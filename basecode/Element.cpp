@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "Qinfo.h"
 
 Element::Element( const Cinfo* c, 
 	Data* d, unsigned int numData, unsigned int dataSize )
@@ -164,8 +163,19 @@ const char* Element::execFunc( const char* buf )
 	*/
 	OpFunc* func = cinfo_->getOpFunc( q.fid() ); // checks for valid func
 	const Msg* m = getMsg( q.mid() ); // Runtime check for Msg identity.
-	if ( func && m )
-		m->exec( this, func, buf );
+
+	if ( q.useSendTo() ) {
+		unsigned int tgtIndex = 
+			*reinterpret_cast< const unsigned int* >( buf + q.size() - sizeof( unsigned int ) );
+		if ( tgtIndex < numData_ ) {
+			func->op( Eref( this, tgtIndex ), buf );
+		} else {
+			cout << "Warning: Message to nonexistent Element index " << 
+				tgtIndex << " on " << this << endl;
+		}
+	} else if ( func && m ) {
+		m->exec( this, func, q.srcIndex(), buf );
+	}
 
 	return buf + q.size();;
 }

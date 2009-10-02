@@ -240,3 +240,42 @@ The Element uses a replacement Cinfo to handle this, so that the operation:
 	OpFunc Element::getOpFunc( funcId ); // asks Cinfo for opFunc.
 is now redone. This handles all field access and async messages.
 < Need to work out what to do with sync messages >
+
+
+
+
+
+
+
+Slot::sendTo
+	- Sets up a temporary buffer for the argument and target index.
+	- only it doesn't use it. Could replace the target index stuff
+		done below in Conn::tsend.
+Eref::tsend
+	- Creates a Qinfo with the useSendTo flag
+	- Element looks up a Conn based on ConnId.
+Conn::tsend
+	- Looks for a Msg with a target Element matching the target Id.
+	- Appends the target index after the arg in the buffer.
+	- Updates the Qinfo to indicate the new size
+Msg::addToQ
+	- the Qinfo gets the msgId of the target
+Element::addToQ
+Qinfo::addToQ called with the queue vector from the Element.
+	- copies the Qinfo and then the arg into the queue.
+
+...................... There it sits till Element::clearQ	
+
+Element::clearQ
+	Marches through buffer
+Element::execFunc
+	- Extracts Qinfo
+	- Looks up func and Msg
+	- If useSendTo:
+		OpFunc::op Executes the function.
+	- else:
+		Msg::exec
+			- Sorts out which target to use. 
+				Unnecessary as it is on it
+		Opfunc::op: Executes the function.
+		

@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "Qinfo.h"
 
 ///////////////////////////////////////////////////////////////////////////
 Msg::Msg( Element* e1, Element* e2 )
@@ -79,25 +78,60 @@ SingleMsg::SingleMsg( Eref e1, Eref e2 )
 	;
 }
 
-void SingleMsg::addToQ( const Element* caller, FuncId f, 
-			const char* arg, unsigned int size ) const
+void SingleMsg::addToQ( const Element* caller, Qinfo& q, 
+			const char* arg ) const
 {
 	if ( caller == e1_ ) {
-		e2_->addToQ( Qinfo( f, size, m2_ ), arg );
+		q.setMsgId( m2_ );
+		e2_->addToQ( q, arg );
 	} else {
 		assert( caller == e2_ );
-		e1_->addToQ( Qinfo( f, size, m1_ ), arg );
+		q.setMsgId( m1_ );
+		e1_->addToQ( q, arg );
 	}
 }
 
 const char* SingleMsg::exec( Element* target, OpFunc* f, 
-			const char* arg ) const
+		unsigned int srcIndex, const char* arg ) const
 {
 	if ( target == e1_ ) {
 		f->op( Eref( target, i1_ ), arg );
 	} else {
 		assert( target == e2_ );
 		f->op( Eref( target, i2_ ), arg );
+	}
+	return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+OneToOneMsg::OneToOneMsg( Element* e1, Element* e2 )
+	: Msg( e1, e2 )
+{
+	;
+}
+
+void OneToOneMsg::addToQ( const Element* caller, Qinfo& q, 
+			const char* arg ) const
+{
+	if ( caller == e1_ ) {
+		q.setMsgId( m2_ );
+		e2_->addToQ( q, arg );
+	} else {
+		q.setMsgId( m1_ );
+		assert( caller == e2_ );
+		e1_->addToQ( q, arg );
+	}
+}
+
+const char* OneToOneMsg::exec( Element* target, OpFunc* f, 
+		unsigned int srcIndex, const char* arg ) const
+{
+	if ( target == e1_ ) {
+		f->op( Eref( target, srcIndex ), arg );
+	} else {
+		assert( target == e2_ );
+		f->op( Eref( target, srcIndex ), arg );
 	}
 	return 0;
 }

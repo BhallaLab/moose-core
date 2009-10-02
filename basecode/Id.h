@@ -66,6 +66,8 @@ class Id
 		 */
 		Element* operator()() const;
 
+		unsigned int index() const;
+
 		/**
 		 * Returns the Eref to the element plus index
 		 */

@@ -36,12 +36,14 @@ class Element;
 class Eref;
 class OpFunc;
 class Id;
+class Qinfo;
 
 #include "Finfo.h"
 #include "ProcInfo.h"
 #include "Cinfo.h"
 #include "Data.h"
 #include "Msg.h"
+#include "Qinfo.h"
 #include "Conn.h"
 #include "Element.h"
 #include "Eref.h"

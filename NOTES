@@ -1008,6 +1008,8 @@ Options:
 	- Encode SendBacks as individual Msgs.
 	- Define special SendBack Msgs that read extra info in args.
 	- Use sync msgs for this sort of thing.
+The conclusion of all this is that if I need a SendBack capable message, I
+have to set up a special msg.
 
 There is a good bit of cleanup needed for the buffers, both for safety
 and efficiency.
@@ -1019,5 +1021,24 @@ Efficiency:
 	- Map data directly to lookup structures like Qinfo, rather than
 		doing a copy.
 	
+Got it together, compiled.  Checked in as revision 1353
+
+One clarification: We have to pass in the SrcIndex for every call: many of the 
+Msgs use it. For example, the OneToOne and the SparseMsg both use it to look
+up targets. So Qinfo needs another field.
+
+Also it is desirable that we should be able to use SendTo with regular
+messages. Perhaps the added field for the SrcIndex in Qinfo can be used for
+this?
+Instead I think the data buffer should be used for the return index. Let's
+have it so that if needed one can always write an OpFunc that can see the
+src MsgId and src index (which together let us figure out the source Element).
+These are there in the args, it is just a case of using the additional 
+fields in Element::execFunc, or passing in a reference to Qinfo.
+What remains is a way to tell the Msgs to use the extra index in the
+args to determine the target of SendTo. Best to use the regular OpFuncs,
+so this means that the Msgs also juggle the args.
 
 
+
+=============================================================================

@@ -33,6 +33,7 @@ class Slot0: public Slot
 	public:
 		Slot0( ConnId conn, const Cinfo* c, const string& funcName );
 		void send( Eref e );
+		void sendTo( Eref e, Id target);
 };
 
 template< class T > class Slot1: public Slot
@@ -51,8 +52,13 @@ template< class T > class Slot1: public Slot
 		void send( Eref e, const T& arg ) {
 			e.asend( conn_, func_, reinterpret_cast< const char* >( &arg ), sizeof( T ) );
 		}
-		void sendTo( Eref e, Id target, const T& arg )
-		{;}
+
+		void sendTo( Eref e, Id target, const T& arg ) {
+			char temp[ sizeof( T ) + sizeof( unsigned int ) ];
+			*reinterpret_cast< T* >( temp ) = arg;
+			*reinterpret_cast< unsigned int* >( temp + sizeof( T ) ) = target.index();
+			e.tsend( conn_, func_, target, reinterpret_cast< const char* >( &arg ), sizeof( T ) );
+		}
 };
 
 

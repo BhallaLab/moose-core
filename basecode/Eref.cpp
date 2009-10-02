@@ -55,5 +55,15 @@ void Eref::ssend2( SyncId src, double v1, double v2 )
 void Eref::asend( ConnId conn, FuncId func, const char* arg, 
 			unsigned int size ) const
 {
-	e_->conn( conn ).asend( e_, func, arg, size );
+	// e_->conn( conn ).asend( e_, Qinfo( func, i_, size ), arg );
+	Qinfo q( func, i_, size );
+	e_->conn( conn ).asend( e_, q, arg );
+}
+
+void Eref::tsend( ConnId conn, FuncId func, Id target, const char* arg, 
+			unsigned int size ) const
+{
+	// e_->conn( conn ).asend( e_, Qinfo( func, i_, size, 1 ), arg );
+	Qinfo q( func, i_, size, 1 );
+	e_->conn( conn ).tsend( e_, target, q, arg );
 }

@@ -42,6 +42,12 @@ class Eref
 			unsigned int size ) const;
 
 		/**
+		 * Asynchronous send to a specific target.
+		 */
+		void tsend( ConnId conn, FuncId func, Id target, const char* arg, 
+			unsigned int size ) const;
+
+		/**
 		 * Returns data entry
 		 */
 		Data* data();

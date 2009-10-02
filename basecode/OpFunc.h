@@ -102,6 +102,11 @@ template< class T, class A1, class A2, class A3 > class OpFunc3:
 				*reinterpret_cast< const A3* >( buf3 )
 			);
 		}
+		
+		// Filthy. Need a way of confirming type against A1
+		unsigned int arg1( const char* buf ) const {
+			return *reinterpret_cast< unsigned int* >( buf );
+		}
 
 	private:
 		void ( T::*func_ )( A1, A2, A3 ); 

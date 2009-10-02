@@ -20,8 +20,14 @@ class Conn
 		 * asend goes through all child Msgs with the specified FuncId
 		 * and adds them into the Element Queue.
 		 */
-		void asend( const Element* e, FuncId f, 
-			const char* arg, unsigned int size ) const;
+		void asend( const Element* e, Qinfo& q, const char* arg ) const;
+
+		/**
+		 * Tsend goes through child Msgs looking for an Element matching
+		 * the target, and calls the matching Id.
+		 */
+		void tsend( const Element* e, Id target, Qinfo& q, 
+			const char* arg ) const;
 
 		/**
 		 * ClearQ calls clearQ on all Msgs.

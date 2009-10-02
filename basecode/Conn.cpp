@@ -10,10 +10,30 @@
 #include "header.h"
 
 void Conn::asend( 
-	const Element* e, FuncId f, const char* arg, unsigned int size ) const
+	const Element* e, Qinfo& q, const char* arg ) const
 {
 	for( vector< Msg* >::const_iterator i = m_.begin(); i != m_.end(); ++i )
-		(*i)->addToQ( e, f, arg, size );
+		(*i)->addToQ( e, q, arg );
+}
+
+// Checks for the correct Msg, and expands the arg to append the
+// target index.
+void Conn::tsend( 
+	const Element* e, Id target, Qinfo& q, const char* arg ) const
+{
+	assert( q.useSendTo() );
+	for( vector< Msg* >::const_iterator i = m_.begin(); i != m_.end(); ++i ) {
+		if ( (*i)->e2() == target() || (*i)->e1() == target() ) {
+			char* temp = new char[ q.size() + sizeof( unsigned int ) ];
+			memcpy( temp, arg, q.size() );
+			q.expandSize();
+			*reinterpret_cast< unsigned int* >( temp + q.size() ) = 
+				target.index();
+				(*i)->addToQ( e, q, arg );
+			delete[] temp;
+			break;
+		}
+	}
 }
 
 /**

@@ -10,7 +10,6 @@
 #include "header.h"
 #include "Neutral.h"
 #include "Dinfo.h"
-#include "Qinfo.h"
 
 void testAsync( )
 {
@@ -33,9 +32,15 @@ void testAsync( )
 		char buf[200];
 
 		unsigned int size = Conv< string >::val2buf( buf, stemp );
-		Qinfo qi( 1, size, m->mid1() );
+
+		*reinterpret_cast< unsigned int* >( buf + size ) = i;
+		
+		Qinfo qi( 1, i, size + sizeof( unsigned int ), 1 );
 
 		e1.element()->addToQ( qi, buf );
 	}
 	e1.element()->clearQ();
+
+	for ( unsigned int i = 0; i < size; ++i )
+		cout << i << "	" << static_cast< Neutral* >(e1.element()->data( i ))->getName() << endl;
 }

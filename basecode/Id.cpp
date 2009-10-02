@@ -76,6 +76,11 @@ Element* Id::operator()() const
 	return elements()[ id_ ];
 }
 
+unsigned int Id::index() const 
+{
+	return index_;
+}
+
 Eref Id::eref() const 
 {
 	return Eref( elements()[ id_ ], index_ );

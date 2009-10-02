@@ -8,7 +8,24 @@
 **********************************************************************/
 
 #include "header.h"
-#include "Qinfo.h"
+
+Qinfo::Qinfo( FuncId f, unsigned int srcIndex, unsigned int size )
+	:	m_( 0 ), 
+		useSendTo_( 0 ), 
+		f_( f ), 
+		srcIndex_( srcIndex ),
+		size_( size )
+{;}
+
+Qinfo::Qinfo( FuncId f, unsigned int srcIndex, 
+	unsigned int size, bool useSendTo )
+	:	m_( 0 ), 
+		useSendTo_( useSendTo ), 
+		f_( f ), 
+		srcIndex_( srcIndex ),
+		size_( size )
+{;}
+
 
 void Qinfo::addToQ( vector< char >& q, const char* arg ) const
 {
@@ -19,3 +36,7 @@ void Qinfo::addToQ( vector< char >& q, const char* arg ) const
 	memcpy( pos + sizeof( Qinfo ), arg, size_ );
 }
 
+void Qinfo::expandSize()
+{
+	size_ += sizeof( unsigned int );
+}

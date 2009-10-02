@@ -15,7 +15,7 @@
  * assorted variants.
  */
 
-typedef unsigned int MsgId;
+typedef unsigned short MsgId;
 
 class Msg
 {
@@ -29,8 +29,8 @@ class Msg
 		 */
 		virtual void clearQ() const;
 
-		virtual void addToQ( const Element* caller, FuncId f, 
-			const char* arg, unsigned int size ) const = 0;
+		virtual void addToQ( const Element* caller, Qinfo& q,
+			const char* arg ) const = 0;
 
 		/**
 		 * Calls Process on e1.
@@ -42,7 +42,9 @@ class Msg
 		 * Returns next buf pos.
 		 */
 		virtual const char* exec( 
-			Element* target, OpFunc* func, const char* arg ) const = 0;
+			Element* target, OpFunc* func, 
+			unsigned int srcIndex, const char* arg 
+		) const = 0;
 
 		/*
 		/// call func( arg ) on all targets in e1. Returns next buf pos
@@ -68,6 +70,14 @@ class Msg
 		// Duplicate message on new Elements.
 		// virtual Msg* dup( Element* e1, Element* e2 ) const;
 
+		Element* e1() const {
+			return e1_;
+		}
+
+		Element* e2() const {
+			return e2_;
+		}
+
 		MsgId mid1() const {
 			return m1_;
 		}
@@ -89,13 +99,33 @@ class SingleMsg: public Msg
 		SingleMsg( Eref e1, Eref e2 );
 		~SingleMsg() {;}
 
-		void addToQ( const Element* caller, FuncId f, 
-			const char* arg, unsigned int size ) const;
+		void addToQ( const Element* caller, Qinfo& q, 
+			const char* arg ) const;
 		const char* exec( 
-			Element* target, OpFunc* func, const char* arg ) const;
+			Element* target, OpFunc* func, 
+			unsigned int srcIndex,  const char* arg
+		) const;
 	private:
 		unsigned int i1_;
 		unsigned int i2_;
 };
+
+class OneToOneMsg: public Msg
+{
+	public:
+		OneToOneMsg( Element* e1, Element* e2 );
+		~OneToOneMsg() {;}
+
+		void addToQ( const Element* caller, Qinfo& q, 
+			const char* arg ) const;
+		const char* exec( 
+			Element* target, OpFunc* func, 
+			unsigned int srcIndex,  const char* arg
+		) const;
+	private:
+		unsigned int i1_;
+		unsigned int i2_;
+};
+
 
 #endif // _MSG_H
