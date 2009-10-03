@@ -330,14 +330,7 @@ FILE *SearchForScript(const char* name, const char* mode)
     
     fp = NULL;
     string file_name = string(name);
-    if ( file_name[0] != '/' )
-    {
-        /*
-	** just look it up in current directory
-	*/
-	fp = OpenScriptFile(name, mode);
-    }
-
+    fp = OpenScriptFile(name, mode);
     if (fp == NULL)
     {
         for( unsigned int i = 0; i < pathHandler.size(); ++i )
