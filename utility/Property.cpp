@@ -153,7 +153,6 @@ void Property::initialize(string fileName, int format)
     {
         readProperties(fileName, format);
     }
-    cout << Property::getProperty(Property::SIMPATH) << endl;
     initialized_ = true;
 }
 
