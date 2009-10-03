@@ -45,7 +45,12 @@ void Cinfo::init( Finfo** finfoArray, unsigned int nFinfos )
 
 Cinfo::~Cinfo()
 {
-	;
+	// This assumes we don't give the same Finfo two different names.
+	for ( map< string, Finfo*>::iterator i = finfoMap_.begin();
+		i != finfoMap_.end(); ++i )
+		delete i->second;
+
+	delete dinfo_;
 }
 
 const std::string& Cinfo::name() const

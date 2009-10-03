@@ -15,7 +15,7 @@ class Finfo
 {
 	public:
 		Finfo( const string& name, const string& doc );
-		~Finfo() {;}
+		virtual ~Finfo() {;}
 
 		const string& name() const;
 

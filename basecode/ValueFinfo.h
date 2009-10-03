@@ -12,6 +12,11 @@
 template < class T, class F > class ValueFinfo: public Finfo
 {
 	public:
+		~ValueFinfo() {
+			delete setOpFunc_;
+			delete getOpFunc_;
+		}
+
 		ValueFinfo( const string& name, const string& doc, 
 			void ( T::*setFunc )( const F& ),
 			const F& ( T::*getFunc )() const )
@@ -20,6 +25,8 @@ template < class T, class F > class ValueFinfo: public Finfo
 				setOpFunc_ = new OpFunc1< T, F >( setFunc );
 				getOpFunc_ = new GetOpFunc< T, F >( getFunc );
 			}
+
+
 		void registerOpFuncs(
 			map< string, FuncId >& fnames, vector< OpFunc* >& funcs ) 
 		{
