@@ -45,15 +45,15 @@ void Property::initDefaults()
     }
     properties_[AUTOSCHEDULE] = "true";
     properties_[CREATESOLVER] = "true";
-    properties_[SIMPATH] = ".";    
+    properties_[SIMPATH] = ".";
     properties_[SIMNOTES] = "notes";
     properties_[DOCPATH] = "doc";
     properties_[HOME] = "~";    
     char * home = getenv(HOME);
     if (( home != NULL ) && (home[0] != '\0'))
     {
-        properties_[SIMPATH] = string(home);
-        simpathHandler_->addPath(properties_[SIMPATH]);
+        simpathHandler_->addPath(string(home));
+        properties_[SIMPATH] = simpathHandler_->getAllPaths();
     }
 }
 
@@ -69,11 +69,12 @@ void Property::setProperty(string key, string value)
 
 void Property::addSimPath(string path)
 {
-    if (!simpathHandler_){
-        simpathHandler_ = new PathUtility(path);
+    if (!initialized_){
+        initialize("", 0); // no need to read file
     } else {
         simpathHandler_->addPath(path);
     }
+    cout << simpathHandler_->getAllPaths() << endl;
     properties_[SIMPATH] = simpathHandler_->getAllPaths();
 }
 
@@ -122,11 +123,7 @@ void Property::readEnvironment()
             env = getenv(SIMPATH);            
             if (( env != NULL ) && (env[0] != '\0'))
             {
-                string path = trim(string(env));
-                if (path.length() > 0 )
-                {
-                    properties_[SIMPATH] = properties_[SIMPATH] + PathUtility::PATH_SEPARATOR+ path;
-                }                
+                simpathHandler_->addPath(string(env));
             }            
             continue;
         }
@@ -147,12 +144,17 @@ void Property::readEnvironment()
 */
 void Property::initialize(string fileName, int format)
 {
+    if (initialized_){
+        return;
+    }
     Property::initDefaults();
     Property::readEnvironment();
     if (fileName.length() > 0)
     {
         readProperties(fileName, format);
-    }    
+    }
+    cout << Property::getProperty(Property::SIMPATH) << endl;
+    initialized_ = true;
 }
 
 /**

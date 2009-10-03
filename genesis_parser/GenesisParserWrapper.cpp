@@ -4090,19 +4090,19 @@ int do_INSTANTZ(int argc, const char** const argv, Id s ) {
 }
 
 const char* do_VOLT_C1_INDEX(int argc, const char ** const argv, Id s){
-    static const string ret = "VOLT_C1_INDEX";
+    static const char* ret = "VOLT_C1_INDEX";
     if (argc != 1) {
         cout << "Error: VOLT_C1_INDEX is a constant" << endl;
     }
-    return ret.c_str();
+    return copyString(ret);
 }
 
 const char* do_VOLT_C2_INDEX(int argc, const char ** const argv, Id s){
-    static const string ret = "VOLT_C2_INDEX";
+    static const char* ret = "VOLT_C2_INDEX";
     if (argc != 1) {
         cout << "Error: VOLT_C1_INDEX is a constant" << endl;
     }
-    return ret.c_str();
+    return copyString(ret);
 }
 
 void do_floatformat(int argc, const char** const argv, Id s ) {
