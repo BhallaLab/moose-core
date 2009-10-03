@@ -757,7 +757,13 @@ bool ReadCell::addHHChannel(
 	static const Finfo* hhChanDestFinfo = chanCinfo->findFinfo( "channel" );
 	static const Finfo* gbarFinfo = chanCinfo->findFinfo( "Gbar" );
 	
-	if ( chan->className() == "HHChannel" ) {
+	if (( chan->className() == "HHChannel" )|| ( chan->className() == "HHChannel2D" )){
+#ifdef DEBUG
+            // DEBUG
+            if ( chan->className() == "HHChannel2D" ) {
+                cout << "name:" << chan->name() << ", path:" << chan->id().path() << endl;
+            }
+#endif
 		bool ret = Eref( compt ).add( chanSrcFinfo->msg(), chan, hhChanDestFinfo->msg(), ConnTainer::Default );
 		// bool ret = chanSrcFinfo->add( compt, chan, hhChanDestFinfo );
 		assert( ret );

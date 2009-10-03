@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 11:38:46 2009 (+0530)
 # Version: 
-# Last-Updated: Mon Jul  6 18:19:30 2009 (+0530)
+# Last-Updated: Sat Oct  3 22:12:35 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 788
+#     Update #: 801
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -195,10 +195,15 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 	    ffilter = ffilter + key + ';;'
 	ffilter = ffilter[:-2]
 	fileDialog.setFilter(self.tr(ffilter))
-        for key, value in self.fileTypes.items():
-            if value == FileTypeChecker.type_genesis:
-                fileDialog.selectNameFilter(key)
-                break
+        # The following version gymnastic is because QFileDialog.selectNameFilter() was introduced in Qt 4.4
+        qtVersion = str(QtCore.QT_VERSION_STR).split('.')
+        major = int(qtVersion[0])
+        minor = int(qtVersion[1])
+        if (major > 4)or ((major == 4) and (minor >= 4)):
+            for key, value in self.fileTypes.items():
+                if value == FileTypeChecker.type_genesis:
+                    fileDialog.selectNameFilter(key)
+                    break
 	if fileDialog.exec_():
 	    fileNames = fileDialog.selectedFiles()
 	    fileFilter = fileDialog.selectedFilter()
