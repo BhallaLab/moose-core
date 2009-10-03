@@ -120,6 +120,7 @@ class Element
 		MsgId addMsg( Msg* m );
 		void dropMsg( const Msg* m, MsgId mid );
 
+		ConnId addConn( Conn c );
 	private:
 		const Msg* getMsg( MsgId mid ) const;
 		/**

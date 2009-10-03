@@ -1063,6 +1063,10 @@ Valgrind helped track things down.
 Checked in as revision 1360: Major stuff cleaned.
 
 Another round of cleaning up, this time mostly stuff from class initialization.
-I have it so Valgrind is completely happy.
+Now I have it so Valgrind is completely happy.
+Checked in as revision 1361.
+
+Implemented the 'send' operation using a hand-crafted Slot object. 
+Ran through it with valgrind, good first pass.
 
 =============================================================================

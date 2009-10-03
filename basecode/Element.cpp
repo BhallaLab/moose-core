@@ -33,6 +33,8 @@ Element::~Element()
 {
 	delete[] sendBuf_;
 	cinfo_->destroy( d_ );
+	for ( vector< Conn >::iterator i = c_.begin(); i != c_.end(); ++i )
+		i->clearConn(); // Get rid of Msgs on them.
 	/*
 	for ( vector< Data* >::iterator i = d_.begin(); i != d_.end(); ++i )
 		delete *i;
@@ -231,4 +233,10 @@ void Element::dropMsg( const Msg* m, MsgId mid )
 	assert( m == m_[mid] );
 
 	m_[mid] = 0; // To clean up later, if at all.
+}
+
+ConnId Element::addConn( Conn c )
+{
+	c_.push_back( c );
+	return c_.size() - 1;
 }

@@ -24,6 +24,13 @@ class Conn
 		void asend( const Element* e, Qinfo& q, const char* arg ) const;
 
 		/**
+		 * Goes through all Msgs, deallocating them. This is separate
+		 * from the Conn destructor, to allow us to pass Conns around
+		 * without invoking destructors.
+		 */
+		void clearConn();
+
+		/**
 		 * Tsend goes through child Msgs looking for an Element matching
 		 * the target, and calls the matching Id.
 		 */

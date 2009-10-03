@@ -11,8 +11,12 @@
 
 
 Conn::~Conn()
+{;}
+
+void Conn::clearConn()
 {
-	for( vector< Msg* >::const_iterator i = m_.begin(); i != m_.end(); ++i ) {
+	for( vector< Msg* >::const_iterator i = m_.begin(); 
+		i != m_.end(); ++i ) {
 		delete *i;
 	}
 }

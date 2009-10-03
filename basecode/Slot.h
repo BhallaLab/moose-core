@@ -62,6 +62,33 @@ template< class T > class Slot1: public Slot
 };
 
 
+template<> class Slot1< string >: public Slot
+{
+	public:
+		Slot1( ConnId conn, const Cinfo* c, const string& funcName )
+			: Slot( conn, c, funcName )
+		{ ; }
+
+		Slot1( ConnId conn, FuncId func )
+			: Slot( conn, func )
+		{ ; }
+
+
+		// Will need to specialize for strings etc.
+		void send( Eref e, const string& arg ) {
+			e.asend( conn_, func_, arg.c_str() , arg.length() + 1 );
+		}
+
+		void sendTo( Eref e, Id target, const string& arg ) {
+			char* temp = new char[ arg.length() + 1 + sizeof( unsigned int ) ];
+			strcpy( temp, arg.c_str() );
+			*reinterpret_cast< unsigned int* >( temp + arg.length() + 1) = target.index();
+			e.tsend( conn_, func_, target, reinterpret_cast< const char* >( &arg ), arg.length() + 1 );
+			delete[] temp;
+		}
+};
+
+
 template< class T1, class T2 > class Slot2: public Slot
 {
 	public:

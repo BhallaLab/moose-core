@@ -11,7 +11,7 @@
 #include "Neutral.h"
 #include "Dinfo.h"
 
-void testAsync( )
+void insertIntoQ( )
 {
 	const Cinfo* nc = Neutral::initCinfo();
 	unsigned int size = 100;
@@ -47,4 +47,49 @@ void testAsync( )
 	delete m;
 	delete i1();
 	delete i2();
+}
+
+void testSendMsg()
+{
+	const Cinfo* nc = Neutral::initCinfo();
+	unsigned int size = 100;
+	FuncId fid = 1;
+
+	Id i1 = nc->create( "test1", size );
+	Id i2 = nc->create( "test2", size );
+
+	Eref e1 = i1.eref();
+	Eref e2 = i2.eref();
+
+	Msg* m = new OneToOneMsg( e1.element(), e2.element() );
+	Conn c;
+	c.add( m );
+	ConnId cid = e1.element()->addConn( c );
+	
+	Slot1<string> s( cid, fid );
+
+	for ( unsigned int i = 0; i < size; ++i ) {
+		char temp[20];
+		sprintf( temp, "send_to_e2_%d", i );
+		string stemp( temp );
+		s.send( Eref( e1.element(), i ), stemp );
+	}
+	e2.element()->clearQ();
+
+	for ( unsigned int i = 0; i < size; ++i )
+		cout << i << "	" << static_cast< Neutral* >(e2.element()->data( i ))->getName() << endl;
+
+	delete i1();
+	delete i2();
+}
+
+void testCreateMsg()
+{
+	
+}
+
+void testAsync( )
+{
+	insertIntoQ();
+	testSendMsg();
 }
