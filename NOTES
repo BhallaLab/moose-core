@@ -1039,6 +1039,21 @@ What remains is a way to tell the Msgs to use the extra index in the
 args to determine the target of SendTo. Best to use the regular OpFuncs,
 so this means that the Msgs also juggle the args.
 
+Implemented it, tested the second part of it by stuffing the queue directly
+and then calling clearQ. That part works.
+Checked in as revision 1356
 
+Next: 
+- Get the 'send' part to work
+- Do a valgrind cleanup. 
+	- Figure out how to delete the data part cleanly.
+	- Msg deletion cleanup.
+	- Serious tests for memory leaks, lots of deletes and creates.
+- Sort out message setup including type safety 
+- Utility function (using messages) to 'get' field values.
+- Heavy traffic tests
+- Sync messages
+- Start to play with nodes and threads.
+- Optimization
 
 =============================================================================

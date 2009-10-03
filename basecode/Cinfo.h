@@ -68,6 +68,11 @@ class Cinfo
 			 */
 			Id create( const string& name, unsigned int numEntries ) const;
 
+			/**
+			 * Destroys data on element
+			 */
+			void destroy( Data* d ) const;
+
 		private:
 			const string name_;
 

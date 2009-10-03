@@ -43,4 +43,8 @@ void testAsync( )
 
 	for ( unsigned int i = 0; i < size; ++i )
 		cout << i << "	" << static_cast< Neutral* >(e1.element()->data( i ))->getName() << endl;
+
+	delete m;
+	delete i1();
+	delete i2();
 }

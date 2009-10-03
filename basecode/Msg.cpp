@@ -19,7 +19,8 @@ Msg::Msg( Element* e1, Element* e2 )
 
 Msg::~Msg()
 {
-	;
+	e1_->dropMsg( this, m1_ );
+	e2_->dropMsg( this, m2_ );
 }
 
 void Msg::clearQ() const 

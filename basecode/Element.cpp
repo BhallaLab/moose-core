@@ -11,7 +11,8 @@
 
 Element::Element( const Cinfo* c, 
 	Data* d, unsigned int numData, unsigned int dataSize )
-	: d_( d ), numData_( numData ), dataSize_( dataSize ), cinfo_( c )
+	: d_( d ), numData_( numData ), dataSize_( dataSize ), 
+	sendBuf_( 0 ), cinfo_( c )
 { 
 	;
 }
@@ -31,13 +32,15 @@ Element::Element( vector< Data* >& d,
 Element::~Element()
 {
 	delete[] sendBuf_;
-	delete[] d_;
+	cinfo_->destroy( d_ );
 	/*
 	for ( vector< Data* >::iterator i = d_.begin(); i != d_.end(); ++i )
 		delete *i;
 	*/
+	/*
 	for ( vector< Msg* >::iterator i = m_.begin(); i != m_.end(); ++i )
 		delete *i;
+	*/
 }
 
 void Element::process( const ProcInfo* p )
@@ -220,4 +223,12 @@ MsgId Element::addMsg( Msg* m )
 {
 	m_.push_back( m );
 	return m_.size() - 1;
+}
+
+void Element::dropMsg( const Msg* m, MsgId mid )
+{
+	assert ( mid < m_.size() );
+	assert( m == m_[mid] );
+
+	m_[mid] = 0; // To clean up later, if at all.
 }

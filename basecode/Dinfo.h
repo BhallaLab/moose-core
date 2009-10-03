@@ -18,6 +18,7 @@ class DinfoBase
 		virtual ~DinfoBase()
 		{;}
 		virtual Data* allocData( unsigned int numData ) const = 0;
+		virtual void destroyData( Data* d ) const = 0;
 		virtual unsigned int size() const = 0;
 		/*
 		static unsigned int size( const D* value ) const = 0;
@@ -36,6 +37,10 @@ template< class D > class Dinfo: public DinfoBase
 		{;}
 		Data* allocData( unsigned int numData ) const {
 			return new D[ numData ];
+		}
+
+		void destroyData( Data* d ) const {
+			delete[] static_cast< D* >( d );
 		}
 
 		unsigned int size()  const {

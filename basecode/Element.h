@@ -118,6 +118,7 @@ class Element
 		 * it up as the MsgId.
 		 */
 		MsgId addMsg( Msg* m );
+		void dropMsg( const Msg* m, MsgId mid );
 
 	private:
 		const Msg* getMsg( MsgId mid ) const;

@@ -16,6 +16,7 @@ typedef unsigned int ConnId;
 class Conn
 {
 	public:
+		~Conn();
 		/**
 		 * asend goes through all child Msgs with the specified FuncId
 		 * and adds them into the Element Queue.

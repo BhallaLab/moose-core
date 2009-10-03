@@ -9,6 +9,14 @@
 
 #include "header.h"
 
+
+Conn::~Conn()
+{
+	for( vector< Msg* >::const_iterator i = m_.begin(); i != m_.end(); ++i ) {
+		delete *i;
+	}
+}
+
 void Conn::asend( 
 	const Element* e, Qinfo& q, const char* arg ) const
 {

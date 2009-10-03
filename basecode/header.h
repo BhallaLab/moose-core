@@ -37,6 +37,7 @@ class Eref;
 class OpFunc;
 class Id;
 class Qinfo;
+class Data;
 
 #include "Finfo.h"
 #include "ProcInfo.h"
