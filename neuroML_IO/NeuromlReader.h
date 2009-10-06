@@ -22,14 +22,20 @@ class NeuromlReader
 		~NeuromlReader() {;}
 		void  readModel(std::string filename,Id location);
 		void pushtoVector(vector< double >&result,string expr_form,double r,double s,double m);
+		double calcSurfaceArea(double length,double diameter);
+		void setupSynChannels(map< string,vector<string> > &,map< string,vector< string > > &);
+		void setupChannels(map< string,vector<string> > &,map< string,vector< string > > &);
 		
 	private:
 		Element* compt_;
  		Element* channel_;
 		Element* gate_;
 		Element* cable_;
+		Element* synchannel_;
 		static const double PI ;
-		//static int numSegments_;		
+		map< string,Id > segMap_;
+		NCell* ncl_;
+			
 		
 		
 		
@@ -38,5 +44,6 @@ class NeuromlReader
 extern const Cinfo* initCompartmentCinfo();
 extern const Cinfo* initHHChannelCinfo();
 extern const Cinfo* initInterpolCinfo();
+extern const Cinfo* initSynChanCinfo();
 #endif // _NEUROMLREADER_H
 
