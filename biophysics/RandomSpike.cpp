@@ -81,6 +81,7 @@ const Cinfo* initRandomSpikeCinfo()
             new DestFinfo("minmaxDest", Ftype2<double, double>::global(),
                           RFCAST( & RandomSpike::setMinMaxAmp)),
         };
+    	static SchedInfo schedInfo[] = { { process, 0, 1 } };
 	static string doc[] =
 	{
 		"Name", "RandomSpike",
@@ -93,7 +94,8 @@ const Cinfo* initRandomSpikeCinfo()
 			       initNeutralCinfo(),
                                randomspikeFinfos,
                                sizeof(randomspikeFinfos)/sizeof(Finfo*),
-                               ValueFtype1<RandomSpike>::global());
+                               ValueFtype1<RandomSpike>::global(),
+                               schedInfo, 1);
     return &randomSpikeCinfo;
 }
 
