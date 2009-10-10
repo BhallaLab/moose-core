@@ -354,6 +354,7 @@ void HHChannel::createGateFunc(
 			// make a new gate which we can change.
 			gate = Neutral::create( gateClass, name, e->id(), idGen.next() );
 			gate->addFinfo( GlobalMarkerFinfo::global() );
+                        Eref(e).dropAll(chanFinfo);
 			bool ret = Eref( e ).add( chanFinfo, gate, gateFinfo );
 			assert( ret );
 		}
