@@ -12,7 +12,7 @@ class Ftype
 	public:
 		virtual ~Ftype()
 		{;}
-		virtual bool checkSlot( const Slot* s) const = 0;
+		virtual bool checkFinfo( const Finfo* s) const = 0;
 		virtual void op( Eref e, const char* buf ) const = 0;
 };
 
@@ -23,8 +23,8 @@ template< class T, class A > class Ftype1: public Ftype
 			: func_( func )
 			{;}
 
-		bool checkSlot( const Slot* s ) const {
-			return dynamic_cast< const Slot1< A >* >( s );
+		bool checkFinfo( const Finfo* s ) const {
+			return dynamic_cast< const Finfo1< A >* >( s );
 		}
 
 		void op( Eref e, const char* buf ) const {
@@ -44,8 +44,8 @@ template< class T, class A1, class A2 > class Ftype2: public Ftype
 			: func_( func )
 			{;}
 
-		bool checkSlot( const Slot* s ) const {
-			return dynamic_cast< const Slot2< A1, A2 >* >( s );
+		bool checkFinfo( const Finfo* s ) const {
+			return dynamic_cast< const Finfo2< A1, A2 >* >( s );
 		}
 
 		void op( Eref e, const char* buf ) const {
@@ -68,8 +68,8 @@ template< class T, class A1, class A2, class A3 > class Ftype3:
 			: func_( func )
 			{;}
 
-		bool checkSlot( const Slot* s ) const {
-			return dynamic_cast< const Slot3< A1, A2, A3 >* >( s );
+		bool checkFinfo( const Finfo* s ) const {
+			return dynamic_cast< const Finfo3< A1, A2, A3 >* >( s );
 		}
 
 		void op( Eref e, const char* buf ) const {
@@ -100,8 +100,8 @@ template< class T, class A > class GetFtype: public Ftype
 			: func_( func )
 			{;}
 
-		bool checkSlot( const Slot* s ) const {
-			return dynamic_cast< const Slot1< A >* >( s );
+		bool checkFinfo( const Finfo* s ) const {
+			return dynamic_cast< const Finfo1< A >* >( s );
 		}
 
 		void op( Eref e, const char* buf ) const {
@@ -111,7 +111,7 @@ template< class T, class A > class GetFtype: public Ftype
 		    MsgId srcMsg = *reinterpret_cast< MsgId* >( buf );
 		    buf += sizeof( MsgId );
 		    FuncId srcFunc = *reinterpret_cast< FuncId* >( buf );
-		    Slot2< MsgId, A > s( MsgId, srcFunc );
+		    Finfo2< MsgId, A > s( MsgId, srcFunc );
 		    s.sendTo( e, Id, ret );
 		}
 

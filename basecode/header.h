@@ -49,10 +49,10 @@ class Data;
 #include "Element.h"
 #include "Eref.h"
 #include "Id.h"
-#include "Slot.h"
 #include "Send.h"
 #include "Async.h"
 #include "Conv.h"
+#include "SrcFinfo.h"
 #include "OpFunc.h"
 #include "ValueFinfo.h"
 

@@ -12,7 +12,7 @@ class OpFunc
 	public:
 		virtual ~OpFunc()
 		{;}
-		virtual bool checkSlot( const Slot* s) const = 0;
+		virtual bool checkFinfo( const Finfo* s) const = 0;
 		virtual void op( Eref e, const char* buf ) const = 0;
 };
 
@@ -23,8 +23,8 @@ template< class T > class OpFunc0: public OpFunc
 			: func_( func )
 			{;}
 
-		bool checkSlot( const Slot* s ) const {
-			return dynamic_cast< const Slot0* >( s );
+		bool checkFinfo( const Finfo* s ) const {
+			return dynamic_cast< const SrcFinfo0* >( s );
 		}
 
 		void op( Eref e, const char* buf ) const {
@@ -42,15 +42,16 @@ template< class T, class A > class OpFunc1: public OpFunc
 			: func_( func )
 			{;}
 
-		bool checkSlot( const Slot* s ) const {
-			return dynamic_cast< const Slot1< A >* >( s );
+		bool checkFinfo( const Finfo* s ) const {
+			return dynamic_cast< const SrcFinfo1< A >* >( s );
 		}
 
 		// This could do with a whole lot of optimization to avoid
 		// copying data back and forth.
+		// buf is organized as Qinfo, args, optionally srcIndex.
 		void op( Eref e, const char* buf ) const {
 			A val;
-			Conv< A >::buf2val( val, buf );
+			Conv< A >::buf2val( val, buf + sizeof( Qinfo ) );
 			(static_cast< T* >( e.data() )->*func_)( val ) ;
 		}
 
@@ -65,11 +66,12 @@ template< class T, class A1, class A2 > class OpFunc2: public OpFunc
 			: func_( func )
 			{;}
 
-		bool checkSlot( const Slot* s ) const {
-			return dynamic_cast< const Slot2< A1, A2 >* >( s );
+		bool checkFinfo( const Finfo* s ) const {
+			return dynamic_cast< const SrcFinfo2< A1, A2 >* >( s );
 		}
 
 		void op( Eref e, const char* buf ) const {
+			buf += sizeof( Qinfo );
 			const char* buf2 = buf + sizeof( A1 );
 			(static_cast< T* >( e.data() )->*func_)( 
 				*reinterpret_cast< const A1* >( buf ),
@@ -89,11 +91,12 @@ template< class T, class A1, class A2, class A3 > class OpFunc3:
 			: func_( func )
 			{;}
 
-		bool checkSlot( const Slot* s ) const {
-			return dynamic_cast< const Slot3< A1, A2, A3 >* >( s );
+		bool checkFinfo( const Finfo* s ) const {
+			return dynamic_cast< const SrcFinfo3< A1, A2, A3 >* >( s );
 		}
 
 		void op( Eref e, const char* buf ) const {
+			buf += sizeof( Qinfo );
 			const char* buf2 = buf + sizeof( A1 );
 			const char* buf3 = buf2 + sizeof( A2 );
 			(static_cast< T* >( e.data() )->*func_)( 
@@ -101,11 +104,6 @@ template< class T, class A1, class A2, class A3 > class OpFunc3:
 				*reinterpret_cast< const A2* >( buf2 ),
 				*reinterpret_cast< const A3* >( buf3 )
 			);
-		}
-		
-		// Filthy. Need a way of confirming type against A1
-		unsigned int arg1( const char* buf ) const {
-			return *reinterpret_cast< unsigned int* >( buf );
 		}
 
 	private:
@@ -126,19 +124,26 @@ template< class T, class A > class GetOpFunc: public OpFunc
 			: func_( func )
 			{;}
 
-		bool checkSlot( const Slot* s ) const {
-			return dynamic_cast< const Slot1< A >* >( s );
+		bool checkFinfo( const Finfo* s ) const {
+			return dynamic_cast< const SrcFinfo1< A >* >( s );
 		}
 
 		void op( Eref e, const char* buf ) const {
+			buf += sizeof( Qinfo );
 			A ret = (( static_cast< T* >( e.data() ) )->*func_)();
 		    Id src = *reinterpret_cast< const Id* >( buf );
 		    buf += sizeof( Id );
+			/*
 		    MsgId srcMsg = *reinterpret_cast< const MsgId* >( buf );
 		    buf += sizeof( MsgId );
 		    FuncId srcFunc = *reinterpret_cast< const FuncId* >( buf );
-		    Slot1< A > s( srcMsg, srcFunc );
+			*/
+			// There should already be the appropriate SrcFinfo defined,
+			// just that its target Func is yet to be set up.
+			/*
+		    SrcFinfo1< A > s( srcMsg, srcFunc );
 		    s.sendTo( e, src, ret );
+			*/
 		}
 
 	private:

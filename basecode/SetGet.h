@@ -7,15 +7,14 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-class Neutral: public Data
+class SetGet: public Data
 {
 	public:
-		Neutral();
+		SetGet();
 		void process( const ProcInfo* p, Eref e );
 		void setName( const string& name );
 		const string& getName() const;
 		static const Cinfo* initCinfo();
-		void destroy();
 
 	private:
 		string name_;

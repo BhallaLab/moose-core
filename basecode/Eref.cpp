@@ -52,14 +52,18 @@ void Eref::ssend2( SyncId src, double v1, double v2 )
 	e_->ssend2( src, i_, v1, v2 );
 }
 
-void Eref::asend( ConnId conn, FuncId func, const char* arg, 
+void Eref::asend( ConnId conn, unsigned int funcIndex, const char* arg, 
 			unsigned int size ) const
 {
 	// e_->conn( conn ).asend( e_, Qinfo( func, i_, size ), arg );
-	Qinfo q( func, i_, size );
+	Qinfo q( e_->getTargetFunc( funcIndex ), i_, size );
 	e_->conn( conn ).asend( e_, q, arg );
 }
 
+/**
+ * Need to sort out: do we use FuncId here (confusing) or funcIndex
+ * (when would it be set up ?)
+ */
 void Eref::tsend( ConnId conn, FuncId func, Id target, const char* arg, 
 			unsigned int size ) const
 {

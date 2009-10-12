@@ -42,7 +42,8 @@ class Cinfo
 
 			void init( Finfo** finfoArray, unsigned int nFinfos );
 
-			OpFunc* getOpFunc( FuncId fid ) const;
+			const OpFunc* getOpFunc( FuncId fid ) const;
+			FuncId getOpFuncId( const string& funcName ) const;
 
 			// Some dummy funcs
 			const std::string& name() const;
@@ -81,6 +82,8 @@ class Cinfo
 			// const std::string description_;
 			const Cinfo* baseCinfo_;
 			const DinfoBase* dinfo_;
+
+			unsigned int numFuncIndex_;
 
 			map< string, Finfo* > finfoMap_;
 			vector< OpFunc* > funcs_;

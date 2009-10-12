@@ -1054,7 +1054,8 @@ Next:
 - Heavy traffic tests
 - Sync messages
 - Start to play with nodes and threads.
-- Optimization
+- Optimization: buffer alignment, clean up management, use in-place rather than
+	copy.
 
 =============================================================================
 3 Oct 2009
@@ -1068,5 +1069,170 @@ Checked in as revision 1361.
 
 Implemented the 'send' operation using a hand-crafted Slot object. 
 Ran through it with valgrind, good first pass.
+Checked in as revision 1362.
+
+=============================================================================
+4 Oct 2009.
+Look at message setup.
+I've had a big simplification by separating the functions from the Msg.
+For the existing MOOSE messaging concept, though, the idea is that in Process
+or in response to a function call, an object should send data on a Message
+specifically set up for the purpose. Using this message, the object calls
+specific target functions whose type is predefined, and whose identity 
+is set up at the same time as the messages themselves.
+
+There is no room for slop: precisely the right # and type of target functions
+must be known.
+
+In the present design, the Slot does the job of tying Msg to function.
+At compile time we know what the Slot type is for all slots we can use.
+At Element creation time we can create predefined Slots for fast function calls.
+	Has to be then, since we want to hardcode Slot identity into
+	e.g. process functions.
+At Message setup time we can attach a ConnId and a FuncId to these slots.
+
+At compile time we know the ConnId for all precompiled Msgs.
+
+Instead of a separate Slot class, let's use SrcFinfos for the slots. 
+All SrcFinfos sharing a common Conn (Shared messages) just store the
+index to this Conn.
+The SrcFinfos/Slots do NOT store the FuncId, since they are static and the 
+FuncId is defined at setup time or even runtime. Instead they index a vector of
+FuncIds somewhere. This will be a fixed (statically defined) index, so we
+know the starting size of the vector. Options:
+	- On the Conn:
+		- Should keep Conn just for the connection info
+		- Clean association of Funcs with appropriate Conn
+	- As a separate vector on the Element
+		- A bit more economical, as it is a single vector for all the funcs.
+
+Note that run-time defined Slots could either directly hold the FuncId, or
+do this index stuff.
+Note that in this design we do not need to have anything special for the
+destinations in shared messages. The correct types have to exist, is all.
+
+In many cases the shared messages had MsgSrc on both sides. Often these 
+were for send-back situations. Also for bidirectional data such as 
+reaction-Molecule data transfer. Options:
+- Ignore this. Go back to GENESIS style where two messages had to be set up.
+- Implement as a higher level op, that results in two distinct messages
+	being formed, one each way, 
+	- Can we put both on the same Msg?
+		- This has some restrictions on there being matching conns.
+		- Really only a minor matter for the msg creation func to handle
+		- As at present, it could be symmetric or asymmetric.
+- Try to do as a single conceptual Msg.
+		- Don't see how it would work.
+
+=============================================================================
+8 Oct 2009
+Target elements should decide which func to use for a given message?
+
+Issue is having multiple possible target funcs from same SrcFinfo
+e.g., mol conc going to plot, to MM enzyme and to channel.
+Possible implementations:
+Category 1: SrcFinfo has static-init defined conn Id and FuncIndex.
+	Option 1:
+		- connId looks up entry on Element::vector<Conn>
+		- FuncIndex looks up entry on Element::vector<FuncId>
+		- Conn marches through Msgs, using same FuncId for all.
+		- Target finds OpFunc from FuncId using Cinfo::funcs_[FuncId]
+		Issues:
+		- Can't handle multiple kinds of target funcs, only derived.
+	Option 2:
+		- connId looks up entry on Element::vector<Conn>
+		- FuncIndex looks up entry on Conn::vector<FuncId>
+		- Conn marches through Msgs, using same FuncId for all.
+		- Conn is a linked list, and next conn has next FuncId.
+		- Target finds OpFunc from FuncId using Cinfo::funcs_[FuncId]
+		Issues:
+		- Ugly. Need to manage linked list, but only occasionally.
+		- Puts Func info on Conn.
+		- Costly. Each Conn manages a vector of FuncIds.
+	Option 3:
+		- connId looks up entry on Element::vector<Conn>
+		- FuncIndex looks up entry on Element::vector<FuncLookup>
+		- Conn marches through Msgs, using same FuncId for all.
+		- Target finds OpFunc from FuncId using Target::funcs_[FuncId]
+		Issues:
+		- Need to set up vector of funcs_ on each target Element
+		- Passing around and setting up a dynamic FuncLookup. Too cute.
+
+Categorey 2: SrcFinfo has static-init defined conn Id and SrcFinfoId
+	Option 4:
+		- connId looks up entry on Element::vector< Conn >
+		- SrcFinfoId plus specific, per msg index, to specify tgt.
+		- Conn marches through Msgs, using same FuncId for all.
+		- Target Cinfo has relatively small list of possible targets
+			for a given SrcFinfoId, based on type matches.
+			specific index pins it down.
+		Issues:
+		- Still problem with multiple kinds of target funcs on Conn.
+Category 3: SrcFinfo has static-init defined MsgId, using Msg link lists.
+	Option 5:
+		- MsgId looks up entry on Element::vector< Msg* >
+		- March through linked list of Msg* (all on vector)
+		- Each Msg has a matching entry in vector funcs_< FuncId >.
+		- Target Cinfo has relatively small list of possible targets
+			for a given SrcFinfoId, based on type matches.
+			specific index pins it down.
+		Issues:
+		- Still problem with multiple kinds of target funcs on Conn.
+Category 4: Exception handling. Assume that a single FuncId will normally
+	work, and treat other cases as rarely-used exceptions.
+	Option 6:
+		- connId looks up entry on Element::vector<Conn>
+		- FuncIndex looks up entry on Element::vector<FuncId>
+		Normal case: FuncId in range:
+			- Conn marches through Msgs, using same FuncId for all.
+		Exception: The FuncIndex is out of range
+			- FuncIndex identifies vector of FuncIds
+			- Conn marches through Msgs, using different FuncId
+				for each, from vector of FuncIds.
+		- Target finds OpFunc from FuncId using Cinfo::funcs_[FuncId]
+=============================================================================
+10 Oct 2009
+Compiled implementation. runs up to part way, then croaks on uninitialized
+variables.
+=============================================================================
+11 Oct 2009
+Fixed croaking problem: I had redefined some private fields in SrcFinfo. 
+
+Remaining issue with setting up the FuncIndex. This is something to be done
+by Cinfo::init().
+
+Fixed testSendMsg issue with setting up FuncIndex. 
+
+Converted both to doing almost silent unit tests.
+
+Implemented and cleared testCreateMsg, cleared valgrind. Need to make it silent.
+
+Also it is unable to find the 'set' field for the field assignment part,
+which is fine as I haven't yet defined it.
+
+For doing 'set':
+- Create Element explicitly, not using Create function
+	Pass in a ptr to the field to be set/get? not needed.
+- Create Msg using regular msg func.
+- Call asend directly
+
+
+
+Need to revisit all opfuncs to pass in Qinfo and Eref.
+Done.
+
+Need to revisit Conv<A> to return a reference or something similar, to avoid
+alloc etc.
+
+=============================================================================
+12 Oct 2009.
+Put the Qinfo into the OpFunc. Runs, clears.
+
+I have two variants of the OpFunc, perhaps premature optimization. One of them
+ignores all the additional info available, such as Qinfo and target eref.
+The other is also derived from OpFunc, but its func takes the reference to
+the Eref and the ptr to the Qinfo as additional args.
+
+Still to set up.
 
 =============================================================================

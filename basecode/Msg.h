@@ -41,17 +41,14 @@ class Msg
 		 * Execute func( arg ) on target, all relevant indices.
 		 * Returns next buf pos.
 		 */
+		virtual void exec( 
+			Element* target, const char* arg 
+		) const = 0;
+		/*
 		virtual const char* exec( 
-			Element* target, OpFunc* func, 
+			Element* target, const OpFunc* func, 
 			unsigned int srcIndex, const char* arg 
 		) const = 0;
-
-		/*
-		/// call func( arg ) on all targets in e1. Returns next buf pos
-		virtual const char* call1( OpFunc func, const char* arg ) const;
-
-		/// call func( arg ) on all targets in e2. Returns next buf pos
-		virtual const char* call2( OpFunc func, const char* arg ) const;
 		*/
 
 		/*
@@ -101,10 +98,14 @@ class SingleMsg: public Msg
 
 		void addToQ( const Element* caller, Qinfo& q, 
 			const char* arg ) const;
+		void exec( Element* target, const char* arg) const;
+		/*
 		const char* exec( 
-			Element* target, OpFunc* func, 
+			Element* target, const OpFunc* func, 
 			unsigned int srcIndex,  const char* arg
 		) const;
+		*/
+
 	private:
 		unsigned int i1_;
 		unsigned int i2_;
@@ -118,10 +119,13 @@ class OneToOneMsg: public Msg
 
 		void addToQ( const Element* caller, Qinfo& q, 
 			const char* arg ) const;
+		void exec( Element* target, const char* arg) const;
+		/*
 		const char* exec( 
-			Element* target, OpFunc* func, 
+			Element* target, const OpFunc* func, 
 			unsigned int srcIndex,  const char* arg
 		) const;
+		*/
 	private:
 		unsigned int i1_;
 		unsigned int i2_;

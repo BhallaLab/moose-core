@@ -23,12 +23,14 @@ OBJ = \
 	Cinfo.o	\
 	Msg.o	\
 	Conn.o \
-	Slot.o \
+	SrcFinfo.o \
 	Id.o \
 	testSync.o	\
 	testAsync.o	\
 	Neutral.o	\
+	SetGet.o	\
 	Qinfo.o \
+	Message.o \
 	main.o	\
 
 HEADERS = \
@@ -47,7 +49,7 @@ HEADERS = \
 	OpFunc.h \
 	ProcInfo.h \
 	Qinfo.h \
-	Slot.h \
+	SrcFinfo.h \
 	ValueFinfo.h \
 
 default: $(TARGET)

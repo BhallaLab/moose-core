@@ -10,11 +10,12 @@
 #include "header.h"
 
 Element::Element( const Cinfo* c, 
-	Data* d, unsigned int numData, unsigned int dataSize )
+	Data* d, unsigned int numData, unsigned int dataSize, 
+		unsigned int numFuncIndex )
 	: d_( d ), numData_( numData ), dataSize_( dataSize ), 
 	sendBuf_( 0 ), cinfo_( c )
 { 
-	;
+	targetFunc_.resize( numFuncIndex, 0 );
 }
 
 /*
@@ -159,18 +160,35 @@ const char* Element::execFunc( const char* buf )
 	assert( buf != 0 );
 
 	Qinfo q = *( reinterpret_cast < const Qinfo * >( buf ) );
+
+
+	if ( q.useSendTo() ) {
+		// const char* temp = buf + sizeof( Qinfo );
+		unsigned int tgtIndex =
+			*reinterpret_cast< const unsigned int* >( 
+			buf + sizeof( Qinfo ) + q.size() - sizeof( unsigned int ) );
+		if ( tgtIndex < numData_ ) {
+			// checks for valid func
+			const OpFunc* func = cinfo_->getOpFunc( q.fid() );
+			func->op( Eref( this, tgtIndex ), buf );
+		} else {
+			cout << "Warning: Message to nonexistent Element index " << 
+				tgtIndex << " on " << this << endl;
+		}
+	} else {
+		const Msg* m = getMsg( q.mid() ); // Runtime check for Msg identity.
+		if ( m )
+			m->exec( this, buf );
+	}
+
+
+/*
 	buf += sizeof( Qinfo );
-	/*
-	FuncId fid = *( reinterpret_cast < const FuncId * >( buf ) );
-	buf += sizeof( FuncId );
-	MsgId mid = *reinterpret_cast< const MsgId* >( buf );
-	buf += sizeof( MsgId );
-	*/
-	OpFunc* func = cinfo_->getOpFunc( q.fid() ); // checks for valid func
+	const OpFunc* func = cinfo_->getOpFunc( q.fid() ); // checks for valid func
 	const Msg* m = getMsg( q.mid() ); // Runtime check for Msg identity.
 
 	if ( q.useSendTo() ) {
-		unsigned int tgtIndex = 
+		unsigned int tgtIndex =
 			*reinterpret_cast< const unsigned int* >( buf + q.size() - sizeof( unsigned int ) );
 		if ( tgtIndex < numData_ ) {
 			func->op( Eref( this, tgtIndex ), buf );
@@ -181,8 +199,9 @@ const char* Element::execFunc( const char* buf )
 	} else if ( func && m ) {
 		m->exec( this, func, q.srcIndex(), buf );
 	}
+*/
 
-	return buf + q.size();;
+	return buf + sizeof( Qinfo) + q.size();;
 }
 
 /**
@@ -235,8 +254,26 @@ void Element::dropMsg( const Msg* m, MsgId mid )
 	m_[mid] = 0; // To clean up later, if at all.
 }
 
-ConnId Element::addConn( Conn c )
+void Element::addConn( Conn c, ConnId cid )
 {
-	c_.push_back( c );
-	return c_.size() - 1;
+	if ( c_.size() < cid + 1 )
+		c_.resize( cid + 1 );
+	c_[cid] = c;
+}
+const Cinfo* Element::cinfo() const
+{
+	return cinfo_;
+}
+
+void Element::addTargetFunc( FuncId fid, unsigned int funcIndex )
+{
+	if ( targetFunc_.size() < funcIndex + 1 )
+		targetFunc_.resize( funcIndex + 1 );
+	targetFunc_[ funcIndex ] = fid;
+}
+
+FuncId Element::getTargetFunc( unsigned int funcIndex ) const
+{
+	assert ( targetFunc_.size() > funcIndex );
+	return targetFunc_[ funcIndex ];
 }

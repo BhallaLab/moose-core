@@ -92,7 +92,21 @@ void SingleMsg::addToQ( const Element* caller, Qinfo& q,
 	}
 }
 
-const char* SingleMsg::exec( Element* target, OpFunc* f, 
+void SingleMsg::exec( Element* target, const char* arg ) const
+{
+	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
+	// arg += sizeof( Qinfo );
+	const OpFunc* f = target->cinfo()->getOpFunc( q->fid() );
+	if ( target == e1_ ) {
+		f->op( Eref( target, i1_ ), arg );
+	} else {
+		assert( target == e2_ );
+		f->op( Eref( target, i2_ ), arg );
+	}
+}
+
+/*
+const char* SingleMsg::exec( Element* target, const OpFunc* f, 
 		unsigned int srcIndex, const char* arg ) const
 {
 	if ( target == e1_ ) {
@@ -103,6 +117,7 @@ const char* SingleMsg::exec( Element* target, OpFunc* f,
 	}
 	return 0;
 }
+*/
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -125,7 +140,18 @@ void OneToOneMsg::addToQ( const Element* caller, Qinfo& q,
 	}
 }
 
-const char* OneToOneMsg::exec( Element* target, OpFunc* f, 
+void OneToOneMsg::exec( Element* target, const char* arg ) const
+{
+	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
+	// arg += sizeof( Qinfo );
+	const OpFunc* f = target->cinfo()->getOpFunc( q->fid() );
+	assert( target == e1_ || target == e2_ );
+	f->op( Eref( target, q->srcIndex() ), arg );
+}
+
+
+/*
+const char* OneToOneMsg::exec( Element* target, const OpFunc* f, 
 		unsigned int srcIndex, const char* arg ) const
 {
 	if ( target == e1_ ) {
@@ -136,3 +162,4 @@ const char* OneToOneMsg::exec( Element* target, OpFunc* f,
 	}
 	return 0;
 }
+*/

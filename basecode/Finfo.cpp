@@ -20,9 +20,33 @@ const string& Finfo::name( ) const
 	return name_;
 }
 
-void Finfo::registerOpFuncs( 
+//////////////////////////////////////////////////////////////////////////
+DestFinfo::~DestFinfo() {
+	delete func_;
+}
+
+DestFinfo::DestFinfo( const string& name, const string& doc, 
+	OpFunc* func )
+	: Finfo( name, doc ), func_( func )
+{
+	;
+}
+
+void DestFinfo::registerOpFuncs( 
 	map< string, FuncId >& fnames, vector< OpFunc* >& funcs
 	)
 {
-	;
+	map< string, FuncId >::iterator i = fnames.find( name() );
+	if ( i != fnames.end() ) {
+		funcs[ i->second ] = func_;
+	} else {
+		unsigned int size = funcs.size();
+		fnames[ name() ] = size;
+		funcs.push_back( func_ );
+	}
+}
+
+unsigned int DestFinfo::registerSrcFuncIndex( unsigned int current )
+{
+	return current;
 }

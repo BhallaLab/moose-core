@@ -211,8 +211,8 @@ ValueFinfo: Stores functions for set and get operations on a specific field.
 LookupFinfo: Stores functions for set with index, get with index, a
 	get to return size of table, and a get to return the whole table.
 DestFinfo: Stores a single function.
-SrcFinfo: Sets up a Slot. This is a kind of ugly half-baked Finfo, no func
-	involved.
+SrcFinfo: Defines origin of a message. Manages the send and sendTo operations.
+	Typed. Provides index for FuncId lookup.
 Note that the Finfos do NOT map one-to-one to the funcs.
 
 The Finfo may have multiple functions in it. Each function is defined using
@@ -220,6 +220,61 @@ an Ftype that provides 3 functions:
 constructor: Loads in the function of the form &Reac::setKf.
 checkSlot( const Slot* s): Does RTTI check on the slot to ensure compatibility.
 op( Eref e, const char* buf): converts the data entry and buffer and calls func.
+
+MESSAGE SETUP
+1. Create Conn and subsidiary Msgs from wildcard. At this point they are
+already aware of target Elements, and vice versa.
+	How does this square with the use of Msgs as wildcards? OK.
+	Can we eliminate Conns and use Msg linked lists instead?
+		- Less classes
+		- Less space (No Msg* vector for Conns to manage)
+		- Need way to distinguish between deleting a single Msg and the
+			entire linked list.
+		- Linked list management
+		- Traversal time for linked list?
+		- Can't store meta-info on Conn.
+
+2. Validate funcs: Traverse Conn. Come back with FuncIds. Check.
+3. Set up FuncIds on src Element.
+
+- All builtin msgs have hard-coded Conn index to use. The SrcFinfo can do
+	at static init time.
+- All builtin msgs have a distinct FuncId to call, but it isn't known till
+	setup time. The SrcFinfo knows the index to look up FuncId.
+- Occasional piggyback calls
+- Occasional new target calls.
+
+add( srcPath, srcField, destPath, destField )
+In general this needs to create a Projection or Edge.
+Location? 
+	Highest common ancestor of src and dest.
+	Separate branch off root.
+	User-specified.
+	Virtual, appears to be child of both src and dest. Of course Src and
+		Dest are potentially many Elements, so this gets messy. OK.
+	Create Projections explicitly? Or only from CreateMap type commands?
+
+
+add( srcE, srcFinfo, destE, destFinfo ): For Shared messages only.
+	When you set this up, then you can send a range of messages
+	along a common Msg fabric.
+	- Conn may be on both sides, since either side can be msg src.
+	- Require that it is either one-to-one or one-to-many?
+	- Check if it exists: Conn already there. Then just need to add
+		entries to the Msgs, or more Msgs.
+add( srcE, srcFinfo, destE, funcId ): Cleaner, for a single target.
+	Implies that we could could incrementally add ops onto an existing msg.
+	Issue here that with the ConnId being predefined, we force the calls
+	to go together on the same Msg. OK.
+--> Problem here is that both funcs want to get the Eref.
+	Probably OK, as the master node will have the Elements.
+	destE->getOpFunc( funcId )
+	OpFunc::checkFinfo( srcFinfo ) //Could also do the check in the srcFinfo
+	Check if we need to have an exception for FuncIds.
+	create Conn, Msg.
+	srcE->addConn
+	conn->addMsg
+	destE->addMsg
 
 ------------------------------------------------------------------------------
 OpFunc lookup
@@ -279,3 +334,6 @@ Element::execFunc
 				Unnecessary as it is on it
 		Opfunc::op: Executes the function.
 		
+
+------------------------------------------------------------------------------
+

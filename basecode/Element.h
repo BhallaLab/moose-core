@@ -35,7 +35,8 @@ class Element
 		);
 		*/
 		Element( const Cinfo* c, 
-			Data* d, unsigned int numData, unsigned int dataSize );
+			Data* d, unsigned int numData, unsigned int dataSize,
+			unsigned int numFuncIndex_ );
 
 		/**
 		 * Destructor
@@ -120,20 +121,37 @@ class Element
 		MsgId addMsg( Msg* m );
 		void dropMsg( const Msg* m, MsgId mid );
 
-		ConnId addConn( Conn c );
+		/**
+		 * Puts the specified Connection in the proper place in the
+		 * vector on the Element.
+		 */
+		void addConn( Conn c, ConnId cid );
+
+		/**
+		 * Puts sthe specified TargetFunc into the properly indexed place
+		 */
+		void addTargetFunc( FuncId fid, unsigned int funcIndex );
+
+		/**
+		 * Returns the target FuncId from funcIndex
+		 */
+		FuncId getTargetFunc( unsigned int funcIndex ) const;
+
+		const Cinfo* cinfo() const;
 	private:
 		const Msg* getMsg( MsgId mid ) const;
+
 		/**
 		 * These are the objects managed by the Element
 		 * Option 1: Just have a big linear array of objects. 
 		 * 		Lookup using size info. Substantial savings possible.
+		 * 		Easier to manage memory.
 		 * Option 2: Allocate the objects elsewhere, just ptrs here.
 		 * 		Easy to get started with.
 		 */
 		Data* d_;
 		unsigned int numData_;
 		unsigned int dataSize_;
-		// vector< Data* > d_;
 
 		/**
 		 * This is the data buffer used for outgoing sync messages from
@@ -192,4 +210,10 @@ class Element
 		 * command.
 		 */
 		vector< Conn > c_;
+
+		/**
+		 * Function Ids attached to outgoing Messages. Multiple funcs
+		 * may be on the same Conn, if it is a shared message.
+		 */
+		vector< FuncId > targetFunc_;
 };

@@ -21,6 +21,8 @@ class Finfo
 
 		virtual void registerOpFuncs( 
 			map< string, FuncId >& fm, vector< OpFunc* >& funcs ) = 0; 
+
+		virtual unsigned int registerSrcFuncIndex( unsigned int current ) = 0;
 		
 	private:
 		string name_;
@@ -31,16 +33,18 @@ class Finfo
 /*
  * Should set this up to take a regular func, similar to field funcs.
  * Will need a bit of templating but will be easier for users.
+*/
 class DestFinfo: public Finfo
 {
 	public:
-		DestFinfo( const string& name, OpFunc func, const string& doc );
+		~DestFinfo();
+		DestFinfo( const string& name, const string& doc,OpFunc* func );
 		void registerOpFuncs( 
-			map< string, FuncId >& fnames, vector< Ftype* >& funcs );
+			map< string, FuncId >& fnames, vector< OpFunc* >& funcs );
+		unsigned int registerSrcFuncIndex( unsigned int current );
 
 	private:
-		OpFunc func_;
+		OpFunc* func_;
 };
-*/
 
 #endif // _FINFO_H

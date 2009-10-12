@@ -50,6 +50,13 @@ template < class T, class F > class ValueFinfo: public Finfo
 				funcs.push_back( getOpFunc_ );
 			}
 		}
+
+		// Need to think about whether an index has to be registered here.
+		unsigned int registerSrcFuncIndex( unsigned int current )
+		{
+			return current;
+		}
+
 	private:
 		OpFunc1< T, F >* setOpFunc_;
 		GetOpFunc< T, F >* getOpFunc_;
@@ -109,7 +116,7 @@ void getop( Eref e, const char* buf const ) {
 	MsgId srcMsg = *reinterpret_cast< MsgId* >( buf );
 	buf += sizeof( MsgId );
 	FuncId srcFunc = *reinterpret_cast< FuncId* >( buf );
-	Slot2< MsgId, double > s( MsgId, srcFunc );
+	Finfo2< MsgId, double > s( MsgId, srcFunc );
 	s.sendTo( e, Id, ret );
 }
 

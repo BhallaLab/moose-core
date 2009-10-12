@@ -18,7 +18,8 @@ Cinfo::Cinfo( const string& name,
 				struct SchedInfo* schedInfo,
 				unsigned int nSched
 )
-		: name_( name ), baseCinfo_( baseCinfo ), dinfo_( d )
+		: name_( name ), baseCinfo_( baseCinfo ), dinfo_( d ),
+			numFuncIndex_( 0 )
 {
 	init( finfoArray, nFinfos );
 }
@@ -35,11 +36,13 @@ void Cinfo::init( Finfo** finfoArray, unsigned int nFinfos )
 		opFuncNames_[ "dummy" ] = 0;
 	}
 
+	numFuncIndex_ = 0;
 	for ( unsigned int i = 0; i < nFinfos; i++ ) {
 		Finfo* f = finfoArray[i];
 		finfoMap_[ f->name() ] = f;
 		
 		f->registerOpFuncs( opFuncNames_, funcs_ );
+		numFuncIndex_ = f->registerSrcFuncIndex( numFuncIndex_ );
 	}
 }
 
@@ -80,9 +83,17 @@ const Finfo* Cinfo::findFinfo( const string& name ) const
 	return 0;
 }
 
-OpFunc* Cinfo::getOpFunc( FuncId fid ) const {
+const OpFunc* Cinfo::getOpFunc( FuncId fid ) const {
 	if ( fid < funcs_.size () )
 		return funcs_[ fid ];
+	return 0;
+}
+
+FuncId Cinfo::getOpFuncId( const string& funcName ) const {
+	map< string, FuncId >::const_iterator i = opFuncNames_.find( funcName );
+	if ( i != opFuncNames_.end() ) {
+		return i->second;
+	}
 	return 0;
 }
 
@@ -92,7 +103,7 @@ Id Cinfo::create( const string& name, unsigned int numEntries ) const
 	return Id::create( 
 		new Element( 
 			this, dinfo_->allocData( numEntries ), numEntries,
-			dinfo_->size() )
+			dinfo_->size(), numFuncIndex_ )
 	);
 }
 

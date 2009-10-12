@@ -7,16 +7,5 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-class Neutral: public Data
-{
-	public:
-		Neutral();
-		void process( const ProcInfo* p, Eref e );
-		void setName( const string& name );
-		const string& getName() const;
-		static const Cinfo* initCinfo();
-		void destroy();
-
-	private:
-		string name_;
-};
+extern bool add( Element* src, const string& srcField, 
+	Element* dest, const string& destField );
