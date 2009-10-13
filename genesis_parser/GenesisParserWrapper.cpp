@@ -603,7 +603,7 @@ map< string, string >& sliSrcLookup()
 
 	// Messages for PulseGen
 	src[ "PulseGen.INPUT output" ] = "outputSrc";
-
+        src[ "PulseGen.INPUT Vm" ] = "outputSrc";
 	// Messages for DiffAmp
 	src[ "DiffAmp.INPUT output" ] = "outputSrc";
 	src[ "PLUS output" ] = "outputSrc";
@@ -629,6 +629,7 @@ map< string, string >& sliSrcLookup()
 	
 	// Some messages for tables, specially used for I/O
 	src[ "SpikeGen.INPUT Vm" ] = "VmSrc";
+	src[ "SpikeGen.INPUT output" ] = "outputSrc";
 	src[ "RandomSpike.INPUT Vm" ] = "eventSrc";	
 	src[ "INPUT Vm" ] = "Vm";
 	src[ "INPUT Im" ] = "Im";
@@ -743,6 +744,7 @@ map< string, string >& sliDestLookup()
 	// Special messages for spikegen and synapse
 	dest[ "SpikeGen.SPIKE" ] = "synapse";
 	dest[ "SpikeGen.INPUT Vm" ] = "Vm";
+	dest[ "SpikeGen.INPUT output" ] = "Vm";
 	// Messages for RandomSpike
 	dest[ "RandomSpike.SPIKE" ] = "synapse";
 	
@@ -1141,11 +1143,16 @@ void GenesisParserWrapper::doAdd(
                 // message to Table (where source is the ValueFinfo
                 // "output" and the same message to other classes,
                 // with an input message, like RC.
-                if ( msgType == "INPUT output" && srcClassName == "PulseGen" && destClassName != "Table" )
-                        msgType = srcClassName + "." + msgType;
-                if ( msgType == "INPUT output" && destClassName == "PulseGen" )
+                // Another hack to separate pulsegen.outputSrc ->
+                // spikegen.Vm ( addmsg pulsegen spikegen INPUT output
+                // - here the target will be Vm
+                if ( msgType == "INPUT output" && srcClassName == "PulseGen" && destClassName == "SpikeGen" )
                         msgType = destClassName + "." + msgType;
-                if ( msgType == "INPUT output" && srcClassName == "DiffAmp" && destClassName != "Table" )
+                else if ( msgType == "INPUT output" && srcClassName == "PulseGen" && destClassName != "Table" )
+                        msgType = srcClassName + "." + msgType;
+                else if ( msgType == "INPUT output" && destClassName == "PulseGen" )
+                        msgType = destClassName + "." + msgType;
+                else if ( msgType == "INPUT output" && srcClassName == "DiffAmp" && destClassName != "Table" )
                         msgType = srcClassName + "." + msgType;
 		bool usingMULTGATE = 0;
 		string gate = "";
