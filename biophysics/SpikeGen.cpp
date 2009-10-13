@@ -149,7 +149,7 @@ double SpikeGen::getState( Eref e )
 void SpikeGen::innerProcessFunc( const Conn* c, ProcInfo p )
 {
 	double t = p->currTime_;
-	if ( V_ > threshold_ && t >= lastEvent_ + refractT_ ) {
+	if ( V_ > threshold_ && (t + p->dt_/2.0) >= (lastEvent_ + refractT_)) {
 		send1< double >( c->target(), eventSlot, t );
 		lastEvent_ = t;
 		state_ = amplitude_;
