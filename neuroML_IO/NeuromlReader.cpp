@@ -149,7 +149,7 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
 	static const Finfo* xpowerFinfo = channelCinfo->findFinfo( "Xpower" );
 	static const Finfo* ypowerFinfo = channelCinfo->findFinfo( "Ypower" );
 	static const Finfo* zpowerFinfo = channelCinfo->findFinfo( "Zpower" );
-	unsigned int num_channels =ncl_->getNumChannels();
+	unsigned int num_channels = ncl_->getNumChannels();
 	map< string,vector<string> >::iterator cmap_iter;
     	map< string,vector<string> >::iterator smap_iter; 
     	for( int ch = 1; ch <= num_channels; ch++ )
@@ -160,14 +160,19 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
 		double gmax,ek;
 		Id loc( "/library" );
 		name = chl->getName();
- 	 	channel_ = Neutral::create( "HHChannel",name,loc,Id::scratchId() );
+		bool is2DChannel = chl->isSetConc_dependence();
+		if ( is2DChannel )
+			channel_ = Neutral::create( "HHChannel2D",name,loc,Id::scratchId() );	
+		else	
+ 	 		channel_ = Neutral::create( "HHChannel",name,loc,Id::scratchId() );
 	 	gmax = chl->getParameterValue();
 	 	//gmax *= 10;//si
 	 	ek = chl->getDefault_erev();
 		set< double >( channel_, ekFinfo, ek );//si
 	 	double xmin,xmax;
 	 	int xdivs;
-	 	string biophysicsunits =ncl_->getBiophysicsUnits();
+	 	string biophysicsunits = ncl_->getBiophysicsUnits();
+		//cout << " unit " << biophysicsunits << endl;
 	 	if ( biophysicsunits == "Physiological Units" ){
 	 		xmin = -100;
 	 		xmax = 50;
@@ -280,11 +285,11 @@ void NeuromlReader::setupSynChannels(map< string,vector<string> > &groupcableMap
 	static const Finfo* synTau2Finfo = synchanCinfo->findFinfo( "tau2" );
 	map< string,vector<string> >::iterator cmap_iter;
     	map< string,vector<string> >::iterator smap_iter; 
-	for( int i = 0; i < numsynchans; i ++ )
+	for( int i = 1; i <= numsynchans; i ++ )
 	{
 		SynChannel* synchl;	
 		Id loc( "/library" );
-		synchl =ncl_->getSynChannel(i);
+		synchl = ncl_->getSynChannel(i);
 		string name = synchl->getSynType();
  	 	synchannel_ = Neutral::create( "SynChan",name,loc,Id::scratchId() );
 		double gmax = synchl->getMax_Conductance();
@@ -319,9 +324,11 @@ void NeuromlReader::setupSynChannels(map< string,vector<string> > &groupcableMap
 			get< double >( comptEl.eref(), "length",len );
 			get< double >( comptEl.eref(), "diameter",dia );
 			double sa = calcSurfaceArea( len,dia );
+			cout << " len "<< len << " dia " << dia << " sa " << sa << endl; 
 			double gbar = gmax * sa;
 			set< double >( synchannel_,synGbarFinfo,gbar );
 			Element* copyEl = synchannel_->copy(comptEl(),synchannel_->name());
+			Eref(comptEl()).add("channel",copyEl,"channel",ConnTainer::Default ); 
 		     }
 		}
 	}

@@ -15,6 +15,8 @@
 **********************************************************************/
 #ifndef _NEUROMLREADER_H
 #define _NEUROMLREADER_H
+#include <neuroML/NCell.h>
+#include <neuroML/NBase.h>
 class NeuromlReader
 {
 	public:
