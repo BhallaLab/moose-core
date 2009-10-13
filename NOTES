@@ -1235,4 +1235,13 @@ the Eref and the ptr to the Qinfo as additional args.
 
 Still to set up.
 
+Checked in as revision 1368.
+=============================================================================
+13 Oct 2009.
+Implemented EpFunc, which is a variant of OpFunc that passes in the
+Eref and Qinfo along with other args. This is needed whenever we have a 
+function that manipulates the Element, or needs additional data about the
+incoming message.
+
+
 =============================================================================

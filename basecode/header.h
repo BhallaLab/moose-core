@@ -54,6 +54,7 @@ class Data;
 #include "Conv.h"
 #include "SrcFinfo.h"
 #include "OpFunc.h"
+#include "EpFunc.h"
 #include "ValueFinfo.h"
 
 #endif // _HEADER_H

@@ -116,7 +116,7 @@ void testCreateMsg()
 	for ( unsigned int i = 0; i < size; ++i ) {
 		const SrcFinfo0* sf = dynamic_cast< const SrcFinfo0* >( f );
 		assert( sf != 0 );
-		sf->send( e1 );
+		sf->send( Eref( e1.element(), i ) );
 	}
 	e2.element()->clearQ();
 

@@ -41,6 +41,20 @@ template< class T > class Conv
 			return sizeof( T );
 		}
 
+		/**
+		 * Puts pointer to T into val. Returns new position of the buffer
+		 * Usually does it simply by pointing T into the correct location
+		 * in buf. No actual data transfer or allocation.
+		 * This has a problem if we need to allocate something new to
+		 * get it into T. For example, converting a char* into a string.
+		static const char* buf2val( T** val, const char* buf );
+		/// Other option is to return a reference
+		 */
+		/**
+		 *
+		static char* val2buf( char* buf, const T* val );
+		*/
+
 		static void str2val( T& val, const string& s ) {
 			istringstream is( s );
 			is >> val;

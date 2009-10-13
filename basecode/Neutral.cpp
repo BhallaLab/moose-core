@@ -27,7 +27,7 @@ const Cinfo* Neutral::initCinfo()
 			&Neutral::getName ),
 		new SrcFinfo0( "child", "Message to child Elements", 0 ),
 		new DestFinfo( "parent", "Message from Parent Element(s)", 
-			new OpFunc0< Neutral >( &Neutral::destroy ) ),
+			new EpFunc0< Neutral >( &Neutral::destroy ) ),
 	};
 
 	static Cinfo neutralCinfo (
@@ -65,8 +65,8 @@ const string& Neutral::getName() const
 	return name_;
 }
 
-void Neutral::destroy()
+void Neutral::destroy( Eref& e, const Qinfo* q )
 {
 	// Need to do something with e, currently missing Eref arg, and qinfo.
-	cout << "in Neutral::destroy()\n";
+	cout << "in Neutral::destroy()[ " << e.index() << "]\n";
 }

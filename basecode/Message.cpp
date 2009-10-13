@@ -20,7 +20,8 @@ bool addMsgToFunc( Element* src, const Finfo* finfo, Element* dest,
 			finfo->name() << "' is not a SrcFinfo\n";
 		return 0;
 	}
-	Msg* m = new SingleMsg( Eref( src, 0 ), Eref( dest, 0 ) );
+	// Msg* m = new SingleMsg( Eref( src, 0 ), Eref( dest, 0 ) );
+	Msg* m = new OneToOneMsg( src, dest );
 	Conn c;
 	c.add( m );
 	src->addConn( c, sf->getConnId() );
