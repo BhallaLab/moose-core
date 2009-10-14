@@ -129,30 +129,24 @@ void testCreateMsg()
 	delete i2();
 }
 
-/*
-void testSetGet()
+void testSet()
 {
-	const Cinfo* sgc = SetGet::initCinfo();
+	const Cinfo* sgc = SetGet::initCinfo(); // This will later be the shell.
 	const Cinfo* nc = Neutral::initCinfo();
 	unsigned int size = 100;
 	string arg;
-	Element* e1 = new Element( sgc, &arg, 1, 2 );
-
-	// Id i1 = sgc->create( "set", size );
+	Id i1 = sgc->create( "set", size );
 	Id i2 = nc->create( "test2", size );
 
 	Eref e1 = i1.eref();
 	Eref e2 = i2.eref();
-
-	bool ret = add( e1.element(), "set", e2.element(), "setname" );
 	
-	assert( ret );
-
 	for ( unsigned int i = 0; i < size; ++i ) {
 		char temp[20];
 		sprintf( temp, "set_e2_%d", i );
 		string stemp( temp );
-		// Do the set assignment here.
+		Eref dest( e2.element(), i );
+		set( e1, dest, "setname", stemp );
 	}
 	e2.element()->clearQ();
 
@@ -161,13 +155,12 @@ void testSetGet()
 
 	delete i1();
 	delete i2();
-	
 }
-*/
 
 void testAsync( )
 {
 	insertIntoQ();
 	testSendMsg();
 	testCreateMsg();
+	testSet();
 }

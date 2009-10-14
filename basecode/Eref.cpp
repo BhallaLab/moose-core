@@ -6,6 +6,12 @@ Eref::Eref( Element* e, unsigned int index )
 	;
 }
 
+ostream& operator <<( ostream& s, const Eref& e )
+{
+	s << e.e_ << "[" << e.i_ << "]";
+	return s;
+}
+
 double Eref::sumBuf( SyncId slot )
 {
 	return e_->sumBuf( slot, i_ );

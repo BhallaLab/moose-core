@@ -19,3 +19,6 @@ class SetGet: public Data
 	private:
 		string name_;
 };
+
+extern bool set( Eref& srce, Eref& dest, 
+	const string& destField, const string& val );

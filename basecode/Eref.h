@@ -1,6 +1,7 @@
 class Eref
 {
 	public:
+		friend ostream& operator <<( ostream& s, const Eref& e );
 		Eref( Element* e, unsigned int index );
 
 		/**

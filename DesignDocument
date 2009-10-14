@@ -171,6 +171,9 @@ Case 3: Message exists, but want to send to a single target:
 s->sendTo( Eref me, Id tgt, [args] );
 
 FIELD ACCESS
+Always use the Shell object to carry out these functions. Put the Shell as
+/root. Shell is present on all nodes.
+
 Set: Use the same set functions as above.
 bool set< double >( Id tgt, FieldId f, double val );
 bool set< double >( Id tgt, const string& fieldname, double val );
@@ -222,59 +225,23 @@ checkSlot( const Slot* s): Does RTTI check on the slot to ensure compatibility.
 op( Eref e, const char* buf): converts the data entry and buffer and calls func.
 
 MESSAGE SETUP
-1. Create Conn and subsidiary Msgs from wildcard. At this point they are
-already aware of target Elements, and vice versa.
-	How does this square with the use of Msgs as wildcards? OK.
-	Can we eliminate Conns and use Msg linked lists instead?
-		- Less classes
-		- Less space (No Msg* vector for Conns to manage)
-		- Need way to distinguish between deleting a single Msg and the
-			entire linked list.
-		- Linked list management
-		- Traversal time for linked list?
-		- Can't store meta-info on Conn.
+bool add( Element* src, const string& srcField,
+	Element* dest, const string& destField );
+	Decides if fields are for simple or shared messages.
+Case 1: Simple Msg:
+bool addMsgToFunc( Element* src, const Finfo* finfo, Element* dest, FuncId fid )
+	Makes a new Msg, with Src and Dest Elements. 
+Msg::Msg( src, dest ): constructor registers the new Msg on the src and dest:
+	Element::addMsg( m )
+	This part needs thought, to decide what kind of Msg to make. 
+Conn::add( m): To put the Msg on the Conn.
+src->addConn : To put the conn on the Src.
+src->addTargetFunc: To put the target Func info on the Src.
 
-2. Validate funcs: Traverse Conn. Come back with FuncIds. Check.
-3. Set up FuncIds on src Element.
+Case 2: Shared Msg.
+addSharedMsg( Element* src, const Finfo* f1, Element* dest, const Finfo* f2 )
+Yet to implement.
 
-- All builtin msgs have hard-coded Conn index to use. The SrcFinfo can do
-	at static init time.
-- All builtin msgs have a distinct FuncId to call, but it isn't known till
-	setup time. The SrcFinfo knows the index to look up FuncId.
-- Occasional piggyback calls
-- Occasional new target calls.
-
-add( srcPath, srcField, destPath, destField )
-In general this needs to create a Projection or Edge.
-Location? 
-	Highest common ancestor of src and dest.
-	Separate branch off root.
-	User-specified.
-	Virtual, appears to be child of both src and dest. Of course Src and
-		Dest are potentially many Elements, so this gets messy. OK.
-	Create Projections explicitly? Or only from CreateMap type commands?
-
-
-add( srcE, srcFinfo, destE, destFinfo ): For Shared messages only.
-	When you set this up, then you can send a range of messages
-	along a common Msg fabric.
-	- Conn may be on both sides, since either side can be msg src.
-	- Require that it is either one-to-one or one-to-many?
-	- Check if it exists: Conn already there. Then just need to add
-		entries to the Msgs, or more Msgs.
-add( srcE, srcFinfo, destE, funcId ): Cleaner, for a single target.
-	Implies that we could could incrementally add ops onto an existing msg.
-	Issue here that with the ConnId being predefined, we force the calls
-	to go together on the same Msg. OK.
---> Problem here is that both funcs want to get the Eref.
-	Probably OK, as the master node will have the Elements.
-	destE->getOpFunc( funcId )
-	OpFunc::checkFinfo( srcFinfo ) //Could also do the check in the srcFinfo
-	Check if we need to have an exception for FuncIds.
-	create Conn, Msg.
-	srcE->addConn
-	conn->addMsg
-	destE->addMsg
 
 ------------------------------------------------------------------------------
 OpFunc lookup
@@ -337,3 +304,46 @@ Element::execFunc
 
 ------------------------------------------------------------------------------
 
+MULTITHREADING.
+Async:
+Setup:
+Nothing special
+Send:
+Each thread has a separate section of the Queue on each target Element. So
+there is never any need for individual mutexes.
+clearQ: Three possible levels of separation.
+	- Separate at the level of Msgs for large Msgs handling lots of
+	targets. Separate chunks of the targets could be assigned to
+	different threads. Needs that no other threads are modifying target.
+	- Separate at the level of Elements; so that each Element is on a
+	different thread. Need to set up enough Elements to balance this
+	properly. Can we set up multiple Elements on the same node with the
+	same Id? This would work well for cases where there are huge numbers
+	of Elements.
+	- Separate at the level of solvers. Works where one big solver handles
+	lots of Elements. This becomes very solver-specific, and we would
+	have to define rules for how the solver is allowed to do this.
+Sync:
+No problems because the memory locations are distinct for all data transfer.
+
+
+------------------------------------------------------------------------------
+
+MPI:
+Async:
+Setup: need to figure out off-node targets. See below for send.
+
+Send:
+Msg has been preconfigured to add to the regular Q, the outgoing Q, or both.
+Shouldn't this be separate Msgs? But it is to the same Element, just to
+a different buffer on it.
+
+ClearQ:
+On-node stuff is as usual.
+Postmasters (or Elements themselves) clear out off-node Qs in a straightforward
+way, since everything is now serialized.
+Once these arrive on the target node, they simply get dumped into the incoming
+Q of the target Element.
+
+
+------------------------------------------------------------------------------

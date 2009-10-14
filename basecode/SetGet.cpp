@@ -61,3 +61,53 @@ const string& SetGet::getName() const
 {
 	return name_;
 }
+
+/*
+bool set( Eref& srce, Eref& dest, const string& destField, const double& val )
+{
+	Element* src = srce.element();
+	SrcFinfo1< double > sf( "set", "dummy", 0 );
+
+	FuncId fid = dest->cinfo()->getOpFuncId( destField );
+	const OpFunc* func = dest->cinfo()->getOpFunc( fid );
+	if ( func ) {
+		if ( func->checkFinfo( &sf ) ) {
+			Msg* m = new OneToOnemsg( src, dest.element() );
+			Conn c;
+			ConnId setCid = 0;
+			unsigned int setFuncIndex = 0;
+			c.add( m );
+			src->addConn( c, setCid );
+			src->addTargetFunc( fid, setFuncIndex );
+		}
+	}
+	sf.send( srce, val );
+}
+*/
+
+bool set( Eref& srce, Eref& dest, const string& destField, const string& val )
+{
+	Element* src = srce.element();
+	SrcFinfo1< string > sf( "set", "dummy", 0 );
+
+	FuncId fid = dest.element()->cinfo()->getOpFuncId( destField );
+	const OpFunc* func = dest.element()->cinfo()->getOpFunc( fid );
+	if ( func ) {
+		if ( func->checkFinfo( &sf ) ) {
+			Msg* m = new SingleMsg( srce, dest );
+			Conn c;
+			ConnId setCid = 0;
+			unsigned int setFuncIndex = 0;
+			c.add( m );
+			src->addConn( c, setCid );
+			src->addTargetFunc( fid, setFuncIndex );
+			sf.send( srce, val );
+			return 1;
+		} else {
+			cout << "set::Type mismatch" << dest << "." << destField << endl;
+		}
+	} else {
+		cout << "set::Failed to find " << dest << "." << destField << endl;
+	}
+	return 0;
+}
