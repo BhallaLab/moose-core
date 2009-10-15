@@ -228,6 +228,7 @@ void Element::clearQ( )
 	{
 		buf = execFunc( buf );
 	}
+	q_.resize( 0 );
 }
 
 /**

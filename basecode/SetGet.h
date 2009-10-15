@@ -15,10 +15,15 @@ class SetGet: public Data
 		void setName( const string& name );
 		const string& getName() const;
 		static const Cinfo* initCinfo();
+		void handleGet( Eref& e, const Qinfo* q, const char* arg );
+		const char* getBuf() const;
 
 	private:
 		string name_;
+		vector< char > getBuf_;
 };
 
 extern bool set( Eref& srce, Eref& dest, 
 	const string& destField, const string& val );
+
+extern bool get( Eref& srce, const Eref& dest, const string& destField );

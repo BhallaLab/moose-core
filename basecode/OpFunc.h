@@ -7,6 +7,9 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#ifndef _OPFUNC_H
+#define _OPFUNC_H
+
 class OpFunc
 {
 	public:
@@ -128,24 +131,31 @@ template< class T, class A > class GetOpFunc: public OpFunc
 			return dynamic_cast< const SrcFinfo1< A >* >( s );
 		}
 
+		/**
+		 * The buf just contains the funcid on the src element that is
+		 * ready to receive the returned data.
+		 * In this special case we do not do typechecking, since the
+		 * constructors for the get command should have done so already.
+		 * So we bypass the usual SrcFinfo::sendTo, and instead go
+		 * right to the Conn to send the data.
+		 */
 		void op( Eref e, const char* buf ) const {
+			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
 			buf += sizeof( Qinfo );
-			A ret = (( static_cast< T* >( e.data() ) )->*func_)();
-		    Id src = *reinterpret_cast< const Id* >( buf );
-		    buf += sizeof( Id );
-			/*
-		    MsgId srcMsg = *reinterpret_cast< const MsgId* >( buf );
-		    buf += sizeof( MsgId );
-		    FuncId srcFunc = *reinterpret_cast< const FuncId* >( buf );
-			*/
-			// There should already be the appropriate SrcFinfo defined,
-			// just that its target Func is yet to be set up.
-			/*
-		    SrcFinfo1< A > s( srcMsg, srcFunc );
-		    s.sendTo( e, src, ret );
-			*/
+		    FuncId retFunc = *reinterpret_cast< const FuncId* >( buf );
+			const A& ret = (( static_cast< T* >( e.data() ) )->*func_)();
+
+			Qinfo retq( retFunc, e.index(), Conv< A >::size( ret ), 1 );
+			char* temp = new char[ retq.size() ];
+			Conv<A>::val2buf( temp, ret );
+			Conn c;
+			c.add( const_cast< Msg* >( e.element()->getMsg( q->mid() ) ) );
+			c.tsend( e.element(), q->srcIndex(), retq, temp );
+			delete[] temp;
 		}
 
 	private:
 		const A& ( T::*func_ )() const;
 };
+
+#endif // _OPFUNC_H

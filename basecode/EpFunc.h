@@ -7,6 +7,8 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#ifndef _EPFUNC_H
+#define _EPFUNC_H
 /**
  * This set of classes is derived from OpFunc, and take extra args
  * for the qinfo and Eref.
@@ -55,3 +57,27 @@ template< class T, class A > class EpFunc1: public OpFunc
 	private:
 		void ( T::*func_ )( Eref& e, const Qinfo* q, const A& ); 
 };
+
+template< class T > class RetFunc: public OpFunc
+{
+	public:
+		RetFunc( void ( T::*func )( Eref& e, const Qinfo* q, const char* arg ) )
+			: func_( func )
+			{;}
+
+		bool checkFinfo( const Finfo* s ) const {
+			return 1;
+		}
+
+		// This could do with a whole lot of optimization to avoid
+		// copying data back and forth.
+		void op( Eref e, const char* buf ) const {
+			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
+			(static_cast< T* >( e.data() )->*func_)( e, q, buf + sizeof( Qinfo ) ) ;
+		}
+
+	private:
+		void ( T::*func_ )( Eref& e, const Qinfo* q, const char* arg ); 
+};
+
+#endif //_EPFUNC_H

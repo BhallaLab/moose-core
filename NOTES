@@ -1246,3 +1246,37 @@ incoming message.
 Checked in as revision 1370.
 
 =============================================================================
+14 Oct 2009.
+Implemented testSet unit test. Seems OK, but need to clean up memory leaks.
+Checked in as revision 1372.
+
+Working on memory leak. Unexpected major problem with whole approach: the
+allocated message m is needed during the clearQ, after the set command
+has returned. So we have a dangling message.
+Related problem: We will have clearQ after Set has returned. So script
+command sequencing cannot be guaranteed, unless we tell the script execution
+to hold off till clearQ. This gets worse with 'get'.
+
+Working on 'get'. I have the skeleton in place.
+=============================================================================
+15 Oct 2009
+More implementation on 'get'. 
+- Msg leak issue could be handled if the msg is permanently stationed on the
+	SetGet object (due to be the Shell). Its far end can dangle, and be
+	connected to targets as needed.
+- Would want to refine this to deal with wildcards, so want a Conn, not just a
+	single Msg.
+- Would want to do cleanup and continuation of script function on the
+	SetGet::handleGet. This function is triggered only when the 'get'
+	call returns. A bit fragile, will want a timeout.
+- If we have multiple targets for 'get', we will need an index to go out to 
+	each target, and come back with the data, so that it can be organized
+	into a vector. The recipient function will then have to keep track of
+	how many have returned.
+- Do we need multiple 'get' buffers and funcIds? If the effective utilization
+	is serial, should be OK to have just one.
+
+After a day of implementation and debugging, seems to work.
+
+=============================================================================
+

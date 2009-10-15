@@ -19,6 +19,7 @@ void Conn::clearConn()
 		i != m_.end(); ++i ) {
 		delete *i;
 	}
+	m_.resize( 0 );
 }
 
 void Conn::asend( 
@@ -38,14 +39,27 @@ void Conn::tsend(
 		if ( (*i)->e2() == target() || (*i)->e1() == target() ) {
 			char* temp = new char[ q.size() + sizeof( unsigned int ) ];
 			memcpy( temp, arg, q.size() );
-			q.expandSize();
 			*reinterpret_cast< unsigned int* >( temp + q.size() ) = 
 				target.index();
-				(*i)->addToQ( e, q, arg );
+			q.expandSize();
+			(*i)->addToQ( e, q, temp );
 			delete[] temp;
 			break;
 		}
 	}
+}
+
+void Conn::tsend( 
+	const Element* e, unsigned int targetIndex, Qinfo& q, const char* arg ) const
+{
+	assert( q.useSendTo() );
+	assert( m_.size() == 1 );
+	char* temp = new char[ q.size() + sizeof( unsigned int ) ];
+	memcpy( temp, arg, q.size() );
+	*reinterpret_cast< unsigned int* >( temp + q.size() ) = targetIndex;
+	q.expandSize();
+	m_[0]->addToQ( e, q, temp );
+	delete[] temp;
 }
 
 /**

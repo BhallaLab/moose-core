@@ -37,6 +37,9 @@ class Conn
 		void tsend( const Element* e, Id target, Qinfo& q, 
 			const char* arg ) const;
 
+		void tsend( const Element* e, unsigned int targetIndex, Qinfo& q, 
+			const char* arg ) const;
+
 		/**
 		 * ClearQ calls clearQ on all Msgs.
 		 */

@@ -47,10 +47,12 @@ HEADERS = \
 	Msg.h \
 	Neutral.h \
 	OpFunc.h \
+	EpFunc.h \
 	ProcInfo.h \
 	Qinfo.h \
 	SrcFinfo.h \
 	ValueFinfo.h \
+	SetGet.h \
 
 default: $(TARGET)
 

@@ -138,8 +138,9 @@ class Element
 		FuncId getTargetFunc( unsigned int funcIndex ) const;
 
 		const Cinfo* cinfo() const;
-	private:
+
 		const Msg* getMsg( MsgId mid ) const;
+	private:
 
 		/**
 		 * These are the objects managed by the Element

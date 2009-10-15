@@ -157,10 +157,50 @@ void testSet()
 	delete i2();
 }
 
+void testGet()
+{
+	const Cinfo* sgc = SetGet::initCinfo(); // This will later be the shell.
+	const Cinfo* nc = Neutral::initCinfo();
+	unsigned int size = 100;
+	string arg;
+	Id i1 = sgc->create( "set", size );
+	Id i2 = nc->create( "test2", size );
+
+	Eref e1 = i1.eref();
+	Eref e2 = i2.eref();
+	
+	for ( unsigned int i = 0; i < size; ++i ) {
+		char temp[20];
+		sprintf( temp, "get_e2_%d", i );
+		string stemp( temp );
+		static_cast< Neutral* >(e2.element()->data( i ))->setName( temp );
+	}
+
+	for ( unsigned int i = 0; i < size; ++i ) {
+		string stemp;
+		Eref dest( e2.element(), i );
+
+			// I don't really want an array of SetGet/Shells to originate
+			// get requests, but just
+			// to test that it works from anywhere...
+		Eref src( e1.element(), i ); 
+		if ( get( src, dest, "getname" ) ) {
+			e2.element()->clearQ(); // Request goes to e2
+			e1.element()->clearQ(); // Response comes back to e1
+			stemp = ( static_cast< SetGet* >(e1.element()->data( i )) )->getBuf();
+			cout << i << "	" << stemp << endl;
+		}
+	}
+
+	delete i1();
+	delete i2();
+}
+
 void testAsync( )
 {
 	insertIntoQ();
 	testSendMsg();
 	testCreateMsg();
 	testSet();
+	testGet();
 }
