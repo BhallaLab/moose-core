@@ -11,7 +11,7 @@
 ////////////////////////////////////////////////////////////////
 load_file("nrngui.hoc")
 load_file("hoc/traubcon.hoc")
-load_file("hoc/utility.hoc")
+
 load_file("cells/tuftRS_template.hoc")
 strdef tstr
 PI=3.141592

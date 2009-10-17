@@ -1,6 +1,17 @@
+////////////////////////////////////////////////////////////////
+// This script tests a deep axo-axonic neuron
+// from the NEURON port of Traub et al, 2005.
+// It simulates 200 ms of real time and applies a 0.3 nA
+// current injection for 50 ms from the start of simulation.
+// The Vm and [Ca2+] respectively of the presynaptic and 
+// the soma compartment are stored in the data directory.
+// Please see README file for references.
+//
+// Author: Subhasis Ray / NCBS, Bangalore/ October 2009
+////////////////////////////////////////////////////////////////
 load_file("nrngui.hoc")
 load_file("hoc/traubcon.hoc")
-load_file("hoc/utility.hoc")
+
 load_file("cells/deepaxax_template.hoc")
 strdef tstr
 PI=3.141592
@@ -19,8 +30,7 @@ proc runcell(){ local i, t1, a1, t2, a2 localobj vvec, tvec, f, g, caconc, ikvec
     
     tstop = $1
     t1 = $2
-    printf("Run for: %g ms, stim at: %g\n", tstop, t1)
-    t2 = 1e9 a2 = 0
+    t2 = $3
     cell = new deepaxax()
     access cell.comp[1]
     f = new File()
@@ -33,7 +43,8 @@ proc runcell(){ local i, t1, a1, t2, a2 localobj vvec, tvec, f, g, caconc, ikvec
     stim1 = new IClamp(0.5) 
     stim1.amp = 0.3
     stim1.del = t1
-    stim1.dur = 50.0
+    stim1.dur = t2
+    printf("Run for: %g ms, inject %g nA current at %g ms for %g ms\n", tstop, stim1.amp, stim1.del, stim1.dur)    
     run()    
     f.wopen("data/Vm_deepaxax.plot")
     for ii = 0, vvec.size() - 1{
@@ -56,5 +67,5 @@ proc finit0(){
     forsec cell.all { v = -65 }
 }
 
-runcell(200., 50.)
+runcell(200., 50., 50.)
 quit()
