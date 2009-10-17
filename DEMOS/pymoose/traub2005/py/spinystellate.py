@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Sep 29 11:43:22 2009 (+0530)
 # Version: 
-# Last-Updated: Sat Oct 17 09:31:54 2009 (+0530)
+# Last-Updated: Sat Oct 17 21:59:33 2009 (+0530)
 #           By: subhasis ray
-#     Update #: 130
+#     Update #: 133
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -104,14 +104,7 @@ class SpinyStellate(TraubCell):
         mycell = SpinyStellate(SpinyStellate.prototype, sim.model.path + "/SpinyStellate")
         print 'Created cell:', mycell.path
         vm_table = mycell.comp[mycell.presyn].insertRecorder('Vm_spinstell', 'Vm', sim.data)
-        ca_conc_path = mycell.soma.path + '/CaPool'
-        ca_table = None
-        if config.context.exists(ca_conc_path):
-            ca_conc = moose.CaConc(ca_conc_path)
-            ca_table = moose.Table('Ca_nontuftRS', sim.data)
-            ca_table.stepMode = 3
-            ca_conc.connect('Ca', ca_table, 'inputRequest')
-
+        ca_table = mycell.soma.insertCaRecorder('CaPool', sim.data)
         pulsegen = mycell.soma.insertPulseGen('pulsegen', sim.model, firstLevel=3e-10, firstDelay=50e-3, firstWidth=50e-3)
 
         sim.schedule()
@@ -125,28 +118,15 @@ class SpinyStellate(TraubCell):
         sim.dump_data('data')
         mus_vm = pylab.array(vm_table) * 1e3
         mus_t = linspace(0, sim.simtime * 1e3, len(mus_vm))
-        ca_array = pylab.array(ca_table)
+        mus_ca = pylab.array(ca_table)
+        nrn_vm = trbutil.read_nrn_data('Vm_spinstell.plot', 'test_spinstell.hoc')
+        nrn_ca = trbutil.read_nrn_data('Ca_spinstell.plot', 'test_spinstell.hoc')
+        if len(nrn_vm) > 0:
+            nrn_t = nrn_vm[:, 0]
+            nrn_vm = nrn_vm[:, 1]
+            nrn_ca = nrn_ca[:,1]
 
-        if config.neuron_bin:
-            call([config.neuron_bin, 'test_spinstell.hoc'], cwd='../nrn')
-
-        nrn_vm = trbutil.read_nrn_data('Vm_spinstell.plot')
-        nrn_t = nrn_vm[:, 0]
-        nrn_vm = nrn_vm[:, 1]
-        nrn_ca = trbutil.read_nrn_data('Ca_spinstell.plot')
-        nrn_ca = nrn_ca[:,1]
-        
-        pylab.subplot(211)
-        pylab.plot(nrn_t, nrn_vm, 'y-', label='NEURON')
-        pylab.plot(mus_t, mus_vm, 'g-.', label='MOOSE')
-        pylab.title('Vm in presynaptic compartment of %s' % cls.__name__)
-        pylab.legend()
-        pylab.subplot(212)
-        pylab.plot(nrn_t, nrn_ca, 'r-', label='NEURON')
-        pylab.plot(mus_t, ca_array, 'b-.', label='MOOSE')
-        pylab.title('[Ca2+] in soma of %s' % cls.__name__)
-        pylab.legend()
-        pylab.show()
+        trbutil.do_plot(cls.__name__, mus_t, mus_ca, mus_vm, nrn_t, nrn_ca, nrn_vm)
         
         
 # test main --
@@ -154,7 +134,6 @@ from simulation import Simulation
 import pylab
 from subprocess import call
 if __name__ == "__main__":
-
     SpinyStellate.test_single_cell()
     
 

@@ -1,6 +1,17 @@
+////////////////////////////////////////////////////////////////
+// This script tests a spiny stellate neuron of layer 4
+// from the NEURON port of Traub et al, 2005.
+// It simulates 200 ms of real time and applies a 0.3 nA
+// current injection for 50 ms from the start of simulation.
+// The Vm and [Ca2+] respectively of the presynaptic and 
+// the soma compartment are stored in the data directory.
+// Please see README file for references.
+//
+// Author: Subhasis Ray / NCBS, Bangalore/ October 2009
+////////////////////////////////////////////////////////////////
 load_file("nrngui.hoc")
 load_file("hoc/traubcon.hoc")
-load_file("hoc/utility.hoc")
+
 load_file("cells/spinstell_template.hoc")
 strdef tstr
 PI=3.141592

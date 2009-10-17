@@ -1,7 +1,17 @@
+////////////////////////////////////////////////////////////////
+// This script tests a single superficial regular spiking 
+// pyramidal cell  from the NEURON port of Traub et al, 2005.
+// It simulates 200 ms of real time and applies a 0.3 nA
+// current injection for 50 ms from the start of simulation.
+// The Vm and [Ca2+] respectively of the presynaptic and 
+// the soma compartment are stored in the data directory.
+// Please see README file for references.
+//
+// Author: Subhasis Ray / NCBS, Bangalore/ October 2009
+////////////////////////////////////////////////////////////////
 load_file("nrngui.hoc")
 load_file("hoc/traubcon.hoc")
-load_file("hoc/utility.hoc")
-// load_file("fortmap.hoc")
+
 load_file("cells/suppyrRS_template.hoc")
 strdef tstr
 PI=3.141592
@@ -9,16 +19,8 @@ FARADAY=96485
 secondorder=2
 
 celsius=30
-//till the shift bug in the mod files are fixed (table depends on range variable)
-// usetable_naf2 = 0
-// usetable_naf = 0
-// usetable_napf_spinstell = 0
-// usetable_napf_tcr = 0
-
 define_shape()
-//objref runinfo_, choice_, cell, nil, stim1, stim2, mchoice_
 objref cell, stim1, stim2
-/* runcell(runtime, delay) */
 
 proc runcell(){ local i, t1, a1, t2, a2 localobj vvec, tvec, f, g, caconc, ikvec
     print "--------------------------------------------------------------"
