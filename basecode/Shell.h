@@ -7,10 +7,10 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-class SetGet: public Data
+class Shell: public Data
 {
 	public:
-		SetGet();
+		Shell();
 		void process( const ProcInfo* p, Eref e );
 		void setName( const string& name );
 		const string& getName() const;

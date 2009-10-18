@@ -1,4 +1,5 @@
 #include "header.h"
+#include "Shell.h"
 #include <sys/time.h>
 #include <math.h>
 #include <queue>
@@ -10,8 +11,14 @@ extern void testAsync();
 extern void testSyncArray( unsigned int size, unsigned int numThreads,
 	unsigned int method );
 
+void init()
+{
+	Shell::initCinfo()->create( "root", 1 );
+}
+
 int main()
 {
+	init();
 	cout << "testing: ";
 	testAsync();
 

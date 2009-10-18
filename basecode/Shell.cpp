@@ -8,10 +8,10 @@
 **********************************************************************/
 
 #include "header.h"
-#include "SetGet.h"
+#include "Shell.h"
 #include "Dinfo.h"
 
-const Cinfo* SetGet::initCinfo()
+const Cinfo* Shell::initCinfo()
 {
 	/*
 	static Finfo* reacFinfos[] = {
@@ -19,56 +19,56 @@ const Cinfo* SetGet::initCinfo()
 		new Finfo( setKb_ ),
 	};
 	*/
-	static Finfo* setGetFinfos[] = {
-		new ValueFinfo< SetGet, string >( 
+	static Finfo* shellFinfos[] = {
+		new ValueFinfo< Shell, string >( 
 			"name",
 			"Name of object", 
-			&SetGet::setName, 
-			&SetGet::getName ),
+			&Shell::setName, 
+			&Shell::getName ),
 		new DestFinfo( "handleGet", 
 			"Function to handle returning values for 'get' calls.",
-			new RetFunc< SetGet >( &SetGet::handleGet ) ),
+			new RetFunc< Shell >( &Shell::handleGet ) ),
 		new SrcFinfo1< FuncId >( "requestGet",
 			"Function to request another Element for a value", 0 ),
 			
 	};
 
-	static Cinfo setGetCinfo (
-		"SetGet",
+	static Cinfo shellCinfo (
+		"Shell",
 		0, // No base class.
-		setGetFinfos,
-		sizeof( setGetFinfos ) / sizeof( Finfo* ),
-		new Dinfo< SetGet >()
+		shellFinfos,
+		sizeof( shellFinfos ) / sizeof( Finfo* ),
+		new Dinfo< Shell >()
 	);
 
-	return &setGetCinfo;
+	return &shellCinfo;
 }
 
-static const Cinfo* setGetCinfo = SetGet::initCinfo();
+static const Cinfo* shellCinfo = Shell::initCinfo();
 
 
-SetGet::SetGet()
+Shell::Shell()
 	: name_( "" )
 {
 	;
 }
 
-void SetGet::process( const ProcInfo* p, Eref e )
+void Shell::process( const ProcInfo* p, Eref e )
 {
 	;
 }
 
-void SetGet::setName( const string& name )
+void Shell::setName( const string& name )
 {
 	name_ = name;
 }
 
-const string& SetGet::getName() const
+const string& Shell::getName() const
 {
 	return name_;
 }
 
-void SetGet::handleGet( Eref& e, const Qinfo* q, const char* arg )
+void Shell::handleGet( Eref& e, const Qinfo* q, const char* arg )
 {
 	getBuf_.resize( q->size() );
 	memcpy( &getBuf_[0], arg, q->size() );
@@ -77,7 +77,7 @@ void SetGet::handleGet( Eref& e, const Qinfo* q, const char* arg )
 	// to targets.
 }
 
-const char* SetGet::getBuf() const
+const char* Shell::getBuf() const
 {
 	if ( getBuf_.size() > 0 )
 		return &( getBuf_[0] );

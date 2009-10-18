@@ -10,7 +10,7 @@
 #include "header.h"
 #include "Neutral.h"
 #include "Dinfo.h"
-#include "SetGet.h"
+#include "Shell.h"
 #include "Message.h"
 
 void insertIntoQ( )
@@ -131,7 +131,7 @@ void testCreateMsg()
 
 void testSet()
 {
-	const Cinfo* sgc = SetGet::initCinfo(); // This will later be the shell.
+	const Cinfo* sgc = Shell::initCinfo(); // This will later be the shell.
 	const Cinfo* nc = Neutral::initCinfo();
 	unsigned int size = 100;
 	string arg;
@@ -159,7 +159,7 @@ void testSet()
 
 void testGet()
 {
-	const Cinfo* sgc = SetGet::initCinfo(); // This will later be the shell.
+	const Cinfo* sgc = Shell::initCinfo(); // This will later be the shell.
 	const Cinfo* nc = Neutral::initCinfo();
 	unsigned int size = 100;
 	string arg;
@@ -187,7 +187,7 @@ void testGet()
 		if ( get( src, dest, "getname" ) ) {
 			e2.element()->clearQ(); // Request goes to e2
 			e1.element()->clearQ(); // Response comes back to e1
-			stemp = ( static_cast< SetGet* >(e1.element()->data( i )) )->getBuf();
+			stemp = ( static_cast< Shell* >(e1.element()->data( i )) )->getBuf();
 			cout << i << "	" << stemp << endl;
 		}
 	}

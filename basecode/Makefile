@@ -28,7 +28,7 @@ OBJ = \
 	testSync.o	\
 	testAsync.o	\
 	Neutral.o	\
-	SetGet.o	\
+	Shell.o	\
 	Qinfo.o \
 	Message.o \
 	main.o	\
@@ -52,7 +52,7 @@ HEADERS = \
 	Qinfo.h \
 	SrcFinfo.h \
 	ValueFinfo.h \
-	SetGet.h \
+	Shell.h \
 
 default: $(TARGET)
 

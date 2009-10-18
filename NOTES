@@ -1277,6 +1277,22 @@ More implementation on 'get'.
 	is serial, should be OK to have just one.
 
 After a day of implementation and debugging, seems to work.
+Checked in as revision 1375.
+
+This is leaking memory copiously. Next step is to organize set and get
+through the SetGet object/shell, of which there should be just one instance.
+In the current test run there were 100. This should allow us to reuse the
+Msg from the SetGet object, and avoid the memory leaks.
+
+Next Steps:
+- Clean up Set/Get
+- Heavy traffic tests
+- Sync messages
+- Start to play with nodes and threads.
+- Optimization: buffer alignment, clean up management, use in-place rather than
+	copy.
+- Incorporate unit tests into cinfo
+- Provide message tree diagnostics.
 
 =============================================================================
 
