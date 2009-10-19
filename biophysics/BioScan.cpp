@@ -20,7 +20,8 @@ void BioScan::initialize( Id object )
 	SetConn c( object(), 0 );
 	if ( isType( object, "Compartment" ) )
 		moose::Compartment::reinitFunc( &c, &p );
-	else if ( isType( object, "HHChannel" ) )
+	else if (( isType( object, "HHChannel" )
+                   && object()->className() != "HHChannel2D")) // hack to avoid HHChannel2D being incorrectly taken in until HSolve has supportfor it.
 		HHChannel::reinitFunc( &c, &p );
 	else if ( isType( object, "CaConc" ) )
 		CaConc::reinitFunc( &c, &p );
@@ -195,15 +196,21 @@ int BioScan::targets(
 		found = i->target()->id();
 		if ( type != "" && !isType( found, type ) )	// speed this up
 			continue;
-		
-		target.push_back( found );
+		if (found()->className() != "HHChannel2D"){ // this hack to save HHChannel2D
+                    target.push_back( found );
+                }
 		
 		ProcInfoBase p;
 		SetConn c( found(), 0 );
 		if ( isType( found, "Compartment" ) )
 			moose::Compartment::reinitFunc( &c, &p );
-		else if ( isType( found, "HHChannel" ) )
+		else if ( isType( found, "HHChannel" ) && (found()->className() != "HHChannel2D")){ /// Subhasis: hack to skip HHChannel2D until support for it is built into HSOlve
+#ifndef NDEBUG
+                    /// Subhasis - DEBUG
+                    cout << "BioScan::targets() - " << found.path() << " is HHChannel" << endl;
+#endif
 			HHChannel::reinitFunc( &c, &p );
+                }
 		else if ( isType( found, "CaConc" ) )
 			CaConc::reinitFunc( &c, &p );
 	}
