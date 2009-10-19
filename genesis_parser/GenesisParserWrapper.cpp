@@ -4227,14 +4227,6 @@ char* const do_shellcmd(int argc, char** const argv, Id s)
     return copyString(buffer);
 }
 
-/**
-   A wrapper for system date command - because it is used frequently
-   in benchmarking performance in old genesis script.
-*/
-char* const do_date(int argc, char** const argv, Id s)
-{
-    return do_shellcmd(argc+1, argv-1, s);
-}
 
 char** do_arglist(int argc, const char** const argv, Id s)
 {
@@ -4433,8 +4425,6 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "readNeuroML", reinterpret_cast< slifunc > ( do_readneuroml ), "void" );
 	AddFunc( "writeNeuroML", reinterpret_cast< slifunc > ( do_writeneuroml ), "void" );
         AddFunc( "sh", reinterpret_cast< slifunc > (do_shellcmd ), "char*" );
-        AddFunc( "date", reinterpret_cast< slifunc > (do_date ), "char*" );
-
 }
 
 //////////////////////////////////////////////////////////////////

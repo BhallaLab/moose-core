@@ -8,6 +8,7 @@
 #include <math.h>
 #include <signal.h>
 #include <string.h>
+#include <stdlib.h>
 // #include "system_deps.h"
 #if defined(unix) || defined(__unix__) || defined(__unix)
 #include <unistd.h>
@@ -31,7 +32,12 @@ int	i;
     /*
     ** prepare the argument list for the fork
     */
-    newargv[0] = "csh";
+    char *shell = getenv("SHELL");
+    if (shell)
+        newargv[0] = shell;
+    else
+        newargv[0] = "sh"; // I believe sh is the most commonly
+                           // encountered shell in Unices. - Subha
     newargv[1] = "-c";
     string[0] = '\0';
     for(i=0;i<argc;i++){
