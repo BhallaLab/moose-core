@@ -23,6 +23,7 @@ class Finfo
 			map< string, FuncId >& fm, vector< OpFunc* >& funcs ) = 0; 
 
 		virtual unsigned int registerSrcFuncIndex( unsigned int current ) = 0;
+		virtual unsigned int registerConn( unsigned int numConn ) = 0;
 		
 	private:
 		string name_;
@@ -42,6 +43,7 @@ class DestFinfo: public Finfo
 		void registerOpFuncs( 
 			map< string, FuncId >& fnames, vector< OpFunc* >& funcs );
 		unsigned int registerSrcFuncIndex( unsigned int current );
+		unsigned int registerConn( unsigned int numConn );
 
 	private:
 		OpFunc* func_;

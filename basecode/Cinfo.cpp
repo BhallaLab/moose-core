@@ -19,7 +19,7 @@ Cinfo::Cinfo( const string& name,
 				unsigned int nSched
 )
 		: name_( name ), baseCinfo_( baseCinfo ), dinfo_( d ),
-			numFuncIndex_( 0 )
+			numConn_( 0 ), numFuncIndex_( 0 )
 {
 	init( finfoArray, nFinfos );
 }
@@ -42,6 +42,7 @@ void Cinfo::init( Finfo** finfoArray, unsigned int nFinfos )
 		finfoMap_[ f->name() ] = f;
 		
 		f->registerOpFuncs( opFuncNames_, funcs_ );
+		numConn_= f->registerConn( numConn_ );
 		numFuncIndex_ = f->registerSrcFuncIndex( numFuncIndex_ );
 	}
 }
@@ -103,7 +104,7 @@ Id Cinfo::create( const string& name, unsigned int numEntries ) const
 	return Id::create( 
 		new Element( 
 			this, dinfo_->allocData( numEntries ), numEntries,
-			dinfo_->size(), numFuncIndex_ )
+			dinfo_->size(), numFuncIndex_, numConn_ )
 	);
 }
 

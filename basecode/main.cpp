@@ -23,6 +23,8 @@ int main()
 	testAsync();
 
 	cout << endl;
+
+	delete Id()();
 	return 0;
 }
 

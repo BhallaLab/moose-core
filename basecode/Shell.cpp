@@ -84,46 +84,27 @@ const char* Shell::getBuf() const
 	return 0;
 }
 
-/*
-bool set( Eref& srce, Eref& dest, const string& destField, const double& val )
-{
-	Element* src = srce.element();
-	SrcFinfo1< double > sf( "set", "dummy", 0 );
 
-	FuncId fid = dest->cinfo()->getOpFuncId( destField );
-	const OpFunc* func = dest->cinfo()->getOpFunc( fid );
-	if ( func ) {
-		if ( func->checkFinfo( &sf ) ) {
-			Msg* m = new OneToOnemsg( src, dest.element() );
-			Conn c;
-			ConnId setCid = 0;
-			unsigned int setFuncIndex = 0;
-			c.add( m );
-			src->addConn( c, setCid );
-			src->addTargetFunc( fid, setFuncIndex );
-		}
-	}
-	sf.send( srce, val );
-}
-*/
-
-bool set( Eref& srce, Eref& dest, const string& destField, const string& val )
+bool set( Eref& dest, const string& destField, const string& val )
 {
-	Element* src = srce.element();
+	static Id shellid;
+	static ConnId setCid = 0;
+	static unsigned int setFuncIndex = 0;
+	Element* shell = shellid();
 	SrcFinfo1< string > sf( "set", "dummy", 0 );
 
 	FuncId fid = dest.element()->cinfo()->getOpFuncId( destField );
 	const OpFunc* func = dest.element()->cinfo()->getOpFunc( fid );
 	if ( func ) {
 		if ( func->checkFinfo( &sf ) ) {
-			Msg* m = new SingleMsg( srce, dest );
-			Conn c;
-			ConnId setCid = 0;
-			unsigned int setFuncIndex = 0;
-			c.add( m );
-			src->addConn( c, setCid );
-			src->addTargetFunc( fid, setFuncIndex );
-			sf.send( srce, val );
+			// Conn &c = shell->conn( setCid );
+			shell->clearConn( setCid );
+			Eref shelle = shellid.eref();
+			// c.setMsgDest( shelle, dest );
+			Msg* m = new SingleMsg( shelle, dest );
+			shell->addMsgToConn( m, setCid );
+			shell->addTargetFunc( fid, setFuncIndex );
+			sf.send( shelle, val );
 			// c.clearConn();
 			return 1;
 		} else {
@@ -152,11 +133,9 @@ bool get( Eref& srce, const Eref& dest, const string& destField )
 	if ( func ) {
 		if ( func->checkFinfo( &sf ) ) {
 			Msg* m = new SingleMsg( srce, dest );
-			Conn c;
 			ConnId setCid = 0;
 			unsigned int setFuncIndex = 0;
-			c.add( m );
-			src->addConn( c, setCid );
+			src->addMsgToConn( m, setCid );
 			src->addTargetFunc( fid, setFuncIndex );
 			rf->send( srce, retFunc );
 			// Now, dest has to clearQ, do its stuff, then src has to clearQ

@@ -53,7 +53,16 @@ class Conn
 		/**
 		 * Drop a msg from the list
 		 */
-		void drop( Msg* m );
+		void drop( const Msg* m );
+
+		/**
+		 * Reassign target. Used typically for once-off calls like 'set'.
+		 * Creates Msg, if doesn't exist.
+		 * Releases previous target, if any.
+		 * Clear later Msgs, if any.
+		void setMsgDest( Eref& src, Eref& dest );
+		 */
+	
 	private:
 		vector< Msg* > m_;
 };

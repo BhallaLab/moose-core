@@ -83,6 +83,7 @@ class Cinfo
 			const Cinfo* baseCinfo_;
 			const DinfoBase* dinfo_;
 
+			unsigned int numConn_;
 			unsigned int numFuncIndex_;
 
 			map< string, Finfo* > finfoMap_;

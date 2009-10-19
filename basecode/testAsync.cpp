@@ -68,10 +68,10 @@ void testSendMsg()
 	Eref e2 = i2.eref();
 
 	Msg* m = new OneToOneMsg( e1.element(), e2.element() );
-	Conn c;
-	c.add( m );
+	// Conn c;
+	// c.add( m );
 	ConnId cid = 0;
-	e1.element()->addConn( c, cid );
+	e1.element()->addMsgToConn( m, cid );
 	
 	SrcFinfo1<string> s( "test", "", cid );
 	s.registerSrcFuncIndex( 0 );
@@ -125,20 +125,18 @@ void testCreateMsg()
 		cout << i << "	" << static_cast< Neutral* >(e2.element()->data( i ))->getName() << endl;
 
 */
+	cout << "." << flush;
 	delete i1();
 	delete i2();
 }
 
 void testSet()
 {
-	const Cinfo* sgc = Shell::initCinfo(); // This will later be the shell.
 	const Cinfo* nc = Neutral::initCinfo();
 	unsigned int size = 100;
 	string arg;
-	Id i1 = sgc->create( "set", size );
 	Id i2 = nc->create( "test2", size );
 
-	Eref e1 = i1.eref();
 	Eref e2 = i2.eref();
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -146,14 +144,24 @@ void testSet()
 		sprintf( temp, "set_e2_%d", i );
 		string stemp( temp );
 		Eref dest( e2.element(), i );
-		set( e1, dest, "setname", stemp );
+		set( dest, "setname", stemp );
+		e2.element()->clearQ();
 	}
-	e2.element()->clearQ();
 
+	/*
 	for ( unsigned int i = 0; i < size; ++i )
 		cout << i << "	" << static_cast< Neutral* >(e2.element()->data( i ))->getName() << endl;
+		*/
 
-	delete i1();
+	for ( unsigned int i = 0; i < size; ++i ) {
+		char temp[20];
+		sprintf( temp, "set_e2_%d", i );
+		assert( static_cast< Neutral* >(e2.element()->data( i ))->getName()
+			== temp );
+	}
+
+	cout << "." << flush;
+
 	delete i2();
 }
 

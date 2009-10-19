@@ -23,7 +23,6 @@ class Shell: public Data
 		vector< char > getBuf_;
 };
 
-extern bool set( Eref& srce, Eref& dest, 
-	const string& destField, const string& val );
+extern bool set( Eref& dest, const string& destField, const string& val );
 
 extern bool get( Eref& srce, const Eref& dest, const string& destField );

@@ -29,6 +29,13 @@ unsigned int SrcFinfo::registerSrcFuncIndex( unsigned int current )
 	return current + 1;
 }
 
+unsigned int SrcFinfo::registerConn( unsigned int current )
+{
+	if ( c_ >= current )
+		return c_ + 1;
+	return current;
+}
+
 /////////////////////////////////////////////////////////////////////
 /**
  * SrcFinfo0 sets up calls without any arguments.

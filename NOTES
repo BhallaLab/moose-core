@@ -1295,4 +1295,26 @@ Next Steps:
 - Provide message tree diagnostics.
 
 =============================================================================
+17-18 Oct 2009.
+Replaced SetGet with Shell. Set up automatic creation of Shell as /root,
+during runtime init. Still leaks memory.
+Checked in as revision 1384.
 
+Working on handling Msgs from Shell. Need still to clear out old msgs during
+Set.
+
+Although it works now, valgrind picks up a nasty situation. When a dest
+Element is deleted, Msgs on it need to be deleted too. Msgs know how to 
+remove themselves from the src element, but not from Conns, which also
+have pointers to them. Options:
+1. Do a grungy search for Msg ptrs on all Conns. Deletes are rare so should
+	be OK.
+2. Store an extra index or two in each Msg for identifying parent Conn(s)
+3. Conns do not store Msg pointers, but lookup indices for them on the Element.
+
+Let's do #1. 
+Done. This completely fixes the memory leaks that afflicted the 'set' function.
+At some point I'll have to benchmark to figure out how much
+of an impact the message deleting has on the overall performance.
+
+=============================================================================

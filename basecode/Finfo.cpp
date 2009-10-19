@@ -50,3 +50,8 @@ unsigned int DestFinfo::registerSrcFuncIndex( unsigned int current )
 {
 	return current;
 }
+
+unsigned int DestFinfo::registerConn( unsigned int current )
+{
+	return current;
+}

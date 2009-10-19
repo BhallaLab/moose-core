@@ -15,11 +15,17 @@ Conn::~Conn()
 
 void Conn::clearConn()
 {
-	for( vector< Msg* >::const_iterator i = m_.begin(); 
-		i != m_.end(); ++i ) {
+	vector< Msg* > temp = m_;
+	// Note that we can't iterate directly over m_, because the deletion
+	// operator alters m_ and will invalidate the iterators.
+	m_.resize( 0 ); // This avoids the system trying to go through all
+	// of the messages on m_. But we still have the disgusting issue of
+	// it going through all other conns looking for the msg to be deleted.
+	for( vector< Msg* >::const_iterator i = temp.begin(); 
+		i != temp.end(); ++i )
+	{
 		delete *i;
 	}
-	m_.resize( 0 );
 }
 
 void Conn::asend( 
@@ -82,8 +88,21 @@ void Conn::add( Msg* m )
 /**
 * Drop a msg from the list
 */
-void Conn::drop( Msg* m )
+void Conn::drop( const Msg* m )
 {
 	// Here we have the spectacularly ugly C++ erase-remove idiot.
 	m_.erase( remove( m_.begin(), m_.end(), m ), m_.end() ); 
 }
+
+/**
+ * Reassign target. Used typically for once-off calls like 'set'.
+ * Creates Msg, if doesn't exist.
+ * Releases previous target, if any.
+ * Clear later Msgs, if any.
+void Conn::setMsgDest( Eref& src, Eref& dest )
+{
+	clearConn();
+	assert ( m_.size() == 0 );
+	m_.push_back( new SingleMsg( src, dest ) );
+}
+ */

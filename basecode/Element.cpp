@@ -11,9 +11,9 @@
 
 Element::Element( const Cinfo* c, 
 	Data* d, unsigned int numData, unsigned int dataSize, 
-		unsigned int numFuncIndex )
+		unsigned int numFuncIndex, unsigned int numConn )
 	: d_( d ), numData_( numData ), dataSize_( dataSize ), 
-	sendBuf_( 0 ), cinfo_( c )
+	sendBuf_( 0 ), cinfo_( c ), c_( numConn )
 { 
 	targetFunc_.resize( numFuncIndex, 0 );
 }
@@ -40,10 +40,9 @@ Element::~Element()
 	for ( vector< Data* >::iterator i = d_.begin(); i != d_.end(); ++i )
 		delete *i;
 	*/
-	/*
 	for ( vector< Msg* >::iterator i = m_.begin(); i != m_.end(); ++i )
-		delete *i;
-	*/
+		if ( *i ) // Dropped Msgs set this pointer to zero, so skip them.
+			delete *i;
 }
 
 void Element::process( const ProcInfo* p )
@@ -161,7 +160,6 @@ const char* Element::execFunc( const char* buf )
 
 	Qinfo q = *( reinterpret_cast < const Qinfo * >( buf ) );
 
-
 	if ( q.useSendTo() ) {
 		// const char* temp = buf + sizeof( Qinfo );
 		unsigned int tgtIndex =
@@ -224,7 +222,7 @@ void Element::clearQ( )
 {
 	const char* buf = &(q_[0]);
 //	while ( buf && *reinterpret_cast< const FuncId* >(buf) != ENDFUNC )
-	while ( buf < &q_.back() )
+	while ( buf && buf < &q_.back() )
 	{
 		buf = execFunc( buf );
 	}
@@ -247,20 +245,33 @@ MsgId Element::addMsg( Msg* m )
 	return m_.size() - 1;
 }
 
+/**
+ * Called from ~Msg.
+ */
 void Element::dropMsg( const Msg* m, MsgId mid )
 {
 	assert ( mid < m_.size() );
 	assert( m == m_[mid] );
 
 	m_[mid] = 0; // To clean up later, if at all.
+	for ( vector< Conn >::iterator i = c_.begin(); i != c_.end(); ++i )
+		i->drop( m ); // Get rid of specific Msg, if present, on Conn
 }
 
-void Element::addConn( Conn c, ConnId cid )
+void Element::addMsgToConn( Msg* m, ConnId cid )
 {
 	if ( c_.size() < cid + 1 )
 		c_.resize( cid + 1 );
-	c_[cid] = c;
+	c_[cid].add( m );
 }
+
+void Element::clearConn( ConnId cid )
+{
+	assert( cid < c_.size() );
+	// if ( c_.size() > cid )
+		c_[cid].clearConn();
+}
+
 const Cinfo* Element::cinfo() const
 {
 	return cinfo_;

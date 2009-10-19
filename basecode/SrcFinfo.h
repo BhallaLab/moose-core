@@ -27,6 +27,8 @@ class SrcFinfo: public Finfo
 
 		unsigned int registerSrcFuncIndex( unsigned int current );
 
+		unsigned int registerConn( unsigned int current );
+
 		ConnId getConnId() const {
 			return c_;
 		}

@@ -68,5 +68,6 @@ const string& Neutral::getName() const
 void Neutral::destroy( Eref& e, const Qinfo* q )
 {
 	// Need to do something with e, currently missing Eref arg, and qinfo.
-	cout << "in Neutral::destroy()[ " << e.index() << "]\n";
+	// cout << "in Neutral::destroy()[ " << e.index() << "]\n";
+	;
 }

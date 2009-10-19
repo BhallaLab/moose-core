@@ -36,7 +36,7 @@ class Element
 		*/
 		Element( const Cinfo* c, 
 			Data* d, unsigned int numData, unsigned int dataSize,
-			unsigned int numFuncIndex_ );
+			unsigned int numFuncIndex, unsigned int numConn );
 
 		/**
 		 * Destructor
@@ -122,13 +122,17 @@ class Element
 		void dropMsg( const Msg* m, MsgId mid );
 
 		/**
-		 * Puts the specified Connection in the proper place in the
-		 * vector on the Element.
+		 * Puts the specified Msg on the specified Connection.
 		 */
-		void addConn( Conn c, ConnId cid );
+		void addMsgToConn( Msg* m, ConnId cid );
+		
+		/**
+		 * Clears out all Msgs on specified conn. Used in Shell::set
+		 */
+		void clearConn( ConnId cid );
 
 		/**
-		 * Puts sthe specified TargetFunc into the properly indexed place
+		 * Puts the specified TargetFunc into the properly indexed place
 		 */
 		void addTargetFunc( FuncId fid, unsigned int funcIndex );
 
@@ -140,6 +144,7 @@ class Element
 		const Cinfo* cinfo() const;
 
 		const Msg* getMsg( MsgId mid ) const;
+
 	private:
 
 		/**
