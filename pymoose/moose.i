@@ -410,6 +410,9 @@ void fillData(PyObject* args)
 %attribute(pymoose::Compartment, double, x, __get_x, __set_x)
 %attribute(pymoose::Compartment, double, y, __get_y, __set_y)
 %attribute(pymoose::Compartment, double, z, __get_z, __set_z)
+%attribute(pymoose::Compartment, double, x0, __get_x0, __set_x0)
+%attribute(pymoose::Compartment, double, y0, __get_y0, __set_y0)
+%attribute(pymoose::Compartment, double, z0, __get_z0, __set_z0)
 
 %include "NeuroScan.h"
 %attribute(pymoose::NeuroScan, int, VDiv, __get_VDiv, __set_VDiv)
