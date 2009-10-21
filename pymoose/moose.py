@@ -4121,6 +4121,9 @@ class Compartment(PyMooseBase):
     x = _swig_property(_moose.Compartment_x_get, _moose.Compartment_x_set)
     y = _swig_property(_moose.Compartment_y_get, _moose.Compartment_y_set)
     z = _swig_property(_moose.Compartment_z_get, _moose.Compartment_z_set)
+    x0 = _swig_property(_moose.Compartment_x0_get, _moose.Compartment_x0_set)
+    y0 = _swig_property(_moose.Compartment_y0_get, _moose.Compartment_y0_set)
+    z0 = _swig_property(_moose.Compartment_z0_get, _moose.Compartment_z0_set)
 Compartment_swigregister = _moose.Compartment_swigregister
 Compartment_swigregister(Compartment)
 Compartment.className_ = _moose.cvar.Compartment_className_
