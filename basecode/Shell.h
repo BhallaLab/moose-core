@@ -25,4 +25,4 @@ class Shell: public Data
 
 extern bool set( Eref& dest, const string& destField, const string& val );
 
-extern bool get( Eref& srce, const Eref& dest, const string& destField );
+extern bool get( const Eref& dest, const string& destField );

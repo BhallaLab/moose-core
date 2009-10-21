@@ -1318,3 +1318,11 @@ At some point I'll have to benchmark to figure out how much
 of an impact the message deleting has on the overall performance.
 
 =============================================================================
+20 Oct 2009.
+Also moved the 'get' function to use the Shell element.
+Next I need to generalize both set and get to handle arbitrary types.
+
+Trying to find a suitable place to do this. In the process I found that
+Send.h and Async.h are no longer used. Removed them.
+
+=============================================================================

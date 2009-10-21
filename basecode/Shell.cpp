@@ -116,28 +116,34 @@ bool set( Eref& dest, const string& destField, const string& val )
 	return 0;
 }
 
-bool get( Eref& srce, const Eref& dest, const string& destField )
+bool get( const Eref& dest, const string& destField )
 {
-	Element* src = srce.element();
-	SrcFinfo1< string > sf( "get", "dummy", 0 );
+	static Id shellid;
+	static ConnId getCid = 0;
+	static unsigned int getFuncIndex = 0;
+
+	static const Finfo* reqFinfo = shellCinfo->findFinfo( "requestGet" );
+	static const SrcFinfo1< FuncId >* rf = 
+		dynamic_cast< const SrcFinfo1< FuncId >* >( reqFinfo );
+	static FuncId retFunc = shellCinfo->getOpFuncId( "handleGet" );
+	static SrcFinfo1< string > sf( "get", "dummy", 0 );
+
+	static Element* shell = shellid();
+	static Eref shelle( shell, 0 );
 
 	FuncId fid = dest.element()->cinfo()->getOpFuncId( destField );
 	const OpFunc* func = dest.element()->cinfo()->getOpFunc( fid );
 
-	FuncId retFunc = srce.element()->cinfo()->getOpFuncId( "handleGet" );
-	const Finfo* reqFinfo = srce.element()->cinfo()->findFinfo( "requestGet" );
-	const SrcFinfo1< FuncId >* rf = 
-		dynamic_cast< const SrcFinfo1< FuncId >* >( reqFinfo );
 	assert( rf != 0 );
 
 	if ( func ) {
 		if ( func->checkFinfo( &sf ) ) {
-			Msg* m = new SingleMsg( srce, dest );
-			ConnId setCid = 0;
-			unsigned int setFuncIndex = 0;
-			src->addMsgToConn( m, setCid );
-			src->addTargetFunc( fid, setFuncIndex );
-			rf->send( srce, retFunc );
+			shell->clearConn( getCid );
+			Msg* m = new SingleMsg( shelle, dest );
+			shell->addMsgToConn( m, getCid );
+
+			shell->addTargetFunc( fid, getFuncIndex );
+			rf->send( shelle, retFunc );
 			// Now, dest has to clearQ, do its stuff, then src has to clearQ
 			return 1;
 		} else {
