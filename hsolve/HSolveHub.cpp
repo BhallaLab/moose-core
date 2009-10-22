@@ -41,6 +41,11 @@ const Cinfo* initHSolveHubCinfo()
 	static Finfo* f2 = initHHChannelZombieFinfo();
 	static Finfo* f3 = initCaConcZombieFinfo();
 	
+	// Only to avoid compiler warnings.
+	f1 = 0;
+	f2 = 0;
+	f3 = 0;
+	
 	return HSolveHubCinfo;
 }
 
@@ -127,9 +132,30 @@ static const Finfo* caconcSolveFinfo =
 	initHSolveHubCinfo()->findFinfo( "caconcSolve" );
 static const Finfo* hubInjectFinfo =
 	initHSolveHubCinfo()->findFinfo( "injectMsg" );
-const Finfo* comptInjectFinfo =
-	initCompartmentCinfo()->findFinfo( "injectMsg" );
 
+/*
+ * Finfos from biophysical objects. Needed so that 'set' operations are done
+ * on the solver as well as the objects. Also needed for redirecting any dest
+ * messages on these finfos to the solver (e.g.: to the inject field).
+ */
+static const Finfo* comptInjectFinfo =
+	initCompartmentCinfo()->findFinfo( "injectMsg" );
+static const Finfo* comptVmFinfo =
+	initCompartmentCinfo()->findFinfo( "Vm" );
+static const Finfo* channelGbarFinfo =
+	initHHChannelCinfo()->findFinfo( "Gbar" );
+static const Finfo* channelEkFinfo =
+	initHHChannelCinfo()->findFinfo( "Ek" );
+static const Finfo* channelGkFinfo =
+	initHHChannelCinfo()->findFinfo( "Gk" );
+static const Finfo* channelXFinfo =
+	initHHChannelCinfo()->findFinfo( "X" );
+static const Finfo* channelYFinfo =
+	initHHChannelCinfo()->findFinfo( "Y" );
+static const Finfo* channelZFinfo =
+	initHHChannelCinfo()->findFinfo( "Z" );
+static const Finfo* caConcCaFinfo =
+	initCaConcCinfo()->findFinfo( "Ca" );
 /////////////////////////////////////////////////////////////////////////
 // Replacement fields for aspiring zombies
 /////////////////////////////////////////////////////////////////////////
@@ -588,8 +614,11 @@ HSolveHub* HSolveHub::getHubFromZombie( Eref e, unsigned int& index )
 
 void HSolveHub::setVm( const Conn* c, double value )
 {
+	Eref e = c->target();
+	set< double >( e, comptVmFinfo, value );
+	
 	unsigned int index;
-	HSolveHub* nh = getHubFromZombie( c->target(), index );
+	HSolveHub* nh = getHubFromZombie( e, index );
 	
 	if ( nh )
 		nh->integ_->setVm( index, value );
@@ -608,8 +637,11 @@ double HSolveHub::getVm( Eref e )
 
 void HSolveHub::setInject( const Conn* c, double value )
 {
+	Eref e = c->target();
+	set< double >( e, comptInjectFinfo, value );
+	
 	unsigned int index;
-	HSolveHub* nh = getHubFromZombie( c->target(), index );
+	HSolveHub* nh = getHubFromZombie( e, index );
 	
 	if ( nh )
 		nh->integ_->setInject( index, value );
@@ -639,8 +671,11 @@ double HSolveHub::getIm( Eref e )
 
 void HSolveHub::setHHChannelGbar( const Conn* c, double value )
 {
+	Eref e = c->target();
+	set< double >( e, channelGbarFinfo, value );
+	
 	unsigned int index;
-	HSolveHub* nh = getHubFromZombie( c->target(), index );
+	HSolveHub* nh = getHubFromZombie( e, index );
 	
 	if ( nh )
 		nh->integ_->setHHChannelGbar( index, value );
@@ -659,8 +694,11 @@ double HSolveHub::getHHChannelGbar( Eref e )
 
 void HSolveHub::setEk( const Conn* c, double value )
 {
+	Eref e = c->target();
+	set< double >( e, channelEkFinfo, value );
+	
 	unsigned int index;
-	HSolveHub* nh = getHubFromZombie( c->target(), index );
+	HSolveHub* nh = getHubFromZombie( e, index );
 	
 	if ( nh )
 		nh->integ_->setEk( index, value );
@@ -679,8 +717,11 @@ double HSolveHub::getEk( Eref e )
 
 void HSolveHub::setGk( const Conn* c, double value )
 {
+	Eref e = c->target();
+	set< double >( e, channelGkFinfo, value );
+	
 	unsigned int index;
-	HSolveHub* nh = getHubFromZombie( c->target(), index );
+	HSolveHub* nh = getHubFromZombie( e, index );
 	
 	if ( nh )
 		nh->integ_->setGk( index, value );
@@ -710,8 +751,11 @@ double HSolveHub::getIk( Eref e )
 
 void HSolveHub::setX( const Conn* c, double value )
 {
+	Eref e = c->target();
+	set< double >( e, channelXFinfo, value );
+	
 	unsigned int index;
-	HSolveHub* nh = getHubFromZombie( c->target(), index );
+	HSolveHub* nh = getHubFromZombie( e, index );
 	
 	if ( nh )
 		nh->integ_->setX( index, value );
@@ -730,8 +774,11 @@ double HSolveHub::getX( Eref e )
 
 void HSolveHub::setY( const Conn* c, double value )
 {
+	Eref e = c->target();
+	set< double >( e, channelYFinfo, value );
+	
 	unsigned int index;
-	HSolveHub* nh = getHubFromZombie( c->target(), index );
+	HSolveHub* nh = getHubFromZombie( e, index );
 	
 	if ( nh )
 		nh->integ_->setY( index, value );
@@ -750,8 +797,11 @@ double HSolveHub::getY( Eref e )
 
 void HSolveHub::setZ( const Conn* c, double value )
 {
+	Eref e = c->target();
+	set< double >( e, channelZFinfo, value );
+	
 	unsigned int index;
-	HSolveHub* nh = getHubFromZombie( c->target(), index );
+	HSolveHub* nh = getHubFromZombie( e, index );
 	
 	if ( nh )
 		nh->integ_->setZ( index, value );
@@ -770,8 +820,11 @@ double HSolveHub::getZ( Eref e )
 
 void HSolveHub::setCa( const Conn* c, double value )
 {
+	Eref e = c->target();
+	set< double >( e, caConcCaFinfo, value );
+	
 	unsigned int index;
-	HSolveHub* nh = getHubFromZombie( c->target(), index );
+	HSolveHub* nh = getHubFromZombie( e, index );
 	
 	if ( nh )
 		nh->integ_->setCa( index, value );
