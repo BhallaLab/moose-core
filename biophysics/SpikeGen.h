@@ -54,6 +54,7 @@ class SpikeGen
 		double state_;
 		double lastEvent_;
 		double V_;
+                bool fired_;
 };
 
 // Used by solver, readcell, etc.
