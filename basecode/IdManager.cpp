@@ -41,6 +41,20 @@ IdManager::IdManager()
 	);
 }
 
+/**
+ * \todo Figure out how to destroy elements at exit.
+ */
+IdManager::~IdManager()
+{
+	//~ Crude attempt to destroy elements.
+	//~ vector< Enode >::iterator ie;
+	//~ for ( ie = elementList_.begin(); ie != elementList_.end(); ie++ ) {
+		//~ Element* el = ie->e();
+		//~ if ( el != 0 )
+			//~ set( el, "destroy" );
+	//~ }
+}
+
 void IdManager::dumpState( ostream& stream ) {
 	unsigned int i;
 	unsigned int zeroBegin;

@@ -10,19 +10,19 @@ set xlabel 'Step # [dt = 50e-6 s]'    # This is the plot dt
 set title 'Synaptic input using TimeTable object: Membrane potential.'
 set ylabel 'Vm (V)'
 plot \
-	'Vm.moose.plot' with line title 'MOOSE', \
-	'Vm.genesis.plot' every ::0::1199 with line title 'GENESIS'
+	'output/Vm.moose.plot' with line title 'MOOSE', \
+	'output/Vm.genesis.plot' every ::0::1199 with line title 'GENESIS'
 
 pause mouse key "Any key to continue.\n"
 
 # Write images to disk
 set term png
-set output 'Vm.png'
+set output 'output/Vm.png'
 replot
 set output
-set term x11
+set term wxt
 
-print "Plot image written to Vm.png.\n"
+print "Plot image written to output/Vm.png.\n"
 
 #
 # Channel conductance
@@ -30,16 +30,16 @@ print "Plot image written to Vm.png.\n"
 set title 'Synaptic input using TimeTable object: Conductance of synaptic channel.'
 set ylabel 'Gk (1 / ohm)'
 plot \
-	'Gk.moose.plot' with line title 'MOOSE', \
-	'Gk.genesis.plot' every ::0::1199 with line title 'GENESIS'
+	'output/Gk.moose.plot' with line title 'MOOSE', \
+	'output/Gk.genesis.plot' every ::0::1199 with line title 'GENESIS'
 
 pause mouse key "Any key to continue.\n"
 
 # Write images to disk
 set term png
-set output 'Gk.png'
+set output 'output/Gk.png'
 replot
 set output
-set term x11
+set term wxt
 
-print "Plot image written to Gk.png.\n"
+print "Plot image written to output/Gk.png.\n"

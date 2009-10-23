@@ -26,7 +26,7 @@ const Cinfo* initAscFileCinfo()
 					"Sends out the request. Issued from the process call." ),
       new DestFinfo( "handleInput", Ftype1< double >::global(),
                      RFCAST( &AscFile::input ),
-						"Handle the returned value." ),
+                     "Handle the returned value." ),
     };
 
 
@@ -35,29 +35,65 @@ const Cinfo* initAscFileCinfo()
       ///////////////////////////////////////////////////////
       // Field definitions
       ///////////////////////////////////////////////////////
-      new ValueFinfo( "fileName",
+      new ValueFinfo( "filename",
                       ValueFtype1< string >::global(),
                       GFCAST( &AscFile::getFileName ),
-                      RFCAST( &AscFile::setFileName )
+                      RFCAST( &AscFile::setFileName ),
+                      "Data will be written into this file."
                       ),
-      new ValueFinfo( "appendFlag",
+      new ValueFinfo( "append",
                       ValueFtype1< int >::global(),
-                      GFCAST( &AscFile::getAppendFlag ),
-                      RFCAST( &AscFile::setAppendFlag )
+                      GFCAST( &AscFile::getAppend ),
+                      RFCAST( &AscFile::setAppend ),
+                      "Data will be appended to file only if non-zero. "
+                      "On by default."
+                      ),
+      new ValueFinfo( "time",
+                      ValueFtype1< int >::global(),
+                      GFCAST( &AscFile::getTime ),
+                      RFCAST( &AscFile::setTime ),
+                      "Simulation time will be written to first column "
+                      "only if this value is non-zero. On by default."
+                      ),
+      new ValueFinfo( "header",
+                      ValueFtype1< int >::global(),
+                      GFCAST( &AscFile::getHeader ),
+                      RFCAST( &AscFile::setHeader ),
+                      "A header containing names of objects being recorded. "
+                      "Currently no way to write the objects' field names into"
+                      "the header. Will be written only if this value is "
+                      "non-zero. On by default."
+                      ),
+      new ValueFinfo( "comment",
+                      ValueFtype1< string >::global(),
+                      GFCAST( &AscFile::getComment ),
+                      RFCAST( &AscFile::setComment ),
+                      "This string will be inserted at the beginning of the "
+                      "header line. Can be used to comment out the header "
+                      "line. Default value: \"#\"."
+                      ),
+      new ValueFinfo( "delimiter",
+                      ValueFtype1< string >::global(),
+                      GFCAST( &AscFile::getDelimiter ),
+                      RFCAST( &AscFile::setDelimiter ),
+                      "This string will be used to separate entries in a row. "
+                      "Default value: \"\\t\"."
                       ),
       ///////////////////////////////////////////////////////
       // MsgSrc definitions
       ///////////////////////////////////////////////////////
+/**
+ * \todo At present this call must be made explicitly at the end of a simulation
+ * to flush the file. Currently elements do not get destroyed at exit, which is
+ * why the destructor also never gets called.
+ */
+      new DestFinfo( "close", Ftype0::global(),
+                     RFCAST( &AscFile::closeFunc ),
+                     "Explicit call to close the AscFile. Useful if the user "
+                     "wishes to switch to a new file between resets."
+                   ),
       ///////////////////////////////////////////////////////
       // MsgDest definitions
-      ///////////////////////////////////////////////////////
-      // Replaced with SharedFinfo, to get hsolver to work.
-      //~ new DestFinfo( "save",
-                     //~ Ftype1< double >::global(),
-                     //~ RFCAST( &AscFile::input )
-                     //~ ),
-      ///////////////////////////////////////////////////////
-      // Synapse definitions
       ///////////////////////////////////////////////////////
       ///////////////////////////////////////////////////////
       // Shared definitions
@@ -79,8 +115,8 @@ const Cinfo* initAscFileCinfo()
 
   static Cinfo ascFileCinfo(
                	doc,
-		sizeof( doc ) / sizeof( string ),                
-		initNeutralCinfo(),
+               	sizeof( doc ) / sizeof( string ),
+               	initNeutralCinfo(),
                 ascFileFinfos,
                 sizeof( ascFileFinfos )/sizeof(Finfo *),
                 ValueFtype1< AscFile >::global(),
@@ -99,76 +135,111 @@ static const Slot inputRequestSlot =
 
 AscFile::AscFile()
         :
-        fileName_( "utdata.txt" ),
-        nCols_( 0 ),
-        appendFlag_( 0 )
-{
-  fileOut_ = new std::ofstream();
-}
+        append_( 1 ),
+        time_( 1 ),
+        header_( 1 ),
+        delimiter_( "\t" ),
+        comment_( "#" ),
+        fileOut_( new std::ofstream() )
+{ ; }
 
-AscFile::~AscFile() {
-  cerr << "DESTROYING AscFile!!" << endl;
+/**
+ * At present the destructor is never called at exit, because elements do not
+ * get destroy at exit.
+ */
+AscFile::~AscFile()
+{
+  fileOut_->close();
+  
+  /*
+   * If fileOut_ is used as an object, instead of a pointer, then this file
+   * does not compile. This is due to a call to the following function during
+   * Cinfo initialization:
+   *    ValueFtype1< AscFile >::global()
+   * Not really sure why, but it has something to do with a copy constructor.
+   * Should be able to find a cleaner way.
+   */
+  delete fileOut_;
+  fileOut_ = 0;
 }
 
 ///////////////////////////////////////////////////
+// Field function definitions
+///////////////////////////////////////////////////
 
-
-
-void AscFile::processFunc( const Conn* c, ProcInfo p )
+void AscFile::setFileName( const Conn* c, string s )
 {
-  // The data arriving by message belongs to the previous timestep.
-  static_cast< AscFile* >( c->data() )->processFuncLocal(c->target(), p->currTime_ - p->dt_);
+   static_cast< AscFile* >( c->data() )->filename_ = s;
 }
 
-void AscFile::processFuncLocal(Eref e, double time)
+string AscFile::getFileName( Eref e )
 {
-  // Write data to file
-
-  //~ cerr << "processFuncLocal" << endl;
-
-  vector< double >::iterator i;
-
-  send0(e, inputRequestSlot );
-
-// !!! Flushing into stream here (slowww)
-
-  if(fileOut_->good()) {
-
-    if(time >= 0) {
-      // First column should contain the time
-      *fileOut_ << time << " " << flush;
-
-      for( i = columnData_.begin(); i != columnData_.end(); i++) {
-        *fileOut_ << *i << " " << flush;
-      }
-
-      *fileOut_ << "\n" << flush;
-    }
-
-    // Empty the old data
-    // columnData_.clear();
-  }
-  else {
-    cerr << "AscFile::processFuncLocal, unable to write to file" << endl;
-  }
-
+  return static_cast< AscFile* >( e.data() )->filename_;
 }
 
-void AscFile::reinitFunc( const Conn* c, ProcInfo info) 
+void AscFile::setAppend( const Conn* c, int v )
 {
-  static_cast< AscFile* >( c->data() )->reinitFuncLocal(c);
+  static_cast< AscFile* >( c->data() )->append_ = v;
 }
 
-void AscFile::reinitFuncLocal( const Conn* c ) 
+int AscFile::getAppend( Eref e )
 {
-  cerr << "AscFile::reinitFuncLocal called." << endl;
+  return static_cast< AscFile* >( e.data() )->append_;
+}
 
+void AscFile::setTime( const Conn* c, int v )
+{
+  static_cast< AscFile* >( c->data() )->time_ = v;
+}
 
-  nCols_ = c->target().e->numTargets( "save" );
-  columnData_.resize(nCols_);
-  cout << "Saving " <<  nCols_ << " column(s) of data" << endl;
+int AscFile::getTime( Eref e )
+{
+  return static_cast< AscFile* >( e.data() )->time_;
+}
 
+void AscFile::setHeader( const Conn* c, int v )
+{
+  static_cast< AscFile* >( c->data() )->header_ = v;
+}
 
+int AscFile::getHeader( Eref e )
+{
+  return static_cast< AscFile* >( e.data() )->header_;
+}
+
+void AscFile::setDelimiter( const Conn* c, string v )
+{
+  static_cast< AscFile* >( c->data() )->delimiter_ = v;
+}
+
+string AscFile::getDelimiter( Eref e )
+{
+  return static_cast< AscFile* >( e.data() )->delimiter_;
+}
+
+void AscFile::setComment( const Conn* c, string v )
+{
+  static_cast< AscFile* >( c->data() )->comment_ = v;
+}
+
+string AscFile::getComment( Eref e )
+{
+  return static_cast< AscFile* >( e.data() )->comment_;
+}
+
+///////////////////////////////////////////////////
+// Dest function definitions
+///////////////////////////////////////////////////
+
+void AscFile::reinitFunc( const Conn* c, ProcInfo info ) 
+{
+  static_cast< AscFile* >( c->data() )->reinitFuncLocal(c->target());
+}
+
+void AscFile::reinitFuncLocal( Eref e ) 
+{
+  unsigned int nCols = e->numTargets( "save" );
+  columnData_.resize(nCols, 0.0);
 
   // Close the file if it is open
   if(fileOut_->is_open()) {
@@ -177,55 +248,63 @@ void AscFile::reinitFuncLocal( const Conn* c )
 
   // Open file for writing
 
-  if(appendFlag_) {
-    fileOut_->open( fileName_.c_str(), ios_base::app );
+  if(append_) {
+    fileOut_->open( filename_.c_str(), ios_base::app );
   } else {
-    fileOut_->open( fileName_.c_str(), ios_base::trunc );
+    fileOut_->open( filename_.c_str(), ios_base::trunc );
   }
-
+  
   if(!fileOut_->good()) {
-    cerr << "AscFile::reinitFuncLocal: Unable to open " << fileName_ << endl;
+    cerr << "AscFile::reinitFuncLocal: Unable to open " << filename_ << endl;
+  } else if ( header_ ) {
+    // Write header
+    string header = comment_;
+    if ( time_ )
+    	header += "Time" + delimiter_;
+    
+    Conn* i = e->targets( "save", 0 );
+    for ( ; i->good(); i->increment() )
+        header += i->target()->name() + delimiter_;
+    delete i;
+    
+    *fileOut_ << header << "\n";
   }
-
-  //bup = fileOut_;
-  //bup2 = fileOut_;
-
 }
 
-
-
-///////////////////////////////////////////////////
-// Field function definitions
-///////////////////////////////////////////////////
-
-void AscFile::setFileName( const Conn* c, string s )
+void AscFile::processFunc( const Conn* c, ProcInfo p )
 {
-   static_cast< AscFile* >( c->data() )->fileName_ = s;
+  // The data arriving by message belongs to the previous timestep.
+  static_cast< AscFile* >( c->data() )->
+    processFuncLocal(c->target(), p->currTime_ - p->dt_);
 }
 
-string AscFile::getFileName( Eref e )
+void AscFile::processFuncLocal(Eref e, double time)
 {
-  return static_cast< AscFile* >( e.data() )->fileName_;
+  if(! fileOut_->good()) {
+    cerr << "Error: AscFile::processFuncLocal, unable to write to file" << endl;
+    return;
+  }
+  
+  // Receive data
+  send0(e, inputRequestSlot );
+  
+  // Write row of data
+  vector< double >::iterator i;
+  if(time >= 0) {
+    if ( time_ )
+      *fileOut_ << time << delimiter_;
+    
+    for( i = columnData_.begin(); i != columnData_.end(); i++)
+      *fileOut_ << *i << delimiter_;
+    
+    *fileOut_ << "\n";
+  }
 }
-
-void AscFile::setAppendFlag( const Conn* c, int f )
-{
-  static_cast< AscFile* >( c->data() )->appendFlag_ = f;
-}
-
-int AscFile::getAppendFlag( Eref e )
-{
-  return static_cast< AscFile* >( e.data() )->appendFlag_;
-}
-
-///////////////////////////////////////////////////
-// Dest function definitions
-///////////////////////////////////////////////////
-
 
 void AscFile::input( const Conn* c, double value )
 {
-  static_cast< AscFile* >( c->data() )->inputLocal( c->targetIndex(), value );
+  static_cast< AscFile* >( c->data() )->
+    inputLocal( c->targetIndex(), value );
 }
 
 void AscFile::inputLocal( unsigned int columnId, double value )
@@ -234,35 +313,23 @@ void AscFile::inputLocal( unsigned int columnId, double value )
 
   // assert(columnId < columnData_.size()); //  Temp. commented
 
-
   // This is temporary check, since the reinit function fails
   // to get the right number of incoming messages sometimes
-  if(columnId >= columnData_.size()) {
-    nCols_ = columnId + 1;
-    columnData_.resize(nCols_);
-  }
+  if(columnId >= columnData_.size())
+    columnData_.resize(columnId + 1);
 
   columnData_[columnId] = value;
 }
 
+void AscFile::closeFunc( const Conn* c ) 
+{
+  static_cast< AscFile* >( c->data() )->closeFuncLocal( );
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+void AscFile::closeFuncLocal( ) 
+{
+  fileOut_->close();
+  delete fileOut_;
+  // Just in case the object is used again after calling "close".
+  fileOut_ = new std::ofstream();
+}
