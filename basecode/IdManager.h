@@ -90,6 +90,7 @@ class IdManager
 {
 	public:
 		IdManager();
+		~IdManager();
 
 		void dumpState( ostream& stream );
 
