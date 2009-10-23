@@ -4,9 +4,11 @@
 
 echo "
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Model: 2 linear cells, with a synapse. 1st cell is excitable, 2nd is not.
-Plots: - Vm of last compartment of postsynaptic cell
-       - Gk of synaptic channel (embedded in first compartment of the same cell)
+Model: TimeTable object connected to a single compartment via a SynChan.
+       The TimeTable object reads spike-times from a text file, and emits
+       spikes at the specified times.
+Plots: - Vm of postsynaptic compartment
+       - Gk of synaptic channel (embedded in compartment)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 "
 
@@ -60,6 +62,7 @@ if ( GENESIS )
 else
 	create TimeTable /tt
 	
+	// Method is 4 by default, but setting it anyway.
 	setfield /tt \
 		method 4 \
 		filename spikes.txt
@@ -111,6 +114,7 @@ step {SIMLENGTH} -time
 ////////////////////////////////////////////////////////////////////////////////
 //  Write Plots
 ////////////////////////////////////////////////////////////////////////////////
+str outdir = "output/"
 str filename
 str extension
 if ( MOOSE )
@@ -119,14 +123,14 @@ else
 	extension = ".genesis.plot"
 end
 
-filename = "Vm" @ {extension}
+filename = {outdir} @ "Vm" @ {extension}
 openfile {filename} w
 writefile {filename} "/newplot"
 writefile {filename} "/plotname Vm"
 closefile {filename}
 tab2file {filename} /data/Vm table
 
-filename = "Gk" @ {extension}
+filename = {outdir} @ "Gk" @ {extension}
 openfile {filename} w
 writefile {filename} "/newplot"
 writefile {filename} "/plotname Gk"
