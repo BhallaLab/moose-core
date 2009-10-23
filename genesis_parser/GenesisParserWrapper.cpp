@@ -892,6 +892,7 @@ map< string, string >& sliClassNameConvert()
 	classnames[ "PID" ] = "PIDController";
 	classnames[ "synchan" ] = "SynChan";
 	classnames[ "table" ] = "Table";
+	classnames[ "asc_file" ] = "AscFile";
 	classnames[ "xbutton" ] = "Sli";
 	classnames[ "xdialog" ] = "Sli";
 	classnames[ "xlabel" ] = "Sli";
