@@ -31,33 +31,49 @@ const Cinfo* initTimeTableCinfo()
       ///////////////////////////////////////////////////////
       // Field definitions
       ///////////////////////////////////////////////////////
+      new ValueFinfo( "filename", 
+                      ValueFtype1< string >::global(),
+                      GFCAST( &TimeTable::getFilename ),
+                      RFCAST( &TimeTable::setFilename )
+                      ),
+      new ValueFinfo( "method", 
+                      ValueFtype1< int >::global(),
+                      GFCAST( &TimeTable::getMethod ),
+                      RFCAST( &TimeTable::setMethod )
+                      ),
       new ValueFinfo( "tableVector", 
                       ValueFtype1< vector< double > >::global(),
                       GFCAST( &TimeTable::getTableVector ),
                       RFCAST( &TimeTable::setTableVector )
                       ),
       new ValueFinfo( "tableSize",
-                     ValueFtype1< unsigned int >::global(),
+                      ValueFtype1< unsigned int >::global(),
                       GFCAST( &TimeTable::getTableSize ),
-                      &dummyFunc),
+                      RFCAST( &TimeTable::setTableSize )
+                      ),
       new LookupFinfo( "table",
                        LookupFtype< double, unsigned int >::global(),
                        GFCAST( &TimeTable::getTable ),
                        RFCAST( &TimeTable::setTable )
                        ),
-      new DestFinfo( "load", Ftype2< string, unsigned int >::global(),
-                     RFCAST( &TimeTable::load ),
-					 "Load contents from file.load filename skiplines"
-                     ),
+      new ValueFinfo( "state",
+                      ValueFtype1< double >::global(),
+                      GFCAST( &TimeTable::getState ),
+                      &dummyFunc
+                      ),
       ///////////////////////////////////////////////////////
       // MsgSrc definitions
       ///////////////////////////////////////////////////////
 
-      // Continous variable switching between 0 and 1
-      new SrcFinfo( "state", Ftype1< double >::global() ),
+      //~ // Continous variable switching between 0 and 1
+      //~ new SrcFinfo( "state", Ftype1< double >::global() ),
 
       // Event triggered by a spike
-      new SrcFinfo( "event", Ftype1< double >::global() ),
+      new SrcFinfo( "event",
+                    Ftype1< double >::global(),
+                    "Sends spike events. No intermediate SpikeGen object "
+                    "required as in GENESIS"
+                    ),
 
       ///////////////////////////////////////////////////////
       // MsgDest definitions
@@ -93,7 +109,7 @@ const Cinfo* initTimeTableCinfo()
 
 static const Cinfo* timeTableCinfo = initTimeTableCinfo();
 
-static const Slot stateSlot = initTimeTableCinfo()->getSlot( "state" );
+//~ static const Slot stateSlot = initTimeTableCinfo()->getSlot( "state" );
 static const Slot eventSlot =  initTimeTableCinfo()->getSlot( "event" );
 
 
@@ -103,7 +119,7 @@ static const Slot eventSlot =  initTimeTableCinfo()->getSlot( "event" );
 
 TimeTable::TimeTable()
   :
-  state_( 0 ),
+  state_( 0.0 ),
   curPos_( 0 ),
   method_( 4 )
 { ; }
@@ -115,53 +131,32 @@ TimeTable::~TimeTable()
 // Field function definitions
 ///////////////////////////////////////////////////
 
-void TimeTable::setTableVector( const Conn* c, vector< double > table )
+/* Filename */
+void TimeTable::setFilename( const Conn* c, string filename )
 {
-  static_cast< TimeTable* >( c->data() )->localSetTableVector( table );
+  static_cast< TimeTable* >( c->data() )->localSetFilename( filename );
 }
 
-vector< double > TimeTable::getTableVector( Eref e )
+string TimeTable::getFilename( Eref e )
 {
-        return static_cast< TimeTable* >( e.data() )->timeTable_;
+  return static_cast< TimeTable* >( e.data() )->filename_;
 }
 
-unsigned int TimeTable::getTableSize( Eref e )
+void TimeTable::localSetFilename( string filename )
 {
-  return static_cast< TimeTable* >( e.data() )->timeTable_.size();
-}
-
-void TimeTable::setTable(const Conn* c, double val, const unsigned int& i )
-{
-        static_cast< TimeTable* >( c->data() )->setTableValue( val, i );
-}
-
-double TimeTable::getTable( Eref e, const unsigned int& i )
-{
-        return static_cast< TimeTable* >( e.data() )->getTableValue( i );
-}
-
-void TimeTable::load( const Conn* c, string fName, unsigned int skipLines )
-{
-        static_cast< TimeTable* >( c->data() )->innerLoad( fName, skipLines );
-}
-
-void TimeTable::innerLoad( const string& fName, unsigned int skipLines )
-{
-  std::ifstream fin( fName.c_str() );
+  filename_ = filename;
+  
+  std::ifstream fin( filename_.c_str() );
   string line;
   
-  if(method_ != 4) {
-    cout << "TimeTable: only method 4 currently implemented!" << endl;
-    return;
-  }
-
   if( !fin.good()) {
     cout << "Error: TimeTable::innerload: Unable to open file" 
-         << fName << endl;
+         << filename_ << endl;
   }
   
-  for(unsigned int i = 0; (i < skipLines) & fin.good() ; i++)
-    getline( fin, line );
+  //~ If lines need to be skipped:
+  //~ for(unsigned int i = 0; (i < skipLines) & fin.good() ; i++)
+    //~ getline( fin, line );
   
   timeTable_.clear();
   
@@ -170,7 +165,7 @@ void TimeTable::innerLoad( const string& fName, unsigned int skipLines )
     timeTable_.push_back(dataPoint);
 
     if(dataPoint < dataPointOld) {
-      cout << "TimeTable: Warning: Spike times in file " << fName
+      cerr << "TimeTable: Warning: Spike times in file " << filename_
            << " are not in increasing order."
            << endl;
     }
@@ -179,26 +174,79 @@ void TimeTable::innerLoad( const string& fName, unsigned int skipLines )
   }
 }
 
-void TimeTable::localSetTableVector( const vector< double >& timeTable )
+/* Method */
+void TimeTable::setMethod( const Conn* c, int method )
 {
-  timeTable_ = timeTable;
+  if ( method != 4 ) {
+    cerr <<
+      "Error: TimeTable::setMethod: "
+      "Currently only method 4 (loading from file) supported.\n";
+    return;
+  }
+  
+  static_cast< TimeTable* >( c->data() )->method_ = method;
 }
 
-void TimeTable::setTableValue( double value, unsigned int index ) {
+int TimeTable::getMethod( Eref e )
+{
+  return static_cast< TimeTable* >( e.data() )->method_;
+}
+
+/* TableVector */
+void TimeTable::setTableVector( const Conn* c, vector< double > table )
+{
+  static_cast< TimeTable* >( c->data() )->timeTable_ = table;
+}
+
+vector< double > TimeTable::getTableVector( Eref e )
+{
+  return static_cast< TimeTable* >( e.data() )->timeTable_;
+}
+
+/* TableSize */
+void TimeTable::setTableSize( const Conn* c, unsigned int size )
+{
+  static_cast< TimeTable* >( c->data() )->
+      timeTable_.resize( size, 0.0 );
+}
+
+unsigned int TimeTable::getTableSize( Eref e )
+{
+  return static_cast< TimeTable* >( e.data() )->timeTable_.size();
+}
+
+/* Table value */
+void TimeTable::setTable(const Conn* c, double val, const unsigned int& i )
+{
+  static_cast< TimeTable* >( c->data() )->localSetTable( val, i );
+}
+
+double TimeTable::getTable( Eref e, const unsigned int& i )
+{
+  return static_cast< TimeTable* >( e.data() )->localGetTable( i );
+}
+
+void TimeTable::localSetTable( double value, unsigned int index ) {
   if ( index < timeTable_.size() )
     timeTable_[ index ] = value;
 }
 
-double TimeTable::getTableValue( unsigned int index ) const {
+double TimeTable::localGetTable( unsigned int index ) const {
   if ( index < timeTable_.size() )
     return timeTable_[ index ];
   
   return 0.0; // Thou shall not call outside the defined vector
 }
 
-double TimeTable::getState() {
-  return state_;
+/* state */
+double TimeTable::getState( Eref e )
+{
+  return static_cast< TimeTable* >( e.data() )->state_;
 }
+
+///////////////////////////////////////////////////
+// Dest function definitions
+///////////////////////////////////////////////////
 
 void TimeTable::reinitFunc( const Conn* c, ProcInfo info )
 {
@@ -220,7 +268,7 @@ void TimeTable::processFuncLocal( Eref e, ProcInfo info )
 {
 
   // Two ways of telling the world about the spike events, both
-  // happening in parallell
+  // happening in parallel
   //
   // state is a continous variable, switching from 0 to 1 when spiking
   // event is an event, that happens at the time of a spike
@@ -235,7 +283,7 @@ void TimeTable::processFuncLocal( Eref e, ProcInfo info )
     state_ = 1;
   }
 
-  send1< double >( e, stateSlot, state_ );
+  //~ send1< double >( e, stateSlot, state_ );
 }
 
 
@@ -274,7 +322,8 @@ void testTimeTable()
   string fileName = "testtider.txt";
 
   // Loading file
-  TimeTable::load( &cm0, fileName, (unsigned int) 0);
+  //~ TimeTable::load( &cm0, fileName, (unsigned int) 0);
+  TimeTable::setFilename( &cm0, fileName );
 
   p.dt_ = 0.1;
 
@@ -294,7 +343,7 @@ void testTimeTable()
       TimeTable::processFunc( &cm0, &p );
       TimeTable::processFunc( &cm1, &p );
 
-      numSpikesSent += static_cast< TimeTable* >( tt->data() )->getState();
+      numSpikesSent += TimeTable::getState( Eref( tt ) );
 
       ASSERT( numSpikesSent != check[i], "testing reading");
       i++;

@@ -60,10 +60,9 @@ if ( GENESIS )
 else
 	create TimeTable /tt
 	
-	//~ setfield /tt \
-		//~ method 4 \
-		//~ fname spikes.txt
-	call /tt load spikes.txt 0
+	setfield /tt \
+		method 4 \
+		filename spikes.txt
 	
 	addmsg /tt/event /cc/syn/synapse
 end
