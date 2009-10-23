@@ -319,11 +319,12 @@ void testTimeTable()
   SetConn cm0( tt, 0 );
   SetConn cm1( sg, 0 );
 
-  string fileName = "testtider.txt";
-
   // Loading file
   //~ TimeTable::load( &cm0, fileName, (unsigned int) 0);
-  TimeTable::setFilename( &cm0, fileName );
+  //~ TimeTable::setFilename( &cm0, fileName );
+  TimeTable::setTableSize( &cm0, 2 );
+  TimeTable::setTable( &cm0, 0.3, 0 );
+  TimeTable::setTable( &cm0, 0.6, 1 );
 
   p.dt_ = 0.1;
 
