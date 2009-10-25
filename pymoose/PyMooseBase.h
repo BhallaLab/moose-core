@@ -38,7 +38,7 @@ namespace pymoose
         const std::string& getField(std::string name) const;
         void setField(std::string name, std::string value);
         const std::vector<std::string> getFieldList(FieldType ftype=ALL);
-        const std::vector<Id> neighbours(const std::string& msgName="*");
+        const std::vector<Id> neighbours(const std::string& msgName="*", int direction=INCOMING);
         // TODO: need a way to find the field name of the other end of
         // a message. It will be good to have the source object Id and
         // the field name.
