@@ -376,9 +376,9 @@ const vector <std::string> PyMooseBase::getFieldList(FieldType ftype)
 {
     return context_->getFieldList(id_, ftype);
 }
-const vector <Id> PyMooseBase::neighbours(const std::string& msgName)
+const vector <Id> PyMooseBase::neighbours(const std::string& msgName, int direction)
 {
-    return context_->getNeighbours(id_, msgName);
+    return context_->getNeighbours(id_, msgName, direction);
 }
 /*
 const map<Id, std::string> PyMooseBase::neighbourFields(const string& field)
