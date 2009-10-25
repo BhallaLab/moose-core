@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "moose.h"
+#include "biophysics/Compartment.h"
 #include "biophysics/SpikeGen.h"
 #include <queue>
 #include "biophysics/SynInfo.h"
@@ -57,7 +58,8 @@ void HSolveActive::solve( ProcInfo info ) {
 	HSolvePassive::backwardSubstitute( );
 	advanceCalcium( );
 	advanceSynChans( info );
-	sendSpikes( info );
+        //sendSpikes( info );
+        sendComptVm();
 }
 
 void HSolveActive::calculateChannelCurrents( ) {
@@ -268,6 +270,12 @@ void HSolveActive::advanceSynChans( ProcInfo info ) {
 	return;
 }
 
+void HSolveActive::sendComptVm(){
+    vector< SpikeGenStruct >::iterator ispike;
+    for ( ispike = spikegen_.begin(); ispike != spikegen_.end(); ++ispike ) {
+        send1<double>(getCompartments()[ispike->compt_].eref(), initCompartmentCinfo()->getSlot("VmSrc"), V_[ ispike->compt_ ]);
+    }
+}
 void HSolveActive::sendSpikes( ProcInfo info ) {
 	vector< SpikeGenStruct >::iterator ispike;
 	for ( ispike = spikegen_.begin(); ispike != spikegen_.end(); ++ispike ) {
@@ -277,5 +285,6 @@ void HSolveActive::sendSpikes( ProcInfo info ) {
 		 * std namespace.
 		 */
 		::set< double >( ispike->elm_, spikeVmFinfo, V_[ ispike->compt_ ] );
-	}
+            // This is dangerous for non-spikegen objects
+        }
 }
