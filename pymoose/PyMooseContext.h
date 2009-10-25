@@ -27,6 +27,7 @@ namespace pymoose
 {
 
 enum FieldType { ALL, VALUE, LOOKUP, SOURCE, DEST, SHARED, SOLVE, THIS, GLOBAL, DEL };
+enum {OUTGOING, INCOMING, INOUT};
     class PyMooseContext
     {
       public:
@@ -135,7 +136,7 @@ enum FieldType { ALL, VALUE, LOOKUP, SOURCE, DEST, SHARED, SOLVE, THIS, GLOBAL, 
         const std::string& description(const std::string className) const;
         const std::string& author(const std::string className) const;
         const std::string& doc(const std::string& className) const;
-        vector<Id> getNeighbours(Id object, const std::string& fieldName="*");
+        vector<Id> getNeighbours(Id object, const std::string& fieldName="*", int direction=INCOMING);
         vector<string> getFieldList(Id id, FieldType ftype=ALL);        
 #ifdef DO_UNIT_TESTS    
         static bool testPyMooseContext(int count, bool print);

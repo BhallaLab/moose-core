@@ -1567,7 +1567,7 @@ const string& PyMooseContext::doc(const string& target) const
 // think if this is sane - returning a local vector - swig somehow
 // takes care of it, but shouldn't we be passing a vector reference as
 // argument which will be filled in?
-vector<Id> PyMooseContext::getNeighbours(Id src, const string& finfoName)
+vector<Id> PyMooseContext::getNeighbours(Id src, const string& finfoName, int direction)
 {
     vector<string> fieldList;
     vector<Id> ret;
@@ -1587,8 +1587,10 @@ vector<Id> PyMooseContext::getNeighbours(Id src, const string& finfoName)
     for ( int i = 0; i < fieldList.size(); ++i){
         Conn* conn = element->targets(fieldList[i], src.index());
         while (conn->good()){
-            Eref target = conn->target();
-            ret.push_back(target.id());
+            if (conn->isDest() == direction || direction == INOUT){
+                Eref target = conn->target();
+                ret.push_back(target.id());
+            }
             conn->increment();
         }      
     }

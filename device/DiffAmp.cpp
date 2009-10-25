@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Mon Dec 29 16:01:22 2008 (+0530)
 // Version: 
-// Last-Updated: Sun Mar  1 23:49:29 2009 (+0530)
+// Last-Updated: Sat Oct 24 02:12:59 2009 (+0530)
 //           By: subhasis ray
-//     Update #: 154
+//     Update #: 180
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -127,12 +127,19 @@ DiffAmp::DiffAmp():gain_(1.0), saturation_(DBL_MAX), plus_(0), minus_(0), output
 void DiffAmp::plusFunc(const Conn* conn, double input)
 {
     DiffAmp* instance = static_cast < DiffAmp* >(conn->data());
+#ifndef NDEBUG
+    cout << "PLUS " << conn->target().id().path() << " : " << instance->plus_ << ", " << instance->minus_<< " : " << input << endl;
+#endif
+
     instance->plus_ += input;
 }
 
 void DiffAmp::minusFunc(const Conn* conn, double input)
 {
     DiffAmp* instance = static_cast < DiffAmp* >(conn->data());
+#ifndef NDEBUG
+    cout << "MINUS " << conn->target().id().path() << " : " << instance->plus_ << ", " << instance->minus_<< " : " << input <<endl;
+#endif
     instance->minus_ += input;
 }
 
@@ -182,6 +189,9 @@ void DiffAmp::processFunc(const Conn* conn, ProcInfo p)
 {
     DiffAmp* instance = static_cast< DiffAmp* >(conn->data());
     double output = instance->gain_ * (instance->plus_ - instance->minus_);
+#ifndef NDEBUG
+    cout << conn->target().id().path() << ": plus = " << instance->plus_ << " :minus = " << instance->minus_ << " :output = " << output << " :gain = " << instance->gain_ << " :saturation = " << instance->saturation_ << endl;
+#endif
     instance->plus_ = 0.0;
     instance->minus_ = 0.0;
     if ( output > instance->saturation_ ) {
@@ -197,9 +207,9 @@ void DiffAmp::processFunc(const Conn* conn, ProcInfo p)
 void DiffAmp::reinitFunc(const Conn* conn, ProcInfo p)
 {
     DiffAmp* instance = static_cast< DiffAmp* >(conn->data());
-    instance->output_ = 0;
-    instance->plus_ = 0;
-    instance->minus_ = 0;
+    instance->output_ = 0.0;
+    instance->plus_ = 0.0;
+    instance->minus_ = 0.0;
 }
 
 // 
