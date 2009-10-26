@@ -114,7 +114,7 @@ private:
 	vector< currentVecIter >  currentBoundary_;
 	vector< unsigned int >    chan2compt_;
 	vector< unsigned int >    chan2state_;
-
+    vector< SpikeGenStruct >  vmDest_;
 	/**
 	 * Setting up of data structures: Defined in HSolveActiveSetup.cpp
 	 */
@@ -122,6 +122,7 @@ private:
 	void readGates( );
 	void readCalcium( );
 	void readSynapses( );
+    void readVmDests();
 	void createLookupTables( );
 	void cleanup( );
 

@@ -51,6 +51,20 @@ int BioScan::children( Id compartment, vector< Id >& ret )
 	return targets( compartment, "axial", ret, "Compartment" );
 }
 
+int BioScan::vmSrcTargets( Id compartment, vector< Id >& ret )
+{
+    int size = targets( compartment, "VmSrc", ret, "");
+    for (vector<Id>::iterator iter = ret.begin(); iter != ret.end(); ++ iter){
+        if ((*iter)()->className() == "HHChannel" ||
+            (*iter)()->className() == "Compartment" ||
+            (*iter)()->className() == "SynChan" ||
+            (*iter)()->className() == "SpikeGen"){
+            ret.erase(iter); // exclude objects that have separate handling
+        }
+    }
+    return size - ret.size();
+}
+
 int BioScan::channels( Id compartment, vector< Id >& ret )
 {
 	// Request for elements of type "HHChannel" only since
@@ -196,23 +210,19 @@ int BioScan::targets(
 		found = i->target()->id();
 		if ( type != "" && !isType( found, type ) )	// speed this up
 			continue;
-		if (found()->className() != "HHChannel2D"){ // this hack to save HHChannel2D
+		if (!((type=="HHChannel") && ( found()->className() == "HHChannel2D"))){ // this hack to save HHChannel2D
                     target.push_back( found );
                 }
 		
 		ProcInfoBase p;
 		SetConn c( found(), 0 );
-		if ( isType( found, "Compartment" ) )
+		if ( isType( found, "Compartment" ) ){
 			moose::Compartment::reinitFunc( &c, &p );
-		else if ( isType( found, "HHChannel" ) && (found()->className() != "HHChannel2D")){ /// Subhasis: hack to skip HHChannel2D until support for it is built into HSOlve
-#ifndef NDEBUG
-                    /// Subhasis - DEBUG
-                    cout << "BioScan::targets() - " << found.path() << " is HHChannel" << endl;
-#endif
+                } else if ( isType( found, "HHChannel" )){
 			HHChannel::reinitFunc( &c, &p );
-                }
-		else if ( isType( found, "CaConc" ) )
+                } else if ( isType( found, "CaConc" ) ){
 			CaConc::reinitFunc( &c, &p );
+                }
 	}
 	delete i;
 	
