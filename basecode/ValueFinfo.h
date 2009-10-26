@@ -30,7 +30,7 @@ template < class T, class F > class ValueFinfo: public Finfo
 		void registerOpFuncs(
 			map< string, FuncId >& fnames, vector< OpFunc* >& funcs ) 
 		{
-			string setName = "set" + name();
+			string setName = "set_" + name();
 			map< string, FuncId >::iterator i = fnames.find( setName );
 			if ( i != fnames.end() ) {
 				funcs[ i->second ] = setOpFunc_;
@@ -40,7 +40,7 @@ template < class T, class F > class ValueFinfo: public Finfo
 				funcs.push_back( setOpFunc_ );
 
 			}
-			string getName = "get" + name();
+			string getName = "get_" + name();
 			i = fnames.find( getName );
 			if ( i != fnames.end() ) {
 				funcs[ i->second ] = getOpFunc_;

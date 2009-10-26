@@ -16,6 +16,7 @@ class OpFunc
 		virtual ~OpFunc()
 		{;}
 		virtual bool checkFinfo( const Finfo* s) const = 0;
+		virtual bool checkSet( const SetGet* s) const = 0;
 		virtual void op( Eref e, const char* buf ) const = 0;
 };
 
@@ -28,6 +29,10 @@ template< class T > class OpFunc0: public OpFunc
 
 		bool checkFinfo( const Finfo* s ) const {
 			return dynamic_cast< const SrcFinfo0* >( s );
+		}
+
+		bool checkSet( const SetGet* s ) const {
+			return dynamic_cast< const SetGet0* >( s );
 		}
 
 		void op( Eref e, const char* buf ) const {
@@ -47,6 +52,10 @@ template< class T, class A > class OpFunc1: public OpFunc
 
 		bool checkFinfo( const Finfo* s ) const {
 			return dynamic_cast< const SrcFinfo1< A >* >( s );
+		}
+
+		bool checkSet( const SetGet* s ) const {
+			return dynamic_cast< const SetGet1< A >* >( s );
 		}
 
 		// This could do with a whole lot of optimization to avoid
@@ -71,6 +80,10 @@ template< class T, class A1, class A2 > class OpFunc2: public OpFunc
 
 		bool checkFinfo( const Finfo* s ) const {
 			return dynamic_cast< const SrcFinfo2< A1, A2 >* >( s );
+		}
+
+		bool checkSet( const SetGet* s ) const {
+			return dynamic_cast< const SetGet2< A1, A2 >* >( s );
 		}
 
 		void op( Eref e, const char* buf ) const {
@@ -98,6 +111,10 @@ template< class T, class A1, class A2, class A3 > class OpFunc3:
 			return dynamic_cast< const SrcFinfo3< A1, A2, A3 >* >( s );
 		}
 
+		bool checkSet( const SetGet* s ) const {
+			return dynamic_cast< const SetGet3< A1, A2, A3 >* >( s );
+		}
+
 		void op( Eref e, const char* buf ) const {
 			buf += sizeof( Qinfo );
 			const char* buf2 = buf + sizeof( A1 );
@@ -116,8 +133,8 @@ template< class T, class A1, class A2, class A3 > class OpFunc3:
 
 /**
  * This specialized OpFunc is for returning a single field value
- * It generates an opFunc that takes three arguments:
- * Id, MsgId and FuncId of the function on the object that requested the
+ * It generates an opFunc that takes a single argument:
+ * FuncId of the function on the object that requested the
  * value. The OpFunc then sends back a message with the info.
  */
 template< class T, class A > class GetOpFunc: public OpFunc
@@ -129,6 +146,10 @@ template< class T, class A > class GetOpFunc: public OpFunc
 
 		bool checkFinfo( const Finfo* s ) const {
 			return dynamic_cast< const SrcFinfo1< A >* >( s );
+		}
+
+		bool checkSet( const SetGet* s ) const {
+			return dynamic_cast< const SetGet1< FuncId >* >( s );
 		}
 
 		/**

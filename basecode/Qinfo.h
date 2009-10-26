@@ -50,7 +50,7 @@ class Qinfo
 		 * Used when adding space for the index in sendTo
 		 */
 		void expandSize();
-		
+
 	private:
 		MsgId m_;
 		bool useSendTo_;

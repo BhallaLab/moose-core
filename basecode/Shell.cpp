@@ -84,6 +84,16 @@ const char* Shell::getBuf() const
 	return 0;
 }
 
+/**
+ * Static global, returns contents of shell buffer.
+ */
+const char* Shell::buf() 
+{
+	static Id shellid;
+	static Element* shell = shellid();
+	assert( shell );
+	return (static_cast< Shell* >(shell->data( 0 )) )->getBuf();
+}
 
 bool set( Eref& dest, const string& destField, const string& val )
 {

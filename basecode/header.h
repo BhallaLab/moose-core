@@ -16,6 +16,7 @@
 #include <string>
 #include <map>
 #include <iostream>
+#include <sstream>
 #include <climits> // Required for g++ 4.3.2
 #include <cstring> // Required for g++ 4.3.2
 #include <cstdlib> // Required for g++ 4.3.2
@@ -51,6 +52,8 @@ class Data;
 #include "Id.h"
 #include "Conv.h"
 #include "SrcFinfo.h"
+#include "Shell.h"
+#include "SetGet.h"
 #include "OpFunc.h"
 #include "EpFunc.h"
 #include "ValueFinfo.h"

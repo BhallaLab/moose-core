@@ -144,7 +144,7 @@ void testSet()
 		sprintf( temp, "set_e2_%d", i );
 		string stemp( temp );
 		Eref dest( e2.element(), i );
-		set( dest, "setname", stemp );
+		set( dest, "set_name", stemp );
 		e2.element()->clearQ();
 	}
 
@@ -184,7 +184,7 @@ void testGet()
 			// I don't really want an array of SetGet/Shells to originate
 			// get requests, but just
 			// to test that it works from anywhere...
-		if ( get( dest, "getname" ) ) {
+		if ( get( dest, "get_name" ) ) {
 			e2.element()->clearQ(); // Request goes to e2
 			shell->clearQ(); // Response comes back to e1
 
@@ -200,6 +200,34 @@ void testGet()
 	delete i2();
 }
 
+void testSetGet()
+{
+	const Cinfo* nc = Neutral::initCinfo();
+	unsigned int size = 100;
+	string arg;
+	Id i2 = nc->create( "test2", size );
+
+	
+	for ( unsigned int i = 0; i < size; ++i ) {
+		Eref e2( i2(), i );
+		char temp[20];
+		sprintf( temp, "sg_e2_%d", i );
+		SetGet1< string >::set( e2, "name", temp );
+		assert( static_cast< Neutral* >(e2.data())->getName() == temp );
+	}
+
+	for ( unsigned int i = 0; i < size; ++i ) {
+		Eref e2( i2(), i );
+		char temp[20];
+		sprintf( temp, "sg_e2_%d", i );
+		string ret = SetGet1< string >::get( e2, "name" );
+		assert( ret == temp );
+	}
+
+	cout << "." << flush;
+	delete i2();
+}
+
 void testAsync( )
 {
 	insertIntoQ();
@@ -207,4 +235,5 @@ void testAsync( )
 	testCreateMsg();
 	testSet();
 	testGet();
+//	testSetGet();
 }

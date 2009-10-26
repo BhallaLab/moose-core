@@ -31,6 +31,7 @@ OBJ = \
 	Shell.o	\
 	Qinfo.o \
 	Message.o \
+	SetGet.o \
 	main.o	\
 
 HEADERS = \

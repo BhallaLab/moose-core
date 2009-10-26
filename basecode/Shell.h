@@ -7,6 +7,9 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#ifndef _SHELL_H
+#define _SHELL_H
+
 class Shell: public Data
 {
 	public:
@@ -17,6 +20,7 @@ class Shell: public Data
 		static const Cinfo* initCinfo();
 		void handleGet( Eref& e, const Qinfo* q, const char* arg );
 		const char* getBuf() const;
+		static const char* buf();
 
 	private:
 		string name_;
@@ -26,3 +30,5 @@ class Shell: public Data
 extern bool set( Eref& dest, const string& destField, const string& val );
 
 extern bool get( const Eref& dest, const string& destField );
+
+#endif // _SHELL_H

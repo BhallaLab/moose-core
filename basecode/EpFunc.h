@@ -25,6 +25,10 @@ template< class T > class EpFunc0: public OpFunc
 			return dynamic_cast< const SrcFinfo0* >( s );
 		}
 
+		bool checkSet( const SetGet* s ) const {
+			return dynamic_cast< const SetGet0* >( s );
+		}
+
 		void op( Eref e, const char* buf ) const {
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
 			(static_cast< T* >( e.data() )->*func_)( e, q ); 
@@ -43,6 +47,10 @@ template< class T, class A > class EpFunc1: public OpFunc
 
 		bool checkFinfo( const Finfo* s ) const {
 			return dynamic_cast< const SrcFinfo1< A >* >( s );
+		}
+
+		bool checkSet( const SetGet* s ) const {
+			return dynamic_cast< const SetGet1< A >* >( s );
 		}
 
 		// This could do with a whole lot of optimization to avoid
@@ -66,6 +74,10 @@ template< class T > class RetFunc: public OpFunc
 			{;}
 
 		bool checkFinfo( const Finfo* s ) const {
+			return 1;
+		}
+
+		bool checkSet( const SetGet* s ) const {
 			return 1;
 		}
 

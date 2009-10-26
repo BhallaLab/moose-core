@@ -13,7 +13,9 @@ extern void testSyncArray( unsigned int size, unsigned int numThreads,
 
 void init()
 {
-	Shell::initCinfo()->create( "root", 1 );
+	Id shellid = Shell::initCinfo()->create( "root", 1 );
+	assert ( shellid == Id() );
+	SetGet::setShell();
 }
 
 int main()

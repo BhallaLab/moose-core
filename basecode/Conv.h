@@ -64,7 +64,6 @@ template< class T > class Conv
 			ostringstream os( s );
 			os << val;
 		}
-
 };
 
 template<> class Conv< string >
