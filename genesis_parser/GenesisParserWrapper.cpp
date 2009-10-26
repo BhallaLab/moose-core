@@ -3184,12 +3184,14 @@ float do_version( int argc, const char** const argv, Id s )
 
 char** doArgv( int argc, const char** const argv, Id s )
 {
-	return 0;
+    cout << argv[0] << ": Not yet implemented!" << endl;
+    return 0;
 }
 
 int doArgc( int argc, const char** const argv, Id s )
 {
-	return 0;
+    cout << argv[0] << ": Not yet implemented!" << endl;
+    return 0;
 }
 
 
