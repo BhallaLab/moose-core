@@ -58,7 +58,8 @@ void HSolveActive::solve( ProcInfo info ) {
 	HSolvePassive::backwardSubstitute( );
 	advanceCalcium( );
 	advanceSynChans( info );
-        sendSpikes( info );
+        // becomes unnecessary when sending Vm to all VmSrc targets
+        // sendSpikes( info );
         sendComptVm();
 }
 
@@ -271,10 +272,8 @@ void HSolveActive::advanceSynChans( ProcInfo info ) {
 }
 
 void HSolveActive::sendComptVm(){
-    vector< SpikeGenStruct >::iterator ispike;
-    for ( ispike = spikegen_.begin(); ispike != spikegen_.end(); ++ispike ) {
-        cout << "%%% Sending VmSrc to " << ispike->elm_.id().path() << endl;
-        send1<double>(getCompartments()[ispike->compt_].eref(), initCompartmentCinfo()->getSlot("VmSrc"), V_[ ispike->compt_ ]);
+    for (unsigned int icomp = 0; icomp < compartmentId_.size(); ++ icomp){
+        send1<double>(compartmentId_[icomp].eref(), initCompartmentCinfo()->getSlot("VmSrc"), V_[ icomp ]);
     }
 }
 void HSolveActive::sendSpikes( ProcInfo info ) {
