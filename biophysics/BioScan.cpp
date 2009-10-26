@@ -51,20 +51,6 @@ int BioScan::children( Id compartment, vector< Id >& ret )
 	return targets( compartment, "axial", ret, "Compartment" );
 }
 
-int BioScan::vmSrcTargets( Id compartment, vector< Id >& ret )
-{
-    int size = targets( compartment, "VmSrc", ret, "");
-    for (vector<Id>::iterator iter = ret.begin(); iter != ret.end(); ++ iter){
-        if ((*iter)()->className() == "HHChannel" ||
-            (*iter)()->className() == "Compartment" ||
-            (*iter)()->className() == "SynChan" ||
-            (*iter)()->className() == "SpikeGen"){
-            ret.erase(iter); // exclude objects that have separate handling
-        }
-    }
-    return size - ret.size();
-}
-
 int BioScan::channels( Id compartment, vector< Id >& ret )
 {
 	// Request for elements of type "HHChannel" only since
