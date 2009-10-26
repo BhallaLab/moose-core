@@ -29,7 +29,7 @@ void HSolveActive::setup( Id seed, double dt ) {
 	readCalcium( );
 	createLookupTables( );
 	readSynapses( );
-	
+        readVmDests();
 	cleanup( );
 }
 
@@ -360,6 +360,20 @@ void HSolveActive::readSynapses( ) {
 	}
 }
 
+void HSolveActive::readVmDests(){
+    vector< Id > destId;
+    vector< Id >::iterator destIter;
+    for ( unsigned int ic = 0; ic < nCompt_; ++ic){
+        destId.clear();
+        BioScan::vmSrcTargets(compartmentId_[ ic ], destId);
+        for (destIter = destId.begin(); destIter != destId.end(); ++ destIter){
+            SpikeGenStruct dest;
+            dest.compt_ = ic;
+            dest.elm_ = (*destIter)();
+            vmDest_.push_back( dest );
+        }
+    }
+}
 void HSolveActive::cleanup( ) {
 //	compartmentId_.clear( );
 	gCaDepend_.clear();
