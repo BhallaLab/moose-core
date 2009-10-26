@@ -347,9 +347,6 @@ void HSolveActive::readSynapses( ) {
 		
 		spikeId.clear( );
                 BioScan::spikegen( compartmentId_[ ic ], spikeId );
-                // Subhasis - SpikeGenStruct is generic enough for all
-                // destinations of VmSrc message
-                BioScan::vmSrcTargets( compartmentId_[ ic ], spikeId );
 		// Very unlikely that there will be >1 spikegens in a compartment,
 		// but lets take care of it anyway.
 		for ( spike = spikeId.begin(); spike != spikeId.end(); ++spike ) {
