@@ -58,7 +58,7 @@ void HSolveActive::solve( ProcInfo info ) {
 	HSolvePassive::backwardSubstitute( );
 	advanceCalcium( );
 	advanceSynChans( info );
-        //sendSpikes( info );
+        sendSpikes( info );
         sendComptVm();
 }
 
@@ -285,6 +285,5 @@ void HSolveActive::sendSpikes( ProcInfo info ) {
 		 * std namespace.
 		 */
 		::set< double >( ispike->elm_, spikeVmFinfo, V_[ ispike->compt_ ] );
-            // This is dangerous for non-spikegen objects
-        }
+	}
 }
