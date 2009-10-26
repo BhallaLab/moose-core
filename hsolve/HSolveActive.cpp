@@ -273,6 +273,7 @@ void HSolveActive::advanceSynChans( ProcInfo info ) {
 void HSolveActive::sendComptVm(){
     vector< SpikeGenStruct >::iterator ispike;
     for ( ispike = spikegen_.begin(); ispike != spikegen_.end(); ++ispike ) {
+        cout << "%%% Sending VmSrc to " << ispike->elm_.id().path() << endl;
         send1<double>(getCompartments()[ispike->compt_].eref(), initCompartmentCinfo()->getSlot("VmSrc"), V_[ ispike->compt_ ]);
     }
 }
