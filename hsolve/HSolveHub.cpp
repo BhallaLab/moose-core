@@ -511,6 +511,9 @@ void HSolveHub::redirectDestMessages(
 		if ( find( elist->begin(), elist->end(), tgt ) == elist->end() ) {
 			map.push_back( eIndex );
 			srcElements.push_back( i->target() );
+#ifndef NDEBUG
+                        cout << "$$ HSolveHub::redirectDestMessages" << i->target().id().path() << endl;
+#endif
 			srcMsg.push_back( i->targetMsg() );
 			if ( !retain )
 				dropList.push_back( i->connTainer() );
