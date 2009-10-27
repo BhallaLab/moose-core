@@ -49,6 +49,31 @@ const Cinfo* initDiffAmpCinfo()
     static Finfo* process = new SharedFinfo("process", processShared, sizeof(processShared) / sizeof(Finfo*),
 					    "This is a shared message to receive process messages from the"
                                             " scheduler objects.");
+    
+	static Finfo* plusShared[] =
+	{
+	    new SrcFinfo(
+	        "request",
+	        Ftype0::global(),
+	        "Sends out the request. Issued from the process call." ),
+	    new DestFinfo( "handle",
+	        Ftype1< double >::global(),
+            RFCAST( &DiffAmp::plusFunc ),
+            "Handle the returned value." ),
+    };
+    
+	static Finfo* minusShared[] =
+	{
+	    new SrcFinfo(
+	        "request",
+	        Ftype0::global(),
+	        "Sends out the request. Issued from the process call." ),
+	    new DestFinfo( "handle",
+	        Ftype1< double >::global(),
+            RFCAST( &DiffAmp::minusFunc ),
+            "Handle the returned value." ),
+    };
+    
     static Finfo* diffAmpFinfos[] = {
 	new ValueFinfo( "gain", ValueFtype1< double >::global(),
                         GFCAST(&DiffAmp::getGain),
@@ -83,14 +108,24 @@ const Cinfo* initDiffAmpCinfo()
 	new DestFinfo( "gainDest", Ftype1< double >::global(),
                        RFCAST(&DiffAmp::setGain),
                        "This is a destination message to control gain dynamically."),
-	new DestFinfo( "plusDest", Ftype1< double >::global(),
-                       RFCAST(&DiffAmp::plusFunc),
-                       "Positive input terminal of the amplifier. All the messages connected"
-                       " here are summed up to get total positive input."),
-	new DestFinfo( "minusDest", Ftype1< double >::global(),
-                       RFCAST(&DiffAmp::minusFunc),
-                       "Negative input terminal of the amplifier. All the messages connected"
-                       " here are summed up to get total positive input."),
+	new SharedFinfo( "plusMsg",
+                      plusShared, 
+                      sizeof( plusShared ) / sizeof( Finfo* ),
+                      "This shared message requests for the plus value, and handles "
+                      "the returned with a callback function." ),
+	new SharedFinfo( "minusMsg",
+                      minusShared, 
+                      sizeof( minusShared ) / sizeof( Finfo* ),
+                      "This shared message requests for the minus value, and handles "
+                      "the returned with a callback function." ),
+	//~ new DestFinfo( "plusDest", Ftype1< double >::global(),
+                       //~ RFCAST(&DiffAmp::plusFunc),
+                       //~ "Positive input terminal of the amplifier. All the messages connected"
+                       //~ " here are summed up to get total positive input."),
+	//~ new DestFinfo( "minusDest", Ftype1< double >::global(),
+                       //~ RFCAST(&DiffAmp::minusFunc),
+                       //~ "Negative input terminal of the amplifier. All the messages connected"
+                       //~ " here are summed up to get total positive input."),
     };
     
     static SchedInfo schedInfo[] = {{ process, 0, 0 }};
@@ -119,6 +154,8 @@ const Cinfo* initDiffAmpCinfo()
 static const Cinfo* diffAmpCinfo = initDiffAmpCinfo();
 
 static const Slot outputSlot = initDiffAmpCinfo()->getSlot("outputSrc");
+static const Slot plusSlot = initDiffAmpCinfo()->getSlot("plusMsg.request");
+static const Slot minusSlot = initDiffAmpCinfo()->getSlot("minusMsg.request");
 
 DiffAmp::DiffAmp():gain_(1.0), saturation_(DBL_MAX), plus_(0), minus_(0), output_(0)
 {
@@ -188,12 +225,22 @@ double DiffAmp::getOutput(Eref e)
 void DiffAmp::processFunc(const Conn* conn, ProcInfo p)
 {
     DiffAmp* instance = static_cast< DiffAmp* >(conn->data());
+    
+	// Resetting plus and minus fields to 0.0
+    instance->plus_ = 0.0;
+    instance->minus_ = 0.0;
+    
+    /*
+     * Request for + and - values.
+     * All incoming values from callbacks will be accumulated.
+     */
+    send0(conn->target(), plusSlot);
+    send0(conn->target(), minusSlot);
+    
     double output = instance->gain_ * (instance->plus_ - instance->minus_);
 #ifndef NDEBUG
     cout << conn->target().id().path() << ": plus = " << instance->plus_ << " :minus = " << instance->minus_ << " :output = " << output << " :gain = " << instance->gain_ << " :saturation = " << instance->saturation_ << endl;
 #endif
-    instance->plus_ = 0.0;
-    instance->minus_ = 0.0;
     if ( output > instance->saturation_ ) {
 	output = instance->saturation_;
     }
