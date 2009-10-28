@@ -98,7 +98,9 @@ void HSolvePassive::initialize( ) {
 	nCompt_ = compartmentId_.size();
 	
 	double Vm, Cm, Em, Rm, inject;
-	
+        double tempE, tempG, eThevenin, rThevenin;
+	vector< Id > leakageId;
+        vector< Id >::iterator leakageIter;
 	for ( unsigned int ic = 0; ic < compartmentId_.size(); ++ic ) {
 		Eref e = compartmentId_[ ic ]();
 		
@@ -109,7 +111,39 @@ void HSolvePassive::initialize( ) {
 		get< double >( e, "inject", inject );
 		
 		V_.push_back( Vm );
-		
+                /*
+                  If there are n leakage channels with reversal
+                  potentials: E[1] ... E[n] and resistance R[1] ... R[n]
+                  respectively, then the membrane circuit can be represented by the
+                  Thevenin equivalent circuit with:
+
+                  R_thevenin = 1 / sum( 1 / R[i] )
+                             = 1 / sum(G[i])
+                  E_thevenin = sum(E[i] / R[i]) * R_thevenin
+                             = sum(E[i] * G[i]) * R_thevenin
+                  
+                  Here we have to add original membrane potential Em as E[0] and
+                  resistance Rm as R[0].
+                */
+                eThevenin = Em / Rm;
+                rThevenin = 1.0 / Rm;
+              
+                BioScan::leakageChannels( compartmentId_[ ic ], leakageId );
+                for (leakageIter = leakageId.begin(); leakageIter != leakageId.end(); ++ leakageIter){
+                    get<double>( (*leakageIter)(), "Ek", tempE);
+                    get<double>( (*leakageIter)(), "Gk", tempG);
+                    eThevenin += tempE * tempG;
+                    rThevenin += tempG;
+#ifndef NDEBUG
+                    cout << "Hsolvepassive::initialize(): " << compartmentId_[ ic ].path() << " Leakage: Ek = " << tempE << ", Gk = " << tempG << endl;
+#endif
+                    
+                }
+                eThevenin = eThevenin / rThevenin;
+                rThevenin = 1.0 / rThevenin;
+#ifndef NDEBUG
+                cout << "E_th = " << eThevenin << ", R_th = " << rThevenin << endl;
+#endif
 		CompartmentStruct compartment;
 		compartment.CmByDt = 2.0 * Cm / dt_;
 		compartment.EmByRm = Em / Rm;
