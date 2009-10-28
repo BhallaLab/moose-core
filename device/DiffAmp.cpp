@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Mon Dec 29 16:01:22 2008 (+0530)
 // Version: 
-// Last-Updated: Tue Oct 27 00:03:43 2009 (+0530)
+// Last-Updated: Wed Oct 28 09:58:36 2009 (+0530)
 //           By: subhasis ray
-//     Update #: 181
+//     Update #: 184
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -90,11 +90,11 @@ const Cinfo* initDiffAmpCinfo()
                         " number representable on the system." ),
 	new ValueFinfo( "plus", ValueFtype1< double >::global(),
                         GFCAST(&DiffAmp::getPlus),
-                        RFCAST(&dummyFunc),
+                        RFCAST(&DiffAmp::plusFunc),
                         "Total input to the positive terminal of the amplifier." ),
 	new ValueFinfo( "minus", ValueFtype1< double >::global(),
                         GFCAST(&DiffAmp::getMinus),
-                        RFCAST(&dummyFunc),
+                        RFCAST(&DiffAmp::minusFunc),
                         "Total input to the negative terminal of the amplifier."
  ),
 	new ValueFinfo( "output", ValueFtype1< double >::global(),
