@@ -2248,7 +2248,7 @@ void Shell::readNeuroml( const Conn* c, string filename, string location, int ch
 			name = location.substr( pos + 1 );
 		}
 		
-		Element* locE = Neutral::create( "Neutral", name, pa, Id::scratchId() );
+		Element* locE = Neutral::create( "Cell", name, pa, Id::scratchId() );
 		loc = locE->id();
 	}
 	
