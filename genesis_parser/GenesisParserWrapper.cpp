@@ -606,15 +606,15 @@ map< string, string >& sliSrcLookup()
         src[ "PulseGen.INPUT Vm" ] = "outputSrc";
 	// Messages for DiffAmp
 	src[ "DiffAmp.INPUT output" ] = "outputSrc";
-	src[ "PLUS output" ] = "output";
-	src[ "MINUS output" ] = "output";
+	src[ "PLUS output" ] = "outputSrc";
+	src[ "MINUS output" ] = "outputSrc";
         // Messages for Compartment/Vm to DiffAmp/plus or minus
-        src[ "PLUS Vm" ] = "Vm";
-        src[ "MINUS Vm" ] = "Vm";
+        src[ "PLUS Vm" ] = "VmSrc";
+        src[ "MINUS Vm" ] = "VmSrc";
 	// For compatibility taking output from RC
 	src[ "INPUT state" ] = "state";
-	src[ "PLUS state" ] = "state";
-	src[ "MINUS state" ] = "state";
+	src[ "PLUS state" ] = "outputSrc";
+	src[ "MINUS state" ] = "outputSrc";
 
 	// Messages for PID
 	src[ "CMD output" ] = "outputSrc";
@@ -774,15 +774,15 @@ map< string, string >& sliDestLookup()
 	dest[ "PulseGen.INPUT output" ] = "input";
 
 	// Messages for DiffAmp
-	dest[ "PLUS output" ] = "plusMsg";
-	dest[ "MINUS output" ] = "minusMsg";
+	dest[ "PLUS output" ] = "plusDest";
+	dest[ "MINUS output" ] = "minusDest";
 	dest[ "GAIN output" ] = "gainDest";
         // Compartment/Vm -> DiffAmp/plus or minus
-	dest[ "PLUS Vm" ] = "plusMsg";
-	dest[ "MINUS Vm" ] = "minusMsg";
+	dest[ "PLUS Vm" ] = "plusDest";
+	dest[ "MINUS Vm" ] = "minusDest";
 	// These are to take output from RC
-	dest[ "PLUS state" ] = "plusMsg";
-	dest[ "MINUS state" ] = "minusMsg";
+	dest[ "PLUS state" ] = "plusDest";
+	dest[ "MINUS state" ] = "minusDest";
 	dest[ "GAIN state" ] = "gainDest";
 	
 	// Messages for PIDController
