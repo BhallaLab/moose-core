@@ -42,7 +42,7 @@ ReadCell.o: ReadCell.h Shell.h
 
 
 .cpp.o:
-	$(CXX) $(CXXFLAGS) -I/usr/include/libxml++-2.6 -I.. -I../basecode $< -c
+	$(CXX) $(CXXFLAGS) -I/home/siji -I/usr/include/libxml2 -I.. -I../basecode $< -c
 
 $(TARGET):		$(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ)

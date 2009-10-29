@@ -34,6 +34,7 @@ class NeuromlReader
 		Element* gate_;
 		Element* cable_;
 		Element* synchannel_;
+		Element* leak_;
 		static const double PI ;
 		map< string,Id > segMap_;
 		NCell* ncl_;
@@ -45,7 +46,9 @@ class NeuromlReader
 };
 extern const Cinfo* initCompartmentCinfo();
 extern const Cinfo* initHHChannelCinfo();
+extern const Cinfo* initHHGateCinfo();
 extern const Cinfo* initInterpolCinfo();
+extern const Cinfo* initLeakageCinfo();
 extern const Cinfo* initSynChanCinfo();
 #endif // _NEUROMLREADER_H
 
