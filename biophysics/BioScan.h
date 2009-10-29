@@ -21,6 +21,7 @@ public:
 	static int gates( Id channel, vector< Id >& ret );
 	static int spikegen( Id compartment, vector< Id >& ret );
 	static int synchan( Id compartment, vector< Id >& ret );
+	static int leakageChannels( Id compartment, vector< Id >& ret );
 	static int caTarget( Id channel, vector< Id >& ret );
 	static int caDepend( Id channel, vector< Id >& ret );
 	// Functions for accessing gates' lookup tables.

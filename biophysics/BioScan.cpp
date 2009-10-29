@@ -80,6 +80,10 @@ int BioScan::synchan( Id compartment, vector< Id >& ret )
 	return targets( compartment, "channel", ret, "SynChan" );
 }
 
+int BioScan::leakageChannels( Id compartment, vector< Id >& ret )
+{
+    return targets( compartment, "channel", ret, "Leakage" );
+}
 int BioScan::caTarget( Id channel, vector< Id >& ret )
 {
 	return targets( channel, "IkSrc", ret, "CaConc" );
