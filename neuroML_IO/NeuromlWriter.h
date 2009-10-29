@@ -21,6 +21,10 @@ class NeuromlWriter
 		NeuromlWriter() {;}
 		~NeuromlWriter() {;}
 		void writeModel( string filepath,Id location );
+		//SBMLDocument* createModel( string filename );
+		//bool validateModel( SBMLDocument* sbmlDoc );
+		//bool writeModel( const SBMLDocument* sbmlDoc, const string& filename );
+
 
 
 };

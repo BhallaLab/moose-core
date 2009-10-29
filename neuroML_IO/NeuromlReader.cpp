@@ -1,13 +1,14 @@
 #include "moose.h"
 #include "element/Neutral.h"
 #include <iostream>
+#include <set>
 #include "neuroML_IO/Cable.h"
 #include <neuroML/NCell.h>
 #include <neuroML/NBase.h>
 #include "Cable.h"
 #include "NeuromlReader.h"
 using namespace std;
-const double NeuromlReader::PI = 3.14159;
+const double NeuromlReader::PI = M_PI;
 void setupSegments();
 void setupCables();
 void NeuromlReader::readModel( string filename,Id location )
@@ -24,10 +25,8 @@ void NeuromlReader::readModel( string filename,Id location )
    static const Finfo* RaFinfo = compartmentCinfo->findFinfo( "Ra" );
    static const Finfo* initVmFinfo = compartmentCinfo->findFinfo( "initVm" );
    static const Finfo* CmFinfo = compartmentCinfo->findFinfo( "Cm" );
-   static const Finfo* EmFinfo = compartmentCinfo->findFinfo( "Em" );
    static const Cinfo* cableCinfo = initCableCinfo();
    NBase nb;   
-   //NCell* c;
    ncl_= nb.readNeuroML (filename);
    ncl_->register_namespaces();
    string lengthunits = ncl_->getLengthUnits();
@@ -58,15 +57,14 @@ void NeuromlReader::readModel( string filename,Id location )
 	//cout << "id " << cid << " name " << cname << endl;
 	cable_ = Neutral::create( "Cable",cid,loc,Id::scratchId() ); 
 	cabMap[cid] = cable_->id();
-	set< string >( cable_,nameFinfo,cid );
+	::set< string >( cable_,nameFinfo,cid );
 	std::vector< std::string > groups;
 	groups = cab->getGroups();
-	set< vector< string > >( cable_,groupsFinfo,groups );
+	::set< vector< string > >( cable_,groupsFinfo,groups );
 	for ( int itr = 0; itr < groups.size(); itr++ )
 	     groupcableMap[groups[itr]].push_back(cid);
    }
    map< string,vector< string > > cablesegMap;
-   //map< string,Id > segMap;	
    for( int i = 1; i<= num_segments; i ++ )
    {
 		
@@ -84,44 +82,55 @@ void NeuromlReader::readModel( string filename,Id location )
 		Eref(compt_).add("raxial",segMap_[parent](),"axial",ConnTainer::Default ); 
 	Eref(cabMap[cable]()).add("compartment",Eref(compt_),"cable",ConnTainer::Default ); 
 	cablesegMap[cable].push_back(id);
-	x = seg->proximal.getX();
-	y = seg->proximal.getY();
-	z = seg->proximal.getZ();
+	bool proxm = seg->isSetProximal();
+        /* if proximal is not given then proximal is the  distal of parent compt */
+	if ( proxm ){
+		x = seg->proximal.getX();
+		y = seg->proximal.getY();
+		z = seg->proximal.getZ();
+		x *= 1e-4;
+		y *= 1e-4;
+		z *= 1e-4;
+	}
+	else {
+		get< double >( segMap_[parent].eref(), "x",x );
+		get< double >( segMap_[parent].eref(), "y",y );
+		get< double >( segMap_[parent].eref(), "z",z );
+	}
 	x1 = seg->distal.getX();
 	y1 = seg->distal.getY();
 	z1 = seg->distal.getZ();
+	x1 *= 1e-4;
+	y1 *= 1e-4;
+	z1 *= 1e-4;
+	length = sqrt(pow((x1-x),2) + pow((y1-y),2) + pow((z1-z),2));
 	diam1 = seg->proximal.getDiameter();
 	diam2 = seg->distal.getDiameter();
-    	set< double >( compt_, x0Finfo, x );
-	set< double >( compt_, y0Finfo, y );
- 	set< double >( compt_, z0Finfo, z );
- 	set< double >( compt_, xFinfo, x1  );
-	set< double >( compt_, yFinfo, y1 );
-	set< double >( compt_, zFinfo, z1 );
 	diameter = (diam1 + diam2 )/2;
-	length = sqrt(pow((x1-x),2) + pow((y1-y),2) + pow((z1-z),2));
 	diameter *= 1e-4; //physiological unit
-	length *= 1e-4;
 	//length *= 1e-6;//si
 	//diameter *= 1e-6;//si
-	set< double >( compt_, diameterFinfo, diameter );
-	set< double >( compt_, lengthFinfo, length );
+	::set< double >( compt_, x0Finfo, x );
+	::set< double >( compt_, y0Finfo, y );
+ 	::set< double >( compt_, z0Finfo, z );
+ 	::set< double >( compt_, xFinfo, x1  );
+	::set< double >( compt_, yFinfo, y1 );
+	::set< double >( compt_, zFinfo, z1 );
+	::set< double >( compt_, diameterFinfo, diameter );
+	::set< double >( compt_, lengthFinfo, length );
 	if ( length == 0 ){
 		Cm = ca * PI * diameter * diameter;
 		Ra = 13.50 * r /( diameter * PI );
-		//sa = 4 * PI * diameter * diameter/4;
 	}
 	else{
         	Cm = ca * length * PI * diameter;
         	Ra = (r * length )/(PI * diameter * diameter/4);
-		//sa = (2 * PI * (diameter * diameter)/4)+(2 * PI * diameter/2 * length);
 	}
-	//cout << "suraface area " << sa << endl;
-        set< double >( compt_, CmFinfo, Cm );
-        set< double >( compt_, RaFinfo, Ra ); 
-	set< double >( compt_, initVmFinfo, initVm );
+	::set< double >( compt_, CmFinfo, Cm );
+        ::set< double >( compt_, RaFinfo, Ra ); 
+	::set< double >( compt_, initVmFinfo, initVm );
         //set< double >( compt_, initVmFinfo, initVm/1000);//si unit 
-	set< double >( compt_, EmFinfo, initVm );
+	
     }
    setupChannels(groupcableMap,cablesegMap);
    setupSynChannels(groupcableMap,cablesegMap);
@@ -132,10 +141,10 @@ double NeuromlReader::calcSurfaceArea(double length,double diameter)
 {
 	double sa ;
 	if( length == 0 )
-		sa = 4 * PI * diameter * diameter/4;
+		sa = PI * diameter * diameter;
 	else
-		sa = (2 * PI * (diameter * diameter)/4)+(2 * PI * diameter/2 * length);
-	return sa;	
+		sa = PI * diameter * length;
+	return sa;
 }
 void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,map< string,vector< string > > &cablesegMap)
 {
@@ -149,6 +158,10 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
 	static const Finfo* xpowerFinfo = channelCinfo->findFinfo( "Xpower" );
 	static const Finfo* ypowerFinfo = channelCinfo->findFinfo( "Ypower" );
 	static const Finfo* zpowerFinfo = channelCinfo->findFinfo( "Zpower" );
+	static const Cinfo* gateCinfo = initHHGateCinfo();
+	static const Cinfo* leakCinfo = initLeakageCinfo();
+	static const Finfo* leakekFinfo = leakCinfo->findFinfo( "Ek" );
+	static const Finfo* setupAlphaFinfo = gateCinfo->findFinfo( "setupAlpha" );
 	unsigned int num_channels = ncl_->getNumChannels();
 	map< string,vector<string> >::iterator cmap_iter;
     	map< string,vector<string> >::iterator smap_iter; 
@@ -160,15 +173,21 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
 		double gmax,ek;
 		Id loc( "/library" );
 		name = chl->getName();
+		cout << "channel is : "<< name << endl;
 		bool is2DChannel = chl->isSetConc_dependence();
-		if ( is2DChannel )
+		bool passive = chl->getPassivecond();
+		ek = chl->getDefault_erev();
+		if ( passive ){
+			leak_ = Neutral::create( "Leakage",name,loc,Id::scratchId() ); 
+			::set< double >( leak_, leakekFinfo, ek );
+		}
+		else if ( is2DChannel )
 			channel_ = Neutral::create( "HHChannel2D",name,loc,Id::scratchId() );	
 		else	
  	 		channel_ = Neutral::create( "HHChannel",name,loc,Id::scratchId() );
 	 	gmax = chl->getParameterValue();
 	 	//gmax *= 10;//si
-	 	ek = chl->getDefault_erev();
-		set< double >( channel_, ekFinfo, ek );//si
+	 	::set< double >( channel_, ekFinfo, ek );
 	 	double xmin,xmax;
 	 	int xdivs;
 	 	string biophysicsunits = ncl_->getBiophysicsUnits();
@@ -195,11 +214,11 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
 			string name = gat->getGateName();
 			double power = gat->getInstances();
 			if ( i == 1 )
-				set< double >( channel_, xpowerFinfo, power );
+				::set< double >( channel_, xpowerFinfo, power );
 			else if ( i == 2 )
-				set< double >( channel_, ypowerFinfo, power );
+				::set< double >( channel_, ypowerFinfo, power );
 			else if ( i == 3 )
-				set< double >( channel_, zpowerFinfo, power );
+				::set< double >( channel_, zpowerFinfo, power );
 			string gatepath = path + gatename[i-1];
 			//cout << " gate path : " << gatepath << endl;
 		 	Id gateid(gatepath);
@@ -224,30 +243,31 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
 			result.push_back(xdivs);
 			result.push_back(xmin);
 			result.push_back(xmax);
-			//cout << "result size : "<< result.size() << endl;
-			set< vector< double > >( Eref(gateid()),"setupAlpha",result );
+			::set< std::vector< double > >( Eref(gateid()),setupAlphaFinfo,result );
 	 	}
-		bool passive = chl->getPassivecond();
-		group = chl->getGroup();
+		
+		//group = chl->getGroups();
+		std::vector< std::string > groups;
+		groups = chl->getGroups();
 		// cout<< " group: " << group ;
 		vector< string > cId ;
 		vector< string > sId;
-		cmap_iter = groupcableMap.find( group );
-		if ( cmap_iter != groupcableMap.end() )
-		   cId = cmap_iter->second;
-		else {
-	   		cout << "Error: CableId is empty" << endl;
-	   		return;
-	 	}
-		for( int i = 0; i < cId.size(); i++ )
+		std::set< string > cableId;
+		for(int gr = 0; gr < groups.size(); gr ++ )
 		{
-		   //cout << " cable id:  " << cId[i];
-		    smap_iter = cablesegMap.find( cId[i] );
-		    if ( smap_iter != cablesegMap.end() )
+			cout << "groups in vector : " << groups[gr] << endl;			
+			cmap_iter = groupcableMap.find( groups[gr] );
+			if ( cmap_iter != groupcableMap.end() ){
+			   cId = cmap_iter->second;
+			   cableId.insert( cId.begin(),cId.end() );
+			}
+		}
+		std::set< string >::iterator itr;
+		for( itr = cableId.begin(); itr != cableId.end(); itr++ )
+		{
+		    smap_iter = cablesegMap.find( (*itr) );
+		    if ( smap_iter != cablesegMap.end() ){
 			sId = smap_iter->second;
-		    else{
-			cout << "Error:SegmentId is empty" << endl;
-			return;
 		    }
 		    for( int j = 0; j < sId.size(); j++ ){
 			//cout << " seg Id:  " << sId[j] << endl; 
@@ -256,22 +276,22 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
 			get< double >( comptEl.eref(), "length",len );
 			get< double >( comptEl.eref(), "diameter",dia );
 			double sa = calcSurfaceArea( len,dia );
+			cout << "surface area : " << sa << "  of  " << comptEl()->name()<< endl;
 		 	double gbar = gmax * sa;
-		 	set< double >( channel_, gbarFinfo, gbar );
+		 	::set< double >( channel_, gbarFinfo, gbar );  
 			if (passive){
-			
-		   		double Rm = 1/(gmax*sa);
-		   		set< double >( comptEl(), RmFinfo, Rm );
-				set< double >( comptEl(), EmFinfo, ek );
+				double Rm = 1/(gmax*sa);
+		   		::set< double >( comptEl(), RmFinfo, Rm );
+				::set< double >( comptEl(), EmFinfo, ek );
 		 	}
 			else{
 				Element* copyEl = channel_->copy(comptEl(),channel_->name());
 				Eref(comptEl()).add("channel",copyEl,"channel",ConnTainer::Default ); 
 			}
-           	}
+           	    }
 	 
-     	}
-}  
+     	        }
+	}  
 }
 
 void NeuromlReader::setupSynChannels(map< string,vector<string> > &groupcableMap,map< string,vector< string > > &cablesegMap)
@@ -294,31 +314,33 @@ void NeuromlReader::setupSynChannels(map< string,vector<string> > &groupcableMap
  	 	synchannel_ = Neutral::create( "SynChan",name,loc,Id::scratchId() );
 		double gmax = synchl->getMax_Conductance();
 		double tau1 = synchl->getRise_Time();
-		set< double >( synchannel_, synTau1Finfo, tau1 );
+		::set< double >( synchannel_, synTau1Finfo, tau1 );
 		double tau2 = synchl->getDecay_Time();
-		set< double >( synchannel_, synTau2Finfo, tau2 );
+		::set< double >( synchannel_, synTau2Finfo, tau2 );
 		double ek = synchl->getReversal_Potential();
-		set< double >( synchannel_, synEkFinfo, ek );
-		string group = synchl->getGroup();
+		::set< double >( synchannel_, synEkFinfo, ek );
+		std::vector< std::string > groups;
+		groups = synchl->getGroups();
 		vector< string > cId ;
 	 	vector< string > sId;
-	 	cmap_iter = groupcableMap.find( group );
-	 	if ( cmap_iter != groupcableMap.end() )
-	    		cId = cmap_iter->second;
-	 	else {
-	   		cout << "Error: CableId is empty" << endl;
-	   		return;
-		 }
-	 	for( int i = 0; i < cId.size(); i++ )
-	 	{
-	  	     smap_iter = cablesegMap.find( cId[i] );
-	    	     if ( smap_iter != cablesegMap.end() )
+		std::set< string > cableId;
+		for(int gr = 0; gr < groups.size(); gr ++ )
+		{
+			cout << "groups in vector : " << groups[gr] << endl;			
+			cmap_iter = groupcableMap.find( groups[gr] );
+			if ( cmap_iter != groupcableMap.end() ){
+			   cId = cmap_iter->second;
+			   cableId.insert( cId.begin(),cId.end() );
+			}
+		}
+		std::set< string >::iterator itr;
+		for( itr = cableId.begin(); itr != cableId.end(); itr++ )
+		{
+		    smap_iter = cablesegMap.find( (*itr) );
+		    if ( smap_iter != cablesegMap.end() ){
 			sId = smap_iter->second;
-	       	     else{
-			cout << "Error:SegmentId is empty" << endl;
-			return;
-	    	     }
-	    	     for( int j = 0; j < sId.size(); j++ ){
+		    }
+	    	    for( int j = 0; j < sId.size(); j++ ){
 			Id comptEl = segMap_[sId[j]];
 			double len,dia;
 			get< double >( comptEl.eref(), "length",len );
@@ -326,10 +348,10 @@ void NeuromlReader::setupSynChannels(map< string,vector<string> > &groupcableMap
 			double sa = calcSurfaceArea( len,dia );
 			cout << " len "<< len << " dia " << dia << " sa " << sa << endl; 
 			double gbar = gmax * sa;
-			set< double >( synchannel_,synGbarFinfo,gbar );
+			::set< double >( synchannel_,synGbarFinfo,gbar );
 			Element* copyEl = synchannel_->copy(comptEl(),synchannel_->name());
 			Eref(comptEl()).add("channel",copyEl,"channel",ConnTainer::Default ); 
-		     }
+		    }
 		}
 	}
 	
