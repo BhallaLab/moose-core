@@ -191,13 +191,13 @@ endif
 # To use NeuroML, pass USE_NeuroML=1 in make command line
 ifeq ($(USE_NEUROML),1)
 #LIBS+= -lxml2 -lneuroml
-LIBS+= -lneuroml -L/home/siji/neuroML
+LIBS+= -lneuroml -L/home/siji/TestLibNeuroML/v0.2/libneuroml
 CXXFLAGS+=-DUSE_NEUROML
 endif
 
 # To compile with readline support pass USE_READLINE=1 in make command line
 ifeq ($(USE_READLINE),1)
-LIBS+= -lreadline
+LIBS+= -lreadline -lncurses
 CXXFLAGS+= -DUSE_READLINE 
 endif
 

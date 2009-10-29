@@ -29,13 +29,13 @@
 void NeuromlWriter::writeModel( string filepath,Id location )
 {
 
-	string::size_type loc;
+	/*string::size_type loc;
 	while ( ( loc = filepath.find( "\\" ) ) != string::npos ) {
 		filepath.replace( loc, 1, "/" );
 	}
 	/* allows to write filename with extensions xml,zip,bz2 and gz. if no 
 	extension is given then .xml is the default one. */
-	string fName = filepath;
+	/*string fName = filepath;
 	if ( filepath[0]== '~' ){
 		cerr << "Error : Replace ~ with absolute path " << endl;
 		return ;
@@ -67,5 +67,16 @@ void NeuromlWriter::writeModel( string filepath,Id location )
 	}
 	if ( i == extensions.end() )
 		filepath += ".xml";
+	//SBMLDocument* sbmlDoc = 0;
+  	bool fileok = false;
+	//sbmlDoc = createModel( fName ); 
+  	//fileok  = validateModel( sbmlDoc );
+	if ( fileok ) 
+		writeModel( sbmlDoc, filepath );
+    	delete sbmlDoc;
+	if ( !fileok ) {
+		cerr << "Errors encountered " << endl;
+		return ;
+	}*/
 	
 }
