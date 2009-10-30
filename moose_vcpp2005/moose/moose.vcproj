@@ -151,6 +151,7 @@
 				UseLibraryDependencyInputs="false"
 				AdditionalDependencies="cblas.lib gsl.lib zlib.lib bzip2.lib libsbml.lib libexpat.lib"
 				AdditionalLibraryDirectories="&quot;D:\sbml\libsbml-3.3.2\win32\bin&quot;;&quot;D:\Program Files\MPICH2\lib&quot;;&quot;D:\DOWNLOADS\gsl-1.11-windows-binaries\gsl\lib&quot;;&quot;C:\Program Files\GnuWin32\lib&quot;"
+				SubSystem="0"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -239,6 +240,10 @@
 				</File>
 				<File
 					RelativePath="..\..\biophysics\IzhikevichNrn.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\biophysics\Leakage.cpp"
 					>
 				</File>
 				<File
@@ -1334,6 +1339,10 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="..\..\ksolve\StateScanner.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\ksolve\SteadyState.cpp"
 					>
 				</File>
@@ -1549,6 +1558,10 @@
 				</File>
 				<File
 					RelativePath="..\..\biophysics\IzhikevichNrn.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\biophysics\Leakage.h"
 					>
 				</File>
 				<File
@@ -2181,6 +2194,10 @@
 				</File>
 				<File
 					RelativePath="..\..\ksolve\RateTerm.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ksolve\StateScanner.h"
 					>
 				</File>
 				<File
