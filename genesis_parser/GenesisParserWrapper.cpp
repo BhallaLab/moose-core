@@ -4209,30 +4209,33 @@ void do_help(int argc, const char** const argv, Id s )
    Note that buffer size is 1KB and only the last 1KB of the output
    is printed.
 */
+
 char* const do_shellcmd(int argc, char** const argv, Id s)
 {
-    const int buf_size = 1024;
+	const int buf_size = 1024;
     static char buffer[buf_size];
-    FILE * cmd_out = NULL;
-    if (argc < 2){
-        cout << "usage: sh <shell-command> [<command_args>]*" << endl;
-        return NULL;
-    }
-    string commandline;
-    for ( int ii = 1; ii < argc; ++ ii){
-        commandline.append(argv[ii]);
-        commandline.append(" ");
-    }
-    cmd_out = popen(commandline.c_str(), "r");
-    if (!cmd_out){
-        return NULL;
-    }    
-    while (fgets(buffer, buf_size, cmd_out)){
-        cout << buffer;
-    }
-    cout << endl;
-    pclose(cmd_out);
-    cmd_out = NULL;
+	#ifndef WIN32
+		FILE * cmd_out = NULL;
+		if (argc < 2){
+			cout << "usage: sh <shell-command> [<command_args>]*" << endl;
+			return NULL;
+		}
+		string commandline;
+		for ( int ii = 1; ii < argc; ++ ii){
+			commandline.append(argv[ii]);
+			commandline.append(" ");
+		}
+		cmd_out = popen(commandline.c_str(), "r");
+		if (!cmd_out){
+			return NULL;
+		}    
+		while (fgets(buffer, buf_size, cmd_out)){
+			cout << buffer;
+		}
+		cout << endl;
+		pclose(cmd_out);
+		cmd_out = NULL;
+	#endif
     return copyString(buffer);
 }
 
