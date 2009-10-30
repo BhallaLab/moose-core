@@ -319,6 +319,28 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="..\..\biophysics\Leakage.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath="..\..\biophysics\Mg_block.cpp"
 					>
 				</File>
@@ -1421,6 +1443,10 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\Leakage.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\MathFunc.cpp"
 					>
 					<FileConfiguration
@@ -2453,6 +2479,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\ksolve\StateScanner.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\ksolve\SteadyState.cpp"
 					>
 				</File>
@@ -2646,6 +2676,10 @@
 				</File>
 				<File
 					RelativePath="..\..\biophysics\IzhikevichNrn.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\biophysics\Leakage.h"
 					>
 				</File>
 				<File
@@ -3297,6 +3331,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\Leakage.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\MathFunc.h"
 					>
 				</File>
@@ -3566,6 +3604,10 @@
 				</File>
 				<File
 					RelativePath="..\..\ksolve\RateTerm.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ksolve\StateScanner.h"
 					>
 				</File>
 				<File
