@@ -1,8 +1,16 @@
 #include <queue>
 #include "header.h"
 #include "IntFire.h"
+#include "Dinfo.h"
 
-const Slot spikeSlot = 0;
+const ConnId spikeSlot = 0;
+
+static SrcFinfo1< double >* spike = 
+	new SrcFinfo1< double >( 
+		"spike", 
+		"Sends out spike events",
+		spikeSlot
+	);
 
 const Cinfo* IntFire::initCinfo()
 {
@@ -27,9 +35,21 @@ const Cinfo* IntFire::initCinfo()
 			&IntFire::setThresh,
 			&IntFire::getThresh
 		),
+		new DestFinfo( "addSpike",
+			"Handles arriving spike messages",
+			new EpFunc1< IntFire, double >( &IntFire::addSpike ) ),
+		spike,
 	};
 
-	return intFireFinfos;
+	static Cinfo intFireCinfo (
+		"IntFire",
+		0, // No base class, but eventually I guess it will be neutral.
+		intFireFinfos,
+		sizeof( intFireFinfos ) / sizeof ( Finfo* ),
+		new Dinfo< IntFire >()
+	);
+
+	return &intFireCinfo;
 }
 
 static const Cinfo* intFireCinfo = IntFire::initCinfo();
@@ -54,7 +74,8 @@ void IntFire::process( const ProcInfo* p, const Eref& e )
 			pendingEvents_.pop();
 	}
 	if ( Vm_ > thresh_ ) {
-		e.sendSpike( spikeSlot, p->currTime );
+		spike->send( e, p->currTime );
+		// e.sendSpike( spikeSlot, p->currTime );
 		Vm_ = -1.0e-7;
 	} else {
 		Vm_ *= ( 1.0 - p->dt / tau_ );
@@ -91,14 +112,19 @@ void IntFire::process( const ProcInfo* p, const Eref& e )
 /**
  * Inserts an event into the pendingEvents queue for spikes.
  */
-void IntFire::addSpike( unsigned int id, double time )
+void IntFire::addSpike( Eref& e, const Qinfo* q, const double& time )
 {
+	/*
+	 * This needs to go to the SynInfo object as a child of the IntFire.
+	 * There is an array of SynInfos, one per synapse.
+	 * There may be multiple SynInfos on each IntFire
 	assert( id < synapses_.size() );
 	SynInfo s( synapses_[ id ], time );
 	pendingEvents_.push( s );
+	 */
 }
 
-void IntFire::reinit( Eref e )
+void IntFire::reinit( Eref& e )
 {
 	// pendingEvents_.resize( 0 );
 	while( !pendingEvents_.empty() )
@@ -134,18 +160,33 @@ unsigned int FuncId::doOperation( Eref e, char* i )
 */
 
 
-void IntFire::setVm( double v )
+void IntFire::setVm( const double& v )
 {
 	Vm_ = v;
 }
 
-void IntFire::setTau( double v )
+void IntFire::setTau( const double& v )
 {
 	tau_ = v;
 }
 
-void IntFire::setThresh( double v )
+void IntFire::setThresh( const double& v )
 {
 	thresh_ = v;
+}
+
+const double &IntFire::getVm() const
+{
+	return Vm_;
+}
+
+const double &IntFire::getTau() const
+{
+	return tau_;
+}
+
+const double &IntFire::getThresh() const
+{
+	return thresh_;
 }
 

@@ -49,24 +49,24 @@ class IntFire: public Data
 	public: 
 		IntFire();
 		IntFire( double thresh, double tau );
-		void process( const ProcInfo* p, Eref& e );
+		void process( const ProcInfo* p, const Eref& e );
 		void reinit( Eref& e );
 
 		/**
  		 * Inserts an event into the pendingEvents queue for spikes.
  		 */
-		void addSpike( unsigned int id, double time );
-		//
+		void addSpike( Eref& e, const Qinfo* q, const double& time );
+		
 		////////////////////////////////////////////////////////////////
 		// Field assignment stuff.
 		////////////////////////////////////////////////////////////////
 		
-		void setVm( double v );
-		double getVm() const;
-		void setTau( double v );
-		double getTau() const;
-		void setThresh( double v );
-		double getThresh() const;
+		void setVm( const double& v );
+		const double &getVm() const;
+		void setTau( const double& v );
+		const double &getTau() const;
+		void setThresh( const double& v );
+		const double &getThresh() const;
 		static const Cinfo* initCinfo();
 	private:
 		double Vm_; // State variable: Membrane potential. Resting pot is 0.

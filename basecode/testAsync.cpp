@@ -12,6 +12,8 @@
 #include "Dinfo.h"
 #include "Shell.h"
 #include "Message.h"
+#include <queue>
+#include "../biophysics/IntFire.h"
 
 void insertIntoQ( )
 {
@@ -229,6 +231,36 @@ void testSetGet()
 	delete i2();
 }
 
+void testSetGetDouble()
+{
+	static const double EPSILON = 1e-9;
+	const Cinfo* ic = IntFire::initCinfo();
+	unsigned int size = 100;
+	string arg;
+	Id i2 = ic->create( "test2", size );
+
+	
+	for ( unsigned int i = 0; i < size; ++i ) {
+		Eref e2( i2(), i );
+		double temp = i;
+		bool ret = SetGet1< double >::set( e2, "Vm", temp );
+		assert( ret );
+		assert( 
+			fabs ( static_cast< IntFire* >(e2.data())->getVm() - temp ) <
+				EPSILON ); 
+	}
+
+	for ( unsigned int i = 0; i < size; ++i ) {
+		Eref e2( i2(), i );
+		double temp = i;
+		double ret = SetGet1< double >::get( e2, "Vm" );
+		assert( fabs ( temp - ret ) < EPSILON );
+	}
+
+	cout << "." << flush;
+	delete i2();
+}
+
 void testAsync( )
 {
 	insertIntoQ();
@@ -237,4 +269,5 @@ void testAsync( )
 	testSet();
 	testGet();
 	testSetGet();
+	testSetGetDouble();
 }

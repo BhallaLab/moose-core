@@ -192,21 +192,22 @@ endif
 
 LD = ld
 
-SUBDIR = basecode \
+SUBDIR = \
+	basecode \
+	biophysics\
 
 
 #	kinetics \
-#	biophysics 
 
 # Used for 'make clean'
 CLEANSUBDIR = $(SUBDIR) 
 
 OBJLIBS =	\
 	basecode/basecode.o \
+	biophysics/biophysics.o \
 
 #
 #	kinetics/kinetics.o \
-#	biophysics/biophysics.o
 #
 #
 
