@@ -4,7 +4,7 @@
 
 const Slot spikeSlot = 0;
 
-Finfo** IntFire::initClassInfo()
+const Cinfo* IntFire::initCinfo()
 {
 	static Finfo* intFireFinfos[] = {
 		new ValueFinfo< IntFire, double >(
@@ -32,8 +32,10 @@ Finfo** IntFire::initClassInfo()
 	return intFireFinfos;
 }
 
+static const Cinfo* intFireCinfo = IntFire::initCinfo();
+
 IntFire::IntFire()
-	: Vm_( 0.0 ), thresh_( thresh ), tau_( tau )
+	: Vm_( 0.0 ), thresh_( 0.0 ), tau_( 1.0 )
 {
 	;
 }
@@ -44,7 +46,7 @@ IntFire::IntFire( double thresh, double tau )
 	;
 }
 
-void IntFire::process( const ProcInfo* p, Eref e )
+void IntFire::process( const ProcInfo* p, const Eref& e )
 {
 	while ( !pendingEvents_.empty() &&
 		pendingEvents_.top().delay <= p->currTime ) {

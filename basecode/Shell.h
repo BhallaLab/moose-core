@@ -14,7 +14,7 @@ class Shell: public Data
 {
 	public:
 		Shell();
-		void process( const ProcInfo* p, Eref e );
+		void process( const ProcInfo* p, const Eref& e );
 		void setName( const string& name );
 		const string& getName() const;
 		static const Cinfo* initCinfo();

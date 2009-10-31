@@ -53,7 +53,7 @@ Shell::Shell()
 	;
 }
 
-void Shell::process( const ProcInfo* p, Eref e )
+void Shell::process( const ProcInfo* p, const Eref& e )
 {
 	;
 }

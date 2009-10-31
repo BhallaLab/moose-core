@@ -67,7 +67,7 @@ class IntFire: public Data
 		double getTau() const;
 		void setThresh( double v );
 		double getThresh() const;
-		Finfo** initClassInfo();
+		static const Cinfo* initCinfo();
 	private:
 		double Vm_; // State variable: Membrane potential. Resting pot is 0.
 		double thresh_;	// Firing threshold

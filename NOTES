@@ -1335,6 +1335,7 @@ Checked in as revision 1404.
 31 Oct 2009.
 Finally got to do some debugging. Fixed problem, now works, clears
 valgrind. 
+Checked in as revision 1422
 
 - Need to test with doubles and other types.
 

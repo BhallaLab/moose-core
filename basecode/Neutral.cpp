@@ -50,7 +50,7 @@ Neutral::Neutral()
 	;
 }
 
-void Neutral::process( const ProcInfo* p, Eref e )
+void Neutral::process( const ProcInfo* p, const Eref& e )
 {
 	;
 }

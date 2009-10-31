@@ -13,12 +13,12 @@ class Data
 	public:
 		virtual ~Data()
 			{;}
-		virtual void process( const ProcInfo* p, Eref e ) = 0;
+		virtual void process( const ProcInfo* p, const Eref& e ) = 0;
 
 		/**
 		 * Every Data class must provide a function to initialize its
 		 * ClassInfo.
-		virtual const Cinfo* initClassInfo() = 0;
+		virtual const Cinfo* initCinfo() = 0;
 		 */
 
 #if 0
