@@ -47,9 +47,10 @@ class IntFire: public Data
 	friend void testStandaloneIntFire();
 	friend void testSynapse();
 	public: 
+		IntFire();
 		IntFire( double thresh, double tau );
-		void process( const ProcInfo* p, Eref e );
-		void reinit( Eref e );
+		void process( const ProcInfo* p, Eref& e );
+		void reinit( Eref& e );
 
 		/**
  		 * Inserts an event into the pendingEvents queue for spikes.
@@ -61,8 +62,11 @@ class IntFire: public Data
 		////////////////////////////////////////////////////////////////
 		
 		void setVm( double v );
+		double getVm() const;
 		void setTau( double v );
+		double getTau() const;
 		void setThresh( double v );
+		double getThresh() const;
 		Finfo** initClassInfo();
 	private:
 		double Vm_; // State variable: Membrane potential. Resting pot is 0.

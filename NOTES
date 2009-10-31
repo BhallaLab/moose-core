@@ -1326,4 +1326,16 @@ Trying to find a suitable place to do this. In the process I found that
 Send.h and Async.h are no longer used. Removed them.
 Checked in as revision 1388.
 =============================================================================
+26 Oct 2009.
+Implemented Set and Get operations in a new templated SetGet class. Better
+typechecking. Compiles but it doesn't yet work.
+Checked in as revision 1404.
 
+=============================================================================
+31 Oct 2009.
+Finally got to do some debugging. Fixed problem, now works, clears
+valgrind. 
+
+- Need to test with doubles and other types.
+
+=============================================================================

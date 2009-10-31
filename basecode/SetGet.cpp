@@ -36,16 +36,17 @@ void SetGet::completeSet() const
 
 bool SetGet::checkSet( const string& destField, FuncId& fid ) const
 {
-	fid = e_.element()->cinfo()->getOpFuncId( destField );
+	string field = "set_" + destField;
+	fid = e_.element()->cinfo()->getOpFuncId( field );
 	const OpFunc* func = e_.element()->cinfo()->getOpFunc( fid );
 	if ( !func ) {
-		cout << "set::Failed to find " << e_ << "." << destField << endl;
+		cout << "set::Failed to find " << e_ << "." << field << endl;
 		return 0;
 	}
 	if ( func->checkSet( this ) ) {
 		return 1;
 	} else {
-		cout << "set::Type mismatch" << e_ << "." << destField << endl;
+		cout << "set::Type mismatch" << e_ << "." << field << endl;
 		return 0;
 	}
 }

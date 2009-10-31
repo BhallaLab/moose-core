@@ -212,7 +212,8 @@ void testSetGet()
 		Eref e2( i2(), i );
 		char temp[20];
 		sprintf( temp, "sg_e2_%d", i );
-		SetGet1< string >::set( e2, "name", temp );
+		bool ret = SetGet1< string >::set( e2, "name", temp );
+		assert( ret );
 		assert( static_cast< Neutral* >(e2.data())->getName() == temp );
 	}
 
@@ -235,5 +236,5 @@ void testAsync( )
 	testCreateMsg();
 	testSet();
 	testGet();
-//	testSetGet();
+	testSetGet();
 }

@@ -4,21 +4,44 @@
 
 const Slot spikeSlot = 0;
 
-IntFire::IntFire( double thresh, double tau )
+Finfo** IntFire::initClassInfo()
+{
+	static Finfo* intFireFinfos[] = {
+		new ValueFinfo< IntFire, double >(
+			"Vm",
+			"Membrane potential",
+			&IntFire::setVm,
+			&IntFire::getVm
+		),
+
+		new ValueFinfo< IntFire, double >(
+			"tau",
+			"charging time-course",
+			&IntFire::setTau,
+			&IntFire::getTau
+		),
+
+		new ValueFinfo< IntFire, double >(
+			"thresh",
+			"firing threshold",
+			&IntFire::setThresh,
+			&IntFire::getThresh
+		),
+	};
+
+	return intFireFinfos;
+}
+
+IntFire::IntFire()
 	: Vm_( 0.0 ), thresh_( thresh ), tau_( tau )
 {
 	;
 }
 
-Finfo** IntFire::initClassInfo()
+IntFire::IntFire( double thresh, double tau )
+	: Vm_( 0.0 ), thresh_( thresh ), tau_( tau )
 {
-	static Finfo* intFireFinfos[] = {
-		new Finfo( async1< IntFire, double, &IntFire::setVm > ),
-		new Finfo( async1< IntFire, double, &IntFire::setThresh > ),
-		new Finfo( async1< IntFire, double, &IntFire::setTau > ),
-	};
-
-	return intFireFinfos;
+	;
 }
 
 void IntFire::process( const ProcInfo* p, Eref e )
