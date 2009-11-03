@@ -264,7 +264,7 @@ void testSetGetDouble()
 
 void testSetGetSynapse()
 {
-	// static const double EPSILON = 1e-9;
+	static const double EPSILON = 1e-9;
 	const Cinfo* ic = IntFire::initCinfo();
 	const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 100;
@@ -272,25 +272,29 @@ void testSetGetSynapse()
 	Id i2 = ic->create( "test2", size );
 	SynElement syn( sc, i2() );
 
-	cout << "NumSyn = " << syn.numData() << endl;
+	assert( syn.numData() == 0 );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref e2( i2(), i );
 		bool ret = SetGet1< unsigned int >::set( e2, "numSynapses", i );
 		assert( ret );
 	}
-	cout << "NumSyn = " << syn.numData() << endl;
+	assert( syn.numData() == ( size * (size - 1) ) / 2 );
+	// cout << "NumSyn = " << syn.numData() << endl;
 	
-	/*
 	for ( unsigned int i = 0; i < size; ++i ) {
-		Eref syne( syn, i );
-		double temp = i;
-		bool ret = SetGet1< double >::set( e2, "delay", temp );
-		assert( ret );
-		assert( 
-			fabs ( reinterpret_cast< IntFire* >(e2.data())->getVm() - temp ) <
+		for ( unsigned int j = 0; j < i; ++j ) {
+			DataId di = i;
+			di = ( di << 32 ) + j;
+			Eref syne( &syn, di );
+			double temp = i * 1000 + j ;
+			bool ret = SetGet1< double >::set( syne, "delay", temp );
+			assert( ret );
+			assert( 
+			fabs ( reinterpret_cast< Synapse* >(syne.data())->getDelay() - temp ) <
 				EPSILON ); 
+		}
 	}
-	*/
+	cout << "." << flush;
 }
 
 void testAsync( )

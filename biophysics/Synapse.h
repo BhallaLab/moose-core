@@ -49,22 +49,22 @@ class SynElement: public Element
 		/**
 		 * Return the Synapse
 		 */
-		virtual char* data( DataId index );
+		char* data( DataId index );
 
 		/**
 		 * Return the IntFire
 		 */
-		virtual char* data1( DataId index );
+		char* data1( DataId index );
 
 		/**
 		 * Return the # of synapses
 		 */
-		virtual unsigned int numData() const;
+		unsigned int numData() const;
 
 		/**
 		 * Return 2.
 		 */
-		virtual unsigned int numDimensions() const;
+		unsigned int numDimensions() const;
 };
 
 #endif // _SYNAPSE_H

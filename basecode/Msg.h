@@ -107,8 +107,8 @@ class SingleMsg: public Msg
 		*/
 
 	private:
-		unsigned int i1_;
-		unsigned int i2_;
+		DataId i1_;
+		DataId i2_;
 };
 
 class OneToOneMsg: public Msg
@@ -127,8 +127,8 @@ class OneToOneMsg: public Msg
 		) const;
 		*/
 	private:
-		unsigned int i1_;
-		unsigned int i2_;
+		//unsigned int i1_;
+		//unsigned int i2_;
 };
 
 

@@ -140,6 +140,9 @@ void OneToOneMsg::addToQ( const Element* caller, Qinfo& q,
 	}
 }
 
+/**
+ * Possible issue here if srcIndex is not a DataId
+ */
 void OneToOneMsg::exec( Element* target, const char* arg ) const
 {
 	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );

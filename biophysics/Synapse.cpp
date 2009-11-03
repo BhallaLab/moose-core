@@ -119,10 +119,10 @@ void SynElement::process( const ProcInfo* p )
 char* SynElement::data( DataId index )
 {
 	static unsigned int numIndexBits = sizeof( DataId ) * 8 / 2;
-	static unsigned long dataMask = ( 1 >>  numIndexBits ) - 1;
+	static unsigned long dataMask = ( 1 <<  numIndexBits ) - 1;
 
-	unsigned int findex = index >> numIndexBits;
-	unsigned int dindex = index & dataMask;
+	unsigned int dindex = index >> numIndexBits;
+	unsigned int findex = index & dataMask;
 
 	assert( dindex < numData_ );
 	Synapse* s = 
@@ -134,8 +134,8 @@ char* SynElement::data( DataId index )
 char* SynElement::data1( DataId index )
 {
 	static unsigned int numIndexBits = sizeof( DataId ) * 8 / 2;
-	static unsigned long dataMask = ( 1 >>  numIndexBits ) - 1;
-	unsigned int dindex = index & dataMask;
+	static unsigned long dataMask = ( 1 <<  numIndexBits ) - 1;
+	unsigned int dindex = index >> numIndexBits;
 
 	assert( dindex < numData_ );
 	return d_ + dindex * dataSize_;
