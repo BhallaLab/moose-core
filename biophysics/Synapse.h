@@ -7,46 +7,36 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _SYN_INFO_H
-#define _SYN_INFO_H
+#ifndef _SYNAPSE_H
+#define _SYNAPSE_H
 
-class SynInfo
+class Synapse
 {
 	public:
-		SynInfo() 
-			: weight( 1.0 ), delay( 0.0 )
-		{
-			;
-		}
-
-		SynInfo( double w, double d ) 
-			: weight( w ), delay( d )
-		{
-			;
-		}
-
-		SynInfo( const SynInfo& other, double time )
-			: weight( other.weight ), delay( time + other.delay )
-		{
-			;
-		}
+		Synapse();
+		Synapse( double w, double d );
+		Synapse( const Synapse& other, double time );
 
 		// This is backward because the syntax of the priority
 		// queue puts the _largest_ element on top.
-		bool operator< ( const SynInfo& other ) const {
-			return delay > other.delay;
+		bool operator< ( const Synapse& other ) const {
+			return delay_ > other.delay_;
 		}
 		
-		bool operator== ( const SynInfo& other ) const {
-			return delay == other.delay && weight == other.weight;
+		bool operator== ( const Synapse& other ) const {
+			return delay_ == other.delay_ && weight_ == other.weight_;
 		}
 
-		SynInfo event( double time ) {
-			return SynInfo( weight, time + delay );
-		}
+		void setWeight( const double& v );
+		void setDelay( const double& v );
 
-		double weight;
-		double delay;
+		const double& getWeight() const;
+		const double& getDelay() const;
+		static const Cinfo* initCinfo();
+	private:
+
+		double weight_;
+		double delay_;
 };
 
 class SynElement: public Element
@@ -75,4 +65,4 @@ class SynElement: public Element
 		virtual unsigned int numDimensions() const;
 };
 
-#endif // _SYN_INFO_H
+#endif // _SYNAPSE_H

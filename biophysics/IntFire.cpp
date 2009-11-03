@@ -36,10 +36,6 @@ const Cinfo* IntFire::initCinfo()
 			&IntFire::setThresh,
 			&IntFire::getThresh
 		),
-		new DestFinfo( "addSpike",
-			"Handles arriving spike messages",
-			new EpFunc1< IntFire, double >( &IntFire::addSpike ) ),
-		spike,
 	};
 
 	static Cinfo intFireCinfo (
@@ -70,8 +66,8 @@ IntFire::IntFire( double thresh, double tau )
 void IntFire::process( const ProcInfo* p, const Eref& e )
 {
 	while ( !pendingEvents_.empty() &&
-		pendingEvents_.top().delay <= p->currTime ) {
-			Vm_ += pendingEvents_.top().weight;
+		pendingEvents_.top().getDelay() <= p->currTime ) {
+			Vm_ += pendingEvents_.top().getWeight();
 			pendingEvents_.pop();
 	}
 	if ( Vm_ > thresh_ ) {
@@ -112,17 +108,16 @@ void IntFire::process( const ProcInfo* p, const Eref& e )
 
 /**
  * Inserts an event into the pendingEvents queue for spikes.
+ * Note that this function lives on the Element managing the Synapses,
+ * and gets redirected to the IntFire.
+ * This is called by UpFunc1< double >
  */
-void IntFire::addSpike( Eref& e, const Qinfo* q, const double& time )
+void IntFire::addSpike( DataId index, const double& time )
 {
-	/*
-	 * This needs to go to the SynInfo object as a child of the IntFire.
-	 * There is an array of SynInfos, one per synapse.
-	 * There may be multiple SynInfos on each IntFire
-	assert( id < synapses_.size() );
-	SynInfo s( synapses_[ id ], time );
+	unsigned int temp = index >> 32;
+	assert( temp < synapses_.size() );
+	Synapse s( synapses_[ temp ], time );
 	pendingEvents_.push( s );
-	 */
 }
 
 void IntFire::reinit( Eref& e )
@@ -191,3 +186,12 @@ const double &IntFire::getThresh() const
 	return thresh_;
 }
 
+unsigned int IntFire::getNumSynapses() const
+{
+	return synapses_.size();
+}
+
+Synapse* IntFire::synapse( unsigned int i )
+{
+	return &synapses_[i];
+}

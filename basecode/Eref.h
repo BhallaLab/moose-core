@@ -66,6 +66,11 @@ class Eref
 		char* data();
 
 		/**
+		 * Returns data entry of parent object of field array
+		 */
+		char* data1();
+
+		/**
 		 * Returns Element part
 		 */
 		Element* element() const {

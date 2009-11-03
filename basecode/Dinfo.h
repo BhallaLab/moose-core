@@ -71,7 +71,7 @@ template< class D > class Dinfo: public DinfoBase
  * This is used for derived classes of Elements made to manage fields,
  * such as synapses. These fields don't need to be allocated.
  */
-class FieldDinfo
+class FieldDinfo: public DinfoBase
 {
 	public:
 		FieldDinfo()
@@ -80,14 +80,14 @@ class FieldDinfo
 		{
 			return 0;
 		}
-		virtual void destroyData( char* d ) const
+		void destroyData( char* d ) const
 		{;}
 
-		virtual unsigned int size() const
+		unsigned int size() const
 		{
 			return 0;
 		}
-		virtual bool isA( const DinfoBase* other ) const {
+		bool isA( const DinfoBase* other ) const {
 			return dynamic_cast< const FieldDinfo* >( other );
 		}
 };

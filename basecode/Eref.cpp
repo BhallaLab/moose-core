@@ -37,6 +37,11 @@ char* Eref::data()
 	return e_->data( i_ );
 }
 
+char* Eref::data1()
+{
+	return e_->data1( i_ );
+}
+
 /*
 void Eref::sendSpike( Slot src, double t )
 {
