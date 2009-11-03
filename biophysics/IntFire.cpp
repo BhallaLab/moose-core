@@ -1,5 +1,6 @@
 #include <queue>
 #include "header.h"
+#include "Synapse.h"
 #include "IntFire.h"
 #include "Dinfo.h"
 

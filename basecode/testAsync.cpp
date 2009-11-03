@@ -13,6 +13,7 @@
 #include "Shell.h"
 #include "Message.h"
 #include <queue>
+#include "../biophysics/Synapse.h"
 #include "../biophysics/IntFire.h"
 
 void insertIntoQ( )

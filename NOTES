@@ -1493,3 +1493,15 @@ Stages:
 * Replace Data with char* in Element::data
 * Make Element a virtual base class.
 
+Checked in as revision 1425
+
+Next:
+- Derive off Element for Synapses on IntFunc.
+- Come up with special element creation options to set up this element.
+- Check that field access works with it
+- Send spike messages to it
+- Sort out how to handle its clearQ.
+
+- Clean out const A& argument in OpFuncs. Should just pass argument, as most
+	of them will be doubles. Will need separate classes for strings and
+	things.

@@ -164,7 +164,7 @@ class Element
 
 		const Msg* getMsg( MsgId mid ) const;
 
-	private:
+	protected:
 
 		/**
 		 * These are the objects managed by the Element
@@ -178,6 +178,7 @@ class Element
 		unsigned int numData_;
 		unsigned int dataSize_;
 
+	private:
 		/**
 		 * This is the data buffer used for outgoing sync messages from
 		 * objects on this Element.

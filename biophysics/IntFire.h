@@ -1,6 +1,7 @@
-#ifndef _SynInfo_h
-#define _SynInfo_h
+#ifndef _INT_FIRE_H
+#define _INT_FIRE_H
 
+/*
 class SynInfo
 {
 	public:
@@ -39,8 +40,7 @@ class SynInfo
 		double weight;
 		double delay;
 };
-
-#endif // _SynInfo_h
+*/
 
 class IntFire: public Data
 {
@@ -75,3 +75,5 @@ class IntFire: public Data
 		vector< SynInfo > synapses_;
 		priority_queue< SynInfo > pendingEvents_;
 };
+
+#endif // _INT_FIRE_H

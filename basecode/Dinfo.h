@@ -65,8 +65,31 @@ template< class D > class Dinfo: public DinfoBase
 		bool isA( const DinfoBase* other ) const {
 			return dynamic_cast< const Dinfo< D >* >( other );
 		}
+};
 
-	private:
+/**
+ * This is used for derived classes of Elements made to manage fields,
+ * such as synapses. These fields don't need to be allocated.
+ */
+class FieldDinfo
+{
+	public:
+		FieldDinfo()
+		{;}
+		Data* allocData( unsigned int numData ) const
+		{
+			return 0;
+		}
+		virtual void destroyData( char* d ) const
+		{;}
+
+		virtual unsigned int size() const
+		{
+			return 0;
+		}
+		virtual bool isA( const DinfoBase* other ) const {
+			return dynamic_cast< const FieldDinfo* >( other );
+		}
 };
 
 #endif // _DINFO_H
