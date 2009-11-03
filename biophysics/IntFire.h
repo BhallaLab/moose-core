@@ -21,14 +21,16 @@ class IntFire: public Data
 		// Field assignment stuff.
 		////////////////////////////////////////////////////////////////
 		
-		void setVm( const double& v );
-		const double &getVm() const;
-		void setTau( const double& v );
-		const double &getTau() const;
-		void setThresh( const double& v );
-		const double &getThresh() const;
-		static const Cinfo* initCinfo();
+		void setVm( double v );
+		double getVm() const;
+		void setTau( double v );
+		double getTau() const;
+		void setThresh( double v );
+		double getThresh() const;
+		void setNumSynapses( unsigned int v );
 		unsigned int getNumSynapses() const;
+
+		static const Cinfo* initCinfo();
 
 		Synapse* synapse( unsigned int i );
 	private:

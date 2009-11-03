@@ -18,6 +18,15 @@ Element::Element( const Cinfo* c,
 	targetFunc_.resize( numFuncIndex, 0 );
 }
 
+Element::Element( const Cinfo* c, const Element* other )
+	: 	d_( other->d_ ), 
+		numData_( other->numData_ ), 
+		dataSize_( other->dataSize_),
+		sendBuf_( 0 ), cinfo_( c ), c_( 0 )
+{
+	;
+}
+
 Element::~Element()
 {
 	delete[] sendBuf_;

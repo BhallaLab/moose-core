@@ -262,6 +262,37 @@ void testSetGetDouble()
 	delete i2();
 }
 
+void testSetGetSynapse()
+{
+	// static const double EPSILON = 1e-9;
+	const Cinfo* ic = IntFire::initCinfo();
+	const Cinfo* sc = Synapse::initCinfo();
+	unsigned int size = 100;
+	string arg;
+	Id i2 = ic->create( "test2", size );
+	SynElement syn( sc, i2() );
+
+	cout << "NumSyn = " << syn.numData() << endl;
+	for ( unsigned int i = 0; i < size; ++i ) {
+		Eref e2( i2(), i );
+		bool ret = SetGet1< unsigned int >::set( e2, "numSynapses", i );
+		assert( ret );
+	}
+	cout << "NumSyn = " << syn.numData() << endl;
+	
+	/*
+	for ( unsigned int i = 0; i < size; ++i ) {
+		Eref syne( syn, i );
+		double temp = i;
+		bool ret = SetGet1< double >::set( e2, "delay", temp );
+		assert( ret );
+		assert( 
+			fabs ( reinterpret_cast< IntFire* >(e2.data())->getVm() - temp ) <
+				EPSILON ); 
+	}
+	*/
+}
+
 void testAsync( )
 {
 	insertIntoQ();
@@ -271,4 +302,5 @@ void testAsync( )
 	testGet();
 	testSetGet();
 	testSetGetDouble();
+	testSetGetSynapse();
 }

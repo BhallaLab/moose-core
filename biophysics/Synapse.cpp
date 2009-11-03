@@ -87,27 +87,31 @@ unsigned int FuncId::doOperation( Eref e, char* i )
 */
 
 
-void Synapse::setWeight( const double& v )
+void Synapse::setWeight( const double v )
 {
 	weight_ = v;
 }
 
-void Synapse::setDelay( const double& v )
+void Synapse::setDelay( const double v )
 {
 	delay_ = v;
 }
 
-const double& Synapse::getWeight() const
+double Synapse::getWeight() const
 {
 	return weight_;
 }
 
-const double& Synapse::getDelay() const
+double Synapse::getDelay() const
 {
 	return delay_;
 }
 
 ///////////////////////////////////////////////////////////////////////
+
+SynElement::SynElement( const Cinfo* c, const Element* other )
+	: 	Element( c, other )
+{ ; }
 
 void SynElement::process( const ProcInfo* p )
 {;}
@@ -121,8 +125,10 @@ char* SynElement::data( DataId index )
 	unsigned int dindex = index & dataMask;
 
 	assert( dindex < numData_ );
-	( reinterpret_cast< IntFire* >( d_ + dindex * dataSize_ ) )->
+	Synapse* s = 
+		( reinterpret_cast< IntFire* >( d_ + dindex * dataSize_ ) )->
 		synapse( findex );
+	return reinterpret_cast< char* >( s );
 }
 
 char* SynElement::data1( DataId index )

@@ -73,7 +73,7 @@ template< class T > class OpFunc0: public OpFunc
 template< class T, class A > class OpFunc1: public OpFunc
 {
 	public:
-		OpFunc1( void ( T::*func )( const A& ) )
+		OpFunc1( void ( T::*func )( const A ) )
 			: func_( func )
 			{;}
 
@@ -95,7 +95,7 @@ template< class T, class A > class OpFunc1: public OpFunc
 		}
 
 	private:
-		void ( T::*func_ )( const A& ); 
+		void ( T::*func_ )( A ); 
 };
 
 template< class T, class A1, class A2 > class OpFunc2: public OpFunc
@@ -167,7 +167,7 @@ template< class T, class A1, class A2, class A3 > class OpFunc3:
 template< class T, class A > class GetOpFunc: public OpFunc
 {
 	public:
-		GetOpFunc( const A& ( T::*func )() const )
+		GetOpFunc( A ( T::*func )() const )
 			: func_( func )
 			{;}
 
@@ -203,7 +203,7 @@ template< class T, class A > class GetOpFunc: public OpFunc
 		}
 
 	private:
-		const A& ( T::*func_ )() const;
+		A ( T::*func_ )() const;
 };
 
 #endif // _OPFUNC_H

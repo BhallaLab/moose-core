@@ -15,8 +15,8 @@ class Shell: public Data
 	public:
 		Shell();
 		void process( const ProcInfo* p, const Eref& e );
-		void setName( const string& name );
-		const string& getName() const;
+		void setName( string name );
+		string getName() const;
 		static const Cinfo* initCinfo();
 		void handleGet( Eref& e, const Qinfo* q, const char* arg );
 		const char* getBuf() const;

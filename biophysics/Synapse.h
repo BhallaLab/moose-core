@@ -27,11 +27,11 @@ class Synapse
 			return delay_ == other.delay_ && weight_ == other.weight_;
 		}
 
-		void setWeight( const double& v );
-		void setDelay( const double& v );
+		void setWeight( double v );
+		void setDelay( double v );
 
-		const double& getWeight() const;
-		const double& getDelay() const;
+		double getWeight() const;
+		double getDelay() const;
 		static const Cinfo* initCinfo();
 	private:
 
@@ -42,6 +42,8 @@ class Synapse
 class SynElement: public Element
 {
 	public:
+		SynElement( const Cinfo* c, const Element* other );
+
 		void process( const ProcInfo* p ); // Don't do anything.
 
 		/**

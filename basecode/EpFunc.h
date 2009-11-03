@@ -41,7 +41,7 @@ template< class T > class EpFunc0: public OpFunc
 template< class T, class A > class EpFunc1: public OpFunc
 {
 	public:
-		EpFunc1( void ( T::*func )( Eref& e, const Qinfo* q, const A& ) )
+		EpFunc1( void ( T::*func )( Eref& e, const Qinfo* q, A ) )
 			: func_( func )
 			{;}
 
@@ -63,7 +63,7 @@ template< class T, class A > class EpFunc1: public OpFunc
 		}
 
 	private:
-		void ( T::*func_ )( Eref& e, const Qinfo* q, const A& ); 
+		void ( T::*func_ )( Eref& e, const Qinfo* q, A ); 
 };
 
 template< class T > class RetFunc: public OpFunc

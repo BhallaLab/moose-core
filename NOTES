@@ -1497,13 +1497,13 @@ Checked in as revision 1425
 
 Next:
 * Derive off Element for Synapses on IntFunc. Checkin 1427.
-* Do Synapse and SynElement implementation.
-- Come up with special element creation options to set up this element.
+* Do Synapse and SynElement implementation. Checkin 1428.
+* Come up with special element creation options to set up this element.
 - Check that field access works with it
 - Send spike messages to it
 - Sort out how to handle its clearQ.
-
-- Clean out const A& argument in OpFuncs. Should just pass argument, as most
+- Fix up sub-fields within DataId.
+* Clean out const A& argument in OpFuncs. Should just pass argument, as most
 	of them will be doubles. Will need separate classes for strings and
 	things.
 

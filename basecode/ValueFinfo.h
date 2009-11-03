@@ -18,8 +18,8 @@ template < class T, class F > class ValueFinfo: public Finfo
 		}
 
 		ValueFinfo( const string& name, const string& doc, 
-			void ( T::*setFunc )( const F& ),
-			const F& ( T::*getFunc )() const )
+			void ( T::*setFunc )( F ),
+			F ( T::*getFunc )() const )
 			: Finfo( name, doc )
 			{
 				setOpFunc_ = new OpFunc1< T, F >( setFunc );

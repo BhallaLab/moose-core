@@ -55,12 +55,12 @@ void Neutral::process( const ProcInfo* p, const Eref& e )
 	;
 }
 
-void Neutral::setName( const string& name )
+void Neutral::setName( string name )
 {
 	name_ = name;
 }
 
-const string& Neutral::getName() const
+string Neutral::getName() const
 {
 	return name_;
 }

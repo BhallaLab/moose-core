@@ -58,12 +58,12 @@ void Shell::process( const ProcInfo* p, const Eref& e )
 	;
 }
 
-void Shell::setName( const string& name )
+void Shell::setName( string name )
 {
 	name_ = name;
 }
 
-const string& Shell::getName() const
+string Shell::getName() const
 {
 	return name_;
 }

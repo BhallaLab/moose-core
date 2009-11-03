@@ -36,6 +36,13 @@ const Cinfo* IntFire::initCinfo()
 			&IntFire::setThresh,
 			&IntFire::getThresh
 		),
+
+		new ValueFinfo< IntFire, unsigned int >(
+			"numSynapses",
+			"Number of synapses on IntFire",
+			&IntFire::setNumSynapses,
+			&IntFire::getNumSynapses
+		),
 	};
 
 	static Cinfo intFireCinfo (
@@ -156,32 +163,38 @@ unsigned int FuncId::doOperation( Eref e, char* i )
 */
 
 
-void IntFire::setVm( const double& v )
+void IntFire::setVm( const double v )
 {
 	Vm_ = v;
 }
 
-void IntFire::setTau( const double& v )
+void IntFire::setTau( const double v )
 {
 	tau_ = v;
 }
 
-void IntFire::setThresh( const double& v )
+void IntFire::setThresh( const double v )
 {
 	thresh_ = v;
 }
 
-const double &IntFire::getVm() const
+void IntFire::setNumSynapses( const unsigned int v )
+{
+	assert( v < 10000000 );
+	synapses_.resize( v );
+}
+
+double IntFire::getVm() const
 {
 	return Vm_;
 }
 
-const double &IntFire::getTau() const
+double IntFire::getTau() const
 {
 	return tau_;
 }
 
-const double &IntFire::getThresh() const
+double IntFire::getThresh() const
 {
 	return thresh_;
 }

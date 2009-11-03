@@ -12,8 +12,8 @@ class Neutral: public Data
 	public:
 		Neutral();
 		void process( const ProcInfo* p, const Eref& e );
-		void setName( const string& name );
-		const string& getName() const;
+		void setName( string name );
+		string getName() const;
 		static const Cinfo* initCinfo();
 		void destroy( Eref& e, const Qinfo* q );
 
