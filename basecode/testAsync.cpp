@@ -47,7 +47,7 @@ void insertIntoQ( )
 	for ( unsigned int i = 0; i < size; ++i ) {
 		char temp[20];
 		sprintf( temp, "objname_%d", i );
-		assert( static_cast< Neutral* >(e1.element()->data( i ))->getName()
+		assert( reinterpret_cast< Neutral* >(e1.element()->data( i ))->getName()
 			== temp );
 	}
 	cout << "." << flush;
@@ -90,7 +90,7 @@ void testSendMsg()
 	for ( unsigned int i = 0; i < size; ++i ) {
 		char temp[20];
 		sprintf( temp, "send_to_e2_%d", i );
-		assert( static_cast< Neutral* >(e2.element()->data( i ))->getName()
+		assert( reinterpret_cast< Neutral* >(e2.element()->data( i ))->getName()
 			== temp );
 	}
 	cout << "." << flush;
@@ -124,7 +124,7 @@ void testCreateMsg()
 
 	/*
 	for ( unsigned int i = 0; i < size; ++i )
-		cout << i << "	" << static_cast< Neutral* >(e2.element()->data( i ))->getName() << endl;
+		cout << i << "	" << reinterpret_cast< Neutral* >(e2.element()->data( i ))->getName() << endl;
 
 */
 	cout << "." << flush;
@@ -153,7 +153,7 @@ void testSet()
 	for ( unsigned int i = 0; i < size; ++i ) {
 		char temp[20];
 		sprintf( temp, "set_e2_%d", i );
-		assert( static_cast< Neutral* >(e2.element()->data( i ))->getName()
+		assert( reinterpret_cast< Neutral* >(e2.element()->data( i ))->getName()
 			== temp );
 	}
 
@@ -176,7 +176,7 @@ void testGet()
 		char temp[20];
 		sprintf( temp, "get_e2_%d", i );
 		string stemp( temp );
-		static_cast< Neutral* >(e2.element()->data( i ))->setName( temp );
+		reinterpret_cast< Neutral* >(e2.element()->data( i ))->setName( temp );
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -190,7 +190,7 @@ void testGet()
 			e2.element()->clearQ(); // Request goes to e2
 			shell->clearQ(); // Response comes back to e1
 
-			stemp = ( static_cast< Shell* >(shell->data( 0 )) )->getBuf();
+			stemp = ( reinterpret_cast< Shell* >(shell->data( 0 )) )->getBuf();
 			// cout << i << "	" << stemp << endl;
 			char temp[20];
 			sprintf( temp, "get_e2_%d", i );
@@ -216,7 +216,7 @@ void testSetGet()
 		sprintf( temp, "sg_e2_%d", i );
 		bool ret = SetGet1< string >::set( e2, "name", temp );
 		assert( ret );
-		assert( static_cast< Neutral* >(e2.data())->getName() == temp );
+		assert( reinterpret_cast< Neutral* >(e2.data())->getName() == temp );
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -246,7 +246,7 @@ void testSetGetDouble()
 		bool ret = SetGet1< double >::set( e2, "Vm", temp );
 		assert( ret );
 		assert( 
-			fabs ( static_cast< IntFire* >(e2.data())->getVm() - temp ) <
+			fabs ( reinterpret_cast< IntFire* >(e2.data())->getVm() - temp ) <
 				EPSILON ); 
 	}
 

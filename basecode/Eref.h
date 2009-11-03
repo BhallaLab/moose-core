@@ -1,8 +1,20 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment.
+**           Copyright (C) 2003-2009 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
+#ifndef _EREF_H
+#define _EREF_H
+
 class Eref
 {
 	public:
 		friend ostream& operator <<( ostream& s, const Eref& e );
-		Eref( Element* e, unsigned int index );
+		Eref( Element* e, DataId index );
 
 		/**
 		 * returns the sum of all valid incoming entries
@@ -51,7 +63,7 @@ class Eref
 		/**
 		 * Returns data entry
 		 */
-		Data* data();
+		char* data();
 
 		/**
 		 * Returns Element part
@@ -63,10 +75,12 @@ class Eref
 		/**
 		 * Returns index part
 		 */
-		unsigned int index() const {
+		DataId index() const {
 			return i_;
 		}
 	private:
 		Element* e_;
-		unsigned int i_;
+		DataId i_;
 };
+
+#endif // _EREF_H

@@ -72,7 +72,7 @@ class Cinfo
 			/**
 			 * Destroys data on element
 			 */
-			void destroy( Data* d ) const;
+			void destroy( char* d ) const;
 
 		private:
 			const string name_;

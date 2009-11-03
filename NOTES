@@ -1337,6 +1337,159 @@ Finally got to do some debugging. Fixed problem, now works, clears
 valgrind. 
 Checked in as revision 1422
 
-- Need to test with doubles and other types.
+* Need to test with doubles and other types. Done. Did a partial 
+	re-implementation of IntFire, and did set/get on one of its 
+	fields of type double.
+
+Checked in as revision 1424
+
+There are several issues with a full implementation of IntFire, most notably
+that the design now requires there to be a distinct target Synapse object for
+each incoming message. In the earlier version we had some extra info 
+figured out by the system to identify the target SynInfo. here I just want
+to use the index of the traget Eref. This is good, but now the destination
+IntFire needs to juggle some subset of the target Synapses, which are
+independent objects presumably on a child element.
+For efficiency, the IntFire would like to have target Synapses as internal
+fields.
+For indexing synapses, we want each to be an individual array entry in a
+big array of Synapses.
+
+Assume we'll handle allocation etc within the parent IntFire.
+
+How to set up indexing? 
+	- Give each IntSyn the same #, which is the biggest # of syns on 
+	any one. 
+		- This needs us to be able to allocate an array of Data with
+		holes in it. Easy to do if we have an indirection step on
+		the Element, but as built the Element won't do it.
+
+	- Set up precisely as many IntSyns as are needed.
+		- Indexing and relating IntSyns to parent are both hard.
+
+	- Explicitly make it look like a 2-D array, with variable length
+		sub-indices.
+	
+	- Make it look like an array of Elements each with an array of
+		Synapses.
+=============================================================================
+1 Nov 2009
+Synaptic info options.
+1. Separate SynInfo or Synapse objects. Each receives input from only
+	one axon. The whole lot are in the same Element.
+	Spike operations:
+		- Spike arrives on a Synapse. 
+		- Synapse sends Msg to parent Element, with delay etc info.
+			It needs efficient orgn of the messaging to parent.
+			Even with optimal organisation, this is costly, 
+			going through entire msging again.
+		- Parent Element updates its pendingEvents queue
+	Process operations:
+		- Check if queue is due. If so, handle event and pop queue
+		- Check if Vm exceeds thresh. If so, send spike, and reset Vm.
+			Otherwise do exp decay calculations on Vm. 
+
+	This has an unpleasant extra messaging step from Synapse to parent.
+	However, there may be efficiencies in the first msg from axon to
+	Synapse as we guarantee a single input.
+
+2. Messages are directed to Synapses but are processed directly by
+	IntFire.
+	Can't do this without some juggling of target index. See next.
+
+3. Messages are directed to parents of Synapses. Munge the indexing of the
+	target Element so that part is used for indexing it, 
+	and part to index the correct Synapse.
+	This could be a special case of an ability to index 2D arrays.
+	But where does one stop?
+	Or, the extra info could just be something that messages can generally
+	do.
+	This arrangement deals with the threading.
+	It also eliminates the issue of passing info down to parent.
+
+4. Give the Synapse a pointer to its parent Element or IntFire.
+	Issues with threading.
+5. Special OpFunc to munge index.
+	- Create Element that deals with individual synapses, but points
+		to the parent IntFire (or ReceptorChannel) Element.
+	- OpFunc munges destIndex in some efficient manner. Bitmap may be
+		best, using top n bytes for specific synapse index.
+		For IntFire, we may need 2 bytes for synapse, leaving only
+		2 for target IntFire. Insufficient.
+	- OpFunc is class-local, so we can set up some reasonable subdivision.
+	- Pass in synapse index as additional arg to the func encapsulated
+		by the OpFunc.
+	- Can generalize to other fields of Synapse
+	- Can generalize to arbitrary arrays using templated 
+		ArrayOpFunc with dimensions?
+
+
+To test scalability, let's do this:
+- Make a speed reference using a sparse matrix and customized code to replace
+	messaging, as a recurrent network with N neurons and P probability
+	of connections. Goal is to do N >= 1e5, P ~0.1.
+- Make the equivalent network in MOOSE
+- Profile, look at bottlenecks.
+- Repeat with multithreading
+- Repeat with multinodes
+
+
+Let comp load of IntFire processing be I.
+Let comp load of Synapse processing be S.
+Let spiking occur every T timesteps.
+N and P are defined above.
+Let # of synapses per neuron = #
+
+If we ignore communcations cost,
+total load per timestep = I * N + N * # * S / T
+Some numbers
+N	#	I	S	T	Load	Notes
+1e5	1e4	1	2	100	2e7	zero messaging cost
+1e9	1e4	1	2	100	2e11	zero messaging cost
+1e9	1e4	1	10	100	1e12	medium messaging cost
+1e9	1e4	1	100	100	1e13	high messaging cost
+
+Now we go down 10x smaller timesteps.
+
+1e9	1e4	1000	2	1000	1e12	Realistic neuronal models,
+						zero messaging cost
+1e9	1e4	1000	10	1000	1.1e12	Some messaging cost.
+1e9	1e4	1000	100	1000	2e12	High messaging cost.
+					
+Main points:
+- in IntFire networks synaptic comput and messaging are overwhelming
+- in realistic neuronal model networks, the costs are comparable.
+
+Overall, efficiency does matter for spike messages.
+
+we may need 13 digits x3.3 = 43 bits. Too much for even an int.
 
 =============================================================================
+2 Nov 2009
+Working out implementations for accessing array fields, such as synapases 
+on an IntFire.
+See ArrayOpFunc.h::ArrayOpFunc0
+
+The array of synapses should act just like any other array in terms of 
+field access, adding messages, and so on.
+	This means that the Eref::data() function has to behave the same way
+	as for any other Element, and look up the correct Synapse without
+	further effort.
+When there is a need to do operations through the parent Data, then we use 
+	Eref::data1() to return the parent data.
+	Eref::index() has all information needed to look up synapse from data1.
+To handle these cases, we have a separate set of OpFuncs that operate on
+	data1 and pass in the index. This is the UpFuncs.
+To do these seamlessly we need to make DataVec a virtual base class, and
+	have 1D, 2D, 1D+field and similar options. The DataVec handles 
+	deleting of data too, so if we need to have more than one Element
+	refer to the same data, then suitable DataVecs have to be defined for
+	each element, and only one may delete the data.
+	Alternatively, we should have the Element itself be a virtual base 
+	class.
+
+Stages:
+* Put in DataId for all Eref indices.
+* Replace Data with char* in Element::data
+* Make Element a virtual base class.
+

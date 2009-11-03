@@ -10,7 +10,7 @@
 #include "header.h"
 
 Element::Element( const Cinfo* c, 
-	Data* d, unsigned int numData, unsigned int dataSize, 
+	char* d, unsigned int numData, unsigned int dataSize, 
 		unsigned int numFuncIndex, unsigned int numConn )
 	: d_( d ), numData_( numData ), dataSize_( dataSize ), 
 	sendBuf_( 0 ), cinfo_( c ), c_( numConn )
@@ -18,28 +18,12 @@ Element::Element( const Cinfo* c,
 	targetFunc_.resize( numFuncIndex, 0 );
 }
 
-/*
-Element::Element( vector< Data* >& d, 
-	unsigned int numSendSlots, unsigned int numRecvSlots )
-	: d_( d ), 
-	finfo_( d_[0]->initClassInfo() ), 
-	numSendSlots_( numSendSlots ),
-	numRecvSlots_( numRecvSlots )
-{
-	q_.resize( 16, 0 ); // Put in place space for at least one entry.
-}
-*/
-
 Element::~Element()
 {
 	delete[] sendBuf_;
 	cinfo_->destroy( d_ );
 	for ( vector< Conn >::iterator i = c_.begin(); i != c_.end(); ++i )
 		i->clearConn(); // Get rid of Msgs on them.
-	/*
-	for ( vector< Data* >::iterator i = d_.begin(); i != d_.end(); ++i )
-		delete *i;
-	*/
 	for ( vector< Msg* >::iterator i = m_.begin(); i != m_.end(); ++i )
 		if ( *i ) // Dropped Msgs set this pointer to zero, so skip them.
 			delete *i;
@@ -47,16 +31,11 @@ Element::~Element()
 
 void Element::process( const ProcInfo* p )
 {
-	char* data = reinterpret_cast< char* >( d_ );
+	char* data = d_;
 	for ( unsigned int i = 0; i < numData_; ++i ) {
 		reinterpret_cast< Data* >( data )->process( p, Eref( this, i ) );
 		data += dataSize_;
 	}
-
-	/*
-	for ( unsigned int i = 0; i < d_.size(); ++i )
-		d_[i]->process( p, Eref( this, i ) );
-		*/
 }
 
 
@@ -118,20 +97,27 @@ void Element::ssend2( SyncId slot, unsigned int i, double v1, double v2 )
 	*sb = v2;
 }
 
-Data* Element::data( unsigned int index )
+char* Element::data( DataId index )
 {
 	assert( index < numData_ );
-	return reinterpret_cast< Data* >( 
-		reinterpret_cast< char* >( d_ ) + index * dataSize_ );
+	return d_ + index * dataSize_;
 }
 
-/*
-const vector< Msg* >& Element::msg( SyncId slot ) const
+char* Element::data1( DataId index )
 {
-	assert( msg_.size() > slot );
-	return msg_[ slot ];
+	assert( index < numData_ );
+	return d_ + index * dataSize_;
 }
-*/
+
+unsigned int Element::numData() const
+{
+	return numData_;
+}
+
+unsigned int Element::numDimensions() const
+{
+	return 1;
+}
 
 const Conn& Element::conn( ConnId c ) const {
 	assert( c < c_.size() );
@@ -178,26 +164,6 @@ const char* Element::execFunc( const char* buf )
 		if ( m )
 			m->exec( this, buf );
 	}
-
-
-/*
-	buf += sizeof( Qinfo );
-	const OpFunc* func = cinfo_->getOpFunc( q.fid() ); // checks for valid func
-	const Msg* m = getMsg( q.mid() ); // Runtime check for Msg identity.
-
-	if ( q.useSendTo() ) {
-		unsigned int tgtIndex =
-			*reinterpret_cast< const unsigned int* >( buf + q.size() - sizeof( unsigned int ) );
-		if ( tgtIndex < numData_ ) {
-			func->op( Eref( this, tgtIndex ), buf );
-		} else {
-			cout << "Warning: Message to nonexistent Element index " << 
-				tgtIndex << " on " << this << endl;
-		}
-	} else if ( func && m ) {
-		m->exec( this, func, q.srcIndex(), buf );
-	}
-*/
 
 	return buf + sizeof( Qinfo) + q.size();;
 }

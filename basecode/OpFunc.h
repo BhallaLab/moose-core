@@ -35,9 +35,36 @@ template< class T > class OpFunc0: public OpFunc
 			return dynamic_cast< const SetGet0* >( s );
 		}
 
+		/**
+		 * Call function on T located at e.data(), which is a simple 
+		 * array lookup of the data_ vector using the Eref index.
+		 */
 		void op( Eref e, const char* buf ) const {
-			(static_cast< T* >( e.data() )->*func_)( );
+			(reinterpret_cast< T* >( e.data() )->*func_)( );
 		}
+
+		/**
+		 * Calls function on first dimension of data, using index as
+		 * argument.
+		void opUp1( Eref e, const char* buf ) const {
+			(reinterpret_cast< T* >( e.data1() )->*func_)( e.index() );
+		}
+		 */
+
+		/**
+		 * Call function on T located at e.aData(). This comes from
+		 * separating the Eref index into data and field parts. The
+		 * data is looked up using the data part of the index, and then
+		 * Data::field looks up a void pointer to the field. Assumes a
+		 * single such field, it would seem.
+		void arrayOp( Eref e, const char* buf ) const {
+			(reinterpret_cast< T* >( e.aData() )->*func_)( );
+		}
+
+		void parentOp( Eref e, const char* buf ) const {
+			(reinterpret_cast< T* >( e.aData() )->*func_)( );
+		}
+		 */
 
 	private:
 		void ( T::*func_ )( ); 
@@ -64,7 +91,7 @@ template< class T, class A > class OpFunc1: public OpFunc
 		void op( Eref e, const char* buf ) const {
 			A val;
 			Conv< A >::buf2val( val, buf + sizeof( Qinfo ) );
-			(static_cast< T* >( e.data() )->*func_)( val ) ;
+			(reinterpret_cast< T* >( e.data() )->*func_)( val ) ;
 		}
 
 	private:
@@ -89,7 +116,7 @@ template< class T, class A1, class A2 > class OpFunc2: public OpFunc
 		void op( Eref e, const char* buf ) const {
 			buf += sizeof( Qinfo );
 			const char* buf2 = buf + sizeof( A1 );
-			(static_cast< T* >( e.data() )->*func_)( 
+			(reinterpret_cast< T* >( e.data() )->*func_)( 
 				*reinterpret_cast< const A1* >( buf ),
 				*reinterpret_cast< const A2* >( buf2 )
 			);
@@ -119,7 +146,7 @@ template< class T, class A1, class A2, class A3 > class OpFunc3:
 			buf += sizeof( Qinfo );
 			const char* buf2 = buf + sizeof( A1 );
 			const char* buf3 = buf2 + sizeof( A2 );
-			(static_cast< T* >( e.data() )->*func_)( 
+			(reinterpret_cast< T* >( e.data() )->*func_)( 
 				*reinterpret_cast< const A1* >( buf ),
 				*reinterpret_cast< const A2* >( buf2 ),
 				*reinterpret_cast< const A3* >( buf3 )
@@ -164,7 +191,7 @@ template< class T, class A > class GetOpFunc: public OpFunc
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
 			buf += sizeof( Qinfo );
 		    FuncId retFunc = *reinterpret_cast< const FuncId* >( buf );
-			const A& ret = (( static_cast< T* >( e.data() ) )->*func_)();
+			const A& ret = (( reinterpret_cast< T* >( e.data() ) )->*func_)();
 
 			Qinfo retq( retFunc, e.index(), Conv< A >::size( ret ), 1 );
 			char* temp = new char[ retq.size() ];

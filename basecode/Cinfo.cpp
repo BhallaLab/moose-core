@@ -103,12 +103,13 @@ Id Cinfo::create( const string& name, unsigned int numEntries ) const
 {
 	return Id::create( 
 		new Element( 
-			this, dinfo_->allocData( numEntries ), numEntries,
-			dinfo_->size(), numFuncIndex_, numConn_ )
+			this, 
+			reinterpret_cast< char* >(dinfo_->allocData( numEntries ) ),
+			numEntries, dinfo_->size(), numFuncIndex_, numConn_ )
 	);
 }
 
-void Cinfo::destroy( Data* d ) const
+void Cinfo::destroy( char* d ) const
 {
 	dinfo_->destroyData( d );
 }

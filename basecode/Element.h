@@ -35,7 +35,7 @@ class Element
 		);
 		*/
 		Element( const Cinfo* c, 
-			Data* d, unsigned int numData, unsigned int dataSize,
+			char* d, unsigned int numData, unsigned int dataSize,
 			unsigned int numFuncIndex, unsigned int numConn );
 
 		/**
@@ -52,7 +52,7 @@ class Element
 		 * Examine process queue, data that is expected every timestep.
 		 * This function is done for all the local data entries in order.
 		 */
-		void process( const ProcInfo* p );
+		virtual void process( const ProcInfo* p );
 
 		/**
 		 * Clear sporadic message queue, events that come randomly.
@@ -92,12 +92,31 @@ class Element
 
 		/**
 		 * Returns the data on the specified index for the Element
+		 * Here we may lose the nice orthogonality of the Data and of the
+		 * Elements. If we have Elements that handle arrays of fields,
+		 * then they have to know about the data structures holding those
+		 * fields. For example, an Element that deals with Synapses must
+		 * know how to get a Synapse from an IntFire.
 		 */
-		Data* data( unsigned int index );
+		virtual char* data( DataId index );
 
-		unsigned int numData() const {
-			return numData_;
-		}
+		/**
+		 * Returns the data at one level up of indexing. So, for a 2-D
+		 * array, would return the start entry of the rows rather than
+		 * the individual entries. For a synapse on an IntFire, would
+		 * return the appropriate IntFire, rather than the synapse.
+		 */
+		virtual char* data1( DataId index );
+
+		/**
+		 * Returns the number of data entries
+		 */
+		virtual unsigned int numData() const;
+
+		/**
+		 * Returns the number of dimensions of the data.
+		 */
+		virtual unsigned int numDimensions() const;
 
 		/** 
 		 * This function pushes a function request onto a queue.
@@ -155,7 +174,7 @@ class Element
 		 * Option 2: Allocate the objects elsewhere, just ptrs here.
 		 * 		Easy to get started with.
 		 */
-		Data* d_;
+		char* d_;
 		unsigned int numData_;
 		unsigned int dataSize_;
 

@@ -1,6 +1,6 @@
 #include "header.h"
 
-Eref::Eref( Element* e, unsigned int index )
+Eref::Eref( Element* e, DataId index )
 			: e_( e ), i_( index )
 {
 	;
@@ -32,7 +32,7 @@ double* Eref::getBufPtr( SyncId slot )
 	return e_->getBufPtr( slot, i_ );
 }
 
-Data* Eref::data()
+char* Eref::data()
 {
 	return e_->data( i_ );
 }

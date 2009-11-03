@@ -30,8 +30,20 @@
 
 using namespace std;
 
+/**
+ * Looks up and uniquely identifies functions.
+ */
 typedef unsigned int FuncId;
+
+/**
+ * Looks up Synchronous messages on elements
+ */
 typedef unsigned int SyncId;
+
+/**
+ * Looks up data entries on elements
+ */
+typedef unsigned long DataId;
 extern const FuncId ENDFUNC;
 
 class Element;

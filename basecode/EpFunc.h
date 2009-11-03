@@ -31,7 +31,7 @@ template< class T > class EpFunc0: public OpFunc
 
 		void op( Eref e, const char* buf ) const {
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
-			(static_cast< T* >( e.data() )->*func_)( e, q ); 
+			(reinterpret_cast< T* >( e.data() )->*func_)( e, q ); 
 		}
 
 	private:
@@ -59,7 +59,7 @@ template< class T, class A > class EpFunc1: public OpFunc
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
 			A val;
 			Conv< A >::buf2val( val, buf + sizeof( Qinfo ) );
-			(static_cast< T* >( e.data() )->*func_)( e, q, val ) ;
+			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, val ) ;
 		}
 
 	private:
@@ -85,7 +85,7 @@ template< class T > class RetFunc: public OpFunc
 		// copying data back and forth.
 		void op( Eref e, const char* buf ) const {
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
-			(static_cast< T* >( e.data() )->*func_)( e, q, buf + sizeof( Qinfo ) ) ;
+			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, buf + sizeof( Qinfo ) ) ;
 		}
 
 	private:
