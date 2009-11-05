@@ -1514,7 +1514,8 @@ working on testSendSpike. Runs but doesn't seem to make sense. After some
 debugging got it to work, sends the spike info. Much of the problem is due
 to the ugly handling of DataIds. Checkin 1433.
 
-Need to fix that next. Fixed.
+Need to fix that next. Fixed. Checkin 1434.
 Also valgrind is very unhappy with the allocations. Need to fix that too.
+	Fixed, it was a simple matter of deleting the IntFire element.
 
 =============================================================================

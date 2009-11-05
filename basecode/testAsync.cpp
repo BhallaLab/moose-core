@@ -294,6 +294,7 @@ void testSetGetSynapse()
 		}
 	}
 	cout << "." << flush;
+	delete i2();
 }
 
 void testSendSpike()
@@ -331,6 +332,7 @@ void testSendSpike()
 	reinterpret_cast< IntFire* >(synParent.data())->process( &p, synParent);
 	double Vm = SetGet1< double >::get( synParent, "Vm" );
 	cout << "Vm = " << Vm << endl;
+	delete i2();
 }
 
 void testAsync( )
