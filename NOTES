@@ -1499,11 +1499,22 @@ Next:
 * Derive off Element for Synapses on IntFunc. Checkin 1427.
 * Do Synapse and SynElement implementation. Checkin 1428.
 * Come up with special element creation options to set up this element. 1429
-* Check that field access works with it
-- Send spike messages to it
+* Check that field access works with it	Checkin 1431.
++ Send spike messages to it
 - Sort out how to handle its clearQ.
 - Fix up sub-fields within DataId.
 * Clean out const A& argument in OpFuncs. Should just pass argument, as most
 	of them will be doubles. Will need separate classes for strings and
 	things. Checked in as 1429, except for string stuff.
 
+Sending spike Msg seems OK, need more tests.
+=============================================================================
+4-5 Nov 2009
+working on testSendSpike. Runs but doesn't seem to make sense. After some
+debugging got it to work, sends the spike info. Much of the problem is due
+to the ugly handling of DataIds. 
+
+Need to fix that next.
+Also valgrind is very unhappy with the allocations. Need to fix that too.
+
+=============================================================================

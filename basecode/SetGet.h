@@ -192,7 +192,7 @@ template< class A > class SetGet1: public SetGet
 		/**
 		 * Blocking, typed 'Set' call
 		 */
-		static bool set( Eref& dest, const string& field, const A& arg )
+		static bool set( Eref& dest, const string& field, A arg )
 		{
 			SetGet1< A > sg( dest );
 			FuncId fid;
@@ -319,7 +319,7 @@ template< class A1, class A2 > class SetGet2: public SetGet
 		 * Blocking, typed 'Set' call
 		 */
 		static bool set( Eref& dest, const string& field, 
-			const A1& arg1, const A2& arg2 )
+			A1 arg1, A2 arg2 )
 		{
 			SetGet2< A1, A2 > sg( dest );
 			FuncId fid;
@@ -414,7 +414,7 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 		 * Blocking, typed 'Set' call
 		 */
 		static bool set( Eref& dest, const string& field, 
-			const A1& arg1, const A2& arg2, const A3& arg3 )
+			A1 arg1, A2 arg2, A3 arg3 )
 		{
 			SetGet3< A1, A2, A3 > sg( dest );
 			FuncId fid;

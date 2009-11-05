@@ -106,6 +106,9 @@ class SingleMsg: public Msg
 		) const;
 		*/
 
+		static bool add( Eref e1, const string& srcField, 
+			Eref e2, const string& destField );
+
 	private:
 		DataId i1_;
 		DataId i2_;

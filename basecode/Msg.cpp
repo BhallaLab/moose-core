@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "Message.h"
 
 ///////////////////////////////////////////////////////////////////////////
 Msg::Msg( Element* e1, Element* e2 )
@@ -118,6 +119,22 @@ const char* SingleMsg::exec( Element* target, const OpFunc* f,
 	return 0;
 }
 */
+
+bool SingleMsg::add( Eref e1, const string& srcField, 
+			Eref e2, const string& destField )
+{
+	FuncId funcId;
+	const SrcFinfo* srcFinfo = validateMsg( e1.element(), srcField,
+		e2.element(), destField, funcId );
+
+	if ( srcFinfo ) {
+		Msg* m = new SingleMsg( e1, e2 );
+		e1.element()->addMsgToConn( m, srcFinfo->getConnId() );
+		e1.element()->addTargetFunc( funcId, srcFinfo->getFuncIndex() );
+		return 1;
+	}
+	return 0;
+}
 
 ///////////////////////////////////////////////////////////////////////////
 

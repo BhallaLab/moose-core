@@ -43,6 +43,8 @@ const Cinfo* IntFire::initCinfo()
 			&IntFire::setNumSynapses,
 			&IntFire::getNumSynapses
 		),
+
+		spike,
 	};
 
 	static Cinfo intFireCinfo (
@@ -121,7 +123,8 @@ void IntFire::process( const ProcInfo* p, const Eref& e )
  */
 void IntFire::addSpike( DataId index, const double& time )
 {
-	unsigned int temp = index >> 32;
+	static const unsigned long mask = ( 1L << 32 ) - 1; 
+	unsigned int temp = index & mask;
 	assert( temp < synapses_.size() );
 	Synapse s( synapses_[ temp ], time );
 	pendingEvents_.push( s );

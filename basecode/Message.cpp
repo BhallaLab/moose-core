@@ -70,3 +70,47 @@ bool add( Element* src, const string& srcField,
 	}
 
 }
+
+const SrcFinfo* validateMsg( Element* src, const string& srcField, 
+	Element* dest, const string& destField, FuncId& fid )
+{
+	const Finfo* f1 = src->cinfo()->findFinfo( srcField );
+	if ( !f1 ) {
+		cout << "add: Error: Failed to find field " << srcField << 
+			" on src:\n"; // Put name here.
+		return 0;
+	}
+
+	fid = dest->cinfo()->getOpFuncId( destField );
+	const OpFunc* func = dest->cinfo()->getOpFunc( fid );
+	if ( func ) {
+		if ( func->checkFinfo( f1 ) ) {
+			const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >( f1 );
+			if ( sf ) {
+				return sf;
+			} else {
+				cout << "Warning: validateMsg:: Source of message '" << 
+					sf->name() << "' is not a SrcFinfo\n";
+				return 0;
+			}
+		} else {
+			cout << "add: Error: Function type mismatch for " << 
+				destField << " on dest:\n"; // Put name here.
+			return 0;
+		}
+	} 
+	return 0;
+	
+	/*
+	else {
+		const Finfo* f2 = dest->cinfo()->findFinfo( destField );
+		if ( f2 ) {
+			return addSharedMsg( src, f1, dest, f2 );
+		} else {
+			cout << "add: Error: Failed to find field " << destField << 
+				" on dest:\n"; // Put name here.
+			return 0;
+		}
+	}
+	*/
+}
