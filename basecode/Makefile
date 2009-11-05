@@ -30,6 +30,7 @@ OBJ = \
 	Neutral.o	\
 	Shell.o	\
 	Qinfo.o \
+	DataId.o \
 	Message.o \
 	SetGet.o \
 	main.o	\
@@ -40,6 +41,7 @@ HEADERS = \
 	Conn.h \
 	Conv.h \
 	Data.h \
+	DataId.h \
 	Dinfo.h \
 	Element.h \
 	Eref.h \

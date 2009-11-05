@@ -283,8 +283,7 @@ void testSetGetSynapse()
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
 		for ( unsigned int j = 0; j < i; ++j ) {
-			DataId di = i;
-			di = ( di << 32 ) + j;
+			DataId di( i, j );
 			Eref syne( &syn, di );
 			double temp = i * 1000 + j ;
 			bool ret = SetGet1< double >::set( syne, "delay", temp );
@@ -316,7 +315,7 @@ void testSendSpike()
 	}
 	assert( syn.numData() == ( size * (size - 1) ) / 2 );
 
-	DataId di = ( 1L << 32 );
+	DataId di( 1, 0 ); // DataId( data, field )
 	Eref syne( &syn, di );
 
 	bool ret = SingleMsg::add( e2, "spike", syne, "addSpike" );

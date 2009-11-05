@@ -43,7 +43,6 @@ typedef unsigned int SyncId;
 /**
  * Looks up data entries on elements
  */
-typedef unsigned long DataId;
 extern const FuncId ENDFUNC;
 
 class Element;
@@ -53,6 +52,7 @@ class Id;
 class Qinfo;
 class Data;
 
+#include "DataId.h"
 #include "Finfo.h"
 #include "ProcInfo.h"
 #include "Cinfo.h"

@@ -108,14 +108,14 @@ void Element::ssend2( SyncId slot, unsigned int i, double v1, double v2 )
 
 char* Element::data( DataId index )
 {
-	assert( index < numData_ );
-	return d_ + index * dataSize_;
+	assert( index.data() < numData_ );
+	return d_ + index.data() * dataSize_;
 }
 
 char* Element::data1( DataId index )
 {
-	assert( index < numData_ );
-	return d_ + index * dataSize_;
+	assert( index.data() < numData_ );
+	return d_ + index.data() * dataSize_;
 }
 
 unsigned int Element::numData() const

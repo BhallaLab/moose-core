@@ -123,10 +123,8 @@ void IntFire::process( const ProcInfo* p, const Eref& e )
  */
 void IntFire::addSpike( DataId index, const double& time )
 {
-	static const unsigned long mask = ( 1L << 32 ) - 1; 
-	unsigned int temp = index & mask;
-	assert( temp < synapses_.size() );
-	Synapse s( synapses_[ temp ], time );
+	assert( index.field() < synapses_.size() );
+	Synapse s( synapses_[ index.field() ], time );
 	pendingEvents_.push( s );
 }
 

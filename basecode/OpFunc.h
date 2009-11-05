@@ -193,7 +193,7 @@ template< class T, class A > class GetOpFunc: public OpFunc
 		    FuncId retFunc = *reinterpret_cast< const FuncId* >( buf );
 			const A& ret = (( reinterpret_cast< T* >( e.data() ) )->*func_)();
 
-			Qinfo retq( retFunc, e.index(), Conv< A >::size( ret ), 1 );
+			Qinfo retq( retFunc, e.index().data(), Conv< A >::size( ret ), 1 );
 			char* temp = new char[ retq.size() ];
 			Conv<A>::val2buf( temp, ret );
 			Conn c;
