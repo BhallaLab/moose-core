@@ -15,6 +15,7 @@
 #include <queue>
 #include "../biophysics/Synapse.h"
 #include "../biophysics/IntFire.h"
+#include "SparseMatrix.h"
 
 void insertIntoQ( )
 {
@@ -335,6 +336,55 @@ void testSendSpike()
 	delete i2();
 }
 
+void printSparseMatrix( const SparseMatrix< unsigned int >& m)
+{
+	unsigned int nRows = m.nRows();
+	unsigned int nCols = m.nColumns();
+	
+	for ( unsigned int i = 0; i < nRows; ++i ) {
+		cout << "[	";
+		for ( unsigned int j = 0; j < nCols; ++j ) {
+			cout << m.get( i, j ) << "	";
+		}
+		cout << "]\n";
+	}
+	const unsigned int *n;
+	const unsigned int *c;
+	for ( unsigned int i = 0; i < nRows; ++i ) {
+		unsigned int num = m.getRow( i, &n, &c );
+		for ( unsigned int j = 0; j < num; ++j )
+			cout << n[j] << "	";
+	}
+	cout << endl;
+
+	for ( unsigned int i = 0; i < nRows; ++i ) {
+		unsigned int num = m.getRow( i, &n, &c );
+		for ( unsigned int j = 0; j < num; ++j )
+			cout << c[j] << "	";
+	}
+	cout << endl;
+	cout << endl;
+}
+
+void testSparseMatrix()
+{
+	SparseMatrix< unsigned int > m( 3, 5 );
+	m.set( 0, 0, 1 );
+	m.set( 0, 4, 2 );
+	m.set( 1, 0, 3 );
+	m.set( 1, 1, 4 );
+	m.set( 1, 2, 5 );
+	m.set( 2, 3, 6 );
+	m.set( 2, 4, 7 );
+
+	printSparseMatrix( m );
+
+	m.transpose();
+
+	printSparseMatrix( m );
+
+}
+
 void testAsync( )
 {
 	insertIntoQ();
@@ -346,4 +396,5 @@ void testAsync( )
 	testSetGetDouble();
 	testSetGetSynapse();
 	testSendSpike();
+	testSparseMatrix();
 }

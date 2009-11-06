@@ -116,6 +116,14 @@ class Element
 		virtual unsigned int numData() const;
 
 		/**
+		 * Returns the number of data entries at index 1.
+		 * For regular Elements this is identical to numData
+		 * For Elements whose entries are array fields, this is
+		 * the number of parent objects.
+		 */
+		virtual unsigned int numData1() const;
+
+		/**
 		 * Returns the number of dimensions of the data.
 		 */
 		virtual unsigned int numDimensions() const;

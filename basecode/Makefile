@@ -33,6 +33,7 @@ OBJ = \
 	DataId.o \
 	Message.o \
 	SetGet.o \
+	SparseMatrix.o \
 	main.o	\
 
 HEADERS = \
@@ -60,6 +61,7 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
+testAsync.o:	SparseMatrix.h
 #TestBasecode.o:	Shell.h ShellWrapper.h
 
 .cpp.o:

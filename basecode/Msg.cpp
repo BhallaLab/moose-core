@@ -34,54 +34,7 @@ void Msg::process( const ProcInfo* p ) const
 	e1_->process( p );
 }
 
-///////////////////////////////////////////////////////////////////////////
-
-/*
-SparseMsg::SparseMsg( Element* src, Element* dest )
-	: Msg( src, dest )
-{
-	;
-}
-
-void SparseMsg::addSpike( unsigned int srcElementIndex, double time ) const
-{
-	const unsigned int* synIndex;
-	const unsigned int* elementIndex;
-	unsigned int n = m_.getRow( srcElementIndex, &synIndex, &elementIndex );
-	for ( unsigned int i = 0; i < n; ++i )
-		dest_->addSpike( *elementIndex++, *synIndex++, time );
-}
-*/
-
-///////////////////////////////////////////////////////////////////////////
-
-/*
-One2OneMsg::One2OneMsg( Element* src, Element* dest )
-	: Msg( src, dest ), synIndex_( 0 )
-{
-	;
-}
-
-void One2OneMsg::addSpike( unsigned int srcElementIndex, double time ) const
-{
-	dest_->addSpike( srcElementIndex, synIndex_, time );
-}
-
-
-
-*/
-///////////////////////////////////////////////////////////////////////////
-
-SingleMsg::SingleMsg( Eref e1, Eref e2 )
-	: Msg( e1.element(), e2.element() ),
-	i1_( e1.index() ), 
-	i2_( e2.index() )
-{
-	;
-}
-
-void SingleMsg::addToQ( const Element* caller, Qinfo& q, 
-			const char* arg ) const
+void Msg::addToQ( const Element* caller, Qinfo& q, const char* arg ) const
 {
 	if ( caller == e1_ ) {
 		q.setMsgId( m2_ );
@@ -91,6 +44,16 @@ void SingleMsg::addToQ( const Element* caller, Qinfo& q,
 		q.setMsgId( m1_ );
 		e1_->addToQ( q, arg );
 	}
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+SingleMsg::SingleMsg( Eref e1, Eref e2 )
+	: Msg( e1.element(), e2.element() ),
+	i1_( e1.index() ), 
+	i2_( e2.index() )
+{
+	;
 }
 
 void SingleMsg::exec( Element* target, const char* arg ) const
@@ -142,19 +105,6 @@ OneToOneMsg::OneToOneMsg( Element* e1, Element* e2 )
 	: Msg( e1, e2 )
 {
 	;
-}
-
-void OneToOneMsg::addToQ( const Element* caller, Qinfo& q, 
-			const char* arg ) const
-{
-	if ( caller == e1_ ) {
-		q.setMsgId( m2_ );
-		e2_->addToQ( q, arg );
-	} else {
-		q.setMsgId( m1_ );
-		assert( caller == e2_ );
-		e1_->addToQ( q, arg );
-	}
 }
 
 /**

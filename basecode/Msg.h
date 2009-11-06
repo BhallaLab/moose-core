@@ -29,8 +29,12 @@ class Msg
 		 */
 		virtual void clearQ() const;
 
+		/**
+		 * Add an event to the queue on the target element.
+		 * This is generally the same function, so the base Msg provides it.
+		 */
 		virtual void addToQ( const Element* caller, Qinfo& q,
-			const char* arg ) const = 0;
+			const char* arg ) const;
 
 		/**
 		 * Calls Process on e1.
@@ -96,8 +100,10 @@ class SingleMsg: public Msg
 		SingleMsg( Eref e1, Eref e2 );
 		~SingleMsg() {;}
 
+		/*
 		void addToQ( const Element* caller, Qinfo& q, 
 			const char* arg ) const;
+			*/
 		void exec( Element* target, const char* arg) const;
 		/*
 		const char* exec( 
@@ -120,8 +126,10 @@ class OneToOneMsg: public Msg
 		OneToOneMsg( Element* e1, Element* e2 );
 		~OneToOneMsg() {;}
 
+		/*
 		void addToQ( const Element* caller, Qinfo& q, 
 			const char* arg ) const;
+			*/
 		void exec( Element* target, const char* arg) const;
 		/*
 		const char* exec( 

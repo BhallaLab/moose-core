@@ -24,6 +24,19 @@ extern const unsigned int SM_MAX_ROWS;
 extern const unsigned int SM_MAX_COLUMNS;
 extern const unsigned int SM_RESERVE;
 
+template< class T > class Triplet {
+	public:
+		Triplet( T a, unsigned int b, unsigned int c )
+			: a_( a ), b_( b ), c_( c )
+		{;}
+		bool operator< ( const Triplet< T >& other ) const {
+			return ( c_ < other.c_ );
+		}
+		T a_;
+		unsigned int b_;
+		unsigned int c_;
+};
+
 typedef vector< class T >::const_iterator constTypeIter;
 template < class T > class SparseMatrix
 {
@@ -233,6 +246,63 @@ template < class T > class SparseMatrix
 
 		unsigned int nEntries() const {
 			return N_.size();
+		}
+
+		void clear() {
+			N_.resize( 0 );
+			colIndex_.resize( 0 );
+			rowStart_.assign( ncolumns_, 0 );
+		}
+
+		/**
+		 * Adds a row to the sparse matrix, must go strictly in row order.
+		 */
+		void addRow( unsigned int rowNum, const vector< T >& row ) {
+			rowStart_[rowNum + 1] = N_.size();
+			for ( unsigned int i = 0; i < ncolumns_; ++i ) {
+				if ( row[i] != -1 ) {
+					N_.push_back( row[i] );
+					colIndex_.push_back( i );
+				}
+			}
+		}
+
+		/**
+		 * Does a transpose, using as workspace a vector of size 3 N_
+		 * 0257 -> 0011122
+		 */
+		void transpose() {
+			vector< Triplet< T > > t;
+			
+			unsigned int rowNum = 0;
+			unsigned int j = 1;
+			cout << "rowNum = ";
+			for ( unsigned int i = 0; i < N_.size(); ++i ) {
+				if ( i == rowStart_[j] ) {
+					rowNum++;
+					j++;
+				}
+				cout << rowNum << " ";
+				Triplet< T > x( N_[i], rowNum, colIndex_[i] );
+				t.push_back( x );
+			}
+			cout << endl;
+			stable_sort( t.begin(), t.end() );
+
+			j = -1;
+			rowStart_.resize( 0 );
+			for ( unsigned int i = 0; i < N_.size(); ++i ) {
+				N_[i] = t[i].a_;
+				colIndex_[i] = t[i].b_;
+				if ( t[i].c_ != j ) {
+					j = t[i].c_;
+					rowStart_.push_back( i );
+				}
+			}
+			rowStart_.push_back( N_.size() );
+			j = nrows_;
+			nrows_ = ncolumns_;
+			ncolumns_ = j;
 		}
 
 	private:
