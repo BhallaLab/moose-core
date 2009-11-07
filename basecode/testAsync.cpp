@@ -300,7 +300,7 @@ void testSetGetSynapse()
 
 void testSendSpike()
 {
-	// static const double EPSILON = 1e-9;
+	static const double EPSILON = 1e-9;
 	const Cinfo* ic = IntFire::initCinfo();
 	const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 100;
@@ -332,7 +332,9 @@ void testSendSpike()
 
 	reinterpret_cast< IntFire* >(synParent.data())->process( &p, synParent);
 	double Vm = SetGet1< double >::get( synParent, "Vm" );
-	cout << "Vm = " << Vm << endl;
+	assert( fabs( Vm + 1e-7) < EPSILON );
+	// cout << "Vm = " << Vm << endl;
+	cout << "." << flush;
 	delete i2();
 }
 
@@ -368,7 +370,15 @@ void printSparseMatrix( const SparseMatrix< unsigned int >& m)
 
 void testSparseMatrix()
 {
+	static unsigned int preN[] = { 1, 2, 3, 4, 5, 6, 7 };
+	static unsigned int postN[] = { 1, 3, 4, 5, 6, 2, 7 };
+	static unsigned int preColIndex[] = { 0, 4, 0, 1, 2, 3, 4 };
+	static unsigned int postColIndex[] = { 0, 1, 1, 1, 2, 0, 2 };
+
 	SparseMatrix< unsigned int > m( 3, 5 );
+	unsigned int nRows = m.nRows();
+	unsigned int nCols = m.nColumns();
+
 	m.set( 0, 0, 1 );
 	m.set( 0, 4, 2 );
 	m.set( 1, 0, 3 );
@@ -377,12 +387,35 @@ void testSparseMatrix()
 	m.set( 2, 3, 6 );
 	m.set( 2, 4, 7 );
 
-	printSparseMatrix( m );
+	const unsigned int *n;
+	const unsigned int *c;
+	unsigned int k = 0;
+	for ( unsigned int i = 0; i < nRows; ++i ) {
+		unsigned int num = m.getRow( i, &n, &c );
+		for ( unsigned int j = 0; j < num; ++j ) {
+			assert( n[j] == preN[ k ] );
+			assert( c[j] == preColIndex[ k ] );
+			k++;
+		}
+	}
+	assert( k == 7 );
+
+	// printSparseMatrix( m );
 
 	m.transpose();
 
-	printSparseMatrix( m );
+	k = 0;
+	for ( unsigned int i = 0; i < nCols; ++i ) {
+		unsigned int num = m.getRow( i, &n, &c );
+		for ( unsigned int j = 0; j < num; ++j ) {
+			assert( n[j] == postN[ k ] );
+			assert( c[j] == postColIndex[ k ] );
+			k++;
+		}
+	}
+	assert( k == 7 );
 
+	cout << "." << flush;
 }
 
 void testAsync( )

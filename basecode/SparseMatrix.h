@@ -276,17 +276,17 @@ template < class T > class SparseMatrix
 			
 			unsigned int rowNum = 0;
 			unsigned int j = 1;
-			cout << "rowNum = ";
+			// cout << "rowNum = ";
 			for ( unsigned int i = 0; i < N_.size(); ++i ) {
 				if ( i == rowStart_[j] ) {
 					rowNum++;
 					j++;
 				}
-				cout << rowNum << " ";
+			//	cout << rowNum << " ";
 				Triplet< T > x( N_[i], rowNum, colIndex_[i] );
 				t.push_back( x );
 			}
-			cout << endl;
+			// cout << endl;
 			stable_sort( t.begin(), t.end() );
 
 			j = ~0;
