@@ -142,6 +142,24 @@ unsigned int SynElement::numData() const
 	return ret;
 }
 
+void SynElement::getArraySizes( vector< unsigned int >& sizes ) const
+{
+	sizes.resize( 0 );
+	char* endData = d_ + numData_ * dataSize_;
+
+	for ( char* data = d_; data < endData; data += dataSize_ )
+		sizes.push_back( ( reinterpret_cast< IntFire* >( data ) )->getNumSynapses() );
+}
+
+void SynElement::setArraySizes( const vector< unsigned int >& sizes )
+{
+	char* endData = d_ + numData_ * dataSize_;
+	assert( sizes.size() == numData_ );
+	vector< unsigned int >::const_iterator i = sizes.begin();
+	for ( char* data = d_; data < endData; data += dataSize_ )
+		( reinterpret_cast< IntFire* >( data ) )->setNumSynapses( *i++ );
+}
+
 unsigned int SynElement::numDimensions() const
 {
 	return 2;

@@ -260,7 +260,7 @@ template < class T > class SparseMatrix
 		void addRow( unsigned int rowNum, const vector< T >& row ) {
 			rowStart_[rowNum + 1] = N_.size();
 			for ( unsigned int i = 0; i < ncolumns_; ++i ) {
-				if ( row[i] != -1 ) {
+				if ( row[i] != T( ~0 ) ) {
 					N_.push_back( row[i] );
 					colIndex_.push_back( i );
 				}
@@ -289,7 +289,7 @@ template < class T > class SparseMatrix
 			cout << endl;
 			stable_sort( t.begin(), t.end() );
 
-			j = -1;
+			j = ~0;
 			rowStart_.resize( 0 );
 			for ( unsigned int i = 0; i < N_.size(); ++i ) {
 				N_[i] = t[i].a_;

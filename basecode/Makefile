@@ -34,6 +34,7 @@ OBJ = \
 	Message.o \
 	SetGet.o \
 	SparseMatrix.o \
+	SparseMsg.o \
 	main.o	\
 
 HEADERS = \

@@ -195,6 +195,7 @@ LD = ld
 SUBDIR = \
 	basecode \
 	biophysics\
+	randnum\
 
 
 #	kinetics \
@@ -205,6 +206,7 @@ CLEANSUBDIR = $(SUBDIR)
 OBJLIBS =	\
 	basecode/basecode.o \
 	biophysics/biophysics.o \
+	randnum/randnum.o \
 
 #
 #	kinetics/kinetics.o \

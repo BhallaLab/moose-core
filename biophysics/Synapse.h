@@ -65,6 +65,9 @@ class SynElement: public Element
 		 * Return 2.
 		 */
 		unsigned int numDimensions() const;
+
+		void setArraySizes( const vector< unsigned int >& sizes );
+		void getArraySizes( vector< unsigned int >& sizes ) const;
 };
 
 #endif // _SYNAPSE_H

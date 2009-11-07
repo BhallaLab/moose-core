@@ -1568,6 +1568,37 @@ Step 3. Sort the col itself to get the new sequence for row#s:
 Implemented. Compiles, not quite there with the unit tests.
 =============================================================================
 6 Nov: Fixed up, now does correct transposition.
+Checked in as Revision 1436.
 
 Next step is to do tests with messaging.
+Working on it. An issue comes up with randomConnect: In the function I
+set up the messaging to synapses, but the target object has not yet allocated
+the synapses. Good, we can do this correctly after setting up. 
+Bad, because we don't have a general way to tell objects that a specific
+field needs to be assigned. It is numSynapses in IntFire, but could be
+one or more different other fields.
+
 =============================================================================
+7 Nov.
+Approach taken to allocate synapse memory, which is generalizable to other
+kinds of array fields: Provide a 
+
+- We will usually have to access these other fields as part of the setup
+	command. For example, setting synaptic weights.
+- The messaging command itself passes input to a named field. More to the
+	point, the SynElement is on a specific array. Should be able to
+	provide info to it generally to define values in this array.
+	- The UpFuncs serve this task in the Cinfo. However, we need this
+	feature in the SynElement type classes quite generally. So it has
+	to be something that the compiler enforces.
+		- UpFuncs in the SynElement constructor?
+
+- Remember that messages were to be the equivalent of wildcards. We should
+	use the created message itself to assign fields, including setting
+	up the weights and the allocation of synapses.
+	- Setting weights: Implement a
+		setrandom<double>( const Msg* m, const string& field, 
+			double lo, double hi, bool isLog );
+		function.
+
+
