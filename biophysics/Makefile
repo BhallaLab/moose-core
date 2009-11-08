@@ -20,8 +20,8 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-IntFire.o:	IntFire.h Synapse.h ../basecode/Data.h
-Synapse.o:	IntFire.h Synapse.h ../basecode/Data.h ../basecode/UpFunc.h
+IntFire.o:	IntFire.h Synapse.h ../basecode/Data.h ../basecode/SparseMatrix.h
+Synapse.o:	IntFire.h Synapse.h ../basecode/Data.h ../basecode/UpFunc.h ../basecode/SparseMatrix.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I.. -I../basecode $< -c

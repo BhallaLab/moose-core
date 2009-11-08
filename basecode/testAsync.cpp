@@ -16,6 +16,7 @@
 #include "../biophysics/Synapse.h"
 #include "../biophysics/IntFire.h"
 #include "SparseMatrix.h"
+#include "SparseMsg.h"
 
 void insertIntoQ( )
 {
@@ -418,6 +419,48 @@ void testSparseMatrix()
 	cout << "." << flush;
 }
 
+void testSparseMsg()
+{
+	// static const double EPSILON = 1e-9;
+	const Cinfo* ic = IntFire::initCinfo();
+	const Cinfo* sc = Synapse::initCinfo();
+	unsigned int size = 1000;
+	string arg;
+	Id i2 = ic->create( "test2", size );
+	Eref e2 = i2.eref();
+	SynElement syn( sc, i2() );
+
+	assert( syn.numData() == 0 );
+	for ( unsigned int i = 0; i < size; ++i ) {
+		Eref er( i2(), i );
+		bool ret = SetGet1< unsigned int >::set( er, "numSynapses", i );
+		assert( ret );
+	}
+	assert( syn.numData() == ( size * (size - 1) ) / 2 );
+
+	DataId di( 1, 0 ); // DataId( data, field )
+	Eref syne( &syn, di );
+
+	bool ret = SparseMsg::add( e2.element(), "spike", &syn, "addSpike", 0.1 );
+	assert( ret );
+
+	/*
+	ret = SetGet1< double >::set( e2, "Vm", 1.0 );
+	ProcInfo p;
+	reinterpret_cast< IntFire* >(e2.data())->process( &p, e2 );
+	syn.clearQ();
+	Eref synParent( e2.element(), 1 );
+
+	reinterpret_cast< IntFire* >(synParent.data())->process( &p, synParent);
+	double Vm = SetGet1< double >::get( synParent, "Vm" );
+	assert( fabs( Vm + 1e-7) < EPSILON );
+	// cout << "Vm = " << Vm << endl;
+	cout << "." << flush;
+	*/
+	delete i2();
+}
+
+
 void testAsync( )
 {
 	insertIntoQ();
@@ -430,4 +473,5 @@ void testAsync( )
 	testSetGetSynapse();
 	testSendSpike();
 	testSparseMatrix();
+	testSparseMsg();
 }

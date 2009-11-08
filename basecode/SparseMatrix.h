@@ -251,20 +251,23 @@ template < class T > class SparseMatrix
 		void clear() {
 			N_.resize( 0 );
 			colIndex_.resize( 0 );
-			rowStart_.assign( ncolumns_, 0 );
+			assert( rowStart_.size() == (nrows_ + 1) );
+			rowStart_.assign( nrows_ + 1, 0 );
 		}
 
 		/**
 		 * Adds a row to the sparse matrix, must go strictly in row order.
 		 */
 		void addRow( unsigned int rowNum, const vector< T >& row ) {
-			rowStart_[rowNum + 1] = N_.size();
 			for ( unsigned int i = 0; i < ncolumns_; ++i ) {
 				if ( row[i] != T( ~0 ) ) {
 					N_.push_back( row[i] );
 					colIndex_.push_back( i );
 				}
 			}
+			assert( rowStart_.size() == (nrows_ + 1 ) );
+			assert( rowNum < nrows_ );
+			rowStart_[rowNum + 1] = N_.size();
 		}
 
 		/**
@@ -276,13 +279,20 @@ template < class T > class SparseMatrix
 			
 			unsigned int rowNum = 0;
 			unsigned int j = 1;
+			if ( rowStart_.size() < 2 )
+				return;
+			/*
+			for ( unsigned int i = 0; i < rowStart_.size(); ++i )
+				cout << rowStart_[i] << " ";
+			cout << endl;
+			*/
 			// cout << "rowNum = ";
 			for ( unsigned int i = 0; i < N_.size(); ++i ) {
 				if ( i == rowStart_[j] ) {
 					rowNum++;
 					j++;
 				}
-			//	cout << rowNum << " ";
+			// cout << rowNum << " ";
 				Triplet< T > x( N_[i], rowNum, colIndex_[i] );
 				t.push_back( x );
 			}
@@ -303,6 +313,7 @@ template < class T > class SparseMatrix
 			j = nrows_;
 			nrows_ = ncolumns_;
 			ncolumns_ = j;
+			assert( rowStart_.size() == nrows_ + 1 );
 		}
 
 	private:

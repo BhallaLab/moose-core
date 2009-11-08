@@ -63,6 +63,7 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 testAsync.o:	SparseMatrix.h
+SparseMsg.o:	SparseMatrix.h
 #TestBasecode.o:	Shell.h ShellWrapper.h
 
 .cpp.o:

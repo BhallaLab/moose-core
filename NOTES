@@ -1602,3 +1602,23 @@ kinds of array fields: Provide a
 		function.
 
 
+OK, hacked it in for now as hard-coded access functions within the SynElement.
+Compiled stuff and cleaned up old printf testing, now uses assertions as
+part of unit tests. Checkin 1438.
+
+Successfully created a 10000 X 10000 sparse matrix with 10% connectivity.
+So about 1e7 entries. Expect memory use to be about 1e7 * 8 bytes. The
+transposition would have used about 1e7 * 12 bytes more.
+Oddly it used over 1.5 G, perhaps would be less if I
+reserved the space rather than fill it with push_back calls. 
+For unit tests I'll use 1000X1000 as it is much faster.
+
+Valgrind is not amused: an error somewhere. 
+The size of rowStart() is 1 smaller thn it should be.
+This was quite nasty. I put in assertions that should have caught it but
+did not. I checked the web for odd interactions between assertions and
+templates. Finally I realized that SparseMsg.o did not depend on SparseMatrix.h
+in the makefile. So the SparseMsg was not seeing any of the updated code.
+Fixed, compiled, reran, clears valgrind.
+
+=============================================================================
