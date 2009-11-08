@@ -501,7 +501,7 @@ void testSparseMsg()
 	static const double delayMax = 4;
 	static const double timestep = 0.2;
 	static const double connectionProbability = 0.1;
-	static const unsigned int runsteps = 15;
+	static const unsigned int runsteps = 1000;
 	const Cinfo* ic = IntFire::initCinfo();
 	const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 1024;
@@ -527,30 +527,38 @@ void testSparseMsg()
 		connectionProbability );
 	assert( ret );
 
-	 cout << "Num Syn = " << syn.numData() << endl;
+	unsigned int nd = syn.numData();
+	cout << "Num Syn = " << nd << endl;
+	vector< double > temp( size, 0.0 );
+	for ( unsigned int i = 0; i < size; ++i )
+		temp[i] = mtrand() * Vmax;
 
+	ret = SetGet1< double >::setVec( e2, "Vm", temp );
+	assert( ret );
+	temp.clear();
+	temp.resize( size, thresh );
+	ret = SetGet1< double >::setVec( e2, "thresh", temp );
+	assert( ret );
+	temp.clear();
+	temp.resize( size, refractoryPeriod );
+	ret = SetGet1< double >::setVec( e2, "refractoryPeriod", temp );
+	assert( ret );
 
+	vector< double > weight;
+	weight.reserve( nd );
+	vector< double > delay;
+	delay.reserve( nd );
 	for ( unsigned int i = 0; i < size; ++i ) {
-		Eref er( i2(), i );
-		double Vm = mtrand() * Vmax;
-		bool ret = SetGet1< double >::set( er, "Vm", Vm );
-		assert( ret );
-		ret = SetGet1< double >::set( er, "thresh", thresh );
-		assert( ret );
-		ret = SetGet1< double >::set( er, "refractoryPeriod", refractoryPeriod );
-		assert( ret );
-		unsigned int numSyn = SetGet1< unsigned int >::get( er, "numSynapses" );
+		unsigned int numSyn = syne.element()->numData2( i );
 		for ( unsigned int j = 0; j < numSyn; ++j ) {
-			DataId dx( i, j );
-			Eref synx( &syn, dx );
-			double weight = mtrand() * weightMax;
-			double delay = mtrand() * delayMax;
-			bool ret = SetGet1< double >::set( synx, "weight", weight );
-			assert( ret );
-			ret = SetGet1< double >::set( synx, "delay", delay );
-			assert( ret );
+			weight.push_back( mtrand() * weightMax );
+			delay.push_back( mtrand() * delayMax );
 		}
 	}
+	ret = SetGet1< double >::setVec( syne, "weight", weight );
+	assert( ret );
+	ret = SetGet1< double >::setVec( syne, "delay", delay );
+	assert( ret );
 
 	printGrid( i2(), "Vm", 0, thresh );
 
@@ -563,9 +571,10 @@ void testSparseMsg()
 		cout << "T = " << p.currTime << ", Q size = " << syn.q_.size() << endl;
 		syn.clearQ();
 //		i2()->process( &p );
-		printGrid( i2(), "Vm", 0, thresh );
+//		printGrid( i2(), "Vm", 0, thresh );
 		// sleep(1);
 	}
+	printGrid( i2(), "Vm", 0, thresh );
 
 	cout << "." << flush;
 	delete i2();
@@ -584,5 +593,5 @@ void testAsync( )
 	testSetGetVec();
 	testSendSpike();
 	testSparseMatrix();
-//	testSparseMsg();
+	testSparseMsg();
 }

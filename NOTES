@@ -1663,5 +1663,26 @@ allocation. Fixed and now works.
 
 Profiling shows that the most time is spent doing the field allocation.
 Silly. Let's set up vector assignment.
+Done, checked in as 1443.
+
+Now did the profiling with a long (1000 timestep) run of the IntFire
+network. The results are gratifying: By far the largest time is spent in the
+heap operations for the synapse. All told, under 10% of the time is spent in
+messaging.
+
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls   s/call   s/call  name    
+ 56.83     18.49    18.49 102317402     0.00     0.00  void std::__adjust_heap<__gnu_cxx::__normal_iterator<Synapse*, std::vector<Synapse, std::allocator<Synapse> > >, long, Synapse, std::less<Synapse> >(__gnu_cxx::__normal_iterator<Synapse*, std::vector<Synapse, std::allocator<Synapse> > >, long, long, Synapse, std::less<Synapse>)
+ 17.09     24.05     5.56 103414264     0.00     0.00  IntFire::addSpike(DataId, double const&)
+  7.84     26.60     2.55 103414264     0.00     0.00  Synapse::Synapse(Synapse const&, double)
+  4.95     28.21     1.61  1012617     0.00     0.00  SparseMsg::exec(Element*, char const*) const
+  3.78     29.44     1.23  1024002     0.00     0.00  IntFire::process(ProcInfo const*, Eref const&)
+  2.06     30.11     0.67 103414264     0.00     0.00  UpFunc1<IntFire, double>::op(Eref, char const*) const
+  1.20     30.50     0.39 103414264     0.00     0.00  Eref::data1()
+  0.86     30.78     0.28 102317402     0.00     0.00  Synapse::getWeight() const
+  0.71     31.01     0.23 103340378     0.00     0.00  Synapse::getDelay() const
+  0.65     31.22     0.21 104896327     0.00     0.00  Eref::Eref(Element*, DataId)
+  0.61     31.42     0.20                             GetOpFunc<Synapse, double>::op(Eref, char const*) const
+
 
 =============================================================================
