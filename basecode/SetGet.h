@@ -211,6 +211,32 @@ template< class A > class SetGet1: public SetGet
 		}
 
 		/**
+		 * I would like to provide a vector set operation. It should
+		 * work in three modes: Set all targets to the same value,
+		 * set targets one by one to a vector of values, and set targets
+		 * one by one to randomly generated values within a range. All
+		 * of these can best be collapsed into the vector assignment 
+		 * operation.
+		static bool setAll( Eref& dest, const string& field, A arg )
+		{
+			SetGet1< A > sg( dest );
+			FuncId fid;
+			if ( sg.checkSet( field, fid ) ) {
+				unsigned int size = Conv< A >::size( arg );
+				char *temp = new char[ size ];
+				Conv< A >::val2buf( temp, arg );
+				sg.iSetInner( fid, temp, size );
+
+				// Ensure that clearQ is called before this return.
+				sg.completeSet();
+				delete[] temp;
+				return 1;
+			}
+			return 0;
+		}
+		 */
+
+		/**
 		 * Blocking call using string conversion
 		 */
 		static bool strSet( Eref& dest, const string& field, 

@@ -221,6 +221,12 @@ void Element::addToQ( const Qinfo& qi, const char* arg )
 
 MsgId Element::addMsg( Msg* m )
 {
+	while ( m_.size() > 0 ) {
+		if ( m_.back() == 0 )
+			m_.pop_back();
+		else
+			break;
+	}
 	m_.push_back( m );
 	return m_.size() - 1;
 }
@@ -233,7 +239,10 @@ void Element::dropMsg( const Msg* m, MsgId mid )
 	assert ( mid < m_.size() );
 	assert( m == m_[mid] );
 
-	m_[mid] = 0; // To clean up later, if at all.
+	m_[mid] = 0; // To clean up later, if at all. We cannot do a
+	// resize of m_ here because this function is called within an iterator
+	// through m_, in ~Element.
+
 	for ( vector< Conn >::iterator i = c_.begin(); i != c_.end(); ++i )
 		i->drop( m ); // Get rid of specific Msg, if present, on Conn
 }

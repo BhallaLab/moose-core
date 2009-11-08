@@ -63,6 +63,13 @@ void SetGet::iSetInner( FuncId fid, const char* val, unsigned int size )
 	static unsigned int setFuncIndex = 0;
 	shell_->clearConn( setCid );
 	Msg* m = new SingleMsg( shelle_, e_ );
+	/*
+	if ( e_.index().toAll() ) {
+		Msg* m = new SingleMsg( shelle_, e_ );
+	} else {
+		Msg* m = new OneToAllMsg( shelle_, e_ );
+	}
+	*/
 	shell_->addMsgToConn( m, setCid );
 	shell_->addTargetFunc( fid, setFuncIndex );
 	shelle_.asend( setCid, setFuncIndex, val, size );

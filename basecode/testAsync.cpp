@@ -17,6 +17,7 @@
 #include "../biophysics/IntFire.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
+#include "../randnum/randnum.h"
 
 void insertIntoQ( )
 {
@@ -424,7 +425,7 @@ void testSparseMsg()
 	// static const double EPSILON = 1e-9;
 	const Cinfo* ic = IntFire::initCinfo();
 	const Cinfo* sc = Synapse::initCinfo();
-	unsigned int size = 1000;
+	unsigned int size = 1024;
 	string arg;
 	Id i2 = ic->create( "test2", size );
 	Eref e2 = i2.eref();
@@ -444,6 +445,29 @@ void testSparseMsg()
 	bool ret = SparseMsg::add( e2.element(), "spike", &syn, "addSpike", 0.1 );
 	assert( ret );
 
+	 cout << "Num Syn = " << syn.numData() << endl;
+
+
+	for ( unsigned int i = 0; i < size; ++i ) {
+		Eref er( i2(), i );
+		double Vm = mtrand() * 0.1 - 0.07;
+		bool ret = SetGet1< double >::set( er, "Vm", Vm );
+		assert( ret );
+		ret = SetGet1< double >::set( er, "thresh", 0.0 );
+		assert( ret );
+		unsigned int numSyn = SetGet1< unsigned int >::get( er, "numSynapses" );
+		for ( unsigned int j = 0; j < numSyn; ++j ) {
+			DataId dx( i, j );
+			Eref synx( &syn, dx );
+			double weight = mtrand();
+			double delay = mtrand() * 10.0;
+			bool ret = SetGet1< double >::set( synx, "weight", weight );
+			assert( ret );
+			ret = SetGet1< double >::set( synx, "delay", delay );
+			assert( ret );
+		}
+	}
+
 	/*
 	ret = SetGet1< double >::set( e2, "Vm", 1.0 );
 	ProcInfo p;
@@ -457,6 +481,7 @@ void testSparseMsg()
 	// cout << "Vm = " << Vm << endl;
 	cout << "." << flush;
 	*/
+	cout << "." << flush;
 	delete i2();
 }
 

@@ -1619,6 +1619,23 @@ This was quite nasty. I put in assertions that should have caught it but
 did not. I checked the web for odd interactions between assertions and
 templates. Finally I realized that SparseMsg.o did not depend on SparseMatrix.h
 in the makefile. So the SparseMsg was not seeing any of the updated code.
-Fixed, compiled, reran, clears valgrind.
+Fixed, compiled, reran, clears valgrind. Checking 1440.
 
 =============================================================================
+8 Nov 2009
+Would like to implement a vector 'set' operation.
+For now stay focussed on the sparse messaging.
+
+I had a difficult bug in field assignment that only materialized after a very
+large number of assignments. After a lot of meandering, turned out that the 
+problem was that I was not clearing old messages out. In the absence of this
+garbage collection, the system was correctly assigning new msgids as it went
+along. In due course the system overflowed the 'short' field range.
+Solution, of course, is to fix up the garbage collection of old messages,
+or rather, the slots allocated to them.
+Implemented it. Works. Valgrind takes several minutes to chew on it, but
+eventually it too passes. 
+
+This is as thorough a test of set/get as any i
+I've done so far. The vector 'set' operation would help.
+
