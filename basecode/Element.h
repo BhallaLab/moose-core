@@ -21,6 +21,7 @@ class Element
 	friend void testStandaloneIntFire();
 	friend void testSynapse();
 	friend void testSyncArray( unsigned int, unsigned int, unsigned int );
+	friend void testSparseMsg();
 	public:
 		/**
 		 * Constructor

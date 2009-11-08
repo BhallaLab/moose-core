@@ -420,9 +420,40 @@ void testSparseMatrix()
 	cout << "." << flush;
 }
 
+void printGrid( Element* e, const string& field, double min, double max )
+{
+	static string icon = " .oO@";
+	unsigned int yside = sqrt( double ( e->numData() ) );
+	unsigned int xside = e->numData() / yside;
+	if ( e->numData() % yside > 0 )
+		xside++;
+	
+	for ( unsigned int i = 0; i < e->numData(); ++i ) {
+		if ( ( i % xside ) == 0 )
+			cout << endl;
+		Eref er( e, i );
+		double Vm = SetGet1< double >::get( er, field );
+		int shape = 5.0 * ( Vm - min ) / ( max - min );
+		if ( shape > 4 )
+			shape = 4;
+		if ( shape < 0 )
+			shape = 0;
+		cout << icon[ shape ];
+	}
+	cout << endl;
+}
+
+
 void testSparseMsg()
 {
-	// static const double EPSILON = 1e-9;
+	static const double thresh = 0.2;
+	static const double Vmax = 1.0;
+	static const double refractoryPeriod = 0.4;
+	static const double weightMax = 0.02;
+	static const double delayMax = 4;
+	static const double timestep = 0.2;
+	static const double connectionProbability = 0.1;
+	static const unsigned int runsteps = 15;
 	const Cinfo* ic = IntFire::initCinfo();
 	const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 1024;
@@ -432,17 +463,20 @@ void testSparseMsg()
 	SynElement syn( sc, i2() );
 
 	assert( syn.numData() == 0 );
+	/*
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref er( i2(), i );
 		bool ret = SetGet1< unsigned int >::set( er, "numSynapses", i );
 		assert( ret );
 	}
 	assert( syn.numData() == ( size * (size - 1) ) / 2 );
+	*/
 
 	DataId di( 1, 0 ); // DataId( data, field )
 	Eref syne( &syn, di );
 
-	bool ret = SparseMsg::add( e2.element(), "spike", &syn, "addSpike", 0.1 );
+	bool ret = SparseMsg::add( e2.element(), "spike", &syn, "addSpike", 
+		connectionProbability );
 	assert( ret );
 
 	 cout << "Num Syn = " << syn.numData() << endl;
@@ -450,17 +484,19 @@ void testSparseMsg()
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref er( i2(), i );
-		double Vm = mtrand() * 0.1 - 0.07;
+		double Vm = mtrand() * Vmax;
 		bool ret = SetGet1< double >::set( er, "Vm", Vm );
 		assert( ret );
-		ret = SetGet1< double >::set( er, "thresh", 0.0 );
+		ret = SetGet1< double >::set( er, "thresh", thresh );
+		assert( ret );
+		ret = SetGet1< double >::set( er, "refractoryPeriod", refractoryPeriod );
 		assert( ret );
 		unsigned int numSyn = SetGet1< unsigned int >::get( er, "numSynapses" );
 		for ( unsigned int j = 0; j < numSyn; ++j ) {
 			DataId dx( i, j );
 			Eref synx( &syn, dx );
-			double weight = mtrand();
-			double delay = mtrand() * 10.0;
+			double weight = mtrand() * weightMax;
+			double delay = mtrand() * delayMax;
 			bool ret = SetGet1< double >::set( synx, "weight", weight );
 			assert( ret );
 			ret = SetGet1< double >::set( synx, "delay", delay );
@@ -468,23 +504,24 @@ void testSparseMsg()
 		}
 	}
 
-	/*
-	ret = SetGet1< double >::set( e2, "Vm", 1.0 );
-	ProcInfo p;
-	reinterpret_cast< IntFire* >(e2.data())->process( &p, e2 );
-	syn.clearQ();
-	Eref synParent( e2.element(), 1 );
+	printGrid( i2(), "Vm", 0, thresh );
 
-	reinterpret_cast< IntFire* >(synParent.data())->process( &p, synParent);
-	double Vm = SetGet1< double >::get( synParent, "Vm" );
-	assert( fabs( Vm + 1e-7) < EPSILON );
-	// cout << "Vm = " << Vm << endl;
-	cout << "." << flush;
-	*/
+	ProcInfo p;
+	p.dt = timestep;
+
+	for ( unsigned int i = 0; i < runsteps; ++i ) {
+		p.currTime += p.dt;
+		i2()->process( &p );
+		cout << "T = " << p.currTime << ", Q size = " << syn.q_.size() << endl;
+		syn.clearQ();
+//		i2()->process( &p );
+		printGrid( i2(), "Vm", 0, thresh );
+		// sleep(1);
+	}
+
 	cout << "." << flush;
 	delete i2();
 }
-
 
 void testAsync( )
 {

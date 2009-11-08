@@ -32,27 +32,25 @@ void SparseMsg::exec( Element* target, const char* arg ) const
 	 * The system is really optimized for data from e1 to e2.
 	 */
 	if ( target == e2_ ) {
-		for ( unsigned int i = 0; i < matrix_.nRows(); ++i ) {
-			const unsigned int* fieldIndex;
-			const unsigned int* colIndex;
-			unsigned int n = matrix_.getRow( i, &fieldIndex, &colIndex );
-			for ( unsigned int j = 0; j < n; ++j ) {
-				// Eref tgt( target, DataId( *colIndex++, *fieldIndex++ )
-				Eref tgt( target, DataId( colIndex[j], fieldIndex[j] ) );
-				f->op( tgt, arg );
-			}
+		unsigned int row = q->srcIndex();
+		const unsigned int* fieldIndex;
+		const unsigned int* colIndex;
+		unsigned int n = matrix_.getRow( row, &fieldIndex, &colIndex );
+		for ( unsigned int j = 0; j < n; ++j ) {
+			// Eref tgt( target, DataId( *colIndex++, *fieldIndex++ )
+			Eref tgt( target, DataId( colIndex[j], fieldIndex[j] ) );
+			f->op( tgt, arg );
 		}
 	} else { // Avoid using this back operation!
 		// Note that we do NOT use the fieldIndex going backward. It is
 		// assumed that e1 does not have fieldArrays.
-		for ( unsigned int i = 0; i < matrix_.nColumns(); ++i ) {
-			vector< unsigned int > fieldIndex;
-			vector< unsigned int > rowIndex;
-			unsigned int n = matrix_.getColumn( i, fieldIndex, rowIndex );
-			for ( unsigned int j = 0; j < n; ++j ) {
-				Eref tgt( target, DataId( rowIndex[j] ) );
-				f->op( tgt, arg );
-			}
+		unsigned int column = q->srcIndex();
+		vector< unsigned int > fieldIndex;
+		vector< unsigned int > rowIndex;
+		unsigned int n = matrix_.getColumn( column, fieldIndex, rowIndex );
+		for ( unsigned int j = 0; j < n; ++j ) {
+			Eref tgt( target, DataId( rowIndex[j] ) );
+			f->op( tgt, arg );
 		}
 	}
 }

@@ -37,6 +37,13 @@ const Cinfo* IntFire::initCinfo()
 			&IntFire::getThresh
 		),
 
+		new ValueFinfo< IntFire, double >(
+			"refractoryPeriod",
+			"Minimum time between successive spikes",
+			&IntFire::setRefractoryPeriod,
+			&IntFire::getRefractoryPeriod
+		),
+
 		new ValueFinfo< IntFire, unsigned int >(
 			"numSynapses",
 			"Number of synapses on IntFire",
@@ -61,24 +68,38 @@ const Cinfo* IntFire::initCinfo()
 static const Cinfo* intFireCinfo = IntFire::initCinfo();
 
 IntFire::IntFire()
-	: Vm_( 0.0 ), thresh_( 0.0 ), tau_( 1.0 )
+	: Vm_( 0.0 ), thresh_( 0.0 ), tau_( 1.0 ), refractoryPeriod_( 0.1 ), lastSpike_( -0.1 )
 {
 	;
 }
 
 IntFire::IntFire( double thresh, double tau )
-	: Vm_( 0.0 ), thresh_( thresh ), tau_( tau )
+	: Vm_( 0.0 ), thresh_( thresh ), tau_( tau ), refractoryPeriod_( 0.1 ), lastSpike_( -0.1 )
 {
 	;
 }
 
 void IntFire::process( const ProcInfo* p, const Eref& e )
 {
+	if ( e.index().data() == 1023 && pendingEvents_.size() > 0 && p->currTime > 0.9 ) {
+		cout << "pending size on " << e.index() << " = " << pendingEvents_.size() << endl;
+		/*
+		while ( !pendingEvents_.empty() ) {
+			double v = pendingEvents_.top().getWeight();
+			double d = pendingEvents_.top().getDelay();
+			cout << "(" << v << "," << d << ")	";
+			pendingEvents_.pop();
+		}
+		*/
+	}
 	while ( !pendingEvents_.empty() &&
 		pendingEvents_.top().getDelay() <= p->currTime ) {
 			Vm_ += pendingEvents_.top().getWeight();
 			pendingEvents_.pop();
 	}
+	if (  ( p->currTime - lastSpike_ ) < refractoryPeriod_ )
+		Vm_ = 0.0;
+
 	if ( Vm_ > thresh_ ) {
 		spike->send( e, p->currTime );
 		// e.sendSpike( spikeSlot, p->currTime );
@@ -179,6 +200,12 @@ void IntFire::setThresh( const double v )
 	thresh_ = v;
 }
 
+void IntFire::setRefractoryPeriod( const double v )
+{
+	refractoryPeriod_ = v;
+	lastSpike_ = -v;
+}
+
 void IntFire::setNumSynapses( const unsigned int v )
 {
 	assert( v < 10000000 );
@@ -198,6 +225,11 @@ double IntFire::getTau() const
 double IntFire::getThresh() const
 {
 	return thresh_;
+}
+
+double IntFire::getRefractoryPeriod() const
+{
+	return refractoryPeriod_;
 }
 
 unsigned int IntFire::getNumSynapses() const

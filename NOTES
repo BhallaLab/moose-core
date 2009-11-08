@@ -1634,8 +1634,24 @@ along. In due course the system overflowed the 'short' field range.
 Solution, of course, is to fix up the garbage collection of old messages,
 or rather, the slots allocated to them.
 Implemented it. Works. Valgrind takes several minutes to chew on it, but
-eventually it too passes. 
+eventually it too passes.  Checked in as revision 1441.
 
 This is as thorough a test of set/get as any i
 I've done so far. The vector 'set' operation would help.
 
+Now working on synaptic delivery. The system is taking up over a gig of
+RAM to store the pending synaptic events for just one timestep.
+
+# of synapses = 1e3 * 100 = 1e5.
+Should not happen even if every single synapse fires.
+
+I wonder if the buffer keeps getting extended as the process call is done..
+No, should have a cleanly separate eventq.
+
+Tracked it down, the SparseMsg dispatcher was sending out stuff to all
+targets regardless of the originating Eref. Fixed. Lots of tinkering later,
+we have a reasonable IntFire network. It goes into saturation rather
+quickly above a certain threshold of connectivity, otherwise decays.
+Also it scales pretty well. Need to do benchmarking.
+
+=============================================================================
