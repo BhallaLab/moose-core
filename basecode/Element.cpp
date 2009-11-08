@@ -128,6 +128,11 @@ unsigned int Element::numData1() const
 	return numData_;
 }
 
+unsigned int Element::numData2( unsigned int index1 ) const
+{
+	return 1;
+}
+
 unsigned int Element::numDimensions() const
 {
 	return 1;

@@ -1652,6 +1652,16 @@ Tracked it down, the SparseMsg dispatcher was sending out stuff to all
 targets regardless of the originating Eref. Fixed. Lots of tinkering later,
 we have a reasonable IntFire network. It goes into saturation rather
 quickly above a certain threshold of connectivity, otherwise decays.
-Also it scales pretty well. Need to do benchmarking.
+Also it scales pretty well in terms of speed and memory. 
+Need to do benchmarking.
+Checked in as revision 1442.
+
+Tried to do a profile. Failes outright in the optimization compile mode,
+with or without profiling. Clears valgrind in debug mode. So I am confused.
+Managed to track it down to very first unit test, was an innocuous array 
+allocation. Fixed and now works.
+
+Profiling shows that the most time is spent doing the field allocation.
+Silly. Let's set up vector assignment.
 
 =============================================================================

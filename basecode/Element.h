@@ -125,6 +125,14 @@ class Element
 		virtual unsigned int numData1() const;
 
 		/**
+		 * Returns the number of data entries at index 2, if present.
+		 * For regular Elements this is always 1.
+		 * For Elements whose entries are array fields, this is the number
+		 * of fields on that data entry.
+		 */
+		 virtual unsigned int numData2( unsigned int index1 ) const;
+
+		/**
 		 * Returns the number of dimensions of the data.
 		 */
 		virtual unsigned int numDimensions() const;

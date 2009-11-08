@@ -62,7 +62,7 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-testAsync.o:	SparseMatrix.h
+testAsync.o:	SparseMatrix.h SetGet.h
 SparseMsg.o:	SparseMatrix.h
 #TestBasecode.o:	Shell.h ShellWrapper.h
 

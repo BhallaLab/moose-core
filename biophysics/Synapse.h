@@ -62,6 +62,11 @@ class SynElement: public Element
 		unsigned int numData() const;
 
 		/**
+		 * Return the # of synapses on a given IntFire
+		 */
+		unsigned int numData2( unsigned int index1 ) const;
+
+		/**
 		 * Return 2.
 		 */
 		unsigned int numDimensions() const;

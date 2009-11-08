@@ -34,7 +34,7 @@ void insertIntoQ( )
 	
 
 	for ( unsigned int i = 0; i < size; ++i ) {
-		char temp[10];
+		char temp[20];
 		sprintf( temp, "objname_%d", i );
 		string stemp( temp );
 		char buf[200];
@@ -300,6 +300,54 @@ void testSetGetSynapse()
 	delete i2();
 }
 
+void testSetGetVec()
+{
+	static const double EPSILON = 1e-9;
+	const Cinfo* ic = IntFire::initCinfo();
+	const Cinfo* sc = Synapse::initCinfo();
+	unsigned int size = 100;
+	string arg;
+	Id i2 = ic->create( "test2", size );
+	SynElement syn( sc, i2() );
+
+	assert( syn.numData() == 0 );
+	vector< unsigned int > numSyn( size, 0 );
+	for ( unsigned int i = 0; i < size; ++i )
+		numSyn[i] = i;
+	
+	Eref e2( i2(), 0 );
+	// Here we test setting a 1-D vector
+	bool ret = SetGet1< unsigned int >::setVec( e2, "numSynapses", numSyn );
+	assert( ret );
+	unsigned int nd = syn.numData();
+	assert( nd == ( size * (size - 1) ) / 2 );
+	// cout << "NumSyn = " << nd << endl;
+	
+	// Here we test setting a 2-D array with different dims on each axis.
+	vector< double > delay( nd, 0.0 );
+	unsigned int k = 0;
+	for ( unsigned int i = 0; i < size; ++i ) {
+		for ( unsigned int j = 0; j < i; ++j ) {
+			delay[k++] = i * 1000 + j;
+		}
+	}
+
+	Eref se( &syn, 0 );
+	ret = SetGet1< double >::setVec( se, "delay", delay );
+	for ( unsigned int i = 0; i < size; ++i ) {
+		for ( unsigned int j = 0; j < i; ++j ) {
+			DataId di( i, j );
+			Eref syne( &syn, di );
+			double temp = i * 1000 + j ;
+			assert( 
+			fabs ( reinterpret_cast< Synapse* >(syne.data())->getDelay() - temp ) <
+				EPSILON ); 
+		}
+	}
+	cout << "." << flush;
+	delete i2();
+}
+
 void testSendSpike()
 {
 	static const double EPSILON = 1e-9;
@@ -533,7 +581,8 @@ void testAsync( )
 	testSetGet();
 	testSetGetDouble();
 	testSetGetSynapse();
+	testSetGetVec();
 	testSendSpike();
 	testSparseMatrix();
-	testSparseMsg();
+//	testSparseMsg();
 }

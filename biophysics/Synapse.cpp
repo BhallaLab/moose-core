@@ -142,6 +142,13 @@ unsigned int SynElement::numData() const
 	return ret;
 }
 
+unsigned int SynElement::numData2( unsigned int index1 ) const
+{
+	assert( index1 < numData_ );
+	return ( reinterpret_cast< IntFire* >( d_ + index1 * dataSize_ ) )->
+		getNumSynapses();
+}
+
 void SynElement::getArraySizes( vector< unsigned int >& sizes ) const
 {
 	sizes.resize( 0 );

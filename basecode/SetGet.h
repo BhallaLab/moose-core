@@ -217,24 +217,58 @@ template< class A > class SetGet1: public SetGet
 		 * one by one to randomly generated values within a range. All
 		 * of these can best be collapsed into the vector assignment 
 		 * operation.
-		static bool setAll( Eref& dest, const string& field, A arg )
+		 */
+		static bool setVec( Eref& dest, const string& field, 
+			const vector< A >& arg )
 		{
 			SetGet1< A > sg( dest );
+			Element* e = dest.element();
 			FuncId fid;
+			assert( arg.size() >= e->numData() );
+			if ( arg.size() == 0 )
+				return 0;
+
 			if ( sg.checkSet( field, fid ) ) {
-				unsigned int size = Conv< A >::size( arg );
+				// Need to decide if this is worth doing for each arg
+				unsigned int size = Conv< A >::size( arg[0] );
 				char *temp = new char[ size ];
-				Conv< A >::val2buf( temp, arg );
-				sg.iSetInner( fid, temp, size );
+
+				if ( e->numDimensions() == 1 ) {
+					for ( unsigned int i = 0; i < e->numData(); ++i )
+					{
+						Eref er( e, i );
+						SetGet1< A > sga( er );
+						Conv< A >::val2buf( temp, arg[i] );
+						sga.iSetInner( fid, temp, size );
+						// Ideally we should queue all these.
+						// To do that we need some other call than
+						// iSetInner, which clears the old msg out.
+						sga.completeSet();
+					}
+				}
+
+				if ( e->numDimensions() == 2 )
+				{
+					unsigned int k = 0;
+					for ( unsigned int i = 0; i < e->numData1(); ++i )
+					{
+						for ( unsigned int j = 0; j < e->numData2(i); ++j )
+						{
+							Eref er( e, DataId( i, j ) );
+							SetGet1< A > sga( er );
+							Conv< A >::val2buf( temp, arg[ k++ ] );
+							sga.iSetInner( fid, temp, size );
+							sga.completeSet();
+						}
+					}
+				}
 
 				// Ensure that clearQ is called before this return.
-				sg.completeSet();
 				delete[] temp;
 				return 1;
 			}
 			return 0;
 		}
-		 */
 
 		/**
 		 * Blocking call using string conversion
