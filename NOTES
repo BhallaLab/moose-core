@@ -1790,5 +1790,9 @@ Setting up unit tests. Need to define calling framework.
 		vector. But there is no rule about ordering clocks by dt
 		(though it is implicit somehwat in GENESIS for clock 0)
 
+Anyway, now that I am back online, checked in a large backlog of changes
+as revision 1455.
 
+Went through the unit tests, converted the massive printouts into assertions.
+Did a little cleaning using valgrind. Now OK.
 =============================================================================

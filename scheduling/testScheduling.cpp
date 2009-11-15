@@ -26,6 +26,8 @@ void setupTicks()
 	// assert( tick.numData() == 0 );
 
 	// bool ret = SetGet2< double, unsigned int >::set( );
+	cout << "." << flush;
+	delete clocke;
 }
 
 void testScheduling( )

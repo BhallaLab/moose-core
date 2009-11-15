@@ -80,8 +80,10 @@ IntFire::IntFire( double thresh, double tau )
 
 void IntFire::process( const ProcInfo* p, const Eref& e )
 {
+	/*
 	if ( e.index().data() == 1023 && pendingEvents_.size() > 0 && p->currTime > 0.9 ) {
 		cout << "pending size on " << e.index() << " = " << pendingEvents_.size() << endl;
+		*/
 		/*
 		while ( !pendingEvents_.empty() ) {
 			double v = pendingEvents_.top().getWeight();
@@ -89,8 +91,8 @@ void IntFire::process( const ProcInfo* p, const Eref& e )
 			cout << "(" << v << "," << d << ")	";
 			pendingEvents_.pop();
 		}
-		*/
 	}
+	*/
 	while ( !pendingEvents_.empty() &&
 		pendingEvents_.top().getDelay() <= p->currTime ) {
 			Vm_ += pendingEvents_.top().getWeight();

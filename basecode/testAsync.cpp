@@ -494,6 +494,9 @@ void printGrid( Element* e, const string& field, double min, double max )
 
 void testSparseMsg()
 {
+	static const unsigned int qSize[] =
+		{ 20112, 240, 144, 432, 864, 2016, 3600, 4704, 6192, 7248 };
+	static const unsigned int NUMSYN = 104576;
 	static const double thresh = 0.2;
 	static const double Vmax = 1.0;
 	static const double refractoryPeriod = 0.4;
@@ -501,7 +504,7 @@ void testSparseMsg()
 	static const double delayMax = 4;
 	static const double timestep = 0.2;
 	static const double connectionProbability = 0.1;
-	static const unsigned int runsteps = 1000;
+	static const unsigned int runsteps = 5;
 	const Cinfo* ic = IntFire::initCinfo();
 	const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 1024;
@@ -528,7 +531,8 @@ void testSparseMsg()
 	assert( ret );
 
 	unsigned int nd = syn.numData();
-	cout << "Num Syn = " << nd << endl;
+	// cout << "Num Syn = " << nd << endl;
+	assert( nd == NUMSYN );
 	vector< double > temp( size, 0.0 );
 	for ( unsigned int i = 0; i < size; ++i )
 		temp[i] = mtrand() * Vmax;
@@ -560,7 +564,7 @@ void testSparseMsg()
 	ret = SetGet1< double >::setVec( syne, "delay", delay );
 	assert( ret );
 
-	printGrid( i2(), "Vm", 0, thresh );
+	// printGrid( i2(), "Vm", 0, thresh );
 
 	ProcInfo p;
 	p.dt = timestep;
@@ -568,13 +572,14 @@ void testSparseMsg()
 	for ( unsigned int i = 0; i < runsteps; ++i ) {
 		p.currTime += p.dt;
 		i2()->process( &p );
-		cout << "T = " << p.currTime << ", Q size = " << syn.q_.size() << endl;
+		assert( syn.q_.size() == qSize[i] );
+		// cout << "T = " << p.currTime << ", Q size = " << syn.q_.size() << endl;
 		syn.clearQ();
 //		i2()->process( &p );
 //		printGrid( i2(), "Vm", 0, thresh );
 		// sleep(1);
 	}
-	printGrid( i2(), "Vm", 0, thresh );
+	// printGrid( i2(), "Vm", 0, thresh );
 
 	cout << "." << flush;
 	delete i2();
