@@ -8,3 +8,5 @@ class ProcInfo
 		double currTime;
 		unsigned int numThreads;
 };
+
+typedef ProcInfo* ProcPtr;

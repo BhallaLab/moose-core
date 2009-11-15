@@ -68,4 +68,50 @@ template < class T, class F > class ValueFinfo: public Finfo
 		GetOpFunc< T, F >* getOpFunc_;
 };
 
+
+template < class T, class F > class ReadonlyValueFinfo: public Finfo
+{
+	public:
+		~ReadonlyValueFinfo() {
+			delete getOpFunc_;
+		}
+
+		ReadonlyValueFinfo( const string& name, const string& doc, 
+			F ( T::*getFunc )() const )
+			: Finfo( name, doc )
+			{
+				getOpFunc_ = new GetOpFunc< T, F >( getFunc );
+			}
+
+
+		void registerOpFuncs(
+			map< string, FuncId >& fnames, vector< OpFunc* >& funcs ) 
+		{
+			string getName = "get_" + name();
+			map< string, FuncId >::iterator i = fnames.find( getName );
+			if ( i != fnames.end() ) {
+				funcs[ i->second ] = getOpFunc_;
+			} else {
+				unsigned int size = funcs.size();
+				fnames[ getName ] = size;
+				funcs.push_back( getOpFunc_ );
+			}
+		}
+
+		// Need to think about whether an index has to be registered here.
+		unsigned int registerSrcFuncIndex( unsigned int current )
+		{
+			return current;
+		}
+
+		// Need to think about whether an index has to be registered here.
+		unsigned int registerConn( unsigned int current )
+		{
+			return current;
+		}
+
+	private:
+		GetOpFunc< T, F >* getOpFunc_;
+};
+
 #endif // _VALUE_FINFO_H

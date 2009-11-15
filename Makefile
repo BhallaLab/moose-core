@@ -196,6 +196,7 @@ SUBDIR = \
 	basecode \
 	biophysics\
 	randnum\
+	scheduling\
 
 
 #	kinetics \
@@ -207,6 +208,7 @@ OBJLIBS =	\
 	basecode/basecode.o \
 	biophysics/biophysics.o \
 	randnum/randnum.o \
+	scheduling/scheduling.o \
 
 #
 #	kinetics/kinetics.o \

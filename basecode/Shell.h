@@ -18,7 +18,7 @@ class Shell: public Data
 		void setName( string name );
 		string getName() const;
 		static const Cinfo* initCinfo();
-		void handleGet( Eref& e, const Qinfo* q, const char* arg );
+		void handleGet( Eref e, const Qinfo* q, const char* arg );
 		const char* getBuf() const;
 		static const char* buf();
 

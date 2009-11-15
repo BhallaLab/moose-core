@@ -65,7 +65,7 @@ string Neutral::getName() const
 	return name_;
 }
 
-void Neutral::destroy( Eref& e, const Qinfo* q )
+void Neutral::destroy( Eref e, const Qinfo* q )
 {
 	// cout << "in Neutral::destroy()[ " << e.index() << "]\n";
 	;

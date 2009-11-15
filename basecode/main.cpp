@@ -10,6 +10,7 @@ extern void testSync();
 extern void testAsync();
 extern void testSyncArray( unsigned int size, unsigned int numThreads,
 	unsigned int method );
+extern void testScheduling();
 
 void init()
 {
@@ -21,9 +22,11 @@ void init()
 int main()
 {
 	init();
+#ifdef DO_UNIT_TESTS
 	cout << "testing: ";
 	testAsync();
-
+	testScheduling();
+#endif
 	cout << endl;
 
 	delete Id()();

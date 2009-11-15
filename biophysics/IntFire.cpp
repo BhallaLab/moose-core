@@ -2,7 +2,6 @@
 #include "header.h"
 #include "Synapse.h"
 #include "IntFire.h"
-#include "Dinfo.h"
 
 const ConnId spikeSlot = 0;
 
@@ -146,6 +145,7 @@ void IntFire::addSpike( DataId index, const double& time )
 {
 	assert( index.field() < synapses_.size() );
 	Synapse s( synapses_[ index.field() ], time );
+	// cout << index << "	";
 	pendingEvents_.push( s );
 }
 

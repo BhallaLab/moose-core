@@ -32,9 +32,9 @@ class IntFire: public Data
 		void setNumSynapses( unsigned int v );
 		unsigned int getNumSynapses() const;
 
-		static const Cinfo* initCinfo();
-
 		Synapse* synapse( unsigned int i );
+
+		static const Cinfo* initCinfo();
 	private:
 		double Vm_; // State variable: Membrane potential. Resting pot is 0.
 		double thresh_;	// Firing threshold

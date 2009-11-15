@@ -70,5 +70,6 @@ class Data;
 #include "OpFunc.h"
 #include "EpFunc.h"
 #include "ValueFinfo.h"
+#include "Dinfo.h"
 
 #endif // _HEADER_H

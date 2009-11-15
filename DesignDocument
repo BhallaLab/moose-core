@@ -21,7 +21,7 @@ This redesign does a lot of things differently from the earlier MOOSE messaging.
 	transferred on every timestep) and asynchronous messaging (variable
 	amounts of data transferred). This split is at the data transfer
 	level but the message specification should be nearly the same.
-- Field access function specification should be cleaner.
+- Field access function specification is cleaner.
 - Separation of function specification from messaging. This means that any
 	message can be used as a communication line for any function call 
 	between two Elements. This gives an enormous simplification to message

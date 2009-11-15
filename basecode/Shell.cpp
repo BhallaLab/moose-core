@@ -68,7 +68,7 @@ string Shell::getName() const
 	return name_;
 }
 
-void Shell::handleGet( Eref& e, const Qinfo* q, const char* arg )
+void Shell::handleGet( Eref e, const Qinfo* q, const char* arg )
 {
 	getBuf_.resize( q->size() );
 	memcpy( &getBuf_[0], arg, q->size() );

@@ -1581,7 +1581,7 @@ one or more different other fields.
 =============================================================================
 7 Nov.
 Approach taken to allocate synapse memory, which is generalizable to other
-kinds of array fields: Provide a 
+kinds of array fields:
 
 - We will usually have to access these other fields as part of the setup
 	command. For example, setting synaptic weights.
@@ -1683,6 +1683,112 @@ messaging.
   0.71     31.01     0.23 103340378     0.00     0.00  Synapse::getDelay() const
   0.65     31.22     0.21 104896327     0.00     0.00  Eref::Eref(Element*, DataId)
   0.61     31.42     0.20                             GetOpFunc<Synapse, double>::op(Eref, char const*) const
+
+
+Checked in as 1445.
+Now to change it so it is more like a unit test.
+
+Calculations: 1024 * 102 synapses ~1e5
+Towards the end, it was saturated: always firing. So rate = refractory
+period = 2 timesteps.
+# of timesteps = 1000.
+So 5e7 synaptic events were transmitted, in about 30 sec. ~1.3 million/sec.
+
+Back on 1 Nov, these were the planned steps:
+To test scalability, let's do this:
+- Make a speed reference using a sparse matrix and customized code to replace
+	messaging, as a recurrent network with N neurons and P probability
+	of connections. Goal is to do N >= 1e5, P ~0.1.
+* Make the equivalent network in MOOSE
+* Profile, look at bottlenecks.
+---> Implement scheduling
+- Repeat with multithreading
+- Repeat with multinodes
+
+I've done a couple of these. The next step is to do the standalone version
+without messaging, to get a tighter estimate of the messaging overhead.
+Then I need to insert a stage where I implement scheduling, before going
+on to the multithread stuff.
+
+=============================================================================
+9 Nov 2009.
+Made another branch, based on moose/Msg. In:
+
+/home/bhalla/moose/IntFireNetworkNoMsg
+
+Munged the IntFire and related code
+in it to directly call functions instead of message passing.
+
+=============================================================================
+10 Nov 2009
+After some debugging, managed to get the code to work. There is very little
+difference with the profiling: 30.2 sec for the message-less version, as
+compared to 32.54 sec for the messaging version.
+
+Ran using 'time' a few times with optimization but no profiling.
+messaging	non-messaging
+37.3		33.7
+37.1		33.5
+37.1		33.7
+
+So the difference is about 3.5 sec, or a bit over 10%. This is outstandingly
+good.
+Checked in the IntFireNetworkNoMsg stuff as the end of its branch. This is
+revision 1448.
+
+Then deleted the branch from my local machine. Still sits on SourceForge.
+
+Now on to scheduling and threading.
+
+The scheduler has to send messages for process and clearQ.
+During runtime:
+	process and clearQ alternate strictly. Many threads to coordinate.
+	Shell has to be blocked, but with an option to halt runtime thread.
+		Ideally this could be done reversibly.
+	Graphics has to continue on yet another thread.
+During setup:
+	clearQ must run in coordination with the thread of the Shell.
+	- Cannot be on the same thread, since we may need to hold up the shell
+	while completing queued calls.
+Graphics and the other threads
+	- Graphics sits on a separate thread.
+	- I need a separate channel for data to go from process to graphics.
+		This is both for the OpenGL graphics, and for Qt.
+		Looks like a thread-safe queue here. 
+		Will need graphics first and computation first policy options.
+	- Qt and OpenGl events will probably be handled by Python.
+
+I'll use the recently implemented stuff for array fields to do the clock ticks.
+Also I'll use priority queue to manage it, rather than the customized version.
+
+=============================================================================
+
+Need to call Erefs by value in EpFunc.h
+Issue with having ticks as ArrayFields: they need to be sorted. If the
+sort order is changed, then the messaging will have to be remapped accordingly.
+This is do-able but involves a possibly messy extension of messaging functions.
+The alternative is to have them as separate Elements, which is messy in other
+ways.
+
+=============================================================================
+13 Nov
+Working on Clock.cpp.
+=============================================================================
+14 Nov.
+Put in skeleton of Clock and Tick, compiles.
+=============================================================================
+15 Nov.
+Setting up unit tests. Need to define calling framework.
+- Creation of ticks
+	- Could create a certain # explicitly, like I do with Synapses.
+	- Could have an 'addTick' function on the Clock. Would need dropTick.
+		- the addClock function works better with this.
+		- Messiness if I drop a tick in between the defined set.
+	- Could create say 10 clocks by default, but manange only the
+		set in the TickPtr vector.
+	- Could get rid of 'stage' field by considering index on the Tick 
+		vector. But there is no rule about ordering clocks by dt
+		(though it is implicit somehwat in GENESIS for clock 0)
 
 
 =============================================================================
