@@ -86,9 +86,22 @@ class Clock: public Data
 		void stop( Eref e, const Qinfo* q );
 		void reinit( Eref e, const Qinfo* q );
 
+		///////////////////////////////////////////////////////////
+		// Tick handlers
+		///////////////////////////////////////////////////////////
 		// Handles dt assignment from the child ticks.
 		void setDt( Eref e, const Qinfo* q, double dt );
+
+		/**
+		 * Looks up the specified clock tick. Returns 0 on failure.
+		 */
+		Tick* getTick( unsigned int i );
+
 		void sortTicks();
+
+		unsigned int getNumTick() const;
+		void setNumTick( unsigned int num );
+
 
 		static const Cinfo* initCinfo();
 	private:

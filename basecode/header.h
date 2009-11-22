@@ -71,5 +71,6 @@ class Data;
 #include "EpFunc.h"
 #include "ValueFinfo.h"
 #include "Dinfo.h"
+#include "FieldElement.h"
 
 #endif // _HEADER_H

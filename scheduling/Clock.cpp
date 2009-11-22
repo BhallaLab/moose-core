@@ -300,3 +300,20 @@ void Clock::sortTicks( )
 	sort( tickPtr_.begin(), tickPtr_.end() );
 	// tick_[tickSeq_[0].index()].updateNextClockTime();
 }
+
+Tick* Clock::getTick( unsigned int i )
+{
+	if ( i < ticks_.size() )
+		return &ticks_[i];
+	else
+		return 0;
+}
+
+unsigned int Clock::getNumTick() const
+{
+	return ticks_.size();
+}
+
+void Clock::setNumTick( unsigned int num )
+{
+}

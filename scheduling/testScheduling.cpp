@@ -22,8 +22,10 @@ void setupTicks()
 	Id clock = Clock::initCinfo()->create( "tclock", 1 );
 	Element* clocke = clock();
 	Eref clocker = clock.eref();
+	FieldElement< Tick, Clock, &Clock::getTick > tick( tc, clocke, 
+		&Clock::getNumTick, &Clock::setNumTick );
 	// TickElement tick( tc, clocke );
-	// assert( tick.numData() == 0 );
+	assert( tick.numData() == 0 );
 
 	// bool ret = SetGet2< double, unsigned int >::set( );
 	cout << "." << flush;
