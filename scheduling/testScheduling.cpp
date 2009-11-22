@@ -10,6 +10,7 @@
 #include "header.h"
 #include "Message.h"
 #include "Tick.h"
+#include "TickPtr.h"
 #include "Clock.h"
 
 /**

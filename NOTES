@@ -1806,6 +1806,13 @@ Resuming work after IMMMI. Compilation works for the FieldElement template
 to handle arrays of fields. Checked in as 1457.
 
 Now worked through replacing SynElement with the FieldElement template.
-Works, clears unit tests. 
+Works, clears unit tests. Checked in as 1458.
+
+Setting up clocks and ticks. Issue: How will ticks be added? Seems like
+the safe thing to do is that any change at all in any of the tick
+parameters (dt, stage, or # of ticks) should invoke a rebuild.
+
+Will need an UpValueFinfo: assignment of fields get diverted to parent.
+Will need to sort out calling of Process and clearQ. Consider Reinit too.
 
 =============================================================================

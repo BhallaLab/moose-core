@@ -46,11 +46,6 @@ const Cinfo* Tick::initCinfo()
 			&Tick::setStage,
 			&Tick::getStage
 		),
-		new ReadonlyValueFinfo< Tick, double >(
-			"nextTime",
-			"Time that the tick reaches upon completion of each step",
-			&Tick::getNextTime
-		),
 		new ValueFinfo< Tick, string>(
 			"path",
 			"Wildcard path of objects managed by this tick",
@@ -202,8 +197,9 @@ void Tick::increment( Eref e, ProcInfo* info ) const
  * because derived classes (ParTick) need to do much more complicated
  * things to coordinate the reinit.
  */
-void Tick::reinit( Eref e )
+void Tick::reinit( Eref e ) const
 {
-	nextTime_ = dt_;
+	;
+	// nextTime_ = dt_;
 	// send1< ProcInfo >( e, reinitSlot, info );
 }

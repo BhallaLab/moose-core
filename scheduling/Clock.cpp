@@ -60,6 +60,7 @@
 
 #include "header.h"
 #include "Tick.h"
+#include "TickPtr.h"
 #include "Clock.h"
 
 const unsigned int finishedSlot = 0;
@@ -234,7 +235,7 @@ void Clock::start(  Eref e, const Qinfo* q, double runTime )
 	double nextTime= endTime;
 	while ( info_.currTime < endTime ) {
 		sort( tickPtr_.begin(), tickPtr_.end() );
-		nextTime = tickPtr_[1].tick()->getNextTime();
+		nextTime = tickPtr_[1].getNextTime();
 		if ( nextTime > endTime )
 			nextTime = endTime;
 		while ( isRunning_ && info_.currTime < nextTime )
@@ -245,8 +246,8 @@ void Clock::start(  Eref e, const Qinfo* q, double runTime )
 
 void Clock::step(  Eref e, const Qinfo* q, unsigned int nsteps )
 {
+	double endTime = info_.currTime + dt_ * nsteps;
 	sort( tickPtr_.begin(), tickPtr_.end() );
-	double endTime = tickPtr_[0].tick()->getDt() * nsteps;
 	start( e, q, endTime );
 }
 
@@ -295,10 +296,26 @@ void Clock::process( const ProcInfo* p, const Eref& e )
 	;
 }
 
-void Clock::sortTicks( )
+void Clock::addTick( Tick* t )
 {
+	for ( vector< TickPtr >::iterator j = tickPtr_.begin(); 
+		j != tickPtr_.end(); ++j)
+	{
+		if ( j->addTick( t ) )
+			return;
+	}
+	tickPtr_.push_back( t );
+}
+
+void Clock::rebuild()
+{
+	tickPtr_.clear();
+	for ( vector< Tick >::iterator i = ticks_.begin(); 
+		i != ticks_.end(); ++i)
+	{
+		addTick( &( *i ) );
+	}
 	sort( tickPtr_.begin(), tickPtr_.end() );
-	// tick_[tickSeq_[0].index()].updateNextClockTime();
 }
 
 Tick* Clock::getTick( unsigned int i )
@@ -316,4 +333,6 @@ unsigned int Clock::getNumTick() const
 
 void Clock::setNumTick( unsigned int num )
 {
+	ticks_.resize( num );
+	rebuild();
 }

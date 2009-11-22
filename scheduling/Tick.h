@@ -42,7 +42,7 @@ class Tick
 		 * itself, and to trigger reinit in all targets, and to go on
 		 * to the next tick
 		 */
-		void reinit( Eref e );
+		void reinit( Eref e ) const;
 
 		///////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
@@ -50,7 +50,7 @@ class Tick
 		bool running_;
 		int callback_;
 		double dt_;
-		int stage_;
+		unsigned int stage_;
 		double nextTime_;
 		double nextTickTime_;
 		bool next_; /// Flag to show if next_ tick is present

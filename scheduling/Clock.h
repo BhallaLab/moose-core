@@ -10,63 +10,10 @@
 #ifndef _CLOCK_H
 #define _CLOCK_H
 
-class TickPtr {
-	public:
-		TickPtr()
-			: ptr_( 0 )
-		{;}
-		
-		TickPtr( Tick* ptr )
-			: ptr_( ptr )
-		{;}
-
-		bool operator<( const TickPtr other ) const {
-			if ( ptr_ && other.ptr_ )
-				return ( *ptr_ < *( other.ptr_ ) );
-			return 0;
-		}
-
-		const Tick* tick() const {
-			return ptr_;
-		}
-
-		/**
-		 * Advance the simulation till the specified end time, without
-		 * worrying about other dts.
-		 */
-		void advance( Eref e, ProcInfo* p, double endTime ) {
-			while ( p->currTime < endTime ) {
-				const TickPtr* t = this;
-				while ( t ) {
-					t->ptr_->increment( e, p );
-					t = t->next_;
-				}
-				p->currTime += p->dt;
-			}
-		}
-
-		void reinit( Eref e ) const
-		{
-			const TickPtr* t = this;
-			while ( t ) {
-				t->ptr_->reinit( e );
-				t = t->next_;
-			}
-		}
-
-		
-	private:
-		Tick* ptr_;
-		const TickPtr* next_;
-};
-
-
 class Clock: public Data
 {
 	public:
 		Clock();
-
-		void process( const ProcInfo* p, const Eref& e );
 
 		//////////////////////////////////////////////////////////
 		//  Field assignment functions
@@ -92,25 +39,36 @@ class Clock: public Data
 		// Handles dt assignment from the child ticks.
 		void setDt( Eref e, const Qinfo* q, double dt );
 
+		void process( const ProcInfo* p, const Eref& e );
+
+		/**
+		 * Pushes the new Tick onto the TickPtr stack.
+		 */
+		void addTick( Tick* t );
+
+		/**
+		 * Scans through all Ticks and puts them in order onto the tickPtr_
+		 */
+		void rebuild();
+
 		/**
 		 * Looks up the specified clock tick. Returns 0 on failure.
 		 */
 		Tick* getTick( unsigned int i );
 
-		void sortTicks();
+//		void sortTicks();
 
 		unsigned int getNumTick() const;
 		void setNumTick( unsigned int num );
-
 
 		static const Cinfo* initCinfo();
 	private:
 		double runTime_;
 		double currentTime_;
 		double nextTime_;
-		int nSteps_;
-		int currentStep_;
-		double dt_;
+		unsigned int nSteps_;
+		unsigned int currentStep_;
+		double dt_; /// The minimum dt among all ticks.
 		bool isRunning_;
 		ProcInfo info_;
 		int callback_;
