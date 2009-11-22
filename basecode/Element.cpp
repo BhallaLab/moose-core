@@ -138,6 +138,15 @@ unsigned int Element::numDimensions() const
 	return 1;
 }
 
+void Element::setArraySizes( const vector< unsigned int >& sizes )
+{;}
+
+void Element::getArraySizes( vector< unsigned int >& sizes ) const
+{
+	sizes.clear();
+	sizes.resize( numData_, 1 );
+}
+
 const Conn& Element::conn( ConnId c ) const {
 	assert( c < c_.size() );
 	return c_[c];

@@ -81,8 +81,8 @@ unsigned int SparseMsg::randomConnect( double probability )
 	unsigned int totalSynapses = 0;
 	vector< unsigned int > sizes;
 
-	SynElement* syn = dynamic_cast< SynElement* >( e2_ );
-	assert( syn );
+	// SynElement* syn = dynamic_cast< SynElement* >( e2_ );
+	Element* syn = e2_;
 	syn->getArraySizes( sizes );
 	assert( sizes.size() == nCols );
 

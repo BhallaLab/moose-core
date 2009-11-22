@@ -1801,3 +1801,11 @@ Starting up with a template for the TickElement. yet to compile.
 16 Nov
 Now trying to compile.
 =============================================================================
+22 Nov.
+Resuming work after IMMMI. Compilation works for the FieldElement template
+to handle arrays of fields. Checked in as 1457.
+
+Now worked through replacing SynElement with the FieldElement template.
+Works, clears unit tests. 
+
+=============================================================================

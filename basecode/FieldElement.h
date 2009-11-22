@@ -87,7 +87,7 @@ template< class Field, class Parent, Field* ( Parent::*Lookup )( unsigned int ) 
 			assert( sizes.size() == numData_ );
 			vector< unsigned int >::const_iterator i = sizes.begin();
 			for ( char* data = d_; data < endData; data += dataSize_ )
-			( reinterpret_cast< Parent* >( data ) )->setNumField_( *i++ );
+			( ( reinterpret_cast< Parent* >( data ) )->*setNumField_ )( *i++ );
 		}
 
 		void getArraySizes( vector< unsigned int >& sizes ) const
@@ -96,7 +96,7 @@ template< class Field, class Parent, Field* ( Parent::*Lookup )( unsigned int ) 
 			char* endData = d_ + numData_ * dataSize_;
 
 			for ( char* data = d_; data < endData; data += dataSize_ )
-				sizes.push_back( ( reinterpret_cast< Parent* >( data ) )->getNumField_() );
+				sizes.push_back( ( ( reinterpret_cast< Parent* >( data ) )->*getNumField_ )() );
 		}
 	private:
 		unsigned int ( Parent::*getNumField_ )() const;

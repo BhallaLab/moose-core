@@ -137,6 +137,26 @@ class Element
 		 */
 		virtual unsigned int numDimensions() const;
 
+		/**
+		 * Assigns the sizes of all array field entries at once.
+		 * This is ignored for regular Elements.
+		 * In a FieldElement we can assign different array sizes for 
+		 * each entry in the Element.
+		 * Note that a single Element may have more than one array field.
+		 * However, each FieldElement instance will refer to just one of
+		 * these array fields, so there is no ambiguity.
+		 */
+		virtual void setArraySizes( const vector< unsigned int >& sizes );
+
+		/**
+		 * Looks up the sizes of all array field entries at once. Returns
+		 * all ones for regular Elements. 
+		 * Note that a single Element may have more than one array field.
+		 * However, each FieldElement instance will refer to just one of
+		 * these array fields, so there is no ambiguity.
+		 */
+		virtual void getArraySizes( vector< unsigned int >& sizes ) const;
+
 		/** 
 		 * This function pushes a function request onto a queue.
 		 * In multithread mode it figures out which queue to use.

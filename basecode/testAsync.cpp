@@ -273,7 +273,8 @@ void testSetGetSynapse()
 	unsigned int size = 100;
 	string arg;
 	Id i2 = ic->create( "test2", size );
-	SynElement syn( sc, i2() );
+	// SynElement syn( sc, i2() );
+	FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
 
 	assert( syn.numData() == 0 );
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -308,7 +309,8 @@ void testSetGetVec()
 	unsigned int size = 100;
 	string arg;
 	Id i2 = ic->create( "test2", size );
-	SynElement syn( sc, i2() );
+//	SynElement syn( sc, i2() );
+	FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
 
 	assert( syn.numData() == 0 );
 	vector< unsigned int > numSyn( size, 0 );
@@ -357,7 +359,8 @@ void testSendSpike()
 	string arg;
 	Id i2 = ic->create( "test2", size );
 	Eref e2 = i2.eref();
-	SynElement syn( sc, i2() );
+	//SynElement syn( sc, i2() );
+	FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
 
 	assert( syn.numData() == 0 );
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -511,7 +514,8 @@ void testSparseMsg()
 	string arg;
 	Id i2 = ic->create( "test2", size );
 	Eref e2 = i2.eref();
-	SynElement syn( sc, i2() );
+	// SynElement syn( sc, i2() );
+	FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
 
 	assert( syn.numData() == 0 );
 	/*
