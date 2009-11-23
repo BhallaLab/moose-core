@@ -48,7 +48,7 @@ template< class T > class UpFunc0: public OpFunc
 template< class T, class A > class UpFunc1: public OpFunc
 {
 	public:
-		UpFunc1( void ( T::*func )( DataId, const A& ) )
+		UpFunc1( void ( T::*func )( DataId, A ) )
 			: func_( func )
 			{;}
 
@@ -70,7 +70,7 @@ template< class T, class A > class UpFunc1: public OpFunc
 		}
 
 	private:
-		void ( T::*func_ )( DataId index, const A& ); 
+		void ( T::*func_ )( DataId index, const A ); 
 };
 
 template< class T, class A1, class A2 > class UpFunc2: public OpFunc
@@ -133,5 +133,58 @@ template< class T, class A1, class A2, class A3 > class UpFunc3:
 	private:
 		void ( T::*func_ )( DataId, A1, A2, A3 ); 
 };
+
+/**
+ * This specialized UpFunc is for returning a single field value
+ * for an array field.
+ * It generates an UpFunc that takes an extra argument:
+ * FuncId of the function on the object that requested the
+ * value. The UpFunc then sends back a message with the info.
+ */
+template< class T, class A > class GetUpFunc: public OpFunc
+{
+	public:
+		GetUpFunc( A ( T::*func )( DataId ) const )
+			: func_( func )
+			{;}
+
+		bool checkFinfo( const Finfo* s ) const {
+			return dynamic_cast< const SrcFinfo1< A >* >( s );
+		}
+
+		bool checkSet( const SetGet* s ) const {
+			return dynamic_cast< const SetGet1< FuncId >* >( s );
+		}
+
+		/**
+		 * The buf just contains the funcid on the src element that is
+		 * ready to receive the returned data.
+		 * In this special case we do not do typechecking, since the
+		 * constructors for the get command should have done so already.
+		 * So we bypass the usual SrcFinfo::sendTo, and instead go
+		 * right to the Conn to send the data.
+		 */
+		void op( Eref e, const char* buf ) const {
+			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
+			buf += sizeof( Qinfo );
+		    FuncId retFunc = *reinterpret_cast< const FuncId* >( buf );
+			const A& ret = (( reinterpret_cast< T* >( e.data1() ) )->*func_)( e.index() );
+
+			// This is a Bad Thing. The returned index should be the full
+			// DataId to figure out who sent it. Instead we send only the
+			// data part of the index.
+			Qinfo retq( retFunc, e.index().data(), Conv< A >::size( ret ), 1 );
+			char* temp = new char[ retq.size() ];
+			Conv<A>::val2buf( temp, ret );
+			Conn c;
+			c.add( const_cast< Msg* >( e.element()->getMsg( q->mid() ) ) );
+			c.tsend( e.element(), q->srcIndex(), retq, temp );
+			delete[] temp;
+		}
+
+	private:
+		A ( T::*func_ )( DataId ) const;
+};
+
 
 #endif // _UPFUNC_H

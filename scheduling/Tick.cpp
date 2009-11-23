@@ -80,7 +80,7 @@ static const Cinfo* tickCinfo = Tick::initCinfo();
 // Tick class definition functions
 ///////////////////////////////////////////////////
 Tick::Tick()
-	: dt_( 1.0 ), stage_( 0 ), nextTime_( 0.0 )
+	: dt_( 1.0 ), stage_( 0 )
 { ; }
 
 Tick::~Tick()
@@ -90,8 +90,8 @@ bool Tick::operator<( const Tick& other ) const
 {
 	const double EPSILON = 1e-9;
 
-	if ( nextTime_ < other.nextTime_ ) return 1;
-		if ( fabs( 1.0 - nextTime_ / other.nextTime_ ) < EPSILON && 
+	if ( dt_ < other.dt_ ) return 1;
+		if ( fabs( 1.0 - dt_ / other.dt_ ) < EPSILON && 
 			stage_ < other.stage_ )
 			return 1;
 	return 0;
@@ -116,9 +116,11 @@ bool Tick::operator==( const Tick& other ) const
  */
 void Tick::setDt( double newdt )
 {
+	/*
 	nextTime_ += newdt - dt_;
 	if ( nextTime_ < dt_ )
 		nextTime_ = dt_;
+	*/
 	dt_ = newdt;
 }
 /**
@@ -152,11 +154,12 @@ unsigned int Tick::getStage() const
 /**
  * nextTime is here to peek into when the tick is due to fire next.
  * Not clear if it should become private.
- */
 double Tick::getNextTime() const
 {
-	return nextTime_;
+	// return nextTime_;
+	return 0.0;
 }
+ */
 
 /**
  * set and get Path are problematic. Their goal is to assign the 

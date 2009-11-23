@@ -27,7 +27,7 @@ class Tick
 		double getDt() const;
 		void setStage( unsigned int v );
 		unsigned int getStage() const;
-		double getNextTime() const;
+		// double getNextTime() const;
 		void setPath( string v );
 		string getPath() const;
 
@@ -47,14 +47,14 @@ class Tick
 		///////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 	private:
-		bool running_;
-		int callback_;
+		// bool running_;
+		// int callback_;
 		double dt_;
 		unsigned int stage_;
-		double nextTime_;
-		double nextTickTime_;
-		bool next_; /// Flag to show if next_ tick is present
-		bool terminate_;
+		//double nextTime_;
+		//double nextTickTime_;
+		//bool next_; /// Flag to show if next_ tick is present
+		//bool terminate_;
 		string path_;/// \todo Perhaps we delete this field
 };
 

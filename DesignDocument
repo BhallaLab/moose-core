@@ -186,6 +186,26 @@ calls:
 s->sendTo( Eref me, Id requester, [args] );
 and then it has to do lots of cleanup afterward.
 <Later: Look into doing an array 'set' and 'get' command.>
+
+Field access is set up using ValueFinfo and its variants.
+ValueFinfo: uses 
+	setFunc of form  void ( T::*setFunc )( F )
+	getFunc of form  F ( T::*getFunc )() const
+to access fields. Wraps these functions into OpFunc1 and GetOpFunc. Generates
+functions named "set_" + fieldname and "get_" + fieldname for the Finfo array.
+
+ReadOnlyValueFinfo: Similar, only doesn't use the setFunc.
+
+We have a small problem here when handling array fields that also need to 
+refer to the parent object. For example, when dt values on clock ticks are
+modified the parent clock needs to do some re-sorting.
+
+A related problems is to set up zombies. In all these cases, things would be
+easier if we always had access to the full DataId as one of the function
+arguments, as in UpFunc. This is untidy for regular function calls.
+For that matter we might want to use yet more information arguments, such
+as the target Element and the Qinfo, as in Epfuncs.
+
 ------------------------------------------------------------------------------
 Setup
 FIELD DEFINITION

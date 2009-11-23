@@ -1812,7 +1812,37 @@ Setting up clocks and ticks. Issue: How will ticks be added? Seems like
 the safe thing to do is that any change at all in any of the tick
 parameters (dt, stage, or # of ticks) should invoke a rebuild.
 
+Implemented much of the Tick scheduling stuff. Checked in as 1459
+
 Will need an UpValueFinfo: assignment of fields get diverted to parent.
 Will need to sort out calling of Process and clearQ. Consider Reinit too.
 
 =============================================================================
+23 Nov.
+Ways to approach the Tick field assignment stuff:
+Pedantic: 
+	The tick field access functions themselves ensure updates of the Clock.
+	- Can do as a special case by making an UpValueFunc which calls
+	the parent clock to do the field assignment, and handle updates.
+	This is clean enough, a little tedious and ugly for the field funcs.
+	- Can do as a general case by making all array field assignment calls
+	into calls to the parent. Ugh.
+	- Can do as a general case by providing extra args so that the function
+	can work out who the parent is. Can ignore this stuff if not needed.
+	Also somewhat ugh.
+
+Pragmatic:
+	Tick field access just updates fields locally. We need another call
+	to the Clock to rebuild the schedule.
+	The wrapping Shell functions for handling clock ticks does this.
+	- This would allow calls to change ticks without having an effect
+	on scheduling. Could be surprising.
+	- There may yet be other cases which need to do similar things.
+
+Hacks:
+	- Provide ValueFinfo with an auxiliary SetFunc
+	- Provide ValueFinfo with an auxiliary trigger func for whatever
+		other operation is needed on parent when a field changes.
+
+
+

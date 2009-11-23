@@ -114,4 +114,69 @@ template < class T, class F > class ReadonlyValueFinfo: public Finfo
 		GetOpFunc< T, F >* getOpFunc_;
 };
 
+/**
+ * Here the value belongs to an array field within class T.
+ * This is used when the assignment function for an array field 
+ * should also update some information in the parent class T.
+ * The function thus does not refer to the class of the array field.
+ */
+template < class T, class F > class UpValueFinfo: public Finfo
+{
+	public:
+		~UpValueFinfo() {
+			delete setUpFunc_;
+			delete getUpFunc_;
+		}
+
+		UpValueFinfo( const string& name, const string& doc, 
+			void ( T::*setFunc )( DataId, F ),
+			F ( T::*getFunc )( DataId ) const )
+			: Finfo( name, doc )
+			{
+				setUpFunc_ = new UpFunc1< T, F >( setFunc );
+				getUpFunc_ = new GetUpFunc< T, F >( getFunc );
+			}
+
+
+		void registerOpFuncs(
+			map< string, FuncId >& fnames, vector< OpFunc* >& funcs ) 
+		{
+			string setName = "set_" + name();
+			map< string, FuncId >::iterator i = fnames.find( setName );
+			if ( i != fnames.end() ) {
+				funcs[ i->second ] = setUpFunc_;
+			} else {
+				unsigned int size = funcs.size();
+				fnames[ setName ] = size;
+				funcs.push_back( setUpFunc_ );
+
+			}
+			string getName = "get_" + name();
+			i = fnames.find( getName );
+			if ( i != fnames.end() ) {
+				funcs[ i->second ] = getUpFunc_;
+			} else {
+				unsigned int size = funcs.size();
+				fnames[ getName ] = size;
+				funcs.push_back( getUpFunc_ );
+			}
+		}
+
+		// Need to think about whether an index has to be registered here.
+		unsigned int registerSrcFuncIndex( unsigned int current )
+		{
+			return current;
+		}
+
+		// Need to think about whether an index has to be registered here.
+		unsigned int registerConn( unsigned int current )
+		{
+			return current;
+		}
+
+	private:
+		UpFunc1< T, F >* setUpFunc_;
+		GetUpFunc< T, F >* getUpFunc_;
+};
+
 #endif // _VALUE_FINFO_H

@@ -143,7 +143,7 @@ void IntFire::process( const ProcInfo* p, const Eref& e )
  * and gets redirected to the IntFire.
  * This is called by UpFunc1< double >
  */
-void IntFire::addSpike( DataId index, const double& time )
+void IntFire::addSpike( DataId index, const double time )
 {
 	assert( index.field() < synapses_.size() );
 	Synapse s( synapses_[ index.field() ], time );

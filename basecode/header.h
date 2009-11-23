@@ -69,6 +69,7 @@ class Data;
 #include "SetGet.h"
 #include "OpFunc.h"
 #include "EpFunc.h"
+#include "UpFunc.h"
 #include "ValueFinfo.h"
 #include "Dinfo.h"
 #include "FieldElement.h"
