@@ -24,6 +24,9 @@ class Clock: public Data
 		void setNsteps( unsigned int v );
 		unsigned int getNsteps( ) const;
 		unsigned int getCurrentStep() const;
+
+		void setTickDt( DataId i, double v );
+		double getTickDt( DataId i ) const;
 		
 		//////////////////////////////////////////////////////////
 		//  Dest functions
@@ -58,8 +61,8 @@ class Clock: public Data
 
 //		void sortTicks();
 
-		unsigned int getNumTick() const;
-		void setNumTick( unsigned int num );
+		unsigned int getNumTicks() const;
+		void setNumTicks( unsigned int num );
 
 		static const Cinfo* initCinfo();
 	private:

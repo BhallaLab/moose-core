@@ -24,7 +24,7 @@ void setupTicks()
 	Element* clocke = clock();
 	Eref clocker = clock.eref();
 	FieldElement< Tick, Clock, &Clock::getTick > tick( tc, clocke, 
-		&Clock::getNumTick, &Clock::setNumTick );
+		&Clock::getNumTicks, &Clock::setNumTicks );
 	// TickElement tick( tc, clocke );
 	assert( tick.numData() == 0 );
 

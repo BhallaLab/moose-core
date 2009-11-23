@@ -18,6 +18,9 @@
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
 #include "../randnum/randnum.h"
+#include "../scheduling/Tick.h"
+#include "../scheduling/TickPtr.h"
+#include "../scheduling/Clock.h"
 
 void insertIntoQ( )
 {
@@ -589,6 +592,42 @@ void testSparseMsg()
 	delete i2();
 }
 
+void testUpValue()
+{
+	static const double EPSILON = 1e-9;
+	const Cinfo* cc = Clock::initCinfo();
+	const Cinfo* tc = Tick::initCinfo();
+	unsigned int size = 10;
+	Id clock = cc->create( "clock", 1 );
+	Eref clocker = clock.eref();
+	//SynElement syn( sc, i2() );
+	FieldElement< Tick, Clock, &Clock::getTick > ticke( tc, clock(), &Clock::getNumTicks, &Clock::setNumTicks );
+
+	assert( ticke.numData() == 0 );
+	bool ret = SetGet1< unsigned int >::set( clocker, "numTicks", size );
+	assert( ret );
+	assert( ticke.numData() == size );
+
+
+	for ( unsigned int i = 0; i < size; ++i ) {
+		DataId di( 0, i ); // DataId( data, field )
+		Eref te( &ticke, di );
+		double dt = i;
+		ret = SetGet1< double >::set( te, "dt", dt );
+		assert( ret );
+		double val = SetGet1< double >::get( te, "olddt" );
+		assert( fabs( dt - val ) < EPSILON );
+
+		dt *= 10.0;
+		ret = SetGet1< double >::set( te, "olddt", dt );
+		assert( ret );
+		val = SetGet1< double >::get( te, "dt" );
+		assert( fabs( dt - val ) < EPSILON );
+	}
+	cout << "." << flush;
+	delete clock();
+}
+
 void testAsync( )
 {
 	insertIntoQ();
@@ -603,4 +642,5 @@ void testAsync( )
 	testSendSpike();
 	testSparseMatrix();
 	testSparseMsg();
+	testUpValue();
 }

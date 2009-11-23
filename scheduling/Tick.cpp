@@ -8,6 +8,8 @@
 **********************************************************************/
 #include "header.h"
 #include "Tick.h"
+#include "TickPtr.h"
+#include "Clock.h"
 
 /**
  * The Tick handles the nuts and bolts of scheduling. It sends the
@@ -34,8 +36,15 @@ const Cinfo* Tick::initCinfo()
 	///////////////////////////////////////////////////////
 	// Field definitions
 	///////////////////////////////////////////////////////
-		new ValueFinfo< Tick, double >(
+		// Refers it to the parent Clock.
+		new UpValueFinfo< Clock, double >(
 			"dt",
+			"Timestep for this tick",
+			&Clock::setTickDt,
+			&Clock::getTickDt
+		),
+		new ValueFinfo< Tick, double >(
+			"olddt",
 			"Timestep for this tick",
 			&Tick::setDt,
 			&Tick::getDt

@@ -83,23 +83,29 @@ const Cinfo* Clock::initCinfo()
 			"Duration to run the simulation",
 			&Clock::setRunTime,
 			&Clock::getRunTime
-			),
+		),
 		new ReadonlyValueFinfo< Clock, double >(
 			"currentTime",
 			"Current simulation time",
 			&Clock::getCurrentTime
-			),
+		),
 		new ValueFinfo< Clock, unsigned int >( 
 			"nsteps",
 			"Number of steps to advance the simulation, in units of the smallest timestep on the clock ticks",
 			&Clock::setNsteps,
 			&Clock::getNsteps
-			),
+		),
+		new ValueFinfo< Clock, unsigned int >( 
+			"numTicks",
+			"Number of clock ticks",
+			&Clock::setNumTicks,
+			&Clock::getNumTicks
+		),
 		new ReadonlyValueFinfo< Clock, unsigned int >( 
 			"currentStep",
 			"Current simulation step",
 			&Clock::getCurrentStep
-			),
+		),
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
@@ -280,11 +286,25 @@ void Clock::reinit( Eref e, const Qinfo* q )
 /**
  * This function handles any changes to dt in the ticks. This means
  * it must redo the ordering of the ticks and call a resched on them.
- * \todo Currently only a placeholder.
  */
-void Clock::setDt( Eref e, const Qinfo* q, double dt )
+void Clock::setTickDt( DataId i, double dt )
 {
-	;
+	if ( i.field() < ticks_.size() ) {
+		ticks_[ i.field() ].setDt( dt ); 
+		rebuild();
+	} else {
+		cout << "Clock::setTickDt:: Tick " << i << " not found\n";
+	}
+}
+
+double Clock::getTickDt( DataId i ) const
+{
+	if ( i.field() < ticks_.size() ) {
+		return ticks_[ i.field() ].getDt(); 
+	} else {
+		cout << "Clock::getTickDt:: Tick " << i << " not found\n";
+	}
+	return 1.0;
 }
 
 ///////////////////////////////////////////////////
@@ -326,12 +346,12 @@ Tick* Clock::getTick( unsigned int i )
 		return 0;
 }
 
-unsigned int Clock::getNumTick() const
+unsigned int Clock::getNumTicks() const
 {
 	return ticks_.size();
 }
 
-void Clock::setNumTick( unsigned int num )
+void Clock::setNumTicks( unsigned int num )
 {
 	ticks_.resize( num );
 	rebuild();

@@ -1845,4 +1845,8 @@ Hacks:
 		other operation is needed on parent when a field changes.
 
 
+I'll use the UpValueFunc, which is what I had originally planned.
+Checked in as 1460.
+Implemented, tested for one field. Works OK. Valgrind also happy. 
 
+=============================================================================
