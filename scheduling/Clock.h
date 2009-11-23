@@ -27,6 +27,8 @@ class Clock: public Data
 
 		void setTickDt( DataId i, double v );
 		double getTickDt( DataId i ) const;
+		void setStage( DataId i, unsigned int  v );
+		unsigned int  getStage( DataId i ) const;
 		
 		//////////////////////////////////////////////////////////
 		//  Dest functions

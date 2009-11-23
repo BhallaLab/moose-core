@@ -44,16 +44,16 @@ const Cinfo* Tick::initCinfo()
 			&Clock::getTickDt
 		),
 		new ValueFinfo< Tick, double >(
-			"olddt",
+			"localdt",
 			"Timestep for this tick",
 			&Tick::setDt,
 			&Tick::getDt
 		),
-		new ValueFinfo< Tick, unsigned int >(
+		new UpValueFinfo< Clock, unsigned int >(
 			"stage",
 			"Sequence number if multiple ticks have the same dt.",
-			&Tick::setStage,
-			&Tick::getStage
+			&Clock::setStage,
+			&Clock::getStage
 		),
 		new ValueFinfo< Tick, string>(
 			"path",

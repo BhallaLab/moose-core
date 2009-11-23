@@ -615,11 +615,11 @@ void testUpValue()
 		double dt = i;
 		ret = SetGet1< double >::set( te, "dt", dt );
 		assert( ret );
-		double val = SetGet1< double >::get( te, "olddt" );
+		double val = SetGet1< double >::get( te, "localdt" );
 		assert( fabs( dt - val ) < EPSILON );
 
 		dt *= 10.0;
-		ret = SetGet1< double >::set( te, "olddt", dt );
+		ret = SetGet1< double >::set( te, "localdt", dt );
 		assert( ret );
 		val = SetGet1< double >::get( te, "dt" );
 		assert( fabs( dt - val ) < EPSILON );

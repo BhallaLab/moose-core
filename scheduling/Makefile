@@ -23,7 +23,7 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 Clock.o:	Tick.h TickPtr.h Clock.h
-Tick.o:	Tick.h
+Tick.o:	Tick.h Clock.h
 TickPtr.o:	Tick.h TickPtr.h
 testScheduling.o:	Tick.h TickPtr.h Clock.h
 

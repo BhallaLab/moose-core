@@ -307,6 +307,30 @@ double Clock::getTickDt( DataId i ) const
 	return 1.0;
 }
 
+/**
+ * This function handles any changes to stage in the ticks. This means
+ * it must redo the ordering of the ticks and call a resched on them.
+ */
+void Clock::setStage( DataId i, unsigned int val )
+{
+	if ( i.field() < ticks_.size() ) {
+		ticks_[ i.field() ].setStage( val ); 
+		rebuild();
+	} else {
+		cout << "Clock::setStage:: Tick " << i << " not found\n";
+	}
+}
+
+unsigned int Clock::getStage( DataId i ) const
+{
+	if ( i.field() < ticks_.size() ) {
+		return ticks_[ i.field() ].getStage(); 
+	} else {
+		cout << "Clock::getStage:: Tick " << i << " not found\n";
+	}
+	return 0;
+}
+
 ///////////////////////////////////////////////////
 // Other function definitions
 ///////////////////////////////////////////////////
