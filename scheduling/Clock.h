@@ -12,6 +12,7 @@
 
 class Clock: public Data
 {
+	friend void setupTicks();
 	public:
 		Clock();
 

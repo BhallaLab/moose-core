@@ -11,6 +11,7 @@
 #define _TICKPTR_H
 
 class TickPtr {
+	friend void setupTicks();
 	public:
 		TickPtr();
 		TickPtr( Tick* ptr );

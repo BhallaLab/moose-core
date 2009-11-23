@@ -41,13 +41,17 @@ bool TickPtr::operator<( const TickPtr other ) const {
 * The new tick is positioning according to stage.
 * This is inefficient, but we don't expect to have many ticks,
 * typically under 10.
+* Cannot use this if a run is already in progress: will need to do
+* something with the ProcInfo if we need to.
 * Returns true if the dt matches and the add was successful.
 */
 bool TickPtr::addTick( const Tick* t )
 {
+	if ( t->getDt() < EPSILON )
+		return 0;
 	if ( ticks_.size() == 0 ) {
 		ticks_.push_back( t );
-		dt_ = t->getDt();
+		nextTime_ = dt_ = t->getDt();
 		return 1;
 	}
 	if ( fabs( t->getDt() - dt_ ) < EPSILON ) {

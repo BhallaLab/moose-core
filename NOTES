@@ -1848,5 +1848,10 @@ Hacks:
 I'll use the UpValueFunc, which is what I had originally planned.
 Checked in as 1460.
 Implemented, tested for one field. Works OK. Valgrind also happy. 1461.
+Implemented for second field as well. 1462.
+
+Set up unit tests for setupTicks(). Looks good.
+
+Implement getVec
 
 =============================================================================

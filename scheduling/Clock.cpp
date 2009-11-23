@@ -342,6 +342,10 @@ void Clock::process( const ProcInfo* p, const Eref& e )
 
 void Clock::addTick( Tick* t )
 {
+	static const double EPSILON = 1.0e-9;
+
+	if ( t->getDt() < EPSILON )
+		return;
 	for ( vector< TickPtr >::iterator j = tickPtr_.begin(); 
 		j != tickPtr_.end(); ++j)
 	{

@@ -89,7 +89,7 @@ static const Cinfo* tickCinfo = Tick::initCinfo();
 // Tick class definition functions
 ///////////////////////////////////////////////////
 Tick::Tick()
-	: dt_( 1.0 ), stage_( 0 )
+	: dt_( 0.0 ), stage_( 0 )
 { ; }
 
 Tick::~Tick()
