@@ -86,6 +86,9 @@ void setupTicks()
 	assert( cdata->tickPtr_[3].ticks_[0] == reinterpret_cast< const Tick* >( er0.data() ) );
 	assert( cdata->tickPtr_[3].ticks_[1] == reinterpret_cast< const Tick* >( er5.data() ) );
 
+	Qinfo q( 0, 0, 8 );
+	cdata->start( clocker, &q, 20 );
+
 	cout << "." << flush;
 	delete clocke;
 }

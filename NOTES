@@ -1850,8 +1850,59 @@ Checked in as 1460.
 Implemented, tested for one field. Works OK. Valgrind also happy. 1461.
 Implemented for second field as well. 1462.
 
-Set up unit tests for setupTicks(). Looks good.
+Set up unit tests for setupTicks(). Looks good. 1463.
+Called 'start'. Hangs, looks like infinite loop.
 
 Implement getVec
 
 =============================================================================
+24 Nov.
+Working on scheduling.
+Algorithm:
+Current time = 0
+While (currrent time < end time)
+	Sort all tickPtrs in order of nextt and stage.
+	Execute the first in sequence.
+		Current time becomes the nextt of the just executed tick.
+		nextt is incremented.
+
+Minor fix to this, since we want each tick to be called just as the system time
+advances. So the first call on tick0 (with dt = 1) is at t = 1.
+
+Next: handle process and clearQ alternately. This is a job for the Ticks.
+To call all process then all ticks:
+	No, the idea of the different stages is that a complete calculation
+	can be sent on during the same overall timestep, comprising several
+	ticks with the same dt but different stages.
+So, assume we call process and clearQ alternately.
+
+What to call first:
+	Process:
+	- ClearQ will have been called ahead of time by the system. For example,
+	reinit will already have been called, and we have values ready to use.
+	- If there were earler stages within this overall timestep, then 
+		we will not have a way to access data passed in.
+	ClearQ: 
+	- This will allow a given tick to handle incoming data and deal with
+	it, and pass it on in Process.
+So, call ClearQ first.
+
+Do we call ClearQ strictly alternating, or should stuff be cleared more often?
+	- More often clearing adds compute cost
+	- More often clearing might lessen queue length.
+	- Never need stuff till Process.
+
+So: Better to strictly alternate with Process.
+
+Do we have multiple Process calls?
+	- Several GENESIS type calculations need a separate 'init' stage then
+	a 'process' stage. For example, the compartment uses
+		- init: previous_state = Vm
+		- process: traverse messages, do integration.
+		If two compartments A and B exchange Vm, then they need to 
+		exchange previous_state in order to avoid asymmetry.
+	- In MOOSE, with the clearQ arrangement, this would not be an issue.
+	The data exchanged will always be previous-state, due to the sequencing
+	of clearQ and Process.
+	Seems like I never use it in other contexts.
+So, don't need multiple Process calls.

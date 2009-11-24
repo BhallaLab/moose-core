@@ -229,25 +229,23 @@ void Clock::start(  Eref e, const Qinfo* q, double runTime )
 		return;
 	}
 	double endTime = runTime * ROUNDING + info_.currTime;
+	isRunning_ = 1;
 
 	if ( tickPtr_.size() == 1 ) {
-		while ( isRunning_ && info_.currTime < endTime )
-			// This advances all ticks with this dt in order.
-			tickPtr_[0].advance( e, &info_, endTime );
+		tickPtr_[0].advance( e, &info_, endTime );
 		return;
 	}
 
 	// Here we have multiple tick times, need to do the sorting.
-	double nextTime= endTime;
-	while ( info_.currTime < endTime ) {
+	sort( tickPtr_.begin(), tickPtr_.end() );
+	double nextTime = tickPtr_[1].getNextTime();
+	while ( isRunning_ && tickPtr_[0].getNextTime() < endTime ) {
+		// This advances all ticks with this dt in order, till nextTime.
+		tickPtr_[0].advance( e, &info_, nextTime * ROUNDING );
 		sort( tickPtr_.begin(), tickPtr_.end() );
 		nextTime = tickPtr_[1].getNextTime();
-		if ( nextTime > endTime )
-			nextTime = endTime;
-		while ( isRunning_ && info_.currTime < nextTime )
-			// This advances all ticks with this dt in order.
-			tickPtr_[0].advance( e, &info_, nextTime );
 	}
+	isRunning_ = 0;
 }
 
 void Clock::step(  Eref e, const Qinfo* q, unsigned int nsteps )

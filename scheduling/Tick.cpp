@@ -198,8 +198,9 @@ string Tick::getPath() const
 /**
  * This sends out the process call.
  */
-void Tick::increment( Eref e, ProcInfo* info ) const
+void Tick::advance( Eref e, ProcInfo* info ) const
 {
+	cout << "(" << dt_ << ", " << stage_ << " ) at " << info->currTime << endl;
 	;
 	// send1< ProcInfo >( e, processSlot, info );
 }

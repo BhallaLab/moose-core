@@ -35,7 +35,7 @@ class Tick
 		// Functions for handling messages
 		///////////////////////////////////////////////////////
 
-		void increment( Eref e, ProcInfo* p ) const;
+		void advance( Eref e, ProcInfo* p ) const;
 
 		/**
 		 * Reinit is used to set the simulation time back to zero for

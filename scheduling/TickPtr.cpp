@@ -33,7 +33,7 @@ TickPtr::TickPtr( Tick* ptr )
 }
 
 bool TickPtr::operator<( const TickPtr other ) const {
-	return ( dt_ < other.dt_ );
+	return ( nextTime_ < other.nextTime_ );
 }
 
 /**
@@ -67,13 +67,14 @@ bool TickPtr::addTick( const Tick* t )
  * worrying about other dts.
  */
 void TickPtr::advance( Eref e, ProcInfo* p, double endTime ) {
-	while ( p->currTime < endTime ) {
+	while ( nextTime_ < endTime ) {
+		p->currTime = nextTime_;
 		for ( vector< const Tick* >::iterator i = ticks_.begin(); 
 			i != ticks_.end(); ++i )
 		{
-			(*i)->increment( e, p );
+			(*i)->advance( e, p );
 		}
-		p->currTime += p->dt;
+		nextTime_ += dt_;
 	}
 }
 
