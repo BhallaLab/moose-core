@@ -56,6 +56,12 @@ class Tick
 		 */
 		void reinit( Eref e ) const;
 
+		/**
+		 * A dummy function for handling messages incoming from parent
+		 * Clock
+		 */
+		void destroy( Eref e, const Qinfo* q );
+
 		///////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 	private:

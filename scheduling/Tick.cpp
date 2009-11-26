@@ -74,6 +74,8 @@ const Cinfo* Tick::initCinfo()
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
 	///////////////////////////////////////////////////////
+		new DestFinfo( "parent", "Message from Parent Element(s)", 
+			new EpFunc0< Tick >( &Tick::destroy ) ),
 	};
 	
 	static Cinfo tickCinfo(
@@ -194,6 +196,11 @@ string Tick::getPath() const
 // Dest function definitions
 ///////////////////////////////////////////////////
 
+void Tick::destroy( Eref e, const Qinfo* q )
+{
+	;
+}
+
 
 ///////////////////////////////////////////////////
 // Virtual function definitions for actually sending out the 
@@ -204,7 +211,7 @@ string Tick::getPath() const
  */
 void Tick::advance( Element* e, ProcInfo* info ) const
 {
-	cout << "(" << dt_ << ", " << stage_ << " ) at " << info->currTime << endl;
+	// cout << "(" << dt_ << ", " << stage_ << " ) at " << info->currTime << endl;
 	// Hack: we need a better way to define which connId to use.
 	// Presumably we should at least take an offset from the predefined
 	// Slots like children.

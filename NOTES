@@ -1925,4 +1925,8 @@ own index.
 
 Many changes needed to get all the pieces to work together. Compiles, 
 yet to get it to work.
+
+OK, now works. Cleaned out the scheduling test so it isn't verbose anymore.
+Also valgrind is happy.
+
 =============================================================================

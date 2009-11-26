@@ -74,6 +74,9 @@ class Cinfo
 			 */
 			void destroy( char* d ) const;
 
+			unsigned int numConn() const;
+			unsigned int numFuncIndex() const;
+
 		private:
 			const string name_;
 

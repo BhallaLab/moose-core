@@ -114,6 +114,16 @@ void Cinfo::destroy( char* d ) const
 	dinfo_->destroyData( d );
 }
 
+unsigned int Cinfo::numConn() const
+{
+	return numConn_;
+}
+
+unsigned int Cinfo::numFuncIndex() const
+{
+	return numFuncIndex_;
+}
+
 ////////////////////////////////////////////////////////////////////////
 // Private functions.
 ////////////////////////////////////////////////////////////////////////

@@ -17,19 +17,20 @@ class testSchedElement: public Element
 {
 	public:
 		testSchedElement() 
-			: Element( 0, 0, 0, 0, 0, 0 ), index_( 0 )
+			: Element( Tick::initCinfo(), 0, 0, 0, 0, 0 ), index_( 0 )
 		{;}
 		
 		void process( const ProcInfo* p ) {
 			static const int timings[] = { 1, 2, 2, 2, 3, 3, 4, 4, 4, 
 				5, 5, 5, 6, 6, 6, 6, 7, 8, 8, 8, 9, 9, 10, 10, 10, 10, 10,
 				11, 12, 12, 12, 12, 13, 14, 14, 14, 15, 15, 15, 15,
-				16, 16, 16, 17, 18, 18, 18, 19, 20, 20, 20, 20, 20 };
+				16, 16, 16, 17, 18, 18, 18, 18, 19, 20, 20, 20, 20, 20 };
 			unsigned int max = sizeof( timings ) / sizeof( int );
+			// cout << "timing[ " << index_ << " ] = " << timings[ index_ ] << ", time = " << p->currTime << endl;
 			assert( static_cast< int >( p->currTime ) == 	
 				timings[ index_++ ] );
 			assert( index_ <= max );
-			cout << index_ << ": " << p->currTime << endl;
+			// cout << index_ << ": " << p->currTime << endl;
 		}
 	private:
 		unsigned int index_;
@@ -50,10 +51,11 @@ void setupTicks()
 		&Clock::getNumTicks, &Clock::setNumTicks );
 	unsigned int size = 10;
 
-	OneToAllMsg::add( clocker, "tick", &ticke, "parent" );
+	bool ret = OneToAllMsg::add( clocker, "tick", &ticke, "parent" );
+	assert( ret );
 
 	assert( ticke.numData() == 0 );
-	bool ret = SetGet1< unsigned int >::set( clocker, "numTicks", size );
+	ret = SetGet1< unsigned int >::set( clocker, "numTicks", size );
 	assert( ret );
 	assert( ticke.numData() == size );
 
@@ -82,6 +84,8 @@ void setupTicks()
 	assert( ret );
 	ret = SetGet1< unsigned int >::set( er4, "stage", 5);
 	assert( ret );
+	// Note that here I put the tick on a different DataId. later it gets
+	// to sit on the appropriate Conn, when the SingleMsg is set up.
 	Eref er5( &ticke, DataId( 0, 7 ) );
 	ret = SetGet1< double >::set( er5, "dt", 5.0);
 	assert( ret );
@@ -115,11 +119,11 @@ void setupTicks()
 	Eref ts( &tse, 0 );
 	
 	SingleMsg m0( er0, ts ); er0.element()->addMsgToConn( &m0, 0 );
-	SingleMsg m1( er1, ts ); er1.element()->addMsgToConn( &m1, 0 );
-	SingleMsg m2( er2, ts ); er2.element()->addMsgToConn( &m2, 0 );
-	SingleMsg m3( er3, ts ); er3.element()->addMsgToConn( &m3, 0 );
-	SingleMsg m4( er4, ts ); er4.element()->addMsgToConn( &m4, 0 );
-	SingleMsg m5( er5, ts ); er5.element()->addMsgToConn( &m5, 0 );
+	SingleMsg m1( er1, ts ); er1.element()->addMsgToConn( &m1, 1 );
+	SingleMsg m2( er2, ts ); er2.element()->addMsgToConn( &m2, 2 );
+	SingleMsg m3( er3, ts ); er3.element()->addMsgToConn( &m3, 3 );
+	SingleMsg m4( er4, ts ); er4.element()->addMsgToConn( &m4, 4 );
+	SingleMsg m5( er5, ts ); er5.element()->addMsgToConn( &m5, 7 );
 
 	Qinfo q( 0, 0, 8 );
 	cdata->start( clocker, &q, 20 );
