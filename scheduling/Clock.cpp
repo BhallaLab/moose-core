@@ -63,7 +63,15 @@
 #include "TickPtr.h"
 #include "Clock.h"
 
-const unsigned int finishedSlot = 0;
+const unsigned int tickSlot = 0;
+static SrcFinfo0* tickSrc = 
+	new SrcFinfo0( 
+		"tick",
+		"Parent of Tick element",
+		tickSlot
+	);
+
+const unsigned int finishedSlot = 1;
 static SrcFinfo0* finished = 
 	new SrcFinfo0( 
 		"finished",
@@ -112,6 +120,7 @@ const Cinfo* Clock::initCinfo()
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
+		tickSrc,
 		finished,
 
 	///////////////////////////////////////////////////////
@@ -231,8 +240,10 @@ void Clock::start(  Eref e, const Qinfo* q, double runTime )
 	double endTime = runTime * ROUNDING + info_.currTime;
 	isRunning_ = 1;
 
+	Element* ticke = getTickE( e.element() );
+
 	if ( tickPtr_.size() == 1 ) {
-		tickPtr_[0].advance( e, &info_, endTime );
+		tickPtr_[0].advance( ticke, &info_, endTime );
 		return;
 	}
 
@@ -241,7 +252,7 @@ void Clock::start(  Eref e, const Qinfo* q, double runTime )
 	double nextTime = tickPtr_[1].getNextTime();
 	while ( isRunning_ && tickPtr_[0].getNextTime() < endTime ) {
 		// This advances all ticks with this dt in order, till nextTime.
-		tickPtr_[0].advance( e, &info_, nextTime * ROUNDING );
+		tickPtr_[0].advance( ticke, &info_, nextTime * ROUNDING );
 		sort( tickPtr_.begin(), tickPtr_.end() );
 		nextTime = tickPtr_[1].getNextTime();
 	}
@@ -356,11 +367,17 @@ void Clock::addTick( Tick* t )
 void Clock::rebuild()
 {
 	tickPtr_.clear();
+	for( unsigned int i = 0; i < ticks_.size(); ++i ) {
+		ticks_[i].setIndex( i );
+		addTick( &( ticks_[i] ) );
+	}
+	/*
 	for ( vector< Tick >::iterator i = ticks_.begin(); 
 		i != ticks_.end(); ++i)
 	{
 		addTick( &( *i ) );
 	}
+	*/
 	sort( tickPtr_.begin(), tickPtr_.end() );
 }
 
@@ -381,4 +398,13 @@ void Clock::setNumTicks( unsigned int num )
 {
 	ticks_.resize( num );
 	rebuild();
+}
+
+Element* Clock::getTickE( Element* e )
+{
+	const Conn* c = e->conn( tickSlot );
+	assert( c != 0 );
+	Element* ret = c->getTargetElement( e, 0 );
+	assert( ret );
+	return ret;
 }

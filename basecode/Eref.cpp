@@ -77,7 +77,7 @@ void Eref::asend( ConnId conn, unsigned int funcIndex, const char* arg,
 {
 	// e_->conn( conn ).asend( e_, Qinfo( func, i_, size ), arg );
 	Qinfo q( e_->getTargetFunc( funcIndex ), i_.data(), size );
-	e_->conn( conn ).asend( e_, q, arg );
+	e_->conn( conn )->asend( e_, q, arg );
 }
 
 /**
@@ -89,5 +89,5 @@ void Eref::tsend( ConnId conn, FuncId func, Id target, const char* arg,
 {
 	// e_->conn( conn ).asend( e_, Qinfo( func, i_, size, 1 ), arg );
 	Qinfo q( func, i_.data(), size, 1 );
-	e_->conn( conn ).tsend( e_, target, q, arg );
+	e_->conn( conn )->tsend( e_, target, q, arg );
 }

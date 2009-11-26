@@ -35,7 +35,19 @@ class Tick
 		// Functions for handling messages
 		///////////////////////////////////////////////////////
 
-		void advance( Eref e, ProcInfo* p ) const;
+		/**
+		 * This advances the simulation by its timestep, for the Elements
+		 * managed by this Tick. It first calls clearQ on them all, then
+		 * calls Process.
+		 */
+		void advance( Element* e, ProcInfo* p ) const;
+
+		/**
+		 * This assigns the index of this Tick in the array. This index
+		 * is used to specify the Connection Slot to use for the outgoing
+		 * clearQ and Process calls.
+		 */
+		void setIndex( unsigned int index );
 
 		/**
 		 * Reinit is used to set the simulation time back to zero for
@@ -51,11 +63,32 @@ class Tick
 		// int callback_;
 		double dt_;
 		unsigned int stage_;
+
+		/**
+		 * This is the index of this Tick in the Tick array. It is needed 
+		 * to rapidly look up the correct Connection Slot to call for 
+		 * Process and clearQ.
+		 */
+		unsigned int index_; 
 		//double nextTime_;
 		//double nextTickTime_;
 		//bool next_; /// Flag to show if next_ tick is present
 		//bool terminate_;
 		string path_;/// \todo Perhaps we delete this field
 };
+
+/*
+class TickSrcFinfo: public SrcFinfo0
+{
+	public:
+		TickSrcFinfo( const string& name, const string& doc, ConnId c )
+			: SrcFinfo0( name, doc, c )
+		{;}
+		unsigned int registerConn( unsigned int current )
+		{
+			
+		}
+};
+*/
 
 #endif // _Tick_h

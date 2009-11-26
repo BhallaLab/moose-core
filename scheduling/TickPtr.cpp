@@ -38,7 +38,7 @@ bool TickPtr::operator<( const TickPtr other ) const {
 
 /**
 * Add a tick to the specified TickPtr, provided dt is OK.
-* The new tick is positioning according to stage.
+* The new tick is positioned right away, according to stage.
 * This is inefficient, but we don't expect to have many ticks,
 * typically under 10.
 * Cannot use this if a run is already in progress: will need to do
@@ -65,8 +65,9 @@ bool TickPtr::addTick( const Tick* t )
 /**
  * Advance the simulation till the specified end time, without
  * worrying about other dts.
+ * The Eref e has to refer to the Tick, not the clock.
  */
-void TickPtr::advance( Eref e, ProcInfo* p, double endTime ) {
+void TickPtr::advance( Element* e, ProcInfo* p, double endTime ) {
 	while ( nextTime_ < endTime ) {
 		p->currTime = nextTime_;
 		for ( vector< const Tick* >::iterator i = ticks_.begin(); 

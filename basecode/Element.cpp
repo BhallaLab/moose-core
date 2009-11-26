@@ -147,9 +147,9 @@ void Element::getArraySizes( vector< unsigned int >& sizes ) const
 	sizes.resize( numData_, 1 );
 }
 
-const Conn& Element::conn( ConnId c ) const {
+const Conn* Element::conn( ConnId c ) const {
 	assert( c < c_.size() );
-	return c_[c];
+	return &( c_[c] );
 }
 
 const Msg* Element::getMsg( MsgId mid ) const {

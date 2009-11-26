@@ -41,9 +41,14 @@ class Conn
 			const char* arg ) const;
 
 		/**
+		 * process calls process on all Msgs.
+		 */
+		void process( const ProcInfo* p ) const;
+
+		/**
 		 * ClearQ calls clearQ on all Msgs.
 		 */
-		void clearQ();
+		void clearQ() const;
 
 		/**
 		 * Add a msg to the list
@@ -54,6 +59,16 @@ class Conn
 		 * Drop a msg from the list
 		 */
 		void drop( const Msg* m );
+
+		/**
+		 * Report number of Msgs
+		 */
+		unsigned int numMsg() const;
+
+		/**
+		 * Report Msg target
+		 */
+		Element* getTargetElement( const Element* e, unsigned int i ) const;
 
 		/**
 		 * Reassign target. Used typically for once-off calls like 'set'.

@@ -1868,6 +1868,7 @@ While (currrent time < end time)
 
 Minor fix to this, since we want each tick to be called just as the system time
 advances. So the first call on tick0 (with dt = 1) is at t = 1.
+Checked in as 1464.
 
 Next: handle process and clearQ alternately. This is a job for the Ticks.
 To call all process then all ticks:
@@ -1906,3 +1907,22 @@ Do we have multiple Process calls?
 	of clearQ and Process.
 	Seems like I never use it in other contexts.
 So, don't need multiple Process calls.
+
+Almost there with the implementation, stuck because the 'advance' call
+needs the correct Tick Eref as an argument.
+
+=============================================================================
+25 Nov.
+One possible hack is to dual-derive Ticks from Msg. I don't like it.
+Another is to store the Element for the Ticks in the Clock. Might be OK
+if it is a child. Better if it is found from a Msg.
+Separate from this, is how to rapidly access the list of Msgs from the Ticks.
+	- have a distinct Conn for each Tick. They could have the same index. 
+=============================================================================
+26 Nov. Avoided hacks, got the TickElement from a message.
+Set up a distinct Conn for each Tick, using the same index as the Tick's
+own index.
+
+Many changes needed to get all the pieces to work together. Compiles, 
+yet to get it to work.
+=============================================================================

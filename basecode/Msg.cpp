@@ -26,12 +26,12 @@ Msg::~Msg()
 
 void Msg::clearQ() const 
 {
-	e1_->clearQ();
+	e2_->clearQ();
 }
 
 void Msg::process( const ProcInfo* p ) const 
 {
-	e1_->process( p );
+	e2_->process( p );
 }
 
 void Msg::addToQ( const Element* caller, Qinfo& q, const char* arg ) const
@@ -68,20 +68,6 @@ void SingleMsg::exec( Element* target, const char* arg ) const
 		f->op( Eref( target, i2_ ), arg );
 	}
 }
-
-/*
-const char* SingleMsg::exec( Element* target, const OpFunc* f, 
-		unsigned int srcIndex, const char* arg ) const
-{
-	if ( target == e1_ ) {
-		f->op( Eref( target, i1_ ), arg );
-	} else {
-		assert( target == e2_ );
-		f->op( Eref( target, i2_ ), arg );
-	}
-	return 0;
-}
-*/
 
 bool SingleMsg::add( Eref e1, const string& srcField, 
 			Eref e2, const string& destField )
@@ -120,16 +106,50 @@ void OneToOneMsg::exec( Element* target, const char* arg ) const
 }
 
 
-/*
-const char* OneToOneMsg::exec( Element* target, const OpFunc* f, 
-		unsigned int srcIndex, const char* arg ) const
+///////////////////////////////////////////////////////////////////////////
+
+OneToAllMsg::OneToAllMsg( Eref e1, Element* e2 )
+	: 
+		Msg( e1.element(), e2 ),
+		i1_( e1.index() )
 {
+	;
+}
+
+void OneToAllMsg::exec( Element* target, const char* arg ) const
+{
+	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
+	// arg += sizeof( Qinfo );
+	const OpFunc* f = target->cinfo()->getOpFunc( q->fid() );
 	if ( target == e1_ ) {
-		f->op( Eref( target, srcIndex ), arg );
+		f->op( Eref( target, i1_ ), arg );
 	} else {
 		assert( target == e2_ );
-		f->op( Eref( target, srcIndex ), arg );
+		if ( target->numDimensions() == 1 ) {
+			for ( unsigned int i = 0; i < target->numData(); ++i )
+				f->op( Eref( target, i ), arg );
+		} else if ( target->numDimensions() == 2 ) {
+			for ( unsigned int i = 0; i < target->numData1(); ++i )
+				for ( unsigned int j = 0; j < target->numData2( i ); ++j )
+					f->op( Eref( target, DataId( i, j ) ), arg );
+		}
+	}
+}
+
+bool OneToAllMsg::add( Eref e1, const string& srcField, 
+			Element* e2, const string& destField )
+{
+	FuncId funcId;
+	const SrcFinfo* srcFinfo = validateMsg( e1.element(), srcField,
+		e2, destField, funcId );
+
+	if ( srcFinfo ) {
+		Msg* m = new OneToAllMsg( e1, e2 );
+		e1.element()->addMsgToConn( m, srcFinfo->getConnId() );
+		e1.element()->addTargetFunc( funcId, srcFinfo->getFuncIndex() );
+		return 1;
 	}
 	return 0;
 }
-*/
+
+///////////////////////////////////////////////////////////////////////////

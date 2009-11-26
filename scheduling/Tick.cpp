@@ -18,7 +18,11 @@
  * objects.
  */
 
-const ConnId procSlot = 0;
+/**
+ * We reserve a large number of slots, since each Tick uses a separate one.
+ * Should ideally find a way to predefine this to the max number of Ticks.
+ */
+const ConnId procSlot = 10;
 
 static SrcFinfo1< ProcPtr >* process = 
 	new SrcFinfo1< ProcPtr >(
@@ -198,11 +202,20 @@ string Tick::getPath() const
 /**
  * This sends out the process call.
  */
-void Tick::advance( Eref e, ProcInfo* info ) const
+void Tick::advance( Element* e, ProcInfo* info ) const
 {
 	cout << "(" << dt_ << ", " << stage_ << " ) at " << info->currTime << endl;
-	;
-	// send1< ProcInfo >( e, processSlot, info );
+	// Hack: we need a better way to define which connId to use.
+	// Presumably we should at least take an offset from the predefined
+	// Slots like children.
+	const Conn* c = e->conn( index_ );
+	c->clearQ();
+	c->process( info );
+}
+
+void Tick::setIndex( unsigned int index ) 
+{
+	index_ = index;
 }
 
 /**

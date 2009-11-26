@@ -100,17 +100,7 @@ class SingleMsg: public Msg
 		SingleMsg( Eref e1, Eref e2 );
 		~SingleMsg() {;}
 
-		/*
-		void addToQ( const Element* caller, Qinfo& q, 
-			const char* arg ) const;
-			*/
 		void exec( Element* target, const char* arg) const;
-		/*
-		const char* exec( 
-			Element* target, const OpFunc* func, 
-			unsigned int srcIndex,  const char* arg
-		) const;
-		*/
 
 		static bool add( Eref e1, const string& srcField, 
 			Eref e2, const string& destField );
@@ -126,20 +116,23 @@ class OneToOneMsg: public Msg
 		OneToOneMsg( Element* e1, Element* e2 );
 		~OneToOneMsg() {;}
 
-		/*
-		void addToQ( const Element* caller, Qinfo& q, 
-			const char* arg ) const;
-			*/
 		void exec( Element* target, const char* arg) const;
-		/*
-		const char* exec( 
-			Element* target, const OpFunc* func, 
-			unsigned int srcIndex,  const char* arg
-		) const;
-		*/
 	private:
-		//unsigned int i1_;
-		//unsigned int i2_;
+};
+
+class OneToAllMsg: public Msg
+{
+	public:
+		OneToAllMsg( Eref e1, Element* e2 );
+		~OneToAllMsg() {;}
+
+		void exec( Element* target, const char* arg) const;
+
+		static bool add( Eref e1, const string& srcField, 
+			Element* e2, const string& destField );
+
+	private:
+		DataId i1_;
 };
 
 

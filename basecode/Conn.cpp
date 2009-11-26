@@ -69,9 +69,18 @@ void Conn::tsend(
 }
 
 /**
- * ClearQ calls clearQ on all Msgs, on e1.
+ * process calls process on all Msgs, on e2.
  */
-void Conn::clearQ()
+void Conn::process( const ProcInfo* p ) const
+{
+	for( vector< Msg* >::const_iterator i = m_.begin(); i != m_.end(); ++i )
+		(*i)->process( p );
+}
+
+/**
+ * ClearQ calls clearQ on all Msgs, on e2.
+ */
+void Conn::clearQ() const
 {
 	for( vector< Msg* >::const_iterator i = m_.begin(); i != m_.end(); ++i )
 		(*i)->clearQ();
@@ -106,3 +115,20 @@ void Conn::setMsgDest( Eref& src, Eref& dest )
 	m_.push_back( new SingleMsg( src, dest ) );
 }
  */
+
+unsigned int Conn::numMsg() const 
+{
+	return m_.size();
+}
+
+Element* Conn::getTargetElement( 
+	const Element* otherElement, unsigned int index ) const
+{
+	if ( index < m_.size() ) {
+		if ( m_[ index ]->e1() == otherElement )
+			return m_[ index ]->e2();
+		else if ( m_[ index ]->e2() == otherElement )
+			return m_[ index ]->e1();
+	}
+	return 0;
+}

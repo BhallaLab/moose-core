@@ -170,7 +170,7 @@ class Element
 		void ssend1( SyncId slot, unsigned int i, double v );
 		void ssend2( SyncId slot, unsigned int i, double v1, double v2 );
 
-		const Conn& conn( ConnId c ) const;
+		const Conn* conn( ConnId c ) const;
 
 		/** 
 		 * Pushes the Msg m onto the list, and returns the index to look
