@@ -133,7 +133,7 @@ void NeuromlReader::readModel( string filename,Id location )
 	
     }
    setupChannels(groupcableMap,cablesegMap);
-   setupSynChannels(groupcableMap,cablesegMap);
+ //  setupSynChannels(groupcableMap,cablesegMap);
     
    
 }
@@ -177,17 +177,25 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
 		bool is2DChannel = chl->isSetConc_dependence();
 		bool passive = chl->getPassivecond();
 		ek = chl->getDefault_erev();
+		string path;
 		if ( passive ){
 			leak_ = Neutral::create( "Leakage",name,loc,Id::scratchId() ); 
 			::set< double >( leak_, leakekFinfo, ek );
+			path = Eref(leak_).id().path();
 		}
-		else if ( is2DChannel )
+		else if ( is2DChannel ){
 			channel_ = Neutral::create( "HHChannel2D",name,loc,Id::scratchId() );	
-		else	
+			::set< double >( channel_, ekFinfo, ek );
+			path = Eref(channel_).id().path();
+		}
+		else{	
  	 		channel_ = Neutral::create( "HHChannel",name,loc,Id::scratchId() );
+			::set< double >( channel_, ekFinfo, ek );
+			path = Eref(channel_).id().path();
+		}
 	 	gmax = chl->getParameterValue();
 	 	//gmax *= 10;//si
-	 	::set< double >( channel_, ekFinfo, ek );
+	 	
 	 	double xmin,xmax;
 	 	int xdivs;
 	 	string biophysicsunits = ncl_->getBiophysicsUnits();
@@ -201,7 +209,8 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
 	 		xmax = 0.05;
 		}
 		xdivs = 3000;
-		string path = Eref(channel_).id().path();
+		
+		//string path = Eref(channel_).id().path();
 		vector< string > gatename;
 		gatename.push_back("/xGate");
 		gatename.push_back("/yGate");
@@ -278,13 +287,14 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
 			double sa = calcSurfaceArea( len,dia );
 			cout << "surface area : " << sa << "  of  " << comptEl()->name()<< endl;
 		 	double gbar = gmax * sa;
-		 	::set< double >( channel_, gbarFinfo, gbar );  
+		 	
 			if (passive){
 				double Rm = 1/(gmax*sa);
 		   		::set< double >( comptEl(), RmFinfo, Rm );
 				::set< double >( comptEl(), EmFinfo, ek );
 		 	}
 			else{
+				::set< double >( channel_, gbarFinfo, gbar );  				
 				Element* copyEl = channel_->copy(comptEl(),channel_->name());
 				Eref(comptEl()).add("channel",copyEl,"channel",ConnTainer::Default ); 
 			}
