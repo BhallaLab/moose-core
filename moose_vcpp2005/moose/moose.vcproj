@@ -178,6 +178,85 @@
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
+		<Configuration
+			Name="Plain|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\signeur;..\..\robots;..\..\randnum;..\..\utility;..\..\shell;..\..\scheduling;..\..\parallel;..\..\device;..\..\maindir;..\..\ksolve;..\..\kinetics;..\..\hsolve;..\..\genesis_parser;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\.."
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0;_WIN32"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="4"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				UseLibraryDependencyInputs="true"
+				ShowProgress="2"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories=""
+				GenerateDebugInformation="true"
+				SubSystem="1"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -516,14 +595,6 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="external"
-				>
-				<Filter
-					Name="include"
-					>
-				</Filter>
-			</Filter>
-			<Filter
 				Name="genesis_parser"
 				>
 				<File
@@ -767,6 +838,15 @@
 							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\randnum\BinomialRng.cpp"
@@ -782,6 +862,15 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)2.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)2.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -811,6 +900,15 @@
 							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\randnum\ExponentialRng.cpp"
@@ -826,6 +924,15 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)2.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)2.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -855,6 +962,15 @@
 							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\randnum\GammaRng.cpp"
@@ -870,6 +986,15 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)2.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)2.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -899,6 +1024,15 @@
 							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\randnum\Normal.cpp"
@@ -914,6 +1048,15 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -943,6 +1086,15 @@
 							XMLDocumentationFileName="$(IntDir)\$(InputName)2.xdc"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)2.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)2.xdc"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\randnum\NumUtil.cpp"
@@ -958,6 +1110,15 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -987,6 +1148,15 @@
 							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\randnum\PoissonRng.cpp"
@@ -1002,6 +1172,15 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)2.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)2.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1031,6 +1210,15 @@
 							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\randnum\RandGenerator.cpp"
@@ -1046,6 +1234,15 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)2.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)2.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1075,6 +1272,15 @@
 							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\randnum\UniformRng.cpp"
@@ -1090,6 +1296,15 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)2.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)2.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1120,6 +1335,15 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1169,6 +1393,15 @@
 							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\hsolve\RateLookup.cpp"
@@ -1184,6 +1417,15 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1221,28 +1463,6 @@
 				Name="ksolve"
 				>
 				<File
-					RelativePath="..\..\ksolve\GslIntegrator.cpp"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)\$(InputName)1.obj"
-							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)\$(InputName)1.obj"
-							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
 					RelativePath="..\..\ksolve\GssaStoich.cpp"
 					>
 				</File>
@@ -1264,6 +1484,15 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1293,6 +1522,15 @@
 							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\ksolve\KinSparseMatrix.cpp"
@@ -1308,6 +1546,15 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1337,14 +1584,15 @@
 							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\..\ksolve\StateScanner.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\ksolve\SteadyState.cpp"
-					>
+					<FileConfiguration
+						Name="Plain|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\ksolve\Stoich.cpp"
@@ -1360,6 +1608,15 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1429,21 +1686,18 @@
 							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\device\RC.cpp"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="sbml_IO"
-				>
-				<File
-					RelativePath="..\..\sbml_IO\SbmlReader.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\sbml_IO\SbmlWriter.cpp"
 					>
 				</File>
 			</Filter>
@@ -1471,6 +1725,15 @@
 							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\signeur\SigNeur.cpp"
@@ -1486,6 +1749,15 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Plain|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2158,16 +2430,8 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="robots"
-				>
-			</Filter>
-			<Filter
 				Name="ksolve"
 				>
-				<File
-					RelativePath="..\..\ksolve\GslIntegrator.h"
-					>
-				</File>
 				<File
 					RelativePath="..\..\ksolve\GssaStoich.h"
 					>
@@ -2194,14 +2458,6 @@
 				</File>
 				<File
 					RelativePath="..\..\ksolve\RateTerm.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\ksolve\StateScanner.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\ksolve\SteadyState.h"
 					>
 				</File>
 				<File
@@ -2242,18 +2498,6 @@
 				</File>
 				<File
 					RelativePath="..\..\device\RC.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="sbml_IO"
-				>
-				<File
-					RelativePath="..\..\sbml_IO\SbmlReader.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\sbml_IO\SbmlWriter.h"
 					>
 				</File>
 			</Filter>
