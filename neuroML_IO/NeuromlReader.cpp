@@ -2,9 +2,9 @@
 #include "element/Neutral.h"
 #include <iostream>
 #include <set>
-#include "neuroML_IO/Cable.h"
-#include <neuroML/NCell.h>
-#include <neuroML/NBase.h>
+#include <libneuroml/NCable.h>
+#include <libneuroml/NCell.h>
+#include <libneuroml/NBase.h>
 #include "Cable.h"
 #include "NeuromlReader.h"
 using namespace std;
