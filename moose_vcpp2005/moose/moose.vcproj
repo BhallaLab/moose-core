@@ -40,8 +40,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\signeur;..\..\robots;..\..\randnum;..\..\utility;..\..\shell;..\..\scheduling;..\..\parallel;..\..\sbml_IO;..\..\device;..\..\maindir;..\..\ksolve;..\..\kinetics;..\..\hsolve;..\..\genesis_parser;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..;&quot;D:\Program Files\MPICH2\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;&quot;D:\DOWNLOADS\gsl-1.11-windows-binaries\gsl\include&quot;;&quot;D:\sbml\libsbml-3.3.2\include&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0;_WIN32;USE_SBML"
+				AdditionalIncludeDirectories="..\..\signeur;..\..\robots;..\..\randnum;..\..\utility;..\..\shell;..\..\scheduling;..\..\parallel;..\..\neuroML_IO;..\..\sbml_IO;..\..\device;..\..\maindir;..\..\ksolve;..\..\kinetics;..\..\hsolve;..\..\genesis_parser;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..;&quot;D:\Program Files\MPICH2\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;&quot;D:\DOWNLOADS\gsl-1.11-windows-binaries\gsl\include&quot;;&quot;D:\sbml\libsbml-3.3.2\include&quot;;&quot;D:\DOWNLOADS\libxml2-2.7.6.win32\libxml2-2.7.6.win32\include&quot;;&quot;D:\DOWNLOADS\iconv-1.9.2.win32\iconv-1.9.2.win32\include&quot;;D:\siji\TestLibNeuroML\v0.2\"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0;_WIN32;USE_SBML;USE_NEUROML"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -62,10 +62,10 @@
 			<Tool
 				Name="VCLinkerTool"
 				UseLibraryDependencyInputs="true"
-				AdditionalDependencies="gsl_d.lib cblas_d.lib mpi.lib Ws2_32.lib cxx.lib bzip2.lib libsbmlD.lib libexpat.lib zlib.lib"
+				AdditionalDependencies="gsl_d.lib cblas_d.lib mpi.lib Ws2_32.lib cxx.lib bzip2.lib libsbmlD.lib libexpat.lib zlib.lib iconv.lib libxml2.lib libNeuroML.lib"
 				ShowProgress="2"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;D:\DOWNLOADS\gsl-1.11-windows-binaries\gsl\lib&quot;;&quot;D:\sbml\libsbml-3.3.2\win32\bin&quot;;&quot;D:\Program Files\MPICH2\lib&quot;;&quot;C:\Program Files\GnuWin32\lib&quot;"
+				AdditionalLibraryDirectories="&quot;D:\DOWNLOADS\gsl-1.11-windows-binaries\gsl\lib&quot;;&quot;D:\sbml\libsbml-3.3.2\win32\bin&quot;;&quot;D:\Program Files\MPICH2\lib&quot;;&quot;C:\Program Files\GnuWin32\lib&quot;;&quot;D:\DOWNLOADS\iconv-1.9.2.win32\iconv-1.9.2.win32\lib&quot;;&quot;D:\DOWNLOADS\libxml2-2.7.6.win32\libxml2-2.7.6.win32\lib&quot;;D:\siji\TestLibNeuroML\v0.2\libNeuroML_vcpp\NeuroML_vcpp"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -1463,6 +1463,10 @@
 				Name="ksolve"
 				>
 				<File
+					RelativePath="..\..\ksolve\GslIntegrator.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\ksolve\GssaStoich.cpp"
 					>
 				</File>
@@ -1593,6 +1597,14 @@
 							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\ksolve\StateScanner.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ksolve\SteadyState.cpp"
+					>
 				</File>
 				<File
 					RelativePath="..\..\ksolve\Stoich.cpp"
@@ -1765,6 +1777,34 @@
 							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
+				</File>
+			</Filter>
+			<Filter
+				Name="sbml_IO"
+				>
+				<File
+					RelativePath="..\..\sbml_IO\SbmlReader.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\sbml_IO\SbmlWriter.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="neuroML_IO"
+				>
+				<File
+					RelativePath="..\..\neuroML_IO\Cable.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\neuroML_IO\NeuromlReader.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\neuroML_IO\NeuromlWriter.cpp"
+					>
 				</File>
 			</Filter>
 		</Filter>
@@ -2433,6 +2473,10 @@
 				Name="ksolve"
 				>
 				<File
+					RelativePath="..\..\ksolve\GslIntegrator.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\ksolve\GssaStoich.h"
 					>
 				</File>
@@ -2458,6 +2502,14 @@
 				</File>
 				<File
 					RelativePath="..\..\ksolve\RateTerm.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ksolve\StateScanner.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ksolve\SteadyState.h"
 					>
 				</File>
 				<File
@@ -2530,6 +2582,34 @@
 				</File>
 				<File
 					RelativePath="..\..\signeur\SigNeur.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="sbml_IO"
+				>
+				<File
+					RelativePath="..\..\sbml_IO\SbmlReader.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\sbml_IO\SbmlWriter.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="neuroML_IO"
+				>
+				<File
+					RelativePath="..\..\neuroML_IO\Cable.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\neuroML_IO\NeuromlReader.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\neuroML_IO\NeuromlWriter.h"
 					>
 				</File>
 			</Filter>
