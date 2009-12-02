@@ -14,8 +14,8 @@ Global
 		{A06CC93D-27A9-4FBF-A303-94391C5AF351}.Debug|Win32.Build.0 = Debug|Win32
 		{A06CC93D-27A9-4FBF-A303-94391C5AF351}.Release|Win32.ActiveCfg = Debug|Win32
 		{A06CC93D-27A9-4FBF-A303-94391C5AF351}.Release|Win32.Build.0 = Debug|Win32
-		{A06CC93D-27A9-4FBF-A303-94391C5AF351}.withoutGSL|Win32.ActiveCfg = Plain|Win32
-		{A06CC93D-27A9-4FBF-A303-94391C5AF351}.withoutGSL|Win32.Build.0 = Plain|Win32
+		{A06CC93D-27A9-4FBF-A303-94391C5AF351}.withoutGSL|Win32.ActiveCfg = Debug|Win32
+		{A06CC93D-27A9-4FBF-A303-94391C5AF351}.withoutGSL|Win32.Build.0 = Debug|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
