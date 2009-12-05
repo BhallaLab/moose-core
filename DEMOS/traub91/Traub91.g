@@ -40,8 +40,8 @@ ce /
 //=====================================
 //  Create cells
 //=====================================
-//readcell CA3.p /CA3
-readcell ca1.p /CA3
+readcell CA3.p /CA3
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // PLOTTING
@@ -155,12 +155,4 @@ Plots written to *.plot. Reference curves from GENESIS are in files named
 If you have gnuplot, run 'gnuplot plot.gnuplot' to view the graphs.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 "
-tab2file Ca_YA.txt /library/Ca Y_A -mode xy -overwrite
-tab2file Ca_YB.txt /library/Ca Y_A -table2 Y_B -mode beta -overwrite
-tab2file kc_XA.txt /library/K_C X_A -mode xy -overwrite
-tab2file kc_XB.txt /library/K_C X_A -table2 X_B -mode beta -overwrite
-tab2file kc_ZA.txt /library/K_C Z_A -mode xy -overwrite
-tab2file kc_ZB.txt /library/K_C Z_A -table2 Z_B -mode beta -overwrite
-tab2file KAHP_ZA.txt /library/K_AHP Z_A -mode xy -overwrite
-tab2file KAHP_ZB.txt /library/K_AHP Z_A -table2 Z_B -mode beta -overwrite 
-//quit
+quit
