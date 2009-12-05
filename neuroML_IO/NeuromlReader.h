@@ -25,8 +25,10 @@ class NeuromlReader
 		void  readModel(std::string filename,Id location);
 		void pushtoVector(vector< double >&result,string expr_form,double r,double s,double m);
 		double calcSurfaceArea(double length,double diameter);
+		double calcVolume(double length,double diameter);
 		void setupSynChannels(map< string,vector<string> > &,map< string,vector< string > > &);
 		void setupChannels(map< string,vector<string> > &,map< string,vector< string > > &);
+		void setupPools(map< string,vector<string> > &,map< string,vector< string > > &);
 		
 	private:
 		Element* compt_;
@@ -35,6 +37,7 @@ class NeuromlReader
 		Element* cable_;
 		Element* synchannel_;
 		Element* leak_;
+		Element* ionPool_;
 		static const double PI ;
 		map< string,Id > segMap_;
 		NCell* ncl_;
@@ -50,5 +53,6 @@ extern const Cinfo* initHHGateCinfo();
 extern const Cinfo* initInterpolCinfo();
 extern const Cinfo* initLeakageCinfo();
 extern const Cinfo* initSynChanCinfo();
+extern const Cinfo* initCaConcCinfo();
 #endif // _NEUROMLREADER_H
 
