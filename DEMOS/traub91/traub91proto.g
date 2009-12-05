@@ -212,7 +212,6 @@ function make_K_AHP
         float x,dx,y
         dx = (xmax - xmin)/xdivs
         x = xmin
-	echo " K_AHP "
         for (i = 0 ; i <= {xdivs} ; i = i + 1)
             if (x < 500.0)
                 y = 0.02*x
@@ -220,9 +219,7 @@ function make_K_AHP
                 y = 10.0
             end
             setfield K_AHP Z_A->table[{i}] {y}
-	    echo " y " {y}
             setfield K_AHP Z_B->table[{i}] {y + 1.0}
-	    echo "y + 1.0  " {y + 1.0}
             x = x + dx
         end
 // For speed during execution, set the calculation mode to "no interpolation"
@@ -274,7 +271,6 @@ function make_K_C
         float x,dx,alpha,beta
         dx = (xmax - xmin)/xdivs
         x = xmin
-	echo " K_C "
         for (i = 0 ; i <= {xdivs} ; i = i + 1)
             if (x < EREST_ACT + 0.05)
                 alpha = {exp {53.872*(x - EREST_ACT) - 0.66835}}/0.018975
@@ -284,9 +280,7 @@ function make_K_C
 		beta = 0.0
             end
             setfield K_C X_A->table[{i}] {alpha}
-	    echo "alpha " {alpha}
             setfield K_C X_B->table[{i}] {alpha+beta}
-	    echo "alpha+beta " {alpha+beta}
             x = x + dx
         end
 // Expand the tables to 3000 entries to use without interpolation
@@ -317,7 +311,6 @@ function make_K_C
             end
 	    /* activation will be computed as Z_A/Z_B */
             setfield K_C Z_A->table[{i}] {y}
-	    echo "y " {y}
             setfield K_C Z_B->table[{i}] 1.0
             x = x + dx
         end
