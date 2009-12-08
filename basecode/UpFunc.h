@@ -170,10 +170,8 @@ template< class T, class A > class GetUpFunc: public OpFunc
 		    FuncId retFunc = *reinterpret_cast< const FuncId* >( buf );
 			const A& ret = (( reinterpret_cast< T* >( e.data1() ) )->*func_)( e.index() );
 
-			// This is a Bad Thing. The returned index should be the full
-			// DataId to figure out who sent it. Instead we send only the
-			// data part of the index.
-			Qinfo retq( retFunc, e.index().data(), Conv< A >::size( ret ), 1 );
+			Qinfo retq( retFunc, e.index(), Conv< A >::size( ret ), 
+				1, !q->isForward() );
 			char* temp = new char[ retq.size() ];
 			Conv<A>::val2buf( temp, ret );
 			Conn c;

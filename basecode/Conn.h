@@ -69,8 +69,8 @@ class Conn
 
 		/**
 		 * Report Msg target
-		Element* getTargetElement( const Element* e, unsigned int i ) const;
 		 */
+		Element* getTargetElement( const Element* e, unsigned int i ) const;
 
 		/**
 		 * Reassign target. Used typically for once-off calls like 'set'.

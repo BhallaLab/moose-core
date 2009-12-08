@@ -216,7 +216,7 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 	// Presumably we should at least take an offset from the predefined
 	// Slots like children.
 	const Conn* c = e->conn( index_ );
-	c->clearQ();
+	Qinfo::clearQ( 0 );
 	c->process( info );
 }
 

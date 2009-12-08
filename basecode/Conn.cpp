@@ -121,16 +121,14 @@ unsigned int Conn::numMsg() const
 	return m_.size();
 }
 
-/*
 Element* Conn::getTargetElement( 
 	const Element* otherElement, unsigned int index ) const
 {
 	if ( index < m_.size() ) {
-		if ( m_[ index ]->e1() == otherElement )
-			return m_[ index ]->e2();
-		else if ( m_[ index ]->e2() == otherElement )
-			return m_[ index ]->e1();
+		if ( Msg::getMsg( m_[ index ] )->e1() == otherElement )
+			return Msg::getMsg( m_[ index ] )->e2();
+		else if ( Msg::getMsg( m_[ index ] )->e2() == otherElement )
+			return Msg::getMsg( m_[ index ] )->e1();
 	}
 	return 0;
 }
-*/

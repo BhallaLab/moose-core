@@ -118,12 +118,12 @@ void setupTicks()
 	testSchedElement tse;
 	Eref ts( &tse, 0 );
 	
-	SingleMsg m0( er0, ts ); er0.element()->addMsgToConn( &m0, 0 );
-	SingleMsg m1( er1, ts ); er1.element()->addMsgToConn( &m1, 1 );
-	SingleMsg m2( er2, ts ); er2.element()->addMsgToConn( &m2, 2 );
-	SingleMsg m3( er3, ts ); er3.element()->addMsgToConn( &m3, 3 );
-	SingleMsg m4( er4, ts ); er4.element()->addMsgToConn( &m4, 4 );
-	SingleMsg m5( er5, ts ); er5.element()->addMsgToConn( &m5, 7 );
+	SingleMsg m0( er0, ts ); er0.element()->addMsgToConn( m0.mid(), 0 );
+	SingleMsg m1( er1, ts ); er1.element()->addMsgToConn( m1.mid(), 1 );
+	SingleMsg m2( er2, ts ); er2.element()->addMsgToConn( m2.mid(), 2 );
+	SingleMsg m3( er3, ts ); er3.element()->addMsgToConn( m3.mid(), 3 );
+	SingleMsg m4( er4, ts ); er4.element()->addMsgToConn( m4.mid(), 4 );
+	SingleMsg m5( er5, ts ); er5.element()->addMsgToConn( m5.mid(), 7 );
 
 	Qinfo q( 0, 0, 8 );
 	cdata->start( clocker, &q, 20 );
