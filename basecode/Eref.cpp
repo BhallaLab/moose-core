@@ -84,10 +84,10 @@ void Eref::asend( ConnId conn, unsigned int funcIndex, const char* arg,
  * Need to sort out: do we use FuncId here (confusing) or funcIndex
  * (when would it be set up ?)
  */
-void Eref::tsend( ConnId conn, FuncId func, Id target, const char* arg, 
+void Eref::tsend( ConnId conn, FuncId func, DataId target, const char* arg, 
 			unsigned int size ) const
 {
 	// e_->conn( conn ).asend( e_, Qinfo( func, i_, size, 1 ), arg );
-	Qinfo q( func, i_.data(), size, 1 );
+	Qinfo q( func, i_, size, 1, 0 );
 	e_->conn( conn )->tsend( e_, target, q, arg );
 }

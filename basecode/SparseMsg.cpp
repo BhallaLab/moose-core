@@ -20,36 +20,49 @@ SparseMsg::SparseMsg( Element* e1, Element* e2 )
 	assert( e1->numDimensions() == 1  && e2->numDimensions() >= 1 );
 }
 
-void SparseMsg::exec( Element* target, const char* arg ) const
+unsigned int rowIndex( const Element* e, const DataId& d )
 {
-	assert( target == e1_ || target == e2_ );
+	if ( e->numDimensions() == 1 ) {
+		return d.data();
+	} else if ( e->numDimensions() == 2 ) {
+		// This is a nasty case, hopefully very rare.
+		unsigned int row = 0;
+		for ( unsigned int i = 0; i < d.data(); ++i )
+			row += e->numData2( i );
+		return ( row + d.field() );
+	}
+	return 0;
+}
 
+void SparseMsg::exec( const char* arg ) const
+{
 	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
 	// arg += sizeof( Qinfo );
-	const OpFunc* f = target->cinfo()->getOpFunc( q->fid() );
 
 	/**
 	 * The system is really optimized for data from e1 to e2.
 	 */
-	if ( target == e2_ ) {
-		unsigned int row = q->srcIndex();
+	if ( q->isForward() ) {
+		const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
+		unsigned int row = rowIndex( e1_, q->srcIndex() );
 		const unsigned int* fieldIndex;
 		const unsigned int* colIndex;
 		unsigned int n = matrix_.getRow( row, &fieldIndex, &colIndex );
 		for ( unsigned int j = 0; j < n; ++j ) {
 			// Eref tgt( target, DataId( *colIndex++, *fieldIndex++ )
-			Eref tgt( target, DataId( colIndex[j], fieldIndex[j] ) );
+			Eref tgt( e2_, DataId( colIndex[j], fieldIndex[j] ) );
 			f->op( tgt, arg );
 		}
 	} else { // Avoid using this back operation!
 		// Note that we do NOT use the fieldIndex going backward. It is
 		// assumed that e1 does not have fieldArrays.
-		unsigned int column = q->srcIndex();
+		const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
+		unsigned int column = rowIndex( e2_, q->srcIndex() );
 		vector< unsigned int > fieldIndex;
 		vector< unsigned int > rowIndex;
 		unsigned int n = matrix_.getColumn( column, fieldIndex, rowIndex );
 		for ( unsigned int j = 0; j < n; ++j ) {
-			Eref tgt( target, DataId( rowIndex[j] ) );
+			Eref tgt( e1_, DataId( rowIndex[j] ) );
 			f->op( tgt, arg );
 		}
 	}
@@ -64,7 +77,7 @@ bool SparseMsg::add( Element* e1, const string& srcField,
 
 	if ( srcFinfo ) {
 		SparseMsg* m = new SparseMsg( e1, e2 );
-		e1->addMsgToConn( m, srcFinfo->getConnId() );
+		e1->addMsgToConn( m->mid(), srcFinfo->getConnId() );
 		e1->addTargetFunc( funcId, srcFinfo->getFuncIndex() );
 		m->randomConnect( probability );
 		return 1;

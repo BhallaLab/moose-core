@@ -31,7 +31,8 @@ void SetGet::setShell()
  */
 void SetGet::completeSet() const
 {
-	e_.element()->clearQ();
+	// e_.element()->clearQ();
+	Qinfo::clearQ( 0 );
 }
 
 bool SetGet::checkSet( const string& destField, FuncId& fid ) const
@@ -70,14 +71,15 @@ void SetGet::iSetInner( FuncId fid, const char* val, unsigned int size )
 		Msg* m = new OneToAllMsg( shelle_, e_ );
 	}
 	*/
-	shell_->addMsgToConn( m, setCid );
+	shell_->addMsgToConn( m->mid(), setCid );
 	shell_->addTargetFunc( fid, setFuncIndex );
 	shelle_.asend( setCid, setFuncIndex, val, size );
 }
 
 void SetGet::clearQ() const
 {
-	e_.element()->clearQ();
+	// e_.element()->clearQ();
+	Qinfo::clearQ( 0 );
 }
 
 void SetGet::resizeBuf( unsigned int size )
@@ -133,7 +135,7 @@ bool SetGet::iGet( const string& field ) const
 	if ( checkGet( field, destFid ) ) {
 		shell_->clearConn( getCid );
 		Msg* m = new SingleMsg( shelle_, e_ );
-		shell_->addMsgToConn( m, getCid );
+		shell_->addMsgToConn( m->mid(), getCid );
 		shell_->addTargetFunc( destFid, getFuncIndex );
 		shelle_.asend( getCid, getFuncIndex, 
 			reinterpret_cast< char* >( &retFunc ), sizeof( FuncId ) );

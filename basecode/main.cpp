@@ -14,6 +14,9 @@ extern void testScheduling();
 
 void init()
 {
+	// Figure out # of threads here, assign queues.
+	Msg::initNull();
+	Qinfo::setNumQs( 1, 1024 );
 	Id shellid = Shell::initCinfo()->create( "root", 1 );
 	assert ( shellid == Id() );
 	SetGet::setShell();

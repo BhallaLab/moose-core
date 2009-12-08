@@ -15,7 +15,7 @@
  * assorted variants.
  */
 
-typedef unsigned short MsgId;
+typedef unsigned int MsgId;
 
 class Msg
 {
@@ -24,14 +24,26 @@ class Msg
 		virtual ~Msg();
 
 		/**
+		 * Deletes a message identified by its mid.
+		 */
+		static void deleteMsg( MsgId mid );
+
+		/**
+ 		* Initialize the Null location in the Msg vector.
+ 		*/
+		static void initNull();
+
+		/**
 		 * Call clearQ on e1. Note that it applies at
 		 * the Element level, not the index level.
 		 */
-		virtual void clearQ() const;
+		// virtual void clearQ() const;
 
 		/**
 		 * Add an event to the queue on the target element.
 		 * This is generally the same function, so the base Msg provides it.
+		 * Will need to be specialized for multithread and
+		 * multinode dispersal of messages too.
 		 */
 		virtual void addToQ( const Element* caller, Qinfo& q,
 			const char* arg ) const;
@@ -41,27 +53,18 @@ class Msg
 		 */
 		virtual void process( const ProcInfo *p ) const;
 
+		
+		/**
+		 * Execute func( arg ) on all relevant indices of target
+		 */
+		virtual void exec( const char* arg ) const = 0;
+		
 		/**
 		 * Execute func( arg ) on target, all relevant indices.
-		 * Returns next buf pos.
-		 */
 		virtual void exec( 
 			Element* target, const char* arg 
 		) const = 0;
-		/*
-		virtual const char* exec( 
-			Element* target, const OpFunc* func, 
-			unsigned int srcIndex, const char* arg 
-		) const = 0;
-		*/
-
-		/*
-		// return pointer to parent connection 1.
-		virtual const Conn* parent1() const;
-
-		// return pointer to parent connection 2.
-		virtual const Conn* parent2() const;
-		*/
+		 */
 
 		// Something here to set up sync message buffers
 
@@ -79,6 +82,11 @@ class Msg
 			return e2_;
 		}
 
+		MsgId mid() const {
+			return mid_;
+		}
+
+		/*
 		MsgId mid1() const {
 			return m1_;
 		}
@@ -86,12 +94,31 @@ class Msg
 		MsgId mid2() const {
 			return m2_;
 		}
+		*/
+
+		/**
+		 * Looks up the message on the global vector of Msgs.
+		 */
+		static const Msg* getMsg( MsgId m );
+
+		/**
+		 * The zero MsgId, used as the error value.
+		 */
+		static const MsgId Null;
 
 	protected:
 		Element* e1_;
 		Element* e2_;
-		MsgId m1_; // Index of Msg on e1
-		MsgId m2_; // Index of Msg on e2
+		MsgId mid_; // Index of this msg on the msg_ vector.
+
+		/// Manages all Msgs in the system.
+		static vector< Msg* > msg_;
+
+		/**
+		 * Manages garbage collection for deleted messages. Deleted
+		 * MsgIds are kept here so that they can be reused.
+		 */
+		static vector< MsgId > garbageMsg_;
 };
 
 class SingleMsg: public Msg
@@ -100,7 +127,7 @@ class SingleMsg: public Msg
 		SingleMsg( Eref e1, Eref e2 );
 		~SingleMsg() {;}
 
-		void exec( Element* target, const char* arg) const;
+		void exec( const char* arg) const;
 
 		static bool add( Eref e1, const string& srcField, 
 			Eref e2, const string& destField );
@@ -116,7 +143,7 @@ class OneToOneMsg: public Msg
 		OneToOneMsg( Element* e1, Element* e2 );
 		~OneToOneMsg() {;}
 
-		void exec( Element* target, const char* arg) const;
+		void exec( const char* arg) const;
 	private:
 };
 
@@ -126,7 +153,7 @@ class OneToAllMsg: public Msg
 		OneToAllMsg( Eref e1, Element* e2 );
 		~OneToAllMsg() {;}
 
-		void exec( Element* target, const char* arg) const;
+		void exec( const char* arg ) const;
 
 		static bool add( Eref e1, const string& srcField, 
 			Element* e2, const string& destField );

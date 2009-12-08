@@ -15,46 +15,45 @@ Conn::~Conn()
 
 void Conn::clearConn()
 {
-	vector< Msg* > temp = m_;
+	vector< MsgId > temp = m_;
 	// Note that we can't iterate directly over m_, because the deletion
 	// operator alters m_ and will invalidate the iterators.
 	m_.resize( 0 ); // This avoids the system trying to go through all
-	// of the messages on m_. But we still have the disgusting issue of
+	// of the messages on m_. But we still have the issue of
 	// it going through all other conns looking for the msg to be deleted.
-	for( vector< Msg* >::const_iterator i = temp.begin(); 
+	for( vector< MsgId >::const_iterator i = temp.begin(); 
 		i != temp.end(); ++i )
 	{
-		delete *i;
+		Msg::deleteMsg( *i );
 	}
 }
 
 void Conn::asend( 
 	const Element* e, Qinfo& q, const char* arg ) const
 {
-	for( vector< Msg* >::const_iterator i = m_.begin(); i != m_.end(); ++i )
-		(*i)->addToQ( e, q, arg );
+	for( vector< MsgId >::const_iterator i = m_.begin(); i != m_.end(); ++i)
+		Msg::getMsg( *i )->addToQ( e, q, arg );
 }
 
 // Checks for the correct Msg, and expands the arg to append the
 // target index.
 void Conn::tsend( 
-	const Element* e, Id target, Qinfo& q, const char* arg ) const
+	const Element* e, DataId target, Qinfo& q, const char* arg ) const
 {
 	assert( q.useSendTo() );
-	for( vector< Msg* >::const_iterator i = m_.begin(); i != m_.end(); ++i ) {
-		if ( (*i)->e2() == target() || (*i)->e1() == target() ) {
-			char* temp = new char[ q.size() + sizeof( unsigned int ) ];
-			memcpy( temp, arg, q.size() );
-			*reinterpret_cast< unsigned int* >( temp + q.size() ) = 
-				target.index();
-			q.expandSize();
-			(*i)->addToQ( e, q, temp );
-			delete[] temp;
-			break;
-		}
+	for( vector< MsgId >::const_iterator i = m_.begin(); i != m_.end(); ++i)
+	{
+		char* temp = new char[ q.size() + sizeof( DataId ) ];
+		memcpy( temp, arg, q.size() );
+		*reinterpret_cast< DataId* >( temp + q.size() ) = target;
+		q.expandSize();
+		Msg::getMsg( *i )->addToQ( e, q, temp );
+		delete[] temp;
+		break;
 	}
 }
 
+/*
 void Conn::tsend( 
 	const Element* e, unsigned int targetIndex, Qinfo& q, const char* arg ) const
 {
@@ -64,32 +63,33 @@ void Conn::tsend(
 	memcpy( temp, arg, q.size() );
 	*reinterpret_cast< unsigned int* >( temp + q.size() ) = targetIndex;
 	q.expandSize();
-	m_[0]->addToQ( e, q, temp );
+	Msg::getMsg( m_[0] )->addToQ( e, q, temp );
 	delete[] temp;
 }
+*/
 
 /**
  * process calls process on all Msgs, on e2.
  */
 void Conn::process( const ProcInfo* p ) const
 {
-	for( vector< Msg* >::const_iterator i = m_.begin(); i != m_.end(); ++i )
-		(*i)->process( p );
+	for( vector< MsgId >::const_iterator i = m_.begin(); i != m_.end(); ++i)
+		Msg::getMsg( *i )->process( p );
 }
 
 /**
  * ClearQ calls clearQ on all Msgs, on e2.
- */
 void Conn::clearQ() const
 {
 	for( vector< Msg* >::const_iterator i = m_.begin(); i != m_.end(); ++i )
 		(*i)->clearQ();
 }
+ */
 
 /**
 * Add a msg to the list
 */
-void Conn::add( Msg* m )
+void Conn::add( MsgId m )
 {
 	m_.push_back( m );
 }
@@ -97,10 +97,10 @@ void Conn::add( Msg* m )
 /**
 * Drop a msg from the list
 */
-void Conn::drop( const Msg* m )
+void Conn::drop( MsgId mid )
 {
 	// Here we have the spectacularly ugly C++ erase-remove idiot.
-	m_.erase( remove( m_.begin(), m_.end(), m ), m_.end() ); 
+	m_.erase( remove( m_.begin(), m_.end(), mid ), m_.end() ); 
 }
 
 /**
@@ -121,6 +121,7 @@ unsigned int Conn::numMsg() const
 	return m_.size();
 }
 
+/*
 Element* Conn::getTargetElement( 
 	const Element* otherElement, unsigned int index ) const
 {
@@ -132,3 +133,4 @@ Element* Conn::getTargetElement(
 	}
 	return 0;
 }
+*/

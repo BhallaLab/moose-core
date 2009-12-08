@@ -112,7 +112,7 @@ bool set( Eref& dest, const string& destField, const string& val )
 			Eref shelle = shellid.eref();
 			// c.setMsgDest( shelle, dest );
 			Msg* m = new SingleMsg( shelle, dest );
-			shell->addMsgToConn( m, setCid );
+			shell->addMsgToConn( m->mid(), setCid );
 			shell->addTargetFunc( fid, setFuncIndex );
 			sf.send( shelle, val );
 			// c.clearConn();
@@ -150,7 +150,7 @@ bool get( const Eref& dest, const string& destField )
 		if ( func->checkFinfo( &sf ) ) {
 			shell->clearConn( getCid );
 			Msg* m = new SingleMsg( shelle, dest );
-			shell->addMsgToConn( m, getCid );
+			shell->addMsgToConn( m->mid(), getCid );
 
 			shell->addTargetFunc( fid, getFuncIndex );
 			rf->send( shelle, retFunc );

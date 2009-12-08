@@ -34,11 +34,13 @@ class Conn
 		 * Tsend goes through child Msgs looking for an Element matching
 		 * the target, and calls the matching Id.
 		 */
-		void tsend( const Element* e, Id target, Qinfo& q, 
+		void tsend( const Element* e, DataId target, Qinfo& q, 
 			const char* arg ) const;
 
+		/*
 		void tsend( const Element* e, unsigned int targetIndex, Qinfo& q, 
 			const char* arg ) const;
+		*/
 
 		/**
 		 * process calls process on all Msgs.
@@ -47,18 +49,18 @@ class Conn
 
 		/**
 		 * ClearQ calls clearQ on all Msgs.
-		 */
 		void clearQ() const;
+		 */
 
 		/**
 		 * Add a msg to the list
 		 */
-		void add( Msg* m );
+		void add( MsgId m );
 
 		/**
 		 * Drop a msg from the list
 		 */
-		void drop( const Msg* m );
+		void drop( const MsgId m );
 
 		/**
 		 * Report number of Msgs
@@ -67,8 +69,8 @@ class Conn
 
 		/**
 		 * Report Msg target
-		 */
 		Element* getTargetElement( const Element* e, unsigned int i ) const;
+		 */
 
 		/**
 		 * Reassign target. Used typically for once-off calls like 'set'.
@@ -79,6 +81,6 @@ class Conn
 		 */
 	
 	private:
-		vector< Msg* > m_;
+		vector< MsgId > m_;
 };
 

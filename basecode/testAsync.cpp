@@ -42,14 +42,15 @@ void insertIntoQ( )
 		string stemp( temp );
 		char buf[200];
 
+		// This simulates a sendTo
 		unsigned int size = Conv< string >::val2buf( buf, stemp );
-		Qinfo qi( 1, i, size + sizeof( unsigned int ), 1 );
+		Qinfo qi( 1, i, size + sizeof( unsigned int ), 1, 1 );
 
 		*reinterpret_cast< unsigned int* >( buf + size ) = i;
 
-		e1.element()->addToQ( qi, buf );
+		qi.addToQ( 0, m->mid(), 1, buf );
 	}
-	e1.element()->clearQ();
+	Qinfo::clearQ( 0 );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		char temp[20];
@@ -80,7 +81,7 @@ void testSendMsg()
 	// Conn c;
 	// c.add( m );
 	ConnId cid = 0;
-	e1.element()->addMsgToConn( m, cid );
+	e1.element()->addMsgToConn( m->mid(), cid );
 	
 	SrcFinfo1<string> s( "test", "", cid );
 	s.registerSrcFuncIndex( 0 );
@@ -92,7 +93,7 @@ void testSendMsg()
 		string stemp( temp );
 		s.send( Eref( e1.element(), i ), stemp );
 	}
-	e2.element()->clearQ();
+	Qinfo::clearQ( 0 );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		char temp[20];
@@ -127,7 +128,7 @@ void testCreateMsg()
 		assert( sf != 0 );
 		sf->send( Eref( e1.element(), i ) );
 	}
-	e2.element()->clearQ();
+	Qinfo::clearQ( 0 );
 
 	/*
 	for ( unsigned int i = 0; i < size; ++i )
@@ -154,7 +155,7 @@ void testSet()
 		string stemp( temp );
 		Eref dest( e2.element(), i );
 		set( dest, "set_name", stemp );
-		e2.element()->clearQ();
+		Qinfo::clearQ( 0 );
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -194,8 +195,8 @@ void testGet()
 			// get requests, but just
 			// to test that it works from anywhere...
 		if ( get( dest, "get_name" ) ) {
-			e2.element()->clearQ(); // Request goes to e2
-			shell->clearQ(); // Response comes back to e1
+			Qinfo::clearQ( 0 ); // Request goes to e2
+			// shell->clearQ(); // Response comes back to e1
 
 			stemp = ( reinterpret_cast< Shell* >(shell->data( 0 )) )->getBuf();
 			// cout << i << "	" << stemp << endl;
@@ -382,7 +383,7 @@ void testSendSpike()
 	ret = SetGet1< double >::set( e2, "Vm", 1.0 );
 	ProcInfo p;
 	reinterpret_cast< IntFire* >(e2.data())->process( &p, e2 );
-	syn.clearQ();
+	Qinfo::clearQ( 0 );
 //	e2.element()->clearQ();
 	Eref synParent( e2.element(), 1 );
 
@@ -581,7 +582,7 @@ void testSparseMsg()
 		i2()->process( &p );
 		assert( syn.q_.size() == qSize[i] );
 		// cout << "T = " << p.currTime << ", Q size = " << syn.q_.size() << endl;
-		syn.clearQ();
+		Qinfo::clearQ( 0 );
 //		i2()->process( &p );
 //		printGrid( i2(), "Vm", 0, thresh );
 		// sleep(1);

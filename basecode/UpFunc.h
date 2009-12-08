@@ -177,7 +177,8 @@ template< class T, class A > class GetUpFunc: public OpFunc
 			char* temp = new char[ retq.size() ];
 			Conv<A>::val2buf( temp, ret );
 			Conn c;
-			c.add( const_cast< Msg* >( e.element()->getMsg( q->mid() ) ) );
+			// c.add( const_cast< Msg* >( e.element()->getMsg( q->mid() ) ) );
+			c.add( q->mid() ); 
 			c.tsend( e.element(), q->srcIndex(), retq, temp );
 			delete[] temp;
 		}

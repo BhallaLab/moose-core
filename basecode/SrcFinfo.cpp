@@ -48,13 +48,12 @@ void SrcFinfo0::send( Eref e ) const {
 	e.asend( getConnId(), getFuncIndex(), 0, 0 );
 }
 
-void SrcFinfo0::sendTo( Eref e, Id target ) const
+void SrcFinfo0::sendTo( Eref e, DataId target ) const
 {
-	unsigned int temp = target.index();
 	/*
+	unsigned int temp = target.index();
 	char temp[ sizeof( unsigned int ) ];
 	*reinterpret_cast< unsigned int* >( temp ) = target.index();
 	*/
-	e.tsend( getConnId(), getFuncIndex(), target, 
-	reinterpret_cast< const char* >( &temp ), 0 );
+	e.tsend( getConnId(), getFuncIndex(), target, 0, 0 );
 }

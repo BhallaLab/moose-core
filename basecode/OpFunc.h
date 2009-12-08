@@ -193,11 +193,14 @@ template< class T, class A > class GetOpFunc: public OpFunc
 		    FuncId retFunc = *reinterpret_cast< const FuncId* >( buf );
 			const A& ret = (( reinterpret_cast< T* >( e.data() ) )->*func_)();
 
-			Qinfo retq( retFunc, e.index().data(), Conv< A >::size( ret ), 1 );
+			// Flag arguments: useSendTo = 1, and flip the isForward flag.
+			Qinfo retq( retFunc, e.index(), Conv< A >::size( ret ), 
+				1, !q->isForward() );
 			char* temp = new char[ retq.size() ];
 			Conv<A>::val2buf( temp, ret );
 			Conn c;
-			c.add( const_cast< Msg* >( e.element()->getMsg( q->mid() ) ) );
+			c.add( q->mid() );
+			// c.add( const_cast< Msg* >( e.element()->getMsg( q->mid() ) ) );
 			c.tsend( e.element(), q->srcIndex(), retq, temp );
 			delete[] temp;
 		}

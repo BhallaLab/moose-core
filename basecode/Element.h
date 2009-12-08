@@ -59,15 +59,15 @@ class Element
 
 		/**
 		 * Clear sporadic message queue, events that come randomly.
-		 */
 		void clearQ();
+		 */
 
 		/**
 		 * execFunc executes the function defined in the buffer, and
 		 * returns the next position of the buffer. Returns 0 at the
 		 * end.
-		 */
 		const char* execFunc( const char* buf );
+		 */
 
 		/**
 		 * Return a single buffer entry specified by slot and eindex
@@ -160,8 +160,8 @@ class Element
 		/** 
 		 * This function pushes a function request onto a queue.
 		 * In multithread mode it figures out which queue to use.
-		 */
 		void addToQ( const Qinfo& qi, const char* arg );
+		 */
 
 		/**
 		 * We'll try these out as alternate Send functions, given that
@@ -173,16 +173,21 @@ class Element
 		const Conn* conn( ConnId c ) const;
 
 		/** 
-		 * Pushes the Msg m onto the list, and returns the index to look
-		 * it up as the MsgId.
+		 * Pushes the Msg mid onto the list.
+		 * The position on the list does not matter.
+		 * 
 		 */
-		MsgId addMsg( Msg* m );
-		void dropMsg( const Msg* m, MsgId mid );
+		void addMsg( MsgId mid );
+
+		/**
+		 * Removes the specified msg from the list.
+		 */
+		void dropMsg( MsgId mid );
 
 		/**
 		 * Puts the specified Msg on the specified Connection.
 		 */
-		void addMsgToConn( Msg* m, ConnId cid );
+		void addMsgToConn( MsgId m, ConnId cid );
 		
 		/**
 		 * Clears out all Msgs on specified conn. Used in Shell::set
@@ -201,7 +206,7 @@ class Element
 
 		const Cinfo* cinfo() const;
 
-		const Msg* getMsg( MsgId mid ) const;
+		// const Msg* getMsg( MsgId mid ) const;
 
 	protected:
 
@@ -254,8 +259,8 @@ class Element
 
 		/**
 		 * This is the buffer for incoming async function requests to this 
-		 * Element. Entries are organized as FuncId, MsgId, data.
-		 * The FuncId has implicit knowledge of data size.
+		 * Element. Entries are organized as Qinfo, data.
+		 * Qinfo explicitly stores the size of the data.
 		 */
 		vector< char > q_; // incoming request queue.
 
@@ -267,7 +272,7 @@ class Element
 		/**
 		 * Message vector. This is the low-level messaging information.
 		 */
-		vector< Msg* > m_;
+		vector< MsgId > m_;
 
 		/**
 		 * Connection vector. Connections are mid-level messaging info.

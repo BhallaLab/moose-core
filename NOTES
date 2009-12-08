@@ -1927,6 +1927,226 @@ Many changes needed to get all the pieces to work together. Compiles,
 yet to get it to work.
 
 OK, now works. Cleaned out the scheduling test so it isn't verbose anymore.
-Also valgrind is happy.
+Also valgrind is happy. Checked in as 1466.
+
+Back on 1 and then 8 Nov, these were the planned steps:
+To test scalability, let's do this:
+- Make a speed reference using a sparse matrix and customized code to replace
+	messaging, as a recurrent network with N neurons and P probability
+	of connections. Goal is to do N >= 1e5, P ~0.1.
+* Make the equivalent network in MOOSE
+* Profile, look at bottlenecks.
+* Implement scheduling
+- Repeat with multithreading
+- Repeat with multinodes
+Now we add:
+- Redo messaging with sync messages
+- Make a good test case, say the signaling network again?
+- Profile, look at bottlenecks
+- Do multithreading
+- Do multinodes.
 
 =============================================================================
+28 Nov.
+
+Multithreading.
+- Need to guarantee that clearQ is element local, and all outgoing
+	messages emerge only at Process.
+	- Otherwise we might add stuff to queues at the same time
+	as we read from them.
+	- Alternatively, have to maintain a separate queue for clearQ input
+	vs output.
+	- Or we could do a mutex to grab control of the target queue for the
+	time we need to put data into it.
+- Use a separate queue on each Element for each thread.
+	- Alternatively use thread-safe queues. Less memory, more mutexes.
+- Barrier after clearQ and after Process.
+- Process is easy to multithread as it is data object-local.
+	- separate sub-parts of data among threads.
+- clearQ is hard to multithread as each msg in the queue could refer to many
+	data objects, and there can be many msgs. 
+- How to multithread the clearQ
+
+Scaling up to huge numbers of threads: This should use the same decomposition
+as scaling up to a similar huge number of nodes.
+
+Suppose I have 1024 threads in my simple network example.
+1. Single or multiple schedulers?
+	- Do I want them to run out of sync? I'll need barrier synchs
+		in either case.
+2. Explicit Element Data splitting or implicit (and even dynamic) as per
+	thread indexing?
+	- Explicit would simplify the queueing model: It would still be the
+	same as single-threaded, as each thread would manage one queue.
+	- How to access stuff with explicit data splitting? Reference Element
+		will have to keep track and if needed, redirect. But this
+		can't be done for all messages: they will need to reshuffle.
+	- Dynamic would do good things for load balancing.
+3. Message structuring.
+	- Explicit Element data splitting will put a separate queue request
+	in for each Element proxy on each thread. So the clearQ can become
+	single threaded, cleanly, but filling the queue requires thread 
+	juggling.
+	Note though that the queue is typically much fewer calls than the # of 
+	calls needed when clearing it, since the target Msg distributes queue
+	calls to many Data destinations.
+	- At send time put messages through a crossbar that knows which
+	threads need to receive each msg. So originating thread A has
+	holding queues for threads A-Z. After barrier, we now access the queues
+	by destination thread.
+	- Simple implementation would be that each originating message just
+	goes to each target thread holding queue. Clearly need to structure up
+	this to only deliver a given message to the queues that really need it.
+	Note that this is exactly what I would have had to do for multinode 
+	stuff. 
+		- This looks like a SparseMsg.
+		- The target thread gets one big fat queue, rather than one
+		per Element. Not hard, just need to add dest Id to Qinfo.
+		- Alternative to one fat queue is for the message delivery
+		crossbar to direct messages already into the correct Element.
+	- another approach: give each Message a unique id for the entire
+	simulation. When sending info, we don't now need src or dest Element,
+	as this is all in the Msg. So a single fat queue is possible for
+	each thread.
+		- Qinfo already holds a MsgId, but it will have to become
+			an unsigned int rather than short.
+		- Will need a boolean to indicate msg direction.
+		- Will need to expand srcIndex to be a full DataId.
+		- funcId, and size remain.
+		- Would like a way to cleanly handle tgtIndex for SendTo.
+=============================================================================
+29 Nov.
+Current design looks like this:
+- Single queue per thread, rather than one per Element. To be more precise,
+  each thread has one incoming queue for each thread (including itself) and
+  one outgoing queue for each thread (including itself).
+  	- We could in principle replace this with a single pair of in and out
+	queues per node, if they were individually thread-safe. Tradeoff in
+	memory and speed. Probably dreadful for many threads.
+		- Suppose a given thread wants to put data out at a fraction
+		F of total time, and there are T threads. Then the fraction of
+		time any thread is blocked by this thread is F/T.
+		So the total fraction of time that any given thread is blocked
+		is F again.
+		- Suppose we provide a further number Q of queues per thread,
+		to subdivide the total set T. Now the fraction of time
+		any other thread is blocked is F/( Q * T ), so the total
+		blockage fraction is F/Q. This may help, but gets messy.
+		- Can we do the same for internode calls? Yes, there is an
+		mpi_any_source option in recv. One can narrow things down
+		by using tags for groups of messages.
+	- Some object operations (like 'get calls' ) put stuff right back
+	onto the queue. This will cause problems especially when we have a
+	single queue per thread. Dual queues?
+	- Also consider sched interleaving, where we do one set of objects 
+	first so as to get their data ready for transfer. Again, dual queues
+	needed. These could be the input and output queues for MPI.
+	- In some cases would want a broadcast queue. If the # of target
+	threads is more than half the total, for example, may as well send
+	data once to all. Huge savings in memory too.
+- Messages now have a unique system-wide Id. Qinfo refers to this, so queue
+	knows (through Msg) which is target Element.
+- Msg::addToQ is the function which puts packets onto the Queues. This
+	is now expanded to decide which threads should receive each packet.
+	For example, a large SparseMsg might use one SparseMatrix for the queue
+	loading, and another on each thread, for clearing. The setup of this
+	large SparseMsg will be the key step in thread/node decomposition.
+- What happens to different clocks?
+	- Some kinds of data transfer do not have to occur each dt: spike msgs.
+	Want to accumulate them.
+	- Sometimes we simply have two very different clocks going. Should we
+	simply send data with the first available?
+	- Sometimes we have small (fast) dt clocks within a thread, and can
+	get by with slower dt clocks between threads. How to do?
+		- Just check queue size for inter-thread data?
+
+I think the next step is an implementation. Too many unknowns here.
+- Rebuild current stuff as just a single queue. Benchmark.
+- Set up simple implementation: one queue on each thread, for each target
+	thread. So a 4-thread system would have 16 queues. Then there are the
+	outgoing queues too.
+	- Benchmark
+- Set up more economical implementation: Each thread manages a thread-safe
+	input queue, and is its only consumer. 
+	Need 4x2 queues for a 4 thread system.
+	- Benchmark.
+- convert from threads to MPI.
+=============================================================================
+30 Nov.
+Just for reference, the starting version is 1466.
+We need to put a queue on each thread. Where should it reside?
+- Clock. This definitely knows about the queues.
+	But it requires that the scheduling be set up before even simple
+	messages can be handled.
+- Shell. This will be replicated on each node, but not necessarily for each
+	thread.
+	I already have a Shell dependency for set/get ops using msgs.
+- ProcInfo.
+- Static field of Element
+
+call stack for addToQ:
+Eref::asend: Creates Qinfo. calls Conn::asend.
+Conn::asend: iterates through Msgs. Each calls addToQ. Qinfo is passed in.
+Msg::addToQ: Checks which is src and which dest Element. Calls addToQ on 
+	non-calling Element. Qinfo is passed in.
+Element::addToQ: calls Qinfo::addToQ on the passed in qinfo. Passes in queue.
+	This actualy does the queue juggling.
+
+So perhaps the Queue should be on Qinfo as a static. if so, the call sequence
+would be:
+Eref::asend: Creates Qinfo. calls Conn::asend.
+Conn::asend: iterates through Msgs. Each calls addToQ. Qinfo is passed in.
+Msg::addToQ: Checks which is src and which dest Element. Fills in direction
+	flag on Qinfo. Figures out the target Queue. Calls Qinfo::addToQ with
+	the chosen queue index.
+Qinfo::addToQ: does the queue work.
+
+So it looks like want to put the queues on Qinfo. This seems like a sensible
+place.
+
+=============================================================================
+5 Dec.
+Need to work out relationship between global Msg vector, and managing msgs on
+individual Elements.
+
+Currently Element manages a vector of Msg ptrs. Element also manages
+a vector of Conns. The Conns too manage a vector of Msg ptrs. To top it all,
+each Msg keeps track of its index in the Element::Msg vector.
+
+We need the fast lookup only for Conns, and there too it is a very tiny part
+of the comp load. May as well always use MsgIds.
+This may let us separate them... use MsgIds only for incoming, Conn only
+for outgoing. Problem with bidirectional msgs.
+
+Now we have to separate the MsgId as the index of the Msg on the Element,
+from the MsgId as the universal Id for the Msg.
+Note that we never seem to use either Msg::mid1() or Msg::mid2(). 
+Likewise, the only time we ever use Element::getMsg is in clearQ.
+
+Working on Qinfo::addToQ
+
+Old call stack for clearQ:
+Tick::advance: calls its conn::clearQ
+Conn::clearQ: goes through all Msgs, calls 
+Msg::clearQ: calls e2->clearQ. Why e2? because e1 is the Tick.
+Element::clearQ: goes through its own queue, calls execFunc for each entry.
+Element::ExecFunc: This figures out if it is a sendTo or regular msg.
+	sendTo: figures out target, Qinfo works out op func, calls op.
+	regular: calls Msg::exec on buf
+	Msg::exec: figures out direction, traverses all targets calling op.
+
+New version:
+Tick::advance: calls Qinfo::clearQ with the appropriate Qid.
+Qinfo::clearQ: goes through its own queue. Looks up for each entry, calls
+Msg::exec( figures out direction, traverses targets calling op.
+
+Working on Msgs.
+Need to modify Elements so that they maintain a vector of Mids rather
+than of pointers to Msgs. Likewise Conns.
+Need to fix Element::dropMsg
+
+
+=============================================================================
+
+8 Dec
+Still trying to compile, but enough done that a checkin is needed.

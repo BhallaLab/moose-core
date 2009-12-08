@@ -31,11 +31,12 @@ Element::~Element()
 {
 	delete[] sendBuf_;
 	cinfo_->destroy( d_ );
+	cinfo_ = 0; // A flag that the Element is doomed, used to avoid lookups when deleting Msgs.
 	for ( vector< Conn >::iterator i = c_.begin(); i != c_.end(); ++i )
 		i->clearConn(); // Get rid of Msgs on them.
-	for ( vector< Msg* >::iterator i = m_.begin(); i != m_.end(); ++i )
+	for ( vector< MsgId >::iterator i = m_.begin(); i != m_.end(); ++i )
 		if ( *i ) // Dropped Msgs set this pointer to zero, so skip them.
-			delete *i;
+			Msg::deleteMsg( *i );
 }
 
 void Element::process( const ProcInfo* p )
@@ -152,10 +153,12 @@ const Conn* Element::conn( ConnId c ) const {
 	return &( c_[c] );
 }
 
+/*
 const Msg* Element::getMsg( MsgId mid ) const {
 	assert( mid < m_.size() );
 	return m_[ mid ];
 }
+*/
 
 /**
  * Parses the buffer and executes the func in all specified Data
@@ -167,7 +170,6 @@ const Msg* Element::getMsg( MsgId mid ) const {
  * The Msg does the iteration, and as it is a virtual base class
  * it can do all sorts of optimizations depending on how the mapping looks.
  *
- */
 const char* Element::execFunc( const char* buf )
 {
 	assert( buf != 0 );
@@ -188,13 +190,14 @@ const char* Element::execFunc( const char* buf )
 				tgtIndex << " on " << this << endl;
 		}
 	} else {
-		const Msg* m = getMsg( q.mid() ); // Runtime check for Msg identity.
+		const Msg* m = Msg::getMsg( q.mid() ); // Runtime check for Msg identity.
 		if ( m )
 			m->exec( this, buf );
 	}
 
 	return buf + sizeof( Qinfo) + q.size();;
 }
+ */
 
 /**
  * clearQ: goes through async function request queue and carries out
@@ -211,7 +214,6 @@ const char* Element::execFunc( const char* buf )
  * Need some way to shift stuff around for balancing. Must ensure that
  * only one Msg deals with any given index.
  *
- */
 void Element::clearQ( )
 {
 	const char* buf = &(q_[0]);
@@ -222,57 +224,55 @@ void Element::clearQ( )
 	}
 	q_.resize( 0 );
 }
+ */
 
 /**
  * This function pushes a function event onto the queue.
  * It should be extended to provide thread safety, which can be done
  * if each thread has its own queue.
- */
 void Element::addToQ( const Qinfo& qi, const char* arg )
 {
 	qi.addToQ( q_, arg );
 }
+ */
 
-MsgId Element::addMsg( Msg* m )
+void Element::addMsg( MsgId m )
 {
 	while ( m_.size() > 0 ) {
-		if ( m_.back() == 0 )
+		if ( m_.back() == Msg::Null )
 			m_.pop_back();
 		else
 			break;
 	}
 	m_.push_back( m );
-	return m_.size() - 1;
 }
 
 /**
- * Called from ~Msg.
+ * Called from ~Msg. This requires the usual scan through all msgs,
+ * and could get inefficient.
  */
-void Element::dropMsg( const Msg* m, MsgId mid )
+void Element::dropMsg( MsgId mid )
 {
-	assert ( mid < m_.size() );
-	assert( m == m_[mid] );
-
-	m_[mid] = 0; // To clean up later, if at all. We cannot do a
-	// resize of m_ here because this function is called within an iterator
-	// through m_, in ~Element.
+	if ( cinfo_ == 0 ) // Don't need to clear if Element itself is going.
+		return;
+	// Here we have the spectacularly ugly C++ erase-remove idiot.
+	m_.erase( remove( m_.begin(), m_.end(), mid ), m_.end() );
 
 	for ( vector< Conn >::iterator i = c_.begin(); i != c_.end(); ++i )
-		i->drop( m ); // Get rid of specific Msg, if present, on Conn
+		i->drop( mid ); // Get rid of specific Msg, if present, on Conn
 }
 
-void Element::addMsgToConn( Msg* m, ConnId cid )
+void Element::addMsgToConn( MsgId mid, ConnId cid )
 {
 	if ( c_.size() < cid + 1 )
 		c_.resize( cid + 1 );
-	c_[cid].add( m );
+	c_[cid].add( mid );
 }
 
 void Element::clearConn( ConnId cid )
 {
 	assert( cid < c_.size() );
-	// if ( c_.size() > cid )
-		c_[cid].clearConn();
+	c_[cid].clearConn();
 }
 
 const Cinfo* Element::cinfo() const
