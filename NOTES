@@ -2150,4 +2150,6 @@ Need to fix Element::dropMsg
 
 8 Dec
 Still trying to compile, but enough done that a checkin is needed. 1476.
+Compiled. Crashes. Checkin as 1477.
+
 =============================================================================

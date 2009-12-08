@@ -89,8 +89,7 @@ class Qinfo
 		 * pointers. Possibly add size as an argument
 		 */
 		// void addToQ( Qid qId, const char* arg );
-		void addToQ( Qid qId, MsgId mid, bool isForward, const char* arg ) 
-			const;
+		void addToQ( Qid qId, MsgId mid, bool isForward, const char* arg );
 
 	private:
 		MsgId m_;

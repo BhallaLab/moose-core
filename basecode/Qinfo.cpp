@@ -90,21 +90,23 @@ void Qinfo::clearQ( Qid qId )
 		}
 		buf += sizeof( Qinfo ) + q->size();
 	}
-	q_.resize( 0 );
+	q_[qId].resize( 0 );
 }
 
 // Non-static: copies itself onto queue.
 // qid specifies which queue to use.
+// mid assigns the msgId.
 void Qinfo::addToQ( Qid qId, MsgId mid, bool isForward, const char* arg )
-	const
 {
 	assert( qId < q_.size() );
 
 	vector< char >& q = q_[qId];
 	unsigned int origSize = q.size();
+	m_ = mid;
+	isForward_ = isForward;
 	q.resize( origSize + sizeof( Qinfo ) + size_ );
 	char* pos = &( q[origSize] );
 	memcpy( pos, this, sizeof( Qinfo ) );
-	( reinterpret_cast< Qinfo* >( pos ) )->setForward( isForward );
+	// ( reinterpret_cast< Qinfo* >( pos ) )->setForward( isForward );
 	memcpy( pos + sizeof( Qinfo ), arg, size_ );
 }

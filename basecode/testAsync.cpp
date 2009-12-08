@@ -44,9 +44,9 @@ void insertIntoQ( )
 
 		// This simulates a sendTo
 		unsigned int size = Conv< string >::val2buf( buf, stemp );
-		Qinfo qi( 1, i, size + sizeof( unsigned int ), 1, 1 );
+		Qinfo qi( 1, i, size + sizeof( DataId ), 1, 1 );
 
-		*reinterpret_cast< unsigned int* >( buf + size ) = i;
+		*reinterpret_cast< DataId* >( buf + size ) = DataId( i );
 
 		qi.addToQ( 0, m->mid(), 1, buf );
 	}
@@ -55,8 +55,8 @@ void insertIntoQ( )
 	for ( unsigned int i = 0; i < size; ++i ) {
 		char temp[20];
 		sprintf( temp, "objname_%d", i );
-		assert( reinterpret_cast< Neutral* >(e1.element()->data( i ))->getName()
-			== temp );
+		string name = ( reinterpret_cast< Neutral* >(e2.element()->data( i )) )->getName();
+		assert( name == temp );
 	}
 	cout << "." << flush;
 
