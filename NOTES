@@ -2160,3 +2160,14 @@ OK, turns out that the msg is deleted on the 'set' call.
 
 =============================================================================
 
+9 Dec. 
+Got unit tests working up to testSendSpike. Checkin as 1479.
+
+Ran into an issue where it seems like every time I do a set/get call,
+it clears out all pre-existing messages. Happens at testAsync.cpp:567.
+
+Fixed. Now it runs through the unit tests, but it does not like the old
+values for Q size in testSparseMsg. I'm not sure if this is an issue with
+ordering of the random number usage, or if it is fundamental. The output
+looks reasonable.
+

@@ -261,8 +261,8 @@ class Element
 		 * This is the buffer for incoming async function requests to this 
 		 * Element. Entries are organized as Qinfo, data.
 		 * Qinfo explicitly stores the size of the data.
-		 */
 		vector< char > q_; // incoming request queue.
+		 */
 
 		/**
 		 * Class information

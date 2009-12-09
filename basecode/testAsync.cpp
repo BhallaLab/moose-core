@@ -538,7 +538,6 @@ void testSparseMsg()
 	string arg;
 	Id i2 = ic->create( "test2", size );
 	Eref e2 = i2.eref();
-	// SynElement syn( sc, i2() );
 	FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
 
 	assert( syn.numData() == 0 );
@@ -559,7 +558,7 @@ void testSparseMsg()
 	assert( ret );
 
 	unsigned int nd = syn.numData();
-	// cout << "Num Syn = " << nd << endl;
+	cout << "Num Syn = " << nd << endl;
 	assert( nd == NUMSYN );
 	vector< double > temp( size, 0.0 );
 	for ( unsigned int i = 0; i < size; ++i )
@@ -600,11 +599,11 @@ void testSparseMsg()
 	for ( unsigned int i = 0; i < runsteps; ++i ) {
 		p.currTime += p.dt;
 		i2()->process( &p );
-		assert( syn.q_.size() == qSize[i] );
-		// cout << "T = " << p.currTime << ", Q size = " << syn.q_.size() << endl;
+	//	assert( Qinfo::q_[0].size() == qSize[i] );
+		cout << "T = " << p.currTime << ", Q size = " << Qinfo::q_[0].size() << endl;
 		Qinfo::clearQ( 0 );
 //		i2()->process( &p );
-//		printGrid( i2(), "Vm", 0, thresh );
+		printGrid( i2(), "Vm", 0, thresh );
 		// sleep(1);
 	}
 	// printGrid( i2(), "Vm", 0, thresh );

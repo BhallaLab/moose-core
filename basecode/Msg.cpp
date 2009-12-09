@@ -22,6 +22,7 @@ Msg::Msg( Element* e1, Element* e2 )
 {
 	if ( garbageMsg_.size() > 0 ) {
 		mid_ = garbageMsg_.back();
+		garbageMsg_.pop_back();
 		msg_[mid_] = this;
 	} else {
 		mid_ = msg_.size();
