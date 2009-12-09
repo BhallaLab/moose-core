@@ -2171,3 +2171,16 @@ values for Q size in testSparseMsg. I'm not sure if this is an issue with
 ordering of the random number usage, or if it is fundamental. The output
 looks reasonable.
 
+Valgrind is happy with it first pass.
+
+OK, checked out the old 1466 and tested for unit tests. Works fine, so
+nothing has changed with the random number generator.
+
+OK, put in a cout to check order of values. Order is correct and
+matches with the old version.
+
+Compared the printout of activation: turns out they were identical all along.
+With this sorted it is easy to see that the difference in Q size was just 
+because Qinfo is now 32 rather than 24 bytes. With this fixed, the unit
+tests all clear. Valgrind is happy too.
+

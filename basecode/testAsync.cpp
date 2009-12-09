@@ -522,7 +522,7 @@ void printGrid( Element* e, const string& field, double min, double max )
 void testSparseMsg()
 {
 	static const unsigned int qSize[] =
-		{ 20112, 240, 144, 432, 864, 2016, 3600, 4704, 6192, 7248 };
+		{ 838, 10, 6, 18, 36, 84, 150, 196, 258, 302 };
 	static const unsigned int NUMSYN = 104576;
 	static const double thresh = 0.2;
 	static const double Vmax = 1.0;
@@ -541,14 +541,6 @@ void testSparseMsg()
 	FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
 
 	assert( syn.numData() == 0 );
-	/*
-	for ( unsigned int i = 0; i < size; ++i ) {
-		Eref er( i2(), i );
-		bool ret = SetGet1< unsigned int >::set( er, "numSynapses", i );
-		assert( ret );
-	}
-	assert( syn.numData() == ( size * (size - 1) ) / 2 );
-	*/
 
 	DataId di( 1, 0 ); // DataId( data, field )
 	Eref syne( &syn, di );
@@ -558,7 +550,7 @@ void testSparseMsg()
 	assert( ret );
 
 	unsigned int nd = syn.numData();
-	cout << "Num Syn = " << nd << endl;
+//	cout << "Num Syn = " << nd << endl;
 	assert( nd == NUMSYN );
 	vector< double > temp( size, 0.0 );
 	for ( unsigned int i = 0; i < size; ++i )
@@ -566,6 +558,10 @@ void testSparseMsg()
 
 	ret = SetGet1< double >::setVec( e2, "Vm", temp );
 	assert( ret );
+	/*
+	for ( unsigned int i = 0; i < 40; ++i )
+		cout << reinterpret_cast< IntFire* >( e2.element()->data( i ) )->getVm() << "	" << temp[i] << endl;
+		*/
 	temp.clear();
 	temp.resize( size, thresh );
 	ret = SetGet1< double >::setVec( e2, "thresh", temp );
@@ -599,11 +595,11 @@ void testSparseMsg()
 	for ( unsigned int i = 0; i < runsteps; ++i ) {
 		p.currTime += p.dt;
 		i2()->process( &p );
-	//	assert( Qinfo::q_[0].size() == qSize[i] );
-		cout << "T = " << p.currTime << ", Q size = " << Qinfo::q_[0].size() << endl;
+		assert( Qinfo::q_[0].size() / ( sizeof( Qinfo ) + sizeof( double ) ) == qSize[i] );
+		// cout << "T = " << p.currTime << ", Q size = " << Qinfo::q_[0].size() << endl;
 		Qinfo::clearQ( 0 );
 //		i2()->process( &p );
-		printGrid( i2(), "Vm", 0, thresh );
+		// printGrid( i2(), "Vm", 0, thresh );
 		// sleep(1);
 	}
 	// printGrid( i2(), "Vm", 0, thresh );
