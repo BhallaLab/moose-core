@@ -531,7 +531,7 @@ void testSparseMsg()
 	static const double delayMax = 4;
 	static const double timestep = 0.2;
 	static const double connectionProbability = 0.1;
-	static const unsigned int runsteps = 5;
+	static const unsigned int runsteps = 1000;
 	const Cinfo* ic = IntFire::initCinfo();
 	const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 1024;

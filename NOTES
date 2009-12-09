@@ -2182,5 +2182,11 @@ matches with the old version.
 Compared the printout of activation: turns out they were identical all along.
 With this sorted it is easy to see that the difference in Q size was just 
 because Qinfo is now 32 rather than 24 bytes. With this fixed, the unit
-tests all clear. Valgrind is happy too.
+tests all clear. Valgrind is happy too. Checkin as 1481.
 
+A bit of benchmarking: Ran using 'time' after enabling the unit tests in
+main.cpp, and setting #runsteps to 1000 from 5.
+36.22, 36.19, 36.17 sec are the times. Marginally faster than earlier even
+though I have a bigger Qinfo. Good.
+
+Now I can go on to serious stuff with threads and the like.

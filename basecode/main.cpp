@@ -25,11 +25,11 @@ void init()
 int main()
 {
 	init();
-#ifdef DO_UNIT_TESTS
+// #ifdef DO_UNIT_TESTS
 	cout << "testing: ";
 	testAsync();
 	testScheduling();
-#endif
+// #endif
 	cout << endl;
 
 	delete Id()();
