@@ -76,7 +76,7 @@ void Eref::asend( ConnId conn, unsigned int funcIndex, const char* arg,
 			unsigned int size ) const
 {
 	// e_->conn( conn ).asend( e_, Qinfo( func, i_, size ), arg );
-	Qinfo q( e_->getTargetFunc( funcIndex ), i_.data(), size );
+	Qinfo q( e_->getTargetFunc( funcIndex ), i_, size );
 	e_->conn( conn )->asend( e_, q, arg );
 }
 

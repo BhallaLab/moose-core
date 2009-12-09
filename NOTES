@@ -2152,4 +2152,11 @@ Need to fix Element::dropMsg
 Still trying to compile, but enough done that a checkin is needed. 1476.
 Compiled. Crashes. Checkin as 1477.
 
+Currently stuck in testSendSpike around line 385. The message has been
+added successfully, but in the IntFire::process when we try to send data,
+there are no Msgs in the conn.
+
+OK, turns out that the msg is deleted on the 'set' call.
+
 =============================================================================
+

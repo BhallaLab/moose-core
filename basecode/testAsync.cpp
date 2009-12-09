@@ -357,6 +357,9 @@ void testSetGetVec()
 void testSendSpike()
 {
 	static const double EPSILON = 1e-9;
+	static const double WEIGHT = -1.0;
+	static const double TAU = 1.0;
+	static const double DT = 0.1;
 	const Cinfo* ic = IntFire::initCinfo();
 	const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 100;
@@ -376,20 +379,37 @@ void testSendSpike()
 
 	DataId di( 1, 0 ); // DataId( data, field )
 	Eref syne( &syn, di );
+	reinterpret_cast< Synapse* >(syne.data())->setWeight( WEIGHT );
 
 	bool ret = SingleMsg::add( e2, "spike", syne, "addSpike" );
 	assert( ret );
 
-	ret = SetGet1< double >::set( e2, "Vm", 1.0 );
+	reinterpret_cast< IntFire* >(e2.data())->setVm( 1.0 );
+	// ret = SetGet1< double >::set( e2, "Vm", 1.0 );
 	ProcInfo p;
+	p.dt = DT;
 	reinterpret_cast< IntFire* >(e2.data())->process( &p, e2 );
+	// At this stage we have sent the spike, so e2.data::Vm should be -1e-7.
+	double Vm = reinterpret_cast< IntFire* >(e2.data())->getVm();
+	assert( fabs( Vm + 1e-7) < EPSILON );
+	// Test that the spike message is in the queue.
+	assert( Qinfo::q_[0].size() == sizeof( Qinfo ) + sizeof( double ) );
+
 	Qinfo::clearQ( 0 );
-//	e2.element()->clearQ();
+	assert( Qinfo::q_[0].size() == 0 );
+
+	/*
+	// Warning: the 'get' function calls clearQ also.
+	Vm = SetGet1< double >::get( e2, "Vm" );
+	assert( fabs( Vm + 1e-7) < EPSILON );
+	*/
+
 	Eref synParent( e2.element(), 1 );
+	reinterpret_cast< IntFire* >(synParent.data())->setTau( TAU );
 
 	reinterpret_cast< IntFire* >(synParent.data())->process( &p, synParent);
-	double Vm = SetGet1< double >::get( synParent, "Vm" );
-	assert( fabs( Vm + 1e-7) < EPSILON );
+	Vm = SetGet1< double >::get( synParent, "Vm" );
+	assert( fabs( Vm - WEIGHT * ( 1.0 - DT / TAU ) ) < EPSILON );
 	// cout << "Vm = " << Vm << endl;
 	cout << "." << flush;
 	delete i2();

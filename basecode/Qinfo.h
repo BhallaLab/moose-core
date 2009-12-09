@@ -18,6 +18,7 @@ typedef unsigned short Qid;
  */
 class Qinfo
 {
+	friend void testSendSpike();
 	public:
 		Qinfo( FuncId f, DataId srcIndex, unsigned int size );
 
