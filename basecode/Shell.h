@@ -21,10 +21,22 @@ class Shell: public Data
 		void handleGet( Eref e, const Qinfo* q, const char* arg );
 		const char* getBuf() const;
 		static const char* buf();
+		static const ProcInfo* procInfo();
+		/**
+		 * Assigns the hardware availability. Assumes that each node will
+		 * have the same number of cores available.
+		 */
+		static void setHardware( unsigned int numCores, unsigned int numNodes );
+		static unsigned int numCores();
 
 	private:
 		string name_;
 		vector< char > getBuf_;
+		static ProcInfo p_; 
+			// Shell owns its own ProcInfo, has global thread/node info.
+			// Used to talk to parser and for thread specification in
+			// setup operations.
+		static unsigned int numCores_;
 };
 
 extern bool set( Eref& dest, const string& destField, const string& val );

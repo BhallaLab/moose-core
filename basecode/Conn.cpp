@@ -29,16 +29,17 @@ void Conn::clearConn()
 }
 
 void Conn::asend( 
-	const Element* e, Qinfo& q, const char* arg ) const
+	const Element* e, Qinfo& q, const ProcInfo* p, const char* arg ) const
 {
 	for( vector< MsgId >::const_iterator i = m_.begin(); i != m_.end(); ++i)
-		Msg::getMsg( *i )->addToQ( e, q, arg );
+		Msg::getMsg( *i )->addToQ( e, q, p, arg );
 }
 
 // Checks for the correct Msg, and expands the arg to append the
 // target index.
 void Conn::tsend( 
-	const Element* e, DataId target, Qinfo& q, const char* arg ) const
+	const Element* e, DataId target, Qinfo& q, const ProcInfo* p,
+		const char* arg ) const
 {
 	assert( q.useSendTo() );
 	for( vector< MsgId >::const_iterator i = m_.begin(); i != m_.end(); ++i)
@@ -47,7 +48,7 @@ void Conn::tsend(
 		memcpy( temp, arg, q.size() );
 		*reinterpret_cast< DataId* >( temp + q.size() ) = target;
 		q.expandSize();
-		Msg::getMsg( *i )->addToQ( e, q, temp );
+		Msg::getMsg( *i )->addToQ( e, q, p, temp );
 		delete[] temp;
 		break;
 	}

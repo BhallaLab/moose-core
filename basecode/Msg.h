@@ -46,7 +46,7 @@ class Msg
 		 * multinode dispersal of messages too.
 		 */
 		virtual void addToQ( const Element* caller, Qinfo& q,
-			const char* arg ) const;
+			const ProcInfo* p, const char* arg ) const;
 
 		/**
 		 * Calls Process on e1.

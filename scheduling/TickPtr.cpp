@@ -79,6 +79,23 @@ void TickPtr::advance( Element* e, ProcInfo* p, double endTime ) {
 	}
 }
 
+/*
+void TickPtr::advanceThread( Element* e, ProcInfo* p, double endTime ) {
+	double nt = nextTime_;
+	while ( nt < endTime ) {
+		p->currTime = nt;
+		for ( vector< const Tick* >::iterator i = ticks_.begin(); 
+			i != ticks_.end(); ++i )
+		{
+			(*i)->advanceThread( e, p );
+		}
+		nt += dt_;
+		if ( p->threadId == 2 ) // first worker thread
+			nextTime_ = nt;
+	}
+}
+*/
+
 double TickPtr::getNextTime() const
 {
 	return nextTime_;

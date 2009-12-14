@@ -102,7 +102,7 @@ void IntFire::process( const ProcInfo* p, const Eref& e )
 		Vm_ = 0.0;
 
 	if ( Vm_ > thresh_ ) {
-		spike->send( e, p->currTime );
+		spike->send( e, p, p->currTime );
 		// e.sendSpike( spikeSlot, p->currTime );
 		Vm_ = -1.0e-7;
 	} else {

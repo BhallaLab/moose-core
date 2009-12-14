@@ -12,8 +12,17 @@ extern void testSyncArray( unsigned int size, unsigned int numThreads,
 	unsigned int method );
 extern void testScheduling();
 
-void init()
+void init( int argc, const char** argv )
 {
+	int numCores = 1;
+	if ( argc > 2 ) {
+		string opt = argv[0];
+		string val = argv[1];
+		if ( opt == "-cores" ) {
+			numCores = atoi( argv[ 1 ] );
+		}
+	}
+	Shell::setHardware( numCores, 1 ); // Only one node for now.
 	// Figure out # of threads here, assign queues.
 	Msg::initNull();
 	Qinfo::setNumQs( 1, 1024 );
@@ -22,14 +31,14 @@ void init()
 	SetGet::setShell();
 }
 
-int main()
+int main( int argc, const char** argv )
 {
-	init();
-// #ifdef DO_UNIT_TESTS
+	init( argc, argv );
+#ifdef DO_UNIT_TESTS
 	cout << "testing: ";
 	testAsync();
 	testScheduling();
-// #endif
+#endif
 	cout << endl;
 
 	delete Id()();

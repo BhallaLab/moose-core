@@ -44,16 +44,16 @@ SrcFinfo0::SrcFinfo0( const string& name, const string& doc, ConnId c )
 	: SrcFinfo( name, doc, c )
 { ; }
 
-void SrcFinfo0::send( Eref e ) const {
-	e.asend( getConnId(), getFuncIndex(), 0, 0 );
+void SrcFinfo0::send( Eref e, const ProcInfo* p ) const {
+	e.asend( getConnId(), getFuncIndex(), p, 0, 0 );
 }
 
-void SrcFinfo0::sendTo( Eref e, DataId target ) const
+void SrcFinfo0::sendTo( Eref e, DataId target, const ProcInfo* p ) const
 {
 	/*
 	unsigned int temp = target.index();
 	char temp[ sizeof( unsigned int ) ];
 	*reinterpret_cast< unsigned int* >( temp ) = target.index();
 	*/
-	e.tsend( getConnId(), getFuncIndex(), target, 0, 0 );
+	e.tsend( getConnId(), getFuncIndex(), target, p, 0, 0 );
 }

@@ -54,8 +54,8 @@ class SrcFinfo0: public SrcFinfo
 		~SrcFinfo0() {;}
 
 		// Will need to specialize for strings etc.
-		void send( Eref e ) const;
-		void sendTo( Eref e, DataId target ) const;
+		void send( Eref e, const ProcInfo* p ) const;
+		void sendTo( Eref e, DataId target, const ProcInfo* p ) const;
 
 	private:
 };
@@ -72,15 +72,15 @@ template < class T > class SrcFinfo1: public SrcFinfo
 			{ ; }
 
 		// Will need to specialize for strings etc.
-		void send( Eref e, const T& arg ) const
+		void send( Eref e, const ProcInfo* p, const T& arg ) const
 		{
-			e.asend( getConnId(), getFuncIndex(), 
+			e.asend( getConnId(), getFuncIndex(), p,
 				reinterpret_cast< const char* >( &arg ), sizeof( T ) );
 		}
 
-		void sendTo( Eref e, DataId target, const T& arg ) const
+		void sendTo( Eref e, DataId target, const ProcInfo* p, const T& arg ) const
 		{
-			e.tsend( getConnId(), getFuncIndex(), target, 
+			e.tsend( getConnId(), getFuncIndex(), target, p,
 				reinterpret_cast< T* >( &arg ), sizeof( T ) );
 
 			/*
@@ -107,15 +107,16 @@ template <> class SrcFinfo1< string >: public SrcFinfo
 			{ ; }
 
 		// Will need to specialize for strings etc.
-		void send( Eref e, const string& arg ) const
+		void send( Eref e, const ProcInfo* p, const string& arg ) const
 		{
-			e.asend( getConnId(), getFuncIndex(), 
+			e.asend( getConnId(), getFuncIndex(), p,
 				arg.c_str() , arg.length() + 1 );
 		}
 
-		void sendTo( Eref e, DataId target, const string& arg ) const
+		void sendTo( Eref e, DataId target, const ProcInfo* p, 
+			const string& arg ) const
 		{
-			e.tsend( getConnId(), getFuncIndex(), target, 
+			e.tsend( getConnId(), getFuncIndex(), target, p,
 				arg.c_str(), arg.length() + 1 );
 			/*
 
@@ -145,23 +146,24 @@ template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 			{ ; }
 
 		// Will need to specialize for strings etc.
-		void send( Eref e, const T1& arg1, const T2& arg2 ) {
+		void send( Eref e, const ProcInfo* p,
+			const T1& arg1, const T2& arg2 ) {
 			char temp[ sizeof( T1 ) + sizeof( T2 ) ];
 			*reinterpret_cast< T1* >( temp ) = arg1;
 			*reinterpret_cast< T2* >( temp + sizeof( T1 ) ) = arg2;
-			e.asend( getConnId(), getFuncIndex(), temp,
-				sizeof( T1 ) + sizeof( T2 ) );
+			e.asend( getConnId(), getFuncIndex(), p,
+				temp, sizeof( T1 ) + sizeof( T2 ) );
 		}
 
-		void sendTo( Eref e, DataId target, 
+		void sendTo( Eref e, DataId target, const ProcInfo* p,
 			const T1& arg1, const T2& arg2 ) {
 			char temp[ sizeof( T1 ) + sizeof( T2 ) + sizeof( unsigned int ) ];
 			*reinterpret_cast< T1* >( temp ) = arg1;
 			*reinterpret_cast< T2* >( temp + sizeof( T1 ) ) = arg2;
 			*reinterpret_cast< DataId* >( temp + sizeof( T1 ) + sizeof( T2 ) ) = target;
 			// e.tsend( c_, funcIndex_, target, reinterpret_cast< const char* >( &arg ), sizeof( T1 ) + sizeof( T2 ) );
-			e.tsend( getConnId(), getFuncIndex(),
-				target, temp, sizeof( T1 ) + sizeof( T2 ) );
+			e.tsend( getConnId(), getFuncIndex(), target, p,
+				temp, sizeof( T1 ) + sizeof( T2 ) );
 		}
 
 	private:
@@ -179,16 +181,17 @@ template < class T1, class T2, class T3 > class SrcFinfo3: public SrcFinfo
 			{ ; }
 
 		// Will need to specialize for strings etc.
-		void send( Eref e, const T1& arg1, const T2& arg2, const T3& arg3 ){
+		void send( Eref e, const ProcInfo* p,
+			const T1& arg1, const T2& arg2, const T3& arg3 ){
 			char temp[ sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) ];
 			*reinterpret_cast< T1* >( temp ) = arg1;
 			*reinterpret_cast< T2* >( temp + sizeof( T1 ) ) = arg2;
 			*reinterpret_cast< T3* >( temp + sizeof( T1 ) + sizeof( T2 ) ) = arg3;
-			e.asend( getConnId(), getFuncIndex(), temp,
-				sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) );
+			e.asend( getConnId(), getFuncIndex(), p,
+				temp, sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) );
 		}
 
-		void sendTo( Eref e, DataId target, 
+		void sendTo( Eref e, DataId target, const ProcInfo* p,
 			const T1& arg1, const T2& arg2, const T3& arg3 )
 		{
 			char temp[ sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) +
@@ -200,8 +203,8 @@ template < class T1, class T2, class T3 > class SrcFinfo3: public SrcFinfo
 				sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) ) = 
 				target;
 			// e.tsend( c_, funcIndex_, target, reinterpret_cast< const char* >( &arg ), sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) );
-			e.tsend( getConnId(), getFuncIndex(),
-				target, temp, sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) );
+			e.tsend( getConnId(), getFuncIndex(), target, p,
+			temp, sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) );
 		}
 
 	private:

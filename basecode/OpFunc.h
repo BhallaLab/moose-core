@@ -201,7 +201,8 @@ template< class T, class A > class GetOpFunc: public OpFunc
 			Conn c;
 			c.add( q->mid() );
 			// c.add( const_cast< Msg* >( e.element()->getMsg( q->mid() ) ) );
-			c.tsend( e.element(), q->srcIndex(), retq, temp );
+			c.tsend( e.element(), q->srcIndex(), retq, 
+				Shell::procInfo(), temp );
 			delete[] temp;
 		}
 

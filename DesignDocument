@@ -56,28 +56,30 @@ Control flow.
 
 1. Scheduling.
 As before, we have a hierarchy of Sched, Clock, and Tick.
-<insert here: how these three work to coordinate operations>
+The Tick now becomes an ArrayField of the Clock. This means that the clock
+can manipulate Ticks directly, which is much easier to understand. However,
+Ticks still look like Elements to the rest of the system and have their
+own messages to all scheduled objects.
 The Tick object is the one that connects to and calls operations on target
 Elements.
 
-The operations of Elements are now split into two functions: clearQ and process.
+Ticks call the 'process' function on Elements. This is built into the Element
+base class, and is the only function called directly. 
+
+Ticks also call the global Qinfo::clearQ() function. This handles all
+asynchronous message passing including spike events and setup calls.
 The old reinit/reset/resched is gone, it will be a function call triggered 
-through clearQ. These two functions are hard-coded into every Element.
+through clearQ.
 
 ASYNCHRONOUS MESSAGING>
 Scheduling:
 clearQ: Manages the event queue for the async messaging. Here are the calls:
 
-Tick::clearQ(): // Calls clearQ on targets specified by Conn
-Conn::clearQ(); // Calls clearQ on all Msgs.
-Msg::clearQ(); // Calls clearQ on e1, the first Element handled by Msg.
-voidElement::clearQ(); // Goes through queues, may select by thread. Calls:
-const char* Element::execFunc( FuncId f, const char* buf ); 
-	Finds the target function and calls the Msg to iterate over all tgts.
-	Returns next buf position.
-const char* Msg::call1( OpFunc func, const char* arg ) const; 
-	Iterates over targets on e1, and executes function. Returns next
-	queue position. If target is off-node, then skip.
+Tick::advance(): // Calls Qinfo::clearQ on the global event queues.
+Qinfo::clearQ: marches through the queue, each entry of which identifies the
+	operative message and hence target Element. Also identifies function
+	to call, and the arguments.
+Msg::exec: specialized for each Msg subclass. Calls func on all target entries.
 
 Still to do: Sort out flow control to interface threads such as graphics
 and console. Presumably these would go through other Jobs. There is some

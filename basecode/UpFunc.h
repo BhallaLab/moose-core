@@ -177,7 +177,8 @@ template< class T, class A > class GetUpFunc: public OpFunc
 			Conn c;
 			// c.add( const_cast< Msg* >( e.element()->getMsg( q->mid() ) ) );
 			c.add( q->mid() ); 
-			c.tsend( e.element(), q->srcIndex(), retq, temp );
+			c.tsend( e.element(), q->srcIndex(), retq, 
+				Shell::procInfo(), temp );
 			delete[] temp;
 		}
 

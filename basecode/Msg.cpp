@@ -76,7 +76,8 @@ void Msg::process( const ProcInfo* p ) const
  * In other words, the Msg needs additional info in cases where we handle
  * multiple threads. The current 
  */
-void Msg::addToQ( const Element* caller, Qinfo& q, const char* arg ) const
+void Msg::addToQ( const Element* caller, Qinfo& q, 
+	const ProcInfo* p, const char* arg ) const
 {
 	// The base function just bungs the data into the one and only queue.
 	q.addToQ( 0, mid_, ( caller == e1_ ), arg );

@@ -2187,6 +2187,227 @@ tests all clear. Valgrind is happy too. Checkin as 1481.
 A bit of benchmarking: Ran using 'time' after enabling the unit tests in
 main.cpp, and setting #runsteps to 1000 from 5.
 36.22, 36.19, 36.17 sec are the times. Marginally faster than earlier even
-though I have a bigger Qinfo. Good.
+though I have a bigger Qinfo. Good. Checked in as 1482 for reference.
 
 Now I can go on to serious stuff with threads and the like.
+
+Putting data onto Queues:
+- Data goes to queue for local thread: 
+	- Easy to send data
+	- Emptying queue is messy.
+- Data goes to separate queue for each dest thread
+	- Need thread safety for filling queues.
+	- Can pre-balance the incoming stuff on each thread.
+	- Msg needs initial stage for dispersal of data.
+	- Works well with multinode systems.
+		- Want to have outgoing queue per node, not per thread on
+		node. But this is just a matter of subdividing at target.
+Emptying Queues:
+- Each thread has its own incoming queue (option 2 above)
+	- Msg pre-separates the sparse matrix per thread basis. Could be costly,
+		requiring substantial duplication of msg per thread.
+	- Need some care to handle msgs put back on queue as it is being
+		cleared.
+- Shared queue between threads
+	- Need to ensure that any given object is handled by only one
+		thread at a time.
+	- Could do dynamic load balancing: just hand out targets as threads
+		request them.
+	- Could also partition based on object DataId. OK only if there
+		are many target objects.
+	- Something like this needed for async msgs arriving on a node.
+
+Just implement a PsparseMsg and see what happens.
+=============================================================================
+10 Dec 2009.
+Parallel sparse Msg and other Msgs.
+
+Potential output queues: 
+	- global: to go to all threads and nodes.
+	- local: to go to specific threads and nodes
+	- group: to go to groups of threads and nodes.
+
+For a typical neural network with 10K randomly assigned targets per synapse:
+	- If # nodes serving network is < 1K, we will usually want to
+	send spike events to all the nodes/threads handling the network,
+	as there will usually be one or more target neurons on each node.
+	- Here we want each of the process threads to dump msgs into its own
+	output queue, and later merge all the queues for processing.
+	- Each process thread will have its own sparse matrix to handle the
+	correct subset of synapses.
+
+For a more 'clumpy' network where data goes to a small subset of threads,
+	typically from within the small subset:
+	- We want comms to be global within the subset. See above.
+	- All other comms should be node specific. See below.
+
+For a particularly sparse network, where any given Msg goes to a small random
+	set of other threads:
+	- Have thread-safe queues for each dest thread
+	- Msgs know which target thread to go for.
+	- Each 'send' call is directed by the Msg to the appropriate queue
+	- When done, each local thread scans its input queue.
+	- Msgs are set up with suitable subset of targets for the thread.
+
+SUMMARY:
+If we merge the 'global' with the 'group' cases, we need to maintain only
+as many queues as there are threads + groups.
+	- Threads within a group:
+		- each thread has its own 'output' queue for data to go 
+			within the group.
+			- No special threading stuff for adding to queue.
+		- Each group as a whole maintains an 'input' queue for
+			stuff coming into the group from other groups.
+			- This queue has to be thread-safe.
+	- Threads outside any group:
+		- Maintain only the thread-safe 'input' queue as above.
+
+Any given Msg is between two Elements. We will assume that this pair is 
+always in only one of the categories above: within a group or outside a group.
+
+Data transfer of 'group' queues, from perspective of each thread.
+	- During process, put off-group stuff into off-group queues.
+		- on-node other threads; and off-node data each have queues.
+	- During process, put in-group data into own 'output' queue.
+	- When Process is done, consolidate all in-group 'output' queues.
+	- Send consolidated in-group queue to all nodes in group
+	- off-group, on-node queues are handled by their owner threads.
+	- Send off-group, off-node queues to target nodes.
+	- Receive consolidated queues from on-group nodes.
+		[further consolidate?]
+	- Receive mythread input queue from off-group, on-node threads
+	- Recieve anythread input queues from off-group off-node
+		[Consolidate input queues ?]
+	- Iterate through consolidated queue for in-group, on-node.
+	- Iterate through consolidated queue for in-group, off-node.
+	- Iterate through input queue for off-group, on-node
+	- Iterate through input queue for off-group, off-node.
+		- Each thread will have to pick subset of entries to handle.
+
+Data transfer of 'non-group' queues, from perspective of each thread:
+	- During process, put off-group stuff into off-group queues.
+		- on-node other threads; and off-node data each have queues.
+	- During process, put own stuff into own input queue.
+	- off-group, on-node queues are handled by their owner threads.
+	- Send off-group, off-node queues to target nodes.
+	- Receive mythread input queue from off-group, on-node threads
+	- Recieve anythread input queues from off-group off-node
+		[Consolidate input queues ?]
+	- Iterate through input queue for off-group, on-node
+	- Iterate through input queue for off-group, off-node.
+		- Each thread will have to pick subset of entries to handle.
+
+This is surprisingly messy. NEURON assumes everthing is in same group,
+and broadcasts everything. Single group is probably sensible also for any
+simulation run on a multicore single node system. However:
+	- graphics threads will typically be off-group
+	- Parser, systems setup and control threads will be off-group.
+	- Could treat each solo thread as a one-thread group, thus reducing
+		the problem.
+	- On a single node, the overhead with consolidating everything into
+		a single queue and scanning through that on all threads is
+		not too bad. Main issue is skipping uninteresting msgs.
+
+From the Msg viewpoint within a group:
+	- addToQueue: Dump all outgoing stuff into the local thread queue.
+	- Then by magic all queues are consolidated
+	- Qinfo::clearQ: goes to Msg,
+		- Msg decides what it should do on current thread.
+
+
+- If Msg has < 100 targets, just do it on any given thread (depends on weight
+	of each target func)
+- If Msg has lots of targets, split by # of threads.
+
+=============================================================================
+12 Dec 2009.
+Thread management. How does each msg know which thread it is on?
+
+Clearing Q:
+Clock, therefore Tick will know threadId.
+Qinfo::clearQ could take an argument for the threadId
+Msg::exec currently only takes buf as an argument, could also take threadId.
+	Do we want to insert thread id into Qinfo? No, the buffer is shared.
+	Options:
+		- single Msg for all the targets, and it picks targets by thread
+		- multiple Msgs, one per thread
+	We need to be able to rebalance the targets. Also need a single point
+	of reference for properties of msg. So use single Msg, pass in threadId.
+
+Sending msgs:
+Tick::advance( ProcInfo* )
+Conn::process( ProcInfo* )
+Msg::process( ProcInfo* )
+Element::process( ProcInfo* )
+Data::process( ProcInfo*, Eref )
+SrcFinfo::send
+Eref::asend, Eref::tsend
+Conn::asend
+Msg::addToQ
+	While we have ProcInfo, we can put threadid into it.
+	At this point the send functions do not handle thread info in any way.
+
+Do we want to pass in threadId or qId?
+	- threadId combines with internal Msg info to work out queue.
+	- qId would be more explicit but would need some logic that depends
+	on internal Msg info anyway.
+
+Do we keep track of threadId within the node or for the entire system?
+	- Related: is there a global we can access for the node Id?
+	Well, we can pass ProcInfo around everywhere and it can keep track of
+	thread as well as node id. Assume all is known.
+
+Where do we assign and create threads?
+	- Clock::start creates threads that last till end of run. 
+		- Calling thread (from Shell) goes to sleep till run done.
+		- each Tick advances through the sim schedule taking the 
+			threadId.
+		- We need to manage barriers or conditions to ensure thread 
+			sync, within each Tick::advance.
+
+OK, went through and implemented passing in of ProcInfo ptr into all 'send'
+functions. Now we have thread info everywhere. If ProcInfo also holds node
+info that too is present. Lots of changes. Would like to check in here but
+am off net.
+
+Valgrind: is happy.
+
+Next step: start off simulation with optional # of cores. There really should
+be a system call to find # of CPUs. We would typically use 1 thread on 
+Shell, assorted threads for GUI, and then as many threads as there are 
+cores for the simulations.
+
+Minor addition to command line so moose can start up on specified # of cores.
+moose -cores <n>
+Default, of course, is 1. Would like to autodetect.
+
+Implementation.
+
+Shell should have a 'start' function which sets off the clocks.
+This should be on thread 0, and it should block. 
+Issue 1: We currently do not allow multiple shells. If we do, we will 
+be in trouble because of assumptions about the thread with the shell,
+and the use of static globals on it.  Defer for now.
+Issue 2: Pthread_create( thread, attr, start_routine, arg)
+	This is a bit awkward with C++. I will want to write a static function
+	that goes to the appropriate Clock (there may be more than one) and
+	identifies the appropriate thread. So my arg will have to identify
+	both the clock and the thread. 
+	
+
+Need 2 barriers per tick: end of clearQ and end of Process.
+Is there an efficient way to do this?
+Condition variables: Each worker increments barrier count, this goes
+on until it reaches # of threads available. Then send a signal to all to
+proceed. This may well be what barrier does.
+
+For now, just plug in the barriers. Later we can try for efficiency.
+
+Do we make one clock+ticks set for each thread?
+	- Barriers means that any calculations on them are redundant.
+	- With one set, how would we call Tick::advanceThread?
+	- We could have just thread0 manage the Clock juggling of threads
+	- All the other threads do the 'advanceThread' call, but with
+		a distinct procInfo.
+
+=============================================================================

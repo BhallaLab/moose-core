@@ -220,6 +220,23 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 	c->process( info );
 }
 
+/*
+void Tick::advanceThread( Element* e, ProcInfo* info ) const
+{
+	// cout << "(" << dt_ << ", " << stage_ << " ) at " << info->currTime << endl;
+	// Hack: we need a better way to define which connId to use.
+	// Presumably we should at least take an offset from the predefined
+	// Slots like children.
+	const Conn* c = e->conn( index_ );
+	Qinfo::clearQ( 0 );
+	int rc = pthread_barrier_wait( info->barrier );
+	assert( rc != 0 && rc != PTHREAD_BARRIER_SERIAL_THREAD );
+	c->process( info );
+	rc = pthread_barrier_wait( info->barrier );
+	assert( rc != 0 && rc != PTHREAD_BARRIER_SERIAL_THREAD );
+}
+*/
+
 void Tick::setIndex( unsigned int index ) 
 {
 	index_ = index;

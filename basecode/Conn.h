@@ -21,7 +21,8 @@ class Conn
 		 * asend goes through all child Msgs with the specified FuncId
 		 * and adds them into the Element Queue.
 		 */
-		void asend( const Element* e, Qinfo& q, const char* arg ) const;
+		void asend( const Element* e, Qinfo& q, const ProcInfo *p,
+			const char* arg ) const;
 
 		/**
 		 * Goes through all Msgs, deallocating them. This is separate
@@ -35,7 +36,7 @@ class Conn
 		 * the target, and calls the matching Id.
 		 */
 		void tsend( const Element* e, DataId target, Qinfo& q, 
-			const char* arg ) const;
+			const ProcInfo* p, const char* arg ) const;
 
 		/*
 		void tsend( const Element* e, unsigned int targetIndex, Qinfo& q, 

@@ -51,13 +51,14 @@ class Eref
 		/**
 		 * Asynchronous message send.
 		 */
-		void asend( ConnId conn, FuncId func, const char* arg, 
-			unsigned int size ) const;
+		void asend( ConnId conn, FuncId func, const ProcInfo* p,
+			const char* arg, unsigned int size ) const;
 
 		/**
 		 * Asynchronous send to a specific target.
 		 */
 		void tsend( ConnId conn, FuncId func, DataId target, 
+			const ProcInfo* p,
 			const char* arg, unsigned int size ) const;
 
 		/**

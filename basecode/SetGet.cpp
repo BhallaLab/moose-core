@@ -73,7 +73,7 @@ void SetGet::iSetInner( FuncId fid, const char* val, unsigned int size )
 	*/
 	shell_->addMsgToConn( m->mid(), setCid );
 	shell_->addTargetFunc( fid, setFuncIndex );
-	shelle_.asend( setCid, setFuncIndex, val, size );
+	shelle_.asend( setCid, setFuncIndex, Shell::procInfo(), val, size );
 }
 
 void SetGet::clearQ() const
@@ -137,7 +137,7 @@ bool SetGet::iGet( const string& field ) const
 		Msg* m = new SingleMsg( shelle_, e_ );
 		shell_->addMsgToConn( m->mid(), getCid );
 		shell_->addTargetFunc( destFid, getFuncIndex );
-		shelle_.asend( getCid, getFuncIndex, 
+		shelle_.asend( getCid, getFuncIndex, Shell::procInfo(),  
 			reinterpret_cast< char* >( &retFunc ), sizeof( FuncId ) );
 		return 1;
 	}

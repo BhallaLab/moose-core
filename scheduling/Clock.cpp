@@ -259,6 +259,58 @@ void Clock::start(  Eref e, const Qinfo* q, double runTime )
 	isRunning_ = 0;
 }
 
+/*
+void Clock::startThread(  Eref e, const Qinfo* q, double runTime, 
+	unsigned int threadId )
+{
+	static const double ROUNDING = 1.0000000001;
+	if ( tickPtr_.size() == 0 ) {
+		info_.currTime += runTime;
+		return;
+	}
+	double endTime = runTime * ROUNDING + info_.currTime;
+	isRunning_ = 1;
+
+	Element* ticke = getTickE( e.element() );
+
+	if ( tickPtr_.size() == 1 ) {
+		tickPtr_[0].advanceThread( ticke, &info_[ threadId ], endTime );
+		return;
+	}
+
+	if ( threadId == FIRSTWORKER ) {
+	// Here we have multiple tick times, need to do the sorting.
+	sort( tickPtr_.begin(), tickPtr_.end() );
+	}
+	// Actually we want all other threads to wait for FIRSTWORKER
+	int rc = pthread_barrier_wait( info->barrier );
+	
+	double nextTime = tickPtr_[1].getNextTime();
+	while ( isRunning_ && tickPtr_[0].getNextTime() < endTime ) {
+		// This advances all ticks with this dt in order, till nextTime.
+		tickPtr_[0].advance( ticke, &info_, nextTime * ROUNDING );
+
+		if ( threadId == FIRSTWORKER )
+			sort( tickPtr_.begin(), tickPtr_.end() );
+		// Actually we want all other threads to wait for FIRSTWORKER
+		rc = pthread_barrier_wait( info->barrier );
+		nextTime = tickPtr_[1].getNextTime();
+	}
+	isRunning_ = 0;
+}
+*/
+
+
+/*
+// Static function used to pass into pthread_create
+void* Clock::threadStart( void* threadInfo )
+{
+	ThreadInfo* ti = reinterpret_cast< ThreadInfo* >( threadInfo );
+	ti->clock->start( ti->e, ti->q, ti->runTime, ti->threadId );
+	pthread_exit( NULL );
+}
+*/
+
 void Clock::step(  Eref e, const Qinfo* q, unsigned int nsteps )
 {
 	double endTime = info_.currTime + dt_ * nsteps;

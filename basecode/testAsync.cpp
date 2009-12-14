@@ -82,6 +82,8 @@ void testSendMsg()
 	// c.add( m );
 	ConnId cid = 0;
 	e1.element()->addMsgToConn( m->mid(), cid );
+
+	ProcInfo p;
 	
 	SrcFinfo1<string> s( "test", "", cid );
 	s.registerSrcFuncIndex( 0 );
@@ -91,7 +93,7 @@ void testSendMsg()
 		char temp[20];
 		sprintf( temp, "send_to_e2_%d", i );
 		string stemp( temp );
-		s.send( Eref( e1.element(), i ), stemp );
+		s.send( Eref( e1.element(), i ), &p, stemp );
 	}
 	Qinfo::clearQ( 0 );
 
@@ -116,6 +118,7 @@ void testCreateMsg()
 
 	Eref e1 = i1.eref();
 	Eref e2 = i2.eref();
+	ProcInfo p;
 
 	bool ret = add( e1.element(), "child", e2.element(), "parent" );
 	
@@ -126,7 +129,7 @@ void testCreateMsg()
 	for ( unsigned int i = 0; i < size; ++i ) {
 		const SrcFinfo0* sf = dynamic_cast< const SrcFinfo0* >( f );
 		assert( sf != 0 );
-		sf->send( Eref( e1.element(), i ) );
+		sf->send( Eref( e1.element(), i ), &p );
 	}
 	Qinfo::clearQ( 0 );
 
@@ -531,7 +534,7 @@ void testSparseMsg()
 	static const double delayMax = 4;
 	static const double timestep = 0.2;
 	static const double connectionProbability = 0.1;
-	static const unsigned int runsteps = 1000;
+	static const unsigned int runsteps = 5;
 	const Cinfo* ic = IntFire::initCinfo();
 	const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 1024;

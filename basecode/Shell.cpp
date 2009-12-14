@@ -11,6 +11,9 @@
 #include "Shell.h"
 #include "Dinfo.h"
 
+ProcInfo Shell::p_;
+unsigned int Shell::numCores_;
+
 const Cinfo* Shell::initCinfo()
 {
 	/*
@@ -84,6 +87,16 @@ const char* Shell::getBuf() const
 	return 0;
 }
 
+////////////////////////////////////////////////////////////////////////
+// Some static utility functions
+////////////////////////////////////////////////////////////////////////
+
+// Statid func for returning the pet ProcInfo of the shell.
+const ProcInfo* Shell::procInfo()
+{
+	return &p_;
+}
+
 /**
  * Static global, returns contents of shell buffer.
  */
@@ -94,6 +107,19 @@ const char* Shell::buf()
 	assert( shell );
 	return (reinterpret_cast< Shell* >(shell->data( 0 )) )->getBuf();
 }
+
+// Static function to assign hardware availability
+void Shell::setHardware( unsigned int numCores, unsigned int numNodes )
+{
+	numCores_ = numCores;
+}
+
+unsigned int Shell::numCores()
+{
+	return numCores_;
+}
+
+////////////////////////////////////////////////////////////////////////
 
 bool set( Eref& dest, const string& destField, const string& val )
 {
@@ -114,7 +140,7 @@ bool set( Eref& dest, const string& destField, const string& val )
 			Msg* m = new SingleMsg( shelle, dest );
 			shell->addMsgToConn( m->mid(), setCid );
 			shell->addTargetFunc( fid, setFuncIndex );
-			sf.send( shelle, val );
+			sf.send( shelle, Shell::procInfo(), val );
 			// c.clearConn();
 			return 1;
 		} else {
@@ -153,7 +179,7 @@ bool get( const Eref& dest, const string& destField )
 			shell->addMsgToConn( m->mid(), getCid );
 
 			shell->addTargetFunc( fid, getFuncIndex );
-			rf->send( shelle, retFunc );
+			rf->send( shelle, Shell::procInfo(), retFunc );
 			// Now, dest has to clearQ, do its stuff, then src has to clearQ
 			return 1;
 		} else {
