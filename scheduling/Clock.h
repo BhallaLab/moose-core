@@ -72,6 +72,7 @@ class Clock: public Data
 		unsigned int getNumTicks() const;
 		void setNumTicks( unsigned int num );
 
+		static void* threadStartFunc( void* threadInfo );
 		static const Cinfo* initCinfo();
 	private:
 		double runTime_;
@@ -85,6 +86,15 @@ class Clock: public Data
 		int callback_;
 		vector< TickPtr > tickPtr_;
 		vector< Tick > ticks_;
+};
+
+class ThreadInfo
+{
+	public:
+		Element* clocke;
+		Qinfo* qinfo;
+		double runtime;
+		unsigned int threadId;
 };
 
 #endif // _CLOCK_H

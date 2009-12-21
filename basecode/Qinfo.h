@@ -26,7 +26,8 @@ class Qinfo
 		Qinfo( FuncId f, DataId srcIndex, 
 			unsigned int size, bool useSendTo, bool isForward );
 
-		Qinfo( const char* buf );
+		Qinfo();
+		// Qinfo( const char* buf );
 
 		void setMsgId( MsgId m ) {
 			m_ = m;

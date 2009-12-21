@@ -11,6 +11,11 @@
 #include "Shell.h"
 #include "Dinfo.h"
 
+// Want to separate out this search path into the Makefile options
+#include "../scheduling/Tick.h"
+#include "../scheduling/TickPtr.h"
+#include "../scheduling/Clock.h"
+
 ProcInfo Shell::p_;
 
 const Cinfo* Shell::initCinfo()
@@ -36,6 +41,9 @@ const Cinfo* Shell::initCinfo()
 		new DestFinfo( "handleGet", 
 			"Function to handle returning values for 'get' calls.",
 			new RetFunc< Shell >( &Shell::handleGet ) ),
+		new DestFinfo( "start", 
+			"Starts off a simulation for the specified run time, automatically partitioning among threads if the settings are right",
+			new OpFunc1< Shell, double >( & Shell::start ) ),
 		new SrcFinfo1< FuncId >( "requestGet",
 			"Function to request another Element for a value", 0 ),
 			
@@ -103,6 +111,31 @@ const char* Shell::getBuf() const
 	if ( getBuf_.size() > 0 )
 		return &( getBuf_[0] );
 	return 0;
+}
+
+void Shell::start( double runtime )
+{
+	Id clockId( 1, 0 );
+	Element* clocke = clockId();
+	vector< ThreadInfo > ti( numCores_ );
+	Qinfo q;
+	for ( unsigned int i = 0; i < numCores_; ++i ) {
+		ti[i].clocke = clocke;
+		ti[i].qinfo = &q;
+		ti[i].runtime = runtime;
+		ti[i].threadId = i;
+	}
+	if ( isSingleThreaded_ ) {
+		Clock::threadStartFunc( &ti[0] );
+	} else {
+		pthread_t* threads = new pthread_t[ numCores_ ];
+		// pthread_t threads[ numCores_ ];
+		for ( unsigned int i = 0; i < numCores_; ++i ) {
+			pthread_create( &threads[i], NULL, Clock::threadStartFunc, 
+				reinterpret_cast< void* >( &ti[i] ) );
+		}
+		delete[] threads;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////

@@ -1,9 +1,21 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment.
+**           Copyright (C) 2003-2009 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
 #include "header.h"
 #include "Shell.h"
 #include <sys/time.h>
 #include <math.h>
 #include <queue>
 #include <unistd.h> // for getopt
+#include "../scheduling/Tick.h"
+#include "../scheduling/TickPtr.h"
+#include "../scheduling/Clock.h"
 
 const FuncId ENDFUNC( -1 );
 
@@ -39,7 +51,9 @@ Id init( int argc, char** argv )
 	}
 	Msg::initNull();
 	Id shellid = Shell::initCinfo()->create( "root", 1 );
+	Id clockId = Clock::initCinfo()->create( "clock", 1 );
 	assert ( shellid == Id() );
+	assert( clockId == Id( 1, 0 ) );
 	SetGet::setShell();
 	Shell* s = reinterpret_cast< Shell* >( shellid.eref().data() );
 	s->setHardware( isSingleThreaded, numCores, numNodes );

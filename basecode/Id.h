@@ -27,6 +27,11 @@ class Id
 		Id();
 
 		/**
+		 * Returns an id with the specified number
+		 */
+		Id( unsigned int id, unsigned int index );
+
+		/**
 		 * Returns an id found by traversing the specified path
 		 * May go off-node to find it.
 		 */
@@ -104,7 +109,6 @@ class Id
 		friend istream& operator >>( istream& s, Id& i );
 
 	private:
-		Id( unsigned int id, unsigned int index );
 		// static void setManager( Manager* m );
 		unsigned int id_; // Unique identifier for Element*
 		unsigned int index_; // Index of array entry within element.

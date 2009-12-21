@@ -301,15 +301,16 @@ void Clock::startThread(  Eref e, const Qinfo* q, double runTime,
 */
 
 
-/*
 // Static function used to pass into pthread_create
-void* Clock::threadStart( void* threadInfo )
+void* Clock::threadStartFunc( void* threadInfo )
 {
 	ThreadInfo* ti = reinterpret_cast< ThreadInfo* >( threadInfo );
-	ti->clock->start( ti->e, ti->q, ti->runTime, ti->threadId );
+	Clock* clock = reinterpret_cast< Clock* >( ti->clocke->data( 0 ) );
+	Eref clocker( ti->clocke, 0 );
+	// clock->start( clocker, ti->qinfo, ti->runtime, ti->threadId );
+	clock->start( clocker, ti->qinfo, ti->runtime );
 	pthread_exit( NULL );
 }
-*/
 
 void Clock::step(  Eref e, const Qinfo* q, unsigned int nsteps )
 {

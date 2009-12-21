@@ -31,6 +31,15 @@ Qinfo::Qinfo( FuncId f, DataId srcIndex, unsigned int size )
 		size_( size )
 {;}
 
+Qinfo::Qinfo()
+	:	m_( 0 ), 
+		useSendTo_( 0 ), 
+		isForward_( 1 ), 
+		f_( 0 ), 
+		srcIndex_( 0 ),
+		size_( 0 )
+{;}
+
 
 /*
 void Qinfo::addToQ( vector< char >& q, const char* arg ) const

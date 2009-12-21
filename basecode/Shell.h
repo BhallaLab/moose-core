@@ -19,7 +19,9 @@ class Shell: public Data
 		string getName() const;
 		void setQuit( bool val );
 		bool getQuit() const;
-		static const Cinfo* initCinfo();
+
+		void start( double runTime );
+
 		void handleGet( Eref e, const Qinfo* q, const char* arg );
 		const char* getBuf() const;
 		static const char* buf();
@@ -32,6 +34,7 @@ class Shell: public Data
 			unsigned int numCores, unsigned int numNodes );
 		unsigned int numCores();
 
+		static const Cinfo* initCinfo();
 	private:
 		string name_;
 		vector< char > getBuf_;

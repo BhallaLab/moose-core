@@ -2443,6 +2443,23 @@ Let thread 0 be the parser thread.
 
 Likely threads: Parser, Python, TTY, GUI, then workers etc.
 
+=============================================================================
+21 Dec 2009.
+Checked in 1491 with initial arguments to main() to select threading options. 
 
+Starting sims: Where to create threads?
+	- On Shell:
+		- It knows all about the threading/node structure
+		- Needs to call a Clock function directly: unpleasant
+		- It has a clean way to separate 'start' calls away from clearQ
+	- On Clock:
+		- It has to ask Shell about threading.
+		- It can deal with the clock functions internally.
+		- No clean way to separate 'start' from clearQ.
+		- Conceptually, the separate of clock calls is a scheduling
+			not a shell function.
 
+Looks like the Shell is the way to go.
 
+Fix up Ids to only handle Elements. Let Erefs deal with indices.
+=============================================================================
