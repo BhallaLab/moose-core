@@ -17,6 +17,8 @@ class Shell: public Data
 		void process( const ProcInfo* p, const Eref& e );
 		void setName( string name );
 		string getName() const;
+		void setQuit( bool val );
+		bool getQuit() const;
 		static const Cinfo* initCinfo();
 		void handleGet( Eref e, const Qinfo* q, const char* arg );
 		const char* getBuf() const;
@@ -26,17 +28,21 @@ class Shell: public Data
 		 * Assigns the hardware availability. Assumes that each node will
 		 * have the same number of cores available.
 		 */
-		static void setHardware( unsigned int numCores, unsigned int numNodes );
-		static unsigned int numCores();
+		void setHardware( bool isSingleThreaded, 
+			unsigned int numCores, unsigned int numNodes );
+		unsigned int numCores();
 
 	private:
 		string name_;
 		vector< char > getBuf_;
+		bool quit_;
+		bool isSingleThreaded_;
+		unsigned int numCores_;
+		unsigned int numNodes_;
 		static ProcInfo p_; 
 			// Shell owns its own ProcInfo, has global thread/node info.
 			// Used to talk to parser and for thread specification in
 			// setup operations.
-		static unsigned int numCores_;
 };
 
 extern bool set( Eref& dest, const string& destField, const string& val );

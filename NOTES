@@ -2411,3 +2411,38 @@ Do we make one clock+ticks set for each thread?
 		a distinct procInfo.
 
 =============================================================================
+17 Dec 2009
+Various options for handling threads and scheduling.
+- Use current format, have the FIRSTWORKER thread advance and sort the 
+	ticks. The other worker threads go through the same loops but don't
+	alter any ticks. 
+	The call sequence remains the same. 
+	- Starting simulations: This is a bit tricky. 
+		- clearQ calls will block, leaving entries dangling.
+		- Other threads may want to addToQ or clearQ.
+		- Note that this issue also needs handling for single-thread
+		 	processing. Will also come up when rebuilding messaging.
+			Need to shunt all such calls off to a local queue,
+			but how do we clear it? Probably in Process.
+
+- Make separate clocks and ticks for each thread.
+	Easier call sequence, but tricky managing all the objects.
+
+Let thread 0 be the parser thread. 
+	- In single thread mode, parser has a non-preemptive event loop.
+	This calls the GUI, the TTY and then the clearQ and Process
+	for the shell, directly. Has to call clearQ because we may have info
+	going to different programs, and for symmetry with multithread mode. 
+		- The shell calls start on the clock, and does so directly:
+		Not through the clearQ mechanism.
+		- The shell knows the disposition of threads, and decides if it
+		should call the regular start or just set off new threads.
+	- In multithread mode, we run GUI, TTY and parser on separate threads.
+	The parser is thread 0 and does a similar event loop with clearQ and
+	process, except that it does not have to handle the GUI and TTY.
+
+Likely threads: Parser, Python, TTY, GUI, then workers etc.
+
+
+
+

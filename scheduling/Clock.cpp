@@ -280,7 +280,7 @@ void Clock::startThread(  Eref e, const Qinfo* q, double runTime,
 
 	if ( threadId == FIRSTWORKER ) {
 	// Here we have multiple tick times, need to do the sorting.
-	sort( tickPtr_.begin(), tickPtr_.end() );
+		sort( tickPtr_.begin(), tickPtr_.end() );
 	}
 	// Actually we want all other threads to wait for FIRSTWORKER
 	int rc = pthread_barrier_wait( info->barrier );

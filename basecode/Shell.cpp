@@ -12,7 +12,6 @@
 #include "Dinfo.h"
 
 ProcInfo Shell::p_;
-unsigned int Shell::numCores_;
 
 const Cinfo* Shell::initCinfo()
 {
@@ -28,6 +27,12 @@ const Cinfo* Shell::initCinfo()
 			"Name of object", 
 			&Shell::setName, 
 			&Shell::getName ),
+
+		new ValueFinfo< Shell, bool >( 
+			"quit",
+			"Flag to tell the system to quit", 
+			&Shell::setQuit, 
+			&Shell::getQuit ),
 		new DestFinfo( "handleGet", 
 			"Function to handle returning values for 'get' calls.",
 			new RetFunc< Shell >( &Shell::handleGet ) ),
@@ -51,15 +56,18 @@ static const Cinfo* shellCinfo = Shell::initCinfo();
 
 
 Shell::Shell()
-	: name_( "" )
+	: name_( "" ),
+		quit_( 0 ), 
+		isSingleThreaded_( 0 ), numCores_( 1 ), numNodes_( 1 )
 {
 	;
 }
 
 void Shell::process( const ProcInfo* p, const Eref& e )
 {
-	;
+	quit_ = 1;
 }
+
 
 void Shell::setName( string name )
 {
@@ -69,6 +77,16 @@ void Shell::setName( string name )
 string Shell::getName() const
 {
 	return name_;
+}
+
+void Shell::setQuit( bool val )
+{
+	quit_ = val;
+}
+
+bool Shell::getQuit() const
+{
+	return quit_;
 }
 
 void Shell::handleGet( Eref e, const Qinfo* q, const char* arg )
@@ -109,15 +127,56 @@ const char* Shell::buf()
 }
 
 // Static function to assign hardware availability
-void Shell::setHardware( unsigned int numCores, unsigned int numNodes )
+void Shell::setHardware( 
+	bool isSingleThreaded, unsigned int numCores, unsigned int numNodes )
 {
-	numCores_ = numCores;
+	isSingleThreaded_ = isSingleThreaded;
+	if ( !isSingleThreaded ) {
+		// Create the parser and the gui threads.
+		numCores_ = numCores;
+		numNodes_ = numNodes;
+		// The zero queue is for system calls. Then there is one queue
+		// per local thread. Each off-node gets another queue.
+		// Note the more complex 'group' orgn for
+		// eventual highly multithreaded architectures, discussed in
+		// NOTES 10 Dec 2009.
+		Qinfo::setNumQs( numCores_ + numNodes_, 1024 );
+	} else {
+		numCores_ = 1;
+		numNodes_ = 1;
+		Qinfo::setNumQs( 1, 1024 );
+	}
 }
 
 unsigned int Shell::numCores()
 {
 	return numCores_;
 }
+
+////////////////////////////////////////////////////////////////////////
+// Functions for setting off clocked processes.
+
+/*
+void Shell::startClock()
+{
+	if ( isSingleThreaded ) {
+		
+	} else {
+	vector< ThreadInfo > ti( numCores_ );
+	for ( i = 0; i < numCores_; ++i ) {
+		ti[i].clock = clocke;
+		ti[i].qinfo = parseQinfo;
+		ti[i].runtime = runtime;
+		ti[i].threadId = i;
+	}
+	// May want to use pthread_create even if single core, when on a 
+	// normal system. The strict single-thread mode will be rare.
+	if ( numCores_ == 1 ) {
+		
+	} else {
+	}
+}
+*/
 
 ////////////////////////////////////////////////////////////////////////
 

@@ -90,7 +90,7 @@ void TickPtr::advanceThread( Element* e, ProcInfo* p, double endTime ) {
 			(*i)->advanceThread( e, p );
 		}
 		nt += dt_;
-		if ( p->threadId == 2 ) // first worker thread
+		if ( p->threadId == FIRSTWORKER ) // first worker thread
 			nextTime_ = nt;
 	}
 }
