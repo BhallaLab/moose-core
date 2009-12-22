@@ -7,6 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#include <pthread.h>
 #include "header.h"
 #include "Shell.h"
 #include "Dinfo.h"
@@ -112,32 +113,6 @@ const char* Shell::getBuf() const
 		return &( getBuf_[0] );
 	return 0;
 }
-
-void Shell::start( double runtime )
-{
-	Id clockId( 1, 0 );
-	Element* clocke = clockId();
-	vector< ThreadInfo > ti( numCores_ );
-	Qinfo q;
-	for ( unsigned int i = 0; i < numCores_; ++i ) {
-		ti[i].clocke = clocke;
-		ti[i].qinfo = &q;
-		ti[i].runtime = runtime;
-		ti[i].threadId = i;
-	}
-	if ( isSingleThreaded_ ) {
-		Clock::threadStartFunc( &ti[0] );
-	} else {
-		pthread_t* threads = new pthread_t[ numCores_ ];
-		// pthread_t threads[ numCores_ ];
-		for ( unsigned int i = 0; i < numCores_; ++i ) {
-			pthread_create( &threads[i], NULL, Clock::threadStartFunc, 
-				reinterpret_cast< void* >( &ti[i] ) );
-		}
-		delete[] threads;
-	}
-}
-
 ////////////////////////////////////////////////////////////////////////
 // Some static utility functions
 ////////////////////////////////////////////////////////////////////////
@@ -189,27 +164,53 @@ unsigned int Shell::numCores()
 ////////////////////////////////////////////////////////////////////////
 // Functions for setting off clocked processes.
 
-/*
-void Shell::startClock()
+void Shell::start( double runtime )
 {
-	if ( isSingleThreaded ) {
-		
-	} else {
+	Id clockId( 1, 0 );
+	Element* clocke = clockId();
 	vector< ThreadInfo > ti( numCores_ );
-	for ( i = 0; i < numCores_; ++i ) {
-		ti[i].clock = clocke;
-		ti[i].qinfo = parseQinfo;
+	Qinfo q;
+	for ( unsigned int i = 0; i < numCores_; ++i ) {
+		ti[i].clocke = clocke;
+		ti[i].qinfo = &q;
 		ti[i].runtime = runtime;
 		ti[i].threadId = i;
 	}
-	// May want to use pthread_create even if single core, when on a 
-	// normal system. The strict single-thread mode will be rare.
-	if ( numCores_ == 1 ) {
-		
+	if ( isSingleThreaded_ ) {
+		Clock::threadStartFunc( &ti[0] );
 	} else {
+		pthread_t* threads = new pthread_t[ numCores_ ];
+		pthread_attr_t attr;
+
+		pthread_attr_init( &attr );
+		pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_JOINABLE );
+		// pthread_t threads[ numCores_ ];
+		for ( unsigned int i = 0; i < numCores_; ++i ) {
+			int ret = pthread_create( 
+				&threads[i], NULL, Clock::threadStartFunc, 
+				reinterpret_cast< void* >( &ti[i] )
+			);
+			if ( ret ) {
+				cout << "Error: Shell::start: Unable to create threads\n";
+				exit( -1 );
+			}
+		}
+
+		// Clean up.
+		pthread_attr_destroy( &attr );
+		for ( unsigned int i = 0; i < numCores_; ++i ) {
+			void* status;
+			int ret = pthread_join( threads[ i ], &status );
+			if ( ret ) {
+				cout << "Error: Shell::start: Unable to join threads\n";
+				exit( -1 );
+			}
+		}
+		cout << "Shell::start: Threads joined successfully\n";
+
+		delete[] threads;
 	}
 }
-*/
 
 ////////////////////////////////////////////////////////////////////////
 

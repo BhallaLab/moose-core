@@ -2461,5 +2461,12 @@ Starting sims: Where to create threads?
 
 Looks like the Shell is the way to go.
 
-Fix up Ids to only handle Elements. Let Erefs deal with indices.
+Checked in as 1492.
+
+
+Need to Fix up Ids to only handle Elements. Let Erefs deal with indices.
+=============================================================================
+22 Dec 2009.
+Set up Shell::start which calls single thread or multithread versions of the
+scheduling.
 =============================================================================
