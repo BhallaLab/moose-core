@@ -309,6 +309,8 @@ void* Clock::threadStartFunc( void* threadInfo )
 	Eref clocker( ti->clocke, 0 );
 	// clock->start( clocker, ti->qinfo, ti->runtime, ti->threadId );
 	clock->start( clocker, ti->qinfo, ti->runtime );
+	cout << "On thread " << ti->threadId << " with runtime " << 
+		ti->runtime << endl;
 	pthread_exit( NULL );
 }
 

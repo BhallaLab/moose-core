@@ -133,7 +133,16 @@ void setupTicks()
 	delete clocke;
 }
 
+void testThreads()
+{
+	Element* se = Id()();
+	Shell* s = reinterpret_cast< Shell* >( se->data( 0 ) );
+	s->start( 100 );
+}
+	
+
 void testScheduling( )
 {
 	setupTicks();
+	testThreads();
 }

@@ -2469,4 +2469,7 @@ Need to Fix up Ids to only handle Elements. Let Erefs deal with indices.
 22 Dec 2009.
 Set up Shell::start which calls single thread or multithread versions of the
 scheduling.
+
+Setup seems to work, I create threads and harvest them. Now to actually get
+them to do some work.
 =============================================================================
