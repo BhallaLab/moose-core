@@ -225,7 +225,7 @@ void testSetGet()
 		Eref e2( i2(), i );
 		char temp[20];
 		sprintf( temp, "sg_e2_%d", i );
-		bool ret = SetGet1< string >::set( e2, "name", temp );
+		bool ret = Field< string >::set( e2, "name", temp );
 		assert( ret );
 		assert( reinterpret_cast< Neutral* >(e2.data())->getName() == temp );
 	}
@@ -234,7 +234,7 @@ void testSetGet()
 		Eref e2( i2(), i );
 		char temp[20];
 		sprintf( temp, "sg_e2_%d", i );
-		string ret = SetGet1< string >::get( e2, "name" );
+		string ret = Field< string >::get( e2, "name" );
 		assert( ret == temp );
 	}
 
@@ -254,7 +254,7 @@ void testSetGetDouble()
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref e2( i2(), i );
 		double temp = i;
-		bool ret = SetGet1< double >::set( e2, "Vm", temp );
+		bool ret = Field< double >::set( e2, "Vm", temp );
 		assert( ret );
 		assert( 
 			fabs ( reinterpret_cast< IntFire* >(e2.data())->getVm() - temp ) <
@@ -264,7 +264,7 @@ void testSetGetDouble()
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref e2( i2(), i );
 		double temp = i;
-		double ret = SetGet1< double >::get( e2, "Vm" );
+		double ret = Field< double >::get( e2, "Vm" );
 		assert( fabs ( temp - ret ) < EPSILON );
 	}
 
@@ -286,7 +286,7 @@ void testSetGetSynapse()
 	assert( syn.numData() == 0 );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref e2( i2(), i );
-		bool ret = SetGet1< unsigned int >::set( e2, "numSynapses", i );
+		bool ret = Field< unsigned int >::set( e2, "numSynapses", i );
 		assert( ret );
 	}
 	assert( syn.numData() == ( size * (size - 1) ) / 2 );
@@ -297,7 +297,7 @@ void testSetGetSynapse()
 			DataId di( i, j );
 			Eref syne( &syn, di );
 			double temp = i * 1000 + j ;
-			bool ret = SetGet1< double >::set( syne, "delay", temp );
+			bool ret = Field< double >::set( syne, "delay", temp );
 			assert( ret );
 			assert( 
 			fabs ( reinterpret_cast< Synapse* >(syne.data())->getDelay() - temp ) <
@@ -326,7 +326,7 @@ void testSetGetVec()
 	
 	Eref e2( i2(), 0 );
 	// Here we test setting a 1-D vector
-	bool ret = SetGet1< unsigned int >::setVec( e2, "numSynapses", numSyn );
+	bool ret = Field< unsigned int >::setVec( e2, "numSynapses", numSyn );
 	assert( ret );
 	unsigned int nd = syn.numData();
 	assert( nd == ( size * (size - 1) ) / 2 );
@@ -342,7 +342,7 @@ void testSetGetVec()
 	}
 
 	Eref se( &syn, 0 );
-	ret = SetGet1< double >::setVec( se, "delay", delay );
+	ret = Field< double >::setVec( se, "delay", delay );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		for ( unsigned int j = 0; j < i; ++j ) {
 			DataId di( i, j );
@@ -375,7 +375,7 @@ void testSendSpike()
 	assert( syn.numData() == 0 );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref er( i2(), i );
-		bool ret = SetGet1< unsigned int >::set( er, "numSynapses", i );
+		bool ret = Field< unsigned int >::set( er, "numSynapses", i );
 		assert( ret );
 	}
 	assert( syn.numData() == ( size * (size - 1) ) / 2 );
@@ -411,7 +411,7 @@ void testSendSpike()
 	reinterpret_cast< IntFire* >(synParent.data())->setTau( TAU );
 
 	reinterpret_cast< IntFire* >(synParent.data())->process( &p, synParent);
-	Vm = SetGet1< double >::get( synParent, "Vm" );
+	Vm = Field< double >::get( synParent, "Vm" );
 	assert( fabs( Vm - WEIGHT * ( 1.0 - DT / TAU ) ) < EPSILON );
 	// cout << "Vm = " << Vm << endl;
 	cout << "." << flush;
@@ -510,7 +510,7 @@ void printGrid( Element* e, const string& field, double min, double max )
 		if ( ( i % xside ) == 0 )
 			cout << endl;
 		Eref er( e, i );
-		double Vm = SetGet1< double >::get( er, field );
+		double Vm = Field< double >::get( er, field );
 		int shape = 5.0 * ( Vm - min ) / ( max - min );
 		if ( shape > 4 )
 			shape = 4;
@@ -559,7 +559,7 @@ void testSparseMsg()
 	for ( unsigned int i = 0; i < size; ++i )
 		temp[i] = mtrand() * Vmax;
 
-	ret = SetGet1< double >::setVec( e2, "Vm", temp );
+	ret = Field< double >::setVec( e2, "Vm", temp );
 	assert( ret );
 	/*
 	for ( unsigned int i = 0; i < 40; ++i )
@@ -567,11 +567,11 @@ void testSparseMsg()
 		*/
 	temp.clear();
 	temp.resize( size, thresh );
-	ret = SetGet1< double >::setVec( e2, "thresh", temp );
+	ret = Field< double >::setVec( e2, "thresh", temp );
 	assert( ret );
 	temp.clear();
 	temp.resize( size, refractoryPeriod );
-	ret = SetGet1< double >::setVec( e2, "refractoryPeriod", temp );
+	ret = Field< double >::setVec( e2, "refractoryPeriod", temp );
 	assert( ret );
 
 	vector< double > weight;
@@ -585,9 +585,9 @@ void testSparseMsg()
 			delay.push_back( mtrand() * delayMax );
 		}
 	}
-	ret = SetGet1< double >::setVec( syne, "weight", weight );
+	ret = Field< double >::setVec( syne, "weight", weight );
 	assert( ret );
-	ret = SetGet1< double >::setVec( syne, "delay", delay );
+	ret = Field< double >::setVec( syne, "delay", delay );
 	assert( ret );
 
 	// printGrid( i2(), "Vm", 0, thresh );
@@ -623,7 +623,7 @@ void testUpValue()
 	FieldElement< Tick, Clock, &Clock::getTick > ticke( tc, clock(), &Clock::getNumTicks, &Clock::setNumTicks );
 
 	assert( ticke.numData() == 0 );
-	bool ret = SetGet1< unsigned int >::set( clocker, "numTicks", size );
+	bool ret = Field< unsigned int >::set( clocker, "numTicks", size );
 	assert( ret );
 	assert( ticke.numData() == size );
 
@@ -632,15 +632,15 @@ void testUpValue()
 		DataId di( 0, i ); // DataId( data, field )
 		Eref te( &ticke, di );
 		double dt = i;
-		ret = SetGet1< double >::set( te, "dt", dt );
+		ret = Field< double >::set( te, "dt", dt );
 		assert( ret );
-		double val = SetGet1< double >::get( te, "localdt" );
+		double val = Field< double >::get( te, "localdt" );
 		assert( fabs( dt - val ) < EPSILON );
 
 		dt *= 10.0;
-		ret = SetGet1< double >::set( te, "localdt", dt );
+		ret = Field< double >::set( te, "localdt", dt );
 		assert( ret );
-		val = SetGet1< double >::get( te, "dt" );
+		val = Field< double >::get( te, "dt" );
 		assert( fabs( dt - val ) < EPSILON );
 	}
 	cout << "." << flush;

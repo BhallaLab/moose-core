@@ -35,9 +35,9 @@ void SetGet::completeSet() const
 	Qinfo::clearQ( 0 );
 }
 
-bool SetGet::checkSet( const string& destField, FuncId& fid ) const
+bool SetGet::checkSet( const string& field, FuncId& fid ) const
 {
-	string field = "set_" + destField;
+	// string field = "set_" + destField;
 	fid = e_.element()->cinfo()->getOpFuncId( field );
 	const OpFunc* func = e_.element()->cinfo()->getOpFunc( fid );
 	if ( !func ) {

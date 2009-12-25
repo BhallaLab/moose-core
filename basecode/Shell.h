@@ -34,6 +34,11 @@ class Shell: public Data
 			unsigned int numCores, unsigned int numNodes );
 		unsigned int numCores();
 
+		// Sets up clock ticks. Essentially is a call into the 
+		// Clock::setupTick function, but may be needed to be called from
+		// the parser so it is a Shell function too.
+		void setclock( unsigned int tickNum, double dt, unsigned int stage );
+
 		static const Cinfo* initCinfo();
 	private:
 		string name_;

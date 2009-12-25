@@ -58,6 +58,7 @@
  * 		retain their state, the simulation can resume smoothly.
  */
 
+#include <pthread.h>
 #include "header.h"
 #include "Tick.h"
 #include "TickPtr.h"
@@ -139,6 +140,11 @@ const Cinfo* Clock::initCinfo()
 		new DestFinfo( "stop", 
 			"Halts the simulation, with option to restart seamlessly",
 			new EpFunc0< Clock >(&Clock::stop )
+		),
+
+		new DestFinfo( "setupTick", 
+			"Sets up a specific clock tick: args tick#, dt, stage",
+			new OpFunc3< Clock, unsigned int, double, unsigned int >(&Clock::setupTick )
 		),
 
 		new DestFinfo( "reinit", 
@@ -259,8 +265,7 @@ void Clock::start(  Eref e, const Qinfo* q, double runTime )
 	isRunning_ = 0;
 }
 
-/*
-void Clock::startThread(  Eref e, const Qinfo* q, double runTime, 
+void Clock::tStart(  Eref e, const Qinfo* q, double runTime, 
 	unsigned int threadId )
 {
 	static const double ROUNDING = 1.0000000001;
@@ -271,35 +276,47 @@ void Clock::startThread(  Eref e, const Qinfo* q, double runTime,
 	double endTime = runTime * ROUNDING + info_.currTime;
 	isRunning_ = 1;
 
-	Element* ticke = getTickE( e.element() );
+	// Element* ticke = getTickE( e.element() );
+	Element* ticke = Id( 2, 0 )();
 
 	if ( tickPtr_.size() == 1 ) {
-		tickPtr_[0].advanceThread( ticke, &info_[ threadId ], endTime );
+		tickPtr_[0].advance( ticke, &info_, endTime );
 		return;
 	}
 
-	if ( threadId == FIRSTWORKER ) {
+	if ( threadId == 0 ) {
 	// Here we have multiple tick times, need to do the sorting.
 		sort( tickPtr_.begin(), tickPtr_.end() );
 	}
 	// Actually we want all other threads to wait for FIRSTWORKER
-	int rc = pthread_barrier_wait( info->barrier );
+	int rc = pthread_barrier_wait( 
+		reinterpret_cast< pthread_barrier_t* >( info_.barrier ) );
 	
 	double nextTime = tickPtr_[1].getNextTime();
 	while ( isRunning_ && tickPtr_[0].getNextTime() < endTime ) {
 		// This advances all ticks with this dt in order, till nextTime.
 		tickPtr_[0].advance( ticke, &info_, nextTime * ROUNDING );
 
-		if ( threadId == FIRSTWORKER )
+		// This is a good place to put in a single condition_wait,
+		// so that thread 0 can deal with the sorting.
+		// This would also abolish the barrier after process.
+		// It does assume that there is a barrier after clearQ, since we
+		// need all threads to be within the 'advance' function before
+		// we can sort the order of tickPtrs.
+		if ( threadId == 0 )
 			sort( tickPtr_.begin(), tickPtr_.end() );
 		// Actually we want all other threads to wait for FIRSTWORKER
-		rc = pthread_barrier_wait( info->barrier );
+		rc = pthread_barrier_wait( 
+			reinterpret_cast< pthread_barrier_t* >( info_.barrier ) );
 		nextTime = tickPtr_[1].getNextTime();
 	}
 	isRunning_ = 0;
 }
-*/
 
+void Clock::setBarrier( void* barrier )
+{
+	info_.barrier = barrier;
+}
 
 // Static function used to pass into pthread_create
 void* Clock::threadStartFunc( void* threadInfo )
@@ -307,8 +324,8 @@ void* Clock::threadStartFunc( void* threadInfo )
 	ThreadInfo* ti = reinterpret_cast< ThreadInfo* >( threadInfo );
 	Clock* clock = reinterpret_cast< Clock* >( ti->clocke->data( 0 ) );
 	Eref clocker( ti->clocke, 0 );
-	// clock->start( clocker, ti->qinfo, ti->runtime, ti->threadId );
-	clock->start( clocker, ti->qinfo, ti->runtime );
+	clock->tStart( clocker, ti->qinfo, ti->runtime, ti->threadId );
+	// clock->start( clocker, ti->qinfo, ti->runtime );
 	cout << "On thread " << ti->threadId << " with runtime " << 
 		ti->runtime << endl;
 	pthread_exit( NULL );
@@ -393,6 +410,19 @@ unsigned int Clock::getStage( DataId i ) const
 		cout << "Clock::getStage:: Tick " << i << " not found\n";
 	}
 	return 0;
+}
+
+/**
+ * This function sets up a new tick, or reassigns an existing one.
+ */
+void Clock::setupTick( unsigned int tickNum, double dt, unsigned int stage )
+{
+	if ( tickNum >= ticks_.size() ) {
+		ticks_.resize( tickNum + 1 );
+	}
+	ticks_[ tickNum ].setDt( dt );
+	ticks_[ tickNum ].setStage( stage );
+	rebuild();
 }
 
 ///////////////////////////////////////////////////

@@ -45,6 +45,10 @@ const Cinfo* Shell::initCinfo()
 		new DestFinfo( "start", 
 			"Starts off a simulation for the specified run time, automatically partitioning among threads if the settings are right",
 			new OpFunc1< Shell, double >( & Shell::start ) ),
+		new DestFinfo( "setclock", 
+			"Assigns clock ticks. Args: tick#, dt, stage",
+			new OpFunc3< Shell, unsigned int, double, unsigned int >( & Shell::setclock ) ),
+
 		new SrcFinfo1< FuncId >( "requestGet",
 			"Function to request another Element for a value", 0 ),
 			
@@ -184,6 +188,13 @@ void Shell::start( double runtime )
 
 		pthread_attr_init( &attr );
 		pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_JOINABLE );
+		pthread_barrier_t barrier;
+		if ( pthread_barrier_init( &barrier, NULL, numCores_ ) ) {
+			cout << "Error: Shell::start: Unable to init barrier\n";
+			exit( -1 );
+		}
+		Clock* clock = reinterpret_cast< Clock* >( clocke->data( 0 ) );
+		clock->setBarrier( &barrier );
 		// pthread_t threads[ numCores_ ];
 		for ( unsigned int i = 0; i < numCores_; ++i ) {
 			int ret = pthread_create( 
@@ -210,6 +221,18 @@ void Shell::start( double runtime )
 
 		delete[] threads;
 	}
+}
+
+void Shell::setclock( unsigned int tickNum, double dt, unsigned int stage )
+{
+	Eref ce = Id( 1, 0 ).eref();
+	/*
+	Element* clocke = Id( 1, 0 )();
+	Element* ticke = Id( 2, 0 )();
+	Eref ce( clocke, 0 );
+	*/
+	SetGet3< unsigned int, double, unsigned int >::set( ce, "setupTick",
+		tickNum, dt, stage );
 }
 
 ////////////////////////////////////////////////////////////////////////

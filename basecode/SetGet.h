@@ -311,6 +311,70 @@ template< class A > class SetGet1: public SetGet
 			return iSet( field, temp );
 		}
 	//////////////////////////////////////////////////////////////////
+		/**
+		 * Terminating call using string conversion
+		 */
+		string harvestStrGet() const
+		{ 
+			return "";
+		}
+};
+
+template< class A > class Field: public SetGet1< A >
+{
+	public:
+		Field( Eref& dest )
+			: SetGet1< A >( dest )
+		{;}
+
+		/**
+		 * Blocking, typed 'Set' call
+		 */
+		static bool set( Eref& dest, const string& field, A arg )
+		{
+			string temp = "set_" + field;
+			return SetGet1< A >::set( dest, temp, arg );
+		}
+
+		static bool setVec( Eref& dest, const string& field, 
+			const vector< A >& arg )
+		{
+			string temp = "set_" + field;
+			return SetGet1< A >::setVec( dest, temp, arg );
+		}
+
+		/**
+		 * Blocking call using string conversion
+		 */
+		static bool strSet( Eref& dest, const string& field, 
+			const string& val )
+		{
+			A arg;
+			str2val( arg, val );
+			return set( dest, field, arg );
+		}
+
+	//////////////////////////////////////////////////////////////////
+
+		/**
+		 * Blocking call using typed values
+		static A get( Eref& dest, const string& field)
+		{ 
+			string temp = "get_" + field;
+			return SetGet1< A >::get( dest, temp );
+		}
+		 */
+
+		/**
+		 * Blocking call using string conversion
+		static string strGet( Eref& dest, const string& field)
+		{ 
+			string temp = "get_" + field;
+			SetGet1< A > sg( dest );
+			 if ( sg.iGet( temp ) )
+			 	return sg.harvestStrGet();
+		}
+		 */
 
 		/**
 		 * Terminating call using typed values
@@ -347,7 +411,7 @@ template< class A > class SetGet1: public SetGet
 		 */
 		static A get( Eref& dest, const string& field)
 		{ 
-			SetGet1< A > sg( dest );
+			Field< A > sg( dest );
 			 if ( sg.iGet( field ) )
 			 	return sg.harvestGet();
 			A temp;
@@ -359,7 +423,7 @@ template< class A > class SetGet1: public SetGet
 		 */
 		static string strGet( Eref& dest, const string& field)
 		{ 
-			SetGet1< A > sg( dest );
+			Field< A > sg( dest );
 			 if ( sg.iGet( field ) )
 			 	return sg.harvestStrGet();
 		}

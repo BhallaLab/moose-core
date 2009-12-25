@@ -11,6 +11,7 @@
 using namespace std;
 */
 
+#include <pthread.h>
 #include "header.h"
 #include "Tick.h"
 #include "TickPtr.h"
@@ -66,7 +67,9 @@ bool TickPtr::addTick( const Tick* t )
  * Advance the simulation till the specified end time, without
  * worrying about other dts.
  * The Eref e has to refer to the Tick, not the clock.
+ * Slightly modified to use a local variable to make it thread-friendly.
  */
+/*
 void TickPtr::advance( Element* e, ProcInfo* p, double endTime ) {
 	while ( nextTime_ < endTime ) {
 		p->currTime = nextTime_;
@@ -78,23 +81,29 @@ void TickPtr::advance( Element* e, ProcInfo* p, double endTime ) {
 		nextTime_ += dt_;
 	}
 }
+*/
 
-/*
-void TickPtr::advanceThread( Element* e, ProcInfo* p, double endTime ) {
+void TickPtr::advance( Element* e, ProcInfo* p, double endTime )
+{
 	double nt = nextTime_;
 	while ( nt < endTime ) {
 		p->currTime = nt;
 		for ( vector< const Tick* >::iterator i = ticks_.begin(); 
 			i != ticks_.end(); ++i )
 		{
-			(*i)->advanceThread( e, p );
+			(*i)->advance( e, p ); // This needs a barrier call.
+			if ( p->barrier ) {
+				//hacked in to test
+				int rc = pthread_barrier_wait( 
+					reinterpret_cast< pthread_barrier_t* >( p->barrier ) );
+				assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+			}
 		}
 		nt += dt_;
-		if ( p->threadId == FIRSTWORKER ) // first worker thread
+		if ( p->threadId == 0 ) // first worker thread
 			nextTime_ = nt;
 	}
 }
-*/
 
 double TickPtr::getNextTime() const
 {
@@ -111,4 +120,3 @@ void TickPtr::reinit( Eref e )
 	}
 }
 
-		

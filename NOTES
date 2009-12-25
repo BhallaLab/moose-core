@@ -2471,5 +2471,23 @@ Set up Shell::start which calls single thread or multithread versions of the
 scheduling.
 
 Setup seems to work, I create threads and harvest them. Now to actually get
-them to do some work.
+them to do some work. Checked in as 1494.
+
+Implemented threads through to TickPtrs.
+Working on compilation.
+
+Compiled, OK. Working on testing threaded clock tick sequencing. A little
+tangent to implement setClock in Shell. Stuck in checkGet/checkSet,
+which for some reason wants to prepend set_ onto the field name. This should
+only be done in ValueFinfo, not in any of the others.
+I see what happens: SetGet is quite independent of Finfos. 
+I should separate out a SetField and GetField templated function from
+the basic SetGet1< type >.
+
+Done. Now we have Field<type>::set and Field<type>::get for doing fields,
+which puts in the set_ and get_ prefixes. The others all use the regular
+names of the field.
+After some more work this now goes some way into the barriers before crashing.
+
+
 =============================================================================

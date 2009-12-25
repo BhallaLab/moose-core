@@ -52,8 +52,21 @@ Id init( int argc, char** argv )
 	Msg::initNull();
 	Id shellid = Shell::initCinfo()->create( "root", 1 );
 	Id clockId = Clock::initCinfo()->create( "clock", 1 );
+	Element* clocke = clockId();
+	// Should put this initialization stuff within the Clock creation
+	// step. This means I need to add an optional init func into the Cinfo
+	// constructor, or to add the init func as a virtual func in Data.
+	FieldElement< Tick, Clock, &Clock::getTick >* ticke =
+		new FieldElement< Tick, Clock, &Clock::getTick >
+		( 
+			Tick::initCinfo(), clocke,
+			&Clock::getNumTicks, &Clock::setNumTicks 
+		);
+	Id tickId = Id::create( ticke );
+
 	assert ( shellid == Id() );
 	assert( clockId == Id( 1, 0 ) );
+	assert( tickId == Id( 2, 0 ) );
 	SetGet::setShell();
 	Shell* s = reinterpret_cast< Shell* >( shellid.eref().data() );
 	s->setHardware( isSingleThreaded, numCores, numNodes );

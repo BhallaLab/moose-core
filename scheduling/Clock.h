@@ -30,14 +30,33 @@ class Clock: public Data
 		double getTickDt( DataId i ) const;
 		void setStage( DataId i, unsigned int  v );
 		unsigned int  getStage( DataId i ) const;
+
 		
 		//////////////////////////////////////////////////////////
 		//  Dest functions
 		//////////////////////////////////////////////////////////
+		/**
+		 * starts up a run to go for runTime without threading.
+		 */
 		void start( Eref e, const Qinfo* q, double runTime );
+
+		/**
+		 * tStart starts up a run using threading. Is called independently
+		 * on each worker thread. threadId starts from 0 and goes up to
+		 * # of worker threads. threadId 0 has a special meaning as it 
+		 * manages increments of current time.
+		 */
+		void tStart(  Eref e, const Qinfo* q, double runTime, 
+			unsigned int threadId );
 		void step( Eref e, const Qinfo* q, unsigned int nsteps );
 		void stop( Eref e, const Qinfo* q );
 		void reinit( Eref e, const Qinfo* q );
+
+		/**
+		 * This utility function creates a tick on the assigned tickNum,
+		 * if necessary expanding the ticks_ array. Assigns dt and stage.
+		 */
+		void setupTick( unsigned int tickNum, double dt, unsigned int stage );
 
 		///////////////////////////////////////////////////////////
 		// Tick handlers
@@ -71,6 +90,7 @@ class Clock: public Data
 
 		unsigned int getNumTicks() const;
 		void setNumTicks( unsigned int num );
+		void setBarrier( void* barrier );
 
 		static void* threadStartFunc( void* threadInfo );
 		static const Cinfo* initCinfo();
