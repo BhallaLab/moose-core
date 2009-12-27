@@ -550,7 +550,7 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 				char *temp = new char[ totSize ];
 				Conv< A1 >::val2buf( temp, arg1 );
 				Conv< A2 >::val2buf( temp + size1, arg2 );
-				Conv< A2 >::val2buf( temp + size1 + size2, arg3 );
+				Conv< A3 >::val2buf( temp + size1 + size2, arg3 );
 				sg.iSetInner( fid, temp, totSize );
 
 				// Ensure that clearQ is called before this return.

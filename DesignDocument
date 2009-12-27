@@ -325,12 +325,27 @@ Element::execFunc
 		
 
 ------------------------------------------------------------------------------
+Parallelism and grouping.
+After some analysis, it seems like many parallel simulations will have a 
+lumpy connectivity. That is, there will be groups with high internal
+connectivity. Different groups and stray other elements have sparser
+connectivity. For example, a brain region (e.g., OB) will be highly connected
+internally, and much more loosely connected externally. So the OB would form
+one group, and perhaps the Piriform another group.
+
+Multithreading and MPI-based decomposition are very similar as one scales up:
+in both cases we need buffers for data transfer. Up to a point it makes sense
+to amalgamate all MPI based communication for each node even if it has many 
+threads internally. This is the main asymmetry.
+
+------------------------------------------------------------------------------
 
 MULTITHREADING.
 Async:
 Setup:
 Nothing special
 Send:
+
 Each thread has a separate section of the Queue on each target Element. So
 there is never any need for individual mutexes.
 clearQ: Three possible levels of separation.
@@ -347,6 +362,92 @@ clearQ: Three possible levels of separation.
 	have to define rules for how the solver is allowed to do this.
 Sync:
 No problems because the memory locations are distinct for all data transfer.
+
+Data transfer of 'group' queues, from perspective of each thread.
+        - During process, put off-group stuff into off-group queues.
+                - on-node other threads; and off-node data each have queues.
+        - During process, put in-group data into own 'output' queue.
+        - When Process is done, consolidate all in-group 'output' queues.
+        - Send consolidated in-group queue to all nodes in group
+        - off-group, on-node queues are handled by their owner threads.
+        - Send off-group, off-node queues to target nodes.
+        - Receive consolidated queues from on-group nodes.
+                [further consolidate?]
+        - Receive mythread input queue from off-group, on-node threads
+        - Recieve anythread input queues from off-group off-node
+                [Consolidate input queues ?]
+        - Iterate through consolidated queue for in-group, on-node.
+        - Iterate through consolidated queue for in-group, off-node.
+        - Iterate through input queue for off-group, on-node
+        - Iterate through input queue for off-group, off-node.
+                - Each thread will have to pick subset of entries to handle.
+
+Data transfer of 'non-group' queues, from perspective of each thread:
+        - During process, put off-group stuff into off-group queues.
+                - on-node other threads; and off-node data each have queues.
+        - During process, put own stuff into own input queue.
+        - off-group, on-node queues are handled by their owner threads.
+        - Send off-group, off-node queues to target nodes.
+        - Receive mythread input queue from off-group, on-node threads
+        - Recieve anythread input queues from off-group off-node
+                [Consolidate input queues ?]
+        - Iterate through input queue for off-group, on-node
+        - Iterate through input queue for off-group, off-node.
+                - Each thread will have to pick subset of entries to handle.
+
+.........................................................................
+Setting up multithread scheduling.
+For comparison, here is regular scheduling
+Shell::start:
+	calls Clock::threadStartFunc( void* threadInfo ), no threads.
+Clock::threadStartFunc( void* threadInfo ) is the static thread function.
+	calls Clock::Start in non-thread version, with args in threadInfo
+Clock::Start:
+	If just one tickPtr: advance through the tickPtr for the entire time.
+	If multiple tickPtrs (i.e., many dts):
+		sort the tickPtrs
+		loop while tickPtr[0].nextTime < endTime
+			advance tickPtr0 till nextTime
+			sort again
+			update nextTime.
+	*---*
+
+Multithread scheduling: Assume group-wise queue handling for now.
+Shell::start:
+	Makes barrier. Spawns child threads, with threadStartFunc.
+	 Waits for them to join.
+Clock::threadStartFunc( void* threadInfo ) calls tStart in threaded version.
+Clock::tStart()
+	if just one tickPtr, advance through it for the entire time.
+	TickPtr::advance: loop while nextTime_ < endTime. In this loop,
+		call all the Ticks (at different stages)
+		Need to cleanly handle advancing of p->currTime and nextTime_,
+		which are used by all threads. So this must be made thread-safe.
+		
+
+		Tick::advance(): 
+			Qinfo::clearQ( threadId )
+				Note that here there is a Q shared among
+				all threads, and it is treated as readonly.
+			Conn::process.
+				Puts outgoing data into thread-local output Q.
+			Condition: when all other threads are done, the
+				Qs are either merged or put into a frame-buffer
+				so that all threads can now handle entire
+				set as readonly.
+			Or, Barrier: Ensure all threads are done
+			Thread 0: Merge Qs into a frame-buffer, set as readonly
+			Barrier: Ensure thread0 is done before proceeding.
+			Equivalently, the entry into the clearQ routine could
+			be the synchronization point.
+			
+	If multiple tickPtrs:		
+		
+	
+
+	
+	*---*
+
 
 
 ------------------------------------------------------------------------------
@@ -369,3 +470,5 @@ Q of the target Element.
 
 
 ------------------------------------------------------------------------------
+
+

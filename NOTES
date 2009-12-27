@@ -2491,3 +2491,10 @@ After some more work this now goes some way into the barriers before crashing.
 
 
 =============================================================================
+27 Dec 2009
+
+Incremental progress on getting threaded scheduling to work. The usual
+pthread pains.
+At this point I have the system sometimes giving the correct sequence with
+2 or 3 threads. 
+

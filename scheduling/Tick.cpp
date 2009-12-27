@@ -211,13 +211,13 @@ void Tick::destroy( Eref e, const Qinfo* q )
  */
 void Tick::advance( Element* e, ProcInfo* info ) const
 {
-	cout << "(" << dt_ << ", " << stage_ << " ) at " << info->currTime <<
+	cout << "(" << dt_ << ", " << stage_ << " ) at t= " << info->currTime <<
 		" on thread " << info->threadId << endl;
 	// Hack: we need a better way to define which connId to use.
 	// Presumably we should at least take an offset from the predefined
 	// Slots like children.
 	const Conn* c = e->conn( index_ );
-	Qinfo::clearQ( 0 );
+	Qinfo::clearQ( info->threadId );
 	c->process( info );
 }
 

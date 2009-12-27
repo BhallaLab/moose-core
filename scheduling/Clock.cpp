@@ -265,12 +265,18 @@ void Clock::start(  Eref e, const Qinfo* q, double runTime )
 	isRunning_ = 0;
 }
 
+/**
+ * This function is called once on each worker thread
+ */
 void Clock::tStart(  Eref e, const Qinfo* q, double runTime, 
 	unsigned int threadId )
 {
+	ProcInfo info = info_; // We use an independent ProcInfo for each thread
+	info.threadId = threadId; // to manage separate threadIds.
 	static const double ROUNDING = 1.0000000001;
 	if ( tickPtr_.size() == 0 ) {
-		info_.currTime += runTime;
+		if ( threadId == 0 )
+			info_.currTime += runTime;
 		return;
 	}
 	double endTime = runTime * ROUNDING + info_.currTime;
@@ -280,7 +286,9 @@ void Clock::tStart(  Eref e, const Qinfo* q, double runTime,
 	Element* ticke = Id( 2, 0 )();
 
 	if ( tickPtr_.size() == 1 ) {
-		tickPtr_[0].advance( ticke, &info_, endTime );
+		tickPtr_[0].advance( ticke, &info, endTime );
+		if ( threadId == 0 )
+			info_ = info; // Do we use info outside? Shouldn't.
 		return;
 	}
 
@@ -288,14 +296,15 @@ void Clock::tStart(  Eref e, const Qinfo* q, double runTime,
 	// Here we have multiple tick times, need to do the sorting.
 		sort( tickPtr_.begin(), tickPtr_.end() );
 	}
-	// Actually we want all other threads to wait for FIRSTWORKER
 	int rc = pthread_barrier_wait( 
 		reinterpret_cast< pthread_barrier_t* >( info_.barrier ) );
+	cout << "Crossed sorting on thread " << threadId << endl;
 	
 	double nextTime = tickPtr_[1].getNextTime();
 	while ( isRunning_ && tickPtr_[0].getNextTime() < endTime ) {
 		// This advances all ticks with this dt in order, till nextTime.
-		tickPtr_[0].advance( ticke, &info_, nextTime * ROUNDING );
+		tickPtr_[0].advance( ticke, &info, nextTime * ROUNDING );
+		cout << "Advance at " << nextTime << " on thread " << threadId << endl;
 
 		// This is a good place to put in a single condition_wait,
 		// so that thread 0 can deal with the sorting.
@@ -324,9 +333,11 @@ void* Clock::threadStartFunc( void* threadInfo )
 	ThreadInfo* ti = reinterpret_cast< ThreadInfo* >( threadInfo );
 	Clock* clock = reinterpret_cast< Clock* >( ti->clocke->data( 0 ) );
 	Eref clocker( ti->clocke, 0 );
+	cout << "Start thread " << ti->threadId << " with runtime " << 
+		ti->runtime << endl;
 	clock->tStart( clocker, ti->qinfo, ti->runtime, ti->threadId );
 	// clock->start( clocker, ti->qinfo, ti->runtime );
-	cout << "On thread " << ti->threadId << " with runtime " << 
+	cout << "End thread " << ti->threadId << " with runtime " << 
 		ti->runtime << endl;
 	pthread_exit( NULL );
 }

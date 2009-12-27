@@ -83,25 +83,44 @@ void TickPtr::advance( Element* e, ProcInfo* p, double endTime ) {
 }
 */
 
+// procInfo is shared, need to ensure it is updated before doing 'advance'.
+// OK if clearQ has a barrier on entry.
+// 
 void TickPtr::advance( Element* e, ProcInfo* p, double endTime )
 {
-	double nt = nextTime_;
-	while ( nt < endTime ) {
-		p->currTime = nt;
+	while ( nextTime_ < endTime ) {
+		p->currTime = nextTime_;
+		if ( p->barrier ) {
+			//hacked in to test
+			cout << "TickPtr::advance: pre barrier1 at time = " <<
+				p->currTime << " on thread " << p->threadId << endl;
+			int rc = pthread_barrier_wait( 
+				reinterpret_cast< pthread_barrier_t* >( p->barrier ) );
+			cout << "TickPtr::advance: post barrier1 at time = " <<
+				p->currTime << " on thread " << p->threadId << endl;
+			assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+		}
+		if ( p->threadId == 0 ) {
+			nextTime_ += dt_;
+		}
+
 		for ( vector< const Tick* >::iterator i = ticks_.begin(); 
 			i != ticks_.end(); ++i )
 		{
 			(*i)->advance( e, p ); // This needs a barrier call.
+			/*
 			if ( p->barrier ) {
 				//hacked in to test
+				cout << "TickPtr::advance: pre barrier at time = " <<
+					nt << " on thread " << p->threadId << endl;
 				int rc = pthread_barrier_wait( 
 					reinterpret_cast< pthread_barrier_t* >( p->barrier ) );
+				cout << "TickPtr::advance: post barrier on thread " <<
+					p->threadId << endl;
 				assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 			}
+			*/
 		}
-		nt += dt_;
-		if ( p->threadId == 0 ) // first worker thread
-			nextTime_ = nt;
 	}
 }
 
