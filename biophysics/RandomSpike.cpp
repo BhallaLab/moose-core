@@ -264,8 +264,8 @@ void RandomSpike::innerProcessFunc(const Conn* c, ProcInfo p)
         {
             state_ = minAmp_;
         }        
+	send1 <double> ( c->target(), eventSlot, t);    
     }
-    send1 <double> ( c->target(), eventSlot, state_);    
 }
 
 #endif
