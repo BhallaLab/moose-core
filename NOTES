@@ -2497,4 +2497,13 @@ Incremental progress on getting threaded scheduling to work. The usual
 pthread pains.
 At this point I have the system sometimes giving the correct sequence with
 2 or 3 threads. 
+checked in as 1498.
+Rather reliable hang at 4 threads.
+Seems like thread 0 has gotten one step ahead of the rest, and is hence
+clearing the barrier instead of thread 2.
+
+=============================================================================
+28 Dec 2009
+Turns out that this same problem (thread 0 getting one step ahead) can also
+happen even with 2 or 3 threads, only less often than with 4 threads.
 

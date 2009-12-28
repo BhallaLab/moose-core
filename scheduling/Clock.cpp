@@ -299,8 +299,10 @@ void Clock::tStart(  Eref e, const Qinfo* q, double runTime,
 	int rc = pthread_barrier_wait( 
 		reinterpret_cast< pthread_barrier_t* >( info_.barrier ) );
 	cout << "Crossed sorting on thread " << threadId << endl;
-	
 	double nextTime = tickPtr_[1].getNextTime();
+	pthread_barrier_wait( 
+		reinterpret_cast< pthread_barrier_t* >( info_.barrier ) );
+	
 	while ( isRunning_ && tickPtr_[0].getNextTime() < endTime ) {
 		// This advances all ticks with this dt in order, till nextTime.
 		tickPtr_[0].advance( ticke, &info, nextTime * ROUNDING );
@@ -312,12 +314,16 @@ void Clock::tStart(  Eref e, const Qinfo* q, double runTime,
 		// It does assume that there is a barrier after clearQ, since we
 		// need all threads to be within the 'advance' function before
 		// we can sort the order of tickPtrs.
+		rc = pthread_barrier_wait( 
+			reinterpret_cast< pthread_barrier_t* >( info_.barrier ) );
 		if ( threadId == 0 )
 			sort( tickPtr_.begin(), tickPtr_.end() );
 		// Actually we want all other threads to wait for FIRSTWORKER
 		rc = pthread_barrier_wait( 
 			reinterpret_cast< pthread_barrier_t* >( info_.barrier ) );
 		nextTime = tickPtr_[1].getNextTime();
+		rc = pthread_barrier_wait( 
+			reinterpret_cast< pthread_barrier_t* >( info_.barrier ) );
 	}
 	isRunning_ = 0;
 }

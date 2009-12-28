@@ -121,6 +121,17 @@ void TickPtr::advance( Element* e, ProcInfo* p, double endTime )
 			}
 			*/
 		}
+
+		if ( p->barrier ) {
+			//hacked in to test
+			cout << "TickPtr::advance: pre barrier2 at time = " <<
+				p->currTime << " on thread " << p->threadId << endl;
+			int rc = pthread_barrier_wait( 
+				reinterpret_cast< pthread_barrier_t* >( p->barrier ) );
+			cout << "TickPtr::advance: post barrier2 at time = " <<
+				p->currTime << " on thread " << p->threadId << endl;
+			assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+		}
 	}
 }
 
