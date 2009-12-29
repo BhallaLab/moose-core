@@ -113,7 +113,7 @@ double SynChan::getWeight(const unsigned int& index) const
     lookupGet < double > (id_(), "weight", weight, index);
     return weight;
 }
-void SynChan::setWeight( double weight, const unsigned int& index )
+void SynChan::setWeight( const unsigned int& index ,double weight )
 {
     lookupSet < double, unsigned int > (id_(), "weight", weight, index);
 }
@@ -123,7 +123,7 @@ double SynChan::getDelay(const unsigned int& index) const
     lookupGet < double > (id_.eref(), "delay", delay, index);
     return delay;
 }
-void SynChan::setDelay( double delay, const unsigned int& index )
+void SynChan::setDelay( const unsigned int& index, double delay)
 {
     lookupSet < double, unsigned int  > (id_.eref(), "delay", delay, index);
 }
