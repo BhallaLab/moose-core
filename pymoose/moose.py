@@ -1336,6 +1336,9 @@ SOLVE = _moose.SOLVE
 THIS = _moose.THIS
 GLOBAL = _moose.GLOBAL
 DEL = _moose.DEL
+OUTGOING = _moose.OUTGOING
+INCOMING = _moose.INCOMING
+INOUT = _moose.INOUT
 class PyMooseContext(object):
     """Proxy of C++ PyMooseContext class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
@@ -1670,6 +1673,7 @@ class PyMooseContext(object):
 
     def getNeighbours(*args):
         """
+        getNeighbours(self, Id object, string fieldName="*", int direction=INCOMING) -> Id_vector
         getNeighbours(self, Id object, string fieldName="*") -> Id_vector
         getNeighbours(self, Id object) -> Id_vector
         """
@@ -1787,6 +1791,7 @@ class PyMooseBase(object):
 
     def neighbours(*args):
         """
+        neighbours(self, string msgName="*", int direction=INCOMING) -> Id_vector
         neighbours(self, string msgName="*") -> Id_vector
         neighbours(self) -> Id_vector
         """
@@ -2617,65 +2622,25 @@ class SynChan(PyMooseBase):
         """__get_Ik(self) -> double"""
         return _moose.SynChan___get_Ik(*args)
 
-    def __set_Ik(*args):
-        """__set_Ik(self, double Ik)"""
-        return _moose.SynChan___set_Ik(*args)
-
     def __get_numSynapses(*args):
         """__get_numSynapses(self) -> unsigned int"""
         return _moose.SynChan___get_numSynapses(*args)
 
-    def __set_numSynapses(*args):
-        """__set_numSynapses(self, unsigned int numSynapses)"""
-        return _moose.SynChan___set_numSynapses(*args)
+    def getWeight(*args):
+        """getWeight(self, unsigned int index) -> double"""
+        return _moose.SynChan_getWeight(*args)
 
-    def __get_weight(*args):
-        """__get_weight(self) -> double"""
-        return _moose.SynChan___get_weight(*args)
+    def setWeight(*args):
+        """setWeight(self, double weight, unsigned int index)"""
+        return _moose.SynChan_setWeight(*args)
 
-    def __set_weight(*args):
-        """__set_weight(self, double weight)"""
-        return _moose.SynChan___set_weight(*args)
+    def getDelay(*args):
+        """getDelay(self, unsigned int index) -> double"""
+        return _moose.SynChan_getDelay(*args)
 
-    def __get_delay(*args):
-        """__get_delay(self) -> double"""
-        return _moose.SynChan___get_delay(*args)
-
-    def __set_delay(*args):
-        """__set_delay(self, double delay)"""
-        return _moose.SynChan___set_delay(*args)
-
-    def __get_IkSrc(*args):
-        """__get_IkSrc(self) -> double"""
-        return _moose.SynChan___get_IkSrc(*args)
-
-    def __set_IkSrc(*args):
-        """__set_IkSrc(self, double IkSrc)"""
-        return _moose.SynChan___set_IkSrc(*args)
-
-    def __get_synapse(*args):
-        """__get_synapse(self) -> double"""
-        return _moose.SynChan___get_synapse(*args)
-
-    def __set_synapse(*args):
-        """__set_synapse(self, double synapse)"""
-        return _moose.SynChan___set_synapse(*args)
-
-    def __get_activation(*args):
-        """__get_activation(self) -> double"""
-        return _moose.SynChan___get_activation(*args)
-
-    def __set_activation(*args):
-        """__set_activation(self, double activation)"""
-        return _moose.SynChan___set_activation(*args)
-
-    def __get_modulator(*args):
-        """__get_modulator(self) -> double"""
-        return _moose.SynChan___get_modulator(*args)
-
-    def __set_modulator(*args):
-        """__set_modulator(self, double modulator)"""
-        return _moose.SynChan___set_modulator(*args)
+    def setDelay(*args):
+        """setDelay(self, double delay, unsigned int index)"""
+        return _moose.SynChan_setDelay(*args)
 
     Gbar = _swig_property(_moose.SynChan_Gbar_get, _moose.SynChan_Gbar_set)
     Ek = _swig_property(_moose.SynChan_Ek_get, _moose.SynChan_Ek_set)
@@ -2683,10 +2648,8 @@ class SynChan(PyMooseBase):
     tau2 = _swig_property(_moose.SynChan_tau2_get, _moose.SynChan_tau2_set)
     normalizeWeights = _swig_property(_moose.SynChan_normalizeWeights_get, _moose.SynChan_normalizeWeights_set)
     Gk = _swig_property(_moose.SynChan_Gk_get, _moose.SynChan_Gk_set)
-    Ik = _swig_property(_moose.SynChan_Ik_get, _moose.SynChan_Ik_set)
+    Ik = _swig_property(_moose.SynChan_Ik_get)
     numSynapses = _swig_property(_moose.SynChan_numSynapses_get)
-    activation = _swig_property(_moose.SynChan_activation_get, _moose.SynChan_activation_set)
-    modulator = _swig_property(_moose.SynChan_modulator_get, _moose.SynChan_modulator_set)
 SynChan_swigregister = _moose.SynChan_swigregister
 SynChan_swigregister(SynChan)
 SynChan.className_ = _moose.cvar.SynChan_className_
@@ -2854,10 +2817,8 @@ class BinSynchan(PyMooseBase):
     tau2 = _swig_property(_moose.BinSynchan_tau2_get, _moose.BinSynchan_tau2_set)
     normalizeWeights = _swig_property(_moose.BinSynchan_normalizeWeights_get, _moose.BinSynchan_normalizeWeights_set)
     Gk = _swig_property(_moose.BinSynchan_Gk_get, _moose.BinSynchan_Gk_set)
-    Ik = _swig_property(_moose.BinSynchan_Ik_get, _moose.BinSynchan_Ik_set)
+    Ik = _swig_property(_moose.BinSynchan_Ik_get)
     numSynapses = _swig_property(_moose.BinSynchan_numSynapses_get)
-    activation = _swig_property(_moose.BinSynchan_activation_get, _moose.BinSynchan_activation_set)
-    modulator = _swig_property(_moose.BinSynchan_modulator_get, _moose.BinSynchan_modulator_set)
 BinSynchan_swigregister = _moose.BinSynchan_swigregister
 BinSynchan_swigregister(BinSynchan)
 BinSynchan.className_ = _moose.cvar.BinSynchan_className_
