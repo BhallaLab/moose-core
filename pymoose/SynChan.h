@@ -33,9 +33,9 @@ namespace pymoose
         unsigned int __get_numSynapses() const;
         // vector<SynInfo>& __get_synapse() const;
         double getWeight(const unsigned int& index) const;
-        void setWeight(double weight, const unsigned int& index);
+        void setWeight(const unsigned int& index, double weight);
         double getDelay(const unsigned int& index) const;
-        void setDelay(double delay, const unsigned int& index);
+        void setDelay(const unsigned int& index, double delay);
     };
 }
 
