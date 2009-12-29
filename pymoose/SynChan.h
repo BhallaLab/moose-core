@@ -1,6 +1,7 @@
 #ifndef _pymoose_SynChan_h
 #define _pymoose_SynChan_h
 #include "PyMooseBase.h"
+#include <biophysics/SynInfo.h>
 namespace pymoose
 {
     class SynChan : public PyMooseBase
@@ -29,21 +30,12 @@ namespace pymoose
         double __get_Gk() const;
         void __set_Gk(double Gk);
         double __get_Ik() const;
-        void __set_Ik(double Ik);
         unsigned int __get_numSynapses() const;
-        void __set_numSynapses(unsigned int numSynapses);
-        double __get_weight() const;
-        void __set_weight(double weight);
-        double __get_delay() const;
-        void __set_delay(double delay);
-        double __get_IkSrc() const;
-        void __set_IkSrc(double IkSrc);
-        double __get_synapse() const;
-        void __set_synapse(double synapse);
-        double __get_activation() const;
-        void __set_activation(double activation);
-        double __get_modulator() const;
-        void __set_modulator(double modulator);
+        // vector<SynInfo>& __get_synapse() const;
+        double getWeight(const unsigned int& index) const;
+        void setWeight(double weight, const unsigned int& index);
+        double getDelay(const unsigned int& index) const;
+        void setDelay(double delay, const unsigned int& index);
     };
 }
 
