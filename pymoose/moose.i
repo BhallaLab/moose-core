@@ -280,10 +280,8 @@ void fillData(PyObject* args)
 %attribute(pymoose::SynChan, double, tau2, __get_tau2, __set_tau2)
 %attribute(pymoose::SynChan, bool, normalizeWeights, __get_normalizeWeights, __set_normalizeWeights)
 %attribute(pymoose::SynChan, double, Gk, __get_Gk, __set_Gk)
-%attribute(pymoose::SynChan, double, Ik, __get_Ik, __set_Ik)
+%attribute(pymoose::SynChan, double, Ik, __get_Ik)
 %attribute(pymoose::SynChan, unsigned int, numSynapses, __get_numSynapses)
-%attribute(pymoose::SynChan, double, activation, __get_activation, __set_activation)
-%attribute(pymoose::SynChan, double, modulator, __get_modulator, __set_modulator)
 
 %include "BinSynchan.h"
 %attribute(pymoose::BinSynchan, double, Gbar, __get_Gbar, __set_Gbar)
@@ -292,10 +290,8 @@ void fillData(PyObject* args)
 %attribute(pymoose::BinSynchan, double, tau2, __get_tau2, __set_tau2)
 %attribute(pymoose::BinSynchan, bool, normalizeWeights, __get_normalizeWeights, __set_normalizeWeights)
 %attribute(pymoose::BinSynchan, double, Gk, __get_Gk, __set_Gk)
-%attribute(pymoose::BinSynchan, double, Ik, __get_Ik, __set_Ik)
+%attribute(pymoose::BinSynchan, double, Ik, __get_Ik)
 %attribute(pymoose::BinSynchan, unsigned int, numSynapses, __get_numSynapses)
-%attribute(pymoose::BinSynchan, double, activation, __get_activation, __set_activation)
-%attribute(pymoose::BinSynchan, double, modulator, __get_modulator, __set_modulator)
 
 %include "StochSynchan.h"
 %attribute(pymoose::StochSynchan, double, Gbar, __get_Gbar, __set_Gbar)
