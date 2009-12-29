@@ -257,7 +257,7 @@ void fillData(PyObject* args)
 %pythoncode %{
 	pymoose::Interpol.__setitem__ = Interpol.__set_table
 	pymoose::Interpol.__getitem__ = Interpol.__get_table
-%}
+%} // end pythoncode
 */
 //%attribute(pymoose::Interpol, string&, dumpFile, __get_print, __set_print) 
 
@@ -282,7 +282,22 @@ void fillData(PyObject* args)
 %attribute(pymoose::SynChan, double, Gk, __get_Gk, __set_Gk)
 %attribute(pymoose::SynChan, double, Ik, __get_Ik)
 %attribute(pymoose::SynChan, unsigned int, numSynapses, __get_numSynapses)
-
+%pythoncode %{
+class Weight:
+      def __init__(self, synchan):
+      	  self.synchan = synchan
+      def __setitem__(index, value):
+      	  self.synchan.setWeight(index, value)
+      def __getitem__(index):
+      	  return self.synchan.getWeight(index)	  	        
+class Delay:
+      def __init__(self, synchan):
+      	  self.synchan = synchan
+      def __setitem__(index, value):
+      	  self.synchan.setDelay(index, value)
+      def __getitem__(index):
+      	  return self.synchan.getDelay(index)
+%} //end pythoncode
 %include "BinSynchan.h"
 %attribute(pymoose::BinSynchan, double, Gbar, __get_Gbar, __set_Gbar)
 %attribute(pymoose::BinSynchan, double, Ek, __get_Ek, __set_Ek)
