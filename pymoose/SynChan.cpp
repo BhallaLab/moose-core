@@ -85,78 +85,46 @@ double SynChan::__get_Ik() const
     get < double > (id_(), "Ik",Ik);
     return Ik;
 }
-void SynChan::__set_Ik( double Ik )
-{
-    set < double > (id_(), "Ik", Ik);
-}
 unsigned int SynChan::__get_numSynapses() const
 {
     unsigned int numSynapses;
     get < unsigned int > (id_(), "numSynapses",numSynapses);
     return numSynapses;
 }
-void SynChan::__set_numSynapses( unsigned int numSynapses )
-{
-    set < unsigned int > (id_(), "numSynapses", numSynapses);
-}
-double SynChan::__get_weight() const
+
+// vector<SynInfo>& SynChan::__get_synapse() const
+// {
+    // This is a problem with the design of SynChan:
+    // It has two facets: one as a whole object, second as a list of
+    // synapses. The vector of synapses is protected in the class
+    // definition, yet it tries to give impression that the user can
+    // access individual synapses. In python, it becomes
+    // difficult(impossible?) to give the user the impression that
+    // synapse is a vector contained inside the SynChan object.
+    // Hence the awkward getWeight and setWeight functions.
+    // I think a better syntax will be:
+    // mySynChan.synapse[0].weight = 1.0
+    // rather than mySynChan.setWeight(1.0, 0), which is highly confusing.
+//     return 0;
+// }
+double SynChan::getWeight(const unsigned int& index) const
 {
     double weight;
-    get < double > (id_(), "weight",weight);
+    lookupGet < double > (id_(), "weight", weight, index);
     return weight;
 }
-void SynChan::__set_weight( double weight )
+void SynChan::setWeight( double weight, const unsigned int& index )
 {
-    set < double > (id_(), "weight", weight);
+    lookupSet < double, unsigned int > (id_(), "weight", weight, index);
 }
-double SynChan::__get_delay() const
+double SynChan::getDelay(const unsigned int& index) const
 {
     double delay;
-    get < double > (id_(), "delay",delay);
+    lookupGet < double > (id_.eref(), "delay", delay, index);
     return delay;
 }
-void SynChan::__set_delay( double delay )
+void SynChan::setDelay( double delay, const unsigned int& index )
 {
-    set < double > (id_(), "delay", delay);
-}
-double SynChan::__get_IkSrc() const
-{
-    double IkSrc;
-    get < double > (id_(), "IkSrc",IkSrc);
-    return IkSrc;
-}
-void SynChan::__set_IkSrc( double IkSrc )
-{
-    set < double > (id_(), "IkSrc", IkSrc);
-}
-double SynChan::__get_synapse() const
-{
-    double synapse;
-    get < double > (id_(), "synapse",synapse);
-    return synapse;
-}
-void SynChan::__set_synapse( double synapse )
-{
-    set < double > (id_(), "synapse", synapse);
-}
-double SynChan::__get_activation() const
-{
-    double activation;
-    get < double > (id_(), "activation",activation);
-    return activation;
-}
-void SynChan::__set_activation( double activation )
-{
-    set < double > (id_(), "activation", activation);
-}
-double SynChan::__get_modulator() const
-{
-    double modulator;
-    get < double > (id_(), "modulator",modulator);
-    return modulator;
-}
-void SynChan::__set_modulator( double modulator )
-{
-    set < double > (id_(), "modulator", modulator);
+    lookupSet < double, unsigned int  > (id_.eref(), "delay", delay, index);
 }
 #endif
