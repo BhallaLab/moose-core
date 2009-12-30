@@ -88,21 +88,20 @@ void TickPtr::advance( Element* e, ProcInfo* p, double endTime ) {
 // 
 void TickPtr::advance( Element* e, ProcInfo* p, double endTime )
 {
-	while ( nextTime_ < endTime ) {
-		p->currTime = nextTime_;
+	double nt = nextTime_; // use an independent timer for each thread.
+	cout << "TickPtr::advance: nextTime_ = " << nextTime_ <<
+		", endTime = " << endTime << ", thread = " << p->threadId << endl;
+	while ( nt < endTime ) {
+		p->currTime = nt;
 		if ( p->barrier ) {
 			//hacked in to test
-			cout << "TickPtr::advance: pre barrier1 at time = " <<
-				p->currTime << " on thread " << p->threadId << endl;
+			// cout << "TickPtr::advance: pre barrier1 at time = " << p->currTime << " on thread " << p->threadId << endl;
 			int rc = pthread_barrier_wait( 
 				reinterpret_cast< pthread_barrier_t* >( p->barrier ) );
-			cout << "TickPtr::advance: post barrier1 at time = " <<
-				p->currTime << " on thread " << p->threadId << endl;
+			// cout << "TickPtr::advance: post barrier1 at time = " << p->currTime << " on thread " << p->threadId << endl;
 			assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 		}
-		if ( p->threadId == 0 ) {
-			nextTime_ += dt_;
-		}
+		nt += dt_;
 
 		for ( vector< const Tick* >::iterator i = ticks_.begin(); 
 			i != ticks_.end(); ++i )
@@ -124,14 +123,20 @@ void TickPtr::advance( Element* e, ProcInfo* p, double endTime )
 
 		if ( p->barrier ) {
 			//hacked in to test
-			cout << "TickPtr::advance: pre barrier2 at time = " <<
-				p->currTime << " on thread " << p->threadId << endl;
+			// cout << "TickPtr::advance: pre barrier2 at time = " << p->currTime << " on thread " << p->threadId << endl;
 			int rc = pthread_barrier_wait( 
 				reinterpret_cast< pthread_barrier_t* >( p->barrier ) );
-			cout << "TickPtr::advance: post barrier2 at time = " <<
-				p->currTime << " on thread " << p->threadId << endl;
+			// cout << "TickPtr::advance: post barrier2 at time = " << p->currTime << " on thread " << p->threadId << endl;
 			assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 		}
+	}
+	if ( p->threadId == 0 ) {
+		nextTime_ = nt;
+	}
+	if ( p->barrier ) {
+		int rc = pthread_barrier_wait( 
+			reinterpret_cast< pthread_barrier_t* >( p->barrier ) );
+		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 	}
 }
 

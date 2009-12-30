@@ -173,12 +173,16 @@ void Shell::start( double runtime )
 	Id clockId( 1, 0 );
 	Element* clocke = clockId();
 	vector< ThreadInfo > ti( numCores_ );
+	pthread_mutex_t sortMutex;
+	pthread_mutex_init( &sortMutex, NULL );
+
 	Qinfo q;
 	for ( unsigned int i = 0; i < numCores_; ++i ) {
 		ti[i].clocke = clocke;
 		ti[i].qinfo = &q;
 		ti[i].runtime = runtime;
 		ti[i].threadId = i;
+		ti[i].sortMutex = &sortMutex;
 	}
 	if ( isSingleThreaded_ ) {
 		Clock::threadStartFunc( &ti[0] );
@@ -195,6 +199,8 @@ void Shell::start( double runtime )
 		}
 		Clock* clock = reinterpret_cast< Clock* >( clocke->data( 0 ) );
 		clock->setBarrier( &barrier );
+		clock->setNumPendingThreads( 0 ); // Used for clock scheduling
+		clock->setNumThreads( numCores_ ); // Used for clock scheduling
 		// pthread_t threads[ numCores_ ];
 		for ( unsigned int i = 0; i < numCores_; ++i ) {
 			int ret = pthread_create( 

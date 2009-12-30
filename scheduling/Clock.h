@@ -10,6 +10,16 @@
 #ifndef _CLOCK_H
 #define _CLOCK_H
 
+class ThreadInfo
+{
+	public:
+		Element* clocke;
+		Qinfo* qinfo;
+		double runtime;
+		unsigned int threadId;
+		pthread_mutex_t* sortMutex;
+};
+
 class Clock: public Data
 {
 	friend void setupTicks();
@@ -30,7 +40,10 @@ class Clock: public Data
 		double getTickDt( DataId i ) const;
 		void setStage( DataId i, unsigned int  v );
 		unsigned int  getStage( DataId i ) const;
-
+		unsigned int getNumPendingThreads() const;
+		void setNumPendingThreads( unsigned int num );
+		unsigned int getNumThreads() const;
+		void setNumThreads( unsigned int num );
 		
 		//////////////////////////////////////////////////////////
 		//  Dest functions
@@ -46,8 +59,9 @@ class Clock: public Data
 		 * # of worker threads. threadId 0 has a special meaning as it 
 		 * manages increments of current time.
 		 */
-		void tStart(  Eref e, const Qinfo* q, double runTime, 
-			unsigned int threadId );
+		// void tStart(  Eref e, const Qinfo* q, double runTime, unsigned int threadId );
+		void tStart(  Eref e, const ThreadInfo* ti );
+		void sortTickPtrs( pthread_mutex_t* sortMutex );
 		void step( Eref e, const Qinfo* q, unsigned int nsteps );
 		void stop( Eref e, const Qinfo* q );
 		void reinit( Eref e, const Qinfo* q );
@@ -103,18 +117,12 @@ class Clock: public Data
 		double dt_; /// The minimum dt among all ticks.
 		bool isRunning_;
 		ProcInfo info_;
+		unsigned int numPendingThreads_;
+		unsigned int numThreads_;
 		int callback_;
 		vector< TickPtr > tickPtr_;
 		vector< Tick > ticks_;
-};
-
-class ThreadInfo
-{
-	public:
-		Element* clocke;
-		Qinfo* qinfo;
-		double runtime;
-		unsigned int threadId;
+		TickPtr* tp0_;
 };
 
 #endif // _CLOCK_H

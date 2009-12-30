@@ -110,6 +110,18 @@ const Cinfo* Clock::initCinfo()
 			&Clock::setNumTicks,
 			&Clock::getNumTicks
 		),
+		new ValueFinfo< Clock, unsigned int >( 
+			"numPendingThreads",
+			"Number of threads still to update",
+			&Clock::setNumPendingThreads,
+			&Clock::getNumPendingThreads
+		),
+		new ValueFinfo< Clock, unsigned int >( 
+			"numThreads",
+			"Number of threads",
+			&Clock::setNumThreads,
+			&Clock::getNumThreads
+		),
 		new ReadonlyValueFinfo< Clock, unsigned int >( 
 			"currentStep",
 			"Current simulation step",
@@ -185,7 +197,9 @@ Clock::Clock()
 	  currentStep_( 0 ), 
 	  dt_( 1.0 ), 
 	  isRunning_( 0 ),
-	  info_()
+	  info_(),
+	  numPendingThreads_( 0 ),
+	  numThreads_( 0 )
 {;}
 ///////////////////////////////////////////////////
 // Field function definitions
@@ -230,6 +244,54 @@ unsigned int Clock::getCurrentStep() const
 	return currentStep_;
 }
 
+Tick* Clock::getTick( unsigned int i )
+{
+	if ( i < ticks_.size() )
+		return &ticks_[i];
+	else
+		return 0;
+}
+
+unsigned int Clock::getNumTicks() const
+{
+	return ticks_.size();
+}
+
+void Clock::setNumTicks( unsigned int num )
+{
+	ticks_.resize( num );
+	rebuild();
+}
+
+Element* Clock::getTickE( Element* e )
+{
+	const Conn* c = e->conn( tickSlot );
+	assert( c != 0 );
+	Element* ret = c->getTargetElement( e, 0 );
+	assert( ret );
+	return ret;
+}
+
+unsigned int Clock::getNumPendingThreads() const
+{
+	return numPendingThreads_;
+}
+
+void Clock::setNumPendingThreads( unsigned int num )
+{
+	numPendingThreads_ = num;
+}
+
+unsigned int Clock::getNumThreads() const
+{
+	return numThreads_;
+}
+
+void Clock::setNumThreads( unsigned int num )
+{
+	numThreads_ = num;
+}
+
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
@@ -268,6 +330,7 @@ void Clock::start(  Eref e, const Qinfo* q, double runTime )
 /**
  * This function is called once on each worker thread
  */
+/*
 void Clock::tStart(  Eref e, const Qinfo* q, double runTime, 
 	unsigned int threadId )
 {
@@ -290,6 +353,11 @@ void Clock::tStart(  Eref e, const Qinfo* q, double runTime,
 		if ( threadId == 0 )
 			info_ = info; // Do we use info outside? Shouldn't.
 		return;
+	}
+
+	sortTickPtrs(); // Handles threading, sets up nextTime_ and tp0_.
+	while ( isRunning_ && tp0_->getNextTime() < endTime ) {
+		
 	}
 
 	if ( threadId == 0 ) {
@@ -327,6 +395,66 @@ void Clock::tStart(  Eref e, const Qinfo* q, double runTime,
 	}
 	isRunning_ = 0;
 }
+*/
+
+// Problem: how do we set up 'numPendingThreads_'? Must do in the parent
+// thread.
+// Sets up the tick Ptrs as the first thread goes through. Resets the
+// counting variable after all are through. Requires that there is a
+// barrier or equivalent downstream, to ensure that any given thread
+// doesn't come back to this function before all other threads are done.
+void Clock::sortTickPtrs( pthread_mutex_t* sortMutex )
+{
+	pthread_mutex_lock( sortMutex );
+		numPendingThreads_++;
+		if ( numPendingThreads_ == 1 ) { // The first thread through should do this.
+			sort( tickPtr_.begin(), tickPtr_.end() );
+			nextTime_ = tickPtr_[1].getNextTime();
+			tp0_ = &tickPtr_[ 0 ];
+			// Someone else may modify isRunning_: don't touch.
+		} 
+		if ( numPendingThreads_ >= numThreads_ )
+			numPendingThreads_ = 0;
+	pthread_mutex_unlock( sortMutex );
+	cout << "Clock::sortTickPtrs: numPending = " << numPendingThreads_ <<
+		", nextTime_ = " << nextTime_ << endl;
+}
+
+// This version uses sortTickPtrs rather than a bunch of barriers.
+void Clock::tStart(  Eref e, const ThreadInfo* ti )
+{
+	ProcInfo info = info_; // We use an independent ProcInfo for each thread
+	info.threadId = ti->threadId; // to manage separate threadIds.
+	static const double ROUNDING = 1.0000000001;
+	if ( tickPtr_.size() == 0 ) {
+		if ( ti->threadId == 0 )
+			info_.currTime += ti->runtime;
+		return;
+	}
+	double endTime = ti->runtime * ROUNDING + info_.currTime;
+	isRunning_ = 1;
+
+	// Element* ticke = getTickE( e.element() );
+	Element* ticke = Id( 2, 0 )();
+
+	if ( tickPtr_.size() == 1 ) {
+		tickPtr_[0].advance( ticke, &info, endTime );
+		if ( ti->threadId == 0 )
+			info_ = info; // Do we use info outside? Shouldn't.
+		return;
+	}
+
+	sortTickPtrs( ti->sortMutex ); // Sets up nextTime_ and tp0_.
+	
+	while ( isRunning_ && tp0_->getNextTime() < endTime ) {
+		// This advances all ticks with this dt in order, till nextTime.
+		// It has a barrier within: essential for the sortTickPtrs to work.
+		tp0_->advance( ticke, &info, nextTime_ * ROUNDING );
+		cout << "Advance at " << nextTime_ << " on thread " << ti->threadId << endl;
+		sortTickPtrs( ti->sortMutex ); // Sets up nextTime_ and tp0_.
+	}
+	isRunning_ = 0;
+}
 
 void Clock::setBarrier( void* barrier )
 {
@@ -341,8 +469,8 @@ void* Clock::threadStartFunc( void* threadInfo )
 	Eref clocker( ti->clocke, 0 );
 	cout << "Start thread " << ti->threadId << " with runtime " << 
 		ti->runtime << endl;
-	clock->tStart( clocker, ti->qinfo, ti->runtime, ti->threadId );
-	// clock->start( clocker, ti->qinfo, ti->runtime );
+	// clock->tStart( clocker, ti->qinfo, ti->runtime, ti->threadId );
+	clock->tStart( clocker, ti );
 	cout << "End thread " << ti->threadId << " with runtime " << 
 		ti->runtime << endl;
 	pthread_exit( NULL );
@@ -483,30 +611,3 @@ void Clock::rebuild()
 	sort( tickPtr_.begin(), tickPtr_.end() );
 }
 
-Tick* Clock::getTick( unsigned int i )
-{
-	if ( i < ticks_.size() )
-		return &ticks_[i];
-	else
-		return 0;
-}
-
-unsigned int Clock::getNumTicks() const
-{
-	return ticks_.size();
-}
-
-void Clock::setNumTicks( unsigned int num )
-{
-	ticks_.resize( num );
-	rebuild();
-}
-
-Element* Clock::getTickE( Element* e )
-{
-	const Conn* c = e->conn( tickSlot );
-	assert( c != 0 );
-	Element* ret = c->getTargetElement( e, 0 );
-	assert( ret );
-	return ret;
-}

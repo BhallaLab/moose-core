@@ -2507,3 +2507,43 @@ clearing the barrier instead of thread 2.
 Turns out that this same problem (thread 0 getting one step ahead) can also
 happen even with 2 or 3 threads, only less often than with 4 threads.
 
+Sprinkled lots of barriers around in Clock::tStart. This fixed it. Works
+for as many as 32 threads. Now to clean up. Checked in as 1501.
+
+Trying to set up using mutexes. But how to set up the flag for the mutex?
+=============================================================================
+29 Dec 2009
+Wrote a much tighter version of the Clock::tStart function that uses a
+mutex and a counter variable to manage sorting and looping for all threads.
+Compiled. Clears with 32 threads, but I'm a bit dubious about the 
+stepping. Look at the sequence of output here:
+Advance at 7 on thread 0
+Advance at 7 on thread 0
+Advance at 8 on thread 1
+Advance at 8 on thread 0
+Advance at 9 on thread 1
+Advance at TickPtr::advance: post barrier2 at time = 9 on thread 1
+Advance at 9 on thread 0
+Advance at 9 on thread 1
+
+=============================================================================
+30 Dec 2009.
+Analyzing sequence
+1. Not reaching final tick. Stops at t=9.
+2. The tick sequence is OK except that the barrier needs to be in the
+	ticks, not the tickPtr.
+3. The tStart routine goes through its while loop sometimes without
+	movement on the TickPtr::advance. This seems to be due to the 
+	nextTime_ field not really advancing, and hence a dummy attempt to
+	get TickPtr to advance. Need to check. Confirmed. Turns out it happens
+	even with the single-thread scheduling. Inefficient but the end 
+	sequence is still OK. Let's fix.
+	
+There is a nastier problem with the threading case, in TickPtr::advance.
+The issue is that I use thread 0 to advance nextTime. If thread 1
+happens to emerge first nextTime is not incremented, so the thread is
+able to go around the loop till the barrier again. Need to protect
+nextTime using a barrier, or to have one independently for each thread.
+
+Brute force implementation using a barrier works. But there is still oddness
+in the sequencing of 'Advance'. 
