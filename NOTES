@@ -2546,4 +2546,6 @@ able to go around the loop till the barrier again. Need to protect
 nextTime using a barrier, or to have one independently for each thread.
 
 Brute force implementation using a barrier works. But there is still oddness
-in the sequencing of 'Advance'. 
+in the sequencing of 'Advance'. Checked in as 1506.
+
+Some cleanup by way of eliminating barriers in TickPtr::advance. More to go.

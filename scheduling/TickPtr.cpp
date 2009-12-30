@@ -93,41 +93,20 @@ void TickPtr::advance( Element* e, ProcInfo* p, double endTime )
 		", endTime = " << endTime << ", thread = " << p->threadId << endl;
 	while ( nt < endTime ) {
 		p->currTime = nt;
-		if ( p->barrier ) {
-			//hacked in to test
-			// cout << "TickPtr::advance: pre barrier1 at time = " << p->currTime << " on thread " << p->threadId << endl;
-			int rc = pthread_barrier_wait( 
-				reinterpret_cast< pthread_barrier_t* >( p->barrier ) );
-			// cout << "TickPtr::advance: post barrier1 at time = " << p->currTime << " on thread " << p->threadId << endl;
-			assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
-		}
 		nt += dt_;
 
 		for ( vector< const Tick* >::iterator i = ticks_.begin(); 
 			i != ticks_.end(); ++i )
 		{
-			(*i)->advance( e, p ); // This needs a barrier call.
-			/*
 			if ( p->barrier ) {
 				//hacked in to test
-				cout << "TickPtr::advance: pre barrier at time = " <<
-					nt << " on thread " << p->threadId << endl;
+				// cout << "TickPtr::advance: pre barrier at time = " << nt << " on thread " << p->threadId << endl;
 				int rc = pthread_barrier_wait( 
 					reinterpret_cast< pthread_barrier_t* >( p->barrier ) );
-				cout << "TickPtr::advance: post barrier on thread " <<
-					p->threadId << endl;
+				// cout << "TickPtr::advance: post barrier on thread " << p->threadId << endl;
 				assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 			}
-			*/
-		}
-
-		if ( p->barrier ) {
-			//hacked in to test
-			// cout << "TickPtr::advance: pre barrier2 at time = " << p->currTime << " on thread " << p->threadId << endl;
-			int rc = pthread_barrier_wait( 
-				reinterpret_cast< pthread_barrier_t* >( p->barrier ) );
-			// cout << "TickPtr::advance: post barrier2 at time = " << p->currTime << " on thread " << p->threadId << endl;
-			assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+			(*i)->advance( e, p ); // This needs a barrier call.
 		}
 	}
 	if ( p->threadId == 0 ) {
