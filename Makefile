@@ -64,6 +64,9 @@
 # USE_CURSES (default value: 0) - To compile with curses support (terminal aware
 # 		printing)
 # 
+# USE_GL (default value: 0) - To compile with OpenSceneGraph support to enable the MOOSE
+# 		elements 'GLcell', 'GLview'.
+#
 # GENERATE_WRAPPERS (default value: 0) - useful for python interface developers.
 # 		The binary created with this option looks for a directory named
 # 		'generated' in the working directory and creates a wrapper class
@@ -84,6 +87,7 @@ USE_READLINE?=1
 USE_MPI?=0
 USE_MUSIC?=0
 USE_CURSES?=0
+USE_GL?=0
 GENERATE_WRAPPERS?=0
 
 export BUILD
@@ -94,11 +98,12 @@ export USE_READLINE
 export USE_MPI
 export USE_MUSIC
 export USE_CURSES
+export USE_GL
 export GENERATE_WRAPPERS
 
-# PLATFORM (= Linux, win32, Darwin)
+# PLATFORM (= Linux, win32, mac)
 #If using mac uncomment the following lines
-# PLATFORM=mac
+PLATFORM=Linux
 #export PLATFORM
 
 # Get the processor architecture - i686 or x86_64
@@ -206,6 +211,23 @@ ifeq ($(USE_CURSES),1)
 LIBS += -lcurses
 CXXFLAGS+= -DUSE_CURSES
 endif
+
+# To compile with OpenSceneGraph support and enable 'GLcell', 'GLview' pass USE_GL=1 in make command line
+ifeq ($(USE_GL),1)
+	LIBS += -losg -losgDB -lOpenThreads -L/usr/local/lib -lboost_serialization
+	CXXFLAGS += -DUSE_GL -I. -Ibasecode
+	GL_DIR = gl/src
+	GLCELL_LIB = gl/src/GLcell.o
+	GLVIEW_LIB = gl/src/GLview.o gl/src/GLshape.o
+endif
+
+# For mac with USE_GL, force 32-bit architecture because OSG doesn't fully build in 64-bit yet
+ifeq ($(PLATFORM),mac)
+ifeq ($(USE_GL),1)
+CXXFLAGS += -arch i386
+endif
+endif
+
 # For 64 bit Linux systems add paths to 64 bit libraries 
 ifeq ($(OSTYPE),Linux)
 ifeq ($(MACHINE),x86_64)
@@ -242,7 +264,7 @@ LD = ld
 
 SUBDIR = basecode connections maindir genesis_parser shell element scheduling \
 	biophysics hsolve kinetics ksolve builtins utility \
-	randnum signeur device $(SBML_DIR) $(NEUROML_DIR) $(PARALLEL_DIR) $(MUSIC_DIR) 
+	randnum signeur device $(GL_DIR) $(SBML_DIR) $(NEUROML_DIR) $(PARALLEL_DIR) $(MUSIC_DIR) 
 
 # Used for 'make clean'
 CLEANSUBDIR = $(SUBDIR) parallel music pymoose sbml_IO neuroML_IO
@@ -264,6 +286,8 @@ OBJLIBS =	\
 	builtins/builtins.o \
 	signeur/signeur.o \
 	device/device.o \
+	$(GLCELL_LIB) \
+	$(GLVIEW_LIB) \
 	$(SBML_LIB) \
 	$(NEUROML_LIB) \
 	$(PARALLEL_LIB) \
@@ -275,7 +299,7 @@ export LD
 export LIBS
 
 moose: libs $(OBJLIBS) 
-	$(CXX) $(OBJLIBS) $(LIBS) -o moose 
+	$(CXX) $(CXXFLAGS) $(OBJLIBS) $(LIBS) -o moose 
 	@echo "Moose compilation finished"
 
 libmoose.so: libs
@@ -297,6 +321,7 @@ libs:
 	@echo "	USE_MPI:" $(USE_MPI)
 	@echo "	USE_MUSIC:" $(USE_MUSIC)
 	@echo "	USE_CURSES:" $(USE_CURSES)
+	@echo "	USE_GL:" $(USE_GL)
 	@(for i in $(SUBDIR); do $(MAKE) -C $$i; done)
 	@echo "All Libs compiled"
 

@@ -1,0 +1,69 @@
+Operating instructions:
+---------------------
+
+The package is launched in two steps; this can be simplified to a
+single step with a PyMOOSE wrapper built around the simulation.
+
+a. Launching the 'glclient' client instance:
+
+>./glclient -p 9999 -c ../colormaps/rainbow2 -m c 
+(for use with GLcell) OR
+> ./glclient -p 9999 -c ../colormaps/rainbow2 -m v
+(for use with GLview)
+
+b. Starting a MOOSE simulation from a script which includes the
+creation and initialization of the GLcell/GLview element: 
+
+An example script for GLcell is included in the directory DEMOS/gbar/
+in the MOOSE distribution, and is named cMyelin.g.
+
+>cd DEMOS/gbar
+>../../moose cMyelin.g
+
+A version of this example script modified to demonstrate GLview is
+included in the same directory and named vMyelin.g.
+
+>cd DEMOS/gbar
+>../../moose vMyelin.g
+
+
+
+Appendix A (explanation of network flow between GLcell|GLview and
+glclient) :
+---------------------------------------------------------------------
+
+GLcell and GLview are single-threaded whereas glclient runs in two
+separate threads. The first thread is responsible for network
+communication with GLcell|GLview and the second to render graphics,
+process incoming color updates from GLcell|GLview and handle picking
+events invoked by the user which are transmitted back to GLcell|GLview
+via the first thread.
+
+An overview of the flow of network communication in the two modes
+(given by the two states of the 'sync' flag) is provided in the
+figures accompanying this document:
+
+a. When 'sync' is 'on':
+
+Please refer to the sequence diagrams in GLcell_sync_on.png and
+GLview_sync_on.png.
+
+  In this mode, GLcell|GLview will await an acknowledgement message
+from the client after every transmission of updated color data to it,
+before any new color data (if updated) is transmitted on the next
+clock pulse. The client instance in turn will only send this
+acknowledgement after the latest colors have been updated in the
+display. This ensures that the client instance displays every color
+change sent to it during the simulation. This is intended to be useful
+while recording sequential images to be stitched into a movie of the
+simulation.
+
+b. When 'sync' is 'off':
+
+Please refer to the sequence diagram in GLcell_sync_off.png and
+GLview_sync_off.png.
+
+  In this mode, the client instance will always display the last set
+of colors transmitted to it by GLcell|GLview. Intermediate frames may
+be skipped. The simulation in this mode will proceed faster than when
+'sync' is 'on'.
