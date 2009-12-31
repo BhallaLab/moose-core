@@ -22,6 +22,8 @@ class NeuromlReader
 	public:
 		NeuromlReader() {;}
 		~NeuromlReader() {;}
+		static int targets( Eref object, const string& msg,vector< Eref >& target,const string& type = "" );
+		static bool isType( Eref object, const string& type );
 		void  readModel(std::string filename,Id location);
 		void pushtoVector(vector< double >&result,string expr_form,double r,double s,double m);
 		double calcSurfaceArea(double length,double diameter);
@@ -38,14 +40,10 @@ class NeuromlReader
 		Element* synchannel_;
 		Element* leak_;
 		Element* ionPool_;
-		static const double PI ;
+		static const double PI;
 		map< string,Id > segMap_;
+		map< string,string > NMsegMap_;
 		NCell* ncl_;
-			
-		
-		
-		
-
 };
 extern const Cinfo* initCompartmentCinfo();
 extern const Cinfo* initHHChannelCinfo();
@@ -54,5 +52,6 @@ extern const Cinfo* initInterpolCinfo();
 extern const Cinfo* initLeakageCinfo();
 extern const Cinfo* initSynChanCinfo();
 extern const Cinfo* initCaConcCinfo();
+extern const Cinfo* initInterpolCinfo();
 #endif // _NEUROMLREADER_H
 
