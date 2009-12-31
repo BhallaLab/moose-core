@@ -47,6 +47,7 @@ void NeuromlReader::readModel( string filename,Id location )
    loc = locE->id();
    map< string,vector<string> > groupcableMap; 
    map< string,Id > cabMap;	
+   map< string,string >NMcabMap;
    for( unsigned int cb = 1; cb <= num_cables; cb++ )
    {
 	const NCable * cab;
@@ -55,7 +56,8 @@ void NeuromlReader::readModel( string filename,Id location )
 	cid = cab->getId();
 	cname = cab->getName(); 
 	name = cname + "_" + cid;
-	cout << "id " << cid << " cname " << cname << "name " << name << endl;
+	NMcabMap[cid] = name; //Neuroml Moose Map
+	//cout << "id " << cid << " cname " << cname << "name " << name << endl;
 	cable_ = Neutral::create( "Cable",name,loc,Id::scratchId() ); 
 	cabMap[name] = cable_->id();
 	::set< string >( cable_,nameFinfo,name );
@@ -71,28 +73,33 @@ void NeuromlReader::readModel( string filename,Id location )
 		
 	const Segment * seg ;
 	seg =ncl_->getSegment(i);
-	std::string id = "", sname = "", cable = "", parent = "", name = ""; 
+	std::string id = "", sname = "", cable = "", sparent = "", name = "", parent =""; 
 	id = seg->getId();
 	sname = seg->getName();   
 	cable = seg->getCable();
-	parent = seg->getParent();
+	sparent = seg->getParent();
+	if (sparent != "")
+	    parent = NMsegMap_[sparent];
 	name = sname + "_" + id ;
-	cout << "id " << id << " sname " << sname << "name " << name << " cable " << cable << endl; 
+	NMsegMap_[id] = name; //Neuroml Moose Map
+	string mooseCable = NMcabMap[cable];
+	//cout << "id " << id << "name " << name << " parent " << parent << endl; 
 	compt_ = Neutral::create( "Compartment",name,location,Id::scratchId() );
 	segMap_[name] = compt_->id(); 
 	if (parent != "")
 		Eref(compt_).add("raxial",segMap_[parent](),"axial",ConnTainer::Default ); 
-	Eref(cabMap[cable]()).add("compartment",Eref(compt_),"cable",ConnTainer::Default ); 
-	cablesegMap[cable].push_back(name);
+	Eref(cabMap[mooseCable]()).add("compartment",Eref(compt_),"cable",ConnTainer::Default ); 
+	cablesegMap[mooseCable].push_back(name);
 	bool proxm = seg->isSetProximal();
         /* if proximal is not given then proximal is the  distal of parent compt */
 	if ( proxm ){
 		x = seg->proximal.getX();
 		y = seg->proximal.getY();
 		z = seg->proximal.getZ();
-		x *= 1e-4;
-		y *= 1e-4;
-		z *= 1e-4;
+		x *= 1e-6;
+		y *= 1e-6;
+		z *= 1e-6;
+		
 	}
 	else {
 		get< double >( segMap_[parent].eref(), "x",x );
@@ -102,14 +109,18 @@ void NeuromlReader::readModel( string filename,Id location )
 	x1 = seg->distal.getX();
 	y1 = seg->distal.getY();
 	z1 = seg->distal.getZ();
-	x1 *= 1e-4;
-	y1 *= 1e-4;
-	z1 *= 1e-4;
+	x1 *= 1e-6;
+	y1 *= 1e-6;
+	z1 *= 1e-6;
+	
 	length = sqrt(pow((x1-x),2) + pow((y1-y),2) + pow((z1-z),2));
-	diam1 = seg->proximal.getDiameter();
+	if ( proxm )
+		diam1 = seg->proximal.getDiameter();
+	else 
+		diam1 = seg->distal.getDiameter();
 	diam2 = seg->distal.getDiameter();
 	diameter = (diam1 + diam2 )/2;
-	diameter *= 1e-4; //physiological unit
+	diameter *= 1e-6; //physiological unit
 	//length *= 1e-6;//si
 	//diameter *= 1e-6;//si
 	::set< double >( compt_, x0Finfo, x );
@@ -134,9 +145,10 @@ void NeuromlReader::readModel( string filename,Id location )
         //set< double >( compt_, initVmFinfo, initVm/1000);//si unit 
 	
     }
-   setupPools(groupcableMap,cablesegMap);
+   
    setupChannels(groupcableMap,cablesegMap);
-   setupSynChannels(groupcableMap,cablesegMap);
+   setupPools(groupcableMap,cablesegMap);
+ // setupSynChannels(groupcableMap,cablesegMap);
   
 }
 double NeuromlReader::calcSurfaceArea(double length,double diameter)
@@ -171,34 +183,91 @@ void NeuromlReader::setupPools(map< string,vector<string> > &groupcableMap,map< 
 	if ( num_pools != 0 ) {  		
 	map< string,vector<string> >::iterator cmap_iter;
     	map< string,vector<string> >::iterator smap_iter; 
-    	for( unsigned int i = 1; i <= num_pools; i++ )
+	vector< string > pool_vec;
+	pool_vec.clear();
+	vector< string >::iterator it;
+	for( unsigned int i = 0; i < num_pools; i++ )
     	{
     		IonPool* pool;
-		pool =ncl_->getPool( i );
+		pool = ncl_->getPool( i );
+		Id loc( "/library" );
+		string name = pool->getName();
+		//cout << "Pool is : "<< name << endl;
+		it = find(pool_vec.begin(), pool_vec.end(), name);
+                if( it == pool_vec.end() ){
+		    pool_vec.push_back(name);
+		    ionPool_ = Neutral::create( "CaConc",name,loc,Id::scratchId() );
+		}
+	}
+
+    	for( unsigned int i = 0; i < num_pools; i++ )
+    	{
+    		IonPool* pool;
+		pool = ncl_->getPool( i );
 		string name = "", group = "",scaling;
 		double Ca_base, tau, B, thick;
-		Id loc( "/library" );
+		//Id loc( "/library" );
 		name = pool->getName();
 		cout << "Pool is : "<< name << endl;
-		string path;
-		ionPool_ = Neutral::create( "CaConc",name,loc,Id::scratchId() );
-		path = Eref(ionPool_).id().path();
+		string path = "/library/"+name;
+		Id poolId(path);
+		
+		
+		//ionPool_ = Neutral::create( "CaConc",name,loc,Id::scratchId() );
+		//path = Eref(ionPool_).id().path();
 		Ca_base = pool->getResting_conc();
 		tau = pool->getDecay_constant();
 		thick = pool->getShell_thickness();
 		scaling = pool->getScaling();	
 		double B_ = pool->getB();
-		::set< double >( ionPool_, Ca_baseFinfo, Ca_base );
-		::set< double >( ionPool_, tauFinfo, tau );
-		::set< double >( ionPool_, thickFinfo, thick );
+		::set< double >( Eref(poolId()), Ca_baseFinfo, Ca_base );
+		::set< double >( Eref(poolId()), tauFinfo, tau );
+		::set< double >( Eref(poolId()), thickFinfo, thick );
 		std::vector< std::string > groups;
 		groups = pool->getGroups();
+		std::vector< std::string > segs;
+		segs = pool->getSegGroups();
+		vector< Eref > channels;
+		for(unsigned int i = 0; i < segs.size(); i++ )
+		{
+			string segName = NMsegMap_[segs[i]];
+			Id comptEl = segMap_[segName];
+			double len,dia;
+			get< double >( comptEl.eref(), "length",len );
+			get< double >( comptEl.eref(), "diameter",dia );
+			double V = calcVolume( len,dia );
+			//cout << "volume : " << V << "  of  " << comptEl()->name()<< endl;
+			if( scaling == "off" )
+				B = B_;
+			else if( scaling == "shell" ){
+				if ( thick <= 0 )
+				    B = B_ / V ; //use compt vol or use absolute value
+				else B = B_ / thick;
+			}
+			else if( scaling == "volume" )
+				B = B_ / V;
+			::set< double >( Eref(poolId()), BFinfo, B );
+		 	Element* copyEl = Eref(poolId())->copy(comptEl(),ionPool_->name());
+			//cout << comptEl()->name() << " " << tau << " " << B << " " << Ca_base << endl;
+			channels.clear();
+			targets( comptEl(),"channel",channels );
+			unsigned int numchls = channels.size();
+			for ( unsigned int i=0; i<numchls; i++ ){
+				string name = channels[ i ].name();
+				if ( name == "CaConductance" )
+				    channels[ i ].add("IkSrc",Eref(copyEl),"current",ConnTainer::Default ); 
+				int use_conc;
+				get< int >( channels[ i ], "useConcentration", use_conc );
+				if( use_conc == 1 )
+					Eref(copyEl).add("concSrc",channels[ i ],"concen",ConnTainer::Default ); 
+			}
+		  }
 		vector< string > cId ;
 		vector< string > sId;
 		std::set< string > cableId;
 		for(unsigned int gr = 0; gr < groups.size(); gr ++ )
 		{
-			cout << "groups in vector : " << groups[gr] << endl;			
+			//cout << "groups in vector : " << groups[gr] << endl;			
 			cmap_iter = groupcableMap.find( groups[gr] );
 			if ( cmap_iter != groupcableMap.end() ){
 			   cId = cmap_iter->second;
@@ -219,7 +288,7 @@ void NeuromlReader::setupPools(map< string,vector<string> > &groupcableMap,map< 
 			get< double >( comptEl.eref(), "length",len );
 			get< double >( comptEl.eref(), "diameter",dia );
 			double V = calcVolume( len,dia );
-			cout << "volume : " << V << "  of  " << comptEl()->name()<< endl;
+			//cout << "volume : " << V << "  of  " << comptEl()->name()<< endl;
 			if( scaling == "off" )
 				B = B_;
 			else if( scaling == "shell" ){
@@ -229,9 +298,20 @@ void NeuromlReader::setupPools(map< string,vector<string> > &groupcableMap,map< 
 			}
 			else if( scaling == "volume" )
 				B = B_ / V;
-			::set< double >( ionPool_, BFinfo, B );
-		 	Element* copyEl = ionPool_->copy(comptEl(),ionPool_->name());
-			//Eref(comptEl()).add("channel",copyEl,"channel",ConnTainer::Default ); 
+			::set< double >( Eref(poolId()), BFinfo, B );
+		 	Element* copyEl = Eref(poolId())->copy(comptEl(),ionPool_->name());
+			channels.clear();
+			targets( comptEl(),"channel",channels );
+			unsigned int numchls = channels.size();
+			for ( unsigned int i=0; i<numchls; i++ ){
+				string name = channels[ i ].name();
+				if ( name == "CaConductance" )
+				    channels[ i ].add("IkSrc",Eref(copyEl),"current",ConnTainer::Default ); 
+				int use_conc;
+				get< int >( channels[ i ], "useConcentration", use_conc );
+				if( use_conc == 1 )
+					Eref(copyEl).add("concSrc",channels[ i ],"concen",ConnTainer::Default ); 
+			}
 		    }
            	}
 	 
@@ -251,28 +331,74 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
 	static const Finfo* xpowerFinfo = channelCinfo->findFinfo( "Xpower" );
 	static const Finfo* ypowerFinfo = channelCinfo->findFinfo( "Ypower" );
 	static const Finfo* zpowerFinfo = channelCinfo->findFinfo( "Zpower" );
+	static const Finfo* useConcFinfo = channelCinfo->findFinfo( "useConcentration" );
 	static const Cinfo* gateCinfo = initHHGateCinfo();
 	static const Cinfo* leakCinfo = initLeakageCinfo();
 	static const Finfo* leakekFinfo = leakCinfo->findFinfo( "Ek" );
 	static const Finfo* setupAlphaFinfo = gateCinfo->findFinfo( "setupAlpha" );
-	unsigned int num_channels = ncl_->getNumChannels();
+	static const Cinfo* interpolCinfo = initInterpolCinfo();
+	static const Finfo* tableVectorFinfo = interpolCinfo->findFinfo( "tableVector" );
+	unsigned int num_channels = 0;
+	num_channels = ncl_->getNumChannels();
 	if ( num_channels != 0 ) {  		
 	map< string,vector<string> >::iterator cmap_iter;
     	map< string,vector<string> >::iterator smap_iter; 
-    	for(unsigned int ch = 1; ch <= num_channels; ch++ )
+	vector< string > channel_vec;
+	channel_vec.clear();
+	vector< string >::iterator it;
+	for(unsigned int ch = 0; ch < num_channels; ch++ )
+	{
+		Channel * chl ;	        
+		chl = ncl_->getChannel( ch );
+		double ek,gmax;
+		Id loc( "/library" );
+		string name = chl->getName();
+		//cout << "channel is : "<< name << endl;
+		// iterator to vector element:
+  	        it = find(channel_vec.begin(), channel_vec.end(), name);
+                if( it == channel_vec.end() ){
+		    channel_vec.push_back(name);
+		    //bool is2DChannel = chl->isSetConc_dependence();
+		    bool is2DChannel  = false;
+		    bool passive = chl->getPassivecond();
+		    ek = chl->getDefault_erev();
+		    gmax = chl->getDefault_gmax();
+		    //string path;
+		    //bool use_conc = false;
+		    if ( passive ){
+			leak_ = Neutral::create( "Leakage",name,loc,Id::scratchId() ); 
+			::set< double >( leak_, leakekFinfo, ek );
+			//path = Eref(leak_).id().path();
+		    }
+		    else if ( is2DChannel ){
+			channel_ = Neutral::create( "HHChannel2D",name,loc,Id::scratchId() );	
+			::set< double >( channel_, ekFinfo, ek );
+			 ::set< double > ( channel_, gbarFinfo, gmax );
+			//path = Eref(channel_).id().path();
+		   }
+		   else{	
+ 	 		channel_ = Neutral::create( "HHChannel",name,loc,Id::scratchId() );
+			::set< double >( channel_, ekFinfo, ek );
+			 ::set< double > ( channel_, gbarFinfo, gmax );
+			//path = Eref(channel_).id().path();
+		   }
+	      }
+        }
+    	for(unsigned int ch = 0; ch < num_channels; ch++ )
     	{
     		Channel * chl ;
 		chl =ncl_->getChannel( ch );
 		string name = "", group = "";
 		double gmax,ek;
-		Id loc( "/library" );
+		//Id loc( "/library" );
 		name = chl->getName();
 		cout << "channel is : "<< name << endl;
-		bool is2DChannel = chl->isSetConc_dependence();
+		string path = "/library/"+name;
+		Id chlId(path);
 		bool passive = chl->getPassivecond();
 		ek = chl->getDefault_erev();
-		string path;
-		if ( passive ){
+		bool use_conc = false;
+		/*if ( passive ){
 			leak_ = Neutral::create( "Leakage",name,loc,Id::scratchId() ); 
 			::set< double >( leak_, leakekFinfo, ek );
 			path = Eref(leak_).id().path();
@@ -286,12 +412,23 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
  	 		channel_ = Neutral::create( "HHChannel",name,loc,Id::scratchId() );
 			::set< double >( channel_, ekFinfo, ek );
 			path = Eref(channel_).id().path();
+		}*/
+		if ( passive )
+			::set< double >( Eref(chlId()), leakekFinfo, ek );
+		else ::set< double >( Eref(chlId()), ekFinfo, ek );
+		if ( !passive ){
+			use_conc = chl->isSetConc_dependence();
+			if( use_conc )
+				::set< int >( Eref(chlId()), useConcFinfo, 1 );	
+			else 
+				::set< int >( Eref(chlId()), useConcFinfo, 0 );		
 		}
 	 	gmax = chl->getGmax();
 	 	//gmax *= 10;//si
 	 	
 	 	double xmin,xmax;
 	 	int xdivs;
+		double min,max;
 	 	string biophysicsunits = ncl_->getBiophysicsUnits();
 		//cout << " unit " << biophysicsunits << endl;
 	 	if ( biophysicsunits == "Physiological Units" ){
@@ -309,65 +446,155 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
 		gatename.push_back("/xGate");
 		gatename.push_back("/yGate");
 		gatename.push_back("/zGate");
+		string gatepath, tablepath;
 		unsigned int  num = chl->getNumGates();
+		if ( num > 3 ) 
+		    	cout << "Error: More than 3 gates is not alllowed" << endl;
+		int counter = 0;
 	 	for( unsigned int i=1;i<=num;i++ )
 	 	{	
-			Gate* gat ;		
+			Gate* gat ;	
+			bool flag = false;	
 			gat = chl->getGate(i);
 			string name = gat->getGateName();
+			//cout << "gate name " << name << endl;
 			double power = gat->getInstances();
-			if ( i == 1 )
-				::set< double >( channel_, xpowerFinfo, power );
-			else if ( i == 2 )
-				::set< double >( channel_, ypowerFinfo, power );
-			else if ( i == 3 )
-				::set< double >( channel_, zpowerFinfo, power );
-			string gatepath = path + gatename[i-1];
+			string x_variable = gat->getX_variable();
+			//cout << "x_variable " << x_variable << endl;
+			if( (x_variable == "concentration") || (use_conc == true && num == 1 ) ) {
+			    if( flag == true )
+				cout << "Error: already encountered Z gate" << endl;
+			    else{
+			        ::set< double >( Eref(chlId()), zpowerFinfo, power );
+			        gatepath = path + gatename[2];
+			        flag = true;
+			    }
+			}
+			string y_variable = gat->getY_variable();
+			if ( flag == false ){
+			   counter++;
+			   if ( counter == 1 )
+			       ::set< double >( Eref(chlId()), xpowerFinfo, power );
+			   else if ( counter == 2 )
+				::set< double >( Eref(chlId()), ypowerFinfo, power );
+			   else if ( counter == 3 )
+				::set< double >( Eref(chlId()), zpowerFinfo, power );
+			   gatepath = path + gatename[counter-1];
+			}
 			//cout << " gate path : " << gatepath << endl;
 		 	Id gateid(gatepath);
 			vector< double > result;
+			vector< double > alphaTable;
+			vector< double > betaTable;
+			vector< double > tableEntry;
 			result.clear();
-			string Aexpr_form = gat->alpha.expr_form;
-			double Arate = gat->alpha.rate;
-			//Arate *= 1000;
-			double Ascale = gat->alpha.scale;
-			//Ascale /= 1000;
-			double Amidpoint = gat->alpha.midpoint;
-			//Amidpoint /= 1000;
-			pushtoVector(result,Aexpr_form,Arate,Ascale,Amidpoint);
+			alphaTable.clear();
+			betaTable.clear();
+			tableEntry.clear();
+			string Aexpr_form = gat->alpha.expr_form; 
+			if( Aexpr_form == "tabulated" ){
+				tablepath = gatepath + "/A";
+				Id tableid(tablepath);
+				min = gat->alpha.xmin;
+				max = gat->alpha.xmax;
+				alphaTable = gat->alpha.tableEntry;
+				::set< double > ( Eref(tableid()),"xmin",min );
+				::set< double > ( Eref(tableid()),"xmax",max );
+				::set< std::vector< double > >( Eref(tableid()),tableVectorFinfo,alphaTable );
+			}
+			else{
+				double Arate = gat->alpha.rate;
+				//Arate *= 1000;
+				double Ascale = gat->alpha.scale;
+				//Ascale /= 1000;
+				double Amidpoint = gat->alpha.midpoint;
+				//Amidpoint /= 1000;
+				pushtoVector(result,Aexpr_form,Arate,Ascale,Amidpoint);
+				
+			}
 			string Bexpr_form = gat->beta.expr_form;
-			double Brate = gat->beta.rate;
-			//Brate *= 1000;
-			double Bscale = gat->beta.scale;
-			//Bscale /= 1000;
-			double Bmidpoint = gat->beta.midpoint;
-			//Bmidpoint /= 1000;
-			pushtoVector(result,Bexpr_form,Brate,Bscale,Bmidpoint);
-			result.push_back(xdivs);
-			result.push_back(xmin);
-			result.push_back(xmax);
-			::set< std::vector< double > >( Eref(gateid()),setupAlphaFinfo,result );
+			if( Bexpr_form == "tabulated" ){
+				tablepath = gatepath + "/B";
+				Id tableid(tablepath);
+				min = gat->beta.xmin;
+				max = gat->beta.xmax;
+				alphaTable = gat->alpha.tableEntry;
+				tableEntry = gat->beta.tableEntry;
+				int asize = alphaTable.size();
+				int bsize = tableEntry.size();
+				//cout << "asize : " << asize << " bsize:  " << bsize << endl; 
+				if ( asize == bsize ){
+				   for(int i = 0; i < asize; i++ )
+					betaTable.push_back(alphaTable[i]+tableEntry[i]);
+				   ::set< double > ( Eref(tableid()),"xmin",min );
+				   ::set< double > ( Eref(tableid()),"xmax",max );
+				   ::set< std::vector< double > >( Eref(tableid()),tableVectorFinfo,betaTable );						
+				   //::set< std::vector< double > >( Eref(tableid()),"tableVector",betaTable );
+				}
+				else cout << "Error: two table values should be of same size " << endl; 
+			}
+			else{
+				double Brate = gat->beta.rate;
+				//Brate *= 1000;
+				double Bscale = gat->beta.scale;
+				//Bscale /= 1000;
+				double Bmidpoint = gat->beta.midpoint;
+				//Bmidpoint /= 1000;
+				pushtoVector(result,Bexpr_form,Brate,Bscale,Bmidpoint);
+				result.push_back(xdivs);
+				result.push_back(xmin);
+				result.push_back(xmax);
+				::set< std::vector< double > >( Eref(gateid()),setupAlphaFinfo,result );
+			}
+			
 	 	}
 		
 		//group = chl->getGroups();
 		std::vector< std::string > groups;
 		groups = chl->getGroups();
-		// cout<< " group: " << group ;
-		vector< string > cId ;
-		vector< string > sId;
-		std::set< string > cableId;
-		for(unsigned int gr = 0; gr < groups.size(); gr ++ )
+		std::vector< std::string > segs;
+		segs = chl->getSegGroups();
+		for(unsigned int i = 0; i < segs.size(); i++ )
 		{
-			cout << "groups in vector : " << groups[gr] << endl;			
+			string segName = NMsegMap_[segs[i]];
+			Id comptEl = segMap_[segName];
+			double len,dia;
+			get< double >( comptEl.eref(), "length",len );
+			get< double >( comptEl.eref(), "diameter",dia );
+			double sa = calcSurfaceArea( len,dia );
+			//cout << "surface area : " << sa << "  of  " << comptEl()->name()<< endl;
+		 	double gbar = gmax * sa;
+		 	
+			if (passive){
+				double Rm = 1/(gmax*sa);
+		   		::set< double >( comptEl(), RmFinfo, Rm );
+				::set< double >( comptEl(), EmFinfo, ek );
+		 	}
+			else{
+				::set< double >( Eref(chlId()), gbarFinfo, gbar );  
+				/*if (chlId()->name() == "K_CConductance"){
+				   cout << comptEl()->name() << " " << gbar << " " << ek << " " << endl;
+				   showmsg chlId()->path() ;
+				}*/
+				Element* copyEl = Eref(chlId())->copy(comptEl(),Eref(chlId())->name());
+				Eref(comptEl()).add("channel",copyEl,"channel",ConnTainer::Default ); 
+			}
+		  }
+		  vector< string > cId ;
+		  vector< string > sId;
+		  std::set< string > cableId;
+		  for(unsigned int gr = 0; gr < groups.size(); gr ++ )
+		  {
+			//cout << "groups in vector : " << groups[gr] << endl;			
 			cmap_iter = groupcableMap.find( groups[gr] );
 			if ( cmap_iter != groupcableMap.end() ){
 			   cId = cmap_iter->second;
 			   cableId.insert( cId.begin(),cId.end() );
 			}
-		}
-		std::set< string >::iterator itr;
-		for( itr = cableId.begin(); itr != cableId.end(); itr++ )
-		{
+		  }
+		  std::set< string >::iterator itr;
+		  for( itr = cableId.begin(); itr != cableId.end(); itr++ )
+		  {
 		    smap_iter = cablesegMap.find( (*itr) );
 		    if ( smap_iter != cablesegMap.end() ){
 			sId = smap_iter->second;
@@ -379,7 +606,7 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
 			get< double >( comptEl.eref(), "length",len );
 			get< double >( comptEl.eref(), "diameter",dia );
 			double sa = calcSurfaceArea( len,dia );
-			cout << "surface area : " << sa << "  of  " << comptEl()->name()<< endl;
+			//cout << "surface area : " << sa << "  of  " << comptEl()->name()<< endl;
 		 	double gbar = gmax * sa;
 		 	
 			if (passive){
@@ -388,14 +615,14 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
 				::set< double >( comptEl(), EmFinfo, ek );
 		 	}
 			else{
-				::set< double >( channel_, gbarFinfo, gbar );  				
-				Element* copyEl = channel_->copy(comptEl(),channel_->name());
+				::set< double >( Eref(chlId()), gbarFinfo, gbar );  
+				
+				Element* copyEl = Eref(chlId())->copy(comptEl(),Eref(chlId())->name());
 				Eref(comptEl()).add("channel",copyEl,"channel",ConnTainer::Default ); 
 			}
            	    }
-	 
-     	        }
-	}  
+	          }
+	  }  
 	}
 }
 
@@ -432,7 +659,7 @@ void NeuromlReader::setupSynChannels(map< string,vector<string> > &groupcableMap
 		std::set< string > cableId;
 		for( unsigned int gr = 0; gr < groups.size(); gr ++ )
 		{
-			cout << "groups in vector : " << groups[gr] << endl;			
+			//cout << "groups in vector : " << groups[gr] << endl;			
 			cmap_iter = groupcableMap.find( groups[gr] );
 			if ( cmap_iter != groupcableMap.end() ){
 			   cId = cmap_iter->second;
@@ -452,7 +679,7 @@ void NeuromlReader::setupSynChannels(map< string,vector<string> > &groupcableMap
 			get< double >( comptEl.eref(), "length",len );
 			get< double >( comptEl.eref(), "diameter",dia );
 			double sa = calcSurfaceArea( len,dia );
-			cout << " len "<< len << " dia " << dia << " sa " << sa << endl; 
+			//cout << " len "<< len << " dia " << dia << " sa " << sa << endl; 
 			double gbar = gmax * sa;
 			::set< double >( synchannel_,synGbarFinfo,gbar );
 			Element* copyEl = synchannel_->copy(comptEl(),synchannel_->name());
@@ -493,7 +720,27 @@ void NeuromlReader::pushtoVector(vector< double > &result,string expr_form,doubl
 	result.push_back(D);
 	result.push_back(F);	
 }
+int NeuromlReader::targets( Eref object,const string& msg,vector< Eref >& target,const string& type )
+{
+	unsigned int oldSize = target.size();
+	Eref found;
+	Conn* i = object->targets( msg, 0 );
+	for ( ; i->good(); i->increment() ) {
+		found = i->target();
+		if ( type != "" && !isType( found, type ) )	// speed this up
+			continue;
+		
+		target.push_back( found );		
+	}
+	delete i;
+	
+	return target.size() - oldSize;
+}
 
+bool NeuromlReader::isType( Eref object, const string& type )
+{
+	return object->cinfo()->isA( Cinfo::find( type ) );
+}
 
 
   
