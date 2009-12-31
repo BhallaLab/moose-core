@@ -18,6 +18,7 @@ class ThreadInfo
 		double runtime;
 		unsigned int threadId;
 		pthread_mutex_t* sortMutex;
+		pthread_mutex_t* advanceMutex;
 };
 
 class Clock: public Data

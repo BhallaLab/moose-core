@@ -2537,7 +2537,14 @@ Analyzing sequence
 	nextTime_ field not really advancing, and hence a dummy attempt to
 	get TickPtr to advance. Need to check. Confirmed. Turns out it happens
 	even with the single-thread scheduling. Inefficient but the end 
-	sequence is still OK. Let's fix.
+	sequence is still OK. Let's fix. After analysis, looks OK.
+4. Does too many steps as reported in "Advance at <time> on thread <t>"
+5. Can we eliminate the second barrier on TickPtr::advance?
+	- It is safe to assign nextTime_ when the first thread emerges, since
+		all threads will have crossed the only reading of nextTime_.
+	- When the first thread emerges, it should be safe to sort the 
+		TickPtrs. Probably should use separate mutex.
+
 	
 There is a nastier problem with the threading case, in TickPtr::advance.
 The issue is that I use thread 0 to advance nextTime. If thread 1
@@ -2549,3 +2556,23 @@ Brute force implementation using a barrier works. But there is still oddness
 in the sequencing of 'Advance'. Checked in as 1506.
 
 Some cleanup by way of eliminating barriers in TickPtr::advance. More to go.
+Checked in as 1507.
+
+Figured out why the "Advance at <time> on thread <thread>"
+sometimes does an extra round for one thread or another. The cout is
+called after the function emerges from TickPtr::advance. If the second
+thread to emerge does so after the first thread has done the sortTickPtrs,
+then nextTime_ will already have been incremented. So the second
+emerger reports a different time. No functional impact.
+Item 4 above has the same issue, and can also be ignored.
+
+
+Next steps:
+- Implement item 5.
+- Move barrier into Tick.
+- Set up real calculation, check values
+- Benchmark
+- Implement condition_wait instead of barrier.
+- Benchmark with condition_wait instead of barrier.
+
+=============================================================================

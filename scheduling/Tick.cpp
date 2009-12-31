@@ -217,6 +217,11 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 	// Presumably we should at least take an offset from the predefined
 	// Slots like children.
 	const Conn* c = e->conn( index_ );
+	if ( info->barrier ) {
+		int rc = pthread_barrier_wait(
+			reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
+		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+	}
 	Qinfo::clearQ( info->threadId );
 	c->process( info );
 }

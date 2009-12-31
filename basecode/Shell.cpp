@@ -175,6 +175,8 @@ void Shell::start( double runtime )
 	vector< ThreadInfo > ti( numCores_ );
 	pthread_mutex_t sortMutex;
 	pthread_mutex_init( &sortMutex, NULL );
+	pthread_mutex_t advanceMutex;
+	pthread_mutex_init( &advanceMutex, NULL );
 
 	Qinfo q;
 	for ( unsigned int i = 0; i < numCores_; ++i ) {
@@ -183,6 +185,7 @@ void Shell::start( double runtime )
 		ti[i].runtime = runtime;
 		ti[i].threadId = i;
 		ti[i].sortMutex = &sortMutex;
+		ti[i].advanceMutex = &advanceMutex;
 	}
 	if ( isSingleThreaded_ ) {
 		Clock::threadStartFunc( &ti[0] );
