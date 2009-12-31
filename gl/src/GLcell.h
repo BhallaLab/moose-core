@@ -122,7 +122,11 @@ class GLcell
 	
 	// testing functions
 	void testInsertVecSmoldynShapeData( void );
+	void testShape1( void );
+	void testShape2( void );
 	void testInsertVecParticleData( void );
+	void testParticle1( void );
+	void testParticle2( void );
   
 
 #ifdef WIN32
