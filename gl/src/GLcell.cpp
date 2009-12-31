@@ -1021,7 +1021,7 @@ void GLcell::disconnect()
 #endif
 }
 
-void GLcell::testInsertVecParticleData( )
+void GLcell::testParticle1( )
 {
 	ParticleData p;
 	p.color[0] = 1.0;
@@ -1056,7 +1056,34 @@ void GLcell::testInsertVecParticleData( )
 	vecParticleData_.push_back( p1 );
 }
 
-void GLcell::testInsertVecSmoldynShapeData( )
+void GLcell::testParticle2( )
+{
+	ParticleData p;
+	p.color[0] = 1.0;
+	p.color[1] = 0.0;
+	p.color[2] = 0.0;
+	p.diameter = 1.0;
+	for ( unsigned int i = 0; i < 100; i++ )
+	{
+		testTicker_++;
+		p.vecCoords.push_back( 0.0 );
+		p.vecCoords.push_back( 0.0 );
+		p.vecCoords.push_back( 10.0 );
+	}
+
+	vecParticleData_.push_back( p );
+}
+
+void GLcell::testInsertVecParticleData( )
+{
+	//~ testParticle1( );
+	testParticle2( );
+}
+
+/*
+ * Demonstrates different Smoldyn shapes.
+ */
+void GLcell::testShape1( )
 {
 	SmoldynShapeData s1, s2, s3, s4, s5, s6;
 
@@ -1115,6 +1142,55 @@ void GLcell::testInsertVecSmoldynShapeData( )
 	vecSmoldynShapeData_.push_back( s4 );
 	vecSmoldynShapeData_.push_back( s5 );
 	vecSmoldynShapeData_.push_back( s6 );
+}
+
+/*
+ * Draws a capsule using hemispheres and a cylinder.
+ */
+void GLcell::testShape2( )
+{
+	SmoldynShapeData s1, s2, s3;
+
+	s1.color[0] = 0.6; s1.color[1] = 0.7; s1.color[2] = 0.8; s1.color[3] = 0.3;
+	s2.color[0] = 0.6; s2.color[1] = 0.7; s2.color[2] = 0.8; s2.color[3] = 0.3;
+	s3.color[0] = 0.6; s3.color[1] = 0.7; s3.color[2] = 0.8; s3.color[3] = 0.3;
+	
+	GLCompartmentCylinderData d1;
+	d1.endPoint1[0] = 0; d1.endPoint1[1] = 0; d1.endPoint1[2] = 0;
+	d1.endPoint2[0] = 10; d1.endPoint2[1] = 0; d1.endPoint2[2] = 0;
+	d1.radius = 4;
+	s1.data = d1;
+	s1.name = "Cylinder";
+	
+	GLCompartmentHemiData d2;
+	d2.centre[0] = 0; d2.centre[1] = 0; d2.centre[2] = 0;
+	d2.orientation[0] = -1; d2.orientation[1] = 0; d2.orientation[2] = 0;
+	d2.radius = 4;
+	s2.data = d2;
+	// s2.name = "Hemi";
+	
+	/*
+	 * If the centre is specified to be ( x, y, z )the hemisphere seems to be
+	 * centered at ( z, y, x ).
+	 * 
+	 * So, giving ( 0, 0, 10 ) when the intended location is ( 10, 0, 0 ).
+	 */
+	GLCompartmentHemiData d3;
+	d3.centre[0] = 0; d3.centre[1] = 0; d3.centre[2] = 10;
+	d3.orientation[0] = 1; d3.orientation[1] = 0; d3.orientation[2] = 0;
+	d3.radius = 4;
+	s3.data = d3;
+	// s3.name = "Hemi";
+	
+	vecSmoldynShapeData_.push_back( s1 );
+	vecSmoldynShapeData_.push_back( s2 );
+	vecSmoldynShapeData_.push_back( s3 );
+}
+
+void GLcell::testInsertVecSmoldynShapeData( )
+{
+	//~ testShape1( );
+	testShape2( );
 }
 
 #ifdef WIN32
