@@ -347,8 +347,7 @@ void Clock::sortTickPtrs( pthread_mutex_t* sortMutex )
 		if ( numPendingThreads_ >= numThreads_ )
 			numPendingThreads_ = 0;
 	pthread_mutex_unlock( sortMutex );
-	cout << "Clock::sortTickPtrs: numPending = " << numPendingThreads_ <<
-		", nextTime_ = " << nextTime_ << endl;
+	// cout << "Clock::sortTickPtrs: numPending = " << numPendingThreads_ << ", nextTime_ = " << nextTime_ << endl;
 }
 
 // This version uses sortTickPtrs rather than a bunch of barriers.
@@ -381,7 +380,7 @@ void Clock::tStart(  Eref e, const ThreadInfo* ti )
 		// This advances all ticks with this dt in order, till nextTime.
 		// It has a barrier within: essential for the sortTickPtrs to work.
 		tp0_->advance( ticke, &info, nextTime_ * ROUNDING );
-		cout << "Advance at " << nextTime_ << " on thread " << ti->threadId << endl;
+		// cout << "Advance at " << nextTime_ << " on thread " << ti->threadId << endl;
 		sortTickPtrs( ti->sortMutex ); // Sets up nextTime_ and tp0_.
 	}
 	isRunning_ = 0;

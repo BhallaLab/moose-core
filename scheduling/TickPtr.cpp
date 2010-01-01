@@ -89,8 +89,7 @@ void TickPtr::advance( Element* e, ProcInfo* p, double endTime ) {
 void TickPtr::advance( Element* e, ProcInfo* p, double endTime )
 {
 	double nt = nextTime_; // use an independent timer for each thread.
-	cout << "TickPtr::advance: nextTime_ = " << nextTime_ <<
-		", endTime = " << endTime << ", thread = " << p->threadId << endl;
+	// cout << "TickPtr::advance: nextTime_ = " << nextTime_ << ", endTime = " << endTime << ", thread = " << p->threadId << endl;
 	while ( nt < endTime ) {
 		p->currTime = nt;
 		nt += dt_;
@@ -98,16 +97,7 @@ void TickPtr::advance( Element* e, ProcInfo* p, double endTime )
 		for ( vector< const Tick* >::iterator i = ticks_.begin(); 
 			i != ticks_.end(); ++i )
 		{
-			/*
-			if ( p->barrier ) {
-				// cout << "TickPtr::advance: pre barrier at time = " << nt << " on thread " << p->threadId << endl;
-				int rc = pthread_barrier_wait( 
-					reinterpret_cast< pthread_barrier_t* >( p->barrier ) );
-				// cout << "TickPtr::advance: post barrier on thread " << p->threadId << endl;
-				assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
-			}
-			*/
-			(*i)->advance( e, p ); // This needs a barrier call.
+			(*i)->advance( e, p ); // This calls barrier just before clearQ.
 		}
 	}
 	if ( p->threadId == 0 ) {
