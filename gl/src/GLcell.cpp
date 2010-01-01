@@ -509,7 +509,7 @@ void GLcell::reinitFuncLocal( const Conn* c )
 		transmit( geometryData, RESET );
 
 
-	// testInsertVecSmoldynShapeData();
+	testInsertVecSmoldynShapeData();
 }
 
 
@@ -1169,14 +1169,8 @@ void GLcell::testShape2( )
 	s2.data = d2;
 	// s2.name = "Hemi";
 	
-	/*
-	 * If the centre is specified to be ( x, y, z )the hemisphere seems to be
-	 * centered at ( z, y, x ).
-	 * 
-	 * So, giving ( 0, 0, 10 ) when the intended location is ( 10, 0, 0 ).
-	 */
 	GLCompartmentHemiData d3;
-	d3.centre[0] = 0; d3.centre[1] = 0; d3.centre[2] = 10;
+	d3.centre[0] = 10; d3.centre[1] = 0; d3.centre[2] = 0;
 	d3.orientation[0] = 1; d3.orientation[1] = 0; d3.orientation[2] = 0;
 	d3.radius = 4;
 	s3.data = d3;
