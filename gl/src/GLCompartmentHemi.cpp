@@ -85,33 +85,40 @@ void GLCompartmentHemi::constructGeometry()
 	osg::Quat quatRotation( acos( initial * orientation_ ), axis );
 
 	// add vertex at tip first
-	vertices_->push_back( quatRotation * osg::Vec3( centre_[0],
-							centre_[1],
-							centre_[2] + radius_ ) );
+	vertices_->push_back( rotateTranslatePoint( osg::Vec3( 0, 0, radius_ ),
+						    quatRotation,
+						    centre_ ) );
 	
 	for ( unsigned int i = 0; i < angles.size()-1; ++i)
 	{
 		osg::DrawElementsUInt* faces = new osg::DrawElementsUInt(osg::PrimitiveSet::QUADS, 0);
 
-		vertices_->push_back( quatRotation * osg::Vec3( centre_[0] + radius_ * cos( angles[i] ),
-								centre_[1] + radius_ * sin( angles[i] ),
-								centre_[2] ) );
-		vertices_->push_back( quatRotation * osg::Vec3( centre_[0] + radius_ * cos( angles[i+1] ),
-								centre_[1] + radius_ * sin( angles[i+1] ),
-								centre_[2] ) );
-
+		vertices_->push_back( rotateTranslatePoint( osg::Vec3( radius_ * cos( angles[i] ),
+								       radius_ * sin( angles[i] ),
+								       0 ),
+							    quatRotation,
+							    centre_ ) );
+		vertices_->push_back( rotateTranslatePoint( osg::Vec3( radius_ * cos( angles[i+1] ),
+								       radius_ * sin( angles[i+1] ),
+								       0 ),
+							    quatRotation,
+							    centre_ ) );
 		unsigned int j;
 		for ( j = 1; j <= 9; ++j )
 		{
 	  
 			faces = new osg::DrawElementsUInt( osg::PrimitiveSet::QUADS, 0 );
 
-			vertices_->push_back( quatRotation * osg::Vec3( centre_[0] + radius_ * sin( acos(j*0.1) ) * cos( angles[i] ),
-									centre_[1] + radius_ * sin( acos(j*0.1) ) * sin( angles[i] ),
-									centre_[2] + ( (j*0.1) * radius_ ) ) );
-			vertices_->push_back( quatRotation * osg::Vec3( centre_[0] + radius_ * sin( acos(j*0.1) ) * cos( angles[i+1] ),
-									centre_[1] + radius_ * sin( acos(j*0.1) ) * sin( angles[i+1] ),
-									centre_[2] + ( (j*0.1) * radius_ ) ) );
+			vertices_->push_back( rotateTranslatePoint( osg::Vec3( radius_ * sin( acos(j*0.1) ) * cos( angles[i] ),
+									       radius_ * sin( acos(j*0.1) ) * sin( angles[i] ),
+									       ( (j*0.1) * radius_ ) ),
+								    quatRotation,
+								    centre_ ) );
+			vertices_->push_back( rotateTranslatePoint( osg::Vec3( radius_ * sin( acos(j*0.1) ) * cos( angles[i+1] ),
+									       radius_ * sin( acos(j*0.1) ) * sin( angles[i+1] ),
+									       ( (j*0.1) * radius_ ) ),
+								    quatRotation,
+								    centre_ ) );
 
 			faces->push_back( 1 + i*20 + 1 + 2*(j-1) ); // 20 == 2 + 9*2 ; vertices on middle ring + two vertices per face added
 			faces->push_back( 1 + i*20 + 0 + 2*(j-1) );
@@ -123,7 +130,7 @@ void GLCompartmentHemi::constructGeometry()
 			osg::Vec3 normal = makeNormal( ( *vertices_ )[1 + i*20 + 1 + 2*(j-1)],
 						       ( *vertices_ )[1 + i*20 + 0 + 2*(j-1)],
 						       ( *vertices_ )[1 + i*20 + 2 + 2*(j-1)] );
-			normals_->push_back(osg::Vec3( normal[0] * -1,
+			normals_->push_back( osg::Vec3( normal[0] * -1,
 						       normal[1] * -1,
 						       normal[2] * -1 ) );
 	
