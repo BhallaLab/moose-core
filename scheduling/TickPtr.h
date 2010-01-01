@@ -33,7 +33,8 @@ class TickPtr {
 		 * Advance the simulation till the specified end time, without
 		 * worrying about other dts.
 		 */
-		void advance( Element* e, ProcInfo* p, double endTime );
+		void advance( Element* e, ProcInfo* p, double endTime,
+			pthread_mutex_t* timeMutex );
 
 		double getNextTime() const;
 
@@ -46,7 +47,8 @@ class TickPtr {
 		// Tick* ptr_;
 		// const TickPtr* next_;
 		double dt_;
-		double nextTime_;
+		double nextTime_; // Upcoming time
+		unsigned int numTimerThread_; // Counter to sync updates on nextTime
 		vector< const Tick* > ticks_;	// Pointer to each Tick.
 		vector< unsigned int > index_; // Index of each Tick.
 		static double EPSILON;

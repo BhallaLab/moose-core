@@ -2570,7 +2570,7 @@ Item 4 above has the same issue, and can also be ignored.
 Next steps:
 - Implement item 5.
 * Move barrier into Tick.
-- Implement thread sched test as unit test.
+* Implement thread sched test as unit test.
 - Set up real calculation, check values
 - Benchmark
 - Implement condition_wait instead of barrier.
@@ -2580,4 +2580,13 @@ Next steps:
 31 Dec 2009.
 Moved barrier into Tick. Compiles, seems to work. Need to convert the printf
 debugging of the threaded scheduling into a unit test.
+=============================================================================
+1 Jan 2010
+Some cleanup of printf debugging. Checked in as 1515. 
+I want to try to eliminate the remaining 'barrier' call in TickPtr::advance,
+and replace it with a simple mutex. This did not work. I need to come back to 
+it.
+
+Implemented thread sched test as a unit test.
+
 =============================================================================

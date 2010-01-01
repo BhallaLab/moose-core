@@ -24,11 +24,12 @@ static bool tickPtrCmp ( const Tick* i, const Tick* j)
 }
 
 TickPtr::TickPtr()
-	: dt_( 1.0 ), nextTime_( 1.0 ) // assumes zero size of ticks_
+	: dt_( 1.0 ), nextTime_( 1.0 ), numTimerThread_( 0 )
+	// assumes zero size of ticks_ vector
 {;}
 		
 TickPtr::TickPtr( Tick* ptr )
-	: dt_( ptr->getDt() ), nextTime_( ptr->getDt() )
+	: dt_( ptr->getDt() ), nextTime_( ptr->getDt() ), numTimerThread_( 0 )
 {
 	ticks_.push_back( ptr );
 }
@@ -83,10 +84,10 @@ void TickPtr::advance( Element* e, ProcInfo* p, double endTime ) {
 }
 */
 
-// procInfo is shared, need to ensure it is updated before doing 'advance'.
-// OK if clearQ has a barrier on entry.
-// 
-void TickPtr::advance( Element* e, ProcInfo* p, double endTime )
+// procInfo is independent for each thread, need to ensure it is updated
+// before doing 'advance'.
+void TickPtr::advance( Element* e, ProcInfo* p, double endTime, 
+	pthread_mutex_t* timeMutex )
 {
 	double nt = nextTime_; // use an independent timer for each thread.
 	// cout << "TickPtr::advance: nextTime_ = " << nextTime_ << ", endTime = " << endTime << ", thread = " << p->threadId << endl;
@@ -100,6 +101,24 @@ void TickPtr::advance( Element* e, ProcInfo* p, double endTime )
 			(*i)->advance( e, p ); // This calls barrier just before clearQ.
 		}
 	}
+	// Relies on barriers in Tick::advance, to ensure that we can advance
+	// nextTime_ as soon as the first thread gets through to here.
+	// Currently this hangs.
+	/*
+	if ( timeMutex ) {
+		pthread_mutex_lock( timeMutex );
+		numTimerThread_++;
+		if ( numTimerThread_ == 1 ) { // First thread advances nextTime_
+			nextTime_ = nt;
+		} else if ( numTimerThread_ >= p->numThreads ) {
+			numTimerThread_ = 0;
+		}
+		pthread_mutex_unlock( timeMutex );
+	} else {
+		nextTime_ = nt;
+	}
+	*/
+
 	if ( p->threadId == 0 ) {
 		nextTime_ = nt;
 	}
@@ -108,6 +127,8 @@ void TickPtr::advance( Element* e, ProcInfo* p, double endTime )
 			reinterpret_cast< pthread_barrier_t* >( p->barrier ) );
 		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 	}
+	/*
+	*/
 }
 
 double TickPtr::getNextTime() const
@@ -118,6 +139,7 @@ double TickPtr::getNextTime() const
 void TickPtr::reinit( Eref e )
 {
 	nextTime_ = dt_;
+	numTimerThread_ = 0;
 	for ( vector< const Tick* >::iterator i = ticks_.begin(); 
 		i != ticks_.end(); ++i )
 	{

@@ -175,8 +175,8 @@ void Shell::start( double runtime )
 	vector< ThreadInfo > ti( numCores_ );
 	pthread_mutex_t sortMutex;
 	pthread_mutex_init( &sortMutex, NULL );
-	pthread_mutex_t advanceMutex;
-	pthread_mutex_init( &advanceMutex, NULL );
+	pthread_mutex_t timeMutex;
+	pthread_mutex_init( &timeMutex, NULL );
 
 	Qinfo q;
 	for ( unsigned int i = 0; i < numCores_; ++i ) {
@@ -185,7 +185,7 @@ void Shell::start( double runtime )
 		ti[i].runtime = runtime;
 		ti[i].threadId = i;
 		ti[i].sortMutex = &sortMutex;
-		ti[i].advanceMutex = &advanceMutex;
+		ti[i].timeMutex = &timeMutex;
 	}
 	if ( isSingleThreaded_ ) {
 		Clock::threadStartFunc( &ti[0] );
@@ -226,10 +226,13 @@ void Shell::start( double runtime )
 				exit( -1 );
 			}
 		}
-		cout << "Shell::start: Threads joined successfully\n";
+		// cout << "Shell::start: Threads joined successfully\n";
+		// cout << "Completed time " << runtime << " on " << numCores_ << " threads\n";
 
 		delete[] threads;
 	}
+	pthread_mutex_destroy( &sortMutex );
+	pthread_mutex_destroy( &timeMutex );
 }
 
 void Shell::setclock( unsigned int tickNum, double dt, unsigned int stage )

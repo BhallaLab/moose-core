@@ -290,6 +290,7 @@ unsigned int Clock::getNumThreads() const
 void Clock::setNumThreads( unsigned int num )
 {
 	numThreads_ = num;
+	info_.numThreads = num;
 }
 
 ///////////////////////////////////////////////////
@@ -311,7 +312,7 @@ void Clock::start(  Eref e, const Qinfo* q, double runTime )
 	Element* ticke = getTickE( e.element() );
 
 	if ( tickPtr_.size() == 1 ) {
-		tickPtr_[0].advance( ticke, &info_, endTime );
+		tickPtr_[0].advance( ticke, &info_, endTime, 0 );
 		return;
 	}
 
@@ -320,7 +321,7 @@ void Clock::start(  Eref e, const Qinfo* q, double runTime )
 	double nextTime = tickPtr_[1].getNextTime();
 	while ( isRunning_ && tickPtr_[0].getNextTime() < endTime ) {
 		// This advances all ticks with this dt in order, till nextTime.
-		tickPtr_[0].advance( ticke, &info_, nextTime * ROUNDING );
+		tickPtr_[0].advance( ticke, &info_, nextTime * ROUNDING, 0 );
 		sort( tickPtr_.begin(), tickPtr_.end() );
 		nextTime = tickPtr_[1].getNextTime();
 	}
@@ -353,8 +354,9 @@ void Clock::sortTickPtrs( pthread_mutex_t* sortMutex )
 // This version uses sortTickPtrs rather than a bunch of barriers.
 void Clock::tStart(  Eref e, const ThreadInfo* ti )
 {
-	ProcInfo info = info_; // We use an independent ProcInfo for each thread
-	info.threadId = ti->threadId; // to manage separate threadIds.
+	ProcInfo pinfo = info_; //We use an independent ProcInfo for each thread
+	pinfo.threadId = ti->threadId; // to manage separate threadIds.
+	assert( pinfo.numThreads == numThreads_ );
 	static const double ROUNDING = 1.0000000001;
 	if ( tickPtr_.size() == 0 ) {
 		if ( ti->threadId == 0 )
@@ -368,9 +370,9 @@ void Clock::tStart(  Eref e, const ThreadInfo* ti )
 	Element* ticke = Id( 2, 0 )();
 
 	if ( tickPtr_.size() == 1 ) {
-		tickPtr_[0].advance( ticke, &info, endTime );
+		tickPtr_[0].advance( ticke, &pinfo, endTime, ti->timeMutex );
 		if ( ti->threadId == 0 )
-			info_ = info; // Do we use info outside? Shouldn't.
+			info_ = pinfo; // Do we use info outside? Shouldn't.
 		return;
 	}
 
@@ -379,10 +381,12 @@ void Clock::tStart(  Eref e, const ThreadInfo* ti )
 	while ( isRunning_ && tp0_->getNextTime() < endTime ) {
 		// This advances all ticks with this dt in order, till nextTime.
 		// It has a barrier within: essential for the sortTickPtrs to work.
-		tp0_->advance( ticke, &info, nextTime_ * ROUNDING );
+		tp0_->advance( ticke, &pinfo, nextTime_ * ROUNDING, ti->timeMutex );
 		// cout << "Advance at " << nextTime_ << " on thread " << ti->threadId << endl;
 		sortTickPtrs( ti->sortMutex ); // Sets up nextTime_ and tp0_.
 	}
+	if ( ti->threadId == 0 )
+		info_ = pinfo;
 	isRunning_ = 0;
 }
 
@@ -397,12 +401,9 @@ void* Clock::threadStartFunc( void* threadInfo )
 	ThreadInfo* ti = reinterpret_cast< ThreadInfo* >( threadInfo );
 	Clock* clock = reinterpret_cast< Clock* >( ti->clocke->data( 0 ) );
 	Eref clocker( ti->clocke, 0 );
-	cout << "Start thread " << ti->threadId << " with runtime " << 
-		ti->runtime << endl;
-	// clock->tStart( clocker, ti->qinfo, ti->runtime, ti->threadId );
+	// cout << "Start thread " << ti->threadId << " with runtime " << ti->runtime << endl;
 	clock->tStart( clocker, ti );
-	cout << "End thread " << ti->threadId << " with runtime " << 
-		ti->runtime << endl;
+	// cout << "End thread " << ti->threadId << " with runtime " << ti->runtime << endl;
 	pthread_exit( NULL );
 }
 
@@ -424,6 +425,7 @@ void Clock::stop(  Eref e, const Qinfo* q )
 
 /**
  * Reinit is used to reinit the state of the scheduling system.
+ * Should be done single-threaded.
  */
 void Clock::reinit( Eref e, const Qinfo* q )
 {

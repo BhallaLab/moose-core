@@ -17,8 +17,8 @@ class ThreadInfo
 		Qinfo* qinfo;
 		double runtime;
 		unsigned int threadId;
-		pthread_mutex_t* sortMutex;
-		pthread_mutex_t* advanceMutex;
+		pthread_mutex_t* sortMutex; // Protects sorting of TickPtrs
+		pthread_mutex_t* timeMutex; // Protects time increment in TickPtrs
 };
 
 class Clock: public Data
