@@ -404,6 +404,7 @@ void* Clock::threadStartFunc( void* threadInfo )
 	// cout << "Start thread " << ti->threadId << " with runtime " << ti->runtime << endl;
 	clock->tStart( clocker, ti );
 	// cout << "End thread " << ti->threadId << " with runtime " << ti->runtime << endl;
+
 	pthread_exit( NULL );
 }
 

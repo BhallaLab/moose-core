@@ -217,7 +217,6 @@ void Shell::start( double runtime )
 		}
 
 		// Clean up.
-		pthread_attr_destroy( &attr );
 		for ( unsigned int i = 0; i < numCores_; ++i ) {
 			void* status;
 			int ret = pthread_join( threads[ i ], &status );
@@ -230,6 +229,8 @@ void Shell::start( double runtime )
 		// cout << "Completed time " << runtime << " on " << numCores_ << " threads\n";
 
 		delete[] threads;
+		pthread_attr_destroy( &attr );
+		pthread_barrier_destroy( &barrier );
 	}
 	pthread_mutex_destroy( &sortMutex );
 	pthread_mutex_destroy( &timeMutex );

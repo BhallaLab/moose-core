@@ -2588,5 +2588,7 @@ and replace it with a simple mutex. This did not work. I need to come back to
 it.
 
 Implemented thread sched test as a unit test.
+Done. Works. Checked in as 1516. Valgrind isn't happy though. Perhaps I need
+to free some more barriers and things. Did so. Still isn't happy.
 
 =============================================================================
