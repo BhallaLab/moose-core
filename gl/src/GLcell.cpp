@@ -509,7 +509,7 @@ void GLcell::reinitFuncLocal( const Conn* c )
 		transmit( geometryData, RESET );
 
 
-	testInsertVecSmoldynShapeData();
+	// testInsertVecSmoldynShapeData();
 }
 
 
