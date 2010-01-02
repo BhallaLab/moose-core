@@ -40,7 +40,7 @@ void receiveData( int newFd );
 void* getInAddr( struct sockaddr* sa );
 int sendAll( int socket, char* buf, int* len );
 int recvAll( int socket, char* buf, int* len);
-void sendAck( int socket );
+void sendAck( int socket, int msgType );
 void initializeRoot( const std::string& pathName );
 void updateGeometryGLcell( const GLcellResetData& geometry );
 void updateGeometryGLview( const GLviewResetData& data );
