@@ -26,14 +26,14 @@ Specifically the following Boost libraries are required:
 	     System 
 
 After these have been installed, MOOSE can be built with support for
-GLcell and GLview by supplying the command-line parameter 'USE_OSG=1',
+GLcell and GLview by supplying the command-line parameter 'USE_GL=1',
 as in:
 
 > make clean
-> make USE_OSG=1
+> make USE_GL=1
 
 This is in the main MOOSE directory. An alternative is to export
-USE_OSG as an environment variable with a value of 1:
+USE_GL as an environment variable with a value of 1:
 
 > export USG_OSG=1
 > make clean
