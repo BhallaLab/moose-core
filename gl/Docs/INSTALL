@@ -12,6 +12,9 @@ the use of this package.
 a. OpenSceneGraph, Stable Release 2.8.0: 
 http://www.openscenegraph.org/projects/osg/wiki/Downloads
 
+OpenSceneGraph must be built with PNG support to be able to export
+single and sequential screenshots in glclient.
+
 b. Boost C++ libaries, Version 1.39.0:
 http://www.boost.org/users/download/
 
