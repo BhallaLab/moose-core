@@ -516,6 +516,8 @@ void receiveData( int newFd )
 						updateSmoldynGeometry( vecSmoldynShapeData );
 
 						isSmoldynShapesDirty_ = true;
+
+						sendAck( newFd, messageType );
 					}
 					else if ( messageType == PROCESS_COLORS || messageType == PROCESS_COLORS_SYNC )
 					{
@@ -550,7 +552,7 @@ void receiveData( int newFd )
 								}
 							}
 						}
-						sendAck( newFd );
+						sendAck( newFd, messageType );
 					}
 					else if ( messageType == PROCESS_PARTICLES || messageType == PROCESS_PARTICLES_SYNC )
 					{
@@ -584,7 +586,7 @@ void receiveData( int newFd )
 								}
 							}
 						}
-						sendAck( newFd );
+						sendAck( newFd, messageType );
 					}
 				}
 				else if ( mode_ == GLVIEW )
@@ -643,7 +645,7 @@ void receiveData( int newFd )
 								}
 							}
 						}		
-						sendAck( newFd );
+						sendAck( newFd, messageType );
 					}	
 				}
 			}
@@ -659,7 +661,7 @@ void receiveData( int newFd )
 #endif
 }
 
-void sendAck( int socket )
+void sendAck( int socket, int msgType )
 {
 	// send back AckPickData structure
 	std::ostringstream archiveStream;
@@ -668,10 +670,10 @@ void sendAck( int socket )
 	{
 		boost::archive::text_oarchive archive( archiveStream );
 				
-
 		if ( isPickingDataUpdated_ )
 		{
 			AckPickData newPick;
+			newPick.msgType = msgType;
 			newPick.wasSomethingPicked = true;
 			{
 				boost::mutex::scoped_lock lock( mutexPickingDataUpdated_ );
@@ -683,6 +685,7 @@ void sendAck( int socket )
 		else
 		{
 			AckPickData noPicks;
+			noPicks.msgType = msgType;
 			noPicks.wasSomethingPicked = false;
 			noPicks.idPicked = 0;
 

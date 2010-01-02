@@ -567,6 +567,7 @@ void GLcell::processFuncLocal( Eref e, ProcInfo info )
 		}
 	}
 
+	// testInsertVecSmoldynShapeData();
 	// testInsertVecParticleData();
 
 	if ( vecSmoldynShapeData_.size() > 0 )
@@ -1076,8 +1077,8 @@ void GLcell::testParticle2( )
 
 void GLcell::testInsertVecParticleData( )
 {
-	//~ testParticle1( );
-	testParticle2( );
+	testParticle1( );
+	// testParticle2( );
 }
 
 /*
@@ -1150,6 +1151,7 @@ void GLcell::testShape1( )
 void GLcell::testShape2( )
 {
 	SmoldynShapeData s1, s2, s3;
+	++testTicker_;
 
 	s1.color[0] = 0.6; s1.color[1] = 0.7; s1.color[2] = 0.8; s1.color[3] = 0.3;
 	s2.color[0] = 0.6; s2.color[1] = 0.7; s2.color[2] = 0.8; s2.color[3] = 0.3;
@@ -1157,7 +1159,7 @@ void GLcell::testShape2( )
 	
 	GLCompartmentCylinderData d1;
 	d1.endPoint1[0] = 0; d1.endPoint1[1] = 0; d1.endPoint1[2] = 0;
-	d1.endPoint2[0] = 10; d1.endPoint2[1] = 0; d1.endPoint2[2] = 0;
+	d1.endPoint2[0] = testTicker_+10; d1.endPoint2[1] = 0; d1.endPoint2[2] = 0;
 	d1.radius = 4;
 	s1.data = d1;
 	s1.name = "Cylinder";
@@ -1170,7 +1172,7 @@ void GLcell::testShape2( )
 	// s2.name = "Hemi";
 	
 	GLCompartmentHemiData d3;
-	d3.centre[0] = 10; d3.centre[1] = 0; d3.centre[2] = 0;
+	d3.centre[0] = testTicker_+10; d3.centre[1] = 0; d3.centre[2] = 0;
 	d3.orientation[0] = 1; d3.orientation[1] = 0; d3.orientation[2] = 0;
 	d3.radius = 4;
 	s3.data = d3;
@@ -1183,7 +1185,7 @@ void GLcell::testShape2( )
 
 void GLcell::testInsertVecSmoldynShapeData( )
 {
-	//~ testShape1( );
+	// testShape1( );
 	testShape2( );
 }
 
