@@ -21,12 +21,14 @@
 
 struct AckPickData
 {
+	int msgType;
 	bool wasSomethingPicked;
 	unsigned int idPicked;
 
 	template< typename Archive >
 	void serialize( Archive& ar, const unsigned int version)
 	{
+		ar & msgType;
 		ar & wasSomethingPicked;
 		ar & idPicked;
 	}
