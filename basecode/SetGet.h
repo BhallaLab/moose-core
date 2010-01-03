@@ -97,7 +97,7 @@ class SetGet
 		 */
 		void iSetInner( const FuncId fid, const char* buf,
 			unsigned int size );
-		void clearQ() const;
+		// void clearQ() const;
 	private:
 		static Eref shelle_;
 		static Element* shell_;
@@ -384,7 +384,7 @@ template< class A > class Field: public SetGet1< A >
 		 */
 		A harvestGet() const
 		{ 
-			Qinfo::clearQ( 0 ); // Need to put in the right thread.
+			Qinfo::clearQ( 0 ); // Need to put in the right thread. assume 0
 			// shell_->clearQ();
 			A ret;
 

@@ -11,6 +11,7 @@
 
 // Declaration of static field
 vector< vector< char > > Qinfo::q_;
+vector< SimGroup > Qinfo::g_;
 
 Qinfo::Qinfo( FuncId f, DataId srcIndex, 
 	unsigned int size, bool useSendTo, bool isForward )
@@ -40,29 +41,37 @@ Qinfo::Qinfo()
 		size_( 0 )
 {;}
 
-
-/*
-void Qinfo::addToQ( vector< char >& q, const char* arg ) const
-{
-	unsigned int origSize = q.size();
-	q.resize( origSize + sizeof( Qinfo ) + size_ );
-	char* pos = &( q[origSize] );
-	memcpy( pos, this, sizeof( Qinfo ) );
-	memcpy( pos + sizeof( Qinfo ), arg, size_ );
-}
-*/
-
 void Qinfo::expandSize()
 {
 	size_ += sizeof( DataId );
 }
 
-// Static func
+// Static func: deprecated
 void Qinfo::setNumQs( unsigned int n, unsigned int reserve )
 {
 	q_.resize( n );
-	for ( unsigned int i = 0; i < n; ++i )
+	for ( unsigned int i = 0; i < n; ++i ) {
 		q_[i].reserve( reserve );
+	}
+}
+
+/**
+ * Static func: Sets up a SimGroup to keep track of thread and node
+ * grouping info. This is used by the Qinfo to manage assignment of
+ * threads and queues.
+ * numThreads is the number of threads present in this group on this node.
+ * Returns the group number of the new group.
+ * have that because it will require updates to messages.
+ */
+unsigned int Qinfo::addSimGroup( unsigned short numThreads )
+{
+	unsigned short ng = g_.size();
+	unsigned short si = 0;
+	if ( ng > 0 )
+		si = g_[ng - 1].startIndex + g_[ng - 1].numThreads + 1;
+	SimGroup sg( numThreads, si );
+	g_.push_back( sg );
+	return ng;
 }
 
 // static func
@@ -82,8 +91,20 @@ void Qinfo::hackForSendTo( const Qinfo* q, const char* buf )
 	func->op( Eref( tgt, *tgtIndex ), buf );
 }
 
-// Static func
 void Qinfo::clearQ( Qid qId )
+{
+	readQ( qId );
+	zeroQ( qId );
+}
+
+/** 
+ * Static func
+ * In this variant we go through all the individual queues in the current
+ * set. Note that we have two sets of queues for double buffering so that
+ * we don't do any memcpys.
+ * Thread safe as it is readonly in the Queue.
+ */ 
+void Qinfo::readQ( Qid qId )
 {
 	assert( qId < q_.size() );
 	vector< char >& q = q_[qId];
@@ -99,8 +120,73 @@ void Qinfo::clearQ( Qid qId )
 		}
 		buf += sizeof( Qinfo ) + q->size();
 	}
-	q_[qId].resize( 0 );
 }
+
+/**
+ * Zeroes out contentsof specified queue.
+ */
+void Qinfo::zeroQ( Qid qId )
+{
+	assert( qId < q_.size() );
+	q_[ qId ].resize( 0 );
+	/*
+	vector< char >& temp = q_[ qId ];
+	for ( unsigned int i = 0; i < temp.size(); ++i )
+		temp.resize( 0 );
+	*/
+}
+
+/**
+ * Static func. Not thread safe.
+ * Merge out all outQs from a group into its inQ. This clears out inQ
+ * before filling it, and clears out the outQs after putting them into inQ.
+ */
+void Qinfo::mergeQ( unsigned int groupId )
+{
+	assert( groupId < g_.size() );
+	SimGroup& g = g_[ groupId ];
+	unsigned int j = g.startIndex;
+	assert( j + g.numThreads < q_.size() );
+
+	unsigned int totSize = 0;
+	for ( unsigned int i = 0; i < g.numThreads; ++i )
+		totSize += q_[ j++ ].size();
+
+	vector< char >& inQ = q_[ groupId ];
+	inQ.resize( totSize );
+	j = g.startIndex;
+	char* buf = &inQ[0];
+	for ( unsigned int i = 0; i < g.numThreads; ++i ) {
+		memcpy( buf, &q_[ j ], q_[ j ].size() );
+		buf += q_[ j ].size();
+		j++;
+		q_[ j ].resize( 0 );
+	}
+}
+
+/**
+ * Static func. Not thread safe. Catenates data from a buffer into queue.
+ * May resize it in the process, so iterators have to watch out.
+ */
+void Qinfo::loadQ( Qid qId, const char* buf, unsigned int length )
+{
+	assert( qId < q_.size() );
+	vector< char >& q = q_[qId];
+	q.insert( q.end(), buf, buf + length );
+}
+
+/**
+ * Static func. Not thread safe. Catenates data from a queue into buffer.
+ * Does not touch the queue. Returns data size.
+ */
+unsigned int Qinfo::dumpQ( Qid qId, char* buf )
+{
+	assert( qId < q_.size() );
+	vector< char >& q = q_[qId];
+	memcpy( buf, &q[0], q.size() );
+	return q.size();
+}
+
 
 // Non-static: copies itself onto queue.
 // qid specifies which queue to use.

@@ -2590,5 +2590,140 @@ it.
 Implemented thread sched test as a unit test.
 Done. Works. Checked in as 1516. Valgrind isn't happy though. Perhaps I need
 to free some more barriers and things. Did so. Still isn't happy.
+Checked in as 1517.
+Turns out this is a known bug/feature of pthreads on Linux. See 
+https://bugzilla.redhat.com/show_bug.cgi?id=483821
+The discussion indicates that pthread_exit doesn't quite clean up, and
+that it isn't likely to be fixed. So I'll leave it at this. It is only 56 bytes.
+
+Onward now to setting up a real calculation. First phase is to totally
+mess up the queue handling system. For now I've gone for a double-buffer
+arrangment, but perhaps this is a false economy. For multinode stuff I'll need
+to memcpy data onto the MPI outgoing buffer, anyway.
 
 =============================================================================
+3 Jan 2010
+Is memcpy thread-safe? That is, if I have two adjacent segments of memory
+into which I copy data, can I do this on different threads and be sure that
+they will not step on each others' memory at the boundary?
+
+Need a bit more general handling of mergeQ/readQ/clearQ/addToQ.
+
+mergeQ is supposed to take writable per-thread Qs, combine them into another
+	Q, and clear the per-thread Qs.
+readQ is supposed to march through a Q performing operations as it specifies,
+	perhaps by many threads at once. The Msg::exec function does the
+	operation. For example, Tick::advance calls readQ on many threads.
+	Each Msg::exec selects some range of Msg targets to scan through with
+	the operation, set by the combination of threadId and Msg target list.
+clearQ is supposed to zero out the Q contents.
+addToQ puts data into the specified queue. We need to separate this function
+	into the thread-unsafe version, which is called by Msgs operating
+	within a group, and the thread-safe version, which is called when
+	Msgs send data outside their own group.
+
+Should I separate out the input and output queues, that readQ and addToQ 
+	work on, respectively?
+	- It will make it OK to allow immediate operations that affect Qs,
+		during readQ. For example, the 'get' function needs to put
+		data into a queue.
+	- Still does not eliminate issue of thread safety in cases where
+		many threads must write to same Q.
+
+Group: has one inQ, and as many outQs as there are threads. These outQs
+	do not need to be thread-safe, they are protected by the scheduler so
+	they only get input from their own thread.
+	The inQ is thread-safe. Data typically comes into it only during
+	'process'. During 'read' and 'clear' it is blocked for write access.
+	During 'process' it uses mutexes to protect data coming in. The
+	Tick also does a mergeQ which takes data from a set of outQs and
+	combines them into the inQ. This step looks like it has to be serial,
+	which is unfortunate.
+
+	- When doing MPI: Each group wants to 'send' all local info 
+	to all other nodes working for the group. So it will want to do a 
+	'send' on the inQ. This can happen on one thread while the worker
+	threads clear the inQ on their own. However the MPI man page suggests
+	that one should not access the contents of the send buffer till the
+	send completes. See below for how to put these together.
+
+Structural options with threads vs MPI:
+	1. Always use MPI, never use threads. Suggested by a couple of people,
+		also compatible with BlueGene machines.
+	2. Always use threads, and use MPI only in virtual shared-memory mode.
+		Never heard this option, sounds dubious.
+	3. Use threads on local node whenever multicore, use MPI between nodes
+		whenever multinode.
+	4. Use threads on local node whenever multicore but no MPI, otherwise
+		use MPI both for local cores and for other nodes.
+
+For now, and based on the MPI analysis below, it looks like #1 would
+be terribly slow. Worth benchmarking though.
+
+For pure MPI, there are a couple of options:
+	1. blocking vs non-blocking calls. Blocking is slower and prone to
+		locks. Non-blocking requires extra buffers
+	2. Async vs sync. Much better comm/comp balance if async. If we provide
+		a guarantee that the async does not slip too far, we're OK.
+
+For now, assume non-blocking and async.
+
+For pure MPI, this is how data would go:
+	1. Local node has a single outQ and one inQ. It has separate extQs,
+		one for each group in the simulation.
+	2. During Process, it adds data into outQ, and into each of the 
+		extQs as per message targeting.
+	3. At end of Process, each node sends a special message with currTime
+		to node 0. Node 0 also sends info about the most laggard
+		currTime.
+	 	On all nodes it then copies outQs onto inQ. InQ goes into
+		a 'send' buffer. Each mpiQ goes into its respective buffer.
+		All these buffers go out using iSend calls.
+	4. System always keeps an irecV posted for 'world'. 
+		Whenever a 'test' clears and data has arrived, it grabs 
+		data and pushes it into inQ, and posts another irecV.
+		Could use memcpy or double buffering.
+	5. At regular intervals throughout clearQ, it checks for arrival of
+		data, and does 4 if so. Since the inQ is circular, it could
+		clear up data as it goes along.
+	6. On node 0, when the special Msg with the currTime arrives, it
+		analyzes that and decides about load balancing. At the least
+		it would send out a message to the way-ahead nodes to throttle
+		back. If throttling, any given node, 
+		it continues in the clearQ loop from 4 till node 0 sends to say
+		to resume.  This won't be needed if we have a
+		step lock for sync data.
+	7. At end of clearQ, it zeros out the queue.
+	8. At regular intervals throughout process, it checks for arrival of
+		data, and does 4. if so. Note it does not do clearQ, just 
+		accumulates data.
+
+From the viewpoint of Queues, what we take from this is that if each node
+is multithreaded, the queues needed are:
+	One thread-safe inQ for each group on the node
+	One non-safe outQ for each thread (i.e. all within-group threads)
+	One thread-safe extQ for each non-self group in the simulation, 
+		including on and off-node.
+Buffers needed:
+	One for catenation of all outQs
+	one for each extQ
+
+So the Queue has to also have info about groups. 
+	Each group is known by: 
+		# of local threads
+		Group start index to index outQs
+		list of external nodes or
+		COM of external nodes?
+	
+So the indexing of queues is:
+InQ: group #
+outQ: groupStart + outQ #
+
+So the inQ and the extQs are in the same set of indices, and the groupStart
+begins at #groups for group 0 and goes up accordingly.
+
+When we do a mergeQ, we identify the group# and the rest happens internally
+based on the Queue grouping.
+
+Implemented, compiled, doesn't run. But many things have changed so I'll 
+check it in.

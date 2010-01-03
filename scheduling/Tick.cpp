@@ -221,8 +221,18 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 			reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
 		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 	}
-	Qinfo::clearQ( info->threadId );
-	c->process( info );
+	if ( info->threadId == 0 )
+		// Put the queues into one big one. Clear others
+		Qinfo::mergeQ( 0 );  // Temporary hack. Should selectively merge
+			// only queue that this Tick is responsible for.
+		
+	if ( info->barrier ) {
+		int rc = pthread_barrier_wait(
+			reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
+		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+	}
+	Qinfo::readQ( 0 ); // March through big queue.
+	c->process( info ); // Do object local ops.
 }
 
 /*

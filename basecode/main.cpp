@@ -78,7 +78,7 @@ int main( int argc, char** argv )
 	Id shellid = init( argc, argv );
 #ifdef DO_UNIT_TESTS
 	cout << "testing: ";
-	// testAsync();
+	testAsync();
 	testScheduling();
 #endif
 	cout << endl;

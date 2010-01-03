@@ -76,11 +76,13 @@ void SetGet::iSetInner( FuncId fid, const char* val, unsigned int size )
 	shelle_.asend( setCid, setFuncIndex, Shell::procInfo(), val, size );
 }
 
+/*
 void SetGet::clearQ() const
 {
 	// e_.element()->clearQ();
 	Qinfo::clearQ( 0 );
 }
+*/
 
 void SetGet::resizeBuf( unsigned int size )
 {

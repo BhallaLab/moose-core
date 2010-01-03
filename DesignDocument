@@ -448,7 +448,14 @@ Clock::tStart()
 	
 	*---*
 
+Qinfo::readQ( threadId )
+	Reads the data from threadId. It is entirely readonly, and is thread-
+	safe. Different threads can use the same threadId.
 
+Qinfo::clearQ( threadId )
+	Clears the data from threadId; that is, zeroes it out. 
+
+The design sequence is that for 
 
 ------------------------------------------------------------------------------
 
