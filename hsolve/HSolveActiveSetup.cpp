@@ -252,7 +252,7 @@ void HSolveActive::createLookupTables( ) {
 	
 	for ( unsigned int ig = 0; ig < caGate.size(); ++ig ) {
 		BioScan::rates( caGate[ ig ], grid, A, B );
-		BioScan::modes( vGate[ ig ], AMode, BMode );
+		BioScan::modes( caGate[ ig ], AMode, BMode );
 		interpolate = ( AMode == 1 ) || ( BMode == 1 );
 		
 		ia = A.begin();
