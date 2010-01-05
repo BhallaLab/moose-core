@@ -47,6 +47,7 @@ void Qinfo::expandSize()
 }
 
 // Static func: deprecated
+/*
 void Qinfo::setNumQs( unsigned int n, unsigned int reserve )
 {
 	q_.resize( n );
@@ -54,6 +55,7 @@ void Qinfo::setNumQs( unsigned int n, unsigned int reserve )
 		q_[i].reserve( reserve );
 	}
 }
+*/ 
 
 /**
  * Static func: Sets up a SimGroup to keep track of thread and node
@@ -71,6 +73,11 @@ unsigned int Qinfo::addSimGroup( unsigned short numThreads )
 		si = g_[ng - 1].startIndex + g_[ng - 1].numThreads + 1;
 	SimGroup sg( numThreads, si );
 	g_.push_back( sg );
+	q_.resize( si + numThreads + 1 );
+	for ( unsigned int i = 0; i <= numThreads; ++i ) {
+		q_[i + si].reserve( 1024 );
+		
+	}
 	return ng;
 }
 

@@ -94,8 +94,9 @@ class Qinfo
 
 		/**
 		 * Decide how many queues to use, and their reserve size
+		 * Deprecated
 		 */
-		static void setNumQs( unsigned int n, unsigned int reserve );
+		// static void setNumQs( unsigned int n, unsigned int reserve );
 
 		/**
 		 * Set up a SimGroup which keeps track of grouping information, and

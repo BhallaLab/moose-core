@@ -39,6 +39,7 @@ const Cinfo* Shell::initCinfo()
 			"Flag to tell the system to quit", 
 			&Shell::setQuit, 
 			&Shell::getQuit ),
+////////////////////////////////////////////////////////////////
 		new DestFinfo( "handleGet", 
 			"Function to handle returning values for 'get' calls.",
 			new RetFunc< Shell >( &Shell::handleGet ) ),
@@ -48,7 +49,11 @@ const Cinfo* Shell::initCinfo()
 		new DestFinfo( "setclock", 
 			"Assigns clock ticks. Args: tick#, dt, stage",
 			new OpFunc3< Shell, unsigned int, double, unsigned int >( & Shell::setclock ) ),
+		new DestFinfo( "loadBalance", 
+			"Set up load balancing",
+			new OpFunc0< Shell >( & Shell::loadBalance ) ),
 
+////////////////////////////////////////////////////////////////
 		new SrcFinfo1< FuncId >( "requestGet",
 			"Function to request another Element for a value", 0 ),
 			
@@ -138,11 +143,12 @@ const char* Shell::buf()
 	return (reinterpret_cast< Shell* >(shell->data( 0 )) )->getBuf();
 }
 
-// Static function to assign hardware availability
+// Function to assign hardware availability
 void Shell::setHardware( 
 	bool isSingleThreaded, unsigned int numCores, unsigned int numNodes )
 {
 	isSingleThreaded_ = isSingleThreaded;
+	Qinfo::addSimGroup( 1 ); // This is the parser thread.
 	if ( !isSingleThreaded ) {
 		// Create the parser and the gui threads.
 		numCores_ = numCores;
@@ -152,12 +158,29 @@ void Shell::setHardware(
 		// Note the more complex 'group' orgn for
 		// eventual highly multithreaded architectures, discussed in
 		// NOTES 10 Dec 2009.
-		Qinfo::setNumQs( numCores_ + numNodes_, 1024 );
+		// Qinfo::setNumQs( numCores_ + numNodes_, 1024 );
+		//
 	} else {
 		numCores_ = 1;
 		numNodes_ = 1;
-		Qinfo::setNumQs( 1, 1024 );
+		// Qinfo::setNumQs( 1, 1024 );
 	}
+}
+
+/**
+ * Regular shell function that requires that the information about the
+ * hardware have been loaded in. For now the function just assigns SimGroups
+ */
+void Shell::loadBalance()
+{
+	// Need more info here on how to set up groups distributed over
+	// nodes. In fact this will have to be computed _after_ the
+	// simulation is loaded. Will also need quite a bit of juggling between
+	// nodes when things get really scaled up.
+	//
+	// Note that the messages have to be rebuilt after this call.
+	for ( unsigned int i = 0; i < numNodes_; ++i )
+		Qinfo::addSimGroup( numCores_ ); // These are the worker threads.
 }
 
 unsigned int Shell::numCores()

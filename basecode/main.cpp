@@ -70,6 +70,7 @@ Id init( int argc, char** argv )
 	SetGet::setShell();
 	Shell* s = reinterpret_cast< Shell* >( shellid.eref().data() );
 	s->setHardware( isSingleThreaded, numCores, numNodes );
+	s->loadBalance();
 	return shellid;
 }
 

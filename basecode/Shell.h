@@ -32,6 +32,12 @@ class Shell: public Data
 		 */
 		void setHardware( bool isSingleThreaded, 
 			unsigned int numCores, unsigned int numNodes );
+
+		/**
+		 * Stub for eventual function to handle load balancing. This must
+		 * be called to set up default groups.
+		 */
+		void loadBalance();
 		unsigned int numCores();
 
 		// Sets up clock ticks. Essentially is a call into the 

@@ -2722,8 +2722,29 @@ outQ: groupStart + outQ #
 So the inQ and the extQs are in the same set of indices, and the groupStart
 begins at #groups for group 0 and goes up accordingly.
 
+Actually this doesn't work, since it would involve renumbering queues when new
+groups are added. So the current structure is:
+InQ: first available #, in other words, groupStart.
+outQs: Next set of numThreads #s.
+
 When we do a mergeQ, we identify the group# and the rest happens internally
 based on the Queue grouping.
 
 Implemented, compiled, doesn't run. But many things have changed so I'll 
-check it in.
+check it in. 1522.
+
+=============================================================================
+5 Jan 2010
+Added a line in the unit test for Ticks : Qinfo::addSimGroup. This fixes up
+the system, it clears the unit tests for many threads. But now there is a
+problem that the unit tests will mess up subsequent scheduling. So I need
+to put in a function to clear out old sim groups too. This will be tricky,
+as all messages have to be recomputed. Should be responsibility of the 
+Shell.
+
+Implemented a stub function for Shell::loadBalance. It is called at init, and
+can be called later. This replaces the deprecated Qinfo::setNumQs
+Runs, clears unit tests with up to 16 threads. Valgrind is also OK with it
+with the same caveat about 56 bytes.
+
+=============================================================================
