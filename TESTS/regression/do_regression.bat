@@ -2,6 +2,7 @@
 
 set mpi = 0
 set sbml = 1
+set neuroml = 1
 set neuronal = 1
 set kinetics = 1
 set misc = 1
@@ -27,6 +28,19 @@ set NEARDIFF = ./neardiff
 /bin/rm -f regression.out >& /dev/null
 /bin/rm -f test.plot >& /dev/null
 /bin/rm -f test_*.plot >& /dev/null
+
+################################################################################
+# NeuroML section
+################################################################################
+if ( $neuroml ) then
+	echo '\n===== NeuroML tests ====='
+	echo -n NeuroML_Read
+	$MOOSE moose_NeuroML_reader.g >>& regression.out
+	$NEARDIFF moose_NeuroMLReader.plot test.plot 5.0e-6
+	echo
+	/bin/rm -f test.plot >& /dev/null
+endif
+
 
 ################################################################################
 # SBML section
