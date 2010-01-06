@@ -31,7 +31,7 @@ class SbmlWriter
 
 	private:
 		Model* model_;	
-		static int targets( Eref object,	const string& msg,vector< Eref >& target,const string& type = "" );
+		static int targets( Eref object, const string& msg,vector< Eref >& target,const string& type = "" );
 		static bool isType( Eref object, const string& type );
 		string parmUnit( double rct_order );
 		double transformUnits( double mvalue,UnitDefinition * ud );
