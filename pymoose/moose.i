@@ -57,6 +57,7 @@
 	#include "DifShell.h"
 	#include "GssaStoich.h"
 	#include "TauPump.h"
+        #include "GLcell.h"
 	#include "TimeTable.h"
 	#include "PIDController.h"
 	#include "DiffAmp.h"
@@ -652,6 +653,18 @@ class Delay:
 %attribute(pymoose::TauPump, double, TB, __get_TB, __set_TB)
 %attribute(pymoose::TauPump, double, TC, __get_TC, __set_TC)
 %attribute(pymoose::TauPump, double, TV, __get_TV, __set_TV)
+
+%include "GLcell.h"
+%attribute(pymoose::GLcell, string, path, __get_path, __set_path)
+%attribute(pymoose::GLcell, string, host, __get_clientHost, __set_clientHost)
+%attribute(pymoose::GLcell, string, port, __get_clientPort, __set_clientPort)
+%attribute(pymoose::GLcell, string, attribute, __get_attributeName, __set_attributeName)
+%attribute(pymoose::GLcell, double, threshold, __get_changeThreshold, __set_changeThreshold)
+%attribute(pymoose::GLcell, double, vscale, __get_VScale, __set_VScale)
+%attribute(pymoose::GLcell, string, sync, __get_syncMode, __set_syncMode)
+%attribute(pymoose::GLcell, string, bgcolor, __get_bgColor, __set_bgColor)
+%attribute(pymoose::GLcell, double, highvalue, __get_highValue, __set_highValue)
+%attribute(pymoose::GLcell, double, lowvalue, __get_lowValue, __set_lowValue)
 
 %include "TimeTable.h"
 %attribute(pymoose::TimeTable, double, maxTime, __get_maxTime, __set_maxTime)
