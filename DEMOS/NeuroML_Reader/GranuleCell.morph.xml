@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<neuroml xmlns="http://morphml.org/neuroml/schema" xmlns:meta="http://morphml.org/metadata/schema" xmlns:mml="http://morphml.org/morphml/schema" xmlns:bio="http://morphml.org/biophysics/schema" xmlns:cml="http://morphml.org/channelml/schema" xmlns:net="http://morphml.org/networkml/schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://morphml.org/neuroml/schema  NeuroML.xsd" lengthUnits="micron">
+<cells>
+    <cell name="GranuleCell">
+        <meta:notes>A very simplified cerebellar Granule like Cell for testing purposes only</meta:notes>
+        <mml:segments>
+            <mml:segment id="0" name="Soma" cable="0">
+                <mml:proximal x="0.0" y="0.0" z="0.0" diameter="8.0"/>
+                <mml:distal x="0.0" y="0.0" z="0.0" diameter="8.0"/>
+            </mml:segment>
+            <mml:segment id="100228" name="mainAxon__Extra_0" parent="0" cable="1">
+                <mml:proximal x="0.0" y="0.0" z="0.0" diameter="1.2"/>
+                <mml:distal x="0.0" y="70.0" z="0.0" diameter="1.2"/>
+            </mml:segment>
+            <mml:segment id="100229" name="mainAxon" parent="100228" cable="1">
+                <mml:distal x="0.0" y="140.0" z="0.0" diameter="1.2"/>
+            </mml:segment>
+            <mml:segment id="100230" name="Axon_1" parent="100229" cable="2">
+                <mml:proximal x="0.0" y="140.0" z="0.0" diameter="1.2"/>
+                <mml:distal x="60.0" y="140.0" z="0.0" diameter="1.2"/>
+            </mml:segment>
+            <mml:segment id="100232" name="Axon_2" parent="100229" cable="3">
+                <mml:proximal x="0.0" y="140.0" z="0.0" diameter="1.2"/>
+                <mml:distal x="-60.0" y="140.0" z="0.0" diameter="1.2"/>
+            </mml:segment>
+            <mml:segment id="100231" name="Axon_3" parent="100230" cable="4">
+                <mml:proximal x="60.0" y="140.0" z="0.0" diameter="1.2"/>
+                <mml:distal x="120.0" y="140.0" z="0.0" diameter="1.2"/>
+            </mml:segment>
+            <mml:segment id="100233" name="Axon_4" parent="100232" cable="5">
+                <mml:proximal x="-60.0" y="140.0" z="0.0" diameter="1.2"/>
+                <mml:distal x="-120.0" y="140.0" z="0.0" diameter="1.2"/>
+            </mml:segment>
+        </mml:segments>
+        <mml:cables>
+            <mml:cable id="0" name="Soma">
+                <meta:group>all</meta:group>
+                <meta:group>soma_group</meta:group>
+            </mml:cable>
+            <mml:cable id="1" name="mainAxonSection" fract_along_parent="0.5">
+                <meta:group>all</meta:group>
+                <meta:group>axon_group</meta:group>
+                <meta:group>ascending_segment</meta:group>
+            </mml:cable>
+            <mml:cable id="2" name="parallelFiberPos">
+                <meta:properties>
+                    <meta:property>
+                        <meta:tag>numberInternalDivisions</meta:tag>
+                        <meta:value>2</meta:value>                    
+                    </meta:property>
+                </meta:properties>
+            <meta:group>all</meta:group>                <meta:group>axon_group</meta:group>
+                <meta:group>parallel_fibers</meta:group>
+            </mml:cable>
+            <mml:cable id="3" name="parallelFiberNeg">
+                <meta:properties>
+                    <meta:property>
+                        <meta:tag>numberInternalDivisions</meta:tag>
+                        <meta:value>2</meta:value>                    
+                    </meta:property>
+                </meta:properties>
+            <meta:group>all</meta:group>                <meta:group>axon_group</meta:group>
+                <meta:group>parallel_fibers</meta:group>
+            </mml:cable>
+            <mml:cable id="4" name="parallelFiberPos_Gen2ndComp">
+                <meta:properties>
+                    <meta:property>
+                        <meta:tag>numberInternalDivisions</meta:tag>
+                        <meta:value>2</meta:value>                    
+                    </meta:property>
+                </meta:properties>
+            <meta:group>all</meta:group>                <meta:group>axon_group</meta:group>
+                <meta:group>parallel_fibers</meta:group>
+            </mml:cable>
+            <mml:cable id="5" name="parallelFiberNeg_Gen2ndComp">
+                <meta:properties>
+                    <meta:property>
+                        <meta:tag>numberInternalDivisions</meta:tag>
+                        <meta:value>2</meta:value>                    
+                    </meta:property>
+                </meta:properties>
+            <meta:group>all</meta:group>                <meta:group>axon_group</meta:group>
+                <meta:group>parallel_fibers</meta:group>
+            </mml:cable>
+        </mml:cables>
+        <!--Adding the biophysical parameters-->
+        <biophysics units="Physiological Units">
+            <bio:mechanism name="NaConductance" type="Channel Mechanism">
+                <bio:parameter name="gmax" value="120.0">
+                    <bio:group>axon_group</bio:group>
+                    <bio:group>soma_group</bio:group>
+                </bio:parameter>
+            </bio:mechanism>
+            <bio:mechanism name="PassiveCond" type="Channel Mechanism" passive_conductance="true">
+                <bio:parameter name="e" value="-54.3">
+                    <bio:group>soma_group</bio:group>
+                    <bio:group>axon_group</bio:group>
+                </bio:parameter>
+                <bio:parameter name="gmax" value="0.3">
+                    <bio:group>soma_group</bio:group>
+                    <bio:group>axon_group</bio:group>
+                </bio:parameter>
+            </bio:mechanism>
+            <bio:mechanism name="KConductance" type="Channel Mechanism">
+                <bio:parameter name="gmax" value="36.0">
+                    <bio:group>all</bio:group>
+                </bio:parameter>
+            </bio:mechanism>
+            <bio:spec_capacitance>
+                <bio:parameter value="1.0">
+                    <bio:group>all</bio:group>
+                </bio:parameter>
+            </bio:spec_capacitance>
+            <bio:spec_axial_resistance>
+                <bio:parameter value="0.02">
+                    <bio:group>all</bio:group>
+                </bio:parameter>
+            </bio:spec_axial_resistance>
+            <bio:init_memb_potential>
+                <bio:parameter value="-65.0">
+                    <bio:group>all</bio:group>
+                </bio:parameter>
+            </bio:init_memb_potential>
+        </biophysics>
+        <connectivity>
+            <net:potential_syn_loc synapse_type="GranPurkSyn">
+                <net:group>parallel_fibers</net:group>
+            </net:potential_syn_loc>
+            <net:potential_syn_loc synapse_type="GranGolgiSyn">
+                <net:group>parallel_fibers</net:group>
+            </net:potential_syn_loc>
+            <net:potential_syn_loc synapse_type="MFGranSyn" synapse_direction="preAndOrPost">
+                <net:group>soma_group</net:group>
+            </net:potential_syn_loc>
+        </connectivity>
+    </cell>
+</cells></neuroml>

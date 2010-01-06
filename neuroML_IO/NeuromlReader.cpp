@@ -34,8 +34,9 @@ void NeuromlReader::readModel( string filename,Id location )
    initVm = ncl_->getInit_memb_potential();
    ca = ncl_->getSpec_capacitance();
    r = ncl_->getSpec_axial_resistance();
-  // ca /= 100; //si unit
-  // r *= 10; //si
+   ca /= 100; //si unit
+   r *= 10; //si
+   initVm /= 1000; //si 
    static const Finfo* nameFinfo = cableCinfo->findFinfo( "name" );
    static const Finfo* groupsFinfo = cableCinfo->findFinfo( "groups" );
    unsigned int num_cables = ncl_->getNumCables();
@@ -120,9 +121,7 @@ void NeuromlReader::readModel( string filename,Id location )
 		diam1 = seg->distal.getDiameter();
 	diam2 = seg->distal.getDiameter();
 	diameter = (diam1 + diam2 )/2;
-	diameter *= 1e-6; //physiological unit
-	//length *= 1e-6;//si
-	//diameter *= 1e-6;//si
+	diameter *= 1e-6; 
 	::set< double >( compt_, x0Finfo, x );
 	::set< double >( compt_, y0Finfo, y );
  	::set< double >( compt_, z0Finfo, z );
@@ -133,16 +132,19 @@ void NeuromlReader::readModel( string filename,Id location )
 	::set< double >( compt_, lengthFinfo, length );
 	if ( length == 0 ){
 		Cm = ca * PI * diameter * diameter;
-		Ra = 13.50 * r /( diameter * PI );
+		//Ra = 13.50 * r /( diameter * PI );
+		Ra = r * 8.0 / ( diameter * PI );
 	}
 	else{
         	Cm = ca * length * PI * diameter;
-        	Ra = (r * length )/(PI * diameter * diameter/4);
+        	//Ra = (r * length )/(PI * diameter * diameter/4);
+		Ra = r * length * 4.0 / ( PI * diameter * diameter );
 	}
+
 	::set< double >( compt_, CmFinfo, Cm );
         ::set< double >( compt_, RaFinfo, Ra ); 
 	::set< double >( compt_, initVmFinfo, initVm );
-        //set< double >( compt_, initVmFinfo, initVm/1000);//si unit 
+        
 	
     }
    
@@ -362,7 +364,9 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
 		    bool is2DChannel  = false;
 		    bool passive = chl->getPassivecond();
 		    ek = chl->getDefault_erev();
+		    ek /= 1000; //si
 		    gmax = chl->getDefault_gmax();
+		    gmax *= 10; //si
 		    //string path;
 		    //bool use_conc = false;
 		    if ( passive ){
@@ -397,6 +401,7 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
 		Id chlId(path);
 		bool passive = chl->getPassivecond();
 		ek = chl->getDefault_erev();
+		ek /= 1000; //si
 		bool use_conc = false;
 		/*if ( passive ){
 			leak_ = Neutral::create( "Leakage",name,loc,Id::scratchId() ); 
@@ -424,21 +429,23 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
 				::set< int >( Eref(chlId()), useConcFinfo, 0 );		
 		}
 	 	gmax = chl->getGmax();
-	 	//gmax *= 10;//si
+	 	gmax *= 10; //si
 	 	
 	 	double xmin,xmax;
 	 	int xdivs;
 		double min,max;
 	 	string biophysicsunits = ncl_->getBiophysicsUnits();
 		//cout << " unit " << biophysicsunits << endl;
-	 	if ( biophysicsunits == "Physiological Units" ){
+	 	/*if ( biophysicsunits == "Physiological Units" ){
 	 		xmin = -100;
 	 		xmax = 50;
 		}
 	 	else if ( biophysicsunits == "SI Units" ){
 	 		xmin = -0.1;
 	 		xmax = 0.05;
-		}
+		}*/
+		xmin = -0.1;
+	 	xmax = 0.05;
 		xdivs = 3000;
 		
 		//string path = Eref(channel_).id().path();
@@ -504,11 +511,11 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
 			}
 			else{
 				double Arate = gat->alpha.rate;
-				//Arate *= 1000;
+				Arate *= 1000; //si
 				double Ascale = gat->alpha.scale;
-				//Ascale /= 1000;
+				Ascale /= 1000; //si
 				double Amidpoint = gat->alpha.midpoint;
-				//Amidpoint /= 1000;
+				Amidpoint /= 1000; //si
 				pushtoVector(result,Aexpr_form,Arate,Ascale,Amidpoint);
 				
 			}
@@ -535,12 +542,13 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
 			}
 			else{
 				double Brate = gat->beta.rate;
-				//Brate *= 1000;
+				Brate *= 1000; //si
 				double Bscale = gat->beta.scale;
-				//Bscale /= 1000;
+				Bscale /= 1000; //si
 				double Bmidpoint = gat->beta.midpoint;
-				//Bmidpoint /= 1000;
+				Bmidpoint /= 1000; //si
 				pushtoVector(result,Bexpr_form,Brate,Bscale,Bmidpoint);
+				cout << "xdivs : "<< xdivs << "xmin : " << xmin << "xmax : " << xmax << endl;
 				result.push_back(xdivs);
 				result.push_back(xmin);
 				result.push_back(xmax);
