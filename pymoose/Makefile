@@ -118,6 +118,7 @@ OBJ = PyMooseBase.o \
 	DifShell.o	\
 	GssaStoich.o	\
 	TauPump.o	\
+	GLcell.o	\
 	TimeTable.o	\
 	PIDController.o \
 	RC.o	\
@@ -190,6 +191,7 @@ HEADERS=PyMooseUtil.h \
 	DifShell.h	\
 	GssaStoich.h	\
 	TauPump.h	\
+	GLcell.h	\
 	TimeTable.h	\
 	PIDController.h \
 	RC.h	\
