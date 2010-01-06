@@ -509,7 +509,7 @@ void Compartment::processFunc( const Conn* c, ProcInfo p )
 void Compartment::innerReinitFunc(  Eref e, ProcInfo p )
 {
 #ifndef NDEBUG
-    cout << "Compartment::innerReinitFunc:: " << e.id().path() << endl;
+   // cout << "Compartment::innerReinitFunc:: " << e.id().path() << endl;
 #endif
 	Vm_ = initVm_;
 	A_ = 0.0;
