@@ -88,7 +88,7 @@ for 'xview' in GENESIS-2.3:
 Required fields:
 -------------
 
-a. 'path': this specifies the GENESIS-style path for elements whose
+a. 'vizpath': this specifies the GENESIS-style path for elements whose
 attributes we wish to visualize directly or after appending the value
 of the attribute 'relpath' to each such element. The attribute 'path'
 is usually specified as a wildcard.
@@ -109,7 +109,7 @@ located just outside the bounding box of shapes that were successfully
 placed.
 
 > readcell test.p /axon
-> setfield gl0 path /axon/##[CLASS=Compartment]
+> setfield gl0 vizpath /axon/##[CLASS=Compartment]
 
 b. 'port': this specifies the network port (on localhost or on a
 remote machine) over which this GLcell element will communicate with

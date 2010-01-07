@@ -90,6 +90,9 @@ extern const Cinfo* initSymCompartmentCinfo();
 extern const Cinfo* initSynChanCinfo();
 extern const Cinfo* initTableCinfo();
 extern const Cinfo* initTauPumpCinfo();
+#ifdef USE_GL
+extern const Cinfo* initGLcellCinfo();
+#endif
 extern const Cinfo* initTimeTableCinfo();
 extern const Cinfo* initTriPanelCinfo();
 extern const Cinfo* initUniformRngCinfo();
@@ -190,6 +193,9 @@ void initCinfos(){
     static const Cinfo* SynChanCinfo = initSynChanCinfo();
     static const Cinfo* TableCinfo = initTableCinfo();
     static const Cinfo* TauPumpCinfo = initTauPumpCinfo();
+#ifdef USE_GL
+    static const Cinfo* GLcellCinfo = initGLcellCinfo();
+#endif
     static const Cinfo* TimeTableCinfo = initTimeTableCinfo();
     static const Cinfo* TriPanelCinfo = initTriPanelCinfo();
     static const Cinfo* UniformRngCinfo = initUniformRngCinfo();
