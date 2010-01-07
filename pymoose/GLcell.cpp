@@ -16,124 +16,124 @@ GLcell::GLcell( const Id& src, std::string name, Id& parent ) : PyMooseBase( src
 GLcell::~GLcell() {}
 const std::string& GLcell::getType() { return className_; }
 
-std::string GLcell::__get_path() const
+std::string GLcell::__get_vizpath() const
 {
-	std::string path;
-	get< std::string >( id_(), "path", path );
-	return path;
+	std::string vizpath;
+	get< std::string >( id_(), "vizpath", vizpath );
+	return vizpath;
 }
 
-void GLcell::__set_path( std::string path )
+void GLcell::__set_vizpath( std::string vizpath )
 {
-	set< std::string >( id_(), "path", path );
+	set< std::string >( id_(), "vizpath", vizpath );
 }
 
 std::string GLcell::__get_clientHost() const
 {
 	std::string clientHost;
-	get< std::string >( id_(), "clientHost", clientHost );
+	get< std::string >( id_(), "host", clientHost );
 	return clientHost;
 }
 
 void GLcell::__set_clientHost( std::string strClientHost )
 {
-	set< std::string >( id_(), "clientHost", strClientHost ); 
+	set< std::string >( id_(), "host", strClientHost ); 
 }
 
 std::string GLcell::__get_clientPort() const
 {
 	std::string clientPort;
-	get< std::string >( id_(), "clientPort", clientPort );
+	get< std::string >( id_(), "port", clientPort );
 	return clientPort;	
 }
 
 void GLcell::__set_clientPort( std::string strClientPort )
 {
-	set< std::string >( id_(), "clientPort", strClientPort ); 
+	set< std::string >( id_(), "port", strClientPort ); 
 }
 
 std::string GLcell::__get_attributeName() const
 {
 	std::string attributeName;
-	get< std::string >( id_(), "attributeName", attributeName );
+	get< std::string >( id_(), "attribute", attributeName );
 	return attributeName;
 }
 
 void GLcell::__set_attributeName( std::string strAttributeName )
 {
-	set< std::string >( id_(), "attributeName", strAttributeName ); 
+	set< std::string >( id_(), "attribute", strAttributeName ); 
 }
 
 double GLcell::__get_changeThreshold() const
 {
 	double changeThreshold;
-	get< double >( id_(), "changeThreshold", changeThreshold );
+	get< double >( id_(), "threshold", changeThreshold );
 	return changeThreshold;
 }
 
 void GLcell::__set_changeThreshold( double changeThreshold )
 {
-	set< double >( id_(), "changeThreshold", changeThreshold );
+	set< double >( id_(), "threshold", changeThreshold );
 }
 
 double GLcell::__get_VScale() const
 {
 	double vScale;
-	get< double >( id_(), "vScale", vScale );
+	get< double >( id_(), "vscale", vScale );
 	return vScale;
 }
 
 void GLcell::__set_VScale( double vScale )
 {
-	set< double >( id_(), "vScale", vScale );
+	set< double >( id_(), "vscale", vScale );
 }
 
 std::string GLcell::__get_syncMode() const
 {
 	std::string syncMode;
-	get< std::string >( id_(), "syncMode", syncMode );
+	get< std::string >( id_(), "sync", syncMode );
 	return syncMode;	
 }
 
 void GLcell::__set_syncMode( std::string strSyncMode )
 {
-	set< std::string >( id_(), "syncMode", strSyncMode );
+	set< std::string >( id_(), "sync", strSyncMode );
 }
 
 std::string GLcell::__get_bgColor() const
 {
 	std::string bgColor;
-	get< std::string >( id_(), "bgColor", bgColor );
+	get< std::string >( id_(), "bgcolor", bgColor );
 	return bgColor;
 }
 
 void GLcell::__set_bgColor( std::string strBgColor )
 {
-	set< std::string >( id_(), "bgColor", strBgColor );
+	set< std::string >( id_(), "bgcolor", strBgColor );
 }
 
 double GLcell::__get_highValue() const
 {
 	double highValue;
-	get< double >( id_(), "highValue", highValue );
+	get< double >( id_(), "highvalue", highValue );
 	return highValue;
 }
 
 void GLcell::__set_highValue( double highValue )
 {
-	set< double >( id_(), "highValue", highValue );
+	set< double >( id_(), "highvalue", highValue );
 }
 
 double GLcell::__get_lowValue() const
 {
 	double lowValue;
-	get< double >( id_(), "lowValue", lowValue );
+	get< double >( id_(), "lowvalue", lowValue );
 	return lowValue;
 }
 
 void GLcell::__set_lowValue( double lowValue )
 {
-	set< double >( id_(), "lowValue", lowValue );
+	set< double >( id_(), "lowvalue", lowValue );
 }
 
 #endif
