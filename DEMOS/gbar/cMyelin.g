@@ -102,7 +102,7 @@ setfield /axon/soma inject {INJECT}
 create GLcell gl0
 setclock 4 0.001
 useclock gl0 4
-setfield gl0 path /axon
+setfield gl0 vizpath /axon
 setfield gl0 port 9999
 setfield gl0 host localhost
 setfield gl0 attribute Vm
