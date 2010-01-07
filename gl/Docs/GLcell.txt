@@ -12,12 +12,12 @@ below. GENESIS-style script examples are also provided:
 Required fields:
 -------------
 
-a. 'path': this specifies the GENESIS-style path for the geometry to
+a. 'vizpath': this specifies the GENESIS-style path for the geometry to
 be visualized; this will have been loaded previously with the
 'readcell' script command:
 
 > readcell test.p /axon
-> setfield gl0 path /axon
+> setfield gl0 vizpath /axon
 
 b. 'port': this specifies the network port (on localhost or on a
 remote machine) over which this GLcell element will communicate with

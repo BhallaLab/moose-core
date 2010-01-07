@@ -30,6 +30,10 @@ ifdef USE_NUMPY
 CXXFLAGS+=-I/usr/lib/python2.5/site-packages/numpy/core/include -DUSE_NUMPY
 SWIGOPTS=-DUSE_NUMPY
 endif
+ifdef USE_GL
+CXXFLAGS+=-I../gl/src -DUSE_GL
+SWIGOPTS=-DUSE_GL
+endif
 # The library location and flags for creating dll in Mac is different from Linux
 # Darwin may not have the OSTYPE environment variable defined in bash. Set OSTYPE=Darwin if required
 ifeq ($(OSTYPE),Darwin)
@@ -63,6 +67,10 @@ OBJFILES := ../basecode/basecode.o \
 
 ifeq ($(USE_SBML),1)
 	OBJFILES := $(OBJFILES) ../sbml_IO/sbml_IO.o
+endif
+
+ifeq ($(USE_GL),1)
+	OBJFILES := $(OBJFILES) ../gl/src/GLcell.o
 endif
 
 OBJ = PyMooseBase.o \

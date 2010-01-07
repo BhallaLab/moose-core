@@ -655,7 +655,7 @@ class Delay:
 %attribute(pymoose::TauPump, double, TV, __get_TV, __set_TV)
 
 %include "GLcell.h"
-%attribute(pymoose::GLcell, string, path, __get_path, __set_path)
+%attribute(pymoose::GLcell, string, vizpath, __get_vizpath, __set_vizpath)
 %attribute(pymoose::GLcell, string, host, __get_clientHost, __set_clientHost)
 %attribute(pymoose::GLcell, string, port, __get_clientPort, __set_clientPort)
 %attribute(pymoose::GLcell, string, attribute, __get_attributeName, __set_attributeName)

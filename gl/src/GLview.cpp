@@ -82,7 +82,7 @@ const Cinfo* initGLviewCinfo()
 				GFCAST( &GLview::getClientPort ),
 				RFCAST( &GLview::setClientPort )
 				),
-		new ValueFinfo( "path",
+		new ValueFinfo( "vizpath",
 				ValueFtype1< string >::global(),
 				GFCAST( &GLview::getPath ),
 				RFCAST( &GLview::setPath )
@@ -935,7 +935,7 @@ int GLview::populateValues( int valueNum, double ** pValues, const string& strVa
 			
 			if ( id.eref() == NULL )
 			{
-				std::cerr << "GLview error: could not find path: " << path << "; error in relpath? " << std::endl;
+				std::cerr << "GLview error: could not find vizpath: " << path << "; error in relpath? " << std::endl;
 				status = -2;
 				break;
 			}

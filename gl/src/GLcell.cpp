@@ -80,7 +80,7 @@ const Cinfo* initGLcellCinfo()
 	///////////////////////////////////////////////////////
 	// Field definitions
 	///////////////////////////////////////////////////////
-		new ValueFinfo( "path",
+		new ValueFinfo( "vizpath",
 				ValueFtype1< string >::global(),
 				GFCAST( &GLcell::getPath ),
 				RFCAST( &GLcell::setPath )
