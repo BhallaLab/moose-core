@@ -19,8 +19,8 @@ namespace pymoose
 		GLcell( const Id& src, std::string name, Id& parent );
 		~GLcell();
 		const std::string& getType();
-		std::string __get_path() const;
-		void __set_path( std::string path );
+		std::string __get_vizpath() const;
+		void __set_vizpath( std::string vizpath );
 		std::string __get_clientHost() const;
 		void __set_clientHost( std::string strClientHost );
 		std::string __get_clientPort() const;
