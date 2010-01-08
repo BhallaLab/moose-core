@@ -185,7 +185,7 @@ GLcell::GLcell()
 	isConnectionUp_( false ),
 	strAttributeName_( "Vm" ),
 	sockFd_( -1 ),
-	changeThreshold_( SIZE_EPSILON ),
+	changeThreshold_( 1 ),
 	vScale_( 1.0 ),
 	syncMode_( false ),
 	bgcolorRed_( 0.0 ),
@@ -542,7 +542,8 @@ void GLcell::processFuncLocal( Eref e, ProcInfo info )
 				     syncMode_ ||
 				     // or we're in sync mode
 
-				     ( fabs( attrValue - renderMapAttrsLastTransmitted_[id] ) > changeThreshold_ ) )
+				     ( fabs( attrValue - renderMapAttrsLastTransmitted_[id] )
+				       > changeThreshold_/100 * ( highValue_ - lowValue_ ) ) )
 				     // or the current change differs significantly from
 				     // that last transmitted for this compartment
 				{
