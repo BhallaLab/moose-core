@@ -57,7 +57,10 @@
 	#include "DifShell.h"
 	#include "GssaStoich.h"
 	#include "TauPump.h"
+#ifdef USE_GL
         #include "GLcell.h"
+	#include "GLview.h"
+#endif
 	#include "TimeTable.h"
 	#include "PIDController.h"
 	#include "DiffAmp.h"
@@ -668,32 +671,32 @@ class Delay:
 
 %include "GLview.h"
 %attribute(pymoose::GLview, string, vizpath, __get_vizpath, __set_vizpath)
-%attribute(pymoose::GLview, string, clientHost, __get_clientHost, __set_clientHost)
-%attribute(pymoose::GLview, string, clientPort, __get_clientPort, __set_clientPort)
-%attribute(pymoose::GLview, string, relPath, __get_relPath, __set_relPath)
-%attribute(pymoose::GLview, string, value1Field, __get_value1Field, __set_value1Field)
-%attribute(pymoose::GLview, double, value1Min, __get_value1Min, __set_value1Min)
-%attribute(pymoose::GLview, double, value1Max, __get_value1Max, __set_value1Max)
-%attribute(pymoose::GLview, string, value2Field, __get_value2Field, __set_value2Field)
-%attribute(pymoose::GLview, double, value2Min, __get_value2Min, __set_value2Min)
-%attribute(pymoose::GLview, double, value2Max, __get_value2Max, __set_value2Max)
-%attribute(pymoose::GLview, string, value3Field, __get_value3Field, __set_value3Field)
-%attribute(pymoose::GLview, double, value3Min, __get_value3Min, __set_value3Min)
-%attribute(pymoose::GLview, double, value3Max, __get_value3Max, __set_value3Max)
-%attribute(pymoose::GLview, string, value4Field, __get_value4Field, __set_value4Field)
-%attribute(pymoose::GLview, double, value4Min, __get_value4Min, __set_value4Min)
-%attribute(pymoose::GLview, double, value4Max, __get_value4Max, __set_value4Max)
-%attribute(pymoose::GLview, string, value5Field, __get_value5Field, __set_value5Field)
-%attribute(pymoose::GLview, double, value5Min, __get_value5Min, __set_value5Min)
-%attribute(pymoose::GLview, double, value5Max, __get_value5Max, __set_value5Max)
-%attribute(pymoose::GLview, string, bgColor, __get_bgColor, __set_bgColor)
-%attribute(pymoose::GLview, string, syncMode, __get_syncMode, __set_syncMode)
-%attribute(pymoose::GLview, string, gridMode, __get_gridMode, __set_gridMode)
-%attribute(pymoose::GLview, unsigned int, colorVal, __get_colorVal, __set_colorVal)
-%attribute(pymoose::GLview, unsigned int, morphVal, __get_morphVal, __set_morphVal)
-%attribute(pymoose::GLview, unsigned int, xoffsetVal, __get_xoffsetVal, __set_xoffsetVal)
-%attribute(pymoose::GLview, unsigned int, yoffsetVal, __get_yoffsetVal, __set_yoffsetVal)
-%attribute(pymoose::GLview, unsigned int, zoffsetVal, __get_zoffsetVal, __set_zoffsetVal)
+%attribute(pymoose::GLview, string, host, __get_clientHost, __set_clientHost)
+%attribute(pymoose::GLview, string, port, __get_clientPort, __set_clientPort)
+%attribute(pymoose::GLview, string, relpath, __get_relPath, __set_relPath)
+%attribute(pymoose::GLview, string, value1, __get_value1Field, __set_value1Field)
+%attribute(pymoose::GLview, double, value1min, __get_value1Min, __set_value1Min)
+%attribute(pymoose::GLview, double, value1max, __get_value1Max, __set_value1Max)
+%attribute(pymoose::GLview, string, value2, __get_value2Field, __set_value2Field)
+%attribute(pymoose::GLview, double, value2min, __get_value2Min, __set_value2Min)
+%attribute(pymoose::GLview, double, value2max, __get_value2Max, __set_value2Max)
+%attribute(pymoose::GLview, string, value3, __get_value3Field, __set_value3Field)
+%attribute(pymoose::GLview, double, value3min, __get_value3Min, __set_value3Min)
+%attribute(pymoose::GLview, double, value3max, __get_value3Max, __set_value3Max)
+%attribute(pymoose::GLview, string, value4, __get_value4Field, __set_value4Field)
+%attribute(pymoose::GLview, double, value4min, __get_value4Min, __set_value4Min)
+%attribute(pymoose::GLview, double, value4max, __get_value4Max, __set_value4Max)
+%attribute(pymoose::GLview, string, value5, __get_value5Field, __set_value5Field)
+%attribute(pymoose::GLview, double, value5min, __get_value5Min, __set_value5Min)
+%attribute(pymoose::GLview, double, value5max, __get_value5Max, __set_value5Max)
+%attribute(pymoose::GLview, string, bgcolor, __get_bgColor, __set_bgColor)
+%attribute(pymoose::GLview, string, sync, __get_syncMode, __set_syncMode)
+%attribute(pymoose::GLview, string, grid, __get_gridMode, __set_gridMode)
+%attribute(pymoose::GLview, unsigned int, color_val, __get_colorVal, __set_colorVal)
+%attribute(pymoose::GLview, unsigned int, morph_val, __get_morphVal, __set_morphVal)
+%attribute(pymoose::GLview, unsigned int, xoffset_val, __get_xoffsetVal, __set_xoffsetVal)
+%attribute(pymoose::GLview, unsigned int, yoffset_val, __get_yoffsetVal, __set_yoffsetVal)
+%attribute(pymoose::GLview, unsigned int, zoffset_val, __get_zoffsetVal, __set_zoffsetVal)
 
 %include "TimeTable.h"
 %attribute(pymoose::TimeTable, double, maxTime, __get_maxTime, __set_maxTime)
