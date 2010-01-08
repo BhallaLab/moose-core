@@ -42,8 +42,8 @@ setfield gl0 host localhost
 setfield gl0 port 9999
 setfield gl0 bgcolor 050050050
 setfield gl0 value1 Vm
-call gl0 set_valuemin 1 -0.1
-call gl0 set_valuemax 1 0.05
+setfield gl0 value1min -0.1
+setfield gl0 value1max 0.05
 setfield gl0 morph_val 1
 setfield gl0 color_val 1
 setfield gl0 sync off

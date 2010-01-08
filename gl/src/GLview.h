@@ -61,6 +61,46 @@ class GLview
 	void innerSetValue5Field( const string& strValue5Field );
 	static string getValue5Field( Eref e );
 
+	static void setValue1Min( const Conn* c, double value1Min );
+	void innerSetValue1Min( const double& value1Min );
+	static double getValue1Min( Eref e );
+
+	static void setValue1Max( const Conn* c, double value1Max );
+	void innerSetValue1Max( const double& value1Max );
+	static double getValue1Max( Eref e );
+
+	static void setValue2Min( const Conn* c, double value2Min );
+	void innerSetValue2Min( const double& value2Min );
+	static double getValue2Min( Eref e );
+
+	static void setValue2Max( const Conn* c, double value2Max );
+	void innerSetValue2Max( const double& value2Max );
+	static double getValue2Max( Eref e );
+
+	static void setValue3Min( const Conn* c, double value3Min );
+	void innerSetValue3Min( const double& value3Min );
+	static double getValue3Min( Eref e );
+
+	static void setValue3Max( const Conn* c, double value3Max );
+	void innerSetValue3Max( const double& value3Max );
+	static double getValue3Max( Eref e );
+
+	static void setValue4Min( const Conn* c, double value4Min );
+	void innerSetValue4Min( const double& value4Min );
+	static double getValue4Min( Eref e );
+
+	static void setValue4Max( const Conn* c, double value4Max );
+	void innerSetValue4Max( const double& value4Max );
+	static double getValue4Max( Eref e );
+
+	static void setValue5Min( const Conn* c, double value5Min );
+	void innerSetValue5Min( const double& value5Min );
+	static double getValue5Min( Eref e );
+
+	static void setValue5Max( const Conn* c, double value5Max );
+	void innerSetValue5Max( const double& value5Max );
+	static double getValue5Max( Eref e );
+
 	static void setBgColor( const Conn* c, string strBgColor );
 	void innerSetBgColor( const double red, const double green, const double blue );
 	static string getBgColor( Eref e );
@@ -92,12 +132,6 @@ class GLview
 	static void setZOffsetVal( const Conn* c, unsigned int zoffsetVal );
 	void innerSetZOffsetVal( unsigned int zoffsetVal );
 	static unsigned int getZOffsetVal( Eref e );
-	
-	static void setValueMin( const Conn* c, unsigned int index, double value );
-	void innerSetValueMin( unsigned int index, double value );
-
-	static void setValueMax( const Conn* c, unsigned int index, double value );
-	void innerSetValueMax( unsigned int index, double value ); 
 
 	static const int MSGTYPE_HEADERLENGTH;
      	static const int MSGSIZE_HEADERLENGTH;

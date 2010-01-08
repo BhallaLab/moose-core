@@ -70,7 +70,7 @@ ifeq ($(USE_SBML),1)
 endif
 
 ifeq ($(USE_GL),1)
-	OBJFILES := $(OBJFILES) ../gl/src/GLcell.o
+	OBJFILES := $(OBJFILES) ../gl/src/GLcell.o ../gl/src/GLview.o
 endif
 
 OBJ = PyMooseBase.o \
@@ -127,6 +127,7 @@ OBJ = PyMooseBase.o \
 	GssaStoich.o	\
 	TauPump.o	\
 	GLcell.o	\
+	GLview.o	\
 	TimeTable.o	\
 	PIDController.o \
 	RC.o	\
@@ -200,6 +201,7 @@ HEADERS=PyMooseUtil.h \
 	GssaStoich.h	\
 	TauPump.h	\
 	GLcell.h	\
+	GLview.h	\
 	TimeTable.h	\
 	PIDController.h \
 	RC.h	\
