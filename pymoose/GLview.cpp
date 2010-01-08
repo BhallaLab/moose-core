@@ -339,3 +339,5 @@ void GLview::__set_zoffsetVal( unsigned int zoffsetVal )
 {
 	set< unsigned int >( id_(), "zoffset_val", zoffsetVal );
 }
+
+#endif
