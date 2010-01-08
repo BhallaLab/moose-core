@@ -61,8 +61,8 @@ namespace pymoose
 		void __set_bgColor( std::string bgColor );
 		std::string __get_syncMode() const;
 		void __set_syncMode( std::string syncMode );
-		std::string __get_boolMode() const;
-		void __set_boolMode( std::string boolMode );
+		std::string __get_gridMode() const;
+		void __set_gridMode( std::string gridMode );
 		unsigned int __get_colorVal() const;
 		void __set_colorVal( unsigned int colorVal );
 		unsigned int __get_morphVal() const;
