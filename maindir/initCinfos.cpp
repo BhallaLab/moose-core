@@ -92,6 +92,7 @@ extern const Cinfo* initTableCinfo();
 extern const Cinfo* initTauPumpCinfo();
 #ifdef USE_GL
 extern const Cinfo* initGLcellCinfo();
+extern const Cinfo* initGLviewCinfo();
 #endif
 extern const Cinfo* initTimeTableCinfo();
 extern const Cinfo* initTriPanelCinfo();
@@ -195,6 +196,7 @@ void initCinfos(){
     static const Cinfo* TauPumpCinfo = initTauPumpCinfo();
 #ifdef USE_GL
     static const Cinfo* GLcellCinfo = initGLcellCinfo();
+    static const Cinfo* GLviewCinfo = initGLviewCinfo();
 #endif
     static const Cinfo* TimeTableCinfo = initTimeTableCinfo();
     static const Cinfo* TriPanelCinfo = initTriPanelCinfo();
