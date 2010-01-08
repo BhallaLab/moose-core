@@ -170,14 +170,13 @@ These specify the indices of the arrays, respectively, that modify the
 offset in the x, y, z directions of 3D shapes from their original
 locations.
 
-k. 'set_valuemin' and 'set_valuemax'
+k. 'value1min'..'value5min' and 'value1max'..'value5max'
 
-This sets value_min and value_max values for the specified array.
-This accepts two arguments, the first of which is the index of the
-array (1..5) and the second is the value to be set.
+This sets minimum and maximum values for 'value1' and 'value5'
+respectively. 
 
-> call gl0 set_valuemin 1 -0.1
-> call gl0 set_valuemax 1 0.05
+> setfield gl0 value1min -0.1
+> setfield gl0 value1max 0.05
 
 So, for instance, this sets value_min for 'value1' to -0.1 and
 value_max for 'value1' to 0.05.
