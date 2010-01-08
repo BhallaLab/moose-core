@@ -85,7 +85,7 @@ class GLcell
 	bool isConnectionUp_;
 	string strAttributeName_;
 	int sockFd_;
-	double changeThreshold_; // any change in attribute below this value is not updated visually (in non-sync mode)
+	double changeThreshold_; // any change in attribute below this value is not updated visually (if not in sync mode)
 	double vScale_; // factor by which the diameter of cylindrical compartments will be scaled up (only in visual appearance, not numerically)
 	bool syncMode_;
 	double bgcolorRed_;
