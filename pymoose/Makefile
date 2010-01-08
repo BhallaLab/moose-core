@@ -70,7 +70,7 @@ ifeq ($(USE_SBML),1)
 endif
 
 ifeq ($(USE_GL),1)
-	OBJFILES := $(OBJFILES) ../gl/src/GLcell.o ../gl/src/GLview.o
+	OBJFILES := $(OBJFILES) ../gl/src/GLcell.o ../gl/src/GLview.o ../gl/src/GLshape.o
 endif
 
 OBJ = PyMooseBase.o \
