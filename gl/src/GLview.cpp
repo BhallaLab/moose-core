@@ -117,6 +117,56 @@ const Cinfo* initGLviewCinfo()
 				GFCAST( &GLview::getValue5Field ),
 				RFCAST( &GLview::setValue5Field )
 				),
+		new ValueFinfo( "value1min",
+				ValueFtype1< double >::global(),
+				GFCAST( &GLview::getValue1Min ),
+				RFCAST( &GLview::setValue1Min )
+				),
+		new ValueFinfo( "value1max",
+				ValueFtype1< double >::global(),
+				GFCAST( &GLview::getValue1Max ),
+				RFCAST( &GLview::setValue1Max )
+				),
+		new ValueFinfo( "value2min",
+				ValueFtype1< double >::global(),
+				GFCAST( &GLview::getValue2Min ),
+				RFCAST( &GLview::setValue2Min )
+				),
+		new ValueFinfo( "value2max",
+				ValueFtype1< double >::global(),
+				GFCAST( &GLview::getValue2Max ),
+				RFCAST( &GLview::setValue2Max )
+				),
+		new ValueFinfo( "value3min",
+				ValueFtype1< double >::global(),
+				GFCAST( &GLview::getValue3Min ),
+				RFCAST( &GLview::setValue3Min )
+				),
+		new ValueFinfo( "value3max",
+				ValueFtype1< double >::global(),
+				GFCAST( &GLview::getValue3Max ),
+				RFCAST( &GLview::setValue3Max )
+				),
+		new ValueFinfo( "value4min",
+				ValueFtype1< double >::global(),
+				GFCAST( &GLview::getValue4Min ),
+				RFCAST( &GLview::setValue4Min )
+				),
+		new ValueFinfo( "value4max",
+				ValueFtype1< double >::global(),
+				GFCAST( &GLview::getValue4Max ),
+				RFCAST( &GLview::setValue4Max )
+				),
+		new ValueFinfo( "value5min",
+				ValueFtype1< double >::global(),
+				GFCAST( &GLview::getValue5Min ),
+				RFCAST( &GLview::setValue5Min )
+				),
+		new ValueFinfo( "value5max",
+				ValueFtype1< double >::global(),
+				GFCAST( &GLview::getValue5Max ),
+				RFCAST( &GLview::setValue5Max )
+				),
 		new ValueFinfo( "bgcolor",
 				ValueFtype1< string >::global(),
 				GFCAST( &GLview::getBgColor ),
@@ -157,14 +207,6 @@ const Cinfo* initGLviewCinfo()
 				GFCAST( &GLview::getZOffsetVal ),
 				RFCAST( &GLview::setZOffsetVal )
 				),
-		new DestFinfo( "set_valuemin",
-			       Ftype2< unsigned int, double >::global(),
-			       RFCAST( &GLview::setValueMin )
-			       ),
-		new DestFinfo( "set_valuemax",
-			       Ftype2< unsigned int, double >::global(),
-			       RFCAST( &GLview::setValueMax )
-			       ),
 		///////////////////////////////////////////////////////
 		// Shared definitions
 		///////////////////////////////////////////////////////
@@ -588,40 +630,154 @@ unsigned int GLview::getZOffsetVal( Eref e )
 	return static_cast< const GLview* >( e.data() )->zoffset_val_;
 }
 
-void GLview::setValueMin( const Conn* c, unsigned int index, double value )
+void GLview::setValue1Min( const Conn* c, double value1Min )
 {
-	static_cast< GLview * >( c->data() )->innerSetValueMin( index, value );
+	static_cast< GLview * >( c->data() )->innerSetValue1Min( value1Min );
 }
 
-void GLview::innerSetValueMin( unsigned int index, double value )
+void GLview::innerSetValue1Min( const double& value1Min )
 {
-	if ( index >= 1 && index <= 5 )
-	{
-		if ( value >= value_max_[index-1] )
-			std::cerr << "GLview warning: value being set to be >= of corresponding value_max, which is " << value_max_[index-1] << std::endl;
-		
-		value_min_[index-1] = value;
-	}
-	else
-		std::cerr << "Index must be between 1 and 5." << std::endl;
+	value_min_[0] = value1Min;
 }
 
-void GLview::setValueMax( const Conn* c, unsigned int index, double value )
+double GLview::getValue1Min( Eref e )
 {
-	static_cast< GLview * >( c->data() )->innerSetValueMax( index, value );
+	return static_cast< const GLview* >( e.data() )->value_min_[0];
 }
 
-void GLview::innerSetValueMax( unsigned int index, double value )
+void GLview::setValue1Max( const Conn* c, double value1Max )
 {
-	if ( index >= 1 && index <= 5 )
-	{
-		if ( value <= value_min_[index-1] )
-			std::cerr << "GLview warning: value being set to be <= of corresponding value_min, which is" << value_min_[index-1] << std::endl;
+	static_cast< GLview * >( c->data() )->innerSetValue1Max( value1Max );
+}
 
-		value_max_[index-1] = value;
-	}
-	else
-		std::cerr << "Index must be between 1 and 5." << std::endl;
+void GLview::innerSetValue1Max( const double& value1Max )
+{
+	value_max_[0] = value1Max;
+}
+
+double GLview::getValue1Max( Eref e )
+{
+	return static_cast< const GLview* >( e.data() )->value_max_[0];
+}
+
+void GLview::setValue2Min( const Conn* c, double value2Min )
+{
+	static_cast< GLview * >( c->data() )->innerSetValue2Min( value2Min );
+}
+
+void GLview::innerSetValue2Min( const double& value2Min )
+{
+	value_min_[1] = value2Min;
+}
+
+double GLview::getValue2Min( Eref e )
+{
+	return static_cast< const GLview* >( e.data() )->value_min_[1];
+}
+
+void GLview::setValue2Max( const Conn* c, double value2Max )
+{
+	static_cast< GLview * >( c->data() )->innerSetValue2Max( value2Max );
+}
+
+void GLview::innerSetValue2Max( const double& value2Max )
+{
+	value_max_[1] = value2Max;
+}
+
+double GLview::getValue2Max( Eref e )
+{
+	return static_cast< const GLview* >( e.data() )->value_max_[1];
+}
+
+void GLview::setValue3Min( const Conn* c, double value3Min )
+{
+	static_cast< GLview * >( c->data() )->innerSetValue3Min( value3Min );
+}
+
+void GLview::innerSetValue3Min( const double& value3Min )
+{
+	value_min_[2] = value3Min;
+}
+
+double GLview::getValue3Min( Eref e )
+{
+	return static_cast< const GLview* >( e.data() )->value_min_[2];
+}
+
+void GLview::setValue3Max( const Conn* c, double value3Max )
+{
+	static_cast< GLview * >( c->data() )->innerSetValue3Max( value3Max );
+}
+
+void GLview::innerSetValue3Max( const double& value3Max )
+{
+	value_max_[2] = value3Max;
+}
+
+double GLview::getValue3Max( Eref e )
+{
+	return static_cast< const GLview* >( e.data() )->value_max_[2];
+}
+
+void GLview::setValue4Min( const Conn* c, double value4Min )
+{
+	static_cast< GLview * >( c->data() )->innerSetValue4Min( value4Min );
+}
+
+void GLview::innerSetValue4Min( const double& value4Min )
+{
+	value_min_[3] = value4Min;
+}
+
+double GLview::getValue4Min( Eref e )
+{
+	return static_cast< const GLview* >( e.data() )->value_min_[3];
+}
+
+void GLview::setValue4Max( const Conn* c, double value4Max )
+{
+	static_cast< GLview * >( c->data() )->innerSetValue4Max( value4Max );
+}
+
+void GLview::innerSetValue4Max( const double& value4Max )
+{
+	value_max_[3] = value4Max;
+}
+
+double GLview::getValue4Max( Eref e )
+{
+	return static_cast< const GLview* >( e.data() )->value_max_[3];
+}
+
+void GLview::setValue5Min( const Conn* c, double value5Min )
+{
+	static_cast< GLview * >( c->data() )->innerSetValue5Min( value5Min );
+}
+
+void GLview::innerSetValue5Min( const double& value5Min )
+{
+	value_min_[4] = value5Min;
+}
+
+double GLview::getValue5Min( Eref e )
+{
+	return static_cast< const GLview* >( e.data() )->value_min_[4];
+}
+
+void GLview::setValue5Max( const Conn* c, double value5Max )
+{
+	static_cast< GLview * >( c->data() )->innerSetValue5Max( value5Max );
+}
+
+void GLview::innerSetValue5Max( const double& value5Max )
+{
+	value_max_[4] = value5Max;
+}
+
+double GLview::getValue5Max( Eref e )
+{
+	return static_cast< const GLview* >( e.data() )->value_max_[4];
 }
 
 ///////////////////////////////////////////////////
