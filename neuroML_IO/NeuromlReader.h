@@ -29,8 +29,8 @@ class NeuromlReader
 		double calcSurfaceArea(double length,double diameter);
 		double calcVolume(double length,double diameter);
 		void setupSynChannels(map< string,vector<string> > &,map< string,vector< string > > &);
-		void setupChannels(map< string,vector<string> > &,map< string,vector< string > > &);
-		void setupPools(map< string,vector<string> > &,map< string,vector< string > > &);
+		void setupChannels(map< string,vector<string> > &,map< string,vector< string > > &,string unit);
+		void setupPools(map< string,vector<string> > &,map< string,vector< string > > &,string unit);
 		
 	private:
 		Element* compt_;
