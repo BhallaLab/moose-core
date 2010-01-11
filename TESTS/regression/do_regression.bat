@@ -35,8 +35,8 @@ set NEARDIFF = ./neardiff
 if ( $neuroml ) then
 	echo '\n===== NeuroML tests ====='
 	echo -n NeuroML_Read
-	$MOOSE moose_NeuroML_reader.g >>& regression.out
-	$NEARDIFF moose_NeuroMLReader.plot test.plot 5.0e-6
+	$MOOSE -p NeuroML_Reader/ moose_NeuroML_reader.g >>& regression.out
+	$NEARDIFF moose_NeuroMLReader.plot test.plot 5.0e-3
 	echo
 	/bin/rm -f test.plot >& /dev/null
 endif
