@@ -6,7 +6,7 @@ str target = "/cell"
 
 int USE_SOLVER = 1
 float SIMDT = 10e-6
-float IODT = 100e-6
+float IODT = 10e-6
 float SIMLENGTH = 0.10
 int IOCLOCK = 2
 
@@ -16,7 +16,7 @@ setclock 2 {IODT}
 
 readNeuroML { infile } { target }
 
-setfield { target }/Soma_0 inject 10.0e-8 
+setfield { target }/Soma_0 inject 10.0e-10
 
 init_plots { SIMLENGTH } { IOCLOCK } { IODT }
 
