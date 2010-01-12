@@ -6776,9 +6776,39 @@ class TimeTable(PyMooseBase):
         """__get_tableSize(self) -> unsigned int"""
         return _moose.TimeTable___get_tableSize(*args)
 
+    def __getitem__(*args):
+        """__getitem__(self, unsigned int index) -> double"""
+        return _moose.TimeTable___getitem__(*args)
+
+    def __setitem__(*args):
+        """__setitem__(self, unsigned int index, double value)"""
+        return _moose.TimeTable___setitem__(*args)
+
+    def __get_state(*args):
+        """__get_state(self) -> double"""
+        return _moose.TimeTable___get_state(*args)
+
+    def __get_method(*args):
+        """__get_method(self) -> int"""
+        return _moose.TimeTable___get_method(*args)
+
+    def __set_method(*args):
+        """__set_method(self, int method)"""
+        return _moose.TimeTable___set_method(*args)
+
+    def __get_filename(*args):
+        """__get_filename(self) -> string"""
+        return _moose.TimeTable___get_filename(*args)
+
+    def __set_filename(*args):
+        """__set_filename(self, string filename)"""
+        return _moose.TimeTable___set_filename(*args)
+
     maxTime = _swig_property(_moose.TimeTable_maxTime_get, _moose.TimeTable_maxTime_set)
-    tableVector = _swig_property(_moose.TimeTable_tableVector_get)
     tableSize = _swig_property(_moose.TimeTable_tableSize_get)
+    state = _swig_property(_moose.TimeTable_state_get)
+    method = _swig_property(_moose.TimeTable_method_get, _moose.TimeTable_method_set)
+    filename = _swig_property(_moose.TimeTable_filename_get, _moose.TimeTable_filename_set)
 TimeTable_swigregister = _moose.TimeTable_swigregister
 TimeTable_swigregister(TimeTable)
 TimeTable.className_ = _moose.cvar.TimeTable_className_
