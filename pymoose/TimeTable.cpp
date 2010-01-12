@@ -29,7 +29,7 @@ vector < double > TimeTable::__get_tableVector() const
     get < vector < double > > (id_(), "tableVector",tableVector);
     return tableVector;
 }
-void TimeTable::__set_tableVector( vector < double > tableVector )
+void TimeTable::__set_tableVector( const vector < double >& tableVector )
 {
     set < vector < double > > (id_(), "tableVector", tableVector);
 }
@@ -38,5 +38,49 @@ unsigned int TimeTable::__get_tableSize() const
     unsigned int tableSize;
     get < unsigned int > (id_(), "tableSize",tableSize);
     return tableSize;
+}
+
+double TimeTable::__getitem__(const unsigned int index) const
+{
+    double value;
+    lookupGet <double, unsigned int>(id_.eref(), "table", value, index);
+    return value;
+}
+
+void TimeTable::__setitem__(const unsigned int index, double value)
+{
+    cout << "Warning: TimeTable currently only supports loading table entries from file. This assignement will have no effect. Try setting \"filename\" attribute." << endl;
+    lookupSet<double, unsigned int>(id_.eref(), "table", value, index); // this is ineffective
+}
+
+double TimeTable::__get_state()
+{
+    double value;
+    get <double> (id_.eref(), "state", value);
+    return value;
+}
+
+int TimeTable::__get_method()
+{
+    int value;
+    get <int> (id_.eref(), "method", value);
+    return value;
+}
+
+void TimeTable::__set_method(const int method)
+{
+    set<int> (id_.eref(), "method", method);
+}
+
+const std::string TimeTable::__get_filename()
+{
+    std::string value;
+    get<std::string> (id_.eref(), "filename", value);
+    return value;
+}
+
+void TimeTable::__set_filename(const std::string& filename)
+{
+    set<std::string>(id_.eref(), "filename", filename);
 }
 #endif

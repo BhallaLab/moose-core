@@ -700,8 +700,11 @@ class Delay:
 
 %include "TimeTable.h"
 %attribute(pymoose::TimeTable, double, maxTime, __get_maxTime, __set_maxTime)
-%attribute(pymoose::TimeTable, const vector < double >&, tableVector, __get_tableVector, __set_tableVector)
 %attribute(pymoose::TimeTable, unsigned int, tableSize, __get_tableSize)
+%attribute(pymoose::TimeTable, double, state, __get_state)
+%attribute(pymoose::TimeTable, int, method, __get_method, __set_method)
+%attribute(pymoose::TimeTable, string, filename, __get_filename, __set_filename)
+
 
 %include "RC.h"
 %attribute(pymoose::RC, double, V0, __get_V0, __set_V0)
