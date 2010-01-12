@@ -15,11 +15,24 @@ namespace pymoose{
         TimeTable( const Id& src, std::string name, Id& parent);
         ~TimeTable();
         const std::string& getType();
-            double __get_maxTime() const;
-            void __set_maxTime(double maxTime);
-            vector < double > __get_tableVector() const;
-            void __set_tableVector(vector < double > tableVector);
-            unsigned int __get_tableSize() const;
+        double __get_maxTime() const;
+        void __set_maxTime(double maxTime);
+        vector < double > __get_tableVector() const;
+        void __set_tableVector(const vector < double >& tableVector);
+        unsigned int __get_tableSize() const;
+        
+        double __getitem__(const unsigned int index) const;
+        
+        void __setitem__(const unsigned int index, double value);
+        double __get_state();
+        
+        int __get_method();
+        
+        void __set_method(const int method);
+
+        const std::string __get_filename();
+        
+        void __set_filename(const std::string& filename);
     };
 }
 #endif
