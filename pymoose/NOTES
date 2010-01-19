@@ -112,3 +112,25 @@
 ** readcell 
    MOOSE does not use the last object when parent is specified as '.' in a .p
    file.
+* Threading
+  We want to make sure that the tty does not get blocked when running moose
+  simulation from python interpreter.
+
+  This shows an example use of QThread for this purpose:
+  http://orangepalantir.org/topicspace/index.php?idnum=33
+  
+
+  Python threads have serious problems, especially due to GIL:
+  http://www.dabeaz.com/python/GIL.pdf
+
+
+  I need to look in further detail to see if pthreads within a module is safe
+  from the issues posed by GIL. If Qt (which, just like python, wraps the
+  OS's native threads) can do it, we should also be able to do it. May need to
+  to steal some code from the Qt sources.
+
+  I am not sure if the issue presented by David Beazly is resolved in QThread.
+
+  - QThread seems to slow down even more than Python thread. For each thread's
+    run() method counting down from 1e7, it takes 19 s for two threads
+    compared to 2 s for Python thread.

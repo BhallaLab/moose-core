@@ -573,7 +573,7 @@ bool ReadCell::buildChannels( Element* compt, vector< string >& argv,
 		double value = atof( argv[ ++j ].c_str() );
 		if ( chan == "RA" ) {
 			double temp;
-			if ( length >= 0.0 ) // spherical flag. Assume length = dia.
+			if ( isEqual(length, 0.0) ) // spherical flag. Assume length = dia.
 				temp = 8.0 * value / (diameter * M_PI );
 			else
 				temp = 4.0 * value * length / (diameter * diameter * M_PI );
