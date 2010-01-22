@@ -58,6 +58,7 @@ class Data;
 #include "Cinfo.h"
 #include "Data.h"
 #include "Msg.h"
+#include "SimGroup.h"
 #include "Qinfo.h"
 #include "Conn.h"
 #include "Element.h"

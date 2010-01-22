@@ -2746,5 +2746,9 @@ Implemented a stub function for Shell::loadBalance. It is called at init, and
 can be called later. This replaces the deprecated Qinfo::setNumQs
 Runs, clears unit tests with up to 16 threads. Valgrind is also OK with it
 with the same caveat about 56 bytes.
+Checked in as 1524.
 
 =============================================================================
+22 Jan 2010
+Finally back to work after a bad spell of meetings and other duties.
+

@@ -106,9 +106,8 @@ void Qinfo::clearQ( Qid qId )
 
 /** 
  * Static func
- * In this variant we go through all the individual queues in the current
- * set. Note that we have two sets of queues for double buffering so that
- * we don't do any memcpys.
+ * In this variant we just go through the specified queue. 
+ * The job of thread safety is left to the calling function.
  * Thread safe as it is readonly in the Queue.
  */ 
 void Qinfo::readQ( Qid qId )
