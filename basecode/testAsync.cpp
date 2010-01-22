@@ -539,6 +539,9 @@ void testSparseMsg()
 	const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 1024;
 	string arg;
+
+	mtseed( 5489UL ); // The default value, but better to be explicit.
+
 	Id i2 = ic->create( "test2", size );
 	Eref e2 = i2.eref();
 	FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );

@@ -2752,3 +2752,5 @@ Checked in as 1524.
 22 Jan 2010
 Finally back to work after a bad spell of meetings and other duties.
 
+Minor cleanup of headers. 
+Did explicit seeding for the random number generator for the matrix unit tests.

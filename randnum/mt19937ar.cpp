@@ -239,9 +239,10 @@ void mtseed(long seed = 0)
 		unsigned long length = 2;
 		init_by_array(init, length);
 	} else {
-		unsigned long init[1] = {seed};
-		unsigned long length = 1;
-		init_by_array(init, length);
+		// unsigned long init[1] = {seed};
+		// unsigned long length = 1;
+		// init_by_array(init, length);
+		init_genrand( seed );
 	}
 }
 
