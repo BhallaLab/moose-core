@@ -76,14 +76,14 @@ class Qinfo
 		/**
 		 * Legacy utility function, just a readQ followed by zeroQ.
 		 */
-		static void clearQ( Qid qId );
+		static void clearQ( const ProcInfo *proc );
 
 		/**
 		 * Read the queue specified by the ProcInfo. Depending on the
 		 * scheduling and threading structure, may simply go through
 		 * all the available queues.
 		 */
-		static void readQ( Qid qId );
+		static void readQ( const ProcInfo* proc );
 
 		/**
 		 * Zeroes out contents (or simply resizes) queue

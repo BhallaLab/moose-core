@@ -50,7 +50,8 @@ void insertIntoQ( )
 
 		qi.addToQ( 0, m->mid(), 1, buf );
 	}
-	Qinfo::clearQ( 0 );
+	ProcInfo p;
+	Qinfo::clearQ( &p );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		char temp[20];
@@ -95,7 +96,7 @@ void testSendMsg()
 		string stemp( temp );
 		s.send( Eref( e1.element(), i ), &p, stemp );
 	}
-	Qinfo::clearQ( 0 );
+	Qinfo::clearQ( &p );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		char temp[20];
@@ -131,7 +132,7 @@ void testCreateMsg()
 		assert( sf != 0 );
 		sf->send( Eref( e1.element(), i ), &p );
 	}
-	Qinfo::clearQ( 0 );
+	Qinfo::clearQ( &p );
 
 	/*
 	for ( unsigned int i = 0; i < size; ++i )
@@ -149,6 +150,7 @@ void testSet()
 	unsigned int size = 100;
 	string arg;
 	Id i2 = nc->create( "test2", size );
+	ProcInfo p;
 
 	Eref e2 = i2.eref();
 	
@@ -158,7 +160,7 @@ void testSet()
 		string stemp( temp );
 		Eref dest( e2.element(), i );
 		set( dest, "set_name", stemp );
-		Qinfo::clearQ( 0 );
+		Qinfo::clearQ( &p );
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -180,6 +182,7 @@ void testGet()
 	string arg;
 	Id i2 = nc->create( "test2", size );
 	Element* shell = Id()();
+	ProcInfo p;
 
 	Eref e2 = i2.eref();
 	
@@ -198,7 +201,7 @@ void testGet()
 			// get requests, but just
 			// to test that it works from anywhere...
 		if ( get( dest, "get_name" ) ) {
-			Qinfo::clearQ( 0 ); // Request goes to e2
+			Qinfo::clearQ( &p ); // Request goes to e2
 			// shell->clearQ(); // Response comes back to e1
 
 			stemp = ( reinterpret_cast< Shell* >(shell->data( 0 )) )->getBuf();
@@ -398,7 +401,7 @@ void testSendSpike()
 	// Test that the spike message is in the queue.
 	assert( Qinfo::q_[0].size() == sizeof( Qinfo ) + sizeof( double ) );
 
-	Qinfo::clearQ( 0 );
+	Qinfo::clearQ( &p );
 	assert( Qinfo::q_[0].size() == 0 );
 
 	/*
@@ -603,7 +606,7 @@ void testSparseMsg()
 		i2()->process( &p );
 		assert( Qinfo::q_[0].size() / ( sizeof( Qinfo ) + sizeof( double ) ) == qSize[i] );
 		// cout << "T = " << p.currTime << ", Q size = " << Qinfo::q_[0].size() << endl;
-		Qinfo::clearQ( 0 );
+		Qinfo::clearQ( &p );
 //		i2()->process( &p );
 		// printGrid( i2(), "Vm", 0, thresh );
 		// sleep(1);

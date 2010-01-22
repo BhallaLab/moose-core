@@ -2754,3 +2754,43 @@ Finally back to work after a bad spell of meetings and other duties.
 
 Minor cleanup of headers. 
 Did explicit seeding for the random number generator for the matrix unit tests.
+Checked in as 1541.
+
+Working on framework for a proper test. Given the current structure, the
+remaining step is to assign workloads to the appropriate thread. 
+Tick::advance( e, ProcInfo* info)
+	if ( info->isFirstThread() )
+		Qinfo::mergeQ( info->groupId );
+	Qinfo::readQ( ProcInfo info ); // threadId also identifies outQ index.
+		extract the Qinfo from the outQ buffer using info->threadId,
+			which also identifies outQ index.
+		sometimes: do hackForSendTo. This will require care about outQ
+		Normally: extract msg from Qinfo
+			m->exec( buf, info )
+			Msg::exec needs two kinds of info from the ProcInfo.
+				- a way to pass threadId to the op,
+					in case it does output
+				- A way to decide which subset of events to 
+					operate on, based on the thread#
+					within the group. Note that this cannot
+					be the threadId, as the threadId may
+					be reassigned.
+
+This is OK for within group messaging. Need to work out how to pass
+messages to other groups: they will have their own InQs which will typically
+be busy during clearQ. 
+	Options:
+		- Do not allow messages to go out during clearQ
+			- But we already have a return message in get()
+				which is messy as it uses the Shell ProcInfo.
+		- Have a thread-safe inQ buffer for each group, for messages
+			coming in from outside.
+	Do this later, after testing the within-group messaging.
+
+
+Did the first phase from Tick::advance till Msg::exec. Lots of cleaning up
+of code, went well. Compiles but doesn't clear unit tests.
+
+
+
+

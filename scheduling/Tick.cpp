@@ -69,7 +69,6 @@ const Cinfo* Tick::initCinfo()
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
 		process,
-		// clearQ,
 
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
@@ -224,7 +223,7 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 	if ( info->threadId == 0 )
 		// Put the queues into one big one. Clear others
 		Qinfo::mergeQ( 0 );  // Temporary hack. Should selectively merge
-			// only queue that this Tick is responsible for.
+			// only queues that this Tick is responsible for.
 		
 	if ( info->barrier ) {
 		int rc = pthread_barrier_wait(
@@ -234,23 +233,6 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 	Qinfo::readQ( 0 ); // March through big queue.
 	c->process( info ); // Do object local ops.
 }
-
-/*
-void Tick::advanceThread( Element* e, ProcInfo* info ) const
-{
-	// cout << "(" << dt_ << ", " << stage_ << " ) at " << info->currTime << endl;
-	// Hack: we need a better way to define which connId to use.
-	// Presumably we should at least take an offset from the predefined
-	// Slots like children.
-	const Conn* c = e->conn( index_ );
-	Qinfo::clearQ( 0 );
-	int rc = pthread_barrier_wait( info->barrier );
-	assert( rc != 0 && rc != PTHREAD_BARRIER_SERIAL_THREAD );
-	c->process( info );
-	rc = pthread_barrier_wait( info->barrier );
-	assert( rc != 0 && rc != PTHREAD_BARRIER_SERIAL_THREAD );
-}
-*/
 
 void Tick::setIndex( unsigned int index ) 
 {

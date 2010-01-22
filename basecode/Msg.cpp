@@ -74,7 +74,7 @@ void Msg::process( const ProcInfo* p ) const
  * Here it has to slot the data into the appropriate queue, depending on
  * which Elements and objects reside on which thread.
  * In other words, the Msg needs additional info in cases where we handle
- * multiple threads. The current 
+ * multiple threads.
  */
 void Msg::addToQ( const Element* caller, Qinfo& q, 
 	const ProcInfo* p, const char* arg ) const
@@ -112,7 +112,7 @@ SingleMsg::SingleMsg( Eref e1, Eref e2 )
 	;
 }
 
-void SingleMsg::exec( const char* arg ) const
+void SingleMsg::exec( const char* arg, const ProcInfo *p ) const
 {
 	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
 
@@ -124,21 +124,6 @@ void SingleMsg::exec( const char* arg ) const
 		f->op( Eref( e1_, i1_ ), arg );
 	}
 }
-
-/*
-void SingleMsg::exec( Element* target, const char* arg ) const
-{
-	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
-	// arg += sizeof( Qinfo );
-	const OpFunc* f = target->cinfo()->getOpFunc( q->fid() );
-	if ( target == e1_ ) {
-		f->op( Eref( target, i1_ ), arg );
-	} else {
-		assert( target == e2_ );
-		f->op( Eref( target, i2_ ), arg );
-	}
-}
-*/
 
 bool SingleMsg::add( Eref e1, const string& srcField, 
 			Eref e2, const string& destField )
@@ -164,7 +149,7 @@ OneToOneMsg::OneToOneMsg( Element* e1, Element* e2 )
 	;
 }
 
-void OneToOneMsg::exec( const char* arg ) const
+void OneToOneMsg::exec( const char* arg, const ProcInfo* p ) const
 {
 	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
 	if ( q->isForward() ) {
@@ -187,7 +172,7 @@ OneToAllMsg::OneToAllMsg( Eref e1, Element* e2 )
 	;
 }
 
-void OneToAllMsg::exec( const char* arg ) const
+void OneToAllMsg::exec( const char* arg, const ProcInfo *p ) const
 {
 	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
 	// arg += sizeof( Qinfo );

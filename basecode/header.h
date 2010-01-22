@@ -54,11 +54,11 @@ class Data;
 
 #include "DataId.h"
 #include "Finfo.h"
+#include "SimGroup.h"
 #include "ProcInfo.h"
 #include "Cinfo.h"
 #include "Data.h"
 #include "Msg.h"
-#include "SimGroup.h"
 #include "Qinfo.h"
 #include "Conn.h"
 #include "Element.h"

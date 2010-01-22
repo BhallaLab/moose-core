@@ -37,7 +37,7 @@ class SparseMsg: public Msg
 		SparseMsg( Element* e1, Element* e2 );
 		~SparseMsg() {;}
 
-		void exec( const char* arg) const;
+		void exec( const char* arg, const ProcInfo* p ) const;
 
 		/**
 		 * Set up connections randomly. Probability should be low to keep

@@ -57,14 +57,7 @@ class Msg
 		/**
 		 * Execute func( arg ) on all relevant indices of target
 		 */
-		virtual void exec( const char* arg ) const = 0;
-		
-		/**
-		 * Execute func( arg ) on target, all relevant indices.
-		virtual void exec( 
-			Element* target, const char* arg 
-		) const = 0;
-		 */
+		virtual void exec( const char* arg, const ProcInfo* p ) const = 0;
 
 		// Something here to set up sync message buffers
 
@@ -127,7 +120,7 @@ class SingleMsg: public Msg
 		SingleMsg( Eref e1, Eref e2 );
 		~SingleMsg() {;}
 
-		void exec( const char* arg) const;
+		void exec( const char* arg, const ProcInfo* p) const;
 
 		static bool add( Eref e1, const string& srcField, 
 			Eref e2, const string& destField );
@@ -143,7 +136,7 @@ class OneToOneMsg: public Msg
 		OneToOneMsg( Element* e1, Element* e2 );
 		~OneToOneMsg() {;}
 
-		void exec( const char* arg) const;
+		void exec( const char* arg, const ProcInfo* p) const;
 	private:
 };
 
@@ -153,7 +146,7 @@ class OneToAllMsg: public Msg
 		OneToAllMsg( Eref e1, Element* e2 );
 		~OneToAllMsg() {;}
 
-		void exec( const char* arg ) const;
+		void exec( const char* arg, const ProcInfo* p ) const;
 
 		static bool add( Eref e1, const string& srcField, 
 			Element* e2, const string& destField );

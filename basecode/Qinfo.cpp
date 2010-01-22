@@ -70,13 +70,12 @@ unsigned int Qinfo::addSimGroup( unsigned short numThreads )
 	unsigned short ng = g_.size();
 	unsigned short si = 0;
 	if ( ng > 0 )
-		si = g_[ng - 1].startIndex + g_[ng - 1].numThreads + 1;
+		si = g_[ng - 1].startThread + g_[ng - 1].numThreads + 1;
 	SimGroup sg( numThreads, si );
 	g_.push_back( sg );
 	q_.resize( si + numThreads + 1 );
 	for ( unsigned int i = 0; i <= numThreads; ++i ) {
 		q_[i + si].reserve( 1024 );
-		
 	}
 	return ng;
 }
@@ -98,10 +97,10 @@ void Qinfo::hackForSendTo( const Qinfo* q, const char* buf )
 	func->op( Eref( tgt, *tgtIndex ), buf );
 }
 
-void Qinfo::clearQ( Qid qId )
+void Qinfo::clearQ( const ProcInfo* proc )
 {
-	readQ( qId );
-	zeroQ( qId );
+	readQ( proc );
+	zeroQ( proc->qId );
 }
 
 /** 
@@ -110,10 +109,10 @@ void Qinfo::clearQ( Qid qId )
  * The job of thread safety is left to the calling function.
  * Thread safe as it is readonly in the Queue.
  */ 
-void Qinfo::readQ( Qid qId )
+void Qinfo::readQ( const ProcInfo* proc )
 {
-	assert( qId < q_.size() );
-	vector< char >& q = q_[qId];
+	assert( proc->qId < q_.size() );
+	vector< char >& q = q_[ proc->qId ];
 	const char* buf = &q[0];
 	while ( buf && buf < &q.back() )
 	{
@@ -122,7 +121,7 @@ void Qinfo::readQ( Qid qId )
 			hackForSendTo( q, buf );
 		} else {
 			const Msg* m = Msg::getMsg( q->m_ );
-			m->exec( buf );
+			m->exec( buf, proc );
 		}
 		buf += sizeof( Qinfo ) + q->size();
 	}
@@ -151,7 +150,7 @@ void Qinfo::mergeQ( unsigned int groupId )
 {
 	assert( groupId < g_.size() );
 	SimGroup& g = g_[ groupId ];
-	unsigned int j = g.startIndex;
+	unsigned int j = g.startThread;
 	assert( j + g.numThreads < q_.size() );
 
 	unsigned int totSize = 0;
@@ -160,7 +159,7 @@ void Qinfo::mergeQ( unsigned int groupId )
 
 	vector< char >& inQ = q_[ groupId ];
 	inQ.resize( totSize );
-	j = g.startIndex;
+	j = g.startThread;
 	char* buf = &inQ[0];
 	for ( unsigned int i = 0; i < g.numThreads; ++i ) {
 		memcpy( buf, &q_[ j ], q_[ j ].size() );

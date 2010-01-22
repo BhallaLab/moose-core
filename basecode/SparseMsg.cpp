@@ -34,7 +34,7 @@ unsigned int rowIndex( const Element* e, const DataId& d )
 	return 0;
 }
 
-void SparseMsg::exec( const char* arg ) const
+void SparseMsg::exec( const char* arg, const ProcInfo *p ) const
 {
 	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
 	// arg += sizeof( Qinfo );
@@ -85,6 +85,9 @@ bool SparseMsg::add( Element* e1, const string& srcField,
 	return 0;
 }
 
+/**
+ * Should really have a seed argument
+ */
 unsigned int SparseMsg::randomConnect( double probability )
 {
 	unsigned int nRows = matrix_.nRows();
