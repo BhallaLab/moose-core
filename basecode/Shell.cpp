@@ -179,8 +179,10 @@ void Shell::loadBalance()
 	// nodes when things get really scaled up.
 	//
 	// Note that the messages have to be rebuilt after this call.
-	for ( unsigned int i = 0; i < numNodes_; ++i )
-		Qinfo::addSimGroup( numCores_ ); // These are the worker threads.
+	if ( !isSingleThreaded_ ) {
+		for ( unsigned int i = 0; i < numNodes_; ++i )
+			Qinfo::addSimGroup( numCores_ ); //These are the worker threads.
+	}
 }
 
 unsigned int Shell::numCores()
@@ -195,13 +197,22 @@ void Shell::start( double runtime )
 {
 	Id clockId( 1, 0 );
 	Element* clocke = clockId();
+	Qinfo q;
+	if ( isSingleThreaded_ ) {
+		// SetGet< double >::set( clocke, runTime );
+		// clock->start( clocke, &q, runTime );
+		Clock *clock = reinterpret_cast< Clock* >( clocke->data( 0 ) );
+		clock->start( clockId.eref(), &q, runtime );
+		return;
+	}
+
 	vector< ThreadInfo > ti( numCores_ );
 	pthread_mutex_t sortMutex;
 	pthread_mutex_init( &sortMutex, NULL );
 	pthread_mutex_t timeMutex;
 	pthread_mutex_init( &timeMutex, NULL );
 
-	Qinfo q;
+	/*
 	for ( unsigned int i = 0; i < numCores_; ++i ) {
 		ti[i].clocke = clocke;
 		ti[i].qinfo = &q;
@@ -210,51 +221,64 @@ void Shell::start( double runtime )
 		ti[i].sortMutex = &sortMutex;
 		ti[i].timeMutex = &timeMutex;
 	}
-	if ( isSingleThreaded_ ) {
-		Clock::threadStartFunc( &ti[0] );
-	} else {
-		pthread_t* threads = new pthread_t[ numCores_ ];
-		pthread_attr_t attr;
+	*/
 
-		pthread_attr_init( &attr );
-		pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_JOINABLE );
-		pthread_barrier_t barrier;
-		if ( pthread_barrier_init( &barrier, NULL, numCores_ ) ) {
-			cout << "Error: Shell::start: Unable to init barrier\n";
+	unsigned int j = 0;
+	for ( unsigned int i = 0; i < Qinfo::numSimGroup(); ++i ) {
+		for ( unsigned short k = 0; k < Qinfo::simGroup( i )->numThreads; ++k ) {
+			ti[j].clocke = clocke;
+			ti[j].qinfo = &q;
+			ti[j].runtime = runtime;
+			ti[j].threadId = j;
+			ti[j].threadIndexInGroup = j - Qinfo::simGroup( i )->startThread;
+			ti[j].sortMutex = &sortMutex;
+			ti[j].timeMutex = &timeMutex;
+			j++;
+		}
+		
+	}
+
+	pthread_t* threads = new pthread_t[ numCores_ ];
+	pthread_attr_t attr;
+
+	pthread_attr_init( &attr );
+	pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_JOINABLE );
+	pthread_barrier_t barrier;
+	if ( pthread_barrier_init( &barrier, NULL, numCores_ ) ) {
+		cout << "Error: Shell::start: Unable to init barrier\n";
+		exit( -1 );
+	}
+	Clock* clock = reinterpret_cast< Clock* >( clocke->data( 0 ) );
+	clock->setBarrier( &barrier );
+	clock->setNumPendingThreads( 0 ); // Used for clock scheduling
+	clock->setNumThreads( numCores_ ); // Used for clock scheduling
+	// pthread_t threads[ numCores_ ];
+	for ( unsigned int i = 0; i < numCores_; ++i ) {
+		int ret = pthread_create( 
+			&threads[i], NULL, Clock::threadStartFunc, 
+			reinterpret_cast< void* >( &ti[i] )
+		);
+		if ( ret ) {
+			cout << "Error: Shell::start: Unable to create threads\n";
 			exit( -1 );
 		}
-		Clock* clock = reinterpret_cast< Clock* >( clocke->data( 0 ) );
-		clock->setBarrier( &barrier );
-		clock->setNumPendingThreads( 0 ); // Used for clock scheduling
-		clock->setNumThreads( numCores_ ); // Used for clock scheduling
-		// pthread_t threads[ numCores_ ];
-		for ( unsigned int i = 0; i < numCores_; ++i ) {
-			int ret = pthread_create( 
-				&threads[i], NULL, Clock::threadStartFunc, 
-				reinterpret_cast< void* >( &ti[i] )
-			);
-			if ( ret ) {
-				cout << "Error: Shell::start: Unable to create threads\n";
-				exit( -1 );
-			}
-		}
+	}
 
-		// Clean up.
-		for ( unsigned int i = 0; i < numCores_; ++i ) {
-			void* status;
-			int ret = pthread_join( threads[ i ], &status );
-			if ( ret ) {
-				cout << "Error: Shell::start: Unable to join threads\n";
-				exit( -1 );
-			}
+	// Clean up.
+	for ( unsigned int i = 0; i < numCores_; ++i ) {
+		void* status;
+		int ret = pthread_join( threads[ i ], &status );
+		if ( ret ) {
+			cout << "Error: Shell::start: Unable to join threads\n";
+			exit( -1 );
 		}
+	}
 		// cout << "Shell::start: Threads joined successfully\n";
 		// cout << "Completed time " << runtime << " on " << numCores_ << " threads\n";
 
-		delete[] threads;
-		pthread_attr_destroy( &attr );
-		pthread_barrier_destroy( &barrier );
-	}
+	delete[] threads;
+	pthread_attr_destroy( &attr );
+	pthread_barrier_destroy( &barrier );
 	pthread_mutex_destroy( &sortMutex );
 	pthread_mutex_destroy( &timeMutex );
 }

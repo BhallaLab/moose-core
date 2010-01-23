@@ -17,6 +17,7 @@ class ThreadInfo
 		Qinfo* qinfo;
 		double runtime;
 		unsigned int threadId;
+		unsigned int threadIndexInGroup;
 		pthread_mutex_t* sortMutex; // Protects sorting of TickPtrs
 		pthread_mutex_t* timeMutex; // Protects time increment in TickPtrs
 };

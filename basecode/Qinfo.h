@@ -74,6 +74,16 @@ class Qinfo
 		static unsigned int addSimGroup( unsigned short numThreads );
 
 		/**
+		 * 	Returns the number of SimGroups
+		 */
+		static unsigned int numSimGroup();
+
+		/**
+		 * Returns the specified SimGroup
+		 */
+		static const SimGroup* simGroup( unsigned int index );
+
+		/**
 		 * Legacy utility function, just a readQ followed by zeroQ.
 		 */
 		static void clearQ( const ProcInfo *proc );

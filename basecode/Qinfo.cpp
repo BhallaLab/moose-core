@@ -70,7 +70,7 @@ unsigned int Qinfo::addSimGroup( unsigned short numThreads )
 	unsigned short ng = g_.size();
 	unsigned short si = 0;
 	if ( ng > 0 )
-		si = g_[ng - 1].startThread + g_[ng - 1].numThreads + 1;
+		si = g_[ng - 1].startThread + g_[ng - 1].numThreads;
 	SimGroup sg( numThreads, si );
 	g_.push_back( sg );
 	q_.resize( si + numThreads + 1 );
@@ -78,6 +78,17 @@ unsigned int Qinfo::addSimGroup( unsigned short numThreads )
 		q_[i + si].reserve( 1024 );
 	}
 	return ng;
+}
+
+unsigned int Qinfo::numSimGroup()
+{
+	return g_.size();
+}
+
+const SimGroup* Qinfo::simGroup( unsigned int index )
+{
+	assert( index < g_.size() );
+	return &( g_[index] );
 }
 
 // static func

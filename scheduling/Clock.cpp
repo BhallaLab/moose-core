@@ -309,7 +309,8 @@ void Clock::start(  Eref e, const Qinfo* q, double runTime )
 	double endTime = runTime * ROUNDING + info_.currTime;
 	isRunning_ = 1;
 
-	Element* ticke = getTickE( e.element() );
+	// Element* ticke = getTickE( e.element() );
+	Element* ticke = Id( 2, 0 )();
 
 	if ( tickPtr_.size() == 1 ) {
 		tickPtr_[0].advance( ticke, &info_, endTime, 0 );
@@ -356,6 +357,7 @@ void Clock::tStart(  Eref e, const ThreadInfo* ti )
 {
 	ProcInfo pinfo = info_; //We use an independent ProcInfo for each thread
 	pinfo.threadId = ti->threadId; // to manage separate threadIds.
+	pinfo.threadIndexInGroup = ti->threadIndexInGroup;
 	assert( pinfo.numThreads == numThreads_ );
 	static const double ROUNDING = 1.0000000001;
 	if ( tickPtr_.size() == 0 ) {

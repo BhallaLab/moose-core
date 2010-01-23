@@ -2791,6 +2791,16 @@ be busy during clearQ.
 Did the first phase from Tick::advance till Msg::exec. Lots of cleaning up
 of code, went well. Compiles but doesn't clear unit tests.
 
+=============================================================================
+23 Jan 2010
+Fixed, clears unit tests. Checkin 1543.
 
+Setting up the ProcInfo to pass the right values in. Croaks. Turns out
+that we have added two SimGroups: one for the shell, and one for everything
+else. However, this fails because the # of threads is just numCores, whereas
+the shell is assumed to be on another thread.
 
+Went through and fixed up the non-threaded calculations. moose -s.
+Now clears unit tests with this.
 
+=============================================================================
