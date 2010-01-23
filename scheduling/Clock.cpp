@@ -403,7 +403,7 @@ void* Clock::threadStartFunc( void* threadInfo )
 	ThreadInfo* ti = reinterpret_cast< ThreadInfo* >( threadInfo );
 	Clock* clock = reinterpret_cast< Clock* >( ti->clocke->data( 0 ) );
 	Eref clocker( ti->clocke, 0 );
-	// cout << "Start thread " << ti->threadId << " with runtime " << ti->runtime << endl;
+	// cout << "Start thread " << ti->threadId << " threadIndex in Group " << ti->threadIndexInGroup << endl;
 	clock->tStart( clocker, ti );
 	// cout << "End thread " << ti->threadId << " with runtime " << ti->runtime << endl;
 

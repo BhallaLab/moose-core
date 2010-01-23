@@ -224,19 +224,20 @@ void Shell::start( double runtime )
 	*/
 
 	unsigned int j = 0;
-	for ( unsigned int i = 0; i < Qinfo::numSimGroup(); ++i ) {
+	for ( unsigned int i = 1; i < Qinfo::numSimGroup(); ++i ) {
 		for ( unsigned short k = 0; k < Qinfo::simGroup( i )->numThreads; ++k ) {
 			ti[j].clocke = clocke;
 			ti[j].qinfo = &q;
 			ti[j].runtime = runtime;
 			ti[j].threadId = j;
-			ti[j].threadIndexInGroup = j - Qinfo::simGroup( i )->startThread;
+			ti[j].threadIndexInGroup = j - Qinfo::simGroup( i )->startThread + 1;
 			ti[j].sortMutex = &sortMutex;
 			ti[j].timeMutex = &timeMutex;
 			j++;
 		}
-		
 	}
+
+	assert( j == numCores_ );
 
 	pthread_t* threads = new pthread_t[ numCores_ ];
 	pthread_attr_t attr;

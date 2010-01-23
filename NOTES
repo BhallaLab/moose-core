@@ -2801,6 +2801,12 @@ else. However, this fails because the # of threads is just numCores, whereas
 the shell is assumed to be on another thread.
 
 Went through and fixed up the non-threaded calculations. moose -s.
-Now clears unit tests with this.
+Now clears unit tests with this. Checkin 1544.
+
+Some work to do in defining what Elements/Messages belong in what group.
+	This determines which threads they are on, as well as numerous other
+	things. 
+For now I need to get the system to work just enough to do the IntFire network
+	test.
 
 =============================================================================
