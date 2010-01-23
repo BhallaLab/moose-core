@@ -90,7 +90,7 @@ int main( int argc, char** argv )
 	Shell* s = reinterpret_cast< Shell* >( shelle->data( 0 ) );
 	ProcInfo p;
 	while( !s->getQuit() ) {
-		Qinfo::clearQ( 0 );
+		Qinfo::clearQ( Shell::procInfo() );
 		// The shell is careful not to execute any structural commands
 		// during clearQ. It instead puts them onto an internal queue for
 		// clearing during process.

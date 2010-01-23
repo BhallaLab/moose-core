@@ -32,7 +32,7 @@ void SetGet::setShell()
 void SetGet::completeSet() const
 {
 	// e_.element()->clearQ();
-	Qinfo::clearQ( 0 );
+	Qinfo::clearQ( Shell::procInfo() );
 }
 
 bool SetGet::checkSet( const string& field, FuncId& fid ) const
@@ -75,14 +75,6 @@ void SetGet::iSetInner( FuncId fid, const char* val, unsigned int size )
 	shell_->addTargetFunc( fid, setFuncIndex );
 	shelle_.asend( setCid, setFuncIndex, Shell::procInfo(), val, size );
 }
-
-/*
-void SetGet::clearQ() const
-{
-	// e_.element()->clearQ();
-	Qinfo::clearQ( 0 );
-}
-*/
 
 void SetGet::resizeBuf( unsigned int size )
 {

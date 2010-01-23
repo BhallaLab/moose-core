@@ -111,6 +111,7 @@ void Qinfo::clearQ( const ProcInfo* proc )
  */ 
 void Qinfo::readQ( const ProcInfo* proc )
 {
+	assert( proc );
 	assert( proc->qId < q_.size() );
 	vector< char >& q = q_[ proc->qId ];
 	const char* buf = &q[0];

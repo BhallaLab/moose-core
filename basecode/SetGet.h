@@ -384,8 +384,7 @@ template< class A > class Field: public SetGet1< A >
 		 */
 		A harvestGet() const
 		{ 
-			Qinfo::clearQ( 0 ); // Need to put in the right thread. assume 0
-			// shell_->clearQ();
+			Qinfo::clearQ( Shell::procInfo() ); // Need to put in the right thread. assume 0
 			A ret;
 
 			Conv< A >::buf2val( ret, Shell::buf() );
@@ -397,8 +396,7 @@ template< class A > class Field: public SetGet1< A >
 		 */
 		string harvestStrGet() const
 		{ 
-			Qinfo::clearQ( 0 ); // need to put in the right thread.
-			// shell_->clearQ();
+			Qinfo::clearQ( Shell::procInfo() );
 			A val;
 			Conv< A >::buf2val( val, Shell::buf() );
 			string s;

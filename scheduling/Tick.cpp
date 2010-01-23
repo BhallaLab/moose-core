@@ -230,7 +230,7 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 			reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
 		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 	}
-	Qinfo::readQ( 0 ); // March through big queue.
+	Qinfo::readQ( info ); // March through big queue.
 	c->process( info ); // Do object local ops.
 }
 
