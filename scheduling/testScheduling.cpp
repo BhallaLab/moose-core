@@ -13,6 +13,13 @@
 #include "TickPtr.h"
 #include "Clock.h"
 
+#include <queue>
+#include "../biophysics/Synapse.h"
+#include "../biophysics/IntFire.h"
+#include "SparseMatrix.h"
+#include "SparseMsg.h"
+#include "../randnum/randnum.h"
+
 class testSchedElement: public Element
 {
 	public:
@@ -221,10 +228,100 @@ void testThreads()
 
 	cout << "." << flush;
 }
+
+void testThreadIntFireNetwork()
+{
+	// Need another way to validate simulation output.
+	static const unsigned int qSize[] =
+		{ 838, 10, 6, 18, 36, 84, 150, 196, 258, 302 };
+	static const unsigned int NUMSYN = 104576;
+	static const double thresh = 0.2;
+	static const double Vmax = 1.0;
+	static const double refractoryPeriod = 0.4;
+	static const double weightMax = 0.02;
+	static const double delayMax = 4;
+	static const double timestep = 0.2;
+	static const double connectionProbability = 0.1;
+	static const unsigned int runsteps = 5;
+	const Cinfo* ic = IntFire::initCinfo();
+	const Cinfo* sc = Synapse::initCinfo();
+	unsigned int size = 1024;
+	string arg;
+
+	mtseed( 5489UL ); // The default value, but better to be explicit.
+
+	Id i2 = ic->create( "test2", size );
+	Eref e2 = i2.eref();
+	FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
+
+	assert( syn.numData() == 0 );
+
+	DataId di( 1, 0 ); // DataId( data, field )
+	Eref syne( &syn, di );
+
+	bool ret = SparseMsg::add( e2.element(), "spike", &syn, "addSpike", 
+		connectionProbability ); // Include group id as an arg. 
+	assert( ret );
+
+	unsigned int nd = syn.numData();
+//	cout << "Num Syn = " << nd << endl;
+	assert( nd == NUMSYN );
+	vector< double > temp( size, 0.0 );
+	for ( unsigned int i = 0; i < size; ++i )
+		temp[i] = mtrand() * Vmax;
+
+	ret = Field< double >::setVec( e2, "Vm", temp );
+	assert( ret );
+	/*
+	for ( unsigned int i = 0; i < 40; ++i )
+		cout << reinterpret_cast< IntFire* >( e2.element()->data( i ) )->getVm() << "	" << temp[i] << endl;
+		*/
+	temp.clear();
+	temp.resize( size, thresh );
+	ret = Field< double >::setVec( e2, "thresh", temp );
+	assert( ret );
+	temp.clear();
+	temp.resize( size, refractoryPeriod );
+	ret = Field< double >::setVec( e2, "refractoryPeriod", temp );
+	assert( ret );
+
+	vector< double > weight;
+	weight.reserve( nd );
+	vector< double > delay;
+	delay.reserve( nd );
+	for ( unsigned int i = 0; i < size; ++i ) {
+		unsigned int numSyn = syne.element()->numData2( i );
+		for ( unsigned int j = 0; j < numSyn; ++j ) {
+			weight.push_back( mtrand() * weightMax );
+			delay.push_back( mtrand() * delayMax );
+		}
+	}
+	ret = Field< double >::setVec( syne, "weight", weight );
+	assert( ret );
+	ret = Field< double >::setVec( syne, "delay", delay );
+	assert( ret );
+
+	// printGrid( i2(), "Vm", 0, thresh );
+	Element* se = Id()();
+	Shell* s = reinterpret_cast< Shell* >( se->data( 0 ) );
+	s->setclock( 0, timestep, 0 );
+	cerr << "starting\n";
+
+	Element* ticke = Id( 2, 0 )();
+	Eref er0( ticke, DataId( 0, 0 ) );
+
+	SingleMsg m0( er0, e2 ); er0.element()->addMsgToConn( m0.mid(), 0 );
+	s->start( timestep * runsteps );
+	cerr << "ending\n";
+
+	cout << "." << flush;
+	delete i2();
+}
 	
 
 void testScheduling( )
 {
 	setupTicks();
 	testThreads();
+	testThreadIntFireNetwork();
 }

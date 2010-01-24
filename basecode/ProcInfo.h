@@ -12,7 +12,7 @@ class ProcInfo
 	public:
 		ProcInfo() 
 			: dt( 1.0 ), currTime( 0.0 ), numThreads( 1 ), threadId( 0 ),
-				qId( 0 ), threadIndexInGroup( 0 ),
+				qId( 0 ), threadIndexInGroup( 0 ), groupId( 0 ),
 				barrier( 0 )
 			{;}
 		double dt;
@@ -21,6 +21,7 @@ class ProcInfo
 		unsigned int threadId;
 		Qid qId;
 		unsigned int threadIndexInGroup;
+		unsigned int groupId;
 		unsigned int node;
 		void* barrier;
 };

@@ -84,7 +84,9 @@ class Qinfo
 		static const SimGroup* simGroup( unsigned int index );
 
 		/**
-		 * Legacy utility function, just a readQ followed by zeroQ.
+		 * Legacy utility function. The proc must specify the correct
+		 * group. clearQ merges all outQs in the group into its inQ,
+		 * then reads the inQ, and then clears the inQ.
 		 */
 		static void clearQ( const ProcInfo *proc );
 
@@ -94,11 +96,6 @@ class Qinfo
 		 * all the available queues.
 		 */
 		static void readQ( const ProcInfo* proc );
-
-		/**
-		 * Zeroes out contents (or simply resizes) queue
-		 */
-		static void zeroQ( Qid qId );
 
 		/**
 		 * Merge all outQs from a group into its inQ.
@@ -139,6 +136,18 @@ class Qinfo
 		FuncId f_;
 		DataId srcIndex_; // DataId of src.
 		unsigned int size_; // size of argument in bytes.
-		static vector< vector< char > > q_; // Here are the queues
+
+		/**
+		 * outQ is one per worker thread. The immediate output goes into
+		 * the outQs which are later consolidated.
+		 */
+		static vector< vector< char > > outQ_;
+
+		/**
+		 * inQ is one per SimGroup. It becomes a readonly vector once
+		 * consolidated, and all the threads in the group read from it.
+		 */
+		static vector< vector< char > > inQ_; // Here are the queues
+
 		static vector< SimGroup > g_; // Information about grouping.
 };

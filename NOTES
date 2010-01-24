@@ -2802,6 +2802,9 @@ the shell is assumed to be on another thread.
 
 Went through and fixed up the non-threaded calculations. moose -s.
 Now clears unit tests with this. Checkin 1544.
+Now got it to work with different numbers of threads. Checkin 1545.
+Next step is to build matrix using threading to decide which messages to
+send where.
 
 Some work to do in defining what Elements/Messages belong in what group.
 	This determines which threads they are on, as well as numerous other
@@ -2810,3 +2813,11 @@ For now I need to get the system to work just enough to do the IntFire network
 	test.
 
 =============================================================================
+24 Jan 2010
+Working through getting the IntFire network to be scheduled through threads.
+Current problem: the Qinfo:mergeQ( groupId) function in Tick::advance.
+How do we know which groupId to use? The ProcInfo holds the thread# in the
+group, but perhaps it should also hold the group#. Done.
+
+Difficult patch. Converting the original single queue array into inQ and outQ.
+Much cleanup.

@@ -358,6 +358,7 @@ void Clock::tStart(  Eref e, const ThreadInfo* ti )
 	ProcInfo pinfo = info_; //We use an independent ProcInfo for each thread
 	pinfo.threadId = ti->threadId; // to manage separate threadIds.
 	pinfo.threadIndexInGroup = ti->threadIndexInGroup;
+	pinfo.groupId = ti->groupId;
 	assert( pinfo.numThreads == numThreads_ );
 	static const double ROUNDING = 1.0000000001;
 	if ( tickPtr_.size() == 0 ) {
@@ -365,6 +366,7 @@ void Clock::tStart(  Eref e, const ThreadInfo* ti )
 			info_.currTime += ti->runtime;
 		return;
 	}
+	info_.currTime = tickPtr_[0].getNextTime() - tickPtr_[0].getDt();
 	double endTime = ti->runtime * ROUNDING + info_.currTime;
 	isRunning_ = 1;
 
@@ -403,7 +405,7 @@ void* Clock::threadStartFunc( void* threadInfo )
 	ThreadInfo* ti = reinterpret_cast< ThreadInfo* >( threadInfo );
 	Clock* clock = reinterpret_cast< Clock* >( ti->clocke->data( 0 ) );
 	Eref clocker( ti->clocke, 0 );
-	// cout << "Start thread " << ti->threadId << " threadIndex in Group " << ti->threadIndexInGroup << endl;
+	cout << "Start thread " << ti->threadId << " threadIndex in Group " << ti->threadIndexInGroup << endl;
 	clock->tStart( clocker, ti );
 	// cout << "End thread " << ti->threadId << " with runtime " << ti->runtime << endl;
 

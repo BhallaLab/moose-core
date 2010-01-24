@@ -37,6 +37,7 @@ class TickPtr {
 			pthread_mutex_t* timeMutex );
 
 		double getNextTime() const;
+		double getDt() const;
 
 		/**
 		 * Set to time = 0. So, nextTime_ = dt.

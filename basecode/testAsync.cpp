@@ -399,10 +399,10 @@ void testSendSpike()
 	double Vm = reinterpret_cast< IntFire* >(e2.data())->getVm();
 	assert( fabs( Vm + 1e-7) < EPSILON );
 	// Test that the spike message is in the queue.
-	assert( Qinfo::q_[0].size() == sizeof( Qinfo ) + sizeof( double ) );
+	assert( Qinfo::outQ_[0].size() == sizeof( Qinfo ) + sizeof( double ) );
 
 	Qinfo::clearQ( &p );
-	assert( Qinfo::q_[0].size() == 0 );
+	assert( Qinfo::outQ_[0].size() == 0 );
 
 	/*
 	// Warning: the 'get' function calls clearQ also.
@@ -604,7 +604,7 @@ void testSparseMsg()
 	for ( unsigned int i = 0; i < runsteps; ++i ) {
 		p.currTime += p.dt;
 		i2()->process( &p );
-		assert( Qinfo::q_[0].size() / ( sizeof( Qinfo ) + sizeof( double ) ) == qSize[i] );
+		assert( Qinfo::outQ_[0].size() / ( sizeof( Qinfo ) + sizeof( double ) ) == qSize[i] );
 		// cout << "T = " << p.currTime << ", Q size = " << Qinfo::q_[0].size() << endl;
 		Qinfo::clearQ( &p );
 //		i2()->process( &p );

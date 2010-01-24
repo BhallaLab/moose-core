@@ -89,6 +89,7 @@ void TickPtr::advance( Element* e, ProcInfo* p, double endTime ) {
 void TickPtr::advance( Element* e, ProcInfo* p, double endTime, 
 	pthread_mutex_t* timeMutex )
 {
+	p->dt = dt_;
 	double nt = nextTime_; // use an independent timer for each thread.
 	// cout << "TickPtr::advance: nextTime_ = " << nextTime_ << ", endTime = " << endTime << ", thread = " << p->threadId << endl;
 	while ( nt < endTime ) {
@@ -136,6 +137,11 @@ double TickPtr::getNextTime() const
 	return nextTime_;
 }
 
+double TickPtr::getDt() const
+{
+	return dt_;
+}
+
 void TickPtr::reinit( Eref e )
 {
 	nextTime_ = dt_;
@@ -146,4 +152,5 @@ void TickPtr::reinit( Eref e )
 		(*i)->reinit( e );
 	}
 }
+
 
