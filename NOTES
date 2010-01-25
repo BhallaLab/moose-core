@@ -2820,4 +2820,8 @@ How do we know which groupId to use? The ProcInfo holds the thread# in the
 group, but perhaps it should also hold the group#. Done.
 
 Difficult patch. Converting the original single queue array into inQ and outQ.
-Much cleanup.
+Much cleanup. Compiles but crashes.
+=============================================================================
+25 Jan 2010
+Struggling with bugs. Cleared first one in mergeQ.
+=============================================================================

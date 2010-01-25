@@ -141,7 +141,7 @@ void Qinfo::mergeQ( unsigned int groupId )
 	assert( groupId < g_.size() );
 	SimGroup& g = g_[ groupId ];
 	unsigned int j = g.startThread;
-	assert( j + g.numThreads < outQ_.size() );
+	assert( j + g.numThreads <= outQ_.size() );
 
 	unsigned int totSize = 0;
 	for ( unsigned int i = 0; i < g.numThreads; ++i )
@@ -152,7 +152,7 @@ void Qinfo::mergeQ( unsigned int groupId )
 	j = g.startThread;
 	char* buf = &inQ[0];
 	for ( unsigned int i = 0; i < g.numThreads; ++i ) {
-		memcpy( buf, &outQ_[ j ], outQ_[ j ].size() );
+		memcpy( buf, &(outQ_[ j ][0]), outQ_[ j ].size() );
 		buf += outQ_[ j ].size();
 		outQ_[ j ].resize( 0 );
 		j++;
