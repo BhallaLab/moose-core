@@ -2823,5 +2823,15 @@ Difficult patch. Converting the original single queue array into inQ and outQ.
 Much cleanup. Compiles but crashes.
 =============================================================================
 25 Jan 2010
-Struggling with bugs. Cleared first one in mergeQ.
+Struggling with bugs. Cleared first one in mergeQ. Checkin as 1547.
+
+Next one is stuck with the 'get' function in testGet():207.
 =============================================================================
+26 Jan 2010.
+A lot of struggling later, turns out that the issue was that now I have
+separated inQ and outQ, and the data was still waiting in the outQ. So it
+just needed another clearQ call.
+
+Having cleared that test, now on to the next one: testSetGet().
+Same issue here: I need a double clearQ. With that in place, it clears all
+the unit tests except the last one, using the -s option.

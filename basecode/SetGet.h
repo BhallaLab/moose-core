@@ -384,7 +384,17 @@ template< class A > class Field: public SetGet1< A >
 		 */
 		A harvestGet() const
 		{ 
-			Qinfo::clearQ( Shell::procInfo() ); // Need to put in the right thread. assume 0
+			/**
+			 * First clearQ is so that the target Element receives the
+			 * request.
+			 * Issue remains: which thread to put this call in. For now
+			 * assume thread 0.
+			 */
+			Qinfo::clearQ( Shell::procInfo() );
+			/**
+			 * Second clearQ is so that the data can come back to the Shell
+			 */
+			Qinfo::clearQ( Shell::procInfo() );
 			A ret;
 
 			Conv< A >::buf2val( ret, Shell::buf() );

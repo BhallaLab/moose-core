@@ -203,6 +203,7 @@ void testGet()
 		if ( get( dest, "get_name" ) ) {
 			Qinfo::clearQ( &p ); // Request goes to e2
 			// shell->clearQ(); // Response comes back to e1
+			Qinfo::clearQ( &p ); // Response comes back to e1
 
 			stemp = ( reinterpret_cast< Shell* >(shell->data( 0 )) )->getBuf();
 			// cout << i << "	" << stemp << endl;
