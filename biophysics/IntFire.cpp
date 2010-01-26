@@ -49,6 +49,16 @@ const Cinfo* IntFire::initCinfo()
 			&IntFire::setNumSynapses,
 			&IntFire::getNumSynapses
 		),
+		//////////////////////////////////////////////////////////////
+		// MsgDest Definitions
+		//////////////////////////////////////////////////////////////
+		new DestFinfo( "process",
+			"Handles process call",
+			new EpFunc1< IntFire, ProcPtr >( &IntFire::eprocess ) ),
+
+		//////////////////////////////////////////////////////////////
+		// MsgSrc Definitions
+		//////////////////////////////////////////////////////////////
 
 		spike,
 	};
@@ -135,6 +145,14 @@ void IntFire::process( const ProcInfo* p, const Eref& e )
 		sendWithId< double >( e, spikeSlot, p->t );
 	}
 */
+}
+
+/**
+ * This variant is called from the regular messaging.
+ */
+void IntFire::eprocess( Eref e, const Qinfo* q, ProcPtr p )
+{
+	process( p, e );
 }
 
 /**

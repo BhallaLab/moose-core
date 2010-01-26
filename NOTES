@@ -2839,3 +2839,12 @@ Checkin as 1548.
 
 Fixed a bug in setting up number of threads in each queue. With that done, the
 system clears all but the last unit test for various # of threads.
+Checkin as 1549.
+
+Narrowed it down to the SingleMsg between the clock tick and the 
+IntFire element.
+
+Replaced the ad-hoc message creation with SingleMsg::add. This took a bit
+of work on setting up the message stub in IntFire, but it worked for single-
+thread mode as well as up to 4 threads. Doesn't yet do partitioning of the
+workload, but it clears unit tests.

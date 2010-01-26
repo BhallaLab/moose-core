@@ -34,6 +34,11 @@ class IntFire: public Data
 
 		Synapse* synapse( unsigned int i );
 
+		////////////////////////////////////////////////////////////////
+		// Dest Func
+		////////////////////////////////////////////////////////////////
+		void eprocess( Eref e, const Qinfo* q, ProcPtr p );
+
 		static const Cinfo* initCinfo();
 	private:
 		double Vm_; // State variable: Membrane potential. Resting pot is 0.
