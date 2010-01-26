@@ -47,6 +47,7 @@ void Msg::deleteMsg( MsgId mid )
 	Msg* m = msg_[ mid ];
 	if ( m != 0 )
 		delete m;
+	msg_[ mid ] = 0;
 }
 
 /**

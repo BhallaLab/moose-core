@@ -2835,3 +2835,7 @@ just needed another clearQ call.
 Having cleared that test, now on to the next one: testSetGet().
 Same issue here: I need a double clearQ. With that in place, it clears all
 the unit tests except the last one, using the -s option.
+Checkin as 1548.
+
+Fixed a bug in setting up number of threads in each queue. With that done, the
+system clears all but the last unit test for various # of threads.

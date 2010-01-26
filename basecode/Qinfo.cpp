@@ -65,7 +65,7 @@ unsigned int Qinfo::addSimGroup( unsigned short numThreads )
 	g_.push_back( sg );
 	inQ_.resize( g_.size() );
 	outQ_.resize( si + numThreads );
-	for ( unsigned int i = 0; i <= numThreads; ++i ) {
+	for ( unsigned int i = 0; i < numThreads; ++i ) {
 		outQ_[i + si].reserve( 1024 );
 	}
 	return ng;
