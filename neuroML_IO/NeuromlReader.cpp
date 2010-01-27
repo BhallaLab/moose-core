@@ -32,7 +32,9 @@ void NeuromlReader::readModel( string filename,Id location )
    for ( unsigned int i = 0; i < pathUtil.size(); ++i )
    {
 	paths.push_back( pathUtil.getPath( i ) );
+	cout << "path is : " << pathUtil.getPath( i ) << endl;
    }
+   cout << "path size : " << pathUtil.size() << endl;
    NBase::setPaths( paths );
    NBase nb;   
    ncl_= nb.readNeuroML (filename);
@@ -217,13 +219,14 @@ void NeuromlReader::setupPools(map< string,vector<string> > &groupcableMap,map< 
 		string name = "", group = "",scaling;
 		double Ca_base, tau, B, thick;
 		name = pool->getName();
+		//cout<< "pool name " << name << endl;
 		string path = "/library/"+name;
 		Id poolId(path);
 		Ca_base = pool->getResting_conc();
 		tau = pool->getDecay_constant();
 		thick = pool->getShell_thickness();
 		scaling = pool->getScaling();	
-		double B_ = pool->getB();
+		double B_ = pool->getScalingFactor();
 		if ( biophysicsunit == "Physiological Units" ){
 			Ca_base *= 1e6;
 			thick *= 1e6;
@@ -234,8 +237,10 @@ void NeuromlReader::setupPools(map< string,vector<string> > &groupcableMap,map< 
 		::set< double >( Eref(poolId()), tauFinfo, tau );
 		::set< double >( Eref(poolId()), thickFinfo, thick );
 		std::vector< std::string > groups;
+		groups.clear();
 		groups = pool->getGroups();
 		std::vector< std::string > segs;
+		segs.clear();
 		segs = pool->getSegGroups();
 		vector< Eref > channels;
 		for(unsigned int i = 0; i < segs.size(); i++ )
@@ -258,6 +263,7 @@ void NeuromlReader::setupPools(map< string,vector<string> > &groupcableMap,map< 
 				B = B_ / V;
 			::set< double >( Eref(poolId()), BFinfo, B );
 		 	Element* copyEl = Eref(poolId())->copy(comptEl(),ionPool_->name());
+			//cout << "in pool compt " << comptEl()->name() << endl;
 			channels.clear();
 			targets( comptEl(),"channel",channels );
 			unsigned int numchls = channels.size();
@@ -276,6 +282,7 @@ void NeuromlReader::setupPools(map< string,vector<string> > &groupcableMap,map< 
 		std::set< string > cableId;
 		for(unsigned int gr = 0; gr < groups.size(); gr ++ )
 		{
+			//cout << "groups in vector from pool : " << groups[gr] << endl;				
 			cmap_iter = groupcableMap.find( groups[gr] );
 			if ( cmap_iter != groupcableMap.end() ){
 			   cId = cmap_iter->second;
@@ -290,19 +297,20 @@ void NeuromlReader::setupPools(map< string,vector<string> > &groupcableMap,map< 
 			sId = smap_iter->second;
 		    }
 		    for(unsigned int j = 0; j < sId.size(); j++ ){
+			//cout << " seg Id:  " << sId[j] << endl; 
 			Id comptEl = segMap_[sId[j]];
 			double len,dia;
 			get< double >( comptEl.eref(), "length",len );
 			get< double >( comptEl.eref(), "diameter",dia );
 			double V = calcVolume( len,dia );
-			if( scaling == "off" )
+			if( scaling == "fixed_current_scaling_factor" )
 				B = B_;
 			else if( scaling == "shell" ){
 				if ( thick <= 0 )
 				    B = B_ / V ; //use compt vol or use absolute value
 				else B = B_ / thick;
 			}
-			else if( scaling == "volume" )
+			else if( scaling == "specific_current_scaling_factor" )
 				B = B_ / V;
 			::set< double >( Eref(poolId()), BFinfo, B );
 		 	Element* copyEl = Eref(poolId())->copy(comptEl(),ionPool_->name());
@@ -393,7 +401,7 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
 		string name = "", group = "";
 		double gmax,ek;
 		name = chl->getName();
-		cout << "channel is : "<< name << endl;
+		//cout << "channel is : "<< name << endl;
 		string path = "/library/"+name;
 		Id chlId(path);
 		bool passive = chl->getPassivecond();
@@ -562,6 +570,7 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
 		  std::set< string > cableId;
 		  for(unsigned int gr = 0; gr < groups.size(); gr ++ )
 		  {
+			//cout << "groups in vector : " << groups[gr] << endl;				
 			cmap_iter = groupcableMap.find( groups[gr] );
 			if ( cmap_iter != groupcableMap.end() ){
 			   cId = cmap_iter->second;
@@ -576,6 +585,7 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
 			sId = smap_iter->second;
 		    }
 		    for( unsigned int j = 0; j < sId.size(); j++ ){
+			//cout << " seg Id:  " << sId[j] << endl; 
 			Id comptEl = segMap_[sId[j]];
 			double len,dia;
 			get< double >( comptEl.eref(), "length",len );
