@@ -23,6 +23,7 @@
 extern const unsigned int SM_MAX_ROWS;
 extern const unsigned int SM_MAX_COLUMNS;
 extern const unsigned int SM_RESERVE;
+extern unsigned int rowIndex( const Element* e, const DataId& d );
 
 template< class T > class Triplet {
 	public:
@@ -259,14 +260,32 @@ template < class T > class SparseMatrix
 		 * Adds a row to the sparse matrix, must go strictly in row order.
 		 */
 		void addRow( unsigned int rowNum, const vector< T >& row ) {
+			assert( rowNum < nrows_ );
+			assert( rowStart_.size() == (nrows_ + 1 ) );
 			for ( unsigned int i = 0; i < ncolumns_; ++i ) {
 				if ( row[i] != T( ~0 ) ) {
 					N_.push_back( row[i] );
 					colIndex_.push_back( i );
 				}
 			}
-			assert( rowStart_.size() == (nrows_ + 1 ) );
+			rowStart_[rowNum + 1] = N_.size();
+		}
+
+		/**
+		 * Used to set an entire row of entries, already in sparse form.
+		 * Assumes that the SparseMatrix has been suitably allocated.
+		 * rowNum must be done in increasing order in successive calls.
+		 */
+		void addRow( unsigned int rowNum, 
+			const vector < T >& entry, 
+			const vector< unsigned int >& colIndexArg )
+		{
 			assert( rowNum < nrows_ );
+			assert( rowStart_.size() == (nrows_ + 1 ) );
+			assert( rowStart_[ rowNum ] == N_.size() );
+			N_.insert( N_.end(), entry.begin(), entry.end() );
+			colIndex_.insert( colIndex_.end(), 
+				colIndexArg.begin(), colIndexArg.end() );
 			rowStart_[rowNum + 1] = N_.size();
 		}
 

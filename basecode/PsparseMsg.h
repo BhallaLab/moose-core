@@ -7,13 +7,26 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _SPARSE_MSG_H
-#define _SPARSE_MSG_H
+#ifndef _PSPARSE_MSG_H
+#define _PSPARSE_MSG_H
+
+
 
 /**
- * This is a general message type optimized for sparse matrix like
+ * This is a parallelized sparse message.
+ * It is a general message type optimized for sparse matrix like
  * projection patterns. For each source object[DataId] there can be a
  * target object[DataId].
+ * For parallel/multithreaded use, we need to guarantee that all requests
+ * to the same target object (and all its synapses) are on the same queue.
+ * So it builds up a separate SparseMatrix for each thread.
+ *
+ * It has a specialized version of exec, to select the appropriate
+ * SparseMatrix. It goes through the entire set of incoming events.
+ *
+ * It has a function to do the node/thread decomposition to generate an
+ * equivalent of the original sparse matrix, but using only the appropriate
+ * RNG seed.
  *
  * A typical case is from an array of IntFire objects to an array of 
  * Synapses, which are array fields of IntFire objects.
@@ -31,29 +44,28 @@
  * BiSparseMsg.
  * It can be modified after creation to add or remove message entries.
  */
-class SparseMsg: public Msg
+class PsparseMsg: public SparseMsg
 {
 	public:
-		SparseMsg( Element* e1, Element* e2 );
-		~SparseMsg() {;}
+		PsparseMsg( Element* e1, Element* e2 );
+		~PsparseMsg() {;}
 
 		void exec( const char* arg, const ProcInfo* p ) const;
 
-		/**
-		 * Set up connections randomly. Probability should be low to keep
-		 * it sparse.
-		 * Returns # of connections.
-		 */
-		unsigned int randomConnect( double probability );
 
 		/**
 		 * Creates a message between e1 and e2, with connections
 		 * ocdurring at the specified probability
 		 */
 		static bool add( Element* e1, const string& srcField, 
-			Element* e2, const string& destField, double probability );
-	protected:
-		SparseMatrix< unsigned int > matrix_;
+			Element* e2, const string& destField, double probability,
+			unsigned int numThreadsInGroup );
+		
+		void loadBalance( unsigned int numThreads );
+		void loadUnbalance();
+	private:
+		unsigned int numThreads_; // Number of threads to partition
+		unsigned int nrows_; // The original size of the matrix.
 };
 
-#endif // _SPARSE_MSG_H
+#endif // _PSPARSE_MSG_H

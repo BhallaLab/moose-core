@@ -22,6 +22,7 @@ class ProcInfo
 		unsigned int threadId;
 		Qid qId;
 		unsigned int threadIndexInGroup;
+		unsigned int numThreadsInGroup;
 		unsigned int groupId;
 		unsigned int node;
 		void* barrier;

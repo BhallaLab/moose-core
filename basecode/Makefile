@@ -35,6 +35,7 @@ OBJ = \
 	SetGet.o \
 	SparseMatrix.o \
 	SparseMsg.o \
+	PsparseMsg.o \
 	main.o	\
 
 HEADERS = \

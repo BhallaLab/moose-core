@@ -2857,5 +2857,12 @@ happening in the correct sequence over all threads. Still crashes at the
 end of it, and not clear yet if it is doing the right calculations.
 Also I can now see a problem with the scheduling in moose -s (single-thread)
 mode. 
+Checkin as 1551.
+
+The crash at the end of the run is due to left-over data in outQ_[0].
+However, outQ_[0] should be reserved for the SimGroup0, which is used by the
+Shell, and not touched by the runtime calculations.
+
+Bypassing for now, working on PsparseMsg and its compilation.
 
 =============================================================================
