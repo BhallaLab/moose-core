@@ -1,6 +1,6 @@
 include NeuroML_Reader/plotUtil.g
 
-str infile = "NeuroML_Reader/PurkinjeCell.morph.xml"
+str infile = "PurkinjeCell.morph.xml"
 str outfile = "test.plot"
 str target = "/cell"
 
