@@ -214,7 +214,8 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 	// Hack: we need a better way to define which connId to use.
 	// Presumably we should at least take an offset from the predefined
 	// Slots like children.
-	const Conn* c = e->conn( index_ );
+	// const Conn* c = e->conn( index_ );
+	const Conn* c = e->conn( procSlot );
 	if ( info->barrier ) {
 		int rc = pthread_barrier_wait(
 			reinterpret_cast< pthread_barrier_t* >( info->barrier ) );

@@ -2848,3 +2848,14 @@ Replaced the ad-hoc message creation with SingleMsg::add. This took a bit
 of work on setting up the message stub in IntFire, but it worked for single-
 thread mode as well as up to 4 threads. Doesn't yet do partitioning of the
 workload, but it clears unit tests.
+Checkin as 1550.
+
+=============================================================================
+27 Jan 2010.
+Further progress, got it to call the IntFire::process, which seems to be
+happening in the correct sequence over all threads. Still crashes at the
+end of it, and not clear yet if it is doing the right calculations.
+Also I can now see a problem with the scheduling in moose -s (single-thread)
+mode. 
+
+=============================================================================
