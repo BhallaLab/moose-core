@@ -40,8 +40,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;c:\karan\3d-viz&quot;;&quot;C:\karan\3d-viz\external\include&quot;;&quot;c:\karan\3d-viz\connections&quot;;&quot;c:\karan\3d-viz\basecode&quot;;&quot;c:\karan\3d-viz\randnum&quot;;&quot;C:\boost\include\boost-1_40&quot;;C:\karan\OpenSceneGraph\include;&quot;c:\karan\3d-viz\ksolve&quot;;&quot;c:\karan\3d-viz\element&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;USE_GENESIS_PARSER"
+				AdditionalIncludeDirectories="D:\siji\27Nov09;D:\siji\27Nov09\external\include;D:\siji\27Nov09\connections;D:\siji\27Nov09\ksolve;D:\siji\27Nov09\element;D:\siji\27Nov09\randnum;D:\siji\27Nov09\basecode;&quot;D:\DOWNLOADS\OpenSceneGraph-2.8.2\include&quot;;&quot;C:\Program Files\boost\boost_1_40&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;USE_GENESIS_PARSER;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -64,7 +64,7 @@
 				AdditionalOptions="WS2_32.lib"
 				OutputFile="$(OutDir)\moose.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="C:\boost\lib"
+				AdditionalLibraryDirectories="&quot;D:\DOWNLOADS\OpenSceneGraph-2.8.2\build\lib&quot;;&quot;C:\Program Files\boost\boost_1_40\lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -560,6 +560,10 @@
 			</File>
 			<File
 				RelativePath=".\ksolve\Kintegrator.h"
+				>
+			</File>
+			<File
+				RelativePath=".\biophysics\Leakage.h"
 				>
 			</File>
 			<File
@@ -1252,6 +1256,10 @@
 			</File>
 			<File
 				RelativePath=".\ksolve\Kintegrator.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\biophysics\Leakage.cpp"
 				>
 			</File>
 			<File
