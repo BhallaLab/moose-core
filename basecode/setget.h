@@ -47,7 +47,7 @@ template < class T > bool set( Eref e, const string& f, T v )
 			f << " T ): Finfo not found\n";
 		return 0;
 	}
-	return set( e, finfo, v );
+	return ::set( e, finfo, v );
 }
 
 /**
