@@ -358,6 +358,8 @@ void Clock::tStart(  Eref e, const ThreadInfo* ti )
 	ProcInfo pinfo = info_; //We use an independent ProcInfo for each thread
 	pinfo.threadId = ti->threadId; // to manage separate threadIds.
 	pinfo.threadIndexInGroup = ti->threadIndexInGroup;
+	assert( ti->groupId < Qinfo::numSimGroup() );
+	pinfo.numThreadsInGroup = Qinfo::simGroup( ti->groupId )->numThreads;
 	pinfo.groupId = ti->groupId;
 	assert( pinfo.numThreads == numThreads_ );
 	static const double ROUNDING = 1.0000000001;

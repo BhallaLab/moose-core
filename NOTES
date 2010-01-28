@@ -2876,5 +2876,10 @@ Checkin as 1558.
 Fixed up thread partitioning in Element::process. Currently hard-coded
 in, doesn't look pretty, but clears tests till the final queueing segv.
 Still need to sort out the threaded message inputs.
+Checkin as 1559.
+
+Minor hack to patch the final queueing segv by clearing the queue manually.
+Still to properly track down, but at least it now clears unit tests.
+Fix to the Element::process subdividing target Element indices.
 
 =============================================================================

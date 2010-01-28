@@ -324,6 +324,9 @@ void testThreadIntFireNetwork()
 	s->start( timestep * runsteps );
 	cerr << "ending\n";
 
+	// Minor hack to clean up leftover items in queue. They cause problems later.
+	Qinfo::mergeQ( 0 );
+
 	cout << "." << flush;
 	delete i2();
 }
