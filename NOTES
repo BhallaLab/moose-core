@@ -2871,5 +2871,10 @@ Checkin as 1553.
 Put in a unit test for the load balancing function in PsparseMsg. Works.
 Tried out PsparseMsg in the testThreadIntFireNetwork. Still doesn't do what
 it should.
+Checkin as 1558.
+
+Fixed up thread partitioning in Element::process. Currently hard-coded
+in, doesn't look pretty, but clears tests till the final queueing segv.
+Still need to sort out the threaded message inputs.
 
 =============================================================================

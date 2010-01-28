@@ -39,10 +39,20 @@ Element::~Element()
 			Msg::deleteMsg( *i );
 }
 
+/**
+ * The indices handled by each thread are in blocks
+ * Thread0 handles the first (numData_ / numThreads ) indices
+ * Thread1 handles ( numData_ / numThreads ) to (numData_*2 / numThreads)
+ * and so on.
+ */
 void Element::process( const ProcInfo* p )
 {
 	char* data = d_;
-	for ( unsigned int i = 0; i < numData_; ++i ) {
+	unsigned int start =
+		( numData_ * p->threadIndexInGroup ) / p->numThreadsInGroup;
+	unsigned int end =
+		( numData_ * ( p->threadIndexInGroup + 1) ) / p->numThreadsInGroup;
+	for ( unsigned int i = start; i < end; ++i ) {
 		reinterpret_cast< Data* >( data )->process( p, Eref( this, i ) );
 		data += dataSize_;
 	}

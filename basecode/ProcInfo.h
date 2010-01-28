@@ -12,7 +12,10 @@ class ProcInfo
 	public:
 		ProcInfo() 
 			: dt( 1.0 ), currTime( 0.0 ), numThreads( 1 ), threadId( 0 ),
-				qId( 0 ), threadIndexInGroup( 0 ), groupId( 0 ),
+				qId( 0 ), 
+				threadIndexInGroup( 0 ), 
+				numThreadsInGroup( 1 ), 
+				groupId( 0 ),
 				node( 0 ),
 				barrier( 0 )
 			{;}
