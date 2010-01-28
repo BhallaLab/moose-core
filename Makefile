@@ -196,7 +196,7 @@ endif
 # To use NeuroML, pass USE_NeuroML=1 in make command line
 ifeq ($(USE_NEUROML),1)
 #LIBS+= -lxml2 -lneuroml
-LIBS+= -lneuroml -L/home/siji/TestLibNeuroML/v0.2/libneuroml
+LIBS+= -lneuroml -L ./external/lib
 CXXFLAGS+=-DUSE_NEUROML
 endif
 
