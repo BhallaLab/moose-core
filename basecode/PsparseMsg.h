@@ -68,4 +68,7 @@ class PsparseMsg: public SparseMsg
 		unsigned int nrows_; // The original size of the matrix.
 };
 
+extern void sparseMatrixBalance( 
+	unsigned int numThreads, SparseMatrix< unsigned int >& matrix );
+
 #endif // _PSPARSE_MSG_H

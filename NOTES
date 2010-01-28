@@ -2864,5 +2864,12 @@ However, outQ_[0] should be reserved for the SimGroup0, which is used by the
 Shell, and not touched by the runtime calculations.
 
 Bypassing for now, working on PsparseMsg and its compilation.
+Checkin as 1553.
+
+=============================================================================
+28 Jan 2010
+Put in a unit test for the load balancing function in PsparseMsg. Works.
+Tried out PsparseMsg in the testThreadIntFireNetwork. Still doesn't do what
+it should.
 
 =============================================================================

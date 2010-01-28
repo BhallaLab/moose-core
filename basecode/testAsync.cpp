@@ -17,6 +17,7 @@
 #include "../biophysics/IntFire.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
+#include "PsparseMsg.h"
 #include "../randnum/randnum.h"
 #include "../scheduling/Tick.h"
 #include "../scheduling/TickPtr.h"
@@ -502,6 +503,35 @@ void testSparseMatrix()
 	cout << "." << flush;
 }
 
+void testSparseMatrixBalance()
+{
+	SparseMatrix< unsigned int > m( 3, 6 );
+	unsigned int nRows = m.nRows();
+	unsigned int nCols = m.nColumns();
+
+	for ( unsigned int i = 0; i < nRows; ++i ) {
+		for ( unsigned int j = 0; j < nCols; ++j ) {
+			m.set( i, j, 100 * i + j );
+		}
+	}
+
+	// printSparseMatrix( m );
+	sparseMatrixBalance( 2, m );
+	// printSparseMatrix( m );
+	
+	for ( unsigned int i = 0; i < nRows; ++i ) {
+		unsigned int threadNum = i % 2;
+		for ( unsigned int j = 0; j < nCols; ++j ) {
+			if ( ( 2 * j ) / nCols == threadNum )
+				assert( m.get( i, j ) ==  100 * ( i / 2 ) + j );
+			else
+				assert( m.get( i, j ) ==  0 );
+		}
+	}
+
+	cout << "." << flush;
+}
+
 void printGrid( Element* e, const string& field, double min, double max )
 {
 	static string icon = " .oO@";
@@ -667,6 +697,7 @@ void testAsync( )
 	testSetGetVec();
 	testSendSpike();
 	testSparseMatrix();
+	testSparseMatrixBalance();
 	testSparseMsg();
 	testUpValue();
 }

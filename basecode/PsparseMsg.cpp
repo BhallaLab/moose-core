@@ -86,26 +86,15 @@ bool PsparseMsg::add( Element* e1, const string& srcField,
 	return 0;
 }
 
-/**
- * loadBalance: 
- * Splits up the sparse matrix so that any given colIndex will occur
- * only on one subset. This ensures that only a single thread will 
- * ever write to a give target, specified by that colIndex.
- *
- * The subsets are accessed sequentially: For source Element 0 we do 
- * thread0, thread1, thread2...
- * then again for source Element 1 we do thread0, thread1, thread2 ...
- * and so on.
- *
- */
-void PsparseMsg::loadBalance( unsigned int numThreads )
+// Utility function for doing load balance
+void sparseMatrixBalance( 
+	unsigned int numThreads, SparseMatrix< unsigned int >& matrix )
 {
-	SparseMatrix< unsigned int > temp = matrix_;
-	unsigned int nrows = matrix_.nRows();
-	unsigned int ncols = matrix_.nColumns();
+	SparseMatrix< unsigned int > temp = matrix;
+	unsigned int nrows = matrix.nRows();
+	unsigned int ncols = matrix.nColumns();
 
-	numThreads_ = numThreads;
-	matrix_.setSize( numThreads * nrows, ncols ); // Clear and reallocate
+	matrix.setSize( numThreads * nrows, ncols ); // Clear and reallocate
 
 	for ( unsigned int i = 0; i < temp.nRows(); ++i )
 	{
@@ -121,10 +110,28 @@ void PsparseMsg::loadBalance( unsigned int numThreads )
 			splitColIndex[ targetThread ].push_back( colIndex[ j ] );
 		}
 		for ( unsigned int j = 0; j < numThreads; ++j ) {
-			matrix_.addRow( i * numThreads + j,
+			matrix.addRow( i * numThreads + j,
 				splitEntry[ j ], splitColIndex[ j ] );
 		}
 	}
+}
+
+/**
+ * loadBalance: 
+ * Splits up the sparse matrix so that any given colIndex will occur
+ * only on one subset. This ensures that only a single thread will 
+ * ever write to a give target, specified by that colIndex.
+ *
+ * The subsets are accessed sequentially: For source Element 0 we do 
+ * thread0, thread1, thread2...
+ * then again for source Element 1 we do thread0, thread1, thread2 ...
+ * and so on.
+ *
+ */
+void PsparseMsg::loadBalance( unsigned int numThreads )
+{
+	sparseMatrixBalance( numThreads, matrix_ );
+	numThreads_ = numThreads;
 }
 
 // Need a restore function to convert the load-balanced form back into

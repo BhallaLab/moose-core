@@ -18,6 +18,7 @@
 #include "../biophysics/IntFire.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
+#include "PsparseMsg.h"
 #include "../randnum/randnum.h"
 
 class testSchedElement: public Element
@@ -259,8 +260,12 @@ void testThreadIntFireNetwork()
 	DataId di( 1, 0 ); // DataId( data, field )
 	Eref syne( &syn, di );
 
-	bool ret = SparseMsg::add( e2.element(), "spike", &syn, "addSpike", 
-		connectionProbability ); // Include group id as an arg. 
+	unsigned int numThreads = 1;
+	if ( Qinfo::numSimGroup() >= 2 ) {
+		numThreads = Qinfo::simGroup( 1 )->numThreads;
+	}
+	bool ret = PsparseMsg::add( e2.element(), "spike", &syn, "addSpike", 
+		connectionProbability, numThreads ); // Include group id as an arg. 
 	assert( ret );
 
 	unsigned int nd = syn.numData();
