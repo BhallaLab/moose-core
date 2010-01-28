@@ -30,7 +30,7 @@ Cable.o:		Cable.h
 
 
 .cpp.o:
-	$(CXX) $(CXXFLAGS) -I/home/siji/TestLibNeuroML/v0.2 -I/usr/include/libxml2 \
+	$(CXX) $(CXXFLAGS) -I ../external/include -I/usr/include/libxml2 \
        	-I../basecode -I../utility/randnum -I.. $< -c
 
 $(TARGET):		$(OBJ) $(HEADERS)
