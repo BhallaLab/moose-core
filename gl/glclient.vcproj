@@ -40,15 +40,15 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;c:\karan\3d-viz&quot;;&quot;C:\karan\3d-viz\external\include&quot;;&quot;c:\karan\3d-viz\connections&quot;;&quot;c:\karan\3d-viz\basecode&quot;;&quot;c:\karan\3d-viz\randnum&quot;;&quot;C:\boost\include\boost-1_40&quot;;C:\karan\OpenSceneGraph\include;&quot;c:\karan\3d-viz\ksolve&quot;;&quot;c:\karan\3d-viz\element&quot;"
+				AdditionalIncludeDirectories="D:\siji\27Nov09;D:\siji\27Nov09\external\include;D:\siji\27Nov09\connections;D:\siji\27Nov09\basecode;D:\siji\27Nov09\randnum;D:\siji\27Nov09\ksolve;D:\siji\27Nov09\element;&quot;C:\Boost\include\boost-1_41&quot;;&quot;D:\DOWNLOADS\OpenSceneGraph-2.8.2-old\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
-				MinimalRebuild="true"
+				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
-				DebugInformationFormat="4"
+				DebugInformationFormat="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -61,10 +61,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="WS2_32.lib osgd.lib osgUtild.lib osgDBd.lib osgGAd.lib osgViewerd.lib osgTextd.lib OpenThreadsd.lib"
+				AdditionalDependencies="WS2_32.lib osg55-osg.dll osg55-osgDB.dll osg55-osgGA.dll osg55-osgText.dll osg55-osgUtil.dll osg55-osgViewer.dll ot11-OpenThreads.dll"
 				OutputFile="$(OutDir)\glclient.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="c:\boost\lib;C:\karan\OpenSceneGraph\lib"
+				AdditionalLibraryDirectories="c:\boost\lib;&quot;E:\Users\MOOSE\OpenGL-Binaries-sent-by-Karan\glclient&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -114,7 +114,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;c:\karan\3d-viz&quot;;&quot;C:\karan\3d-viz\external\include&quot;;&quot;c:\karan\3d-viz\connections&quot;;&quot;c:\karan\3d-viz\basecode&quot;;&quot;c:\karan\3d-viz\randnum&quot;;&quot;C:\boost\include\boost-1_40&quot;;C:\karan\OpenSceneGraph\include;&quot;c:\karan\3d-viz\ksolve&quot;;&quot;c:\karan\3d-viz\element&quot;"
+				AdditionalIncludeDirectories="D:\siji\27Nov09;D:\siji\27Nov09\external\include;D:\siji\27Nov09\connections;D:\siji\27Nov09\basecode;D:\siji\27Nov09\randnum;&quot;C:\Program Files\boost\boost_1_40&quot;;&quot;D:\DOWNLOADS\OpenSceneGraph-2.8.2\include&quot;;D:\siji\27Nov09\ksolve;D:\siji\27Nov09\element"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -133,10 +133,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="WS2_32.lib osg.lib osgUtil.lib osgDB.lib osgGA.lib osgViewer.lib osgText.lib OpenThreads.lib"
+				UseLibraryDependencyInputs="true"
+				AdditionalDependencies="osg.lib osgUtil.lib osgDB.lib osgGA.lib osgViewer.lib osgText.lib OpenThreads.lib ws2_32.lib"
 				OutputFile="$(OutDir)\glclient.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="c:\boost\lib;C:\karan\OpenSceneGraph\lib"
+				AdditionalLibraryDirectories="&quot;C:\Program Files\boost\boost_1_40\lib&quot;;&quot;D:\DOWNLOADS\OpenSceneGraph-2.8.2\build\lib&quot;"
 				GenerateDebugInformation="false"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -175,22 +176,6 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\src\AckPickData.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\Constants.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\GLcellProcData.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\GLcellResetData.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\GLclient.h"
 				>
 			</File>
@@ -203,15 +188,51 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\GLCompartmentCylinderData.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\GLCompartmentDisk.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\GLCompartmentDiskData.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\GLCompartmentHemi.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\GLCompartmentHemiData.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\GLCompartmentRect.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\GLCompartmentRectData.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\GLCompartmentSphere.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\GLshapeData.h"
+				RelativePath=".\src\GLCompartmentSphereData.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\GLviewResetData.h"
+				RelativePath=".\src\GLCompartmentTri.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\GLCompartmentTriData.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\GLCompartmentType.h"
 				>
 			</File>
 			<File
@@ -220,6 +241,10 @@
 			</File>
 			<File
 				RelativePath=".\src\ParticleData.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\SmoldynShapeData.h"
 				>
 			</File>
 			<File
@@ -255,7 +280,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\GLCompartmentDisk.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\GLCompartmentHemi.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\GLCompartmentRect.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\GLCompartmentSphere.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\GLCompartmentTri.cpp"
 				>
 			</File>
 			<File

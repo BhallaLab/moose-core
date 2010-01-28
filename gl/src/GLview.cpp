@@ -1448,8 +1448,8 @@ int GLview::getSocket( const char* hostname, const char* service )
 		return -1;
 	}
 	
-	inet_ntop( p->ai_family, getInAddress( ( struct sockaddr * )p->ai_addr ),
-		   s, sizeof s );
+	/*inet_ntop( p->ai_family, getInAddress( ( struct sockaddr * )p->ai_addr ),
+		   s, sizeof s );*/
 	// std::cout << "Connecting to " << s << std::endl;
 	
 	freeaddrinfo( servinfo );

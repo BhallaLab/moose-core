@@ -16,7 +16,7 @@
 //////////////////////////////////////////////////////////////////////
 
 TraverseMsgConn::TraverseMsgConn( const Msg* m, Eref e )
-	: Conn( 0 ), msg_( m ), e_( e ), c_( 0 ), cti_( 0 )
+	: Conn( 0 ), msg_( m ), e_( e ), c_( 0 )
 {
 	// Advance till we get to a 'good' conn, or to the end.
 	for ( mi_ = msg_; mi_; mi_ = mi_->next( e.e ) ) {

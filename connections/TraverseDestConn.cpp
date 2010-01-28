@@ -18,7 +18,7 @@
 
 TraverseDestConn::TraverseDestConn(
 	const vector< ConnTainer* >* ct, Eref e )
-	: Conn( 0 ), ct_( ct ), c_( 0 ), cti_( 0 ), e_( e )
+	: Conn( 0 ), ct_( ct ), c_( 0 ), e_( e )
 {
 	assert( ct_ != 0 );
 	// Advance till we get to a 'good' conn, or to the end.
