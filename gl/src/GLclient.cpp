@@ -432,9 +432,9 @@ int acceptNewConnection( char * port )
 		return -1;
 	}
 		
-	inet_ntop( theirAddr.ss_family, getInAddr( ( struct sockaddr * ) &theirAddr ), s, sizeof( s ) );
+	/*inet_ntop( theirAddr.ss_family, getInAddr( ( struct sockaddr * ) &theirAddr ), s, sizeof( s ) );
 
-	std::cout << "GLclient: connected to " << s << std::endl;
+	std::cout << "GLclient: connected to " << s << std::endl;*/
 
 #ifdef WIN32
 	closesocket( sockFd );
