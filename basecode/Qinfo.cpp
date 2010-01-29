@@ -185,6 +185,20 @@ unsigned int Qinfo::dumpQ( Qid qId, char* buf )
 	return q.size();
 }
 
+/**
+ * Static func. readonly, so it is thread safe
+ */
+void Qinfo::reportQ()
+{
+	cout << "	inQ: ";
+	for ( unsigned int i = 0; i < inQ_.size(); ++i )
+		cout << "[" << i << "]=" << inQ_[i].size() << "	";
+	cout << "outQ: ";
+	for ( unsigned int i = 0; i < outQ_.size(); ++i )
+		cout << "[" << i << "]=" << outQ_[i].size() << "	";
+	cout << endl;
+}
+
 
 // Non-static: copies itself onto queue.
 // qid specifies which queue to use. Must be an outQ.

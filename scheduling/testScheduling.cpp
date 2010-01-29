@@ -237,6 +237,7 @@ void testThreadIntFireNetwork()
 		{ 838, 10, 6, 18, 36, 84, 150, 196, 258, 302 };
 	static const unsigned int NUMSYN = 104576;
 	static const double thresh = 0.2;
+	// static const double thresh = -0.2;
 	static const double Vmax = 1.0;
 	static const double refractoryPeriod = 0.4;
 	static const double weightMax = 0.02;
@@ -277,6 +278,8 @@ void testThreadIntFireNetwork()
 
 	ret = Field< double >::setVec( e2, "Vm", temp );
 	assert( ret );
+
+	// cout << "testThreadIntFireNetwork: "; Qinfo::reportQ();
 	/*
 	for ( unsigned int i = 0; i < 40; ++i )
 		cout << reinterpret_cast< IntFire* >( e2.element()->data( i ) )->getVm() << "	" << temp[i] << endl;
@@ -321,6 +324,13 @@ void testThreadIntFireNetwork()
 	SingleMsg m0( er0, e2 ); 
 	er0.element()->addMsgToConn( m0.mid(), 0 );
 	*/
+
+	Element* e2e = e2.element();
+	for (unsigned int i = 0; i < size; i+= 100 ) {
+		IntFire* f = reinterpret_cast< IntFire* >( Eref( e2e, i ).data() );
+		cout << i << "	" << f->getVm() << ",	" << f->getThresh() << endl;
+	}
+
 	s->start( timestep * runsteps );
 	cerr << "ending\n";
 

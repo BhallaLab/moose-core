@@ -221,9 +221,12 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 			reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
 		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 	}
-	if ( info->threadIndexInGroup == 0 )
+	if ( info->threadIndexInGroup == 0 ) {
 		// Put the queues into one big one. Clear others
+		Qinfo::reportQ();
 		Qinfo::mergeQ( info->groupId ); 
+		cout << "Tick::advance: t = " << info->currTime;
+	}
 		
 	if ( info->barrier ) {
 		int rc = pthread_barrier_wait(

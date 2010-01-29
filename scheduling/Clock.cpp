@@ -361,6 +361,7 @@ void Clock::tStart(  Eref e, const ThreadInfo* ti )
 	assert( ti->groupId < Qinfo::numSimGroup() );
 	pinfo.numThreadsInGroup = Qinfo::simGroup( ti->groupId )->numThreads;
 	pinfo.groupId = ti->groupId;
+	pinfo.outQid = ti->outQid;
 	assert( pinfo.numThreads == numThreads_ );
 	static const double ROUNDING = 1.0000000001;
 	if ( tickPtr_.size() == 0 ) {

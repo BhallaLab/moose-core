@@ -122,6 +122,11 @@ class Qinfo
 		static void hackForSendTo( const Qinfo* q, const char* buf );
 
 		/**
+		 * Reporting function to tell us about queue status.
+		 */
+		static void reportQ();
+
+		/**
 		 * Add data to the queue. This is non-static, since we will also
 		 * put the current Qinfo on the queue as a header.
 		 * The arg will just be memcopied onto the queue, so avoid

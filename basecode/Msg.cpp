@@ -80,8 +80,7 @@ void Msg::process( const ProcInfo* p ) const
 void Msg::addToQ( const Element* caller, Qinfo& q, 
 	const ProcInfo* p, const char* arg ) const
 {
-	// The base function just bungs the data into the one and only queue.
-	q.addToQ( 0, mid_, ( caller == e1_ ), arg );
+	q.addToQ( p->outQid, mid_, ( caller == e1_ ), arg );
 
 /*
 	q.setForward( caller == e1_ );

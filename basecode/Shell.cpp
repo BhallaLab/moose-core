@@ -232,6 +232,7 @@ void Shell::start( double runtime )
 			ti[j].threadId = j;
 			ti[j].threadIndexInGroup = j - Qinfo::simGroup( i )->startThread + 1;
 			ti[j].groupId = i;
+			ti[j].outQid = Qinfo::simGroup(i)->startThread + k;
 			ti[j].sortMutex = &sortMutex;
 			ti[j].timeMutex = &timeMutex;
 			j++;

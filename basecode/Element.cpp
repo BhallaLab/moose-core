@@ -52,6 +52,7 @@ void Element::process( const ProcInfo* p )
 		( numData_ * p->threadIndexInGroup ) / p->numThreadsInGroup;
 	unsigned int end =
 		( numData_ * ( p->threadIndexInGroup + 1) ) / p->numThreadsInGroup;
+	data += start * dataSize_;
 	for ( unsigned int i = start; i < end; ++i ) {
 		reinterpret_cast< Data* >( data )->process( p, Eref( this, i ) );
 		data += dataSize_;

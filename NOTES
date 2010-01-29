@@ -2881,5 +2881,40 @@ Checkin as 1559.
 Minor hack to patch the final queueing segv by clearing the queue manually.
 Still to properly track down, but at least it now clears unit tests.
 Fix to the Element::process subdividing target Element indices.
+Checkin as 1560.
 
+The potential in IntFire does not cross threshold as we init it, so the 
+network does nothing.
+Looks like the initialization of IntFire isn't right.
 =============================================================================
+29 Jn 2010
+Fixed a problem with the Qinfo::addToQ, which was putting everything into
+outQ_[0]. Now there are some events coming through to the IntFire in the
+thread test, but not as many as there should be.
+
+With more debugging it gets messier. Most (usually all) of the first round
+of spike messages go into just one thread. No subsequent messages emerge.
+
+Lowered threshold so that all neurons will always fire.
+Now all outQs hold the identical # of requests, all steps.
+
+Raised threshold a bit to 0.1. Earlier was 0.2. Now we have
+variable firing, but firing happens on all outQs. Except first step,
+	where again almost all output is on a single queue.
+
+Crashes occasionally, more often with more threads.
+
+Checked Vm. That was it. It is only being set on one of the threads, the
+first one.
+
+Closer check. Turns out Vm is set correctly on all objects, right up to the
+line before Shell::start in testThreadIntFireNetwork(). Something else
+happens to zero it out on all but one thread.
+
+Is there an issue with field access by indexing? Something odd about the
+addresses of the IntFires.
+
+Tracked it down to a silly pointer assignment error in Element::process.
+With that fixed, it looks like the whole things works, including the 
+numerical values of the Vm on different IntFires.
+Also I'm not seeing crashes.
