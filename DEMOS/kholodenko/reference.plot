@@ -1201,6 +1201,7 @@
 0.107688
 0.100458
 0.0930402
+
 /newplot
 /plotname /graphs/conc2/MKK.Co
 0.299397
@@ -2404,6 +2405,7 @@
 0.153976
 0.150483
 0.147052
+
 /newplot
 /plotname /graphs/conc1/MAPK-PP.Co
 3.32651e-12
@@ -3607,6 +3609,7 @@
 0.11764
 0.124269
 0.131164
+
 /newplot
 /plotname /graphs/conc2/Ras-MKKKK.Co
 0.001
@@ -4810,6 +4813,7 @@
 7.8188e-05
 7.38349e-05
 6.97835e-05
+
 /newplot
 /plotname /graphs/conc2/MAPK.Co
 0.3
@@ -6013,6 +6017,7 @@
 0.107688
 0.100458
 0.0930402
+
 /newplot
 /plotname /graphs/conc2/MKKK.Co
 0.0891611
