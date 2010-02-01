@@ -54,6 +54,7 @@ function do_save_all_plots( filename )
 		openfile {filename} a
 		writefile {filename} "/newplot"
 		writefile {filename} "/plotname "{name}
+		writefile {filename}
 		closefile {filename}
 		setfield {name} append {filename}
 	end
@@ -77,8 +78,8 @@ end
 
 function complete_loading
 	reset
-	//step {MAXTIME} -t
+	step {MAXTIME} -t
 	do_save_all_plots test.plot
-	//quit
+	quit
 end
 
