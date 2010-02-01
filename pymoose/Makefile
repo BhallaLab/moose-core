@@ -25,9 +25,9 @@
 
 TARGET=pymoose
 CXXFLAGS+=-I/usr/local/include -I.. -I../basecode -I../connections -I../maindir -I../genesis_parser  -I../shell -I../element -I../scheduling -I../biophysics -I../hsolve -I../kinetics -I../ksolve -I../builtins -I../utility -I../randnum -I../signeur -I../device
-LIBS += -L/usr/local/lib -lpython2.5
+LIBS += -L/usr/local/lib -lpython2.6
 ifdef USE_NUMPY
-CXXFLAGS+=-I/usr/lib/python2.5/site-packages/numpy/core/include -DUSE_NUMPY
+CXXFLAGS+=-I/usr/lib/python2.6/site-packages/numpy/core/include -DUSE_NUMPY
 SWIGOPTS=-DUSE_NUMPY
 endif
 ifdef USE_GL
@@ -40,7 +40,7 @@ ifeq ($(OSTYPE),Darwin)
 	CXXFLAGS+=-bundle -fno-common /usr/bin/python -flat_namespace -undefined suppress -I/Library/Frameworks/Python.framework/Versions/2.5/include/python2.5
 	LDFLAGS+=-bundle -fno-common -L/Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/config/
 else # this is for unix like systems - change /usr/include/Python2.5 to the directory where Python.h is located
-	CXXFLAGS +=-I/usr/include/python2.5
+	CXXFLAGS +=-I/usr/include/python2.6
 	LDFLAGS+=-shared
 endif
 
