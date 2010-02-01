@@ -188,3 +188,4 @@ different point along the axon.
 If you have gnuplot, run 'gnuplot plot.gnuplot' to view the graphs.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 "
+quit
