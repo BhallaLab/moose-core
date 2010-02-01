@@ -69,6 +69,10 @@ ifeq ($(USE_SBML),1)
 	OBJFILES := $(OBJFILES) ../sbml_IO/sbml_IO.o
 endif
 
+ifeq ($(USE_NEUROML),1)
+	LIBS+= -L../external/lib/
+endif
+
 ifeq ($(USE_GL),1)
 	OBJFILES := $(OBJFILES) ../gl/src/GLcell.o ../gl/src/GLview.o ../gl/src/GLshape.o
 endif
