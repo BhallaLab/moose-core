@@ -391,6 +391,12 @@ const std::string& PyMooseBase::__get_name() const
     return context_->getName(id_);
 }
 
+const int PyMooseBase::__get_index() const
+{
+    int index = 0;
+    get<int>(id_(), "index", index);
+    return index;
+}
 void PyMooseBase::useClock(int clockNo, string func)
 {
     context_->useClock(clockNo, id_.path(), func);
