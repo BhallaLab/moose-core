@@ -24,12 +24,12 @@ static bool tickPtrCmp ( const Tick* i, const Tick* j)
 }
 
 TickPtr::TickPtr()
-	: dt_( 1.0 ), nextTime_( 1.0 ), numTimerThread_( 0 )
+	: dt_( 1.0 ), nextTime_( 1.0 )
 	// assumes zero size of ticks_ vector
 {;}
 		
 TickPtr::TickPtr( Tick* ptr )
-	: dt_( ptr->getDt() ), nextTime_( ptr->getDt() ), numTimerThread_( 0 )
+	: dt_( ptr->getDt() ), nextTime_( ptr->getDt() )
 {
 	ticks_.push_back( ptr );
 }
@@ -145,7 +145,6 @@ double TickPtr::getDt() const
 void TickPtr::reinit( Eref e )
 {
 	nextTime_ = dt_;
-	numTimerThread_ = 0;
 	for ( vector< const Tick* >::iterator i = ticks_.begin(); 
 		i != ticks_.end(); ++i )
 	{

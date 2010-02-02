@@ -90,9 +90,11 @@ IntFire::IntFire( double thresh, double tau )
 
 void IntFire::process( const ProcInfo* p, const Eref& e )
 {
-	if ( e.index().data() % 100 == 0 ) {
+	/*
+	if ( e.index().data() % 900 == 0 ) {
 	cout << "IntFire[" << e.index().data() << "]::process dt = " << p->dt << ", " << " t= " << p->currTime << ", #Pending= " << pendingEvents_.size() << " on thread " << p->threadId << ", " << p->threadIndexInGroup << ", Vm= " << Vm_ << endl << flush;
 	}
+	*/
 	/*
 	if ( e.index().data() == 1023 && pendingEvents_.size() > 0 && p->currTime > 0.9 ) {
 		cout << "pending size on " << e.index() << " = " << pendingEvents_.size() << endl;
@@ -118,7 +120,7 @@ void IntFire::process( const ProcInfo* p, const Eref& e )
 		spike->send( e, p, p->currTime );
 		// e.sendSpike( spikeSlot, p->currTime );
 		if ( e.index().data() % 100 == 0 ) {
-			cout << "IntFire[" << e.index().data() << "]::process, zeroing Vm= " << Vm_ << ", Ptr = " << this << endl;
+			// cout << "IntFire[" << e.index().data() << "]::process, zeroing Vm= " << Vm_ << ", Ptr = " << this << endl;
 		}
 		Vm_ = -1.0e-7;
 	} else {

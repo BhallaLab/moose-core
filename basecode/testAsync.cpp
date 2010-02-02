@@ -631,6 +631,8 @@ void testSparseMsg()
 
 	ProcInfo p;
 	p.dt = timestep;
+	IntFire* ifire100 = reinterpret_cast< IntFire* >( e2.element()->data( 100 ) );
+	IntFire* ifire900 = reinterpret_cast< IntFire* >( e2.element()->data( 900 ) );
 
 	for ( unsigned int i = 0; i < runsteps; ++i ) {
 		p.currTime += p.dt;
@@ -645,6 +647,7 @@ void testSparseMsg()
 		for ( unsigned int j = 0; j < numWorkerThreads; ++j )
 			totOutqEntries += Qinfo::outQ_[ j ].size();
 		assert( totOutqEntries / ( sizeof( Qinfo ) + sizeof( double ) ) == qSize[i] );
+		cout << p.currTime << "	" << ifire100->getVm() << "	" << ifire900->getVm() << endl;
 		// cout << "T = " << p.currTime << ", Q size = " << Qinfo::q_[0].size() << endl;
 		Qinfo::clearQ( &p );
 //		i2()->process( &p );

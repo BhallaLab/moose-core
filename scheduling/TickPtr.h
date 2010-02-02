@@ -49,9 +49,7 @@ class TickPtr {
 		// const TickPtr* next_;
 		double dt_;
 		double nextTime_; // Upcoming time
-		unsigned int numTimerThread_; // Counter to sync updates on nextTime
 		vector< const Tick* > ticks_;	// Pointer to each Tick.
-		vector< unsigned int > index_; // Index of each Tick.
 		static double EPSILON;
 };
 

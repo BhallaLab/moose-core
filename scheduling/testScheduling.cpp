@@ -233,11 +233,15 @@ void testThreads()
 void testThreadIntFireNetwork()
 {
 	// Need another way to validate simulation output.
-	static const unsigned int qSize[] =
-		{ 838, 10, 6, 18, 36, 84, 150, 196, 258, 302 };
+	// static const unsigned int qSize[] = { 838, 10, 6, 18, 36, 84, 150, 196, 258, 302 };
+	static const double Vm100[] = {
+		0.0143366, 0.034505, 0.0818641, 0.0857292
+	};
+	static const double Vm900[] = { 
+		0.0369425, 0.0512392, 0.0838155, 0.107449
+	};
 	static const unsigned int NUMSYN = 104576;
 	static const double thresh = 0.2;
-	// static const double thresh = -0.2;
 	static const double Vmax = 1.0;
 	static const double refractoryPeriod = 0.4;
 	static const double weightMax = 0.02;
@@ -245,6 +249,7 @@ void testThreadIntFireNetwork()
 	static const double timestep = 0.2;
 	static const double connectionProbability = 0.1;
 	static const unsigned int runsteps = 5;
+	// static const unsigned int runsteps = 1000;
 	const Cinfo* ic = IntFire::initCinfo();
 	const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 1024;
@@ -313,7 +318,6 @@ void testThreadIntFireNetwork()
 	Element* se = Id()();
 	Shell* s = reinterpret_cast< Shell* >( se->data( 0 ) );
 	s->setclock( 0, timestep, 0 );
-	cerr << "starting\n";
 
 	Element* ticke = Id( 2, 0 )();
 	Eref er0( ticke, DataId( 0, 0 ) );
@@ -325,14 +329,21 @@ void testThreadIntFireNetwork()
 	er0.element()->addMsgToConn( m0.mid(), 0 );
 	*/
 
+	/*
+	 * For checking initialization.
 	Element* e2e = e2.element();
 	for (unsigned int i = 0; i < size; i+= 100 ) {
 		IntFire* f = reinterpret_cast< IntFire* >( Eref( e2e, i ).data() );
 		cout << i << "	" << f->getVm() << ",	" << f->getThresh() << endl;
 	}
+	*/
 
+	IntFire* ifire100 = reinterpret_cast< IntFire* >( e2.element()->data( 100 ) );
+	IntFire* ifire900 = reinterpret_cast< IntFire* >( e2.element()->data( 900 ) );
+
+	cout << ifire100->getVm() << " " << ifire900->getVm() << endl;
 	s->start( timestep * runsteps );
-	cerr << "ending\n";
+	cout << ifire100->getVm() << " " << ifire900->getVm() << endl;
 
 	// Minor hack to clean up leftover items in queue. They cause problems later.
 	Qinfo::mergeQ( 0 );

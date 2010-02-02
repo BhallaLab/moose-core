@@ -22,13 +22,13 @@
  * We reserve a large number of slots, since each Tick uses a separate one.
  * Should ideally find a way to predefine this to the max number of Ticks.
  */
-const ConnId procSlot = 10;
+const ConnId maxProcSlot = 10;
 
 static SrcFinfo1< ProcPtr >* process = 
 	new SrcFinfo1< ProcPtr >(
 		"process",
 		"Calls Process on target Elements. May need special option.",
-		procSlot
+		maxProcSlot
 );
 
 
@@ -215,7 +215,7 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 	// Presumably we should at least take an offset from the predefined
 	// Slots like children.
 	// const Conn* c = e->conn( index_ );
-	const Conn* c = e->conn( procSlot );
+	const Conn* c = e->conn( maxProcSlot );
 	if ( info->barrier ) {
 		int rc = pthread_barrier_wait(
 			reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
@@ -223,9 +223,9 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 	}
 	if ( info->threadIndexInGroup == 0 ) {
 		// Put the queues into one big one. Clear others
-		Qinfo::reportQ();
+		// Qinfo::reportQ();
 		Qinfo::mergeQ( info->groupId ); 
-		cout << "Tick::advance: t = " << info->currTime;
+		// cout << "Tick::advance: t = " << info->currTime;
 	}
 		
 	if ( info->barrier ) {

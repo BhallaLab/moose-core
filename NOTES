@@ -2918,3 +2918,106 @@ Tracked it down to a silly pointer assignment error in Element::process.
 With that fixed, it looks like the whole things works, including the 
 numerical values of the Vm on different IntFires.
 Also I'm not seeing crashes.
+
+Checkin as 1562.
+
+Some benchmarks. Increased runsteps to 1000 in testThreadIntFireNetwork(),
+compiled with O3.
+
+Previous	./moose		./moose -c 2	-c 4		-c 8
+36.22		35.8		42.6/21.9	41.2/21.9	40.2/21.2
+36.19		35.7		42.8/22.1	41.3/21.9	40.1/21.2
+36.17		35.8		42.7/22.0	41.3/21.8	40.1/21.3
+
+Surprising scaling with more threads. I really need to do profiling on this
+to see where the loss in efficiency comes. 
+I suspect in memcpy, as more threads don't seem to matter.
+
+Made profile files:
+profile.1thread
+profile.2thread
+
+I don't really see any difference. Not sure how to handle gprof with multiple
+threads.
+=============================================================================
+
+2 Feb
+Trying to set up unit tests for IntFire in scheduling, independent of #
+of threads. Uses Vm as the calculated quantity. Currently doesn't even
+come out.
+
+TickPtr is a mess. Should just have the pointer to a Tick, as the TickPtr
+gets sorted and hence shuffled all around. Instead it has a vector of 
+pointers, and other nasty stuff.
+
+Also the sort function should get rid of Ticks that lack targets.
+
+Also the selected Conn should be specific for the tick, not a generic one.
+
+What has happened in this bug is that there are two Ticks with small enough
+dts to be called: tick0 (set to dt = 0.2) and tick1 (legacy set to 1.0)
+
+The message to the targets was hard-coded to be on slot 10.
+
+The Tick::advance doesn't care which tick it is, it just calls the Conn on
+slot 10. 
+
+Clearly need to do some designing here.
+
+Step 1: Setting up messages from Tick to target Elements.
+Alternatives:
+	- Original idea had been to have a separate conn for each tick,
+	indexed by the Tick index. Traversal efficient.
+	. Issue is that the regular Msg::add function assumes the ConnId from
+	the SrcFinfo, which is hard-coded. 
+	. I can fudge this using a special Msg::add variant, but then the 
+	SrcFinfo information does not agree with what is on the Msg. This
+	may confuse traversal functions.
+	. I can fudge this too using a series of 'process' SrcFinfos, one
+	for each tick. This is easy but a hack.
+	- Alternative: use regular messaging. 
+	. Issue is that we will need to serially traverse the msgs in the Conn
+	till we find the one(s) that have the target Elements for this Tick.
+	All the targets will sit on the same Conn.
+	- Alternative: Separate Elements for each Tick.
+	. Issue is the use of pointers to other Elements within the Clock.
+	# This really comes back to the bigger pending issue of multilevel
+	object indexing.
+Decision: Use the simple option of having a series of 'process' SrcFinfos
+
+Step 2: Ticks and TickPtrs. 
+	- Original idea: Ticks are separate array entries in the Clock.
+	TickPtrs were supposed to have managed these in a lightweight manner so
+	that sorting of TickPtrs is cheap. Furthermore, we should not have to
+	manage unused Ticks at all.
+	. Issue: TickPtrs are now heavy, with vectors in them. Bad to sort.
+	. Issue: Unused Ticks are currently still managed. Can solve this
+	using info about which ticks are connected to targets.
+Decision: I've removed a couple of fields from TickPtr. I think the rest,
+	including the vector< Tick* >, are OK for now.
+
+Step 3: SetClock, UseClock, Resched, rebuild: High-level control functions.
+	- Original idea: Genesis BC options, would like not to have to do this
+	at all.
+	. Issue: need automatic scheduling.
+	. Issue: We need to use SetClock anyway as display needs it.
+
+
+Step 4: Automatic scheduling of elements.
+Alternatives:
+	- Predefine certain ticks for each kind of object. For example,
+	t0, t1 should be for all neuronal modeling objects.
+	. Issue: Solvers. Do we have a separate tick for each solver type?
+		Worse, if we have two identical nonuniform dt solvers, do we
+		need two ticks for them? Or do the ticks only define external
+		update times?
+	. Issue: Different solution methods. Suppose we do some mols using
+		Gillespie, and others using RK5.
+	- Assume we will always have a SimManager of some kind. This does
+		load balancing, scheduling, and so on. The default one
+		knows about solvers for neuronal and signaling models.
+		This doesn't deal with any of the higher-level funcs, and
+		instead sets up suitable messages directly.
+	. Issue: Where do we go to set plot dts? Separate, unlocked thread?
+
+
