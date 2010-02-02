@@ -190,27 +190,6 @@ void testThreads()
 
 	testThreadSchedElement tse;
 	Eref ts( &tse, 0 );
-
-	/*
-	// The useclock function needs to set up messages that call suitable
-	// sub-parts of the elements for each thread.
-	// Here we hard-code a lot of stuff that can be simplified when the
-	// Element parent/child framework is in place.
-	Eref ce = Id( 1, 0 ).eref();
-	Eref ticke = Id( 2, 0 ).eref();
-	// Clock* cdata = reinterpret_cast< Clock* >( ce.data() );
-	FieldElement< Tick, Clock, &Clock::getTick > ticke( tc, clocke, 
-		&Clock::getNumTicks, &Clock::setNumTicks );
-	unsigned int size = 10;
-
-	bool ret = OneToAllMsg::add( clocker, "tick", &ticke, "parent" );
-	assert( ret );
-
-	assert( ticke.numData() == 0 );
-	ret = Field< unsigned int >::set( clocker, "numTicks", size );
-	assert( ret );
-	assert( ticke.numData() == size );
-	*/
 	Element* ticke = Id( 2, 0 )();
 	Eref er0( ticke, DataId( 0, 0 ) );
 	Eref er1( ticke, DataId( 0, 1 ) );
@@ -232,14 +211,9 @@ void testThreads()
 
 void testThreadIntFireNetwork()
 {
-	// Need another way to validate simulation output.
-	// static const unsigned int qSize[] = { 838, 10, 6, 18, 36, 84, 150, 196, 258, 302 };
-	static const double Vm100[] = {
-		0.0143366, 0.034505, 0.0818641, 0.0857292
-	};
-	static const double Vm900[] = { 
-		0.0369425, 0.0512392, 0.0838155, 0.107449
-	};
+	// Known value from single-thread run, at t = 1 sec.
+	static const double Vm100 = 0.0857292;
+	static const double Vm900 = 0.107449;
 	static const unsigned int NUMSYN = 104576;
 	static const double thresh = 0.2;
 	static const double Vmax = 1.0;
@@ -284,11 +258,6 @@ void testThreadIntFireNetwork()
 	ret = Field< double >::setVec( e2, "Vm", temp );
 	assert( ret );
 
-	// cout << "testThreadIntFireNetwork: "; Qinfo::reportQ();
-	/*
-	for ( unsigned int i = 0; i < 40; ++i )
-		cout << reinterpret_cast< IntFire* >( e2.element()->data( i ) )->getVm() << "	" << temp[i] << endl;
-		*/
 	temp.clear();
 	temp.resize( size, thresh );
 	ret = Field< double >::setVec( e2, "thresh", temp );
@@ -324,29 +293,13 @@ void testThreadIntFireNetwork()
 
 	ret = SingleMsg::add( er0, "process0", e2, "process" );
 	assert( ret );
-	/*
-	SingleMsg m0( er0, e2 ); 
-	er0.element()->addMsgToConn( m0.mid(), 0 );
-	*/
-
-	/*
-	 * For checking initialization.
-	Element* e2e = e2.element();
-	for (unsigned int i = 0; i < size; i+= 100 ) {
-		IntFire* f = reinterpret_cast< IntFire* >( Eref( e2e, i ).data() );
-		cout << i << "	" << f->getVm() << ",	" << f->getThresh() << endl;
-	}
-	*/
 
 	IntFire* ifire100 = reinterpret_cast< IntFire* >( e2.element()->data( 100 ) );
 	IntFire* ifire900 = reinterpret_cast< IntFire* >( e2.element()->data( 900 ) );
 
-	cout << ifire100->getVm() << " " << ifire900->getVm() << endl;
 	s->start( timestep * runsteps );
-	cout << ifire100->getVm() << " " << ifire900->getVm() << endl;
-
-	// Minor hack to clean up leftover items in queue. They cause problems later.
-	Qinfo::mergeQ( 0 );
+	assert( fabs( ifire100->getVm() - Vm100 ) < 1e-6 );
+	assert( fabs( ifire900->getVm() - Vm900 ) < 1e-6 );
 
 	cout << "." << flush;
 	delete i2();
