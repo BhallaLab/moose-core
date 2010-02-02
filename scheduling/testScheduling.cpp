@@ -322,7 +322,7 @@ void testThreadIntFireNetwork()
 	Element* ticke = Id( 2, 0 )();
 	Eref er0( ticke, DataId( 0, 0 ) );
 
-	ret = SingleMsg::add( er0, "process", e2, "process" );
+	ret = SingleMsg::add( er0, "process0", e2, "process" );
 	assert( ret );
 	/*
 	SingleMsg m0( er0, e2 ); 

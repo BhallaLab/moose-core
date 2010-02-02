@@ -3021,3 +3021,7 @@ Alternatives:
 	. Issue: Where do we go to set plot dts? Separate, unlocked thread?
 
 
+Checkin as 1566 prior to starting work on these.
+
+Implemented step 1. This already fixes up the problem with 
+testThreadIntFireNetwork() in testScheduling.cpp.

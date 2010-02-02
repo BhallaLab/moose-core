@@ -18,23 +18,29 @@
  * objects.
  */
 
-/**
- * We reserve a large number of slots, since each Tick uses a separate one.
- * Should ideally find a way to predefine this to the max number of Ticks.
- */
-const ConnId maxProcSlot = 10;
+// This vector contains the SrcFinfos used for Process calls for each
+// of the Ticks.
+vector< SrcFinfo* > process;
 
-static SrcFinfo1< ProcPtr >* process = 
-	new SrcFinfo1< ProcPtr >(
-		"process",
-		"Calls Process on target Elements. May need special option.",
-		maxProcSlot
-);
+SrcFinfo* makeProcessFinfo()
+{
+	static int i = 0;
+	stringstream ss;
+	ss << "process" << i;
+	SrcFinfo* ret = 
+		new SrcFinfo1< ProcPtr > (
+			ss.str(),
+			"Calls Process on target Elements. Indexed by Tick#",
+			i
+		);
+	process.push_back( ret );
+	++i;
+	return ret;
+}
 
 
 const Cinfo* Tick::initCinfo()
 {
-
 	static Finfo* tickFinfos[] =
 	{
 	///////////////////////////////////////////////////////
@@ -68,7 +74,16 @@ const Cinfo* Tick::initCinfo()
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
-		process,
+		makeProcessFinfo(),
+		makeProcessFinfo(),
+		makeProcessFinfo(),
+		makeProcessFinfo(),
+		makeProcessFinfo(),
+		makeProcessFinfo(),
+		makeProcessFinfo(),
+		makeProcessFinfo(),
+		makeProcessFinfo(),
+		makeProcessFinfo(),
 
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
@@ -215,7 +230,7 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 	// Presumably we should at least take an offset from the predefined
 	// Slots like children.
 	// const Conn* c = e->conn( index_ );
-	const Conn* c = e->conn( maxProcSlot );
+	const Conn* c = e->conn( index_ );
 	if ( info->barrier ) {
 		int rc = pthread_barrier_wait(
 			reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
