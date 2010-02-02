@@ -306,6 +306,7 @@ void Clock::start(  Eref e, const Qinfo* q, double runTime )
 		info_.currTime += runTime;
 		return;
 	}
+	info_.currTime = tickPtr_[0].getNextTime() - tickPtr_[0].getDt();
 	double endTime = runTime * ROUNDING + info_.currTime;
 	isRunning_ = 1;
 

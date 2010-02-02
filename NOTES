@@ -3028,4 +3028,10 @@ testThreadIntFireNetwork() in testScheduling.cpp.
 Checkin as 1567.
 Step 2 has also already been done.
 
+Cleanup of unit tests. Clears up to 17 threads (more gets too big for the
+SparseMatrix limit).
+Checkin as 1568.
+Valgrind is happy, up to the last 56 bytes.
+
+Fixed the bug with the simulation duration in -s mode. May need to revisit.
 
