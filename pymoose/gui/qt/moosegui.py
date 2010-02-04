@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Feb  2 11:47:30 2010 (+0530)
+# Last-Updated: Thu Feb  4 14:00:11 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 653
+#     Update #: 667
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -47,19 +47,31 @@
 
 import sys
 import code
-
-sys.path.append('/home/subha/src/moose/pymoose')
-
 from datetime import date
+
 from PyQt4 import QtCore, QtGui
 from PyQt4.Qt import Qt
-# from QScintilla.Shell import Shell
-# from QScintilla.MiniEditor import MiniEditor
+
+# The following line is for ease in development environment. Normal
+# users will have moose.py and _moose.so installed in some directory
+# in PYTHONPATH.  If you have these two files in /usr/local/moose, you
+# can enter the command:
+#
+# "export PYTHONPATH=$PYTHONPATH:/usr/local/moose" 
+#
+# in the command prompt before running the
+# moosegui with "python moosegui.py"
+sys.path.append('/home/subha/src/moose/pymoose')
+
+
+
+# These are the MOOSE GUI specific imports
 from objedit import ObjectFieldsModel
 from moosetree import *
 from mooseclasses import *
 from mooseglobals import MooseGlobals
 from mooseshell import MooseShell
+
 def makeModelTree(parent):
     mooseTree = MooseTreeWidget(parent)
     return mooseTree
