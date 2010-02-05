@@ -1,4 +1,4 @@
-# loadcell.py --- 
+# glcellloader.py --- 
 # 
 # Filename: loadcell.py
 # Description: 
@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Feb  4 20:34:34 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Feb  5 14:00:14 2010 (+0530)
+# Last-Updated: Fri Feb  5 18:07:10 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 100
+#     Update #: 103
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -64,7 +64,7 @@ models = {'CA1':'ca1passive.p',
 
 CONTEXT = moose.PyMooseBase.getContext()
 
-class MorphLoader(object):
+class GLCellLoader(object):
     def __init__(self, cell_type, host='localhost', port='9999'):
 	'''Cell loader for glcell using glclient'''
 	filepath = morphs_dir + models[cell_type]
@@ -113,9 +113,9 @@ class MorphLoader(object):
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
-	loader = MorphLoader(sys.argv[1])
+	loader = GLCellLoader(sys.argv[1])
     else:
-	loader = MorphLoader('Purkinje3')
+	loader = GLCellLoader('Purkinje3')
     print 'loaded morphology file'
     CONTEXT.setClock(0, SIMDT)
     CONTEXT.setClock(1, SIMDT)
@@ -127,4 +127,4 @@ if __name__ == '__main__':
     CONTEXT.step(RUNTIME)
 
 # 
-# loadcell.py ends here
+# glcellloader.py ends here
