@@ -1,0 +1,143 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<channelml xmlns="http://morphml.org/channelml/schema" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns:meta="http://morphml.org/metadata/schema" 
+    xsi:schemaLocation="http://morphml.org/channelml/schema  ../../../../../trunk/web/NeuroMLFiles/Schemata/v1.7.3/Level2/ChannelML_v1.7.3.xsd" 
+    units="SI Units">
+     
+    <channel_type name="CaConductance">
+    
+        <status value="stable">
+        </status>
+        <current_voltage_relation cond_law="ohmic" ion="ca" default_gmax="132.8e-9" default_erev="0.080" charge="2" fixed_erev="yes">
+            
+            <q10_settings q10_factor="3" experimental_temp="17.350264793"/>
+            <offset value="0.010"/>
+            
+            <gate name="m" instances="2">
+                <closed_state id="m0"/>
+                <open_state id="m"/>
+                     
+                <transition name="alpha" from="m0" to="m" expr_form="sigmoid" rate="1600" scale="-0.01389" midpoint="0.005" />
+                <transition name="beta" from="m" to="m0" expr_form="exp_linear" rate="100" scale="-0.005" midpoint="-0.0089" />
+                    
+            </gate>
+        
+            <gate name="h" instances="1">
+                <closed_state id="h0"/>
+                <open_state id="h"/>
+                     
+                <transition name="alpha" from="h0" to="h" expr_form="tabulated" >
+		  <table xmin = "-0.1" xmax = "0.05">
+			<entry value="5"/>
+			<entry value="5"/>
+			<entry value="5"/>
+			<entry value="5"/>
+			<entry value="5"/>
+			<entry value="5"/>
+			<entry value="5"/>
+			<entry value="5"/>
+			<entry value="5"/>
+			<entry value="5"/>
+			<entry value="5"/>
+			<entry value="5"/>
+			<entry value="5"/>
+			<entry value="5"/>
+			<entry value="4.33439"/>
+			<entry value="3.71924"/>
+			<entry value="3.19139"/>
+			<entry value="2.73846"/>
+			<entry value="2.34981"/>
+			<entry value="2.01632"/>
+			<entry value="1.73017"/>
+			<entry value="1.4846"/>
+			<entry value="1.27391"/>
+			<entry value="1.09311"/>
+			<entry value="0.937975"/>
+			<entry value="0.804856"/>
+			<entry value="0.690629"/>
+			<entry value="0.592614"/>
+			<entry value="0.508509"/>
+			<entry value="0.436336"/>
+			<entry value="0.374411"/>
+			<entry value="0.321274"/>
+			<entry value="0.275678"/>
+			<entry value="0.236553"/>
+			<entry value="0.202981"/>
+			<entry value="0.174174"/>
+			<entry value="0.149455"/>
+			<entry value="0.128243"/>
+			<entry value="0.110042"/>
+			<entry value="0.0944247"/>
+			<entry value="0.0810238"/>
+			<entry value="0.0695248"/>
+			<entry value="0.0596577"/>
+			<entry value="0.051191"/>
+			<entry value="0.0439259"/>
+			<entry value="0.0376914"/>
+			<entry value="0.0323422"/>
+			<entry value="0.0277521"/>
+			<entry value="0.0238135"/>
+			<entry value="0.0204339"/>
+		     </table>
+		 </transition> 
+                <transition name="beta" from="h" to="h0" expr_form="tabulated" >
+                  <table xmin = "-0.1" xmax = "0.05">
+			<entry value="0"/>
+			<entry value="0"/>
+			<entry value="0"/>
+			<entry value="0"/>
+			<entry value="0"/>
+			<entry value="0"/>
+			<entry value="0"/>
+			<entry value="0"/>
+			<entry value="0"/>
+			<entry value="0"/>
+			<entry value="0"/>
+			<entry value="0"/>
+			<entry value="0"/>
+			<entry value="0"/>
+			<entry value="0.66561"/>
+			<entry value="1.28076"/>
+			<entry value="1.80861"/>
+			<entry value="2.26154"/>
+			<entry value="2.65019"/>
+			<entry value="2.98368"/>
+			<entry value="3.26983"/>
+			<entry value="3.5154"/>
+			<entry value="3.72609"/>
+			<entry value="3.90689"/>
+			<entry value="4.06203"/>
+			<entry value="4.19514"/>
+			<entry value="4.30937"/>
+			<entry value="4.40739"/>
+			<entry value="4.49149"/>
+			<entry value="4.56366"/>
+			<entry value="4.62559"/>
+			<entry value="4.67873"/>
+			<entry value="4.72432"/>
+			<entry value="4.76345"/>
+			<entry value="4.79702"/>
+			<entry value="4.82583"/>
+			<entry value="4.85055"/>
+			<entry value="4.87176"/>
+			<entry value="4.88996"/>
+			<entry value="4.90558"/>
+			<entry value="4.91898"/>
+			<entry value="4.93048"/>
+			<entry value="4.94034"/>
+			<entry value="4.94881"/>
+			<entry value="4.95607"/>
+			<entry value="4.96231"/>
+			<entry value="4.96766"/>
+			<entry value="4.97225"/>
+			<entry value="4.97619"/>
+			<entry value="4.97957"/>
+		 </table>
+		 </transition> 
+            </gate>
+        </current_voltage_relation> 
+        
+    </channel_type>
+</channelml>
