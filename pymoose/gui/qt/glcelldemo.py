@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Feb  4 19:58:31 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Feb  4 22:12:48 2010 (+0530)
+# Last-Updated: Fri Feb  5 12:05:42 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 34
+#     Update #: 47
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -49,14 +49,27 @@ import time
 import sys
 import subprocess
 from glclient import GLClient
+# from bulbchannel import KMitralUSB, NaMitralUSB
 
 class GlCellDemo(object):
-    def __init__(self, port=9999, colormap='../../../gl/colormaps/rainbow2', celltype='Purkinje3'):
+    def __init__(self, port=9999, colormap='../../../gl/colormaps/rainbow2', celltype='Mitral'):
 	self.client = GLClient(port=str(port), colormap=colormap)
 	time.sleep(3) # Without a little delay the client gives bind error
+        # create the channels for Mitral cell.        
 	self.server = subprocess.Popen(['python', 'loadcell.py', celltype])
 if __name__ == '__main__':
-    celltype = 'Purkinje3'
+    '''main mathod for running glcell demo. There are four models associated with this demo:
+       They are the following with corresponding command line option:
+
+       mitral cell          : Mitral
+       purkinje cell (small): Purkinje1
+       purkinje cell        : Purkinje2
+       purkinje cell        : Purkinje3
+
+
+       By default it runs the Mitral cell model.
+       The models are not exact as all the ion channels may not be present.'''
+    celltype = 'Mitral'
     if len(sys.argv) > 1:
 	celltype = sys.argv[1]
     
