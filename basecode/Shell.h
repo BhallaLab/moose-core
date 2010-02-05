@@ -20,9 +20,20 @@ class Shell: public Data
 		void setQuit( bool val );
 		bool getQuit() const;
 
-		void start( double runTime );
-
+		///////////////////////////////////////////////////////////
+		// DestFinfo functions
+		///////////////////////////////////////////////////////////
 		void handleGet( Eref e, const Qinfo* q, const char* arg );
+		void start( double runTime );
+		/**
+		 * Stub for eventual function to handle load balancing. This must
+		 * be called to set up default groups.
+		 */
+		void loadBalance();
+
+		void create( string type, Id parent, string name, unsigned int num);
+		void addmsg( Id src, Id dest, string srcfield, string destfield );
+
 		const char* getBuf() const;
 		static const char* buf();
 		static const ProcInfo* procInfo();
@@ -33,11 +44,6 @@ class Shell: public Data
 		void setHardware( bool isSingleThreaded, 
 			unsigned int numCores, unsigned int numNodes );
 
-		/**
-		 * Stub for eventual function to handle load balancing. This must
-		 * be called to set up default groups.
-		 */
-		void loadBalance();
 		unsigned int numCores();
 
 		// Sets up clock ticks. Essentially is a call into the 

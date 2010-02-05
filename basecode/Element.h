@@ -44,7 +44,7 @@ class Element
 		/**
 		 * Destructor
 		 */
-		~Element();
+		virtual ~Element();
 
 		/**
 		 * Here we build the array on the fly.

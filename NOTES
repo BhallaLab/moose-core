@@ -3034,4 +3034,54 @@ Checkin as 1568.
 Valgrind is happy, up to the last 56 bytes.
 
 Fixed the bug with the simulation duration in -s mode. May need to revisit.
+Checkin as 1569.
 
+Ran the benchmarks again on a 4-node machine (gj: AMD Opteron 2.4 Ghz)
+
+./moose		./moose -c 2	-c 4		-c 8
+41.1		36.7/19.1	39.8/11.2	43.8/12.4
+41.5		43.8/24.1	40.8/11.1	44.0/12.4
+41.3		39.2/20.5	42.1/11.5	43.4/12.4
+
+So it looks like the scaling on these machines is far better than on the
+laptop. Almost linear speedup with # of threads. Unclear why it is so much
+better scaling than the laptop was.
+Laptop: Intel(R) Core(TM)2 Duo CPU     U9400
+GJ node: Dual Core AMD Opteron(tm) Processor 280
+Anyway, it is reassuring because I had been wondering how to do benchmarking
+to find out why the laptop wasn't scaling well.
+
+Next steps:
+- Test on 8-core machine.
+
+- Set up MPI-based parallel calculations
+	- Shell::create and 'add'
+	- MPI picks up and sends out appropriate inQs.
+	- Polling iRecv for incoming stuff
+	- Figure out which queue to put the incoming stuff.
+	- One thread broadcasting Shell commands to all nodes.
+	- Hard-code setup of IntFire test.
+	- Parallel Element creation
+	- Parallel Message creation
+	- Deferred object instantiation at time of Shell::loadBalance
+		- may not work, because typical scripts do field assignment
+		right away.
+
+=============================================================================
+2 Feb continued.
+
+Ran the benchmarks again on an 8-node machine
+(ghevar:  Intel(R) Xeon(R) CPU           E5520  @ 2.27GHz)
+
+./moose		./moose -c 2	-c 4		-c 8		-c 16
+25.0		22.9/11.9	21.6/5.9	22.2/3.2	31.4/3.2
+28.0		22.9/12.5	22.0/6.0	23.5/3.8	30.1/2.9
+28.1		22.8/12.4	21.6/6.1	23.6/3.8	31.5/3.1
+
+Also moose -s seems to go quite a bit faster: ~23.5 sec 
+Unfortunately the -c segvs with some of the higher core numbers: 15, 17.
+Overall, looks pretty linear. The hyperthreading is occasionally helpful,
+in some other runs I've gotten it as low as 2.4 sec on 16 'cores', which means
+hyperthreading on all 8 cores. There is a lot of variability.
+
+=============================================================================

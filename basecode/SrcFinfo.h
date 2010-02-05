@@ -210,4 +210,46 @@ template < class T1, class T2, class T3 > class SrcFinfo3: public SrcFinfo
 	private:
 };
 
+template < class T1, class T2, class T3, class T4 > class SrcFinfo4: public SrcFinfo
+{
+	public:
+		~SrcFinfo4() {;}
+
+		SrcFinfo4( const string& name, const string& doc, 
+			ConnId c )
+			: SrcFinfo( name, doc, c )
+			{ ; }
+
+		// Will need to specialize for strings etc.
+		void send( Eref e, const ProcInfo* p,
+			const T1& arg1, const T2& arg2, const T3& arg3, const T4& arg4 ){
+			char temp[ sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) ];
+			*reinterpret_cast< T1* >( temp ) = arg1;
+			*reinterpret_cast< T2* >( temp + sizeof( T1 ) ) = arg2;
+			*reinterpret_cast< T3* >( temp + sizeof( T1 ) + sizeof( T2 ) ) = arg3;
+			*reinterpret_cast< T4* >( temp + sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) ) = arg4;
+			e.asend( getConnId(), getFuncIndex(), p,
+				temp, sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) + sizeof(T4 ) );
+		}
+
+		void sendTo( Eref e, DataId target, const ProcInfo* p,
+			const T1& arg1, const T2& arg2, const T3& arg3, const T4& arg4 )
+		{
+			char temp[ sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) +
+				sizeof( T4 ) + sizeof( unsigned int ) ];
+			*reinterpret_cast< T1* >( temp ) = arg1;
+			*reinterpret_cast< T2* >( temp + sizeof( T1 ) ) = arg2;
+			*reinterpret_cast< T3* >( temp + sizeof( T1 ) + sizeof( T2 ) ) = arg3;
+			*reinterpret_cast< T4* >( temp + sizeof( T1 ) + sizeof( T2 ) + sizeof( T4 ) ) = arg4;
+			*reinterpret_cast< DataId* >( temp + 
+				sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) + sizeof( T4 ) ) = 
+				target;
+			// e.tsend( c_, funcIndex_, target, reinterpret_cast< const char* >( &arg ), sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) );
+			e.tsend( getConnId(), getFuncIndex(), target, p,
+			temp, sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) + sizeof( T4 ) );
+		}
+
+	private:
+};
+
 #endif // _SRC_FINFO_H

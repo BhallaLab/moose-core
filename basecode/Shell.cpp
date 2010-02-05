@@ -40,6 +40,8 @@ const Cinfo* Shell::initCinfo()
 			&Shell::setQuit, 
 			&Shell::getQuit ),
 ////////////////////////////////////////////////////////////////
+// Dest Finfos: Functions handled by Shell
+////////////////////////////////////////////////////////////////
 		new DestFinfo( "handleGet", 
 			"Function to handle returning values for 'get' calls.",
 			new RetFunc< Shell >( &Shell::handleGet ) ),
@@ -52,6 +54,14 @@ const Cinfo* Shell::initCinfo()
 		new DestFinfo( "loadBalance", 
 			"Set up load balancing",
 			new OpFunc0< Shell >( & Shell::loadBalance ) ),
+
+		new DestFinfo( "create", 
+			"Creates Element. Args: class, parent, name, array_size",
+			new OpFunc4< Shell, string, Id, string, unsigned int >( & Shell::create ) ),
+
+		new DestFinfo( "addmsg", 
+			"Adds a Msg between specified Elements. Args: Src, Dest, srcField, destField",
+			new OpFunc4< Shell, Id, Id, string, string >( & Shell::addmsg ) ),
 
 ////////////////////////////////////////////////////////////////
 		new SrcFinfo1< FuncId >( "requestGet",
@@ -80,6 +90,10 @@ Shell::Shell()
 {
 	;
 }
+
+////////////////////////////////////////////////////////////////
+// DestFuncs
+////////////////////////////////////////////////////////////////
 
 void Shell::process( const ProcInfo* p, const Eref& e )
 {
@@ -122,6 +136,17 @@ const char* Shell::getBuf() const
 		return &( getBuf_[0] );
 	return 0;
 }
+
+void Shell::create( string type, Id parent, string name, unsigned int num)
+{
+}
+
+// I really also want to put in a message type. But each message has its
+// own features and these may well be done separately
+void Shell::addmsg( Id src, Id dest, string srcfield, string destfield )
+{
+}
+
 ////////////////////////////////////////////////////////////////////////
 // Some static utility functions
 ////////////////////////////////////////////////////////////////////////

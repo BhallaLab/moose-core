@@ -635,4 +635,113 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 		}
 };
 
+/**
+ * SetGet4 handles 4-argument Sets. It does not deal with Gets.
+ */
+template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
+{
+	public:
+		SetGet4( Eref& dest )
+			: SetGet( dest )
+		{;}
+
+		/**
+		 * Blocking, typed 'Set' call
+		 */
+		static bool set( Eref& dest, const string& field, 
+			A1 arg1, A2 arg2, A3 arg3, A4 arg4 )
+		{
+			SetGet4< A1, A2, A3, A4 > sg( dest );
+			FuncId fid;
+			if ( sg.checkSet( field, fid ) ) {
+				unsigned int size1 = Conv< A1 >::size( arg1 );
+				unsigned int size2 = Conv< A2 >::size( arg2 );
+				unsigned int size3 = Conv< A3 >::size( arg3 );
+				unsigned int size4 = Conv< A4 >::size( arg4 );
+				unsigned int totSize = size1 + size2 + size3 + size4;
+				char *temp = new char[ totSize ];
+				Conv< A1 >::val2buf( temp, arg1 );
+				Conv< A2 >::val2buf( temp + size1, arg2 );
+				Conv< A3 >::val2buf( temp + size1 + size2, arg3 );
+				Conv< A4 >::val2buf( temp + size1 + size2 + size3, arg4 );
+				sg.iSetInner( fid, temp, totSize );
+
+				// Ensure that clearQ is called before this return.
+				sg.completeSet();
+				delete[] temp;
+				return 1;
+			}
+			return 0;
+		}
+
+		/**
+		 * Blocking call using string conversion.
+		 * As yet we don't have 2 arg conversion from a single string.
+		 * So this is a dummy
+		 */
+		static bool strSet( Eref& dest, const string& field, 
+			const string& val )
+		{
+			cout << "strSet< A1, A2, A3, A4 >: string convertion not yet implemented\n";
+			A1 arg1;
+			A2 arg2;
+			A3 arg3;
+			A4 arg4;
+			str2val( arg1, val );
+			return set( dest, field, arg1, arg2, arg3, arg4 );
+		}
+
+		/**
+		 * Nonblocking 'set' call, no args.
+		 * There is a matching nonblocking iStrSet call with a string arg.
+		 */
+		bool iSet( const string& field, const A1& arg1, const A2& arg2, const A3& arg3, const A4& arg4 )
+		{
+			FuncId fid;
+			if ( checkSet( field, fid ) ) {
+				unsigned int size1 = Conv< A1 >::size( arg1 );
+				unsigned int size2 = Conv< A2 >::size( arg2 );
+				unsigned int size3 = Conv< A3 >::size( arg3 );
+				unsigned int size4 = Conv< A4 >::size( arg4 );
+				unsigned int totSize = size1 + size2 + size3 + size4;
+				resizeBuf( totSize );
+				char *temp = buf();
+				Conv< A1 >::val2buf( temp, arg1 );
+				Conv< A2 >::val2buf( temp + size1, arg2 );
+				Conv< A3 >::val2buf( temp + size1 + size2, arg3 );
+				Conv< A4 >::val2buf( temp + size1 + size2 + size3, arg4 );
+				iSetInner( fid, temp, totSize );
+				return 1;
+			}
+			return 0;
+		}
+
+		/**
+		 * Nonblocking 'set' call, using automatic string conversion into
+		 * arbitrary numbers of arguments.
+		 * There is a matching nonblocking set call with typed arguments.
+		 */
+		bool iStrSet( const string& field, const string& val )
+		{
+			cout << "iStrSet< A1, A2, A3, A4 >: string convertion not yet implemented\n";
+			A1 arg1;
+			A2 arg2;
+			A3 arg3;
+			A4 arg4;
+			Conv< A1 >::str2val( arg1, val );
+			return iSet( field, arg1, arg2, arg3, arg4 );
+		}
+	//////////////////////////////////////////////////////////////////
+	//  The 'Get' calls for 2 args are currently undefined.
+	//////////////////////////////////////////////////////////////////
+	
+		/**
+		 * Terminating call using string conversion
+		 */
+		string harvestStrGet() const
+		{ 
+			return "";
+		}
+};
+
 #endif // _SETGET_H
