@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Feb  4 20:34:34 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Feb  4 21:56:01 2010 (+0530)
+# Last-Updated: Fri Feb  5 14:00:14 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 54
+#     Update #: 100
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -68,6 +68,25 @@ class MorphLoader(object):
     def __init__(self, cell_type, host='localhost', port='9999'):
 	'''Cell loader for glcell using glclient'''
 	filepath = morphs_dir + models[cell_type]
+
+        # Load the channel definitions from bulbchan.g
+        CONTEXT.loadG('../../../DEMOS/gl-demo/channels/bulbchan.g')
+        cwe = CONTEXT.getCwe()
+        CONTEXT.setCwe('/library')
+        CONTEXT.runG('make_LCa3_mit_usb')
+        CONTEXT.runG('make_Na_rat_smsnn')
+        CONTEXT.runG('make_Na2_rat_smsnn')
+        CONTEXT.runG('make_KA_bsg_yka')
+        CONTEXT.runG('make_KM_bsg_yka')
+        CONTEXT.runG('make_K_mit_usb')
+        CONTEXT.runG('make_K2_mit_usb')
+        # CONTEXT.runG('make_K_slow_usb')
+        CONTEXT.runG('make_Na_mit_usb')
+        CONTEXT.runG('make_Na2_mit_usb')
+        # CONTEXT.runG('make_Ca_mit_conc')
+        # CONTEXT.runG('make_Kca_mit_usb')
+        print 'created channels'
+        CONTEXT.setCwe(cwe)
 	CONTEXT.readCell(filepath, cell_type)
 	self.cell = moose.Cell(cell_type)
 	self.glServer = moose.GLcell('gl_' + cell_type)
@@ -77,11 +96,12 @@ class MorphLoader(object):
 	self.glServer.attribute = 'Vm'
 	self.glServer.threshold = 1
 	self.glServer.sync = 'on'
-	self.glServer.vscale = 10
+	self.glServer.vscale = 1.0
 	self.glServer.bgcolor = '050050050'
 	self.glServer.highvalue = 0.05
 	self.glServer.loader = -0.1
-	
+	if cell_type == 'Mitral':
+            self.glServer.vscale = 10.0
 	# ** Assuming every cell has a top-level compartment called
 	# ** soma
 	self.pulsegen = moose.PulseGen('pg_' + cell_type)
@@ -101,7 +121,9 @@ if __name__ == '__main__':
     CONTEXT.setClock(1, SIMDT)
     CONTEXT.setClock(4, GLDT)
     CONTEXT.useClock(4, '/#[TYPE=GLcell]')
+    print 'Before reset'
     CONTEXT.reset()
+    print 'After reset'
     CONTEXT.step(RUNTIME)
 
 # 
