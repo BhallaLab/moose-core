@@ -6,7 +6,6 @@ from squidModel import *
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 from PyQt4 import Qwt5 as Qwt
-import PyQt4.Qwt5.qplt as qplt
 import PyQt4.Qwt5.anynumpy as numpy
 
 
