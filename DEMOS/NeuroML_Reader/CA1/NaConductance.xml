@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<channelml xmlns="http://morphml.org/channelml/schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:meta="http://morphml.org/metadata/schema" xsi:schemaLocation="http://morphml.org/channelml/schema  ../../Schemata/v1.7.3/Level2/ChannelML_v1.7.3.xsd" units="SI Units">
+    
+    <channel_type name="NaConductance" density="yes">
+        
+        <status value="stable">
+        </status>
+        <current_voltage_relation cond_law="ohmic" ion="na" default_erev="0.055" default_gmax="300"> 
+            
+            <gate name="m" instances="2">
+                <closed_state id="m0"/>
+                <open_state id="m"/>
+
+                <transition name="alpha" from="m0" to="m" expr_form="exp_linear" rate="1280" scale="0.004" midpoint="-0.0469"/>  
+                <transition name="beta" from="m" to="m0" expr_form="exp_linear" rate="1400" scale="-0.005" midpoint="-0.0199"/>  
+            </gate>
+            
+            <gate name="h" instances="1">
+                <closed_state id="h0"/>
+                <open_state id="h"/>
+
+                <transition name="alpha" from="h0" to="h" expr_form="exponential" rate="128" scale="-0.018" midpoint="-0.043"/>  
+                <transition name="beta" from="h" to="h0" expr_form="sigmoid" rate="4000" scale="-0.005" midpoint="-0.02"/>    
+            </gate>
+            
+        </current_voltage_relation>
+        
+        
+    </channel_type>
+</channelml>

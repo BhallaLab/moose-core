@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<channelml xmlns="http://morphml.org/channelml/schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:meta="http://morphml.org/metadata/schema" xsi:schemaLocation="http://morphml.org/channelml/schema ../../Schemata/v1.8.0/Level2/ChannelML_v1.8.0.xsd" units="SI Units">
+    
+    <channel_type name="K_DRConductance">
+        
+        <status value="stable">
+        </status>
+        <current_voltage_relation cond_law="ohmic" ion="k" default_gmax="498e-9" default_erev="-0.075">
+            
+            <gate name="n" instances="1">
+                <closed_state id="n0"/>
+                <open_state id="n"/>
+                     
+                <transition name="alpha" from="n0" to="n" expr_form="exp_linear" rate="80" scale="0.005" midpoint="-0.0249"/>
+                <transition name="beta" from="n" to="n0" expr_form="exponential" rate="250" scale="-0.04" midpoint="-0.04"/>
+                    
+            </gate>
+                       
+        </current_voltage_relation>
+        
+    </channel_type>
+</channelml>
