@@ -1,4 +1,4 @@
-# glview.py --- 
+# glviewloader.py --- 
 # 
 # Filename: loadcell.py
 # Description: 
@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Feb  4 20:34:34 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Feb  5 17:57:25 2010 (+0530)
+# Last-Updated: Fri Feb  5 18:01:32 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 120
+#     Update #: 126
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -64,7 +64,7 @@ models = {'CA1':'ca1passive.p',
 
 CONTEXT = moose.PyMooseBase.getContext()
 
-class ScriptLoader(object):
+class GLViewLoader(object):
     def __init__(self, cell_type, host='localhost', port='9999'):
 	'''Cell loader for glview using glclient'''
 	filepath = morphs_dir + models[cell_type]
@@ -111,9 +111,9 @@ class ScriptLoader(object):
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
-	loader = ScriptLoader(sys.argv[1])
+	loader = GLViewLoader(sys.argv[1])
     else:
-	loader = ScriptLoader('Purkinje3')
+	loader = GLViewLoader('Mitral')
     print 'loaded morphology file'
     CONTEXT.setClock(0, SIMDT)
     CONTEXT.setClock(1, SIMDT)
