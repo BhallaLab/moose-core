@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 11:38:46 2009 (+0530)
 # Version: 
-# Last-Updated: Sat Oct  3 22:12:35 2009 (+0530)
-#           By: subhasis ray
-#     Update #: 801
+# Last-Updated: Fri Feb  5 23:57:51 2010 (+0530)
+#           By: Subhasis Ray
+#     Update #: 810
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -130,6 +130,12 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 	self.connect(self.actionIzhikevich_Neurons,
 		     QtCore.SIGNAL('triggered()'),
 		     self.loadIzhikevich_Neurons_Tutorial)
+        self.connect(self.actionGLCell,
+                     QtCore.SIGNAL('triggered()'),
+                     self.loadGLCellDemo)
+        self.connect(self.actionGLView,
+                     QtCore.SIGNAL('triggered()'),
+                     self.loadGLViewDemo)
 	self.connect(self.actionAbout_MOOSE,
 		     QtCore.SIGNAL('triggered()'),
 		     self.showAbout_MOOSE)
@@ -220,7 +226,14 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         spath = sys.path[0] + '/../../DEMOS/pymoose/izhikevich/Izhikevich.py'
         self.mooseHandler.load(spath, 'MOOSE')
         
-	
+    def loadGLCellDemo(self):
+        spath = sys.path[0] + '/demo/glcelldemo.py'
+        self.mooseHandler.load(spath, 'MOOSE')
+
+    def loadGLViewDemo(self):
+        spath = sys.path[0] + '/demo/glviewdemo.py'
+        self.mooseHandler.load(spath, 'MOOSE')
+        
 
 
     def loadSquid_Axon_Tutorial(self):
