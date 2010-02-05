@@ -1,14 +1,14 @@
-# glcelldemo.py --- 
+# glviewdemo.py --- 
 # 
-# Filename: glcelldemo.py
+# Filename: glviewdemo.py
 # Description: 
 # Author: Subhasis Ray
 # Maintainer: 
-# Created: Thu Feb  4 19:58:31 2010 (+0530)
+# Created: Fri Feb  5 16:45:13 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Feb  5 16:46:34 2010 (+0530)
+# Last-Updated: Fri Feb  5 18:00:34 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 49
+#     Update #: 10
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -48,15 +48,40 @@
 import time
 import sys
 import subprocess
-from glclient import GLClient
-# from bulbchannel import KMitralUSB, NaMitralUSB
+import moose
 
-class GLCellDemo(object):
+from glclient import GLClient
+
+SIMDT = 1e-5
+GLDT = 1e-2
+RUNTIME = 100e-3
+
+morphs_dir = '../../../DEMOS/gl-demo/morphologies/'
+models = {'CA1':'ca1passive.p',
+	  'Mitral': 'mit.p',
+	  'Purkinje1': 'psmall.p',
+	  'Purkinje2': 'Purk2M9s.p',
+	  'Purkinje3': 'Purkinje4M9.p'
+	  }
+
+CONTEXT = moose.PyMooseBase.getContext()
+
+
+class GLViewDemo(object):
+    '''Demo showing a cell in glview mode.
+    
+    By default it loads a Mitral Cell model and shows the compartments
+    as cubes placed in 3D. The startup is always a profile view and if
+    you rotate it downwards to have the topview (axon being the
+    bottom), you will see nice changes in color and size of the cubes
+    indicating the propagation of spikes.
+    '''
     def __init__(self, port=9999, colormap='../../../gl/colormaps/rainbow2', celltype='Mitral'):
-	self.client = GLClient(port=str(port), colormap=colormap)
+	self.client = GLClient(port=str(port), colormap=colormap, mode='v')
 	time.sleep(3) # Without a little delay the client gives bind error
         # create the channels for Mitral cell.        
-	self.server = subprocess.Popen(['python', 'loadcell.py', celltype])
+	self.server = subprocess.Popen(['python', 'glviewloader.py', celltype])
+
 if __name__ == '__main__':
     '''main mathod for running glcell demo. There are four models associated with this demo:
        They are the following with corresponding command line option:
@@ -73,10 +98,11 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
 	celltype = sys.argv[1]
     
-    demo = GLCellDemo(celltype=celltype)
+    demo = GLViewDemo(celltype=celltype)
     
 	
 
 
+
 # 
-# glcelldemo.py ends here
+# glviewdemo.py ends here
