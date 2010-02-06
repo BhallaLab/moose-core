@@ -1,0 +1,164 @@
+load_file("nrngui.hoc")
+load_file("hoc/traubcon.hoc")
+load_file("fortmap.hoc")
+load_file("cell_templates.hoc")
+
+// til the shift bug in the mod files are fixed (table depends on range variable)
+usetable_naf2 = 0
+usetable_naf = 0
+usetable_napf_spinstell = 0
+usetable_napf_tcr = 0
+
+objref runinfo_, choice_, cell, nil, stim1, stim2, mchoice_
+runinfo_ = new List()
+strdef tstr1, tstr2
+for i=1,14 {getstr(tstr1) runinfo_.append(new String(tstr1))}
+deepaxax	0 0.4
+deepbask 	0 0.3
+deepLTS		0 0.4
+nontuftRS	0 0.8
+nRT		0 0.3
+spinstell	0 -0.25 10 0.25
+supaxax		0 0.4
+supbask		0 0.4
+supLTS		0 0.4
+suppyrFRB	0 0.0 10 0.4
+suppyrRS	0 0.0 5 0.75
+TCR		0 -0.9 100 0.5
+tuftIB		0 0 10 1.5
+tuftRS		0 -0.4 50 0.8
+
+//for i=0, runinfo_.count-1 {print runinfo_.object(i).s}
+
+proc mkpanel() {local i
+	exact_ = 0  normal_ = 1
+	choice_ = new Vector(runinfo_.count)
+	xpanel("Cell Run")
+	for i=0, runinfo_.count-1 {
+		sscanf(runinfo_.object(i).s, "%s", tstr1)
+		sprint(tstr2, "runcell(%d) run()", i)
+		xcheckbox(tstr1, &choice_.x[i], tstr2)
+	}
+	xlabel("")
+	xcheckbox("NEURON style ri", &normal_, "exact(0)")
+	xcheckbox("Exact traub style ri", &exact_, "exact(1)")
+	if (name_declared("showtstspk")) {
+		xlabel("")
+		xbutton("Raster for test sim", "showtstspk()")
+	}
+	xpanel(20, 80, 0)
+}
+mkpanel()
+
+proc mkpanel2() {local i
+	exact_ = 0  normal_ = 1
+	mchoice_ = new Vector(runinfo_.count)
+	xpanel("Cell Make")
+	for i=0, runinfo_.count-1 {
+		sscanf(runinfo_.object(i).s, "%s", tstr1)
+		sprint(tstr2, "mkcell(%d) run()", i)
+		xcheckbox(tstr1, &mchoice_.x[i], tstr2)
+	}
+	xlabel("")
+	xpanel(20, 500, 0)
+}
+//mkpanel2()
+
+load_file("onecell.ses")
+
+proc exact() {
+	normal_ = ($1 == 0)
+	exact_ = ($1 != 0)
+	runcell(cellnum)
+}
+
+proc runcell() {local i, t1,a1,t2,a2  localobj vvec, tvec, f, g
+	cellnum = $1
+	choice_.fill(0)
+	choice_.x[$1] = 1
+	t2 = 1e9   a2 = 0
+	i = sscanf(runinfo_.object($1).s, "%s %lf %lf %lf %lf", tstr1, \
+		&t1, &a1, &t2, &a2)
+//	print tstr1, t1, a1, t2, a2
+	cell = nil
+	sprint(tstr2, "cell = new %s()", tstr1)
+	execute(tstr2)
+	access cell.comp[1]
+	define_shape()
+	g = Graph[0]
+	g.erase_all
+	f = new File()
+	sprint(tstr2, "dat/%s_v_F.dat", tstr1)
+//	sprint(tstr2, "../p2c/data/GROUCHO110.%s", tstr1)
+	clipboard_retrieve(tstr2)
+	tvec = hoc_obj_[1]
+	vvec = hoc_obj_[0]
+	vvec.line(g, tvec, 2, 1)
+	g.exec_menu("Keep Lines")
+	g.exec_menu("Keep Lines")
+	stim1 = nil
+	stim2 = nil
+	stim1 = new IClamp(.5)
+	stim2 = new IClamp(.5)
+	stim1.del = t1  stim2.del = t2
+	stim1.amp = .3  stim2.amp = 0
+	stim1.dur = 50  stim2.dur = 1e9
+	sprint(tstr2, "cell.comp[%d].v(.5)", cell.presyn_comp)
+	g.addvar(tstr2)
+	if (exact_) { traubexact(cell, tci) }
+}
+
+runcell(0)
+
+objref cell2
+
+proc mkcell() {local i, t1,a1,t2,a2  localobj vvec, tvec, f, g
+	cellnum = $1
+	mchoice_.fill(0)
+	mchoice_.x[$1] = 1
+	t2 = 1e9   a2 = 0
+	i = sscanf(runinfo_.object($1).s, "%s %lf %lf %lf %lf", tstr1, \
+		&t1, &a1, &t2, &a2)
+//	print tstr1, t1, a1, t2, a2
+	cell2 = nil
+	sprint(tstr2, "cell2 = new %s()", tstr1)
+	execute(tstr2)
+}
+
+objref fih0_, fih1_
+fih0_ = new FInitializeHandler(0, "finit0()")
+fih1_ = new FInitializeHandler(1, "finit1()")
+
+proc finit0() { local ix
+	if (cell != nil) {
+		ix = cell.type()
+		forsec cell.all { v = type_vinit.x[ix] }
+		if (ix == TCRtype) {
+			forsec cell.all { v = -85 }
+		}
+	}
+	if (cell2 != nil) {
+		ix = cell2.type()
+		forsec cell2.all { v = type_vinit.x[ix] }
+		if (ix == TCRtype) {
+			forsec cell2.all { v = -85 }
+		}
+	}
+}
+
+proc finit1() { local ix
+	if (cell != nil) {
+		ix = cell.type()
+		if (ix == TCRtype) {
+			forsec cell.all { v = type_vinit.x[ix] }
+		}
+	}
+	if (cell2 != nil) {
+		ix = cell2.type()
+		forsec cell2.all { v = type_vinit.x[ix] }
+		if (ix == TCRtype) {
+			forsec cell2.all { v = type_vinit.x[ix] }
+		}
+	}
+}
+
