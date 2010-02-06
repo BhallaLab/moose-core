@@ -1,0 +1,102 @@
+// network_specification_interface.hoc
+// from NetGUI[0], the GUI Network Builder
+
+objref cells, nclist, netcon
+{cells = new List() nclist = new List()}
+
+func cell_append() {cells.append($o1) $o1.position($2,$3,$4)
+	return cells.count - 1
+}
+
+func nc_append() { // srcindex, tarcelindex, synindex
+	if ($3 >= 0) {
+		cells.object($1).connect2target(cells.object($2).synlist.object($3),netcon)
+		netcon.weight = $4  netcon.delay = $5
+	} else {
+		cells.object($1).connect2target(cells.object($2).pp.netcon)
+		netcon.weight = $4  netcon.delay = $5
+	}
+nclist.append(netcon)
+return nclist.count-1
+}
+
+/* instantiate network with commands like
+cell_append(new deepaxax_Cell(), -80, 0, 0)
+cell_append(new deepaxax_Cell(),  80, 0, 0)
+
+nc_append(1, 0, 0, 4, 8)
+nc_append(1, 0, 1, 3, 7)
+nc_append(0, 1, 0, 2, 6)
+nc_append(0, 1, 0, 1, 5)
+first two arguments:
+where 0 is the first deepaxax cell, 1 is the second.
+next argument:
+the synapse number 0 is an AlphaSynKinT0, 1 is an NMDA1 rcptr.
+where 1,2,3,4 are weights, 5,6,7,8 are delays
+
+other examples from NetGUI's export of a NetStim hoc file (*'s removed before /'s)
+//Network instantiation
+
+  /* NetStim_slow0 /  cell_append(new NetStim_slow_NetStim(),	-131,	 19, 0)
+  /* NetStim1 /  cell_append(new NetStim_NetStim(),	-123,	 -30, 0)
+  /* Cell2 /  cell_append(new Cell_Cell(),	45,	 -4, 0)
+  /* NetStim_slow0 -> Cell2.PulseSyn0 /  nc_append(0,   2, 0,  0,1)
+  /* NetStim1 -> Cell2.PulseSyn0 /  nc_append(1,   2, 0,  0,1)
+
+*/
+
+/* note: the automatically created from FORTRAN cell templates
+contain the cell templates in the style that would be written
+from network builder. */
+
+//create acell_home_ // now done in parlib.hoc
+
+// here is a template from network builder for the stimulation of cells
+
+begintemplate S_NetStim
+public pp, connect2target, x, y, z, position, is_art
+external acell_home_
+objref pp
+proc init() {
+  acell_home_ pp = new NetStim(.5)
+// the interval is expected to be reset in each object instance
+    pp.interval = 1e+08
+// this arbitrarily large number allows the poisson process
+// to deliver as many spikes as would occur without restraint
+// in the simulation
+    pp.number = 1e8
+    pp.start = 0
+    pp.noise = 1 // setting for a poisson process
+}
+func is_art() { return 1 }
+proc connect2target() { $o2 = new NetCon(pp, $o1) }
+proc position(){x=$1  y=$2  z=$3}
+endtemplate S_NetStim
+
+// here is a function which sets up constant current injections into
+// the somas of some cell types
+
+
+objref iclamp_const_list, tmpobj
+iclamp_const_list = new List()  // don't know if we will need these
+
+proc set_const_curr_inj() { 
+// arguments past are
+// double cellname_base, double num_cellname, Vector curr_cellname
+//        $1                    $2                   $o3
+
+	for i=1,$2 { // loop over all the cells
+	// create the IClamp_const
+
+	// insert IClamp_const
+
+	    cells.object($1 + i).comp[1] tmpobj = new IClamp_const(0.5)
+//	    cells.object($1 + i).synlist.append(tmpobj)  // should this be on this list?
+
+	    tmpobj.amp = $o3.x[i]
+	    iclamp_const_list.append(tmpobj)
+	}
+}
+
+
+if (pmesg) print "made it to end of network_specification_interface.hoc"
