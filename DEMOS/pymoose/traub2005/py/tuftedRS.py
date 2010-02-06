@@ -161,7 +161,7 @@ from simulation import Simulation
 import pylab
 from subprocess import call
 if __name__ == "__main__":    
-    call(['/home/subha/neuron/nrn/x86_64/bin/nrngui', 'test_tuftRS.hoc'], cwd='../nrn')
+    #call(['/home/subha/neuron/nrn/x86_64/bin/nrngui', 'test_tuftRS.hoc'], cwd='../nrn')
     TuftedRS.test_single_cell()
 
 
