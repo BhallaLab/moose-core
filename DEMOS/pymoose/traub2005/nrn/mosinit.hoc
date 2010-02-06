@@ -1,0 +1,6 @@
+//moddir mod
+{load_file("nrngui.hoc")}
+
+{load_file("spkplt.hoc")}
+{load_file("onecell.hoc")}
+
