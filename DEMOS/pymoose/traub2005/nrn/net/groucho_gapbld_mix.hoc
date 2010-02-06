@@ -1,0 +1,101 @@
+// groucho_gapbld_mix.hoc
+/*
+****************************this is one big comment ************************
+! 15 Nov. 2003, variation of groucho_gapbld.f to allow for gj
+! between 2 cell populations, eg suppyrRS and suppyrFRB, or
+! tuftRS and tuftIB.  Structure of gjtable as before, with col. 1
+! giving cell of 1st type and col. 3 giving coupled cell of 2nd type.
+
+      SUBROUTINE GROUCHO_gapbld_mix (thisno, numcells1, numcells2,
+     & numgj, gjtable, allowedcomps, num_allowedcomps, display)
+c       Construct a gap-junction network for groucho.f
+$1 thisno double
+$2 numcells1 = number of cells in 1st population.
+$3 numcells2 = number of cells in 2nd population.
+$4 numgj = total number of gj to be formed between these populations.
+// this is the output: gjtable = table of gj's: each row is a gj.  
+   Entries are: cell A, compartment on cell A; cell B, compartment on cell B
+$o5 allowedcomps = a list of compartments where gj allowed to form
+$6 num_allowedcomps = number of compartments in a cell on which a gj 
+$7 display
+c    might form.
+! IT IS ASSUMED THAT ALLOWEDCOMPS AND NUM_ALLOWEDCOMPS SAME FOR
+! THE 2 POPULATIONS.
+c display is an integer flag.  If display = 1, print gjtable
+
+        INTEGER thisno, numcells1, numcells2, numgj, gjtable(numgj,4),
+     &    num_allowedcomps, allowedcomps(num_allowedcomps)
+        INTEGER i,j,k,l,m,n,o,p, ictr /0/
+c ictr keeps track of how many gj have been "built"
+        INTEGER display
+
+        double precision seed, x1(1), x2(1), y(2)
+****************************this is one big comment ************************
+*/
+objref gjtable,x1, x2, y1
+obfunc groucho_gapbld_mix() { // see note above for arguments:
+	thisno  = $1
+	numcells1 = $2
+	numcells2 = $3
+	numgj = $4
+	allowedcomps = $o5
+	num_allowedcomps = $6
+	display = $7
+//	print "Arrived at groucho_gapbld_mix with display = ",display
+
+	seed = new Vector()
+	seed.append(137.e0)
+	objref gjtable
+	gjtable = new Matrix(numgj+1, 4+1) // FORTRAN-like indicies start at 1
+
+	ictr = 0
+
+// 2
+	while (ictr < numgj) {
+		k = 1
+	    not_unique = 1
+	    while (not_unique) {
+		x1 = durand (seed, k, x1) // durand returns vec c-style indicies
+		x2 = durand (seed, k, x2)
+// c This defines a candidate cell pair
+                k = 2
+		y = durand (seed, k, y)
+// c This defines a candidate pair of compartments
+
+		i = int ( x1.x[0] * numcells1 ) + 1
+		j = int ( x2.x[0] * numcells2 ) + 1
+
+// c Is the ORDERED cell pair (i,j) in the list so far?
+// superfluous but true           if (ictr.eq.0) goto 1
+
+		not_unique = 0
+		for eL = 1, ictr {
+		  if ((gjtable.x(eL,1) == i) && (gjtable.x(eL,3) == j)) {not_unique = 1}
+		}
+	    } // loop replaces  if (p.eq.1) goto 2
+
+// c Proceed with construction
+// 1
+	    ictr = ictr + 1
+	    m = int ( y.x[0] * num_allowedcomps ) + 1
+	    n = int ( y.x[1] * num_allowedcomps ) + 1
+
+	    gjtable.x[ictr][1] = i
+	    gjtable.x[ictr][3] = j
+	    gjtable.x[ictr][2] = allowedcomps.x[m]
+	    gjtable.x[ictr][4] = allowedcomps.x[n]
+
+	} // loop replacing if (ictr.lt.numgj) goto 2
+
+// c Possibly print out gjtable when done.
+//	print "at end of groucho_gapbld_mix display = ",display,", thisno = ",thisno
+	if ((display == 1) && (thisno == 0)) {
+		print " MIX GJTABLE"
+		for i = 1, numgj {
+	          printf("%6d, %6d %6d %6d \n",gjtable.x(i,1), gjtable.x(i,2), \
+                                       gjtable.x(i,3), gjtable.x(i,4))
+		}
+	}
+//	print "successfully printed or not"
+	return gjtable
+}
