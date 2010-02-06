@@ -1,0 +1,96 @@
+objref compmap, allow, x
+
+obfunc synaptic_compmap_construct () { local nrow, ncol  localobj f, s, tmpmap
+/*
+***************************************************************
+Parameter, Description:
+$1 thisno, maybe this double will be replaced in NEURON?
+$2 num_postsynaptic_cells,  another double
+// returned compmap(i,j), Matrix object=compartment #on postsyn cell j for ith presyn input
+$3 num_presyninputs_perpostsyn_cell, a double 
+$4 num_allowcomp, another double
+$o5 allow, a Vector object of allowed postsyn compartments
+$6 display, another double
+
+c Construct a map of compartments at connections of one presynaptic
+c cell to type to a postsynaptic cell type.
+c compmap (i,j) = compartment number on postsynaptic cell j of its
+c  i'th presynaptic input.
+c display is an integer flag.  If display = 1, print compmap
+
+        INTEGER thisno,
+     &   num_postsynaptic_cells,
+     &   num_presyninputs_perpostsyn_cell,
+     &   compmap (num_presyninputs_perpostsyn_cell, 
+     &                  num_postsynaptic_cells),
+     &   num_allowcomp, allow(num_allowcomp)
+c num_allowcomp = number of different allowed compartments
+c allow = list of allowed compartments
+        INTEGER i,j,k,l,m,n,o,p
+        INTEGER display
+
+        double precision seed, x(1)
+***************************************************************
+*/
+//	print "arrived"
+//	objref seed
+	seed = new Vector()
+        seed.append(377.e0)
+
+        num_postsynaptic_cells = $2
+	ncol=$2
+        num_presyninputs_perpostsyn_cell = $3
+	nrow=$3
+	num_allowcomp = $4
+	objref allow
+	allow = $o5
+	display = $6
+
+	objref compmap
+	compmap = new Matrix(num_presyninputs_perpostsyn_cell+1, num_postsynaptic_cells+1)
+  if (!use_p2c_net_connections) {
+//            map = 0
+            k = 1
+// print "num_postsynaptic_cells, num_presyninputs_perpostsyn_cell = ",num_postsynaptic_cells, num_presyninputs_perpostsyn_cell
+// print "matrix size = ",compmap.nrow(),compmap.ncol()
+
+        for ii = 1, num_postsynaptic_cells {
+        for jj = 1, num_presyninputs_perpostsyn_cell {
+            x = durand (seed, k, x)
+// c This defines a compartment     
+           LL = int ( x.x[0] * (num_allowcomp) ) + 1
+//	 print "jj,ii: ",jj,ii, " LL=",LL
+        if (LL > num_allowcomp) {
+		print " unnexpected boundary issue in synaptic_compmap_construct()"
+		LL = num_allowcomp
+	}
+// print allow.x(L)
+           compmap.x[jj][ii] = allow.x[LL]
+
+        }
+        }
+
+	thisno = $1
+// c Possibly print out map when done.
+       if ((display == 1) && (thisno == 0)) {
+	print "SYNAPTIC COMPARTMENT MAP "
+        for i = 1, num_postsynaptic_cells {
+         printf("%6d %6d %6d\n", compmap.x(1,i), compmap.x(2,i), \
+         compmap.x(num_presyninputs_perpostsyn_cell,i))               
+
+        }
+       }
+  }else{
+	// read from file created by port2colossus
+	s = new String()
+	sprint(s.s, "../../p2c/compmap/%s.dat", $s7)
+//printf("%s %d %d\n", s.s, nrow, ncol)
+	f = new File()
+	f.ropen(s.s)
+	tmpmap = new Matrix(ncol, nrow) // need to transpose
+	tmpmap.scanf(f, ncol, nrow)
+	tmpmap = tmpmap.transpose
+	tmpmap.bcopy(0,0,nrow, ncol, 1, 1, compmap)
+  }
+       return compmap
+}
