@@ -1,0 +1,108 @@
+NEURON version of Traub et al J Neurophysiol. 2005 Apr;93(4):1829-30.
+Single-column thalamocortical network model exhibiting gamma oscillations
+sleep spindles, and epileptogenic bursts.
+
+See: http://senselab.med.yale.edu/senselab/modeldb/ShowModel.asp?model=45539
+
+Prepare for running with
+nrnivmod mod
+
+See the comparison of each cell type with the fortran output with
+nrngui onecell.hoc
+
+Selecting the "Exact traub style ri" which forces the NEURON connection
+coefficients to be exactly the same as computed by the Traub's equivalent
+circuit style from the FORTRAN demonstrates that cell and channel properties
+are reliably represented in this NEURON translation of the FORTRAN code.
+
+
+Reliability:
+
+Since the NEURON and Fortran models do not produce quantitatively
+identical results there is always some question as to whether simulation
+differences are due to substantive parameter translation errors or
+can be attributed to different numerical methods.
+It must be realized that our experience has
+been that every test into a new runtime domain has exhibited
+discprepancies that were ultimately resolved by fixing
+translation errors.
+
+And also that our comparison
+tests are only between NEURON and an already significantly modified
+FORTRAN code. The bulk of the FORTRAN modifications are toward more
+generic FORTRAN syntax to allow the original ifc compatible FORTRAN to
+run under g77. Most of the execution places where the g77 version
+differs from the ifc version are straight forward transformations of
+bulk array assignment into equivalent elementwise assignment via do loops.
+Did we get them all? Did we assign over ALL the elements in each array?
+We did manually review all ifc to g77 editing changes but
+a few cases involved our judgement with regard to whether there was a bug
+in the original ifc fortran version.  The modified FORTRAN used for the
+NEURON comparisons is available from this model=45539 page. As is, the
+g77 FORTRAN model can only be run as 14 processes, one for each cell type
+and a full model run takes 20 hours or so. Simplifying to 1/10 the number
+of cells gives a model that takes approximate 1.5 hours for 100 ms of
+simulation time. Our last network bug, based on significant spike raster
+plot discrepancies, was found using a 10 ms run.
+
+We consider the translation of the 14 individual cell types to be quite
+reliable based on the quantitative similarity of the g77 and NEURON
+isolated 100 ms cell trajectories at the spike detection location for
+0 and 0.3 nA constant current stimulation into the soma. Note that
+quantitative similarity demands compartment coupling of exactly the
+same values used by the FORTRAN version algorithms (imitated in NEURON
+using the "traub_exact()" algorithm where some branch points had the
+form of "wye" equivalent circuits, some had the "delta" form, and all had
+a different view of how resistance from child to parent should be computed.)
+
+Network topology and chemical synapse parameter reliability is limited to the
+diagnostic power of our specific tests. For quantitative comparisons we
+printed the precise FORTRAN network topology to files and used that information
+to define the NEURON network connections. For 10 ms with a 1/10 size network
+we focused on quantitative similarity of the spike raster plots. The FORTRAN
+version has a spike resolution time of 0.1 ms and all synaptic conductance
+trajectories are step functions with that resolution (the underying
+dt is 50 times smaller, dt = 0.002). We prepared a special version of the
+NEURON executable to force spike threshold detection on 0.1 ms boundaries
+to allow convenient comparison of spike rasters. For the first 10 ms
+we judged whether spike discrepancies were due to FORTRAN-NEURON spikes
+straddling the 0.1 ms boundaries or whether the discrepancy was likely to
+be due to a topology or synaptic parameter error. The judgement was based
+on the details of the voltage trajectory at the spike detector compartment.
+We believe that careful analysis of the first
+10 ms of the  100 ms spike raster overlap plot for the
+FORTRAN (fat red marks) and NEURON (thin black marks) in combination with
+the spike trajectory sensitivity of suppyrRS cells with respect to number
+of spikes in their burst after the first spike will convince that we
+have gone as far as possible with quantitative spike location similarity
+as a diagnostic technique. Further diagnostics will likely have to be
+based on specific questions in regard to qualitative discrepancies and
+a focus on the NEURON model itself as the tool for exploration in terms
+of certain properties added or subtracted from successive runs. Unfortunately
+that can only be done in response to a specific suspicion on the part of the
+user. Enumerated below are the known discrepancies between the representations
+of the Traub model in FORTRAN and NEURON:
+
+The NEURON nmda saturation is turned off. See the NMDA_saturation_fact in
+the FORTRAN groucho.f file and the nrntraub/mod/traub_nmda.mod file.
+Warning: NEURON will not mimic the FORTRAN
+merely by setting the factor to 80.
+
+The groucho.f axon_refrac_time is normally set to 1.5. Our quantitative
+tests temporarily set this parameter to 0.5. The NEURON spike detection
+algorithm defines a spike as a positive going transition past the
+trigger value.
+
+Enumerated below are those major components (of which we
+are aware) that are in the model but have not been tested in terms of their
+quantitative equivalence to FORTRAN:
+gap junctions.
+long term nmda properties and effects.
+ectopic spikes
+random current stimulation
+
+The bottom line: The spike rasters for a
+full g77 FORTRAN run (gap junctions and current stimulation present) and
+a full NEURON run with its own independent random variables
+(no "traub_exact" connection coefficients, dt = 0.025 (ms),
+secondorder = 2, and spike detection with dt resolution) is presented.
