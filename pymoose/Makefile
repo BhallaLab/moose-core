@@ -63,6 +63,7 @@ OBJFILES := ../basecode/basecode.o \
 	../ksolve/ksolve.o	\
 	../device/device.o \
 	../signeur/signeur.o	\
+	../neuroML_IO/neuroML_IO.o \
 # 	../robots/robots.o	\
 
 ifeq ($(USE_SBML),1)
@@ -144,11 +145,10 @@ OBJ = PyMooseBase.o \
 	SteadyState.o	\
 	InterSolverFlux.o	\
 	Adaptor.o	\
- 	SigNeur.o	\
+	SigNeur.o	\
 	Leakage.o	\
 
 
-	
 HEADERS=PyMooseUtil.h \
 	PyMooseContext.h \
 	PyMooseBase.h \
@@ -225,8 +225,8 @@ HEADERS=PyMooseUtil.h \
 	../randnum/Normal.h	\
 	../randnum/Poisson.h	\
 	../maindir/init.h		\
-  	Adaptor.h	\
-  	SigNeur.h	\
+	Adaptor.h	\
+	SigNeur.h	\
 
 
 #TEST_MAIN = TestPyMoose.o
