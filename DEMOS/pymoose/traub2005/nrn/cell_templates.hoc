@@ -1,0 +1,19 @@
+// cell_templates.hoc
+// loads all the cell templates
+
+{
+load_file("cells/deepaxax_template.hoc")
+load_file("cells/deepbask_template.hoc")
+load_file("cells/deepLTS_template.hoc")
+load_file("cells/nontuftRS_template.hoc")
+load_file("cells/nRT_template.hoc")
+load_file("cells/spinstell_template.hoc")
+load_file("cells/supaxax_template.hoc")
+load_file("cells/supbask_template.hoc")
+load_file("cells/supLTS_template.hoc")
+load_file("cells/suppyrFRB_template.hoc")
+load_file("cells/suppyrRS_template.hoc")
+load_file("cells/TCR_template.hoc")
+load_file("cells/tuftIB_template.hoc")
+load_file("cells/tuftRS_template.hoc")
+}
