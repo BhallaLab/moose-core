@@ -1,0 +1,52 @@
+{load_file("nrngui.hoc")}
+objectvar save_window_, rvp_
+objectvar scene_vector_[4]
+objectvar ocbox_, ocbox_list_, scene_, scene_list_
+{ocbox_list_ = new List()  scene_list_ = new List()}
+{pwman_place(0,0,0)}
+{
+save_window_ = new Graph(0)
+save_window_.size(0,5,-80,40)
+scene_vector_[2] = save_window_
+{save_window_.view(0, -80, 5, 120, 434, 67, 775.68, 544)}
+graphList[0].append(save_window_)
+save_window_.save_name("graphList[0].")
+save_window_.addexpr("cell.comp[cell.presyn_comp].v( 0.5 )", 1, 1, 0.199361, 1.03898, 2)
+}
+{
+xpanel("RunControl", 0)
+v_init = -65
+xvalue("Init","v_init", 1,"stdinit()", 1, 1 )
+xbutton("Init & Run","run()")
+xbutton("Stop","stoprun=1")
+runStopAt = 5
+xvalue("Continue til","runStopAt", 1,"{continuerun(runStopAt) stoprun=1}", 1, 1 )
+runStopIn = 1
+xvalue("Continue for","runStopIn", 1,"{continuerun(t + runStopIn) stoprun=1}", 1, 1 )
+xbutton("Single Step","steprun()")
+t = 4
+xvalue("t","t", 2 )
+tstop = 5
+xvalue("Tstop","tstop", 1,"tstop_changed()", 0, 1 )
+dt = 0.01
+xvalue("dt","dt", 1,"setdt()", 0, 1 )
+steps_per_ms = 100
+xvalue("Points plotted/ms","steps_per_ms", 1,"setdt()", 0, 1 )
+screen_update_invl = 0.05
+xvalue("Scrn update invl","screen_update_invl", 1,"", 0, 1 )
+realtime = 0.51
+xvalue("Real Time","realtime", 0,"", 0, 1 )
+xpanel(102,148)
+}
+{
+save_window_ = new Graph(0)
+save_window_.size(0,5.1,0,0.0015)
+scene_vector_[3] = save_window_
+{save_window_.view(0, 0, 5, 0.0015, 1362, 122, 624.96, 474.88)}
+graphList[2].append(save_window_)
+save_window_.save_name("graphList[2].")
+//save_window_.addvar("AMPA[56].g", 1, 1, 0.686329, 0.857547, 2)
+//save_window_.addvar("NMDA[56].g", 1, 1, 0.686329, 0.857547, 2)
+}
+objectvar scene_vector_[1]
+{doNotify()}
