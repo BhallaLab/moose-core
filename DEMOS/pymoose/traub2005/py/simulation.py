@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Apr 30 02:25:06 2009 (+0530)
 # Version: 
-# Last-Updated: Tue Sep 15 10:03:38 2009 (+0530)
-#           By: subhasis ray
-#     Update #: 41
+# Last-Updated: Sat Feb  6 12:27:49 2010 (+0530)
+#           By: Subhasis Ray
+#     Update #: 51
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -79,10 +79,12 @@ class Simulation:
         config.context.reset()
         t2 = datetime.now()
         delta = t2 - t1
-        print 'reset time: ', delta.seconds + 1e-6 * delta.microseconds
+        # print 'reset time: ', delta.seconds + 1e-6 * delta.microseconds
         self.start_t = datetime.now()
         config.context.step(float(time))
         self.end_t = datetime.now()
+        delta = self.end_t - t1 # include reset time
+	print 'RUNTIME [reset + step] (second): ', delta.seconds + 1e-6 * delta.microseconds
 
     def dump_data(self, directory, time_stamp=False):
         """Save the data in directory. It creates a subdirectory with
