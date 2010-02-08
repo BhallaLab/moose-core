@@ -26,6 +26,7 @@ objref cell, stim1, stim2
 proc runcell(){ local i, t1, a1, t2, a2 localobj vvec, tvec, f, g, caconc, ikvec
     print "--------------------------------------------------------------"
     print "|    NEURON Simulation of deepaxax cell                       |"
+    printf("|    timestep %g ms                                           |\n", dt)
     print "--------------------------------------------------------------"
     
     tstop = $1
@@ -61,6 +62,7 @@ proc runcell(){ local i, t1, a1, t2, a2 localobj vvec, tvec, f, g, caconc, ikvec
     f.close()
     print "--------------------------------------------------------------"
     print "|    NEURON Simulation of deepaxax cell finished              |"
+    printf("|    total time %g ms                                         |\n", t)
     print "--------------------------------------------------------------"
 }
 
