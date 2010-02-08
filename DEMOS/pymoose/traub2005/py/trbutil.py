@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Jun  5 13:59:40 2009 (+0530)
 # Version: 
-# Last-Updated: Sat Oct 17 11:43:42 2009 (+0530)
-#           By: subhasis ray
-#     Update #: 45
+# Last-Updated: Sat Feb  6 12:52:44 2010 (+0530)
+#           By: Subhasis Ray
+#     Update #: 46
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -72,6 +72,7 @@ def read_nrn_data(filename, hoc_script=None):
     return data
 
 def do_plot(class_name, mus_t, mus_ca, mus_vm, nrn_t=None, nrn_ca=None, nrn_vm=None):
+    return
     if nrn_vm is None or len(nrn_vm) is 0:
         nrn_t = pylab.array()
         nrn_vm = pylab.array() 
