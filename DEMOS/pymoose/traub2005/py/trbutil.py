@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Jun  5 13:59:40 2009 (+0530)
 # Version: 
-# Last-Updated: Sat Feb  6 12:52:44 2010 (+0530)
+# Last-Updated: Tue Feb  9 14:52:04 2010 (+0100)
 #           By: Subhasis Ray
-#     Update #: 46
+#     Update #: 57
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -72,7 +72,7 @@ def read_nrn_data(filename, hoc_script=None):
     return data
 
 def do_plot(class_name, mus_t, mus_ca, mus_vm, nrn_t=None, nrn_ca=None, nrn_vm=None):
-    return
+    '''Plot the membrane potential over time in both moose and neuron.'''
     if nrn_vm is None or len(nrn_vm) is 0:
         nrn_t = pylab.array()
         nrn_vm = pylab.array() 

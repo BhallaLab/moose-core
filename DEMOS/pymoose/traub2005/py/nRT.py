@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Oct 16 15:18:24 2009 (+0530)
 # Version: 
-# Last-Updated: Sat Oct 17 22:23:43 2009 (+0530)
-#           By: subhasis ray
-#     Update #: 55
+# Last-Updated: Tue Feb  9 14:29:35 2010 (+0100)
+#           By: Subhasis Ray
+#     Update #: 61
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -110,26 +110,26 @@ class nRT(TraubCell):
     def test_single_cell(cls):
         """Simulates a single nRT cell and plots the Vm and [Ca2+]"""
 
-        print "/**************************************************************************"
-        print " *"
-        print " * Simulating a single cell: ", cls.__name__
-        print " *"
-        print " **************************************************************************/"
-        sim = Simulation()
+        config.LOGGER.info("/**************************************************************************")
+        config.LOGGER.info(" *")
+        config.LOGGER.info(" * Simulating a single cell: %s" % (cls.__name__))
+        config.LOGGER.info(" *")
+        config.LOGGER.info(" **************************************************************************/")
+        sim = Simulation(cls.__name__)
         mycell = nRT(nRT.prototype, sim.model.path + "/nRT")
-        print 'Created cell:', mycell.path
+        config.LOGGER.info('Created cell: %s' % (mycell.path))
         vm_table = mycell.comp[mycell.presyn].insertRecorder('Vm_nRT', 'Vm', sim.data)
         ca_table = mycell.soma.insertCaRecorder('CaPool', sim.data)
 
         pulsegen = mycell.soma.insertPulseGen('pulsegen', sim.model, firstLevel=3e-10, firstDelay=50.0e-3, firstWidth=50e-3)
         sim.schedule()
         if mycell.has_cycle():
-            print "WARNING!! CYCLE PRESENT IN CICRUIT."
+            config.LOGGING.warning("WARNING!! CYCLE PRESENT IN CICRUIT.")
         t1 = datetime.now()
         sim.run(200e-3)
         t2 = datetime.now()
         delta = t2 - t1
-        print 'simulation time: ', delta.seconds + 1e-6 * delta.microseconds
+        config.LOGGER.info('simulation time: %g'  % (delta.seconds + 1e-6 * delta.microseconds))
         sim.dump_data('data')
         mus_vm = pylab.array(vm_table) * 1e3
         mus_t = linspace(0, sim.simtime * 1e3, len(mus_vm))

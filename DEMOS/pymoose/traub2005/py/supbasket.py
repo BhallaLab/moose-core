@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Oct  6 16:52:28 2009 (+0530)
 # Version: 
-# Last-Updated: Sat Oct 17 22:26:25 2009 (+0530)
-#           By: subhasis ray
-#     Update #: 38
+# Last-Updated: Tue Feb  9 14:29:30 2010 (+0100)
+#           By: Subhasis Ray
+#     Update #: 41
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -106,12 +106,12 @@ class SupBasket(TraubCell):
     def test_single_cell(cls):
         """Simulates a single nRT cell and plots the Vm and [Ca2+]"""
 
-        print "/**************************************************************************"
-        print " *"
-        print " * Simulating a single cell: ", cls.__name__
-        print " *"
-        print " **************************************************************************/"
-        sim = Simulation()
+        config.LOGGER.info("/**************************************************************************")
+        config.LOGGER.info(" *")
+        config.LOGGER.info(" * Simulating a single cell: %s" % (cls.__name__))
+        config.LOGGER.info(" *")
+        config.LOGGER.info(" **************************************************************************/")
+        sim = Simulation(cls.__name__)
         mycell = SupBasket(SupBasket.prototype, sim.model.path + "/SupBasket")
         print 'Created cell:', mycell.path
         vm_table = mycell.comp[mycell.presyn].insertRecorder('Vm_supbask', 'Vm', sim.data)
