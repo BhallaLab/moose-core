@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Oct 16 11:11:39 2009 (+0530)
 # Version: 
-# Last-Updated: Sat Oct 17 22:03:16 2009 (+0530)
-#           By: subhasis ray
-#     Update #: 45
+# Last-Updated: Tue Feb  9 14:23:26 2010 (+0100)
+#           By: Subhasis Ray
+#     Update #: 49
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -107,14 +107,14 @@ class DeepAxoaxonic(TraubCell):
     @classmethod
     def test_single_cell(cls):
         """Simulates a single deep axoaxonic cell and plots the Vm and [Ca2+]"""
-        print "/**************************************************************************"
-        print " *"
-        print " * Simulating a single cell: ", cls.__name__
-        print " *"
-        print " **************************************************************************/"
-        sim = Simulation()
+        config.LOGGER.info("/**************************************************************************")
+        config.LOGGER.info(" *")
+        config.LOGGER.info(" * Simulating a single cell: %s" % (cls.__name__))
+        config.LOGGER.info(" *")
+        config.LOGGER.info(" **************************************************************************/")
+        sim = Simulation(cls.__name__)
         mycell = DeepAxoaxonic(DeepAxoaxonic.prototype, sim.model.path + "/DeepAxoaxonic")
-        print 'Created cell:', mycell.path
+        config.LOGGER.info('Created cell: %s' % (mycell.path))
         vm_table = mycell.comp[mycell.presyn].insertRecorder('Vm_deepaxax', 'Vm', sim.data)
         ca_table = mycell.soma.insertCaRecorder('CaPool', sim.data)
         pulsegen = mycell.soma.insertPulseGen('pulsegen', sim.model, firstLevel=3e-10, firstDelay=50e-3, firstWidth=50e-3)
