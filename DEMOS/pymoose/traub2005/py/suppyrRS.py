@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Aug  7 13:59:30 2009 (+0530)
 # Version: 
-# Last-Updated: Sat Oct 17 22:29:41 2009 (+0530)
-#           By: subhasis ray
-#     Update #: 595
+# Last-Updated: Tue Feb  9 14:29:27 2010 (+0100)
+#           By: Subhasis Ray
+#     Update #: 601
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -130,21 +130,21 @@ class SupPyrRS(TraubCell):
 
         obj = moose.CaConc(self.soma.path + '/CaPool')
         obj.tau = 1e-3 / 0.01
-        print obj.path, 'set tau to', obj.tau
+        config.LOGGER.debug(obj.path + 'set tau to %g' % (obj.tau))
 
     @classmethod
     def test_single_cell(cls):
         """Simulates a single superficial pyramidal regula spiking
         cell and plots the Vm and [Ca2+]"""
 
-        print "/**************************************************************************"
-        print " *"
-        print " * Simulating a single cell: ", cls.__name__
-        print " *"
-        print " **************************************************************************/"
-        sim = Simulation()
+        config.LOGGER.info("/**************************************************************************")
+        config.LOGGER.info(" *")
+        config.LOGGER.info(" * Simulating a single cell: %s" % (cls.__name__))
+        config.LOGGER.info(" *")
+        config.LOGGER.info(" **************************************************************************/")
+        sim = Simulation(cls.__name__)
         mycell = SupPyrRS(SupPyrRS.prototype, sim.model.path + "/SupPyrRS")
-        print 'Created cell:', mycell.path
+        config.LOGGER.info('Created cell: %s' % (mycell.path))
         vm_table = mycell.comp[mycell.presyn].insertRecorder('Vm_suppyrrs', 'Vm', sim.data)
         ca_table = mycell.soma.insertCaRecorder('CaPool', sim.data)
 
@@ -153,7 +153,7 @@ class SupPyrRS(TraubCell):
 
         sim.schedule()
         if mycell.has_cycle():
-            print "WARNING!! CYCLE PRESENT IN CICRUIT."
+            config.LOGGER.warning("WARNING!! CYCLE PRESENT IN CICRUIT.")
         t1 = datetime.now()
         sim.run(200e-3)
         t2 = datetime.now()

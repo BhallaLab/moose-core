@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 14:36:30 2009 (+0530)
 # Version: 
-# Last-Updated: Mon Feb  8 17:21:14 2010 (+0530)
+# Last-Updated: Tue Feb  9 14:26:09 2010 (+0100)
 #           By: Subhasis Ray
-#     Update #: 98
+#     Update #: 126
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -46,7 +46,9 @@
 # Code:
 
 import sys
+import logging
 import moose
+
 
 context = moose.PyMooseBase.getContext()
 lib = moose.Neutral('/library')
@@ -89,6 +91,16 @@ channel_map = {'AR': 'ar',
 
 channel_lib = {}
 
+# Logging
+LOG_FILENAME = 'traub_2005.log'
+LOG_LEVEL = logging.ERROR
+logging.basicConfig(filename=LOG_FILENAME, level=LOG_LEVEL)#, filemode='w')
+LOGGER = logging.getLogger('traub2005')
+BENCHMARK_LOGGER = logging.getLogger('traub2005.benchmark')
+BENCHMARK_LOGGER.setLevel(logging.INFO)
+benchmarking=True # Dump benchmarking information
+
+
 # Locate the neuron binaries
 import subprocess
 neuron_bin = None
@@ -97,7 +109,7 @@ try:
     for neuron_bin in which_neuron.stdout:
         neuron_bin = neuron_bin.strip()
         if neuron_bin:
-            print 'nrngui fount at:', neuron_bin
+            LOGGER.info('nrngui fount at: %s' % (neuron_bin))
             break
 except Exception, e:
     print e

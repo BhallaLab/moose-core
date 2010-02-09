@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Oct 16 13:42:14 2009 (+0530)
 # Version: 
-# Last-Updated: Sat Oct 17 11:54:37 2009 (+0530)
-#           By: subhasis ray
-#     Update #: 43
+# Last-Updated: Tue Feb  9 14:25:33 2010 (+0100)
+#           By: Subhasis Ray
+#     Update #: 45
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -122,12 +122,12 @@ class TuftedRS(TraubCell):
         """Simulates a single thalamocortical relay cell
         and plots the Vm and [Ca2+]"""
 
-        print "/**************************************************************************"
-        print " *"
-        print " * Simulating a single cell: ", cls.__name__
-        print " *"
-        print " **************************************************************************/"
-        sim = Simulation()
+        config.LOGGER.info("/**************************************************************************")
+        config.LOGGER.info(" *")
+        config.LOGGER.info(" * Simulating a single cell: %s" % (cls.__name__))
+        config.LOGGER.info(" *")
+        config.LOGGER.info(" **************************************************************************/")
+        sim = Simulation(cls.__name__)
         mycell = TuftedRS(TuftedRS.prototype, sim.model.path + "/TuftedRS")
         print 'MOOSE: Created cell:', mycell.path
         vm_table = mycell.comp[mycell.presyn].insertRecorder('Vm_tuftRS', 'Vm', sim.data)
