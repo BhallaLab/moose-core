@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Sep 29 11:43:22 2009 (+0530)
 # Version: 
-# Last-Updated: Sat Oct 17 21:59:33 2009 (+0530)
-#           By: subhasis ray
-#     Update #: 133
+# Last-Updated: Tue Feb  9 14:29:33 2010 (+0100)
+#           By: Subhasis Ray
+#     Update #: 136
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -95,12 +95,12 @@ class SpinyStellate(TraubCell):
         """Simulates a single spiny stellate cell and plots the Vm and
         [Ca2+]"""
 
-        print "/**************************************************************************"
-        print " *"
-        print " * Simulating a single cell: ", cls.__name__
-        print " *"
-        print " **************************************************************************/"
-        sim = Simulation()
+        config.LOGGER.info("/**************************************************************************")
+        config.LOGGER.info(" *")
+        config.LOGGER.info(" * Simulating a single cell: %s" % (cls.__name__))
+        config.LOGGER.info(" *")
+        config.LOGGER.info(" **************************************************************************/")
+        sim = Simulation(cls.__name__)
         mycell = SpinyStellate(SpinyStellate.prototype, sim.model.path + "/SpinyStellate")
         print 'Created cell:', mycell.path
         vm_table = mycell.comp[mycell.presyn].insertRecorder('Vm_spinstell', 'Vm', sim.data)
