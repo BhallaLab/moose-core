@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Oct 16 19:32:34 2009 (+0530)
 # Version: 
-# Last-Updated: Sat Oct 17 22:18:29 2009 (+0530)
-#           By: subhasis ray
-#     Update #: 60
+# Last-Updated: Tue Feb  9 14:32:39 2010 (+0100)
+#           By: Subhasis Ray
+#     Update #: 83
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -97,11 +97,11 @@ class DeepLTS(TraubCell):
 	    if ca_pool:
 		for channel in ca_chans:
 		    channel.connect('IkSrc', ca_pool, 'current')
-		    print comp.name, ':', channel.name, 'connected to', ca_pool.name
+		    config.LOGGER.debug(comp.name + ' : ' + channel.name + ' connected to ' + ca_pool.name)
 		for channel in ca_dep_chans:
 		    channel.useConcentration = 1
 		    ca_pool.connect("concSrc", channel, "concen")
-		    print comp.name, ':', ca_pool.name, 'connected to', channel.name
+		    config.LOGGER.debug(comp.name + ' : ' + ca_pool.name + ' connected to ' + channel.name)
 
 	obj = moose.CaConc(self.soma.path + '/CaPool')
         obj.tau = 50e-3
@@ -110,14 +110,15 @@ class DeepLTS(TraubCell):
     @classmethod
     def test_single_cell(cls):
         """Simulates a single deep LTS cell and plots the Vm and [Ca2+]"""
-        print "/**************************************************************************"
-        print " *"
-        print " * Simulating a single cell: ", cls.__name__
-        print " *"
-        print " **************************************************************************/"
-        sim = Simulation()
+        config.LOGGER.info("/**************************************************************************")
+        config.LOGGER.info(" *")
+        config.LOGGER.info(" * Simulating a single cell: %s" % (cls.__name__))
+        config.LOGGER.info(" *")
+        config.LOGGER.info(" **************************************************************************/")
+        sim = Simulation(cls.__name__)
         mycell = DeepLTS(DeepLTS.prototype, sim.model.path + "/DeepLTS")
-        print 'Created cell:', mycell.path
+        
+        config.LOGGER.debug(('Created cell: %s' % mycell.path))
         vm_table = mycell.comp[mycell.presyn].insertRecorder('Vm_deepLTS', 'Vm', sim.data)
         ca_table = mycell.soma.insertCaRecorder('CaPool', sim.data)
         pulsegen = mycell.soma.insertPulseGen('pulsegen', sim.model, firstLevel=0.3e-9, firstDelay=50e-3, firstWidth=50e-3)
@@ -125,12 +126,9 @@ class DeepLTS(TraubCell):
         sim.schedule()
 
         if mycell.has_cycle():
-            print "WARNING!! CYCLE PRESENT IN CICRUIT."
-        t1 = datetime.now()
+            config.LOGGER.warning("WARNING!! CYCLE PRESENT IN CICRUIT.")
+
         sim.run(200e-3)
-        t2 = datetime.now()
-        delta = t2 - t1
-        print 'simulation time: ', delta.seconds + 1e-6 * delta.microseconds
         sim.dump_data('data')
         mus_vm = pylab.array(vm_table) * 1e3
         mus_t = linspace(0, sim.simtime * 1e3, len(mus_vm))

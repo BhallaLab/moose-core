@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Sep 23 00:18:00 2009 (+0530)
 # Version: 
-# Last-Updated: Sat Oct 17 11:50:16 2009 (+0530)
-#           By: subhasis ray
-#     Update #: 66
+# Last-Updated: Tue Feb  9 14:22:18 2010 (+0100)
+#           By: Subhasis Ray
+#     Update #: 68
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -91,12 +91,12 @@ class SupLTS(TraubCell):
     def test_single_cell(cls):
         """Simulates a single superficial LTS cell and plots the Vm and [Ca2+]"""
 
-        print "/**************************************************************************"
-        print " *"
-        print " * Simulating a single cell: ", cls.__name__
-        print " *"
-        print " **************************************************************************/"
-        sim = Simulation()
+        config.LOGGER.info("/**************************************************************************")
+        config.LOGGER.info(" *")
+        config.LOGGER.info(" * Simulating a single cell: %s" % (cls.__name__))
+        config.LOGGER.info(" *")
+        config.LOGGER.info(" **************************************************************************/")
+        sim = Simulation(cls.__name__)
         mycell = SupLTS(SupLTS.prototype, sim.model.path + "/SupLTS")
         print 'Created cell:', mycell.path
         vm_table = mycell.comp[mycell.presyn].insertRecorder('Vm_supLTS', 'Vm', sim.data)
