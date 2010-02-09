@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Jul 24 10:04:47 2009 (+0530)
 # Version: 
-# Last-Updated: Fri Oct 16 17:03:54 2009 (+0530)
-#           By: subhasis ray
-#     Update #: 219
+# Last-Updated: Tue Feb  9 14:07:30 2010 (+0100)
+#           By: Subhasis Ray
+#     Update #: 222
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -59,12 +59,12 @@ from compartment import MyCompartment
 def init_channel_lib():
     """Initialize the prototype channels in library"""
     if not config.channel_lib:
-        print '* Generating channel prototypes in /library'
+        config.LOGGER.debug('* Generating channel prototypes in /library')
         for channel_name in config.channel_name_list:
             channel_class = eval(channel_name)
             channel = channel_class(channel_name, config.lib)
             config.channel_lib[channel_name] = channel
-            print '* Created ', channel.path
+            config.LOGGER.debug( '* Created ', channel.path)
     return config.channel_lib
 
 def nameindex(comp):
@@ -139,7 +139,7 @@ class TraubCell(moose.Cell):
         ret = False
         for item in comp.raxial_list:
             if hasattr(item, '_visited') and item._visited:
-                print 'Cycle between: ', comp.path, 'and', item.path
+                config.LOGGER.warning('Cycle between: ', comp.path, 'and', item.path)
                 return True
             ret = ret or has_cycle(item)
         return ret

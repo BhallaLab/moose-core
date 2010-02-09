@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Oct  6 16:52:28 2009 (+0530)
 # Version: 
-# Last-Updated: Sat Oct 17 22:25:02 2009 (+0530)
-#           By: subhasis ray
-#     Update #: 24
+# Last-Updated: Tue Feb  9 14:29:32 2010 (+0100)
+#           By: Subhasis Ray
+#     Update #: 27
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -107,12 +107,12 @@ class SupAxoaxonic(TraubCell):
         """Simulates a single superficial axo-axonic cell and plots
         the Vm and [Ca2+]"""
 
-        print "/**************************************************************************"
-        print " *"
-        print " * Simulating a single cell: ", cls.__name__
-        print " *"
-        print " **************************************************************************/"
-        sim = Simulation()
+        config.LOGGER.info("/**************************************************************************")
+        config.LOGGER.info(" *")
+        config.LOGGER.info(" * Simulating a single cell: %s" % (cls.__name__))
+        config.LOGGER.info(" *")
+        config.LOGGER.info(" **************************************************************************/")
+        sim = Simulation(cls.__name__)
         mycell = SupAxoaxonic(SupAxoaxonic.prototype, sim.model.path + "/SupAxoaxonic")
         print 'Created cell:', mycell.path
         vm_table = mycell.comp[mycell.presyn].insertRecorder('Vm_supaxax', 'Vm', sim.data)

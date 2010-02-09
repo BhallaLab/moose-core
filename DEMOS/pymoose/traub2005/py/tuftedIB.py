@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Oct 16 11:44:48 2009 (+0530)
 # Version: 
-# Last-Updated: Sat Oct 17 11:47:29 2009 (+0530)
-#           By: subhasis ray
-#     Update #: 38
+# Last-Updated: Tue Feb  9 14:29:23 2010 (+0100)
+#           By: Subhasis Ray
+#     Update #: 41
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -122,12 +122,12 @@ class TuftedIB(TraubCell):
         """Simulates a single tufted intrinsically bursting cell and
         plots the Vm and [Ca2+]"""
 
-        print "/**************************************************************************"
-        print " *"
-        print " * Simulating a single cell: ", cls.__name__
-        print " *"
-        print " **************************************************************************/"
-        sim = Simulation()
+        config.LOGGER.info("/**************************************************************************")
+        config.LOGGER.info(" *")
+        config.LOGGER.info(" * Simulating a single cell: %s" % (cls.__name__))
+        config.LOGGER.info(" *")
+        config.LOGGER.info(" **************************************************************************/")
+        sim = Simulation(cls.__name__)
         mycell = TuftedIB(TuftedIB.prototype, sim.model.path + "/TuftedIB")
         print 'Created cell:', mycell.path
         vm_table = mycell.comp[mycell.presyn].insertRecorder('Vm_tuftIB', 'Vm', sim.data)

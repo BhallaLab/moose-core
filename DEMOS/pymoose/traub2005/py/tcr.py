@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Oct 16 10:14:07 2009 (+0530)
 # Version: 
-# Last-Updated: Sat Oct 17 11:51:39 2009 (+0530)
-#           By: subhasis ray
-#     Update #: 53
+# Last-Updated: Tue Feb  9 14:29:25 2010 (+0100)
+#           By: Subhasis Ray
+#     Update #: 56
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -110,12 +110,12 @@ class TCR(TraubCell):
         """Simulates a single thalamocortical relay cell
         and plots the Vm and [Ca2+]"""
 
-        print "/**************************************************************************"
-        print " *"
-        print " * Simulating a single cell: ", cls.__name__
-        print " *"
-        print " **************************************************************************/"
-        sim = Simulation()
+        config.LOGGER.info("/**************************************************************************")
+        config.LOGGER.info(" *")
+        config.LOGGER.info(" * Simulating a single cell: %s" % (cls.__name__))
+        config.LOGGER.info(" *")
+        config.LOGGER.info(" **************************************************************************/")
+        sim = Simulation(cls.__name__)
         mycell = TCR(TCR.prototype, sim.model.path + "/TCR")
         print 'Created cell:', mycell.path
         vm_table = mycell.comp[mycell.presyn].insertRecorder('Vm_TCR', 'Vm', sim.data)

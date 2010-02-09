@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Apr 30 02:25:06 2009 (+0530)
 # Version: 
-# Last-Updated: Sat Feb  6 12:27:49 2010 (+0530)
+# Last-Updated: Tue Feb  9 14:20:31 2010 (+0100)
 #           By: Subhasis Ray
-#     Update #: 51
+#     Update #: 57
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -56,7 +56,8 @@ channel_lib = {}
 
 class Simulation:
     """This class is a wrapper to control a whole simulation."""
-    def __init__(self):
+    def __init__(self, name):
+        self.name = name
         self.model = moose.Neutral('model')
         self.data = moose.Neutral('data')
         self.start_t = None
@@ -84,7 +85,7 @@ class Simulation:
         config.context.step(float(time))
         self.end_t = datetime.now()
         delta = self.end_t - t1 # include reset time
-	print 'RUNTIME [reset + step] (second): ', delta.seconds + 1e-6 * delta.microseconds
+	config.BENCHMARK_LOGGER.info('%s : RUNTIME [reset + step] (second): %g' %  (self.name, delta.seconds + 1e-6 * delta.microseconds))
 
     def dump_data(self, directory, time_stamp=False):
         """Save the data in directory. It creates a subdirectory with
@@ -93,7 +94,7 @@ class Simulation:
         path = directory
         tables = []
         if not os.access(directory, os.W_OK):
-            print 'data directory:', directory, 'is not writable'
+            config.LOGGER.warning('data directory: ' + directory + 'is not writable')
             return
         else:
             path = directory + '/' # + self.start_t.strftime('%Y_%m_%d') + '/'
@@ -106,7 +107,7 @@ class Simulation:
             tables.append(table)
             file_path = path + table.name + '.plot'
             table.dumpFile(file_path)
-            print 'Dumped data in ', file_path
+            config.LOGGER.info('Dumped data in %s' % (file_path))
         return tables
 
 # 

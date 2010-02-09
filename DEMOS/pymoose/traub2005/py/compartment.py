@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 24 10:01:45 2009 (+0530)
 # Version: 
-# Last-Updated: Sat Oct 17 11:43:34 2009 (+0530)
-#           By: subhasis ray
-#     Update #: 174
+# Last-Updated: Tue Feb  9 14:12:09 2010 (+0100)
+#           By: Subhasis Ray
+#     Update #: 176
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -61,7 +61,7 @@ class MyCompartment(moose.Compartment):
 
     def setSpecificRa(self, RA):
         self.Ra = RA * self.length / self.xarea()
-        print self.name, self.Ra, self.length, self.xarea()
+        config.LOGGER.debug('%s %g %g %g' % (self.name, self.Ra, self.length, self.xarea()))
 
     def getSpecificRa(self):
         return self.Ra * self.xarea() / self.length
@@ -302,7 +302,7 @@ def has_cycle(comp):
     ret = False
     for item in comp.raxial_list:
         if hasattr(item, '_visited') and item._visited:
-            print 'Cycle between: ', comp.path, 'and', item.path
+            config.LOGGER.warning('Cycle between: %s and %s' % (comp.path, 'and', item.path))
             return True
         ret = ret or has_cycle(item)
     return ret
