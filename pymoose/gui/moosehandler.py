@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 12:25:40 2009 (+0530)
 # Version: 
-# Last-Updated: Mon Jul  6 10:00:07 2009 (+0530)
-#           By: subhasis ray
-#     Update #: 202
+# Last-Updated: Wed Feb 10 01:54:22 2010 (+0100)
+#           By: Subhasis Ray
+#     Update #: 216
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -58,6 +58,7 @@ class MHandler(QtCore.QThread):
     file_types = {
         'Genesis Script(*.g)':'GENESIS',
         'SBML(*.xml *.bz2 *.zip *.gz)':'SBML',
+        'neuroML(*.xml)': 'NEUROML',
         }
     def __init__(self, *args):
         QtCore.QObject.__init__(self, *args)
@@ -83,7 +84,7 @@ class MHandler(QtCore.QThread):
         fileName = fileName.replace(self.tr('\\'), self.tr('/'))
         directory = os.path.dirname(fileName)
         os.chdir(directory)
-        #print 'directory:', directory
+        print 'directory:', directory
         fileType = str(fileType)
         if fileType == 'GENESIS' or fileType == 'KKIT':
             fileName = os.path.basename(fileName)
@@ -107,6 +108,9 @@ class MHandler(QtCore.QThread):
                         mol = moose.Molecule(mol_id)
                         if mol.className == 'Molecule':
                             self.moleculeList.append(mol)
+        elif fileType == 'NEUROML':
+            command = 'readNeuroML "' + os.path.basename(fileName) + '" ' + parent
+            self.context.runG(command)
         elif fileType == 'MOOSE':
             import subprocess
             subprocess.call(['python', fileName])
