@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 11:38:46 2009 (+0530)
 # Version: 
-# Last-Updated: Fri Feb  5 23:57:51 2010 (+0530)
+# Last-Updated: Wed Feb 10 01:45:45 2010 (+0100)
 #           By: Subhasis Ray
-#     Update #: 810
+#     Update #: 812
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -301,7 +301,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 #            import subprocess
 #            subprocess.call(['python', 'main.py', fileName, fileType])
         fileType = FileTypeChecker(str(fileName)).fileType()
-#         print 'File is of type:', fileType
+        print 'File is of type:', fileType
         self.mooseHandler.context.setCwe(self.modelTreeWidget.currentItem().getMooseObject().path)
         self.mooseHandler.load(fileName, fileType)
         self.isModelLoaded = True
