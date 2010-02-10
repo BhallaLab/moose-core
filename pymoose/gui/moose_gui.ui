@@ -43,7 +43,7 @@
           </sizepolicy>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="modelTreeTab">
           <attribute name="title">
@@ -100,7 +100,7 @@
                  <x>0</x>
                  <y>0</y>
                  <width>308</width>
-                 <height>413</height>
+                 <height>409</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -112,8 +112,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>96</width>
-                 <height>26</height>
+                 <width>308</width>
+                 <height>409</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -280,7 +280,7 @@
      <x>0</x>
      <y>0</y>
      <width>689</width>
-     <height>26</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuMOOSE">
