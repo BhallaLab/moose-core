@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 11:38:46 2009 (+0530)
 # Version: 
-# Last-Updated: Wed Feb 10 01:45:45 2010 (+0100)
+# Last-Updated: Wed Feb 10 12:43:10 2010 (+0100)
 #           By: Subhasis Ray
-#     Update #: 812
+#     Update #: 876
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -74,7 +74,6 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
     def __init__(self, loadFile=None, fileType=None):
 	QtGui.QMainWindow.__init__(self)
 	self.setupUi(self)
-        self.moleCulesWidget = None
         self.setWindowIcon(QtGui.QIcon(':moose_thumbnail.png'))
         self.settingsDialog = SettingsDialog()
         self.settingsDialog.hide()
@@ -191,6 +190,8 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
                      item.updateSlot)
         self.propertyEditor = QtGui.QTableView()
         self.propertyEditor.setModel(self.propertyModel)
+        self.propertyEditor.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.connect(self.propertyEditor, QtCore.SIGNAL('customContextMenuRequested ( const QPoint&)'), self.popupFieldMenu)
         self.propertyEditor.show()
 
     def loadFileDialog(self):
@@ -344,6 +345,26 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         result = self.settingsDialog.exec_()
         if result == self.settingsDialog.Accepted:
             self.mooseHandler.addSimPathList(self.settingsDialog.simPathList())
+
+    def popupFieldMenu(self, clickpoint):
+        print 'PopupFieldMenu'
+        index = self.propertyEditor.indexAt(clickpoint)
+        data = self.propertyModel.data(QtCore.QModelIndex(index.row, 0))
+        print data
+        menu = QtGui.QMenu(self.propertyEditor)
+        self.actionPlotField = menu.addAction('Plot this field')
+        self.connect(self.actionPlotField, QtCore.SIGNAL('triggered()'), self.plotThisFieldSlot)
+        menu.popup(clickpoint)
+
+    def plotThisFieldSlot(self):
+        print 'plotThisFieldSlot'
+        moose_object = self.modelTreeWidget.currentItem().getMooseObject()
+        current_item = self.propertyEditor.currentItem()
+        index = QtCore.QModelIndex(current_item.row(), 0)
+        print index.row(), index.column()
+        field_name = self.propertyModel.data(index)        
+        table = self.mooseHandler.createTableForMolecule(moose_object, field_name)
+        print table.path
         
 # 
 # mainwin.py ends here
