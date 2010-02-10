@@ -133,6 +133,7 @@
 %include "PyMooseContext.h"
 %include "PyMooseBase.h"
 %attribute(pymoose::PyMooseBase, Id*, id, __get_id)
+%attribute(pymoose::PyMooseBase, int, index, __get_index)
 %attribute(pymoose::PyMooseBase, Id*, parent, __get_parent)
 %attribute(pymoose::PyMooseBase, const std::string, className, __get_className)
 %attribute(pymoose::PyMooseBase, const std::string, author, __get_author)
