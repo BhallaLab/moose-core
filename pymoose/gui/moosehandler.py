@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 12:25:40 2009 (+0530)
 # Version: 
-# Last-Updated: Wed Feb 10 01:54:22 2010 (+0100)
+# Last-Updated: Wed Feb 10 10:02:44 2010 (+0100)
 #           By: Subhasis Ray
-#     Update #: 216
+#     Update #: 229
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -176,5 +176,15 @@ class MHandler(QtCore.QThread):
                 table.connect('inputRequest', molecule, 'conc')
                 return table
 
+    def createTableForField(self, moose_object, field_name):
+        # moose_object = moose.Neutral(moose_object_path)
+        # class_name = moose_object.className
+        # moose_object = eval('moose.'+ class_name + '("' + moose_object_path + '")')
+        table = moose.Table('/data/' + moose_object.name)
+        table.stepMode = 3
+        table.connect('inputRequest', molecule, field_name)
+        return table
+        
+        
 # 
 # moosehandler.py ends here
