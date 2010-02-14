@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Feb  4 14:52:22 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Feb  4 22:06:37 2010 (+0530)
+# Last-Updated: Sun Feb 14 00:06:18 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 105
+#     Update #: 140
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -50,7 +50,7 @@ import sys
 from getopt import getopt
 from subprocess import Popen
 
-GLCLIENT_EXE = '../../../gl/src/glclient'
+import config
 
 option_dict={'-p': '9999',
 	     '-m': 'c',
@@ -59,14 +59,17 @@ option_dict={'-p': '9999',
 
 
 class GLClient(object):
-    def __init__(self, port='9999', mode='c', colormap='../../../gl/colormaps/rainbow2'):
+    def __init__(self, exe=config.GL_CLIENT_EXECUTABLE, port=config.GL_PORT, mode='c', colormap=config.GL_DEFAULT_COLORMAP):
 	self.opt_dict = {}
 	self.opt_dict['-p'] = port
 	self.opt_dict['-m'] = mode
 	self.opt_dict['-c'] = colormap
-        self.run()
+        self.executable = exe
+        self.running = False
+        self.run(self.opt_dict)
+
     def run(self, option_dict=None):
-	cmd = [GLCLIENT_EXE]
+	cmd = [self.executable]
 	if option_dict:
 	    for key, value in option_dict.items():
 		value = option_dict[key]
@@ -74,9 +77,18 @@ class GLClient(object):
 	
 	for key, value in self.opt_dict.items():
 	    cmd.extend([key, value])
+            self.stop()
+        self.running = True
+	self.child = Popen(cmd)
+	return self.child
 
-	child = Popen(cmd)
-	return child
+    def stop(self):
+        if not self.running:
+            print self.__class__.__name__, ': stop() - client is not running'
+            return
+        self.child.kill()
+        self.child.wait()
+        self.running = False
 
 if __name__ == '__main__':
     print 'sys.argv:', sys.argv
