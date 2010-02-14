@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Feb  4 14:00:11 2010 (+0530)
+# Last-Updated: Sun Feb 14 02:29:14 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 667
+#     Update #: 791
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -51,6 +51,9 @@ from datetime import date
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.Qt import Qt
+
+import config
+from glclientgui import GLClientGUI
 
 # The following line is for ease in development environment. Normal
 # users will have moose.py and _moose.so installed in some directory
@@ -95,7 +98,12 @@ def makeClassList(parent=None, mode=MooseGlobals.MODE_ADVANCED):
 def makeAboutMooseLabel(parent):
         """Create a QLabel with basic info about MOOSE."""
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
-        aboutText = '<html><h3>%s</h3><p>%s</p><p>%s</p><p>%s</p></html>' % (MooseGlobals.TITLE_TEXT, MooseGlobals.COPYRIGHT_TEXT, MooseGlobals.LICENSE_TEXT, MooseGlobals.ABOUT_TEXT)
+        aboutText = '<html><h3>%s</h3><p>%s</p><p>%s</p><p>%s</p></html>' % \
+            (MooseGlobals.TITLE_TEXT, 
+             MooseGlobals.COPYRIGHT_TEXT, 
+             MooseGlobals.LICENSE_TEXT, 
+             MooseGlobals.ABOUT_TEXT)
+
         aboutMooseLabel = QtGui.QLabel(parent)
         aboutMooseLabel.setText(aboutText)
         aboutMooseLabel.setWordWrap(True)
@@ -106,13 +114,12 @@ def makeAboutMooseLabel(parent):
 class MainWindow(QtGui.QMainWindow):
             
     def __init__(self, interpreter=None, parent=None):
-        print 'MainWindow.__init__'
 	QtGui.QMainWindow.__init__(self, parent)
-        print 'QMainWindow.__init__(self, *args)'
-        self.layoutFile = 'moose.layout'
-	self.resize(800, 600)
-        self.setDockOptions(self.AllowNestedDocks | self.AllowTabbedDocks | self.ForceTabbedDocks | self.AnimatedDocks)
+        self.settings = config.get_settings()
 
+        self.resize(800, 600)
+        self.setDockOptions(self.AllowNestedDocks | self.AllowTabbedDocks | self.ForceTabbedDocks | self.AnimatedDocks)
+        
         # This is the element tree of MOOSE
 	self.mooseTreePanel = QtGui.QDockWidget(self.tr('Element Tree'), self)
         self.mooseTreePanel.setObjectName(self.tr('MooseClassPanel'))
@@ -149,6 +156,8 @@ class MainWindow(QtGui.QMainWindow):
                          QtCore.SIGNAL('itemDoubleClicked(QListWidgetItem*)'), 
                          self.insertMooseObjectSlot)
         self.connect(QtGui.qApp, QtCore.SIGNAL('lastWindowClosed()'), self.saveLayout)
+        self.createActions()
+        self.makeMenu()
         # Loading of layout should happen only after all dockwidgets
         # have been created
         self.loadLayout()
@@ -199,59 +208,64 @@ class MainWindow(QtGui.QMainWindow):
 	self.objFieldEditPanel.show()
 
     def makeMenu(self):
-        pass
+        self.fileMenu = QtGui.QMenu('&File', self)
+        self.fileMenu.addAction(self.quitAction)
+        self.viewMenu = QtGui.QMenu('&View', self)
+        self.viewMenu.addAction(self.glClientAction)
+        self.viewMenu.addAction(self.mooseTreeAction)
+        self.menuBar().addMenu(self.fileMenu)
+        self.menuBar().addMenu(self.viewMenu)
+
+    def createActions(self):
+        self.glClientAction = QtGui.QAction(self.tr('&GLClient'), self)
+        self.glClientAction.setCheckable(True)
+        self.connect(self.glClientAction, QtCore.SIGNAL('toggled(bool)'), self.createGLClientWidget)
+
+        self.mooseTreeAction = QtGui.QAction(self.tr('&Moose Tree'), self)
+        self.mooseTreeAction.setCheckable(True)
+        self.mooseTreeAction.setChecked(True)
+        self.connect(self.mooseTreeAction, QtCore.SIGNAL('toggled(bool)'), self.toggleMooseTreeView)
+        
+        self.quitAction = QtGui.QAction(self.tr('&Quit'), self)
+        self.quitAction.setShortcut(QtGui.QKeySequence(self.tr('Ctrl+Q')))
+        self.connect(self.quitAction, QtCore.SIGNAL('triggered()'), QtGui.qApp, QtCore.SLOT('closeAllWindows()'))
+        
 
     def saveLayout(self):
-        """Overriding QMainWindow.close() to save window state."""
-
-        stateFile = QtCore.QFile(self.layoutFile)
-        if not stateFile.open(QtCore.QFile.WriteOnly):
-            message = self.tr('Failed to open %1\n%2').arg(self.layoutFile).arg(stateFile.errorString())
-            messageBox = QtGui.QMessageBox.warning(self, self.tr('Error'), message)
-            return
+        '''Save window layout'''
         geo_data = self.saveGeometry()
         layout_data = self.saveState()
-        ok = stateFile.putChar(chr(geo_data.size()))
-        if ok:
-            ok = stateFile.write(geo_data) == geo_data.size()
-        if ok:
-            ok = stateFile.write(layout_data) == layout_data.size()
-            
-        if not ok:
-            msg = self.tr("Error writing to %1\n%2").arg(self.layoutFile).arg(stateFile.errorString())
-            QtGui.QMessageBox.warning(self, self.tr("Error"), msg)
-            stateFile.close()
-            stateFile.remove()
-            return
-        else:
-            stateFile.close()
+        self.settings.setValue(config.KEY_WINDOW_GEOMETRY, QtCore.QVariant(geo_data))
+        self.settings.setValue(config.KEY_WINDOW_LAYOUT, QtCore.QVariant(layout_data))
 
     def loadLayout(self):
-        stateFile = QtCore.QFile(self.layoutFile)
-        ok = stateFile.open(QtCore.QFile.ReadOnly)
-        if not ok:
-            print 'Will save layout info for the first time at exit.'
-            stateFile.close()
-            return 
-        geo_size = QtCore.QChar()
-        (ok, geo_size) = stateFile.getChar()
-        if ok:
-            geo_data = stateFile.read(ord(geo_size))
-            ok = len(geo_data) == ord(geo_size)
-        if ok:
-            layout_data = stateFile.readAll()
-            ok = len(layout_data) > 0
-        if ok:
-            ok = self.restoreGeometry(geo_data)
-        if ok:
-            ok = self.restoreState(layout_data)
-        if not ok:
-            msg = self.tr('Error reading %1').arg(self.layoutFile)
-            QtGui.QMessageBox.warning(self, self.tr('Error'), msg)
-            stateFile.close()
-            return
-        stateFile.close()
-    
+        geo_data = self.settings.value(config.KEY_WINDOW_GEOMETRY).toByteArray()
+        layout_data = self.settings.value(config.KEY_WINDOW_LAYOUT).toByteArray()
+        self.restoreGeometry(geo_data)
+        self.restoreState(layout_data)
+
+    def toggleMooseTreeView(self, value):
+        if value:
+            self.mooseTreePanel.show()
+        else:
+            self.mooseTreePanel.hide()
+
+    def createGLClientWidget(self, value):
+        '''When the menu item is checked, show a GLClient widget, hide
+        it otherwise'''
+        if not hasattr(self, 'glClientWidget'):
+            self.glClientWidget = GLClientGUI(self)
+            self.glClientDock = QtGui.QDockWidget('GL Client', self)
+            self.glClientDock.setWidget(self.glClientWidget)
+            self.glClientDock.setObjectName('glclient_dock')
+            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.glClientDock)
+        if value:#self.glClientAction.isChecked():
+            self.glClientDock.show()
+        else:
+            self.glClientDock.hide()
+            print 'hiding glclient'
+
+
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     QtCore.QObject.connect(app, QtCore.SIGNAL('lastWindowClosed()'), app, QtCore.SLOT('quit()'))
