@@ -23,6 +23,7 @@ extern void testSync();
 extern void testAsync();
 extern void testSyncArray( unsigned int size, unsigned int numThreads,
 	unsigned int method );
+extern void testShell();
 extern void testScheduling();
 
 Id init( int argc, char** argv )
@@ -80,6 +81,7 @@ int main( int argc, char** argv )
 #ifdef DO_UNIT_TESTS
 	cout << "testing: ";
 	testAsync();
+	testShell();
 	testScheduling();
 #endif
 	cout << endl;

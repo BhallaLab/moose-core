@@ -80,6 +80,9 @@ class SetGet
 		 */
 		void completeSet() const;
 
+		/**
+		 * Resizes the internal buffer on the SetGet
+		 */
 		void resizeBuf( unsigned int size );
 
 		char* buf();
@@ -197,10 +200,11 @@ template< class A > class SetGet1: public SetGet
 			SetGet1< A > sg( dest );
 			FuncId fid;
 			if ( sg.checkSet( field, fid ) ) {
-				unsigned int size = Conv< A >::size( arg );
-				char *temp = new char[ size ];
-				Conv< A >::val2buf( temp, arg );
-				sg.iSetInner( fid, temp, size );
+				Conv< A > conv( arg );
+				// unsigned int size = Conv< A >::size( arg );
+				char *temp = new char[ conv.size() ];
+				conv.val2buf( temp );
+				sg.iSetInner( fid, temp, conv.size() );
 
 				// Ensure that clearQ is called before this return.
 				sg.completeSet();
@@ -229,21 +233,20 @@ template< class A > class SetGet1: public SetGet
 				return 0;
 
 			if ( sg.checkSet( field, fid ) ) {
-				// Need to decide if this is worth doing for each arg
-				unsigned int size = Conv< A >::size( arg[0] );
-				char *temp = new char[ size ];
-
 				if ( e->numDimensions() == 1 ) {
 					for ( unsigned int i = 0; i < e->numData(); ++i )
 					{
 						Eref er( e, i );
 						SetGet1< A > sga( er );
-						Conv< A >::val2buf( temp, arg[i] );
-						sga.iSetInner( fid, temp, size );
+						Conv< A > conv( arg[i] );
+						char *temp = new char[ conv.size() ];
+						conv.val2buf( temp );
+						sga.iSetInner( fid, temp, conv.size() );
 						// Ideally we should queue all these.
 						// To do that we need some other call than
 						// iSetInner, which clears the old msg out.
 						sga.completeSet();
+						delete[] temp;
 					}
 				}
 
@@ -256,15 +259,17 @@ template< class A > class SetGet1: public SetGet
 						{
 							Eref er( e, DataId( i, j ) );
 							SetGet1< A > sga( er );
-							Conv< A >::val2buf( temp, arg[ k++ ] );
-							sga.iSetInner( fid, temp, size );
+							Conv< A > conv( arg[ k++ ] );
+							char *temp = new char[ conv.size() ];
+							conv.val2buf( temp );
+							sga.iSetInner( fid, temp, conv.size() );
 							sga.completeSet();
+							delete[] temp;
 						}
 					}
 				}
 
 				// Ensure that clearQ is called before this return.
-				delete[] temp;
 				return 1;
 			}
 			return 0;
@@ -289,11 +294,11 @@ template< class A > class SetGet1: public SetGet
 		{
 			FuncId fid;
 			if ( checkSet( field, fid ) ) {
-				unsigned int size = Conv< A >::size( arg );
-				resizeBuf( size );
+				Conv< A > conv( arg );
+				resizeBuf( conv.size() );
 				char *temp = buf();
-				Conv< A >::val2buf( temp, arg );
-				iSetInner( fid, temp, size );
+				conv.val2buf( temp );
+				iSetInner( fid, temp, conv.size() );
 				return 1;
 			}
 			return 0;
@@ -395,10 +400,8 @@ template< class A > class Field: public SetGet1< A >
 			 * Second clearQ is so that the data can come back to the Shell
 			 */
 			Qinfo::clearQ( Shell::procInfo() );
-			A ret;
-
-			Conv< A >::buf2val( ret, Shell::buf() );
-			return ret;
+			Conv< A > ret( Shell::buf() );
+			return *ret;
 		}
 
 		/**
@@ -406,11 +409,8 @@ template< class A > class Field: public SetGet1< A >
 		 */
 		string harvestStrGet() const
 		{ 
-			Qinfo::clearQ( Shell::procInfo() );
-			A val;
-			Conv< A >::buf2val( val, Shell::buf() );
 			string s;
-			Conv< A >::val2str( s, val );
+			Conv< A >::val2str( s, harvestGet() );
 			return s;
 		}
 
@@ -456,12 +456,12 @@ template< class A1, class A2 > class SetGet2: public SetGet
 			SetGet2< A1, A2 > sg( dest );
 			FuncId fid;
 			if ( sg.checkSet( field, fid ) ) {
-				unsigned int size1 = Conv< A1 >::size( arg1 );
-				unsigned int size2 = Conv< A2 >::size( arg2 );
-				char *temp = new char[ size1 + size2 ];
-				Conv< A1 >::val2buf( temp, arg1 );
-				Conv< A2 >::val2buf( temp + size1, arg2 );
-				sg.iSetInner( fid, temp, size1 + size2 );
+				Conv< A1 > conv1( arg1 );
+				Conv< A2 > conv2( arg2 );
+				char *temp = new char[ conv1.size() + conv2.size() ];
+				conv1.val2buf( temp );
+				conv2.val2buf( temp + conv1.size() );
+				sg.iSetInner( fid, temp, conv1.size() + conv2.size() );
 
 				// Ensure that clearQ is called before this return.
 				sg.completeSet();
@@ -492,6 +492,7 @@ template< class A1, class A2 > class SetGet2: public SetGet
 		 */
 		bool iSet( const string& field, const A1& arg1, const A2& arg2 )
 		{
+			/*
 			FuncId fid;
 			if ( checkSet( field, fid ) ) {
 				unsigned int size1 = Conv< A1 >::size( arg1 );
@@ -503,6 +504,7 @@ template< class A1, class A2 > class SetGet2: public SetGet
 				iSetInner( fid, temp, size1 + size2 );
 				return 1;
 			}
+			*/
 			return 0;
 		}
 
@@ -513,11 +515,14 @@ template< class A1, class A2 > class SetGet2: public SetGet
 		 */
 		bool iStrSet( const string& field, const string& val )
 		{
+			/*
 			cout << "iStrSet< A1, A2 >: string convertion not yet implemented\n";
 			A1 arg1;
 			A2 arg2;
 			Conv< A1 >::str2val( arg1, val );
 			return iSet( field, arg1, arg2 );
+			*/
+			return 0;
 		}
 	//////////////////////////////////////////////////////////////////
 	//  The 'Get' calls for 2 args are currently undefined.
@@ -551,14 +556,16 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 			SetGet3< A1, A2, A3 > sg( dest );
 			FuncId fid;
 			if ( sg.checkSet( field, fid ) ) {
-				unsigned int size1 = Conv< A1 >::size( arg1 );
-				unsigned int size2 = Conv< A2 >::size( arg2 );
-				unsigned int size3 = Conv< A3 >::size( arg3 );
-				unsigned int totSize = size1 + size2 + size3;
+				Conv< A1 > conv1( arg1 );
+				Conv< A2 > conv2( arg2 );
+				Conv< A3 > conv3( arg3 );
+				unsigned int s1 = conv1.size();
+				unsigned int s1s2 = s1 + conv2.size();
+				unsigned int totSize = s1s2 + conv3.size();
 				char *temp = new char[ totSize ];
-				Conv< A1 >::val2buf( temp, arg1 );
-				Conv< A2 >::val2buf( temp + size1, arg2 );
-				Conv< A3 >::val2buf( temp + size1 + size2, arg3 );
+				conv1.val2buf( temp );
+				conv2.val2buf( temp + s1 );
+				conv3.val2buf( temp + s1s2 );
 				sg.iSetInner( fid, temp, totSize );
 
 				// Ensure that clearQ is called before this return.
@@ -591,6 +598,7 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 		 */
 		bool iSet( const string& field, const A1& arg1, const A2& arg2, const A3& arg3 )
 		{
+			/*
 			FuncId fid;
 			if ( checkSet( field, fid ) ) {
 				unsigned int size1 = Conv< A1 >::size( arg1 );
@@ -605,6 +613,7 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 				iSetInner( fid, temp, totSize );
 				return 1;
 			}
+			*/
 			return 0;
 		}
 
@@ -615,12 +624,15 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 		 */
 		bool iStrSet( const string& field, const string& val )
 		{
+			/*
 			cout << "iStrSet< A1, A2, A3 >: string convertion not yet implemented\n";
 			A1 arg1;
 			A2 arg2;
 			A3 arg3;
 			Conv< A1 >::str2val( arg1, val );
 			return iSet( field, arg1, arg2, arg3 );
+			*/
+			return 0;
 		}
 	//////////////////////////////////////////////////////////////////
 	//  The 'Get' calls for 2 args are currently undefined.
@@ -654,16 +666,19 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 			SetGet4< A1, A2, A3, A4 > sg( dest );
 			FuncId fid;
 			if ( sg.checkSet( field, fid ) ) {
-				unsigned int size1 = Conv< A1 >::size( arg1 );
-				unsigned int size2 = Conv< A2 >::size( arg2 );
-				unsigned int size3 = Conv< A3 >::size( arg3 );
-				unsigned int size4 = Conv< A4 >::size( arg4 );
-				unsigned int totSize = size1 + size2 + size3 + size4;
+				Conv< A1 > conv1( arg1 );
+				Conv< A2 > conv2( arg2 );
+				Conv< A3 > conv3( arg3 );
+				Conv< A4 > conv4( arg4 );
+				unsigned int s1 = conv1.size();
+				unsigned int s1s2 = s1 + conv2.size();
+				unsigned int s1s2s3 = s1s2 + conv3.size();
+				unsigned int totSize = s1s2s3 + conv4.size();
 				char *temp = new char[ totSize ];
-				Conv< A1 >::val2buf( temp, arg1 );
-				Conv< A2 >::val2buf( temp + size1, arg2 );
-				Conv< A3 >::val2buf( temp + size1 + size2, arg3 );
-				Conv< A4 >::val2buf( temp + size1 + size2 + size3, arg4 );
+				conv1.val2buf( temp );
+				conv2.val2buf( temp + s1 );
+				conv3.val2buf( temp + s1s2 );
+				conv4.val2buf( temp + s1s2s3 );
 				sg.iSetInner( fid, temp, totSize );
 
 				// Ensure that clearQ is called before this return.
@@ -697,6 +712,7 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 		 */
 		bool iSet( const string& field, const A1& arg1, const A2& arg2, const A3& arg3, const A4& arg4 )
 		{
+		/*
 			FuncId fid;
 			if ( checkSet( field, fid ) ) {
 				unsigned int size1 = Conv< A1 >::size( arg1 );
@@ -713,6 +729,7 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 				iSetInner( fid, temp, totSize );
 				return 1;
 			}
+			*/
 			return 0;
 		}
 
@@ -723,6 +740,7 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 		 */
 		bool iStrSet( const string& field, const string& val )
 		{
+			/*
 			cout << "iStrSet< A1, A2, A3, A4 >: string convertion not yet implemented\n";
 			A1 arg1;
 			A2 arg2;
@@ -730,6 +748,8 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 			A4 arg4;
 			Conv< A1 >::str2val( arg1, val );
 			return iSet( field, arg1, arg2, arg3, arg4 );
+			*/
+			return 0;
 		}
 	//////////////////////////////////////////////////////////////////
 	//  The 'Get' calls for 2 args are currently undefined.

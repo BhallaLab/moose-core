@@ -37,6 +37,7 @@ OBJ = \
 	SparseMsg.o \
 	PsparseMsg.o \
 	main.o	\
+	testShell.o	\
 
 HEADERS = \
 	header.h \

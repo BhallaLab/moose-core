@@ -44,7 +44,9 @@ void insertIntoQ( )
 		char buf[200];
 
 		// This simulates a sendTo
-		unsigned int size = Conv< string >::val2buf( buf, stemp );
+		Conv< string > conv( stemp );
+		unsigned int size = conv.val2buf( buf );
+		// unsigned int size = Conv< string >::val2buf( buf, stemp );
 		Qinfo qi( 1, i, size + sizeof( DataId ), 1, 1 );
 
 		*reinterpret_cast< DataId* >( buf + size ) = DataId( i );

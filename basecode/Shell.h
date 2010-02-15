@@ -32,6 +32,7 @@ class Shell: public Data
 		void loadBalance();
 
 		void create( string type, Id parent, string name, unsigned int num);
+		Id innerCreate( string type, Id parent, string name, unsigned int num);
 		void addmsg( Id src, Id dest, string srcfield, string destfield );
 
 		const char* getBuf() const;
@@ -50,6 +51,9 @@ class Shell: public Data
 		// Clock::setupTick function, but may be needed to be called from
 		// the parser so it is a Shell function too.
 		void setclock( unsigned int tickNum, double dt, unsigned int stage );
+
+		void warning( const string& text );
+		void error( const string& text );
 
 		static const Cinfo* initCinfo();
 	private:

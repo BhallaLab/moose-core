@@ -139,12 +139,46 @@ const char* Shell::getBuf() const
 
 void Shell::create( string type, Id parent, string name, unsigned int num)
 {
+	innerCreate( type, parent, name, num );
 }
+
+
+Id Shell::innerCreate( string type, Id parent, string name, unsigned int num)
+{
+	const Cinfo* c = Cinfo::find( type );
+	if ( c ) {
+		Element* pa = parent();
+		if ( !pa ) {
+			stringstream ss;
+			ss << "create: Parent Element'" << parent << "' not found. No Element created";
+			return Id();
+		}
+		Id eid = c->create( name, num );
+		return eid;
+		// Perhaps the eid should be returned to the calling func?
+	} else {
+		stringstream ss;
+		ss << "create: Class '" << type << "' not known. No Element created";
+		warning( ss.str() );
+	}
+	return Id();
+}
+
 
 // I really also want to put in a message type. But each message has its
 // own features and these may well be done separately
 void Shell::addmsg( Id src, Id dest, string srcfield, string destfield )
 {
+}
+
+void Shell::warning( const string& text )
+{
+	cout << "Warning: Shell:: " << text << endl;
+}
+
+void Shell::error( const string& text )
+{
+	cout << "Error: Shell:: " << text << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////

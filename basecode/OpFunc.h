@@ -85,13 +85,9 @@ template< class T, class A > class OpFunc1: public OpFunc
 			return dynamic_cast< const SetGet1< A >* >( s );
 		}
 
-		// This could do with a whole lot of optimization to avoid
-		// copying data back and forth.
-		// buf is organized as Qinfo, args, optionally srcIndex.
 		void op( Eref e, const char* buf ) const {
-			A val;
-			Conv< A >::buf2val( val, buf + sizeof( Qinfo ) );
-			(reinterpret_cast< T* >( e.data() )->*func_)( val ) ;
+			Conv< A > arg1( buf + sizeof( Qinfo ) );
+			(reinterpret_cast< T* >( e.data() )->*func_)( *arg1 );
 		}
 
 	private:
@@ -113,6 +109,7 @@ template< class T, class A1, class A2 > class OpFunc2: public OpFunc
 			return dynamic_cast< const SetGet2< A1, A2 >* >( s );
 		}
 
+		/*
 		void op( Eref e, const char* buf ) const {
 			buf += sizeof( Qinfo );
 			const char* buf2 = buf + sizeof( A1 );
@@ -120,6 +117,13 @@ template< class T, class A1, class A2 > class OpFunc2: public OpFunc
 				*reinterpret_cast< const A1* >( buf ),
 				*reinterpret_cast< const A2* >( buf2 )
 			);
+		}
+		*/
+		void op( Eref e, const char* buf ) const {
+			buf += sizeof( Qinfo );
+			Conv< A1 > arg1( buf );
+			Conv< A2 > arg2( buf + arg1.size() );
+			(reinterpret_cast< T* >( e.data() )->*func_)( *arg1, *arg2 );
 		}
 
 	private:
@@ -144,13 +148,13 @@ template< class T, class A1, class A2, class A3 > class OpFunc3:
 
 		void op( Eref e, const char* buf ) const {
 			buf += sizeof( Qinfo );
-			const char* buf2 = buf + sizeof( A1 );
-			const char* buf3 = buf2 + sizeof( A2 );
+			Conv< A1 > arg1( buf );
+			buf += arg1.size();
+			Conv< A2 > arg2( buf );
+			buf += arg2.size();
+			Conv< A3 > arg3( buf );
 			(reinterpret_cast< T* >( e.data() )->*func_)( 
-				*reinterpret_cast< const A1* >( buf ),
-				*reinterpret_cast< const A2* >( buf2 ),
-				*reinterpret_cast< const A3* >( buf3 )
-			);
+				*arg1, *arg2, *arg3 );
 		}
 
 	private:
@@ -175,15 +179,15 @@ template< class T, class A1, class A2, class A3, class A4 > class OpFunc4:
 
 		void op( Eref e, const char* buf ) const {
 			buf += sizeof( Qinfo );
-			const char* buf2 = buf + sizeof( A1 );
-			const char* buf3 = buf2 + sizeof( A2 );
-			const char* buf4 = buf3 + sizeof( A3 );
+			Conv< A1 > arg1( buf );
+			buf += arg1.size();
+			Conv< A2 > arg2( buf );
+			buf += arg2.size();
+			Conv< A3 > arg3( buf );
+			buf += arg3.size();
+			Conv< A4 > arg4( buf );
 			(reinterpret_cast< T* >( e.data() )->*func_)( 
-				*reinterpret_cast< const A1* >( buf ),
-				*reinterpret_cast< const A2* >( buf2 ),
-				*reinterpret_cast< const A3* >( buf3 ),
-				*reinterpret_cast< const A4* >( buf4 )
-			);
+				*arg1, *arg2, *arg3, *arg4 );
 		}
 
 	private:
@@ -224,13 +228,15 @@ template< class T, class A > class GetOpFunc: public OpFunc
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
 			buf += sizeof( Qinfo );
 		    FuncId retFunc = *reinterpret_cast< const FuncId* >( buf );
-			const A& ret = (( reinterpret_cast< T* >( e.data() ) )->*func_)();
+			const A& ret = 
+				(( reinterpret_cast< T* >( e.data() ) )->*func_)();
 
 			// Flag arguments: useSendTo = 1, and flip the isForward flag.
-			Qinfo retq( retFunc, e.index(), Conv< A >::size( ret ), 
+			Conv<A> conv( ret );
+			Qinfo retq( retFunc, e.index(), conv.size(), 
 				1, !q->isForward() );
 			char* temp = new char[ retq.size() ];
-			Conv<A>::val2buf( temp, ret );
+			conv.val2buf( temp ); 
 			Conn c;
 			c.add( q->mid() );
 			// c.add( const_cast< Msg* >( e.element()->getMsg( q->mid() ) ) );

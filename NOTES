@@ -3085,3 +3085,111 @@ in some other runs I've gotten it as low as 2.4 sec on 16 'cores', which means
 hyperthreading on all 8 cores. There is a lot of variability.
 
 =============================================================================
+5 Feb 2010
+Put in hooks for Shell::create and Shell::add functions. Involved making
+4-argument OpFunc, SetGet and SrcFinfo.
+Checkin as 1583
+
+=============================================================================
+14 Feb 2010
+Working on Shell::create. Compiles, crashes on test.
+Turns out to be a fairly fundamental problem with argument conversion in
+messaging, specifically for strings.
+I need to extend the Conv<T> class to return a pointer to the desired 
+object, which will normally be a direct cast. For strings, I need to be
+clever to handle the conversion. Perhaps the way to go is to create an
+instance of the Conv<T> object, which typically is just the desired ptr.
+But for strings it does a local allocation etc.
+Will need to do benchmarking after all this to ensure we don't slow things
+down massively.
+
+
+Some design thoughts regarding interaction between parser and shell.
+3 options:
+
+Option 1:
+
+	Node 0				Node 1
+	Parser
+	  ^ |
+Regular	  | |
+funcs	  | V
+	Shell::interface funcs
+	(Handles sync)
+	  ^
+Msg	  |-------------------------------|
+funcs	  |                               |
+	  V                               V
+	Shell::msg funcs		Shell::msg funcs
+
+- Needs ptr to shell in parser, or static interface funcs.
+- Shell::interface funcs are blocking so that the msg funcs return
+- Needs 2 layers of funcs in Shell (interface vs msg)
+	OR
+  Needs separate interface class.
+
+
+Option 2:
+
+	Node 0				Node 1
+	Parser
+	  ^
+Msg	  |-------------------------------|
+funcs	  |                               |
+	  V                               V
+	Shell::msg funcs <------------>	Shell::msg funcs
+			  Sync and merge
+
+- Needs parser to talk to the msgs, as it goes out to all nodes.
+- Sync and merge looks messy.
+
+
+
+Option 3:
+
+	Node 0				Node 1
+	Parser
+	  ^ 
+Msg	  |
+funcs	  V
+	Shell::interface funcs
+	(Handles sync)
+	  ^
+msg	  |-------------------------------|
+funcs	  |                               |
+	  V                               V
+	Shell::msg funcs		Shell::msg funcs
+
+- Needs either ptr or msg interface on parser. But both of them are
+	awkward, since parser funcs would like to call a func and get a
+	return value. The Msgs don't do that.
+- Needs 2 layers of funcs, only both are msg type.
+- Which level is blocking?  Presumably the first level of Msg funcs.
+
+.......................................................................
+
+Option 2 is silly. Option 3 is awkward and will munge the current parser 
+framework. Option 1 it is then.
+
+Some use cases:
+create
+addmsg
+start
+init
+
+
+=============================================================================
+15 Feb 2010
+Working on cleanup of conversions. This has cascaded down to OpFunc (done)
+and SetGet. SetGet is a bit confusing and I suspect it may be ripe for
+cleanup. There is a regular 'set' command which does appropriate type
+checking and type conversion. Then there is an iSet command, used only in
+the iStrSet. iStrSet itself is never used. The iSet does a lot of things
+redundantly with the simple 'set' command.
+
+Commented all the body of the iSet and iStrSet out. 
+Got the whole thing to compile.
+Surprisingly, works all through and clears unit tests. The new test for
+Shell::create bails out but doesn't crash. Need to tighten.
+
+=============================================================================
