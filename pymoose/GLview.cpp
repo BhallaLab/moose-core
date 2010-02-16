@@ -16,62 +16,52 @@ GLview::GLview( const Id& src, std::string name, Id& parent ) : PyMooseBase( src
 GLview::~GLview() {}
 const std::string& GLview::getType() { return className_; }
 
-std::string GLview::__get_vizpath() const
+const std::string& GLview::__get_vizpath() const
 {
-	std::string vizpath;
-	get< std::string >( id_(), "vizpath", vizpath );
-	return vizpath;
+    return getField(  "vizpath");
 }
 
-void GLview::__set_vizpath( std::string vizpath )
+void GLview::__set_vizpath( const std::string& vizpath )
 {
 	set< std::string >( id_(), "vizpath", vizpath );
 }
 
-std::string GLview::__get_clientHost() const
+const std::string& GLview::__get_clientHost() const
 {
-	std::string clientHost;
-	get< std::string >( id_(), "host", clientHost );
-	return clientHost;
+    return getField(  "host");
 }
 
-void GLview::__set_clientHost( std::string clientHost )
+void GLview::__set_clientHost( const std::string& clientHost )
 {
 	set< std::string >( id_(), "host", clientHost );
 }
 
-std::string GLview::__get_clientPort() const
+const std::string& GLview::__get_clientPort() const
 {
-	std::string clientPort;
-	get< std::string >( id_(), "port", clientPort );
-	return clientPort;
+	return getField(  "port");
 }
 
-void GLview::__set_clientPort( std::string clientPort )
+void GLview::__set_clientPort( const std::string& clientPort )
 {
 	set< std::string >( id_(), "port", clientPort );
 }
 
-std::string GLview::__get_relPath() const
+const std::string& GLview::__get_relPath() const
 {
-	std::string relPath;
-	get< std::string >( id_(), "relpath", relPath );
-	return relPath;
+    return this->getField(  "relpath");
 }
 
-void GLview::__set_relPath( std::string relPath )
+void GLview::__set_relPath( const std::string& relPath )
 {
 	set< std::string >( id_(), "relpath", relPath );
 }
 
-std::string GLview::__get_value1Field() const
+const std::string& GLview::__get_value1Field() const
 {
-	std::string value1Field;
-	get< std::string >( id_(), "value1", value1Field );
-	return value1Field;
+    return this->getField( "value1");
 }
 
-void GLview::__set_value1Field( std::string value1Field )
+void GLview::__set_value1Field( const std::string& value1Field )
 {
 	set< std::string >( id_(), "value1", value1Field );
 }
@@ -100,14 +90,12 @@ void GLview::__set_value1Max( double value1Max )
 	set< double >( id_(), "value1max", value1Max );
 }
 
-std::string GLview::__get_value2Field() const
+const std::string& GLview::__get_value2Field() const
 {
-	std::string value2Field;
-	get< std::string >( id_(), "value2", value2Field );
-	return value2Field;
+    return this->getField(  "value2");
 }
 
-void GLview::__set_value2Field( std::string value2Field )
+void GLview::__set_value2Field( const std::string& value2Field )
 {
 	set< std::string >( id_(), "value2", value2Field );
 }
@@ -136,14 +124,12 @@ void GLview::__set_value2Max( double value2Max )
 	set< double >( id_(), "value2max", value2Max );
 }
 
-std::string GLview::__get_value3Field() const
+const std::string& GLview::__get_value3Field() const
 {
-	std::string value3Field;
-	get< std::string >( id_(), "value3", value3Field );
-	return value3Field;
+    return this->getField(  "value3");
 }
 
-void GLview::__set_value3Field( std::string value3Field )
+void GLview::__set_value3Field( const std::string& value3Field )
 {
 	set< std::string >( id_(), "value3", value3Field );
 }
@@ -172,14 +158,12 @@ void GLview::__set_value3Max( double value3Max )
 	set< double >( id_(), "value3max", value3Max );
 }
 
-std::string GLview::__get_value4Field() const
+const std::string& GLview::__get_value4Field() const
 {
-	std::string value4Field;
-	get< std::string >( id_(), "value4", value4Field );
-	return value4Field;
+	return this->getField("value4"  );
 }
 
-void GLview::__set_value4Field( std::string value4Field )
+void GLview::__set_value4Field( const std::string& value4Field )
 {
 	set< std::string >( id_(), "value4", value4Field );
 }
@@ -205,17 +189,15 @@ double GLview::__get_value4Max() const
 
 void GLview::__set_value4Max( double value4Max )
 {
-	set< double >( id_(), "value4max", value4Max );
+set< double >( id_(), "value4max", value4Max );
 }
 
-std::string GLview::__get_value5Field() const
+const std::string& GLview::__get_value5Field() const
 {
-	std::string value5Field;
-	get< std::string >( id_(), "value5", value5Field );
-	return value5Field;
+    return this->getField(  "value5");
 }
 
-void GLview::__set_value5Field( std::string value5Field )
+void GLview::__set_value5Field( const std::string& value5Field )
 {
 	set< std::string >( id_(), "value5", value5Field );
 }
@@ -244,38 +226,34 @@ void GLview::__set_value5Max( double value5Max )
 	set< double >( id_(), "value5max", value5Max );
 }
 
-std::string GLview::__get_bgColor() const
+const std::string& GLview::__get_bgColor() const
 {
-	std::string bgColor;
-	get< std::string >( id_(), "bgcolor", bgColor );
-	return bgColor;
+    return this->getField(  "bgcolor");
 }
 
-void GLview::__set_bgColor( std::string bgColor )
+void GLview::__set_bgColor( const std::string& bgColor )
 {
 	set< std::string >( id_(), "bgcolor", bgColor );
 }
 
-std::string GLview::__get_syncMode() const
+const std::string& GLview::__get_syncMode() const
 {
-	std::string syncMode;
-	get< std::string >( id_(), "sync", syncMode );
-	return syncMode;
+    return this->getField(  "sync");
 }
 
-void GLview::__set_syncMode( std::string syncMode )
+void GLview::__set_syncMode( const std::string& syncMode )
 {
 	set< std::string >( id_(), "sync", syncMode );
 }
 
-std::string GLview::__get_gridMode() const
+const std::string& GLview::__get_gridMode() const
 {
 	std::string gridMode;
-	get< std::string >( id_(), "grid", gridMode );
+	return this->getField(  "grid");
 	return gridMode;
 }
 
-void GLview::__set_gridMode( std::string gridMode )
+void GLview::__set_gridMode( const std::string& gridMode )
 {
 	set< std::string >( id_(), "grid", gridMode );
 }
