@@ -240,15 +240,24 @@ void Cinfo::init( const string* doc,
                                 
                 if (fieldType != "void" && dynamic_cast<ValueFinfo*>(finfoArray[i]) != NULL)
                 {
-                    /* Insert the getters and setters */                  
-                    header << "            " << fieldType << " __get_" << fieldName << "() const;\n";
+                    /* Insert the getters and setters
+                       Strings require special treatment as they may
+                       get deleted from the stack, so we use
+                       PyMooseBase::getField() to return a reference
+                       to the context_->fieldValue member.
+                     */                  
+                    header << "            " << (fieldType == "string") ? "const string& " : fieldType << " __get_" << fieldName << "() const;\n";
                 
-                    cpp << fieldType <<" " <<  name() << "::__get_" <<  fieldName << "() const\n"
-                        << "{\n"
-                        << "    " <<  fieldType << " " << fieldName << ";\n"
-                        << "    get < " << fieldType << " > (id_(), \""<< fieldName << "\"," << fieldName << ");\n"
-                        << "    return " << fieldName << ";\n"
-                        << "}" << endl;
+                    cpp << (fieldType == "string") ? "const string& " : fieldType <<" " <<  name() << "::__get_" <<  fieldName << "() const\n"
+                        << "{\n";
+                    if (fieldType != "string"){
+                        cpp << "    " << fieldType << " " << fieldName << ";\n"
+                            << "    get < " << fieldType << " > (id_(), \""<< fieldName << "\"," << fieldName << ");\n"
+                            << "    return " << fieldName << ";\n";
+                    } else {
+                        cpp << "return this->getField(\"" << fieldName << "\");\n";
+                    }
+                    cpp << "}" << endl;
                     swig << "%attribute(pymoose::" << name() << ", " << fieldType << ", " << fieldName << ", __get_" << fieldName;
                     
                     if ( finfoArray[i]->recvFunc() != &dummyFunc) // read-write field - put setter
