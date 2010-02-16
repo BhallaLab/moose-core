@@ -16,50 +16,42 @@ GLcell::GLcell( const Id& src, std::string name, Id& parent ) : PyMooseBase( src
 GLcell::~GLcell() {}
 const std::string& GLcell::getType() { return className_; }
 
-std::string GLcell::__get_vizpath() const
+const std::string GLcell::__get_vizpath() const
 {
-	std::string vizpath;
-	get< std::string >( id_(), "vizpath", vizpath );
-	return vizpath;
+    return this->getField("vizpath");
 }
 
-void GLcell::__set_vizpath( std::string vizpath )
+void GLcell::__set_vizpath( const std::string vizpath )
 {
 	set< std::string >( id_(), "vizpath", vizpath );
 }
 
-std::string GLcell::__get_clientHost() const
+const std::string& GLcell::__get_clientHost() const
 {
-	std::string clientHost;
-	get< std::string >( id_(), "host", clientHost );
-	return clientHost;
+    return getField("host");
 }
 
-void GLcell::__set_clientHost( std::string strClientHost )
+void GLcell::__set_clientHost( const std::string strClientHost )
 {
 	set< std::string >( id_(), "host", strClientHost ); 
 }
 
-std::string GLcell::__get_clientPort() const
+const std::string& GLcell::__get_clientPort() const
 {
-	std::string clientPort;
-	get< std::string >( id_(), "port", clientPort );
-	return clientPort;	
+    return this->getField("port");
 }
 
-void GLcell::__set_clientPort( std::string strClientPort )
+void GLcell::__set_clientPort( const std::string strClientPort )
 {
 	set< std::string >( id_(), "port", strClientPort ); 
 }
 
-std::string GLcell::__get_attributeName() const
+const std::string& GLcell::__get_attributeName() const
 {
-	std::string attributeName;
-	get< std::string >( id_(), "attribute", attributeName );
-	return attributeName;
+    return getField("attribute");
 }
 
-void GLcell::__set_attributeName( std::string strAttributeName )
+void GLcell::__set_attributeName( const std::string strAttributeName )
 {
 	set< std::string >( id_(), "attribute", strAttributeName ); 
 }
@@ -88,26 +80,22 @@ void GLcell::__set_VScale( double vScale )
 	set< double >( id_(), "vscale", vScale );
 }
 
-std::string GLcell::__get_syncMode() const
+const std::string& GLcell::__get_syncMode() const
 {
-	std::string syncMode;
-	get< std::string >( id_(), "sync", syncMode );
-	return syncMode;	
+    return this->getField("sync");	
 }
 
-void GLcell::__set_syncMode( std::string strSyncMode )
+void GLcell::__set_syncMode( const std::string& strSyncMode )
 {
 	set< std::string >( id_(), "sync", strSyncMode );
 }
 
-std::string GLcell::__get_bgColor() const
+const std::string& GLcell::__get_bgColor() const
 {
-	std::string bgColor;
-	get< std::string >( id_(), "bgcolor", bgColor );
-	return bgColor;
+	return this->getField("bgcolor" );
 }
 
-void GLcell::__set_bgColor( std::string strBgColor )
+void GLcell::__set_bgColor( const std::string strBgColor )
 {
 	set< std::string >( id_(), "bgcolor", strBgColor );
 }

@@ -1757,6 +1757,10 @@ class PyMooseBase(object):
         """__get_name(self) -> string"""
         return _moose.PyMooseBase___get_name(*args)
 
+    def __get_index(*args):
+        """__get_index(self) -> int"""
+        return _moose.PyMooseBase___get_index(*args)
+
     def useClock(*args):
         """
         useClock(self, int clockNo, string func="process")
@@ -1840,6 +1844,7 @@ class PyMooseBase(object):
 
     initSimulation = staticmethod(initSimulation)
     id = _swig_property(_moose.PyMooseBase_id_get)
+    index = _swig_property(_moose.PyMooseBase_index_get)
     parent = _swig_property(_moose.PyMooseBase_parent_get)
     className = _swig_property(_moose.PyMooseBase_className_get)
     author = _swig_property(_moose.PyMooseBase_author_get)
@@ -6701,28 +6706,28 @@ class GLview(PyMooseBase):
         """__set_zoffsetVal(self, unsigned int zoffsetVal)"""
         return _moose.GLview___set_zoffsetVal(*args)
 
-    vizpath = _swig_property(_moose.GLview_vizpath_get, _moose.GLview_vizpath_set)
-    host = _swig_property(_moose.GLview_host_get, _moose.GLview_host_set)
-    port = _swig_property(_moose.GLview_port_get, _moose.GLview_port_set)
-    relpath = _swig_property(_moose.GLview_relpath_get, _moose.GLview_relpath_set)
-    value1 = _swig_property(_moose.GLview_value1_get, _moose.GLview_value1_set)
+    vizpath = _swig_property(_moose.GLview_vizpath_get)
+    host = _swig_property(_moose.GLview_host_get)
+    port = _swig_property(_moose.GLview_port_get)
+    relpath = _swig_property(_moose.GLview_relpath_get)
+    value1 = _swig_property(_moose.GLview_value1_get)
     value1min = _swig_property(_moose.GLview_value1min_get, _moose.GLview_value1min_set)
     value1max = _swig_property(_moose.GLview_value1max_get, _moose.GLview_value1max_set)
-    value2 = _swig_property(_moose.GLview_value2_get, _moose.GLview_value2_set)
+    value2 = _swig_property(_moose.GLview_value2_get)
     value2min = _swig_property(_moose.GLview_value2min_get, _moose.GLview_value2min_set)
     value2max = _swig_property(_moose.GLview_value2max_get, _moose.GLview_value2max_set)
-    value3 = _swig_property(_moose.GLview_value3_get, _moose.GLview_value3_set)
+    value3 = _swig_property(_moose.GLview_value3_get)
     value3min = _swig_property(_moose.GLview_value3min_get, _moose.GLview_value3min_set)
     value3max = _swig_property(_moose.GLview_value3max_get, _moose.GLview_value3max_set)
-    value4 = _swig_property(_moose.GLview_value4_get, _moose.GLview_value4_set)
+    value4 = _swig_property(_moose.GLview_value4_get)
     value4min = _swig_property(_moose.GLview_value4min_get, _moose.GLview_value4min_set)
     value4max = _swig_property(_moose.GLview_value4max_get, _moose.GLview_value4max_set)
-    value5 = _swig_property(_moose.GLview_value5_get, _moose.GLview_value5_set)
+    value5 = _swig_property(_moose.GLview_value5_get)
     value5min = _swig_property(_moose.GLview_value5min_get, _moose.GLview_value5min_set)
     value5max = _swig_property(_moose.GLview_value5max_get, _moose.GLview_value5max_set)
-    bgcolor = _swig_property(_moose.GLview_bgcolor_get, _moose.GLview_bgcolor_set)
-    sync = _swig_property(_moose.GLview_sync_get, _moose.GLview_sync_set)
-    grid = _swig_property(_moose.GLview_grid_get, _moose.GLview_grid_set)
+    bgcolor = _swig_property(_moose.GLview_bgcolor_get)
+    sync = _swig_property(_moose.GLview_sync_get)
+    grid = _swig_property(_moose.GLview_grid_get)
     color_val = _swig_property(_moose.GLview_color_val_get, _moose.GLview_color_val_set)
     morph_val = _swig_property(_moose.GLview_morph_val_get, _moose.GLview_morph_val_set)
     xoffset_val = _swig_property(_moose.GLview_xoffset_val_get, _moose.GLview_xoffset_val_set)
