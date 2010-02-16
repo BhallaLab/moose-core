@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 11:38:46 2009 (+0530)
 # Version: 
-# Last-Updated: Wed Feb 10 12:43:10 2010 (+0100)
+# Last-Updated: Mon Feb 15 10:29:59 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 876
+#     Update #: 883
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -349,7 +349,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
     def popupFieldMenu(self, clickpoint):
         print 'PopupFieldMenu'
         index = self.propertyEditor.indexAt(clickpoint)
-        data = self.propertyModel.data(QtCore.QModelIndex(index.row, 0))
+        data = self.propertyModel.data(self.propertyModel.createIndex(index.row(), 0))
         print data
         menu = QtGui.QMenu(self.propertyEditor)
         self.actionPlotField = menu.addAction('Plot this field')
@@ -359,8 +359,8 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
     def plotThisFieldSlot(self):
         print 'plotThisFieldSlot'
         moose_object = self.modelTreeWidget.currentItem().getMooseObject()
-        current_item = self.propertyEditor.currentItem()
-        index = QtCore.QModelIndex(current_item.row(), 0)
+        row = self.propertyEditor.currentIndex().row()
+        index = self.propertyModel.createIndex(row, 0)
         print index.row(), index.column()
         field_name = self.propertyModel.data(index)        
         table = self.mooseHandler.createTableForMolecule(moose_object, field_name)

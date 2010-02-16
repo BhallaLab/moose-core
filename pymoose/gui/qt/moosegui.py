@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Sun Feb 14 02:29:14 2010 (+0530)
+# Last-Updated: Tue Feb 16 12:09:11 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 791
+#     Update #: 905
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -116,27 +116,21 @@ class MainWindow(QtGui.QMainWindow):
     def __init__(self, interpreter=None, parent=None):
 	QtGui.QMainWindow.__init__(self, parent)
         self.settings = config.get_settings()
-
         self.resize(800, 600)
         self.setDockOptions(self.AllowNestedDocks | self.AllowTabbedDocks | self.ForceTabbedDocks | self.AnimatedDocks)
         
         # This is the element tree of MOOSE
-	self.mooseTreePanel = QtGui.QDockWidget(self.tr('Element Tree'), self)
-        self.mooseTreePanel.setObjectName(self.tr('MooseClassPanel'))
-	self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.mooseTreePanel)
-	self.modelTreeWidget = makeModelTree(self.mooseTreePanel) 
-	self.mooseTreePanel.setWidget(self.modelTreeWidget)
+        self.createMooseTreePanel()
         # List of classes - one can double click on any class to
         # create an instance under the currently selected element in
         # mooseTreePanel
-	self.mooseClassesPanel = QtGui.QDockWidget(self.tr('Classes'), self)
-        self.mooseClassesPanel.setObjectName(self.tr('MooseClassPanel'))
-	self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.mooseClassesPanel)
-	self.mooseClassesWidget = makeClassList(self.mooseClassesPanel)
-	self.mooseClassesPanel.setWidget(self.mooseClassesWidget)
-        
+        self.createMooseClassesPanel()
+
+        # Create a widget to configure the glclient
+        self.createGLClientDock()
         # Connect the double-click event on modelTreeWidget items to
         # creation of the object editor.
+        # TODO - will create a right-click menu
         self.connect(self.modelTreeWidget, 
                      QtCore.SIGNAL('itemDoubleClicked(QTreeWidgetItem *, int)'),
                      self.makeObjectFieldEditor)
@@ -207,29 +201,41 @@ class MainWindow(QtGui.QMainWindow):
         self.objFieldEditPanel.setWidget(self.objFieldEditor)
 	self.objFieldEditPanel.show()
 
-    def makeMenu(self):
-        self.fileMenu = QtGui.QMenu('&File', self)
-        self.fileMenu.addAction(self.quitAction)
-        self.viewMenu = QtGui.QMenu('&View', self)
-        self.viewMenu.addAction(self.glClientAction)
-        self.viewMenu.addAction(self.mooseTreeAction)
-        self.menuBar().addMenu(self.fileMenu)
-        self.menuBar().addMenu(self.viewMenu)
+    def createGLCellWidget(self):
+        '''Create a GLCell object to show the currently selected cell'''
+        cellItem = self.modelTreeWidget.currentItem()
+        cell = cellItem.getMooseObject()
+        if not cell.className == 'Cell':
+            QtGui.QMessageBox.information(self, self.tr('Incorrect type for GLCell'), self.tr('GLCell is for visualizing a cell. Please select one in the Tree view. Currently selected item is of ' + cell.className + ' class. Hover mouse over an item to see its class.'))
+            return
+        self.
 
     def createActions(self):
-        self.glClientAction = QtGui.QAction(self.tr('&GLClient'), self)
-        self.glClientAction.setCheckable(True)
-        self.connect(self.glClientAction, QtCore.SIGNAL('toggled(bool)'), self.createGLClientWidget)
-
-        self.mooseTreeAction = QtGui.QAction(self.tr('&Moose Tree'), self)
-        self.mooseTreeAction.setCheckable(True)
-        self.mooseTreeAction.setChecked(True)
-        self.connect(self.mooseTreeAction, QtCore.SIGNAL('toggled(bool)'), self.toggleMooseTreeView)
-        
+        self.glClientAction = self.glClientDock.toggleViewAction()
+        self.mooseTreeAction = self.mooseTreePanel.toggleViewAction()
+        self.mooseClassesAction = self.mooseClassesPanel.toggleViewAction()
+        self.mooseShellAction = self.commandLineDock.toggleViewAction()
+        self.mooseGLCellAction = QtGui.QAction(self.tr('GLCell'), self)
+        self.connect(self.mooseGLCellAction, QtCore.SIGNAL('triggered()'), self.createGLCellWidget)
         self.quitAction = QtGui.QAction(self.tr('&Quit'), self)
         self.quitAction.setShortcut(QtGui.QKeySequence(self.tr('Ctrl+Q')))
         self.connect(self.quitAction, QtCore.SIGNAL('triggered()'), QtGui.qApp, QtCore.SLOT('closeAllWindows()'))
         
+        self.resetSettingsAction = QtGui.QAction(self.tr('Reset Settings'), self)
+        self.connect(self.resetSettingsAction, QtCore.SIGNAL('triggered()'), self.resetSettings)
+
+    def makeMenu(self):
+        self.fileMenu = QtGui.QMenu('&File', self)
+        self.fileMenu.addAction(self.quitAction)
+        self.fileMenu.addAction(self.resetSettingsAction)
+        self.viewMenu = QtGui.QMenu('&View', self)
+        self.viewMenu.addAction(self.glClientAction)
+        self.viewMenu.addAction(self.mooseTreeAction)
+        self.viewMenu.addAction(self.mooseClassesAction)
+        self.viewMenu.addAction(self.mooseShellAction)
+        
+        self.menuBar().addMenu(self.fileMenu)
+        self.menuBar().addMenu(self.viewMenu)
 
     def saveLayout(self):
         '''Save window layout'''
@@ -239,32 +245,76 @@ class MainWindow(QtGui.QMainWindow):
         self.settings.setValue(config.KEY_WINDOW_LAYOUT, QtCore.QVariant(layout_data))
 
     def loadLayout(self):
+        '''Load the window layout.'''
         geo_data = self.settings.value(config.KEY_WINDOW_GEOMETRY).toByteArray()
         layout_data = self.settings.value(config.KEY_WINDOW_LAYOUT).toByteArray()
         self.restoreGeometry(geo_data)
         self.restoreState(layout_data)
 
-    def toggleMooseTreeView(self, value):
-        if value:
-            self.mooseTreePanel.show()
+        # The checked state of the menu items do not remain stored
+        # properly. Looks like something dependent on the sequence of
+        # object creation. So after every restart the GLClient will be
+        # visible while TreePanel depends on what state ot was in when
+        # the application was closed last time. The following code
+        # fixes that issue.
+        if self.mooseTreePanel.isHidden():
+            self.mooseTreeAction.setChecked(False)
         else:
-            self.mooseTreePanel.hide()
+            self.mooseTreeAction.setChecked(True)
 
-    def createGLClientWidget(self, value):
-        '''When the menu item is checked, show a GLClient widget, hide
-        it otherwise'''
-        if not hasattr(self, 'glClientWidget'):
-            self.glClientWidget = GLClientGUI(self)
-            self.glClientDock = QtGui.QDockWidget('GL Client', self)
-            self.glClientDock.setWidget(self.glClientWidget)
-            self.glClientDock.setObjectName('glclient_dock')
-            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.glClientDock)
-        if value:#self.glClientAction.isChecked():
-            self.glClientDock.show()
+        if self.glClientDock.isHidden():
+            print 'Glclient is hidden'
+            self.glClientAction.setChecked(False)
         else:
-            self.glClientDock.hide()
-            print 'hiding glclient'
+            print 'Glclient is visible'
+            self.glClientAction.setChecked(True)
 
+        if self.mooseClassesPanel.isHidden():
+            self.mooseClassesAction.setChecked(False)
+        else:
+            self.mooseClassesAction.setChecked(True)
+
+        if self.commandLineDock.isHidden():
+            self.mooseShellAction.setChecked(False)
+        else:
+            self.mooseShellAction.setChecked(True)
+
+
+    def createMooseClassesPanel(self):
+        config.LOGGER.debug('createMooseClassesPanel - start')
+        self.mooseClassesPanel = QtGui.QDockWidget(self.tr('Classes'), self)
+        self.mooseClassesPanel.setObjectName(self.tr('MooseClassPanel'))
+	self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.mooseClassesPanel)
+	self.mooseClassesWidget = makeClassList(self.mooseClassesPanel)
+	self.mooseClassesPanel.setWidget(self.mooseClassesWidget)
+        config.LOGGER.debug('createMooseClassesPanel - end')
+
+    def createMooseTreePanel(self):
+        config.LOGGER.debug('createMooseTreePanel - start')
+	self.mooseTreePanel = QtGui.QDockWidget(self.tr('Element Tree'), self)
+        self.mooseTreePanel.setObjectName(self.tr('MooseClassPanel'))
+	self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.mooseTreePanel)
+	self.modelTreeWidget = makeModelTree(self.mooseTreePanel) 
+	self.mooseTreePanel.setWidget(self.modelTreeWidget)
+        config.LOGGER.debug('createMooseTreePanel - end')
+        
+    def createGLClientDock(self):
+        config.LOGGER.debug('createGLClientDock - start')
+        self.glClientWidget = GLClientGUI(self)
+        config.LOGGER.debug('createGLClientDock - 1')
+        
+        self.glClientDock = QtGui.QDockWidget('GL Client', self)
+        config.LOGGER.debug('createGLClientDock - 2')
+        self.glClientDock.setObjectName(self.tr('GLClient'))
+        config.LOGGER.debug('createGLClientDock - 3')
+        self.glClientDock.setWidget(self.glClientWidget)
+        config.LOGGER.debug('createGLClientDock - 4')
+
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.glClientDock)
+        config.LOGGER.debug('createGLClientDock - end')
+
+    def resetSettings(self):
+        self.settings.clear()
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)

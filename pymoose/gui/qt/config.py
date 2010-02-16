@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Feb 13 16:07:56 2010 (+0530)
 # Version: 
-# Last-Updated: Sun Feb 14 00:12:08 2010 (+0530)
+# Last-Updated: Mon Feb 15 01:08:07 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 91
+#     Update #: 100
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -54,6 +54,7 @@ GL_COLORMAP_REDHOT = 'redhot'
 GL_DEFAULT_COLORMAP = '../../gl/colormaps/rainbow2'
 GL_PORT = '9999'
 
+import logging
 from PyQt4.Qt import Qt
 from PyQt4 import QtGui, QtCore
 
@@ -76,6 +77,13 @@ def get_settings():
 	QtCore.QCoreApplication.setApplicationName('MOOSE')
     settings = QtCore.QSettings()
     return settings
+
+LOG_FILENAME = 'moose.log'
+LOG_LEVEL = logging.DEBUG
+logging.basicConfig(filename=LOG_FILENAME, level=LOG_LEVEL, filemode='w')
+LOGGER = logging.getLogger('moose')
+BENCHMARK_LOGGER = logging.getLogger('moose.benchmark')
+BENCHMARK_LOGGER.setLevel(logging.INFO)
 
 # 
 # config.py ends here
