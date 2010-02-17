@@ -52,6 +52,11 @@
 # 		Markup Language (SBML). This allows you to read and write chemical 
 # 		kinetic models in the simulator-indpendent SBML format.
 # 
+# USE_NEUROML (default value: 0) - compile with support for the NeuroML. This 
+#		allows you to read neuronal models in the NeuroML format.
+#		Look in external/neuroML_src/README for the extra steps needed 
+#		to add the libraries & headers.
+#
 # USE_READLINE (default value: 1) - use the readline library which provides
 # 		command history and better command line editing capabilities
 #
