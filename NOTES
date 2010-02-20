@@ -3194,3 +3194,13 @@ Shell::create bails out but doesn't crash. Need to tighten.
 Checkin as 1602.
 
 =============================================================================
+20 Feb 2010
+Not sure why previous compile worked, perhaps I didn't do a make clean.
+Anyway, I had to fix up a EpFunc and OpFunc to also use the new Conv syntax.
+And it still fails in Shell::create.
+
+Much struggling later, realized that the apparent bad passing of arguments
+through OpFunc into Shell::create was just a gdb bug/limitation. Valgrind
+was OK with it. The real problem was that new Cinfos were not being put
+into the cinfoMap.  With that fixed, it clears unit tests and valgrind.
+=============================================================================

@@ -21,7 +21,11 @@ Cinfo::Cinfo( const string& name,
 		: name_( name ), baseCinfo_( baseCinfo ), dinfo_( d ),
 			numConn_( 0 ), numFuncIndex_( 0 )
 {
+	if ( cinfoMap().find( name ) != cinfoMap().end() ) {
+		cout << "Warning: Duplicate Cinfo name " << name << endl;
+	}
 	init( finfoArray, nFinfos );
+	cinfoMap()[ name ] = this;
 }
 
 void Cinfo::init( Finfo** finfoArray, unsigned int nFinfos )
