@@ -57,9 +57,8 @@ template< class T, class A > class EpFunc1: public OpFunc
 		// copying data back and forth.
 		void op( Eref e, const char* buf ) const {
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
-			A val;
-			Conv< A >::buf2val( val, buf + sizeof( Qinfo ) );
-			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, val ) ;
+			Conv< A > arg1( buf + sizeof( Qinfo ) );
+			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1 ) ;
 		}
 
 	private:

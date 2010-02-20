@@ -64,9 +64,9 @@ template< class T, class A > class UpFunc1: public OpFunc
 		// copying data back and forth.
 		// buf is organized as Qinfo, args, optionally srcIndex.
 		void op( Eref e, const char* buf ) const {
-			A val;
-			Conv< A >::buf2val( val, buf + sizeof( Qinfo ) );
-			(reinterpret_cast< T* >( e.data1() )->*func_)( e.index(), val );
+			Conv< A > arg1( buf + sizeof( Qinfo ) );
+			(reinterpret_cast< T* >( e.data1() )->*func_)( 
+				e.index(), *arg1 );
 		}
 
 	private:
@@ -90,12 +90,11 @@ template< class T, class A1, class A2 > class UpFunc2: public OpFunc
 
 		void op( Eref e, const char* buf ) const {
 			buf += sizeof( Qinfo );
-			const char* buf2 = buf + sizeof( A1 );
+			Conv< A1 > arg1( buf );
+			buf += arg1.size();
+			Conv< A2 > arg2( buf );
 			(reinterpret_cast< T* >( e.data1() )->*func_)( 
-				e.index(),
-				*reinterpret_cast< const A1* >( buf ),
-				*reinterpret_cast< const A2* >( buf2 )
-			);
+				e.index(), *arg1, *arg2 );
 		}
 
 	private:
@@ -120,14 +119,13 @@ template< class T, class A1, class A2, class A3 > class UpFunc3:
 
 		void op( Eref e, const char* buf ) const {
 			buf += sizeof( Qinfo );
-			const char* buf2 = buf + sizeof( A1 );
-			const char* buf3 = buf2 + sizeof( A2 );
+			Conv< A1 > arg1( buf );
+			buf += arg1.size();
+			Conv< A2 > arg2( buf );
+			buf += arg2.size();
+			Conv< A3 > arg3( buf );
 			(reinterpret_cast< T* >( e.data1() )->*func_)( 
-				e.index(),
-				*reinterpret_cast< const A1* >( buf ),
-				*reinterpret_cast< const A2* >( buf2 ),
-				*reinterpret_cast< const A3* >( buf3 )
-			);
+				e.index(), *arg1, *arg2, *arg3 );
 		}
 
 	private:
@@ -169,11 +167,12 @@ template< class T, class A > class GetUpFunc: public OpFunc
 			buf += sizeof( Qinfo );
 		    FuncId retFunc = *reinterpret_cast< const FuncId* >( buf );
 			const A& ret = (( reinterpret_cast< T* >( e.data1() ) )->*func_)( e.index() );
+			Conv< A > arg( ret );
 
-			Qinfo retq( retFunc, e.index(), Conv< A >::size( ret ), 
+			Qinfo retq( retFunc, e.index(), arg.size(),
 				1, !q->isForward() );
 			char* temp = new char[ retq.size() ];
-			Conv<A>::val2buf( temp, ret );
+			arg.val2buf( temp );
 			Conn c;
 			// c.add( const_cast< Msg* >( e.element()->getMsg( q->mid() ) ) );
 			c.add( q->mid() ); 

@@ -3191,5 +3191,6 @@ Commented all the body of the iSet and iStrSet out.
 Got the whole thing to compile.
 Surprisingly, works all through and clears unit tests. The new test for
 Shell::create bails out but doesn't crash. Need to tighten.
+Checkin as 1602.
 
 =============================================================================
