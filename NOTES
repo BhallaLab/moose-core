@@ -3203,4 +3203,101 @@ Much struggling later, realized that the apparent bad passing of arguments
 through OpFunc into Shell::create was just a gdb bug/limitation. Valgrind
 was OK with it. The real problem was that new Cinfos were not being put
 into the cinfoMap.  With that fixed, it clears unit tests and valgrind.
+Checkin as 1609.
+Oops, there is a small new leak.
+
+That is probably because I don't delete the test Element.
+Working on delete. Now I run into the framework issues I had deferred
+- I need to have a parserCreate function that is blocking and runs on the
+	parser thread.
+- I need to pass the Id of the new Element to all nodes
+- I may need to set up arbitrary array dimensions.
+
+I could do this in one messaging call if I expand to 5 arguments, and put the
+dimensions of the array in a vector< unsigned int > argument. Or I could
+have a separate redimensioning call and do that separately.
+
+Struggling a little now with formalising SrcFinfos and corresponding slots.
+Idea is that slots should identify a communications channel. Each SrcFinfo
+has a funcIndex, which looks up the Element::targetFunc_ array for the
+funcId of the specified Msg.
+
+Items still to formalise:
+- Fix up SrcFinfos to use Conv.
+- How is a shared message set up?
+	- All the funcsIds get assigned. The size of the targetFunc_ array has
+		to handle all the possible SrcFinfos even if they are 
+		never used.
+- How do we handle the typechecking?
+	- Need a SharedFinfo much like before. It does all the individual
+		typechecks during the 'add' function, which will be moved
+		into Shell. See below.
+
+- How do we handle cases where the same 'send' deals with different
+		SharedFinfo message targets?
+	See below. The SrcFinfo provides a distinct FuncId for each Msg in
+	its Conn.
+- For that matter, even with non-sharedFinfo targets, what do we do when  a
+	single SrcFinfo has distinct FuncIds to call on different targets?
+	- Note that the SrcFinfo has a single funcIndex to look up the
+		targetFunc.
+	- Currently, the target Conn is part of the SrcFinfo.
+	: Put the extra info in a relay or hub if needed.
+	: Put it back in the Conn, where it was in the earlier MOOSE.
+	 	- Drawback: 
+			- Conn ceases to be only a wire, now it has func info.
+				It has dependencies on what goes over it.
+			- If I want to do a piggyback msg I need to add a hack,
+				such as making a new temporary msg.
+			- For each entry in the MsgId vector in Conn, I need
+				a whole vector of FuncIds, one for each
+				dest entry in the sharedFinfo target.
+			- Multiple SrcFinfos may point to the same Conn. So it
+				should be the SrcFinfos who manage funcs, not
+				Conns.
+		- Positive: Conn now carries all msg info, and can be examined
+			like old GENESIS.
+	: Do the extra ones on the fly. Then where do I store the dest funcids?
+	: Put an array of targets for each entry in targetFunc_.
+		- How do I figure out which entry to look up?
+	: Make duplicate dummy SrcFinfos. Nah. How would I call, manage, etc?
+	: Linked list of SrcFinfos. But SrcFinfos are readonly statics.
+	: in Eref::asend, pass funcIndex rather than targetFunc Id into Qinfo.
+		- This goes to Conn::asend
+		- This goes to Msg::addToQ
+		- This goes to Qinfo::addToQ, but at this point the identity
+			of the callerElement is lost.
+		: I think Conn::asend is the one place where I know that there
+			are multiple msg targets. I could successively look up
+			Element::targetFunc for each of these targets. The
+			Qinfo::FuncId could be set here.
+	: Turn Conns into a virtual base class, having one or more Msgs.
+		- This is only to make the scanning go a little faster, doesn't
+		help with the function lookup stuff.
+	: Turn targetFunc entries into virtual base classes, allowing 
+		iteration for successive Msgs. Again, only an optimization hack
+		and it will be fine to have the targetFunc_ entries just be
+		vectors of FuncIds.
+	SUMMARY: Conns unchanged. Element::targetFunc_ entries are now arrays
+		of FuncIds. Pass not FuncId but SrcFinfo::funcIndex into
+		send functions. Resolve FuncIds at Conn::asend, so when we scan
+		through each Msg, we lookup Element::targetfunc_ and
+		scan through target FuncIds.
+
+- Is the backward direction from one target of the one-to-all Msg a one-to-one?
+	Yes.
+
+- How do we specify which type of message we want?
+	- Should have an argument (string?) to specify type
+		- Set up a static init for each msg to fill name-type mapping.
+	Yes.
+	- 'add' function needs to be incorporated in the Shell
+	Yes.
+	- Needs to be taken out of Message.h and Message.cpp
+	Yes.
+	- Create Message classes
+
 =============================================================================
+22 Feb 2010
+Clearing the decks before the major rewrite for shared messages.
+Compiles, but doesn't clear unit tests.

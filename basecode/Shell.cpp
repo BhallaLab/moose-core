@@ -19,6 +19,45 @@
 
 ProcInfo Shell::p_;
 
+const ConnId requestShellOp = 0;
+const ConnId ackShellOp = 1;
+const ConnId requestGetSlot = 2;
+
+static SrcFinfo4< string, Id, Id, string  > *requestCreate =
+		new SrcFinfo4< string, Id, Id, string  >( "requestCreate",
+			"requestCreate( class, parent, newElm, name ): "
+			"creates a new Element on all nodes with the specified Id. "
+			"Initiates a callback to indicate completion of operation. "
+			"Goes to all nodes including self.", 
+			requestShellOp );
+
+static SrcFinfo0* ackCreate =
+		new SrcFinfo0( "ackCreate",
+			"ackCreate():"
+			"Acknowledges receipt and completion of Create command."
+			"Goes back only to master node.",
+			ackShellOp );
+
+static SrcFinfo1< Id  > *requestDelete =
+		new SrcFinfo1< Id >( "requestDelete",
+			"requestDelete( doomedElement ):"
+			"Deletes specified Element on all nodes."
+			"Initiates a callback to indicate completion of operation."
+			"Goes to all nodes including self.", 
+			requestShellOp );
+
+static SrcFinfo0* ackDelete =
+		new SrcFinfo0( "ackDelete",
+			"ackDelete():"
+			"Acknowledges receipt and completion of Delete command."
+			"Goes back only to master node.",
+			ackShellOp );
+
+static SrcFinfo1< FuncId > *requestGet = 
+		new SrcFinfo1< FuncId >( "requestGet",
+			"Function to request another Element for a value",
+			requestGetSlot );
+
 const Cinfo* Shell::initCinfo()
 {
 	/*
@@ -56,17 +95,23 @@ const Cinfo* Shell::initCinfo()
 			new OpFunc0< Shell >( & Shell::loadBalance ) ),
 
 		new DestFinfo( "create", 
-			"Creates Element. Args: class, parent, name, array_size",
-			new OpFunc4< Shell, string, Id, string, unsigned int >( & Shell::create ) ),
+			"create( class, parent, newElm, name",
+			new OpFunc4< Shell, string, Id, Id, string>( &Shell::create )),
+		new DestFinfo( "delete", 
+			"Destroys Element, all its messages, and all its children. Args: Id",
+			new OpFunc1< Shell, Id >( & Shell::destroy ) ),
 
 		new DestFinfo( "addmsg", 
 			"Adds a Msg between specified Elements. Args: Src, Dest, srcField, destField",
 			new OpFunc4< Shell, Id, Id, string, string >( & Shell::addmsg ) ),
 
 ////////////////////////////////////////////////////////////////
-		new SrcFinfo1< FuncId >( "requestGet",
-			"Function to request another Element for a value", 0 ),
-			
+
+		requestCreate,
+		ackCreate,
+		requestDelete,
+		ackDelete,
+		requestGet,
 	};
 
 	static Cinfo shellCinfo (
@@ -137,12 +182,33 @@ const char* Shell::getBuf() const
 	return 0;
 }
 
-void Shell::create( string type, Id parent, string name, unsigned int num)
+/**
+ * This is the version used by the parser. Acts as a blocking,
+ * serial-like interface to a potentially multithread, multinode call.
+ * Returns the new Id index.
+ */
+Id Shell::doCreate( string type, Id parent, string name, vector< unsigned int > dimensions )
 {
-	innerCreate( type, parent, name, num );
+	return Id();
 }
 
+/**
+ * This function handles the message request to create an Element.
+ * This request specifies the Id of the new Element and is handled on
+ * all nodes.
+ *
+ * In due course we also have to set up the node decomposition of the
+ * Element, but for now the num indicates the total # of array entries.
+ * This gets a bit complicated if the Element is a multidim array.
+ */
+void Shell::create( string type, Id parent, Id newElm, string name )
+{
+	// innerCreate( type, parent, name, num );
+}
 
+/**
+ * This function actually creates the object
+ */
 Id Shell::innerCreate( string type, Id parent, string name, unsigned int num)
 {
 	const Cinfo* c = Cinfo::find( type );
@@ -162,6 +228,11 @@ Id Shell::innerCreate( string type, Id parent, string name, unsigned int num)
 		warning( ss.str() );
 	}
 	return Id();
+}
+
+void Shell::destroy( Id eid)
+{
+	eid.destroy();
 }
 
 

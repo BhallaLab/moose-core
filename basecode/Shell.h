@@ -21,6 +21,12 @@ class Shell: public Data
 		bool getQuit() const;
 
 		///////////////////////////////////////////////////////////
+		// Parser functions
+		///////////////////////////////////////////////////////////
+		Id doCreate( string type, Id parent, string name, 
+			vector< unsigned int > dimensions );
+
+		///////////////////////////////////////////////////////////
 		// DestFinfo functions
 		///////////////////////////////////////////////////////////
 		void handleGet( Eref e, const Qinfo* q, const char* arg );
@@ -31,7 +37,8 @@ class Shell: public Data
 		 */
 		void loadBalance();
 
-		void create( string type, Id parent, string name, unsigned int num);
+		void create( string type, Id parent, Id newElm, string name);
+		void destroy( Id elm);
 		Id innerCreate( string type, Id parent, string name, unsigned int num);
 		void addmsg( Id src, Id dest, string srcfield, string destfield );
 

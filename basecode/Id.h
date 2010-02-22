@@ -48,7 +48,7 @@ class Id
 
 		static Id create( Element* e );
 
-		Id destroy();
+		void destroy();
     
 		//////////////////////////////////////////////////////////////
 		//	Id info

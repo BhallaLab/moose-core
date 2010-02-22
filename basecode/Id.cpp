@@ -92,6 +92,15 @@ Id Id::create( Element* e )
 	return Id( elements().size() - 1, 0 );
 }
 
+void Id::destroy()
+{
+	if ( elements()[ id_ ] ) {
+		delete elements()[ id_ ];
+		elements()[ id_ ] = 0;
+		// Put id_ on 'available' list
+	}
+}
+
 //////////////////////////////////////////////////////////////
 //	Id utility
 //////////////////////////////////////////////////////////////

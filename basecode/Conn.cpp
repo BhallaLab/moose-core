@@ -35,6 +35,37 @@ void Conn::asend(
 		Msg::getMsg( *i )->addToQ( e, q, p, arg );
 }
 
+/**
+ * This version uses a different Fid for each Msg. The original funcId in
+ * the Qinfo is actually a funcIndex, and is used to look them up.
+void Conn::asend( 
+	const Element* e, Qinfo& q, const ProcInfo* p, const char* arg ) const
+{
+	unsigned int funcIndex_ = q.fid();
+	unsigned int j = 0;
+	for( vector< MsgId >::const_iterator i = m_.begin(); i != m_.end(); ++i)
+	{
+		q.setFid( e->getTargetFunc( funcIndex, j++ ) );
+		Msg::getMsg( *i )->addToQ( e, q, p, arg );
+	}
+}
+
+void Conn::asend( 
+	const Element* e, Qinfo& q, const ProcInfo* p, const char* arg ) const
+{
+	unsigned int funcIndex_ = q.fid();
+	assert( e->getTargetFuncSize() == m_.size() );
+
+	vector< FuncId >::iterator j = e->getTargetFuncIter( funcIndex );
+	unsigned int j = 0;
+	for( vector< MsgId >::const_iterator i = m_.begin(); i != m_.end(); ++i)
+	{
+		q.setFid( *j++ );
+		Msg::getMsg( *i )->addToQ( e, q, p, arg );
+	}
+}
+ */
+
 // Checks for the correct Msg, and expands the arg to append the
 // target index.
 void Conn::tsend( 
