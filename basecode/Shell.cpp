@@ -19,9 +19,9 @@
 
 ProcInfo Shell::p_;
 
-const ConnId requestShellOp = 0;
+const ConnId requestShellOp = 2;
 const ConnId ackShellOp = 1;
-const ConnId requestGetSlot = 2;
+const ConnId requestGetSlot = 0;
 
 static SrcFinfo4< string, Id, Id, string  > *requestCreate =
 		new SrcFinfo4< string, Id, Id, string  >( "requestCreate",
@@ -107,11 +107,11 @@ const Cinfo* Shell::initCinfo()
 
 ////////////////////////////////////////////////////////////////
 
+		requestGet,
 		requestCreate,
 		ackCreate,
 		requestDelete,
 		ackDelete,
-		requestGet,
 	};
 
 	static Cinfo shellCinfo (

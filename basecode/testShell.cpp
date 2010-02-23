@@ -14,7 +14,7 @@ void testCreate()
 {
 	Eref ser(Id()(), 0 );
 	// Need to get the id back so that I can delete it later.
-	bool ret = SetGet4< string, Id, string, unsigned int >::set( ser, "create", "Neutral", Id(), "testCreate", 27 );
+	bool ret = SetGet4< string, Id, Id, string >::set( ser, "create", "Neutral", Id(), Id(2, 0) , "testCreate" );
 	assert( ret );
 	cout << "." << flush;
 }

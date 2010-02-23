@@ -3301,3 +3301,11 @@ Items still to formalise:
 22 Feb 2010
 Clearing the decks before the major rewrite for shared messages.
 Compiles, but doesn't clear unit tests.
+Checked in as 1610.
+=============================================================================
+23 Feb 2010
+Fixing up the unit tests: turns out that there were issues with testGet
+because of implicit assumptions both on the slot used for gets
+(require requestGetSlot = 0) and also on the sequence of initialization
+of SrcFinfos (require requestGet to be first, so that it has a ConnId of 0).
+A bit more cleanup and it now clears unit tests.
