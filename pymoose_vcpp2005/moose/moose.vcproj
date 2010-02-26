@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="9.00"
 	Name="moose"
 	ProjectGUID="{A06CC93D-27A9-4FBF-A303-94391C5AF351}"
 	RootNamespace="moose"
 	Keyword="Win32Proj"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -66,6 +67,8 @@
 				AdditionalLibraryDirectories="C:\Python25\libs;&quot;C:\Program Files\GnuWin32\lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -87,9 +90,6 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -103,12 +103,12 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="E:\Users\Mus\swigwin-1.3.39\swig  -modern -python -c++ -o $(ProjectDir)\$(InputName)_wrap.cxx  $(ProjectDir)\..\..\pymoose\moose.i"
+				CommandLine="E:\Users\Mus\swigwin-1.3.39\swig  -modern -python -c++ -o $(ProjectDir)\$(InputName)_wrap.cxx  $(ProjectDir)\..\..\pymoose\moose.i "
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
 				CommandLine=""
-				Outputs="$(ProjectDir)\$(InputName)_wrap.cxx;..\..\pymoose\moose.py"
+				Outputs="$(ProjectDir)\$(InputName)_wrap.cxx;..\..\pymoose\moose.py "
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -123,9 +123,10 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="..\..\device;..\..\scheduling;..\..\maindir;..\..\hsolve;..\..\utility;..\..\kinetics;..\..\ksolve;..\..\genesis_parser;..\..\shell;..\..\randnum;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..\pymoose;..\..\sbml_IO;..\..;&quot;C:\Program Files\GnuWin32\include&quot;;&quot;D:\sbml\libsbml-3.3.2\include&quot;;&quot;D:\DOWNLOADS\gsl-1.11-windows-binaries\gsl\include&quot;;&quot;$(PYTHON_INCLUDE)&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;USE_GENESIS_PARSER;USE_GSL;USE_SBML;snprintf=_snprintf_s;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0;PYMOOSE"
+				AdditionalIncludeDirectories="..\..\gl\src;..\..\neuroML_IO;..\..\device;..\..\scheduling;..\..\maindir;..\..\hsolve;..\..\utility;..\..\kinetics;..\..\ksolve;..\..\genesis_parser;..\..\shell;..\..\randnum;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..\pymoose;..\..\sbml_IO;..\..;&quot;$(PYTHON_INCLUDE)&quot;;..\..\external\include\GnuWin32\include;..\..\external\include\gsl\include;&quot;..\..\external\include\libsbml-3.3.2\include&quot;;&quot;..\..\external\include\libxml2-2.7.6.win32\include&quot;;&quot;..\..\external\include\iconv-1.9.2.win32\include&quot;;&quot;..\..\external\include\OpenSceneGraph-2.8.2\include&quot;;..\..\external\include\boost_1_40"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;USE_GENESIS_PARSER;USE_GSL;USE_SBML;USE_GL;USE_NEUROML;snprintf=_snprintf_s;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0;PYMOOSE"
 				MinimalRebuild="false"
+				BasicRuntimeChecks="0"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -144,15 +145,21 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="gsl.lib cblas.lib zlib.lib bzip2.lib libsbml.lib libexpat.lib $(PYTHON_LIB)"
+				UseLibraryDependencyInputs="true"
+				AdditionalOptions="/VERBOSE"
+				AdditionalDependencies="gsl.lib cblas.lib zlib.lib bzip2.lib libsbml.lib iconv.lib libxml2.lib libNeuroML.lib ws2_32.lib Vfw32.lib $(PYTHON_LIB)"
 				OutputFile="_moose.pyd"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;D:\sbml\libsbml-3.3.2\win32\bin&quot;;&quot;C:\Program Files\GnuWin32\lib&quot;;&quot;D:\DOWNLOADS\gsl-1.11-windows-binaries\gsl\lib&quot;"
+				AdditionalLibraryDirectories="&quot;..\..\external\lib\libxml2-2.7.6.win32\lib&quot;;&quot;..\..\external\lib\iconv-1.9.2.win32\lib&quot;;..\..\external\lib\GnuWin32\lib;..\..\external\lib\MPICH2\lib;&quot;..\..\external\lib\libsbml-3.3.2\bin&quot;;..\..\external\lib\gsl\lib;..\..\external\lib;&quot;..\..\external\lib\OpenSceneGraph-2.8.2\lib&quot;;..\..\external\lib\boost_1_40\lib"
+				IgnoreAllDefaultLibraries="false"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				LinkTimeCodeGeneration="0"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary=".\Release/_moose.lib"
 				TargetMachine="1"
 			/>
@@ -173,9 +180,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -1657,6 +1661,14 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\pyGLcell.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\pyGLview.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\PyMooseBase.cpp"
 					>
 				</File>
@@ -2613,6 +2625,42 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="gl"
+				>
+				<Filter
+					Name="src"
+					>
+					<File
+						RelativePath="..\..\gl\src\GLcell.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\gl\src\GLshape.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\gl\src\GLview.cpp"
+						>
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="neuroML_IO"
+				>
+				<File
+					RelativePath="..\..\neuroML_IO\Cable.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\neuroML_IO\NeuromlReader.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\neuroML_IO\NeuromlWriter.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -3275,6 +3323,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\pymoose\GLcell.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\pymoose\GLview.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\pymoose\GssaStoich.h"
 					>
 				</File>
@@ -3674,6 +3730,66 @@
 					RelativePath="..\..\signeur\SigNeur.h"
 					>
 				</File>
+			</Filter>
+			<Filter
+				Name="neuroML_IO"
+				>
+				<File
+					RelativePath="..\..\neuroML_IO\Cable.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\neuroML_IO\NeuromlReader.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\neuroML_IO\NeuromlWriter.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="gl"
+				>
+				<Filter
+					Name="src"
+					>
+					<File
+						RelativePath="..\..\gl\src\AckPickData.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\gl\src\Constants.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\gl\src\GLcell.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\gl\src\GLcellProcData.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\gl\src\GLcellResetData.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\gl\src\GLshape.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\gl\src\GLshapeData.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\gl\src\GLview.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\gl\src\GLviewResetData.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter

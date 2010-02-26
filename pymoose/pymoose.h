@@ -44,6 +44,8 @@
 #include "CaConc.h"
 
 #include "Tick.h"
+#include "GLcell.h"
+#include "GLview.h"
 namespace pymoose{
 extern PyMooseContext* context;
 #if 0
