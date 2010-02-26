@@ -941,7 +941,7 @@ void GLcell::transmit( T& data, MsgType messageType)
 	}
 
 	std::ostringstream archiveStream;
-
+	
 	// starting new scope so that the archive's stream's destructor is called after the archive's
 	{
 		boost::archive::text_oarchive archive( archiveStream );
