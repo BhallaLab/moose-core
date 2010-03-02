@@ -208,7 +208,6 @@ class MainWindow(QtGui.QMainWindow):
         if not cell.className == 'Cell':
             QtGui.QMessageBox.information(self, self.tr('Incorrect type for GLCell'), self.tr('GLCell is for visualizing a cell. Please select one in the Tree view. Currently selected item is of ' + cell.className + ' class. Hover mouse over an item to see its class.'))
             return
-        self.
 
     def createActions(self):
         self.glClientAction = self.glClientDock.toggleViewAction()
