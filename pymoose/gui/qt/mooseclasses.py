@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Sun Apr 12 14:05:01 2009 (+0530)
 # Version: 
-# Last-Updated: Tue Jan 26 18:39:20 2010 (+0530)
-#           By: subhasis ray
-#     Update #: 176
+# Last-Updated: Sat Feb 27 18:11:16 2010 (+0530)
+#           By: Subhasis Ray
+#     Update #: 179
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -67,7 +67,7 @@ moose_class = {'Neutral':'base',
                  'IntFire':'biophysics',
                  'IzhikevichNrn':'biophysics',
                  'Mg_block':'biophysics',
-                 'MMPump':'biophysics',
+                 # 'MMPump':'biophysics',
                  'Nernst':'biophysics',
                  'RandomSpike':'biophysics',
                  'script_out':'biophysics',
@@ -89,7 +89,7 @@ moose_class = {'Neutral':'base',
                  'PulseGen':'device',
                  'RC':'device',
                  
-                 'KineticManager':'kinetics',
+                 # 'KineticManager':'kinetics',
                  'CylPanel':'kinetics',
                  'DiskPanel':'kinetics',
                  'Enzyme':'kinetics',
@@ -103,7 +103,7 @@ moose_class = {'Neutral':'base',
                  'Particle':'kinetics',
                  'Reaction':'kinetics',
                  'RectPanel':'kinetics',
-                 'SmoldynHub':'kinetics',
+                 # 'SmoldynHub':'kinetics',
                  'SpherePanel':'kinetics',
                  'Surface':'kinetics',
                  'TriPanel':'kinetics'}
