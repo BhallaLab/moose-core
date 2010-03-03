@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Feb 16 12:09:11 2010 (+0530)
+# Last-Updated: Wed Mar  3 12:14:39 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 905
+#     Update #: 935
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -198,6 +198,8 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.objFieldEditModel, 
                      QtCore.SIGNAL('objectNameChanged(const QString&)'),
                      item.updateSlot)
+        self.objFieldEditor.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.connect(self.objFieldEditor, QtCore.SIGNAL('customContextMenuRequested ( const QPoint&)'), self.popupFieldMenu)
         self.objFieldEditPanel.setWidget(self.objFieldEditor)
 	self.objFieldEditPanel.show()
 
@@ -311,6 +313,28 @@ class MainWindow(QtGui.QMainWindow):
 
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.glClientDock)
         config.LOGGER.debug('createGLClientDock - end')
+
+    def popupFieldMenu(self, clickpoint):
+        print 'PopupFieldMenu'
+        index = self.objFieldEditor.indexAt(clickpoint)
+        data = self.objFieldEditModel.data(self.objFieldEditModel.createIndex(index.row(), 0))
+        print data
+        menu = QtGui.QMenu(self.objFieldEditor)
+        self.actionPlotField = menu.addAction('Plot this field')
+        self.connect(self.actionPlotField, QtCore.SIGNAL('triggered()'), self.plotThisFieldSlot)
+        menu.popup(self.objFieldEditor.mapToGlobal(clickpoint))
+
+    def plotThisFieldSlot(self):
+        config.LOGGER.debug('plotThisFieldSlot - start')
+        config.LOGGER.warning('Not ported this functionality yet.')
+        moose_object = self.modelTreeWidget.currentItem().getMooseObject()
+        row = self.objFieldEditor.currentIndex().row()
+        index = self.objFieldEditModel.createIndex(row, 0)
+        print index.row(), index.column()
+        field_name = self.objFieldEditModel.data(index)        
+        # table = self.mooseHandler.createTableForMolecule(moose_object, field_name)
+        # print table.path
+        config.LOGGER.debug('plotThisFieldSlot - end')
 
     def resetSettings(self):
         self.settings.clear()

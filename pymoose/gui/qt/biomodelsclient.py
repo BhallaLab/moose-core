@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Mar  2 07:57:39 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Mar  2 14:19:09 2010 (+0530)
+# Last-Updated: Wed Mar  3 11:21:27 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 174
+#     Update #: 194
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -106,6 +106,13 @@ class BioModelsClientWidget(QtGui.QWidget):
     def setupActions(self):
         self.connect(self.queryLineEdit, QtCore.SIGNAL('returnPressed()'), self.runQuery)
 
+    def download(self):
+        """Download the selected model"""
+        selectedRow = self.resultsPanel.currentRow()
+        modelId = self.resultsPanel.item(selectedRow, 0).text()
+        modelSBML = self.client.service.getModelSBMLbyId(modelId)
+        print modelSBML
+
     def runQuery(self):
         print 'Running query'
         index = self.queryModelCombo.currentIndex()
@@ -120,15 +127,16 @@ class BioModelsClientWidget(QtGui.QWidget):
 
         row = 0
         column = 0
+        self.resultsPanel.setColumnCount(2)
+        self.resultsPanel.setHorizontalHeaderItem(column, QtGui.QTableWidgetItem('Id'))
+        self.resultsPanel.setHorizontalHeaderItem(column + 1, QtGui.QTableWidgetItem('Name'))
         if type(result) is type(''):
-            self.resultsPanel.setColumnCount(1)
             self.resultsPanel.insertRow(row)
-            self.resultsPanel.setItem(row, column, QtGui.QTableWidgetItem(result))
-            self.resultsPanel.setHorizontalHeaderItem(column, QtGui.QTableWidgetItem('Name'))
+            item = QtGui.QTableWidgetItem(argument)
+            self.resultsPanel.setItem(row, column, item)
+            item = QtGui.QTableWidgetItem(result)
+            self.resultsPanel.setItem(row, column + 1, item)
         elif type(result) is type([]):
-            self.resultsPanel.setColumnCount(2)
-            self.resultsPanel.setHorizontalHeaderItem(column, QtGui.QTableWidgetItem('Id'))
-            self.resultsPanel.setHorizontalHeaderItem(column + 1, QtGui.QTableWidgetItem('Name'))
             for value in result:
                 self.resultsPanel.insertRow(row)
                 item = QtGui.QTableWidgetItem(self.tr(value))
