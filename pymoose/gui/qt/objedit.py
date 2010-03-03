@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Apr 16 14:22:29 2009 (+0530)
 # Version: 
-# Last-Updated: Tue Feb  2 11:23:03 2010 (+0530)
+# Last-Updated: Wed Mar  3 12:27:24 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 166
+#     Update #: 177
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -45,11 +45,11 @@
 
 # Code:
 
+import types
 import sys
 sys.path.append('/home/subha/src/moose/pymoose')
 import moose
-import types
-
+import config
 from PyQt4 import QtGui
 from PyQt4.Qt import Qt
 from PyQt4 import QtCore
@@ -60,7 +60,7 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
     excluded_fields = set(extra_fields + sys_fields)
     def __init__(self, mooseObject, parent=None):
         QtCore.QAbstractTableModel.__init__(self)
-        self._header = ("Field", "Value", "Plot")
+        self._header = ("Field", "Value", "Plot It")
         self.mooseObject = mooseObject
         classObj = eval('moose.' + self.mooseObject.className)
         fieldList = self.mooseObject.getFieldList(moose.VALUE)
@@ -75,8 +75,8 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
                     prop = eval('moose.' + self.mooseObject.__class__.__name__ + '.' + fieldName)
                     if (type(prop) is property) and prop.fset:
                         flag = flag | Qt.ItemIsEditable
-                except (SyntaxError, AttributeError):
-                    pass
+                except (SyntaxError, AttributeError) as err:
+                    config.LOGGER.debug('ObjectFieldsModel.__init__: %s' % (str(err)))
 
                 self.field_flags[fieldName] = [flag, False]
 
@@ -95,7 +95,7 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
         value = str(value.toString())
         
         field = self.field[index.row()]
-        if index.column() == 1:
+        if index.column() == 1: # This is value of the field
             self.mooseObject.setField(field, value)
             if field == 'name':
                 self.emit(QtCore.SIGNAL('objectNameChanged(const QString&)'), QtCore.QString(field)) 
