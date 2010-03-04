@@ -3309,3 +3309,101 @@ because of implicit assumptions both on the slot used for gets
 (require requestGetSlot = 0) and also on the sequence of initialization
 of SrcFinfos (require requestGet to be first, so that it has a ConnId of 0).
 A bit more cleanup and it now clears unit tests.
+Checked in as 1611.
+
+=============================================================================
+24 Feb 2010
+Implemented the array of FuncIds for each funcIndex. This makes it messier
+to delete messages. We need to:
+- Scan through all Conns to find which holds doomed Msg. Get Msg index.
+- Scan through all SrcFinfos that talk to the affected Conn.
+	- erase/remove the FuncId at the affected index.
+
+=============================================================================
+25 Feb 2010
+Thinking about this. We have a problem with funcIds, because the ability to
+completely recreate a message is now compromised. In other words, the mapping
+from message creation call to the simulation is now dispersed among
+Conn, Msg, SrcFinfo, and the vector< vector< FuncId > > Element::targetFunc_
+Points:
+- Every SrcFinfo in a SharedFinfo points to the same Conn. Can we create the
+	Msg with a subset of the SharedFinfos, even one SrcFinfo?
+- Is every Conn accessed by exactly one SharedFinfo at most?
+- A complex regionConnect call might decompose into multiple msgs on a Conn,
+	but not all of them. For example, we have a projection to all subtypes
+	of mitral cell from ORN, but another projection to all subtypes of PG
+	cell. This would be fiendish to reconstruct from the outcome. If we
+	do store setup info on the Conn, how do we store multiple such 
+	regionConnect calls?
+- If we have a separate entity storing the original messaging call,
+	how do we relate back and forth?
+- For economy, we may not want there to be permanent ConnIds or FuncIds
+- For speed we do want to have permanent Conn and FuncIds.
+
+All ugly. Deleting Msgs has also become ugly. I want to get back to single
+funcId.
+
+Try this:
+- Eliminate Conn, Element::c_, Element::targetFunc_
+- class SrcFinfo { unsigned short index };
+	- If index < msgInfo.size() follow the msg.
+- class MsgInfo { MsgId mid_; FuncId fid_; ushort next_ };
+	- The next_ field points to a separate vector than the original msgInfo
+		Or even pointers.
+		Or even make MsgInfo a vector and eliminate next_
+- SrcFinfo::send combines ops of Eref::asend and conn::asend, and
+	iterates directly through the series of MsgInfos to put stuff in Qs.
+- To delete a Msg we now need to just find the Msg on the MsgInfos.
+- We may end up having multiple MsgInfos point to the same MsgId. Need to
+	do reference counting so we kill it only when all ptrs go.
+	Actually it is usually the other way around: msgs themselves are deleted
+- MsgSpec lives in a separate indexed vector.
+	- Each MsgSpec refers to its subordinate Msgs and SrcFinfo.
+	- Each Msg (MsgInfo?) refers to a given MsgSpec ?
+- The index off SrcFinfo also points to an entry in MsgSpec?
+	- No, since we may have multiple MsgSpecs using the same SrcFinfo.
+- Deletes are done at the MsgSpec level, not the low level of messaging.
+- Multiple MsgSpecs may refer to the same Msg, for example, in a SparseMsg.
+- Multiple Msgs may be referred to by the same MsgSpecs.
+- SrcFinfo[0] is the parent->child msg
+- SrcFinfo[1] is the Element->msgspec msg
+
+=============================================================================
+28 Feb
+Suppose we have a SharedMsg with bidirectional func calls. Then both sides
+have individual SrcFinfos indexing into their respective msgBinding vectors.
+Nothing special needs to be done for the arriving msgs.
+
+After much fiddling with the call sequence, I am now working on compilation.
+Lots of templates have to be redone. I have eliminated a lot of
+intermediate functions and the system just goes from SrcFinfo::send to
+Element::asend to q::addToQ.
+In SrcFinfo::send calls there is some work to be done to optimize and to 
+perhaps use Conv rather than direct conversions. But there is an extra
+data copy involved with the current form.
+Need to implement BackSrcFinfo1 etc.
+
+Now working on the SrcFinfo1::sendTo. Issue is that there are multiple
+possible target Elements or MsgIds.
+=============================================================================
+2,3 Mar 2010
+SendTo is used when sending data back to src, and when sending data to a 
+completely specified target. In both cases the target elm is known.
+
+Cleaned up Id to just have an index to the elm.
+
+SendTo is currently a  problem. In the general case it has to provide the target
+elm. So it now requires pretty much everything that the message creation 
+itself requires, It may as well do what Set does: create a
+temporary message and send data along it. Differences:
+- If message already exists then verification not needed.
+- May need to scan through target Msgs on msgBinding_ vec to find one that 
+	matches. Usually only a few.
+
+Cost of making new message probably bigger, but anyway, this is awkward.
+
+Putting in a new Qinfo::addSendToToQ to put the data in the right place 
+=============================================================================
+4 Mar 2010
+Now grinding through the compilation and cleanup process. Since so much
+has been done, time to do a checkin.

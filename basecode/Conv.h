@@ -48,8 +48,12 @@ template< class T > class Conv
 			return *reinterpret_cast< const T* >( val_ );
 		}
 
-		// Will need to specialize for variable size and pointer-containing
-		// D.
+		/**
+		 * Converts data contents into char* buf. Buf must be allocated
+		 * ahead of time.
+		 * Needs to be specialized for variable size and pointer-containing
+		 * types T.
+		 */
 		unsigned int val2buf( char* buf ) {
 			*reinterpret_cast< T* >( buf ) = *reinterpret_cast< const T* >( val_);
 			// Or I could do a memcpy. Worth trying to see speed implication

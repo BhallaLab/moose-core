@@ -170,7 +170,11 @@ class Element
 		void ssend1( SyncId slot, unsigned int i, double v );
 		void ssend2( SyncId slot, unsigned int i, double v1, double v2 );
 
-		const Conn* conn( ConnId c ) const;
+		void asend( Qinfo& q, BindIndex bindIndex, 
+			const ProcInfo *p, const char* arg );
+
+		void tsend( Qinfo& q, BindIndex bindIndex, 
+			const ProcInfo *p, const char* arg, const FullId& target );
 
 		/** 
 		 * Pushes the Msg mid onto the list.
@@ -186,23 +190,42 @@ class Element
 
 		/**
 		 * Puts the specified Msg on the specified Connection.
-		 */
 		void addMsgToConn( MsgId m, ConnId cid );
+		 */
 		
 		/**
 		 * Clears out all Msgs on specified conn. Used in Shell::set
-		 */
 		void clearConn( ConnId cid );
+		 */
+
+		/**
+		 * Pushes back the specified Msg and Func pair into the properly
+		 * indexed place on the msgBinding_ vector.
+		 */
+		void addMsgAndFunc( MsgId mid, FuncId fid, BindIndex bindIndex );
 
 		/**
 		 * Puts the specified TargetFunc into the properly indexed place
-		 */
 		void addTargetFunc( FuncId fid, unsigned int funcIndex );
+		 */
+
+		/**
+		 * Returns the begin iterator for the FuncId vector at the specified
+		 * funcIndex.
+		 */
+		// vector< FuncId >::const_iterator getMsgBindingBegin( unsigned short bindIndex ) const;
+
+		/**
+		 * Returns the # of funcIds at the specified funcIndex
+		 */
+		unsigned int getTargetFuncSize( unsigned int funcIndex ) const;
+
+
 
 		/**
 		 * Returns the target FuncId from funcIndex
 		 */
-		FuncId getTargetFunc( unsigned int funcIndex ) const;
+		// FuncId getTargetFunc( unsigned int funcIndex ) const;
 
 		const Cinfo* cinfo() const;
 
@@ -271,6 +294,7 @@ class Element
 
 		/**
 		 * Message vector. This is the low-level messaging information.
+		 * Contains info about incoming msgs? But this lacks binding info.
 		 */
 		vector< MsgId > m_;
 
@@ -278,12 +302,29 @@ class Element
 		 * Connection vector. Connections are mid-level messaging info.
 		 * They group together messages to be called by a given 'send'
 		 * command.
+		 * Each SrcFinfo has a predefined index, ConnId, into the 
+		 * Connection vector. Many SrcFinfos may share the same Conn.
 		 */
-		vector< Conn > c_;
+		// vector< Conn > c_;
 
 		/**
-		 * Function Ids attached to outgoing Messages. Multiple funcs
-		 * may be on the same Conn, if it is a shared message.
+		 * Function Ids attached to outgoing Messages. Each SrcFinfo
+		 * has a predefined funcIndex that looks into the targetFunc_
+		 * vector. As we iterate through the target MsgIds on the 
+		 * Conn vector, we also step through the FuncIds.
+		 * Each SrcFinfo has a unique funcIndex.
 		 */
-		vector< FuncId > targetFunc_;
+		// vector< vector< FuncId > > targetFunc_;
+
+		/**
+		 * Binds a message to its function. Indexed from srcMsg.
+		 */
+		vector< vector < MsgFuncBinding > > msgBinding_;
+
+		/**
+		 * High level messaging info, containing a declarative record of the
+		 * specification of the message including connectivity and
+		 * functionality. These are indices into a global vector.
+		 */
+//		vector< MsgSpecId >
 };

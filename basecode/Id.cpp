@@ -15,7 +15,8 @@
 //////////////////////////////////////////////////////////////
 
 Id::Id()
-	: id_( 0 ), index_( 0 )
+	// : id_( 0 ), index_( 0 )
+	: id_( 0 )
 {;}
 
 Id::Id( const string& path, const string& separator )
@@ -76,14 +77,17 @@ Element* Id::operator()() const
 	return elements()[ id_ ];
 }
 
+/*
 unsigned int Id::index() const 
 {
 	return index_;
 }
+*/
 
 Eref Id::eref() const 
 {
-	return Eref( elements()[ id_ ], index_ );
+	return Eref( elements()[ id_ ], 0 );
+	// return Eref( elements()[ id_ ], index_ );
 }
 
 Id Id::create( Element* e )
@@ -107,10 +111,13 @@ void Id::destroy()
 
 ostream& operator <<( ostream& s, const Id& i )
 {
+	s << i.id_;
+	/*
 	if ( i.index_ == 0 )
 		s << i.id_;
 	else 
 		s << i.id_ << "[" << i.index_ << "]";
+	*/
 	return s;
 }
 
@@ -120,8 +127,10 @@ istream& operator >>( istream& s, Id& i )
 	return s;
 }
 
+/*
 Id::Id( unsigned int id, unsigned int index )
 	: id_( id ), index_( index )
 {
 	;
 }
+*/

@@ -16,19 +16,32 @@ vector< SimGroup > Qinfo::g_;
 
 Qinfo::Qinfo( FuncId f, DataId srcIndex, 
 	unsigned int size, bool useSendTo, bool isForward )
-	:	m_( 0 ), 
+	:	
 		useSendTo_( useSendTo ), 
 		isForward_( isForward ), 
+		m_( 0 ), 
 		f_( f ), 
 		srcIndex_( srcIndex ),
 		size_( size )
 {;}
 
 Qinfo::Qinfo( FuncId f, DataId srcIndex, unsigned int size )
-	:	m_( 0 ), 
+	:	
 		useSendTo_( 0 ), 
 		isForward_( 1 ), 
+		m_( 0 ), 
 		f_( f ), 
+		srcIndex_( srcIndex ),
+		size_( size )
+{;}
+
+Qinfo::Qinfo( bool useSendTo, bool isForward,
+	DataId srcIndex, unsigned int size )
+	:	
+		useSendTo_( useSendTo ), 
+		isForward_( isForward ), 
+		m_( 0 ), 
+		f_( 0 ), 
 		srcIndex_( srcIndex ),
 		size_( size )
 {;}
@@ -41,11 +54,6 @@ Qinfo::Qinfo()
 		srcIndex_( 0 ),
 		size_( 0 )
 {;}
-
-void Qinfo::expandSize()
-{
-	size_ += sizeof( DataId );
-}
 
 /**
  * Static func: Sets up a SimGroup to keep track of thread and node
@@ -203,6 +211,7 @@ void Qinfo::reportQ()
 // Non-static: copies itself onto queue.
 // qid specifies which queue to use. Must be an outQ.
 // mid assigns the msgId.
+/*
 void Qinfo::addToQ( Qid qId, MsgId mid, bool isForward, const char* arg )
 {
 	assert( qId < outQ_.size() );
@@ -216,4 +225,42 @@ void Qinfo::addToQ( Qid qId, MsgId mid, bool isForward, const char* arg )
 	memcpy( pos, this, sizeof( Qinfo ) );
 	// ( reinterpret_cast< Qinfo* >( pos ) )->setForward( isForward );
 	memcpy( pos + sizeof( Qinfo ), arg, size_ );
+}
+*/
+
+void Qinfo::addToQ( Qid qId, MsgFuncBinding b, const char* arg )
+{
+	assert( qId < outQ_.size() );
+
+	vector< char >& q = outQ_[qId];
+	unsigned int origSize = q.size();
+	m_ = b.mid;
+	f_ = b.fid;
+	q.resize( origSize + sizeof( Qinfo ) + size_ );
+	char* pos = &( q[origSize] );
+	memcpy( pos, this, sizeof( Qinfo ) );
+	// ( reinterpret_cast< Qinfo* >( pos ) )->setForward( isForward );
+	memcpy( pos + sizeof( Qinfo ), arg, size_ );
+}
+
+void Qinfo::addSpecificTargetToQ( Qid qId, MsgFuncBinding b, 
+	const char* arg, FullId& target )
+{
+	assert( qId < outQ_.size() );
+
+	unsigned int temp = size_;
+	// Expand local size to accommodate FullId for target of msg.
+	size_ += sizeof( FullId );
+
+	vector< char >& q = outQ_[qId];
+	unsigned int origSize = q.size();
+	m_ = b.mid;
+	f_ = b.fid;
+	q.resize( origSize + sizeof( Qinfo ) + size_ );
+	char* pos = &( q[origSize] );
+	memcpy( pos, this, sizeof( Qinfo ) );
+	pos += sizeof( Qinfo );
+	memcpy( pos, arg, temp );
+	pos += temp;
+	memcpy( pos, &target, sizeof( FullId ) );
 }

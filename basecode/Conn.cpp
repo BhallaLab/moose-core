@@ -28,43 +28,20 @@ void Conn::clearConn()
 	}
 }
 
+/*
 void Conn::asend( 
 	const Element* e, Qinfo& q, const ProcInfo* p, const char* arg ) const
 {
-	for( vector< MsgId >::const_iterator i = m_.begin(); i != m_.end(); ++i)
-		Msg::getMsg( *i )->addToQ( e, q, p, arg );
-}
+	// unsigned int funcIndex_ = q.fid();
+	assert( e->getTargetFuncSize( q.fid() ) == m_.size() );
 
-/**
- * This version uses a different Fid for each Msg. The original funcId in
- * the Qinfo is actually a funcIndex, and is used to look them up.
-void Conn::asend( 
-	const Element* e, Qinfo& q, const ProcInfo* p, const char* arg ) const
-{
-	unsigned int funcIndex_ = q.fid();
-	unsigned int j = 0;
-	for( vector< MsgId >::const_iterator i = m_.begin(); i != m_.end(); ++i)
-	{
-		q.setFid( e->getTargetFunc( funcIndex, j++ ) );
-		Msg::getMsg( *i )->addToQ( e, q, p, arg );
-	}
-}
-
-void Conn::asend( 
-	const Element* e, Qinfo& q, const ProcInfo* p, const char* arg ) const
-{
-	unsigned int funcIndex_ = q.fid();
-	assert( e->getTargetFuncSize() == m_.size() );
-
-	vector< FuncId >::iterator j = e->getTargetFuncIter( funcIndex );
-	unsigned int j = 0;
+	vector< FuncId >::const_iterator j = e->getTargetFuncBegin( q.fid() );
 	for( vector< MsgId >::const_iterator i = m_.begin(); i != m_.end(); ++i)
 	{
 		q.setFid( *j++ );
 		Msg::getMsg( *i )->addToQ( e, q, p, arg );
 	}
 }
- */
 
 // Checks for the correct Msg, and expands the arg to append the
 // target index.
@@ -83,20 +60,6 @@ void Conn::tsend(
 		delete[] temp;
 		break;
 	}
-}
-
-/*
-void Conn::tsend( 
-	const Element* e, unsigned int targetIndex, Qinfo& q, const char* arg ) const
-{
-	assert( q.useSendTo() );
-	assert( m_.size() == 1 );
-	char* temp = new char[ q.size() + sizeof( unsigned int ) ];
-	memcpy( temp, arg, q.size() );
-	*reinterpret_cast< unsigned int* >( temp + q.size() ) = targetIndex;
-	q.expandSize();
-	Msg::getMsg( m_[0] )->addToQ( e, q, temp );
-	delete[] temp;
 }
 */
 
@@ -129,10 +92,16 @@ void Conn::add( MsgId m )
 /**
 * Drop a msg from the list
 */
-void Conn::drop( MsgId mid )
+unsigned int Conn::drop( MsgId mid )
 {
+	vector< MsgId >::iterator i = find( m_.begin(), m_.end(), mid );
+	if ( i == m_.end() )
+		return -1;
+
+	unsigned int ret = i - m_.begin();
 	// Here we have the spectacularly ugly C++ erase-remove idiot.
 	m_.erase( remove( m_.begin(), m_.end(), mid ), m_.end() ); 
+	return ret;
 }
 
 /**

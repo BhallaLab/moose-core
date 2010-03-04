@@ -25,6 +25,7 @@ class SrcFinfo: public Finfo
 		void registerOpFuncs(
 			map< string, FuncId >& fnames, vector< OpFunc* >& funcs );
 
+		/*
 		unsigned int registerSrcFuncIndex( unsigned int current );
 
 		unsigned int registerConn( unsigned int current );
@@ -35,12 +36,36 @@ class SrcFinfo: public Finfo
 		unsigned int getFuncIndex() const {
 			return funcIndex_;
 		}
+		*/
+
+		
+		unsigned int registerBindIndex( unsigned int current );
+
+		unsigned short getBindIndex() const {
+			return bindIndex_;
+		}
 
 	private:
+		/**
+		 * Index into the msgBinding_ vector.
+		 */
+		unsigned short bindIndex_;
+		/*
 		ConnId c_; /// Predefined ConnId for the outgoing data.
 
 		/// Index into a table with FuncIds, on Elements
 		unsigned int funcIndex_; 
+		*/
+		/**
+		 * In most cases this is true, may need to derive special
+		 * cases for backward cases. Those would occur only in Shared
+		 * Msgs.
+		 * Doesn't have to be virtual, because it is only called within
+		 * private funcs.
+		 */
+		bool isForward() const {
+			return 1;
+		}
 };
 
 /**
@@ -55,7 +80,7 @@ class SrcFinfo0: public SrcFinfo
 
 		// Will need to specialize for strings etc.
 		void send( Eref e, const ProcInfo* p ) const;
-		void sendTo( Eref e, DataId target, const ProcInfo* p ) const;
+		void sendTo( Eref e, const ProcInfo* p, const FullId& target) const;
 
 	private:
 };
@@ -74,23 +99,23 @@ template < class T > class SrcFinfo1: public SrcFinfo
 		// Will need to specialize for strings etc.
 		void send( Eref e, const ProcInfo* p, const T& arg ) const
 		{
-			e.asend( getConnId(), getFuncIndex(), p,
-				reinterpret_cast< const char* >( &arg ), sizeof( T ) );
+			// Qinfo( useSendTo, isForward, eindex, size );
+			Qinfo q( 0, 1, e.index(), sizeof( T ) );
+			e.element()->asend( q, getBindIndex(), p, 
+				reinterpret_cast< const char* >( &arg ) );
 		}
 
-		void sendTo( Eref e, DataId target, const ProcInfo* p, const T& arg ) const
+		/**
+		 * We know the data index but we also need to know the target 
+		 * Element or Msg, since there could be multiple ones. 
+		 */
+		void sendTo( Eref e, const ProcInfo* p,
+			const T& arg, const FullId& target ) const
 		{
-			e.tsend( getConnId(), getFuncIndex(), target, p,
-				reinterpret_cast< T* >( &arg ), sizeof( T ) );
-
-			/*
-			char temp[ sizeof( T ) + sizeof( DataId ) ];
-			*reinterpret_cast< T* >( temp ) = arg;
-			*reinterpret_cast< DataId* >( temp + sizeof( T ) ) = target;
-			// e.tsend( c_, funcIndex_, target, reinterpret_cast< const char* >( &arg ), sizeof( T ) );
-			e.tsend( getConnId(), getFuncIndex(), 
-				target, temp, sizeof( T ) );
-				*/
+			// Qinfo( useSendTo, isForward, eindex, size );
+			Qinfo q( 1, 1, e.index(), sizeof( T ) );
+			e.element()->tsend( q, getBindIndex(), p, 
+				reinterpret_cast< const char* >( &arg ), target );
 		}
 
 	private:
@@ -109,27 +134,27 @@ template <> class SrcFinfo1< string >: public SrcFinfo
 		// Will need to specialize for strings etc.
 		void send( Eref e, const ProcInfo* p, const string& arg ) const
 		{
-			e.asend( getConnId(), getFuncIndex(), p,
-				arg.c_str() , arg.length() + 1 );
+			Conv< string > s( arg );
+
+			// Qinfo( useSendTo, isForward, eindex, size );
+			Qinfo q( 0, 1, e.index(), s.size() );
+			char* buf = new char[ s.size() ];
+			s.val2buf( buf );
+
+			e.element()->asend( q, getBindIndex(), p, buf );
+			delete[] buf;
 		}
 
-		void sendTo( Eref e, DataId target, const ProcInfo* p, 
-			const string& arg ) const
+		void sendTo( Eref e, const ProcInfo* p, 
+			const string& arg, const FullId& target ) const
 		{
-			e.tsend( getConnId(), getFuncIndex(), target, p,
-				arg.c_str(), arg.length() + 1 );
-			/*
+			Conv< string > s( arg );
+			Qinfo q( 1, 1, e.index(), s.size() );
+			char* buf = new char[ s.size() ];
+			s.val2buf( buf );
 
-
-			char* temp = new char[ arg.length() + 1 + sizeof( unsigned int ) ];
-			strcpy( temp, arg.c_str() );
-			*reinterpret_cast< DataId* >( temp + arg.length() + 1) = 
-				target;
-			// e.tsend( c_, funcIndex_, target, reinterpret_cast< const char* >( &arg ), arg.length() + 1 );
-			e.tsend( getConnId(), getFuncIndex(), 
-				target, temp, arg.length() + 1 );
-			delete[] temp;
-			*/
+			e.element()->tsend( q, getBindIndex(), p, buf, target );
+			delete[] buf;
 		}
 
 	private:
@@ -145,25 +170,29 @@ template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 			: SrcFinfo( name, doc, c )
 			{ ; }
 
-		// Will need to specialize for strings etc.
+		// This version is general but inefficient as it uses an extra
+		// memcpy in val2buf.
 		void send( Eref e, const ProcInfo* p,
 			const T1& arg1, const T2& arg2 ) {
-			char temp[ sizeof( T1 ) + sizeof( T2 ) ];
-			*reinterpret_cast< T1* >( temp ) = arg1;
-			*reinterpret_cast< T2* >( temp + sizeof( T1 ) ) = arg2;
-			e.asend( getConnId(), getFuncIndex(), p,
-				temp, sizeof( T1 ) + sizeof( T2 ) );
+			Conv< T1 > a1( arg1 );
+			Conv< T2 > a2( arg2 );
+			Qinfo q( 0, 1, e.index(), a1.size() + a2.size() );
+			char temp[ a1.size() + a2.size() ];
+			a1.val2buf( temp );
+			a2.val2buf( temp + a1.size() );
+			e.element()->asend( q, getBindIndex(), p, temp );
 		}
 
-		void sendTo( Eref e, DataId target, const ProcInfo* p,
-			const T1& arg1, const T2& arg2 ) {
-			char temp[ sizeof( T1 ) + sizeof( T2 ) + sizeof( unsigned int ) ];
-			*reinterpret_cast< T1* >( temp ) = arg1;
-			*reinterpret_cast< T2* >( temp + sizeof( T1 ) ) = arg2;
-			*reinterpret_cast< DataId* >( temp + sizeof( T1 ) + sizeof( T2 ) ) = target;
-			// e.tsend( c_, funcIndex_, target, reinterpret_cast< const char* >( &arg ), sizeof( T1 ) + sizeof( T2 ) );
-			e.tsend( getConnId(), getFuncIndex(), target, p,
-				temp, sizeof( T1 ) + sizeof( T2 ) );
+		void sendTo( Eref e, const ProcInfo* p,
+			const T1& arg1, const T2& arg2,
+			const FullId& target ) {
+			Conv< T1 > a1( arg1 );
+			Conv< T2 > a2( arg2 );
+			Qinfo q( 1, 1, e.index(), a1.size() + a2.size() );
+			char temp[ a1.size() + a2.size() ];
+			a1.val2buf( temp );
+			a2.val2buf( temp + a1.size() );
+			e.element()->tsend( q, getBindIndex(), p, temp, target );
 		}
 
 	private:
@@ -183,28 +212,29 @@ template < class T1, class T2, class T3 > class SrcFinfo3: public SrcFinfo
 		// Will need to specialize for strings etc.
 		void send( Eref e, const ProcInfo* p,
 			const T1& arg1, const T2& arg2, const T3& arg3 ){
-			char temp[ sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) ];
-			*reinterpret_cast< T1* >( temp ) = arg1;
-			*reinterpret_cast< T2* >( temp + sizeof( T1 ) ) = arg2;
-			*reinterpret_cast< T3* >( temp + sizeof( T1 ) + sizeof( T2 ) ) = arg3;
-			e.asend( getConnId(), getFuncIndex(), p,
-				temp, sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) );
+			Conv< T1 > a1( arg1 );
+			Conv< T2 > a2( arg2 );
+			Conv< T3 > a3( arg3 );
+			Qinfo q( 0, 1, e.index(), a1.size() + a2.size() + a3.size() );
+			char temp[ a1.size() + a2.size() + a3.size() ];
+			a1.val2buf( temp );
+			a2.val2buf( temp + a1.size() );
+			a3.val2buf( temp + a1.size() + a2.size() );
+			e.element()->asend( q, getBindIndex(), p, temp );
 		}
 
 		void sendTo( Eref e, DataId target, const ProcInfo* p,
 			const T1& arg1, const T2& arg2, const T3& arg3 )
 		{
-			char temp[ sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) +
-				sizeof( unsigned int ) ];
-			*reinterpret_cast< T1* >( temp ) = arg1;
-			*reinterpret_cast< T2* >( temp + sizeof( T1 ) ) = arg2;
-			*reinterpret_cast< T3* >( temp + sizeof( T1 ) + sizeof( T2 ) ) = arg3;
-			*reinterpret_cast< DataId* >( temp + 
-				sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) ) = 
-				target;
-			// e.tsend( c_, funcIndex_, target, reinterpret_cast< const char* >( &arg ), sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) );
-			e.tsend( getConnId(), getFuncIndex(), target, p,
-			temp, sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) );
+			Conv< T1 > a1( arg1 );
+			Conv< T2 > a2( arg2 );
+			Conv< T3 > a3( arg3 );
+			Qinfo q( 1, 1, e.index(), a1.size() + a2.size() + a3.size() );
+			char temp[ a1.size() + a2.size() + a3.size() ];
+			a1.val2buf( temp );
+			a2.val2buf( temp + a1.size() );
+			a3.val2buf( temp + a1.size() + a2.size() );
+			e.element()->tsend( q, getBindIndex(), p, temp, target );
 		}
 
 	private:
@@ -223,30 +253,33 @@ template < class T1, class T2, class T3, class T4 > class SrcFinfo4: public SrcF
 		// Will need to specialize for strings etc.
 		void send( Eref e, const ProcInfo* p,
 			const T1& arg1, const T2& arg2, const T3& arg3, const T4& arg4 ){
-			char temp[ sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) ];
-			*reinterpret_cast< T1* >( temp ) = arg1;
-			*reinterpret_cast< T2* >( temp + sizeof( T1 ) ) = arg2;
-			*reinterpret_cast< T3* >( temp + sizeof( T1 ) + sizeof( T2 ) ) = arg3;
-			*reinterpret_cast< T4* >( temp + sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) ) = arg4;
-			e.asend( getConnId(), getFuncIndex(), p,
-				temp, sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) + sizeof(T4 ) );
+			Conv< T1 > a1( arg1 );
+			Conv< T2 > a2( arg2 );
+			Conv< T3 > a3( arg3 );
+			Conv< T4 > a4( arg4 );
+			Qinfo q( 0, 1, e.index(), a1.size() + a2.size() + a3.size() + a4.size() );
+			char temp[ a1.size() + a2.size() + a3.size() + a4.size() ];
+			a1.val2buf( temp );
+			a2.val2buf( temp + a1.size() );
+			a3.val2buf( temp + a1.size() + a2.size() );
+			a4.val2buf( temp + a1.size() + a2.size() + a3.size() );
+			e.element()->asend( q, getBindIndex(), p, temp );
 		}
 
-		void sendTo( Eref e, DataId target, const ProcInfo* p,
-			const T1& arg1, const T2& arg2, const T3& arg3, const T4& arg4 )
-		{
-			char temp[ sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) +
-				sizeof( T4 ) + sizeof( unsigned int ) ];
-			*reinterpret_cast< T1* >( temp ) = arg1;
-			*reinterpret_cast< T2* >( temp + sizeof( T1 ) ) = arg2;
-			*reinterpret_cast< T3* >( temp + sizeof( T1 ) + sizeof( T2 ) ) = arg3;
-			*reinterpret_cast< T4* >( temp + sizeof( T1 ) + sizeof( T2 ) + sizeof( T4 ) ) = arg4;
-			*reinterpret_cast< DataId* >( temp + 
-				sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) + sizeof( T4 ) ) = 
-				target;
-			// e.tsend( c_, funcIndex_, target, reinterpret_cast< const char* >( &arg ), sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) );
-			e.tsend( getConnId(), getFuncIndex(), target, p,
-			temp, sizeof( T1 ) + sizeof( T2 ) + sizeof( T3 ) + sizeof( T4 ) );
+		void sendTo( Eref e, const ProcInfo* p,
+			const T1& arg1, const T2& arg2, const T3& arg3, const T4& arg4,
+			const FullId& target ) {
+			Conv< T1 > a1( arg1 );
+			Conv< T2 > a2( arg2 );
+			Conv< T3 > a3( arg3 );
+			Conv< T4 > a4( arg4 );
+			Qinfo q( 0, 1, e.index(), a1.size() + a2.size() + a3.size() + a4.size() );
+			char temp[ a1.size() + a2.size() + a3.size() + a4.size() ];
+			a1.val2buf( temp );
+			a2.val2buf( temp + a1.size() );
+			a3.val2buf( temp + a1.size() + a2.size() );
+			a4.val2buf( temp + a1.size() + a2.size() + a3.size() );
+			e.element()->tsend( q, getBindIndex(), p, temp, target );
 		}
 
 	private:

@@ -17,6 +17,9 @@ class Qinfo
 	public:
 		Qinfo( FuncId f, DataId srcIndex, unsigned int size );
 
+		Qinfo( bool useSendTo, bool isForward,
+			DataId srcIndex, unsigned int size );
+
 		Qinfo( FuncId f, DataId srcIndex, 
 			unsigned int size, bool useSendTo, bool isForward );
 
@@ -35,9 +38,12 @@ class Qinfo
 			return isForward_;
 		}
 
+		/*
 		void setForward( bool isForward ) {
 			isForward_ = isForward;
 		}
+		*/
+
 
 		MsgId mid() const {
 			return m_;
@@ -47,6 +53,12 @@ class Qinfo
 			return f_;
 		}
 
+		/*
+		void setFid( FuncId f ) {
+			f_ = f;
+		}
+		*/
+
 		DataId srcIndex() const {
 			return srcIndex_;
 		}
@@ -55,16 +67,6 @@ class Qinfo
 			return size_;
 		}
 
-		/**
-		 * Used when adding space for the index in sendTo
-		 */
-		void expandSize();
-
-		/**
-		 * Decide how many queues to use, and their reserve size
-		 * Deprecated
-		 */
-		// static void setNumQs( unsigned int n, unsigned int reserve );
 
 		/**
 		 * Set up a SimGroup which keeps track of grouping information, and
@@ -132,12 +134,14 @@ class Qinfo
 		 * The arg will just be memcopied onto the queue, so avoid
 		 * pointers. Possibly add size as an argument
 		 */
-		void addToQ( Qid qId, MsgId mid, bool isForward, const char* arg );
+		// void addToQ( Qid qId, MsgId mid, bool isForward, const char* arg );
+		void addToQ( Qid qId, MsgFuncBinding b, const char* arg );
+		void addSpecificTargetToQ( Qid qId, MsgFuncBinding b, const char* arg );
 
 	private:
-		MsgId m_;
 		bool useSendTo_;	// true if the msg is to a single target DataId.
 		bool isForward_; // True if the msg is from e1 to e2.
+		MsgId m_;
 		FuncId f_;
 		DataId srcIndex_; // DataId of src.
 		unsigned int size_; // size of argument in bytes.

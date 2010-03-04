@@ -29,7 +29,7 @@ class Id
 		/**
 		 * Returns an id with the specified number
 		 */
-		Id( unsigned int id, unsigned int index );
+//		Id( unsigned int id, unsigned int index );
 
 		/**
 		 * Returns an id found by traversing the specified path
@@ -71,7 +71,7 @@ class Id
 		 */
 		Element* operator()() const;
 
-		unsigned int index() const;
+//		unsigned int index() const;
 
 		/**
 		 * Returns the Eref to the element plus index
@@ -93,16 +93,19 @@ class Id
 		//	Comparisons between ids
 		//////////////////////////////////////////////////////////////
 		bool operator==( const Id& other ) const {
-			return id_ == other.id_ && index_ == other.index_;
+			// return id_ == other.id_ && index_ == other.index_;
+			return id_ == other.id_;
 		}
 
 		bool operator!=( const Id& other ) const {
-			return id_ != other.id_ || index_ != other.index_;
+			// return id_ != other.id_ || index_ != other.index_;
+			return id_ != other.id_;
 		}
 
 		bool operator<( const Id& other ) const {
-			return ( id_ < other.id_ ) ||
-				( id_ == other.id_ && index_ < other.index_ );
+		//	return ( id_ < other.id_ ) ||
+		//		( id_ == other.id_ && index_ < other.index_ );
+			return ( id_ < other.id_ );
 		}
 
 		friend ostream& operator <<( ostream& s, const Id& i );
@@ -111,7 +114,7 @@ class Id
 	private:
 		// static void setManager( Manager* m );
 		unsigned int id_; // Unique identifier for Element*
-		unsigned int index_; // Index of array entry within element.
+//		unsigned int index_; // Index of array entry within element.
 		static vector< Element* >& elements();
 };
 

@@ -49,6 +49,7 @@ class Element;
 class Eref;
 class OpFunc;
 class Id;
+class FullId;
 class Qinfo;
 class Data;
 
@@ -59,11 +60,13 @@ class Data;
 #include "Cinfo.h"
 #include "Data.h"
 #include "Msg.h"
+#include "MsgFuncBinding.h"
 #include "Qinfo.h"
 #include "Conn.h"
 #include "Element.h"
 #include "Eref.h"
 #include "Id.h"
+#include "FullId.h"
 #include "Conv.h"
 #include "SrcFinfo.h"
 #include "Shell.h"

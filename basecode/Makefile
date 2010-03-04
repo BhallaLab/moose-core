@@ -25,6 +25,7 @@ OBJ = \
 	Conn.o \
 	SrcFinfo.o \
 	Id.o \
+	FullId.o \
 	testSync.o	\
 	testAsync.o	\
 	Neutral.o	\

@@ -13,18 +13,19 @@ Element::Element( const Cinfo* c,
 	char* d, unsigned int numData, unsigned int dataSize, 
 		unsigned int numFuncIndex, unsigned int numConn )
 	: d_( d ), numData_( numData ), dataSize_( dataSize ), 
-	sendBuf_( 0 ), cinfo_( c ), c_( numConn )
+	sendBuf_( 0 ), cinfo_( c ), msgBinding_( numFuncIndex )
 { 
-	targetFunc_.resize( numFuncIndex, 0 );
+	;
 }
 
 Element::Element( const Cinfo* c, const Element* other )
 	: 	d_( other->d_ ), 
 		numData_( other->numData_ ), 
 		dataSize_( other->dataSize_),
-		sendBuf_( 0 ), cinfo_( c ), c_( c->numConn() )
+		sendBuf_( 0 ), cinfo_( c ),
+		msgBinding_( c->numFuncIndex() )
 {
-	targetFunc_.resize( c->numFuncIndex(), 0 );
+	;
 }
 
 Element::~Element()
@@ -32,8 +33,13 @@ Element::~Element()
 	delete[] sendBuf_;
 	cinfo_->destroy( d_ );
 	cinfo_ = 0; // A flag that the Element is doomed, used to avoid lookups when deleting Msgs.
-	for ( vector< Conn >::iterator i = c_.begin(); i != c_.end(); ++i )
-		i->clearConn(); // Get rid of Msgs on them.
+	for ( vector< vector< MsgFuncBinding > >::iterator i = msgBinding_.begin(); i != msgBinding_.end(); ++i ) {
+		for ( vector< MsgFuncBinding >::iterator j = i->begin(); j != i->end(); ++j ) {
+			// This call internally protects against double deletion.
+			Msg::deleteMsg( j->mid );
+		}
+	}
+
 	for ( vector< MsgId >::iterator i = m_.begin(); i != m_.end(); ++i )
 		if ( *i ) // Dropped Msgs set this pointer to zero, so skip them.
 			Msg::deleteMsg( *i );
@@ -159,11 +165,6 @@ void Element::getArraySizes( vector< unsigned int >& sizes ) const
 	sizes.resize( numData_, 1 );
 }
 
-const Conn* Element::conn( ConnId c ) const {
-	assert( c < c_.size() );
-	return &( c_[c] );
-}
-
 void Element::addMsg( MsgId m )
 {
 	while ( m_.size() > 0 ) {
@@ -190,17 +191,11 @@ void Element::dropMsg( MsgId mid )
 		i->drop( mid ); // Get rid of specific Msg, if present, on Conn
 }
 
-void Element::addMsgToConn( MsgId mid, ConnId cid )
+void Element::addMsgAndFunc( MsgId mid, FuncId fid, BindIndex bindIndex )
 {
-	if ( c_.size() < cid + 1 )
-		c_.resize( cid + 1 );
-	c_[cid].add( mid );
-}
-
-void Element::clearConn( ConnId cid )
-{
-	assert( cid < c_.size() );
-	c_[cid].clearConn();
+	if ( msgBinding_.size() < bindIndex + 1 )
+		msgBinding_.resize( bindIndex + 1 );
+	msgBinding_[ bindIndex ].push_back( MsgFuncBinding( mid, fid ) );
 }
 
 const Cinfo* Element::cinfo() const
@@ -208,15 +203,78 @@ const Cinfo* Element::cinfo() const
 	return cinfo_;
 }
 
+/*
 void Element::addTargetFunc( FuncId fid, unsigned int funcIndex )
 {
 	if ( targetFunc_.size() < funcIndex + 1 )
 		targetFunc_.resize( funcIndex + 1 );
-	targetFunc_[ funcIndex ] = fid;
+	targetFunc_[ funcIndex ].push_back( fid );
 }
 
 FuncId Element::getTargetFunc( unsigned int funcIndex ) const
 {
 	assert ( targetFunc_.size() > funcIndex );
 	return targetFunc_[ funcIndex ];
+}
+
+const vector< FuncId >& Element::getTargetFuncVec(
+	unsigned int funcIndex ) const
+{
+	assert ( targetFunc_.size() > funcIndex );
+	return targetFunc_[ funcIndex ];
+}
+
+vector< FuncId >::const_iterator Element::getTargetFuncBegin(
+	unsigned int funcIndex ) const
+{
+	assert ( targetFunc_.size() > funcIndex );
+	return targetFunc_[ funcIndex ].begin();
+}
+
+unsigned int Element::getTargetFuncSize( unsigned int funcIndex ) const
+{
+	assert ( targetFunc_.size() > funcIndex );
+	return targetFunc_[ funcIndex ].size();
+}
+*/
+
+/*
+ * Asynchronous send
+ * At this point the Qinfo has the values for 
+ * Eref::index() and size assigned.
+ * ProcInfo is used only for p->qId?
+ * Qinfo needs to have funcid put in, and Msg Id.
+ * Msg info is also need to work out if Q entry is forward or back.
+ */
+void Element::asend( Qinfo& q, BindIndex bindIndex, 
+	const ProcInfo *p, const char* arg )
+{
+	assert ( bindIndex < msgBinding_.size() );
+	for ( vector< MsgFuncBinding >::const_iterator i =
+		msgBinding_[ bindIndex ].begin(); 
+		i != msgBinding_[ bindIndex ].end(); ++i ) {
+		q.addToQ( p->outQid, *i, arg );
+	}
+}
+
+/*
+ * Asynchronous send to specific target.
+ * Scan through potential targets, figure out direction, 
+ * copy over FullId to sit in specially assigned space on queue.
+ */
+void Element::tsend( Qinfo& q, BindIndex bindIndex, 
+	const ProcInfo *p, const char* arg, const FullId& target )
+{
+	assert ( bindIndex < msgBinding_.size() );
+	Element *e = target.id();
+	for ( vector< MsgFuncBinding >::const_iterator i =
+		msgBinding_[ bindIndex ].begin(); 
+		i != msgBinding_[ bindIndex ].end(); ++i ) {
+		if ( Msg::getMsg( i->mid )->e1() == e ) {
+			q.addSpecificTargetToQ( p->outQid, *i, arg );
+			return;
+		}
+	}
+	cout << "Warning: Element::tsend: Failed to find specific target " <<
+		target << endl;
 }
