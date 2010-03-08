@@ -145,9 +145,9 @@ map< string,Id > SbmlReader::createCompartment( Id location )
 		if ( outside != "" )
 			outsideMap[comptEl_->id()] = outside ; 
 		if ( size != 0.0 )
-		    set< double >( comptEl_, sizeFinfo, size );
+		    ::set< double >( comptEl_, sizeFinfo, size );
 		if ( dimension != 0 )
-			set< unsigned int >( comptEl_,dimensionFinfo,dimension );		
+			::set< unsigned int >( comptEl_,dimensionFinfo,dimension );		
 	}
 	for ( iter = outsideMap.begin(); iter != outsideMap.end(); iter++ )
 	{
@@ -230,17 +230,17 @@ map< string,Id > SbmlReader::createMolecule( map< string,Id > &idMap )
 			get< double > (comptEl.eref(),sizeFinfo,size); 		
 			transvalue *= size;	
 		}
-		set< double >( molecule_, nInitFinfo, transvalue ); //initialAmount 	
+		::set< double >( molecule_, nInitFinfo, transvalue ); //initialAmount 	
 		bool cons=s->getConstant(); 
 		bool bcondition = s->getBoundaryCondition();
 		if (cons){
-			set< int >( molecule_,modeFinfo,4 );
+			::set< int >( molecule_,modeFinfo,4 );
 			//cout << "set constant 4" << endl;
 		}else if (bcondition) {
-			set< int >( molecule_,modeFinfo,1 );
+			::set< int >( molecule_,modeFinfo,1 );
 			//cout << "set constant 1" << endl;
 		}else {
-			set< int >( molecule_,modeFinfo,0 );
+			::set< int >( molecule_,modeFinfo,0 );
 			//cout << "set constant 0" << endl;	
 		}
 	}
@@ -435,11 +435,11 @@ void SbmlReader::setupEnzymaticReaction( const EnzymeInfo & einfo,string name )
 		Eref( enzyme_ ).add( "prd",P,"prd",ConnTainer::Default );
 
 	}
-	set< double >( enzyme_, k1Finfo, einfo.k1 );
-	set< double >( enzyme_, k2Finfo, einfo.k2 );
-	set< double >( enzyme_, k3Finfo, einfo.k3 );
-	set< bool >( enzyme_,"mode",0 );
-	set( complx,"destroy" );
+	::set< double >( enzyme_, k1Finfo, einfo.k1 );
+	::set< double >( enzyme_, k2Finfo, einfo.k2 );
+	::set< double >( enzyme_, k3Finfo, einfo.k3 );
+	::set< bool >( enzyme_,"mode",0 );
+	::set( complx,"destroy" );
 }
 /*
 *  set up Michalies Menten reaction
@@ -468,7 +468,7 @@ void SbmlReader::setupMMEnzymeReaction( Reaction * reac,string rid )
 		if ( errorFlag_ )
 			return;
 		else if ( !errorFlag_ ){
-			set< bool >( enzyme_,"mode",1 );
+			::set< bool >( enzyme_,"mode",1 );
 			Eref(enzyme_).add( "enz",E,"reac",ConnTainer::Default ); 
 			for ( unsigned int rt = 0; rt < reac->getNumReactants(); rt++ )
 			{	
@@ -484,8 +484,8 @@ void SbmlReader::setupMMEnzymeReaction( Reaction * reac,string rid )
 				Eref P = elmtMap_.find(sp)->second;
 				Eref(enzyme_).add( "prd",P,"prd",ConnTainer::Default );
 			}
-			set< double >( enzyme_, kcatFinfo, rate[0] );
-			set< double >( enzyme_, kmFinfo, rate[1] );
+			::set< double >( enzyme_, kcatFinfo, rate[0] );
+			::set< double >( enzyme_, kmFinfo, rate[1] );
 		}
 
 	}	
@@ -561,8 +561,8 @@ void SbmlReader::createReaction( map< string,Id > &molMap )
 					molecule_ = Neutral::create( "Molecule",spId.str(),parent,Id::scratchId() );//create Molecule
 					molMap[spId.str()] = parent; 
 					elmtMap_[spId.str()] = Eref( molecule_ );
-					set< double >( molecule_,"conc", 1 );
-					set< int >( molecule_,"mode",4 );
+					::set< double >( molecule_,"conc", 1 );
+					::set< int >( molecule_,"mode",4 );
 					reaction_ = Neutral::create( "Reaction",id,parent,Id::scratchId() ); //create Reaction
 					Eref( reaction_ ).add( subFinfo->msg(),elmtMap_[spId.str()],reacFinfo->msg(),ConnTainer::Default );
 				}
@@ -640,8 +640,8 @@ void SbmlReader::createReaction( map< string,Id > &molMap )
 					if ( errorFlag_ )
 						return;
 					else if ( !errorFlag_ ){
-						set< double >( reaction_, kfFinfo, rate[0] ); 
-						set< double >( reaction_, kbFinfo, rate[1] );	
+						::set< double >( reaction_, kfFinfo, rate[0] ); 
+						::set< double >( reaction_, kbFinfo, rate[1] );	
 					}
 			
 				}
