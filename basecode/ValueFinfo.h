@@ -51,14 +51,7 @@ template < class T, class F > class ValueFinfo: public Finfo
 			}
 		}
 
-		// Need to think about whether an index has to be registered here.
-		unsigned int registerSrcFuncIndex( unsigned int current )
-		{
-			return current;
-		}
-
-		// Need to think about whether an index has to be registered here.
-		unsigned int registerConn( unsigned int current )
+		BindIndex registerBindIndex( BindIndex current )
 		{
 			return current;
 		}

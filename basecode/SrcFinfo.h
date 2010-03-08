@@ -18,7 +18,7 @@ class SrcFinfo: public Finfo
 {
 	public:
 		SrcFinfo( const string& name, const string& doc, 
-			ConnId c );
+			BindIndex b );
 
 		~SrcFinfo() {;}
 
@@ -39,9 +39,9 @@ class SrcFinfo: public Finfo
 		*/
 
 		
-		unsigned int registerBindIndex( unsigned int current );
+		BindIndex registerBindIndex( BindIndex current );
 
-		unsigned short getBindIndex() const {
+		BindIndex getBindIndex() const {
 			return bindIndex_;
 		}
 
@@ -50,22 +50,6 @@ class SrcFinfo: public Finfo
 		 * Index into the msgBinding_ vector.
 		 */
 		unsigned short bindIndex_;
-		/*
-		ConnId c_; /// Predefined ConnId for the outgoing data.
-
-		/// Index into a table with FuncIds, on Elements
-		unsigned int funcIndex_; 
-		*/
-		/**
-		 * In most cases this is true, may need to derive special
-		 * cases for backward cases. Those would occur only in Shared
-		 * Msgs.
-		 * Doesn't have to be virtual, because it is only called within
-		 * private funcs.
-		 */
-		bool isForward() const {
-			return 1;
-		}
 };
 
 /**
@@ -75,7 +59,7 @@ class SrcFinfo0: public SrcFinfo
 {
 	public:
 
-		SrcFinfo0( const string& name, const string& doc, ConnId c );
+		SrcFinfo0( const string& name, const string& doc, BindIndex b );
 		~SrcFinfo0() {;}
 
 		// Will need to specialize for strings etc.
@@ -92,8 +76,8 @@ template < class T > class SrcFinfo1: public SrcFinfo
 		~SrcFinfo1() {;}
 
 		SrcFinfo1( const string& name, const string& doc, 
-			ConnId c )
-			: SrcFinfo( name, doc, c )
+			BindIndex b )
+			: SrcFinfo( name, doc, b )
 			{ ; }
 
 		// Will need to specialize for strings etc.
@@ -127,8 +111,8 @@ template <> class SrcFinfo1< string >: public SrcFinfo
 		~SrcFinfo1() {;}
 
 		SrcFinfo1( const string& name, const string& doc, 
-			ConnId c )
-			: SrcFinfo( name, doc, c )
+			BindIndex b )
+			: SrcFinfo( name, doc, b )
 			{ ; }
 
 		// Will need to specialize for strings etc.
@@ -166,8 +150,8 @@ template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 		~SrcFinfo2() {;}
 
 		SrcFinfo2( const string& name, const string& doc, 
-			ConnId c )
-			: SrcFinfo( name, doc, c )
+			BindIndex b )
+			: SrcFinfo( name, doc, b )
 			{ ; }
 
 		// This version is general but inefficient as it uses an extra
@@ -205,8 +189,8 @@ template < class T1, class T2, class T3 > class SrcFinfo3: public SrcFinfo
 		~SrcFinfo3() {;}
 
 		SrcFinfo3( const string& name, const string& doc, 
-			ConnId c )
-			: SrcFinfo( name, doc, c )
+			BindIndex b )
+			: SrcFinfo( name, doc, b )
 			{ ; }
 
 		// Will need to specialize for strings etc.
@@ -246,8 +230,8 @@ template < class T1, class T2, class T3, class T4 > class SrcFinfo4: public SrcF
 		~SrcFinfo4() {;}
 
 		SrcFinfo4( const string& name, const string& doc, 
-			ConnId c )
-			: SrcFinfo( name, doc, c )
+			BindIndex b )
+			: SrcFinfo( name, doc, b )
 			{ ; }
 
 		// Will need to specialize for strings etc.

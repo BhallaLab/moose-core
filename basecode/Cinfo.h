@@ -74,8 +74,7 @@ class Cinfo
 			 */
 			void destroy( char* d ) const;
 
-			unsigned int numConn() const;
-			unsigned int numFuncIndex() const;
+			unsigned int numBindIndex() const;
 
 		private:
 			const string name_;
@@ -86,8 +85,7 @@ class Cinfo
 			const Cinfo* baseCinfo_;
 			const DinfoBase* dinfo_;
 
-			unsigned int numConn_;
-			unsigned int numFuncIndex_;
+			unsigned int  numBindIndex_;
 
 			map< string, Finfo* > finfoMap_;
 			vector< OpFunc* > funcs_;

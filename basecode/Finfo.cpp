@@ -46,12 +46,7 @@ void DestFinfo::registerOpFuncs(
 	}
 }
 
-unsigned int DestFinfo::registerSrcFuncIndex( unsigned int current )
-{
-	return current;
-}
-
-unsigned int DestFinfo::registerConn( unsigned int current )
+BindIndex DestFinfo::registerBindIndex( BindIndex current )
 {
 	return current;
 }

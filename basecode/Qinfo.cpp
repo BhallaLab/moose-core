@@ -244,13 +244,13 @@ void Qinfo::addToQ( Qid qId, MsgFuncBinding b, const char* arg )
 }
 
 void Qinfo::addSpecificTargetToQ( Qid qId, MsgFuncBinding b, 
-	const char* arg, FullId& target )
+	const char* arg, DataId& target )
 {
 	assert( qId < outQ_.size() );
 
 	unsigned int temp = size_;
 	// Expand local size to accommodate FullId for target of msg.
-	size_ += sizeof( FullId );
+	size_ += sizeof( DataId );
 
 	vector< char >& q = outQ_[qId];
 	unsigned int origSize = q.size();
@@ -262,5 +262,5 @@ void Qinfo::addSpecificTargetToQ( Qid qId, MsgFuncBinding b,
 	pos += sizeof( Qinfo );
 	memcpy( pos, arg, temp );
 	pos += temp;
-	memcpy( pos, &target, sizeof( FullId ) );
+	memcpy( pos, &target, sizeof( DataId ) );
 }

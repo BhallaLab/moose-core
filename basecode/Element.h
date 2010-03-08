@@ -37,7 +37,7 @@ class Element
 		*/
 		Element( const Cinfo* c, 
 			char* d, unsigned int numData, unsigned int dataSize,
-			unsigned int numFuncIndex, unsigned int numConn );
+			unsigned int numBindIndex );
 
 		Element( const Cinfo* c, const Element* other );
 

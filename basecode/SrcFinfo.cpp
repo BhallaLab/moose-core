@@ -13,8 +13,8 @@
  * a type-safe send operation, and to provide typechecking for it.
  */
 
-SrcFinfo::SrcFinfo( const string& name, const string& doc, ConnId c )
-	: Finfo( name, doc ), c_( c ), funcIndex_( 0 )
+SrcFinfo::SrcFinfo( const string& name, const string& doc, BindIndex b )
+	: Finfo( name, doc ), bindIndex_( b )
 { ; }
 
 void SrcFinfo::registerOpFuncs(
@@ -23,42 +23,29 @@ void SrcFinfo::registerOpFuncs(
 	;
 }
 
-unsigned int SrcFinfo::registerSrcFuncIndex( unsigned int current )
+BindIndex SrcFinfo::registerBindIndex( BindIndex current )
 {
-	funcIndex_ = current;
+	bindIndex_ = current;
 	return current + 1;
-}
-
-unsigned int SrcFinfo::registerConn( unsigned int current )
-{
-	if ( c_ >= current )
-		return c_ + 1;
-	return current;
 }
 
 /////////////////////////////////////////////////////////////////////
 /**
  * SrcFinfo0 sets up calls without any arguments.
  */
-SrcFinfo0::SrcFinfo0( const string& name, const string& doc, ConnId c )
-	: SrcFinfo( name, doc, c )
+SrcFinfo0::SrcFinfo0( const string& name, const string& doc, BindIndex b )
+	: SrcFinfo( name, doc, b )
 { ; }
 
 void SrcFinfo0::send( Eref e, const ProcInfo* p ) const {
-	// e.asend( getConnId(), getFuncIndex(), p, 0, 0 );
-	// e.asend( getBindIndex(), p, 0, 0 );
-
 	// First arg is useSendTo, second arg is isForward, last arg is size
-	Qinfo q( 0, isForward(), e.index(), 0 )
+	Qinfo q( 0, 1, e.index(), 0 );
 	e.element()->asend( q, getBindIndex(), p, 0 ); // last arg is data
 }
 
-void SrcFinfo0::sendTo( Eref e, DataId target, const ProcInfo* p ) const
+void SrcFinfo0::sendTo( Eref e, const ProcInfo* p, 
+	const FullId& target ) const
 {
-	/*
-	unsigned int temp = target.index();
-	char temp[ sizeof( unsigned int ) ];
-	*reinterpret_cast< unsigned int* >( temp ) = target.index();
-	*/
-	e.tsend( getConnId(), getFuncIndex(), target, p, 0, 0 );
+	Qinfo q( 1, 1, e.index(), 0 );
+	e.element()->tsend( q, getBindIndex(), p, 0, target );
 }

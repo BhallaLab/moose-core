@@ -221,8 +221,11 @@ template< class T, class A > class GetOpFunc: public OpFunc
 		 * ready to receive the returned data.
 		 * In this special case we do not do typechecking, since the
 		 * constructors for the get command should have done so already.
+		 * Also we are returning the data along the Msg that brought in
+		 * the request, so we don't need to scan through all Msgs in
+		 * the Element to find the right one.
 		 * So we bypass the usual SrcFinfo::sendTo, and instead go
-		 * right to the Conn to send the data.
+		 * right to the Qinfo::addToQ to send off data.
 		 */
 		void op( Eref e, const char* buf ) const {
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
@@ -237,11 +240,9 @@ template< class T, class A > class GetOpFunc: public OpFunc
 				1, !q->isForward() );
 			char* temp = new char[ retq.size() ];
 			conv.val2buf( temp ); 
-			Conn c;
-			c.add( q->mid() );
-			// c.add( const_cast< Msg* >( e.element()->getMsg( q->mid() ) ) );
-			c.tsend( e.element(), q->srcIndex(), retq, 
-				Shell::procInfo(), temp );
+			MsgFuncBinding mfb( q->mid(), retFunc );
+			retq.addSpecificTargetToQ( Shell::procInfo()->outQid, mfb, 
+				temp );
 			delete[] temp;
 		}
 

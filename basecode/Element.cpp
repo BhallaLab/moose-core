@@ -11,9 +11,9 @@
 
 Element::Element( const Cinfo* c, 
 	char* d, unsigned int numData, unsigned int dataSize, 
-		unsigned int numFuncIndex, unsigned int numConn )
+		unsigned int numBindIndex )
 	: d_( d ), numData_( numData ), dataSize_( dataSize ), 
-	sendBuf_( 0 ), cinfo_( c ), msgBinding_( numFuncIndex )
+	sendBuf_( 0 ), cinfo_( c ), msgBinding_( numBindIndex )
 { 
 	;
 }
@@ -23,7 +23,7 @@ Element::Element( const Cinfo* c, const Element* other )
 		numData_( other->numData_ ), 
 		dataSize_( other->dataSize_),
 		sendBuf_( 0 ), cinfo_( c ),
-		msgBinding_( c->numFuncIndex() )
+		msgBinding_( c->numBindIndex() )
 {
 	;
 }
@@ -176,6 +176,20 @@ void Element::addMsg( MsgId m )
 	m_.push_back( m );
 }
 
+class matchMid
+{
+	public:
+		matchMid( MsgId mid )
+			: mid_( mid )
+		{;}
+
+		bool operator()( const MsgFuncBinding& m ) const {
+			return m.mid == mid_;
+		}
+	private:
+		MsgId mid_;
+};
+
 /**
  * Called from ~Msg. This requires the usual scan through all msgs,
  * and could get inefficient.
@@ -187,56 +201,34 @@ void Element::dropMsg( MsgId mid )
 	// Here we have the spectacularly ugly C++ erase-remove idiot.
 	m_.erase( remove( m_.begin(), m_.end(), mid ), m_.end() );
 
-	for ( vector< Conn >::iterator i = c_.begin(); i != c_.end(); ++i )
-		i->drop( mid ); // Get rid of specific Msg, if present, on Conn
+	for ( vector< vector< MsgFuncBinding > >::iterator i = msgBinding_.begin(); i != msgBinding_.end(); ++i ) {
+		matchMid match( mid ); 
+		i->erase( remove_if( i->begin(), i->end(), match ), i->end() );
+	}
 }
 
 void Element::addMsgAndFunc( MsgId mid, FuncId fid, BindIndex bindIndex )
 {
-	if ( msgBinding_.size() < bindIndex + 1 )
+	if ( msgBinding_.size() < bindIndex + 1U )
 		msgBinding_.resize( bindIndex + 1 );
 	msgBinding_[ bindIndex ].push_back( MsgFuncBinding( mid, fid ) );
+}
+
+void Element::clearBinding( BindIndex b )
+{
+	assert( msgBinding_.size() < bindIndex );
+	vector< MsgFuncBinding > temp = msgBinding_[ bindIndex ];
+	msgBinding_[ bindIndex ].resize( 0 );
+	for( vector< MsgFuncBinding >::iterator i = temp.begin(); 
+		i != temp.end(); ++i ) {
+		Msg::deleteMsg( i->mid );
+	}
 }
 
 const Cinfo* Element::cinfo() const
 {
 	return cinfo_;
 }
-
-/*
-void Element::addTargetFunc( FuncId fid, unsigned int funcIndex )
-{
-	if ( targetFunc_.size() < funcIndex + 1 )
-		targetFunc_.resize( funcIndex + 1 );
-	targetFunc_[ funcIndex ].push_back( fid );
-}
-
-FuncId Element::getTargetFunc( unsigned int funcIndex ) const
-{
-	assert ( targetFunc_.size() > funcIndex );
-	return targetFunc_[ funcIndex ];
-}
-
-const vector< FuncId >& Element::getTargetFuncVec(
-	unsigned int funcIndex ) const
-{
-	assert ( targetFunc_.size() > funcIndex );
-	return targetFunc_[ funcIndex ];
-}
-
-vector< FuncId >::const_iterator Element::getTargetFuncBegin(
-	unsigned int funcIndex ) const
-{
-	assert ( targetFunc_.size() > funcIndex );
-	return targetFunc_[ funcIndex ].begin();
-}
-
-unsigned int Element::getTargetFuncSize( unsigned int funcIndex ) const
-{
-	assert ( targetFunc_.size() > funcIndex );
-	return targetFunc_[ funcIndex ].size();
-}
-*/
 
 /*
  * Asynchronous send
@@ -261,6 +253,14 @@ void Element::asend( Qinfo& q, BindIndex bindIndex,
  * Asynchronous send to specific target.
  * Scan through potential targets, figure out direction, 
  * copy over FullId to sit in specially assigned space on queue.
+ *
+ * This may seem easier to do if we don't even bother with the Msg,
+ * and just plug in the queue entry.
+ * but there is a requirement that all function calls should be able
+ * to trace back their calling Element. At present that goes by the Msg.
+ *
+ * Note that this sends data only in the forward direction, that is,
+ * originating from Msg::e1.
  */
 void Element::tsend( Qinfo& q, BindIndex bindIndex, 
 	const ProcInfo *p, const char* arg, const FullId& target )

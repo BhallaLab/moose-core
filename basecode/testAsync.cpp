@@ -51,7 +51,9 @@ void insertIntoQ( )
 
 		*reinterpret_cast< DataId* >( buf + size ) = DataId( i );
 
-		qi.addToQ( 0, m->mid(), 1, buf );
+		MsgFuncBinding b( m->mid(), 1 );
+
+		qi.addToQ( 0, b, buf );
 	}
 	ProcInfo p;
 	Qinfo::clearQ( &p );
@@ -82,16 +84,13 @@ void testSendMsg()
 	Eref e2 = i2.eref();
 
 	Msg* m = new OneToOneMsg( e1.element(), e2.element() );
-	// Conn c;
-	// c.add( m );
-	ConnId cid = 0;
-	e1.element()->addMsgToConn( m->mid(), cid );
 
+	
 	ProcInfo p;
 	
-	SrcFinfo1<string> s( "test", "", cid );
-	s.registerSrcFuncIndex( 0 );
-	e1.element()->addTargetFunc( fid, s.getFuncIndex() );
+	SrcFinfo1<string> s( "test", "", 0U );
+	s.registerBindIndex( 0 );
+	e1.element()->addMsgAndFunc( m->mid(), fid, s.getBindIndex() );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		char temp[20];

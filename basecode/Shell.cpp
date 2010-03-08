@@ -19,9 +19,9 @@
 
 ProcInfo Shell::p_;
 
-const ConnId requestShellOp = 2;
-const ConnId ackShellOp = 1;
-const ConnId requestGetSlot = 0;
+const BindIndex requestShellOp = 2;
+const BindIndex ackShellOp = 1;
+const BindIndex requestGetSlot = 0;
 
 static SrcFinfo4< string, Id, Id, string  > *requestCreate =
 		new SrcFinfo4< string, Id, Id, string  >( "requestCreate",
@@ -325,7 +325,7 @@ unsigned int Shell::numCores()
 
 void Shell::start( double runtime )
 {
-	Id clockId( 1, 0 );
+	Id clockId( 1 );
 	Element* clocke = clockId();
 	Qinfo q;
 	if ( isSingleThreaded_ ) {
@@ -418,22 +418,18 @@ void Shell::start( double runtime )
 
 void Shell::setclock( unsigned int tickNum, double dt, unsigned int stage )
 {
-	Eref ce = Id( 1, 0 ).eref();
-	/*
-	Element* clocke = Id( 1, 0 )();
-	Element* ticke = Id( 2, 0 )();
-	Eref ce( clocke, 0 );
-	*/
+	Eref ce = Id( 1 ).eref();
 	SetGet3< unsigned int, double, unsigned int >::set( ce, "setupTick",
 		tickNum, dt, stage );
 }
 
 ////////////////////////////////////////////////////////////////////////
 
+// Deprecated. Will go into Shell.
 bool set( Eref& dest, const string& destField, const string& val )
 {
 	static Id shellid;
-	static ConnId setCid = 0;
+	static BindIndex setBinding = 0; // Need to fix up.
 	static unsigned int setFuncIndex = 0;
 	Element* shell = shellid();
 	SrcFinfo1< string > sf( "set", "dummy", 0 );
@@ -442,15 +438,12 @@ bool set( Eref& dest, const string& destField, const string& val )
 	const OpFunc* func = dest.element()->cinfo()->getOpFunc( fid );
 	if ( func ) {
 		if ( func->checkFinfo( &sf ) ) {
-			// Conn &c = shell->conn( setCid );
+			shell->clearBinding( setBinding );
 			shell->clearConn( setCid );
 			Eref shelle = shellid.eref();
-			// c.setMsgDest( shelle, dest );
 			Msg* m = new SingleMsg( shelle, dest );
-			shell->addMsgToConn( m->mid(), setCid );
-			shell->addTargetFunc( fid, setFuncIndex );
+			shell->addMsgFuncBinding( m->mid(), fid, setBinding );
 			sf.send( shelle, Shell::procInfo(), val );
-			// c.clearConn();
 			return 1;
 		} else {
 			cout << "set::Type mismatch" << dest << "." << destField << endl;

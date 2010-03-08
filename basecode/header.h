@@ -45,6 +45,11 @@ typedef unsigned int SyncId;
  */
 extern const FuncId ENDFUNC;
 
+/**
+ * Index into Element::vector< vector< MsgFuncBinding > > msgBinding_;
+ */
+typedef unsigned short BindIndex;
+
 class Element;
 class Eref;
 class OpFunc;
@@ -62,7 +67,6 @@ class Data;
 #include "Msg.h"
 #include "MsgFuncBinding.h"
 #include "Qinfo.h"
-#include "Conn.h"
 #include "Element.h"
 #include "Eref.h"
 #include "Id.h"

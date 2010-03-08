@@ -44,9 +44,9 @@ class Msg
 		 * This is generally the same function, so the base Msg provides it.
 		 * Will need to be specialized for multithread and
 		 * multinode dispersal of messages too.
-		 */
 		virtual void addToQ( const Element* caller, Qinfo& q,
 			const ProcInfo* p, const char* arg ) const;
+		 */
 
 		/**
 		 * Calls Process on e1.

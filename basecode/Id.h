@@ -27,9 +27,9 @@ class Id
 		Id();
 
 		/**
-		 * Returns an id with the specified number
+		 * Creates an id with the specified Element number
 		 */
-//		Id( unsigned int id, unsigned int index );
+		Id( unsigned int id );
 
 		/**
 		 * Returns an id found by traversing the specified path

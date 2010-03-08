@@ -22,7 +22,6 @@ OBJ = \
 	Finfo.o	\
 	Cinfo.o	\
 	Msg.o	\
-	Conn.o \
 	SrcFinfo.o \
 	Id.o \
 	FullId.o \
@@ -43,7 +42,6 @@ OBJ = \
 HEADERS = \
 	header.h \
 	Cinfo.h \
-	Conn.h \
 	Conv.h \
 	Data.h \
 	DataId.h \

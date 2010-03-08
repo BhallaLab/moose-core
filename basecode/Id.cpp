@@ -19,6 +19,10 @@ Id::Id()
 	: id_( 0 )
 {;}
 
+Id::Id( unsigned int id )
+	: id_( id )
+{;}
+
 Id::Id( const string& path, const string& separator )
 {
 	;
@@ -92,8 +96,9 @@ Eref Id::eref() const
 
 Id Id::create( Element* e )
 {
+	Id ret( elements().size() );
 	elements().push_back( e );
-	return Id( elements().size() - 1, 0 );
+	return ret;
 }
 
 void Id::destroy()

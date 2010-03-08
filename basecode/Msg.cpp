@@ -77,12 +77,12 @@ void Msg::process( const ProcInfo* p ) const
  * In other words, the Msg needs additional info in cases where we handle
  * multiple threads.
  */
+/*
 void Msg::addToQ( const Element* caller, Qinfo& q, 
 	const ProcInfo* p, const char* arg ) const
 {
 	q.addToQ( p->outQid, mid_, ( caller == e1_ ), arg );
 
-/*
 	q.setForward( caller == e1_ );
 	q.setMsgId( mid_ );
 	if ( caller == e1_ ) {
@@ -93,8 +93,8 @@ void Msg::addToQ( const Element* caller, Qinfo& q,
 		q.setMsgId( m1_ );
 		e1_->addToQ( q, arg );
 	}
-	*/
 }
+	*/
 
 const Msg* Msg::getMsg( MsgId m )
 {
@@ -134,8 +134,7 @@ bool SingleMsg::add( Eref e1, const string& srcField,
 
 	if ( srcFinfo ) {
 		Msg* m = new SingleMsg( e1, e2 );
-		e1.element()->addMsgToConn( m->mid(), srcFinfo->getConnId() );
-		e1.element()->addTargetFunc( funcId, srcFinfo->getFuncIndex() );
+		e1.element()->addMsgAndFunc( m->mid(), funcId, srcFinfo->getBindIndex() );
 		return 1;
 	}
 	return 0;
@@ -201,8 +200,7 @@ bool OneToAllMsg::add( Eref e1, const string& srcField,
 
 	if ( srcFinfo ) {
 		Msg* m = new OneToAllMsg( e1, e2 );
-		e1.element()->addMsgToConn( m->mid(), srcFinfo->getConnId() );
-		e1.element()->addTargetFunc( funcId, srcFinfo->getFuncIndex() );
+		e1.element()->addMsgAndFunc( m->mid(), funcId, srcFinfo->getBindIndex() );
 		return 1;
 	}
 	return 0;

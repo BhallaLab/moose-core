@@ -3406,4 +3406,13 @@ Putting in a new Qinfo::addSendToToQ to put the data in the right place
 =============================================================================
 4 Mar 2010
 Now grinding through the compilation and cleanup process. Since so much
-has been done, time to do a checkin.
+has been done, time to do a checkin. V1617.
+
+=============================================================================
+5 Mar 2010
+Compilation grind. Currently fixing up OpFunc.h:GetOpFunc return values.
+
+=============================================================================
+6 Mar 2010
+
+Still grinding through compilation. Now into Shell.cpp

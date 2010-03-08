@@ -19,7 +19,7 @@ Cinfo::Cinfo( const string& name,
 				unsigned int nSched
 )
 		: name_( name ), baseCinfo_( baseCinfo ), dinfo_( d ),
-			numConn_( 0 ), numFuncIndex_( 0 )
+			numBindIndex_( 0 )
 {
 	if ( cinfoMap().find( name ) != cinfoMap().end() ) {
 		cout << "Warning: Duplicate Cinfo name " << name << endl;
@@ -40,14 +40,13 @@ void Cinfo::init( Finfo** finfoArray, unsigned int nFinfos )
 		opFuncNames_[ "dummy" ] = 0;
 	}
 
-	numFuncIndex_ = 0;
+	numBindIndex_ = 0;
 	for ( unsigned int i = 0; i < nFinfos; i++ ) {
 		Finfo* f = finfoArray[i];
 		finfoMap_[ f->name() ] = f;
 		
 		f->registerOpFuncs( opFuncNames_, funcs_ );
-		numConn_= f->registerConn( numConn_ );
-		numFuncIndex_ = f->registerSrcFuncIndex( numFuncIndex_ );
+		numBindIndex_= f->registerBindIndex( numBindIndex_ );
 	}
 }
 
@@ -109,7 +108,7 @@ Id Cinfo::create( const string& name, unsigned int numEntries ) const
 		new Element( 
 			this, 
 			reinterpret_cast< char* >(dinfo_->allocData( numEntries ) ),
-			numEntries, dinfo_->size(), numFuncIndex_, numConn_ )
+			numEntries, dinfo_->size(), numBindIndex_ )
 	);
 }
 
@@ -118,14 +117,9 @@ void Cinfo::destroy( char* d ) const
 	dinfo_->destroyData( d );
 }
 
-unsigned int Cinfo::numConn() const
+unsigned int Cinfo::numBindIndex() const
 {
-	return numConn_;
-}
-
-unsigned int Cinfo::numFuncIndex() const
-{
-	return numFuncIndex_;
+	return numBindIndex_;
 }
 
 ////////////////////////////////////////////////////////////////////////
