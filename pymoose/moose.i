@@ -657,7 +657,7 @@ class Delay:
 %attribute(pymoose::TauPump, double, TB, __get_TB, __set_TB)
 %attribute(pymoose::TauPump, double, TC, __get_TC, __set_TC)
 %attribute(pymoose::TauPump, double, TV, __get_TV, __set_TV)
-
+#ifdef USE_GL
 %include "GLcell.h"
 %attribute(pymoose::GLcell, std::string, vizpath, __get_vizpath, __set_vizpath)
 %attribute(pymoose::GLcell, std::string, host, __get_clientHost, __set_clientHost)
@@ -698,7 +698,7 @@ class Delay:
 %attribute(pymoose::GLview, unsigned int, xoffset_val, __get_xoffsetVal, __set_xoffsetVal)
 %attribute(pymoose::GLview, unsigned int, yoffset_val, __get_yoffsetVal, __set_yoffsetVal)
 %attribute(pymoose::GLview, unsigned int, zoffset_val, __get_zoffsetVal, __set_zoffsetVal)
-
+#endif
 %include "TimeTable.h"
 %attribute(pymoose::TimeTable, double, maxTime, __get_maxTime, __set_maxTime)
 %attribute(pymoose::TimeTable, unsigned int, tableSize, __get_tableSize)
