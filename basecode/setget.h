@@ -138,7 +138,7 @@ template < class T1, class T2 > bool set(
 			f << " T1, T2 ): Finfo not found\n";
 		return 0;
 	}
-	return set( e, finfo, v1, v2 );
+	return ::set( e, finfo, v1, v2 );
 }
 
 /**
@@ -180,7 +180,7 @@ template < class T1, class T2, class T3 > bool set(
 			f << " T1, T2, T3 ): Finfo not found\n";
 		return 0;
 	}
-	return set( e, finfo, v1, v2, v3 );
+	return ::set( e, finfo, v1, v2, v3 );
 }
 
 
@@ -223,6 +223,6 @@ template < class T1, class T2, class T3, class T4 > bool set(
 			f << " T1, T2, T3, T4 ): Finfo not found\n";
 		return 0;
 	}
-	return set( e, finfo, v1, v2, v3, v4 );
+	return ::set( e, finfo, v1, v2, v3, v4 );
 }
 #endif // _SETGET_H
