@@ -2166,7 +2166,7 @@ void Shell::localFile2tab(
 		return;
 	}
 	
-	if ( !set< string, unsigned int >( e, "load", filename, skiplines ) ) {
+	if ( !::set< string, unsigned int >( e, "load", filename, skiplines ) ) {
 		cerr <<
 			"Error: Shell::file2tab: cannot set field " << e->name() << ".load\n";
 	}
@@ -2280,7 +2280,7 @@ void Shell::createGateMaster( const Conn* c, Id chan, string gateName )
 	assert( myNode() == 0 );
 	
 	IdGenerator idGen = Id::generator( chan.node() );
-	set< string >( chan(), "createGate", gateName, idGen );
+	::set< string >( chan(), "createGate", gateName, idGen );
 	
 #ifdef USE_MPI
 	if ( chan.isGlobal() ) {
@@ -2299,7 +2299,7 @@ void Shell::createGateWorker(
 	assert( myNode() != 0 );
 	assert( chan.good() && chan.isGlobal() );
 	
-	set< string, IdGenerator >( chan(), "createGate", gateName, idGen );
+	::set< string, IdGenerator >( chan(), "createGate", gateName, idGen );
 }
 
 
@@ -2336,7 +2336,7 @@ void Shell::setClock( const Conn* c, int clockNo, double dt,
 			tick = Neutral::create( 
 						"ParTick", TickName, cj, Id::scratchId() );
 			assert( tick != 0 );
-			bool ret = set< bool >( tick, "doSync", 1 );
+			bool ret = ::set< bool >( tick, "doSync", 1 );
 			assert(ret );
 			cout << "setClock: Creating parTick on node " << myNode() << endl;
 			Eref pe = Id::postId( Id::AnyIndex ).eref();
@@ -2351,10 +2351,10 @@ void Shell::setClock( const Conn* c, int clockNo, double dt,
 		tick = id();
 	}
 	assert ( tick != 0 && tick != Element::root() );
-	set< double >( tick, "dt", dt );
+	::set< double >( tick, "dt", dt );
 	if ( stage >= 0 ) // Otherwise leave it at earlier value.
-		set< int >( tick, "stage", stage );
-	set( cj(), "resched" );
+		::set< int >( tick, "stage", stage );
+	::set( cj(), "resched" );
 	// Call the function
 }
 
@@ -2606,11 +2606,11 @@ void Shell::resched( const Conn* c )
 #endif
 	// Should be a msg
 	Element* cj = findCj();
-	set( cj, "resched" );
+	::set( cj, "resched" );
 	Id kinetics = Id::localId( "/kinetics" );
 	if ( kinetics.good() && 
 		kinetics.eref().e->className() == "KineticManager" )
-		set( kinetics(), "resched" );
+		::set( kinetics(), "resched" );
 }
 
 void Shell::reinit( const Conn* c )
@@ -2623,7 +2623,7 @@ void Shell::reinit( const Conn* c )
 #endif
 	// Should be a msg
 	Element* cj = findCj();
-	set( cj, "reinit" );
+	::set( cj, "reinit" );
 }
 
 void Shell::stop( const Conn* c )
@@ -2643,7 +2643,7 @@ void Shell::step( const Conn* c, double time )
 #endif
 	// Should be a msg
 	Element* cj = findCj();
-	set< double >( cj, "start", time );
+	::set< double >( cj, "start", time );
 }
 
 /**
@@ -2984,7 +2984,7 @@ void Shell::setupAlpha( const Conn* c, Id gateId,
 				<< gate->name() << endl;
 		return;
 	}
-	set< vector< double > >( gate, setupAlphaFinfo, parms );
+	::set< vector< double > >( gate, setupAlphaFinfo, parms );
 	
 #ifdef USE_MPI
 	if ( gateId.isGlobal() && myNode() == 0 )
@@ -3006,7 +3006,7 @@ void Shell::setupTau( const Conn* c, Id gateId,
 				<< gate->name() << endl;
 		return;
 	}
-	set< vector< double > >( gate, setupTauFinfo, parms );
+	::set< vector< double > >( gate, setupTauFinfo, parms );
 	
 #ifdef USE_MPI
 	if ( gateId.isGlobal() && myNode() == 0 )
@@ -3027,7 +3027,7 @@ void Shell::tweakAlpha( const Conn* c, Id gateId )
 				<< gate->name() << endl;
 		return;
 	}
-	set( gate, tweakAlphaFinfo );
+	::set( gate, tweakAlphaFinfo );
 	
 #ifdef USE_MPI
 	if ( gateId.isGlobal() && myNode() == 0 )
@@ -3048,7 +3048,7 @@ void Shell::tweakTau( const Conn* c, Id gateId )
 				<< gate->name() << endl;
 		return;
 	}
-	set( gate, tweakTauFinfo );
+	::set( gate, tweakTauFinfo );
 	
 #ifdef USE_MPI
 	if ( gateId.isGlobal() && myNode() == 0 )
@@ -3070,7 +3070,7 @@ void Shell::setupGate( const Conn* c, Id gateId,
 				<< gate->name() << endl;
 		return;
 	}
-	set< vector< double > >( gate, setupGateFinfo, parms );
+	::set< vector< double > >( gate, setupGateFinfo, parms );
 	
 #ifdef USE_MPI
 	if ( gateId.isGlobal() && myNode() == 0 )
@@ -3148,7 +3148,7 @@ void Shell::loadtab( const Conn* c, string data )
 
 void Shell::tabop( const Conn* c, Id tab, char op, double min, double max )
 {
-	set< char, double, double >( tab(), "tabop", op, min, max );
+	::set< char, double, double >( tab(), "tabop", op, min, max );
 }
 
 //////////////////////////////////////////////////////////////////
@@ -3345,7 +3345,7 @@ void Shell::destroy( Id victim )
 		return;
 	}
 
-	set( e, "destroy" );
+	::set( e, "destroy" );
 }
 
 /**
