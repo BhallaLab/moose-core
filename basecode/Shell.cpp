@@ -430,7 +430,6 @@ bool set( Eref& dest, const string& destField, const string& val )
 {
 	static Id shellid;
 	static BindIndex setBinding = 0; // Need to fix up.
-	static unsigned int setFuncIndex = 0;
 	Element* shell = shellid();
 	SrcFinfo1< string > sf( "set", "dummy", 0 );
 
@@ -439,10 +438,10 @@ bool set( Eref& dest, const string& destField, const string& val )
 	if ( func ) {
 		if ( func->checkFinfo( &sf ) ) {
 			shell->clearBinding( setBinding );
-			shell->clearConn( setCid );
+			shell->clearBinding( setBinding );
 			Eref shelle = shellid.eref();
 			Msg* m = new SingleMsg( shelle, dest );
-			shell->addMsgFuncBinding( m->mid(), fid, setBinding );
+			shell->addMsgAndFunc( m->mid(), fid, setBinding );
 			sf.send( shelle, Shell::procInfo(), val );
 			return 1;
 		} else {
@@ -457,8 +456,7 @@ bool set( Eref& dest, const string& destField, const string& val )
 bool get( const Eref& dest, const string& destField )
 {
 	static Id shellid;
-	static ConnId getCid = 0;
-	static unsigned int getFuncIndex = 0;
+	static BindIndex getBindIndex = 0;
 
 	static const Finfo* reqFinfo = shellCinfo->findFinfo( "requestGet" );
 	static const SrcFinfo1< FuncId >* rf = 
@@ -476,11 +474,9 @@ bool get( const Eref& dest, const string& destField )
 
 	if ( func ) {
 		if ( func->checkFinfo( &sf ) ) {
-			shell->clearConn( getCid );
+			shell->clearBinding( getBindIndex );
 			Msg* m = new SingleMsg( shelle, dest );
-			shell->addMsgToConn( m->mid(), getCid );
-
-			shell->addTargetFunc( fid, getFuncIndex );
+			shell->addMsgAndFunc( m->mid(), fid, getBindIndex );
 			rf->send( shelle, Shell::procInfo(), retFunc );
 			// Now, dest has to clearQ, do its stuff, then src has to clearQ
 			return 1;

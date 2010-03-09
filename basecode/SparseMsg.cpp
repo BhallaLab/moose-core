@@ -77,8 +77,7 @@ bool SparseMsg::add( Element* e1, const string& srcField,
 
 	if ( srcFinfo ) {
 		SparseMsg* m = new SparseMsg( e1, e2 );
-		e1->addMsgToConn( m->mid(), srcFinfo->getConnId() );
-		e1->addTargetFunc( funcId, srcFinfo->getFuncIndex() );
+		e1->addMsgAndFunc( m->mid(), funcId, srcFinfo->getBindIndex() );
 		m->randomConnect( probability );
 		return 1;
 	}

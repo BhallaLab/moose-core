@@ -47,9 +47,10 @@ Qinfo::Qinfo( bool useSendTo, bool isForward,
 {;}
 
 Qinfo::Qinfo()
-	:	m_( 0 ), 
+	:	
 		useSendTo_( 0 ), 
 		isForward_( 1 ), 
+		m_( 0 ), 
 		f_( 0 ), 
 		srcIndex_( 0 ),
 		size_( 0 )
@@ -244,7 +245,7 @@ void Qinfo::addToQ( Qid qId, MsgFuncBinding b, const char* arg )
 }
 
 void Qinfo::addSpecificTargetToQ( Qid qId, MsgFuncBinding b, 
-	const char* arg, DataId& target )
+	const char* arg, const DataId& target )
 {
 	assert( qId < outQ_.size() );
 

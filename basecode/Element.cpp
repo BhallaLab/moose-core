@@ -216,9 +216,9 @@ void Element::addMsgAndFunc( MsgId mid, FuncId fid, BindIndex bindIndex )
 
 void Element::clearBinding( BindIndex b )
 {
-	assert( msgBinding_.size() < bindIndex );
-	vector< MsgFuncBinding > temp = msgBinding_[ bindIndex ];
-	msgBinding_[ bindIndex ].resize( 0 );
+	assert( msgBinding_.size() < b );
+	vector< MsgFuncBinding > temp = msgBinding_[ b ];
+	msgBinding_[ b ].resize( 0 );
 	for( vector< MsgFuncBinding >::iterator i = temp.begin(); 
 		i != temp.end(); ++i ) {
 		Msg::deleteMsg( i->mid );
@@ -271,7 +271,7 @@ void Element::tsend( Qinfo& q, BindIndex bindIndex,
 		msgBinding_[ bindIndex ].begin(); 
 		i != msgBinding_[ bindIndex ].end(); ++i ) {
 		if ( Msg::getMsg( i->mid )->e1() == e ) {
-			q.addSpecificTargetToQ( p->outQid, *i, arg );
+			q.addSpecificTargetToQ( p->outQid, *i, arg, target.dataId );
 			return;
 		}
 	}

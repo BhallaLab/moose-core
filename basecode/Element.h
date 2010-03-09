@@ -198,6 +198,8 @@ class Element
 		void clearConn( ConnId cid );
 		 */
 
+		void clearBinding( BindIndex b );
+
 		/**
 		 * Pushes back the specified Msg and Func pair into the properly
 		 * indexed place on the msgBinding_ vector.

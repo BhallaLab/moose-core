@@ -13,6 +13,10 @@
 class MsgFuncBinding
 {
 	public:
+		MsgFuncBinding()
+			: mid( 0 ), fid( 0 )
+		{;}
+
 		MsgFuncBinding( MsgId m, FuncId f )
 			: mid( m ), fid( f )
 		{;}

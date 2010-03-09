@@ -136,7 +136,8 @@ class Qinfo
 		 */
 		// void addToQ( Qid qId, MsgId mid, bool isForward, const char* arg );
 		void addToQ( Qid qId, MsgFuncBinding b, const char* arg );
-		void addSpecificTargetToQ( Qid qId, MsgFuncBinding b, const char* arg );
+		void addSpecificTargetToQ( Qid qId, MsgFuncBinding b, 
+			const char* arg, const DataId& target );
 
 	private:
 		bool useSendTo_;	// true if the msg is to a single target DataId.

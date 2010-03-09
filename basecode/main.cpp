@@ -66,8 +66,8 @@ Id init( int argc, char** argv )
 	Id tickId = Id::create( ticke );
 
 	assert ( shellid == Id() );
-	assert( clockId == Id( 1, 0 ) );
-	assert( tickId == Id( 2, 0 ) );
+	assert( clockId == Id( 1 ) );
+	assert( tickId == Id( 2 ) );
 	SetGet::setShell();
 	Shell* s = reinterpret_cast< Shell* >( shellid.eref().data() );
 	s->setHardware( isSingleThreaded, numCores, numNodes );
@@ -100,8 +100,8 @@ int main( int argc, char** argv )
 	}
 
 	delete Id()();
-	delete Id( 1, 0 )();
-	delete Id( 2, 0 )();
+	delete Id( 1 )();
+	delete Id( 2 )();
 	return 0;
 }
 

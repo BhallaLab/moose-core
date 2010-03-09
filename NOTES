@@ -3416,3 +3416,6 @@ Compilation grind. Currently fixing up OpFunc.h:GetOpFunc return values.
 6 Mar 2010
 
 Still grinding through compilation. Now into Shell.cpp
+=============================================================================
+9 Mar 2010.
+Compiled through basecode directory. Others pending.

@@ -77,8 +77,7 @@ bool PsparseMsg::add( Element* e1, const string& srcField,
 
 	if ( srcFinfo ) {
 		PsparseMsg* m = new PsparseMsg( e1, e2 );
-		e1->addMsgToConn( m->mid(), srcFinfo->getConnId() );
-		e1->addTargetFunc( funcId, srcFinfo->getFuncIndex() );
+		e1->addMsgAndFunc( m->mid(), funcId, srcFinfo->getBindIndex() );
 		m->randomConnect( probability );
 		m->loadBalance( numThreadsInGroup );
 		return 1;

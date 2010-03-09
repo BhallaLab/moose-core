@@ -175,7 +175,7 @@ template< class T, class A > class GetUpFunc: public OpFunc
 			arg.val2buf( temp );
 			MsgFuncBinding mfb( q->mid(), retFunc );
 			retq.addSpecificTargetToQ( Shell::procInfo()->outQid, mfb, 
-				temp );
+				temp, q->srcIndex() );
 			delete[] temp;
 		}
 

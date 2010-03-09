@@ -60,20 +60,13 @@ bool SetGet::checkSet( const string& field, FuncId& fid ) const
  */
 void SetGet::iSetInner( FuncId fid, const char* val, unsigned int size )
 {
-	static ConnId setCid = 0;
-	static unsigned int setFuncIndex = 0;
-	shell_->clearConn( setCid );
+	static unsigned int setBindIndex = 0;
+	shell_->clearBinding( setBindIndex );
 	Msg* m = new SingleMsg( shelle_, e_ );
-	/*
-	if ( e_.index().toAll() ) {
-		Msg* m = new SingleMsg( shelle_, e_ );
-	} else {
-		Msg* m = new OneToAllMsg( shelle_, e_ );
-	}
-	*/
-	shell_->addMsgToConn( m->mid(), setCid );
-	shell_->addTargetFunc( fid, setFuncIndex );
-	shelle_.asend( setCid, setFuncIndex, Shell::procInfo(), val, size );
+	shell_->addMsgAndFunc( m->mid(), fid, setBindIndex );
+	// Qinfo( FuncId f, DataId srcIndex, unsigned int size )
+	Qinfo q(  fid, 0, size );
+	shell_->asend( q, setBindIndex, Shell::procInfo(), val );
 }
 
 void SetGet::resizeBuf( unsigned int size )
@@ -121,18 +114,17 @@ bool SetGet::checkGet( const string& field, FuncId& getFid )
 
 bool SetGet::iGet( const string& field ) const
 {
-	static ConnId getCid = 0;
-	static unsigned int getFuncIndex = 0;
+	static unsigned int getBindIndex = 0;
 	static FuncId retFunc = shell_->cinfo()->getOpFuncId( "handleGet" );
 
 	FuncId destFid;
 	if ( checkGet( field, destFid ) ) {
-		shell_->clearConn( getCid );
+		shell_->clearBinding( getBindIndex );
 		Msg* m = new SingleMsg( shelle_, e_ );
-		shell_->addMsgToConn( m->mid(), getCid );
-		shell_->addTargetFunc( destFid, getFuncIndex );
-		shelle_.asend( getCid, getFuncIndex, Shell::procInfo(),  
-			reinterpret_cast< char* >( &retFunc ), sizeof( FuncId ) );
+		shell_->addMsgAndFunc( m->mid(), destFid, getBindIndex );
+		Qinfo q( destFid, 0, sizeof( FuncId ) );
+		shell_->asend( q, getBindIndex, Shell::procInfo(),  
+			reinterpret_cast< char* >( &retFunc ) );
 		return 1;
 	}
 	return 0;

@@ -59,6 +59,7 @@ HEADERS = \
 	SrcFinfo.h \
 	ValueFinfo.h \
 	Shell.h \
+	MsgFuncBinding.h \
 
 default: $(TARGET)
 
