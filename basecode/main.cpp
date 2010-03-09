@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "Shell.h"
 #include <sys/time.h>
 #include <math.h>
 #include <queue>

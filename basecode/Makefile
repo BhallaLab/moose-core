@@ -28,7 +28,6 @@ OBJ = \
 	testSync.o	\
 	testAsync.o	\
 	Neutral.o	\
-	Shell.o	\
 	Qinfo.o \
 	DataId.o \
 	Message.o \
@@ -37,7 +36,6 @@ OBJ = \
 	SparseMsg.o \
 	PsparseMsg.o \
 	main.o	\
-	testShell.o	\
 
 HEADERS = \
 	header.h \
@@ -58,7 +56,6 @@ HEADERS = \
 	Qinfo.h \
 	SrcFinfo.h \
 	ValueFinfo.h \
-	Shell.h \
 	MsgFuncBinding.h \
 
 default: $(TARGET)

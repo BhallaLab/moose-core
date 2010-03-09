@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "Shell.h"
 #include "SetGet.h"
 
 Eref SetGet::shelle_( 0, 0 );

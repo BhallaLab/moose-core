@@ -10,7 +10,6 @@
 #include "header.h"
 #include "Neutral.h"
 #include "Dinfo.h"
-#include "Shell.h"
 #include "Message.h"
 #include <queue>
 #include "../biophysics/Synapse.h"

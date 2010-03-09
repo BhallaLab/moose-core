@@ -194,6 +194,7 @@ LD = ld
 
 SUBDIR = \
 	basecode \
+	shell \
 	biophysics\
 	randnum\
 	scheduling\
@@ -206,6 +207,7 @@ CLEANSUBDIR = $(SUBDIR)
 
 OBJLIBS =	\
 	basecode/basecode.o \
+	shell/shell.o \
 	biophysics/biophysics.o \
 	randnum/randnum.o \
 	scheduling/scheduling.o \

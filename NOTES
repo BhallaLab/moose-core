@@ -3426,9 +3426,17 @@ Checkin 1624.
 Also clears valgrind, with the usual caveat about pthreads.
 
 Now to step back and look at the status with respect to multinode testing
-- Redo benchmarking.
+* Redo benchmarking.
 - Get Shell commands to work for basic functions
 - Get Shared Messages to work
 - Get Shell Messages to work for basic functions
 
+
+Benchmarking on gj (opteron 2.4 GHz)
+./moose		./moose -c 2	-c 4		-c 8
+45		36.7/19.3	43.4/12		44.5/13.0
+This is marginally slower than earlier, under 10%.
+
+Minor shuffling to put Shell stuff in a separate directory. Will be handy
+as the # of functions handled by Shell increases.
 =============================================================================

@@ -73,7 +73,7 @@ class Data;
 #include "FullId.h"
 #include "Conv.h"
 #include "SrcFinfo.h"
-#include "Shell.h"
+#include "../shell/Shell.h"
 #include "SetGet.h"
 #include "OpFunc.h"
 #include "EpFunc.h"
