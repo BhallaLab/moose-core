@@ -25,7 +25,7 @@ class testSchedElement: public Element
 {
 	public:
 		testSchedElement() 
-			: Element( Tick::initCinfo(), 0, 0, 0, 0, 0 ), index_( 0 )
+			: Element( Tick::initCinfo(), 0, 0, 0, 0 ), index_( 0 )
 		{;}
 		
 		void process( const ProcInfo* p ) {
@@ -48,7 +48,7 @@ class testThreadSchedElement: public Element
 {
 	public:
 		testThreadSchedElement() 
-			: Element( Tick::initCinfo(), 0, 0, 0, 0, 0 ), index_( 0 )
+			: Element( Tick::initCinfo(), 0, 0, 0, 0 ), index_( 0 )
 		{ 
 			pthread_mutex_init( &mutex_, NULL );
 		}
@@ -162,12 +162,14 @@ void setupTicks()
 	testSchedElement tse;
 	Eref ts( &tse, 0 );
 	
-	SingleMsg m0( er0, ts ); er0.element()->addMsgToConn( m0.mid(), 0 );
-	SingleMsg m1( er1, ts ); er1.element()->addMsgToConn( m1.mid(), 1 );
-	SingleMsg m2( er2, ts ); er2.element()->addMsgToConn( m2.mid(), 2 );
-	SingleMsg m3( er3, ts ); er3.element()->addMsgToConn( m3.mid(), 3 );
-	SingleMsg m4( er4, ts ); er4.element()->addMsgToConn( m4.mid(), 4 );
-	SingleMsg m5( er5, ts ); er5.element()->addMsgToConn( m5.mid(), 7 );
+	// No idea what FuncId to use here. Assume 0.
+	FuncId f( 0 );
+	SingleMsg m0( er0, ts ); er0.element()->addMsgAndFunc( m0.mid(), f, 0 );
+	SingleMsg m1( er1, ts ); er1.element()->addMsgAndFunc( m1.mid(), f, 1 );
+	SingleMsg m2( er2, ts ); er2.element()->addMsgAndFunc( m2.mid(), f, 2 );
+	SingleMsg m3( er3, ts ); er3.element()->addMsgAndFunc( m3.mid(), f, 3 );
+	SingleMsg m4( er4, ts ); er4.element()->addMsgAndFunc( m4.mid(), f, 4 );
+	SingleMsg m5( er5, ts ); er5.element()->addMsgAndFunc( m5.mid(), f, 7 );
 
 	Qinfo q( 0, 0, 8 );
 	cdata->start( clocker, &q, 20 );
@@ -190,7 +192,7 @@ void testThreads()
 
 	testThreadSchedElement tse;
 	Eref ts( &tse, 0 );
-	Element* ticke = Id( 2, 0 )();
+	Element* ticke = Id( 2 )();
 	Eref er0( ticke, DataId( 0, 0 ) );
 	Eref er1( ticke, DataId( 0, 1 ) );
 	Eref er2( ticke, DataId( 0, 2 ) );
@@ -198,12 +200,14 @@ void testThreads()
 	Eref er4( ticke, DataId( 0, 4 ) );
 	Eref er5( ticke, DataId( 0, 5 ) );
 
-	SingleMsg m0( er0, ts ); er0.element()->addMsgToConn( m0.mid(), 0 );
-	SingleMsg m1( er1, ts ); er1.element()->addMsgToConn( m1.mid(), 1 );
-	SingleMsg m2( er2, ts ); er2.element()->addMsgToConn( m2.mid(), 2 );
-	SingleMsg m3( er3, ts ); er3.element()->addMsgToConn( m3.mid(), 3 );
-	SingleMsg m4( er4, ts ); er4.element()->addMsgToConn( m4.mid(), 4 );
-	SingleMsg m5( er5, ts ); er5.element()->addMsgToConn( m5.mid(), 5 );
+	// No idea what FuncId to use here. Assume 0.
+	FuncId f( 0 );
+	SingleMsg m0( er0, ts ); er0.element()->addMsgAndFunc( m0.mid(), f, 0 );
+	SingleMsg m1( er1, ts ); er1.element()->addMsgAndFunc( m1.mid(), f, 1 );
+	SingleMsg m2( er2, ts ); er2.element()->addMsgAndFunc( m2.mid(), f, 2 );
+	SingleMsg m3( er3, ts ); er3.element()->addMsgAndFunc( m3.mid(), f, 3 );
+	SingleMsg m4( er4, ts ); er4.element()->addMsgAndFunc( m4.mid(), f, 4 );
+	SingleMsg m5( er5, ts ); er5.element()->addMsgAndFunc( m5.mid(), f, 5 );
 	s->start( 10 );
 
 	cout << "." << flush;
@@ -288,7 +292,7 @@ void testThreadIntFireNetwork()
 	Shell* s = reinterpret_cast< Shell* >( se->data( 0 ) );
 	s->setclock( 0, timestep, 0 );
 
-	Element* ticke = Id( 2, 0 )();
+	Element* ticke = Id( 2 )();
 	Eref er0( ticke, DataId( 0, 0 ) );
 
 	ret = SingleMsg::add( er0, "process0", e2, "process" );

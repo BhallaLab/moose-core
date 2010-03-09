@@ -225,6 +225,14 @@ void Element::clearBinding( BindIndex b )
 	}
 }
 
+const vector< MsgFuncBinding >* Element::getMsgAndFunc( BindIndex b ) const
+{
+	if ( b < msgBinding_.size() )
+		return &( msgBinding_[ b ] );
+	return 0;
+}
+
+
 const Cinfo* Element::cinfo() const
 {
 	return cinfo_;

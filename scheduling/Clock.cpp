@@ -64,7 +64,8 @@
 #include "TickPtr.h"
 #include "Clock.h"
 
-const unsigned int tickSlot = 0;
+const BindIndex tickSlot = 0;
+
 static SrcFinfo0* tickSrc = 
 	new SrcFinfo0( 
 		"tick",
@@ -263,15 +264,6 @@ void Clock::setNumTicks( unsigned int num )
 	rebuild();
 }
 
-Element* Clock::getTickE( Element* e )
-{
-	const Conn* c = e->conn( tickSlot );
-	assert( c != 0 );
-	Element* ret = c->getTargetElement( e, 0 );
-	assert( ret );
-	return ret;
-}
-
 unsigned int Clock::getNumPendingThreads() const
 {
 	return numPendingThreads_;
@@ -310,8 +302,7 @@ void Clock::start(  Eref e, const Qinfo* q, double runTime )
 	double endTime = runTime * ROUNDING + info_.currTime;
 	isRunning_ = 1;
 
-	// Element* ticke = getTickE( e.element() );
-	Element* ticke = Id( 2, 0 )();
+	Element* ticke = Id( 2 )();
 
 	if ( tickPtr_.size() == 1 ) {
 		tickPtr_[0].advance( ticke, &info_, endTime, 0 );
@@ -374,8 +365,7 @@ void Clock::tStart(  Eref e, const ThreadInfo* ti )
 	double endTime = ti->runtime * ROUNDING + info_.currTime;
 	isRunning_ = 1;
 
-	// Element* ticke = getTickE( e.element() );
-	Element* ticke = Id( 2, 0 )();
+	Element* ticke = Id( 2 )();
 
 	if ( tickPtr_.size() == 1 ) {
 		tickPtr_[0].advance( ticke, &pinfo, endTime, ti->timeMutex );

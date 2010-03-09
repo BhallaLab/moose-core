@@ -157,12 +157,6 @@ class Element
 		 */
 		virtual void getArraySizes( vector< unsigned int >& sizes ) const;
 
-		/** 
-		 * This function pushes a function request onto a queue.
-		 * In multithread mode it figures out which queue to use.
-		void addToQ( const Qinfo& qi, const char* arg );
-		 */
-
 		/**
 		 * We'll try these out as alternate Send functions, given that
 		 * the buffer is local.
@@ -170,9 +164,18 @@ class Element
 		void ssend1( SyncId slot, unsigned int i, double v );
 		void ssend2( SyncId slot, unsigned int i, double v1, double v2 );
 
+		/**
+		 * Asynchronous send command. Adds Qinfo and data onto msg specified
+		 * by bindIndex, and queue specified in the ProcInfo.
+		 */
 		void asend( Qinfo& q, BindIndex bindIndex, 
 			const ProcInfo *p, const char* arg );
 
+		/**
+		 * Asynchronous send command, going to specific target Element/Data.
+		 * Adds Qinfo and data onto msg specified
+		 * by bindIndex, and queue specified in the ProcInfo.
+		 */
 		void tsend( Qinfo& q, BindIndex bindIndex, 
 			const ProcInfo *p, const char* arg, const FullId& target );
 
@@ -187,17 +190,10 @@ class Element
 		 * Removes the specified msg from the list.
 		 */
 		void dropMsg( MsgId mid );
-
-		/**
-		 * Puts the specified Msg on the specified Connection.
-		void addMsgToConn( MsgId m, ConnId cid );
-		 */
 		
 		/**
-		 * Clears out all Msgs on specified conn. Used in Shell::set
-		void clearConn( ConnId cid );
+		 * Clears out all Msgs on specified BindIndex. Used in Shell::set
 		 */
-
 		void clearBinding( BindIndex b );
 
 		/**
@@ -207,28 +203,15 @@ class Element
 		void addMsgAndFunc( MsgId mid, FuncId fid, BindIndex bindIndex );
 
 		/**
-		 * Puts the specified TargetFunc into the properly indexed place
-		void addTargetFunc( FuncId fid, unsigned int funcIndex );
+		 * gets the Msg/Func binding information for specified bindIndex.
+		 * This is a vector.
+		 * Returns 0 on failure.
 		 */
+		const vector< MsgFuncBinding >* getMsgAndFunc( BindIndex b ) const;
 
 		/**
-		 * Returns the begin iterator for the FuncId vector at the specified
-		 * funcIndex.
+		 * Gets the class information for this Element
 		 */
-		// vector< FuncId >::const_iterator getMsgBindingBegin( unsigned short bindIndex ) const;
-
-		/**
-		 * Returns the # of funcIds at the specified funcIndex
-		 */
-		unsigned int getTargetFuncSize( unsigned int funcIndex ) const;
-
-
-
-		/**
-		 * Returns the target FuncId from funcIndex
-		 */
-		// FuncId getTargetFunc( unsigned int funcIndex ) const;
-
 		const Cinfo* cinfo() const;
 
 		// const Msg* getMsg( MsgId mid ) const;
@@ -301,25 +284,10 @@ class Element
 		vector< MsgId > m_;
 
 		/**
-		 * Connection vector. Connections are mid-level messaging info.
-		 * They group together messages to be called by a given 'send'
-		 * command.
-		 * Each SrcFinfo has a predefined index, ConnId, into the 
-		 * Connection vector. Many SrcFinfos may share the same Conn.
-		 */
-		// vector< Conn > c_;
-
-		/**
-		 * Function Ids attached to outgoing Messages. Each SrcFinfo
-		 * has a predefined funcIndex that looks into the targetFunc_
-		 * vector. As we iterate through the target MsgIds on the 
-		 * Conn vector, we also step through the FuncIds.
-		 * Each SrcFinfo has a unique funcIndex.
-		 */
-		// vector< vector< FuncId > > targetFunc_;
-
-		/**
-		 * Binds a message to its function. Indexed from srcMsg.
+		 * Binds an outgoing message to its function.
+		 * SrcFinfo keeps track of the BindIndex to look things up.
+		 * Note that a single BindIndex may refer to multiple Msg/Func
+		 * pairs.
 		 */
 		vector< vector < MsgFuncBinding > > msgBinding_;
 

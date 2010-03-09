@@ -3,7 +3,7 @@
 #include "Synapse.h"
 #include "IntFire.h"
 
-const ConnId spikeSlot = 0;
+const BindIndex spikeSlot = 0;
 
 static SrcFinfo1< double >* spike = 
 	new SrcFinfo1< double >( 

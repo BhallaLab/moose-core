@@ -226,11 +226,6 @@ void Tick::destroy( Eref e, const Qinfo* q )
 void Tick::advance( Element* e, ProcInfo* info ) const
 {
 	// cout << "(" << dt_ << ", " << stage_ << " ) at t= " << info->currTime << " on thread " << info->threadId << endl;
-	// Hack: we need a better way to define which connId to use.
-	// Presumably we should at least take an offset from the predefined
-	// Slots like children.
-	// const Conn* c = e->conn( index_ );
-	const Conn* c = e->conn( index_ );
 	if ( info->barrier ) {
 		int rc = pthread_barrier_wait(
 			reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
@@ -249,7 +244,14 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 	}
 	Qinfo::readQ( info ); // March through big queue.
-	c->process( info ); // Do object local ops.
+
+	// March through Process calls for each scheduled Element.
+	// Note that there is a unique BindIndex for each tick.
+	// We preallocate 0 through 10 for this. May need to rethink.
+	const vector< MsgFuncBinding >* m = e->getMsgAndFunc( index_ );
+	for ( vector< MsgFuncBinding >::const_iterator i = m->begin();
+		i != m->end(); ++i )
+		Msg::getMsg( i->mid )->process( info );
 }
 
 void Tick::setIndex( unsigned int index ) 

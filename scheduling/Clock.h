@@ -99,13 +99,6 @@ class Clock: public Data
 		 */
 		Tick* getTick( unsigned int i );
 
-		/**
-		 * Looks up the tick Element. Failure is not an option.
-		 */
-		Element* getTickE( Element* clocke );
-
-//		void sortTicks();
-
 		unsigned int getNumTicks() const;
 		void setNumTicks( unsigned int num );
 		void setBarrier( void* barrier );
