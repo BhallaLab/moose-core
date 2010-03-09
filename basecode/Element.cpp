@@ -216,7 +216,7 @@ void Element::addMsgAndFunc( MsgId mid, FuncId fid, BindIndex bindIndex )
 
 void Element::clearBinding( BindIndex b )
 {
-	assert( msgBinding_.size() < b );
+	assert( b < msgBinding_.size() );
 	vector< MsgFuncBinding > temp = msgBinding_[ b ];
 	msgBinding_[ b ].resize( 0 );
 	for( vector< MsgFuncBinding >::iterator i = temp.begin(); 

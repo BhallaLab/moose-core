@@ -3419,5 +3419,8 @@ Still grinding through compilation. Now into Shell.cpp
 =============================================================================
 9 Mar 2010.
 Compiled through basecode directory. Others pending. Checked in revision 1622.
+Compiled entire thing. Doesn't clear unit tests. Checkin 1623.
+
+Fixed minor bug. To my utter astonishment the thing now does clear unit tests.
 
 =============================================================================
