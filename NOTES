@@ -3422,5 +3422,13 @@ Compiled through basecode directory. Others pending. Checked in revision 1622.
 Compiled entire thing. Doesn't clear unit tests. Checkin 1623.
 
 Fixed minor bug. To my utter astonishment the thing now does clear unit tests.
+Checkin 1624.
+Also clears valgrind, with the usual caveat about pthreads.
+
+Now to step back and look at the status with respect to multinode testing
+- Redo benchmarking.
+- Get Shell commands to work for basic functions
+- Get Shared Messages to work
+- Get Shell Messages to work for basic functions
 
 =============================================================================
