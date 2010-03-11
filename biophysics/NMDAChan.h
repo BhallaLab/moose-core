@@ -5,9 +5,9 @@
 // Maintainer: 
 // Created: Mon Mar  8 15:13:02 2010 (+0530)
 // Version: 
-// Last-Updated: Mon Mar  8 15:15:26 2010 (+0530)
+// Last-Updated: Thu Mar 11 14:42:18 2010 (+0530)
 //           By: Subhasis Ray
-//     Update #: 6
+//     Update #: 63
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -44,13 +44,52 @@
 
 // Code:
 
+#ifndef _NMDACchan_h
+
+#include "SynChan.h"
+
 class NMDAChan: public SynChan
 {
+  public:
+    NMDAChan();
+    static void setTransitionParam(const Conn* c, int index, double value);
+    void innerSetTransitionParam(int index, double value);
+    static double getTransitionParam(Eref e, int index);
+    double innerGetTransitionParam(int index);
+    static double getUnblocked(Eref e);
+    double innerGetUnblocked();
+    static void processFunc(const Conn* conn, ProcInfo info);
+    void innerProcessFunc(Eref e, ProcInfo info);
+    static void reinitFunc(const Conn* conn, ProcInfo info);
+    void innerReinitFunc(Eref e, ProcInfo info);
+    static void setMgConc(const Conn* conn, double conc);
+    void innerSetMgConc(double value);
+    static double getMgConc(Eref e);
+    double innerGetMgConc();
+    
   protected:
-    priority_queue<SynInfo> old_events_; // This is for removing teh
+    double c0_;
+    double c1_;
+    double c2_;
+    double c3_;
+    double c4_;
+    double c5_;
+    double c6_;
+    double c7_;
+    double c8_;
+    double c9_;
+    double c10_;
+    double A_;
+    double B1_;
+    double B2_;
+    double x_;
+    double y_;
+    double Mg_;
+    double unblocked_;
+    priority_queue<SynInfo> oldEvents_; // This is for removing the
                                          // effects of old event after tau1
 };
 
-
+#endif
 // 
 // NMDAChan.h ends here
