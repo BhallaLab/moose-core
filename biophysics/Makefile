@@ -24,6 +24,7 @@ OBJ = \
 	SynChan.o	\
 	BinSynchan.o	\
 	StochSynchan.o	\
+	NMDAChan.o	\
 	RandomSpike.o \
 	Cell.o		\
 	BioScan.o	\
@@ -57,6 +58,7 @@ Nernst.o:	Nernst.h
 SpikeGen.o:	SpikeGen.h
 script_out.o:	script_out.h
 SynChan.o:	SynChan.h SynInfo.h
+NMDAChan.o:	NMDAChan.h SynInfo.h
 Cell.o:	Cell.h ../element/Neutral.h
 BioScan.o:		BioScan.h
 StochSynchan.o:	StochSynchan.h StochSynInfo.h
