@@ -29,6 +29,15 @@ BindIndex SrcFinfo::registerBindIndex( BindIndex current )
 	return current + 1;
 }
 
+bool SrcFinfo::checkTarget( const Finfo* target ) const
+{
+	const DestFinfo* d = dynamic_cast< const DestFinfo* >( target );
+	if ( d ) {
+		return d->getOpFunc()->checkFinfo( this );
+	}
+	return 0;
+}
+
 /////////////////////////////////////////////////////////////////////
 /**
  * SrcFinfo0 sets up calls without any arguments.

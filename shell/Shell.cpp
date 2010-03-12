@@ -53,6 +53,35 @@ static SrcFinfo0* ackDelete =
 			"Goes back only to master node.",
 			ackShellOp );
 
+static DestFinfo* create = new DestFinfo( "create", 
+			"create( class, parent, newElm, name",
+			new OpFunc4< Shell, string, Id, Id, string>( &Shell::create ) );
+
+static DestFinfo* del = new DestFinfo( "delete", 
+			"Destroys Element, all its messages, and all its children. Args: Id",
+			new OpFunc1< Shell, Id >( & Shell::destroy ) );
+
+static const Finfo* shellMsgVec[] = {
+	requestCreate, ackCreate, requestDelete, ackDelete,
+};
+/*
+static SrcFinfo4< Id, string, Id, string  > *requestMsg =
+		new SrcFinfo4< string, Id, Id, MsgId  >( "requestMsg",
+			"requestMsg( msgtype, e1, e2, msgid ): "
+			"creates a new Msg on all nodes with the specified MsgId. "
+			"Initiates a callback to indicate completion of operation. "
+			"Goes to all nodes including self."
+			"This is a low-level call.", 
+			requestShellOp );
+
+static SrcFinfo0* ackMsg =
+		new SrcFinfo0( "ackMsg",
+			"ackMsg():"
+			"Acknowledges receipt and completion of requestMsg command."
+			"Goes back only to master node.",
+			ackShellOp );
+*/
+
 static SrcFinfo1< FuncId > *requestGet = 
 		new SrcFinfo1< FuncId >( "requestGet",
 			"Function to request another Element for a value",
@@ -106,12 +135,22 @@ const Cinfo* Shell::initCinfo()
 			new OpFunc4< Shell, Id, Id, string, string >( & Shell::addmsg ) ),
 
 ////////////////////////////////////////////////////////////////
+//  Predefined Msg Src and MsgDests.
+////////////////////////////////////////////////////////////////
 
 		requestGet,
 		requestCreate,
 		ackCreate,
 		requestDelete,
 		ackDelete,
+////////////////////////////////////////////////////////////////
+//  Shared msg
+////////////////////////////////////////////////////////////////
+
+		new SharedFinfo( "interNodeShell",
+			"Connects together shells located on different nodes",
+			shellMsgVec, sizeof( shellMsgVec ) / sizeof( const Finfo* )
+		),
 	};
 
 	static Cinfo shellCinfo (

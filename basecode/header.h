@@ -60,6 +60,7 @@ class Data;
 
 #include "DataId.h"
 #include "Finfo.h"
+#include "DestFinfo.h"
 #include "SimGroup.h"
 #include "ProcInfo.h"
 #include "Cinfo.h"
@@ -79,6 +80,7 @@ class Data;
 #include "EpFunc.h"
 #include "UpFunc.h"
 #include "ValueFinfo.h"
+#include "SharedFinfo.h"
 #include "Dinfo.h"
 #include "FieldElement.h"
 

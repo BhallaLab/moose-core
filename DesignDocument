@@ -55,23 +55,118 @@ This redesign does a lot of things differently from the earlier MOOSE messaging.
 Control flow.
 
 1. Scheduling.
-As before, we have a hierarchy of Sched, Clock, and Tick.
+Shell::start( double runtime )
+	Sets up thread stuff
+	Configures clocks for barriers, threads, etc.
+	Inits threads with Clock::threadStartFunc
+	Clock::threadStartFunc
+		Clock::tStart
+			Sets up grouping for current thread
+			TickPtr::advance
+				Tick::advance on all ticks.
+					pthread_barrier_wait
+					Qinfo::readQ
+					Call process on all scheduled Elements.
+				pthread_barrier_wait
+			sorts TickPtrs.
+	pthread_exit
+join threads
+clean up
+
+
+As before, we have a hierarchy of Shell, Clock, and Tick.
 The Tick now becomes an ArrayField of the Clock. This means that the clock
 can manipulate Ticks directly, which is much easier to understand. However,
 Ticks still look like Elements to the rest of the system and have their
 own messages to all scheduled objects.
+The TickPtr is an intermediate wrapper for Ticks that helps to sort them
+efficiently.
 The Tick object is the one that connects to and calls operations on target
 Elements.
-
 Ticks call the 'process' function on Elements. This is built into the Element
 base class, and is the only function called directly. 
 
-Ticks also call the global Qinfo::clearQ() function. This handles all
+Ticks also call the global Qinfo::readQ() function. This handles all
 asynchronous message passing including spike events and setup calls.
 The old reinit/reset/resched is gone, it will be a function call triggered 
 through clearQ.
 
-ASYNCHRONOUS MESSAGING>
+2. ASYNCHRONOUS MESSAGING
+Async messages work at two levels. First, the developer sees the creation and
+calls to messages within MOOSE objects. Second, the data transfer happens
+under the surface through queues that span threads and nodes.
+
+2.1 Data structures used for messages within MOOSE objects.
+Messages are called through the static const instances of SrcFinfos.
+As described elsewhere, SrcFinfos are initialized along with other Element
+fields at static initialization time.
+SrcFinfo< T1, T2...>( name, description, slot );
+	The slot here is a BindIndex, which looks up which Message and Function
+	will be called by SrcFinfo::send.
+	Slot 0 is reserved for parent->child messages
+	Slot 1 is reserved for element->msgSpec messages
+	Slots 2 onward are used for data-transfer messages.
+	For now each data-transfer slot is predefined.
+	Later, if there is a proliferation of costly slot definitions, it
+	should be possible to predefine slots only for those SrcFinfos which
+	need to be executed efficiently. Other slots will have to generate an
+	entry on the fly.
+
+2.1.1 Element-level messaging data structures.
+The Element carries two messaging data structures:
+	vector< MsgId > m_; // Handles incoming messages
+	vector< vector< MsgFuncBinding > > msgBinding_; // Handles outgoing msgs
+
+The first of these is just to keep track of what comes in to the Element.
+The msgBinding_ is indexed by the slot described above, which is of type
+BindIndex. Each slot refers to a vector of MsgFuncBinding objects, which are
+basically pairs of MsgIds and FuncIds. 
+When send executes, the code iterates through this vector of MsgFuncBinding
+objects, adding each MsgId/FuncId pair into the outgoing queue.
+
+2.1.2 Shared messages and messages with many distinct target classes/functions
+There are often cases where a pair of objects must exchange multiple kinds
+of information. When this happens, we want to use a single Msg between the
+two, to keep track of the trajectory of the data, but we want to send
+many kinds of data along this Msg. 
+	Example 1: when getting a field, the querying object needs to tell 
+	the responder what information to send, and the responder must send
+	back the field value. This is a single Msg, but different kinds of
+	data travel in different directions along it in this case.  
+	To accomplish this, the querying object sets up an entry in its
+	msgBinding_ vector. The responding object in this special case
+	just puts the other end of the Msg in its m_ vector.
+	- Execution works as follows: Querying object calls send< FuncId >
+	where the FuncId identifies the 'get_field' function on the responder.
+	The get_field function is registered automagically by the Field< T >
+	field definition as a GetOpFunc. The operation done by this function
+	is to get the field value, and send it right back along the querying
+	Msg using somewhat low-level call to Qinfo::addSpecificTargetToQ.
+	Example 2. A molecule might send a display object both its xyz
+	coordinates, and also its state. It might do so at different times,
+	called by different SrcFinfo::send functions.
+	Here we have more than one kind of data go from the source
+	to the target object.
+	- To accomplish this, the two SrcFinfos have distinct slot values,
+	pointing to distinct msgBinding_ entries. The MsgFuncBindings point
+	to the same MsgId but distinct FuncIds for the respective SrcFinfos. 
+	Example 3. A molecule sends its conc to a reaction, and the reaction
+	sends back the change in conc on each timestep.
+	- This is really a sync message problem. If done using async calls,
+	the SrcFinfos on either side of the Msg would point to their own
+	msg slots, each referring to a BindIndex entry. We don't really worry
+	about what the m_ vector does, it isn't too costly for this to
+	maintain the Msg at one or both sides of the msg, but it isn't
+	necessary either. Since the Shared Msg setup will use a single call,
+	it is not hard to do it efficiently. Since the high-level details of
+	the Msg are stored in the MsgSpec, we don't worry too much about
+	traversal either.
+
+2.2 Calls to messages within MOOSE objects.
+To send a message, one just calls
+	srcFinfoInstance->send( Eref current, ProcInfo p, arg1, arg2 ... )
+
+
 Scheduling:
 clearQ: Manages the event queue for the async messaging. Here are the calls:
 

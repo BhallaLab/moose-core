@@ -3439,4 +3439,59 @@ This is marginally slower than earlier, under 10%.
 
 Minor shuffling to put Shell stuff in a separate directory. Will be handy
 as the # of functions handled by Shell increases.
+
+=============================================================================
+11 Mar 2010
+Two immediate things to sort out:
+- Making a SharedFinfo for shared msgs
+- Implement node-directed messages for shell operations.
+	- Master to all nodes including self
+	- Slave back only to master
+	Also need harvester routine to check that all slaves have reported back.
+
+Need to work out whether regular addMsg commands exist at all, or if they
+are hidden under the MsgSpec ops.
+
+Possible separate steps:
+validateMsg: Checks that the src and destfields are compatible. 
+	Only needs to go to master node.
+createMsg: Makes Msg of specified type and specified MsgId, between 
+	src and dest Elements
+	Goes to all nodes, master waits till all ack.
+	At this point this is a bare Msg, no functions associated.
+assignMsgParms:
+	Separate step where the Msg-type specific functions, e.g., 
+	randomconnect or add_one_target, get called. Node-specific 
+	setup stuff may happen here.
+bindFuncToMsg: Binds the functions to the Msg, uses Element::addMsgAndFunc.
+	May need to deal with a vector of FuncIds for shared Msgs.
+	Goes to all nodes, master waits till all ack.
+	Once this is done the Msg is live.
+instantiateMsg: Fills in values. may want to have this as a wrap-up step
+	so that the data allocation, node stuff and RNGs get done here.
+
+These are all elementary functions. They will be coordinated by the function
+that sets up the MsgSpecs. Shall that be the only one that the Shell exposes?
+OK, let's try it that way.
+
+Id Shell::addMsg( FullId src, string srcField, FullId dest, string destField, 
+	);
+
+Id Shell::addMsg( IdList src, string srcField, IdList dest, string destField );
+Id Shell::addMsg( IdRule src, string srcField, IdRule dest, string destField );
+Id Shell::addMsg( File mapping, string srcField, string destField );
+
+
+Working on SharedFinfo, and how to validate messages with it.
+=============================================================================
+12 March 2010
+Working on compilation of SharedFinfo. The current stuck point is 
+message validation. Existing approach is to use the name of the FuncId.
+This is a hack, done because ValueFinfos define two FuncIds: 
+	set_<fieldname> and get_<fieldname>
+May work out if I instead treat ValueFinfos as a shorthand for entering
+two DestFinfos. Maybe SharedFinfos can set up all their contents? In
+which case ValueFinfos are just a special case of SharedFinfo.
+However, I don't want to exclude the possibility of connecting to just one
+of the components of a SharedFinfo.  
 =============================================================================

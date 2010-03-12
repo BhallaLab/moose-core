@@ -45,6 +45,8 @@ class SrcFinfo: public Finfo
 			return bindIndex_;
 		}
 
+		bool checkTarget( const Finfo* target ) const;
+
 	private:
 		/**
 		 * Index into the msgBinding_ vector.

@@ -20,9 +20,11 @@ OBJ = \
 	Element.o	\
 	Eref.o	\
 	Finfo.o	\
+	DestFinfo.o	\
 	Cinfo.o	\
 	Msg.o	\
 	SrcFinfo.o \
+	SharedFinfo.o \
 	Id.o \
 	FullId.o \
 	testSync.o	\
@@ -47,6 +49,7 @@ HEADERS = \
 	Element.h \
 	Eref.h \
 	Finfo.h \
+	DestFinfo.h \
 	Id.h \
 	Msg.h \
 	Neutral.h \
@@ -56,6 +59,7 @@ HEADERS = \
 	Qinfo.h \
 	SrcFinfo.h \
 	ValueFinfo.h \
+	SharedFinfo.h \
 	MsgFuncBinding.h \
 
 default: $(TARGET)
