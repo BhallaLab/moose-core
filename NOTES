@@ -3508,4 +3508,7 @@ Working on the create command.
 		- Safer, let's do this.
 
 =============================================================================
+13 Marc 2010.
+Compiled, runs, but valgrind not happy. Trying to clean up.
 
+=============================================================================

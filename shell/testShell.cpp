@@ -10,7 +10,7 @@
 #include "header.h"
 #include "Shell.h"
 
-void testCreate()
+void testCreateDelete()
 {
 	
 	Eref ser = Id().eref();
@@ -18,10 +18,14 @@ void testCreate()
 	// Need to get the id back so that I can delete it later.
 	bool ret = SetGet4< string, Id, Id, string >::set( ser, "create", "Neutral", Id(), testId , "testCreate" );
 	assert( ret );
+
+	ret = SetGet1< Id >::set( ser, "delete", testId );
+	assert( ret );
+
 	cout << "." << flush;
 }
 
 void testShell( )
 {
-	testCreate();
+	testCreateDelete();
 }

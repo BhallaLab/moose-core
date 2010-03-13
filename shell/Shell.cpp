@@ -53,16 +53,16 @@ static SrcFinfo0* ackDelete =
 			"Goes back only to master node.",
 			ackShellOp );
 
-static DestFinfo* create = new DestFinfo( "create", 
+static DestFinfo create( "create", 
 			"create( class, parent, newElm, name",
 			new OpFunc4< Shell, string, Id, Id, string>( &Shell::create ) );
 
-static DestFinfo* del = new DestFinfo( "delete", 
+static DestFinfo del( "delete", 
 			"Destroys Element, all its messages, and all its children. Args: Id",
 			new OpFunc1< Shell, Id >( & Shell::destroy ) );
 
 static const Finfo* shellMsgVec[] = {
-	requestCreate, create, ackCreate, requestDelete, ackDelete,
+	requestCreate, &create, ackCreate, requestDelete, ackDelete,
 };
 /*
 static SrcFinfo4< Id, string, Id, string  > *requestMsg =

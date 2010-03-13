@@ -54,8 +54,16 @@ class Id
 		 */
 		static Id nextId();
 
+		/**
+		 * The specified element is placed into current id.
+		 */
 		void bindIdToElement( Element* e ); 
 
+		/**
+		 * Cleanly deletes the associated Element, and zeroes out
+		 * contents of elements vector at the location pointed to by
+		 * this->id_.
+		 */
 		void destroy();
     
 		//////////////////////////////////////////////////////////////

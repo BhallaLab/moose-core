@@ -83,9 +83,9 @@ int main( int argc, char** argv )
 	Id shellId = init( argc, argv );
 #ifdef DO_UNIT_TESTS
 	cout << "testing: ";
-	testAsync();
+//	testAsync();
 	testShell();
-	testScheduling();
+//	testScheduling();
 #endif
 	cout << endl;
 
@@ -102,9 +102,9 @@ int main( int argc, char** argv )
 		shelle->process( &p );
 	}
 
-	delete Id()();
-	delete Id( 1 )();
-	delete Id( 2 )();
+	shellId.destroy();
+	Id(1).destroy();
+	Id(2).destroy();
 	return 0;
 }
 
