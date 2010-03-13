@@ -50,8 +50,11 @@ Id init( int argc, char** argv )
 		}
 	}
 	Msg::initNull();
-	Id shellid = Shell::initCinfo()->create( "root", 1 );
-	Id clockId = Clock::initCinfo()->create( "clock", 1 );
+	Id shellId = Id::nextId();
+	Shell::initCinfo()->create( shellId, "root", 1 );
+
+	Id clockId = Id::nextId();
+	Clock::initCinfo()->create( clockId, "clock", 1 );
 	Element* clocke = clockId();
 	// Should put this initialization stuff within the Clock creation
 	// step. This means I need to add an optional init func into the Cinfo
@@ -62,21 +65,22 @@ Id init( int argc, char** argv )
 			Tick::initCinfo(), clocke,
 			&Clock::getNumTicks, &Clock::setNumTicks 
 		);
-	Id tickId = Id::create( ticke );
+	Id tickId = Id::nextId();
+	tickId.bindIdToElement( ticke );
 
-	assert ( shellid == Id() );
+	assert ( shellId == Id() );
 	assert( clockId == Id( 1 ) );
 	assert( tickId == Id( 2 ) );
 	SetGet::setShell();
-	Shell* s = reinterpret_cast< Shell* >( shellid.eref().data() );
+	Shell* s = reinterpret_cast< Shell* >( shellId.eref().data() );
 	s->setHardware( isSingleThreaded, numCores, numNodes );
 	s->loadBalance();
-	return shellid;
+	return shellId;
 }
 
 int main( int argc, char** argv )
 {
-	Id shellid = init( argc, argv );
+	Id shellId = init( argc, argv );
 #ifdef DO_UNIT_TESTS
 	cout << "testing: ";
 	testAsync();
@@ -87,7 +91,7 @@ int main( int argc, char** argv )
 
 	// Note that the main loop remains the parser loop, though it may
 	// spawn a lot of other stuff.
-	Element* shelle = shellid();
+	Element* shelle = shellId();
 	Shell* s = reinterpret_cast< Shell* >( shelle->data( 0 ) );
 	ProcInfo p;
 	while( !s->getQuit() ) {

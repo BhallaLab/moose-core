@@ -94,12 +94,34 @@ Eref Id::eref() const
 	// return Eref( elements()[ id_ ], index_ );
 }
 
+Id Id::nextId()
+{
+	// Should really look up 'available' list.
+	// Should really put the returned value onto the 'reserved' list
+	// so they don't go dangling.
+	Id ret( elements().size() );
+	elements().push_back( 0 );
+	return ret;
+}
+
+void Id::bindIdToElement( Element* e )
+{
+	if ( elements().size() <= id_ )
+		elements().resize( id_ + 1, 0 );
+	if ( elements()[ id_ ] != 0 )
+		cout << "Warning: assigning Element to existing id " << id_ << "\n";
+		// kick, scream, and shout.
+	elements()[ id_ ] = e;
+}
+
+/*
 Id Id::create( Element* e )
 {
 	Id ret( elements().size() );
 	elements().push_back( e );
 	return ret;
 }
+*/
 
 void Id::destroy()
 {

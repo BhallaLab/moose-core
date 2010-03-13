@@ -101,15 +101,17 @@ FuncId Cinfo::getOpFuncId( const string& funcName ) const {
 	return 0;
 }
 
-// Later: make it possible to assign specific new Id.
-Id Cinfo::create( const string& name, unsigned int numEntries ) const
+bool Cinfo::create( Id id, const string& name, unsigned int numEntries ) const
 {
-	return Id::create( 
-		new Element( 
+	Element* e = new Element( 
 			this, 
 			reinterpret_cast< char* >(dinfo_->allocData( numEntries ) ),
-			numEntries, dinfo_->size(), numBindIndex_ )
-	);
+			numEntries, dinfo_->size(), numBindIndex_ );
+	if ( e ) {
+		id.bindIdToElement( e );
+		return 1;
+	}
+	return 0;
 }
 
 void Cinfo::destroy( char* d ) const

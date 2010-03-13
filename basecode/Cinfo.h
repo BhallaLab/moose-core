@@ -67,7 +67,7 @@ class Cinfo
 			/**
 			 * Creates a new Element. Assigns a new Id or takes one you give
 			 */
-			Id create( const string& name, unsigned int numEntries ) const;
+			bool create( Id id, const string& name, unsigned int numEntries ) const;
 
 			/**
 			 * Destroys data on element

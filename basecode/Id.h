@@ -1,4 +1,3 @@
-
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment.
@@ -46,7 +45,16 @@ class Id
 		//	Element creation and deletion.
 		//////////////////////////////////////////////////////////////
 
-		static Id create( Element* e );
+//		static Id create( Element* e );
+
+		/**
+		 * Reserves an id for assigning to an Element. Each time it is
+		 * called a new id is reserved, even if previous ones have not been
+		 * used yet.
+		 */
+		static Id nextId();
+
+		void bindIdToElement( Element* e ); 
 
 		void destroy();
     

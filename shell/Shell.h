@@ -39,7 +39,7 @@ class Shell: public Data
 
 		void create( string type, Id parent, Id newElm, string name);
 		void destroy( Id elm);
-		Id innerCreate( string type, Id parent, string name, unsigned int num);
+		void innerCreate( string type, Id parent, Id newElm, string name );
 		void addmsg( Id src, Id dest, string srcfield, string destfield );
 
 		const char* getBuf() const;

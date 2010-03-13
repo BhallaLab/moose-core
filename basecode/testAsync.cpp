@@ -27,8 +27,12 @@ void insertIntoQ( )
 	const Cinfo* nc = Neutral::initCinfo();
 	unsigned int size = 100;
 
-	Id i1 = nc->create( "test1", size );
-	Id i2 = nc->create( "test2", size );
+	Id i1 = Id::nextId();
+	Id i2 = Id::nextId();
+	bool ret = nc->create( i1, "test1", size );
+	assert( ret );
+	ret = nc->create( i2, "test2", size );
+	assert( ret );
 
 	Eref e1 = i1.eref();
 	Eref e2 = i2.eref();
@@ -76,8 +80,12 @@ void testSendMsg()
 	unsigned int size = 100;
 	FuncId fid = 1;
 
-	Id i1 = nc->create( "test1", size );
-	Id i2 = nc->create( "test2", size );
+	Id i1 = Id::nextId();
+	Id i2 = Id::nextId();
+	bool ret = nc->create( i1, "test1", size );
+	assert( ret );
+	ret = nc->create( i2, "test2", size );
+	assert( ret );
 
 	Eref e1 = i1.eref();
 	Eref e2 = i2.eref();
@@ -115,14 +123,18 @@ void testCreateMsg()
 {
 	const Cinfo* nc = Neutral::initCinfo();
 	unsigned int size = 100;
-	Id i1 = nc->create( "test1", size );
-	Id i2 = nc->create( "test2", size );
+	Id i1 = Id::nextId();
+	Id i2 = Id::nextId();
+	bool ret = nc->create( i1, "test1", size );
+	assert( ret );
+	ret = nc->create( i2, "test2", size );
+	assert( ret );
 
 	Eref e1 = i1.eref();
 	Eref e2 = i2.eref();
 	ProcInfo p;
 
-	bool ret = add( e1.element(), "child", e2.element(), "parent" );
+	ret = add( e1.element(), "child", e2.element(), "parent" );
 	
 	assert( ret );
 
@@ -150,7 +162,9 @@ void testSet()
 	const Cinfo* nc = Neutral::initCinfo();
 	unsigned int size = 100;
 	string arg;
-	Id i2 = nc->create( "test2", size );
+	Id i2 = Id::nextId();
+	bool ret = nc->create( i2, "test2", size );
+	assert( ret );
 	ProcInfo p;
 
 	Eref e2 = i2.eref();
@@ -181,7 +195,9 @@ void testGet()
 	const Cinfo* nc = Neutral::initCinfo();
 	unsigned int size = 100;
 	string arg;
-	Id i2 = nc->create( "test2", size );
+	Id i2 = Id::nextId();
+	bool ret = nc->create( i2, "test2", size );
+	assert( ret );
 	Element* shell = Id()();
 	ProcInfo p;
 
@@ -223,7 +239,9 @@ void testSetGet()
 	const Cinfo* nc = Neutral::initCinfo();
 	unsigned int size = 100;
 	string arg;
-	Id i2 = nc->create( "test2", size );
+	Id i2 = Id::nextId();
+	bool ret = nc->create( i2, "test2", size );
+	assert( ret );
 
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -253,7 +271,9 @@ void testSetGetDouble()
 	const Cinfo* ic = IntFire::initCinfo();
 	unsigned int size = 100;
 	string arg;
-	Id i2 = ic->create( "test2", size );
+	Id i2 = Id::nextId();
+	bool ret = ic->create( i2, "test2", size );
+	assert( ret );
 
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -284,14 +304,17 @@ void testSetGetSynapse()
 	const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 100;
 	string arg;
-	Id i2 = ic->create( "test2", size );
+	Id i2 = Id::nextId();
+	bool ret = ic->create( i2, "test2", size );
+	assert( ret );
+
 	// SynElement syn( sc, i2() );
 	FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
 
 	assert( syn.numData() == 0 );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref e2( i2(), i );
-		bool ret = Field< unsigned int >::set( e2, "numSynapses", i );
+		ret = Field< unsigned int >::set( e2, "numSynapses", i );
 		assert( ret );
 	}
 	assert( syn.numData() == ( size * (size - 1) ) / 2 );
@@ -320,7 +343,9 @@ void testSetGetVec()
 	const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 100;
 	string arg;
-	Id i2 = ic->create( "test2", size );
+	Id i2 = Id::nextId();
+	bool ret = ic->create( i2, "test2", size );
+	assert( ret );
 //	SynElement syn( sc, i2() );
 	FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
 
@@ -331,7 +356,7 @@ void testSetGetVec()
 	
 	Eref e2( i2(), 0 );
 	// Here we test setting a 1-D vector
-	bool ret = Field< unsigned int >::setVec( e2, "numSynapses", numSyn );
+	ret = Field< unsigned int >::setVec( e2, "numSynapses", numSyn );
 	assert( ret );
 	unsigned int nd = syn.numData();
 	assert( nd == ( size * (size - 1) ) / 2 );
@@ -372,7 +397,9 @@ void testSendSpike()
 	const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 100;
 	string arg;
-	Id i2 = ic->create( "test2", size );
+	Id i2 = Id::nextId();
+	bool ret = ic->create( i2, "test2", size );
+	assert( ret );
 	Eref e2 = i2.eref();
 	//SynElement syn( sc, i2() );
 	FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
@@ -389,7 +416,7 @@ void testSendSpike()
 	Eref syne( &syn, di );
 	reinterpret_cast< Synapse* >(syne.data())->setWeight( WEIGHT );
 
-	bool ret = SingleMsg::add( e2, "spike", syne, "addSpike" );
+	ret = SingleMsg::add( e2, "spike", syne, "addSpike" );
 	assert( ret );
 
 	reinterpret_cast< IntFire* >(e2.data())->setVm( 1.0 );
@@ -576,7 +603,9 @@ void testSparseMsg()
 
 	mtseed( 5489UL ); // The default value, but better to be explicit.
 
-	Id i2 = ic->create( "test2", size );
+	Id i2 = Id::nextId();
+	bool ret = ic->create( i2, "test2", size );
+	assert( ret );
 	Eref e2 = i2.eref();
 	FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
 
@@ -585,7 +614,7 @@ void testSparseMsg()
 	DataId di( 1, 0 ); // DataId( data, field )
 	Eref syne( &syn, di );
 
-	bool ret = SparseMsg::add( e2.element(), "spike", &syn, "addSpike", 
+	ret = SparseMsg::add( e2.element(), "spike", &syn, "addSpike", 
 		connectionProbability );
 	assert( ret );
 
@@ -668,13 +697,16 @@ void testUpValue()
 	const Cinfo* cc = Clock::initCinfo();
 	const Cinfo* tc = Tick::initCinfo();
 	unsigned int size = 10;
-	Id clock = cc->create( "clock", 1 );
+	Id clock = Id::nextId();
+	bool ret = cc->create( clock, "clock", 1 );
+	assert( ret );
+
 	Eref clocker = clock.eref();
 	//SynElement syn( sc, i2() );
 	FieldElement< Tick, Clock, &Clock::getTick > ticke( tc, clock(), &Clock::getNumTicks, &Clock::setNumTicks );
 
 	assert( ticke.numData() == 0 );
-	bool ret = Field< unsigned int >::set( clocker, "numTicks", size );
+	ret = Field< unsigned int >::set( clocker, "numTicks", size );
 	assert( ret );
 	assert( ticke.numData() == size );
 

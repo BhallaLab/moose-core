@@ -62,7 +62,7 @@ static DestFinfo* del = new DestFinfo( "delete",
 			new OpFunc1< Shell, Id >( & Shell::destroy ) );
 
 static const Finfo* shellMsgVec[] = {
-	requestCreate, ackCreate, requestDelete, ackDelete,
+	requestCreate, create, ackCreate, requestDelete, ackDelete,
 };
 /*
 static SrcFinfo4< Id, string, Id, string  > *requestMsg =
@@ -225,10 +225,18 @@ const char* Shell::getBuf() const
  * This is the version used by the parser. Acts as a blocking,
  * serial-like interface to a potentially multithread, multinode call.
  * Returns the new Id index.
+ * The data of the new Element is not necessarily allocated at this point,
+ * that can be deferred till the global Instantiate or Reset calls.
+ * Idea is that the model should be fully defined before load balancing.
+ *
  */
 Id Shell::doCreate( string type, Id parent, string name, vector< unsigned int > dimensions )
 {
-	return Id();
+	Id ret = Id::nextId();
+	// Here we would do the 'send' on an internode msg to do the actual
+	// Create.
+	innerCreate( type, parent, ret, name );
+	return ret;
 }
 
 /**
@@ -242,31 +250,31 @@ Id Shell::doCreate( string type, Id parent, string name, vector< unsigned int > 
  */
 void Shell::create( string type, Id parent, Id newElm, string name )
 {
-	// innerCreate( type, parent, name, num );
+	innerCreate( type, parent, newElm, name );
 }
 
 /**
- * This function actually creates the object
+ * This function actually creates the object.
  */
-Id Shell::innerCreate( string type, Id parent, string name, unsigned int num)
+void Shell::innerCreate( string type, Id parent, Id newElm, string name )
 {
 	const Cinfo* c = Cinfo::find( type );
+	bool ret = 0;
+	unsigned int num = 1; // hack till I figure out how to set up allocs.
 	if ( c ) {
 		Element* pa = parent();
 		if ( !pa ) {
 			stringstream ss;
 			ss << "create: Parent Element'" << parent << "' not found. No Element created";
-			return Id();
 		}
-		Id eid = c->create( name, num );
-		return eid;
-		// Perhaps the eid should be returned to the calling func?
+		ret = c->create( newElm, name, num );
 	} else {
 		stringstream ss;
 		ss << "create: Class '" << type << "' not known. No Element created";
 		warning( ss.str() );
 	}
-	return Id();
+	// Send back ack with status
+	// ack.send( e, ret );
 }
 
 void Shell::destroy( Id eid)

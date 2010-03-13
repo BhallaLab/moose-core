@@ -3428,7 +3428,8 @@ Also clears valgrind, with the usual caveat about pthreads.
 Now to step back and look at the status with respect to multinode testing
 * Redo benchmarking.
 - Get Shell commands to work for basic functions
-- Get Shared Messages to work
++ Get Shared Messages to work
+	- Redesign ValueFinfos to be more like an automatic SharedMessage.
 - Get Shell Messages to work for basic functions
 
 
@@ -3494,4 +3495,17 @@ two DestFinfos. Maybe SharedFinfos can set up all their contents? In
 which case ValueFinfos are just a special case of SharedFinfo.
 However, I don't want to exclude the possibility of connecting to just one
 of the components of a SharedFinfo.  
+
+Implemented the SharedFinfos and also a new scheme for validating match
+for the purposes of setting up message.
+
+Working on the create command. 
+- The new elements Id:
+	- In theory each node should keep track of everything and this should be
+	unambiguous if we just increment the Id each time an Element is created.
+		- Assumes fixed sequence of messaging - should avoid.
+	- We could get the id on the master node and send it around to all.
+		- Safer, let's do this.
+
 =============================================================================
+

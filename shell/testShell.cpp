@@ -14,8 +14,9 @@ void testCreate()
 {
 	
 	Eref ser = Id().eref();
+	Id testId = Id::nextId();
 	// Need to get the id back so that I can delete it later.
-	bool ret = SetGet4< string, Id, Id, string >::set( ser, "create", "Neutral", Id(), Id(3) , "testCreate" );
+	bool ret = SetGet4< string, Id, Id, string >::set( ser, "create", "Neutral", Id(), testId , "testCreate" );
 	assert( ret );
 	cout << "." << flush;
 }
