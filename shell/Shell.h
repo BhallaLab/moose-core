@@ -46,6 +46,10 @@ class Shell: public Data
 		 */
 		void loadBalance();
 
+		void handleAckCreate();
+		void handleAckDelete();
+	
+
 		void create( string type, Id parent, Id newElm, string name);
 		void destroy( Id elm);
 		void innerCreate( string type, Id parent, Id newElm, string name );

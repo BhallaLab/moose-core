@@ -23,20 +23,22 @@ const BindIndex requestShellOp = 2;
 const BindIndex ackShellOp = 1;
 const BindIndex requestGetSlot = 0;
 
+static BindIndex bi = 2;
+
 static SrcFinfo4< string, Id, Id, string  > *requestCreate =
 		new SrcFinfo4< string, Id, Id, string  >( "requestCreate",
 			"requestCreate( class, parent, newElm, name ): "
 			"creates a new Element on all nodes with the specified Id. "
 			"Initiates a callback to indicate completion of operation. "
 			"Goes to all nodes including self.", 
-			requestShellOp );
+			bi++ );
 
 static SrcFinfo0* ackCreate =
 		new SrcFinfo0( "ackCreate",
 			"ackCreate():"
 			"Acknowledges receipt and completion of Create command."
 			"Goes back only to master node.",
-			ackShellOp );
+			bi++ );
 
 static SrcFinfo1< Id  > *requestDelete =
 		new SrcFinfo1< Id >( "requestDelete",
@@ -44,14 +46,14 @@ static SrcFinfo1< Id  > *requestDelete =
 			"Deletes specified Element on all nodes."
 			"Initiates a callback to indicate completion of operation."
 			"Goes to all nodes including self.", 
-			requestShellOp );
+			bi++ );
 
 static SrcFinfo0* ackDelete =
 		new SrcFinfo0( "ackDelete",
 			"ackDelete():"
 			"Acknowledges receipt and completion of Delete command."
 			"Goes back only to master node.",
-			ackShellOp );
+			bi++ );
 
 static DestFinfo create( "create", 
 			"create( class, parent, newElm, name",
@@ -61,9 +63,16 @@ static DestFinfo del( "delete",
 			"Destroys Element, all its messages, and all its children. Args: Id",
 			new OpFunc1< Shell, Id >( & Shell::destroy ) );
 
+static DestFinfo handleAckCreate( "handleAckCreate", 
+			"Keeps track of # of responders to ackCreate. Args: none",
+			new OpFunc0< Shell >( & Shell::handleAckCreate ) );
+
+static DestFinfo handleAckDelete( "handleAckCreate", 
+			"Keeps track of # of responders to ackCreate. Args: none",
+			new OpFunc0< Shell >( & Shell::handleAckCreate ) );
+
 static const Finfo* shellMsgVec[] = {
-	requestCreate, &create, ackCreate, requestDelete, ackDelete,
-};
+	requestCreate, &create, ackCreate, &handleAckCreate, requestDelete, &del, ackDelete, &handleAckDelete, };
 /*
 static SrcFinfo4< Id, string, Id, string  > *requestMsg =
 		new SrcFinfo4< string, Id, Id, MsgId  >( "requestMsg",
@@ -227,7 +236,7 @@ MsgId Shell::doCreateMsg( Id src, const string& srcField, Id dest,
 	// And so on, lots of msg types here.
 	
 	if ( m ) {
-		if ( f1->addMsg( f2, m->mid(), src, dest ) )
+		if ( f1->addMsg( f2, m->mid(), src ) )
 			return m->mid();
 		else
 			delete m; // Nasty, but rare.
@@ -340,6 +349,16 @@ void Shell::warning( const string& text )
 void Shell::error( const string& text )
 {
 	cout << "Error: Shell:: " << text << endl;
+}
+
+void Shell::handleAckCreate()
+{
+	;
+}
+
+void Shell::handleAckDelete()
+{
+	;
 }
 
 ////////////////////////////////////////////////////////////////////////

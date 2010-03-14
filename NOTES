@@ -3513,7 +3513,8 @@ Compiled, runs, but valgrind not happy. Trying to clean up. Fixed.
 Checkin 1632.
 
 Next steps:
-	- Shared Msg between Shells should be set up.
+	+ Shared Msg between Shells should be set up. Checkin 1633.
+		Issues again with message direction.
 	- The InterNodeMsg type should be defined, specially so that Shell
 		can send stuff to itself and get back acks to master node.
 	- Shell::doCreate should do a 'send' on an internode Msg to all Shells.
@@ -3521,5 +3522,7 @@ Next steps:
 	- Shell::doDelete likewise
 	- Test on MPI.
 	- Set up Shell::warning, Shell::error as a stream.
+	- Cleanup: go through and eliminate Message.cpp and its standalone 
+		messaging functions. The Shell now handles it.
 
 =============================================================================

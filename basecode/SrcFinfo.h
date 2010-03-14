@@ -25,20 +25,6 @@ class SrcFinfo: public Finfo
 		void registerOpFuncs(
 			map< string, FuncId >& fnames, vector< OpFunc* >& funcs );
 
-		/*
-		unsigned int registerSrcFuncIndex( unsigned int current );
-
-		unsigned int registerConn( unsigned int current );
-
-		ConnId getConnId() const {
-			return c_;
-		}
-		unsigned int getFuncIndex() const {
-			return funcIndex_;
-		}
-		*/
-
-		
 		BindIndex registerBindIndex( BindIndex current );
 
 		BindIndex getBindIndex() const {
@@ -53,7 +39,7 @@ class SrcFinfo: public Finfo
 		/**
 		 * First checks that the target will work, then adds the Msg.
 		 */
-		bool addMsg( const Finfo* target, MsgId mid, Id src, Id dest) const;
+		bool addMsg( const Finfo* target, MsgId mid, Id src ) const;
 
 	private:
 		/**
