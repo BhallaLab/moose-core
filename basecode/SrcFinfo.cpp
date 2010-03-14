@@ -38,6 +38,19 @@ bool SrcFinfo::checkTarget( const Finfo* target ) const
 	return 0;
 }
 
+bool SrcFinfo::addMsg( const Finfo* target, MsgId mid, 
+	Id src, Id dest ) const
+{
+	const DestFinfo* d = dynamic_cast< const DestFinfo* >( target );
+	if ( d ) {
+		if ( d->getOpFunc()->checkFinfo( this ) ) {
+			src()->addMsgAndFunc( mid, d->getFid(), bindIndex_ );
+			return 1;
+		}
+	}
+	return 0;
+}
+
 /////////////////////////////////////////////////////////////////////
 /**
  * SrcFinfo0 sets up calls without any arguments.

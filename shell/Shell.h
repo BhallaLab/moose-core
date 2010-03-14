@@ -26,6 +26,15 @@ class Shell: public Data
 		Id doCreate( string type, Id parent, string name, 
 			vector< unsigned int > dimensions );
 
+		bool doDelete( Id i );
+
+		/**
+		 * Sets up a Message of specified type.
+		 * Later need to consider doing this through MsgSpecs only.
+		 */
+		MsgId doCreateMsg( Id src, const string& srcField, Id dest,
+			const string& destField, const string& msgType );
+
 		///////////////////////////////////////////////////////////
 		// DestFinfo functions
 		///////////////////////////////////////////////////////////
@@ -59,6 +68,8 @@ class Shell: public Data
 		// the parser so it is a Shell function too.
 		void setclock( unsigned int tickNum, double dt, unsigned int stage );
 
+		// Should set these up as streams so that we can build error
+		// messages similar to cout.
 		void warning( const string& text );
 		void error( const string& text );
 

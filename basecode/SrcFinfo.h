@@ -45,7 +45,15 @@ class SrcFinfo: public Finfo
 			return bindIndex_;
 		}
 
+		/**
+		 * Checks that the target will work for this Msg.
+		 */
 		bool checkTarget( const Finfo* target ) const;
+
+		/**
+		 * First checks that the target will work, then adds the Msg.
+		 */
+		bool addMsg( const Finfo* target, MsgId mid, Id src, Id dest) const;
 
 	private:
 		/**

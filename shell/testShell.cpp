@@ -25,7 +25,41 @@ void testCreateDelete()
 	cout << "." << flush;
 }
 
+/**
+ * Tests creation of SharedMsg from Shell to itself.
+ */
+void testSharedMsg()
+{
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+
+	bool ret = shell->doCreateMsg( Id(), "interNodeOps", 
+		Id(), "interNodeOps", "OneToOneMsg" );
+	assert( ret );
+	cout << "." << flush;
+}
+
+/**
+ * Tests Create and Delete calls issued through the parser interface,
+ * which internally sets up blocking messaging calls.
+ */
+void testShellParserCreateDelete()
+{
+	;
+}
+
+/**
+ * Tests Shell operations carried out on multiple nodes
+ */
+void testInterNodeOps()
+{
+	;
+}
+
 void testShell( )
 {
 	testCreateDelete();
+	testSharedMsg();
+	testShellParserCreateDelete();
+	testInterNodeOps();
 }

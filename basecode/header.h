@@ -31,9 +31,15 @@
 using namespace std;
 
 /**
- * Looks up and uniquely identifies functions.
+ * Looks up and uniquely identifies functions, on a per-Cinfo basis.
+ * These are NOT global indices to identify the function.
  */
 typedef unsigned int FuncId;
+
+/**
+ * Looks up and uniquely identifies Msgs. This is a global index
+ */
+typedef unsigned int MsgId;
 
 /**
  * Looks up Synchronous messages on elements
@@ -53,12 +59,12 @@ typedef unsigned short BindIndex;
 class Element;
 class Eref;
 class OpFunc;
-class Id;
-class FullId;
 class Qinfo;
 class Data;
 
+#include "Id.h"
 #include "DataId.h"
+#include "FullId.h"
 #include "Finfo.h"
 #include "DestFinfo.h"
 #include "SimGroup.h"
@@ -70,8 +76,6 @@ class Data;
 #include "Qinfo.h"
 #include "Element.h"
 #include "Eref.h"
-#include "Id.h"
-#include "FullId.h"
 #include "Conv.h"
 #include "SrcFinfo.h"
 #include "../shell/Shell.h"

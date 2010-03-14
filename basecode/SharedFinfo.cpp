@@ -59,4 +59,29 @@ bool SharedFinfo::checkTarget( const Finfo* target ) const
 	return 0;
 }
 
+bool SharedFinfo::addMsg( const Finfo* target, MsgId mid,
+	Id src, Id dest ) const
+{
+	if ( !checkTarget( target ) )
+		return 0;
+	const SharedFinfo* tgt = dynamic_cast< const SharedFinfo* >( target );
+	for ( unsigned int i = 0; i < src_.size(); ++i ) {
+		if ( !src_[i]->addMsg( tgt->dest_[i], mid, src, dest ) ) {
+			// Should never happen. The checkTarget should preclude this.
+			cerr << "Error:SharedFinfo::addMsg: Failed between " <<
+				src << " and " << dest << ", unrecoverable\n";
+			exit(0);
+		}
+	}
+	for ( unsigned int i = 0; i < tgt->src_.size(); ++i ) {
+		if ( !tgt->src_[i]->addMsg( dest_[i], mid, src, dest ) ) {
+			// Should never happen. The checkTarget should preclude this.
+			cerr << "Error:SharedFinfo::addMsg: Failed between " <<
+				src << " and " << dest << ", unrecoverable\n";
+			exit( 0 );
+		}
+	}
+	return 0;
+}
+
 /////////////////////////////////////////////////////////////////////

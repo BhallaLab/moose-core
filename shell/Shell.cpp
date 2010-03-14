@@ -147,7 +147,7 @@ const Cinfo* Shell::initCinfo()
 //  Shared msg
 ////////////////////////////////////////////////////////////////
 
-		new SharedFinfo( "interNodeShell",
+		new SharedFinfo( "interNodeOps",
 			"Connects together shells located on different nodes",
 			shellMsgVec, sizeof( shellMsgVec ) / sizeof( const Finfo* )
 		),
@@ -173,6 +173,66 @@ Shell::Shell()
 		isSingleThreaded_( 0 ), numCores_( 1 ), numNodes_( 1 )
 {
 	;
+}
+
+////////////////////////////////////////////////////////////////
+// Parser functions.
+////////////////////////////////////////////////////////////////
+
+/**
+ * This is the version used by the parser. Acts as a blocking,
+ * serial-like interface to a potentially multithread, multinode call.
+ * Returns the new Id index.
+ * The data of the new Element is not necessarily allocated at this point,
+ * that can be deferred till the global Instantiate or Reset calls.
+ * Idea is that the model should be fully defined before load balancing.
+ *
+ */
+Id Shell::doCreate( string type, Id parent, string name, vector< unsigned int > dimensions )
+{
+	Id ret = Id::nextId();
+	// Here we would do the 'send' on an internode msg to do the actual
+	// Create.
+	innerCreate( type, parent, ret, name );
+	return ret;
+}
+
+bool Shell::doDelete( Id i )
+{
+	destroy( i );
+	return 1;
+}
+
+MsgId Shell::doCreateMsg( Id src, const string& srcField, Id dest,
+	const string& destField, const string& msgType )
+{
+	const Finfo* f1 = src()->cinfo()->findFinfo( srcField );
+	if ( !f1 ) {
+		cout << "add: Error: Failed to find field " << srcField << 
+			" on src:\n"; // Put name here.
+		return 0;
+	}
+	const Finfo* f2 = dest()->cinfo()->findFinfo( destField );
+	if ( !f2 ) {
+		cout << "add: Error: Failed to find field " << srcField << 
+			" on src:\n"; // Put name here.
+		return 0;
+	}
+
+	Msg* m = 0;
+	if ( msgType == "OneToOneMsg" )
+		m = new OneToOneMsg( src(), dest() );
+	if ( msgType == "OneToAllMsg" )
+		m = new OneToAllMsg( src.eref(), dest() );
+	// And so on, lots of msg types here.
+	
+	if ( m ) {
+		if ( f1->addMsg( f2, m->mid(), src, dest ) )
+			return m->mid();
+		else
+			delete m; // Nasty, but rare.
+	}
+	return Msg::Null;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -221,23 +281,6 @@ const char* Shell::getBuf() const
 	return 0;
 }
 
-/**
- * This is the version used by the parser. Acts as a blocking,
- * serial-like interface to a potentially multithread, multinode call.
- * Returns the new Id index.
- * The data of the new Element is not necessarily allocated at this point,
- * that can be deferred till the global Instantiate or Reset calls.
- * Idea is that the model should be fully defined before load balancing.
- *
- */
-Id Shell::doCreate( string type, Id parent, string name, vector< unsigned int > dimensions )
-{
-	Id ret = Id::nextId();
-	// Here we would do the 'send' on an internode msg to do the actual
-	// Create.
-	innerCreate( type, parent, ret, name );
-	return ret;
-}
 
 /**
  * This function handles the message request to create an Element.

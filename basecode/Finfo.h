@@ -34,8 +34,19 @@ class Finfo
 		 * to exchange messages with.
 		 * Is called only from msg src, so most Finfos return 0.
 		 * SrcFinfo and SharedFinfo will need to implement this.
-		 */
 		virtual bool checkTarget( const Finfo* target) const {
+			return 0;
+		}
+		 */
+
+		/**
+		 * Sets up specified Msg between src and dest. 
+		 * Does all the type checking.
+		 * Returns 1 on success.
+		 * Defaults to 0 because many Finfo combinations won't work.
+		 */
+		virtual bool addMsg( const Finfo* target, MsgId mid, 
+			Id src, Id dest ) const {
 			return 0;
 		}
 		

@@ -28,6 +28,13 @@ class SharedFinfo: public Finfo
 
 		BindIndex registerBindIndex( BindIndex current );
 
+
+		/**
+		 * First calls checkTarget on all targets, then sets up message.
+		 * Returns true on success.
+		 */
+		bool addMsg( const Finfo* target, MsgId mid, Id src, Id dest) const;
+	protected:
 		/**
 		 * Checks that the type of target Finfo matches self, and is safe
 		 * to exchange messages with.

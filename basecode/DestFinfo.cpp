@@ -27,9 +27,11 @@ void DestFinfo::registerOpFuncs(
 	map< string, FuncId >::iterator i = fnames.find( name() );
 	if ( i != fnames.end() ) {
 		funcs[ i->second ] = func_;
+		fid_ = i->second;
 	} else {
 		unsigned int size = funcs.size();
 		fnames[ name() ] = size;
+		fid_ = size;
 		funcs.push_back( func_ );
 	}
 }
@@ -42,4 +44,9 @@ BindIndex DestFinfo::registerBindIndex( BindIndex current )
 const OpFunc* DestFinfo::getOpFunc() const
 {
 	return func_;
+}
+
+FuncId DestFinfo::getFid() const
+{
+	return fid_;
 }

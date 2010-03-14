@@ -15,8 +15,6 @@
  * assorted variants.
  */
 
-typedef unsigned int MsgId;
-
 class Msg
 {
 	public:

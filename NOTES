@@ -3509,6 +3509,17 @@ Working on the create command.
 
 =============================================================================
 13 Marc 2010.
-Compiled, runs, but valgrind not happy. Trying to clean up.
+Compiled, runs, but valgrind not happy. Trying to clean up. Fixed. 
+Checkin 1632.
+
+Next steps:
+	- Shared Msg between Shells should be set up.
+	- The InterNodeMsg type should be defined, specially so that Shell
+		can send stuff to itself and get back acks to master node.
+	- Shell::doCreate should do a 'send' on an internode Msg to all Shells.
+		It should wait till ack from all nodes.
+	- Shell::doDelete likewise
+	- Test on MPI.
+	- Set up Shell::warning, Shell::error as a stream.
 
 =============================================================================

@@ -24,9 +24,11 @@ class DestFinfo: public Finfo
 			map< string, FuncId >& fnames, vector< OpFunc* >& funcs );
 		BindIndex registerBindIndex( BindIndex current );
 		const OpFunc* getOpFunc() const;
+		FuncId getFid() const;
 
 	private:
 		OpFunc* func_;
+		FuncId fid_;
 };
 
 #endif // _DEST_FINFO_H
