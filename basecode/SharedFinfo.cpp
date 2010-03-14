@@ -59,22 +59,31 @@ bool SharedFinfo::checkTarget( const Finfo* target ) const
 	return 0;
 }
 
-bool SharedFinfo::addMsg( const Finfo* target, MsgId mid, Id src ) const
+bool SharedFinfo::addMsg( const Finfo* target, MsgId mid, 
+	Element* srcElm ) const
 {
 	if ( !checkTarget( target ) )
 		return 0;
 	const SharedFinfo* tgt = dynamic_cast< const SharedFinfo* >( target );
 	for ( unsigned int i = 0; i < src_.size(); ++i ) {
-		if ( !src_[i]->addMsg( tgt->dest_[i], mid, src ) ) {
+		if ( !src_[i]->addMsg( tgt->dest_[i], mid, srcElm ) ) {
 			// Should never happen. The checkTarget should preclude this.
 			cerr << "Error:SharedFinfo::addMsg: Failed on MsgId " <<
 				mid << ", unrecoverable\n";
 			exit(0);
 		}
 	}
-	// For the reverse msgs we have a problem for the 'send' command...
+
+	// For the reverse msgs we have a problem for the 'send' command,
+	// to assign the isForward flag. Logic goes to the user function,
+	// not good.
+	const Msg* m = Msg::getMsg( mid );
+	Element* destElm = m->e2();
+	if ( srcElm == destElm )
+		destElm = m->e1();
+	
 	for ( unsigned int i = 0; i < tgt->src_.size(); ++i ) {
-		if ( !tgt->src_[i]->addMsg( dest_[i], mid, src ) ) {
+		if ( !tgt->src_[i]->addMsg( dest_[i], mid, destElm ) ) {
 			// Should never happen. The checkTarget should preclude this.
 			cerr << "Error:SharedFinfo::addMsg: Failed on MsgId " <<
 				mid << ", unrecoverable\n";

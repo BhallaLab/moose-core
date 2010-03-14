@@ -28,7 +28,7 @@ void testCreateDelete()
 /**
  * Tests creation of SharedMsg from Shell to itself.
  */
-void testSharedMsg()
+void testShellSharedMsg()
 {
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
@@ -59,7 +59,7 @@ void testInterNodeOps()
 void testShell( )
 {
 	testCreateDelete();
-	testSharedMsg();
+	testShellSharedMsg();
 	testShellParserCreateDelete();
 	testInterNodeOps();
 }

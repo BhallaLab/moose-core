@@ -91,4 +91,34 @@ template< class T > class RetFunc: public OpFunc
 		void ( T::*func_ )( Eref e, const Qinfo* q, const char* arg ); 
 };
 
+
+template< class T, class A1, class A2 > class EpFunc2: public OpFunc
+{
+	public:
+		EpFunc2( void ( T::*func )( Eref e, const Qinfo* q, A1, A2 ) )
+			: func_( func )
+			{;}
+
+		bool checkFinfo( const Finfo* s ) const {
+			return dynamic_cast< const SrcFinfo2< A1, A2 >* >( s );
+		}
+
+		bool checkSet( const SetGet* s ) const {
+			return dynamic_cast< const SetGet2< A1, A2 >* >( s );
+		}
+
+		// This could do with a whole lot of optimization to avoid
+		// copying data back and forth.
+		void op( Eref e, const char* buf ) const {
+			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
+			buf += sizeof( Qinfo );
+			Conv< A1 > arg1( buf );
+			Conv< A2 > arg2( buf + arg1.size() );
+			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2 ) ;
+		}
+
+	private:
+		void ( T::*func_ )( Eref e, const Qinfo* q, A1, A2 ); 
+};
+
 #endif //_EPFUNC_H

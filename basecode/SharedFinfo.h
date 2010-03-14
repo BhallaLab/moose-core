@@ -38,7 +38,7 @@ class SharedFinfo: public Finfo
 		 * First calls checkTarget on all targets, then sets up message.
 		 * Returns true on success.
 		 */
-		bool addMsg( const Finfo* target, MsgId mid, Id src ) const;
+		bool addMsg( const Finfo* target, MsgId mid, Element* src ) const;
 
 	private:
 		vector< const SrcFinfo* > src_;

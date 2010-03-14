@@ -236,7 +236,7 @@ MsgId Shell::doCreateMsg( Id src, const string& srcField, Id dest,
 	// And so on, lots of msg types here.
 	
 	if ( m ) {
-		if ( f1->addMsg( f2, m->mid(), src ) )
+		if ( f1->addMsg( f2, m->mid(), src() ) )
 			return m->mid();
 		else
 			delete m; // Nasty, but rare.

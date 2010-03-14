@@ -3517,6 +3517,7 @@ Next steps:
 		Issues again with message direction. If we have a reciprocal
 		msg, the direction info is only from the calling Elm.
 		Added isForward = 1 default arg to SrcFinfo<>::send calls.
+		Checkin 1635.
 	- The InterNodeMsg type should be defined, specially so that Shell
 		can send stuff to itself and get back acks to master node.
 	- Shell::doCreate should do a 'send' on an internode Msg to all Shells.

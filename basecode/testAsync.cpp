@@ -730,6 +730,141 @@ void testUpValue()
 	delete clock();
 }
 
+/**
+ * This sets up a reciprocal shared Msg in which the incoming value gets
+ * appended onto the corresponding value of the target. Also, as soon
+ * as any of the s1 or s2 are received, the target sends out an s0 call.
+ * All this is tallied for validating the unit test.
+ */
+
+static SrcFinfo0 *s0 = new SrcFinfo0( "", "", 2);
+class Test: public Data
+{
+	public:
+		Test()
+			: numAcks_( 0 )
+		{;}
+
+		void process( const ProcInfo* p, const Eref& e )
+		{;}
+
+		void handleS0() {
+			numAcks_++;
+		}
+
+		void handleS1( Eref e, const Qinfo* q, string s ) {
+			s_ = s + s_;
+			s0->send( e, 0 );
+		}
+
+		void handleS2( Eref e, const Qinfo* q, int i1, int i2 ) {
+			i1_ += 10 * i1;
+			i2_ += 10 * i2;
+			s0->send( e, 0 );
+		}
+
+		static const Finfo* sharedVec[ 6 ];
+
+		static const Cinfo* initCinfo()
+		{
+			static Finfo * testFinfos[] = {
+				new SharedFinfo( "shared", "",
+					sharedVec, sizeof( sharedVec ) / sizeof( const Finfo * ) ),
+			};
+
+			static Cinfo testCinfo(
+				"Test",
+				0,
+				testFinfos,
+				sizeof( testFinfos ) / sizeof( Finfo* ),
+				new Dinfo< Test >()
+			);
+	
+			return &testCinfo;
+		}
+
+		string s_;
+		int i1_;
+		int i2_;
+		int numAcks_;
+};
+
+const Finfo* Test::sharedVec[6];
+
+void testSharedMsg()
+{
+	static BindIndex bi = 3;
+	static SrcFinfo1< string > *s1 = new SrcFinfo1< string >( "", "", bi++);
+	static SrcFinfo2< int, int > *s2 = new SrcFinfo2< int, int >( "", "", bi++);
+	static DestFinfo d0( "", "", new OpFunc0< Test >( & Test::handleS0 ) );
+	static DestFinfo d1( "", "", 
+		new EpFunc1< Test, string >( &Test::handleS1 ) );
+	static DestFinfo d2( "", "", 
+		new EpFunc2< Test, int, int >( &Test::handleS2 ) );
+
+	Test::sharedVec[0] = s0;
+	Test::sharedVec[1] = &d0;
+	Test::sharedVec[2] = s1;
+	Test::sharedVec[3] = &d1;
+	Test::sharedVec[4] = s2;
+	Test::sharedVec[5] = &d2;
+	
+	Id t1 = Id::nextId();
+	Id t2 = Id::nextId();
+	bool ret = Test::initCinfo()->create( t1, "test1", 1 );
+	assert( ret );
+	ret = Test::initCinfo()->create( t2, "test2", 1 );
+	assert( ret );
+
+	// Assign initial values
+	Test* tdata1 = reinterpret_cast< Test* >( t1.eref().data() );
+	tdata1->s_ = "tdata1";
+	tdata1->i1_ = 1;
+	tdata1->i2_ = 2;
+
+	Test* tdata2 = reinterpret_cast< Test* >( t2.eref().data() );
+	tdata2->s_ = "TDATA2";
+	tdata2->i1_ = 5;
+	tdata2->i2_ = 6;
+
+	// Set up message. The actual routine is in Shell.cpp, but here we
+	// do it independently.
+	
+	const Finfo* shareFinfo = Test::initCinfo()->findFinfo( "shared" );
+	assert( shareFinfo != 0 );
+	Msg* m = new OneToOneMsg( t1(), t2() );
+	assert( m != 0 );
+	ret = shareFinfo->addMsg( shareFinfo, m->mid(), t1() );
+	assert( ret );
+
+	// Send messages
+	ProcInfo p;
+	string arg1 = " hello ";
+	s1->send( t1.eref(), &p, arg1 );
+	s2->send( t1.eref(), &p, 100, 200 );
+
+	Qinfo::clearQ( &p );
+	Qinfo::clearQ( &p );
+
+	string arg2 = " goodbye ";
+	s1->send( t2.eref(), &p, arg2, 0 );
+	s2->send( t2.eref(), &p, 500, 600, 0 );
+
+	Qinfo::clearQ( &p );
+	Qinfo::clearQ( &p );
+
+	cout << "data1: s=" << tdata1->s_ << 
+		", i1=" << tdata1->i1_ << ", i2=" << tdata1->i2_ << endl;
+	cout << "data2: s=" << tdata2->s_ << 
+		", i1=" << tdata2->i1_ << ", i2=" << tdata2->i2_ << endl;
+	// Check results
+	
+	t1.destroy();
+	t2.destroy();
+
+	cout << "." << flush;
+}
+
 void testAsync( )
 {
 	insertIntoQ();
@@ -746,4 +881,5 @@ void testAsync( )
 	testSparseMatrixBalance();
 	testSparseMsg();
 	testUpValue();
+	testSharedMsg();
 }

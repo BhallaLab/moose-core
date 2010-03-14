@@ -45,7 +45,7 @@ class Finfo
 		 * Returns 1 on success.
 		 * Defaults to 0 because many Finfo combinations won't work.
 		 */
-		virtual bool addMsg( const Finfo* target, MsgId mid, Id src ) const
+		virtual bool addMsg( const Finfo* target, MsgId mid, Element* src ) const
 		{ 
 			return 0;
 		}

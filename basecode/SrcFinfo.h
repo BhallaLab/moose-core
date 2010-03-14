@@ -39,7 +39,7 @@ class SrcFinfo: public Finfo
 		/**
 		 * First checks that the target will work, then adds the Msg.
 		 */
-		bool addMsg( const Finfo* target, MsgId mid, Id src ) const;
+		bool addMsg( const Finfo* target, MsgId mid, Element* src ) const;
 
 	private:
 		/**
@@ -162,10 +162,11 @@ template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
 			Qinfo q( 0, isForward, e.index(), a1.size() + a2.size() );
-			char temp[ a1.size() + a2.size() ];
+			char* temp = new char[ a1.size() + a2.size() ];
 			a1.val2buf( temp );
 			a2.val2buf( temp + a1.size() );
 			e.element()->asend( q, getBindIndex(), p, temp );
+			delete[] temp;
 		}
 
 		void sendTo( Eref e, const ProcInfo* p,
@@ -175,10 +176,11 @@ template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
 			Qinfo q( 1, isForward, e.index(), a1.size() + a2.size() );
-			char temp[ a1.size() + a2.size() ];
+			char* temp = new char[ a1.size() + a2.size() ];
 			a1.val2buf( temp );
 			a2.val2buf( temp + a1.size() );
 			e.element()->tsend( q, getBindIndex(), p, temp, target );
+			delete[] temp;
 		}
 
 	private:
