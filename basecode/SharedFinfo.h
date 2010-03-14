@@ -19,7 +19,7 @@ class SharedFinfo: public Finfo
 {
 	public:
 		SharedFinfo( const string& name, const string& doc, 
-			const Finfo** entries, unsigned int numEntries );
+			Finfo** entries, unsigned int numEntries );
 
 		~SharedFinfo() {;}
 
@@ -42,7 +42,7 @@ class SharedFinfo: public Finfo
 
 	private:
 		vector< const SrcFinfo* > src_;
-		vector< const Finfo* > dest_;
+		vector< Finfo* > dest_;
 };
 
 #endif // _SHARED_FINFO_H

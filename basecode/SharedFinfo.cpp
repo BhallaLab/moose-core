@@ -14,7 +14,7 @@
  */
 
 SharedFinfo::SharedFinfo( const string& name, const string& doc,
-	const Finfo** entries, unsigned int numEntries )
+	Finfo** entries, unsigned int numEntries )
 	: Finfo( name, doc )
 { 
 	for ( unsigned int i = 0; i < numEntries; ++i )
@@ -27,10 +27,17 @@ SharedFinfo::SharedFinfo( const string& name, const string& doc,
 	}
 }
 
+/**
+ * It is possible that we have DestFinfos in this SharedFinfo, that have
+ * not been registered. So we need to scan through.
+ * Note that the register operation overwrites values if they already 
+ * exist. Best not to have conflicts!.
+ */
 void SharedFinfo::registerOpFuncs(
-		map< string, FuncId >& fnames, vector< OpFunc* >& funcs ) 
+		map< string, FuncId >& fnames, vector< OpFunc* >& funcs )
 {
-	;
+	for ( unsigned int i = 0; i < dest_.size(); ++i )
+		dest_[i]->registerOpFuncs( fnames, funcs );
 }
 
 BindIndex SharedFinfo::registerBindIndex( BindIndex current )

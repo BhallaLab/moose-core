@@ -737,7 +737,7 @@ void testUpValue()
  * All this is tallied for validating the unit test.
  */
 
-static SrcFinfo0 *s0 = new SrcFinfo0( "", "", 2);
+static SrcFinfo0 *s0 = new SrcFinfo0( "s0", "", 2);
 class Test: public Data
 {
 	public:
@@ -753,17 +753,19 @@ class Test: public Data
 		}
 
 		void handleS1( Eref e, const Qinfo* q, string s ) {
+			ProcInfo p;
 			s_ = s + s_;
-			s0->send( e, 0 );
+			s0->send( e, &p, 0 );
 		}
 
 		void handleS2( Eref e, const Qinfo* q, int i1, int i2 ) {
+			ProcInfo p;
 			i1_ += 10 * i1;
 			i2_ += 10 * i2;
-			s0->send( e, 0 );
+			s0->send( e, &p, 0 );
 		}
 
-		static const Finfo* sharedVec[ 6 ];
+		static Finfo* sharedVec[ 6 ];
 
 		static const Cinfo* initCinfo()
 		{
@@ -789,17 +791,18 @@ class Test: public Data
 		int numAcks_;
 };
 
-const Finfo* Test::sharedVec[6];
+Finfo* Test::sharedVec[6];
 
 void testSharedMsg()
 {
 	static BindIndex bi = 3;
-	static SrcFinfo1< string > *s1 = new SrcFinfo1< string >( "", "", bi++);
-	static SrcFinfo2< int, int > *s2 = new SrcFinfo2< int, int >( "", "", bi++);
-	static DestFinfo d0( "", "", new OpFunc0< Test >( & Test::handleS0 ) );
-	static DestFinfo d1( "", "", 
+	static SrcFinfo1< string > *s1 = new SrcFinfo1< string >( "s1", "", bi++);
+	static SrcFinfo2< int, int > *s2 = new SrcFinfo2< int, int >( "s2", "", bi++);
+	static DestFinfo d0( "d0", "",
+		new OpFunc0< Test >( & Test::handleS0 ) );
+	static DestFinfo d1( "d1", "", 
 		new EpFunc1< Test, string >( &Test::handleS1 ) );
-	static DestFinfo d2( "", "", 
+	static DestFinfo d2( "d2", "", 
 		new EpFunc2< Test, int, int >( &Test::handleS2 ) );
 
 	Test::sharedVec[0] = s0;
@@ -854,10 +857,21 @@ void testSharedMsg()
 	Qinfo::clearQ( &p );
 
 	cout << "data1: s=" << tdata1->s_ << 
-		", i1=" << tdata1->i1_ << ", i2=" << tdata1->i2_ << endl;
+		", i1=" << tdata1->i1_ << ", i2=" << tdata1->i2_ << 
+		", numAcks=" << tdata1->numAcks_ << endl;
 	cout << "data2: s=" << tdata2->s_ << 
-		", i1=" << tdata2->i1_ << ", i2=" << tdata2->i2_ << endl;
+		", i1=" << tdata2->i1_ << ", i2=" << tdata2->i2_ <<
+		", numAcks=" << tdata2->numAcks_ << endl;
 	// Check results
+	
+	assert( tdata1->s_ == " goodbye tdata1" );
+	assert( tdata2->s_ == " hello TDATA2" );
+	assert( tdata1->i1_ == 5001  );
+	assert( tdata1->i2_ == 6002  );
+	assert( tdata2->i1_ == 1005  );
+	assert( tdata2->i2_ == 2006  );
+	assert( tdata1->numAcks_ == 4  ); // not good.
+	assert( tdata2->numAcks_ == 0  );
 	
 	t1.destroy();
 	t2.destroy();

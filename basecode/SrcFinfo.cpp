@@ -18,7 +18,7 @@ SrcFinfo::SrcFinfo( const string& name, const string& doc, BindIndex b )
 { ; }
 
 void SrcFinfo::registerOpFuncs(
-		map< string, FuncId >& fnames, vector< OpFunc* >& funcs ) 
+		map< string, FuncId >& fnames, vector< OpFunc* >& funcs )
 {
 	;
 }

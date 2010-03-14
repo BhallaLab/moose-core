@@ -19,8 +19,12 @@ class Finfo
 
 		const string& name() const;
 
+		/**
+		 * For DestFinfos, this takes note of the OpFunc and generates
+		 * a FuncId. For SharedFinfos, it recurses down to all sub-Finfos.
+		 */
 		virtual void registerOpFuncs( 
-			map< string, FuncId >& fm, vector< OpFunc* >& funcs ) = 0; 
+			map< string, FuncId >& fm, vector< OpFunc* >& funcs ) = 0;
 
 		/**
 		 * Registers the Msg slot to be used for transmitting messages.

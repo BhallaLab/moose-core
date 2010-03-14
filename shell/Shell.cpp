@@ -71,7 +71,7 @@ static DestFinfo handleAckDelete( "handleAckCreate",
 			"Keeps track of # of responders to ackCreate. Args: none",
 			new OpFunc0< Shell >( & Shell::handleAckCreate ) );
 
-static const Finfo* shellMsgVec[] = {
+static Finfo* shellMsgVec[] = {
 	requestCreate, &create, ackCreate, &handleAckCreate, requestDelete, &del, ackDelete, &handleAckDelete, };
 /*
 static SrcFinfo4< Id, string, Id, string  > *requestMsg =
