@@ -208,27 +208,6 @@ void Qinfo::reportQ()
 	cout << endl;
 }
 
-
-// Non-static: copies itself onto queue.
-// qid specifies which queue to use. Must be an outQ.
-// mid assigns the msgId.
-/*
-void Qinfo::addToQ( Qid qId, MsgId mid, bool isForward, const char* arg )
-{
-	assert( qId < outQ_.size() );
-
-	vector< char >& q = outQ_[qId];
-	unsigned int origSize = q.size();
-	m_ = mid;
-	isForward_ = isForward;
-	q.resize( origSize + sizeof( Qinfo ) + size_ );
-	char* pos = &( q[origSize] );
-	memcpy( pos, this, sizeof( Qinfo ) );
-	// ( reinterpret_cast< Qinfo* >( pos ) )->setForward( isForward );
-	memcpy( pos + sizeof( Qinfo ), arg, size_ );
-}
-*/
-
 void Qinfo::addToQ( Qid qId, MsgFuncBinding b, const char* arg )
 {
 	assert( qId < outQ_.size() );

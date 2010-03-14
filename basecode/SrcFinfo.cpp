@@ -58,15 +58,15 @@ SrcFinfo0::SrcFinfo0( const string& name, const string& doc, BindIndex b )
 	: SrcFinfo( name, doc, b )
 { ; }
 
-void SrcFinfo0::send( Eref e, const ProcInfo* p ) const {
+void SrcFinfo0::send( Eref e, const ProcInfo* p, bool isForward ) const {
 	// First arg is useSendTo, second arg is isForward, last arg is size
-	Qinfo q( 0, 1, e.index(), 0 );
+	Qinfo q( 0, isForward, e.index(), 0 );
 	e.element()->asend( q, getBindIndex(), p, 0 ); // last arg is data
 }
 
 void SrcFinfo0::sendTo( Eref e, const ProcInfo* p, 
-	const FullId& target ) const
+	const FullId& target, bool isForward ) const
 {
-	Qinfo q( 1, 1, e.index(), 0 );
+	Qinfo q( 1, isForward, e.index(), 0 );
 	e.element()->tsend( q, getBindIndex(), p, 0, target );
 }

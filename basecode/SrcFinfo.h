@@ -59,8 +59,9 @@ class SrcFinfo0: public SrcFinfo
 		~SrcFinfo0() {;}
 
 		// Will need to specialize for strings etc.
-		void send( Eref e, const ProcInfo* p ) const;
-		void sendTo( Eref e, const ProcInfo* p, const FullId& target) const;
+		void send( Eref e, const ProcInfo* p, bool isForward = 1 ) const;
+		void sendTo( Eref e, const ProcInfo* p, const FullId& target,
+			bool isForward = 1 ) const;
 
 	private:
 };
@@ -77,10 +78,11 @@ template < class T > class SrcFinfo1: public SrcFinfo
 			{ ; }
 
 		// Will need to specialize for strings etc.
-		void send( Eref e, const ProcInfo* p, const T& arg ) const
+		void send( Eref e, const ProcInfo* p, const T& arg, 
+			bool isForward = 1 ) const
 		{
 			// Qinfo( useSendTo, isForward, eindex, size );
-			Qinfo q( 0, 1, e.index(), sizeof( T ) );
+			Qinfo q( 0, isForward, e.index(), sizeof( T ) );
 			e.element()->asend( q, getBindIndex(), p, 
 				reinterpret_cast< const char* >( &arg ) );
 		}
@@ -90,10 +92,10 @@ template < class T > class SrcFinfo1: public SrcFinfo
 		 * Element or Msg, since there could be multiple ones. 
 		 */
 		void sendTo( Eref e, const ProcInfo* p,
-			const T& arg, const FullId& target ) const
+			const T& arg, const FullId& target, bool isForward = 1 ) const
 		{
 			// Qinfo( useSendTo, isForward, eindex, size );
-			Qinfo q( 1, 1, e.index(), sizeof( T ) );
+			Qinfo q( 1, isForward, e.index(), sizeof( T ) );
 			e.element()->tsend( q, getBindIndex(), p, 
 				reinterpret_cast< const char* >( &arg ), target );
 		}
@@ -112,12 +114,13 @@ template <> class SrcFinfo1< string >: public SrcFinfo
 			{ ; }
 
 		// Will need to specialize for strings etc.
-		void send( Eref e, const ProcInfo* p, const string& arg ) const
+		void send( Eref e, const ProcInfo* p, const string& arg,
+			bool isForward = 1 ) const
 		{
 			Conv< string > s( arg );
 
 			// Qinfo( useSendTo, isForward, eindex, size );
-			Qinfo q( 0, 1, e.index(), s.size() );
+			Qinfo q( 0, isForward, e.index(), s.size() );
 			char* buf = new char[ s.size() ];
 			s.val2buf( buf );
 
@@ -126,10 +129,11 @@ template <> class SrcFinfo1< string >: public SrcFinfo
 		}
 
 		void sendTo( Eref e, const ProcInfo* p, 
-			const string& arg, const FullId& target ) const
+			const string& arg, const FullId& target,
+			bool isForward = 1 ) const
 		{
 			Conv< string > s( arg );
-			Qinfo q( 1, 1, e.index(), s.size() );
+			Qinfo q( 1, isForward, e.index(), s.size() );
 			char* buf = new char[ s.size() ];
 			s.val2buf( buf );
 
@@ -153,10 +157,11 @@ template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 		// This version is general but inefficient as it uses an extra
 		// memcpy in val2buf.
 		void send( Eref e, const ProcInfo* p,
-			const T1& arg1, const T2& arg2 ) {
+			const T1& arg1, const T2& arg2, 
+			bool isForward = 1 ) {
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
-			Qinfo q( 0, 1, e.index(), a1.size() + a2.size() );
+			Qinfo q( 0, isForward, e.index(), a1.size() + a2.size() );
 			char temp[ a1.size() + a2.size() ];
 			a1.val2buf( temp );
 			a2.val2buf( temp + a1.size() );
@@ -165,10 +170,11 @@ template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 
 		void sendTo( Eref e, const ProcInfo* p,
 			const T1& arg1, const T2& arg2,
-			const FullId& target ) {
+			const FullId& target,
+			bool isForward = 1 ) {
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
-			Qinfo q( 1, 1, e.index(), a1.size() + a2.size() );
+			Qinfo q( 1, isForward, e.index(), a1.size() + a2.size() );
 			char temp[ a1.size() + a2.size() ];
 			a1.val2buf( temp );
 			a2.val2buf( temp + a1.size() );
@@ -191,11 +197,13 @@ template < class T1, class T2, class T3 > class SrcFinfo3: public SrcFinfo
 
 		// Will need to specialize for strings etc.
 		void send( Eref e, const ProcInfo* p,
-			const T1& arg1, const T2& arg2, const T3& arg3 ){
+			const T1& arg1, const T2& arg2, const T3& arg3,
+			bool isForward = 1 ) {
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
 			Conv< T3 > a3( arg3 );
-			Qinfo q( 0, 1, e.index(), a1.size() + a2.size() + a3.size() );
+			Qinfo q( 0, isForward , e.index(), 
+				a1.size() + a2.size() + a3.size() );
 			char temp[ a1.size() + a2.size() + a3.size() ];
 			a1.val2buf( temp );
 			a2.val2buf( temp + a1.size() );
@@ -204,12 +212,14 @@ template < class T1, class T2, class T3 > class SrcFinfo3: public SrcFinfo
 		}
 
 		void sendTo( Eref e, DataId target, const ProcInfo* p,
-			const T1& arg1, const T2& arg2, const T3& arg3 )
+			const T1& arg1, const T2& arg2, const T3& arg3,
+			bool isForward = 1 )
 		{
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
 			Conv< T3 > a3( arg3 );
-			Qinfo q( 1, 1, e.index(), a1.size() + a2.size() + a3.size() );
+			Qinfo q( 1, isForward, e.index(), 
+				a1.size() + a2.size() + a3.size() );
 			char temp[ a1.size() + a2.size() + a3.size() ];
 			a1.val2buf( temp );
 			a2.val2buf( temp + a1.size() );
@@ -232,12 +242,14 @@ template < class T1, class T2, class T3, class T4 > class SrcFinfo4: public SrcF
 
 		// Will need to specialize for strings etc.
 		void send( Eref e, const ProcInfo* p,
-			const T1& arg1, const T2& arg2, const T3& arg3, const T4& arg4 ){
+			const T1& arg1, const T2& arg2, const T3& arg3, const T4& arg4,
+			bool isForward = 1 ) {
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
 			Conv< T3 > a3( arg3 );
 			Conv< T4 > a4( arg4 );
-			Qinfo q( 0, 1, e.index(), a1.size() + a2.size() + a3.size() + a4.size() );
+			Qinfo q( 0, isForward, e.index(), 
+				a1.size() + a2.size() + a3.size() + a4.size() );
 			char temp[ a1.size() + a2.size() + a3.size() + a4.size() ];
 			a1.val2buf( temp );
 			a2.val2buf( temp + a1.size() );
@@ -248,12 +260,14 @@ template < class T1, class T2, class T3, class T4 > class SrcFinfo4: public SrcF
 
 		void sendTo( Eref e, const ProcInfo* p,
 			const T1& arg1, const T2& arg2, const T3& arg3, const T4& arg4,
-			const FullId& target ) {
+			const FullId& target,
+			bool isForward = 1 ) {
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
 			Conv< T3 > a3( arg3 );
 			Conv< T4 > a4( arg4 );
-			Qinfo q( 0, 1, e.index(), a1.size() + a2.size() + a3.size() + a4.size() );
+			Qinfo q( 0, isForward, e.index(), 
+				a1.size() + a2.size() + a3.size() + a4.size() );
 			char temp[ a1.size() + a2.size() + a3.size() + a4.size() ];
 			a1.val2buf( temp );
 			a2.val2buf( temp + a1.size() );

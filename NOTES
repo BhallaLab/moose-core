@@ -3513,8 +3513,10 @@ Compiled, runs, but valgrind not happy. Trying to clean up. Fixed.
 Checkin 1632.
 
 Next steps:
-	+ Shared Msg between Shells should be set up. Checkin 1633.
-		Issues again with message direction.
+	+ Shared Msg between Shells should be set up. Checkin 1633, 1634.
+		Issues again with message direction. If we have a reciprocal
+		msg, the direction info is only from the calling Elm.
+		Added isForward = 1 default arg to SrcFinfo<>::send calls.
 	- The InterNodeMsg type should be defined, specially so that Shell
 		can send stuff to itself and get back acks to master node.
 	- Shell::doCreate should do a 'send' on an internode Msg to all Shells.
