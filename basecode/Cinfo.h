@@ -39,10 +39,33 @@ class Cinfo
 			);
 
 			~Cinfo();
+//////////////////////////////////////////////////////////////////////////
+			/**
+			 * Initializes the Cinfo. Must be called exactly once for
+			 * each Cinfo.
+			 */
+			void init( Finfo** finfoArray, unsigned int nFinfos );
 
+			/**
+			 * registerFinfo:
+			 * Puts Finfo information into Cinfo, and updates fields on
+			 * Finfo as necessary.
+			 */
 			void registerFinfo( Finfo* f );
 
-			void init( Finfo** finfoArray, unsigned int nFinfos );
+			/**
+			 * Registers the OpFunc, assigns it a FuncId and returns the
+			 * FuncId.
+			 */
+			FuncId registerOpFunc( const OpFunc* f );
+
+			/**
+			 * Returns the next free value for BindIndex, and keeps track
+			 * of the total number set up.
+			 */
+			BindIndex registerBindIndex();
+
+//////////////////////////////////////////////////////////////////////////
 
 			const OpFunc* getOpFunc( FuncId fid ) const;
 			FuncId getOpFuncId( const string& funcName ) const;
@@ -89,11 +112,11 @@ class Cinfo
 			const Cinfo* baseCinfo_;
 			const DinfoBase* dinfo_;
 
-			unsigned int  numBindIndex_;
+			BindIndex numBindIndex_;
 
 			map< string, Finfo* > finfoMap_;
-			vector< OpFunc* > funcs_;
-			map< string, FuncId > opFuncNames_;
+			vector< const OpFunc* > funcs_;
+//			map< string, FuncId > opFuncNames_;
 
 			static map< string, Cinfo* >& cinfoMap();
 

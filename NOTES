@@ -3548,4 +3548,40 @@ Next steps:
 Working on msg-based doCreate. Goes into infinite loop. Hard to debug.
 Working on implementing a showMsg. This regresses back to Cinfo::init
 handling SharedMsgs to init all the entries.
+Put in printf debugging fron tests. Compiles, but still stuck in loop.
 =============================================================================
+16 March 2010
+Some sloppiness in handling Finfo registration has caught up with me, and
+it is a spiral of problems. So I have to go right back to fixing this.
+It will break a lot of the unit tests. Sigh.
+
+Cinfo::init 
+	- Copies out parent class Finfos.
+		To what extent must we retain base Finfo and func indices?
+		- How do we access them? If through name, no problem.
+		- Can we always plop a derived class in? We do not have the
+			concept of FinfoId. So should be safe.
+		- But if we want to replace a class by its derived
+			version, what happens? Need to rebuild linkages,
+		-> will have to do so by name.
+		- Can use a hint in the Finfo to say if it should be 
+			registered with a predefined BindIndex. This is
+			only to keep the preallocated bind_ vector small,
+			useful when we have lots of SrcFinfos. But then why
+			would we have a SrcFinfo if it isn't to be preallocated?
+			The fields are what will proliferate, and those are
+			only destFinfos.
+	- To clone or to use original ptr?
+		- Clone seems safer
+		- Clone requires me to put in an op in all templated SrcFinfos
+			as well as OpFuncs. Not on.
+		- To use original ptr I'll have to use static creation of
+			all Finfos, rather that 'new' allocation in each object.
+		- Cinfo will no longer have to clean up Finfos when it is
+			deleted.
+		- Cannot now overwrite BindIndex and other Finfo fields.
+		- Decide if to reuse old Finfo BindIndex. For now, do not.
+
+	- Adds in current class Finfos. If there is a duplicate, free old one
+		and plug in new one.
+	- scans through Finfo map, registering each one.

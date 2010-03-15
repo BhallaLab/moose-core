@@ -17,6 +17,12 @@ SrcFinfo::SrcFinfo( const string& name, const string& doc, BindIndex b )
 	: Finfo( name, doc ), bindIndex_( b )
 { ; }
 
+void SrcFinfo::registerFinfo( Cinfo* c )
+{
+	bindIndex_ = c->registerBindIndex();
+}
+
+/*
 void SrcFinfo::registerOpFuncs(
 		map< string, FuncId >& fnames, vector< OpFunc* >& funcs )
 {
@@ -28,6 +34,7 @@ BindIndex SrcFinfo::registerBindIndex( BindIndex current )
 	bindIndex_ = current;
 	return current + 1;
 }
+*/
 
 bool SrcFinfo::checkTarget( const Finfo* target ) const
 {

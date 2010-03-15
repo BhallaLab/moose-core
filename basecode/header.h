@@ -47,11 +47,6 @@ typedef unsigned int MsgId;
 typedef unsigned int SyncId;
 
 /**
- * Looks up data entries on elements
- */
-extern const FuncId ENDFUNC;
-
-/**
  * Index into Element::vector< vector< MsgFuncBinding > > msgBinding_;
  */
 typedef unsigned short BindIndex;
@@ -61,6 +56,7 @@ class Eref;
 class OpFunc;
 class Qinfo;
 class Data;
+class Cinfo;
 
 #include "Id.h"
 #include "DataId.h"

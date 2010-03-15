@@ -16,8 +16,6 @@
 #include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
 
-const FuncId ENDFUNC( -1 );
-
 extern void testSync();
 extern void testAsync();
 extern void testSyncArray( unsigned int size, unsigned int numThreads,
@@ -83,9 +81,9 @@ int main( int argc, char** argv )
 	Id shellId = init( argc, argv );
 #ifdef DO_UNIT_TESTS
 	cout << "testing: ";
-	testAsync();
+	// testAsync();
 	testShell();
-	testScheduling();
+	//testScheduling();
 #endif
 	cout << endl;
 

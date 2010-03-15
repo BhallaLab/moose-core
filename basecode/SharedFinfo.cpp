@@ -27,12 +27,23 @@ SharedFinfo::SharedFinfo( const string& name, const string& doc,
 	}
 }
 
+void SharedFinfo::registerFinfo( Cinfo* c )
+{
+	for( vector< SrcFinfo* >::iterator i = 
+		src_.begin(); i != src_.end(); ++i)
+		c->registerFinfo( *i );
+	for( vector< Finfo* >::iterator i = 
+		dest_.begin(); i != dest_.end(); ++i)
+		c->registerFinfo( *i );
+}
+
 /**
  * It is possible that we have DestFinfos in this SharedFinfo, that have
  * not been registered. So we need to scan through.
  * Note that the register operation overwrites values if they already 
  * exist. Best not to have conflicts!.
  */
+/*
 void SharedFinfo::registerOpFuncs(
 		map< string, FuncId >& fnames, vector< OpFunc* >& funcs )
 {
@@ -44,6 +55,7 @@ BindIndex SharedFinfo::registerBindIndex( BindIndex current )
 {
 	return current;
 }
+*/
 
 bool SharedFinfo::checkTarget( const Finfo* target ) const
 {

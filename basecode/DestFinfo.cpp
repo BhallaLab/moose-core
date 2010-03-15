@@ -20,6 +20,19 @@ DestFinfo::DestFinfo( const string& name, const string& doc,
 	;
 }
 
+/*
+Finfo* DestFinfo::clone() const
+{
+	return new Destfinfo( *this );
+}
+*/
+
+void DestFinfo::registerFinfo( Cinfo* c )
+{
+	fid_ = c->registerOpFunc( func_ );
+}
+
+/*
 void DestFinfo::registerOpFuncs( 
 	map< string, FuncId >& fnames, vector< OpFunc* >& funcs
 	)
@@ -40,6 +53,7 @@ BindIndex DestFinfo::registerBindIndex( BindIndex current )
 {
 	return current;
 }
+*/
 
 const OpFunc* DestFinfo::getOpFunc() const
 {

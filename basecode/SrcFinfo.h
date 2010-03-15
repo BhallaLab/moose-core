@@ -22,10 +22,14 @@ class SrcFinfo: public Finfo
 
 		~SrcFinfo() {;}
 
+		void registerFinfo( Cinfo* c );
+
+		/*
 		void registerOpFuncs(
 			map< string, FuncId >& fnames, vector< OpFunc* >& funcs );
 
 		BindIndex registerBindIndex( BindIndex current );
+		*/
 
 		BindIndex getBindIndex() const {
 			return bindIndex_;
@@ -57,7 +61,7 @@ class SrcFinfo0: public SrcFinfo
 
 		SrcFinfo0( const string& name, const string& doc, BindIndex b );
 		~SrcFinfo0() {;}
-
+		
 		// Will need to specialize for strings etc.
 		void send( Eref e, const ProcInfo* p, bool isForward = 1 ) const;
 		void sendTo( Eref e, const ProcInfo* p, const FullId& target,

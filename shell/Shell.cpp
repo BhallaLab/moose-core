@@ -53,26 +53,26 @@ static SrcFinfo0* ackDelete =
 			"Goes back only to master node.",
 			bi++ );
 
-static DestFinfo create( "create", 
+static DestFinfo* create = new DestFinfo( "create", 
 			"create( class, parent, newElm, name",
 			new EpFunc4< Shell, string, Id, Id, string>( &Shell::create ) );
 
-static DestFinfo del( "delete", 
+static DestFinfo *del = new DestFinfo( "delete", 
 			"Destroys Element, all its messages, and all its children. Args: Id",
 			new EpFunc1< Shell, Id >( & Shell::destroy ) );
 
-static DestFinfo handleAckCreate( "handleAckCreate", 
+static DestFinfo *handleAckCreate = new DestFinfo( "handleAckCreate", 
 			"Keeps track of # of responders to ackCreate. Args: none",
 			new OpFunc0< Shell >( & Shell::handleAckCreate ) );
 
-static DestFinfo handleAckDelete( "handleAckCreate", 
+static DestFinfo *handleAckDelete = new DestFinfo( "handleAckCreate", 
 			"Keeps track of # of responders to ackCreate. Args: none",
 			new OpFunc0< Shell >( & Shell::handleAckDelete ) );
 
 static Finfo* shellMaster[] = {
-	requestCreate, &handleAckCreate, requestDelete, &handleAckDelete, };
+	requestCreate, handleAckCreate, requestDelete, handleAckDelete, };
 static Finfo* shellWorker[] = {
-	&create, ackCreate, &del, ackDelete };
+	create, ackCreate, del, ackDelete };
 /*
 static SrcFinfo4< Id, string, Id, string  > *requestMsg =
 		new SrcFinfo4< string, Id, Id, MsgId  >( "requestMsg",
@@ -98,12 +98,6 @@ static SrcFinfo1< FuncId > *requestGet =
 
 const Cinfo* Shell::initCinfo()
 {
-	/*
-	static Finfo* reacFinfos[] = {
-		new Finfo( setKf_ ),
-		new Finfo( setKb_ ),
-	};
-	*/
 	static Finfo* shellFinfos[] = {
 		new ValueFinfo< Shell, string >( 
 			"name",
@@ -147,11 +141,13 @@ const Cinfo* Shell::initCinfo()
 //  Predefined Msg Src and MsgDests.
 ////////////////////////////////////////////////////////////////
 
+		/*
 		requestGet,
 		requestCreate,
 		ackCreate,
 		requestDelete,
 		ackDelete,
+		*/
 ////////////////////////////////////////////////////////////////
 //  Shared msg
 ////////////////////////////////////////////////////////////////

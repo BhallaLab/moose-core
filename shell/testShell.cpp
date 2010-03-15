@@ -36,6 +36,7 @@ void testShellSharedMsg()
 	bool ret = shell->doCreateMsg( Id(), "master", 
 		Id(), "worker", "OneToOneMsg" );
 	assert( ret );
+	sheller.element()->showMsg();
 	cout << "." << flush;
 }
 
@@ -47,6 +48,10 @@ void testShellParserCreateDelete()
 {
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+
+	bool ret = shell->doCreateMsg( Id(), "master", 
+		Id(), "worker", "OneToOneMsg" );
+	assert( ret );
 
 	vector< unsigned int > dimensions;
 	Id child = shell->doCreate( "Neutral", Id(), "test", dimensions );

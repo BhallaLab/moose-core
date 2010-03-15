@@ -298,8 +298,8 @@ void Element::showMsg() const
 			const vector< MsgFuncBinding >& mb = msgBinding_[ sf->getBindIndex()];
 			unsigned int numTgt = mb.size();
 			if ( numTgt > 0 ) {
-				cout << sf->name() << ": ";
 				for ( unsigned int j = 0; j < numTgt; ++j ) {
+					cout << sf->name() << " bindId=" << sf->getBindIndex() << ": ";
 					cout << j << ": MsgId=" << mb[j].mid << 
 					", FuncId=" << mb[j].fid << 
 					", " << Msg::getMsg( mb[j].mid )->e1() << " -> " <<
