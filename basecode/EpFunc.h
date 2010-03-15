@@ -121,4 +121,69 @@ template< class T, class A1, class A2 > class EpFunc2: public OpFunc
 		void ( T::*func_ )( Eref e, const Qinfo* q, A1, A2 ); 
 };
 
+template< class T, class A1, class A2, class A3 > class EpFunc3:
+	public OpFunc
+{
+	public:
+		EpFunc3( void ( T::*func )( Eref e, const Qinfo* q, A1, A2, A3 ) )
+			: func_( func )
+			{;}
+
+		bool checkFinfo( const Finfo* s ) const {
+			return dynamic_cast< const SrcFinfo3< A1, A2, A3 >* >( s );
+		}
+
+		bool checkSet( const SetGet* s ) const {
+			return dynamic_cast< const SetGet3< A1, A2, A3 >* >( s );
+		}
+
+		// This could do with a whole lot of optimization to avoid
+		// copying data back and forth.
+		void op( Eref e, const char* buf ) const {
+			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
+			buf += sizeof( Qinfo );
+			Conv< A1 > arg1( buf );
+			Conv< A2 > arg2( buf + arg1.size() );
+			Conv< A3 > arg3( buf + arg1.size() + arg2.size() );
+			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, 
+				*arg1, *arg2, *arg3 ) ;
+		}
+
+	private:
+		void ( T::*func_ )( Eref e, const Qinfo* q, A1, A2, A3 ); 
+};
+
+template< class T, class A1, class A2, class A3, class A4 > class EpFunc4:
+	public OpFunc
+{
+	public:
+		EpFunc4( void ( T::*func )( Eref e, const Qinfo* q, A1, A2, A3, A4 ) )
+			: func_( func )
+			{;}
+
+		bool checkFinfo( const Finfo* s ) const {
+			return dynamic_cast< const SrcFinfo4< A1, A2, A3, A4 >* >( s );
+		}
+
+		bool checkSet( const SetGet* s ) const {
+			return dynamic_cast< const SetGet4< A1, A2, A3, A4 >* >( s );
+		}
+
+		// This could do with a whole lot of optimization to avoid
+		// copying data back and forth.
+		void op( Eref e, const char* buf ) const {
+			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
+			buf += sizeof( Qinfo );
+			Conv< A1 > arg1( buf );
+			Conv< A2 > arg2( buf + arg1.size() );
+			Conv< A3 > arg3( buf + arg1.size() + arg2.size() );
+			Conv< A4 > arg4( buf + arg1.size() + arg2.size() + arg3.size());
+			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, 
+				*arg1, *arg2, *arg3, *arg4 ) ;
+		}
+
+	private:
+		void ( T::*func_ )( Eref e, const Qinfo* q, A1, A2, A3, A4 ); 
+};
+
 #endif //_EPFUNC_H

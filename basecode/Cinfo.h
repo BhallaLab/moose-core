@@ -40,6 +40,8 @@ class Cinfo
 
 			~Cinfo();
 
+			void registerFinfo( Finfo* f );
+
 			void init( Finfo** finfoArray, unsigned int nFinfos );
 
 			const OpFunc* getOpFunc( FuncId fid ) const;
@@ -75,6 +77,8 @@ class Cinfo
 			void destroy( char* d ) const;
 
 			unsigned int numBindIndex() const;
+
+			const map< string, Finfo* >& finfoMap() const;
 
 		private:
 			const string name_;

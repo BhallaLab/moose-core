@@ -40,8 +40,12 @@ class SharedFinfo: public Finfo
 		 */
 		bool addMsg( const Finfo* target, MsgId mid, Element* src ) const;
 
+		const vector< SrcFinfo* >& src() const;
+
+		const vector< Finfo* >& dest() const;
+
 	private:
-		vector< const SrcFinfo* > src_;
+		vector< SrcFinfo* > src_;
 		vector< Finfo* > dest_;
 };
 

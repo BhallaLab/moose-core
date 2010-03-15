@@ -206,11 +206,12 @@ template < class T1, class T2, class T3 > class SrcFinfo3: public SrcFinfo
 			Conv< T3 > a3( arg3 );
 			Qinfo q( 0, isForward , e.index(), 
 				a1.size() + a2.size() + a3.size() );
-			char temp[ a1.size() + a2.size() + a3.size() ];
+			char* temp = new char[ a1.size() + a2.size() + a3.size() ];
 			a1.val2buf( temp );
 			a2.val2buf( temp + a1.size() );
 			a3.val2buf( temp + a1.size() + a2.size() );
 			e.element()->asend( q, getBindIndex(), p, temp );
+			delete[] temp;
 		}
 
 		void sendTo( Eref e, DataId target, const ProcInfo* p,
@@ -222,11 +223,12 @@ template < class T1, class T2, class T3 > class SrcFinfo3: public SrcFinfo
 			Conv< T3 > a3( arg3 );
 			Qinfo q( 1, isForward, e.index(), 
 				a1.size() + a2.size() + a3.size() );
-			char temp[ a1.size() + a2.size() + a3.size() ];
+			char* temp = new char[ a1.size() + a2.size() + a3.size() ];
 			a1.val2buf( temp );
 			a2.val2buf( temp + a1.size() );
 			a3.val2buf( temp + a1.size() + a2.size() );
 			e.element()->tsend( q, getBindIndex(), p, temp, target );
+			delete[] temp;
 		}
 
 	private:
@@ -252,12 +254,13 @@ template < class T1, class T2, class T3, class T4 > class SrcFinfo4: public SrcF
 			Conv< T4 > a4( arg4 );
 			Qinfo q( 0, isForward, e.index(), 
 				a1.size() + a2.size() + a3.size() + a4.size() );
-			char temp[ a1.size() + a2.size() + a3.size() + a4.size() ];
+			char* temp = new char[ a1.size() + a2.size() + a3.size() + a4.size() ];
 			a1.val2buf( temp );
 			a2.val2buf( temp + a1.size() );
 			a3.val2buf( temp + a1.size() + a2.size() );
 			a4.val2buf( temp + a1.size() + a2.size() + a3.size() );
 			e.element()->asend( q, getBindIndex(), p, temp );
+			delete[] temp;
 		}
 
 		void sendTo( Eref e, const ProcInfo* p,
@@ -270,12 +273,13 @@ template < class T1, class T2, class T3, class T4 > class SrcFinfo4: public SrcF
 			Conv< T4 > a4( arg4 );
 			Qinfo q( 0, isForward, e.index(), 
 				a1.size() + a2.size() + a3.size() + a4.size() );
-			char temp[ a1.size() + a2.size() + a3.size() + a4.size() ];
+			char* temp = new char[ a1.size() + a2.size() + a3.size() + a4.size() ];
 			a1.val2buf( temp );
 			a2.val2buf( temp + a1.size() );
 			a3.val2buf( temp + a1.size() + a2.size() );
 			a4.val2buf( temp + a1.size() + a2.size() + a3.size() );
 			e.element()->tsend( q, getBindIndex(), p, temp, target );
+			delete[] temp;
 		}
 
 	private:

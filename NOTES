@@ -3508,7 +3508,7 @@ Working on the create command.
 		- Safer, let's do this.
 
 =============================================================================
-13 Marc 2010.
+13,14 March 2010.
 Compiled, runs, but valgrind not happy. Trying to clean up. Fixed. 
 Checkin 1632.
 
@@ -3521,6 +3521,7 @@ Next steps:
 		- Need to change Msg types between Shells so it isn't
 		reciprocal: that is just too messy. It is a fairly obvious
 		command/ack pair.
+		Checkin 1638.
 	+ Unit test for SharedMsg. Things got too messy with the Shells.
 		Checkin as 1636, still to clear tests.
 		- We have a mess with registerOpFuncs for SharedFinfos.
@@ -3534,10 +3535,17 @@ Next steps:
 		can send stuff to itself and get back acks to master node.
 	- Shell::doCreate should do a 'send' on an internode Msg to all Shells.
 		It should wait till ack from all nodes.
+		- Should the ack return success?
+			- If it fails, what do we do to handle?
 	- Shell::doDelete likewise
 	- Test on MPI.
 	- Set up Shell::warning, Shell::error as a stream.
 	- Cleanup: go through and eliminate Message.cpp and its standalone 
 		messaging functions. The Shell now handles it.
 
+=============================================================================
+15 March 2010
+Working on msg-based doCreate. Goes into infinite loop. Hard to debug.
+Working on implementing a showMsg. This regresses back to Cinfo::init
+handling SharedMsgs to init all the entries.
 =============================================================================

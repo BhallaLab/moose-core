@@ -286,3 +286,26 @@ void Element::tsend( Qinfo& q, BindIndex bindIndex,
 	cout << "Warning: Element::tsend: Failed to find specific target " <<
 		target << endl;
 }
+
+void Element::showMsg() const
+{
+	cout << "Outgoing: \n";
+	for ( map< string, Finfo* >::const_iterator i = 
+		cinfo_->finfoMap().begin();
+		i != cinfo_->finfoMap().end(); ++i ) {
+		const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >( i->second );
+		if ( sf && msgBinding_.size() > sf->getBindIndex() ) {
+			const vector< MsgFuncBinding >& mb = msgBinding_[ sf->getBindIndex()];
+			unsigned int numTgt = mb.size();
+			if ( numTgt > 0 ) {
+				cout << sf->name() << ": ";
+				for ( unsigned int j = 0; j < numTgt; ++j ) {
+					cout << j << ": MsgId=" << mb[j].mid << 
+					", FuncId=" << mb[j].fid << 
+					", " << Msg::getMsg( mb[j].mid )->e1() << " -> " <<
+					Msg::getMsg( mb[j].mid )->e2() << endl;
+				}
+			}
+		}
+	}
+}

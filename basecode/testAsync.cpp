@@ -840,6 +840,10 @@ void testSharedMsg()
 	ret = shareFinfo->addMsg( shareFinfo, m->mid(), t1() );
 	assert( ret );
 
+	// Display stuff. Need to figure out how to unit test this.
+	t1()->showMsg();
+	t2()->showMsg();
+
 	// Send messages
 	ProcInfo p;
 	string arg1 = " hello ";

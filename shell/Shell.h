@@ -50,8 +50,9 @@ class Shell: public Data
 		void handleAckDelete();
 	
 
-		void create( string type, Id parent, Id newElm, string name);
-		void destroy( Id elm);
+		void create( Eref e, const Qinfo* q, 
+			string type, Id parent, Id newElm, string name );
+		void destroy( Eref e, const Qinfo* q, Id eid);
 		void innerCreate( string type, Id parent, Id newElm, string name );
 		void addmsg( Id src, Id dest, string srcfield, string destfield );
 
@@ -89,6 +90,8 @@ class Shell: public Data
 			// Shell owns its own ProcInfo, has global thread/node info.
 			// Used to talk to parser and for thread specification in
 			// setup operations.
+		unsigned short numCreateAcks_;
+		unsigned short numDeleteAcks_;
 };
 
 extern bool set( Eref& dest, const string& destField, const string& val );

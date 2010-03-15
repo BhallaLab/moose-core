@@ -45,7 +45,14 @@ void testShellSharedMsg()
  */
 void testShellParserCreateDelete()
 {
-	;
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+
+	vector< unsigned int > dimensions;
+	Id child = shell->doCreate( "Neutral", Id(), "test", dimensions );
+
+	shell->doDelete( child );
+	cout << "." << flush;
 }
 
 /**

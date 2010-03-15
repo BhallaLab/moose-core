@@ -19,8 +19,6 @@
 
 ProcInfo Shell::p_;
 
-const BindIndex requestShellOp = 2;
-const BindIndex ackShellOp = 1;
 const BindIndex requestGetSlot = 0;
 
 static BindIndex bi = 2;
@@ -57,11 +55,11 @@ static SrcFinfo0* ackDelete =
 
 static DestFinfo create( "create", 
 			"create( class, parent, newElm, name",
-			new OpFunc4< Shell, string, Id, Id, string>( &Shell::create ) );
+			new EpFunc4< Shell, string, Id, Id, string>( &Shell::create ) );
 
 static DestFinfo del( "delete", 
 			"Destroys Element, all its messages, and all its children. Args: Id",
-			new OpFunc1< Shell, Id >( & Shell::destroy ) );
+			new EpFunc1< Shell, Id >( & Shell::destroy ) );
 
 static DestFinfo handleAckCreate( "handleAckCreate", 
 			"Keeps track of # of responders to ackCreate. Args: none",
@@ -69,7 +67,7 @@ static DestFinfo handleAckCreate( "handleAckCreate",
 
 static DestFinfo handleAckDelete( "handleAckCreate", 
 			"Keeps track of # of responders to ackCreate. Args: none",
-			new OpFunc0< Shell >( & Shell::handleAckCreate ) );
+			new OpFunc0< Shell >( & Shell::handleAckDelete ) );
 
 static Finfo* shellMaster[] = {
 	requestCreate, &handleAckCreate, requestDelete, &handleAckDelete, };
@@ -136,10 +134,10 @@ const Cinfo* Shell::initCinfo()
 
 		new DestFinfo( "create", 
 			"create( class, parent, newElm, name",
-			new OpFunc4< Shell, string, Id, Id, string>( &Shell::create )),
+			new EpFunc4< Shell, string, Id, Id, string>( &Shell::create )),
 		new DestFinfo( "delete", 
 			"Destroys Element, all its messages, and all its children. Args: Id",
-			new OpFunc1< Shell, Id >( & Shell::destroy ) ),
+			new EpFunc1< Shell, Id >( & Shell::destroy ) ),
 
 		new DestFinfo( "addmsg", 
 			"Adds a Msg between specified Elements. Args: Src, Dest, srcField, destField",
@@ -187,7 +185,8 @@ static const Cinfo* shellCinfo = Shell::initCinfo();
 Shell::Shell()
 	: name_( "" ),
 		quit_( 0 ), 
-		isSingleThreaded_( 0 ), numCores_( 1 ), numNodes_( 1 )
+		isSingleThreaded_( 0 ), numCores_( 1 ), numNodes_( 1 ),
+		numCreateAcks_( 0 ), numDeleteAcks_( 0 )
 {
 	;
 }
@@ -210,13 +209,26 @@ Id Shell::doCreate( string type, Id parent, string name, vector< unsigned int > 
 	Id ret = Id::nextId();
 	// Here we would do the 'send' on an internode msg to do the actual
 	// Create.
-	innerCreate( type, parent, ret, name );
+	requestCreate->send( Id().eref(), &p_, type, parent, ret, name );
+	// innerCreate( type, parent, ret, name );
+
+	// Now we wait till all nodes are done.
+	numCreateAcks_ = 0;
+	while ( numCreateAcks_ < numNodes_ )
+		Qinfo::clearQ( &p_ );
+	// Here we might choose to check if success on all nodes.
+	
 	return ret;
 }
 
 bool Shell::doDelete( Id i )
 {
-	destroy( i );
+	requestDelete->send( Id().eref(), &p_, i );
+	// Now we wait till all nodes are done.
+	numDeleteAcks_ = 0;
+	while ( numDeleteAcks_ < numNodes_ )
+		Qinfo::clearQ( &p_ );
+
 	return 1;
 }
 
@@ -308,9 +320,11 @@ const char* Shell::getBuf() const
  * Element, but for now the num indicates the total # of array entries.
  * This gets a bit complicated if the Element is a multidim array.
  */
-void Shell::create( string type, Id parent, Id newElm, string name )
+void Shell::create( Eref e, const Qinfo* q, 
+	string type, Id parent, Id newElm, string name )
 {
 	innerCreate( type, parent, newElm, name );
+	ackCreate->send( e, &p_, 0 );
 }
 
 /**
@@ -337,9 +351,10 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name )
 	// ack.send( e, ret );
 }
 
-void Shell::destroy( Id eid)
+void Shell::destroy( Eref e, const Qinfo* q, Id eid)
 {
 	eid.destroy();
+	ackDelete->send( e, &p_, 0 );
 }
 
 
@@ -361,12 +376,12 @@ void Shell::error( const string& text )
 
 void Shell::handleAckCreate()
 {
-	;
+	numCreateAcks_++;
 }
 
 void Shell::handleAckDelete()
 {
-	;
+	numDeleteAcks_++;
 }
 
 ////////////////////////////////////////////////////////////////////////

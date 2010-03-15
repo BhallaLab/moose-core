@@ -19,7 +19,7 @@ SharedFinfo::SharedFinfo( const string& name, const string& doc,
 { 
 	for ( unsigned int i = 0; i < numEntries; ++i )
 	{
-		const SrcFinfo* s = dynamic_cast< const SrcFinfo* >( entries[i] );
+		SrcFinfo* s = dynamic_cast< SrcFinfo* >( entries[i] );
 		if ( s != 0 )
 			src_.push_back( s );
 		else
@@ -98,6 +98,17 @@ bool SharedFinfo::addMsg( const Finfo* target, MsgId mid,
 		}
 	}
 	return 1;
+}
+
+const vector< SrcFinfo* >& SharedFinfo::src() const
+{
+	return src_;
+}
+
+
+const vector< Finfo* >& SharedFinfo::dest() const
+{
+	return dest_;
 }
 
 /////////////////////////////////////////////////////////////////////

@@ -209,6 +209,8 @@ class Element
 		 */
 		const vector< MsgFuncBinding >* getMsgAndFunc( BindIndex b ) const;
 
+		void showMsg() const;
+
 		/**
 		 * Gets the class information for this Element
 		 */

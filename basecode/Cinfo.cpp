@@ -28,6 +28,14 @@ Cinfo::Cinfo( const string& name,
 	cinfoMap()[ name ] = this;
 }
 
+void Cinfo::registerFinfo( Finfo* f )
+{
+		finfoMap_[ f->name() ] = f;
+		
+		f->registerOpFuncs( opFuncNames_, funcs_ );
+		numBindIndex_= f->registerBindIndex( numBindIndex_ );
+}
+
 void Cinfo::init( Finfo** finfoArray, unsigned int nFinfos )
 {
 	if ( baseCinfo_ ) {
@@ -43,10 +51,19 @@ void Cinfo::init( Finfo** finfoArray, unsigned int nFinfos )
 	numBindIndex_ = 0;
 	for ( unsigned int i = 0; i < nFinfos; i++ ) {
 		Finfo* f = finfoArray[i];
-		finfoMap_[ f->name() ] = f;
-		
-		f->registerOpFuncs( opFuncNames_, funcs_ );
-		numBindIndex_= f->registerBindIndex( numBindIndex_ );
+		registerFinfo( f );
+
+		SharedFinfo* sf = dynamic_cast< SharedFinfo* >( f );
+		if ( sf ) {
+			for ( vector< SrcFinfo* >::const_iterator j = sf->src().begin();
+				j != sf->src().end(); ++j ) {
+				registerFinfo( *j );
+			}
+			for ( vector< Finfo* >::const_iterator j = sf->dest().begin();
+				j != sf->dest().end(); ++j ) {
+				registerFinfo( *j );
+			}
+		}
 	}
 }
 
@@ -122,6 +139,11 @@ void Cinfo::destroy( char* d ) const
 unsigned int Cinfo::numBindIndex() const
 {
 	return numBindIndex_;
+}
+
+const map< string, Finfo* >& Cinfo::finfoMap() const
+{
+	return finfoMap_;
 }
 
 ////////////////////////////////////////////////////////////////////////
