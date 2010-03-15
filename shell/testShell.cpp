@@ -33,8 +33,8 @@ void testShellSharedMsg()
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 
-	bool ret = shell->doCreateMsg( Id(), "interNodeOps", 
-		Id(), "interNodeOps", "OneToOneMsg" );
+	bool ret = shell->doCreateMsg( Id(), "master", 
+		Id(), "worker", "OneToOneMsg" );
 	assert( ret );
 	cout << "." << flush;
 }

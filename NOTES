@@ -3518,6 +3518,9 @@ Next steps:
 		msg, the direction info is only from the calling Elm.
 		Added isForward = 1 default arg to SrcFinfo<>::send calls.
 		Checkin 1635.
+		- Need to change Msg types between Shells so it isn't
+		reciprocal: that is just too messy. It is a fairly obvious
+		command/ack pair.
 	+ Unit test for SharedMsg. Things got too messy with the Shells.
 		Checkin as 1636, still to clear tests.
 		- We have a mess with registerOpFuncs for SharedFinfos.
@@ -3526,6 +3529,7 @@ Next steps:
 			Fixed.
 		- We still have a mess with isForward. Should not need user
 			input at all, should figure out from elms.
+		Clears tests, but isForward still a problem. Checkin as 1637.
 	- The InterNodeMsg type should be defined, specially so that Shell
 		can send stuff to itself and get back acks to master node.
 	- Shell::doCreate should do a 'send' on an internode Msg to all Shells.

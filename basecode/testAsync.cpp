@@ -856,12 +856,14 @@ void testSharedMsg()
 	Qinfo::clearQ( &p );
 	Qinfo::clearQ( &p );
 
+	/*
 	cout << "data1: s=" << tdata1->s_ << 
 		", i1=" << tdata1->i1_ << ", i2=" << tdata1->i2_ << 
 		", numAcks=" << tdata1->numAcks_ << endl;
 	cout << "data2: s=" << tdata2->s_ << 
 		", i1=" << tdata2->i1_ << ", i2=" << tdata2->i2_ <<
 		", numAcks=" << tdata2->numAcks_ << endl;
+	*/
 	// Check results
 	
 	assert( tdata1->s_ == " goodbye tdata1" );

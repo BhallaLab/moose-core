@@ -71,8 +71,10 @@ static DestFinfo handleAckDelete( "handleAckCreate",
 			"Keeps track of # of responders to ackCreate. Args: none",
 			new OpFunc0< Shell >( & Shell::handleAckCreate ) );
 
-static Finfo* shellMsgVec[] = {
-	requestCreate, &create, ackCreate, &handleAckCreate, requestDelete, &del, ackDelete, &handleAckDelete, };
+static Finfo* shellMaster[] = {
+	requestCreate, &handleAckCreate, requestDelete, &handleAckDelete, };
+static Finfo* shellWorker[] = {
+	&create, ackCreate, &del, ackDelete };
 /*
 static SrcFinfo4< Id, string, Id, string  > *requestMsg =
 		new SrcFinfo4< string, Id, Id, MsgId  >( "requestMsg",
@@ -156,9 +158,15 @@ const Cinfo* Shell::initCinfo()
 //  Shared msg
 ////////////////////////////////////////////////////////////////
 
-		new SharedFinfo( "interNodeOps",
-			"Connects together shells located on different nodes",
-			shellMsgVec, sizeof( shellMsgVec ) / sizeof( const Finfo* )
+		new SharedFinfo( "master",
+			"Issues commands from master shell to worker shells located "
+			"on different nodes. Also handles acknowledgements from them.",
+			shellMaster, sizeof( shellMaster ) / sizeof( const Finfo* )
+		),
+		new SharedFinfo( "worker",
+			"Handles commands arriving from master shell on node 0."
+			"Sends out acknowledgements from them.",
+			shellWorker, sizeof( shellWorker ) / sizeof( const Finfo* )
 		),
 	};
 
