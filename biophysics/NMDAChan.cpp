@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sun Feb 28 18:17:56 2010 (+0530)
 // Version: 
-// Last-Updated: Thu Mar 11 14:41:40 2010 (+0530)
+// Last-Updated: Mon Mar 15 16:03:32 2010 (+0530)
 //           By: Subhasis Ray
-//     Update #: 369
+//     Update #: 445
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -45,6 +45,7 @@
 // Code:
 
 #include <cmath>
+#include <cfloat>
 #include <queue>
 #include "basecode/header.h"
 #include "basecode/moose.h"
@@ -54,33 +55,16 @@
 
 const Cinfo* initNMDAChanCinfo()
 {
-    static Finfo* processShared[] =
-            {
-                new DestFinfo( "process", Ftype1< ProcInfo >::global(),
-                               RFCAST( &NMDAChan::processFunc ) ),
-                new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
-                               RFCAST( &NMDAChan::reinitFunc ) ),
-            };
-    static Finfo* process =	new SharedFinfo( "process", processShared, 
-                                                 sizeof( processShared ) / sizeof( Finfo* ),
-                                                 "This is a shared message to receive Process message from the scheduler." );
-    static Finfo* channelShared[] =
-            {
-                new SrcFinfo( "channel", Ftype2< double, double >::global() ),
-                new DestFinfo( "Vm", Ftype1< double >::global(), 
-                               RFCAST( &NMDAChan::channelFunc ) ),
-            };
-
     ///////////////////////////////////////////////////////
     // Field definitions
     ///////////////////////////////////////////////////////
-
+    
     static Finfo* NMDAChanFinfos[] =
             {
-                new ValueFinfo("transitionParam", LookupFtype<int, double>::global(),
+                new LookupFinfo("transitionParam", LookupFtype<double, unsigned int>::global(),
                                GFCAST(&NMDAChan::getTransitionParam),
                                RFCAST(&NMDAChan::setTransitionParam),
-                               "Transition parameters c1 to c11 in the Mg2+ dependent state transitions."),
+                               "Transition parameters c0 to c10 in the Mg2+ dependent state transitions."),
                 new ValueFinfo("MgConc", ValueFtype1< double >::global(),
                                GFCAST(&NMDAChan::getMgConc),
                                RFCAST(&NMDAChan::setMgConc),
@@ -93,92 +77,24 @@ const Cinfo* initNMDAChanCinfo()
                                " in the equation for conductance:\n "
                                " c * g(V, [Mg2+]o) * S(t) "
                                ),
+                new ValueFinfo("saturation", ValueFtype1< double >::global(),
+                               GFCAST(&NMDAChan::getSaturation),
+                               RFCAST(&NMDAChan::setSaturation),
+                               "An upper limit on the NMDA conductance."),
             
-                // The commented out fields are already inherited from SynChan
-		// new ValueFinfo( "Gbar", ValueFtype1< double >::global(),
-		// 	GFCAST( &NMDAChan::getGbar ), 
-		// 	RFCAST( &NMDAChan::setGbar )
-		// ),
-		// new ValueFinfo( "Ek", ValueFtype1< double >::global(),
-		// 	GFCAST( &NMDAChan::getEk ), 
-		// 	RFCAST( &NMDAChan::setEk )
-		// ),
-		// new ValueFinfo( "tau1", ValueFtype1< double >::global(),
-		// 	GFCAST( &NMDAChan::getTau1 ), 
-		// 	RFCAST( &NMDAChan::setTau1 )
-		// ),
-		// new ValueFinfo( "tau2", ValueFtype1< double >::global(),
-		// 	GFCAST( &NMDAChan::getTau2 ), 
-		// 	RFCAST( &NMDAChan::setTau2 )
-		// ),
-		// new ValueFinfo( "normalizeWeights", 
-		// 	ValueFtype1< bool >::global(),
-		// 	GFCAST( &NMDAChan::getNormalizeWeights ), 
-		// 	RFCAST( &NMDAChan::setNormalizeWeights )
-		// ),
-		// new ValueFinfo( "Gk", ValueFtype1< double >::global(),
-		// 	GFCAST( &NMDAChan::getGk ), 
-		// 	RFCAST( &NMDAChan::setGk )
-		// ),
-		// new ValueFinfo( "Ik", ValueFtype1< double >::global(),
-		// 	GFCAST( &NMDAChan::getIk ), 
-		// 	&dummyFunc
-		// ),
-
-		// new ValueFinfo( "numSynapses",
-		// 	ValueFtype1< unsigned int >::global(),
-		// 	GFCAST( &NMDAChan::getNumSynapses ), 
-		// 	&dummyFunc // Prohibit reassignment of this index.
-		// ),
-
-		// new LookupFinfo( "weight",
-		// 	LookupFtype< double, unsigned int >::global(),
-		// 	GFCAST( &NMDAChan::getWeight ),
-		// 	RFCAST( &NMDAChan::setWeight )
-		// ),
-
-		// new LookupFinfo( "delay",
-		// 	LookupFtype< double, unsigned int >::global(),
-		// 	GFCAST( &NMDAChan::getDelay ),
-		// 	RFCAST( &NMDAChan::setDelay )
-		// ),
-                ///////////////////////////////////////////////////////
-                // Shared message definitions
-                ///////////////////////////////////////////////////////
-		// process,
-		// new SharedFinfo( "process", processShared,
-		// 	sizeof( processShared ) / sizeof( Finfo* ),
-		// 	"This is a shared message to receive Process message from the scheduler." ), 
-		// new SharedFinfo( "channel", channelShared,
-		// 	sizeof( channelShared ) / sizeof( Finfo* ),
-		// 	"This is a shared message to couple channel to compartment. "
-		// 	"The first entry is a MsgSrc to send Gk and Ek to the compartment "
-		// 	"The second entry is a MsgDest for Vm from the compartment." ),
-
                 ///////////////////////////////////////////////////////
                 // MsgSrc definitions
                 ///////////////////////////////////////////////////////
-		// new SrcFinfo( "IkSrc", Ftype1< double >::global() ),
-		// new SrcFinfo( "GkSrc", Ftype1< double >::global() ),
-		// new SrcFinfo( "origChannel", Ftype2< double, double >::
-		// 	global() ),
+		new SrcFinfo( "unblockedSrc", Ftype1< double >::global() ),
 
                 ///////////////////////////////////////////////////////
                 // MsgDest definitions
                 ///////////////////////////////////////////////////////
-		// new DestFinfo( "synapse", Ftype1< double >::global(),
-		// 		RFCAST( &NMDAChan::synapseFunc ) ,
-		// 		"Arrival of a spike. Arg is time of sending of spike." ),
-		// new DestFinfo( "activation", Ftype1< double >::global(),
-		// 		RFCAST( &NMDAChan::activationFunc ),
-		// 		"Sometimes we want to continuously activate the channel" ),
-		// new DestFinfo( "modulator", Ftype1< double >::global(),
-		// 		RFCAST( &NMDAChan::modulatorFunc ),
-		// 		"Modulate channel response" ),
+		new DestFinfo( "MgConcDest", Ftype1< double >::global(),
+				RFCAST( &NMDAChan::setMgConc ) ,
+				"Update [Mg2+] from other sources at every time step." ),
             };
 
-    // NMDAChan is scheduled after the compartment calculations.
-    static SchedInfo schedInfo[] = { { process, 0, 1 } };
 
     static string doc[] =
             {
@@ -215,9 +131,7 @@ const Cinfo* initNMDAChanCinfo()
             initSynChanCinfo(),
             NMDAChanFinfos,
             sizeof( NMDAChanFinfos )/sizeof(Finfo *),
-            ValueFtype1< NMDAChan >::global(),
-            schedInfo, 1
-                               );
+            ValueFtype1< NMDAChan >::global());
 
     return &NMDAChanCinfo;
 }
@@ -233,8 +147,8 @@ static const Slot gkSlot =
 	initNMDAChanCinfo()->getSlot( "GkSrc" );
 static const Slot ikSlot =
 	initNMDAChanCinfo()->getSlot( "IkSrc" );
-static const Slot NMDAapseSlot =
-	initNMDAChanCinfo()->getSlot( "NMDAapse" );
+static const Slot unblockedSlot =
+	initNMDAChanCinfo()->getSlot( "unblockedSrc" );
 
 
 /**
@@ -252,52 +166,22 @@ NMDAChan::NMDAChan(): c0_(-16.0),
                       c7_(0.96),
                       c8_(2.847),
                       c9_(0.693),
-                      c10_(3.101)
+                      c10_(3.101),
+                      Mg_(1.5), // mM (value from Traub et al 2005)
+                      unblocked_(0.0),
+                      saturation_(DBL_MAX)
 {
     A_ = 1e3 * exp(-c8_);
     B1_ = 1e3 * exp(-c9_);
     B2_ = 1e3 * exp(-c10_);
 }
 
-#if 0
-/**
-   Set the constants c1 - c11 in the expression by Jahr and Stevens
-   This form expects a vector with all the constants in it.
-*/
-void NMDAChan::innerTransitionParams(vector<couble> constList)
-{
-    if (constList.size() != 11){
-        cout << "Error: Expect a vector of 11 constants. Got only " << constList.size() << endl;
-        return;
-    }
-    c0_ = constList[0];
-    c1_ = constList[1];
-    c3_ = constList[2];
-    c4_ = constList[3];
-    c5_ = constList[4];
-    c6_ = constList[5];
-    c7_ = constList[6];
-    c8_ = constList[7];
-    c9_ = constList[8];
-    c10_ = constList[9];
-    c11_ = constList[10];
-    A_ = 1e3 * exp(-c8);
-    B1_ = 1e3 * exp(-c9);
-    B2_ = 1e3 * exp(-c10);
-}
-
-void NMDAChan::setTransitionParams(const Conn* conn, vector<double> constList)
-{
-    static_cast< NMDAChan* >( c->data() )->innerSetConstants(constList);
-}
-
-#endif
 
 /**
-   Set one of the the constants c1 - c11 in the expression by Jahr and
-   Stevens. The indexing starts at 0.
+   Set one of the the constants c0 - c10 in the expression by Jahr and
+   Stevens.
 */
-void NMDAChan::innerSetTransitionParam(int index, double value)
+void NMDAChan::innerSetTransitionParam(double value, const unsigned int index)
 {
     switch (index) {
         case 0: c0_ = value; break;
@@ -311,22 +195,22 @@ void NMDAChan::innerSetTransitionParam(int index, double value)
         case 8: c8_ = value; A_ = 1e3 * exp(-c8_); break;
         case 9: c9_ = value; B1_ = 1e3 * exp(-c9_); break;
         case 10: c10_ = value; B2_ = 1e3 * exp(-c10_); break;
-        default: cout << "Error: The index must be between 1 and 11 (inclusive)." << endl;
+        default: cout << "Error: The index must be between 0 and 10 (inclusive)." << endl;
     }
 }
 
 /**
    Static function for setting the transition parameter.
 */
-void NMDAChan::setTransitionParam(const Conn* conn, int index, double value)
+void NMDAChan::setTransitionParam(const Conn* conn, double value, const unsigned int& index )
 {
-    static_cast< NMDAChan* >( conn->data() )->innerSetTransitionParam(index, value);
+    static_cast< NMDAChan* >( conn->data() )->innerSetTransitionParam(value, index);
 }
 
 /**
    return the transition parameters c1 - c11 specified by the index.
 */
-double NMDAChan::getTransitionParam(Eref e, int index)
+double NMDAChan::getTransitionParam(Eref e, const unsigned int& index)
 {
     return static_cast< NMDAChan* >(e.data())->innerGetTransitionParam(index);
 }
@@ -335,7 +219,7 @@ double NMDAChan::getTransitionParam(Eref e, int index)
    get the transition parameter according to index. See class
    documentation for more information.
 */
-double NMDAChan::innerGetTransitionParam(int index)
+double NMDAChan::innerGetTransitionParam(unsigned int index)
 {
     switch (index) {
         case 0: return c0_;
@@ -349,7 +233,7 @@ double NMDAChan::innerGetTransitionParam(int index)
         case 8: return c8_;
         case 9: return c9_;
         case 10: return c10_;
-        default: cout << "Error: The index must be between 1 and 11 (inclusive)." << endl;
+        default: cout << "Error: The index must be between 0 and 10 (inclusive)." << endl;
     }
     return 0.0;
 }
@@ -391,6 +275,39 @@ double NMDAChan::innerGetUnblocked()
     return unblocked_;
 }
 
+/**
+   get th upper limit on channel conductance
+*/
+double NMDAChan::getSaturation(Eref e)
+{
+    return static_cast < NMDAChan* >( e.data() )->innerGetSaturation() ;
+}
+double NMDAChan::innerGetSaturation()
+{
+    return saturation_;
+}
+
+/**
+   Set the upper limit on channel conductance
+*/
+void NMDAChan::setSaturation(const Conn * conn, double value)
+{
+    static_cast< NMDAChan* >(conn->data())->innerSetSaturation(value);
+}
+void NMDAChan::innerSetSaturation(double value)
+{
+    saturation_ = value;
+}
+
+unsigned int NMDAChan::updateNumSynapse( Eref e )
+{
+    static const Finfo* synFinfo = initNMDAChanCinfo()->findFinfo( "synapse" );
+    unsigned int n = e.e->numTargets( synFinfo->msg(), e.i );
+    if ( n >= synapses_.size())
+        synapses_.resize(n);
+    return synapses_.size();
+}
+
 void NMDAChan::processFunc(const Conn* conn, ProcInfo info)
 {
     static_cast<NMDAChan*>(conn->data())->innerProcessFunc(conn->target(), info);
@@ -426,6 +343,9 @@ void NMDAChan::innerProcessFunc(Eref e, ProcInfo info)
     y_ += -y_ * info->dt_ / tau2_;
     unblocked_ = 1.0 / ( 1.0 + (a1_ + a2_) * (a1_ * b1_ + a2_ * b2_) / (A_ * (a1_ * (B1_ + b1_) + a2_ * (B2_ + b2_))));
     Gk_ = (x_ + y_) * unblocked_ * (Vm_ - Ek_);
+    if (Gk_ > saturation_){
+        Gk_ = saturation_;
+    }
     Ik_ = ( Ek_ - Vm_ ) * Gk_;
     activation_ = 0.0;
     modulation_ = 1.0;
@@ -433,7 +353,8 @@ void NMDAChan::innerProcessFunc(Eref e, ProcInfo info)
     send2< double, double >( e, origChannelSlot, Gk_, Ek_ );
     send1< double >( e, ikSlot, Ik_ );
     // Usually needed by GHK-type objects
-    send1< double >( e, gkSlot, Gk_ );    
+    send1< double >( e, gkSlot, Gk_ );
+    send1< double >( e, unblockedSlot, unblocked_);
 }
 
 void NMDAChan::reinitFunc(const Conn* conn, ProcInfo info)

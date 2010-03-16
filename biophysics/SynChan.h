@@ -85,13 +85,13 @@ class SynChan
 		double innerGetDelay(
 				Eref e, unsigned int i );
 		void innerSynapseFunc( const Conn* c, double time );
-		void innerProcessFunc( Eref e, ProcInfo p );
-		void innerReinitFunc( Eref e,  ProcInfo p );
+		virtual void innerProcessFunc( Eref e, ProcInfo p );
+		virtual void innerReinitFunc( Eref e,  ProcInfo p );
 
 ///////////////////////////////////////////////////
 // Utility function
 ///////////////////////////////////////////////////
-		unsigned int updateNumSynapse( Eref e );
+    virtual unsigned int updateNumSynapse( Eref e );
 		
 		double Ek_;
 		double Gk_;
