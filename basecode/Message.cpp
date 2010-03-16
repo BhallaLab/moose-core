@@ -54,7 +54,7 @@ bool add( Element* src, const string& srcField,
 	}
 
 	Msg* m = new OneToOneMsg( src, dest );
-	if ( f1->addMsg( f2, m->mid(), src )  ) {
+	if ( !f1->addMsg( f2, m->mid(), src )  ) {
 		cout << "add: Error: Finfo type mismatch for " << 
 			destField << " on dest:\n"; // Put name here.
 		delete m;

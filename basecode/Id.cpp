@@ -108,8 +108,11 @@ void Id::bindIdToElement( Element* e )
 {
 	if ( elements().size() <= id_ )
 		elements().resize( id_ + 1, 0 );
+	assert( elements()[ id_ ] == 0 );
+	/*
 	if ( elements()[ id_ ] != 0 )
 		cout << "Warning: assigning Element to existing id " << id_ << "\n";
+		*/
 		// kick, scream, and shout.
 	elements()[ id_ ] = e;
 }

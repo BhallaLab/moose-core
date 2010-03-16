@@ -3609,3 +3609,9 @@ Now compiles the whole project. Doesn't run yet. Checkin 1643.
 Deeper into the murk. I was unable to debug the first unit test, insertIntoQ,
 so I wrote a new one to just print out Element Finfos. That compiles but
 also crashes.
+
+Fixed issue with Finfo registration. Now clears first two tests. Checkin 1645
+
+Now clears all unit tests except the last one, where I was earlier: using
+messaging to request the create call. The problem is that the messaging is
+trying to create two elements.

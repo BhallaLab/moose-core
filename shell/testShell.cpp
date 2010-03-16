@@ -36,7 +36,7 @@ void testShellSharedMsg()
 	bool ret = shell->doCreateMsg( Id(), "master", 
 		Id(), "worker", "OneToOneMsg" );
 	assert( ret );
-	sheller.element()->showMsg();
+	// sheller.element()->showMsg();
 	cout << "." << flush;
 }
 

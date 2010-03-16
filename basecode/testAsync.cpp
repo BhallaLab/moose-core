@@ -97,7 +97,11 @@ void testSendMsg()
 {
 	const Cinfo* nc = Neutral::initCinfo();
 	unsigned int size = 100;
-	FuncId fid = 1;
+
+	const DestFinfo* df = dynamic_cast< const DestFinfo* >(
+		nc->findFinfo( "set_name" ) );
+	assert( df != 0 );
+	FuncId fid = df->getFid();
 
 	Id i1 = Id::nextId();
 	Id i2 = Id::nextId();
@@ -293,6 +297,8 @@ void testSetGetDouble()
 	Id i2 = Id::nextId();
 	bool ret = ic->create( i2, "test2", size );
 	assert( ret );
+
+	// i2()->showFields();
 
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -859,8 +865,8 @@ void testSharedMsg()
 	assert( ret );
 
 	// Display stuff. Need to figure out how to unit test this.
-	t1()->showMsg();
-	t2()->showMsg();
+	// t1()->showMsg();
+	// t2()->showMsg();
 
 	// Send messages
 	ProcInfo p;
