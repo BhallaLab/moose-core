@@ -88,6 +88,7 @@ extern const Cinfo* initStoichCinfo();
 extern const Cinfo* initSurfaceCinfo();
 extern const Cinfo* initSymCompartmentCinfo();
 extern const Cinfo* initSynChanCinfo();
+extern const Cinfo* initNMDAChanCinfo();
 extern const Cinfo* initTableCinfo();
 extern const Cinfo* initTauPumpCinfo();
 #ifdef USE_GL
@@ -192,6 +193,7 @@ void initCinfos(){
     static const Cinfo* SurfaceCinfo = initSurfaceCinfo();
     static const Cinfo* SymCompartmentCinfo = initSymCompartmentCinfo();
     static const Cinfo* SynChanCinfo = initSynChanCinfo();
+    static const Cinfo* NMDAChanCinfo = initNMDAChanCinfo();
     static const Cinfo* TableCinfo = initTableCinfo();
     static const Cinfo* TauPumpCinfo = initTauPumpCinfo();
 #ifdef USE_GL
