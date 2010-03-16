@@ -16,25 +16,31 @@
 
 const Cinfo* Synapse::initCinfo()
 {
-	static Finfo* synapseFinfos[] = {
-		new ValueFinfo< Synapse, double >(
+		static ValueFinfo< Synapse, double > weight(
 			"weight",
 			"Synaptic weight",
 			&Synapse::setWeight,
 			&Synapse::getWeight
-		),
+		);
 
-		new ValueFinfo< Synapse, double >(
+		static ValueFinfo< Synapse, double > delay(
 			"delay",
 			"Axonal propagation delay to this synapse",
 			&Synapse::setDelay,
 			&Synapse::getDelay
-		),
+		);
 
-		new DestFinfo( "addSpike",
+		static DestFinfo addSpike( "addSpike",
 			"Handles arriving spike messages, by redirecting up to parent "
 			"Int Fire object",
-			new UpFunc1< IntFire, double >( &IntFire::addSpike ) ),
+			new UpFunc1< IntFire, double >( &IntFire::addSpike ) );
+
+	static Finfo* synapseFinfos[] = {
+		// Fields
+		&weight,
+		&delay,
+		// DestFinfo
+		&addSpike,
 	};
 
 	static Cinfo synapseCinfo (

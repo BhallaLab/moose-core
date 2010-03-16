@@ -27,6 +27,8 @@ void testCreateDelete()
 
 /**
  * Tests creation of SharedMsg from Shell to itself.
+ * Will need to put in a deleteMsg as the Shell is a permanent fixture,
+ * and dangling messages are bad.
  */
 void testShellSharedMsg()
 {
@@ -53,6 +55,9 @@ void testShellParserCreateDelete()
 		Id(), "worker", "OneToOneMsg" );
 	assert( ret );
 
+//	sheller.element()->showFields();
+//	sheller.element()->showMsg();
+
 	vector< unsigned int > dimensions;
 	Id child = shell->doCreate( "Neutral", Id(), "test", dimensions );
 
@@ -71,7 +76,7 @@ void testInterNodeOps()
 void testShell( )
 {
 	testCreateDelete();
-	testShellSharedMsg();
+	// testShellSharedMsg();
 	testShellParserCreateDelete();
 	testInterNodeOps();
 }

@@ -30,11 +30,14 @@ Cinfo::Cinfo( const string& name,
 
 Cinfo::~Cinfo()
 {
+	/*
+	 * We no longer have to delete the Finfos, as they are all statically
+	 * defined.
 	// This assumes we don't give the same Finfo two different names.
 	for ( map< string, Finfo*>::iterator i = finfoMap_.begin();
 		i != finfoMap_.end(); ++i )
 		delete i->second;
-
+	*/
 	delete dinfo_;
 }
 

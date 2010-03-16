@@ -3614,4 +3614,11 @@ Fixed issue with Finfo registration. Now clears first two tests. Checkin 1645
 
 Now clears all unit tests except the last one, where I was earlier: using
 messaging to request the create call. The problem is that the messaging is
-trying to create two elements.
+trying to create two elements. Checkin 1646.
+
+Clears all tests. The double create was because I had set up two identical
+messages.
+Valgrind is still not happy. Tracked most of it down to the Finfo definition of 
+Synapse, which was still using heap rather than static Finfos. Fixed this,
+also found another leak in testAsync.cpp. Now valgrind is happy.
+

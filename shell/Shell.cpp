@@ -322,7 +322,7 @@ const char* Shell::getBuf() const
 void Shell::create( Eref e, const Qinfo* q, 
 	string type, Id parent, Id newElm, string name )
 {
-	cout << "In Shell::create for element " << name << " id " << newElm << endl;
+	// cout << "In Shell::create for element " << name << " id " << newElm << endl;
 	innerCreate( type, parent, newElm, name );
 	ackCreate.send( e, &p_, 0 );
 }

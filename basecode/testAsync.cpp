@@ -29,7 +29,7 @@ void showFields()
 	bool ret = nc->create( i1, "test1", 1 );
 	assert( ret );
 
-	i1.eref().element()->showFields();
+	// i1.eref().element()->showFields();
 	cout << "." << flush;
 
 	delete i1();
@@ -794,9 +794,10 @@ class Test: public Data
 
 		static const Cinfo* initCinfo()
 		{
+			static SharedFinfo shared( "shared", "",
+				sharedVec, sizeof( sharedVec ) / sizeof( const Finfo * ) );
 			static Finfo * testFinfos[] = {
-				new SharedFinfo( "shared", "",
-					sharedVec, sizeof( sharedVec ) / sizeof( const Finfo * ) ),
+				&shared,
 			};
 
 			static Cinfo testCinfo(
