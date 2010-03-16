@@ -13,7 +13,7 @@
 
 const Cinfo* Neutral::initCinfo()
 {
-	SrcFinfo0 child( "child", "Message to child Elements" );
+	static SrcFinfo0 child( "child", "Message to child Elements" );
 	static DestFinfo parent( "parent", "Message from Parent Element(s)", 
 			new EpFunc0< Neutral >( &Neutral::destroy ) );
 	static ValueFinfo< Neutral, string > name( 

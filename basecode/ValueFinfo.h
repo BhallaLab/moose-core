@@ -38,8 +38,8 @@ template < class T, class F > class ValueFinfo: public Finfo
 
 
 		void registerFinfo( Cinfo* c ) {
-			set_->registerFinfo( c );
-			get_->registerFinfo( c );
+			c->registerFinfo( set_ );
+			c->registerFinfo( get_ );
 		}
 
 	private:
@@ -71,7 +71,7 @@ template < class T, class F > class ReadOnlyValueFinfo: public Finfo
 
 
 		void registerFinfo( Cinfo* c ) {
-			get_->registerFinfo( c );
+			c->registerFinfo( get_ );
 		}
 
 	private:
@@ -114,8 +114,10 @@ template < class T, class F > class UpValueFinfo: public Finfo
 
 
 		void registerFinfo( Cinfo* c ) {
-			set_->registerFinfo( c );
-			get_->registerFinfo( c );
+			c->registerFinfo( set_ );
+			c->registerFinfo( get_ );
+			// set_->registerFinfo( c );
+			// get_->registerFinfo( c );
 		}
 
 	private:

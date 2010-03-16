@@ -42,81 +42,6 @@ Cinfo::~Cinfo()
 // Initialization funcs
 ////////////////////////////////////////////////////////////////////
 
-#if 0
-void Cinfo::init( Finfo** finfoArray, unsigned int nFinfos )
-{
-	if ( baseCinfo_ ) {
-		// Copy over base Finfos.
-		numBindIndex_ = baseCinfo->numBindIndex_
-		finfoMap_ = baseCinfo->finfoMap_;
-		funcs_ = baseCinfo->funcs_;
-		/*
-		for ( map< string, Finfo* >::iterator i = 
-			baseCinfo_->finfoMap_.begin();
-			i != baseCinfo_->finfoMap_.end();
-			++i ) {
-			Finfo* f = i->second->clone();
-			finfo_map_[ i->first ] = f;
-		}
-		*/
-		// Start out by copying base class function array.
-		// funcs_ = baseCinfo_->funcs_;
-		// opFuncNames_ = baseCinfo_->opFuncNames_;
-	} 
-	/*
-	else {
-		// Initialize zero funcId
-		// funcs_.push_back( 0 );
-		opFuncNames_[ "dummy" ] = 0;
-	}
-	*/
-	// Fill in new finfos. Just overwrite baseCinfo entries.
-	for ( unsigned int i = 0; i < nFinfos; i++ ) {
-		Finfo* f = finfoArray[i];
-		finfoMap_[ f->name() ] = f;
-		// Register them too.
-		f->registerFinfo( this );
-		/*
-		map< string, Finfo* >::iterator i = finfoMap_.find( f->name() );
-		if ( i != finfoMap_.end() ) {
-			delete i->second;
-			i->second = f;
-		} else {
-			finfoMap_[ f->name() ] = f;
-		}
-		*/
-	}
-
-/*
-	// Register the whole mess.
-	numBindIndex_ = 0;
-	for ( map< string, Finfo* >::iterator i = finfoMap_.begin();
-		i != finfoMap_.end(); ++i ) {
-		i->second->registerFinfo( this );
-	}
-	*/
-
-	/*
-	for ( unsigned int i = 0; i < nFinfos; i++ ) {
-		Finfo* f = finfoArray[i];
-		registerFinfo( f );
-
-		SharedFinfo* sf = dynamic_cast< SharedFinfo* >( f );
-		if ( sf ) {
-			for ( vector< SrcFinfo* >::const_iterator j = sf->src().begin();
-				j != sf->src().end(); ++j ) {
-				registerFinfo( *j );
-			}
-			for ( vector< Finfo* >::const_iterator j = sf->dest().begin();
-				j != sf->dest().end(); ++j ) {
-				registerFinfo( *j );
-			}
-		}
-	}
-	*/
-}
-#endif
-
 /**
  * init: initializes the Cinfo. Must be called just once
  */
@@ -132,18 +57,6 @@ void Cinfo::init( Finfo** finfoArray, unsigned int nFinfos )
 		registerFinfo( finfoArray[i] );
 	}
 }
-
-/*
-void Cinfo::addMoreFinfos( Finfo** finfoArray, unsigned int nFinfos )
-	// Fill in new finfos. Just overwrite baseCinfo entries.
-	for ( unsigned int i = 0; i < nFinfos; i++ ) {
-		Finfo* f = finfoArray[i];
-		finfoMap_[ f->name() ] = f;
-		// Register them too.
-		f->registerFinfo( this );
-	}
-}
-*/
 
 FuncId Cinfo::registerOpFunc( const OpFunc* f )
 {
@@ -161,10 +74,6 @@ void Cinfo::registerFinfo( Finfo* f )
 {
 		finfoMap_[ f->name() ] = f;
 		f->registerFinfo( this );
-		/*
-		f->registerOpFuncs( opFuncNames_, funcs_ );
-		numBindIndex_= f->registerBindIndex( numBindIndex_ );
-		*/
 }
 
 //////////////////////////////////////////////////////////////////////
