@@ -209,6 +209,14 @@ class Element
 		 */
 		const vector< MsgFuncBinding >* getMsgAndFunc( BindIndex b ) const;
 
+		/**
+		 * Utility function for printing out all fields and their values
+		 */
+		void showFields() const;
+
+		/**
+		 * Utility function for traversing and displaying all messages
+		 */
 		void showMsg() const;
 
 		/**

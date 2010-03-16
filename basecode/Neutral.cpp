@@ -16,7 +16,7 @@ const Cinfo* Neutral::initCinfo()
 	SrcFinfo0 child( "child", "Message to child Elements" );
 	static DestFinfo parent( "parent", "Message from Parent Element(s)", 
 			new EpFunc0< Neutral >( &Neutral::destroy ) );
-	ValueFinfo< Neutral, string > name( 
+	static ValueFinfo< Neutral, string > name( 
 			"name",
 			"Name of object", 
 			&Neutral::setName, 

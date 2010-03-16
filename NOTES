@@ -3604,4 +3604,8 @@ Done.
 
 Need to deprecate Message.cpp, Message.h, SetGet.cpp, SetGet.h
 
-Now compiles the whole project. Doesn't run yet.
+Now compiles the whole project. Doesn't run yet. Checkin 1643.
+
+Deeper into the murk. I was unable to debug the first unit test, insertIntoQ,
+so I wrote a new one to just print out Element Finfos. That compiles but
+also crashes.

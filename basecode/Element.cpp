@@ -309,3 +309,46 @@ void Element::showMsg() const
 		}
 	}
 }
+
+void Element::showFields() const
+{
+	vector< const SrcFinfo* > srcVec;
+	vector< const DestFinfo* > destVec;
+	vector< const SharedFinfo* > sharedVec;
+	vector< const Finfo* > valueVec; // ValueFinfos are what is left.
+	for ( map< string, Finfo* >::const_iterator i = 
+		cinfo_->finfoMap().begin();
+		i != cinfo_->finfoMap().end(); ++i ) {
+		const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >( i->second);
+		const DestFinfo* df = dynamic_cast< const DestFinfo* >( i->second);
+		const SharedFinfo* shf = dynamic_cast< const SharedFinfo* >( i->second);
+		if ( sf )
+			srcVec.push_back( sf );
+		else if ( df )
+			destVec.push_back( df );
+		else if ( shf )
+			sharedVec.push_back( shf );
+		else
+			valueVec.push_back( i->second );
+	}
+
+	cout << "Showing SrcFinfos: \n";
+	for ( unsigned int i = 0; i < srcVec.size(); ++i )
+		cout << i << ": " << srcVec[i]->name() << "	Bind=" << srcVec[i]->getBindIndex() << endl;
+	cout << "Showing DestFinfos: \n";
+	for ( unsigned int i = 0; i < destVec.size(); ++i )
+		cout << i << ": " << destVec[i]->name() << "	FuncId=" << destVec[i]->getFid() << endl;
+	cout << "Showing SharedFinfos: \n";
+	for ( unsigned int i = 0; i < sharedVec.size(); ++i ) {
+		cout << i << ": " << sharedVec[i]->name() << "	Src=[ ";
+		for ( unsigned int j = 0; j < sharedVec[i]->src().size(); ++j )
+			cout << " " << sharedVec[i]->src()[j]->name();
+		cout << " ]	Dest=[ ";
+		for ( unsigned int j = 0; j < sharedVec[i]->dest().size(); ++j )
+			cout << " " << sharedVec[i]->dest()[j]->name();
+		cout << " ]\n";
+	}
+	cout << "Listing ValueFinfos: \n";
+	for ( unsigned int i = 0; i < valueVec.size(); ++i )
+		cout << i << ": " << valueVec[i]->name() << endl;
+}

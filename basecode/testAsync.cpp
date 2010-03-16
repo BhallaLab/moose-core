@@ -22,10 +22,28 @@
 #include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
 
+void showFields()
+{
+	const Cinfo* nc = Neutral::initCinfo();
+	Id i1 = Id::nextId();
+	bool ret = nc->create( i1, "test1", 1 );
+	assert( ret );
+
+	i1.eref().element()->showFields();
+	cout << "." << flush;
+
+	delete i1();
+}
+
 void insertIntoQ( )
 {
 	const Cinfo* nc = Neutral::initCinfo();
 	unsigned int size = 100;
+
+	const DestFinfo* df = dynamic_cast< const DestFinfo* >(
+		nc->findFinfo( "set_name" ) );
+	assert( df != 0 );
+	FuncId fid = df->getFid();
 
 	Id i1 = Id::nextId();
 	Id i2 = Id::nextId();
@@ -54,8 +72,9 @@ void insertIntoQ( )
 
 		*reinterpret_cast< DataId* >( buf + size ) = DataId( i );
 
-		MsgFuncBinding b( m->mid(), 1 );
+		MsgFuncBinding b( m->mid(), fid );
 
+		// addToQ( qid, Binding, argbuf )
 		qi.addToQ( 0, b, buf );
 	}
 	ProcInfo p;
@@ -886,6 +905,7 @@ void testSharedMsg()
 
 void testAsync( )
 {
+	showFields();
 	insertIntoQ();
 	testSendMsg();
 	testCreateMsg();
