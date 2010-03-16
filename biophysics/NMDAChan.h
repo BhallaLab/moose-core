@@ -5,9 +5,9 @@
 // Maintainer: 
 // Created: Mon Mar  8 15:13:02 2010 (+0530)
 // Version: 
-// Last-Updated: Thu Mar 11 14:42:18 2010 (+0530)
+// Last-Updated: Mon Mar 15 16:03:23 2010 (+0530)
 //           By: Subhasis Ray
-//     Update #: 63
+//     Update #: 76
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -52,12 +52,16 @@ class NMDAChan: public SynChan
 {
   public:
     NMDAChan();
-    static void setTransitionParam(const Conn* c, int index, double value);
-    void innerSetTransitionParam(int index, double value);
-    static double getTransitionParam(Eref e, int index);
-    double innerGetTransitionParam(int index);
+    static void setTransitionParam(const Conn* c, double value, const unsigned int& index);
+    void innerSetTransitionParam(double value, const unsigned int index);
+    static double getTransitionParam(Eref e, const unsigned int& index);
+    double innerGetTransitionParam(unsigned int index);
     static double getUnblocked(Eref e);
     double innerGetUnblocked();
+    static double getSaturation(Eref e);
+    double innerGetSaturation();
+    static void setSaturation(const Conn * conn, double value);
+    void innerSetSaturation(double value);
     static void processFunc(const Conn* conn, ProcInfo info);
     void innerProcessFunc(Eref e, ProcInfo info);
     static void reinitFunc(const Conn* conn, ProcInfo info);
@@ -66,7 +70,7 @@ class NMDAChan: public SynChan
     void innerSetMgConc(double value);
     static double getMgConc(Eref e);
     double innerGetMgConc();
-    
+    unsigned int updateNumSynapse( Eref e );
   protected:
     double c0_;
     double c1_;
@@ -86,6 +90,7 @@ class NMDAChan: public SynChan
     double y_;
     double Mg_;
     double unblocked_;
+    double saturation_;
     priority_queue<SynInfo> oldEvents_; // This is for removing the
                                          // effects of old event after tau1
 };
