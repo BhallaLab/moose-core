@@ -27,8 +27,6 @@ OBJ = \
 	SharedFinfo.o \
 	Id.o \
 	FullId.o \
-	testSync.o	\
-	testAsync.o	\
 	Neutral.o	\
 	Qinfo.o \
 	DataId.o \
@@ -38,6 +36,8 @@ OBJ = \
 	SparseMsg.o \
 	PsparseMsg.o \
 	main.o	\
+	testSync.o	\
+	testAsync.o	\
 
 HEADERS = \
 	header.h \

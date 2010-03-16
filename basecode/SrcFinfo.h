@@ -17,8 +17,7 @@
 class SrcFinfo: public Finfo
 {
 	public:
-		SrcFinfo( const string& name, const string& doc, 
-			BindIndex b );
+		SrcFinfo( const string& name, const string& doc ); 
 
 		~SrcFinfo() {;}
 
@@ -59,7 +58,7 @@ class SrcFinfo0: public SrcFinfo
 {
 	public:
 
-		SrcFinfo0( const string& name, const string& doc, BindIndex b );
+		SrcFinfo0( const string& name, const string& doc );
 		~SrcFinfo0() {;}
 		
 		// Will need to specialize for strings etc.
@@ -76,9 +75,8 @@ template < class T > class SrcFinfo1: public SrcFinfo
 	public:
 		~SrcFinfo1() {;}
 
-		SrcFinfo1( const string& name, const string& doc, 
-			BindIndex b )
-			: SrcFinfo( name, doc, b )
+		SrcFinfo1( const string& name, const string& doc )
+			: SrcFinfo( name, doc )
 			{ ; }
 
 		// Will need to specialize for strings etc.
@@ -112,9 +110,8 @@ template <> class SrcFinfo1< string >: public SrcFinfo
 	public:
 		~SrcFinfo1() {;}
 
-		SrcFinfo1( const string& name, const string& doc, 
-			BindIndex b )
-			: SrcFinfo( name, doc, b )
+		SrcFinfo1( const string& name, const string& doc ) 
+			: SrcFinfo( name, doc )
 			{ ; }
 
 		// Will need to specialize for strings etc.
@@ -153,9 +150,8 @@ template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 	public:
 		~SrcFinfo2() {;}
 
-		SrcFinfo2( const string& name, const string& doc, 
-			BindIndex b )
-			: SrcFinfo( name, doc, b )
+		SrcFinfo2( const string& name, const string& doc ) 
+			: SrcFinfo( name, doc )
 			{ ; }
 
 		// This version is general but inefficient as it uses an extra
@@ -196,9 +192,8 @@ template < class T1, class T2, class T3 > class SrcFinfo3: public SrcFinfo
 	public:
 		~SrcFinfo3() {;}
 
-		SrcFinfo3( const string& name, const string& doc, 
-			BindIndex b )
-			: SrcFinfo( name, doc, b )
+		SrcFinfo3( const string& name, const string& doc ) 
+			: SrcFinfo( name, doc )
 			{ ; }
 
 		// Will need to specialize for strings etc.
@@ -243,9 +238,8 @@ template < class T1, class T2, class T3, class T4 > class SrcFinfo4: public SrcF
 	public:
 		~SrcFinfo4() {;}
 
-		SrcFinfo4( const string& name, const string& doc, 
-			BindIndex b )
-			: SrcFinfo( name, doc, b )
+		SrcFinfo4( const string& name, const string& doc ) 
+			: SrcFinfo( name, doc )
 			{ ; }
 
 		// Will need to specialize for strings etc.

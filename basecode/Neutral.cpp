@@ -13,21 +13,19 @@
 
 const Cinfo* Neutral::initCinfo()
 {
-	/*
-	static Finfo* reacFinfos[] = {
-		new Finfo( setKf_ ),
-		new Finfo( setKb_ ),
-	};
-	*/
-	static Finfo* neutralFinfos[] = {
-		new ValueFinfo< Neutral, string >( 
+	SrcFinfo0 child( "child", "Message to child Elements" );
+	static DestFinfo parent( "parent", "Message from Parent Element(s)", 
+			new EpFunc0< Neutral >( &Neutral::destroy ) );
+	ValueFinfo< Neutral, string > name( 
 			"name",
 			"Name of object", 
 			&Neutral::setName, 
-			&Neutral::getName ),
-		new SrcFinfo0( "child", "Message to child Elements", 0 ),
-		new DestFinfo( "parent", "Message from Parent Element(s)", 
-			new EpFunc0< Neutral >( &Neutral::destroy ) ),
+			&Neutral::getName );
+	
+	static Finfo* neutralFinfos[] = {
+		&name,
+		&child,
+		&parent,
 	};
 
 	static Cinfo neutralCinfo (

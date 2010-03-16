@@ -3585,3 +3585,7 @@ Cinfo::init
 	- Adds in current class Finfos. If there is a duplicate, free old one
 		and plug in new one.
 	- scans through Finfo map, registering each one.
+
+Begun implementation. Compiles through to the testAsync.cpp.
+Checkin 1640.
+

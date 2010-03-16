@@ -13,28 +13,14 @@
  * a type-safe send operation, and to provide typechecking for it.
  */
 
-SrcFinfo::SrcFinfo( const string& name, const string& doc, BindIndex b )
-	: Finfo( name, doc ), bindIndex_( b )
+SrcFinfo::SrcFinfo( const string& name, const string& doc )
+	: Finfo( name, doc ), bindIndex_( 0 )
 { ; }
 
 void SrcFinfo::registerFinfo( Cinfo* c )
 {
 	bindIndex_ = c->registerBindIndex();
 }
-
-/*
-void SrcFinfo::registerOpFuncs(
-		map< string, FuncId >& fnames, vector< OpFunc* >& funcs )
-{
-	;
-}
-
-BindIndex SrcFinfo::registerBindIndex( BindIndex current )
-{
-	bindIndex_ = current;
-	return current + 1;
-}
-*/
 
 bool SrcFinfo::checkTarget( const Finfo* target ) const
 {
@@ -61,8 +47,8 @@ bool SrcFinfo::addMsg( const Finfo* target, MsgId mid, Element* src ) const
 /**
  * SrcFinfo0 sets up calls without any arguments.
  */
-SrcFinfo0::SrcFinfo0( const string& name, const string& doc, BindIndex b )
-	: SrcFinfo( name, doc, b )
+SrcFinfo0::SrcFinfo0( const string& name, const string& doc )
+	: SrcFinfo( name, doc )
 { ; }
 
 void SrcFinfo0::send( Eref e, const ProcInfo* p, bool isForward ) const {

@@ -13,93 +13,71 @@ template < class T, class F > class ValueFinfo: public Finfo
 {
 	public:
 		~ValueFinfo() {
-			delete setOpFunc_;
-			delete getOpFunc_;
+			delete set_;
+			delete get_;
 		}
 
 		ValueFinfo( const string& name, const string& doc, 
 			void ( T::*setFunc )( F ),
 			F ( T::*getFunc )() const )
 			: Finfo( name, doc )
-			{
-				setOpFunc_ = new OpFunc1< T, F >( setFunc );
-				getOpFunc_ = new GetOpFunc< T, F >( getFunc );
-			}
-
-
-		void registerOpFuncs(
-			map< string, FuncId >& fnames, vector< OpFunc* >& funcs ) 
 		{
-			string setName = "set_" + name();
-			map< string, FuncId >::iterator i = fnames.find( setName );
-			if ( i != fnames.end() ) {
-				funcs[ i->second ] = setOpFunc_;
-			} else {
-				unsigned int size = funcs.size();
-				fnames[ setName ] = size;
-				funcs.push_back( setOpFunc_ );
+				string setname = "set_" + name;
+				set_ = new DestFinfo(
+					setname,
+					"Assigns field value.",
+					new OpFunc1< T, F >( setFunc ) );
 
-			}
-			string getName = "get_" + name();
-			i = fnames.find( getName );
-			if ( i != fnames.end() ) {
-				funcs[ i->second ] = getOpFunc_;
-			} else {
-				unsigned int size = funcs.size();
-				fnames[ getName ] = size;
-				funcs.push_back( getOpFunc_ );
-			}
+				string getname = "get_" + name;
+				get_ = new DestFinfo(
+					getname,
+					"Requests field value. The requesting Element must "
+					"provide a handler for the returned value.",
+					new GetOpFunc< T, F >( getFunc ) );
 		}
 
-		BindIndex registerBindIndex( BindIndex current )
-		{
-			return current;
+
+		void registerFinfo( Cinfo* c ) {
+			set_->registerFinfo( c );
+			get_->registerFinfo( c );
 		}
 
 	private:
-		OpFunc1< T, F >* setOpFunc_;
-		GetOpFunc< T, F >* getOpFunc_;
+		DestFinfo* set_;
+		DestFinfo* get_;
+		
+	//	OpFunc1< T, F >* setOpFunc_;
+	//	GetOpFunc< T, F >* getOpFunc_;
 };
 
-
-template < class T, class F > class ReadonlyValueFinfo: public Finfo
+template < class T, class F > class ReadOnlyValueFinfo: public Finfo
 {
 	public:
-		~ReadonlyValueFinfo() {
-			delete getOpFunc_;
+		~ReadOnlyValueFinfo() {
+			delete get_;
 		}
 
-		ReadonlyValueFinfo( const string& name, const string& doc, 
+		ReadOnlyValueFinfo( const string& name, const string& doc, 
 			F ( T::*getFunc )() const )
 			: Finfo( name, doc )
-			{
-				getOpFunc_ = new GetOpFunc< T, F >( getFunc );
-			}
-
-
-		void registerOpFuncs(
-			map< string, FuncId >& fnames, vector< OpFunc* >& funcs ) 
 		{
-			string getName = "get_" + name();
-			map< string, FuncId >::iterator i = fnames.find( getName );
-			if ( i != fnames.end() ) {
-				funcs[ i->second ] = getOpFunc_;
-			} else {
-				unsigned int size = funcs.size();
-				fnames[ getName ] = size;
-				funcs.push_back( getOpFunc_ );
-			}
+				string getname = "get_" + name;
+				get_ = new DestFinfo(
+					getname,
+					"Requests field value. The requesting Element must "
+					"provide a handler for the returned value.",
+					new GetOpFunc< T, F >( getFunc ) );
 		}
 
-		// Need to think about whether an index has to be registered here.
-		BindIndex registerBindIndex( BindIndex current )
-		{
-			return current;
+
+		void registerFinfo( Cinfo* c ) {
+			get_->registerFinfo( c );
 		}
 
 	private:
-		GetOpFunc< T, F >* getOpFunc_;
+		DestFinfo* get_;
 };
+
 
 /**
  * Here the value belongs to an array field within class T.
@@ -111,53 +89,41 @@ template < class T, class F > class UpValueFinfo: public Finfo
 {
 	public:
 		~UpValueFinfo() {
-			delete setUpFunc_;
-			delete getUpFunc_;
+			delete set_;
+			delete get_;
 		}
 
 		UpValueFinfo( const string& name, const string& doc, 
 			void ( T::*setFunc )( DataId, F ),
 			F ( T::*getFunc )( DataId ) const )
 			: Finfo( name, doc )
-			{
-				setUpFunc_ = new UpFunc1< T, F >( setFunc );
-				getUpFunc_ = new GetUpFunc< T, F >( getFunc );
-			}
-
-
-		void registerOpFuncs(
-			map< string, FuncId >& fnames, vector< OpFunc* >& funcs ) 
 		{
-			string setName = "set_" + name();
-			map< string, FuncId >::iterator i = fnames.find( setName );
-			if ( i != fnames.end() ) {
-				funcs[ i->second ] = setUpFunc_;
-			} else {
-				unsigned int size = funcs.size();
-				fnames[ setName ] = size;
-				funcs.push_back( setUpFunc_ );
+				string setname = "set_" + name;
+				set_ = new DestFinfo(
+					setname,
+					"Assigns field value.",
+					new UpFunc1< T, F >( setFunc ) );
 
-			}
-			string getName = "get_" + name();
-			i = fnames.find( getName );
-			if ( i != fnames.end() ) {
-				funcs[ i->second ] = getUpFunc_;
-			} else {
-				unsigned int size = funcs.size();
-				fnames[ getName ] = size;
-				funcs.push_back( getUpFunc_ );
-			}
+				string getname = "get_" + name;
+				get_ = new DestFinfo(
+					getname,
+					"Requests field value. The requesting Element must "
+					"provide a handler for the returned value.",
+					new GetUpFunc< T, F >( getFunc ) );
 		}
 
-		// Need to think about whether an index has to be registered here.
-		BindIndex registerBindIndex( BindIndex current )
-		{
-			return current;
+
+		void registerFinfo( Cinfo* c ) {
+			set_->registerFinfo( c );
+			get_->registerFinfo( c );
 		}
 
 	private:
-		UpFunc1< T, F >* setUpFunc_;
-		GetUpFunc< T, F >* getUpFunc_;
+		DestFinfo* set_;
+		DestFinfo* get_;
+		
+	//	OpFunc1< T, F >* setOpFunc_;
+	//	GetOpFunc< T, F >* getOpFunc_;
 };
 
 #endif // _VALUE_FINFO_H

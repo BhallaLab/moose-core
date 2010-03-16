@@ -95,8 +95,8 @@ void testSendMsg()
 	
 	ProcInfo p;
 	
-	SrcFinfo1<string> s( "test", "", 0U );
-	s.registerBindIndex( 0 );
+	// Defaults to BindIndex of 0.
+	SrcFinfo1<string> s( "test", "" );
 	e1.element()->addMsgAndFunc( m->mid(), fid, s.getBindIndex() );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -737,7 +737,7 @@ void testUpValue()
  * All this is tallied for validating the unit test.
  */
 
-static SrcFinfo0 *s0 = new SrcFinfo0( "s0", "", 2);
+static SrcFinfo0 s0( "s0", "");
 class Test: public Data
 {
 	public:
@@ -755,14 +755,14 @@ class Test: public Data
 		void handleS1( Eref e, const Qinfo* q, string s ) {
 			ProcInfo p;
 			s_ = s + s_;
-			s0->send( e, &p, 0 );
+			s0.send( e, &p, 0 );
 		}
 
 		void handleS2( Eref e, const Qinfo* q, int i1, int i2 ) {
 			ProcInfo p;
 			i1_ += 10 * i1;
 			i2_ += 10 * i2;
-			s0->send( e, &p, 0 );
+			s0.send( e, &p, 0 );
 		}
 
 		static Finfo* sharedVec[ 6 ];
@@ -795,9 +795,8 @@ Finfo* Test::sharedVec[6];
 
 void testSharedMsg()
 {
-	static BindIndex bi = 3;
-	static SrcFinfo1< string > *s1 = new SrcFinfo1< string >( "s1", "", bi++);
-	static SrcFinfo2< int, int > *s2 = new SrcFinfo2< int, int >( "s2", "", bi++);
+	static SrcFinfo1< string > s1( "s1", "" );
+	static SrcFinfo2< int, int > s2( "s2", "" );
 	static DestFinfo d0( "d0", "",
 		new OpFunc0< Test >( & Test::handleS0 ) );
 	static DestFinfo d1( "d1", "", 
@@ -805,11 +804,11 @@ void testSharedMsg()
 	static DestFinfo d2( "d2", "", 
 		new EpFunc2< Test, int, int >( &Test::handleS2 ) );
 
-	Test::sharedVec[0] = s0;
+	Test::sharedVec[0] = &s0;
 	Test::sharedVec[1] = &d0;
-	Test::sharedVec[2] = s1;
+	Test::sharedVec[2] = &s1;
 	Test::sharedVec[3] = &d1;
-	Test::sharedVec[4] = s2;
+	Test::sharedVec[4] = &s2;
 	Test::sharedVec[5] = &d2;
 	
 	Id t1 = Id::nextId();
@@ -847,15 +846,15 @@ void testSharedMsg()
 	// Send messages
 	ProcInfo p;
 	string arg1 = " hello ";
-	s1->send( t1.eref(), &p, arg1 );
-	s2->send( t1.eref(), &p, 100, 200 );
+	s1.send( t1.eref(), &p, arg1 );
+	s2.send( t1.eref(), &p, 100, 200 );
 
 	Qinfo::clearQ( &p );
 	Qinfo::clearQ( &p );
 
 	string arg2 = " goodbye ";
-	s1->send( t2.eref(), &p, arg2, 0 );
-	s2->send( t2.eref(), &p, 500, 600, 0 );
+	s1.send( t2.eref(), &p, arg2, 0 );
+	s2.send( t2.eref(), &p, 500, 600, 0 );
 
 	Qinfo::clearQ( &p );
 	Qinfo::clearQ( &p );
