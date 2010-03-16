@@ -246,9 +246,9 @@ void Cinfo::init( const string* doc,
                        PyMooseBase::getField() to return a reference
                        to the context_->fieldValue member.
                      */                  
-                    header << "            " << (fieldType == "string") ? "const string& " : fieldType << " __get_" << fieldName << "() const;\n";
+                    header << "            " << ((fieldType == "string") ? "const string& " : fieldType) << " __get_" << fieldName << "() const;\n";
                 
-                    cpp << (fieldType == "string") ? "const string& " : fieldType <<" " <<  name() << "::__get_" <<  fieldName << "() const\n"
+                    cpp << ((fieldType == "string") ? "const string& " : fieldType) <<" " <<  name() << "::__get_" <<  fieldName << "() const\n"
                         << "{\n";
                     if (fieldType != "string"){
                         cpp << "    " << fieldType << " " << fieldName << ";\n"
