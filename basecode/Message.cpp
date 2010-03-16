@@ -46,7 +46,24 @@ bool add( Element* src, const string& srcField,
 			" on src:\n"; // Put name here.
 		return 0;
 	}
+	const Finfo* f2 = dest->cinfo()->findFinfo( destField );
+	if ( !f2 ) {
+		cout << "add: Error: Failed to find field " << destField << 
+			" on dest:\n"; // Put name here.
+		return 0;
+	}
 
+	Msg* m = new OneToOneMsg( src, dest );
+	if ( f1->addMsg( f2, m->mid(), src )  ) {
+		cout << "add: Error: Finfo type mismatch for " << 
+			destField << " on dest:\n"; // Put name here.
+		delete m;
+		return 0;
+	}
+	return 1;
+
+
+/*
 	FuncId fid = dest->cinfo()->getOpFuncId( destField );
 	const OpFunc* func = dest->cinfo()->getOpFunc( fid );
 	if ( func ) {
@@ -67,9 +84,42 @@ bool add( Element* src, const string& srcField,
 			return 0;
 		}
 	}
-
+*/
 }
 
+const SrcFinfo* validateMsg( Element* src, const string& srcField, 
+	Element* dest, const string& destField, FuncId& fid )
+{
+	const Finfo* f1 = src->cinfo()->findFinfo( srcField );
+	if ( !f1 ) {
+		cout << "add: Error: Failed to find field " << srcField << 
+			" on src:\n"; // Put name here.
+		return 0;
+	}
+
+	const Finfo* f2 = dest->cinfo()->findFinfo( destField );
+	if ( !f2 ) {
+		cout << "add: Error: Failed to find field " << destField << 
+			" on dest:\n"; // Put name here.
+		return 0;
+	}
+
+	if ( f1->checkTarget( f2 ) ) {
+		const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >( f1 );
+		const DestFinfo* df = dynamic_cast< const DestFinfo* >( f2 );
+		if ( sf && df ) {
+			fid = df->getFid();
+			return sf;
+		} else {
+			cout << "Warning: validateMsg:: Source of message '" << 
+				sf->name() << "' is not a SrcFinfo\n";
+			return 0;
+		}
+	}
+	return 0;
+}
+
+#if 0
 const SrcFinfo* validateMsg( Element* src, const string& srcField, 
 	Element* dest, const string& destField, FuncId& fid )
 {
@@ -113,3 +163,4 @@ const SrcFinfo* validateMsg( Element* src, const string& srcField,
 	}
 	*/
 }
+#endif

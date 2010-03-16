@@ -19,60 +19,50 @@
 
 ProcInfo Shell::p_;
 
-const BindIndex requestGetSlot = 0;
-
-static BindIndex bi = 2;
-
-static SrcFinfo4< string, Id, Id, string  > *requestCreate =
-		new SrcFinfo4< string, Id, Id, string  >( "requestCreate",
+static SrcFinfo4< string, Id, Id, string  > requestCreate( "requestCreate",
 			"requestCreate( class, parent, newElm, name ): "
 			"creates a new Element on all nodes with the specified Id. "
 			"Initiates a callback to indicate completion of operation. "
-			"Goes to all nodes including self.", 
-			bi++ );
+			"Goes to all nodes including self."
+			);
 
-static SrcFinfo0* ackCreate =
-		new SrcFinfo0( "ackCreate",
+static SrcFinfo0 ackCreate( "ackCreate",
 			"ackCreate():"
 			"Acknowledges receipt and completion of Create command."
-			"Goes back only to master node.",
-			bi++ );
+			"Goes back only to master node."
+			);
 
-static SrcFinfo1< Id  > *requestDelete =
-		new SrcFinfo1< Id >( "requestDelete",
+static SrcFinfo1< Id  > requestDelete( "requestDelete",
 			"requestDelete( doomedElement ):"
 			"Deletes specified Element on all nodes."
 			"Initiates a callback to indicate completion of operation."
-			"Goes to all nodes including self.", 
-			bi++ );
+			"Goes to all nodes including self." ); 
 
-static SrcFinfo0* ackDelete =
-		new SrcFinfo0( "ackDelete",
+static SrcFinfo0 ackDelete( "ackDelete",
 			"ackDelete():"
 			"Acknowledges receipt and completion of Delete command."
-			"Goes back only to master node.",
-			bi++ );
+			"Goes back only to master node." );
 
-static DestFinfo* create = new DestFinfo( "create", 
+static DestFinfo create( "create", 
 			"create( class, parent, newElm, name",
 			new EpFunc4< Shell, string, Id, Id, string>( &Shell::create ) );
 
-static DestFinfo *del = new DestFinfo( "delete", 
+static DestFinfo del( "delete", 
 			"Destroys Element, all its messages, and all its children. Args: Id",
 			new EpFunc1< Shell, Id >( & Shell::destroy ) );
 
-static DestFinfo *handleAckCreate = new DestFinfo( "handleAckCreate", 
+static DestFinfo handleAckCreate( "handleAckCreate", 
 			"Keeps track of # of responders to ackCreate. Args: none",
 			new OpFunc0< Shell >( & Shell::handleAckCreate ) );
 
-static DestFinfo *handleAckDelete = new DestFinfo( "handleAckCreate", 
+static DestFinfo handleAckDelete( "handleAckCreate", 
 			"Keeps track of # of responders to ackCreate. Args: none",
 			new OpFunc0< Shell >( & Shell::handleAckDelete ) );
 
 static Finfo* shellMaster[] = {
-	requestCreate, handleAckCreate, requestDelete, handleAckDelete, };
+	&requestCreate, &handleAckCreate, &requestDelete, &handleAckDelete, };
 static Finfo* shellWorker[] = {
-	create, ackCreate, del, ackDelete };
+	&create, &ackCreate, &del, &ackDelete };
 /*
 static SrcFinfo4< Id, string, Id, string  > *requestMsg =
 		new SrcFinfo4< string, Id, Id, MsgId  >( "requestMsg",
@@ -91,58 +81,80 @@ static SrcFinfo0* ackMsg =
 			ackShellOp );
 */
 
-static SrcFinfo1< FuncId > *requestGet = 
-		new SrcFinfo1< FuncId >( "requestGet",
-			"Function to request another Element for a value",
-			requestGetSlot );
+static SrcFinfo1< FuncId > requestGet( "requestGet",
+			"Function to request another Element for a value" );
 
 const Cinfo* Shell::initCinfo()
 {
-	static Finfo* shellFinfos[] = {
-		new ValueFinfo< Shell, string >( 
+////////////////////////////////////////////////////////////////
+// Value Finfos
+////////////////////////////////////////////////////////////////
+	static ValueFinfo< Shell, string > name( 
 			"name",
 			"Name of object", 
 			&Shell::setName, 
-			&Shell::getName ),
+			&Shell::getName );
 
-		new ValueFinfo< Shell, bool >( 
+	static ValueFinfo< Shell, bool > quit( 
 			"quit",
 			"Flag to tell the system to quit", 
 			&Shell::setQuit, 
-			&Shell::getQuit ),
+			&Shell::getQuit );
+
 ////////////////////////////////////////////////////////////////
 // Dest Finfos: Functions handled by Shell
 ////////////////////////////////////////////////////////////////
-		new DestFinfo( "handleGet", 
+		static DestFinfo handleGet( "handleGet", 
 			"Function to handle returning values for 'get' calls.",
-			new RetFunc< Shell >( &Shell::handleGet ) ),
-		new DestFinfo( "start", 
+			new RetFunc< Shell >( &Shell::handleGet ) );
+		static DestFinfo start( "start", 
 			"Starts off a simulation for the specified run time, automatically partitioning among threads if the settings are right",
-			new OpFunc1< Shell, double >( & Shell::start ) ),
-		new DestFinfo( "setclock", 
+			new OpFunc1< Shell, double >( & Shell::start ) );
+		static DestFinfo setclock( "setclock", 
 			"Assigns clock ticks. Args: tick#, dt, stage",
-			new OpFunc3< Shell, unsigned int, double, unsigned int >( & Shell::setclock ) ),
-		new DestFinfo( "loadBalance", 
+			new OpFunc3< Shell, unsigned int, double, unsigned int >( & Shell::setclock ) );
+		static DestFinfo loadBalance( "loadBalance", 
 			"Set up load balancing",
-			new OpFunc0< Shell >( & Shell::loadBalance ) ),
+			new OpFunc0< Shell >( & Shell::loadBalance ) );
 
-		new DestFinfo( "create", 
+		/*
+		static DestFinfo( "create", 
 			"create( class, parent, newElm, name",
 			new EpFunc4< Shell, string, Id, Id, string>( &Shell::create )),
-		new DestFinfo( "delete", 
+		static DestFinfo( "delete", 
 			"Destroys Element, all its messages, and all its children. Args: Id",
 			new EpFunc1< Shell, Id >( & Shell::destroy ) ),
 
 		new DestFinfo( "addmsg", 
 			"Adds a Msg between specified Elements. Args: Src, Dest, srcField, destField",
 			new OpFunc4< Shell, Id, Id, string, string >( & Shell::addmsg ) ),
+			*/
+
+		static SharedFinfo master( "master",
+			"Issues commands from master shell to worker shells located "
+			"on different nodes. Also handles acknowledgements from them.",
+			shellMaster, sizeof( shellMaster ) / sizeof( const Finfo* )
+		);
+		static SharedFinfo worker( "worker",
+			"Handles commands arriving from master shell on node 0."
+			"Sends out acknowledgements from them.",
+			shellWorker, sizeof( shellWorker ) / sizeof( const Finfo* )
+		);
+	
+	static Finfo* shellFinfos[] = {
+		&name,
+		&quit,
+		&handleGet,
+		&start,
+		&setclock,
+		&loadBalance,
 
 ////////////////////////////////////////////////////////////////
 //  Predefined Msg Src and MsgDests.
 ////////////////////////////////////////////////////////////////
 
+		&requestGet,
 		/*
-		requestGet,
 		requestCreate,
 		ackCreate,
 		requestDelete,
@@ -151,22 +163,13 @@ const Cinfo* Shell::initCinfo()
 ////////////////////////////////////////////////////////////////
 //  Shared msg
 ////////////////////////////////////////////////////////////////
-
-		new SharedFinfo( "master",
-			"Issues commands from master shell to worker shells located "
-			"on different nodes. Also handles acknowledgements from them.",
-			shellMaster, sizeof( shellMaster ) / sizeof( const Finfo* )
-		),
-		new SharedFinfo( "worker",
-			"Handles commands arriving from master shell on node 0."
-			"Sends out acknowledgements from them.",
-			shellWorker, sizeof( shellWorker ) / sizeof( const Finfo* )
-		),
+		&master,
+		&worker,
 	};
 
 	static Cinfo shellCinfo (
 		"Shell",
-		0, // No base class.
+		0, // No base class. Make it neutral soon.
 		shellFinfos,
 		sizeof( shellFinfos ) / sizeof( Finfo* ),
 		new Dinfo< Shell >()
@@ -205,7 +208,7 @@ Id Shell::doCreate( string type, Id parent, string name, vector< unsigned int > 
 	Id ret = Id::nextId();
 	// Here we would do the 'send' on an internode msg to do the actual
 	// Create.
-	requestCreate->send( Id().eref(), &p_, type, parent, ret, name );
+	requestCreate.send( Id().eref(), &p_, type, parent, ret, name );
 	// innerCreate( type, parent, ret, name );
 
 	// Now we wait till all nodes are done.
@@ -219,7 +222,7 @@ Id Shell::doCreate( string type, Id parent, string name, vector< unsigned int > 
 
 bool Shell::doDelete( Id i )
 {
-	requestDelete->send( Id().eref(), &p_, i );
+	requestDelete.send( Id().eref(), &p_, i );
 	// Now we wait till all nodes are done.
 	numDeleteAcks_ = 0;
 	while ( numDeleteAcks_ < numNodes_ )
@@ -320,7 +323,7 @@ void Shell::create( Eref e, const Qinfo* q,
 	string type, Id parent, Id newElm, string name )
 {
 	innerCreate( type, parent, newElm, name );
-	ackCreate->send( e, &p_, 0 );
+	ackCreate.send( e, &p_, 0 );
 }
 
 /**
@@ -350,7 +353,7 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name )
 void Shell::destroy( Eref e, const Qinfo* q, Id eid)
 {
 	eid.destroy();
-	ackDelete->send( e, &p_, 0 );
+	ackDelete.send( e, &p_, 0 );
 }
 
 
@@ -559,10 +562,18 @@ bool set( Eref& dest, const string& destField, const string& val )
 	static Id shellid;
 	static BindIndex setBinding = 0; // Need to fix up.
 	Element* shell = shellid();
-	SrcFinfo1< string > sf( "set", "dummy", 0 );
+	SrcFinfo1< string > sf( "set", "dummy" );
 
-	FuncId fid = dest.element()->cinfo()->getOpFuncId( destField );
-	const OpFunc* func = dest.element()->cinfo()->getOpFunc( fid );
+	const Finfo* f = dest.element()->cinfo()->findFinfo( destField );
+	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
+	if ( !df )
+		return 0;
+	
+	FuncId fid = df->getFid();
+	const OpFunc* func = df->getOpFunc();
+
+	// FuncId fid = dest.element()->cinfo()->getOpFuncId( destField );
+	// const OpFunc* func = dest.element()->cinfo()->getOpFunc( fid );
 	if ( func ) {
 		if ( func->checkFinfo( &sf ) ) {
 			shell->clearBinding( setBinding );
@@ -589,14 +600,27 @@ bool get( const Eref& dest, const string& destField )
 	static const Finfo* reqFinfo = shellCinfo->findFinfo( "requestGet" );
 	static const SrcFinfo1< FuncId >* rf = 
 		dynamic_cast< const SrcFinfo1< FuncId >* >( reqFinfo );
-	static FuncId retFunc = shellCinfo->getOpFuncId( "handleGet" );
-	static SrcFinfo1< string > sf( "get", "dummy", 0 );
+
+	// static FuncId retFunc = shellCinfo->getOpFuncId( "handleGet" );
+	static SrcFinfo1< string > sf( "get", "dummy" );
 
 	static Element* shell = shellid();
 	static Eref shelle( shell, 0 );
 
-	FuncId fid = dest.element()->cinfo()->getOpFuncId( destField );
-	const OpFunc* func = dest.element()->cinfo()->getOpFunc( fid );
+	const DestFinfo* hf = dynamic_cast< const DestFinfo* >( 
+		shellCinfo->findFinfo( "handleGet" ) );
+	assert( hf );
+	FuncId retFunc = hf->getFid();
+
+	const Finfo* f = dest.element()->cinfo()->findFinfo( destField );
+	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
+	if ( !df )
+		return 0;
+	
+	FuncId fid = df->getFid();
+	const OpFunc* func = df->getOpFunc();
+	// FuncId fid = dest.element()->cinfo()->getOpFuncId( destField );
+	// const OpFunc* func = dest.element()->cinfo()->getOpFunc( fid );
 
 	assert( rf != 0 );
 

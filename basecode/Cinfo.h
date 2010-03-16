@@ -68,7 +68,7 @@ class Cinfo
 //////////////////////////////////////////////////////////////////////////
 
 			const OpFunc* getOpFunc( FuncId fid ) const;
-			FuncId getOpFuncId( const string& funcName ) const;
+			// FuncId getOpFuncId( const string& funcName ) const;
 
 			// Some dummy funcs
 			const std::string& name() const;

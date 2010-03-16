@@ -37,8 +37,16 @@ void SetGet::completeSet() const
 bool SetGet::checkSet( const string& field, FuncId& fid ) const
 {
 	// string field = "set_" + destField;
-	fid = e_.element()->cinfo()->getOpFuncId( field );
-	const OpFunc* func = e_.element()->cinfo()->getOpFunc( fid );
+	const Finfo* f = e_.element()->cinfo()->findFinfo( field );
+	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
+	if ( !df )
+		return 0;
+	
+	fid = df->getFid();
+	const OpFunc* func = df->getOpFunc();
+
+// 	fid = e_.element()->cinfo()->getOpFuncId( field );
+//	const OpFunc* func = e_.element()->cinfo()->getOpFunc( fid );
 	if ( !func ) {
 		cout << "set::Failed to find " << e_ << "." << field << endl;
 		return 0;
@@ -92,6 +100,22 @@ bool SetGet::checkGet( const string& field, FuncId& getFid )
 
 	string setField = "set_" + field;
 	string getField = "get_" + field;
+
+	const DestFinfo* sf = dynamic_cast< const DestFinfo* >( 
+		e_.element()->cinfo()->findFinfo( setField ) );
+	const DestFinfo* gf = dynamic_cast< const DestFinfo* >(
+		e_.element()->cinfo()->findFinfo( getField ) );
+
+	if ( !( sf && gf ) ) {
+		cout << "get::Failed to find " << e_ << "." << field << endl;
+		return 0;
+	}
+
+	getFid = gf->getFid();
+	const OpFunc* setFunc = sf->getOpFunc();
+	const OpFunc* getFunc = gf->getOpFunc();
+
+/*
 	FuncId setFid = e_.element()->cinfo()->getOpFuncId( setField );
 	getFid = e_.element()->cinfo()->getOpFuncId( getField );
 	const OpFunc* setFunc = e_.element()->cinfo()->getOpFunc( setFid );
@@ -100,6 +124,7 @@ bool SetGet::checkGet( const string& field, FuncId& getFid )
 		cout << "get::Failed to find " << e_ << "." << field << endl;
 		return 0;
 	}
+*/
 	if ( !getFunc->checkSet( &sgf ) ) {
 		 cout << "get::Type mismatch on getFunc" << e_ << "." << field << endl;
 		return 0;
@@ -113,8 +138,18 @@ bool SetGet::checkGet( const string& field, FuncId& getFid )
 
 bool SetGet::iGet( const string& field ) const
 {
-	static unsigned int getBindIndex = 0;
-	static FuncId retFunc = shell_->cinfo()->getOpFuncId( "handleGet" );
+	// static unsigned int getBindIndex = 0;
+	// static FuncId retFunc = shell_->cinfo()->getOpFuncId( "handleGet" );
+
+	const DestFinfo* df = dynamic_cast< const DestFinfo* >( 
+		shell_->cinfo()->findFinfo( "handleGet" ) );
+	assert( df );
+	FuncId retFunc = df->getFid();
+
+	const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >(
+		shell_->cinfo()->findFinfo( "requestGet" ) );
+	assert( sf );
+	BindIndex getBindIndex = sf->getBindIndex();
 
 	FuncId destFid;
 	if ( checkGet( field, destFid ) ) {

@@ -64,106 +64,115 @@
 #include "TickPtr.h"
 #include "Clock.h"
 
-const BindIndex tickSlot = 0;
-
-static SrcFinfo0* tickSrc = 
-	new SrcFinfo0( 
+	///////////////////////////////////////////////////////
+	// MsgSrc definitions
+	///////////////////////////////////////////////////////
+static SrcFinfo0 tickSrc( 
 		"tick",
-		"Parent of Tick element",
-		tickSlot
+		"Parent of Tick element"
 	);
 
-const unsigned int finishedSlot = 1;
-static SrcFinfo0* finished = 
-	new SrcFinfo0( 
+static SrcFinfo0 finished( 
 		"finished",
-		"Signal for completion of run",
-		finishedSlot
+		"Signal for completion of run"
 	);
 
 const Cinfo* Clock::initCinfo()
 {
-	static Finfo* clockFinfos[] =
-	{
 	///////////////////////////////////////////////////////
 	// Field definitions
 	///////////////////////////////////////////////////////
-		new ValueFinfo< Clock, double >( 
+		static ValueFinfo< Clock, double > runTime( 
 			"runTime",
 			"Duration to run the simulation",
 			&Clock::setRunTime,
 			&Clock::getRunTime
-		),
-		new ReadonlyValueFinfo< Clock, double >(
+		);
+		static ReadOnlyValueFinfo< Clock, double > currentTime(
 			"currentTime",
 			"Current simulation time",
 			&Clock::getCurrentTime
-		),
-		new ValueFinfo< Clock, unsigned int >( 
+		);
+		static ValueFinfo< Clock, unsigned int > nsteps( 
 			"nsteps",
 			"Number of steps to advance the simulation, in units of the smallest timestep on the clock ticks",
 			&Clock::setNsteps,
 			&Clock::getNsteps
-		),
-		new ValueFinfo< Clock, unsigned int >( 
+		);
+		static ValueFinfo< Clock, unsigned int > numTicks( 
 			"numTicks",
 			"Number of clock ticks",
 			&Clock::setNumTicks,
 			&Clock::getNumTicks
-		),
-		new ValueFinfo< Clock, unsigned int >( 
+		);
+		static ValueFinfo< Clock, unsigned int > numPendingThreads( 
 			"numPendingThreads",
 			"Number of threads still to update",
 			&Clock::setNumPendingThreads,
 			&Clock::getNumPendingThreads
-		),
-		new ValueFinfo< Clock, unsigned int >( 
+		);
+		static ValueFinfo< Clock, unsigned int > numThreads( 
 			"numThreads",
 			"Number of threads",
 			&Clock::setNumThreads,
 			&Clock::getNumThreads
-		),
-		new ReadonlyValueFinfo< Clock, unsigned int >( 
+		);
+		static ReadOnlyValueFinfo< Clock, unsigned int > currentStep( 
 			"currentStep",
 			"Current simulation step",
 			&Clock::getCurrentStep
-		),
+		);
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////
-	// MsgSrc definitions
-	///////////////////////////////////////////////////////
-		tickSrc,
-		finished,
 
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
 	///////////////////////////////////////////////////////
-		new DestFinfo( "start", 
+		static DestFinfo start( "start", 
 			"Sets off the simulation for the specified duration",
 			new EpFunc1< Clock, double >(&Clock::start )
-		),
+		);
 
-		new DestFinfo( "step", 
+		static DestFinfo step( "step", 
 			"Sets off the simulation for the specified # of steps",
 			new EpFunc1< Clock, unsigned int >(&Clock::step )
-		),
+		);
 
-		new DestFinfo( "stop", 
+		static DestFinfo stop( "stop", 
 			"Halts the simulation, with option to restart seamlessly",
 			new EpFunc0< Clock >(&Clock::stop )
-		),
+		);
 
-		new DestFinfo( "setupTick", 
+		static DestFinfo setupTick( "setupTick", 
 			"Sets up a specific clock tick: args tick#, dt, stage",
 			new OpFunc3< Clock, unsigned int, double, unsigned int >(&Clock::setupTick )
-		),
+		);
 
-		new DestFinfo( "reinit", 
+		static DestFinfo reinit( "reinit", 
 			"Zeroes out all ticks, starts at t = 0",
 			new EpFunc0< Clock >(&Clock::reinit )
-		),
+		);
+
+	static Finfo* clockFinfos[] =
+	{
+		// Fields
+		&runTime,
+		&currentTime,
+		&nsteps,
+		&numTicks,
+		&numPendingThreads,
+		&numThreads,
+		&currentStep,
+		// SrcFinfos
+		&tickSrc,
+		&finished,
+		// DestFinfos
+		&start,
+		&step,
+		&stop,
+		&setupTick,
+		&reinit,
 	};
 	
 	static string doc[] =

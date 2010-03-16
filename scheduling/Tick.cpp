@@ -22,6 +22,21 @@
 // of the Ticks.
 vector< SrcFinfo* > process;
 
+static SrcFinfo1< ProcPtr > proc0( "process0", "Process for Tick 0" );
+static SrcFinfo1< ProcPtr > proc1( "process1", "Process for Tick 1" );
+static SrcFinfo1< ProcPtr > proc2( "process2", "Process for Tick 2" );
+static SrcFinfo1< ProcPtr > proc3( "process3", "Process for Tick 3" );
+static SrcFinfo1< ProcPtr > proc4( "process4", "Process for Tick 4" );
+static SrcFinfo1< ProcPtr > proc5( "process5", "Process for Tick 5" );
+static SrcFinfo1< ProcPtr > proc6( "process6", "Process for Tick 6" );
+static SrcFinfo1< ProcPtr > proc7( "process7", "Process for Tick 7" );
+static SrcFinfo1< ProcPtr > proc8( "process8", "Process for Tick 8" );
+static SrcFinfo1< ProcPtr > proc9( "process9", "Process for Tick 9" );
+
+static SrcFinfo* procVec[] = {
+	&proc0, &proc1, &proc2, &proc3, &proc4, &proc5, &proc6, &proc7, &proc8, &proc9, };
+
+/*
 SrcFinfo* makeProcessFinfo()
 {
 	static int i = 0;
@@ -31,65 +46,75 @@ SrcFinfo* makeProcessFinfo()
 		new SrcFinfo1< ProcPtr > (
 			ss.str(),
 			"Calls Process on target Elements. Indexed by Tick#",
-			i
 		);
 	process.push_back( ret );
 	++i;
 	return ret;
 }
-
+*/
 
 const Cinfo* Tick::initCinfo()
 {
-	static Finfo* tickFinfos[] =
-	{
 	///////////////////////////////////////////////////////
 	// Field definitions
 	///////////////////////////////////////////////////////
 		// Refers it to the parent Clock.
-		new UpValueFinfo< Clock, double >(
+		static UpValueFinfo< Clock, double > dt(
 			"dt",
 			"Timestep for this tick",
 			&Clock::setTickDt,
 			&Clock::getTickDt
-		),
-		new ValueFinfo< Tick, double >(
+		);
+		static ValueFinfo< Tick, double > localdt(
 			"localdt",
 			"Timestep for this tick",
 			&Tick::setDt,
 			&Tick::getDt
-		),
-		new UpValueFinfo< Clock, unsigned int >(
+		);
+		static UpValueFinfo< Clock, unsigned int > stage(
 			"stage",
 			"Sequence number if multiple ticks have the same dt.",
 			&Clock::setStage,
 			&Clock::getStage
-		),
-		new ValueFinfo< Tick, string>(
+		);
+		static ValueFinfo< Tick, string> path(
 			"path",
 			"Wildcard path of objects managed by this tick",
 			&Tick::setPath,
 			&Tick::getPath
-		),
+		);
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
-		makeProcessFinfo(),
-		makeProcessFinfo(),
-		makeProcessFinfo(),
-		makeProcessFinfo(),
-		makeProcessFinfo(),
-		makeProcessFinfo(),
-		makeProcessFinfo(),
-		makeProcessFinfo(),
-		makeProcessFinfo(),
-		makeProcessFinfo(),
+		// These are defined outside this function.
 
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
 	///////////////////////////////////////////////////////
-		new DestFinfo( "parent", "Message from Parent Element(s)", 
-			new EpFunc0< Tick >( &Tick::destroy ) ),
+		static DestFinfo parent( "parent", 
+			"Message from Parent Element(s)", 
+			new EpFunc0< Tick >( &Tick::destroy ) );
+
+	static Finfo* tickFinfos[] =
+	{
+		// Fields
+		&dt,
+		&localdt,
+		&stage,
+		&path,
+		// SrcFinfos for process
+		&proc0,
+		&proc1,
+		&proc2,
+		&proc3,
+		&proc4,
+		&proc5,
+		&proc6,
+		&proc7,
+		&proc8,
+		&proc9,
+		// MsgDest definitions
+		&parent, // I thought this was to be inherited?
 	};
 	
 	static Cinfo tickCinfo(
@@ -248,7 +273,9 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 	// March through Process calls for each scheduled Element.
 	// Note that there is a unique BindIndex for each tick.
 	// We preallocate 0 through 10 for this. May need to rethink.
-	const vector< MsgFuncBinding >* m = e->getMsgAndFunc( index_ );
+	assert( index_ < sizeof( procVec ) / sizeof( SrcFinfo* ) );
+	BindIndex b = procVec[ index_ ]->getBindIndex();
+	const vector< MsgFuncBinding >* m = e->getMsgAndFunc( b );
 	for ( vector< MsgFuncBinding >::const_iterator i = m->begin();
 		i != m->end(); ++i )
 		Msg::getMsg( i->mid )->process( info );

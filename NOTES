@@ -3589,3 +3589,19 @@ Cinfo::init
 Begun implementation. Compiles through to the testAsync.cpp.
 Checkin 1640.
 
+Compiles through all basecode files. 
+Checkin 1642.
+
+Compiles through Shell and IntFire. In sched there is an old hack come back
+to haunt me: in Tick::advance, it uses the tick index_ to look up 
+the msgBinding. With the more structured and automated scheme now in place,
+this has to be done differently.
+	- Set up an array of process SrcFinfos
+	- Use the Tick::index_ to look up this array
+	- Find the bindIndex from the identified SrcFinfo.
+	- Use this bindIndex for calling process.
+Done.
+
+Need to deprecate Message.cpp, Message.h, SetGet.cpp, SetGet.h
+
+Now compiles the whole project. Doesn't run yet.

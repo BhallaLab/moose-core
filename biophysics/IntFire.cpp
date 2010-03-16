@@ -3,64 +3,69 @@
 #include "Synapse.h"
 #include "IntFire.h"
 
-const BindIndex spikeSlot = 0;
-
-static SrcFinfo1< double >* spike = 
-	new SrcFinfo1< double >( 
+static SrcFinfo1< double > spike( 
 		"spike", 
-		"Sends out spike events",
-		spikeSlot
+		"Sends out spike events"
 	);
 
 const Cinfo* IntFire::initCinfo()
 {
-	static Finfo* intFireFinfos[] = {
-		new ValueFinfo< IntFire, double >(
+		//////////////////////////////////////////////////////////////
+		// Field Definitions
+		//////////////////////////////////////////////////////////////
+		static ValueFinfo< IntFire, double > Vm(
 			"Vm",
 			"Membrane potential",
 			&IntFire::setVm,
 			&IntFire::getVm
-		),
+		);
 
-		new ValueFinfo< IntFire, double >(
+		static ValueFinfo< IntFire, double > tau(
 			"tau",
 			"charging time-course",
 			&IntFire::setTau,
 			&IntFire::getTau
-		),
+		);
 
-		new ValueFinfo< IntFire, double >(
+		static ValueFinfo< IntFire, double > thresh(
 			"thresh",
 			"firing threshold",
 			&IntFire::setThresh,
 			&IntFire::getThresh
-		),
+		);
 
-		new ValueFinfo< IntFire, double >(
+		static ValueFinfo< IntFire, double > refractoryPeriod(
 			"refractoryPeriod",
 			"Minimum time between successive spikes",
 			&IntFire::setRefractoryPeriod,
 			&IntFire::getRefractoryPeriod
-		),
+		);
 
-		new ValueFinfo< IntFire, unsigned int >(
+		static ValueFinfo< IntFire, unsigned int > numSynapses(
 			"numSynapses",
 			"Number of synapses on IntFire",
 			&IntFire::setNumSynapses,
 			&IntFire::getNumSynapses
-		),
+		);
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
-		new DestFinfo( "process",
+		static DestFinfo process( "process",
 			"Handles process call",
-			new EpFunc1< IntFire, ProcPtr >( &IntFire::eprocess ) ),
+			new EpFunc1< IntFire, ProcPtr >( &IntFire::eprocess ) );
 
 		//////////////////////////////////////////////////////////////
 		// MsgSrc Definitions
 		//////////////////////////////////////////////////////////////
 
-		spike,
+	static Finfo* intFireFinfos[] = {
+		&Vm,	// Value
+		&tau,	// Value
+		&thresh,				// Value
+		&refractoryPeriod,		// Value
+		&numSynapses,			// Value
+		&process,				// DestFinfo
+		&spike, // MsgSrc
 	};
 
 	static Cinfo intFireCinfo (
@@ -117,7 +122,7 @@ void IntFire::process( const ProcInfo* p, const Eref& e )
 		Vm_ = 0.0;
 
 	if ( Vm_ > thresh_ ) {
-		spike->send( e, p, p->currTime );
+		spike.send( e, p, p->currTime );
 		// e.sendSpike( spikeSlot, p->currTime );
 		if ( e.index().data() % 100 == 0 ) {
 			// cout << "IntFire[" << e.index().data() << "]::process, zeroing Vm= " << Vm_ << ", Ptr = " << this << endl;
