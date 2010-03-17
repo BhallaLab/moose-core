@@ -15,6 +15,7 @@
 #include "HHChannel.h"
 #include "SpikeGen.h"
 #include "SynChan.h"
+#include "NMDAChan.h"
 #include "BinSynchan.h"
 
 #include "Interpol.h"
