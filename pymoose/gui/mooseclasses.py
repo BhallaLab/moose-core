@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Sun Apr 12 14:05:01 2009 (+0530)
 # Version: 
-# Last-Updated: Mon Jul  6 09:21:24 2009 (+0530)
-#           By: subhasis ray
-#     Update #: 42
+# Last-Updated: Wed Mar 17 10:28:07 2010 (+0530)
+#           By: Subhasis Ray
+#     Update #: 43
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -86,6 +86,7 @@ class MooseClasses:
                 "StochSynchan",
                 "SymCompartment",
                 "SynChan",
+                "NMDAChan",
                 "TauPump",
                 "TestBiophysics"],
         "builtins":[
