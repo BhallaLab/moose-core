@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sun Feb 28 18:17:56 2010 (+0530)
 // Version: 
-// Last-Updated: Wed Mar 17 17:42:37 2010 (+0530)
+// Last-Updated: Wed Mar 17 19:01:06 2010 (+0530)
 //           By: Subhasis Ray
-//     Update #: 472
+//     Update #: 473
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -347,7 +347,7 @@ void NMDAChan::innerProcessFunc(Eref e, ProcInfo info)
     y_ += -y_ * info->dt_ / tau2_;
     unblocked_ = 1.0 / ( 1.0 + (a1_ + a2_) * (a1_ * b1_ + a2_ * b2_) / (A_ * (a1_ * (B1_ + b1_) + a2_ * (B2_ + b2_))));
     Gk_ = (x_ + y_) * unblocked_;
-    cout << "#NMDA: Vm: " << Vm_ << " a1: " << a1_ << " a2: " << a2_ << " b1: " << b1_ << " b2: " << b2_ << " x: " << x_ << " y: " << y_ << " unblocked: " << unblocked_ << " GK: " << Gk_ << endl;
+
     if (Gk_ > saturation_){
         Gk_ = saturation_;
     }
