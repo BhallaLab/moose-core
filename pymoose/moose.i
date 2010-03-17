@@ -21,6 +21,7 @@
 	#include "SynChan.h"
 	#include "BinSynchan.h"
 	#include "StochSynchan.h"
+        #include "NMDAChan.h"
 	#include "SpikeGen.h"
 	#include "PulseGen.h"
 	#include "RandomSpike.h"
@@ -114,6 +115,23 @@
 %template(string_vector) std::vector<std::string>;
 %template(Id_vector) std::vector<Id>;
 
+%pythoncode %{
+    
+def listproperty(getter=None, setter=None, deller=None):
+    """Adds property attributes that behave like lists or 
+    dictionaries but use underlying function calls for getter and
+    setter: For example, SynChan.weight, SynChan.delay
+    """
+
+    class _proxy(object):
+        def __init__(self, obj):
+            self._obj = obj
+        def __getitem__(self, index):
+            return getter(self._obj, index)
+        def __setitem__(self, index, value):
+            setter(self._obj, index, value)
+    return property(_proxy)
+%}
 
 %include "../basecode/header.h"
 %include "../basecode/moose.h"
@@ -288,20 +306,8 @@ void fillData(PyObject* args)
 %attribute(pymoose::SynChan, double, Ik, __get_Ik)
 %attribute(pymoose::SynChan, unsigned int, numSynapses, __get_numSynapses)
 %pythoncode %{
-class Weight:
-      def __init__(self, synchan):
-      	  self.synchan = synchan
-      def __setitem__(index, value):
-      	  self.synchan.setWeight(index, value)
-      def __getitem__(index):
-      	  return self.synchan.getWeight(index)	  	        
-class Delay:
-      def __init__(self, synchan):
-      	  self.synchan = synchan
-      def __setitem__(index, value):
-      	  self.synchan.setDelay(index, value)
-      def __getitem__(index):
-      	  return self.synchan.getDelay(index)
+SynChan.weight = listproperty(SynChan.getWeight, SynChan.setWeight)
+SynChan.delay = listproperty(SynChan.getDelay, SynChan.setDelay)                    
 %} //end pythoncode
 %include "BinSynchan.h"
 %attribute(pymoose::BinSynchan, double, Gbar, __get_Gbar, __set_Gbar)
@@ -325,6 +331,12 @@ class Delay:
 %attribute(pymoose::StochSynchan, double, activation, __get_activation, __set_activation)
 %attribute(pymoose::StochSynchan, double, modulator, __get_modulator, __set_modulator)
 
+%include "NMDAChan.h"
+%attribute(pymoose::NMDAChan, double, MgConc, __get_MgConc, __set_MgConc)
+%attribute(pymoose::NMDAChan, double, unblocked, __get_unblocked)
+%pythoncode %{
+NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.setTransitionParam)
+%}       
 //%include "PyMooseIterable.h"
 //%template(BinSynchanDILookup) InnerPyMooseIterable < BinSynchan, unsigned int, double > ;
 //%template(StochSynchanDILookup) InnerPyMooseIterable < StochSynchan, unsigned int, double > ;

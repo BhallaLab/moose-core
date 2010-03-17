@@ -36,6 +36,14 @@ namespace pymoose
         void setWeight(const unsigned int& index, double weight);
         double getDelay(const unsigned int& index) const;
         void setDelay(const unsigned int& index, double delay);
+      protected:
+        // This constructor is for allowing derived type (Table) to
+        // have constructors exactly as if it was directly derived from PyMooseBase.
+    
+        SynChan(std::string className, std::string objectName, Id parentId);
+        SynChan(std::string className, std::string path);    
+        SynChan(std::string className, std::string objectName, PyMooseBase& parent);
+        
     };
 }
 

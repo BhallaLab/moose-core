@@ -110,7 +110,7 @@ unsigned int SynChan::__get_numSynapses() const
 double SynChan::getWeight(const unsigned int& index) const
 {
     double weight;
-    lookupGet < double > (id_(), "weight", weight, index);
+    lookupGet < double, unsigned int > (id_(), "weight", weight, index);
     return weight;
 }
 void SynChan::setWeight( const unsigned int& index ,double weight )
@@ -120,11 +120,29 @@ void SynChan::setWeight( const unsigned int& index ,double weight )
 double SynChan::getDelay(const unsigned int& index) const
 {
     double delay;
-    lookupGet < double > (id_.eref(), "delay", delay, index);
+    lookupGet < double, unsigned int > (id_.eref(), "delay", delay, index);
     return delay;
 }
 void SynChan::setDelay( const unsigned int& index, double delay)
 {
     lookupSet < double, unsigned int  > (id_.eref(), "delay", delay, index);
 }
+
+//Manually edited
+// These are for allowing Table access to constructors in PyMooseBase
+SynChan::SynChan(std::string typeName, std::string objectName, Id parentId):
+    PyMooseBase(typeName, objectName, parentId)
+{
+}
+   
+SynChan::SynChan(std::string typeName, std::string path):
+    PyMooseBase(typeName, path)
+{
+}
+
+SynChan::SynChan(std::string typeName, std::string objectName, PyMooseBase& parent):
+    PyMooseBase(typeName, objectName, parent)
+{
+}
+
 #endif
