@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sun Feb 28 18:17:56 2010 (+0530)
 // Version: 
-// Last-Updated: Mon Mar 15 16:03:32 2010 (+0530)
+// Last-Updated: Wed Mar 17 17:42:37 2010 (+0530)
 //           By: Subhasis Ray
-//     Update #: 445
+//     Update #: 472
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -111,7 +111,7 @@ const Cinfo* initNMDAChanCinfo()
                 "t = tau2. "
                 "g is a function of voltage and the extracellular [Mg2+] defined as: "
                 "1 / { 1 + (a1 + a2) * (a1 * B1 + a2 * B2)/ [A * a1 * (b1 + B1) + A * a2 * (b2 + B2)]} "
-                "a1 = 1e3 * exp( - c0 * V - c1) s^-1, c0 = - 16.0 / V, c1 = 2.91 "
+                "a1 = 1e3 * exp( - c0 * V - c1) s^-1, c0 = 16.0 / V, c1 = 2.91 "
                 "a2 = 1e-3 * [Mg2+] * exp( -c2 * V - c3) mM^-1 s, c2 = 45.0 / V, c3 = 6.97 "
                 "b1 = 1e3 * exp(c4  * V + c5) s^-1, c4 = 9.0 / V, c5 = 1.22 "
                 "b2 = 1e3 * exp(c6 * V + c7) s^-1, c6 = 17.0 / V, c7 = 0.96 "
@@ -156,7 +156,7 @@ static const Slot unblockedSlot =
    for [Mg2+] dependent component of the channel conductance according
    to Jahr and Stevens (Sept. 1990) equation 4(a) for details.
 */
-NMDAChan::NMDAChan(): c0_(-16.0),
+NMDAChan::NMDAChan(): c0_(16.0),
                       c1_(2.91),
                       c2_(45.0),
                       c3_(6.97),
@@ -169,11 +169,15 @@ NMDAChan::NMDAChan(): c0_(-16.0),
                       c10_(3.101),
                       Mg_(1.5), // mM (value from Traub et al 2005)
                       unblocked_(0.0),
-                      saturation_(DBL_MAX)
+                      saturation_(DBL_MAX),
+                      x_(0.0),
+                      y_(0.0)
 {
-    A_ = 1e3 * exp(-c8_);
-    B1_ = 1e3 * exp(-c9_);
-    B2_ = 1e3 * exp(-c10_);
+    tau1_ = 0.005;
+    tau2_ = 0.130;
+    A_ = exp(-c8_);
+    B1_ = exp(-c9_);
+    B2_ = exp(-c10_);
 }
 
 
@@ -332,9 +336,9 @@ void NMDAChan::innerProcessFunc(Eref e, ProcInfo info)
     }
     // TODO: May need to optimize these exponentiations
     double a1_ = exp(-c0_ * Vm_ - c1_);
-    double a2_ = 1e-3 * Mg_ * exp(-c3_ * Vm_ - c3_);
-    double b1_ = 1e3 * exp(c4_ * Vm_ + c5_ );
-    double b2_ = 1e3 * exp(c6_ * Vm_ + c7_);
+    double a2_ = 1000.0 * Mg_ * exp(-c3_ * Vm_ - c3_);
+    double b1_ = exp(c4_ * Vm_ + c5_ );
+    double b2_ = exp(c6_ * Vm_ + c7_);
     // The following two lines calculate next values of x_ and y_
     // according to Forward Euler method:
     // x' = activation
@@ -342,7 +346,8 @@ void NMDAChan::innerProcessFunc(Eref e, ProcInfo info)
     x_ += activation_ * info->dt_; 
     y_ += -y_ * info->dt_ / tau2_;
     unblocked_ = 1.0 / ( 1.0 + (a1_ + a2_) * (a1_ * b1_ + a2_ * b2_) / (A_ * (a1_ * (B1_ + b1_) + a2_ * (B2_ + b2_))));
-    Gk_ = (x_ + y_) * unblocked_ * (Vm_ - Ek_);
+    Gk_ = (x_ + y_) * unblocked_;
+    cout << "#NMDA: Vm: " << Vm_ << " a1: " << a1_ << " a2: " << a2_ << " b1: " << b1_ << " b2: " << b2_ << " x: " << x_ << " y: " << y_ << " unblocked: " << unblocked_ << " GK: " << Gk_ << endl;
     if (Gk_ > saturation_){
         Gk_ = saturation_;
     }
