@@ -75,6 +75,7 @@ moose_class = {'Neutral':'base',
                  'StochSynchan':'biophysics',
                  'SymCompartment':'biophysics',
                  'SynChan':'biophysics',
+		 'NMDAChan':'biophysics',
                  'TauPump':'biophysics',
 
                  'AscFile':'builtins',
