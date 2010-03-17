@@ -63,7 +63,6 @@ OBJFILES := ../basecode/basecode.o \
 	../ksolve/ksolve.o	\
 	../device/device.o \
 	../signeur/signeur.o	\
-	../neuroML_IO/neuroML_IO.o \
 # 	../robots/robots.o	\
 
 ifeq ($(USE_SBML),1)
@@ -72,6 +71,7 @@ endif
 
 ifeq ($(USE_NEUROML),1)
 	LIBS+= -L../external/lib/
+	OBJFILES :=  $(OBJFILES) ../neuroML_IO/neuroML_IO.o
 endif
 
 ifeq ($(USE_GL),1)
@@ -94,6 +94,7 @@ OBJ = PyMooseBase.o \
 	PulseGen.o	\
 	RandomSpike.o	\
 	SynChan.o \
+	NMDAChan.o \
 	BinSynchan.o	\
 	StochSynchan.o	\
 	Table.o \
@@ -166,6 +167,7 @@ HEADERS=PyMooseUtil.h \
 	RandomSpike.h	\
 	PulseGen.h	\
 	SynChan.h \
+	NMDAChan.h \
 	BinSynchan.h	\
 	StochSynchan.h	\
 	Table.h \

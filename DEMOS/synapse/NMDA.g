@@ -23,7 +23,8 @@ pushe comp
 create NMDAChan nmda
 setfield nmda Gbar 0.075e-3 \
               tau1 5e-3 \
-              tau2 130e-3
+              tau2 130e-3 \
+              saturation 1e6
 
 // addmsg ../comp/VmSrc nmda/Vm
 addmsg nmda/channel ../comp/channel
