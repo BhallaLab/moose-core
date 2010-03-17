@@ -827,6 +827,21 @@ class Id_vector(object):
 Id_vector_swigregister = _moose.Id_vector_swigregister
 Id_vector_swigregister(Id_vector)
 
+def listproperty(getter=None, setter=None, deller=None):
+    """Adds property attributes that behave like lists or 
+    dictionaries but use underlying function calls for getter and
+    setter: For example, SynChan.weight, SynChan.delay
+    """
+
+    class _proxy(object):
+        def __init__(self, obj):
+            self._obj = obj
+        def __getitem__(self, index):
+            return getter(self._obj, index)
+        def __setitem__(self, index, value):
+            setter(self._obj, index, value)
+    return property(_proxy)
+
 
 def getParBuf(*args):
   """getParBuf(Conn c, unsigned int size) -> void"""
@@ -2599,20 +2614,8 @@ SynChan_swigregister = _moose.SynChan_swigregister
 SynChan_swigregister(SynChan)
 SynChan.className_ = _moose.cvar.SynChan_className_
 
-class Weight:
-      def __init__(self, synchan):
-      	  self.synchan = synchan
-      def __setitem__(index, value):
-      	  self.synchan.setWeight(index, value)
-      def __getitem__(index):
-      	  return self.synchan.getWeight(index)	  	        
-class Delay:
-      def __init__(self, synchan):
-      	  self.synchan = synchan
-      def __setitem__(index, value):
-      	  self.synchan.setDelay(index, value)
-      def __getitem__(index):
-      	  return self.synchan.getDelay(index)
+SynChan.weight = listproperty(SynChan.getWeight, SynChan.setWeight)
+SynChan.delay = listproperty(SynChan.getDelay, SynChan.setDelay)                    
 
 class BinSynchan(PyMooseBase):
     """Proxy of C++ BinSynchan class"""
@@ -2944,6 +2947,58 @@ class StochSynchan(PyMooseBase):
 StochSynchan_swigregister = _moose.StochSynchan_swigregister
 StochSynchan_swigregister(StochSynchan)
 StochSynchan.className_ = _moose.cvar.StochSynchan_className_
+
+class NMDAChan(SynChan):
+    """Proxy of C++ NMDAChan class"""
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        """
+        __init__(self, Id id) -> NMDAChan
+        __init__(self, string path) -> NMDAChan
+        __init__(self, string name, Id parentId) -> NMDAChan
+        __init__(self, string name, PyMooseBase parent) -> NMDAChan
+        __init__(self, NMDAChan src, string name, PyMooseBase parent) -> NMDAChan
+        __init__(self, NMDAChan src, string name, Id parent) -> NMDAChan
+        __init__(self, NMDAChan src, string path) -> NMDAChan
+        __init__(self, Id src, string name, Id parent) -> NMDAChan
+        """
+        this = _moose.new_NMDAChan(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _moose.delete_NMDAChan
+    __del__ = lambda self : None;
+    def getType(*args):
+        """getType(self) -> string"""
+        return _moose.NMDAChan_getType(*args)
+
+    def getTransitionParam(*args):
+        """getTransitionParam(self, unsigned int index) -> double"""
+        return _moose.NMDAChan_getTransitionParam(*args)
+
+    def setTransitionParam(*args):
+        """setTransitionParam(self, unsigned int index, double transitionParam)"""
+        return _moose.NMDAChan_setTransitionParam(*args)
+
+    def __get_MgConc(*args):
+        """__get_MgConc(self) -> double"""
+        return _moose.NMDAChan___get_MgConc(*args)
+
+    def __set_MgConc(*args):
+        """__set_MgConc(self, double MgConc)"""
+        return _moose.NMDAChan___set_MgConc(*args)
+
+    def __get_unblocked(*args):
+        """__get_unblocked(self) -> double"""
+        return _moose.NMDAChan___get_unblocked(*args)
+
+    MgConc = _swig_property(_moose.NMDAChan_MgConc_get, _moose.NMDAChan_MgConc_set)
+    unblocked = _swig_property(_moose.NMDAChan_unblocked_get)
+NMDAChan_swigregister = _moose.NMDAChan_swigregister
+NMDAChan_swigregister(NMDAChan)
+NMDAChan.className_ = _moose.cvar.NMDAChan_className_
+
+NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.setTransitionParam)
 
 class SpikeGen(PyMooseBase):
     """Proxy of C++ SpikeGen class"""
