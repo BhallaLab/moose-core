@@ -12,16 +12,16 @@
 
 class SpikeGen
 {
-	public:
-		SpikeGen()
-		{
-			threshold_ = 0.0;
-			refractT_ = 0.0;
-			amplitude_ = 1.0;
-			state_ = 0.0;
-			lastEvent_ = 0.0;
-			V_ = 0.0;
-		}
+  public:
+    SpikeGen():threshold_(0.0),
+               refractT_(0.0),
+               amplitude_(1.0),
+               state_(0.0),
+               lastEvent_(0.0),
+               V_(0.0),
+               edgeTriggered_(1)
+    {
+    }
 
 	//////////////////////////////////////////////////////////////////
 	// Field functions.
@@ -37,6 +37,9 @@ class SpikeGen
 
 		static void setState( const Conn* c, double val );
 		static double getState( Eref e );
+
+                static void setEdgeTriggered( const Conn* c, int yes);
+                static int getEdgeTriggered( Eref e);
 
 	//////////////////////////////////////////////////////////////////
 	// Message dest functions.
@@ -55,6 +58,7 @@ class SpikeGen
 		double lastEvent_;
 		double V_;
                 bool fired_;
+                int edgeTriggered_;
 };
 
 // Used by solver, readcell, etc.
