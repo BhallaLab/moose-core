@@ -3636,3 +3636,7 @@ Next steps: pending from 13 March.
 	- Cleanup: go through and eliminate Message.cpp and its standalone 
 		messaging functions. The Shell now handles it.
 
+
+=============================================================================
+18 March. Put in wrapper stuff for parallel running using MPI. Checkin 1654.
+Oops, added in the parallel directory and files. Checkin 1655.
