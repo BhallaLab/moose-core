@@ -52,6 +52,16 @@ const Cinfo* initSpikeGenCinfo()
 			GFCAST( &SpikeGen::getState ),
 			RFCAST( &SpikeGen::setState )
 		),
+		new ValueFinfo( "edgeTriggered", ValueFtype1< int >::global(),
+			GFCAST( &SpikeGen::getEdgeTriggered ),
+                        RFCAST( &SpikeGen::setEdgeTriggered ),
+                        "When edgeTriggered = 0, the SpikeGen will fire an event in each timestep "
+                        "while incoming Vm is > threshold and at least abs_refract time has passed "
+                        "since last event. This may be problematic if the incoming Vm remains above "
+                        "threshold for longer than abs_refract. Setting edgeTriggered to 1 resolves this "
+                        "as the SpikeGen generates an event only on the rising edge of the incoming Vm "
+                        "and will remain idle unless the incoming Vm goes below threshold."
+		),
 
 	//////////////////////////////////////////////////////////////////
 	// SharedFinfos
@@ -81,7 +91,9 @@ const Cinfo* initSpikeGenCinfo()
 	{
 		"Name", "SpikeGen",
 		"Author", "Upi Bhalla",
-		"Description", "SpikeGen object, for detecting threshold crossings.",
+		"Description", "SpikeGen object, for detecting threshold crossings. "
+                "The threshold detection can work in multiple modes.\n "
+                "If the refractT < 0.0, then it fires an event only at the rising edge of the "
 	};
 	static Cinfo spikeGenCinfo(
 				doc,
@@ -142,6 +154,15 @@ double SpikeGen::getState( Eref e )
 	return static_cast< SpikeGen* >( e.data() )->state_;
 }
 
+void SpikeGen::setEdgeTriggered( const Conn* c, int yes )
+{
+	static_cast< SpikeGen* >( c->data() )->edgeTriggered_ = yes;
+}
+int SpikeGen::getEdgeTriggered( Eref e )
+{
+	return static_cast< SpikeGen* >( e.data() )->edgeTriggered_;
+}
+
 //////////////////////////////////////////////////////////////////
 // SpikeGen::Dest function definitions.
 //////////////////////////////////////////////////////////////////
@@ -150,8 +171,8 @@ void SpikeGen::innerProcessFunc( const Conn* c, ProcInfo p )
 {
 	double t = p->currTime_;
 	if ( V_ > threshold_ ){
-            if ((refractT_ >= 0.0 && (t + p->dt_/2.0) >= (lastEvent_ + refractT_))||
-                (refractT_ < 0.0 && !fired_)) {
+            if ((!edgeTriggered_ && (t + p->dt_/2.0) >= (lastEvent_ + refractT_))||
+                (edgeTriggered_ && !fired_)) {
 		send1< double >( c->target(), eventSlot, t );
 		lastEvent_ = t;
 		state_ = amplitude_;
