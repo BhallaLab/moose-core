@@ -64,7 +64,8 @@ class Shell: public Data
 		 * have the same number of cores available.
 		 */
 		void setHardware( bool isSingleThreaded, 
-			unsigned int numCores, unsigned int numNodes );
+			unsigned int numCores, unsigned int numNodes, 
+			unsigned int myNode );
 
 		unsigned int numCores();
 
@@ -86,6 +87,7 @@ class Shell: public Data
 		bool isSingleThreaded_;
 		unsigned int numCores_;
 		unsigned int numNodes_;
+		unsigned int myNode_;
 		static ProcInfo p_; 
 			// Shell owns its own ProcInfo, has global thread/node info.
 			// Used to talk to parser and for thread specification in

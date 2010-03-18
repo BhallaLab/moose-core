@@ -15,6 +15,9 @@
 #include "../scheduling/Tick.h"
 #include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
+#ifdef USE_MPI
+#include <mpi.h>
+#endif
 
 extern void testSync();
 extern void testAsync();
@@ -27,6 +30,7 @@ Id init( int argc, char** argv )
 {
 	int numCores = 1;
 	int numNodes = 1;
+	int myNode = 0;
 	bool isSingleThreaded = 0;
 	int opt;
 	while ( ( opt = getopt( argc, argv, "shn:c:" ) ) != -1 ) {
@@ -47,6 +51,12 @@ Id init( int argc, char** argv )
 				exit( 1 );
 		}
 	}
+#ifdef USE_MPI
+	MPI::Init( argc, argv );
+	numNodes = MPI::COMM_WORLD.Get_size();
+	myNode = MPI::COMM_WORLD.Get_rank();
+#endif
+
 	Msg::initNull();
 	Id shellId = Id::nextId();
 	Shell::initCinfo()->create( shellId, "root", 1 );
@@ -71,7 +81,7 @@ Id init( int argc, char** argv )
 	assert( tickId == Id( 2 ) );
 	SetGet::setShell();
 	Shell* s = reinterpret_cast< Shell* >( shellId.eref().data() );
-	s->setHardware( isSingleThreaded, numCores, numNodes );
+	s->setHardware( isSingleThreaded, numCores, numNodes, myNode );
 	s->loadBalance();
 	return shellId;
 }
@@ -103,6 +113,9 @@ int main( int argc, char** argv )
 	shellId.destroy();
 	Id(1).destroy();
 	Id(2).destroy();
+#ifdef USE_MPI
+	MPI::Finalize();
+#endif
 	return 0;
 }
 

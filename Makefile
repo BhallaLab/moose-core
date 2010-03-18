@@ -92,6 +92,12 @@ endif
 ifeq ($(BUILD),thread)
 CXXFLAGS  = -O3 -pthread -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER  
 endif
+
+# MPI mode:
+ifeq ($(BUILD),mpi)
+CXXFLAGS  = -g -Wall -Wno-long-long -pedantic -DUSE_GENESIS_PARSER  
+USE_MPI = 1
+endif
 ##########################################################################
 #
 # MAC OS X compilation, Debug mode:
@@ -203,7 +209,7 @@ SUBDIR = \
 #	kinetics \
 
 # Used for 'make clean'
-CLEANSUBDIR = $(SUBDIR) 
+CLEANSUBDIR = $(SUBDIR) $(PARALLEL_DIR)
 
 OBJLIBS =	\
 	basecode/basecode.o \
@@ -223,7 +229,7 @@ export LD
 export LIBS
 
 moose: libs $(OBJLIBS) $(PARALLEL_LIB)
-	$(CXX) $(CXXFLAGS) $(OBJLIBS) $(LIBS) -o moose
+	$(CXX) $(CXXFLAGS) $(OBJLIBS) $(PARALLEL_LIB) $(LIBS) -o moose
 	@echo "Moose compilation finished"
 
 libmoose.so: libs
@@ -236,7 +242,7 @@ pymoose: libs $(OBJLIBS)
 	$(MAKE) -C $@
 
 libs:
-	@(for i in $(SUBDIR); do $(MAKE) -C $$i; done)
+	@(for i in $(SUBDIR) $(PARALLEL_DIR); do $(MAKE) -C $$i; done)
 	@echo "All Libs compiled"
 
 mpp: preprocessor/*.cpp preprocessor/*.h

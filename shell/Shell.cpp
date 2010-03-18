@@ -407,7 +407,8 @@ const char* Shell::buf()
 
 // Function to assign hardware availability
 void Shell::setHardware( 
-	bool isSingleThreaded, unsigned int numCores, unsigned int numNodes )
+	bool isSingleThreaded, unsigned int numCores, unsigned int numNodes,
+	unsigned int myNode )
 {
 	isSingleThreaded_ = isSingleThreaded;
 	Qinfo::addSimGroup( 1 ); // This is the parser thread.
@@ -427,6 +428,7 @@ void Shell::setHardware(
 		numNodes_ = 1;
 		// Qinfo::setNumQs( 1, 1024 );
 	}
+	myNode_ = myNode;
 }
 
 /**

@@ -3513,7 +3513,7 @@ Compiled, runs, but valgrind not happy. Trying to clean up. Fixed.
 Checkin 1632.
 
 Next steps:
-	+ Shared Msg between Shells should be set up. Checkin 1633, 1634.
+	* Shared Msg between Shells should be set up. Checkin 1633, 1634.
 		Issues again with message direction. If we have a reciprocal
 		msg, the direction info is only from the calling Elm.
 		Added isForward = 1 default arg to SrcFinfo<>::send calls.
@@ -3522,7 +3522,7 @@ Next steps:
 		reciprocal: that is just too messy. It is a fairly obvious
 		command/ack pair.
 		Checkin 1638.
-	+ Unit test for SharedMsg. Things got too messy with the Shells.
+	* Unit test for SharedMsg. Things got too messy with the Shells.
 		Checkin as 1636, still to clear tests.
 		- We have a mess with registerOpFuncs for SharedFinfos.
 			Fixed, now it registers each dest in the SharedFinfo.
@@ -3533,7 +3533,7 @@ Next steps:
 		Clears tests, but isForward still a problem. Checkin as 1637.
 	- The InterNodeMsg type should be defined, specially so that Shell
 		can send stuff to itself and get back acks to master node.
-	- Shell::doCreate should do a 'send' on an internode Msg to all Shells.
+	* Shell::doCreate should do a 'send' on an internode Msg to all Shells.
 		It should wait till ack from all nodes.
 		- Should the ack return success?
 			- If it fails, what do we do to handle?
@@ -3620,5 +3620,19 @@ Clears all tests. The double create was because I had set up two identical
 messages.
 Valgrind is still not happy. Tracked most of it down to the Finfo definition of 
 Synapse, which was still using heap rather than static Finfos. Fixed this,
-also found another leak in testAsync.cpp. Now valgrind is happy.
+also found another leak in testAsync.cpp. Now valgrind is happy. Checkin 1647.
+
+Next steps: pending from 13 March.
+	* Shell::doDelete also set up through messaging.
+	- Test on MPI.
+		- Start up MPI
+		- Create Shell and basic Elms on both nodes.
+		- Set up default Msg between shells
+		- Figure out scheduling
+	- Set up basic set of commands as do<Command> with messaging.
+	- Set up numerical test with IntFire network.
+		- Benchmark
+	- Set up Shell::warning, Shell::error as a stream.
+	- Cleanup: go through and eliminate Message.cpp and its standalone 
+		messaging functions. The Shell now handles it.
 
