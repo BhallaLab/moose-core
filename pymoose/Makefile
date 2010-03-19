@@ -25,7 +25,7 @@
 
 TARGET=pymoose
 CXXFLAGS+=-I/usr/local/include -I.. -I../basecode -I../connections -I../maindir -I../genesis_parser  -I../shell -I../element -I../scheduling -I../biophysics -I../hsolve -I../kinetics -I../ksolve -I../builtins -I../utility -I../randnum -I../signeur -I../device
-LIBS += -L/usr/local/lib -lpython2.6
+LIBS += -L/usr/lib -lpython2.6
 ifdef USE_NUMPY
 CXXFLAGS+=-I/usr/lib/python2.6/site-packages/numpy/core/include -DUSE_NUMPY
 SWIGOPTS=-DUSE_NUMPY
@@ -37,9 +37,9 @@ endif
 # The library location and flags for creating dll in Mac is different from Linux
 # Darwin may not have the OSTYPE environment variable defined in bash. Set OSTYPE=Darwin if required
 ifeq ($(OSTYPE),Darwin)
-	CXXFLAGS+=-bundle -fno-common /usr/bin/python -flat_namespace -undefined suppress -I/Library/Frameworks/Python.framework/Versions/2.5/include/python2.5
-	LDFLAGS+=-bundle -fno-common -L/Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/config/
-else # this is for unix like systems - change /usr/include/Python2.5 to the directory where Python.h is located
+	CXXFLAGS+=-bundle -fno-common /usr/bin/python -flat_namespace -undefined suppress -I/Library/Frameworks/Python.framework/Versions/2.6/include/python2.6
+	LDFLAGS+=-bundle -fno-common -L/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/config/
+else # this is for unix like systems - change /usr/include/Python2.6 to the directory where Python.h is located
 	CXXFLAGS +=-I/usr/include/python2.6
 	LDFLAGS+=-shared
 endif
@@ -70,6 +70,7 @@ ifeq ($(USE_SBML),1)
 endif
 
 ifeq ($(USE_NEUROML),1)
+	OBJFILES := $(OBJFILES) ../neuroML_IO/neuroML_IO.o 
 	LIBS+= -L../external/lib/
 	OBJFILES :=  $(OBJFILES) ../neuroML_IO/neuroML_IO.o
 endif
