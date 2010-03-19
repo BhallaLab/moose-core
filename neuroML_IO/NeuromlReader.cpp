@@ -12,8 +12,10 @@ using namespace std;
 const double NeuromlReader::PI = M_PI;
 //void setupSegments();
 //void setupCables();
+/*  */
 void NeuromlReader::readModel( string filename,Id location )
 {
+   #ifdef USE_NEUROML
    static const Cinfo* compartmentCinfo = initCompartmentCinfo();
    static const Finfo* lengthFinfo = compartmentCinfo->findFinfo( "length" );
    static const Finfo* diameterFinfo = compartmentCinfo->findFinfo( "diameter" );
@@ -162,8 +164,12 @@ void NeuromlReader::readModel( string filename,Id location )
    setupChannels(groupcableMap,cablesegMap,biophysicsunit);
    setupPools(groupcableMap,cablesegMap,biophysicsunit);
  // setupSynChannels(groupcableMap,cablesegMap);
-  
+ #else
+	cout << "This version does not have NEUROML support." << endl; 
+#endif 
 }
+ #ifdef USE_NEUROML
+/* Returns the surface area of the compartment */
 double NeuromlReader::calcSurfaceArea(double length,double diameter)
 {
 	double sa ;
@@ -173,7 +179,7 @@ double NeuromlReader::calcSurfaceArea(double length,double diameter)
 		sa = PI * diameter * length;
 	return sa;
 }
-
+/* Returns the volume of the compartment */
 double NeuromlReader::calcVolume(double length,double diameter)
 {
 	double v ;
@@ -670,7 +676,7 @@ void NeuromlReader::setupSynChannels(map< string,vector<string> > &groupcableMap
 	}
 	}
 }
-
+/*function which insert elements into the vector for setupAlpha */
 void NeuromlReader::pushtoVector(vector< double > &result,string expr_form,double r,double s,double m)
 {
 	double A,B,C,D,F;
@@ -722,7 +728,7 @@ bool NeuromlReader::isType( Eref object, const string& type )
 {
 	return object->cinfo()->isA( Cinfo::find( type ) );
 }
-
+#endif // USE_NEUROML
 
   
 
