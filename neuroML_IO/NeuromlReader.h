@@ -22,17 +22,24 @@ class NeuromlReader
 	public:
 		NeuromlReader() {;}
 		~NeuromlReader() {;}
+		//
+         #ifdef USE_NEUROML
 		static int targets( Eref object, const string& msg,vector< Eref >& target,const string& type = "" );
 		static bool isType( Eref object, const string& type );
+		/* Reads in a NeuroML model into MOOSE */
 		void  readModel(std::string filename,Id location);
+		/* function which insert elements into the vector for setupAlpha */
 		void pushtoVector(vector< double >&result,string expr_form,double r,double s,double m);
+		/* Returns the surface area of the compartment */
 		double calcSurfaceArea(double length,double diameter);
+		/* Returns the volume of the compartment */
 		double calcVolume(double length,double diameter);
 		void setupSynChannels(map< string,vector<string> > &,map< string,vector< string > > &);
 		void setupChannels(map< string,vector<string> > &,map< string,vector< string > > &,string unit);
 		void setupPools(map< string,vector<string> > &,map< string,vector< string > > &,string unit);
-		
+	#endif	// USE_NEUROML	
 	private:
+	#ifdef USE_NEUROML
 		Element* compt_;
  		Element* channel_;
 		Element* gate_;
@@ -44,6 +51,7 @@ class NeuromlReader
 		map< string,Id > segMap_;
 		map< string,string > NMsegMap_;
 		NCell* ncl_;
+	#endif	// USE_NEUROML	
 };
 extern const Cinfo* initCompartmentCinfo();
 extern const Cinfo* initHHChannelCinfo();
