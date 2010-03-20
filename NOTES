@@ -3640,3 +3640,20 @@ Next steps: pending from 13 March.
 =============================================================================
 18 March. Put in wrapper stuff for parallel running using MPI. Checkin 1654.
 Oops, added in the parallel directory and files. Checkin 1655.
+=============================================================================
+21 March.
+MPI and MOOSE.
+First, which parts of the unit tests do what:
+- testAsync: Works fine, does more unit tests than the rest put together.
+- testScheduling: Croaks badly with segv
+- testShell: Doesn't croak, but never terminates either.
+
+testShell:testCreateDelete: OK
+testShell::testParserCreateDelete: hangs. This is now clear: it wants 
+	as many acks as there are nodes. Currently we don't get acks off-node.
+	Hence the hang.
+testScheduling.cpp:setupTicks(): OK.
+testScheduling.cpp:testThreads(): Croaks.
+testScheduling.cpp:testThreadIntFireNetwork(): Croaks.
+
+=============================================================================

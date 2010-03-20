@@ -443,8 +443,9 @@ void Shell::loadBalance()
 	// nodes when things get really scaled up.
 	//
 	// Note that the messages have to be rebuilt after this call.
+	// Note that this function is called independently on each node.
 	if ( !isSingleThreaded_ ) {
-		for ( unsigned int i = 0; i < numNodes_; ++i )
+		// for ( unsigned int i = 0; i < numNodes_; ++i )
 			Qinfo::addSimGroup( numCores_ ); //These are the worker threads.
 	}
 }

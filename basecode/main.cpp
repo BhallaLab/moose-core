@@ -55,6 +55,7 @@ Id init( int argc, char** argv )
 	MPI::Init( argc, argv );
 	numNodes = MPI::COMM_WORLD.Get_size();
 	myNode = MPI::COMM_WORLD.Get_rank();
+	cout << "on node " << myNode << ", numNodes = " << numNodes << endl;
 #endif
 
 	Msg::initNull();
@@ -91,10 +92,10 @@ int main( int argc, char** argv )
 	Id shellId = init( argc, argv );
 #ifdef DO_UNIT_TESTS
 	cout << "testing: ";
+#endif
 	testAsync();
 	testShell();
 	testScheduling();
-#endif
 	cout << endl;
 
 	// Note that the main loop remains the parser loop, though it may
