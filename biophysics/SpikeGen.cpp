@@ -176,10 +176,10 @@ void SpikeGen::innerProcessFunc( const Conn* c, ProcInfo p )
                     send1< double >( c->target(), eventSlot, t );
                     lastEvent_ = t;
                     state_ = amplitude_;
+                    fired_ = true;                    
                 } else {
                     state_ = 0.0;                
                 }
-            fired_ = true;
 	} else {
             state_ = 0.0;
             fired_ = false;
