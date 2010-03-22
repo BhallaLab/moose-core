@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sun Feb 28 18:17:56 2010 (+0530)
 // Version: 
-// Last-Updated: Wed Mar 17 19:01:06 2010 (+0530)
+// Last-Updated: Mon Mar 22 19:20:01 2010 (+0530)
 //           By: Subhasis Ray
-//     Update #: 473
+//     Update #: 478
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -167,11 +167,11 @@ NMDAChan::NMDAChan(): c0_(16.0),
                       c8_(2.847),
                       c9_(0.693),
                       c10_(3.101),
+                      x_(0.0),
+                      y_(0.0),
                       Mg_(1.5), // mM (value from Traub et al 2005)
                       unblocked_(0.0),
-                      saturation_(DBL_MAX),
-                      x_(0.0),
-                      y_(0.0)
+                      saturation_(DBL_MAX)
 {
     tau1_ = 0.005;
     tau2_ = 0.130;
@@ -280,7 +280,7 @@ double NMDAChan::innerGetUnblocked()
 }
 
 /**
-   get th upper limit on channel conductance
+   get the upper limit on channel conductance
 */
 double NMDAChan::getSaturation(Eref e)
 {
