@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sun Feb 28 18:17:56 2010 (+0530)
 // Version: 
-// Last-Updated: Mon Mar 22 19:20:01 2010 (+0530)
+// Last-Updated: Wed Mar 24 17:43:00 2010 (+0530)
 //           By: Subhasis Ray
-//     Update #: 478
+//     Update #: 500
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -319,24 +319,24 @@ void NMDAChan::processFunc(const Conn* conn, ProcInfo info)
 
 void NMDAChan::innerProcessFunc(Eref e, ProcInfo info)
 {
-    while ( !pendingEvents_.empty() &&
-            pendingEvents_.top().delay <= info->currTime_ ) {
-        SynInfo event = pendingEvents_.top();
-        pendingEvents_.pop();
-        activation_ += event.weight / info->dt_;
-        oldEvents_.push(event.event(tau1_));
-    }
     while (!oldEvents_.empty() &&
            oldEvents_.top().delay <= info->currTime_){
         SynInfo event = oldEvents_.top();
         oldEvents_.pop();
-        activation_ -= event.weight / info->dt_;
-        // x_ -= event.weight; // this is already incorporated into activation_
+        activation_ -= event.weight / tau1_;
+        x_ -= event.weight; 
         y_ += event.weight;
+    }
+    while ( !pendingEvents_.empty() &&
+            pendingEvents_.top().delay <= info->currTime_ ) {
+        SynInfo event = pendingEvents_.top();
+        pendingEvents_.pop();
+        activation_ += event.weight / tau1_;
+        oldEvents_.push(event.event(tau1_));
     }
     // TODO: May need to optimize these exponentiations
     double a1_ = exp(-c0_ * Vm_ - c1_);
-    double a2_ = 1000.0 * Mg_ * exp(-c3_ * Vm_ - c3_);
+    double a2_ = 1000.0 * Mg_ * exp(-c2_ * Vm_ - c3_);
     double b1_ = exp(c4_ * Vm_ + c5_ );
     double b2_ = exp(c6_ * Vm_ + c7_);
     // The following two lines calculate next values of x_ and y_
@@ -344,15 +344,14 @@ void NMDAChan::innerProcessFunc(Eref e, ProcInfo info)
     // x' = activation
     // y' = -y/tau2
     x_ += activation_ * info->dt_; 
-    y_ += -y_ * info->dt_ / tau2_;
-    unblocked_ = 1.0 / ( 1.0 + (a1_ + a2_) * (a1_ * b1_ + a2_ * b2_) / (A_ * (a1_ * (B1_ + b1_) + a2_ * (B2_ + b2_))));
-    Gk_ = (x_ + y_) * unblocked_;
-
+    y_ = y_ * decayFactor_;
+    unblocked_ = 1.0 / ( 1.0 + (a1_ + a2_) * (a1_ * B1_ + a2_ * B2_) / (A_ * (a1_ * (B1_ + b1_) + a2_ * (B2_ + b2_))));
+    Gk_ = Gbar_* (x_ + y_) * unblocked_;
     if (Gk_ > saturation_){
         Gk_ = saturation_;
     }
     Ik_ = ( Ek_ - Vm_ ) * Gk_;
-    activation_ = 0.0;
+    // activation_ = 0.0;
     modulation_ = 1.0;
     send2< double, double >( e, channelSlot, Gk_, Ek_ );
     send2< double, double >( e, origChannelSlot, Gk_, Ek_ );
@@ -375,6 +374,7 @@ void NMDAChan::innerReinitFunc(Eref e, ProcInfo info)
     unblocked_ = 0.0;
     activation_ = 0.0;
     modulation_ = 1.0;
+    decayFactor_ = exp(-info->dt_ / tau2_);
     Ik_ = 0.0;
     updateNumSynapse( e );
     while(!pendingEvents_.empty()){
