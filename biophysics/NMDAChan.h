@@ -5,9 +5,9 @@
 // Maintainer: 
 // Created: Mon Mar  8 15:13:02 2010 (+0530)
 // Version: 
-// Last-Updated: Mon Mar 15 16:03:23 2010 (+0530)
+// Last-Updated: Tue Mar 23 12:10:49 2010 (+0530)
 //           By: Subhasis Ray
-//     Update #: 76
+//     Update #: 79
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -92,7 +92,10 @@ class NMDAChan: public SynChan
     double unblocked_;
     double saturation_;
     priority_queue<SynInfo> oldEvents_; // This is for removing the
-                                         // effects of old event after tau1
+                                         // effects of old event after
+                                         // tau1
+    double decayFactor_; // Intermediate variable for Exponential
+                         // Euler method exp(-t/tau2)
 };
 
 #endif
