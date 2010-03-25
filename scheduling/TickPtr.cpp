@@ -86,8 +86,7 @@ void TickPtr::advance( Element* e, ProcInfo* p, double endTime ) {
 
 // procInfo is independent for each thread, need to ensure it is updated
 // before doing 'advance'.
-void TickPtr::advance( Element* e, ProcInfo* p, double endTime, 
-	pthread_mutex_t* timeMutex )
+void TickPtr::advance( Element* e, ProcInfo* p, double endTime ) 
 {
 	p->dt = dt_;
 	double nt = nextTime_; // use an independent timer for each thread.
@@ -102,23 +101,6 @@ void TickPtr::advance( Element* e, ProcInfo* p, double endTime,
 			(*i)->advance( e, p ); // This calls barrier just before clearQ.
 		}
 	}
-	// Relies on barriers in Tick::advance, to ensure that we can advance
-	// nextTime_ as soon as the first thread gets through to here.
-	// Currently this hangs.
-	/*
-	if ( timeMutex ) {
-		pthread_mutex_lock( timeMutex );
-		numTimerThread_++;
-		if ( numTimerThread_ == 1 ) { // First thread advances nextTime_
-			nextTime_ = nt;
-		} else if ( numTimerThread_ >= p->numThreads ) {
-			numTimerThread_ = 0;
-		}
-		pthread_mutex_unlock( timeMutex );
-	} else {
-		nextTime_ = nt;
-	}
-	*/
 
 	if ( p->threadId == 0 ) {
 		nextTime_ = nt;

@@ -314,7 +314,7 @@ void Clock::start(  Eref e, const Qinfo* q, double runTime )
 	Element* ticke = Id( 2 )();
 
 	if ( tickPtr_.size() == 1 ) {
-		tickPtr_[0].advance( ticke, &info_, endTime, 0 );
+		tickPtr_[0].advance( ticke, &info_, endTime );
 		return;
 	}
 
@@ -323,7 +323,7 @@ void Clock::start(  Eref e, const Qinfo* q, double runTime )
 	double nextTime = tickPtr_[1].getNextTime();
 	while ( isRunning_ && tickPtr_[0].getNextTime() < endTime ) {
 		// This advances all ticks with this dt in order, till nextTime.
-		tickPtr_[0].advance( ticke, &info_, nextTime * ROUNDING, 0 );
+		tickPtr_[0].advance( ticke, &info_, nextTime * ROUNDING );
 		sort( tickPtr_.begin(), tickPtr_.end() );
 		nextTime = tickPtr_[1].getNextTime();
 	}
@@ -377,7 +377,7 @@ void Clock::tStart(  Eref e, const ThreadInfo* ti )
 	Element* ticke = Id( 2 )();
 
 	if ( tickPtr_.size() == 1 ) {
-		tickPtr_[0].advance( ticke, &pinfo, endTime, ti->timeMutex );
+		tickPtr_[0].advance( ticke, &pinfo, endTime );
 		if ( ti->threadId == 0 )
 			info_ = pinfo; // Do we use info outside? Shouldn't.
 		return;
@@ -388,7 +388,7 @@ void Clock::tStart(  Eref e, const ThreadInfo* ti )
 	while ( isRunning_ && tp0_->getNextTime() < endTime ) {
 		// This advances all ticks with this dt in order, till nextTime.
 		// It has a barrier within: essential for the sortTickPtrs to work.
-		tp0_->advance( ticke, &pinfo, nextTime_ * ROUNDING, ti->timeMutex );
+		tp0_->advance( ticke, &pinfo, nextTime_ * ROUNDING );
 		// cout << "Advance at " << nextTime_ << " on thread " << ti->threadId << endl;
 		sortTickPtrs( ti->sortMutex ); // Sets up nextTime_ and tp0_.
 	}

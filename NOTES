@@ -3656,4 +3656,154 @@ testScheduling.cpp:setupTicks(): OK.
 testScheduling.cpp:testThreads(): Croaks.
 testScheduling.cpp:testThreadIntFireNetwork(): Croaks.
 
+Fixed the issue in testScheduling: I was making a SimGroup for every node,
+but actually each node makes its own. So I commented out the loop and the
+testScheduling worked. testShell still hangs. Checkin 1658.
+
+Now again looking at queue handling with MPI. See 3 Jan 2010.
+Since threading is always (except for the BlueGene arch) going to be part
+of such systems, lets do as follows:
+- We maintain a single recv buffer. 
+	- Use MPI_irecv to scan for incoming stuff, on the MPI thread. This
+		goes on all the time. May need another thread than the 
+		Shell thread, if Shell ops are likely to block.
+	- Put GroupId in the MPI_tag. It is an unsigned short.
+	- Append the received msg into the mpiQ of the specified Group.
+- We also have to figure out when we can send the messages. The two options
+	are to interleave with MPI_irecv, or to use the the master thread of
+	each group. Problem 
+	- If we use isends on thread0 within simGroup, we will need to do an 
+	MPI_wait on this thread 
+	before using the buffer again, to ensure the data is gone. This is
+	not so bad, because we can do the iSend as soon as we have filled up
+	the inQ, and then do the MPI_wait when the inQ processing is complete.
+	Issue of thread safety.
+	- If we use iSends on a separate MPI-thread, it will have to be told
+	which SimGroups are ready to send stuff, and those simGroups have to
+	block from returning (and hence touching the inQ_) till the iSend
+	is done and also till the corresponding MPI_wait says the buffer is
+	clear. At first we will just have two simGroups: the shell, and the
+	processing group.
+		- The MPI thread keeps in a loop 
+			- test for iRecv, if it has come, assign it to mpiQ
+			of appropriate SimGroup defined by tag.
+				- A combined mpiQ for all external data is not
+				practical for huge numbers of nodes.
+				- Use a separate mpiQ for each of the nodes
+				contributing to the SimGroup. Test for receipt.
+				- As each extnodempiQ comes in, set a 
+				mutexed flag to inform owner process thread.
+			- check for flags indicating that a SimGroup is
+			ready to send its inQ. Not sure if flag needs to be
+			mutexed, perhaps volatile will do.
+			- sends stuff if ready.
+			- check for any sends having completed. 
+				- Reports to SimGroup.
+			- Check for flags from process threads to call iRecv
+			for any completed mpiQs.
+		------ repeat loop.------------
+			- If a SimGroup is ready, the MPI thread does an
+			iSend of its inQ. 
+				- It puts in a flag to indicate that the
+					process thread has to wait till the
+					inQ is sent.
+				- It adds the MPI_request to its list,
+				and continues on its loop.
+			- The MPI thread calls the MPI_test command or its
+			variants to check on one or more requests at a time.
+			- As soon as the MPI_request is cleared, the thread
+			reports back to the process thread of the SimGroup that
+			owns the inQ, and liberates it from a condition_wait. 
+		- in Tick::advance, after Qinfo::mergeQ, the simGroup sets
+		a Mutexed flag to tell the MPIthread to send the inQ. 
+		The Tick continues on to process the local-node stuff.
+			- After local-node stuff is done, the Tick checks
+			if any off-node mpiQs have been received. It goes
+			through them.
+			- When each off-node mpiQ is done, a mutexed flag is
+			set to tell the MPI thread to put them back on iRecv.
+			- When all off-node mpiQs are serviced, use a 
+			condition_wait to check if the inQ was sent yet.
+			- continue with Tick process.
+		
+
+		
+
+Unfortunate amount of data juggling here. Would be nice to have a list
+	of buffers that we can rotate where needed. Later optimization.
+Seems like the way to go is to have a separate set of mpiQs, indexed by
+groupId.
+Can we direct MPI messages to specific groups? Yes, there is the MPI-tag
+which is currently an unsigned short, which will do.
+
+Is MPI thread-safe? This appears to be implementation-dependent. OpenMPI
+claims it is, but it is slightly ambiguous about whether this is here or a
+goal still. MPI-LAM is not thread safe. I suspect we cannot rely on it for 
+now.
+
 =============================================================================
+23 March
+Working on implementation of above. Instead of regular MPI-sends/recvs
+(of which I'd have to do one per node, on each node, I could do an 
+MPI-broadcast on each node, but then I'd have to do one per node to receive
+the broadast data. Or even more compactly, MPI_all_to_all and its variants
+send info everywhere in one step. The bare MPI_all_to_all expects uniform
+size buffers, but since I don't know ahead of time what the sizes are
+going to be, and since they change each timestep anyway, I may as well
+use it with the max likely size.
+
+If we use the MPI_allToAll, then the loop becomes simpler:
+mpiThreadFunc:
+	Check that inQ is ready: condition_wait perhaps, or maybe barrier.
+	AllToAll transmission.
+	clear condition_wait for the Tick::advance. Perhaps barrier is better,
+		as there are multiple threads to permit.
+	repeat loop
+Tick::advance:
+	mergeQ // This gets inQ all set
+	barrier// This is for processing threads, but could add mpiThread too?
+	clear the condition_wait for the mpiThreadFunc.
+	Start the local processing on inQ. Keep busy while the AllToAll happens.
+	condition_wait for mpiThreadFunc to finish. Again, perhaps a 
+		barrier is better.
+
+Barriers:
+	- We need a separate barrier for each SimGroup
+	- We do NOT want to go into a SimGroup if it is not being Processed.
+		- The Shell SimGroup is always being processed - or we have
+			shell in both sim groups.
+		- Can we put the Shell in both its own SimGroup (0) and also
+		the numerical SimGroups? 
+			- This would halve the need for AllToAll calls, also
+			halve the barriers.
+			- Will need to create the barriers at the same time
+			as we create the SimGroups. So they may as well sit
+			in the SimGroups.
+			- But we really want the Shell comms to be out-of-band
+			wrt the computational ones, so comput can start/stop
+			whenever.
+=============================================================================
+24 March.
+Is it good to have the Tick directly coordinate the mpiThreadfunc? Or
+even have the mpi steps handled directly by Tick::advance?
+
+If we have a rigid blocking call in the data exchange, then it is simpler
+to put the mpi steps in Tick::advance. But we will need another barrier to
+get the MPI_alltoall handling thread to complete.
+The problem with doing this is that the blocking call should really sit and
+wait on one thread while the local inQ is being cleared on other threads.
+So we still want it on another thread.
+
+Also another issue emerges with doing the alltoall: If the # of nodes is
+large, then this takes a long time and brings in lots of data. This
+means that the nodes do only communication during alltoall, and only 
+computation once the data comes in. Will need to benchmark to test.
+
+
+=============================================================================
+25 March
+Stages:
+	- Get mpiThreadFunc to synchronize with Tick::advance
+	- Figure out how to coordinate with shell::process.
+	- Try out flaggable implementations for alltoall, broadcast, isend.
+	- Benchmark.

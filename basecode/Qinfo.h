@@ -138,7 +138,20 @@ class Qinfo
 		void addToQ( Qid qId, MsgFuncBinding b, const char* arg );
 		void addSpecificTargetToQ( Qid qId, MsgFuncBinding b, 
 			const char* arg, const DataId& target );
+	
+		/**
+		 * Returns a pointer to the inQ. Readonly.
+		 */
+		const char* getInQ( unsigned int i );
 
+		/**
+		 * Returns a pointer to the first block of the mpiQ, which is one
+		 * long array.
+		 * Note that the mpiQ has as many blocks as there are nodes,
+		 * including current one. All blocks are the same size.
+		 */
+		char* getMpiQ( unsigned int i );
+		
 	private:
 		bool useSendTo_;	// true if the msg is to a single target DataId.
 		bool isForward_; // True if the msg is from e1 to e2.
@@ -157,7 +170,13 @@ class Qinfo
 		 * inQ is one per SimGroup. It becomes a readonly vector once
 		 * consolidated, and all the threads in the group read from it.
 		 */
-		static vector< vector< char > > inQ_; // Here are the queues
+		static vector< vector< char > > inQ_;
+
+		/**
+		 * There are numCores mpiQ blocks per SimGroup, but the blocks
+		 * for each SimGroup are arranged as one long linear array.
+		 */
+		static vector< vector< char > > mpiQ_;
 
 		static vector< SimGroup > g_; // Information about grouping.
 };

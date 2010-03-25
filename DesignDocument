@@ -65,7 +65,10 @@ Shell::start( double runtime )
 			TickPtr::advance
 				Tick::advance on all ticks.
 					pthread_barrier_wait
-					Qinfo::readQ
+					On first thread only: Qinfo::mergeQ
+						Puts local data into InQ
+					pthread_barrier_wait
+					Qinfo::readQ: handle msgs in InQ
 					Call process on all scheduled Elements.
 				pthread_barrier_wait
 			sorts TickPtrs.

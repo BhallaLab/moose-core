@@ -251,16 +251,25 @@ void Tick::destroy( Eref e, const Qinfo* q )
 void Tick::advance( Element* e, ProcInfo* info ) const
 {
 	// cout << "(" << dt_ << ", " << stage_ << " ) at t= " << info->currTime << " on thread " << info->threadId << endl;
+
+	/**
+	 * This barrier pair protects the inQ from being accessed for reading, 
+	 * while it is being updated, and vice versa.
+	 */
 	if ( info->barrier ) {
 		int rc = pthread_barrier_wait(
 			reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
 		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 	}
+	// Start updating inQ
+	// Have to ensure mpiThread does not do anything with inQ for a bit.
 	if ( info->threadIndexInGroup == 0 ) {
 		// Put the queues into one big one. Clear others
 		// Qinfo::reportQ();
 		Qinfo::mergeQ( info->groupId ); 
 		// cout << "Tick::advance: t = " << info->currTime;
+		// Send out all stuff in inQ to current group on other nodes
+		// Harvest data for current node.
 	}
 		
 	if ( info->barrier ) {
@@ -268,8 +277,26 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 			reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
 		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 	}
-	Qinfo::readQ( info ); // March through big queue.
-
+	// Set off mpiThread for MPI_alltoall data exchange of inQ
+	// Start reading inQ
+	Qinfo::readQ( info ); // March through inQ. Each thread magically deals
+		// with updates needed by its own Process calls, and none other.
+	// 
+	// label A.
+	// Block till mpiThread has finished with MPI_alltoall.
+	// 	All threads in this SimGroup
+	// 	block here. This assumes that we don't try the interleaving.
+	// Qinfo::readMpiQ( info ); // March through mpiQ, typically 
+	// much bigger than inQ due to the # of nodes. Here it would be
+	// nice to do partial exchanges and interleave with computation.
+	// If we were interleaving we would want to barrier here, and then
+	// loop back to the label A. Possibly we could even do the barrier
+	// below, after the process is done, if we know we're going to loop
+	// back. That gives the system more comm time while computing happens.
+	//
+	// Assuming same magic of thread allocation applies, carry on with 
+	// Process. This fills up the individual outQs.
+	//
 	// March through Process calls for each scheduled Element.
 	// Note that there is a unique BindIndex for each tick.
 	// We preallocate 0 through 10 for this. May need to rethink.

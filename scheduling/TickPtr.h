@@ -33,8 +33,7 @@ class TickPtr {
 		 * Advance the simulation till the specified end time, without
 		 * worrying about other dts.
 		 */
-		void advance( Element* e, ProcInfo* p, double endTime,
-			pthread_mutex_t* timeMutex );
+		void advance( Element* e, ProcInfo* p, double endTime );
 
 		double getNextTime() const;
 		double getDt() const;

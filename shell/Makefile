@@ -11,6 +11,7 @@ TARGET = shell.o
 
 OBJ = \
 	Shell.o	\
+	ShellThreads.o	\
 	testShell.o	\
 
 HEADERS = \

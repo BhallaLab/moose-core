@@ -10,6 +10,8 @@
 #ifndef _SHELL_H
 #define _SHELL_H
 
+class ThreadInfo;
+
 class Shell: public Data
 {
 	public:
@@ -39,12 +41,12 @@ class Shell: public Data
 		// DestFinfo functions
 		///////////////////////////////////////////////////////////
 		void handleGet( Eref e, const Qinfo* q, const char* arg );
-		void start( double runTime );
+
 		/**
-		 * Stub for eventual function to handle load balancing. This must
-		 * be called to set up default groups.
+		 * Sets of a simulation for duration runTime. Handles
+		 * cases including single-thread, multithread, and multinode
 		 */
-		void loadBalance();
+		void start( double runTime );
 
 		void handleAckCreate();
 		void handleAckDelete();
@@ -59,6 +61,10 @@ class Shell: public Data
 		const char* getBuf() const;
 		static const char* buf();
 		static const ProcInfo* procInfo();
+
+		////////////////////////////////////////////////////////////////
+		// Thread and MPI handling functions
+		////////////////////////////////////////////////////////////////
 		/**
 		 * Assigns the hardware availability. Assumes that each node will
 		 * have the same number of cores available.
@@ -69,6 +75,25 @@ class Shell: public Data
 
 		unsigned int numCores();
 
+		void initThreadInfo( vector< ThreadInfo >& ti,
+		Element* clocke, Qinfo* q,
+		pthread_mutex_t* sortMutex, double runtime );
+
+		/**
+		 * Stub for eventual function to handle load balancing. This must
+		 * be called to set up default groups.
+		 */
+		void loadBalance();
+
+		/**
+		 * Function to execute on the mpiThread. Deals with
+		 * all MPI transactions. I am keeping it on a single thread
+		 * because different MPI implementations vary in their thread-
+		 * safety.
+		 */
+		void mpiThreadFunc( void* shellPtr );
+
+		////////////////////////////////////////////////////////////////
 		// Sets up clock ticks. Essentially is a call into the 
 		// Clock::setupTick function, but may be needed to be called from
 		// the parser so it is a Shell function too.
@@ -94,6 +119,7 @@ class Shell: public Data
 			// setup operations.
 		unsigned short numCreateAcks_;
 		unsigned short numDeleteAcks_;
+		void* barrier_;
 };
 
 extern bool set( Eref& dest, const string& destField, const string& val );

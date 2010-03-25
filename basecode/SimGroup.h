@@ -24,8 +24,10 @@ typedef unsigned short Qid;
  * Each SimGroup has 
  *  startThread: the identifier (index) of the first thread in the group.
  *  numGroupThreads: the number of threads in this group.
- * 	inQ: Index of input queue.
+ * 	inQ: Index of input queue. Equal to groupIndex at this point.
  * 	outQ, Starting index of output queues. There are numGroupThreads of them
+ * 	mpiQ: index of queue used for arriving stuff from other nodes. Each
+ * 		SimGroup has one per remote node.
  *
  * If I put the inQs separately, I could index the outQs directly from
  * the threadId. That would be handy. The inQ would also be easier, it would
@@ -48,6 +50,7 @@ class SimGroup {
 			return startIndex + threadId + 1;
 		}
 		 */
+
 
 		/**
 		 * returns Qid for the absolute threadId
