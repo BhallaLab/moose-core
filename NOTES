@@ -3822,3 +3822,7 @@ computation has stopped.
 Hacked in a flag in Shell to indicate that the simulation is still running.
 When the Clock finishes, it sets this flag to 0 as well. Seems to work.
 
+Now on to extending the mpiThreadFunc with another barrier to clear up
+the mpiQ. This compiles but fails unit test.
+
+=============================================================================

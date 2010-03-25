@@ -15,8 +15,9 @@ class ProcInfo
 				outQid( 0 ), 
 				threadIndexInGroup( 0 ), 
 				numThreadsInGroup( 1 ), 
+				nodeIndexInGroup( 0 ),
+				numNodesInGroup( 1 ), 
 				groupId( 0 ),
-				node( 0 ),
 				barrier( 0 )
 			{;}
 		double dt;
@@ -26,8 +27,9 @@ class ProcInfo
 		Qid outQid;	// Index of outQ to use.
 		unsigned int threadIndexInGroup;
 		unsigned int numThreadsInGroup;
+		unsigned int nodeIndexInGroup;
+		unsigned int numNodesInGroup;
 		unsigned int groupId;
-		unsigned int node;
 		void* barrier;
 };
 

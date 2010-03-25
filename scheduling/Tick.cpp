@@ -306,6 +306,23 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 	for ( vector< MsgFuncBinding >::const_iterator i = m->begin();
 		i != m->end(); ++i )
 		Msg::getMsg( i->mid )->process( info );
+
+
+	if ( info->numNodesInGroup > 1 ) { // Sync up with mpiThreadfunc
+		// At this point the MPI_alltoall should have completed
+		if ( info->barrier ) {
+			int rc = pthread_barrier_wait(
+				reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
+			assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+		}
+		Qinfo::readMpiQ( info ); // March through mpiQ
+		// March through process calls
+		BindIndex b = procVec[ index_ ]->getBindIndex();
+		const vector< MsgFuncBinding >* m = e->getMsgAndFunc( b );
+		for ( vector< MsgFuncBinding >::const_iterator i = m->begin();
+			i != m->end(); ++i )
+			Msg::getMsg( i->mid )->process( info );
+	}
 }
 
 void Tick::setIndex( unsigned int index ) 

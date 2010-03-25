@@ -100,6 +100,11 @@ class Qinfo
 		static void readQ( const ProcInfo* proc );
 
 		/**
+		 * Read the MPI Q
+		 */
+		static void readMpiQ( const ProcInfo* proc );
+
+		/**
 		 * Merge all outQs from a group into its inQ.
 		 */
 		static void mergeQ( unsigned int groupId );

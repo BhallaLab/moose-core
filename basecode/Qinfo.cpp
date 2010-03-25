@@ -140,6 +140,10 @@ void Qinfo::readQ( const ProcInfo* proc )
 	}
 }
 
+void Qinfo::readMpiQ( const ProcInfo* proc )
+{
+}
+
 /**
  * Static func. Not thread safe.
  * Merge out all outQs from a group into its inQ. This clears out inQ

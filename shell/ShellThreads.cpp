@@ -32,30 +32,35 @@ void Shell::setRunning( bool value )
 void* Shell::mpiThreadFunc( void* shellPtr )
 {
 	Shell* shell = reinterpret_cast< Shell* >( shellPtr );
+	assert( shell->numNodes_ > 1 );
+	assert( shell->barrier_ );
 
 	while( shell->isRunning_ ) {
-		if ( shell->barrier_ ) { // Sync with first step in Tick::advance
-			int rc = pthread_barrier_wait(
-				reinterpret_cast< pthread_barrier_t* >( shell->barrier_ ) );
-			assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
-		}
+		// Sync with first step in Tick::advance
+		int rc = pthread_barrier_wait(
+			reinterpret_cast< pthread_barrier_t* >( shell->barrier_ ) );
+		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 		if ( !shell->isRunning_ )
 			break;
 			// Now inQ is being updated.
-			cout << "mpiThreadFunc waiting for inQ to fill\n";
+			cout << "mpiThreadFunc: waiting for inQ to fill, clearing mpiQ\n";
 			// wait till inQ is filled
-		if ( shell->barrier_ ) { // Now inQ has been filled.
-			int rc = pthread_barrier_wait(
-				reinterpret_cast< pthread_barrier_t* >( shell->barrier_ ) );
-			assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
-		}
+		// Now inQ has been filled.
+		rc = pthread_barrier_wait(
+			reinterpret_cast< pthread_barrier_t* >( shell->barrier_ ) );
+		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 		// Now inQ is filled and is safe to use.
-			cout << "mpiThreadFunc ready to use inQ\n";
-		
+			cout << "mpiThreadFunc: inQ ready, used by readQ and alltoall\n";
+
 		// start MPI_alltoall
 		// barrier till localnode proc is done on all threads in Tick::advance
 		// Barrier till localnode cleans up all mpiQ stuff too.
 		// Clean up mpiQ for next round of incoming stuff.
+		rc = pthread_barrier_wait(
+			reinterpret_cast< pthread_barrier_t* >( shell->barrier_ ) );
+		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+		cout << "mpiThreadFunc: mpiQ ready, used by readMpiQ\n";
+		
 	
 	}
 	
@@ -236,7 +241,9 @@ void Shell::start( double runtime )
 		return;
 	}
 
-	unsigned int numThreads = numCores_ + 1; 
+	unsigned int numThreads = numCores_;
+	if ( numNodes_ > 1 )
+		++numThreads;
 
 	vector< ThreadInfo > ti( numThreads );
 	pthread_mutex_t sortMutex;
@@ -271,13 +278,15 @@ void Shell::start( double runtime )
 			exit( -1 );
 		}
 	}
-	int ret = pthread_create( &threads[ numCores_ ], NULL, 
-			Shell::mpiThreadFunc, 
-			reinterpret_cast< void* >( this )
-	);
-	if ( ret ) {
-		cout << "Error: Shell::start: Unable to create mpi_threadn";
-		exit( -1 );
+	if ( numNodes_ > 1 ) { // Create a thread to dispatch MPI traffic.
+		int ret = pthread_create( &threads[ numCores_ ], NULL, 
+				Shell::mpiThreadFunc, 
+				reinterpret_cast< void* >( this )
+		);
+		if ( ret ) {
+			cout << "Error: Shell::start: Unable to create mpiThread";
+			exit( -1 );
+		}
 	}
 
 	// Clean up.
