@@ -3807,3 +3807,18 @@ Stages:
 	- Figure out how to coordinate with shell::process.
 	- Try out flaggable implementations for alltoall, broadcast, isend.
 	- Benchmark.
+
+Got the whole mess to compile again, begun process of implementing
+Shell::mpiThreadFunc. Checkin 1661
+Added in the mpiThread. It promptly stalled. I need to have a loop of the
+correct number of cycles through the barriers. Perhaps better to be informed
+about how long the calculations continue, rather than do the ugly stuff that
+the ticks do.
+
+Here we run into one of the issues with barriers. They are really designed for
+lockstep calculations, and don't allow one to keep going around even if the
+computation has stopped.
+
+Hacked in a flag in Shell to indicate that the simulation is still running.
+When the Clock finishes, it sets this flag to 0 as well. Seems to work.
+

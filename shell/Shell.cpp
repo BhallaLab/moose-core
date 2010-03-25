@@ -184,7 +184,8 @@ Shell::Shell()
 	: name_( "" ),
 		quit_( 0 ), 
 		isSingleThreaded_( 0 ), numCores_( 1 ), numNodes_( 1 ),
-		numCreateAcks_( 0 ), numDeleteAcks_( 0 )
+		numCreateAcks_( 0 ), numDeleteAcks_( 0 ),
+		isRunning_( 0 )
 {
 	;
 }

@@ -91,7 +91,9 @@ class Shell: public Data
 		 * because different MPI implementations vary in their thread-
 		 * safety.
 		 */
-		void mpiThreadFunc( void* shellPtr );
+		static void* mpiThreadFunc( void* shellPtr );
+
+		void setRunning( bool value );
 
 		////////////////////////////////////////////////////////////////
 		// Sets up clock ticks. Essentially is a call into the 
@@ -120,6 +122,10 @@ class Shell: public Data
 		unsigned short numCreateAcks_;
 		unsigned short numDeleteAcks_;
 		void* barrier_;
+		/**
+		 * Used to coordinate threads especially when doing MPI.
+		 */
+		bool isRunning_;
 };
 
 extern bool set( Eref& dest, const string& destField, const string& val );

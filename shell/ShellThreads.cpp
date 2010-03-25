@@ -22,33 +22,44 @@
 #include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
 
+void Shell::setRunning( bool value )
+{
+	isRunning_ = value;
+}
 
 // Static func, passed in to the thread.
 // Version 2, dated 24 March. This variant uses alltoall
-void Shell::mpiThreadFunc( void* shellPtr )
+void* Shell::mpiThreadFunc( void* shellPtr )
 {
 	Shell* shell = reinterpret_cast< Shell* >( shellPtr );
 
-	if ( shell->barrier_ ) { // Sync with the first step in Tick::advance
-		int rc = pthread_barrier_wait(
-			reinterpret_cast< pthread_barrier_t* >( shell->barrier_ ) );
-		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
-	}
-		// Now inQ is being updated.
-		cout << "mpiThreadFunc waiting for inQ to fill\n";
-		// wait till inQ is filled
-	if ( shell->barrier_ ) { // Now inQ has been filled.
-		int rc = pthread_barrier_wait(
-			reinterpret_cast< pthread_barrier_t* >( shell->barrier_ ) );
-		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
-	}
-	// Now inQ is filled and is safe to use.
-		cout << "mpiThreadFunc ready to use inQ\n";
+	while( shell->isRunning_ ) {
+		if ( shell->barrier_ ) { // Sync with first step in Tick::advance
+			int rc = pthread_barrier_wait(
+				reinterpret_cast< pthread_barrier_t* >( shell->barrier_ ) );
+			assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+		}
+		if ( !shell->isRunning_ )
+			break;
+			// Now inQ is being updated.
+			cout << "mpiThreadFunc waiting for inQ to fill\n";
+			// wait till inQ is filled
+		if ( shell->barrier_ ) { // Now inQ has been filled.
+			int rc = pthread_barrier_wait(
+				reinterpret_cast< pthread_barrier_t* >( shell->barrier_ ) );
+			assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+		}
+		// Now inQ is filled and is safe to use.
+			cout << "mpiThreadFunc ready to use inQ\n";
+		
+		// start MPI_alltoall
+		// barrier till localnode proc is done on all threads in Tick::advance
+		// Barrier till localnode cleans up all mpiQ stuff too.
+		// Clean up mpiQ for next round of incoming stuff.
 	
-	// start MPI_alltoall
-	// barrier till localnode proc is done on all threads on Tick::advance
-	// Barrier till localnode cleans up all mpiQ stuff too.
-	// Clean up mpiQ for next round of incoming stuff.
+	}
+	
+	pthread_exit( NULL );
 }
 
 #if 0
@@ -225,27 +236,31 @@ void Shell::start( double runtime )
 		return;
 	}
 
-	vector< ThreadInfo > ti( numCores_ );
+	unsigned int numThreads = numCores_ + 1; 
+
+	vector< ThreadInfo > ti( numThreads );
 	pthread_mutex_t sortMutex;
 	pthread_mutex_init( &sortMutex, NULL );
 
 	initThreadInfo( ti, clocke, &q, &sortMutex, runtime );
 
-	pthread_t* threads = new pthread_t[ numCores_ ];
+	setRunning( 1 );
+
+	pthread_t* threads = new pthread_t[ numThreads ];
 	pthread_attr_t attr;
 
 	pthread_attr_init( &attr );
 	pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_JOINABLE );
 	pthread_barrier_t barrier;
-	if ( pthread_barrier_init( &barrier, NULL, numCores_ ) ) {
+	if ( pthread_barrier_init( &barrier, NULL, numThreads ) ) {
 		cout << "Error: Shell::start: Unable to init barrier\n";
 		exit( -1 );
 	}
 	Clock* clock = reinterpret_cast< Clock* >( clocke->data( 0 ) );
 	clock->setBarrier( &barrier );
+	barrier_ = &barrier;
 	clock->setNumPendingThreads( 0 ); // Used for clock scheduling
 	clock->setNumThreads( numCores_ ); // Used for clock scheduling
-	// pthread_t threads[ numCores_ ];
 	for ( unsigned int i = 0; i < numCores_; ++i ) {
 		int ret = pthread_create( 
 			&threads[i], NULL, Clock::threadStartFunc, 
@@ -256,9 +271,17 @@ void Shell::start( double runtime )
 			exit( -1 );
 		}
 	}
+	int ret = pthread_create( &threads[ numCores_ ], NULL, 
+			Shell::mpiThreadFunc, 
+			reinterpret_cast< void* >( this )
+	);
+	if ( ret ) {
+		cout << "Error: Shell::start: Unable to create mpi_threadn";
+		exit( -1 );
+	}
 
 	// Clean up.
-	for ( unsigned int i = 0; i < numCores_; ++i ) {
+	for ( unsigned int i = 0; i < numThreads ; ++i ) {
 		void* status;
 		int ret = pthread_join( threads[ i ], &status );
 		if ( ret ) {

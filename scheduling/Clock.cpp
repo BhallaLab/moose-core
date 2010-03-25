@@ -394,6 +394,8 @@ void Clock::tStart(  Eref e, const ThreadInfo* ti )
 	}
 	if ( ti->threadId == 0 )
 		info_ = pinfo;
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	s->setRunning( 0 );
 	isRunning_ = 0;
 }
 
