@@ -276,7 +276,7 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 	
 	assert( ( info->numNodesInGroup > 1 ) == ( info->numThreads == (info->numThreadsInGroup + 1) ) );
 	// This is the mpiThread.
-	if ( info->threadIndexInGroup == info->numThreadsInGroup ) {
+	if ( info->isMpiThread ) {
 		mpiAdvance( info );
 	} else {
 

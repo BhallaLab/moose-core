@@ -67,11 +67,13 @@ class testThreadSchedElement: public Element
 			// cout << "timing[ " << index_ << ", " << p->threadId << " ] = " << timings[ index_ / p->numThreads ] << ", time = " << p->currTime << endl;
 			if ( static_cast< int >( p->currTime ) != 	
 				timings[ index_ / p->numThreads ] )
-				cout << "testThreadhSchedElement::process: index= " << index_ << ", numThreads = " <<
+				/*
+				cout << "testThreadSchedElement::process: index= " << index_ << ", numThreads = " <<
 					p->numThreads << ", currTime = " << p->currTime << 
 					", mynode = " << p->nodeIndexInGroup << endl;
+			*/
 			assert( static_cast< int >( p->currTime ) == 	
-				timings[ index_ / p->numThreads ] );
+				timings[ index_ / p->numThreadsInGroup ] );
 
 			pthread_mutex_lock( &mutex_ );
 				++index_;
@@ -217,6 +219,7 @@ void testThreads()
 	SingleMsg m5( er5, ts ); er5.element()->addMsgAndFunc( m5.mid(), f, 5 );
 	s->start( 10 );
 
+	cout << "Done TestThreads" << flush;
 	cout << "." << flush;
 }
 
@@ -315,6 +318,7 @@ void testThreadIntFireNetwork()
 	assert( fabs( ifire100->getVm() - Vm100 ) < 1e-6 );
 	assert( fabs( ifire900->getVm() - Vm900 ) < 1e-6 );
 
+	cout << "Done ThreadIntFireNetwork" << flush;
 	cout << "." << flush;
 	delete i2();
 }

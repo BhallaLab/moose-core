@@ -18,6 +18,7 @@ class ProcInfo
 				nodeIndexInGroup( 0 ),
 				numNodesInGroup( 1 ), 
 				groupId( 0 ),
+				isMpiThread( 0 ),
 				barrier( 0 )
 			{;}
 		double dt;
@@ -30,6 +31,7 @@ class ProcInfo
 		unsigned int nodeIndexInGroup;
 		unsigned int numNodesInGroup;
 		unsigned int groupId;
+		bool isMpiThread;
 		void* barrier;
 };
 

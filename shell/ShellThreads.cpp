@@ -218,23 +218,41 @@ void Shell::initThreadInfo( vector< ThreadInfo >& ti,
 	double runtime )
 {
 	unsigned int j = 0;
+	unsigned int numThreads = Qinfo::simGroup( 1 )->numThreads;
+	if ( numNodes_ > 1 )
+		numThreads++;
+
+	cout << "Shell::initThreadInfo: ti.size() = " << ti.size() << 
+		", numCores = " << numCores_ << 
+		", numSimGroup = " << Qinfo::numSimGroup() <<
+		", numThreads[sg[1]] = " << Qinfo::simGroup( 1 )->numThreads <<
+		", numThreads = " << numThreads <<
+		endl;
 	for ( unsigned int i = 1; i < Qinfo::numSimGroup(); ++i ) {
-		// for ( unsigned short k = 0; k < Qinfo::simGroup( i )->numThreads; ++k ) {
-		for ( unsigned short k = 0; k < ti.size(); ++k ) {
+		for ( unsigned short k = 0; k < numThreads; ++k )
+	//	for ( unsigned short k = 0; k < ti.size(); ++k )
+		{
 			ti[j].clocke = clocke;
 			ti[j].qinfo = q;
 			ti[j].runtime = runtime;
 			ti[j].threadId = j;
-			ti[j].threadIndexInGroup = j - Qinfo::simGroup( i )->startThread + 1;
+			if ( i > 0 && numNodes_ > 1 && k == ti.size() - 1 )
+				ti[j].threadIndexInGroup = ~0;
+			else
+				ti[j].threadIndexInGroup = 
+					j - Qinfo::simGroup( i )->startThread + 1;
 			ti[j].nodeIndexInGroup = myNode_;
 			ti[j].groupId = i;
 			ti[j].outQid = Qinfo::simGroup(i)->startThread + k;
 			ti[j].sortMutex = sortMutex;
+			cout << i << " " << k << ", j = " << j << 
+				", thrIndexInGrp= " << ti[j].threadIndexInGroup << endl;
 			j++;
 		}
 	}
 
-	assert( j == numCores_ + (numNodes_ > 1) );
+	assert( j == ti.size() );
+	assert( j == ( numCores_ + (numNodes_ > 1) ) );
 }
 
 void Shell::start( double runtime )

@@ -360,6 +360,7 @@ void Clock::tStart(  Eref e, const ThreadInfo* ti )
 	ProcInfo pinfo = info_; //We use an independent ProcInfo for each thread
 	pinfo.threadId = ti->threadId; // to manage separate threadIds.
 	pinfo.threadIndexInGroup = ti->threadIndexInGroup;
+	pinfo.isMpiThread = ( ti->threadIndexInGroup == ~0U );
 	pinfo.nodeIndexInGroup = ti->nodeIndexInGroup;
 	assert( ti->groupId < Qinfo::numSimGroup() );
 	pinfo.numThreadsInGroup = Qinfo::simGroup( ti->groupId )->numThreads;
@@ -411,8 +412,10 @@ void Clock::setBarrier( void* barrier )
 void* Clock::threadStartFunc( void* threadInfo )
 {
 	ThreadInfo* ti = reinterpret_cast< ThreadInfo* >( threadInfo );
-	Clock* clock = reinterpret_cast< Clock* >( ti->clocke->data( 0 ) );
-	Eref clocker( ti->clocke, 0 );
+	Id clockId( 1 );
+	Element* clocke = clockId();
+	Clock* clock = reinterpret_cast< Clock* >( clocke->data( 0 ) );
+	Eref clocker( clockId.eref() );
 	// cout << "Start thread " << ti->threadId << " threadIndex in Group " << ti->threadIndexInGroup << endl;
 	clock->tStart( clocker, ti );
 	// cout << "End thread " << ti->threadId << " with runtime " << ti->runtime << endl;

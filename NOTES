@@ -3904,10 +3904,23 @@ ProcInfo: Keeps track of stuff that current thread is doing.
 	threadIndexInGroup
 	nodeIndexInGroup? or current node#
 	whether current thread is for mpi.
+	clocke: can get globally.
 	barrier
+	sortMutex
 
 Perhaps instead of passing in a ThreadInfo structure I should
 pass in ProcInfos.
 
 =============================================================================
 
+28 March 2010: Stuck in silly assertion. Fixed up, now we
+should have decent check for when we are in the mpiThread.
+This uses the ugly old ThreadInfo structure for now.
+But the assertion in testThreadSchedElement::process still fails.
+OK, finally cleared it. I was testing numThreads, rather than 
+numThreadsInGroup. The former also counts the extra mpiThread.
+So the problem was indeed with the messiness of keeping track of threads.
+Now hangs, but no crash.
+
+Hangs in coming out of testThreads. When I comment out testThreads,
+there is no problem.
