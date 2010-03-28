@@ -326,8 +326,7 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 	// Process. This fills up the individual outQs.
 
 
-	//if ( info->numNodesInGroup > 1 ) // Sync up with mpiThreadfunc
-	if ( info->threadIndexInGroup == info->numThreadsInGroup )
+	if ( info->numNodesInGroup > 1 ) // Sync up with mpiThreadfunc
 	{ // Sync up with mpiAdvance.
 		// At this point the MPI_alltoall should have completed
 		if ( info->barrier ) {

@@ -3924,3 +3924,4 @@ Now hangs, but no crash.
 
 Hangs in coming out of testThreads. When I comment out testThreads,
 there is no problem.
+Checkin as 1665.

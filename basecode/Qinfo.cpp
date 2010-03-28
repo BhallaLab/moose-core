@@ -143,6 +143,8 @@ void Qinfo::readQ( const ProcInfo* proc )
 
 void Qinfo::readMpiQ( const ProcInfo* proc )
 {
+	// cout << "in Qinfo::readMpiQ on node " << proc->nodeIndexInGroup << endl;
+	;
 }
 
 /**
