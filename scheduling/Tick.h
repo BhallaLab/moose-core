@@ -43,6 +43,12 @@ class Tick
 		void advance( Element* e, ProcInfo* p ) const;
 
 		/**
+		 * This runs in parallel with 'advance' on the extra thread
+		 * dedicated to dealing with MPI data transfer.
+		 */
+		void mpiAdvance( ProcInfo* p ) const;
+
+		/**
 		 * This assigns the index of this Tick in the array. This index
 		 * is used to specify the Connection Slot to use for the outgoing
 		 * clearQ and Process calls.

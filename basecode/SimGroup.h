@@ -37,11 +37,12 @@ typedef unsigned short Qid;
  */
 class SimGroup {
 	public: 
-		SimGroup( unsigned short nt, unsigned short si )
-			: numThreads( nt ), startThread( si )
+		SimGroup( unsigned short nt, unsigned short si, unsigned short nn )
+			: numThreads( nt ), startThread( si ), numNodes( nn )
 			{;}
 		unsigned short numThreads; // Number of threads in this group.
 		unsigned short startThread; // Index of first thread, used for inQ.
+		unsigned short numNodes; // Number of nodes in this group.
 
 		/**
 		 * returns Qid for the thread specified within this group

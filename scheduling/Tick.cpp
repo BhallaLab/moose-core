@@ -245,12 +245,40 @@ void Tick::destroy( Eref e, const Qinfo* q )
 // Virtual function definitions for actually sending out the 
 // process and reinit calls.
 ///////////////////////////////////////////////////
+
+/**
+ * This handles the mpi stuff.
+ */
+void Tick::mpiAdvance( ProcInfo* info) const
+{
+	assert( info->barrier );
+	int rc = pthread_barrier_wait(
+		reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
+	assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+	// wait for inQ to be updated. Use time to clear mpiQ
+	rc = pthread_barrier_wait(
+		reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
+	assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+	// Wait for inQ to be filled. Do data transfer between nodes.
+	rc = pthread_barrier_wait(
+		reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
+	assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+	// Data has been transferred. Wait till it is processed.
+
+}
+
 /**
  * This sends out the process call.
  */
 void Tick::advance( Element* e, ProcInfo* info ) const
 {
 	// cout << "(" << dt_ << ", " << stage_ << " ) at t= " << info->currTime << " on thread " << info->threadId << endl;
+	
+	assert( ( info->numNodesInGroup > 1 ) == ( info->numThreads == (info->numThreadsInGroup + 1) ) );
+	// This is the mpiThread.
+	if ( info->threadIndexInGroup == info->numThreadsInGroup ) {
+		mpiAdvance( info );
+	} else {
 
 	/**
 	 * This barrier pair protects the inQ from being accessed for reading, 
@@ -296,7 +324,29 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 	//
 	// Assuming same magic of thread allocation applies, carry on with 
 	// Process. This fills up the individual outQs.
-	//
+
+
+	//if ( info->numNodesInGroup > 1 ) // Sync up with mpiThreadfunc
+	if ( info->threadIndexInGroup == info->numThreadsInGroup )
+	{ // Sync up with mpiAdvance.
+		// At this point the MPI_alltoall should have completed
+		if ( info->barrier ) {
+			int rc = pthread_barrier_wait(
+				reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
+			assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+		}
+		Qinfo::readMpiQ( info ); // March through mpiQ
+		// March through process calls
+#if 0
+		BindIndex b = procVec[ index_ ]->getBindIndex();
+		const vector< MsgFuncBinding >* m = e->getMsgAndFunc( b );
+		for ( vector< MsgFuncBinding >::const_iterator i = m->begin();
+			i != m->end(); ++i )
+			Msg::getMsg( i->mid )->process( info );
+#endif
+	}
+
+
 	// March through Process calls for each scheduled Element.
 	// Note that there is a unique BindIndex for each tick.
 	// We preallocate 0 through 10 for this. May need to rethink.
@@ -306,23 +356,8 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 	for ( vector< MsgFuncBinding >::const_iterator i = m->begin();
 		i != m->end(); ++i )
 		Msg::getMsg( i->mid )->process( info );
-
-
-	if ( info->numNodesInGroup > 1 ) { // Sync up with mpiThreadfunc
-		// At this point the MPI_alltoall should have completed
-		if ( info->barrier ) {
-			int rc = pthread_barrier_wait(
-				reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
-			assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
-		}
-		Qinfo::readMpiQ( info ); // March through mpiQ
-		// March through process calls
-		BindIndex b = procVec[ index_ ]->getBindIndex();
-		const vector< MsgFuncBinding >* m = e->getMsgAndFunc( b );
-		for ( vector< MsgFuncBinding >::const_iterator i = m->begin();
-			i != m->end(); ++i )
-			Msg::getMsg( i->mid )->process( info );
 	}
+
 }
 
 void Tick::setIndex( unsigned int index ) 

@@ -65,6 +65,11 @@ class testThreadSchedElement: public Element
 				16, 16, 16, 17, 18, 18, 18, 18, 19, 20, 20, 20, 20, 20 };
 			unsigned int max = sizeof( timings ) / sizeof( int );
 			// cout << "timing[ " << index_ << ", " << p->threadId << " ] = " << timings[ index_ / p->numThreads ] << ", time = " << p->currTime << endl;
+			if ( static_cast< int >( p->currTime ) != 	
+				timings[ index_ / p->numThreads ] )
+				cout << "testThreadhSchedElement::process: index= " << index_ << ", numThreads = " <<
+					p->numThreads << ", currTime = " << p->currTime << 
+					", mynode = " << p->nodeIndexInGroup << endl;
 			assert( static_cast< int >( p->currTime ) == 	
 				timings[ index_ / p->numThreads ] );
 

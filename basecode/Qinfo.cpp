@@ -64,13 +64,14 @@ Qinfo::Qinfo()
  * Returns the group number of the new group.
  * have that because it will require updates to messages.
  */
-unsigned int Qinfo::addSimGroup( unsigned short numThreads )
+unsigned int Qinfo::addSimGroup( unsigned short numThreads, 
+	unsigned short numNodes )
 {
 	unsigned short ng = g_.size();
 	unsigned short si = 0;
 	if ( ng > 0 )
 		si = g_[ng - 1].startThread + g_[ng - 1].numThreads;
-	SimGroup sg( numThreads, si );
+	SimGroup sg( numThreads, si, numNodes );
 	g_.push_back( sg );
 	inQ_.resize( g_.size() );
 	outQ_.resize( si + numThreads );

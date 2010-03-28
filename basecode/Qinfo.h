@@ -73,7 +73,8 @@ class Qinfo
 		 * resulting queue information.
 		 * Returns group#
 		 */
-		static unsigned int addSimGroup( unsigned short numThreads );
+		static unsigned int addSimGroup( unsigned short numThreads,
+			unsigned short numNodes );
 
 		/**
 		 * 	Returns the number of SimGroups

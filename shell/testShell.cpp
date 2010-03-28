@@ -77,6 +77,6 @@ void testShell( )
 {
 	testCreateDelete();
 	// testShellSharedMsg();
-	testShellParserCreateDelete();
+//	testShellParserCreateDelete();
 	//testInterNodeOps();
 }

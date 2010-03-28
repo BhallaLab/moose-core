@@ -62,6 +62,7 @@
 #include "header.h"
 #include "Tick.h"
 #include "TickPtr.h"
+#include "ThreadInfo.h"
 #include "Clock.h"
 
 	///////////////////////////////////////////////////////
@@ -359,8 +360,10 @@ void Clock::tStart(  Eref e, const ThreadInfo* ti )
 	ProcInfo pinfo = info_; //We use an independent ProcInfo for each thread
 	pinfo.threadId = ti->threadId; // to manage separate threadIds.
 	pinfo.threadIndexInGroup = ti->threadIndexInGroup;
+	pinfo.nodeIndexInGroup = ti->nodeIndexInGroup;
 	assert( ti->groupId < Qinfo::numSimGroup() );
 	pinfo.numThreadsInGroup = Qinfo::simGroup( ti->groupId )->numThreads;
+	pinfo.numNodesInGroup = Qinfo::simGroup( ti->groupId )->numNodes;
 	pinfo.groupId = ti->groupId;
 	pinfo.outQid = ti->outQid;
 	assert( pinfo.numThreads == numThreads_ );

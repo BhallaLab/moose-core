@@ -20,7 +20,10 @@
 // Want to separate out this search path into the Makefile options
 #include "../scheduling/Tick.h"
 #include "../scheduling/TickPtr.h"
+#include "../scheduling/ThreadInfo.h"
 #include "../scheduling/Clock.h"
+
+#define USE_NODES 1
 
 void Shell::setRunning( bool value )
 {
@@ -34,6 +37,7 @@ void* Shell::mpiThreadFunc( void* shellPtr )
 	Shell* shell = reinterpret_cast< Shell* >( shellPtr );
 	assert( shell->numNodes_ > 1 );
 	assert( shell->barrier_ );
+	cout << "mpiThreadFunc: on node " << shell->myNode_ << endl;
 
 	while( shell->isRunning_ ) {
 		// Sync with first step in Tick::advance
@@ -49,6 +53,8 @@ void* Shell::mpiThreadFunc( void* shellPtr )
 		rc = pthread_barrier_wait(
 			reinterpret_cast< pthread_barrier_t* >( shell->barrier_ ) );
 		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+		if ( !shell->isRunning_ )
+			break;
 		// Now inQ is filled and is safe to use.
 			cout << "mpiThreadFunc: inQ ready, used by readQ and alltoall\n";
 
@@ -151,7 +157,7 @@ void Shell::setHardware(
 	unsigned int myNode )
 {
 	isSingleThreaded_ = isSingleThreaded;
-	Qinfo::addSimGroup( 1 ); // This is the parser thread.
+	Qinfo::addSimGroup( 1, numNodes_ ); // This is the parser thread.
 	if ( !isSingleThreaded ) {
 		// Create the parser and the gui threads.
 		numCores_ = numCores;
@@ -192,7 +198,8 @@ void Shell::loadBalance()
 	// Note that this function is called independently on each node.
 	if ( !isSingleThreaded_ ) {
 		// for ( unsigned int i = 0; i < numNodes_; ++i )
-			Qinfo::addSimGroup( numCores_ ); //These are the worker threads.
+			//These are the worker threads.
+			Qinfo::addSimGroup( numCores_, numNodes_ );
 	}
 }
 
@@ -212,12 +219,14 @@ void Shell::initThreadInfo( vector< ThreadInfo >& ti,
 {
 	unsigned int j = 0;
 	for ( unsigned int i = 1; i < Qinfo::numSimGroup(); ++i ) {
-		for ( unsigned short k = 0; k < Qinfo::simGroup( i )->numThreads; ++k ) {
+		// for ( unsigned short k = 0; k < Qinfo::simGroup( i )->numThreads; ++k ) {
+		for ( unsigned short k = 0; k < ti.size(); ++k ) {
 			ti[j].clocke = clocke;
 			ti[j].qinfo = q;
 			ti[j].runtime = runtime;
 			ti[j].threadId = j;
 			ti[j].threadIndexInGroup = j - Qinfo::simGroup( i )->startThread + 1;
+			ti[j].nodeIndexInGroup = myNode_;
 			ti[j].groupId = i;
 			ti[j].outQid = Qinfo::simGroup(i)->startThread + k;
 			ti[j].sortMutex = sortMutex;
@@ -225,7 +234,7 @@ void Shell::initThreadInfo( vector< ThreadInfo >& ti,
 		}
 	}
 
-	assert( j == numCores_ );
+	assert( j == numCores_ + (numNodes_ > 1) );
 }
 
 void Shell::start( double runtime )
@@ -242,8 +251,10 @@ void Shell::start( double runtime )
 	}
 
 	unsigned int numThreads = numCores_;
+#if USE_NODES
 	if ( numNodes_ > 1 )
 		++numThreads;
+#endif
 
 	vector< ThreadInfo > ti( numThreads );
 	pthread_mutex_t sortMutex;
@@ -267,8 +278,8 @@ void Shell::start( double runtime )
 	clock->setBarrier( &barrier );
 	barrier_ = &barrier;
 	clock->setNumPendingThreads( 0 ); // Used for clock scheduling
-	clock->setNumThreads( numCores_ ); // Used for clock scheduling
-	for ( unsigned int i = 0; i < numCores_; ++i ) {
+	clock->setNumThreads( numThreads ); // Used for clock scheduling
+	for ( unsigned int i = 0; i < numThreads; ++i ) {
 		int ret = pthread_create( 
 			&threads[i], NULL, Clock::threadStartFunc, 
 			reinterpret_cast< void* >( &ti[i] )
@@ -278,7 +289,11 @@ void Shell::start( double runtime )
 			exit( -1 );
 		}
 	}
+	cout << "Shell::start: setting off with " << numNodes_ << " nodes on node " << myNode_ << "\n";
+/*
+#if USE_NODES
 	if ( numNodes_ > 1 ) { // Create a thread to dispatch MPI traffic.
+		// cout << "Shell::start: setting off with " << numNodes_ << " nodes\n";
 		int ret = pthread_create( &threads[ numCores_ ], NULL, 
 				Shell::mpiThreadFunc, 
 				reinterpret_cast< void* >( this )
@@ -288,6 +303,8 @@ void Shell::start( double runtime )
 			exit( -1 );
 		}
 	}
+#endif
+*/
 
 	// Clean up.
 	for ( unsigned int i = 0; i < numThreads ; ++i ) {

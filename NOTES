@@ -3825,4 +3825,89 @@ When the Clock finishes, it sets this flag to 0 as well. Seems to work.
 Now on to extending the mpiThreadFunc with another barrier to clear up
 the mpiQ. This compiles but fails unit test.
 
+Passes unit test, but doesn't engage second or any further threads. They do
+seem to form, though.
+After a lot of messing around it transpires that all was OK, I just didn't run
+the multithread calculation for long enough to see the other thread in
+action. Just changed the runsteps from 5 to 50 in testScheduling.cpp, and
+it is now visible when I run moose -c 2
+
+Now the mpiThreadFunc does not kick in when I run 
+mpirun -np 2 ./moose. Perhaps shell->isRunning_ is false?
+
+No, it was just that I handn't compiled with the BUILD=mpi flag.
+Now it hangs very satisfactorily, but without printing out lots of stuff.
+
+This turned out to be an old (known) issue with the shells trying to
+talk to each other without the mpi running. Commented it out. Now it
+crashes in testScheduling.cpp on an assertion.
+
+This is in testThreadSchedElement::process
 =============================================================================
+26 March
+Confirmed that this happens only on node 0, at least over 10 trials.
+Confirmed that it does not happen for mpirun -np 1
+Confirmed that it does happen, on node 0, for mpirun -np 4
+
+=============================================================================
+27 March
+Added USE_NODES flag. Turns out that the mpi problem happens even when the
+mpiThread isn't running.
+
+Fixed by commenting out the section in Tick::advance() where we go through
+process again. This must be it: I should only call process once on each Element,
+after all the incoming messages are dealt with. 
+	Yes, it now clears the tests, and the
+mpiThreadFunc is called as expected. But it now hangs with no CPU load 
+after the job is done. Suspect imbalance in clearing barriers.
+
+Try this: Before each barrier, the Tick sets a stage flag
+After each barrier the mpiThreadFunc looks at it.
+Problem is that it is possible for mpiThreadFunc to look
+at stage flag before Tick has set it. We actually have to
+wrap the flag assignment within barriers to be thread-safe.
+Then we need to de-assign the flag within the other pair
+of barriers.
+
+B---S---B-------B---S---B
+B-------B---U---B-------B
+
+Unfortunately this isn't enough for MPI traffic. Here
+we have an extra state.
+
+B---S1--B---S2--B---S3---B  loop TickPtrBarrier
+B---U3--B---U1--B---U2---B  loop TPB
+Could also do with just S1 and S2 and use logical ops to work out
+if we are in S3.
+Problem is the MPI thread doesn't know when we're done with
+the loop. Also I am myself not sure what happens with the 
+end of a tickPtr cycle when there are multiple ticks.
+
+Alternatively, perhaps cleaner, have three barriers plus the
+termination barrier.
+
+B1----B2---B3 loop ---B4
+B1----B2---B3 loop ---B4
+
+The other approach is to set off the mpiThread as just another Tick
+thread. The problem with this is to guarantee that only one thread
+ever calls MPI functions. I think this is safe. Let's try it.
+We currently have a huge mess of things passing threading
+info into the Clock::tStart. Some go through the ThreadInfo,
+others are extracted from the GroupId, others directly set into Clock.
+
+Tried to proceed anyway. Things are so messy it isn't doable.
+Cleanup:
+SimGroups: These contain the primary job decomposition info.
+ProcInfo: Keeps track of stuff that current thread is doing.
+	GroupId
+	threadIndexInGroup
+	nodeIndexInGroup? or current node#
+	whether current thread is for mpi.
+	barrier
+
+Perhaps instead of passing in a ThreadInfo structure I should
+pass in ProcInfos.
+
+=============================================================================
+

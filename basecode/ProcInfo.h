@@ -22,11 +22,11 @@ class ProcInfo
 			{;}
 		double dt;
 		double currTime;
-		unsigned int numThreads;
+		unsigned int numThreads; // Includes the mpiThread, if any
 		unsigned int threadId;
 		Qid outQid;	// Index of outQ to use.
 		unsigned int threadIndexInGroup;
-		unsigned int numThreadsInGroup;
+		unsigned int numThreadsInGroup; // compute threads
 		unsigned int nodeIndexInGroup;
 		unsigned int numNodesInGroup;
 		unsigned int groupId;

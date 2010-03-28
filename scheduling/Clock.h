@@ -10,20 +10,6 @@
 #ifndef _CLOCK_H
 #define _CLOCK_H
 
-class ThreadInfo
-{
-	public:
-		Element* clocke;
-		Qinfo* qinfo;
-		double runtime;
-		unsigned int threadId;
-		unsigned int threadIndexInGroup;
-		unsigned int groupId;
-		Qid outQid;
-		pthread_mutex_t* sortMutex; // Protects sorting of TickPtrs
-		pthread_mutex_t* timeMutex; // Protects time increment in TickPtrs
-};
-
 class Clock: public Data
 {
 	friend void setupTicks();
