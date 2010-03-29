@@ -123,6 +123,11 @@ class Qinfo
 		static unsigned int dumpQ( Qid qid, char* buf );
 
 		/**
+		 * Send contents of specified inQ to all nodes using MPI
+		 */
+		static void sendAllToAll( const ProcInfo* proc );
+
+		/**
 		 * Handles the case where the system wants to send a msg to
 		 * a single target. Currently done through an ugly hack, 
 		 * encapsulated here.
@@ -147,16 +152,16 @@ class Qinfo
 	
 		/**
 		 * Returns a pointer to the inQ. Readonly.
-		 */
 		const char* getInQ( unsigned int i );
+		 */
 
 		/**
 		 * Returns a pointer to the first block of the mpiQ, which is one
 		 * long array.
 		 * Note that the mpiQ has as many blocks as there are nodes,
 		 * including current one. All blocks are the same size.
-		 */
 		char* getMpiQ( unsigned int i );
+		 */
 		
 	private:
 		bool useSendTo_;	// true if the msg is to a single target DataId.

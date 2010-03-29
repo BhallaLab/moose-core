@@ -3925,3 +3925,11 @@ Now hangs, but no crash.
 Hangs in coming out of testThreads. When I comment out testThreads,
 there is no problem.
 Checkin as 1665.
+
+Got rid of the hang. Checkin as 1666.
+This is good. But I think I need to get the extra thread
+running also for the Shell msg.
+Then I can think about implementing it.
+
+Setting up stuff for the Shell basic thread, in ShellThreads.cpp:
+passThroughMsgQs

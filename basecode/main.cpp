@@ -103,6 +103,11 @@ int main( int argc, char** argv )
 	Element* shelle = shellId();
 	Shell* s = reinterpret_cast< Shell* >( shelle->data( 0 ) );
 	ProcInfo p;
+	// Actually here we should launch off the thread doing
+	// Shell messaging/MPI, and yield control to the parser.
+	s->launchMsgLoop( shelle );
+	s->launchParser();
+	/*
 	while( !s->getQuit() ) {
 		Qinfo::clearQ( Shell::procInfo() );
 		// The shell is careful not to execute any structural commands
@@ -110,6 +115,7 @@ int main( int argc, char** argv )
 		// clearing during process.
 		shelle->process( &p );
 	}
+	*/
 
 	shellId.destroy();
 	Id(1).destroy();

@@ -30,6 +30,52 @@ void Shell::setRunning( bool value )
 	isRunning_ = value;
 }
 
+/**
+ * Launches Parser. Blocking when the parser blocks.
+ */
+void Shell::launchParser()
+{
+	;
+}
+
+/**
+ * Sets of message loop either on a separate thread, or the current one.
+ */
+void Shell::launchMsgLoop( Element* shelle )
+{
+	msgLoop( shelle );
+}
+
+// Static func, passed in to the thread.
+// This function handles local node as well as off-node messaging 
+// for the Shell. 
+void* Shell::msgLoop( void* shellePtr )
+{
+	Element* shelle = reinterpret_cast< Element* >( shellePtr );
+	Shell* shell = reinterpret_cast< Shell* >( shelle->data( 0 ) );
+	while ( !shell->getQuit() ) {
+		// Put in a condition_wait here in case we have to sync with the
+		// Clock. The idea is that if the clock gets going, this
+		// loop must wait.
+		shell->passThroughMsgQs( shelle );
+	}
+}
+
+// This is a single pass through the Shell messaging
+// It can be called as a separate thread or as a serial
+// function by the Clock, interleaved between data handled by the 
+// processing threads.
+void Shell::passThroughMsgQs( Element* shelle )
+{
+	Qinfo::mergeQ( 0 ); // Fill up inQ
+	Qinfo::sendAllToAll( &p_ ); // Send out inQ
+	// send alltoall. Could do on another thread.
+	Qinfo::readQ( &p_ ); // execute stuff on inQ
+	Qinfo::readMpiQ( &p_ ); // execute stuff on mpiQ that came in alltoall
+	shelle->process( &p_ );
+}
+
+
 // Static func, passed in to the thread.
 // Version 2, dated 24 March. This variant uses alltoall
 void* Shell::mpiThreadFunc( void* shellPtr )

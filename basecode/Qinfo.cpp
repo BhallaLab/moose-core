@@ -176,6 +176,14 @@ void Qinfo::mergeQ( unsigned int groupId )
 }
 
 /**
+ * Static func.
+ */
+void Qinfo::sendAllToAll( const ProcInfo* proc )
+{
+	;
+}
+
+/**
  * Static func. Not thread safe. Catenates data from a buffer into 
  * specified inQ.
  * May resize it in the process, so iterators have to watch out.

@@ -93,6 +93,17 @@ class Shell: public Data
 		 */
 		static void* mpiThreadFunc( void* shellPtr );
 
+		void launchParser();
+
+		void launchMsgLoop( Element* shelle );
+		/**
+		 * Thread func for handling msgs.
+		 */
+		void* msgLoop( void* shelle );
+
+		void passThroughMsgQs( Element* shelle );
+
+
 		void setRunning( bool value );
 
 		////////////////////////////////////////////////////////////////
