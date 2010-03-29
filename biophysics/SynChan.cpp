@@ -44,50 +44,61 @@ const Cinfo* initSynChanCinfo()
 	{
 		new ValueFinfo( "Gbar", ValueFtype1< double >::global(),
 			GFCAST( &SynChan::getGbar ), 
-			RFCAST( &SynChan::setGbar )
+                        RFCAST( &SynChan::setGbar ),
+                        "Peak channel conductance."        
 		),
 		new ValueFinfo( "Ek", ValueFtype1< double >::global(),
 			GFCAST( &SynChan::getEk ), 
-			RFCAST( &SynChan::setEk )
+                        RFCAST( &SynChan::setEk ),
+                        "Reversal potential for the synaptic channel."        
 		),
 		new ValueFinfo( "tau1", ValueFtype1< double >::global(),
 			GFCAST( &SynChan::getTau1 ), 
-			RFCAST( &SynChan::setTau1 )
+                        RFCAST( &SynChan::setTau1 ),
+                        "Decay time constant for the synaptic conductance, tau1 >= tau2."
 		),
 		new ValueFinfo( "tau2", ValueFtype1< double >::global(),
 			GFCAST( &SynChan::getTau2 ), 
-			RFCAST( &SynChan::setTau2 )
+                        RFCAST( &SynChan::setTau2 ),
+                        "Rise time constant for the synaptic conductance, tau1 >= tau2."
 		),
 		new ValueFinfo( "normalizeWeights", 
 			ValueFtype1< bool >::global(),
 			GFCAST( &SynChan::getNormalizeWeights ), 
-			RFCAST( &SynChan::setNormalizeWeights )
+                        RFCAST( &SynChan::setNormalizeWeights ),
+                        "If true, the overall conductance is normalized by the number of individual synapses in this SynChan object."        
 		),
 		new ValueFinfo( "Gk", ValueFtype1< double >::global(),
 			GFCAST( &SynChan::getGk ), 
-			RFCAST( &SynChan::setGk )
+                        RFCAST( &SynChan::setGk ),
+                        "Conductance of the synaptic channel"
 		),
 		new ValueFinfo( "Ik", ValueFtype1< double >::global(),
 			GFCAST( &SynChan::getIk ), 
-			&dummyFunc
+                        &dummyFunc,
+                        "Channel current."        
 		),
 
 		new ValueFinfo( "numSynapses",
 			ValueFtype1< unsigned int >::global(),
 			GFCAST( &SynChan::getNumSynapses ), 
-			&dummyFunc // Prohibit reassignment of this index.
+                        &dummyFunc, // Prohibit reassignment of this
+                                    // index.
+                        "Number of individual synapses clubbed in this SynChan object."        
 		),
 
 		new LookupFinfo( "weight",
 			LookupFtype< double, unsigned int >::global(),
 			GFCAST( &SynChan::getWeight ),
-			RFCAST( &SynChan::setWeight )
+                        RFCAST( &SynChan::setWeight ),
+                        "Weight of i-th synaptic connection in the SynChan object."         
 		),
 
 		new LookupFinfo( "delay",
 			LookupFtype< double, unsigned int >::global(),
 			GFCAST( &SynChan::getDelay ),
-			RFCAST( &SynChan::setDelay )
+                        RFCAST( &SynChan::setDelay ),
+                        "Events coming on i-th synaptic connection will contribute to the SynChan conductance only after this time."
 		),
 ///////////////////////////////////////////////////////
 // Shared message definitions
