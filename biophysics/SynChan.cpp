@@ -228,6 +228,7 @@ double SynChan::getIk( Eref e )
 
 int SynChan::getNumSynapses( Eref e )
 {
+        static_cast< SynChan* >( e.data() )->updateNumSynapse( e );
 	return static_cast< SynChan* >( e.data() )->synapses_.size();
 }
 
