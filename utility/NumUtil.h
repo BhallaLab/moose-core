@@ -18,7 +18,10 @@
 #ifndef _NUMUTIL_H
 #define _NUMUTIL_H
 
+#include <cmath>
 #include <cfloat>
+#include <limits>
+
 const int WORD_LENGTH = 32; // number of bits in a word - check for portability
 const double LN2 = 0.69314718055994528622676;
 const unsigned long LN2BYTES = 0xB1721814;
@@ -30,10 +33,52 @@ const double NATURAL_E = 2.718281828459045;
 #define M_PI 3.14159265358979323846             
 #endif
 
+/**
+ * Functions for floating point comparisons
+ */
+template<class T>
+bool isNaN( T value )
+{
+	return value != value;
+}
+
+template< typename T >
+bool isInfinity( T value )
+{
+	return value == std::numeric_limits< T >::infinity();
+}
+
+/**
+ * Check 2 floating-point numbers for "equality".
+ * Algorithm (from Knuth) 'a' and 'b' are close if:
+ *      | ( a - b ) / a | < e AND | ( a - b ) / b | < e
+ * where 'e' is a small number.
+ * 
+ * In this function, 'e' is computed as:
+ * 	    e = tolerance * machine-epsilon
+ */
+template< class T >
+bool isClose( T a, T b, T tolerance )
+{
+    T epsilon = std::numeric_limits< T >::epsilon();
+	
+	if ( a == b )
+		return true;
+	
+	if ( a == 0 || b == 0 )
+		return ( fabs( a - b ) < tolerance * epsilon );
+	
+	return (
+		fabs( ( a - b ) / a ) < tolerance * epsilon
+		&&
+		fabs( ( a - b ) / b ) < tolerance * epsilon
+	);
+}
 
 bool isEqual(float x, float y, float epsilon = FLT_EPSILON);
 bool isEqual(double x, double y, double epsilon = DBL_EPSILON);
 bool isEqual(long double x, long double y, long double epsilon = LDBL_EPSILON);
+
 // round, isinf and isnan are not defined in VC++ or Borland C++
 #if defined(__TURBOC__) || defined(__BORLANDC__) || defined(_MSC_VER)
 #define isinf(param) !_finite(param)
