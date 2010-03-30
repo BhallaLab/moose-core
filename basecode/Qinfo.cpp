@@ -216,17 +216,22 @@ void Qinfo::sendAllToAll( const ProcInfo* proc )
 #ifdef USE_MPI
 	cout << "Sending stuff via mpi\n";
 	if ( proc->nodeIndexInGroup == 0 ) {
-		MPI::COMM_WORLD.Bcast( 
-			sendbuf, BLOCKSIZE, MPI::CHAR, 0 );
+		MPI_Bcast( 
+			sendbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
 	} else {
-		MPI::COMM_WORLD.Bcast( 
-			recvbuf, BLOCKSIZE, MPI::CHAR, 0 );
+		MPI_Bcast( 
+			recvbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
 	}
 
 	// Recieve data from all other nodes
+	MPI_Gather( 
+		sendbuf, BLOCKSIZE, MPI_CHAR, 
+		recvbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
+	/*
 	MPI::COMM_WORLD.Gather( 
 		sendbuf, BLOCKSIZE, MPI::CHAR, 
 		recvbuf, BLOCKSIZE, MPI::CHAR, 0 );
+		*/
 #endif
 }
 

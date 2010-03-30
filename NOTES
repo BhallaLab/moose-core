@@ -3946,6 +3946,13 @@ of broadcasts, which will give a chance to interleave comm and comp.
 - Define size of data to go
 * Allocate buffers.
 	
-Got a dummy data transfer to go via MPI.
+Got a dummy data transfer to go via MPI. Checkin 1670.
+Came across a surprising note, confirmed on the web: MPI2.2 deprecates
+the C++ bindings. Given this situation, I need to go back at this
+early stage and recode the MPI calls to C.
+Done. Also put in a check for thread support, which turns out to
+be missing on the current MPI implementation on my machine. Anyway,
+my implementation is serialized so that I protect the MPI from 
+simultaneous calls on different threads.
 
 =============================================================================

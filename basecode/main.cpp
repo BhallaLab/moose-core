@@ -52,9 +52,15 @@ Id init( int argc, char** argv )
 		}
 	}
 #ifdef USE_MPI
-	MPI::Init( argc, argv );
-	numNodes = MPI::COMM_WORLD.Get_size();
-	myNode = MPI::COMM_WORLD.Get_rank();
+	int provided;
+	MPI_Init_thread( &argc, &argv, MPI_THREAD_SERIALIZED, &provided );
+	if ( provided < MPI_THREAD_SERIALIZED ) {
+		cout << "Warning: This MPI implementation does not like multithreading: " << provided << "\n";
+	}
+
+	MPI_Comm_size( MPI_COMM_WORLD, &numNodes );
+	MPI_Comm_rank( MPI_COMM_WORLD, &myNode );
+	// myNode = MPI::COMM_WORLD.Get_rank();
 	cout << "on node " << myNode << ", numNodes = " << numNodes << endl;
 #endif
 
@@ -121,7 +127,7 @@ int main( int argc, char** argv )
 	Id(1).destroy();
 	Id(2).destroy();
 #ifdef USE_MPI
-	MPI::Finalize();
+	MPI_Finalize();
 #endif
 	return 0;
 }
