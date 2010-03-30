@@ -12,7 +12,6 @@ OBJ = \
 	Poisson.o	\
 	Gamma.o		\
 	RandGenerator.o	\
-	NumUtil.o	\
 	NormalRng.o	\
 	PoissonRng.o	\
 	BinomialRng.o	\
@@ -29,7 +28,6 @@ HEADERS = \
 	Poisson.h	\
 	Gamma.h		\
 	randnum.h	\
-	NumUtil.h	\
 	RandGenerator.h	\
 	NormalRng.h	\
 	PoissonRng.h	\
