@@ -19,7 +19,7 @@
 #define _BINOMIAL_CPP
 #include <cmath>
 #include "randnum.h"
-#include "NumUtil.h"
+#include "utility/NumUtil.h"
 #include "Binomial.h"
 #include <vector>
 #include <iostream>

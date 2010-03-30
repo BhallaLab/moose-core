@@ -7,6 +7,7 @@ TARGET = utility.o
 OBJ = \
 	ArgParser.o	\
 	PathUtility.o	\
+	NumUtil.o	\
 	StringUtil.o	\
 	Property.o	\
 	SparseMatrix.o	\
@@ -16,6 +17,7 @@ OBJ = \
 HEADERS = \
 	ArgParser.h	\
 	PathUtility.h	\
+	NumUtil.h	\
 	Property.h	\
 	StringUtil.h	\
 	utility.h	\
@@ -27,6 +29,7 @@ default: $(TARGET)
 
 ArgParser.o : ArgParser.h
 PathUtility.o : PathUtility.h
+NumUtil.o: NumUtil.h
 StringUtil.o : StringUtil.h
 Property.o : Property.h
 SparseMatrix.o : SparseMatrix.h
