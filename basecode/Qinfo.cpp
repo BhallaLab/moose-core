@@ -8,10 +8,14 @@
 **********************************************************************/
 
 #include "header.h"
+#ifdef USE_MPI
+#include <mpi.h>
+#endif
 
 // Declaration of static field
 vector< vector< char > > Qinfo::inQ_;
 vector< vector< char > > Qinfo::outQ_;
+vector< vector< char > > Qinfo::mpiQ_;
 vector< SimGroup > Qinfo::g_;
 
 Qinfo::Qinfo( FuncId f, DataId srcIndex, 
@@ -73,7 +77,12 @@ unsigned int Qinfo::addSimGroup( unsigned short numThreads,
 		si = g_[ng - 1].startThread + g_[ng - 1].numThreads;
 	SimGroup sg( numThreads, si, numNodes );
 	g_.push_back( sg );
+
 	inQ_.resize( g_.size() );
+
+	mpiQ_.resize( g_.size() );
+	mpiQ_.back().resize( 1024 * numNodes );
+
 	outQ_.resize( si + numThreads );
 	for ( unsigned int i = 0; i < numThreads; ++i ) {
 		outQ_[i + si].reserve( 1024 );
@@ -177,10 +186,48 @@ void Qinfo::mergeQ( unsigned int groupId )
 
 /**
  * Static func.
+ * the MPI::Alltoall function doesn't work here because it partitions out
+ * the send buffer into pieces targetted for each other node. 
+ * The Scatter fucntion does something similar, but it is one-way.
+ * The Broadcast function is good. Sends just the one datum from source
+ * to all other nodes.
+ * For return we need the Gather function: the root node collects responses
+ * from each of the other nodes.
  */
 void Qinfo::sendAllToAll( const ProcInfo* proc )
 {
-	;
+	static const unsigned int BLOCKSIZE = 1024;
+	if ( proc->numNodesInGroup == 1 )
+		return;
+	cout << "ng = " << g_.size() << "nmpiQ = " << mpiQ_.size() << 
+		" proc->groupId =  " << proc->groupId  <<
+		" s1 = " << mpiQ_[ proc->groupId ].size() <<
+		" s2 = " << BLOCKSIZE * proc->numNodesInGroup;
+	assert( mpiQ_[ proc->groupId ].size() >= BLOCKSIZE * proc->numNodesInGroup );
+	char* sendbuf = &inQ_[ proc->groupId ][0];
+	char* recvbuf = &mpiQ_[ proc->groupId ][0];
+	assert ( inQ_[ proc->groupId ].size() < BLOCKSIZE );
+	/*
+	MPI::COMM_WORLD.Alltoall( 
+		sendbuf, BLOCKSIZE, MPI::CHAR,
+		recvbuf, BLOCKSIZE, MPI::CHAR );
+		*/
+	// Send out data from master node.
+#ifdef USE_MPI
+	cout << "Sending stuff via mpi\n";
+	if ( proc->nodeIndexInGroup == 0 ) {
+		MPI::COMM_WORLD.Bcast( 
+			sendbuf, BLOCKSIZE, MPI::CHAR, 0 );
+	} else {
+		MPI::COMM_WORLD.Bcast( 
+			recvbuf, BLOCKSIZE, MPI::CHAR, 0 );
+	}
+
+	// Recieve data from all other nodes
+	MPI::COMM_WORLD.Gather( 
+		sendbuf, BLOCKSIZE, MPI::CHAR, 
+		recvbuf, BLOCKSIZE, MPI::CHAR, 0 );
+#endif
 }
 
 /**

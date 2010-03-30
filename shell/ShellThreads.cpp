@@ -59,6 +59,7 @@ void* Shell::msgLoop( void* shellePtr )
 		// loop must wait.
 		shell->passThroughMsgQs( shelle );
 	}
+	pthread_exit( NULL );
 }
 
 // This is a single pass through the Shell messaging
@@ -68,6 +69,7 @@ void* Shell::msgLoop( void* shellePtr )
 void Shell::passThroughMsgQs( Element* shelle )
 {
 	Qinfo::mergeQ( 0 ); // Fill up inQ
+	p_.numNodesInGroup = numNodes_;
 	Qinfo::sendAllToAll( &p_ ); // Send out inQ
 	// send alltoall. Could do on another thread.
 	Qinfo::readQ( &p_ ); // execute stuff on inQ
@@ -203,7 +205,7 @@ void Shell::setHardware(
 	unsigned int myNode )
 {
 	isSingleThreaded_ = isSingleThreaded;
-	Qinfo::addSimGroup( 1, numNodes_ ); // This is the parser thread.
+	Qinfo::addSimGroup( 1, numNodes ); // This is the parser thread.
 	if ( !isSingleThreaded ) {
 		// Create the parser and the gui threads.
 		numCores_ = numCores;

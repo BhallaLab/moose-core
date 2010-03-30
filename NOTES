@@ -3933,3 +3933,19 @@ Then I can think about implementing it.
 
 Setting up stuff for the Shell basic thread, in ShellThreads.cpp:
 passThroughMsgQs
+This framework is now OK: compiles and clears preliminary unit tests.
+Checkin as 1669
+=============================================================================
+30 March.
+Qinfo::sendAllToAll
+Should be renamed, Qinfo::syncShells
+
+The sendAllToAll will probably have to be implemented as a series
+of broadcasts, which will give a chance to interleave comm and comp.
+
+- Define size of data to go
+* Allocate buffers.
+	
+Got a dummy data transfer to go via MPI.
+
+=============================================================================
