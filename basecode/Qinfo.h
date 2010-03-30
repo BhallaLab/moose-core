@@ -113,14 +113,14 @@ class Qinfo
 		/**
 		 * Load a buffer of data into an inQ. Assumes threading has been
 		 * dealt with.
-		 */
 		static void loadQ( Qid qId, const char* buf, unsigned int length );
+		 */
 
 		/**
 		 * Dump an inQ into a buffer of data. Again, assumes threading has
 		 * been dealt with. Basically a memcpy.
-		 */
 		static unsigned int dumpQ( Qid qid, char* buf );
+		 */
 
 		/**
 		 * Send contents of specified inQ to all nodes using MPI
@@ -131,8 +131,8 @@ class Qinfo
 		 * Handles the case where the system wants to send a msg to
 		 * a single target. Currently done through an ugly hack, 
 		 * encapsulated here.
-		 */
 		static void hackForSendTo( const Qinfo* q, const char* buf );
+		 */
 
 		/**
 		 * Reporting function to tell us about queue status.

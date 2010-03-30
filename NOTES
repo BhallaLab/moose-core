@@ -3943,7 +3943,7 @@ Should be renamed, Qinfo::syncShells
 The sendAllToAll will probably have to be implemented as a series
 of broadcasts, which will give a chance to interleave comm and comp.
 
-- Define size of data to go
+* Define size of data to go
 * Allocate buffers.
 	
 Got a dummy data transfer to go via MPI. Checkin 1670.
@@ -3953,6 +3953,10 @@ early stage and recode the MPI calls to C.
 Done. Also put in a check for thread support, which turns out to
 be missing on the current MPI implementation on my machine. Anyway,
 my implementation is serialized so that I protect the MPI from 
-simultaneous calls on different threads.
+simultaneous calls on different threads. Checkin 1672.
+
+Added in info on inQ buffer size in the beginning of the buffer, as
+an unsigned int. Surprisingly clean, all within Qinfo. Clears
+unit tests.
 
 =============================================================================
