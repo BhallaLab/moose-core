@@ -18,7 +18,7 @@
 #ifndef _NUMUTIL_H
 #define _NUMUTIL_H
 
-#include <float.h>
+#include <cfloat>
 const int WORD_LENGTH = 32; // number of bits in a word - check for portability
 const double LN2 = 0.69314718055994528622676;
 const unsigned long LN2BYTES = 0xB1721814;
