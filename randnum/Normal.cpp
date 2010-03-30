@@ -19,7 +19,7 @@
 #define _NORMAL_CPP
 #include "Normal.h"
 #include "randnum.h"
-#include "NumUtil.h"
+#include "utility/NumUtil.h"
 #include <cmath>
 #include <iostream>
 using namespace std;

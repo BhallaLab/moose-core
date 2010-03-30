@@ -18,7 +18,7 @@
 #ifndef _GAMMA_CPP
 #define _GAMMA_CPP
 #include <cmath>
-#include "NumUtil.h"
+#include "utility/NumUtil.h"
 #include "Gamma.h"
 #include "Exponential.h"
 #include "randnum.h"

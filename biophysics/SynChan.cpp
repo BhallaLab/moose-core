@@ -8,8 +8,9 @@
 **********************************************************************/
 
 #include <math.h>
-#include "moose.h"
 #include <queue>
+#include "moose.h"
+#include "utility/NumUtil.h"
 #include "SynInfo.h"
 #include "SynChan.h"
 #include "../element/Neutral.h"
@@ -366,18 +367,25 @@ void SynChan::innerReinitFunc( Eref e, ProcInfo info )
 	Y_ = 0.0;
 	xconst1_ = tau1_ * ( 1.0 - exp( -dt / tau1_ ) );
 	xconst2_ = exp( -dt / tau1_ );
-	yconst1_ = tau2_ * ( 1.0 - exp( -dt / tau2_ ) );
-	yconst2_ = exp( -dt / tau2_ );
-	if ( tau1_ == tau2_ ) {
-		norm_ = Gbar_ * SynE / tau1_;
-	} else {
-		double tpeak = tau1_ * tau2_ * log( tau1_ / tau2_ ) / 
-			( tau1_ - tau2_ );
-		norm_ = Gbar_ * ( tau1_ - tau2_ ) / 
-			( tau1_ * tau2_ * ( 
-				exp( -tpeak / tau1_ ) - exp( -tpeak / tau2_ )
-			) );
-	}
+        if (isEqual(tau2_, 0.0)) {
+                yconst1_ = 1.0;
+                yconst2_ = 0.0;
+                norm_ = 1.0;
+        } else {
+                yconst1_ = tau2_ * ( 1.0 - exp( -dt / tau2_ ) );
+                yconst2_ = exp( -dt / tau2_ );
+                if ( tau1_ == tau2_ ) {
+                    norm_ = Gbar_ * SynE / tau1_;
+                } else {
+                    double tpeak = tau1_ * tau2_ * log( tau1_ / tau2_ ) / 
+                            ( tau1_ - tau2_ );
+                    norm_ = Gbar_ * ( tau1_ - tau2_ ) / 
+                            ( tau1_ * tau2_ * ( 
+                                    exp( -tpeak / tau1_ ) - exp( -tpeak / tau2_ )
+                                                ));
+                }
+        }
+        
 	updateNumSynapse( e );
 	if ( normalizeWeights_ && synapses_.size() > 0 )
 		norm_ /= static_cast< double >( synapses_.size() );
