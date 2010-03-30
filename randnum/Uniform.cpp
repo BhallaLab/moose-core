@@ -24,7 +24,7 @@
 
 #include "Uniform.h"
 #include "randnum.h"
-#include "NumUtil.h"
+#include "utility/NumUtil.h"
 
 using namespace std;
 
