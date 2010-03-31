@@ -26,10 +26,9 @@ namespace pymoose
         void __set_amplitude(double amplitude);
         double __get_state() const;
         void __set_state(double state);
-        double __get_event() const;
-        void __set_event(double event);
-        double __get_Vm() const;
-        void __set_Vm(double Vm);
+        int __get_edgeTriggered() const;
+        void __set_edgeTriggered(int edgeTriggered);
+        
     };
 }
 

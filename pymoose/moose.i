@@ -347,9 +347,8 @@ NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.se
 %attribute(pymoose::SpikeGen, double, absRefractT, __get_absRefractT, __set_absRefractT)
 %attribute(pymoose::SpikeGen, double, amplitude, __get_amplitude, __set_amplitude)
 %attribute(pymoose::SpikeGen, double, state, __get_state, __set_state)
-%attribute(pymoose::SpikeGen, double, event, __get_event, __set_event)
-%attribute(pymoose::SpikeGen, double, Vm, __get_Vm, __set_Vm)
-
+%attribute(pymoose::SpikeGen, int, edgeTriggered, __get_edgeTriggered, __set_edgeTriggered)
+           
 %include "RandomSpike.h"
 %attribute(pymoose::RandomSpike, double, minAmp, __get_minAmp, __set_minAmp)
 %attribute(pymoose::RandomSpike, double, maxAmp, __get_maxAmp, __set_maxAmp)
@@ -571,6 +570,10 @@ NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.se
 %attribute(pymoose::NormalRng, double, mean, __get_mean, __set_mean)
 %attribute(pymoose::NormalRng, double, variance, __get_variance, __set_variance)
 %attribute(pymoose::NormalRng, int, method, __get_method, __set_method)
+
+//************************************************
+// Chemical Kinetics classes
+//************************************************
 
 %include "KineticManager.h"
 %attribute(pymoose::KineticManager, bool, autoMode, __get_autoMode, __set_autoMode)
