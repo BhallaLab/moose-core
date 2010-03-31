@@ -94,6 +94,11 @@ class Qinfo
 		static void clearQ( const ProcInfo *proc );
 
 		/**
+		 * Variant that also takes care of internode stuff.
+		 */
+		static void mpiClearQ( const ProcInfo *proc );
+
+		/**
 		 * Read the queue specified by the ProcInfo. Depending on the
 		 * scheduling and threading structure, may simply go through
 		 * all the available queues.

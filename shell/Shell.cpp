@@ -214,7 +214,7 @@ Id Shell::doCreate( string type, Id parent, string name, vector< unsigned int > 
 	// Now we wait till all nodes are done.
 	numCreateAcks_ = 0;
 	while ( numCreateAcks_ < numNodes_ )
-		Qinfo::clearQ( &p_ );
+		Qinfo::mpiClearQ( &p_ );
 	// Here we might choose to check if success on all nodes.
 	
 	return ret;
@@ -226,7 +226,7 @@ bool Shell::doDelete( Id i )
 	// Now we wait till all nodes are done.
 	numDeleteAcks_ = 0;
 	while ( numDeleteAcks_ < numNodes_ )
-		Qinfo::clearQ( &p_ );
+		Qinfo::mpiClearQ( &p_ );
 
 	return 1;
 }

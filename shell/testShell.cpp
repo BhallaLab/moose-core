@@ -50,6 +50,8 @@ void testShellParserCreateDelete()
 {
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+	if ( shell->myNode() != 0 )
+		return;
 
 	bool ret = shell->doCreateMsg( Id(), "master", 
 		Id(), "worker", "OneToOneMsg" );
@@ -77,6 +79,6 @@ void testShell( )
 {
 	testCreateDelete();
 	// testShellSharedMsg();
-//	testShellParserCreateDelete();
+	testShellParserCreateDelete();
 	//testInterNodeOps();
 }

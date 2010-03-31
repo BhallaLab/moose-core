@@ -3957,6 +3957,11 @@ simultaneous calls on different threads. Checkin 1672.
 
 Added in info on inQ buffer size in the beginning of the buffer, as
 an unsigned int. Surprisingly clean, all within Qinfo. Clears
-unit tests.
+unit tests. Checkin 1673.
 
+Now beginning attempts to do actual data transfer. It does look like it
+would be good to put the queue transfer stuff onto a separate thread.
+
+Struggling. Segvs. Valgrind suggests that there is a problem when broadcasting
+the inQ.
 =============================================================================

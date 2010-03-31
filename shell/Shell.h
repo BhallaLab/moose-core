@@ -73,7 +73,8 @@ class Shell: public Data
 			unsigned int numCores, unsigned int numNodes, 
 			unsigned int myNode );
 
-		unsigned int numCores();
+		unsigned int myNode() const ;
+		unsigned int numCores() const;
 
 		void initThreadInfo( vector< ThreadInfo >& ti,
 		Element* clocke, Qinfo* q,

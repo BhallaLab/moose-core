@@ -99,9 +99,9 @@ int main( int argc, char** argv )
 #ifdef DO_UNIT_TESTS
 	cout << "testing: ";
 #endif
-	testAsync();
+//	testAsync();
 	testShell();
-	testScheduling();
+//	testScheduling();
 	cout << endl;
 
 	// Note that the main loop remains the parser loop, though it may
