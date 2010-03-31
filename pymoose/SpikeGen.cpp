@@ -69,24 +69,15 @@ void SpikeGen::__set_state( double state )
 {
     set < double > (id_(), "state", state);
 }
-double SpikeGen::__get_event() const
+int SpikeGen::__get_edgeTriggered() const
 {
-    double event;
-    get < double > (id_(), "event",event);
-    return event;
+    int edgeTriggered;
+    get < int > (id_(), "edgeTriggered",edgeTriggered);
+    return edgeTriggered;
 }
-void SpikeGen::__set_event( double event )
+void SpikeGen::__set_edgeTriggered( int edgeTriggered )
 {
-    set < double > (id_(), "event", event);
+    set < int > (id_(), "edgeTriggered", edgeTriggered);
 }
-double SpikeGen::__get_Vm() const
-{
-    double Vm;
-    get < double > (id_(), "Vm",Vm);
-    return Vm;
-}
-void SpikeGen::__set_Vm( double Vm )
-{
-    set < double > (id_(), "Vm", Vm);
-}
+
 #endif
