@@ -9,6 +9,9 @@
 
 #include "header.h"
 #include "Shell.h"
+#ifdef USE_MPI
+#include <mpi.h>
+#endif
 
 void testCreateDelete()
 {
@@ -50,13 +53,18 @@ void testShellParserCreateDelete()
 {
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-	if ( shell->myNode() != 0 )
-		return;
 
 	bool ret = shell->doCreateMsg( Id(), "master", 
 		Id(), "worker", "OneToOneMsg" );
 	assert( ret );
+#ifdef USE_MPI
+	cerr << shell->myNode() << " testShellParserCreateDelete: before barrier\n";
+	MPI_Barrier( MPI_COMM_WORLD );
+	cerr << shell->myNode() << " testShellParserCreateDelete: after barrier\n";
+#endif
 
+	if ( shell->myNode() != 0 )
+		return;
 //	sheller.element()->showFields();
 //	sheller.element()->showMsg();
 

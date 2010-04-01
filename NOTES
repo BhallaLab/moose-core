@@ -3965,3 +3965,11 @@ would be good to put the queue transfer stuff onto a separate thread.
 Struggling. Segvs. Valgrind suggests that there is a problem when broadcasting
 the inQ.
 =============================================================================
+31 March.
+A clue: If I put in an MPI_barrier, the function hangs. So something is 
+wrong with the sequencing. Trying to track this down.
+=============================================================================
+1 April
+Looks like I've found the cause of the segvs. I had swapped
+sendbuf and recvbuf in the MPI_Gather command. Now the program
+can go on indefinitely without error, but I've cut it short.

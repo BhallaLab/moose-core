@@ -111,8 +111,10 @@ int main( int argc, char** argv )
 	ProcInfo p;
 	// Actually here we should launch off the thread doing
 	// Shell messaging/MPI, and yield control to the parser.
-	s->launchMsgLoop( shelle );
-	s->launchParser();
+	if ( s->myNode() == 0 )
+		s->launchParser();
+	else
+		s->launchMsgLoop( shelle );
 	/*
 	while( !s->getQuit() ) {
 		Qinfo::clearQ( Shell::procInfo() );

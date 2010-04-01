@@ -57,6 +57,8 @@ void* Shell::msgLoop( void* shellePtr )
 		// Put in a condition_wait here in case we have to sync with the
 		// Clock. The idea is that if the clock gets going, this
 		// loop must wait.
+		cout << "Shell::msgLoop on " << myNode_ << 
+			" of " << numNodes_ << " nodes\n";
 		shell->passThroughMsgQs( shelle );
 	}
 	pthread_exit( NULL );

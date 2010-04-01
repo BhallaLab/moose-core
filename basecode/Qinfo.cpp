@@ -131,12 +131,14 @@ void Qinfo::clearQ( const ProcInfo* proc )
 	} else {
 		readQ( proc );
 	}
-	inQ_[ proc->groupId ].resize( 0 );
+	inQ_[ proc->groupId ].resize( BLOCKSIZE );
+	*reinterpret_cast< unsigned int* >( &inQ_[ proc->groupId ][0] ) = 0;
 }
 
 void Qinfo::mpiClearQ( const ProcInfo* proc )
 {
-	cout << "in Qinfo::mpiClearQ: numNodes= " <<
+	cout << "in Qinfo::mpiClearQ: on " << proc->nodeIndexInGroup <<
+		", numNodes= " <<
 		proc->numNodesInGroup << "\n";
 	mergeQ( proc->groupId );
 	if ( proc->numNodesInGroup > 1 ) {
@@ -146,37 +148,38 @@ void Qinfo::mpiClearQ( const ProcInfo* proc )
 	} else {
 		readQ( proc );
 	}
-	inQ_[ proc->groupId ].resize( 0 );
+	inQ_[ proc->groupId ].resize( BLOCKSIZE );
+	*reinterpret_cast< unsigned int* >( &inQ_[ proc->groupId ][0] ) = 0;
 }
 
 void readBuf(const char* begin, const ProcInfo* proc )
 {
 	const char* buf = begin;
-	cerr << "1";
+	cout << "1";
 	unsigned int bufsize = *reinterpret_cast< const unsigned int* >( buf );
-	cerr << "2";
+	cout << "2";
 	if ( bufsize != 36 && proc->numNodesInGroup > 1 && proc->groupId == 0 )
-		cerr << "In readBuf on " << proc->nodeIndexInGroup << ", bufsize = " << bufsize << endl;
+		cout << "In readBuf on " << proc->nodeIndexInGroup << ", bufsize = " << bufsize << endl;
 	const char* end = buf + bufsize;
-	cerr << "3";
+	cout << "3";
 	buf += sizeof( unsigned int );
-	cerr << "4";
+	cout << "4" << flush;
 	while ( buf && buf < end )
 	{
-		cerr << "5";
+		cout << "5" << flush;
 		const Qinfo *qi = reinterpret_cast< const Qinfo* >( buf );
-		cerr << "6";
+		cout << "6" << flush;
 		if ( qi->useSendTo() ) {
 			hackForSendTo( qi, buf );
 		} else {
-		cerr << "7";
+		cout << "7: msg=" << qi->mid() << " " << flush;
 			const Msg* m = Msg::getMsg( qi->mid() );
-		cerr << "8";
+		cout << "8" << flush;
 			m->exec( buf, proc );
-		cerr << "9";
+		cout << "9" << flush;
 		}
 		buf += sizeof( Qinfo ) + qi->size();
-		cerr << "a";
+		cout << "a";
 	}
 }
 
@@ -194,23 +197,6 @@ void Qinfo::readQ( const ProcInfo* proc )
 	vector< char >& q = inQ_[ proc->groupId ];
 	assert( q.size() >= sizeof( unsigned int ) );
 	readBuf( &q[0], proc );
-	/*
-	const char* buf = &q[0];
-	unsigned int bufsize = *reinterpret_cast< unsigned int* >( buf );
-	assert (bufsize == q[0].size() );
-	buf += sizeof( unsigned int );
-	while ( buf && buf < &q.back() )
-	{
-		const Qinfo *qi = reinterpret_cast< const Qinfo* >( buf );
-		if ( qi->useSendTo() ) {
-			hackForSendTo( qi, buf );
-		} else {
-			const Msg* m = Msg::getMsg( qi->m_ );
-			m->exec( buf, proc );
-		}
-		buf += sizeof( Qinfo ) + qi->size();
-	}
-	*/
 }
 
 void Qinfo::readMpiQ( const ProcInfo* proc )
@@ -256,15 +242,18 @@ void Qinfo::mergeQ( unsigned int groupId )
 		totSize += outQ_[ j++ ].size();
 
 	vector< char >& inQ = inQ_[ groupId ];
-	inQ.resize( totSize + sizeof( unsigned int ) );
+	assert( totSize + sizeof( unsigned int ) <= BLOCKSIZE );
+	// inQ.resize( totSize + sizeof( unsigned int ) );
+	inQ.resize( BLOCKSIZE );
 	j = g.startThread;
 	char* buf = &inQ[0];
 	unsigned int *bufsize = reinterpret_cast< unsigned int* >( buf );
-	*bufsize = inQ.size();
+//	*bufsize = inQ.size();
 	buf += sizeof( unsigned int );
 	for ( unsigned int i = 0; i < g.numThreads; ++i ) {
 		memcpy( buf, &(outQ_[ j ][0]), outQ_[ j ].size() );
 		buf += outQ_[ j ].size();
+		*bufsize += outQ_[ j ].size();
 		outQ_[ j ].resize( 0 );
 		j++;
 	}
@@ -293,7 +282,7 @@ void Qinfo::sendAllToAll( const ProcInfo* proc )
 	assert( inQ_[ proc->groupId ].size() > 0 );
 	char* sendbuf = &inQ_[ proc->groupId ][0];
 	char* recvbuf = &mpiQ_[ proc->groupId ][0];
-	assert ( inQ_[ proc->groupId ].size() < BLOCKSIZE );
+	assert ( inQ_[ proc->groupId ].size() == BLOCKSIZE );
 	/*
 	MPI::COMM_WORLD.Alltoall( 
 		sendbuf, BLOCKSIZE, MPI::CHAR,
@@ -301,22 +290,31 @@ void Qinfo::sendAllToAll( const ProcInfo* proc )
 		*/
 	// Send out data from master node.
 #ifdef USE_MPI
+
+	char garbage[BLOCKSIZE];
+	for ( unsigned int i = 0; i < BLOCKSIZE; ++i )
+		garbage[i] = 0;
+
+		cout << "\n\nEntering sendAllToAll barrier, on node = " << proc->nodeIndexInGroup << endl;
+	MPI_Barrier( MPI_COMM_WORLD );
+		cout << "Exiting sendAllToAll barrier, on node = " << proc->nodeIndexInGroup << endl;
 	if ( proc->nodeIndexInGroup == 0 ) {
-		cout << "\n\nSending stuff via mpi, size = " << 
-			*reinterpret_cast< unsigned int* >( sendbuf ) << "\n";
-		MPI_Bcast( 
+		cout << "\n\nSending stuff via mpi, on node = " << proc->nodeIndexInGroup << ", size = " << *reinterpret_cast< unsigned int* >( sendbuf ) << "\n";
+		int ret = MPI_Bcast( 
 			sendbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
+		cout << "\n\nSent stuff via mpi, on node = " << proc->nodeIndexInGroup << ", ret = " << ret << endl;
 	} else {
+		cout << "\n\nStarting Recv via mpi, on node = " << proc->nodeIndexInGroup << endl;
 		MPI_Bcast( 
 			recvbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
-		cout << "\n\nRecvd stuff via mpi, size = " << 
-			*reinterpret_cast< unsigned int* >( recvbuf ) << "\n";
+		cout << "\n\nRecvd stuff via mpi, on node = " << proc->nodeIndexInGroup << ", size = " << *reinterpret_cast< unsigned int* >( recvbuf ) << "\n";
 	}
 
 	// Recieve data into recvbuf of node0 from sendbuf of all other nodes
 	MPI_Gather( 
-		recvbuf, BLOCKSIZE, MPI_CHAR, 
-		sendbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
+		sendbuf, BLOCKSIZE, MPI_CHAR, 
+		recvbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
+	cout << "\n\nGathered stuff via mpi, on node = " << proc->nodeIndexInGroup << ", size = " << *reinterpret_cast< unsigned int* >( recvbuf ) << "\n";
 	/*
 	MPI::COMM_WORLD.Gather( 
 		sendbuf, BLOCKSIZE, MPI::CHAR, 
@@ -325,31 +323,6 @@ void Qinfo::sendAllToAll( const ProcInfo* proc )
 #endif
 }
 
-/**
- * Static func. Not thread safe. Catenates data from a buffer into 
- * specified inQ.
- * May resize it in the process, so iterators have to watch out.
-void Qinfo::loadQ( Qid qid, const char* buf, unsigned int length )
-{
-	assert( qid < inQ_.size() );
-	vector< char >& q = inQ_[qid];
-	q.insert( q.end(), buf, buf + length );
-}
- */
-
-/**
- * Static func. Not thread safe. Catenates data from a outQ into buffer.
- * Does not touch the queue. Returns data size.
- * Should perhaps replace qid with the proc or groupid so it can dump
- * the whole set.
-unsigned int Qinfo::dumpQ( Qid qId, char* buf )
-{
-	assert( qId < outQ_.size() );
-	vector< char >& q = outQ_[qId];
-	memcpy( buf, &q[0], q.size() );
-	return q.size();
-}
- */
 
 /**
  * Static func. readonly, so it is thread safe

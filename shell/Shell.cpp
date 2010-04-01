@@ -216,6 +216,7 @@ Id Shell::doCreate( string type, Id parent, string name, vector< unsigned int > 
 	while ( numCreateAcks_ < numNodes_ )
 		Qinfo::mpiClearQ( &p_ );
 	// Here we might choose to check if success on all nodes.
+	cerr << "Shell::doCreate: Done create\n";
 	
 	return ret;
 }
@@ -269,7 +270,7 @@ MsgId Shell::doCreateMsg( Id src, const string& srcField, Id dest,
 
 void Shell::process( const ProcInfo* p, const Eref& e )
 {
-	quit_ = 1;
+	quit_ = 0;
 }
 
 
@@ -322,7 +323,8 @@ const char* Shell::getBuf() const
 void Shell::create( Eref e, const Qinfo* q, 
 	string type, Id parent, Id newElm, string name )
 {
-	// cout << "In Shell::create for element " << name << " id " << newElm << endl;
+	cout << "In Shell::create for element " << name << " id " << newElm <<
+		" on node " << myNode_ << endl;
 	innerCreate( type, parent, newElm, name );
 	ackCreate.send( e, &p_, 0 );
 }
@@ -377,6 +379,8 @@ void Shell::error( const string& text )
 void Shell::handleAckCreate()
 {
 	numCreateAcks_++;
+	cerr << "In Shell::handleAckCreate: numCreateAcks_ = " <<
+		numCreateAcks_ << " on " << myNode_ << endl;
 }
 
 void Shell::handleAckDelete()
