@@ -3993,4 +3993,12 @@ So in theory all should exit at the same time.
 Tracked it down: the msgLoop had a pthread_exit, which was bad as there
 wasn't a thread going on for the main loop. Now for the first time I
 have a little test which creates an element on multiple nodes, deletes it,
-and quits cleanly. 
+and quits cleanly.  Checkin as 1679
+Works with any number of nodes (up to 17) and also in combination with
+multiple threads (up to 4nodes x 4 threads).
+
+Now need to set up 'doStart' to see if I can work with multiple nodes doing
+computation.
+
+
+

@@ -44,6 +44,17 @@ static SrcFinfo0 ackDelete( "ackDelete",
 static SrcFinfo0 requestQuit( "requestQuit",
 			"requestQuit():"
 			"Emerges from the inner loop, and wraps up. No return value." );
+static SrcFinfo1< double > requestStart( "requestStart",
+			"requestStart( runtime ):"
+			"Starts a simulation. Goes to all nodes including self."
+			"Initiates a callback to indicate completion of run."
+			);
+static SrcFinfo0 ackStart( "ackStart",
+			"ackStart():"
+			"Acknowledges receipt and completion of Start command."
+			"To be more precise, reports when the simulation is complete."
+			"Uses this form for symmetry with the other ack calls."
+			"Goes back only to master node." );
 
 static DestFinfo create( "create", 
 			"create( class, parent, newElm, name)",
@@ -65,10 +76,17 @@ static DestFinfo handleQuit( "handleQuit",
 			"quit(): Quits simulation.",
 			new OpFunc0< Shell >( & Shell::handleQuit ) );
 
+static DestFinfo handleStart( "start", 
+			"Starts off a simulation for the specified run time, automatically partitioning among threads if the settings are right",
+			new OpFunc1< Shell, double >( & Shell::start ) );
+static DestFinfo handleAckStart( "handleAckStart", 
+			"Keeps track of # of responders to ackStart. Args: none",
+			new OpFunc0< Shell >( & Shell::handleAckStart ) );
+
 static Finfo* shellMaster[] = {
-	&requestCreate, &handleAckCreate, &requestDelete, &handleAckDelete, &requestQuit };
+	&requestCreate, &handleAckCreate, &requestDelete, &handleAckDelete, &requestQuit, &requestStart, &handleAckStart };
 static Finfo* shellWorker[] = {
-	&create, &ackCreate, &del, &ackDelete, &handleQuit };
+	&create, &ackCreate, &del, &ackDelete, &handleQuit, &handleStart, &ackStart };
 /*
 static SrcFinfo4< Id, string, Id, string  > *requestMsg =
 		new SrcFinfo4< string, Id, Id, MsgId  >( "requestMsg",
@@ -113,9 +131,6 @@ const Cinfo* Shell::initCinfo()
 		static DestFinfo handleGet( "handleGet", 
 			"Function to handle returning values for 'get' calls.",
 			new RetFunc< Shell >( &Shell::handleGet ) );
-		static DestFinfo start( "start", 
-			"Starts off a simulation for the specified run time, automatically partitioning among threads if the settings are right",
-			new OpFunc1< Shell, double >( & Shell::start ) );
 		static DestFinfo setclock( "setclock", 
 			"Assigns clock ticks. Args: tick#, dt, stage",
 			new OpFunc3< Shell, unsigned int, double, unsigned int >( & Shell::setclock ) );
@@ -151,7 +166,7 @@ const Cinfo* Shell::initCinfo()
 		&name,
 		&quit,
 		&handleGet,
-		&start,
+		&handleStart,
 		&setclock,
 		&loadBalance,
 
@@ -282,6 +297,17 @@ void Shell::doQuit( )
 		Qinfo::mpiClearQ( &p_ );
 //	Qinfo::mpiClearQ( &p_ );
 	cout << myNode_ << ": Shell::doQuit: quitting\n";
+}
+
+void Shell::doStart( double runtime )
+{
+	numStartAcks_ = 0;
+	requestStart.send( Id().eref(), &p_, 1 );
+	cout << myNode_ << ": Shell::doStart: request sent\n";
+	while ( numStartAcks_ < numNodes_ )
+		Qinfo::mpiClearQ( &p_ );
+//	Qinfo::mpiClearQ( &p_ );
+	cout << myNode_ << ": Shell::doStart: quitting\n";
 }
 
 ////////////////////////////////////////////////////////////////
@@ -419,6 +445,11 @@ void Shell::handleQuit()
 {
 	cout << myNode_ << ": Shell::handleQuit" << endl;
 	quit_ = 1;
+}
+
+void Shell::handleAckStart()
+{
+	numStartAcks_++;
 }
 
 ////////////////////////////////////////////////////////////////////////

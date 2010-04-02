@@ -39,6 +39,8 @@ class Shell: public Data
 
 		void doQuit( );
 
+		void doStart( double runtime );
+
 		///////////////////////////////////////////////////////////
 		// DestFinfo functions
 		///////////////////////////////////////////////////////////
@@ -53,6 +55,7 @@ class Shell: public Data
 		void handleAckCreate();
 		void handleAckDelete();
 		void handleQuit();
+		void handleAckStart();
 	
 
 		void create( Eref e, const Qinfo* q, 
@@ -136,6 +139,7 @@ class Shell: public Data
 			// setup operations.
 		unsigned short numCreateAcks_;
 		unsigned short numDeleteAcks_;
+		unsigned short numStartAcks_;
 		void* barrier_;
 		/**
 		 * Used to coordinate threads especially when doing MPI.
