@@ -58,9 +58,9 @@ void testShellParserCreateDelete()
 		Id(), "worker", "OneToOneMsg" );
 	assert( ret );
 #ifdef USE_MPI
-	cerr << shell->myNode() << " testShellParserCreateDelete: before barrier\n";
+	cout << shell->myNode() << " testShellParserCreateDelete: before barrier\n";
 	MPI_Barrier( MPI_COMM_WORLD );
-	cerr << shell->myNode() << " testShellParserCreateDelete: after barrier\n";
+	cout << shell->myNode() << " testShellParserCreateDelete: after barrier\n";
 #endif
 
 	if ( shell->myNode() != 0 )
@@ -72,6 +72,7 @@ void testShellParserCreateDelete()
 	Id child = shell->doCreate( "Neutral", Id(), "test", dimensions );
 
 	shell->doDelete( child );
+	shell->doQuit( );
 	cout << "." << flush;
 }
 

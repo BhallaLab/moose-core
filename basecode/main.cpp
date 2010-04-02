@@ -124,6 +124,7 @@ int main( int argc, char** argv )
 		shelle->process( &p );
 	}
 	*/
+	cout << s->myNode() << ": Main: out of parser/MsgLoop\n";
 
 	shellId.destroy();
 	Id(1).destroy();

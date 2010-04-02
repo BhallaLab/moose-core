@@ -37,6 +37,8 @@ class Shell: public Data
 		MsgId doCreateMsg( Id src, const string& srcField, Id dest,
 			const string& destField, const string& msgType );
 
+		void doQuit( );
+
 		///////////////////////////////////////////////////////////
 		// DestFinfo functions
 		///////////////////////////////////////////////////////////
@@ -50,6 +52,7 @@ class Shell: public Data
 
 		void handleAckCreate();
 		void handleAckDelete();
+		void handleQuit();
 	
 
 		void create( Eref e, const Qinfo* q, 

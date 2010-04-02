@@ -3973,3 +3973,24 @@ wrong with the sequencing. Trying to track this down.
 Looks like I've found the cause of the segvs. I had swapped
 sendbuf and recvbuf in the MPI_Gather command. Now the program
 can go on indefinitely without error, but I've cut it short.
+Checking in 1678
+
+Seems now to work through Create and Delete tests, but doesn't quit cleanly.
+Part implementation of handleQuit etc. Need to poll on node0 for returns,
+so that we can wrap up all processes.
+
+=============================================================================
+2 April
+Looking at quit. Tricky because of lack of sync.
+
+doQuit sends out msg
+	It goes out to all nodes
+	Whenever nodes get round to reading their Bcast, they get it.
+		Nodes exit their loop after one more cycle of Bcast.
+	Master gets Msg along with others.
+So in theory all should exit at the same time.
+
+Tracked it down: the msgLoop had a pthread_exit, which was bad as there
+wasn't a thread going on for the main loop. Now for the first time I
+have a little test which creates an element on multiple nodes, deletes it,
+and quits cleanly. 
