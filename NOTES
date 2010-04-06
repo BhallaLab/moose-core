@@ -3999,6 +3999,21 @@ multiple threads (up to 4nodes x 4 threads).
 
 Now need to set up 'doStart' to see if I can work with multiple nodes doing
 computation.
+Put it in, yet to check.
+Next steps:
+	- Confirm that clock scheduling is OK
+	- Run test simulation with IntFire neurons.
+	- Test on different architectures.
 
 
+=============================================================================
+5 April.
+Trying to get the system to handle the 'start' command.
+Control flow is now in shell hands, .cpp:357
+
+=============================================================================
+6 April.
+Got start command to work very minimally in unit test. Issue was just that
+the ackStart was not being called so there was no info about the job finishing.
+Now it runs and stops nicely on 1, 2 nodes with 1 and 2 threads.
 

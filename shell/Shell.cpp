@@ -302,7 +302,7 @@ void Shell::doQuit( )
 void Shell::doStart( double runtime )
 {
 	numStartAcks_ = 0;
-	requestStart.send( Id().eref(), &p_, 1 );
+	requestStart.send( Id().eref(), &p_, runtime, 1 );
 	cout << myNode_ << ": Shell::doStart: request sent\n";
 	while ( numStartAcks_ < numNodes_ )
 		Qinfo::mpiClearQ( &p_ );

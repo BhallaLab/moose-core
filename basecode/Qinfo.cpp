@@ -137,9 +137,7 @@ void Qinfo::clearQ( const ProcInfo* proc )
 
 void Qinfo::mpiClearQ( const ProcInfo* proc )
 {
-	cout << "in Qinfo::mpiClearQ: on " << proc->nodeIndexInGroup <<
-		", numNodes= " <<
-		proc->numNodesInGroup << "\n";
+	// cout << proc->nodeIndexInGroup << ": Qinfo::mpiClearQ: numNodes= " << proc->numNodesInGroup << "\n";
 	mergeQ( proc->groupId );
 	if ( proc->numNodesInGroup > 1 ) {
 		sendAllToAll( proc );
@@ -155,31 +153,33 @@ void Qinfo::mpiClearQ( const ProcInfo* proc )
 void readBuf(const char* begin, const ProcInfo* proc )
 {
 	const char* buf = begin;
-	cout << "1";
+	// cout << "1";
 	unsigned int bufsize = *reinterpret_cast< const unsigned int* >( buf );
-	cout << "2";
+	// cout << "2";
+	/*
 	if ( bufsize != 36 && proc->numNodesInGroup > 1 && proc->groupId == 0 )
 		cout << "In readBuf on " << proc->nodeIndexInGroup << ", bufsize = " << bufsize << endl;
+		*/
 	const char* end = buf + bufsize;
-	cout << "3";
+	// cout << "3";
 	buf += sizeof( unsigned int );
-	cout << "4" << flush;
+	// cout << "4" << flush;
 	while ( buf && buf < end )
 	{
-		cout << "5" << flush;
+		// cout << "5" << flush;
 		const Qinfo *qi = reinterpret_cast< const Qinfo* >( buf );
-		cout << "6" << flush;
+		// cout << "6" << flush;
 		if ( qi->useSendTo() ) {
 			hackForSendTo( qi, buf );
 		} else {
-		cout << "7: msg=" << qi->mid() << " " << flush;
+		// cout << "7: msg=" << qi->mid() << " " << flush;
 			const Msg* m = Msg::getMsg( qi->mid() );
-		cout << "8" << flush;
+		// cout << "8" << flush;
 			m->exec( buf, proc );
-		cout << "9" << flush;
+		// cout << "9" << flush;
 		}
 		buf += sizeof( Qinfo ) + qi->size();
-		cout << "a";
+		// cout << "a";
 	}
 }
 

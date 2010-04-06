@@ -72,7 +72,22 @@ void testShellParserCreateDelete()
 	Id child = shell->doCreate( "Neutral", Id(), "test", dimensions );
 
 	shell->doDelete( child );
-	shell->doQuit( );
+//	shell->doQuit( );
+	cout << "." << flush;
+}
+
+void testShellParserStart()
+{
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+
+	// This is already done in the previous test. Would like to institutionalize it.
+	// bool ret = shell->doCreateMsg( Id(), "master", Id(), "worker", "OneToOneMsg" );
+
+	if ( shell->myNode() != 0 )
+		return;
+
+	shell->doStart( 20 );
 	cout << "." << flush;
 }
 
@@ -84,10 +99,22 @@ void testInterNodeOps()
 	;
 }
 
+void testShellParserQuit()
+{
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+	if ( shell->myNode() != 0 )
+		return;
+	shell->doQuit( );
+	cout << "." << flush;
+}
+
 void testShell( )
 {
 	testCreateDelete();
 	// testShellSharedMsg();
 	testShellParserCreateDelete();
 	//testInterNodeOps();
+	testShellParserStart();
+	testShellParserQuit();
 }
