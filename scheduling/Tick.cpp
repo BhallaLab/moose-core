@@ -272,7 +272,7 @@ void Tick::mpiAdvance( ProcInfo* info) const
  */
 void Tick::advance( Element* e, ProcInfo* info ) const
 {
-	// cout << "(" << dt_ << ", " << stage_ << " ) at t= " << info->currTime << " on thread " << info->threadId << endl;
+	cout << info->nodeIndexInGroup << ", " << info->threadId << ": Tick::advance (" << dt_ << ", " << stage_ << " ) at t= " << info->currTime << endl;
 	
 	assert( ( info->numNodesInGroup > 1 ) == ( info->numThreads == (info->numThreadsInGroup + 1) ) );
 	// This is the mpiThread.

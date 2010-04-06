@@ -4017,3 +4017,10 @@ Got start command to work very minimally in unit test. Issue was just that
 the ackStart was not being called so there was no info about the job finishing.
 Now it runs and stops nicely on 1, 2 nodes with 1 and 2 threads.
 
+Incorporated testSchedThreads to keep track of clock ticks. Tried
+out multinode. Two issues.
+	1. Doesn't seem to be synchronizing between nodes
+	2. Nodes seem to set off one more thread than I want.
+
+Other than that it seems to work.
+=============================================================================

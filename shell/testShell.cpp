@@ -12,6 +12,8 @@
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
+#include "../scheduling/Tick.h"
+#include "../scheduling/testScheduling.h"
 
 void testCreateDelete()
 {
@@ -76,18 +78,44 @@ void testShellParserCreateDelete()
 	cout << "." << flush;
 }
 
+// Here we create the element independently on each node, and connect
+// it up independently. Using the doAddMsg we will be able to do this
+// automatically on all nodes.
 void testShellParserStart()
 {
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 
-	// This is already done in the previous test. Would like to institutionalize it.
-	// bool ret = shell->doCreateMsg( Id(), "master", Id(), "worker", "OneToOneMsg" );
+	shell->setclock( 0, 5.0, 0 );
+	shell->setclock( 1, 2.0, 0 );
+	shell->setclock( 2, 2.0, 1 );
+	shell->setclock( 3, 1.0, 0 );
+	shell->setclock( 4, 3.0, 5 );
+	shell->setclock( 5, 5.0, 1 );
+
+	testThreadSchedElement tse;
+	Eref ts( &tse, 0 );
+	Element* ticke = Id( 2 )();
+	Eref er0( ticke, DataId( 0, 0 ) );
+	Eref er1( ticke, DataId( 0, 1 ) );
+	Eref er2( ticke, DataId( 0, 2 ) );
+	Eref er3( ticke, DataId( 0, 3 ) );
+	Eref er4( ticke, DataId( 0, 4 ) );
+	Eref er5( ticke, DataId( 0, 5 ) );
+
+	// No idea what FuncId to use here. Assume 0.
+	FuncId f( 0 );
+	SingleMsg m0( er0, ts ); er0.element()->addMsgAndFunc( m0.mid(), f, 0 );
+	SingleMsg m1( er1, ts ); er1.element()->addMsgAndFunc( m1.mid(), f, 1 );
+	SingleMsg m2( er2, ts ); er2.element()->addMsgAndFunc( m2.mid(), f, 2 );
+	SingleMsg m3( er3, ts ); er3.element()->addMsgAndFunc( m3.mid(), f, 3 );
+	SingleMsg m4( er4, ts ); er4.element()->addMsgAndFunc( m4.mid(), f, 4 );
+	SingleMsg m5( er5, ts ); er5.element()->addMsgAndFunc( m5.mid(), f, 5 );
 
 	if ( shell->myNode() != 0 )
 		return;
 
-	shell->doStart( 20 );
+	shell->doStart( 10 );
 	cout << "." << flush;
 }
 
@@ -98,6 +126,7 @@ void testInterNodeOps()
 {
 	;
 }
+
 
 void testShellParserQuit()
 {
