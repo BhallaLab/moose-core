@@ -251,20 +251,22 @@ void Tick::destroy( Eref e, const Qinfo* q )
  */
 void Tick::mpiAdvance( ProcInfo* info) const
 {
+	cout << info->nodeIndexInGroup << ", " << info->threadId << ": Tick::mpiAdvance (" << dt_ << ", " << stage_ << " ) at t= " << info->currTime << endl;
 	assert( info->barrier );
 	int rc = pthread_barrier_wait(
 		reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
 	assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
-	// wait for inQ to be updated. Use time to clear mpiQ
+	// mergeQ is going on. Wait for inQ to be updated. Use time to clear mpiQ
+	rc = pthread_barrier_wait(
+		reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
+	// readQ is going on. InQ is ready. Do data transfer between nodes.
+		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+		Qinfo::sendAllToAll( info );
+	
 	rc = pthread_barrier_wait(
 		reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
 	assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
-	// Wait for inQ to be filled. Do data transfer between nodes.
-	rc = pthread_barrier_wait(
-		reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
-	assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
-	// Data has been transferred. Wait till it is processed.
-
+	// readMpiQ is going on, and also process. Data has been transferred.
 }
 
 /**
@@ -272,13 +274,13 @@ void Tick::mpiAdvance( ProcInfo* info) const
  */
 void Tick::advance( Element* e, ProcInfo* info ) const
 {
-	cout << info->nodeIndexInGroup << ", " << info->threadId << ": Tick::advance (" << dt_ << ", " << stage_ << " ) at t= " << info->currTime << endl;
 	
 	assert( ( info->numNodesInGroup > 1 ) == ( info->numThreads == (info->numThreadsInGroup + 1) ) );
 	// This is the mpiThread.
 	if ( info->isMpiThread ) {
 		mpiAdvance( info );
 	} else {
+		cout << info->nodeIndexInGroup << ", " << info->threadId << ": Tick::advance (" << dt_ << ", " << stage_ << " ) at t= " << info->currTime << endl;
 
 	/**
 	 * This barrier pair protects the inQ from being accessed for reading, 

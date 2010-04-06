@@ -125,7 +125,7 @@ void Qinfo::clearQ( const ProcInfo* proc )
 {
 	mergeQ( proc->groupId );
 	if ( 0 ) {
-		sendAllToAll( proc );
+		sendRootToAll( proc );
 		readQ( proc );
 		readMpiQ( proc );
 	} else {
@@ -140,7 +140,7 @@ void Qinfo::mpiClearQ( const ProcInfo* proc )
 	// cout << proc->nodeIndexInGroup << ": Qinfo::mpiClearQ: numNodes= " << proc->numNodesInGroup << "\n";
 	mergeQ( proc->groupId );
 	if ( proc->numNodesInGroup > 1 ) {
-		sendAllToAll( proc );
+		sendRootToAll( proc );
 		readQ( proc );
 		readMpiQ( proc );
 	} else {
@@ -199,6 +199,13 @@ void Qinfo::readQ( const ProcInfo* proc )
 	readBuf( &q[0], proc );
 }
 
+/**
+ * Static func. 
+ * Deliver the contents of the mpiQ to target objects
+ * Not thread safe. To run multithreaded, requires that
+ * the messages have been subdivided on a per-thread basis to avoid 
+ * overwriting each others targets.
+ */
 void Qinfo::readMpiQ( const ProcInfo* proc )
 {
 	assert( proc );
@@ -261,6 +268,8 @@ void Qinfo::mergeQ( unsigned int groupId )
 
 /**
  * Static func.
+ * Used for simulation time data transfer. Symmetric across all nodes.
+ *
  * the MPI::Alltoall function doesn't work here because it partitions out
  * the send buffer into pieces targetted for each other node. 
  * The Scatter fucntion does something similar, but it is one-way.
@@ -273,11 +282,24 @@ void Qinfo::sendAllToAll( const ProcInfo* proc )
 {
 	if ( proc->numNodesInGroup == 1 )
 		return;
-	cout << "ng = " << g_.size() << ", ninQ= " << inQ_[0].size() << 
-		", nmpiQ = " << mpiQ_[0].size() << 
-		" proc->groupId =  " << proc->groupId  <<
-		" s1 = " << mpiQ_[ proc->groupId ].size() <<
-		" s2 = " << BLOCKSIZE * proc->numNodesInGroup;
+}
+
+/**
+ * Static func.
+ * Here the root node tells all other nodes what to do, using a Bcast.
+ * It then reads back all their responses. The function is meant to
+ * be run on all nodes, and it partitions out the work according to
+ * node#.
+ * The function is used only by the Shell thread.
+ * the MPI::Alltoall function doesn't work here because it partitions out
+ * the send buffer into pieces targetted for each other node. 
+ */
+void Qinfo::sendRootToAll( const ProcInfo* proc )
+{
+	if ( proc->numNodesInGroup == 1 )
+		return;
+	cout << proc->nodeIndexInGroup << ", " << proc->threadId << ": Qinfo::sendRootToAll\n";
+	// cout << "ng = " << g_.size() << ", ninQ= " << inQ_[0].size() << ", nmpiQ = " << mpiQ_[0].size() << " proc->groupId =  " << proc->groupId  << " s1 = " << mpiQ_[ proc->groupId ].size() << " s2 = " << BLOCKSIZE * proc->numNodesInGroup;
 	assert( mpiQ_[ proc->groupId ].size() >= BLOCKSIZE * proc->numNodesInGroup );
 	assert( inQ_[ proc->groupId ].size() > 0 );
 	char* sendbuf = &inQ_[ proc->groupId ][0];
@@ -295,9 +317,9 @@ void Qinfo::sendAllToAll( const ProcInfo* proc )
 	for ( unsigned int i = 0; i < BLOCKSIZE; ++i )
 		garbage[i] = 0;
 
-		cout << "\n\nEntering sendAllToAll barrier, on node = " << proc->nodeIndexInGroup << endl;
+		cout << "\n\nEntering sendRootToAll barrier, on node = " << proc->nodeIndexInGroup << endl;
 	MPI_Barrier( MPI_COMM_WORLD );
-		cout << "Exiting sendAllToAll barrier, on node = " << proc->nodeIndexInGroup << endl;
+		cout << "Exiting sendRootToAll barrier, on node = " << proc->nodeIndexInGroup << endl;
 	if ( proc->nodeIndexInGroup == 0 ) {
 		cout << "\n\nSending stuff via mpi, on node = " << proc->nodeIndexInGroup << ", size = " << *reinterpret_cast< unsigned int* >( sendbuf ) << "\n";
 		int ret = MPI_Bcast( 

@@ -133,6 +133,12 @@ class Qinfo
 		static void sendAllToAll( const ProcInfo* proc );
 
 		/**
+		 * Send contents of root inQ to all nodes using MPI, gather
+		 * their pending return functions.
+		 */
+		static void sendRootToAll( const ProcInfo* proc );
+
+		/**
 		 * Handles the case where the system wants to send a msg to
 		 * a single target. Currently done through an ugly hack, 
 		 * encapsulated here.

@@ -283,7 +283,8 @@ void Shell::initThreadInfo( vector< ThreadInfo >& ti,
 	if ( numNodes_ > 1 )
 		numThreads++;
 
-	cout << "Shell::initThreadInfo: ti.size() = " << ti.size() << 
+	cout << myNode_ << 
+		": Shell::initThreadInfo: ti.size() = " << ti.size() << 
 		", numCores = " << numCores_ << 
 		", numSimGroup = " << Qinfo::numSimGroup() <<
 		", numThreads[sg[1]] = " << Qinfo::simGroup( 1 )->numThreads <<
@@ -297,11 +298,13 @@ void Shell::initThreadInfo( vector< ThreadInfo >& ti,
 			ti[j].qinfo = q;
 			ti[j].runtime = runtime;
 			ti[j].threadId = j;
-			if ( i > 0 && numNodes_ > 1 && k == ti.size() - 1 )
-				ti[j].threadIndexInGroup = ~0;
-			else
+			if ( i > 0 && numNodes_ > 1 && (k == numThreads - 1 ) ) {
+				cout << myNode_ << ": Shell::initThreadInfo: isMpiThread\n";
+				ti[j].threadIndexInGroup = ~0; // isMpiThread
+			} else {
 				ti[j].threadIndexInGroup = 
 					j - Qinfo::simGroup( i )->startThread + 1;
+			}
 			ti[j].nodeIndexInGroup = myNode_;
 			ti[j].groupId = i;
 			ti[j].outQid = Qinfo::simGroup(i)->startThread + k;

@@ -144,6 +144,6 @@ void testShell( )
 	// testShellSharedMsg();
 	testShellParserCreateDelete();
 	//testInterNodeOps();
-	testShellParserStart();
+//	testShellParserStart();
 	testShellParserQuit();
 }

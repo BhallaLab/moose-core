@@ -4022,5 +4022,11 @@ out multinode. Two issues.
 	1. Doesn't seem to be synchronizing between nodes
 	2. Nodes seem to set off one more thread than I want.
 
-Other than that it seems to work.
+Other than that it seems to work. Valgrind is OK too. Checkin 1682.
+
+Now I understand both points. Item 2 was actually due to the
+mpiThread being reported along with the worker threads.
+Item 1 was because mpiThread doesn't currently do anything.
+
+
 =============================================================================
