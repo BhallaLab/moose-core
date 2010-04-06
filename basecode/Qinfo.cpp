@@ -282,6 +282,32 @@ void Qinfo::sendAllToAll( const ProcInfo* proc )
 {
 	if ( proc->numNodesInGroup == 1 )
 		return;
+	// cout << proc->nodeIndexInGroup << ", " << proc->threadId << ": Qinfo::sendAllToAll\n";
+	assert( mpiQ_[ proc->groupId ].size() >= BLOCKSIZE * proc->numNodesInGroup );
+	assert( inQ_[ proc->groupId ].size() > 0 );
+	char* sendbuf = &inQ_[ proc->groupId ][0];
+	char* recvbuf = &mpiQ_[ proc->groupId ][0];
+	assert ( inQ_[ proc->groupId ].size() == BLOCKSIZE );
+
+#ifdef USE_MPI
+	MPI_Barrier( MPI_COMM_WORLD );
+	/*
+	if ( proc->nodeIndexInGroup == 0 ) {
+		int ret = MPI_Bcast( 
+			sendbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
+	} else {
+		MPI_Bcast( 
+			recvbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
+	}
+	*/
+
+	// Recieve data into recvbuf of all nodes from sendbuf of all nodes
+	MPI_Allgather( 
+		sendbuf, BLOCKSIZE, MPI_CHAR, 
+		recvbuf, BLOCKSIZE, MPI_CHAR, 
+		MPI_COMM_WORLD );
+	// cout << "\n\nGathered stuff via mpi, on node = " << proc->nodeIndexInGroup << ", size = " << *reinterpret_cast< unsigned int* >( recvbuf ) << "\n";
+#endif
 }
 
 /**
@@ -312,11 +338,6 @@ void Qinfo::sendRootToAll( const ProcInfo* proc )
 		*/
 	// Send out data from master node.
 #ifdef USE_MPI
-
-	char garbage[BLOCKSIZE];
-	for ( unsigned int i = 0; i < BLOCKSIZE; ++i )
-		garbage[i] = 0;
-
 		cout << "\n\nEntering sendRootToAll barrier, on node = " << proc->nodeIndexInGroup << endl;
 	MPI_Barrier( MPI_COMM_WORLD );
 		cout << "Exiting sendRootToAll barrier, on node = " << proc->nodeIndexInGroup << endl;

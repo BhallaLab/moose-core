@@ -4028,5 +4028,11 @@ Now I understand both points. Item 2 was actually due to the
 mpiThread being reported along with the worker threads.
 Item 1 was because mpiThread doesn't currently do anything.
 
+Some cleanup, followed by an hour of debugging because I couldn't figure out
+why it didn't work any more. Now fixed. Checkin 1683.
+
+Trying out mpi_Allgather in Qinfo to transfer data during compute time.
+Seems to be doing the right thing, even for mpirun -np 2 ./moose -c 2
+ie, 2 nodes and 2 threads on each.
 
 =============================================================================

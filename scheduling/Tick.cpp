@@ -251,7 +251,7 @@ void Tick::destroy( Eref e, const Qinfo* q )
  */
 void Tick::mpiAdvance( ProcInfo* info) const
 {
-	cout << info->nodeIndexInGroup << ", " << info->threadId << ": Tick::mpiAdvance (" << dt_ << ", " << stage_ << " ) at t= " << info->currTime << endl;
+	// cout << info->nodeIndexInGroup << ", " << info->threadId << ": Tick::mpiAdvance (" << dt_ << ", " << stage_ << " ) at t= " << info->currTime << endl;
 	assert( info->barrier );
 	int rc = pthread_barrier_wait(
 		reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
