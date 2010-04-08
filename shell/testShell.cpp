@@ -124,6 +124,12 @@ void testShellParserStart()
  */
 void testInterNodeOps()
 {
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+
+	vector< unsigned int > dimensions;
+	dimensions.push_back( shell->numCores() );
+	Id child = shell->doCreate( "Neutral", Id(), "test", dimensions );
 	;
 }
 

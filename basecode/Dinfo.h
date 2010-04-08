@@ -36,7 +36,10 @@ template< class D > class Dinfo: public DinfoBase
 		Dinfo()
 		{;}
 		Data* allocData( unsigned int numData ) const {
-			return new D[ numData ];
+			if ( numData == 0 )
+				return 0;
+			else 
+				return new D[ numData ];
 		}
 
 		void destroyData( char* d ) const {

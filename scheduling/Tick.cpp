@@ -311,22 +311,6 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 	// Start reading inQ
 	Qinfo::readQ( info ); // March through inQ. Each thread magically deals
 		// with updates needed by its own Process calls, and none other.
-	// 
-	// label A.
-	// Block till mpiThread has finished with MPI_alltoall.
-	// 	All threads in this SimGroup
-	// 	block here. This assumes that we don't try the interleaving.
-	// Qinfo::readMpiQ( info ); // March through mpiQ, typically 
-	// much bigger than inQ due to the # of nodes. Here it would be
-	// nice to do partial exchanges and interleave with computation.
-	// If we were interleaving we would want to barrier here, and then
-	// loop back to the label A. Possibly we could even do the barrier
-	// below, after the process is done, if we know we're going to loop
-	// back. That gives the system more comm time while computing happens.
-	//
-	// Assuming same magic of thread allocation applies, carry on with 
-	// Process. This fills up the individual outQs.
-
 
 	if ( info->numNodesInGroup > 1 ) // Sync up with mpiThreadfunc
 	{ // Sync up with mpiAdvance.

@@ -97,11 +97,11 @@ int main( int argc, char** argv )
 {
 	Id shellId = init( argc, argv );
 #ifdef DO_UNIT_TESTS
-	cout << "testing: ";
 #endif
-//	testAsync();
+	cout << "testing: ";
+	testAsync();
 	testShell();
-//	testScheduling();
+	testScheduling();
 	cout << endl;
 
 	// Note that the main loop remains the parser loop, though it may

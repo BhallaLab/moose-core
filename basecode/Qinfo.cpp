@@ -19,7 +19,7 @@ vector< vector< char > > Qinfo::mpiQ_;
 vector< SimGroup > Qinfo::g_;
 
 void hackForSendTo( const Qinfo* q, const char* buf );
-static const unsigned int BLOCKSIZE = 1024;
+static const unsigned int BLOCKSIZE = 65536;
 
 Qinfo::Qinfo( FuncId f, DataId srcIndex, 
 	unsigned int size, bool useSendTo, bool isForward )
@@ -255,6 +255,7 @@ void Qinfo::mergeQ( unsigned int groupId )
 	j = g.startThread;
 	char* buf = &inQ[0];
 	unsigned int *bufsize = reinterpret_cast< unsigned int* >( buf );
+	*bufsize = 0;
 //	*bufsize = inQ.size();
 	buf += sizeof( unsigned int );
 	for ( unsigned int i = 0; i < g.numThreads; ++i ) {

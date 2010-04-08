@@ -386,7 +386,7 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name )
 {
 	const Cinfo* c = Cinfo::find( type );
 	bool ret = 0;
-	unsigned int num = 1; // hack till I figure out how to set up allocs.
+	unsigned int num = 0; // hack till I figure out how to set up allocs.
 	if ( c ) {
 		Element* pa = parent();
 		if ( !pa ) {
