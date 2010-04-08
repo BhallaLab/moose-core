@@ -4080,7 +4080,7 @@ MOOSE initialization. This connects up all shells on all nodes to
 each other so that the do<Function> calls can be sent out on messages.
 Checkin 1686
 
-Implemented 5-argument MOOSE functions to handle data transfer for
+Implementing 5-argument MOOSE functions to handle data transfer for
 Shell::doCreate. May have to do 6 argument to handle message creation.
 Checkin 1687.
 
@@ -4088,5 +4088,9 @@ In a bit of a tangent, implemented a specialization for
 Conv< vector< T > >.
 This will be useful in passing arbitrary vectors around, but for
 now I need it to pass the dimensions of the newly created Element.
+Checkin 1688.
 
+Working on implementing the 5 argument function for the Shell::create
+command.
+Also lots of cleanup of printf debugging.
 =============================================================================

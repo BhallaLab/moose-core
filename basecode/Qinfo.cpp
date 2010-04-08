@@ -221,12 +221,14 @@ void Qinfo::readMpiQ( const ProcInfo* proc )
 			assert( q.size() >= sizeof( unsigned int ) + BLOCKSIZE * i );
 			readBuf( buf, proc );
 			unsigned int *bufsize = reinterpret_cast< unsigned int* >( buf);
+			/*
 			if ( *bufsize > 0 ) {
 				cout << "On (" << proc->nodeIndexInGroup << 
 					", " << proc->threadIndexInGroup << 
 					"): got msg of size " << *bufsize << endl;
 
 			}
+			*/
 			*bufsize = 0;
 		}
 	}
@@ -325,7 +327,7 @@ void Qinfo::sendRootToAll( const ProcInfo* proc )
 {
 	if ( proc->numNodesInGroup == 1 )
 		return;
-	cout << proc->nodeIndexInGroup << ", " << proc->threadId << ": Qinfo::sendRootToAll\n";
+	// cout << proc->nodeIndexInGroup << ", " << proc->threadId << ": Qinfo::sendRootToAll\n";
 	// cout << "ng = " << g_.size() << ", ninQ= " << inQ_[0].size() << ", nmpiQ = " << mpiQ_[0].size() << " proc->groupId =  " << proc->groupId  << " s1 = " << mpiQ_[ proc->groupId ].size() << " s2 = " << BLOCKSIZE * proc->numNodesInGroup;
 	assert( mpiQ_[ proc->groupId ].size() >= BLOCKSIZE * proc->numNodesInGroup );
 	assert( inQ_[ proc->groupId ].size() > 0 );
@@ -339,31 +341,26 @@ void Qinfo::sendRootToAll( const ProcInfo* proc )
 		*/
 	// Send out data from master node.
 #ifdef USE_MPI
-		cout << "\n\nEntering sendRootToAll barrier, on node = " << proc->nodeIndexInGroup << endl;
+		// cout << "\n\nEntering sendRootToAll barrier, on node = " << proc->nodeIndexInGroup << endl;
 	MPI_Barrier( MPI_COMM_WORLD );
-		cout << "Exiting sendRootToAll barrier, on node = " << proc->nodeIndexInGroup << endl;
+		// cout << "Exiting sendRootToAll barrier, on node = " << proc->nodeIndexInGroup << endl;
 	if ( proc->nodeIndexInGroup == 0 ) {
-		cout << "\n\nSending stuff via mpi, on node = " << proc->nodeIndexInGroup << ", size = " << *reinterpret_cast< unsigned int* >( sendbuf ) << "\n";
-		int ret = MPI_Bcast( 
+		// cout << "\n\nSending stuff via mpi, on node = " << proc->nodeIndexInGroup << ", size = " << *reinterpret_cast< unsigned int* >( sendbuf ) << "\n";
+		MPI_Bcast( 
 			sendbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
-		cout << "\n\nSent stuff via mpi, on node = " << proc->nodeIndexInGroup << ", ret = " << ret << endl;
+		// cout << "\n\nSent stuff via mpi, on node = " << proc->nodeIndexInGroup << ", ret = " << ret << endl;
 	} else {
-		cout << "\n\nStarting Recv via mpi, on node = " << proc->nodeIndexInGroup << endl;
+		// cout << "\n\nStarting Recv via mpi, on node = " << proc->nodeIndexInGroup << endl;
 		MPI_Bcast( 
 			recvbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
-		cout << "\n\nRecvd stuff via mpi, on node = " << proc->nodeIndexInGroup << ", size = " << *reinterpret_cast< unsigned int* >( recvbuf ) << "\n";
+		// cout << "\n\nRecvd stuff via mpi, on node = " << proc->nodeIndexInGroup << ", size = " << *reinterpret_cast< unsigned int* >( recvbuf ) << "\n";
 	}
 
 	// Recieve data into recvbuf of node0 from sendbuf of all other nodes
 	MPI_Gather( 
 		sendbuf, BLOCKSIZE, MPI_CHAR, 
 		recvbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
-	cout << "\n\nGathered stuff via mpi, on node = " << proc->nodeIndexInGroup << ", size = " << *reinterpret_cast< unsigned int* >( recvbuf ) << "\n";
-	/*
-	MPI::COMM_WORLD.Gather( 
-		sendbuf, BLOCKSIZE, MPI::CHAR, 
-		recvbuf, BLOCKSIZE, MPI::CHAR, 0 );
-		*/
+	// cout << "\n\nGathered stuff via mpi, on node = " << proc->nodeIndexInGroup << ", size = " << *reinterpret_cast< unsigned int* >( recvbuf ) << "\n";
 #endif
 }
 

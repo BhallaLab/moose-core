@@ -20,8 +20,10 @@ void testCreateDelete()
 	
 	Eref ser = Id().eref();
 	Id testId = Id::nextId();
+	vector< unsigned int > dimensions;
+	dimensions.push_back( 1 );
 	// Need to get the id back so that I can delete it later.
-	bool ret = SetGet4< string, Id, Id, string >::set( ser, "create", "Neutral", Id(), testId , "testCreate" );
+	bool ret = SetGet5< string, Id, Id, string, vector< unsigned int > >::set( ser, "create", "Neutral", Id(), testId , "testCreate", dimensions );
 	assert( ret );
 
 	ret = SetGet1< Id >::set( ser, "delete", testId );
@@ -62,9 +64,9 @@ void testShellParserCreateDelete()
 	assert( ret );
 	*/
 #ifdef USE_MPI
-	cout << shell->myNode() << " testShellParserCreateDelete: before barrier\n";
+	// cout << shell->myNode() << " testShellParserCreateDelete: before barrier\n";
 	MPI_Barrier( MPI_COMM_WORLD );
-	cout << shell->myNode() << " testShellParserCreateDelete: after barrier\n";
+	// cout << shell->myNode() << " testShellParserCreateDelete: after barrier\n";
 #endif
 
 	if ( shell->myNode() != 0 )
@@ -73,6 +75,7 @@ void testShellParserCreateDelete()
 //	sheller.element()->showMsg();
 
 	vector< unsigned int > dimensions;
+	dimensions.push_back( 1 );
 	Id child = shell->doCreate( "Neutral", Id(), "test", dimensions );
 
 	shell->doDelete( child );

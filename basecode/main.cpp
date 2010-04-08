@@ -120,7 +120,7 @@ int main( int argc, char** argv )
 	else
 		s->launchMsgLoop( shelle );
 
-	cout << s->myNode() << ": Main: out of parser/MsgLoop\n";
+	// cout << s->myNode() << ": Main: out of parser/MsgLoop\n";
 
 	shellId.destroy();
 	Id(1).destroy();

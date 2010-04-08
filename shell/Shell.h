@@ -60,7 +60,8 @@ class Shell: public Data
 	
 
 		void create( Eref e, const Qinfo* q, 
-			string type, Id parent, Id newElm, string name );
+			string type, Id parent, Id newElm, string name,
+			vector< unsigned int > );
 		void destroy( Eref e, const Qinfo* q, Id eid);
 		void innerCreate( string type, Id parent, Id newElm, string name );
 		void addmsg( Id src, Id dest, string srcfield, string destfield );

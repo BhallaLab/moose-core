@@ -18,8 +18,8 @@
 
 ProcInfo Shell::p_;
 
-static SrcFinfo4< string, Id, Id, string  > requestCreate( "requestCreate",
-			"requestCreate( class, parent, newElm, name ): "
+static SrcFinfo5< string, Id, Id, string, vector< unsigned int > > requestCreate( "requestCreate",
+			"requestCreate( class, parent, newElm, name, dimensions ): "
 			"creates a new Element on all nodes with the specified Id. "
 			"Initiates a callback to indicate completion of operation. "
 			"Goes to all nodes including self."
@@ -57,8 +57,8 @@ static SrcFinfo0 ackStart( "ackStart",
 			"Goes back only to master node." );
 
 static DestFinfo create( "create", 
-			"create( class, parent, newElm, name)",
-			new EpFunc4< Shell, string, Id, Id, string>( &Shell::create ) );
+			"create( class, parent, newElm, name, dimensions )",
+			new EpFunc5< Shell, string, Id, Id, string, vector< unsigned int > >( &Shell::create ) );
 
 static DestFinfo del( "delete", 
 			"Destroys Element, all its messages, and all its children. Args: Id",
@@ -230,16 +230,16 @@ Id Shell::doCreate( string type, Id parent, string name, vector< unsigned int > 
 	Id ret = Id::nextId();
 	// Here we would do the 'send' on an internode msg to do the actual
 	// Create.
-	requestCreate.send( Id().eref(), &p_, type, parent, ret, name );
+	requestCreate.send( Id().eref(), &p_, type, parent, ret, name, dimensions );
 	// innerCreate( type, parent, ret, name );
-	cout << myNode_ << ": Shell::doCreate: request sent\n";
+	// cout << myNode_ << ": Shell::doCreate: request sent\n";
 
 	// Now we wait till all nodes are done.
 	numCreateAcks_ = 0;
 	while ( numCreateAcks_ < numNodes_ )
 		Qinfo::mpiClearQ( &p_ );
 	// Here we might choose to check if success on all nodes.
-	cout << myNode_ << ": Shell::doCreate: ack received\n";
+	// cout << myNode_ << ": Shell::doCreate: ack received\n";
 	
 	return ret;
 }
@@ -247,12 +247,12 @@ Id Shell::doCreate( string type, Id parent, string name, vector< unsigned int > 
 bool Shell::doDelete( Id i )
 {
 	requestDelete.send( Id().eref(), &p_, i );
-	cout << myNode_ << ": Shell::doDelete: request sent\n";
+	// cout << myNode_ << ": Shell::doDelete: request sent\n";
 	// Now we wait till all nodes are done.
 	numDeleteAcks_ = 0;
 	while ( numDeleteAcks_ < numNodes_ )
 		Qinfo::mpiClearQ( &p_ );
-	cout << myNode_ << ": Shell::doDelete: ack received\n";
+	// cout << myNode_ << ": Shell::doDelete: ack received\n";
 
 	return 1;
 }
@@ -323,22 +323,22 @@ void Shell::connectMasterMsg()
 void Shell::doQuit( )
 {
 	requestQuit.send( Id().eref(), &p_, 1 );
-	cout << myNode_ << ": Shell::doQuit: request sent\n";
+	// cout << myNode_ << ": Shell::doQuit: request sent\n";
 	while ( !quit_ )
 		Qinfo::mpiClearQ( &p_ );
 //	Qinfo::mpiClearQ( &p_ );
-	cout << myNode_ << ": Shell::doQuit: quitting\n";
+	// cout << myNode_ << ": Shell::doQuit: quitting\n";
 }
 
 void Shell::doStart( double runtime )
 {
 	numStartAcks_ = 0;
 	requestStart.send( Id().eref(), &p_, runtime, 1 );
-	cout << myNode_ << ": Shell::doStart: request sent\n";
+	// cout << myNode_ << ": Shell::doStart: request sent\n";
 	while ( numStartAcks_ < numNodes_ )
 		Qinfo::mpiClearQ( &p_ );
 //	Qinfo::mpiClearQ( &p_ );
-	cout << myNode_ << ": Shell::doStart: quitting\n";
+	// cout << myNode_ << ": Shell::doStart: quitting\n";
 }
 
 ////////////////////////////////////////////////////////////////
@@ -399,15 +399,15 @@ const char* Shell::getBuf() const
  * This gets a bit complicated if the Element is a multidim array.
  */
 void Shell::create( Eref e, const Qinfo* q, 
-	string type, Id parent, Id newElm, string name )
+	string type, Id parent, Id newElm, string name,
+	vector< unsigned int > dimensions )
 {
-	cout << myNode_ << ": In Shell::create for element " << name << " id " << newElm <<
-		" on node " << myNode_ << endl;
+	// cout << myNode_ << ": In Shell::create for element " << name << " id " << newElm << ", dim = " << dimensions[0] << endl;
 	innerCreate( type, parent, newElm, name );
-	cout << myNode_ << ": Shell::create inner Create done for element " << name << " id " << newElm << endl;
+	// cout << myNode_ << ": Shell::create inner Create done for element " << name << " id " << newElm << endl;
 //	if ( myNode_ != 0 )
 		ackCreate.send( e, &p_, 0 );
-	cout << myNode_ << ": Shell::create ack sent" << endl;
+	// cout << myNode_ << ": Shell::create ack sent" << endl;
 }
 
 /**
@@ -437,7 +437,7 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name )
 void Shell::destroy( Eref e, const Qinfo* q, Id eid)
 {
 	eid.destroy();
-	cout << myNode_ << ": Shell::destroy done for element id " << eid << endl;
+	// cout << myNode_ << ": Shell::destroy done for element id " << eid << endl;
 
 	//if ( myNode_ != 0 )
 		ackDelete.send( e, &p_, 0 );
@@ -463,8 +463,7 @@ void Shell::error( const string& text )
 void Shell::handleAckCreate()
 {
 	numCreateAcks_++;
-	cout << myNode_ << ": Shell::handleAckCreate: numCreateAcks_ = " <<
-		numCreateAcks_ << endl;
+	// cout << myNode_ << ": Shell::handleAckCreate: numCreateAcks_ = " << numCreateAcks_ << endl;
 }
 
 void Shell::handleAckDelete()
@@ -474,7 +473,7 @@ void Shell::handleAckDelete()
 
 void Shell::handleQuit()
 {
-	cout << myNode_ << ": Shell::handleQuit" << endl;
+	// cout << myNode_ << ": Shell::handleQuit" << endl;
 	quit_ = 1;
 }
 

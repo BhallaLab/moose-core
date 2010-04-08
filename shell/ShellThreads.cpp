@@ -57,10 +57,10 @@ void* Shell::msgLoop( void* shellePtr )
 		// Put in a condition_wait here in case we have to sync with the
 		// Clock. The idea is that if the clock gets going, this
 		// loop must wait.
-		cout << myNode_ << ": in Shell::msgLoop, numNodes=" << numNodes_ <<"\n";
+		// cout << myNode_ << ": in Shell::msgLoop, numNodes=" << numNodes_ <<"\n";
 		shell->passThroughMsgQs( shelle );
 	}
-	cout << myNode_ << ": Shell::msgLoop, exiting\n";
+	// cout << myNode_ << ": Shell::msgLoop, exiting\n";
 	// pthread_exit( NULL );
 	return 0;
 }
@@ -283,6 +283,7 @@ void Shell::initThreadInfo( vector< ThreadInfo >& ti,
 	if ( numNodes_ > 1 )
 		numThreads++;
 
+	/*
 	cout << myNode_ << 
 		": Shell::initThreadInfo: ti.size() = " << ti.size() << 
 		", numCores = " << numCores_ << 
@@ -290,6 +291,7 @@ void Shell::initThreadInfo( vector< ThreadInfo >& ti,
 		", numThreads[sg[1]] = " << Qinfo::simGroup( 1 )->numThreads <<
 		", numThreads = " << numThreads <<
 		endl;
+		*/
 	for ( unsigned int i = 1; i < Qinfo::numSimGroup(); ++i ) {
 		for ( unsigned short k = 0; k < numThreads; ++k )
 	//	for ( unsigned short k = 0; k < ti.size(); ++k )
@@ -299,7 +301,7 @@ void Shell::initThreadInfo( vector< ThreadInfo >& ti,
 			ti[j].runtime = runtime;
 			ti[j].threadId = j;
 			if ( i > 0 && numNodes_ > 1 && (k == numThreads - 1 ) ) {
-				cout << myNode_ << ": Shell::initThreadInfo: isMpiThread\n";
+				//cout << myNode_ << ": Shell::initThreadInfo: isMpiThread\n";
 				ti[j].threadIndexInGroup = ~0; // isMpiThread
 			} else {
 				ti[j].threadIndexInGroup = 
@@ -309,8 +311,7 @@ void Shell::initThreadInfo( vector< ThreadInfo >& ti,
 			ti[j].groupId = i;
 			ti[j].outQid = Qinfo::simGroup(i)->startThread + k;
 			ti[j].sortMutex = sortMutex;
-			cout << i << " " << k << ", j = " << j << 
-				", thrIndexInGrp= " << ti[j].threadIndexInGroup << endl;
+			// cout << i << " " << k << ", j = " << j << ", thrIndexInGrp= " << ti[j].threadIndexInGroup << endl;
 			j++;
 		}
 	}
@@ -371,7 +372,7 @@ void Shell::start( double runtime )
 			exit( -1 );
 		}
 	}
-	cout << "Shell::start: setting off with " << numNodes_ << " nodes on node " << myNode_ << "\n";
+	// cout << "Shell::start: setting off with " << numNodes_ << " nodes on node " << myNode_ << "\n";
 
 	// Clean up.
 	for ( unsigned int i = 0; i < numThreads ; ++i ) {
