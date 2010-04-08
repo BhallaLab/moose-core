@@ -910,6 +910,31 @@ void testSharedMsg()
 	cout << "." << flush;
 }
 
+void testConvVector()
+{
+	vector< unsigned int > intVec;
+	for ( unsigned int i = 0; i < 5; ++i )
+		intVec.push_back( i * i );
+	
+	char buf[500];
+
+	Conv< vector< unsigned int > > intConv( intVec );
+	assert( intConv.size() == sizeof( unsigned int ) * (intVec.size() + 1));
+	unsigned int ret = intConv.val2buf( buf );
+	assert( ret == sizeof( unsigned int ) * (intVec.size() + 1));
+	assert( *reinterpret_cast< unsigned int* >( buf ) == intVec.size() );
+
+	Conv< vector< unsigned int > > testIntConv( buf );
+	assert( intConv.size() == testIntConv.size() );
+	vector< unsigned int > testIntVec = *testIntConv;
+	assert( intVec.size() == testIntVec.size() );
+	for ( unsigned int i = 0; i < intVec.size(); ++i ) {
+		assert( intVec[ i ] == testIntVec[i] );
+	}
+
+	cout << "." << flush;
+}
+
 void testAsync( )
 {
 	showFields();
@@ -928,4 +953,5 @@ void testAsync( )
 	testSparseMsg();
 	testUpValue();
 	testSharedMsg();
+	testConvVector();
 }

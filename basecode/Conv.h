@@ -54,8 +54,9 @@ template< class T > class Conv
 		 * Needs to be specialized for variable size and pointer-containing
 		 * types T.
 		 */
-		unsigned int val2buf( char* buf ) {
-			*reinterpret_cast< T* >( buf ) = *reinterpret_cast< const T* >( val_);
+		unsigned int val2buf( char* buf ) const {
+			*reinterpret_cast< T* >( buf ) = 
+				*reinterpret_cast< const T* >( val_);
 			// Or I could do a memcpy. Worth trying to see speed implication
 			return sizeof( T );
 		}
@@ -100,7 +101,7 @@ template<> class Conv< string >
 			return val_;
 		}
 
-		unsigned int val2buf( char* buf ) {
+		unsigned int val2buf( char* buf ) const {
 			strcpy( buf, val_.c_str() );
 			return size();
 		}
@@ -116,4 +117,74 @@ template<> class Conv< string >
 		string val_;
 };
 
-#endif // _DINFO_H
+
+/**
+ * Trying to do a partial specialization.
+ * The buffer here starts with the # of entries in the vector
+ * Then it has the actual entries.
+ */
+template< class T > class Conv< vector< T > >
+{
+	public:
+		Conv( const char* buf )
+		{
+			// I choose this value because of the internode BUFSIZE,
+			// which is 65536.
+			static const unsigned int UnreasonablyLargeArray = 8192;
+			unsigned int numEntries = 
+				*reinterpret_cast< const unsigned int* >( buf );
+			buf += sizeof( unsigned int );
+			assert( numEntries < UnreasonablyLargeArray );
+			val_.resize( numEntries );
+			size_ = sizeof( unsigned int );
+			for ( unsigned int i = 0; i < numEntries; ++i ) {
+				Conv< T > arg( buf );
+				val_[ i ] = *arg;
+				unsigned int temp = arg.size();
+				buf += temp;
+				size_ += temp;
+			}
+		}
+
+		Conv( const vector< T >& arg )
+			: val_( arg )
+		{
+			size_ = sizeof( unsigned int );
+			for ( unsigned int i = 0; i < val_.size(); ++i ) {
+				Conv< T > temp( val_[ i ] );
+				size_ += temp.size();
+			}
+		}
+
+		unsigned int size() const
+		{
+			return size_;
+		}
+
+		const vector< T >& operator*() const {
+			return val_;
+		}
+
+		unsigned int val2buf( char* buf ) const {
+			*( reinterpret_cast< unsigned int* >( buf ) ) = val_.size();
+			buf += sizeof( unsigned int );
+			for ( unsigned int i = 0; i < val_.size(); ++i ) {
+				Conv< T > temp( val_[ i ] );
+				buf += temp.val2buf( buf );
+			}
+			return size_;
+		}
+
+		static void str2val( T& val, const string& s ) {
+			cout << "Specialized Conv< vector< T > >::str2val not done\n";
+		}
+
+		static void val2str( string& s, const T& val ) {
+			cout << "Specialized Conv< vector< T > >::val2str not done\n";
+		}
+	private:
+		unsigned int size_;
+		vector< T > val_;
+};
+
+#endif // _CONV_H
