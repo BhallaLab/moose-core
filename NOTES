@@ -4078,5 +4078,9 @@ the tests.
 Implemented Shell::connectMasterMsg and set it up to execute at
 MOOSE initialization. This connects up all shells on all nodes to
 each other so that the do<Function> calls can be sent out on messages.
+Checkin 1686
+
+Implemented 5-argument MOOSE functions to handle data transfer for
+Shell::doCreate. May have to do 6 argument to handle message creation.
 
 =============================================================================

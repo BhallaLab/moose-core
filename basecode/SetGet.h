@@ -764,4 +764,98 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 		}
 };
 
+/**
+ * SetGet5 handles 5-argument Sets. It does not deal with Gets.
+ */
+template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
+	public SetGet
+{
+	public:
+		SetGet5( Eref& dest )
+			: SetGet( dest )
+		{;}
+
+		/**
+		 * Blocking, typed 'Set' call
+		 */
+		static bool set( Eref& dest, const string& field, 
+			A1 arg1, A2 arg2, A3 arg3, A4 arg4, A5 arg5 )
+		{
+			SetGet5< A1, A2, A3, A4, A5 > sg( dest );
+			FuncId fid;
+			if ( sg.checkSet( field, fid ) ) {
+				Conv< A1 > conv1( arg1 );
+				Conv< A2 > conv2( arg2 );
+				Conv< A3 > conv3( arg3 );
+				Conv< A4 > conv4( arg4 );
+				Conv< A5 > conv5( arg5 );
+				unsigned int totSize = conv1.size() + conv2.size() +
+					conv3.size() + conv4.size() + conv5.size();
+				char *temp = new char[ totSize ];
+				conv1.val2buf( temp );
+				conv2.val2buf( temp + conv1.size() );
+				conv3.val2buf( temp + conv1.size() + conv2.size() );
+				conv4.val2buf( temp + conv1.size() + conv2.size() + 
+					conv3.size() );
+				conv5.val2buf( temp + conv1.size() + conv2.size() + 
+					conv3.size() + conv4.size() );
+				sg.iSetInner( fid, temp, totSize );
+
+				// Ensure that clearQ is called before this return.
+				sg.completeSet();
+				delete[] temp;
+				return 1;
+			}
+			return 0;
+		}
+
+		/**
+		 * Blocking call using string conversion.
+		 * As yet we don't have 2 arg conversion from a single string.
+		 * So this is a dummy
+		 */
+		static bool strSet( Eref& dest, const string& field, 
+			const string& val )
+		{
+			cout << "strSet< A1, A2, A3, A4, A5 >: string convertion not yet implemented\n";
+			A1 arg1;
+			A2 arg2;
+			A3 arg3;
+			A4 arg4;
+			A5 arg5;
+			str2val( arg1, val );
+			return set( dest, field, arg1, arg2, arg3, arg4, arg5 );
+		}
+
+		/**
+		 * Nonblocking 'set' call, no args.
+		 * There is a matching nonblocking iStrSet call with a string arg.
+		 */
+		bool iSet( const string& field, const A1& arg1, const A2& arg2, const A3& arg3, const A4& arg4, const A5& arg5 )
+		{
+			return 0;
+		}
+
+		/**
+		 * Nonblocking 'set' call, using automatic string conversion into
+		 * arbitrary numbers of arguments.
+		 * There is a matching nonblocking set call with typed arguments.
+		 */
+		bool iStrSet( const string& field, const string& val )
+		{
+			return 0;
+		}
+	//////////////////////////////////////////////////////////////////
+	//  The 'Get' calls for 2 args are currently undefined.
+	//////////////////////////////////////////////////////////////////
+	
+		/**
+		 * Terminating call using string conversion
+		 */
+		string harvestStrGet() const
+		{ 
+			return "";
+		}
+};
+
 #endif // _SETGET_H

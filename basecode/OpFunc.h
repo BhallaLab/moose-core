@@ -194,6 +194,41 @@ template< class T, class A1, class A2, class A3, class A4 > class OpFunc4:
 		void ( T::*func_ )( A1, A2, A3, A4 ); 
 };
 
+template< class T, class A1, class A2, class A3, class A4, class A5 > class OpFunc5: 
+	public OpFunc
+{
+	public:
+		OpFunc5( void ( T::*func )( A1, A2, A3, A4, A5 ) )
+			: func_( func )
+			{;}
+
+		bool checkFinfo( const Finfo* s ) const {
+			return dynamic_cast< const SrcFinfo5< A1, A2, A3, A4, A5 >* >( s );
+		}
+
+		bool checkSet( const SetGet* s ) const {
+			return dynamic_cast< const SetGet5< A1, A2, A3, A4, A5 >* >( s );
+		}
+
+		void op( Eref e, const char* buf ) const {
+			buf += sizeof( Qinfo );
+			Conv< A1 > arg1( buf );
+			buf += arg1.size();
+			Conv< A2 > arg2( buf );
+			buf += arg2.size();
+			Conv< A3 > arg3( buf );
+			buf += arg3.size();
+			Conv< A4 > arg4( buf );
+			buf += arg4.size();
+			Conv< A5 > arg5( buf );
+			(reinterpret_cast< T* >( e.data() )->*func_)( 
+				*arg1, *arg2, *arg3, *arg4, *arg5 );
+		}
+
+	private:
+		void ( T::*func_ )( A1, A2, A3, A4, A5 ); 
+};
+
 
 /**
  * This specialized OpFunc is for returning a single field value
