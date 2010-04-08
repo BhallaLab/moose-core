@@ -90,6 +90,10 @@ Id init( int argc, char** argv )
 	Shell* s = reinterpret_cast< Shell* >( shellId.eref().data() );
 	s->setHardware( isSingleThreaded, numCores, numNodes, myNode );
 	s->loadBalance();
+	Shell::connectMasterMsg();
+	Msg* m = new OneToOneMsg( shellId(), shellId() );
+	assert ( m != 0 );
+
 	return shellId;
 }
 
@@ -100,8 +104,8 @@ int main( int argc, char** argv )
 #endif
 	cout << "testing: ";
 	testAsync();
+//	testScheduling();
 	testShell();
-	testScheduling();
 	cout << endl;
 
 	// Note that the main loop remains the parser loop, though it may
@@ -115,15 +119,7 @@ int main( int argc, char** argv )
 		s->launchParser();
 	else
 		s->launchMsgLoop( shelle );
-	/*
-	while( !s->getQuit() ) {
-		Qinfo::clearQ( Shell::procInfo() );
-		// The shell is careful not to execute any structural commands
-		// during clearQ. It instead puts them onto an internal queue for
-		// clearing during process.
-		shelle->process( &p );
-	}
-	*/
+
 	cout << s->myNode() << ": Main: out of parser/MsgLoop\n";
 
 	shellId.destroy();

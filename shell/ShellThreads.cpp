@@ -372,21 +372,6 @@ void Shell::start( double runtime )
 		}
 	}
 	cout << "Shell::start: setting off with " << numNodes_ << " nodes on node " << myNode_ << "\n";
-/*
-#if USE_NODES
-	if ( numNodes_ > 1 ) { // Create a thread to dispatch MPI traffic.
-		// cout << "Shell::start: setting off with " << numNodes_ << " nodes\n";
-		int ret = pthread_create( &threads[ numCores_ ], NULL, 
-				Shell::mpiThreadFunc, 
-				reinterpret_cast< void* >( this )
-		);
-		if ( ret ) {
-			cout << "Error: Shell::start: Unable to create mpiThread";
-			exit( -1 );
-		}
-	}
-#endif
-*/
 
 	// Clean up.
 	for ( unsigned int i = 0; i < numThreads ; ++i ) {

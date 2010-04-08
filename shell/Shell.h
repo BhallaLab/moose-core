@@ -37,6 +37,7 @@ class Shell: public Data
 		MsgId doCreateMsg( Id src, const string& srcField, Id dest,
 			const string& destField, const string& msgType );
 
+
 		void doQuit( );
 
 		void doStart( double runtime );
@@ -71,6 +72,12 @@ class Shell: public Data
 		////////////////////////////////////////////////////////////////
 		// Thread and MPI handling functions
 		////////////////////////////////////////////////////////////////
+		
+		/**
+		 * Sets up master message that interconnects all shells on all
+		 * nodes
+		 */
+		static void connectMasterMsg();
 		/**
 		 * Assigns the hardware availability. Assumes that each node will
 		 * have the same number of cores available.
@@ -112,6 +119,7 @@ class Shell: public Data
 
 
 		void setRunning( bool value );
+
 
 		////////////////////////////////////////////////////////////////
 		// Sets up clock ticks. Essentially is a call into the 

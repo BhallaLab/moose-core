@@ -289,6 +289,37 @@ MsgId Shell::doCreateMsg( Id src, const string& srcField, Id dest,
 	return Msg::Null;
 }
 
+/**
+ * Static function, sets up the master message that connects
+ * all shells on all nodes to each other. Uses low-level calls to
+ * do so.
+ */
+void Shell::connectMasterMsg()
+{
+	Id shellId;
+	Element* shelle = shellId();
+	const Finfo* f1 = shelle->cinfo()->findFinfo( "master" );
+	if ( !f1 ) {
+		cout << "Error: Shell::connectMasterMsg: failed to find 'master' msg\n";
+		exit( 0 ); // Bad!
+	}
+	const Finfo* f2 = shelle->cinfo()->findFinfo( "worker" );
+	if ( !f2 ) {
+		cout << "Error: Shell::connectMasterMsg: failed to find 'worker' msg\n";
+		exit( 0 ); // Bad!
+	}
+
+	Msg* m = 0;
+		m = new OneToOneMsg( shelle, shelle );
+	if ( m ) {
+		if ( f1->addMsg( f2, m->mid(), shelle ) )
+			return;
+		else
+			delete m; // Nasty, but rare.
+	}
+	exit( 0 ); // Bad!
+}
+
 void Shell::doQuit( )
 {
 	requestQuit.send( Id().eref(), &p_, 1 );
