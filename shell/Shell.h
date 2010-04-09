@@ -57,6 +57,10 @@ class Shell: public Data
 		void handleAckDelete();
 		void handleQuit();
 		void handleAckStart();
+		void handleAddMsg( Eref e, const Qinfo* q, 
+			vector< unsigned int > ids, string srcField, string destField,
+				string msgType );
+		void handleAckMsg();
 	
 
 		void create( Eref e, const Qinfo* q, 
@@ -151,6 +155,7 @@ class Shell: public Data
 		unsigned short numCreateAcks_;
 		unsigned short numDeleteAcks_;
 		unsigned short numStartAcks_;
+		unsigned short numMsgAcks_;
 		void* barrier_;
 		/**
 		 * Used to coordinate threads especially when doing MPI.

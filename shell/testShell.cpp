@@ -32,22 +32,6 @@ void testCreateDelete()
 	cout << "." << flush;
 }
 
-/**
- * Tests creation of SharedMsg from Shell to itself.
- * Will need to put in a deleteMsg as the Shell is a permanent fixture,
- * and dangling messages are bad.
-void testShellSharedMsg()
-{
-	Eref sheller = Id().eref();
-	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-
-	bool ret = shell->doCreateMsg( Id(), "master", 
-		Id(), "worker", "OneToOneMsg" );
-	assert( ret );
-	// sheller.element()->showMsg();
-	cout << "." << flush;
-}
- */
 
 /**
  * Tests Create and Delete calls issued through the parser interface,
@@ -58,11 +42,6 @@ void testShellParserCreateDelete()
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 
-	/*
-	bool ret = shell->doCreateMsg( Id(), "master", 
-		Id(), "worker", "OneToOneMsg" );
-	assert( ret );
-	*/
 #ifdef USE_MPI
 	// cout << shell->myNode() << " testShellParserCreateDelete: before barrier\n";
 //	MPI_Barrier( MPI_COMM_WORLD );

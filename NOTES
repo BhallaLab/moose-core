@@ -4153,6 +4153,14 @@ Turns out it doesn't work when the 'doStart' begins right after it: hangs.
 Fixed, just needed one more passThroughMsgQs on the worker nodes to 
 send out the ack after creating elements.
 Works for 2, 4 and 17 nodes.
+Checkin 1693
 
 Now on to runtime messaging.
+- Set up messages with a predefined Id on the master node.
+	- Is this the same as an Eid?
+	- Do we have a single Message child on each Elm and using
+		indexing for Message Spec data?
+	- Do we redo MsgId to behave more like Id? 
+		Or should we downgrade the Id to be like a typedefed int?
+
 

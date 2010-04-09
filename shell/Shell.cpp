@@ -55,6 +55,16 @@ static SrcFinfo0 ackStart( "ackStart",
 			"To be more precise, reports when the simulation is complete."
 			"Uses this form for symmetry with the other ack calls."
 			"Goes back only to master node." );
+static SrcFinfo4< vector< unsigned int >, string, string, string  > requestMsg( "requestMsg",
+			"requestMsg( ids, field1, field2, msgtype );"
+			"Creates specified Msg between specified Element on all nodes."
+			"Initiates a callback to indicate completion of operation."
+			"Goes to all nodes including self."
+			); 
+static SrcFinfo0 ackAddMsg( "ackAddMsg",
+			"ackAddMsg():"
+			"Acknowledges receipt and completion of AddMsg command."
+			"Goes back only to master node." );
 
 static DestFinfo create( "create", 
 			"create( class, parent, newElm, name, dimensions )",
@@ -83,10 +93,19 @@ static DestFinfo handleAckStart( "handleAckStart",
 			"Keeps track of # of responders to ackStart. Args: none",
 			new OpFunc0< Shell >( & Shell::handleAckStart ) );
 
+static DestFinfo handleAddMsg( "handleAddMsg", 
+			"Makes a msg",
+			new EpFunc4< Shell, 
+				vector< unsigned int >, string, string, string
+				>( & Shell::handleAddMsg ) );
+static DestFinfo handleAckMsg( "handleAckMsg", 
+			"Keeps track of # of responders to ackStart. Args: none",
+			new OpFunc0< Shell >( & Shell::handleAckMsg ) );
+
 static Finfo* shellMaster[] = {
-	&requestCreate, &handleAckCreate, &requestDelete, &handleAckDelete, &requestQuit, &requestStart, &handleAckStart };
+	&requestCreate, &handleAckCreate, &requestDelete, &handleAckDelete, &requestQuit, &requestStart, &handleAckStart, &requestMsg, &handleAckMsg };
 static Finfo* shellWorker[] = {
-	&create, &ackCreate, &del, &ackDelete, &handleQuit, &handleStart, &ackStart };
+	&create, &ackCreate, &del, &ackDelete, &handleQuit, &handleStart, &ackStart, &ackAddMsg, &handleAddMsg };
 /*
 static SrcFinfo4< Id, string, Id, string  > *requestMsg =
 		new SrcFinfo4< string, Id, Id, MsgId  >( "requestMsg",
@@ -272,6 +291,11 @@ MsgId Shell::doCreateMsg( Id src, const string& srcField, Id dest,
 			" on src:\n"; // Put name here.
 		return 0;
 	}
+	unsigned int mid = 0;
+	vector< unsigned int > ids;
+	ids.push_back( src.value() );
+	ids.push_back( dest.value() );
+	ids.push_back( mid );
 
 	Msg* m = 0;
 	if ( msgType == "OneToOneMsg" )
@@ -447,8 +471,11 @@ void Shell::destroy( Eref e, const Qinfo* q, Id eid)
 
 // I really also want to put in a message type. But each message has its
 // own features and these may well be done separately
-void Shell::addmsg( Id src, Id dest, string srcfield, string destfield )
+void Shell::handleAddMsg( Eref e, const Qinfo* q,
+		vector< unsigned int > ids, string srcfield,
+		string destfield, string msgType )
 {
+	cout << myNode_ << ", Shell::handleAddMsg << \n";
 }
 
 void Shell::warning( const string& text )
@@ -481,6 +508,11 @@ void Shell::handleQuit()
 void Shell::handleAckStart()
 {
 	numStartAcks_++;
+}
+
+void Shell::handleAckMsg()
+{
+	numMsgAcks_++;
 }
 
 ////////////////////////////////////////////////////////////////////////
