@@ -149,6 +149,7 @@ void testInterNodeOps()
 		child = Id::nextId();
 		while ( !child() )
 			shell->passThroughMsgQs( sheller.element() );
+		shell->passThroughMsgQs( sheller.element() );
 	}
 	cout << shell->myNode() << ": testInterNodeOps: #entries = " <<
 		child()->numData() << endl;
@@ -171,6 +172,6 @@ void testShell( )
 	// testShellSharedMsg();
 	testShellParserCreateDelete();
 	testInterNodeOps();
-//	testShellParserStart();
+	testShellParserStart();
 	testShellParserQuit();
 }

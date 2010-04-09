@@ -4146,3 +4146,13 @@ put them in for 3 cycles, but this hack does not scale to 17 nodes.
 Put in a relatively clean way to ensure that exactly the right # of
 clearQ passes occur: test for creation of the Element. This works with
 1, 2, 4, 17 nodes.
+The partitioning of data entries among elements on different nodes seems
+to be OK.
+Checkin 1692.
+Turns out it doesn't work when the 'doStart' begins right after it: hangs.
+Fixed, just needed one more passThroughMsgQs on the worker nodes to 
+send out the ack after creating elements.
+Works for 2, 4 and 17 nodes.
+
+Now on to runtime messaging.
+
