@@ -89,6 +89,7 @@ class Shell: public Data
 			unsigned int myNode );
 
 		unsigned int myNode() const ;
+		unsigned int numNodes() const;
 		unsigned int numCores() const;
 
 		void initThreadInfo( vector< ThreadInfo >& ti,

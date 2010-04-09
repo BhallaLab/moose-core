@@ -264,6 +264,11 @@ unsigned int Shell::numCores() const
 	return numCores_;
 }
 
+unsigned int Shell::numNodes() const
+{
+	return numNodes_;
+}
+
 unsigned int Shell::myNode() const
 {
 	return myNode_;

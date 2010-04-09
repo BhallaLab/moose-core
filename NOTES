@@ -4136,3 +4136,13 @@ Checkin 1690
 
 Ran valgrind to see if it picked up the problem with MPI. It picked up
 something else, fixed. MPI still a problem.
+Checkin 1691
+
+MPI issue is the familiar one of having to have the worker nodes go in
+a loop to clear Q entries for one test (testShellParserCreateDelete())
+before we go on to other unit tests. It usually works on 2 nodes if I
+put them in for 3 cycles, but this hack does not scale to 17 nodes.
+
+Put in a relatively clean way to ensure that exactly the right # of
+clearQ passes occur: test for creation of the Element. This works with
+1, 2, 4, 17 nodes.

@@ -425,6 +425,7 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 			return;
 		}
 		unsigned int n = ( numEntries + myNode_ ) / numNodes_;
+		cout << myNode_ << ": Shell::innerCreate newElmId= " << newElm << endl;
 		new Element( newElm, c, name, n, Element::Block );
 		//ret = c->create( newElm, name, n, Element::Decomposition::Block );
 	} else {

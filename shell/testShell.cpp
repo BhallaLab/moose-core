@@ -65,18 +65,26 @@ void testShellParserCreateDelete()
 	*/
 #ifdef USE_MPI
 	// cout << shell->myNode() << " testShellParserCreateDelete: before barrier\n";
-	MPI_Barrier( MPI_COMM_WORLD );
+//	MPI_Barrier( MPI_COMM_WORLD );
 	// cout << shell->myNode() << " testShellParserCreateDelete: after barrier\n";
 #endif
 
-	if ( shell->myNode() != 0 )
+	if ( shell->myNode() != 0 ) {
+		Id child = Id::nextId();
+		cout << shell->myNode() << " testShellParserCreateDelete: child=" << child << endl;
+		while ( !child() ) // Wait till it is created
+			shell->passThroughMsgQs( sheller.element() );
+		while ( child() ) // Wait till it is destroyed
+			shell->passThroughMsgQs( sheller.element() );
 		return;
+	}
 //	sheller.element()->showFields();
 //	sheller.element()->showMsg();
 
 	vector< unsigned int > dimensions;
 	dimensions.push_back( 1 );
 	Id child = shell->doCreate( "Neutral", Id(), "test", dimensions );
+	cout << shell->myNode() << " testShellParserCreateDelete: child=" << child << endl;
 
 	shell->doDelete( child );
 //	shell->doQuit( );
@@ -131,11 +139,19 @@ void testInterNodeOps()
 {
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-
-	vector< unsigned int > dimensions;
-	dimensions.push_back( shell->numCores() );
-	Id child = shell->doCreate( "Neutral", Id(), "test", dimensions );
-	;
+	Id child;
+	if ( shell->myNode() == 0 ) {
+		vector< unsigned int > dimensions;
+		// dimensions.push_back( shell->numNodes() + 1 );
+		dimensions.push_back( 6139 );
+		child = shell->doCreate( "Neutral", Id(), "test", dimensions );
+	} else {
+		child = Id::nextId();
+		while ( !child() )
+			shell->passThroughMsgQs( sheller.element() );
+	}
+	cout << shell->myNode() << ": testInterNodeOps: #entries = " <<
+		child()->numData() << endl;
 }
 
 
@@ -154,7 +170,7 @@ void testShell( )
 	testCreateDelete();
 	// testShellSharedMsg();
 	testShellParserCreateDelete();
-	//testInterNodeOps();
-	testShellParserStart();
+	testInterNodeOps();
+//	testShellParserStart();
 	testShellParserQuit();
 }
