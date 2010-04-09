@@ -403,7 +403,7 @@ void Shell::create( Eref e, const Qinfo* q,
 	vector< unsigned int > dimensions )
 {
 	// cout << myNode_ << ": In Shell::create for element " << name << " id " << newElm << ", dim = " << dimensions[0] << endl;
-	innerCreate( type, parent, newElm, name );
+	innerCreate( type, parent, newElm, name, dimensions[0] );
 	// cout << myNode_ << ": Shell::create inner Create done for element " << name << " id " << newElm << endl;
 //	if ( myNode_ != 0 )
 		ackCreate.send( e, &p_, 0 );
@@ -413,25 +413,25 @@ void Shell::create( Eref e, const Qinfo* q,
 /**
  * This function actually creates the object.
  */
-void Shell::innerCreate( string type, Id parent, Id newElm, string name )
+void Shell::innerCreate( string type, Id parent, Id newElm, string name,
+	unsigned int numEntries )
 {
 	const Cinfo* c = Cinfo::find( type );
-	bool ret = 0;
-	unsigned int num = 0; // hack till I figure out how to set up allocs.
 	if ( c ) {
 		Element* pa = parent();
 		if ( !pa ) {
 			stringstream ss;
 			ss << "create: Parent Element'" << parent << "' not found. No Element created";
+			return;
 		}
-		ret = c->create( newElm, name, num );
+		unsigned int n = ( numEntries + myNode_ ) / numNodes_;
+		new Element( newElm, c, name, n, Element::Block );
+		//ret = c->create( newElm, name, n, Element::Decomposition::Block );
 	} else {
 		stringstream ss;
 		ss << "create: Class '" << type << "' not known. No Element created";
 		warning( ss.str() );
 	}
-	// Send back ack with status
-	// ack.send( e, ret );
 }
 
 void Shell::destroy( Eref e, const Qinfo* q, Id eid)

@@ -11,7 +11,7 @@ class testSchedElement: public Element
 {
 	public:
 		testSchedElement() 
-			: Element( Tick::initCinfo(), 0, 0, 0, 0 ), index_( 0 )
+			: Element( Id::nextId(), Tick::initCinfo(), "testSched", 0 )
 		{;}
 		
 		void process( const ProcInfo* p ) {
@@ -34,7 +34,9 @@ class testThreadSchedElement: public Element
 {
 	public:
 		testThreadSchedElement() 
-			: Element( Tick::initCinfo(), 0, 0, 0, 0 ), index_( 0 )
+			// : Element( Tick::initCinfo(), 0, 0, 0, 0 ), index_( 0 )
+			: Element( Id::nextId(), Tick::initCinfo(), 
+				"testThreadSched", 0 )
 		{ 
 			pthread_mutex_init( &mutex_, NULL );
 		}

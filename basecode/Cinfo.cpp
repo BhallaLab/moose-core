@@ -130,20 +130,28 @@ const std::string& Cinfo::name() const
 	return name_;
 }
 
-bool Cinfo::create( Id id, const string& name, unsigned int numEntries ) const
+char* Cinfo::createData( unsigned int numEntries ) const 
+{
+	return reinterpret_cast< char* >(dinfo_->allocData( numEntries ) );
+}
+
+/*
+bool Cinfo::create( Id id, const string& name, unsigned int numEntries,
+	Element::Decomposition decomp ) const
 {
 	Element* e = new Element( 
 			this, 
 			reinterpret_cast< char* >(dinfo_->allocData( numEntries ) ),
-			numEntries, dinfo_->size(), numBindIndex_ );
+			numEntries, dinfo_->size(), numBindIndex_, decomp );
 	if ( e ) {
 		id.bindIdToElement( e );
 		return 1;
 	}
 	return 0;
 }
+*/
 
-void Cinfo::destroy( char* d ) const
+void Cinfo::destroyData( char* d ) const
 {
 	dinfo_->destroyData( d );
 }
@@ -151,6 +159,11 @@ void Cinfo::destroy( char* d ) const
 unsigned int Cinfo::numBindIndex() const
 {
 	return numBindIndex_;
+}
+
+unsigned int Cinfo::dataSize() const
+{
+	return dinfo_->size();
 }
 
 const map< string, Finfo* >& Cinfo::finfoMap() const

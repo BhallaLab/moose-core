@@ -91,13 +91,21 @@ class Cinfo
 
 			/**
 			 * Creates a new Element. Assigns a new Id or takes one you give
+			bool create( Id id, const string& name, unsigned int numEntries,
+				Element::Decomposition decomp ) const;
 			 */
-			bool create( Id id, const string& name, unsigned int numEntries ) const;
+
+			/**
+			 * Creates data to be attached to element
+			 */
+			char* createData( unsigned int numEntries ) const;
+
+			unsigned int dataSize() const;
 
 			/**
 			 * Destroys data on element
 			 */
-			void destroy( char* d ) const;
+			void destroyData( char* d ) const;
 
 			unsigned int numBindIndex() const;
 

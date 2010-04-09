@@ -31,15 +31,17 @@ void setupTicks()
 	static const double EPSILON = 1.0e-9;
 	const Cinfo* tc = Tick::initCinfo();
 	Id clock = Id::nextId();
-	bool ret = Clock::initCinfo()->create( clock, "tclock", 1 );
-	assert( ret );
-	Element* clocke = clock();
+	Element* clocke = new Element( clock, Clock::initCinfo(), "tclock", 1 );
+	assert( clocke );
+	// bool ret = Clock::initCinfo()->create( clock, "tclock", 1 );
+	// assert( ret );
+	// Element* clocke = clock();
 	Eref clocker = clock.eref();
 	FieldElement< Tick, Clock, &Clock::getTick > ticke( tc, clocke, 
 		&Clock::getNumTicks, &Clock::setNumTicks );
 	unsigned int size = 10;
 
-	ret = OneToAllMsg::add( clocker, "tick", &ticke, "parent" );
+	bool ret = OneToAllMsg::add( clocker, "tick", &ticke, "parent" );
 	assert( ret );
 
 	assert( ticke.numData() == 0 );
@@ -181,8 +183,9 @@ void testThreadIntFireNetwork()
 	mtseed( 5489UL ); // The default value, but better to be explicit.
 
 	Id i2 = Id::nextId();
-	bool ret = ic->create( i2, "test2", size );
-	assert( ret );
+	// bool ret = ic->create( i2, "test2", size );
+	Element* t2 = new Element( i2, ic, "test2", size );
+	assert( t2 );
 
 	Eref e2 = i2.eref();
 	FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
@@ -196,7 +199,7 @@ void testThreadIntFireNetwork()
 	if ( Qinfo::numSimGroup() >= 2 ) {
 		numThreads = Qinfo::simGroup( 1 )->numThreads;
 	}
-	ret = PsparseMsg::add( e2.element(), "spike", &syn, "addSpike", 
+	bool ret = PsparseMsg::add( e2.element(), "spike", &syn, "addSpike", 
 		connectionProbability, numThreads ); // Include group id as an arg. 
 	assert( ret );
 

@@ -9,19 +9,39 @@
 
 #include "header.h"
 
+/*
 Element::Element( const Cinfo* c, 
 	char* d, unsigned int numData, unsigned int dataSize, 
-		unsigned int numBindIndex )
+		unsigned int numBindIndex, Element::Decomposition decomp )
 	: d_( d ), numData_( numData ), dataSize_( dataSize ), 
+	decomposition_( decomp ),
 	sendBuf_( 0 ), cinfo_( c ), msgBinding_( numBindIndex )
 { 
 	;
 }
+*/
 
+Element::Element( Id id, const Cinfo* c, const string& name, 
+	unsigned int numData, Element::Decomposition decomp )
+	: d_( c->createData( numData ) ), numData_( numData ), 
+		dataSize_( c->dataSize() ), 
+		decomposition_( decomp ),
+		name_( name ),
+		sendBuf_( 0 ), 
+		cinfo_( c ), 
+		msgBinding_( c->numBindIndex() )
+{ 
+	id.bindIdToElement( this );
+}
+
+/**
+ * What is the point of this?
+ */
 Element::Element( const Cinfo* c, const Element* other )
 	: 	d_( other->d_ ), 
 		numData_( other->numData_ ), 
 		dataSize_( other->dataSize_),
+		decomposition_( other->decomposition_ ),
 		sendBuf_( 0 ), cinfo_( c ),
 		msgBinding_( c->numBindIndex() )
 {
@@ -31,7 +51,7 @@ Element::Element( const Cinfo* c, const Element* other )
 Element::~Element()
 {
 	delete[] sendBuf_;
-	cinfo_->destroy( d_ );
+	cinfo_->destroyData( d_ );
 	cinfo_ = 0; // A flag that the Element is doomed, used to avoid lookups when deleting Msgs.
 	for ( vector< vector< MsgFuncBinding > >::iterator i = msgBinding_.begin(); i != msgBinding_.end(); ++i ) {
 		for ( vector< MsgFuncBinding >::iterator j = i->begin(); j != i->end(); ++j ) {

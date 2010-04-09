@@ -4093,4 +4093,42 @@ Checkin 1688.
 Working on implementing the 5 argument function for the Shell::create
 command.
 Also lots of cleanup of printf debugging.
+Checkin 1689.
+
+- Decide how to record partitioning info
+	- Completely implicit. Based on node#, numNodes, and numData, derive
+		local indices by a formula
+		- lets one find desired node from index.
+		- Could put in decomposition mode in order to get more variety.
+- Decide how to instantiate Elements
+	- Do so on creation, which is when the size should be known. 
+		- Nice because then there is not just-in-time juggling when
+		  fields etc are assigned.
+		- Bad if there are different alternate decompositions to try.
+	- Do so on 'start'
+	- Do so whenever fields are assigned.
+	- Do so on creation, and be willing and easy to redo at any point.
+		- This would be helped if there is a terse specification of
+		the current decomposition
+- Should Messages be converted to creation with predefined MsgId?
+	- If all is done in perfect sequence, no need. Same applies to Elements.
+- How to spec Messages in a high-level way
+	- Current set are simple enough that the spec can be extracted
+	from the message
+	- Exception is the SparseMsg which will need a high-level front-end.
+	- Means that the message creation function needs some thought.
+- When to set up the low-level messages
+	- Wait till 'start' or 'reset'
+	- Assuming Elements are done right away, do it right away.
+- How to partition stuff in low-level messages
+	- Look up partitioning rule on Element
+	- Most low-levels follow right on.
+	- SparseMsg needs some calculation.
+
+
+Working on updated Element instantiation and creation. Lots of unit tests
+in testAsync to be redone.
 =============================================================================
+9 April
+Cleaned up compile after redoing Element creation code. Clears single node
+tests, not MPI.

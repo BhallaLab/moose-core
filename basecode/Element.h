@@ -23,6 +23,10 @@ class Element
 	friend void testSyncArray( unsigned int, unsigned int, unsigned int );
 	friend void testSparseMsg();
 	public:
+		enum Decomposition {
+			Block,	// Successive blocks of Elements are on same node
+			Sequential // Entries are put sequentially on successive nodes.
+		};
 		/**
 		 * Constructor
 		 * It would be nice to have shared data: e.g., thresh and tau for
@@ -35,10 +39,17 @@ class Element
 			unsigned int numRecvSlots_
 		);
 		*/
+		/*
 		Element( const Cinfo* c, 
 			char* d, unsigned int numData, unsigned int dataSize,
-			unsigned int numBindIndex );
+			unsigned int numBindIndex, Element::Decomposition decomp );
+			*/
 
+		Element( Id id, const Cinfo* c, const string& name,
+			unsigned int numData, Element::Decomposition decomp =
+				Element::Block );
+
+		// What is the point of this constructor?
 		Element( const Cinfo* c, const Element* other );
 
 		/**
@@ -225,6 +236,8 @@ class Element
 		const Cinfo* cinfo() const;
 
 		// const Msg* getMsg( MsgId mid ) const;
+		
+		Decomposition decomposition() const;
 
 	protected:
 
@@ -240,7 +253,11 @@ class Element
 		unsigned int numData_;
 		unsigned int dataSize_;
 
+		// Enum. Specifies how to subdivide indices among nodes.
+		Decomposition decomposition_; 
 	private:
+		string name_;
+
 		/**
 		 * This is the data buffer used for outgoing sync messages from
 		 * objects on this Element.
