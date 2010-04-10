@@ -134,6 +134,9 @@ void testInterNodeOps()
 		child()->numData() << endl;
 }
 
+void testShellAddMsg()
+{
+}
 
 void testShellParserQuit()
 {
@@ -148,9 +151,9 @@ void testShellParserQuit()
 void testShell( )
 {
 	testCreateDelete();
-	// testShellSharedMsg();
 	testShellParserCreateDelete();
 	testInterNodeOps();
 	testShellParserStart();
+	testShellAddMsg();
 	testShellParserQuit();
 }

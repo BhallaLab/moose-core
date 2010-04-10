@@ -55,8 +55,8 @@ static SrcFinfo0 ackStart( "ackStart",
 			"To be more precise, reports when the simulation is complete."
 			"Uses this form for symmetry with the other ack calls."
 			"Goes back only to master node." );
-static SrcFinfo4< vector< unsigned int >, string, string, string  > requestMsg( "requestMsg",
-			"requestMsg( ids, field1, field2, msgtype );"
+static SrcFinfo4< vector< unsigned int >, string, string, string  > requestAddMsg( "requestAddMsg",
+			"requestAddMsg( ids, field1, field2, msgtype );"
 			"Creates specified Msg between specified Element on all nodes."
 			"Initiates a callback to indicate completion of operation."
 			"Goes to all nodes including self."
@@ -103,7 +103,7 @@ static DestFinfo handleAckMsg( "handleAckMsg",
 			new OpFunc0< Shell >( & Shell::handleAckMsg ) );
 
 static Finfo* shellMaster[] = {
-	&requestCreate, &handleAckCreate, &requestDelete, &handleAckDelete, &requestQuit, &requestStart, &handleAckStart, &requestMsg, &handleAckMsg };
+	&requestCreate, &handleAckCreate, &requestDelete, &handleAckDelete, &requestQuit, &requestStart, &handleAckStart, &requestAddMsg, &handleAckMsg };
 static Finfo* shellWorker[] = {
 	&create, &ackCreate, &del, &ackDelete, &handleQuit, &handleStart, &ackStart, &ackAddMsg, &handleAddMsg };
 /*
@@ -226,6 +226,7 @@ Shell::Shell()
 		quit_( 0 ), 
 		isSingleThreaded_( 0 ), numCores_( 1 ), numNodes_( 1 ),
 		numCreateAcks_( 0 ), numDeleteAcks_( 0 ),
+		numMsgAcks_( 0 ),
 		isRunning_( 0 )
 {
 	;
@@ -276,18 +277,18 @@ bool Shell::doDelete( Id i )
 	return 1;
 }
 
-MsgId Shell::doCreateMsg( Id src, const string& srcField, Id dest,
+MsgId Shell::doAddMsg( Id src, const string& srcField, Id dest,
 	const string& destField, const string& msgType )
 {
 	const Finfo* f1 = src()->cinfo()->findFinfo( srcField );
 	if ( !f1 ) {
-		cout << "add: Error: Failed to find field " << srcField << 
+		cout << myNode_ << ": Shell::doAddMsg: Error: Failed to find field " << srcField << 
 			" on src:\n"; // Put name here.
 		return 0;
 	}
 	const Finfo* f2 = dest()->cinfo()->findFinfo( destField );
 	if ( !f2 ) {
-		cout << "add: Error: Failed to find field " << srcField << 
+		cout << "Shell::doAddMsg: Error: Failed to find field " << srcField << 
 			" on src:\n"; // Put name here.
 		return 0;
 	}
@@ -297,10 +298,18 @@ MsgId Shell::doCreateMsg( Id src, const string& srcField, Id dest,
 	ids.push_back( dest.value() );
 	ids.push_back( mid );
 
+	requestAddMsg.send( Id().eref(), &p_, ids, 
+		srcField, destField, msgType );
+
+	numMsgAcks_ = 0;
+	while ( numMsgAcks_ < numNodes_ )
+		Qinfo::mpiClearQ( &p_ );
+
+	/*
 	Msg* m = 0;
-	if ( msgType == "OneToOneMsg" )
+	if ( msgType == "OneToOne" )
 		m = new OneToOneMsg( src(), dest() );
-	if ( msgType == "OneToAllMsg" )
+	if ( msgType == "OneToAll" )
 		m = new OneToAllMsg( src.eref(), dest() );
 	// And so on, lots of msg types here.
 	
@@ -310,6 +319,7 @@ MsgId Shell::doCreateMsg( Id src, const string& srcField, Id dest,
 		else
 			delete m; // Nasty, but rare.
 	}
+	*/
 	return Msg::Null;
 }
 
@@ -476,6 +486,7 @@ void Shell::handleAddMsg( Eref e, const Qinfo* q,
 		string destfield, string msgType )
 {
 	cout << myNode_ << ", Shell::handleAddMsg << \n";
+	ackAddMsg.send( e, &p_, 0 );
 }
 
 void Shell::warning( const string& text )

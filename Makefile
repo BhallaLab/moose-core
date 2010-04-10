@@ -204,6 +204,7 @@ SUBDIR = \
 	biophysics\
 	randnum\
 	scheduling\
+	builtins\
 
 
 #	kinetics \
@@ -217,6 +218,7 @@ OBJLIBS =	\
 	biophysics/biophysics.o \
 	randnum/randnum.o \
 	scheduling/scheduling.o \
+	builtins/builtins.o \
 
 #
 #	kinetics/kinetics.o \

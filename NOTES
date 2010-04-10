@@ -4163,4 +4163,19 @@ Now on to runtime messaging.
 	- Do we redo MsgId to behave more like Id? 
 		Or should we downgrade the Id to be like a typedefed int?
 
+Begun process by putting in skeleton code for doCreateMsg,
+and the various fields that implement it.
+Checkin 1694.
+Getting there. Need to make a test case of Shell::doAddMsg 
+=============================================================================
+10 April
+Working on test case. Implemented 'builtins' directory. Implemented
+Arith class there, currently it just adds its two inputs. Implemented a
+very superficial test case for it.
 
+Next: Implement a "DiagonalMsg". Should provide diagonal messaging with
+a specifiable slope, width and offset. 
+Then: Make DiagonalMsg node-aware, thread-aware.
+Then: Try it out with the Arith class.
+
+=============================================================================

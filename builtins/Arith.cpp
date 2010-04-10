@@ -1,0 +1,105 @@
+#include <queue>
+#include "header.h"
+#include "Arith.h"
+
+static SrcFinfo1< double > output( 
+		"output", 
+		"Sends out the computed value"
+	);
+
+const Cinfo* Arith::initCinfo()
+{
+		//////////////////////////////////////////////////////////////
+		// Field Definitions
+		//////////////////////////////////////////////////////////////
+		static ValueFinfo< Arith, string > function(
+			"function",
+			"Arithmetic function to perform on inputs.",
+			&Arith::setFunction,
+			&Arith::getFunction
+		);
+		static ValueFinfo< Arith, double > outputValue(
+			"outputValue",
+			"Value of output as computed last timestep.",
+			&Arith::setOutput,
+			&Arith::getOutput
+		);
+		//////////////////////////////////////////////////////////////
+		// MsgDest Definitions
+		//////////////////////////////////////////////////////////////
+		static DestFinfo arg1( "arg1",
+			"Handles argument 1",
+			new OpFunc1< Arith, double >( &Arith::arg1 ) );
+
+		static DestFinfo arg2( "arg2",
+			"Handles argument 2",
+			new OpFunc1< Arith, double >( &Arith::arg2 ) );
+
+		//////////////////////////////////////////////////////////////
+		// MsgSrc Definitions
+		//////////////////////////////////////////////////////////////
+
+	static Finfo* arithFinfos[] = {
+		&function,	// Value
+		&outputValue,	// Value
+		&arg1,		// DestFinfo
+		&arg2,		// DestFinfo
+		&output, 	// SrcFinfo
+	};
+
+	static Cinfo arithCinfo (
+		"Arith",
+		0, // No base class, but eventually I guess it will be neutral.
+		arithFinfos,
+		sizeof( arithFinfos ) / sizeof ( Finfo* ),
+		new Dinfo< Arith >()
+	);
+
+	return &arithCinfo;
+}
+
+static const Cinfo* arithCinfo = Arith::initCinfo();
+
+Arith::Arith()
+	: function_( "sum" ), 
+	output_( 0.0 ),
+	arg1_( 0.0 ), arg2_( 0.0 )
+{
+	;
+}
+
+void Arith::process( const ProcInfo* p, const Eref& e )
+{
+	output_ = arg1_ + arg2_; // Doing a hard-coded function.
+	output.send( e, p, output_ );
+}
+
+void Arith::arg1( const double arg )
+{
+	arg1_ = arg;
+}
+
+void Arith::arg2( const double arg )
+{
+	arg2_ = arg;
+}
+
+void Arith::setFunction( const string v )
+{
+	function_ = v;
+}
+
+string Arith::getFunction() const
+{
+	return function_;
+}
+
+void Arith::setOutput( double v )
+{
+	output_ = v;
+}
+
+double Arith::getOutput() const
+{
+	return output_;
+}

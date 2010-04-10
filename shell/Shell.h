@@ -34,7 +34,7 @@ class Shell: public Data
 		 * Sets up a Message of specified type.
 		 * Later need to consider doing this through MsgSpecs only.
 		 */
-		MsgId doCreateMsg( Id src, const string& srcField, Id dest,
+		MsgId doAddMsg( Id src, const string& srcField, Id dest,
 			const string& destField, const string& msgType );
 
 

@@ -25,6 +25,7 @@ extern void testSyncArray( unsigned int size, unsigned int numThreads,
 	unsigned int method );
 extern void testShell();
 extern void testScheduling();
+extern void testBuiltins();
 
 Id init( int argc, char** argv )
 {
@@ -107,6 +108,7 @@ int main( int argc, char** argv )
 	testAsync();
 //	testScheduling();
 	testShell();
+	testBuiltins();
 	cout << endl;
 
 	// Note that the main loop remains the parser loop, though it may
