@@ -105,7 +105,7 @@ int main( int argc, char** argv )
 #ifdef DO_UNIT_TESTS
 #endif
 	cout << "testing: ";
-	testAsync();
+//	testAsync();
 //	testScheduling();
 	testShell();
 	testBuiltins();

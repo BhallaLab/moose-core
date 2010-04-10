@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "DiagonalMsg.h"
 #include "Arith.h"
 
 void testArith()
@@ -36,7 +37,17 @@ void testArith()
 
 	assert( data1_0->getOutput() == 3 );
 
+	a1id.destroy();
+
 	cout << "." << flush;
+}
+
+/** 
+ * This test uses the Diagonal Msg and summing in the Arith element to
+ * generate a Fibonacci series.
+ */
+void testFibonacci()
+{
 }
 
 void testBuiltins()

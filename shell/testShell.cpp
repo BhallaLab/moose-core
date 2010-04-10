@@ -132,6 +132,9 @@ void testInterNodeOps()
 	}
 	cout << shell->myNode() << ": testInterNodeOps: #entries = " <<
 		child()->numData() << endl;
+
+	child.destroy();
+	cout << "." << flush;
 }
 
 void testShellAddMsg()
