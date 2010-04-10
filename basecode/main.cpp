@@ -24,8 +24,8 @@ extern void testAsync();
 extern void testSyncArray( unsigned int size, unsigned int numThreads,
 	unsigned int method );
 extern void testShell();
-extern void testScheduling();
-extern void testBuiltins();
+extern void testScheduling( bool useMPI );
+extern void testBuiltins( bool useMPI );
 
 Id init( int argc, char** argv )
 {
@@ -102,19 +102,19 @@ Id init( int argc, char** argv )
 int main( int argc, char** argv )
 {
 	Id shellId = init( argc, argv );
-#ifdef DO_UNIT_TESTS
-#endif
-	cout << "testing: ";
-//	testAsync();
-//	testScheduling();
-	testShell();
-	testBuiltins();
-	cout << endl;
-
 	// Note that the main loop remains the parser loop, though it may
 	// spawn a lot of other stuff.
 	Element* shelle = shellId();
 	Shell* s = reinterpret_cast< Shell* >( shelle->data( 0 ) );
+#ifdef DO_UNIT_TESTS
+#endif
+	cout << "testing: ";
+	testAsync();
+	testScheduling( s->numNodes() > 1 );
+	testBuiltins( s->numNodes() > 1 );
+	testShell();
+	cout << endl;
+
 	ProcInfo p;
 	// Actually here we should launch off the thread doing
 	// Shell messaging/MPI, and yield control to the parser.

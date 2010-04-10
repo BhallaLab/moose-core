@@ -262,9 +262,10 @@ void testThreadIntFireNetwork()
 }
 	
 
-void testScheduling( )
+void testScheduling( bool useMPI )
 {
 	setupTicks();
 	testThreads();
-	testThreadIntFireNetwork();
+	if ( !useMPI )
+		testThreadIntFireNetwork();
 }

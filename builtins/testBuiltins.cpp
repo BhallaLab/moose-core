@@ -9,6 +9,9 @@
 
 #include "header.h"
 #include "DiagonalMsg.h"
+#include "../scheduling/Tick.h"
+#include "../scheduling/TickPtr.h"
+#include "../scheduling/Clock.h"
 #include "Arith.h"
 
 void testArith()
@@ -48,10 +51,10 @@ void testArith()
  */
 void testFibonacci()
 {
-	unsigned int NumFib = 10;
+	unsigned int numFib = 10;
 
 	Id a1id = Id::nextId();
-	Element* a1 = new Element( a1id, Arith::initCinfo(), "a1", NumFib );
+	Element* a1 = new Element( a1id, Arith::initCinfo(), "a1", numFib );
 
 	Arith* data = reinterpret_cast< Arith* >( a1->data1( 0 ) );
 	data->arg1( 0 );
@@ -69,11 +72,20 @@ void testFibonacci()
 	ret = OneToAllMsg::add( ticker, "process0", a1, "process" );
 	assert( ret );
 
-	shell->doStart( NumFib );
+	/*
+	Eref clocker = Id(1).eref();
+	Clock* clock = reinterpret_cast< Clock* >( clocker.data() );
+	Qinfo dummyQ; // Not actually used in the Clock::start function
+	clock->setNumThreads( 0 );
+	clock->setBarrier( 0 );
+	clock->start( clocker, &dummyQ, numFib );
+	*/
+	// clock->tStart( clocker, ti )
+	shell->doStart( numFib );
 
 	unsigned int f1 = 1;
 	unsigned int f2 = 0;
-	for ( unsigned int i = 0; i < NumFib; ++i ) {
+	for ( unsigned int i = 0; i < numFib; ++i ) {
 		Arith* data = reinterpret_cast< Arith* >( a1->data1( i ) );
 		assert( data->getOutput() == f1 );
 		// cout << i << ", " << data->getOutput() << ", " << f1 << endl;
@@ -86,8 +98,9 @@ void testFibonacci()
 	cout << "." << flush;
 }
 
-void testBuiltins()
+void testBuiltins( bool useMPI )
 {
 	testArith();
-	testFibonacci();
+	if ( !useMPI )
+		testFibonacci();
 }

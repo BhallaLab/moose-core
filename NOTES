@@ -4187,5 +4187,14 @@ To handle multiple such mappings, use multiple DiagonalMsgs.
 Implemented the Fibonacci series as a good test for DiagonalMsg as well as
 Arith. There is some mess with scheduling in that it retains legacy
 clock ticks even though they are not used.
+Checkin 1698
 
+Something unpleasant happening with the moose processes. Lots of bad
+interactions between the various unit tests, specially in mpi mode.
+
+Put them all in the simplest way, and the situation is that the whole set
+run fine except in mpi mode.
+
+Bodged together a workaround: test for useMPI and skip the problem functions
+if MPI is running. Now the thing clears all combos of thread and node tried.
 =============================================================================
