@@ -92,15 +92,15 @@ const SrcFinfo* validateMsg( Element* src, const string& srcField,
 {
 	const Finfo* f1 = src->cinfo()->findFinfo( srcField );
 	if ( !f1 ) {
-		cout << "add: Error: Failed to find field " << srcField << 
-			" on src:\n"; // Put name here.
+		cout << "add: Error: Failed to find field '" << srcField << 
+			"' on src: " << src->name() << "\n"; // Put name here.
 		return 0;
 	}
 
 	const Finfo* f2 = dest->cinfo()->findFinfo( destField );
 	if ( !f2 ) {
-		cout << "add: Error: Failed to find field " << destField << 
-			" on dest:\n"; // Put name here.
+		cout << "add: Error: Failed to find field '" << destField << 
+			"' on dest: " << dest->name() << "\n"; // Put name here.
 		return 0;
 	}
 

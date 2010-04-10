@@ -65,6 +65,11 @@ Element::~Element()
 			Msg::deleteMsg( *i );
 }
 
+const string& Element::name() const
+{
+	return name_;
+}
+
 /**
  * The indices handled by each thread are in blocks
  * Thread0 handles the first (numData_ / numThreads ) indices

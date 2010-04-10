@@ -35,6 +35,7 @@ class Arith: public Data
 		
 		void arg1( double v );
 		void arg2( double v );
+		void eprocess( Eref e, const Qinfo* q, ProcPtr p );
 
 		////////////////////////////////////////////////////////////////
 

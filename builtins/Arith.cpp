@@ -35,6 +35,10 @@ const Cinfo* Arith::initCinfo()
 			"Handles argument 2",
 			new OpFunc1< Arith, double >( &Arith::arg2 ) );
 
+		static DestFinfo process( "process",
+			"Handles process call",
+			new EpFunc1< Arith, ProcPtr >( &Arith::eprocess ) );
+
 		//////////////////////////////////////////////////////////////
 		// MsgSrc Definitions
 		//////////////////////////////////////////////////////////////
@@ -44,6 +48,7 @@ const Cinfo* Arith::initCinfo()
 		&outputValue,	// Value
 		&arg1,		// DestFinfo
 		&arg2,		// DestFinfo
+		&process,	// DestFinfo
 		&output, 	// SrcFinfo
 	};
 
@@ -66,6 +71,11 @@ Arith::Arith()
 	arg1_( 0.0 ), arg2_( 0.0 )
 {
 	;
+}
+
+void Arith::eprocess( Eref e, const Qinfo* q, ProcPtr p )
+{
+	process( p, e );
 }
 
 void Arith::process( const ProcInfo* p, const Eref& e )

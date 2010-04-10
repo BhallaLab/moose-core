@@ -48,9 +48,46 @@ void testArith()
  */
 void testFibonacci()
 {
+	unsigned int NumFib = 10;
+
+	Id a1id = Id::nextId();
+	Element* a1 = new Element( a1id, Arith::initCinfo(), "a1", NumFib );
+
+	Arith* data = reinterpret_cast< Arith* >( a1->data1( 0 ) );
+	data->arg1( 0 );
+	data->arg2( 1 );
+
+	bool ret = DiagonalMsg::add( a1, "output", a1, "arg1", 1 );
+	assert( ret );
+	ret = DiagonalMsg::add( a1, "output", a1, "arg2", 2 );
+	assert( ret );
+
+
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	shell->setclock( 0, 1.0, 0 );
+	Eref ticker = Id( 2 ).eref();
+	ret = OneToAllMsg::add( ticker, "process0", a1, "process" );
+	assert( ret );
+
+	shell->doStart( NumFib );
+
+	unsigned int f1 = 1;
+	unsigned int f2 = 0;
+	for ( unsigned int i = 0; i < NumFib; ++i ) {
+		Arith* data = reinterpret_cast< Arith* >( a1->data1( i ) );
+		assert( data->getOutput() == f1 );
+		// cout << i << ", " << data->getOutput() << ", " << f1 << endl;
+		unsigned int temp = f1;
+		f1 = temp + f2;
+		f2 = temp;
+	}
+
+	a1id.destroy();
+	cout << "." << flush;
 }
 
 void testBuiltins()
 {
 	testArith();
+	testFibonacci();
 }

@@ -57,6 +57,8 @@ class Element
 		 */
 		virtual ~Element();
 
+		const string& name() const;
+
 		/**
 		 * Here we build the array on the fly.
 		Element( const Data *prototype, unsigned int numEntries );

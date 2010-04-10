@@ -4184,4 +4184,8 @@ array entry connects to a matching entry in the target. The difference between
 indices of the src and dest entries are the stride = destEntry - srcEntry.
 To handle multiple such mappings, use multiple DiagonalMsgs.
 
+Implemented the Fibonacci series as a good test for DiagonalMsg as well as
+Arith. There is some mess with scheduling in that it retains legacy
+clock ticks even though they are not used.
+
 =============================================================================
