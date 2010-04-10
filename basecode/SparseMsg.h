@@ -48,7 +48,7 @@ class SparseMsg: public Msg
 
 		/**
 		 * Creates a message between e1 and e2, with connections
-		 * ocdurring at the specified probability
+		 * occurring at the specified probability
 		 */
 		static bool add( Element* e1, const string& srcField, 
 			Element* e2, const string& destField, double probability );

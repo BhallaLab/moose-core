@@ -35,6 +35,7 @@ OBJ = \
 	SparseMatrix.o \
 	SparseMsg.o \
 	PsparseMsg.o \
+	DiagonalMsg.o \
 	main.o	\
 	testSync.o	\
 	testAsync.o	\

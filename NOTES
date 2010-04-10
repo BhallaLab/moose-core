@@ -4177,5 +4177,11 @@ Next: Implement a "DiagonalMsg". Should provide diagonal messaging with
 a specifiable slope, width and offset. 
 Then: Make DiagonalMsg node-aware, thread-aware.
 Then: Try it out with the Arith class.
+Checkin 1695.
+
+Implemented DiagonalMsg. It sets up messages between arrays, where each
+array entry connects to a matching entry in the target. The difference between
+indices of the src and dest entries are the stride = destEntry - srcEntry.
+To handle multiple such mappings, use multiple DiagonalMsgs.
 
 =============================================================================
