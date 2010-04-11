@@ -21,7 +21,7 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 Arith.o:	Arith.h
-testBuiltins.o:	Arith.h
+testBuiltins.o:	Arith.h ../basecode/DiagonalMsg.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I.. -I../basecode $< -c

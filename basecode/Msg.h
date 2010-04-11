@@ -95,7 +95,7 @@ class Msg
 		/**
 		 * The zero MsgId, used as the error value.
 		 */
-		static const MsgId Null;
+		static const MsgId badMsg;
 
 	protected:
 		Element* e1_;

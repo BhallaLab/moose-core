@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "DiagonalMsg.h"
 #include "Shell.h"
 #include "Dinfo.h"
 
@@ -55,13 +56,14 @@ static SrcFinfo0 ackStart( "ackStart",
 			"To be more precise, reports when the simulation is complete."
 			"Uses this form for symmetry with the other ack calls."
 			"Goes back only to master node." );
-static SrcFinfo4< vector< unsigned int >, string, string, string  > requestAddMsg( "requestAddMsg",
-			"requestAddMsg( ids, field1, field2, msgtype );"
+static SrcFinfo5< vector< unsigned int >, string, string, string,
+	vector< double > > requestAddMsg( "requestAddMsg",
+			"requestAddMsg( ids, field1, field2, msgtype, args );"
 			"Creates specified Msg between specified Element on all nodes."
 			"Initiates a callback to indicate completion of operation."
 			"Goes to all nodes including self."
 			); 
-static SrcFinfo0 ackAddMsg( "ackAddMsg",
+static SrcFinfo1< MsgId > ackAddMsg( "ackAddMsg",
 			"ackAddMsg():"
 			"Acknowledges receipt and completion of AddMsg command."
 			"Goes back only to master node." );
@@ -95,12 +97,13 @@ static DestFinfo handleAckStart( "handleAckStart",
 
 static DestFinfo handleAddMsg( "handleAddMsg", 
 			"Makes a msg",
-			new EpFunc4< Shell, 
-				vector< unsigned int >, string, string, string
+			new EpFunc5< Shell, 
+				vector< unsigned int >, string, string, string,
+					vector< double >
 				>( & Shell::handleAddMsg ) );
 static DestFinfo handleAckMsg( "handleAckMsg", 
 			"Keeps track of # of responders to ackStart. Args: none",
-			new OpFunc0< Shell >( & Shell::handleAckMsg ) );
+			new OpFunc1< Shell, MsgId >( & Shell::handleAckMsg ) );
 
 static Finfo* shellMaster[] = {
 	&requestCreate, &handleAckCreate, &requestDelete, &handleAckDelete, &requestQuit, &requestStart, &handleAckStart, &requestAddMsg, &handleAckMsg };
@@ -278,7 +281,7 @@ bool Shell::doDelete( Id i )
 }
 
 MsgId Shell::doAddMsg( Id src, const string& srcField, Id dest,
-	const string& destField, const string& msgType )
+	const string& destField, const string& msgType, vector< double > args )
 {
 	const Finfo* f1 = src()->cinfo()->findFinfo( srcField );
 	if ( !f1 ) {
@@ -299,7 +302,7 @@ MsgId Shell::doAddMsg( Id src, const string& srcField, Id dest,
 	ids.push_back( mid );
 
 	requestAddMsg.send( Id().eref(), &p_, ids, 
-		srcField, destField, msgType );
+		srcField, destField, msgType, args );
 
 	numMsgAcks_ = 0;
 	while ( numMsgAcks_ < numNodes_ )
@@ -320,7 +323,7 @@ MsgId Shell::doAddMsg( Id src, const string& srcField, Id dest,
 			delete m; // Nasty, but rare.
 	}
 	*/
-	return Msg::Null;
+	return Msg::badMsg;
 }
 
 /**
@@ -482,11 +485,40 @@ void Shell::destroy( Eref e, const Qinfo* q, Id eid)
 // I really also want to put in a message type. But each message has its
 // own features and these may well be done separately
 void Shell::handleAddMsg( Eref e, const Qinfo* q,
-		vector< unsigned int > ids, string srcfield,
-		string destfield, string msgType )
+		vector< unsigned int > ids, string srcField,
+		string destField, string msgType, vector< double > args )
 {
 	cout << myNode_ << ", Shell::handleAddMsg << \n";
-	ackAddMsg.send( e, &p_, 0 );
+	Id e1( ids[0] );
+	Id e2( ids[1] );
+	// Could actually make a required static function in all the Msgs,
+	// that has the arguments srcId, srcField, destId, destField, 
+	// vector< double > args. 
+	if ( !e1() ) {
+		cout << myNode_ << ": Error: Shell::handleAddMsg: e1 not found\n";
+		ackAddMsg.send( e, &p_, Msg::badMsg, 0 );
+		return;
+	}
+	if ( !e2() ) {
+		cout << myNode_ << ": Error: Shell::handleAddMsg: e2 not found\n";
+		ackAddMsg.send( e, &p_, Msg::badMsg, 0 );
+		return;
+	}
+
+	if ( msgType == "diagonal" || msgType == "Diagonal" ) {
+		if ( args.size() != 1 ) {
+			cout << myNode_ << ": Error: Shell::handleAddMsg: Should have 1 arg, was " << args.size() << endl;
+			ackAddMsg.send( e, &p_, Msg::badMsg, 0 );
+			return;
+		}
+		int stride = args[0];
+		MsgId ret = 
+			DiagonalMsg::add( e1(), srcField, e2(), destField, stride );
+		ackAddMsg.send( e, &p_, ret, 0 );
+	}
+	cout << myNode_ << ": Error: Shell::handleAddMsg: msgType not known: "
+		<< msgType << endl;
+	ackAddMsg.send( e, &p_, Msg::badMsg, 0 );
 }
 
 void Shell::warning( const string& text )
@@ -521,8 +553,10 @@ void Shell::handleAckStart()
 	numStartAcks_++;
 }
 
-void Shell::handleAckMsg()
+void Shell::handleAckMsg( MsgId mid )
 {
+	// Should do something with the mids, like check they are all good
+	// and the same value.
 	numMsgAcks_++;
 }
 

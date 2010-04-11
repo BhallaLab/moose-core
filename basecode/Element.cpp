@@ -193,7 +193,7 @@ void Element::getArraySizes( vector< unsigned int >& sizes ) const
 void Element::addMsg( MsgId m )
 {
 	while ( m_.size() > 0 ) {
-		if ( m_.back() == Msg::Null )
+		if ( m_.back() == Msg::badMsg )
 			m_.pop_back();
 		else
 			break;

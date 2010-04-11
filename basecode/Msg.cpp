@@ -15,7 +15,7 @@
 // Static field declaration.
 vector< Msg* > Msg::msg_;
 vector< MsgId > Msg::garbageMsg_;
-const MsgId Msg::Null = 0;
+const MsgId Msg::badMsg = 0;
 
 Msg::Msg( Element* e1, Element* e2 )
 	: e1_( e1 ), e2_( e2 )

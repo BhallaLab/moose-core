@@ -4202,4 +4202,7 @@ Checking 1699
 11 April
 Minor cleanup: separated the Msg.h and Msg.cpp file into separate files for
 the individual msg types.
+Two nasty subversion timeouts later, I've finally been able to check in this
+minor update: 1700.
 
+Putting in place the framework for Shell::doAddMsg.

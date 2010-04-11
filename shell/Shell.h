@@ -33,9 +33,12 @@ class Shell: public Data
 		/**
 		 * Sets up a Message of specified type.
 		 * Later need to consider doing this through MsgSpecs only.
+		 * Here the 'args' vector handles whatever arguments we may need
+		 * to pass to the specified msgType.
 		 */
 		MsgId doAddMsg( Id src, const string& srcField, Id dest,
-			const string& destField, const string& msgType );
+			const string& destField, const string& msgType,
+			vector< double > args);
 
 
 		void doQuit( );
@@ -59,8 +62,8 @@ class Shell: public Data
 		void handleAckStart();
 		void handleAddMsg( Eref e, const Qinfo* q, 
 			vector< unsigned int > ids, string srcField, string destField,
-				string msgType );
-		void handleAckMsg();
+				string msgType, vector< double > args );
+		void handleAckMsg( MsgId mid );
 	
 
 		void create( Eref e, const Qinfo* q, 
