@@ -23,6 +23,9 @@ OBJ = \
 	DestFinfo.o	\
 	Cinfo.o	\
 	Msg.o	\
+	SingleMsg.o	\
+	OneToOneMsg.o	\
+	OneToAllMsg.o	\
 	SrcFinfo.o \
 	SharedFinfo.o \
 	Id.o \
@@ -53,6 +56,9 @@ HEADERS = \
 	DestFinfo.h \
 	Id.h \
 	Msg.h \
+	SingleMsg.h \
+	OneToOneMsg.h \
+	OneToAllMsg.h \
 	Neutral.h \
 	OpFunc.h \
 	EpFunc.h \

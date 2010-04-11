@@ -1,7 +1,7 @@
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment.
-**           Copyright (C) 2003-2009 Upinder S. Bhalla. and NCBS
+**           Copyright (C) 2003-2010 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
@@ -111,47 +111,5 @@ class Msg
 		 */
 		static vector< MsgId > garbageMsg_;
 };
-
-class SingleMsg: public Msg
-{
-	public:
-		SingleMsg( Eref e1, Eref e2 );
-		~SingleMsg() {;}
-
-		void exec( const char* arg, const ProcInfo* p) const;
-
-		static bool add( Eref e1, const string& srcField, 
-			Eref e2, const string& destField );
-
-	private:
-		DataId i1_;
-		DataId i2_;
-};
-
-class OneToOneMsg: public Msg
-{
-	public:
-		OneToOneMsg( Element* e1, Element* e2 );
-		~OneToOneMsg() {;}
-
-		void exec( const char* arg, const ProcInfo* p) const;
-	private:
-};
-
-class OneToAllMsg: public Msg
-{
-	public:
-		OneToAllMsg( Eref e1, Element* e2 );
-		~OneToAllMsg() {;}
-
-		void exec( const char* arg, const ProcInfo* p ) const;
-
-		static bool add( Eref e1, const string& srcField, 
-			Element* e2, const string& destField );
-
-	private:
-		DataId i1_;
-};
-
 
 #endif // _MSG_H
