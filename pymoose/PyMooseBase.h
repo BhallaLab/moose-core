@@ -35,6 +35,7 @@ namespace pymoose
         const std::string& getSeparator() const;
         static pymoose::PyMooseContext* getContext();
         const std::vector<std::string> getFieldList() const;
+        const std::vector<std::string> __get_fieldList() const;
         const std::string& getField(std::string name) const;
         void setField(std::string name, std::string value);
         const std::vector<std::string> getFieldList(FieldType ftype=ALL);
