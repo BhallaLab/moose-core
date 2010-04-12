@@ -26,14 +26,17 @@
 TARGET=pymoose
 CXXFLAGS+=-I/usr/local/include -I.. -I../basecode -I../connections -I../maindir -I../genesis_parser  -I../shell -I../element -I../scheduling -I../biophysics -I../hsolve -I../kinetics -I../ksolve -I../builtins -I../utility -I../randnum -I../signeur -I../device
 LIBS += -L/usr/lib -lpython2.6
+
 ifdef USE_NUMPY
 CXXFLAGS+=-I/usr/lib/python2.6/site-packages/numpy/core/include -DUSE_NUMPY
 SWIGOPTS=-DUSE_NUMPY
 endif
-ifdef USE_GL
+
+ifeq ($(USE_GL),1)
 CXXFLAGS+=-I../gl/src -DUSE_GL
 SWIGOPTS=-DUSE_GL
 endif
+
 # The library location and flags for creating dll in Mac is different from Linux
 # Darwin may not have the OSTYPE environment variable defined in bash. Set OSTYPE=Darwin if required
 ifeq ($(OSTYPE),Darwin)

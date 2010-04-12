@@ -138,6 +138,7 @@ enum {OUTGOING, INCOMING, INOUT};
         const std::string& author(const std::string className) const;
         const std::string& doc(const std::string& className) const;
         vector<Id> getNeighbours(Id object, const std::string& fieldName="*", int direction=INCOMING);
+        vector <string> getValueFieldList(Id id);
         vector<string> getFieldList(Id id, FieldType ftype=ALL);        
 #ifdef DO_UNIT_TESTS    
         static bool testPyMooseContext(int count, bool print);
@@ -171,6 +172,7 @@ enum {OUTGOING, INCOMING, INOUT};
         // for easier printing, whereas we can allow python to handle the
         // display
         mutable std::string fieldValue_;
+        std::vector< std::string> strings_;
         std::vector< double > dbls_;
         // We may need the shell
         Id shell_;
