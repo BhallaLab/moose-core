@@ -7,8 +7,8 @@
 #** See the file COPYING.LIB for the full notice.
 #**********************************************************************/
 
-OSG_INCLUDE = /usr/local/include/osg/include
-OSG_LIBS = -L/usr/local/lib -losg -losgUtil -losgDB -losgGA -losgViewer -losgText -lOpenThreads
+OSG_INCLUDE = /usr/include/osg/include
+OSG_LIBS = -L/usr/lib -losg -losgUtil -losgDB -losgGA -losgViewer -losgText -lOpenThreads
 BOOST_LIBS = -L/lib -lboost_filesystem -lboost_system -lboost_serialization -lboost_thread
 
 MOOSE_HEADERS = \
