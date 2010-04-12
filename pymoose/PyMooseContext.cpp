@@ -1622,6 +1622,27 @@ double PyMooseContext::getCurrentTime()
     return static_cast< float >( ret );    
 }
 
+
+/**
+   This function just picks up the ValueFinfo fields. As opposed to
+   getFieldList with FieldType = VALUE, this version gets all value
+   fields including the user-added ones (by addField call).
+*/
+vector <string> PyMooseContext::getValueFieldList(Id id)
+{
+    
+    send2 <Id, string>(myId_(), requestFieldSlot, id, "fieldList");
+    vector< string >::iterator i;
+    separateString( fieldValue_, strings_, ", " );
+    return strings_;
+}
+
+/**
+   This gets the field names in a vector according to field type. This
+   uses the statically initialized field names, so in case of VALUE
+   fields, it does not retrieve the fields added later via addField
+   call.
+ */
 vector<string> PyMooseContext::getFieldList(Id id, FieldType ftype)
 {
     vector<string> fieldList;
