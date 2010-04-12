@@ -365,12 +365,43 @@ const Id* PyMooseBase::__get_parent() const
     return &context_->getParent(id_);
 }
 
+const int PyMooseBase::__get_dataMem() const
+{
+    int dataMem;
+    get<int>(id_(),  "dataMem", dataMem);
+    return dataMem;
+}
+
+const int PyMooseBase::__get_msgMem() const 
+{
+    int msgMem;
+    get< int >(id_(), "msgMem", msgMem);
+    return msgMem;
+}
+
+const int PyMooseBase::__get_node() const
+{
+    int node;
+    get < int >(id_(), "node", node);
+    return node;
+}
+
+const int PyMooseBase::__get_cpu() const
+{
+    int cpu;
+    get < int > (id_(), "cpu", cpu);
+    return cpu;
+}
+
 const vector <Id> PyMooseBase::children() const
 {
     return context_->getChildren(id_);
 }
 
-
+void PyMooseBase::addField(const std::string fieldName)
+{
+    context_->addField(id_, fieldName);
+}
 
 const vector <std::string> PyMooseBase::getFieldList(FieldType ftype)
 {
