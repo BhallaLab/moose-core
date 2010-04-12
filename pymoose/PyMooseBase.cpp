@@ -323,6 +323,11 @@ const std::string& PyMooseBase::__get_description() const
     return cinfo->description();
 }
 
+const std::vector<std::string> PyMooseBase::__get_fieldList() const
+{
+    return context_->getValueFieldList(id_);    
+}
+
 const std::vector<std::string> PyMooseBase::getFieldList() const
 {
     std::string fields = PyMooseBase::getContext()->getField(this->id_, "fieldList");

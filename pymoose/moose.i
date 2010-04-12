@@ -156,6 +156,12 @@ def listproperty(getter=None, setter=None, deller=None):
 %attribute(pymoose::PyMooseBase, const std::string, className, __get_className)
 %attribute(pymoose::PyMooseBase, const std::string, author, __get_author)
 %attribute(pymoose::PyMooseBase, const std::string, description, __get_description)
+%attribute(pymoose::PyMooseBase, const int, node, __get_node)
+%attribute(pymoose::PyMooseBase, const int, cpu, __get_cpu)
+%attribute(pymoose::PyMooseBase, const int, dataMem, __get_dataMem)
+%attribute(pymoose::PyMooseBase, const int, msgMem, __get_msgMem)
+%attribute(pymoose::PyMooseBase, const std::vector<std::string>&, fieldList, __get_fieldList)
+
 
 %pythoncode %{
 from inspect import isclass
