@@ -863,9 +863,14 @@ bool PyMooseContext::exists(string path)
     return !id.bad();    
 }
 
-void PyMooseContext::addField(string classname, string fieldname)
+void PyMooseContext::addField(string objectPath, string fieldname)
 {
-    send2<Id, string>(myId_(), addfieldSlot, Id(classname), fieldname);
+    send2<Id, string>(myId_(), addfieldSlot, Id(objectPath), fieldname);
+}
+
+void PyMooseContext::addField(Id objectId, string fieldname)
+{
+    send2<Id, string>(myId_(), addfieldSlot, objectId, fieldname);
 }
 
 vector < Id > PyMooseContext::getChildren(Id id)

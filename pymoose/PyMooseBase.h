@@ -49,6 +49,11 @@ namespace pymoose
         const Id* __get_id() const;
         const std::string& __get_name() const;
         const int __get_index() const;
+        const int __get_dataMem() const;
+        const int __get_msgMem() const;
+        const int __get_node() const;
+        const int __get_cpu() const;
+        void addField(const std::string fieldName);
 //        static const std::string __get_docString() const;
         void useClock(int clockNo, string func="process");
         void useClock(Id clock, string func="process");        
