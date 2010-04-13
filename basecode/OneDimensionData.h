@@ -11,11 +11,8 @@
 #define _ONE_DIMENSION_DATA_H
 
 /**
- * This class manages the data part of Elements. This includes
- * allocation and freeing, lookup, and decomposition between nodes.
- * It is a virtual base class.
- * It works closely with DataId, whose role is to provide a lookup
- * into the contents of the DataHandler.
+ * This class manages the data part of Elements. It handles a one-
+ * dimensional array.
  */
 class OneDimensionData: public DataHandler
 {
