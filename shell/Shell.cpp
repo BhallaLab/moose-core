@@ -17,6 +17,9 @@
 #include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
 
+unsigned int Shell::numCores_;
+unsigned int Shell::numNodes_;
+unsigned int Shell::myNode_;
 ProcInfo Shell::p_;
 
 static SrcFinfo5< string, Id, Id, string, vector< unsigned int > > requestCreate( "requestCreate",
@@ -227,7 +230,7 @@ static const Cinfo* shellCinfo = Shell::initCinfo();
 Shell::Shell()
 	: name_( "" ),
 		quit_( 0 ), 
-		isSingleThreaded_( 0 ), numCores_( 1 ), numNodes_( 1 ),
+		isSingleThreaded_( 0 ),
 		numCreateAcks_( 0 ), numDeleteAcks_( 0 ),
 		numMsgAcks_( 0 ),
 		isRunning_( 0 )

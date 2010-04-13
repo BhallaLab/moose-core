@@ -73,6 +73,10 @@ class Cinfo;
 #include "OneToAllMsg.h"
 #include "MsgFuncBinding.h"
 #include "Qinfo.h"
+#include "Dinfo.h"
+#include "DataHandler.h"
+#include "ZeroDimensionData.h"
+#include "OneDimensionData.h"
 #include "Element.h"
 #include "Eref.h"
 #include "Conv.h"
@@ -84,7 +88,6 @@ class Cinfo;
 #include "UpFunc.h"
 #include "ValueFinfo.h"
 #include "SharedFinfo.h"
-#include "Dinfo.h"
 #include "FieldElement.h"
 
 #endif // _HEADER_H

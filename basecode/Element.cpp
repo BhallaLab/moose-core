@@ -25,6 +25,7 @@ Element::Element( Id id, const Cinfo* c, const string& name,
 	unsigned int numData, Element::Decomposition decomp )
 	: d_( c->createData( numData ) ), numData_( numData ), 
 		dataSize_( c->dataSize() ), 
+		dataStart_( 0 ), 
 		decomposition_( decomp ),
 		name_( name ),
 		sendBuf_( 0 ), 
@@ -41,6 +42,7 @@ Element::Element( const Cinfo* c, const Element* other )
 	: 	d_( other->d_ ), 
 		numData_( other->numData_ ), 
 		dataSize_( other->dataSize_),
+		dataStart_( other->dataStart_),
 		decomposition_( other->decomposition_ ),
 		sendBuf_( 0 ), cinfo_( c ),
 		msgBinding_( c->numBindIndex() )
@@ -151,7 +153,6 @@ void Element::ssend2( SyncId slot, unsigned int i, double v1, double v2 )
 
 char* Element::data( DataId index )
 {
-	assert( index.data() < numData_ );
 	return d_ + index.data() * dataSize_;
 }
 

@@ -4206,3 +4206,140 @@ Two nasty subversion timeouts later, I've finally been able to check in this
 minor update: 1700.
 
 Putting in place the framework for Shell::doAddMsg.
+Checkin 1701
+
+Now need to tighten up the data decomposition, and what is stored on each
+Element.
+
+Perhaps a Decomposition/indexing class that does:
+- Take the DataId and look up the appropriate Data entry.
+	- DataId should be indivisible. Only the data() functions should
+		query its parts?
+- Reports whether a given Data Id is there
+- Provide whatever info is needed by Messages to build their tables.
+- Deal with array dimensions in lookup.
+- Returns field, parent data, and other levels of nesting.
+	- Currently the FieldElement class is templated on Field and Parent,
+	and uses a lookup function provided by the Parent to find an 
+	indexed Field.
+- Deal with different decompositions.
+
+=============================================================================
+12 April.
+Data Id uses an unsigned int to index data, and another to index field.
+Actually should be an unsigned int and whatever else is needed to figure out
+how to partition the dimensions.
+
+I would like to also be able to take, say, a cell model and array-ize it.
+And the whole thing has to work on N nodes.
+
+Here are some of the use cases.
+	- synapse[ IntFire# ][ syn# ]: Current deal. Can look up either
+		parent IntFire, or any of a variable # of synapses.
+		Summary: FieldElement class template.
+	- compartment[ neuron# ][ compt# ]: This would work fine, even with
+		different # of compts per neuron. But differs from 
+		FieldElement in that the compts are not special fields, but
+		a different index. Here the parent Element or the DataHandler
+		should either do a vector of vectors, or some other 2-D array.
+		Summary: Variant on Element or DataHandler class.
+	- channel[ neuron# ][ compt# ]: Keep one Element per channel type.
+		But not all compts have the channel. Can use an extra lookup
+		table to go to the channel entry in the array, from the compt#.
+		Summary: Another variant on Element or DataHandler.
+	- compt[ glom ][ neuron ][ compt# ] Probably best done as a set of
+		individual gloms.
+	- molecule[ neuron# ][ compt # ][ mol# ]: similar to compartment or
+		channel above, but will have to split one of the indices to
+		look up mol#.
+		Summary: Variant on Element/DataHandler, further split of
+		DataId index.
+	- Solver has taken over a neuron. Has an Element tree for the cell.
+		Array of these solvers has the same Element tree, but each is an
+		array. But indexing is backwards. 
+		/model/cell[342]/dend23/KA
+		The messaging to children would do the right thing.
+	Access to indices:
+	Msg::exec seems to call indices directly.
+		DiagonalMsg: scans through data part, incrementing by 'stride'
+		SparseMsg is worse: explicitly constructs 
+			DataId( colIndex[j], fieldIndex[j] ).
+		OneToAll: Checks for dim. If 1, scans through dim1. 
+			If 2, scans through each of dim1 (data) then dim2(field)
+		Here we want to create a DataId and tell _it_ to do the
+		incrementing.
+
+Now how to split among nodes. 
+	Element->data( dataId ) should always be able to find the data, or
+	report it off-node. 
+		Likewise Element->data1( dataId )
+	So, dataId does not know where data is located. That is Element's job.
+	Element->findNode( dataId ) should be able to tell where to go.
+		Or, could do with a DataHandler using a single Element class.
+	Element->data( dataId, mynode ): possible? Should I require every
+		attempt to acees the data to have myNoe available.
+
+Use variants on Element, or delegate to DataHandler?
+	- Element currently does too many things, notably handling messages,
+		fields, and Cinfo.
+	- DataHandler would have to be virtual and provide an interface to 
+		
+
+Q: Should Data itself do the lookup, ie., provide virtual lookup and dimension
+funcs? This works well for nesting of arrays of X in Y. Doesn't help for
+2-D arrays of X. Doesn't help if we want to nest two arrays, X1 and X2, in Y.
+The FieldElement kind of arrangement also helps if we just want to have a
+child Element that is fully contained but is seen as its own Element.
+Ans: No, Data should not do any lookups. Leave it to the DataHandler.
+	Data Handler will also take over the kind of role that FieldElement used to
+	play.
+
+DataId: Currently structured explicitly to look up data and field. Should be
+more general. Should know what its dimensions are.
+
+
+
+If we want the DataHandler and the Msg::Exec to both agree on how to do ops
+on DataId, then we need an open and explicit definition for DataId as
+a series of ints one for each dimension.
+
+If we want a safer representation, we need to make DataId opaque, which 
+is OK for DataHandler but tricky for Msg::Exec. But perhaps a good thing.
+Will end up with more explicit specification of what the msgs are projecting to,
+in some cases. Certain Msg types may need to be extended to do somewhat
+different things for different kinds of projection. For example, SparseMsg
+currently assumes a single target synapse on each target neuron. However,
+if the first index is neuron, the second is compartment, and the third is 
+synapse, we could have multiple synapses on different compartments but on 
+the same neuron
+
+This comes back to asking, how do we handle multiple levels of nesting?
+We don't want to overdo this. The original explicit single Elements were
+inefficient but simple.
+Array Elements as here are efficient at one level, but add complexity.
+Array fields in Array Elements are very efficient, but add further complexity.
+2-D arrays would have a similar level of complexity.
+We could stop here.
+
+Summary:
+1. Keep DataIds the way they are for now. Higher order indexing should be done
+with caution. Perhaps add info about dimensionality of the DataId.
+	1a. May need to put in some checking code for the messages.
+2. Make a DataHandler virtual base class, templated for funny lookups that 
+	FieldElement used to do. This deals with all the data access.
+	2a. DataHandler requires node info as well as DataId to find data. This is
+	so pervasive it should be a global static field of the Shell.
+	2b. DataHandler requires info about decomposition of this specific Element.
+	This is local info. Rather than weigh it down with options and ifs, the
+	decomposition info is coded into derived classes of the DataHandler.
+	2c. Each DataHandler knows how big the whole data set is to be. But it
+	doesn't have to allocate it right away.
+	2d. Can merge in Dinfo?
+3. Element is now a single class, and its job is handling messages and
+	field info. Has a DataHandler ptr to deal with the data.
+
+=============================================================================
+13 April.
+Starting on implementation. Made DataHandler and two derived classes
+ZeroDimensionData and OneDimensionData.
+

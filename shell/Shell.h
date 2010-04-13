@@ -95,9 +95,9 @@ class Shell: public Data
 			unsigned int numCores, unsigned int numNodes, 
 			unsigned int myNode );
 
-		unsigned int myNode() const ;
-		unsigned int numNodes() const;
-		unsigned int numCores() const;
+		static unsigned int myNode();
+		static unsigned int numNodes();
+		static unsigned int numCores();
 
 		void initThreadInfo( vector< ThreadInfo >& ti,
 		Element* clocke, Qinfo* q,
@@ -148,9 +148,9 @@ class Shell: public Data
 		vector< char > getBuf_;
 		bool quit_;
 		bool isSingleThreaded_;
-		unsigned int numCores_;
-		unsigned int numNodes_;
-		unsigned int myNode_;
+		static unsigned int numCores_;
+		static unsigned int numNodes_;
+		static unsigned int myNode_;
 		static ProcInfo p_; 
 			// Shell owns its own ProcInfo, has global thread/node info.
 			// Used to talk to parser and for thread specification in

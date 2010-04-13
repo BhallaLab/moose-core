@@ -16,6 +16,16 @@ class Data
 		virtual void process( const ProcInfo* p, const Eref& e ) = 0;
 
 		/**
+		 *
+		 * Lookup function for nested arrays:
+		 * 	What if we want to look up two things?
+		 * Data* lookup( unsigned int index );
+		 * unsigned int numEntries() const;
+		 *	Good thing is that this is recursive.
+		 *
+		 */
+
+		/**
 		 * Every Data class must provide a function to initialize its
 		 * ClassInfo.
 		virtual const Cinfo* initCinfo() = 0;

@@ -259,17 +259,17 @@ void Shell::loadBalance()
 	}
 }
 
-unsigned int Shell::numCores() const
+unsigned int Shell::numCores()
 {
 	return numCores_;
 }
 
-unsigned int Shell::numNodes() const
+unsigned int Shell::numNodes()
 {
 	return numNodes_;
 }
 
-unsigned int Shell::myNode() const
+unsigned int Shell::myNode()
 {
 	return myNode_;
 }

@@ -40,7 +40,8 @@ void SparseMsg::exec( const char* arg, const ProcInfo *p ) const
 	// arg += sizeof( Qinfo );
 
 	/**
-	 * The system is really optimized for data from e1 to e2.
+	 * The system is really optimized for data from e1 to e2,
+	 * where e2 is a 2-D array or an array nested in another array.
 	 */
 	if ( q->isForward() ) {
 		const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );

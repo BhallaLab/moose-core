@@ -252,8 +252,9 @@ class Element
 		 * 		Easy to get started with.
 		 */
 		char* d_;
-		unsigned int numData_;
-		unsigned int dataSize_;
+		unsigned int numData_;	// Number of data entries
+		unsigned int dataSize_;	// Size of each data entry
+		unsigned int dataStart_;	// Starting index of data, used in MPI.
 
 		// Enum. Specifies how to subdivide indices among nodes.
 		Decomposition decomposition_; 
