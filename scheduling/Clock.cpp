@@ -154,6 +154,16 @@ const Cinfo* Clock::initCinfo()
 			"Zeroes out all ticks, starts at t = 0",
 			new EpFunc0< Clock >(&Clock::reinit )
 		);
+	///////////////////////////////////////////////////////
+	// FieldElementFinfo definition for ticks.
+	///////////////////////////////////////////////////////
+		static FieldElementFinfo< Clock, Tick > tickInfo( "tick",
+			"Sets up field Elements for Tick",
+			Tick::initCinfo(),
+			&Clock::getTick,
+			&Clock::getNumTicks,
+			&Clock::setNumTicks
+		);
 
 	static Finfo* clockFinfos[] =
 	{
@@ -174,6 +184,7 @@ const Cinfo* Clock::initCinfo()
 		&stop,
 		&setupTick,
 		&reinit,
+		&tickFinfo,
 	};
 	
 	static string doc[] =

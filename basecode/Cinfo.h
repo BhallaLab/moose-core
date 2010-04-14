@@ -65,6 +65,18 @@ class Cinfo
 			 */
 			BindIndex registerBindIndex();
 
+			/**
+			 * Handles any operations that must be done after an Element
+			 * is created. Scans through all Finfos as they are the ones to
+			 * manage such requests. Examples are to create FieldElements.
+			 */
+			void postCreationFunc( Id newId, Element* newElm );
+
+			/**
+			 * Registers a finfo as needing post-creation work
+			 */
+			void registerPostCreationFinfo( const Finfo* f );
+
 //////////////////////////////////////////////////////////////////////////
 
 			const OpFunc* getOpFunc( FuncId fid ) const;
@@ -118,6 +130,7 @@ class Cinfo
 			BindIndex numBindIndex_;
 
 			map< string, Finfo* > finfoMap_;
+			vector< const Finfo* > postCreationFinfos_;
 			vector< const OpFunc* > funcs_;
 //			map< string, FuncId > opFuncNames_;
 

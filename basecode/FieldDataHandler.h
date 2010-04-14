@@ -182,7 +182,7 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		unsigned int size_;	// Number of data entries in the whole array
 		unsigned int start_;	// Starting index of data, used in MPI.
 		unsigned int end_;	// Starting index of data, used in MPI.
-		Field* ( Parent::*lookupField_ )( unsigned int ),
+		Field* ( Parent::*lookupField_ )( unsigned int );
 		unsigned int ( Parent::*getNumField_ )() const;
 		void ( Parent::*setNumField_ )( unsigned int num );
 };

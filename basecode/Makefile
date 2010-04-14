@@ -72,6 +72,7 @@ HEADERS = \
 	SrcFinfo.h \
 	ValueFinfo.h \
 	SharedFinfo.h \
+	FieldElementFinfo.h \
 	MsgFuncBinding.h \
 
 default: $(TARGET)

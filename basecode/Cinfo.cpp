@@ -79,6 +79,18 @@ void Cinfo::registerFinfo( Finfo* f )
 		f->registerFinfo( this );
 }
 
+void Cinfo::registerPostCreationFinfo( const Finfo* f )
+{
+	postCreationFinfos_.push_back( f );
+}
+
+void Cinfo::postCreationFunc( Id newId, Element* newElm )
+{
+	for ( vector< const Finfo* >::iterator i = postCreationFinfos_.begin();
+		i != postCreationFinfos_.end(); ++i )
+		(*i)->postCreationFunc( newId, newElm );
+}
+
 //////////////////////////////////////////////////////////////////////
 // Look up operations.
 //////////////////////////////////////////////////////////////////////

@@ -26,7 +26,8 @@ void showFields()
 {
 	const Cinfo* nc = Neutral::initCinfo();
 	Id i1 = Id::nextId();
-	Element* ret = new Element( i1, nc, "test1", 1 );
+	vector< unsigned int > dims( 1, 1 );
+	Element* ret = new Element( i1, nc, "test1", dims );
 	// bool ret = nc->create( i1, "test1", 1 );
 	assert( ret );
 
@@ -48,11 +49,12 @@ void insertIntoQ( )
 
 	Id i1 = Id::nextId();
 	Id i2 = Id::nextId();
+	vector< unsigned int > dims( 1, size );
 
-	Element* ret = new Element( i1, nc, "test1", size );
+	Element* ret = new Element( i1, nc, "test1", dims );
 	// bool ret = nc->create( i1, "test1", size );
 	assert( ret );
-	ret = new Element( i2, nc, "test2", size );
+	ret = new Element( i2, nc, "test2", dims );
 	// ret = nc->create( i2, "test2", size );
 	assert( ret );
 
@@ -87,7 +89,7 @@ void insertIntoQ( )
 	for ( unsigned int i = 0; i < size; ++i ) {
 		char temp[20];
 		sprintf( temp, "objname_%d", i );
-		string name = ( reinterpret_cast< Neutral* >(e2.element()->data( i )) )->getName();
+		string name = ( reinterpret_cast< Neutral* >(e2.element()->dataHandler()->data( i )) )->getName();
 		assert( name == temp );
 	}
 	cout << "." << flush;
@@ -106,14 +108,15 @@ void testSendMsg()
 		nc->findFinfo( "set_name" ) );
 	assert( df != 0 );
 	FuncId fid = df->getFid();
+	vector< unsigned int > dims( 1, size );
 
 	Id i1 = Id::nextId();
 	Id i2 = Id::nextId();
-	Element* ret = new Element( i1, nc, "test1", size );
+	Element* ret = new Element( i1, nc, "test1", dims );
 	// bool ret = nc->create( i1, "test1", size );
 	assert( ret );
 	// ret = nc->create( i2, "test2", size );
-	ret = new Element( i2, nc, "test2", size );
+	ret = new Element( i2, nc, "test2", dims );
 	assert( ret );
 
 	Eref e1 = i1.eref();
@@ -139,7 +142,7 @@ void testSendMsg()
 	for ( unsigned int i = 0; i < size; ++i ) {
 		char temp[20];
 		sprintf( temp, "send_to_e2_%d", i );
-		assert( reinterpret_cast< Neutral* >(e2.element()->data( i ))->getName()
+		assert( reinterpret_cast< Neutral* >(e2.element()->dataHandler()->data( i ))->getName()
 			== temp );
 	}
 	cout << "." << flush;
@@ -152,12 +155,13 @@ void testCreateMsg()
 {
 	const Cinfo* nc = Neutral::initCinfo();
 	unsigned int size = 100;
+	vector< unsigned int > dims( 1, size );
 	Id i1 = Id::nextId();
 	Id i2 = Id::nextId();
-	Element* temp = new Element( i1, nc, "test1", size );
+	Element* temp = new Element( i1, nc, "test1", dims );
 	// bool ret = nc->create( i1, "test1", size );
 	assert( temp );
-	temp = new Element( i2, nc, "test2", size );
+	temp = new Element( i2, nc, "test2", dims );
 	// ret = nc->create( i2, "test2", size );
 	assert( temp );
 
@@ -192,10 +196,11 @@ void testSet()
 {
 	const Cinfo* nc = Neutral::initCinfo();
 	unsigned int size = 100;
+	vector< unsigned int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
 	//bool ret = nc->create( i2, "test2", size );
-	Element* ret = new Element( i2, nc, "test2", size );
+	Element* ret = new Element( i2, nc, "test2", dims );
 	assert( ret );
 	ProcInfo p;
 
@@ -213,7 +218,7 @@ void testSet()
 	for ( unsigned int i = 0; i < size; ++i ) {
 		char temp[20];
 		sprintf( temp, "set_e2_%d", i );
-		assert( reinterpret_cast< Neutral* >(e2.element()->data( i ))->getName()
+		assert( reinterpret_cast< Neutral* >(e2.element()->dataHandler()->data( i ))->getName()
 			== temp );
 	}
 
@@ -229,7 +234,8 @@ void testGet()
 	string arg;
 	Id i2 = Id::nextId();
 	// bool ret = nc->create( i2, "test2", size );
-	Element* ret = new Element( i2, nc, "test2", size );
+	vector< unsigned int > dims( 1, size );
+	Element* ret = new Element( i2, nc, "test2", dims );
 	assert( ret );
 	Element* shell = Id()();
 	ProcInfo p;
@@ -240,7 +246,7 @@ void testGet()
 		char temp[20];
 		sprintf( temp, "get_e2_%d", i );
 		string stemp( temp );
-		reinterpret_cast< Neutral* >(e2.element()->data( i ))->setName( temp );
+		reinterpret_cast< Neutral* >(e2.element()->dataHandler()->data( i ))->setName( temp );
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -255,7 +261,7 @@ void testGet()
 			// shell->clearQ(); // Response comes back to e1
 			Qinfo::clearQ( &p ); // Response comes back to e1
 
-			stemp = ( reinterpret_cast< Shell* >(shell->data( 0 )) )->getBuf();
+			stemp = ( reinterpret_cast< Shell* >(shell->dataHandler()->data( 0 )) )->getBuf();
 			// cout << i << "	" << stemp << endl;
 			char temp[20];
 			sprintf( temp, "get_e2_%d", i );
@@ -271,10 +277,11 @@ void testSetGet()
 {
 	const Cinfo* nc = Neutral::initCinfo();
 	unsigned int size = 100;
+	vector< unsigned int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
 	// bool ret = nc->create( i2, "test2", size );
-	Element* ret = new Element( i2, nc, "test2", size );
+	Element* ret = new Element( i2, nc, "test2", dims );
 	assert( ret );
 
 	
@@ -304,10 +311,11 @@ void testSetGetDouble()
 	static const double EPSILON = 1e-9;
 	const Cinfo* ic = IntFire::initCinfo();
 	unsigned int size = 100;
+	vector< unsigned int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
 	// bool ret = ic->create( i2, "test2", size );
-	Element* ret = new Element( i2, ic, "test2", size );
+	Element* ret = new Element( i2, ic, "test2", dims );
 	assert( ret );
 
 	// i2()->showFields();
@@ -338,30 +346,36 @@ void testSetGetSynapse()
 {
 	static const double EPSILON = 1e-9;
 	const Cinfo* ic = IntFire::initCinfo();
-	const Cinfo* sc = Synapse::initCinfo();
+	// const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 100;
+	vector< unsigned int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
 	// bool ret = ic->create( i2, "test2", size );
-	Element* temp = new Element( i2, ic, "test2", size );
+	Element* temp = new Element( i2, ic, "test2", dims );
 	assert( temp );
 
-	// SynElement syn( sc, i2() );
-	FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
+	Id synId( i2.value() + 1 );
+	Element* syn = synId();
+	assert ( syn != 0 );
+	assert ( syn->name() == "synapse" );
 
-	assert( syn.numData() == 0 );
+	// SynElement syn( sc, i2() );
+	// FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
+
+	assert( syn->dataHandler()->numData() == 0 );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref e2( i2(), i );
 		bool ret = Field< unsigned int >::set( e2, "numSynapses", i );
 		assert( ret );
 	}
-	assert( syn.numData() == ( size * (size - 1) ) / 2 );
+	assert( syn->dataHandler()->numData() == ( size * (size - 1) ) / 2 );
 	// cout << "NumSyn = " << syn.numData() << endl;
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
 		for ( unsigned int j = 0; j < i; ++j ) {
 			DataId di( i, j );
-			Eref syne( &syn, di );
+			Eref syne( syn, di );
 			double temp = i * 1000 + j ;
 			bool ret = Field< double >::set( syne, "delay", temp );
 			assert( ret );
@@ -380,10 +394,11 @@ void testSetGetVec()
 	const Cinfo* ic = IntFire::initCinfo();
 	const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 100;
+	vector< unsigned int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
 	// bool ret = ic->create( i2, "test2", size );
-	Element* temp = new Element( i2, ic, "test2", size );
+	Element* temp = new Element( i2, ic, "test2", dims );
 	assert( temp );
 //	SynElement syn( sc, i2() );
 	FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
@@ -435,10 +450,11 @@ void testSendSpike()
 	const Cinfo* ic = IntFire::initCinfo();
 	const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 100;
+	vector< unsigned int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
 //	bool ret = ic->create( i2, "test2", size );
-	Element* temp = new Element( i2, ic, "test2", size );
+	Element* temp = new Element( i2, ic, "test2", dims );
 	assert( temp );
 	Eref e2 = i2.eref();
 	//SynElement syn( sc, i2() );
@@ -639,13 +655,14 @@ void testSparseMsg()
 	const Cinfo* ic = IntFire::initCinfo();
 	const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 1024;
+	vector< unsigned int > dims( 1, size );
 	string arg;
 
 	mtseed( 5489UL ); // The default value, but better to be explicit.
 
 	Id i2 = Id::nextId();
 	// bool ret = ic->create( i2, "test2", size );
-	Element* t2 = new Element( i2, ic, "test2", size );
+	Element* t2 = new Element( i2, ic, "test2", dims );
 	assert( t2 );
 	Eref e2 = i2.eref();
 	FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
@@ -738,9 +755,10 @@ void testUpValue()
 	const Cinfo* cc = Clock::initCinfo();
 	const Cinfo* tc = Tick::initCinfo();
 	unsigned int size = 10;
+	vector< unsigned int > dims( 1, 1 )
 	Id clock = Id::nextId();
 	// bool ret = cc->create( clock, "clock", 1 );
-	Element* temp = new Element( clock, cc, "clock", 1 );
+	Element* temp = new Element( clock, cc, "clock", dims );
 	assert( temp );
 
 	Eref clocker = clock.eref();

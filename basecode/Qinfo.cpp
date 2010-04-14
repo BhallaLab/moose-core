@@ -287,12 +287,11 @@ void Qinfo::sendAllToAll( const ProcInfo* proc )
 		return;
 	// cout << proc->nodeIndexInGroup << ", " << proc->threadId << ": Qinfo::sendAllToAll\n";
 	assert( mpiQ_[ proc->groupId ].size() >= BLOCKSIZE * proc->numNodesInGroup );
-	assert( inQ_[ proc->groupId ].size() > 0 );
+#ifdef USE_MPI
 	char* sendbuf = &inQ_[ proc->groupId ][0];
 	char* recvbuf = &mpiQ_[ proc->groupId ][0];
 	assert ( inQ_[ proc->groupId ].size() == BLOCKSIZE );
 
-#ifdef USE_MPI
 	MPI_Barrier( MPI_COMM_WORLD );
 	/*
 	if ( proc->nodeIndexInGroup == 0 ) {
@@ -330,7 +329,7 @@ void Qinfo::sendRootToAll( const ProcInfo* proc )
 	// cout << proc->nodeIndexInGroup << ", " << proc->threadId << ": Qinfo::sendRootToAll\n";
 	// cout << "ng = " << g_.size() << ", ninQ= " << inQ_[0].size() << ", nmpiQ = " << mpiQ_[0].size() << " proc->groupId =  " << proc->groupId  << " s1 = " << mpiQ_[ proc->groupId ].size() << " s2 = " << BLOCKSIZE * proc->numNodesInGroup;
 	assert( mpiQ_[ proc->groupId ].size() >= BLOCKSIZE * proc->numNodesInGroup );
-	assert( inQ_[ proc->groupId ].size() > 0 );
+#ifdef USE_MPI
 	char* sendbuf = &inQ_[ proc->groupId ][0];
 	char* recvbuf = &mpiQ_[ proc->groupId ][0];
 	assert ( inQ_[ proc->groupId ].size() == BLOCKSIZE );
@@ -340,7 +339,6 @@ void Qinfo::sendRootToAll( const ProcInfo* proc )
 		recvbuf, BLOCKSIZE, MPI::CHAR );
 		*/
 	// Send out data from master node.
-#ifdef USE_MPI
 		// cout << "\n\nEntering sendRootToAll barrier, on node = " << proc->nodeIndexInGroup << endl;
 	MPI_Barrier( MPI_COMM_WORLD );
 		// cout << "Exiting sendRootToAll barrier, on node = " << proc->nodeIndexInGroup << endl;

@@ -36,6 +36,17 @@ class Finfo
 		 */
 
 		/**
+		 * This function is called on each new Element after
+		 * it is created, in case any stuff needs doing. Typical
+		 * uses are to create FieldElements automatically
+		 * as soon as the parent is made.
+		 * Used in FieldElementFinfo.h
+		 */
+		virtual void postCreationFunc( Id newId, Element* newElm ) const {
+			;
+		}
+
+		/**
 		 * Registers the Msg slot to be used for transmitting messages.
 		 * SrcFinfos take the 'current' value and increment it, other
 		 * msgs leave it alone.

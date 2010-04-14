@@ -75,11 +75,12 @@ Id init( int argc, char** argv )
 
 	Id clockId = Id::nextId();
 	// Clock::initCinfo()->create( clockId, "clock", 1 );
-	Element* clocke = 
+	// Element* clocke = 
 		new Element( clockId, Clock::initCinfo(), "clock", dims );
 	// Should put this initialization stuff within the Clock creation
 	// step. This means I need to add an optional init func into the Cinfo
 	// constructor, or to add the init func as a virtual func in Data.
+	/*
 	FieldElement< Tick, Clock, &Clock::getTick >* ticke =
 		new FieldElement< Tick, Clock, &Clock::getTick >
 		( 
@@ -88,6 +89,10 @@ Id init( int argc, char** argv )
 		);
 	Id tickId = Id::nextId();
 	tickId.bindIdToElement( ticke );
+	*/
+	Id tickId( 2 );
+	assert( tickId() != 0 );
+	assert( tickId()->name() == "tick" ) ;
 
 	assert ( shellId == Id() );
 	assert( clockId == Id( 1 ) );
@@ -109,7 +114,7 @@ int main( int argc, char** argv )
 	// Note that the main loop remains the parser loop, though it may
 	// spawn a lot of other stuff.
 	Element* shelle = shellId();
-	Shell* s = reinterpret_cast< Shell* >( shelle->data( 0 ) );
+	Shell* s = reinterpret_cast< Shell* >( shelle->dataHandler()->data( 0 ) );
 #ifdef DO_UNIT_TESTS
 #endif
 	cout << "testing: ";
