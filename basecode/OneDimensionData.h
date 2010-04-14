@@ -63,20 +63,21 @@ class OneDimensionData: public DataHandler
 		}
 
 		/**
-		 * Assigns the sizes of all array field entries at once.
-		 * If data is allocated, resizes that.
-		 * If data is not allocated, does not touch it.
+		 * Assigns the size for the data dimension.
 		 */
-		void setArraySizes( const vector< unsigned int >& sizes );
+		void setNumData1( unsigned int size );
 
 		/**
-		 * Looks up the sizes of all array field entries at once. Returns
-		 * all ones for regular Elements. 
-		 * Note that a single Element may have more than one array field.
-		 * However, each FieldElement instance will refer to just one of
-		 * these array fields, so there is no ambiguity.
+		 * Assigns the sizes of all array field entries at once.
+		 * Ignore in this case, as there are none.
 		 */
-		void getArraySizes( vector< unsigned int >& sizes ) const;
+		void setNumData2( const vector< unsigned int >& sizes );
+
+		/**
+		 * Looks up the sizes of all array field entries at once.
+		 * Ignore in this case, as there are no array fields.
+		 */
+		void getNumData2( vector< unsigned int >& sizes ) const;
 
 		/**
 		 * Returns true if the node decomposition has the data on the

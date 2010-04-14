@@ -82,27 +82,35 @@ class DataHandler
 		virtual unsigned int numDimensions() const = 0;
 
 		/**
+		 * Assigns the # of entries in dimension 1.
+		 * Ignores if 0 dimensions.
+		 * Does not do any actual allocation: that waits till
+		 * the 'allocate' function.
+		 */
+		virtual void setNumData1( unsigned int size ) = 0;
+
+		/**
 		 * Assigns the sizes of all array field entries at once.
-		 * If data is allocated, resizes it if necessary.
-		 * If data is not allocated, does ont touch it.
-		 * In a FieldElement we can assign different array sizes for 
-		 * each entry in the Element.
+		 * Ignore if 1 or 0 dimensions.
+		 * The 'sizes' vector must be of length numData1.
+		 * In a FieldElement we can assign different array sizes
+		 * for each entry in the Element.
 		 * In a 2-D array we can do the equivalent.
 		 * Note that a single Element may have more than one array field.
 		 * However, each FieldElement instance will refer to just one of
 		 * these array fields, so there is no ambiguity.
 		 */
-		virtual void setArraySizes( const vector< unsigned int >& sizes ) 
+		virtual void setNumData2( const vector< unsigned int >& sizes ) 
 			 = 0;
 
 		/**
-		 * Looks up the sizes of all array field entries at once. Returns
-		 * all ones for regular Elements. 
+		 * Looks up the sizes of all array field entries at once.
+		 * Ignored for 0 and 1 dimension Elements. 
 		 * Note that a single Element may have more than one array field.
 		 * However, each FieldElement instance will refer to just one of
 		 * these array fields, so there is no ambiguity.
 		 */
-		virtual void getArraySizes( vector< unsigned int >& sizes ) const
+		virtual void getNumData2( vector< unsigned int >& sizes ) const
 			= 0;
 
 		/**
@@ -122,7 +130,8 @@ class DataHandler
 		virtual void allocate() = 0;
 
 	protected:
-		const DinfoBase* dinfo() {
+		const DinfoBase* dinfo() const
+		{
 			return dinfo_;
 		}
 

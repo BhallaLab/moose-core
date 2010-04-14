@@ -21,7 +21,7 @@ OneDimensionData::~OneDimensionData() {
 
 char* OneDimensionData::data( DataId index ) const {
 	if ( isDataHere( index ) )
-		return data_ + index.data() - start_;
+		return data_ + ( index.data() - start_ ) * dinfo()->size();
 	return 0;
 }
 
@@ -32,41 +32,46 @@ char* OneDimensionData::data1( DataId index ) const {
 }
 
 /**
-* Assigns the sizes of all array field entries at once.
+ * Assigns the size to use for the first (data) dimension
 * If data is allocated, resizes that.
 * If data is not allocated, does not touch it.
-*/
-void OneDimensionData::setArraySizes( const vector< unsigned int >& sizes )
+* For now: allocate it every time.
+ */
+void OneDimensionData::setNumData1( unsigned int size )
 {
-	assert( sizes.size() == 1 );
-	size_ = sizes[0];
+	size_ = size;
 	unsigned int start =
 		( size_ * Shell::myNode() ) / Shell::numNodes();
 	unsigned int end = 
 		( size_ * ( 1 + Shell::myNode() ) ) / Shell::numNodes();
-	if ( data_ ) {
+	// if ( data_ ) {
 		if ( start == start_ && end == end_ ) // already done
 			return;
 		// Otherwise reallocate.
-		dinfo()->destroyData( data_ );
+		if ( data_ )
+			dinfo()->destroyData( data_ );
 		data_ = reinterpret_cast< char* >( 
 			dinfo()->allocData( end - start ) );
-	}
+	// }
 	start_ = start;
 	end_ = end;
 }
 
 /**
- * Looks up the sizes of all array field entries at once. Returns
- * all ones for regular Elements. 
- * Note that a single Element may have more than one array field.
- * However, each FieldElement instance will refer to just one of
- * these array fields, so there is no ambiguity.
- */
-void OneDimensionData::getArraySizes( vector< unsigned int >& sizes ) const {
-	sizes.resize( 0 );
-	sizes.push_back( size_ );
+* Assigns the sizes of all array field entries at once.
+* Ignore if 1 or 0 dimensions.
+*/
+void OneDimensionData::setNumData2( const vector< unsigned int >& sizes )
+{
+	;
 }
+
+/**
+ * Looks up the sizes of all array field entries at once.
+ * Ignore in this case
+ */
+void OneDimensionData::getNumData2( vector< unsigned int >& sizes ) const
+{;}
 
 /**
  * Returns true if the node decomposition has the data on the

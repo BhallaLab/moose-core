@@ -68,22 +68,28 @@ class ZeroDimensionData: public DataHandler
 		}
 
 		/**
+		 * Assign # of entries in dimension 1. 
+		 * Ignore here
+		 */
+		void setNumData1( unsigned int size ) {
+			;
+		}
+		/**
 		 * Assigns the sizes of all array field entries at once.
 		 * This is ignored for regular Elements.
 		 */
-		void setArraySizes( const vector< unsigned int >& sizes ) {
+		void setNumData2( const vector< unsigned int >& sizes ) {
 			;
 		}
 
 
 		/**
-		 * Looks up the sizes of all array field entries at once. Returns
-		 * all ones for regular Elements. 
-		 * Note that a single Element may have more than one array field.
-		 * However, each FieldElement instance will refer to just one of
-		 * these array fields, so there is no ambiguity.
+		 * Looks up the sizes of all array field entries at once.
+		 * Ignored in this case, as there are none.
 		 */
-		void getArraySizes( vector< unsigned int >& sizes ) const;
+		void getNumData2( vector< unsigned int >& sizes ) const {
+			;
+		}
 
 		/**
 		 * Returns true if the node decomposition has the data on the

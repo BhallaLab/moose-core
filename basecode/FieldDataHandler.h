@@ -38,9 +38,13 @@ template< class Field, class Parent, Field* ( Parent::*Lookup )( unsigned int ) 
 		 */
 		char* data( DataId index ) const
 		{
-			assert( index.data() < size_ );
-			Field* s = ( ( reinterpret_cast< Parent* >( data_ + index.data() * dinfo()->size() ) )->*Lookup )( index.field() );
-			return reinterpret_cast< char* >( s );
+			if ( isDataHere( index ) ) {
+				Field* s = ( ( reinterpret_cast< Parent* >( 
+					data_ + ( index.data() - start_ ) * 
+						dinfo()->size() ) )->*Lookup )( index.field() );
+				return reinterpret_cast< char* >( s );
+			}
+			return 0;
 		}
 
 		/**
@@ -52,16 +56,18 @@ template< class Field, class Parent, Field* ( Parent::*Lookup )( unsigned int ) 
 			assert( index.data() < size_ );
 			if ( isDataHere( index ) )
 			{
-				return data_ + index.data() * dinfo()->size();
+				return data_ + ( index.data() - start_ ) * dinfo()->size();
 			}
 		}
 
 		/**
 		 * Returns the number of field entries.
+		 * This runs into trouble on multinodes.
+		 * I'll just return # on local node.
 		 */
 		unsigned int numData() const {
 			unsigned int ret = 0;
-			char* endData = data_ + size_ * dinfo()->size();
+			char* endData = data_ + ( end_ - start_ ) * dinfo()->size();
 			for ( char* data = data_; 
 					data < endData; data += dinfo()->size() )
 				ret += ( ( reinterpret_cast< Parent* >( data ) )->*getNumField_ )();
@@ -69,21 +75,24 @@ template< class Field, class Parent, Field* ( Parent::*Lookup )( unsigned int ) 
 		}
 
 		/**
-		 * Returns the number of data entries
+		 * Returns the number of data entries in the whole object.
 		 */
 		unsigned int numData1() const {
 			return size_;
 		}
 
 		/**
-		 * Returns the number of data entries at index 2, if present.
+		 * Returns the number of field entries on the data entry indicated
+		 * by index1, if present.
 		 * e.g., return the # of synapses on a given IntFire
 		 */
 		unsigned int numData2( unsigned int index1 ) const
 		{
-			assert( index1 < size_ );
-			return ( ( reinterpret_cast< Parent* >(
-				data_ + index1 * dinfo()->size() ) )->*getNumField_ )();
+			if ( index1 >= start_ && index1 < end_ ) {
+				return ( ( reinterpret_cast< Parent* >(
+					data_ + ( index1 - start_ ) * dinfo()->size() ) )->*getNumField_ )();
+			}
+			return 0;
 		}
 
 		/**
@@ -94,10 +103,32 @@ template< class Field, class Parent, Field* ( Parent::*Lookup )( unsigned int ) 
 		}
 
 		/**
+		 * Assigns size for first (data) dimension. This usually will not
+		 * be called here, but by the parent data Element.
+		 */
+		void setNumData1( unsigned int size ) {
+		/*
+			size_ = size;
+			unsigned int start = 
+				( size_ * Shell::myNode() ) / Shell::numNodes();
+			unsigned int end = 
+				( size_ * ( 1 + Shell::myNode() ) ) / Shell::numNodes();
+			if ( data_ && start == start && end == end_ ) // already done
+				return;
+			if ( data_ )
+				dinfo()->destroyData
+			data_ = reinterpret_cast< char* >(
+				dinfo()->allocData( end - start ) );
+			start_ = start;
+			end_ = end;
+			*/
+		}
+
+		/**
 		 * Assigns the sizes of all array field entries at once.
 		 * oops, this differs from what I had done for other subclasses.
 		 */
-		void setArraySizes( const vector< unsigned int >& sizes ) {
+		void setNumData2( const vector< unsigned int >& sizes ) {
 			char* endData = data_ + size_ * dinfo()->size();
 			assert( sizes.size() == size_ );
 			vector< unsigned int >::const_iterator i = sizes.begin();
@@ -111,7 +142,7 @@ template< class Field, class Parent, Field* ( Parent::*Lookup )( unsigned int ) 
 		 * Looks up the sizes of all array field entries at once. Returns
 		 * all ones for regular Elements. 
 		 */
-		void getArraySizes( vector< unsigned int >& sizes ) const
+		void getNumData2( vector< unsigned int >& sizes ) const
 		{
 			sizes.resize( 0 );
 			char* endData = data_ + size_ * dinfo().size();
@@ -126,11 +157,24 @@ template< class Field, class Parent, Field* ( Parent::*Lookup )( unsigned int ) 
 		 * Returns true if the node decomposition has the data on the
 		 * current node
 		 */
-		bool isDataHere( DataId index ) const;
+		bool isDataHere( DataId index ) const {
+			return ( index.data() >= start_ && index.data() < end_ );
+		}
 
-		bool isAllocated() const;
+		bool isAllocated() const {
+			return (data_ != 0 );
+		}
 
-		void allocate();
+		/**
+		 * Again, this should really be done at the parent Element, not
+		 * here.
+		 */
+		void allocate() {
+			if ( data_ )
+				dinfo()->destroyData( data_ );
+			data_ = reinterpret_cast< char* >(
+				dinfo()->allocData( end_ - start_ ) );
+		}
 
 	private:
 		char* data_;

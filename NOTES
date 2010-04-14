@@ -4345,3 +4345,18 @@ ZeroDimensionData and OneDimensionData.
 Checkin 1704.
 
 Added skeleton code for FieldDataHandler.h.
+Checkin 1705.
+
+- Need to gear FieldDataHandler.h up for handling multiple nodes
+	In progress.
+- Need to rename ZeroDimensionData to ZeroDimHandler.h, etc.
+- Need to do some unit tests for them.
+- Need to do major overhaul so Element does not use its own data access fields.
+- Did some cleanup of functions of DataHandler.
+- Need to figure out how to do prototypes and other globals (all node) elements.
+	If this is easy to flag, then all the initial setup should be in
+	global mode (without allocation) and then the load balancing should
+	take place. For now, proceed with immediate allocation so as to test
+	the messaging.
+
+

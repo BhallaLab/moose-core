@@ -14,12 +14,6 @@ ZeroDimensionData::~ZeroDimensionData()
 	dinfo()->destroyData( data_ );
 }
 
-void ZeroDimensionData::getArraySizes( vector< unsigned int >& sizes ) const
-{
-	sizes.resize( 0 );
-	sizes.push_back( 1 );
-}
-
 /**
  * Returns true if the node decomposition has the data on the
  * current node
