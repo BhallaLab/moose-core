@@ -1463,27 +1463,26 @@ void PyMooseContext::tabFill(const Id& table, int xdivs, int mode)
 }
 
 
+void PyMooseContext::readCell(string filename, string cellpath)
+{
+    std::string command = "readcell " + filename + " " + cellpath;
+    this->runG(command);
+}
+
 /**
    params should have these entries:
    CM, RM, RA, EREST_ACT, ELEAK
 
-*/
-void PyMooseContext::readCell(string filename, string cellpath)
-{
-    static const int node = 0;
-    vector <double> params;
-    params.push_back(0.0);
-    params.push_back(0.0);
-    params.push_back(0.0);
-    params.push_back(0.0);
-    params.push_back(0.0);
-    send4< string, string, vector < double >, int >( 
-        myId_(), 
-        readCellSlot, filename, cellpath , params, node);
-}
 
+   -- these functions have been deprecated because of the bug with
+   ReadCell::read() - which requires the GenesisParserWrapper to be
+   connected to Shell. But PyMooseContext has to be connected to
+   Shell in order for the readCell message to reach it.
+*/
 void PyMooseContext::readCell(string filename, string cellpath, vector <double> params)
 {
+    cout << "void PyMooseContext::readCell(string filename, string cellpath, vector <double> params) -  deprecated." << endl;
+    return;
     static const int node = 0;
     send4< string, string, vector < double >, int >( 
         myId_(), 
@@ -1492,6 +1491,9 @@ void PyMooseContext::readCell(string filename, string cellpath, vector <double> 
 
 void PyMooseContext::readCell(string filename, string cellpath, double cm, double rm, double ra, double erestAct, double eleak)
 {
+    cout << "void PyMooseContext::readCell(string filename, string cellpath, double cm, double rm, double ra, double erestAct, double eleak) - deprecated." << endl;
+    return;
+    
     static const int node = 0; // this parameter was added in the shell
                         // function to handle distributed network. do
                         // not know what to do with this for PyMOOSE
