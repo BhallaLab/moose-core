@@ -9,23 +9,23 @@
 
 #include "header.h"
 
-OneDimensionData::OneDimensionData( const DinfoBase* dinfo )
+OneDimHandler::OneDimHandler( const DinfoBase* dinfo )
 		: DataHandler( dinfo ), 
 			data_( 0 ), size_( 0 ), 
 			start_( 0 ), end_( 0 )
 {;}
 
-OneDimensionData::~OneDimensionData() {
+OneDimHandler::~OneDimHandler() {
 	dinfo()->destroyData( data_ );
 }
 
-char* OneDimensionData::data( DataId index ) const {
+char* OneDimHandler::data( DataId index ) const {
 	if ( isDataHere( index ) )
 		return data_ + ( index.data() - start_ ) * dinfo()->size();
 	return 0;
 }
 
-char* OneDimensionData::data1( DataId index ) const {
+char* OneDimHandler::data1( DataId index ) const {
 	if ( isDataHere( index ) )
 		return data_ + index.data() - start_;
 	return 0;
@@ -37,7 +37,7 @@ char* OneDimensionData::data1( DataId index ) const {
 * If data is not allocated, does not touch it.
 * For now: allocate it every time.
  */
-void OneDimensionData::setNumData1( unsigned int size )
+void OneDimHandler::setNumData1( unsigned int size )
 {
 	size_ = size;
 	unsigned int start =
@@ -61,7 +61,7 @@ void OneDimensionData::setNumData1( unsigned int size )
 * Assigns the sizes of all array field entries at once.
 * Ignore if 1 or 0 dimensions.
 */
-void OneDimensionData::setNumData2( const vector< unsigned int >& sizes )
+void OneDimHandler::setNumData2( const vector< unsigned int >& sizes )
 {
 	;
 }
@@ -70,22 +70,22 @@ void OneDimensionData::setNumData2( const vector< unsigned int >& sizes )
  * Looks up the sizes of all array field entries at once.
  * Ignore in this case
  */
-void OneDimensionData::getNumData2( vector< unsigned int >& sizes ) const
+void OneDimHandler::getNumData2( vector< unsigned int >& sizes ) const
 {;}
 
 /**
  * Returns true if the node decomposition has the data on the
  * current node
  */
-bool OneDimensionData::isDataHere( DataId index ) const {
+bool OneDimHandler::isDataHere( DataId index ) const {
 	return ( index.data() >= start_ && index.data() < end_ );
 }
 
-bool OneDimensionData::isAllocated() const {
+bool OneDimHandler::isAllocated() const {
 	return data_ != 0;
 }
 
-void OneDimensionData::allocate() {
+void OneDimHandler::allocate() {
 	if ( data_ )
 		dinfo()->destroyData( data_ );
 	data_ = reinterpret_cast< char* >( dinfo()->allocData( end_ - start_ ));

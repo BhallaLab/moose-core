@@ -4349,7 +4349,7 @@ Checkin 1705.
 
 - Need to gear FieldDataHandler.h up for handling multiple nodes
 	In progress.
-- Need to rename ZeroDimensionData to ZeroDimHandler.h, etc.
+* Need to rename ZeroDimensionData to ZeroDimHandler.h, etc.
 - Need to do some unit tests for them.
 - Need to do major overhaul so Element does not use its own data access fields.
 - Did some cleanup of functions of DataHandler.

@@ -9,7 +9,7 @@
 
 #include "header.h"
 
-ZeroDimensionData::~ZeroDimensionData()
+ZeroDimHandler::~ZeroDimHandler()
 {
 	dinfo()->destroyData( data_ );
 }
@@ -18,15 +18,15 @@ ZeroDimensionData::~ZeroDimensionData()
  * Returns true if the node decomposition has the data on the
  * current node
  */
-bool ZeroDimensionData::isDataHere( DataId index ) const {
+bool ZeroDimHandler::isDataHere( DataId index ) const {
 	return ( Shell::myNode() == 0 );
 }
 
-bool ZeroDimensionData::isAllocated() const {
+bool ZeroDimHandler::isAllocated() const {
 	return data_ != 0;
 }
 
-void ZeroDimensionData::allocate() {
+void ZeroDimHandler::allocate() {
 	if ( data_ ) 
 		dinfo()->destroyData( data_ );
 	data_ = reinterpret_cast< char* >( dinfo()->allocData( 1 ) );

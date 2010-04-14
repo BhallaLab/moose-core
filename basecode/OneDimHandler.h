@@ -7,49 +7,44 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _ZERO_DIMENSION_DATA_H
-#define _ZERO_DIMENSION_DATA_H
+#ifndef _ONE_DIM_HANDLER_H
+#define _ONE_DIM_HANDLER_H
 
 /**
- * This class manages the data part of Elements having just one
- * data entry.
+ * This class manages the data part of Elements. It handles a one-
+ * dimensional array.
  */
-class ZeroDimensionData: public DataHandler
+class OneDimHandler: public DataHandler
 {
 	public:
-		ZeroDimensionData( const DinfoBase* dinfo )
-			: DataHandler( dinfo ), data_( 0 )
-		{;}
+		OneDimHandler( const DinfoBase* dinfo );
 
-		~ZeroDimensionData();
+		~OneDimHandler();
 
 		/**
 		 * Returns the data on the specified index.
 		 */
-		char* data( DataId index ) const {
-			return data_;
-		}
+		char* data( DataId index ) const;
 
 		/**
-		 * Returns the data at one level up of indexing.
-		 * Here there isn't any.
+		 * Returns the data at one level up of indexing. In this case it
+		 * just returns the data on the specified index.
 		 */
-		char* data1( DataId index ) const {
-			return data_;
-		}
+		char* data1( DataId index ) const;
 
 		/**
 		 * Returns the number of data entries.
 		 */
 		unsigned int numData() const {
-			return 1;
+			return size_;
 		}
 
 		/**
 		 * Returns the number of data entries at index 1.
+		 * For regular Elements this is identical to numData.
 		 */
 		unsigned int numData1() const {
-			return 1;
+			return size_;
 		}
 
 		/**
@@ -64,32 +59,25 @@ class ZeroDimensionData: public DataHandler
 		 * Returns the number of dimensions of the data.
 		 */
 		unsigned int numDimensions() const {
-			return 0;
+			return 1;
 		}
 
 		/**
-		 * Assign # of entries in dimension 1. 
-		 * Ignore here
+		 * Assigns the size for the data dimension.
 		 */
-		void setNumData1( unsigned int size ) {
-			;
-		}
+		void setNumData1( unsigned int size );
+
 		/**
 		 * Assigns the sizes of all array field entries at once.
-		 * This is ignored for regular Elements.
+		 * Ignore in this case, as there are none.
 		 */
-		void setNumData2( const vector< unsigned int >& sizes ) {
-			;
-		}
-
+		void setNumData2( const vector< unsigned int >& sizes );
 
 		/**
 		 * Looks up the sizes of all array field entries at once.
-		 * Ignored in this case, as there are none.
+		 * Ignore in this case, as there are no array fields.
 		 */
-		void getNumData2( vector< unsigned int >& sizes ) const {
-			;
-		}
+		void getNumData2( vector< unsigned int >& sizes ) const;
 
 		/**
 		 * Returns true if the node decomposition has the data on the
@@ -97,14 +85,15 @@ class ZeroDimensionData: public DataHandler
 		 */
 		bool isDataHere( DataId index ) const;
 
-		virtual bool isAllocated() const;
+		bool isAllocated() const;
 
 		void allocate();
 
-	protected:
-
 	private:
 		char* data_;
+		unsigned int size_;	// Number of data entries in the whole array
+		unsigned int start_;	// Starting index of data, used in MPI.
+		unsigned int end_;	// Starting index of data, used in MPI.
 };
 
-#endif // _ZERO_DIMENSION_DATA_H
+#endif	// _ONE_DIM_HANDLER_H

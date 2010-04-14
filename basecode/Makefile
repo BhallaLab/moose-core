@@ -18,8 +18,8 @@ TARGET = basecode.o
 
 OBJ = \
 	Element.o	\
-	ZeroDimensionData.o \
-	OneDimensionData.o \
+	ZeroDimHandler.o \
+	OneDimHandler.o \
 	Eref.o	\
 	Finfo.o	\
 	DestFinfo.o	\
@@ -53,8 +53,8 @@ HEADERS = \
 	DataId.h \
 	Dinfo.h \
 	DataHandler.h \
-	ZeroDimensionData.h \
-	OneDimensionData.h \
+	ZeroDimHandler.h \
+	OneDimHandler.h \
 	Element.h \
 	Eref.h \
 	Finfo.h \
