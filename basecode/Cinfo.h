@@ -90,26 +90,21 @@ class Cinfo
 			const FuncId findFuncId( const string& name) const;
 
 			/**
-			 * Creates a new Element. Assigns a new Id or takes one you give
-			bool create( Id id, const string& name, unsigned int numEntries,
-				Element::Decomposition decomp ) const;
+			 * Number of SrcMsgs in total. Each has a unique number to
+			 * bind to an entry in the msgBinding vector in the Element.
 			 */
-
-			/**
-			 * Creates data to be attached to element
-			 */
-			char* createData( unsigned int numEntries ) const;
-
-			unsigned int dataSize() const;
-
-			/**
-			 * Destroys data on element
-			 */
-			void destroyData( char* d ) const;
-
 			unsigned int numBindIndex() const;
 
+			/**
+			 * Returns the map between name and field info
+			 */
 			const map< string, Finfo* >& finfoMap() const;
+
+			/**
+			 * Returns the Dinfo, which manages creation and destruction
+			 * of the data, and knows about its size.
+			 */
+			const DinfoBase* dinfo() const;
 
 		private:
 			const string name_;

@@ -4359,4 +4359,22 @@ Checkin 1705.
 	take place. For now, proceed with immediate allocation so as to test
 	the messaging.
 
+=============================================================================
+14 April.
+Did renaming of ZeroDimensionData etc.
+Checkin 1707.
+
+Working on Element conversion. Pending points:
+OneToAllMsg::exec needs to handle nodes. Should ideally pass the iteration
+	into the DataHandlers.
+Likewise SparseMsg and PsparseMsg.
+
+FieldElement is turning messy. Ideally should be created automagically
+as soon as the parent element is made. Problem crops up now with
+Id allocation.
+Working on automatic creation of FieldElement. This is done by having a
+FieldElementFinfo with all the required access func info.
+It will use the registerFinfo
+to register a PostCreationFunc with Cinfo, and this will be used when the
+parent Element is created, to make the FieldElement
 

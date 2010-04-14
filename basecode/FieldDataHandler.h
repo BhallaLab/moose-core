@@ -18,13 +18,15 @@
  * that extracts the field from the parent.
  */
 
-template< class Field, class Parent, Field* ( Parent::*Lookup )( unsigned int ) > class FieldDataHandler: public DataHandler
+template< class Parent, class Field > class FieldDataHandler: public DataHandler
 {
 	public:
 		FieldDataHandler( const DinfoBase* dinfo,
+			Field* ( Parent::*lookupField )( unsigned int ),
 			unsigned int ( Parent::*getNumField )() const,
-			void ( Parent::*setNumField )( unsigned int num ))
+			void ( Parent::*setNumField )( unsigned int num ) )
 			: DataHandler( dinfo ),
+				lookupField_( lookupField ),
 				getNumField_( getNumField ),
 				setNumField_( setNumField )
 
@@ -41,7 +43,7 @@ template< class Field, class Parent, Field* ( Parent::*Lookup )( unsigned int ) 
 			if ( isDataHere( index ) ) {
 				Field* s = ( ( reinterpret_cast< Parent* >( 
 					data_ + ( index.data() - start_ ) * 
-						dinfo()->size() ) )->*Lookup )( index.field() );
+						dinfo()->size() ) )->*lookupField_ )( index.field() );
 				return reinterpret_cast< char* >( s );
 			}
 			return 0;
@@ -126,7 +128,6 @@ template< class Field, class Parent, Field* ( Parent::*Lookup )( unsigned int ) 
 
 		/**
 		 * Assigns the sizes of all array field entries at once.
-		 * oops, this differs from what I had done for other subclasses.
 		 */
 		void setNumData2( const vector< unsigned int >& sizes ) {
 			char* endData = data_ + size_ * dinfo()->size();
@@ -181,6 +182,7 @@ template< class Field, class Parent, Field* ( Parent::*Lookup )( unsigned int ) 
 		unsigned int size_;	// Number of data entries in the whole array
 		unsigned int start_;	// Starting index of data, used in MPI.
 		unsigned int end_;	// Starting index of data, used in MPI.
+		Field* ( Parent::*lookupField_ )( unsigned int ),
 		unsigned int ( Parent::*getNumField_ )() const;
 		void ( Parent::*setNumField_ )( unsigned int num );
 };

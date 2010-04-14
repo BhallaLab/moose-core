@@ -443,7 +443,7 @@ void Shell::create( Eref e, const Qinfo* q,
 	vector< unsigned int > dimensions )
 {
 	// cout << myNode_ << ": In Shell::create for element " << name << " id " << newElm << ", dim = " << dimensions[0] << endl;
-	innerCreate( type, parent, newElm, name, dimensions[0] );
+	innerCreate( type, parent, newElm, name, dimensions );
 	// cout << myNode_ << ": Shell::create inner Create done for element " << name << " id " << newElm << endl;
 //	if ( myNode_ != 0 )
 		ackCreate.send( e, &p_, 0 );
@@ -454,7 +454,7 @@ void Shell::create( Eref e, const Qinfo* q,
  * This function actually creates the object.
  */
 void Shell::innerCreate( string type, Id parent, Id newElm, string name,
-	unsigned int numEntries )
+	const vector< unsigned int >& dimensions )
 {
 	const Cinfo* c = Cinfo::find( type );
 	if ( c ) {
@@ -464,9 +464,8 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 			ss << "create: Parent Element'" << parent << "' not found. No Element created";
 			return;
 		}
-		unsigned int n = ( numEntries + myNode_ ) / numNodes_;
 		cout << myNode_ << ": Shell::innerCreate newElmId= " << newElm << endl;
-		new Element( newElm, c, name, n, Element::Block );
+		new Element( newElm, c, name, dimensions );
 		//ret = c->create( newElm, name, n, Element::Decomposition::Block );
 	} else {
 		stringstream ss;

@@ -9,35 +9,38 @@
 
 #include "header.h"
 
-/*
-Element::Element( const Cinfo* c, 
-	char* d, unsigned int numData, unsigned int dataSize, 
-		unsigned int numBindIndex, Element::Decomposition decomp )
-	: d_( d ), numData_( numData ), dataSize_( dataSize ), 
-	decomposition_( decomp ),
-	sendBuf_( 0 ), cinfo_( c ), msgBinding_( numBindIndex )
-{ 
-	;
-}
-*/
-
 Element::Element( Id id, const Cinfo* c, const string& name, 
-	unsigned int numData, Element::Decomposition decomp )
-	: d_( c->createData( numData ) ), numData_( numData ), 
-		dataSize_( c->dataSize() ), 
-		dataStart_( 0 ), 
-		decomposition_( decomp ),
-		name_( name ),
+	const vector< unsigned int >& dimensions )
+	:	name_( name ),
 		sendBuf_( 0 ), 
 		cinfo_( c ), 
 		msgBinding_( c->numBindIndex() )
 { 
+	unsigned int numRealDimensions = 0;
+
+	for ( unsigned int i = 0; i < dimensions.size(); ++i ) {
+		if ( dimensions[i] > 1 ) {
+			++numRealDimensions;
+		} else {
+			break; // Do not permit high dimensions later.
+		}
+	}
+
+	if ( numRealDimensions == 0 ) {
+		dataHandler_ = new ZeroDimHandler( c->dinfo() );		
+	} else if ( numRealDimensions == 1 ) {
+		dataHandler_ = new OneDimHandler( c->dinfo() );		
+		dataHandler_->setNumData1( dimensions[ 0 ] );
+	} else {
+		cout << "Don't yet have Two or higher DimHandler\n";
+		exit( 0 );
+	}
+
 	id.bindIdToElement( this );
 }
 
 /**
  * What is the point of this?
- */
 Element::Element( const Cinfo* c, const Element* other )
 	: 	d_( other->d_ ), 
 		numData_( other->numData_ ), 
@@ -49,11 +52,12 @@ Element::Element( const Cinfo* c, const Element* other )
 {
 	;
 }
+ */
 
 Element::~Element()
 {
 	delete[] sendBuf_;
-	cinfo_->destroyData( d_ );
+	delete dataHandler_;
 	cinfo_ = 0; // A flag that the Element is doomed, used to avoid lookups when deleting Msgs.
 	for ( vector< vector< MsgFuncBinding > >::iterator i = msgBinding_.begin(); i != msgBinding_.end(); ++i ) {
 		for ( vector< MsgFuncBinding >::iterator j = i->begin(); j != i->end(); ++j ) {
@@ -80,6 +84,8 @@ const string& Element::name() const
  */
 void Element::process( const ProcInfo* p )
 {
+	dataHandler_->process( p, this );
+	/*
 	char* data = d_;
 	unsigned int start =
 		( numData_ * p->threadIndexInGroup ) / p->numThreadsInGroup;
@@ -90,8 +96,8 @@ void Element::process( const ProcInfo* p )
 		reinterpret_cast< Data* >( data )->process( p, Eref( this, i ) );
 		data += dataSize_;
 	}
+	*/
 }
-
 
 double Element::sumBuf( SyncId slot, unsigned int i ) const
 {
@@ -149,46 +155,6 @@ void Element::ssend2( SyncId slot, unsigned int i, double v1, double v2 )
 	double* sb = sendBuf_ + slot + i * numSendSlots_;
 	*sb++ = v1;
 	*sb = v2;
-}
-
-char* Element::data( DataId index )
-{
-	return d_ + index.data() * dataSize_;
-}
-
-char* Element::data1( DataId index )
-{
-	assert( index.data() < numData_ );
-	return d_ + index.data() * dataSize_;
-}
-
-unsigned int Element::numData() const
-{
-	return numData_;
-}
-
-unsigned int Element::numData1() const
-{
-	return numData_;
-}
-
-unsigned int Element::numData2( unsigned int index1 ) const
-{
-	return 1;
-}
-
-unsigned int Element::numDimensions() const
-{
-	return 1;
-}
-
-void Element::setArraySizes( const vector< unsigned int >& sizes )
-{;}
-
-void Element::getArraySizes( vector< unsigned int >& sizes ) const
-{
-	sizes.clear();
-	sizes.resize( numData_, 1 );
 }
 
 void Element::addMsg( MsgId m )
@@ -262,6 +228,11 @@ const vector< MsgFuncBinding >* Element::getMsgAndFunc( BindIndex b ) const
 const Cinfo* Element::cinfo() const
 {
 	return cinfo_;
+}
+
+DataHandler* Element::dataHandler() const
+{
+	return dataHandler_;
 }
 
 /*

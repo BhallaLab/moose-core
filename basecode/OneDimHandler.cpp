@@ -19,6 +19,27 @@ OneDimHandler::~OneDimHandler() {
 	dinfo()->destroyData( data_ );
 }
 
+
+/**
+ * Handles both the thread and node decomposition
+ */
+void OneDimHandler::process( const ProcInfo* p, Element* e )
+{
+	unsigned int startIndex =
+		( ( end_ - start_ ) * p->threadIndexInGroup ) /
+			p->numThreadsInGroup;
+	unsigned int endIndex =
+		( ( end_ - start_ ) * p->threadIndexInGroup ) /
+			p->numThreadsInGroup;
+	
+	char* temp = data_ + startIndex * dinfo()->size();
+	for ( unsigned int i = startIndex; i != endIndex; ++i ) {
+		reinterpret_cast< Data* >( temp )->process( p, Eref( e, i + start_ ) );
+		temp += dinfo()->size();
+	}
+}
+
+
 char* OneDimHandler::data( DataId index ) const {
 	if ( isDataHere( index ) )
 		return data_ + ( index.data() - start_ ) * dinfo()->size();

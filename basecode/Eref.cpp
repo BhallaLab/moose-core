@@ -43,12 +43,12 @@ double* Eref::getBufPtr( SyncId slot )
 
 char* Eref::data()
 {
-	return e_->data( i_ );
+	return e_->dataHandler()->data( i_ );
 }
 
 char* Eref::data1()
 {
-	return e_->data1( i_ );
+	return e_->dataHandler()->data1( i_ );
 }
 
 void Eref::ssend1( SyncId src, double v )

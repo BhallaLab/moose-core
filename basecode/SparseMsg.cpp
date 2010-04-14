@@ -15,20 +15,22 @@
 #include "../biophysics/Synapse.h"
 
 SparseMsg::SparseMsg( Element* e1, Element* e2 )
-	: Msg( e1, e2 ), matrix_( e1->numData1(), e2->numData1() )
+	: Msg( e1, e2 ), 
+	matrix_( e1->dataHandler()->numData1(), e2->dataHandler()->numData1() )
 {
-	assert( e1->numDimensions() == 1  && e2->numDimensions() >= 1 );
+	assert( e1->dataHandler()->numDimensions() == 1  && 
+		e2->dataHandler()->numDimensions() >= 1 );
 }
 
 unsigned int rowIndex( const Element* e, const DataId& d )
 {
-	if ( e->numDimensions() == 1 ) {
+	if ( e->dataHandler()->numDimensions() == 1 ) {
 		return d.data();
-	} else if ( e->numDimensions() == 2 ) {
+	} else if ( e->dataHandler()->numDimensions() == 2 ) {
 		// This is a nasty case, hopefully very rare.
 		unsigned int row = 0;
 		for ( unsigned int i = 0; i < d.data(); ++i )
-			row += e->numData2( i );
+			row += e->dataHandler()->numData2( i );
 		return ( row + d.field() );
 	}
 	return 0;
@@ -99,7 +101,7 @@ unsigned int SparseMsg::randomConnect( double probability )
 
 	// SynElement* syn = dynamic_cast< SynElement* >( e2_ );
 	Element* syn = e2_;
-	syn->getArraySizes( sizes );
+	syn->dataHandler()->getNumData2( sizes );
 	assert( sizes.size() == nCols );
 
 	for ( unsigned int i = 0; i < nCols; ++i ) {
@@ -125,7 +127,7 @@ unsigned int SparseMsg::randomConnect( double probability )
 
 		matrix_.addRow( i, synIndex );
 	}
-	syn->setArraySizes( sizes );
+	syn->dataHandler()->setNumData2( sizes );
 	matrix_.transpose();
 	return totalSynapses;
 }

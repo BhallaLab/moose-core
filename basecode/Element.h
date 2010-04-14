@@ -23,39 +23,23 @@ class Element
 	friend void testSyncArray( unsigned int, unsigned int, unsigned int );
 	friend void testSparseMsg();
 	public:
-		enum Decomposition {
-			Block,	// Successive blocks of Elements are on same node
-			Sequential // Entries are put sequentially on successive nodes.
-		};
 		/**
 		 * Constructor
 		 * It would be nice to have shared data: e.g., thresh and tau for
 		 * IntFire. Common but not static.
 		 * Also think about parent-child hierarchy.
 		 */
-		/*
-		Element( vector< Data * >& d, 
-			unsigned int numSendSlots_,
-			unsigned int numRecvSlots_
-		);
-		*/
-		/*
-		Element( const Cinfo* c, 
-			char* d, unsigned int numData, unsigned int dataSize,
-			unsigned int numBindIndex, Element::Decomposition decomp );
-			*/
 
 		Element( Id id, const Cinfo* c, const string& name,
-			unsigned int numData, Element::Decomposition decomp =
-				Element::Block );
+			const vector< unsigned int >& dimensions );
 
 		// What is the point of this constructor?
-		Element( const Cinfo* c, const Element* other );
+		// Element( const Cinfo* c, const Element* other );
 
 		/**
 		 * Destructor
 		 */
-		virtual ~Element();
+		~Element();
 
 		const string& name() const;
 
@@ -68,19 +52,8 @@ class Element
 		 * Examine process queue, data that is expected every timestep.
 		 * This function is done for all the local data entries in order.
 		 */
-		virtual void process( const ProcInfo* p );
+		void process( const ProcInfo* p );
 
-		/**
-		 * Clear sporadic message queue, events that come randomly.
-		void clearQ();
-		 */
-
-		/**
-		 * execFunc executes the function defined in the buffer, and
-		 * returns the next position of the buffer. Returns 0 at the
-		 * end.
-		const char* execFunc( const char* buf );
-		 */
 
 		/**
 		 * Return a single buffer entry specified by slot and eindex
@@ -107,68 +80,9 @@ class Element
 		double* getBufPtr( SyncId slot, unsigned int i );
 
 		/**
-		 * Returns the data on the specified index for the Element
-		 * Here we may lose the nice orthogonality of the Data and of the
-		 * Elements. If we have Elements that handle arrays of fields,
-		 * then they have to know about the data structures holding those
-		 * fields. For example, an Element that deals with Synapses must
-		 * know how to get a Synapse from an IntFire.
+		 * Returns the DataHandler, which actually manages the data.
 		 */
-		virtual char* data( DataId index );
-
-		/**
-		 * Returns the data at one level up of indexing. So, for a 2-D
-		 * array, would return the start entry of the rows rather than
-		 * the individual entries. For a synapse on an IntFire, would
-		 * return the appropriate IntFire, rather than the synapse.
-		 */
-		virtual char* data1( DataId index );
-
-		/**
-		 * Returns the number of data entries
-		 */
-		virtual unsigned int numData() const;
-
-		/**
-		 * Returns the number of data entries at index 1.
-		 * For regular Elements this is identical to numData
-		 * For Elements whose entries are array fields, this is
-		 * the number of parent objects.
-		 */
-		virtual unsigned int numData1() const;
-
-		/**
-		 * Returns the number of data entries at index 2, if present.
-		 * For regular Elements this is always 1.
-		 * For Elements whose entries are array fields, this is the number
-		 * of fields on that data entry.
-		 */
-		 virtual unsigned int numData2( unsigned int index1 ) const;
-
-		/**
-		 * Returns the number of dimensions of the data.
-		 */
-		virtual unsigned int numDimensions() const;
-
-		/**
-		 * Assigns the sizes of all array field entries at once.
-		 * This is ignored for regular Elements.
-		 * In a FieldElement we can assign different array sizes for 
-		 * each entry in the Element.
-		 * Note that a single Element may have more than one array field.
-		 * However, each FieldElement instance will refer to just one of
-		 * these array fields, so there is no ambiguity.
-		 */
-		virtual void setArraySizes( const vector< unsigned int >& sizes );
-
-		/**
-		 * Looks up the sizes of all array field entries at once. Returns
-		 * all ones for regular Elements. 
-		 * Note that a single Element may have more than one array field.
-		 * However, each FieldElement instance will refer to just one of
-		 * these array fields, so there is no ambiguity.
-		 */
-		virtual void getArraySizes( vector< unsigned int >& sizes ) const;
+		DataHandler* dataHandler() const;
 
 		/**
 		 * We'll try these out as alternate Send functions, given that
@@ -237,29 +151,10 @@ class Element
 		 */
 		const Cinfo* cinfo() const;
 
-		// const Msg* getMsg( MsgId mid ) const;
-		
-		Decomposition decomposition() const;
-
-	protected:
-
-		/**
-		 * These are the objects managed by the Element
-		 * Option 1: Just have a big linear array of objects. 
-		 * 		Lookup using size info. Substantial savings possible.
-		 * 		Easier to manage memory.
-		 * Option 2: Allocate the objects elsewhere, just ptrs here.
-		 * 		Easy to get started with.
-		 */
-		char* d_;
-		unsigned int numData_;	// Number of data entries
-		unsigned int dataSize_;	// Size of each data entry
-		unsigned int dataStart_;	// Starting index of data, used in MPI.
-
-		// Enum. Specifies how to subdivide indices among nodes.
-		Decomposition decomposition_; 
 	private:
 		string name_;
+
+		DataHandler* dataHandler_;
 
 		/**
 		 * This is the data buffer used for outgoing sync messages from

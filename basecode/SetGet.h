@@ -228,13 +228,13 @@ template< class A > class SetGet1: public SetGet
 			SetGet1< A > sg( dest );
 			Element* e = dest.element();
 			FuncId fid;
-			assert( arg.size() >= e->numData() );
+			assert( arg.size() >= e->dataHandler()->numData() );
 			if ( arg.size() == 0 )
 				return 0;
 
 			if ( sg.checkSet( field, fid ) ) {
-				if ( e->numDimensions() == 1 ) {
-					for ( unsigned int i = 0; i < e->numData(); ++i )
+				if ( e->dataHandler()->numDimensions() == 1 ) {
+					for ( unsigned int i = 0; i < e->dataHandler()->numData(); ++i )
 					{
 						Eref er( e, i );
 						SetGet1< A > sga( er );
@@ -250,12 +250,12 @@ template< class A > class SetGet1: public SetGet
 					}
 				}
 
-				if ( e->numDimensions() == 2 )
+				if ( e->dataHandler()->numDimensions() == 2 )
 				{
 					unsigned int k = 0;
-					for ( unsigned int i = 0; i < e->numData1(); ++i )
+					for ( unsigned int i = 0; i < e->dataHandler()->numData1(); ++i )
 					{
-						for ( unsigned int j = 0; j < e->numData2(i); ++j )
+						for ( unsigned int j = 0; j < e->dataHandler()->numData2(i); ++j )
 						{
 							Eref er( e, DataId( i, j ) );
 							SetGet1< A > sga( er );

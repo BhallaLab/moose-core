@@ -89,6 +89,6 @@ class Cinfo;
 #include "UpFunc.h"
 #include "ValueFinfo.h"
 #include "SharedFinfo.h"
-#include "FieldElement.h"
+// #include "FieldElement.h"
 
 #endif // _HEADER_H

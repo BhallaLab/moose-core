@@ -22,6 +22,12 @@ class OneDimHandler: public DataHandler
 		~OneDimHandler();
 
 		/**
+		 * calls process on data, using threading info from the ProcInfo,
+		 * and internal info about node decomposition.
+		 */
+		void process( const ProcInfo* p, Element* e );
+
+		/**
 		 * Returns the data on the specified index.
 		 */
 		char* data( DataId index ) const;

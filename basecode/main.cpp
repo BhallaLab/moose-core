@@ -67,12 +67,16 @@ Id init( int argc, char** argv )
 
 	Msg::initNull();
 	Id shellId = Id::nextId();
-	Element* shelle = new Element( shellId, Shell::initCinfo(), "root", 1 );
+	vector< unsigned int > dims;
+	dims.push_back( 1 );
+	Element* shelle = 
+		new Element( shellId, Shell::initCinfo(), "root", dims );
 	// Shell::initCinfo()->create( shellId, "root", 1 );
 
 	Id clockId = Id::nextId();
 	// Clock::initCinfo()->create( clockId, "clock", 1 );
-	Element* clocke = new Element( clockId, Clock::initCinfo(), "clock", 1 );
+	Element* clocke = 
+		new Element( clockId, Clock::initCinfo(), "clock", dims );
 	// Should put this initialization stuff within the Clock creation
 	// step. This means I need to add an optional init func into the Cinfo
 	// constructor, or to add the init func as a virtual func in Data.

@@ -33,6 +33,12 @@ class DataHandler
 		virtual char* data( DataId index ) const = 0;
 
 		/**
+		 * Goes through all the data resident on the local node, using
+		 * threading info from the ProcInfo
+		 */
+		virtual void process( const ProcInfo* p, Element* e ) = 0;
+
+		/**
 		 * Returns the data at one level up of indexing, in the special
 		 * case where we have arrays of type X nested in an array of
 		 * type Y. This function returns the entry of type Y.

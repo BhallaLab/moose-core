@@ -14,6 +14,13 @@ ZeroDimHandler::~ZeroDimHandler()
 	dinfo()->destroyData( data_ );
 }
 
+void ZeroDimHandler::process( const ProcInfo* p, Element* e )
+{
+	if ( Shell::myNode() == 0 && 
+		p->threadIndexInGroup == p->numThreadsInGroup )
+		reinterpret_cast< Data* >( data_ )->process( p, Eref( e, 0 ) );
+}
+
 /**
  * Returns true if the node decomposition has the data on the
  * current node
