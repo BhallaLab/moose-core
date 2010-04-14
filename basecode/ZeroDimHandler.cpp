@@ -14,7 +14,7 @@ ZeroDimHandler::~ZeroDimHandler()
 	dinfo()->destroyData( data_ );
 }
 
-void ZeroDimHandler::process( const ProcInfo* p, Element* e )
+void ZeroDimHandler::process( const ProcInfo* p, Element* e ) const
 {
 	if ( Shell::myNode() == 0 && 
 		p->threadIndexInGroup == p->numThreadsInGroup )

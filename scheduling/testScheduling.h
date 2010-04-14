@@ -7,11 +7,13 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+static vector< unsigned int > _dims;
+
 class testSchedElement: public Element
 {
 	public:
 		testSchedElement() 
-			: Element( Id::nextId(), Tick::initCinfo(), "testSched", 0 ),
+			: Element( Id::nextId(), Tick::initCinfo(), "testSched", _dims ),
 			index_( 0 )
 		{;}
 		
@@ -37,7 +39,7 @@ class testThreadSchedElement: public Element
 		testThreadSchedElement() 
 			// : Element( Tick::initCinfo(), 0, 0, 0, 0 ), index_( 0 )
 			: Element( Id::nextId(), Tick::initCinfo(), 
-				"testThreadSched", 0 ), index_( 0 )
+				"testThreadSched", _dims ), index_( 0 )
 		{ 
 			pthread_mutex_init( &mutex_, NULL );
 		}

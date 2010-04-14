@@ -39,6 +39,17 @@ Element::Element( Id id, const Cinfo* c, const string& name,
 	id.bindIdToElement( this );
 }
 
+Element::Element( Id id, const Cinfo* c, const string& name, 
+	DataHandler* dataHandler )
+	:	name_( name ),
+		dataHandler_( dataHandler ),
+		sendBuf_( 0 ), 
+		cinfo_( c ), 
+		msgBinding_( c->numBindIndex() )
+{
+	;
+}
+
 /**
  * What is the point of this?
 Element::Element( const Cinfo* c, const Element* other )

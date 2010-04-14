@@ -84,9 +84,10 @@ void Cinfo::registerPostCreationFinfo( const Finfo* f )
 	postCreationFinfos_.push_back( f );
 }
 
-void Cinfo::postCreationFunc( Id newId, Element* newElm )
+void Cinfo::postCreationFunc( Id newId, Element* newElm ) const
 {
-	for ( vector< const Finfo* >::iterator i = postCreationFinfos_.begin();
+	for ( vector< const Finfo* >::const_iterator i =
+		postCreationFinfos_.begin();
 		i != postCreationFinfos_.end(); ++i )
 		(*i)->postCreationFunc( newId, newElm );
 }

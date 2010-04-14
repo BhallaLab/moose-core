@@ -29,54 +29,58 @@
 void setupTicks()
 {
 	static const double EPSILON = 1.0e-9;
-	const Cinfo* tc = Tick::initCinfo();
+	// const Cinfo* tc = Tick::initCinfo();
 	Id clock = Id::nextId();
-	Element* clocke = new Element( clock, Clock::initCinfo(), "tclock", 1 );
+	vector< unsigned int > dims( 1, 1 );
+	Element* clocke = new Element( clock, Clock::initCinfo(), "tclock", dims );
 	assert( clocke );
 	// bool ret = Clock::initCinfo()->create( clock, "tclock", 1 );
 	// assert( ret );
 	// Element* clocke = clock();
 	Eref clocker = clock.eref();
-	FieldElement< Tick, Clock, &Clock::getTick > ticke( tc, clocke, 
-		&Clock::getNumTicks, &Clock::setNumTicks );
+	Id tickId( clock.value() + 1 );
+	Element* ticke = tickId();
+	assert( ticke->name() == "tick" );
+
+	// FieldElement< Tick, Clock, &Clock::getTick > ticke( tc, clocke, &Clock::getNumTicks, &Clock::setNumTicks );
 	unsigned int size = 10;
 
-	bool ret = OneToAllMsg::add( clocker, "tick", &ticke, "parent" );
+	bool ret = OneToAllMsg::add( clocker, "tick", ticke, "parent" );
 	assert( ret );
 
-	assert( ticke.numData() == 0 );
+	assert( ticke->dataHandler()->numData() == 0 );
 	ret = Field< unsigned int >::set( clocker, "numTicks", size );
 	assert( ret );
-	assert( ticke.numData() == size );
+	assert( ticke->dataHandler()->numData() == size );
 
-	Eref er0( &ticke, DataId( 0, 2 ) );
+	Eref er0( ticke, DataId( 0, 2 ) );
 	ret = Field< double >::set( er0, "dt", 5.0);
 	assert( ret );
 	ret = Field< unsigned int >::set( er0, "stage", 0);
 	assert( ret );
-	Eref er1( &ticke, DataId( 0, 1 ) );
+	Eref er1( ticke, DataId( 0, 1 ) );
 	ret = Field< double >::set( er1, "dt", 2.0);
 	assert( ret );
 	ret = Field< unsigned int >::set( er1, "stage", 0);
 	assert( ret );
-	Eref er2( &ticke, DataId( 0, 0 ) );
+	Eref er2( ticke, DataId( 0, 0 ) );
 	ret = Field< double >::set( er2, "dt", 2.0);
 	assert( ret );
 	ret = Field< unsigned int >::set( er2, "stage", 1);
 	assert( ret );
-	Eref er3( &ticke, DataId( 0, 3 ) );
+	Eref er3( ticke, DataId( 0, 3 ) );
 	ret = Field< double >::set( er3, "dt", 1.0);
 	assert( ret );
 	ret = Field< unsigned int >::set( er3, "stage", 0);
 	assert( ret );
-	Eref er4( &ticke, DataId( 0, 4 ) );
+	Eref er4( ticke, DataId( 0, 4 ) );
 	ret = Field< double >::set( er4, "dt", 3.0);
 	assert( ret );
 	ret = Field< unsigned int >::set( er4, "stage", 5);
 	assert( ret );
 	// Note that here I put the tick on a different DataId. later it gets
 	// to sit on the appropriate Conn, when the SingleMsg is set up.
-	Eref er5( &ticke, DataId( 0, 7 ) );
+	Eref er5( ticke, DataId( 0, 7 ) );
 	ret = Field< double >::set( er5, "dt", 5.0);
 	assert( ret );
 	ret = Field< unsigned int >::set( er5, "stage", 1);
@@ -128,7 +132,7 @@ void setupTicks()
 void testThreads()
 {
 	Element* se = Id()();
-	Shell* s = reinterpret_cast< Shell* >( se->data( 0 ) );
+	Shell* s = reinterpret_cast< Shell* >( se->dataHandler()->data( 0 ) );
 	s->setclock( 0, 5.0, 0 );
 	s->setclock( 1, 2.0, 0 );
 	s->setclock( 2, 2.0, 1 );
@@ -176,7 +180,7 @@ void testThreadIntFireNetwork()
 	static const unsigned int runsteps = 5;
 	// static const unsigned int runsteps = 1000;
 	const Cinfo* ic = IntFire::initCinfo();
-	const Cinfo* sc = Synapse::initCinfo();
+	// const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 1024;
 	string arg;
 
@@ -184,26 +188,30 @@ void testThreadIntFireNetwork()
 
 	Id i2 = Id::nextId();
 	// bool ret = ic->create( i2, "test2", size );
-	Element* t2 = new Element( i2, ic, "test2", size );
+	vector< unsigned int > dims( 1, size );
+	Element* t2 = new Element( i2, ic, "test2", dims );
 	assert( t2 );
 
 	Eref e2 = i2.eref();
-	FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
+	// FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
+	Id synId( i2.value() + 1 );
+	Element* syn = synId();
+	assert( syn->name() == "synapse" );
 
-	assert( syn.numData() == 0 );
+	assert( syn->dataHandler()->numData() == 0 );
 
 	DataId di( 1, 0 ); // DataId( data, field )
-	Eref syne( &syn, di );
+	Eref syne( syn, di );
 
 	unsigned int numThreads = 1;
 	if ( Qinfo::numSimGroup() >= 2 ) {
 		numThreads = Qinfo::simGroup( 1 )->numThreads;
 	}
-	bool ret = PsparseMsg::add( e2.element(), "spike", &syn, "addSpike", 
+	bool ret = PsparseMsg::add( e2.element(), "spike", syn, "addSpike", 
 		connectionProbability, numThreads ); // Include group id as an arg. 
 	assert( ret );
 
-	unsigned int nd = syn.numData();
+	unsigned int nd = syn->dataHandler()->numData();
 //	cout << "Num Syn = " << nd << endl;
 	assert( nd == NUMSYN );
 	vector< double > temp( size, 0.0 );
@@ -227,7 +235,7 @@ void testThreadIntFireNetwork()
 	vector< double > delay;
 	delay.reserve( nd );
 	for ( unsigned int i = 0; i < size; ++i ) {
-		unsigned int numSyn = syne.element()->numData2( i );
+		unsigned int numSyn = syne.element()->dataHandler()->numData2( i );
 		for ( unsigned int j = 0; j < numSyn; ++j ) {
 			weight.push_back( mtrand() * weightMax );
 			delay.push_back( mtrand() * delayMax );
@@ -240,7 +248,7 @@ void testThreadIntFireNetwork()
 
 	// printGrid( i2(), "Vm", 0, thresh );
 	Element* se = Id()();
-	Shell* s = reinterpret_cast< Shell* >( se->data( 0 ) );
+	Shell* s = reinterpret_cast< Shell* >( se->dataHandler()->data( 0 ) );
 	s->setclock( 0, timestep, 0 );
 
 	Element* ticke = Id( 2 )();
@@ -249,8 +257,8 @@ void testThreadIntFireNetwork()
 	ret = SingleMsg::add( er0, "process0", e2, "process" );
 	assert( ret );
 
-	IntFire* ifire100 = reinterpret_cast< IntFire* >( e2.element()->data( 100 ) );
-	IntFire* ifire900 = reinterpret_cast< IntFire* >( e2.element()->data( 900 ) );
+	IntFire* ifire100 = reinterpret_cast< IntFire* >( e2.element()->dataHandler()->data( 100 ) );
+	IntFire* ifire900 = reinterpret_cast< IntFire* >( e2.element()->dataHandler()->data( 900 ) );
 
 	s->start( timestep * runsteps );
 	assert( fabs( ifire100->getVm() - Vm100 ) < 1e-6 );

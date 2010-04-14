@@ -48,7 +48,7 @@ const Cinfo* Synapse::initCinfo()
 		0, // No base class, but eventually I guess it will be neutral.
 		synapseFinfos,
 		sizeof( synapseFinfos ) / sizeof ( Finfo* ),
-		new FieldDinfo()
+		new Dinfo< Synapse >()
 	);
 
 	return &synapseCinfo;

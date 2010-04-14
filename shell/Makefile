@@ -22,7 +22,7 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 Shell.o:	Shell.h
-testShell.o:	Shell.h
+testShell.o:	Shell.h ../scheduling/Tick.h ../scheduling/testScheduling.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I.. -I../basecode $< -c

@@ -70,7 +70,7 @@ class Cinfo
 			 * is created. Scans through all Finfos as they are the ones to
 			 * manage such requests. Examples are to create FieldElements.
 			 */
-			void postCreationFunc( Id newId, Element* newElm );
+			void postCreationFunc( Id newId, Element* newElm ) const;
 
 			/**
 			 * Registers a finfo as needing post-creation work

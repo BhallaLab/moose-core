@@ -26,7 +26,7 @@ class ZeroDimHandler: public DataHandler
 		/**
 		 * calls process on data, using threading info from the ProcInfo
 		 */
-		void process( const ProcInfo* p, Element* e );
+		void process( const ProcInfo* p, Element* e ) const;
 
 		/**
 		 * Returns the data on the specified index.

@@ -35,6 +35,11 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		~FieldDataHandler()
 		{;}
 
+		void process( const ProcInfo* p, Element* e ) const 
+		{
+			; // Fields don't do independent process?
+		}
+
 		/**
 		 * Returns the data on the specified index.
 		 */
@@ -60,6 +65,7 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 			{
 				return data_ + ( index.data() - start_ ) * dinfo()->size();
 			}
+			return 0;
 		}
 
 		/**
@@ -146,11 +152,11 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		void getNumData2( vector< unsigned int >& sizes ) const
 		{
 			sizes.resize( 0 );
-			char* endData = data_ + size_ * dinfo().size();
+			char* endData = data_ + size_ * dinfo()->size();
 
 			for ( char* data = data_; 
 				data < endData; 
-				data += dinfo().size() )
+				data += dinfo()->size() )
 				sizes.push_back( ( ( reinterpret_cast< Parent* >( data ) )->*getNumField_ )() );
 		}
 

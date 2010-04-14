@@ -157,7 +157,7 @@ const Cinfo* Clock::initCinfo()
 	///////////////////////////////////////////////////////
 	// FieldElementFinfo definition for ticks.
 	///////////////////////////////////////////////////////
-		static FieldElementFinfo< Clock, Tick > tickInfo( "tick",
+		static FieldElementFinfo< Clock, Tick > tickFinfo( "tick",
 			"Sets up field Elements for Tick",
 			Tick::initCinfo(),
 			&Clock::getTick,
@@ -425,7 +425,7 @@ void* Clock::threadStartFunc( void* threadInfo )
 	ThreadInfo* ti = reinterpret_cast< ThreadInfo* >( threadInfo );
 	Id clockId( 1 );
 	Element* clocke = clockId();
-	Clock* clock = reinterpret_cast< Clock* >( clocke->data( 0 ) );
+	Clock* clock = reinterpret_cast< Clock* >( clocke->dataHandler()->data( 0 ) );
 	Eref clocker( clockId.eref() );
 	// cout << "Start thread " << ti->threadId << " threadIndex in Group " << ti->threadIndexInGroup << endl;
 	clock->tStart( clocker, ti );

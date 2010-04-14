@@ -581,7 +581,7 @@ const char* Shell::buf()
 	static Id shellid;
 	static Element* shell = shellid();
 	assert( shell );
-	return (reinterpret_cast< Shell* >(shell->data( 0 )) )->getBuf();
+	return (reinterpret_cast< Shell* >(shell->dataHandler()->data( 0 )) )->getBuf();
 }
 
 void Shell::setclock( unsigned int tickNum, double dt, unsigned int stage )

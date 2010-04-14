@@ -23,7 +23,7 @@ OneDimHandler::~OneDimHandler() {
 /**
  * Handles both the thread and node decomposition
  */
-void OneDimHandler::process( const ProcInfo* p, Element* e )
+void OneDimHandler::process( const ProcInfo* p, Element* e ) const
 {
 	unsigned int startIndex =
 		( ( end_ - start_ ) * p->threadIndexInGroup ) /

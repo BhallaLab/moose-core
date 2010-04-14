@@ -68,10 +68,10 @@ class Shell: public Data
 
 		void create( Eref e, const Qinfo* q, 
 			string type, Id parent, Id newElm, string name,
-			vector< unsigned int > );
+			vector< unsigned int > dimensions );
 		void destroy( Eref e, const Qinfo* q, Id eid);
 		void innerCreate( string type, Id parent, Id newElm, string name,
-			unsigned int numEntries );
+			const vector< unsigned int >& dimensions );
 		void addmsg( Id src, Id dest, string srcfield, string destfield );
 
 		const char* getBuf() const;

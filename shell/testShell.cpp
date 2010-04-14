@@ -131,7 +131,7 @@ void testInterNodeOps()
 		shell->passThroughMsgQs( sheller.element() );
 	}
 	cout << shell->myNode() << ": testInterNodeOps: #entries = " <<
-		child()->numData() << endl;
+		child()->dataHandler()->numData() << endl;
 
 	child.destroy();
 	cout << "." << flush;

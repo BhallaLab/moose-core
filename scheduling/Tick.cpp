@@ -122,7 +122,7 @@ const Cinfo* Tick::initCinfo()
 		0,
 		tickFinfos,
 		sizeof(tickFinfos) / sizeof(Finfo *),
-		new FieldDinfo()
+		new Dinfo< Tick >()
 	);
 
 	return &tickCinfo;

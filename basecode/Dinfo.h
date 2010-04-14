@@ -17,7 +17,7 @@ class DinfoBase
 		{;}
 		virtual ~DinfoBase()
 		{;}
-		virtual Data* allocData( unsigned int numData ) const = 0;
+		virtual char* allocData( unsigned int numData ) const = 0;
 		virtual void destroyData( char* d ) const = 0;
 		virtual unsigned int size() const = 0;
 		/*
@@ -35,11 +35,11 @@ template< class D > class Dinfo: public DinfoBase
 	public:
 		Dinfo()
 		{;}
-		Data* allocData( unsigned int numData ) const {
+		char* allocData( unsigned int numData ) const {
 			if ( numData == 0 )
 				return 0;
 			else 
-				return new D[ numData ];
+				return reinterpret_cast< char* >( new D[ numData ] );
 		}
 
 		void destroyData( char* d ) const {
@@ -73,7 +73,6 @@ template< class D > class Dinfo: public DinfoBase
 /**
  * This is used for derived classes of Elements made to manage fields,
  * such as synapses. These fields don't need to be allocated.
- */
 class FieldDinfo: public DinfoBase
 {
 	public:
@@ -94,5 +93,6 @@ class FieldDinfo: public DinfoBase
 			return dynamic_cast< const FieldDinfo* >( other );
 		}
 };
+ */
 
 #endif // _DINFO_H

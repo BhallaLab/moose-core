@@ -52,7 +52,7 @@ void Shell::launchMsgLoop( Element* shelle )
 void* Shell::msgLoop( void* shellePtr )
 {
 	Element* shelle = reinterpret_cast< Element* >( shellePtr );
-	Shell* shell = reinterpret_cast< Shell* >( shelle->data( 0 ) );
+	Shell* shell = reinterpret_cast< Shell* >( shelle->dataHandler()->data( 0 ) );
 	while ( !shell->getQuit() ) {
 		// Put in a condition_wait here in case we have to sync with the
 		// Clock. The idea is that if the clock gets going, this
@@ -333,7 +333,7 @@ void Shell::start( double runtime )
 	if ( isSingleThreaded_ ) {
 		// SetGet< double >::set( clocke, runTime );
 		// clock->start( clocke, &q, runTime );
-		Clock *clock = reinterpret_cast< Clock* >( clocke->data( 0 ) );
+		Clock *clock = reinterpret_cast< Clock* >( clocke->dataHandler()->data( 0 ) );
 		clock->start( clockId.eref(), &q, runtime );
 		return;
 	}
@@ -362,7 +362,7 @@ void Shell::start( double runtime )
 		cout << "Error: Shell::start: Unable to init barrier\n";
 		exit( -1 );
 	}
-	Clock* clock = reinterpret_cast< Clock* >( clocke->data( 0 ) );
+	Clock* clock = reinterpret_cast< Clock* >( clocke->dataHandler()->data( 0 ) );
 	clock->setBarrier( &barrier );
 	barrier_ = &barrier;
 	clock->setNumPendingThreads( 0 ); // Used for clock scheduling

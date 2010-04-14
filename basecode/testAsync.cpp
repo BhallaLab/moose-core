@@ -392,7 +392,7 @@ void testSetGetVec()
 {
 	static const double EPSILON = 1e-9;
 	const Cinfo* ic = IntFire::initCinfo();
-	const Cinfo* sc = Synapse::initCinfo();
+	// const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 100;
 	vector< unsigned int > dims( 1, size );
 	string arg;
@@ -401,9 +401,13 @@ void testSetGetVec()
 	Element* temp = new Element( i2, ic, "test2", dims );
 	assert( temp );
 //	SynElement syn( sc, i2() );
-	FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
+	// FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
+	Id synId( i2.value() + 1 );
+	Element* syn = synId();
+	assert ( syn != 0 );
+	assert ( syn->name() == "synapse" );
 
-	assert( syn.numData() == 0 );
+	assert( syn->dataHandler()->numData() == 0 );
 	vector< unsigned int > numSyn( size, 0 );
 	for ( unsigned int i = 0; i < size; ++i )
 		numSyn[i] = i;
@@ -412,7 +416,7 @@ void testSetGetVec()
 	// Here we test setting a 1-D vector
 	bool ret = Field< unsigned int >::setVec( e2, "numSynapses", numSyn );
 	assert( ret );
-	unsigned int nd = syn.numData();
+	unsigned int nd = syn->dataHandler()->numData();
 	assert( nd == ( size * (size - 1) ) / 2 );
 	// cout << "NumSyn = " << nd << endl;
 	
@@ -425,12 +429,12 @@ void testSetGetVec()
 		}
 	}
 
-	Eref se( &syn, 0 );
+	Eref se( syn, 0 );
 	ret = Field< double >::setVec( se, "delay", delay );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		for ( unsigned int j = 0; j < i; ++j ) {
 			DataId di( i, j );
-			Eref syne( &syn, di );
+			Eref syne( syn, di );
 			double temp = i * 1000 + j ;
 			assert( 
 			fabs ( reinterpret_cast< Synapse* >(syne.data())->getDelay() - temp ) <
@@ -448,7 +452,7 @@ void testSendSpike()
 	static const double TAU = 1.0;
 	static const double DT = 0.1;
 	const Cinfo* ic = IntFire::initCinfo();
-	const Cinfo* sc = Synapse::initCinfo();
+	// const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 100;
 	vector< unsigned int > dims( 1, size );
 	string arg;
@@ -458,18 +462,22 @@ void testSendSpike()
 	assert( temp );
 	Eref e2 = i2.eref();
 	//SynElement syn( sc, i2() );
-	FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
+	// FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
+	Id synId( i2.value() + 1 );
+	Element* syn = synId();
+	assert ( syn != 0 );
+	assert ( syn->name() == "synapse" );
 
-	assert( syn.numData() == 0 );
+	assert( syn->dataHandler()->numData() == 0 );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref er( i2(), i );
 		bool ret = Field< unsigned int >::set( er, "numSynapses", i );
 		assert( ret );
 	}
-	assert( syn.numData() == ( size * (size - 1) ) / 2 );
+	assert( syn->dataHandler()->numData() == ( size * (size - 1) ) / 2 );
 
 	DataId di( 1, 0 ); // DataId( data, field )
-	Eref syne( &syn, di );
+	Eref syne( syn, di );
 	reinterpret_cast< Synapse* >(syne.data())->setWeight( WEIGHT );
 
 	bool ret = SingleMsg::add( e2, "spike", syne, "addSpike" );
@@ -618,12 +626,12 @@ void testSparseMatrixBalance()
 void printGrid( Element* e, const string& field, double min, double max )
 {
 	static string icon = " .oO@";
-	unsigned int yside = sqrt( double ( e->numData() ) );
-	unsigned int xside = e->numData() / yside;
-	if ( e->numData() % yside > 0 )
+	unsigned int yside = sqrt( double ( e->dataHandler()->numData() ) );
+	unsigned int xside = e->dataHandler()->numData() / yside;
+	if ( e->dataHandler()->numData() % yside > 0 )
 		xside++;
 	
-	for ( unsigned int i = 0; i < e->numData(); ++i ) {
+	for ( unsigned int i = 0; i < e->dataHandler()->numData(); ++i ) {
 		if ( ( i % xside ) == 0 )
 			cout << endl;
 		Eref er( e, i );
@@ -653,7 +661,7 @@ void testSparseMsg()
 	static const double connectionProbability = 0.1;
 	static const unsigned int runsteps = 5;
 	const Cinfo* ic = IntFire::initCinfo();
-	const Cinfo* sc = Synapse::initCinfo();
+	// const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 1024;
 	vector< unsigned int > dims( 1, size );
 	string arg;
@@ -665,18 +673,22 @@ void testSparseMsg()
 	Element* t2 = new Element( i2, ic, "test2", dims );
 	assert( t2 );
 	Eref e2 = i2.eref();
-	FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
+	// FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
+	Id synId( i2.value() + 1 );
+	Element* syn = synId();
+	assert ( syn != 0 );
+	assert ( syn->name() == "synapse" );
 
-	assert( syn.numData() == 0 );
+	assert( syn->dataHandler()->numData() == 0 );
 
 	DataId di( 1, 0 ); // DataId( data, field )
-	Eref syne( &syn, di );
+	Eref syne( syn, di );
 
-	bool ret = SparseMsg::add( e2.element(), "spike", &syn, "addSpike", 
+	bool ret = SparseMsg::add( e2.element(), "spike", syn, "addSpike", 
 		connectionProbability );
 	assert( ret );
 
-	unsigned int nd = syn.numData();
+	unsigned int nd = syn->dataHandler()->numData();
 //	cout << "Num Syn = " << nd << endl;
 	assert( nd == NUMSYN );
 	vector< double > temp( size, 0.0 );
@@ -703,7 +715,7 @@ void testSparseMsg()
 	vector< double > delay;
 	delay.reserve( nd );
 	for ( unsigned int i = 0; i < size; ++i ) {
-		unsigned int numSyn = syne.element()->numData2( i );
+		unsigned int numSyn = syne.element()->dataHandler()->numData2( i );
 		for ( unsigned int j = 0; j < numSyn; ++j ) {
 			weight.push_back( mtrand() * weightMax );
 			delay.push_back( mtrand() * delayMax );
@@ -753,9 +765,9 @@ void testUpValue()
 {
 	static const double EPSILON = 1e-9;
 	const Cinfo* cc = Clock::initCinfo();
-	const Cinfo* tc = Tick::initCinfo();
+	// const Cinfo* tc = Tick::initCinfo();
 	unsigned int size = 10;
-	vector< unsigned int > dims( 1, 1 )
+	vector< unsigned int > dims( 1, 1 );
 	Id clock = Id::nextId();
 	// bool ret = cc->create( clock, "clock", 1 );
 	Element* temp = new Element( clock, cc, "clock", dims );
@@ -763,17 +775,21 @@ void testUpValue()
 
 	Eref clocker = clock.eref();
 	//SynElement syn( sc, i2() );
-	FieldElement< Tick, Clock, &Clock::getTick > ticke( tc, clock(), &Clock::getNumTicks, &Clock::setNumTicks );
+	// FieldElement< Tick, Clock, &Clock::getTick > ticke( tc, clock(), &Clock::getNumTicks, &Clock::setNumTicks );
+	Id tickId( clock.value() + 1 );
+	Element* ticke = tickId();
+	assert ( ticke != 0 );
+	assert ( ticke->name() == "tick" );
 
-	assert( ticke.numData() == 0 );
+	assert( ticke->dataHandler()->numData() == 0 );
 	bool ret = Field< unsigned int >::set( clocker, "numTicks", size );
 	assert( ret );
-	assert( ticke.numData() == size );
+	assert( ticke->dataHandler()->numData() == size );
 
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		DataId di( 0, i ); // DataId( data, field )
-		Eref te( &ticke, di );
+		Eref te( ticke, di );
 		double dt = i;
 		ret = Field< double >::set( te, "dt", dt );
 		assert( ret );
@@ -875,9 +891,10 @@ void testSharedMsg()
 	Id t1 = Id::nextId();
 	Id t2 = Id::nextId();
 	// bool ret = Test::initCinfo()->create( t1, "test1", 1 );
-	Element* temp = new Element( t1, Test::initCinfo(), "test1", 1 );
+	vector< unsigned int > dims( 1, 1 );
+	Element* temp = new Element( t1, Test::initCinfo(), "test1", dims );
 	assert( temp );
-	temp = new Element( t2, Test::initCinfo(), "test2", 1 );
+	temp = new Element( t2, Test::initCinfo(), "test2", dims );
 	// ret = Test::initCinfo()->create( t2, "test2", 1 );
 	assert( temp );
 
