@@ -10,6 +10,7 @@
 #include "moose.h"
 #include "biophysics/Compartment.h"
 #include "biophysics/SpikeGen.h"
+#include "biophysics/CaConc.h"
 #include <queue>
 #include "biophysics/SynInfo.h"
 #include "biophysics/SynChan.h"
@@ -58,9 +59,9 @@ void HSolveActive::solve( ProcInfo info ) {
 	HSolvePassive::backwardSubstitute( );
 	advanceCalcium( );
 	advanceSynChans( info );
-        // becomes unnecessary when sending Vm to all VmSrc targets
-        // sendSpikes( info );
-        sendComptVm();
+	
+	sendValues( );
+	sendSpikes( info );
 }
 
 void HSolveActive::calculateChannelCurrents( ) {
@@ -271,11 +272,6 @@ void HSolveActive::advanceSynChans( ProcInfo info ) {
 	return;
 }
 
-void HSolveActive::sendComptVm(){
-    for (unsigned int icomp = 0; icomp < compartmentId_.size(); ++ icomp){
-        send1<double>(compartmentId_[icomp].eref(), initCompartmentCinfo()->getSlot("VmSrc"), V_[ icomp ]);
-    }
-}
 void HSolveActive::sendSpikes( ProcInfo info ) {
 	vector< SpikeGenStruct >::iterator ispike;
 	for ( ispike = spikegen_.begin(); ispike != spikegen_.end(); ++ispike ) {
@@ -286,4 +282,32 @@ void HSolveActive::sendSpikes( ProcInfo info ) {
 		 */
 		::set< double >( ispike->elm_, spikeVmFinfo, V_[ ispike->compt_ ] );
 	}
+}
+
+/**
+ * This function dispatches state values via any source messages on biophysical
+ * objects which have been taken over.
+ */
+void HSolveActive::sendValues( ) {
+	static const Slot compartmentVmSrcSlot =
+		initCompartmentCinfo( )->getSlot( "VmSrc" );
+	static const Slot caConcConcSrcSlot =
+		initCaConcCinfo( )->getSlot( "concSrc" );
+	
+	for ( unsigned int i = 0; i < compartmentId_.size( ); ++i )
+		send1< double > (
+			compartmentId_[ i ].eref(),
+			compartmentVmSrcSlot,
+			V_[ i ]
+		);
+	
+	/*
+	 * Speed up this function by sending only from objects which have targets.
+	 */
+	for ( unsigned int i = 0; i < caConcId_.size( ); ++i )
+		send1< double > (
+			caConcId_[ i ].eref(),
+			caConcConcSrcSlot,
+			ca_[ i ]
+		);
 }
