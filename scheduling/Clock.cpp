@@ -69,7 +69,7 @@
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
 static SrcFinfo0 tickSrc( 
-		"tick",
+		"childTick",
 		"Parent of Tick element"
 	);
 
@@ -184,6 +184,7 @@ const Cinfo* Clock::initCinfo()
 		&stop,
 		&setupTick,
 		&reinit,
+		// FieldElementFinfo
 		&tickFinfo,
 	};
 	

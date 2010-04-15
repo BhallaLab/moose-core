@@ -29,7 +29,7 @@ void OneDimHandler::process( const ProcInfo* p, Element* e ) const
 		( ( end_ - start_ ) * p->threadIndexInGroup ) /
 			p->numThreadsInGroup;
 	unsigned int endIndex =
-		( ( end_ - start_ ) * p->threadIndexInGroup ) /
+		( ( end_ - start_ ) * ( 1 + p->threadIndexInGroup ) ) /
 			p->numThreadsInGroup;
 	
 	char* temp = data_ + startIndex * dinfo()->size();

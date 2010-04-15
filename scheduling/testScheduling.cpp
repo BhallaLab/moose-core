@@ -45,7 +45,7 @@ void setupTicks()
 	// FieldElement< Tick, Clock, &Clock::getTick > ticke( tc, clocke, &Clock::getNumTicks, &Clock::setNumTicks );
 	unsigned int size = 10;
 
-	bool ret = OneToAllMsg::add( clocker, "tick", ticke, "parent" );
+	bool ret = OneToAllMsg::add( clocker, "childTick", ticke, "parent" );
 	assert( ret );
 
 	assert( ticke->dataHandler()->numData() == 0 );
