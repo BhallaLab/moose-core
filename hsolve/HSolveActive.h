@@ -135,8 +135,9 @@ private:
 	void advanceCalcium( );
 	void advanceChannels( double dt );
 	void advanceSynChans( ProcInfo info );
-    	void sendSpikes( ProcInfo info );
-        void sendComptVm();
+	void sendSpikes( ProcInfo info );
+	void sendValues( );
+	
 	static const int INSTANT_X;
 	static const int INSTANT_Y;
 	static const int INSTANT_Z;
