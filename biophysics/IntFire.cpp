@@ -61,8 +61,8 @@ const Cinfo* IntFire::initCinfo()
 			"Sets up field Elements for synapse",
 			Synapse::initCinfo(),
 			&IntFire::getSynapse,
-			&IntFire::getNumSynapses,
-			&IntFire::setNumSynapses
+			&IntFire::setNumSynapses,
+			&IntFire::getNumSynapses
 		);
 
 	static Finfo* intFireFinfos[] = {

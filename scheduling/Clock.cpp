@@ -161,8 +161,8 @@ const Cinfo* Clock::initCinfo()
 			"Sets up field Elements for Tick",
 			Tick::initCinfo(),
 			&Clock::getTick,
-			&Clock::getNumTicks,
-			&Clock::setNumTicks
+			&Clock::setNumTicks,
+			&Clock::getNumTicks
 		);
 
 	static Finfo* clockFinfos[] =

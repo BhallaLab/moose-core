@@ -48,7 +48,7 @@ char* OneDimHandler::data( DataId index ) const {
 
 char* OneDimHandler::data1( DataId index ) const {
 	if ( isDataHere( index ) )
-		return data_ + index.data() - start_;
+		return data_ + ( index.data() - start_ ) * dinfo()->size();
 	return 0;
 }
 

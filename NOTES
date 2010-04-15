@@ -4390,3 +4390,5 @@ of a synapse on IntFire.
 15 April.
 Lots of headaches with the FieldDataHandler. I think it needs to embed the
 parent element's data handler. 
+Intermediate commit 1712.
+Done the embedding. Some more cleanups and progress into unit tests.

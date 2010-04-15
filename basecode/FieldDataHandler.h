@@ -22,10 +22,12 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 {
 	public:
 		FieldDataHandler( const DinfoBase* dinfo,
+			const DataHandler* parentDataHandler,
 			Field* ( Parent::*lookupField )( unsigned int ),
 			unsigned int ( Parent::*getNumField )() const,
 			void ( Parent::*setNumField )( unsigned int num ) )
 			: DataHandler( dinfo ),
+				parentDataHandler_( parentDataHandler ),
 				lookupField_( lookupField ),
 				getNumField_( getNumField ),
 				setNumField_( setNumField )
@@ -45,10 +47,9 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		 */
 		char* data( DataId index ) const
 		{
-			if ( isDataHere( index ) ) {
-				Field* s = ( ( reinterpret_cast< Parent* >( 
-					data_ + ( index.data() - start_ ) * 
-						sizeof( Parent ) ) )->*lookupField_ )( index.field() );
+			char* pa = parentDataHandler_->data( index );
+			if ( pa ) {
+				Field* s = ( ( reinterpret_cast< Parent* >( pa ) )->*lookupField_ )( index.field() );
 				return reinterpret_cast< char* >( s );
 			}
 			return 0;
@@ -60,12 +61,7 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		 */
 		char* data1( DataId index ) const
 		{
-			assert( index.data() < size_ );
-			if ( isDataHere( index ) )
-			{
-				return data_ + ( index.data() - start_ ) * sizeof( Parent );
-			}
-			return 0;
+			return parentDataHandler_->data1( index );
 		}
 
 		/**
@@ -75,18 +71,28 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		 */
 		unsigned int numData() const {
 			unsigned int ret = 0;
-			char* endData = data_ + ( end_ - start_ ) * sizeof( Parent );
-			for ( char* data = data_; 
-					data < endData; data += sizeof( Parent ) )
-				ret += ( ( reinterpret_cast< Parent* >( data ) )->*getNumField_ )();
+			unsigned int size = parentDataHandler_->numData1();
+			unsigned int start = 
+				 ( size * Shell::myNode() ) / Shell::numNodes();
+			unsigned int end = 
+				 ( size * ( 1 + Shell::myNode() ) ) / Shell::numNodes();
+
+			for ( unsigned int i = start; i < end; ++i ) {
+				char* pa = parentDataHandler_->data1( i );
+				ret += ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
+			}
 			return ret;
 		}
 
 		/**
 		 * Returns the number of data entries in the whole object.
+		 * What is least surprising: To get the # of data entries of
+		 * the parent (current version) or to go one level nested and
+		 * get the # of field entries? In order to do the latter we need
+		 * an index, so I think it is out of the question.
 		 */
 		unsigned int numData1() const {
-			return size_;
+			return parentDataHandler_->numData1();
 		}
 
 		/**
@@ -96,9 +102,9 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		 */
 		unsigned int numData2( unsigned int index1 ) const
 		{
-			if ( index1 >= start_ && index1 < end_ ) {
-				return ( ( reinterpret_cast< Parent* >(
-					data_ + ( index1 - start_ ) * sizeof( Parent ) ) )->*getNumField_ )();
+			char* pa = parentDataHandler_->data1( index1 );
+			if ( pa ) {
+				return ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
 			}
 			return 0;
 		}
@@ -115,6 +121,7 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		 * be called here, but by the parent data Element.
 		 */
 		void setNumData1( unsigned int size ) {
+			cout << Shell::myNode() << ": FieldDataHandler::setNumData1: Error: Cannot set parent data size from Field\n";
 		/*
 			size_ = size;
 			unsigned int start = 
@@ -136,14 +143,17 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		 * Assigns the sizes of all array field entries at once.
 		 */
 		void setNumData2( const vector< unsigned int >& sizes ) {
-			char* endData = data_ + size_ * sizeof( Parent );
-			assert( sizes.size() == size_ );
-			vector< unsigned int >::const_iterator i = sizes.begin();
-			for ( char* data = data_; 
-				data < endData; 
-				data += sizeof( Parent )
-				)
-				( ( reinterpret_cast< Parent* >( data ) )->*setNumField_ )( *i++ );
+			unsigned int size = parentDataHandler_->numData1();
+			assert( sizes.size() == size );
+			unsigned int start = 
+				 ( size * Shell::myNode() ) / Shell::numNodes();
+			unsigned int end = 
+				 ( size * ( 1 + Shell::myNode() ) ) / Shell::numNodes();
+
+			for ( unsigned int i = start; i < end; ++i ) {
+				char* pa = parentDataHandler_->data1( i );
+				( ( reinterpret_cast< Parent* >( pa ) )->*setNumField_ )( sizes[i] );
+			}
 		}
 
 		/**
@@ -153,13 +163,18 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		void getNumData2( vector< unsigned int >& sizes ) const
 		{
 			sizes.resize( 0 );
-			char* endData = data_ + size_ * sizeof( Parent );
+			unsigned int size = parentDataHandler_->numData1();
+			unsigned int start = 
+				 ( size * Shell::myNode() ) / Shell::numNodes();
+			unsigned int end = 
+				 ( size * ( 1 + Shell::myNode() ) ) / Shell::numNodes();
 
-			for ( char* data = data_; 
-				data < endData; 
-				data += sizeof( Parent )
-				)
-				sizes.push_back( ( ( reinterpret_cast< Parent* >( data ) )->*getNumField_ )() );
+			for ( unsigned int i = start; i < end; ++i ) {
+				char* pa = parentDataHandler_->data1( i );
+				sizes.push_back( 
+				( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )()
+				);
+			}
 		}
 
 		/**
@@ -167,11 +182,11 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		 * current node
 		 */
 		bool isDataHere( DataId index ) const {
-			return ( index.data() >= start_ && index.data() < end_ );
+			return parentDataHandler_->isDataHere( index );
 		}
 
 		bool isAllocated() const {
-			return (data_ != 0 );
+			return parentDataHandler_->isAllocated();
 		}
 
 		/**
@@ -189,9 +204,12 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 
 	private:
 		char* data_;
+		const DataHandler* parentDataHandler_;
+		/*
 		unsigned int size_;	// Number of data entries in the whole array
 		unsigned int start_;	// Starting index of data, used in MPI.
 		unsigned int end_;	// Starting index of data, used in MPI.
+		*/
 		Field* ( Parent::*lookupField_ )( unsigned int );
 		unsigned int ( Parent::*getNumField_ )() const;
 		void ( Parent::*setNumField_ )( unsigned int num );
