@@ -20,6 +20,8 @@ OBJ = \
 	Element.o	\
 	ZeroDimHandler.o \
 	OneDimHandler.o \
+	ZeroDimGlobalHandler.o \
+	OneDimGlobalHandler.o \
 	Eref.o	\
 	Finfo.o	\
 	DestFinfo.o	\
@@ -55,6 +57,8 @@ HEADERS = \
 	DataHandler.h \
 	ZeroDimHandler.h \
 	OneDimHandler.h \
+	ZeroDimGlobalHandler.h \
+	OneDimGlobalHandler.h \
 	FieldDataHandler.h \
 	Element.h \
 	Eref.h \

@@ -135,11 +135,41 @@ class DataHandler
 		 */
 		virtual void allocate() = 0;
 
+		/**
+		 * True if the data is global on all nodes
+		 */
+		virtual bool isGlobal() const = 0;
+
+		typedef unsigned int iterator; // the ++i and i++ operators are already known.
+
+		virtual iterator begin() const = 0;
+		virtual iterator end() const = 0;
+
 	protected:
 		const DinfoBase* dinfo() const
 		{
 			return dinfo_;
 		}
+
+		/**
+		 * Used to iterate over indices managed by DataHandler
+		 * to find those on the current node. A foreach would be nice.
+		class iterator {
+			public:
+				iterator( unsigned int start, const DataHandler *d )
+					: i( 0 )
+				{;}
+
+				iterator ++operator() {
+					return ++i;
+				}
+
+				iterator 
+			
+			private:
+				unsigned int i;
+		};
+		 */
 
 	private:
 		const DinfoBase* dinfo_;

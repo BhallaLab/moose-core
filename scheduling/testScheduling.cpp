@@ -32,7 +32,8 @@ void setupTicks()
 	// const Cinfo* tc = Tick::initCinfo();
 	Id clock = Id::nextId();
 	vector< unsigned int > dims( 1, 1 );
-	Element* clocke = new Element( clock, Clock::initCinfo(), "tclock", dims );
+	Element* clocke = new Element( clock, Clock::initCinfo(), "tclock",
+		dims, 1 );
 	assert( clocke );
 	// bool ret = Clock::initCinfo()->create( clock, "tclock", 1 );
 	// assert( ret );
@@ -49,8 +50,13 @@ void setupTicks()
 	assert( ret );
 
 	assert( ticke->dataHandler()->numData() == 0 );
-	ret = Field< unsigned int >::set( clocker, "numTicks", size );
+
+	// ret = Field< unsigned int >::set( clocker, "numTicks", size );
+	Clock* clockData = reinterpret_cast< Clock* >( clocker.data() );
+	clockData->setNumTicks( size );
+
 	assert( ret );
+	cout << Shell::myNode() << ": numTicks: " << ticke->dataHandler()->numData() << ", " << size << endl;
 	assert( ticke->dataHandler()->numData() == size );
 
 	Eref er0( ticke, DataId( 0, 2 ) );
@@ -126,7 +132,8 @@ void setupTicks()
 
 	cout << "." << flush;
 
-	delete clocke;
+	clock.destroy();
+	// tickId.destroy();
 }
 
 void testThreads()
@@ -266,7 +273,9 @@ void testThreadIntFireNetwork()
 
 	cout << "Done ThreadIntFireNetwork" << flush;
 	cout << "." << flush;
-	delete i2();
+	// delete i2();
+	i2.destroy();
+	// synId.destroy();
 }
 	
 

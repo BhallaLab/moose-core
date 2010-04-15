@@ -95,6 +95,19 @@ class OneDimHandler: public DataHandler
 
 		void allocate();
 
+		bool isGlobal() const
+		{
+			return 0;
+		}
+
+		iterator begin() const {
+			return start_;
+		}
+
+		iterator end() const {
+			return end_;
+		}
+
 	private:
 		char* data_;
 		unsigned int size_;	// Number of data entries in the whole array

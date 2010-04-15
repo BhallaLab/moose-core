@@ -18,7 +18,7 @@ void testArith()
 {
 	Id a1id = Id::nextId();
 	vector< unsigned int > dims( 1, 10 );
-	Element* a1 = new Element( a1id, Arith::initCinfo(), "a1", dims );
+	Element* a1 = new Element( a1id, Arith::initCinfo(), "a1", dims, 1 );
 
 	Eref a1_0( a1, 0 );
 	Eref a1_1( a1, 1 );

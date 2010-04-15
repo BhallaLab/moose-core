@@ -77,6 +77,8 @@ class Cinfo;
 #include "DataHandler.h"
 #include "ZeroDimHandler.h"
 #include "OneDimHandler.h"
+#include "ZeroDimGlobalHandler.h"
+#include "OneDimGlobalHandler.h"
 #include "Element.h"
 #include "Eref.h"
 #include "Conv.h"

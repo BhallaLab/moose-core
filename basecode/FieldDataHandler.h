@@ -35,7 +35,7 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		{;}
 
 		~FieldDataHandler()
-		{;}
+		{;} // Don't delete data because the parent Element should do so.
 
 		void process( const ProcInfo* p, Element* e ) const 
 		{
@@ -71,6 +71,13 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		 */
 		unsigned int numData() const {
 			unsigned int ret = 0;
+			for ( DataHandler::iterator i = parentDataHandler_->begin();
+				i != parentDataHandler_->end(); ++i ) {
+				char* pa = parentDataHandler_->data1( i );
+				ret += ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
+			}
+
+			/*
 			unsigned int size = parentDataHandler_->numData1();
 			unsigned int start = 
 				 ( size * Shell::myNode() ) / Shell::numNodes();
@@ -81,6 +88,7 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 				char* pa = parentDataHandler_->data1( i );
 				ret += ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
 			}
+			*/
 			return ret;
 		}
 
@@ -122,27 +130,19 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		 */
 		void setNumData1( unsigned int size ) {
 			cout << Shell::myNode() << ": FieldDataHandler::setNumData1: Error: Cannot set parent data size from Field\n";
-		/*
-			size_ = size;
-			unsigned int start = 
-				( size_ * Shell::myNode() ) / Shell::numNodes();
-			unsigned int end = 
-				( size_ * ( 1 + Shell::myNode() ) ) / Shell::numNodes();
-			if ( data_ && start == start && end == end_ ) // already done
-				return;
-			if ( data_ )
-				dinfo()->destroyData
-			data_ = reinterpret_cast< char* >(
-				dinfo()->allocData( end - start ) );
-			start_ = start;
-			end_ = end;
-			*/
 		}
 
 		/**
 		 * Assigns the sizes of all array field entries at once.
 		 */
 		void setNumData2( const vector< unsigned int >& sizes ) {
+			for ( DataHandler::iterator i = parentDataHandler_->begin();
+				i != parentDataHandler_->end(); ++i ) {
+				char* pa = parentDataHandler_->data1( i );
+				( ( reinterpret_cast< Parent* >( pa ) )->*setNumField_ )( sizes[i] );
+			}
+
+/*
 			unsigned int size = parentDataHandler_->numData1();
 			assert( sizes.size() == size );
 			unsigned int start = 
@@ -154,6 +154,7 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 				char* pa = parentDataHandler_->data1( i );
 				( ( reinterpret_cast< Parent* >( pa ) )->*setNumField_ )( sizes[i] );
 			}
+			*/
 		}
 
 		/**
@@ -163,6 +164,15 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		void getNumData2( vector< unsigned int >& sizes ) const
 		{
 			sizes.resize( 0 );
+			for ( DataHandler::iterator i = parentDataHandler_->begin();
+				i != parentDataHandler_->end(); ++i ) {
+				char* pa = parentDataHandler_->data1( i );
+				sizes.push_back( 
+				( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )()
+				);
+			}
+
+			/*
 			unsigned int size = parentDataHandler_->numData1();
 			unsigned int start = 
 				 ( size * Shell::myNode() ) / Shell::numNodes();
@@ -175,6 +185,7 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 				( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )()
 				);
 			}
+			*/
 		}
 
 		/**
@@ -194,22 +205,25 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		 * here.
 		 */
 		void allocate() {
-			/*
-			if ( data_ )
-				dinfo()->destroyData( data_ );
-			data_ = reinterpret_cast< char* >(
-				dinfo()->allocData( end_ - start_ ) );
-			*/
+			;
+		}
+
+		bool isGlobal() const
+		{
+			return parentDataHandler_->isGlobal();
+		}
+
+		iterator begin() const {
+			return 0;
+		}
+
+		// Don't want to permit iterating here, it will cause problems.
+		iterator end() const {
+			return 0;
 		}
 
 	private:
-		char* data_;
 		const DataHandler* parentDataHandler_;
-		/*
-		unsigned int size_;	// Number of data entries in the whole array
-		unsigned int start_;	// Starting index of data, used in MPI.
-		unsigned int end_;	// Starting index of data, used in MPI.
-		*/
 		Field* ( Parent::*lookupField_ )( unsigned int );
 		unsigned int ( Parent::*getNumField_ )() const;
 		void ( Parent::*setNumField_ )( unsigned int num );

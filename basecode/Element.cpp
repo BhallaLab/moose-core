@@ -10,12 +10,12 @@
 #include "header.h"
 
 Element::Element( Id id, const Cinfo* c, const string& name, 
-	const vector< unsigned int >& dimensions )
+	const vector< unsigned int >& dimensions, bool isGlobal )
 	:	name_( name ),
 		sendBuf_( 0 ), 
 		cinfo_( c ), 
 		msgBinding_( c->numBindIndex() )
-{ 
+{
 	unsigned int numRealDimensions = 0;
 
 	for ( unsigned int i = 0; i < dimensions.size(); ++i ) {
@@ -27,10 +27,16 @@ Element::Element( Id id, const Cinfo* c, const string& name,
 	}
 
 	if ( numRealDimensions == 0 ) {
-		dataHandler_ = new ZeroDimHandler( c->dinfo() );		
+		if ( isGlobal )
+			dataHandler_ = new ZeroDimGlobalHandler( c->dinfo() );
+		else
+			dataHandler_ = new ZeroDimHandler( c->dinfo() );
 		dataHandler_->allocate();
 	} else if ( numRealDimensions == 1 ) {
-		dataHandler_ = new OneDimHandler( c->dinfo() );		
+		if ( isGlobal )
+			dataHandler_ = new OneDimGlobalHandler( c->dinfo() );
+		else
+			dataHandler_ = new OneDimHandler( c->dinfo() );	
 		dataHandler_->setNumData1( dimensions[ 0 ] );
 	} else {
 		cout << "Don't yet have Two or higher DimHandler\n";
@@ -52,21 +58,6 @@ Element::Element( Id id, const Cinfo* c, const string& name,
 	id.bindIdToElement( this );
 	c->postCreationFunc( id, this );
 }
-
-/**
- * What is the point of this?
-Element::Element( const Cinfo* c, const Element* other )
-	: 	d_( other->d_ ), 
-		numData_( other->numData_ ), 
-		dataSize_( other->dataSize_),
-		dataStart_( other->dataStart_),
-		decomposition_( other->decomposition_ ),
-		sendBuf_( 0 ), cinfo_( c ),
-		msgBinding_( c->numBindIndex() )
-{
-	;
-}
- */
 
 Element::~Element()
 {

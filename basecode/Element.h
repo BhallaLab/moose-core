@@ -31,7 +31,8 @@ class Element
 		 */
 
 		Element( Id id, const Cinfo* c, const string& name,
-			const vector< unsigned int >& dimensions );
+			const vector< unsigned int >& dimensions, 
+			bool isGlobal = 0 );
 
 		Element( Id id, const Cinfo* c, const string& name,
 			DataHandler* dataHandler );
@@ -157,6 +158,9 @@ class Element
 	private:
 		string name_;
 
+		/**
+		 * This object stores and manages the actual data for the Element.
+		 */
 		DataHandler* dataHandler_;
 
 		/**

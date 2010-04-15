@@ -38,3 +38,9 @@ void ZeroDimHandler::allocate() {
 		dinfo()->destroyData( data_ );
 	data_ = reinterpret_cast< char* >( dinfo()->allocData( 1 ) );
 }
+
+DataHandler::iterator ZeroDimHandler::end() const
+{
+	// cout << Shell::myNode() << ": ZeroDimHandler Iterator\n";
+	return ( Shell::myNode() == 0 );
+}

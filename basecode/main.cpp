@@ -119,10 +119,10 @@ int main( int argc, char** argv )
 #ifdef DO_UNIT_TESTS
 #endif
 	cout << "testing: ";
-	testAsync();
+//	testAsync();
 	testScheduling( s->numNodes() > 1 );
 	testBuiltins( s->numNodes() > 1 );
-	testShell();
+//	testShell();
 	cout << endl;
 
 	ProcInfo p;

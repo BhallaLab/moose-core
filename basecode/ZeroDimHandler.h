@@ -106,7 +106,16 @@ class ZeroDimHandler: public DataHandler
 
 		void allocate();
 
-	protected:
+		bool isGlobal() const
+		{
+			return 0;
+		}
+
+		iterator begin() const {
+			return 0;
+		}
+
+		iterator end() const;
 
 	private:
 		char* data_;
