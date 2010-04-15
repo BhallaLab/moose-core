@@ -32,7 +32,7 @@ class IntFire: public Data
 		void setNumSynapses( unsigned int v );
 		unsigned int getNumSynapses() const;
 
-		Synapse* synapse( unsigned int i );
+		Synapse* getSynapse( unsigned int i );
 
 		////////////////////////////////////////////////////////////////
 		// Dest Func

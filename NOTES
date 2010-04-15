@@ -4379,3 +4379,14 @@ to register a PostCreationFunc with Cinfo, and this will be used when the
 parent Element is created, to make the FieldElement
 
 Checkin 1708, 1709 as an intermediate step while I work on this.
+Got the whole mess to compile. Doesn't clear tests. Checkin as 1711.
+
+Starting to clear it up. Practical question: Do we allocate
+data on the 'new Element' command or wait?
+
+Starting to get some unit tests to clear. Currently stuck with instantiation
+of a synapse on IntFire.
+=============================================================================
+15 April.
+Lots of headaches with the FieldDataHandler. I think it needs to embed the
+parent element's data handler. 

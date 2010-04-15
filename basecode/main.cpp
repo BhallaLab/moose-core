@@ -66,7 +66,7 @@ Id init( int argc, char** argv )
 #endif
 
 	Msg::initNull();
-	Id shellId = Id::nextId();
+	Id shellId;
 	vector< unsigned int > dims;
 	dims.push_back( 1 );
 	Element* shelle = 
@@ -77,6 +77,7 @@ Id init( int argc, char** argv )
 	// Clock::initCinfo()->create( clockId, "clock", 1 );
 	// Element* clocke = 
 		new Element( clockId, Clock::initCinfo(), "clock", dims );
+	// Clock::initCinfo()->postCreationFunc( clockId, clocke );
 	// Should put this initialization stuff within the Clock creation
 	// step. This means I need to add an optional init func into the Cinfo
 	// constructor, or to add the init func as a virtual func in Data.

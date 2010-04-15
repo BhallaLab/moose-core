@@ -48,7 +48,7 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 			if ( isDataHere( index ) ) {
 				Field* s = ( ( reinterpret_cast< Parent* >( 
 					data_ + ( index.data() - start_ ) * 
-						dinfo()->size() ) )->*lookupField_ )( index.field() );
+						sizeof( Parent ) ) )->*lookupField_ )( index.field() );
 				return reinterpret_cast< char* >( s );
 			}
 			return 0;
@@ -63,7 +63,7 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 			assert( index.data() < size_ );
 			if ( isDataHere( index ) )
 			{
-				return data_ + ( index.data() - start_ ) * dinfo()->size();
+				return data_ + ( index.data() - start_ ) * sizeof( Parent );
 			}
 			return 0;
 		}
@@ -75,9 +75,9 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		 */
 		unsigned int numData() const {
 			unsigned int ret = 0;
-			char* endData = data_ + ( end_ - start_ ) * dinfo()->size();
+			char* endData = data_ + ( end_ - start_ ) * sizeof( Parent );
 			for ( char* data = data_; 
-					data < endData; data += dinfo()->size() )
+					data < endData; data += sizeof( Parent ) )
 				ret += ( ( reinterpret_cast< Parent* >( data ) )->*getNumField_ )();
 			return ret;
 		}
@@ -98,7 +98,7 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		{
 			if ( index1 >= start_ && index1 < end_ ) {
 				return ( ( reinterpret_cast< Parent* >(
-					data_ + ( index1 - start_ ) * dinfo()->size() ) )->*getNumField_ )();
+					data_ + ( index1 - start_ ) * sizeof( Parent ) ) )->*getNumField_ )();
 			}
 			return 0;
 		}
@@ -136,13 +136,14 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		 * Assigns the sizes of all array field entries at once.
 		 */
 		void setNumData2( const vector< unsigned int >& sizes ) {
-			char* endData = data_ + size_ * dinfo()->size();
+			char* endData = data_ + size_ * sizeof( Parent );
 			assert( sizes.size() == size_ );
 			vector< unsigned int >::const_iterator i = sizes.begin();
 			for ( char* data = data_; 
 				data < endData; 
-				data += dinfo()->size() )
-			( ( reinterpret_cast< Parent* >( data ) )->*setNumField_ )( *i++ );
+				data += sizeof( Parent )
+				)
+				( ( reinterpret_cast< Parent* >( data ) )->*setNumField_ )( *i++ );
 		}
 
 		/**
@@ -152,11 +153,12 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		void getNumData2( vector< unsigned int >& sizes ) const
 		{
 			sizes.resize( 0 );
-			char* endData = data_ + size_ * dinfo()->size();
+			char* endData = data_ + size_ * sizeof( Parent );
 
 			for ( char* data = data_; 
 				data < endData; 
-				data += dinfo()->size() )
+				data += sizeof( Parent )
+				)
 				sizes.push_back( ( ( reinterpret_cast< Parent* >( data ) )->*getNumField_ )() );
 		}
 
@@ -177,10 +179,12 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		 * here.
 		 */
 		void allocate() {
+			/*
 			if ( data_ )
 				dinfo()->destroyData( data_ );
 			data_ = reinterpret_cast< char* >(
 				dinfo()->allocData( end_ - start_ ) );
+			*/
 		}
 
 	private:

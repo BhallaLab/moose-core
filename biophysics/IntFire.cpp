@@ -55,8 +55,15 @@ const Cinfo* IntFire::initCinfo()
 			new EpFunc1< IntFire, ProcPtr >( &IntFire::eprocess ) );
 
 		//////////////////////////////////////////////////////////////
-		// MsgSrc Definitions
+		// FieldElementFinfo definition for Synapses
 		//////////////////////////////////////////////////////////////
+		static FieldElementFinfo< IntFire, Synapse > synFinfo( "synapse",
+			"Sets up field Elements for synapse",
+			Synapse::initCinfo(),
+			&IntFire::getSynapse,
+			&IntFire::getNumSynapses,
+			&IntFire::setNumSynapses
+		);
 
 	static Finfo* intFireFinfos[] = {
 		&Vm,	// Value
@@ -66,6 +73,7 @@ const Cinfo* IntFire::initCinfo()
 		&numSynapses,			// Value
 		&process,				// DestFinfo
 		&spike, // MsgSrc
+		&synFinfo		// FieldElementFinfo for synapses.
 	};
 
 	static Cinfo intFireCinfo (
@@ -270,7 +278,7 @@ unsigned int IntFire::getNumSynapses() const
 	return synapses_.size();
 }
 
-Synapse* IntFire::synapse( unsigned int i )
+Synapse* IntFire::getSynapse( unsigned int i )
 {
 	return &synapses_[i];
 }

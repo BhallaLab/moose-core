@@ -465,8 +465,8 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 			return;
 		}
 		cout << myNode_ << ": Shell::innerCreate newElmId= " << newElm << endl;
-		Element* ret = new Element( newElm, c, name, dimensions );
-		c->postCreationFunc( newElm, ret );
+	//	Element* ret = 
+		new Element( newElm, c, name, dimensions );
 		//ret = c->create( newElm, name, n, Element::Decomposition::Block );
 	} else {
 		stringstream ss;

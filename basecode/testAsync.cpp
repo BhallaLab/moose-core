@@ -357,8 +357,12 @@ void testSetGetSynapse()
 
 	Id synId( i2.value() + 1 );
 	Element* syn = synId();
+
+	// Element should exist even if data doesn't
 	assert ( syn != 0 );
-	assert ( syn->name() == "synapse" );
+	assert ( syn->name() == "synapse" ); 
+
+	assert( syn->dataHandler()->data( 0 ) == 0 );
 
 	// SynElement syn( sc, i2() );
 	// FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );

@@ -28,6 +28,7 @@ Element::Element( Id id, const Cinfo* c, const string& name,
 
 	if ( numRealDimensions == 0 ) {
 		dataHandler_ = new ZeroDimHandler( c->dinfo() );		
+		dataHandler_->allocate();
 	} else if ( numRealDimensions == 1 ) {
 		dataHandler_ = new OneDimHandler( c->dinfo() );		
 		dataHandler_->setNumData1( dimensions[ 0 ] );
@@ -37,6 +38,7 @@ Element::Element( Id id, const Cinfo* c, const string& name,
 	}
 
 	id.bindIdToElement( this );
+	c->postCreationFunc( id, this );
 }
 
 Element::Element( Id id, const Cinfo* c, const string& name, 
@@ -47,7 +49,8 @@ Element::Element( Id id, const Cinfo* c, const string& name,
 		cinfo_( c ), 
 		msgBinding_( c->numBindIndex() )
 {
-	;
+	id.bindIdToElement( this );
+	c->postCreationFunc( id, this );
 }
 
 /**

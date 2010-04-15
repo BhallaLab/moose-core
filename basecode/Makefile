@@ -55,6 +55,7 @@ HEADERS = \
 	DataHandler.h \
 	ZeroDimHandler.h \
 	OneDimHandler.h \
+	FieldDataHandler.h \
 	Element.h \
 	Eref.h \
 	Finfo.h \
