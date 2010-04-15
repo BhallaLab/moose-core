@@ -484,9 +484,11 @@ void testSynChan()
 	ret = set< double >( sg1, "threshold", 0.0 );
 	ret = set< double >( sg1, "refractT", 1.0 );
 	ret = set< double >( sg1, "amplitude", 1.0 );
+	ret = set< int >( sg1, "edgeTriggered", 0 );
 	ret = set< double >( sg2, "threshold", 0.0 );
 	ret = set< double >( sg2, "refractT", 1.0 );
 	ret = set< double >( sg2, "amplitude", 1.0 );
+	ret = set< int >( sg2, "edgeTriggered", 0 );
 	SpikeGen::reinitFunc( &csg1, &p );
 	SpikeGen::reinitFunc( &csg2, &p );
 
