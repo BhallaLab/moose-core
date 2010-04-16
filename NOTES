@@ -4409,3 +4409,6 @@ commands because creations are on only one node. Modest progress in
 fixing. Checkin 1717
 
 =============================================================================
+16 April
+Now unit tests work. Put in global Element construction for all testAsync tests,
+and it seemed to come together painlessly. Checkin 1718.

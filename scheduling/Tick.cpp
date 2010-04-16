@@ -280,7 +280,7 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 	if ( info->isMpiThread ) {
 		mpiAdvance( info );
 	} else {
-		cout << info->nodeIndexInGroup << ", " << info->threadId << ": Tick::advance (" << dt_ << ", " << stage_ << " ) at t= " << info->currTime << endl;
+		// cout << info->nodeIndexInGroup << ", " << info->threadId << ": Tick::advance (" << dt_ << ", " << stage_ << " ) at t= " << info->currTime << endl;
 
 	/**
 	 * This barrier pair protects the inQ from being accessed for reading, 

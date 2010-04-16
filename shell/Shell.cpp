@@ -464,7 +464,7 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 			ss << "create: Parent Element'" << parent << "' not found. No Element created";
 			return;
 		}
-		cout << myNode_ << ": Shell::innerCreate newElmId= " << newElm << endl;
+		// cout << myNode_ << ": Shell::innerCreate newElmId= " << newElm << endl;
 	//	Element* ret = 
 		new Element( newElm, c, name, dimensions );
 		//ret = c->create( newElm, name, n, Element::Decomposition::Block );

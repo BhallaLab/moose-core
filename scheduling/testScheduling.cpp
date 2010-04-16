@@ -56,7 +56,7 @@ void setupTicks()
 	clockData->setNumTicks( size );
 
 	assert( ret );
-	cout << Shell::myNode() << ": numTicks: " << ticke->dataHandler()->numData() << ", " << size << endl;
+	// cout << Shell::myNode() << ": numTicks: " << ticke->dataHandler()->numData() << ", " << size << endl;
 	assert( ticke->dataHandler()->numData() == size );
 
 	Eref er0( ticke, DataId( 0, 2 ) );
@@ -167,7 +167,7 @@ void testThreads()
 	SingleMsg m5( er5, ts ); er5.element()->addMsgAndFunc( m5.mid(), f, 5 );
 	s->start( 10 );
 
-	cout << "Done TestThreads" << flush;
+	// cout << "Done TestThreads" << flush;
 	cout << "." << flush;
 }
 
@@ -271,7 +271,7 @@ void testThreadIntFireNetwork()
 	assert( fabs( ifire100->getVm() - Vm100 ) < 1e-6 );
 	assert( fabs( ifire900->getVm() - Vm900 ) < 1e-6 );
 
-	cout << "Done ThreadIntFireNetwork" << flush;
+	// cout << "Done ThreadIntFireNetwork" << flush;
 	cout << "." << flush;
 	// delete i2();
 	i2.destroy();

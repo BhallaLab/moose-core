@@ -50,7 +50,7 @@ void testShellParserCreateDelete()
 
 	if ( shell->myNode() != 0 ) {
 		Id child = Id::nextId();
-		cout << shell->myNode() << " testShellParserCreateDelete: child=" << child << endl;
+		// cout << shell->myNode() << " testShellParserCreateDelete: child=" << child << endl;
 		while ( !child() ) // Wait till it is created
 			shell->passThroughMsgQs( sheller.element() );
 		while ( child() ) // Wait till it is destroyed
@@ -63,7 +63,7 @@ void testShellParserCreateDelete()
 	vector< unsigned int > dimensions;
 	dimensions.push_back( 1 );
 	Id child = shell->doCreate( "Neutral", Id(), "test", dimensions );
-	cout << shell->myNode() << " testShellParserCreateDelete: child=" << child << endl;
+	// cout << shell->myNode() << " testShellParserCreateDelete: child=" << child << endl;
 
 	shell->doDelete( child );
 //	shell->doQuit( );
@@ -130,8 +130,7 @@ void testInterNodeOps()
 			shell->passThroughMsgQs( sheller.element() );
 		shell->passThroughMsgQs( sheller.element() );
 	}
-	cout << shell->myNode() << ": testInterNodeOps: #entries = " <<
-		child()->dataHandler()->numData() << endl;
+	// cout << shell->myNode() << ": testInterNodeOps: #entries = " << child()->dataHandler()->numData() << endl;
 
 	child.destroy();
 	cout << "." << flush;

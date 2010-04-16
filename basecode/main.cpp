@@ -55,14 +55,14 @@ Id init( int argc, char** argv )
 #ifdef USE_MPI
 	int provided;
 	MPI_Init_thread( &argc, &argv, MPI_THREAD_SERIALIZED, &provided );
-	if ( provided < MPI_THREAD_SERIALIZED ) {
-		cout << "Warning: This MPI implementation does not like multithreading: " << provided << "\n";
-	}
 
 	MPI_Comm_size( MPI_COMM_WORLD, &numNodes );
 	MPI_Comm_rank( MPI_COMM_WORLD, &myNode );
+	if ( provided < MPI_THREAD_SERIALIZED && myNode == 0 ) {
+		cout << "Warning: This MPI implementation does not like multithreading: " << provided << "\n";
+	}
 	// myNode = MPI::COMM_WORLD.Get_rank();
-	cout << "on node " << myNode << ", numNodes = " << numNodes << endl;
+	// cout << "on node " << myNode << ", numNodes = " << numNodes << endl;
 #endif
 
 	Msg::initNull();
@@ -118,12 +118,10 @@ int main( int argc, char** argv )
 	Shell* s = reinterpret_cast< Shell* >( shelle->dataHandler()->data( 0 ) );
 #ifdef DO_UNIT_TESTS
 #endif
-	cout << "testing: ";
 	testAsync();
 	testScheduling( s->numNodes() > 1 );
 	testBuiltins( s->numNodes() > 1 );
 	testShell();
-	cout << endl;
 
 	ProcInfo p;
 	// Actually here we should launch off the thread doing
