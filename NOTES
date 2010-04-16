@@ -4412,3 +4412,9 @@ fixing. Checkin 1717
 16 April
 Now unit tests work. Put in global Element construction for all testAsync tests,
 and it seemed to come together painlessly. Checkin 1718.
+Minor cleanup of printf debugging. Checkin 1719.
+
+Converted the Fibonacci test in builtins to run multinode. It works!!!
+Tried different # of nodes, automatically does it right.
+
+=============================================================================

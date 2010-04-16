@@ -31,18 +31,31 @@ void DiagonalMsg::exec( const char* arg, const ProcInfo *p ) const
 	if ( q->isForward() ) {
 		int src = q->srcIndex().data();
 		int dest = src + stride_;
+		if ( dest >= 0 && e2_->dataHandler()->isDataHere( dest ) ) {
+			const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
+			f->op( Eref( e2_, dest ), arg );
+		}
+		/*
 		if ( dest >= 0 && dest < static_cast< int >( e2_->dataHandler()->numData() ) ) {
 			const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
 			f->op( Eref( e2_, dest ), arg );
 		}
+		*/
 	} else {
 		// Here we are stuck a bit. I will assume srcIndex is now for e2.
 		int src = q->srcIndex().data();
 		int dest = src - stride_;
+		if ( dest >= 0 && e1_->dataHandler()->isDataHere( dest ) ) {
+			const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
+			f->op( Eref( e1_, dest ), arg );
+		}
+
+		/*
 		if ( dest >= 0 && dest < static_cast< int >( e1_->dataHandler()->numData() ) ) {
 			const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
 			f->op( Eref( e1_, dest ), arg );
 		}
+		*/
 	}
 }
 

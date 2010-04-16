@@ -52,15 +52,17 @@ void testArith()
  */
 void testFibonacci()
 {
-	unsigned int numFib = 10;
+	unsigned int numFib = 20;
 	vector< unsigned int > dims( 1, numFib );
 
 	Id a1id = Id::nextId();
 	Element* a1 = new Element( a1id, Arith::initCinfo(), "a1", dims );
 
 	Arith* data = reinterpret_cast< Arith* >( a1->dataHandler()->data1( 0 ) );
-	data->arg1( 0 );
-	data->arg2( 1 );
+	if ( data ) {
+		data->arg1( 0 );
+		data->arg2( 1 );
+	}
 
 	bool ret = DiagonalMsg::add( a1, "output", a1, "arg1", 1 );
 	assert( ret );
@@ -83,14 +85,27 @@ void testFibonacci()
 	clock->start( clocker, &dummyQ, numFib );
 	*/
 	// clock->tStart( clocker, ti )
-	shell->doStart( numFib );
+	if ( Shell::myNode() == 0 ) {
+		shell->doStart( numFib );
+	} else {
+		Element* shelle = Id().eref().element();
+		Eref clocker = Id( 1 ).eref();
+		double currentTime = 0.0;
+		while ( currentTime < 1 ) {
+			shell->passThroughMsgQs( shelle );
+			currentTime = ( reinterpret_cast< Clock* >( clocker.data() ) )->getCurrentTime();
+		}
+		shell->passThroughMsgQs( shelle );
+	}
 
 	unsigned int f1 = 1;
 	unsigned int f2 = 0;
 	for ( unsigned int i = 0; i < numFib; ++i ) {
-		Arith* data = reinterpret_cast< Arith* >( a1->dataHandler()->data1( i ) );
-		assert( data->getOutput() == f1 );
-		// cout << i << ", " << data->getOutput() << ", " << f1 << endl;
+		if ( a1->dataHandler()->isDataHere( i ) ) {
+			Arith* data = reinterpret_cast< Arith* >( a1->dataHandler()->data1( i ) );
+			cout << Shell::myNode() << ": i = " << i << ", " << data->getOutput() << ", " << f1 << endl;
+			assert( data->getOutput() == f1 );
+		}
 		unsigned int temp = f1;
 		f1 = temp + f2;
 		f2 = temp;
@@ -103,6 +118,6 @@ void testFibonacci()
 void testBuiltins( bool useMPI )
 {
 	testArith();
-	if ( !useMPI )
+	// if ( !useMPI )
 		testFibonacci();
 }

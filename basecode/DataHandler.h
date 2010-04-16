@@ -29,6 +29,7 @@ class DataHandler
 
 		/**
 		 * Returns the data on the specified index.
+		 * Returns 0 if data not present on current node on specified index
 		 */
 		virtual char* data( DataId index ) const = 0;
 
@@ -45,6 +46,8 @@ class DataHandler
 		 * For a synapse on an IntFire, would
 		 * return the appropriate IntFire, rather than the synapse.
 		 * In other cases returns the data at the first index of DataId.
+		 *
+		 * Returns 0 if data not found at index.
 		 */
 		virtual char* data1( DataId index ) const = 0;
 
