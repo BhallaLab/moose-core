@@ -142,6 +142,53 @@ void testInterNodeOps() // redundant.
 	cout << "." << flush;
 }
 
+void testShellSetGet()
+{
+	unsigned int numCells = 65535;
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+	vector< unsigned int > dimensions;
+	dimensions.push_back( numCells );
+	Id child = shell->doCreate( "IntFire", Id(), "test", dimensions );
+	for ( unsigned int i = 0; i < numCells; ++i ) {
+		shell->doSetDouble( child, DataId( i ), "thresh", i * i );
+	}
+
+	/*
+	for ( unsigned int i = 0; i < numCells; ++i ) {
+		unsigned int x;
+		x = shell->doGetDouble( child, DataId( i ), "thresh" );
+		assert( x == i * i );
+	}
+	*/
+	
+	shell->doDelete( child );
+	cout << "." << flush;
+}
+
+void testShellSetGetVec()
+{
+	/*
+	unsigned int numCells = 65535;
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+	vector< unsigned int > dimensions;
+	dimensions.push_back( numCells );
+	Id child = shell->doCreate( "IntFire", Id(), "test", dimensions );
+	for ( unsigned int i = 0; i < numCells; ++i )
+		numSyn.push_back( i % 32 );
+	shell->doSetUintVec( child, DataId( i ), "numSynapses", numSyn );
+	numSyn.clear();
+	shell->doGetUintVec( child, DataId( i ), "numSynapses", numSyn );
+	for ( unsigned int i = 0; i < numCells; ++i )
+		assert( numSyn[i] == i % 32 );
+	// Also want to assign each of the synapses to a different value.
+	
+	shell->doDelete( child );
+	cout << "." << flush;
+	*/
+}
+
 void testShellAddMsg()
 {
 }
@@ -163,6 +210,7 @@ void testShell( )
 void testMpiShell( )
 {
 	testShellParserCreateDelete();
+	testShellSetGet();
 	testInterNodeOps();
 	/** 
 	 * Need to update

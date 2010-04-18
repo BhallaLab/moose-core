@@ -137,83 +137,6 @@ void* Shell::mpiThreadFunc( void* shellPtr )
 	pthread_exit( NULL );
 }
 
-#if 0
-// Static func, passed in to the thread.
-void Shell::mpiThreadFunc( void* shellPtr )
-{
-	Shell* shell = reinterpret_cast< Shell* >( shellPtr );
-
-
-
-	int numDone = Request::TestSome( numRecvReq_, requestArray_, 
-		requestIndices_, requestStatus_ );
-	
-	for ( int i = 0; i < numDone; ++i ) {
-		// Tell relevant SimGroup that this request is done.
-	}
-
-	for ( int i = 0; i < Qinfo::numSimGroup(); ++i ) {
-		const SimGroup* sg = Qinfo::simGroup( i );
-		if ( sg->inQisReady() ) {
-			/**
-			 * Issue here. I would like to use a broadcast, but it doesn't
-			 * look like that can be done with a non-blocking call. 
-			 * May have to do a serial set of iSends, or grin and
-			 * bear it with the blocking call.
-			 * There is also the blocking Alltoall call. May be faster
-			 * because it is low-level, but it then does not interleave
-			 * computation with communication. But it is by far the 
-			 * simplest.
-			 */
-			/*
-			for ( int destNode = 0; destNode < numNodes_; ++destNode ) {
-				pendingSends.push_back( sg->comm()->Isend(
-					Qinfo::getInQ( i ), Qinfo::getInQsize( i ), 
-					MPI::CHAR, destNode, sg->tag() ));
-			}
-			// OR
-			sg->comm()->Bcast( 
-				Qinfo::getInQ( i ), Qinfo::getInQsize( i ),
-				MPI::CHAR, myNode_ );
-			*/
-			// OR
-			sg->comm()->Alltoall( 
-				Qinfo::getInQ( i ), sg->msgSize(), MPI::CHAR, 
-				Qinfo::getMpiQ( i ), sg->msgSize(), MPI::CHAR );
-
-			sg->releaseInQ(); // Now the threads can alter inQ.
-		}
-	}
-}
-#endif
-
-/*
-void Shell::startMpiThread()
-{
-	pthread_t mpiThread;
-	pthread_attr_t attr;
-
-	pthread_attr_init( &attr );
-	pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_JOINABLE );
-	int ret = pthread_create( 
-		&mpiThread, NULL, Shell::mpiThreadFunc, 
-			reinterpret_cast< void* >( this )
-	);
-	if ( ret ) {
-		cout << "Error: Shell::start: Unable to create mpi_threadn";
-		exit( -1 );
-	}
-
-	// Clean up.
-	void* status;
-	int ret = pthread_join( mpiThread, &status );
-	if ( ret ) {
-		cout << "Error: Shell::start: Unable to join mpi_thread\n";
-		exit( -1 );
-	}
-	pthread_attr_destroy( &attr );
-}
-*/
 
 // Function to assign hardware availability
 void Shell::setHardware( 
@@ -247,6 +170,7 @@ void Shell::setHardware(
 	myNode_ = myNode;
 	p_.numNodesInGroup = numNodes_;
 	p_.nodeIndexInGroup = myNode;
+	acked_.resize( numNodes, 0 );
 }
 
 /**
@@ -401,10 +325,11 @@ void Shell::start( double runtime )
 		// cout << "Shell::start: Threads joined successfully\n";
 		// cout << "Completed time " << runtime << " on " << numCores_ << " threads\n";
 	
-	static const Finfo* temp = Shell::initCinfo()->findFinfo( "ackStart" );
-	static const SrcFinfo0* ackStart = 
-		static_cast< const SrcFinfo0* >( temp );
-	ackStart->send( Id().eref(), &p_, 0 );
+	static const Finfo* temp = Shell::initCinfo()->findFinfo( "ack" );
+	static const SrcFinfo2< unsigned int, unsigned int >* ack = 
+		static_cast< const SrcFinfo2< unsigned int, unsigned int>* >( temp );
+	assert( ack != 0 );
+	ack->send( Id().eref(), &p_, myNode_, OkStatus, 0 );
 
 	delete[] threads;
 	pthread_attr_destroy( &attr );

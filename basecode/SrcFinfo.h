@@ -158,7 +158,8 @@ template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 		// memcpy in val2buf.
 		void send( Eref e, const ProcInfo* p,
 			const T1& arg1, const T2& arg2, 
-			bool isForward = 1 ) {
+			bool isForward = 1 ) const
+		{
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
 			Qinfo q( 0, isForward, e.index(), a1.size() + a2.size() );
@@ -172,7 +173,8 @@ template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 		void sendTo( Eref e, const ProcInfo* p,
 			const T1& arg1, const T2& arg2,
 			const FullId& target,
-			bool isForward = 1 ) {
+			bool isForward = 1 ) const
+		{
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
 			Qinfo q( 1, isForward, e.index(), a1.size() + a2.size() );
@@ -199,7 +201,8 @@ template < class T1, class T2, class T3 > class SrcFinfo3: public SrcFinfo
 		// Will need to specialize for strings etc.
 		void send( Eref e, const ProcInfo* p,
 			const T1& arg1, const T2& arg2, const T3& arg3,
-			bool isForward = 1 ) {
+			bool isForward = 1 ) const
+		{
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
 			Conv< T3 > a3( arg3 );
@@ -215,7 +218,7 @@ template < class T1, class T2, class T3 > class SrcFinfo3: public SrcFinfo
 
 		void sendTo( Eref e, DataId target, const ProcInfo* p,
 			const T1& arg1, const T2& arg2, const T3& arg3,
-			bool isForward = 1 )
+			bool isForward = 1 ) const
 		{
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
@@ -245,7 +248,8 @@ template < class T1, class T2, class T3, class T4 > class SrcFinfo4: public SrcF
 		// Will need to specialize for strings etc.
 		void send( Eref e, const ProcInfo* p,
 			const T1& arg1, const T2& arg2, const T3& arg3, const T4& arg4,
-			bool isForward = 1 ) {
+			bool isForward = 1 ) const
+		{
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
 			Conv< T3 > a3( arg3 );
@@ -264,7 +268,8 @@ template < class T1, class T2, class T3, class T4 > class SrcFinfo4: public SrcF
 		void sendTo( Eref e, const ProcInfo* p,
 			const T1& arg1, const T2& arg2, const T3& arg3, const T4& arg4,
 			const FullId& target,
-			bool isForward = 1 ) {
+			bool isForward = 1 ) const
+		{
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
 			Conv< T3 > a3( arg3 );
@@ -296,7 +301,8 @@ template < class T1, class T2, class T3, class T4, class T5 > class SrcFinfo5: p
 		void send( Eref e, const ProcInfo* p,
 			const T1& arg1, const T2& arg2, const T3& arg3, const T4& arg4,
 			const T5& arg5,
-			bool isForward = 1 ) {
+			bool isForward = 1 ) const
+		{
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
 			Conv< T3 > a3( arg3 );
@@ -319,7 +325,8 @@ template < class T1, class T2, class T3, class T4, class T5 > class SrcFinfo5: p
 			const T1& arg1, const T2& arg2, const T3& arg3, const T4& arg4,
 			const T5& arg5,
 			const FullId& target,
-			bool isForward = 1 ) {
+			bool isForward = 1 ) const
+		{
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
 			Conv< T3 > a3( arg3 );

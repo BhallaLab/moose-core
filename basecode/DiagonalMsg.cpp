@@ -59,7 +59,7 @@ void DiagonalMsg::exec( const char* arg, const ProcInfo *p ) const
 	}
 }
 
-MsgId DiagonalMsg::add( Element* e1, const string& srcField, 
+bool DiagonalMsg::add( Element* e1, const string& srcField, 
 			Element* e2, const string& destField, int stride )
 {
 	FuncId funcId;
@@ -70,7 +70,7 @@ MsgId DiagonalMsg::add( Element* e1, const string& srcField,
 		DiagonalMsg* m = new DiagonalMsg( e1, e2 );
 		e1->addMsgAndFunc( m->mid(), funcId, srcFinfo->getBindIndex() );
 		m->stride_ = stride;
-		return m->mid();
+		return 1;
 	}
-	return Msg::badMsg; // Null msgId.
+	return 0; // Null msgId.
 }

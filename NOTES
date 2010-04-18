@@ -4433,3 +4433,21 @@ multinode messaging.
 18 April.
 Framework begun. The non-mpi test are fine, but the mpi tests have yet to
 take shape. But it seems to work smoothly.
+Checkin 1721.
+
+We will need to set up Shell::doSetClock and doClearClocks.
+For now, let's just eliminate these and directly assign to the 
+Clock object. So what we really need is Shell::doSet and Shell::doGet,
+and their vector equivalents.
+Use Shell::doAddMsg to do the actual scheduling for now. Eliminate the 
+useclock function as a legacy.
+
+Before going much further, let me clean up the node-acknowledge system.
+Most of the cases just need to return an ack to the specific request.
+Given that the requests are issued in serial, at this point there is no
+need to identify who the request came from either.
+
+Should I ever permit multiple shells, this would have to change.
+Updated the ack system to have a single ack, and pass back node # and status.
+
+=============================================================================

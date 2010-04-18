@@ -45,6 +45,10 @@ class Shell: public Data
 
 		void doStart( double runtime );
 
+		void doSetDouble( Id id, DataId d, string field, double value );
+
+		double doGetDouble( Id id, DataId d, string field);
+
 		///////////////////////////////////////////////////////////
 		// DestFinfo functions
 		///////////////////////////////////////////////////////////
@@ -56,15 +60,14 @@ class Shell: public Data
 		 */
 		void start( double runTime );
 
-		void handleAckCreate();
-		void handleAckDelete();
+		void initAck();
+		void handleAck( unsigned int ackNode, unsigned int status );
+		bool isAckPending() const;
+
 		void handleQuit();
-		void handleAckStart();
 		void handleAddMsg( Eref e, const Qinfo* q, 
 			vector< unsigned int > ids, string srcField, string destField,
 				string msgType, vector< double > args );
-		void handleAckMsg( MsgId mid );
-	
 
 		void create( Eref e, const Qinfo* q, 
 			string type, Id parent, Id newElm, string name,
@@ -143,6 +146,8 @@ class Shell: public Data
 		void error( const string& text );
 
 		static const Cinfo* initCinfo();
+		static const unsigned int OkStatus;
+		static const unsigned int ErrorStatus;
 	private:
 		string name_;
 		vector< char > getBuf_;
@@ -155,10 +160,8 @@ class Shell: public Data
 			// Shell owns its own ProcInfo, has global thread/node info.
 			// Used to talk to parser and for thread specification in
 			// setup operations.
-		unsigned short numCreateAcks_;
-		unsigned short numDeleteAcks_;
-		unsigned short numStartAcks_;
-		unsigned short numMsgAcks_;
+		unsigned int numAcks_;
+		vector< unsigned int > acked_;
 		void* barrier_;
 		/**
 		 * Used to coordinate threads especially when doing MPI.

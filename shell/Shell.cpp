@@ -17,6 +17,8 @@
 #include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
 
+const unsigned int Shell::OkStatus = ~0;
+const unsigned int Shell::ErrorStatus = ~1;
 unsigned int Shell::numCores_;
 unsigned int Shell::numNodes_;
 unsigned int Shell::myNode_;
@@ -29,9 +31,9 @@ static SrcFinfo5< string, Id, Id, string, vector< unsigned int > > requestCreate
 			"Goes to all nodes including self."
 			);
 
-static SrcFinfo0 ackCreate( "ackCreate",
-			"ackCreate():"
-			"Acknowledges receipt and completion of Create command."
+static SrcFinfo2< unsigned int, unsigned int > ack( "ack",
+			"ack( unsigned int node# ):"
+			"Acknowledges receipt and completion of a command on a worker node."
 			"Goes back only to master node."
 			);
 
@@ -41,10 +43,6 @@ static SrcFinfo1< Id  > requestDelete( "requestDelete",
 			"Initiates a callback to indicate completion of operation."
 			"Goes to all nodes including self." ); 
 
-static SrcFinfo0 ackDelete( "ackDelete",
-			"ackDelete():"
-			"Acknowledges receipt and completion of Delete command."
-			"Goes back only to master node." );
 static SrcFinfo0 requestQuit( "requestQuit",
 			"requestQuit():"
 			"Emerges from the inner loop, and wraps up. No return value." );
@@ -53,12 +51,6 @@ static SrcFinfo1< double > requestStart( "requestStart",
 			"Starts a simulation. Goes to all nodes including self."
 			"Initiates a callback to indicate completion of run."
 			);
-static SrcFinfo0 ackStart( "ackStart",
-			"ackStart():"
-			"Acknowledges receipt and completion of Start command."
-			"To be more precise, reports when the simulation is complete."
-			"Uses this form for symmetry with the other ack calls."
-			"Goes back only to master node." );
 static SrcFinfo5< vector< unsigned int >, string, string, string,
 	vector< double > > requestAddMsg( "requestAddMsg",
 			"requestAddMsg( ids, field1, field2, msgtype, args );"
@@ -66,10 +58,6 @@ static SrcFinfo5< vector< unsigned int >, string, string, string,
 			"Initiates a callback to indicate completion of operation."
 			"Goes to all nodes including self."
 			); 
-static SrcFinfo1< MsgId > ackAddMsg( "ackAddMsg",
-			"ackAddMsg():"
-			"Acknowledges receipt and completion of AddMsg command."
-			"Goes back only to master node." );
 
 static DestFinfo create( "create", 
 			"create( class, parent, newElm, name, dimensions )",
@@ -79,13 +67,10 @@ static DestFinfo del( "delete",
 			"Destroys Element, all its messages, and all its children. Args: Id",
 			new EpFunc1< Shell, Id >( & Shell::destroy ) );
 
-static DestFinfo handleAckCreate( "handleAckCreate", 
-			"Keeps track of # of responders to ackCreate. Args: none",
-			new OpFunc0< Shell >( & Shell::handleAckCreate ) );
-
-static DestFinfo handleAckDelete( "handleAckCreate", 
-			"Keeps track of # of responders to ackCreate. Args: none",
-			new OpFunc0< Shell >( & Shell::handleAckDelete ) );
+static DestFinfo handleAck( "handleAck", 
+			"Keeps track of # of acks to a blocking shell command. Arg: Source node num.",
+			new OpFunc2< Shell, unsigned int, unsigned int >( 
+				& Shell::handleAck ) );
 
 static DestFinfo handleQuit( "handleQuit", 
 			"quit(): Quits simulation.",
@@ -94,9 +79,6 @@ static DestFinfo handleQuit( "handleQuit",
 static DestFinfo handleStart( "start", 
 			"Starts off a simulation for the specified run time, automatically partitioning among threads if the settings are right",
 			new OpFunc1< Shell, double >( & Shell::start ) );
-static DestFinfo handleAckStart( "handleAckStart", 
-			"Keeps track of # of responders to ackStart. Args: none",
-			new OpFunc0< Shell >( & Shell::handleAckStart ) );
 
 static DestFinfo handleAddMsg( "handleAddMsg", 
 			"Makes a msg",
@@ -104,31 +86,12 @@ static DestFinfo handleAddMsg( "handleAddMsg",
 				vector< unsigned int >, string, string, string,
 					vector< double >
 				>( & Shell::handleAddMsg ) );
-static DestFinfo handleAckMsg( "handleAckMsg", 
-			"Keeps track of # of responders to ackStart. Args: none",
-			new OpFunc1< Shell, MsgId >( & Shell::handleAckMsg ) );
 
 static Finfo* shellMaster[] = {
-	&requestCreate, &handleAckCreate, &requestDelete, &handleAckDelete, &requestQuit, &requestStart, &handleAckStart, &requestAddMsg, &handleAckMsg };
+	&requestCreate, &requestDelete, &requestQuit, &requestStart,
+	&requestAddMsg, &handleAck };
 static Finfo* shellWorker[] = {
-	&create, &ackCreate, &del, &ackDelete, &handleQuit, &handleStart, &ackStart, &ackAddMsg, &handleAddMsg };
-/*
-static SrcFinfo4< Id, string, Id, string  > *requestMsg =
-		new SrcFinfo4< string, Id, Id, MsgId  >( "requestMsg",
-			"requestMsg( msgtype, e1, e2, msgid ): "
-			"creates a new Msg on all nodes with the specified MsgId. "
-			"Initiates a callback to indicate completion of operation. "
-			"Goes to all nodes including self."
-			"This is a low-level call.", 
-			requestShellOp );
-
-static SrcFinfo0* ackMsg =
-		new SrcFinfo0( "ackMsg",
-			"ackMsg():"
-			"Acknowledges receipt and completion of requestMsg command."
-			"Goes back only to master node.",
-			ackShellOp );
-*/
+	&create, &del, &handleQuit, &handleStart, &handleAddMsg, &ack };
 
 static SrcFinfo1< FuncId > requestGet( "requestGet",
 			"Function to request another Element for a value" );
@@ -200,12 +163,6 @@ const Cinfo* Shell::initCinfo()
 ////////////////////////////////////////////////////////////////
 
 		&requestGet,
-		/*
-		requestCreate,
-		ackCreate,
-		requestDelete,
-		ackDelete,
-		*/
 ////////////////////////////////////////////////////////////////
 //  Shared msg
 ////////////////////////////////////////////////////////////////
@@ -231,8 +188,7 @@ Shell::Shell()
 	: name_( "" ),
 		quit_( 0 ), 
 		isSingleThreaded_( 0 ),
-		numCreateAcks_( 0 ), numDeleteAcks_( 0 ),
-		numMsgAcks_( 0 ),
+		numAcks_( 0 ),
 		isRunning_( 0 )
 {
 	;
@@ -254,6 +210,7 @@ Shell::Shell()
 Id Shell::doCreate( string type, Id parent, string name, vector< unsigned int > dimensions )
 {
 	Id ret = Id::nextId();
+	initAck(); // Always put the init before the request.
 	// Here we would do the 'send' on an internode msg to do the actual
 	// Create.
 	requestCreate.send( Id().eref(), &p_, type, parent, ret, name, dimensions );
@@ -261,9 +218,9 @@ Id Shell::doCreate( string type, Id parent, string name, vector< unsigned int > 
 	// cout << myNode_ << ": Shell::doCreate: request sent\n";
 
 	// Now we wait till all nodes are done.
-	numCreateAcks_ = 0;
-	while ( numCreateAcks_ < numNodes_ )
+	while ( isAckPending() )
 		Qinfo::mpiClearQ( &p_ );
+	
 	// Here we might choose to check if success on all nodes.
 	// cout << myNode_ << ": Shell::doCreate: ack received\n";
 	
@@ -272,11 +229,11 @@ Id Shell::doCreate( string type, Id parent, string name, vector< unsigned int > 
 
 bool Shell::doDelete( Id i )
 {
+	initAck();
 	requestDelete.send( Id().eref(), &p_, i );
 	// cout << myNode_ << ": Shell::doDelete: request sent\n";
 	// Now we wait till all nodes are done.
-	numDeleteAcks_ = 0;
-	while ( numDeleteAcks_ < numNodes_ )
+	while ( isAckPending() )
 		Qinfo::mpiClearQ( &p_ );
 	// cout << myNode_ << ": Shell::doDelete: ack received\n";
 
@@ -304,29 +261,14 @@ MsgId Shell::doAddMsg( Id src, const string& srcField, Id dest,
 	ids.push_back( dest.value() );
 	ids.push_back( mid );
 
+	initAck();
 	requestAddMsg.send( Id().eref(), &p_, ids, 
 		srcField, destField, msgType, args );
 
-	numMsgAcks_ = 0;
-	while ( numMsgAcks_ < numNodes_ )
+	while ( isAckPending() )
 		Qinfo::mpiClearQ( &p_ );
 
-	/*
-	Msg* m = 0;
-	if ( msgType == "OneToOne" )
-		m = new OneToOneMsg( src(), dest() );
-	if ( msgType == "OneToAll" )
-		m = new OneToAllMsg( src.eref(), dest() );
-	// And so on, lots of msg types here.
-	
-	if ( m ) {
-		if ( f1->addMsg( f2, m->mid(), src() ) )
-			return m->mid();
-		else
-			delete m; // Nasty, but rare.
-	}
-	*/
-	return Msg::badMsg;
+	return Msg::badMsg; // Shouldn't we return the msg data?
 }
 
 /**
@@ -372,13 +314,21 @@ void Shell::doQuit( )
 
 void Shell::doStart( double runtime )
 {
-	numStartAcks_ = 0;
+	initAck();
 	requestStart.send( Id().eref(), &p_, runtime, 1 );
 	// cout << myNode_ << ": Shell::doStart: request sent\n";
-	while ( numStartAcks_ < numNodes_ )
+	while ( isAckPending() )
 		Qinfo::mpiClearQ( &p_ );
-//	Qinfo::mpiClearQ( &p_ );
 	// cout << myNode_ << ": Shell::doStart: quitting\n";
+}
+
+void Shell::doSetDouble( Id id, DataId d, string field, double value )
+{
+}
+
+double Shell::doGetDouble( Id id, DataId d, string field )
+{
+	return 0.0;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -410,6 +360,11 @@ void Shell::setQuit( bool val )
 bool Shell::getQuit() const
 {
 	return quit_;
+}
+
+void Shell::handleQuit()
+{
+	quit_ = 1;
 }
 
 void Shell::handleGet( Eref e, const Qinfo* q, const char* arg )
@@ -446,7 +401,7 @@ void Shell::create( Eref e, const Qinfo* q,
 	innerCreate( type, parent, newElm, name, dimensions );
 	// cout << myNode_ << ": Shell::create inner Create done for element " << name << " id " << newElm << endl;
 //	if ( myNode_ != 0 )
-		ackCreate.send( e, &p_, 0 );
+	ack.send( e, &p_, Shell::myNode(), OkStatus, 0 );
 	// cout << myNode_ << ": Shell::create ack sent" << endl;
 }
 
@@ -481,7 +436,7 @@ void Shell::destroy( Eref e, const Qinfo* q, Id eid)
 	// cout << myNode_ << ": Shell::destroy done for element id " << eid << endl;
 
 	//if ( myNode_ != 0 )
-		ackDelete.send( e, &p_, 0 );
+		ack.send( e, &p_, Shell::myNode(), OkStatus, 0 );
 }
 
 
@@ -499,29 +454,32 @@ void Shell::handleAddMsg( Eref e, const Qinfo* q,
 	// vector< double > args. 
 	if ( !e1() ) {
 		cout << myNode_ << ": Error: Shell::handleAddMsg: e1 not found\n";
-		ackAddMsg.send( e, &p_, Msg::badMsg, 0 );
+		ack.send( e, &p_, ErrorStatus, 0 );
 		return;
 	}
 	if ( !e2() ) {
 		cout << myNode_ << ": Error: Shell::handleAddMsg: e2 not found\n";
-		ackAddMsg.send( e, &p_, Msg::badMsg, 0 );
+		ack.send( e, &p_, ErrorStatus, 0 );
 		return;
 	}
 
 	if ( msgType == "diagonal" || msgType == "Diagonal" ) {
 		if ( args.size() != 1 ) {
 			cout << myNode_ << ": Error: Shell::handleAddMsg: Should have 1 arg, was " << args.size() << endl;
-			ackAddMsg.send( e, &p_, Msg::badMsg, 0 );
+			ack.send( e, &p_, ErrorStatus, 0 );
 			return;
 		}
 		int stride = args[0];
-		MsgId ret = 
+		bool ret = 
 			DiagonalMsg::add( e1(), srcField, e2(), destField, stride );
-		ackAddMsg.send( e, &p_, ret, 0 );
+		if ( ret ) {
+			ack.send( e, &p_, OkStatus, 0 );
+			return;
+		}
 	}
 	cout << myNode_ << ": Error: Shell::handleAddMsg: msgType not known: "
 		<< msgType << endl;
-	ackAddMsg.send( e, &p_, Msg::badMsg, 0 );
+	ack.send( e, &p_, ErrorStatus, 0 );
 }
 
 void Shell::warning( const string& text )
@@ -534,33 +492,47 @@ void Shell::error( const string& text )
 	cout << "Error: Shell:: " << text << endl;
 }
 
-void Shell::handleAckCreate()
+///////////////////////////////////////////////////////////////////////////
+// Functions for handling acks for blocking Shell function calls.
+///////////////////////////////////////////////////////////////////////////
+
+/**
+ * Initialize acks. This call should be done before the 'send' goes out,
+ * because with the wonders of threading we might get a response to the
+ * 'send' before this call is executed.
+ */
+void Shell::initAck()
 {
-	numCreateAcks_++;
-	// cout << myNode_ << ": Shell::handleAckCreate: numCreateAcks_ = " << numCreateAcks_ << endl;
+	acked_.assign( numNodes_, 0 );
+	numAcks_ = 0;
+	// Could put in timeout check here.
 }
 
-void Shell::handleAckDelete()
+/**
+ * Generic handler for ack msgs from various nodes. Keeps track of
+ * which nodes have responded.
+ */
+void Shell::handleAck( unsigned int ackNode, unsigned int status )
 {
-	numDeleteAcks_++;
+	assert( ackNode <= numNodes_ );
+	acked_[ ackNode ] = status;
+		// Here we could also check which node(s) are last, in order to do
+		// some dynamic load balancing.
+	++numAcks_;
+	if ( status != OkStatus ) {
+		cout << myNode_ << ": Shell::handleAck: Error: status = " <<
+			status << " from node " << ackNode << endl;
+	}
 }
 
-void Shell::handleQuit()
+/**
+ * Test for receipt of acks from all nodes
+ */ 
+bool Shell::isAckPending() const
 {
-	// cout << myNode_ << ": Shell::handleQuit" << endl;
-	quit_ = 1;
-}
-
-void Shell::handleAckStart()
-{
-	numStartAcks_++;
-}
-
-void Shell::handleAckMsg( MsgId mid )
-{
-	// Should do something with the mids, like check they are all good
-	// and the same value.
-	numMsgAcks_++;
+	// Put in timeout check here. At this point we would inspect the
+	// acked vector to see which is last.
+	return ( numAcks_ < numNodes_ );
 }
 
 ////////////////////////////////////////////////////////////////////////
