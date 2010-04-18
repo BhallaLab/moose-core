@@ -45,9 +45,9 @@ class Shell: public Data
 
 		void doStart( double runtime );
 
-		void doSetDouble( Id id, DataId d, string field, double value );
+		// void doSetDouble( Id id, DataId d, string field, double value );
 
-		double doGetDouble( Id id, DataId d, string field);
+		// double doGetDouble( Id id, DataId d, string field);
 
 		///////////////////////////////////////////////////////////
 		// DestFinfo functions
@@ -68,6 +68,7 @@ class Shell: public Data
 		void handleAddMsg( Eref e, const Qinfo* q, 
 			vector< unsigned int > ids, string srcField, string destField,
 				string msgType, vector< double > args );
+		void handleSet( Id id, DataId d, FuncId fid, PrepackedBuffer arg);
 
 		void create( Eref e, const Qinfo* q, 
 			string type, Id parent, Id newElm, string name,
@@ -133,6 +134,13 @@ class Shell: public Data
 
 		void setRunning( bool value );
 
+		////////////////////////////////////////////////////////////////
+		// Functions for handling field Set/Get operations
+		////////////////////////////////////////////////////////////////
+
+
+		void innerSet( const Eref& er, FuncId fid, const char* args,
+			unsigned int size );
 
 		////////////////////////////////////////////////////////////////
 		// Sets up clock ticks. Essentially is a call into the 
@@ -150,6 +158,7 @@ class Shell: public Data
 		static const unsigned int ErrorStatus;
 	private:
 		string name_;
+		Element* shelle_; // It is useful for the Shell to have this.
 		vector< char > getBuf_;
 		bool quit_;
 		bool isSingleThreaded_;

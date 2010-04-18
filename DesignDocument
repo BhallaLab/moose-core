@@ -270,22 +270,38 @@ Both of these functions create a temporary object and add a temporary message.
 Case 3: Message exists, but want to send to a single target:
 s->sendTo( Eref me, Id tgt, [args] );
 
-FIELD ACCESS
-Always use the Shell object to carry out these functions. Put the Shell as
-/root. Shell is present on all nodes.
+=============================================================================
+FIELD ACCESS. Updated 18 Apr 2010.
+Field and function access is routed through the Shell object, /root. 
+The Shell is present on all nodes. 
+For the coder, the field access functions have a templated front-end described
+	below. This is more efficient than the string interface functions.
+For the parser talking to the Shell, the field/func access functions go through
+	string-ified arguments void doSet( Id, DataId, field, args) and
+	string doGet( Id, DataId, field )
 
-Set: Use the same set functions as above.
-bool set< double >( Id tgt, FieldId f, double val );
-bool set< double >( Id tgt, const string& fieldname, double val );
-Get:
-bool get< double >( Id tgt, FieldId f, double& val );
-bool get< double >( Id tgt, const string& fieldname, double& val );
-Again, we create a temporary object, send off the request with the originating
-temporary object as one of the args. On the remote node the request function
-calls:
-s->sendTo( Eref me, Id requester, [args] );
-and then it has to do lots of cleanup afterward.
-<Later: Look into doing an array 'set' and 'get' command.>
+These functions are mediated by the SetGet<N>< Type > class templates. 
+N can be any number of arguments, from 0 to 5.
+Each provides one consistent function:
+SetGet1< double >::set( const Eref& dest, const string& field, A arg )
+
+For N = 1 we also have the following functions.
+SetGet1< double >::strSet( const Eref& dest, const string& field, 
+	const string& val )
+string SetGet1< double >::strGet( const Eref& dest, const string& field )
+SetGet1< double >::setVec( const Eref& dest, const string& field, 
+	const vector< A >& arg )
+We would like to also make a function:
+SetGet1< double >::getVec( const Eref& dest, const string& field, 
+	vector< A >& arg )
+
+In addition, the Field< Type > template is derived from SetGet1< A > and
+is designed to interface with the automatically generated functions for
+field access from ValueFinfo: set_<fieldname> and get_<fieldname>
+It provides type-specific functions:
+bool Field< double >::set( const Eref& dest, const string& field, double arg )
+double Field< double >::get( const Eref& dest, const string& field )
+
 
 Field access is set up using ValueFinfo and its variants.
 ValueFinfo: uses 
@@ -295,6 +311,43 @@ to access fields. Wraps these functions into OpFunc1 and GetOpFunc. Generates
 functions named "set_" + fieldname and "get_" + fieldname for the Finfo array.
 
 ReadOnlyValueFinfo: Similar, only doesn't use the setFunc.
+
+
+Internals for SetGet access to fields.
+Sets:
+1. DestFinfos provide templated functions with different types and # of args.
+	SetGet< ArgTypes >::set( const Eref& dest, const string& field, Args)
+	This munges the arguments into a char* array.
+2. Shell::innerSet( Eref, funcId, val, size ) (taking over SetGet::iSetInner)
+	This creates a message to the target Eref:Finfo, and passes the data.
+	This message is predefined
+		- Not deleted/recreated for different targets, just changes
+			the target
+		- Avoid running up the MsgIds for this Msg. It is always the
+			same on all nodes.
+		- Avoid having different nodes end up with different MsgIds
+			due to creation on local node.
+	2.1 When running on multiple nodes, this first sends out the data
+	to all workers and the owner of the target object has to deal with it.
+	2.2 The owner shell then passes back an ack to the master node.
+3. The target function sends back an ack to the calling Shell? Need this to 
+	ensure serial operation. But it will mess up Destfinfos.
+
+Gets:
+1. ValueFinfos provide the proper combination of a handler and a return
+	function that sends the return value back.
+	Field< Type > currently handles the return op, not sure why.
+	Type Field< Type >::get just passes data on to the Shell::innerGet
+2. Shell::innerGet( Eref, DataId, requestFid, handleFid, field )
+	replaces SetGet::iGet in doing field validation, setting up msgs,
+	and sending request. Now it polls till the return comes in.
+3. Shell::handleGet deals with the return value, just bunging it into a buffer
+	on the Shell object. We don't know yet what the type is.
+4. Shell::innerGet again, having waited till the data came home. Passes
+	data back to the Field< Type >::get.
+5. Field< Type >::get now has a buffer and knows how to deal with it, converts
+	back to the desired type and returns.
+Note that we can probably replace all of the Field stuff with SetGet1< Type >.
 
 We have a small problem here when handling array fields that also need to 
 refer to the parent object. For example, when dt values on clock ticks are

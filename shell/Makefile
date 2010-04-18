@@ -21,7 +21,7 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-Shell.o:	Shell.h
+Shell.o:	Shell.h ../basecode/AssignmentMsg.h
 testShell.o:	Shell.h ../scheduling/Tick.h ../scheduling/testScheduling.h
 
 .cpp.o:

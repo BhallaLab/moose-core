@@ -144,6 +144,7 @@ void testInterNodeOps() // redundant.
 
 void testShellSetGet()
 {
+	/*
 	unsigned int numCells = 65535;
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
@@ -154,16 +155,9 @@ void testShellSetGet()
 		shell->doSetDouble( child, DataId( i ), "thresh", i * i );
 	}
 
-	/*
-	for ( unsigned int i = 0; i < numCells; ++i ) {
-		unsigned int x;
-		x = shell->doGetDouble( child, DataId( i ), "thresh" );
-		assert( x == i * i );
-	}
-	*/
-	
 	shell->doDelete( child );
 	cout << "." << flush;
+	*/
 }
 
 void testShellSetGetVec()

@@ -43,6 +43,7 @@ OBJ = \
 	SparseMsg.o \
 	PsparseMsg.o \
 	DiagonalMsg.o \
+	AssignmentMsg.o \
 	main.o	\
 	testSync.o	\
 	testAsync.o	\
@@ -50,6 +51,7 @@ OBJ = \
 HEADERS = \
 	header.h \
 	Cinfo.h \
+	PrepackedBuffer.h \
 	Conv.h \
 	Data.h \
 	DataId.h \

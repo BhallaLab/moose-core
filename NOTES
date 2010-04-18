@@ -4449,5 +4449,34 @@ need to identify who the request came from either.
 
 Should I ever permit multiple shells, this would have to change.
 Updated the ack system to have a single ack, and pass back node # and status.
+Checkin 1722.
+
+Working on Set and Get. Later will need a close look at the
+affected functions that rely on get especially. many in testAsync.
+
+I have put the design for Set/Get in the DesignDocument. One pending issue is
+serializing the Set calls. Options:
+	DestFinfos send back acks:
+		No, because the DestFinfos are normally called by 
+		time-critical functions.
+	Magic wrapper for all DestFinfos to be called by set
+		Ugly
+	Shell sends in a separate test function on the same temporary message,
+		which returns an ack.
+		Should be OK. The messages are executed in sequence and for 
+		Shell calls we should operate always on thread 0.
+
+First, let's sort out the single-node operations.
+Need to cleanly attach msg to a given MsgId, so that we can use MsgIds
+across nodes.
+	- Provide a Msg::Msg function that specifies MsgId.
+		- Use a special Msg class for the set/get msg that knows how to
+		use this constructor.
+	- Make a msg attached to the Shell at the start, with one end 
+		attached to the shell and the other end dangling. The free
+		end gets attached to whichever Element is being assigned.
+		- Need to modify Msg base class
+		- Need to make a special msg class.
+I prefer the first option.
 
 =============================================================================

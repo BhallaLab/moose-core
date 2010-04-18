@@ -117,6 +117,52 @@ template<> class Conv< string >
 		string val_;
 };
 
+template<> class Conv< PrepackedBuffer >
+{
+	public:
+		Conv( const char* buf )
+			: val_( buf + sizeof( unsigned int ), 
+				*reinterpret_cast< const unsigned int* >( buf ) )
+		{;}
+
+		Conv( const PrepackedBuffer& arg )
+			: val_( arg )
+		{;}
+
+		unsigned int size() const
+		{
+			return val_.size();
+		}
+
+		const PrepackedBuffer operator*() const {
+			return val_;
+		}
+
+		/**
+		 * Converts data contents into char* buf. Buf must be allocated
+		 * ahead of time.
+		 * Needs to be specialized for variable size and pointer-containing
+		 * types T.
+		 */
+		unsigned int val2buf( char* buf ) const {
+			*reinterpret_cast< unsigned int* >( buf ) = val_.size();
+			buf += sizeof( unsigned int );
+			memcpy( buf, val_.data(), 
+				val_.size() - sizeof( unsigned int ) );
+			return val_.size();
+		}
+
+		static void str2val( PrepackedBuffer& val, const string& s ) {
+			; // Doesn't work.
+		}
+
+		static void val2str( string& s, const PrepackedBuffer& val ) {
+			; // Doesn't work.
+		}
+	private:
+		PrepackedBuffer val_;
+};
+
 
 /**
  * Trying to do a partial specialization.

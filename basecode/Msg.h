@@ -19,6 +19,8 @@ class Msg
 {
 	public:
 		Msg( Element* e1, Element* e2 );
+
+		Msg( Element* e1, Element* e2, MsgId mid );
 		virtual ~Msg();
 
 		/**
@@ -96,6 +98,11 @@ class Msg
 		 * The zero MsgId, used as the error value.
 		 */
 		static const MsgId badMsg;
+
+		/**
+		 * A special MsgId used for Shell to assign msgs.
+		 */
+		static const MsgId setMsg;
 
 	protected:
 		Element* e1_;

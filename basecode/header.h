@@ -81,6 +81,7 @@ class Cinfo;
 #include "OneDimGlobalHandler.h"
 #include "Element.h"
 #include "Eref.h"
+#include "PrepackedBuffer.h"
 #include "Conv.h"
 #include "SrcFinfo.h"
 #include "../shell/Shell.h"

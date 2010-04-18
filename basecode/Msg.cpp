@@ -16,6 +16,7 @@
 vector< Msg* > Msg::msg_;
 vector< MsgId > Msg::garbageMsg_;
 const MsgId Msg::badMsg = 0;
+const MsgId Msg::setMsg = 1;
 
 Msg::Msg( Element* e1, Element* e2 )
 	: e1_( e1 ), e2_( e2 )
@@ -28,6 +29,20 @@ Msg::Msg( Element* e1, Element* e2 )
 		mid_ = msg_.size();
 		msg_.push_back( this );
 	}
+	e1->addMsg( mid_ );
+	e2->addMsg( mid_ );
+}
+
+/**
+ * This sets up the set/get msg. It should be called first of all,
+ * at init time.
+ */
+Msg::Msg( Element* e1, Element* e2, MsgId mid )
+	: e1_( e1 ), e2_( e2 )
+{
+	if ( msg_.size() < mid )
+		msg_.resize( mid + 1 );
+	msg_[mid_] = this;
 	e1->addMsg( mid_ );
 	e2->addMsg( mid_ );
 }

@@ -9,6 +9,7 @@
 
 #include "header.h"
 #include "DiagonalMsg.h"
+#include "AssignmentMsg.h"
 #include "Shell.h"
 #include "Dinfo.h"
 
@@ -58,6 +59,11 @@ static SrcFinfo5< vector< unsigned int >, string, string, string,
 			"Initiates a callback to indicate completion of operation."
 			"Goes to all nodes including self."
 			); 
+static SrcFinfo4< Id, DataId, FuncId, PrepackedBuffer > requestSet(
+			"requestSet",
+			"requestSet( tgtId, tgtDataId, tgtFieldId, value ):"
+			"Assigns a value on target field."
+			);
 
 static DestFinfo create( "create", 
 			"create( class, parent, newElm, name, dimensions )",
@@ -79,6 +85,7 @@ static DestFinfo handleQuit( "handleQuit",
 static DestFinfo handleStart( "start", 
 			"Starts off a simulation for the specified run time, automatically partitioning among threads if the settings are right",
 			new OpFunc1< Shell, double >( & Shell::start ) );
+			
 
 static DestFinfo handleAddMsg( "handleAddMsg", 
 			"Makes a msg",
@@ -86,6 +93,13 @@ static DestFinfo handleAddMsg( "handleAddMsg",
 				vector< unsigned int >, string, string, string,
 					vector< double >
 				>( & Shell::handleAddMsg ) );
+
+static DestFinfo handleSet( "handleSet", 
+			"Deals with request, to set specified field on any node to a value.",
+			new OpFunc4< Shell, Id, DataId, FuncId, PrepackedBuffer >( 
+				&Shell::handleSet )
+			);
+
 
 static Finfo* shellMaster[] = {
 	&requestCreate, &requestDelete, &requestQuit, &requestStart,
@@ -95,6 +109,15 @@ static Finfo* shellWorker[] = {
 
 static SrcFinfo1< FuncId > requestGet( "requestGet",
 			"Function to request another Element for a value" );
+
+/*
+static SrcFinfo1< PrepackedBuffer > setField( "setField",
+			"set( PrepackagedBuffer ):"
+			"Assigns a value on target field."
+			"This is a special SrcFinfo, as it uses preconverted arguments"
+			"to communicate with the target."
+			);
+			*/
 
 const Cinfo* Shell::initCinfo()
 {
@@ -163,6 +186,7 @@ const Cinfo* Shell::initCinfo()
 ////////////////////////////////////////////////////////////////
 
 		&requestGet,
+		&requestSet,
 ////////////////////////////////////////////////////////////////
 //  Shared msg
 ////////////////////////////////////////////////////////////////
@@ -322,14 +346,26 @@ void Shell::doStart( double runtime )
 	// cout << myNode_ << ": Shell::doStart: quitting\n";
 }
 
+/*
 void Shell::doSetDouble( Id id, DataId d, string field, double value )
 {
+	initAck();
+	requestSet.send( Id().eref(), &p_, id, d, field, value );
+	while ( isAckPending() )
+		Qinfo::mpiClearQ( &p_ );
 }
 
 double Shell::doGetDouble( Id id, DataId d, string field )
 {
+	initAck();
+	requestSet.send( Id().eref(), &p_, field, value );
+	while ( isAckPending() )
+		Qinfo::mpiClearQ( &p_ );
+
+
 	return 0.0;
 }
+*/
 
 ////////////////////////////////////////////////////////////////
 // DestFuncs
@@ -366,6 +402,29 @@ void Shell::handleQuit()
 {
 	quit_ = 1;
 }
+
+/*
+void Shell::handleGet2( Eref e, const Qinfo* q, const char* arg )
+{
+	getBuf_.resize( q->size() );
+	memcpy( &getBuf_[0], arg, q->size() );
+	// Instead of deleting and recreating the msg, it could be a 
+	// permanent msg on this object, reaching out whenever needed
+	// to targets.
+}
+void Shell::handleAck( unsigned int ackNode, unsigned int status )
+{
+	assert( ackNode <= numNodes_ );
+	acked_[ ackNode ] = status;
+		// Here we could also check which node(s) are last, in order to do
+		// some dynamic load balancing.
+	++numAcks_;
+	if ( status != OkStatus ) {
+		cout << myNode_ << ": Shell::handleAck: Error: status = " <<
+			status << " from node " << ackNode << endl;
+	}
+}
+*/
 
 void Shell::handleGet( Eref e, const Qinfo* q, const char* arg )
 {
@@ -561,6 +620,38 @@ void Shell::setclock( unsigned int tickNum, double dt, unsigned int stage )
 	Eref ce = Id( 1 ).eref();
 	SetGet3< unsigned int, double, unsigned int >::set( ce, "setupTick",
 		tickNum, dt, stage );
+}
+
+////////////////////////////////////////////////////////////////////////
+// Functions for handling field set/get and func calls
+////////////////////////////////////////////////////////////////////////
+
+void Shell::innerSet( const Eref& er, FuncId fid, const char* args, 
+	unsigned int size )
+{
+	shelle_->clearBinding ( requestSet.getBindIndex() );
+	Msg* m = new AssignmentMsg( Eref( shelle_, 0 ), er, Msg::setMsg );
+	shelle_->addMsgAndFunc( m->mid(), fid, requestSet.getBindIndex() );
+
+	Qinfo q( fid, 0, size );
+	shelle_->asend( q, requestSet.getBindIndex(), &p_, args );
+
+	/*
+	vector< MsgFuncBinding* > bind =
+		shelle_->getMsgAndFunc( setField.getBindIndex() );
+	assert( bind.size() == 1 );
+	MsgId mid = Msg::getMsg( bind[0].mid );
+	Msg* m = Msg::getMsg( mid );
+	Element* tgt = m->e2();
+	if ( tgt )
+		tgt->dropMsg( mid );
+	m->replaceTgt( er );
+	*/
+}
+
+void Shell::handleSet( Id id, DataId d, FuncId fid, PrepackedBuffer arg)
+{
+	// eref er( id(), d );
 }
 
 ////////////////////////////////////////////////////////////////////////
