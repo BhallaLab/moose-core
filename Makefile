@@ -95,7 +95,7 @@ endif
 
 # MPI mode:
 ifeq ($(BUILD),mpi)
-CXXFLAGS  = -g -pthread -Wall -Wno-long-long -pedantic -DUSE_GENESIS_PARSER
+CXXFLAGS  = -g -pthread -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
 USE_MPI = 1
 endif
 ##########################################################################

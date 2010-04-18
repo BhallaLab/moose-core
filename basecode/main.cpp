@@ -24,8 +24,12 @@ extern void testAsync();
 extern void testSyncArray( unsigned int size, unsigned int numThreads,
 	unsigned int method );
 extern void testShell();
-extern void testScheduling( bool useMPI );
-extern void testBuiltins( bool useMPI );
+extern void testScheduling();
+extern void testBuiltins();
+
+extern void testMpiScheduling();
+extern void testMpiBuiltins();
+extern void testMpiShell();
 
 Id init( int argc, char** argv )
 {
@@ -109,6 +113,29 @@ Id init( int argc, char** argv )
 	return shellId;
 }
 
+void nonMpiTests()
+{
+#ifdef DO_UNIT_TESTS
+	if ( Shell::numNodes() == 1 ) {
+		testAsync();
+		testScheduling();
+		testBuiltins();
+		testShell();
+	}
+#endif
+}
+
+void mpiTests()
+{
+#ifdef DO_UNIT_TESTS
+	if ( Shell::numNodes() > 1 ) {
+		testMpiShell();
+		testMpiBuiltins();
+		testMpiScheduling();
+	}
+#endif
+}
+
 int main( int argc, char** argv )
 {
 	Id shellId = init( argc, argv );
@@ -116,20 +143,16 @@ int main( int argc, char** argv )
 	// spawn a lot of other stuff.
 	Element* shelle = shellId();
 	Shell* s = reinterpret_cast< Shell* >( shelle->dataHandler()->data( 0 ) );
-#ifdef DO_UNIT_TESTS
-#endif
-	testAsync();
-	testScheduling( s->numNodes() > 1 );
-	testBuiltins( s->numNodes() > 1 );
-	testShell();
-
-	ProcInfo p;
+	nonMpiTests();
+	// ProcInfo p;
 	// Actually here we should launch off the thread doing
 	// Shell messaging/MPI, and yield control to the parser.
-	if ( s->myNode() == 0 )
+	if ( s->myNode() == 0 ) {
+		mpiTests();
 		s->launchParser();
-	else
+	} else {
 		s->launchMsgLoop( shelle );
+	}
 
 	// cout << s->myNode() << ": Main: out of parser/MsgLoop\n";
 

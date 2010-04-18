@@ -48,6 +48,7 @@ void testShellParserCreateDelete()
 	// cout << shell->myNode() << " testShellParserCreateDelete: after barrier\n";
 #endif
 
+	/*
 	if ( shell->myNode() != 0 ) {
 		Id child = Id::nextId();
 		// cout << shell->myNode() << " testShellParserCreateDelete: child=" << child << endl;
@@ -57,6 +58,7 @@ void testShellParserCreateDelete()
 			shell->passThroughMsgQs( sheller.element() );
 		return;
 	}
+	*/
 //	sheller.element()->showFields();
 //	sheller.element()->showMsg();
 
@@ -114,7 +116,7 @@ void testShellParserStart()
 /**
  * Tests Shell operations carried out on multiple nodes
  */
-void testInterNodeOps()
+void testInterNodeOps() // redundant.
 {
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
@@ -124,15 +126,19 @@ void testInterNodeOps()
 		// dimensions.push_back( shell->numNodes() + 1 );
 		dimensions.push_back( 6139 );
 		child = shell->doCreate( "Neutral", Id(), "test", dimensions );
-	} else {
+	} 
+	/*
+	else {
 		child = Id::nextId();
 		while ( !child() )
 			shell->passThroughMsgQs( sheller.element() );
 		shell->passThroughMsgQs( sheller.element() );
 	}
+	*/
 	// cout << shell->myNode() << ": testInterNodeOps: #entries = " << child()->dataHandler()->numData() << endl;
 
-	child.destroy();
+	shell->doDelete( child );
+	// child.destroy();
 	cout << "." << flush;
 }
 
@@ -144,8 +150,6 @@ void testShellParserQuit()
 {
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-	if ( shell->myNode() != 0 )
-		return;
 	shell->doQuit( );
 	cout << "." << flush;
 }
@@ -153,9 +157,18 @@ void testShellParserQuit()
 void testShell( )
 {
 	testCreateDelete();
+	testShellAddMsg();
+}
+
+void testMpiShell( )
+{
 	testShellParserCreateDelete();
 	testInterNodeOps();
+	/** 
+	 * Need to update
 	testShellParserStart();
 	testShellAddMsg();
-	testShellParserQuit();
+	*/
+	// Don't do this yet.
+	// testShellParserQuit();
 }

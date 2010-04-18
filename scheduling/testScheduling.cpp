@@ -279,10 +279,145 @@ void testThreadIntFireNetwork()
 }
 	
 
-void testScheduling( bool useMPI )
+void testThreadNodeIntFireNetwork()
+{
+	// Known value from single-thread run, at t = 1 sec.
+	static const double Vm100 = 0.0857292;
+	static const double Vm900 = 0.107449;
+	// static const unsigned int NUMSYN = 104576;
+	static const double thresh = 0.2;
+	static const double Vmax = 1.0;
+	static const double refractoryPeriod = 0.4;
+	static const double weightMax = 0.02;
+	static const double delayMax = 4;
+	static const double timestep = 0.2;
+	static const double connectionProbability = 0.1;
+	static const unsigned int runsteps = 5;
+	// static const unsigned int runsteps = 1000;
+	const Cinfo* ic = IntFire::initCinfo();
+	// const Cinfo* sc = Synapse::initCinfo();
+	unsigned int size = 1024;
+	string arg;
+
+	mtseed( 5489UL ); // The default value, but better to be explicit.
+
+	Id i2 = Id::nextId();
+	// bool ret = ic->create( i2, "test2", size );
+	vector< unsigned int > dims( 1, size );
+	Element* t2 = new Element( i2, ic, "test2", dims );
+	assert( t2 );
+
+	Eref e2 = i2.eref();
+	// FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
+	Id synId( i2.value() + 1 );
+	Element* syn = synId();
+	assert( syn->name() == "synapse" );
+
+	assert( syn->dataHandler()->numData() == 0 );
+
+	DataId di( 1, 0 ); // DataId( data, field )
+	Eref syne( syn, di );
+
+	unsigned int numThreads = 1;
+	if ( Qinfo::numSimGroup() >= 2 ) {
+		numThreads = Qinfo::simGroup( 1 )->numThreads;
+	}
+	bool ret = PsparseMsg::add( e2.element(), "spike", syn, "addSpike", 
+		connectionProbability, numThreads ); // Include group id as an arg. 
+	assert( ret );
+
+	unsigned int nd = syn->dataHandler()->numData();
+	cout << Shell::myNode() << ": Num Syn = " << nd << endl;
+	// assert( nd == NUMSYN );
+	vector< double > temp( size, 0.0 );
+	for ( unsigned int i = 0; i < size; ++i )
+		temp[i] = mtrand() * Vmax;
+
+	ret = Field< double >::setVec( e2, "Vm", temp );
+	assert( ret );
+
+	temp.clear();
+	temp.resize( size, thresh );
+	ret = Field< double >::setVec( e2, "thresh", temp );
+	assert( ret );
+	temp.clear();
+	temp.resize( size, refractoryPeriod );
+	ret = Field< double >::setVec( e2, "refractoryPeriod", temp );
+	assert( ret );
+
+	vector< double > weight;
+	weight.reserve( nd );
+	vector< double > delay;
+	delay.reserve( nd );
+	for ( unsigned int i = 0; i < size; ++i ) {
+		unsigned int numSyn = syne.element()->dataHandler()->numData2( i );
+		for ( unsigned int j = 0; j < numSyn; ++j ) {
+			weight.push_back( mtrand() * weightMax );
+			delay.push_back( mtrand() * delayMax );
+		}
+	}
+	ret = Field< double >::setVec( syne, "weight", weight );
+	assert( ret );
+	ret = Field< double >::setVec( syne, "delay", delay );
+	assert( ret );
+
+	Eref clocker = Id( 1 ).eref();
+	//Clock* clock = reinterpret_cast< Clock* >( clocker.data() );
+
+	// printGrid( i2(), "Vm", 0, thresh );
+	Element* se = Id()();
+	Shell* s = reinterpret_cast< Shell* >( se->dataHandler()->data( 0 ) );
+	s->setclock( 0, timestep, 0 );
+	// clock->reinit( clocker, 0 );
+
+	Element* ticke = Id( 2 )();
+	Eref er0( ticke, DataId( 0, 0 ) );
+
+	ret = SingleMsg::add( er0, "process0", e2, "process" );
+	assert( ret );
+
+	IntFire* ifire100 = reinterpret_cast< IntFire* >( e2.element()->dataHandler()->data( 100 ) );
+	IntFire* ifire900 = reinterpret_cast< IntFire* >( e2.element()->dataHandler()->data( 900 ) );
+
+
+	if ( Shell::myNode() == 0 ) {
+		s->doStart( timestep * runsteps );
+	} else {
+		double currentTime = 0.0;
+		currentTime = ( reinterpret_cast< Clock* >( clocker.data() ) )->getCurrentTime();
+		cout << Shell::myNode() << ": start curr time = " << currentTime << endl;
+		while ( currentTime < timestep * runsteps ) {
+			s->passThroughMsgQs( se );
+			currentTime = ( reinterpret_cast< Clock* >( clocker.data() ) )->getCurrentTime();
+		}
+		s->passThroughMsgQs( se );
+	}
+	// s->start( timestep * runsteps );
+	if ( ifire100 ) {
+		cout << Shell::myNode() << ": fire100Vm = " <<  ifire100->getVm() << ", expected Vm = " << Vm100 << endl;
+		assert( fabs( ifire100->getVm() - Vm100 ) < 1e-6 );
+	}
+	if ( ifire900 ) {
+		cout << Shell::myNode() << ": fire900Vm = " <<  ifire900->getVm() << ", expected Vm = " << Vm900 << endl;
+		assert( fabs( ifire900->getVm() - Vm900 ) < 1e-6 );
+	}
+
+	// cout << "Done ThreadIntFireNetwork" << flush;
+	cout << "." << flush;
+	// delete i2();
+	i2.destroy();
+	// synId.destroy();
+}
+	
+
+void testScheduling()
 {
 	setupTicks();
 	testThreads();
-	if ( !useMPI )
-		testThreadIntFireNetwork();
+	testThreadIntFireNetwork();
+}
+
+void testMpiScheduling()
+{
+	// testThreadNodeIntFireNetwork();
 }

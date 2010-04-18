@@ -76,14 +76,54 @@ void testFibonacci()
 	ret = OneToAllMsg::add( ticker, "process0", a1, "process" );
 	assert( ret );
 
-	/*
-	Eref clocker = Id(1).eref();
-	Clock* clock = reinterpret_cast< Clock* >( clocker.data() );
-	Qinfo dummyQ; // Not actually used in the Clock::start function
-	clock->setNumThreads( 0 );
-	clock->setBarrier( 0 );
-	clock->start( clocker, &dummyQ, numFib );
-	*/
+	shell->doStart( numFib );
+	unsigned int f1 = 1;
+	unsigned int f2 = 0;
+	for ( unsigned int i = 0; i < numFib; ++i ) {
+		if ( a1->dataHandler()->isDataHere( i ) ) {
+			Arith* data = reinterpret_cast< Arith* >( a1->dataHandler()->data1( i ) );
+			// cout << Shell::myNode() << ": i = " << i << ", " << data->getOutput() << ", " << f1 << endl;
+			assert( data->getOutput() == f1 );
+		}
+		unsigned int temp = f1;
+		f1 = temp + f2;
+		f2 = temp;
+	}
+
+	a1id.destroy();
+	cout << "." << flush;
+}
+
+/** 
+ * This test uses the Diagonal Msg and summing in the Arith element to
+ * generate a Fibonacci series.
+ */
+void testMpiFibonacci()
+{
+	unsigned int numFib = 20;
+	vector< unsigned int > dims( 1, numFib );
+
+	Id a1id = Id::nextId();
+	Element* a1 = new Element( a1id, Arith::initCinfo(), "a1", dims );
+
+	Arith* data = reinterpret_cast< Arith* >( a1->dataHandler()->data1( 0 ) );
+	if ( data ) {
+		data->arg1( 0 );
+		data->arg2( 1 );
+	}
+
+	bool ret = DiagonalMsg::add( a1, "output", a1, "arg1", 1 );
+	assert( ret );
+	ret = DiagonalMsg::add( a1, "output", a1, "arg2", 2 );
+	assert( ret );
+
+
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	shell->setclock( 0, 1.0, 0 );
+	Eref ticker = Id( 2 ).eref();
+	ret = OneToAllMsg::add( ticker, "process0", a1, "process" );
+	assert( ret );
+
 	// clock->tStart( clocker, ti )
 	if ( Shell::myNode() == 0 ) {
 		shell->doStart( numFib );
@@ -103,7 +143,7 @@ void testFibonacci()
 	for ( unsigned int i = 0; i < numFib; ++i ) {
 		if ( a1->dataHandler()->isDataHere( i ) ) {
 			Arith* data = reinterpret_cast< Arith* >( a1->dataHandler()->data1( i ) );
-			cout << Shell::myNode() << ": i = " << i << ", " << data->getOutput() << ", " << f1 << endl;
+			// cout << Shell::myNode() << ": i = " << i << ", " << data->getOutput() << ", " << f1 << endl;
 			assert( data->getOutput() == f1 );
 		}
 		unsigned int temp = f1;
@@ -115,9 +155,14 @@ void testFibonacci()
 	cout << "." << flush;
 }
 
-void testBuiltins( bool useMPI )
+void testBuiltins()
 {
 	testArith();
-	// if ( !useMPI )
-		testFibonacci();
+	testFibonacci();
+}
+
+void testMpiBuiltins( )
+{
+	//Need to update
+// 	testMpiFibonacci();
 }

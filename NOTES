@@ -4415,6 +4415,21 @@ and it seemed to come together painlessly. Checkin 1718.
 Minor cleanup of printf debugging. Checkin 1719.
 
 Converted the Fibonacci test in builtins to run multinode. It works!!!
-Tried different # of nodes, automatically does it right.
+Tried different # of nodes, automatically does it right. Checkin 1720.
+
+Working on full IntFire network matix.
+=============================================================================
+17 April.
+I've run into a lot of problems because older, low-level unit tests,
+don't play well with MPI.
+Conversely, I need to do the MPI unit tests in a manner which is completely
+high-level, using the properly operating MPI infrastructure.
+
+Setting up a framework. The non-mpi tests will just do their usual thing.
+The MPI tests will have to work with the existing infrastruture for handling
+multinode messaging.
 
 =============================================================================
+18 April.
+Framework begun. The non-mpi test are fine, but the mpi tests have yet to
+take shape. But it seems to work smoothly.

@@ -53,7 +53,8 @@ class DataHandler
 
 
 		/**
-		 * Returns the number of data entries. If we have arrays of
+		 * Returns the number of data entries in the whole message,
+		 * not just what is present here on this node. If we have arrays of
 		 * type X nested in an array of type Y, then returns total # of X.
 		 * If we have a 2-D array of type X, returns total # of X.
 		 * If we have a vector of vectors of type X, returns total # of X.

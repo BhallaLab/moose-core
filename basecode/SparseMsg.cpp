@@ -92,8 +92,8 @@ bool SparseMsg::add( Element* e1, const string& srcField,
  */
 unsigned int SparseMsg::randomConnect( double probability )
 {
-	unsigned int nRows = matrix_.nRows();
-	unsigned int nCols = matrix_.nColumns();
+	unsigned int nRows = matrix_.nRows(); // Sources
+	unsigned int nCols = matrix_.nColumns();	// Destinations
 	// matrix_.setSize( 0, nRows ); // we will transpose this later.
 	matrix_.clear();
 	unsigned int totalSynapses = 0;
@@ -102,14 +102,19 @@ unsigned int SparseMsg::randomConnect( double probability )
 	// SynElement* syn = dynamic_cast< SynElement* >( e2_ );
 	Element* syn = e2_;
 	syn->dataHandler()->getNumData2( sizes );
+	cout << Shell::myNode() << ": sizes.size() = " << sizes.size() << 
+		", ncols = " << nCols << endl;
 	assert( sizes.size() == nCols );
 
 	for ( unsigned int i = 0; i < nCols; ++i ) {
+		// Check if synapse is on local node
+		bool isSynOnMyNode = syn->dataHandler()->isDataHere( i );
 		vector< unsigned int > synIndex;
 		// This needs to be obtained from current size of syn array.
 		unsigned int synNum = sizes[ i ];
 		for ( unsigned int j = 0; j < nRows; ++j ) {
-			if ( mtrand() < probability ) {
+			double r = mtrand(); // Want to ensure it is called each time round the loop.
+			if ( r < probability && isSynOnMyNode ) {
 				synIndex.push_back( synNum );
 				++synNum;
 			} else {
@@ -117,12 +122,6 @@ unsigned int SparseMsg::randomConnect( double probability )
 			}
 		}
 		sizes[ i ] = synNum;
-		/**
-		 * Here I have a problem. The number of synapses is known here, as
-		 * synIndex. I need to specify to the target base Element to 
-		 * assign this number, without knowing what type this base Element
-		 * is.
-		 */
 		totalSynapses += synNum;
 
 		matrix_.addRow( i, synIndex );

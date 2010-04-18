@@ -136,6 +136,7 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		 * Assigns the sizes of all array field entries at once.
 		 */
 		void setNumData2( const vector< unsigned int >& sizes ) {
+			assert ( sizes.size() == parentDataHandler_->numData() );
 			for ( DataHandler::iterator i = parentDataHandler_->begin();
 				i != parentDataHandler_->end(); ++i ) {
 				char* pa = parentDataHandler_->data1( i );
@@ -158,18 +159,19 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		}
 
 		/**
-		 * Looks up the sizes of all array field entries at once. Returns
-		 * all ones for regular Elements. 
+		 * Looks up the sizes of all array field entries at once.
+		 * This is messy for multinode situations, because many/most
+		 * entries will be zero for the local node.
+		 * So I pass back not just the sizes, but also the 
 		 */
 		void getNumData2( vector< unsigned int >& sizes ) const
 		{
-			sizes.resize( 0 );
+			sizes.assign( parentDataHandler_->numData(), 0 );
 			for ( DataHandler::iterator i = parentDataHandler_->begin();
 				i != parentDataHandler_->end(); ++i ) {
 				char* pa = parentDataHandler_->data1( i );
-				sizes.push_back( 
-				( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )()
-				);
+				sizes[i] =  
+				( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
 			}
 
 			/*
