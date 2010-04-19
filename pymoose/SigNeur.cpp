@@ -11,6 +11,7 @@ SigNeur::SigNeur(const SigNeur& src, std::string objectName, PyMooseBase& parent
 SigNeur::SigNeur(const SigNeur& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 SigNeur::SigNeur(const SigNeur& src, std::string path):PyMooseBase(src, path){}
 SigNeur::SigNeur(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+SigNeur::SigNeur(const Id& src, std::string path):PyMooseBase(src, path){}
 SigNeur::~SigNeur(){}
 const std::string& SigNeur::getType(){ return className_; }
 Id& SigNeur::__get_cellProto() const

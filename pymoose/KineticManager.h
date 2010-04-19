@@ -13,6 +13,7 @@ namespace pymoose{
         KineticManager( const KineticManager& src, std::string name, Id& parent);
         KineticManager( const KineticManager& src, std::string path);
         KineticManager( const Id& src, std::string name, Id& parent);
+	KineticManager( const Id& src, std::string path);
         ~KineticManager();
         const std::string& getType();
             bool __get_autoMode() const;

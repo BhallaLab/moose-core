@@ -16,6 +16,7 @@ namespace pymoose
 		GLview( const GLview& src, std::string name, PyMooseBase& parent );
 		GLview( const GLview& src, std::string name, Id& parent );
 		GLview( const GLview& src, std::string path );
+		GLview( const Id& src, std::string path );
 		GLview( const Id& src, std::string name, Id& parent );
 		~GLview();
 		const std::string& getType();

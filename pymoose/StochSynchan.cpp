@@ -153,6 +153,9 @@ StochSynchan::StochSynchan(const StochSynchan& src, std::string path):PyMooseBas
 StochSynchan::StochSynchan(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
 {
 }
+StochSynchan::StochSynchan(const Id& src, string path):PyMooseBase(src, path)
+{
+}
 StochSynchan::~StochSynchan()
 {
     delete weight;

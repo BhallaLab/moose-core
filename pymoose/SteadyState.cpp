@@ -11,6 +11,7 @@ SteadyState::SteadyState(const SteadyState& src, std::string objectName, PyMoose
 SteadyState::SteadyState(const SteadyState& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 SteadyState::SteadyState(const SteadyState& src, std::string path):PyMooseBase(src, path){}
 SteadyState::SteadyState(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+SteadyState::SteadyState(const Id& src, std::string path):PyMooseBase(src, path){}
 SteadyState::~SteadyState(){}
 const std::string& SteadyState::getType(){ return className_; }
 bool SteadyState::__get_badStoichiometry() const

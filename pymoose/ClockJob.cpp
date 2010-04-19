@@ -14,6 +14,9 @@ ClockJob::ClockJob(const ClockJob& src, std::string objectName, Id& parent):PyMo
 ClockJob::ClockJob(const ClockJob& src, std::string path):PyMooseBase(src, path)
 {
 }
+ClockJob::ClockJob(const Id& src, std::string path):PyMooseBase(src, path)
+{
+}
 
 ClockJob::ClockJob(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
 {

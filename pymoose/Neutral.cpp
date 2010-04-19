@@ -18,6 +18,9 @@ Neutral::Neutral(const Neutral& src, std::string path):PyMooseBase(src, path)
 Neutral::Neutral(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
 {
 }
+Neutral::Neutral(const Id& src, string path):PyMooseBase(src, path)
+{
+}
 
 Neutral::~Neutral(){}
 const std::string& Neutral::getType(){ return className_; }

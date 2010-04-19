@@ -14,6 +14,7 @@ namespace pymoose{
         TriPanel( const TriPanel& src, std::string name, Id& parent);
         TriPanel( const TriPanel& src, std::string path);
         TriPanel( const Id& src, std::string name, Id& parent);
+        TriPanel( const Id& src, std::string path);
         ~TriPanel();
         const std::string& getType();
     };

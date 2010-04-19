@@ -22,6 +22,22 @@ void initPyMoose()
 {    
     context = PyMooseBase::getContext();
 }
+
+/**
+  returns true if path ends with a slash (separator).
+*/
+bool endsWithSep(string path){
+    return !path.compare(path.length() - PyMooseBase::getSeparator().length(), PyMooseBase::getSeparator().length(), PyMooseBase::getSeparator());
+}
+
+/**
+  returns true if path is root-path or does not end with the
+  separator.
+*/
+bool pathIsSane(string path){
+    return !(endsWithSep(path) && path != "/" && path.length() > 0);
+}
+
 pymoose::PyMooseContext* PyMooseBase::context_ = pymoose::PyMooseContext::createPyMooseContext("BaseContext", "shell");
 
 /**
@@ -116,7 +132,12 @@ PyMooseBase::PyMooseBase(std::string className, std::string objectName, Id paren
 PyMooseBase::PyMooseBase(std::string className, std::string path)
 {
      
-    assert(path.length() > 0);
+    std::string::size_type length = path.length();
+    if (!pathIsSane(path)){
+        cerr << "PyMooseBase::PyMooseBase(std::string className, std::string path) [className=" << className << ", path=" << path << "] -- path cannot be an empty string." << endl;
+        return;
+    }
+    
     // Consider the pros and cons - do we want to check pre existence for each new create call?
     // But I personally tend to make the mistake of trying to wrap an existing path inside a new python object
     // table_A = moose.Interpol(channel.getPath+'/xGate/A') - which fails otherwise
@@ -217,6 +238,17 @@ PyMooseBase::PyMooseBase(std::string className, std::string path, std::string fi
 {
     // ReadCell reader;
 //     reader.read(fileName, path);
+    std::string::size_type length = path.length();
+    if (length <= 0) {
+        cerr << "PyMooseBase::PyMooseBase(std::string className, std::string path, std::string fileName) -- path cannot be an empty string." << endl;
+        return;
+    } else {
+        if (path.compare(length - getSeparator().length(), getSeparator().length(), getSeparator())) {
+            cerr << "PyMooseBase::PyMooseBase(std::string className, std::string path, std::string fileName) -- path to target object cannot end with '" << getSeparator() << "'." << endl;
+            return;
+        }
+    }
+    
     id_ = PyMooseBase::pathToId(path,false);
     if (!id_.bad())
     {
@@ -225,11 +257,11 @@ PyMooseBase::PyMooseBase(std::string className, std::string path, std::string fi
         
         if ( path == getSeparator() || path == (getSeparator()+"root"))
         {
-            cerr << "Returning the predefined root element." << endl;
+            cout << "Returning the predefined root element." << endl;
         }
         else 
         {
-            cerr << "Returning already existing object." << endl;
+            cout << "Returning already existing object." << endl;
         }
 #endif
         return;
@@ -245,6 +277,11 @@ PyMooseBase::PyMooseBase(const PyMooseBase& src, std::string objectName, PyMoose
 
 PyMooseBase::PyMooseBase(const PyMooseBase& src, std::string path)
 {
+    std::string::size_type length = path.length();
+    if (!pathIsSane(path)){
+        cerr << "PyMooseBase::PyMooseBase(const PyMooseBase& src, std::string path) -- path cannot be empty or end with '/'." << endl;
+        return;
+    } 
     id_ = PyMooseBase::pathToId(path,false);
     if (!id_.bad())
     {
@@ -255,7 +292,9 @@ PyMooseBase::PyMooseBase(const PyMooseBase& src, std::string path)
     std::string::size_type name_start = path.rfind(getSeparator(),path.length()-1);
     std::string myName;    
     std::string parentPath;
-    
+#ifndef NDEBUG
+    cout << "Name start: " << name_start << endl;
+#endif
     if (name_start == std::string::npos)
     {
         name_start = 0;
@@ -266,9 +305,17 @@ PyMooseBase::PyMooseBase(const PyMooseBase& src, std::string path)
     else 
     {
         myName = path.substr(name_start+1);
+        
         parentPath = path.substr(0,name_start);
+#ifndef NDEBUG
+    cout << "PyMooseBase(const PyMooseBase& src, string path): myName = " << myName << ", parentPath = " << parentPath << endl;
+#endif
         Id parentId = context_->pathToId(parentPath, false);
-        id_ = context_->deepCopy(src.id_, parentId, myName);
+        if (parentId.bad()){
+            cerr << "Error: PyMooseBase::PyMooseBase(const PyMooseBase& src, std::string path) -- parent object: " << parentPath << " not found." << endl;
+        } else {
+            id_ = context_->deepCopy(src.id_, parentId, myName);
+        }
     }
 }
 
@@ -277,6 +324,48 @@ PyMooseBase::PyMooseBase(const Id& src, string name, Id& parent)
     id_ = context_->deepCopy(src, parent, name);    
 }
 
+PyMooseBase::PyMooseBase(const Id& src, std::string path)
+{
+    std::string::size_type length = path.length();
+    if (!pathIsSane(path)){
+        cerr << "PyMooseBase::PyMooseBase(const Id& src, std::string path) -- path cannot be an empty string or end with '/'." << endl;
+        return;
+    }
+    id_ = PyMooseBase::pathToId(path,false);
+    if (!id_.bad())
+    {
+        cerr << "Warning: target object exists. No copying done." << endl;        
+        return;
+    }
+    id_ = PyMooseBase::pathToId(path,false);
+    if (!id_.bad())
+    {
+        cerr << "Warning: target object exists. No copying done." << endl;        
+        return;
+    }
+    std::string::size_type name_start = path.rfind(getSeparator(),path.length()-1);
+    std::string myName;    
+    std::string parentPath;
+    
+    if (name_start == std::string::npos)
+    {
+        name_start = 0;
+        myName = path;
+        Id parentId = context_->getCwe();
+        id_ = context_->deepCopy(src, parentId, myName);        
+    }
+    else 
+    {
+        myName = path.substr(name_start+1);
+        parentPath = path.substr(0,name_start);
+        Id parentId = context_->pathToId(parentPath, false);
+        if (parentId.bad()){
+            cerr << "Error: PyMooseBase::PyMooseBase(const PyMooseBase& src, std::string path) -- parent object: " << parentPath << " not found." << endl;
+        } else {
+            id_ = context_->deepCopy(src, parentId, myName);
+        }
+    }
+}
 
 PyMooseBase::PyMooseBase(const PyMooseBase& src, std::string objectName, Id& parent)
 {
@@ -346,7 +435,7 @@ void PyMooseBase::setField(std::string name, std::string value)
     PyMooseBase::getContext()->setField(this->id_, name, value);
 }
 
-const std::string& PyMooseBase::getSeparator() const
+const std::string& PyMooseBase::getSeparator() 
 {
     return context_->separator;    
 }

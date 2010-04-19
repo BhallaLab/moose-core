@@ -22,7 +22,8 @@ namespace pymoose
         PyMooseBase(const PyMooseBase& src, std::string objectName, PyMooseBase& parent);
         PyMooseBase(const PyMooseBase& src, std::string objectName, Id& parent);
         PyMooseBase(const PyMooseBase& src, std::string path);
-        PyMooseBase(const Id& src, string name, Id& parent);
+        PyMooseBase(const Id& src, std::string name, Id& parent);
+        PyMooseBase(const Id& src, std::string path);
         
         virtual ~PyMooseBase();
 
@@ -32,7 +33,7 @@ namespace pymoose
         static bool destroy(Id id);    
         static void endSimulation();    
         virtual const std::string& getType() = 0;
-        const std::string& getSeparator() const;
+        static const std::string& getSeparator();
         static pymoose::PyMooseContext* getContext();
         const std::vector<std::string> getFieldList() const;
         const std::vector<std::string> __get_fieldList() const;

@@ -12,6 +12,7 @@ namespace pymoose{
         TimeTable( const TimeTable& src, std::string name, PyMooseBase& parent);
         TimeTable( const TimeTable& src, std::string name, Id& parent);
         TimeTable( const TimeTable& src, std::string path);
+        TimeTable( const Id& src, std::string path);
         TimeTable( const Id& src, std::string name, Id& parent);
         ~TimeTable();
         const std::string& getType();

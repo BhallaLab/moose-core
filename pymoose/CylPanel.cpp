@@ -11,6 +11,7 @@ CylPanel::CylPanel(const CylPanel& src, std::string objectName, PyMooseBase& par
 CylPanel::CylPanel(const CylPanel& src, std::string objectName, Id& parent):Panel(src, objectName, parent){}
 CylPanel::CylPanel(const CylPanel& src, std::string path):Panel(src, path){}
 CylPanel::CylPanel(const Id& src, std::string name, Id& parent):Panel(src, name, parent){}
+CylPanel::CylPanel(const Id& src, std::string path):Panel(src, path){}
 CylPanel::~CylPanel(){}
 const std::string& CylPanel::getType(){ return className_; }
 #endif

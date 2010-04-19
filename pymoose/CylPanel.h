@@ -14,6 +14,7 @@ namespace pymoose{
         CylPanel( const CylPanel& src, std::string name, Id& parent);
         CylPanel( const CylPanel& src, std::string path);
         CylPanel( const Id& src, std::string name, Id& parent);
+	CylPanel( const Id& src, std::string path);
         ~CylPanel();
         const std::string& getType();
     };

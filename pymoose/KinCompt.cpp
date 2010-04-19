@@ -11,6 +11,8 @@ KinCompt::KinCompt(const KinCompt& src, std::string objectName, PyMooseBase& par
 KinCompt::KinCompt(const KinCompt& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 KinCompt::KinCompt(const KinCompt& src, std::string path):PyMooseBase(src, path){}
 KinCompt::KinCompt(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+KinCompt::KinCompt(const Id& src, std::string path):PyMooseBase(src, path){}
+
 KinCompt::~KinCompt(){}
 const std::string& KinCompt::getType(){ return className_; }
 double KinCompt::__get_volume() const

@@ -12,6 +12,8 @@ HHChannel::HHChannel(const HHChannel& src, std::string objectName, PyMooseBase& 
 HHChannel::HHChannel(const HHChannel& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 HHChannel::HHChannel(const HHChannel& src, std::string path):PyMooseBase(src, path){}
 HHChannel::HHChannel(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+HHChannel::HHChannel(const Id& src, std::string path):PyMooseBase(src, path){}
+
 HHChannel::~HHChannel(){}
 const std::string& HHChannel::getType(){ return className_; }
 double HHChannel::__get_Gbar() const

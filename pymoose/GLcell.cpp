@@ -12,6 +12,7 @@ GLcell::GLcell( std::string name, PyMooseBase& parent ) : PyMooseBase( className
 GLcell::GLcell( const GLcell& src, std::string name, PyMooseBase& parent ) : PyMooseBase( src, name, parent ) {}
 GLcell::GLcell( const GLcell& src, std::string name, Id& parent ) : PyMooseBase( src, name, parent ) {}
 GLcell::GLcell( const GLcell& src, std::string path ) : PyMooseBase( src, path ) {}
+GLcell::GLcell( const Id& src, std::string path ) : PyMooseBase( src, path ) {}
 GLcell::GLcell( const Id& src, std::string name, Id& parent ) : PyMooseBase( src, name, parent ) {}
 GLcell::~GLcell() {}
 const std::string& GLcell::getType() { return className_; }

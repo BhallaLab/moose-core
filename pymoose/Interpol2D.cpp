@@ -11,6 +11,8 @@ Interpol2D::Interpol2D(const Interpol2D& src, std::string objectName, PyMooseBas
 Interpol2D::Interpol2D(const Interpol2D& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 Interpol2D::Interpol2D(const Interpol2D& src, std::string path):PyMooseBase(src, path){}
 Interpol2D::Interpol2D(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+Interpol2D::Interpol2D(const Id& src, std::string path):PyMooseBase(src, path){}
+
 Interpol2D::~Interpol2D(){}
 const std::string& Interpol2D::getType(){ return className_; }
 double Interpol2D::__get_ymin() const

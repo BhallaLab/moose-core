@@ -13,6 +13,7 @@ namespace pymoose{
         InterSolverFlux( const InterSolverFlux& src, std::string name, Id& parent);
         InterSolverFlux( const InterSolverFlux& src, std::string path);
         InterSolverFlux( const Id& src, std::string name, Id& parent);
+	InterSolverFlux( const Id& src, std::string path);
         ~InterSolverFlux();
         const std::string& getType();
             string __get_method() const;
