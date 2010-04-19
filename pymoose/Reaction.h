@@ -14,6 +14,7 @@ namespace pymoose
         Reaction(const Reaction& src,std::string name, Id& parent);
         Reaction(const Id& src,std::string name, Id& parent);
         Reaction(const Reaction& src,std::string path);
+        Reaction(const Id& src,std::string path);
         ~Reaction();
         const std::string& getType();
         double __get_kf() const;

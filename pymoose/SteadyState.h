@@ -13,6 +13,7 @@ namespace pymoose{
         SteadyState( const SteadyState& src, std::string name, Id& parent);
         SteadyState( const SteadyState& src, std::string path);
         SteadyState( const Id& src, std::string name, Id& parent);
+        SteadyState( const Id& src, std::string path);
         ~SteadyState();
         const std::string& getType();
             bool __get_badStoichiometry() const;

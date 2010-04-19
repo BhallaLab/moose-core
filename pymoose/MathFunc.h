@@ -15,6 +15,7 @@ namespace pymoose
         MathFunc(const MathFunc& src,std::string name, Id& parent);
         MathFunc( const MathFunc& src, std::string path);
         MathFunc( const Id& src, std::string name, Id& parent);
+	MathFunc( const Id& src, std::string path);
         ~MathFunc();
         const std::string& getType();
         string __get_mathML() const;

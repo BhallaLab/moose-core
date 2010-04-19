@@ -15,6 +15,7 @@ namespace pymoose
         Enzyme(const Enzyme& src,std::string name, Id& parent);
         Enzyme(const Id& src,std::string name, Id& parent);
         Enzyme(const Enzyme& src,std::string path);
+        Enzyme(const Id& src,std::string path);
         ~Enzyme();
         const std::string& getType();
         double __get_k1() const;

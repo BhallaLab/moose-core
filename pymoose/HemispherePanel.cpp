@@ -11,6 +11,7 @@ HemispherePanel::HemispherePanel(const HemispherePanel& src, std::string objectN
 HemispherePanel::HemispherePanel(const HemispherePanel& src, std::string objectName, Id& parent):Panel(src, objectName, parent){}
 HemispherePanel::HemispherePanel(const HemispherePanel& src, std::string path):Panel(src, path){}
 HemispherePanel::HemispherePanel(const Id& src, std::string name, Id& parent):Panel(src, name, parent){}
+HemispherePanel::HemispherePanel(const Id& src, std::string path):Panel(src, path){}
 HemispherePanel::~HemispherePanel(){}
 const std::string& HemispherePanel::getType(){ return className_; }
 #endif

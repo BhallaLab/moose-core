@@ -17,6 +17,9 @@ Nernst::Nernst(const Nernst& src, std::string path):PyMooseBase(src, path)
 Nernst::Nernst(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
 {
 }
+Nernst::Nernst(const Id& src, string path):PyMooseBase(src, path)
+{
+}
 Nernst::~Nernst(){}
 const std::string& Nernst::getType(){ return className_; }
 double Nernst::__get_E() const

@@ -11,6 +11,8 @@ AscFile::AscFile(const AscFile& src, std::string objectName, PyMooseBase& parent
 AscFile::AscFile(const AscFile& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 AscFile::AscFile(const AscFile& src, std::string path):PyMooseBase(src, path){}
 AscFile::AscFile(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+AscFile::AscFile(const Id& src, std::string path):PyMooseBase(src, path){}
+
 AscFile::~AscFile(){}
 const std::string& AscFile::getType(){ return className_; }
 string AscFile::__get_fileName() const

@@ -11,6 +11,8 @@ NeuroScan::NeuroScan(const NeuroScan& src, std::string objectName, PyMooseBase& 
 NeuroScan::NeuroScan(const NeuroScan& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 NeuroScan::NeuroScan(const NeuroScan& src, std::string path):PyMooseBase(src, path){}
 NeuroScan::NeuroScan(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+NeuroScan::NeuroScan(const Id& src, std::string path):PyMooseBase(src, path){}
+
 NeuroScan::~NeuroScan(){}
 const std::string& NeuroScan::getType(){ return className_; }
 int NeuroScan::__get_VDiv() const

@@ -11,6 +11,8 @@ GHK::GHK(const GHK& src, std::string objectName, PyMooseBase& parent):PyMooseBas
 GHK::GHK(const GHK& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 GHK::GHK(const GHK& src, std::string path):PyMooseBase(src, path){}
 GHK::GHK(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+GHK::GHK(const Id& src, std::string path):PyMooseBase(src, path){}
+
 GHK::~GHK(){}
 const std::string& GHK::getType(){ return className_; }
 double GHK::__get_Ik() const

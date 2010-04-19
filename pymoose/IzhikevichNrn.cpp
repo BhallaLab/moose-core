@@ -11,6 +11,8 @@ IzhikevichNrn::IzhikevichNrn(const IzhikevichNrn& src, std::string objectName, P
 IzhikevichNrn::IzhikevichNrn(const IzhikevichNrn& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 IzhikevichNrn::IzhikevichNrn(const IzhikevichNrn& src, std::string path):PyMooseBase(src, path){}
 IzhikevichNrn::IzhikevichNrn(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+IzhikevichNrn::IzhikevichNrn(const Id& src, std::string path):PyMooseBase(src, path){}
+
 IzhikevichNrn::~IzhikevichNrn(){}
 const std::string& IzhikevichNrn::getType(){ return className_; }
 double IzhikevichNrn::__get_Vmax() const

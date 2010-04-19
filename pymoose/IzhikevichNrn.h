@@ -13,6 +13,7 @@ namespace pymoose{
         IzhikevichNrn( const IzhikevichNrn& src, std::string name, Id& parent);
         IzhikevichNrn( const IzhikevichNrn& src, std::string path);
         IzhikevichNrn( const Id& src, std::string name, Id& parent);
+	IzhikevichNrn( const Id& src, std::string path);
         ~IzhikevichNrn();
         const std::string& getType();
             double __get_Vmax() const;

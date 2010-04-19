@@ -14,6 +14,7 @@ namespace pymoose{
         HemispherePanel( const HemispherePanel& src, std::string name, Id& parent);
         HemispherePanel( const HemispherePanel& src, std::string path);
         HemispherePanel( const Id& src, std::string name, Id& parent);
+	HemispherePanel( const Id& src, std::string path);
         ~HemispherePanel();
         const std::string& getType();
     };

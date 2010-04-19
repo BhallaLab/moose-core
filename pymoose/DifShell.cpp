@@ -11,6 +11,8 @@ DifShell::DifShell(const DifShell& src, std::string objectName, PyMooseBase& par
 DifShell::DifShell(const DifShell& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 DifShell::DifShell(const DifShell& src, std::string path):PyMooseBase(src, path){}
 DifShell::DifShell(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+DifShell::DifShell(const Id& src, std::string path):PyMooseBase(src, path){}
+
 DifShell::~DifShell(){}
 const std::string& DifShell::getType(){ return className_; }
 double DifShell::__get_C() const

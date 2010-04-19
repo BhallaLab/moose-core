@@ -13,6 +13,7 @@ namespace pymoose{
         AscFile( const AscFile& src, std::string name, Id& parent);
         AscFile( const AscFile& src, std::string path);
         AscFile( const Id& src, std::string name, Id& parent);
+	AscFile( const Id& src, std::string path);
         ~AscFile();
         const std::string& getType();
             string __get_fileName() const;

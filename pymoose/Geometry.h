@@ -13,6 +13,7 @@ namespace pymoose{
         Geometry( const Geometry& src, std::string name, Id& parent);
         Geometry( const Geometry& src, std::string path);
         Geometry( const Id& src, std::string name, Id& parent);
+	Geometry( const Id& src, std::string path);
         ~Geometry();
         const std::string& getType();
             double __get_epsilon() const;

@@ -13,6 +13,9 @@ ExponentialRng::ExponentialRng(const ExponentialRng& src, std::string objectName
 ExponentialRng::ExponentialRng(const ExponentialRng& src, std::string path):RandGenerator(src, path)
 {
 }
+ExponentialRng::ExponentialRng(const Id& src, std::string path):RandGenerator(src, path)
+{
+}
 
 ExponentialRng::ExponentialRng(const Id& src, string name, Id& parent):RandGenerator(src, name, parent)
 {

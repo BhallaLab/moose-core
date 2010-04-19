@@ -14,6 +14,9 @@ Tick::Tick(const Tick& src, std::string objectName, Id& parent):PyMooseBase(src,
 Tick::Tick(const Tick& src, std::string path):PyMooseBase(src, path)
 {
 }
+Tick::Tick(const Id& src, std::string path):PyMooseBase(src, path)
+{
+}
 
 Tick::Tick(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
 {

@@ -11,6 +11,8 @@ HHChannel2D::HHChannel2D(const HHChannel2D& src, std::string objectName, PyMoose
 HHChannel2D::HHChannel2D(const HHChannel2D& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 HHChannel2D::HHChannel2D(const HHChannel2D& src, std::string path):PyMooseBase(src, path){}
 HHChannel2D::HHChannel2D(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+HHChannel2D::HHChannel2D(const Id& src, std::string path):PyMooseBase(src, path){}
+
 HHChannel2D::~HHChannel2D(){}
 const std::string& HHChannel2D::getType(){ return className_; }
 string HHChannel2D::__get_Xindex() const

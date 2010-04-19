@@ -14,6 +14,7 @@ namespace pymoose
         Tick(const Tick& src,std::string name, Id& parent);
         Tick(const Id& src,std::string name, Id& parent);
         Tick(const Tick& src,std::string path);
+        Tick(const Id& src,std::string path);
         ~Tick();
         const std::string& getType();
         double __get_dt() const;

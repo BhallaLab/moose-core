@@ -13,6 +13,7 @@ namespace pymoose{
         Interpol2D( const Interpol2D& src, std::string name, Id& parent);
         Interpol2D( const Interpol2D& src, std::string path);
         Interpol2D( const Id& src, std::string name, Id& parent);
+	Interpol2D( const Id& src, std::string path);
         ~Interpol2D();
         const std::string& getType();
             double __get_ymin() const;

@@ -17,6 +17,9 @@ PulseGen::PulseGen(const PulseGen& src, std::string path):PyMooseBase(src, path)
 PulseGen::PulseGen(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
 {
 }
+PulseGen::PulseGen(const Id& src, string path):PyMooseBase(src, path)
+{
+}
 PulseGen::~PulseGen(){}
 const std::string& PulseGen::getType(){ return className_; }
 double PulseGen::__get_firstLevel() const

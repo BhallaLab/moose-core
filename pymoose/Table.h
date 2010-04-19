@@ -15,6 +15,7 @@ namespace pymoose
         Table(const Table& src,std::string name, Id& parent);
         Table(const Id& src,std::string name, Id& parent);
         Table(const Table& src,std::string path);
+        Table(const Id& src,std::string path);
         ~Table();
         const std::string& getType();
         double __get_input() const;

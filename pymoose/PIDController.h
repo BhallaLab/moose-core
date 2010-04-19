@@ -13,6 +13,7 @@ namespace pymoose{
         PIDController( const PIDController& src, std::string name, Id& parent);
         PIDController( const PIDController& src, std::string path);
         PIDController( const Id& src, std::string name, Id& parent);
+        PIDController( const Id& src, std::string path);
         ~PIDController();
         const std::string& getType();
             double __get_gain() const;

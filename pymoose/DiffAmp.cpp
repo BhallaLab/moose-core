@@ -11,6 +11,8 @@ DiffAmp::DiffAmp(const DiffAmp& src, std::string objectName, PyMooseBase& parent
 DiffAmp::DiffAmp(const DiffAmp& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 DiffAmp::DiffAmp(const DiffAmp& src, std::string path):PyMooseBase(src, path){}
 DiffAmp::DiffAmp(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+DiffAmp::DiffAmp(const Id& src, std::string path):PyMooseBase(src, path){}
+
 DiffAmp::~DiffAmp(){}
 const std::string& DiffAmp::getType(){ return className_; }
 double DiffAmp::__get_gain() const
