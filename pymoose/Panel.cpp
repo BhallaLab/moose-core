@@ -37,6 +37,12 @@ Panel::Panel(
     :PyMooseBase(src, name, parent)
 {
 }
+Panel::Panel(
+        const Id& src,
+        std::string path)
+        :PyMooseBase(src, path)
+{
+}
 Panel::Panel(std::string typeName, std::string objectName, Id parentId):
     PyMooseBase(typeName, objectName, parentId)
 {

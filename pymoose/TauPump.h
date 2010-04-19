@@ -13,6 +13,7 @@ namespace pymoose{
         TauPump( const TauPump& src, std::string name, Id& parent);
         TauPump( const TauPump& src, std::string path);
         TauPump( const Id& src, std::string name, Id& parent);
+        TauPump( const Id& src, std::string path);
         ~TauPump();
         const std::string& getType();
             double __get_pumpRate() const;

@@ -11,6 +11,7 @@ Surface::Surface(const Surface& src, std::string objectName, PyMooseBase& parent
 Surface::Surface(const Surface& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 Surface::Surface(const Surface& src, std::string path):PyMooseBase(src, path){}
 Surface::Surface(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+Surface::Surface(const Id& src, std::string path):PyMooseBase(src, path){}
 Surface::~Surface(){}
 const std::string& Surface::getType(){ return className_; }
 double Surface::__get_volume() const

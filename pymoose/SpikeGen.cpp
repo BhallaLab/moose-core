@@ -17,6 +17,9 @@ SpikeGen::SpikeGen(const SpikeGen& src, std::string path):PyMooseBase(src, path)
 SpikeGen::SpikeGen(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
 {
 }
+SpikeGen::SpikeGen(const Id& src, string path):PyMooseBase(src, path)
+{
+}
 SpikeGen::~SpikeGen(){}
 const std::string& SpikeGen::getType(){ return className_; }
 double SpikeGen::__get_threshold() const

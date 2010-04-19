@@ -21,6 +21,9 @@ Geometry::Geometry( const Geometry& src, std::string path):PyMooseBase(src, path
 Geometry::Geometry( const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent)
 {
 }
+Geometry::Geometry( const Id& src, std::string path):PyMooseBase(src, path)
+{
+}
 
 
 Geometry::~Geometry(){}

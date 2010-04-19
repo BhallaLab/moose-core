@@ -19,6 +19,7 @@ namespace pymoose
         Interpol(const Interpol& src,std::string name, Id& parent);
         Interpol(const Id& src,std::string name, Id& parent);
         Interpol(const Interpol& src,std::string path);
+        Interpol(const Id& src,std::string path);
         ~Interpol();
         const std::string& getType();
         double __get_xmin() const;

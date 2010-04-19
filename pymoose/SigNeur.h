@@ -13,6 +13,7 @@ namespace pymoose{
         SigNeur( const SigNeur& src, std::string name, Id& parent);
         SigNeur( const SigNeur& src, std::string path);
         SigNeur( const Id& src, std::string name, Id& parent);
+        SigNeur( const Id& src, std::string path);
         ~SigNeur();
         const std::string& getType();
             Id& __get_cellProto() const;

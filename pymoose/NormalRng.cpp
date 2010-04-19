@@ -17,6 +17,9 @@ NormalRng::NormalRng(const NormalRng& src, std::string path):RandGenerator(src, 
 NormalRng::NormalRng(const Id& src, string name, Id& parent):RandGenerator(src, name, parent)
 {
 }
+NormalRng::NormalRng(const Id& src, string path):RandGenerator(src, path)
+{
+}
 NormalRng::~NormalRng(){}
 const std::string& NormalRng::getType(){ return className_; }
 double NormalRng::__get_mean() const

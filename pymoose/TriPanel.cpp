@@ -11,6 +11,7 @@ TriPanel::TriPanel(const TriPanel& src, std::string objectName, PyMooseBase& par
 TriPanel::TriPanel(const TriPanel& src, std::string objectName, Id& parent):Panel(src, objectName, parent){}
 TriPanel::TriPanel(const TriPanel& src, std::string path):Panel(src, path){}
 TriPanel::TriPanel(const Id& src, std::string name, Id& parent):Panel(src, name, parent){}
+TriPanel::TriPanel(const Id& src, std::string path):Panel(src, path){}
 TriPanel::~TriPanel(){}
 const std::string& TriPanel::getType(){ return className_; }
 #endif

@@ -13,6 +13,9 @@ Table::Table(const Table& src, std::string objectName, Id& parent):Interpol(src,
 Table::Table(const Table& src, std::string path):Interpol(src, path)
 {
 }
+Table::Table(const Id& src, std::string path):Interpol(src, path)
+{
+}
 
 Table::Table(const Id& src, string name, Id& parent):Interpol(src, name, parent)
 {

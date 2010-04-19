@@ -14,6 +14,7 @@ namespace pymoose
         Stoich(const Stoich& src,std::string name, Id& parent);
         Stoich(const Id& src,std::string name, Id& parent);
         Stoich(const Stoich& src,std::string path);
+        Stoich(const Id& src,std::string path);
         ~Stoich();
         const std::string& getType();
         unsigned int __get_nMols() const;

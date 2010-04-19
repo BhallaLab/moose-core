@@ -11,6 +11,8 @@ Adaptor::Adaptor(const Adaptor& src, std::string objectName, PyMooseBase& parent
 Adaptor::Adaptor(const Adaptor& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 Adaptor::Adaptor(const Adaptor& src, std::string path):PyMooseBase(src, path){}
 Adaptor::Adaptor(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+Adaptor::Adaptor(const Id& src, std::string path):PyMooseBase(src, path){}
+
 Adaptor::~Adaptor(){}
 const std::string& Adaptor::getType(){ return className_; }
 double Adaptor::__get_inputOffset() const

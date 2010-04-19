@@ -11,6 +11,8 @@ NeuroHub::NeuroHub(const NeuroHub& src, std::string objectName, PyMooseBase& par
 NeuroHub::NeuroHub(const NeuroHub& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 NeuroHub::NeuroHub(const NeuroHub& src, std::string path):PyMooseBase(src, path){}
 NeuroHub::NeuroHub(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+NeuroHub::NeuroHub(const Id& src, std::string path):PyMooseBase(src, path){}
+
 NeuroHub::~NeuroHub(){}
 const std::string& NeuroHub::getType(){ return className_; }
 #endif

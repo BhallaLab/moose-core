@@ -15,6 +15,7 @@ namespace pymoose
         UniformRng(const UniformRng& src,std::string name, Id& parent);
         UniformRng(const Id& src,std::string name, Id& parent);
         UniformRng(const UniformRng& src,std::string path);
+        UniformRng(const Id& src,std::string path);
 
         ~UniformRng();
         const std::string& getType();

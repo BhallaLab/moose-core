@@ -33,6 +33,9 @@ pymoose::Class::Class(const pymoose::Class& src, std::string objectName, Id& par
 pymoose::Class::Class(const pymoose::Class& src, std::string path):PyMooseBase(src, path)
 {
 }
+pymoose::Class::Class(const ::Id& src, std::string path):PyMooseBase(src, path)
+{
+}
 
 pymoose::Class::Class(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
 {

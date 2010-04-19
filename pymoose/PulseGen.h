@@ -13,6 +13,7 @@ namespace pymoose{
         PulseGen(const PulseGen& src,std::string name, Id& parent);
         PulseGen(const Id& src,std::string name, Id& parent);
         PulseGen(const PulseGen& src,std::string path);
+        PulseGen(const Id& src,std::string path);
         ~PulseGen();
         const std::string& getType();
         double __get_firstLevel() const;

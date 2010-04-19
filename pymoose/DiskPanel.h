@@ -15,6 +15,7 @@ namespace pymoose{
         DiskPanel( const DiskPanel& src, std::string name, Id& parent);
         DiskPanel( const DiskPanel& src, std::string path);
         DiskPanel( const Id& src, std::string name, Id& parent);
+	DiskPanel( const Id& src, std::string path);
         ~DiskPanel();
         const std::string& getType();
     };

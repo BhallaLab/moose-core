@@ -13,6 +13,7 @@ namespace pymoose{
         Panel( const Panel& src, std::string name, Id& parent);
         Panel( const Panel& src, std::string path);
         Panel( const Id& src, std::string name, Id& parent);
+        Panel( const Id& src, std::string path);
         
 	Panel(std::string typeName, std::string objectName, Id parentId);
         Panel(std::string typeName, std::string path);

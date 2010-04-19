@@ -13,6 +13,9 @@ CaConc::CaConc(const CaConc& src, std::string objectName, Id& parent):PyMooseBas
 CaConc::CaConc(const CaConc& src, std::string path):PyMooseBase(src, path)
 {
 }
+CaConc::CaConc(const Id& src, std::string path):PyMooseBase(src, path)
+{
+}
 
 CaConc::CaConc(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
 {

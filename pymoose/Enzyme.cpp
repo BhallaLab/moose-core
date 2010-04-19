@@ -13,6 +13,9 @@ Enzyme::Enzyme(const Enzyme& src, std::string objectName, Id& parent):PyMooseBas
 Enzyme::Enzyme(const Enzyme& src, std::string path):PyMooseBase(src, path)
 {
 }
+Enzyme::Enzyme(const Id& src, std::string path):PyMooseBase(src, path)
+{
+}
 
 Enzyme::Enzyme(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
 {

@@ -11,6 +11,8 @@ GssaStoich::GssaStoich(const GssaStoich& src, std::string objectName, PyMooseBas
 GssaStoich::GssaStoich(const GssaStoich& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 GssaStoich::GssaStoich(const GssaStoich& src, std::string path):PyMooseBase(src, path){}
 GssaStoich::GssaStoich(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+GssaStoich::GssaStoich(const Id& src, std::string path):PyMooseBase(src, path){}
+
 GssaStoich::~GssaStoich(){}
 const std::string& GssaStoich::getType(){ return className_; }
 string GssaStoich::__get_method() const
