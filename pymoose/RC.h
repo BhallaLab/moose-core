@@ -13,6 +13,7 @@ namespace pymoose{
         RC( const RC& src, std::string name, Id& parent);
         RC( const RC& src, std::string path);
         RC( const Id& src, std::string name, Id& parent);
+        RC( const Id& src, std::string path);
         ~RC();
         const std::string& getType();
             double __get_V0() const;

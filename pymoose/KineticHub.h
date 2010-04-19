@@ -15,6 +15,7 @@ namespace pymoose
         KineticHub(const KineticHub& src,std::string name, Id& parent);
         KineticHub(const Id& src,std::string name, Id& parent);
         KineticHub(const KineticHub& src,std::string path);
+        KineticHub(const Id& src,std::string path);
         ~KineticHub();
         const std::string& getType();
         unsigned int __get_nMol() const;

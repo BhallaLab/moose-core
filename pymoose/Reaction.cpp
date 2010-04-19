@@ -17,6 +17,9 @@ Reaction::Reaction(const Reaction& src, std::string path):PyMooseBase(src, path)
 Reaction::Reaction(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
 {
 }
+Reaction::Reaction(const Id& src, string path):PyMooseBase(src, path)
+{
+}
 Reaction::~Reaction(){}
 const std::string& Reaction::getType(){ return className_; }
 double Reaction::__get_kf() const

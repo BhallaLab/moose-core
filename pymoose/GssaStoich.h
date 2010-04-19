@@ -13,6 +13,7 @@ namespace pymoose{
         GssaStoich( const GssaStoich& src, std::string name, Id& parent);
         GssaStoich( const GssaStoich& src, std::string path);
         GssaStoich( const Id& src, std::string name, Id& parent);
+	GssaStoich( const Id& src, std::string path);
         ~GssaStoich();
         const std::string& getType();
             string __get_method() const;

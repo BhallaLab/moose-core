@@ -37,6 +37,12 @@ KineticManager::KineticManager(
  :PyMooseBase(src, name, parent)
 {
 }
+KineticManager::KineticManager(
+    const Id& src,
+    std::string path)
+ :PyMooseBase(src, path)
+{
+}
 
 KineticManager::~KineticManager(){}
 

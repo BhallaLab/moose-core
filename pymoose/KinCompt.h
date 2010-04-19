@@ -13,6 +13,7 @@ namespace pymoose{
         KinCompt( const KinCompt& src, std::string name, Id& parent);
         KinCompt( const KinCompt& src, std::string path);
         KinCompt( const Id& src, std::string name, Id& parent);
+	KinCompt( const Id& src, std::string path);
         ~KinCompt();
         const std::string& getType();
             double __get_volume() const;

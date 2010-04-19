@@ -17,6 +17,9 @@ Mg_block::Mg_block(const Mg_block& src, std::string path):PyMooseBase(src, path)
 Mg_block::Mg_block(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
 {
 }
+Mg_block::Mg_block(const Id& src, string path):PyMooseBase(src, path)
+{
+}
 Mg_block::~Mg_block(){}
 const std::string& Mg_block::getType(){ return className_; }
 double Mg_block::__get_KMg_A() const

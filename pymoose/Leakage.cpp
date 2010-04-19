@@ -11,6 +11,8 @@ Leakage::Leakage(const Leakage& src, std::string objectName, PyMooseBase& parent
 Leakage::Leakage(const Leakage& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 Leakage::Leakage(const Leakage& src, std::string path):PyMooseBase(src, path){}
 Leakage::Leakage(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+Leakage::Leakage(const Id& src, std::string path):PyMooseBase(src, path){}
+
 Leakage::~Leakage(){}
 const std::string& Leakage::getType(){ return className_; }
 double Leakage::__get_Ek() const

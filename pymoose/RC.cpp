@@ -11,6 +11,7 @@ RC::RC(const RC& src, std::string objectName, PyMooseBase& parent):PyMooseBase(s
 RC::RC(const RC& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 RC::RC(const RC& src, std::string path):PyMooseBase(src, path){}
 RC::RC(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+RC::RC(const Id& src, std::string path):PyMooseBase(src, path){}
 RC::~RC(){}
 const std::string& RC::getType(){ return className_; }
 double RC::__get_V0() const

@@ -72,6 +72,9 @@ BinSynchan::BinSynchan(const BinSynchan& src, std::string objectName, Id& parent
 BinSynchan::BinSynchan(const BinSynchan& src, std::string path):PyMooseBase(src, path)
 {
 }
+BinSynchan::BinSynchan(const Id& src, std::string path):PyMooseBase(src, path)
+{
+}
 
 BinSynchan::BinSynchan(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
 {

@@ -10,6 +10,7 @@ TimeTable::TimeTable(std::string name, PyMooseBase& parent):PyMooseBase(classNam
 TimeTable::TimeTable(const TimeTable& src, std::string objectName, PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
 TimeTable::TimeTable(const TimeTable& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 TimeTable::TimeTable(const TimeTable& src, std::string path):PyMooseBase(src, path){}
+TimeTable::TimeTable(const Id& src, std::string path):PyMooseBase(src, path){}
 TimeTable::TimeTable(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
 TimeTable::~TimeTable(){}
 const std::string& TimeTable::getType(){ return className_; }

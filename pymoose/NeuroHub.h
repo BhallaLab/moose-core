@@ -13,6 +13,7 @@ namespace pymoose{
         NeuroHub( const NeuroHub& src, std::string name, Id& parent);
         NeuroHub( const NeuroHub& src, std::string path);
         NeuroHub( const Id& src, std::string name, Id& parent);
+	NeuroHub( const Id& src, std::string path);
         ~NeuroHub();
         const std::string& getType();
     };

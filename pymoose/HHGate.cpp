@@ -13,6 +13,9 @@ HHGate::HHGate(const HHGate& src, std::string objectName, Id& parent):PyMooseBas
 HHGate::HHGate(const HHGate& src, std::string path):PyMooseBase(src, path)
 {
 }
+HHGate::HHGate(const Id& src, std::string path):PyMooseBase(src, path)
+{
+}
 
 HHGate::HHGate(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
 {

@@ -11,6 +11,7 @@ RectPanel::RectPanel(const RectPanel& src, std::string objectName, PyMooseBase& 
 RectPanel::RectPanel(const RectPanel& src, std::string objectName, Id& parent):Panel(src, objectName, parent){}
 RectPanel::RectPanel(const RectPanel& src, std::string path):Panel(src, path){}
 RectPanel::RectPanel(const Id& src, std::string name, Id& parent):Panel(src, name, parent){}
+RectPanel::RectPanel(const Id& src, std::string path):Panel(src, path){}
 RectPanel::~RectPanel(){}
 const std::string& RectPanel::getType(){ return className_; }
 #endif

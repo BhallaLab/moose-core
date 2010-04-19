@@ -14,6 +14,7 @@ namespace pymoose
         Nernst(const Nernst& src,std::string name, Id& parent);
         Nernst(const Id& src,std::string name, Id& parent);
         Nernst(const Nernst& src,std::string path);
+        Nernst(const Id& src,std::string path);
         ~Nernst();
         const std::string& getType();
         double __get_E() const;

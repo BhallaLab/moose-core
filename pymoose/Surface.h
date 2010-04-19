@@ -13,6 +13,7 @@ namespace pymoose{
         Surface( const Surface& src, std::string name, Id& parent);
         Surface( const Surface& src, std::string path);
         Surface( const Id& src, std::string name, Id& parent);
+        Surface( const Id& src, std::string path);
         ~Surface();
         const std::string& getType();
             double __get_volume() const;

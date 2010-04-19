@@ -13,6 +13,7 @@ namespace pymoose{
         Leakage( const Leakage& src, std::string name, Id& parent);
         Leakage( const Leakage& src, std::string path);
         Leakage( const Id& src, std::string name, Id& parent);
+	Leakage( const Id& src, std::string path);
         ~Leakage();
         const std::string& getType();
             double __get_Ek() const;
