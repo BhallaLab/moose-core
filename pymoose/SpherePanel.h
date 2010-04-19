@@ -15,6 +15,7 @@ namespace pymoose{
         SpherePanel( const SpherePanel& src, std::string name, Id& parent);
         SpherePanel( const SpherePanel& src, std::string path);
         SpherePanel( const Id& src, std::string name, Id& parent);
+        SpherePanel( const Id& src, std::string path);
         ~SpherePanel();
         const std::string& getType();
     };

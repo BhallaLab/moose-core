@@ -12,6 +12,7 @@ namespace pymoose
         RandGenerator(const RandGenerator& src,std::string name, PyMooseBase& parent);
         RandGenerator(const RandGenerator& src,std::string name, Id& parent);
         RandGenerator(const Id& src,std::string name, Id& parent);
+        RandGenerator(const Id& src,std::string path);
         RandGenerator(const RandGenerator& src,std::string path);
         RandGenerator(string className, std::string name, PyMooseBase& parent);
 //        ~RandGenerator();

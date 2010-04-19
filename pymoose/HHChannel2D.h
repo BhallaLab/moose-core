@@ -13,6 +13,7 @@ namespace pymoose{
         HHChannel2D( const HHChannel2D& src, std::string name, Id& parent);
         HHChannel2D( const HHChannel2D& src, std::string path);
         HHChannel2D( const Id& src, std::string name, Id& parent);
+	HHChannel2D( const Id& src, std::string path);
         ~HHChannel2D();
         const std::string& getType();
             string __get_Xindex() const;

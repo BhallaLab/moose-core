@@ -14,6 +14,9 @@ UniformRng::UniformRng(const UniformRng& src, std::string objectName, Id& parent
 UniformRng::UniformRng(const UniformRng& src, std::string path):RandGenerator(src, path)
 {
 }
+UniformRng::UniformRng(const Id& src, std::string path):RandGenerator(src, path)
+{
+}
 
 UniformRng::UniformRng(const Id& src, string name, Id& parent):RandGenerator(src, name, parent)
 {

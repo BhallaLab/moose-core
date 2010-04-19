@@ -13,6 +13,7 @@ namespace pymoose{
         GHK( const GHK& src, std::string name, Id& parent);
         GHK( const GHK& src, std::string path);
         GHK( const Id& src, std::string name, Id& parent);
+	GHK( const Id& src, std::string path);
         ~GHK();
         const std::string& getType();
             double __get_Ik() const;

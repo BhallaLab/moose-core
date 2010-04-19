@@ -15,6 +15,7 @@ namespace pymoose
         Kintegrator(const Kintegrator& src,std::string name, Id& parent);
         Kintegrator(const Id& src,std::string name, Id& parent);
         Kintegrator(const Kintegrator& src,std::string path);
+        Kintegrator(const Id& src,std::string path);
         ~Kintegrator();
         const std::string& getType();
         bool __get_isInitiatilized() const;

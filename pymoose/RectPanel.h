@@ -14,6 +14,7 @@ namespace pymoose{
         RectPanel( const RectPanel& src, std::string name, Id& parent);
         RectPanel( const RectPanel& src, std::string path);
         RectPanel( const Id& src, std::string name, Id& parent);
+        RectPanel( const Id& src, std::string path);
         ~RectPanel();
         const std::string& getType();
     };

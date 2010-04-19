@@ -13,6 +13,9 @@ KineticHub::KineticHub(const KineticHub& src, std::string objectName, Id& parent
 KineticHub::KineticHub(const KineticHub& src, std::string path):PyMooseBase(src, path)
 {
 }
+KineticHub::KineticHub(const Id& src, std::string path):PyMooseBase(src, path)
+{
+}
 
 KineticHub::KineticHub(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
 {

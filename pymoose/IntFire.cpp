@@ -11,6 +11,8 @@ IntFire::IntFire(const IntFire& src, std::string objectName, PyMooseBase& parent
 IntFire::IntFire(const IntFire& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 IntFire::IntFire(const IntFire& src, std::string path):PyMooseBase(src, path){}
 IntFire::IntFire(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+IntFire::IntFire(const Id& src, std::string path):PyMooseBase(src, path){}
+
 IntFire::~IntFire(){}
 const std::string& IntFire::getType(){ return className_; }
 double IntFire::__get_Vt() const

@@ -12,6 +12,7 @@ GLview::GLview( std::string name, PyMooseBase& parent ) : PyMooseBase( className
 GLview::GLview( const GLview& src, std::string name, PyMooseBase& parent ) : PyMooseBase( src, name, parent ) {}
 GLview::GLview( const GLview& src, std::string name, Id& parent ) : PyMooseBase( src, name, parent ) {}
 GLview::GLview( const GLview& src, std::string path ) : PyMooseBase( src, path ) {}
+GLview::GLview( const Id& src, std::string path ) : PyMooseBase( src, path ) {}
 GLview::GLview( const Id& src, std::string name, Id& parent ) : PyMooseBase( src, name, parent ) {}
 GLview::~GLview() {}
 const std::string& GLview::getType() { return className_; }

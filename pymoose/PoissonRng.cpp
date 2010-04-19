@@ -17,6 +17,9 @@ PoissonRng::PoissonRng(const PoissonRng& src, std::string path):RandGenerator(sr
 PoissonRng::PoissonRng(const Id& src, string name, Id& parent):RandGenerator(src, name, parent)
 {
 }
+PoissonRng::PoissonRng(const Id& src, string path):RandGenerator(src, path)
+{
+}
 PoissonRng::~PoissonRng(){}
 const std::string& PoissonRng::getType(){ return className_; }
 double PoissonRng::__get_mean() const

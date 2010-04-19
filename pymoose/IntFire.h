@@ -13,6 +13,7 @@ namespace pymoose{
         IntFire( const IntFire& src, std::string name, Id& parent);
         IntFire( const IntFire& src, std::string path);
         IntFire( const Id& src, std::string name, Id& parent);
+	IntFire( const Id& src, std::string path);
         ~IntFire();
         const std::string& getType();
             double __get_Vt() const;

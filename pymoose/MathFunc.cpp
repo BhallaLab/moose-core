@@ -17,6 +17,9 @@ MathFunc::MathFunc(const MathFunc& src, std::string path):PyMooseBase(src, path)
 MathFunc::MathFunc(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
 {
 }
+MathFunc::MathFunc(const Id& src, string path):PyMooseBase(src, path)
+{
+}
 MathFunc::~MathFunc(){}
 const std::string& MathFunc::getType(){ return className_; }
 string MathFunc::__get_mathML() const

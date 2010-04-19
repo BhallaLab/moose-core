@@ -11,6 +11,7 @@ NMDAChan::NMDAChan(const NMDAChan& src, std::string objectName, PyMooseBase& par
 NMDAChan::NMDAChan(const NMDAChan& src, std::string objectName, Id& parent):SynChan(src, objectName, parent){}
 NMDAChan::NMDAChan(const NMDAChan& src, std::string path):SynChan(src, path){}
 NMDAChan::NMDAChan(const Id& src, std::string name, Id& parent):SynChan(src, name, parent){}
+NMDAChan::NMDAChan(const Id& src, std::string path):SynChan(src, path){}
 NMDAChan::~NMDAChan(){}
 const std::string& NMDAChan::getType(){ return className_; }
 double NMDAChan::getTransitionParam(const unsigned int index) const

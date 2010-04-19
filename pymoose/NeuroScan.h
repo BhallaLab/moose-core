@@ -13,6 +13,7 @@ namespace pymoose{
         NeuroScan( const NeuroScan& src, std::string name, Id& parent);
         NeuroScan( const NeuroScan& src, std::string path);
         NeuroScan( const Id& src, std::string name, Id& parent);
+	NeuroScan( const Id& src, std::string path);
         ~NeuroScan();
         const std::string& getType();
             int __get_VDiv() const;

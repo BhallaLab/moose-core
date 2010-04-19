@@ -15,6 +15,7 @@ namespace pymoose
 		GLcell( std::string name, PyMooseBase& parent );
 		GLcell( const GLcell& src, std::string name, PyMooseBase& parent );
 		GLcell( const GLcell& src, std::string name, Id& parent );
+		GLcell( const Id& src, std::string path );
 		GLcell( const GLcell& src, std::string path );
 		GLcell( const Id& src, std::string name, Id& parent );
 		~GLcell();

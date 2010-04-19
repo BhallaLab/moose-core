@@ -15,6 +15,7 @@ namespace pymoose
         Neutral(const Neutral& src,std::string name, Id& parent);
         Neutral(const Id& src,std::string name, Id& parent);
         Neutral(const Neutral& src,std::string path);
+        Neutral(const Id& src,std::string path);
     
         ~Neutral();
         const std::string& getType();

@@ -39,6 +39,12 @@ Interpol::Interpol(
     :PyMooseBase(src, path)
 {
 }
+Interpol::Interpol(
+    const Id& src,
+    std::string path)
+    :PyMooseBase(src, path)
+{
+}
 
 Interpol::Interpol(
     const Id& src,

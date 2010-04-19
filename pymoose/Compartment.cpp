@@ -14,6 +14,9 @@ Compartment::Compartment(const Compartment& src, std::string objectName, Id& par
 Compartment::Compartment(const Compartment& src, std::string path):PyMooseBase(src, path)
 {
 }
+Compartment::Compartment(const Id& src, std::string path):PyMooseBase(src, path)
+{
+}
 
 Compartment::Compartment(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
 {

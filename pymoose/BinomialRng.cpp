@@ -32,6 +32,9 @@ BinomialRng::BinomialRng(const BinomialRng& src, std::string objectName, Id& par
 BinomialRng::BinomialRng(const BinomialRng& src, std::string path):RandGenerator(src, path)
 {
 }
+BinomialRng::BinomialRng(const Id& src, std::string path):RandGenerator(src, path)
+{
+}
 
 BinomialRng::BinomialRng(const Id& src, string name, Id& parent):RandGenerator(src, name, parent)
 {
