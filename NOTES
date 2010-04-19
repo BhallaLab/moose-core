@@ -4479,4 +4479,61 @@ across nodes.
 		- Need to make a special msg class.
 I prefer the first option.
 
+In the process of implementing this. Put in framework, currently haven't
+tied it to the single-node set/get functions, let alone the multinode. 
+Checkin 1723
+
+=============================================================================
+19 April 2010
+
+Some longer-term perspectives. 
+
+We need these things to work before merging in the mainline MOOSE
+	- Set/Get functionality
+	- Multinode message setup
+	- Unit test for IntFire system
+	- Benchmarks and optimization
+	- Continuous messages
+	- Element tree, wildcards
+	- Move and copy of elements
+	- Node balancing, even if it is done offline
+	- Autosched
+	
+We need to work into these things as we bring in mainline MOOSE
+	- Solvers
+	- Parsers and threading
+	- Graphics and threading
+
+The conversion of mainline MOOSE will be tedious
+	- object conversions
+	- Unit tests as we go along.
+	- Back conversion of MUSIC and related stuff.
+	- Fix SBML, specially units
+
+Release management has issues
+	- Library dependency bloat
+	- GUI cleanup
+
+Finally, we get to interesting stuff
+	- SBML and NeuroML
+	- nkit, kkit, chankit, etc.
+	- Tutorials and demos
+	- A complete illustrated course
+	- SigNeur
+
+Back to the basic issues of set/get
+Q: Does the command execute on worker nodes or on the master?
+	We probably need to provide for all options. Start with strictly
+	local version.
+	Options:
+	- Local node set/get for stuff it knows is local.
+	- Local node calls all nodes for set/get
+	- Master node calls all nodes for set/get
+	Danger with the local node stuff is that the master node might want
+	to also do a Set. Who is going to control the Msg if it is to persist
+	for long enough for a return msg?
+Conclusion: Only do master node control. If finer level set/get is needed then
+we should be making an object with its own messages.
+
+Done much of the implementing. Doesn't clear unit tests.
 =============================================================================

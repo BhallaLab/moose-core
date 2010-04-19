@@ -125,10 +125,13 @@ class SetGet0: public SetGet
 			SetGet0 sg( dest );
 			FuncId fid;
 			if ( sg.checkSet( field, fid ) ) {
+				Shell::dispatchSet( dest, fid, "", 0 );
+				/*
 				sg.iSetInner( fid, "", 0 );
 
 				// Ensure that clearQ is called before this return.
 				sg.completeSet();
+				*/
 				return 1;
 			}
 			return 0;
@@ -204,10 +207,13 @@ template< class A > class SetGet1: public SetGet
 				// unsigned int size = Conv< A >::size( arg );
 				char *temp = new char[ conv.size() ];
 				conv.val2buf( temp );
+				Shell::dispatchSet( dest, fid, temp, conv.size() );
+				/*
 				sg.iSetInner( fid, temp, conv.size() );
 
 				// Ensure that clearQ is called before this return.
 				sg.completeSet();
+				*/
 				delete[] temp;
 				return 1;
 			}

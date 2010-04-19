@@ -155,8 +155,18 @@ class Element
 		 */
 		const Cinfo* cinfo() const;
 
+		/**
+		 * Returns the Id on this Elm
+		 */
+		Id id() const;
+
+		
+
+
 	private:
 		string name_;
+
+		Id id_; // The current I blod.
 
 		/**
 		 * This object stores and manages the actual data for the Element.

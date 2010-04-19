@@ -68,7 +68,6 @@ class Shell: public Data
 		void handleAddMsg( Eref e, const Qinfo* q, 
 			vector< unsigned int > ids, string srcField, string destField,
 				string msgType, vector< double > args );
-		void handleSet( Id id, DataId d, FuncId fid, PrepackedBuffer arg);
 
 		void create( Eref e, const Qinfo* q, 
 			string type, Id parent, Id newElm, string name,
@@ -142,6 +141,14 @@ class Shell: public Data
 		void innerSet( const Eref& er, FuncId fid, const char* args,
 			unsigned int size );
 
+		void handleSet( Id id, DataId d, FuncId fid, PrepackedBuffer arg);
+
+		static void dispatchSet( const Eref& er, FuncId fid, 
+			const char* args, unsigned int size );
+
+		void innerDispatchSet( Eref& sheller, const Eref& er, 
+			FuncId fid, const char* args, unsigned int size );
+
 		////////////////////////////////////////////////////////////////
 		// Sets up clock ticks. Essentially is a call into the 
 		// Clock::setupTick function, but may be needed to be called from
@@ -156,6 +163,9 @@ class Shell: public Data
 		static const Cinfo* initCinfo();
 		static const unsigned int OkStatus;
 		static const unsigned int ErrorStatus;
+
+		// Initialization function, used only in main.cpp:init()
+		void setShellElement( Element* shelle );
 	private:
 		string name_;
 		Element* shelle_; // It is useful for the Shell to have this.

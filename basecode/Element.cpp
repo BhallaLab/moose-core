@@ -12,6 +12,7 @@
 Element::Element( Id id, const Cinfo* c, const string& name, 
 	const vector< unsigned int >& dimensions, bool isGlobal )
 	:	name_( name ),
+		id_( id ),
 		sendBuf_( 0 ), 
 		cinfo_( c ), 
 		msgBinding_( c->numBindIndex() )
@@ -50,6 +51,7 @@ Element::Element( Id id, const Cinfo* c, const string& name,
 Element::Element( Id id, const Cinfo* c, const string& name, 
 	DataHandler* dataHandler )
 	:	name_( name ),
+		id_( id ),
 		dataHandler_( dataHandler ),
 		sendBuf_( 0 ), 
 		cinfo_( c ), 
@@ -238,6 +240,11 @@ const Cinfo* Element::cinfo() const
 DataHandler* Element::dataHandler() const
 {
 	return dataHandler_;
+}
+
+Id Element::id() const
+{
+	return id_;
 }
 
 /*

@@ -218,6 +218,10 @@ Shell::Shell()
 	;
 }
 
+void Shell::setShellElement( Element* shelle )
+{
+	shelle_ = shelle;
+}
 ////////////////////////////////////////////////////////////////
 // Parser functions.
 ////////////////////////////////////////////////////////////////
@@ -635,23 +639,49 @@ void Shell::innerSet( const Eref& er, FuncId fid, const char* args,
 
 	Qinfo q( fid, 0, size );
 	shelle_->asend( q, requestSet.getBindIndex(), &p_, args );
-
-	/*
-	vector< MsgFuncBinding* > bind =
-		shelle_->getMsgAndFunc( setField.getBindIndex() );
-	assert( bind.size() == 1 );
-	MsgId mid = Msg::getMsg( bind[0].mid );
-	Msg* m = Msg::getMsg( mid );
-	Element* tgt = m->e2();
-	if ( tgt )
-		tgt->dropMsg( mid );
-	m->replaceTgt( er );
-	*/
 }
 
 void Shell::handleSet( Id id, DataId d, FuncId fid, PrepackedBuffer arg)
 {
-	// eref er( id(), d );
+	Eref er( id(), d );
+	innerSet( er, fid, arg.data(), arg.size() );
+	ack.send( Eref( shelle_, 0 ), &p_, OkStatus, 0 );
+	// We assume that the ack will get back to the master node no sooner
+	// than the field assignment. This is probably pretty safe. More to the
+	// point, the Parser thread won't be able to do anything else before
+	// the field assignment is done.
+}
+
+/*
+void Shell::handleSetAck()
+{
+	ack.send( e, &p_, OkStatus, 0 );
+}
+*/
+
+// Static function, used for developer-code triggered SetGet functions.
+// Should only be issued from master node.
+// This is a blocking function, and returns only when the job is done.
+void Shell::dispatchSet( const Eref& tgt, FuncId fid, const char* args,
+	unsigned int size )
+{
+	Eref sheller = Id().eref();
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	s->innerDispatchSet( sheller, tgt, fid, args, size );
+}
+
+// regular function, does the actual dispatching.
+void Shell::innerDispatchSet( Eref& sheller, const Eref& tgt, 
+	FuncId fid, const char* args, unsigned int size )
+{
+	PrepackedBuffer buf( args, size );
+	Id tgtId( tgt.element()->id() );
+	initAck();
+	requestSet.send( sheller, &p_,  tgtId, tgt.index(), fid, buf );
+	// requestSetAck.send( sheller, &p_, 1 );
+
+	while ( isAckPending() )
+		Qinfo::mpiClearQ( &p_ );
 }
 
 ////////////////////////////////////////////////////////////////////////
