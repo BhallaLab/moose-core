@@ -11,6 +11,7 @@ TauPump::TauPump(const TauPump& src, std::string objectName, PyMooseBase& parent
 TauPump::TauPump(const TauPump& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 TauPump::TauPump(const TauPump& src, std::string path):PyMooseBase(src, path){}
 TauPump::TauPump(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+TauPump::TauPump(const Id& src, std::string path):PyMooseBase(src, path){}
 TauPump::~TauPump(){}
 const std::string& TauPump::getType(){ return className_; }
 double TauPump::__get_pumpRate() const

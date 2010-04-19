@@ -13,6 +13,7 @@ namespace pymoose{
         DifShell( const DifShell& src, std::string name, Id& parent);
         DifShell( const DifShell& src, std::string path);
         DifShell( const Id& src, std::string name, Id& parent);
+	DifShell( const Id& src, std::string path);
         ~DifShell();
         const std::string& getType();
         double __get_C() const;

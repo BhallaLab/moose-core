@@ -13,6 +13,7 @@ namespace pymoose{
         HHGate2D( const HHGate2D& src, std::string name, Id& parent);
         HHGate2D( const HHGate2D& src, std::string path);
         HHGate2D( const Id& src, std::string name, Id& parent);
+	HHGate2D( const Id& src, std::string path);
         ~HHGate2D();
         const std::string& getType();
     };

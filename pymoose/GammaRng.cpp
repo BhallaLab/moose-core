@@ -13,6 +13,9 @@ GammaRng::GammaRng(const GammaRng& src, std::string objectName, Id& parent):Rand
 GammaRng::GammaRng(const GammaRng& src, std::string path):RandGenerator(src, path)
 {
 }
+GammaRng::GammaRng(const Id& src, std::string path):RandGenerator(src, path)
+{
+}
 
 GammaRng::GammaRng(const Id& src, string name, Id& parent):RandGenerator(src, name, parent)
 {

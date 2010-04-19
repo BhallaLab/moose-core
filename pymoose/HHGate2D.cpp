@@ -11,6 +11,8 @@ HHGate2D::HHGate2D(const HHGate2D& src, std::string objectName, PyMooseBase& par
 HHGate2D::HHGate2D(const HHGate2D& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 HHGate2D::HHGate2D(const HHGate2D& src, std::string path):PyMooseBase(src, path){}
 HHGate2D::HHGate2D(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+HHGate2D::HHGate2D(const Id& src, std::string path):PyMooseBase(src, path){}
+
 HHGate2D::~HHGate2D(){}
 const std::string& HHGate2D::getType(){ return className_; }
 #endif

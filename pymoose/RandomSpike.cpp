@@ -17,6 +17,9 @@ RandomSpike::RandomSpike(const RandomSpike& src, std::string path):PyMooseBase(s
 RandomSpike::RandomSpike(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
 {
 }
+RandomSpike::RandomSpike(const Id& src, string path):PyMooseBase(src, path)
+{
+}
 RandomSpike::~RandomSpike(){}
 const std::string& RandomSpike::getType(){ return className_; }
 double RandomSpike::__get_minAmp() const

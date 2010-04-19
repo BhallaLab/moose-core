@@ -13,6 +13,9 @@ Kintegrator::Kintegrator(const Kintegrator& src, std::string objectName, Id& par
 Kintegrator::Kintegrator(const Kintegrator& src, std::string path):PyMooseBase(src, path)
 {
 }
+Kintegrator::Kintegrator(const Id& src, std::string path):PyMooseBase(src, path)
+{
+}
 
 Kintegrator::Kintegrator(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
 {

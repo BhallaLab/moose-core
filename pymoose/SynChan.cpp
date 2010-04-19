@@ -17,6 +17,10 @@ SynChan::SynChan(const SynChan& src, std::string path):PyMooseBase(src, path)
 SynChan::SynChan(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
 {
 }
+SynChan::SynChan(const Id& src, string path):PyMooseBase(src, path)
+{
+}
+
 SynChan::~SynChan(){}
 const std::string& SynChan::getType(){ return className_; }
 double SynChan::__get_Gbar() const

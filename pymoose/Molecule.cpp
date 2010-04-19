@@ -17,6 +17,9 @@ Molecule::Molecule(const Molecule& src, std::string path):PyMooseBase(src, path)
 Molecule::Molecule(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
 {
 }
+Molecule::Molecule(const Id& src, string path):PyMooseBase(src, path)
+{
+}
 Molecule::~Molecule(){}
 const std::string& Molecule::getType(){ return className_; }
 double Molecule::__get_nInit() const

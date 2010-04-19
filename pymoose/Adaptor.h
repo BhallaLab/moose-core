@@ -13,6 +13,7 @@ namespace pymoose{
         Adaptor( const Adaptor& src, std::string name, Id& parent);
         Adaptor( const Adaptor& src, std::string path);
         Adaptor( const Id& src, std::string name, Id& parent);
+	Adaptor( const Id& src, std::string path);
         ~Adaptor();
         const std::string& getType();
             double __get_inputOffset() const;

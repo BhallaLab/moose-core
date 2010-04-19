@@ -11,6 +11,8 @@ InterSolverFlux::InterSolverFlux(const InterSolverFlux& src, std::string objectN
 InterSolverFlux::InterSolverFlux(const InterSolverFlux& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 InterSolverFlux::InterSolverFlux(const InterSolverFlux& src, std::string path):PyMooseBase(src, path){}
 InterSolverFlux::InterSolverFlux(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+InterSolverFlux::InterSolverFlux(const Id& src, std::string path):PyMooseBase(src, path){}
+
 InterSolverFlux::~InterSolverFlux(){}
 const std::string& InterSolverFlux::getType(){ return className_; }
 string InterSolverFlux::__get_method() const

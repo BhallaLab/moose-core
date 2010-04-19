@@ -13,6 +13,7 @@ namespace pymoose{
         DiffAmp( const DiffAmp& src, std::string name, Id& parent);
         DiffAmp( const DiffAmp& src, std::string path);
         DiffAmp( const Id& src, std::string name, Id& parent);
+	DiffAmp( const Id& src, std::string path);
         ~DiffAmp();
         const std::string& getType();
             double __get_gain() const;

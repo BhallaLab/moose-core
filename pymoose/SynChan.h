@@ -15,6 +15,7 @@ namespace pymoose
         SynChan(const SynChan& src,std::string name, Id& parent);
         SynChan(const Id& src,std::string name, Id& parent);
         SynChan(const SynChan& src,std::string path);
+        SynChan(const Id& src,std::string path);
         ~SynChan();
         const std::string& getType();
         double __get_Gbar() const;

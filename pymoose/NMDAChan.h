@@ -14,6 +14,7 @@ namespace pymoose{
         NMDAChan( const NMDAChan& src, std::string name, Id& parent);
         NMDAChan( const NMDAChan& src, std::string path);
         NMDAChan( const Id& src, std::string name, Id& parent);
+	NMDAChan( const Id& src, std::string path);
         ~NMDAChan();
         const std::string& getType();
             double getTransitionParam(const unsigned int index) const;

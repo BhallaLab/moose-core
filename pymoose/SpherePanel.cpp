@@ -11,6 +11,7 @@ SpherePanel::SpherePanel(const SpherePanel& src, std::string objectName, PyMoose
 SpherePanel::SpherePanel(const SpherePanel& src, std::string objectName, Id& parent):Panel(src, objectName, parent){}
 SpherePanel::SpherePanel(const SpherePanel& src, std::string path):Panel(src, path){}
 SpherePanel::SpherePanel(const Id& src, std::string name, Id& parent):Panel(src, name, parent){}
+SpherePanel::SpherePanel(const Id& src, std::string path):Panel(src, path){}
 SpherePanel::~SpherePanel(){}
 const std::string& SpherePanel::getType(){ return className_; }
 #endif

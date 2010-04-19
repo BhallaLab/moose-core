@@ -14,6 +14,9 @@ Stoich::Stoich(const Stoich& src, std::string objectName, Id& parent):PyMooseBas
 Stoich::Stoich(const Stoich& src, std::string path):PyMooseBase(src, path)
 {
 }
+Stoich::Stoich(const Id& src, std::string path):PyMooseBase(src, path)
+{
+}
 
 Stoich::Stoich(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
 {

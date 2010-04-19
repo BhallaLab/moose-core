@@ -15,6 +15,7 @@ namespace pymoose
         GammaRng(const GammaRng& src,std::string name, Id& parent);
         GammaRng(const Id& src,std::string name, Id& parent);
         GammaRng(const GammaRng& src,std::string path);
+        GammaRng(const Id& src,std::string path);
         ~GammaRng();
         const std::string& getType();
         double __get_alpha() const;

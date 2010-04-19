@@ -11,6 +11,7 @@ PIDController::PIDController(const PIDController& src, std::string objectName, P
 PIDController::PIDController(const PIDController& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
 PIDController::PIDController(const PIDController& src, std::string path):PyMooseBase(src, path){}
 PIDController::PIDController(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+PIDController::PIDController(const Id& src, std::string path):PyMooseBase(src, path){}
 PIDController::~PIDController(){}
 const std::string& PIDController::getType(){ return className_; }
 double PIDController::__get_gain() const
