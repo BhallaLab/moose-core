@@ -37,7 +37,7 @@ Cell::Cell(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent
 Cell::Cell(const Id& src, string path):PyMooseBase(src, path)
 {
 }
-Cell::Cell(std::string cellpath, std::string filepath):PyMooseBase(cellpath, filepath)
+Cell::Cell(std::string cellpath, std::string filepath):PyMooseBase(className_, cellpath, filepath)
 {
 }
 Cell::~Cell(){}
