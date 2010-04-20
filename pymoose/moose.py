@@ -3975,7 +3975,7 @@ class Mg_block(PyMooseBase):
         return _moose.Mg_block___set_Zk(*args)
 
     KMg_A = _swig_property(_moose.Mg_block_KMg_A_get, _moose.Mg_block_KMg_A_set)
-    K_MgB = _swig_property(_moose.Mg_block_K_MgB_get, _moose.Mg_block_K_MgB_set)
+    KMg_B = _swig_property(_moose.Mg_block_KMg_B_get, _moose.Mg_block_KMg_B_set)
     CMg = _swig_property(_moose.Mg_block_CMg_get, _moose.Mg_block_CMg_set)
     Ik = _swig_property(_moose.Mg_block_Ik_get, _moose.Mg_block_Ik_set)
     Gk = _swig_property(_moose.Mg_block_Gk_get, _moose.Mg_block_Gk_set)
