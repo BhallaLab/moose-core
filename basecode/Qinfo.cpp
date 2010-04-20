@@ -375,6 +375,20 @@ void Qinfo::reportQ()
 	for ( unsigned int i = 0; i < outQ_.size(); ++i )
 		cout << "[" << i << "]=" << outQ_[i].size() << "	";
 	cout << endl;
+
+	cout << "Reporting inQ[0]\n";
+	const char* buf = &(inQ_[0][0]);
+	unsigned int bufsize = *reinterpret_cast< const unsigned int* >( buf );
+	const char* end = buf + bufsize;
+	buf += sizeof( unsigned int );
+	while ( buf < end ) {
+		const Qinfo *q = reinterpret_cast< const Qinfo* >( buf );
+		const Msg *m = Msg::getMsg( q->m_ );
+		cout << "Q::MsgId = " << q->m_ << ", FuncId = " << q->f_ <<
+			", srcIndex = " << q->srcIndex_ << ", size = " << q->size_ <<
+			", src = " << m->e1()->name() << ", dest = " << m->e2()->name() << endl;
+		buf += q->size() + sizeof( Qinfo );
+	}
 }
 
 void Qinfo::addToQ( Qid qId, MsgFuncBinding b, const char* arg )
@@ -389,7 +403,7 @@ void Qinfo::addToQ( Qid qId, MsgFuncBinding b, const char* arg )
 	char* pos = &( q[origSize] );
 	memcpy( pos, this, sizeof( Qinfo ) );
 	// ( reinterpret_cast< Qinfo* >( pos ) )->setForward( isForward );
-	cout << Shell::myNode() << ": Qinfo::addToQ: size_ = " << size_ << endl;
+	// cout << Shell::myNode() << ": Qinfo::addToQ: size_ = " << size_ << endl;
 	memcpy( pos + sizeof( Qinfo ), arg, size_ );
 }
 

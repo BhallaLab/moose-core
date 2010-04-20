@@ -108,8 +108,8 @@ Id init( int argc, char** argv )
 	s->setHardware( isSingleThreaded, numCores, numNodes, myNode );
 	s->loadBalance();
 	Shell::connectMasterMsg();
-	Msg* m = new OneToOneMsg( shelle, shelle );
-	assert ( m != 0 );
+	// Msg* m = new OneToOneMsg( shelle, shelle );
+	// assert ( m != 0 );
 
 	return shellId;
 }

@@ -71,7 +71,8 @@ void Msg::deleteMsg( MsgId mid )
 void Msg::initNull()
 {
 	assert( msg_.size() == 0 );
-	msg_.push_back( 0 );
+	msg_.push_back( 0 ); // for badMsg
+	msg_.push_back( 0 ); // for setMsg
 }
 
 /*

@@ -4545,6 +4545,24 @@ Cleared up a problem with PrepackedBuffer.h and its converter Conv.
 Added unit test for this. 
 Valgrind now happy.
 Still stuck in infinite loop doing the testSetGet unit test.
+Checkin 1726.
 
+Possibly the Master->worker message is not set up. No, it is.
+Do we ever use SrcFinfo::addMsg? If not, get rid ofit.. Yes. we do.
+Does the Msg::add function do the right thing with SharedMsgs?
+	Usually not. Need to fix.
 
+Another point is that the basic unit tests should not get stuck on this
+high-level issue. Should I recode the tests to bypass it?
+
+For now still struggling to get it to work. I have put in a function
+Qinfo::reportQ(), which examines inQ[0]. Shows that the
+FuncId going to the target element for field assignment, is
+incorrect. The actual FuncId is 14, which is for handleSet.
+Should be 0, and oddly seems to be 0 earlier in the stack.
+
+Just noticed that the MsgId was always 1. This MsgId is reserved for
+Shell connecting to Elements for SetGet. I think that it has been
+overwritten for the ones going to the other Shells. Yes.
+Fixed it, now clears a good set of unit tests before failing in testSparseMsg.
 

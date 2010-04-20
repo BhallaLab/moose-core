@@ -110,6 +110,13 @@ static Finfo* shellWorker[] = {
 static SrcFinfo1< FuncId > requestGet( "requestGet",
 			"Function to request another Element for a value" );
 
+static SrcFinfo0 lowLevelSet(
+			"lowLevelSet",
+			"lowlevelSet():"
+			"Low-level SrcFinfo. Not for external use, internally used as"
+			"a handle to assign a value on target field."
+);
+
 /*
 static SrcFinfo1< PrepackedBuffer > setField( "setField",
 			"set( PrepackagedBuffer ):"
@@ -172,6 +179,7 @@ const Cinfo* Shell::initCinfo()
 			"Sends out acknowledgements from them.",
 			shellWorker, sizeof( shellWorker ) / sizeof( const Finfo* )
 		);
+
 	
 	static Finfo* shellFinfos[] = {
 		&name,
@@ -186,7 +194,8 @@ const Cinfo* Shell::initCinfo()
 ////////////////////////////////////////////////////////////////
 
 		&requestGet,
-		&requestSet,
+		// &requestSet,
+		&lowLevelSet,
 ////////////////////////////////////////////////////////////////
 //  Shared msg
 ////////////////////////////////////////////////////////////////
@@ -322,10 +331,12 @@ void Shell::connectMasterMsg()
 	Msg* m = 0;
 		m = new OneToOneMsg( shelle, shelle );
 	if ( m ) {
-		if ( f1->addMsg( f2, m->mid(), shelle ) )
+		if ( f1->addMsg( f2, m->mid(), shelle ) ) {
 			return;
-		else
+		} else {
+			cout << "Error: failed in Shell::connectMasterMsg()\n";
 			delete m; // Nasty, but rare.
+		}
 	}
 	exit( 0 ); // Bad!
 }
@@ -517,32 +528,32 @@ void Shell::handleAddMsg( Eref e, const Qinfo* q,
 	// vector< double > args. 
 	if ( !e1() ) {
 		cout << myNode_ << ": Error: Shell::handleAddMsg: e1 not found\n";
-		ack.send( e, &p_, ErrorStatus, 0 );
+		ack.send( e, &p_, Shell::myNode(), ErrorStatus, 0 );
 		return;
 	}
 	if ( !e2() ) {
 		cout << myNode_ << ": Error: Shell::handleAddMsg: e2 not found\n";
-		ack.send( e, &p_, ErrorStatus, 0 );
+		ack.send( e, &p_, Shell::myNode(), ErrorStatus, 0 );
 		return;
 	}
 
 	if ( msgType == "diagonal" || msgType == "Diagonal" ) {
 		if ( args.size() != 1 ) {
 			cout << myNode_ << ": Error: Shell::handleAddMsg: Should have 1 arg, was " << args.size() << endl;
-			ack.send( e, &p_, ErrorStatus, 0 );
+			ack.send( e, &p_, Shell::myNode(), ErrorStatus, 0 );
 			return;
 		}
 		int stride = args[0];
 		bool ret = 
 			DiagonalMsg::add( e1(), srcField, e2(), destField, stride );
 		if ( ret ) {
-			ack.send( e, &p_, OkStatus, 0 );
+			ack.send( e, &p_, Shell::myNode(), OkStatus, 0 );
 			return;
 		}
 	}
 	cout << myNode_ << ": Error: Shell::handleAddMsg: msgType not known: "
 		<< msgType << endl;
-	ack.send( e, &p_, ErrorStatus, 0 );
+	ack.send( e, &p_, Shell::myNode(), ErrorStatus, 0 );
 }
 
 void Shell::warning( const string& text )
@@ -634,12 +645,12 @@ void Shell::innerSet( const Eref& er, FuncId fid, const char* args,
 	unsigned int size )
 {
 	if ( er.isDataHere() ) {
-		shelle_->clearBinding ( requestSet.getBindIndex() );
+		shelle_->clearBinding ( lowLevelSet.getBindIndex() );
 		Msg* m = new AssignmentMsg( Eref( shelle_, 0 ), er, Msg::setMsg );
-		shelle_->addMsgAndFunc( m->mid(), fid, requestSet.getBindIndex() );
+		shelle_->addMsgAndFunc( m->mid(), fid, lowLevelSet.getBindIndex() );
 	
 		Qinfo q( fid, 0, size );
-		shelle_->asend( q, requestSet.getBindIndex(), &p_, args );
+		shelle_->asend( q, lowLevelSet.getBindIndex(), &p_, args );
 	}
 }
 
@@ -647,7 +658,7 @@ void Shell::handleSet( Id id, DataId d, FuncId fid, PrepackedBuffer arg)
 {
 	Eref er( id(), d );
 	innerSet( er, fid, arg.data(), arg.dataSize() );
-	ack.send( Eref( shelle_, 0 ), &p_, OkStatus, 0 );
+	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus, 0 );
 	// We assume that the ack will get back to the master node no sooner
 	// than the field assignment. This is probably pretty safe. More to the
 	// point, the Parser thread won't be able to do anything else before
