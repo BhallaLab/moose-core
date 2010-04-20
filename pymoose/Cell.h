@@ -34,6 +34,7 @@ namespace pymoose
         Cell(const Id& src, std::string name, Id& parent);
         Cell(const Id& src, std::string path);
         Cell(const Cell& src, std::string path);
+        Cell(std::string cellpath, std::string filepath);
         ~Cell();
         const std::string& getType();
         void __set_method(std::string method);
