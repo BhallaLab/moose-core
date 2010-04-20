@@ -238,15 +238,9 @@ PyMooseBase::PyMooseBase(std::string className, std::string path, std::string fi
 {
     // ReadCell reader;
 //     reader.read(fileName, path);
-    std::string::size_type length = path.length();
-    if (length <= 0) {
-        cerr << "PyMooseBase::PyMooseBase(std::string className, std::string path, std::string fileName) -- path cannot be an empty string." << endl;
+    if (!pathIsSane(path)){
+        cerr << "PyMooseBase::PyMooseBase(std::string className, std::string path, std::string fileName) -- path cannot be an empty string or end with'/'." << endl;
         return;
-    } else {
-        if (path.compare(length - getSeparator().length(), getSeparator().length(), getSeparator())) {
-            cerr << "PyMooseBase::PyMooseBase(std::string className, std::string path, std::string fileName) -- path to target object cannot end with '" << getSeparator() << "'." << endl;
-            return;
-        }
     }
     
     id_ = PyMooseBase::pathToId(path,false);

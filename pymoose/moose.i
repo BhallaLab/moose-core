@@ -422,7 +422,7 @@ NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.se
 
 %include "Mg_block.h"
 %attribute(pymoose::Mg_block, double, KMg_A, __get_KMg_A, __set_KMg_A)
-%attribute(pymoose::Mg_block, double, K_MgB, __get_KMg_B, __set_KMg_B)
+%attribute(pymoose::Mg_block, double, KMg_B, __get_KMg_B, __set_KMg_B)
 %attribute(pymoose::Mg_block, double, CMg, __get_CMg, __set_CMg)
 %attribute(pymoose::Mg_block, double, Ik, __get_Ik, __set_Ik)
 %attribute(pymoose::Mg_block, double, Gk, __get_Gk,  __set_Gk)
