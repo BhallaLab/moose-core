@@ -1727,9 +1727,10 @@ class PyMooseBase(object):
         return _moose.PyMooseBase_getType(*args)
 
     def getSeparator(*args):
-        """getSeparator(self) -> string"""
+        """getSeparator() -> string"""
         return _moose.PyMooseBase_getSeparator(*args)
 
+    getSeparator = staticmethod(getSeparator)
     def getContext(*args):
         """getContext() -> PyMooseContext"""
         return _moose.PyMooseBase_getContext(*args)
@@ -1913,6 +1914,10 @@ def PyMooseBase_endSimulation(*args):
   """PyMooseBase_endSimulation()"""
   return _moose.PyMooseBase_endSimulation(*args)
 
+def PyMooseBase_getSeparator(*args):
+  """PyMooseBase_getSeparator() -> string"""
+  return _moose.PyMooseBase_getSeparator(*args)
+
 def PyMooseBase_getContext(*args):
   """PyMooseBase_getContext() -> PyMooseContext"""
   return _moose.PyMooseBase_getContext(*args)
@@ -1992,6 +1997,7 @@ class Neutral(PyMooseBase):
         __init__(self, Neutral src, string name, Id parent) -> Neutral
         __init__(self, Id src, string name, Id parent) -> Neutral
         __init__(self, Neutral src, string path) -> Neutral
+        __init__(self, Id src, string path) -> Neutral
         """
         this = _moose.new_Neutral(*args)
         try: self.this.append(this)
@@ -2037,6 +2043,7 @@ class Class(PyMooseBase):
         __init__(self, Class src, string name, Id parent) -> Class
         __init__(self, Id src, string name, Id parent) -> Class
         __init__(self, Class src, string path) -> Class
+        __init__(self, Id src, string path) -> Class
         """
         this = _moose.new_Class(*args)
         try: self.this.append(this)
@@ -2097,7 +2104,9 @@ class Cell(PyMooseBase):
         __init__(self, Cell src, string name, PyMooseBase parent) -> Cell
         __init__(self, Cell src, string name, Id parent) -> Cell
         __init__(self, Id src, string name, Id parent) -> Cell
+        __init__(self, Id src, string path) -> Cell
         __init__(self, Cell src, string path) -> Cell
+        __init__(self, string cellpath, string filepath) -> Cell
         """
         this = _moose.new_Cell(*args)
         try: self.this.append(this)
@@ -2146,6 +2155,7 @@ class Tick(PyMooseBase):
         __init__(self, Tick src, string name, Id parent) -> Tick
         __init__(self, Id src, string name, Id parent) -> Tick
         __init__(self, Tick src, string path) -> Tick
+        __init__(self, Id src, string path) -> Tick
         """
         this = _moose.new_Tick(*args)
         try: self.this.append(this)
@@ -2223,6 +2233,7 @@ class ClockJob(PyMooseBase):
         __init__(self, ClockJob src, string name, Id parent) -> ClockJob
         __init__(self, Id src, string name, Id parent) -> ClockJob
         __init__(self, ClockJob src, string path) -> ClockJob
+        __init__(self, Id src, string path) -> ClockJob
         """
         this = _moose.new_ClockJob(*args)
         try: self.this.append(this)
@@ -2326,6 +2337,7 @@ class Interpol(PyMooseBase):
         __init__(self, Interpol src, string name, Id parent) -> Interpol
         __init__(self, Id src, string name, Id parent) -> Interpol
         __init__(self, Interpol src, string path) -> Interpol
+        __init__(self, Id src, string path) -> Interpol
         """
         this = _moose.new_Interpol(*args)
         try: self.this.append(this)
@@ -2479,6 +2491,7 @@ class Table(Interpol):
         __init__(self, Table src, string name, Id parent) -> Table
         __init__(self, Id src, string name, Id parent) -> Table
         __init__(self, Table src, string path) -> Table
+        __init__(self, Id src, string path) -> Table
         """
         this = _moose.new_Table(*args)
         try: self.this.append(this)
@@ -2556,6 +2569,7 @@ class SynChan(PyMooseBase):
         __init__(self, SynChan src, string name, Id parent) -> SynChan
         __init__(self, Id src, string name, Id parent) -> SynChan
         __init__(self, SynChan src, string path) -> SynChan
+        __init__(self, Id src, string path) -> SynChan
         """
         this = _moose.new_SynChan(*args)
         try: self.this.append(this)
@@ -2667,6 +2681,7 @@ class BinSynchan(PyMooseBase):
         __init__(self, BinSynchan src, string name, Id parent) -> BinSynchan
         __init__(self, Id src, string name, Id parent) -> BinSynchan
         __init__(self, BinSynchan src, string path) -> BinSynchan
+        __init__(self, Id src, string path) -> BinSynchan
         """
         this = _moose.new_BinSynchan(*args)
         try: self.this.append(this)
@@ -2836,6 +2851,7 @@ class StochSynchan(PyMooseBase):
         __init__(self, StochSynchan src, string name, Id parent) -> StochSynchan
         __init__(self, Id src, string name, Id parent) -> StochSynchan
         __init__(self, StochSynchan src, string path) -> StochSynchan
+        __init__(self, Id src, string path) -> StochSynchan
         """
         this = _moose.new_StochSynchan(*args)
         try: self.this.append(this)
@@ -2998,6 +3014,7 @@ class NMDAChan(SynChan):
         __init__(self, NMDAChan src, string name, Id parent) -> NMDAChan
         __init__(self, NMDAChan src, string path) -> NMDAChan
         __init__(self, Id src, string name, Id parent) -> NMDAChan
+        __init__(self, Id src, string path) -> NMDAChan
         """
         this = _moose.new_NMDAChan(*args)
         try: self.this.append(this)
@@ -3050,6 +3067,7 @@ class SpikeGen(PyMooseBase):
         __init__(self, SpikeGen src, string name, Id parent) -> SpikeGen
         __init__(self, Id src, string name, Id parent) -> SpikeGen
         __init__(self, SpikeGen src, string path) -> SpikeGen
+        __init__(self, Id src, string path) -> SpikeGen
         """
         this = _moose.new_SpikeGen(*args)
         try: self.this.append(this)
@@ -3132,6 +3150,7 @@ class RandomSpike(PyMooseBase):
         __init__(self, RandomSpike src, string name, Id parent) -> RandomSpike
         __init__(self, Id src, string name, Id parent) -> RandomSpike
         __init__(self, RandomSpike src, string path) -> RandomSpike
+        __init__(self, Id src, string path) -> RandomSpike
         """
         this = _moose.new_RandomSpike(*args)
         try: self.this.append(this)
@@ -3228,6 +3247,7 @@ class PulseGen(PyMooseBase):
         __init__(self, PulseGen src, string name, Id parent) -> PulseGen
         __init__(self, Id src, string name, Id parent) -> PulseGen
         __init__(self, PulseGen src, string path) -> PulseGen
+        __init__(self, Id src, string path) -> PulseGen
         """
         this = _moose.new_PulseGen(*args)
         try: self.this.append(this)
@@ -3347,6 +3367,7 @@ class Nernst(PyMooseBase):
         __init__(self, Nernst src, string name, Id parent) -> Nernst
         __init__(self, Id src, string name, Id parent) -> Nernst
         __init__(self, Nernst src, string path) -> Nernst
+        __init__(self, Id src, string path) -> Nernst
         """
         this = _moose.new_Nernst(*args)
         try: self.this.append(this)
@@ -3453,6 +3474,7 @@ class CaConc(PyMooseBase):
         __init__(self, CaConc src, string name, Id parent) -> CaConc
         __init__(self, Id src, string name, Id parent) -> CaConc
         __init__(self, CaConc src, string path) -> CaConc
+        __init__(self, Id src, string path) -> CaConc
         """
         this = _moose.new_CaConc(*args)
         try: self.this.append(this)
@@ -3553,6 +3575,7 @@ class HHGate(PyMooseBase):
         __init__(self, HHGate src, string name, Id parent) -> HHGate
         __init__(self, Id src, string name, Id parent) -> HHGate
         __init__(self, HHGate src, string path) -> HHGate
+        __init__(self, Id src, string path) -> HHGate
         """
         this = _moose.new_HHGate(*args)
         try: self.this.append(this)
@@ -3639,6 +3662,7 @@ class Leakage(PyMooseBase):
         __init__(self, Leakage src, string name, Id parent) -> Leakage
         __init__(self, Leakage src, string path) -> Leakage
         __init__(self, Id src, string name, Id parent) -> Leakage
+        __init__(self, Id src, string path) -> Leakage
         """
         this = _moose.new_Leakage(*args)
         try: self.this.append(this)
@@ -3699,6 +3723,7 @@ class HHChannel(PyMooseBase):
         __init__(self, HHChannel src, string name, Id parent) -> HHChannel
         __init__(self, HHChannel src, string path) -> HHChannel
         __init__(self, Id src, string name, Id parent) -> HHChannel
+        __init__(self, Id src, string path) -> HHChannel
         """
         this = _moose.new_HHChannel(*args)
         try: self.this.append(this)
@@ -3882,6 +3907,7 @@ class Mg_block(PyMooseBase):
         __init__(self, Mg_block src, string name, Id parent) -> Mg_block
         __init__(self, Id src, string name, Id parent) -> Mg_block
         __init__(self, Mg_block src, string path) -> Mg_block
+        __init__(self, Id src, string path) -> Mg_block
         """
         this = _moose.new_Mg_block(*args)
         try: self.this.append(this)
@@ -3973,6 +3999,7 @@ class Compartment(PyMooseBase):
         __init__(self, Compartment src, string name, Id parent) -> Compartment
         __init__(self, Id src, string name, Id parent) -> Compartment
         __init__(self, Compartment src, string path) -> Compartment
+        __init__(self, Id src, string path) -> Compartment
         """
         this = _moose.new_Compartment(*args)
         try: self.this.append(this)
@@ -4145,6 +4172,7 @@ class NeuroScan(PyMooseBase):
         __init__(self, NeuroScan src, string name, Id parent) -> NeuroScan
         __init__(self, NeuroScan src, string path) -> NeuroScan
         __init__(self, Id src, string name, Id parent) -> NeuroScan
+        __init__(self, Id src, string path) -> NeuroScan
         """
         this = _moose.new_NeuroScan(*args)
         try: self.this.append(this)
@@ -4227,6 +4255,7 @@ class HSolve(PyMooseBase):
         __init__(self, HSolve src, string name, Id parent) -> HSolve
         __init__(self, Id src, string name, Id parent) -> HSolve
         __init__(self, HSolve src, string path) -> HSolve
+        __init__(self, Id src, string path) -> HSolve
         """
         this = _moose.new_HSolve(*args)
         try: self.this.append(this)
@@ -4291,6 +4320,7 @@ class Kintegrator(PyMooseBase):
         __init__(self, Kintegrator src, string name, Id parent) -> Kintegrator
         __init__(self, Id src, string name, Id parent) -> Kintegrator
         __init__(self, Kintegrator src, string path) -> Kintegrator
+        __init__(self, Id src, string path) -> Kintegrator
         """
         this = _moose.new_Kintegrator(*args)
         try: self.this.append(this)
@@ -4335,6 +4365,7 @@ class MathFunc(PyMooseBase):
         __init__(self, MathFunc src, string name, Id parent) -> MathFunc
         __init__(self, MathFunc src, string path) -> MathFunc
         __init__(self, Id src, string name, Id parent) -> MathFunc
+        __init__(self, Id src, string path) -> MathFunc
         """
         this = _moose.new_MathFunc(*args)
         try: self.this.append(this)
@@ -4390,6 +4421,7 @@ class Stoich(PyMooseBase):
         __init__(self, Stoich src, string name, Id parent) -> Stoich
         __init__(self, Id src, string name, Id parent) -> Stoich
         __init__(self, Stoich src, string path) -> Stoich
+        __init__(self, Id src, string path) -> Stoich
         """
         this = _moose.new_Stoich(*args)
         try: self.this.append(this)
@@ -4515,6 +4547,7 @@ class KineticHub(PyMooseBase):
         __init__(self, KineticHub src, string name, Id parent) -> KineticHub
         __init__(self, Id src, string name, Id parent) -> KineticHub
         __init__(self, KineticHub src, string path) -> KineticHub
+        __init__(self, Id src, string path) -> KineticHub
         """
         this = _moose.new_KineticHub(*args)
         try: self.this.append(this)
@@ -4583,6 +4616,7 @@ class Enzyme(PyMooseBase):
         __init__(self, Enzyme src, string name, Id parent) -> Enzyme
         __init__(self, Id src, string name, Id parent) -> Enzyme
         __init__(self, Enzyme src, string path) -> Enzyme
+        __init__(self, Id src, string path) -> Enzyme
         """
         this = _moose.new_Enzyme(*args)
         try: self.this.append(this)
@@ -4689,6 +4723,7 @@ class Reaction(PyMooseBase):
         __init__(self, Reaction src, string name, Id parent) -> Reaction
         __init__(self, Id src, string name, Id parent) -> Reaction
         __init__(self, Reaction src, string path) -> Reaction
+        __init__(self, Id src, string path) -> Reaction
         """
         this = _moose.new_Reaction(*args)
         try: self.this.append(this)
@@ -4753,6 +4788,7 @@ class Molecule(PyMooseBase):
         __init__(self, Molecule src, string name, Id parent) -> Molecule
         __init__(self, Id src, string name, Id parent) -> Molecule
         __init__(self, Molecule src, string path) -> Molecule
+        __init__(self, Id src, string path) -> Molecule
         """
         this = _moose.new_Molecule(*args)
         try: self.this.append(this)
@@ -5079,6 +5115,7 @@ class RandGenerator(PyMooseBase):
         __init__(self, RandGenerator src, string name, PyMooseBase parent) -> RandGenerator
         __init__(self, RandGenerator src, string name, Id parent) -> RandGenerator
         __init__(self, Id src, string name, Id parent) -> RandGenerator
+        __init__(self, Id src, string path) -> RandGenerator
         __init__(self, RandGenerator src, string path) -> RandGenerator
         __init__(self, string className, string name, PyMooseBase parent) -> RandGenerator
         """
@@ -5144,6 +5181,7 @@ class UniformRng(RandGenerator):
         __init__(self, UniformRng src, string name, Id parent) -> UniformRng
         __init__(self, Id src, string name, Id parent) -> UniformRng
         __init__(self, UniformRng src, string path) -> UniformRng
+        __init__(self, Id src, string path) -> UniformRng
         """
         this = _moose.new_UniformRng(*args)
         try: self.this.append(this)
@@ -5192,6 +5230,7 @@ class GammaRng(RandGenerator):
         __init__(self, GammaRng src, string name, Id parent) -> GammaRng
         __init__(self, Id src, string name, Id parent) -> GammaRng
         __init__(self, GammaRng src, string path) -> GammaRng
+        __init__(self, Id src, string path) -> GammaRng
         """
         this = _moose.new_GammaRng(*args)
         try: self.this.append(this)
@@ -5238,6 +5277,7 @@ class ExponentialRng(RandGenerator):
         __init__(self, ExponentialRng src, string name, Id parent) -> ExponentialRng
         __init__(self, Id src, string name, Id parent) -> ExponentialRng
         __init__(self, ExponentialRng src, string path) -> ExponentialRng
+        __init__(self, Id src, string path) -> ExponentialRng
         """
         this = _moose.new_ExponentialRng(*args)
         try: self.this.append(this)
@@ -5280,6 +5320,7 @@ class BinomialRng(RandGenerator):
         __init__(self, BinomialRng src, string name, Id parent) -> BinomialRng
         __init__(self, Id src, string name, Id parent) -> BinomialRng
         __init__(self, BinomialRng src, string path) -> BinomialRng
+        __init__(self, Id src, string path) -> BinomialRng
         """
         this = _moose.new_BinomialRng(*args)
         try: self.this.append(this)
@@ -5326,6 +5367,7 @@ class PoissonRng(RandGenerator):
         __init__(self, PoissonRng src, string name, Id parent) -> PoissonRng
         __init__(self, Id src, string name, Id parent) -> PoissonRng
         __init__(self, PoissonRng src, string path) -> PoissonRng
+        __init__(self, Id src, string path) -> PoissonRng
         """
         this = _moose.new_PoissonRng(*args)
         try: self.this.append(this)
@@ -5359,6 +5401,7 @@ class NormalRng(RandGenerator):
         __init__(self, NormalRng src, string name, Id parent) -> NormalRng
         __init__(self, Id src, string name, Id parent) -> NormalRng
         __init__(self, NormalRng src, string path) -> NormalRng
+        __init__(self, Id src, string path) -> NormalRng
         """
         this = _moose.new_NormalRng(*args)
         try: self.this.append(this)
@@ -5406,6 +5449,7 @@ class KineticManager(PyMooseBase):
         __init__(self, KineticManager src, string name, Id parent) -> KineticManager
         __init__(self, KineticManager src, string path) -> KineticManager
         __init__(self, Id src, string name, Id parent) -> KineticManager
+        __init__(self, Id src, string path) -> KineticManager
         """
         this = _moose.new_KineticManager(*args)
         try: self.this.append(this)
@@ -5505,6 +5549,7 @@ class KinCompt(PyMooseBase):
         __init__(self, KinCompt src, string name, Id parent) -> KinCompt
         __init__(self, KinCompt src, string path) -> KinCompt
         __init__(self, Id src, string name, Id parent) -> KinCompt
+        __init__(self, Id src, string path) -> KinCompt
         """
         this = _moose.new_KinCompt(*args)
         try: self.this.append(this)
@@ -5578,6 +5623,7 @@ class Panel(PyMooseBase):
         __init__(self, Panel src, string name, Id parent) -> Panel
         __init__(self, Panel src, string path) -> Panel
         __init__(self, Id src, string name, Id parent) -> Panel
+        __init__(self, Id src, string path) -> Panel
         __init__(self, string typeName, string objectName, Id parentId) -> Panel
         __init__(self, string typeName, string path) -> Panel
         __init__(self, string typeName, string objectName, PyMooseBase parent) -> Panel
@@ -5634,6 +5680,7 @@ class DiskPanel(Panel):
         __init__(self, DiskPanel src, string name, Id parent) -> DiskPanel
         __init__(self, DiskPanel src, string path) -> DiskPanel
         __init__(self, Id src, string name, Id parent) -> DiskPanel
+        __init__(self, Id src, string path) -> DiskPanel
         """
         this = _moose.new_DiskPanel(*args)
         try: self.this.append(this)
@@ -5662,6 +5709,7 @@ class CylPanel(Panel):
         __init__(self, CylPanel src, string name, Id parent) -> CylPanel
         __init__(self, CylPanel src, string path) -> CylPanel
         __init__(self, Id src, string name, Id parent) -> CylPanel
+        __init__(self, Id src, string path) -> CylPanel
         """
         this = _moose.new_CylPanel(*args)
         try: self.this.append(this)
@@ -5690,6 +5738,7 @@ class HemispherePanel(Panel):
         __init__(self, HemispherePanel src, string name, Id parent) -> HemispherePanel
         __init__(self, HemispherePanel src, string path) -> HemispherePanel
         __init__(self, Id src, string name, Id parent) -> HemispherePanel
+        __init__(self, Id src, string path) -> HemispherePanel
         """
         this = _moose.new_HemispherePanel(*args)
         try: self.this.append(this)
@@ -5718,6 +5767,7 @@ class SpherePanel(Panel):
         __init__(self, SpherePanel src, string name, Id parent) -> SpherePanel
         __init__(self, SpherePanel src, string path) -> SpherePanel
         __init__(self, Id src, string name, Id parent) -> SpherePanel
+        __init__(self, Id src, string path) -> SpherePanel
         """
         this = _moose.new_SpherePanel(*args)
         try: self.this.append(this)
@@ -5746,6 +5796,7 @@ class TriPanel(Panel):
         __init__(self, TriPanel src, string name, Id parent) -> TriPanel
         __init__(self, TriPanel src, string path) -> TriPanel
         __init__(self, Id src, string name, Id parent) -> TriPanel
+        __init__(self, Id src, string path) -> TriPanel
         """
         this = _moose.new_TriPanel(*args)
         try: self.this.append(this)
@@ -5774,6 +5825,7 @@ class RectPanel(Panel):
         __init__(self, RectPanel src, string name, Id parent) -> RectPanel
         __init__(self, RectPanel src, string path) -> RectPanel
         __init__(self, Id src, string name, Id parent) -> RectPanel
+        __init__(self, Id src, string path) -> RectPanel
         """
         this = _moose.new_RectPanel(*args)
         try: self.this.append(this)
@@ -5802,6 +5854,7 @@ class Surface(PyMooseBase):
         __init__(self, Surface src, string name, Id parent) -> Surface
         __init__(self, Surface src, string path) -> Surface
         __init__(self, Id src, string name, Id parent) -> Surface
+        __init__(self, Id src, string path) -> Surface
         """
         this = _moose.new_Surface(*args)
         try: self.this.append(this)
@@ -5835,6 +5888,7 @@ class Geometry(PyMooseBase):
         __init__(self, Geometry src, string name, Id parent) -> Geometry
         __init__(self, Geometry src, string path) -> Geometry
         __init__(self, Id src, string name, Id parent) -> Geometry
+        __init__(self, Id src, string path) -> Geometry
         """
         this = _moose.new_Geometry(*args)
         try: self.this.append(this)
@@ -5881,6 +5935,7 @@ class Adaptor(PyMooseBase):
         __init__(self, Adaptor src, string name, Id parent) -> Adaptor
         __init__(self, Adaptor src, string path) -> Adaptor
         __init__(self, Id src, string name, Id parent) -> Adaptor
+        __init__(self, Id src, string path) -> Adaptor
         """
         this = _moose.new_Adaptor(*args)
         try: self.this.append(this)
@@ -5941,6 +5996,7 @@ class SigNeur(PyMooseBase):
         __init__(self, SigNeur src, string name, Id parent) -> SigNeur
         __init__(self, SigNeur src, string path) -> SigNeur
         __init__(self, Id src, string name, Id parent) -> SigNeur
+        __init__(self, Id src, string path) -> SigNeur
         """
         this = _moose.new_SigNeur(*args)
         try: self.this.append(this)
@@ -6142,6 +6198,7 @@ class AscFile(PyMooseBase):
         __init__(self, AscFile src, string name, Id parent) -> AscFile
         __init__(self, AscFile src, string path) -> AscFile
         __init__(self, Id src, string name, Id parent) -> AscFile
+        __init__(self, Id src, string path) -> AscFile
         """
         this = _moose.new_AscFile(*args)
         try: self.this.append(this)
@@ -6188,6 +6245,7 @@ class DifShell(PyMooseBase):
         __init__(self, DifShell src, string name, Id parent) -> DifShell
         __init__(self, DifShell src, string path) -> DifShell
         __init__(self, Id src, string name, Id parent) -> DifShell
+        __init__(self, Id src, string path) -> DifShell
         """
         this = _moose.new_DifShell(*args)
         try: self.this.append(this)
@@ -6320,6 +6378,7 @@ class GssaStoich(PyMooseBase):
         __init__(self, GssaStoich src, string name, Id parent) -> GssaStoich
         __init__(self, GssaStoich src, string path) -> GssaStoich
         __init__(self, Id src, string name, Id parent) -> GssaStoich
+        __init__(self, Id src, string path) -> GssaStoich
         """
         this = _moose.new_GssaStoich(*args)
         try: self.this.append(this)
@@ -6362,6 +6421,7 @@ class TauPump(PyMooseBase):
         __init__(self, TauPump src, string name, Id parent) -> TauPump
         __init__(self, TauPump src, string path) -> TauPump
         __init__(self, Id src, string name, Id parent) -> TauPump
+        __init__(self, Id src, string path) -> TauPump
         """
         this = _moose.new_TauPump(*args)
         try: self.this.append(this)
@@ -6443,6 +6503,7 @@ class TimeTable(PyMooseBase):
         __init__(self, TimeTable src, string name, PyMooseBase parent) -> TimeTable
         __init__(self, TimeTable src, string name, Id parent) -> TimeTable
         __init__(self, TimeTable src, string path) -> TimeTable
+        __init__(self, Id src, string path) -> TimeTable
         __init__(self, Id src, string name, Id parent) -> TimeTable
         """
         this = _moose.new_TimeTable(*args)
@@ -6525,6 +6586,7 @@ class RC(PyMooseBase):
         __init__(self, RC src, string name, Id parent) -> RC
         __init__(self, RC src, string path) -> RC
         __init__(self, Id src, string name, Id parent) -> RC
+        __init__(self, Id src, string path) -> RC
         """
         this = _moose.new_RC(*args)
         try: self.this.append(this)
@@ -6594,6 +6656,7 @@ class PIDController(PyMooseBase):
         __init__(self, PIDController src, string name, Id parent) -> PIDController
         __init__(self, PIDController src, string path) -> PIDController
         __init__(self, Id src, string name, Id parent) -> PIDController
+        __init__(self, Id src, string path) -> PIDController
         """
         this = _moose.new_PIDController(*args)
         try: self.this.append(this)
@@ -6677,6 +6740,7 @@ class DiffAmp(PyMooseBase):
         __init__(self, DiffAmp src, string name, Id parent) -> DiffAmp
         __init__(self, DiffAmp src, string path) -> DiffAmp
         __init__(self, Id src, string name, Id parent) -> DiffAmp
+        __init__(self, Id src, string path) -> DiffAmp
         """
         this = _moose.new_DiffAmp(*args)
         try: self.this.append(this)
@@ -6738,6 +6802,7 @@ class IntFire(PyMooseBase):
         __init__(self, IntFire src, string name, Id parent) -> IntFire
         __init__(self, IntFire src, string path) -> IntFire
         __init__(self, Id src, string name, Id parent) -> IntFire
+        __init__(self, Id src, string path) -> IntFire
         """
         this = _moose.new_IntFire(*args)
         try: self.this.append(this)
@@ -6852,6 +6917,7 @@ class IzhikevichNrn(PyMooseBase):
         __init__(self, IzhikevichNrn src, string name, Id parent) -> IzhikevichNrn
         __init__(self, IzhikevichNrn src, string path) -> IzhikevichNrn
         __init__(self, Id src, string name, Id parent) -> IzhikevichNrn
+        __init__(self, Id src, string path) -> IzhikevichNrn
         """
         this = _moose.new_IzhikevichNrn(*args)
         try: self.this.append(this)
@@ -6989,6 +7055,7 @@ class GHK(PyMooseBase):
         __init__(self, GHK src, string name, Id parent) -> GHK
         __init__(self, GHK src, string path) -> GHK
         __init__(self, Id src, string name, Id parent) -> GHK
+        __init__(self, Id src, string path) -> GHK
         """
         this = _moose.new_GHK(*args)
         try: self.this.append(this)
@@ -7086,6 +7153,7 @@ class HHChannel2D(PyMooseBase):
         __init__(self, HHChannel2D src, string name, Id parent) -> HHChannel2D
         __init__(self, HHChannel2D src, string path) -> HHChannel2D
         __init__(self, Id src, string name, Id parent) -> HHChannel2D
+        __init__(self, Id src, string path) -> HHChannel2D
         """
         this = _moose.new_HHChannel2D(*args)
         try: self.this.append(this)
@@ -7141,6 +7209,7 @@ class HHGate2D(PyMooseBase):
         __init__(self, HHGate2D src, string name, Id parent) -> HHGate2D
         __init__(self, HHGate2D src, string path) -> HHGate2D
         __init__(self, Id src, string name, Id parent) -> HHGate2D
+        __init__(self, Id src, string path) -> HHGate2D
         """
         this = _moose.new_HHGate2D(*args)
         try: self.this.append(this)
