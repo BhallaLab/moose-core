@@ -4536,4 +4536,15 @@ Conclusion: Only do master node control. If finer level set/get is needed then
 we should be making an object with its own messages.
 
 Done much of the implementing. Doesn't clear unit tests.
+Checkin 1725.
 =============================================================================
+20 April 2010
+Stuck in infinite loop doing the testSetGet unit test.
+Valgrind showed problem.
+Cleared up a problem with PrepackedBuffer.h and its converter Conv.
+Added unit test for this. 
+Valgrind now happy.
+Still stuck in infinite loop doing the testSetGet unit test.
+
+
+

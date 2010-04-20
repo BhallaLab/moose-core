@@ -103,9 +103,9 @@ static DestFinfo handleSet( "handleSet",
 
 static Finfo* shellMaster[] = {
 	&requestCreate, &requestDelete, &requestQuit, &requestStart,
-	&requestAddMsg, &handleAck };
+	&requestAddMsg, &requestSet, &handleAck };
 static Finfo* shellWorker[] = {
-	&create, &del, &handleQuit, &handleStart, &handleAddMsg, &ack };
+	&create, &del, &handleQuit, &handleStart, &handleAddMsg, &handleSet, &ack };
 
 static SrcFinfo1< FuncId > requestGet( "requestGet",
 			"Function to request another Element for a value" );
@@ -633,18 +633,20 @@ void Shell::setclock( unsigned int tickNum, double dt, unsigned int stage )
 void Shell::innerSet( const Eref& er, FuncId fid, const char* args, 
 	unsigned int size )
 {
-	shelle_->clearBinding ( requestSet.getBindIndex() );
-	Msg* m = new AssignmentMsg( Eref( shelle_, 0 ), er, Msg::setMsg );
-	shelle_->addMsgAndFunc( m->mid(), fid, requestSet.getBindIndex() );
-
-	Qinfo q( fid, 0, size );
-	shelle_->asend( q, requestSet.getBindIndex(), &p_, args );
+	if ( er.isDataHere() ) {
+		shelle_->clearBinding ( requestSet.getBindIndex() );
+		Msg* m = new AssignmentMsg( Eref( shelle_, 0 ), er, Msg::setMsg );
+		shelle_->addMsgAndFunc( m->mid(), fid, requestSet.getBindIndex() );
+	
+		Qinfo q( fid, 0, size );
+		shelle_->asend( q, requestSet.getBindIndex(), &p_, args );
+	}
 }
 
 void Shell::handleSet( Id id, DataId d, FuncId fid, PrepackedBuffer arg)
 {
 	Eref er( id(), d );
-	innerSet( er, fid, arg.data(), arg.size() );
+	innerSet( er, fid, arg.data(), arg.dataSize() );
 	ack.send( Eref( shelle_, 0 ), &p_, OkStatus, 0 );
 	// We assume that the ack will get back to the master node no sooner
 	// than the field assignment. This is probably pretty safe. More to the

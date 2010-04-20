@@ -60,3 +60,8 @@ void Eref::ssend2( SyncId src, double v1, double v2 )
 {
 	e_->ssend2( src, i_.data(), v1, v2 );
 }
+
+bool Eref::isDataHere() const
+{
+	return e_->dataHandler()->isDataHere( i_ );
+}

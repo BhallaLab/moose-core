@@ -389,6 +389,7 @@ void Qinfo::addToQ( Qid qId, MsgFuncBinding b, const char* arg )
 	char* pos = &( q[origSize] );
 	memcpy( pos, this, sizeof( Qinfo ) );
 	// ( reinterpret_cast< Qinfo* >( pos ) )->setForward( isForward );
+	cout << Shell::myNode() << ": Qinfo::addToQ: size_ = " << size_ << endl;
 	memcpy( pos + sizeof( Qinfo ), arg, size_ );
 }
 

@@ -121,7 +121,8 @@ template<> class Conv< PrepackedBuffer >
 {
 	public:
 		Conv( const char* buf )
-			: val_( buf + sizeof( unsigned int ), 
+			: val_( 
+				buf + sizeof( unsigned int ), 
 				*reinterpret_cast< const unsigned int* >( buf ) )
 		{;}
 
@@ -129,9 +130,12 @@ template<> class Conv< PrepackedBuffer >
 			: val_( arg )
 		{;}
 
+		/**
+		 * This is the size of the char* converted array
+		 */
 		unsigned int size() const
 		{
-			return val_.size();
+			return val_.dataSize() + sizeof( unsigned int );
 		}
 
 		const PrepackedBuffer operator*() const {
@@ -143,13 +147,13 @@ template<> class Conv< PrepackedBuffer >
 		 * ahead of time.
 		 * Needs to be specialized for variable size and pointer-containing
 		 * types T.
+		 * returns size of newly filled buffer.
 		 */
 		unsigned int val2buf( char* buf ) const {
-			*reinterpret_cast< unsigned int* >( buf ) = val_.size();
+			*reinterpret_cast< unsigned int* >( buf ) = val_.dataSize();
 			buf += sizeof( unsigned int );
-			memcpy( buf, val_.data(), 
-				val_.size() - sizeof( unsigned int ) );
-			return val_.size();
+			memcpy( buf, val_.data(), val_.dataSize() );
+			return val_.dataSize() + sizeof( unsigned int );
 		}
 
 		static void str2val( PrepackedBuffer& val, const string& s ) {

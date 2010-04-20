@@ -38,13 +38,13 @@ Msg::Msg( Element* e1, Element* e2 )
  * at init time.
  */
 Msg::Msg( Element* e1, Element* e2, MsgId mid )
-	: e1_( e1 ), e2_( e2 )
+	: e1_( e1 ), e2_( e2 ), mid_( mid )
 {
 	if ( msg_.size() < mid )
 		msg_.resize( mid + 1 );
-	msg_[mid_] = this;
-	e1->addMsg( mid_ );
-	e2->addMsg( mid_ );
+	msg_[mid] = this;
+	e1->addMsg( mid );
+	e2->addMsg( mid );
 }
 
 Msg::~Msg()

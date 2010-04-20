@@ -84,6 +84,11 @@ class Eref
 		DataId index() const {
 			return i_;
 		}
+
+		/**
+		 * True if the data are on the current node
+		 */
+		bool isDataHere() const;
 	private:
 		Element* e_;
 		DataId i_;

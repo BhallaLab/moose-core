@@ -7,36 +7,47 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+/**
+ * this class is used to take data that has already been converted into
+ * a buffer by one or more Conv<> operations, and send it between nodes.
+ * Useful when one doesn't know the data type being transferred.
+ */
 class PrepackedBuffer
 {
 	public:
-		PrepackedBuffer( const char* data, unsigned int size )
-			: size_( size )
+		/**
+		 * Constructor. Here size is the size of the data
+		 */
+		PrepackedBuffer( const char* data, unsigned int dataSize )
+			: dataSize_( dataSize )
 		{
-			data_ = new char[ size ];
-			memcpy( data_, data, size );
+			data_ = new char[ dataSize ];
+			memcpy( data_, data, dataSize );
 		}
 
 		PrepackedBuffer( const PrepackedBuffer& other )
-			: size_( other.size_ )
+			: dataSize_( other.dataSize_ )
 		{
-			data_ = new char[ size_ ];
-			memcpy( data_, other.data_, size_ );
+			data_ = new char[ dataSize_ ];
+			memcpy( data_, other.data_, dataSize_ );
 		}
 
 		~PrepackedBuffer() {
-			delete data_;
+			delete[] data_;
 		}
 
 		const char* data() const {
 			return data_;
 		}
 
-		unsigned int size() const {
-			return size_;
+		/**
+		 * 	Returns the size of the data contents.
+		 */
+		unsigned int dataSize() const {
+			return dataSize_;
 		}
 
 	private:
-		unsigned int size_;
-		char* data_;
+		unsigned int dataSize_; // Size of data.
+		char* data_; // Converted data.
 };

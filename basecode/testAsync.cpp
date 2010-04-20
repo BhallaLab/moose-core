@@ -37,6 +37,58 @@ void showFields()
 	delete i1();
 }
 
+void testPrepackedBuffer()
+{
+	string arg1 = "This is arg1";
+	double arg2 = 123.4;
+	unsigned int arg3 = 567;
+	Conv< string > conv1( arg1 );
+	Conv< double > conv2( arg2 );
+	Conv< unsigned int > conv3( arg3 );
+
+	unsigned int totSize = conv1.size() + conv2.size() + conv3.size();
+	char* buf = new char[ totSize ];
+	char* temp = buf;
+
+	conv1.val2buf( temp ); temp += conv1.size();
+	conv2.val2buf( temp ); temp += conv2.size();
+	conv3.val2buf( temp ); temp += conv3.size();
+
+	PrepackedBuffer pb( buf, totSize );
+
+	Conv< PrepackedBuffer > conv4( pb );
+
+	assert( conv4.size() == pb.dataSize() + sizeof( unsigned int ) );
+
+	temp = new char[ conv4.size() ];
+
+	unsigned int size = conv4.val2buf( temp );
+	assert( size == pb.dataSize() + sizeof( unsigned int ) );
+
+	Conv< PrepackedBuffer > conv5( temp );
+
+	PrepackedBuffer pb2 = *conv5;
+
+	assert( pb2.dataSize() == pb.dataSize() );
+
+	const char* temp2 = pb2.data();
+
+	Conv< string > conv6( temp2 );
+	temp2 += conv6.size();
+	Conv< double > conv7( temp2 );
+	temp2 += conv7.size();
+	Conv< unsigned int > conv8( temp2 );
+	temp2 += conv8.size();
+
+	assert( *conv6 == arg1 );
+	assert( *conv7 == arg2 );
+	assert( *conv8 == arg3 );
+
+	delete[] buf;
+	delete[] temp;
+	cout << "." << flush;
+}
+
 void insertIntoQ( )
 {
 	const Cinfo* nc = Neutral::initCinfo();
@@ -996,6 +1048,7 @@ void testConvVector()
 void testAsync( )
 {
 	showFields();
+	testPrepackedBuffer();
 	insertIntoQ();
 	testSendMsg();
 	testCreateMsg();
