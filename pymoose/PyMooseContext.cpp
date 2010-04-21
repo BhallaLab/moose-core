@@ -1466,6 +1466,9 @@ void PyMooseContext::tabFill(const Id& table, int xdivs, int mode)
 void PyMooseContext::readCell(string filename, string cellpath)
 {
     std::string command = "readcell " + filename + " " + cellpath;
+#ifndef NDEBUG
+    cout << "PyMooseContext::readCell -- running GENESIS command: " << command << endl;
+#endif
     this->runG(command);
 }
 
