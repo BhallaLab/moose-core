@@ -236,8 +236,6 @@ PyMooseBase::PyMooseBase(std::string className, std::string objectName, PyMooseB
 */
 PyMooseBase::PyMooseBase(std::string className, std::string path, std::string fileName)
 {
-    // ReadCell reader;
-//     reader.read(fileName, path);
     if (!pathIsSane(path)){
         cerr << "PyMooseBase::PyMooseBase(std::string className, std::string path, std::string fileName) -- path cannot be an empty string or end with'/'." << endl;
         return;
@@ -260,7 +258,8 @@ PyMooseBase::PyMooseBase(std::string className, std::string path, std::string fi
 #endif
         return;
     }
-    context_->readCell(path, fileName);    
+    context_->readCell(fileName, path);
+    id_ = PyMooseBase::pathToId(path);    
 }
 
 PyMooseBase::PyMooseBase(const PyMooseBase& src, std::string objectName, PyMooseBase& parent)

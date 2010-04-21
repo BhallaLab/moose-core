@@ -113,7 +113,11 @@ void ReadCell::read(
 		fin.clear( );
 		fin.open( path.c_str() );
 	}
-
+        if (!fin){
+            cerr << "ReadCell::read -- could not open file " << filename << endl;
+            return;
+        }
+        
 	cell_ = Neutral::create( "Cell", cellname, pa, idGen_.next() );
 
 	if ( !cell_ ) {
