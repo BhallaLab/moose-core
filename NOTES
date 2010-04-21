@@ -4565,4 +4565,15 @@ Just noticed that the MsgId was always 1. This MsgId is reserved for
 Shell connecting to Elements for SetGet. I think that it has been
 overwritten for the ones going to the other Shells. Yes.
 Fixed it, now clears a good set of unit tests before failing in testSparseMsg.
+Checkin 1729
 
+=============================================================================
+21 April 2010
+Another bizarre bug in testAsync. The Field::setVec command at line 754 
+is changing the e2.e_->msgBinding_[0].size() from 1 to 0. 
+In other words, messages are being deleted or something. 
+Valgrind doesn't see anything odd.
+The SetGet1::setVec does nasty things with the shell msgBind indices.
+Should be fixed, perhaps that is part of the problem.
+Fixed one issue with SetGet: Replaced all instances of iSetInner
+with the current Shell::dispatchSet. Still fails at the same place.

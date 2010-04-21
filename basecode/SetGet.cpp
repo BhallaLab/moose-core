@@ -64,7 +64,6 @@ bool SetGet::checkSet( const string& field, FuncId& fid ) const
  * fields. This is a common core function used by the various
  * type-specialized variants.
  * Called after func checking etc.
- */
 void SetGet::iSetInner( FuncId fid, const char* val, unsigned int size )
 {
 	static unsigned int setBindIndex = 0;
@@ -75,6 +74,7 @@ void SetGet::iSetInner( FuncId fid, const char* val, unsigned int size )
 	Qinfo q(  fid, 0, size );
 	shell_->asend( q, setBindIndex, Shell::procInfo(), val );
 }
+ */
 
 void SetGet::resizeBuf( unsigned int size )
 {

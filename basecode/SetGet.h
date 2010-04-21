@@ -67,8 +67,8 @@ class SetGet
 		 * Nonblocking 'set' call, using automatic string conversion into
 		 * arbitrary numbers of arguments.
 		 * There is a matching nonblocking set call with typed arguments.
-		 */
 		virtual bool iStrSet( const string& field, const string& val ) = 0;
+		 */
 		
 		/**
 		 * Waits for completion of a nonblocking 'set' call, either
@@ -97,9 +97,9 @@ class SetGet
 		 * Puts data into target queue for calling functions and setting
 		 * fields. This is a common core function used by the various
 		 * type-specialized variants.
-		 */
 		void iSetInner( const FuncId fid, const char* buf,
 			unsigned int size );
+		 */
 		// void clearQ() const;
 	private:
 		static Eref shelle_;
@@ -149,7 +149,6 @@ class SetGet0: public SetGet
 		/**
 		 * Nonblocking 'set' call, no args.
 		 * There is a matching nonblocking iStrSet call with a string arg.
-		 */
 		bool iSet( const string& field )
 		{
 			FuncId fid;
@@ -159,16 +158,17 @@ class SetGet0: public SetGet
 			}
 			return 0;
 		}
+		 */
 
 		/**
 		 * Nonblocking 'set' call, using automatic string conversion into
 		 * arbitrary numbers of arguments.
 		 * There is a matching nonblocking set call with typed arguments.
-		 */
 		bool iStrSet( const string& field, const string& val )
 		{
 			return iSet( field );
 		}
+		 */
 	//////////////////////////////////////////////////////////////////
 
 		void harvestGet() const
@@ -247,11 +247,14 @@ template< class A > class SetGet1: public SetGet
 						Conv< A > conv( arg[i] );
 						char *temp = new char[ conv.size() ];
 						conv.val2buf( temp );
+				Shell::dispatchSet( er, fid, temp, conv.size() );
+						/*
 						sga.iSetInner( fid, temp, conv.size() );
 						// Ideally we should queue all these.
 						// To do that we need some other call than
 						// iSetInner, which clears the old msg out.
 						sga.completeSet();
+						*/
 						delete[] temp;
 					}
 				}
@@ -268,8 +271,11 @@ template< class A > class SetGet1: public SetGet
 							Conv< A > conv( arg[ k++ ] );
 							char *temp = new char[ conv.size() ];
 							conv.val2buf( temp );
+				Shell::dispatchSet( er, fid, temp, conv.size() );
+							/*
 							sga.iSetInner( fid, temp, conv.size() );
 							sga.completeSet();
+							*/
 							delete[] temp;
 						}
 					}
@@ -295,7 +301,6 @@ template< class A > class SetGet1: public SetGet
 		/**
 		 * Nonblocking 'set' call, no args.
 		 * There is a matching nonblocking iStrSet call with a string arg.
-		 */
 		bool iSet( const string& field, const A& arg )
 		{
 			FuncId fid;
@@ -309,6 +314,7 @@ template< class A > class SetGet1: public SetGet
 			}
 			return 0;
 		}
+		 */
 
 		/**
 		 * Nonblocking 'set' call, using automatic string conversion into
@@ -467,10 +473,15 @@ template< class A1, class A2 > class SetGet2: public SetGet
 				char *temp = new char[ conv1.size() + conv2.size() ];
 				conv1.val2buf( temp );
 				conv2.val2buf( temp + conv1.size() );
+				Shell::dispatchSet( dest, fid, temp, 
+					conv1.size() + conv2.size() );
+
+				/*
 				sg.iSetInner( fid, temp, conv1.size() + conv2.size() );
 
 				// Ensure that clearQ is called before this return.
 				sg.completeSet();
+				*/
 				delete[] temp;
 				return 1;
 			}
@@ -572,10 +583,13 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 				conv1.val2buf( temp );
 				conv2.val2buf( temp + s1 );
 				conv3.val2buf( temp + s1s2 );
-				sg.iSetInner( fid, temp, totSize );
+				Shell::dispatchSet( dest, fid, temp, totSize );
 
+				/*
+				sg.iSetInner( fid, temp, totSize );
 				// Ensure that clearQ is called before this return.
 				sg.completeSet();
+				*/
 				delete[] temp;
 				return 1;
 			}
@@ -685,10 +699,13 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 				conv2.val2buf( temp + s1 );
 				conv3.val2buf( temp + s1s2 );
 				conv4.val2buf( temp + s1s2s3 );
-				sg.iSetInner( fid, temp, totSize );
+				Shell::dispatchSet( dest, fid, temp, totSize );
 
+				/*
+				sg.iSetInner( fid, temp, totSize );
 				// Ensure that clearQ is called before this return.
 				sg.completeSet();
+				*/
 				delete[] temp;
 				return 1;
 			}
@@ -805,10 +822,13 @@ template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
 					conv3.size() );
 				conv5.val2buf( temp + conv1.size() + conv2.size() + 
 					conv3.size() + conv4.size() );
-				sg.iSetInner( fid, temp, totSize );
+				Shell::dispatchSet( dest, fid, temp, totSize );
 
+				/*
+				sg.iSetInner( fid, temp, totSize );
 				// Ensure that clearQ is called before this return.
 				sg.completeSet();
+				*/
 				delete[] temp;
 				return 1;
 			}
