@@ -285,9 +285,6 @@ PyMooseBase::PyMooseBase(const PyMooseBase& src, std::string path)
     std::string::size_type name_start = path.rfind(getSeparator(),path.length()-1);
     std::string myName;    
     std::string parentPath;
-#ifndef NDEBUG
-    cout << "Name start: " << name_start << endl;
-#endif
     if (name_start == std::string::npos)
     {
         name_start = 0;
