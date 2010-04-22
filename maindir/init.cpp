@@ -222,8 +222,13 @@ void initSched()
 	Element* cj =
 		Neutral::create( "ClockJob", "cj", sched->id(), Id::initId() );
 	assert( cj != 0 );
+        if (Property::getProperty(Property::AUTOSCHEDULE) == "false"){
+            set<int>(cj, "autoschedule", 0);
+        } else {
+            set<int>(cj, "autoschedule", 1);
+        }
 	cj->id().setGlobal();
-
+        
 	// Not really honouring AUTOSCHEDULE setting -
 	// May need only t0 for AUTOSCHEDULE=false
 	// But creating a few extra clock ticks does not hurt as much as

@@ -24,7 +24,8 @@ class ClockJob
 		static void setNsteps( const Conn* c, int v );
 		static int getNsteps( Eref e );
 		static int getCurrentStep( Eref e );
-		
+                static int getAutoschedule( Eref e);
+                static void setAutoschedule(const Conn* c, int v);
 		//////////////////////////////////////////////////////////
 		//  Dest functions
 		//////////////////////////////////////////////////////////
@@ -46,7 +47,7 @@ class ClockJob
 		void reschedFuncLocal( Eref e );
 		static void dtFunc( const Conn* c, double dt );
 		void dtFuncLocal( Eref e, double dt );
-
+    
 		//////////////////////////////////////////////////////////
 		//  Utility functions
 		//////////////////////////////////////////////////////////
@@ -68,6 +69,7 @@ class ClockJob
 		bool isRunning_;
 		ProcInfoBase info_;
 		int callback_;
+                int autoschedule_;
 };
 
 #endif // _CLOCKJOB_H
