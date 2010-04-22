@@ -149,6 +149,17 @@ class Shell: public Data
 		void innerDispatchSet( Eref& sheller, const Eref& er, 
 			FuncId fid, const char* args, unsigned int size );
 
+		static const char* dispatchGet( 
+			const Eref& tgt, const string& field, const SetGet* sg );
+
+		const char* innerDispatchGet( 
+			const Eref& sheller, const Eref& tgt, FuncId tgtFid );
+
+		void handleGet( Id id, DataId index, FuncId fid );
+
+		void recvGet( unsigned int node, unsigned int status, 
+			PrepackedBuffer pb );
+
 		////////////////////////////////////////////////////////////////
 		// Sets up clock ticks. Essentially is a call into the 
 		// Clock::setupTick function, but may be needed to be called from

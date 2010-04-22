@@ -303,6 +303,38 @@ bool Field< double >::set( const Eref& dest, const string& field, double arg )
 double Field< double >::get( const Eref& dest, const string& field )
 
 
+Inner functioning.
+Set works as follows:
+
+Func		Src		Dest			Args
+Master::innerDispatchSet
+		requestSet	Worker: handleSet	Id, DataId, FuncId, 
+							Prepacked Buffer
+Worker::handleSet
+		lowLevelSet	Target::set_field	None: hacks in the data.
+		ack		Master::handleAck	
+
+				-------------
+Get works as follows.
+
+Func		Src		Dest			Args
+Master::innerDispatchGet
+		requestGet	Worker::handleGet	Id, DataId, FuncId
+
+Worker::handleGet on non_tgt node
+		ack		Master::handleAck
+Worker::handleGet on tgt node
+		lowLevelGet	Target::get_field	Eref, buf
+
+Target::get_field
+		Hacked func 	Worker::receiveGet	Eref, buf
+		to add directly from RetFunc
+		into Q
+		
+Worker::receiveGet
+		reportGet	Master::completeGet
+				(deals with Ack too)
+
 Field access is set up using ValueFinfo and its variants.
 ValueFinfo: uses 
 	setFunc of form  void ( T::*setFunc )( F )

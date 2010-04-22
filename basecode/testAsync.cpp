@@ -263,8 +263,9 @@ void testSet()
 		sprintf( temp, "set_e2_%d", i );
 		string stemp( temp );
 		Eref dest( e2.element(), i );
-		set( dest, "set_name", stemp );
-		Qinfo::clearQ( &p );
+		SetGet1< string >::set( dest, "set_name", stemp );
+		// set( dest, "set_name", stemp );
+		// Qinfo::clearQ( &p );
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -289,7 +290,7 @@ void testGet()
 	vector< unsigned int > dims( 1, size );
 	Element* ret = new Element( i2, nc, "test2", dims, 1 );
 	assert( ret );
-	Element* shell = Id()();
+	// Element* shell = Id()();
 	ProcInfo p;
 
 	Eref e2 = i2.eref();
@@ -308,6 +309,11 @@ void testGet()
 			// I don't really want an array of SetGet/Shells to originate
 			// get requests, but just
 			// to test that it works from anywhere...
+		stemp = Field< string >::get( dest, "name" );
+		char temp[20];
+		sprintf( temp, "get_e2_%d", i );
+		assert( stemp == temp );
+		/*
 		if ( get( dest, "get_name" ) ) {
 			Qinfo::clearQ( &p ); // Request goes to e2
 			// shell->clearQ(); // Response comes back to e1
@@ -319,6 +325,7 @@ void testGet()
 			sprintf( temp, "get_e2_%d", i );
 			assert( stemp == temp );
 		}
+		*/
 	}
 
 	cout << "." << flush;

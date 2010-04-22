@@ -254,14 +254,47 @@ template< class T, class A > class GetOpFunc: public OpFunc
 		/**
 		 * The buf just contains the funcid on the src element that is
 		 * ready to receive the returned data.
-		 * In this special case we do not do typechecking, since the
-		 * constructors for the get command should have done so already.
 		 * Also we are returning the data along the Msg that brought in
 		 * the request, so we don't need to scan through all Msgs in
 		 * the Element to find the right one.
 		 * So we bypass the usual SrcFinfo::sendTo, and instead go
 		 * right to the Qinfo::addToQ to send off data.
+		 * Finally, the data is copied back-and-forth about 3 times.
+		 * Wasteful, but the 'get' function is not to be heavily used.
 		 */
+		void op( Eref e, const char* buf ) const {
+			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
+			buf += sizeof( Qinfo );
+		    FuncId retFunc = *reinterpret_cast< const FuncId* >( buf );
+			const A& ret = 
+				(( reinterpret_cast< T* >( e.data() ) )->*func_)();
+			Conv<A> conv0( ret );
+			char* temp0 = new char[ conv0.size() ];
+			conv0.val2buf( temp0 );
+			PrepackedBuffer pb( temp0, conv0.size() );
+			delete[] temp0;
+
+			// Flag arguments: useSendTo = 1, and flip the isForward flag.
+			Conv< unsigned int > conv1( Shell::myNode() );
+			Conv< unsigned int > conv2( Shell::OkStatus );
+			// This costs 2 copy operations. Wasteful, but who cares.
+			Conv< PrepackedBuffer > conv3( pb );
+			unsigned int totSize = 
+				conv1.size() + conv2.size() + conv3.size();
+
+			char* temp = new char[ totSize ];
+			char* tbuf = temp;
+			conv1.val2buf( tbuf ); tbuf += conv1.size();
+			conv2.val2buf( tbuf ); tbuf += conv2.size();
+			conv3.val2buf( tbuf ); tbuf += conv3.size();
+
+			MsgFuncBinding mfb( q->mid(), retFunc );
+			Qinfo retq( retFunc, e.index(), totSize, 1, !q->isForward() );
+			retq.addToQ( Shell::procInfo()->outQid, mfb, temp );
+			delete[] temp;
+		}
+
+		/*
 		void op( Eref e, const char* buf ) const {
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
 			buf += sizeof( Qinfo );
@@ -280,6 +313,7 @@ template< class T, class A > class GetOpFunc: public OpFunc
 				temp, q->srcIndex() );
 			delete[] temp;
 		}
+		*/
 
 	private:
 		A ( T::*func_ )() const;

@@ -53,7 +53,8 @@ Msg::~Msg()
 	e1_->dropMsg( mid_ );
 	e2_->dropMsg( mid_ );
 
-	garbageMsg_.push_back( mid_ );
+	if ( mid_ > 1 )
+		garbageMsg_.push_back( mid_ );
 }
 
 void Msg::deleteMsg( MsgId mid )

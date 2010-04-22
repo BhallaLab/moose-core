@@ -107,15 +107,46 @@ static Finfo* shellMaster[] = {
 static Finfo* shellWorker[] = {
 	&create, &del, &handleQuit, &handleStart, &handleAddMsg, &handleSet, &ack };
 
-static SrcFinfo1< FuncId > requestGet( "requestGet",
-			"Function to request another Element for a value" );
-
 static SrcFinfo0 lowLevelSet(
 			"lowLevelSet",
 			"lowlevelSet():"
 			"Low-level SrcFinfo. Not for external use, internally used as"
 			"a handle to assign a value on target field."
 );
+
+
+/**
+ * Sequence is:
+ * innerDispatchGet->requestGet->handleGet->lowLevelGet->get_field->
+ * 	receiveGet->completeGet
+ */
+
+static SrcFinfo3< Id, DataId, FuncId > requestGet( "requestGet",
+			"Function to request another Element for a value" );
+
+static DestFinfo handleGet( "handleGet", 
+			"handleGet( Id elementId, DataId index, FuncId fid )"
+			"Deals with requestGet, to get specified field from any node.",
+			new OpFunc3< Shell, Id, DataId, FuncId >( 
+				&Shell::handleGet )
+			);
+static SrcFinfo1< FuncId > lowLevelGet(
+			"lowLevelGet",
+			"lowlevelGet():"
+			"Low-level SrcFinfo. Not for external use, internally used as"
+			"a handle to request a value from target field."
+);
+
+/*
+static DestFinfo receiveGet( "receiveGet", 
+	"Function to handle returning values for 'get' calls.",
+	new RetFunc< Shell >( &Shell::receiveGet ) );
+	*/
+
+static DestFinfo receiveGet( "completeGet", 
+	"completeGet( Uint node#, Uint status, PrepackedBuffer data )"
+	"Function on master shell that handles the value relayed from worker.",
+	new OpFunc3< Shell, unsigned int, unsigned int, PrepackedBuffer >( &Shell::recvGet ) );
 
 /*
 static SrcFinfo1< PrepackedBuffer > setField( "setField",
@@ -146,9 +177,6 @@ const Cinfo* Shell::initCinfo()
 ////////////////////////////////////////////////////////////////
 // Dest Finfos: Functions handled by Shell
 ////////////////////////////////////////////////////////////////
-		static DestFinfo handleGet( "handleGet", 
-			"Function to handle returning values for 'get' calls.",
-			new RetFunc< Shell >( &Shell::handleGet ) );
 		static DestFinfo setclock( "setclock", 
 			"Assigns clock ticks. Args: tick#, dt, stage",
 			new OpFunc3< Shell, unsigned int, double, unsigned int >( & Shell::setclock ) );
@@ -184,7 +212,7 @@ const Cinfo* Shell::initCinfo()
 	static Finfo* shellFinfos[] = {
 		&name,
 		&quit,
-		&handleGet,
+		&receiveGet,
 		&handleStart,
 		&setclock,
 		&loadBalance,
@@ -441,7 +469,8 @@ void Shell::handleAck( unsigned int ackNode, unsigned int status )
 }
 */
 
-void Shell::handleGet( Eref e, const Qinfo* q, const char* arg )
+/*
+void Shell::recvGet( Eref e, const Qinfo* q, const char* arg )
 {
 	getBuf_.resize( q->size() );
 	memcpy( &getBuf_[0], arg, q->size() );
@@ -449,6 +478,7 @@ void Shell::handleGet( Eref e, const Qinfo* q, const char* arg )
 	// permanent msg on this object, reaching out whenever needed
 	// to targets.
 }
+*/
 
 const char* Shell::getBuf() const
 {
@@ -697,8 +727,92 @@ void Shell::innerDispatchSet( Eref& sheller, const Eref& tgt,
 		Qinfo::mpiClearQ( &p_ );
 }
 
+/**
+ * Returns buffer containing desired data.
+ * Static function, used for developer-code triggered SetGet fucntions.
+ * Should only be issued from master node.
+ * This is a blocking function and returns only when the job is done.
+ */
+const char* Shell::dispatchGet( const Eref& tgt, const string& field, 
+	const SetGet* sg )
+{
+	string getField = "get_" + field;
+	const Finfo* gf = tgt.element()->cinfo()->findFinfo( getField );
+	const DestFinfo * df = dynamic_cast< const DestFinfo* >( gf );
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	if ( !df ) {
+		cout << s->myNode() << ": Error: Shell::dispatchGet: field '" << field << "' not found on " << tgt << endl;
+		return 0;
+	}
+
+	if ( df->getOpFunc()->checkSet( sg ) ) { // Type validation
+		Eref sheller = Id().eref();
+		return s->innerDispatchGet( sheller, tgt, df->getFid() );
+	} else {
+		cout << s->myNode() << ": Error: Shell::dispatchGet: type mismatch for field " << field << " on " << tgt << endl;
+	}
+	return 0;
+}
+
+/**
+ * Tells all nodes to dig up specified field, if object is present on node.
+ * Not thread safe: this should only run on master node.
+ */
+const char* Shell::innerDispatchGet( const Eref& sheller, const Eref& tgt, 
+	FuncId fid )
+{
+	initAck();
+	requestGet.send( sheller, &p_, tgt.element()->id(), tgt.index(), fid );
+
+	while ( isAckPending() )
+		Qinfo::mpiClearQ( &p_ );
+	
+	return &getBuf_[0];
+}
+
+
+/**
+ * This operates on the worker node. It handles the Get request from
+ * the master node, and dispatches if need to the local object.
+ */
+void Shell::handleGet( Id id, DataId index, FuncId fid )
+{
+	Eref sheller( shelle_, 0 );
+	Eref tgt( id(), index );
+	if ( id()->dataHandler()->isDataHere( index ) ) {
+		shelle_->clearBinding( lowLevelGet.getBindIndex() );
+		Msg* m = new AssignmentMsg( sheller, tgt, Msg::setMsg );
+		shelle_->addMsgAndFunc( m->mid(), fid, lowLevelGet.getBindIndex() );
+		FuncId retFunc = receiveGet.getFid();
+		lowLevelGet.send( sheller, &p_, retFunc );
+	} else {
+		ack.send( sheller, &p_, myNode_, OkStatus, 0 );
+	}
+}
+
+/*
+void Shell::receiveGet( Eref e, const Qinfo* q, const char* arg )
+{
+	if ( myNode_ == 0 ) {
+		getBuf_.resize( q->size() );
+		memcpy( &getBuf[0], arg );
+	}
+}
+*/
+
+void Shell::recvGet( 
+	unsigned int node, unsigned int status, PrepackedBuffer pb )
+{
+	if ( myNode_ == 0 ) {
+		getBuf_.resize( pb.dataSize() );
+		memcpy( &getBuf_[0], pb.data(), pb.dataSize() );
+	}
+	handleAck( node, status );
+}
+
 ////////////////////////////////////////////////////////////////////////
 
+#if 0
 // Deprecated. Will go into Shell.
 bool set( Eref& dest, const string& destField, const string& val )
 {
@@ -784,3 +898,4 @@ bool get( const Eref& dest, const string& destField )
 	return 0;
 }
 
+#endif

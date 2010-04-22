@@ -35,21 +35,21 @@ class SetGet
 		 * that the dest field matches the type of this request, and that
 		 * the dest funcId will accept a funcId argument for the
 		 * callback.
-		 */
 		bool checkGet( const string& field, FuncId& fid ) const;
+		 */
 //////////////////////////////////////////////////////////////////////
 		/**
 		 * Initiate a nonblocking 'get' call.
 		 * This can be harvested either using harvestStrGet or
 		 * harvestGet< Type >.
-		 */
 		bool iGet( const string &field ) const;
+		 */
 
 		/**
 		 * Complete a nonblocking 'get' call, returning a string.
 		 * There is also a nonblocking typed counterpart, harvestGet< T >.
-		 */
 		virtual string harvestStrGet() const = 0;
+		 */
 //////////////////////////////////////////////////////////////////////
 		/**
 		 * Blocking 'get' call, returning into a string.
@@ -399,6 +399,7 @@ template< class A > class Field: public SetGet1< A >
 		 * multinode calls. Probably want to record a 'baton' to know
 		 * when the call ends.
 		 */
+#if 0
 		A harvestGet() const
 		{ 
 			/**
@@ -425,28 +426,27 @@ template< class A > class Field: public SetGet1< A >
 			Conv< A >::val2str( s, harvestGet() );
 			return s;
 		}
-
+#endif
 		/**
 		 * Blocking call using typed values
 		 */
 		static A get( Eref& dest, const string& field)
 		{ 
-			Field< A > sg( dest );
-			 if ( sg.iGet( field ) )
-			 	return sg.harvestGet();
-			A temp;
-			return temp;
+			SetGet1< A > sg( dest );
+			const char* ret = Shell::dispatchGet( dest, field, &sg );
+			Conv< A > conv( ret );
+			return *conv;
 		}
 
 		/**
 		 * Blocking call using string conversion
-		 */
 		static string strGet( Eref& dest, const string& field)
 		{ 
 			Field< A > sg( dest );
 			 if ( sg.iGet( field ) )
 			 	return sg.harvestStrGet();
 		}
+		 */
 };
 
 /**

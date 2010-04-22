@@ -100,7 +100,7 @@ class Msg
 		static const MsgId badMsg;
 
 		/**
-		 * A special MsgId used for Shell to assign msgs.
+		 * A special MsgId used for Shell to get/set values
 		 */
 		static const MsgId setMsg;
 

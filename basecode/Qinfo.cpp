@@ -362,6 +362,12 @@ void Qinfo::sendRootToAll( const ProcInfo* proc )
 #endif
 }
 
+unsigned int inQsize( const vector< char >& q ) {
+	if ( q.size() < sizeof( unsigned int ) )
+		return 0;
+	const char *temp =  &q[0];
+	return *reinterpret_cast< const unsigned int* >( temp );
+}
 
 /**
  * Static func. readonly, so it is thread safe
@@ -370,24 +376,48 @@ void Qinfo::reportQ()
 {
 	cout << "	inQ: ";
 	for ( unsigned int i = 0; i < inQ_.size(); ++i )
-		cout << "[" << i << "]=" << inQ_[i].size() << "	";
+		cout << "[" << i << "]=" << inQsize( inQ_[i] ) << "	";
 	cout << "outQ: ";
 	for ( unsigned int i = 0; i < outQ_.size(); ++i )
 		cout << "[" << i << "]=" << outQ_[i].size() << "	";
 	cout << endl;
 
-	cout << "Reporting inQ[0]\n";
-	const char* buf = &(inQ_[0][0]);
-	unsigned int bufsize = *reinterpret_cast< const unsigned int* >( buf );
-	const char* end = buf + bufsize;
-	buf += sizeof( unsigned int );
-	while ( buf < end ) {
-		const Qinfo *q = reinterpret_cast< const Qinfo* >( buf );
-		const Msg *m = Msg::getMsg( q->m_ );
-		cout << "Q::MsgId = " << q->m_ << ", FuncId = " << q->f_ <<
-			", srcIndex = " << q->srcIndex_ << ", size = " << q->size_ <<
-			", src = " << m->e1()->name() << ", dest = " << m->e2()->name() << endl;
-		buf += q->size() + sizeof( Qinfo );
+	if ( inQ_.size() > 0 ) {
+		unsigned int bufsize = inQsize( inQ_[0] );
+		if ( bufsize > 0 ) {
+			cout << "Reporting inQ[0]\n";
+			const char* buf = &(inQ_[0][0]);
+			const char* end = buf + bufsize;
+			buf += sizeof( unsigned int );
+			while ( buf < end ) {
+				const Qinfo *q = reinterpret_cast< const Qinfo* >( buf );
+				const Msg *m = Msg::getMsg( q->m_ );
+				cout << "Q::MsgId = " << q->m_ << ", FuncId = " << q->f_ <<
+					", srcIndex = " << q->srcIndex_ << 
+					", size = " << q->size_ <<
+					", src = " << m->e1()->name() << 
+					", dest = " << m->e2()->name() << endl;
+				buf += q->size() + sizeof( Qinfo );
+			}
+		}
+	}
+	if ( outQ_.size() > 0 ) {
+		if ( outQ_[0].size() > 0 ) {
+			cout << "Reporting outQ[0]\n";
+			const char* buf = &(outQ_[0][0]);
+			const char* end = buf + outQ_[0].size();
+			buf += sizeof( unsigned int );
+			while ( buf < end ) {
+				const Qinfo *q = reinterpret_cast< const Qinfo* >( buf );
+				const Msg *m = Msg::getMsg( q->m_ );
+				cout << "Q::MsgId = " << q->m_ << ", FuncId = " << q->f_ <<
+					", srcIndex = " << q->srcIndex_ << 
+					", size = " << q->size_ <<
+					", src = " << m->e1()->name() << 
+					", dest = " << m->e2()->name() << endl;
+				buf += q->size() + sizeof( Qinfo );
+			}
+		}
 	}
 }
 

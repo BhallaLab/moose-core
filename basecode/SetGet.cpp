@@ -93,16 +93,19 @@ char* SetGet::buf()
  * We use the setFid only to do type checking. The actual Fid we
  * need to call is the getFid, which is passed back.
  */
+#if 0
 bool SetGet::checkGet( const string& field, FuncId& getFid )	
 	const
 {
 	static const SetGet1< FuncId > sgf( shelle_ );
 
-	string setField = "set_" + field;
+//	string setField = "set_" + field;
 	string getField = "get_" + field;
 
+	/*
 	const DestFinfo* sf = dynamic_cast< const DestFinfo* >( 
 		e_.element()->cinfo()->findFinfo( setField ) );
+		*/
 	const DestFinfo* gf = dynamic_cast< const DestFinfo* >(
 		e_.element()->cinfo()->findFinfo( getField ) );
 
@@ -112,7 +115,7 @@ bool SetGet::checkGet( const string& field, FuncId& getFid )
 	}
 
 	getFid = gf->getFid();
-	const OpFunc* setFunc = sf->getOpFunc();
+	// const OpFunc* setFunc = sf->getOpFunc();
 	const OpFunc* getFunc = gf->getOpFunc();
 
 /*
@@ -163,3 +166,4 @@ bool SetGet::iGet( const string& field ) const
 	}
 	return 0;
 }
+#endif

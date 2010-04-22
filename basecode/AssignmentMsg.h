@@ -13,7 +13,7 @@
 /**
  * This is a specialized msg type used during field set and gets. It is
  * always anchored at e1 to the Shell, and at e2 to the actual target.
- * It always has the same MsgId of zero.
+ * It always has the same MsgId of one.
  */
 
 class AssignmentMsg: public Msg

@@ -4577,3 +4577,25 @@ The SetGet1::setVec does nasty things with the shell msgBind indices.
 Should be fixed, perhaps that is part of the problem.
 Fixed one issue with SetGet: Replaced all instances of iSetInner
 with the current Shell::dispatchSet. Still fails at the same place.
+Checkin 1731.
+Found problem. Another nasty issue with the MsgIds. Turns out that
+the deleted assignment Msg was being saved in the garbageMsg_, and
+then the MsgId of 1 was being reused. 
+Now it croaks somewhat further along.
+
+Now it fails on an assertion in testScheduling.cpp:271, which is in the
+function  "testThreadIntFireNetwork()". 
+
+=============================================================================
+22 April.
+Checked messaging from Tick. Seems OK.
+Seems the setclock function never actually delivers the command to
+Clock::setupTick.
+
+Struggling with this. Perhaps first let's fix two pending items:
+- the Get function
+- the setVec function, which works but is miserably inefficient.
+
+Massive changes to implement the updated Get function. compiles, does not
+clear unit tests.
+=============================================================================

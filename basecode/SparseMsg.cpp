@@ -102,8 +102,7 @@ unsigned int SparseMsg::randomConnect( double probability )
 	// SynElement* syn = dynamic_cast< SynElement* >( e2_ );
 	Element* syn = e2_;
 	syn->dataHandler()->getNumData2( sizes );
-	cout << Shell::myNode() << ": sizes.size() = " << sizes.size() << 
-		", ncols = " << nCols << endl;
+	// cout << Shell::myNode() << ": sizes.size() = " << sizes.size() << ", ncols = " << nCols << endl;
 	assert( sizes.size() == nCols );
 
 	for ( unsigned int i = 0; i < nCols; ++i ) {

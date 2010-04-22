@@ -57,6 +57,7 @@ class OpFunc;
 class Qinfo;
 class Data;
 class Cinfo;
+class SetGet;
 
 #include "Id.h"
 #include "DataId.h"

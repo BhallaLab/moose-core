@@ -65,6 +65,7 @@ template< class T, class A > class EpFunc1: public OpFunc
 		void ( T::*func_ )( Eref e, const Qinfo* q, A ); 
 };
 
+/*
 template< class T > class RetFunc: public OpFunc
 {
 	public:
@@ -90,6 +91,7 @@ template< class T > class RetFunc: public OpFunc
 	private:
 		void ( T::*func_ )( Eref e, const Qinfo* q, const char* arg ); 
 };
+*/
 
 
 template< class T, class A1, class A2 > class EpFunc2: public OpFunc
