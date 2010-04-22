@@ -39,10 +39,10 @@ double ClockJob::__get_currentTime() const
     get < double > (id_(), "currentTime",currentTime);
     return currentTime;
 }
-void ClockJob::__set_currentTime( double currentTime )
-{
-    set < double > (id_(), "currentTime", currentTime);
-}
+// void ClockJob::__set_currentTime( double currentTime )
+// {
+//     set < double > (id_(), "currentTime", currentTime);
+// }
 int ClockJob::__get_nsteps() const
 {
     int nsteps;
@@ -59,45 +59,57 @@ int ClockJob::__get_currentStep() const
     get < int > (id_(), "currentStep",currentStep);
     return currentStep;
 }
-void ClockJob::__set_currentStep( int currentStep )
+
+int ClockJob::__get_autoschedule() const
 {
-    set < int > (id_(), "currentStep", currentStep);
-}
-double ClockJob::__get_start() const
-{
-    double start;
-    get < double > (id_(), "start",start);
-    return start;
-}
-void ClockJob::__set_start( double start )
-{
-    set < double > (id_(), "start", start);
-}
-int ClockJob::__get_step() const
-{
-    int step;
-    get < int > (id_(), "step",step);
-    return step;
-}
-void ClockJob::__set_step( int step )
-{
-    set < int > (id_(), "step", step);
+    int autoschedule;
+    get<int>(id_(), "autoschedule", autoschedule);
+    return autoschedule;
 }
 
-void ClockJob::resched()
+void ClockJob::__set_autoschedule(int value)
 {
-    set (id_(), "resched");    
+    set<int>(id_(), "autoschedule", value);
 }
+// void ClockJob::__set_currentStep( int currentStep )
+// {
+//     set < int > (id_(), "currentStep", currentStep);
+// }
+// double ClockJob::__get_start() const
+// {
+//     double start;
+//     get < double > (id_(), "start",start);
+//     return start;
+// }
+// void ClockJob::__set_start( double start )
+// {
+//     set < double > (id_(), "start", start);
+// }
+// int ClockJob::__get_step() const
+// {
+//     int step;
+//     get < int > (id_(), "step",step);
+//     return step;
+// }
+// void ClockJob::__set_step( int step )
+// {
+//     set < int > (id_(), "step", step);
+// }
 
-void ClockJob::reinit()
-{
-        set (id_(), "reinit");
-}
+// void ClockJob::resched()
+// {
+//     set (id_(), "resched");    
+// }
 
-void ClockJob::stop()
-{
-        set (id_(), "stop");
-}
+// void ClockJob::reinit()
+// {
+//         set (id_(), "reinit");
+// }
+
+// void ClockJob::stop()
+// {
+//         set (id_(), "stop");
+// }
 
 vector <double> & ClockJob::getClocks()
 {
