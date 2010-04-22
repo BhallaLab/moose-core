@@ -2256,10 +2256,6 @@ class ClockJob(PyMooseBase):
         """__get_currentTime(self) -> double"""
         return _moose.ClockJob___get_currentTime(*args)
 
-    def __set_currentTime(*args):
-        """__set_currentTime(self, double currentTime)"""
-        return _moose.ClockJob___set_currentTime(*args)
-
     def __get_nsteps(*args):
         """__get_nsteps(self) -> int"""
         return _moose.ClockJob___get_nsteps(*args)
@@ -2272,37 +2268,13 @@ class ClockJob(PyMooseBase):
         """__get_currentStep(self) -> int"""
         return _moose.ClockJob___get_currentStep(*args)
 
-    def __set_currentStep(*args):
-        """__set_currentStep(self, int currentStep)"""
-        return _moose.ClockJob___set_currentStep(*args)
+    def __get_autoschedule(*args):
+        """__get_autoschedule(self) -> int"""
+        return _moose.ClockJob___get_autoschedule(*args)
 
-    def __get_start(*args):
-        """__get_start(self) -> double"""
-        return _moose.ClockJob___get_start(*args)
-
-    def __set_start(*args):
-        """__set_start(self, double start)"""
-        return _moose.ClockJob___set_start(*args)
-
-    def __get_step(*args):
-        """__get_step(self) -> int"""
-        return _moose.ClockJob___get_step(*args)
-
-    def __set_step(*args):
-        """__set_step(self, int step)"""
-        return _moose.ClockJob___set_step(*args)
-
-    def resched(*args):
-        """resched(self)"""
-        return _moose.ClockJob_resched(*args)
-
-    def reinit(*args):
-        """reinit(self)"""
-        return _moose.ClockJob_reinit(*args)
-
-    def stop(*args):
-        """stop(self)"""
-        return _moose.ClockJob_stop(*args)
+    def __set_autoschedule(*args):
+        """__set_autoschedule(self, int value)"""
+        return _moose.ClockJob___set_autoschedule(*args)
 
     def getClocks(*args):
         """getClocks() -> double_vector"""
@@ -2310,11 +2282,10 @@ class ClockJob(PyMooseBase):
 
     getClocks = staticmethod(getClocks)
     runTime = _swig_property(_moose.ClockJob_runTime_get, _moose.ClockJob_runTime_set)
-    currentTime = _swig_property(_moose.ClockJob_currentTime_get, _moose.ClockJob_currentTime_set)
+    currentTime = _swig_property(_moose.ClockJob_currentTime_get)
     nsteps = _swig_property(_moose.ClockJob_nsteps_get, _moose.ClockJob_nsteps_set)
-    currentStep = _swig_property(_moose.ClockJob_currentStep_get, _moose.ClockJob_currentStep_set)
-    start = _swig_property(_moose.ClockJob_start_get, _moose.ClockJob_start_set)
-    step = _swig_property(_moose.ClockJob_step_get, _moose.ClockJob_step_set)
+    currentStep = _swig_property(_moose.ClockJob_currentStep_get)
+    autoschedule = _swig_property(_moose.ClockJob_autoschedule_get, _moose.ClockJob_autoschedule_set)
 ClockJob_swigregister = _moose.ClockJob_swigregister
 ClockJob_swigregister(ClockJob)
 ClockJob.className_ = _moose.cvar.ClockJob_className_

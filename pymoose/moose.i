@@ -205,11 +205,12 @@ def doc(cls):
 
 %include "ClockJob.h"
 %attribute(pymoose::ClockJob, double, runTime, __get_runTime, __set_runTime)
-%attribute(pymoose::ClockJob, double, currentTime, __get_currentTime, __set_currentTime)
+%attribute(pymoose::ClockJob, double, currentTime, __get_currentTime)
 %attribute(pymoose::ClockJob, int, nsteps, __get_nsteps, __set_nsteps)
-%attribute(pymoose::ClockJob, int, currentStep, __get_currentStep, __set_currentStep)
-%attribute(pymoose::ClockJob, double, start, __get_start, __set_start)
-%attribute(pymoose::ClockJob, int, step, __get_step, __set_step)
+%attribute(pymoose::ClockJob, int, currentStep, __get_currentStep)
+%attribute(pymoose::ClockJob, int, autoschedule, __get_autoschedule, __set_autoschedule)
+/* %attribute(pymoose::ClockJob, double, start, __get_start, __set_start) */
+/* %attribute(pymoose::ClockJob, int, step, __get_step, __set_step) */
 
 %include "Interpol.h"
 /* Numpy interface for Interpol */
