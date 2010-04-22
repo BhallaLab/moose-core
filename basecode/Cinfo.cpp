@@ -203,6 +203,7 @@ void Cinfo::init( const string* doc,
                    << "        " << name() << "( const " << name() << "& src, std::string name, Id& parent);\n"
                    << "        " << name() << "( const " << name() << "& src, std::string path);\n"
                    << "        " << name() << "( const Id& src, std::string name, Id& parent);\n"
+                   << "        " << name() << "( const Id&" << "& src, std::string path);\n"
                    << "        ~" << name() <<"();\n"
                    << "        const std::string& getType();\n";
 
@@ -219,6 +220,7 @@ void Cinfo::init( const string* doc,
                 << name() << "::" << name() << "(const " << name() << "& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}\n"
                 << name() << "::" << name() << "(const " << name() << "& src, std::string path):PyMooseBase(src, path){}\n"
                 << name() << "::" << name() << "(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}\n"
+                << name() << "::" << name() << "(const Id&& src, std::string path):PyMooseBase(src, path){}\n"
                 << name() << "::~" << name() <<"(){}\n"
                 << "const std::string& "<< name() <<"::getType(){ return className_; }\n";
             swig << "%include \"" << name() << ".h\"\n";        
@@ -582,7 +584,18 @@ bool Cinfo::schedule( Element* e, unsigned int connTainerOption ) const
 {
 	if ( scheduling_.size() == 0 ) 
 		return 1;
-
+        // Subhasis - 2010-04-22 12:13:42 (+0530)
+        // Adding autoschedule enabling and disabling code.
+        // Right now it is done by querying the autoschedule field of
+        // ClockJob object. Not sure it should go into Property.
+        Id cjId = Id::localId( "/sched/cj" );
+        assert( cjId.good() );
+        int autoschedule;
+        get<int>(cjId(), "autoschedule", autoschedule);
+        if (!autoschedule){
+            return 1;
+        }
+        
 	string tickClass = "Tick";
 	if ( Shell::numNodes() > 1 )
 		tickClass = "ParTick";
@@ -616,8 +629,6 @@ bool Cinfo::schedule( Element* e, unsigned int connTainerOption ) const
 		sprintf( line, "/sched/cj/t%d", i->tick * 2 + i->stage );
 		Id tick = Id::localId( line );
 		if ( !tick.good() ) { // Make the clock tick
-			Id cjId = Id::localId( "/sched/cj" );
-			assert( cjId.good() );
 			sprintf( line, "t%d", i->tick * 2 + i->stage );
 			Element* t = Neutral::create( tickClass, line, cjId, 
 				Id::scratchId() );

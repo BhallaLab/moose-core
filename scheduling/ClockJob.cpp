@@ -147,6 +147,10 @@ const Cinfo* initClockJobCinfo()
 			GFCAST( &ClockJob::getCurrentStep ), 
 			&dummyFunc
 			),
+                new ValueFinfo( "autoschedule", ValueFtype1< int > ::global(),
+                                GFCAST( & ClockJob::getAutoschedule),
+                                RFCAST( & ClockJob::setAutoschedule),
+                                "If 0, disable autoscheduling. Autoscheduling is enabled by default."),
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
@@ -281,6 +285,16 @@ int ClockJob::getNsteps( Eref e )
 int ClockJob::getCurrentStep( Eref e )
 {
 	return static_cast< ClockJob* >( e.data() )->currentStep_;
+}
+
+int ClockJob::getAutoschedule( Eref e )
+{
+    return static_cast< ClockJob* >( e.data() )->autoschedule_;
+}
+
+void ClockJob::setAutoschedule( const Conn* c, int value )
+{
+    static_cast< ClockJob* >( c->data() )->autoschedule_ = value;
 }
 
 ///////////////////////////////////////////////////
