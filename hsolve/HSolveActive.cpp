@@ -34,13 +34,9 @@ HSolveActive::HSolveActive()
 {
 	caAdvance_ = 1;
 	
-	// Default lookup table size and boundaries
+	// Default lookup table size
 	vDiv_ = 3000;    // for voltage
-	//~ vMin_ = -0.100;
-	//~ vMax_ = 0.050;
 	caDiv_ = 3000;   // for calcium
-	//~ caMin_ = 0.0;
-	//~ caMax_ = 1000.0;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -62,6 +58,8 @@ void HSolveActive::solve( ProcInfo info ) {
 	
 	sendValues( );
 	sendSpikes( info );
+	
+	externalCurrent_.assign( externalCurrent_.size(), 0.0 );
 }
 
 void HSolveActive::calculateChannelCurrents( ) {
@@ -108,7 +106,7 @@ void HSolveActive::updateMatrix( ) {
 	}
 	
 	map< unsigned int, InjectStruct >::iterator inject;
-	for ( inject = inject_.begin(); inject != inject_.end(); inject++ ) {
+	for ( inject = inject_.begin(); inject != inject_.end(); ++inject ) {
 		unsigned int ic = inject->first;
 		InjectStruct& value = inject->second;
 		
@@ -126,6 +124,15 @@ void HSolveActive::updateMatrix( ) {
 		unsigned int ic = isyn->compt_;
 		HS_[ 4 * ic ] += Gk;
 		HS_[ 4 * ic + 3 ] += Gk * Ek;
+	}
+	
+	ihs = HS_.begin();
+	vector< double >::iterator iec;
+	for ( iec = externalCurrent_.begin(); iec != externalCurrent_.end(); iec += 2 ) {
+		*ihs += *iec;
+		*( 3 + ihs ) += *( iec + 1 );
+		
+		ihs += 4;
 	}
 	
 	stage_ = 0;    // Update done.
@@ -293,13 +300,27 @@ void HSolveActive::sendValues( ) {
 		initCompartmentCinfo( )->getSlot( "VmSrc" );
 	static const Slot caConcConcSrcSlot =
 		initCaConcCinfo( )->getSlot( "concSrc" );
+	static const Slot compartmentChannelVmSlot =
+		initCompartmentCinfo( )->getSlot( "channel.Vm" );
 	
-	for ( unsigned int i = 0; i < compartmentId_.size( ); ++i )
+	for ( unsigned int i = 0; i < compartmentId_.size( ); ++i ) {
 		send1< double > (
 			compartmentId_[ i ].eref(),
 			compartmentVmSrcSlot,
 			V_[ i ]
 		);
+		
+		// An advantage of sending from the compartment here is that we can use
+		// as simple 'send' as opposed to 'sendTo'. sendTo requires the conn
+		// index for the target, and that will require extra book keeping.
+		// Disadvantage is that the message will go out to regular HHChannels,
+		// etc. A possibility is to delete those messages.
+		send1< double >(
+			compartmentId_[ i ].eref(),
+			compartmentChannelVmSlot,
+			V_[ i ]
+		);
+	}
 	
 	/*
 	 * Speed up this function by sending only from objects which have targets.
