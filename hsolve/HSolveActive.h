@@ -31,7 +31,9 @@ public:
 	double getInject( unsigned int index ) const;
 	void setInject( unsigned int index, double value );
 	double getIm( unsigned int index ) const;
+	void insertInject( unsigned int index );
 	void addInject( unsigned int index, double value );
+	void addGkEk( unsigned int index, double v1, double v2 );
 	
 	/// Interface to channels
 	const vector< Id >& getHHChannels( ) const;
@@ -54,6 +56,9 @@ public:
 	const vector< Id >& getCaConcs( ) const;
 	double getCa( unsigned int index ) const;
 	void setCa( unsigned int index, double value );
+	
+	/// Interface to external channels
+	const vector< vector< Id > >& getExternalChannels( ) const;
 	
 protected:
 	/**
@@ -114,13 +119,17 @@ private:
 	vector< currentVecIter >  currentBoundary_;
 	vector< unsigned int >    chan2compt_;
 	vector< unsigned int >    chan2state_;
+	vector< vector< Id > >    externalChannelId_;
+	vector< double >          externalCurrent_;
+	
 	/**
 	 * Setting up of data structures: Defined in HSolveActiveSetup.cpp
 	 */
-	void readChannels( );
+	void readHHChannels( );
 	void readGates( );
 	void readCalcium( );
 	void readSynapses( );
+	void readExternalChannels( );
 
 	void createLookupTables( );
 	void cleanup( );

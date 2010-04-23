@@ -20,6 +20,12 @@ struct CompartmentStruct
 
 struct InjectStruct
 {
+	InjectStruct()
+		:
+		injectVarying( 0.0 ),
+		injectBasal( 0.0 )
+	{ ; }
+	
 	double injectVarying;
 	double injectBasal;
 };
