@@ -24,15 +24,16 @@
 void HSolveActive::setup( Id seed, double dt ) {
 	this->HSolvePassive::setup( seed, dt );
 	
-	readChannels( );
+	readHHChannels( );
 	readGates( );
 	readCalcium( );
 	createLookupTables( );
 	readSynapses( );
+	readExternalChannels( );
 	cleanup( );
 }
 
-void HSolveActive::readChannels( ) {
+void HSolveActive::readHHChannels( ) {
 	vector< Id >::iterator icompt;
 	vector< Id >::iterator ichan;
 	int nChannel;
@@ -43,7 +44,7 @@ void HSolveActive::readChannels( ) {
 	
 	for ( icompt = compartmentId_.begin(); icompt != compartmentId_.end(); ++icompt )
 	{
-		nChannel = BioScan::channels( *icompt, channelId_ );
+		nChannel = BioScan::hhchannels( *icompt, channelId_ );
 		
 		// todo: discard channels with Gbar = 0.0
 		channelCount_.push_back( nChannel );
@@ -337,7 +338,7 @@ void HSolveActive::readSynapses( ) {
 	
 	for ( unsigned int ic = 0; ic < nCompt_; ++ic ) {
 		synId.clear( );
-		BioScan::synchan( compartmentId_[ ic ], synId );
+		BioScan::synchans( compartmentId_[ ic ], synId );
 		for ( syn = synId.begin(); syn != synId.end(); ++syn ) {
 			synchan.compt_ = ic;
 			synchan.elm_ = ( *syn )();
@@ -345,7 +346,7 @@ void HSolveActive::readSynapses( ) {
 		}
 		
 		spikeId.clear( );
-                BioScan::spikegen( compartmentId_[ ic ], spikeId );
+		BioScan::spikegens( compartmentId_[ ic ], spikeId );
 		// Very unlikely that there will be >1 spikegens in a compartment,
 		// but lets take care of it anyway.
 		for ( spike = spikeId.begin(); spike != spikeId.end(); ++spike ) {
@@ -356,6 +357,24 @@ void HSolveActive::readSynapses( ) {
 	}
 }
 
+void HSolveActive::readExternalChannels( ) {
+	vector< string > include;
+	vector< string > exclude;
+	exclude.push_back( "HHChannel" );
+	exclude.push_back( "SynChan" );
+	
+	externalChannelId_.resize( compartmentId_.size() );
+	externalCurrent_.resize( 2 * compartmentId_.size(), 0.0 );
+	
+	for ( unsigned int ic = 0; ic < compartmentId_.size(); ++ic )
+		BioScan::targets(
+			compartmentId_[ ic ],
+			"channel",
+			externalChannelId_[ ic ],
+			include,
+			exclude
+		);
+}
 
 void HSolveActive::cleanup( ) {
 //	compartmentId_.clear( );
