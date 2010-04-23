@@ -79,9 +79,10 @@ addmsg /axon/c{N_COMPARTMENT} /plots/vn INPUT Vm
 //=====================================
 setclock 0 {SIMDT}
 setclock 1 {SIMDT}
-setclock 2 {IODT}
+setclock 2 {SIMDT}
+setclock 3 {IODT}
 
-useclock /plots/#[TYPE=table] 2
+useclock /plots/#[TYPE=table] 3
 
 //=====================================
 //  Stimulus
