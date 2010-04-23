@@ -57,6 +57,17 @@ const Cinfo* initHSolveHubCinfoInner()
 		new SrcFinfo( "reinit", Ftype1< ProcInfo >::global() ),
 	};
 	
+	static Finfo* compartmentChannelShared[] =
+	{
+		new DestFinfo(
+			"channel",
+			Ftype2< double, double >::global(),
+			RFCAST( &HSolveHub::compartmentChannelFunc ) ),
+		new SrcFinfo(
+			"Vm",
+			Ftype1< double >::global() ),
+	};
+	
 	static Finfo* HSolveHubFinfos[] =
 	{
 	///////////////////////////////////////////////////////
@@ -81,8 +92,12 @@ const Cinfo* initHSolveHubCinfoInner()
 			RFCAST( &HSolveHub::childFunc ),
 			"override the Neutral::childFunc here, so that when this is deleted "
 			"all the zombies are reanimated." ),
-		new DestFinfo( "injectMsg", Ftype1< double >::global(),
-			RFCAST( &HSolveHub::comptInjectMsgFunc ) ),
+		new DestFinfo( "compartmentInjectMsg", Ftype1< double >::global(),
+			RFCAST( &HSolveHub::compartmentInjectMsgFunc ) ),
+		new SharedFinfo( "compartmentChannel", compartmentChannelShared,
+			sizeof( compartmentChannelShared ) / sizeof( Finfo* ),
+			"This message allows communication between external channels and "
+			"the Hines' solver." ),
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
@@ -130,17 +145,21 @@ static const Finfo* hhchannelSolveFinfo =
 	initHSolveHubCinfo()->findFinfo( "hhchannelSolve" );
 static const Finfo* caconcSolveFinfo = 
 	initHSolveHubCinfo()->findFinfo( "caconcSolve" );
-static const Finfo* hubInjectFinfo =
-	initHSolveHubCinfo()->findFinfo( "injectMsg" );
+static const Finfo* hubCompartmentInjectFinfo =
+	initHSolveHubCinfo()->findFinfo( "compartmentInjectMsg" );
+static const Finfo* hubCompartmentChannelFinfo =
+	initHSolveHubCinfo()->findFinfo( "compartmentChannel" );
 
 /*
  * Finfos from biophysical objects. Needed so that 'set' operations are done
  * on the solver as well as the objects. Also needed for redirecting any dest
  * messages on these finfos to the solver (e.g.: to the inject field).
  */
-static const Finfo* comptInjectFinfo =
+static const Finfo* compartmentInjectFinfo =
 	initCompartmentCinfo()->findFinfo( "injectMsg" );
-static const Finfo* comptVmFinfo =
+static const Finfo* compartmentChannelFinfo =
+	initCompartmentCinfo()->findFinfo( "channel" );
+static const Finfo* compartmentVmFinfo =
 	initCompartmentCinfo()->findFinfo( "Vm" );
 static const Finfo* channelGbarFinfo =
 	initHHChannelCinfo()->findFinfo( "Gbar" );
@@ -354,16 +373,24 @@ void HSolveHub::childFunc( const Conn* c, int stage )
 // Class functions
 /////////////////////////////////////////////////////////////////////////
 
-void HSolveHub::manageCompartments( )
+void HSolveHub::idlist2elist(
+	const vector< Id >& idlist,
+	vector< Element* >& elist )
 {
-	const vector< Id >& idlist = integ_->getCompartments( );
-	
-	// Converting to Ids to Element pointers
-	vector< Element* > elist;
-	elist.reserve( idlist.size() );
 	vector< Id >::const_iterator id;
 	for ( id = idlist.begin(); id != idlist.end(); id++ )
 		elist.push_back( ( *id )() );
+}	
+
+void HSolveHub::manageCompartments( )
+{
+	const vector< Id >& idlist = integ_->getCompartments( );
+	vector< Element* > elist;
+	idlist2elist( idlist, elist );
+	
+	const vector< vector< Id > >& externalChannelIds =
+		integ_->getExternalChannels();
+	vector< Element* > extChanList;
 	
 	const Finfo* initFinfo = initCompartmentCinfo()->findFinfo( "init" );
 	vector< Element* >::const_iterator i;
@@ -377,29 +404,38 @@ void HSolveHub::manageCompartments( )
 	}
 	
 	/*
-	 * Redirecting inject messages
+	 * Redirecting dest/shared messages
 	 */
-	for ( i = elist.begin(); i != elist.end(); i++ ) {
-		// The 'retain' flag at the end is 1: we do not want to delete 
-		// the original message to the compartment.
+	for ( unsigned int ic = 0; ic < elist.size(); ic++ ) {
+		// The 'retain' flag at the end is 1: we do not delete the original
+		// message to the compartment.
 		redirectDestMessages(
-			hub_, *i,
-			hubInjectFinfo, comptInjectFinfo, 
-			i - elist.begin(), comptInjectMap_,
-			&elist, 1 );
+			hub_, elist[ ic ],
+			hubCompartmentInjectFinfo, compartmentInjectFinfo, 
+			ic, compartmentInjectMap_,
+			&elist, 0,
+			1 );
+		
+		extChanList.clear();
+		idlist2elist( externalChannelIds[ ic ], extChanList );
+		redirectDestMessages(
+			hub_, elist[ ic ],
+			hubCompartmentChannelFinfo, compartmentChannelFinfo, 
+			ic, compartmentChannelMap_,
+			&elist, &extChanList,
+			1 );
 	}
+	
+	vector< unsigned int >::iterator ii;
+	for ( ii = compartmentInjectMap_.begin(); ii != compartmentInjectMap_.end(); ++ii )
+		integ_->insertInject( *ii );
 }
 
 void HSolveHub::manageHHChannels( )
 {
 	const vector< Id >& idlist = integ_->getHHChannels( );
-	
-	// Converting to Ids to Element pointers
 	vector< Element* > elist;
-	elist.reserve( idlist.size() );
-	vector< Id >::const_iterator id;
-	for ( id = idlist.begin(); id != idlist.end(); id++ )
-		elist.push_back( ( *id )() );
+	idlist2elist( idlist, elist );
 	
 	vector< Element* >::const_iterator i;
 	for ( i = elist.begin(); i != elist.end(); i++ ) {
@@ -412,13 +448,8 @@ void HSolveHub::manageHHChannels( )
 void HSolveHub::manageCaConcs( )
 {
 	const vector< Id >& idlist = integ_->getCaConcs( );
-	
-	// Converting to Ids to Element pointers
 	vector< Element* > elist;
-	elist.reserve( idlist.size() );
-	vector< Id >::const_iterator id;
-	for ( id = idlist.begin(); id != idlist.end(); id++ )
-		elist.push_back( ( *id )() );
+	idlist2elist( idlist, elist );
 	
 	vector< Element* >::const_iterator i;
 	for ( i = elist.begin(); i != elist.end(); i++ ) {
@@ -436,7 +467,7 @@ void HSolveHub::clearFunc( Eref hub )
 	clearMsgsFromFinfo( hub, compartmentSolveFinfo );
 	clearMsgsFromFinfo( hub, hhchannelSolveFinfo );
 
-	hub.dropAll( comptInjectFinfo->msg() );
+	hub.dropAll( compartmentInjectFinfo->msg() );
 }
 
 void HSolveHub::clearMsgsFromFinfo( Eref hub, const Finfo * f )
@@ -495,10 +526,15 @@ void HSolveHub::zombify(
  * eIndex is the index to look up the element.
  */
 void HSolveHub::redirectDestMessages(
-	Eref hub, Eref e,
-	const Finfo* hubFinfo, const Finfo* eFinfo,
-	unsigned int eIndex, vector< unsigned int >& map, 
-	vector< Element *>*  elist, bool retain )
+	Eref hub,
+	Eref e,
+	const Finfo* hubFinfo,
+	const Finfo* eFinfo,
+	unsigned int eIndex,
+	vector< unsigned int >& map, 
+	vector< Element * >* elist,
+	vector< Element * >* include,
+	bool retain )
 {
 	Conn* i = e.e->targets( eFinfo->msg(), e.i );
 	vector< Eref > srcElements;
@@ -507,13 +543,16 @@ void HSolveHub::redirectDestMessages(
 
 	while( i->good() ) {
 		Element* tgt = i->target().e;
+		
 		// Handle messages going outside purview of solver.
-		if ( find( elist->begin(), elist->end(), tgt ) == elist->end() ) {
+		bool inElist = find( elist->begin(), elist->end(), tgt ) != elist->end();
+		bool inInclude =
+			include == 0 ||
+			find( include->begin(), include->end(), tgt ) != include->end();
+		
+		if ( ! inElist && inInclude ) {
 			map.push_back( eIndex );
 			srcElements.push_back( i->target() );
-#ifndef NDEBUG
-                        cout << "$$ HSolveHub::redirectDestMessages" << i->target().id().path() << endl;
-#endif
 			srcMsg.push_back( i->targetMsg() );
 			if ( !retain )
 				dropList.push_back( i->connTainer() );
@@ -618,7 +657,7 @@ HSolveHub* HSolveHub::getHubFromZombie( Eref e, unsigned int& index )
 void HSolveHub::setVm( const Conn* c, double value )
 {
 	Eref e = c->target();
-	set< double >( e, comptVmFinfo, value );
+	set< double >( e, compartmentVmFinfo, value );
 	
 	unsigned int index;
 	HSolveHub* nh = getHubFromZombie( e, index );
@@ -641,7 +680,7 @@ double HSolveHub::getVm( Eref e )
 void HSolveHub::setInject( const Conn* c, double value )
 {
 	Eref e = c->target();
-	set< double >( e, comptInjectFinfo, value );
+	set< double >( e, compartmentInjectFinfo, value );
 	
 	unsigned int index;
 	HSolveHub* nh = getHubFromZombie( e, index );
@@ -847,14 +886,28 @@ double HSolveHub::getCa( Eref e )
 /////////////////////////////////////////////////////////////////////////
 // Dest functions (Biophysics)
 /////////////////////////////////////////////////////////////////////////
-void HSolveHub::comptInjectMsgFunc( const Conn* c, double value )
+void HSolveHub::compartmentInjectMsgFunc( const Conn* c, double value )
 {
 	Element* hub = c->target().e;
 	unsigned int index = c->targetIndex();
 	HSolveHub* nh = static_cast< HSolveHub* >( hub->data() );
 	
-	assert( index < nh->comptInjectMap_.size() );
+	assert( nh != 0 );
+	assert( index < nh->compartmentInjectMap_.size() );
 	
-	if ( nh )
-		nh->integ_->addInject( nh->comptInjectMap_[ index ], value );
+	nh->integ_->addInject( nh->compartmentInjectMap_[ index ], value );
+}
+
+void HSolveHub::compartmentChannelFunc( const Conn* c, double v1, double v2 )
+{
+	Element* hub = c->target().e;
+	unsigned int index = c->targetIndex();
+	HSolveHub* nh = static_cast< HSolveHub* >( hub->data() );
+	
+	assert( nh != 0 );
+	assert( index < nh->compartmentChannelMap_.size() );
+	
+	nh->integ_->addGkEk(
+		nh->compartmentChannelMap_[ index ],
+		v1, v2 );
 }
