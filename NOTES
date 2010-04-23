@@ -4600,3 +4600,10 @@ Massive changes to implement the updated Get function. compiles, does not
 clear unit tests.
 Checkin 1733.
 =============================================================================
+23 April.
+Got a first round of tests on Get to work. Checkin 1734.
+Need to fix GetUpFunc. Fixed.
+Also confirmed that one of the slow operations is SetVec. 
+Will get to that soon.
+Now it fails the unit tests where it did before I began working on the 
+Set/Get stuff: in the testScheduling.cpp:testThreadIntFireNetwork.

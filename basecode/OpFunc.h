@@ -43,29 +43,6 @@ template< class T > class OpFunc0: public OpFunc
 			(reinterpret_cast< T* >( e.data() )->*func_)( );
 		}
 
-		/**
-		 * Calls function on first dimension of data, using index as
-		 * argument.
-		void opUp1( Eref e, const char* buf ) const {
-			(reinterpret_cast< T* >( e.data1() )->*func_)( e.index() );
-		}
-		 */
-
-		/**
-		 * Call function on T located at e.aData(). This comes from
-		 * separating the Eref index into data and field parts. The
-		 * data is looked up using the data part of the index, and then
-		 * Data::field looks up a void pointer to the field. Assumes a
-		 * single such field, it would seem.
-		void arrayOp( Eref e, const char* buf ) const {
-			(reinterpret_cast< T* >( e.aData() )->*func_)( );
-		}
-
-		void parentOp( Eref e, const char* buf ) const {
-			(reinterpret_cast< T* >( e.aData() )->*func_)( );
-		}
-		 */
-
 	private:
 		void ( T::*func_ )( ); 
 };
@@ -109,16 +86,6 @@ template< class T, class A1, class A2 > class OpFunc2: public OpFunc
 			return dynamic_cast< const SetGet2< A1, A2 >* >( s );
 		}
 
-		/*
-		void op( Eref e, const char* buf ) const {
-			buf += sizeof( Qinfo );
-			const char* buf2 = buf + sizeof( A1 );
-			(reinterpret_cast< T* >( e.data() )->*func_)( 
-				*reinterpret_cast< const A1* >( buf ),
-				*reinterpret_cast< const A2* >( buf2 )
-			);
-		}
-		*/
 		void op( Eref e, const char* buf ) const {
 			buf += sizeof( Qinfo );
 			Conv< A1 > arg1( buf );
@@ -266,11 +233,6 @@ template< class T, class A > class GetOpFunc: public OpFunc
 		 * Wasteful, but the 'get' function is not to be heavily used.
 		 */
 		void op( Eref e, const char* buf ) const {
-			/*
-			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
-			buf += sizeof( Qinfo );
-		    FuncId retFunc = *reinterpret_cast< const FuncId* >( buf );
-			*/
 			const A& ret = 
 				(( reinterpret_cast< T* >( e.data() ) )->*func_)();
 			Conv<A> conv0( ret );
@@ -278,53 +240,7 @@ template< class T, class A > class GetOpFunc: public OpFunc
 			conv0.val2buf( temp0 );
 			fieldOp( e, buf, temp0, conv0.size() );
 			delete[] temp0;
-
-
-			/*
-			PrepackedBuffer pb( temp0, conv0.size() );
-			delete[] temp0;
-
-			// Flag arguments: useSendTo = 1, and flip the isForward flag.
-			Conv< unsigned int > conv1( Shell::myNode() );
-			Conv< unsigned int > conv2( Shell::OkStatus );
-			// This costs 2 copy operations. Wasteful, but who cares.
-			Conv< PrepackedBuffer > conv3( pb );
-			unsigned int totSize = 
-				conv1.size() + conv2.size() + conv3.size();
-
-			char* temp = new char[ totSize ];
-			char* tbuf = temp;
-			conv1.val2buf( tbuf ); tbuf += conv1.size();
-			conv2.val2buf( tbuf ); tbuf += conv2.size();
-			conv3.val2buf( tbuf ); tbuf += conv3.size();
-
-			MsgFuncBinding mfb( q->mid(), retFunc );
-			Qinfo retq( retFunc, e.index(), totSize, 1, !q->isForward() );
-			retq.addToQ( Shell::procInfo()->outQid, mfb, temp );
-			delete[] temp;
-			*/
 		}
-
-		/*
-		void op( Eref e, const char* buf ) const {
-			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
-			buf += sizeof( Qinfo );
-		    FuncId retFunc = *reinterpret_cast< const FuncId* >( buf );
-			const A& ret = 
-				(( reinterpret_cast< T* >( e.data() ) )->*func_)();
-
-			// Flag arguments: useSendTo = 1, and flip the isForward flag.
-			Conv<A> conv( ret );
-			Qinfo retq( retFunc, e.index(), conv.size(), 
-				1, !q->isForward() );
-			char* temp = new char[ retq.size() ];
-			conv.val2buf( temp ); 
-			MsgFuncBinding mfb( q->mid(), retFunc );
-			retq.addSpecificTargetToQ( Shell::procInfo()->outQid, mfb, 
-				temp, q->srcIndex() );
-			delete[] temp;
-		}
-		*/
 
 	private:
 		A ( T::*func_ )() const;

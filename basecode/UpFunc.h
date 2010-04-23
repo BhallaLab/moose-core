@@ -219,7 +219,7 @@ template< class T, class A > class GetUpFunc: public OpFunc
 		}
 
 		bool checkSet( const SetGet* s ) const {
-			return dynamic_cast< const SetGet1< FuncId >* >( s );
+			return dynamic_cast< const SetGet1< A >* >( s );
 		}
 
 		/**
@@ -230,6 +230,15 @@ template< class T, class A > class GetUpFunc: public OpFunc
 		 * So we bypass the usual SrcFinfo::sendTo, and instead go
 		 * right to the Conn to send the data.
 		 */
+		void op( Eref e, const char* buf ) const {
+			const A& ret = (( reinterpret_cast< T* >( e.data1() ) )->*func_)( e.index() );
+			Conv< A > arg( ret );
+			char* temp = new char[ arg.size() ];
+			arg.val2buf( temp );
+			fieldOp( e, buf, temp, arg.size() );
+			delete[] temp;
+		}
+		/*
 		void op( Eref e, const char* buf ) const {
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
 			buf += sizeof( Qinfo );
@@ -246,6 +255,7 @@ template< class T, class A > class GetUpFunc: public OpFunc
 				temp, q->srcIndex() );
 			delete[] temp;
 		}
+		*/
 
 	private:
 		A ( T::*func_ )( DataId ) const;
