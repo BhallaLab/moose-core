@@ -18,12 +18,12 @@ void BioScan::initialize( Id object )
 {
 	ProcInfoBase p;
 	SetConn c( object(), 0 );
-	if ( isType( object, "Compartment" ) )
+	
+	if ( object()->className() == "Compartment" )
 		moose::Compartment::reinitFunc( &c, &p );
-	else if (( isType( object, "HHChannel" )
-                   && object()->className() != "HHChannel2D")) // hack to avoid HHChannel2D being incorrectly taken in until HSolve has supportfor it.
+	else if ( object()->className() == "HHChannel" )
 		HHChannel::reinitFunc( &c, &p );
-	else if ( isType( object, "CaConc" ) )
+	else if ( object()->className() == "CaConc" )
 		CaConc::reinitFunc( &c, &p );
 }
 
@@ -51,7 +51,16 @@ int BioScan::children( Id compartment, vector< Id >& ret )
 	return targets( compartment, "axial", ret, "Compartment" );
 }
 
+/**
+ * Gives all channels (hhchannels, synchans, any other) attached to a given
+ * compartment.
+ */
 int BioScan::channels( Id compartment, vector< Id >& ret )
+{
+	return targets( compartment, "channel", ret );
+}
+
+int BioScan::hhchannels( Id compartment, vector< Id >& ret )
 {
 	// Request for elements of type "HHChannel" only since
 	// channel messages can lead to synchans as well.
@@ -68,12 +77,12 @@ int BioScan::gates( Id channel, vector< Id >& ret )
 	return gate.size();
 }
 
-int BioScan::spikegen( Id compartment, vector< Id >& ret )
+int BioScan::spikegens( Id compartment, vector< Id >& ret )
 {
 	return targets( compartment, "VmSrc", ret, "SpikeGen" );
 }
 
-int BioScan::synchan( Id compartment, vector< Id >& ret )
+int BioScan::synchans( Id compartment, vector< Id >& ret )
 {
 	// "channel" msgs lead to SynChans as well HHChannels, so request
 	// explicitly for former.
@@ -189,8 +198,27 @@ int BioScan::targets(
 	Id object,
 	const string& msg,
 	vector< Id >& target,
-	const string& type )
-// default argument: type = ""
+	const string& include,    // default value: ""
+	const string& exclude )   // default value: ""
+{
+	vector< string > include_v;
+	vector< string > exclude_v;
+	
+	if ( include != "" )
+		include_v.push_back( include );
+	
+	if ( exclude != "" )
+		exclude_v.push_back( exclude );
+	
+	return targets( object, msg, target, include_v, exclude_v );
+}
+
+int BioScan::targets(
+	Id object,
+	const string& msg,
+	vector< Id >& target,
+	const vector< string >& include,    // Mandatory to provide
+	const vector< string >& exclude )   // default value: empty vector
 {
 	unsigned int oldSize = target.size();
 	
@@ -198,30 +226,24 @@ int BioScan::targets(
 	Conn* i = object()->targets( msg, 0 );
 	for ( ; i->good(); i->increment() ) {
 		found = i->target()->id();
-		if ( type != "" && !isType( found, type ) )	// speed this up
-			continue;
-		if (!((type=="HHChannel") && ( found()->className() == "HHChannel2D"))){ // this hack to save HHChannel2D
-                    target.push_back( found );
-                }
 		
-		ProcInfoBase p;
-		SetConn c( found(), 0 );
-		if ( isType( found, "Compartment" ) ){
-			moose::Compartment::reinitFunc( &c, &p );
-                } else if ( isType( found, "HHChannel" )){
-			HHChannel::reinitFunc( &c, &p );
-                } else if ( isType( found, "CaConc" ) ){
-			CaConc::reinitFunc( &c, &p );
-                }
+		bool inInclude =
+			find( include.begin(), include.end(), found()->className() ) != include.end();
+		if ( ! include.empty() && ! inInclude )
+			continue;
+		
+		bool inExclude =
+			find( exclude.begin(), exclude.end(), found()->className() ) != exclude.end();
+		if ( inExclude )
+			continue;
+		
+		initialize( found );
+		
+		target.push_back( found );
 	}
 	delete i;
 	
 	return target.size() - oldSize;
-}
-
-bool BioScan::isType( Id object, const string& type )
-{
-	return object()->cinfo()->isA( Cinfo::find( type ) );
 }
 
 ////////////////////////////////////////////////////////////////////////////

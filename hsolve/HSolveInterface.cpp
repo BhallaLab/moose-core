@@ -29,6 +29,11 @@ const vector< Id >& HSolveActive::getCaConcs( ) const
 	return caConcId_;
 }
 
+const vector< vector< Id > >& HSolveActive::getExternalChannels( ) const
+{
+	return externalChannelId_;
+}
+
 double HSolveActive::getVm( unsigned int index ) const
 {
 	assert( index < V_.size() );
@@ -39,6 +44,16 @@ void HSolveActive::setVm( unsigned int index, double value )
 {
 	assert( index < V_.size() );
 	V_[ index ] = value;
+}
+
+void HSolveActive::insertInject( unsigned int index )
+{
+	assert( index < nCompt_ );
+	
+	// Ensure we do not step on an existing entry in the map, corresponding to a
+	// compartment that has a non-zero injection field value.
+	if ( inject_.find( index ) == inject_.end() )
+		inject_[ index ] = InjectStruct();
 }
 
 double HSolveActive::getInject( unsigned int index ) const
@@ -82,7 +97,15 @@ double HSolveActive::getIm( unsigned int index ) const
 
 void HSolveActive::addInject( unsigned int index, double value )
 {
+	assert( index < inject_.size() );
 	inject_[ index ].injectVarying += value;
+}
+
+void HSolveActive::addGkEk( unsigned int index, double Gk, double Ek )
+{
+	assert( 2 * index + 1 < externalCurrent_.size() );
+	externalCurrent_[ 2 * index ] += Gk;
+	externalCurrent_[ 2 * index + 1 ] += Gk * Ek;
 }
 
 double HSolveActive::getHHChannelGbar( unsigned int index ) const

@@ -66,7 +66,8 @@ public:
 	///////////////////////////////////////////////////
 	// Dest functions (Biophysics)
 	///////////////////////////////////////////////////
-	static void comptInjectMsgFunc( const Conn* c, double value );
+	static void compartmentInjectMsgFunc( const Conn* c, double value );
+	static void compartmentChannelFunc( const Conn* c, double v1, double v2 );
 	
 private:
 	void innerHubFunc( Eref hub, HSolveActive* integ );
@@ -80,17 +81,27 @@ private:
 	static void unzombify( Element* e );
 	static void clearFunc( Eref e );
 	static void clearMsgsFromFinfo( Eref e, const Finfo * f );
+	static void idlist2elist(
+		const vector< Id >& idlist,
+		vector< Element* >& elist );
 	static void redirectDestMessages(
-		Eref hub, Eref e,
-		const Finfo* hubFinfo, const Finfo* eFinfo,
-		unsigned int eIndex, vector< unsigned int >& map, 
-		vector< Element *>*  elist, bool retain );
+		Eref hub,
+		Eref e,
+		const Finfo* hubFinfo,
+		const Finfo* eFinfo,
+		unsigned int eIndex,
+		vector< unsigned int >& map, 
+		vector< Element * >* elist,
+		vector< Element * >* include,
+		bool retain );
 	static void redirectDynamicMessages( Element* e );
 	static HSolveHub* getHubFromZombie( Eref e, unsigned int& index );
 	
 	Eref hub_;
 	HSolveActive* integ_;
-	vector< unsigned int > comptInjectMap_;
+	
+	vector< unsigned int > compartmentInjectMap_;
+	vector< unsigned int > compartmentChannelMap_;
 };
 
 #endif // _HSOLVE_HUB_H
