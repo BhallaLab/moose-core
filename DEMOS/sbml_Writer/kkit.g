@@ -88,4 +88,7 @@ end
 
 function complete_loading
 	reset
+	step {MAXTIME} -t
+	do_save_all_plots test.plot
+	exit
 end
