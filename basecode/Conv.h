@@ -45,6 +45,9 @@ template< class T > class Conv
 		}
 
 		const T operator*() const {
+			if ( val_ == 0 ) {
+				return T();
+			}
 			return *reinterpret_cast< const T* >( val_ );
 		}
 
@@ -78,8 +81,12 @@ template<> class Conv< string >
 {
 	public:
 		Conv( const char* buf )
-			: val_( buf )
-		{;}
+		{
+			if ( buf == 0 )
+				val_ = "";
+			else
+				val_ = buf;
+		}
 
 		Conv( const string& arg )
 			: val_( arg )

@@ -229,6 +229,9 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class OpFu
 		void ( T::*func_ )( A1, A2, A3, A4, A5 ); 
 };
 
+extern void fieldOp( const Eref& e, const char* buf, 
+	const char* data, unsigned int size );
+
 
 /**
  * This specialized OpFunc is for returning a single field value
@@ -248,7 +251,7 @@ template< class T, class A > class GetOpFunc: public OpFunc
 		}
 
 		bool checkSet( const SetGet* s ) const {
-			return dynamic_cast< const SetGet1< FuncId >* >( s );
+			return dynamic_cast< const SetGet1< A >* >( s );
 		}
 
 		/**
@@ -263,14 +266,21 @@ template< class T, class A > class GetOpFunc: public OpFunc
 		 * Wasteful, but the 'get' function is not to be heavily used.
 		 */
 		void op( Eref e, const char* buf ) const {
+			/*
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
 			buf += sizeof( Qinfo );
 		    FuncId retFunc = *reinterpret_cast< const FuncId* >( buf );
+			*/
 			const A& ret = 
 				(( reinterpret_cast< T* >( e.data() ) )->*func_)();
 			Conv<A> conv0( ret );
 			char* temp0 = new char[ conv0.size() ];
 			conv0.val2buf( temp0 );
+			fieldOp( e, buf, temp0, conv0.size() );
+			delete[] temp0;
+
+
+			/*
 			PrepackedBuffer pb( temp0, conv0.size() );
 			delete[] temp0;
 
@@ -292,6 +302,7 @@ template< class T, class A > class GetOpFunc: public OpFunc
 			Qinfo retq( retFunc, e.index(), totSize, 1, !q->isForward() );
 			retq.addToQ( Shell::procInfo()->outQid, mfb, temp );
 			delete[] temp;
+			*/
 		}
 
 		/*

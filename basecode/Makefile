@@ -39,6 +39,7 @@ OBJ = \
 	DataId.o \
 	Message.o \
 	SetGet.o \
+	OpFunc.o \
 	SparseMatrix.o \
 	SparseMsg.o \
 	PsparseMsg.o \

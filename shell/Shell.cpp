@@ -100,13 +100,6 @@ static DestFinfo handleSet( "handleSet",
 				&Shell::handleSet )
 			);
 
-
-static Finfo* shellMaster[] = {
-	&requestCreate, &requestDelete, &requestQuit, &requestStart,
-	&requestAddMsg, &requestSet, &handleAck };
-static Finfo* shellWorker[] = {
-	&create, &del, &handleQuit, &handleStart, &handleAddMsg, &handleSet, &ack };
-
 static SrcFinfo0 lowLevelSet(
 			"lowLevelSet",
 			"lowlevelSet():"
@@ -156,6 +149,14 @@ static SrcFinfo1< PrepackedBuffer > setField( "setField",
 			"to communicate with the target."
 			);
 			*/
+
+static Finfo* shellMaster[] = {
+	&requestCreate, &requestDelete, &requestQuit, &requestStart,
+	&requestAddMsg, &requestSet, &requestGet, &handleAck };
+static Finfo* shellWorker[] = {
+	&create, &del, &handleQuit, &handleStart, 
+		&handleAddMsg, &handleSet, &handleGet, &ack };
+
 
 const Cinfo* Shell::initCinfo()
 {
