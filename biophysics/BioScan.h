@@ -18,9 +18,10 @@ public:
 	static int adjacent( Id compartment, Id exclude, vector< Id >& ret );
 	static int children( Id compartment, vector< Id >& ret );
 	static int channels( Id compartment, vector< Id >& ret );
+	static int hhchannels( Id compartment, vector< Id >& ret );
 	static int gates( Id channel, vector< Id >& ret );
-	static int spikegen( Id compartment, vector< Id >& ret );
-	static int synchan( Id compartment, vector< Id >& ret );
+	static int spikegens( Id compartment, vector< Id >& ret );
+	static int synchans( Id compartment, vector< Id >& ret );
 	static int leakageChannels( Id compartment, vector< Id >& ret );
 	static int caTarget( Id channel, vector< Id >& ret );
 	static int caDepend( Id channel, vector< Id >& ret );
@@ -39,14 +40,19 @@ public:
 		int& AMode,
 		int& BMode );
 
-private:
 	static int targets(
 		Id object,
 		const string& msg,
 		vector< Id >& target,
-		const string& type = "" );
-
-	static bool isType( Id object, const string& type );
+		const string& include = "",
+		const string& exclude = "" );
+	
+	static int targets(
+		Id object,
+		const string& msg,
+		vector< Id >& target,
+		const vector< string >& include,
+		const vector< string >& exclude = vector< string >() );
 };
 
 #endif // _BIO_SCAN_H
