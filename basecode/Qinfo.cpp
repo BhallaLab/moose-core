@@ -19,7 +19,7 @@ vector< vector< char > > Qinfo::mpiQ_;
 vector< SimGroup > Qinfo::g_;
 
 void hackForSendTo( const Qinfo* q, const char* buf );
-static const unsigned int BLOCKSIZE = 65536;
+static const unsigned int BLOCKSIZE = 2000000;
 
 Qinfo::Qinfo( FuncId f, DataId srcIndex, 
 	unsigned int size, bool useSendTo, bool isForward )

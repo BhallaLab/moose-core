@@ -819,7 +819,7 @@ void testSparseMsg()
 		// sleep(1);
 	}
 	// printGrid( i2(), "Vm", 0, thresh );
-
+	
 	cout << "." << flush;
 	delete i2();
 }

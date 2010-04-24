@@ -167,6 +167,8 @@ void testThreads()
 	SingleMsg m5( er5, ts ); er5.element()->addMsgAndFunc( m5.mid(), f, 5 );
 	s->start( 10 );
 
+	Qinfo::mergeQ( 0 ); // Need to clean up stuff.
+
 	// cout << "Done TestThreads" << flush;
 	cout << "." << flush;
 }
@@ -190,6 +192,8 @@ void testThreadIntFireNetwork()
 	// const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 1024;
 	string arg;
+
+	// Qinfo::mergeQ( 0 );
 
 	mtseed( 5489UL ); // The default value, but better to be explicit.
 

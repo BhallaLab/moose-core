@@ -4627,4 +4627,17 @@ Good progress on SetVec. Nearly there except for 2 things:
 - Need to handle passing in data bigger than BLOCKSIZE. We're already 
 	at that limit.
 
+- Problem with handling 2-D vectors through a single vector assignment.
+	On child nodes we won't be able to iterate through the whole lot, so
+	won't know where to start.
+- If we split up the msg, need to ensure that the ack part is last.
+
+Checkin 1739
+
+Bypassed this for now, simply made BLOCKSIZE bigger.
+Now unit tests go on properly till the same old problem with testScheduling.
+Seems that the IntFire::process is just not being called.
+Tracked it down. There was a hangover of stuff frome the 
+testAsync.cpp:testSparseMsg. Inserting a Qinfo::mergeQ fixed it.
+
 =============================================================================
