@@ -324,16 +324,17 @@ Master::innerDispatchGet
 Worker::handleGet on non_tgt node
 		ack		Master::handleAck
 Worker::handleGet on tgt node
-		lowLevelGet	Target::get_field	Eref, buf
+		lowLevelGet	Target::get_field::	Eref, buf
+				GetOpFunc
 
-Target::get_field
-		Hacked func 	Worker::receiveGet	Eref, buf
-		to add directly from RetFunc
+Target::get_field::GetOpFunc::fieldOp
+		Hacked func 	Worker::recvGet		node, status, 
+		to add directly from RetFunc		PrepackedBuffer
 		into Q
 		
-Worker::receiveGet
-		reportGet	Master::completeGet
-				(deals with Ack too)
+Worker::recvGet
+		Puts the data into the buffer
+		calls handleAck to complete the operation.
 
 Field access is set up using ValueFinfo and its variants.
 ValueFinfo: uses 

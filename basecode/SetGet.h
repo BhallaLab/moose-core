@@ -227,64 +227,35 @@ template< class A > class SetGet1: public SetGet
 		 * one by one to randomly generated values within a range. All
 		 * of these can best be collapsed into the vector assignment 
 		 * operation.
+		 * This variant requires that all vector entries have the same
+		 * size. Strings won't work.
 		 */
 		static bool setVec( Eref& dest, const string& field, 
 			const vector< A >& arg )
 		{
 			SetGet1< A > sg( dest );
-			Element* e = dest.element();
 			FuncId fid;
-			assert( arg.size() >= e->dataHandler()->numData() );
 			if ( arg.size() == 0 )
 				return 0;
 
 			if ( sg.checkSet( field, fid ) ) {
-				if ( e->dataHandler()->numDimensions() == 1 ) {
-					for ( unsigned int i = 0; i < e->dataHandler()->numData(); ++i )
-					{
-						Eref er( e, i );
-						SetGet1< A > sga( er );
-						Conv< A > conv( arg[i] );
-						char *temp = new char[ conv.size() ];
-						conv.val2buf( temp );
-				Shell::dispatchSet( er, fid, temp, conv.size() );
-						/*
-						sga.iSetInner( fid, temp, conv.size() );
-						// Ideally we should queue all these.
-						// To do that we need some other call than
-						// iSetInner, which clears the old msg out.
-						sga.completeSet();
-						*/
-						delete[] temp;
-					}
-				}
-
-				if ( e->dataHandler()->numDimensions() == 2 )
-				{
-					unsigned int k = 0;
-					for ( unsigned int i = 0; i < e->dataHandler()->numData1(); ++i )
-					{
-						for ( unsigned int j = 0; j < e->dataHandler()->numData2(i); ++j )
-						{
-							Eref er( e, DataId( i, j ) );
-							SetGet1< A > sga( er );
-							Conv< A > conv( arg[ k++ ] );
-							char *temp = new char[ conv.size() ];
-							conv.val2buf( temp );
-				Shell::dispatchSet( er, fid, temp, conv.size() );
-							/*
-							sga.iSetInner( fid, temp, conv.size() );
-							sga.completeSet();
-							*/
-							delete[] temp;
-						}
-					}
-				}
-
-				// Ensure that clearQ is called before this return.
+				const char* data = reinterpret_cast< const char* >( &arg[0] );
+				PrepackedBuffer pb( data, arg.size() * sizeof( A ), 
+					arg.size() ) ;
+				Shell::dispatchSetVec( dest, fid, pb );
 				return 1;
 			}
 			return 0;
+		}
+
+		/**
+		 * Sets all target array values to the single value
+		 */
+		static bool setRepeat( Eref& dest, const string& field, 
+			const A& arg )
+		{
+			vector< A >temp ( arg, 1 );
+			return setVec( dest, field, temp );
 		}
 
 		/**

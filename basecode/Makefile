@@ -44,7 +44,9 @@ OBJ = \
 	SparseMsg.o \
 	PsparseMsg.o \
 	DiagonalMsg.o \
+	PrepackedBuffer.o \
 	AssignmentMsg.o \
+	AssignVecMsg.o \
 	main.o	\
 	testSync.o	\
 	testAsync.o	\

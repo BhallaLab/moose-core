@@ -12,6 +12,8 @@
 
 class ThreadInfo;
 
+enum AssignmentType { SINGLE, VECTOR, REPEAT };
+
 class Shell: public Data
 {
 	public:
@@ -138,16 +140,37 @@ class Shell: public Data
 		////////////////////////////////////////////////////////////////
 
 
+		/**
+		 * Local node function to assign a single entry in target object
+		 */
 		void innerSet( const Eref& er, FuncId fid, const char* args,
 			unsigned int size );
 
-		void handleSet( Id id, DataId d, FuncId fid, PrepackedBuffer arg);
+		/**
+		 * Local node function to assign all entries in an array target
+		 * object. The target object may be decomposed between nodes,
+		 * this function has to figure out which part of the array to
+		 * use for which entry.
+		 */
+		void innerSetVec( const Eref& er, FuncId fid, 
+			const PrepackedBuffer& arg );
+
+
+		/**
+		 * Local node function that orchestrates the assignment. It picks
+		 * the assignment mode to operate the appropriate innerSet 
+		 * function.
+		 */
+		void handleSet( Id id, DataId d, FuncId fid, PrepackedBuffer arg );
 
 		static void dispatchSet( const Eref& er, FuncId fid, 
 			const char* args, unsigned int size );
 
+		static void dispatchSetVec( const Eref& er, FuncId fid, 
+			const PrepackedBuffer& arg );
+
 		void innerDispatchSet( Eref& sheller, const Eref& er, 
-			FuncId fid, const char* args, unsigned int size );
+			FuncId fid, const PrepackedBuffer& arg );
 
 		static const char* dispatchGet( 
 			const Eref& tgt, const string& field, const SetGet* sg );

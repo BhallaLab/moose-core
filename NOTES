@@ -4607,3 +4607,24 @@ Also confirmed that one of the slow operations is SetVec.
 Will get to that soon.
 Now it fails the unit tests where it did before I began working on the 
 Set/Get stuff: in the testScheduling.cpp:testThreadIntFireNetwork.
+Checkin 1737.
+
+One option for SetVec: Put in a special flag for all of the data
+or field indices. For example, ~0. 
+	- We can use the entire same 'set' sequence with little or no
+	change in the functions.
+	- OpFunc::op will have to change in all cases, to handle
+		single or a range of Ids.
+	- This takes away the functionality of OneToAll type messages,
+		and forces the OneToOne types to deal with both.
+	- We could achieve the same result by adding a flag argument to
+		the Set functions.
+=============================================================================
+24 April.
+Good progress on SetVec. Nearly there except for 2 things:
+- Need to put in a cleaner way to give the opfunc the Qinfo it expects. 
+	This is in the AssignVecMsg.cpp file.
+- Need to handle passing in data bigger than BLOCKSIZE. We're already 
+	at that limit.
+
+=============================================================================

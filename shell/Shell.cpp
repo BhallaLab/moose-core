@@ -10,6 +10,7 @@
 #include "header.h"
 #include "DiagonalMsg.h"
 #include "AssignmentMsg.h"
+#include "AssignVecMsg.h"
 #include "Shell.h"
 #include "Dinfo.h"
 
@@ -672,6 +673,20 @@ void Shell::setclock( unsigned int tickNum, double dt, unsigned int stage )
 // Functions for handling field set/get and func calls
 ////////////////////////////////////////////////////////////////////////
 
+void Shell::innerSetVec( const Eref& er, FuncId fid, const PrepackedBuffer& arg )
+{
+	shelle_->clearBinding ( lowLevelSet.getBindIndex() );
+	Msg* m = new AssignVecMsg( Eref( shelle_, 0 ), er.element(), Msg::setMsg );
+	shelle_->addMsgAndFunc( m->mid(), fid, lowLevelSet.getBindIndex() );
+	char* temp = new char[ arg.size() ];
+	arg.conv2buf( temp );
+
+	Qinfo q( fid, 0, arg.size() );
+	shelle_->asend( q, lowLevelSet.getBindIndex(), &p_, temp );
+
+	delete[] temp;
+}
+
 void Shell::innerSet( const Eref& er, FuncId fid, const char* args, 
 	unsigned int size )
 {
@@ -685,10 +700,14 @@ void Shell::innerSet( const Eref& er, FuncId fid, const char* args,
 	}
 }
 
-void Shell::handleSet( Id id, DataId d, FuncId fid, PrepackedBuffer arg)
+void Shell::handleSet( Id id, DataId d, FuncId fid, PrepackedBuffer arg )
 {
 	Eref er( id(), d );
-	innerSet( er, fid, arg.data(), arg.dataSize() );
+	if ( arg.isVector() ) {
+		innerSetVec( er, fid, arg );
+	} else {
+		innerSet( er, fid, arg.data(), arg.dataSize() );
+	}
 	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus, 0 );
 	// We assume that the ack will get back to the master node no sooner
 	// than the field assignment. This is probably pretty safe. More to the
@@ -706,19 +725,21 @@ void Shell::handleSetAck()
 // Static function, used for developer-code triggered SetGet functions.
 // Should only be issued from master node.
 // This is a blocking function, and returns only when the job is done.
+// mode = 0 is single value set, mode = 1 is vector set, mode = 2 is
+// to set the entire target array to a single value.
 void Shell::dispatchSet( const Eref& tgt, FuncId fid, const char* args,
 	unsigned int size )
 {
 	Eref sheller = Id().eref();
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-	s->innerDispatchSet( sheller, tgt, fid, args, size );
+	PrepackedBuffer buf( args, size );
+	s->innerDispatchSet( sheller, tgt, fid, buf );
 }
 
 // regular function, does the actual dispatching.
 void Shell::innerDispatchSet( Eref& sheller, const Eref& tgt, 
-	FuncId fid, const char* args, unsigned int size )
+	FuncId fid, const PrepackedBuffer& buf )
 {
-	PrepackedBuffer buf( args, size );
 	Id tgtId( tgt.element()->id() );
 	initAck();
 	requestSet.send( sheller, &p_,  tgtId, tgt.index(), fid, buf );
@@ -726,6 +747,15 @@ void Shell::innerDispatchSet( Eref& sheller, const Eref& tgt,
 
 	while ( isAckPending() )
 		Qinfo::mpiClearQ( &p_ );
+}
+
+// Static function.
+void Shell::dispatchSetVec( const Eref& tgt, FuncId fid, 
+	const PrepackedBuffer& pb )
+{
+	Eref sheller = Id().eref();
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	s->innerDispatchSet( sheller, tgt, fid, pb );
 }
 
 /**

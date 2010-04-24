@@ -58,12 +58,12 @@ void testPrepackedBuffer()
 
 	Conv< PrepackedBuffer > conv4( pb );
 
-	assert( conv4.size() == pb.dataSize() + sizeof( unsigned int ) );
+	assert( conv4.size() == pb.dataSize() + 2 * sizeof( unsigned int ) );
 
 	temp = new char[ conv4.size() ];
 
 	unsigned int size = conv4.val2buf( temp );
-	assert( size == pb.dataSize() + sizeof( unsigned int ) );
+	assert( size == pb.dataSize() + 2 * sizeof( unsigned int ) );
 
 	Conv< PrepackedBuffer > conv5( temp );
 
