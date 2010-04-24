@@ -226,6 +226,7 @@ const Cinfo* Shell::initCinfo()
 		&requestGet,
 		// &requestSet,
 		&lowLevelSet,
+		&lowLevelGet,
 ////////////////////////////////////////////////////////////////
 //  Shared msg
 ////////////////////////////////////////////////////////////////
@@ -675,14 +676,14 @@ void Shell::setclock( unsigned int tickNum, double dt, unsigned int stage )
 
 void Shell::innerSetVec( const Eref& er, FuncId fid, const PrepackedBuffer& arg )
 {
-	shelle_->clearBinding ( lowLevelSet.getBindIndex() );
+	shelle_->clearBinding ( lowLevelGet.getBindIndex() );
 	Msg* m = new AssignVecMsg( Eref( shelle_, 0 ), er.element(), Msg::setMsg );
-	shelle_->addMsgAndFunc( m->mid(), fid, lowLevelSet.getBindIndex() );
+	shelle_->addMsgAndFunc( m->mid(), fid, lowLevelGet.getBindIndex() );
 	char* temp = new char[ arg.size() ];
 	arg.conv2buf( temp );
 
 	Qinfo q( fid, 0, arg.size() );
-	shelle_->asend( q, lowLevelSet.getBindIndex(), &p_, temp );
+	shelle_->asend( q, lowLevelGet.getBindIndex(), &p_, temp );
 
 	delete[] temp;
 }
@@ -691,12 +692,12 @@ void Shell::innerSet( const Eref& er, FuncId fid, const char* args,
 	unsigned int size )
 {
 	if ( er.isDataHere() ) {
-		shelle_->clearBinding ( lowLevelSet.getBindIndex() );
+		shelle_->clearBinding ( lowLevelGet.getBindIndex() );
 		Msg* m = new AssignmentMsg( Eref( shelle_, 0 ), er, Msg::setMsg );
-		shelle_->addMsgAndFunc( m->mid(), fid, lowLevelSet.getBindIndex() );
+		shelle_->addMsgAndFunc( m->mid(), fid, lowLevelGet.getBindIndex() );
 	
 		Qinfo q( fid, 0, size );
-		shelle_->asend( q, lowLevelSet.getBindIndex(), &p_, args );
+		shelle_->asend( q, lowLevelGet.getBindIndex(), &p_, args );
 	}
 }
 

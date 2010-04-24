@@ -120,18 +120,25 @@ void setupTicks()
 	
 	// No idea what FuncId to use here. Assume 0.
 	FuncId f( 0 );
-	SingleMsg m0( er0, ts ); er0.element()->addMsgAndFunc( m0.mid(), f, 0 );
-	SingleMsg m1( er1, ts ); er1.element()->addMsgAndFunc( m1.mid(), f, 1 );
-	SingleMsg m2( er2, ts ); er2.element()->addMsgAndFunc( m2.mid(), f, 2 );
-	SingleMsg m3( er3, ts ); er3.element()->addMsgAndFunc( m3.mid(), f, 3 );
-	SingleMsg m4( er4, ts ); er4.element()->addMsgAndFunc( m4.mid(), f, 4 );
-	SingleMsg m5( er5, ts ); er5.element()->addMsgAndFunc( m5.mid(), f, 7 );
+	SingleMsg *m0 = new SingleMsg( er0, ts ); 
+	er0.element()->addMsgAndFunc( m0->mid(), f, 0 );
+	SingleMsg *m1 = new SingleMsg( er1, ts ); 
+	er1.element()->addMsgAndFunc( m1->mid(), f, 1 );
+	SingleMsg *m2 = new SingleMsg( er2, ts );
+	er2.element()->addMsgAndFunc( m2->mid(), f, 2 );
+	SingleMsg *m3 = new SingleMsg( er3, ts ); 
+	er3.element()->addMsgAndFunc( m3->mid(), f, 3 );
+	SingleMsg *m4 = new SingleMsg( er4, ts ); 
+	er4.element()->addMsgAndFunc( m4->mid(), f, 4 );
+	SingleMsg *m5 = new SingleMsg( er5, ts ); 
+	er5.element()->addMsgAndFunc( m5->mid(), f, 7 );
 
 	Qinfo q( 0, 0, 8 );
 	cdata->start( clocker, &q, 20 );
 
 	cout << "." << flush;
 
+	tickId.destroy();
 	clock.destroy();
 	// tickId.destroy();
 }

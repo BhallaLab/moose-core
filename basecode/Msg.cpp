@@ -42,6 +42,7 @@ Msg::Msg( Element* e1, Element* e2, MsgId mid )
 {
 	if ( msg_.size() < mid )
 		msg_.resize( mid + 1 );
+	assert( msg_[mid] == 0 );
 	msg_[mid] = this;
 	e1->addMsg( mid );
 	e2->addMsg( mid );

@@ -4637,7 +4637,19 @@ Checkin 1739
 Bypassed this for now, simply made BLOCKSIZE bigger.
 Now unit tests go on properly till the same old problem with testScheduling.
 Seems that the IntFire::process is just not being called.
-Tracked it down. There was a hangover of stuff frome the 
-testAsync.cpp:testSparseMsg. Inserting a Qinfo::mergeQ fixed it.
+Tracked it down. There was a hangover of stuff in the queue from the 
+testScheduling.cpp:testThreads. Inserting a Qinfo::mergeQ fixed it.
+Checkin 1740.
+
+Valgrind indicates lots of cleanup. The faster SetVec makes it much easier
+to run.
+One nasty set identified, not too happy with the fix but it helps: There were
+two lowLevel functions for Set and Get respectively, each with a
+different bindIndex. This bindIndex was used to clear the temporary msg
+after use. However, as they were using different bindIndices, every time I
+switched from Set to Get or vice versa, one msg was left uncleared.
+Hacked around by using lowLevelGet for both.
+Still lots of junk to clean up in valgrind, seems to do
+with FieldElementFinfo.
 
 =============================================================================
