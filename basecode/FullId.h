@@ -39,6 +39,11 @@ class FullId
 		{;}
 
 		/**
+		 * Returns the Eref matching itself.
+		 */
+		Eref eref() const;
+
+		/**
 		 * Here are the data values.
 		 */
 		Id id; 

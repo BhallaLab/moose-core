@@ -30,3 +30,8 @@ istream& operator >>( istream& s, FullId& i )
 	s >> i.id;
 	return s;
 }
+
+Eref FullId::eref() const
+{
+	return Eref( id(), dataId );
+}

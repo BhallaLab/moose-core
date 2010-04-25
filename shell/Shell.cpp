@@ -11,6 +11,9 @@
 #include "DiagonalMsg.h"
 #include "AssignmentMsg.h"
 #include "AssignVecMsg.h"
+#include "SparseMatrix.h"
+#include "SparseMsg.h"
+#include "PsparseMsg.h"
 #include "Shell.h"
 #include "Dinfo.h"
 
@@ -53,9 +56,9 @@ static SrcFinfo1< double > requestStart( "requestStart",
 			"Starts a simulation. Goes to all nodes including self."
 			"Initiates a callback to indicate completion of run."
 			);
-static SrcFinfo5< vector< unsigned int >, string, string, string,
-	vector< double > > requestAddMsg( "requestAddMsg",
-			"requestAddMsg( ids, field1, field2, msgtype, args );"
+static SrcFinfo5< string, FullId, string, FullId, string > requestAddMsg( 
+			"requestAddMsg",
+			"requestAddMsg( type, src, srcField, dest, destField );"
 			"Creates specified Msg between specified Element on all nodes."
 			"Initiates a callback to indicate completion of operation."
 			"Goes to all nodes including self."
@@ -90,10 +93,8 @@ static DestFinfo handleStart( "start",
 
 static DestFinfo handleAddMsg( "handleAddMsg", 
 			"Makes a msg",
-			new EpFunc5< Shell, 
-				vector< unsigned int >, string, string, string,
-					vector< double >
-				>( & Shell::handleAddMsg ) );
+			new OpFunc5< Shell, string, FullId, string, FullId, string >
+				( & Shell::handleAddMsg ) );
 
 static DestFinfo handleSet( "handleSet", 
 			"Deals with request, to set specified field on any node to a value.",
@@ -131,25 +132,11 @@ static SrcFinfo1< FuncId > lowLevelGet(
 			"a handle to request a value from target field."
 );
 
-/*
-static DestFinfo receiveGet( "receiveGet", 
-	"Function to handle returning values for 'get' calls.",
-	new RetFunc< Shell >( &Shell::receiveGet ) );
-	*/
-
 static DestFinfo receiveGet( "completeGet", 
 	"completeGet( Uint node#, Uint status, PrepackedBuffer data )"
 	"Function on master shell that handles the value relayed from worker.",
 	new OpFunc3< Shell, unsigned int, unsigned int, PrepackedBuffer >( &Shell::recvGet ) );
 
-/*
-static SrcFinfo1< PrepackedBuffer > setField( "setField",
-			"set( PrepackagedBuffer ):"
-			"Assigns a value on target field."
-			"This is a special SrcFinfo, as it uses preconverted arguments"
-			"to communicate with the target."
-			);
-			*/
 
 static Finfo* shellMaster[] = {
 	&requestCreate, &requestDelete, &requestQuit, &requestStart,
@@ -185,19 +172,6 @@ const Cinfo* Shell::initCinfo()
 		static DestFinfo loadBalance( "loadBalance", 
 			"Set up load balancing",
 			new OpFunc0< Shell >( & Shell::loadBalance ) );
-
-		/*
-		static DestFinfo( "create", 
-			"create( class, parent, newElm, name",
-			new EpFunc4< Shell, string, Id, Id, string>( &Shell::create )),
-		static DestFinfo( "delete", 
-			"Destroys Element, all its messages, and all its children. Args: Id",
-			new EpFunc1< Shell, Id >( & Shell::destroy ) ),
-
-		new DestFinfo( "addmsg", 
-			"Adds a Msg between specified Elements. Args: Src, Dest, srcField, destField",
-			new OpFunc4< Shell, Id, Id, string, string >( & Shell::addmsg ) ),
-			*/
 
 		static SharedFinfo master( "master",
 			"Issues commands from master shell to worker shells located "
@@ -308,35 +282,42 @@ bool Shell::doDelete( Id i )
 	return 1;
 }
 
-MsgId Shell::doAddMsg( Id src, const string& srcField, Id dest,
-	const string& destField, const string& msgType, vector< double > args )
+MsgId Shell::doAddMsg( const string& msgType, 
+	FullId src, const string& srcField, 
+	FullId dest, const string& destField )
 {
-	const Finfo* f1 = src()->cinfo()->findFinfo( srcField );
+	if ( !src.id() ) {
+		cout << myNode_ << ": Error: Shell::doAddMsg: src not found\n";
+		return Msg::badMsg;
+	}
+	if ( !dest.id() ) {
+		cout << myNode_ << ": Error: Shell::doAddMsg: dest not found\n";
+		return Msg::badMsg;
+	}
+	const Finfo* f1 = src.id()->cinfo()->findFinfo( srcField );
 	if ( !f1 ) {
 		cout << myNode_ << ": Shell::doAddMsg: Error: Failed to find field " << srcField << 
-			" on src:\n"; // Put name here.
-		return 0;
+			" on src: " << src.id()->name() << "\n";
+		return Msg::badMsg;
 	}
-	const Finfo* f2 = dest()->cinfo()->findFinfo( destField );
+	const Finfo* f2 = dest.id()->cinfo()->findFinfo( destField );
 	if ( !f2 ) {
-		cout << "Shell::doAddMsg: Error: Failed to find field " << srcField << 
-			" on src:\n"; // Put name here.
-		return 0;
+		cout << myNode_ << ": Shell::doAddMsg: Error: Failed to find field " << destField << 
+			" on dest: " << dest.id()->name() << "\n";
+		return Msg::badMsg;
 	}
-	unsigned int mid = 0;
-	vector< unsigned int > ids;
-	ids.push_back( src.value() );
-	ids.push_back( dest.value() );
-	ids.push_back( mid );
+	if ( ! f1->checkTarget( f2 ) ) {
+		cout << myNode_ << ": Shell::doAddMsg: Error: Src/Dest Msg type mismatch: " << srcField << "/" << destField << endl;
+		return Msg::badMsg;
+	}
 
 	initAck();
-	requestAddMsg.send( Id().eref(), &p_, ids, 
-		srcField, destField, msgType, args );
-
+	requestAddMsg.send( Eref( shelle_, 0 ), &p_, 
+		msgType, src, srcField, dest, destField );
 	while ( isAckPending() )
 		Qinfo::mpiClearQ( &p_ );
 
-	return Msg::badMsg; // Shouldn't we return the msg data?
+	return latestMsgId_;
 }
 
 /**
@@ -392,27 +373,6 @@ void Shell::doStart( double runtime )
 	// cout << myNode_ << ": Shell::doStart: quitting\n";
 }
 
-/*
-void Shell::doSetDouble( Id id, DataId d, string field, double value )
-{
-	initAck();
-	requestSet.send( Id().eref(), &p_, id, d, field, value );
-	while ( isAckPending() )
-		Qinfo::mpiClearQ( &p_ );
-}
-
-double Shell::doGetDouble( Id id, DataId d, string field )
-{
-	initAck();
-	requestSet.send( Id().eref(), &p_, field, value );
-	while ( isAckPending() )
-		Qinfo::mpiClearQ( &p_ );
-
-
-	return 0.0;
-}
-*/
-
 ////////////////////////////////////////////////////////////////
 // DestFuncs
 ////////////////////////////////////////////////////////////////
@@ -448,40 +408,6 @@ void Shell::handleQuit()
 {
 	quit_ = 1;
 }
-
-/*
-void Shell::handleGet2( Eref e, const Qinfo* q, const char* arg )
-{
-	getBuf_.resize( q->size() );
-	memcpy( &getBuf_[0], arg, q->size() );
-	// Instead of deleting and recreating the msg, it could be a 
-	// permanent msg on this object, reaching out whenever needed
-	// to targets.
-}
-void Shell::handleAck( unsigned int ackNode, unsigned int status )
-{
-	assert( ackNode <= numNodes_ );
-	acked_[ ackNode ] = status;
-		// Here we could also check which node(s) are last, in order to do
-		// some dynamic load balancing.
-	++numAcks_;
-	if ( status != OkStatus ) {
-		cout << myNode_ << ": Shell::handleAck: Error: status = " <<
-			status << " from node " << ackNode << endl;
-	}
-}
-*/
-
-/*
-void Shell::recvGet( Eref e, const Qinfo* q, const char* arg )
-{
-	getBuf_.resize( q->size() );
-	memcpy( &getBuf_[0], arg, q->size() );
-	// Instead of deleting and recreating the msg, it could be a 
-	// permanent msg on this object, reaching out whenever needed
-	// to targets.
-}
-*/
 
 const char* Shell::getBuf() const
 {
@@ -549,44 +475,51 @@ void Shell::destroy( Eref e, const Qinfo* q, Id eid)
 
 // I really also want to put in a message type. But each message has its
 // own features and these may well be done separately
-void Shell::handleAddMsg( Eref e, const Qinfo* q,
-		vector< unsigned int > ids, string srcField,
-		string destField, string msgType, vector< double > args )
+void Shell::handleAddMsg( string msgType, FullId src, string srcField, 
+	FullId dest, string destField )
 {
 	cout << myNode_ << ", Shell::handleAddMsg << \n";
-	Id e1( ids[0] );
-	Id e2( ids[1] );
-	// Could actually make a required static function in all the Msgs,
-	// that has the arguments srcId, srcField, destId, destField, 
-	// vector< double > args. 
-	if ( !e1() ) {
-		cout << myNode_ << ": Error: Shell::handleAddMsg: e1 not found\n";
-		ack.send( e, &p_, Shell::myNode(), ErrorStatus, 0 );
-		return;
-	}
-	if ( !e2() ) {
-		cout << myNode_ << ": Error: Shell::handleAddMsg: e2 not found\n";
-		ack.send( e, &p_, Shell::myNode(), ErrorStatus, 0 );
-		return;
-	}
+	const Finfo* f1 = src.id()->cinfo()->findFinfo( srcField );
+	assert( f1 != 0 );
+	const Finfo* f2 = dest.id()->cinfo()->findFinfo( destField );
+	assert( f2 != 0 );
+	
+	// Should have been done before msgs request went out.
+	assert( f1->checkTarget( f2 ) );
 
+	latestMsgId_ = Msg::badMsg;
+
+	Msg *m = 0;
 	if ( msgType == "diagonal" || msgType == "Diagonal" ) {
-		if ( args.size() != 1 ) {
-			cout << myNode_ << ": Error: Shell::handleAddMsg: Should have 1 arg, was " << args.size() << endl;
-			ack.send( e, &p_, Shell::myNode(), ErrorStatus, 0 );
-			return;
-		}
-		int stride = args[0];
-		bool ret = 
-			DiagonalMsg::add( e1(), srcField, e2(), destField, stride );
-		if ( ret ) {
-			ack.send( e, &p_, Shell::myNode(), OkStatus, 0 );
-			return;
-		}
+		m = new DiagonalMsg( src.id(), dest.id() );
+	} else if ( msgType == "sparse" || msgType == "Sparse" ) {
+		m = new SparseMsg( src.id(), dest.id() );
+	} else if ( msgType == "Single" || msgType == "single" ) {
+		m = new SingleMsg( src.eref(), dest.eref() );
+	} else if ( msgType == "OneToAll" || msgType == "oneToAll" ) {
+		m = new OneToAllMsg( src.eref(), dest.id() );
+	} else if ( msgType == "OneToOne" || msgType == "oneToOne" ) {
+		m = new OneToOneMsg( src.id(), dest.id() );
+	} else {
+		cout << myNode_ << 
+			": Error: Shell::handleAddMsg: msgType not known: "
+			<< msgType << endl;
+		ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus, 0 );
+		return;
 	}
-	cout << myNode_ << ": Error: Shell::handleAddMsg: msgType not known: "
-		<< msgType << endl;
-	ack.send( e, &p_, Shell::myNode(), ErrorStatus, 0 );
+	if ( m ) {
+		if ( f1->addMsg( f2, m->mid(), src.id() ) ) {
+			latestMsgId_ = m->mid();
+			ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus, 0 );
+			return;
+		}
+		delete m;
+	}
+	cout << myNode_ << 
+			": Error: Shell::handleAddMsg: Unable to make/connect Msg: "
+			<< msgType << " from " << src.id()->name() <<
+			" to " << dest.id()->name() << endl;
+	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus, 0 );
 }
 
 void Shell::warning( const string& text )
@@ -822,16 +755,6 @@ void Shell::handleGet( Id id, DataId index, FuncId fid )
 	}
 }
 
-/*
-void Shell::receiveGet( Eref e, const Qinfo* q, const char* arg )
-{
-	if ( myNode_ == 0 ) {
-		getBuf_.resize( q->size() );
-		memcpy( &getBuf[0], arg );
-	}
-}
-*/
-
 void Shell::recvGet( 
 	unsigned int node, unsigned int status, PrepackedBuffer pb )
 {
@@ -843,91 +766,3 @@ void Shell::recvGet(
 }
 
 ////////////////////////////////////////////////////////////////////////
-
-#if 0
-// Deprecated. Will go into Shell.
-bool set( Eref& dest, const string& destField, const string& val )
-{
-	static Id shellid;
-	static BindIndex setBinding = 0; // Need to fix up.
-	Element* shell = shellid();
-	SrcFinfo1< string > sf( "set", "dummy" );
-
-	const Finfo* f = dest.element()->cinfo()->findFinfo( destField );
-	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
-	if ( !df )
-		return 0;
-	
-	FuncId fid = df->getFid();
-	const OpFunc* func = df->getOpFunc();
-
-	// FuncId fid = dest.element()->cinfo()->getOpFuncId( destField );
-	// const OpFunc* func = dest.element()->cinfo()->getOpFunc( fid );
-	if ( func ) {
-		if ( func->checkFinfo( &sf ) ) {
-			shell->clearBinding( setBinding );
-			shell->clearBinding( setBinding );
-			Eref shelle = shellid.eref();
-			Msg* m = new SingleMsg( shelle, dest );
-			shell->addMsgAndFunc( m->mid(), fid, setBinding );
-			sf.send( shelle, Shell::procInfo(), val );
-			return 1;
-		} else {
-			cout << "set::Type mismatch" << dest << "." << destField << endl;
-		}
-	} else {
-		cout << "set::Failed to find " << dest << "." << destField << endl;
-	}
-	return 0;
-}
-
-bool get( const Eref& dest, const string& destField )
-{
-	static Id shellid;
-	static BindIndex getBindIndex = 0;
-
-	static const Finfo* reqFinfo = shellCinfo->findFinfo( "requestGet" );
-	static const SrcFinfo1< FuncId >* rf = 
-		dynamic_cast< const SrcFinfo1< FuncId >* >( reqFinfo );
-
-	// static FuncId retFunc = shellCinfo->getOpFuncId( "handleGet" );
-	static SrcFinfo1< string > sf( "get", "dummy" );
-
-	static Element* shell = shellid();
-	static Eref shelle( shell, 0 );
-
-	const DestFinfo* hf = dynamic_cast< const DestFinfo* >( 
-		shellCinfo->findFinfo( "handleGet" ) );
-	assert( hf );
-	FuncId retFunc = hf->getFid();
-
-	const Finfo* f = dest.element()->cinfo()->findFinfo( destField );
-	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
-	if ( !df )
-		return 0;
-	
-	FuncId fid = df->getFid();
-	const OpFunc* func = df->getOpFunc();
-	// FuncId fid = dest.element()->cinfo()->getOpFuncId( destField );
-	// const OpFunc* func = dest.element()->cinfo()->getOpFunc( fid );
-
-	assert( rf != 0 );
-
-	if ( func ) {
-		if ( func->checkFinfo( &sf ) ) {
-			shell->clearBinding( getBindIndex );
-			Msg* m = new SingleMsg( shelle, dest );
-			shell->addMsgAndFunc( m->mid(), fid, getBindIndex );
-			rf->send( shelle, Shell::procInfo(), retFunc );
-			// Now, dest has to clearQ, do its stuff, then src has to clearQ
-			return 1;
-		} else {
-			cout << "set::Type mismatch" << dest << "." << destField << endl;
-		}
-	} else {
-		cout << "set::Failed to find " << dest << "." << destField << endl;
-	}
-	return 0;
-}
-
-#endif

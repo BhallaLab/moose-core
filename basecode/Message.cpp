@@ -11,6 +11,7 @@
 #include "Message.h"
 
 
+/*
 bool addMsgToFunc( Element* src, const Finfo* finfo, Element* dest, 
 	FuncId fid )
 {
@@ -31,6 +32,7 @@ bool addSharedMsg( Element* src, const Finfo* f1, Element* dest,
 {
 	return 0;
 }
+*/
 
 /**
  * Normal message adds should be from srcFinfo to named opFunc.

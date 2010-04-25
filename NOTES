@@ -4489,7 +4489,7 @@ Checkin 1723
 Some longer-term perspectives. 
 
 We need these things to work before merging in the mainline MOOSE
-	- Set/Get functionality
+	+ Set/Get functionality: GetVec yet to be done.
 	- Multinode message setup
 	- Unit test for IntFire system
 	- Benchmarks and optimization
@@ -4649,7 +4649,44 @@ different bindIndex. This bindIndex was used to clear the temporary msg
 after use. However, as they were using different bindIndices, every time I
 switched from Set to Get or vice versa, one msg was left uncleared.
 Hacked around by using lowLevelGet for both.
-Still lots of junk to clean up in valgrind, seems to do
+Still lots of junk to clean up in valgrind, seems to have to do
 with FieldElementFinfo.
+Checkin 1742.
 
 =============================================================================
+25 April
+Moving on to message setup. 
+- Treat messages like other objects, except that instead of one parent they
+	have two.
+	- Provide a Cinfo and the usual field and setup stuff for messages
+	- Regular field assignment stuff is OK.
+		- This means we can send messages to messsages. Hm.
+	- Merge in concept of Msgid with that of Id.
+- Higher-level messageSpecs can manage a group of messages.
+
+Put down lots of points for this in the paper notes.
+Could try the following:
+- Provide a Cinfo for each Msg, 
+	- look up in the usual way to create msgs
+	- Accessed through a virtual function that looks up the appropriate
+		MsgClass::initCinfo.
+- Provide a common Element for all Msgs
+	- Element does an end-run to get Cinfo appropriate for the selected Msg
+		How do we look up the right one?
+		Many cases where we do a lookup Eref.element()->cinfo()->stuff
+	- Element only allows Get-type messages.
+	- Special DataHandler looks up message based on DataId( MsgId, 0 ). 
+- Create Element on the fly whenever inspecting a given Msg.
+	- Likely to cause problems with its life-cycle.
+- Have a permanent Element, but change its Cinfo on the fly
+	- Sure to cause problems with wrong Cinfo.
+- Provide a separate Element for each of the Msg types.
+	- Cinfo is set just once, on creation
+	- Need to add and delete msgs as they are cycled.
+	- Msg has to be able to identify either the Cinfo or Element that 
+		it is associated with.
+
+For now:
+1. Set up a multinode doAddMsg
+2. Test out fibonacci
+3. Test out IntFire

@@ -38,10 +38,9 @@ class Shell: public Data
 		 * Here the 'args' vector handles whatever arguments we may need
 		 * to pass to the specified msgType.
 		 */
-		MsgId doAddMsg( Id src, const string& srcField, Id dest,
-			const string& destField, const string& msgType,
-			vector< double > args);
-
+		MsgId doAddMsg( const string& msgType, 
+			FullId src, const string& srcField, 
+			FullId dest, const string& destField);
 
 		void doQuit( );
 
@@ -67,9 +66,6 @@ class Shell: public Data
 		bool isAckPending() const;
 
 		void handleQuit();
-		void handleAddMsg( Eref e, const Qinfo* q, 
-			vector< unsigned int > ids, string srcField, string destField,
-				string msgType, vector< double > args );
 
 		void create( Eref e, const Qinfo* q, 
 			string type, Id parent, Id newElm, string name,
@@ -77,11 +73,12 @@ class Shell: public Data
 		void destroy( Eref e, const Qinfo* q, Id eid);
 		void innerCreate( string type, Id parent, Id newElm, string name,
 			const vector< unsigned int >& dimensions );
-		void addmsg( Id src, Id dest, string srcfield, string destfield );
 
-		const char* getBuf() const;
-		static const char* buf();
-		static const ProcInfo* procInfo();
+		// void addmsg( Id src, Id dest, string srcfield, string destfield );
+
+		void handleAddMsg( string msgType, 
+			FullId src, string srcField, 
+			FullId dest, string destField);
 
 		////////////////////////////////////////////////////////////////
 		// Thread and MPI handling functions
@@ -200,10 +197,15 @@ class Shell: public Data
 
 		// Initialization function, used only in main.cpp:init()
 		void setShellElement( Element* shelle );
+
+		const char* getBuf() const;
+		static const char* buf();
+		static const ProcInfo* procInfo();
 	private:
 		string name_;
 		Element* shelle_; // It is useful for the Shell to have this.
 		vector< char > getBuf_;
+		MsgId latestMsgId_; // Hack to communicate newly made MsgIds.
 		bool quit_;
 		bool isSingleThreaded_;
 		static unsigned int numCores_;
