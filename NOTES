@@ -4701,4 +4701,10 @@ is no test for that DataId. I have hacked the two of them to do the test
 at the exec stage, after the data is in the queue, but this is obviously
 inefficient. Need to exclude the data before it gets sent. Anyway,
 this clears the unit tests.
+Checkin 1744.
 
+Cleaning up the send operation with a test at the Element::asend and
+Element::tsend. The latter turned out to have another bug, which I have
+fixed, but which may well break a unit test. Let's see.
+OK, clears tests. I do need to make a unit test specifically for sendTo.
+For now, move on.

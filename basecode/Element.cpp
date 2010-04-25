@@ -262,7 +262,8 @@ void Element::asend( Qinfo& q, BindIndex bindIndex,
 	for ( vector< MsgFuncBinding >::const_iterator i =
 		msgBinding_[ bindIndex ].begin(); 
 		i != msgBinding_[ bindIndex ].end(); ++i ) {
-		q.addToQ( p->outQid, *i, arg );
+		if ( Msg::getMsg( i->mid )->isMsgHere( q ) )
+			q.addToQ( p->outQid, *i, arg );
 	}
 }
 
@@ -276,8 +277,6 @@ void Element::asend( Qinfo& q, BindIndex bindIndex,
  * but there is a requirement that all function calls should be able
  * to trace back their calling Element. At present that goes by the Msg.
  *
- * Note that this sends data only in the forward direction, that is,
- * originating from Msg::e1.
  */
 void Element::tsend( Qinfo& q, BindIndex bindIndex, 
 	const ProcInfo *p, const char* arg, const FullId& target )
@@ -287,9 +286,17 @@ void Element::tsend( Qinfo& q, BindIndex bindIndex,
 	for ( vector< MsgFuncBinding >::const_iterator i =
 		msgBinding_[ bindIndex ].begin(); 
 		i != msgBinding_[ bindIndex ].end(); ++i ) {
-		if ( Msg::getMsg( i->mid )->e1() == e ) {
-			q.addSpecificTargetToQ( p->outQid, *i, arg, target.dataId );
-			return;
+		const Msg* m = Msg::getMsg( i->mid );
+		if ( q.isForward() ) {
+			if ( m->e2() == e && m->isMsgHere( q ) ) {
+				q.addSpecificTargetToQ( p->outQid, *i, arg, target.dataId );
+				return;
+			}
+		} else {
+			if ( m->e1() == e && m->isMsgHere( q ) ) {
+				q.addSpecificTargetToQ( p->outQid, *i, arg, target.dataId );
+				return;
+			}
 		}
 	}
 	cout << "Warning: Element::tsend: Failed to find specific target " <<

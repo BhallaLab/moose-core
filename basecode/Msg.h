@@ -34,24 +34,19 @@ class Msg
 		static void initNull();
 
 		/**
-		 * Call clearQ on e1. Note that it applies at
-		 * the Element level, not the index level.
-		 */
-		// virtual void clearQ() const;
-
-		/**
-		 * Add an event to the queue on the target element.
-		 * This is generally the same function, so the base Msg provides it.
-		 * Will need to be specialized for multithread and
-		 * multinode dispersal of messages too.
-		virtual void addToQ( const Element* caller, Qinfo& q,
-			const ProcInfo* p, const char* arg ) const;
-		 */
-
-		/**
 		 * Calls Process on e1.
 		 */
 		virtual void process( const ProcInfo *p ) const;
+
+		/**
+		 * Report if the msg accepts input from the DataId specified
+		 * in the Qinfo. Note that the direction of the message is also
+		 * important to know in order to figure this out.
+		 * Usually the answer is yes, regardless of DataId.
+		 */
+		virtual bool isMsgHere( const Qinfo& q ) const {
+			return 1;
+		}
 
 		
 		/**
@@ -59,35 +54,26 @@ class Msg
 		 */
 		virtual void exec( const char* arg, const ProcInfo* p ) const = 0;
 
-		// Something here to set up sync message buffers
-
-		// Something here to print message info
-		// virtual void print( string& output ) const;
-
-		// Duplicate message on new Elements.
-		// virtual Msg* dup( Element* e1, Element* e2 ) const;
-
+		/**
+		 * Return the first element
+		 */
 		Element* e1() const {
 			return e1_;
 		}
 
+		/**
+		 * Return the second element
+		 */
 		Element* e2() const {
 			return e2_;
 		}
 
+		/**
+		 * return the Msg Id.
+		 */
 		MsgId mid() const {
 			return mid_;
 		}
-
-		/*
-		MsgId mid1() const {
-			return m1_;
-		}
-
-		MsgId mid2() const {
-			return m2_;
-		}
-		*/
 
 		/**
 		 * Looks up the message on the global vector of Msgs.

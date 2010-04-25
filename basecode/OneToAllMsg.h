@@ -23,6 +23,8 @@ class OneToAllMsg: public Msg
 
 		void exec( const char* arg, const ProcInfo* p ) const;
 
+		bool isMsgHere( const Qinfo& q ) const;
+
 		static bool add( Eref e1, const string& srcField, 
 			Element* e2, const string& destField );
 

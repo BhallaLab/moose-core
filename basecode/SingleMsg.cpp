@@ -23,18 +23,24 @@ void SingleMsg::exec( const char* arg, const ProcInfo *p ) const
 {
 	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
 
-	if ( q->srcIndex() == i1_ ) {
 	if ( q->isForward() && e2_->dataHandler()->isDataHere( i2_ ) ) {
 		const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
 		f->op( Eref( e2_, i2_ ), arg );
 		return;
 	} 
-	}
 
 	if ( !q->isForward() && e1_->dataHandler()->isDataHere( i1_ ) ) {
 		const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
 		f->op( Eref( e1_, i1_ ), arg );
 	}
+}
+
+bool SingleMsg::isMsgHere( const Qinfo& q ) const
+{
+	if ( q.isForward() )
+		return ( i1_ == q.srcIndex() );
+	else
+		return ( i2_ == q.srcIndex() );
 }
 
 bool SingleMsg::add( Eref e1, const string& srcField, 

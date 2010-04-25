@@ -19,6 +19,8 @@ class SingleMsg: public Msg
 
 		void exec( const char* arg, const ProcInfo* p) const;
 
+		bool isMsgHere( const Qinfo& q ) const;
+
 		static bool add( Eref e1, const string& srcField, 
 			Eref e2, const string& destField );
 
