@@ -102,7 +102,7 @@ Id init( int argc, char** argv )
 	assert ( shellId == Id() );
 	assert( clockId == Id( 1 ) );
 	assert( tickId == Id( 2 ) );
-	SetGet::setShell();
+	// SetGet::setShell();
 	Shell* s = reinterpret_cast< Shell* >( shellId.eref().data() );
 	s->setShellElement( shelle );
 	s->setHardware( isSingleThreaded, numCores, numNodes, myNode );

@@ -26,6 +26,7 @@ void OneToAllMsg::exec( const char* arg, const ProcInfo *p ) const
 	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
 	// arg += sizeof( Qinfo );
 	if ( q->isForward() ) {
+		if ( q->srcIndex() == i1_ ) {
 		const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
 		if ( e2_->dataHandler()->numDimensions() == 1 ) {
 			for ( unsigned int i = 0; i < e2_->dataHandler()->numData(); ++i )
@@ -34,6 +35,7 @@ void OneToAllMsg::exec( const char* arg, const ProcInfo *p ) const
 			for ( unsigned int i = 0; i < e2_->dataHandler()->numData1(); ++i )
 				for ( unsigned int j = 0; j < e2_->dataHandler()->numData2( i ); ++j )
 					f->op( Eref( e2_, DataId( i, j ) ), arg );
+		}
 		}
 	} else {
 		const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );

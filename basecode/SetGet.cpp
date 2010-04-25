@@ -10,6 +10,7 @@
 #include "header.h"
 #include "SetGet.h"
 
+/*
 Eref SetGet::shelle_( 0, 0 );
 Element* SetGet::shell_;
 
@@ -19,6 +20,7 @@ void SetGet::setShell()
 	shelle_ = shellid.eref();
 	shell_ = shelle_.element();
 }
+*/
 
 /**
  * completeSet: Confirms that the target function has been executed.
@@ -76,6 +78,7 @@ void SetGet::iSetInner( FuncId fid, const char* val, unsigned int size )
 }
  */
 
+/*
 void SetGet::resizeBuf( unsigned int size )
 {
 	buf_.resize( size );
@@ -85,6 +88,7 @@ char* SetGet::buf()
 {
 	return &buf_[0];
 }
+*/
 
 /////////////////////////////////////////////////////////////////////////
 

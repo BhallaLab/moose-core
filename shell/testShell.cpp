@@ -15,6 +15,8 @@
 #include "../scheduling/Tick.h"
 #include "../scheduling/testScheduling.h"
 
+#include "../builtins/Arith.h"
+
 void testCreateDelete()
 {
 	
@@ -183,8 +185,152 @@ void testShellSetGetVec()
 	*/
 }
 
+bool setupSched( Shell* shell, FullId& tick, Id dest )
+{
+	MsgId ret = shell->doAddMsg( "OneToAll", 
+		tick, "process0", FullId( dest, 0 ), "process" );
+	return ( ret != Msg::badMsg );
+}
+
+bool checkOutput( Id e, 
+	double v0, double v1, double v2, double v3, double v4 )
+{
+	bool ret = 1;
+	Eref e0( e(), 0 );
+	double val = Field< double >::get( e0, "outputValue" );
+	ret = ret && ( fabs( val - v0 ) < 1e-6 );
+
+	Eref e1( e(), 1 );
+	val = Field< double >::get( e1, "outputValue" );
+	ret = ret && ( fabs( val - v1 ) < 1e-6 );
+
+	Eref e2( e(), 2 );
+	val = Field< double >::get( e2, "outputValue" );
+	ret = ret && ( fabs( val - v2 ) < 1e-6 );
+
+	Eref e3( e(), 3 );
+	val = Field< double >::get( e3, "outputValue" );
+	ret = ret && ( fabs( val - v3 ) < 1e-6 );
+
+	Eref e4( e(), 4 );
+	val = Field< double >::get( e4, "outputValue" );
+	ret = ret && ( fabs( val - v4 ) < 1e-6 );
+
+	return ret;
+}
+
 void testShellAddMsg()
 {
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+	vector< unsigned int > dimensions;
+	dimensions.push_back( 5 );
+
+
+	///////////////////////////////////////////////////////////
+	// Set up the objects.
+	///////////////////////////////////////////////////////////
+	Id a1 = shell->doCreate( "Arith", Id(), "a1", dimensions );
+	Id a2 = shell->doCreate( "Arith", Id(), "a2", dimensions );
+
+	Id b1 = shell->doCreate( "Arith", Id(), "b1", dimensions );
+	Id b2 = shell->doCreate( "Arith", Id(), "b2", dimensions );
+
+	Id c1 = shell->doCreate( "Arith", Id(), "c1", dimensions );
+	Id c2 = shell->doCreate( "Arith", Id(), "c2", dimensions );
+
+	Id d1 = shell->doCreate( "Arith", Id(), "d1", dimensions );
+	Id d2 = shell->doCreate( "Arith", Id(), "d2", dimensions );
+
+	///////////////////////////////////////////////////////////
+	// Set up initial conditions
+	///////////////////////////////////////////////////////////
+	bool ret = 0;
+	vector< double > init; // 12345
+	for ( unsigned int i = 1; i < 6; ++i )
+		init.push_back( i );
+	ret = SetGet1< double >::setVec( a1.eref(), "arg1", init ); // 12345
+	assert( ret );
+	ret = SetGet1< double >::setVec( b1.eref(), "arg1", init ); // 12345
+	assert( ret );
+	ret = SetGet1< double >::setVec( c1.eref(), "arg1", init ); // 12345
+	assert( ret );
+	ret = SetGet1< double >::setVec( d1.eref(), "arg1", init ); // 12345
+	assert( ret );
+
+	///////////////////////////////////////////////////////////
+	// Set up messaging
+	///////////////////////////////////////////////////////////
+	// Should give 04000
+	MsgId m1 = shell->doAddMsg( "Single", 
+		FullId( a1, 3 ), "output", FullId( a2, 1 ), "arg1" );
+	assert( m1 != Msg::badMsg );
+
+	// Should give 33333
+	MsgId m2 = shell->doAddMsg( "OneToAll", 
+		FullId( b1, 2 ), "output", FullId( b2, 0 ), "arg1" );
+	assert( m2 != Msg::badMsg );
+
+	// Should give 12345
+	MsgId m3 = shell->doAddMsg( "OneToOne", 
+		FullId( c1, 0 ), "output", FullId( c2, 0 ), "arg1" );
+	assert( m3 != Msg::badMsg );
+
+	// Should give 01234
+	MsgId m4 = shell->doAddMsg( "Diagonal", 
+		FullId( d1, 0 ), "output", FullId( d2, 0 ), "arg1" );
+	assert( m4 != Msg::badMsg );
+	
+	///////////////////////////////////////////////////////////
+	// Set up scheduling
+	///////////////////////////////////////////////////////////
+	shell->setclock( 0, 1.0, 0 );
+	FullId tick( Id( 2 ), 0 );
+	ret = setupSched( shell, tick, a1 ); assert( ret );
+	ret = setupSched( shell, tick, a2 ); assert( ret );
+	ret = setupSched( shell, tick, b1 ); assert( ret );
+	ret = setupSched( shell, tick, b2 ); assert( ret );
+	ret = setupSched( shell, tick, c1 ); assert( ret );
+	ret = setupSched( shell, tick, c2 ); assert( ret );
+	ret = setupSched( shell, tick, d1 ); assert( ret );
+	ret = setupSched( shell, tick, d2 ); assert( ret );
+
+	///////////////////////////////////////////////////////////
+	// Run it
+	///////////////////////////////////////////////////////////
+	Qinfo::mergeQ( 0 );
+	Qinfo::mergeQ( 0 );
+	
+	shell->doStart( 1 );
+
+	///////////////////////////////////////////////////////////
+	// Check output.
+	///////////////////////////////////////////////////////////
+	
+	ret = checkOutput( a2, 0, 4, 0, 0, 0 );
+	assert( ret );
+	ret = checkOutput( b1, 1, 2, 3, 4, 5 );
+	assert( ret );
+	ret = checkOutput( b2, 3, 3, 3, 3, 3 );
+	assert( ret );
+	ret = checkOutput( c2, 1, 2, 3, 4, 5 );
+	assert( ret );
+	ret = checkOutput( d2, 0, 1, 2, 3, 4 );
+	assert( ret );
+
+	///////////////////////////////////////////////////////////
+	// Clean up.
+	///////////////////////////////////////////////////////////
+	shell->doDelete( a1 );
+	shell->doDelete( a2 );
+	shell->doDelete( b1 );
+	shell->doDelete( b2 );
+	shell->doDelete( c1 );
+	shell->doDelete( c2 );
+	shell->doDelete( d1 );
+	shell->doDelete( d2 );
+
+	cout << "." << flush;
 }
 
 void testShellParserQuit()
@@ -206,10 +352,12 @@ void testMpiShell( )
 	testShellParserCreateDelete();
 	testShellSetGet();
 	testInterNodeOps();
+	Qinfo::mergeQ( 0 );
+	Qinfo::mergeQ( 0 );
+	testShellAddMsg();
 	/** 
 	 * Need to update
 	testShellParserStart();
-	testShellAddMsg();
 	*/
 	// Don't do this yet.
 	// testShellParserQuit();

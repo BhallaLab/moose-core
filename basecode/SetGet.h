@@ -13,7 +13,7 @@
 class SetGet
 {
 	public:
-		SetGet( Eref& e )
+		SetGet( const Eref& e )
 			: e_( e )
 		{;}
 
@@ -55,13 +55,13 @@ class SetGet
 		 * Blocking 'get' call, returning into a string.
 		 * There is a matching 'get<T> call, returning appropriate type.
 		 */
-		static string strGet( Eref& dest, const string& field);
+		static string strGet( const Eref& dest, const string& field);
 
 		/**
 		 * Blocking 'set' call, using automatic string conversion
 		 * There is a matching blocking set call with typed arguments.
 		 */
-		static bool strSet( Eref& dest, const string& field, const string& val );
+		static bool strSet( const Eref& dest, const string& field, const string& val );
 
 		/**
 		 * Nonblocking 'set' call, using automatic string conversion into
@@ -89,8 +89,8 @@ class SetGet
 
 		/**
 		 * Utility function for the init() function
-		 */
 		static void setShell();
+		 */
 
 	protected:
 		/**
@@ -102,25 +102,25 @@ class SetGet
 		 */
 		// void clearQ() const;
 	private:
-		static Eref shelle_;
-		static Element* shell_;
+		// static Eref shelle_;
+		// static Element* shell_;
 		// Should have something - baton - to identify the specific set/get
 		// call here.
-		Eref& e_;
-		vector< char > buf_;
+		Eref e_;
+		// vector< char > buf_;
 };
 
 class SetGet0: public SetGet
 {
 	public:
-		SetGet0( Eref& dest )
+		SetGet0( const Eref& dest )
 			: SetGet( dest )
 		{;}
 
 		/**
 		 * Blocking, typed 'Set' call
 		 */
-		bool set( Eref& dest, const string& field ) const
+		bool set( const Eref& dest, const string& field ) const
 		{
 			SetGet0 sg( dest );
 			FuncId fid;
@@ -140,7 +140,7 @@ class SetGet0: public SetGet
 		/**
 		 * Blocking call using string conversion
 		 */
-		bool strSet( Eref& dest, const string& field, 
+		bool strSet( const Eref& dest, const string& field, 
 			const string& val ) const
 		{
 			return set( dest, field );
@@ -181,7 +181,7 @@ class SetGet0: public SetGet
 			return "";
 		}
 
-		string strGet( Eref& dest, const string& field) const
+		string strGet( const Eref& dest, const string& field) const
 		{ 
 			return "";
 		}
@@ -191,14 +191,14 @@ class SetGet0: public SetGet
 template< class A > class SetGet1: public SetGet
 {
 	public:
-		SetGet1( Eref& dest )
+		SetGet1( const Eref& dest )
 			: SetGet( dest )
 		{;}
 
 		/**
 		 * Blocking, typed 'Set' call
 		 */
-		static bool set( Eref& dest, const string& field, A arg )
+		static bool set( const Eref& dest, const string& field, A arg )
 		{
 			SetGet1< A > sg( dest );
 			FuncId fid;
@@ -230,7 +230,7 @@ template< class A > class SetGet1: public SetGet
 		 * This variant requires that all vector entries have the same
 		 * size. Strings won't work.
 		 */
-		static bool setVec( Eref& dest, const string& field, 
+		static bool setVec( const Eref& dest, const string& field, 
 			const vector< A >& arg )
 		{
 			SetGet1< A > sg( dest );
@@ -251,17 +251,17 @@ template< class A > class SetGet1: public SetGet
 		/**
 		 * Sets all target array values to the single value
 		 */
-		static bool setRepeat( Eref& dest, const string& field, 
+		static bool setRepeat( const Eref& dest, const string& field, 
 			const A& arg )
 		{
-			vector< A >temp ( arg, 1 );
+			vector< A >temp ( 1, arg );
 			return setVec( dest, field, temp );
 		}
 
 		/**
 		 * Blocking call using string conversion
 		 */
-		static bool strSet( Eref& dest, const string& field, 
+		static bool strSet( const Eref& dest, const string& field, 
 			const string& val )
 		{
 			A arg;
@@ -311,30 +311,37 @@ template< class A > class SetGet1: public SetGet
 template< class A > class Field: public SetGet1< A >
 {
 	public:
-		Field( Eref& dest )
+		Field( const Eref& dest )
 			: SetGet1< A >( dest )
 		{;}
 
 		/**
 		 * Blocking, typed 'Set' call
 		 */
-		static bool set( Eref& dest, const string& field, A arg )
+		static bool set( const Eref& dest, const string& field, A arg )
 		{
 			string temp = "set_" + field;
 			return SetGet1< A >::set( dest, temp, arg );
 		}
 
-		static bool setVec( Eref& dest, const string& field, 
+		static bool setVec( const Eref& dest, const string& field, 
 			const vector< A >& arg )
 		{
 			string temp = "set_" + field;
 			return SetGet1< A >::setVec( dest, temp, arg );
 		}
 
+		static bool setRepeat( const Eref& dest, const string& field, 
+			A arg )
+		{
+			string temp = "set_" + field;
+			return SetGet1< A >::setRepeat( dest, temp, arg );
+		}
+
 		/**
 		 * Blocking call using string conversion
 		 */
-		static bool strSet( Eref& dest, const string& field, 
+		static bool strSet( const Eref& dest, const string& field, 
 			const string& val )
 		{
 			A arg;
@@ -401,7 +408,7 @@ template< class A > class Field: public SetGet1< A >
 		/**
 		 * Blocking call using typed values
 		 */
-		static A get( Eref& dest, const string& field)
+		static A get( const Eref& dest, const string& field)
 		{ 
 			SetGet1< A > sg( dest );
 			const char* ret = Shell::dispatchGet( dest, field, &sg );
@@ -426,14 +433,14 @@ template< class A > class Field: public SetGet1< A >
 template< class A1, class A2 > class SetGet2: public SetGet
 {
 	public:
-		SetGet2( Eref& dest )
+		SetGet2( const Eref& dest )
 			: SetGet( dest )
 		{;}
 
 		/**
 		 * Blocking, typed 'Set' call
 		 */
-		static bool set( Eref& dest, const string& field, 
+		static bool set( const Eref& dest, const string& field, 
 			A1 arg1, A2 arg2 )
 		{
 			SetGet2< A1, A2 > sg( dest );
@@ -464,7 +471,7 @@ template< class A1, class A2 > class SetGet2: public SetGet
 		 * As yet we don't have 2 arg conversion from a single string.
 		 * So this is a dummy
 		 */
-		static bool strSet( Eref& dest, const string& field, 
+		static bool strSet( const Eref& dest, const string& field, 
 			const string& val )
 		{
 			cout << "strSet< A1, A2 >: string convertion not yet implemented\n";
@@ -531,14 +538,14 @@ template< class A1, class A2 > class SetGet2: public SetGet
 template< class A1, class A2, class A3 > class SetGet3: public SetGet
 {
 	public:
-		SetGet3( Eref& dest )
+		SetGet3( const Eref& dest )
 			: SetGet( dest )
 		{;}
 
 		/**
 		 * Blocking, typed 'Set' call
 		 */
-		static bool set( Eref& dest, const string& field, 
+		static bool set( const Eref& dest, const string& field, 
 			A1 arg1, A2 arg2, A3 arg3 )
 		{
 			SetGet3< A1, A2, A3 > sg( dest );
@@ -572,7 +579,7 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 		 * As yet we don't have 2 arg conversion from a single string.
 		 * So this is a dummy
 		 */
-		static bool strSet( Eref& dest, const string& field, 
+		static bool strSet( const Eref& dest, const string& field, 
 			const string& val )
 		{
 			cout << "strSet< A1, A2, A3 >: string convertion not yet implemented\n";
@@ -644,14 +651,14 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 {
 	public:
-		SetGet4( Eref& dest )
+		SetGet4( const Eref& dest )
 			: SetGet( dest )
 		{;}
 
 		/**
 		 * Blocking, typed 'Set' call
 		 */
-		static bool set( Eref& dest, const string& field, 
+		static bool set( const Eref& dest, const string& field, 
 			A1 arg1, A2 arg2, A3 arg3, A4 arg4 )
 		{
 			SetGet4< A1, A2, A3, A4 > sg( dest );
@@ -688,7 +695,7 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 		 * As yet we don't have 2 arg conversion from a single string.
 		 * So this is a dummy
 		 */
-		static bool strSet( Eref& dest, const string& field, 
+		static bool strSet( const Eref& dest, const string& field, 
 			const string& val )
 		{
 			cout << "strSet< A1, A2, A3, A4 >: string convertion not yet implemented\n";
@@ -765,14 +772,14 @@ template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
 	public SetGet
 {
 	public:
-		SetGet5( Eref& dest )
+		SetGet5( const Eref& dest )
 			: SetGet( dest )
 		{;}
 
 		/**
 		 * Blocking, typed 'Set' call
 		 */
-		static bool set( Eref& dest, const string& field, 
+		static bool set( const Eref& dest, const string& field, 
 			A1 arg1, A2 arg2, A3 arg3, A4 arg4, A5 arg5 )
 		{
 			SetGet5< A1, A2, A3, A4, A5 > sg( dest );
@@ -811,7 +818,7 @@ template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
 		 * As yet we don't have 2 arg conversion from a single string.
 		 * So this is a dummy
 		 */
-		static bool strSet( Eref& dest, const string& field, 
+		static bool strSet( const Eref& dest, const string& field, 
 			const string& val )
 		{
 			cout << "strSet< A1, A2, A3, A4, A5 >: string convertion not yet implemented\n";

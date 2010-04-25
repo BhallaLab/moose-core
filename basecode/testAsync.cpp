@@ -508,6 +508,55 @@ void testSetGetVec()
 	delete i2();
 }
 
+void testSetRepeat()
+{
+	static const double EPSILON = 1e-9;
+	const Cinfo* ic = IntFire::initCinfo();
+	// const Cinfo* sc = Synapse::initCinfo();
+	unsigned int size = 100;
+	vector< unsigned int > dims( 1, size );
+	string arg;
+	Id i2 = Id::nextId();
+	// bool ret = ic->create( i2, "test2", size );
+	Element* temp = new Element( i2, ic, "test2", dims, 1 );
+	assert( temp );
+//	SynElement syn( sc, i2() );
+	// FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
+	Id synId( i2.value() + 1 );
+	Element* syn = synId();
+	assert ( syn != 0 );
+	assert ( syn->name() == "synapse" );
+
+	assert( syn->dataHandler()->numData() == 0 );
+	vector< unsigned int > numSyn( size, 0 );
+	for ( unsigned int i = 0; i < size; ++i )
+		numSyn[i] = i;
+	
+	Eref e2( i2(), 0 );
+	// Here we test setting a 1-D vector
+	bool ret = Field< unsigned int >::setVec( e2, "numSynapses", numSyn );
+	assert( ret );
+	unsigned int nd = syn->dataHandler()->numData();
+	assert( nd == ( size * (size - 1) ) / 2 );
+	// cout << "NumSyn = " << nd << endl;
+	
+	// Here we test setting a 2-D array with different dims on each axis.
+	Eref se( syn, 0 );
+	ret = Field< double >::setRepeat( se, "delay", 123.0 );
+	assert( ret );
+	for ( unsigned int i = 0; i < size; ++i ) {
+		for ( unsigned int j = 0; j < i; ++j ) {
+			DataId di( i, j );
+			Eref syne( syn, di );
+			assert( 
+			fabs ( reinterpret_cast< Synapse* >(syne.data())->getDelay() - 123.0 ) <
+				EPSILON ); 
+		}
+	}
+	cout << "." << flush;
+	delete i2();
+}
+
 void testSendSpike()
 {
 	static const double EPSILON = 1e-9;
@@ -1065,6 +1114,7 @@ void testAsync( )
 	testSetGetDouble();
 	testSetGetSynapse();
 	testSetGetVec();
+	testSetRepeat();
 	testSendSpike();
 	testSparseMatrix();
 	testSparseMatrixBalance();

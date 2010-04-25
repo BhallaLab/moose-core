@@ -43,6 +43,10 @@ class DataId {
 		unsigned int field() const {
 			return field_;
 		}
+
+		bool operator==( const DataId& other ) const {
+			return ( data_ == other.data_ && field_ == other.field_ );
+		}
 	
 	private:
 		unsigned int data_;

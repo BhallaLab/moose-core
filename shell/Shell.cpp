@@ -478,7 +478,7 @@ void Shell::destroy( Eref e, const Qinfo* q, Id eid)
 void Shell::handleAddMsg( string msgType, FullId src, string srcField, 
 	FullId dest, string destField )
 {
-	cout << myNode_ << ", Shell::handleAddMsg << \n";
+	// cout << myNode_ << ", Shell::handleAddMsg" << "\n";
 	const Finfo* f1 = src.id()->cinfo()->findFinfo( srcField );
 	assert( f1 != 0 );
 	const Finfo* f2 = dest.id()->cinfo()->findFinfo( destField );
