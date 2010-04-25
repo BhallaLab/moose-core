@@ -16,6 +16,8 @@
 #include "../scheduling/testScheduling.h"
 
 #include "../builtins/Arith.h"
+#include "SparseMatrix.h"
+#include "SparseMsg.h"
 
 void testCreateDelete()
 {
@@ -242,6 +244,9 @@ void testShellAddMsg()
 	Id d1 = shell->doCreate( "Arith", Id(), "d1", dimensions );
 	Id d2 = shell->doCreate( "Arith", Id(), "d2", dimensions );
 
+	Id e1 = shell->doCreate( "Arith", Id(), "e1", dimensions );
+	Id e2 = shell->doCreate( "Arith", Id(), "e2", dimensions );
+
 	///////////////////////////////////////////////////////////
 	// Set up initial conditions
 	///////////////////////////////////////////////////////////
@@ -256,6 +261,8 @@ void testShellAddMsg()
 	ret = SetGet1< double >::setVec( c1.eref(), "arg1", init ); // 12345
 	assert( ret );
 	ret = SetGet1< double >::setVec( d1.eref(), "arg1", init ); // 12345
+	assert( ret );
+	ret = SetGet1< double >::setVec( e1.eref(), "arg1", init ); // 12345
 	assert( ret );
 
 	///////////////////////////////////////////////////////////
@@ -280,6 +287,21 @@ void testShellAddMsg()
 	MsgId m4 = shell->doAddMsg( "Diagonal", 
 		FullId( d1, 0 ), "output", FullId( d2, 0 ), "arg1" );
 	assert( m4 != Msg::badMsg );
+
+	// Should give 54321
+	MsgId m5 = shell->doAddMsg( "Sparse", 
+		FullId( e1, 0 ), "output", FullId( e2, 0 ), "arg1" );
+	assert( m5 != Msg::badMsg );
+	const SparseMsg *csm = 
+		static_cast< const SparseMsg * >( Msg::getMsg( m5 ) );
+	SparseMsg *sm = const_cast< SparseMsg * >( csm );
+	SparseMatrix< unsigned int > mtx( 5, 5 );
+	mtx.set( 0, 4, 0 );
+	mtx.set( 1, 3, 0 );
+	mtx.set( 2, 2, 0 );
+	mtx.set( 3, 1, 0 );
+	mtx.set( 4, 0, 0 );
+	sm->setMatrix( mtx );
 	
 	///////////////////////////////////////////////////////////
 	// Set up scheduling
@@ -294,11 +316,13 @@ void testShellAddMsg()
 	ret = setupSched( shell, tick, c2 ); assert( ret );
 	ret = setupSched( shell, tick, d1 ); assert( ret );
 	ret = setupSched( shell, tick, d2 ); assert( ret );
+	ret = setupSched( shell, tick, e1 ); assert( ret );
+	ret = setupSched( shell, tick, e2 ); assert( ret );
 
 	///////////////////////////////////////////////////////////
 	// Run it
 	///////////////////////////////////////////////////////////
-	Qinfo::mergeQ( 0 );
+	// Qinfo::mergeQ( 0 );
 	Qinfo::mergeQ( 0 );
 	
 	shell->doStart( 1 );
@@ -317,6 +341,8 @@ void testShellAddMsg()
 	assert( ret );
 	ret = checkOutput( d2, 0, 1, 2, 3, 4 );
 	assert( ret );
+	ret = checkOutput( e2, 5, 4, 3, 2, 1 );
+	assert( ret );
 
 	///////////////////////////////////////////////////////////
 	// Clean up.
@@ -329,6 +355,8 @@ void testShellAddMsg()
 	shell->doDelete( c2 );
 	shell->doDelete( d1 );
 	shell->doDelete( d2 );
+	shell->doDelete( e1 );
+	shell->doDelete( e2 );
 
 	cout << "." << flush;
 }
@@ -352,8 +380,8 @@ void testMpiShell( )
 	testShellParserCreateDelete();
 	testShellSetGet();
 	testInterNodeOps();
-	Qinfo::mergeQ( 0 );
-	Qinfo::mergeQ( 0 );
+//	Qinfo::mergeQ( 0 );
+//	Qinfo::mergeQ( 0 );
 	testShellAddMsg();
 	/** 
 	 * Need to update

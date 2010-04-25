@@ -129,3 +129,8 @@ unsigned int SparseMsg::randomConnect( double probability )
 	matrix_.transpose();
 	return totalSynapses;
 }
+
+void SparseMsg::setMatrix( const SparseMatrix< unsigned int >& m )
+{
+	matrix_ = m;
+}

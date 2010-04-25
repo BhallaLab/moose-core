@@ -46,6 +46,8 @@ class SparseMsg: public Msg
 		 */
 		unsigned int randomConnect( double probability );
 
+		void setMatrix( const SparseMatrix< unsigned int >& m );
+
 		/**
 		 * Creates a message between e1 and e2, with connections
 		 * occurring at the specified probability

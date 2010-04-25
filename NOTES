@@ -4707,4 +4707,13 @@ Cleaning up the send operation with a test at the Element::asend and
 Element::tsend. The latter turned out to have another bug, which I have
 fixed, but which may well break a unit test. Let's see.
 OK, clears tests. I do need to make a unit test specifically for sendTo.
-For now, move on.
+For now, move on. Checkin 1745.
+
+Next: make a SparseMatrix. Then go to multinode tests.
+Also need to get rid of the legacy cruft in Message.cpp and the various
+Msg<subtype>::add functions.
+
+Made SparseMatrix, included it in unit tests. But this won't work on 
+multiple nodes because I manipulate the matrix directly rather than through
+a Shell command. 
+
