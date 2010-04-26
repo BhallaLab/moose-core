@@ -31,7 +31,6 @@ public:
 	double getInject( unsigned int index ) const;
 	void setInject( unsigned int index, double value );
 	double getIm( unsigned int index ) const;
-	void insertInject( unsigned int index );
 	void addInject( unsigned int index, double value );
 	void addGkEk( unsigned int index, double v1, double v2 );
 	
