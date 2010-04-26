@@ -425,10 +425,6 @@ void HSolveHub::manageCompartments( )
 			&elist, &extChanList,
 			1 );
 	}
-	
-	vector< unsigned int >::iterator ii;
-	for ( ii = compartmentInjectMap_.begin(); ii != compartmentInjectMap_.end(); ++ii )
-		integ_->insertInject( *ii );
 }
 
 void HSolveHub::manageHHChannels( )

@@ -46,18 +46,9 @@ void HSolveActive::setVm( unsigned int index, double value )
 	V_[ index ] = value;
 }
 
-void HSolveActive::insertInject( unsigned int index )
-{
-	assert( index < nCompt_ );
-	
-	// Ensure we do not step on an existing entry in the map, corresponding to a
-	// compartment that has a non-zero injection field value.
-	if ( inject_.find( index ) == inject_.end() )
-		inject_[ index ] = InjectStruct();
-}
-
 double HSolveActive::getInject( unsigned int index ) const
 {
+	// Not assert( index < inject_.size() ), because inject_ is a map.
 	assert( index < nCompt_ );
 	
 	map< unsigned int, InjectStruct >::const_iterator i;
@@ -71,6 +62,7 @@ double HSolveActive::getInject( unsigned int index ) const
 
 void HSolveActive::setInject( unsigned int index, double value )
 {
+	// Not assert( index < inject_.size() ), because inject_ is a map.
 	assert( index < nCompt_ );
 	inject_[ index ].injectBasal = value;
 }
@@ -97,7 +89,8 @@ double HSolveActive::getIm( unsigned int index ) const
 
 void HSolveActive::addInject( unsigned int index, double value )
 {
-	assert( index < inject_.size() );
+	// Not assert( index < inject_.size() ), because inject_ is a map.
+	assert( index < nCompt_ );
 	inject_[ index ].injectVarying += value;
 }
 
