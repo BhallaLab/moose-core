@@ -5,9 +5,9 @@
 // Maintainer: 
 // Created: Mon Mar  8 15:13:02 2010 (+0530)
 // Version: 
-// Last-Updated: Tue Mar 23 12:10:49 2010 (+0530)
+// Last-Updated: Mon Apr 26 21:42:14 2010 (+0530)
 //           By: Subhasis Ray
-//     Update #: 79
+//     Update #: 80
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -44,7 +44,8 @@
 
 // Code:
 
-#ifndef _NMDACchan_h
+#ifndef _NMDAChan_h
+#define _NMDAChan_h
 
 #include "SynChan.h"
 
