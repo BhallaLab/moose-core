@@ -203,7 +203,7 @@ void Cinfo::init( const string* doc,
                    << "        " << name() << "( const " << name() << "& src, std::string name, Id& parent);\n"
                    << "        " << name() << "( const " << name() << "& src, std::string path);\n"
                    << "        " << name() << "( const Id& src, std::string name, Id& parent);\n"
-                   << "        " << name() << "( const Id&" << "& src, std::string path);\n"
+                   << "        " << name() << "( const Id& src, std::string path);\n"
                    << "        ~" << name() <<"();\n"
                    << "        const std::string& getType();\n";
 
@@ -220,7 +220,7 @@ void Cinfo::init( const string* doc,
                 << name() << "::" << name() << "(const " << name() << "& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}\n"
                 << name() << "::" << name() << "(const " << name() << "& src, std::string path):PyMooseBase(src, path){}\n"
                 << name() << "::" << name() << "(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}\n"
-                << name() << "::" << name() << "(const Id&& src, std::string path):PyMooseBase(src, path){}\n"
+                << name() << "::" << name() << "(const Id& src, std::string path):PyMooseBase(src, path){}\n"
                 << name() << "::~" << name() <<"(){}\n"
                 << "const std::string& "<< name() <<"::getType(){ return className_; }\n";
             swig << "%include \"" << name() << ".h\"\n";        
