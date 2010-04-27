@@ -87,7 +87,9 @@ class SynChan
 		void innerSynapseFunc( const Conn* c, double time );
 		virtual void innerProcessFunc( Eref e, ProcInfo p );
 		virtual void innerReinitFunc( Eref e,  ProcInfo p );
-
+    virtual void innerSetTau2(double value);
+    virtual double innerGetTau2();
+    
 ///////////////////////////////////////////////////
 // Utility function
 ///////////////////////////////////////////////////
