@@ -208,11 +208,22 @@ double SynChan::getTau1( Eref e )
 
 void SynChan::setTau2( const Conn* c, double tau2 )
 {
-	static_cast< SynChan* >( c->data() )->tau2_ = tau2;
+    static_cast< SynChan* >( c->data() )->innerSetTau2(tau2);
 }
+
+void SynChan::innerSetTau2(double tau2)
+{
+    tau2_ = tau2;
+}
+
 double SynChan::getTau2( Eref e )
 {
-	return static_cast< SynChan* >( e.data() )->tau2_;
+    return static_cast< SynChan* >( e.data() )->innerGetTau2();
+}
+
+double SynChan::innerGetTau2()
+{
+    return tau2_;
 }
 
 void SynChan::setNormalizeWeights( const Conn* c, bool value )
