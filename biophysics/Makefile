@@ -36,6 +36,7 @@ OBJ = \
 	IntFire.o	\
 	IzhikevichNrn.o \
 	Leakage.o	\
+	KinSynChan.o	\
 
 
 HEADERS = \
@@ -69,6 +70,7 @@ GHK.o: GHK.h ../basecode/Ftype2.h
 IntFire.o: IntFire.h
 IzhikevichNrn.o: IzhikevichNrn.h
 Leakage.o: Leakage.h
+KinSynChan.o: KinSynChan.h SynChan.h SynInfo.h
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -I../basecode -I../randnum -I.. $< -c
 
