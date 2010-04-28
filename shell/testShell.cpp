@@ -334,10 +334,7 @@ void testShellAddMsg()
 	///////////////////////////////////////////////////////////
 	// Run it
 	///////////////////////////////////////////////////////////
-	// Qinfo::mergeQ( 0 );
 	cout << Shell::myNode() << ": 12\n";
-//	Qinfo::mergeQ( 0 );
-	cout << Shell::myNode() << ": 13\n";
 	
 	shell->doStart( 1 );
 	cout << Shell::myNode() << ": 14\n";
@@ -395,8 +392,6 @@ void testMpiShell( )
 	testShellParserCreateDelete();
 	testShellSetGet();
 	testInterNodeOps();
-//	Qinfo::mergeQ( 0 );
-	Qinfo::mergeQ( 0 );
 	testShellAddMsg();
 	/** 
 	 * Need to update

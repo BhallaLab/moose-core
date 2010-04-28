@@ -325,11 +325,13 @@ void Shell::start( double runtime )
 		// cout << "Shell::start: Threads joined successfully\n";
 		// cout << "Completed time " << runtime << " on " << numCores_ << " threads\n";
 	
+	/*
 	static const Finfo* temp = Shell::initCinfo()->findFinfo( "ack" );
 	static const SrcFinfo2< unsigned int, unsigned int >* ack = 
 		static_cast< const SrcFinfo2< unsigned int, unsigned int>* >( temp );
 	assert( ack != 0 );
 	ack->send( Id().eref(), &p_, myNode_, OkStatus, 0 );
+	*/
 
 	delete[] threads;
 	pthread_attr_destroy( &attr );

@@ -4954,3 +4954,13 @@ OK, I see it. The mpi tests are done only on multinode systems. Duh.
 Now confirmed that the testShallAddMsg has the seeds of its own destruction.
 But a Qinfo::mergQ( 0 ) before it stops it from crashing.
 Checkin for now since I've been making a lot of little changes and fixes.
+Checkin 1751.
+Ack call is indeed pending as you come in to testShellAddMsg.
+First appears after testScheduling.
+There is also a huge amount of stuff in the queue after testBuiltins.
+Remains after testShell, which is an empty function.
+
+Tracked down the issue to testScheduling:testThreads. The call to 
+Shell::start sends out an ack msg, which is not required in this case.
+Fixed, now seems to do all unit tests on single node. Fails on 2.
+

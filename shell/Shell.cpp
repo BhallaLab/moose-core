@@ -88,7 +88,7 @@ static DestFinfo handleQuit( "handleQuit",
 
 static DestFinfo handleStart( "start", 
 			"Starts off a simulation for the specified run time, automatically partitioning among threads if the settings are right",
-			new OpFunc1< Shell, double >( & Shell::start ) );
+			new OpFunc1< Shell, double >( & Shell::handleStart ) );
 			
 
 static DestFinfo handleAddMsg( "handleAddMsg", 
@@ -203,7 +203,6 @@ const Cinfo* Shell::initCinfo()
 		&name,
 		&quit,
 		&receiveGet,
-		&handleStart,
 		&setclock,
 		&loadBalance,
 
@@ -428,6 +427,12 @@ const char* Shell::getBuf() const
 	if ( getBuf_.size() > 0 )
 		return &( getBuf_[0] );
 	return 0;
+}
+
+void Shell::handleStart( double runtime )
+{
+	start( runtime );
+	ack.send( Eref( shelle_, 0 ), &p_, myNode_, OkStatus, 0 );
 }
 
 

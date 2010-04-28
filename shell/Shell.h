@@ -61,6 +61,12 @@ class Shell: public Data
 		 */
 		void start( double runTime );
 
+		/**
+		 * Wrapper for the start function. This adds the call back
+		 * to acknowledge completion of op.
+		 */
+		void handleStart( double runTime );
+
 		void initAck();
 		void handleAck( unsigned int ackNode, unsigned int status );
 		bool isAckPending() const;
