@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Mon Apr 26 
 // Version: 
-// Last-Updated: Tue Apr 27 23:34:16 2010 (+0530)
+// Last-Updated: Wed Apr 28 15:06:14 2010 (+0530)
 //           By: Subhasis Ray
-//     Update #: 188
+//     Update #: 189
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -66,7 +66,7 @@ const Cinfo* initKinSynChanCinfo()
                         "Rise time constant for the synaptic conductance, it is the duration of the neuroTransmitter pulse. It is calculated using rInf and tau1 [See: Destexhe, Mainen and Sejnowski, 1994. It corresponds to tau_r in that paper.]"
 		),
 
-		new ValueFinfo( "pulseDuration", ValueFtype1< double >::global(),
+		new ValueFinfo( "pulseWidth", ValueFtype1< double >::global(),
 			GFCAST( &KinSynChan::getPulseWidth ), 
                         RFCAST( &KinSynChan::setPulseWidth ),
                         "The duration of the neuroTransmitter pulse. [See: Destexhe, Mainen and Sejnowski, 1994. It corresponds to t1 in that paper.]"
