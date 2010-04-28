@@ -20,14 +20,8 @@ class DestFinfo: public Finfo
 	public:
 		~DestFinfo();
 		DestFinfo( const string& name, const string& doc,OpFunc* func );
-		// Finfo* clone() const;
 		void registerFinfo( Cinfo* c );
 		
-		/*
-		void registerOpFuncs( 
-			map< string, FuncId >& fnames, vector< OpFunc* >& funcs );
-		BindIndex registerBindIndex( BindIndex current );
-		*/
 		const OpFunc* getOpFunc() const;
 		FuncId getFid() const;
 

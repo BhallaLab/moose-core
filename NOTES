@@ -4715,5 +4715,242 @@ Msg<subtype>::add functions.
 
 Made SparseMatrix, included it in unit tests. But this won't work on 
 multiple nodes because I manipulate the matrix directly rather than through
-a Shell command. 
+a Shell command.  Checkin 1746.
 
+Now trying out multinode stuff. In addition to the SparseMsg setup,
+we have to get all the scheduling (setclock etc) done in parallel before
+we can test this.
+Struggling a bit here. The old setclock used simple 'set' commands to
+do the assignment. How would these work across nodes?
+
+=============================================================================
+27 April 2010
+
+Need to separate queues for Shell messages to local node and other nodes. By
+default, all Shell messages should be to local node unless they are to 
+the Shells on other nodes. Shell messages will typically be for Set/Get
+kinds of operations.
+
+Responses to Shell requests are either from 'get' functions or are acks.
+In due course higher-order objects may generate Shell requests to orchestrate
+complex ops such as gradient descent calculations. All these messages need
+to be directed to the master node.
+
+inQ[0] on master node gets input from queues on all other nodes.
+	All messages to shell on any node must end up at master node.
+inQ[0] on worker node gets input only from master node.
+master node shell needs a special queue sending stuff to other shells
+all node shells need a special queue for sending stuff to local node objects.
+
+Also any messages to a global should stay on the local node and not
+clutter up MPI. All our Shells and clocks are globals.
+
+Currently we have two sets of input Qs: inQ and mpiQ. We have a single set of
+outQs.
+
+If we follow through on this, we will have to add 
+	- localQ: for incoming data that is on local node only.
+	- localOutQ: for dumping output that is to go to local node only.
+	- Message-specific stuff for directing queue assignments in
+		Element::asend.
+An alternative is to have the msg on the target node decide if it should
+	bother with the msg. It would have to ask if the srcIndex of the 
+	src is on the current node.
+	- Can be done for specific msg types, in the exec call itself.
+	- Will add to internode traffic. Consider global calls to tables.
+Both these look expensive. The additional queues will be a pain to manage,
+	but have the advantage of not being bound by BLOCKSIZE.
+
+While we're at it, let's consider queue block overflow.
+
+Wrote out the possible Q arrangements on pen/paper. It proliferates 
+unpleasantly, specially considering the multiplier effect of multiple threads.
+Worst case would have, for each thread, one localQ, one outQ, and as many extQs
+as there are SimGroups.
+
+Option 1: Do the mergeQ in parallel, multithreaded. Each thread merges its own
+outQ into the inQ, the localQ, and the respective extQs destined for other
+COMMs. To do this, each thread scans through the outQ and fills up a vector
+with start and end blocks for each destination, and simultaneously tallies
+size. The threads provide each size in respective slots in a vector. Then
+they hit a barrier or condition wait. The master (or zero) thread then 
+tallies up sizes, allocates upper and lower bounds for each thread, and then
+releases each thread to fill up its section of the queue.
+
+Option 2: Actually this scanning could happen while the queues are being 
+filled in the first place. This would be Element::asend or Element::tsend.
+
+Decision: Go with option 2.
+-----------------------------------------------------------------------------
+Dealing with BLOCKSIZE. Most likely case is large setup message, copy or
+other once-off. If the sustained messages have blocksize problems then it
+will have to be increased.
+
+Option 1:
+	Locally, let inQ expand. Its first word contains bufsize, so we know
+how big it will be. Send this out, up to the limit of Blocksize. The target
+nodes now must scan all recieved msgs, and if any Blocksizes are too big
+they (all) have to post another MPI_allgather. 
+	- Still need to work out how to set up buffers to manage ths.
+		- Could implement an overflowQ which fills up from the problem
+		nodes. 
+			- Need to have as many overflowQs as there are problem
+			nodes. But this is dynamic.
+- Could in principle do a different message passing, one which uses a specific
+MPI call like MPI_bcast, with the known entire message size. This would get
+the info over in one step, providing that we are still within the MPI size
+limits. This is cleaner and no buffer juggling needed to assemble the final
+message.
+
+Option 2:
+	While doing the classification of outQ entries, each thread also
+keeps track of buffer size. Unfortunately the final tally will have to be
+done on the single thread. Here we know if we're out of bounds for BLOCKSIZE.
+Send along a size flag along with the block so all nodes know right away they
+have to keep gathering data.
+Split up Q entries to keep things down. Have an auxiliary Q for the overflow.
+	- Doesn't help for a single giant assignment, like lots of syn wts.
+	- Still doesn't help with setting up buffers to manage big input.
+This will in any case reduce to the previous option for giant single messages.
+
+Decision: I'll go with option 1.
+Would like to have the rest of the mpiQ processed while all this extra
+stuff is being transmitted. But that is a later refinement.
+
+-----------------------------------------------------------------------------
+Since I'm recording major design decisions, here is how I'll handle the
+access to Msg fields.
+
+1. Have a separate Element for each Msg class. 
+	The cinfo for the Element handles field access for the Msgs.
+	The Element can initially just manage MsgIds in the DataHandler array .
+	Eventually it may help to have them actually allocated on the 
+	DataHandler.
+
+2. The Msg has a virtual function returning the Id of the managing Element.
+	This Element has the appropriate Cinfo for this class of Msgs. 
+
+3. The mapping from MsgId to specific Data entry happens through a map. I
+	don't anticipate huge traffic in this direction. 
+		Other options:
+			- subdivide the MsgId address space to do this faster. 
+			- have an indirection array to convert MsgIds into 
+				the array index on their specific Element.
+			- Allocate MsgIds based on Msg type.
+	Summary: MsgId -> DataId( ArrayIndex, MsgId )
+	If MsgId is badMsg, figure it out from ArrayIndex.
+	If MsgId is reasonable, always use the MsgId to figure it out.
+
+4. Path access to Msgs: MsgSrc_Element_path/SrcFinfo[index]. Should
+	convert directly into a MsgId.
+
+5. Projections (higher order Msgs) may manage several Msgs, including 
+	ones between different Elements. Can do so through Msgs to the Elements
+	that wrap the Msgs.
+
+6. Field assignment: Regular SetGet calls. The Eref defines the holding Element
+	and through the DataId we specify the Msg.
+
+7. Message handling into MsgHandlerElements: same as usual.
+
+-----------------------------------------------------------------------------
+27 Apr 2010 
+Back to debugging.
+Implemented a busy loop option for starting moose, so I can get gdb to
+examine each of the nodes.
+Turns out that the data getting to node 1 is correct for setclock:
+the arguments are correct and so is the function.
+The problem is that for some reason the old message is left intact on 
+MsgId 1, still going to the 'arith' element e1, through an AssignMsgVec.
+Instead it should be redone to go to the Clock through a regular
+AssignmentMsg.
+Perhaps should check flushing of Qs.
+=============================================================================
+28 Apr 2010
+Nasty debugging, issue of queue sequencing.
+
+To help, here is the list of all funcIds.
+
+Shell.set_name: 0
+Shell.get_name: 1
+Shell.set_quit: 2
+Shell.get_quit: 3
+Shell.completeGet: 4
+Shell.start: 5
+Shell.setclock: 6
+Shell.loadBalance: 7
+Shell.handleAck: 8
+Shell.create: 9
+Shell.delete: 10
+Shell.handleQuit: 11
+Shell.start: 12
+Shell.handleAddMsg: 13
+Shell.handleSet: 14
+Shell.handleGet: 15
+Arith.set_function: 0
+Arith.get_function: 1
+Arith.set_outputValue: 2
+Arith.get_outputValue: 3
+Arith.arg1: 4
+Arith.arg2: 5
+Arith.process: 6
+Tick.set_dt: 0
+Tick.get_dt: 1
+Tick.set_localdt: 2
+Tick.get_localdt: 3
+Tick.set_stage: 4
+Tick.get_stage: 5
+Tick.set_path: 6
+Tick.get_path: 7
+Tick.parent: 8
+Clock.set_runTime: 0
+Clock.get_runTime: 1
+Clock.get_currentTime: 2
+Clock.set_nsteps: 3
+Clock.get_nsteps: 4
+Clock.set_numTicks: 5
+Clock.get_numTicks: 6
+Clock.set_numPendingThreads: 7
+Clock.get_numPendingThreads: 8
+Clock.set_numThreads: 9
+Clock.get_numThreads: 10
+Clock.get_currentStep: 11
+Clock.start: 12
+Clock.step: 13
+Clock.stop: 14
+Clock.setupTick: 15
+Clock.reinit: 16
+Clock.set_num_tick: 17
+Clock.get_num_tick: 18
+
+Here is an inspection of the queue as we wrap up the message Adds.
+
+147                     readQ( proc );
+(gdb) call Qinfo::reportQ()
+0:      inQ: [0]=120    [1]=0   outQ: [0]=0     [1]=0
+Reporting inQ[0]
+Q::MsgId = 2, FuncId = 8, srcIndex = 0:0, size = 8, src = root, dest = root
+Q::MsgId = 2, FuncId = 13, srcIndex = 0:0, size = 64, src = root, dest = root
+(gdb) n
+149             inQ_[ proc->groupId ].resize( BLOCKSIZE );
+(gdb) call Qinfo::reportQ()
+0:      inQ: [0]=0      [1]=0   outQ: [0]=32    [1]=0
+Reporting outQ[0]
+Q::MsgId = 2, FuncId = 8, srcIndex = 0:0, size = 8, src = root, dest = root
+
+After the handleAddMsg is done, not surprisingly another handleAck is generated.
+
+So we have a handleAck in the queue just _before_ the handleAddMsg.
+That should never be. We should not have reached handleAddMsg while a 
+handleAck was pending. I need to work back through the tests to see
+where the ack may have been first generated.
+Sequentially reinstated tests after commenting them out. Turns out that I
+had put testShellAddMsg both in the testShell and testMpiShell. I'm not
+sure why this matters. I tried having it done two times in a row and it
+was fine. Perhaps testCreateDelete is the problem.
+testCreateDelete should not be a single-node test. It uses Set/Get
+functions which are now multinode.
+OK, I see it. The mpi tests are done only on multinode systems. Duh.
+Now confirmed that the testShallAddMsg has the seeds of its own destruction.
+But a Qinfo::mergQ( 0 ) before it stops it from crashing.
+Checkin for now since I've been making a lot of little changes and fixes.

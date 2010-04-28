@@ -132,7 +132,7 @@ void Qinfo::clearQ( const ProcInfo* proc )
 		readQ( proc );
 	}
 	inQ_[ proc->groupId ].resize( BLOCKSIZE );
-	*reinterpret_cast< unsigned int* >( &inQ_[ proc->groupId ][0] ) = 0;
+	// *reinterpret_cast< unsigned int* >( &inQ_[ proc->groupId ][0] ) = 0;
 }
 
 void Qinfo::mpiClearQ( const ProcInfo* proc )
@@ -147,7 +147,7 @@ void Qinfo::mpiClearQ( const ProcInfo* proc )
 		readQ( proc );
 	}
 	inQ_[ proc->groupId ].resize( BLOCKSIZE );
-	*reinterpret_cast< unsigned int* >( &inQ_[ proc->groupId ][0] ) = 0;
+	// *reinterpret_cast< unsigned int* >( &inQ_[ proc->groupId ][0] ) = 0;
 }
 
 void readBuf(const char* begin, const ProcInfo* proc )
@@ -196,7 +196,10 @@ void Qinfo::readQ( const ProcInfo* proc )
 	assert( proc->groupId < inQ_.size() );
 	vector< char >& q = inQ_[ proc->groupId ];
 	assert( q.size() >= sizeof( unsigned int ) );
-	readBuf( &q[0], proc );
+	char* buf = &q[0];
+	readBuf( buf, proc );
+	unsigned int *bufsize = reinterpret_cast< unsigned int* >( buf);
+	*bufsize = 0;
 }
 
 /**
@@ -374,7 +377,7 @@ unsigned int inQsize( const vector< char >& q ) {
  */
 void Qinfo::reportQ()
 {
-	cout << "	inQ: ";
+	cout << Shell::myNode() << ":	inQ: ";
 	for ( unsigned int i = 0; i < inQ_.size(); ++i )
 		cout << "[" << i << "]=" << inQsize( inQ_[i] ) << "	";
 	cout << "outQ: ";
@@ -406,7 +409,7 @@ void Qinfo::reportQ()
 			cout << "Reporting outQ[0]\n";
 			const char* buf = &(outQ_[0][0]);
 			const char* end = buf + outQ_[0].size();
-			buf += sizeof( unsigned int );
+			// buf += sizeof( unsigned int );
 			while ( buf < end ) {
 				const Qinfo *q = reinterpret_cast< const Qinfo* >( buf );
 				const Msg *m = Msg::getMsg( q->m_ );

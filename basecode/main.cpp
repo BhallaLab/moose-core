@@ -37,8 +37,9 @@ Id init( int argc, char** argv )
 	int numNodes = 1;
 	int myNode = 0;
 	bool isSingleThreaded = 0;
+	bool isInfinite = 0;
 	int opt;
-	while ( ( opt = getopt( argc, argv, "shn:c:" ) ) != -1 ) {
+	while ( ( opt = getopt( argc, argv, "shin:c:" ) ) != -1 ) {
 		switch ( opt ) {
 			case 's': // Single threaded mode
 				isSingleThreaded = 1;
@@ -50,9 +51,12 @@ Id init( int argc, char** argv )
 			case 'n': // Multiple nodes
 				numNodes = atoi( optarg );
 				break;
+			case 'i' : // infinite loop, used for multinode debugging, to give gdb something to attach to.
+				isInfinite = 1;
+				break;
 			case 'h': // help
 			default:
-				cout << "Usage: moose -singleThreaded -help -c numCores -n numNodes\n";
+				cout << "Usage: moose -singleThreaded -help -infiniteLoop -c numCores -n numNodes\n";
 				exit( 1 );
 		}
 	}
@@ -74,13 +78,13 @@ Id init( int argc, char** argv )
 	vector< unsigned int > dims;
 	dims.push_back( 1 );
 	Element* shelle = 
-		new Element( shellId, Shell::initCinfo(), "root", dims );
+		new Element( shellId, Shell::initCinfo(), "root", dims, 1 );
 	// Shell::initCinfo()->create( shellId, "root", 1 );
 
 	Id clockId = Id::nextId();
 	// Clock::initCinfo()->create( clockId, "clock", 1 );
 	// Element* clocke = 
-		new Element( clockId, Clock::initCinfo(), "clock", dims );
+		new Element( clockId, Clock::initCinfo(), "clock", dims, 1 );
 	// Clock::initCinfo()->postCreationFunc( clockId, clocke );
 	// Should put this initialization stuff within the Clock creation
 	// step. This means I need to add an optional init func into the Cinfo
@@ -110,10 +114,17 @@ Id init( int argc, char** argv )
 	Shell::connectMasterMsg();
 	// Msg* m = new OneToOneMsg( shelle, shelle );
 	// assert ( m != 0 );
+	
+	while ( isInfinite ) // busy loop for debugging under gdb and MPI.
+		;
 
 	return shellId;
 }
 
+/**
+ * These tests are meant to run on individual nodes, and should
+ * not invoke MPI calls. They should not be run when MPI is running
+ */
 void nonMpiTests()
 {
 #ifdef DO_UNIT_TESTS
@@ -126,14 +137,18 @@ void nonMpiTests()
 #endif
 }
 
+/**
+ * These are tests that are MPI safe. They should also run
+ * properly on single nodes.
+ */
 void mpiTests()
 {
 #ifdef DO_UNIT_TESTS
-	if ( Shell::numNodes() > 1 ) {
+	// if ( Shell::numNodes() > 1 ) {
 		testMpiShell();
 		testMpiBuiltins();
 		testMpiScheduling();
-	}
+	// }
 #endif
 }
 

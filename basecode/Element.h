@@ -160,9 +160,6 @@ class Element
 		 */
 		Id id() const;
 
-		
-
-
 	private:
 		string name_;
 

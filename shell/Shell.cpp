@@ -137,13 +137,27 @@ static DestFinfo receiveGet( "completeGet",
 	"Function on master shell that handles the value relayed from worker.",
 	new OpFunc3< Shell, unsigned int, unsigned int, PrepackedBuffer >( &Shell::recvGet ) );
 
+/*
+static SrcFinfo3< unsigned int, double, unsigned int > requestSetClock(
+			"requestSetClock",
+			"requestSetClock( tickNum, dt, unsigned int stage )"
+		);
+
+static DestFinfo handleSetClock( "handleSetClock", 
+			"handleSetClock( unsigned int tickNum, double dt, unsigned int stage )",
+			new OpFunc3< Shell, unsigned int, double, unsigned int >(
+				&shell::handleSetClock )
+			);
+			*/
 
 static Finfo* shellMaster[] = {
 	&requestCreate, &requestDelete, &requestQuit, &requestStart,
-	&requestAddMsg, &requestSet, &requestGet, &handleAck };
+	&requestAddMsg, &requestSet, &requestGet, 
+	&handleAck };
 static Finfo* shellWorker[] = {
 	&create, &del, &handleQuit, &handleStart, 
-		&handleAddMsg, &handleSet, &handleGet, &ack };
+		&handleAddMsg, &handleSet, &handleGet,
+	&ack };
 
 
 const Cinfo* Shell::initCinfo()
@@ -597,6 +611,8 @@ const char* Shell::buf()
 	assert( shell );
 	return (reinterpret_cast< Shell* >(shell->dataHandler()->data( 0 )) )->getBuf();
 }
+
+////////////////////////////////////////////////////////////////////////
 
 void Shell::setclock( unsigned int tickNum, double dt, unsigned int stage )
 {

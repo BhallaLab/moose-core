@@ -201,22 +201,27 @@ bool checkOutput( Id e,
 	Eref e0( e(), 0 );
 	double val = Field< double >::get( e0, "outputValue" );
 	ret = ret && ( fabs( val - v0 ) < 1e-6 );
+	cout << "( " << v0 << ", " << val << " ) ";
 
 	Eref e1( e(), 1 );
 	val = Field< double >::get( e1, "outputValue" );
 	ret = ret && ( fabs( val - v1 ) < 1e-6 );
+	cout << "( " << v1 << ", " << val << " ) ";
 
 	Eref e2( e(), 2 );
 	val = Field< double >::get( e2, "outputValue" );
 	ret = ret && ( fabs( val - v2 ) < 1e-6 );
+	cout << "( " << v2 << ", " << val << " ) ";
 
 	Eref e3( e(), 3 );
 	val = Field< double >::get( e3, "outputValue" );
 	ret = ret && ( fabs( val - v3 ) < 1e-6 );
+	cout << "( " << v3 << ", " << val << " ) ";
 
 	Eref e4( e(), 4 );
 	val = Field< double >::get( e4, "outputValue" );
 	ret = ret && ( fabs( val - v4 ) < 1e-6 );
+	cout << "( " << v4 << ", " << val << " )\n";
 
 	return ret;
 }
@@ -292,6 +297,7 @@ void testShellAddMsg()
 	MsgId m5 = shell->doAddMsg( "Sparse", 
 		FullId( e1, 0 ), "output", FullId( e2, 0 ), "arg1" );
 	assert( m5 != Msg::badMsg );
+	cout << Shell::myNode() << ": 11\n";
 	const SparseMsg *csm = 
 		static_cast< const SparseMsg * >( Msg::getMsg( m5 ) );
 	SparseMsg *sm = const_cast< SparseMsg * >( csm );
@@ -302,13 +308,19 @@ void testShellAddMsg()
 	mtx.set( 3, 1, 0 );
 	mtx.set( 4, 0, 0 );
 	sm->setMatrix( mtx );
+
+	cout << Shell::myNode() << ": 11a\n";
 	
 	///////////////////////////////////////////////////////////
 	// Set up scheduling
 	///////////////////////////////////////////////////////////
 	shell->setclock( 0, 1.0, 0 );
+
+	cout << Shell::myNode() << ": 11b\n";
 	FullId tick( Id( 2 ), 0 );
+	cout << Shell::myNode() << ": 11c\n";
 	ret = setupSched( shell, tick, a1 ); assert( ret );
+	cout << Shell::myNode() << ": 11d\n";
 	ret = setupSched( shell, tick, a2 ); assert( ret );
 	ret = setupSched( shell, tick, b1 ); assert( ret );
 	ret = setupSched( shell, tick, b2 ); assert( ret );
@@ -323,15 +335,19 @@ void testShellAddMsg()
 	// Run it
 	///////////////////////////////////////////////////////////
 	// Qinfo::mergeQ( 0 );
-	Qinfo::mergeQ( 0 );
+	cout << Shell::myNode() << ": 12\n";
+//	Qinfo::mergeQ( 0 );
+	cout << Shell::myNode() << ": 13\n";
 	
 	shell->doStart( 1 );
+	cout << Shell::myNode() << ": 14\n";
 
 	///////////////////////////////////////////////////////////
 	// Check output.
 	///////////////////////////////////////////////////////////
 	
 	ret = checkOutput( a2, 0, 4, 0, 0, 0 );
+	cout << Shell::myNode() << ": 15\n";
 	assert( ret );
 	ret = checkOutput( b1, 1, 2, 3, 4, 5 );
 	assert( ret );
@@ -371,8 +387,7 @@ void testShellParserQuit()
 
 void testShell( )
 {
-	testCreateDelete();
-	testShellAddMsg();
+//	testCreateDelete();
 }
 
 void testMpiShell( )
@@ -381,7 +396,7 @@ void testMpiShell( )
 	testShellSetGet();
 	testInterNodeOps();
 //	Qinfo::mergeQ( 0 );
-//	Qinfo::mergeQ( 0 );
+	Qinfo::mergeQ( 0 );
 	testShellAddMsg();
 	/** 
 	 * Need to update

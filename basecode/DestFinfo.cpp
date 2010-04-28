@@ -20,40 +20,11 @@ DestFinfo::DestFinfo( const string& name, const string& doc,
 	;
 }
 
-/*
-Finfo* DestFinfo::clone() const
-{
-	return new Destfinfo( *this );
-}
-*/
-
 void DestFinfo::registerFinfo( Cinfo* c )
 {
 	fid_ = c->registerOpFunc( func_ );
+//	cout << c->name() << "." << name() << ": " << fid_ << endl;
 }
-
-/*
-void DestFinfo::registerOpFuncs( 
-	map< string, FuncId >& fnames, vector< OpFunc* >& funcs
-	)
-{
-	map< string, FuncId >::iterator i = fnames.find( name() );
-	if ( i != fnames.end() ) {
-		funcs[ i->second ] = func_;
-		fid_ = i->second;
-	} else {
-		unsigned int size = funcs.size();
-		fnames[ name() ] = size;
-		fid_ = size;
-		funcs.push_back( func_ );
-	}
-}
-
-BindIndex DestFinfo::registerBindIndex( BindIndex current )
-{
-	return current;
-}
-*/
 
 const OpFunc* DestFinfo::getOpFunc() const
 {
