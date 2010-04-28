@@ -1,0 +1,120 @@
+% Created 2010-04-28 Wed 14:14
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{soul}
+\usepackage{hyperref}
+\usepackage{chemarr}
+
+\title{KinSynChan}
+\author{Subhasis Ray}
+\date{28 April 2010}
+
+\begin{document}
+
+\maketitle
+
+\setcounter{tocdepth}{3}
+\tableofcontents
+\vspace*{1cm}
+
+KinSynChan class is based on the derivations by Destexhe, Mainen and
+Sejnowski (1994)\cite{destexhe_efficient_1994}
+
+The model is based on the kinetics of neurotransmitter binding to
+receptors at the post synaptic terminal. This can be represented by
+the first order kinetic scheme:
+
+\begin{center}
+$T + R$
+\xrightleftharpoons[{\beta}]{\alpha} 
+$TR^{*}$
+\end{center}
+
+where the forward rate is $\alpha$ and the backward rate is $\beta$.
+This gives the rate of change of the fraction \textit{r} of the
+receptors that are open:
+
+$\frac{dr}{dt} = \alpha * [T] * (1 - r ) - \beta * r$
+
+Assuming transmitter concentration in the cleft goes up at time
+$t_{0}$ and remains high till time $t1$, the value of $\textit{r}$ at
+time t ($t_{0} < t < t_{1}$) is given by:
+\begin{equation}
+r(t) = r_{\infty} + (r(t_{0}) - r_{\infty}) * e^{-(t-t_{0})/\tau_{r}}
+\end{equation}
+where 
+\begin{center}
+  $r_{\infty} = \frac{\alpha * T_{max}}{\alpha * T_{max} + \beta}$
+\end{center}
+
+and 
+\begin{center}
+$\tau_{r} = \frac{1}{\alpha * T_{max} + \beta}$
+\end{center}
+So the usual time constant for rise-time is $\tau_{r} = \tau_{2}$ in
+GENESIS SynChan convention.
+
+When the neurotransmitter-pulse is over, the fraction of open
+receptors decays exponentially:
+\begin{equation}
+  r(t) = r(t1) * e^{-\beta (t - t_{1})}
+\end{equation}
+
+where $t_{1}$ is the time when the neurotransmitter pulse gets over.
+In MOOSE KinSynChan we call this $pulseWidth$.
+Thus $\frac{1}{\beta}$ is the decay time constant $\tau_{1}$ in
+GENESIS synchan convention.
+
+From equation 1, 
+\begin{center}
+  $r'(t) = \frac{r_{\infty}}{\tau_{r}} - \frac{r(t)}{\tau_{r}}$
+\end{center}
+when compared to the form for exponential Euler method: $y'(t) = A - B
+* y(t)$, we see, $A = \frac{r_{\infty}}{tau_{r}}$ , $B =
+\frac{1}{tau_{r}}$ and $\frac{A}{B} = r_{\infty}$.
+
+So if we replace these values in the exponential Euler form:
+\begin{equation}
+  r(t+dt) = r(t) * e^{-\frac{dt}{\tau_{r}}} - r_{\infty} * ( 1 - e^{-\frac{dt}{tau_{r}}})
+\end{equation}
+
+This is the equation used in KinSynChan class when there are pending
+events in the event queue - which indicates that the current time is
+within the pulse duration for those events. Once the transmitter
+pulse duration is over, the event is removed from the queue. So, in
+that situation, the time evolution of the fraction of open gates
+follows equation 2. In this case,
+\begin{center}
+$r'(t) = - \beta * r(t)$
+\end{center}
+Taking $tau_{1} = \frac{1}{\beta}$, this becomes
+\begin{center}
+$r'(t) = - \frac{r(t)}{\tau_{1}}$
+\end{center}
+So, here $A = 0$ and $B = \frac{1}{\tau_{1}}$ and the difference
+equation for $r$ is given by
+\begin{equation}
+r(t+dt) = r(t) * e^{-\frac{1}{tau_{1}} dt}
+\end{equation}
+
+In the MOOSE class, we set $\tau_{r}$ as an alias of the rise time
+constant $\tau_{2}$ and the decay time constant $\tau_{1}$ as
+described above. Also, the duration of the transmitter pulse, $t_{1}$
+is specified by the field $pulseWidth$ in KinSynChan class.
+
+Since $r_{\infty}$, $\tau_{1}$ and $\tau_{2}$ are interdependent, we
+do not allow the user to set $\tau_{2}$, but it is calculated from
+$\tau_{1}$ and $r_{\infty}$ as $\tau_{2} = ( 1 - r_{\infty}) * \tau_{1}$.
+
+\bibliographystyle{ieeetr}
+\begin{thebibliography}{2}
+  \bibitem{destexhe_efficient_94}A. Destexhe, Z. F. Mainen and
+    T. J. Sejnowski, \emph{An Efficient Method for Computing Synaptic
+      Conductances Based on a Kinetic Model of Receptor
+      Binding}. Neural Computation, vol. 6, no. 1, pp. 14-18, 1994.
+\end{thebibliography}
+
+\end{document}
