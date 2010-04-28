@@ -326,6 +326,7 @@ libs:
 	@echo "	USE_MUSIC:" $(USE_MUSIC)
 	@echo "	USE_CURSES:" $(USE_CURSES)
 	@echo "	USE_GL:" $(USE_GL)
+	@echo " GENERATE_WRAPPERS:" $(GENERATE_WRAPPERS)
 	@(for i in $(SUBDIR); do $(MAKE) -C $$i; done)
 	@echo "All Libs compiled"
 
