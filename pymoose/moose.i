@@ -22,6 +22,7 @@
 	#include "BinSynchan.h"
 	#include "StochSynchan.h"
         #include "NMDAChan.h"
+        #include "KinSynChan.h"
 	#include "SpikeGen.h"
 	#include "PulseGen.h"
 	#include "RandomSpike.h"
@@ -347,6 +348,10 @@ NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.se
 //%include "PyMooseIterable.h"
 //%template(BinSynchanDILookup) InnerPyMooseIterable < BinSynchan, unsigned int, double > ;
 //%template(StochSynchanDILookup) InnerPyMooseIterable < StochSynchan, unsigned int, double > ;
+%include "KinSynChan.h"
+%attribute(pymoose::KinSynChan, double, rInf, __get_rInf, __set_rInf)
+%attribute(pymoose::KinSynChan, double, tauR, __get_tauR, __set_tauR)
+%attribute(pymoose::KinSynChan, double, pulseWidth, __get_pulseWidth, __set_pulseWidth)
 
 %include "SpikeGen.h"
 %attribute(pymoose::SpikeGen, double, threshold, __get_threshold, __set_threshold)
