@@ -3024,6 +3024,62 @@ NMDAChan.className_ = _moose.cvar.NMDAChan_className_
 
 NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.setTransitionParam)
 
+class KinSynChan(SynChan):
+    """Proxy of C++ KinSynChan class"""
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        """
+        __init__(self, Id id) -> KinSynChan
+        __init__(self, string path) -> KinSynChan
+        __init__(self, string name, Id parentId) -> KinSynChan
+        __init__(self, string name, PyMooseBase parent) -> KinSynChan
+        __init__(self, KinSynChan src, string name, PyMooseBase parent) -> KinSynChan
+        __init__(self, KinSynChan src, string name, Id parent) -> KinSynChan
+        __init__(self, KinSynChan src, string path) -> KinSynChan
+        __init__(self, Id src, string name, Id parent) -> KinSynChan
+        __init__(self, Id src, string path) -> KinSynChan
+        """
+        this = _moose.new_KinSynChan(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _moose.delete_KinSynChan
+    __del__ = lambda self : None;
+    def getType(*args):
+        """getType(self) -> string"""
+        return _moose.KinSynChan_getType(*args)
+
+    def __get_rInf(*args):
+        """__get_rInf(self) -> double"""
+        return _moose.KinSynChan___get_rInf(*args)
+
+    def __set_rInf(*args):
+        """__set_rInf(self, double rInf)"""
+        return _moose.KinSynChan___set_rInf(*args)
+
+    def __get_tauR(*args):
+        """__get_tauR(self) -> double"""
+        return _moose.KinSynChan___get_tauR(*args)
+
+    def __set_tauR(*args):
+        """__set_tauR(self, double tauR)"""
+        return _moose.KinSynChan___set_tauR(*args)
+
+    def __get_pulseWidth(*args):
+        """__get_pulseWidth(self) -> double"""
+        return _moose.KinSynChan___get_pulseWidth(*args)
+
+    def __set_pulseWidth(*args):
+        """__set_pulseWidth(self, double pulseWidth)"""
+        return _moose.KinSynChan___set_pulseWidth(*args)
+
+    rInf = _swig_property(_moose.KinSynChan_rInf_get, _moose.KinSynChan_rInf_set)
+    tauR = _swig_property(_moose.KinSynChan_tauR_get, _moose.KinSynChan_tauR_set)
+    pulseWidth = _swig_property(_moose.KinSynChan_pulseWidth_get, _moose.KinSynChan_pulseWidth_set)
+KinSynChan_swigregister = _moose.KinSynChan_swigregister
+KinSynChan_swigregister(KinSynChan)
+KinSynChan.className_ = _moose.cvar.KinSynChan_className_
+
 class SpikeGen(PyMooseBase):
     """Proxy of C++ SpikeGen class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
