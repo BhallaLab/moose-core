@@ -94,3 +94,12 @@ const Msg* Msg::getMsg( MsgId m )
 	assert( m < msg_.size() );
 	return msg_[ m ];
 }
+
+const Msg* Msg::safeGetMsg( MsgId m )
+{
+	if ( m == badMsg )
+		return 0;
+	if ( m < msg_.size() )
+		return msg_[ m ];
+	return 0;
+}

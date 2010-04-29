@@ -76,9 +76,17 @@ class Msg
 		}
 
 		/**
-		 * Looks up the message on the global vector of Msgs.
+		 * Looks up the message on the global vector of Msgs. No checks,
+		 * except assertions in debug mode.
 		 */
 		static const Msg* getMsg( MsgId m );
+
+		/**
+		 * Returns the Msg if the MsgId is valid, otherwise returns 0.
+		 * Utility function to check if Msg is OK. Used by diagnostic
+		 * function Qinfo::reportQ. Normal code uses getMsg above.
+		 */
+		static const Msg* safeGetMsg( MsgId m );
 
 		/**
 		 * The zero MsgId, used as the error value.
@@ -89,6 +97,7 @@ class Msg
 		 * A special MsgId used for Shell to get/set values
 		 */
 		static const MsgId setMsg;
+
 
 	protected:
 		Element* e1_;

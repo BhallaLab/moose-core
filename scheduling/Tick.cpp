@@ -308,7 +308,8 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 	}
 	// Set off mpiThread for MPI_alltoall data exchange of inQ
-	// Start reading inQ
+	
+	Qinfo::readLocalQ( info ); // March through localQ.
 	Qinfo::readQ( info ); // March through inQ. Each thread magically deals
 		// with updates needed by its own Process calls, and none other.
 

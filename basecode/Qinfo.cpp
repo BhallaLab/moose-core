@@ -136,7 +136,7 @@ void Qinfo::clearQ( const ProcInfo* proc )
 		readLocalQ( proc );
 		readQ( proc );
 	}
-	inQ_[ proc->groupId ].resize( BLOCKSIZE );
+	// inQ_[ proc->groupId ].resize( BLOCKSIZE );
 	// *reinterpret_cast< unsigned int* >( &inQ_[ proc->groupId ][0] ) = 0;
 }
 
@@ -153,7 +153,7 @@ void Qinfo::mpiClearQ( const ProcInfo* proc )
 		readLocalQ( proc );
 		readQ( proc );
 	}
-	inQ_[ proc->groupId ].resize( BLOCKSIZE );
+	// inQ_[ proc->groupId ].resize( BLOCKSIZE );
 	// *reinterpret_cast< unsigned int* >( &inQ_[ proc->groupId ][0] ) = 0;
 }
 
@@ -269,15 +269,16 @@ void Qinfo::mergeQ( unsigned int groupId )
 {
 	assert( groupId < g_.size() );
 	SimGroup& g = g_[ groupId ];
-	unsigned int j = g.startThread;
-	assert( j + g.numThreads <= outQ_.size() );
+	// unsigned int j = g.startThread;
+	// assert( j + g.numThreads <= outQ_.size() );
 	vector< char >& inQ = inQ_[ groupId ];
 
 	inQ.resize( sizeof( unsigned int ) );
 	localQ_.resize( sizeof( unsigned int ) );
 	for ( unsigned int i = 0; i < g.numThreads; ++i ) {
 		vector< QueueBlock >& qb = qBlock_[i];
-		vector< char >::iterator begin = outQ_[i].begin();
+		unsigned int outQindex = i + g.startThread;
+		vector< char >::iterator begin = outQ_[outQindex].begin();
 		for ( unsigned int j = 0; j < qb.size(); ++j ) {
 			if ( qb[j].whichQ == 0 ) {
 				inQ.insert( inQ.end(), begin + qb[j].startOffset, 
@@ -287,7 +288,7 @@ void Qinfo::mergeQ( unsigned int groupId )
 					begin + qb[j].startOffset + qb[j].size );
 			}
 		}
-		outQ_[i].resize( 0 );
+		outQ_[outQindex].resize( 0 );
 		qb.resize( 0 );
 	}
 	*reinterpret_cast< unsigned int* >( &inQ[0] ) = inQ.size();
@@ -408,7 +409,7 @@ void innerReportQ( const char* buf, unsigned int bufsize )
 	const char* end = buf + bufsize;
 	while ( buf < end ) {
 		const Qinfo *q = reinterpret_cast< const Qinfo* >( buf );
-		const Msg *m = Msg::getMsg( q->mid() );
+		const Msg *m = Msg::safeGetMsg( q->mid() );
 		if ( m ) {
 			cout << "Q::MsgId = " << q->mid() << 
 				", FuncId = " << q->fid() <<
@@ -417,7 +418,7 @@ void innerReportQ( const char* buf, unsigned int bufsize )
 				", src = " << m->e1()->name() << 
 				", dest = " << m->e2()->name() << endl;
 		} else {
-			cout << "Q::MsgId = " << q->mid() << " (points to null Msg)" <<
+			cout << "Q::MsgId = " << q->mid() << " (points to bad Msg)" <<
 				", FuncId = " << q->fid() <<
 				", srcIndex = " << q->srcIndex() << 
 				", size = " << q->size() << endl;
@@ -447,6 +448,16 @@ void Qinfo::reportQ()
 		unsigned int bufsize = *reinterpret_cast< const unsigned int* >( buf );
 		if ( bufsize > sizeof( unsigned int ) ) {
 			cout << Shell::myNode() << ": Reporting inQ[0]\n";
+			bufsize -= sizeof( unsigned int );
+			innerReportQ( buf + sizeof( unsigned int ), bufsize );
+		}
+	}
+
+	if ( inQ_.size() > 1 && inQ_[1].size() > 0 ) {
+		const char* buf = &inQ_[1][0];
+		unsigned int bufsize = *reinterpret_cast< const unsigned int* >( buf );
+		if ( bufsize > sizeof( unsigned int ) ) {
+			cout << Shell::myNode() << ": Reporting inQ[1]\n";
 			bufsize -= sizeof( unsigned int );
 			innerReportQ( buf + sizeof( unsigned int ), bufsize );
 		}

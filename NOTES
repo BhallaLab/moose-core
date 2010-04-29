@@ -4993,5 +4993,9 @@ need will come up again. Prior to that, checkin 1755.
 Now it clears the testAsync unit tests. Extremely slow for Set/Get,
 specificaly in testSetGetSynapse. Not clear why. Fails at 
 testScheduling:testThreadIntFireNetwork.
-This is significant progress.
+This is significant progress. Checkin 1756.
+
+Put in localQ and some additional queue management code. Some debugging later,
+clears unit tests with single thread.
+
 =============================================================================
