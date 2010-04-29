@@ -372,6 +372,29 @@ unsigned int inQsize( const vector< char >& q ) {
 	return *reinterpret_cast< const unsigned int* >( temp );
 }
 
+void innerReportQ( const char* buf, unsigned int bufsize )
+{
+	const char* end = buf + bufsize;
+	while ( buf < end ) {
+		const Qinfo *q = reinterpret_cast< const Qinfo* >( buf );
+		const Msg *m = Msg::getMsg( q->mid() );
+		if ( m ) {
+			cout << "Q::MsgId = " << q->mid() << 
+				", FuncId = " << q->fid() <<
+				", srcIndex = " << q->srcIndex() << 
+				", size = " << q->size() <<
+				", src = " << m->e1()->name() << 
+				", dest = " << m->e2()->name() << endl;
+		} else {
+			cout << "Q::MsgId = " << q->mid() << " (points to null Msg)" <<
+				", FuncId = " << q->fid() <<
+				", srcIndex = " << q->srcIndex() << 
+				", size = " << q->size() << endl;
+		}
+		buf += q->size() + sizeof( Qinfo );
+	}
+}
+
 /**
  * Static func. readonly, so it is thread safe
  */
@@ -383,44 +406,30 @@ void Qinfo::reportQ()
 	cout << "outQ: ";
 	for ( unsigned int i = 0; i < outQ_.size(); ++i )
 		cout << "[" << i << "]=" << outQ_[i].size() << "	";
+	cout << "mpiQ: ";
+	for ( unsigned int i = 0; i < mpiQ_.size(); ++i )
+		cout << "[" << i << "]=" << mpiQ_[i].size() << "	";
 	cout << endl;
 
-	if ( inQ_.size() > 0 ) {
-		unsigned int bufsize = inQsize( inQ_[0] );
+	if ( inQ_.size() > 0 && inQ_[0].size() > 0 ) {
+		const char* buf = &inQ_[0][0];
+		unsigned int bufsize = *reinterpret_cast< const unsigned int* >( buf );
 		if ( bufsize > 0 ) {
-			cout << "Reporting inQ[0]\n";
-			const char* buf = &(inQ_[0][0]);
-			const char* end = buf + bufsize;
-			buf += sizeof( unsigned int );
-			while ( buf < end ) {
-				const Qinfo *q = reinterpret_cast< const Qinfo* >( buf );
-				const Msg *m = Msg::getMsg( q->m_ );
-				cout << "Q::MsgId = " << q->m_ << ", FuncId = " << q->f_ <<
-					", srcIndex = " << q->srcIndex_ << 
-					", size = " << q->size_ <<
-					", src = " << m->e1()->name() << 
-					", dest = " << m->e2()->name() << endl;
-				buf += q->size() + sizeof( Qinfo );
-			}
+			cout << Shell::myNode() << ": Reporting inQ[0]\n";
+			innerReportQ( buf + sizeof( unsigned int ), bufsize );
 		}
 	}
 	if ( outQ_.size() > 0 ) {
 		if ( outQ_[0].size() > 0 ) {
-			cout << "Reporting outQ[0]\n";
-			const char* buf = &(outQ_[0][0]);
-			const char* end = buf + outQ_[0].size();
-			// buf += sizeof( unsigned int );
-			while ( buf < end ) {
-				const Qinfo *q = reinterpret_cast< const Qinfo* >( buf );
-				const Msg *m = Msg::getMsg( q->m_ );
-				cout << "Q::MsgId = " << q->m_ << ", FuncId = " << q->f_ <<
-					", srcIndex = " << q->srcIndex_ << 
-					", size = " << q->size_ <<
-					", src = " << m->e1()->name() << 
-					", dest = " << m->e2()->name() << endl;
-				buf += q->size() + sizeof( Qinfo );
-			}
+			cout << Shell::myNode() << ": Reporting outQ[0]\n";
+			innerReportQ( &( outQ_[0][0] ), outQ_[0].size() );
 		}
+	}
+	if ( mpiQ_.size() > 0 && mpiQ_[0].size() > 0 ) {
+		const char* buf = &mpiQ_[0][0];
+		unsigned int bufsize = *reinterpret_cast< const unsigned int* >( buf );
+		cout << Shell::myNode() << ": Reporting mpiQ[0]\n";
+		innerReportQ( buf + sizeof( unsigned int ), bufsize );
 	}
 }
 

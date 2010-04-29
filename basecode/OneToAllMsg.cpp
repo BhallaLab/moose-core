@@ -28,16 +28,30 @@ void OneToAllMsg::exec( const char* arg, const ProcInfo *p ) const
 	if ( q->isForward() ) {
 		const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
 		if ( e2_->dataHandler()->numDimensions() == 1 ) {
+			DataHandler::iterator end = e2_->dataHandler()->end();
+			for ( DataHandler::iterator i = e2_->dataHandler()->begin();
+				i != end; ++i )
+				f->op( Eref( e2_, i ), arg );
+
+			/*
 			for ( unsigned int i = 0; i < e2_->dataHandler()->numData(); ++i )
 				f->op( Eref( e2_, i ), arg );
+				*/
 		} else if ( e2_->dataHandler()->numDimensions() == 2 ) {
-			for ( unsigned int i = 0; i < e2_->dataHandler()->numData1(); ++i )
+			// The first dimension is partitioned between nodes
+			DataHandler::iterator end = e2_->dataHandler()->end();
+			for ( DataHandler::iterator i = e2_->dataHandler()->begin();
+				i != end; ++i ) {
+			// for ( unsigned int i = 0; i < e2_->dataHandler()->numData1(); ++i ) {
 				for ( unsigned int j = 0; j < e2_->dataHandler()->numData2( i ); ++j )
 					f->op( Eref( e2_, DataId( i, j ) ), arg );
+			}
 		}
 	} else {
-		const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
-		f->op( Eref( e1_, i1_ ), arg );
+		if ( e1_->dataHandler()->isDataHere( i1_ ) ) {
+			const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
+			f->op( Eref( e1_, i1_ ), arg );
+		}
 	}
 }
 

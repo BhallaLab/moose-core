@@ -4963,4 +4963,30 @@ Remains after testShell, which is an empty function.
 Tracked down the issue to testScheduling:testThreads. The call to 
 Shell::start sends out an ack msg, which is not required in this case.
 Fixed, now seems to do all unit tests on single node. Fails on 2.
+Checkin 1754.
 
+Now trying to get things to work on 2 nodes. Nothing does.
+
+=============================================================================
+29 Apr 2010
+
+Step back a bit. Implementing a multinode version of testShellSetGet. This
+fails on 2 or more nodes.
+
+After some tedious multinode MPI/gdb debugging it looks like the problem is
+with the queue request sent out to the local message on node0, which gets
+sent over to node 1 as well.
+The msg referred to in this queue is present only on node0 at this time,
+hence it dies. But a worse bug would be when an existing message from an
+earlier assignment sits on the Shell. Then we would send data on msgId 1 to
+the wrong target.
+
+Options:
+- use a localQ. This avoids sending the data at all.
+- have node-specific MsgId rather than all at setMsgId==1
+- encode node info somewhere in msg. Other nodes can ignore.
+- Clear out temp msg quickly, so we can check for 0 msg.
+
+I think I'll have to set up the localQ. Other options are hacks, and the
+need will come up again.
+=============================================================================

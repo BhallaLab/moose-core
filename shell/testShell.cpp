@@ -148,20 +148,41 @@ void testInterNodeOps() // redundant.
 
 void testShellSetGet()
 {
-	/*
-	unsigned int numCells = 65535;
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+	const unsigned int size = 100;
 	vector< unsigned int > dimensions;
-	dimensions.push_back( numCells );
-	Id child = shell->doCreate( "IntFire", Id(), "test", dimensions );
-	for ( unsigned int i = 0; i < numCells; ++i ) {
-		shell->doSetDouble( child, DataId( i ), "thresh", i * i );
-	}
+	dimensions.push_back( size );
+	vector< double > val;
 
-	shell->doDelete( child );
+	// Set up the objects.
+	Id a1 = shell->doCreate( "Arith", Id(), "a1", dimensions );
+
+	cout << Shell::myNode() << ": testShellSetGet: data here = (" << 
+		a1()->dataHandler()->begin() << " to " <<
+		a1()->dataHandler()->end() << ")" << endl;
+	for ( unsigned int i = 0; i < size; ++i ) {
+		val.push_back( i * i * i ); // use i^3 as a simple test.
+		bool ret = SetGet1< double >::set( Eref( a1(), i ), "set_outputValue", i * i );
+		assert( ret );
+	}
+	cout << "Sets done\n";
+	for ( unsigned int i = 0; i < size; ++i ) {
+		double x = Field< double >::get( Eref( a1(), i ), "outputValue" );
+		assert( fabs( x - i * i ) < 1e-6 );
+	}
+	cout << "Gets done\n";
+	bool ret = SetGet1< double >::setVec( Eref( a1(), 0 ), "set_outputValue", val );
+	assert( ret );
+	cout << "SetVec done\n";
+	for ( unsigned int i = 0; i < size; ++i ) {
+		double x = Field< double >::get( Eref( a1(), i ), "outputValue" );
+		assert( fabs( x - i * i * i ) < 1e-6 );
+	}
+	cout << "Gets 2 done\n";
+
+	shell->doDelete( a1 );
 	cout << "." << flush;
-	*/
 }
 
 void testShellSetGetVec()
@@ -297,7 +318,6 @@ void testShellAddMsg()
 	MsgId m5 = shell->doAddMsg( "Sparse", 
 		FullId( e1, 0 ), "output", FullId( e2, 0 ), "arg1" );
 	assert( m5 != Msg::badMsg );
-	cout << Shell::myNode() << ": 11\n";
 	const SparseMsg *csm = 
 		static_cast< const SparseMsg * >( Msg::getMsg( m5 ) );
 	SparseMsg *sm = const_cast< SparseMsg * >( csm );
@@ -308,19 +328,14 @@ void testShellAddMsg()
 	mtx.set( 3, 1, 0 );
 	mtx.set( 4, 0, 0 );
 	sm->setMatrix( mtx );
-
-	cout << Shell::myNode() << ": 11a\n";
 	
 	///////////////////////////////////////////////////////////
 	// Set up scheduling
 	///////////////////////////////////////////////////////////
 	shell->setclock( 0, 1.0, 0 );
 
-	cout << Shell::myNode() << ": 11b\n";
 	FullId tick( Id( 2 ), 0 );
-	cout << Shell::myNode() << ": 11c\n";
 	ret = setupSched( shell, tick, a1 ); assert( ret );
-	cout << Shell::myNode() << ": 11d\n";
 	ret = setupSched( shell, tick, a2 ); assert( ret );
 	ret = setupSched( shell, tick, b1 ); assert( ret );
 	ret = setupSched( shell, tick, b2 ); assert( ret );
@@ -334,17 +349,14 @@ void testShellAddMsg()
 	///////////////////////////////////////////////////////////
 	// Run it
 	///////////////////////////////////////////////////////////
-	cout << Shell::myNode() << ": 12\n";
 	
 	shell->doStart( 1 );
-	cout << Shell::myNode() << ": 14\n";
 
 	///////////////////////////////////////////////////////////
 	// Check output.
 	///////////////////////////////////////////////////////////
 	
 	ret = checkOutput( a2, 0, 4, 0, 0, 0 );
-	cout << Shell::myNode() << ": 15\n";
 	assert( ret );
 	ret = checkOutput( b1, 1, 2, 3, 4, 5 );
 	assert( ret );
