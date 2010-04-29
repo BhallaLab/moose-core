@@ -8,6 +8,24 @@
 **********************************************************************/
 
 /**
+ * This little class keeps track of blocks of data destined for different
+ * queues.
+ */
+class QueueBlock {
+	public:
+		QueueBlock()
+			: whichQ( 0), startOffset( 0 ), size( 0 )
+		{;}
+
+		QueueBlock( short wq, unsigned int so, unsigned int si )
+			: whichQ( wq), startOffset( so ), size( si )
+		{;}
+		short whichQ;
+		unsigned int startOffset; // Position of data wrt start of Q.
+		unsigned int size; // size in bytes
+};
+
+/**
  * This class manages information going into and out of the async queue.
  */
 class Qinfo
@@ -99,11 +117,14 @@ class Qinfo
 		static void mpiClearQ( const ProcInfo *proc );
 
 		/**
-		 * Read the queue specified by the ProcInfo. Depending on the
-		 * scheduling and threading structure, may simply go through
-		 * all the available queues.
+		 * Read the inQ specified by the ProcInfo.
 		 */
 		static void readQ( const ProcInfo* proc );
+
+		/**
+		 * Read the localQ.
+		 */
+		static void readLocalQ( const ProcInfo* proc );
 
 		/**
 		 * Read the MPI Q
@@ -162,17 +183,11 @@ class Qinfo
 			const char* arg, const DataId& target );
 	
 		/**
-		 * Returns a pointer to the inQ. Readonly.
-		const char* getInQ( unsigned int i );
+		 * Organizes data going into outQ so that we know which
+		 * execution queue the data is due to end up in, and how big
+		 * each block is to be.
 		 */
-
-		/**
-		 * Returns a pointer to the first block of the mpiQ, which is one
-		 * long array.
-		 * Note that the mpiQ has as many blocks as there are nodes,
-		 * including current one. All blocks are the same size.
-		char* getMpiQ( unsigned int i );
-		 */
+		void assignQblock( const Msg* m, const ProcInfo* p );
 		
 	private:
 		bool useSendTo_;	// true if the msg is to a single target DataId.
@@ -191,6 +206,8 @@ class Qinfo
 		/**
 		 * inQ is one per SimGroup. It becomes a readonly vector once
 		 * consolidated, and all the threads in the group read from it.
+		 * Each inQ has a header of sizeof( unsigned int ) that contains
+		 * the buffer size, in bytes. This size INCLUDES the header.
 		 */
 		static vector< vector< char > > inQ_;
 
@@ -199,6 +216,23 @@ class Qinfo
 		 * for each SimGroup are arranged as one long linear array.
 		 */
 		static vector< vector< char > > mpiQ_;
+
+		/**
+		 * This is a single, simple queue that lives only on the local node.
+		 * It is for messages that are not going even to other elements
+		 * in the same SimGroup.
+		 * Examples are SetGet messages, and messages to globals.
+		 * It is populated by examining outQ for local-only messages.
+		 */
+		static vector< char > localQ_;
+
+		/**
+		 * This keeps track of which data go into which queue.
+		 * This accompanies each outQ. At the time messages are dumped
+		 * into outQ, the Msgs need to assign suitable queues.
+		 * Each Qblock has start, size, and target queue.
+		 */
+		static vector< vector< QueueBlock > > qBlock_;
 
 		static vector< SimGroup > g_; // Information about grouping.
 };

@@ -16,7 +16,9 @@
 vector< vector< char > > Qinfo::inQ_;
 vector< vector< char > > Qinfo::outQ_;
 vector< vector< char > > Qinfo::mpiQ_;
+vector< char > Qinfo::localQ_;
 vector< SimGroup > Qinfo::g_;
+vector< vector< QueueBlock > > Qinfo::qBlock_;
 
 void hackForSendTo( const Qinfo* q, const char* buf );
 static const unsigned int BLOCKSIZE = 2000000;
@@ -87,6 +89,7 @@ unsigned int Qinfo::addSimGroup( unsigned short numThreads,
 	mpiQ_.back().resize( BLOCKSIZE * numNodes );
 
 	outQ_.resize( si + numThreads );
+	qBlock_.resize( si + numThreads );
 	for ( unsigned int i = 0; i < numThreads; ++i ) {
 		outQ_[i + si].reserve( BLOCKSIZE );
 	}
@@ -126,9 +129,11 @@ void Qinfo::clearQ( const ProcInfo* proc )
 	mergeQ( proc->groupId );
 	if ( 0 ) {
 		sendRootToAll( proc );
+		readLocalQ( proc );
 		readQ( proc );
 		readMpiQ( proc );
 	} else {
+		readLocalQ( proc );
 		readQ( proc );
 	}
 	inQ_[ proc->groupId ].resize( BLOCKSIZE );
@@ -141,9 +146,11 @@ void Qinfo::mpiClearQ( const ProcInfo* proc )
 	mergeQ( proc->groupId );
 	if ( proc->numNodesInGroup > 1 ) {
 		sendRootToAll( proc );
+		readLocalQ( proc );
 		readQ( proc );
 		readMpiQ( proc );
 	} else {
+		readLocalQ( proc );
 		readQ( proc );
 	}
 	inQ_[ proc->groupId ].resize( BLOCKSIZE );
@@ -183,7 +190,6 @@ void readBuf(const char* begin, const ProcInfo* proc )
 	}
 }
 
-
 /** 
  * Static func
  * In this variant we just go through the specified queue. 
@@ -197,6 +203,23 @@ void Qinfo::readQ( const ProcInfo* proc )
 	vector< char >& q = inQ_[ proc->groupId ];
 	assert( q.size() >= sizeof( unsigned int ) );
 	char* buf = &q[0];
+	readBuf( buf, proc );
+	unsigned int *bufsize = reinterpret_cast< unsigned int* >( buf);
+	*bufsize = 0;
+}
+
+/** 
+ * Static func
+ * In this variant we just go through the local Q.
+ * The localQ is readonly here, and the code design means that
+ * localQ is never updated while this function operates.
+ * Thread safe as it is readonly in the Queue.
+ */ 
+void Qinfo::readLocalQ( const ProcInfo* proc )
+{
+	assert( proc );
+	assert( localQ_.size() >= sizeof( unsigned int ) );
+	char* buf = &localQ_[0];
 	readBuf( buf, proc );
 	unsigned int *bufsize = reinterpret_cast< unsigned int* >( buf);
 	*bufsize = 0;
@@ -248,12 +271,33 @@ void Qinfo::mergeQ( unsigned int groupId )
 	SimGroup& g = g_[ groupId ];
 	unsigned int j = g.startThread;
 	assert( j + g.numThreads <= outQ_.size() );
+	vector< char >& inQ = inQ_[ groupId ];
 
+	inQ.resize( sizeof( unsigned int ) );
+	localQ_.resize( sizeof( unsigned int ) );
+	for ( unsigned int i = 0; i < g.numThreads; ++i ) {
+		vector< QueueBlock >& qb = qBlock_[i];
+		vector< char >::iterator begin = outQ_[i].begin();
+		for ( unsigned int j = 0; j < qb.size(); ++j ) {
+			if ( qb[j].whichQ == 0 ) {
+				inQ.insert( inQ.end(), begin + qb[j].startOffset, 
+					begin + qb[j].startOffset + qb[j].size );
+			} else {
+				localQ_.insert( localQ_.end(), begin + qb[j].startOffset, 
+					begin + qb[j].startOffset + qb[j].size );
+			}
+		}
+		outQ_[i].resize( 0 );
+		qb.resize( 0 );
+	}
+	*reinterpret_cast< unsigned int* >( &inQ[0] ) = inQ.size();
+	*reinterpret_cast< unsigned int* >( &localQ_[0] ) = localQ_.size();
+
+	/*
 	unsigned int totSize = 0;
 	for ( unsigned int i = 0; i < g.numThreads; ++i )
 		totSize += outQ_[ j++ ].size();
 
-	vector< char >& inQ = inQ_[ groupId ];
 	assert( totSize + sizeof( unsigned int ) <= BLOCKSIZE );
 	// inQ.resize( totSize + sizeof( unsigned int ) );
 	inQ.resize( BLOCKSIZE );
@@ -270,6 +314,7 @@ void Qinfo::mergeQ( unsigned int groupId )
 		outQ_[ j ].resize( 0 );
 		j++;
 	}
+	*/
 }
 
 /**
@@ -296,15 +341,6 @@ void Qinfo::sendAllToAll( const ProcInfo* proc )
 	assert ( inQ_[ proc->groupId ].size() == BLOCKSIZE );
 
 	MPI_Barrier( MPI_COMM_WORLD );
-	/*
-	if ( proc->nodeIndexInGroup == 0 ) {
-		int ret = MPI_Bcast( 
-			sendbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
-	} else {
-		MPI_Bcast( 
-			recvbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
-	}
-	*/
 
 	// Recieve data into recvbuf of all nodes from sendbuf of all nodes
 	MPI_Allgather( 
@@ -336,11 +372,6 @@ void Qinfo::sendRootToAll( const ProcInfo* proc )
 	char* sendbuf = &inQ_[ proc->groupId ][0];
 	char* recvbuf = &mpiQ_[ proc->groupId ][0];
 	assert ( inQ_[ proc->groupId ].size() == BLOCKSIZE );
-	/*
-	MPI::COMM_WORLD.Alltoall( 
-		sendbuf, BLOCKSIZE, MPI::CHAR,
-		recvbuf, BLOCKSIZE, MPI::CHAR );
-		*/
 	// Send out data from master node.
 		// cout << "\n\nEntering sendRootToAll barrier, on node = " << proc->nodeIndexInGroup << endl;
 	MPI_Barrier( MPI_COMM_WORLD );
@@ -409,16 +440,28 @@ void Qinfo::reportQ()
 	cout << "mpiQ: ";
 	for ( unsigned int i = 0; i < mpiQ_.size(); ++i )
 		cout << "[" << i << "]=" << mpiQ_[i].size() << "	";
-	cout << endl;
+	cout << "localQ: " << localQ_.size() << endl;
 
 	if ( inQ_.size() > 0 && inQ_[0].size() > 0 ) {
 		const char* buf = &inQ_[0][0];
 		unsigned int bufsize = *reinterpret_cast< const unsigned int* >( buf );
-		if ( bufsize > 0 ) {
+		if ( bufsize > sizeof( unsigned int ) ) {
 			cout << Shell::myNode() << ": Reporting inQ[0]\n";
+			bufsize -= sizeof( unsigned int );
 			innerReportQ( buf + sizeof( unsigned int ), bufsize );
 		}
 	}
+
+	if ( localQ_.size() > sizeof( unsigned int ) ) {
+		const char* buf = &localQ_[0];
+		unsigned int bufsize = *reinterpret_cast< const unsigned int* >( buf );
+		if ( bufsize > 0 ) {
+			cout << Shell::myNode() << ": Reporting localQ\n";
+			bufsize -= sizeof( unsigned int );
+			innerReportQ( buf + sizeof( unsigned int ), bufsize );
+		}
+	}
+
 	if ( outQ_.size() > 0 ) {
 		if ( outQ_[0].size() > 0 ) {
 			cout << Shell::myNode() << ": Reporting outQ[0]\n";
@@ -428,8 +471,10 @@ void Qinfo::reportQ()
 	if ( mpiQ_.size() > 0 && mpiQ_[0].size() > 0 ) {
 		const char* buf = &mpiQ_[0][0];
 		unsigned int bufsize = *reinterpret_cast< const unsigned int* >( buf );
-		cout << Shell::myNode() << ": Reporting mpiQ[0]\n";
-		innerReportQ( buf + sizeof( unsigned int ), bufsize );
+		if ( bufsize > 0 ) {
+			cout << Shell::myNode() << ": Reporting mpiQ[0]\n";
+			innerReportQ( buf + sizeof( unsigned int ), bufsize );
+		}
 	}
 }
 
@@ -469,4 +514,34 @@ void Qinfo::addSpecificTargetToQ( Qid qId, MsgFuncBinding b,
 	memcpy( pos, arg, temp );
 	pos += temp;
 	memcpy( pos, &target, sizeof( DataId ) );
+}
+
+/**
+ * Three blocks: 
+ * 0 is inQ, going to all nodes in group
+ * 1 is local, going only to current node.
+ * 2 and higher are to other simGroups. Don't worry about yet
+ */
+void Qinfo::assignQblock( const Msg* m, const ProcInfo* p )
+{	
+	unsigned int offset = outQ_[ p->outQid ].size();
+	unsigned int threadIndex = p->threadIndexInGroup;
+	vector< QueueBlock >& qb = qBlock_[ threadIndex ];
+	if (
+		m->mid() == Msg::setMsg ||
+		( isForward_ && m->e2()->dataHandler()->isGlobal() )  ||
+		( !isForward_ && m->e1()->dataHandler()->isGlobal() )
+	) {
+		if ( qb.size() > 0 && qb.back().whichQ == 1 ) { // Extend qb.back
+			qb.back().size += size_ + sizeof( Qinfo );
+		} else {
+			qb.push_back( QueueBlock( 1, offset, size_ + sizeof( Qinfo ) ));
+		}
+	} else {
+		if ( qb.size() > 0 && qb.back().whichQ == 0 ) { // Extend qb.back
+			qb.back().size += size_ + sizeof( Qinfo );
+		} else {
+			qb.push_back( QueueBlock( 0, offset, size_ + sizeof( Qinfo ) ));
+		}
+	}
 }

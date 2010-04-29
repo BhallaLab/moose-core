@@ -4988,5 +4988,10 @@ Options:
 - Clear out temp msg quickly, so we can check for 0 msg.
 
 I think I'll have to set up the localQ. Other options are hacks, and the
-need will come up again.
+need will come up again. Prior to that, checkin 1755.
+
+Now it clears the testAsync unit tests. Extremely slow for Set/Get,
+specificaly in testSetGetSynapse. Not clear why. Fails at 
+testScheduling:testThreadIntFireNetwork.
+This is significant progress.
 =============================================================================

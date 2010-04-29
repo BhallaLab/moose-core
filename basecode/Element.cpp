@@ -262,8 +262,11 @@ void Element::asend( Qinfo& q, BindIndex bindIndex,
 	for ( vector< MsgFuncBinding >::const_iterator i =
 		msgBinding_[ bindIndex ].begin(); 
 		i != msgBinding_[ bindIndex ].end(); ++i ) {
-		if ( Msg::getMsg( i->mid )->isMsgHere( q ) )
+		const Msg* m = Msg::getMsg( i->mid );
+		if ( m->isMsgHere( q ) ) {
+			q.assignQblock( m, p );
 			q.addToQ( p->outQid, *i, arg );
+		}
 	}
 }
 
@@ -289,11 +292,13 @@ void Element::tsend( Qinfo& q, BindIndex bindIndex,
 		const Msg* m = Msg::getMsg( i->mid );
 		if ( q.isForward() ) {
 			if ( m->e2() == e && m->isMsgHere( q ) ) {
+				q.assignQblock( m, p );
 				q.addSpecificTargetToQ( p->outQid, *i, arg, target.dataId );
 				return;
 			}
 		} else {
 			if ( m->e1() == e && m->isMsgHere( q ) ) {
+				q.assignQblock( m, p );
 				q.addSpecificTargetToQ( p->outQid, *i, arg, target.dataId );
 				return;
 			}

@@ -114,7 +114,7 @@ void insertIntoQ( )
 	Eref e2 = i2.eref();
 
 	Msg* m = new SingleMsg( e1, e2 );
-	
+	ProcInfo p;
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		char temp[20];
@@ -133,9 +133,9 @@ void insertIntoQ( )
 		MsgFuncBinding b( m->mid(), fid );
 
 		// addToQ( qid, Binding, argbuf )
+		qi.assignQblock( m, &p );
 		qi.addToQ( 0, b, buf );
 	}
-	ProcInfo p;
 	Qinfo::clearQ( &p );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
