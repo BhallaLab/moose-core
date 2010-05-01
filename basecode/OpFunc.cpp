@@ -20,7 +20,12 @@ void fieldOp( const Eref& e, const char* buf,
 	FuncId retFunc = *reinterpret_cast< const FuncId* >( buf );
 
 	PrepackedBuffer pb( data, size );
+	Conv< PrepackedBuffer > conv( pb );
+	unsigned int totSize = conv.size();
+	char* temp = new char[ totSize ];
+	conv.val2buf( temp );
 
+	/*
 	// Flag arguments: useSendTo = 1, and flip the isForward flag.
 	Conv< unsigned int > conv1( Shell::myNode() );
 	Conv< unsigned int > conv2( Shell::OkStatus );
@@ -34,6 +39,7 @@ void fieldOp( const Eref& e, const char* buf,
 	conv1.val2buf( tbuf ); tbuf += conv1.size();
 	conv2.val2buf( tbuf ); tbuf += conv2.size();
 	conv3.val2buf( tbuf ); tbuf += conv3.size();
+	*/
 
 	MsgFuncBinding mfb( q->mid(), retFunc );
 	Qinfo retq( retFunc, e.index(), totSize, 1, !q->isForward() );

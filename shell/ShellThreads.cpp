@@ -322,6 +322,7 @@ void Shell::start( double runtime )
 			exit( -1 );
 		}
 	}
+	setRunning( 0 );
 		// cout << "Shell::start: Threads joined successfully\n";
 		// cout << "Completed time " << runtime << " on " << numCores_ << " threads\n";
 	

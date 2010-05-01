@@ -21,6 +21,7 @@ OneDimGlobalHandler::~OneDimGlobalHandler() {
 
 /**
  * Handles both the thread and node decomposition
+ * Yet to put in thread decomposition.
  */
 void OneDimGlobalHandler::process( const ProcInfo* p, Element* e ) const
 {

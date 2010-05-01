@@ -337,9 +337,10 @@ void Qinfo::sendAllToAll( const ProcInfo* proc )
 	// cout << proc->nodeIndexInGroup << ", " << proc->threadId << ": Qinfo::sendAllToAll\n";
 	assert( mpiQ_[ proc->groupId ].size() >= BLOCKSIZE * proc->numNodesInGroup );
 #ifdef USE_MPI
+	inQ_[proc->groupId ].resize( BLOCKSIZE );
 	char* sendbuf = &inQ_[ proc->groupId ][0];
 	char* recvbuf = &mpiQ_[ proc->groupId ][0];
-	assert ( inQ_[ proc->groupId ].size() == BLOCKSIZE );
+	//assert ( inQ_[ proc->groupId ].size() == BLOCKSIZE );
 
 	MPI_Barrier( MPI_COMM_WORLD );
 
@@ -370,9 +371,12 @@ void Qinfo::sendRootToAll( const ProcInfo* proc )
 	// cout << "ng = " << g_.size() << ", ninQ= " << inQ_[0].size() << ", nmpiQ = " << mpiQ_[0].size() << " proc->groupId =  " << proc->groupId  << " s1 = " << mpiQ_[ proc->groupId ].size() << " s2 = " << BLOCKSIZE * proc->numNodesInGroup;
 	assert( mpiQ_[ proc->groupId ].size() >= BLOCKSIZE * proc->numNodesInGroup );
 #ifdef USE_MPI
+	if ( inQ_[proc->groupId].size() < BLOCKSIZE )
+		inQ_[proc->groupId].resize( BLOCKSIZE );
 	char* sendbuf = &inQ_[ proc->groupId ][0];
 	char* recvbuf = &mpiQ_[ proc->groupId ][0];
-	assert ( inQ_[ proc->groupId ].size() == BLOCKSIZE );
+//	assert ( inQ_[ proc->groupId ].size() == BLOCKSIZE );
+	assert ( inQ_[ proc->groupId ].size() >= sizeof( unsigned int ) );
 	// Send out data from master node.
 		// cout << "\n\nEntering sendRootToAll barrier, on node = " << proc->nodeIndexInGroup << endl;
 	MPI_Barrier( MPI_COMM_WORLD );
@@ -483,6 +487,7 @@ void Qinfo::reportQ()
 		const char* buf = &mpiQ_[0][0];
 		unsigned int bufsize = *reinterpret_cast< const unsigned int* >( buf );
 		if ( bufsize > 0 ) {
+			bufsize -= sizeof( unsigned int );
 			cout << Shell::myNode() << ": Reporting mpiQ[0]\n";
 			innerReportQ( buf + sizeof( unsigned int ), bufsize );
 		}
@@ -540,8 +545,12 @@ void Qinfo::assignQblock( const Msg* m, const ProcInfo* p )
 	vector< QueueBlock >& qb = qBlock_[ threadIndex ];
 	if (
 		m->mid() == Msg::setMsg ||
-		( isForward_ && m->e2()->dataHandler()->isGlobal() )  ||
-		( !isForward_ && m->e1()->dataHandler()->isGlobal() )
+		( 
+			( m->mid() != 2 ) && (
+				( isForward_ && m->e2()->dataHandler()->isGlobal() )  ||
+				( !isForward_ && m->e1()->dataHandler()->isGlobal() )
+			)
+		)
 	) {
 		if ( qb.size() > 0 && qb.back().whichQ == 1 ) { // Extend qb.back
 			qb.back().size += size_ + sizeof( Qinfo );

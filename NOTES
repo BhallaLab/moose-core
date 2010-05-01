@@ -4996,6 +4996,60 @@ testScheduling:testThreadIntFireNetwork.
 This is significant progress. Checkin 1756.
 
 Put in localQ and some additional queue management code. Some debugging later,
-clears unit tests with single thread.
+clears unit tests with single thread. Checkin 1757.
+
+Fails right away with 2 nodes. Looks like the system sees that the Shell->Shell
+msg is going to a global, and puts the data on the local node.
+Yes, fixing this helps.
+Stuck now in 'Get'. Here we currently have the object send the data right back
+to the master node. Now we'll have to relay through the local Shell.
+
+Implemented this extra stage. Clears the single-node unit tests, croaks 
+on 2 nodes.
+
+Next: Get multinode tests to work
+	Apply to IntFire network
+	Implement MessageElements for field acces
+	Implement big data packet sending.
+	Clean up old messsage.cpp and like cruft.
+
+=============================================================================
+30 April.
+Clears the SetGet on multiple nodes. Now stuck in doStart. The queues
+are bad, and both nodes fail in readBuf at Qinfo.cpp:185 trying to access a
+MsgId of 0.
+
+testShellAddMsg: about to doStart
+1:      inQ: [0]=388    [1]=0   outQ: [0]=0     [1]=352 mpiQ: [0]=4000000      [1]=4000000      localQ: 4
+1: Reporting inQ[0]
+Q::MsgId = 2, FuncId = 8, srcIndex = 0:0, size = 8, src = root, dest = root
+Q::MsgId = 0 (points to bad Msg), FuncId = 0, srcIndex = 2:8, size = 0
+Q::MsgId = 8, FuncId = 1, srcIndex = 4294967295:0, size = 2, src = tick, dest = a1
+Q::MsgId = 0 (points to bad Msg), FuncId = 524288, srcIndex = 65536:4294901760, size = 65535
+1: Reporting mpiQ[0]
+Q::MsgId = 2, FuncId = 8, srcIndex = 0:0, size = 8, src = root, dest = root
+Q::MsgId = 6, FuncId = 2, srcIndex = 0:0, size = 1668248176, src = d1, dest = d2
+
+
+0:      inQ: [0]=0      [1]=4   outQ: [0]=0     [1]=192 mpiQ: [0]=4000000      [1]=4000000      localQ: 4
+0: Reporting mpiQ[0]
+Q::MsgId = 2, FuncId = 8, srcIndex = 0:0, size = 8, src = root, dest = root
+Q::MsgId = 6, FuncId = 2, srcIndex = 0:0, size = 1668248176, src = d1, dest = d2
+
+Went through one round of stepping through the system. Didn't help.
+I think one issue is that we initiate the runtime state while still within
+Qinfo::readBuf::m->exec. This leaves the existing buffer dangling and other
+bad things. Want instead to change over gracefully.
+
+Did that. That uncovers lots of problems with how we do 'process'.
+currently the testThreadSchedElement::process is bad.
+=============================================================================
+1 May.
+OK, the problem is that the Element class is no longer virtual. So the
+'process' in testThreadSchedElement doesn't get called, and instead the
+original Element::process does.
+
+Put in a proper TestSched class, derived from Data, with all the usual
+initCinfo and so on. Now it works for one thread but not for two.
 
 =============================================================================

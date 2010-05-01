@@ -22,6 +22,29 @@
 #include "PsparseMsg.h"
 #include "../randnum/randnum.h"
 
+const Cinfo* TestSched::initCinfo()
+{
+	static DestFinfo process( "process",
+		"handles process call",
+		new EpFunc1< TestSched, ProcPtr>( &TestSched::eprocess ) );
+
+	static Finfo* testSchedFinfos[] = {
+		&process
+	};
+
+	static Cinfo testSchedCinfo (
+		"testSched",
+		0,
+		testSchedFinfos,
+		sizeof ( testSchedFinfos ) / sizeof( Finfo* ),
+		new Dinfo< TestSched >()
+	);
+
+	return &testSchedCinfo;
+}
+
+static const Cinfo* testSchedCinfo = TestSched::initCinfo();
+
 /**
  * Check that the ticks are set up properly, created and destroyed as
  * needed, and are sorted when dts are assigned
@@ -154,8 +177,11 @@ void testThreads()
 	s->setclock( 4, 3.0, 5 );
 	s->setclock( 5, 5.0, 1 );
 
-	testThreadSchedElement tse;
-	Eref ts( &tse, 0 );
+	vector< unsigned int > dims;
+	Id tsid = Id::nextId();
+	Element* tse = new Element( tsid, testSchedCinfo, "tse", dims, 1 );
+	// testThreadSchedElement tse;
+	Eref ts( tse, 0 );
 	Element* ticke = Id( 2 )();
 	Eref er0( ticke, DataId( 0, 0 ) );
 	Eref er1( ticke, DataId( 0, 1 ) );
@@ -166,17 +192,24 @@ void testThreads()
 
 	// No idea what FuncId to use here. Assume 0.
 	FuncId f( 0 );
-	SingleMsg m0( er0, ts ); er0.element()->addMsgAndFunc( m0.mid(), f, 0 );
-	SingleMsg m1( er1, ts ); er1.element()->addMsgAndFunc( m1.mid(), f, 1 );
-	SingleMsg m2( er2, ts ); er2.element()->addMsgAndFunc( m2.mid(), f, 2 );
-	SingleMsg m3( er3, ts ); er3.element()->addMsgAndFunc( m3.mid(), f, 3 );
-	SingleMsg m4( er4, ts ); er4.element()->addMsgAndFunc( m4.mid(), f, 4 );
-	SingleMsg m5( er5, ts ); er5.element()->addMsgAndFunc( m5.mid(), f, 5 );
+	SingleMsg* m0 = new SingleMsg( er0, ts );
+	er0.element()->addMsgAndFunc( m0->mid(), f, 0 );
+	SingleMsg* m1 = new SingleMsg( er1, ts );
+	er1.element()->addMsgAndFunc( m1->mid(), f, 1 );
+	SingleMsg* m2 = new SingleMsg( er2, ts );
+	er2.element()->addMsgAndFunc( m2->mid(), f, 2 );
+	SingleMsg* m3 = new SingleMsg( er3, ts );
+	er3.element()->addMsgAndFunc( m3->mid(), f, 3 );
+	SingleMsg* m4 = new SingleMsg( er4, ts );
+	er4.element()->addMsgAndFunc( m4->mid(), f, 4 );
+	SingleMsg* m5 = new SingleMsg( er5, ts );
+	er5.element()->addMsgAndFunc( m5->mid(), f, 5 );
 	s->start( 10 );
 
 	Qinfo::mergeQ( 0 ); // Need to clean up stuff.
 
 	// cout << "Done TestThreads" << flush;
+	tsid.destroy();
 	cout << "." << flush;
 }
 

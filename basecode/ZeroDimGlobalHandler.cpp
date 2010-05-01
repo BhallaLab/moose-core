@@ -16,7 +16,8 @@ ZeroDimGlobalHandler::~ZeroDimGlobalHandler()
 
 void ZeroDimGlobalHandler::process( const ProcInfo* p, Element* e ) const
 {
-	if ( p->threadIndexInGroup == p->numThreadsInGroup )
+	// We only want one thread to deal with this.
+	if ( p->threadIndexInGroup == p->numThreadsInGroup - 1 )
 		reinterpret_cast< Data* >( data_ )->process( p, Eref( e, 0 ) );
 }
 

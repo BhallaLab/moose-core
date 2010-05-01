@@ -91,8 +91,14 @@ void testShellParserStart()
 	shell->setclock( 4, 3.0, 5 );
 	shell->setclock( 5, 5.0, 1 );
 
-	testThreadSchedElement tse;
-	Eref ts( &tse, 0 );
+
+	const Cinfo* testSchedCinfo = TestSched::initCinfo();
+	vector< unsigned int > dims;
+	Id tsid = Id::nextId();
+	Element* tse = new Element( tsid, testSchedCinfo, "tse", dims );
+
+	// testThreadSchedElement tse;
+	Eref ts( tse, 0 );
 	Element* ticke = Id( 2 )();
 	Eref er0( ticke, DataId( 0, 0 ) );
 	Eref er1( ticke, DataId( 0, 1 ) );
@@ -114,6 +120,8 @@ void testShellParserStart()
 		return;
 
 	shell->doStart( 10 );
+
+	tsid.destroy();
 	cout << "." << flush;
 }
 
@@ -350,7 +358,10 @@ void testShellAddMsg()
 	// Run it
 	///////////////////////////////////////////////////////////
 	
+	cout << Shell::myNode() << ": testShellAddMsg: about to doStart\n";
+	
 	shell->doStart( 1 );
+	cout << Shell::myNode() << ": testShellAddMsg: done doStart\n";
 
 	///////////////////////////////////////////////////////////
 	// Check output.

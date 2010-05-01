@@ -132,11 +132,24 @@ static SrcFinfo1< FuncId > lowLevelGet(
 			"a handle to request a value from target field."
 );
 
-static DestFinfo receiveGet( "completeGet", 
-	"completeGet( Uint node#, Uint status, PrepackedBuffer data )"
-	"Function on master shell that handles the value relayed from worker.",
-	new OpFunc3< Shell, unsigned int, unsigned int, PrepackedBuffer >( &Shell::recvGet ) );
+// This function is called by directly inserting entries into the queue,
+// when getting a value.
+static DestFinfo lowLevelReceiveGet( "lowLevelReceiveGet", 
+	"lowLevelReceiveGet( PrepackedBuffer data )"
+	"Function on worker node Shell to handle the value returned by object.",
+	new OpFunc1< Shell, PrepackedBuffer >( &Shell::lowLevelRecvGet )
+);
 
+static DestFinfo receiveGet( "receiveGet", 
+	"receiveGet( Uint node#, Uint status, PrepackedBuffer data )"
+	"Function on master shell that handles the value relayed from worker.",
+	new OpFunc3< Shell, unsigned int, unsigned int, PrepackedBuffer >( &Shell::recvGet )
+);
+
+static SrcFinfo3< unsigned int, unsigned int, PrepackedBuffer > relayGet(
+	"relayGet",
+	"relayGet( node, status, data ): Passes 'get' data back to master node"
+);
 /*
 static SrcFinfo3< unsigned int, double, unsigned int > requestSetClock(
 			"requestSetClock",
@@ -152,11 +165,11 @@ static DestFinfo handleSetClock( "handleSetClock",
 
 static Finfo* shellMaster[] = {
 	&requestCreate, &requestDelete, &requestQuit, &requestStart,
-	&requestAddMsg, &requestSet, &requestGet, 
+	&requestAddMsg, &requestSet, &requestGet, &receiveGet,
 	&handleAck };
 static Finfo* shellWorker[] = {
 	&create, &del, &handleQuit, &handleStart, 
-		&handleAddMsg, &handleSet, &handleGet,
+		&handleAddMsg, &handleSet, &handleGet, &relayGet,
 	&ack };
 
 
@@ -202,7 +215,7 @@ const Cinfo* Shell::initCinfo()
 	static Finfo* shellFinfos[] = {
 		&name,
 		&quit,
-		&receiveGet,
+		&lowLevelReceiveGet,
 		&setclock,
 		&loadBalance,
 
@@ -240,7 +253,8 @@ Shell::Shell()
 		quit_( 0 ), 
 		isSingleThreaded_( 0 ),
 		numAcks_( 0 ),
-		isRunning_( 0 )
+		isRunning_( 0 ),
+		runtime_( 0.0 )
 {
 	;
 }
@@ -379,10 +393,13 @@ void Shell::doQuit( )
 void Shell::doStart( double runtime )
 {
 	initAck();
-	requestStart.send( Id().eref(), &p_, runtime, 1 );
+	Eref sheller( shelle_, 0 );
+	requestStart.send( sheller, &p_, runtime, 1 );
 	// cout << myNode_ << ": Shell::doStart: request sent\n";
-	while ( isAckPending() )
+	while ( isAckPending() ) {
 		Qinfo::mpiClearQ( &p_ );
+		process( &p_, sheller );
+	}
 	// cout << myNode_ << ": Shell::doStart: quitting\n";
 }
 
@@ -392,8 +409,10 @@ void Shell::doStart( double runtime )
 
 void Shell::process( const ProcInfo* p, const Eref& e )
 {
-	;
-	// quit_ = 0;
+	if ( isRunning_ ) {
+		start( runtime_ ); // This is a blocking call
+		ack.send( Eref( shelle_, 0 ), &p_, myNode_, OkStatus, 0 );
+	}
 }
 
 
@@ -431,8 +450,10 @@ const char* Shell::getBuf() const
 
 void Shell::handleStart( double runtime )
 {
-	start( runtime );
-	ack.send( Eref( shelle_, 0 ), &p_, myNode_, OkStatus, 0 );
+	isRunning_ = 1;
+	runtime_ = runtime;
+	// start( runtime );
+	// ack.send( Eref( shelle_, 0 ), &p_, myNode_, OkStatus, 0 );
 }
 
 
@@ -771,7 +792,7 @@ void Shell::handleGet( Id id, DataId index, FuncId fid )
 		shelle_->clearBinding( lowLevelGet.getBindIndex() );
 		Msg* m = new AssignmentMsg( sheller, tgt, Msg::setMsg );
 		shelle_->addMsgAndFunc( m->mid(), fid, lowLevelGet.getBindIndex() );
-		FuncId retFunc = receiveGet.getFid();
+		FuncId retFunc = lowLevelReceiveGet.getFid();
 		lowLevelGet.send( sheller, &p_, retFunc );
 	} else {
 		ack.send( sheller, &p_, myNode_, OkStatus, 0 );
@@ -784,8 +805,15 @@ void Shell::recvGet(
 	if ( myNode_ == 0 ) {
 		getBuf_.resize( pb.dataSize() );
 		memcpy( &getBuf_[0], pb.data(), pb.dataSize() );
+		handleAck( node, status );
+	} else {
+		// cout << myNode_ << ": Error: Shell::recvGet: should never be called except on node 0\n";
 	}
-	handleAck( node, status );
+}
+
+void Shell::lowLevelRecvGet( PrepackedBuffer pb )
+{
+	relayGet.send( Eref( shelle_, 0 ), &p_, myNode(), OkStatus, pb );
 }
 
 ////////////////////////////////////////////////////////////////////////

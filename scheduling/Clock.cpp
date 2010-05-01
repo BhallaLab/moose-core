@@ -386,7 +386,8 @@ void Clock::tStart(  Eref e, const ThreadInfo* ti )
 			info_.currTime += ti->runtime;
 		return;
 	}
-	info_.currTime = tickPtr_[0].getNextTime() - tickPtr_[0].getDt();
+	if ( ti->threadId == 0 )
+		info_.currTime = tickPtr_[0].getNextTime() - tickPtr_[0].getDt();
 	double endTime = ti->runtime * ROUNDING + info_.currTime;
 	isRunning_ = 1;
 
@@ -408,11 +409,12 @@ void Clock::tStart(  Eref e, const ThreadInfo* ti )
 		// cout << "Advance at " << nextTime_ << " on thread " << ti->threadId << endl;
 		sortTickPtrs( ti->sortMutex ); // Sets up nextTime_ and tp0_.
 	}
-	if ( ti->threadId == 0 )
+	if ( ti->threadId == 0 ) {
 		info_ = pinfo;
-	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-	s->setRunning( 0 );
-	isRunning_ = 0;
+		isRunning_ = 0;
+	}
+	// Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	// s->setRunning( 0 );
 }
 
 void Clock::setBarrier( void* barrier )

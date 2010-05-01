@@ -17,7 +17,7 @@ ZeroDimHandler::~ZeroDimHandler()
 void ZeroDimHandler::process( const ProcInfo* p, Element* e ) const
 {
 	if ( Shell::myNode() == 0 && 
-		p->threadIndexInGroup == p->numThreadsInGroup )
+		p->threadIndexInGroup == p->numThreadsInGroup - 1 )
 		reinterpret_cast< Data* >( data_ )->process( p, Eref( e, 0 ) );
 }
 

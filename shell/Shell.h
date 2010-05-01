@@ -186,6 +186,8 @@ class Shell: public Data
 		void recvGet( unsigned int node, unsigned int status, 
 			PrepackedBuffer pb );
 
+		void lowLevelRecvGet( PrepackedBuffer pb );
+
 		////////////////////////////////////////////////////////////////
 		// Sets up clock ticks. Essentially is a call into the 
 		// Clock::setupTick function, but may be needed to be called from
@@ -228,6 +230,10 @@ class Shell: public Data
 		 * Used to coordinate threads especially when doing MPI.
 		 */
 		bool isRunning_;
+		/**
+		 * Simulation run time
+		 */
+		double runtime_;
 };
 
 extern bool set( Eref& dest, const string& destField, const string& val );
