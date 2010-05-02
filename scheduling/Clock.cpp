@@ -324,7 +324,10 @@ void Clock::start(  Eref e, const Qinfo* q, double runTime )
 	double endTime = runTime * ROUNDING + info_.currTime;
 	isRunning_ = 1;
 
-	Element* ticke = Id( 2 )();
+	/// Should actually use a lookup for child, or even postCreate Id.
+	// Element* ticke = Id( 2 )();
+	Id tickId( e.element()->id().value() + 1 );
+	Element* ticke = tickId();
 
 	if ( tickPtr_.size() == 1 ) {
 		tickPtr_[0].advance( ticke, &info_, endTime );

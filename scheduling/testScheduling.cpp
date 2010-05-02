@@ -22,14 +22,18 @@
 #include "PsparseMsg.h"
 #include "../randnum/randnum.h"
 
+//////////////////////////////////////////////////////////////////////
+// Setting up a class for testing scheduling.
+//////////////////////////////////////////////////////////////////////
+
+static DestFinfo processFinfo( "process",
+	"handles process call",
+	new EpFunc1< TestSched, ProcPtr>( &TestSched::eprocess ) );
 const Cinfo* TestSched::initCinfo()
 {
-	static DestFinfo process( "process",
-		"handles process call",
-		new EpFunc1< TestSched, ProcPtr>( &TestSched::eprocess ) );
 
 	static Finfo* testSchedFinfos[] = {
-		&process
+		&processFinfo
 	};
 
 	static Cinfo testSchedCinfo (
@@ -44,6 +48,34 @@ const Cinfo* TestSched::initCinfo()
 }
 
 static const Cinfo* testSchedCinfo = TestSched::initCinfo();
+
+void TestSched::process( const ProcInfo*p, const Eref& e )
+{
+	static const int timings[] = { 1, 2, 2, 2, 3, 3, 4, 4, 4, 
+		5, 5, 5, 6, 6, 6, 6, 7, 8, 8, 8, 9, 9, 10, 10, 10, 10, 10,
+		11, 12, 12, 12, 12, 13, 14, 14, 14, 15, 15, 15, 15,
+		16, 16, 16, 17, 18, 18, 18, 18, 19, 20, 20, 20, 20, 20 };
+	unsigned int max = sizeof( timings ) / sizeof( int );
+	cout << Shell::myNode() << ": timing[ " << index_ << ", " << p->threadId << " ] = " << timings[ index_ / p->numThreads ] << ", time = " << p->currTime << endl;
+	if ( static_cast< int >( p->currTime ) != 	
+		timings[ index_ / p->numThreads ] )
+		/*
+		cout << "testThreadSchedElement::process: index= " << index_ << ", numThreads = " <<
+			p->numThreads << ", currTime = " << p->currTime << 
+			", mynode = " << p->nodeIndexInGroup << endl;
+	*/
+	assert( static_cast< int >( p->currTime ) == 	
+		timings[ index_ / p->numThreadsInGroup ] );
+
+	pthread_mutex_lock( &mutex_ );
+		++index_;
+	pthread_mutex_unlock( &mutex_ );
+
+	assert( index_ <= max * p->numThreads );
+	// cout << index_ << ": " << p->currTime << endl;
+}
+
+//////////////////////////////////////////////////////////////////////
 
 /**
  * Check that the ticks are set up properly, created and destroyed as
@@ -69,16 +101,16 @@ void setupTicks()
 	// FieldElement< Tick, Clock, &Clock::getTick > ticke( tc, clocke, &Clock::getNumTicks, &Clock::setNumTicks );
 	unsigned int size = 10;
 
-	bool ret = OneToAllMsg::add( clocker, "childTick", ticke, "parent" );
-	assert( ret );
+	// bool ret = OneToAllMsg::add( clocker, "childTick", ticke, "parent" );
+	// assert( ret );
 
 	assert( ticke->dataHandler()->numData() == 0 );
 
-	// ret = Field< unsigned int >::set( clocker, "numTicks", size );
+	bool ret = Field< unsigned int >::set( clocker, "numTicks", size );
 	Clock* clockData = reinterpret_cast< Clock* >( clocker.data() );
 	clockData->setNumTicks( size );
 
-	assert( ret );
+	// assert( ret );
 	// cout << Shell::myNode() << ": numTicks: " << ticke->dataHandler()->numData() << ", " << size << endl;
 	assert( ticke->dataHandler()->numData() == size );
 
@@ -137,12 +169,14 @@ void setupTicks()
 	assert( cdata->tickPtr_[3].ticks_[0] == reinterpret_cast< const Tick* >( er0.data() ) );
 	assert( cdata->tickPtr_[3].ticks_[1] == reinterpret_cast< const Tick* >( er5.data() ) );
 
+	Id tsid = Id::nextId();
+	Element* tse = new Element( tsid, testSchedCinfo, "tse", dims, 1 );
 
-	testSchedElement tse;
-	Eref ts( &tse, 0 );
+	// testSchedElement tse;
+	Eref ts( tse, 0 );
 	
 	// No idea what FuncId to use here. Assume 0.
-	FuncId f( 0 );
+	FuncId f( processFinfo.getFid() );
 	SingleMsg *m0 = new SingleMsg( er0, ts ); 
 	er0.element()->addMsgAndFunc( m0->mid(), f, 0 );
 	SingleMsg *m1 = new SingleMsg( er1, ts ); 
@@ -156,14 +190,18 @@ void setupTicks()
 	SingleMsg *m5 = new SingleMsg( er5, ts ); 
 	er5.element()->addMsgAndFunc( m5->mid(), f, 7 );
 
+	cdata->rebuild();
+
 	Qinfo q( 0, 0, 8 );
 	cdata->start( clocker, &q, 20 );
 
-	cout << "." << flush;
 
 	tickId.destroy();
 	clock.destroy();
+	tsid.destroy();
 	// tickId.destroy();
+	cout << "done setupTicks\n";
+	cout << "." << flush;
 }
 
 void testThreads()
@@ -208,7 +246,7 @@ void testThreads()
 
 	Qinfo::mergeQ( 0 ); // Need to clean up stuff.
 
-	// cout << "Done TestThreads" << flush;
+	cout << "Done TestThreads" << flush;
 	tsid.destroy();
 	cout << "." << flush;
 }

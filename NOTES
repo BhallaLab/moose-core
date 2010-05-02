@@ -5051,5 +5051,15 @@ original Element::process does.
 
 Put in a proper TestSched class, derived from Data, with all the usual
 initCinfo and so on. Now it works for one thread but not for two.
+Checkin 1758.
+
+Seems like the system goes through ticks, in setupTicks, but doesn't call
+target.
+=============================================================================
+2 May.
+Solved the setupTicks problem, it was a bit of a waste. I was using absolute
+lookup to find the Tick Element in Clock::start. However in the setupTicks
+test, I was creating both the Clock and the Ticks locally. Hence I was
+not seeing any of the targets of the test Tick.
 
 =============================================================================

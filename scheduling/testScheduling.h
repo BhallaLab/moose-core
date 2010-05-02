@@ -89,30 +89,7 @@ class TestSched: public Data
 			pthread_mutex_destroy( &mutex_ );
 		}
 
-		void process( const ProcInfo*p, const Eref& e ) {
-			static const int timings[] = { 1, 2, 2, 2, 3, 3, 4, 4, 4, 
-				5, 5, 5, 6, 6, 6, 6, 7, 8, 8, 8, 9, 9, 10, 10, 10, 10, 10,
-				11, 12, 12, 12, 12, 13, 14, 14, 14, 15, 15, 15, 15,
-				16, 16, 16, 17, 18, 18, 18, 18, 19, 20, 20, 20, 20, 20 };
-			unsigned int max = sizeof( timings ) / sizeof( int );
-			cout << Shell::myNode() << ": timing[ " << index_ << ", " << p->threadId << " ] = " << timings[ index_ / p->numThreads ] << ", time = " << p->currTime << endl;
-			if ( static_cast< int >( p->currTime ) != 	
-				timings[ index_ / p->numThreads ] )
-				/*
-				cout << "testThreadSchedElement::process: index= " << index_ << ", numThreads = " <<
-					p->numThreads << ", currTime = " << p->currTime << 
-					", mynode = " << p->nodeIndexInGroup << endl;
-			*/
-			assert( static_cast< int >( p->currTime ) == 	
-				timings[ index_ / p->numThreadsInGroup ] );
-
-			pthread_mutex_lock( &mutex_ );
-				++index_;
-			pthread_mutex_unlock( &mutex_ );
-
-			assert( index_ <= max * p->numThreads );
-			// cout << index_ << ": " << p->currTime << endl;
-		}
+		void process( const ProcInfo*p, const Eref& e );
 
 		void eprocess( Eref e, const Qinfo* q, ProcPtr p ) {
 			process( p, e );
