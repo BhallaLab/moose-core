@@ -343,7 +343,6 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 		i != m->end(); ++i )
 		Msg::getMsg( i->mid )->process( info );
 	}
-
 }
 
 void Tick::setIndex( unsigned int index ) 

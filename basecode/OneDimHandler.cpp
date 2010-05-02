@@ -25,6 +25,15 @@ OneDimHandler::~OneDimHandler() {
  */
 void OneDimHandler::process( const ProcInfo* p, Element* e ) const
 {
+	char* temp = data_ + p->threadIndexInGroup * dinfo()->size();
+	for ( unsigned int i = start_ + p->threadIndexInGroup; i < end_;
+		i += p->numThreadsInGroup ) {
+		reinterpret_cast< Data* >( temp )->process( p, Eref( e, i ) );
+		temp += dinfo()->size();
+	}
+
+
+	/*
 	unsigned int startIndex =
 		( ( end_ - start_ ) * p->threadIndexInGroup ) /
 			p->numThreadsInGroup;
@@ -37,6 +46,7 @@ void OneDimHandler::process( const ProcInfo* p, Element* e ) const
 		reinterpret_cast< Data* >( temp )->process( p, Eref( e, i + start_ ) );
 		temp += dinfo()->size();
 	}
+	*/
 }
 
 

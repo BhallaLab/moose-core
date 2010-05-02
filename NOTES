@@ -5061,5 +5061,11 @@ Solved the setupTicks problem, it was a bit of a waste. I was using absolute
 lookup to find the Tick Element in Clock::start. However in the setupTicks
 test, I was creating both the Clock and the Ticks locally. Hence I was
 not seeing any of the targets of the test Tick.
+Checkin 1759
+
+Now the system clears single-thread tests. The 2-thread tests run into
+problems because I now explicitly check threads before executing process on
+any Data entry. The old test design assumed not. Need to change the 
+TestSched class to be a proper multi-dimension type.
 
 =============================================================================

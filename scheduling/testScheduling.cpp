@@ -56,14 +56,12 @@ void TestSched::process( const ProcInfo*p, const Eref& e )
 		11, 12, 12, 12, 12, 13, 14, 14, 14, 15, 15, 15, 15,
 		16, 16, 16, 17, 18, 18, 18, 18, 19, 20, 20, 20, 20, 20 };
 	unsigned int max = sizeof( timings ) / sizeof( int );
-	cout << Shell::myNode() << ": timing[ " << index_ << ", " << p->threadId << " ] = " << timings[ index_ / p->numThreads ] << ", time = " << p->currTime << endl;
+	cout << Shell::myNode() << ":" << p->threadIndexInGroup << " : timing[ " << index_ << ", " << p->threadId << " ] = " << timings[ index_ / p->numThreads ] << ", time = " << p->currTime << endl;
 	if ( static_cast< int >( p->currTime ) != 	
 		timings[ index_ / p->numThreads ] )
-		/*
-		cout << "testThreadSchedElement::process: index= " << index_ << ", numThreads = " <<
-			p->numThreads << ", currTime = " << p->currTime << 
-			", mynode = " << p->nodeIndexInGroup << endl;
-	*/
+		cout << Shell::myNode() << ":" << p->threadIndexInGroup << " :testThreadSchedElement::process: index= " << index_ << ", numThreads = " <<
+			p->numThreads << ", currTime = " << p->currTime << endl;
+
 	assert( static_cast< int >( p->currTime ) == 	
 		timings[ index_ / p->numThreadsInGroup ] );
 
@@ -84,6 +82,7 @@ void TestSched::process( const ProcInfo*p, const Eref& e )
 void setupTicks()
 {
 	static const double EPSILON = 1.0e-9;
+	const double runtime = 20.0;
 	// const Cinfo* tc = Tick::initCinfo();
 	Id clock = Id::nextId();
 	vector< unsigned int > dims( 1, 1 );
@@ -192,9 +191,10 @@ void setupTicks()
 
 	cdata->rebuild();
 
-	Qinfo q( 0, 0, 8 );
-	cdata->start( clocker, &q, 20 );
+	Qinfo q( 0, 0, 8 ); // Not really used in the 'start' function.
+	cdata->start( clocker, &q, runtime );
 
+	assert( fabs( cdata->getCurrentTime() - runtime ) < 1e-6 );
 
 	tickId.destroy();
 	clock.destroy();
@@ -228,8 +228,7 @@ void testThreads()
 	Eref er4( ticke, DataId( 0, 4 ) );
 	Eref er5( ticke, DataId( 0, 5 ) );
 
-	// No idea what FuncId to use here. Assume 0.
-	FuncId f( 0 );
+	FuncId f( processFinfo.getFid() );
 	SingleMsg* m0 = new SingleMsg( er0, ts );
 	er0.element()->addMsgAndFunc( m0->mid(), f, 0 );
 	SingleMsg* m1 = new SingleMsg( er1, ts );
