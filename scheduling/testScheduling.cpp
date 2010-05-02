@@ -345,10 +345,6 @@ void testThreadIntFireNetwork()
 	ret = Field< double >::setVec( syne, "delay", delay );
 	assert( ret );
 
-	// printGrid( i2(), "Vm", 0, thresh );
-	Element* se = Id()();
-	Shell* s = reinterpret_cast< Shell* >( se->dataHandler()->data( 0 ) );
-	s->setclock( 0, timestep, 0 );
 
 	Element* ticke = Id( 2 )();
 	Eref er0( ticke, DataId( 0, 0 ) );
@@ -363,6 +359,11 @@ void testThreadIntFireNetwork()
 
 	ret = SingleMsg::add( er0, "process0", e2, "process" );
 	assert( ret );
+
+	// printGrid( i2(), "Vm", 0, thresh );
+	Element* se = Id()();
+	Shell* s = reinterpret_cast< Shell* >( se->dataHandler()->data( 0 ) );
+	s->setclock( 0, timestep, 0 );
 
 	IntFire* ifire100 = reinterpret_cast< IntFire* >( e2.element()->dataHandler()->data( 100 ) );
 	IntFire* ifire900 = reinterpret_cast< IntFire* >( e2.element()->dataHandler()->data( 900 ) );
@@ -481,6 +482,7 @@ void testThreadNodeIntFireNetwork()
 	IntFire* ifire900 = reinterpret_cast< IntFire* >( e2.element()->dataHandler()->data( 900 ) );
 
 
+	/*
 	if ( Shell::myNode() == 0 ) {
 		s->doStart( timestep * runsteps );
 	} else {
@@ -493,7 +495,8 @@ void testThreadNodeIntFireNetwork()
 		}
 		s->passThroughMsgQs( se );
 	}
-	// s->start( timestep * runsteps );
+	*/
+	s->start( timestep * runsteps );
 	if ( ifire100 ) {
 		cout << Shell::myNode() << ": fire100Vm = " <<  ifire100->getVm() << ", expected Vm = " << Vm100 << endl;
 		assert( fabs( ifire100->getVm() - Vm100 ) < 1e-6 );

@@ -26,10 +26,11 @@ OneDimHandler::~OneDimHandler() {
 void OneDimHandler::process( const ProcInfo* p, Element* e ) const
 {
 	char* temp = data_ + p->threadIndexInGroup * dinfo()->size();
+	unsigned int stride = dinfo()->size() * p->numThreadsInGroup;
 	for ( unsigned int i = start_ + p->threadIndexInGroup; i < end_;
 		i += p->numThreadsInGroup ) {
 		reinterpret_cast< Data* >( temp )->process( p, Eref( e, i ) );
-		temp += dinfo()->size();
+		temp += stride;
 	}
 
 

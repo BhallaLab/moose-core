@@ -5070,5 +5070,10 @@ TestSched class to be a proper multi-dimension type.
 Checkin 1760.
 
 Tightened up test for TestSched. Now compares time alignment between threads.
+Checkin 1761
+
+Little fix done for OneDimHandler::process. Now it often clears the tests
+for 2 threads, but for 3 or more it either hangs or fails the assertion on
+the output.
 
 =============================================================================
