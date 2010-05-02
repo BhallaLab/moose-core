@@ -25,6 +25,8 @@ OneDimHandler::~OneDimHandler() {
  */
 void OneDimHandler::process( const ProcInfo* p, Element* e ) const
 {
+	/**
+	 * This is the variant with interleaved threads.
 	char* temp = data_ + p->threadIndexInGroup * dinfo()->size();
 	unsigned int stride = dinfo()->size() * p->numThreadsInGroup;
 	for ( unsigned int i = start_ + p->threadIndexInGroup; i < end_;
@@ -32,22 +34,25 @@ void OneDimHandler::process( const ProcInfo* p, Element* e ) const
 		reinterpret_cast< Data* >( temp )->process( p, Eref( e, i ) );
 		temp += stride;
 	}
+	 */
 
-
-	/*
-	unsigned int startIndex =
-		( ( end_ - start_ ) * p->threadIndexInGroup ) /
+	/**
+	 * This is the variant with threads in a block.
+	 */
+	unsigned int startIndex = start_ + 
+		( ( end_ - start_ ) * p->threadIndexInGroup + 
+		p->numThreadsInGroup - 1 ) /
 			p->numThreadsInGroup;
-	unsigned int endIndex =
-		( ( end_ - start_ ) * ( 1 + p->threadIndexInGroup ) ) /
+	unsigned int endIndex = start_ + 
+		( ( end_ - start_ ) * ( 1 + p->threadIndexInGroup ) +
+		p->numThreadsInGroup - 1 ) /
 			p->numThreadsInGroup;
 	
-	char* temp = data_ + startIndex * dinfo()->size();
+	char* temp = data_ + ( startIndex - start_ ) * dinfo()->size();
 	for ( unsigned int i = startIndex; i != endIndex; ++i ) {
-		reinterpret_cast< Data* >( temp )->process( p, Eref( e, i + start_ ) );
+		reinterpret_cast< Data* >( temp )->process( p, Eref( e, i ) );
 		temp += dinfo()->size();
 	}
-	*/
 }
 
 

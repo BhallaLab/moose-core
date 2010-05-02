@@ -5085,5 +5085,68 @@ Fixed a bug that came up because the Clock was not initialized to zero
 properly. But the earlier symptoms still persist: usually clears
 2-thread tests, sometimes fails. Always fails with more threads.
 Valgrind doesn't find anything wrong, other than about 2K of memory leak.
+Checkin 1763.
+
+Checked output. The values are usually pretty close but not right on,
+sometimes one of the values is right, sometimes it is quite far off.
+Nothing pending in the queues.
+This looks to me like possible race conditions: data slopping between threads.
+
+The thread balancing is as follows:
+Process: Thread X out of N threads access data[ X + Y*N ] where Y is a 
+non-negative integer.
+PsparseMsg: Thread X out of N access row[ X + origRow * N ]
+targetThread = ( colIndex * numThreads ) / ncols.
+So successive targets are in the same thread:
+
+Array index	Array size	# threads	Thread #	Low	High
+colIndex	ncols		numThreads
+0-1023		1024		1		0		0	1024
+0-511		1024		2		0		0	512
+512-1023	1024		2		1		512	1024
+0-341		1024		3		0		0	341*
+342-682		1024		3		1		341*	682
+683-1023	1024		3		2		682*	1024
+etc.
+So my Process load balancing was wrong. Not too much to fix, though:
+
+Msg type	Handles threads?
+Single		No
+OneToAll	No
+OneToOne	No
+Single		No
+Diagonal	No
+Sparse		No
+Psparse		Yes.
+
+Now the inverse calculation: What is the range of Array indices for a
+given array size, # threads, and thread #:
+lowIndex = ( thread# * array size ) / numThreads
+highIndex = ( ( thread# + 1 ) * arraySize ) / numThreads
+	For high index we use C convention of one more than the last one used.
+This will give:
+
+Array index	Array 	#thrds	Thrd#	Low	High	lowV2	HighV2
+colIndex	size	
+0-1023		1024	1	0	0	1024	0	1024
+0-511		1024	2	0	0	512	0	512
+512-1023	1024	2	1	512	1024	512	1024
+0-341		1024	3	0	0	341*	0	342
+342-682		1024	3	1	341*	682	342	683
+683-1023	1024	3	2	682*	1024	683	1024
+
+This isn't right. Low and high indices are rounded down where they should not
+be.
+
+Try version 2: See columns lowV2 and highV2
+lowIndex = ( thread# * arraySize + numThreads -1 ) / numThreads
+highIndex = ( (thread# + 1)* arraySize + numthreads - 1 ) / numThreads
+This looks OK. But it is messy to index. Let's try it to see if the 
+threads work. No, they still don't. The error looks much the same as before.
+The are either very close, or one is close and the other is off.
+This time the 4-thread version seems to work OK at least half the time.
+3-threads works occasionally. Suggests that something else is also wrong.
+
+Another option is to change how PsparseMatrix decomposes things. 
 
 =============================================================================
