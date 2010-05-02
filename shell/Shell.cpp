@@ -253,6 +253,8 @@ Shell::Shell()
 		quit_( 0 ), 
 		isSingleThreaded_( 0 ),
 		numAcks_( 0 ),
+		barrier1_( 0 ),
+		barrier2_( 0 ),
 		isRunning_( 0 ),
 		runtime_( 0.0 )
 {

@@ -420,9 +420,10 @@ void Clock::tStart(  Eref e, const ThreadInfo* ti )
 	// s->setRunning( 0 );
 }
 
-void Clock::setBarrier( void* barrier )
+void Clock::setBarrier( void* barrier1, void* barrier2 )
 {
-	info_.barrier = barrier;
+	info_.barrier1 = barrier1;
+	info_.barrier2 = barrier2;
 }
 
 // Static function used to pass into pthread_create

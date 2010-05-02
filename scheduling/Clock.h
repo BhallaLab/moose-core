@@ -87,7 +87,7 @@ class Clock: public Data
 
 		unsigned int getNumTicks() const;
 		void setNumTicks( unsigned int num );
-		void setBarrier( void* barrier );
+		void setBarrier( void* barrier1, void* barrier2 );
 
 		static void* threadStartFunc( void* threadInfo );
 		static const Cinfo* initCinfo();

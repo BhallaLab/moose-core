@@ -368,6 +368,7 @@ void testThreadIntFireNetwork()
 	IntFire* ifire100 = reinterpret_cast< IntFire* >( e2.element()->dataHandler()->data( 100 ) );
 	IntFire* ifire900 = reinterpret_cast< IntFire* >( e2.element()->dataHandler()->data( 900 ) );
 
+	// Does reinit too.
 	s->start( timestep * runsteps );
 	assert( fabs( ifire100->getVm() - Vm100 ) < 1e-6 );
 	assert( fabs( ifire900->getVm() - Vm900 ) < 1e-6 );

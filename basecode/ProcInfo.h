@@ -19,7 +19,8 @@ class ProcInfo
 				numNodesInGroup( 1 ), 
 				groupId( 0 ),
 				isMpiThread( 0 ),
-				barrier( 0 )
+				barrier1( 0 ),
+				barrier2( 0 )
 			{;}
 		double dt;
 		double currTime;
@@ -32,7 +33,8 @@ class ProcInfo
 		unsigned int numNodesInGroup;
 		unsigned int groupId;
 		bool isMpiThread;
-		void* barrier;
+		void* barrier1;
+		void* barrier2;
 };
 
 typedef ProcInfo* ProcPtr;

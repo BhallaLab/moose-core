@@ -5074,6 +5074,16 @@ Checkin 1761
 
 Little fix done for OneDimHandler::process. Now it often clears the tests
 for 2 threads, but for 3 or more it either hangs or fails the assertion on
-the output.
+the output. Checkin 1762.
+
+In order to tighten up the Tick::advance logic, I have introduced a second
+barrier. Earlier there was just one barrier, being used twice. This doesn't
+seem to make any difference to the running, but perhaps debugging will be
+cleaner.
+
+Fixed a bug that came up because the Clock was not initialized to zero 
+properly. But the earlier symptoms still persist: usually clears
+2-thread tests, sometimes fails. Always fails with more threads.
+Valgrind doesn't find anything wrong, other than about 2K of memory leak.
 
 =============================================================================

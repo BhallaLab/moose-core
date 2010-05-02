@@ -100,13 +100,14 @@ void* Shell::mpiThreadFunc( void* shellPtr )
 {
 	Shell* shell = reinterpret_cast< Shell* >( shellPtr );
 	assert( shell->numNodes_ > 1 );
-	assert( shell->barrier_ );
+	assert( shell->barrier1_ );
+	assert( shell->barrier2_ );
 	cout << "mpiThreadFunc: on node " << shell->myNode_ << endl;
 
 	while( shell->isRunning_ ) {
 		// Sync with first step in Tick::advance
 		int rc = pthread_barrier_wait(
-			reinterpret_cast< pthread_barrier_t* >( shell->barrier_ ) );
+			reinterpret_cast< pthread_barrier_t* >( shell->barrier1_ ) );
 		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 		if ( !shell->isRunning_ )
 			break;
@@ -115,7 +116,7 @@ void* Shell::mpiThreadFunc( void* shellPtr )
 			// wait till inQ is filled
 		// Now inQ has been filled.
 		rc = pthread_barrier_wait(
-			reinterpret_cast< pthread_barrier_t* >( shell->barrier_ ) );
+			reinterpret_cast< pthread_barrier_t* >( shell->barrier2_ ) );
 		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 		if ( !shell->isRunning_ )
 			break;
@@ -127,7 +128,7 @@ void* Shell::mpiThreadFunc( void* shellPtr )
 		// Barrier till localnode cleans up all mpiQ stuff too.
 		// Clean up mpiQ for next round of incoming stuff.
 		rc = pthread_barrier_wait(
-			reinterpret_cast< pthread_barrier_t* >( shell->barrier_ ) );
+			reinterpret_cast< pthread_barrier_t* >( shell->barrier1_ ) );
 		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 		cout << "mpiThreadFunc: mpiQ ready, used by readMpiQ\n";
 		
@@ -263,12 +264,18 @@ void Shell::start( double runtime )
 {
 	Id clockId( 1 );
 	Element* clocke = clockId();
+	Clock *clock = reinterpret_cast< Clock* >( clocke->dataHandler()->data( 0 ) );
 	Qinfo q;
+	bool doReinit = 1;
+
+	if ( doReinit )
+		clock->reinit( clockId.eref(), &q ); 
+		// Should be msg. Or perhaps not, as queue should be clear here.
+
 	if ( isSingleThreaded_ ) {
 		// SetGet< double >::set( clocke, runTime );
 		// clock->start( clocke, &q, runTime );
-		Clock *clock = reinterpret_cast< Clock* >( clocke->dataHandler()->data( 0 ) );
-		clock->start( clockId.eref(), &q, runtime );
+		clock->start( clockId.eref(), &q, runtime ); // Should be msg
 		return;
 	}
 
@@ -291,14 +298,19 @@ void Shell::start( double runtime )
 
 	pthread_attr_init( &attr );
 	pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_JOINABLE );
-	pthread_barrier_t barrier;
-	if ( pthread_barrier_init( &barrier, NULL, numThreads ) ) {
+	pthread_barrier_t barrier1;
+	if ( pthread_barrier_init( &barrier1, NULL, numThreads ) ) {
 		cout << "Error: Shell::start: Unable to init barrier\n";
 		exit( -1 );
 	}
-	Clock* clock = reinterpret_cast< Clock* >( clocke->dataHandler()->data( 0 ) );
-	clock->setBarrier( &barrier );
-	barrier_ = &barrier;
+	pthread_barrier_t barrier2;
+	if ( pthread_barrier_init( &barrier2, NULL, numThreads ) ) {
+		cout << "Error: Shell::start: Unable to init barrier\n";
+		exit( -1 );
+	}
+	clock->setBarrier( &barrier1, &barrier2 );
+	barrier1_ = &barrier1;
+	barrier2_ = &barrier2;
 	clock->setNumPendingThreads( 0 ); // Used for clock scheduling
 	clock->setNumThreads( numThreads ); // Used for clock scheduling
 	for ( unsigned int i = 0; i < numThreads; ++i ) {
@@ -333,9 +345,13 @@ void Shell::start( double runtime )
 	assert( ack != 0 );
 	ack->send( Id().eref(), &p_, myNode_, OkStatus, 0 );
 	*/
+	clock->setBarrier( 0, 0 );
+	barrier1_ = 0;
+	barrier2_ = 0;
 
 	delete[] threads;
 	pthread_attr_destroy( &attr );
-	pthread_barrier_destroy( &barrier );
+	pthread_barrier_destroy( &barrier1 );
+	pthread_barrier_destroy( &barrier2 );
 	pthread_mutex_destroy( &sortMutex );
 }

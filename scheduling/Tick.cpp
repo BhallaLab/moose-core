@@ -252,19 +252,20 @@ void Tick::destroy( Eref e, const Qinfo* q )
 void Tick::mpiAdvance( ProcInfo* info) const
 {
 	// cout << info->nodeIndexInGroup << ", " << info->threadId << ": Tick::mpiAdvance (" << dt_ << ", " << stage_ << " ) at t= " << info->currTime << endl;
-	assert( info->barrier );
+	assert( info->barrier1 );
+	assert( info->barrier2 );
 	int rc = pthread_barrier_wait(
-		reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
+		reinterpret_cast< pthread_barrier_t* >( info->barrier1 ) );
 	assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 	// mergeQ is going on. Wait for inQ to be updated. Use time to clear mpiQ
 	rc = pthread_barrier_wait(
-		reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
+		reinterpret_cast< pthread_barrier_t* >( info->barrier2 ) );
 	// readQ is going on. InQ is ready. Do data transfer between nodes.
 		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 		Qinfo::sendAllToAll( info );
 	
 	rc = pthread_barrier_wait(
-		reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
+		reinterpret_cast< pthread_barrier_t* >( info->barrier1 ) );
 	assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 	// readMpiQ is going on, and also process. Data has been transferred.
 }
@@ -274,37 +275,33 @@ void Tick::mpiAdvance( ProcInfo* info) const
  */
 void Tick::advance( Element* e, ProcInfo* info ) const
 {
-	
 	assert( ( info->numNodesInGroup > 1 ) == ( info->numThreads == (info->numThreadsInGroup + 1) ) );
 	// This is the mpiThread.
 	if ( info->isMpiThread ) {
 		mpiAdvance( info );
-	} else {
-		// cout << info->nodeIndexInGroup << ", " << info->threadId << ": Tick::advance (" << dt_ << ", " << stage_ << " ) at t= " << info->currTime << endl;
+		return;
+	}
+	// cout << Shell::myNode() << ":" << info->threadId << ": Tick::advance (" << dt_ << ", " << stage_ << " ) at t= " << info->currTime << endl;
 
 	/**
 	 * This barrier pair protects the inQ from being accessed for reading, 
 	 * while it is being updated, and vice versa.
 	 */
-	if ( info->barrier ) {
+	if ( info->barrier1 ) {
 		int rc = pthread_barrier_wait(
-			reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
+			reinterpret_cast< pthread_barrier_t* >( info->barrier1 ) );
 		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 	}
 	// Start updating inQ
 	// Have to ensure mpiThread does not do anything with inQ for a bit.
 	if ( info->threadIndexInGroup == 0 ) {
-		// Put the queues into one big one. Clear others
-		// Qinfo::reportQ();
 		Qinfo::mergeQ( info->groupId ); 
 		// cout << "Tick::advance: t = " << info->currTime;
-		// Send out all stuff in inQ to current group on other nodes
-		// Harvest data for current node.
 	}
 		
-	if ( info->barrier ) {
+	if ( info->barrier2 ) {
 		int rc = pthread_barrier_wait(
-			reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
+			reinterpret_cast< pthread_barrier_t* >( info->barrier2 ) );
 		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 	}
 	// Set off mpiThread for MPI_alltoall data exchange of inQ
@@ -312,27 +309,18 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 	Qinfo::readLocalQ( info ); // March through localQ.
 	Qinfo::readQ( info ); // March through inQ. Each thread magically deals
 		// with updates needed by its own Process calls, and none other.
+		// The Msgs do this partitioning.
 
 	if ( info->numNodesInGroup > 1 ) // Sync up with mpiThreadfunc
 	{ // Sync up with mpiAdvance.
 		// At this point the MPI_alltoall should have completed
-		if ( info->barrier ) {
+		if ( info->barrier1 ) {
 			int rc = pthread_barrier_wait(
-				reinterpret_cast< pthread_barrier_t* >( info->barrier ) );
+				reinterpret_cast< pthread_barrier_t* >( info->barrier1 ) );
 			assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 		}
 		Qinfo::readMpiQ( info ); // March through mpiQ
-		// March through process calls
-#if 0
-		BindIndex b = procVec[ index_ ]->getBindIndex();
-		const vector< MsgFuncBinding >* m = e->getMsgAndFunc( b );
-		for ( vector< MsgFuncBinding >::const_iterator i = m->begin();
-			i != m->end(); ++i )
-			Msg::getMsg( i->mid )->process( info );
-#endif
 	}
-
-
 	// March through Process calls for each scheduled Element.
 	// Note that there is a unique BindIndex for each tick.
 	// We preallocate 0 through 10 for this. May need to rethink.
@@ -340,8 +328,10 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 	BindIndex b = procVec[ index_ ]->getBindIndex();
 	const vector< MsgFuncBinding >* m = e->getMsgAndFunc( b );
 	for ( vector< MsgFuncBinding >::const_iterator i = m->begin();
-		i != m->end(); ++i )
-		Msg::getMsg( i->mid )->process( info );
+		i != m->end(); ++i ) {
+		// Element->dataHandler keeps track of which entry needs to be
+		// updated by which thread.
+		Msg::getMsg( i->mid )->process( info ); 
 	}
 }
 

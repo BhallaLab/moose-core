@@ -225,7 +225,8 @@ class Shell: public Data
 			// setup operations.
 		unsigned int numAcks_;
 		vector< unsigned int > acked_;
-		void* barrier_;
+		void* barrier1_;
+		void* barrier2_;
 		/**
 		 * Used to coordinate threads especially when doing MPI.
 		 */
