@@ -5067,5 +5067,8 @@ Now the system clears single-thread tests. The 2-thread tests run into
 problems because I now explicitly check threads before executing process on
 any Data entry. The old test design assumed not. Need to change the 
 TestSched class to be a proper multi-dimension type.
+Checkin 1760.
+
+Tightened up test for TestSched. Now compares time alignment between threads.
 
 =============================================================================

@@ -26,13 +26,14 @@ OneDimGlobalHandler::~OneDimGlobalHandler() {
  */
 void OneDimGlobalHandler::process( const ProcInfo* p, Element* e ) const
 {
-	char* temp = data_;
+	char* temp = data_ + p->threadIndexInGroup * dinfo()->size();
+	unsigned int stride = dinfo()->size() * p->numThreadsInGroup;
 
 	for ( unsigned int i = p->threadIndexInGroup; i < size_; 
 		i+= p->numThreadsInGroup )
 	{
 		reinterpret_cast< Data* >( temp )->process( p, Eref( e, i ) );
-		temp += dinfo()->size();
+		temp += stride;
 	}
 
 /*

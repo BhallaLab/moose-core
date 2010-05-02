@@ -10,14 +10,23 @@
 class TestSched: public Data
 {
 	public:
+		/** 
+		 * This may be created as an array, but only on one thread
+		 */
 		TestSched()
 			: index_( 0 )
 		{
-			pthread_mutex_init( &mutex_, NULL );
+			if ( isInitPending_ ) {
+				globalIndex_ = 0;
+				pthread_mutex_init( &mutex_, NULL );
+				isInitPending_ = 0;
+			}
 		}
 		~TestSched()
 		{
-			pthread_mutex_destroy( &mutex_ );
+			if ( !isInitPending_ )
+				pthread_mutex_destroy( &mutex_ );
+			isInitPending_ = 1;
 		}
 
 		void process( const ProcInfo*p, const Eref& e );
@@ -28,7 +37,9 @@ class TestSched: public Data
 
 		static const Cinfo* initCinfo();
 	private:
-		pthread_mutex_t mutex_;
-		unsigned int index_;
+		int index_;
+		static pthread_mutex_t mutex_;
+		static int globalIndex_;
+		static bool isInitPending_;
 };
 

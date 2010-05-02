@@ -22,6 +22,10 @@
 #include "PsparseMsg.h"
 #include "../randnum/randnum.h"
 
+pthread_mutex_t TestSched::mutex_;
+bool TestSched::isInitPending_( 1 );
+int TestSched::globalIndex_( 0 );
+
 //////////////////////////////////////////////////////////////////////
 // Setting up a class for testing scheduling.
 //////////////////////////////////////////////////////////////////////
@@ -55,21 +59,27 @@ void TestSched::process( const ProcInfo*p, const Eref& e )
 		5, 5, 5, 6, 6, 6, 6, 7, 8, 8, 8, 9, 9, 10, 10, 10, 10, 10,
 		11, 12, 12, 12, 12, 13, 14, 14, 14, 15, 15, 15, 15,
 		16, 16, 16, 17, 18, 18, 18, 18, 19, 20, 20, 20, 20, 20 };
-	unsigned int max = sizeof( timings ) / sizeof( int );
-	cout << Shell::myNode() << ":" << p->threadIndexInGroup << " : timing[ " << index_ << ", " << p->threadId << " ] = " << timings[ index_ / p->numThreads ] << ", time = " << p->currTime << endl;
-	if ( static_cast< int >( p->currTime ) != 	
-		timings[ index_ / p->numThreads ] )
+	// unsigned int max = sizeof( timings ) / sizeof( int );
+	// cout << Shell::myNode() << ":" << p->threadIndexInGroup << " : timing[ " << index_ << ", " << p->threadId << " ] = " << timings[ index_ ] << ", time = " << p->currTime << endl;
+	if ( static_cast< int >( p->currTime ) != timings[ index_ ] )
 		cout << Shell::myNode() << ":" << p->threadIndexInGroup << " :testThreadSchedElement::process: index= " << index_ << ", numThreads = " <<
 			p->numThreads << ", currTime = " << p->currTime << endl;
 
+	assert( static_cast< int >( p->currTime ) == timings[ index_ ] );
+	++index_;
+	/*
 	assert( static_cast< int >( p->currTime ) == 	
 		timings[ index_ / p->numThreadsInGroup ] );
+		*/
 
+	// Check that everything remains in sync across threads.
 	pthread_mutex_lock( &mutex_ );
-		++index_;
+		assert( ( globalIndex_ - index_ )*( globalIndex_ - index_ ) <= 1 );
+		if ( p->threadIndexInGroup == 0 )
+			globalIndex_ = index_;
 	pthread_mutex_unlock( &mutex_ );
 
-	assert( index_ <= max * p->numThreads );
+	// assert( index_ <= max * p->numThreads );
 	// cout << index_ << ": " << p->currTime << endl;
 }
 
@@ -216,6 +226,7 @@ void testThreads()
 	s->setclock( 5, 5.0, 1 );
 
 	vector< unsigned int > dims;
+	dims.push_back( 7 ); // A suitable number to test dispatch of Process calls during threading.
 	Id tsid = Id::nextId();
 	Element* tse = new Element( tsid, testSchedCinfo, "tse", dims, 1 );
 	// testThreadSchedElement tse;
@@ -243,7 +254,7 @@ void testThreads()
 	er5.element()->addMsgAndFunc( m5->mid(), f, 5 );
 	s->start( 10 );
 
-	Qinfo::mergeQ( 0 ); // Need to clean up stuff.
+	// Qinfo::mergeQ( 0 ); // Need to clean up stuff.
 
 	cout << "Done TestThreads" << flush;
 	tsid.destroy();
@@ -342,6 +353,14 @@ void testThreadIntFireNetwork()
 	Element* ticke = Id( 2 )();
 	Eref er0( ticke, DataId( 0, 0 ) );
 
+	/*
+	 * This is how we should do it if we don't use Msg::add.
+	SingleMsg* m0 = new SingleMsg( er0, e2 );
+	FuncId f = intFireProcFinfo->getFid();
+	BindIndex b = tickProcFinfo->getBindIndex();
+	er0.element()->addMsgAndFunc( m0->mid(), f, b );
+	*/
+
 	ret = SingleMsg::add( er0, "process0", e2, "process" );
 	assert( ret );
 
@@ -403,6 +422,7 @@ void testThreadNodeIntFireNetwork()
 	if ( Qinfo::numSimGroup() >= 2 ) {
 		numThreads = Qinfo::simGroup( 1 )->numThreads;
 	}
+
 	bool ret = PsparseMsg::add( e2.element(), "spike", syn, "addSpike", 
 		connectionProbability, numThreads ); // Include group id as an arg. 
 	assert( ret );
