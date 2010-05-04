@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include <stdio.h>
 #include "Neutral.h"
 #include "Dinfo.h"
 #include "Message.h"

@@ -61,9 +61,10 @@ void TestSched::process( const ProcInfo*p, const Eref& e )
 		16, 16, 16, 17, 18, 18, 18, 18, 19, 20, 20, 20, 20, 20 };
 	// unsigned int max = sizeof( timings ) / sizeof( int );
 	// cout << Shell::myNode() << ":" << p->threadIndexInGroup << " : timing[ " << index_ << ", " << p->threadId << " ] = " << timings[ index_ ] << ", time = " << p->currTime << endl;
-	if ( static_cast< int >( p->currTime ) != timings[ index_ ] )
+	if ( static_cast< int >( p->currTime ) != timings[ index_ ] ) {
 		cout << Shell::myNode() << ":" << p->threadIndexInGroup << " :testThreadSchedElement::process: index= " << index_ << ", numThreads = " <<
 			p->numThreads << ", currTime = " << p->currTime << endl;
+	}
 
 	assert( static_cast< int >( p->currTime ) == timings[ index_ ] );
 	++index_;
@@ -210,7 +211,7 @@ void setupTicks()
 	clock.destroy();
 	tsid.destroy();
 	// tickId.destroy();
-	cout << "done setupTicks\n";
+	// cout << "done setupTicks\n";
 	cout << "." << flush;
 }
 
@@ -256,7 +257,7 @@ void testThreads()
 
 	// Qinfo::mergeQ( 0 ); // Need to clean up stuff.
 
-	cout << "Done TestThreads" << flush;
+	// cout << "Done TestThreads" << flush;
 	tsid.destroy();
 	cout << "." << flush;
 }
@@ -369,7 +370,7 @@ void testThreadIntFireNetwork()
 	IntFire* ifire900 = reinterpret_cast< IntFire* >( e2.element()->dataHandler()->data( 900 ) );
 
 	// Does reinit too.
-	s->start( timestep * runsteps );
+	s->start( static_cast< double >( timestep * runsteps) + 0.1 );
 	assert( fabs( ifire100->getVm() - Vm100 ) < 1e-6 );
 	assert( fabs( ifire900->getVm() - Vm900 ) < 1e-6 );
 

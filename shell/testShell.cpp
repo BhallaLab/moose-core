@@ -166,28 +166,22 @@ void testShellSetGet()
 	// Set up the objects.
 	Id a1 = shell->doCreate( "Arith", Id(), "a1", dimensions );
 
-	cout << Shell::myNode() << ": testShellSetGet: data here = (" << 
-		a1()->dataHandler()->begin() << " to " <<
-		a1()->dataHandler()->end() << ")" << endl;
+	// cout << Shell::myNode() << ": testShellSetGet: data here = (" << a1()->dataHandler()->begin() << " to " << a1()->dataHandler()->end() << ")" << endl;
 	for ( unsigned int i = 0; i < size; ++i ) {
 		val.push_back( i * i * i ); // use i^3 as a simple test.
 		bool ret = SetGet1< double >::set( Eref( a1(), i ), "set_outputValue", i * i );
 		assert( ret );
 	}
-	cout << "Sets done\n";
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double x = Field< double >::get( Eref( a1(), i ), "outputValue" );
 		assert( fabs( x - i * i ) < 1e-6 );
 	}
-	cout << "Gets done\n";
 	bool ret = SetGet1< double >::setVec( Eref( a1(), 0 ), "set_outputValue", val );
 	assert( ret );
-	cout << "SetVec done\n";
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double x = Field< double >::get( Eref( a1(), i ), "outputValue" );
 		assert( fabs( x - i * i * i ) < 1e-6 );
 	}
-	cout << "Gets 2 done\n";
 
 	shell->doDelete( a1 );
 	cout << "." << flush;
@@ -230,27 +224,27 @@ bool checkOutput( Id e,
 	Eref e0( e(), 0 );
 	double val = Field< double >::get( e0, "outputValue" );
 	ret = ret && ( fabs( val - v0 ) < 1e-6 );
-	cout << "( " << v0 << ", " << val << " ) ";
+	// cout << "( " << v0 << ", " << val << " ) ";
 
 	Eref e1( e(), 1 );
 	val = Field< double >::get( e1, "outputValue" );
 	ret = ret && ( fabs( val - v1 ) < 1e-6 );
-	cout << "( " << v1 << ", " << val << " ) ";
+	// cout << "( " << v1 << ", " << val << " ) ";
 
 	Eref e2( e(), 2 );
 	val = Field< double >::get( e2, "outputValue" );
 	ret = ret && ( fabs( val - v2 ) < 1e-6 );
-	cout << "( " << v2 << ", " << val << " ) ";
+	// cout << "( " << v2 << ", " << val << " ) ";
 
 	Eref e3( e(), 3 );
 	val = Field< double >::get( e3, "outputValue" );
 	ret = ret && ( fabs( val - v3 ) < 1e-6 );
-	cout << "( " << v3 << ", " << val << " ) ";
+	// cout << "( " << v3 << ", " << val << " ) ";
 
 	Eref e4( e(), 4 );
 	val = Field< double >::get( e4, "outputValue" );
 	ret = ret && ( fabs( val - v4 ) < 1e-6 );
-	cout << "( " << v4 << ", " << val << " )\n";
+	// cout << "( " << v4 << ", " << val << " )\n";
 
 	return ret;
 }
@@ -358,10 +352,7 @@ void testShellAddMsg()
 	// Run it
 	///////////////////////////////////////////////////////////
 	
-	cout << Shell::myNode() << ": testShellAddMsg: about to doStart\n";
-	
 	shell->doStart( 1 );
-	cout << Shell::myNode() << ": testShellAddMsg: done doStart\n";
 
 	///////////////////////////////////////////////////////////
 	// Check output.
@@ -408,6 +399,7 @@ void testShellParserQuit()
 void testShell( )
 {
 //	testCreateDelete();
+	testShellParserQuit();
 }
 
 void testMpiShell( )
@@ -421,5 +413,5 @@ void testMpiShell( )
 	testShellParserStart();
 	*/
 	// Don't do this yet.
-	// testShellParserQuit();
+	testShellParserQuit();
 }

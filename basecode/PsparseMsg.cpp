@@ -32,6 +32,8 @@ void PsparseMsg::exec( const char* arg, const ProcInfo *p ) const
 	if ( q->isForward() ) {
 		const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
 		unsigned int row = rowIndex( e1_, q->srcIndex() );
+		// unsigned int oldRow = row;
+
 
 		// This is the crucial line where we define which subset of data
 		// can be accessed by this thread.
@@ -40,6 +42,16 @@ void PsparseMsg::exec( const char* arg, const ProcInfo *p ) const
 		const unsigned int* fieldIndex;
 		const unsigned int* colIndex;
 		unsigned int n = matrix_.getRow( row, &fieldIndex, &colIndex );
+
+		/*
+		if ( oldRow % 100 == 0 ) {
+			cout << Shell::myNode() << "." << p->threadIndexInGroup << 
+				": row = " << oldRow << 
+				", Trow = " << row <<
+				", n = " << n << endl;
+		}
+		*/
+
 		for ( unsigned int j = 0; j < n; ++j ) {
 			// Eref tgt( target, DataId( *colIndex++, *fieldIndex++ )
 			Eref tgt( e2_, DataId( colIndex[j], fieldIndex[j] ) );

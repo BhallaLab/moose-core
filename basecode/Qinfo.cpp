@@ -204,8 +204,10 @@ void Qinfo::readQ( const ProcInfo* proc )
 	assert( q.size() >= sizeof( unsigned int ) );
 	char* buf = &q[0];
 	readBuf( buf, proc );
+	/*
 	unsigned int *bufsize = reinterpret_cast< unsigned int* >( buf);
 	*bufsize = 0;
+	*/
 }
 
 /** 
@@ -221,8 +223,10 @@ void Qinfo::readLocalQ( const ProcInfo* proc )
 	assert( localQ_.size() >= sizeof( unsigned int ) );
 	char* buf = &localQ_[0];
 	readBuf( buf, proc );
+	/*
 	unsigned int *bufsize = reinterpret_cast< unsigned int* >( buf);
 	*bufsize = 0;
+	*/
 }
 
 /**
@@ -274,7 +278,9 @@ void Qinfo::mergeQ( unsigned int groupId )
 	vector< char >& inQ = inQ_[ groupId ];
 
 	inQ.resize( sizeof( unsigned int ) );
+	*( reinterpret_cast< unsigned int* >( &inQ[0] ) ) = 0;
 	localQ_.resize( sizeof( unsigned int ) );
+	*( reinterpret_cast< unsigned int* >( &localQ_[0] ) ) = 0;
 	for ( unsigned int i = 0; i < g.numThreads; ++i ) {
 		vector< QueueBlock >& qb = qBlock_[i];
 		unsigned int outQindex = i + g.startThread;

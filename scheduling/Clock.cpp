@@ -406,12 +406,14 @@ void Clock::tStart(  Eref e, const ThreadInfo* ti )
 	}
 	double endTime = ti->runtime * ROUNDING + previousTime;
 
+	/*
 	cout << Shell::myNode() << "." << ti->threadIndexInGroup << 
 		": numThr=" << pinfo.numThreadsInGroup << 
 		", endTime= " << endTime << 
 		", prevousTime= " << previousTime << 
 		", currTime = " << info_.currTime <<
 		endl << flush;
+		*/;
 
 	Element* ticke = Id( 2 )();
 

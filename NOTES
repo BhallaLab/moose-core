@@ -5185,4 +5185,33 @@ config continues across multiple timesteps. Suggests a setup issue.
 
 There were numerous problems with multiple threads accessing and assigning
 fields in shared memory. Tried to fix this but it still causes problems.
+The frequency of failures is now lower, but the nature is the same:
+blocks of messages don't communicate. 
+
+Put in a printf onthe PsparseMsg::exec function too. Turns out that
+the offending threads simply do not call the exec function.
+
+OK, I think I got one problem: we are not really treating the queue as 
+readonly. Instead in the readQ (or readLocalQ) call itself, we zero out the
+bufsize. Need to separate out the zeroing and protect it.
+
+OK, seems I can put it in mergeQ, which is also protected.
+Note that mergeQ is protected in an awkward way using two barriers.
+This may go much faster as follows:
+
+in mutex:
+	increment counter for barrier
+	Check for completion
+		If complete:
+			mergeQ
+			clear condition.
+	condition_wait
+everybody emerges at the right time, only a single barrier-type
+function.
+
+Anyway, that is for the future. For now, I put the zeroing out of the queues
+into mergeQ, right where it resizes the same queues, and it now works.
+I have run a series of threads up to 19, 4 repeats each, in a little foreach
+loop, and moose never complains. Above 19 it goes over the sparse matrix 
+size limit. Major step forward.
 
