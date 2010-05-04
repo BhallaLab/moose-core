@@ -105,9 +105,9 @@ void TickPtr::advance( Element* e, ProcInfo* p, double endTime )
 	if ( p->threadId == 0 ) {
 		nextTime_ = nt;
 	}
-	if ( p->barrier ) {
+	if ( p->barrier1 ) {
 		int rc = pthread_barrier_wait( 
-			reinterpret_cast< pthread_barrier_t* >( p->barrier ) );
+			reinterpret_cast< pthread_barrier_t* >( p->barrier1 ) );
 		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 	}
 	/*

@@ -103,10 +103,10 @@ IntFire::IntFire( double thresh, double tau )
 
 void IntFire::process( const ProcInfo* p, const Eref& e )
 {
-	/*
-	if ( e.index().data() % 900 == 0 ) {
-	cout << "IntFire[" << e.index().data() << "]::process dt = " << p->dt << ", " << " t= " << p->currTime << ", #Pending= " << pendingEvents_.size() << " on thread " << p->threadId << ", " << p->threadIndexInGroup << ", Vm= " << Vm_ << endl << flush;
+	if ( e.index().data() % 100 == 0 ) {
+	// cout << Shell::myNode() << "." << p->threadIndexInGroup << ":IntFire[" << e.index().data() << "]::process dt = " << p->dt << ", " << " t= " << p->currTime << ", #Pending= " << pendingEvents_.size() << ", Vm= " << Vm_ << endl << flush;
 	}
+	/*
 	*/
 	/*
 	if ( e.index().data() == 1023 && pendingEvents_.size() > 0 && p->currTime > 0.9 ) {

@@ -384,26 +384,52 @@ void Clock::tStart(  Eref e, const ThreadInfo* ti )
 	pinfo.outQid = ti->outQid;
 	assert( pinfo.numThreads == numThreads_ );
 	static const double ROUNDING = 1.0000000001;
+
+	if ( info_.barrier1 ) {
+		int rc = pthread_barrier_wait(
+		reinterpret_cast< pthread_barrier_t* >( info_.barrier1 ) );
+		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+	}
+
 	if ( tickPtr_.size() == 0 ) {
-		if ( ti->threadId == 0 )
+		if ( ti->threadId == 0 ) {
 			info_.currTime += ti->runtime;
+			isRunning_ = 0;
+		}
 		return;
 	}
-	if ( ti->threadId == 0 )
-		info_.currTime = tickPtr_[0].getNextTime() - tickPtr_[0].getDt();
-	double endTime = ti->runtime * ROUNDING + info_.currTime;
-	isRunning_ = 1;
+	// double previousTime = tickPtr_[0].getNextTime() - tickPtr_[0].getDt();
+	double previousTime = 0.0;
+	if ( ti->threadId == 0 ) {
+		//info_.currTime = previousTime;
+		isRunning_ = 1;
+	}
+	double endTime = ti->runtime * ROUNDING + previousTime;
+
+	cout << Shell::myNode() << "." << ti->threadIndexInGroup << 
+		": numThr=" << pinfo.numThreadsInGroup << 
+		", endTime= " << endTime << 
+		", prevousTime= " << previousTime << 
+		", currTime = " << info_.currTime <<
+		endl << flush;
 
 	Element* ticke = Id( 2 )();
 
 	if ( tickPtr_.size() == 1 ) {
 		tickPtr_[0].advance( ticke, &pinfo, endTime );
-		if ( ti->threadId == 0 )
+		if ( ti->threadId == 0 ) {
 			info_ = pinfo; // Do we use info outside? Shouldn't.
+			isRunning_ = 0;
+		}
 		return;
 	}
 
 	sortTickPtrs( ti->sortMutex ); // Sets up nextTime_ and tp0_.
+	if ( info_.barrier1 ) {
+		int rc = pthread_barrier_wait(
+		reinterpret_cast< pthread_barrier_t* >( info_.barrier1 ) );
+		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+	}
 	
 	while ( isRunning_ && tp0_->getNextTime() < endTime ) {
 		// This advances all ticks with this dt in order, till nextTime.

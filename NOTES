@@ -5146,7 +5146,43 @@ threads work. No, they still don't. The error looks much the same as before.
 The are either very close, or one is close and the other is off.
 This time the 4-thread version seems to work OK at least half the time.
 3-threads works occasionally. Suggests that something else is also wrong.
+Checkin 1764.
 
 Another option is to change how PsparseMatrix decomposes things. 
 
 =============================================================================
+3 May
+Went through another round of checks for the thread decomposition. See
+may03_2010_thread_decomp_test.xls
+The formulas above seem OK.
+
+Did a printout of each tick for 1 to 5 threads.
+This shows that the problems set in quite early, and seem to be confined to 
+thread# 2, which starts out by not having any pending events, and
+this trickles through to other problems.
+Oddly enough even with 4 threads, #2 seems to be a problem
+For 5 threads, #2 and #4 are problems.
+Pending events are the job of the message. From the tables it is clear
+that the process operations are all being called.
+I should flag to indicate the event (outgoing msgs) and their threads to
+see if the alignment is good.
+
+=============================================================================
+4 May
+A table of where the zero msgs come in.
+#threads	Blank threads
+1		-
+2		-
+3		2
+4		2
+5		2,4 or 4
+7		0,1,3,4 or 1,2,5,6 or 6
+
+If it were a fixed set of blank threads I would suspect the PSparseMatrix
+decomposition. As it is, I need to look for some thread/race issue that
+systematically blanks out an entire block of messages, and once done, the
+config continues across multiple timesteps. Suggests a setup issue.
+
+There were numerous problems with multiple threads accessing and assigning
+fields in shared memory. Tried to fix this but it still causes problems.
+
