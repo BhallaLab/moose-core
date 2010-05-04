@@ -5213,5 +5213,7 @@ Anyway, that is for the future. For now, I put the zeroing out of the queues
 into mergeQ, right where it resizes the same queues, and it now works.
 I have run a series of threads up to 19, 4 repeats each, in a little foreach
 loop, and moose never complains. Above 19 it goes over the sparse matrix 
-size limit. Major step forward.
+size limit. Major step forward. Checkin 1766.
 
+Cleaned up memory leaks: all were due to post-creation function of 
+FieldElements. Valgrind now happy, barring the pthread leak.

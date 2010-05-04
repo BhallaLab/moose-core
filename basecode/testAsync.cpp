@@ -374,6 +374,7 @@ void testSetGetDouble()
 	vector< unsigned int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
+	Id i3( i2.value() + 1 );
 	// bool ret = ic->create( i2, "test2", size );
 	Element* ret = new Element( i2, ic, "test2", dims, 1 );
 	assert( ret );
@@ -400,6 +401,7 @@ void testSetGetDouble()
 
 	cout << "." << flush;
 	delete i2();
+	delete i3();
 }
 
 void testSetGetSynapse()
@@ -411,6 +413,7 @@ void testSetGetSynapse()
 	vector< unsigned int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
+	Id i3( i2.value() + 1 );
 	// bool ret = ic->create( i2, "test2", size );
 	Element* temp = new Element( i2, ic, "test2", dims, 1 );
 	assert( temp );
@@ -449,6 +452,7 @@ void testSetGetSynapse()
 		}
 	}
 	cout << "." << flush;
+	delete i3();
 	delete i2();
 }
 
@@ -461,6 +465,7 @@ void testSetGetVec()
 	vector< unsigned int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
+	Id i3( i2.value() + 1 );
 	// bool ret = ic->create( i2, "test2", size );
 	Element* temp = new Element( i2, ic, "test2", dims, 1 );
 	assert( temp );
@@ -506,6 +511,7 @@ void testSetGetVec()
 		}
 	}
 	cout << "." << flush;
+	delete i3();
 	delete i2();
 }
 
@@ -518,6 +524,7 @@ void testSetRepeat()
 	vector< unsigned int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
+	Id i3( i2.value() + 1 );
 	// bool ret = ic->create( i2, "test2", size );
 	Element* temp = new Element( i2, ic, "test2", dims, 1 );
 	assert( temp );
@@ -555,6 +562,7 @@ void testSetRepeat()
 		}
 	}
 	cout << "." << flush;
+	delete i3();
 	delete i2();
 }
 
@@ -570,6 +578,7 @@ void testSendSpike()
 	vector< unsigned int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
+	Id i3( i2.value() + 1 );
 //	bool ret = ic->create( i2, "test2", size );
 	Element* temp = new Element( i2, ic, "test2", dims, 1 );
 	assert( temp );
@@ -624,6 +633,7 @@ void testSendSpike()
 	assert( fabs( Vm - WEIGHT * ( 1.0 - DT / TAU ) ) < EPSILON );
 	// cout << "Vm = " << Vm << endl;
 	cout << "." << flush;
+	delete i3();
 	delete i2();
 }
 
@@ -782,6 +792,7 @@ void testSparseMsg()
 	mtseed( 5489UL ); // The default value, but better to be explicit.
 
 	Id i2 = Id::nextId();
+	Id i3( i2.value() + 1 );
 	// bool ret = ic->create( i2, "test2", size );
 	Element* t2 = new Element( i2, ic, "test2", dims, 1 );
 	assert( t2 );
@@ -871,6 +882,7 @@ void testSparseMsg()
 	// printGrid( i2(), "Vm", 0, thresh );
 	
 	cout << "." << flush;
+	delete i3();
 	delete i2();
 }
 
@@ -916,6 +928,7 @@ void testUpValue()
 		assert( fabs( dt - val ) < EPSILON );
 	}
 	cout << "." << flush;
+	delete tickId();
 	delete clock();
 }
 

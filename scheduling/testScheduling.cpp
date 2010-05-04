@@ -377,6 +377,7 @@ void testThreadIntFireNetwork()
 	// cout << "Done ThreadIntFireNetwork" << flush;
 	cout << "." << flush;
 	// delete i2();
+	synId.destroy();
 	i2.destroy();
 	// synId.destroy();
 }
@@ -511,6 +512,7 @@ void testThreadNodeIntFireNetwork()
 	// cout << "Done ThreadIntFireNetwork" << flush;
 	cout << "." << flush;
 	// delete i2();
+	synId.destroy();
 	i2.destroy();
 	// synId.destroy();
 }
