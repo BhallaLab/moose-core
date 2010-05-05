@@ -133,7 +133,7 @@ void insertIntoQ( )
 
 		MsgFuncBinding b( m->mid(), fid );
 
-		// addToQ( qid, Binding, argbuf )
+		// addToQ( threadIndex, Binding, argbuf )
 		qi.assignQblock( m, &p );
 		qi.addToQ( 0, b, buf );
 	}

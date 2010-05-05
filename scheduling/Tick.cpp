@@ -251,7 +251,7 @@ void Tick::destroy( Eref e, const Qinfo* q )
  */
 void Tick::mpiAdvance( ProcInfo* info) const
 {
-	// cout << info->nodeIndexInGroup << ", " << info->threadId << ": Tick::mpiAdvance (" << dt_ << ", " << stage_ << " ) at t= " << info->currTime << endl;
+	cout << info->nodeIndexInGroup << "." << info->threadId << ": Tick::mpiAdvance (" << dt_ << ", " << stage_ << " ) at t= " << info->currTime << endl;
 	assert( info->barrier1 );
 	assert( info->barrier2 );
 	int rc = pthread_barrier_wait(
@@ -281,7 +281,8 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 		mpiAdvance( info );
 		return;
 	}
-	// cout << Shell::myNode() << ":" << info->threadId << ": Tick::advance (" << dt_ << ", " << stage_ << " ) at t= " << info->currTime << endl;
+	cout << Shell::myNode() << "." << info->threadId << ": Tick::advance (" << dt_ << ", " << stage_ << " ) at t= " << info->currTime << endl;
+	Qinfo::reportQ();
 
 	/**
 	 * This barrier pair protects the inQ from being accessed for reading, 
@@ -319,6 +320,9 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 				reinterpret_cast< pthread_barrier_t* >( info->barrier1 ) );
 			assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 		}
+		cout << Shell::myNode() << "." << info->threadId << 
+			": after MPI transfer\n";
+		Qinfo::reportQ();
 		Qinfo::readMpiQ( info ); // March through mpiQ
 	}
 	// March through Process calls for each scheduled Element.

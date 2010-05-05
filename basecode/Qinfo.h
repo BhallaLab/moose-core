@@ -177,9 +177,9 @@ class Qinfo
 		 * The arg will just be memcopied onto the queue, so avoid
 		 * pointers. Possibly add size as an argument
 		 */
-		// void addToQ( Qid qId, MsgId mid, bool isForward, const char* arg );
-		void addToQ( Qid qId, MsgFuncBinding b, const char* arg );
-		void addSpecificTargetToQ( Qid qId, MsgFuncBinding b, 
+		void addToQ( unsigned int threadId, MsgFuncBinding b, 
+			const char* arg );
+		void addSpecificTargetToQ( unsigned int threadId, MsgFuncBinding b, 
 			const char* arg, const DataId& target );
 	
 		/**

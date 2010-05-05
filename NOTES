@@ -5215,5 +5215,37 @@ I have run a series of threads up to 19, 4 repeats each, in a little foreach
 loop, and moose never complains. Above 19 it goes over the sparse matrix 
 size limit. Major step forward. Checkin 1766.
 
-Cleaned up memory leaks: all were due to post-creation function of 
-FieldElements. Valgrind now happy, barring the pthread leak.
+Cleaned up memory leaks: all were due to post-creation of 
+FieldElements. Valgrind now happy, barring the pthread leak. Checkin 1767.
+
+Now on to tackling multinode runs. It fails because of a mid in Qinfo being
+zero.
+
+I think one good approach is similar to
+what I did for the threads: Just put out enough debug information to
+find where problems happen.
+
+Going into mpiClearQ the queues look OK.
+Then things go wrong.
+Looks like the contents of QueueBlock are bad.
+OK, I think I've tracked it down. QueueBlock is OK but part of the data is
+in outQ[0] and part in outQ[1]. Presumably there were some setup messages
+still pending, so they got put in the other queue. Yet more thought needed
+to straightening out queueing system.
+
+We currently have a set of groups, each of which can occupy some threads
+and some nodes. There is one inQ for each group. The inQ has whatever
+data needs to go to other nodes in the group.
+
+We also have outQs, one per thread. Each outQ is matched by a QueueBlock.
+Need to combine. There is some confusion here about how groupIds look them up.
+
+We have the localQ, which is just one queue handling all strictly local
+messages. But this doesn't take care of many possible local calls in
+different groups. But it doesn't matter. They can all be done together.
+
+We also have mpiQs, one for each node or SimGroup sending info to current node.
+Somewhat poorly defined for other SimGroups.
+
+In a nutshell, the SimGroup organization is quite messy here. This turns out
+to cause problems when trying to fix up the QueueBlock system.
