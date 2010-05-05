@@ -54,7 +54,8 @@ void SparseMsg::exec( const char* arg, const ProcInfo *p ) const
 		for ( unsigned int j = 0; j < n; ++j ) {
 			// Eref tgt( target, DataId( *colIndex++, *fieldIndex++ )
 			Eref tgt( e2_, DataId( colIndex[j], fieldIndex[j] ) );
-			f->op( tgt, arg );
+			if ( tgt.isDataHere() )
+				f->op( tgt, arg );
 		}
 	} else { // Avoid using this back operation!
 		// Note that we do NOT use the fieldIndex going backward. It is
@@ -66,7 +67,8 @@ void SparseMsg::exec( const char* arg, const ProcInfo *p ) const
 		unsigned int n = matrix_.getColumn( column, fieldIndex, rowIndex );
 		for ( unsigned int j = 0; j < n; ++j ) {
 			Eref tgt( e1_, DataId( rowIndex[j] ) );
-			f->op( tgt, arg );
+			if ( tgt.isDataHere() )
+				f->op( tgt, arg );
 		}
 	}
 }

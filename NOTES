@@ -5249,3 +5249,10 @@ Somewhat poorly defined for other SimGroups.
 
 In a nutshell, the SimGroup organization is quite messy here. This turns out
 to cause problems when trying to fix up the QueueBlock system.
+A hacked together version finally there, checkin 1768.
+
+OK, clears multithread tests.
+And also finds a new place to crash in the mpi run. So some progress.
+
+Got through the message execution in testShellAddMsg. The outputs don't match
+though.
