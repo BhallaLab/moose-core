@@ -5218,6 +5218,8 @@ size limit. Major step forward. Checkin 1766.
 Cleaned up memory leaks: all were due to post-creation of 
 FieldElements. Valgrind now happy, barring the pthread leak. Checkin 1767.
 
+============================================================================
+5 May
 Now on to tackling multinode runs. It fails because of a mid in Qinfo being
 zero.
 
@@ -5255,4 +5257,12 @@ OK, clears multithread tests.
 And also finds a new place to crash in the mpi run. So some progress.
 
 Got through the message execution in testShellAddMsg. The outputs don't match
-though.
+though. Checkin 1769.
+============================================================================
+6 May 2010
+
+Big progress: When I change the runtime from 1 to 2 in testShell:355
+(testShellAddMsg) then all the outputs match up, except the already known
+problem with the SparseMsg. We're in business.
+
+============================================================================
