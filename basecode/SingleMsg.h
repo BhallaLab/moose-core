@@ -24,9 +24,33 @@ class SingleMsg: public Msg
 		static bool add( Eref e1, const string& srcField, 
 			Eref e2, const string& destField );
 
+		DataId i1() const;
+		DataId i2() const;
+
+		void setI1( DataId di );
+		void setI2( DataId di );
+
+
 	private:
 		DataId i1_;
 		DataId i2_;
+};
+
+class SingleMsgWrapper
+{
+	public:
+		Id getE1() const;
+		Id getE2() const;
+
+		void setI1( DataId di );
+		DataId getI1() const;
+
+		void setI2( DataId di );
+		DataId getI2() const;
+
+		static const Cinfo* initCinfo();
+	private:
+		MsgId mid_;
 };
 
 #endif // _SINGLE_MSG_H

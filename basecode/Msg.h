@@ -86,7 +86,7 @@ class Msg
 		 * Utility function to check if Msg is OK. Used by diagnostic
 		 * function Qinfo::reportQ. Normal code uses getMsg above.
 		 */
-		static const Msg* safeGetMsg( MsgId m );
+		static Msg* safeGetMsg( MsgId m );
 
 		/**
 		 * The zero MsgId, used as the error value.

@@ -5264,5 +5264,25 @@ though. Checkin 1769.
 Big progress: When I change the runtime from 1 to 2 in testShell:355
 (testShellAddMsg) then all the outputs match up, except the already known
 problem with the SparseMsg. We're in business.
+Checkin 1770.
+- Why does the system require two clock steps? One worked on a single node.
+	Seems like the first step doesn't actually pass any of the
+	process time message info.
+	OK, this is what seems to happen:
+		- The message passing happens before the 'process' in each tick.
+		- The 'process' call is needed to dump the msg data into queues.
+		- On one node, the subsequent scanning for the field values
+			clears the queues.
+		- On multiple nodes, the field value scan uses special MPI
+			calls between shells and does not clear the queues.
+	So, a second timestep is needed to complete the message passing 
+	between nodes.
+
+- Make valgrind happy.
+- Set up the Msg field stuff.
+- Confirm the functioning of the current tests
+- Set up a multinode IntFire network, and test.
+- Set up multinode/multithread IntFire network.
+- Benchmarks and optimization?
 
 ============================================================================

@@ -95,7 +95,7 @@ const Msg* Msg::getMsg( MsgId m )
 	return msg_[ m ];
 }
 
-const Msg* Msg::safeGetMsg( MsgId m )
+Msg* Msg::safeGetMsg( MsgId m )
 {
 	if ( m == badMsg )
 		return 0;

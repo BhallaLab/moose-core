@@ -11,6 +11,122 @@
 #include "SingleMsg.h"
 #include "Message.h"
 
+const Cinfo* SingleMsgWrapper::initCinfo()
+{
+	///////////////////////////////////////////////////////////////////
+	// Field definitions.
+	///////////////////////////////////////////////////////////////////
+	static ReadOnlyValueFinfo< SingleMsgWrapper, Id > element1(
+		"e1",
+		"Id of source Element.",
+		&SingleMsgWrapper::getE1
+	);
+	static ReadOnlyValueFinfo< SingleMsgWrapper, Id > element2(
+		"e2",
+		"Id of source Element.",
+		&SingleMsgWrapper::getE2
+	);
+	static ValueFinfo< SingleMsgWrapper, DataId > index1(
+		"i1",
+		"Index of source object.",
+		&SingleMsgWrapper::setI1,
+		&SingleMsgWrapper::getI1
+	);
+	static ValueFinfo< SingleMsgWrapper, DataId > index2(
+		"i2",
+		"Index of dest object.",
+		&SingleMsgWrapper::setI2,
+		&SingleMsgWrapper::getI2
+	);
+
+	static Finfo* singleMsgFinfos[] = {
+		&element1,		// readonly value
+		&element2,		// readonly value
+		&index1,		// value
+		&index2,		// value
+	};
+
+	static Cinfo singleMsgCinfo (
+		"SingleMsg",	// name
+		0,				// base class
+		singleMsgFinfos,
+		sizeof( singleMsgFinfos ) / sizeof( Finfo* ),	// num Fields
+		new Dinfo< SingleMsgWrapper >()
+	);
+
+	return &singleMsgCinfo;
+}
+
+static const Cinfo* singleMsgCinfo = SingleMsgWrapper::initCinfo();
+
+Id SingleMsgWrapper::getE1() const
+{
+	const Msg* m = Msg::safeGetMsg( mid_ );
+	if ( m ) {
+		return m->e1()->id();
+	}
+	return Id();
+}
+
+Id SingleMsgWrapper::getE2() const
+{
+	const Msg* m = Msg::safeGetMsg( mid_ );
+	if ( m ) {
+		return m->e2()->id();
+	}
+	return Id();
+}
+
+DataId SingleMsgWrapper::getI1() const
+{
+	const Msg* m = Msg::safeGetMsg( mid_ );
+	if ( m ) {
+		const SingleMsg* sm = dynamic_cast< const SingleMsg* >( m );
+		if ( sm ) {
+			return sm->i1();
+		}
+	}
+	return DataId( 0 );
+}
+
+void SingleMsgWrapper::setI1( DataId di )
+{
+	Msg* m = Msg::safeGetMsg( mid_ );
+	if ( m ) {
+		SingleMsg* sm = dynamic_cast< SingleMsg* >( m );
+		if ( sm ) {
+			sm->setI1( di );
+		}
+	}
+}
+
+DataId SingleMsgWrapper::getI2() const
+{
+	const Msg* m = Msg::safeGetMsg( mid_ );
+	if ( m ) {
+		const SingleMsg* sm = dynamic_cast< const SingleMsg* >( m );
+		if ( sm ) {
+			return sm->i2();
+		}
+	}
+	return DataId( 0 );
+}
+
+void SingleMsgWrapper::setI2( DataId di )
+{
+	Msg* m = Msg::safeGetMsg( mid_ );
+	if ( m ) {
+		SingleMsg* sm = dynamic_cast< SingleMsg* >( m );
+		if ( sm ) {
+			sm->setI2( di );
+		}
+	}
+}
+
+/////////////////////////////////////////////////////////////////////
+// Here is the SingleMsg code
+/////////////////////////////////////////////////////////////////////
+
 SingleMsg::SingleMsg( Eref e1, Eref e2 )
 	: Msg( e1.element(), e2.element() ),
 	i1_( e1.index() ), 
@@ -43,6 +159,27 @@ bool SingleMsg::isMsgHere( const Qinfo& q ) const
 		return ( i2_ == q.srcIndex() );
 }
 
+DataId SingleMsg::i1() const
+{
+	return i1_;
+}
+
+DataId SingleMsg::i2() const
+{
+	return i2_;
+}
+
+void SingleMsg::setI1( DataId di )
+{
+	i1_ = di;
+}
+
+void SingleMsg::setI2( DataId di )
+{
+	i2_ = di;
+}
+
+// Deprecated.
 bool SingleMsg::add( Eref e1, const string& srcField, 
 			Eref e2, const string& destField )
 {
@@ -57,3 +194,5 @@ bool SingleMsg::add( Eref e1, const string& srcField,
 	}
 	return 0;
 }
+
+
