@@ -27,6 +27,7 @@ OBJ = \
 	DestFinfo.o	\
 	Cinfo.o	\
 	Msg.o	\
+	MsgManager.o \
 	SingleMsg.o	\
 	OneToOneMsg.o	\
 	OneToAllMsg.o	\
@@ -71,6 +72,7 @@ HEADERS = \
 	DestFinfo.h \
 	Id.h \
 	Msg.h \
+	MsgManager.h \
 	SingleMsg.h \
 	OneToOneMsg.h \
 	OneToAllMsg.h \

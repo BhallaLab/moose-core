@@ -11,11 +11,16 @@
 #include "AssignmentMsg.h"
 
 AssignmentMsg::AssignmentMsg( Eref e1, Eref e2, MsgId mid )
-	: Msg( e1.element(), e2.element(), mid ),
+	: Msg( e1.element(), e2.element(), mid, id_ ),
 	i1_( e1.index() ), 
 	i2_( e2.index() )
 {
 	;
+}
+
+AssignmentMsg::~AssignmentMsg()
+{
+	MsgManager::dropMsg( mid() );
 }
 
 void AssignmentMsg::exec( const char* arg, const ProcInfo *p ) const
@@ -32,4 +37,9 @@ void AssignmentMsg::exec( const char* arg, const ProcInfo *p ) const
 		const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
 		f->op( Eref( e1_, i1_ ), arg );
 	}
+}
+
+Id AssignmentMsg::id() const
+{
+	return id_;
 }

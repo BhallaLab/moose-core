@@ -12,7 +12,7 @@
 
 OneToAllMsg::OneToAllMsg( Eref e1, Element* e2 )
 	: 
-		Msg( e1.element(), e2 ),
+		Msg( e1.element(), e2, id_ ),
 		i1_( e1.index() )
 {
 	;
@@ -77,3 +77,8 @@ bool OneToAllMsg::add( Eref e1, const string& srcField,
 	return 0;
 }
 
+
+Id OneToAllMsg::id() const
+{
+	return id_;
+}

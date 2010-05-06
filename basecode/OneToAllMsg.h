@@ -17,19 +17,24 @@
 
 class OneToAllMsg: public Msg
 {
+	friend void initMsgManagers();
 	public:
 		OneToAllMsg( Eref e1, Element* e2 );
 		~OneToAllMsg() {;}
 
 		void exec( const char* arg, const ProcInfo* p ) const;
 
+
 		bool isMsgHere( const Qinfo& q ) const;
+
+		Id id() const;
 
 		static bool add( Eref e1, const string& srcField, 
 			Element* e2, const string& destField );
 
 	private:
 		DataId i1_;
+		static Id id_;
 };
 
 

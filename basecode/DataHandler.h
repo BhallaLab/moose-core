@@ -149,6 +149,15 @@ class DataHandler
 		virtual iterator begin() const = 0;
 		virtual iterator end() const = 0;
 
+		/**
+		 * Adds another entry to the data. Copies the info over.
+		 * Returns the index of the new data.
+		 * Some derived classes can't handle this. They return 0;
+		 */
+		virtual unsigned int addOneEntry( const char* data ) {
+			return 0;
+		}
+
 	protected:
 		const DinfoBase* dinfo() const
 		{

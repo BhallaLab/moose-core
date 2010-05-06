@@ -26,6 +26,7 @@
  */
 class DiagonalMsg: public Msg
 {
+	friend void initMsgManagers(); // for initializing Id.
 	public:
 		DiagonalMsg( Element* e1, Element* e2 );
 		~DiagonalMsg() {;}
@@ -35,10 +36,12 @@ class DiagonalMsg: public Msg
 		static bool add( Element* e1, const string& srcField, 
 			Element* e2, const string& destField, int stride );
 
+		Id id() const;
 	private:
 		int stride_; // Increment between targets.
 		unsigned int numThreads_;
 		unsigned int numNodes_;
+		static Id id_;
 };
 
 #endif // _DIAGONAL_MSG_H

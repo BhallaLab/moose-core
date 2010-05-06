@@ -47,8 +47,8 @@ const Cinfo* SingleMsgWrapper::initCinfo()
 	};
 
 	static Cinfo singleMsgCinfo (
-		"SingleMsg",	// name
-		0,				// base class
+		"SingleMsg",					// name
+		MsgManager::initCinfo(),		// base class
 		singleMsgFinfos,
 		sizeof( singleMsgFinfos ) / sizeof( Finfo* ),	// num Fields
 		new Dinfo< SingleMsgWrapper >()
@@ -59,6 +59,7 @@ const Cinfo* SingleMsgWrapper::initCinfo()
 
 static const Cinfo* singleMsgCinfo = SingleMsgWrapper::initCinfo();
 
+/*
 Id SingleMsgWrapper::getE1() const
 {
 	const Msg* m = Msg::safeGetMsg( mid_ );
@@ -76,10 +77,11 @@ Id SingleMsgWrapper::getE2() const
 	}
 	return Id();
 }
+*/
 
 DataId SingleMsgWrapper::getI1() const
 {
-	const Msg* m = Msg::safeGetMsg( mid_ );
+	const Msg* m = Msg::safeGetMsg( getMid() );
 	if ( m ) {
 		const SingleMsg* sm = dynamic_cast< const SingleMsg* >( m );
 		if ( sm ) {
@@ -91,7 +93,7 @@ DataId SingleMsgWrapper::getI1() const
 
 void SingleMsgWrapper::setI1( DataId di )
 {
-	Msg* m = Msg::safeGetMsg( mid_ );
+	Msg* m = Msg::safeGetMsg( getMid() );
 	if ( m ) {
 		SingleMsg* sm = dynamic_cast< SingleMsg* >( m );
 		if ( sm ) {
@@ -102,7 +104,7 @@ void SingleMsgWrapper::setI1( DataId di )
 
 DataId SingleMsgWrapper::getI2() const
 {
-	const Msg* m = Msg::safeGetMsg( mid_ );
+	const Msg* m = Msg::safeGetMsg( getMid() );
 	if ( m ) {
 		const SingleMsg* sm = dynamic_cast< const SingleMsg* >( m );
 		if ( sm ) {
@@ -114,7 +116,7 @@ DataId SingleMsgWrapper::getI2() const
 
 void SingleMsgWrapper::setI2( DataId di )
 {
-	Msg* m = Msg::safeGetMsg( mid_ );
+	Msg* m = Msg::safeGetMsg( getMid() );
 	if ( m ) {
 		SingleMsg* sm = dynamic_cast< SingleMsg* >( m );
 		if ( sm ) {
@@ -128,11 +130,16 @@ void SingleMsgWrapper::setI2( DataId di )
 /////////////////////////////////////////////////////////////////////
 
 SingleMsg::SingleMsg( Eref e1, Eref e2 )
-	: Msg( e1.element(), e2.element() ),
+	: Msg( e1.element(), e2.element(), id_ ),
 	i1_( e1.index() ), 
 	i2_( e2.index() )
 {
 	;
+}
+
+SingleMsg::~SingleMsg()
+{
+	MsgManager::dropMsg( mid() );
 }
 
 void SingleMsg::exec( const char* arg, const ProcInfo *p ) const
@@ -179,6 +186,11 @@ void SingleMsg::setI2( DataId di )
 	i2_ = di;
 }
 
+Id SingleMsg::id() const 
+{
+	return id_;
+}
+
 // Deprecated.
 bool SingleMsg::add( Eref e1, const string& srcField, 
 			Eref e2, const string& destField )
@@ -195,4 +207,8 @@ bool SingleMsg::add( Eref e1, const string& srcField,
 	return 0;
 }
 
-
+/// Static function used during initialization
+void SingleMsg::setId( Id id )
+{
+	id_ = id;
+}

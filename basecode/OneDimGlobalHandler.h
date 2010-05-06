@@ -108,9 +108,17 @@ class OneDimGlobalHandler: public DataHandler
 			return size_;
 		}
 
+		/**
+		 * Adds another entry to the data. Copies the info over.
+		 * Returns the index of the new data.
+		 * Some derived classes can't handle this. They return 0.
+		 */
+		unsigned int addOneEntry( const char* data );
+
 	private:
 		char* data_;
 		unsigned int size_;	// Number of data entries in the whole array
+		unsigned int reserve_; // Number of places actually allocated.
 };
 
 #endif	// _ONE_DIM_GLOBAL_HANDLER_H

@@ -69,6 +69,7 @@ class SetGet;
 #include "Cinfo.h"
 #include "Data.h"
 #include "Msg.h"
+#include "MsgManager.h"
 #include "SingleMsg.h"
 #include "OneToOneMsg.h"
 #include "OneToAllMsg.h"

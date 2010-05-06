@@ -13,9 +13,10 @@
 
 class SingleMsg: public Msg
 {
+	friend void initMsgManagers(); // for initializing Id.
 	public:
 		SingleMsg( Eref e1, Eref e2 );
-		~SingleMsg() {;}
+		~SingleMsg();
 
 		void exec( const char* arg, const ProcInfo* p) const;
 
@@ -30,17 +31,23 @@ class SingleMsg: public Msg
 		void setI1( DataId di );
 		void setI2( DataId di );
 
+		// returns the id of the managing Element.
+		Id id() const;
 
 	private:
+		static void setId( Id id );
 		DataId i1_;
 		DataId i2_;
+		static Id id_;
 };
 
-class SingleMsgWrapper
+class SingleMsgWrapper: public MsgManager
 {
 	public:
+		/*
 		Id getE1() const;
 		Id getE2() const;
+		*/
 
 		void setI1( DataId di );
 		DataId getI1() const;
@@ -50,7 +57,7 @@ class SingleMsgWrapper
 
 		static const Cinfo* initCinfo();
 	private:
-		MsgId mid_;
+		// MsgId mid_;
 };
 
 #endif // _SINGLE_MSG_H

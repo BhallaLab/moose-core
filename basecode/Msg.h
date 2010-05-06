@@ -18,9 +18,9 @@
 class Msg
 {
 	public:
-		Msg( Element* e1, Element* e2 );
+		Msg( Element* e1, Element* e2, Id managerId );
 
-		Msg( Element* e1, Element* e2, MsgId mid );
+		Msg( Element* e1, Element* e2, MsgId mid, Id managerId );
 		virtual ~Msg();
 
 		/**
@@ -53,6 +53,22 @@ class Msg
 		 * Execute func( arg ) on all relevant indices of target
 		 */
 		virtual void exec( const char* arg, const ProcInfo* p ) const = 0;
+
+		/**
+		 * Return the Id of the managing Element. Each derived Msg class
+		 * has its own manager. This is predefined at initialization.
+		 */
+		virtual Id id() const = 0;
+
+		/**
+		 * Return the Eref of the managing object.
+		 */
+		virtual Eref manager( Id id ) const;
+
+		/**
+		 * Fills in the specified dataId for this msg.
+		 */
+		void setDataId( unsigned int di ) const;
 
 		/**
 		 * Return the first element
@@ -98,7 +114,6 @@ class Msg
 		 */
 		static const MsgId setMsg;
 
-
 	protected:
 		Element* e1_;
 		Element* e2_;
@@ -112,6 +127,16 @@ class Msg
 		 * MsgIds are kept here so that they can be reused.
 		 */
 		static vector< MsgId > garbageMsg_;
+
+		/**
+		 * Manages lookup of DataIds from MsgIds. This is the index of
+		 * the MsgManager data entry in the appropriate Element, for the
+		 * specified MsgId.
+		 * Used to find and set
+		 * msg fields. We only need the data part of the DataId, so this
+		 * is just an unsigned int.
+		 */
+		static vector< unsigned int > lookupDataId_;
 };
 
 #endif // _MSG_H

@@ -15,6 +15,13 @@
 #include "../scheduling/Tick.h"
 #include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
+#include "Neutral.h"
+#include "DiagonalMsg.h"
+#include "SparseMatrix.h"
+#include "SparseMsg.h"
+#include "PsparseMsg.h"
+#include "AssignmentMsg.h"
+#include "AssignVecMsg.h"
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
@@ -30,6 +37,43 @@ extern void testBuiltins();
 extern void testMpiScheduling();
 extern void testMpiBuiltins();
 extern void testMpiShell();
+
+Id SingleMsg::id_;
+Id OneToOneMsg::id_;
+Id OneToAllMsg::id_;
+Id DiagonalMsg::id_;
+Id SparseMsg::id_;
+Id PsparseMsg::id_;
+Id AssignmentMsg::id_;
+Id AssignVecMsg::id_;
+
+void initMsgManagers()
+{
+	vector< unsigned int > dims( 1, 2 );
+
+	// This is to be the parent of al the msg managers.
+	Id msgManagerId = Id::nextId();
+	new Element( msgManagerId, Neutral::initCinfo(), "Msgs", dims, 1 );
+
+	SingleMsg::id_ = Id::nextId();
+	new Element( SingleMsg::id_, SingleMsgWrapper::initCinfo(), "singleMsg", dims, 1 );
+
+	OneToOneMsg::id_ = Id::nextId();
+	new Element( OneToOneMsg::id_, OneToOneMsgWrapper::initCinfo(), "oneToOneMsg", dims, 1 );
+
+	OneToAllMsg::id_ = Id::nextId();
+	new Element( OneToAllMsg::id_, SingleMsgWrapper::initCinfo(), "oneToAllMsg", dims, 1 );
+	DiagonalMsg::id_ = Id::nextId();
+	new Element( DiagonalMsg::id_, SingleMsgWrapper::initCinfo(), "diagonalMsg", dims, 1 );
+	SparseMsg::id_ = Id::nextId();
+	new Element( SparseMsg::id_, SingleMsgWrapper::initCinfo(), "sparseMsg", dims, 1 );
+	PsparseMsg::id_ = Id::nextId();
+	new Element( PsparseMsg::id_, SingleMsgWrapper::initCinfo(), "pSparseMsg", dims, 1 );
+	AssignmentMsg::id_ = Id::nextId();
+	new Element( AssignmentMsg::id_, SingleMsgWrapper::initCinfo(), "assignmentMsg", dims, 1 );
+	AssignVecMsg::id_ = Id::nextId();
+	new Element( AssignVecMsg::id_, SingleMsgWrapper::initCinfo(), "assignVecMsg", dims, 1 );
+}
 
 Id init( int argc, char** argv )
 {
@@ -106,6 +150,9 @@ Id init( int argc, char** argv )
 	assert ( shellId == Id() );
 	assert( clockId == Id( 1 ) );
 	assert( tickId == Id( 2 ) );
+
+	initMsgManagers();
+
 	// SetGet::setShell();
 	Shell* s = reinterpret_cast< Shell* >( shellId.eref().data() );
 	s->setShellElement( shelle );

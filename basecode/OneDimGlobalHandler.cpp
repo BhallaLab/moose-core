@@ -72,7 +72,7 @@ char* OneDimGlobalHandler::data1( DataId index ) const {
  */
 void OneDimGlobalHandler::setNumData1( unsigned int size )
 {
-	size_ = size;
+	reserve_ = size_ = size;
 	if ( data_ )
 		dinfo()->destroyData( data_ );
 	data_ = reinterpret_cast< char* >( 
@@ -107,8 +107,26 @@ bool OneDimGlobalHandler::isAllocated() const {
 	return data_ != 0;
 }
 
-void OneDimGlobalHandler::allocate() {
+void OneDimGlobalHandler::allocate()
+{
 	if ( data_ )
 		dinfo()->destroyData( data_ );
 	data_ = reinterpret_cast< char* >( dinfo()->allocData( size_ ));
+	reserve_ = size_;
+}
+
+unsigned int OneDimGlobalHandler::addOneEntry( const char* data )
+{
+	if ( size_ == reserve_ ) {
+		reserve_ = size_ + 10;
+		char* temp = dinfo()->allocData( reserve_ );
+		if ( size_ > 0 ) {
+			memcpy( temp, data_, size_ * dinfo()->size() );
+			dinfo()->destroyData( data_ );
+			data_ = temp;
+		}
+	}
+	memcpy( data_ + size_ * dinfo()->size(), data, dinfo()->size() );
+	++size_;
+	return ( size_ - 1 );
 }

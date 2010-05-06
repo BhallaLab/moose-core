@@ -17,13 +17,25 @@
  */
 class OneToOneMsg: public Msg
 {
+	friend void initMsgManagers();
 	public:
 		OneToOneMsg( Element* e1, Element* e2 );
 		~OneToOneMsg() {;}
 
 		void exec( const char* arg, const ProcInfo* p) const;
+
+		Id id() const;
 	private:
+		static Id id_;
 };
 
+// No extra fields compared to the MsgManager.
+class OneToOneMsgWrapper: public MsgManager
+{
+	public:
+		static const Cinfo* initCinfo();
+	private:
+		// MsgId mid_;
+};
 
 #endif // _ONE_TO_ONE_MSG_H

@@ -11,10 +11,15 @@
 #include "AssignVecMsg.h"
 
 AssignVecMsg::AssignVecMsg( Eref e1, Element* e2, MsgId mid )
-	: Msg( e1.element(), e2, mid ),
+	: Msg( e1.element(), e2, mid, id_ ),
 	i1_( e1.index() )
 {
 	;
+}
+
+AssignVecMsg::~AssignVecMsg()
+{
+	MsgManager::dropMsg( mid() );
 }
 
 void AssignVecMsg::exec( const char* arg, const ProcInfo *p ) const
@@ -60,4 +65,9 @@ void AssignVecMsg::exec( const char* arg, const ProcInfo *p ) const
 		const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
 		f->op( Eref( e1_, i1_ ), arg );
 	}
+}
+
+Id AssignVecMsg::id() const
+{
+	return id_;
 }

@@ -14,8 +14,16 @@
 #include "../randnum/randnum.h"
 #include "../biophysics/Synapse.h"
 
+SparseMsg::SparseMsg( Element* e1, Element* e2, Id managerId )
+	: Msg( e1, e2, managerId ), 
+	matrix_( e1->dataHandler()->numData1(), e2->dataHandler()->numData1() )
+{
+	assert( e1->dataHandler()->numDimensions() == 1  && 
+		e2->dataHandler()->numDimensions() >= 1 );
+}
+
 SparseMsg::SparseMsg( Element* e1, Element* e2 )
-	: Msg( e1, e2 ), 
+	: Msg( e1, e2, id_ ), 
 	matrix_( e1->dataHandler()->numData1(), e2->dataHandler()->numData1() )
 {
 	assert( e1->dataHandler()->numDimensions() == 1  && 
@@ -135,4 +143,9 @@ unsigned int SparseMsg::randomConnect( double probability )
 void SparseMsg::setMatrix( const SparseMatrix< unsigned int >& m )
 {
 	matrix_ = m;
+}
+
+Id SparseMsg::id() const
+{
+	return id_;
 }

@@ -18,14 +18,18 @@
 
 class AssignVecMsg: public Msg
 {
+	friend void initMsgManagers(); // for initializing Id.
 	public:
 		AssignVecMsg( Eref e1, Element* e2, MsgId mid );
-		~AssignVecMsg() {;}
+		~AssignVecMsg();
 
 		void exec( const char* arg, const ProcInfo* p) const;
 
+		Id id() const;
 	private:
 		DataId i1_;
+
+		static Id id_;
 };
 
 #endif // _ASSIGN_VEC_MSG_H

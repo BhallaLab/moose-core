@@ -5280,6 +5280,8 @@ Checkin 1770.
 
 - Make valgrind happy.
 - Set up the Msg field stuff.
+	- Implemented SingleMsgWrapper. Compiles, clears tests, yet to 
+		exercise it. Checkin 1772.
 - Confirm the functioning of the current tests
 - Set up a multinode IntFire network, and test.
 - Set up multinode/multithread IntFire network.

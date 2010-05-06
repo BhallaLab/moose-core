@@ -46,6 +46,7 @@
  */
 class PsparseMsg: public SparseMsg
 {
+	friend void initMsgManagers(); // for initializing Id.
 	public:
 		PsparseMsg( Element* e1, Element* e2 );
 		~PsparseMsg() {;}
@@ -63,9 +64,12 @@ class PsparseMsg: public SparseMsg
 		
 		void loadBalance( unsigned int numThreads );
 		void loadUnbalance();
+
+		Id id() const;
 	private:
 		unsigned int numThreads_; // Number of threads to partition
 		unsigned int nrows_; // The original size of the matrix.
+		static Id id_; // The Element that manages Psparse Msgs.
 };
 
 extern void sparseMatrixBalance( 

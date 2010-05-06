@@ -15,41 +15,49 @@
 // Static field declaration.
 vector< Msg* > Msg::msg_;
 vector< MsgId > Msg::garbageMsg_;
+vector< unsigned int > Msg::lookupDataId_;
 const MsgId Msg::badMsg = 0;
 const MsgId Msg::setMsg = 1;
 
-Msg::Msg( Element* e1, Element* e2 )
+Msg::Msg( Element* e1, Element* e2, Id managerId )
 	: e1_( e1 ), e2_( e2 )
 {
 	if ( garbageMsg_.size() > 0 ) {
 		mid_ = garbageMsg_.back();
 		garbageMsg_.pop_back();
 		msg_[mid_] = this;
+		lookupDataId_[ mid_ ] = 0;
 	} else {
 		mid_ = msg_.size();
 		msg_.push_back( this );
+		lookupDataId_.push_back( 0 );
 	}
 	e1->addMsg( mid_ );
 	e2->addMsg( mid_ );
+	MsgManager::addMsg( mid_, managerId );
 }
 
 /**
  * This sets up the set/get msg. It should be called first of all,
  * at init time.
  */
-Msg::Msg( Element* e1, Element* e2, MsgId mid )
+Msg::Msg( Element* e1, Element* e2, MsgId mid, Id managerId )
 	: e1_( e1 ), e2_( e2 ), mid_( mid )
 {
 	if ( msg_.size() < mid )
 		msg_.resize( mid + 1 );
 	assert( msg_[mid] == 0 );
+	assert( lookupDataId_[mid] == 0 );
 	msg_[mid] = this;
+	lookupDataId_[ mid_ ] = 0;
 	e1->addMsg( mid );
 	e2->addMsg( mid );
+	MsgManager::addMsg( mid_, managerId );
 }
 
 Msg::~Msg()
 {
+	// MsgManager::dropMsg( mid_ );
 	msg_[ mid_ ] = 0;
 	e1_->dropMsg( mid_ );
 	e2_->dropMsg( mid_ );
@@ -75,6 +83,8 @@ void Msg::initNull()
 	assert( msg_.size() == 0 );
 	msg_.push_back( 0 ); // for badMsg
 	msg_.push_back( 0 ); // for setMsg
+	lookupDataId_.push_back( 0 ); // for badmsg
+	lookupDataId_.push_back( 0 ); // for setMsg, which is a OneToOne msg.
 }
 
 /*
@@ -102,4 +112,16 @@ Msg* Msg::safeGetMsg( MsgId m )
 	if ( m < msg_.size() )
 		return msg_[ m ];
 	return 0;
+}
+
+Eref Msg::manager( Id id ) const
+{
+	assert( lookupDataId_.size() > mid_ );
+	return Eref( id(), lookupDataId_[ mid_ ] );
+}
+
+void Msg::setDataId( unsigned int di ) const
+{
+	assert( lookupDataId_.size() > mid_ );
+	lookupDataId_[ mid_ ] = di;
 }

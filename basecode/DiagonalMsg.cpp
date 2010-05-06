@@ -12,7 +12,7 @@
 #include "DiagonalMsg.h"
 
 DiagonalMsg::DiagonalMsg( Element* e1, Element* e2 )
-	: Msg( e1, e2 ), stride_( 1 )
+	: Msg( e1, e2, id_ ), stride_( 1 )
 {
 	;
 }
@@ -73,4 +73,9 @@ bool DiagonalMsg::add( Element* e1, const string& srcField,
 		return 1;
 	}
 	return 0; // Null msgId.
+}
+
+Id DiagonalMsg::id() const
+{
+	return id_;
 }

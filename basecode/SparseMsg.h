@@ -33,8 +33,10 @@
  */
 class SparseMsg: public Msg
 {
+	friend void initMsgManagers(); // for initializing Id.
 	public:
 		SparseMsg( Element* e1, Element* e2 );
+		SparseMsg( Element* e1, Element* e2, Id managerId );
 		~SparseMsg() {;}
 
 		void exec( const char* arg, const ProcInfo* p ) const;
@@ -54,8 +56,11 @@ class SparseMsg: public Msg
 		 */
 		static bool add( Element* e1, const string& srcField, 
 			Element* e2, const string& destField, double probability );
+
+		Id id() const;
 	protected:
 		SparseMatrix< unsigned int > matrix_;
+		static Id id_;
 };
 
 #endif // _SPARSE_MSG_H

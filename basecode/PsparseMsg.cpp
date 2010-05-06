@@ -16,7 +16,7 @@
 #include "../biophysics/Synapse.h"
 
 PsparseMsg::PsparseMsg( Element* e1, Element* e2 )
-	: SparseMsg( e1, e2 )
+	: SparseMsg( e1, e2, id_ )
 {
 	;
 }
@@ -150,4 +150,9 @@ void PsparseMsg::loadBalance( unsigned int numThreads )
 void PsparseMsg::loadUnbalance()
 {
 	;
+}
+
+Id PsparseMsg::id() const
+{
+	return id_;
 }

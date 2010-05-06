@@ -10,8 +10,44 @@
 #include "header.h"
 #include "Message.h"
 
+const Cinfo* OneToOneMsgWrapper::initCinfo()
+{
+	///////////////////////////////////////////////////////////////////
+	// Field definitions.
+	///////////////////////////////////////////////////////////////////
+	static ReadOnlyValueFinfo< OneToOneMsgWrapper, Id > element1(
+		"e1",
+		"Id of source Element.",
+		&OneToOneMsgWrapper::getE1
+	);
+	static ReadOnlyValueFinfo< OneToOneMsgWrapper, Id > element2(
+		"e2",
+		"Id of source Element.",
+		&OneToOneMsgWrapper::getE2
+	);
+
+	static Finfo* oneToOneMsgFinfos[] = {
+		&element1,		// readonly value
+		&element2,		// readonly value
+	};
+
+	static Cinfo oneToOneMsgCinfo (
+		"OneToOneMsg",					// name
+		MsgManager::initCinfo(),		// base class
+		oneToOneMsgFinfos,
+		sizeof( oneToOneMsgFinfos ) / sizeof( Finfo* ),	// num Fields
+		new Dinfo< OneToOneMsgWrapper >()
+	);
+
+	return &oneToOneMsgCinfo;
+}
+
+static const Cinfo* oneToOneMsgCinfo = OneToOneMsgWrapper::initCinfo();
+
+//////////////////////////////////////////////////////////////////////
+
 OneToOneMsg::OneToOneMsg( Element* e1, Element* e2 )
-	: Msg( e1, e2 )
+	: Msg( e1, e2, id_ )
 {
 	;
 }
@@ -33,3 +69,7 @@ void OneToOneMsg::exec( const char* arg, const ProcInfo* p ) const
 	}
 }
 
+Id OneToOneMsg::id() const
+{
+	return id_;
+}
