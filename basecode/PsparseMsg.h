@@ -75,4 +75,18 @@ class PsparseMsg: public SparseMsg
 extern void sparseMatrixBalance( 
 	unsigned int numThreads, SparseMatrix< unsigned int >& matrix );
 
+class PsparseMsgWrapper: public MsgManager
+{
+	public:
+		void setRandom( double probability, unsigned long seed );
+		double getProbability() const;
+		unsigned long getSeed() const;
+
+		void setMatrix( const SparseMatrix< unsigned int >& m );
+
+	private:
+		double p_;
+		unsigned long seed_;
+};
+
 #endif // _PSPARSE_MSG_H

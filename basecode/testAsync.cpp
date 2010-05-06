@@ -1115,6 +1115,87 @@ void testConvVector()
 	cout << "." << flush;
 }
 
+void testMsgField()
+{
+	const Cinfo* nc = Neutral::initCinfo();
+	unsigned int size = 10;
+
+	const DestFinfo* df = dynamic_cast< const DestFinfo* >(
+		nc->findFinfo( "set_name" ) );
+	assert( df != 0 );
+	FuncId fid = df->getFid();
+	vector< unsigned int > dims( 1, size );
+
+	Id i1 = Id::nextId();
+	Id i2 = Id::nextId();
+	Element* ret = new Element( i1, nc, "test1", dims, 1 );
+	// bool ret = nc->create( i1, "test1", size );
+	assert( ret );
+	// ret = nc->create( i2, "test2", size );
+	ret = new Element( i2, nc, "test2", dims, 1 );
+	assert( ret );
+
+	Eref e1 = i1.eref();
+	Eref e2 = i2.eref();
+
+	Msg* m = new SingleMsg( Eref( i1(), 5 ), Eref( i2(), 3 ) );
+	ProcInfo p;
+
+	Id msgElmId = m->id();
+
+	Element *msgElm = msgElmId();
+
+	assert( msgElm->name() == "singleMsg" );
+
+	Eref msgEr = m->manager( msgElmId );
+
+	MsgManager* mm = reinterpret_cast< MsgManager* >( msgEr.data() );
+	assert( mm );
+	assert ( mm->getMid() == m->mid() );
+	SingleMsgWrapper *sm = reinterpret_cast< SingleMsgWrapper* >( mm );
+	assert( sm->getI1() == DataId( 5 ) );
+	assert( sm->getI2() == DataId( 3 ) );
+	
+	SrcFinfo1<string> s( "test", "" );
+	e1.element()->addMsgAndFunc( m->mid(), fid, s.getBindIndex() );
+
+	for ( unsigned int i = 0; i < size; ++i ) {
+		char temp[20];
+		sprintf( temp, "send_to_e2_%d", i );
+		string stemp( temp );
+		s.send( Eref( e1.element(), i ), &p, stemp );
+	}
+	Qinfo::clearQ( &p );
+
+	// Check that regular msgs go through.
+	Eref tgt3( i2(), 3 );
+	Eref tgt8( i2(), 8 );
+	string name = reinterpret_cast< Neutral* >(tgt3.data())->getName();
+	assert( name == "send_to_e2_5" );
+	name = reinterpret_cast< Neutral* >(tgt8.data())->getName();
+	assert( name == "" );
+
+	// Now change I1 and I2, rerun, and check.
+	sm->setI1( 9 );
+	sm->setI2( 8 );
+	for ( unsigned int i = 0; i < size; ++i ) {
+		char temp[20];
+		sprintf( temp, "other_to_e2_%d", i );
+		string stemp( temp );
+		s.send( Eref( e1.element(), i ), &p, stemp );
+	}
+	Qinfo::clearQ( &p );
+	name = reinterpret_cast< Neutral* >(tgt3.data())->getName();
+	assert( name == "send_to_e2_5" );
+	name = reinterpret_cast< Neutral* >(tgt8.data())->getName();
+	assert( name == "other_to_e2_9" );
+
+	cout << "." << flush;
+
+	delete i1();
+	delete i2();
+}
+
 void testAsync( )
 {
 	showFields();
@@ -1136,4 +1217,5 @@ void testAsync( )
 	testUpValue();
 	testSharedMsg();
 	testConvVector();
+	testMsgField();
 }

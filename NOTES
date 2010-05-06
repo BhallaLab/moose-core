@@ -5284,7 +5284,9 @@ Checkin 1770.
 		exercise it. Checkin 1772.
 	- Went through with the implementation. Lots of cleanups. 
 		Clears tests even though it isn't complete. Check 1773.
-	- Cleaned up destructors.
+	- Cleaned up destructors. Checkin 1774.
+	- Made a unit test (on SingleMsg) to check the fields it digs up,
+		and to reassign targets of the message. Works.
 - Confirm the functioning of the current tests
 - Set up a multinode IntFire network, and test.
 - Set up multinode/multithread IntFire network.
