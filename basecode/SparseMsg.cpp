@@ -30,6 +30,12 @@ SparseMsg::SparseMsg( Element* e1, Element* e2 )
 		e2->dataHandler()->numDimensions() >= 1 );
 }
 
+SparseMsg::~SparseMsg()
+{
+	if ( safeGetMsg( mid() ) != 0 ) // this may be called by ~PsparseMsg
+		MsgManager::dropMsg( mid() );
+}
+
 unsigned int rowIndex( const Element* e, const DataId& d )
 {
 	if ( e->dataHandler()->numDimensions() == 1 ) {

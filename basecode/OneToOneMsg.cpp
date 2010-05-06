@@ -52,6 +52,11 @@ OneToOneMsg::OneToOneMsg( Element* e1, Element* e2 )
 	;
 }
 
+OneToOneMsg::~OneToOneMsg()
+{
+	MsgManager::dropMsg( mid() );
+}
+
 void OneToOneMsg::exec( const char* arg, const ProcInfo* p ) const
 {
 	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );

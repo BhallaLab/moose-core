@@ -17,6 +17,11 @@ DiagonalMsg::DiagonalMsg( Element* e1, Element* e2 )
 	;
 }
 
+DiagonalMsg::~DiagonalMsg()
+{
+	MsgManager::dropMsg( mid() );
+}
+
 /**
  * This is sort of thread-safe, as there is only ever one target for
  * any given input. Furthermore, this target will always be unique:

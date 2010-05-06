@@ -21,6 +21,11 @@ PsparseMsg::PsparseMsg( Element* e1, Element* e2 )
 	;
 }
 
+PsparseMsg::~PsparseMsg()
+{
+	MsgManager::dropMsg( mid() );
+}
+
 void PsparseMsg::exec( const char* arg, const ProcInfo *p ) const
 {
 	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );

@@ -37,7 +37,7 @@ class SparseMsg: public Msg
 	public:
 		SparseMsg( Element* e1, Element* e2 );
 		SparseMsg( Element* e1, Element* e2, Id managerId );
-		~SparseMsg() {;}
+		~SparseMsg();
 
 		void exec( const char* arg, const ProcInfo* p ) const;
 

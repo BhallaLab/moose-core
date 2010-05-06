@@ -18,6 +18,11 @@ OneToAllMsg::OneToAllMsg( Eref e1, Element* e2 )
 	;
 }
 
+OneToAllMsg::~OneToAllMsg()
+{
+	MsgManager::dropMsg( mid() );
+}
+
 /**
  * Need to revisit to handle nodes
  */

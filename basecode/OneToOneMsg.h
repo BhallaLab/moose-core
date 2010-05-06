@@ -20,7 +20,7 @@ class OneToOneMsg: public Msg
 	friend void initMsgManagers();
 	public:
 		OneToOneMsg( Element* e1, Element* e2 );
-		~OneToOneMsg() {;}
+		~OneToOneMsg();
 
 		void exec( const char* arg, const ProcInfo* p) const;
 

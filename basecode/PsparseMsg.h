@@ -49,7 +49,7 @@ class PsparseMsg: public SparseMsg
 	friend void initMsgManagers(); // for initializing Id.
 	public:
 		PsparseMsg( Element* e1, Element* e2 );
-		~PsparseMsg() {;}
+		~PsparseMsg();
 
 		void exec( const char* arg, const ProcInfo* p ) const;
 
