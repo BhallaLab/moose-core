@@ -5303,3 +5303,12 @@ Checkin 1770.
 - Benchmarks and optimization?
 
 ============================================================================
+7 May 2010
+Checked in working version from yesterday. Network had failed. 1776.
+Working on setting up IntFire network using message fields. This still isn't
+clearing.
+
+Got setup of IntFire to work, using message fields and Shell-based commands
+only. This works with 1 thread. Good progress there, but 2 threads crashes,
+and 2 nodes stalls and I can't tell if it is in an infinite loop or just 
+extremely slow.

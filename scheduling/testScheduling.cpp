@@ -406,7 +406,7 @@ void testMultiNodeIntFireNetwork()
 
 	// Qinfo::mergeQ( 0 );
 
-	mtseed( 5489UL ); // The default value, but better to be explicit.
+	//mtseed( 5489UL ); // The default value, but better to be explicit.
 
 	vector< unsigned int > dims( 1, size );
 	Id i2 = shell->doCreate( "IntFire", Id(), "test2", dims );
@@ -450,6 +450,9 @@ void testMultiNodeIntFireNetwork()
 	for ( unsigned int i = 0; i < size; ++i )
 		temp[i] = mtrand() * Vmax;
 
+	double origVm100 = temp[100];
+	double origVm900 = temp[900];
+
 	bool ret = Field< double >::setVec( e2, "Vm", temp );
 	assert( ret );
 
@@ -482,14 +485,18 @@ void testMultiNodeIntFireNetwork()
 	Element* ticke = Id( 2 )();
 	Eref er0( ticke, DataId( 0, 0 ) );
 
-	shell->doAddMsg( "SingleMsg", er0.fullId(), "process0",
+	shell->doAddMsg( "Single", er0.fullId(), "process0",
 		e2.fullId(), "process" );
 	shell->setclock( 0, timestep, 0 );
 
-	shell->doStart( static_cast< double >( timestep * runsteps) + 0.1 );
 	double retVm100 = Field< double >::get( Eref( e2.element(), 100 ), "Vm" );
 	double retVm900 = Field< double >::get( Eref( e2.element(), 900 ), "Vm" );
+	assert( fabs( retVm100 - origVm100 ) < 1e-6 );
+	assert( fabs( retVm900 - origVm900 ) < 1e-6 );
 
+	shell->doStart( static_cast< double >( timestep * runsteps) + 0.1 );
+	retVm100 = Field< double >::get( Eref( e2.element(), 100 ), "Vm" );
+	retVm900 = Field< double >::get( Eref( e2.element(), 900 ), "Vm" );
 	assert( fabs( retVm100 - Vm100 ) < 1e-6 );
 	assert( fabs( retVm900 - Vm900 ) < 1e-6 );
 
@@ -505,10 +512,10 @@ void testScheduling()
 	setupTicks();
 	testThreads();
 	testThreadIntFireNetwork();
-//	testMultiNodeIntFireNetwork();
+	testMultiNodeIntFireNetwork();
 }
 
 void testMpiScheduling()
 {
-//	testMultiNodeIntFireNetwork();
+	testMultiNodeIntFireNetwork();
 }
