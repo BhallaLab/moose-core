@@ -65,3 +65,8 @@ bool Eref::isDataHere() const
 {
 	return e_->dataHandler()->isDataHere( i_ );
 }
+
+FullId Eref::fullId() const
+{
+	return FullId( e_->id(), i_ );
+}

@@ -68,7 +68,7 @@ void initMsgManagers()
 	SparseMsg::id_ = Id::nextId();
 	new Element( SparseMsg::id_, SingleMsgWrapper::initCinfo(), "sparseMsg", dims, 1 );
 	PsparseMsg::id_ = Id::nextId();
-	new Element( PsparseMsg::id_, SingleMsgWrapper::initCinfo(), "pSparseMsg", dims, 1 );
+	new Element( PsparseMsg::id_, PsparseMsgWrapper::initCinfo(), "pSparseMsg", dims, 1 );
 	AssignmentMsg::id_ = Id::nextId();
 	new Element( AssignmentMsg::id_, SingleMsgWrapper::initCinfo(), "assignmentMsg", dims, 1 );
 	AssignVecMsg::id_ = Id::nextId();

@@ -58,6 +58,8 @@ class SparseMsg: public Msg
 			Element* e2, const string& destField, double probability );
 
 		Id id() const;
+
+		SparseMatrix< unsigned int >& matrix();
 	protected:
 		SparseMatrix< unsigned int > matrix_;
 		static Id id_;

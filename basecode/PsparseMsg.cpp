@@ -15,6 +15,270 @@
 #include "../randnum/randnum.h"
 #include "../biophysics/Synapse.h"
 
+//////////////////////////////////////////////////////////////////
+//    MOOSE wrapper functions for field access.
+//////////////////////////////////////////////////////////////////
+
+const Cinfo* PsparseMsgWrapper::initCinfo()
+{
+	///////////////////////////////////////////////////////////////////
+	// Field definitions.
+	///////////////////////////////////////////////////////////////////
+	/*
+	static ReadOnlyValueFinfo< PsparseMsgWrapper, Id > element1(
+		"e1",
+		"Id of source Element.",
+		&PsparseMsgWrapper::getE1
+	);
+	static ReadOnlyValueFinfo< PsparseMsgWrapper, Id > element2(
+		"e2",
+		"Id of source Element.",
+		&PsparseMsgWrapper::getE2
+	);
+	*/
+	static ReadOnlyValueFinfo< PsparseMsgWrapper, unsigned int > numRows(
+		"numRows",
+		"Number of rows in matrix.",
+		&PsparseMsgWrapper::getNumRows
+	);
+	static ReadOnlyValueFinfo< PsparseMsgWrapper, unsigned int > numColumns(
+		"numColumns",
+		"Number of columns in matrix.",
+		&PsparseMsgWrapper::getNumColumns
+	);
+	static ReadOnlyValueFinfo< PsparseMsgWrapper, unsigned int > numEntries(
+		"numEntries",
+		"Number of Entries in matrix.",
+		&PsparseMsgWrapper::getNumEntries
+	);
+
+	static ValueFinfo< PsparseMsgWrapper, double > probability(
+		"probability",
+		"connection probability for random connectivity.",
+		&PsparseMsgWrapper::setProbability,
+		&PsparseMsgWrapper::getProbability
+	);
+
+	static ValueFinfo< PsparseMsgWrapper, long > seed(
+		"seed",
+		"Random number seed for generating probabilistic connectivity.",
+		&PsparseMsgWrapper::setSeed,
+		&PsparseMsgWrapper::getSeed
+	);
+
+////////////////////////////////////////////////////////////////////////
+// DestFinfos
+////////////////////////////////////////////////////////////////////////
+
+	static DestFinfo setRandomConnectivity( "setRandomConnectivity",
+		"Assigns connectivity with specified probability and seed",
+		new OpFunc2< PsparseMsgWrapper, double, long >( 
+		&PsparseMsgWrapper::setRandomConnectivity ) );
+
+	static DestFinfo setEntry( "setEntry",
+		"Assigns single row,column value",
+		new OpFunc3< PsparseMsgWrapper, unsigned int, unsigned int, unsigned int >( 
+		&PsparseMsgWrapper::setEntry ) );
+
+	static DestFinfo unsetEntry( "unsetEntry",
+		"Clears single row,column entry",
+		new OpFunc2< PsparseMsgWrapper, unsigned int, unsigned int >( 
+		&PsparseMsgWrapper::unsetEntry ) );
+
+	static DestFinfo clear( "clear",
+		"Clears out the entire matrix",
+		new OpFunc0< PsparseMsgWrapper >( 
+		&PsparseMsgWrapper::clear ) );
+
+	static DestFinfo transpose( "transpose",
+		"Transposes the sparse matrix",
+		new OpFunc0< PsparseMsgWrapper >( 
+		&PsparseMsgWrapper::transpose ) );
+
+	static DestFinfo loadBalance( "loadBalance",
+		"Decomposes the sparse matrix for threaded operation",
+		new OpFunc1< PsparseMsgWrapper, unsigned int >( 
+		&PsparseMsgWrapper::loadBalance ) );
+
+	static DestFinfo loadUnbalance( "loadUnbalance",
+		"Converts the threaded matrix back into single-thread form",
+		new OpFunc0< PsparseMsgWrapper >( 
+		&PsparseMsgWrapper::loadUnbalance ) );
+
+////////////////////////////////////////////////////////////////////////
+// Assemble it all.
+////////////////////////////////////////////////////////////////////////
+
+	static Finfo* pSparseMsgFinfos[] = {
+		&numRows,			// readonly value
+		&numColumns,		// readonly value
+		&numEntries,		// readonly value
+		&probability,		// value
+		&seed,				// value
+		&setRandomConnectivity,	// dest
+		&setEntry,			// dest
+		&unsetEntry,		//dest
+		&clear,				//dest
+		&transpose,			//dest
+		&loadBalance,		//dest
+		&loadUnbalance		//dest
+	};
+
+	static Cinfo pSparseMsgCinfo (
+		"PsparseMsg",					// name
+		MsgManager::initCinfo(),		// base class
+		pSparseMsgFinfos,
+		sizeof( pSparseMsgFinfos ) / sizeof( Finfo* ),	// num Fields
+		new Dinfo< PsparseMsgWrapper >()
+	);
+
+	return &pSparseMsgCinfo;
+}
+
+static const Cinfo* pSparseMsgCinfo = PsparseMsgWrapper::initCinfo();
+
+//////////////////////////////////////////////////////////////////
+//    Value Fields
+//////////////////////////////////////////////////////////////////
+void PsparseMsgWrapper::setProbability ( double probability )
+{
+	Msg* m = Msg::safeGetMsg( getMid() );
+	PsparseMsg* pm = dynamic_cast< PsparseMsg *>( m );
+	if ( pm ) {
+		p_ = probability;
+		mtseed( seed_ );
+		pm->randomConnect( probability );
+	}
+}
+
+double PsparseMsgWrapper::getProbability ( ) const
+{
+	return p_;
+}
+
+void PsparseMsgWrapper::setSeed ( long seed )
+{
+	Msg* m = Msg::safeGetMsg( getMid() );
+	PsparseMsg* pm = dynamic_cast< PsparseMsg *>( m );
+	if ( pm ) {
+		seed_ = seed;
+		mtseed( seed_ );
+		pm->randomConnect( p_ );
+	}
+}
+
+long PsparseMsgWrapper::getSeed () const
+{
+	return seed_;
+}
+
+unsigned int PsparseMsgWrapper::getNumRows() const
+{
+	Msg* m = Msg::safeGetMsg( getMid() );
+	PsparseMsg* pm = dynamic_cast< PsparseMsg *>( m );
+	if ( pm ) {
+		return pm->matrix().nRows();
+	}
+	return 0;
+}
+
+unsigned int PsparseMsgWrapper::getNumColumns() const
+{
+	Msg* m = Msg::safeGetMsg( getMid() );
+	PsparseMsg* pm = dynamic_cast< PsparseMsg *>( m );
+	if ( pm ) {
+		return pm->matrix().nColumns();
+	}
+	return 0;
+}
+
+unsigned int PsparseMsgWrapper::getNumEntries() const
+{
+	Msg* m = Msg::safeGetMsg( getMid() );
+	PsparseMsg* pm = dynamic_cast< PsparseMsg *>( m );
+	if ( pm ) {
+		return pm->matrix().nEntries();
+	}
+	return 0;
+}
+
+//////////////////////////////////////////////////////////////////
+//    DestFields
+//////////////////////////////////////////////////////////////////
+
+void PsparseMsgWrapper::setRandomConnectivity(
+	double probability, long seed )
+{
+	Msg* m = Msg::safeGetMsg( getMid() );
+	PsparseMsg* pm = dynamic_cast< PsparseMsg* >( m );
+	if ( pm ) {
+		p_ = probability;
+		seed_ = seed;
+		mtseed( seed );
+		pm->randomConnect( probability );
+	}
+}
+
+void PsparseMsgWrapper::setEntry(
+	unsigned int row, unsigned int column, unsigned int value )
+{
+	Msg* m = Msg::safeGetMsg( getMid() );
+	PsparseMsg* pm = dynamic_cast< PsparseMsg *>( m );
+	if ( pm ) {
+		pm->matrix().set( row, column, value );
+	}
+}
+
+void PsparseMsgWrapper::unsetEntry( unsigned int row, unsigned int column )
+{
+	Msg* m = Msg::safeGetMsg( getMid() );
+	PsparseMsg* pm = dynamic_cast< PsparseMsg *>( m );
+	if ( pm ) {
+		pm->matrix().unset( row, column );
+	}
+}
+
+void PsparseMsgWrapper::clear()
+{
+	Msg* m = Msg::safeGetMsg( getMid() );
+	PsparseMsg* pm = dynamic_cast< PsparseMsg *>( m );
+	if ( pm ) {
+		pm->matrix().clear();
+	}
+}
+
+void PsparseMsgWrapper::transpose()
+{
+	Msg* m = Msg::safeGetMsg( getMid() );
+	PsparseMsg* pm = dynamic_cast< PsparseMsg *>( m );
+	if ( pm ) {
+		pm->matrix().transpose();
+	}
+}
+
+void PsparseMsgWrapper::loadBalance( unsigned int numThreads )
+{
+	Msg* m = Msg::safeGetMsg( getMid() );
+	PsparseMsg* pm = dynamic_cast< PsparseMsg *>( m );
+	if ( pm ) {
+		pm->loadBalance( numThreads );
+	}
+}
+
+void PsparseMsgWrapper::loadUnbalance()
+{
+	Msg* m = Msg::safeGetMsg( getMid() );
+	PsparseMsg* pm = dynamic_cast< PsparseMsg *>( m );
+	if ( pm ) {
+		pm->loadUnbalance();
+	}
+}
+
+//////////////////////////////////////////////////////////////////
+//    Here are the actual class functions
+//////////////////////////////////////////////////////////////////
+
+
 PsparseMsg::PsparseMsg( Element* e1, Element* e2 )
 	: SparseMsg( e1, e2, id_ )
 {
@@ -60,7 +324,8 @@ void PsparseMsg::exec( const char* arg, const ProcInfo *p ) const
 		for ( unsigned int j = 0; j < n; ++j ) {
 			// Eref tgt( target, DataId( *colIndex++, *fieldIndex++ )
 			Eref tgt( e2_, DataId( colIndex[j], fieldIndex[j] ) );
-			f->op( tgt, arg );
+			if ( tgt.isDataHere() )
+				f->op( tgt, arg );
 		}
 	} else  if ( p->threadIndexInGroup == 0 ) {
 		// Avoid using this back operation! Currently we don't
@@ -74,7 +339,8 @@ void PsparseMsg::exec( const char* arg, const ProcInfo *p ) const
 		unsigned int n = matrix_.getColumn( column, fieldIndex, rowIndex );
 		for ( unsigned int j = 0; j < n; ++j ) {
 			Eref tgt( e1_, DataId( rowIndex[j] ) );
-			f->op( tgt, arg );
+			if ( tgt.isDataHere() )
+				f->op( tgt, arg );
 		}
 	}
 }
@@ -106,6 +372,8 @@ bool PsparseMsg::add( Element* e1, const string& srcField,
 void sparseMatrixBalance( 
 	unsigned int numThreads, SparseMatrix< unsigned int >& matrix )
 {
+	if ( numThreads <= 1 )
+		return;
 	SparseMatrix< unsigned int > temp = matrix;
 	unsigned int nrows = matrix.nRows();
 	unsigned int ncols = matrix.nColumns();

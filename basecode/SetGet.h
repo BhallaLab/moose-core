@@ -353,60 +353,6 @@ template< class A > class Field: public SetGet1< A >
 
 		/**
 		 * Blocking call using typed values
-		static A get( Eref& dest, const string& field)
-		{ 
-			string temp = "get_" + field;
-			return SetGet1< A >::get( dest, temp );
-		}
-		 */
-
-		/**
-		 * Blocking call using string conversion
-		static string strGet( Eref& dest, const string& field)
-		{ 
-			string temp = "get_" + field;
-			SetGet1< A > sg( dest );
-			 if ( sg.iGet( temp ) )
-			 	return sg.harvestStrGet();
-		}
-		 */
-
-		/**
-		 * Terminating call using typed values
-		 * Again, need to do a lot more checking in threaded and in 
-		 * multinode calls. Probably want to record a 'baton' to know
-		 * when the call ends.
-		 */
-#if 0
-		A harvestGet() const
-		{ 
-			/**
-			 * First clearQ is so that the target Element receives the
-			 * request.
-			 * Issue remains: which thread to put this call in. For now
-			 * assume thread 0.
-			 */
-			Qinfo::clearQ( Shell::procInfo() );
-			/**
-			 * Second clearQ is so that the data can come back to the Shell
-			 */
-			Qinfo::clearQ( Shell::procInfo() );
-			Conv< A > ret( Shell::buf() );
-			return *ret;
-		}
-
-		/**
-		 * Terminating call using string conversion
-		 */
-		string harvestStrGet() const
-		{ 
-			string s;
-			Conv< A >::val2str( s, harvestGet() );
-			return s;
-		}
-#endif
-		/**
-		 * Blocking call using typed values
 		 */
 		static A get( const Eref& dest, const string& field)
 		{ 
@@ -415,16 +361,6 @@ template< class A > class Field: public SetGet1< A >
 			Conv< A > conv( ret );
 			return *conv;
 		}
-
-		/**
-		 * Blocking call using string conversion
-		static string strGet( Eref& dest, const string& field)
-		{ 
-			Field< A > sg( dest );
-			 if ( sg.iGet( field ) )
-			 	return sg.harvestStrGet();
-		}
-		 */
 };
 
 /**

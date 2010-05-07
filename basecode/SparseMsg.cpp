@@ -155,3 +155,8 @@ Id SparseMsg::id() const
 {
 	return id_;
 }
+
+SparseMatrix< unsigned int >& SparseMsg::matrix() 
+{
+	return matrix_;
+}

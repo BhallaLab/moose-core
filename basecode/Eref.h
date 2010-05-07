@@ -85,6 +85,8 @@ class Eref
 			return i_;
 		}
 
+		FullId fullId() const;
+
 		/**
 		 * True if the data are on the current node
 		 */

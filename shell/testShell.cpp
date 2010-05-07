@@ -317,9 +317,34 @@ void testShellAddMsg()
 	assert( m4 != Msg::badMsg );
 
 	// Should give 54321
-	MsgId m5 = shell->doAddMsg( "Sparse", 
+	MsgId m5 = shell->doAddMsg( "Psparse", 
 		FullId( e1, 0 ), "output", FullId( e2, 0 ), "arg1" );
 	assert( m5 != Msg::badMsg );
+
+	const Msg* m5p = Msg::getMsg( m5 );
+	Eref m5er = m5p->manager( m5p->id() );
+
+	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
+		m5er, "setEntry", 0, 4, 0 );
+	assert( ret );
+	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
+		m5er, "setEntry", 1, 3, 0 );
+	assert( ret );
+	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
+		m5er, "setEntry", 2, 2, 0 );
+	assert( ret );
+	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
+		m5er, "setEntry", 3, 1, 0 );
+	assert( ret );
+	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
+		m5er, "setEntry", 4, 0, 0 );
+	assert( ret );
+
+	ret = SetGet1< unsigned int >::set(
+		m5er, "loadBalance", Shell::numCores() );
+	assert( ret );
+
+	/*
 	const SparseMsg *csm = 
 		static_cast< const SparseMsg * >( Msg::getMsg( m5 ) );
 	SparseMsg *sm = const_cast< SparseMsg * >( csm );
@@ -330,6 +355,7 @@ void testShellAddMsg()
 	mtx.set( 3, 1, 0 );
 	mtx.set( 4, 0, 0 );
 	sm->setMatrix( mtx );
+	*/
 	
 	///////////////////////////////////////////////////////////
 	// Set up scheduling
@@ -359,15 +385,15 @@ void testShellAddMsg()
 	///////////////////////////////////////////////////////////
 	
 	ret = checkOutput( a2, 0, 4, 0, 0, 0 );
-	// assert( ret );
+	assert( ret );
 	ret = checkOutput( b1, 1, 2, 3, 4, 5 );
-	// assert( ret );
+	assert( ret );
 	ret = checkOutput( b2, 3, 3, 3, 3, 3 );
-	// assert( ret );
+	assert( ret );
 	ret = checkOutput( c2, 1, 2, 3, 4, 5 );
-	// assert( ret );
+	assert( ret );
 	ret = checkOutput( d2, 0, 1, 2, 3, 4 );
-	// assert( ret );
+	assert( ret );
 	ret = checkOutput( e2, 5, 4, 3, 2, 1 );
 	assert( ret );
 

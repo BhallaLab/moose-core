@@ -5279,16 +5279,26 @@ Checkin 1770.
 	between nodes.
 
 - Make valgrind happy.
-- Set up the Msg field stuff.
+* Set up the Msg field stuff.
 	- Implemented SingleMsgWrapper. Compiles, clears tests, yet to 
 		exercise it. Checkin 1772.
 	- Went through with the implementation. Lots of cleanups. 
 		Clears tests even though it isn't complete. Check 1773.
 	- Cleaned up destructors. Checkin 1774.
 	- Made a unit test (on SingleMsg) to check the fields it digs up,
-		and to reassign targets of the message. Works.
-- Confirm the functioning of the current tests
+		and to reassign targets of the message. Works. Checkin 1774.
+* Confirm the functioning of the current tests
+	- Got the testShellAddMsg to work with 1 thread, 1 node, using the
+		new field access to the PsparseMsg.
+	- Got it to work with 2 threads, 1 node. Had to add several additional
+		utility functions to the Element interface to PsparseMsg 
+		including loadBalance
+	- Got it to work with 1 thread, 2 nodes. Simple fix on PsparseMsg::exec,
+		and now that the assignment of the matrix is good it went
+		cleanly.
+	- Not yet working with 2 threads, 2 nodes.
 - Set up a multinode IntFire network, and test.
+	- Doing setup. Compiles but croak in unit tests.
 - Set up multinode/multithread IntFire network.
 - Benchmarks and optimization?
 

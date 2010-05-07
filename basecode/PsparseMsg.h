@@ -78,12 +78,31 @@ extern void sparseMatrixBalance(
 class PsparseMsgWrapper: public MsgManager
 {
 	public:
-		void setRandom( double probability, unsigned long seed );
+		void setRandomConnectivity( double probability, long seed );
 		double getProbability() const;
-		unsigned long getSeed() const;
+		void setProbability( double value );
+
+		long getSeed() const;
+		void setSeed( long value );
 
 		void setMatrix( const SparseMatrix< unsigned int >& m );
 
+		void setEntry( unsigned int row, unsigned int column, 
+			unsigned int value );
+
+		void unsetEntry( unsigned int row, unsigned int column );
+
+		// Still need to implement array field gets.
+
+		unsigned int getNumRows() const;
+		unsigned int getNumColumns() const;
+		unsigned int getNumEntries() const;
+		void clear();
+		void transpose();
+		void loadBalance( unsigned int numThreads );
+		void loadUnbalance();
+
+		static const Cinfo* initCinfo();
 	private:
 		double p_;
 		unsigned long seed_;
