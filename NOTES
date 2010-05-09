@@ -5311,4 +5311,46 @@ clearing.
 Got setup of IntFire to work, using message fields and Shell-based commands
 only. This works with 1 thread. Good progress there, but 2 threads crashes,
 and 2 nodes stalls and I can't tell if it is in an infinite loop or just 
-extremely slow.
+extremely slow. Checkin 1777.
+
+Fixed issue with node stall: it was just that I had 'quit' the simulation and
+as far as the other nodes were concerned, they were wainting on MPI_finalize.
+With this the IntFire network simulation runs and Vm100 is Ok
+But Vm900 differs. 
+============================================================================
+8 May 2010.
+Looking at IntFire circuit and the PSparseMsg setup.
+Very peculiar.
+Even on 1 node, it isn't displaying rows 100 and 600.
+Even on 1 node, it is only showing up at t = 0.4.
+
+On 2 nodes, it seems to miss rows 0, 100 and 600. Seems to do row 500 twice.
+
+1. Why it only shows up at t = 0.4: at other times only  a few axons are 
+firing. So none of the selected (%100) set is hit.
+2. Actually it does all rows that the single-node version does. The #
+of input msgs does match up between 1 and 2 nodes.
+
+Looks like there is a problem with the setup of the sparse matrix
+on node 1.
+
+Checking the sizes array. There is a stark contradiction in the printfs in
+PsparseMsg::exec. Need to do a printf to see how the node 1 array is set up.
+Confirmed problem. All colindices for node 1 are 1. Fieldindices are big
+numbers, unlike the fieldindices for node 0 which are usually small single 
+digits.
+============================================================================
+9 May 2010.
+Walking through the code with gdb.
+Matrix looks good on both nodes before transposition.
+The various lookup operations for resizing the SynIndex look OK.
+Matrix transpostion fails. Astonishing, I thought I had dealt with this
+and had unit tests for it. rowStart looks OK but colIndex on node 1 is all 1.
+
+Confirmed problems with transpose. I can cause the matrix code to crash with
+a test matrix that starts with lots of empty spaces.
+Some ugly, careful indexing and housekeeping later, I think I've fixed the
+matrix transposition code. It was so broken that it is amazing it worked
+for the earlier, smaller unit tests.
+
+But it _still_ doesn't work with the multinode IntFire test.

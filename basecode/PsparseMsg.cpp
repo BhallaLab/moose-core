@@ -301,7 +301,7 @@ void PsparseMsg::exec( const char* arg, const ProcInfo *p ) const
 	if ( q->isForward() ) {
 		const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
 		unsigned int row = rowIndex( e1_, q->srcIndex() );
-		// unsigned int oldRow = row;
+		unsigned int oldRow = row;
 
 
 		// This is the crucial line where we define which subset of data
@@ -317,13 +317,31 @@ void PsparseMsg::exec( const char* arg, const ProcInfo *p ) const
 			cout << Shell::myNode() << "." << p->threadIndexInGroup << 
 				": row = " << oldRow << 
 				", Trow = " << row <<
-				", n = " << n << endl;
+				", n = " << n << 
+				", t = " << p->currTime <<
+				endl;
+		}
+		for ( unsigned int j = 0; j < n; ++j ) {
+			cout << Shell::myNode() << "." << p->threadIndexInGroup << 
+			": " << oldRow << 
+			" colindex[" << j << "] = " << colIndex[j] <<
+			", fieldindex[" << j << "] = " << fieldIndex[j] << 
+			endl << flush;
 		}
 		*/
 
+		// J counts over all the column entries, i.e., all targets.
 		for ( unsigned int j = 0; j < n; ++j ) {
-			// Eref tgt( target, DataId( *colIndex++, *fieldIndex++ )
 			Eref tgt( e2_, DataId( colIndex[j], fieldIndex[j] ) );
+			/*
+			if ( colIndex[j] % 100 == 0 ) {
+				cout << Shell::myNode() << "." << p->threadIndexInGroup << 
+				":Psparse exec    [" << colIndex[j] << 
+				"," << fieldIndex[j] << 
+				"], target here = " << tgt.isDataHere() <<
+				", t = " << p->currTime << endl << flush;
+			}
+			*/
 			if ( tgt.isDataHere() )
 				f->op( tgt, arg );
 		}

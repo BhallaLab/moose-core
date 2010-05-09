@@ -118,7 +118,6 @@ unsigned int SparseMsg::randomConnect( double probability )
 	// SynElement* syn = dynamic_cast< SynElement* >( e2_ );
 	Element* syn = e2_;
 	syn->dataHandler()->getNumData2( sizes );
-	// cout << Shell::myNode() << ": sizes.size() = " << sizes.size() << ", ncols = " << nCols << endl;
 	assert( sizes.size() == nCols );
 
 	for ( unsigned int i = 0; i < nCols; ++i ) {
@@ -141,6 +140,12 @@ unsigned int SparseMsg::randomConnect( double probability )
 
 		matrix_.addRow( i, synIndex );
 	}
+	/*
+	cout << Shell::myNode() << ": sizes.size() = " << sizes.size() << ", ncols = " << nCols << endl;
+	for ( unsigned int i = 0; i < sizes.size(); ++i ) {
+		cout << Shell::myNode() << ": sizes[" << i << "] = " << sizes[i] << endl;
+	}
+	*/
 	syn->dataHandler()->setNumData2( sizes );
 	matrix_.transpose();
 	return totalSynapses;

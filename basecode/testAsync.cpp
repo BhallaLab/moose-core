@@ -717,6 +717,55 @@ void testSparseMatrix()
 	cout << "." << flush;
 }
 
+void testSparseMatrix2()
+{
+	// Here zeroes mean no entry, not an entry of zero.
+	// Rows 0 to 4 are totally empty
+	static unsigned int row5[] = { 1, 0, 2, 0, 0, 0, 0, 0, 0, 0 };
+	static unsigned int row6[] = { 0, 0, 3, 4, 0, 0, 0, 0, 0, 0 };
+	static unsigned int row7[] = { 0, 0, 0, 0, 5, 0, 0, 0, 0, 6 };
+	static unsigned int row8[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	static unsigned int row9[] = { 0, 0, 7, 0, 0, 0, 0, 8, 0, 0 };
+
+	vector< vector < unsigned int > > m( 10 );
+	for ( unsigned int i = 0; i < 10; ++i )
+		m[i].resize( 10, 0 );
+
+	for ( unsigned int i = 0; i < 10; ++i ) m[5][i] = row5[i];
+	for ( unsigned int i = 0; i < 10; ++i ) m[6][i] = row6[i];
+	for ( unsigned int i = 0; i < 10; ++i ) m[7][i] = row7[i];
+	for ( unsigned int i = 0; i < 10; ++i ) m[8][i] = row8[i];
+	for ( unsigned int i = 0; i < 10; ++i ) m[9][i] = row9[i];
+
+	SparseMatrix< unsigned int > n( 10, 10 );
+	for ( unsigned int i = 0; i < 10; ++i )
+		for ( unsigned int j = 0; j < 10; ++j )
+			if ( m[i][j] != 0 )
+				n.set( i, j, m[i][j] );
+				
+	n.transpose();
+	for ( unsigned int i = 0; i < 10; ++i )
+		for ( unsigned int j = 0; j < 10; ++j )
+			assert (n.get( j, i ) ==  m[i][j] );
+	n.transpose();
+	for ( unsigned int i = 0; i < 10; ++i )
+		for ( unsigned int j = 0; j < 10; ++j )
+			assert (n.get( i, j ) ==  m[i][j] );
+	/*
+	n.printInternal();
+	cout << "before transpose\n";
+	n.print();
+	n.transpose();
+	cout << "after transpose\n";
+	n.print();
+	n.transpose();
+	cout << "after transpose back\n";
+	n.print();
+	*/
+
+	cout << "." << flush;
+}
+
 void testSparseMatrixBalance()
 {
 	SparseMatrix< unsigned int > m( 3, 6 );
@@ -1212,6 +1261,7 @@ void testAsync( )
 	testSetRepeat();
 	testSendSpike();
 	testSparseMatrix();
+	testSparseMatrix2();
 	testSparseMatrixBalance();
 	testSparseMsg();
 	testUpValue();

@@ -425,7 +425,7 @@ void testShellParserQuit()
 void testShell( )
 {
 //	testCreateDelete();
-	testShellParserQuit();
+	// testShellParserQuit();
 }
 
 void testMpiShell( )
@@ -439,5 +439,5 @@ void testMpiShell( )
 	testShellParserStart();
 	*/
 	// Don't do this yet.
-	testShellParserQuit();
+	//testShellParserQuit();
 }
