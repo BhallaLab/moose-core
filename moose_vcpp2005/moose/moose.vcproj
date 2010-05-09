@@ -41,8 +41,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\gl\src;..\..\signeur;..\..\robots;..\..\randnum;..\..\utility;..\..\shell;..\..\scheduling;..\..\parallel;..\..\neuroML_IO;..\..\sbml_IO;..\..\device;..\..\maindir;..\..\ksolve;..\..\kinetics;..\..\hsolve;..\..\genesis_parser;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..;..\..\external\include\MPICH2\include;..\..\external\include\GnuWin32\include;..\..\external\include\gsl\include;&quot;..\..\external\include\libsbml-3.3.2\include&quot;;&quot;..\..\external\include\libxml2-2.7.6.win32\include&quot;;&quot;..\..\external\include\iconv-1.9.2.win32\include&quot;;&quot;D:\DOWNLOADS\OpenSceneGraph-2.8.2\include&quot;;&quot;C:\Program Files\boost\boost_1_40&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0;_WIN32;USE_SBML;USE_NEUROML;USE_GL=1"
+				AdditionalIncludeDirectories="..\..\gl\src;..\..\signeur;..\..\robots;..\..\randnum;..\..\utility;..\..\shell;..\..\scheduling;..\..\parallel;..\..\neuroML_IO;..\..\device;..\..\maindir;..\..\ksolve;..\..\kinetics;..\..\hsolve;..\..\genesis_parser;..\..\external\include;..\..\example;..\..\element;..\..\connections;..\..\builtins;..\..\biophysics;..\..\basecode;..\..;..\..\external\include\GnuWin32\include;..\..\external\include\gsl\include;..\..\external\include\neuroML;&quot;..\..\external\include\libxml2-2.7.6.win32\include&quot;;&quot;..\..\external\include\iconv-1.9.2.win32\include&quot;;&quot;..\..\external\include\OpenSceneGraph-2.8.2\include&quot;;..\..\external\include\boost_1_40\"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;YY_NO_UNISTD_H;YYSTYPE_IS_DECLARED;DO_UNIT_TESTS;USE_GENESIS_PARSER;USE_GSL;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0;_WIN32;USE_NEUROML;USE_GL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -63,10 +63,10 @@
 			<Tool
 				Name="VCLinkerTool"
 				UseLibraryDependencyInputs="false"
-				AdditionalDependencies="gsl_d.lib cblas_d.lib mpi.lib Ws2_32.lib cxx.lib bzip2.lib libsbmlD.lib zlib.lib iconv.lib libxml2.lib libNeuroML.lib"
+				AdditionalDependencies="gsl_d.lib cblas_d.lib Ws2_32.lib iconv.lib libxml2.lib libNeuroML.lib"
 				ShowProgress="2"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;..\..\external\lib\libxml2-2.7.6.win32\lib&quot;;&quot;..\..\external\lib\iconv-1.9.2.win32\lib&quot;;..\..\external\lib\GnuWin32\lib;..\..\external\lib\MPICH2\lib;&quot;..\..\external\lib\libsbml-3.3.2\bin&quot;;..\..\external\lib\gsl\lib;..\..\external\lib;&quot;D:\DOWNLOADS\OpenSceneGraph-2.8.2\build\lib&quot;;&quot;C:\Program Files\boost\boost_1_40\lib&quot;"
+				AdditionalLibraryDirectories="&quot;..\..\external\lib\libxml2-2.7.6.win32\lib&quot;;&quot;..\..\external\lib\iconv-1.9.2.win32\lib&quot;;..\..\external\lib\GnuWin32\lib;..\..\external\lib\gsl\lib;..\..\external\lib;&quot;..\..\external\lib\OpenSceneGraph-2.8.2\lib&quot;;..\..\external\lib\boost_1_40\lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				RandomizedBaseAddress="2"
@@ -320,6 +320,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\biophysics\KinSynChan.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\biophysics\Leakage.cpp"
 					>
 				</File>
@@ -329,6 +333,10 @@
 				</File>
 				<File
 					RelativePath="..\..\biophysics\Nernst.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\biophysics\NMDAChan.cpp"
 					>
 				</File>
 				<File
@@ -792,6 +800,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\utility\NumUtil.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\utility\PathUtility.cpp"
 					>
 				</File>
@@ -1091,37 +1103,6 @@
 							Name="VCCLCompilerTool"
 							ObjectFile="$(IntDir)\$(InputName)2.obj"
 							XMLDocumentationFileName="$(IntDir)\$(InputName)2.xdc"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\..\randnum\NumUtil.cpp"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)\$(InputName)1.obj"
-							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)\$(InputName)1.obj"
-							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Plain|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)\$(InputName)1.obj"
-							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
 				</File>
@@ -1778,18 +1759,6 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="sbml_IO"
-				>
-				<File
-					RelativePath="..\..\sbml_IO\SbmlReader.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\sbml_IO\SbmlWriter.cpp"
-					>
-				</File>
-			</Filter>
-			<Filter
 				Name="neuroML_IO"
 				>
 				<File
@@ -1887,6 +1856,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\biophysics\KinSynChan.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\biophysics\Leakage.h"
 					>
 				</File>
@@ -1896,6 +1869,10 @@
 				</File>
 				<File
 					RelativePath="..\..\biophysics\Nernst.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\biophysics\NMDAChan.h"
 					>
 				</File>
 				<File
@@ -2355,6 +2332,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\utility\NumUtil.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\utility\PathUtility.h"
 					>
 				</File>
@@ -2412,10 +2393,6 @@
 				</File>
 				<File
 					RelativePath="..\..\randnum\NormalRng.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\randnum\NumUtil.h"
 					>
 				</File>
 				<File
@@ -2596,18 +2573,6 @@
 				</File>
 				<File
 					RelativePath="..\..\signeur\SigNeur.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="sbml_IO"
-				>
-				<File
-					RelativePath="..\..\sbml_IO\SbmlReader.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\sbml_IO\SbmlWriter.h"
 					>
 				</File>
 			</Filter>
