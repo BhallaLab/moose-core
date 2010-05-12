@@ -224,27 +224,27 @@ bool checkOutput( Id e,
 	Eref e0( e(), 0 );
 	double val = Field< double >::get( e0, "outputValue" );
 	ret = ret && ( fabs( val - v0 ) < 1e-6 );
-	cout << "( " << v0 << ", " << val << " ) ";
+	// cout << "( " << v0 << ", " << val << " ) ";
 
 	Eref e1( e(), 1 );
 	val = Field< double >::get( e1, "outputValue" );
 	ret = ret && ( fabs( val - v1 ) < 1e-6 );
-	cout << "( " << v1 << ", " << val << " ) ";
+	// cout << "( " << v1 << ", " << val << " ) ";
 
 	Eref e2( e(), 2 );
 	val = Field< double >::get( e2, "outputValue" );
 	ret = ret && ( fabs( val - v2 ) < 1e-6 );
-	cout << "( " << v2 << ", " << val << " ) ";
+	// cout << "( " << v2 << ", " << val << " ) ";
 
 	Eref e3( e(), 3 );
 	val = Field< double >::get( e3, "outputValue" );
 	ret = ret && ( fabs( val - v3 ) < 1e-6 );
-	cout << "( " << v3 << ", " << val << " ) ";
+	// cout << "( " << v3 << ", " << val << " ) ";
 
 	Eref e4( e(), 4 );
 	val = Field< double >::get( e4, "outputValue" );
 	ret = ret && ( fabs( val - v4 ) < 1e-6 );
-	cout << "( " << v4 << ", " << val << " )\n";
+	// cout << "( " << v4 << ", " << val << " )\n";
 
 	return ret;
 }

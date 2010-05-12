@@ -52,15 +52,6 @@ class SparseMsg: public Msg
 		~SparseMsg();
 
 		void exec( const char* arg, const ProcInfo* p ) const;
-
-
-		/**
-		 * Creates a message between e1 and e2, with connections
-		 * ocdurring at the specified probability
-		 */
-		static bool add( Element* e1, const string& srcField, 
-			Element* e2, const string& destField, double probability,
-			unsigned int numThreadsInGroup );
 		
 		unsigned int randomConnect( double probability );
 

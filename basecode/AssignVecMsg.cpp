@@ -55,10 +55,6 @@ void AssignVecMsg::exec( const char* arg, const ProcInfo *p ) const
 			// DataHandler* pa = d2->parentHandler();
 			for ( DataHandler::iterator i = d2->begin(); 
 				i != d2->end(); ++i ) {
-				if ( i % 100 == 0 ) 
-					cout << Shell::myNode() << "." << 
-						p->threadIndexInGroup << ": " << i <<
-						",	vecIndex = " << k << endl;
 				for ( unsigned int j = 0; j < d2->numData2( i ); ++j ) {
 				// This is nasty. We assume that none of the op funcs
 				// will actually use the Qinfo. 

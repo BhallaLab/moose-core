@@ -23,18 +23,6 @@ const Cinfo* SparseMsgWrapper::initCinfo()
 	///////////////////////////////////////////////////////////////////
 	// Field definitions.
 	///////////////////////////////////////////////////////////////////
-	/*
-	static ReadOnlyValueFinfo< SparseMsgWrapper, Id > element1(
-		"e1",
-		"Id of source Element.",
-		&SparseMsgWrapper::getE1
-	);
-	static ReadOnlyValueFinfo< SparseMsgWrapper, Id > element2(
-		"e2",
-		"Id of source Element.",
-		&SparseMsgWrapper::getE2
-	);
-	*/
 	static ReadOnlyValueFinfo< SparseMsgWrapper, unsigned int > numRows(
 		"numRows",
 		"Number of rows in matrix.",
@@ -214,8 +202,7 @@ void SparseMsgWrapper::setRandomConnectivity(
 		p_ = probability;
 		seed_ = seed;
 		mtseed( seed );
-		unsigned int numSynapses = pm->randomConnect( probability );
-		cout << Shell::myNode() << ": SparseMsgWrapper::setRandomConnectivity numSyn= " << numSynapses << endl;
+		pm->randomConnect( probability );
 	}
 }
 
@@ -379,29 +366,6 @@ void SparseMsg::exec( const char* arg, const ProcInfo *p ) const
 	}
 }
 
-/**
- * This mostly duplicates what the SparseMsg variant does, but since
- * it explicitly creates a SparseMsg we can't just use the parent func.
- * Then it does the load balancing.
- */
-bool SparseMsg::add( Element* e1, const string& srcField, 
-	Element* e2, const string& destField, double probability, 
-	unsigned int numThreadsInGroup )
-{
-	FuncId funcId;
-	const SrcFinfo* srcFinfo = validateMsg( e1, srcField,
-		e2, destField, funcId );
-
-	if ( srcFinfo ) {
-		SparseMsg* m = new SparseMsg( e1, e2 );
-		e1->addMsgAndFunc( m->mid(), funcId, srcFinfo->getBindIndex() );
-		m->randomConnect( probability );
-		m->loadBalance( numThreadsInGroup );
-		return 1;
-	}
-	return 0;
-}
-
 
 /**
  * Should really have a seed argument
@@ -452,14 +416,8 @@ unsigned int SparseMsg::randomConnect( double probability )
 
 		matrix_.addRow( i, synIndex );
 	}
-	/*
-	cout << Shell::myNode() << ": sizes.size() = " << sizes.size() << ", ncols = " << nCols << endl;
-	for ( unsigned int i = 0; i < sizes.size(); ++i ) {
-		cout << Shell::myNode() << ": sizes[" << i << "] = " << sizes[i] << endl;
-	}
-	*/
 	syn->dataHandler()->setNumData2( startSynapse, sizes );
-	cout << Shell::myNode() << ": sizes.size() = " << sizes.size() << ", ncols = " << nCols << ", startSynapse = " << startSynapse << endl;
+	// cout << Shell::myNode() << ": sizes.size() = " << sizes.size() << ", ncols = " << nCols << ", startSynapse = " << startSynapse << endl;
 	matrix_.transpose();
 	return totalSynapses;
 }

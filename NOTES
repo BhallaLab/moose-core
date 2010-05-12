@@ -5439,3 +5439,4 @@ Also works for 3 and 4 nodes.
 Cleanup: Folded the old SparseMsg code into PsparseMsg, and renamed the 
 PsparseMsg class to SparseMsg.  Checkin 1783.
 
+Cleanup: Renamed the PsparseMsg files too. Checkin 1784.

@@ -461,16 +461,15 @@ void testMultiNodeIntFireNetwork()
 	SetGet1< unsigned int >::set( mer, "loadBalance", numThreads ); 
 	vector< unsigned int > synArraySizes;
 	unsigned int start = syn->dataHandler()->getNumData2( synArraySizes );
-	cout << "start = " << start << endl;
+	// cout << "start = " << start << endl;
 	unsigned int synIndex = start;
 	for ( unsigned int i = 0; i < size; ++i ) {
-		if ( ( i % 100 ) == 0 )
-			cout << "i = " << i << "SynIndex = " << synIndex << endl;
+		// if ( ( i % 100 ) == 0 ) cout << "i = " << i << "SynIndex = " << synIndex << endl;
 		synIndex += synArraySizes[i];
 	}
 
 	unsigned int nd = syn->dataHandler()->numData();
-	cout << "Num Syn = " << nd << endl;
+	// cout << "Num Syn = " << nd << endl;
 	nd = 104576;
 
 	// This fails on multinodes.
@@ -502,20 +501,6 @@ void testMultiNodeIntFireNetwork()
 		weight.push_back( mtrand() * weightMax );
 		delay.push_back( mtrand() * delayMax );
 	}
-	/*
-	vector< vector< double > > checkWeight( size );
-	for ( unsigned int i = 0; i < size; ++i ) {
-		unsigned int numSyn = syne.element()->dataHandler()->numData2( i );
-		for ( unsigned int j = 0; j < numSyn; ++j ) {
-			weight.push_back( mtrand() * weightMax );
-			delay.push_back( mtrand() * delayMax );
-			if ( i %100 == 0 && j == 0 )
-				checkWeight[ i / 100 ].push_back( weight.back() );
-			if ( i %100 == 0 && j == 1 )
-				checkWeight[ i / 100 ].push_back( weight.back() );
-		}
-	}
-	*/
 	ret = Field< double >::setVec( syne, "weight", weight );
 	assert( ret );
 	ret = Field< double >::setVec( syne, "delay", delay );
@@ -524,29 +509,9 @@ void testMultiNodeIntFireNetwork()
 	for ( unsigned int i = 0; i < size; i+= 100 ) {
 		double wt = Field< double >::get( 
 			Eref( syne.element(), DataId( i, 0 ) ), "weight" );
-		// assert( fabs( wt - weight[ synIndices[ i / 100 ] ] ) < 1e-6 );
-		cout << "Actual wt = " << wt << ", expected = " <<
-			weight[ synIndices[ i / 100 ] ] << endl;
+		assert( fabs( wt - weight[ synIndices[ i / 100 ] ] ) < 1e-6 );
+		// cout << "Actual wt = " << wt << ", expected = " << weight[ synIndices[ i / 100 ] ] << endl;
 	}
-
-	// Checks multinode assignment of weights.
-	/*
-	for ( unsigned int i = 0; i < size; i += 100 ) {
-		const vector< double >& cw = checkWeight[ i/100 ];
-		if ( cw.size() > 0 ) {
-			double wt = Field< double >::get( 
-				Eref( syne.element(), DataId( i, 0 ) ), "weight" );
-			assert( fabs ( wt - cw[0] ) < 1e-6 );
-			cout << "*" << flush;
-		}
-		if ( cw.size() > 1 ) {
-			double wt = Field< double >::get( 
-				Eref( syne.element(), DataId( i, 1 ) ), "weight" );
-			assert( fabs ( wt - cw[1] ) < 1e-6 );
-			cout << "*" << flush;
-		}
-	}
-	*/
 
 	Element* ticke = Id( 2 )();
 	Eref er0( ticke, DataId( 0, 0 ) );
@@ -564,12 +529,10 @@ void testMultiNodeIntFireNetwork()
 	retVm100 = Field< double >::get( Eref( e2.element(), 100 ), "Vm" );
 	retVm900 = Field< double >::get( Eref( e2.element(), 900 ), "Vm" );
 
-	cout << "MultiNodeIntFireNetwork: Vm100 = " << retVm100 << ", " <<
-		Vm100 << "; Vm900 = " << retVm900 << ", " << Vm900 << endl;
+	// cout << "MultiNodeIntFireNetwork: Vm100 = " << retVm100 << ", " << Vm100 << "; Vm900 = " << retVm900 << ", " << Vm900 << endl;
 	assert( fabs( retVm100 - Vm100 ) < 1e-6 );
 	assert( fabs( retVm900 - Vm900 ) < 1e-6 );
 
-	cout << "Done MultiNodeIntFireNetwork" << flush;
 	cout << "." << flush;
 	shell->doDelete( synId );
 	shell->doDelete( i2 );
