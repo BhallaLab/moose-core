@@ -191,6 +191,7 @@ Id SingleMsg::id() const
 	return id_;
 }
 
+/*
 // Deprecated.
 bool SingleMsg::add( Eref e1, const string& srcField, 
 			Eref e2, const string& destField )
@@ -206,6 +207,7 @@ bool SingleMsg::add( Eref e1, const string& srcField,
 	}
 	return 0;
 }
+*/
 
 /// Static function used during initialization
 void SingleMsg::setId( Id id )

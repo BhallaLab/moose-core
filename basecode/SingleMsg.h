@@ -22,8 +22,10 @@ class SingleMsg: public Msg
 
 		bool isMsgHere( const Qinfo& q ) const;
 
+		/*
 		static bool add( Eref e1, const string& srcField, 
 			Eref e2, const string& destField );
+			*/
 
 		DataId i1() const;
 		DataId i2() const;

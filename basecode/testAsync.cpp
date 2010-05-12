@@ -605,7 +605,11 @@ void testSendSpike()
 	Eref syne( syn, di );
 	reinterpret_cast< Synapse* >(syne.data())->setWeight( WEIGHT );
 
-	bool ret = SingleMsg::add( e2, "spike", syne, "addSpike" );
+	SingleMsg *m = new SingleMsg( e2, syne );
+	const Finfo* f1 = ic->findFinfo( "spike" );
+	const Finfo* f2 = Synapse::initCinfo()->findFinfo( "addSpike" );
+	bool ret = f1->addMsg( f2, m->mid(), e2.element() );
+	// bool ret = SingleMsg::add( e2, "spike", syne, "addSpike" );
 	assert( ret );
 
 	reinterpret_cast< IntFire* >(e2.data())->setVm( 1.0 );

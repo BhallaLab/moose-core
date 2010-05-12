@@ -363,14 +363,13 @@ void testThreadIntFireNetwork()
 	Eref er0( ticke, DataId( 0, 0 ) );
 
 	/*
-	 * This is how we should do it if we don't use Msg::add.
-	SingleMsg* m0 = new SingleMsg( er0, e2 );
-	FuncId f = intFireProcFinfo->getFid();
-	BindIndex b = tickProcFinfo->getBindIndex();
-	er0.element()->addMsgAndFunc( m0->mid(), f, b );
 	*/
+	SingleMsg* m = new SingleMsg( er0, e2 );
+	const Finfo* p1 = Tick::initCinfo()->findFinfo( "process0" );
+	const Finfo* p2 = ic->findFinfo( "process" );
+	ret = p1->addMsg( p2, m->mid(), ticke );
 
-	ret = SingleMsg::add( er0, "process0", e2, "process" );
+	// ret = SingleMsg::add( er0, "process0", e2, "process" );
 	assert( ret );
 
 	// printGrid( i2(), "Vm", 0, thresh );

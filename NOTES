@@ -5443,3 +5443,6 @@ Cleanup: Renamed the PsparseMsg files too. Checkin 1784.
 
 Cleanup: printf debugging. Checkin 1785.
 
+Cleanup: Got rid of Message.cpp:add. Used only in testAsync. Checkin 1786.
+
+Cleanup: Got rid of SingleMsg::add.
