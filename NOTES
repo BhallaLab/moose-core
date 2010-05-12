@@ -5446,3 +5446,7 @@ Cleanup: printf debugging. Checkin 1785.
 Cleanup: Got rid of Message.cpp:add. Used only in testAsync. Checkin 1786.
 
 Cleanup: Got rid of SingleMsg::add. Checkin 1787.
+
+Cleanup: Getting rid of all dependencies on Message.cpp. Checkin 1788
+
+Cleanup: Getting rid of Message.cpp and Message.h.
