@@ -26,11 +26,6 @@ OBJ = \
 	Finfo.o	\
 	DestFinfo.o	\
 	Cinfo.o	\
-	Msg.o	\
-	MsgManager.o \
-	SingleMsg.o	\
-	OneToOneMsg.o	\
-	OneToAllMsg.o	\
 	SrcFinfo.o \
 	SharedFinfo.o \
 	Id.o \
@@ -41,11 +36,7 @@ OBJ = \
 	SetGet.o \
 	OpFunc.o \
 	SparseMatrix.o \
-	SparseMsg.o \
-	DiagonalMsg.o \
 	PrepackedBuffer.o \
-	AssignmentMsg.o \
-	AssignVecMsg.o \
 	main.o	\
 	testSync.o	\
 	testAsync.o	\
@@ -69,11 +60,8 @@ HEADERS = \
 	Finfo.h \
 	DestFinfo.h \
 	Id.h \
-	Msg.h \
-	MsgManager.h \
-	SingleMsg.h \
-	OneToOneMsg.h \
-	OneToAllMsg.h \
+	../msg/Msg.h \
+	../msg/MsgManager.h \
 	Neutral.h \
 	OpFunc.h \
 	EpFunc.h \
@@ -93,7 +81,7 @@ SparseMsg.o:	SparseMatrix.h
 #TestBasecode.o:	Shell.h ShellWrapper.h
 
 .cpp.o:
-	$(CXX) $(CXXFLAGS) $< -c
+	$(CXX) $(CXXFLAGS) -I../msg $< -c
 
 $(TARGET):		$(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ)

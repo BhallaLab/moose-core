@@ -5449,4 +5449,5 @@ Cleanup: Got rid of SingleMsg::add. Checkin 1787.
 
 Cleanup: Getting rid of all dependencies on Message.cpp. Checkin 1788
 
-Cleanup: Getting rid of Message.cpp and Message.h.
+Cleanup: Getting rid of Message.cpp and Message.h. Checkin 1789.
+

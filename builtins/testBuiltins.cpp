@@ -9,6 +9,7 @@
 
 #include "header.h"
 #include "DiagonalMsg.h"
+#include "OneToAllMsg.h"
 #include "../scheduling/Tick.h"
 #include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"

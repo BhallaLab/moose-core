@@ -14,8 +14,11 @@
 #include <queue>
 #include "../biophysics/Synapse.h"
 #include "../biophysics/IntFire.h"
+#include "MsgManager.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
+#include "SingleMsg.h"
+#include "OneToOneMsg.h"
 #include "../randnum/randnum.h"
 #include "../scheduling/Tick.h"
 #include "../scheduling/TickPtr.h"

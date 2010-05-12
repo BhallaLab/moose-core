@@ -20,11 +20,11 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-IntFire.o:	IntFire.h Synapse.h ../basecode/Data.h ../basecode/SparseMatrix.h
-Synapse.o:	IntFire.h Synapse.h ../basecode/Data.h ../basecode/UpFunc.h ../basecode/SparseMatrix.h
+IntFire.o:	IntFire.h Synapse.h 
+Synapse.o:	IntFire.h Synapse.h
 
 .cpp.o:
-	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I.. -I../basecode $< -c
+	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg $< -c
 
 $(TARGET):		$(OBJ) $(SMOLDYN_OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ) $(SMOLDYN_OBJ) $(SMOLDYN_LIB_PATH) $(SMOLDYN_LIBS) 

@@ -21,10 +21,10 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 Arith.o:	Arith.h
-testBuiltins.o:	Arith.h ../basecode/DiagonalMsg.h
+testBuiltins.o:	Arith.h ../msg/DiagonalMsg.h
 
 .cpp.o:
-	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I.. -I../basecode $< -c
+	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg $< -c
 
 $(TARGET):		$(OBJ) $(SMOLDYN_OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ) $(SMOLDYN_OBJ) $(SMOLDYN_LIB_PATH) $(SMOLDYN_LIBS) 

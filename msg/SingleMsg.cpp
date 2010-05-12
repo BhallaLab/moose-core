@@ -8,7 +8,10 @@
 **********************************************************************/
 
 #include "header.h"
+#include "MsgManager.h"
 #include "SingleMsg.h"
+
+Id SingleMsg::id_;
 
 const Cinfo* SingleMsgWrapper::initCinfo()
 {

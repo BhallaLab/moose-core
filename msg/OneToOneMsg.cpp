@@ -8,6 +8,10 @@
 **********************************************************************/
 
 #include "header.h"
+#include "MsgManager.h"
+#include "OneToOneMsg.h"
+
+Id OneToOneMsg::id_;
 
 const Cinfo* OneToOneMsgWrapper::initCinfo()
 {

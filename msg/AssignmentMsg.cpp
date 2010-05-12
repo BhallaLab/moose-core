@@ -8,7 +8,10 @@
 **********************************************************************/
 
 #include "header.h"
+#include "MsgManager.h"
 #include "AssignmentMsg.h"
+
+Id AssignmentMsg::id_;
 
 AssignmentMsg::AssignmentMsg( Eref e1, Eref e2, MsgId mid )
 	: Msg( e1.element(), e2.element(), mid, id_ ),

@@ -200,6 +200,7 @@ LD = ld
 
 SUBDIR = \
 	basecode \
+	msg \
 	shell \
 	biophysics\
 	randnum\
@@ -214,6 +215,7 @@ CLEANSUBDIR = $(SUBDIR) $(PARALLEL_DIR)
 
 OBJLIBS =	\
 	basecode/basecode.o \
+	msg/msg.o \
 	shell/shell.o \
 	biophysics/biophysics.o \
 	randnum/randnum.o \

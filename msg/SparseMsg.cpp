@@ -8,11 +8,13 @@
 **********************************************************************/
 
 #include "header.h"
-#include "Message.h"
+#include "MsgManager.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
 #include "../randnum/randnum.h"
 #include "../biophysics/Synapse.h"
+
+Id SparseMsg::id_;
 
 //////////////////////////////////////////////////////////////////
 //    MOOSE wrapper functions for field access.

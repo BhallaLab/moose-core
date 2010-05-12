@@ -8,7 +8,10 @@
 **********************************************************************/
 
 #include "header.h"
+#include "MsgManager.h"
 #include "DiagonalMsg.h"
+
+Id DiagonalMsg::id_;
 
 DiagonalMsg::DiagonalMsg( Element* e1, Element* e2 )
 	: Msg( e1, e2, id_ ), stride_( 1 )

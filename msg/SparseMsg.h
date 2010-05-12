@@ -10,8 +10,6 @@
 #ifndef _SPARSE_MSG_H
 #define _SPARSE_MSG_H
 
-
-
 /**
  * This is a parallelized sparse message.
  * It is a general message type optimized for sparse matrix like

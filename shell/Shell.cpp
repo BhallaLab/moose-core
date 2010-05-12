@@ -8,7 +8,11 @@
 **********************************************************************/
 
 #include "header.h"
+#include "MsgManager.h"
+#include "SingleMsg.h"
 #include "DiagonalMsg.h"
+#include "OneToOneMsg.h"
+#include "OneToAllMsg.h"
 #include "AssignmentMsg.h"
 #include "AssignVecMsg.h"
 #include "SparseMatrix.h"

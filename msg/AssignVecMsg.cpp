@@ -8,7 +8,10 @@
 **********************************************************************/
 
 #include "header.h"
+#include "MsgManager.h"
 #include "AssignVecMsg.h"
+
+Id AssignVecMsg::id_;
 
 AssignVecMsg::AssignVecMsg( Eref e1, Element* e2, MsgId mid )
 	: Msg( e1.element(), e2, mid, id_ ),

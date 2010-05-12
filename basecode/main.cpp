@@ -17,6 +17,7 @@
 #include "../scheduling/Clock.h"
 #include "Neutral.h"
 #include "DiagonalMsg.h"
+#include "MsgManager.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
 #include "AssignmentMsg.h"
@@ -36,51 +37,10 @@ extern void testBuiltins();
 extern void testMpiScheduling();
 extern void testMpiBuiltins();
 extern void testMpiShell();
-
-Id SingleMsg::id_;
-Id OneToOneMsg::id_;
-Id OneToAllMsg::id_;
-Id DiagonalMsg::id_;
-Id SparseMsg::id_;
-Id AssignmentMsg::id_;
-Id AssignVecMsg::id_;
-
-Id msgManagerId;
-
-void initMsgManagers()
-{
-	vector< unsigned int > dims( 1, 2 );
-
-	// This is to be the parent of al the msg managers.
-	msgManagerId = Id::nextId();
-	new Element( msgManagerId, Neutral::initCinfo(), "Msgs", dims, 1 );
-
-	SingleMsg::id_ = Id::nextId();
-	new Element( SingleMsg::id_, SingleMsgWrapper::initCinfo(), "singleMsg", dims, 1 );
-
-	OneToOneMsg::id_ = Id::nextId();
-	new Element( OneToOneMsg::id_, OneToOneMsgWrapper::initCinfo(), "oneToOneMsg", dims, 1 );
-
-	OneToAllMsg::id_ = Id::nextId();
-	new Element( OneToAllMsg::id_, SingleMsgWrapper::initCinfo(), "oneToAllMsg", dims, 1 );
-	DiagonalMsg::id_ = Id::nextId();
-	new Element( DiagonalMsg::id_, SingleMsgWrapper::initCinfo(), "diagonalMsg", dims, 1 );
-	SparseMsg::id_ = Id::nextId();
-	new Element( SparseMsg::id_, SparseMsgWrapper::initCinfo(), "sparseMsg", dims, 1 );
-	AssignmentMsg::id_ = Id::nextId();
-	new Element( AssignmentMsg::id_, SingleMsgWrapper::initCinfo(), "assignmentMsg", dims, 1 );
-	AssignVecMsg::id_ = Id::nextId();
-	new Element( AssignVecMsg::id_, SingleMsgWrapper::initCinfo(), "assignVecMsg", dims, 1 );
-}
-
-void destroyMsgManagers()
-{
-	const unsigned int numMsgTypes = 7;
-	for ( unsigned int i = 0; i < numMsgTypes; ++i ) {
-		Id( 1 + i + msgManagerId.value() ).destroy();
-	}
-	msgManagerId.destroy();
-}
+extern void testMsg();
+extern void testMpiMsg();
+extern void initMsgManagers();
+extern void destroyMsgManagers();
 
 Id init( int argc, char** argv )
 {
@@ -184,6 +144,7 @@ void nonMpiTests()
 #ifdef DO_UNIT_TESTS
 	if ( Shell::numNodes() == 1 ) {
 		testAsync();
+		testMsg();
 		testScheduling();
 		testBuiltins();
 		testShell();
@@ -199,6 +160,7 @@ void mpiTests()
 {
 #ifdef DO_UNIT_TESTS
 	// if ( Shell::numNodes() > 1 ) {
+		testMpiMsg();
 		testMpiShell();
 		testMpiBuiltins();
 		testMpiScheduling();

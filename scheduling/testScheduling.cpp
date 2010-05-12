@@ -16,8 +16,10 @@
 #include <queue>
 #include "../biophysics/Synapse.h"
 #include "../biophysics/IntFire.h"
+#include "MsgManager.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
+#include "SingleMsg.h"
 #include "../randnum/randnum.h"
 
 pthread_mutex_t TestSched::mutex_;

@@ -8,6 +8,11 @@
 **********************************************************************/
 
 #include "header.h"
+#include "MsgManager.h"
+#include "OneToAllMsg.h"
+
+Id OneToAllMsg::id_;
+
 
 OneToAllMsg::OneToAllMsg( Eref e1, Element* e2 )
 	: 

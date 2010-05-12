@@ -69,10 +69,10 @@ class SetGet;
 #include "Cinfo.h"
 #include "Data.h"
 #include "Msg.h"
-#include "MsgManager.h"
-#include "SingleMsg.h"
-#include "OneToOneMsg.h"
-#include "OneToAllMsg.h"
+// #include "MsgManager.h"
+// #include "SingleMsg.h"
+// #include "OneToOneMsg.h"
+// #include "OneToAllMsg.h"
 #include "MsgFuncBinding.h"
 #include "Qinfo.h"
 #include "Dinfo.h"
@@ -95,6 +95,5 @@ class SetGet;
 #include "ValueFinfo.h"
 #include "SharedFinfo.h"
 #include "FieldElementFinfo.h"
-// #include "FieldElement.h"
 
 #endif // _HEADER_H
