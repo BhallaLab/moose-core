@@ -921,6 +921,7 @@ void testSparseMsg()
 		for ( unsigned int j = 0; j < numWorkerThreads; ++j )
 			totOutqEntries += Qinfo::outQ_[ j ].size();
 		assert( totOutqEntries / ( sizeof( Qinfo ) + sizeof( double ) ) == qSize[i] );
+		// cout << i << ": " << totOutqEntries / ( sizeof( Qinfo ) + sizeof( double ) ) << endl << endl ;
 		// cout << p.currTime << "	" << ifire100->getVm() << "	" << ifire900->getVm() << endl;
 		// cout << "T = " << p.currTime << ", Q size = " << Qinfo::q_[0].size() << endl;
 		Qinfo::clearQ( &p );

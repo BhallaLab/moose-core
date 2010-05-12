@@ -83,17 +83,22 @@ void OneDimGlobalHandler::setNumData1( unsigned int size )
 * Assigns the sizes of all array field entries at once.
 * Ignore if 1 or 0 dimensions.
 */
-void OneDimGlobalHandler::setNumData2( const vector< unsigned int >& sizes )
+void OneDimGlobalHandler::setNumData2( unsigned int start,
+	const vector< unsigned int >& sizes )
 {
 	;
 }
 
 /**
  * Looks up the sizes of all array field entries at once.
+ * Returns the start index.
  * Ignore in this case
  */
-void OneDimGlobalHandler::getNumData2( vector< unsigned int >& sizes ) const
-{;}
+unsigned int OneDimGlobalHandler::getNumData2( 
+	vector< unsigned int >& sizes ) const
+{	
+	return 0;
+}
 
 /**
  * Returns true if the node decomposition has the data on the

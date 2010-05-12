@@ -48,17 +48,22 @@ void AssignVecMsg::exec( const char* arg, const ProcInfo *p ) const
 			return;
 		}
 		if ( d2->numDimensions() == 2 ) {
-			unsigned int k = 0;
-			for ( unsigned int i = 0; 
-				i < e2_->dataHandler()->numData1(); ++i )
+			unsigned int k = d2->startDim2index();
+			// Note that begin and and refer to the data part of the
+			// index, in other words, they are the same as for the
+			// parent DataHandler..
+			// DataHandler* pa = d2->parentHandler();
+			for ( DataHandler::iterator i = d2->begin(); 
+				i != d2->end(); ++i ) {
 				for ( unsigned int j = 0; 
-					j < e2_->dataHandler()->numData2( i ); ++j )
+					j < d2->numData2( i ); ++j )
 				// This is nasty. We assume that none of the op funcs
 				// will actually use the Qinfo. 
 					f->op( Eref( e2_, DataId( i, j ) ), 
 						pb[ k++ ] - sizeof( Qinfo ) );
 			// Problem here. 2nd dimension size may vary. Do we do a 
 			// single stripe, or the entire array? Assume latter.
+			}
 		}
 	}
 	if ( !q->isForward() && e1_->dataHandler()->isDataHere( i1_ ) ) {

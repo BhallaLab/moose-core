@@ -120,7 +120,7 @@ class SetGet0: public SetGet
 		/**
 		 * Blocking, typed 'Set' call
 		 */
-		bool set( const Eref& dest, const string& field ) const
+		static bool set( const Eref& dest, const string& field )
 		{
 			SetGet0 sg( dest );
 			FuncId fid;

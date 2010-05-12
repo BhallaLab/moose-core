@@ -265,8 +265,11 @@ void testThreads()
 void testThreadIntFireNetwork()
 {
 	// Known value from single-thread run, at t = 1 sec.
+	// These are the old values
 	static const double Vm100 = 0.0857292;
 	static const double Vm900 = 0.107449;
+	// static const double Vm100 = 0.10124059893763067;
+	// static const double Vm900 = 0.091409481280996352;
 	static const unsigned int NUMSYN = 104576;
 	static const double thresh = 0.2;
 	static const double Vmax = 1.0;
@@ -387,7 +390,9 @@ void testMultiNodeIntFireNetwork()
 	// Known value from single-thread run, at t = 1 sec.
 	static const double Vm100 = 0.0857292;
 	static const double Vm900 = 0.107449;
-	static const unsigned int NUMSYN = 104576;
+	// static const double Vm100 = 0.10124059893763067;
+	// static const double Vm900 = 0.091409481280996352;
+	// static const unsigned int NUMSYN = 104576;
 	static const double thresh = 0.2;
 	static const double Vmax = 1.0;
 	static const double refractoryPeriod = 0.4;
@@ -396,6 +401,13 @@ void testMultiNodeIntFireNetwork()
 	static const double timestep = 0.2;
 	static const double connectionProbability = 0.1;
 	static const unsigned int runsteps = 5;
+	// These are the starting indices of synapses on
+	// IntFire[0], [100], [200], ...
+	static unsigned int synIndices[] = {
+		0, 10355, 20696, 30782, 41080,
+		51226, 61456, 71579, 81765, 92060,
+		102178,
+	};
 	// static const unsigned int runsteps = 1000;
 	// const Cinfo* ic = IntFire::initCinfo();
 	// const Cinfo* sc = Synapse::initCinfo();
@@ -437,14 +449,20 @@ void testMultiNodeIntFireNetwork()
 	SetGet2< double, long >::set( mer, "setRandomConnectivity", 
 		connectionProbability, 5489UL );
 
-	/*
-	bool ret = PsparseMsg::add( e2.element(), "spike", syn, "addSpike", 
-		connectionProbability, numThreads ); // Include group id as an arg. 
-	assert( ret );
-	*/
+	SetGet1< unsigned int >::set( mer, "loadBalance", numThreads ); 
+	vector< unsigned int > synArraySizes;
+	unsigned int start = syn->dataHandler()->getNumData2( synArraySizes );
+	cout << "start = " << start << endl;
+	unsigned int synIndex = start;
+	for ( unsigned int i = 0; i < size; ++i ) {
+		if ( ( i % 100 ) == 0 )
+			cout << "i = " << i << "SynIndex = " << synIndex << endl;
+		synIndex += synArraySizes[i];
+	}
 
 	unsigned int nd = syn->dataHandler()->numData();
 	cout << "Num Syn = " << nd << endl;
+	nd = 104576;
 
 	// This fails on multinodes.
 	// assert( nd == NUMSYN );
@@ -471,18 +489,53 @@ void testMultiNodeIntFireNetwork()
 	weight.reserve( nd );
 	vector< double > delay;
 	delay.reserve( nd );
+	for ( unsigned int i = 0; i < nd; ++i ) {
+		weight.push_back( mtrand() * weightMax );
+		delay.push_back( mtrand() * delayMax );
+	}
+	/*
+	vector< vector< double > > checkWeight( size );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		unsigned int numSyn = syne.element()->dataHandler()->numData2( i );
 		for ( unsigned int j = 0; j < numSyn; ++j ) {
 			weight.push_back( mtrand() * weightMax );
 			delay.push_back( mtrand() * delayMax );
+			if ( i %100 == 0 && j == 0 )
+				checkWeight[ i / 100 ].push_back( weight.back() );
+			if ( i %100 == 0 && j == 1 )
+				checkWeight[ i / 100 ].push_back( weight.back() );
 		}
 	}
+	*/
 	ret = Field< double >::setVec( syne, "weight", weight );
 	assert( ret );
 	ret = Field< double >::setVec( syne, "delay", delay );
 	assert( ret );
 
+	for ( unsigned int i = 0; i < size; i+= 100 ) {
+		double wt = Field< double >::get( 
+			Eref( syne.element(), DataId( i, 0 ) ), "weight" );
+		assert( fabs( wt - weight[ synIndices[ i / 100 ] ] ) < 1e-6 );
+	}
+
+	// Checks multinode assignment of weights.
+	/*
+	for ( unsigned int i = 0; i < size; i += 100 ) {
+		const vector< double >& cw = checkWeight[ i/100 ];
+		if ( cw.size() > 0 ) {
+			double wt = Field< double >::get( 
+				Eref( syne.element(), DataId( i, 0 ) ), "weight" );
+			assert( fabs ( wt - cw[0] ) < 1e-6 );
+			cout << "*" << flush;
+		}
+		if ( cw.size() > 1 ) {
+			double wt = Field< double >::get( 
+				Eref( syne.element(), DataId( i, 1 ) ), "weight" );
+			assert( fabs ( wt - cw[1] ) < 1e-6 );
+			cout << "*" << flush;
+		}
+	}
+	*/
 
 	Element* ticke = Id( 2 )();
 	Eref er0( ticke, DataId( 0, 0 ) );

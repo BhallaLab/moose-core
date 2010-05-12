@@ -77,13 +77,14 @@ class OneDimGlobalHandler: public DataHandler
 		 * Assigns the sizes of all array field entries at once.
 		 * Ignore in this case, as there are none.
 		 */
-		void setNumData2( const vector< unsigned int >& sizes );
+		void setNumData2( unsigned int start,
+			const vector< unsigned int >& sizes );
 
 		/**
 		 * Looks up the sizes of all array field entries at once.
 		 * Ignore in this case, as there are no array fields.
 		 */
-		void getNumData2( vector< unsigned int >& sizes ) const;
+		unsigned int getNumData2( vector< unsigned int >& sizes ) const;
 
 		/**
 		 * Returns true if the node decomposition has the data on the
@@ -114,6 +115,14 @@ class OneDimGlobalHandler: public DataHandler
 		 * Some derived classes can't handle this. They return 0.
 		 */
 		unsigned int addOneEntry( const char* data );
+
+		/**
+		 * This is relevant only for the 2 D cases like
+		 * FieldDataHandlers.
+		 */
+		unsigned int startDim2index() const {
+			return 0;
+		}
 
 	private:
 		char* data_;

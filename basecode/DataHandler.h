@@ -101,6 +101,8 @@ class DataHandler
 
 		/**
 		 * Assigns the sizes of all array field entries at once.
+		 * The 'start' entry is needed for multinode setups because
+		 * one cannot compute the start index from node# alone.
 		 * Ignore if 1 or 0 dimensions.
 		 * The 'sizes' vector must be of length numData1.
 		 * In a FieldElement we can assign different array sizes
@@ -110,7 +112,8 @@ class DataHandler
 		 * However, each FieldElement instance will refer to just one of
 		 * these array fields, so there is no ambiguity.
 		 */
-		virtual void setNumData2( const vector< unsigned int >& sizes ) 
+		virtual void setNumData2( unsigned int start,
+			const vector< unsigned int >& sizes )
 			 = 0;
 
 		/**
@@ -120,7 +123,8 @@ class DataHandler
 		 * However, each FieldElement instance will refer to just one of
 		 * these array fields, so there is no ambiguity.
 		 */
-		virtual void getNumData2( vector< unsigned int >& sizes ) const
+		virtual unsigned int getNumData2( 
+			vector< unsigned int >& sizes ) const
 			= 0;
 
 		/**
@@ -157,6 +161,17 @@ class DataHandler
 		virtual unsigned int addOneEntry( const char* data ) {
 			return 0;
 		}
+
+		/**
+		 * Returns the starting index for the second dimension
+		 */
+		virtual unsigned int startDim2index() const = 0;
+
+		/*
+		virtual const DataHandler* parentDataHandler() const {
+			return 0;
+		}
+		*/
 
 	protected:
 		const DinfoBase* dinfo() const

@@ -30,7 +30,8 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 				parentDataHandler_( parentDataHandler ),
 				lookupField_( lookupField ),
 				getNumField_( getNumField ),
-				setNumField_( setNumField )
+				setNumField_( setNumField ),
+				start_( 0 )
 
 		{;}
 
@@ -135,13 +136,15 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		/**
 		 * Assigns the sizes of all array field entries at once.
 		 */
-		void setNumData2( const vector< unsigned int >& sizes ) {
+		void setNumData2( unsigned int start, 
+			const vector< unsigned int >& sizes ) {
 			assert ( sizes.size() == parentDataHandler_->numData() );
 			for ( DataHandler::iterator i = parentDataHandler_->begin();
 				i != parentDataHandler_->end(); ++i ) {
 				char* pa = parentDataHandler_->data1( i );
 				( ( reinterpret_cast< Parent* >( pa ) )->*setNumField_ )( sizes[i] );
 			}
+			start_ = start;
 
 /*
 			unsigned int size = parentDataHandler_->numData1();
@@ -161,10 +164,12 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		/**
 		 * Looks up the sizes of all array field entries at once.
 		 * This is messy for multinode situations, because many/most
-		 * entries will be zero for the local node.
-		 * So I pass back not just the sizes, but also the 
+		 * entries will be zero for the local node. So we just fill out
+		 * the entries that concern the local node. 
+		 * Returns the start index on the current node: this is not
+		 * possible to compute just from the node#.
 		 */
-		void getNumData2( vector< unsigned int >& sizes ) const
+		unsigned int getNumData2( vector< unsigned int >& sizes ) const
 		{
 			sizes.assign( parentDataHandler_->numData(), 0 );
 			for ( DataHandler::iterator i = parentDataHandler_->begin();
@@ -188,6 +193,7 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 				);
 			}
 			*/
+			return start_;
 		}
 
 		/**
@@ -215,13 +221,26 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 			return parentDataHandler_->isGlobal();
 		}
 
+		/**
+		 * This seems funny, but remember than begin() refers to the
+		 * data part on the index.
+		 * Don't want to permit iterating here, it will cause problems.
+		 */
 		iterator begin() const {
-			return 0;
+			return parentDataHandler_->begin();
 		}
 
 		// Don't want to permit iterating here, it will cause problems.
 		iterator end() const {
-			return 0;
+			return parentDataHandler_->end();
+		}
+
+		const DataHandler* parentDataHandler() const {
+			return parentDataHandler_;
+		}
+
+		unsigned int startDim2index() const {
+			return start_;
 		}
 
 	private:
@@ -229,6 +248,7 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		Field* ( Parent::*lookupField_ )( unsigned int );
 		unsigned int ( Parent::*getNumField_ )() const;
 		void ( Parent::*setNumField_ )( unsigned int num );
+		unsigned int start_;
 };
 
 #endif	// _FIELD_DATA_HANDLER_H

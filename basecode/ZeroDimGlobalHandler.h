@@ -84,7 +84,8 @@ class ZeroDimGlobalHandler: public DataHandler
 		 * Assigns the sizes of all array field entries at once.
 		 * This is ignored for regular Elements.
 		 */
-		void setNumData2( const vector< unsigned int >& sizes ) {
+		void setNumData2( unsigned int start,
+			const vector< unsigned int >& sizes ) {
 			;
 		}
 
@@ -92,9 +93,10 @@ class ZeroDimGlobalHandler: public DataHandler
 		/**
 		 * Looks up the sizes of all array field entries at once.
 		 * Ignored in this case, as there are none.
+		 * Returns the first index on this node, irrelevant here.
 		 */
-		void getNumData2( vector< unsigned int >& sizes ) const {
-			;
+		unsigned int getNumData2( vector< unsigned int >& sizes ) const {
+			return 0;
 		}
 
 		/**
@@ -114,6 +116,14 @@ class ZeroDimGlobalHandler: public DataHandler
 		iterator begin() const;
 
 		iterator end() const;
+
+		/**
+		 * This is relevant only for the 2 D cases like
+		 * FieldDataHandlers.
+		 */
+		unsigned int startDim2index() const {
+			return 0;
+		}
 
 	private:
 		char* data_;

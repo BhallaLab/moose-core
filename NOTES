@@ -5354,3 +5354,76 @@ matrix transposition code. It was so broken that it is amazing it worked
 for the earlier, smaller unit tests.
 
 But it _still_ doesn't work with the multinode IntFire test.
+After fighting with GNOMEs keyring for quite a while, finally managed to
+subdue it, and was able to checkin as 1778
+
+Looks now like the weight assignment was completely off. Need to figure out
+how to get the correct # of synapses across all nodes, in order to do this
+assignment. Then the check becomes interesting too.
+
+Design issue: Suppose there is a field like NumSynapses, which has a different
+value on each node. How do we get individual NumSynapses? How do we get the
+total?
+We could set up a vector of the values... But that assumes we know how the
+nodes are decomposed.
+We should know all this at the time that the synapses are set up. If it is done
+using a global function like the SparseMsg randomConnect, then each
+node will know where it starts from. Need to get this info into the 
+appropriate DataHandler.
+
+AssignMsgVec is also messed up for 2-D data assignment.
+
+============================================================================
+10 May 2010
+For fields like numSynapses, which have input from all nodes, we need to
+set up a distinct Finfo which may need a distinct OpFunc to run it.
+This can do the gather and summation of data from all over the place.
+
+Also need to merge the variants of the SparseMsg to give a single one.
+============================================================================
+11 May 2010
+
+There seems to be a memory overwrite bug, causing things to crash. For once
+valgrind isn't much help as it reports a different problem in a different place
+than gdb. But it seems likely that one of the Element or DataId,
+contents is being overwritten.
+
+Here is some tighter debugging info. Looks like parentDataHandler ptr is also
+funny:
+(gdb) p se.e_->dataHandler_->begin()
+$4 = 0
+(gdb) p se.e_->dataHandler_->end()
+$5 = 0
+(gdb) p temp->dataHandler_->end()
+$6 = 100
+(gdb) p temp->dataHandler_->begin()
+$7 = 0
+
+So this is something nasty about the FieldDataHandler class and how it has
+inherited from the DataHandler.
+
+Changed the DataHandler to use a pure virtual function for the 
+startDim2index. Now it works. Don't ask why.
+Had to clear up a number of unit tests involving the random connected sparse
+matrix. This follows from the fixes to the SparseMatrix::transpose() function.
+Clears unit tests on 1 thread, 1 node. Other cases fail.
+Went to regular make (as opposed to the MPI version). Did a valgrind test.
+No bad accesses, but lots of leaks. These turn out to be due to the 
+MsgManagers. When they are cleared out valgrind is happy.
+
+This version still doesn't work with multiple threads. Fails when trying to
+doStart in testScheduling.cpp:testMultiNodeIntFireNetwork.
+Seems I need to do a loadbalance.... Done, now it works for 2 threads.
+
+Trying to set up for multinode. Need to hard-code in checks for weights/delays.
+There is something funny happening with the start_: should be 0, comes out 10.
+This turned out to be a nasty little bug in randomConnect. Fixed, and now the
+sparse matrix and IntFire solutions are back to what they used to be.
+
+Implemented some tests for synaptic weights and their assignments. 
+1 thread clears it. 2 nodes fails even before it gets there.
+
+
+
+
+============================================================================

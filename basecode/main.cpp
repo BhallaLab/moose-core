@@ -47,12 +47,14 @@ Id PsparseMsg::id_;
 Id AssignmentMsg::id_;
 Id AssignVecMsg::id_;
 
+Id msgManagerId;
+
 void initMsgManagers()
 {
 	vector< unsigned int > dims( 1, 2 );
 
 	// This is to be the parent of al the msg managers.
-	Id msgManagerId = Id::nextId();
+	msgManagerId = Id::nextId();
 	new Element( msgManagerId, Neutral::initCinfo(), "Msgs", dims, 1 );
 
 	SingleMsg::id_ = Id::nextId();
@@ -73,6 +75,15 @@ void initMsgManagers()
 	new Element( AssignmentMsg::id_, SingleMsgWrapper::initCinfo(), "assignmentMsg", dims, 1 );
 	AssignVecMsg::id_ = Id::nextId();
 	new Element( AssignVecMsg::id_, SingleMsgWrapper::initCinfo(), "assignVecMsg", dims, 1 );
+}
+
+void destroyMsgManagers()
+{
+	const unsigned int numMsgTypes = 8;
+	for ( unsigned int i = 0; i < numMsgTypes; ++i ) {
+		Id( 1 + i + msgManagerId.value() ).destroy();
+	}
+	msgManagerId.destroy();
 }
 
 Id init( int argc, char** argv )
@@ -222,6 +233,7 @@ int main( int argc, char** argv )
 	shellId.destroy();
 	Id(1).destroy();
 	Id(2).destroy();
+	destroyMsgManagers();
 #ifdef USE_MPI
 	MPI_Finalize();
 #endif

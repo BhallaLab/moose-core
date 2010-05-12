@@ -215,7 +215,8 @@ void PsparseMsgWrapper::setRandomConnectivity(
 		p_ = probability;
 		seed_ = seed;
 		mtseed( seed );
-		pm->randomConnect( probability );
+		unsigned int numSynapses = pm->randomConnect( probability );
+		cout << Shell::myNode() << ": PsparseMsgWrapper::setRandomConnectivity numSyn= " << numSynapses << endl;
 	}
 }
 
