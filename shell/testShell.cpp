@@ -317,7 +317,7 @@ void testShellAddMsg()
 	assert( m4 != Msg::badMsg );
 
 	// Should give 54321
-	MsgId m5 = shell->doAddMsg( "Psparse", 
+	MsgId m5 = shell->doAddMsg( "Sparse", 
 		FullId( e1, 0 ), "output", FullId( e2, 0 ), "arg1" );
 	assert( m5 != Msg::badMsg );
 

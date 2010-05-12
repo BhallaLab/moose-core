@@ -18,7 +18,6 @@
 #include "../biophysics/Synapse.h"
 #include "../biophysics/IntFire.h"
 #include "SparseMatrix.h"
-#include "SparseMsg.h"
 #include "PsparseMsg.h"
 #include "../randnum/randnum.h"
 
@@ -310,9 +309,18 @@ void testThreadIntFireNetwork()
 	if ( Qinfo::numSimGroup() >= 2 ) {
 		numThreads = Qinfo::simGroup( 1 )->numThreads;
 	}
+	/*
 	bool ret = PsparseMsg::add( e2.element(), "spike", syn, "addSpike", 
 		connectionProbability, numThreads ); // Include group id as an arg. 
 	assert( ret );
+	*/
+	SparseMsg* sm = new SparseMsg( e2.element(), syn );
+	assert( sm );
+	const Finfo* f1 = ic->findFinfo( "spike" );
+	const Finfo* f2 = Synapse::initCinfo()->findFinfo( "addSpike" );
+	assert( f1 && f2 );
+	f1->addMsg( f2, sm->mid(), t2 );
+	sm->randomConnect( connectionProbability );
 
 	unsigned int nd = syn->dataHandler()->numData();
 //	cout << "Num Syn = " << nd << endl;
@@ -321,7 +329,7 @@ void testThreadIntFireNetwork()
 	for ( unsigned int i = 0; i < size; ++i )
 		temp[i] = mtrand() * Vmax;
 
-	ret = Field< double >::setVec( e2, "Vm", temp );
+	bool ret = Field< double >::setVec( e2, "Vm", temp );
 	assert( ret );
 
 	temp.clear();
@@ -440,7 +448,7 @@ void testMultiNodeIntFireNetwork()
 		numThreads = Qinfo::simGroup( 1 )->numThreads;
 	}
 
-	MsgId mid = shell->doAddMsg( "Psparse", e2.fullId(), "spike",
+	MsgId mid = shell->doAddMsg( "Sparse", e2.fullId(), "spike",
 		FullId( synId, 0 ), "addSpike" );
 	
 	const Msg* m = Msg::getMsg( mid );

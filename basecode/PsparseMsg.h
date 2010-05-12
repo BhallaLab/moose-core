@@ -7,8 +7,8 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _PSPARSE_MSG_H
-#define _PSPARSE_MSG_H
+#ifndef _SPARSE_MSG_H
+#define _SPARSE_MSG_H
 
 
 
@@ -44,12 +44,12 @@
  * BiSparseMsg.
  * It can be modified after creation to add or remove message entries.
  */
-class PsparseMsg: public SparseMsg
+class SparseMsg: public Msg
 {
 	friend void initMsgManagers(); // for initializing Id.
 	public:
-		PsparseMsg( Element* e1, Element* e2 );
-		~PsparseMsg();
+		SparseMsg( Element* e1, Element* e2 );
+		~SparseMsg();
 
 		void exec( const char* arg, const ProcInfo* p ) const;
 
@@ -62,20 +62,27 @@ class PsparseMsg: public SparseMsg
 			Element* e2, const string& destField, double probability,
 			unsigned int numThreadsInGroup );
 		
+		unsigned int randomConnect( double probability );
+
 		void loadBalance( unsigned int numThreads );
 		void loadUnbalance();
 
 		Id id() const;
+
+		void setMatrix( const SparseMatrix< unsigned int >& m );
+		SparseMatrix< unsigned int >& getMatrix();
+
 	private:
+		SparseMatrix< unsigned int > matrix_;
 		unsigned int numThreads_; // Number of threads to partition
 		unsigned int nrows_; // The original size of the matrix.
-		static Id id_; // The Element that manages Psparse Msgs.
+		static Id id_; // The Element that manages Sparse Msgs.
 };
 
 extern void sparseMatrixBalance( 
 	unsigned int numThreads, SparseMatrix< unsigned int >& matrix );
 
-class PsparseMsgWrapper: public MsgManager
+class SparseMsgWrapper: public MsgManager
 {
 	public:
 		void setRandomConnectivity( double probability, long seed );
@@ -108,4 +115,4 @@ class PsparseMsgWrapper: public MsgManager
 		unsigned long seed_;
 };
 
-#endif // _PSPARSE_MSG_H
+#endif // _SPARSE_MSG_H

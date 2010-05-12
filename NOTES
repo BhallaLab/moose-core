@@ -5433,5 +5433,7 @@ OK but it fails in the tests for the weights, on 2 nodes.
 Checked, found that the startSynapse number was not set correctly for worker
 node. Some more minor fixes in the randomConnect. Now it works. IntFire network
 seems to be set up and compute correctly across nodes. But it still fails
-for 2 nodes each with 2 threads.
+for 2 nodes each with 2 threads. Checkin 1782.
+Also works for 3 and 4 nodes.
+
 

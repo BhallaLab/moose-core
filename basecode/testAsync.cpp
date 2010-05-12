@@ -16,7 +16,6 @@
 #include "../biophysics/Synapse.h"
 #include "../biophysics/IntFire.h"
 #include "SparseMatrix.h"
-#include "SparseMsg.h"
 #include "PsparseMsg.h"
 #include "../randnum/randnum.h"
 #include "../scheduling/Tick.h"
@@ -857,9 +856,19 @@ void testSparseMsg()
 	DataId di( 1, 0 ); // DataId( data, field )
 	Eref syne( syn, di );
 
+	/*
+	/// This old utility function is replaced with the series of funcs 
 	bool ret = SparseMsg::add( e2.element(), "spike", syn, "addSpike", 
 		connectionProbability );
-	assert( ret );
+	*/
+	SparseMsg* sm = new SparseMsg( e2.element(), syn );
+	assert( sm );
+	const Finfo* f1 = ic->findFinfo( "spike" );
+	const Finfo* f2 = Synapse::initCinfo()->findFinfo( "addSpike" );
+	assert( f1 && f2 );
+	f1->addMsg( f2, sm->mid(), t2 );
+	sm->randomConnect( connectionProbability );
+	//sm->loadBalance( 1 );
 
 	unsigned int nd = syn->dataHandler()->numData();
 //	cout << "Num Syn = " << nd << endl;
@@ -868,7 +877,7 @@ void testSparseMsg()
 	for ( unsigned int i = 0; i < size; ++i )
 		temp[i] = mtrand() * Vmax;
 
-	ret = Field< double >::setVec( e2, "Vm", temp );
+	bool ret = Field< double >::setVec( e2, "Vm", temp );
 	assert( ret );
 	/*
 	for ( unsigned int i = 0; i < 40; ++i )

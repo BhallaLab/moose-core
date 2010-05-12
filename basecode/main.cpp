@@ -18,7 +18,6 @@
 #include "Neutral.h"
 #include "DiagonalMsg.h"
 #include "SparseMatrix.h"
-#include "SparseMsg.h"
 #include "PsparseMsg.h"
 #include "AssignmentMsg.h"
 #include "AssignVecMsg.h"
@@ -43,7 +42,6 @@ Id OneToOneMsg::id_;
 Id OneToAllMsg::id_;
 Id DiagonalMsg::id_;
 Id SparseMsg::id_;
-Id PsparseMsg::id_;
 Id AssignmentMsg::id_;
 Id AssignVecMsg::id_;
 
@@ -68,9 +66,7 @@ void initMsgManagers()
 	DiagonalMsg::id_ = Id::nextId();
 	new Element( DiagonalMsg::id_, SingleMsgWrapper::initCinfo(), "diagonalMsg", dims, 1 );
 	SparseMsg::id_ = Id::nextId();
-	new Element( SparseMsg::id_, SingleMsgWrapper::initCinfo(), "sparseMsg", dims, 1 );
-	PsparseMsg::id_ = Id::nextId();
-	new Element( PsparseMsg::id_, PsparseMsgWrapper::initCinfo(), "pSparseMsg", dims, 1 );
+	new Element( SparseMsg::id_, SparseMsgWrapper::initCinfo(), "sparseMsg", dims, 1 );
 	AssignmentMsg::id_ = Id::nextId();
 	new Element( AssignmentMsg::id_, SingleMsgWrapper::initCinfo(), "assignmentMsg", dims, 1 );
 	AssignVecMsg::id_ = Id::nextId();
@@ -79,7 +75,7 @@ void initMsgManagers()
 
 void destroyMsgManagers()
 {
-	const unsigned int numMsgTypes = 8;
+	const unsigned int numMsgTypes = 7;
 	for ( unsigned int i = 0; i < numMsgTypes; ++i ) {
 		Id( 1 + i + msgManagerId.value() ).destroy();
 	}

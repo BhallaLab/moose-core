@@ -10,7 +10,6 @@
 #include "header.h"
 #include "Message.h"
 #include "SparseMatrix.h"
-#include "SparseMsg.h"
 #include "PsparseMsg.h"
 #include "../randnum/randnum.h"
 #include "../biophysics/Synapse.h"
@@ -19,51 +18,51 @@
 //    MOOSE wrapper functions for field access.
 //////////////////////////////////////////////////////////////////
 
-const Cinfo* PsparseMsgWrapper::initCinfo()
+const Cinfo* SparseMsgWrapper::initCinfo()
 {
 	///////////////////////////////////////////////////////////////////
 	// Field definitions.
 	///////////////////////////////////////////////////////////////////
 	/*
-	static ReadOnlyValueFinfo< PsparseMsgWrapper, Id > element1(
+	static ReadOnlyValueFinfo< SparseMsgWrapper, Id > element1(
 		"e1",
 		"Id of source Element.",
-		&PsparseMsgWrapper::getE1
+		&SparseMsgWrapper::getE1
 	);
-	static ReadOnlyValueFinfo< PsparseMsgWrapper, Id > element2(
+	static ReadOnlyValueFinfo< SparseMsgWrapper, Id > element2(
 		"e2",
 		"Id of source Element.",
-		&PsparseMsgWrapper::getE2
+		&SparseMsgWrapper::getE2
 	);
 	*/
-	static ReadOnlyValueFinfo< PsparseMsgWrapper, unsigned int > numRows(
+	static ReadOnlyValueFinfo< SparseMsgWrapper, unsigned int > numRows(
 		"numRows",
 		"Number of rows in matrix.",
-		&PsparseMsgWrapper::getNumRows
+		&SparseMsgWrapper::getNumRows
 	);
-	static ReadOnlyValueFinfo< PsparseMsgWrapper, unsigned int > numColumns(
+	static ReadOnlyValueFinfo< SparseMsgWrapper, unsigned int > numColumns(
 		"numColumns",
 		"Number of columns in matrix.",
-		&PsparseMsgWrapper::getNumColumns
+		&SparseMsgWrapper::getNumColumns
 	);
-	static ReadOnlyValueFinfo< PsparseMsgWrapper, unsigned int > numEntries(
+	static ReadOnlyValueFinfo< SparseMsgWrapper, unsigned int > numEntries(
 		"numEntries",
 		"Number of Entries in matrix.",
-		&PsparseMsgWrapper::getNumEntries
+		&SparseMsgWrapper::getNumEntries
 	);
 
-	static ValueFinfo< PsparseMsgWrapper, double > probability(
+	static ValueFinfo< SparseMsgWrapper, double > probability(
 		"probability",
 		"connection probability for random connectivity.",
-		&PsparseMsgWrapper::setProbability,
-		&PsparseMsgWrapper::getProbability
+		&SparseMsgWrapper::setProbability,
+		&SparseMsgWrapper::getProbability
 	);
 
-	static ValueFinfo< PsparseMsgWrapper, long > seed(
+	static ValueFinfo< SparseMsgWrapper, long > seed(
 		"seed",
 		"Random number seed for generating probabilistic connectivity.",
-		&PsparseMsgWrapper::setSeed,
-		&PsparseMsgWrapper::getSeed
+		&SparseMsgWrapper::setSeed,
+		&SparseMsgWrapper::getSeed
 	);
 
 ////////////////////////////////////////////////////////////////////////
@@ -72,44 +71,44 @@ const Cinfo* PsparseMsgWrapper::initCinfo()
 
 	static DestFinfo setRandomConnectivity( "setRandomConnectivity",
 		"Assigns connectivity with specified probability and seed",
-		new OpFunc2< PsparseMsgWrapper, double, long >( 
-		&PsparseMsgWrapper::setRandomConnectivity ) );
+		new OpFunc2< SparseMsgWrapper, double, long >( 
+		&SparseMsgWrapper::setRandomConnectivity ) );
 
 	static DestFinfo setEntry( "setEntry",
 		"Assigns single row,column value",
-		new OpFunc3< PsparseMsgWrapper, unsigned int, unsigned int, unsigned int >( 
-		&PsparseMsgWrapper::setEntry ) );
+		new OpFunc3< SparseMsgWrapper, unsigned int, unsigned int, unsigned int >( 
+		&SparseMsgWrapper::setEntry ) );
 
 	static DestFinfo unsetEntry( "unsetEntry",
 		"Clears single row,column entry",
-		new OpFunc2< PsparseMsgWrapper, unsigned int, unsigned int >( 
-		&PsparseMsgWrapper::unsetEntry ) );
+		new OpFunc2< SparseMsgWrapper, unsigned int, unsigned int >( 
+		&SparseMsgWrapper::unsetEntry ) );
 
 	static DestFinfo clear( "clear",
 		"Clears out the entire matrix",
-		new OpFunc0< PsparseMsgWrapper >( 
-		&PsparseMsgWrapper::clear ) );
+		new OpFunc0< SparseMsgWrapper >( 
+		&SparseMsgWrapper::clear ) );
 
 	static DestFinfo transpose( "transpose",
 		"Transposes the sparse matrix",
-		new OpFunc0< PsparseMsgWrapper >( 
-		&PsparseMsgWrapper::transpose ) );
+		new OpFunc0< SparseMsgWrapper >( 
+		&SparseMsgWrapper::transpose ) );
 
 	static DestFinfo loadBalance( "loadBalance",
 		"Decomposes the sparse matrix for threaded operation",
-		new OpFunc1< PsparseMsgWrapper, unsigned int >( 
-		&PsparseMsgWrapper::loadBalance ) );
+		new OpFunc1< SparseMsgWrapper, unsigned int >( 
+		&SparseMsgWrapper::loadBalance ) );
 
 	static DestFinfo loadUnbalance( "loadUnbalance",
 		"Converts the threaded matrix back into single-thread form",
-		new OpFunc0< PsparseMsgWrapper >( 
-		&PsparseMsgWrapper::loadUnbalance ) );
+		new OpFunc0< SparseMsgWrapper >( 
+		&SparseMsgWrapper::loadUnbalance ) );
 
 ////////////////////////////////////////////////////////////////////////
 // Assemble it all.
 ////////////////////////////////////////////////////////////////////////
 
-	static Finfo* pSparseMsgFinfos[] = {
+	static Finfo* sparseMsgFinfos[] = {
 		&numRows,			// readonly value
 		&numColumns,		// readonly value
 		&numEntries,		// readonly value
@@ -124,26 +123,26 @@ const Cinfo* PsparseMsgWrapper::initCinfo()
 		&loadUnbalance		//dest
 	};
 
-	static Cinfo pSparseMsgCinfo (
-		"PsparseMsg",					// name
+	static Cinfo sparseMsgCinfo (
+		"SparseMsg",					// name
 		MsgManager::initCinfo(),		// base class
-		pSparseMsgFinfos,
-		sizeof( pSparseMsgFinfos ) / sizeof( Finfo* ),	// num Fields
-		new Dinfo< PsparseMsgWrapper >()
+		sparseMsgFinfos,
+		sizeof( sparseMsgFinfos ) / sizeof( Finfo* ),	// num Fields
+		new Dinfo< SparseMsgWrapper >()
 	);
 
-	return &pSparseMsgCinfo;
+	return &sparseMsgCinfo;
 }
 
-static const Cinfo* pSparseMsgCinfo = PsparseMsgWrapper::initCinfo();
+static const Cinfo* sparseMsgCinfo = SparseMsgWrapper::initCinfo();
 
 //////////////////////////////////////////////////////////////////
 //    Value Fields
 //////////////////////////////////////////////////////////////////
-void PsparseMsgWrapper::setProbability ( double probability )
+void SparseMsgWrapper::setProbability ( double probability )
 {
 	Msg* m = Msg::safeGetMsg( getMid() );
-	PsparseMsg* pm = dynamic_cast< PsparseMsg *>( m );
+	SparseMsg* pm = dynamic_cast< SparseMsg *>( m );
 	if ( pm ) {
 		p_ = probability;
 		mtseed( seed_ );
@@ -151,15 +150,15 @@ void PsparseMsgWrapper::setProbability ( double probability )
 	}
 }
 
-double PsparseMsgWrapper::getProbability ( ) const
+double SparseMsgWrapper::getProbability ( ) const
 {
 	return p_;
 }
 
-void PsparseMsgWrapper::setSeed ( long seed )
+void SparseMsgWrapper::setSeed ( long seed )
 {
 	Msg* m = Msg::safeGetMsg( getMid() );
-	PsparseMsg* pm = dynamic_cast< PsparseMsg *>( m );
+	SparseMsg* pm = dynamic_cast< SparseMsg *>( m );
 	if ( pm ) {
 		seed_ = seed;
 		mtseed( seed_ );
@@ -167,37 +166,37 @@ void PsparseMsgWrapper::setSeed ( long seed )
 	}
 }
 
-long PsparseMsgWrapper::getSeed () const
+long SparseMsgWrapper::getSeed () const
 {
 	return seed_;
 }
 
-unsigned int PsparseMsgWrapper::getNumRows() const
+unsigned int SparseMsgWrapper::getNumRows() const
 {
 	Msg* m = Msg::safeGetMsg( getMid() );
-	PsparseMsg* pm = dynamic_cast< PsparseMsg *>( m );
+	SparseMsg* pm = dynamic_cast< SparseMsg *>( m );
 	if ( pm ) {
-		return pm->matrix().nRows();
+		return pm->getMatrix().nRows();
 	}
 	return 0;
 }
 
-unsigned int PsparseMsgWrapper::getNumColumns() const
+unsigned int SparseMsgWrapper::getNumColumns() const
 {
 	Msg* m = Msg::safeGetMsg( getMid() );
-	PsparseMsg* pm = dynamic_cast< PsparseMsg *>( m );
+	SparseMsg* pm = dynamic_cast< SparseMsg *>( m );
 	if ( pm ) {
-		return pm->matrix().nColumns();
+		return pm->getMatrix().nColumns();
 	}
 	return 0;
 }
 
-unsigned int PsparseMsgWrapper::getNumEntries() const
+unsigned int SparseMsgWrapper::getNumEntries() const
 {
 	Msg* m = Msg::safeGetMsg( getMid() );
-	PsparseMsg* pm = dynamic_cast< PsparseMsg *>( m );
+	SparseMsg* pm = dynamic_cast< SparseMsg *>( m );
 	if ( pm ) {
-		return pm->matrix().nEntries();
+		return pm->getMatrix().nEntries();
 	}
 	return 0;
 }
@@ -206,70 +205,70 @@ unsigned int PsparseMsgWrapper::getNumEntries() const
 //    DestFields
 //////////////////////////////////////////////////////////////////
 
-void PsparseMsgWrapper::setRandomConnectivity(
+void SparseMsgWrapper::setRandomConnectivity(
 	double probability, long seed )
 {
 	Msg* m = Msg::safeGetMsg( getMid() );
-	PsparseMsg* pm = dynamic_cast< PsparseMsg* >( m );
+	SparseMsg* pm = dynamic_cast< SparseMsg* >( m );
 	if ( pm ) {
 		p_ = probability;
 		seed_ = seed;
 		mtseed( seed );
 		unsigned int numSynapses = pm->randomConnect( probability );
-		cout << Shell::myNode() << ": PsparseMsgWrapper::setRandomConnectivity numSyn= " << numSynapses << endl;
+		cout << Shell::myNode() << ": SparseMsgWrapper::setRandomConnectivity numSyn= " << numSynapses << endl;
 	}
 }
 
-void PsparseMsgWrapper::setEntry(
+void SparseMsgWrapper::setEntry(
 	unsigned int row, unsigned int column, unsigned int value )
 {
 	Msg* m = Msg::safeGetMsg( getMid() );
-	PsparseMsg* pm = dynamic_cast< PsparseMsg *>( m );
+	SparseMsg* pm = dynamic_cast< SparseMsg *>( m );
 	if ( pm ) {
-		pm->matrix().set( row, column, value );
+		pm->getMatrix().set( row, column, value );
 	}
 }
 
-void PsparseMsgWrapper::unsetEntry( unsigned int row, unsigned int column )
+void SparseMsgWrapper::unsetEntry( unsigned int row, unsigned int column )
 {
 	Msg* m = Msg::safeGetMsg( getMid() );
-	PsparseMsg* pm = dynamic_cast< PsparseMsg *>( m );
+	SparseMsg* pm = dynamic_cast< SparseMsg *>( m );
 	if ( pm ) {
-		pm->matrix().unset( row, column );
+		pm->getMatrix().unset( row, column );
 	}
 }
 
-void PsparseMsgWrapper::clear()
+void SparseMsgWrapper::clear()
 {
 	Msg* m = Msg::safeGetMsg( getMid() );
-	PsparseMsg* pm = dynamic_cast< PsparseMsg *>( m );
+	SparseMsg* pm = dynamic_cast< SparseMsg *>( m );
 	if ( pm ) {
-		pm->matrix().clear();
+		pm->getMatrix().clear();
 	}
 }
 
-void PsparseMsgWrapper::transpose()
+void SparseMsgWrapper::transpose()
 {
 	Msg* m = Msg::safeGetMsg( getMid() );
-	PsparseMsg* pm = dynamic_cast< PsparseMsg *>( m );
+	SparseMsg* pm = dynamic_cast< SparseMsg *>( m );
 	if ( pm ) {
-		pm->matrix().transpose();
+		pm->getMatrix().transpose();
 	}
 }
 
-void PsparseMsgWrapper::loadBalance( unsigned int numThreads )
+void SparseMsgWrapper::loadBalance( unsigned int numThreads )
 {
 	Msg* m = Msg::safeGetMsg( getMid() );
-	PsparseMsg* pm = dynamic_cast< PsparseMsg *>( m );
+	SparseMsg* pm = dynamic_cast< SparseMsg *>( m );
 	if ( pm ) {
 		pm->loadBalance( numThreads );
 	}
 }
 
-void PsparseMsgWrapper::loadUnbalance()
+void SparseMsgWrapper::loadUnbalance()
 {
 	Msg* m = Msg::safeGetMsg( getMid() );
-	PsparseMsg* pm = dynamic_cast< PsparseMsg *>( m );
+	SparseMsg* pm = dynamic_cast< SparseMsg *>( m );
 	if ( pm ) {
 		pm->loadUnbalance();
 	}
@@ -280,18 +279,34 @@ void PsparseMsgWrapper::loadUnbalance()
 //////////////////////////////////////////////////////////////////
 
 
-PsparseMsg::PsparseMsg( Element* e1, Element* e2 )
-	: SparseMsg( e1, e2, id_ )
+SparseMsg::SparseMsg( Element* e1, Element* e2 )
+	: Msg( e1, e2, id_ ),
+	matrix_( e1->dataHandler()->numData1(), e2->dataHandler()->numData1() )
 {
-	;
+	assert( e1->dataHandler()->numDimensions() == 1  && 
+		e2->dataHandler()->numDimensions() >= 1 );
 }
 
-PsparseMsg::~PsparseMsg()
+SparseMsg::~SparseMsg()
 {
 	MsgManager::dropMsg( mid() );
 }
 
-void PsparseMsg::exec( const char* arg, const ProcInfo *p ) const
+unsigned int rowIndex( const Element* e, const DataId& d )
+{
+	if ( e->dataHandler()->numDimensions() == 1 ) {
+		return d.data();
+	} else if ( e->dataHandler()->numDimensions() == 2 ) {
+		// This is a nasty case, hopefully very rare.
+		unsigned int row = 0;
+		for ( unsigned int i = 0; i < d.data(); ++i )
+			row += e->dataHandler()->numData2( i );
+		return ( row + d.field() );
+	}
+	return 0;
+}
+
+void SparseMsg::exec( const char* arg, const ProcInfo *p ) const
 {
 	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
 	// arg += sizeof( Qinfo );
@@ -302,7 +317,7 @@ void PsparseMsg::exec( const char* arg, const ProcInfo *p ) const
 	if ( q->isForward() ) {
 		const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
 		unsigned int row = rowIndex( e1_, q->srcIndex() );
-		unsigned int oldRow = row;
+		// unsigned int oldRow = row;
 
 
 		// This is the crucial line where we define which subset of data
@@ -337,7 +352,7 @@ void PsparseMsg::exec( const char* arg, const ProcInfo *p ) const
 			/*
 			if ( colIndex[j] % 100 == 0 ) {
 				cout << Shell::myNode() << "." << p->threadIndexInGroup << 
-				":Psparse exec    [" << colIndex[j] << 
+				":Sparse exec    [" << colIndex[j] << 
 				"," << fieldIndex[j] << 
 				"], target here = " << tgt.isDataHere() <<
 				", t = " << p->currTime << endl << flush;
@@ -369,7 +384,7 @@ void PsparseMsg::exec( const char* arg, const ProcInfo *p ) const
  * it explicitly creates a SparseMsg we can't just use the parent func.
  * Then it does the load balancing.
  */
-bool PsparseMsg::add( Element* e1, const string& srcField, 
+bool SparseMsg::add( Element* e1, const string& srcField, 
 	Element* e2, const string& destField, double probability, 
 	unsigned int numThreadsInGroup )
 {
@@ -378,7 +393,7 @@ bool PsparseMsg::add( Element* e1, const string& srcField,
 		e2, destField, funcId );
 
 	if ( srcFinfo ) {
-		PsparseMsg* m = new PsparseMsg( e1, e2 );
+		SparseMsg* m = new SparseMsg( e1, e2 );
 		e1->addMsgAndFunc( m->mid(), funcId, srcFinfo->getBindIndex() );
 		m->randomConnect( probability );
 		m->loadBalance( numThreadsInGroup );
@@ -386,6 +401,69 @@ bool PsparseMsg::add( Element* e1, const string& srcField,
 	}
 	return 0;
 }
+
+
+/**
+ * Should really have a seed argument
+ */
+unsigned int SparseMsg::randomConnect( double probability )
+{
+	unsigned int nRows = matrix_.nRows(); // Sources
+	unsigned int nCols = matrix_.nColumns();	// Destinations
+	// matrix_.setSize( 0, nRows ); // we will transpose this later.
+	matrix_.clear();
+	unsigned int totalSynapses = 0;
+	unsigned int startSynapse = 0;
+	vector< unsigned int > sizes;
+	bool isFirstRound = 1;
+	unsigned int totSynNum = 0;
+
+	// SynElement* syn = dynamic_cast< SynElement* >( e2_ );
+	Element* syn = e2_;
+	syn->dataHandler()->getNumData2( sizes );
+	assert( sizes.size() == nCols );
+
+	for ( unsigned int i = 0; i < nCols; ++i ) {
+		// Check if synapse is on local node
+		bool isSynOnMyNode = syn->dataHandler()->isDataHere( i );
+		vector< unsigned int > synIndex;
+		// This needs to be obtained from current size of syn array.
+		// unsigned int synNum = sizes[ i ];
+		unsigned int synNum = 0;
+		for ( unsigned int j = 0; j < nRows; ++j ) {
+			double r = mtrand(); // Want to ensure it is called each time round the loop.
+			if ( isSynOnMyNode ) {
+				if ( isFirstRound ) {
+					startSynapse = totSynNum;
+					isFirstRound = 0;
+				}
+			}
+			if ( r < probability && isSynOnMyNode ) {
+				synIndex.push_back( synNum );
+				++synNum;
+			} else {
+				synIndex.push_back( ~0 );
+			}
+			if ( r < probability )
+				++totSynNum;
+		}
+		sizes[ i ] = synNum;
+		totalSynapses += synNum;
+
+		matrix_.addRow( i, synIndex );
+	}
+	/*
+	cout << Shell::myNode() << ": sizes.size() = " << sizes.size() << ", ncols = " << nCols << endl;
+	for ( unsigned int i = 0; i < sizes.size(); ++i ) {
+		cout << Shell::myNode() << ": sizes[" << i << "] = " << sizes[i] << endl;
+	}
+	*/
+	syn->dataHandler()->setNumData2( startSynapse, sizes );
+	cout << Shell::myNode() << ": sizes.size() = " << sizes.size() << ", ncols = " << nCols << ", startSynapse = " << startSynapse << endl;
+	matrix_.transpose();
+	return totalSynapses;
+}
+
 
 // Utility function for doing load balance
 void sparseMatrixBalance( 
@@ -431,7 +509,7 @@ void sparseMatrixBalance(
  * and so on.
  *
  */
-void PsparseMsg::loadBalance( unsigned int numThreads )
+void SparseMsg::loadBalance( unsigned int numThreads )
 {
 	sparseMatrixBalance( numThreads, matrix_ );
 	numThreads_ = numThreads;
@@ -439,12 +517,22 @@ void PsparseMsg::loadBalance( unsigned int numThreads )
 
 // Need a restore function to convert the load-balanced form back into
 // the regular sparse matrix.
-void PsparseMsg::loadUnbalance()
+void SparseMsg::loadUnbalance()
 {
 	;
 }
 
-Id PsparseMsg::id() const
+Id SparseMsg::id() const
 {
 	return id_;
+}
+
+void SparseMsg::setMatrix( const SparseMatrix< unsigned int >& m )
+{
+	matrix_ = m;
+}
+
+SparseMatrix< unsigned int >& SparseMsg::getMatrix( )
+{
+	return matrix_;
 }

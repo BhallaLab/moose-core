@@ -12,7 +12,6 @@
 #include "AssignmentMsg.h"
 #include "AssignVecMsg.h"
 #include "SparseMatrix.h"
-#include "SparseMsg.h"
 #include "PsparseMsg.h"
 #include "Shell.h"
 #include "Dinfo.h"
@@ -542,8 +541,6 @@ void Shell::handleAddMsg( string msgType, FullId src, string srcField,
 		m = new OneToAllMsg( src.eref(), dest.id() );
 	} else if ( msgType == "OneToOne" || msgType == "oneToOne" ) {
 		m = new OneToOneMsg( src.id(), dest.id() );
-	} else if ( msgType == "Psparse" || msgType == "psparse" ) {
-		m = new PsparseMsg( src.id(), dest.id() );
 	} else {
 		cout << myNode_ << 
 			": Error: Shell::handleAddMsg: msgType not known: "
