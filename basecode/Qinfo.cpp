@@ -21,7 +21,7 @@ vector< SimGroup > Qinfo::g_;
 vector< vector< QueueBlock > > Qinfo::qBlock_;
 
 void hackForSendTo( const Qinfo* q, const char* buf );
-static const unsigned int BLOCKSIZE = 2000000;
+static const unsigned int BLOCKSIZE = 20000;
 
 Qinfo::Qinfo( FuncId f, DataId srcIndex, 
 	unsigned int size, bool useSendTo, bool isForward )
@@ -374,8 +374,10 @@ void Qinfo::sendRootToAll( const ProcInfo* proc )
 	// cout << "ng = " << g_.size() << ", ninQ= " << inQ_[0].size() << ", nmpiQ = " << mpiQ_[0].size() << " proc->groupId =  " << proc->groupId  << " s1 = " << mpiQ_[ proc->groupId ].size() << " s2 = " << BLOCKSIZE * proc->numNodesInGroup;
 	assert( mpiQ_[ proc->groupId ].size() >= BLOCKSIZE * proc->numNodesInGroup );
 #ifdef USE_MPI
+	/*
 	if ( inQ_[proc->groupId].size() < BLOCKSIZE )
 		inQ_[proc->groupId].resize( BLOCKSIZE );
+		*/
 	char* sendbuf = &inQ_[ proc->groupId ][0];
 	char* recvbuf = &mpiQ_[ proc->groupId ][0];
 //	assert ( inQ_[ proc->groupId ].size() == BLOCKSIZE );
@@ -389,11 +391,27 @@ void Qinfo::sendRootToAll( const ProcInfo* proc )
 		MPI_Bcast( 
 			sendbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
 		// cout << "\n\nSent stuff via mpi, on node = " << proc->nodeIndexInGroup << ", ret = " << ret << endl;
+		unsigned int bufsize = *( reinterpret_cast< unsigned int* >( sendbuf ) );
+		if ( bufsize > BLOCKSIZE ) {
+			cout << Shell::myNode() << "." << proc->threadIndexInGroup << 
+				": Large MPI_Bcast of size = " << bufsize << endl;
+			MPI_Bcast( 
+				sendbuf, bufsize, MPI_CHAR, 0, MPI_COMM_WORLD );
+		}
 	} else {
 		// cout << "\n\nStarting Recv via mpi, on node = " << proc->nodeIndexInGroup << endl;
 		MPI_Bcast( 
 			recvbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
 		// cout << "\n\nRecvd stuff via mpi, on node = " << proc->nodeIndexInGroup << ", size = " << *reinterpret_cast< unsigned int* >( recvbuf ) << "\n";
+		unsigned int bufsize = *( reinterpret_cast< unsigned int* >( recvbuf ) );
+		if ( bufsize > BLOCKSIZE ) {
+			cout << Shell::myNode() << "." << proc->threadIndexInGroup << 
+				": Large MPI_Bcast of size = " << bufsize << endl;
+			mpiQ_[ proc->groupId ].resize( bufsize );
+			recvbuf = &mpiQ_[ proc->groupId ][0];
+			MPI_Bcast( 
+				recvbuf, bufsize, MPI_CHAR, 0, MPI_COMM_WORLD );
+		}
 	}
 
 	// Recieve data into recvbuf of node0 from sendbuf of all other nodes

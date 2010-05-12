@@ -189,8 +189,8 @@ endif
 # Here we automagically change compilers to deal with MPI.
 ifdef USE_MPI
 	CXX = mpicxx
-	PARALLEL_DIR = parallel
-	PARALLEL_LIB = parallel/parallel.o
+#	PARALLEL_DIR = parallel
+#	PARALLEL_LIB = parallel/parallel.o
 else
 	CXX = g++
 #	CXX = CC	# Choose between Solaris CC and g++ on a Solaris machine

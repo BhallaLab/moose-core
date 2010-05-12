@@ -5451,3 +5451,9 @@ Cleanup: Getting rid of all dependencies on Message.cpp. Checkin 1788
 
 Cleanup: Getting rid of Message.cpp and Message.h. Checkin 1789.
 
+Cleanup: Make a separate directory for Msgs. Checkin 1790.
+
+New stuff: Implemented check for buffer size, followed by special send of
+	expanded data. This works for 1 and 2 nodes but not 3 or 4.
+	Makes a huge speed difference on multinodes.
+============================================================================
