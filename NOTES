@@ -5423,7 +5423,15 @@ sparse matrix and IntFire solutions are back to what they used to be.
 Implemented some tests for synaptic weights and their assignments. 
 1 thread clears it. 2 nodes fails even before it gets there.
 
-
-
-
 ============================================================================
+12 May 2010
+Checkin of all the above pending stuff, 1781.
+
+Fixed yet another bug in the randomConnect. Now the connectivity is set up
+OK but it fails in the tests for the weights, on 2 nodes.
+
+Checked, found that the startSynapse number was not set correctly for worker
+node. Some more minor fixes in the randomConnect. Now it works. IntFire network
+seems to be set up and compute correctly across nodes. But it still fails
+for 2 nodes each with 2 threads.
+

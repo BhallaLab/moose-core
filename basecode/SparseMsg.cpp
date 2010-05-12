@@ -115,6 +115,8 @@ unsigned int SparseMsg::randomConnect( double probability )
 	unsigned int totalSynapses = 0;
 	unsigned int startSynapse = 0;
 	vector< unsigned int > sizes;
+	bool isFirstRound = 1;
+	unsigned int totSynNum = 0;
 
 	// SynElement* syn = dynamic_cast< SynElement* >( e2_ );
 	Element* syn = e2_;
@@ -128,8 +130,6 @@ unsigned int SparseMsg::randomConnect( double probability )
 		// This needs to be obtained from current size of syn array.
 		// unsigned int synNum = sizes[ i ];
 		unsigned int synNum = 0;
-		unsigned int totSynNum = synNum;
-		bool isFirstRound = 1;
 		for ( unsigned int j = 0; j < nRows; ++j ) {
 			double r = mtrand(); // Want to ensure it is called each time round the loop.
 			if ( isSynOnMyNode ) {
@@ -137,12 +137,12 @@ unsigned int SparseMsg::randomConnect( double probability )
 					startSynapse = totSynNum;
 					isFirstRound = 0;
 				}
-				if ( r < probability ) {
-					synIndex.push_back( synNum );
-					++synNum;
-				} else {
-					synIndex.push_back( ~0 );
-				}
+			}
+			if ( r < probability && isSynOnMyNode ) {
+				synIndex.push_back( synNum );
+				++synNum;
+			} else {
+				synIndex.push_back( ~0 );
 			}
 			if ( r < probability )
 				++totSynNum;
@@ -159,6 +159,7 @@ unsigned int SparseMsg::randomConnect( double probability )
 	}
 	*/
 	syn->dataHandler()->setNumData2( startSynapse, sizes );
+	cout << Shell::myNode() << ": sizes.size() = " << sizes.size() << ", ncols = " << nCols << ", startSynapse = " << startSynapse << endl;
 	matrix_.transpose();
 	return totalSynapses;
 }

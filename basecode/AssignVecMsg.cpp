@@ -49,20 +49,22 @@ void AssignVecMsg::exec( const char* arg, const ProcInfo *p ) const
 		}
 		if ( d2->numDimensions() == 2 ) {
 			unsigned int k = d2->startDim2index();
-			// Note that begin and and refer to the data part of the
+			// Note that begin and end refer to the data part of the
 			// index, in other words, they are the same as for the
 			// parent DataHandler..
 			// DataHandler* pa = d2->parentHandler();
 			for ( DataHandler::iterator i = d2->begin(); 
 				i != d2->end(); ++i ) {
-				for ( unsigned int j = 0; 
-					j < d2->numData2( i ); ++j )
+				if ( i % 100 == 0 ) 
+					cout << Shell::myNode() << "." << 
+						p->threadIndexInGroup << ": " << i <<
+						",	vecIndex = " << k << endl;
+				for ( unsigned int j = 0; j < d2->numData2( i ); ++j ) {
 				// This is nasty. We assume that none of the op funcs
 				// will actually use the Qinfo. 
 					f->op( Eref( e2_, DataId( i, j ) ), 
 						pb[ k++ ] - sizeof( Qinfo ) );
-			// Problem here. 2nd dimension size may vary. Do we do a 
-			// single stripe, or the entire array? Assume latter.
+				}
 			}
 		}
 	}
