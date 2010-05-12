@@ -38,7 +38,6 @@ OBJ = \
 	Neutral.o	\
 	Qinfo.o \
 	DataId.o \
-	Message.o \
 	SetGet.o \
 	OpFunc.o \
 	SparseMatrix.o \

@@ -9,7 +9,6 @@
 
 #include "header.h"
 #include "SingleMsg.h"
-#include "Message.h"
 
 const Cinfo* SingleMsgWrapper::initCinfo()
 {
@@ -190,24 +189,6 @@ Id SingleMsg::id() const
 {
 	return id_;
 }
-
-/*
-// Deprecated.
-bool SingleMsg::add( Eref e1, const string& srcField, 
-			Eref e2, const string& destField )
-{
-	FuncId funcId;
-	const SrcFinfo* srcFinfo = validateMsg( e1.element(), srcField,
-		e2.element(), destField, funcId );
-
-	if ( srcFinfo ) {
-		Msg* m = new SingleMsg( e1, e2 );
-		e1.element()->addMsgAndFunc( m->mid(), funcId, srcFinfo->getBindIndex() );
-		return 1;
-	}
-	return 0;
-}
-*/
 
 /// Static function used during initialization
 void SingleMsg::setId( Id id )

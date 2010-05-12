@@ -33,10 +33,15 @@ class DiagonalMsg: public Msg
 
 		void exec( const char* arg, const ProcInfo* p ) const;
 
+		/*
 		static bool add( Element* e1, const string& srcField, 
 			Element* e2, const string& destField, int stride );
+			*/
 
 		Id id() const;
+
+		void setStride( int stride );
+		int getStride() const;
 	private:
 		int stride_; // Increment between targets.
 		unsigned int numThreads_;

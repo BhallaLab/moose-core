@@ -10,7 +10,7 @@
 /*
 extern bool add( Element* src, const string& srcField, 
 	Element* dest, const string& destField );
-	*/
 
 extern const SrcFinfo* validateMsg( Element* src, const string& srcField, 
 	Element* dest, const string& destField, FuncId& fid );
+	*/

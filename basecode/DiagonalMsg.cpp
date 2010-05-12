@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "Message.h" // defines validateMsg
 #include "DiagonalMsg.h"
 
 DiagonalMsg::DiagonalMsg( Element* e1, Element* e2 )
@@ -31,7 +30,6 @@ DiagonalMsg::~DiagonalMsg()
 void DiagonalMsg::exec( const char* arg, const ProcInfo *p ) const
 {
 	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
-	// arg += sizeof( Qinfo );
 
 	if ( q->isForward() ) {
 		int src = q->srcIndex().data();
@@ -40,12 +38,6 @@ void DiagonalMsg::exec( const char* arg, const ProcInfo *p ) const
 			const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
 			f->op( Eref( e2_, dest ), arg );
 		}
-		/*
-		if ( dest >= 0 && dest < static_cast< int >( e2_->dataHandler()->numData() ) ) {
-			const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
-			f->op( Eref( e2_, dest ), arg );
-		}
-		*/
 	} else {
 		// Here we are stuck a bit. I will assume srcIndex is now for e2.
 		int src = q->srcIndex().data();
@@ -54,33 +46,20 @@ void DiagonalMsg::exec( const char* arg, const ProcInfo *p ) const
 			const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
 			f->op( Eref( e1_, dest ), arg );
 		}
-
-		/*
-		if ( dest >= 0 && dest < static_cast< int >( e1_->dataHandler()->numData() ) ) {
-			const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
-			f->op( Eref( e1_, dest ), arg );
-		}
-		*/
 	}
-}
-
-bool DiagonalMsg::add( Element* e1, const string& srcField, 
-			Element* e2, const string& destField, int stride )
-{
-	FuncId funcId;
-	const SrcFinfo* srcFinfo = validateMsg( e1, srcField,
-		e2, destField, funcId );
-
-	if ( srcFinfo ) {
-		DiagonalMsg* m = new DiagonalMsg( e1, e2 );
-		e1->addMsgAndFunc( m->mid(), funcId, srcFinfo->getBindIndex() );
-		m->stride_ = stride;
-		return 1;
-	}
-	return 0; // Null msgId.
 }
 
 Id DiagonalMsg::id() const
 {
 	return id_;
+}
+
+void DiagonalMsg::setStride( int stride )
+{
+	stride_ = stride;
+}
+
+int DiagonalMsg::getStride() const
+{
+	return stride_;
 }

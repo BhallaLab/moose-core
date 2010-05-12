@@ -64,16 +64,36 @@ void testFibonacci()
 		data->arg2( 1 );
 	}
 
+	const Finfo* outFinfo = Arith::initCinfo()->findFinfo( "output" );
+	const Finfo* arg1Finfo = Arith::initCinfo()->findFinfo( "arg1" );
+	const Finfo* arg2Finfo = Arith::initCinfo()->findFinfo( "arg2" );
+	const Finfo* procFinfo = Arith::initCinfo()->findFinfo( "process" );
+	DiagonalMsg* dm1 = new DiagonalMsg( a1, a1 );
+	bool ret = outFinfo->addMsg( arg1Finfo, dm1->mid(), a1 );
+	assert( ret );
+	dm1->setStride( 1 );
+
+	DiagonalMsg* dm2 = new DiagonalMsg( a1, a1 );
+	ret = outFinfo->addMsg( arg2Finfo, dm2->mid(), a1 );
+	assert( ret );
+	dm1->setStride( 2 );
+
+	/*
 	bool ret = DiagonalMsg::add( a1, "output", a1, "arg1", 1 );
 	assert( ret );
 	ret = DiagonalMsg::add( a1, "output", a1, "arg2", 2 );
 	assert( ret );
-
+	*/
 
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	shell->setclock( 0, 1.0, 0 );
 	Eref ticker = Id( 2 ).eref();
-	ret = OneToAllMsg::add( ticker, "process0", a1, "process" );
+
+	const Finfo* proc0Finfo = Tick::initCinfo()->findFinfo( "process0" );
+	OneToAllMsg* otam = new OneToAllMsg( ticker, a1 );
+	ret = proc0Finfo->addMsg( procFinfo, otam->mid(), ticker.element() );
+
+	// ret = OneToAllMsg::add( ticker, "process0", a1, "process" );
 	assert( ret );
 
 	shell->doStart( numFib );
@@ -104,39 +124,44 @@ void testMpiFibonacci()
 	vector< unsigned int > dims( 1, numFib );
 
 	Id a1id = Id::nextId();
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+
 	Element* a1 = new Element( a1id, Arith::initCinfo(), "a1", dims );
 
 	Arith* data = reinterpret_cast< Arith* >( a1->dataHandler()->data1( 0 ) );
+
 	if ( data ) {
 		data->arg1( 0 );
 		data->arg2( 1 );
 	}
 
+	MsgId mid1 = shell->doAddMsg( "Diagonal", 
+		FullId( a1id, 0 ), "output", FullId( a1id, 0 ), "arg1" );
+	const Msg* m1 = Msg::getMsg( mid1 );
+	Eref er1 = m1->manager( m1->id() );
+	bool ret = Field< int >::set( er1, "stride", 1 );
+	assert( ret );
+
+	MsgId mid2 = shell->doAddMsg( "Diagonal", 
+		FullId( a1id, 0 ), "output", FullId( a1id, 0 ), "arg2" );
+	const Msg* m2 = Msg::getMsg( mid2 );
+	Eref er2 = m2->manager( m2->id() );
+	ret = Field< int >::set( er2, "stride", 2 );
+	assert( ret );
+	
+	/*
 	bool ret = DiagonalMsg::add( a1, "output", a1, "arg1", 1 );
 	assert( ret );
 	ret = DiagonalMsg::add( a1, "output", a1, "arg2", 2 );
 	assert( ret );
+	*/
 
-
-	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	shell->setclock( 0, 1.0, 0 );
 	Eref ticker = Id( 2 ).eref();
-	ret = OneToAllMsg::add( ticker, "process0", a1, "process" );
-	assert( ret );
+//	ret = OneToAllMsg::add( ticker, "process0", a1, "process" );
+//	assert( ret );
 
-	// clock->tStart( clocker, ti )
-	if ( Shell::myNode() == 0 ) {
-		shell->doStart( numFib );
-	} else {
-		Element* shelle = Id().eref().element();
-		Eref clocker = Id( 1 ).eref();
-		double currentTime = 0.0;
-		while ( currentTime < 1 ) {
-			shell->passThroughMsgQs( shelle );
-			currentTime = ( reinterpret_cast< Clock* >( clocker.data() ) )->getCurrentTime();
-		}
-		shell->passThroughMsgQs( shelle );
-	}
+	shell->doStart( numFib );
 
 	unsigned int f1 = 1;
 	unsigned int f2 = 0;

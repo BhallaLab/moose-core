@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "Message.h"
 
 const Cinfo* OneToOneMsgWrapper::initCinfo()
 {

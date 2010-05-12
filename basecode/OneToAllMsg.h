@@ -29,9 +29,6 @@ class OneToAllMsg: public Msg
 
 		Id id() const;
 
-		static bool add( Eref e1, const string& srcField, 
-			Element* e2, const string& destField );
-
 	private:
 		DataId i1_;
 		static Id id_;

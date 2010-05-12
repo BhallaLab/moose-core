@@ -66,6 +66,7 @@ bool add( Element* src, const string& srcField,
 }
  */
 
+/*
 const SrcFinfo* validateMsg( Element* src, const string& srcField, 
 	Element* dest, const string& destField, FuncId& fid )
 {
@@ -97,3 +98,4 @@ const SrcFinfo* validateMsg( Element* src, const string& srcField,
 	}
 	return 0;
 }
+*/
