@@ -221,7 +221,11 @@ void testCreateMsg()
 	Eref e2 = i2.eref();
 	ProcInfo p;
 
-	bool ret = add( e1.element(), "child", e2.element(), "parent" );
+	OneToOneMsg *m = new OneToOneMsg( e1.element(), e2.element() );
+	const Finfo* f1 = nc->findFinfo( "child" );
+	const Finfo* f2 = nc->findFinfo( "parent" );
+	bool ret = f1->addMsg( f2, m->mid(), e1.element() );
+	// bool ret = add( e1.element(), "child", e2.element(), "parent" );
 	
 	assert( ret );
 
