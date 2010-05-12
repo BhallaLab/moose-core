@@ -12,7 +12,7 @@
 #include "AssignmentMsg.h"
 #include "AssignVecMsg.h"
 #include "SparseMatrix.h"
-#include "PsparseMsg.h"
+#include "SparseMsg.h"
 #include "Shell.h"
 #include "Dinfo.h"
 

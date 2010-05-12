@@ -10,7 +10,7 @@
 #include "header.h"
 #include "Message.h"
 #include "SparseMatrix.h"
-#include "PsparseMsg.h"
+#include "SparseMsg.h"
 #include "../randnum/randnum.h"
 #include "../biophysics/Synapse.h"
 

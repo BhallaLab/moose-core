@@ -42,7 +42,7 @@ OBJ = \
 	SetGet.o \
 	OpFunc.o \
 	SparseMatrix.o \
-	PsparseMsg.o \
+	SparseMsg.o \
 	DiagonalMsg.o \
 	PrepackedBuffer.o \
 	AssignmentMsg.o \

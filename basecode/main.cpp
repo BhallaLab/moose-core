@@ -18,7 +18,7 @@
 #include "Neutral.h"
 #include "DiagonalMsg.h"
 #include "SparseMatrix.h"
-#include "PsparseMsg.h"
+#include "SparseMsg.h"
 #include "AssignmentMsg.h"
 #include "AssignVecMsg.h"
 #ifdef USE_MPI

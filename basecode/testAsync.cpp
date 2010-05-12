@@ -16,7 +16,7 @@
 #include "../biophysics/Synapse.h"
 #include "../biophysics/IntFire.h"
 #include "SparseMatrix.h"
-#include "PsparseMsg.h"
+#include "SparseMsg.h"
 #include "../randnum/randnum.h"
 #include "../scheduling/Tick.h"
 #include "../scheduling/TickPtr.h"

@@ -18,7 +18,7 @@
 #include "../biophysics/Synapse.h"
 #include "../biophysics/IntFire.h"
 #include "SparseMatrix.h"
-#include "PsparseMsg.h"
+#include "SparseMsg.h"
 #include "../randnum/randnum.h"
 
 pthread_mutex_t TestSched::mutex_;
@@ -310,7 +310,7 @@ void testThreadIntFireNetwork()
 		numThreads = Qinfo::simGroup( 1 )->numThreads;
 	}
 	/*
-	bool ret = PsparseMsg::add( e2.element(), "spike", syn, "addSpike", 
+	bool ret = SparseMsg::add( e2.element(), "spike", syn, "addSpike", 
 		connectionProbability, numThreads ); // Include group id as an arg. 
 	assert( ret );
 	*/
@@ -321,6 +321,7 @@ void testThreadIntFireNetwork()
 	assert( f1 && f2 );
 	f1->addMsg( f2, sm->mid(), t2 );
 	sm->randomConnect( connectionProbability );
+	sm->loadBalance( numThreads );
 
 	unsigned int nd = syn->dataHandler()->numData();
 //	cout << "Num Syn = " << nd << endl;

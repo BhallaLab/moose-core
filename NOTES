@@ -5436,4 +5436,6 @@ seems to be set up and compute correctly across nodes. But it still fails
 for 2 nodes each with 2 threads. Checkin 1782.
 Also works for 3 and 4 nodes.
 
+Cleanup: Folded the old SparseMsg code into PsparseMsg, and renamed the 
+PsparseMsg class to SparseMsg.  Checkin 1783.
 
