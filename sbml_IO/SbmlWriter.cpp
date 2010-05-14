@@ -371,7 +371,7 @@ SBMLDocument* SbmlWriter::createModel( string filename )
 			}
 			// Create a KineticLaw object inside the Reaction object 
 			ostringstream rate_law,kfparm,kbparm;
-			if ( kf != 0.0 ){
+			//if ( kf != 0.0 ){
 				kfparm << rtnName << "_" << "kf";
 				kbparm << rtnName << "_" << "kb";
 				rate_law << kfparm.str();
@@ -392,7 +392,7 @@ SBMLDocument* SbmlWriter::createModel( string filename )
 						rate_law << "*" <<newriName << "^" << rstoch;
    				} 
 				
-			}
+			//}
 			if ( kb != 0.0 ){
 				rate_law << "-" << kbparm.str();
 				std::set < Eref > ::iterator i;
