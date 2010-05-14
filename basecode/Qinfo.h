@@ -132,9 +132,20 @@ class Qinfo
 		static void readMpiQ( const ProcInfo* proc );
 
 		/**
+		 * Read the MPI Q in contexts where only the message from the
+		 * root Element should be considered.
+		 */
+		static void readRootQ( const ProcInfo* proc );
+
+		/**
 		 * Merge all outQs from a group into its inQ.
 		 */
 		static void mergeQ( unsigned int groupId );
+
+		/**
+		 * Clears out contents of all qs, correspondingly the qBlock.
+		 */
+		static void emptyAllQs();
 
 		/**
 		 * Load a buffer of data into an inQ. Assumes threading has been

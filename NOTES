@@ -5457,3 +5457,28 @@ New stuff: Implemented check for buffer size, followed by special send of
 	expanded data. This works for 1 and 2 nodes but not 3 or 4.
 	Makes a huge speed difference on multinodes.
 ============================================================================
+13 May 2010
+Trying to figure out why it fails for multinodes with the expanding buffer code.
+This happens just after the big data broadcast.
+Nothing obvious at this point. Using printf debugging I can see it handles the 
+expanded broadcast just fine, and the subsequent 'gather' seems to be OK
+as well.
+What makes it odder is that it fails for > 2 nodes.
+Tried valgrind with mpirun -np 3 valgrind ./moose.
+Doesn't report anything amiss. The system fails an assert.
+
+Looks like there are some leftover/spurious message packets in queue 1, 
+when the system sends the big messages which are on node 0.
+Tried to add in an mpiClearQ after the last cycle of Process. Doesn't seem
+to work. Queue 1 still has lots of stuff.
+============================================================================
+14 May 2010
+Tried clearing out Queue1 hard coded at the end of clock::tstart. Doesn't
+work.
+
+Found another problem with the handling of readMpiQ. Basically, on worker nodes
+I don't really want it to inspect any nodes other than node 0. 
+For now, at least. Also implemented a function Qinfo::emptyAllQs to clear
+up stuff after a processing run. Together these make it work on n = 2, 3, 4
+nodes.
+============================================================================

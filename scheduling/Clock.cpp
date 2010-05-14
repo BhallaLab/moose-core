@@ -342,7 +342,7 @@ void Clock::start(  Eref e, const Qinfo* q, double runTime )
 		tickPtr_[0].advance( ticke, &info_, nextTime * ROUNDING );
 		sort( tickPtr_.begin(), tickPtr_.end() );
 		nextTime = tickPtr_[1].getNextTime();
-	}
+	} 
 	isRunning_ = 0;
 }
 
@@ -423,6 +423,13 @@ void Clock::tStart(  Eref e, const ThreadInfo* ti )
 			info_ = pinfo; // Do we use info outside? Shouldn't.
 			isRunning_ = 0;
 		}
+		cout << Shell::myNode() << ": TickPtr.size() == 1\n";
+		cout << Shell::myNode() << ": Emptying queuueueueues\n";
+		// Qinfo::mpiClearQ( &pinfo ); // Clear up dangling messages in queue.
+		Qinfo::emptyAllQs();
+		// Qinfo::reportQ();
+		/*
+		*/
 		return;
 	}
 
@@ -440,10 +447,18 @@ void Clock::tStart(  Eref e, const ThreadInfo* ti )
 		// cout << "Advance at " << nextTime_ << " on thread " << ti->threadId << endl;
 		sortTickPtrs( ti->sortMutex ); // Sets up nextTime_ and tp0_.
 	}
+	/*
+	Qinfo::mpiClearQ( &pinfo ); // Clear up dangling messages in queue.
+	Qinfo::mergeQ( pinfo.groupId ); // Clear up dangling messages in queue.
+	Qinfo::mergeQ( 1 ); // Clear up dangling messages in queue.
+	cout << Shell::myNode() << ": Emptying queuueueueues\n";
+	Qinfo::emptyAllQs();
+	*/
 	if ( ti->threadId == 0 ) {
 		info_ = pinfo;
 		isRunning_ = 0;
 	}
+	// Qinfo::reportQ();
 	// Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 	// s->setRunning( 0 );
 }

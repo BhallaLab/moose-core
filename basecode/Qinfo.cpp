@@ -154,7 +154,11 @@ void Qinfo::mpiClearQ( const ProcInfo* proc )
 		sendRootToAll( proc );
 		readLocalQ( proc );
 		readQ( proc );
-		readMpiQ( proc );
+		if ( Shell::myNode() == 0 )
+			readMpiQ( proc );
+		else
+			readRootQ( proc );
+		// cout << Shell::myNode() << ": Done readMpiQ\n";
 	} else {
 		readLocalQ( proc );
 		readQ( proc );
@@ -241,12 +245,23 @@ void Qinfo::readMpiQ( const ProcInfo* proc )
 	cout << "in Qinfo::readMpiQ on node " << proc->nodeIndexInGroup <<
 		", qsize = " << q.size() << endl;
 	*/
+
+	/*
+	unsigned int *bufsize = reinterpret_cast< unsigned int* >( &q[0] );
+	if ( *bufsize > BLOCKSIZE ) { // giant message.
+		readBuf( &q[0], proc );
+		*bufsize = 0;
+		cout << Shell::myNode() << ": readMpiQ: intercepted giant msg\n";
+		Qinfo::reportQ();
+		return;
+	}
+	*/
 	for ( unsigned int i = 0; i < proc->numNodesInGroup; ++i ) {
 		if ( i != proc->nodeIndexInGroup ) {
 			char* buf = &q[0] + BLOCKSIZE * i;
 			assert( q.size() >= sizeof( unsigned int ) + BLOCKSIZE * i );
-			readBuf( buf, proc );
 			unsigned int *bufsize = reinterpret_cast< unsigned int* >( buf);
+			readBuf( buf, proc );
 			/*
 			if ( *bufsize > 0 ) {
 				cout << "On (" << proc->nodeIndexInGroup << 
@@ -255,9 +270,37 @@ void Qinfo::readMpiQ( const ProcInfo* proc )
 
 			}
 			*/
+			if ( *bufsize > BLOCKSIZE ) // Giant message
+
 			*bufsize = 0;  // Will have to alter to deal with threads
 		}
 	}
+}
+
+/**
+ * Static func. 
+ * Deliver the contents of the mpiQ to target objects,
+ * used in sending data between roots.
+ * Not thread safe. To run multithreaded, requires that
+ * the messages have been subdivided on a per-thread basis to avoid 
+ * overwriting each others targets.
+ */
+void Qinfo::readRootQ( const ProcInfo* proc )
+{
+	assert( proc );
+	assert( proc->groupId < mpiQ_.size() );
+	vector< char >& q = mpiQ_[ 0 ];
+	/*
+	cout << "in Qinfo::readMpiQ on node " << proc->nodeIndexInGroup <<
+		", qsize = " << q.size() << endl;
+	*/
+
+	unsigned int *bufsize = reinterpret_cast< unsigned int* >( &q[0] );
+	readBuf( &q[0], proc );
+	*bufsize = 0;
+	// cout << Shell::myNode() << ": readRootQ\n";
+	// Qinfo::reportQ();
+	return;
 }
 
 /**
@@ -296,29 +339,6 @@ void Qinfo::mergeQ( unsigned int groupId )
 	}
 	*reinterpret_cast< unsigned int* >( &inQ[0] ) = inQ.size();
 	*reinterpret_cast< unsigned int* >( &localQ_[0] ) = localQ_.size();
-
-	/*
-	unsigned int totSize = 0;
-	for ( unsigned int i = 0; i < g.numThreads; ++i )
-		totSize += outQ_[ j++ ].size();
-
-	assert( totSize + sizeof( unsigned int ) <= BLOCKSIZE );
-	// inQ.resize( totSize + sizeof( unsigned int ) );
-	inQ.resize( BLOCKSIZE );
-	j = g.startThread;
-	char* buf = &inQ[0];
-	unsigned int *bufsize = reinterpret_cast< unsigned int* >( buf );
-	*bufsize = 0;
-//	*bufsize = inQ.size();
-	buf += sizeof( unsigned int );
-	for ( unsigned int i = 0; i < g.numThreads; ++i ) {
-		memcpy( buf, &(outQ_[ j ][0]), outQ_[ j ].size() );
-		buf += outQ_[ j ].size();
-		*bufsize += outQ_[ j ].size();
-		outQ_[ j ].resize( 0 );
-		j++;
-	}
-	*/
 }
 
 /**
@@ -394,7 +414,7 @@ void Qinfo::sendRootToAll( const ProcInfo* proc )
 		unsigned int bufsize = *( reinterpret_cast< unsigned int* >( sendbuf ) );
 		if ( bufsize > BLOCKSIZE ) {
 			cout << Shell::myNode() << "." << proc->threadIndexInGroup << 
-				": Large MPI_Bcast of size = " << bufsize << endl;
+				": Sending Large MPI_Bcast of size = " << bufsize << endl;
 			MPI_Bcast( 
 				sendbuf, bufsize, MPI_CHAR, 0, MPI_COMM_WORLD );
 		}
@@ -406,7 +426,8 @@ void Qinfo::sendRootToAll( const ProcInfo* proc )
 		unsigned int bufsize = *( reinterpret_cast< unsigned int* >( recvbuf ) );
 		if ( bufsize > BLOCKSIZE ) {
 			cout << Shell::myNode() << "." << proc->threadIndexInGroup << 
-				": Large MPI_Bcast of size = " << bufsize << endl;
+				": Recv Large MPI_Bcast of size = " << bufsize << 
+				" on group " << proc->groupId << endl;
 			mpiQ_[ proc->groupId ].resize( bufsize );
 			recvbuf = &mpiQ_[ proc->groupId ][0];
 			MPI_Bcast( 
@@ -414,11 +435,34 @@ void Qinfo::sendRootToAll( const ProcInfo* proc )
 		}
 	}
 
+	unsigned int* sendbufSize = reinterpret_cast< unsigned int* >( sendbuf);
+	unsigned int* recvbufSize = reinterpret_cast< unsigned int* >( recvbuf);
+
+	/*
+	if ( Shell::myNode() == 0 )
+		*sendbufSize = 4;
+	*/
+
 	// Recieve data into recvbuf of node0 from sendbuf of all other nodes
-	MPI_Gather( 
-		sendbuf, BLOCKSIZE, MPI_CHAR, 
-		recvbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
-	// cout << "\n\nGathered stuff via mpi, on node = " << proc->nodeIndexInGroup << ", size = " << *reinterpret_cast< unsigned int* >( recvbuf ) << "\n";
+	// cout << Shell::myNode() << "." << proc->threadIndexInGroup << ": About to Gather stuff via mpi, recvbufsize = " << *recvbufSize << ", sendbufsize = " << *sendbufSize << "\n";
+	if ( proc->nodeIndexInGroup == 0 ) {
+		static char dummySendbuf[BLOCKSIZE];
+		*reinterpret_cast< unsigned int* >( dummySendbuf ) = 4;
+		MPI_Gather( 
+			dummySendbuf, BLOCKSIZE, MPI_CHAR, 
+			recvbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
+	} else {
+		MPI_Gather( 
+			sendbuf, BLOCKSIZE, MPI_CHAR, 
+			recvbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
+	}
+	if ( *recvbufSize > BLOCKSIZE ) {
+		cout << Shell::myNode() << "." << proc->threadIndexInGroup << ": BigMsg: recvbufsize = " << *recvbufSize << ", sendbufsize = " << *sendbufSize << "\n";
+
+		// Qinfo::reportQ();
+		// cout << Shell::myNode() << ": Q reporting done\n";
+	}
+	// cout << Shell::myNode() << "." << proc->threadIndexInGroup << ": Gathered stuff via mpi, recvbufsize = " << *recvbufSize << ", sendbufsize = " << *sendbufSize << "\n";
 #endif
 }
 
@@ -597,5 +641,19 @@ void Qinfo::assignQblock( const Msg* m, const ProcInfo* p )
 		} else {
 			qb.push_back( QueueBlock( 0, offset, size_ + sizeof( Qinfo ) ));
 		}
+	}
+}
+
+void Qinfo::emptyAllQs()
+{
+	for ( unsigned int i = 0; i < g_.size(); ++i ) {
+		inQ_[i].resize( sizeof( unsigned int ) );
+		*( reinterpret_cast< unsigned int* >( &inQ_[i][0] ) ) = 4;
+	}
+	localQ_.resize( sizeof( unsigned int ) );
+	*( reinterpret_cast< unsigned int* >( &localQ_[0] ) ) = 4;
+	for ( unsigned int i = 0; i < Shell::numCores(); ++i ) {
+		outQ_[i].resize( 0 );
+		qBlock_[i].resize(0);
 	}
 }
