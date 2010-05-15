@@ -5489,5 +5489,20 @@ Try	Machine		1thread	2thread	2 nodes	4thread
 
 This is pretty wild. The unoptimized MPI stuff is actually faster than
 the threading?! Need to check on a serious machine.
+Checkin 1794.
+
+I needed to redo the IntFire network to get it to generate some usefully
+diverse Vm values at 1000 steps. Managed by adding -ve weights. Put in a
+test - not assertions, but an if statement. Confirmed that things work for
+1 core, 2 nodes and 2 threads respectively. Timings have now changed:
+
+Try	Machine		1thread	2thread	2nodes	4thread	4nodes
+1	laptop		29.8	18.7	18.4	17.7	32.1
+2	laptop		29.6	18.2	18.5	17.7	32.1
+
+Importantly, it handles the higher node/thread cases correctly, even if slower
+for more nodes.
+
+Tested mpirun -np 2 ./moose -c 2: Incorrect output.
 
 ============================================================================

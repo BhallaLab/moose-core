@@ -540,14 +540,27 @@ void testMultiNodeIntFireNetwork()
 	
 void speedTestMultiNodeIntFireNetwork()
 {
-	static const double thresh = 0.2;
+	static const double thresh = 0.1;
 	static const double Vmax = 1.0;
 	static const double refractoryPeriod = 0.4;
-	static const double weightMax = 0.02;
+	static const double weightMax = 0.1;
 	static const double delayMax = 4;
 	static const double timestep = 0.2;
-	static const double connectionProbability = 0.1;
+	static const double connectionProbability = 0.2;
 	static const unsigned int runsteps = 1000;
+	static const double testVm[] = {
+		-3.41353,
+		-2.50449,
+		-2.64486,
+		-0.387621,
+		-1.08778,
+		-1e-07,
+		-0.187895,
+		-0.716069,
+		-1e-07,
+		-0.0155043,
+		-1e-07
+	};
 	unsigned int size = 1024;
 	string arg;
 	Eref sheller( Id().eref() );
@@ -584,7 +597,6 @@ void speedTestMultiNodeIntFireNetwork()
 	SetGet1< unsigned int >::set( mer, "loadBalance", numThreads ); 
 	vector< unsigned int > synArraySizes;
 	unsigned int start = syn->dataHandler()->getNumData2( synArraySizes );
-	unsigned int synIndex = start;
 
 	unsigned int nd = syn->dataHandler()->numData();
 	nd = 104576;
@@ -592,9 +604,6 @@ void speedTestMultiNodeIntFireNetwork()
 	vector< double > temp( size, 0.0 );
 	for ( unsigned int i = 0; i < size; ++i )
 		temp[i] = mtrand() * Vmax;
-
-	double origVm100 = temp[100];
-	double origVm900 = temp[900];
 
 	bool ret = Field< double >::setVec( e2, "Vm", temp );
 	assert( ret );
@@ -613,7 +622,7 @@ void speedTestMultiNodeIntFireNetwork()
 	vector< double > delay;
 	delay.reserve( nd );
 	for ( unsigned int i = 0; i < nd; ++i ) {
-		weight.push_back( mtrand() * weightMax );
+		weight.push_back( 2.0 * ( mtrand() - 0.5 ) * weightMax );
 		delay.push_back( mtrand() * delayMax );
 	}
 	ret = Field< double >::setVec( syne, "weight", weight );
@@ -629,6 +638,13 @@ void speedTestMultiNodeIntFireNetwork()
 	shell->setclock( 0, timestep, 0 );
 
 	shell->doStart( static_cast< double >( timestep * runsteps) + 0.0 );
+
+	for ( unsigned int i = 0; i < size; i += 100 ) {
+		double ret = Field< double >::get( Eref( e2.element(), i ), "Vm" );
+		if ( fabs( ret - testVm[i/100] ) > 1e-5 )
+			cout << "1000 step IntFire test Error: " << i << ": got = " 
+				<< ret << ", expected = " << testVm[i/100] << endl;
+	}
 
 	cout << "." << flush;
 	shell->doDelete( synId );
