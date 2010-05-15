@@ -41,6 +41,7 @@ extern void testMsg();
 extern void testMpiMsg();
 extern void initMsgManagers();
 extern void destroyMsgManagers();
+extern void speedTestMultiNodeIntFireNetwork();
 
 Id init( int argc, char** argv )
 {
@@ -168,6 +169,11 @@ void mpiTests()
 #endif
 }
 
+void benchmarkTests()
+{
+	speedTestMultiNodeIntFireNetwork();
+}
+
 int main( int argc, char** argv )
 {
 	Id shellId = init( argc, argv );
@@ -181,6 +187,7 @@ int main( int argc, char** argv )
 	// Shell messaging/MPI, and yield control to the parser.
 	if ( s->myNode() == 0 ) {
 		mpiTests();
+		benchmarkTests();
 		s->launchParser();
 	} else {
 		s->launchMsgLoop( shelle );

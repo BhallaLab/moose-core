@@ -98,6 +98,12 @@ ifeq ($(BUILD),mpi)
 CXXFLAGS  = -g -pthread -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
 USE_MPI = 1
 endif
+
+# optimized MPI mode:
+ifeq ($(BUILD),ompi)
+CXXFLAGS  = -O3 -pthread -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER
+USE_MPI = 1
+endif
 ##########################################################################
 #
 # MAC OS X compilation, Debug mode:

@@ -5481,4 +5481,13 @@ I don't really want it to inspect any nodes other than node 0.
 For now, at least. Also implemented a function Qinfo::emptyAllQs to clear
 up stuff after a processing run. Together these make it work on n = 2, 3, 4
 nodes.
+Checkin 1792.
+Recompiled with optimization, threads, MPI. Timings
+Try	Machine		1thread	2thread	2 nodes	4thread
+1	laptop		37.7	23.4	23.17
+2	laptop		37.9	23.4	23.01
+
+This is pretty wild. The unoptimized MPI stuff is actually faster than
+the threading?! Need to check on a serious machine.
+
 ============================================================================

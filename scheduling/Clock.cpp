@@ -423,9 +423,9 @@ void Clock::tStart(  Eref e, const ThreadInfo* ti )
 			info_ = pinfo; // Do we use info outside? Shouldn't.
 			isRunning_ = 0;
 		}
-		cout << Shell::myNode() << ": TickPtr.size() == 1\n";
-		cout << Shell::myNode() << ": Emptying queuueueueues\n";
-		// Qinfo::mpiClearQ( &pinfo ); // Clear up dangling messages in queue.
+		// cout << Shell::myNode() << ": TickPtr.size() == 1\n";
+		// cout << Shell::myNode() << ": Emptying queuueueueues\n";
+		// This one is not needed. Qinfo::mpiClearQ( &pinfo ); // Clear up dangling messages in queue.
 		Qinfo::emptyAllQs();
 		// Qinfo::reportQ();
 		/*

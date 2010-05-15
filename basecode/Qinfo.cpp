@@ -413,8 +413,7 @@ void Qinfo::sendRootToAll( const ProcInfo* proc )
 		// cout << "\n\nSent stuff via mpi, on node = " << proc->nodeIndexInGroup << ", ret = " << ret << endl;
 		unsigned int bufsize = *( reinterpret_cast< unsigned int* >( sendbuf ) );
 		if ( bufsize > BLOCKSIZE ) {
-			cout << Shell::myNode() << "." << proc->threadIndexInGroup << 
-				": Sending Large MPI_Bcast of size = " << bufsize << endl;
+			// cout << Shell::myNode() << "." << proc->threadIndexInGroup << ": Sending Large MPI_Bcast of size = " << bufsize << endl;
 			MPI_Bcast( 
 				sendbuf, bufsize, MPI_CHAR, 0, MPI_COMM_WORLD );
 		}
@@ -425,9 +424,7 @@ void Qinfo::sendRootToAll( const ProcInfo* proc )
 		// cout << "\n\nRecvd stuff via mpi, on node = " << proc->nodeIndexInGroup << ", size = " << *reinterpret_cast< unsigned int* >( recvbuf ) << "\n";
 		unsigned int bufsize = *( reinterpret_cast< unsigned int* >( recvbuf ) );
 		if ( bufsize > BLOCKSIZE ) {
-			cout << Shell::myNode() << "." << proc->threadIndexInGroup << 
-				": Recv Large MPI_Bcast of size = " << bufsize << 
-				" on group " << proc->groupId << endl;
+			// cout << Shell::myNode() << "." << proc->threadIndexInGroup << ": Recv Large MPI_Bcast of size = " << bufsize << " on group " << proc->groupId << endl;
 			mpiQ_[ proc->groupId ].resize( bufsize );
 			recvbuf = &mpiQ_[ proc->groupId ][0];
 			MPI_Bcast( 
@@ -435,13 +432,8 @@ void Qinfo::sendRootToAll( const ProcInfo* proc )
 		}
 	}
 
-	unsigned int* sendbufSize = reinterpret_cast< unsigned int* >( sendbuf);
-	unsigned int* recvbufSize = reinterpret_cast< unsigned int* >( recvbuf);
-
-	/*
-	if ( Shell::myNode() == 0 )
-		*sendbufSize = 4;
-	*/
+//	unsigned int* sendbufSize = reinterpret_cast< unsigned int* >( sendbuf);
+//	unsigned int* recvbufSize = reinterpret_cast< unsigned int* >( recvbuf);
 
 	// Recieve data into recvbuf of node0 from sendbuf of all other nodes
 	// cout << Shell::myNode() << "." << proc->threadIndexInGroup << ": About to Gather stuff via mpi, recvbufsize = " << *recvbufSize << ", sendbufsize = " << *sendbufSize << "\n";
@@ -456,12 +448,14 @@ void Qinfo::sendRootToAll( const ProcInfo* proc )
 			sendbuf, BLOCKSIZE, MPI_CHAR, 
 			recvbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
 	}
+	/*
 	if ( *recvbufSize > BLOCKSIZE ) {
-		cout << Shell::myNode() << "." << proc->threadIndexInGroup << ": BigMsg: recvbufsize = " << *recvbufSize << ", sendbufsize = " << *sendbufSize << "\n";
+		// cout << Shell::myNode() << "." << proc->threadIndexInGroup << ": BigMsg: recvbufsize = " << *recvbufSize << ", sendbufsize = " << *sendbufSize << "\n";
 
 		// Qinfo::reportQ();
 		// cout << Shell::myNode() << ": Q reporting done\n";
 	}
+	*/
 	// cout << Shell::myNode() << "." << proc->threadIndexInGroup << ": Gathered stuff via mpi, recvbufsize = " << *recvbufSize << ", sendbufsize = " << *sendbufSize << "\n";
 #endif
 }

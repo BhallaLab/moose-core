@@ -538,6 +538,103 @@ void testMultiNodeIntFireNetwork()
 	shell->doDelete( i2 );
 }
 	
+void speedTestMultiNodeIntFireNetwork()
+{
+	static const double thresh = 0.2;
+	static const double Vmax = 1.0;
+	static const double refractoryPeriod = 0.4;
+	static const double weightMax = 0.02;
+	static const double delayMax = 4;
+	static const double timestep = 0.2;
+	static const double connectionProbability = 0.1;
+	static const unsigned int runsteps = 1000;
+	unsigned int size = 1024;
+	string arg;
+	Eref sheller( Id().eref() );
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+
+	vector< unsigned int > dims( 1, size );
+	Id i2 = shell->doCreate( "IntFire", Id(), "test2", dims );
+	assert( i2()->name() == "test2" );
+	Eref e2 = i2.eref();
+
+	Id synId( i2.value() + 1 );
+	Element* syn = synId();
+	assert( syn->name() == "synapse" );
+
+	assert( syn->dataHandler()->numData() == 0 );
+
+	DataId di( 1, 0 ); // DataId( data, field )
+	Eref syne( syn, di );
+
+	unsigned int numThreads = 1;
+	if ( Qinfo::numSimGroup() >= 2 ) {
+		numThreads = Qinfo::simGroup( 1 )->numThreads;
+	}
+
+	MsgId mid = shell->doAddMsg( "Sparse", e2.fullId(), "spike",
+		FullId( synId, 0 ), "addSpike" );
+	
+	const Msg* m = Msg::getMsg( mid );
+	Eref mer = m->manager( m->id() );
+
+	SetGet2< double, long >::set( mer, "setRandomConnectivity", 
+		connectionProbability, 5489UL );
+
+	SetGet1< unsigned int >::set( mer, "loadBalance", numThreads ); 
+	vector< unsigned int > synArraySizes;
+	unsigned int start = syn->dataHandler()->getNumData2( synArraySizes );
+	unsigned int synIndex = start;
+
+	unsigned int nd = syn->dataHandler()->numData();
+	nd = 104576;
+
+	vector< double > temp( size, 0.0 );
+	for ( unsigned int i = 0; i < size; ++i )
+		temp[i] = mtrand() * Vmax;
+
+	double origVm100 = temp[100];
+	double origVm900 = temp[900];
+
+	bool ret = Field< double >::setVec( e2, "Vm", temp );
+	assert( ret );
+
+	temp.clear();
+	temp.resize( size, thresh );
+	ret = Field< double >::setVec( e2, "thresh", temp );
+	assert( ret );
+	temp.clear();
+	temp.resize( size, refractoryPeriod );
+	ret = Field< double >::setVec( e2, "refractoryPeriod", temp );
+	assert( ret );
+
+	vector< double > weight;
+	weight.reserve( nd );
+	vector< double > delay;
+	delay.reserve( nd );
+	for ( unsigned int i = 0; i < nd; ++i ) {
+		weight.push_back( mtrand() * weightMax );
+		delay.push_back( mtrand() * delayMax );
+	}
+	ret = Field< double >::setVec( syne, "weight", weight );
+	assert( ret );
+	ret = Field< double >::setVec( syne, "delay", delay );
+	assert( ret );
+
+	Element* ticke = Id( 2 )();
+	Eref er0( ticke, DataId( 0, 0 ) );
+
+	shell->doAddMsg( "Single", er0.fullId(), "process0",
+		e2.fullId(), "process" );
+	shell->setclock( 0, timestep, 0 );
+
+	shell->doStart( static_cast< double >( timestep * runsteps) + 0.0 );
+
+	cout << "." << flush;
+	shell->doDelete( synId );
+	shell->doDelete( i2 );
+	shell->doQuit();
+}
 
 void testScheduling()
 {

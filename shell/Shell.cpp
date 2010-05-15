@@ -405,8 +405,7 @@ void Shell::doStart( double runtime )
 		Qinfo::mpiClearQ( &p_ );
 		process( &p_, sheller );
 	}
-	cout << Shell::myNode() << ": Shell::doStart(" << runtime << ")" << 
-		endl;
+	// cout << Shell::myNode() << ": Shell::doStart(" << runtime << ")" << endl;
 	// Qinfo::reportQ();
 	// cout << myNode_ << ": Shell::doStart: quitting\n";
 }
