@@ -24,29 +24,6 @@
 #ifndef _FIELD_ELEMENT_FINFO_H
 #define _FIELD_ELEMENT_FINFO_H
 
-/*
-class FieldElementBaseFinfo: public Finfo
-{
-	public:
-		FieldElementBaseFinfo( const string& name, const string& doc, 
-			const Cinfo* fieldCinfo )
-		: Finfo( name, doc ), fieldCinfo_( fieldCinfo )
-		{;}
-
-		~FieldElementBaseFinfo()
-		{;}
-
-		const Cinfo* cinfo() const {
-			return cinfo_;
-		}
-
-		virtual DataHandler* makeDataHandler() const = 0;
-
-	private
-		const Cinfo* fieldCinfo_;
-};
-*/
-
 template < class T, class F > class FieldElementFinfo: public Finfo
 {
 	public:
@@ -84,15 +61,6 @@ template < class T, class F > class FieldElementFinfo: public Finfo
 			delete setNum_;
 			delete getNum_;
 		}
-
-		/**
-		 * Virtual function, creates a new DataHandler for the new 
-		 * FieldElement
-		DataHandler* makeDataHandler() const {
-			return new FieldDataHandler< T, F >(
-				new Dinfo< F >, lookupField_, getNumField_, setNumField_ );
-		}
-		 */
 
 		/**
 		 * Virtual function. Later will need to add stuff to tie the

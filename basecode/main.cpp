@@ -101,16 +101,6 @@ Id init( int argc, char** argv )
 	// Should put this initialization stuff within the Clock creation
 	// step. This means I need to add an optional init func into the Cinfo
 	// constructor, or to add the init func as a virtual func in Data.
-	/*
-	FieldElement< Tick, Clock, &Clock::getTick >* ticke =
-		new FieldElement< Tick, Clock, &Clock::getTick >
-		( 
-			Tick::initCinfo(), clocke,
-			&Clock::getNumTicks, &Clock::setNumTicks 
-		);
-	Id tickId = Id::nextId();
-	tickId.bindIdToElement( ticke );
-	*/
 	Id tickId( 2 );
 	assert( tickId() != 0 );
 	assert( tickId()->name() == "tick" ) ;
@@ -187,7 +177,7 @@ int main( int argc, char** argv )
 	// Shell messaging/MPI, and yield control to the parser.
 	if ( s->myNode() == 0 ) {
 		mpiTests();
-		benchmarkTests();
+//		benchmarkTests();
 		s->launchParser();
 	} else {
 		s->launchMsgLoop( shelle );

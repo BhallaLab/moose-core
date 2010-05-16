@@ -5504,5 +5504,24 @@ Importantly, it handles the higher node/thread cases correctly, even if slower
 for more nodes.
 
 Tested mpirun -np 2 ./moose -c 2: Incorrect output.
+Checkin 1795.
 
 ============================================================================
+16 May 2010
+From 19 April: Some longer-term perspectives.  
+	+ Set/Get functionality: GetVec yet to be done.
+	* Multinode message setup
+	* Unit test for IntFire system
+	+ Benchmarks and optimization
+	- Continuous messages
+	- Element tree, wildcards
+	- Move and copy of elements
+	- Node balancing, even if it is done offline
+	- Autosched
+	- Documentation
+	
+We need to work into these things as we bring in mainline MOOSE
+	- Solvers
+	- Parsers and threading
+	- Graphics and threading
+

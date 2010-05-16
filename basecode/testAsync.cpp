@@ -432,9 +432,6 @@ void testSetGetSynapse()
 
 	assert( syn->dataHandler()->data( 0 ) == 0 );
 
-	// SynElement syn( sc, i2() );
-	// FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
-
 	assert( syn->dataHandler()->numData() == 0 );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref e2( i2(), i );
@@ -474,8 +471,6 @@ void testSetGetVec()
 	// bool ret = ic->create( i2, "test2", size );
 	Element* temp = new Element( i2, ic, "test2", dims, 1 );
 	assert( temp );
-//	SynElement syn( sc, i2() );
-	// FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
 	Id synId( i2.value() + 1 );
 	Element* syn = synId();
 	assert ( syn != 0 );
@@ -533,8 +528,6 @@ void testSetRepeat()
 	// bool ret = ic->create( i2, "test2", size );
 	Element* temp = new Element( i2, ic, "test2", dims, 1 );
 	assert( temp );
-//	SynElement syn( sc, i2() );
-	// FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
 	Id synId( i2.value() + 1 );
 	Element* syn = synId();
 	assert ( syn != 0 );
@@ -588,8 +581,6 @@ void testSendSpike()
 	Element* temp = new Element( i2, ic, "test2", dims, 1 );
 	assert( temp );
 	Eref e2 = i2.eref();
-	//SynElement syn( sc, i2() );
-	// FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
 	Id synId( i2.value() + 1 );
 	Element* syn = synId();
 	assert ( syn != 0 );
@@ -855,7 +846,6 @@ void testSparseMsg()
 	Element* t2 = new Element( i2, ic, "test2", dims, 1 );
 	assert( t2 );
 	Eref e2 = i2.eref();
-	// FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
 	Id synId( i2.value() + 1 );
 	Element* syn = synId();
 	assert ( syn != 0 );
@@ -968,8 +958,6 @@ void testUpValue()
 	assert( temp );
 
 	Eref clocker = clock.eref();
-	//SynElement syn( sc, i2() );
-	// FieldElement< Tick, Clock, &Clock::getTick > ticke( tc, clock(), &Clock::getNumTicks, &Clock::setNumTicks );
 	Id tickId( clock.value() + 1 );
 	Element* ticke = tickId();
 	assert ( ticke != 0 );
