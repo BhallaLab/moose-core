@@ -41,7 +41,8 @@ extern void testMsg();
 extern void testMpiMsg();
 extern void initMsgManagers();
 extern void destroyMsgManagers();
-extern void speedTestMultiNodeIntFireNetwork();
+extern void speedTestMultiNodeIntFireNetwork( 
+	unsigned int size, unsigned int runsteps );
 
 Id init( int argc, char** argv )
 {
@@ -161,7 +162,7 @@ void mpiTests()
 
 void benchmarkTests()
 {
-	speedTestMultiNodeIntFireNetwork();
+	speedTestMultiNodeIntFireNetwork( 2048, 2000 );
 }
 
 int main( int argc, char** argv )

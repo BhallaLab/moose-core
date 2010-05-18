@@ -5592,6 +5592,12 @@ But it runs!
 
 Made the problem 2x bigger: 2x as many IntFire neurons, 4x as many connections.
 This was done by setting 'size' to 2048 instead of 1024.
+We have connectionProbability = 0.2, so the # of synapses ~ 0.84 million
+There are 1000 timesteps and 7/20 neurons have fired in the previous timestep,
+so about 2048 * 1000 * 7/20 = 0.72 million APs have fired.
+With 0.2 connectivity, this comes to 2048 * 0.2 * 0.72e6 = 294e6 
+synaptic events.
+
 Try	Machine		1thread	2thread	2nodes	4thread	4nodes	6thread	6node
 1	Nehalem		93.9	45.8	failed	23.0	23.2	19.7	15.8
 2	Nehalem		93.9	45.8	failed	25.3	25.5	16.2	15.9
@@ -5606,5 +5612,13 @@ Try	Machine		1thread	2thread	2nodes	4thread	4nodes	6thread	6node
 
 This is interesting. The cluster scaling beyond 8nodes is pretty poor. 
 No benefit at all in going to 32 nodes. This is using an infiniband network.
+Would be interesting to see scaling with more detailed neurons.
+I wonder how much of this is setup time... Let's rerun with 2000 sec 
+runtime.
+
+Also there is a puzzling crash that seems to happen at a certain
+number of nodes, and across machines. Need to track down.
+
+Checkin 1798
 
 ============================================================================

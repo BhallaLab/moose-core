@@ -538,7 +538,7 @@ void testMultiNodeIntFireNetwork()
 	shell->doDelete( i2 );
 }
 	
-void speedTestMultiNodeIntFireNetwork()
+void speedTestMultiNodeIntFireNetwork( unsigned int size, unsigned int runsteps )
 {
 	static const double thresh = 0.1;
 	static const double Vmax = 1.0;
@@ -547,7 +547,6 @@ void speedTestMultiNodeIntFireNetwork()
 	static const double delayMax = 4;
 	static const double timestep = 0.2;
 	static const double connectionProbability = 0.2;
-	static const unsigned int runsteps = 1000;
 	/*
 	static const double testVm[] = {
 		-3.41353,
@@ -587,10 +586,6 @@ void speedTestMultiNodeIntFireNetwork()
 		-1.81688
 	};
 
-
-
-
-	unsigned int size = 2048;
 	string arg;
 	Eref sheller( Id().eref() );
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
@@ -668,12 +663,14 @@ void speedTestMultiNodeIntFireNetwork()
 
 	shell->doStart( static_cast< double >( timestep * runsteps) + 0.0 );
 
+	/*
 	for ( unsigned int i = 0; i < size; i += 100 ) {
 		double ret = Field< double >::get( Eref( e2.element(), i ), "Vm" );
 		if ( fabs( ret - testVm[i/100] ) > 1e-5 )
 			cout << "1000 step IntFire test Error: " << i << ": got = " 
 				<< ret << ", expected = " << testVm[i/100] << endl;
 	}
+	*/
 
 	cout << "." << flush;
 	shell->doDelete( synId );
