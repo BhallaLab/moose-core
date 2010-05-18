@@ -548,6 +548,7 @@ void speedTestMultiNodeIntFireNetwork()
 	static const double timestep = 0.2;
 	static const double connectionProbability = 0.2;
 	static const unsigned int runsteps = 1000;
+	/*
 	static const double testVm[] = {
 		-3.41353,
 		-2.50449,
@@ -561,7 +562,35 @@ void speedTestMultiNodeIntFireNetwork()
 		-0.0155043,
 		-1e-07
 	};
-	unsigned int size = 1024;
+	*/
+	static const double testVm[] = {
+		-1e-07,
+		-0.0505845,
+		0.0456282,
+		-5.61229,
+		-1e-07,
+		-1e-07,
+		-2.72,
+		-0.0441219,
+		-1e-07,
+		-1e-07,
+		-1e-07,
+		-2.4886,
+		-3.89123,
+		-0.479408,
+		-2.84331,
+		-2.7225,
+		-1e-07,
+		-1.74236,
+		-0.35803,
+		-1.89033,
+		-1.81688
+	};
+
+
+
+
+	unsigned int size = 2048;
 	string arg;
 	Eref sheller( Id().eref() );
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );

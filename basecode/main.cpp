@@ -177,7 +177,7 @@ int main( int argc, char** argv )
 	// Shell messaging/MPI, and yield control to the parser.
 	if ( s->myNode() == 0 ) {
 		mpiTests();
-//		benchmarkTests();
+		benchmarkTests();
 		s->launchParser();
 	} else {
 		s->launchMsgLoop( shelle );

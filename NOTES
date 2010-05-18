@@ -5563,4 +5563,48 @@ Write: Formal ML based dump of model structure/parameters/state.
 Practicalities: Moved Neutral into the shell directory to begin the process.
 Set up the Parent/child msg to pass an int.
 
+Checkin 1797
+============================================================================
+18 May 2010
+Working on benchmarking. Got it to compile on an 8-core Nehalem.
 
+Try	Machine		1thread	2thread	2nodes	4thread	4nodes	7thread	7node
+1	laptop		29.8	18.7	18.4	17.7	32.1	
+2	laptop		29.6	18.2	18.5	17.7	32.1
+3	Nehalem		20.1	9.5	9.3	5.3	Failed	3.3	3.8
+4	Nehalem		20.8	10.2	10.6	4.9	Failed	3.1	3.7
+5	Opteron1node	33.6	16.1	17.8	9.7	10.5	9.7	13.6
+6	Opteron1node	33.7	16.1	18.3	9.8	10.5	9.4	11.8
+
+	1 job/node	1thr	2node	4node	8node	16node	32node
+7	Opteron clus	30.9	16.8	9.3	5.7	5.5	5.7
+8	Opteron clus	30.9	16.1	9.3	5.0	5.5	5.1
+
+	2 job/node	1thr	2node	4node	8node	16node	32node
+9	Opteron clus	30.9	17.8	10.1	6.4	4.8	6.8
+10	Opteron clus	30.9	17.9	9.6	6.4	4.9	6.9
+
+Note that the Nehalem was running something else 100% on one of the cores.
+So the 7thread/7node cases are actually faster than if I use all 8 cores.
+
+This problem at least does not scale too well on the cluster past 8 nodes. 
+But it runs!
+
+Made the problem 2x bigger: 2x as many IntFire neurons, 4x as many connections.
+This was done by setting 'size' to 2048 instead of 1024.
+Try	Machine		1thread	2thread	2nodes	4thread	4nodes	6thread	6node
+1	Nehalem		93.9	45.8	failed	23.0	23.2	19.7	15.8
+2	Nehalem		93.9	45.8	failed	25.3	25.5	16.2	15.9
+
+	1 job/node	1thr	2thr	2node	4node	8node	16node	32node
+3	Opteron clus	142	69.1	failed	31.3	16.2	11.1	11.0
+4	Opteron clus	136	72.7	failed	31.2	16.1	10.8	11.2
+
+	2 job/node	1thr	2thr	2node	4node	8node	16node	32node
+5	Opteron clus			failed	38.5	19.5	14.2	17.4
+6	Opteron clus			failed	38.8	20.3	11.4	17.2
+
+This is interesting. The cluster scaling beyond 8nodes is pretty poor. 
+No benefit at all in going to 32 nodes. This is using an infiniband network.
+
+============================================================================
