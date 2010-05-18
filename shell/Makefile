@@ -12,6 +12,7 @@ TARGET = shell.o
 OBJ = \
 	Shell.o	\
 	ShellThreads.o	\
+	Neutral.o	\
 	testShell.o	\
 
 HEADERS = \
@@ -22,6 +23,7 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 Shell.o:	Shell.h ../msg/AssignmentMsg.h
+Neutral.o:	Neutral.h
 testShell.o:	Shell.h ../scheduling/Tick.h ../scheduling/testScheduling.h
 
 .cpp.o:

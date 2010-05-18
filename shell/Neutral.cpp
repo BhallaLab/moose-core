@@ -13,9 +13,9 @@
 
 const Cinfo* Neutral::initCinfo()
 {
-	static SrcFinfo0 child( "child", "Message to child Elements" );
+	static SrcFinfo1< int > child( "child", "Message to child Elements" );
 	static DestFinfo parent( "parent", "Message from Parent Element(s)", 
-			new EpFunc0< Neutral >( &Neutral::destroy ) );
+			new EpFunc1< Neutral, int >( &Neutral::destroy ) );
 	static ValueFinfo< Neutral, string > name( 
 			"name",
 			"Name of object", 
@@ -63,7 +63,11 @@ string Neutral::getName() const
 	return name_;
 }
 
-void Neutral::destroy( Eref e, const Qinfo* q )
+//
+// Stage 1: mark for deletion
+// Stage 2: Clear out outside-going msgs
+// Stage 3: delete self and attached msgs, 
+void Neutral::destroy( Eref e, const Qinfo* q, int stage )
 {
 	// cout << "in Neutral::destroy()[ " << e.index() << "]\n";
 	;

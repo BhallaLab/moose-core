@@ -5525,3 +5525,42 @@ We need to work into these things as we bring in mainline MOOSE
 	- Parsers and threading
 	- Graphics and threading
 
+Got rid of leftover stuff from FieldElement. Checkin 1796
+
+Decide how to place the subdirectory for Element heirarchy: Neutral, 
+the wildcard stuff, copy, and possibly the various data handlers.
+
+I think this should be in its own subdirectory. Call it tree.
+
+Wildcards: Vector of FullIds. For compactness, have special cases
+	to indicate that all entries are included.
+	
+Operations for wildcard traversal:
+	- Implement a wildcard Filter object
+		This will be needed in due course also for complex messaging.
+	- Do local node traversal for Elements
+		Filter manages field-dependent operations, such as name/value
+		lookups.
+
+Copy: Too many permutations, need to tighten:
+	Local/Global src, Local/Global dest, src single/array,
+	dest x1/xn.  Msgs within/outside tree.
+
+Move: Change parent is one, but may have to convert singles to arrays? Later.
+	Invisible move between nodes
+
+Load balance: Move data between nodes, while retaining original tree
+
+Serialize: Used for dumping data. Copy may use. 
+
+Read: Formal ML based load of model structure/parameters/state
+
+Write: Formal ML based dump of model structure/parameters/state.
+
+============================================================================
+17 May 2010
+
+Practicalities: Moved Neutral into the shell directory to begin the process.
+Set up the Parent/child msg to pass an int.
+
+

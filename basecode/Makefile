@@ -30,7 +30,6 @@ OBJ = \
 	SharedFinfo.o \
 	Id.o \
 	FullId.o \
-	Neutral.o	\
 	Qinfo.o \
 	DataId.o \
 	SetGet.o \
@@ -62,7 +61,6 @@ HEADERS = \
 	Id.h \
 	../msg/Msg.h \
 	../msg/MsgManager.h \
-	Neutral.h \
 	OpFunc.h \
 	EpFunc.h \
 	ProcInfo.h \

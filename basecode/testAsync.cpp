@@ -9,7 +9,7 @@
 
 #include "header.h"
 #include <stdio.h>
-#include "Neutral.h"
+#include "../shell/Neutral.h"
 #include "Dinfo.h"
 #include <queue>
 #include "../biophysics/Synapse.h"
@@ -234,9 +234,9 @@ void testCreateMsg()
 	const Finfo* f = nc->findFinfo( "child" );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
-		const SrcFinfo0* sf = dynamic_cast< const SrcFinfo0* >( f );
+		const SrcFinfo1< int >* sf = dynamic_cast< const SrcFinfo1< int >* >( f );
 		assert( sf != 0 );
-		sf->send( Eref( e1.element(), i ), &p );
+		sf->send( Eref( e1.element(), i ), &p, 0 );
 	}
 	Qinfo::clearQ( &p );
 

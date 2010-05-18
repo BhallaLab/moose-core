@@ -15,7 +15,7 @@ class Neutral: public Data
 		void setName( string name );
 		string getName() const;
 		static const Cinfo* initCinfo();
-		void destroy( Eref e, const Qinfo* q );
+		void destroy( Eref e, const Qinfo* q, int stage );
 
 	private:
 		string name_;
