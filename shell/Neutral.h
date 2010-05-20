@@ -7,6 +7,9 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#ifndef _NEUTRAL_H
+#define _NEUTRAL_H
+
 class Neutral: public Data
 {
 	public:
@@ -43,3 +46,5 @@ class Neutral: public Data
 	private:
 		// string name_;
 };
+
+#endif // _NEUTRAL_H

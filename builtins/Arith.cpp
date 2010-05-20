@@ -1,6 +1,5 @@
 #include <queue>
 #include "header.h"
-#include "../shell/Neutral.h"
 #include "Arith.h"
 
 static SrcFinfo1< double > output( 

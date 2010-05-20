@@ -91,9 +91,11 @@ const Cinfo* Tick::initCinfo()
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
 	///////////////////////////////////////////////////////
+		/*
 		static DestFinfo parent( "parent", 
 			"Message from Parent Element(s)", 
 			new EpFunc0< Tick >( &Tick::destroy ) );
+			*/
 
 	static Finfo* tickFinfos[] =
 	{
@@ -114,12 +116,13 @@ const Cinfo* Tick::initCinfo()
 		&proc8,
 		&proc9,
 		// MsgDest definitions
-		&parent, // I thought this was to be inherited?
+		// &parent, // I thought this was to be inherited?
 	};
 	
 	static Cinfo tickCinfo(
 		"Tick",
 		0,
+		// Neutral::initCinfo(),
 		tickFinfos,
 		sizeof(tickFinfos) / sizeof(Finfo *),
 		new Dinfo< Tick >()

@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "Neutral.h"
 #include "Dinfo.h"
 #include "ElementValueFinfo.h"
 
@@ -49,11 +48,11 @@ const Cinfo* Neutral::initCinfo()
 	// Setting up the Finfo list.
 	/////////////////////////////////////////////////////////////////
 	static Finfo* neutralFinfos[] = {
+		&childMsg,
+		&parentMsg,
 		&name,
 		&parent,
 		&className,
-		&childMsg,
-		&parentMsg,
 	};
 
 	/////////////////////////////////////////////////////////////////

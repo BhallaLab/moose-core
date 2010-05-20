@@ -5656,4 +5656,9 @@ Continuing with implementation. Removing the 'name' field from the Neutral and
 putting it into the parent Element has led to all sorts of updates needed
 in the unit tests, about halfway through. Checkin 1800.
 
-Went through the remaining tests, now clears all.
+Went through the remaining tests, now clears all. Checkin 1801.
+Ran valgrind. It is happy.
+
+Now setting up Neutral as the base class for all Elements. Odd bug pops up in
+testScheduling.cpp:69, where the timings don't match.
+Turns out to happen when Tick is derived from Neutral. Will deal with it later.

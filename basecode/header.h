@@ -95,5 +95,6 @@ class SetGet;
 #include "ValueFinfo.h"
 #include "SharedFinfo.h"
 #include "FieldElementFinfo.h"
+#include "../shell/Neutral.h"
 
 #endif // _HEADER_H

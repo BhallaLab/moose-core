@@ -239,7 +239,7 @@ const Cinfo* Shell::initCinfo()
 
 	static Cinfo shellCinfo (
 		"Shell",
-		0, // No base class. Make it neutral soon.
+		Neutral::initCinfo(),
 		shellFinfos,
 		sizeof( shellFinfos ) / sizeof( Finfo* ),
 		new Dinfo< Shell >()

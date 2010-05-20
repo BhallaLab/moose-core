@@ -78,7 +78,7 @@ const Cinfo* IntFire::initCinfo()
 
 	static Cinfo intFireCinfo (
 		"IntFire",
-		0, // No base class, but eventually I guess it will be neutral.
+		Neutral::initCinfo(),
 		intFireFinfos,
 		sizeof( intFireFinfos ) / sizeof ( Finfo* ),
 		new Dinfo< IntFire >()

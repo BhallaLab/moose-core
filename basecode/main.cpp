@@ -15,7 +15,6 @@
 #include "../scheduling/Tick.h"
 #include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
-#include "../shell/Neutral.h"
 #include "DiagonalMsg.h"
 #include "MsgManager.h"
 #include "SparseMatrix.h"

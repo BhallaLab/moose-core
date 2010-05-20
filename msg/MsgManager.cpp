@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "../shell/Neutral.h"
 #include "MsgManager.h"
 #include "AssignmentMsg.h"
 #include "AssignVecMsg.h"
