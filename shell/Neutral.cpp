@@ -10,24 +10,55 @@
 #include "header.h"
 #include "Neutral.h"
 #include "Dinfo.h"
+#include "ElementValueFinfo.h"
 
 const Cinfo* Neutral::initCinfo()
 {
-	static SrcFinfo1< int > child( "child", "Message to child Elements" );
-	static DestFinfo parent( "parent", "Message from Parent Element(s)", 
-			new EpFunc1< Neutral, int >( &Neutral::destroy ) );
-	static ValueFinfo< Neutral, string > name( 
-			"name",
-			"Name of object", 
-			&Neutral::setName, 
-			&Neutral::getName );
+	/////////////////////////////////////////////////////////////////
+	// Value Finfos
+	/////////////////////////////////////////////////////////////////
+	static ElementValueFinfo< Neutral, string > name( 
+		"name",
+		"Name of object", 
+		&Neutral::setName, 
+		&Neutral::getName );
+
+	static ReadOnlyElementValueFinfo< Neutral, FullId > parent( 
+		"parent",
+		"Parent FullId for current object", 
+			&Neutral::getParent );
+
+	static ReadOnlyElementValueFinfo< Neutral, string > className( 
+		"class",
+		"Class Name of object", 
+			&Neutral::getClass );
+	/////////////////////////////////////////////////////////////////
+	// SrcFinfos
+	/////////////////////////////////////////////////////////////////
+	static SrcFinfo1< int > childMsg( "childMsg", 
+		"Message to child Elements");
+
+	/////////////////////////////////////////////////////////////////
+	// DestFinfos
+	/////////////////////////////////////////////////////////////////
+	static DestFinfo parentMsg( "parentMsg", 
+		"Message from Parent Element(s)", 
+		new EpFunc1< Neutral, int >( &Neutral::destroy ) );
 	
+	/////////////////////////////////////////////////////////////////
+	// Setting up the Finfo list.
+	/////////////////////////////////////////////////////////////////
 	static Finfo* neutralFinfos[] = {
 		&name,
-		&child,
 		&parent,
+		&className,
+		&childMsg,
+		&parentMsg,
 	};
 
+	/////////////////////////////////////////////////////////////////
+	// Setting up the Cinfo.
+	/////////////////////////////////////////////////////////////////
 	static Cinfo neutralCinfo (
 		"Neutral",
 		0, // No base class.
@@ -43,7 +74,7 @@ static const Cinfo* neutralCinfo = Neutral::initCinfo();
 
 
 Neutral::Neutral()
-	: name_( "" )
+	// : name_( "" )
 {
 	;
 }
@@ -53,14 +84,24 @@ void Neutral::process( const ProcInfo* p, const Eref& e )
 	;
 }
 
-void Neutral::setName( string name )
+void Neutral::setName( Eref e, const Qinfo* q, string name )
 {
-	name_ = name;
+	e.element()->setName( name );
 }
 
-string Neutral::getName() const
+string Neutral::getName( Eref e, const Qinfo* q ) const
 {
-	return name_;
+	return e.element()->getName();
+}
+
+FullId Neutral::getParent( Eref e, const Qinfo* q ) const
+{
+	return FullId( Id(), DataId( 0, 0 ) );
+}
+
+string Neutral::getClass( Eref e, const Qinfo* q ) const
+{
+	return e.element()->cinfo()->name();
 }
 
 //

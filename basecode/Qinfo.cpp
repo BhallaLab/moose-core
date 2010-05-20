@@ -478,8 +478,8 @@ void innerReportQ( const char* buf, unsigned int bufsize )
 				", FuncId = " << q->fid() <<
 				", srcIndex = " << q->srcIndex() << 
 				", size = " << q->size() <<
-				", src = " << m->e1()->name() << 
-				", dest = " << m->e2()->name() << endl;
+				", src = " << m->e1()->getName() << 
+				", dest = " << m->e2()->getName() << endl;
 		} else {
 			cout << "Q::MsgId = " << q->mid() << " (points to bad Msg)" <<
 				", FuncId = " << q->fid() <<

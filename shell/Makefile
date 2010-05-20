@@ -23,7 +23,7 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 Shell.o:	Shell.h ../msg/AssignmentMsg.h
-Neutral.o:	Neutral.h
+Neutral.o:	Neutral.h ../basecode/ElementValueFinfo.h
 testShell.o:	Shell.h ../scheduling/Tick.h ../scheduling/testScheduling.h
 
 .cpp.o:

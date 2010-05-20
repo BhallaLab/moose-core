@@ -226,5 +226,53 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class EpFu
 		void ( T::*func_ )( Eref e, const Qinfo* q, A1, A2, A3, A4, A5 ); 
 };
 
+/**
+ * This specialized EpFunc is for returning a single field value.
+ * Unlike the regular GetOpFunc, this variant takes the Eref
+ * and Qinfo.
+ * It generates an opFunc that takes a single argument:
+ * FuncId of the function on the object that requested the
+ * value. The EpFunc then sends back a message with the info.
+ */
+template< class T, class A > class GetEpFunc: public OpFunc
+{
+	public:
+		GetEpFunc( A ( T::*func )( Eref e, const Qinfo* q ) const )
+			: func_( func )
+			{;}
+
+		bool checkFinfo( const Finfo* s ) const {
+			return dynamic_cast< const SrcFinfo1< A >* >( s );
+		}
+
+		bool checkSet( const SetGet* s ) const {
+			return dynamic_cast< const SetGet1< A >* >( s );
+		}
+
+		/**
+		 * The buf just contains the funcid on the src element that is
+		 * ready to receive the returned data.
+		 * Also we are returning the data along the Msg that brought in
+		 * the request, so we don't need to scan through all Msgs in
+		 * the Element to find the right one.
+		 * So we bypass the usual SrcFinfo::sendTo, and instead go
+		 * right to the Qinfo::addToQ to send off data.
+		 * Finally, the data is copied back-and-forth about 3 times.
+		 * Wasteful, but the 'get' function is not to be heavily used.
+		 */
+		void op( Eref e, const char* buf ) const {
+			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
+			const A& ret = 
+				(( reinterpret_cast< T* >( e.data() ) )->*func_)( e, q );
+			Conv<A> conv0( ret );
+			char* temp0 = new char[ conv0.size() ];
+			conv0.val2buf( temp0 );
+			fieldOp( e, buf, temp0, conv0.size() );
+			delete[] temp0;
+		}
+
+	private:
+		A ( T::*func_ )( Eref e, const Qinfo* q ) const;
+};
 
 #endif //_EPFUNC_H

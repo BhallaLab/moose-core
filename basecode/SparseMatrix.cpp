@@ -11,7 +11,7 @@
 #include "header.h"
 #include "SparseMatrix.h"
 
-const unsigned int SM_MAX_ROWS = 20000;
-const unsigned int SM_MAX_COLUMNS = 20000;
+const unsigned int SM_MAX_ROWS = 200000;
+const unsigned int SM_MAX_COLUMNS = 200000;
 const unsigned int SM_RESERVE = 8;
 

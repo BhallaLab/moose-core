@@ -106,7 +106,7 @@ void setupTicks()
 	Eref clocker = clock.eref();
 	Id tickId( clock.value() + 1 );
 	Element* ticke = tickId();
-	assert( ticke->name() == "tick" );
+	assert( ticke->getName() == "tick" );
 
 	// FieldElement< Tick, Clock, &Clock::getTick > ticke( tc, clocke, &Clock::getNumTicks, &Clock::setNumTicks );
 	unsigned int size = 10;
@@ -299,7 +299,7 @@ void testThreadIntFireNetwork()
 	// FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
 	Id synId( i2.value() + 1 );
 	Element* syn = synId();
-	assert( syn->name() == "synapse" );
+	assert( syn->getName() == "synapse" );
 
 	assert( syn->dataHandler()->numData() == 0 );
 
@@ -431,13 +431,13 @@ void testMultiNodeIntFireNetwork()
 
 	vector< unsigned int > dims( 1, size );
 	Id i2 = shell->doCreate( "IntFire", Id(), "test2", dims );
-	assert( i2()->name() == "test2" );
+	assert( i2()->getName() == "test2" );
 	Eref e2 = i2.eref();
 
 	// FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
 	Id synId( i2.value() + 1 );
 	Element* syn = synId();
-	assert( syn->name() == "synapse" );
+	assert( syn->getName() == "synapse" );
 
 	assert( syn->dataHandler()->numData() == 0 );
 
@@ -548,6 +548,7 @@ void speedTestMultiNodeIntFireNetwork( unsigned int size, unsigned int runsteps 
 	static const double timestep = 0.2;
 	static const double connectionProbability = 0.2;
 	/*
+	// Applicable for size == 1024
 	static const double testVm[] = {
 		-3.41353,
 		-2.50449,
@@ -561,7 +562,7 @@ void speedTestMultiNodeIntFireNetwork( unsigned int size, unsigned int runsteps 
 		-0.0155043,
 		-1e-07
 	};
-	*/
+	// Applicable for size == 2048
 	static const double testVm[] = {
 		-1e-07,
 		-0.0505845,
@@ -585,6 +586,7 @@ void speedTestMultiNodeIntFireNetwork( unsigned int size, unsigned int runsteps 
 		-1.89033,
 		-1.81688
 	};
+	*/
 
 	string arg;
 	Eref sheller( Id().eref() );
@@ -592,12 +594,12 @@ void speedTestMultiNodeIntFireNetwork( unsigned int size, unsigned int runsteps 
 
 	vector< unsigned int > dims( 1, size );
 	Id i2 = shell->doCreate( "IntFire", Id(), "test2", dims );
-	assert( i2()->name() == "test2" );
+	assert( i2()->getName() == "test2" );
 	Eref e2 = i2.eref();
 
 	Id synId( i2.value() + 1 );
 	Element* syn = synId();
-	assert( syn->name() == "synapse" );
+	assert( syn->getName() == "synapse" );
 
 	assert( syn->dataHandler()->numData() == 0 );
 
@@ -620,7 +622,7 @@ void speedTestMultiNodeIntFireNetwork( unsigned int size, unsigned int runsteps 
 
 	SetGet1< unsigned int >::set( mer, "loadBalance", numThreads ); 
 	vector< unsigned int > synArraySizes;
-	unsigned int start = syn->dataHandler()->getNumData2( synArraySizes );
+	// unsigned int start = syn->dataHandler()->getNumData2( synArraySizes );
 
 	unsigned int nd = syn->dataHandler()->numData();
 	nd = 104576;

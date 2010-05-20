@@ -329,13 +329,13 @@ MsgId Shell::doAddMsg( const string& msgType,
 	const Finfo* f1 = src.id()->cinfo()->findFinfo( srcField );
 	if ( !f1 ) {
 		cout << myNode_ << ": Shell::doAddMsg: Error: Failed to find field " << srcField << 
-			" on src: " << src.id()->name() << "\n";
+			" on src: " << src.id()->getName() << "\n";
 		return Msg::badMsg;
 	}
 	const Finfo* f2 = dest.id()->cinfo()->findFinfo( destField );
 	if ( !f2 ) {
 		cout << myNode_ << ": Shell::doAddMsg: Error: Failed to find field " << destField << 
-			" on dest: " << dest.id()->name() << "\n";
+			" on dest: " << dest.id()->getName() << "\n";
 		return Msg::badMsg;
 	}
 	if ( ! f1->checkTarget( f2 ) ) {
@@ -564,8 +564,8 @@ void Shell::handleAddMsg( string msgType, FullId src, string srcField,
 	}
 	cout << myNode_ << 
 			": Error: Shell::handleAddMsg: Unable to make/connect Msg: "
-			<< msgType << " from " << src.id()->name() <<
-			" to " << dest.id()->name() << endl;
+			<< msgType << " from " << src.id()->getName() <<
+			" to " << dest.id()->getName() << endl;
 	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus, 0 );
 }
 

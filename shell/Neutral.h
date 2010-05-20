@@ -12,11 +12,34 @@ class Neutral: public Data
 	public:
 		Neutral();
 		void process( const ProcInfo* p, const Eref& e );
-		void setName( string name );
-		string getName() const;
-		static const Cinfo* initCinfo();
+
+		/**
+		 * Field access functions for the name of the Element/Neutral
+		 */
+		void setName( Eref e, const Qinfo* q, string name );
+		string getName( Eref e, const Qinfo* q ) const;
+
+		/**
+		 * Looks up the full Id info for the parent of the current Element
+		 */
+		FullId getParent( Eref e, const Qinfo* q ) const;
+
+		/**
+		 * Looks up the Class name of the current Element
+		 */
+		string getClass( Eref e, const Qinfo* q ) const;
+
+		/**
+		 * Destroys Element and all children
+		 */
 		void destroy( Eref e, const Qinfo* q, int stage );
 
+		/**
+		 * Standard initialization function, used whenever we want to
+		 * look up the class Cinfo
+		 */
+		static const Cinfo* initCinfo();
+
 	private:
-		string name_;
+		// string name_;
 };

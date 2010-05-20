@@ -104,7 +104,7 @@ Id init( int argc, char** argv )
 	// constructor, or to add the init func as a virtual func in Data.
 	Id tickId( 2 );
 	assert( tickId() != 0 );
-	assert( tickId()->name() == "tick" ) ;
+	assert( tickId()->getName() == "tick" ) ;
 
 	assert ( shellId == Id() );
 	assert( clockId == Id( 1 ) );

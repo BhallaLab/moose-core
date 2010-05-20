@@ -45,7 +45,15 @@ class Element
 		 */
 		~Element();
 
-		const string& name() const;
+		/**
+		 * Returns name of Element
+		 */
+		const string& getName() const;
+		
+		/**
+		 * Changes name of Element
+		 */
+		void setName( const string& val );
 
 		/**
 		 * Here we build the array on the fly.

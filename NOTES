@@ -5621,4 +5621,32 @@ number of nodes, and across machines. Need to track down.
 
 Checkin 1798
 
+Redoing for 2000 sec runtime to estimate setup time.
+
+Try	Machine		1thread	2thread	2nodes	4thread	4nodes	6thread	6node
+1	Nehalem		187.0		failed	55.6	49.9
+2	Nehalem		171.8			50.3	48.6
+
+	1 job/node	1thr	2thr	2node	4node	8node	16node	32node
+3	Opteron clus	271	124.7	fail	61.2	31.5	19.7	17.4
+4	Opteron clus	275.8	134.9	fail	61.0	30.9	18.5	19.7
+
+
+10000 neuron model, 200 steps
+Try	Machine		1thread	2thread	2nodes	4thread	4nodes	6thread	6node
+1	Nehalem		556.8	308		189.8	217.2	127.2
+2	Nehalem		680	336		207.6	185.1	129.9
+
+		1thr	2thr	4node	8node	16node	32node	48node	64node
+3	GJclus	1367	603.7	236.5	90.6	42.9	27.1	26.0	26.8
+4	GJclus	1408	580.3	236.3	90.7	42.7	26.9	25.9	26.6
+	no overlap					25.0	23.3	22.5
+							24.5	22.8	21.3
+
+Firing rate in 10000x200 model is 22 out of 81 per timestep. 
+
 ============================================================================
+19 May 2010
+Working on Neutral.cpp. Trying to implement Field access to name 
+(which is stored on Element) and 
+

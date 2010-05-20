@@ -78,9 +78,14 @@ Element::~Element()
 			Msg::deleteMsg( *i );
 }
 
-const string& Element::name() const
+const string& Element::getName() const
 {
 	return name_;
+}
+
+void Element::setName( const string& val )
+{
+	name_ = val;
 }
 
 /**

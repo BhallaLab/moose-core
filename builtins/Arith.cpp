@@ -1,5 +1,6 @@
 #include <queue>
 #include "header.h"
+#include "../shell/Neutral.h"
 #include "Arith.h"
 
 static SrcFinfo1< double > output( 
@@ -54,7 +55,7 @@ const Cinfo* Arith::initCinfo()
 
 	static Cinfo arithCinfo (
 		"Arith",
-		0, // No base class, but eventually I guess it will be neutral.
+		Neutral::initCinfo(),
 		arithFinfos,
 		sizeof( arithFinfos ) / sizeof ( Finfo* ),
 		new Dinfo< Arith >()

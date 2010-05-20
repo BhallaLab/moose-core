@@ -10,6 +10,7 @@
 #include "header.h"
 #include <stdio.h>
 #include "../shell/Neutral.h"
+#include "../builtins/Arith.h"
 #include "Dinfo.h"
 #include <queue>
 #include "../biophysics/Synapse.h"
@@ -91,13 +92,18 @@ void testPrepackedBuffer()
 	cout << "." << flush;
 }
 
+/**
+ * This used to use the 'name' field of Neutral as a test variable.
+ * Now no longer as useful, since the field is replaced with the 'name'
+ * of the parent Element. Instead use Arith.output.
+ */
 void insertIntoQ( )
 {
-	const Cinfo* nc = Neutral::initCinfo();
+	const Cinfo* ac = Arith::initCinfo();
 	unsigned int size = 100;
 
 	const DestFinfo* df = dynamic_cast< const DestFinfo* >(
-		nc->findFinfo( "set_name" ) );
+		ac->findFinfo( "set_outputValue" ) );
 	assert( df != 0 );
 	FuncId fid = df->getFid();
 
@@ -105,10 +111,10 @@ void insertIntoQ( )
 	Id i2 = Id::nextId();
 	vector< unsigned int > dims( 1, size );
 
-	Element* ret = new Element( i1, nc, "test1", dims, 1 );
+	Element* ret = new Element( i1, ac, "test1", dims, 1 );
 	// bool ret = nc->create( i1, "test1", size );
 	assert( ret );
-	ret = new Element( i2, nc, "test2", dims, 1 );
+	ret = new Element( i2, ac, "test2", dims, 1 );
 	// ret = nc->create( i2, "test2", size );
 	assert( ret );
 
@@ -119,15 +125,12 @@ void insertIntoQ( )
 	ProcInfo p;
 
 	for ( unsigned int i = 0; i < size; ++i ) {
-		char temp[20];
-		sprintf( temp, "objname_%d", i );
-		string stemp( temp );
+		double x = i * i;
 		char buf[200];
 
 		// This simulates a sendTo
-		Conv< string > conv( stemp );
+		Conv< double > conv( x );
 		unsigned int size = conv.val2buf( buf );
-		// unsigned int size = Conv< string >::val2buf( buf, stemp );
 		Qinfo qi( 1, i, size + sizeof( DataId ), 1, 1 );
 
 		*reinterpret_cast< DataId* >( buf + size ) = DataId( i );
@@ -141,10 +144,8 @@ void insertIntoQ( )
 	Qinfo::clearQ( &p );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
-		char temp[20];
-		sprintf( temp, "objname_%d", i );
-		string name = ( reinterpret_cast< Neutral* >(e2.element()->dataHandler()->data( i )) )->getName();
-		assert( name == temp );
+		double val = ( reinterpret_cast< Arith* >(e2.element()->dataHandler()->data( i )) )->getOutput();
+		assert( fabs( val - i * i ) < 1e-8 );
 	}
 	cout << "." << flush;
 
@@ -155,22 +156,22 @@ void insertIntoQ( )
 
 void testSendMsg()
 {
-	const Cinfo* nc = Neutral::initCinfo();
+	const Cinfo* ac = Arith::initCinfo();
 	unsigned int size = 100;
 
 	const DestFinfo* df = dynamic_cast< const DestFinfo* >(
-		nc->findFinfo( "set_name" ) );
+		ac->findFinfo( "set_outputValue" ) );
 	assert( df != 0 );
 	FuncId fid = df->getFid();
 	vector< unsigned int > dims( 1, size );
 
 	Id i1 = Id::nextId();
 	Id i2 = Id::nextId();
-	Element* ret = new Element( i1, nc, "test1", dims, 1 );
+	Element* ret = new Element( i1, ac, "test1", dims, 1 );
 	// bool ret = nc->create( i1, "test1", size );
 	assert( ret );
 	// ret = nc->create( i2, "test2", size );
-	ret = new Element( i2, nc, "test2", dims, 1 );
+	ret = new Element( i2, ac, "test2", dims, 1 );
 	assert( ret );
 
 	Eref e1 = i1.eref();
@@ -182,22 +183,19 @@ void testSendMsg()
 	ProcInfo p;
 	
 	// Defaults to BindIndex of 0.
-	SrcFinfo1<string> s( "test", "" );
+	SrcFinfo1<double> s( "test", "" );
 	e1.element()->addMsgAndFunc( m->mid(), fid, s.getBindIndex() );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
-		char temp[20];
-		sprintf( temp, "send_to_e2_%d", i );
-		string stemp( temp );
-		s.send( Eref( e1.element(), i ), &p, stemp );
+		double x = i + i * i;
+		s.send( Eref( e1.element(), i ), &p, x );
 	}
 	Qinfo::clearQ( &p );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
-		char temp[20];
-		sprintf( temp, "send_to_e2_%d", i );
-		assert( reinterpret_cast< Neutral* >(e2.element()->dataHandler()->data( i ))->getName()
-			== temp );
+		double temp = i + i * i;
+		double val = reinterpret_cast< Arith* >(e2.element()->dataHandler()->data( i ))->getOutput();
+		assert( fabs( val - temp ) < 1e-8 );
 	}
 	cout << "." << flush;
 
@@ -224,14 +222,17 @@ void testCreateMsg()
 	ProcInfo p;
 
 	OneToOneMsg *m = new OneToOneMsg( e1.element(), e2.element() );
-	const Finfo* f1 = nc->findFinfo( "child" );
-	const Finfo* f2 = nc->findFinfo( "parent" );
+	assert( m );
+	const Finfo* f1 = nc->findFinfo( "childMsg" );
+	assert( f1 );
+	const Finfo* f2 = nc->findFinfo( "parentMsg" );
+	assert( f2 );
 	bool ret = f1->addMsg( f2, m->mid(), e1.element() );
 	// bool ret = add( e1.element(), "child", e2.element(), "parent" );
 	
 	assert( ret );
 
-	const Finfo* f = nc->findFinfo( "child" );
+	const Finfo* f = nc->findFinfo( "childMsg" );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		const SrcFinfo1< int >* sf = dynamic_cast< const SrcFinfo1< int >* >( f );
@@ -252,33 +253,31 @@ void testCreateMsg()
 
 void testSet()
 {
-	const Cinfo* nc = Neutral::initCinfo();
+	const Cinfo* ac = Arith::initCinfo();
 	unsigned int size = 100;
 	vector< unsigned int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
-	//bool ret = nc->create( i2, "test2", size );
-	Element* ret = new Element( i2, nc, "test2", dims, 1 );
+	Element* ret = new Element( i2, ac, "test2", dims, 1 );
 	assert( ret );
 	ProcInfo p;
 
 	Eref e2 = i2.eref();
+
+	assert( ret->getName() == "test2" );
+	Field< string >::set( e2, "name", "NewImprovedTest" );
+	assert( ret->getName() == "NewImprovedTest" );
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
-		char temp[20];
-		sprintf( temp, "set_e2_%d", i );
-		string stemp( temp );
+		double x = sqrt( i );
 		Eref dest( e2.element(), i );
-		SetGet1< string >::set( dest, "set_name", stemp );
-		// set( dest, "set_name", stemp );
-		// Qinfo::clearQ( &p );
+		SetGet1< double >::set( dest, "set_outputValue", x );
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
-		char temp[20];
-		sprintf( temp, "set_e2_%d", i );
-		assert( reinterpret_cast< Neutral* >(e2.element()->dataHandler()->data( i ))->getName()
-			== temp );
+		double temp = sqrt( i );
+		double val = reinterpret_cast< Arith* >(e2.element()->dataHandler()->data( i ))->getOutput();
+		assert( fabs( val - temp ) < 1e-6 );
 	}
 
 	cout << "." << flush;
@@ -288,50 +287,35 @@ void testSet()
 
 void testGet()
 {
-	const Cinfo* nc = Neutral::initCinfo();
+	const Cinfo* ac = Arith::initCinfo();
 	unsigned int size = 100;
 	string arg;
 	Id i2 = Id::nextId();
-	// bool ret = nc->create( i2, "test2", size );
 	vector< unsigned int > dims( 1, size );
-	Element* ret = new Element( i2, nc, "test2", dims, 1 );
+	Element* ret = new Element( i2, ac, "test2", dims, 1 );
 	assert( ret );
 	// Element* shell = Id()();
 	ProcInfo p;
 
 	Eref e2 = i2.eref();
+
+	string val = Field< string >::get( e2, "name" );
+	assert( val == "test2" );
+	ret->setName( "HupTwoThree" );
+	val = Field< string >::get( e2, "name" );
+	assert( val == "HupTwoThree" );
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
-		char temp[20];
-		sprintf( temp, "get_e2_%d", i );
-		string stemp( temp );
-		reinterpret_cast< Neutral* >(e2.element()->dataHandler()->data( i ))->setName( temp );
+		double temp = i * 3;
+		reinterpret_cast< Arith* >(e2.element()->dataHandler()->data( i ))->setOutput( temp );
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
-		string stemp;
 		Eref dest( e2.element(), i );
 
-			// I don't really want an array of SetGet/Shells to originate
-			// get requests, but just
-			// to test that it works from anywhere...
-		stemp = Field< string >::get( dest, "name" );
-		char temp[20];
-		sprintf( temp, "get_e2_%d", i );
-		assert( stemp == temp );
-		/*
-		if ( get( dest, "get_name" ) ) {
-			Qinfo::clearQ( &p ); // Request goes to e2
-			// shell->clearQ(); // Response comes back to e1
-			Qinfo::clearQ( &p ); // Response comes back to e1
-
-			stemp = ( reinterpret_cast< Shell* >(shell->dataHandler()->data( 0 )) )->getBuf();
-			// cout << i << "	" << stemp << endl;
-			char temp[20];
-			sprintf( temp, "get_e2_%d", i );
-			assert( stemp == temp );
-		}
-		*/
+		double val = Field< double >::get( dest, "outputValue" );
+		double temp = i * 3;
+		assert( fabs( val - temp ) < 1e-8 );
 	}
 
 	cout << "." << flush;
@@ -356,7 +340,8 @@ void testSetGet()
 		sprintf( temp, "sg_e2_%d", i );
 		bool ret = Field< string >::set( e2, "name", temp );
 		assert( ret );
-		assert( reinterpret_cast< Neutral* >(e2.data())->getName() == temp );
+		assert( reinterpret_cast< Neutral* >(e2.data())->getName( e2, 0 ) 
+			== temp );
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -428,7 +413,7 @@ void testSetGetSynapse()
 
 	// Element should exist even if data doesn't
 	assert ( syn != 0 );
-	assert ( syn->name() == "synapse" ); 
+	assert ( syn->getName() == "synapse" ); 
 
 	assert( syn->dataHandler()->data( 0 ) == 0 );
 
@@ -474,7 +459,7 @@ void testSetGetVec()
 	Id synId( i2.value() + 1 );
 	Element* syn = synId();
 	assert ( syn != 0 );
-	assert ( syn->name() == "synapse" );
+	assert ( syn->getName() == "synapse" );
 
 	assert( syn->dataHandler()->numData() == 0 );
 	vector< unsigned int > numSyn( size, 0 );
@@ -531,7 +516,7 @@ void testSetRepeat()
 	Id synId( i2.value() + 1 );
 	Element* syn = synId();
 	assert ( syn != 0 );
-	assert ( syn->name() == "synapse" );
+	assert ( syn->getName() == "synapse" );
 
 	assert( syn->dataHandler()->numData() == 0 );
 	vector< unsigned int > numSyn( size, 0 );
@@ -584,7 +569,7 @@ void testSendSpike()
 	Id synId( i2.value() + 1 );
 	Element* syn = synId();
 	assert ( syn != 0 );
-	assert ( syn->name() == "synapse" );
+	assert ( syn->getName() == "synapse" );
 
 	assert( syn->dataHandler()->numData() == 0 );
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -849,7 +834,7 @@ void testSparseMsg()
 	Id synId( i2.value() + 1 );
 	Element* syn = synId();
 	assert ( syn != 0 );
-	assert ( syn->name() == "synapse" );
+	assert ( syn->getName() == "synapse" );
 
 	assert( syn->dataHandler()->numData() == 0 );
 
@@ -961,7 +946,7 @@ void testUpValue()
 	Id tickId( clock.value() + 1 );
 	Element* ticke = tickId();
 	assert ( ticke != 0 );
-	assert ( ticke->name() == "tick" );
+	assert ( ticke->getName() == "tick" );
 
 	assert( ticke->dataHandler()->numData() == 0 );
 	bool ret = Field< unsigned int >::set( clocker, "numTicks", size );
@@ -1202,7 +1187,7 @@ void testMsgField()
 
 	Element *msgElm = msgElmId();
 
-	assert( msgElm->name() == "singleMsg" );
+	assert( msgElm->getName() == "singleMsg" );
 
 	Eref msgEr = m->manager( msgElmId );
 
@@ -1227,9 +1212,12 @@ void testMsgField()
 	// Check that regular msgs go through.
 	Eref tgt3( i2(), 3 );
 	Eref tgt8( i2(), 8 );
-	string name = reinterpret_cast< Neutral* >(tgt3.data())->getName();
+	string name = tgt3.element()->getName();
 	assert( name == "send_to_e2_5" );
-	name = reinterpret_cast< Neutral* >(tgt8.data())->getName();
+	name = reinterpret_cast< Neutral* >(tgt3.data())->getName( tgt3, 0 );
+	assert( name == "send_to_e2_5" );
+	name = tgt8.element()->getName();
+	// name = reinterpret_cast< Neutral* >(tgt8.data())->getName();
 	assert( name == "" );
 
 	// Now change I1 and I2, rerun, and check.
@@ -1242,9 +1230,9 @@ void testMsgField()
 		s.send( Eref( e1.element(), i ), &p, stemp );
 	}
 	Qinfo::clearQ( &p );
-	name = reinterpret_cast< Neutral* >(tgt3.data())->getName();
+	name = reinterpret_cast< Neutral* >(tgt3.data())->getName( tgt3, 0 );
 	assert( name == "send_to_e2_5" );
-	name = reinterpret_cast< Neutral* >(tgt8.data())->getName();
+	name = reinterpret_cast< Neutral* >(tgt8.data())->getName( tgt8, 0 );
 	assert( name == "other_to_e2_9" );
 
 	cout << "." << flush;
