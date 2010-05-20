@@ -324,32 +324,30 @@ void testGet()
 
 void testSetGet()
 {
-	const Cinfo* nc = Neutral::initCinfo();
+	const Cinfo* ac = Arith::initCinfo();
 	unsigned int size = 100;
 	vector< unsigned int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
 	// bool ret = nc->create( i2, "test2", size );
-	Element* ret = new Element( i2, nc, "test2", dims, 1 );
+	Element* ret = new Element( i2, ac, "test2", dims, 1 );
 	assert( ret );
 
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref e2( i2(), i );
-		char temp[20];
-		sprintf( temp, "sg_e2_%d", i );
-		bool ret = Field< string >::set( e2, "name", temp );
+		double x = i * 3.14;
+		bool ret = Field< double >::set( e2, "outputValue", x );
 		assert( ret );
-		assert( reinterpret_cast< Neutral* >(e2.data())->getName( e2, 0 ) 
-			== temp );
+		double val = reinterpret_cast< Arith* >(e2.data())->getOutput();
+		assert( fabs( val - x ) < 1e-8 );
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref e2( i2(), i );
-		char temp[20];
-		sprintf( temp, "sg_e2_%d", i );
-		string ret = Field< string >::get( e2, "name" );
-		assert( ret == temp );
+		double x = i * 3.14;
+		double ret = Field< double >::get( e2, "outputValue" );
+		assert( fabs( ret - x ) < 1e-8 );
 	}
 
 	cout << "." << flush;
@@ -1159,22 +1157,20 @@ void testConvVector()
 
 void testMsgField()
 {
-	const Cinfo* nc = Neutral::initCinfo();
+	const Cinfo* ac = Arith::initCinfo();
 	unsigned int size = 10;
 
 	const DestFinfo* df = dynamic_cast< const DestFinfo* >(
-		nc->findFinfo( "set_name" ) );
+		ac->findFinfo( "set_outputValue" ) );
 	assert( df != 0 );
 	FuncId fid = df->getFid();
 	vector< unsigned int > dims( 1, size );
 
 	Id i1 = Id::nextId();
 	Id i2 = Id::nextId();
-	Element* ret = new Element( i1, nc, "test1", dims, 1 );
-	// bool ret = nc->create( i1, "test1", size );
+	Element* ret = new Element( i1, ac, "test1", dims, 1 );
 	assert( ret );
-	// ret = nc->create( i2, "test2", size );
-	ret = new Element( i2, nc, "test2", dims, 1 );
+	ret = new Element( i2, ac, "test2", dims, 1 );
 	assert( ret );
 
 	Eref e1 = i1.eref();
@@ -1198,42 +1194,35 @@ void testMsgField()
 	assert( sm->getI1() == DataId( 5 ) );
 	assert( sm->getI2() == DataId( 3 ) );
 	
-	SrcFinfo1<string> s( "test", "" );
+	SrcFinfo1<double> s( "test", "" );
 	e1.element()->addMsgAndFunc( m->mid(), fid, s.getBindIndex() );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
-		char temp[20];
-		sprintf( temp, "send_to_e2_%d", i );
-		string stemp( temp );
-		s.send( Eref( e1.element(), i ), &p, stemp );
+		double x = i * 42;
+		s.send( Eref( e1.element(), i ), &p, x );
 	}
 	Qinfo::clearQ( &p );
 
 	// Check that regular msgs go through.
 	Eref tgt3( i2(), 3 );
 	Eref tgt8( i2(), 8 );
-	string name = tgt3.element()->getName();
-	assert( name == "send_to_e2_5" );
-	name = reinterpret_cast< Neutral* >(tgt3.data())->getName( tgt3, 0 );
-	assert( name == "send_to_e2_5" );
-	name = tgt8.element()->getName();
-	// name = reinterpret_cast< Neutral* >(tgt8.data())->getName();
-	assert( name == "" );
+	double val = reinterpret_cast< Arith* >( tgt3.data() )->getOutput();
+	assert( fabs( val - 5 * 42 ) < 1e-8 );
+	val = reinterpret_cast< Arith* >( tgt8.data() )->getOutput();
+	assert( fabs( val ) < 1e-8 );
 
 	// Now change I1 and I2, rerun, and check.
 	sm->setI1( 9 );
 	sm->setI2( 8 );
 	for ( unsigned int i = 0; i < size; ++i ) {
-		char temp[20];
-		sprintf( temp, "other_to_e2_%d", i );
-		string stemp( temp );
-		s.send( Eref( e1.element(), i ), &p, stemp );
+		double x = i * 1000;
+		s.send( Eref( e1.element(), i ), &p, x );
 	}
 	Qinfo::clearQ( &p );
-	name = reinterpret_cast< Neutral* >(tgt3.data())->getName( tgt3, 0 );
-	assert( name == "send_to_e2_5" );
-	name = reinterpret_cast< Neutral* >(tgt8.data())->getName( tgt8, 0 );
-	assert( name == "other_to_e2_9" );
+	val = reinterpret_cast< Arith* >( tgt3.data() )->getOutput();
+	assert( fabs( val - 5 * 42 ) < 1e-8 );
+	val = reinterpret_cast< Arith* >( tgt8.data() )->getOutput();
+	assert( fabs( val - 9000 ) < 1e-8 );
 
 	cout << "." << flush;
 

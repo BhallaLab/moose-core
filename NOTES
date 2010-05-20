@@ -5648,5 +5648,12 @@ Firing rate in 10000x200 model is 22 out of 81 per timestep.
 ============================================================================
 19 May 2010
 Working on Neutral.cpp. Trying to implement Field access to name 
-(which is stored on Element) and 
+(which is stored on Element)
 
+============================================================================
+20 May 2010
+Continuing with implementation. Removing the 'name' field from the Neutral and
+putting it into the parent Element has led to all sorts of updates needed
+in the unit tests, about halfway through. Checkin 1800.
+
+Went through the remaining tests, now clears all.
