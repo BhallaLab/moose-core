@@ -5662,3 +5662,7 @@ Ran valgrind. It is happy.
 Now setting up Neutral as the base class for all Elements. Odd bug pops up in
 testScheduling.cpp:69, where the timings don't match.
 Turns out to happen when Tick is derived from Neutral. Will deal with it later.
+Checkin 1802.
+
+Implemented creation-time message from parent to child. Surprisingly it 
+Just Works. Yet to do full testing on it, but it clears old unit tests.

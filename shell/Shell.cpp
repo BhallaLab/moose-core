@@ -497,11 +497,29 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 		if ( !pa ) {
 			stringstream ss;
 			ss << "create: Parent Element'" << parent << "' not found. No Element created";
+			warning( ss.str() );
 			return;
 		}
+		const Finfo* f1 = pa->cinfo()->findFinfo( "childMsg" );
+		if ( !f1 ) {
+			stringstream ss;
+			ss << "create: Parent Element'" << parent << "' cannot handle children. No Element created";
+			warning( ss.str() );
+			return;
+		}
+		const Finfo* f2 = Neutral::initCinfo()->findFinfo( "parentMsg" );
+		assert( f2 );
 		// cout << myNode_ << ": Shell::innerCreate newElmId= " << newElm << endl;
-	//	Element* ret = 
-		new Element( newElm, c, name, dimensions );
+		Element* ret = new Element( newElm, c, name, dimensions );
+		Msg* m = new OneToAllMsg( parent.eref(), ret );
+		assert( m );
+		if ( !f1->addMsg( f2, m->mid(), parent() ) ) {
+			cout << "create: Error: unable to add parent->child msg for " <<
+				name << "\n";
+			return;
+		}
+		
+
 		//ret = c->create( newElm, name, n, Element::Decomposition::Block );
 	} else {
 		stringstream ss;
