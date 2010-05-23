@@ -86,5 +86,5 @@ FullId AssignVecMsg::findOtherEnd( FullId f ) const
 	if ( f.id() == e2() ) {
 		return FullId( e1()->id(), i1_ );
 	}
-	return FullId( Id(), DataId::bad() );
+	return FullId::bad();
 }

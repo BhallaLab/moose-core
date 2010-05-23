@@ -345,19 +345,6 @@ void testShellAddMsg()
 	ret = SetGet1< unsigned int >::set(
 		m5er, "loadBalance", Shell::numCores() );
 	assert( ret );
-
-	/*
-	const SparseMsg *csm = 
-		static_cast< const SparseMsg * >( Msg::getMsg( m5 ) );
-	SparseMsg *sm = const_cast< SparseMsg * >( csm );
-	SparseMatrix< unsigned int > mtx( 5, 5 );
-	mtx.set( 0, 4, 0 );
-	mtx.set( 1, 3, 0 );
-	mtx.set( 2, 2, 0 );
-	mtx.set( 3, 1, 0 );
-	mtx.set( 4, 0, 0 );
-	sm->setMatrix( mtx );
-	*/
 	
 	///////////////////////////////////////////////////////////
 	// Set up scheduling

@@ -35,3 +35,14 @@ Eref FullId::eref() const
 {
 	return Eref( id(), dataId );
 }
+
+bool FullId::operator==( const FullId& other ) const
+{
+	return ( id == other.id && dataId == other.dataId );
+}
+
+const FullId& FullId::bad()
+{
+	static FullId bad_( Id(), DataId::bad() );
+	return bad_;
+}

@@ -214,5 +214,5 @@ FullId SingleMsg::findOtherEnd( FullId f ) const
 			return FullId( e1()->id(), DataId::bad() );
 	}
 	
-	return FullId( Id(), DataId::bad() );
+	return FullId::bad();
 }

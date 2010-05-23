@@ -89,5 +89,5 @@ FullId OneToOneMsg::findOtherEnd( FullId f ) const
 	else if ( f.id() == e2() )
 		return FullId( e1()->id(), f.dataId );
 	
-	return FullId( Id(), DataId::bad() );
+	return FullId::bad();
 }

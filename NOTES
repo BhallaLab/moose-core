@@ -5684,3 +5684,10 @@ Msg::findSrcEref: Find the full Eref of the src, given the dest. In most
 Msg cases this is the src Element. Sometimes, like the SparseMsg, we will 
 need to look up msg internals to find src from dest and its DataId part.
 
+============================================================================
+23 May 2010
+Implementing Neutral::getParent. This requires some message traversal 
+functions, so lots of implementation in the different Msg classes. 
+Checkin 1804.
+
+============================================================================

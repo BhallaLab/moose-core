@@ -11,7 +11,154 @@
 
 void testAssortedMsg()
 {
-;
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+	vector< unsigned int > dimensions;
+	dimensions.push_back( 5 );
+
+
+	///////////////////////////////////////////////////////////
+	// Set up the objects.
+	///////////////////////////////////////////////////////////
+	Id a1 = shell->doCreate( "Arith", Id(), "a1", dimensions );
+	Id a2 = shell->doCreate( "Arith", Id(), "a2", dimensions );
+
+	Id b1 = shell->doCreate( "Arith", Id(), "b1", dimensions );
+	Id b2 = shell->doCreate( "Arith", Id(), "b2", dimensions );
+
+	Id c1 = shell->doCreate( "Arith", Id(), "c1", dimensions );
+	Id c2 = shell->doCreate( "Arith", Id(), "c2", dimensions );
+
+	Id d1 = shell->doCreate( "Arith", Id(), "d1", dimensions );
+	Id d2 = shell->doCreate( "Arith", Id(), "d2", dimensions );
+
+	Id e1 = shell->doCreate( "Arith", Id(), "e1", dimensions );
+	Id e2 = shell->doCreate( "Arith", Id(), "e2", dimensions );
+
+	///////////////////////////////////////////////////////////
+	// Set up initial conditions
+	///////////////////////////////////////////////////////////
+	bool ret = 0;
+	vector< double > init; // 12345
+	for ( unsigned int i = 1; i < 6; ++i )
+		init.push_back( i );
+	ret = SetGet1< double >::setVec( a1.eref(), "arg1", init ); // 12345
+	assert( ret );
+	ret = SetGet1< double >::setVec( b1.eref(), "arg1", init ); // 12345
+	assert( ret );
+	ret = SetGet1< double >::setVec( c1.eref(), "arg1", init ); // 12345
+	assert( ret );
+	ret = SetGet1< double >::setVec( d1.eref(), "arg1", init ); // 12345
+	assert( ret );
+	ret = SetGet1< double >::setVec( e1.eref(), "arg1", init ); // 12345
+	assert( ret );
+
+	///////////////////////////////////////////////////////////
+	// Set up messaging
+	///////////////////////////////////////////////////////////
+	// Should give 04000
+	MsgId m1 = shell->doAddMsg( "Single", 
+		FullId( a1, 3 ), "output", FullId( a2, 1 ), "arg1" );
+	assert( m1 != Msg::badMsg );
+
+	// Should give 33333
+	MsgId m2 = shell->doAddMsg( "OneToAll", 
+		FullId( b1, 2 ), "output", FullId( b2, 0 ), "arg1" );
+	assert( m2 != Msg::badMsg );
+
+	// Should give 12345
+	MsgId m3 = shell->doAddMsg( "OneToOne", 
+		FullId( c1, 0 ), "output", FullId( c2, 0 ), "arg1" );
+	assert( m3 != Msg::badMsg );
+
+	// Should give 01234
+	MsgId m4 = shell->doAddMsg( "Diagonal", 
+		FullId( d1, 0 ), "output", FullId( d2, 0 ), "arg1" );
+	assert( m4 != Msg::badMsg );
+
+	// Should give 54321
+	MsgId m5 = shell->doAddMsg( "Sparse", 
+		FullId( e1, 0 ), "output", FullId( e2, 0 ), "arg1" );
+	assert( m5 != Msg::badMsg );
+
+	const Msg* m5p = Msg::getMsg( m5 );
+	Eref m5er = m5p->manager( m5p->id() );
+
+	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
+		m5er, "setEntry", 0, 4, 0 );
+	assert( ret );
+	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
+		m5er, "setEntry", 1, 3, 0 );
+	assert( ret );
+	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
+		m5er, "setEntry", 2, 2, 0 );
+	assert( ret );
+	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
+		m5er, "setEntry", 3, 1, 0 );
+	assert( ret );
+	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
+		m5er, "setEntry", 4, 0, 0 );
+	assert( ret );
+
+	ret = SetGet1< unsigned int >::set(
+		m5er, "loadBalance", Shell::numCores() );
+	assert( ret );
+
+	///////////////////////////////////////////////////////////
+	// Test traversal
+	///////////////////////////////////////////////////////////
+	// Single
+	FullId f = Msg::getMsg( m1 )->findOtherEnd( FullId( a1, 3 ) );
+	assert( f == FullId( a2, 1 ) );
+
+	f = Msg::getMsg( m1 )->findOtherEnd( FullId( a2, 1 ) );
+	assert( f == FullId( a1, 3 ) );
+
+	f = Msg::getMsg( m1 )->findOtherEnd( FullId( a1, 0 ) );
+	assert( f == FullId( a2, DataId::bad() ) );
+
+	f = Msg::getMsg( m1 )->findOtherEnd( FullId( a2, 0 ) );
+	assert( f == FullId( a1, DataId::bad() ) );
+
+	f = Msg::getMsg( m1 )->findOtherEnd( FullId( b2, 1 ) );
+	assert( f == FullId::bad() );
+
+	// OneToAll
+	f = Msg::getMsg( m2 )->findOtherEnd( FullId( b1, 2 ) );
+	assert( f == FullId( b2, 0 ) );
+
+	f = Msg::getMsg( m2 )->findOtherEnd( FullId( b2, 0 ) );
+	assert( f == FullId( b1, 2 ) );
+	f = Msg::getMsg( m2 )->findOtherEnd( FullId( b2, 1 ) );
+	assert( f == FullId( b1, 2 ) );
+	f = Msg::getMsg( m2 )->findOtherEnd( FullId( b2, 2 ) );
+	assert( f == FullId( b1, 2 ) );
+	f = Msg::getMsg( m2 )->findOtherEnd( FullId( b2, 3 ) );
+	assert( f == FullId( b1, 2 ) );
+	f = Msg::getMsg( m2 )->findOtherEnd( FullId( b2, 4 ) );
+	assert( f == FullId( b1, 2 ) );
+
+	f = Msg::getMsg( m2 )->findOtherEnd( FullId( b1, 0 ) );
+	assert( f == FullId( b2, DataId::bad() ) );
+
+	f = Msg::getMsg( m2 )->findOtherEnd( FullId( a2, 1 ) );
+	assert( f == FullId::bad() );
+
+	///////////////////////////////////////////////////////////
+	// Clean up.
+	///////////////////////////////////////////////////////////
+	shell->doDelete( a1 );
+	shell->doDelete( a2 );
+	shell->doDelete( b1 );
+	shell->doDelete( b2 );
+	shell->doDelete( c1 );
+	shell->doDelete( c2 );
+	shell->doDelete( d1 );
+	shell->doDelete( d2 );
+	shell->doDelete( e1 );
+	shell->doDelete( e2 );
+
+	cout << "." << flush;
 }
 
 
@@ -25,3 +172,7 @@ void testMpiMsg( )
 {
 	;
 }
+
+
+
+

@@ -38,10 +38,17 @@ class FullId
 			: id( i ), dataId( d )
 		{;}
 
+		static const FullId& bad();
+
 		/**
 		 * Returns the Eref matching itself.
 		 */
 		Eref eref() const;
+
+		/**
+		 * For equality check
+		 */
+		bool operator==( const FullId& other ) const;
 
 		/**
 		 * Here are the data values.
