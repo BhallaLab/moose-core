@@ -378,3 +378,36 @@ void Element::showFields() const
 	for ( unsigned int i = 0; i < valueVec.size(); ++i )
 		cout << i << ": " << valueVec[i]->name() << endl;
 }
+
+const Msg* Element::findDestMsgByFid( FuncId fid ) const
+{
+	for ( vector< MsgId >::const_iterator i = m_.begin(); 
+		i != m_.end(); ++i )
+	{
+		const Msg* m = Msg::getMsg( *i );
+		const Element* src;
+		if ( m->e1() == this ) {
+			src = m->e2();
+		} else {
+			src = m->e1();
+		}
+		unsigned int ret = src->findBinding( MsgFuncBinding( *i, fid ) );
+		if ( ret != ~0U ) {
+			return m;
+		}
+	}
+	return 0;
+}
+
+unsigned int Element::findBinding( MsgFuncBinding b ) const
+{
+	for ( unsigned int i = 0; i < msgBinding_.size(); ++i ) 
+	{
+		const vector< MsgFuncBinding >& mb = msgBinding_[i];
+		vector< MsgFuncBinding>::const_iterator bi = 
+			find( mb.begin(), mb.end(), b );
+		if ( bi != mb.end() )
+			return i;
+	}
+	return ~0;
+}

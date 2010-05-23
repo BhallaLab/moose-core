@@ -198,3 +198,21 @@ void SingleMsg::setId( Id id )
 {
 	id_ = id;
 }
+
+FullId SingleMsg::findOtherEnd( FullId f ) const
+{
+	if ( f.id() == e1() ) {
+		if ( f.dataId == i1_ )
+			return FullId( e2()->id(), i2_ );
+		else
+			return FullId( e2()->id(), DataId::bad() );
+	}
+	else if ( f.id() == e2() ) {
+		if ( f.dataId == i2_ )
+			return FullId( e1()->id(), i1_ );
+		else
+			return FullId( e1()->id(), DataId::bad() );
+	}
+	
+	return FullId( Id(), DataId::bad() );
+}

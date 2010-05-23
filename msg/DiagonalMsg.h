@@ -40,6 +40,8 @@ class DiagonalMsg: public Msg
 
 		Id id() const;
 
+		FullId findOtherEnd( FullId end ) const;
+
 		void setStride( int stride );
 		int getStride() const;
 	private:

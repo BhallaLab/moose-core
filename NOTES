@@ -5666,3 +5666,21 @@ Checkin 1802.
 
 Implemented creation-time message from parent to child. Surprisingly it 
 Just Works. Yet to do full testing on it, but it clears old unit tests.
+============================================================================
+21 May 2010
+First "simple" function in doing msg traversing turns out to be messy.
+I want to get the FullId of the parent of any Eref. Looks like I have to:
+- scan through Element::m_ array of all destMsgs. 
+	Likely that it is entry 0.
+- Find the srcElement from e1()
+- go to SrcElement, scan through Element::msgBinding_ till we find one that
+	mathches the MsgFuncBinding, that is, both the mid and the fid are OK.
+	Check if this 
+	
+
+============================================================================
+22 May 2010
+Msg::findSrcEref: Find the full Eref of the src, given the dest. In most 
+Msg cases this is the src Element. Sometimes, like the SparseMsg, we will 
+need to look up msg internals to find src from dest and its DataId part.
+

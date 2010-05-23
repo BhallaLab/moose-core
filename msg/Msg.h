@@ -92,6 +92,18 @@ class Msg
 		}
 
 		/**
+		 * Find the other end of this Msg. In most cases this is a 
+		 * straightforward return of e1 or e2, plus perhaps a DataId.
+		 * But in some complex msgs we need to figure out
+		 * DataIds that match with the target.
+		 * In many-to-one cases we just return the first entry.
+		 * If no Element match, return FullId( Id(), DataId::bad() )
+		 * If Element e matches but not DataId, return 
+		 * FullId( e.id(), DataId::bad() )
+		 */
+		virtual FullId findOtherEnd( FullId ) const = 0;
+
+		/**
 		 * Looks up the message on the global vector of Msgs. No checks,
 		 * except assertions in debug mode.
 		 */

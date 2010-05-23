@@ -16,3 +16,13 @@ ostream& operator <<( ostream& s, const DataId& d )
 	s << d.data_ << ":" << d.field_;
 	return s;
 }
+
+const DataId& DataId::bad() {
+	static DataId bad_( ~0U, ~0U );
+	return bad_;
+}
+
+const DataId& DataId::any() {
+	static DataId any_( ~0U, ~0U );
+	return any_;
+}

@@ -47,6 +47,12 @@ class DataId {
 		bool operator==( const DataId& other ) const {
 			return ( data_ == other.data_ && field_ == other.field_ );
 		}
+
+		/// Represents a bad dataId.
+		static const DataId& bad();
+
+		/// Represents any dataId: a wildcard for any data index.
+		static const DataId& any();
 	
 	private:
 		unsigned int data_;

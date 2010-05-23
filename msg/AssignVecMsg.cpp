@@ -77,3 +77,14 @@ Id AssignVecMsg::id() const
 {
 	return id_;
 }
+
+FullId AssignVecMsg::findOtherEnd( FullId f ) const
+{
+	if ( f.id() == e1() ) {
+		return FullId( e2()->id(), 0 );
+	}
+	if ( f.id() == e2() ) {
+		return FullId( e1()->id(), i1_ );
+	}
+	return FullId( Id(), DataId::bad() );
+}

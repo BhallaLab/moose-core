@@ -168,6 +168,18 @@ class Element
 		 */
 		Id id() const;
 
+		/**
+		 * Returns the dest Msg that sports the specified Fid.
+		 * Returns 0 on failure.
+		 */
+		 const Msg* findDestMsgByFid( FuncId fid ) const;
+
+		 /**
+		  * Returns the binding index of the specified entry.
+		  * Returns ~0 on failure.
+		  */
+		 unsigned int findBinding( MsgFuncBinding b ) const;
+
 	private:
 		string name_;
 

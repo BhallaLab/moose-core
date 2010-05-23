@@ -22,6 +22,8 @@ class MsgManager
 		void setMid( MsgId mid );
 		MsgId getMid() const;
 
+		FullId findOtherEnd( FullId end ) const;
+
 		/**
 		 * Register a new Msg into the appropriate Msg Manager.
 		 */

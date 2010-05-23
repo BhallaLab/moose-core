@@ -11,6 +11,7 @@
 #include "Dinfo.h"
 #include "ElementValueFinfo.h"
 
+
 const Cinfo* Neutral::initCinfo()
 {
 	/////////////////////////////////////////////////////////////////
@@ -43,7 +44,7 @@ const Cinfo* Neutral::initCinfo()
 	static DestFinfo parentMsg( "parentMsg", 
 		"Message from Parent Element(s)", 
 		new EpFunc1< Neutral, int >( &Neutral::destroy ) );
-	
+			
 	/////////////////////////////////////////////////////////////////
 	// Setting up the Finfo list.
 	/////////////////////////////////////////////////////////////////
@@ -95,7 +96,12 @@ string Neutral::getName( Eref e, const Qinfo* q ) const
 
 FullId Neutral::getParent( Eref e, const Qinfo* q ) const
 {
-	return FullId( Id(), DataId( 0, 0 ) );
+	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
+	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
+	static const FuncId pafid = pf2->getFid();
+
+	const Msg* m = e.element()->findDestMsgByFid( pafid );
+	return m->findOtherEnd( e.fullId() );
 }
 
 string Neutral::getClass( Eref e, const Qinfo* q ) const

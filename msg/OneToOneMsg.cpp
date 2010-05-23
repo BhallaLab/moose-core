@@ -81,3 +81,13 @@ Id OneToOneMsg::id() const
 {
 	return id_;
 }
+
+FullId OneToOneMsg::findOtherEnd( FullId f ) const
+{
+	if ( f.id() == e1() )
+		return FullId( e2()->id(), f.dataId );
+	else if ( f.id() == e2() )
+		return FullId( e1()->id(), f.dataId );
+	
+	return FullId( Id(), DataId::bad() );
+}

@@ -26,6 +26,8 @@ class AssignVecMsg: public Msg
 		void exec( const char* arg, const ProcInfo* p) const;
 
 		Id id() const;
+
+		FullId findOtherEnd( FullId end ) const;
 	private:
 		DataId i1_;
 

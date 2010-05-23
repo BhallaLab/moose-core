@@ -31,6 +31,8 @@ class SingleMsg: public Msg
 		// returns the id of the managing Element.
 		Id id() const;
 
+		FullId findOtherEnd( FullId end ) const;
+
 	private:
 		static void setId( Id id );
 		DataId i1_;

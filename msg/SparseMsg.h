@@ -58,6 +58,8 @@ class SparseMsg: public Msg
 
 		Id id() const;
 
+		FullId findOtherEnd( FullId end ) const;
+
 		void setMatrix( const SparseMatrix< unsigned int >& m );
 		SparseMatrix< unsigned int >& getMatrix();
 

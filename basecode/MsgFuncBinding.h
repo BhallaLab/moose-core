@@ -21,6 +21,10 @@ class MsgFuncBinding
 			: mid( m ), fid( f )
 		{;}
 
+		bool operator==( const MsgFuncBinding& other ) const {
+			return ( mid == other.mid && fid == other.fid );
+		}
+
 		MsgId mid;
 		FuncId fid;
 	

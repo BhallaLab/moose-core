@@ -29,6 +29,8 @@ class OneToAllMsg: public Msg
 
 		Id id() const;
 
+		FullId findOtherEnd( FullId end ) const;
+
 	private:
 		DataId i1_;
 		static Id id_;
