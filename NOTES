@@ -5690,4 +5690,5 @@ Implementing Neutral::getParent. This requires some message traversal
 functions, so lots of implementation in the different Msg classes. 
 Checkin 1804.
 
+Partial implementation of unit tests for traversal.  Checkin 1805.
 ============================================================================

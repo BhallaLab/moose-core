@@ -144,6 +144,46 @@ void testAssortedMsg()
 	f = Msg::getMsg( m2 )->findOtherEnd( FullId( a2, 1 ) );
 	assert( f == FullId::bad() );
 
+	// OneToOne
+	for ( unsigned int i = 0; i < 5; ++i ) {
+		f = Msg::getMsg( m3 )->findOtherEnd( FullId( c1, i ) );
+		assert( f == FullId( c2, i ) );
+		f = Msg::getMsg( m3 )->findOtherEnd( FullId( c2, i ) );
+		assert( f == FullId( c1, i ) );
+	}
+	f = Msg::getMsg( m3 )->findOtherEnd( FullId( a2, 1 ) );
+	assert( f == FullId::bad() );
+
+	// Diagonal
+	for ( unsigned int i = 0; i < 4; ++i ) {
+		f = Msg::getMsg( m4 )->findOtherEnd( FullId( d1, i ) );
+		assert( f == FullId( d2, i + 1 ) );
+		f = Msg::getMsg( m4 )->findOtherEnd( FullId( d2, i + 1 ) );
+		assert( f == FullId( d1, i ) );
+	}
+	f = Msg::getMsg( m4 )->findOtherEnd( FullId( d1, 4 ) );
+	assert( f == FullId( d2, DataId::bad() ) );
+	f = Msg::getMsg( m4 )->findOtherEnd( FullId( d2, 0 ) );
+	assert( f == FullId( d1, DataId::bad() ) );
+
+	f = Msg::getMsg( m4 )->findOtherEnd( FullId( a2, 1 ) );
+	assert( f == FullId::bad() );
+
+	// Sparse
+	for ( unsigned int i = 0; i < 5; ++i ) {
+		f = Msg::getMsg( m5 )->findOtherEnd( FullId( e1, i ) );
+		assert( f == FullId( e2, 4 - i ) );
+		f = Msg::getMsg( m5 )->findOtherEnd( FullId( e2, i ) );
+		assert( f == FullId( e1, 4 - i ) );
+	}
+
+	f = Msg::getMsg( m5 )->findOtherEnd( FullId( a2, 1 ) );
+	assert( f == FullId::bad() );
+
+	///////////////////////////////////////////////////////////
+	// Check lookup by funcId.
+	///////////////////////////////////////////////////////////
+
 	///////////////////////////////////////////////////////////
 	// Clean up.
 	///////////////////////////////////////////////////////////
