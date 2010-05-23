@@ -100,8 +100,10 @@ FullId Neutral::getParent( Eref e, const Qinfo* q ) const
 	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
 	static const FuncId pafid = pf2->getFid();
 
-	const Msg* m = e.element()->findDestMsgByFid( pafid );
-	return m->findOtherEnd( e.fullId() );
+	MsgId mid = e.element()->findCaller( pafid );
+	assert( mid != Msg::badMsg );
+
+	return Msg::getMsg( mid )->findOtherEnd( e.fullId() );
 }
 
 string Neutral::getClass( Eref e, const Qinfo* q ) const

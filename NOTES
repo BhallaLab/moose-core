@@ -5691,4 +5691,7 @@ functions, so lots of implementation in the different Msg classes.
 Checkin 1804.
 
 Partial implementation of unit tests for traversal.  Checkin 1805.
+Implemented all unit tests for Msg::findOtherEnd. Checkin 1806.
+
+Added tests for Element::findCaller.
 ============================================================================

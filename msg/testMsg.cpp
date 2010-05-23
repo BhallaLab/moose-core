@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "../builtins/Arith.h"
 
 void testAssortedMsg()
 {
@@ -180,9 +181,24 @@ void testAssortedMsg()
 	f = Msg::getMsg( m5 )->findOtherEnd( FullId( a2, 1 ) );
 	assert( f == FullId::bad() );
 
+	cout << "." << flush;
+
 	///////////////////////////////////////////////////////////
 	// Check lookup by funcId.
 	///////////////////////////////////////////////////////////
+	const Finfo* aFinfo = Arith::initCinfo()->findFinfo( "arg1" );
+	FuncId afid = dynamic_cast< const DestFinfo* >( aFinfo )->getFid();
+
+	MsgId m = a2()->findCaller( afid );
+	assert ( m == m1 );
+	m = b2()->findCaller( afid );
+	assert ( m == m2 );
+	m = c2()->findCaller( afid );
+	assert ( m == m3 );
+	m = d2()->findCaller( afid );
+	assert ( m == m4 );
+	m = e2()->findCaller( afid );
+	assert ( m == m5 );
 
 	///////////////////////////////////////////////////////////
 	// Clean up.
@@ -212,7 +228,3 @@ void testMpiMsg( )
 {
 	;
 }
-
-
-
-

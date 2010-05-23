@@ -379,7 +379,7 @@ void Element::showFields() const
 		cout << i << ": " << valueVec[i]->name() << endl;
 }
 
-const Msg* Element::findDestMsgByFid( FuncId fid ) const
+MsgId Element::findCaller( FuncId fid ) const
 {
 	for ( vector< MsgId >::const_iterator i = m_.begin(); 
 		i != m_.end(); ++i )
@@ -393,10 +393,10 @@ const Msg* Element::findDestMsgByFid( FuncId fid ) const
 		}
 		unsigned int ret = src->findBinding( MsgFuncBinding( *i, fid ) );
 		if ( ret != ~0U ) {
-			return m;
+			return *i;
 		}
 	}
-	return 0;
+	return Msg::badMsg;
 }
 
 unsigned int Element::findBinding( MsgFuncBinding b ) const

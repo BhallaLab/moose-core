@@ -169,10 +169,10 @@ class Element
 		Id id() const;
 
 		/**
-		 * Returns the dest Msg that sports the specified Fid.
+		 * Returns the Msg that calls the specified Fid, on current Element.
 		 * Returns 0 on failure.
 		 */
-		 const Msg* findDestMsgByFid( FuncId fid ) const;
+		 MsgId findCaller( FuncId fid ) const;
 
 		 /**
 		  * Returns the binding index of the specified entry.
