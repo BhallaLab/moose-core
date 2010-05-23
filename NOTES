@@ -5695,5 +5695,8 @@ Implemented all unit tests for Msg::findOtherEnd. Checkin 1806.
 
 Added tests for Element::findCaller. Checkin 1807.
 
-Added tests for Neutral::parent (to look up parent id).
+Added tests for Neutral::parent (to look up parent id). Checkin 1808.
+
+Added 'children' field to return a vector of child Ids. Tested OK.
+
 ============================================================================

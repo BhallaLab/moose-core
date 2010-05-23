@@ -28,6 +28,11 @@ const Cinfo* Neutral::initCinfo()
 		"Parent FullId for current object", 
 			&Neutral::getParent );
 
+	static ReadOnlyElementValueFinfo< Neutral, vector< Id > > children( 
+		"children",
+		"vector of FullIds listing all children of current object", 
+			&Neutral::getChildren );
+
 	static ReadOnlyElementValueFinfo< Neutral, string > className( 
 		"class",
 		"Class Name of object", 
@@ -53,6 +58,7 @@ const Cinfo* Neutral::initCinfo()
 		&parentMsg,
 		&name,
 		&parent,
+		&children,
 		&className,
 	};
 
@@ -104,6 +110,33 @@ FullId Neutral::getParent( Eref e, const Qinfo* q ) const
 	assert( mid != Msg::badMsg );
 
 	return Msg::getMsg( mid )->findOtherEnd( e.fullId() );
+}
+
+/**
+ * Gets Element children, not individual entries in the array.
+ */
+vector< Id > Neutral::getChildren( Eref e, const Qinfo* q ) const
+{
+	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
+	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
+	static const FuncId pafid = pf2->getFid();
+	static const Finfo* cf = neutralCinfo->findFinfo( "childMsg" );
+	static const SrcFinfo* cf2 = dynamic_cast< const SrcFinfo* >( cf );
+	static const BindIndex bi = cf2->getBindIndex();
+	
+	const vector< MsgFuncBinding >* bvec = e.element()->getMsgAndFunc( bi );
+
+	vector< Id > ret;
+
+	for ( vector< MsgFuncBinding >::const_iterator i = bvec->begin();
+		i != bvec->end(); ++i ) {
+		if ( i->fid == pafid ) {
+			const Msg* m = Msg::getMsg( i->mid );
+			assert( m );
+			ret.push_back( m->e2()->id() );
+		}
+	}
+	return ret;
 }
 
 string Neutral::getClass( Eref e, const Qinfo* q ) const

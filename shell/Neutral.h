@@ -28,6 +28,11 @@ class Neutral: public Data
 		FullId getParent( Eref e, const Qinfo* q ) const;
 
 		/**
+		 * Looks up all the Element children of the current Element
+		 */
+		vector< Id > getChildren( Eref e, const Qinfo* q ) const;
+
+		/**
 		 * Looks up the Class name of the current Element
 		 */
 		string getClass( Eref e, const Qinfo* q ) const;
