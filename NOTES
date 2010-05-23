@@ -5693,5 +5693,7 @@ Checkin 1804.
 Partial implementation of unit tests for traversal.  Checkin 1805.
 Implemented all unit tests for Msg::findOtherEnd. Checkin 1806.
 
-Added tests for Element::findCaller.
+Added tests for Element::findCaller. Checkin 1807.
+
+Added tests for Neutral::parent (to look up parent id).
 ============================================================================

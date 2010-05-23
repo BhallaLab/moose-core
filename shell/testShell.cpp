@@ -48,33 +48,42 @@ void testShellParserCreateDelete()
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 
-#ifdef USE_MPI
-	// cout << shell->myNode() << " testShellParserCreateDelete: before barrier\n";
-//	MPI_Barrier( MPI_COMM_WORLD );
-	// cout << shell->myNode() << " testShellParserCreateDelete: after barrier\n";
-#endif
-
-	/*
-	if ( shell->myNode() != 0 ) {
-		Id child = Id::nextId();
-		// cout << shell->myNode() << " testShellParserCreateDelete: child=" << child << endl;
-		while ( !child() ) // Wait till it is created
-			shell->passThroughMsgQs( sheller.element() );
-		while ( child() ) // Wait till it is destroyed
-			shell->passThroughMsgQs( sheller.element() );
-		return;
-	}
-	*/
-//	sheller.element()->showFields();
-//	sheller.element()->showMsg();
-
 	vector< unsigned int > dimensions;
 	dimensions.push_back( 1 );
 	Id child = shell->doCreate( "Neutral", Id(), "test", dimensions );
-	// cout << shell->myNode() << " testShellParserCreateDelete: child=" << child << endl;
 
 	shell->doDelete( child );
-//	shell->doQuit( );
+	cout << "." << flush;
+}
+
+/**
+ * Tests traversal through parents and siblings.
+ */
+void testTreeTraversal()
+{
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+
+	vector< unsigned int > dimensions;
+	dimensions.push_back( 1 );
+	Id f1 = shell->doCreate( "Neutral", Id(), "f1", dimensions );
+	Id f2a = shell->doCreate( "Neutral", f1, "f2a", dimensions );
+	Id f2b = shell->doCreate( "Neutral", f1, "f2b", dimensions );
+	Id f2c = shell->doCreate( "Neutral", f1, "f2c", dimensions );
+	Id f3aa = shell->doCreate( "Neutral", f2a, "f3aa", dimensions );
+	Id f3ab = shell->doCreate( "Neutral", f2a, "f3ab", dimensions );
+	Id f3ba = shell->doCreate( "Neutral", f2b, "f3ba", dimensions );
+
+	FullId pa = Field< FullId >::get( f3aa.eref(), "parent" );
+	assert( pa == FullId( f2a, 0 ) );
+	pa = Field< FullId >::get( f3ab.eref(), "parent" );
+	assert( pa == FullId( f2a, 0 ) );
+	pa = Field< FullId >::get( f2b.eref(), "parent" );
+	assert( pa == FullId( f1, 0 ) );
+	pa = Field< FullId >::get( f1.eref(), "parent" );
+	assert( pa == FullId( Id(), 0 ) );
+
+	shell->doDelete( f1 );
 	cout << "." << flush;
 }
 
@@ -137,18 +146,9 @@ void testInterNodeOps() // redundant.
 	Id child;
 	if ( shell->myNode() == 0 ) {
 		vector< unsigned int > dimensions;
-		// dimensions.push_back( shell->numNodes() + 1 );
 		dimensions.push_back( 6139 );
 		child = shell->doCreate( "Neutral", Id(), "test", dimensions );
 	} 
-	/*
-	else {
-		child = Id::nextId();
-		while ( !child() )
-			shell->passThroughMsgQs( sheller.element() );
-		shell->passThroughMsgQs( sheller.element() );
-	}
-	*/
 	// cout << shell->myNode() << ": testInterNodeOps: #entries = " << child()->dataHandler()->numData() << endl;
 
 	shell->doDelete( child );
@@ -420,13 +420,8 @@ void testShell( )
 void testMpiShell( )
 {
 	testShellParserCreateDelete();
+	testTreeTraversal();
 	testShellSetGet();
 	testInterNodeOps();
 	testShellAddMsg();
-	/** 
-	 * Need to update
-	testShellParserStart();
-	*/
-	// Don't do this yet.
-	//testShellParserQuit();
 }
