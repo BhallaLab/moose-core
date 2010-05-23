@@ -23,6 +23,11 @@ const Cinfo* Neutral::initCinfo()
 		&Neutral::setName, 
 		&Neutral::getName );
 
+	static ReadOnlyElementValueFinfo< Neutral, FullId > me( 
+		"me",
+		"FullId for current object", 
+			&Neutral::getFullId );
+
 	static ReadOnlyElementValueFinfo< Neutral, FullId > parent( 
 		"parent",
 		"Parent FullId for current object", 
@@ -32,6 +37,11 @@ const Cinfo* Neutral::initCinfo()
 		"children",
 		"vector of FullIds listing all children of current object", 
 			&Neutral::getChildren );
+
+	static ReadOnlyElementValueFinfo< Neutral, string > path( 
+		"path",
+		"text path for object", 
+			&Neutral::getPath );
 
 	static ReadOnlyElementValueFinfo< Neutral, string > className( 
 		"class",
@@ -57,8 +67,10 @@ const Cinfo* Neutral::initCinfo()
 		&childMsg,
 		&parentMsg,
 		&name,
+		&me,
 		&parent,
 		&children,
+		&path,
 		&className,
 	};
 
@@ -100,6 +112,11 @@ string Neutral::getName( Eref e, const Qinfo* q ) const
 	return e.element()->getName();
 }
 
+FullId Neutral::getFullId( Eref e, const Qinfo* q ) const
+{
+	return e.fullId();
+}
+
 FullId Neutral::getParent( Eref e, const Qinfo* q ) const
 {
 	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
@@ -137,6 +154,33 @@ vector< Id > Neutral::getChildren( Eref e, const Qinfo* q ) const
 		}
 	}
 	return ret;
+}
+
+string Neutral::getPath( Eref e, const Qinfo* q ) const
+{
+	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
+	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
+	static const FuncId pafid = pf2->getFid();
+
+	vector< FullId > pathVec;
+	FullId curr = e.fullId();
+	stringstream ss;
+
+	pathVec.push_back( curr );
+	while ( !( curr == FullId( Id(), 0 ) ) ) {
+		MsgId mid = curr.eref().element()->findCaller( pafid );
+		assert( mid != Msg::badMsg );
+		curr = Msg::getMsg( mid )->findOtherEnd( curr );
+		pathVec.push_back( curr );
+	}
+
+	ss << "/";
+	for ( int i = pathVec.size() - 2; i >= 0; --i ) {
+		ss << pathVec[i].eref();
+		if ( i > 0 )
+			ss << "/";
+	}
+	return ss.str();
 }
 
 string Neutral::getClass( Eref e, const Qinfo* q ) const

@@ -5697,6 +5697,7 @@ Added tests for Element::findCaller. Checkin 1807.
 
 Added tests for Neutral::parent (to look up parent id). Checkin 1808.
 
-Added 'children' field to return a vector of child Ids. Tested OK.
+Added 'children' field to return a vector of child Ids. Tested OK. Checkin 1809.
 
+Added 'path' field, added 'me' field. Tested OK.
 ============================================================================

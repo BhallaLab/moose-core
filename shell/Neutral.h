@@ -23,6 +23,11 @@ class Neutral: public Data
 		string getName( Eref e, const Qinfo* q ) const;
 
 		/**
+		 * Simply returns own fullId
+		 */
+		FullId getFullId( Eref e, const Qinfo* q ) const;
+
+		/**
 		 * Looks up the full Id info for the parent of the current Element
 		 */
 		FullId getParent( Eref e, const Qinfo* q ) const;
@@ -31,6 +36,11 @@ class Neutral: public Data
 		 * Looks up all the Element children of the current Element
 		 */
 		vector< Id > getChildren( Eref e, const Qinfo* q ) const;
+
+		/**
+		 * Traverses to root, building path.
+		 */
+		string getPath( Eref e, const Qinfo* q ) const;
 
 		/**
 		 * Looks up the Class name of the current Element

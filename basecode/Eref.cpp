@@ -17,7 +17,10 @@ Eref::Eref( Element* e, DataId index )
 
 ostream& operator <<( ostream& s, const Eref& e )
 {
-	s << e.e_ << "[" << e.i_ << "]";
+	if ( e.i_.data() == 0 && e.i_.field() == 0 )
+		s << e.e_->getName();
+	else
+		s << e.e_->getName() << "[" << e.i_ << "]";
 	return s;
 }
 

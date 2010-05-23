@@ -74,6 +74,19 @@ void testTreeTraversal()
 	Id f3ab = shell->doCreate( "Neutral", f2a, "f3ab", dimensions );
 	Id f3ba = shell->doCreate( "Neutral", f2b, "f3ba", dimensions );
 
+	////////////////////////////////////////////////////////////////
+	// Checking for own Ids
+	////////////////////////////////////////////////////////////////
+	FullId me = Field< FullId >::get( f3aa.eref(), "me" );
+	assert( me == FullId( f3aa, 0 ) );
+	me = Field< FullId >::get( f3ba.eref(), "me" );
+	assert( me == FullId( f3ba, 0 ) );
+	me = Field< FullId >::get( f2c.eref(), "me" );
+	assert( me == FullId( f2c, 0 ) );
+
+	////////////////////////////////////////////////////////////////
+	// Checking for parent Ids
+	////////////////////////////////////////////////////////////////
 	FullId pa = Field< FullId >::get( f3aa.eref(), "parent" );
 	assert( pa == FullId( f2a, 0 ) );
 	pa = Field< FullId >::get( f3ab.eref(), "parent" );
@@ -83,6 +96,11 @@ void testTreeTraversal()
 	pa = Field< FullId >::get( f1.eref(), "parent" );
 	assert( pa == FullId( Id(), 0 ) );
 
+	cout << "." << flush;
+
+	////////////////////////////////////////////////////////////////
+	// Checking for child Id lists
+	////////////////////////////////////////////////////////////////
 	vector< Id > kids = Field< vector< Id > >::get( f1.eref(), "children" );
 	assert( kids.size() == 3 );
 	assert( kids[0] == f2a );
@@ -100,6 +118,29 @@ void testTreeTraversal()
 
 	kids = Field< vector< Id > >::get( f2c.eref(), "children" );
 	assert( kids.size() == 0 );
+
+	cout << "." << flush;
+
+	////////////////////////////////////////////////////////////////
+	// Checking path string generation.
+	////////////////////////////////////////////////////////////////
+	string path = Field< string >::get( f3aa.eref(), "path" );
+	assert( path == "/f1/f2a/f3aa" );
+	path = Field< string >::get( f3ab.eref(), "path" );
+	assert( path == "/f1/f2a/f3ab" );
+	path = Field< string >::get( f3ba.eref(), "path" );
+	assert( path == "/f1/f2b/f3ba" );
+
+	path = Field< string >::get( f2a.eref(), "path" );
+	assert( path == "/f1/f2a" );
+	path = Field< string >::get( f2b.eref(), "path" );
+	assert( path == "/f1/f2b" );
+	path = Field< string >::get( f2c.eref(), "path" );
+	assert( path == "/f1/f2c" );
+	path = Field< string >::get( f1.eref(), "path" );
+	assert( path == "/f1" );
+	path = Field< string >::get( Id().eref(), "path" );
+	assert( path == "/" );
 
 	shell->doDelete( f1 );
 	cout << "." << flush;
