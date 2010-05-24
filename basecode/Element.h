@@ -183,7 +183,7 @@ class Element
 	private:
 		string name_;
 
-		Id id_; // The current I blod.
+		Id id_; // The current way of accessing Id.
 
 		/**
 		 * This object stores and manages the actual data for the Element.

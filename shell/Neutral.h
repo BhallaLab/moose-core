@@ -53,6 +53,11 @@ class Neutral: public Data
 		void destroy( Eref e, const Qinfo* q, int stage );
 
 		/**
+		 * Finds specific named child
+		 */
+		Id getChild( Eref e, const Qinfo* q, const string& name ) const;
+
+		/**
 		 * Standard initialization function, used whenever we want to
 		 * look up the class Cinfo
 		 */

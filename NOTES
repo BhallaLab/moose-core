@@ -5522,8 +5522,18 @@ From 19 April: Some longer-term perspectives.
 	
 We need to work into these things as we bring in mainline MOOSE
 	- Solvers
+		- Replace Cinfo and DataHandler on Elements that are solved.
+		- The Finfos in Cinfo all get replaced.
+		- The DataHandler points right to the solver.
+		- The messages and other stuff remain untouched.
+		- The Fids are all local to the Cinfo, so they now just refer
+			to their new functions.
 	- Parsers and threading
 	- Graphics and threading
+	- Extended fields
+		- coordinates, generated rule-based on DataId
+		- arbitrary new fields, one per entry
+		- Element-globals: fields that are one per Element.
 
 Got rid of leftover stuff from FieldElement. Checkin 1796
 
@@ -5699,5 +5709,14 @@ Added tests for Neutral::parent (to look up parent id). Checkin 1808.
 
 Added 'children' field to return a vector of child Ids. Tested OK. Checkin 1809.
 
-Added 'path' field, added 'me' field. Tested OK.
+Added 'path' field, added 'me' field. Tested OK. Checkin 1810.
+
+Added 'getChild' function. Need a LookupFieldFinfo to handle such cases,
+where the field uses and extra argument. In array type lookups I could use
+the index field of the dataId, but this isn't general.
+
+============================================================================
+24 May 2010
+Put in a unit test for raw getChild, without a Finfo wrapper. Works.
+
 ============================================================================

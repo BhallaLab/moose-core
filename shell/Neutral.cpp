@@ -156,6 +156,34 @@ vector< Id > Neutral::getChildren( Eref e, const Qinfo* q ) const
 	return ret;
 }
 
+/**
+ * Gets specific named child
+ */
+Id Neutral::getChild( Eref e, const Qinfo* q, const string& name ) const
+{
+	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
+	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
+	static const FuncId pafid = pf2->getFid();
+	static const Finfo* cf = neutralCinfo->findFinfo( "childMsg" );
+	static const SrcFinfo* cf2 = dynamic_cast< const SrcFinfo* >( cf );
+	static const BindIndex bi = cf2->getBindIndex();
+	
+	const vector< MsgFuncBinding >* bvec = e.element()->getMsgAndFunc( bi );
+
+	vector< Id > ret;
+
+	for ( vector< MsgFuncBinding >::const_iterator i = bvec->begin();
+		i != bvec->end(); ++i ) {
+		if ( i->fid == pafid ) {
+			const Msg* m = Msg::getMsg( i->mid );
+			assert( m );
+			if ( m->e2()->getName() == name )
+				return m->e2()->id();
+		}
+	}
+	return Id();
+}
+
 string Neutral::getPath( Eref e, const Qinfo* q ) const
 {
 	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );

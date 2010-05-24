@@ -142,6 +142,16 @@ void testTreeTraversal()
 	path = Field< string >::get( Id().eref(), "path" );
 	assert( path == "/" );
 
+	cout << "." << flush;
+
+	////////////////////////////////////////////////////////////////
+	// Checking getChild
+	////////////////////////////////////////////////////////////////
+	Neutral* f1data = reinterpret_cast< Neutral* >( f1.eref().data() );
+	assert( f2a == f1data->getChild( f1.eref(), 0, "f2a" ) );
+	assert( f2b == f1data->getChild( f1.eref(), 0, "f2b" ) );
+	assert( f2c == f1data->getChild( f1.eref(), 0, "f2c" ) );
+
 	shell->doDelete( f1 );
 	cout << "." << flush;
 }
