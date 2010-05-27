@@ -5718,5 +5718,15 @@ the index field of the dataId, but this isn't general.
 ============================================================================
 24 May 2010
 Put in a unit test for raw getChild, without a Finfo wrapper. Works.
+Checkin 1811.
+
+Trying to set up LookupValueFinfo and associated funcs. 
+Working on LookupEpFunc.
 
 ============================================================================
+25 May 2010.
+Tracked through SetGet and Field operations for doing a 'get' call. 
+It goes through Shell::innerDispatchGet. There
+is no easy way to pass in an argument to the Get function. So the 
+LookupEpFunc isn't much use.
+

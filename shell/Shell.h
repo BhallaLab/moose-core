@@ -46,9 +46,19 @@ class Shell: public Data
 
 		void doStart( double runtime );
 
-		// void doSetDouble( Id id, DataId d, string field, double value );
+		/**
+		 * shifts orig Element to newParent.
+		 */
+		void doMove( Id orig, Id newParent );
 
-		// double doGetDouble( Id id, DataId d, string field);
+		/**
+		 * Copies orig Element to newParent. n specifies how many copies
+		 * are made.
+		 * copyExtMsgs specifies whether to also copy messages from orig
+		 * to objects outside the copy tree. Usually we don't do this.
+		 */
+		void doCopy( Id orig, Id newParent, 
+			unsigned int n, bool copyExtMsgs );
 
 		///////////////////////////////////////////////////////////
 		// DestFinfo functions
@@ -86,6 +96,9 @@ class Shell: public Data
 			FullId src, string srcField, 
 			FullId dest, string destField);
 
+		void handleMove( Id orig, Id newParent );
+
+		void handleCopy( Id orig, Id newParent, unsigned int n, bool copyExtMsgs );
 		////////////////////////////////////////////////////////////////
 		// Thread and MPI handling functions
 		////////////////////////////////////////////////////////////////

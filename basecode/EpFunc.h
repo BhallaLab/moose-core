@@ -275,4 +275,50 @@ template< class T, class A > class GetEpFunc: public OpFunc
 		A ( T::*func_ )( Eref e, const Qinfo* q ) const;
 };
 
+/**
+ * This specialized EpFunc is for looking up a single field value using
+ * an argument such as a name or an index.
+ * It generates an opFunc that takes a single argument:
+ * FuncId of the function on the object that requested the
+ * value. The EpFunc then sends back a message with the info.
+ * After analyzing the call structure it seems like we can't get the
+ * argument in to this through the Set/Get format. The Shell, which
+ * dispatches the request, doesn't have the hooks to do this.
+ * So we roll this back for now.
+ *
+template< class T, class A, class L > class LookupEpFunc: public OpFunc
+{
+	public:
+		LookupEpFunc( A ( T::*func )( Eref e, const Qinfo* q, L index ) const )
+			: func_( func )
+			{;}
+
+		bool checkFinfo( const Finfo* s ) const {
+			return dynamic_cast< const SrcFinfo1< A >* >( s );
+		}
+
+		bool checkSet( const SetGet* s ) const {
+			return dynamic_cast< const SetGet1< A >* >( s );
+		}
+
+		void op( Eref e, const char* buf ) const {
+			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
+			buf += sizeof( Qinfo );
+			Conv< L > index( buf );
+
+			const A& ret = 
+				(( reinterpret_cast< T* >( e.data() ) )->*func_)( e, q,
+					*index );
+			Conv<A> conv0( ret );
+			char* temp0 = new char[ conv0.size() ];
+			conv0.val2buf( temp0 );
+			fieldOp( e, buf, temp0, conv0.size() );
+			delete[] temp0;
+		}
+
+	private:
+		A ( T::*func_ )( Eref e, const Qinfo* q, L index ) const;
+};
+*/
+
 #endif //_EPFUNC_H

@@ -71,6 +71,16 @@ static SrcFinfo4< Id, DataId, FuncId, PrepackedBuffer > requestSet(
 			"requestSet( tgtId, tgtDataId, tgtFieldId, value ):"
 			"Assigns a value on target field."
 			);
+static SrcFinfo2< Id, Id > requestMove(
+			"move",
+			"move( origId, newParent);"
+			"Moves origId to become a child of newParent"
+			);
+static SrcFinfo4< Id, Id, unsigned int, bool > requestCopy(
+			"copy",
+			"copy( origId, newParent, numRepeats, copyExtMsg );"
+			"Copies origId to become a child of newParent"
+			);
 
 static DestFinfo create( "create", 
 			"create( class, parent, newElm, name, dimensions )",
@@ -153,6 +163,18 @@ static SrcFinfo3< unsigned int, unsigned int, PrepackedBuffer > relayGet(
 	"relayGet",
 	"relayGet( node, status, data ): Passes 'get' data back to master node"
 );
+
+static DestFinfo handleMove( "move", 
+		"handleMove( Id orig, Id newParent ): "
+		"moves an Element to a new parent",
+	new OpFunc2< Shell, Id, Id >( & Shell::handleMove ) );
+
+static DestFinfo handleCopy( "copy", 
+		"handleCopy( Id orig, Id newParent, unsigned int nCopies, bool copyExtMsgs ): "
+		"Copies an Element to a new parent",
+			new OpFunc4< Shell, Id, Id, unsigned int, bool >( 
+				& Shell::handleCopy ) );
+
 /*
 static SrcFinfo3< unsigned int, double, unsigned int > requestSetClock(
 			"requestSetClock",
@@ -410,6 +432,27 @@ void Shell::doStart( double runtime )
 	// cout << myNode_ << ": Shell::doStart: quitting\n";
 }
 
+void Shell::doMove( Id orig, Id newParent )
+{
+	initAck();
+	Eref sheller( shelle_, 0 );
+	requestMove.send( sheller, &p_, orig, newParent );
+	while ( isAckPending() ) {
+		Qinfo::mpiClearQ( &p_ );
+	}
+}
+
+void Shell::doCopy( Id orig, Id newParent, unsigned int n, bool copyExtMsg )
+{
+	initAck();
+	Eref sheller( shelle_, 0 );
+	requestCopy.send( sheller, &p_, orig, newParent, n, copyExtMsg );
+	while ( isAckPending() ) {
+		Qinfo::mpiClearQ( &p_ );
+	}
+}
+
+
 ////////////////////////////////////////////////////////////////
 // DestFuncs
 ////////////////////////////////////////////////////////////////
@@ -585,6 +628,17 @@ void Shell::handleAddMsg( string msgType, FullId src, string srcField,
 			<< msgType << " from " << src.id()->getName() <<
 			" to " << dest.id()->getName() << endl;
 	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus, 0 );
+}
+
+void Shell::handleMove( Id orig, Id newParent )
+{
+	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus, 0 );
+}
+
+void Shell::handleCopy( Id orig, Id newParent, unsigned int n, 
+	bool copyExtMsgs )
+{
+	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus, 0 );
 }
 
 void Shell::warning( const string& text )
