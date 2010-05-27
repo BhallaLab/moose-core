@@ -190,11 +190,13 @@ static DestFinfo handleSetClock( "handleSetClock",
 
 static Finfo* shellMaster[] = {
 	&requestCreate, &requestDelete, &requestQuit, &requestStart,
-	&requestAddMsg, &requestSet, &requestGet, &receiveGet,
+	&requestAddMsg, &requestSet, &requestGet, &receiveGet, 
+	&requestMove, &requestCopy,
 	&handleAck };
 static Finfo* shellWorker[] = {
 	&create, &del, &handleQuit, &handleStart, 
-		&handleAddMsg, &handleSet, &handleGet, &relayGet,
+		&handleAddMsg, &handleSet, &handleGet, &relayGet, 
+		&handleMove, &handleCopy,
 	&ack };
 
 
@@ -632,6 +634,31 @@ void Shell::handleAddMsg( string msgType, FullId src, string srcField,
 
 void Shell::handleMove( Id orig, Id newParent )
 {
+	static const Finfo* pf = Neutral::initCinfo()->findFinfo( "parentMsg" );
+	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
+	static const FuncId pafid = pf2->getFid();
+	static const Finfo* f1 = Neutral::initCinfo()->findFinfo( "childMsg" );
+
+	if ( orig == Id() ) {
+		cout << "Error: Shell::handleMove: Cannot move root Element\n";
+		return;
+	}
+
+	if ( newParent() == 0 ) {
+		cout << "Error: Shell::handleMove: Cannot move object to null parent \n";
+		return;
+	}
+	MsgId mid = orig()->findCaller( pafid );
+	orig()->dropMsg( mid );
+
+	Msg* m = new OneToAllMsg( newParent.eref(), orig() );
+	assert( m );
+	if ( !f1->addMsg( pf, m->mid(), newParent() ) ) {
+		cout << "move: Error: unable to add parent->child msg from " <<
+			newParent()->getName() << " to " << orig()->getName() << "\n";
+		return;
+	}
+	
 	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus, 0 );
 }
 

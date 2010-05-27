@@ -156,6 +156,44 @@ void testTreeTraversal()
 	cout << "." << flush;
 }
 
+void testMove()
+{
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+
+	vector< unsigned int > dimensions;
+	dimensions.push_back( 1 );
+	Id f1 = shell->doCreate( "Neutral", Id(), "f1", dimensions );
+	Id f2a = shell->doCreate( "Neutral", f1, "f2a", dimensions );
+	Id f2b = shell->doCreate( "Neutral", f1, "f2b", dimensions );
+	Id f3aa = shell->doCreate( "Neutral", f2a, "f3aa", dimensions );
+
+	FullId pa = Field< FullId >::get( f3aa.eref(), "parent" );
+	assert( pa == FullId( f2a, 0 ) );
+	pa = Field< FullId >::get( f2a.eref(), "parent" );
+	assert( pa == FullId( f1, 0 ) );
+	string path = Field< string >::get( f3aa.eref(), "path" );
+	assert( path == "/f1/f2a/f3aa" );
+
+	shell->doMove( f3aa, f1 );
+	pa = Field< FullId >::get( f3aa.eref(), "parent" );
+	assert( pa == FullId( f1, 0 ) );
+
+	shell->doMove( f2b, f3aa );
+	pa = Field< FullId >::get( f2b.eref(), "parent" );
+	assert( pa == FullId( f3aa, 0 ) );
+	path = Field< string >::get( f2b.eref(), "path" );
+	assert( path == "/f1/f3aa/f2b" );
+
+	Neutral* f1data = reinterpret_cast< Neutral* >( f1.eref().data() );
+	assert( f2b == f1data->getChild( f3aa.eref(), 0, "f2b" ) );
+	assert( f3aa == f1data->getChild( f1.eref(), 0, "f3aa" ) );
+
+	shell->doDelete( f1 );
+	cout << "." << flush;
+}
+
+
 // Here we create the element independently on each node, and connect
 // it up independently. Using the doAddMsg we will be able to do this
 // automatically on all nodes.
@@ -490,6 +528,7 @@ void testMpiShell( )
 {
 	testShellParserCreateDelete();
 	testTreeTraversal();
+	testMove();
 	testShellSetGet();
 	testInterNodeOps();
 	testShellAddMsg();

@@ -5730,3 +5730,10 @@ It goes through Shell::innerDispatchGet. There
 is no easy way to pass in an argument to the Get function. So the 
 LookupEpFunc isn't much use.
 
+============================================================================
+27 May 2010.
+Starting move and copy operations, which are handled by the Shell. Checkin 1813.
+
+Implemented move operation, and its unit tests. Works. 
+
+============================================================================
