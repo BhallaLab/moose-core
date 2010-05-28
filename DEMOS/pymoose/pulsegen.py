@@ -93,5 +93,7 @@ plot1.dumpFile("pulse1.plot")
 plot2.dumpFile("pulse2.plot")
 plotGate.dumpFile("gate.plot")
 plotTrig.dumpFile("trig.plot")
+print '----------------------------------------------------------'
+print 'pulsegen.py: data saved in pulse0.plot, pulse1.plot, pulse2.plot, gate.plot and trig.plot'
 print "pulsegen.py: finished simulation"
 
