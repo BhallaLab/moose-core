@@ -153,6 +153,7 @@ class Squid(moose.Compartment):
             raise OverflowError("Cannot handle 0 conc of ion.")
  
 def testSquid():
+    print 'Starting test simulation.'
     model = moose.Neutral("/model")
     data = moose.Neutral("/data")
     squid = Squid("/model/testSquid")
@@ -174,6 +175,7 @@ def testSquid():
     iNaTable.connect("inputRequest", squid.Na(), "Ik")
     iKTable.connect("inputRequest", squid.K(), "Ik")
     nTable.connect("inputRequest", squid.K(), "X")
+    print 'Starting scheduling.'
     squid.getContext().setClock(0, SIMDT, 0)
     squid.getContext().setClock(1, SIMDT, 1)
     squid.getContext().setClock(2, PLOTDT, 0)
@@ -185,8 +187,6 @@ def testSquid():
     iNaTable.useClock(2) 
     iKTable.useClock(2)
     nTable.useClock(2)
-    for msg in vmTable.inMessages(): print msg
-    for msg in vmTable.outMessages(): print msg
     squid.getContext().reset()
     print 'Successfully reset.'
     squid.inject = 0.0
@@ -202,6 +202,8 @@ def testSquid():
     iNaTable.dumpFile("testSquidINa.plot")
     iKTable.dumpFile("testSquidIK.plot")
     nTable.dumpFile("testSquidN.plot")
+
+    print 'Test simulation finished. Data saved in testSquid*.plot'
 
 if __name__ == "__main__":
     testSquid()
