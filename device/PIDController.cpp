@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Tue Dec 30 23:36:01 2008 (+0530)
 // Version: 
-// Last-Updated: Mon Mar  2 01:29:51 2009 (+0530)
-//           By: subhasis ray
-//     Update #: 201
+// Last-Updated: Fri May 28 16:02:24 2010 (+0530)
+//           By: Subhasis Ray
+//     Update #: 202
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -279,7 +279,7 @@ double PIDController::getEPrevious( Eref e )
 
 void PIDController::processFunc( const Conn* conn, ProcInfo proc )
 {
-    static double e_prev = 0.0;
+    double e_prev = 0.0;
     PIDController* instance = static_cast< PIDController* >( conn->data() );
     instance->error_ = instance->command_ - instance->sensed_;
     instance->e_integral_ += 0.5 * (instance->error_ + e_prev) * proc->dt_;
