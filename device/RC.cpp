@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Wed Dec 31 15:47:45 2008 (+0530)
 // Version: 
-// Last-Updated: Mon Mar  2 01:30:30 2009 (+0530)
-//           By: subhasis ray
-//     Update #: 165
+// Last-Updated: Fri May 28 14:22:31 2010 (+0530)
+//           By: Subhasis Ray
+//     Update #: 166
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -179,7 +179,7 @@ void RC::setInjectMsg( const Conn* conn, double inject )
 void RC::processFunc( const Conn* conn, ProcInfo proc )
 {
     RC* instance = static_cast< RC* >( conn->data() );
-    static double sum_inject_prev = instance->inject_ + instance->msg_inject_;
+    double sum_inject_prev = instance->inject_ + instance->msg_inject_;
     double sum_inject = instance->inject_ + instance->msg_inject_;
     double dVin = (sum_inject - sum_inject_prev) * instance->resistance_;
     double Vin = sum_inject * instance->resistance_;
