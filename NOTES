@@ -5734,6 +5734,13 @@ LookupEpFunc isn't much use.
 27 May 2010.
 Starting move and copy operations, which are handled by the Shell. Checkin 1813.
 
-Implemented move operation, and its unit tests. Works. 
+Implemented move operation, and its unit tests. Works. Checkin 1814.
 
 ============================================================================
+28 May 2010
+Working on 'copy' func. Trying to compile.
+
+============================================================================
+29 May 2010
+compiles but I don't have any data in the new Element tree. Need to 
+implement pure virtual function DataHandler::copy( n ).

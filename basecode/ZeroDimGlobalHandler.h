@@ -25,6 +25,12 @@ class ZeroDimGlobalHandler: public DataHandler
 		~ZeroDimGlobalHandler();
 
 		/**
+		 * Make 'n' copies, doing appropriate node partitioning if
+		 * toGlobal is false.
+		 */
+		DataHandler* copy( unsigned int n, bool toGlobal ) const;
+
+		/**
 		 * calls process on data, using threading info from the ProcInfo
 		 */
 		void process( const ProcInfo* p, Element* e ) const;
@@ -123,6 +129,10 @@ class ZeroDimGlobalHandler: public DataHandler
 		 */
 		unsigned int startDim2index() const {
 			return 0;
+		}
+
+		void setData( char* data, unsigned int numData ) {
+			data_ = data;
 		}
 
 	private:

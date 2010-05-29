@@ -19,6 +19,45 @@ OneDimGlobalHandler::~OneDimGlobalHandler() {
 }
 
 
+DataHandler* OneDimGlobalHandler::copy( unsigned int n, bool toGlobal )
+	const
+{
+	if ( n > 1 ) {
+		cout << Shell::myNode() << ": Error: OneDimGlobalHandler::copy: Cannot yet handle 2d arrays\n";
+		exit( 0 );
+	}
+
+	if ( toGlobal ) {
+		if ( n <= 1 ) { // Don't need to boost dimension.
+			OneDimGlobalHandler* ret = new OneDimGlobalHandler( dinfo() );
+			ret->size_ = size_;
+			ret->reserve_ = reserve_;
+			ret->data_ = dinfo()->copyData( data_, size_, 1 );
+			return ret;
+		} else {
+			OneDimGlobalHandler* ret = new OneDimGlobalHandler( dinfo() );
+			ret->setData( dinfo()->copyData( data_, size_, n ), size_ * n );
+			return ret;
+		}
+	} else {
+		if ( n <= 1 ) { // do copy only on node 0.
+			OneDimHandler* ret = new OneDimHandler( dinfo() );
+			ret->setNumData1( size_ );
+			ret->setData( dinfo()->copyData( data_, size_, 1 ), size_ );
+			return ret;
+		} else {
+			OneDimHandler* ret = new OneDimHandler( dinfo() );
+			unsigned int size = ret->end() - ret->begin();
+			if ( size > 0 ) {
+				ret->setNumData1( size_ * size );
+				ret->setData( dinfo()->copyData( data_, size_, n * size_ ), 
+					size_ * size );
+			}
+			return ret;
+		}
+	}
+}
+
 /**
  * Handles both the thread and node decomposition
  * Here there is no node decomposition: all entries are present

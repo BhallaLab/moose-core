@@ -22,6 +22,16 @@ class OneDimHandler: public DataHandler
 		~OneDimHandler();
 
 		/**
+		 * Copies contents into a 2-D array.
+		 * This fails if the copy is global, and the simulation is 
+		 * multinode, as we don't know how to get the other data.
+		 * This works through a hack if the copy is not global. The best
+		 * partitioning is not possible, so it uses the existing node
+		 * partitioning and just scales up by n.
+		 */
+		DataHandler* copy( unsigned int n, bool toGlobal ) const;
+
+		/**
 		 * calls process on data, using threading info from the ProcInfo,
 		 * and internal info about node decomposition.
 		 */
@@ -116,6 +126,8 @@ class OneDimHandler: public DataHandler
 		unsigned int startDim2index() const {
 			return 0;
 		}
+
+		void setData( char* data, unsigned int numData );
 
 	private:
 		char* data_;

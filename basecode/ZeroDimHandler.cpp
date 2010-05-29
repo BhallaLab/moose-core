@@ -14,6 +14,41 @@ ZeroDimHandler::~ZeroDimHandler()
 	dinfo()->destroyData( data_ );
 }
 
+DataHandler* ZeroDimHandler::copy( unsigned int n, bool toGlobal ) 
+	const
+{
+	if ( Shell::myNode() > 0 ) {
+		cout << Shell::myNode() << ": Error: ZeroDimHandler::copy: Should not call on multinode systems\n";
+		return 0;
+	}
+	if ( toGlobal ) {
+		if ( n <= 1 ) { // Don't need to boost dimension.
+			ZeroDimGlobalHandler* ret = new ZeroDimGlobalHandler( dinfo() );
+			ret->setData( dinfo()->copyData( data_, 1, 1 ), 1);
+			return ret;
+		} else {
+			OneDimGlobalHandler* ret = new OneDimGlobalHandler( dinfo() );
+			ret->setData( dinfo()->copyData( data_, 1, n ), n );
+			return ret;
+		}
+	} else {
+		if ( n <= 1 ) { // do copy only on node 0.
+			ZeroDimHandler* ret = new ZeroDimHandler( dinfo() );
+			if ( Shell::myNode() == 0 ) {
+				ret->setData( dinfo()->copyData( data_, 1, 1 ), 1 );
+			}
+			return ret;
+		} else {
+			OneDimHandler* ret = new OneDimHandler( dinfo() );
+			ret->setNumData1( n );
+			unsigned int size = ret->end() - ret->begin();
+			if ( size > 0 )
+			ret->setData( dinfo()->copyData( data_, 1, size ), size );
+			return ret;
+		}
+	}
+}
+
 void ZeroDimHandler::process( const ProcInfo* p, Element* e ) const
 {
 	if ( Shell::myNode() == 0 && 

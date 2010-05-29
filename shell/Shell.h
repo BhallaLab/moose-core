@@ -57,8 +57,8 @@ class Shell: public Data
 		 * copyExtMsgs specifies whether to also copy messages from orig
 		 * to objects outside the copy tree. Usually we don't do this.
 		 */
-		void doCopy( Id orig, Id newParent, 
-			unsigned int n, bool copyExtMsgs );
+		Id doCopy( Id orig, Id newParent, string newName,
+			unsigned int n, bool copyExtMsgs);
 
 		///////////////////////////////////////////////////////////
 		// DestFinfo functions
@@ -98,7 +98,9 @@ class Shell: public Data
 
 		void handleMove( Id orig, Id newParent );
 
-		void handleCopy( Id orig, Id newParent, unsigned int n, bool copyExtMsgs );
+		void handleCopy( vector< Id > args, string newName, unsigned int n, 
+			bool copyExtMsgs );
+		// void innerCopyElements( Id orig, Id newParent, Id newElm, 	unsigned int n );
 		////////////////////////////////////////////////////////////////
 		// Thread and MPI handling functions
 		////////////////////////////////////////////////////////////////

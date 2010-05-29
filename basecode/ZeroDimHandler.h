@@ -24,6 +24,13 @@ class ZeroDimHandler: public DataHandler
 		~ZeroDimHandler();
 
 		/**
+		 * Copies contents into a 1-D array where possible.
+		 * However, this should not be called on multinode machines
+		 * because the original data for a copy should already be global.
+		 */
+		DataHandler* copy( unsigned int n, bool toGlobal ) const;
+
+		/**
 		 * calls process on data, using threading info from the ProcInfo
 		 */
 		void process( const ProcInfo* p, Element* e ) const;
@@ -124,6 +131,10 @@ class ZeroDimHandler: public DataHandler
 		 */
 		unsigned int startDim2index() const {
 			return 0;
+		}
+
+		void setData( char* data, unsigned int numData ) {
+			data_ = data;
 		}
 
 	private:

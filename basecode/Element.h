@@ -37,8 +37,10 @@ class Element
 		Element( Id id, const Cinfo* c, const string& name,
 			DataHandler* dataHandler );
 
-		// What is the point of this constructor?
-		// Element( const Cinfo* c, const Element* other );
+		/**
+		 * This constructor copies over the original n times.
+		 */
+		Element( Id id, const Element* orig, unsigned int n );
 
 		/**
 		 * Destructor

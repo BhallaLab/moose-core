@@ -38,6 +38,26 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		~FieldDataHandler()
 		{;} // Don't delete data because the parent Element should do so.
 
+		/**
+		 * This really won't work, as it is just a hook to the parent
+		 * Data Handler. Need the duplicated Parent for this.
+		 *
+		 * If n is 1, just duplicates everything. No problem.
+		 * if n > 1, then operation is nasty.
+		 * Scales up the data dimension from 0 to 1 if original had 1 entry,
+		 * and assigns n to the new dimension. This is a problem on multi
+		 * nodes as the original would have been sitting on node 0.
+		 * Scales up data dimension from 1 to 2 if original had an array.
+		 * 2nd dimension is now n. For multinodes does a hack by scaling
+		 * up all entries by n, rather than doing a clean repartitioning.
+		 */
+		DataHandler* copy( unsigned int n, bool toGlobal ) const
+		{
+			FieldDataHandler< Parent, Field >* ret =
+				new FieldDataHandler< Parent, Field >( *this );
+			return ret;
+		}
+
 		void process( const ProcInfo* p, Element* e ) const 
 		{
 			; // Fields don't do independent process?
@@ -243,6 +263,10 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 			return start_;
 		}
 
+	protected:
+		void setData( char* data, unsigned int numData ) {
+			;
+		}
 	private:
 		const DataHandler* parentDataHandler_;
 		Field* ( Parent::*lookupField_ )( unsigned int );

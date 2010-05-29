@@ -20,6 +20,8 @@ class DinfoBase
 		virtual char* allocData( unsigned int numData ) const = 0;
 		virtual void destroyData( char* d ) const = 0;
 		virtual unsigned int size() const = 0;
+		virtual char* copyData( const char* orig, unsigned int numData,
+			unsigned int numCopies ) const = 0;
 		/*
 		static unsigned int size( const D* value ) const = 0;
 		static unsigned int serialize( char* buf, const Data* d ) const = 0;
@@ -40,6 +42,22 @@ template< class D > class Dinfo: public DinfoBase
 				return 0;
 			else 
 				return reinterpret_cast< char* >( new D[ numData ] );
+		}
+
+		char* copyData( const char* orig, unsigned int numData,
+			unsigned int numCopies ) const
+		{
+			if ( numData == 0 )
+				return 0;
+
+			D* ret = new D[ numData * numCopies ];
+			const D* origData = reinterpret_cast< const D* >( orig );
+			for ( unsigned int i = 0; i < numData; ++i ) {
+				for ( unsigned int j = 0; j < numCopies; ++j ) {
+					ret[ i * numCopies + j ] = origData[ i ];
+				}
+			}
+			return reinterpret_cast< char* >( new D[ numData ] );
 		}
 
 		void destroyData( char* d ) const {

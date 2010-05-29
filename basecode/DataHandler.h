@@ -28,6 +28,22 @@ class DataHandler
 		{;}
 
 		/**
+		 * Makes 'n' copies of the contents of the current DataHandler.
+		 * if the toGlobal flag is true then the copies are globals.
+		 * If n is 1, then it is straightforward: every node gets a copy
+		 * of whatever it started out with.
+		 * If n > 1 and the original is zero dimension, then we bump up
+		 * a dimension and do the usual node allocation. For this we
+		 * need a way to get hold of the original data, but we'll assume
+		 * that the system has figured out this and put the data as a
+		 * Global.
+		 * If n > 1 and the original is 1 dimension, we need to figure out
+		 * but for starters, we use the existing node decomposition and
+		 * scale each up by n. It now becomes 2 dimensions.
+		 */
+		virtual DataHandler* copy( unsigned int n, bool toGlobal) const = 0;
+
+		/**
 		 * Returns the data on the specified index.
 		 * Returns 0 if data not present on current node on specified index
 		 */
@@ -174,10 +190,17 @@ class DataHandler
 		*/
 
 	protected:
+		/**
+		 * Assigns the data field and indicates how many total entries
+		 * are present.
+		 */
+		virtual void setData( char* data, unsigned int numData ) = 0; 
+
 		const DinfoBase* dinfo() const
 		{
 			return dinfo_;
 		}
+
 
 		/**
 		 * Used to iterate over indices managed by DataHandler

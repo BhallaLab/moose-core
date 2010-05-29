@@ -175,7 +175,9 @@ void testMove()
 	string path = Field< string >::get( f3aa.eref(), "path" );
 	assert( path == "/f1/f2a/f3aa" );
 
+	//////////////////////////////////////////////////////////////////
 	shell->doMove( f3aa, f1 );
+	//////////////////////////////////////////////////////////////////
 	pa = Field< FullId >::get( f3aa.eref(), "parent" );
 	assert( pa == FullId( f1, 0 ) );
 
@@ -188,6 +190,55 @@ void testMove()
 	Neutral* f1data = reinterpret_cast< Neutral* >( f1.eref().data() );
 	assert( f2b == f1data->getChild( f3aa.eref(), 0, "f2b" ) );
 	assert( f3aa == f1data->getChild( f1.eref(), 0, "f3aa" ) );
+
+	shell->doDelete( f1 );
+	cout << "." << flush;
+}
+
+void testCopy()
+{
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+
+	vector< unsigned int > dimensions;
+	dimensions.push_back( 1 );
+	Id f1 = shell->doCreate( "Neutral", Id(), "f1", dimensions );
+	Id f2a = shell->doCreate( "Neutral", f1, "f2a", dimensions );
+	Id f2b = shell->doCreate( "Neutral", f1, "f2b", dimensions );
+	Id f3 = shell->doCreate( "Neutral", f2a, "f3", dimensions );
+	Id f4a = shell->doCreate( "Neutral", f3, "f4a", dimensions );
+	Id f4b = shell->doCreate( "Neutral", f3, "f4b", dimensions );
+
+	FullId pa = Field< FullId >::get( f3.eref(), "parent" );
+	assert( pa == FullId( f2a, 0 ) );
+	pa = Field< FullId >::get( f2a.eref(), "parent" );
+	assert( pa == FullId( f1, 0 ) );
+	string path = Field< string >::get( f3.eref(), "path" );
+	assert( path == "/f1/f2a/f3" );
+
+	//////////////////////////////////////////////////////////////////
+	Id dupf2a = shell->doCopy( f2a, Id(), "TheElephantsAreLoose", 1, 0 );
+	//////////////////////////////////////////////////////////////////
+
+	assert( dupf2a != Id() );
+	// pa = Field< FullId >::get( dupf2a.eref(), "parent" );
+	// assert( pa == FullId( f1, 0 ) );
+	assert( dupf2a()->getName() == "TheElephantsAreLoose" );
+	Neutral* f2aDupData = reinterpret_cast< Neutral* >( dupf2a.eref().data() );
+	Id dupf3 = f2aDupData->getChild( dupf2a.eref(), 0, "f3" );
+	assert( dupf3 != Id() );
+	assert( dupf3 != f3 );
+	assert( dupf3()->getName() == "f3" );
+	vector< Id > kids = f2aDupData->getChildren( dupf2a.eref(), 0 );
+	assert( kids.size() == 1 );
+	assert( kids[0] == dupf3 );
+
+	Neutral* f3DupData = reinterpret_cast< Neutral* >( dupf3.eref().data());
+	assert( f3DupData->getParent( dupf3.eref(), 0 ) == FullId( dupf2a, 0 ));
+	kids = f3DupData->getChildren( dupf3.eref(), 0 );
+	assert( kids.size() == 2 );
+	assert( kids[0]()->getName() == "f4a" );
+	assert( kids[1]()->getName() == "f4b" );
 
 	shell->doDelete( f1 );
 	cout << "." << flush;
@@ -529,6 +580,7 @@ void testMpiShell( )
 	testShellParserCreateDelete();
 	testTreeTraversal();
 	testMove();
+	testCopy();
 	testShellSetGet();
 	testInterNodeOps();
 	testShellAddMsg();

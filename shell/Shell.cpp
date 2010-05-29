@@ -76,7 +76,7 @@ static SrcFinfo2< Id, Id > requestMove(
 			"move( origId, newParent);"
 			"Moves origId to become a child of newParent"
 			);
-static SrcFinfo4< Id, Id, unsigned int, bool > requestCopy(
+static SrcFinfo4< vector< Id >, string, unsigned int, bool > requestCopy(
 			"copy",
 			"copy( origId, newParent, numRepeats, copyExtMsg );"
 			"Copies origId to become a child of newParent"
@@ -170,9 +170,13 @@ static DestFinfo handleMove( "move",
 	new OpFunc2< Shell, Id, Id >( & Shell::handleMove ) );
 
 static DestFinfo handleCopy( "copy", 
-		"handleCopy( Id orig, Id newParent, unsigned int nCopies, bool copyExtMsgs ): "
-		"Copies an Element to a new parent",
-			new OpFunc4< Shell, Id, Id, unsigned int, bool >( 
+		"handleCopy( vector< Id > args, string newName, unsigned int nCopies, bool copyExtMsgs ): "
+		" The vector< Id > has Id orig, Id newParent, Id newElm. " 
+		"This function copies an Element and all its children to a new parent."
+		" May also expand out the original into nCopies copies."
+		" Normally all messages within the copy tree are also copied. "
+		" If the flag copyExtMsgs is true, then all msgs going out are also copied.",
+			new OpFunc4< Shell, vector< Id >, string, unsigned int, bool >( 
 				& Shell::handleCopy ) );
 
 /*
@@ -436,6 +440,16 @@ void Shell::doStart( double runtime )
 
 void Shell::doMove( Id orig, Id newParent )
 {
+	if ( orig == Id() ) {
+		cout << "Error: Shell::doMove: Cannot move root Element\n";
+		return;
+	}
+
+	if ( newParent() == 0 ) {
+		cout << "Error: Shell::doMove: Cannot move object to null parent \n";
+		return;
+	}
+	// Put in check here that newParent is not a child of orig.
 	initAck();
 	Eref sheller( shelle_, 0 );
 	requestMove.send( sheller, &p_, orig, newParent );
@@ -444,14 +458,22 @@ void Shell::doMove( Id orig, Id newParent )
 	}
 }
 
-void Shell::doCopy( Id orig, Id newParent, unsigned int n, bool copyExtMsg )
+/// Returns the Id of the root of the copied tree.
+Id Shell::doCopy( Id orig, Id newParent, string newName, unsigned int n, bool copyExtMsg )
 {
 	initAck();
 	Eref sheller( shelle_, 0 );
-	requestCopy.send( sheller, &p_, orig, newParent, n, copyExtMsg );
+	Id newElm = Id::nextId();
+	vector< Id > args;
+	args.push_back( orig );
+	args.push_back( newParent );
+	args.push_back( newElm );
+	requestCopy.send( sheller, &p_, args, newName , n, copyExtMsg);
 	while ( isAckPending() ) {
 		Qinfo::mpiClearQ( &p_ );
 	}
+
+	return newElm;
 }
 
 
@@ -639,15 +661,9 @@ void Shell::handleMove( Id orig, Id newParent )
 	static const FuncId pafid = pf2->getFid();
 	static const Finfo* f1 = Neutral::initCinfo()->findFinfo( "childMsg" );
 
-	if ( orig == Id() ) {
-		cout << "Error: Shell::handleMove: Cannot move root Element\n";
-		return;
-	}
+	assert( !( orig == Id() ) );
+	assert( !( newParent() == 0 ) );
 
-	if ( newParent() == 0 ) {
-		cout << "Error: Shell::handleMove: Cannot move object to null parent \n";
-		return;
-	}
 	MsgId mid = orig()->findCaller( pafid );
 	orig()->dropMsg( mid );
 
@@ -662,9 +678,54 @@ void Shell::handleMove( Id orig, Id newParent )
 	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus, 0 );
 }
 
-void Shell::handleCopy( Id orig, Id newParent, unsigned int n, 
-	bool copyExtMsgs )
+Element* innerCopyElements( Id orig, Id newParent, Id newElm, 
+	unsigned int n )
 {
+	static const Finfo* pf = Neutral::initCinfo()->findFinfo( "parentMsg" );
+	static const Finfo* cf = Neutral::initCinfo()->findFinfo( "childMsg" );
+
+	Element* e = new Element( newElm, orig(), n );
+	Msg* m = new OneToAllMsg( newParent.eref(), e );
+	assert( m );
+	if ( !cf->addMsg( pf, m->mid(), newParent() ) ) {
+		cout << "copy: Error: unable to add parent->child msg from " <<
+			newParent()->getName() << " to " << e->getName() << "\n";
+		return 0;
+	}
+	const Neutral* origData = reinterpret_cast< const Neutral* >(
+		orig.eref().data() );
+	vector< Id > kids = origData->getChildren( orig.eref(), 0 );
+
+	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i ) {
+		innerCopyElements( *i, e->id(), Id::nextId(), n );
+	}
+	return e;
+}
+
+/*
+void Shell::innerCopyData( Id orig, Id newParent )
+{
+}
+
+void Shell::innerCopyData( Id orig, Id newParent )
+{
+}
+
+void Shell::innerCopyMsgs( shelle, Id orig )
+{
+}
+*/
+
+void Shell::handleCopy( vector< Id > args, string newName,
+	unsigned int n, bool copyExtMsgs )
+{
+	// args are orig, newParent, newElm.
+	assert( args.size() == 3 );
+	Element* e = innerCopyElements( args[0], args[1], args[2], n );
+	if ( newName != "" )
+		e->setName( newName );
+	//innerCopyData( orig, newParent );
+	// innerCopyMsgs( orig, newParent );
 	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus, 0 );
 }
 

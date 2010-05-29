@@ -61,6 +61,18 @@ Element::Element( Id id, const Cinfo* c, const string& name,
 	c->postCreationFunc( id, this );
 }
 
+Element::Element( Id id, const Element* orig, unsigned int n )
+	:	name_( orig->getName() ),
+		id_( id ),
+		// dataHandler_( orig->dataHandler_->copy( n ) ),
+		sendBuf_( 0 ), 
+		cinfo_( orig->cinfo_ ), 
+		msgBinding_( orig->cinfo_->numBindIndex() )
+{
+	id.bindIdToElement( this );
+	cinfo_->postCreationFunc( id, this );
+}
+
 Element::~Element()
 {
 	delete[] sendBuf_;
