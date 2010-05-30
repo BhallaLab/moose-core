@@ -5755,5 +5755,6 @@ Big things still to fix:
 - delete operation to clear all children recursively
 - Copy operation to copy all messages.
 
+Implemented Neutral::isDescendant, and unit test. Clears. Checkin 1825.
 
 ============================================================================
