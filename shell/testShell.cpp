@@ -156,6 +156,40 @@ void testTreeTraversal()
 	cout << "." << flush;
 }
 
+/// Test the Neutral::isDescendant
+void testDescendant()
+{
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+
+	vector< unsigned int > dimensions;
+	dimensions.push_back( 1 );
+	Id f1 = shell->doCreate( "Neutral", Id(), "f1", dimensions );
+	Id f2a = shell->doCreate( "Neutral", f1, "f2a", dimensions );
+	Id f2b = shell->doCreate( "Neutral", f1, "f2b", dimensions );
+	Id f3aa = shell->doCreate( "Neutral", f2a, "f3aa", dimensions );
+
+	assert( Neutral::isDescendant( f3aa, Id() ) );
+	assert( Neutral::isDescendant( f3aa, f1 ) );
+	assert( Neutral::isDescendant( f3aa, f2a ) );
+	assert( Neutral::isDescendant( f3aa, f3aa ) );
+	assert( !Neutral::isDescendant( f3aa, f2b ) );
+
+	assert( Neutral::isDescendant( f2b, Id() ) );
+	assert( Neutral::isDescendant( f2b, f2b ) );
+	assert( !Neutral::isDescendant( f2b, f2a ) );
+	assert( !Neutral::isDescendant( f2b, f3aa ) );
+
+	assert( Neutral::isDescendant( f1, Id() ) );
+	assert( Neutral::isDescendant( f1, f1 ) );
+	assert( !Neutral::isDescendant( f1, f2a ) );
+	assert( !Neutral::isDescendant( f1, f2b ) );
+	assert( !Neutral::isDescendant( f1, f3aa ) );
+
+	shell->doDelete( f1 );
+	cout << "." << flush;
+}
+
 void testMove()
 {
 	Eref sheller = Id().eref();
@@ -579,6 +613,7 @@ void testMpiShell( )
 {
 	testShellParserCreateDelete();
 	testTreeTraversal();
+	testDescendant();
 	testMove();
 	testCopy();
 	testShellSetGet();

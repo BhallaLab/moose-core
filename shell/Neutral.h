@@ -58,6 +58,11 @@ class Neutral: public Data
 		Id getChild( Eref e, const Qinfo* q, const string& name ) const;
 
 		/**
+		 * Checks if 'me' is a descendant of 'ancestor'
+		 */
+		static bool isDescendant( Id me, Id ancestor );
+
+		/**
 		 * Standard initialization function, used whenever we want to
 		 * look up the class Cinfo
 		 */

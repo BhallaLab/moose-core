@@ -225,3 +225,20 @@ void Neutral::destroy( Eref e, const Qinfo* q, int stage )
 	// cout << "in Neutral::destroy()[ " << e.index() << "]\n";
 	;
 }
+
+bool Neutral::isDescendant( Id me, Id ancestor )
+{
+	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
+	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
+	static const FuncId pafid = pf2->getFid();
+
+	Eref e = me.eref();
+	
+	while ( e.element()->id() != Id() && e.element()->id() != ancestor ) {
+		MsgId mid = e.element()->findCaller( pafid );
+		assert( mid != Msg::badMsg );
+		FullId fid = Msg::getMsg( mid )->findOtherEnd( e.fullId() );
+		e = fid.eref();
+	}
+	return ( e.element()->id() == ancestor );
+}

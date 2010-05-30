@@ -449,6 +449,11 @@ void Shell::doMove( Id orig, Id newParent )
 		cout << "Error: Shell::doMove: Cannot move object to null parent \n";
 		return;
 	}
+	if ( Neutral::isDescendant( newParent, orig ) ) {
+		cout << "Error: Shell::doMove: Cannot move object to descendant in tree\n";
+		return;
+		
+	}
 	// Put in check here that newParent is not a child of orig.
 	initAck();
 	Eref sheller( shelle_, 0 );
@@ -461,6 +466,11 @@ void Shell::doMove( Id orig, Id newParent )
 /// Returns the Id of the root of the copied tree.
 Id Shell::doCopy( Id orig, Id newParent, string newName, unsigned int n, bool copyExtMsg )
 {
+	if ( Neutral::isDescendant( newParent, orig ) ) {
+		cout << "Error: Shell::doCopy: Cannot copy object to descendant in tree\n";
+		return Id();
+	}
+
 	initAck();
 	Eref sheller( shelle_, 0 );
 	Id newElm = Id::nextId();

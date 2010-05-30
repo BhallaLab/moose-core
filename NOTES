@@ -5515,7 +5515,7 @@ From 19 April: Some longer-term perspectives.
 	+ Benchmarks and optimization
 	- Continuous messages
 	- Element tree, wildcards
-	- Move and copy of elements
+	+ Move and copy of elements
 	- Node balancing, even if it is done offline
 	- Autosched
 	- Documentation
@@ -5750,6 +5750,10 @@ clear unit tests. Checkin 1823.
 ============================================================================
 30 May 2010
 Fixed up Shell::doCopy. Clears unit tests, but they do not yet stress
-the data handling of the copy operation.
+the data handling of the copy operation. Checkin 1824.
+Big things still to fix:
+- delete operation to clear all children recursively
+- Copy operation to copy all messages.
+
 
 ============================================================================
