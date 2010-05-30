@@ -5744,3 +5744,12 @@ Working on 'copy' func. Trying to compile.
 29 May 2010
 compiles but I don't have any data in the new Element tree. Need to 
 implement pure virtual function DataHandler::copy( n ).
+Implemented most of the stuff for Shell::doCopy, compiles, does not
+clear unit tests. Checkin 1823.
+
+============================================================================
+30 May 2010
+Fixed up Shell::doCopy. Clears unit tests, but they do not yet stress
+the data handling of the copy operation.
+
+============================================================================
