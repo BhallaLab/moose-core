@@ -169,7 +169,7 @@ static DestFinfo handleMove( "move",
 		"moves an Element to a new parent",
 	new OpFunc2< Shell, Id, Id >( & Shell::handleMove ) );
 
-static DestFinfo handleCopy( "copy", 
+static DestFinfo handleCopy( "handleCopy", 
 		"handleCopy( vector< Id > args, string newName, unsigned int nCopies, bool copyExtMsgs ): "
 		" The vector< Id > has Id orig, Id newParent, Id newElm. " 
 		"This function copies an Element and all its children to a new parent."

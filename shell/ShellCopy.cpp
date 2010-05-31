@@ -15,9 +15,11 @@
 Id Shell::doCopy( Id orig, Id newParent, string newName, unsigned int n, bool copyExtMsg )
 {
 	static const Finfo* reqf = 
-		Shell::initCinfo()->findFinfo( "requestCopy" );
+		Shell::initCinfo()->findFinfo( "copy" );
 	static const SrcFinfo4< vector< Id >, string, unsigned int, bool >* 
 		requestCopy = dynamic_cast< const SrcFinfo4< vector< Id >, string, unsigned int, bool >* >( reqf );
+	assert( reqf );
+	assert( requestCopy );
 
 	if ( Neutral::isDescendant( newParent, orig ) ) {
 		cout << "Error: Shell::doCopy: Cannot copy object to descendant in tree\n";
@@ -67,27 +69,37 @@ Element* innerCopyElements( Id orig, Id newParent, Id newElm,
 
 void innerCopyMsgs( map< Id, Id >& tree, unsigned int n, bool copyExtMsgs )
 {
+	static const Finfo* cf = Neutral::initCinfo()->findFinfo( "childMsg" );
+	static const SrcFinfo1< int >* cf2 = 
+		dynamic_cast< const SrcFinfo1< int >* >( cf );
+	assert( cf );
+	assert( cf2 );
+
 	for ( map< Id, Id >::const_iterator i = tree.begin(); 
 		i != tree.end(); ++i ) {
 		Element *e = i->first.operator()();
 		unsigned int j = 0;
 		const vector< MsgFuncBinding >* b = e->getMsgAndFunc( j );
 		while ( b ) {
-			for ( vector< MsgFuncBinding >::const_iterator k = b->begin();
-				k != b->end(); ++k ) {
-				MsgId mid = k->mid;
-				const Msg* m = Msg::getMsg( mid );
-				assert( m );
-				map< Id, Id >::const_iterator tgt;
-				if ( m->e1() == e ) {
-					tgt = tree.find( m->e2()->id() );
-				} else if ( m->e2() == e ) {
-					tgt = tree.find( m->e1()->id() );
-				} else {
-					assert( 0 );
+			if ( j != cf2->getBindIndex() ) {
+				for ( vector< MsgFuncBinding >::const_iterator k = 
+					b->begin();
+					k != b->end(); ++k ) {
+					MsgId mid = k->mid;
+					const Msg* m = Msg::getMsg( mid );
+					assert( m );
+					map< Id, Id >::const_iterator tgt;
+					if ( m->e1() == e ) {
+						tgt = tree.find( m->e2()->id() );
+					} else if ( m->e2() == e ) {
+						tgt = tree.find( m->e1()->id() );
+					} else {
+						assert( 0 );
+					}
+					if ( tgt != tree.end() )
+						m->copy( e->id(), i->second, tgt->second, 
+							k->fid, j, n );
 				}
-				if ( tgt != tree.end() )
-					m->copy( e->id(), i->second, tgt->second, k->fid, j, n);
 			}
 			b = e->getMsgAndFunc( ++j );
 		}
@@ -101,6 +113,8 @@ void Shell::handleCopy( vector< Id > args, string newName,
 		Shell::initCinfo()->findFinfo( "ack" );
 	static const SrcFinfo2< unsigned int, unsigned int >* 
 		ack = dynamic_cast< const SrcFinfo2< unsigned int, unsigned int >* >( ackf );
+	assert( ackf );
+	assert( ack );
 
 	map< Id, Id > tree;
 	// args are orig, newParent, newElm.

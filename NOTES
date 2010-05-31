@@ -5786,5 +5786,6 @@ The outcome of this, of course, is that n-copies won't work till I sort out
 the issues of 2-D arrays and add the Slice msg types.
 
 Did a first pass, pending implementation of these issues. Compiles but
-does not clear unit tests.
+does not clear unit tests. Checkin 1827.
 
+Was duplicating the parent->child msgs. Now clears unit tests.
