@@ -5756,5 +5756,35 @@ Big things still to fix:
 - Copy operation to copy all messages.
 
 Implemented Neutral::isDescendant, and unit test. Clears. Checkin 1825.
+Separated out Copy operations into ShellCopy.cpp. Checkin 1826.
+
+Need to implement Msg::copy( Id orig, FuncId fid, Id newElement, Id newTgt, 
+	unsigned int n );
 
 ============================================================================
+31 May 2010
+
+Message copying into array turns out to be messy.
+		What happens to:
+Msg type	OrigSrc		OrigDest	NewMsg type
+SingleMsg	ZeroDim		ZeroDim		OneToOne
+SingleMsg	ZeroDim		OneDim		OneToSlice
+SingleMsg	OneDim		ZeroDim		SliceToOne
+SingleMsg	OneDim		OneDim		SliceToSlice
+
+OneToOne	Zero or One	Zero or One	OneToOne I think.
+
+OneToAll	Zero or One	Zero or One	SliceToAll: parents
+						SliceToFatSlice: comput
+						OneToAll: master-worker control
+
+Diagonal	One		One		SliceDiagonal
+
+Sparse		One		One		SliceSparse
+
+The outcome of this, of course, is that n-copies won't work till I sort out
+the issues of 2-D arrays and add the Slice msg types.
+
+Did a first pass, pending implementation of these issues. Compiles but
+does not clear unit tests.
+

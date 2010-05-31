@@ -42,6 +42,9 @@ class DiagonalMsg: public Msg
 
 		FullId findOtherEnd( FullId end ) const;
 
+		Msg* copy( Id origSrc, Id newSrc, Id newTgt,
+			FuncId fid, unsigned int b, unsigned int n ) const;
+
 		void setStride( int stride );
 		int getStride() const;
 	private:

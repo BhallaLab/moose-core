@@ -27,7 +27,7 @@ Shell.o:	Shell.h ../msg/AssignmentMsg.h Neutral.h
 ShellCopy.o:	Shell.h Neutral.h
 ShellThreads.o:	Shell.h Neutral.h
 Neutral.o:	Neutral.h ../basecode/ElementValueFinfo.h
-testShell.o:	Shell.h Neutral.h ../scheduling/Tick.h ../scheduling/testScheduling.h ../builtins/Arith.h MsgManager.h SparseMatrix.h SparseMsg.h SingleMsg.h
+testShell.o:	Shell.h Neutral.h ../scheduling/Tick.h ../scheduling/testScheduling.h ../builtins/Arith.h ../msg/MsgManager.h ../basecode/SparseMatrix.h ../msg/SparseMsg.h ../msg/SingleMsg.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg $< -c

@@ -520,3 +520,27 @@ FullId SparseMsg::findOtherEnd( FullId f ) const
 	}
 	return FullId::bad();
 }
+
+Msg* SparseMsg::copy( Id origSrc, Id newSrc, Id newTgt,
+			FuncId fid, unsigned int b, unsigned int n ) const
+{
+	const Element* orig = origSrc();
+	if ( n <= 1 ) {
+		SparseMsg* ret;
+		if ( orig == e1() )
+			ret = new SparseMsg( newSrc(), newTgt() );
+		else if ( orig == e2() )
+			ret = new SparseMsg( newTgt(), newSrc() );
+		else
+			assert( 0 );
+		ret->setMatrix( matrix_ );
+		ret->numThreads_ = numThreads_;
+		ret->nrows_ = nrows_;
+		ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
+		return ret;
+	} else {
+		// Here we need a SliceMsg which goes from one 2-d array to another.
+		cout << "Error: SparseMsg::copy: SparseSliceMsg not yet implemented\n";
+		return 0;
+	}
+}

@@ -65,19 +65,34 @@ Element* innerCopyElements( Id orig, Id newParent, Id newElm,
 	return e;
 }
 
-/*
-void Shell::innerCopyData( Id orig, Id newParent )
+void innerCopyMsgs( map< Id, Id >& tree, unsigned int n, bool copyExtMsgs )
 {
+	for ( map< Id, Id >::const_iterator i = tree.begin(); 
+		i != tree.end(); ++i ) {
+		Element *e = i->first.operator()();
+		unsigned int j = 0;
+		const vector< MsgFuncBinding >* b = e->getMsgAndFunc( j );
+		while ( b ) {
+			for ( vector< MsgFuncBinding >::const_iterator k = b->begin();
+				k != b->end(); ++k ) {
+				MsgId mid = k->mid;
+				const Msg* m = Msg::getMsg( mid );
+				assert( m );
+				map< Id, Id >::const_iterator tgt;
+				if ( m->e1() == e ) {
+					tgt = tree.find( m->e2()->id() );
+				} else if ( m->e2() == e ) {
+					tgt = tree.find( m->e1()->id() );
+				} else {
+					assert( 0 );
+				}
+				if ( tgt != tree.end() )
+					m->copy( e->id(), i->second, tgt->second, k->fid, j, n);
+			}
+			b = e->getMsgAndFunc( ++j );
+		}
+	}
 }
-
-void Shell::innerCopyData( Id orig, Id newParent )
-{
-}
-
-void Shell::innerCopyMsgs( shelle, Id orig )
-{
-}
-*/
 
 void Shell::handleCopy( vector< Id > args, string newName,
 	unsigned int n, bool copyExtMsgs )
@@ -99,6 +114,6 @@ void Shell::handleCopy( vector< Id > args, string newName,
 	if ( newName != "" )
 		e->setName( newName );
 	//innerCopyData( orig, newParent );
-	// innerCopyMsgs( tree, copyExtMsgs );
+	innerCopyMsgs( tree, n, copyExtMsgs );
 	ack->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus, 0 );
 }

@@ -28,6 +28,9 @@ class AssignVecMsg: public Msg
 		Id id() const;
 
 		FullId findOtherEnd( FullId end ) const;
+
+		Msg* copy( Id origSrc, Id newSrc, Id newTgt,
+			FuncId fid, unsigned int b, unsigned int n ) const;
 	private:
 		DataId i1_;
 

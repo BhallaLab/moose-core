@@ -216,3 +216,25 @@ FullId SingleMsg::findOtherEnd( FullId f ) const
 	
 	return FullId::bad();
 }
+
+Msg* SingleMsg::copy( Id origSrc, Id newSrc, Id newTgt,
+			FuncId fid, unsigned int b, unsigned int n ) const
+{
+	const Element* orig = origSrc();
+	if ( n <= 1 ) {
+		SingleMsg* ret;
+		if ( orig == e1() )
+			ret = new SingleMsg( Eref( newSrc(), i1_ ), Eref( newTgt(), i2_ ) );
+		else if ( orig == e2() )
+			ret = new SingleMsg( Eref( newTgt(), i1_ ), Eref( newSrc(), i2_ ) );
+		else
+			assert( 0 );
+		ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
+		return ret;
+	} else {
+		// Here we need a SliceMsg which goes from one 2-d array to another.
+		cout << "Error: SingleMsg::copy: SliceMsg not yet implemented\n";
+		return 0;
+	}
+}
+

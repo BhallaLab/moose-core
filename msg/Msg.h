@@ -104,6 +104,16 @@ class Msg
 		virtual FullId findOtherEnd( FullId ) const = 0;
 
 		/**
+		 * Make a copy of this Msg. The original msg was on
+		 * origSrc. The new Msg should go from newSrc to newTgt,
+		 * and have the function fid, on bindIndex b.
+		 * The copy may have to be a higher-order
+		 * Msg type to handle arrays if n > 1.
+		 */
+		virtual Msg* copy( Id origSrc, Id newSrc, Id newTgt,
+			FuncId fid, unsigned int b, unsigned int n ) const = 0;
+
+		/**
 		 * Looks up the message on the global vector of Msgs. No checks,
 		 * except assertions in debug mode.
 		 */

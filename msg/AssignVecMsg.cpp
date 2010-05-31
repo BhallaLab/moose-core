@@ -88,3 +88,11 @@ FullId AssignVecMsg::findOtherEnd( FullId f ) const
 	}
 	return FullId::bad();
 }
+
+/// Dummy. We should never be copying assignment messages.
+Msg* AssignVecMsg::copy( Id origSrc, Id newSrc, Id newTgt,
+			FuncId fid, unsigned int b, unsigned int n ) const
+{
+	assert( 0 );
+	return 0;
+}

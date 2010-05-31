@@ -91,3 +91,19 @@ FullId OneToOneMsg::findOtherEnd( FullId f ) const
 	
 	return FullId::bad();
 }
+
+Msg* OneToOneMsg::copy( Id origSrc, Id newSrc, Id newTgt,
+			FuncId fid, unsigned int b, unsigned int n ) const
+{
+	const Element* orig = origSrc();
+	// This works both for 1-copy and for n-copies
+	OneToOneMsg* ret;
+	if ( orig == e1() )
+		ret = new OneToOneMsg( newSrc(), newTgt() );
+	else if ( orig == e2() )
+		ret = new OneToOneMsg( newTgt(), newSrc() );
+	else
+		assert( 0 );
+	ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
+	return ret;
+}

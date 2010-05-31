@@ -60,6 +60,9 @@ class SparseMsg: public Msg
 
 		FullId findOtherEnd( FullId end ) const;
 
+		Msg* copy( Id origSrc, Id newSrc, Id newTgt,
+			FuncId fid, unsigned int b, unsigned int n ) const;
+
 		void setMatrix( const SparseMatrix< unsigned int >& m );
 		SparseMatrix< unsigned int >& getMatrix();
 

@@ -82,3 +82,24 @@ FullId OneToAllMsg::findOtherEnd( FullId f ) const
 	
 	return FullId::bad();
 }
+
+Msg* OneToAllMsg::copy( Id origSrc, Id newSrc, Id newTgt,
+			FuncId fid, unsigned int b, unsigned int n ) const
+{
+	const Element* orig = origSrc();
+	if ( n <= 1 ) {
+		OneToAllMsg* ret;
+		if ( orig == e1() )
+			ret = new OneToAllMsg( Eref( newSrc(), i1_ ), newTgt() );
+		else if ( orig == e2() )
+			ret = new OneToAllMsg( Eref( newTgt(), i1_ ), newSrc() );
+		else
+			assert( 0 );
+		ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
+		return ret;
+	} else {
+		// Here we need a SliceMsg which goes from one 2-d array to another.
+		cout << "Error: OneToAllMsg::copy: SliceToSliceMsg not yet implemented\n";
+		return 0;
+	}
+}

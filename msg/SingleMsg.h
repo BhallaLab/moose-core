@@ -33,6 +33,9 @@ class SingleMsg: public Msg
 
 		FullId findOtherEnd( FullId end ) const;
 
+		Msg* copy( Id origSrc, Id newSrc, Id newTgt,
+			FuncId fid, unsigned int b, unsigned int n ) const;
+
 	private:
 		static void setId( Id id );
 		DataId i1_;
