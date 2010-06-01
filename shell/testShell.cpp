@@ -208,12 +208,26 @@ void testMove()
 	assert( pa == FullId( f1, 0 ) );
 	string path = Field< string >::get( f3aa.eref(), "path" );
 	assert( path == "/f1/f2a/f3aa" );
+	Neutral* f1data = reinterpret_cast< Neutral* >( f1.eref().data() );
+
+	vector< Id > kids = f1data->getChildren( f1.eref(), 0 );
+	assert( kids.size() == 2 );
+
+	Neutral* f2adata = reinterpret_cast< Neutral* >( f2a.eref().data() );
+	kids = f2adata->getChildren( f2a.eref(), 0 );
+	assert( kids.size() == 1 );
 
 	//////////////////////////////////////////////////////////////////
 	shell->doMove( f3aa, f1 );
 	//////////////////////////////////////////////////////////////////
+
 	pa = Field< FullId >::get( f3aa.eref(), "parent" );
 	assert( pa == FullId( f1, 0 ) );
+
+	kids = f1data->getChildren( f1.eref(), 0 );
+	assert( kids.size() == 3 );
+	kids = f2adata->getChildren( f2a.eref(), 0 );
+	assert( kids.size() == 0 );
 
 	shell->doMove( f2b, f3aa );
 	pa = Field< FullId >::get( f2b.eref(), "parent" );
@@ -221,7 +235,6 @@ void testMove()
 	path = Field< string >::get( f2b.eref(), "path" );
 	assert( path == "/f1/f3aa/f2b" );
 
-	Neutral* f1data = reinterpret_cast< Neutral* >( f1.eref().data() );
 	assert( f2b == f1data->getChild( f3aa.eref(), 0, "f2b" ) );
 	assert( f3aa == f1data->getChild( f1.eref(), 0, "f3aa" ) );
 
@@ -595,6 +608,178 @@ void testShellAddMsg()
 	cout << "." << flush;
 }
 
+// Very similar to above, except that the tests are done on a copy.
+void testCopyMsgOps()
+{
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+	vector< unsigned int > dimensions;
+	Id pa = shell->doCreate( "Neutral", Id(), "pa", dimensions );
+	dimensions.push_back( 5 );
+
+
+	///////////////////////////////////////////////////////////
+	// Set up the objects.
+	///////////////////////////////////////////////////////////
+	Id a1 = shell->doCreate( "Arith", pa, "a1", dimensions );
+	Id a2 = shell->doCreate( "Arith", pa, "a2", dimensions );
+
+	Id b1 = shell->doCreate( "Arith", pa, "b1", dimensions );
+	Id b2 = shell->doCreate( "Arith", pa, "b2", dimensions );
+
+	Id c1 = shell->doCreate( "Arith", pa, "c1", dimensions );
+	Id c2 = shell->doCreate( "Arith", pa, "c2", dimensions );
+
+	Id d1 = shell->doCreate( "Arith", pa, "d1", dimensions );
+	Id d2 = shell->doCreate( "Arith", pa, "d2", dimensions );
+
+	Id e1 = shell->doCreate( "Arith", pa, "e1", dimensions );
+	Id e2 = shell->doCreate( "Arith", pa, "e2", dimensions );
+
+	///////////////////////////////////////////////////////////
+	// Set up initial conditions
+	///////////////////////////////////////////////////////////
+	bool ret = 0;
+	vector< double > init; // 12345
+	for ( unsigned int i = 1; i < 6; ++i )
+		init.push_back( i );
+	ret = SetGet1< double >::setVec( a1.eref(), "arg1", init ); // 12345
+	assert( ret );
+	ret = SetGet1< double >::setVec( b1.eref(), "arg1", init ); // 12345
+	assert( ret );
+	ret = SetGet1< double >::setVec( c1.eref(), "arg1", init ); // 12345
+	assert( ret );
+	ret = SetGet1< double >::setVec( d1.eref(), "arg1", init ); // 12345
+	assert( ret );
+	ret = SetGet1< double >::setVec( e1.eref(), "arg1", init ); // 12345
+	assert( ret );
+
+	///////////////////////////////////////////////////////////
+	// Set up messaging
+	///////////////////////////////////////////////////////////
+	// Should give 04000
+	MsgId m1 = shell->doAddMsg( "Single", 
+		FullId( a1, 3 ), "output", FullId( a2, 1 ), "arg1" );
+	assert( m1 != Msg::badMsg );
+
+	// Should give 33333
+	MsgId m2 = shell->doAddMsg( "OneToAll", 
+		FullId( b1, 2 ), "output", FullId( b2, 0 ), "arg1" );
+	assert( m2 != Msg::badMsg );
+
+	// Should give 12345
+	MsgId m3 = shell->doAddMsg( "OneToOne", 
+		FullId( c1, 0 ), "output", FullId( c2, 0 ), "arg1" );
+	assert( m3 != Msg::badMsg );
+
+	// Should give 01234
+	MsgId m4 = shell->doAddMsg( "Diagonal", 
+		FullId( d1, 0 ), "output", FullId( d2, 0 ), "arg1" );
+	assert( m4 != Msg::badMsg );
+
+	// Should give 54321
+	MsgId m5 = shell->doAddMsg( "Sparse", 
+		FullId( e1, 0 ), "output", FullId( e2, 0 ), "arg1" );
+	assert( m5 != Msg::badMsg );
+
+	const Msg* m5p = Msg::getMsg( m5 );
+	Eref m5er = m5p->manager( m5p->id() );
+
+	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
+		m5er, "setEntry", 0, 4, 0 );
+	assert( ret );
+	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
+		m5er, "setEntry", 1, 3, 0 );
+	assert( ret );
+	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
+		m5er, "setEntry", 2, 2, 0 );
+	assert( ret );
+	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
+		m5er, "setEntry", 3, 1, 0 );
+	assert( ret );
+	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
+		m5er, "setEntry", 4, 0, 0 );
+	assert( ret );
+
+	ret = SetGet1< unsigned int >::set(
+		m5er, "loadBalance", Shell::numCores() );
+	assert( ret );
+	
+	///////////////////////////////////////////////////////////
+	// Set up scheduling
+	///////////////////////////////////////////////////////////
+	shell->setclock( 0, 1.0, 0 );
+
+	FullId tick( Id( 2 ), 0 );
+
+	///////////////////////////////////////////////////////////
+	// Copy it
+	///////////////////////////////////////////////////////////
+
+	Id pa2 = shell->doCopy( pa, Id(), "pa2", 1, 0 );
+	// Id pa3 = shell->doCopy( pa, Id(), "pa2", 10, 0 );
+
+	///////////////////////////////////////////////////////////
+	// Pull out the child Ids.
+	///////////////////////////////////////////////////////////
+	vector< Id > kids = Field< vector< Id > >::get( pa2.eref(), "children");
+	assert ( kids.size() == 10 );
+	for ( unsigned int i = 0; i < kids.size(); ++i ) {
+		ret = setupSched( shell, tick, kids[i] ); 
+		assert( ret );
+	}
+
+	unsigned int j = 0;
+	assert( kids[j]()->getName() == "a1" ); ++j;
+	assert( kids[j]()->getName() == "a2" ); ++j;
+	assert( kids[j]()->getName() == "b1" ); ++j;
+	assert( kids[j]()->getName() == "b2" ); ++j;
+	assert( kids[j]()->getName() == "c1" ); ++j;
+	assert( kids[j]()->getName() == "c2" ); ++j;
+	assert( kids[j]()->getName() == "d1" ); ++j;
+	assert( kids[j]()->getName() == "d2" ); ++j;
+	assert( kids[j]()->getName() == "e1" ); ++j;
+	assert( kids[j]()->getName() == "e2" ); ++j;
+
+	///////////////////////////////////////////////////////////
+	// Check initial values
+	///////////////////////////////////////////////////////////
+	const Arith* a1obj = reinterpret_cast< const Arith* >( kids[0].eref().data() );
+	for (unsigned int i = 0; i < 5; ++i )
+		assert( fabs( a1obj[i].arg1_ - init[i] ) < 1e-6 );
+
+	///////////////////////////////////////////////////////////
+	// Run it
+	///////////////////////////////////////////////////////////
+	
+	shell->doStart( 2 );
+
+	///////////////////////////////////////////////////////////
+	// Check output.
+	///////////////////////////////////////////////////////////
+	
+	ret = checkOutput( kids[1], 0, 4, 0, 0, 0 );
+	assert( ret );
+	ret = checkOutput( kids[2], 1, 2, 3, 4, 5 );
+	assert( ret );
+	ret = checkOutput( kids[3], 3, 3, 3, 3, 3 );
+	assert( ret );
+	ret = checkOutput( kids[5], 1, 2, 3, 4, 5 );
+	assert( ret );
+	ret = checkOutput( kids[7], 0, 1, 2, 3, 4 );
+	assert( ret );
+	ret = checkOutput( kids[9], 5, 4, 3, 2, 1 );
+	assert( ret );
+
+	///////////////////////////////////////////////////////////
+	// Clean up.
+	///////////////////////////////////////////////////////////
+	shell->doDelete( pa );
+	shell->doDelete( pa2 );
+
+	cout << "." << flush;
+}
+
 void testShellParserQuit()
 {
 	Eref sheller = Id().eref();
@@ -619,4 +804,5 @@ void testMpiShell( )
 	testShellSetGet();
 	testInterNodeOps();
 	testShellAddMsg();
+	testCopyMsgOps();
 }

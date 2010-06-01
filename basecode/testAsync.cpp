@@ -203,18 +203,19 @@ void testSendMsg()
 	delete i2();
 }
 
+// This used to use parent/child msg, but that has other implications
+// as it causes deletion of elements.
 void testCreateMsg()
 {
-	const Cinfo* nc = Neutral::initCinfo();
+	const Cinfo* ac = Arith::initCinfo();
 	unsigned int size = 100;
 	vector< unsigned int > dims( 1, size );
 	Id i1 = Id::nextId();
 	Id i2 = Id::nextId();
-	Element* temp = new Element( i1, nc, "test1", dims, 1 );
+	Element* temp = new Element( i1, ac, "test1", dims, 1 );
 	// bool ret = nc->create( i1, "test1", size );
 	assert( temp );
-	temp = new Element( i2, nc, "test2", dims, 1 );
-	// ret = nc->create( i2, "test2", size );
+	temp = new Element( i2, ac, "test2", dims, 1 );
 	assert( temp );
 
 	Eref e1 = i1.eref();
@@ -223,21 +224,19 @@ void testCreateMsg()
 
 	OneToOneMsg *m = new OneToOneMsg( e1.element(), e2.element() );
 	assert( m );
-	const Finfo* f1 = nc->findFinfo( "childMsg" );
+	const Finfo* f1 = ac->findFinfo( "output" );
 	assert( f1 );
-	const Finfo* f2 = nc->findFinfo( "parentMsg" );
+	const Finfo* f2 = ac->findFinfo( "arg1" );
 	assert( f2 );
 	bool ret = f1->addMsg( f2, m->mid(), e1.element() );
 	// bool ret = add( e1.element(), "child", e2.element(), "parent" );
 	
 	assert( ret );
 
-	const Finfo* f = nc->findFinfo( "childMsg" );
-
 	for ( unsigned int i = 0; i < size; ++i ) {
-		const SrcFinfo1< int >* sf = dynamic_cast< const SrcFinfo1< int >* >( f );
+		const SrcFinfo1< double >* sf = dynamic_cast< const SrcFinfo1< double >* >( f1 );
 		assert( sf != 0 );
-		sf->send( Eref( e1.element(), i ), &p, 0 );
+		sf->send( Eref( e1.element(), i ), &p, double( i ) );
 	}
 	Qinfo::clearQ( &p );
 

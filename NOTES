@@ -5789,3 +5789,66 @@ Did a first pass, pending implementation of these issues. Compiles but
 does not clear unit tests. Checkin 1827.
 
 Was duplicating the parent->child msgs. Now clears unit tests.
+============================================================================
+1 June 2010
+
+Confirmed functioning of messages in copied tree, and also correct 
+copying over of initial values. There is a big revisit of all this 
+pending to deal with the issues of arrays: dimensions, start, end
+of copied data on multiple nodes, and so on.
+I've gone through some of this on pg 49 of the handwritten notes.
+Basic conclusion is that adjacent indices should remain together.
+Also it looks like the current DataId will do with a linear lookup: it is
+up to the DataHandlers and possibly Msgs to keep track of dimensions.
+Also think about promoting locals to globals if they are going to be
+copied.
+Other big pending issue is proper cleanup of children after delete of
+parent.
+In addition I need to rebuild the signaling solver. That is a major use case
+to be converted over, and then I need to look at parallelizing it.
+Also ext fields. This comes up in deleting element trees.
+The stages in the earlier version were: 
+Mark for deletion
+Clear Msgs
+Delete.
+This works out because it is far faster to clear Msgs if we know that the
+whole lot are to be wiped out. Otherwise there is overhead to find and
+clear dangling ends. In principle I could first build the delete tree as
+a set, and use that instead.
+
+To do ext fields, we need another hook, or to replace the Cinfo. 
+The kinds of ext fields we need are:
+- shared. All the entries on the Element should see them. The 'name' is an
+	example. 
+- One per object entry. Coords are an example.
+- Purely synthetic. Coords in a regular array are an example here too.
+
+Why not do as child Elements?
+	- Slow. This is primarily because of linear search by name.
+	- Parsimonious. Adds nothing to the existing structure.
+
+So Child Elements it is. But it is kind of strange to decorate an entire tree
+with additional child Elements. Also assumes everything is derived from 
+Neutral. If we were going to make this strong assumption, then it could have
+been built into the Element class.
+
+Turns out I already had a good indicator for deleting elements: the cinfo_
+field. When set to 0 it tells the Msgs not to bother to traverse.
+Coded up, clears unit tests, but the destroy op isn't actually being called.
+need to decide if deleting an Id should refer to the Neutral::destroy.
+
+To be symmetrical with the Element creation convention, let's have it so that
+Shell::doDelete really does destroy the element and its children, but the
+Id operations do not.
+also we need to be careful to put the doDelete operations on a safe queue
+separate from the Messaging queue.
+
+The Shell::doDelete seems to be OK, but it has uncovered at least two problems:
+- The previously pending issue of Synapse descent (or not) from Neutral.
+* the testMove() function turns out to have problems. While the moved child
+	thinks it has moved, its old parent still wants to hold on.
+	Further confirmed by putting in a count for # of children.
+  Fixed the Shell::doMove. It was not deleting the old msg, just disconnecting 
+  	Now all the unit tests clear. Rather a lot of stuff now to checkin.
+
+============================================================================

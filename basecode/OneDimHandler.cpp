@@ -23,37 +23,37 @@ DataHandler* OneDimHandler::copy( unsigned int n, bool toGlobal )
 	const
 {
 	if ( n > 1 ) {
-		cout << Shell::myNode() << ": Error: OneDimGlobalHandler::copy: Cannot yet handle 2d arrays\n";
+		cout << Shell::myNode() << ": Error: OneDimHandler::copy: Cannot yet handle 2d arrays\n";
 		exit( 0 );
 	}
-	if ( Shell::myNode > 0 ) {
-		cout << Shell::myNode() << ": Error: OneDimGlobalHandler::copy: Cannot yet handle multinode simulations\n";
+	if ( Shell::myNode() > 0 ) {
+		cout << Shell::myNode() << ": Error: OneDimHandler::copy: Cannot yet handle multinode simulations\n";
 		exit( 0 );
 	}
 
 	if ( toGlobal ) {
 		if ( n <= 1 ) { // Don't need to boost dimension.
 			OneDimGlobalHandler* ret = new OneDimGlobalHandler( dinfo() );
-			ret->setNumData1( size_ );
+//			ret->setNumData1( size_ );
 			ret->setData( dinfo()->copyData( data_, size_, 1 ), size_ );
 			return ret;
 		} else {
 			OneDimGlobalHandler* ret = new OneDimGlobalHandler( dinfo() );
-			ret->setNumData1( n * size_ );
+//			ret->setNumData1( n * size_ );
 			ret->setData( dinfo()->copyData( data_, size_, n ), size_ * n );
 			return ret;
 		}
 	} else {
 		if ( n <= 1 ) { // do copy only on node 0.
 			OneDimHandler* ret = new OneDimHandler( dinfo() );
-			ret->setNumData1( size_ );
+//			ret->setNumData1( size_ );
 			ret->setData( dinfo()->copyData( data_, size_, 1 ), size_ );
 			return ret;
 		} else {
 			OneDimHandler* ret = new OneDimHandler( dinfo() );
 			unsigned int size = ret->end() - ret->begin();
 			if ( size > 0 ) {
-				ret->setNumData1( size_ * size );
+//				ret->setNumData1( size_ * size );
 				ret->setData( dinfo()->copyData( data_, size_, size ), 
 					size_ * size );
 			}
@@ -175,8 +175,11 @@ void OneDimHandler::allocate() {
 	data_ = reinterpret_cast< char* >( dinfo()->allocData( end_ - start_ ));
 }
 
-void OneDimHandler::setData( char* data, unsigned int numData )
+// Should really be 'start, end' rather than size. See setNumData1.
+void OneDimHandler::setData( char* data, unsigned int size )
 {
-	data_ = data;
-	setNumData1( numData );
+	data_ = data; // Data is preallocated, so we only want to set the size.
+	size_ = size;
+	start_ = 0;
+	end_ = size;
 }

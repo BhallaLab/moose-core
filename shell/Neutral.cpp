@@ -216,14 +216,27 @@ string Neutral::getClass( Eref e, const Qinfo* q ) const
 	return e.element()->cinfo()->name();
 }
 
+unsigned int Neutral::buildTree( Eref e, const Qinfo* q, vector< Id >& tree )
+	const 
+{
+	unsigned int ret = 1;
+	tree.push_back( e.element()->id() );
+	vector< Id > kids = getChildren( e, q );
+	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i )
+		ret += buildTree( i->eref(), q, tree );
+	return ret;
+}
+
 //
-// Stage 1: mark for deletion
+// Stage 1: mark for deletion. This is done by setting cinfo = 0
 // Stage 2: Clear out outside-going msgs
 // Stage 3: delete self and attached msgs, 
 void Neutral::destroy( Eref e, const Qinfo* q, int stage )
 {
-	// cout << "in Neutral::destroy()[ " << e.index() << "]\n";
-	;
+	vector< Id > tree;
+	unsigned int numDescendants = buildTree( e, q, tree );
+	assert( numDescendants == tree.size() );
+	Element::destroyElementTree( tree );
 }
 
 bool Neutral::isDescendant( Id me, Id ancestor )

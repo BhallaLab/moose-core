@@ -534,7 +534,7 @@ void testMultiNodeIntFireNetwork()
 	assert( fabs( retVm900 - Vm900 ) < 1e-6 );
 
 	cout << "." << flush;
-	shell->doDelete( synId );
+	// shell->doDelete( synId );
 	shell->doDelete( i2 );
 }
 	

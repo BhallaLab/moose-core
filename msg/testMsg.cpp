@@ -15,26 +15,27 @@ void testAssortedMsg()
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 	vector< unsigned int > dimensions;
+	Id pa = shell->doCreate( "Neutral", Id(), "pa", dimensions );
 	dimensions.push_back( 5 );
 
 
 	///////////////////////////////////////////////////////////
 	// Set up the objects.
 	///////////////////////////////////////////////////////////
-	Id a1 = shell->doCreate( "Arith", Id(), "a1", dimensions );
-	Id a2 = shell->doCreate( "Arith", Id(), "a2", dimensions );
+	Id a1 = shell->doCreate( "Arith", pa, "a1", dimensions );
+	Id a2 = shell->doCreate( "Arith", pa, "a2", dimensions );
 
-	Id b1 = shell->doCreate( "Arith", Id(), "b1", dimensions );
-	Id b2 = shell->doCreate( "Arith", Id(), "b2", dimensions );
+	Id b1 = shell->doCreate( "Arith", pa, "b1", dimensions );
+	Id b2 = shell->doCreate( "Arith", pa, "b2", dimensions );
 
-	Id c1 = shell->doCreate( "Arith", Id(), "c1", dimensions );
-	Id c2 = shell->doCreate( "Arith", Id(), "c2", dimensions );
+	Id c1 = shell->doCreate( "Arith", pa, "c1", dimensions );
+	Id c2 = shell->doCreate( "Arith", pa, "c2", dimensions );
 
-	Id d1 = shell->doCreate( "Arith", Id(), "d1", dimensions );
-	Id d2 = shell->doCreate( "Arith", Id(), "d2", dimensions );
+	Id d1 = shell->doCreate( "Arith", pa, "d1", dimensions );
+	Id d2 = shell->doCreate( "Arith", pa, "d2", dimensions );
 
-	Id e1 = shell->doCreate( "Arith", Id(), "e1", dimensions );
-	Id e2 = shell->doCreate( "Arith", Id(), "e2", dimensions );
+	Id e1 = shell->doCreate( "Arith", pa, "e1", dimensions );
+	Id e2 = shell->doCreate( "Arith", pa, "e2", dimensions );
 
 	///////////////////////////////////////////////////////////
 	// Set up initial conditions
@@ -203,6 +204,8 @@ void testAssortedMsg()
 	///////////////////////////////////////////////////////////
 	// Clean up.
 	///////////////////////////////////////////////////////////
+	shell->doDelete( pa );
+	/*
 	shell->doDelete( a1 );
 	shell->doDelete( a2 );
 	shell->doDelete( b1 );
@@ -213,6 +216,7 @@ void testAssortedMsg()
 	shell->doDelete( d2 );
 	shell->doDelete( e1 );
 	shell->doDelete( e2 );
+	*/
 
 	cout << "." << flush;
 }

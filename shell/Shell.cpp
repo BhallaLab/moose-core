@@ -609,11 +609,13 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 
 void Shell::destroy( Eref e, const Qinfo* q, Id eid)
 {
-	eid.destroy();
+	Neutral *n = reinterpret_cast< Neutral* >( e.data() );
+	assert( n );
+	n->destroy( eid.eref(), 0, 0 );
+	// eid.destroy();
 	// cout << myNode_ << ": Shell::destroy done for element id " << eid << endl;
 
-	//if ( myNode_ != 0 )
-		ack.send( e, &p_, Shell::myNode(), OkStatus, 0 );
+	ack.send( e, &p_, Shell::myNode(), OkStatus, 0 );
 }
 
 
@@ -677,7 +679,7 @@ void Shell::handleMove( Id orig, Id newParent )
 	assert( !( newParent() == 0 ) );
 
 	MsgId mid = orig()->findCaller( pafid );
-	orig()->dropMsg( mid );
+	Msg::deleteMsg( mid );
 
 	Msg* m = new OneToAllMsg( newParent.eref(), orig() );
 	assert( m );
@@ -689,67 +691,6 @@ void Shell::handleMove( Id orig, Id newParent )
 	
 	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus, 0 );
 }
-
-#if 0
-
-Element* innerCopyElements( Id orig, Id newParent, Id newElm, 
-	unsigned int n, map< Id, Id >& tree )
-{
-	static const Finfo* pf = Neutral::initCinfo()->findFinfo( "parentMsg" );
-	static const Finfo* cf = Neutral::initCinfo()->findFinfo( "childMsg" );
-
-	Element* e = new Element( newElm, orig(), n );
-	Msg* m = new OneToAllMsg( newParent.eref(), e );
-	assert( m );
-	if ( !cf->addMsg( pf, m->mid(), newParent() ) ) {
-		cout << "copy: Error: unable to add parent->child msg from " <<
-			newParent()->getName() << " to " << e->getName() << "\n";
-		return 0;
-	}
-	map[ orig ] = e->id();
-
-	const Neutral* origData = reinterpret_cast< const Neutral* >(
-		orig.eref().data() );
-	vector< Id > kids = origData->getChildren( orig.eref(), 0 );
-
-	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i ) {
-		innerCopyElements( *i, e->id(), Id::nextId(), n );
-	}
-	return e;
-}
-
-/*
-void Shell::innerCopyData( Id orig, Id newParent )
-{
-}
-
-void Shell::innerCopyData( Id orig, Id newParent )
-{
-}
-
-void Shell::innerCopyMsgs( shelle, Id orig )
-{
-}
-*/
-
-void Shell::handleCopy( vector< Id > args, string newName,
-	unsigned int n, bool copyExtMsgs )
-{
-	map< Id, Id > tree;
-	// args are orig, newParent, newElm.
-	assert( args.size() == 3 );
-	Element* e = innerCopyElements( args[0], args[1], args[2], n, tree );
-	if ( !e ) {
-		ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus, 0 );
-		return;
-	}
-	if ( newName != "" )
-		e->setName( newName );
-	//innerCopyData( orig, newParent );
-	// innerCopyMsgs( tree, copyExtMsgs );
-	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus, 0 );
-}
-#endif
 
 void Shell::warning( const string& text )
 {
@@ -834,6 +775,20 @@ void Shell::setclock( unsigned int tickNum, double dt, unsigned int stage )
 		tickNum, dt, stage );
 }
 
+/*
+Id Shell::id( const string& path )
+{
+	Id start;
+	if ( path[0] == '.' ) {
+		if ( path[1] == '.' && path[2] == '/' ) {
+			start = cwe_;
+		} else if path[1] == '/' {
+			start = cwe_;
+		}
+	}
+}
+*/
+
 ////////////////////////////////////////////////////////////////////////
 // Functions for handling field set/get and func calls
 ////////////////////////////////////////////////////////////////////////
@@ -879,13 +834,6 @@ void Shell::handleSet( Id id, DataId d, FuncId fid, PrepackedBuffer arg )
 	// point, the Parser thread won't be able to do anything else before
 	// the field assignment is done.
 }
-
-/*
-void Shell::handleSetAck()
-{
-	ack.send( e, &p_, OkStatus, 0 );
-}
-*/
 
 // Static function, used for developer-code triggered SetGet functions.
 // Should only be issued from master node.

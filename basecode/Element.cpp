@@ -424,3 +424,14 @@ unsigned int Element::findBinding( MsgFuncBinding b ) const
 	}
 	return ~0;
 }
+
+void Element::destroyElementTree( const vector< Id >& tree )
+{
+	for( vector< Id >::const_iterator i = tree.begin(); 
+		i != tree.end(); i++ )
+		i->operator()()->cinfo_ = 0; // Indicate that Element is doomed
+	for( vector< Id >::const_iterator i = tree.begin(); 
+		i != tree.end(); i++ )
+		i->destroy();
+		// delete i->operator()();
+}

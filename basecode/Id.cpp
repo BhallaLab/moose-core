@@ -126,12 +126,14 @@ Id Id::create( Element* e )
 }
 */
 
-void Id::destroy()
+void Id::destroy() const
 {
 	if ( elements()[ id_ ] ) {
 		delete elements()[ id_ ];
 		elements()[ id_ ] = 0;
 		// Put id_ on 'available' list
+	} else {
+		cout << "Warning: Id::destroy: " << id_ << " already zeroed\n";
 	}
 }
 

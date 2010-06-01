@@ -57,7 +57,7 @@ template< class D > class Dinfo: public DinfoBase
 					ret[ i * numCopies + j ] = origData[ i ];
 				}
 			}
-			return reinterpret_cast< char* >( new D[ numData ] );
+			return reinterpret_cast< char* >( ret );
 		}
 
 		void destroyData( char* d ) const {

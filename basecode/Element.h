@@ -166,6 +166,15 @@ class Element
 		const Cinfo* cinfo() const;
 
 		/**
+		 * Destroys all Elements in tree, being efficient about not
+		 * trying to traverse through clearing messages to doomed Elements.
+		 * Assumes tree includes all child elements.
+		 * Typically the Neutral::destroy function builds up this tree
+		 * and then calls this function.
+		 */
+		static void destroyElementTree( const vector< Id >& tree );
+
+		/**
 		 * Returns the Id on this Elm
 		 */
 		Id id() const;

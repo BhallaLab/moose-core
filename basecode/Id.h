@@ -64,7 +64,7 @@ class Id
 		 * contents of elements vector at the location pointed to by
 		 * this->id_.
 		 */
-		void destroy();
+		void destroy() const;
     
 		//////////////////////////////////////////////////////////////
 		//	Id info

@@ -11,6 +11,7 @@
 
 class Arith: public Data
 {
+	friend void testCopyMsgOps();
 	public: 
 		Arith();
 		void process( const ProcInfo* p, const Eref& e );

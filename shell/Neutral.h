@@ -38,6 +38,12 @@ class Neutral: public Data
 		vector< Id > getChildren( Eref e, const Qinfo* q ) const;
 
 		/**
+		 * Builds a vector of all descendants of e
+		 */
+		unsigned int buildTree( Eref e, const Qinfo* q, 
+			vector< Id >& tree ) const;
+
+		/**
 		 * Traverses to root, building path.
 		 */
 		string getPath( Eref e, const Qinfo* q ) const;
