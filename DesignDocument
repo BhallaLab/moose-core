@@ -448,6 +448,28 @@ Case 2: Shared Msg.
 addSharedMsg( Element* src, const Finfo* f1, Element* dest, const Finfo* f2 )
 Yet to implement.
 
+------------------------------------------------------------------------------
+Tree operations.
+Move:
+Shell::doMove( Id orig, Id newParent )
+This function moves the object orig to the new parent NewParent. It does so
+by deleting the old parent->child Msg and creating a new one.
+
+Shell::doCopy( Id orig, Id newParent, string newName, unsigned int n, bool copyExtMsgs)
+This function creates a copy of the 'orig' object and all its descendants.
+It renames the object to 'newName'.
+This copy includes all parameters and state variables. The copy can be multiple,
+so that the single original now becomes an array of size n. If this happens
+then the DataHandlers of the copy have to be upgraded to the next higher
+dimension. Likewise, Messages must also be upgraded.
+The copy always includes the messages that were within the copied tree. If the
+copeExtMsgs field is True then all messages are copied.
+Present status: only n = 1 and copyExtMsgs = 0 are currently supported.
+Tested with all current implementations of messaging.
+Not tested on multiplen nodes.
+
+Shell::doDelete( Id i )
+Destroys Id i, all its messages, and all its children.
 
 ------------------------------------------------------------------------------
 OpFunc lookup

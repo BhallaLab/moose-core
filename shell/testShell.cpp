@@ -288,6 +288,7 @@ void testCopy()
 	assert( kids[1]()->getName() == "f4b" );
 
 	shell->doDelete( f1 );
+	shell->doDelete( dupf2a );
 	cout << "." << flush;
 }
 

@@ -5850,5 +5850,10 @@ The Shell::doDelete seems to be OK, but it has uncovered at least two problems:
 	Further confirmed by putting in a count for # of children.
   Fixed the Shell::doMove. It was not deleting the old msg, just disconnecting 
   	Now all the unit tests clear. Rather a lot of stuff now to checkin.
+	Checkin 1831
 
 ============================================================================
+2 June.
+Fixed up many of the memory leaks with valgrind. Still need to tackle the
+issue with the Synchan inheriting from Neutral: I think I can then clear the
+rest.
