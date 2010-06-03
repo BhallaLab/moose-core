@@ -78,6 +78,7 @@ template < class T, class F > class FieldElementFinfo: public Finfo
 					parentElm->dataHandler(),
 					lookupField_, getNumField_, setNumField_ )
 			);
+			Shell::adopt( parent, kid );
 		}
 
 		void registerFinfo( Cinfo* c ) {

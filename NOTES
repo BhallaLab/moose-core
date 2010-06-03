@@ -5857,3 +5857,9 @@ The Shell::doDelete seems to be OK, but it has uncovered at least two problems:
 Fixed up many of the memory leaks with valgrind. Still need to tackle the
 issue with the Synchan inheriting from Neutral: I think I can then clear the
 rest.
+============================================================================
+3 June.
+Nasty bug came up with the scheduling: When Tick is inherited from
+Neutral, it inherits the Parent SrcFinfo. This messed up the hard-coded
+indexing in the tests for process messages out of the Tick.
+Fixed, clears unit tests again.

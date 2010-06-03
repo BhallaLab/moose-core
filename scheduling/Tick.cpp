@@ -121,8 +121,8 @@ const Cinfo* Tick::initCinfo()
 	
 	static Cinfo tickCinfo(
 		"Tick",
-		0,
-		// Neutral::initCinfo(),
+		// 0,
+		Neutral::initCinfo(),
 		tickFinfos,
 		sizeof(tickFinfos) / sizeof(Finfo *),
 		new Dinfo< Tick >()

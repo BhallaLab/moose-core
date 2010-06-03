@@ -44,10 +44,13 @@ Id Shell::doCopy( Id orig, Id newParent, string newName, unsigned int n, bool co
 Element* innerCopyElements( Id orig, Id newParent, Id newElm, 
 	unsigned int n, map< Id, Id >& tree )
 {
-	static const Finfo* pf = Neutral::initCinfo()->findFinfo( "parentMsg" );
-	static const Finfo* cf = Neutral::initCinfo()->findFinfo( "childMsg" );
+	// static const Finfo* pf = Neutral::initCinfo()->findFinfo( "parentMsg" );
+	// static const Finfo* cf = Neutral::initCinfo()->findFinfo( "childMsg" );
 
 	Element* e = new Element( newElm, orig(), n );
+	assert( e );
+	Shell::adopt( newParent, newElm );
+	/*
 	Msg* m = new OneToAllMsg( newParent.eref(), e );
 	assert( m );
 	if ( !cf->addMsg( pf, m->mid(), newParent() ) ) {
@@ -55,6 +58,7 @@ Element* innerCopyElements( Id orig, Id newParent, Id newElm,
 			newParent()->getName() << " to " << e->getName() << "\n";
 		return 0;
 	}
+	*/
 	tree[ orig ] = e->id();
 
 	const Neutral* origData = reinterpret_cast< const Neutral* >(

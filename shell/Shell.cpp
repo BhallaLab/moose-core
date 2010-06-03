@@ -564,6 +564,27 @@ void Shell::create( Eref e, const Qinfo* q,
 	// cout << myNode_ << ": Shell::create ack sent" << endl;
 }
 
+/// Utility function 
+bool Shell::adopt( Id parent, Id child ) {
+	static const Finfo* pf = Neutral::initCinfo()->findFinfo( "parentMsg" );
+	// static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
+	// static const FuncId pafid = pf2->getFid();
+	static const Finfo* f1 = Neutral::initCinfo()->findFinfo( "childMsg" );
+
+	assert( !( child() == 0 ) );
+	assert( !( child == Id() ) );
+	assert( !( parent() == 0 ) );
+
+	Msg* m = new OneToAllMsg( parent.eref(), child() );
+	assert( m );
+	if ( !f1->addMsg( pf, m->mid(), parent() ) ) {
+		cout << "move: Error: unable to add parent->child msg from " <<
+			parent()->getName() << " to " << child()->getName() << "\n";
+		return 0;
+	}
+	return 1;
+}
+
 /**
  * This function actually creates the object.
  */
@@ -579,6 +600,7 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 			warning( ss.str() );
 			return;
 		}
+		/*
 		const Finfo* f1 = pa->cinfo()->findFinfo( "childMsg" );
 		if ( !f1 ) {
 			stringstream ss;
@@ -589,7 +611,12 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 		const Finfo* f2 = Neutral::initCinfo()->findFinfo( "parentMsg" );
 		assert( f2 );
 		// cout << myNode_ << ": Shell::innerCreate newElmId= " << newElm << endl;
+		*/
 		Element* ret = new Element( newElm, c, name, dimensions );
+		assert( ret );
+		adopt( parent, newElm );
+
+		/*
 		Msg* m = new OneToAllMsg( parent.eref(), ret );
 		assert( m );
 		if ( !f1->addMsg( f2, m->mid(), parent() ) ) {
@@ -597,7 +624,7 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 				name << "\n";
 			return;
 		}
-		
+		*/
 
 		//ret = c->create( newElm, name, n, Element::Decomposition::Block );
 	} else {

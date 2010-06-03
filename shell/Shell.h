@@ -215,6 +215,12 @@ class Shell: public Data
 		void error( const string& text );
 
 		static const Cinfo* initCinfo();
+
+		////////////////////////////////////////////////////////////////
+		// Utility functions
+		////////////////////////////////////////////////////////////////
+		static bool adopt( Id parent, Id child );
+
 		static const unsigned int OkStatus;
 		static const unsigned int ErrorStatus;
 
