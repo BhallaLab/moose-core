@@ -5862,4 +5862,46 @@ rest.
 Nasty bug came up with the scheduling: When Tick is inherited from
 Neutral, it inherits the Parent SrcFinfo. This messed up the hard-coded
 indexing in the tests for process messages out of the Tick.
-Fixed, clears unit tests again.
+Fixed, clears unit tests again.  Checkin 1833.
+Excellent, clears valgrind too without further messing around.
+
+From 19 April: Some longer-term perspectives.  
+	+ Set/Get functionality: GetVec yet to be done.
+	* Multinode message setup
+	* Unit test for IntFire system
+	+ Benchmarks and optimization
+	- Continuous messages: Should we abandon these? 
+		- Enormous simplification of system.
+		- High-traffic continuous stuff should use solvers
+		- High-traffic stuff is pretty efficient using queues.
+		- Likely speed penalty.
+	- Element tree, wildcards
+	+ Move and copy of elements
+	- Node balancing, even if it is done offline
+	- Autosched
+	- Documentation
+	
+We need to work into these things as we bring in mainline MOOSE
+	- Solvers
+		- Replace Cinfo and DataHandler on Elements that are solved.
+		- The Finfos in Cinfo all get replaced.
+		- The DataHandler points right to the solver.
+		- The messages and other stuff remain untouched.
+		- The Fids are all local to the Cinfo, so they now just refer
+			to their new functions.
+	- Parsers and threading
+	- Graphics and threading
+	- Extended fields
+		- coordinates, generated rule-based on DataId
+		- arbitrary new fields, one per entry
+		- Element-globals: fields that are one per Element.
+============================================================================
+4 June.
+Another thought for a sweeping change: How about eliminating the regular
+messaging form ( GENESIS legacy) for signaling simulations? Instead have all
+molecules go directly over to solver calculations?
+
+I'm implementing a skeleton for the kinetics directory, which has been
+present but not compiled for a long time. Seems that it would be far more
+efficient to go straight to a solver-based design here.
+For now, put in Mol and Reac implementations and complete compilation.

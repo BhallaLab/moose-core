@@ -212,9 +212,7 @@ SUBDIR = \
 	randnum\
 	scheduling\
 	builtins\
-
-
-#	kinetics \
+	kinetics \
 
 # Used for 'make clean'
 CLEANSUBDIR = $(SUBDIR) $(PARALLEL_DIR)
@@ -227,11 +225,8 @@ OBJLIBS =	\
 	randnum/randnum.o \
 	scheduling/scheduling.o \
 	builtins/builtins.o \
+	kinetics/kinetics.o \
 
-#
-#	kinetics/kinetics.o \
-#
-#
 
 export CXX
 export CXXFLAGS

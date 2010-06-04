@@ -12,7 +12,8 @@ TARGET = kinetics.o
 OBJ = \
 	Mol.o	\
 	Reac.o	\
-	Tab.o	\
+
+	#Tab.o	\
 
 HEADERS = \
 	../basecode/header.h \
@@ -26,7 +27,7 @@ Reac.o:	Reac.h ../basecode/Data.h
 Tab.o:	Tab.h ../basecode/Data.h
 
 .cpp.o:
-	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I.. -I../basecode $< -c
+	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I.. -I../basecode -I../msg $< -c
 
 $(TARGET):		$(OBJ) $(SMOLDYN_OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ) $(SMOLDYN_OBJ) $(SMOLDYN_LIB_PATH) $(SMOLDYN_LIBS) 

@@ -1,21 +1,41 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment.
+**           Copyright (C) 2003-2010 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
 class Reac: public Data
 {
-	friend void testAsync();
-		
 	public: 
 		Reac();
 		Reac( double kf, double kb );
-		void process( const ProcInfo* p, Eref e );
-		void reinit( Eref e );
-		// void clearQ( Eref e );
-		// void doOp( const Conn* c ); //The Conn has src, dest and arg info
+
+		//////////////////////////////////////////////////////////////////
+		// Field assignment stuff
+		//////////////////////////////////////////////////////////////////
 
 		void setKf( double v );
+		double getKf() const;
 		void setKb( double v );
-		const double& getKf() const;
+		double getKb() const;
 
-		Finfo** initClassInfo();
+		//////////////////////////////////////////////////////////////////
+		// Dest funcs
+		//////////////////////////////////////////////////////////////////
+
+		void process( const ProcInfo* p, const Eref& e );
+		void eprocess( Eref e, const Qinfo* q, ProcInfo* p );
+		void reinit( const Eref& e, const Qinfo*q, ProcInfo* p );
+		void sub( double v );
+		void prd( double v );
+
+		static const Cinfo* initCinfo();
 	private:
 		double kf_;
 		double kb_;
+		double sub_;
+		double prd_;
 };
