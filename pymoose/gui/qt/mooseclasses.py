@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Sun Apr 12 14:05:01 2009 (+0530)
 # Version: 
-# Last-Updated: Sat Feb 27 18:11:16 2010 (+0530)
+# Last-Updated: Sat Jun  5 16:36:43 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 179
+#     Update #: 181
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -130,7 +130,7 @@ class MooseClassWidget(QtGui.QToolBox):
                 widget.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding))
                 widget.setLayout(QtGui.QVBoxLayout())
             item = MooseClassItem(class_name, category, widget)
-            item.setToolTip(self.tr('<html>' + moose.PyMooseBase.getContext().description(class_name) + '</html>'))
+            item.setToolTip(self.tr('<html>%s</html>' % (moose.PyMooseBase.getContext().description(class_name))))
             self._item.append(item)
         for category in moose_category:
             widget = self._listWidget[category]            
