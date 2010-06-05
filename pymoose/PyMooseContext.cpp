@@ -1532,26 +1532,28 @@ const string& PyMooseContext::description(const string className) const
 {
     const Cinfo* cinfo = Cinfo::find(className);
     if (cinfo){
-        return cinfo->description();
+        fieldValue_ = cinfo->description();
     }
-    else return className + ": No such MOOSE class exists.";
+    else fieldValue_ = className + ": No such MOOSE class exists.";
+    return fieldValue_;
 }
 const string& PyMooseContext::author(const string className) const
 {
     const Cinfo* cinfo = Cinfo::find(className);
     if (cinfo){
-        return cinfo->author();
+        fieldValue_ = cinfo->author();
     }
-    else return className + ": No such MOOSE class exists.";
+    else fieldValue_ = className + ": No such MOOSE class exists.";
+    return fieldValue_;
 }/**
    returns help on a specied class or a specific field of a class.
 */
 const string& PyMooseContext::doc(const string& target) const
 {
-        string field = "";
-        string className(target);
-        string::size_type field_start = target.find_first_of(".");
-        if ( field_start != string::npos) {
+    string field = "";
+    string className(target);
+    string::size_type field_start = target.find_first_of(".");
+    if ( field_start != string::npos) {
         // May we need to go recursively?
         // Assume for the time being that only one level of field
         // documentation is displayed. No help for channel.xGate.A
@@ -1559,8 +1561,8 @@ const string& PyMooseContext::doc(const string& target) const
         field = target.substr(field_start+1); 
         className = target.substr(0, field_start);
     }
-
-        fieldValue_ = getClassDoc(className, field);
+        
+    fieldValue_ = getClassDoc(className, field);
     if (!fieldValue_.empty())
     {
         return fieldValue_;
