@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Tue Dec 30 23:36:01 2008 (+0530)
 // Version: 
-// Last-Updated: Fri May 28 16:02:24 2010 (+0530)
+// Last-Updated: Fri Jun  4 14:35:26 2010 (+0530)
 //           By: Subhasis Ray
-//     Update #: 202
+//     Update #: 222
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -279,34 +279,35 @@ double PIDController::getEPrevious( Eref e )
 
 void PIDController::processFunc( const Conn* conn, ProcInfo proc )
 {
-    double e_prev = 0.0;
     PIDController* instance = static_cast< PIDController* >( conn->data() );
+    instance->e_previous_ = instance->error_;
     instance->error_ = instance->command_ - instance->sensed_;
-    instance->e_integral_ += 0.5 * (instance->error_ + e_prev) * proc->dt_;
-    instance->e_derivative_ = (instance->error_ - e_prev) / proc->dt_;
+    instance->e_integral_ += 0.5 * (instance->error_ + instance->e_previous_) * proc->dt_;
+    instance->e_derivative_ = (instance->error_ - instance->e_previous_) / proc->dt_;
     instance->output_ = instance->gain_ * (instance->error_ +
                                            instance->e_integral_ / instance->tau_i_ +
                                            instance->e_derivative_ * instance->tau_d_);
     if (instance->output_ > instance->saturation_){
         instance->output_ = instance->saturation_;
-        instance->e_integral_ -= 0.5 * (instance->error_ + e_prev) * proc->dt_;
+        instance->e_integral_ -= 0.5 * (instance->error_ + instance->e_previous_) * proc->dt_;
     }
     else if (instance->output_ < -instance->saturation_){
         instance->output_ = -instance->saturation_;
-        instance->e_integral_ -= 0.5 * (instance->error_ + e_prev) * proc->dt_;
+        instance->e_integral_ -= 0.5 * (instance->error_ + instance->e_previous_) * proc->dt_;
     }
-
+#ifndef NDEBUG
+    cout << "PIDController::processFunc : " << conn->target().name() << ", command: " << instance->command_ << ", sensed: " << instance->sensed_ << ", e: " << instance->error_ << ", e_i: " << instance->e_integral_ << ", e_d: " << instance->e_derivative_ << ", e_prev: " << instance->e_previous_ << ", output: " << instance->output_ << ", gain: " << instance->gain_ << ", tauI: "<< instance->tau_i_ << ", tauD: " << instance->tau_d_ << endl;
+#endif
     send1<double>( conn->target(), outputSlot, instance->output_);
-    instance->e_previous_ = e_prev; 
-    e_prev = instance->error_;
 }
+
 
 void PIDController::reinitFunc( const Conn* conn, ProcInfo proc )
 {
     PIDController* instance = static_cast< PIDController* >( conn->data());
     if ( instance->tau_i_ <= 0.0 )
         instance->tau_i_ = proc->dt_;
-    if ( instance->tau_d_ <= 0.0 )
+    if ( instance->tau_d_ < 0.0 )
         instance->tau_d_ = proc->dt_ / 4;
     instance->sensed_ = 0.0;
     instance->output_ = 0;
