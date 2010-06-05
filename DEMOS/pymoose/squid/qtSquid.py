@@ -204,15 +204,15 @@ class QtSquid(QtGui.QMainWindow):
         vClampPanel = QtGui.QGroupBox("Voltage-Clamp Settings", self)
         self.vClampCtrlBox = vClampPanel
         self.holdingVLabel = QtGui.QLabel("Holding Voltage (mV)", vClampPanel)
-        self.holdingVEdit = QtGui.QLineEdit("0", vClampPanel)
+        self.holdingVEdit = QtGui.QLineEdit("-70", vClampPanel)
         self.holdingTimeLabel = QtGui.QLabel("Holding Time (ms)", vClampPanel)
-        self.holdingTimeEdit = QtGui.QLineEdit("10.0", vClampPanel)
+        self.holdingTimeEdit = QtGui.QLineEdit("0.0", vClampPanel) # TODO - revert to 10
         self.prePulseVLabel = QtGui.QLabel("Pre-pulse Voltage (mV)", vClampPanel)
-        self.prePulseVEdit = QtGui.QLineEdit("0.0", vClampPanel)
+        self.prePulseVEdit = QtGui.QLineEdit("-70.0", vClampPanel)
         self.prePulseTimeLabel = QtGui.QLabel("Pre-pulse Time (ms)", vClampPanel)
         self.prePulseTimeEdit = QtGui.QLineEdit("0.0", vClampPanel)
         self.clampVLabel = QtGui.QLabel("Clamp Voltage (mV)", vClampPanel)
-        self.clampVEdit = QtGui.QLineEdit("50.0", vClampPanel)
+        self.clampVEdit = QtGui.QLineEdit("-70.0", vClampPanel) # TODO - revert to 50?
         self.clampTimeLabel = QtGui.QLabel("Clamp Time (ms)", vClampPanel)
         self.clampTimeEdit = QtGui.QLineEdit("20.0", vClampPanel)
         layout = QtGui.QGridLayout(vClampPanel)
@@ -427,9 +427,28 @@ class QtSquid(QtGui.QMainWindow):
             paramDict["temperature"] = float(self.temperatureEdit.text())
             paramDict["naConc"] = float(self.naConcEdit.text())
             paramDict["kConc"] = float(self.kConcEdit.text())
+            print '### Doing reset for IClamp'
             self.squidModel.doResetForIClamp(paramDict)
         else:
-            print "Voltage clamp not yet implemented."
+            print "Voltage clamp"
+            paramDict["baseLevel"] = 1e-3 * float(self.holdingVEdit.text())
+            paramDict["firstDelay"] = 1e-3 * float(self.holdingTimeEdit.text())
+            paramDict["firstWidth"] = 1e-3 * float(self.prePulseTimeEdit.text())
+            paramDict["firstLevel"] = 1e-3 * float(self.prePulseVEdit.text())
+            paramDict["secondLevel"] = 1e-3 * float(self.clampVEdit.text())
+            paramDict["secondDelay"] = 1e-3 * paramDict["firstWidth"]
+            paramDict["secondWidth"] = 1e-3 * float(self.clampTimeEdit.text())
+            paramDict["simDt"] = 1e-3 * float(self.simTimeStepEdit.text())
+            paramDict["plotDt"] = 1e-3 * float(self.plotTimeStepEdit.text())
+            paramDict["singlePulse"] = (self.pulseMode.currentIndex() == 0)
+            paramDict["blockNa"] = self.naChannelBlock.isChecked()
+            paramDict["blockK"] = self.kChannelBlock.isChecked()
+            paramDict["temperature"] = float(self.temperatureEdit.text())
+            paramDict["naConc"] = float(self.naConcEdit.text())
+            paramDict["kConc"] = float(self.kConcEdit.text())
+            self.squidModel.doResetForVClamp(paramDict)
+            
+
 
     def addCurve(self, plot, curveName, color, xData, yData):
         """Add curve with curveName to the plot using color."""
