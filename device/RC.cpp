@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Wed Dec 31 15:47:45 2008 (+0530)
 // Version: 
-// Last-Updated: Fri May 28 14:22:31 2010 (+0530)
+// Last-Updated: Fri Jun  4 00:03:11 2010 (+0530)
 //           By: Subhasis Ray
-//     Update #: 166
+//     Update #: 167
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -65,7 +65,7 @@ const Cinfo* initRCCinfo()
         new ValueFinfo( "state", ValueFtype1< double >::global(),
                         GFCAST( &RC::getState ),
                         RFCAST( &dummyFunc ),
-                        "Output value of the RC circuit. This is the voltage across teh capacitor." ),
+                        "Output value of the RC circuit. This is the voltage across the capacitor." ),
         new ValueFinfo( "inject", ValueFtype1< double >::global(),
                         GFCAST( &RC::getInject ),
                         RFCAST( &RC::setInject ),
