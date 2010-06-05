@@ -6517,6 +6517,397 @@ TauPump_swigregister = _moose.TauPump_swigregister
 TauPump_swigregister(TauPump)
 TauPump.className_ = _moose.cvar.TauPump_className_
 
+class GLcell(PyMooseBase):
+    """Proxy of C++ GLcell class"""
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        """
+        __init__(self, Id id) -> GLcell
+        __init__(self, string path) -> GLcell
+        __init__(self, string name, Id parentId) -> GLcell
+        __init__(self, string name, PyMooseBase parent) -> GLcell
+        __init__(self, GLcell src, string name, PyMooseBase parent) -> GLcell
+        __init__(self, GLcell src, string name, Id parent) -> GLcell
+        __init__(self, Id src, string path) -> GLcell
+        __init__(self, GLcell src, string path) -> GLcell
+        __init__(self, Id src, string name, Id parent) -> GLcell
+        """
+        this = _moose.new_GLcell(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _moose.delete_GLcell
+    __del__ = lambda self : None;
+    def getType(*args):
+        """getType(self) -> string"""
+        return _moose.GLcell_getType(*args)
+
+    def __get_vizpath(*args):
+        """__get_vizpath(self) -> string"""
+        return _moose.GLcell___get_vizpath(*args)
+
+    def __set_vizpath(*args):
+        """__set_vizpath(self, string vizpath)"""
+        return _moose.GLcell___set_vizpath(*args)
+
+    def __get_clientHost(*args):
+        """__get_clientHost(self) -> string"""
+        return _moose.GLcell___get_clientHost(*args)
+
+    def __set_clientHost(*args):
+        """__set_clientHost(self, string strClientHost)"""
+        return _moose.GLcell___set_clientHost(*args)
+
+    def __get_clientPort(*args):
+        """__get_clientPort(self) -> string"""
+        return _moose.GLcell___get_clientPort(*args)
+
+    def __set_clientPort(*args):
+        """__set_clientPort(self, string strClientPort)"""
+        return _moose.GLcell___set_clientPort(*args)
+
+    def __get_attributeName(*args):
+        """__get_attributeName(self) -> string"""
+        return _moose.GLcell___get_attributeName(*args)
+
+    def __set_attributeName(*args):
+        """__set_attributeName(self, string strAttributeName)"""
+        return _moose.GLcell___set_attributeName(*args)
+
+    def __get_changeThreshold(*args):
+        """__get_changeThreshold(self) -> double"""
+        return _moose.GLcell___get_changeThreshold(*args)
+
+    def __set_changeThreshold(*args):
+        """__set_changeThreshold(self, double changeThreshold)"""
+        return _moose.GLcell___set_changeThreshold(*args)
+
+    def __get_VScale(*args):
+        """__get_VScale(self) -> double"""
+        return _moose.GLcell___get_VScale(*args)
+
+    def __set_VScale(*args):
+        """__set_VScale(self, double vScale)"""
+        return _moose.GLcell___set_VScale(*args)
+
+    def __get_syncMode(*args):
+        """__get_syncMode(self) -> string"""
+        return _moose.GLcell___get_syncMode(*args)
+
+    def __set_syncMode(*args):
+        """__set_syncMode(self, string strSyncMode)"""
+        return _moose.GLcell___set_syncMode(*args)
+
+    def __get_bgColor(*args):
+        """__get_bgColor(self) -> string"""
+        return _moose.GLcell___get_bgColor(*args)
+
+    def __set_bgColor(*args):
+        """__set_bgColor(self, string strBgColor)"""
+        return _moose.GLcell___set_bgColor(*args)
+
+    def __get_highValue(*args):
+        """__get_highValue(self) -> double"""
+        return _moose.GLcell___get_highValue(*args)
+
+    def __set_highValue(*args):
+        """__set_highValue(self, double highValue)"""
+        return _moose.GLcell___set_highValue(*args)
+
+    def __get_lowValue(*args):
+        """__get_lowValue(self) -> double"""
+        return _moose.GLcell___get_lowValue(*args)
+
+    def __set_lowValue(*args):
+        """__set_lowValue(self, double lowValue)"""
+        return _moose.GLcell___set_lowValue(*args)
+
+    vizpath = _swig_property(_moose.GLcell_vizpath_get, _moose.GLcell_vizpath_set)
+    host = _swig_property(_moose.GLcell_host_get, _moose.GLcell_host_set)
+    port = _swig_property(_moose.GLcell_port_get, _moose.GLcell_port_set)
+    attribute = _swig_property(_moose.GLcell_attribute_get, _moose.GLcell_attribute_set)
+    threshold = _swig_property(_moose.GLcell_threshold_get, _moose.GLcell_threshold_set)
+    vscale = _swig_property(_moose.GLcell_vscale_get, _moose.GLcell_vscale_set)
+    sync = _swig_property(_moose.GLcell_sync_get, _moose.GLcell_sync_set)
+    bgcolor = _swig_property(_moose.GLcell_bgcolor_get, _moose.GLcell_bgcolor_set)
+    highvalue = _swig_property(_moose.GLcell_highvalue_get, _moose.GLcell_highvalue_set)
+    lowvalue = _swig_property(_moose.GLcell_lowvalue_get, _moose.GLcell_lowvalue_set)
+GLcell_swigregister = _moose.GLcell_swigregister
+GLcell_swigregister(GLcell)
+GLcell.className_ = _moose.cvar.GLcell_className_
+
+class GLview(PyMooseBase):
+    """Proxy of C++ GLview class"""
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        """
+        __init__(self, Id id) -> GLview
+        __init__(self, string path) -> GLview
+        __init__(self, string name, Id parentId) -> GLview
+        __init__(self, string name, PyMooseBase parent) -> GLview
+        __init__(self, GLview src, string name, PyMooseBase parent) -> GLview
+        __init__(self, GLview src, string name, Id parent) -> GLview
+        __init__(self, GLview src, string path) -> GLview
+        __init__(self, Id src, string path) -> GLview
+        __init__(self, Id src, string name, Id parent) -> GLview
+        """
+        this = _moose.new_GLview(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _moose.delete_GLview
+    __del__ = lambda self : None;
+    def getType(*args):
+        """getType(self) -> string"""
+        return _moose.GLview_getType(*args)
+
+    def __get_vizpath(*args):
+        """__get_vizpath(self) -> string"""
+        return _moose.GLview___get_vizpath(*args)
+
+    def __set_vizpath(*args):
+        """__set_vizpath(self, string vizpath)"""
+        return _moose.GLview___set_vizpath(*args)
+
+    def __get_clientHost(*args):
+        """__get_clientHost(self) -> string"""
+        return _moose.GLview___get_clientHost(*args)
+
+    def __set_clientHost(*args):
+        """__set_clientHost(self, string clientHost)"""
+        return _moose.GLview___set_clientHost(*args)
+
+    def __get_clientPort(*args):
+        """__get_clientPort(self) -> string"""
+        return _moose.GLview___get_clientPort(*args)
+
+    def __set_clientPort(*args):
+        """__set_clientPort(self, string clientPort)"""
+        return _moose.GLview___set_clientPort(*args)
+
+    def __get_relPath(*args):
+        """__get_relPath(self) -> string"""
+        return _moose.GLview___get_relPath(*args)
+
+    def __set_relPath(*args):
+        """__set_relPath(self, string relPath)"""
+        return _moose.GLview___set_relPath(*args)
+
+    def __get_value1Field(*args):
+        """__get_value1Field(self) -> string"""
+        return _moose.GLview___get_value1Field(*args)
+
+    def __set_value1Field(*args):
+        """__set_value1Field(self, string value1Field)"""
+        return _moose.GLview___set_value1Field(*args)
+
+    def __get_value1Min(*args):
+        """__get_value1Min(self) -> double"""
+        return _moose.GLview___get_value1Min(*args)
+
+    def __set_value1Min(*args):
+        """__set_value1Min(self, double value1Min)"""
+        return _moose.GLview___set_value1Min(*args)
+
+    def __get_value1Max(*args):
+        """__get_value1Max(self) -> double"""
+        return _moose.GLview___get_value1Max(*args)
+
+    def __set_value1Max(*args):
+        """__set_value1Max(self, double value1Max)"""
+        return _moose.GLview___set_value1Max(*args)
+
+    def __get_value2Field(*args):
+        """__get_value2Field(self) -> string"""
+        return _moose.GLview___get_value2Field(*args)
+
+    def __set_value2Field(*args):
+        """__set_value2Field(self, string value2Field)"""
+        return _moose.GLview___set_value2Field(*args)
+
+    def __get_value2Min(*args):
+        """__get_value2Min(self) -> double"""
+        return _moose.GLview___get_value2Min(*args)
+
+    def __set_value2Min(*args):
+        """__set_value2Min(self, double value2Min)"""
+        return _moose.GLview___set_value2Min(*args)
+
+    def __get_value2Max(*args):
+        """__get_value2Max(self) -> double"""
+        return _moose.GLview___get_value2Max(*args)
+
+    def __set_value2Max(*args):
+        """__set_value2Max(self, double value2Max)"""
+        return _moose.GLview___set_value2Max(*args)
+
+    def __get_value3Field(*args):
+        """__get_value3Field(self) -> string"""
+        return _moose.GLview___get_value3Field(*args)
+
+    def __set_value3Field(*args):
+        """__set_value3Field(self, string value3Field)"""
+        return _moose.GLview___set_value3Field(*args)
+
+    def __get_value3Min(*args):
+        """__get_value3Min(self) -> double"""
+        return _moose.GLview___get_value3Min(*args)
+
+    def __set_value3Min(*args):
+        """__set_value3Min(self, double value3Min)"""
+        return _moose.GLview___set_value3Min(*args)
+
+    def __get_value3Max(*args):
+        """__get_value3Max(self) -> double"""
+        return _moose.GLview___get_value3Max(*args)
+
+    def __set_value3Max(*args):
+        """__set_value3Max(self, double value3Max)"""
+        return _moose.GLview___set_value3Max(*args)
+
+    def __get_value4Field(*args):
+        """__get_value4Field(self) -> string"""
+        return _moose.GLview___get_value4Field(*args)
+
+    def __set_value4Field(*args):
+        """__set_value4Field(self, string value4Field)"""
+        return _moose.GLview___set_value4Field(*args)
+
+    def __get_value4Min(*args):
+        """__get_value4Min(self) -> double"""
+        return _moose.GLview___get_value4Min(*args)
+
+    def __set_value4Min(*args):
+        """__set_value4Min(self, double value4Min)"""
+        return _moose.GLview___set_value4Min(*args)
+
+    def __get_value4Max(*args):
+        """__get_value4Max(self) -> double"""
+        return _moose.GLview___get_value4Max(*args)
+
+    def __set_value4Max(*args):
+        """__set_value4Max(self, double value4Max)"""
+        return _moose.GLview___set_value4Max(*args)
+
+    def __get_value5Field(*args):
+        """__get_value5Field(self) -> string"""
+        return _moose.GLview___get_value5Field(*args)
+
+    def __set_value5Field(*args):
+        """__set_value5Field(self, string value5Field)"""
+        return _moose.GLview___set_value5Field(*args)
+
+    def __get_value5Min(*args):
+        """__get_value5Min(self) -> double"""
+        return _moose.GLview___get_value5Min(*args)
+
+    def __set_value5Min(*args):
+        """__set_value5Min(self, double value5Min)"""
+        return _moose.GLview___set_value5Min(*args)
+
+    def __get_value5Max(*args):
+        """__get_value5Max(self) -> double"""
+        return _moose.GLview___get_value5Max(*args)
+
+    def __set_value5Max(*args):
+        """__set_value5Max(self, double value5Max)"""
+        return _moose.GLview___set_value5Max(*args)
+
+    def __get_bgColor(*args):
+        """__get_bgColor(self) -> string"""
+        return _moose.GLview___get_bgColor(*args)
+
+    def __set_bgColor(*args):
+        """__set_bgColor(self, string bgColor)"""
+        return _moose.GLview___set_bgColor(*args)
+
+    def __get_syncMode(*args):
+        """__get_syncMode(self) -> string"""
+        return _moose.GLview___get_syncMode(*args)
+
+    def __set_syncMode(*args):
+        """__set_syncMode(self, string syncMode)"""
+        return _moose.GLview___set_syncMode(*args)
+
+    def __get_gridMode(*args):
+        """__get_gridMode(self) -> string"""
+        return _moose.GLview___get_gridMode(*args)
+
+    def __set_gridMode(*args):
+        """__set_gridMode(self, string gridMode)"""
+        return _moose.GLview___set_gridMode(*args)
+
+    def __get_colorVal(*args):
+        """__get_colorVal(self) -> unsigned int"""
+        return _moose.GLview___get_colorVal(*args)
+
+    def __set_colorVal(*args):
+        """__set_colorVal(self, unsigned int colorVal)"""
+        return _moose.GLview___set_colorVal(*args)
+
+    def __get_morphVal(*args):
+        """__get_morphVal(self) -> unsigned int"""
+        return _moose.GLview___get_morphVal(*args)
+
+    def __set_morphVal(*args):
+        """__set_morphVal(self, unsigned int morphVal)"""
+        return _moose.GLview___set_morphVal(*args)
+
+    def __get_xoffsetVal(*args):
+        """__get_xoffsetVal(self) -> unsigned int"""
+        return _moose.GLview___get_xoffsetVal(*args)
+
+    def __set_xoffsetVal(*args):
+        """__set_xoffsetVal(self, unsigned int xoffsetVal)"""
+        return _moose.GLview___set_xoffsetVal(*args)
+
+    def __get_yoffsetVal(*args):
+        """__get_yoffsetVal(self) -> unsigned int"""
+        return _moose.GLview___get_yoffsetVal(*args)
+
+    def __set_yoffsetVal(*args):
+        """__set_yoffsetVal(self, unsigned int yoffsetVal)"""
+        return _moose.GLview___set_yoffsetVal(*args)
+
+    def __get_zoffsetVal(*args):
+        """__get_zoffsetVal(self) -> unsigned int"""
+        return _moose.GLview___get_zoffsetVal(*args)
+
+    def __set_zoffsetVal(*args):
+        """__set_zoffsetVal(self, unsigned int zoffsetVal)"""
+        return _moose.GLview___set_zoffsetVal(*args)
+
+    vizpath = _swig_property(_moose.GLview_vizpath_get, _moose.GLview_vizpath_set)
+    host = _swig_property(_moose.GLview_host_get, _moose.GLview_host_set)
+    port = _swig_property(_moose.GLview_port_get, _moose.GLview_port_set)
+    relpath = _swig_property(_moose.GLview_relpath_get, _moose.GLview_relpath_set)
+    value1 = _swig_property(_moose.GLview_value1_get, _moose.GLview_value1_set)
+    value1min = _swig_property(_moose.GLview_value1min_get, _moose.GLview_value1min_set)
+    value1max = _swig_property(_moose.GLview_value1max_get, _moose.GLview_value1max_set)
+    value2 = _swig_property(_moose.GLview_value2_get, _moose.GLview_value2_set)
+    value2min = _swig_property(_moose.GLview_value2min_get, _moose.GLview_value2min_set)
+    value2max = _swig_property(_moose.GLview_value2max_get, _moose.GLview_value2max_set)
+    value3 = _swig_property(_moose.GLview_value3_get, _moose.GLview_value3_set)
+    value3min = _swig_property(_moose.GLview_value3min_get, _moose.GLview_value3min_set)
+    value3max = _swig_property(_moose.GLview_value3max_get, _moose.GLview_value3max_set)
+    value4 = _swig_property(_moose.GLview_value4_get, _moose.GLview_value4_set)
+    value4min = _swig_property(_moose.GLview_value4min_get, _moose.GLview_value4min_set)
+    value4max = _swig_property(_moose.GLview_value4max_get, _moose.GLview_value4max_set)
+    value5 = _swig_property(_moose.GLview_value5_get, _moose.GLview_value5_set)
+    value5min = _swig_property(_moose.GLview_value5min_get, _moose.GLview_value5min_set)
+    value5max = _swig_property(_moose.GLview_value5max_get, _moose.GLview_value5max_set)
+    bgcolor = _swig_property(_moose.GLview_bgcolor_get, _moose.GLview_bgcolor_set)
+    sync = _swig_property(_moose.GLview_sync_get, _moose.GLview_sync_set)
+    grid = _swig_property(_moose.GLview_grid_get, _moose.GLview_grid_set)
+    color_val = _swig_property(_moose.GLview_color_val_get, _moose.GLview_color_val_set)
+    morph_val = _swig_property(_moose.GLview_morph_val_get, _moose.GLview_morph_val_set)
+    xoffset_val = _swig_property(_moose.GLview_xoffset_val_get, _moose.GLview_xoffset_val_set)
+    yoffset_val = _swig_property(_moose.GLview_yoffset_val_get, _moose.GLview_yoffset_val_set)
+    zoffset_val = _swig_property(_moose.GLview_zoffset_val_get, _moose.GLview_zoffset_val_set)
+GLview_swigregister = _moose.GLview_swigregister
+GLview_swigregister(GLview)
+GLview.className_ = _moose.cvar.GLview_className_
+
 class TimeTable(PyMooseBase):
     """Proxy of C++ TimeTable class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
