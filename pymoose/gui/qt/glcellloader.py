@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Feb  4 20:34:34 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Feb  5 18:07:10 2010 (+0530)
+# Last-Updated: Wed Jun  2 16:56:44 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 103
+#     Update #: 105
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -70,7 +70,7 @@ class GLCellLoader(object):
 	filepath = morphs_dir + models[cell_type]
 
         # Load the channel definitions from bulbchan.g
-        CONTEXT.loadG('../../../DEMOS/gl-demo/channels/bulbchan.g')
+        CONTEXT.loadG('../../../DEMOS/mitral-ee/bulbchan.g')
         cwe = CONTEXT.getCwe()
         CONTEXT.setCwe('/library')
         CONTEXT.runG('make_LCa3_mit_usb')

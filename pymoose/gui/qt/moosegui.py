@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Mar  3 12:14:39 2010 (+0530)
+# Last-Updated: Mon Jun  7 00:54:52 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 935
+#     Update #: 984
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -64,7 +64,7 @@ from glclientgui import GLClientGUI
 #
 # in the command prompt before running the
 # moosegui with "python moosegui.py"
-sys.path.append('/home/subha/src/moose/pymoose')
+# sys.path.append('/home/subha/src/moose/pymoose')
 
 
 
@@ -94,6 +94,7 @@ def makeClassList(parent=None, mode=MooseGlobals.MODE_ADVANCED):
         pass
     else:
 	print 'Error: makeClassList() - mode:', mode, 'is undefined.'
+
 
 def makeAboutMooseLabel(parent):
         """Create a QLabel with basic info about MOOSE."""
@@ -221,10 +222,31 @@ class MainWindow(QtGui.QMainWindow):
         self.quitAction = QtGui.QAction(self.tr('&Quit'), self)
         self.quitAction.setShortcut(QtGui.QKeySequence(self.tr('Ctrl+Q')))
         self.connect(self.quitAction, QtCore.SIGNAL('triggered()'), QtGui.qApp, QtCore.SLOT('closeAllWindows()'))
-        
+        self.aboutMooseAction = QtGui.QAction(self.tr('&About'), self)
+        self.connect(self.aboutMooseAction, QtCore.SIGNAL('triggered()'), makeAboutMooseLabel)
         self.resetSettingsAction = QtGui.QAction(self.tr('Reset Settings'), self)
         self.connect(self.resetSettingsAction, QtCore.SIGNAL('triggered()'), self.resetSettings)
+        # TODO: the following actions are yet to be implemented.
+        self.showDocAction = QtGui.QAction(self.tr('Documentation'), self)
+        self.contextHelpAction = QtGui.QAction(self.tr('Context Help'), self)
+        
+    def runSquidDemo(self):
+        QtGui.QMessageBox.information(self, 'Not yet incorporated', 'this demo is yet to be incorporated into moosegui')
 
+    def runIzhikevichDemo(self):
+        QtGui.QMessageBox.information(self, 'Not yet incorporated', 'this demo is yet to be incorporated into moosegui')
+    
+    def makeDemosMenu(self):
+        self.squidDemoAction = QtGui.QAction(self.tr('Squid Axon'), self)
+        self.connect(self.squidDemoAction, QtCore.SIGNAL('triggered()'), self.runSquidDemo)
+        self.IzhikevichDemoAction = QtGui.QAction(self.tr('Izhikevich Model'), self)
+        self.connect(self.IzhikevichDemoAction, QtCore.SIGNAL('triggered()'), self.runIzhikevichDemo)
+        menu = QtGui.QMenu('&Demos and Tutorials', self)
+        menu.addAction(self.squidDemoAction)
+        menu.addAction(self.IzhikevichDemoAction)
+        return menu
+        # TODO: create a class for the demos menu.
+        
     def makeMenu(self):
         self.fileMenu = QtGui.QMenu('&File', self)
         self.fileMenu.addAction(self.quitAction)
@@ -234,9 +256,16 @@ class MainWindow(QtGui.QMainWindow):
         self.viewMenu.addAction(self.mooseTreeAction)
         self.viewMenu.addAction(self.mooseClassesAction)
         self.viewMenu.addAction(self.mooseShellAction)
-        
+        self.helpMenu = QtGui.QMenu('&Help', self)
+        # TODO: code the actual functions
+        self.helpMenu.addAction(self.showDocAction)
+        self.helpMenu.addAction(self.contextHelpAction)
+ 
+        self.demosMenu = self.makeDemosMenu()
+        self.helpMenu.addMenu(self.demosMenu)
         self.menuBar().addMenu(self.fileMenu)
         self.menuBar().addMenu(self.viewMenu)
+        self.menuBar().addMenu(self.helpMenu)
 
     def saveLayout(self):
         '''Save window layout'''

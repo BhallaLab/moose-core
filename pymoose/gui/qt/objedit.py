@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Apr 16 14:22:29 2009 (+0530)
 # Version: 
-# Last-Updated: Wed Mar  3 12:27:24 2010 (+0530)
+# Last-Updated: Wed Mar  3 17:07:32 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 177
+#     Update #: 184
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -54,6 +54,18 @@ from PyQt4 import QtGui
 from PyQt4.Qt import Qt
 from PyQt4 import QtCore
 
+class ObjectFieldsDelegate(QtGui.QItemDelegate):
+    """A custom delegate to handle view and user interaction for the
+    ObjectFields model."""
+    def __init__(self, *args):
+        QtGui.QItemDelegate.__init__(self, *args)
+    
+    def createEditor(self, widget, styleOptionViewItem, modelIndex):
+        if modelIndex.column() == 1: # Value field - use the inherited default editor
+            return QtGui.QItemDelegate.createEditor(self, widget, styleOptionViewItem, modelIndex)
+        elif modelIndex.column() == 2: 
+            editor = QtGui.QCheckBox()
+            editor.setCheckState()
 class ObjectFieldsModel(QtCore.QAbstractTableModel):
     extra_fields = ['parent', 'childList', 'fieldList']
     sys_fields = ['node', 'cpu', 'dataMem', 'msgMem']
