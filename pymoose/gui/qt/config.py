@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Feb 13 16:07:56 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Feb 15 01:08:07 2010 (+0530)
+# Last-Updated: Wed Jun  2 16:52:11 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 100
+#     Update #: 102
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -45,13 +45,13 @@
 
 # Code:
 
-GL_CLIENT_EXECUTABLE = '../../gl/src/glclient'
-GL_COLORMAP_DIR = '../../gl/colormaps'
+GL_CLIENT_EXECUTABLE = '../../../gl/src/glclient'
+GL_COLORMAP_DIR = '../../../gl/colormaps'
 GL_COLORMAP_RAINBOW2 = 'rainbow2'
 GL_COLORMAP_HOT = 'hot'
 GL_COLORMAP_GREY = 'grey'
 GL_COLORMAP_REDHOT = 'redhot'
-GL_DEFAULT_COLORMAP = '../../gl/colormaps/rainbow2'
+GL_DEFAULT_COLORMAP = '../../../gl/colormaps/rainbow2'
 GL_PORT = '9999'
 
 import logging
