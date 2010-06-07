@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Mar  2 07:57:39 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Mar  3 11:21:27 2010 (+0530)
+# Last-Updated: Mon Jun  7 18:31:32 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 194
+#     Update #: 203
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -86,10 +86,13 @@ class BioModelsClientWidget(QtGui.QWidget):
         self.queryModelLabel = QtGui.QLabel('Get ', self.queryPanel)
         self.queryModelCombo = QtGui.QComboBox(self.queryPanel)
         self.queryLineEdit = QtGui.QLineEdit(self.queryPanel)
+        self.goButton = QtGui.QPushButton('Go', self.queryPanel)
+        
         layout = QtGui.QHBoxLayout(self.queryPanel)
         layout.addWidget(self.queryModelLabel)
         layout.addWidget(self.queryModelCombo)
         layout.addWidget(self.queryLineEdit)
+        layout.addWidget(self.goButton)
         self.queryPanel.setLayout(layout)
         for entry in BioModelsClientWidget.COMBO_ITEM_QUERY_MAP:
             self.queryModelCombo.addItem(self.tr(entry[0]), QtCore.QVariant(entry[1]))
@@ -105,6 +108,7 @@ class BioModelsClientWidget(QtGui.QWidget):
 
     def setupActions(self):
         self.connect(self.queryLineEdit, QtCore.SIGNAL('returnPressed()'), self.runQuery)
+        self.connect(self.goButton, QtCore.SIGNAL('clicked()'), self.runQuery)
 
     def download(self):
         """Download the selected model"""
@@ -133,17 +137,21 @@ class BioModelsClientWidget(QtGui.QWidget):
         if type(result) is type(''):
             self.resultsPanel.insertRow(row)
             item = QtGui.QTableWidgetItem(argument)
+            item.setFlags(item.flags() & ~Qt.ItemIsEditable)
             self.resultsPanel.setItem(row, column, item)
             item = QtGui.QTableWidgetItem(result)
+            item.setFlags(item.flags() & ~Qt.ItemIsEditable)
             self.resultsPanel.setItem(row, column + 1, item)
         elif type(result) is type([]):
             for value in result:
                 self.resultsPanel.insertRow(row)
                 item = QtGui.QTableWidgetItem(self.tr(value))
+                item.setFlags(item.flags() & ~Qt.ItemIsEditable)
                 # item.setData(Qt.DisplayRole, QtCore.QVariant(value))
                 self.resultsPanel.setItem(row, column, item)
                 name = self.client.service.getModelNameById(value)
                 item = QtGui.QTableWidgetItem(name)
+                item.setFlags(item.flags() & ~Qt.ItemIsEditable)
                 self.resultsPanel.setItem(row, column + 1, item)
                 row = row + 1
         print 'Finished running query'
