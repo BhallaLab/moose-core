@@ -47,3 +47,21 @@ void fieldOp( const Eref& e, const char* buf,
 	retq.addToQ( Shell::procInfo()->threadIndexInGroup, mfb, temp );
 	delete[] temp;
 }
+
+//////////////////////////////////////////////////////////////////
+
+OpFuncDummy::OpFuncDummy()
+{;}
+
+bool OpFuncDummy::checkFinfo( const Finfo* s ) const
+{
+	return dynamic_cast< const SrcFinfo0* >( s );
+}
+
+bool OpFuncDummy::checkSet( const SetGet* s ) const {
+	return dynamic_cast< const SetGet0* >( s );
+}
+
+void OpFuncDummy::op( Eref e, const char* buf ) const {
+	;
+}

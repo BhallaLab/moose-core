@@ -20,6 +20,16 @@ class OpFunc
 		virtual void op( Eref e, const char* buf ) const = 0;
 };
 
+// Should I template these off an integer for generating a family?
+class OpFuncDummy: public OpFunc
+{
+	public:
+		OpFuncDummy();
+		bool checkFinfo( const Finfo* s) const;
+		bool checkSet( const SetGet* s) const;
+		void op( Eref e, const char* buf ) const;
+};
+
 template< class T > class OpFunc0: public OpFunc
 {
 	public:

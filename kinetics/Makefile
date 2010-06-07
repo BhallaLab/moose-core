@@ -12,6 +12,7 @@ TARGET = kinetics.o
 OBJ = \
 	Mol.o	\
 	Reac.o	\
+	ChemCompt.o	\
 
 	#Tab.o	\
 
@@ -24,6 +25,7 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 Mol.o:	Mol.h ../basecode/Data.h
 Reac.o:	Reac.h ../basecode/Data.h
+ChemCompt.o:	ChemCompt.h ../basecode/Data.h
 Tab.o:	Tab.h ../basecode/Data.h
 
 .cpp.o:

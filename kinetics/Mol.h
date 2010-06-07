@@ -7,6 +7,9 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#ifndef _MOL_H
+#define _MOL_H
+
 class Mol: public Data
 {
 	friend void testSyncArray( unsigned int size, unsigned int numThreads,
@@ -15,13 +18,9 @@ class Mol: public Data
 	friend void forceCheckVal( double time, Element* e, unsigned int size );
 
 	public: 
-		Mol()
-			: n_( 0.0 ), nInit_( 0.0 ), A_( 0.0 ), B_( 0.0 )
-			{;}
+		Mol();
+		Mol( double nInit );
 
-		Mol( double nInit )
-			: n_( 0.0 ), nInit_( nInit ), A_( 0.0 ), B_( 0.0 )
-			{;}
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
@@ -31,6 +30,11 @@ class Mol: public Data
 		void setNinit( double v );
 		double getNinit() const;
 
+		void setConc( double v );
+		double getConc() const;
+		void setConcInit( double v );
+		double getConcInit() const;
+
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
@@ -39,12 +43,14 @@ class Mol: public Data
 		void eprocess( Eref e, const Qinfo* q, ProcInfo* p );
 		void reinit( const Eref& e, const Qinfo*q, ProcInfo* p );
 		void reac( double A, double B );
-		void sumTotal( double v );
 
 		static const Cinfo* initCinfo();
 	private:
 		double n_;
 		double nInit_;
-		double A_;
+		double size_;
+		double A_; // Internal state variables
 		double B_;
 };
+
+#endif	// _MOL_H

@@ -7,40 +7,33 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _REAC_H
-#define _REAC_H
+#ifndef _CHEM_COMPT_H
+#define _CHEM_COMPT_H
 
-class Reac: public Data
+class ChemCompt: public Data
 {
 	public: 
-		Reac();
-		Reac( double kf, double kb );
-
+		ChemCompt();
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
 
-		void setKf( double v );
-		double getKf() const;
-		void setKb( double v );
-		double getKb() const;
+		void setSize( double v );
+		double getSize() const;
+
+		void setDimensions( unsigned int v );
+		unsigned int getDimensions() const;
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
 
 		void process( const ProcInfo* p, const Eref& e );
-		void eprocess( Eref e, const Qinfo* q, ProcInfo* p );
-		void reinit( const Eref& e, const Qinfo*q, ProcInfo* p );
-		void sub( double v );
-		void prd( double v );
 
 		static const Cinfo* initCinfo();
 	private:
-		double kf_;
-		double kb_;
-		double sub_;
-		double prd_;
+		double size_;
+		unsigned int dimensions_;
 };
 
-#endif // REAC_H
+#endif	// _CHEM_COMPT_H

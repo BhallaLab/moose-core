@@ -5905,3 +5905,167 @@ I'm implementing a skeleton for the kinetics directory, which has been
 present but not compiled for a long time. Seems that it would be far more
 efficient to go straight to a solver-based design here.
 For now, put in Mol and Reac implementations and complete compilation.
+Checkin 1835.
+
+Design for signaling calculations:
+- Molecules grouped into compartments and 'groups', like GENESIS.
+	- Note that compartments != groups
+	- Compartments point to their spatial definition, but the compt
+		itself could be inside or outside, or a surface.
+		- Would it make sense to have functionless messages: just
+		indicate connectivity without any implied operations?
+			- Issues with some of the builtin functions, that assume
+			one end is on the msgBinding_ vector.
+			- How do we identify the msg if there is no associated
+   			  funcId? We have gone to some lengths to ensure that
+   			  Msgs do Not carry func info. Here we would be stuck.
+		So for now, don't go there.
+Q: Which is 'parent' for this organization, and which is handled by messaging?
+	Option 1: Parent = compt, groups as msgs, compt pts to geom.
+	- allows for multiple levels of grouping
+	- compt natural container for reacs/mols.
+	- Problem with kkit convention, needs effort to convert
+	Option 2: GENESIS grouping, assign compts by Msgs.
+	- Same convention as kkit: possibly cleaner conceptually?
+	- Awkward messaging for volume issues, compartments get muddled.
+	- Note that the solver handles volume issues
+Pick option 1.
+Q: Organization on solver, vs GENESIS backward compatibility
+	Option 1: Solver is parent cell/compt. Compts or molecules
+	are ElementFields.
+		- Nasty nested ElementFinfos to handle 
+		  channels/synapses etc.
+		- Nasty SparseMsg to stand in for various inter-compt
+		  and other msgs. If we don't expect to support this 
+		  level of backward compatibility, we could eliminate.
+	Option 2: Implement whole mess on solver with whatever
+	data organization is good for computation. 
+		- Implement entire arbitrary Element tree elsewhere,
+		  with whatever data organization is good for user. 
+		- If necessary make the tree structure readonly so 
+	  	  that we don't get into nasty callbacks when adding 
+		  or removing molecules.
+		- Use smarter versions of FieldElements to access
+		  the data. These can make their own heirarchy as
+		  they like, but use a FieldDataHandler which takes
+		  extra args to know which portion of the data set
+		  it should handle.
+	Option 3: Same as option 2, except:
+		- Use messaging to map data entries from solver to
+		  aribtrary Element tree.
+		- How often do we need fast field access?
+		- Explicit but messy map may be worse than implicit one.
+	Issues
+		- The link between data and access is implicit if it uses
+		  ptrs for the Data, and messy if it uses messages.
+		- When and how are the two versions of the
+		  model interface synchronized?
+		  - At Reset on the solver
+		  - As part of the function that adds reactions to the solver
+		  - At creation time using kkit or SBML reader
+		- Do I rebuild the entire Element interface if I implement a
+		  solver with a different data structure?
+		- Which is the reference model/data struct?
+			- The full mol element tree is expensive esp in arrays
+			- The 
+
+Most fundamentally: how essential is it to preserve backward compatibility?
+Easy: drop it.
+Medium: Preserve field and Element browsing compatibility, and any scripting
+	that uses this. Field assignments but only partial Element creation.
+Medium-ugly: Preserve message browsing compatibility too, specially message
+	scanning. But all readonly. A few special messages, such as for I/O
+	could still be possible to create/remove in old form.
+Hard: Preserve full messaging and Element creation compatibility.
+
+I think that though the centre of gravity should shift to a Python-optimized
+view of the model, the BC is important enough to deploy people to get the
+medium and medium-ugly aspects to continue to work.
+
+If we want this to happen, we need something on the order of option 2 or 3,
+where an entire apparent Element tree is visible.
+
+Some of this comes to the question: can we map a large number of distinct
+Elements with individual names, such as molecules or electrical compartments,
+onto an array? If this is done then various issues can be sorted. 
+Key features:
+	- Names managed separately
+	- Data through any of the >0 dimension DataHandlers, including
+		FieldDataHandlers
+	- Element traversal knows how to deal with this. That is really a
+		Shell issue.
+	- Wildcard and allchild traversal also knows how to deal with it.
+	- Provision for unique children for individual entries.
+	- Separate out node-specific subsets.
+Key issues addressed:
+	- Scalability
+	- Backward-compatible interface
+	- Browsable interface.
+
+Much work. We need a really good reason to do this. Scalability is the only 
+one that existing Element structures do not handle. Here too it might not
+be such a problem:
+	- # of individual Elements is usually finite and small, even in things
+		like a complex neuronal model
+	- Scaling usually involves making huge arrays of the originals. This
+		can be done efficiently in MOOSE.
+In the existing MOOSE, Raamesh had implemented a transform for array indexing.
+It went like this: If we make an array of a prototype tree, then each Element
+in the new tree is an array. However, to the old Genesis it looked like the
+parent of the tree was an array and it had individual children.
+Options:
+	- We don't need to replicate this in MOOSE.
+	- We could replicate this only in the GENESIS interface.
+
+Related issue: predefined indices for Element::m_ vector of MsgIds.
+Index 0 should be parent.
+Index 1 could be the explicit link to the solver.
+
+		-----------------------------------
+Some decisions, from the need to maintain a uniform interface.
+1. Will maintain medium to medium-ugly levels of backward compatibility for
+	purposes of browsing, both within SLI and Python.
+2. Will maintain regular Element tree for things like cells and reac networks.
+2a. Existing array functionality will handle scaling issues.
+2b. Special msgs keep track of grouping, other system-specific conventions.
+	Src is on group organizer, dest on components of group.
+3.? When loading models use the minimal interface class.
+4. Minimal interface class will include dummy messages for connectivity info
+4a. Doesn't hurt to make the Msgs functional, but then the 'process'
+	has to be turned off.
+4b. Need to provide simple and complete API for traversal e.g., 
+	vector< FullId >targets( string msgName ); // Looks up outputs of MsgSrc
+	vector< FullId >sources( string msgName ); // Looks up inputs of MsgDest
+5. Solver classes must be able to build their model definitions from the
+	interface classes.
+6. For runtime updates, solver classes must 'take over' interface classes
+	in situ by replacing cinfos and data handlers.
+
+These are essentially the same decisions as in the earlier MOOSE.
+		-----------------------------------
+
+Steps:
+- Implement standalone kkit parser to build models.
+	- Move out SUMTOTALS, buffered mols and other oddities into special
+	entities like arbitrary math op, buffered subclass of mol, etc.
+	- Build it on compartment heirarchy, with grouping defined by 
+		additional msgs.
+	
+
+Implementing OpFuncDummy for use in grouping. Done.
+
+============================================================================
+6 June.
+Implementing ChemCompt. Some points.
+- It would be nice to have a piggyback msg so that child Molecules could easily
+	look up their 'size' so as to report conc. The context of piggyback 
+	use is when there is already a message connecting two objects but we
+	would like an additional function.
+- It would be nice to have a fast lookup across Elements, avoiding the 
+	messaging. Again, consider conc calculations. Perhaps this is
+	legal only in FieldElements.
+
+Setting up parsing using the CellParser code from moose_g3.
+============================================================================
+7 June 2010
+Checking in the kinetics code changes.

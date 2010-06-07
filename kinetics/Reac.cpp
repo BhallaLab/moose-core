@@ -59,6 +59,10 @@ const Cinfo* Reac::initCinfo()
 			"Handles process call",
 			new EpFunc1< Reac, ProcPtr >( &Reac::eprocess ) );
 
+		static DestFinfo group( "group",
+			"Handle for group msgs. Doesn't do anything",
+			new OpFuncDummy() );
+
 		//////////////////////////////////////////////////////////////
 		// Shared Msg Definitions
 		//////////////////////////////////////////////////////////////

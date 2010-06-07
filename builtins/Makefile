@@ -11,6 +11,7 @@ TARGET = builtins.o
 
 OBJ = \
 	Arith.o	\
+	Group.o	\
 	testBuiltins.o	\
 
 HEADERS = \
@@ -21,7 +22,8 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 Arith.o:	Arith.h
-testBuiltins.o:	Arith.h ../msg/DiagonalMsg.h
+Group.o:	Group.h
+testBuiltins.o:	Group.h Arith.h ../msg/DiagonalMsg.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg $< -c

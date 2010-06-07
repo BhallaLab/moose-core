@@ -15,7 +15,16 @@
 static SrcFinfo1< double > nOut( 
 		"nOut", 
 		"Sends out # of molecules on each timestep"
-	);
+);
+
+static DestFinfo reacDest( "reacDest",
+	"Handles reaction input",
+	new OpFunc2< Mol, double, double >( &Mol::reac )
+);
+
+static Finfo* reacShared[] = {
+	&reacDest, &nOut
+};
 
 const Cinfo* Mol::initCinfo()
 {
@@ -36,6 +45,20 @@ const Cinfo* Mol::initCinfo()
 			&Mol::getNinit
 		);
 
+		static ValueFinfo< Mol, double > conc(
+			"conc",
+			"Concentration of molecules",
+			&Mol::setConc,
+			&Mol::getConc
+		);
+
+		static ValueFinfo< Mol, double > concInit(
+			"concInit",
+			"Initial value of molecular concentration",
+			&Mol::setConcInit,
+			&Mol::getConcInit
+		);
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -43,21 +66,24 @@ const Cinfo* Mol::initCinfo()
 			"Handles process call",
 			new EpFunc1< Mol, ProcPtr >( &Mol::eprocess ) );
 
-		static DestFinfo reac( "reac",
-			"Handles reaction input",
-			new OpFunc2< Mol, double, double >( &Mol::reac ) );
+		static DestFinfo group( "group",
+			"Handle for grouping. Doesn't do anything.",
+			new OpFuncDummy() );
 
-		static DestFinfo sumTotal( "sumTotal",
-			"Handles summing input. Deprecated",
-			new OpFunc1< Mol, double >( &Mol::sumTotal ) );
+		//////////////////////////////////////////////////////////////
+		// SharedMsg Definitions
+		//////////////////////////////////////////////////////////////
+		static SharedFinfo reac( "reac",
+			"Connects to reaction",
+			reacShared, sizeof( reacShared ) / sizeof( const Finfo* )
+		);
 
 	static Finfo* molFinfos[] = {
 		&n,	// Value
 		&nInit,	// Value
 		&process,			// DestFinfo
-		&reac,				// DestFinfo
-		&sumTotal,			// DestFinfo
-		&nOut,				// SrcFinfo
+		&group,			// DestFinfo
+		&reac,				// SharedFinfo
 	};
 
 	static Cinfo molCinfo (
@@ -70,6 +96,19 @@ const Cinfo* Mol::initCinfo()
 
 	return &molCinfo;
 }
+
+//////////////////////////////////////////////////////////////
+// Class definitions
+//////////////////////////////////////////////////////////////
+static const Cinfo* molCinfo = Mol::initCinfo();
+
+Mol::Mol()
+	: n_( 0.0 ), nInit_( 0.0 ), size_( 1.0 ), A_( 0.0 ), B_( 0.0 )
+{;}
+
+Mol::Mol( double nInit)
+	: n_( 0.0 ), nInit_( nInit ), size_( 1.0 ), A_( 0.0 ), B_( 0.0 )
+{;}
 
 //////////////////////////////////////////////////////////////
 // MsgDest Definitions
@@ -102,11 +141,6 @@ void Mol::reac( double A, double B )
 	B_ += B;
 }
 
-void Mol::sumTotal( double v )
-{
-	;
-}
-
 void Mol::reinit( const Eref& e, const Qinfo*q, ProcInfo* p )
 {
 	n_ = nInit_;
@@ -136,4 +170,24 @@ void Mol::setNinit( double v )
 double Mol::getNinit() const
 {
 	return nInit_;
+}
+
+void Mol::setConc( double v )
+{
+	n_ = v * size_;
+}
+
+double Mol::getConc() const
+{
+	return n_ / size_;
+}
+
+void Mol::setConcInit( double v )
+{
+	nInit_ = v * size_;
+}
+
+double Mol::getConcInit() const
+{
+	return nInit_ / size_;
 }
