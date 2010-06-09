@@ -25,6 +25,6 @@ set term png
 set output 'axon.png'
 replot
 set output
-set term x11
+set term pop
 
 print "Plot image written to axon.png.\n"

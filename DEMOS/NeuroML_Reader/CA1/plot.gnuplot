@@ -7,7 +7,7 @@ p \
 	set output 'ca.png'
 	replot
 	set output
-	set term x11
+	set term pop
 
 
 p \
@@ -17,5 +17,5 @@ p \
 	set output 'vm.png'
 	replot
 	set output
-	set term x11
+	set term pop
 
