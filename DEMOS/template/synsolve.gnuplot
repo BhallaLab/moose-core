@@ -18,4 +18,4 @@ set term png
 set output 'synapse.png'
 replot
 set output
-set term x11
+set term pop

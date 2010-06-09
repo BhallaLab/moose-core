@@ -9,7 +9,7 @@ p \
 	set output 'Vm.png'
 	replot
 	set output
-	set term x11
+	set term pop
 	print "Plot image written to Vm.png.\n"
 
 
