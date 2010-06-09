@@ -15,7 +15,7 @@ plot \
 	set output 'MAPK.png'
 	replot
 	set output
-	set term x11
+	set term pop
 	print "Plot image written to MAPK.png.\n"
 
 set title 'Species:MKK'
@@ -27,7 +27,7 @@ plot \
 	set output 'MKK.png'
 	replot
 	set output
-	set term x11
+	set term pop
 	print "Plot image written to MKK.png.\n"
 
 set title 'Species:MAPK-PP'
@@ -39,7 +39,7 @@ plot \
 	set output 'MAPK-PP.png'
 	replot
 	set output
-	set term x11
+	set term pop
 	print "Plot image written to MAPK-PP.png.\n"
 
 set title 'Species:Ras-MKKKK'
@@ -51,7 +51,7 @@ plot \
 	set output 'Ras-MKKKK.png'
 	replot
 	set output
-	set term x11
+	set term pop
 	print "Plot image written to Ras-MKKKK.png.\n"
 
 set title 'Species:MAPK'
@@ -63,7 +63,7 @@ plot \
 	set output 'MAPK.png'
 	replot
 	set output
-	set term x11
+	set term pop
 	print "Plot image written to MAPK.png.\n"
 	
 set title 'Species:MKKK'
@@ -75,6 +75,6 @@ plot \
 	set output 'MKKK.png'
 	replot
 	set output
-	set term x11
+	set term pop
 	print "Plot image written to MKKK.png.\n"
 
