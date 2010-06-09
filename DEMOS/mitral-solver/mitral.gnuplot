@@ -18,4 +18,4 @@ set term png
 set output 'mitral.png'
 replot
 set output
-set term x11
+set term pop
