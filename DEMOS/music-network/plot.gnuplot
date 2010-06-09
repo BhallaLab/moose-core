@@ -31,7 +31,7 @@ set term png
 set output 'output/c0.png'
 replot
 set output
-set term x11
+set term pop
 
 print "Plot image written to output/c0.png.\n"
 
@@ -52,7 +52,7 @@ set term png
 set output 'output/c1.png'
 replot
 set output
-set term x11
+set term pop
 
 print "Plot image written to output/c1.png.\n"
 
@@ -73,7 +73,7 @@ set term png
 set output 'output/c2.png'
 replot
 set output
-set term x11
+set term pop
 
 print "Plot image written to output/c2.png.\n"
 
@@ -94,7 +94,7 @@ set term png
 set output 'output/c3.png'
 replot
 set output
-set term x11
+set term pop
 
 print "Plot image written to output/c3.png.\n"
 
@@ -115,6 +115,6 @@ set term png
 set output 'output/c4.png'
 replot
 set output
-set term x11
+set term pop
 
 print "Plot image written to output/c4.png.\n"

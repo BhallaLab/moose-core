@@ -9,7 +9,7 @@ p \
 	set output 'PDK1.png'
 	replot
 	set output
-	set term x11
+	set term pop
 	print "Plot image written to PDK1.png.\n"
 
 set title 'Species:PP2A'
@@ -21,7 +21,7 @@ p \
 	set output 'PP2A.png'
 	replot
 	set output
-	set term x11
+	set term pop
 	print "Plot image written to PP2A.png.\n"
 
 set title 'Species:Rheb_minus_GTP'
@@ -33,7 +33,7 @@ p \
 	set output 'Rheb_minus_GTP.png'
 	replot
 	set output
-	set term x11
+	set term pop
 	print "Plot image written to Rheb_minus_GTP.png.\n"
 
 set title 'Species:TOR_minus_clx'
@@ -45,7 +45,7 @@ p \
 	set output 'TOR_minus_clx.png'
 	replot
 	set output
-	set term x11
+	set term pop
 	print "Plot image written to TOR_minus_clx.png.\n"
 
 set title 'Species:TOR_Rheb_minus_GTP_clx'
@@ -57,7 +57,7 @@ p \
 	set output 'TOR_Rheb_minus_GTP_clx.png'
 	replot
 	set output
-	set term x11
+	set term pop
 	print "Plot image written to TOR_Rheb_minus_GTP_clx.png.\n"
 
 set title 'Species:S6K_star_'
@@ -69,7 +69,7 @@ p \
 	set output 'S6K_star_.png'
 	replot
 	set output
-	set term x11
+	set term pop
 	print "Plot image written to S6K_star_.png.\n"
 
 set title 'Species:S6K'
@@ -81,7 +81,7 @@ p \
 	set output 'S6K.png'
 	replot
 	set output
-	set term x11
+	set term pop
 	print "Plot image written to S6K.png.\n"
 
 set title 'Species:S6K_thr_minus_412'
@@ -93,7 +93,7 @@ p \
 	set output 'S6K_thr_minus_412.png'
 	replot
 	set output
-	set term x11
+	set term pop
 	print "Plot image written to S6K_thr_minus_412.png.\n"
 
 set title 'Species:40S_inact'
@@ -105,7 +105,7 @@ p \
 	set output '40S_inact.png'
 	replot
 	set output
-	set term x11
+	set term pop
 	print "Plot image written to 40S_inact.png.\n"
 
 set title 'Species:S6K_tot'
@@ -117,7 +117,7 @@ p \
 	set output 'S6K_tot.png'
 	replot
 	set output
-	set term x11
+	set term pop
 	print "Plot image written to S6K_tot.png.\n"
 
 set title 'Species:_40S'
@@ -129,7 +129,7 @@ p \
 	set output '_40S.png'
 	replot
 	set output
-	set term x11
+	set term pop
 	print "Plot image written to _40S.png.\n"
 
 set title 'Species:S6K_thr_minus_252'
@@ -141,7 +141,7 @@ p \
 	set output 'S6K_thr_minus_252.png'
 	replot
 	set output
-	set term x11
+	set term pop
 	print "Plot image written to S6K_thr_minus_252.png.\n"
 
 set title 'Species:MAPK_star'
@@ -153,7 +153,7 @@ p \
 	set output 'MAPK_star.png'
 	replot
 	set output
-	set term x11
+	set term pop
 	print "Plot image written to MAPK_star.png.\n"
 
 set title 'Species:_40S_basal'
@@ -165,7 +165,7 @@ p \
 	set output '_40S_basal.png'
 	replot
 	set output
-	set term x11
+	set term pop
 	print "Plot image written to _40S_basal.png.\n"
 
 

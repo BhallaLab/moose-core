@@ -21,7 +21,7 @@ set term png
 set output 'branch-0.png'
 replot
 set output
-set term x11
+set term pop
 
 print "Plot image written to branch-0.png.\n"
 
@@ -40,6 +40,6 @@ set term png
 set output 'branch-x.png'
 replot
 set output
-set term x11
+set term pop
 
 print "Plot image written to branch-x.png.\n"
