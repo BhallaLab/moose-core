@@ -21,7 +21,7 @@ set term png
 set output 'Vm.png'
 replot
 set output
-set term x11
+set term pop
 
 print "Plot image written to Vm.png.\n"
 
@@ -41,7 +41,7 @@ set term png
 set output 'Ca.png'
 replot
 set output
-set term x11
+set term pop
 
 print "Plot image written to Ca.png.\n"
 
