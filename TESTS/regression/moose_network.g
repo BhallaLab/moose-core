@@ -25,7 +25,7 @@ int N_OUTPUT = 10
 int i
 int j
 
-include network-ee/hh_tchan.g
+include hh_tchan.g
 
 ce /library
 	make_Na_hh_tchan
@@ -49,8 +49,20 @@ ce /library
 	copy compt in_compt
 	pushe in_compt
 		create spikegen spike
-		setfield spike thresh -0.04 abs_refract 0.001
+		setfield spike thresh -0.04 abs_refract 0.004
 		addmsg . spike INPUT Vm
+		
+		/*
+		 * MOOSE uses edge triggering (edgeTriggered = 1) to detect spikes by
+		 * default. Here we set edgeTriggered to 0, to mimic GENESIS. It does
+		 * not make a difference here, since the transient in the input cells
+		 * is less than 4 ms, which is the absolute refractory period set above.
+		 * However, if we reduce the abs_refract to, say 1 ms, then MOOSE and
+		 * GENESIS results will diverge (unless edge triggering is switched off).
+		 */
+		if ( MOOSE )
+			setfield spike edgeTriggered 0
+		end
 	pope
 	
 	//
@@ -84,7 +96,7 @@ for ( i = 0; i < {N_OUTPUT}; i = i + 1 )
 	for ( j = 0; j < {N_INPUT}; j = j + 1 )
 		setfield /out_array/out_compt[{i}]/glu \
 			synapse[{j}].weight { i + j } \
-			synapse[{j}].delay { i * j * 1e-4 }
+			synapse[{j}].delay { i * j * 5e-4 }
 	end
 end
 
@@ -92,11 +104,18 @@ end
 ////////////////////////////////////////////////////////////////////////////////
 // PLOTTING
 ////////////////////////////////////////////////////////////////////////////////
-createmap table /plots 1 {N_OUTPUT} -object
+create neutral /data
+
+create table /data/in
+call /data/in TABCREATE {SIMLENGTH / IODT} 0 {SIMLENGTH}
+setfield /data/in step_mode 3
+addmsg /in_array/in_compt[0] /data/in INPUT Vm
+
+createmap table /data 1 {N_OUTPUT} -object
 for ( i = 0; i < N_OUTPUT; i = i + 1 )
-	call /plots/table[{i}] TABCREATE {SIMLENGTH / IODT} 0 {SIMLENGTH}
-	setfield /plots/table[{i}] step_mode 3
-	addmsg /out_array/out_compt[{i}] /plots/table[{i}] INPUT Vm
+	call /data/table[{i}] TABCREATE {SIMLENGTH / IODT} 0 {SIMLENGTH}
+	setfield /data/table[{i}] step_mode 3
+	addmsg /out_array/out_compt[{i}] /data/table[{i}] INPUT Vm
 end
 
 
@@ -111,7 +130,8 @@ setclock 0 {SIMDT}
 setclock 1 {SIMDT}
 setclock 2 {IODT}
 
-useclock /plots/table[] 2
+useclock /data/in 2
+useclock /data/table[] 2
 
 //=====================================
 //  Simulation
@@ -119,40 +139,40 @@ useclock /plots/table[] 2
 reset
 
 step {SIMLENGTH / 2} -t
-setfield /in_array/in_compt Vm 0.0
+setfield /in_array/in_compt[] Vm 0.0
 step {SIMLENGTH / 2} -t
 
 
 ////////////////////////////////////////////////////////////////////////////////
 //  Write Plots
 ////////////////////////////////////////////////////////////////////////////////
-str filename
-str extension
-if ( MOOSE )
-	extension = ".moose.plot"
-else
-	extension = ".genesis.plot"
-end
-
-// filename = "network" @ {extension}
-filename = "test.plot"
+str filename = "test.plot"
 
 // Clear file contents
 openfile {filename} w
 closefile {filename}
 
+openfile {filename} a
+writefile {filename} "/newplot"
+writefile {filename} "/plotname Input[0]"
+flushfile {filename}
+tab2file {filename} /data/in table	
+writefile {filename} " "
+
+// Force tab2file output to be flushed
+closefile {filename}
+
 for (i = 0; i < N_OUTPUT; i = i + 1)
 	openfile {filename} a
 	writefile {filename} "/newplot"
-	writefile {filename} "/plotname Vm["{i}"]"
+	writefile {filename} "/plotname Output["{i}"]"
 	flushfile {filename}
-	tab2file {filename} /plots/table[{i}] table	
+	tab2file {filename} /data/table[{i}] table	
 	writefile {filename} " "
 	
 	// Force tab2file output to be flushed
 	closefile {filename}
 end
-
 
 echo "
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
