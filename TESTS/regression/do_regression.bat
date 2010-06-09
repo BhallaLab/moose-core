@@ -1,11 +1,11 @@
 #!/bin/tcsh
 
 set mpi = 0
-set sbml = 1
-set neuroml = 1
+set sbml = 0
+set neuroml = 0
 set neuronal = 1
-set kinetics = 1
-set misc = 1
+set kinetics = 0
+set misc = 0
 
 if ( $mpi ) then
 	set MOOSE = 'mpirun -n 1 ../../moose'
