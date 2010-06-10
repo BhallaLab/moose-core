@@ -28,6 +28,15 @@ COLORLIST = [ QtCore.Qt.red,
               QtCore.Qt.darkBlue, 
               QtCore.Qt.lightGray ]
 
+
+class QSliderWithToolTip(QtGui.QSlider):
+    def __init__(self, *args):
+        QtGui.QSlider.__init__(self, *args)
+    def event():
+        self.setToolTip(self.tr(self.value()))
+        print 'event'
+        return True
+
 class QtSquid(QtGui.QMainWindow):
     """The squid demo using PyQt4 and PyQwt5"""
     def __init__(self, *args):
@@ -110,7 +119,7 @@ class QtSquid(QtGui.QMainWindow):
         self.simTimeStepLabel = QtGui.QLabel("Simulation time step (ms)", self)
         self.plotTimeStepLabel = QtGui.QLabel("Plotting interval (ms)", self)
         self.runTimeEdit = QtGui.QLineEdit("50.0", self)
-        self.simTimeStepEdit = QtGui.QLineEdit("0.1", self)
+        self.simTimeStepEdit = QtGui.QLineEdit("0.01", self)
         self.plotTimeStepEdit = QtGui.QLineEdit("0.1", self)
         layout = QtGui.QGridLayout(self.simInputBox)
         layout.addWidget(self.runTimeLabel, 0,0)
@@ -204,17 +213,30 @@ class QtSquid(QtGui.QMainWindow):
         vClampPanel = QtGui.QGroupBox("Voltage-Clamp Settings", self)
         self.vClampCtrlBox = vClampPanel
         self.holdingVLabel = QtGui.QLabel("Holding Voltage (mV)", vClampPanel)
-        self.holdingVEdit = QtGui.QLineEdit("-70", vClampPanel)
+        self.holdingVEdit = QtGui.QLineEdit("0.0", vClampPanel)
         self.holdingTimeLabel = QtGui.QLabel("Holding Time (ms)", vClampPanel)
-        self.holdingTimeEdit = QtGui.QLineEdit("0.0", vClampPanel) # TODO - revert to 10
+        self.holdingTimeEdit = QtGui.QLineEdit("10.0", vClampPanel)
         self.prePulseVLabel = QtGui.QLabel("Pre-pulse Voltage (mV)", vClampPanel)
-        self.prePulseVEdit = QtGui.QLineEdit("-70.0", vClampPanel)
+        self.prePulseVEdit = QtGui.QLineEdit("0.0", vClampPanel)
         self.prePulseTimeLabel = QtGui.QLabel("Pre-pulse Time (ms)", vClampPanel)
         self.prePulseTimeEdit = QtGui.QLineEdit("0.0", vClampPanel)
         self.clampVLabel = QtGui.QLabel("Clamp Voltage (mV)", vClampPanel)
-        self.clampVEdit = QtGui.QLineEdit("-70.0", vClampPanel) # TODO - revert to 50?
+        self.clampVEdit = QtGui.QLineEdit("50.0", vClampPanel)
         self.clampTimeLabel = QtGui.QLabel("Clamp Time (ms)", vClampPanel)
         self.clampTimeEdit = QtGui.QLineEdit("20.0", vClampPanel)
+        self.pidGainValueSlider = QSliderWithToolTip(QtCore.Qt.Horizontal, vClampPanel)
+        self.pidGainValueSlider.setRange(0, 9)
+        self.pidGainValueSlider.setTickPosition(self.pidGainValueSlider.TicksBelow)
+        self.pidGainValueSlider.setTickInterval(1)
+        self.pidGainValueSlider.setValue(3)
+        self.pidGainExpSlider = QSliderWithToolTip(QtCore.Qt.Horizontal, vClampPanel)
+        self.pidGainExpSlider.setRange(-9, 0)
+        self.pidGainExpSlider.setTickPosition(self.pidGainExpSlider.TicksBelow)
+        self.pidGainExpSlider.setTickInterval(1)
+        self.pidGainExpSlider.setValue(-4)
+        self.pidGainLabel = QtGui.QLabel("PID Gain")
+        self.pidGainValueLabel = QtGui.QLabel("(mantissa [0..9])")
+        self.pidGainExpLabel = QtGui.QLabel("(exponent [-9..0])")
         layout = QtGui.QGridLayout(vClampPanel)
         layout.addWidget(self.holdingVLabel, 0, 0)
         layout.addWidget(self.holdingVEdit, 0, 1)
@@ -228,9 +250,16 @@ class QtSquid(QtGui.QMainWindow):
         layout.addWidget(self.clampVEdit, 4, 1)
         layout.addWidget(self.clampTimeLabel, 5, 0)
         layout.addWidget(self.clampTimeEdit, 5, 1)
+        layout.addWidget(self.pidGainLabel, 6, 0)
+        layout.addWidget(self.pidGainValueSlider, 7, 0)
+        layout.addWidget(self.pidGainExpSlider, 7, 1)
+        layout.addWidget(self.pidGainValueLabel, 8, 0)
+        layout.addWidget(self.pidGainExpLabel, 8, 1)
+        
         vClampPanel.setLayout(layout)
     #! QtSquid.createVClampCtrl
 
+    
     def createInputPanel(self):
         """Create the input panel"""
         self.inputPanel = QtGui.QFrame(self)
@@ -447,6 +476,7 @@ class QtSquid(QtGui.QMainWindow):
             paramDict["naConc"] = float(self.naConcEdit.text())
             paramDict["kConc"] = float(self.kConcEdit.text())
             self.squidModel.doResetForVClamp(paramDict)
+            self.squidModel._PID.gain = float(self.pidGainValueSlider.value()) * pow(10.0, -float(self.pidGainExpSlider.value()))
             
 
 
@@ -512,6 +542,7 @@ class QtSquid(QtGui.QMainWindow):
                       QtCore.Qt.red, xData, hParamTable)
         self.addCurve(self.activationPlot, "n",
                       QtCore.Qt.blue, xData, nParamTable)
+        self.squidModel.dumpPlotData()
 
     def statePlotSlot(self):
         """Show state plot"""
