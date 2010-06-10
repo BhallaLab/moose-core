@@ -82,8 +82,8 @@ class SquidModel(moose.Neutral):
         self._pulseGen.trigMode = 1
         self._pulseGen.trigTime = 0.0
 
-        self._lowpass.R = 1e-3
-        self._lowpass.C = 3e-3
+        self._lowpass.R = 1.0
+        self._lowpass.C = 3e-2
         self._iClamp.gain = 0.0
         self._vClamp.gain = 0.0
         self._PID.gain = 0.5e-6
@@ -96,6 +96,9 @@ class SquidModel(moose.Neutral):
         # Connect voltage clamp circuitry
         self._pulseGen.connect("outputSrc", self._lowpass, "injectMsg")
         self._lowpass.connect("outputSrc", self._vClamp, "plusDest")
+        self._rcTable = moose.Table('RCTable', self._data)
+        self._rcTable.stepMode = 3
+        self._rcTable.connect('inputRequest', self._lowpass, 'state')
         self._vClamp.connect("outputSrc", self._PID, "commandDest")
         self._squidAxon.connect("VmSrc", self._PID, "sensedDest")
         self._PID.connect("outputSrc", self._squidAxon, "injectMsg")
@@ -228,9 +231,9 @@ class SquidModel(moose.Neutral):
         self._lowpass.C = 0.03e-4
         self._vClamp.gain = 1.0
         self._iClamp.gain = 0.0
-        self._PID.gain = 0.3e-8
-        self._PID.tauI = 200.0 #self.simDt() * 2
-        self._PID.tauD = 1e-2/8 #self.simDt()
+        self._PID.gain = 0.7e-6
+        self._PID.tauI = self.simDt() * 2
+        self._PID.tauD = self.simDt()
         print 'PID tauD', self._PID.tauD
         print paramDict
         self.getContext().reset()
@@ -298,7 +301,8 @@ class SquidModel(moose.Neutral):
         if not runTime == None:
             self._runTime = runTime
         self.getContext().step(self._runTime)
-
+        self._rcTable.dumpFile('RC.dat')
+        self._vClampInjectTable.dumpFile('inject.dat')
         
     def dumpPlotData(self):
         self._vmTable.dumpFile("squidModelVm.plot")
