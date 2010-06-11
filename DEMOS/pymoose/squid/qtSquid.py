@@ -29,13 +29,6 @@ COLORLIST = [ QtCore.Qt.red,
               QtCore.Qt.lightGray ]
 
 
-class QSliderWithToolTip(QtGui.QSlider):
-    def __init__(self, *args):
-        QtGui.QSlider.__init__(self, *args)
-    def event():
-        self.setToolTip(self.tr(self.value()))
-        print 'event'
-        return True
 
 class QtSquid(QtGui.QMainWindow):
     """The squid demo using PyQt4 and PyQwt5"""
@@ -224,12 +217,12 @@ class QtSquid(QtGui.QMainWindow):
         self.clampVEdit = QtGui.QLineEdit("50.0", vClampPanel)
         self.clampTimeLabel = QtGui.QLabel("Clamp Time (ms)", vClampPanel)
         self.clampTimeEdit = QtGui.QLineEdit("20.0", vClampPanel)
-        self.pidGainValueSlider = QSliderWithToolTip(QtCore.Qt.Horizontal, vClampPanel)
+        self.pidGainValueSlider = QtGui.QSlider(QtCore.Qt.Horizontal, vClampPanel)
         self.pidGainValueSlider.setRange(0, 9)
         self.pidGainValueSlider.setTickPosition(self.pidGainValueSlider.TicksBelow)
         self.pidGainValueSlider.setTickInterval(1)
         self.pidGainValueSlider.setValue(3)
-        self.pidGainExpSlider = QSliderWithToolTip(QtCore.Qt.Horizontal, vClampPanel)
+        self.pidGainExpSlider = QtGui.QSlider(QtCore.Qt.Horizontal, vClampPanel)
         self.pidGainExpSlider.setRange(-9, 0)
         self.pidGainExpSlider.setTickPosition(self.pidGainExpSlider.TicksBelow)
         self.pidGainExpSlider.setTickInterval(1)
@@ -476,7 +469,7 @@ class QtSquid(QtGui.QMainWindow):
             paramDict["naConc"] = float(self.naConcEdit.text())
             paramDict["kConc"] = float(self.kConcEdit.text())
             self.squidModel.doResetForVClamp(paramDict)
-            self.squidModel._PID.gain = float(self.pidGainValueSlider.value()) * pow(10.0, -float(self.pidGainExpSlider.value()))
+            self.squidModel._PID.gain = float(self.pidGainValueSlider.value()) * pow(10.0, float(self.pidGainExpSlider.value()))
             
 
 
