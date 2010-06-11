@@ -17,12 +17,20 @@ const Cinfo* Neutral::initCinfo()
 	/////////////////////////////////////////////////////////////////
 	// Value Finfos
 	/////////////////////////////////////////////////////////////////
+	static ValueFinfo< Neutral, Neutral > thisFinfo (
+		"this",
+		"Access function for entire object",
+		&Neutral::setThis,
+		&Neutral::getThis
+	);
+
 	static ElementValueFinfo< Neutral, string > name( 
 		"name",
 		"Name of object", 
 		&Neutral::setName, 
 		&Neutral::getName );
 
+	// Should be renamed to myId
 	static ReadOnlyElementValueFinfo< Neutral, FullId > me( 
 		"me",
 		"FullId for current object", 
@@ -100,6 +108,21 @@ Neutral::Neutral()
 void Neutral::process( const ProcInfo* p, const Eref& e )
 {
 	;
+}
+
+////////////////////////////////////////////////////////////////////////
+// Access functions
+////////////////////////////////////////////////////////////////////////
+
+
+void Neutral::setThis( Neutral v )
+{
+	;
+}
+
+Neutral Neutral::getThis() const
+{
+	return *this;
 }
 
 void Neutral::setName( Eref e, const Qinfo* q, string name )

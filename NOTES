@@ -6068,4 +6068,52 @@ Implementing ChemCompt. Some points.
 Setting up parsing using the CellParser code from moose_g3.
 ============================================================================
 7 June 2010
-Checking in the kinetics code changes.
+Checking in the kinetics code changes. Checkin 1842.
+
+============================================================================
+8 June 2010
+Extended fields revisited.
+If we can automatically promote child Elements to fields, we're in business.
+This is like the converse of FieldElements.
+Does it have to be hard-coded, or only in the Shell functions?
+
+One option:
+	- Make Element->findFinfo function to replace current lookup
+		through cinfo.
+	- If it fails to find finfo, tries for child object name
+		matching the field.
+		- Perhaps a flag to indicate that the child is to be
+			used as a field?
+		- The name of the base object is just ""
+		- Shell::dispatchSet will have to do stuff.
+
+	- Alternatively, Shell::innerSet could go after the child
+		Element, except that all we have here to find the
+		correct child is the FuncId. 
+		- This would be a good place if we could manage it
+		because it handles the incoming Msgs.
+
+============================================================================
+10 June 2010
+The SetGet::checkSet function has all the info needed to decide if the
+field is actually a child Element. Supposing we define fid == 0 as a
+predefined fid for setting value of entire object. fid == 1 would have to
+do the 'get' function on it.
+
+What could go wrong:
+	- mis-name a field, and as a result try to 'set' a child Element.
+		This is unlikely because of type safety rules.
+	- Waste of a couple of good FuncIds: for set and get resp.
+	- It is a bit of a hack.
+	- Hard coding this is ugly.
+	- Will need to redo stuff here for adding msgs to these 'fields'
+	- How to handle SetVec etc.
+	- Type of same fid changes with Element class: this is OK
+	- Figure out how to do 'get'
+
+At init, Cinfo could automagically adapt Dinfo to assign the base set/get
+Finfos.
+This is messy. Simpler to have Neutral define set_this and get_this as
+dummy funcs, and then override these in classes which are allowed to be
+used as ext fields. Might also be useful in data transfer across nodes
+and other kinds of serialization.

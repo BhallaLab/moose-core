@@ -16,6 +16,30 @@ class Neutral: public Data
 		Neutral();
 		void process( const ProcInfo* p, const Eref& e );
 
+		/////////////////////////////////////////////////////////////////
+		// Field access functions
+		/////////////////////////////////////////////////////////////////
+
+		/**
+		 * Field access functions for the entire object. For Neutrals 
+		 * the setThis function is a dummy: it doesn't do anything because
+		 * the Neutral has no data to set. However, the function name acts
+		 * as a placeholder and derived objects can override the function
+		 * so that the entire object can be accessed as a field and also
+		 * for inter-node data transfer.
+		 */
+		void setThis( Neutral v );
+
+		/**
+		 * Field access functions for the entire object. For Neutrals 
+		 * the getThis function does return the Neutral object, but it
+		 * has no data to set. However, the function name acts
+		 * as a placeholder and derived objects can override the function
+		 * so that the entire object can be accessed as a field and also
+		 * used for inter-node data transfer.
+		 */
+		Neutral getThis() const;
+
 		/**
 		 * Field access functions for the name of the Element/Neutral
 		 */

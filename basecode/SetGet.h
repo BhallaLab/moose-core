@@ -28,28 +28,6 @@ class SetGet
 		 */
 		bool checkSet( const string& field, FuncId& fid ) const;
 
-		/**
-		 * Checks arg # and type for a 'get' call. Single argument.
-		 * Returns true if good. Passes back found fid.
-		 * Utility function to check two things: 
-		 * that the dest field matches the type of this request, and that
-		 * the dest funcId will accept a funcId argument for the
-		 * callback.
-		bool checkGet( const string& field, FuncId& fid ) const;
-		 */
-//////////////////////////////////////////////////////////////////////
-		/**
-		 * Initiate a nonblocking 'get' call.
-		 * This can be harvested either using harvestStrGet or
-		 * harvestGet< Type >.
-		bool iGet( const string &field ) const;
-		 */
-
-		/**
-		 * Complete a nonblocking 'get' call, returning a string.
-		 * There is also a nonblocking typed counterpart, harvestGet< T >.
-		virtual string harvestStrGet() const = 0;
-		 */
 //////////////////////////////////////////////////////////////////////
 		/**
 		 * Blocking 'get' call, returning into a string.
@@ -63,12 +41,6 @@ class SetGet
 		 */
 		static bool strSet( const Eref& dest, const string& field, const string& val );
 
-		/**
-		 * Nonblocking 'set' call, using automatic string conversion into
-		 * arbitrary numbers of arguments.
-		 * There is a matching nonblocking set call with typed arguments.
-		virtual bool iStrSet( const string& field, const string& val ) = 0;
-		 */
 		
 		/**
 		 * Waits for completion of a nonblocking 'set' call, either
