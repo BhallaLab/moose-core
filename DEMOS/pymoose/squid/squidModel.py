@@ -187,6 +187,7 @@ class SquidModel(moose.Neutral):
         return self._hParamTable
 
     def iInjectTable(self):
+        print '%%%%%%%%', self._iInjectTable.path
         return self._iInjectTable
 
     def pulseGen(self):
@@ -301,8 +302,8 @@ class SquidModel(moose.Neutral):
         if not runTime == None:
             self._runTime = runTime
         self.getContext().step(self._runTime)
-        self._rcTable.dumpFile('RC.dat')
-        self._vClampInjectTable.dumpFile('inject.dat')
+        # self._rcTable.dumpFile('RC.dat')
+        # self._vClampInjectTable.dumpFile('inject.dat')
         
     def dumpPlotData(self):
         self._vmTable.dumpFile("squidModelVm.plot")
