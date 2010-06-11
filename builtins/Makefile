@@ -12,6 +12,7 @@ TARGET = builtins.o
 OBJ = \
 	Arith.o	\
 	Group.o	\
+	Real.o	\
 	testBuiltins.o	\
 
 HEADERS = \
@@ -23,6 +24,7 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 Arith.o:	Arith.h
 Group.o:	Group.h
+Real.o:		Real.h
 testBuiltins.o:	Group.h Arith.h ../msg/DiagonalMsg.h
 
 .cpp.o:

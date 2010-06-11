@@ -74,6 +74,7 @@ const Cinfo* Neutral::initCinfo()
 	static Finfo* neutralFinfos[] = {
 		&childMsg,
 		&parentMsg,
+		&thisFinfo,
 		&name,
 		&me,
 		&parent,
