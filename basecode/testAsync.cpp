@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include "../shell/Neutral.h"
 #include "../builtins/Arith.h"
+#include "../builtins/Real.h"
 #include "Dinfo.h"
 #include <queue>
 #include "../biophysics/Synapse.h"
@@ -1229,45 +1230,62 @@ void testMsgField()
 	delete i2();
 }
 
-/*
 void testSetGetExtField()
 {
 	static const double EPSILON = 1e-9;
 	const Cinfo* nc = Neutral::initCinfo();
+	const Cinfo* rc = Real::initCinfo();
 	unsigned int size = 100;
 	vector< unsigned int > dims( 1, size );
 	string arg;
-	Id i2 = Id::nextId();
+	Id i1 = Id::nextId();
+	Id i2( i1.value() + 1 );
 	Id i3( i2.value() + 1 );
-	// bool ret = ic->create( i2, "test2", size );
-	Element* ret = new Element( i2, ic, "test2", dims, 1 );
-	assert( ret );
+	Element* e1 = new Element( i1, nc, "test", dims, 1 );
+	assert( e1 );
+	Shell::adopt( Id(), i1 );
+	Element* e2 = new Element( i2, rc, "x", dims, 1 );
+	assert( e2 );
+	Shell::adopt( i1, i2 );
+	Element* e3 = new Element( i3, rc, "y", dims, 1 );
+	assert( e3 );
+	Shell::adopt( i1, i3 );
 
-	// i2()->showFields();
-
-	
 	for ( unsigned int i = 0; i < size; ++i ) {
-		Eref e2( i2(), i );
+		Eref a( e1, i );
+		Eref b( e1, size - i - 1 );
 		double temp = i;
-		bool ret = Field< double >::set( e2, "Vm", temp );
+		bool ret = Field< double >::set( a, "x", temp );
 		assert( ret );
-		assert( 
-			fabs ( reinterpret_cast< IntFire* >(e2.data())->getVm() - temp ) <
+		double temp2  = temp * temp;
+		ret = Field< double >::set( b, "y", temp2 );
+		assert( ret );
+	}
+
+	for ( unsigned int i = 0; i < size; ++i ) {
+		Eref a( e1, i );
+		Eref b( e1, size - i - 1 );
+		double temp = i;
+		double temp2  = temp * temp;
+		fabs ( ( reinterpret_cast< Real* >(a.data())->getThis() - temp ) <
+				EPSILON ); 
+
+		fabs ( ( reinterpret_cast< Real* >(b.data())->getThis() - temp2 ) <
 				EPSILON ); 
 	}
 
+	/*
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref e2( i2(), i );
 		double temp = i;
 		double ret = Field< double >::get( e2, "Vm" );
 		assert( fabs ( temp - ret ) < EPSILON );
 	}
+	*/
 
 	cout << "." << flush;
-	delete i2();
-	delete i3();
+	i1.destroy();
 }
-*/
 
 void testAsync( )
 {
@@ -1292,4 +1310,5 @@ void testAsync( )
 	testSharedMsg();
 	testConvVector();
 	testMsgField();
+	testSetGetExtField();
 }

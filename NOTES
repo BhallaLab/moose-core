@@ -6143,5 +6143,8 @@ To do child Element field assignment:
 - Fix Shell::dispatchGet to look for the finfo on the child element if needed
 - Later: Fix Shell::doAddMsg to handle set/get driven by message.
 
+Checkin 1852.
 Now need to put in unit test
+Put in test for 'set' command. To my astonishment, it works.
+
 ============================================================================

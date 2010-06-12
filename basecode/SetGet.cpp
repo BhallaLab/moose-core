@@ -40,10 +40,15 @@ bool SetGet::checkSet( const string& field, Eref& tgt, FuncId& fid ) const
 {
 	// string field = "set_" + destField;
 	const Finfo* f = e_.element()->cinfo()->findFinfo( field );
-	if ( !f ) { // Could be a child element?
-		Id child = ( Neutral::getChild( e_, 0, field ) );
-		if ( child != Id() ) {
-			f = child()->cinfo()->findFinfo( "setThis" );
+	if ( !f ) { // Could be a child element? Note that field name will 
+		// change from set_<name> to just <name>
+		string f2 = field.substr( 4 );
+		Id child = ( Neutral::getChild( e_, 0, f2 ) );
+		if ( child == Id() ) {
+			cout << "Error: SetGet:checkSet:: No field or child named '" <<
+				field << "' was found\n";
+		} else {
+			f = child()->cinfo()->findFinfo( "set_this" );
 			assert( f ); // should always work as Neutral has the field.
 			if ( child()->dataHandler()->numData1() == 
 				e_.element()->dataHandler()->numData1() )
