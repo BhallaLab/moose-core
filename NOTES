@@ -6145,6 +6145,8 @@ To do child Element field assignment:
 
 Checkin 1852.
 Now need to put in unit test
-Put in test for 'set' command. To my astonishment, it works.
+Put in test for 'set' command. To my astonishment, it works. Checkin 1853.
+Actually the unit test was buggy. Fixed. Still works. Also handles SetVec
+correctly.
 
 ============================================================================

@@ -1241,6 +1241,7 @@ void testSetGetExtField()
 	Id i1 = Id::nextId();
 	Id i2( i1.value() + 1 );
 	Id i3( i2.value() + 1 );
+	Id i4( i3.value() + 1 );
 	Element* e1 = new Element( i1, nc, "test", dims, 1 );
 	assert( e1 );
 	Shell::adopt( Id(), i1 );
@@ -1250,28 +1251,42 @@ void testSetGetExtField()
 	Element* e3 = new Element( i3, rc, "y", dims, 1 );
 	assert( e3 );
 	Shell::adopt( i1, i3 );
+	Element* e4 = new Element( i4, rc, "z", dims, 1 );
+	assert( e4 );
+	Shell::adopt( i1, i4 );
+	bool ret;
 
+	vector< double > vec;
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref a( e1, i );
 		Eref b( e1, size - i - 1 );
 		double temp = i;
-		bool ret = Field< double >::set( a, "x", temp );
+		ret = Field< double >::set( a, "x", temp );
 		assert( ret );
 		double temp2  = temp * temp;
 		ret = Field< double >::set( b, "y", temp2 );
 		assert( ret );
+		vec.push_back( temp2 - temp );
 	}
 
+	ret = Field< double >::setVec( Eref( e1, 0 ), "z", vec );
+	assert( ret );
+
 	for ( unsigned int i = 0; i < size; ++i ) {
-		Eref a( e1, i );
-		Eref b( e1, size - i - 1 );
+		Eref a( e2, i );
+		Eref b( e3, size - i - 1 );
+		Eref c( e4, i );
 		double temp = i;
 		double temp2  = temp * temp;
-		fabs ( ( reinterpret_cast< Real* >(a.data())->getThis() - temp ) <
-				EPSILON ); 
 
-		fabs ( ( reinterpret_cast< Real* >(b.data())->getThis() - temp2 ) <
-				EPSILON ); 
+		double v = reinterpret_cast< Real* >(a.data() )->getThis();
+		assert( fabs ( v - temp ) < EPSILON ); 
+
+		v = reinterpret_cast< Real* >(b.data() )->getThis();
+		assert( fabs( v - temp2 ) < EPSILON );
+
+		v = reinterpret_cast< Real* >( c.data() )->getThis();
+		assert( fabs( v - ( temp2 - temp ) ) < EPSILON );
 	}
 
 	/*
