@@ -183,7 +183,7 @@ vector< Id > Neutral::getChildren( Eref e, const Qinfo* q ) const
 /**
  * Gets specific named child
  */
-Id Neutral::getChild( Eref e, const Qinfo* q, const string& name ) const
+Id Neutral::getChild( Eref e, const Qinfo* q, const string& name ) 
 {
 	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
 	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );

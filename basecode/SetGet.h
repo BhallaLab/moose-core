@@ -26,7 +26,7 @@ class SetGet
 		 * Utility function to check that the target field matches this
 		 * source type, and to look up and pass back the fid.
 		 */
-		bool checkSet( const string& field, FuncId& fid ) const;
+		bool checkSet( const string& field, Eref& tgt, FuncId& fid ) const;
 
 //////////////////////////////////////////////////////////////////////
 		/**
@@ -96,8 +96,9 @@ class SetGet0: public SetGet
 		{
 			SetGet0 sg( dest );
 			FuncId fid;
-			if ( sg.checkSet( field, fid ) ) {
-				Shell::dispatchSet( dest, fid, "", 0 );
+			Eref tgt( dest );
+			if ( sg.checkSet( field, tgt, fid ) ) {
+				Shell::dispatchSet( tgt, fid, "", 0 );
 				/*
 				sg.iSetInner( fid, "", 0 );
 
@@ -118,29 +119,6 @@ class SetGet0: public SetGet
 			return set( dest, field );
 		}
 
-		/**
-		 * Nonblocking 'set' call, no args.
-		 * There is a matching nonblocking iStrSet call with a string arg.
-		bool iSet( const string& field )
-		{
-			FuncId fid;
-			if ( checkSet( field, fid ) ) {
-				iSetInner( fid, "", 0 );
-				return 1;
-			}
-			return 0;
-		}
-		 */
-
-		/**
-		 * Nonblocking 'set' call, using automatic string conversion into
-		 * arbitrary numbers of arguments.
-		 * There is a matching nonblocking set call with typed arguments.
-		bool iStrSet( const string& field, const string& val )
-		{
-			return iSet( field );
-		}
-		 */
 	//////////////////////////////////////////////////////////////////
 
 		void harvestGet() const
@@ -174,18 +152,12 @@ template< class A > class SetGet1: public SetGet
 		{
 			SetGet1< A > sg( dest );
 			FuncId fid;
-			if ( sg.checkSet( field, fid ) ) {
+			Eref tgt( dest );
+			if ( sg.checkSet( field, tgt, fid ) ) {
 				Conv< A > conv( arg );
-				// unsigned int size = Conv< A >::size( arg );
 				char *temp = new char[ conv.size() ];
 				conv.val2buf( temp );
-				Shell::dispatchSet( dest, fid, temp, conv.size() );
-				/*
-				sg.iSetInner( fid, temp, conv.size() );
-
-				// Ensure that clearQ is called before this return.
-				sg.completeSet();
-				*/
+				Shell::dispatchSet( tgt, fid, temp, conv.size() );
 				delete[] temp;
 				return 1;
 			}
@@ -207,14 +179,15 @@ template< class A > class SetGet1: public SetGet
 		{
 			SetGet1< A > sg( dest );
 			FuncId fid;
+			Eref tgt( dest );
 			if ( arg.size() == 0 )
 				return 0;
 
-			if ( sg.checkSet( field, fid ) ) {
+			if ( sg.checkSet( field, tgt, fid ) ) {
 				const char* data = reinterpret_cast< const char* >( &arg[0] );
 				PrepackedBuffer pb( data, arg.size() * sizeof( A ), 
 					arg.size() ) ;
-				Shell::dispatchSetVec( dest, fid, pb );
+				Shell::dispatchSetVec( tgt, fid, pb );
 				return 1;
 			}
 			return 0;
@@ -240,24 +213,6 @@ template< class A > class SetGet1: public SetGet
 			str2val( arg, val );
 			return set( dest, field, arg );
 		}
-
-		/**
-		 * Nonblocking 'set' call, no args.
-		 * There is a matching nonblocking iStrSet call with a string arg.
-		bool iSet( const string& field, const A& arg )
-		{
-			FuncId fid;
-			if ( checkSet( field, fid ) ) {
-				Conv< A > conv( arg );
-				resizeBuf( conv.size() );
-				char *temp = buf();
-				conv.val2buf( temp );
-				iSetInner( fid, temp, conv.size() );
-				return 1;
-			}
-			return 0;
-		}
-		 */
 
 		/**
 		 * Nonblocking 'set' call, using automatic string conversion into
@@ -353,21 +308,15 @@ template< class A1, class A2 > class SetGet2: public SetGet
 		{
 			SetGet2< A1, A2 > sg( dest );
 			FuncId fid;
-			if ( sg.checkSet( field, fid ) ) {
+			Eref tgt( dest );
+			if ( sg.checkSet( field, tgt, fid ) ) {
 				Conv< A1 > conv1( arg1 );
 				Conv< A2 > conv2( arg2 );
 				char *temp = new char[ conv1.size() + conv2.size() ];
 				conv1.val2buf( temp );
 				conv2.val2buf( temp + conv1.size() );
-				Shell::dispatchSet( dest, fid, temp, 
+				Shell::dispatchSet( tgt, fid, temp, 
 					conv1.size() + conv2.size() );
-
-				/*
-				sg.iSetInner( fid, temp, conv1.size() + conv2.size() );
-
-				// Ensure that clearQ is called before this return.
-				sg.completeSet();
-				*/
 				delete[] temp;
 				return 1;
 			}
@@ -389,44 +338,6 @@ template< class A1, class A2 > class SetGet2: public SetGet
 			return set( dest, field, arg1, arg2 );
 		}
 
-		/**
-		 * Nonblocking 'set' call, no args.
-		 * There is a matching nonblocking iStrSet call with a string arg.
-		 */
-		bool iSet( const string& field, const A1& arg1, const A2& arg2 )
-		{
-			/*
-			FuncId fid;
-			if ( checkSet( field, fid ) ) {
-				unsigned int size1 = Conv< A1 >::size( arg1 );
-				unsigned int size2 = Conv< A2 >::size( arg2 );
-				resizeBuf( size1 + size2 );
-				char *temp = buf();
-				Conv< A1 >::val2buf( temp, arg1 );
-				Conv< A2 >::val2buf( temp + size1, arg2 );
-				iSetInner( fid, temp, size1 + size2 );
-				return 1;
-			}
-			*/
-			return 0;
-		}
-
-		/**
-		 * Nonblocking 'set' call, using automatic string conversion into
-		 * arbitrary numbers of arguments.
-		 * There is a matching nonblocking set call with typed arguments.
-		 */
-		bool iStrSet( const string& field, const string& val )
-		{
-			/*
-			cout << "iStrSet< A1, A2 >: string convertion not yet implemented\n";
-			A1 arg1;
-			A2 arg2;
-			Conv< A1 >::str2val( arg1, val );
-			return iSet( field, arg1, arg2 );
-			*/
-			return 0;
-		}
 	//////////////////////////////////////////////////////////////////
 	//  The 'Get' calls for 2 args are currently undefined.
 	//////////////////////////////////////////////////////////////////
@@ -458,7 +369,8 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 		{
 			SetGet3< A1, A2, A3 > sg( dest );
 			FuncId fid;
-			if ( sg.checkSet( field, fid ) ) {
+			Eref tgt( dest );
+			if ( sg.checkSet( field, tgt, fid ) ) {
 				Conv< A1 > conv1( arg1 );
 				Conv< A2 > conv2( arg2 );
 				Conv< A3 > conv3( arg3 );
@@ -469,13 +381,7 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 				conv1.val2buf( temp );
 				conv2.val2buf( temp + s1 );
 				conv3.val2buf( temp + s1s2 );
-				Shell::dispatchSet( dest, fid, temp, totSize );
-
-				/*
-				sg.iSetInner( fid, temp, totSize );
-				// Ensure that clearQ is called before this return.
-				sg.completeSet();
-				*/
+				Shell::dispatchSet( tgt, fid, temp, totSize );
 				delete[] temp;
 				return 1;
 			}
@@ -498,48 +404,6 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 			return set( dest, field, arg1, arg2, arg3 );
 		}
 
-		/**
-		 * Nonblocking 'set' call, no args.
-		 * There is a matching nonblocking iStrSet call with a string arg.
-		 */
-		bool iSet( const string& field, const A1& arg1, const A2& arg2, const A3& arg3 )
-		{
-			/*
-			FuncId fid;
-			if ( checkSet( field, fid ) ) {
-				unsigned int size1 = Conv< A1 >::size( arg1 );
-				unsigned int size2 = Conv< A2 >::size( arg2 );
-				unsigned int size3 = Conv< A3 >::size( arg3 );
-				unsigned int totSize = size1 + size2 + size3;
-				resizeBuf( totSize );
-				char *temp = buf();
-				Conv< A1 >::val2buf( temp, arg1 );
-				Conv< A2 >::val2buf( temp + size1, arg2 );
-				Conv< A2 >::val2buf( temp + size1 + size2, arg3 );
-				iSetInner( fid, temp, totSize );
-				return 1;
-			}
-			*/
-			return 0;
-		}
-
-		/**
-		 * Nonblocking 'set' call, using automatic string conversion into
-		 * arbitrary numbers of arguments.
-		 * There is a matching nonblocking set call with typed arguments.
-		 */
-		bool iStrSet( const string& field, const string& val )
-		{
-			/*
-			cout << "iStrSet< A1, A2, A3 >: string convertion not yet implemented\n";
-			A1 arg1;
-			A2 arg2;
-			A3 arg3;
-			Conv< A1 >::str2val( arg1, val );
-			return iSet( field, arg1, arg2, arg3 );
-			*/
-			return 0;
-		}
 	//////////////////////////////////////////////////////////////////
 	//  The 'Get' calls for 2 args are currently undefined.
 	//////////////////////////////////////////////////////////////////
@@ -571,7 +435,8 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 		{
 			SetGet4< A1, A2, A3, A4 > sg( dest );
 			FuncId fid;
-			if ( sg.checkSet( field, fid ) ) {
+			Eref tgt( dest );
+			if ( sg.checkSet( field, tgt, fid ) ) {
 				Conv< A1 > conv1( arg1 );
 				Conv< A2 > conv2( arg2 );
 				Conv< A3 > conv3( arg3 );
@@ -585,13 +450,7 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 				conv2.val2buf( temp + s1 );
 				conv3.val2buf( temp + s1s2 );
 				conv4.val2buf( temp + s1s2s3 );
-				Shell::dispatchSet( dest, fid, temp, totSize );
-
-				/*
-				sg.iSetInner( fid, temp, totSize );
-				// Ensure that clearQ is called before this return.
-				sg.completeSet();
-				*/
+				Shell::dispatchSet( tgt, fid, temp, totSize );
 				delete[] temp;
 				return 1;
 			}
@@ -615,51 +474,6 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 			return set( dest, field, arg1, arg2, arg3, arg4 );
 		}
 
-		/**
-		 * Nonblocking 'set' call, no args.
-		 * There is a matching nonblocking iStrSet call with a string arg.
-		 */
-		bool iSet( const string& field, const A1& arg1, const A2& arg2, const A3& arg3, const A4& arg4 )
-		{
-		/*
-			FuncId fid;
-			if ( checkSet( field, fid ) ) {
-				unsigned int size1 = Conv< A1 >::size( arg1 );
-				unsigned int size2 = Conv< A2 >::size( arg2 );
-				unsigned int size3 = Conv< A3 >::size( arg3 );
-				unsigned int size4 = Conv< A4 >::size( arg4 );
-				unsigned int totSize = size1 + size2 + size3 + size4;
-				resizeBuf( totSize );
-				char *temp = buf();
-				Conv< A1 >::val2buf( temp, arg1 );
-				Conv< A2 >::val2buf( temp + size1, arg2 );
-				Conv< A3 >::val2buf( temp + size1 + size2, arg3 );
-				Conv< A4 >::val2buf( temp + size1 + size2 + size3, arg4 );
-				iSetInner( fid, temp, totSize );
-				return 1;
-			}
-			*/
-			return 0;
-		}
-
-		/**
-		 * Nonblocking 'set' call, using automatic string conversion into
-		 * arbitrary numbers of arguments.
-		 * There is a matching nonblocking set call with typed arguments.
-		 */
-		bool iStrSet( const string& field, const string& val )
-		{
-			/*
-			cout << "iStrSet< A1, A2, A3, A4 >: string convertion not yet implemented\n";
-			A1 arg1;
-			A2 arg2;
-			A3 arg3;
-			A4 arg4;
-			Conv< A1 >::str2val( arg1, val );
-			return iSet( field, arg1, arg2, arg3, arg4 );
-			*/
-			return 0;
-		}
 	//////////////////////////////////////////////////////////////////
 	//  The 'Get' calls for 2 args are currently undefined.
 	//////////////////////////////////////////////////////////////////
@@ -692,7 +506,8 @@ template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
 		{
 			SetGet5< A1, A2, A3, A4, A5 > sg( dest );
 			FuncId fid;
-			if ( sg.checkSet( field, fid ) ) {
+			Eref tgt( dest );
+			if ( sg.checkSet( field, tgt, fid ) ) {
 				Conv< A1 > conv1( arg1 );
 				Conv< A2 > conv2( arg2 );
 				Conv< A3 > conv3( arg3 );
@@ -708,13 +523,8 @@ template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
 					conv3.size() );
 				conv5.val2buf( temp + conv1.size() + conv2.size() + 
 					conv3.size() + conv4.size() );
-				Shell::dispatchSet( dest, fid, temp, totSize );
+				Shell::dispatchSet( tgt, fid, temp, totSize );
 
-				/*
-				sg.iSetInner( fid, temp, totSize );
-				// Ensure that clearQ is called before this return.
-				sg.completeSet();
-				*/
 				delete[] temp;
 				return 1;
 			}
@@ -737,25 +547,6 @@ template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
 			A5 arg5;
 			str2val( arg1, val );
 			return set( dest, field, arg1, arg2, arg3, arg4, arg5 );
-		}
-
-		/**
-		 * Nonblocking 'set' call, no args.
-		 * There is a matching nonblocking iStrSet call with a string arg.
-		 */
-		bool iSet( const string& field, const A1& arg1, const A2& arg2, const A3& arg3, const A4& arg4, const A5& arg5 )
-		{
-			return 0;
-		}
-
-		/**
-		 * Nonblocking 'set' call, using automatic string conversion into
-		 * arbitrary numbers of arguments.
-		 * There is a matching nonblocking set call with typed arguments.
-		 */
-		bool iStrSet( const string& field, const string& val )
-		{
-			return 0;
 		}
 	//////////////////////////////////////////////////////////////////
 	//  The 'Get' calls for 2 args are currently undefined.

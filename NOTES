@@ -6117,3 +6117,31 @@ This is messy. Simpler to have Neutral define set_this and get_this as
 dummy funcs, and then override these in classes which are allowed to be
 used as ext fields. Might also be useful in data transfer across nodes
 and other kinds of serialization.
+
+============================================================================
+11 June 2010
+
+Working on ext field elements. Implemented a 'Real' class. I would be
+happier if I could figure out how to do the operations
+double foo = Real(1.234);
+
+Also I am unsure how far I can go if Real is not derived from Data.
+
+With this in place I can now start to munge the field assignment code to
+look for child Elements to act as ext fields.
+============================================================================
+12 June 2010
+One impediment in doing this is that we still derive all MOOSE classes from
+Data. This derivation is only used in DataHandler<subclass>::process, 
+which typecasts the data to a Data*, and then calls its Process.
+We could do better by using a Process call in Dinfo. This would be typesafe
+and would also allow for classes that do not support Process.
+Later.
+
+To do child Element field assignment:
+- Add Element return to SetGet::checkSet
+- Fix Shell::dispatchGet to look for the finfo on the child element if needed
+- Later: Fix Shell::doAddMsg to handle set/get driven by message.
+
+Now need to put in unit test
+============================================================================

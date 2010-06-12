@@ -1229,6 +1229,46 @@ void testMsgField()
 	delete i2();
 }
 
+/*
+void testSetGetExtField()
+{
+	static const double EPSILON = 1e-9;
+	const Cinfo* nc = Neutral::initCinfo();
+	unsigned int size = 100;
+	vector< unsigned int > dims( 1, size );
+	string arg;
+	Id i2 = Id::nextId();
+	Id i3( i2.value() + 1 );
+	// bool ret = ic->create( i2, "test2", size );
+	Element* ret = new Element( i2, ic, "test2", dims, 1 );
+	assert( ret );
+
+	// i2()->showFields();
+
+	
+	for ( unsigned int i = 0; i < size; ++i ) {
+		Eref e2( i2(), i );
+		double temp = i;
+		bool ret = Field< double >::set( e2, "Vm", temp );
+		assert( ret );
+		assert( 
+			fabs ( reinterpret_cast< IntFire* >(e2.data())->getVm() - temp ) <
+				EPSILON ); 
+	}
+
+	for ( unsigned int i = 0; i < size; ++i ) {
+		Eref e2( i2(), i );
+		double temp = i;
+		double ret = Field< double >::get( e2, "Vm" );
+		assert( fabs ( temp - ret ) < EPSILON );
+	}
+
+	cout << "." << flush;
+	delete i2();
+	delete i3();
+}
+*/
+
 void testAsync( )
 {
 	showFields();

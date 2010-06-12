@@ -85,7 +85,7 @@ class Neutral: public Data
 		/**
 		 * Finds specific named child
 		 */
-		Id getChild( Eref e, const Qinfo* q, const string& name ) const;
+		static Id getChild( Eref e, const Qinfo* q, const string& name );
 
 		/**
 		 * Checks if 'me' is a descendant of 'ancestor'

@@ -36,10 +36,28 @@ void SetGet::completeSet() const
 	Qinfo::clearQ( Shell::procInfo() );
 }
 
-bool SetGet::checkSet( const string& field, FuncId& fid ) const
+bool SetGet::checkSet( const string& field, Eref& tgt, FuncId& fid ) const
 {
 	// string field = "set_" + destField;
 	const Finfo* f = e_.element()->cinfo()->findFinfo( field );
+	if ( !f ) { // Could be a child element?
+		Id child = ( Neutral::getChild( e_, 0, field ) );
+		if ( child != Id() ) {
+			f = child()->cinfo()->findFinfo( "setThis" );
+			assert( f ); // should always work as Neutral has the field.
+			if ( child()->dataHandler()->numData1() == 
+				e_.element()->dataHandler()->numData1() )
+				tgt = Eref( child(), e_.index() );
+			else if ( child()->dataHandler()->numData1() <= 1 )
+				tgt = Eref( child(), 0 );
+			else {
+				cout << "SetGet::checkSet: child index mismatch\n";
+				return 0;
+			}
+		}
+	} else {
+		tgt = e_;
+	}
 	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
 	if ( !df )
 		return 0;
