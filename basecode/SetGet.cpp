@@ -43,7 +43,7 @@ bool SetGet::checkSet( const string& field, Eref& tgt, FuncId& fid ) const
 	if ( !f ) { // Could be a child element? Note that field name will 
 		// change from set_<name> to just <name>
 		string f2 = field.substr( 4 );
-		Id child = ( Neutral::getChild( e_, 0, f2 ) );
+		Id child = Neutral::getChild( e_, 0, f2 );
 		if ( child == Id() ) {
 			cout << "Error: SetGet:checkSet:: No field or child named '" <<
 				field << "' was found\n";

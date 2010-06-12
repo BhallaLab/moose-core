@@ -6147,6 +6147,8 @@ Checkin 1852.
 Now need to put in unit test
 Put in test for 'set' command. To my astonishment, it works. Checkin 1853.
 Actually the unit test was buggy. Fixed. Still works. Also handles SetVec
-correctly.
+correctly. Checkin 1854.
+
+Added in functionality for ExtField 'get'. Unit tests happy.
 
 ============================================================================

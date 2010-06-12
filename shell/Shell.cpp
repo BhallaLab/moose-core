@@ -904,11 +904,33 @@ void Shell::dispatchSetVec( const Eref& tgt, FuncId fid,
  * Should only be issued from master node.
  * This is a blocking function and returns only when the job is done.
  */
-const char* Shell::dispatchGet( const Eref& tgt, const string& field, 
+const char* Shell::dispatchGet( const Eref& e, const string& field, 
 	const SetGet* sg )
 {
-	string getField = "get_" + field;
-	const Finfo* gf = tgt.element()->cinfo()->findFinfo( getField );
+	Eref tgt( e );
+	const Finfo* gf = tgt.element()->cinfo()->findFinfo( field );
+	if ( !gf ) {	// Could be a child Element. Field name changes.
+		string f2 = field.substr( 4 );
+		Id child = Neutral::getChild( tgt, 0, f2 );
+		if ( child == Id() ) {
+			cout << myNode() << 
+				": Error: Shell::dispatchGet: No field or child named '" <<
+				field << "' was found\n";
+		} else {
+			gf = child()->cinfo()->findFinfo( "get_this" );
+			assert( gf ); // Neutral has get_this, so all derived should too
+			if ( child()->dataHandler()->numData1() ==
+				e.element()->dataHandler()->numData1() )
+				tgt = Eref( child(), e.index() );
+			else if ( child()->dataHandler()->numData1() <= 1 )
+				tgt = Eref( child(), 0 );
+			else {
+				cout << myNode() << 
+					": Error: Shell::dispatchGet: child index mismatch\n";
+				return 0;
+			}
+		}
+	}
 	const DestFinfo * df = dynamic_cast< const DestFinfo* >( gf );
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 	if ( !df ) {

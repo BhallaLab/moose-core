@@ -284,7 +284,8 @@ template< class A > class Field: public SetGet1< A >
 		static A get( const Eref& dest, const string& field)
 		{ 
 			SetGet1< A > sg( dest );
-			const char* ret = Shell::dispatchGet( dest, field, &sg );
+			string temp = "get_" + field;
+			const char* ret = Shell::dispatchGet( dest, temp, &sg );
 			Conv< A > conv( ret );
 			return *conv;
 		}

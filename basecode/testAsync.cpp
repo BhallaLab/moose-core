@@ -1289,14 +1289,22 @@ void testSetGetExtField()
 		assert( fabs( v - ( temp2 - temp ) ) < EPSILON );
 	}
 
-	/*
 	for ( unsigned int i = 0; i < size; ++i ) {
-		Eref e2( i2(), i );
+		Eref a( e1, i );
+		Eref b( e1, size - i - 1 );
+
 		double temp = i;
-		double ret = Field< double >::get( e2, "Vm" );
+		double temp2  = temp * temp;
+		double ret = Field< double >::get( a, "x" );
 		assert( fabs ( temp - ret ) < EPSILON );
+		
+		ret = Field< double >::get( b, "y" );
+		assert( fabs ( temp2 - ret ) < EPSILON );
+
+		ret = Field< double >::get( a, "z" );
+		assert( fabs ( (temp2 - temp) - ret ) < EPSILON );
+		// cout << i << "	" << ret << "	temp2 = " << temp2 << endl;
 	}
-	*/
 
 	cout << "." << flush;
 	i1.destroy();
