@@ -6150,5 +6150,8 @@ Actually the unit test was buggy. Fixed. Still works. Also handles SetVec
 correctly. Checkin 1854.
 
 Added in functionality for ExtField 'get'. Unit tests happy. Checkin 1855.
+Fixed memory leak found by valgrind. Checkin 1856.
+
+Renamed Real to Mdouble. The string class will then be Mstring, etc.
 
 ============================================================================

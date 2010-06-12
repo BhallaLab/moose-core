@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include "../shell/Neutral.h"
 #include "../builtins/Arith.h"
-#include "../builtins/Real.h"
+#include "../builtins/Mdouble.h"
 #include "Dinfo.h"
 #include <queue>
 #include "../biophysics/Synapse.h"
@@ -1234,7 +1234,7 @@ void testSetGetExtField()
 {
 	static const double EPSILON = 1e-9;
 	const Cinfo* nc = Neutral::initCinfo();
-	const Cinfo* rc = Real::initCinfo();
+	const Cinfo* rc = Mdouble::initCinfo();
 	unsigned int size = 100;
 	vector< unsigned int > dims( 1, size );
 	string arg;
@@ -1279,13 +1279,13 @@ void testSetGetExtField()
 		double temp = i;
 		double temp2  = temp * temp;
 
-		double v = reinterpret_cast< Real* >(a.data() )->getThis();
+		double v = reinterpret_cast< Mdouble* >(a.data() )->getThis();
 		assert( fabs ( v - temp ) < EPSILON ); 
 
-		v = reinterpret_cast< Real* >(b.data() )->getThis();
+		v = reinterpret_cast< Mdouble* >(b.data() )->getThis();
 		assert( fabs( v - temp2 ) < EPSILON );
 
-		v = reinterpret_cast< Real* >( c.data() )->getThis();
+		v = reinterpret_cast< Mdouble* >( c.data() )->getThis();
 		assert( fabs( v - ( temp2 - temp ) ) < EPSILON );
 	}
 

@@ -6,19 +6,14 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-#ifndef _REAL_H
-#define _REAL_H
+#ifndef _M_DOUBLE_H
+#define _M_DOUBLE_H
 
-class Real
+class Mdouble
 {
 	public: 
-		Real();
-		Real( double other );
-		/*
-		void process( const ProcInfo* p, const Eref& e ) {
-			;
-		}
-		*/
+		Mdouble();
+		Mdouble( double other );
 		
 		////////////////////////////////////////////////////////////////
 		// Field assignment stuff.
@@ -30,8 +25,8 @@ class Real
 		////////////////////////////////////////////////////////////////
 		// Utility stuff
 		////////////////////////////////////////////////////////////////
-		// const Real& operator=( const Real& other );
-		// double operator=( const Real& other );
+		// const Mdouble& operator=( const Mdouble& other );
+		// double operator=( const Mdouble& other );
 		// double operator=( const double& other );
 	
 		////////////////////////////////////////////////////////////////
@@ -41,4 +36,4 @@ class Real
 		double value_;
 };
 
-#endif // _REAL_H
+#endif // _M_DOUBLE_H

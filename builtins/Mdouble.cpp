@@ -7,72 +7,72 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 #include "header.h"
-#include "Real.h"
+#include "Mdouble.h"
 
-const Cinfo* Real::initCinfo()
+const Cinfo* Mdouble::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
 		// Field Definitions
 		//////////////////////////////////////////////////////////////
-		static ValueFinfo< Real, double > thisFinfo(
+		static ValueFinfo< Mdouble, double > thisFinfo(
 			"this",
-			"Access function for entire real object.",
-			&Real::setThis,
-			&Real::getThis
+			"Access function for entire Mdouble object.",
+			&Mdouble::setThis,
+			&Mdouble::getThis
 		);
 
-	static Finfo* realFinfos[] = {
+	static Finfo* mDoubleFinfos[] = {
 		&thisFinfo,	// Value
 	};
 
-	static Cinfo realCinfo (
-		"Real",
+	static Cinfo mDoubleCinfo (
+		"Mdouble",
 		Neutral::initCinfo(),
-		realFinfos,
-		sizeof( realFinfos ) / sizeof ( Finfo* ),
-		new Dinfo< Real >()
+		mDoubleFinfos,
+		sizeof( mDoubleFinfos ) / sizeof ( Finfo* ),
+		new Dinfo< Mdouble >()
 	);
 
-	return &realCinfo;
+	return &mDoubleCinfo;
 }
 
-static const Cinfo* realCinfo = Real::initCinfo();
+static const Cinfo* mDoubleCinfo = Mdouble::initCinfo();
 
-Real::Real()
+Mdouble::Mdouble()
 	: value_( 0.0 )
 {
 	;
 }
 
-Real::Real( double val )
+Mdouble::Mdouble( double val )
 	: value_( val )
 {
 	;
 }
 
-void Real::setThis( double v )
+void Mdouble::setThis( double v )
 {
 	value_ = v;
 }
 
-double Real::getThis() const
+double Mdouble::getThis() const
 {
 	return value_;
 }
 
 /*
-const Real& Real::operator=( const Real& other )
+const Mdouble& Mdouble::operator=( const Mdouble& other )
 {
 	value_ = other.value_;
 	return *this;
 }
 
-double Real::operator=( const Real& other )
+double Mdouble::operator=( const Mdouble& other )
 {
 	return ( value_ = other.value_ );
 }
 
-double Real::operator=( const double& other )
+double Mdouble::operator=( const double& other )
 {
 	return ( value_ = other );
 }
