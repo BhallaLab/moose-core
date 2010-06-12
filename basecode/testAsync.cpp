@@ -1307,6 +1307,16 @@ void testSetGetExtField()
 	}
 
 	cout << "." << flush;
+
+	/*
+	* This works, but I want to avoid calling the Shell specific ops here
+	*
+	* Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	* s->doDelete( i1 );
+	*/
+	i4.destroy();
+	i3.destroy();
+	i2.destroy();
 	i1.destroy();
 }
 
