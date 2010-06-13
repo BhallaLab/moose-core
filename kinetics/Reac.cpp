@@ -94,6 +94,7 @@ const Cinfo* Reac::initCinfo()
 	return &reacCinfo;
 }
 
+ static const Cinfo* reacCinfo = Reac::initCinfo();
 
 //////////////////////////////////////////////////////////////
 // Reac internal functions

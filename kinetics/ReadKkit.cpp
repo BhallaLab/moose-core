@@ -322,30 +322,22 @@ Id ReadKkit::buildCompartment( const vector< string >& args )
 Id ReadKkit::buildReac( const vector< string >& args )
 {
 	static vector< unsigned int > dim( 1, 1 );
-	Id reac;
+
 	string head;
 	string tail = pathTail( args[2], head );
-	Id pa = findParent( head );
-	if ( pa == Id() ) {
-		return Id();
-	}
+	Id pa = shell_->doFind( head );
+	assert( pa != Id() );
 
 	double kf = atof( args[ reacMap_[ "kf" ] ].c_str() );
 	double kb = atof( args[ reacMap_[ "kb" ] ].c_str() );
-	double x = atof( args[ reacMap_[ "x" ] ].c_str() );
-	double y = atof( args[ reacMap_[ "y" ] ].c_str() );
-	int color = atoi( args[ reacMap_[ "color" ] ].c_str() );
-	/*
-	Id compt = figureOutCompartment( pa, vol );
 
-	Id reac = s->doCreate( "Molecule", pa, tail, dim );
-	reacIds[ args[2].substr( 10 ) ] = reac; 
-	Id x = s->doCreate( "Mdouble", reac, "x", dim );
-	Id y = s->doCreate( "Mdouble", reac, "y", dim );
-	Id notes = s->doCreate( "Mstring", reac, "notes", dim );
+	Id reac = shell_->doCreate( "Reac", pa, tail, dim );
+	reacIds_[ args[2].substr( 10 ) ] = reac; 
 
-	set< double >( Eref( reac(), 0 ), "nInit", nInit );
-	*/
+	Field< double >::set( reac.eref(), "kf", kf );
+	Field< double >::set( reac.eref(), "kb", kb );
+
+	Id info = buildInfo( reac, reacMap_, args );
 
 	numReacs_++;
 	return reac;

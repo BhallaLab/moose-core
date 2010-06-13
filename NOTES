@@ -6205,6 +6205,7 @@ and was able to checkin as 1862.
 Added functions for field access to Shell::cwe_. 
 Clears tests for Shell::doFind. Checkin 1863.
 
-ReadKkit now creates real live Groups and Molecules.
+ReadKkit now creates real live Groups and Molecules. Checkin 1864.
+ReadKkit now creates Reacs. 
 
 ============================================================================
