@@ -17,11 +17,11 @@ static SrcFinfo2< double, double > reac(
 		"Sends out increment of molecules on product each timestep"
 	);
 
-static DestFinfo sub( "sub",
+static DestFinfo sub( "subDest",
 		"Handles # of molecules of substrate",
 		new OpFunc1< Reac, double >( &Reac::sub ) );
 
-static DestFinfo prd( "prd",
+static DestFinfo prd( "prdDest",
 		"Handles # of molecules of product",
 		new OpFunc1< Reac, double >( &Reac::sub ) );
 	

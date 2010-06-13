@@ -465,5 +465,38 @@ unsigned int ReadKkit::loadTab( const vector< string >& args )
 
 void ReadKkit::addmsg( const vector< string >& args)
 {
-	;
+	string src = args[1].substr( 10 );
+	string dest = args[2].substr( 10 );
+	
+	if ( args[3] == "REAC" ) {
+		if ( args[4] == "A" && args[5] == "B" ) {
+			map< string, Id >::iterator i = reacIds_.find( src );
+			assert( i != reacIds_.end() );
+			Id srcId = i->second;
+
+			i = molIds_.find( dest );
+			assert( i != molIds_.end() );
+			Id destId = i->second;
+
+			// dest mol is substrate of src reac
+			shell_->doAddMsg( "single", 
+				FullId( srcId, 0 ), "sub", 
+				FullId( destId, 0 ), "reac" ); 
+		} 
+		else if ( args[4] == "B" && args[5] == "A" ) {
+			// dest mol is product of src reac
+			map< string, Id >::iterator i = reacIds_.find( src );
+			assert( i != reacIds_.end() );
+			Id srcId = i->second;
+
+			i = molIds_.find( dest );
+			assert( i != molIds_.end() );
+			Id destId = i->second;
+
+			// dest mol is substrate of src reac
+			shell_->doAddMsg( "single", 
+				FullId( srcId, 0 ), "prd", 
+				FullId( destId, 0 ), "reac" ); 
+		}
+	}
 }
