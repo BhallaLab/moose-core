@@ -25,7 +25,7 @@ typedef int Id; // dummy
 #include "header.h"
 #include "ReadKkit.h"
 
-unsigned int chopLine( string line, vector< string >& ret )
+unsigned int chopLine( const string& line, vector< string >& ret )
 {
 	ret.resize( 0 );
 	stringstream ss( line );
@@ -194,6 +194,12 @@ ReadKkit::ParseMode ReadKkit::readInit( const string& line )
 
 	if ( argv[0] == "initdump" ) {
 		initdumpVersion_ = atoi( argv[2].c_str() );
+		Id kinetics = Neutral::child( Id().eref(), "kinetics" );
+		if ( kinetics == Id() ) {
+			vector< unsigned int > dims( 1, 1 );
+			Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+			s->doCreate( "Neutral", Id(), "kinetics", dims );
+		}
 		return DATA;
 	}
 
@@ -380,7 +386,16 @@ Id ReadKkit::buildText( const vector< string >& args )
 
 Id ReadKkit::buildGroup( const vector< string >& args )
 {
+	static vector< unsigned int > dim( 1, 1 );
 	Id group;
+
+	string head;
+	string tail = pathTail( args[2], head );
+
+	double x = atof( args[ molMap_[ "x" ] ].c_str() );
+	double y = atof( args[ molMap_[ "y" ] ].c_str() );
+	int color = atoi( args[ molMap_[ "color" ] ].c_str() );
+
 	numOthers_++;
 	return group;
 }

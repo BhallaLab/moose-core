@@ -6194,4 +6194,7 @@ So the heuristic is like this:
 - Groups that have components in multiple compartments: duplicate group names
 	in the sub-compartments.
 
+Merged compilation into main tree. Checkin 1861.
+
+Added Shell/Neutral calls for tree traversal.
 ============================================================================

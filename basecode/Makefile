@@ -77,6 +77,7 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 testAsync.o:	SparseMatrix.h SetGet.h
 SparseMsg.o:	SparseMatrix.h
+SetGet.o:	SetGet.h ../shell/Neutral.h
 #TestBasecode.o:	Shell.h ShellWrapper.h
 
 .cpp.o:

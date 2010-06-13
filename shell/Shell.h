@@ -60,6 +60,18 @@ class Shell: public Data
 		Id doCopy( Id orig, Id newParent, string newName,
 			unsigned int n, bool copyExtMsgs);
 
+		/**
+		 * Looks up the Id specified by the given path. May include
+		 * relative references and the internal cwe 
+		 * (current working Element) on the shell
+		 */
+		Id doFind( const string& path ) const;
+
+		/**
+		 * Looks up the Id specified by the given path, starting from
+		 * the specified Id.
+		Id doFind( Id start, const string& path ) const;
+		 */
 		///////////////////////////////////////////////////////////
 		// DestFinfo functions
 		///////////////////////////////////////////////////////////
@@ -230,6 +242,8 @@ class Shell: public Data
 		const char* getBuf() const;
 		static const char* buf();
 		static const ProcInfo* procInfo();
+
+		static bool chopPath( const string& path, vector< string >& ret );
 	private:
 		string name_;
 		Element* shelle_; // It is useful for the Shell to have this.
@@ -256,6 +270,9 @@ class Shell: public Data
 		 * Simulation run time
 		 */
 		double runtime_;
+
+		/// Current working Element
+		Id cwe_;
 };
 
 extern bool set( Eref& dest, const string& destField, const string& val );

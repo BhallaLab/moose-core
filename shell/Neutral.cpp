@@ -143,6 +143,8 @@ FullId Neutral::getFullId( Eref e, const Qinfo* q ) const
 
 FullId Neutral::getParent( Eref e, const Qinfo* q ) const
 {
+	return parent( e );
+	/*
 	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
 	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
 	static const FuncId pafid = pf2->getFid();
@@ -151,6 +153,7 @@ FullId Neutral::getParent( Eref e, const Qinfo* q ) const
 	assert( mid != Msg::badMsg );
 
 	return Msg::getMsg( mid )->findOtherEnd( e.fullId() );
+	*/
 }
 
 /**
@@ -180,9 +183,8 @@ vector< Id > Neutral::getChildren( Eref e, const Qinfo* q ) const
 	return ret;
 }
 
-/**
+/*
  * Gets specific named child
- */
 Id Neutral::getChild( Eref e, const Qinfo* q, const string& name ) 
 {
 	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
@@ -207,6 +209,8 @@ Id Neutral::getChild( Eref e, const Qinfo* q, const string& name )
 	}
 	return Id();
 }
+*/
+
 
 string Neutral::getPath( Eref e, const Qinfo* q ) const
 {
@@ -263,6 +267,11 @@ void Neutral::destroy( Eref e, const Qinfo* q, int stage )
 	Element::destroyElementTree( tree );
 }
 
+/////////////////////////////////////////////////////////////////////////
+// Static utility functions.
+/////////////////////////////////////////////////////////////////////////
+
+// static function
 bool Neutral::isDescendant( Id me, Id ancestor )
 {
 	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
@@ -278,4 +287,48 @@ bool Neutral::isDescendant( Id me, Id ancestor )
 		e = fid.eref();
 	}
 	return ( e.element()->id() == ancestor );
+}
+
+// static function
+Id Neutral::child( const Eref& e, const string& name ) 
+{
+	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
+	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
+	static const FuncId pafid = pf2->getFid();
+	static const Finfo* cf = neutralCinfo->findFinfo( "childMsg" );
+	static const SrcFinfo* cf2 = dynamic_cast< const SrcFinfo* >( cf );
+	static const BindIndex bi = cf2->getBindIndex();
+	
+	const vector< MsgFuncBinding >* bvec = e.element()->getMsgAndFunc( bi );
+
+	vector< Id > ret;
+
+	for ( vector< MsgFuncBinding >::const_iterator i = bvec->begin();
+		i != bvec->end(); ++i ) {
+		if ( i->fid == pafid ) {
+			const Msg* m = Msg::getMsg( i->mid );
+			assert( m );
+			if ( m->e2()->getName() == name )
+				return m->e2()->id();
+		}
+	}
+	return Id();
+}
+
+// static function
+FullId Neutral::parent( const Eref& e )
+{
+	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
+	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
+	static const FuncId pafid = pf2->getFid();
+
+	if ( e.element()->id() == Id() ) {
+		cout << "Warning: Neutral::parent: tried to take parent of root\n";
+		return FullId( Id(), 0 );
+	}
+
+	MsgId mid = e.element()->findCaller( pafid );
+	assert( mid != Msg::badMsg );
+
+	return Msg::getMsg( mid )->findOtherEnd( e.fullId() );
 }

@@ -81,11 +81,15 @@ class Neutral: public Data
 		 * Destroys Element and all children
 		 */
 		void destroy( Eref e, const Qinfo* q, int stage );
+		
+		////////////////////////////////////////////////////////////
 
 		/**
 		 * Finds specific named child
 		 */
-		static Id getChild( Eref e, const Qinfo* q, const string& name );
+		static Id child( const Eref& e, const string& name );
+
+		static FullId parent( const Eref& e );
 
 		/**
 		 * Checks if 'me' is a descendant of 'ancestor'

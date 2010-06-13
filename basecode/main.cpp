@@ -38,6 +38,8 @@ extern void testMpiBuiltins();
 extern void testMpiShell();
 extern void testMsg();
 extern void testMpiMsg();
+extern void testKinetics();
+
 extern void initMsgManagers();
 extern void destroyMsgManagers();
 extern void speedTestMultiNodeIntFireNetwork( 
@@ -139,6 +141,7 @@ void nonMpiTests()
 		testScheduling();
 		testBuiltins();
 		testShell();
+		testKinetics();
 	}
 #endif
 }

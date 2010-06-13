@@ -147,10 +147,10 @@ void testTreeTraversal()
 	////////////////////////////////////////////////////////////////
 	// Checking getChild
 	////////////////////////////////////////////////////////////////
-	Neutral* f1data = reinterpret_cast< Neutral* >( f1.eref().data() );
-	assert( f2a == f1data->getChild( f1.eref(), 0, "f2a" ) );
-	assert( f2b == f1data->getChild( f1.eref(), 0, "f2b" ) );
-	assert( f2c == f1data->getChild( f1.eref(), 0, "f2c" ) );
+	// Neutral* f1data = reinterpret_cast< Neutral* >( f1.eref().data() );
+	assert( f2a == Neutral::child( f1.eref(), "f2a" ) );
+	assert( f2b == Neutral::child( f1.eref(), "f2b" ) );
+	assert( f2c == Neutral::child( f1.eref(), "f2c" ) );
 
 	shell->doDelete( f1 );
 	cout << "." << flush;
@@ -235,8 +235,8 @@ void testMove()
 	path = Field< string >::get( f2b.eref(), "path" );
 	assert( path == "/f1/f3aa/f2b" );
 
-	assert( f2b == f1data->getChild( f3aa.eref(), 0, "f2b" ) );
-	assert( f3aa == f1data->getChild( f1.eref(), 0, "f3aa" ) );
+	assert( f2b == f1data->child( f3aa.eref(), "f2b" ) );
+	assert( f3aa == f1data->child( f1.eref(), "f3aa" ) );
 
 	shell->doDelete( f1 );
 	cout << "." << flush;
@@ -272,7 +272,7 @@ void testCopy()
 	// assert( pa == FullId( f1, 0 ) );
 	assert( dupf2a()->getName() == "TheElephantsAreLoose" );
 	Neutral* f2aDupData = reinterpret_cast< Neutral* >( dupf2a.eref().data() );
-	Id dupf3 = f2aDupData->getChild( dupf2a.eref(), 0, "f3" );
+	Id dupf3 = f2aDupData->child( dupf2a.eref(), "f3" );
 	assert( dupf3 != Id() );
 	assert( dupf3 != f3 );
 	assert( dupf3()->getName() == "f3" );
@@ -789,8 +789,58 @@ void testShellParserQuit()
 	cout << "." << flush;
 }
 
+void testChopPath()
+{
+	vector< string > args;
+
+	assert( Shell::chopPath( ".", args ) == 0 );
+	assert( args.size() == 1 );
+	assert( args[0] == "." );
+
+	assert( Shell::chopPath( "/", args ) == 1 );
+	assert( args.size() == 0 );
+
+	assert( Shell::chopPath( "..", args ) == 0 );
+	assert( args.size() == 1 );
+	assert( args[0] == ".." );
+
+	assert( Shell::chopPath( "./", args ) == 0 );
+	assert( args.size() == 1 );
+	assert( args[0] == "." );
+
+	assert( Shell::chopPath( "./foo", args ) == 0 );
+	assert( args.size() == 2 );
+	assert( args[0] == "." );
+	assert( args[1] == "foo" );
+
+	assert( Shell::chopPath( "/foo", args ) == 1 );
+	assert( args.size() == 1 );
+	assert( args[0] == "foo" );
+
+	assert( Shell::chopPath( "foo", args ) == 0 );
+	assert( args.size() == 1 );
+	assert( args[0] == "foo" );
+
+	assert( Shell::chopPath( "foo/", args ) == 0 );
+	assert( args.size() == 1 );
+	assert( args[0] == "foo" );
+
+	assert( Shell::chopPath( "/foo/", args ) == 1 );
+	assert( args.size() == 1 );
+	assert( args[0] == "foo" );
+
+	assert( Shell::chopPath( "foo/bar/zod", args ) == 0 );
+	assert( args.size() == 3 );
+	assert( args[0] == "foo" );
+	assert( args[1] == "bar" );
+	assert( args[2] == "zod" );
+
+	cout << "." << flush;
+}
+
 void testShell( )
 {
+	testChopPath();
 //	testCreateDelete();
 	// testShellParserQuit();
 }

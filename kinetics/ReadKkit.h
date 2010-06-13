@@ -89,6 +89,9 @@ class ReadKkit
 		map< string, int > enzMap_;
 		map< string, int > groupMap_;
 		map< string, int > tableMap_;
+		map< string, Id > molIds_;
+		map< string, Id > reacIds_;
+		map< string, Id > enzIds_;
 };
 
 #endif // READ_KKIT_H

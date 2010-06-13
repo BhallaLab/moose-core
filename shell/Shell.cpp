@@ -287,7 +287,8 @@ Shell::Shell()
 		barrier1_( 0 ),
 		barrier2_( 0 ),
 		isRunning_( 0 ),
-		runtime_( 0.0 )
+		runtime_( 0.0 ),
+		cwe_( Id() )
 {
 	;
 }
@@ -463,30 +464,71 @@ void Shell::doMove( Id orig, Id newParent )
 	}
 }
 
-/*
-/// Returns the Id of the root of the copied tree.
-Id Shell::doCopy( Id orig, Id newParent, string newName, unsigned int n, bool copyExtMsg )
+/**
+ * static func.
+ * Chops up the names in the path into the vector of strings. 
+ * Returns true if it starts at '/'.
+ */
+bool Shell::chopPath( const string& path, vector< string >& ret )
 {
-	if ( Neutral::isDescendant( newParent, orig ) ) {
-		cout << "Error: Shell::doCopy: Cannot copy object to descendant in tree\n";
-		return Id();
+	// /foo/bar/zod
+	// foo/bar/zod
+	// ./foo/bar/zod
+	// ../foo/bar/zod
+	// .
+	// /
+	// ..
+
+	bool isAbsolute = 0;
+	string temp = path;
+	ret.resize( 0 );
+	if ( path[0] == '/' ) {
+		isAbsolute = 1;
+		if ( path.length() == 1 )
+			return 1;
+		temp = temp.substr( 1 );
 	}
 
-	initAck();
-	Eref sheller( shelle_, 0 );
-	Id newElm = Id::nextId();
-	vector< Id > args;
-	args.push_back( orig );
-	args.push_back( newParent );
-	args.push_back( newElm );
-	requestCopy.send( sheller, &p_, args, newName , n, copyExtMsg);
-	while ( isAckPending() ) {
-		Qinfo::mpiClearQ( &p_ );
+	string::size_type pos = temp.find_first_of( "/" );
+	ret.push_back( temp.substr( 0, pos ) );
+	while ( pos != string::npos ) {
+		temp = temp.substr( pos + 1 );
+		if ( temp.length() == 0 )
+			break;
+		pos = temp.find_first_of( "/" );
+		ret.push_back( temp.substr( 0, pos ) );
 	}
 
-	return newElm;
+	/*
+	do {
+		ret.push_back( temp.substr( 0, pos ) );
+		temp = temp.substr( pos );
+	} while ( pos != string::npos ) ;
+	*/
+	return isAbsolute;
 }
-*/
+
+/// non-static func. Returns the Id found by traversing the specified path.
+Id Shell::doFind( const string& path ) const
+{
+	Id curr = Id();
+	vector< string > names;
+	bool isAbsolute = chopPath( path, names );
+
+	if ( !isAbsolute )
+		curr = cwe_;
+	
+	for ( vector< string >::iterator i = names.begin(); 
+		i != names.end(); ++i ) {
+		if ( *i == "." ) {
+		} else if ( *i == ".." ) {
+			curr = Neutral::parent( curr.eref() ).id;
+		} else {
+			curr = Neutral::child( curr.eref(), *i );
+		}
+	}
+	return curr;
+}
 
 
 ////////////////////////////////////////////////////////////////
@@ -911,7 +953,7 @@ const char* Shell::dispatchGet( const Eref& e, const string& field,
 	const Finfo* gf = tgt.element()->cinfo()->findFinfo( field );
 	if ( !gf ) {	// Could be a child Element. Field name changes.
 		string f2 = field.substr( 4 );
-		Id child = Neutral::getChild( tgt, 0, f2 );
+		Id child = Neutral::child( tgt, f2 );
 		if ( child == Id() ) {
 			cout << myNode() << 
 				": Error: Shell::dispatchGet: No field or child named '" <<

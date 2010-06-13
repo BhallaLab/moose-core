@@ -14,6 +14,7 @@ OBJ = \
 	Reac.o	\
 	ChemCompt.o	\
 	ReadKkit.o	\
+	testKinetics.o	\
 
 	#Tab.o	\
 
@@ -29,6 +30,7 @@ Reac.o:	Reac.h ../basecode/Data.h
 ChemCompt.o:	ChemCompt.h ../basecode/Data.h
 ReadKkit.o:	ReadKkit.h
 Tab.o:	Tab.h ../basecode/Data.h
+testKinetics.o:	ReadKkit.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I.. -I../basecode -I../msg $< -c
