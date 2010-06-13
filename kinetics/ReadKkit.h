@@ -16,7 +16,8 @@ class ReadKkit
 		enum ParseMode {
 			DATA,
 			INIT,
-			COMMENT
+			COMMENT,
+			LINE_CONTINUE
 		};
 
 		ReadKkit();
@@ -42,15 +43,15 @@ class ReadKkit
 		//////////////////////////////////////////////////////////////////
 		// Building up the model
 		//////////////////////////////////////////////////////////////////
-		Id buildCompartment();
+		Id buildCompartment( const vector< string >& args );
 		Id buildMol( const vector< string >& args );
-		Id buildReac();
-		Id buildEnz();
-		Id buildPlot();
-		Id buildTab();
+		Id buildReac( const vector< string >& args );
+		Id buildEnz( const vector< string >& args );
+		Id buildPlot( const vector< string >& args );
+		Id buildTab( const vector< string >& args );
 		unsigned int loadTab(  const vector< string >& args );
-		Id buildGroup();
-		Id buildText();
+		Id buildGroup( const vector< string >& args );
+		Id buildText( const vector< string >& args );
 
 		//////////////////////////////////////////////////////////////////
 		// Special ops in the model definition

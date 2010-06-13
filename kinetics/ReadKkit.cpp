@@ -9,6 +9,7 @@
 
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <vector>
 #include <string>
@@ -61,13 +62,37 @@ ReadKkit::ReadKkit()
 void ReadKkit::innerRead( ifstream& fin )
 {
 	string line;
+	string temp;
 	lineNum_ = 0;
 	string::size_type pos;
+	bool clearLine = 1;
 	ParseMode parseMode = INIT;
-	while ( getline( fin, line ) ) {
+
+	while ( getline( fin, temp ) ) {
 		lineNum_++;
-		if ( line.length() == 0 )
+		if ( clearLine )
+			line = "";
+
+		if ( temp.length() == 0 )
 				continue;
+		pos = temp.find_last_not_of( "\t " );
+		if ( pos == string::npos ) { 
+			// Nothing new in line, go with what was left earlier, 
+			// and clear out line for the next cycle.
+			temp = "";
+			clearLine = 1;
+		} else {
+			if ( temp[pos] == '\\' ) {
+				temp[pos] = ' ';
+				line.append( temp );
+				clearLine = 0;
+				continue;
+			} else {
+				line.append( temp );
+				clearLine = 1;
+			}
+		}
+			
 		pos = line.find_first_not_of( "\t " );
 		if ( pos == string::npos )
 				continue;
@@ -92,6 +117,7 @@ void ReadKkit::innerRead( ifstream& fin )
 					line = line.substr( pos + 2 );
 			}
 		}
+
 		if ( parseMode == DATA )
 				readData( line );
 		else if ( parseMode == INIT ) {
@@ -202,10 +228,24 @@ void ReadKkit::readData( const string& line )
 		loadtab( argv );
 }
 
+string pathTail( const string& path, string& head )
+{
+	string::size_type pos = path.find_last_of( "/" );
+	assert( pos != string::npos );
+
+	head = path.substr( 0, pos ); 
+	return path.substr( pos + 1 );
+}
+
+Id ReadKkit::findParent( const string& path ) const
+{
+	return 1;
+}
+
 void assignArgs( map< string, int >& argConv, const vector< string >& args )
 {
 	for ( unsigned int i = 2; i != args.size(); ++i )
-		argConv[ args[i] ] = i;
+		argConv[ args[i] ] = i + 2;
 }
 
 void ReadKkit::objdump( const vector< string >& args)
@@ -240,67 +280,96 @@ void ReadKkit::undump( const vector< string >& args)
 	if ( args[1] == "kpool" )
 		buildMol( args );
 	else if ( args[1] == "kreac" )
-		buildReac();
+		buildReac( args );
 	else if ( args[1] == "kenz" )
-		buildEnz();
+		buildEnz( args );
 	else if ( args[1] == "text" )
-		buildText();
+		buildText( args );
 	else if ( args[1] == "xplot" )
-		buildPlot();
+		buildPlot( args );
 	else if ( args[1] == "group" )
-		buildGroup();
+		buildGroup( args );
 	else
 		cout << "ReadKkit::undump: Do not know how to build '" << args[1] <<
 		"'\n";
 }
 
-Id ReadKkit::buildCompartment()
+Id ReadKkit::buildCompartment( const vector< string >& args )
 {
 	Id compt;
 	numCompartments_++;
 	return compt;
 }
 
-Id ReadKkit::buildReac()
+Id ReadKkit::buildReac( const vector< string >& args )
 {
+	static vector< unsigned int > dim( 1, 1 );
 	Id reac;
+	string head;
+	string tail = pathTail( args[2], head );
+	Id pa = findParent( head );
+	if ( pa == Id() ) {
+		return Id();
+	}
+
+	double kf = atof( args[ reacMap_[ "kf" ] ].c_str() );
+	double kb = atof( args[ reacMap_[ "kb" ] ].c_str() );
+	double x = atof( args[ reacMap_[ "x" ] ].c_str() );
+	double y = atof( args[ reacMap_[ "y" ] ].c_str() );
+	int color = atoi( args[ reacMap_[ "color" ] ].c_str() );
+	/*
+	Id compt = figureOutCompartment( pa, vol );
+
+	Id reac = s->doCreate( "Molecule", pa, tail, dim );
+	Id x = s->doCreate( "Mdouble", reac, "x", dim );
+	Id y = s->doCreate( "Mdouble", reac, "y", dim );
+	Id notes = s->doCreate( "Mstring", reac, "notes", dim );
+
+	set< double >( Eref( reac(), 0 ), "nInit", nInit );
+	*/
+
 	numReacs_++;
 	return reac;
 }
 
-Id ReadKkit::buildEnz()
+Id ReadKkit::buildEnz( const vector< string >& args )
 {
 	Id enz;
+	static vector< unsigned int > dim( 1, 1 );
+	string head;
+	string tail = pathTail( args[2], head );
+	Id pa = findParent( head );
+	if ( pa == Id() ) {
+		return Id();
+	}
+
+	double k1 = atof( args[ reacMap_[ "k1" ] ].c_str() );
+	double k2 = atof( args[ reacMap_[ "k2" ] ].c_str() );
+	double k3 = atof( args[ reacMap_[ "k3" ] ].c_str() );
+	double nComplexInit = atof( args[ reacMap_[ "nComplexInit" ] ].c_str());
+	double vol = atof( args[ reacMap_[ "vol" ] ].c_str());
+	bool isMM = !atoi( args[ reacMap_[ "usecomplex" ] ].c_str());
+
+	double x = atof( args[ reacMap_[ "x" ] ].c_str() );
+	double y = atof( args[ reacMap_[ "y" ] ].c_str() );
+	int color = atoi( args[ reacMap_[ "color" ] ].c_str() );
+
 	numEnz_++;
 	return enz;
 }
 
-Id ReadKkit::buildText()
+Id ReadKkit::buildText( const vector< string >& args )
 {
 	Id text;
 	numOthers_++;
 	return text;
 }
 
-Id ReadKkit::buildGroup()
+Id ReadKkit::buildGroup( const vector< string >& args )
 {
 	Id group;
 	numOthers_++;
 	return group;
-}
-
-string pathTail( const string& path, string& head )
-{
-	string::size_type pos = path.find_last_of( "/" );
-	assert( pos != string::npos );
-
-	head = path.substr( 0, pos - 1 ); 
-	return path.substr( pos );
-}
-
-Id ReadKkit::findParent( const string& path ) const
-{
-	return 0;
 }
 
 Id ReadKkit::buildMol( const vector< string >& args )
@@ -314,14 +383,15 @@ Id ReadKkit::buildMol( const vector< string >& args )
 	if ( pa == Id() ) {
 		return Id();
 	}
-
+	int index1 = molMap_[ "nInit" ];
+	int index2 = molMap_[ "vol" ];
 
 	double nInit = atof( args[ molMap_[ "nInit" ] ].c_str() );
 	double vol = atof( args[ molMap_[ "vol" ] ].c_str() );
+	int slaveEnable = atoi( args[ molMap_[ "slave_enable" ] ].c_str() );
 	double diffConst = atof( args[ molMap_[ "DiffConst" ] ].c_str() );
 	double x = atof( args[ molMap_[ "x" ] ].c_str() );
 	double y = atof( args[ molMap_[ "y" ] ].c_str() );
-	int slaveEnable = atoi( args[ molMap_[ "slave_enable" ] ].c_str() );
 	int color = atoi( args[ molMap_[ "color" ] ].c_str() );
 	/*
 	Id compt = figureOutCompartment( pa, vol );
@@ -334,18 +404,22 @@ Id ReadKkit::buildMol( const vector< string >& args )
 	set< double >( Eref( mol(), 0 ), "nInit", nInit );
 	*/
 
+	cout << setw( 20 ) << head << setw( 15 ) << tail << "	" << 
+		setw( 12 ) << nInit << "	" << 
+		vol << "	" << diffConst << "	" <<
+		slaveEnable << endl;
 	numMols_++;
 	return mol;
 }
 
-Id ReadKkit::buildPlot()
+Id ReadKkit::buildPlot( const vector< string >& args )
 {
 	Id plot;
 	numPlot_++;
 	return plot;
 }
 
-Id ReadKkit::buildTab()
+Id ReadKkit::buildTab( const vector< string >& args )
 {
 	Id tab;
 	numOthers_++;

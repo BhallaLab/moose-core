@@ -6164,6 +6164,7 @@ Then I can go back to parallel coding.
 ============================================================================
 13 June 2010
 Starting on ReadKkit. Skeleton coded and it runs. Checkin 1858.
-Incremental progress on framework for argument conversion.
+Incremental progress on framework for argument conversion. Checkin 1859.
+Further progress and checks on ReadKkit argument conversion.
 
 ============================================================================
