@@ -8,9 +8,10 @@
 **********************************************************************/
 
 
-#include <iostream>
 #include <iomanip>
 #include <fstream>
+/*
+#include <iostream>
 #include <vector>
 #include <string>
 #include <sstream>
@@ -20,6 +21,8 @@
 
 using namespace std;
 typedef int Id; // dummy
+*/
+#include "header.h"
 #include "ReadKkit.h"
 
 unsigned int chopLine( string line, vector< string >& ret )
@@ -33,6 +36,7 @@ unsigned int chopLine( string line, vector< string >& ret )
 	return ret.size();
 }
 
+/*
 int main( int argc, const char* argv[] )
 {
 	string fname = "dend_v26.g";
@@ -41,20 +45,29 @@ int main( int argc, const char* argv[] )
 	ReadKkit rk;
 	rk.read( fname, "cell", 0 );
 }
+*/
 
 ////////////////////////////////////////////////////////////////////////
 
 ReadKkit::ReadKkit()
 	:
-	maxtime_( 1.0 ),
-	simdt_( 0.01 ),
 	fastdt_( 0.001 ),
+	simdt_( 0.01 ),
+	controldt_( 0.1 ),
+	plotdt_( 1 ),
+	maxtime_( 1.0 ),
+	transientTime_( 1.0 ),
+	useVariableDt_( 0 ),
+	defaultVol_( 1 ),
+	version_( 11 ),
+	initdumpVersion_( 3 ),
 	numCompartments_( 0 ),
 	numMols_( 0 ),
 	numReacs_( 0 ),
 	numEnz_( 0 ),
 	numPlot_( 0 ),
-	numOthers_( 0 )
+	numOthers_( 0 ),
+	lineNum_( 0 )
 {
 	;
 }
@@ -250,7 +263,6 @@ void assignArgs( map< string, int >& argConv, const vector< string >& args )
 
 void ReadKkit::objdump( const vector< string >& args)
 {
-	map< string, int >* argConv;
 	if ( args[1] == "kpool" )
 		assignArgs( molMap_, args );
 	else if ( args[1] == "kreac" )
@@ -321,6 +333,7 @@ Id ReadKkit::buildReac( const vector< string >& args )
 	Id compt = figureOutCompartment( pa, vol );
 
 	Id reac = s->doCreate( "Molecule", pa, tail, dim );
+	reacIds[ args[2].substr( 10 ) ] = reac; 
 	Id x = s->doCreate( "Mdouble", reac, "x", dim );
 	Id y = s->doCreate( "Mdouble", reac, "y", dim );
 	Id notes = s->doCreate( "Mstring", reac, "notes", dim );
@@ -397,6 +410,8 @@ Id ReadKkit::buildMol( const vector< string >& args )
 	Id compt = figureOutCompartment( pa, vol );
 
 	Id mol = s->doCreate( "Molecule", pa, tail, dim );
+	// skip the 10 chars of "/kinetics/"
+	molIds[ args[2].substr( 10 ) ] = mol; 
 	Id x = s->doCreate( "Mdouble", mol, "x", dim );
 	Id y = s->doCreate( "Mdouble", mol, "y", dim );
 	Id notes = s->doCreate( "Mstring", mol, "notes", dim );

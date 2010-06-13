@@ -6165,6 +6165,33 @@ Then I can go back to parallel coding.
 13 June 2010
 Starting on ReadKkit. Skeleton coded and it runs. Checkin 1858.
 Incremental progress on framework for argument conversion. Checkin 1859.
-Further progress and checks on ReadKkit argument conversion.
+Further progress and checks on ReadKkit argument conversion. Checkin 1860.
+
+Now I need to implement the tricky part of this process, the grouping and
+the compartment assignment.
+Planned design for kkit successor is that the compartments form primary
+groups. Within these, there can be organizational groups that do not have
+any compartmental implications, but are just for placement. 
+Orthogonal to this, we can have other organizational groups that may span
+compartments. For example, synapses.
+
+Conversion has some frequent issues. For example, PKC exchanges between
+the cytosolic and membrane-bound forms. I often do not even have a volume
+difference between them. These are legacy models, so I may not be able to
+do the right thing automatically in all cases.
+In the synapse, AMPAR cycles between PSD and bulk. kkit tries to assign
+a compartment (geometry and geometry[1]) to them. May as well use this, but
+sometimes these have to be merged if the volumes are the same. 
+Problem is that the grouping is orthogonal. For now make sub-groups within
+the geometry. Avoid third layer of grouping.
+
+So the heuristic is like this:
+- Build up the kkit tree the original way
+- Check for compartments as the model is loaded. Build these on /kinetics.
+	At this point I can't deal with nesting. Maybe never should.
+- Groups that are intact in one compartment: no problem, they just move into
+	the compartment.
+- Groups that have components in multiple compartments: duplicate group names
+	in the sub-compartments.
 
 ============================================================================

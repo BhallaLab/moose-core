@@ -13,6 +13,7 @@ OBJ = \
 	Mol.o	\
 	Reac.o	\
 	ChemCompt.o	\
+	ReadKkit.o	\
 
 	#Tab.o	\
 
@@ -26,6 +27,7 @@ $(OBJ)	: $(HEADERS)
 Mol.o:	Mol.h ../basecode/Data.h
 Reac.o:	Reac.h ../basecode/Data.h
 ChemCompt.o:	ChemCompt.h ../basecode/Data.h
+ReadKkit.o:	ReadKkit.h
 Tab.o:	Tab.h ../basecode/Data.h
 
 .cpp.o:
