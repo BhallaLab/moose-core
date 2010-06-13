@@ -27,25 +27,40 @@ class ReadKkit
 
 
 		//////////////////////////////////////////////////////////////////
-		// Utility funcs
+		// Undump operations
 		//////////////////////////////////////////////////////////////////
 		
+		Id findParent( const string& path ) const;
 		void innerRead( ifstream& fin );
 		ParseMode readInit( const string& line );
 		void read( const string& filename, const string& cellname, 
 			Id parent );
 		void readData( const string& line );
 		void undump( const vector< string >& args );
+
+
+		//////////////////////////////////////////////////////////////////
+		// Building up the model
+		//////////////////////////////////////////////////////////////////
 		Id buildCompartment();
-		Id buildMol();
+		Id buildMol( const vector< string >& args );
 		Id buildReac();
 		Id buildEnz();
 		Id buildPlot();
 		Id buildTab();
-		unsigned int loadTab();
+		unsigned int loadTab(  const vector< string >& args );
 		Id buildGroup();
 		Id buildText();
+
+		//////////////////////////////////////////////////////////////////
+		// Special ops in the model definition
+		//////////////////////////////////////////////////////////////////
 		void addmsg( const vector< string >& args );
+		void call( const vector< string >& args );
+		void objdump( const vector< string >& args );
+		void textload( const vector< string >& args );
+		void loadtab( const vector< string >& args );
+
 		// static const Cinfo* initCinfo();
 	private:
 		double fastdt_;
@@ -67,6 +82,12 @@ class ReadKkit
 		unsigned int numOthers_;
 
 		unsigned int lineNum_;
+
+		map< string, int > molMap_;
+		map< string, int > reacMap_;
+		map< string, int > enzMap_;
+		map< string, int > groupMap_;
+		map< string, int > tableMap_;
 };
 
 #endif // READ_KKIT_H
