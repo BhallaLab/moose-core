@@ -554,6 +554,16 @@ string Shell::getName() const
 	return name_;
 }
 
+void Shell::setCwe( Id val )
+{
+	cwe_ = val;
+}
+
+Id Shell::getCwe() const
+{
+	return cwe_;
+}
+
 void Shell::setQuit( bool val )
 {
 	quit_ = val;

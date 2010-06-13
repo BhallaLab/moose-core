@@ -6197,4 +6197,13 @@ So the heuristic is like this:
 Merged compilation into main tree. Checkin 1861.
 
 Added Shell/Neutral calls for tree traversal.
+Like May 9, had to fight with GNOMEs keyring for quite a while, 
+finally managed to subdue it, by adding a line in  .subversion/config:
+password-stores =
+and was able to checkin as 1862.
+
+Added functions for field access to Shell::cwe_. 
+Added tests for Shell::doFind.
+Clears.
+
 ============================================================================

@@ -19,10 +19,16 @@ class Shell: public Data
 	public:
 		Shell();
 		void process( const ProcInfo* p, const Eref& e );
+
+		///////////////////////////////////////////////////////////
+		// Field functions
+		///////////////////////////////////////////////////////////
 		void setName( string name );
 		string getName() const;
 		void setQuit( bool val );
 		bool getQuit() const;
+		void setCwe( Id cwe );
+		Id getCwe() const;
 
 		///////////////////////////////////////////////////////////
 		// Parser functions

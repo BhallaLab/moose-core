@@ -143,7 +143,29 @@ void testTreeTraversal()
 	assert( path == "/" );
 
 	cout << "." << flush;
+	////////////////////////////////////////////////////////////////
+	// Checking finding Ids from path
+	////////////////////////////////////////////////////////////////
 
+	shell->setCwe( Id() );
+	assert( shell->doFind( "/f1/f2a/f3aa" ) == f3aa );
+	assert( shell->doFind( "/f1/f2a/f3ab" ) == f3ab );
+	assert( shell->doFind( "/f1/f2b/f3ba" ) == f3ba );
+	assert( shell->doFind( "/f1/f2b/f3ba/" ) == f3ba );
+	assert( shell->doFind( "/f1/f2b/f3ba/.." ) == f2b );
+	assert( shell->doFind( "f1/f2b/f3ba" ) == f3ba );
+	assert( shell->doFind( "./f1/f2b/f3ba" ) == f3ba );
+	assert( shell->doFind( "./f1/f2b/../f2a/f3aa" ) == f3aa );
+
+	shell->setCwe( f2b );
+	assert( shell->doFind( "." ) == f2b );
+	assert( shell->doFind( "f3ba" ) == f3ba );
+	assert( shell->doFind( "f3ba/" ) == f3ba );
+	assert( shell->doFind( "f3ba/.." ) == f2b );
+	assert( shell->doFind( "f3ba/../../f2a/f3aa" ) == f3aa );
+	assert( shell->doFind( "../f2a/f3ab" ) == f3ab );
+	
+	cout << "." << flush;
 	////////////////////////////////////////////////////////////////
 	// Checking getChild
 	////////////////////////////////////////////////////////////////
