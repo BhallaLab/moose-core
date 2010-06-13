@@ -6203,7 +6203,8 @@ password-stores =
 and was able to checkin as 1862.
 
 Added functions for field access to Shell::cwe_. 
-Added tests for Shell::doFind.
-Clears.
+Clears tests for Shell::doFind. Checkin 1863.
+
+ReadKkit now creates real live Groups and Molecules.
 
 ============================================================================

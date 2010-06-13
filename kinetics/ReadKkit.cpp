@@ -67,7 +67,8 @@ ReadKkit::ReadKkit()
 	numEnz_( 0 ),
 	numPlot_( 0 ),
 	numOthers_( 0 ),
-	lineNum_( 0 )
+	lineNum_( 0 ),
+	shell_( reinterpret_cast< Shell* >( Id().eref().data() ) )
 {
 	;
 }
@@ -197,8 +198,7 @@ ReadKkit::ParseMode ReadKkit::readInit( const string& line )
 		Id kinetics = Neutral::child( Id().eref(), "kinetics" );
 		if ( kinetics == Id() ) {
 			vector< unsigned int > dims( 1, 1 );
-			Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-			s->doCreate( "Neutral", Id(), "kinetics", dims );
+			shell_->doCreate( "Neutral", Id(), "kinetics", dims );
 		}
 		return DATA;
 	}
@@ -384,17 +384,37 @@ Id ReadKkit::buildText( const vector< string >& args )
 	return text;
 }
 
+Id ReadKkit::buildInfo( Id parent, 
+	map< string, int >& m, const vector< string >& args )
+{
+	static vector< unsigned int > dim( 1, 1 );
+	Id info = shell_->doCreate( "Neutral", parent, "info", dim );
+
+	/*
+	Id info = shell_->doCreate( "KkitInfo", parent, "info", dim );
+	double x = atof( args[ m[ "x" ] ].c_str() );
+	double y = atof( args[ m[ "y" ] ].c_str() );
+	int color = atoi( args[ m[ "color" ] ].c_str() );
+
+	Field< double >::set( info.eref(), "x", x );
+	Field< double >::set( info.eref(), "y", y );
+	Field< int >::set( info.eref(), "color", color );
+	*/
+
+	return info;
+}
+
 Id ReadKkit::buildGroup( const vector< string >& args )
 {
 	static vector< unsigned int > dim( 1, 1 );
-	Id group;
 
 	string head;
 	string tail = pathTail( args[2], head );
 
-	double x = atof( args[ molMap_[ "x" ] ].c_str() );
-	double y = atof( args[ molMap_[ "y" ] ].c_str() );
-	int color = atoi( args[ molMap_[ "color" ] ].c_str() );
+	Id pa = shell_->doFind( head );
+	assert( pa != Id() );
+	Id group = shell_->doCreate( "Neutral", pa, tail, dim );
+	Id info = buildInfo( group, groupMap_, args );
 
 	numOthers_++;
 	return group;
@@ -403,41 +423,31 @@ Id ReadKkit::buildGroup( const vector< string >& args )
 Id ReadKkit::buildMol( const vector< string >& args )
 {
 	static vector< unsigned int > dim( 1, 1 );
-	Id mol;
 
 	string head;
 	string tail = pathTail( args[2], head );
-	Id pa = findParent( head );
-	if ( pa == Id() ) {
-		return Id();
-	}
-	int index1 = molMap_[ "nInit" ];
-	int index2 = molMap_[ "vol" ];
+	Id pa = shell_->doFind( head );
+	assert( pa != Id() );
 
 	double nInit = atof( args[ molMap_[ "nInit" ] ].c_str() );
 	double vol = atof( args[ molMap_[ "vol" ] ].c_str() );
 	int slaveEnable = atoi( args[ molMap_[ "slave_enable" ] ].c_str() );
 	double diffConst = atof( args[ molMap_[ "DiffConst" ] ].c_str() );
-	double x = atof( args[ molMap_[ "x" ] ].c_str() );
-	double y = atof( args[ molMap_[ "y" ] ].c_str() );
-	int color = atoi( args[ molMap_[ "color" ] ].c_str() );
-	/*
-	Id compt = figureOutCompartment( pa, vol );
 
-	Id mol = s->doCreate( "Molecule", pa, tail, dim );
+	Id mol = shell_->doCreate( "Mol", pa, tail, dim );
 	// skip the 10 chars of "/kinetics/"
-	molIds[ args[2].substr( 10 ) ] = mol; 
-	Id x = s->doCreate( "Mdouble", mol, "x", dim );
-	Id y = s->doCreate( "Mdouble", mol, "y", dim );
-	Id notes = s->doCreate( "Mstring", mol, "notes", dim );
+	molIds_[ args[2].substr( 10 ) ] = mol; 
 
-	set< double >( Eref( mol(), 0 ), "nInit", nInit );
-	*/
+	Field< double >::set( mol.eref(), "nInit", nInit );
 
+	Id info = buildInfo( mol, molMap_, args );
+
+	/*
 	cout << setw( 20 ) << head << setw( 15 ) << tail << "	" << 
 		setw( 12 ) << nInit << "	" << 
 		vol << "	" << diffConst << "	" <<
 		slaveEnable << endl;
+		*/
 	numMols_++;
 	return mol;
 }

@@ -52,6 +52,8 @@ class ReadKkit
 		unsigned int loadTab(  const vector< string >& args );
 		Id buildGroup( const vector< string >& args );
 		Id buildText( const vector< string >& args );
+		Id buildInfo( Id parent, map< string, int >& m, 
+			const vector< string >& args );
 
 		//////////////////////////////////////////////////////////////////
 		// Special ops in the model definition
@@ -92,6 +94,8 @@ class ReadKkit
 		map< string, Id > molIds_;
 		map< string, Id > reacIds_;
 		map< string, Id > enzIds_;
+
+		Shell* shell_;
 };
 
 #endif // READ_KKIT_H
