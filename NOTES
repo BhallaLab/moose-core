@@ -5891,7 +5891,7 @@ We need to work into these things as we bring in mainline MOOSE
 			to their new functions.
 	- Parsers and threading
 	- Graphics and threading
-	- Extended fields
+	* Extended fields
 		- coordinates, generated rule-based on DataId
 		- arbitrary new fields, one per entry
 		- Element-globals: fields that are one per Element.
@@ -6152,6 +6152,17 @@ correctly. Checkin 1854.
 Added in functionality for ExtField 'get'. Unit tests happy. Checkin 1855.
 Fixed memory leak found by valgrind. Checkin 1856.
 
-Renamed Real to Mdouble. The string class will then be Mstring, etc.
+Renamed Real to Mdouble. The string class will then be Mstring, etc. 
+Checkin 1857.
+
+For tomorrow:
+	- Get rid of Data class.
+	- kkit parser
+	- Solver infrastructure.
+Then I can go back to parallel coding.
+
+============================================================================
+13 June 2010
+Starting on ReadKkit. Skeleton coded and it runs.
 
 ============================================================================
