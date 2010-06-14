@@ -12,6 +12,7 @@ TARGET = kinetics.o
 OBJ = \
 	Mol.o	\
 	Reac.o	\
+	Enz.o	\
 	ChemCompt.o	\
 	ReadKkit.o	\
 	testKinetics.o	\
@@ -27,6 +28,7 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 Mol.o:	Mol.h ../basecode/Data.h
 Reac.o:	Reac.h ../basecode/Data.h
+Enz.o:	Enz.h ../basecode/Data.h
 ChemCompt.o:	ChemCompt.h ../basecode/Data.h
 ReadKkit.o:	ReadKkit.h
 Tab.o:	Tab.h ../basecode/Data.h

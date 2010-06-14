@@ -6207,6 +6207,8 @@ Clears tests for Shell::doFind. Checkin 1863.
 
 ReadKkit now creates real live Groups and Molecules. Checkin 1864.
 ReadKkit now creates Reacs. Checkin 1865.
-ReadKkit now creates messages between mols and reacs.
+ReadKkit now creates messages between mols and reacs. Checkin 1866.
 
 ============================================================================
+14 June 2010
+Implemented Enz, incorporated into ReadKkit. Msgs pending.

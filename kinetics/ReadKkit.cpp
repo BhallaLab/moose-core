@@ -144,6 +144,7 @@ void ReadKkit::innerRead( ifstream& fin )
 			numCompartments_ << " compartments, " << 
 			numMols_ << " molecules, " << 
 			numReacs_ << " reacs, " << 
+			numEnz_ << " enzs, " << 
 			numOthers_ << " others," <<
 			" PlotDt = " << plotdt_ <<
 			endl;
@@ -345,28 +346,39 @@ Id ReadKkit::buildReac( const vector< string >& args )
 
 Id ReadKkit::buildEnz( const vector< string >& args )
 {
-	Id enz;
 	static vector< unsigned int > dim( 1, 1 );
 	string head;
 	string tail = pathTail( args[2], head );
 	Id pa = findParent( head );
-	if ( pa == Id() ) {
-		return Id();
-	}
+	assert ( pa != Id() );
 
 	double k1 = atof( args[ reacMap_[ "k1" ] ].c_str() );
 	double k2 = atof( args[ reacMap_[ "k2" ] ].c_str() );
 	double k3 = atof( args[ reacMap_[ "k3" ] ].c_str() );
 	double nComplexInit = atof( args[ reacMap_[ "nComplexInit" ] ].c_str());
 	double vol = atof( args[ reacMap_[ "vol" ] ].c_str());
-	bool isMM = !atoi( args[ reacMap_[ "usecomplex" ] ].c_str());
+	bool isMM = atoi( args[ reacMap_[ "usecomplex" ] ].c_str());
 
-	double x = atof( args[ reacMap_[ "x" ] ].c_str() );
-	double y = atof( args[ reacMap_[ "y" ] ].c_str() );
-	int color = atoi( args[ reacMap_[ "color" ] ].c_str() );
+	if ( !isMM ) {
+		Id enz = shell_->doCreate( "Enz", pa, tail, dim );
+		string enzPath = args[2].substr( 10 );
+		enzIds_[ enzPath ] = enz; 
 
-	numEnz_++;
-	return enz;
+		Field< double >::set( enz.eref(), "k1", k1 );
+		Field< double >::set( enz.eref(), "k2", k2 );
+		Field< double >::set( enz.eref(), "k3", k3 );
+
+		string cplxName = tail + "_cplx";
+		string cplxPath = enzPath + "/" + cplxName;
+		Id cplx = shell_->doCreate( "Mol", enz, cplxName, dim );
+		molIds_[ cplxPath ] = enz; 
+		Field< double >::set( cplx.eref(), "nInit", nComplexInit );
+		Id info = buildInfo( enz, enzMap_, args );
+		numEnz_++;
+		return enz;
+	} else {
+		return Id();
+	}
 }
 
 Id ReadKkit::buildText( const vector< string >& args )
@@ -467,6 +479,7 @@ void ReadKkit::addmsg( const vector< string >& args)
 {
 	string src = args[1].substr( 10 );
 	string dest = args[2].substr( 10 );
+	MsgId ret;
 	
 	if ( args[3] == "REAC" ) {
 		if ( args[4] == "A" && args[5] == "B" ) {
@@ -479,9 +492,10 @@ void ReadKkit::addmsg( const vector< string >& args)
 			Id destId = i->second;
 
 			// dest mol is substrate of src reac
-			shell_->doAddMsg( "single", 
+			ret = shell_->doAddMsg( "single", 
 				FullId( srcId, 0 ), "sub", 
 				FullId( destId, 0 ), "reac" ); 
+			assert( ret != Msg::badMsg );
 		} 
 		else if ( args[4] == "B" && args[5] == "A" ) {
 			// dest mol is product of src reac
@@ -494,9 +508,10 @@ void ReadKkit::addmsg( const vector< string >& args)
 			Id destId = i->second;
 
 			// dest mol is substrate of src reac
-			shell_->doAddMsg( "single", 
+			ret = shell_->doAddMsg( "single", 
 				FullId( srcId, 0 ), "prd", 
 				FullId( destId, 0 ), "reac" ); 
+			assert( ret != Msg::badMsg );
 		}
 	}
 }

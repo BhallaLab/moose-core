@@ -23,7 +23,7 @@ static DestFinfo sub( "subDest",
 
 static DestFinfo prd( "prdDest",
 		"Handles # of molecules of product",
-		new OpFunc1< Reac, double >( &Reac::sub ) );
+		new OpFunc1< Reac, double >( &Reac::prd ) );
 	
 static Finfo* subShared[] = {
 	&reac, &sub
