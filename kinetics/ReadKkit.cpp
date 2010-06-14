@@ -373,6 +373,12 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 		Id cplx = shell_->doCreate( "Mol", enz, cplxName, dim );
 		molIds_[ cplxPath ] = enz; 
 		Field< double >::set( cplx.eref(), "nInit", nComplexInit );
+
+		bool ret = shell_->doAddMsg( "single", 
+			FullId( enz, 0 ), "cplx",
+			FullId( cplx, 0 ), "reac" ); 
+		assert( ret != Msg::badMsg );
+
 		Id info = buildInfo( enz, enzMap_, args );
 		numEnz_++;
 		return enz;
@@ -475,43 +481,48 @@ unsigned int ReadKkit::loadTab( const vector< string >& args )
 	return 0;
 }
 
+void ReadKkit::innerAddMsg( 
+	const string& src, const map< string, Id >& m1, const string& srcMsg,
+	const string& dest, const map< string, Id >& m2, const string& destMsg )
+{
+	map< string, Id >::const_iterator i = m1.find( src );
+	assert( i != m1.end() );
+	Id srcId = i->second;
+
+	i = m2.find( dest );
+	assert( i != m2.end() );
+	Id destId = i->second;
+
+	// dest mol is substrate of src reac
+	bool ret = shell_->doAddMsg( "single", 
+		FullId( srcId, 0 ), srcMsg,
+		FullId( destId, 0 ), destMsg ); 
+	assert( ret != Msg::badMsg );
+}
+
+
 void ReadKkit::addmsg( const vector< string >& args)
 {
 	string src = args[1].substr( 10 );
 	string dest = args[2].substr( 10 );
-	MsgId ret;
 	
 	if ( args[3] == "REAC" ) {
 		if ( args[4] == "A" && args[5] == "B" ) {
-			map< string, Id >::iterator i = reacIds_.find( src );
-			assert( i != reacIds_.end() );
-			Id srcId = i->second;
-
-			i = molIds_.find( dest );
-			assert( i != molIds_.end() );
-			Id destId = i->second;
-
-			// dest mol is substrate of src reac
-			ret = shell_->doAddMsg( "single", 
-				FullId( srcId, 0 ), "sub", 
-				FullId( destId, 0 ), "reac" ); 
-			assert( ret != Msg::badMsg );
+			innerAddMsg( src, reacIds_, "sub", dest, molIds_, "reac" );
 		} 
 		else if ( args[4] == "B" && args[5] == "A" ) {
 			// dest mol is product of src reac
-			map< string, Id >::iterator i = reacIds_.find( src );
-			assert( i != reacIds_.end() );
-			Id srcId = i->second;
-
-			i = molIds_.find( dest );
-			assert( i != molIds_.end() );
-			Id destId = i->second;
-
-			// dest mol is substrate of src reac
-			ret = shell_->doAddMsg( "single", 
-				FullId( srcId, 0 ), "prd", 
-				FullId( destId, 0 ), "reac" ); 
-			assert( ret != Msg::badMsg );
+			innerAddMsg( src, reacIds_, "prd", dest, molIds_, "reac" );
 		}
+		else if ( args[4] == "sA" && args[5] == "B" ) {
+			// Msg from enzyme to substrate.
+			innerAddMsg( src, enzIds_, "sub", dest, molIds_, "reac" );
+		}
+	}
+	if ( args[3] == "ENZYME" ) { // Msg from enz mol to enz site
+		innerAddMsg( src, molIds_, "reac", dest, enzIds_, "enz" );
+	}
+	if ( args[3] == "MM_PRD" ) { // Msg from enz to Prd mol
+		innerAddMsg( src, enzIds_, "prd", dest, molIds_, "reac" );
 	}
 }

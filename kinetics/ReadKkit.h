@@ -59,6 +59,11 @@ class ReadKkit
 		// Special ops in the model definition
 		//////////////////////////////////////////////////////////////////
 		void addmsg( const vector< string >& args );
+		void innerAddMsg( 
+			const string& src, const map< string, Id >& m1, 
+				const string& srcMsg,
+			const string& dest, const map< string, Id >& m2, 
+				const string& destMsg );
 		void call( const vector< string >& args );
 		void objdump( const vector< string >& args );
 		void textload( const vector< string >& args );

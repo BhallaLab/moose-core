@@ -12,8 +12,12 @@
 
 #define EPSILON 1e-15
 
-static SrcFinfo2< double, double > reac( 
-		"reac", 
+static SrcFinfo2< double, double > toSub( 
+		"toSub", 
+		"Sends out increment of molecules on product each timestep"
+	);
+static SrcFinfo2< double, double > toPrd( 
+		"toPrd", 
 		"Sends out increment of molecules on product each timestep"
 	);
 
@@ -26,11 +30,11 @@ static DestFinfo prd( "prdDest",
 		new OpFunc1< Reac, double >( &Reac::prd ) );
 	
 static Finfo* subShared[] = {
-	&reac, &sub
+	&toSub, &sub
 };
 
 static Finfo* prdShared[] = {
-	&reac, &prd
+	&toPrd, &prd
 };
 
 const Cinfo* Reac::initCinfo()
@@ -134,8 +138,8 @@ void Reac::eprocess( Eref e, const Qinfo* q, ProcInfo* p )
 
 void Reac::process( const ProcInfo* p, const Eref& e )
 {
-	reac.send( e, p, sub_, prd_ );
-	reac.send( e, p, prd_, sub_ );
+	toPrd.send( e, p, sub_, prd_ );
+	toSub.send( e, p, prd_, sub_ );
 	
 	sub_ = kf_;
 	prd_ = kb_;
