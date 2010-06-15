@@ -6212,7 +6212,9 @@ ReadKkit now creates messages between mols and reacs. Checkin 1866.
 ============================================================================
 14 June 2010
 Implemented Enz, incorporated into ReadKkit. Msgs pending. Checkin 1867.
-Put in most of the Enz msgs too.
+Put in most of the Enz msgs too. Checkin 1868.
 Still to do the MMenz case.
 
 ============================================================================
+15 June 2010
+First pass MMEnz implementation. Compiles.

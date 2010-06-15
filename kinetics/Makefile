@@ -13,6 +13,7 @@ OBJ = \
 	Mol.o	\
 	Reac.o	\
 	Enz.o	\
+	MMenz.o	\
 	ChemCompt.o	\
 	ReadKkit.o	\
 	testKinetics.o	\
@@ -29,6 +30,7 @@ $(OBJ)	: $(HEADERS)
 Mol.o:	Mol.h ../basecode/Data.h
 Reac.o:	Reac.h ../basecode/Data.h
 Enz.o:	Enz.h ../basecode/Data.h
+MMenz.o:	MMenz.h ../basecode/Data.h
 ChemCompt.o:	ChemCompt.h ../basecode/Data.h
 ReadKkit.o:	ReadKkit.h
 Tab.o:	Tab.h ../basecode/Data.h
