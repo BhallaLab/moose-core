@@ -7,9 +7,9 @@
 // Maintainer: 
 // Created: Fri Apr  3 17:52:55 2009 (+0530)
 // Version: 
-// Last-Updated: Mon Apr  6 17:58:12 2009 (+0530)
-//           By: subhasis ray
-//     Update #: 28
+// Last-Updated: Mon May 31 17:37:52 2010 (+0530)
+//           By: Subhasis Ray
+//     Update #: 33
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -73,12 +73,14 @@ class IzhikevichNrn
     static double getU(Eref e);
     static void processFunc(const Conn* conn, ProcInfo proc);
     static void reinitFunc(const Conn* conn, ProcInfo proc);
-    
+    static void setRm(const Conn * conn, double value);
+    static double getRm(Eref e);
     
   private:
     double alpha_;
     double beta_;
     double gamma_;
+    double Rm_;
     double a_;
     double b_;
     double c_;
@@ -89,6 +91,7 @@ class IzhikevichNrn
     double initVm_;
     double initU_;
     double sum_inject_;
+    double Im_;
 };
 #endif
 
