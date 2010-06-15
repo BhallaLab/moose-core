@@ -2,27 +2,21 @@
 # 
 # Filename: Izhikevich.py
 # Description: 
-#  This is a PyMOOSE implementation of twenty different kinds 
-# of spiking neurons described in "Which Model to Use for Cortical 
-# Spiking Neurons?" by Eugene M Izhikevich. IEE Transactions on 
-# Neural Networks, VOL 15. No. 5. Sept 2004. pp 1063-1070.
-#
-# Author: subhasis ray
+# Author: Subhasis Ray
 # Maintainer: 
-# Created: Mon Apr  6 15:43:16 2009 (+0530)
+# Created: Fri May 28 14:42:33 2010 (+0530)
 # Version: 
-# Last-Updated: Sat Jul  4 16:20:26 2009 (+0530)
-#           By: subhasis ray
-#     Update #: 653
+# Last-Updated: Tue Jun 15 20:21:21 2010 (+0530)
+#           By: Subhasis Ray
+#     Update #: 684
 # URL: 
 # Keywords: 
 # Compatibility: 
 # 
 # 
 
-# Commentary: Initial PyQt version of the GUI. The inputs are not
-#       right. So the behaviour is strange for some types. Need to
-#       fix.
+# Commentary: 
+# 
 # 
 # 
 # 
@@ -50,318 +44,255 @@
 # 
 
 # Code:
-import sys
-from math import *
 
+from numpy import *
+from pylab import *
 import moose
 
-class SimEnv:
-    """Global simulation environment variables"""
-    context = moose.PyMooseBase.getContext() # global context object
-    dt = 1.0 # integration time step
-    duration = 200.0 # duration of simulation
-
-def set_dt(dt):
-    SimEnv.dt = dt
-
-def set_dur(dur):
-    SimEnv.duration = dur
-
-types = ["tonic_spiking",   
-         "phasic_spiking",  
-         "tonic_bursting",  
-         "phasic_bursting", 
-         "mixed_mode",      
-         "spike_freq_adapt",
-         "Class_1",         
-         "Class_2",         
-         "spike_latency",   
-         "subthresh_osc",   
-         "resonator",       
-         "integrator",      
-         "rebound_spike",   
-         "rebound_burst",   
-         "thresh_var",      
-         "bistable",        
-         "DAP",             
-         "accommodation",   
-         "iispike",         
-         "iiburst"]         
-# The parameters are: a, b, c, d followed by injection current I and duration of simulation
-pars={"tonic_spiking":    [0.02  ,    0.2  ,   -65.0,     6.0  ,      14.0,  100.0],
-      "phasic_spiking":   [0.02  ,    0.25 ,   -65.0,     6.0  ,      0.5,   200.0],
-      "tonic_bursting":   [0.02  ,    0.2  ,   -50.0,     2.0  ,      15.0,  200.0],
-      "phasic_bursting":  [0.02  ,    0.25 ,   -55.0,     0.05 ,      0.6,   200.0],
-      "mixed_mode":       [0.02  ,    0.2  ,   -55.0,     4.0   ,     10.0,  200.0],
-      "spike_freq_adapt": [0.01  ,    0.2  ,   -65.0,     8.0   ,     30.0,  100.0],# spike frequency adaptation
-      "Class_1":          [0.02  ,    -0.1 ,   -55.0,     6.0   ,     0,     500.0],
-      "Class_2":          [0.2   ,    0.26 ,   -65.0,     0.0   ,     0,     500.0],
-      "spike_latency":    [0.02  ,    0.2  ,   -65.0,     6.0   ,     7.0,   100.0],
-      "subthresh_osc":    [0.05  ,    0.26 ,   -60.0,     0.0   ,     0,     200.0],	# subthreshold oscillations
-      "resonator":        [0.1   ,    0.26 ,   -60.0,     -1.0  ,     0,     500.0],
-      "integrator":       [0.02  ,    -0.1 ,   -55.0,     6.0   ,     0,     100.0],
-      "rebound_spike":    [0.03  ,    0.25 ,   -60.0,     4.0   ,     0,     200.0],
-      "rebound_burst":    [0.03  ,    0.25 ,   -52.0,     0.0   ,     0,     200.0],
-      "thresh_var":       [0.03  ,    0.25 ,   -60.0,     4.0   ,     0,     100.0],	# threshold variability
-      "bistable":         [1.0   ,    1.5  ,   -60.0,     0.0   ,     -65.0, 500.0],	# bistability
-      "DAP":              [1.0   ,    0.2  ,   -60.0,     -21.0 ,     0,     50.0 ],
-      "accommodation":    [0.02  ,    1.0  ,   -55.0,     4.0   ,     0,     500.0],
-      "iispike":          [-0.02 ,    -1.0 ,   -60.0,     8.0   ,     80.0,  500.0],	# inhibition-induced spiking
-      "iiburst":          [-0.026,    -1.0 ,   -45.0,     0.0   ,     80.0,  500.0]}       # inhibition-induced bursting
-
-
-class IzhikevichTest(moose.IzhikevichNrn):
-    def __init__(self, *args):
-        moose.IzhikevichNrn.__init__(self, *args)
-        self.nrn_type = "tonic_spiking" # default
-        # using physiological unit
-        self.alpha = 0.04
-        self.beta = 5.0
-        self.gamma = 140.0
-        self.Vmax = 30.0
-        self.initVm = -70.0
-        self.initU = -20.0
-        print 'init: creating table'
-        self.vm_table = moose.Table("VmTable", self)
-        self.vm_table.stepMode = 3
-        self.inject_table =  moose.Table("injectTable", self)
-        self.inject_table.stepMode = 3
-        self.connect("Vm", self.vm_table, "inputRequest")
-        # The input table provides injection current to the neuron.
-        # Must be set according to requirements of the test.
-        # In particular, xmin, xmax, step_size need to be set.
-        self.input = moose.Table("input", self)
-        self.input.stepMode = 1 # TAB_LOOP
-        print 'init: creating connection'
-        self.input.connect("outputSrc", self, "injectDest")
-        self.input.connect("output", self.inject_table, "inputRequest")
-        print 'init: done'
+class IzhikevichDemo:
+    """Class to setup and simulate the various kind of neuronal behaviour using Izhikevich model.
     
-    def schedule(self):
-        """Assigns clocks to the model components."""
-        print 'schedule: start'
-        self.getContext().setClock(0, SimEnv.dt, 0)
-        self.getContext().setClock(1, SimEnv.dt, 1)
-        print 'before useclock', self.inject_table.id.path()
-        self.inject_table.useClock(0)
-        self.vm_table.useClock(1)
-        self.inject_table.useClock(1)
-        self.useClock(1)
-        print 'after useclock'
+    Fields:
+    """    
+    # Paramteres for different kinds of behaviour described by Izhikevich
+    # (1. IEEE TRANSACTIONS ON NEURAL NETWORKS, VOL. 14, NO. 6, NOVEMBER 2003
+    # and 2. IEEE TRANSACTIONS ON NEURAL NETWORKS, VOL. 15, NO. 5, SEPTEMBER
+    # 2004)
+    # Modified and enhanced using: http://www.izhikevich.org/publications/figure1.m
+    # The entries in the tuple are as follows:
+    # fig. no. in paper (2), parameter a, parameter b, parameter c (reset value of v in mV), parameter d (after-spike reset value of u), injection current I (mA), initial value of Vm, duration of simulation (ms)
+    # 
+    # They are all in whatever unit they were in the paper. Just before use we convert them to SI.
+    parameters = {
+        "tonic_spiking":    ('A', 0.02  ,    0.2  ,   -65.0,     6.0  ,      14.0,      -70.0,  100.0), # Fig. 1.A
+        "phasic_spiking":   ('B', 0.02  ,    0.25 ,   -65.0,     6.0  ,      0.5,       -64.0,  200.0), # Fig. 1.B
+        "tonic_bursting":   ('C', 0.02  ,    0.2  ,   -50.0,     2.0  ,      15.0,      -70.0,  220.0), # Fig. 1.C
+        "phasic_bursting":  ('D', 0.02  ,    0.25 ,   -55.0,     0.05 ,      0.6,       -64.0,  200.0), # Fig. 1.D
+        "mixed_mode":       ('E', 0.02  ,    0.2  ,   -55.0,     4.0   ,     10.0,      -70.0,  160.0), # Fig. 1.E
+        "spike_freq_adapt": ('F', 0.01  ,    0.2  ,   -65.0,     8.0   ,     30.0,      -70.0,  85.0), # Fig. 1.F # spike frequency adaptation
+        "Class_1":          ('G', 0.02  ,    -0.1 ,   -55.0,     6.0   ,     0,         -60.0,  300.0), # Fig. 1.G # Spikining Frequency increases with input strength
+        "Class_2":          ('H', 0.2   ,    0.26 ,   -65.0,     0.0   ,     0,         -64.0,  300.0), # Fig. 1.H # Produces high frequency spikes  
+        "spike_latency":    ('I', 0.02  ,    0.2  ,   -65.0,     6.0   ,     7.0,       -70.0,  100.0), # Fig. 1.I
+        "subthresh_osc":    ('J', 0.05  ,    0.26 ,   -60.0,     0.0   ,     0,         -62.0,  200.0), # Fig. 1.J # subthreshold oscillations
+        "resonator":        ('K', 0.1   ,    0.26 ,   -60.0,     -1.0  ,     0,         -62.0,  400.0), # Fig. 1.K 
+        "integrator":       ('L', 0.02  ,    -0.1 ,   -55.0,     6.0   ,     0,         -60.0,  100.0), # Fig. 1.L 
+        "rebound_spike":    ('M', 0.03  ,    0.25 ,   -60.0,     4.0   ,     -15,       -64.0,  200.0), # Fig. 1.M 
+        "rebound_burst":    ('N', 0.03  ,    0.25 ,   -52.0,     0.0   ,     -15,       -64.0,  200.0), # Fig. 1.N 
+        "thresh_var":       ('O', 0.03  ,    0.25 ,   -60.0,     4.0   ,     0,         -64.0,  100.0), # Fig. 1.O # threshold variability
+        "bistable":         ('P', 1.0   ,    1.5  ,   -60.0,     0.0   ,     1.24,      -61.0,  300.0), # Fig. 1.P 
+        "DAP":              ('Q', 1.0   ,    0.2  ,   -60.0,     -21.0 ,     20,        -70.0,  50.0 ), # Fig. 1.Q # Depolarizing after-potential 
+        "accommodation":    ('R', 0.02  ,    1.0  ,   -55.0,     4.0   ,     0,         -65.0,  400.0), # Fig. 1.R 
+        "iispike":          ('S', -0.02 ,    -1.0 ,   -60.0,     8.0   ,     75.0,      -63.8,  350.0), # Fig. 1.S # inhibition-induced spiking
+        "iiburst":          ('T', -0.026,    -1.0 ,   -45.0,     0.0   ,     75.0,      -63.8,  350.0)  # Fig. 1.T # inhibition-induced bursting
+    }
 
-    def set_type(self, name):
-        """Parameterizes the model according to its type"""
-        global pars
-        props = pars[name]
-        if props is None:
-            print name, ": no such neuron type in dictionary. falling back to tonic spiking."
-            return
-        self.nrn_type = name
-        self.a = props[0]
-        self.b = props[1]
-        self.c = props[2]
-        self.d = props[3]
-        self.I = props[4]
+    
+    def __init__(self):
+        """Initialize the object."""
+        self.neurons = {}
+        self.Vm_tables = {}
+        self.inject_tables = {}
+        self.inputs = {}
+        self.context = moose.PyMooseBase.getContext()
+        self.simtime = 100e-3
+        self.dt = 1e-5
+        self.steps = int(self.simtime/self.dt)
+        self.context.setClock(0, self.dt)
+        self.context.setClock(1, self.dt)
+        self.context.setClock(2, self.dt)
+        self.pulsegen = moose.PulseGen('pulsegen')
+        self.neuron = None
+        self.current = 'tonic_spiking'
 
-    def set_input(self, array):
-        """Populate the input table from an array (numpy possibly)"""
-        self.input.xmin = 0.0
-        self.input.xmax = SimEnv.dt * len(array)
-        self.input.stepSize = SimEnv.dt
-        SimEnv.duration = SimEnv.dt * len(array)
-        self.input.xdivs = int(len(array))
-        for i in range(len(array)):
-            self.input[i] = array[i]
+    def setup(self, key):
+        neuron = self._get_neuron(key)
+        pulsegen = self._make_pulse_input(key)
+        if pulsegen is None:
+            print key, 'Not implemented.'
             
-    def init_input(self):
-        """Create input according to the type of this neuron."""
-        input_array = create_input(self.nrn_type, int(SimEnv.duration / SimEnv.dt))
-        self.set_input(input_array)
+    def simulate(self, key):
+        self.setup(key)
+        return self.run(key)
 
-    def dump_data(self):
-        self.vm_table.dumpFile(self.nrn_type + "_vm.plot")
-        self.inject_table.dumpFile(self.nrn_type + "_i.plot")
-        return self.vm_table
-
-    def fullrun(self):
-        #print 'fullrun: start'
-        self.init_input()
-        self.schedule()
-        #print 'fullrun: before reset'
-        moose.PyMooseBase.getContext().reset()
-        #print 'fullrun: after reset'
-        moose.PyMooseBase.getContext().step(SimEnv.duration)
-        #print 'fullrun: done'
-        return self.dump_data()
-
-def create_input(nrn_type, input_len):
-    #print 'create_input: start'
-    if input_len < 50:
-        print("Simulate at least for 50 ms.")
-        return numpy.zeros(input_len)
-
-    input_array = numpy.zeros(int(input_len))
-    if nrn_type == 'tonic_spiking' or  \
-            nrn_type == 'phasic_spiking' or \
-            nrn_type =="tonic_bursting" or \
-            nrn_type =="phasic_bursting" or \
-            nrn_type =="mixed_mode" or \
-            nrn_type =="spike_freq_adapt":
-            input_array[:20] = 0.0
-            input_array[20:] = pars[nrn_type][4]
-    
-    elif nrn_type =="Class_1" or nrn_type =="Class_2":        
-        input_array = numpy.linspace(0, 2.0, input_len)
-    elif nrn_type =="spike_latency" or nrn_type =="subthresh_osc" or nrn_type =="DAP":
-        input_array[20:21] = 20.0
-    elif nrn_type =="resonator": 
-        isi = 1
-        width = 10
-        # keep changing the interspike interval to find out the resonance freq
-        i = 0
-        while i < input_len:
-            input_array[i] = 20.0
-            index = i + isi + 1
-            if index > input_len:
-                break
-            else:
-                input_array[index] = 20.0
-            i = i + width
-    elif nrn_type =="integrator":     
-        input_array[5] = 10.0
-        input_array[10] = 10.0
-        input_array[50] = 10.0
-        input_array[65] = 10.0        
-    elif nrn_type =="rebound_spike" or  nrn_type =="rebound_burst":
-        input_array[20] = -20.0
-    elif nrn_type =="thresh_var":     
-        input_array[5] = 20.0
-        input_array[80:85] = -20.0
-        input_array[90:95] = 20.0        
-    elif nrn_type =="bistable":
-        input_array[20] = 20.0
-        input_array[100] = 20.0        
-    elif nrn_type =="accommodation":
-        increasing = 200
-        input_array[:increasing] = numpy.linspace(-5.0, 1.0, increasing)
-        input_array[300] = 1.0
-    elif nrn_type =="iispike" or nrn_type =="iiburst":        
-        input_array[20:120] = -20.0
-    #print 'create_input: finished'
-    return input_array
-
-
-def run_model(nrn_type):
-    nrn = IzhikevichTest(nrn_type)
-    nrn.set_type(nrn_type)
-    vm_array = numpy.array(nrn.fullrun(SimEnv.duration, SimEnv.dt))
-    return (input_array, vm_array)
-
-def run():
-    """Runs the simulation."""
-    #print 'Going to reset'
-    moose.PyMooseBase.getContext().reset()
-    #print 'reset: done'
-    moose.PyMooseBase.getContext().step(SimEnv.duration)
-    #print 'step: done'
-
-def numpy_sim(nrn_type, input_array):
-    """Do the same simulation using direct array operations."""
-    
-
-
-####################################################
-# Qt GUI code starts here
-####################################################
-
-from PyQt4 import Qt
-from PyQt4 import QtGui
-from PyQt4 import QtCore
-from PyQt4 import Qwt5 as Qwt
-import PyQt4.Qwt5.qplt as qplt
-import PyQt4.Qwt5.anynumpy as numpy
-
-class IzhikevichGui(QtGui.QMainWindow):
-    def __init__(self, *args):
-        QtGui.QMainWindow.__init__(self, *args)
-        self.setMinimumSize(QtCore.QSize(800, 200))
-        self.plots = []
-        self.buttons = []
-        self.nrn = IzhikevichTest("Izhikevich")
-        self.ctrl_frame = QtGui.QFrame(self)
-        layout = QtGui.QGridLayout(self.ctrl_frame)
-        row = 0
-        col = 0
-        for key in types:
-            button = QtGui.QPushButton(key, self.ctrl_frame)
-            self.connect(button, QtCore.SIGNAL('clicked()'), self.run_slot)
-            print row, col
-            layout.addWidget(button, row, col)
-            print button.text(), row, col
-            if col == 0:
-                col = 1
-            else:
-                col = 0
-                row = row + 1
-            self.buttons.append(button)
-        dur_label = QtGui.QLabel("duration", self.ctrl_frame)
-        layout.addWidget(dur_label, row, 0)
-        dt_label = QtGui.QLabel("dt", self.ctrl_frame)
-        layout.addWidget(dt_label, row, 1)
-        row = row + 1
-        self.dur_input = QtGui.QLineEdit(self.ctrl_frame)
-        layout.addWidget(self.dur_input, row, 0)
-        self.dt_input = QtGui.QLineEdit(self.ctrl_frame)
-        layout.addWidget(self.dt_input, row, 1)
-        self.ctrl_frame.setLayout(layout)
-        self.setCentralWidget(self.ctrl_frame)
-
-    def run_slot(self):
-        print "In run slot"
-        source = self.sender()
-        nrn_type = str(source.text())
-        self.nrn.set_type(nrn_type)
+    def run(self, key):
         try:
-            dur = float(str(self.dur_input.text()))
-            dt = float(str(self.dt_input.text()))
-            set_dur(dur)
-            set_dt(dt)
-        except ValueError:
-            set_dur(pars[nrn_type][5])
-        vm_array = numpy.array(self.nrn.fullrun())
-        inj_array = numpy.array(self.nrn.inject_table)
-        plot = Qwt.QwtPlot()
-        plot.setTitle(nrn_type)
-        plot.insertLegend(Qwt.QwtLegend(), Qwt.QwtPlot.RightLegend)
-        vm_curve = Qwt.QwtPlotCurve(nrn_type + "_Vm")
-        vm_curve.setPen(Qt.QPen(Qt.Qt.blue))
-        vm_curve.attach(plot)
-        inj_curve = Qwt.QwtPlotCurve(plot.tr(nrn_type + "_I"))
-        inj_curve.setPen(Qt.QPen(Qt.Qt.red))
-        inj_curve.attach(plot)
-        vm_curve.setData(numpy.linspace(0, SimEnv.duration, len(vm_array)), vm_array)
-        inj_curve.setData(numpy.linspace(0, SimEnv.duration, len(inj_array)), inj_array - 100)
-        plot.replot()
-        plot.show()
-        self.plots.append(plot)
+            Vm = self.Vm_tables[key]
+        except KeyError, e:
+            Vm = moose.Table(key + '_Vm')
+            Vm.stepMode = 3
+            Vm.connect('inputRequest', self.neurons[key], 'Vm')
+            self.Vm_tables[key] = Vm
+        try:
+            Im = self.inject_tables[key]
+        except KeyError, e:
+            Im = moose.Table(key + '_inject') # May be different for non-pulsegen sources.
+            Im.stepMode = 3
+            Im.connect('inputRequest', self._get_neuron(key), 'Im')
+            self.inject_tables[key] = Im
+        self.simtime = IzhikevichDemo.parameters[key][7] * 1e-3
+        self.context.reset()
+        self.context.step(self.simtime)
+        time = linspace(0, IzhikevichDemo.parameters[key][7], len(Vm))
+        return (time, Vm, Im)
 
-    def closeEvent(self, event):
-        """Overriding QWidget.closeEvent() in order to close all other
-        windows
-        """
-        windowList = QtGui.qApp.topLevelWidgets()
-        for window in windowList:
-            if window != self:
-                window.close()
-        QtGui.qApp.quit()
 
-    
-if __name__ == "__main__":
-    qApp = QtGui.QApplication(sys.argv)
-    main_w = IzhikevichGui()
-    main_w.show()
-    sys.exit(qApp.exec_())
-    
+    def _get_neuron(self, key):
+        try:
+            neuron = self.neurons[key]
+            return neuron
+        except KeyError, e:
+            pass
+        try:
+            params = IzhikevichDemo.parameters[key]
+        except KeyError, e:
+            print ' %s : Invalid neuron type. The valid types are:' % (key)
+            for key in IzhikevichDemo.paramteres:
+                print key
+            raise
+        neuron = moose.IzhikevichNrn(key)
+        self.neuron = neuron
+        neuron.a = params[1] * 1e3 # ms^-1 -> s^-1
+        neuron.b = params[2] * 1e3 # ms^-1 -> s^-1
+        neuron.c = params[3] * 1e-3 # mV -> V
+        neuron.d = params[4]  # d is in mV/ms = V/s
+        neuron.initVm = params[6] * 1e-3 # mV -> V
+        neuron.Vmax = 0.03 # mV -> V
+        if key is not 'accommodation':
+            neuron.initU = neuron.initVm * neuron.b
+        else:
+            neuron.initU = -16.0 # u is in mV/ms = V/s
+        self.neurons[key] = neuron
+        return neuron
+
+    def _make_pulse_input(self, key):
+        """This is for creating a pulse generator for use as a current
+        source for all cases except Class_1, Class_2, resonator,
+        integrator, thresh_var and accommodation."""
+        baseLevel = 0.0
+        firstWidth = 1e6
+        firstDelay = 0.0
+        firstLevel = IzhikevichDemo.parameters[key][5] * 1e-9
+        secondDelay = 1e6
+        secondWidth = 0.0
+        secondLevel = 0.0
+        if key is 'tonic_spiking':
+            firstDelay = 10e-3
+        elif key is 'phasic_spiking':
+            firstDelay = 20e-3
+        elif key is 'tonic_bursting':
+            firstDelay = 22e-3
+        elif key is 'phasic_bursting':
+            firstDelay = 20e-3
+        elif key is 'mixed_mode':
+            firstDelay = 16e-3
+        elif key is 'spike_freq_adapt':
+            firstDelay = 8.5e-3
+        elif key is 'spike_latency':
+            firstDelay = 10e-3
+            firstWidth = 3e-3
+        elif key is 'subthresh_osc':
+            firstDelay = 20e-3
+            firstWidth = 5e-3
+        elif key is 'rebound_spike':
+            firstDelay = 20e-3
+            firstWidth = 5e-3
+        elif key is 'rebound_burst':
+            firstDelay = 20e-3
+            firstWidth = 5e-3
+        elif key is 'bistable':
+            firstDelay = 300e-3/8
+            firstWidth = 5e-3
+            secondLevel = firstLevel
+            secondWidth = 5e-3
+            secondDelay = 216e-3 - firstDelay
+            baseLevel = 0.24e-9
+        elif key is 'DAP':
+            firstDelay = 9e-3
+            firstWidth = 2e-3
+        elif key is 'iispike' or key is 'iiburst':
+            baseLevel = 80e-9
+            firstDelay = 50e-3
+            firstWidth = 200e-3
+        elif key is 'Class_1':
+            input_table = self._make_Class_1_input()
+            input_table.connect('outputSrc', self._get_neuron(key), 'injectDest')
+            self.inputs[key] = input_table
+            return input_table
+        elif key is 'Class_2':
+            input_table = self._make_Class_2_input()
+            input_table.connect('outputSrc', self._get_neuron(key), 'injectDest')
+            self.inputs[key] = input_table
+            return input_table
+        else:
+            print key, ': Stimulus is not based on pulse generator.'
+            return None
+        pulsegen = self._make_pulsegen(key, 
+                                      firstLevel,
+                                      firstDelay,
+                                      firstWidth,
+                                      secondLevel,
+                                      secondDelay,
+                                      secondWidth, baseLevel)
+        return pulsegen
+                                               
+
+    def _make_pulsegen(self, key, firstLevel, firstDelay, firstWidth=1e6, secondLevel=0, secondDelay=1e6, secondWidth=0, baseLevel=0):
+        try:
+            pulsegen = self.inputs[key]
+        except KeyError:
+            pulsegen = moose.PulseGen(self.current + '_input')
+            pulsegen.firstLevel = firstLevel
+            pulsegen.firstDelay = firstDelay
+            pulsegen.firstWidth = firstWidth
+            pulsegen.secondLevel = secondLevel
+            pulsegen.secondDelay = secondDelay
+            pulsegen.secondWidth = secondWidth
+            pulsegen.baseLevel = baseLevel
+            self.inputs[key] = pulsegen
+            pulsegen.connect('outputSrc', self._get_neuron(key), 'injectDest')
+        return pulsegen    
+        
+    def _make_Class_1_input(self):
+        input_table = moose.Table('Class_1_input')
+        input_table.stepMode = 1 # Table acts as a function generator
+        input_table.stepSize = self.dt
+        input_table.xmin = 30e-3 # The ramp starts at 30 ms
+        input_table.xmax = IzhikevichDemo.parameters['Class_1'][7] * 1e-3
+        input_table.xdivs = int(ceil((input_table.xmax - input_table.xmin) / input_table.stepSize))
+        input_table[0] = 0.0
+        for i in range(1, len(input_table)):
+            input_table[i] = 0.075e-9 * i * self.dt * 1e3
+        return input_table
+
+    def _make_Class_2_input(self):
+        input_table = moose.Table('Class_2_input')
+        input_table.stepMode = 1 # Table acts as a function generator
+        input_table.stepSize = self.dt
+        input_table.xmin = 30e-3 # The ramp starts at 30 ms
+        input_table.xmax = IzhikevichDemo.parameters['Class_2'][7] * 1e-3
+        input_table.xdivs = int(ceil((input_table.xmax - input_table.xmin) / input_table.stepSize))
+        input_table[0] = -0.5e-9
+        for i in range(1, len(input_table)):
+            # The matlab code is:if (t>T1) I=-0.5+(0.015*(t-T1)); else I=-0.5
+            input_table[i] = (-0.5 + 0.015 * i * self.dt * 1e3) * 1e-9 # convert dt from s to ms, and convert total current from nA to A.
+        return input_table
+        
+import sys
+if __name__ == '__main__':
+    key = 'tonic_spiking'
+    if len(sys.argv) > 1:
+        key = sys.argv[1]
+    demo = IzhikevichDemo()
+    (time, Vm, Im) = demo.simulate(key)
+    title(IzhikevichDemo.parameters[key][0] + '. ' + key)
+    subplot(2,1,1)
+    plot(time, array(Vm))
+    subplot(2,1,2)
+    plot(time, array(Im))
+    show()
+    # data.dumpFile(data.name + '.plot')
+    # demo.inject_table.dumpFile(demo.inject_table.name + '.plot')
+    print 'Finished simulation.'
 
 # 
 # Izhikevich.py ends here
