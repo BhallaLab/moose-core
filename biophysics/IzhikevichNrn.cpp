@@ -10,9 +10,9 @@
 // Maintainer: 
 // Created: Fri Apr  3 18:00:50 2009 (+0530)
 // Version: 
-// Last-Updated: Tue Apr  7 16:27:57 2009 (+0530)
-//           By: subhasis ray
-//     Update #: 187
+// Last-Updated: Fri Jun 11 13:49:37 2010 (+0530)
+//           By: Subhasis Ray
+//     Update #: 257
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -78,15 +78,15 @@ const Cinfo* initIzhikevichNrnCinfo()
         new ValueFinfo("d", ValueFtype1<double>::global(),
                        GFCAST(&IzhikevichNrn::getD),
                        RFCAST(&IzhikevichNrn::setD),
-                       "Parameter d in Izhikevich model."),
+                       "Parameter d in Izhikevich model. Unit is V/s."),
         new ValueFinfo("a", ValueFtype1<double>::global(),
                        GFCAST(&IzhikevichNrn::getA),
                        RFCAST(&IzhikevichNrn::setA),
-                       "Parameter a in Izhikevich model."),
+                       "Parameter a in Izhikevich model. Unit is s^-1"),
         new ValueFinfo("b", ValueFtype1<double>::global(),
                        GFCAST(&IzhikevichNrn::getB),
                        RFCAST(&IzhikevichNrn::setB),
-                       "The membrane potential."),
+                       "Parameter b in Izhikevich model. Unit is s^-1"),
         new ValueFinfo("Vm", ValueFtype1<double>::global(),
                        GFCAST(&IzhikevichNrn::getVm),
                        RFCAST(&IzhikevichNrn::setVm),
@@ -94,34 +94,38 @@ const Cinfo* initIzhikevichNrnCinfo()
         new ValueFinfo("u", ValueFtype1<double>::global(),
                        GFCAST(&IzhikevichNrn::getU),
                        RFCAST(&dummyFunc),
-                       "Parameter u in Izhikevich equation."),
+                       "Parameter u in Izhikevich equation. Unit is V/s^-1"),
         new ValueFinfo("Im", ValueFtype1<double>::global(),
                        GFCAST(&IzhikevichNrn::getInject),
                        RFCAST(&dummyFunc),
-                       "Total current going through the membrane."),
+                       "Total current going through the membrane. Unit is A."),
         new ValueFinfo("initVm", ValueFtype1<double>::global(),
                        GFCAST(&IzhikevichNrn::getInitVm),
                        RFCAST(&IzhikevichNrn::setInitVm),
-                       "Initial membrane potential."),
+                       "Initial membrane potential. Unit is V."),
         new ValueFinfo("initU", ValueFtype1<double>::global(),
                        GFCAST(&IzhikevichNrn::getInitU),
                        RFCAST(&IzhikevichNrn::setInitU),
-                       "Initial membrane potential."),
+                       "Initial value of u."),
         new ValueFinfo("alpha", ValueFtype1<double>::global(),
                        GFCAST(&IzhikevichNrn::getAlpha),
                        RFCAST(&IzhikevichNrn::setAlpha),
                        "Coefficient of v^2 in Izhikevich equation. Defaults to 0.04 in"
-                       " physiological unit. In SI it should be 40000.0"),
+                       " physiological unit. In SI it should be 40000.0. Unit is V^-1 s^-1"),
         new ValueFinfo("beta", ValueFtype1<double>::global(),
                         GFCAST(&IzhikevichNrn::getBeta),
                         RFCAST(&IzhikevichNrn::setBeta),
                        "Coefficient of v in Izhikevich model. Defaults to 5 in physiological"
-                       " unit, 5000.0 for SI units."),
+                       " unit, 5000.0 for SI units. Unit is s^-1"),
         new ValueFinfo("gamma", ValueFtype1<double>::global(),
                        GFCAST(&IzhikevichNrn::getGamma),
                        RFCAST(&IzhikevichNrn::setGamma),
                        "Constant term in Izhikevich model. Defaults to 140 in both"
-                       " physiological and SI units."),
+                       " physiological and SI units. unit is V/s."),
+        new ValueFinfo("Rm", ValueFtype1<double>::global(),
+                       GFCAST(&IzhikevichNrn::getRm),
+                       RFCAST(&IzhikevichNrn::setRm),
+                       "Hidden cefficient of input current term (I) in Izhikevich model. Defaults to 1e6 Ohm."),
         
         ///////////////////////////////
         // MsgSrc definition
@@ -188,19 +192,22 @@ static const Slot VmSrcSlot = initIzhikevichNrnCinfo()->getSlot("VmSrc");
 
 
 IzhikevichNrn::IzhikevichNrn():
-        alpha_(40000.0),
-        beta_(5000.0),
-        gamma_(140.0),
-        a_(20.0),
+        alpha_(40000.0), // 0.04 physiological unit
+        beta_(5000.0), // 5 physiological unit
+        gamma_(140.0), // 140 physiological unit
+        Rm_(1e6), // Assuming Izhikevich was using nA as unit of
+                  // current, 1e6 Ohm will be the scaling term for SI
+        a_(20.0), 
         b_(200.0),
-        c_(-0.065),
-        d_(2.0),
+        c_(-0.065), // -65 mV
+        d_(2.0), // assuming u is in mV/ms
         Vm_(-0.065),
         u_(-13.0),
-        Vmax_(0.03),
-        initVm_(-0.065),
-        initU_(-13.0),
-        sum_inject_(0.0)
+        Vmax_(0.03), // 30 mV
+        initVm_(-0.065),// -65 mV
+        initU_(-13.0), 
+        sum_inject_(0.0),
+        Im_(0.0)
 {}
 
 void IzhikevichNrn::setA(const Conn* conn, double value)
@@ -240,6 +247,16 @@ void IzhikevichNrn::setD(const Conn* conn, double value)
 double IzhikevichNrn::getD(Eref e)
 {
     return static_cast<IzhikevichNrn*>(e.data())->d_;
+}
+
+void IzhikevichNrn::setRm(const Conn* conn, double value)
+{
+    static_cast<IzhikevichNrn*>(conn->data())->Rm_ = value;
+}
+
+double IzhikevichNrn::getRm(Eref e)
+{
+    return static_cast<IzhikevichNrn*>(e.data())->Rm_;
 }                             
 void IzhikevichNrn::setVm(const Conn* conn, double value)       
 {
@@ -302,7 +319,7 @@ void IzhikevichNrn::setInject(const Conn* conn, double value)
 
 double IzhikevichNrn::getInject(Eref e)
 {
-    return static_cast<IzhikevichNrn*>(e.data())->sum_inject_;
+    return static_cast<IzhikevichNrn*>(e.data())->Im_;
 }                        
 
 void IzhikevichNrn::setInitVm(const Conn* conn, double value)    
@@ -329,19 +346,23 @@ void IzhikevichNrn::processFunc(const Conn* conn, ProcInfo proc)
 {
     double dt = proc->dt_;
     IzhikevichNrn* instance = static_cast<IzhikevichNrn*>(conn->data());
-    if (instance->Vm_ >= instance->Vmax_){
+    if (instance->Vm_ > instance->Vmax_){
         instance->Vm_ = instance->c_;
         instance->u_ += instance->d_;
+        send1<double>(conn->target(), VmSrcSlot, instance->Vmax_);
         send1<double>(conn->target(), eventSrcSlot, proc->currTime_);
     } else {
-        instance->Vm_ = instance->Vm_ *
-                ( 1.0 + dt * (instance->alpha_ * instance->Vm_ + instance->beta_ )) +
-                dt * (instance->gamma_ - instance->u_ + instance->sum_inject_);
-        instance->u_ = instance->u_ +
-                dt * (instance->a_ * (instance->b_ * instance->Vm_ - instance->u_));
+        double prevVm = instance->Vm_;
+        instance->Vm_ += dt * ((instance->alpha_ * instance->Vm_ + instance->beta_) * instance->Vm_
+                               + instance->gamma_ - instance->u_ + 1e3 * instance->Rm_ * instance->sum_inject_);
+        // (c * Rm * I) has unit of mV/ms. If I is in nA, Rm
+        // is 1e6 Ohm, then c has to be 1 ms^-1 = 1e3 s^-1, hence 1e3 * instance->Rm_ * instance->sum_inject_        
+        instance->u_ += dt * instance->a_ * (instance->b_ * prevVm - instance->u_);
+        send1<double>(conn->target(), VmSrcSlot, instance->Vm_);
+
     }
+    instance->Im_ = instance->sum_inject_;
     instance->sum_inject_ = 0.0;
-    send1<double>(conn->target(), VmSrcSlot, instance->Vm_);
 }
 
 void IzhikevichNrn::reinitFunc(const Conn* conn, ProcInfo proc)
@@ -351,6 +372,7 @@ void IzhikevichNrn::reinitFunc(const Conn* conn, ProcInfo proc)
     instance->sum_inject_ = 0.0;
     instance->Vm_ = instance->initVm_;
     instance->u_ = instance->initU_;
+    instance->Im_ = 0.0;
 	//cout << "IzhikevichNrn::reinitFunc - end." << endl;
    
 }
