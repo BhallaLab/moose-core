@@ -6217,4 +6217,5 @@ Still to do the MMenz case.
 
 ============================================================================
 15 June 2010
-First pass MMEnz implementation. Compiles.
+First pass MMEnz implementation. Compiles. Checkin 1869.
+Second pass: Sets up the MMenz messaging.

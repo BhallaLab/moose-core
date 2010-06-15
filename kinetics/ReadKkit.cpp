@@ -25,6 +25,8 @@ typedef int Id; // dummy
 #include "header.h"
 #include "ReadKkit.h"
 
+const double ReadKkit::EPSILON = 1.0e-15;
+
 unsigned int chopLine( const string& line, vector< string >& ret )
 {
 	ret.resize( 0 );
@@ -65,6 +67,7 @@ ReadKkit::ReadKkit()
 	numMols_( 0 ),
 	numReacs_( 0 ),
 	numEnz_( 0 ),
+	numMMenz_( 0 ),
 	numPlot_( 0 ),
 	numOthers_( 0 ),
 	lineNum_( 0 ),
@@ -145,6 +148,7 @@ void ReadKkit::innerRead( ifstream& fin )
 			numMols_ << " molecules, " << 
 			numReacs_ << " reacs, " << 
 			numEnz_ << " enzs, " << 
+			numMMenz_ << " MM enzs, " << 
 			numOthers_ << " others," <<
 			" PlotDt = " << plotdt_ <<
 			endl;
@@ -352,14 +356,26 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 	Id pa = findParent( head );
 	assert ( pa != Id() );
 
-	double k1 = atof( args[ reacMap_[ "k1" ] ].c_str() );
-	double k2 = atof( args[ reacMap_[ "k2" ] ].c_str() );
-	double k3 = atof( args[ reacMap_[ "k3" ] ].c_str() );
-	double nComplexInit = atof( args[ reacMap_[ "nComplexInit" ] ].c_str());
-	double vol = atof( args[ reacMap_[ "vol" ] ].c_str());
-	bool isMM = atoi( args[ reacMap_[ "usecomplex" ] ].c_str());
+	double k1 = atof( args[ enzMap_[ "k1" ] ].c_str() );
+	double k2 = atof( args[ enzMap_[ "k2" ] ].c_str() );
+	double k3 = atof( args[ enzMap_[ "k3" ] ].c_str() );
+	double nComplexInit = atof( args[ enzMap_[ "nComplexInit" ] ].c_str());
+	double vol = atof( args[ enzMap_[ "vol" ] ].c_str());
+	bool isMM = atoi( args[ enzMap_[ "usecomplex" ] ].c_str());
 
-	if ( !isMM ) {
+	if ( isMM ) {
+		Id enz = shell_->doCreate( "MMenz", pa, tail, dim );
+		string mmEnzPath = args[2].substr( 10 );
+		mmEnzIds_[ mmEnzPath ] = enz; 
+
+		assert( k1 > EPSILON );
+		double Km = ( k2 + k3 ) / k1;
+		Field< double >::set( enz.eref(), "Km", Km );
+		Field< double >::set( enz.eref(), "kcat", k3 );
+		Id info = buildInfo( enz, enzMap_, args );
+		numMMenz_++;
+		return enz;
+	} else {
 		Id enz = shell_->doCreate( "Enz", pa, tail, dim );
 		string enzPath = args[2].substr( 10 );
 		enzIds_[ enzPath ] = enz; 
@@ -382,8 +398,6 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 		Id info = buildInfo( enz, enzMap_, args );
 		numEnz_++;
 		return enz;
-	} else {
-		return Id();
 	}
 }
 
@@ -516,13 +530,22 @@ void ReadKkit::addmsg( const vector< string >& args)
 		}
 		else if ( args[4] == "sA" && args[5] == "B" ) {
 			// Msg from enzyme to substrate.
-			innerAddMsg( src, enzIds_, "sub", dest, molIds_, "reac" );
+			if ( mmEnzIds_.find( src ) == mmEnzIds_.end() )
+				innerAddMsg( src, enzIds_, "sub", dest, molIds_, "reac" );
+			else
+				innerAddMsg( src, mmEnzIds_, "sub", dest, molIds_, "reac" );
 		}
 	}
 	if ( args[3] == "ENZYME" ) { // Msg from enz mol to enz site
-		innerAddMsg( src, molIds_, "reac", dest, enzIds_, "enz" );
+		if ( mmEnzIds_.find( dest ) == mmEnzIds_.end() )
+			innerAddMsg( src, molIds_, "reac", dest, enzIds_, "enz" );
+		else
+			innerAddMsg( src, molIds_, "nOut", dest, mmEnzIds_, "enz" );
 	}
 	if ( args[3] == "MM_PRD" ) { // Msg from enz to Prd mol
-		innerAddMsg( src, enzIds_, "prd", dest, molIds_, "reac" );
+		if ( mmEnzIds_.find( src ) == mmEnzIds_.end() )
+			innerAddMsg( src, enzIds_, "prd", dest, molIds_, "reac" );
+		else
+			innerAddMsg( src, mmEnzIds_, "prd", dest, molIds_, "reac" );
 	}
 }

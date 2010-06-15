@@ -13,6 +13,7 @@
 void testReadKkit()
 {
 	ReadKkit rk;
+	// rk.read( "test.g", "dend", 0 );
 	rk.read( "dend_v26.g", "dend", 0 );
 
 	cout << "." << flush;

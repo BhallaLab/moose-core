@@ -86,6 +86,7 @@ class ReadKkit
 		unsigned int numMols_;
 		unsigned int numReacs_;
 		unsigned int numEnz_;
+		unsigned int numMMenz_;
 		unsigned int numPlot_;
 		unsigned int numOthers_;
 
@@ -99,8 +100,11 @@ class ReadKkit
 		map< string, Id > molIds_;
 		map< string, Id > reacIds_;
 		map< string, Id > enzIds_;
+		map< string, Id > mmEnzIds_;
 
 		Shell* shell_;
+
+		static const double EPSILON;
 };
 
 #endif // READ_KKIT_H
