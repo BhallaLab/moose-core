@@ -45,6 +45,13 @@ const Cinfo* Mol::initCinfo()
 			&Mol::getNinit
 		);
 
+		static ValueFinfo< Mol, double > diffConst(
+			"diffConst",
+			"Diffusion constant of molecule",
+			&Mol::setDiffConst,
+			&Mol::getDiffConst
+		);
+
 		static ValueFinfo< Mol, double > conc(
 			"conc",
 			"Concentration of molecules",
@@ -81,6 +88,7 @@ const Cinfo* Mol::initCinfo()
 	static Finfo* molFinfos[] = {
 		&n,	// Value
 		&nInit,	// Value
+		&diffConst,	// Value
 		&process,			// DestFinfo
 		&group,			// DestFinfo
 		&reac,				// SharedFinfo
@@ -190,4 +198,14 @@ void Mol::setConcInit( double v )
 double Mol::getConcInit() const
 {
 	return nInit_ / size_;
+}
+
+void Mol::setDiffConst( double v )
+{
+	diffConst_ = v;
+}
+
+double Mol::getDiffConst() const
+{
+	return diffConst_;
 }

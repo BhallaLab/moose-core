@@ -310,8 +310,18 @@ void ReadKkit::undump( const vector< string >& args)
 		buildText( args );
 	else if ( args[1] == "xplot" )
 		buildPlot( args );
+	else if ( args[1] == "xgraph" )
+		buildGraph( args );
 	else if ( args[1] == "group" )
 		buildGroup( args );
+	else if ( args[1] == "geometry" )
+		buildGeometry( args );
+	else if ( args[1] == "xcoredraw" )
+		;
+	else if ( args[1] == "xtree" )
+		;
+	else if ( args[1] == "xtext" )
+		;
 	else
 		cout << "ReadKkit::undump: Do not know how to build '" << args[1] <<
 		"'\n";
@@ -346,6 +356,11 @@ Id ReadKkit::buildReac( const vector< string >& args )
 
 	numReacs_++;
 	return reac;
+}
+
+void ReadKkit::assignCompartment( Id mol, double vol )
+{
+	;
 }
 
 Id ReadKkit::buildEnz( const vector< string >& args )
@@ -389,6 +404,8 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 		Id cplx = shell_->doCreate( "Mol", enz, cplxName, dim );
 		molIds_[ cplxPath ] = enz; 
 		Field< double >::set( cplx.eref(), "nInit", nComplexInit );
+
+		assignCompartment( cplx, vol );
 
 		bool ret = shell_->doAddMsg( "single", 
 			FullId( enz, 0 ), "cplx",
@@ -463,6 +480,13 @@ Id ReadKkit::buildMol( const vector< string >& args )
 	molIds_[ args[2].substr( 10 ) ] = mol; 
 
 	Field< double >::set( mol.eref(), "nInit", nInit );
+	Field< double >::set( mol.eref(), "diffConst", diffConst );
+
+	if ( slaveEnable == 4 ) {
+		// Field< bool >::set( mol.eref(), "buffer", 1 );
+	}
+
+	assignCompartment( mol, vol );
 
 	Id info = buildInfo( mol, molMap_, args );
 
@@ -474,6 +498,20 @@ Id ReadKkit::buildMol( const vector< string >& args )
 		*/
 	numMols_++;
 	return mol;
+}
+
+Id ReadKkit::buildGeometry( const vector< string >& args )
+{
+	Id geometry;
+	numOthers_++;
+	return geometry;
+}
+
+Id ReadKkit::buildGraph( const vector< string >& args )
+{
+	Id graph;
+	numOthers_++;
+	return graph;
 }
 
 Id ReadKkit::buildPlot( const vector< string >& args )

@@ -29,6 +29,8 @@ class Mol: public Data
 		double getN() const;
 		void setNinit( double v );
 		double getNinit() const;
+		void setDiffConst( double v );
+		double getDiffConst() const;
 
 		void setConc( double v );
 		double getConc() const;
@@ -49,6 +51,7 @@ class Mol: public Data
 		double n_;
 		double nInit_;
 		double size_;
+		double diffConst_;
 		double A_; // Internal state variables
 		double B_;
 };

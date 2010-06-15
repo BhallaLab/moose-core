@@ -6219,4 +6219,9 @@ Still to do the MMenz case.
 15 June 2010
 First pass MMEnz implementation. Compiles. Checkin 1869.
 Second pass: Sets up the MMenz messaging. Checkin 1870.
-Added in the test file dend_v26.g that I used.
+Added in the test file dend_v26.g that I used. Checkin 1871.
+
+Minor cleanups for unused variables vol and slave_enable. For now I've
+just put in hooks for their future use.
+Also implemented Pool::diffConst field.
+

@@ -52,6 +52,8 @@ class ReadKkit
 		unsigned int loadTab(  const vector< string >& args );
 		Id buildGroup( const vector< string >& args );
 		Id buildText( const vector< string >& args );
+		Id buildGraph( const vector< string >& args );
+		Id buildGeometry( const vector< string >& args );
 		Id buildInfo( Id parent, map< string, int >& m, 
 			const vector< string >& args );
 
@@ -68,6 +70,7 @@ class ReadKkit
 		void objdump( const vector< string >& args );
 		void textload( const vector< string >& args );
 		void loadtab( const vector< string >& args );
+		void assignCompartment( Id mol, double vol );
 
 		// static const Cinfo* initCinfo();
 	private:
