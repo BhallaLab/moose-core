@@ -687,4 +687,16 @@ Q of the target Element.
 
 ------------------------------------------------------------------------------
 
+Managing space, specially in chemical models.
+
+Conceptually, each Compartment is enclosed by one or more Geometry
+objects. There may or may not be an adjacent Compartment on the other
+side. The Compartment has a vector of Boundary objects, which are
+managed in a FieldElement. 
+The geometry/adjacency relationships are defined by messages from the
+Boundary FieldElement.
+Compartments also have a 'size' and 'dimension'. I haven't yet worked
+out a general way to get this from an arbitrary set of Geometries
+around them, but in principle it can be obtained from this.
+Again, in principle, the size may change during a simulation.
 

@@ -14,6 +14,7 @@ OBJ = \
 	Reac.o	\
 	Enz.o	\
 	MMenz.o	\
+	Boundary.o	\
 	ChemCompt.o	\
 	ReadKkit.o	\
 	testKinetics.o	\
@@ -31,6 +32,7 @@ Mol.o:	Mol.h ../basecode/Data.h
 Reac.o:	Reac.h ../basecode/Data.h
 Enz.o:	Enz.h ../basecode/Data.h
 MMenz.o:	MMenz.h ../basecode/Data.h
+Boundary.o:	Boundary.h ../basecode/Data.h
 ChemCompt.o:	ChemCompt.h ../basecode/Data.h
 ReadKkit.o:	ReadKkit.h
 Tab.o:	Tab.h ../basecode/Data.h

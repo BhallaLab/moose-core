@@ -6223,5 +6223,51 @@ Added in the test file dend_v26.g that I used. Checkin 1871.
 
 Minor cleanups for unused variables vol and slave_enable. For now I've
 just put in hooks for their future use.
-Also implemented Pool::diffConst field.
+Also implemented Pool::diffConst field. Checkin 1874.
 
+- Define compartment objects and some default geometries.
+- Make /kinetics a compartment with the default volume
+- The assignCompartment function maintains a list of compartments
+	with different volumes. Every time a new volume appears,
+	it creates a new compartment. For now assume that all
+	objects with the same volume are in the same compartment.
+	Returns compartment id.
+- After build is done, then we scan all groups to see if all contents
+	are in same compartment. We need to build up a map of
+	all mol ids, which refer to their compartment.
+	Are all mols in same compartment?			(A)
+	- Yes: If same compt as parent of group, retain.
+	- Yes: If differs from parent of group:
+		Has new compt been instantiated?
+		- Yes: move group to new compt
+		- No: Make new compt. Move group into it.
+	- No: Split group into same/diff compartment parts.
+		With each part of group, goto (A). 
+
+- Groups are invisible to a compartment. Any molecule looking for its
+	volume or geometry goes ancestorwise till it finds a compt.
+- 
+
+
+compartment has a collection of boundaries
+	- Each is a geom.
+	- Simple compartments are just enclosed. Single boundary.
+	- Complex compartments have different diffusion rates on
+		each boundary. E.g., cylindrical compartment part
+		of a long cylinder.
+	- At each boundary there is a possible adjacent compartment.
+		- Can we have both the surface compt and also the
+			next one out?
+		- Adjacent compartments may be dimension shifted.
+			(e.g., cytoplasm to membrane)
+	- All compartments have a size.
+
+	- A membrane compartment may have 
+		membranes on others. Multiple boundaries.
+	- Compartment as a whole has a volume
+
+	- How do we square with 'outside' concept of current SBML?
+
+Worked out ChemCompt and Boundary to set up compartmentalization and 
+interfaces between compartments. Will also need a geometry class for these
+to connect to.

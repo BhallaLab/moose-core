@@ -8,11 +8,12 @@
 **********************************************************************/
 
 #include "header.h"
+#include "Boundary.h"
 #include "ChemCompt.h"
 
-static SrcFinfo1< double > size( 
-		"size", 
-		"Sends out # of molecules on each timestep"
+static SrcFinfo0 requestSize( 
+		"requestSize", 
+		"Requests size from geometry. "
 );
 
 const Cinfo* ChemCompt::initCinfo()
@@ -20,7 +21,7 @@ const Cinfo* ChemCompt::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// Field Definitions
 		//////////////////////////////////////////////////////////////
-		static ValueFinfo< ChemCompt, double > n(
+		static ValueFinfo< ChemCompt, double > size(
 			"size",
 			"Size of compartment",
 			&ChemCompt::setSize,
@@ -45,6 +46,18 @@ const Cinfo* ChemCompt::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
 		//////////////////////////////////////////////////////////////
+
+		//////////////////////////////////////////////////////////////
+		// Field Element for the boundaries
+		//////////////////////////////////////////////////////////////
+		static FieldElementFinfo< ChemCompt, Boundary > boundaryFinfo( 
+			"boundary", 
+			"Field Element for Boundaries",
+			Boundary::initCinfo(),
+			&ChemCompt::lookupBoundary,
+			&ChemCompt::setNumBoundary,
+			&ChemCompt::getNumBoundary
+		);
 
 	static Finfo* chemComptFinfos[] = {
 		&size,	// Value
@@ -84,6 +97,22 @@ void ChemCompt::process( const ProcInfo* p, const Eref& e )
 ;
 }
 
+/*
+bool ChemCompt::isInside( double x, double y, double z )
+{
+}
+*/
+
+void ChemCompt::extent( DataId di, double volume, double area, double perimeter )
+{
+	if ( dimensions_ == 3 ) 
+		size_ = volume;
+	else if ( dimensions_ == 2 ) 
+		size_ = area;
+	else if ( dimensions_ <= 1 ) 
+		size_ = perimeter;
+}
+
 //////////////////////////////////////////////////////////////
 // Field Definitions
 //////////////////////////////////////////////////////////////
@@ -100,10 +129,37 @@ double ChemCompt::getSize() const
 
 void ChemCompt::setDimensions( unsigned int v )
 {
-	dimensions_ = v;
+	if ( v <= 3 )
+		dimensions_ = v;
+	if ( dimensions_ == 0 )
+		dimensions_ = 1;
 }
 
 unsigned int ChemCompt::getDimensions() const
 {
 	return dimensions_;
+}
+
+//////////////////////////////////////////////////////////////
+// Element Field Definitions
+//////////////////////////////////////////////////////////////
+
+Boundary* ChemCompt::lookupBoundary( unsigned int index )
+{
+	if ( index < boundaries_.size() )
+		return &( boundaries_[index] );
+	cout << "Error: ChemCompt::lookupBoundary: Index " << index << 
+		" >= vector size " << boundaries_.size() << endl;
+	return 0;
+}
+
+void ChemCompt::setNumBoundary( unsigned int num )
+{
+	assert( num < 1000 ); // Pretty unlikely upper limit
+	boundaries_.resize( num );
+}
+
+unsigned int ChemCompt::getNumBoundary() const
+{
+	return boundaries_.size();
 }
