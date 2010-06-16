@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri May 28 14:42:33 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Jun 15 20:21:21 2010 (+0530)
+# Last-Updated: Wed Jun 16 10:09:38 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 684
+#     Update #: 701
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -100,9 +100,7 @@ class IzhikevichDemo:
         self.context.setClock(0, self.dt)
         self.context.setClock(1, self.dt)
         self.context.setClock(2, self.dt)
-        self.pulsegen = moose.PulseGen('pulsegen')
         self.neuron = None
-        self.current = 'tonic_spiking'
 
     def setup(self, key):
         neuron = self._get_neuron(key)
@@ -146,7 +144,7 @@ class IzhikevichDemo:
             params = IzhikevichDemo.parameters[key]
         except KeyError, e:
             print ' %s : Invalid neuron type. The valid types are:' % (key)
-            for key in IzhikevichDemo.paramteres:
+            for key in IzhikevichDemo.parameters:
                 print key
             raise
         neuron = moose.IzhikevichNrn(key)
@@ -157,7 +155,7 @@ class IzhikevichDemo:
         neuron.d = params[4]  # d is in mV/ms = V/s
         neuron.initVm = params[6] * 1e-3 # mV -> V
         neuron.Vmax = 0.03 # mV -> V
-        if key is not 'accommodation':
+        if key != 'accommodation':
             neuron.initU = neuron.initVm * neuron.b
         else:
             neuron.initU = -16.0 # u is in mV/ms = V/s
@@ -175,50 +173,50 @@ class IzhikevichDemo:
         secondDelay = 1e6
         secondWidth = 0.0
         secondLevel = 0.0
-        if key is 'tonic_spiking':
+        if key == 'tonic_spiking':
             firstDelay = 10e-3
-        elif key is 'phasic_spiking':
+        elif key == 'phasic_spiking':
             firstDelay = 20e-3
-        elif key is 'tonic_bursting':
+        elif key == 'tonic_bursting':
             firstDelay = 22e-3
-        elif key is 'phasic_bursting':
+        elif key == 'phasic_bursting':
             firstDelay = 20e-3
-        elif key is 'mixed_mode':
+        elif key == 'mixed_mode':
             firstDelay = 16e-3
-        elif key is 'spike_freq_adapt':
+        elif key == 'spike_freq_adapt':
             firstDelay = 8.5e-3
-        elif key is 'spike_latency':
+        elif key == 'spike_latency':
             firstDelay = 10e-3
             firstWidth = 3e-3
-        elif key is 'subthresh_osc':
+        elif key == 'subthresh_osc':
             firstDelay = 20e-3
             firstWidth = 5e-3
-        elif key is 'rebound_spike':
+        elif key == 'rebound_spike':
             firstDelay = 20e-3
             firstWidth = 5e-3
-        elif key is 'rebound_burst':
+        elif key == 'rebound_burst':
             firstDelay = 20e-3
             firstWidth = 5e-3
-        elif key is 'bistable':
+        elif key == 'bistable':
             firstDelay = 300e-3/8
             firstWidth = 5e-3
             secondLevel = firstLevel
             secondWidth = 5e-3
             secondDelay = 216e-3 - firstDelay
             baseLevel = 0.24e-9
-        elif key is 'DAP':
+        elif key == 'DAP':
             firstDelay = 9e-3
             firstWidth = 2e-3
-        elif key is 'iispike' or key is 'iiburst':
+        elif (key == 'iispike') or (key == 'iiburst'):
             baseLevel = 80e-9
             firstDelay = 50e-3
             firstWidth = 200e-3
-        elif key is 'Class_1':
+        elif key == 'Class_1':
             input_table = self._make_Class_1_input()
             input_table.connect('outputSrc', self._get_neuron(key), 'injectDest')
             self.inputs[key] = input_table
             return input_table
-        elif key is 'Class_2':
+        elif key == 'Class_2':
             input_table = self._make_Class_2_input()
             input_table.connect('outputSrc', self._get_neuron(key), 'injectDest')
             self.inputs[key] = input_table
@@ -261,7 +259,8 @@ class IzhikevichDemo:
         input_table.xdivs = int(ceil((input_table.xmax - input_table.xmin) / input_table.stepSize))
         input_table[0] = 0.0
         for i in range(1, len(input_table)):
-            input_table[i] = 0.075e-9 * i * self.dt * 1e3
+            # matlab code: if (t>T1) I=(0.075*(t-T1)); else I=0;
+            input_table[i] = (0.075 * i * self.dt * 1e3) * 1e-9
         return input_table
 
     def _make_Class_2_input(self):
@@ -273,9 +272,10 @@ class IzhikevichDemo:
         input_table.xdivs = int(ceil((input_table.xmax - input_table.xmin) / input_table.stepSize))
         input_table[0] = -0.5e-9
         for i in range(1, len(input_table)):
-            # The matlab code is:if (t>T1) I=-0.5+(0.015*(t-T1)); else I=-0.5
+            # The matlab code is: if (t>T1) I=-0.5+(0.015*(t-T1)); else I=-0.5
             input_table[i] = (-0.5 + 0.015 * i * self.dt * 1e3) * 1e-9 # convert dt from s to ms, and convert total current from nA to A.
         return input_table
+
         
 import sys
 if __name__ == '__main__':
