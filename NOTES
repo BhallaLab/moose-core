@@ -6270,4 +6270,32 @@ compartment has a collection of boundaries
 
 Worked out ChemCompt and Boundary to set up compartmentalization and 
 interfaces between compartments. Will also need a geometry class for these
-to connect to.
+to connect to. Checkin 1875.
+
+I could scan through and find all volumes.
+I could scan through and put all Ids in a list by volume
+I could create compartments on the fly as soon as I find a new volume.
+	It could be on the current group
+	It could be on /kinetics
+		But if the compt
+I want /kinetics to have the biggest volume, others inside it.
+
+First scan: find all volumes
+Assign /kinetics to biggest, put all compts right on /kinetics
+Second scan: find groups that have a single volume. Put on appropriate
+	compartment. May lose nesting?
+	Groups that have multiple volumes: split up into volume-defined groups.
+	Put onto appropriate compartment.
+
+Massive struggle to get the compartmentalizing done. For now I'll skip it
+to test that the model gets loaded and can run. Next:
+- Implement tables to test output
+- Implement the solver. This is what this exercise was really about.
+- Then I can come back to the compartmentalization.
+- Look at the sbml reader.
+
+
+Starting on tables. Implemented them from scratch, not bothering with too
+much backward compatibility in this round. The table entries are 
+handled as FieldElements.
+

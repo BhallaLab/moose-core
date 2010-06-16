@@ -70,7 +70,8 @@ class ReadKkit
 		void objdump( const vector< string >& args );
 		void textload( const vector< string >& args );
 		void loadtab( const vector< string >& args );
-		void assignCompartment( Id mol, double vol );
+		void separateVols( Id mol, double vol );
+		void assignCompartments();
 
 		// static const Cinfo* initCinfo();
 	private:
@@ -104,6 +105,10 @@ class ReadKkit
 		map< string, Id > reacIds_;
 		map< string, Id > enzIds_;
 		map< string, Id > mmEnzIds_;
+
+		vector< double > vols_;
+		vector< vector< Id > > mols_;
+		vector< Id > compartments_;
 
 		Shell* shell_;
 

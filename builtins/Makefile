@@ -13,6 +13,8 @@ OBJ = \
 	Arith.o	\
 	Group.o	\
 	Mdouble.o	\
+	Table.o	\
+	TableEntry.o	\
 	testBuiltins.o	\
 
 HEADERS = \
@@ -25,6 +27,8 @@ $(OBJ)	: $(HEADERS)
 Arith.o:	Arith.h
 Group.o:	Group.h
 Mdouble.o:		Mdouble.h
+Table.o:		Table.h TableEntry.h
+TableEntry.o:		TableEntry.h
 testBuiltins.o:	Group.h Arith.h ../msg/DiagonalMsg.h
 
 .cpp.o:

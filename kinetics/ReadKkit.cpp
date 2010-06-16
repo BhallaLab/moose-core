@@ -203,8 +203,11 @@ ReadKkit::ParseMode ReadKkit::readInit( const string& line )
 		Id kinetics = Neutral::child( Id().eref(), "kinetics" );
 		if ( kinetics == Id() ) {
 			vector< unsigned int > dims( 1, 1 );
-			shell_->doCreate( "Neutral", Id(), "kinetics", dims );
+			kinetics = 
+			shell_->doCreate( "ChemCompt", Id(), "kinetics", dims );
 		}
+		assert( kinetics != Id() );
+		assert( kinetics.eref().element()->getName() == "kinetics" );
 		return DATA;
 	}
 
@@ -231,6 +234,8 @@ void ReadKkit::read(
 	vector< unsigned int > dimensions( 1, 1 );
 	// Id model = s->doCreate( "Neutral", pa, cellname, dimensions );
 	innerRead( fin );
+
+	assignCompartments();
 }
 
 void ReadKkit::readData( const string& line )
@@ -358,9 +363,48 @@ Id ReadKkit::buildReac( const vector< string >& args )
 	return reac;
 }
 
-void ReadKkit::assignCompartment( Id mol, double vol )
+void ReadKkit::separateVols( Id mol, double vol )
 {
-	;
+	static const double TINY = 1e-3;
+	for ( unsigned int i = 0 ; i < vols_.size(); ++i ) {
+		if ( fabs( vols_[i] - vol ) / ( vols_[i] + vol ) < TINY ) {
+			mols_[i].push_back( mol );
+		}
+	}
+}
+
+// We assume that the biggest compartment contains all the rest.
+// This is not true in synapses, where they are adjacent.
+void ReadKkit::assignCompartments()
+{
+	static const double TINY = 1e-3;
+	double max = 0.0;
+	Id kinetics = Neutral::child( Id().eref(), "kinetics" );
+	assert( kinetics != Id() );
+	for ( unsigned int i = 0 ; i < vols_.size(); ++i ) {
+		if ( max < vols_[i] )
+			max = vols_[i];
+	}
+
+	Field< double >::set( kinetics.eref(), "size", max );
+	vector< unsigned int > dims( 1, 1 );
+
+	for ( unsigned int i = 0 ; i < vols_.size(); ++i ) {
+		if ( fabs ( max - vols_[i] ) / (max + vols_[i] ) > TINY ) {
+			stringstream ss;
+			ss << "compartment_" << i;
+			Id compt = shell_->doCreate( 
+				"ChemCompartment", kinetics, ss.str(), dims );
+			compartments_.push_back( compt );
+		} else {
+			compartments_.push_back( kinetics );
+		}
+	}
+	// Set up a map/vector of molecule Ids with their volumes.
+	// Associate each group with one or more volumes
+	// If more than one, then the group is split. This is done by
+	// making a duplicate with the same name on the appropriate compartment.
+	// Ignore any intermediate group nesting. Rare anyway.
 }
 
 Id ReadKkit::buildEnz( const vector< string >& args )
@@ -405,7 +449,7 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 		molIds_[ cplxPath ] = enz; 
 		Field< double >::set( cplx.eref(), "nInit", nComplexInit );
 
-		assignCompartment( cplx, vol );
+		separateVols( cplx, vol );
 
 		bool ret = shell_->doAddMsg( "single", 
 			FullId( enz, 0 ), "cplx",
@@ -486,7 +530,7 @@ Id ReadKkit::buildMol( const vector< string >& args )
 		// Field< bool >::set( mol.eref(), "buffer", 1 );
 	}
 
-	assignCompartment( mol, vol );
+	separateVols( mol, vol );
 
 	Id info = buildInfo( mol, molMap_, args );
 
