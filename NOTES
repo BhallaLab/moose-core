@@ -6294,10 +6294,16 @@ to test that the model gets loaded and can run. Next:
 - Then I can come back to the compartmentalization.
 - Look at the sbml reader.
 
+============================================================================
+16 June 2010
 
 Starting on tables. Implemented them from scratch, not bothering with too
 much backward compatibility in this round. The table entries are 
 handled as FieldElements. Checkin 1878.
 
 Put in first pass unit test for Table acting as a buffer for incoming
-data.
+data. Checkin 1879.
+
+Put in a manual check that the table can dump data into xplot form. 
+Commented out after checking.
+Coded in the details for ReadKkit to talk to tables as plot substitutes.

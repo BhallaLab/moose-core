@@ -105,6 +105,7 @@ class ReadKkit
 		map< string, Id > reacIds_;
 		map< string, Id > enzIds_;
 		map< string, Id > mmEnzIds_;
+		map< string, Id > plotIds_;
 
 		vector< double > vols_;
 		vector< vector< Id > > mols_;

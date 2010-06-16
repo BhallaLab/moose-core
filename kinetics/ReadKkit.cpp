@@ -150,6 +150,7 @@ void ReadKkit::innerRead( ifstream& fin )
 			numEnz_ << " enzs, " << 
 			numMMenz_ << " MM enzs, " << 
 			numOthers_ << " others," <<
+			numPlot_ << " plots," <<
 			" PlotDt = " << plotdt_ <<
 			endl;
 }
@@ -553,14 +554,31 @@ Id ReadKkit::buildGeometry( const vector< string >& args )
 
 Id ReadKkit::buildGraph( const vector< string >& args )
 {
-	Id graph;
+	static vector< unsigned int > dim( 1, 1 );
+
+	string head;
+	string tail = pathTail( args[2], head );
+
+	Id pa = shell_->doFind( head );
+	assert( pa == Id() );
+	Id graph = shell_->doCreate( "Neutral", pa, tail, dim );
 	numOthers_++;
 	return graph;
 }
 
 Id ReadKkit::buildPlot( const vector< string >& args )
 {
-	Id plot;
+	static vector< unsigned int > dim( 1, 1 );
+
+	string head;
+	string tail = pathTail( args[2], head );
+
+	Id pa = shell_->doFind( head );
+	assert( pa != Id() );
+	Id plot = shell_->doCreate( "Table", pa, tail, dim );
+
+	plotIds_[ args[2].substr( 10 ) ] = plot; 
+
 	numPlot_++;
 	return plot;
 }
@@ -618,16 +636,19 @@ void ReadKkit::addmsg( const vector< string >& args)
 				innerAddMsg( src, mmEnzIds_, "sub", dest, molIds_, "reac" );
 		}
 	}
-	if ( args[3] == "ENZYME" ) { // Msg from enz mol to enz site
+	else if ( args[3] == "ENZYME" ) { // Msg from enz mol to enz site
 		if ( mmEnzIds_.find( dest ) == mmEnzIds_.end() )
 			innerAddMsg( src, molIds_, "reac", dest, enzIds_, "enz" );
 		else
 			innerAddMsg( src, molIds_, "nOut", dest, mmEnzIds_, "enz" );
 	}
-	if ( args[3] == "MM_PRD" ) { // Msg from enz to Prd mol
+	else if ( args[3] == "MM_PRD" ) { // Msg from enz to Prd mol
 		if ( mmEnzIds_.find( src ) == mmEnzIds_.end() )
 			innerAddMsg( src, enzIds_, "prd", dest, molIds_, "reac" );
 		else
 			innerAddMsg( src, mmEnzIds_, "prd", dest, molIds_, "reac" );
+	}
+	else if ( args[3] == "PLOT" ) { // Time-course output for molecule
+		innerAddMsg( src, molIds_, "nOut", dest, plotIds_, "input" );
 	}
 }

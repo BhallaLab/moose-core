@@ -201,6 +201,10 @@ void testTable()
 		double ret = Field< double >::get( temp, "value" );
 		assert( fabs( ret - sqrt( i ) ) < 1e-6 );
 	}
+	/*
+	SetGet2< string, string >::set( 
+		tabid.eref(), "xplot", "testfile", "testplot" );
+		*/
 	tabentry.destroy();
 	tabid.destroy();
 	cout << "." << flush;

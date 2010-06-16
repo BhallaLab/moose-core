@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include <fstream>
 #include "TableEntry.h"
 #include "Table.h"
 
@@ -49,6 +50,11 @@ const Cinfo* Table::initCinfo()
 			"Fills spike timings into the Table. Signal has to exceed thresh",
 			new OpFunc1< Table, double >( &Table::spike ) );
 
+		static DestFinfo xplot( "xplot",
+			"Dumps table contents to xplot-format file. "
+			"Argument 1 is filename, argument 2 is plotname",
+			new OpFunc2< Table, string, string >( &Table::xplot ) );
+
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
 		//////////////////////////////////////////////////////////////
@@ -70,6 +76,7 @@ const Cinfo* Table::initCinfo()
 		&group,			// DestFinfo
 		&input,			// DestFinfo
 		&spike,			// DestFinfo
+		&xplot,			// DestFinfo
 		&output,		// SrcFinfo
 		&outputLoop,		// SrcFinfo
 		&tableEntryFinfo,	// FieldElementFinfo
@@ -136,6 +143,16 @@ void Table::spike( double v )
 {
 	if ( v > threshold_ )
 		vec_.push_back( lastTime_ );
+}
+
+void Table::xplot( string fname, string plotname )
+{
+	ofstream fout( fname.c_str(), ios_base::app | ios_base::out );
+	fout << "%newplot\n";
+	fout << "%plotname " << plotname << "\n";
+	for ( vector< double >::iterator i = vec_.begin(); i != vec_.end(); ++i)
+		fout << *i << endl;
+	fout << "\n";
 }
 
 //////////////////////////////////////////////////////////////

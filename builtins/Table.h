@@ -39,6 +39,7 @@ class Table: public Data
 
 		void input( double v );
 		void spike( double v );
+		void xplot( string file, string plotname );
 
 		//////////////////////////////////////////////////////////////////
 		// Lookup funcs for table
