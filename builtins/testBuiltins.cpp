@@ -14,6 +14,7 @@
 #include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
 #include "Arith.h"
+#include "Table.h"
 
 void testArith()
 {
@@ -181,10 +182,35 @@ void testMpiFibonacci()
 	cout << "." << flush;
 }
 
+void testTable()
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< unsigned int > dims( 1, 1 );
+	Id tabid = shell->doCreate( "Table", Id(), "tab", dims );
+	assert( tabid != Id() );
+	Id tabentry( tabid.value() + 1 );
+	Table* t = reinterpret_cast< Table* >( tabid.eref().data() );
+	for ( unsigned int i = 0; i < 100; ++i ) {
+		t->input( sqrt( i ) );
+	}
+	unsigned int numEntries = Field< unsigned int >::get( 
+		tabid.eref(), "num_table" );
+	assert( numEntries = 100 );
+	for ( unsigned int i = 0; i < 100; ++i ) {
+		Eref temp( tabentry(), DataId( 0, i ) );
+		double ret = Field< double >::get( temp, "value" );
+		assert( fabs( ret - sqrt( i ) ) < 1e-6 );
+	}
+	tabentry.destroy();
+	tabid.destroy();
+	cout << "." << flush;
+}
+
 void testBuiltins()
 {
 	testArith();
 	testFibonacci();
+	testTable();
 }
 
 void testMpiBuiltins( )

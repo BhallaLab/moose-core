@@ -6297,5 +6297,7 @@ to test that the model gets loaded and can run. Next:
 
 Starting on tables. Implemented them from scratch, not bothering with too
 much backward compatibility in this round. The table entries are 
-handled as FieldElements.
+handled as FieldElements. Checkin 1878.
 
+Put in first pass unit test for Table acting as a buffer for incoming
+data.
