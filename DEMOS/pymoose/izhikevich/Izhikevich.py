@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri May 28 14:42:33 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jun 16 10:09:38 2010 (+0530)
+# Last-Updated: Wed Jun 16 18:55:49 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 701
+#     Update #: 824
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -17,9 +17,15 @@
 
 # Commentary: 
 # 
-# 
-# 
-# 
+# threhold variablity to be checked.
+# Bistability not working.
+# DAP not working
+# inhibition induced spiking kind of working but not matching with the paper figure
+# inhibition induced bursting kind of working but not matching with the paper figure
+# Accommodation cannot work with the current implementation: because the equation for u is not what is mentioned in the paper
+# it is: u = u + tau*a*(b*(V+65)); [It is nowhere in the paper and you face it only if you look at the matlab code for figure 1].
+# It is not possible to tune a, b, c, d in any way to produce this from: u = u + tau*a*(b*V - u) 
+#
 
 # Change log:
 # 
@@ -79,7 +85,7 @@ class IzhikevichDemo:
         "rebound_spike":    ('M', 0.03  ,    0.25 ,   -60.0,     4.0   ,     -15,       -64.0,  200.0), # Fig. 1.M 
         "rebound_burst":    ('N', 0.03  ,    0.25 ,   -52.0,     0.0   ,     -15,       -64.0,  200.0), # Fig. 1.N 
         "thresh_var":       ('O', 0.03  ,    0.25 ,   -60.0,     4.0   ,     0,         -64.0,  100.0), # Fig. 1.O # threshold variability
-        "bistable":         ('P', 1.0   ,    1.5  ,   -60.0,     0.0   ,     1.24,      -61.0,  300.0), # Fig. 1.P 
+        "bistable":         ('P', 0.1   ,    0.26  ,  -60.0,     0.0   ,     1.24,      -61.0,  300.0), # Fig. 1.P 
         "DAP":              ('Q', 1.0   ,    0.2  ,   -60.0,     -21.0 ,     20,        -70.0,  50.0 ), # Fig. 1.Q # Depolarizing after-potential 
         "accommodation":    ('R', 0.02  ,    1.0  ,   -55.0,     4.0   ,     0,         -65.0,  400.0), # Fig. 1.R 
         "iispike":          ('S', -0.02 ,    -1.0 ,   -60.0,     8.0   ,     75.0,      -63.8,  350.0), # Fig. 1.S # inhibition-induced spiking
@@ -109,6 +115,9 @@ class IzhikevichDemo:
             print key, 'Not implemented.'
             
     def simulate(self, key):
+        if key == 'accommodation':
+            raise Exception, 'Equation for u for the accommodating neuron is: u\' = a * b * (V + 65)\n Which different from the regular equation and cannot be obtained from the latter by any choice of a and b.'
+            return
         self.setup(key)
         return self.run(key)
 
@@ -148,6 +157,9 @@ class IzhikevichDemo:
                 print key
             raise
         neuron = moose.IzhikevichNrn(key)
+        if key == 'integrator' or key == 'Class_1': # Integrator has different constants
+            neuron.beta = 4.1e3
+            neuron.gamma = 108.0
         self.neuron = neuron
         neuron.a = params[1] * 1e3 # ms^-1 -> s^-1
         neuron.b = params[2] * 1e3 # ms^-1 -> s^-1
@@ -166,6 +178,10 @@ class IzhikevichDemo:
         """This is for creating a pulse generator for use as a current
         source for all cases except Class_1, Class_2, resonator,
         integrator, thresh_var and accommodation."""
+        try:
+            return self.inputs[key]
+        except KeyError:
+            pass # continue to the reset of the function
         baseLevel = 0.0
         firstWidth = 1e6
         firstDelay = 0.0
@@ -191,6 +207,7 @@ class IzhikevichDemo:
         elif key == 'subthresh_osc':
             firstDelay = 20e-3
             firstWidth = 5e-3
+            firstLevel = 2e-9
         elif key == 'rebound_spike':
             firstDelay = 20e-3
             firstWidth = 5e-3
@@ -198,12 +215,9 @@ class IzhikevichDemo:
             firstDelay = 20e-3
             firstWidth = 5e-3
         elif key == 'bistable':
-            firstDelay = 300e-3/8
-            firstWidth = 5e-3
-            secondLevel = firstLevel
-            secondWidth = 5e-3
-            secondDelay = 216e-3 - firstDelay
-            baseLevel = 0.24e-9
+            input_table = self._make_bistable_input()
+            self.inputs[key] = input_table
+            return input_table
         elif key == 'DAP':
             firstDelay = 9e-3
             firstWidth = 2e-3
@@ -211,19 +225,34 @@ class IzhikevichDemo:
             baseLevel = 80e-9
             firstDelay = 50e-3
             firstWidth = 200e-3
+            fisrtLevel = 75e-9
         elif key == 'Class_1':
             input_table = self._make_Class_1_input()
-            input_table.connect('outputSrc', self._get_neuron(key), 'injectDest')
             self.inputs[key] = input_table
             return input_table
         elif key == 'Class_2':
             input_table = self._make_Class_2_input()
-            input_table.connect('outputSrc', self._get_neuron(key), 'injectDest')
             self.inputs[key] = input_table
             return input_table
+        elif key == 'resonator':
+            input_table = self._make_resonator_input()
+            self.inputs[key] = input_table
+            return input_table
+        elif key == 'integrator':
+            input_table = self._make_integrator_input()
+            self.inputs[key] = input_table
+            return input_table
+        elif key == 'accommodation':
+            input_table = self._make_accommodation_input()
+            self.inputs[key] = input_table
+            return input_table            
+        elif key == 'thresh_var':
+            input_table = self._make_thresh_var_input()
+            self.inputs[key] = input_table
+            return input_table                        
         else:
             print key, ': Stimulus is not based on pulse generator.'
-            return None
+            raise
         pulsegen = self._make_pulsegen(key, 
                                       firstLevel,
                                       firstDelay,
@@ -231,23 +260,20 @@ class IzhikevichDemo:
                                       secondLevel,
                                       secondDelay,
                                       secondWidth, baseLevel)
+        self.inputs[key] = pulsegen
         return pulsegen
                                                
 
     def _make_pulsegen(self, key, firstLevel, firstDelay, firstWidth=1e6, secondLevel=0, secondDelay=1e6, secondWidth=0, baseLevel=0):
-        try:
-            pulsegen = self.inputs[key]
-        except KeyError:
-            pulsegen = moose.PulseGen(self.current + '_input')
-            pulsegen.firstLevel = firstLevel
-            pulsegen.firstDelay = firstDelay
-            pulsegen.firstWidth = firstWidth
-            pulsegen.secondLevel = secondLevel
-            pulsegen.secondDelay = secondDelay
-            pulsegen.secondWidth = secondWidth
-            pulsegen.baseLevel = baseLevel
-            self.inputs[key] = pulsegen
-            pulsegen.connect('outputSrc', self._get_neuron(key), 'injectDest')
+        pulsegen = moose.PulseGen(key + '_input')
+        pulsegen.firstLevel = firstLevel
+        pulsegen.firstDelay = firstDelay
+        pulsegen.firstWidth = firstWidth
+        pulsegen.secondLevel = secondLevel
+        pulsegen.secondDelay = secondDelay
+        pulsegen.secondWidth = secondWidth
+        pulsegen.baseLevel = baseLevel
+        pulsegen.connect('outputSrc', self._get_neuron(key), 'injectDest')
         return pulsegen    
         
     def _make_Class_1_input(self):
@@ -261,21 +287,130 @@ class IzhikevichDemo:
         for i in range(1, len(input_table)):
             # matlab code: if (t>T1) I=(0.075*(t-T1)); else I=0;
             input_table[i] = (0.075 * i * self.dt * 1e3) * 1e-9
+        input_table.connect('outputSrc', self._get_neuron('Class_1'), 'injectDest')
         return input_table
 
     def _make_Class_2_input(self):
-        input_table = moose.Table('Class_2_input')
+        key = 'Class_2'
+        input_table = moose.Table(key + '_input')
         input_table.stepMode = 1 # Table acts as a function generator
         input_table.stepSize = self.dt
         input_table.xmin = 30e-3 # The ramp starts at 30 ms
-        input_table.xmax = IzhikevichDemo.parameters['Class_2'][7] * 1e-3
+        input_table.xmax = IzhikevichDemo.parameters[key][7] * 1e-3
         input_table.xdivs = int(ceil((input_table.xmax - input_table.xmin) / input_table.stepSize))
         input_table[0] = -0.5e-9
         for i in range(1, len(input_table)):
             # The matlab code is: if (t>T1) I=-0.5+(0.015*(t-T1)); else I=-0.5
             input_table[i] = (-0.5 + 0.015 * i * self.dt * 1e3) * 1e-9 # convert dt from s to ms, and convert total current from nA to A.
+        input_table.connect('outputSrc', self._get_neuron(key), 'injectDest')
         return input_table
 
+    def _make_bistable_input(self):
+        key = 'bistable'
+        input_table = moose.Table(key + '_input')
+        input_table.stepMode = 1 # Table acts as a function generator
+        input_table.stepSize = self.dt
+        input_table.xmin =  0
+        input_table.xmax = IzhikevichDemo.parameters[key][7] * 1e-3
+        input_table.xdivs = int(ceil((input_table.xmax - input_table.xmin) / input_table.stepSize))
+        t1 = IzhikevichDemo.parameters[key][7] * 1e-3/8
+        t2 = 216e-3
+        t = 0.0
+        for ii in range(len(input_table)):
+            if (t > t1 and t < t1 + 5e-3) or (t > t2 and t < t2 + 5e-3):
+                input_table[ii] = 1.24e-9
+            else:
+                input_table[ii] = 0.24e-9
+            t = t + self.dt
+        input_table.connect('outputSrc', self._get_neuron(key), 'injectDest')
+        return input_table
+
+    def _make_resonator_input(self):
+        key = 'resonator'
+        input_table = moose.Table(key + '_input')
+        input_table.stepMode = 1 # Table acts as a function generator
+        input_table.stepSize = self.dt
+        input_table.xmin =  0
+        input_table.xmax = IzhikevichDemo.parameters[key][7] * 1e-3
+        input_table.xdivs = int(ceil((input_table.xmax - input_table.xmin) / input_table.stepSize))
+        t1 = IzhikevichDemo.parameters[key][7] * 1e-3/10
+        t2 = t1 + 20e-3
+        t3 = 0.7 * IzhikevichDemo.parameters[key][7] * 1e-3
+        t4 = t3 + 40e-3
+        t = 0.0
+        for ii in range(len(input_table)):
+            if (t > t1 and t < t1 + 4e-3) or (t > t2 and t < t2 + 4e-3) or (t > t3 and t < t3 + 4e-3) or (t > t4 and t < t4 + 4e-3):
+                input_table[ii] = 0.65e-9
+            else:
+                input_table[ii] = 0.0
+            t = t + self.dt
+        input_table.connect('outputSrc', self._get_neuron(key), 'injectDest')
+        return input_table
+        
+    def _make_integrator_input(self):
+        key = 'integrator'
+        input_table = moose.Table(key + '_input')
+        input_table.stepMode = 1 # Table acts as a function generator
+        input_table.stepSize = self.dt
+        input_table.xmin =  0
+        input_table.xmax = IzhikevichDemo.parameters[key][7] * 1e-3
+        input_table.xdivs = int(ceil((input_table.xmax - input_table.xmin) / input_table.stepSize))
+        t1 = IzhikevichDemo.parameters[key][7] * 1e-3/11
+        t2 = t1 + 5e-3
+        t3 = 0.7 * IzhikevichDemo.parameters[key][7] * 1e-3
+        t4 = t3 + 10e-3
+        t = 0.0
+        for ii in range(len(input_table)):
+            if (t > t1 and t < t1 + 2e-3) or (t > t2 and t < t2 + 2e-3) or (t > t3 and t < t3 + 2e-3) or (t > t4 and t < t4 + 2e-3):
+                input_table[ii] = 9e-9
+            else:
+                input_table[ii] = 0.0
+            t = t + self.dt
+        input_table.connect('outputSrc', self._get_neuron(key), 'injectDest')
+        return input_table
+        
+    def _make_accommodation_input(self):
+        key = 'accommodation'
+        input_table = moose.Table(key + '_input')
+        input_table.stepMode = 1 # Table acts as a function generator
+        input_table.stepSize = self.dt
+        input_table.xmin =  0
+        input_table.xmax = IzhikevichDemo.parameters[key][7] * 1e-3
+        input_table.xdivs = int(ceil((input_table.xmax - input_table.xmin) / input_table.stepSize))
+        t = 0.0
+        for ii in range(len(input_table)):
+            if t < 200e-3:
+                input_table[ii] = t * 1e-9/25
+            elif t < 300e-3:
+                input_table[ii] = 0.0
+            elif t < 312.5e-3:
+                input_table[ii] = 4e-9 * (t-300e-3)/12.5
+            else:
+                input_table[ii] = 0.0
+            t = t + self.dt
+        input_table.connect('outputSrc', self._get_neuron(key), 'injectDest')
+        return input_table
+        
+    def _make_thresh_var_input(self):
+        key = 'thresh_var'
+        input_table = moose.Table(key + '_input')
+        input_table.stepMode = 1 # Table acts as a function generator
+        input_table.stepSize = self.dt
+        input_table.xmin =  0
+        input_table.xmax = IzhikevichDemo.parameters[key][7] * 1e-3
+        input_table.xdivs = int(ceil((input_table.xmax - input_table.xmin) / input_table.stepSize))
+        t = 0.0
+        for ii in range(len(input_table)):
+            if (t > 10e-3 and t < 15e3) or (t > 80e-3 and t < 85e-3):
+                input_table[ii] = 1e-9
+            elif t > 70e-3 and t < 75e-3:
+                input_table[ii] = -6e-9
+            else:
+                input_table[ii] = 0.0
+            t = t + self.dt
+        input_table.connect('outputSrc', self._get_neuron(key), 'injectDest')
+        return input_table
+        
         
 import sys
 if __name__ == '__main__':

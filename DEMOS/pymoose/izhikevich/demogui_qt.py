@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 16 05:41:58 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jun 16 09:53:00 2010 (+0530)
+# Last-Updated: Wed Jun 16 18:49:10 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 192
+#     Update #: 213
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -86,12 +86,16 @@ class IzhikevichGui(QtGui.QMainWindow):
         self.connect(self.signalMapper, QtCore.SIGNAL('mapped(const QString &)'), self._simulateAndPlot)         
         self.controlPanel.setLayout(layout)
         self.plotPanel = QtGui.QFrame(self.demoFrame)
-        self.plot = Qwt.QwtPlot(self.plotPanel)
-        self.plot.setAxisTitle(Qwt.QwtPlot.xBottom, 'time (ms)')
-        self.plot.setAxisTitle(Qwt.QwtPlot.yLeft, 'Vm (mV)')
-        self.plot.replot()
+        self.VmPlot = Qwt.QwtPlot(self.plotPanel)
+        self.VmPlot.setAxisTitle(Qwt.QwtPlot.xBottom, 'time (ms)')
+        self.VmPlot.setAxisTitle(Qwt.QwtPlot.yLeft, 'Vm (mV)')
+        self.VmPlot.replot()
+        self.ImPlot = Qwt.QwtPlot(self.plotPanel)
+        self.ImPlot.setAxisTitle(Qwt.QwtPlot.xBottom, 'time (ms)')
+        self.ImPlot.setAxisTitle(Qwt.QwtPlot.yLeft, 'Im (nA)')
         layout = QtGui.QVBoxLayout(self.demoFrame)
-        layout.addWidget(self.plot)
+        layout.addWidget(self.VmPlot)
+        layout.addWidget(self.ImPlot)
         self.plotPanel.setLayout(layout)
         layout = QtGui.QVBoxLayout()
         layout.addWidget(self.plotPanel)
@@ -101,22 +105,29 @@ class IzhikevichGui(QtGui.QMainWindow):
 
     def _simulateAndPlot(self, key):
         key = str(key)
+        if key == 'accommodation':
+            mbox = QtGui.QMessageBox(self)
+            mbox.setText(self.tr('Accommodation cannot be shown with regular Izhikevich model.'))
+            mbox.setDetailedText(self.tr('Equation for u for the accommodating neuron is: u\' = a * b * (V + 65)\n Which is different from the regular equation u\' = a * (b*V - u) and cannot be obtained from the latter by any choice of a and b.'))
+            mbox.show()
+            return
         (time, Vm, Im) = self.demo.simulate(key)
         Vm = numpy.array(Vm) * 1e3
         Im = numpy.array(Im) * 1e9 - 120.0
         numpy.savetxt(key + '_Vm.plot', Vm)
         numpy.savetxt(key + '_Im.plot', Im)
-        self.plot.clear()
+        self.VmPlot.clear()
+        self.ImPlot.clear()
         curve = Qwt.QwtPlotCurve(self.tr(key + '_Vm'))
         curve.setPen(QtCore.Qt.red)
         curve.setData(time, numpy.array(Vm))
-        curve.attach(self.plot)
+        curve.attach(self.VmPlot)
         curve = Qwt.QwtPlotCurve(self.tr(key + '_Im'))
         curve.setPen(QtCore.Qt.blue)
         curve.setData(time, Im)
-        curve.attach(self.plot)
-        self.plot.replot()
-
+        curve.attach(self.ImPlot)
+        self.ImPlot.replot()
+        self.VmPlot.replot()
 import sys
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
