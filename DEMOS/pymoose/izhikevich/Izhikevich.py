@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri May 28 14:42:33 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jun 17 05:32:02 2010 (+0530)
+# Last-Updated: Thu Jun 17 06:59:02 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 848
+#     Update #: 880
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -92,6 +92,28 @@ class IzhikevichDemo:
         "iiburst":          ('T', -0.026,    -1.0 ,   -45.0,     0.0   ,     75.0,      -63.8,  350.0)  # Fig. 1.T # inhibition-induced bursting
     }
 
+    documentation = {
+        "tonic_spiking":        'Neuron is normally silent but spikes when stimulated with a current injection.',
+        "phasic_spiking":       'Neuron fires a single spike only at the start of a current pulse.',
+        "tonic_bursting":       'Neuron is normally silent but produces bursts of spikes when stimulated with current injection.',
+        "phasic_bursting":      'Neuron is normally silent but produces a burst of spikes at the beginning of an input current pulse.',
+        "mixed_mode":           'Neuron fires a burst at the beginning of input current pulse, but then switches to tonic spiking.',
+        "spike_freq_adapt":     'Neuron fires spikes when a current injection is applied, but at a gradually reducing rate.',
+        "Class_1":              'Neuron fires low frequency spikes with weak input current injection.',
+        "Class_2":              'Neuron fires high frequency (40-200 Hz) spikes when stimulated with current injection.',
+        "spike_latency":        'The spike starts after a delay from the onset of current injection. The delay is dependent on strength of input.',
+        "subthresh_osc":        'Even at subthreshold inputs a neuron exhibits oscillatory membrane potential.',
+        "resonator":            'Neuron fires spike only when an input pulsetrain of a frequency similar to that of the neuron\'s subthreshold oscillatory frequency is applied.',
+        "integrator":           'The chances of the neuron firing increases with increase in the frequency of input pulse train.',
+        "rebound_spike":        'When the neuron is released from an inhibitory input, it fires a spike.',
+        "rebound_burst":        'When the neuron is released from an inhibitory input, it fires a burst of action potentials.',
+        "thresh_var":           'Depending on the previous input, the firing threshold of a neuron may change. In this example, the first input pulse does not produce spike, but when the same input is applied after an inhibitory input, it fires.',
+        "bistable":             'These neurons switch between two stable modes (resting and tonic spiking). The switch happens via an excitatory or inhibitory input.',
+        "DAP":                  'After firing a spike, the membrane potential shows a prolonged depolarized after-potential.',
+        "accommodation":        'These neurons do not respond to slowly rising input, but a sharp increase in input may cause firing.',
+        "iispike":              'These neurons fire in response to inhibitory input.',
+        "iiburst":              'These neurons show bursting in response to inhibitory input.'
+    }
     
     def __init__(self):
         """Initialize the object."""
