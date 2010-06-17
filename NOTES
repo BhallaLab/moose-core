@@ -6289,7 +6289,8 @@ Second scan: find groups that have a single volume. Put on appropriate
 
 Massive struggle to get the compartmentalizing done. For now I'll skip it
 to test that the model gets loaded and can run. Next:
-- Implement tables to test output
+* Implement tables to test output
+- Implement enough scheduling to run model and test it.
 - Implement the solver. This is what this exercise was really about.
 - Then I can come back to the compartmentalization.
 - Look at the sbml reader.
@@ -6307,3 +6308,18 @@ data. Checkin 1879.
 Put in a manual check that the table can dump data into xplot form. 
 Commented out after checking.
 Coded in the details for ReadKkit to talk to tables as plot substitutes.
+Checkin 1880.
+
+Now to implement Shell::doUseclock, the hook for which is now implemented in
+Shell.cpp.
+============================================================================
+17 June 2010
+Thoughts on generic wildcarder, one that can do network messaging too.
+- Object
+	- Portion that does traversal. Follows wildcard tree.
+	- Portion(s) that handle constraints and return a double. For example,
+		distance from source, membrane potential, or combination.
+	- Portion(s) that operate on constraints. For example, create a
+		message, set a synaptic strength, connect up a clock tick.
+	
+

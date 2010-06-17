@@ -81,6 +81,14 @@ static SrcFinfo4< vector< Id >, string, unsigned int, bool > requestCopy(
 			"copy( origId, newParent, numRepeats, copyExtMsg );"
 			"Copies origId to become a child of newParent"
 			);
+static SrcFinfo3< string, string, unsigned int > requestUseClock(
+			"useClock",
+			"useClock( path, field, tick# );"
+			"Specifies which clock tick to use for all elements in Path."
+			"The 'field' is typically process, but some cases need to send"
+			"updates to the 'init' field."
+			"Tick # specifies which tick to be attached to the objects."
+			);
 
 static DestFinfo create( "create", 
 			"create( class, parent, newElm, name, dimensions )",
@@ -439,6 +447,17 @@ void Shell::doStart( double runtime )
 	// cout << myNode_ << ": Shell::doStart: quitting\n";
 }
 
+void Shell::doUseClock( string path, string field, unsigned int tick )
+{
+	initAck();
+	Eref sheller( shelle_, 0 );
+	requestUseClock.send( sheller, &p_, path, field, tick, 1 );
+	while ( isAckPending() ) {
+		Qinfo::mpiClearQ( &p_ );
+		process( &p_, sheller );
+	}
+}
+
 void Shell::doMove( Id orig, Id newParent )
 {
 	if ( orig == Id() ) {
@@ -698,9 +717,24 @@ void Shell::destroy( Eref e, const Qinfo* q, Id eid)
 }
 
 
-// I really also want to put in a message type. But each message has its
-// own features and these may well be done separately
+/**
+ * Wrapper function, that does the ack. Other functions also use the
+ * inner function to build message trees, so we don't want it to emit
+ * multiple acks.
+ */
 void Shell::handleAddMsg( string msgType, FullId src, string srcField, 
+	FullId dest, string destField )
+{
+	if ( innerAddMsg( msgType, src, srcField, dest, destField ) )
+		ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus, 0 );
+	else
+		ack.send( Eref( shelle_, 0), &p_, Shell::myNode(), ErrorStatus, 0);
+}
+
+/**
+ * The actual function that adds messages. Does NOT send an ack.
+ */
+bool Shell::innerAddMsg( string msgType, FullId src, string srcField, 
 	FullId dest, string destField )
 {
 	// cout << myNode_ << ", Shell::handleAddMsg" << "\n";
@@ -729,14 +763,14 @@ void Shell::handleAddMsg( string msgType, FullId src, string srcField,
 		cout << myNode_ << 
 			": Error: Shell::handleAddMsg: msgType not known: "
 			<< msgType << endl;
-		ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus, 0 );
-		return;
+		// ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus, 0 );
+		return 0;
 	}
 	if ( m ) {
 		if ( f1->addMsg( f2, m->mid(), src.id() ) ) {
 			latestMsgId_ = m->mid();
-			ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus, 0 );
-			return;
+			// ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus, 0 );
+			return 1;
 		}
 		delete m;
 	}
@@ -744,7 +778,8 @@ void Shell::handleAddMsg( string msgType, FullId src, string srcField,
 			": Error: Shell::handleAddMsg: Unable to make/connect Msg: "
 			<< msgType << " from " << src.id()->getName() <<
 			" to " << dest.id()->getName() << endl;
-	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus, 0 );
+	return 1;
+//	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus, 0 );
 }
 
 void Shell::handleMove( Id orig, Id newParent )
@@ -771,6 +806,27 @@ void Shell::handleMove( Id orig, Id newParent )
 	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus, 0 );
 }
 
+void Shell::handleUseClock( string path, string field, unsigned int tick)
+{
+	vector< Id > list;
+	wildcard( path, list ); // By default scans only Elements.
+	for ( vector< Id >::iterator i = list.begin(); i != list.end(); ++i ) {
+		stringstream ss;
+		FullId tickId( Id( 2 ), DataId( 0, tick ) );
+		ss << "process" << tick;
+		bool ret = 
+			innerAddMsg( "oneToAll", tickId, ss.str(), FullId( *i, 0 ), 
+			field);
+		if ( !ret ) {
+			cout << Shell::myNode() << "Error: Shell::handleUseClock: Messaging failed\n";
+			ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), 
+				ErrorStatus, 0 );
+			return;
+		}
+	}
+	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus, 0 );
+}
+
 void Shell::warning( const string& text )
 {
 	cout << "Warning: Shell:: " << text << endl;
@@ -779,6 +835,10 @@ void Shell::warning( const string& text )
 void Shell::error( const string& text )
 {
 	cout << "Error: Shell:: " << text << endl;
+}
+
+void Shell::wildcard( const string& path, vector< Id >& list )
+{
 }
 
 ///////////////////////////////////////////////////////////////////////////

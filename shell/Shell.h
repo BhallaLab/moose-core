@@ -74,6 +74,15 @@ class Shell: public Data
 		Id doFind( const string& path ) const;
 
 		/**
+		 * Connects up process messages from the specified Tick to the
+		 * targets on the path. Does so for whole Elements, not individual
+		 * entries in the Element array.
+		 * The target on the path usually has the 'process' field but
+		 * other options are allowed, like 'init'
+		 */
+		void doUseClock( string path, string field, unsigned int tick );
+
+		/**
 		 * Looks up the Id specified by the given path, starting from
 		 * the specified Id.
 		Id doFind( Id start, const string& path ) const;
@@ -109,16 +118,47 @@ class Shell: public Data
 			const vector< unsigned int >& dimensions );
 
 		// void addmsg( Id src, Id dest, string srcfield, string destfield );
+		/**
+		 * Connects src to dest on appropriate fields, with specified
+		 * msgType. 
+		 * This inner function does NOT send an ack. Returns true on 
+		 * success
+		 */
+		bool innerAddMsg( string msgType, 
+			FullId src, string srcField, 
+			FullId dest, string destField);
 
+		/**
+		 * Connects src to dest on appropriate fields, with specified
+		 * msgType. 
+		 * This wrapper function sends the ack back to the master node.
+		 */
 		void handleAddMsg( string msgType, 
 			FullId src, string srcField, 
 			FullId dest, string destField);
 
+		/**
+		 * Moves Element orig onto the newParent.
+		 */
 		void handleMove( Id orig, Id newParent );
 
+		/**
+		 * Deep copy of source element to target, renaming it to newName.
+		 * The Args are orig, newParent, newElm
+		 * where the newElm is the Id passed in for the root of the copy.
+		 * All subsequent created Elements should have successive Ids.
+		 * The copy may generate an array with n entries.
+		 * Normally only copies msgs within the tree, but if the flag
+		 * copyExtMsgs is true then it copies external Msgs too.
+		 */
 		void handleCopy( vector< Id > args, string newName, unsigned int n, 
 			bool copyExtMsgs );
-		// void innerCopyElements( Id orig, Id newParent, Id newElm, 	unsigned int n );
+
+		/**
+		 * Sets up scheduling for elements on the path.
+		 */
+		void handleUseClock( string path, string field, unsigned int tick );
+
 		////////////////////////////////////////////////////////////////
 		// Thread and MPI handling functions
 		////////////////////////////////////////////////////////////////
@@ -250,6 +290,8 @@ class Shell: public Data
 		static const ProcInfo* procInfo();
 
 		static bool chopPath( const string& path, vector< string >& ret );
+
+		static void wildcard( const string& path, vector< Id >& list );
 	private:
 		string name_;
 		Element* shelle_; // It is useful for the Shell to have this.
