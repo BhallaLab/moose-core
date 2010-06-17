@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri May 28 14:42:33 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jun 16 18:55:49 2010 (+0530)
+# Last-Updated: Thu Jun 17 05:32:02 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 824
+#     Update #: 848
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -19,7 +19,7 @@
 # 
 # threhold variablity to be checked.
 # Bistability not working.
-# DAP not working
+# DAP working with increased parameter value 'a'
 # inhibition induced spiking kind of working but not matching with the paper figure
 # inhibition induced bursting kind of working but not matching with the paper figure
 # Accommodation cannot work with the current implementation: because the equation for u is not what is mentioned in the paper
@@ -75,7 +75,7 @@ class IzhikevichDemo:
         "tonic_bursting":   ('C', 0.02  ,    0.2  ,   -50.0,     2.0  ,      15.0,      -70.0,  220.0), # Fig. 1.C
         "phasic_bursting":  ('D', 0.02  ,    0.25 ,   -55.0,     0.05 ,      0.6,       -64.0,  200.0), # Fig. 1.D
         "mixed_mode":       ('E', 0.02  ,    0.2  ,   -55.0,     4.0   ,     10.0,      -70.0,  160.0), # Fig. 1.E
-        "spike_freq_adapt": ('F', 0.01  ,    0.2  ,   -65.0,     8.0   ,     30.0,      -70.0,  85.0), # Fig. 1.F # spike frequency adaptation
+        "spike_freq_adapt": ('F', 0.01  ,    0.2  ,   -65.0,     8.0   ,     30.0,      -70.0,  85.0),  # Fig. 1.F # spike frequency adaptation
         "Class_1":          ('G', 0.02  ,    -0.1 ,   -55.0,     6.0   ,     0,         -60.0,  300.0), # Fig. 1.G # Spikining Frequency increases with input strength
         "Class_2":          ('H', 0.2   ,    0.26 ,   -65.0,     0.0   ,     0,         -64.0,  300.0), # Fig. 1.H # Produces high frequency spikes  
         "spike_latency":    ('I', 0.02  ,    0.2  ,   -65.0,     6.0   ,     7.0,       -70.0,  100.0), # Fig. 1.I
@@ -86,7 +86,7 @@ class IzhikevichDemo:
         "rebound_burst":    ('N', 0.03  ,    0.25 ,   -52.0,     0.0   ,     -15,       -64.0,  200.0), # Fig. 1.N 
         "thresh_var":       ('O', 0.03  ,    0.25 ,   -60.0,     4.0   ,     0,         -64.0,  100.0), # Fig. 1.O # threshold variability
         "bistable":         ('P', 0.1   ,    0.26  ,  -60.0,     0.0   ,     1.24,      -61.0,  300.0), # Fig. 1.P 
-        "DAP":              ('Q', 1.0   ,    0.2  ,   -60.0,     -21.0 ,     20,        -70.0,  50.0 ), # Fig. 1.Q # Depolarizing after-potential 
+        "DAP":              ('Q', 1.15   ,    0.2  ,   -60.0,     -21.0 ,     20,        -70.0,  50.0), # Fig. 1.Q # Depolarizing after-potential - a had to be increased in order to reproduce the figure
         "accommodation":    ('R', 0.02  ,    1.0  ,   -55.0,     4.0   ,     0,         -65.0,  400.0), # Fig. 1.R 
         "iispike":          ('S', -0.02 ,    -1.0 ,   -60.0,     8.0   ,     75.0,      -63.8,  350.0), # Fig. 1.S # inhibition-induced spiking
         "iiburst":          ('T', -0.026,    -1.0 ,   -45.0,     0.0   ,     75.0,      -63.8,  350.0)  # Fig. 1.T # inhibition-induced bursting
@@ -140,6 +140,10 @@ class IzhikevichDemo:
         self.context.reset()
         self.context.step(self.simtime)
         time = linspace(0, IzhikevichDemo.parameters[key][7], len(Vm))
+        # DEBUG
+        nrn = self._get_neuron(key)
+        print 'a = %g, b = %g, c = %g, d = %g, initVm = %g, initU = %g' % (nrn.a,nrn.b, nrn.c, nrn.d, nrn.initVm, nrn.initU)
+        #! DEBUG
         return (time, Vm, Im)
 
 
@@ -401,7 +405,7 @@ class IzhikevichDemo:
         input_table.xdivs = int(ceil((input_table.xmax - input_table.xmin) / input_table.stepSize))
         t = 0.0
         for ii in range(len(input_table)):
-            if (t > 10e-3 and t < 15e3) or (t > 80e-3 and t < 85e-3):
+            if (t > 10e-3 and t < 15e-3) or (t > 80e-3 and t < 85e-3):
                 input_table[ii] = 1e-9
             elif t > 70e-3 and t < 75e-3:
                 input_table[ii] = -6e-9
