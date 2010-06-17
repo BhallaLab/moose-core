@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 16 05:41:58 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jun 16 18:49:10 2010 (+0530)
+# Last-Updated: Thu Jun 17 06:58:17 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 213
+#     Update #: 226
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -78,6 +78,7 @@ class IzhikevichGui(QtGui.QMainWindow):
                 if  index < length:
                     key = self.figureNo[keys[index]]
                     button = self.buttons[key]
+                    button.setToolTip(self.tr(IzhikevichDemo.documentation[key]))
                     print 'Adding button ', button.text(), 'at (', ii, ',', jj, ')'
                     layout.addWidget(button, ii, jj)
                     self.connect(button, QtCore.SIGNAL('clicked()'), self.signalMapper, QtCore.SLOT('map()'))
@@ -93,6 +94,8 @@ class IzhikevichGui(QtGui.QMainWindow):
         self.ImPlot = Qwt.QwtPlot(self.plotPanel)
         self.ImPlot.setAxisTitle(Qwt.QwtPlot.xBottom, 'time (ms)')
         self.ImPlot.setAxisTitle(Qwt.QwtPlot.yLeft, 'Im (nA)')
+        self.vmPlotZoomer = self._make_zoomer(self.VmPlot)
+        self.imPlotZoomer = self._make_zoomer(self.ImPlot)
         layout = QtGui.QVBoxLayout(self.demoFrame)
         layout.addWidget(self.VmPlot)
         layout.addWidget(self.ImPlot)
@@ -126,8 +129,22 @@ class IzhikevichGui(QtGui.QMainWindow):
         curve.setPen(QtCore.Qt.blue)
         curve.setData(time, Im)
         curve.attach(self.ImPlot)
+        self.imPlotZoomer.setZoomBase()
+        self.vmPlotZoomer.setZoomBase()
         self.ImPlot.replot()
         self.VmPlot.replot()
+
+    def _make_zoomer(self, plot):
+        zoomer = Qwt.QwtPlotZoomer(Qwt.QwtPlot.xBottom,
+                                   Qwt.QwtPlot.yLeft,
+                                   Qwt.QwtPicker.DragSelection,
+                                   Qwt.QwtPicker.AlwaysOn,
+                                   plot.canvas())
+        zoomer.setRubberBandPen(QtGui.QPen(QtCore.Qt.white))
+        zoomer.setTrackerPen(QtGui.QPen(QtCore.Qt.cyan))
+        return zoomer
+        
+
 import sys
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
