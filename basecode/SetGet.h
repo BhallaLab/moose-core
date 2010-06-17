@@ -21,6 +21,25 @@ class SetGet
 		{;}
 
 		/**
+		 * Assigns 'field' on 'tgt' to 'val', after doing necessary type
+		 * conversion from the string val. Returns 0 if it can't
+		 * handle it, which is unusual.
+		 */
+		virtual bool innerStrSet( const Eref& tgt, 
+			const string& field, const string& val ) const = 0;
+
+		/**
+		 * Looks up field value on tgt, converts to string, and puts on 
+		 * 'ret'. Returns 0 if the class does not support 'get' operations,
+		 * which is usually the case. Fields are the exception.
+		 */
+		virtual bool innerStrGet( const Eref& tgt, 
+			const string& field, string& ret ) const {
+			return 0;
+		}
+
+
+		/**
 		 * Checks arg # and types for a 'set' call. Can be zero to 3 args.
 		 * Returns true if good. Passes back found fid.
 		 * Utility function to check that the target field matches this
@@ -33,7 +52,7 @@ class SetGet
 		 * Blocking 'get' call, returning into a string.
 		 * There is a matching 'get<T> call, returning appropriate type.
 		 */
-		static string strGet( const Eref& dest, const string& field);
+		static bool strGet( const Eref& tgt, const string& field, string& ret );
 
 		/**
 		 * Blocking 'set' call, using automatic string conversion
@@ -52,34 +71,10 @@ class SetGet
 		 */
 		void completeSet() const;
 
-		/**
-		 * Resizes the internal buffer on the SetGet
-		 */
-		void resizeBuf( unsigned int size );
-
 		char* buf();
 
-		/**
-		 * Utility function for the init() function
-		static void setShell();
-		 */
-
-	protected:
-		/**
-		 * Puts data into target queue for calling functions and setting
-		 * fields. This is a common core function used by the various
-		 * type-specialized variants.
-		void iSetInner( const FuncId fid, const char* buf,
-			unsigned int size );
-		 */
-		// void clearQ() const;
 	private:
-		// static Eref shelle_;
-		// static Element* shell_;
-		// Should have something - baton - to identify the specific set/get
-		// call here.
 		Eref e_;
-		// vector< char > buf_;
 };
 
 class SetGet0: public SetGet
@@ -113,29 +108,11 @@ class SetGet0: public SetGet
 		/**
 		 * Blocking call using string conversion
 		 */
-		bool strSet( const Eref& dest, const string& field, 
+		bool innerStrSet( const Eref& dest, const string& field, 
 			const string& val ) const
 		{
 			return set( dest, field );
 		}
-
-	//////////////////////////////////////////////////////////////////
-
-		void harvestGet() const
-		{ 
-			;
-		}
-
-		string harvestStrGet() const
-		{ 
-			return "";
-		}
-
-		string strGet( const Eref& dest, const string& field) const
-		{ 
-			return "";
-		}
-		
 };
 
 template< class A > class SetGet1: public SetGet
@@ -206,11 +183,11 @@ template< class A > class SetGet1: public SetGet
 		/**
 		 * Blocking call using string conversion
 		 */
-		static bool strSet( const Eref& dest, const string& field, 
-			const string& val )
+		bool innerStrSet( const Eref& dest, const string& field, 
+			const string& val ) const
 		{
 			A arg;
-			str2val( arg, val );
+			Conv< A >::str2val( arg, val );
 			return set( dest, field, arg );
 		}
 
@@ -224,14 +201,6 @@ template< class A > class SetGet1: public SetGet
 			A temp;
 			Conv< A >::str2val( temp, val );
 			return iSet( field, temp );
-		}
-	//////////////////////////////////////////////////////////////////
-		/**
-		 * Terminating call using string conversion
-		 */
-		string harvestStrGet() const
-		{ 
-			return "";
 		}
 };
 
@@ -268,8 +237,8 @@ template< class A > class Field: public SetGet1< A >
 		/**
 		 * Blocking call using string conversion
 		 */
-		static bool strSet( const Eref& dest, const string& field, 
-			const string& val )
+		bool innerStrSet( const Eref& dest, const string& field, 
+			const string& val ) const 
 		{
 			A arg;
 			str2val( arg, val );
@@ -288,6 +257,21 @@ template< class A > class Field: public SetGet1< A >
 			const char* ret = Shell::dispatchGet( dest, temp, &sg );
 			Conv< A > conv( ret );
 			return *conv;
+		}
+
+		/**
+		 * Blocking virtual call for finding a value and returning in a
+		 * string.
+		 */
+		bool innerStrGet( const Eref& dest, const string& field, 
+			string& str ) const
+		{
+			SetGet1< A > sg( dest );
+			string temp = "get_" + field;
+			const char* ret = Shell::dispatchGet( dest, temp, &sg );
+			Conv< A > conv( ret );
+			val2str( str, *conv );
+			return 1;
 		}
 };
 
@@ -329,10 +313,10 @@ template< class A1, class A2 > class SetGet2: public SetGet
 		 * As yet we don't have 2 arg conversion from a single string.
 		 * So this is a dummy
 		 */
-		static bool strSet( const Eref& dest, const string& field, 
-			const string& val )
+		bool innerStrSet( const Eref& dest, const string& field, 
+			const string& val ) const
 		{
-			cout << "strSet< A1, A2 >: string convertion not yet implemented\n";
+			cout << "innerStrSet< A1, A2 >: string convertion not yet implemented\n";
 			A1 arg1;
 			A2 arg2;
 			str2val( arg1, val );
@@ -394,10 +378,10 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 		 * As yet we don't have 2 arg conversion from a single string.
 		 * So this is a dummy
 		 */
-		static bool strSet( const Eref& dest, const string& field, 
-			const string& val )
+		bool innerStrSet( const Eref& dest, const string& field, 
+			const string& val ) const 
 		{
-			cout << "strSet< A1, A2, A3 >: string convertion not yet implemented\n";
+			cout << "innerStrSet< A1, A2, A3 >: string convertion not yet implemented\n";
 			A1 arg1;
 			A2 arg2;
 			A3 arg3;
@@ -463,10 +447,10 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 		 * As yet we don't have 2 arg conversion from a single string.
 		 * So this is a dummy
 		 */
-		static bool strSet( const Eref& dest, const string& field, 
-			const string& val )
+		bool innerStrSet( const Eref& dest, const string& field, 
+			const string& val ) const
 		{
-			cout << "strSet< A1, A2, A3, A4 >: string convertion not yet implemented\n";
+			cout << "innerStrSet< A1, A2, A3, A4 >: string convertion not yet implemented\n";
 			A1 arg1;
 			A2 arg2;
 			A3 arg3;
@@ -537,10 +521,10 @@ template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
 		 * As yet we don't have 2 arg conversion from a single string.
 		 * So this is a dummy
 		 */
-		static bool strSet( const Eref& dest, const string& field, 
-			const string& val )
+		bool innerStrSet( const Eref& dest, const string& field, 
+			const string& val ) const
 		{
-			cout << "strSet< A1, A2, A3, A4, A5 >: string convertion not yet implemented\n";
+			cout << "innerStrSet< A1, A2, A3, A4, A5 >: string convertion not yet implemented\n";
 			A1 arg1;
 			A2 arg2;
 			A3 arg3;

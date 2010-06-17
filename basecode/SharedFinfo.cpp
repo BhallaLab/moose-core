@@ -37,6 +37,11 @@ void SharedFinfo::registerFinfo( Cinfo* c )
 		c->registerFinfo( *i );
 }
 
+SetGet* SharedFinfo::getSetGet( const Eref& e ) const
+{
+	return 0;
+}
+
 /**
  * It is possible that we have DestFinfos in this SharedFinfo, that have
  * not been registered. So we need to scan through.

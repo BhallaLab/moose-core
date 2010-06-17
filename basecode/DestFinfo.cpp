@@ -35,3 +35,9 @@ FuncId DestFinfo::getFid() const
 {
 	return fid_;
 }
+
+// For now we bail. Later we can update OpFunc to dig up the correct SetGet
+SetGet* DestFinfo::getSetGet( const Eref& e ) const
+{
+	return 0;
+}

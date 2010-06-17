@@ -23,6 +23,10 @@ class SrcFinfo: public Finfo
 
 		void registerFinfo( Cinfo* c );
 
+		SetGet* getSetGet( const Eref& e ) const {
+			return 0; // Always fails. 
+		}
+
 		/*
 		void registerOpFuncs(
 			map< string, FuncId >& fnames, vector< OpFunc* >& funcs );

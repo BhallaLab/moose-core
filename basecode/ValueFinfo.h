@@ -42,6 +42,10 @@ template < class T, class F > class ValueFinfo: public Finfo
 			c->registerFinfo( get_ );
 		}
 
+		SetGet* getSetGet( const Eref& e ) const {
+			return new SetGet1< F >( e );
+		}
+
 	private:
 		DestFinfo* set_;
 		DestFinfo* get_;

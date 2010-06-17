@@ -36,6 +36,14 @@ class Finfo
 		 */
 
 		/**
+		 * Creates a SetGet object of the type specified by the Finfo.
+		 * Must be freed after use.
+		 * Normally called only by SetGet::strGet and strSet.
+		 */
+		virtual SetGet* getSetGet( const Eref& e ) const = 0;
+		
+
+		/**
 		 * This function is called on each new Element after
 		 * it is created, in case any stuff needs doing. Typical
 		 * uses are to create FieldElements automatically
@@ -73,7 +81,7 @@ class Finfo
 		{ 
 			return 0;
 		}
-		
+
 	private:
 		string name_;
 		string doc_;

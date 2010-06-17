@@ -24,12 +24,8 @@ class SharedFinfo: public Finfo
 		~SharedFinfo() {;}
 
 		void registerFinfo( Cinfo* c );
-		/*
-		void registerOpFuncs(
-			map< string, FuncId >& fnames, vector< OpFunc* >& funcs );
 
-		BindIndex registerBindIndex( BindIndex current );
-		*/
+		SetGet* getSetGet( const Eref& e ) const;
 
 		/**
 		 * Checks that the type of target Finfo matches self, and is safe

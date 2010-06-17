@@ -46,6 +46,10 @@ template < class T, class F > class ElementValueFinfo: public Finfo
 			c->registerFinfo( set_ );
 			c->registerFinfo( get_ );
 		}
+		
+		SetGet* getSetGet( const Eref& e ) const {
+			return new SetGet1< F >( e );
+		}
 
 	private:
 		DestFinfo* set_;

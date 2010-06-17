@@ -87,6 +87,10 @@ template < class T, class F > class FieldElementFinfo: public Finfo
 			c->registerPostCreationFinfo( this );
 		}
 
+		SetGet* getSetGet( const Eref& e ) const {
+			return 0;
+		}
+
 	private:
 		DestFinfo* setNum_;
 		DestFinfo* getNum_;

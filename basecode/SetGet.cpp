@@ -84,113 +84,45 @@ bool SetGet::checkSet( const string& field, Eref& tgt, FuncId& fid ) const
 	}
 }
 
-/**
- * Puts data into target queue for calling functions and setting
- * fields. This is a common core function used by the various
- * type-specialized variants.
- * Called after func checking etc.
-void SetGet::iSetInner( FuncId fid, const char* val, unsigned int size )
-{
-	static unsigned int setBindIndex = 0;
-	shell_->clearBinding( setBindIndex );
-	Msg* m = new SingleMsg( shelle_, e_ );
-	shell_->addMsgAndFunc( m->mid(), fid, setBindIndex );
-	// Qinfo( FuncId f, DataId srcIndex, unsigned int size )
-	Qinfo q(  fid, 0, size );
-	shell_->asend( q, setBindIndex, Shell::procInfo(), val );
-}
- */
-
-/*
-void SetGet::resizeBuf( unsigned int size )
-{
-	buf_.resize( size );
-}
-
-char* SetGet::buf()
-{
-	return &buf_[0];
-}
-*/
-
 /////////////////////////////////////////////////////////////////////////
 
-/**
- * Here we generate the actual opfunc names from the field name.
- * We use the setFid only to do type checking. The actual Fid we
- * need to call is the getFid, which is passed back.
- */
-#if 0
-bool SetGet::checkGet( const string& field, FuncId& getFid )	
-	const
+// Static function
+bool SetGet::strGet( const Eref& tgt, const string& field, string& ret )
 {
-	static const SetGet1< FuncId > sgf( shelle_ );
-
-//	string setField = "set_" + field;
-	string getField = "get_" + field;
-
-	/*
-	const DestFinfo* sf = dynamic_cast< const DestFinfo* >( 
-		e_.element()->cinfo()->findFinfo( setField ) );
-		*/
-	const DestFinfo* gf = dynamic_cast< const DestFinfo* >(
-		e_.element()->cinfo()->findFinfo( getField ) );
-
-	if ( !( sf && gf ) ) {
-		cout << "get::Failed to find " << e_ << "." << field << endl;
+	const Finfo* f = tgt.element()->cinfo()->findFinfo( field );
+	if ( !f ) {
+		cout << Shell::myNode() << ": Error: SetGet::strGet: Field " <<
+			field << " not found on Element " << tgt.element()->getName() <<
+			endl;
 		return 0;
 	}
-
-	getFid = gf->getFid();
-	// const OpFunc* setFunc = sf->getOpFunc();
-	const OpFunc* getFunc = gf->getOpFunc();
-
-/*
-	FuncId setFid = e_.element()->cinfo()->getOpFuncId( setField );
-	getFid = e_.element()->cinfo()->getOpFuncId( getField );
-	const OpFunc* setFunc = e_.element()->cinfo()->getOpFunc( setFid );
-	const OpFunc* getFunc = e_.element()->cinfo()->getOpFunc( getFid );
-	if ( !( setFunc && getFunc ) ) {
-		cout << "get::Failed to find " << e_ << "." << field << endl;
+	SetGet* sg = f->getSetGet( tgt );
+	if ( sg ) {
+		return sg->innerStrGet( tgt, field, ret );
+	} else {
+		cout << Shell::myNode() << ": Error: SetGet::strGet: " <<
+			tgt.element()->getName() << ":" << field << 
+			" does not support get operation" << endl;
 		return 0;
 	}
-*/
-	if ( !getFunc->checkSet( &sgf ) ) {
-		 cout << "get::Type mismatch on getFunc" << e_ << "." << field << endl;
-		return 0;
-	}
-	if ( !setFunc->checkSet( this ) ) {
-		 cout << "get::Type mismatch on return value" << e_ << "." << field << endl;
-		return 0;
-	}
-	return 1;
 }
 
-bool SetGet::iGet( const string& field ) const
+bool SetGet::strSet( const Eref& tgt, const string& field, const string& v )
 {
-	// static unsigned int getBindIndex = 0;
-	// static FuncId retFunc = shell_->cinfo()->getOpFuncId( "handleGet" );
-
-	const DestFinfo* df = dynamic_cast< const DestFinfo* >( 
-		shell_->cinfo()->findFinfo( "handleGet" ) );
-	assert( df );
-	FuncId retFunc = df->getFid();
-
-	const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >(
-		shell_->cinfo()->findFinfo( "requestGet" ) );
-	assert( sf );
-	BindIndex getBindIndex = sf->getBindIndex();
-
-	FuncId destFid;
-	if ( checkGet( field, destFid ) ) {
-		shell_->clearBinding( getBindIndex );
-		Msg* m = new SingleMsg( shelle_, e_ );
-		shell_->addMsgAndFunc( m->mid(), destFid, getBindIndex );
-		Qinfo q( destFid, 0, sizeof( FuncId ) );
-		shell_->asend( q, getBindIndex, Shell::procInfo(),  
-			reinterpret_cast< char* >( &retFunc ) );
-		return 1;
+	const Finfo* f = tgt.element()->cinfo()->findFinfo( field );
+	if ( !f ) {
+		cout << Shell::myNode() << ": Error: SetGet::strSet: Field " <<
+			field << " not found on Element " << tgt.element()->getName() <<
+			endl;
+		return 0;
 	}
-	return 0;
+	SetGet* sg = f->getSetGet( tgt );
+	if ( sg ) {
+		return sg->innerStrSet( tgt, field, v );
+	} else {
+		cout << Shell::myNode() << ": Error: SetGet::strSet: " <<
+			tgt.element()->getName() << ":" << field << 
+			" does not support set operation" << endl;
+		return 0;
+	}
 }
-#endif
