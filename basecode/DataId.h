@@ -23,7 +23,8 @@
 
 class DataId {
 	public:
-		friend ostream& operator <<( ostream& s, const DataId& e );
+		friend ostream& operator <<( ostream& s, const DataId& d );
+		friend istream& operator >>( istream& s, DataId& d );
 		DataId()
 			: data_( 0 ), field_( 0 )
 		{;}

@@ -13,6 +13,7 @@
 class Neutral: public Data
 {
 	public:
+		friend istream& operator >>( istream& s, Neutral& d );
 		Neutral();
 		void process( const ProcInfo* p, const Eref& e );
 
@@ -89,6 +90,11 @@ class Neutral: public Data
 		 */
 		static Id child( const Eref& e, const string& name );
 
+		/**
+		 * Looks up all the Element children of the current Element
+		 */
+		static vector< Id > children( Eref e );
+
 		static FullId parent( const Eref& e );
 
 		/**
@@ -102,6 +108,10 @@ class Neutral: public Data
 		 */
 		static const Cinfo* initCinfo();
 
+		/**
+		 * return ids of all the children in ret.
+		 */
+		static void children( Eref e, vector< Id >& ret );
 	private:
 		// string name_;
 };

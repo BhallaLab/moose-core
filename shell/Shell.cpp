@@ -488,7 +488,8 @@ void Shell::doMove( Id orig, Id newParent )
  * Chops up the names in the path into the vector of strings. 
  * Returns true if it starts at '/'.
  */
-bool Shell::chopPath( const string& path, vector< string >& ret )
+bool Shell::chopPath( const string& path, vector< string >& ret, 
+	const char* separator )
 {
 	// /foo/bar/zod
 	// foo/bar/zod

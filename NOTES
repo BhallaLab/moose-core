@@ -6322,4 +6322,8 @@ Thoughts on generic wildcarder, one that can do network messaging too.
 	- Portion(s) that operate on constraints. For example, create a
 		message, set a synaptic strength, connect up a clock tick.
 	
+Converted in previous moose wildcard code, threw out the indexing stuff.
+Lots of Set/Get fixes needed to do string set/gets without prior knowledge
+of types.
 
+============================================================================

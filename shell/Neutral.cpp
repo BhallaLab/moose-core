@@ -161,6 +161,14 @@ FullId Neutral::getParent( Eref e, const Qinfo* q ) const
  */
 vector< Id > Neutral::getChildren( Eref e, const Qinfo* q ) const
 {
+	vector< Id > ret;
+	children( e, ret );
+	return ret;
+}
+
+// Static function
+void Neutral::children( Eref e, vector< Id >& ret )
+{
 	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
 	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
 	static const FuncId pafid = pf2->getFid();
@@ -170,8 +178,6 @@ vector< Id > Neutral::getChildren( Eref e, const Qinfo* q ) const
 	
 	const vector< MsgFuncBinding >* bvec = e.element()->getMsgAndFunc( bi );
 
-	vector< Id > ret;
-
 	for ( vector< MsgFuncBinding >::const_iterator i = bvec->begin();
 		i != bvec->end(); ++i ) {
 		if ( i->fid == pafid ) {
@@ -180,7 +186,6 @@ vector< Id > Neutral::getChildren( Eref e, const Qinfo* q ) const
 			ret.push_back( m->e2()->id() );
 		}
 	}
-	return ret;
 }
 
 /*
@@ -331,4 +336,10 @@ FullId Neutral::parent( const Eref& e )
 	assert( mid != Msg::badMsg );
 
 	return Msg::getMsg( mid )->findOtherEnd( e.fullId() );
+}
+
+// Neutral does not have any fields.
+istream& operator >>( istream& s, Neutral& d )
+{
+	return s;
 }

@@ -80,6 +80,10 @@ template < class T, class F > class ReadOnlyElementValueFinfo: public Finfo
 			c->registerFinfo( get_ );
 		}
 
+		SetGet* getSetGet( const Eref& e ) const {
+			return new SetGet1< F >( e );
+		}
+
 	private:
 		DestFinfo* get_;
 };

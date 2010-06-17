@@ -227,11 +227,11 @@ template< class T > class Conv< vector< T > >
 			return size_;
 		}
 
-		static void str2val( T& val, const string& s ) {
+		static void str2val( vector< T >& val, const string& s ) {
 			cout << "Specialized Conv< vector< T > >::str2val not done\n";
 		}
 
-		static void val2str( string& s, const T& val ) {
+		static void val2str( string& s, const vector< T >& val ) {
 			cout << "Specialized Conv< vector< T > >::val2str not done\n";
 		}
 	private:

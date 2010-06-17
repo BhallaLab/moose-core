@@ -241,7 +241,7 @@ template< class A > class Field: public SetGet1< A >
 			const string& val ) const 
 		{
 			A arg;
-			str2val( arg, val );
+			Conv< A >::str2val( arg, val );
 			return set( dest, field, arg );
 		}
 
@@ -270,7 +270,7 @@ template< class A > class Field: public SetGet1< A >
 			string temp = "get_" + field;
 			const char* ret = Shell::dispatchGet( dest, temp, &sg );
 			Conv< A > conv( ret );
-			val2str( str, *conv );
+			Conv<A>::val2str( str, *conv );
 			return 1;
 		}
 };
@@ -316,10 +316,10 @@ template< class A1, class A2 > class SetGet2: public SetGet
 		bool innerStrSet( const Eref& dest, const string& field, 
 			const string& val ) const
 		{
-			cout << "innerStrSet< A1, A2 >: string convertion not yet implemented\n";
+			cout << "innerStrSet< A1, A2 >: string conversion not yet implemented\n";
 			A1 arg1;
 			A2 arg2;
-			str2val( arg1, val );
+			Conv< A1 >::str2val( arg1, val );
 			return set( dest, field, arg1, arg2 );
 		}
 
@@ -381,12 +381,13 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 		bool innerStrSet( const Eref& dest, const string& field, 
 			const string& val ) const 
 		{
-			cout << "innerStrSet< A1, A2, A3 >: string convertion not yet implemented\n";
+			cout << "innerStrSet< A1, A2, A3 >: string conversion not yet implemented\n";
 			A1 arg1;
 			A2 arg2;
 			A3 arg3;
-			str2val( arg1, val );
-			return set( dest, field, arg1, arg2, arg3 );
+			Conv<A1>::str2val( arg1, val );
+			//return set( dest, field, arg1, arg2, arg3 );
+			return 0;
 		}
 
 	//////////////////////////////////////////////////////////////////
@@ -455,7 +456,7 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 			A2 arg2;
 			A3 arg3;
 			A4 arg4;
-			str2val( arg1, val );
+			Conv<A1>::str2val( arg1, val );
 			return set( dest, field, arg1, arg2, arg3, arg4 );
 		}
 
@@ -530,7 +531,7 @@ template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
 			A3 arg3;
 			A4 arg4;
 			A5 arg5;
-			str2val( arg1, val );
+			Conv<A1>::str2val( arg1, val );
 			return set( dest, field, arg1, arg2, arg3, arg4, arg5 );
 		}
 	//////////////////////////////////////////////////////////////////

@@ -17,6 +17,13 @@ ostream& operator <<( ostream& s, const DataId& d )
 	return s;
 }
 
+istream& operator >>( istream& s, DataId& d )
+{
+	string dummy;
+	s >> d.data_ >> dummy >> d.field_;
+	return s;
+}
+
 const DataId& DataId::bad() {
 	static DataId bad_( ~0U, ~0U );
 	return bad_;

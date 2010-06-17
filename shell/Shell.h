@@ -289,7 +289,8 @@ class Shell: public Data
 		static const char* buf();
 		static const ProcInfo* procInfo();
 
-		static bool chopPath( const string& path, vector< string >& ret );
+		static bool chopPath( const string& path, vector< string >& ret,
+			const char* separator = "/" );
 
 		static void wildcard( const string& path, vector< Id >& list );
 	private:

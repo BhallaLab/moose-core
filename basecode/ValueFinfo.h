@@ -78,6 +78,10 @@ template < class T, class F > class ReadOnlyValueFinfo: public Finfo
 			c->registerFinfo( get_ );
 		}
 
+		SetGet* getSetGet( const Eref& e ) const {
+			return new SetGet1< F >( e );
+		}
+
 	private:
 		DestFinfo* get_;
 };
@@ -122,6 +126,10 @@ template < class T, class F > class UpValueFinfo: public Finfo
 			c->registerFinfo( get_ );
 			// set_->registerFinfo( c );
 			// get_->registerFinfo( c );
+		}
+
+		SetGet* getSetGet( const Eref& e ) const {
+			return new SetGet1< F >( e );
 		}
 
 	private:
