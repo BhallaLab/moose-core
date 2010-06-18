@@ -268,7 +268,7 @@ LD = ld
 
 SUBDIR = basecode connections maindir genesis_parser shell element scheduling \
 	biophysics hsolve kinetics ksolve builtins utility \
-	randnum signeur device $(GL_DIR) $(SBML_DIR) $(NEUROML_DIR) $(PARALLEL_DIR) $(MUSIC_DIR) 
+	randnum robots device $(GL_DIR) $(SBML_DIR) $(NEUROML_DIR) $(PARALLEL_DIR) $(MUSIC_DIR) 
 
 # Used for 'make clean'
 CLEANSUBDIR = $(SUBDIR) parallel music pymoose sbml_IO neuroML_IO
@@ -288,7 +288,7 @@ OBJLIBS =	\
 	kinetics/kinetics.o \
 	ksolve/ksolve.o \
 	builtins/builtins.o \
-	signeur/signeur.o \
+	robots/robots.o \
 	device/device.o \
 	$(GLCELL_LIB) \
 	$(GLVIEW_LIB) \
