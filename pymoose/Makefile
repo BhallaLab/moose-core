@@ -24,7 +24,7 @@
 ############################################################################
 
 TARGET=pymoose
-CXXFLAGS+=-I/usr/local/include -I.. -I../basecode -I../connections -I../maindir -I../genesis_parser  -I../shell -I../element -I../scheduling -I../biophysics -I../hsolve -I../kinetics -I../ksolve -I../builtins -I../utility -I../randnum -I../signeur -I../device
+CXXFLAGS+=-I/usr/local/include -I.. -I../basecode -I../connections -I../maindir -I../genesis_parser  -I../shell -I../element -I../scheduling -I../biophysics -I../hsolve -I../kinetics -I../ksolve -I../builtins -I../utility -I../randnum -I../robots -I../device
 LIBS += -L/usr/lib -lpython2.6
 
 ifdef USE_NUMPY
@@ -65,8 +65,9 @@ OBJFILES := ../basecode/basecode.o \
 	../hsolve/hsolve.o	\
 	../ksolve/ksolve.o	\
 	../device/device.o \
-	../signeur/signeur.o	\
-# 	../robots/robots.o	\
+	../robots/robots.o	\
+
+
 
 ifeq ($(USE_SBML),1)
 	OBJFILES := $(OBJFILES) ../sbml_IO/sbml_IO.o
