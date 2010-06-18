@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri May 28 14:42:33 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jun 17 06:59:02 2010 (+0530)
+# Last-Updated: Thu Jun 17 09:49:19 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 880
+#     Update #: 883
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -52,7 +52,7 @@
 # Code:
 
 from numpy import *
-from pylab import *
+
 import moose
 
 class IzhikevichDemo:
@@ -439,21 +439,25 @@ class IzhikevichDemo:
         
         
 import sys
-if __name__ == '__main__':
-    key = 'tonic_spiking'
-    if len(sys.argv) > 1:
-        key = sys.argv[1]
-    demo = IzhikevichDemo()
-    (time, Vm, Im) = demo.simulate(key)
-    title(IzhikevichDemo.parameters[key][0] + '. ' + key)
-    subplot(2,1,1)
-    plot(time, array(Vm))
-    subplot(2,1,2)
-    plot(time, array(Im))
-    show()
-    # data.dumpFile(data.name + '.plot')
-    # demo.inject_table.dumpFile(demo.inject_table.name + '.plot')
-    print 'Finished simulation.'
+try:
+    from pylab import *
+    if __name__ == '__main__':
+        key = 'tonic_spiking'
+        if len(sys.argv) > 1:
+            key = sys.argv[1]
+        demo = IzhikevichDemo()
+        (time, Vm, Im) = demo.simulate(key)
+        title(IzhikevichDemo.parameters[key][0] + '. ' + key)
+        subplot(2,1,1)
+        plot(time, array(Vm))
+        subplot(2,1,2)
+        plot(time, array(Im))
+        show()
+        # data.dumpFile(data.name + '.plot')
+        # demo.inject_table.dumpFile(demo.inject_table.name + '.plot')
+        print 'Finished simulation.'
+except ImportError:
+    print 'Matplotlib not installed.'
 
 # 
 # Izhikevich.py ends here
