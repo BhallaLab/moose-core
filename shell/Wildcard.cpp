@@ -447,7 +447,7 @@ void testWildcard()
 	Id c1 = shell->doCreate( "Arith", a1, "c1", dims );
 	Id c2 = shell->doCreate( "Arith", a1, "c2", dims );
 	Id c3 = shell->doCreate( "Arith", a1, "c3", dims );
-	Id cIndex = shell->doCreate( "Arith", a1, "c4[1]", dims );
+	Id cIndex = shell->doCreate( "Neutral", a1, "c4[1]", dims );
 
 	bool ret = matchBeforeBrace( a1, "a1", 0 );
 	assert( ret );
@@ -528,9 +528,9 @@ void testWildcard()
 
 	Id el1[] = { Id(), a1, c1 };
 	wildcardTestFunc( el1, 3, "/,/a1,/a1/c1" );
-	Id el3[] = { c1, c2, c3 };
-	wildcardTestFunc( el3, 3, "a1/c#" );
-	wildcardTestFunc( el3, 3, "a1/c#[TYPE=Arith]" );
+	Id el3[] = { c1, c2, c3, cIndex };
+	wildcardTestFunc( el3, 4, "/a1/c#" );
+	wildcardTestFunc( el3, 3, "/a1/c#[TYPE=Arith]" );
 
 	Id el2[ 100 ];
 	for ( i = 0 ; i < 100; i++ ) {

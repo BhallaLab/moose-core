@@ -502,7 +502,7 @@ bool Shell::chopPath( const string& path, vector< string >& ret,
 	bool isAbsolute = 0;
 	string temp = path;
 	ret.resize( 0 );
-	if ( path[0] == '/' ) {
+	if ( path[0] == separator ) {
 		isAbsolute = 1;
 		if ( path.length() == 1 )
 			return 1;
