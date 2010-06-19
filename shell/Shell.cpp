@@ -489,7 +489,7 @@ void Shell::doMove( Id orig, Id newParent )
  * Returns true if it starts at '/'.
  */
 bool Shell::chopPath( const string& path, vector< string >& ret, 
-	const char* separator )
+	char separator )
 {
 	// /foo/bar/zod
 	// foo/bar/zod
@@ -509,13 +509,13 @@ bool Shell::chopPath( const string& path, vector< string >& ret,
 		temp = temp.substr( 1 );
 	}
 
-	string::size_type pos = temp.find_first_of( "/" );
+	string::size_type pos = temp.find_first_of( separator );
 	ret.push_back( temp.substr( 0, pos ) );
 	while ( pos != string::npos ) {
 		temp = temp.substr( pos + 1 );
 		if ( temp.length() == 0 )
 			break;
-		pos = temp.find_first_of( "/" );
+		pos = temp.find_first_of( separator );
 		ret.push_back( temp.substr( 0, pos ) );
 	}
 

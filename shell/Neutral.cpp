@@ -343,3 +343,8 @@ istream& operator >>( istream& s, Neutral& d )
 {
 	return s;
 }
+
+ostream& operator <<( ostream& s, const Neutral& d )
+{
+	return s;
+}

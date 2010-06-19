@@ -40,6 +40,9 @@ class SetGet
 
 
 		/**
+		 * Tgt is passed in as the destination Eref. May be changed inside,
+		 * if the function determines that it should be directed to a 
+		 * child Element acting as a Value.
 		 * Checks arg # and types for a 'set' call. Can be zero to 3 args.
 		 * Returns true if good. Passes back found fid.
 		 * Utility function to check that the target field matches this
@@ -241,6 +244,8 @@ template< class A > class Field: public SetGet1< A >
 			const string& val ) const 
 		{
 			A arg;
+			// Do NOT add 'set_' to the field name, as the 'set' func
+			// does it anyway.
 			Conv< A >::str2val( arg, val );
 			return set( dest, field, arg );
 		}
@@ -383,10 +388,10 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 		{
 			cout << "innerStrSet< A1, A2, A3 >: string conversion not yet implemented\n";
 			A1 arg1;
-			A2 arg2;
-			A3 arg3;
+			// A2 arg2;
+			// A3 arg3;
 			Conv<A1>::str2val( arg1, val );
-			//return set( dest, field, arg1, arg2, arg3 );
+			// return set( dest, field, arg1, arg2, arg3 );
 			return 0;
 		}
 

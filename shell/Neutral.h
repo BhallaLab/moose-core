@@ -14,6 +14,7 @@ class Neutral: public Data
 {
 	public:
 		friend istream& operator >>( istream& s, Neutral& d );
+		friend ostream& operator <<( ostream& s, const Neutral& d );
 		Neutral();
 		void process( const ProcInfo* p, const Eref& e );
 

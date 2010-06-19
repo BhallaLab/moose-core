@@ -70,8 +70,11 @@ template< class T > class Conv
 		}
 
 		static void val2str( string& s, const T& val ) {
-			ostringstream os( s );
-			os << val;
+			stringstream ss;
+			ss << val;
+			s = ss.str();
+			// ostringstream os( s );
+			// os << val;
 		}
 	private:
 		const char* val_;

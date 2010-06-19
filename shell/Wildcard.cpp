@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include <stdio.h>
 #include "Neutral.h"
 #include "Wildcard.h"
 // #define NOINDEX (UINT_MAX - 2)
@@ -136,7 +137,7 @@ int simpleWildcardFind( const string& path, vector<Id>& ret)
 		return 0;
 	unsigned int n = ret.size();
 	vector< string > wildcards;
-	Shell::chopPath( path, wildcards, "," );
+	Shell::chopPath( path, wildcards, ',' );
 	// separateString( path, wildcards, "," );
 	vector< string >::iterator i;
 	for ( i = wildcards.begin(); i != wildcards.end(); ++i )
@@ -213,13 +214,14 @@ void findBraceContent( const string& path, string& beforeBrace,
 	if ( path.length() == 0 )
 		return;
 	vector< string > names;
-	Shell::chopPath( path, names, "[" );
+	Shell::chopPath( path, names, '[' );
 	if ( names.size() == 0 )
 		return;
 	if ( names.size() >= 1 )
 		beforeBrace = names[0];
 	if ( names.size() >= 2 ) {
 		if ( names[1].find_first_not_of( " 	]" ) == string::npos ) {
+			// look up numerical index which lives in first brace.
 		} else {
 			string n1 = names[1].substr( 0, names[1].length() - 1 );
 			insideBrace = n1;
@@ -394,13 +396,7 @@ int wildcardRelativeFind( Id start, const vector< string >& path,
 	return nret;
 }
 
-#if 0
-// #ifdef DO_UNIT_TESTS
-
-// Checks if the elements in elist are identical to those that path
-// should generate.
-void wildcardTestFunc( 
-	Element** elist, unsigned int ne, const string& path )
+void wildcardTestFunc( Id* elist, unsigned int ne, const string& path )
 {
 	vector< Id > ret;
 	simpleWildcardFind( path, ret );
@@ -410,10 +406,10 @@ void wildcardTestFunc(
 		assert( 0 );
 	}
 	for ( unsigned int i = 0; i < ne ; i++ ) {
-		if ( elist[ i ] != ret[ i ]() ) {
+		if ( elist[ i ] != ret[ i ] ) {
 			cout << "!\nAssert	" << path << ": item " << i << 
-				": " << elist[ i ]->name() << " != " <<
-					ret[ i ]()->name() << "\n";
+				": " << elist[ i ]()->getName() << " != " <<
+					ret[ i ]()->getName() << "\n";
 			assert( 0 );
 		}
 	}
@@ -428,163 +424,154 @@ void testWildcard()
 	
 	string bb;
 	string ib;
-	unsigned int ii;
-	findBraceContent( "foo[23][TYPE=Compartment]", bb, ib, ii );
-	ASSERT( bb == "foo", "findBraceContent" );
-	ASSERT( ib == "TYPE=Compartment", "findBraceContent" );
-	ASSERT( ii == 23, "findBraceContent" );
-	findBraceContent( "foo[][TYPE=Channel]", bb, ib, ii );
-	ASSERT( bb == "foo", "findBraceContent" );
-	ASSERT( ib == "TYPE=Channel", "findBraceContent" );
-	ASSERT( ii == Id::AnyIndex, "findBraceContent" );
-	findBraceContent( "foo[TYPE=membrane]", bb, ib, ii );
-	ASSERT( bb == "foo", "findBraceContent" );
-	ASSERT( ib == "TYPE=membrane", "findBraceContent" );
-	ASSERT( ii == NOINDEX, "findBraceContent" );
-	findBraceContent( "bar[]", bb, ib, ii );
-	ASSERT( bb == "bar", "findBraceContent" );
-	ASSERT( ib == "", "findBraceContent" );
-	ASSERT( ii == Id::AnyIndex, "findBraceContent" );
-	findBraceContent( "zod[24]", bb, ib, ii );
-	ASSERT( bb == "zod", "findBraceContent" );
-	ASSERT( ib == "", "findBraceContent" );
-	ASSERT( ii == 24, "findBraceContent" );
+	findBraceContent( "foo[23][TYPE=Compartment]", bb, ib );
+	assert( bb == "foo" );
+	assert( ib == "TYPE=Compartment" );
+	findBraceContent( "foo[][TYPE=Channel]", bb, ib );
+	assert( bb == "foo" );
+	assert( ib == "TYPE=Channel" );
+	findBraceContent( "foo[TYPE=membrane]", bb, ib );
+	assert( bb == "foo" );
+	assert( ib == "TYPE=membrane" );
+	findBraceContent( "bar[]", bb, ib );
+	assert( bb == "bar" );
+	assert( ib == "" );
+	findBraceContent( "zod[24]", bb, ib );
+	assert( bb == "zod" );
+	assert( ib == "24" );
 
 
-	Element* a1 = Neutral::create( "Neutral", "a1", Element::root()->id(), Id::scratchId() );
-	Element* c1 = Neutral::create( "Compartment", "c1", a1->id(), Id::scratchId() );
-	Element* c2 = Neutral::create( "Compartment", "c2", a1->id(), Id::scratchId() );
-	Element* c3 = Neutral::create( "Compartment", "c3", a1->id(), Id::scratchId() );
-	Element* cIndex = Neutral::create( "Compartment", "c4[1]", a1->id(), Id::scratchId() );
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< unsigned int > dims( 1, 1 );
+	Id a1 = shell->doCreate( "Neutral", Id(), "a1", dims );
+	Id c1 = shell->doCreate( "Arith", a1, "c1", dims );
+	Id c2 = shell->doCreate( "Arith", a1, "c2", dims );
+	Id c3 = shell->doCreate( "Arith", a1, "c3", dims );
+	Id cIndex = shell->doCreate( "Arith", a1, "c4[1]", dims );
 
-	ASSERT( cIndex->elementType() == "Simple", "Wildcard test" );
+	bool ret = matchBeforeBrace( a1, "a1", 0 );
+	assert( ret );
+	ret = matchBeforeBrace( a1, "a2", 0 );
+	assert( ret == 0 );
+	ret = matchBeforeBrace( a1, "a?", 0 );
+	assert( ret == 1 );
+	ret = matchBeforeBrace( a1, "?1", 0 );
+	assert( ret == 1 );
+	ret = matchBeforeBrace( a1, "??", 0 );
+	assert( ret == 1 );
+	ret = matchBeforeBrace( a1, "#", 0 );
+	assert( ret == 1 );
+	ret = matchBeforeBrace( a1, "a#", 0 );
+	assert( ret == 1 );
+	ret = matchBeforeBrace( a1, "#1", 0 );
+	assert( ret == 1 );
 
-
-	bool ret = matchBeforeBrace( a1->id(), "a1", 0, 0 );
-	ASSERT( ret, "matchBeforeBrace" );
-	ret = matchBeforeBrace( a1->id(), "a2", 0, 0 );
-	ASSERT( ret == 0, "matchBeforeBrace" );
-	ret = matchBeforeBrace( a1->id(), "a?", 0, 0 );
-	ASSERT( ret == 1, "matchBeforeBrace" );
-	ret = matchBeforeBrace( a1->id(), "?1", 0, 0 );
-	ASSERT( ret == 1, "matchBeforeBrace" );
-	ret = matchBeforeBrace( a1->id(), "??", 0, 0 );
-	ASSERT( ret == 1, "matchBeforeBrace" );
-	ret = matchBeforeBrace( a1->id(), "#", 0, 0 );
-	ASSERT( ret == 1, "matchBeforeBrace" );
-	ret = matchBeforeBrace( a1->id(), "a#", 0, 0 );
-	ASSERT( ret == 1, "matchBeforeBrace" );
-	ret = matchBeforeBrace( a1->id(), "#1", 0, 0 );
-	ASSERT( ret == 1, "matchBeforeBrace" );
-
-	ret = matchBeforeBrace( cIndex->id(), "c4", 1, 1 );
-	ASSERT( ret == 1, "matchBeforeBrace" );
-	ret = matchBeforeBrace( cIndex->id(), "c4", 1, Id::AnyIndex );
-	ASSERT( ret == 1, "matchBeforeBrace" );
-	ret = matchBeforeBrace( cIndex->id(), "#4", 1, 1 );
-	ASSERT( ret == 1, "matchBeforeBrace" );
-	ret = matchBeforeBrace( cIndex->id(), "#", 1, 1 );
-	ASSERT( ret == 1, "matchBeforeBrace" );
-	ret = matchBeforeBrace( cIndex->id(), "?4", 1, 1 );
-	ASSERT( ret == 1, "matchBeforeBrace" );
-	ret = matchBeforeBrace( cIndex->id(), "c4", 1, 2 );
-	ASSERT( ret == 0, "matchBeforeBrace" );
-	ret = matchBeforeBrace( cIndex->id(), "c1", 1, 2 );
-	ASSERT( ret == 0, "matchBeforeBrace" );
-	ret = matchBeforeBrace( cIndex->id(), "c4", 0, 0 );
-	ASSERT( ret == 0, "matchBeforeBrace" );
+	ret = matchBeforeBrace( cIndex, "c4", 1 );
+	assert( ret == 1 );
+	ret = matchBeforeBrace( cIndex, "c4", 1 );
+	assert( ret == 1 );
+	ret = matchBeforeBrace( cIndex, "#4", 1 );
+	assert( ret == 1 );
+	ret = matchBeforeBrace( cIndex, "#", 1 );
+	assert( ret == 1 );
+	ret = matchBeforeBrace( cIndex, "?4", 1 );
+	assert( ret == 1 );
+	ret = matchBeforeBrace( cIndex, "c1", 1 );
+	assert( ret == 0 );
+	ret = matchBeforeBrace( cIndex, "c4", 0 );
+	assert( ret == 0 );
 
 
-	ret = matchInsideBrace( a1->id(), "TYPE=Neutral" );
-	ASSERT( ret, "matchInsideBrace" );
-	ret = matchInsideBrace( a1->id(), "TYPE==Neutral" );
-	ASSERT( ret, "matchInsideBrace" );
-	ret = matchInsideBrace( a1->id(), "CLASS=Neutral" );
-	ASSERT( ret, "matchInsideBrace" );
-	ret = matchInsideBrace( a1->id(), "ISA=Neutral" );
-	ASSERT( ret, "matchInsideBrace" );
-	ret = matchInsideBrace( a1->id(), "CLASS=Neutral" );
-	ASSERT( ret, "matchInsideBrace" );
-	ret = matchInsideBrace( a1->id(), "TYPE!=Channel" );
-	ASSERT( ret, "matchInsideBrace" );
-	ret = matchInsideBrace( a1->id(), "CLASS!=Channel" );
-	ASSERT( ret, "matchInsideBrace" );
-	ret = matchInsideBrace( a1->id(), "ISA!=Channel" );
-	ASSERT( ret, "matchInsideBrace" );
-	ret = matchInsideBrace( c3->id(), "ISA!=Neutral" );
-	ASSERT( ret, "matchInsideBrace" );
-	ret = matchInsideBrace( c3->id(), "ISA=Compartment" );
-	ASSERT( ret, "matchInsideBrace" );
-	ret = matchInsideBrace( c3->id(), "TYPE=membrane" );
-	ASSERT( ret, "matchInsideBrace" );
+	ret = matchInsideBrace( a1, "TYPE=Neutral" );
+	assert( ret );
+	ret = matchInsideBrace( a1, "TYPE==Neutral" );
+	assert( ret );
+	ret = matchInsideBrace( a1, "CLASS=Neutral" );
+	assert( ret );
+	ret = matchInsideBrace( a1, "ISA=Neutral" );
+	assert( ret );
+	ret = matchInsideBrace( a1, "CLASS=Neutral" );
+	assert( ret );
+	ret = matchInsideBrace( a1, "TYPE!=Channel" );
+	assert( ret );
+	ret = matchInsideBrace( a1, "CLASS!=Channel" );
+	assert( ret );
+	ret = matchInsideBrace( a1, "ISA!=Channel" );
+	assert( ret );
+	ret = matchInsideBrace( c3, "ISA!=Neutral" );
+	assert( ret );
+	ret = matchInsideBrace( c3, "ISA=Arith" );
+	assert( ret );
+	ret = matchInsideBrace( c3, "TYPE=membrane" );
+	assert( !ret );
 
-	set< double >( c3, "Em", double( 123.5 ) );
-	ret = matchInsideBrace( c3->id(), "FIELD(Em)=123.5" );
-	ASSERT( ret, "Field matchInsideBrace" );
-	ret = matchInsideBrace( c3->id(), "FIELD(Em)==123.5" );
-	ASSERT( ret, "Field matchInsideBrace" );
-	ret = matchInsideBrace( c3->id(), "FIELD(Em)!=123.4" );
-	ASSERT( ret, "Field matchInsideBrace" );
-	ret = matchInsideBrace( c3->id(), "FIELD(Em)>123.4" );
-	ASSERT( ret, "Field matchInsideBrace" );
-	ret = matchInsideBrace( c3->id(), "FIELD(Em)<123.6" );
-	ASSERT( ret, "Field matchInsideBrace" );
-	ret = matchInsideBrace( c3->id(), "FIELD(Em)>=123.4" );
-	ASSERT( ret, "Field matchInsideBrace" );
-	ret = matchInsideBrace( c3->id(), "FIELD(Em)<=123.6" );
-	ASSERT( ret, "Field matchInsideBrace" );
-	ret = matchInsideBrace( c3->id(), "FIELD(Em)>=123.5" );
-	ASSERT( ret, "Field matchInsideBrace" );
-	ret = matchInsideBrace( c3->id(), "FIELD(Em)<=123.5" );
-	ASSERT( ret, "Field matchInsideBrace" );
+	Field<double>::set( c3.eref(), "outputValue", 123.5 );
+	ret = matchInsideBrace( c3, "FIELD(outputValue)=123.5" );
+	assert( ret );
+	ret = matchInsideBrace( c3, "FIELD(outputValue)==123.5" );
+	assert( ret );
+	ret = matchInsideBrace( c3, "FIELD(outputValue)!=123.4" );
+	assert( ret );
+	ret = matchInsideBrace( c3, "FIELD(outputValue)>123.4" );
+	assert( ret );
+	ret = matchInsideBrace( c3, "FIELD(outputValue)<123.6" );
+	assert( ret );
+	ret = matchInsideBrace( c3, "FIELD(outputValue)>=123.4" );
+	assert( ret );
+	ret = matchInsideBrace( c3, "FIELD(outputValue)<=123.6" );
+	assert( ret );
+	ret = matchInsideBrace( c3, "FIELD(outputValue)>=123.5" );
+	assert( ret );
+	ret = matchInsideBrace( c3, "FIELD(outputValue)<=123.5" );
+	assert( ret );
 
 
-	Element* el1[] = { Element::root(), a1, c1 };
+	Id el1[] = { Id(), a1, c1 };
 	wildcardTestFunc( el1, 3, "/,/a1,/a1/c1" );
-	Element* el3[] = { c1, c2, c3 };
+	Id el3[] = { c1, c2, c3 };
 	wildcardTestFunc( el3, 3, "a1/c#" );
-	wildcardTestFunc( el3, 3, "a1/c#[TYPE=Compartment]" );
+	wildcardTestFunc( el3, 3, "a1/c#[TYPE=Arith]" );
 
-	int initialNumInstances = SimpleElement::numInstances;
-
-	Element* el2[ 100 ];
+	Id el2[ 100 ];
 	for ( i = 0 ; i < 100; i++ ) {
 		char name[10];
 		sprintf( name, "ch%ld", i );
-		el2[i] = Neutral::create( "HHChannel", name, c1->id(), Id::scratchId() );
-		set< double >( el2[i], "Ek", static_cast< double >( i ) );
-		set< double >( el2[i], "Gbar", static_cast< double >( i * 10 ));
+		el2[i] = shell->doCreate( "IntFire", c1, name, dims );
+		//el2[i] = Neutral::create( "HHChannel", name, c1->id(), Id::scratchId() );
+		Field< double >::set( el2[i].eref(), "Vm", i );
+		Field< double >::set( el2[i].eref(), "tau", i * 10 );
 	}
-	ASSERT( SimpleElement::numInstances - initialNumInstances == 100,
-			"Check that array is made" );
 
 	wildcardTestFunc( el2, 100, "/a1/c1/##" );
 	wildcardTestFunc( el2, 100, "/a1/c1/#" );
 
-	wildcardTestFunc( el2, 100, "/a1/##[TYPE=HHChannel]" );
-	wildcardTestFunc( el2, 0, "/a1/##[TYPE=HHGate]" );
+	wildcardTestFunc( el2, 100, "/a1/##[TYPE=IntFire]" );
+	wildcardTestFunc( el2, 0, "/a1/##[TYPE=Arith]" );
 
 	// Here we set up some thoroughly ugly nesting.
 	// Note the sequence: The wildcarding goes depth first,
 	// and then in order of creation.
-	el2[0] = Neutral::create( "HHGate", "g0", el2[0]->id(), Id::scratchId() );
-	el2[1] = Neutral::create( "HHGate", "g1", el2[1]->id(), Id::scratchId() );
-	el2[2] = Neutral::create( "HHGate", "g2", el2[1]->id(), Id::scratchId() );
-	el2[3] = Neutral::create( "HHGate", "g3", el2[2]->id(), Id::scratchId() );
-	el2[4] = Neutral::create( "HHGate", "g4", el2[2]->id(), Id::scratchId() );
-	el2[5] = Neutral::create( "HHGate", "g5", el2[4]->id(), Id::scratchId() );
-	el2[6] = Neutral::create( "HHGate", "g6", el2[5]->id(), Id::scratchId() );
-	el2[7] = Neutral::create( "HHGate", "g7", el2[6]->id(), Id::scratchId() );
-	el2[8] = Neutral::create( "HHGate", "g8", el2[1]->id(), Id::scratchId() );
-	el2[9] = Neutral::create( "HHGate", "g9", el2[1]->id(), Id::scratchId() );
-	el2[10] = Neutral::create( "HHGate", "g10", c2->id(), Id::scratchId() );
-	el2[11] = Neutral::create( "HHGate", "g11", c3->id(), Id::scratchId() );
+	Id el4[12];
+	i = 0;
+	el4[i] = shell->doCreate( "Mdouble", el2[0], "g0", dims ); ++i;
+	el4[i] = shell->doCreate( "Mdouble", el2[1], "g1", dims ); ++i;
+	el4[i] = shell->doCreate( "Mdouble", el2[1], "g2", dims ); ++i;
+	el4[i] = shell->doCreate( "Mdouble", el2[2], "g3", dims ); ++i;
+	el4[i] = shell->doCreate( "Mdouble", el2[2], "g4", dims ); ++i;
+	el4[i] = shell->doCreate( "Mdouble", el2[4], "g5", dims ); ++i;
+	el4[i] = shell->doCreate( "Mdouble", el2[5], "g6", dims ); ++i;
+	el4[i] = shell->doCreate( "Mdouble", el2[6], "g7", dims ); ++i;
+	el4[i] = shell->doCreate( "Mdouble", el2[1], "g8", dims ); ++i;
+	el4[i] = shell->doCreate( "Mdouble", el2[1], "g9", dims ); ++i;
+	el4[i] = shell->doCreate( "Mdouble", c2, "g10", dims ); ++i;
+	el4[i] = shell->doCreate( "Mdouble", c3, "g11", dims ); ++i;
+
 	wildcardTestFunc( el2, 12, "/a1/##[TYPE=HHGate]" );
 	wildcardTestFunc( el2, 12, "/##[TYPE=HHGate]" );
 
-	ASSERT( set( a1, "destroy" ), "Cleaning up" );
-	ASSERT( SimpleElement::numInstances - initialNumInstances == -5,
-			"Check that array is gone" );
+	a1.destroy();
+	//assert( set( a1, "destroy" ) );
+	// Check that array is gone
 
 	/*
 	Field( "/classes/child_out" ).dest( flist );
@@ -631,4 +618,3 @@ void testWildcard()
 	*/
 }
 
-#endif

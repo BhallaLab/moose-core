@@ -43,7 +43,7 @@ template < class T, class F > class ValueFinfo: public Finfo
 		}
 
 		SetGet* getSetGet( const Eref& e ) const {
-			return new SetGet1< F >( e );
+			return new Field< F >( e );
 		}
 
 	private:
@@ -79,7 +79,7 @@ template < class T, class F > class ReadOnlyValueFinfo: public Finfo
 		}
 
 		SetGet* getSetGet( const Eref& e ) const {
-			return new SetGet1< F >( e );
+			return new Field< F >( e );
 		}
 
 	private:
@@ -129,7 +129,7 @@ template < class T, class F > class UpValueFinfo: public Finfo
 		}
 
 		SetGet* getSetGet( const Eref& e ) const {
-			return new SetGet1< F >( e );
+			return new Field< F >( e );
 		}
 
 	private:

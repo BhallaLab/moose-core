@@ -20,6 +20,7 @@
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
 #include "SingleMsg.h"
+#include "Wildcard.h"
 
 void testCreateDelete()
 {
@@ -867,6 +868,8 @@ void testShell( )
 	// testShellParserQuit();
 }
 
+extern void testWildcard();
+
 void testMpiShell( )
 {
 	testShellParserCreateDelete();
@@ -878,4 +881,5 @@ void testMpiShell( )
 	testInterNodeOps();
 	testShellAddMsg();
 	testCopyMsgOps();
+	testWildcard();
 }

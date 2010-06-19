@@ -9,6 +9,7 @@
 
 #include "header.h"
 #include <stdio.h>
+#include <iomanip>
 #include "../shell/Neutral.h"
 #include "../builtins/Arith.h"
 #include "../builtins/Mdouble.h"
@@ -285,6 +286,45 @@ void testSet()
 	delete i2();
 }
 
+void testStrSet()
+{
+	const Cinfo* ac = Arith::initCinfo();
+	unsigned int size = 100;
+	vector< unsigned int > dims( 1, size );
+	string arg;
+	Id i2 = Id::nextId();
+	Element* ret = new Element( i2, ac, "test2", dims, 1 );
+	assert( ret );
+	ProcInfo p;
+
+	Eref e2 = i2.eref();
+
+	assert( ret->getName() == "test2" );
+	bool ok = SetGet::strSet( e2, "name", "NewImprovedTest" );
+	assert( ok );
+	assert( ret->getName() == "NewImprovedTest" );
+	
+	for ( unsigned int i = 0; i < size; ++i ) {
+		double x = sqrt( i );
+		Eref dest( e2.element(), i );
+		stringstream ss;
+		ss << setw( 7 ) << x;
+		ok = SetGet::strSet( dest, "outputValue", ss.str() );
+		assert( ok );
+		// SetGet1< double >::set( dest, "set_outputValue", x );
+	}
+
+	for ( unsigned int i = 0; i < size; ++i ) {
+		double temp = sqrt( i );
+		double val = reinterpret_cast< Arith* >( Eref( i2(), i ).data() )->getOutput();
+		assert( fabs( val - temp ) < 1e-5 );
+	}
+
+	cout << "." << flush;
+
+	delete i2();
+}
+
 void testGet()
 {
 	const Cinfo* ac = Arith::initCinfo();
@@ -316,6 +356,47 @@ void testGet()
 		double val = Field< double >::get( dest, "outputValue" );
 		double temp = i * 3;
 		assert( fabs( val - temp ) < 1e-8 );
+	}
+
+	cout << "." << flush;
+	delete i2();
+}
+
+void testStrGet()
+{
+	const Cinfo* ac = Arith::initCinfo();
+	unsigned int size = 100;
+	string arg;
+	Id i2 = Id::nextId();
+	vector< unsigned int > dims( 1, size );
+	Element* ret = new Element( i2, ac, "test2", dims, 1 );
+	assert( ret );
+	// Element* shell = Id()();
+	ProcInfo p;
+
+	Eref e2 = i2.eref();
+
+	string val;
+	bool ok = SetGet::strGet( e2, "name", val );
+	assert( ok );
+	assert( val == "test2" );
+	ret->setName( "HupTwoThree" );
+	ok = SetGet::strGet( e2, "name", val );
+	assert( ok );
+	assert( val == "HupTwoThree" );
+	
+	for ( unsigned int i = 0; i < size; ++i ) {
+		double temp = i * 3;
+		reinterpret_cast< Arith* >( Eref( i2(), i ).data() )->setOutput( temp );
+	}
+
+	for ( unsigned int i = 0; i < size; ++i ) {
+		Eref dest( e2.element(), i );
+		ok = SetGet::strGet( dest, "outputValue", val );
+		assert( ok );
+		double conv = atof( val.c_str() );
+		double temp = i * 3;
+		assert( fabs( conv - temp ) < 1e-5 );
 	}
 
 	cout << "." << flush;
@@ -1334,6 +1415,8 @@ void testAsync( )
 	testSetGetSynapse();
 	testSetGetVec();
 	testSetRepeat();
+	testStrSet();
+	testStrGet();
 	testSendSpike();
 	testSparseMatrix();
 	testSparseMatrix2();

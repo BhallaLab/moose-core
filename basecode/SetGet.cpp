@@ -76,6 +76,8 @@ bool SetGet::checkSet( const string& field, Eref& tgt, FuncId& fid ) const
 		cout << "set::Failed to find " << e_ << "." << field << endl;
 		return 0;
 	}
+
+	// This is the crux of the function: typecheck for the field.
 	if ( func->checkSet( this ) ) {
 		return 1;
 	} else {
@@ -107,8 +109,10 @@ bool SetGet::strGet( const Eref& tgt, const string& field, string& ret )
 	}
 }
 
-bool SetGet::strSet( const Eref& tgt, const string& field, const string& v )
+bool SetGet::strSet( const Eref& dest, const string& field, const string& v)
 {
+	Eref tgt( dest );
+	
 	const Finfo* f = tgt.element()->cinfo()->findFinfo( field );
 	if ( !f ) {
 		cout << Shell::myNode() << ": Error: SetGet::strSet: Field " <<
