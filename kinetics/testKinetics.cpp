@@ -14,11 +14,14 @@ void testReadKkit()
 {
 	ReadKkit rk;
 	// rk.read( "test.g", "dend", 0 );
-	Id base = rk.read( "dend_v26.g", "dend", Id() );
+	Id base = rk.read( "foo.g", "dend", Id() );
 	assert( base != Id() );
 	// Id kinetics = s->doFind( "/kinetics" );
 
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	rk.run();
+	rk.dumpPlots( "dend.plot" );
+
 	s->doDelete( base );
 	cout << "." << flush;
 }

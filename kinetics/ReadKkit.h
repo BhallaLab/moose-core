@@ -38,6 +38,8 @@ class ReadKkit
 		void readData( const string& line );
 		void undump( const vector< string >& args );
 
+		void run();
+		void dumpPlots( const string& filename );
 
 		//////////////////////////////////////////////////////////////////
 		// Building up the model

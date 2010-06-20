@@ -107,6 +107,39 @@ Id ReadKkit::read(
 	return base;
 }
 
+void ReadKkit::run()
+{
+	shell_->setclock( 0, fastdt_, 0 );
+	shell_->setclock( 1, controldt_, 0 );
+	shell_->setclock( 2, plotdt_, 0 );
+	string kinpath = basePath_ + "/kinetics/##";
+	string plotpath = basePath_ + "/graphs/##[TYPE=Table],/moregraphs/##[TYPE=Table]";
+	shell_->doUseClock( kinpath, "process", 0 );
+	shell_->doUseClock( plotpath, "process", 2 );
+	shell_->doStart( transientTime_ );
+	shell_->setclock( 0, simdt_, 0 );
+	shell_->doStart( maxtime_ - transientTime_ );
+	if ( useVariableDt_ ) {
+		shell_->setclock( 0, fastdt_, 0 );
+		shell_->doStart( transientTime_ );
+		shell_->setclock( 0, simdt_, 0 );
+		shell_->doStart( maxtime_ - transientTime_ );
+	} else {
+		shell_->doStart( maxtime_ );
+	}
+}
+
+void ReadKkit::dumpPlots( const string& filename )
+{
+	// ofstream fout ( filename.c_str() );
+	vector< Id > plots;
+	string plotpath = basePath_ + "/graphs/##[TYPE=Table],/moregraphs/##[TYPE=Table]";
+	Shell::wildcard( plotpath, plots );
+	for ( vector< Id >::iterator i = plots.begin(); i != plots.end(); ++i )
+		SetGet2< string, string >::set( i->eref(), "xplot",
+			filename, (*i)()->getName() );
+}
+
 void ReadKkit::innerRead( ifstream& fin )
 {
 	string line;

@@ -19,6 +19,7 @@
 #include "SparseMsg.h"
 #include "Shell.h"
 #include "Dinfo.h"
+#include "Wildcard.h"
 
 // Want to separate out this search path into the Makefile options
 #include "../scheduling/Tick.h"
@@ -840,6 +841,7 @@ void Shell::error( const string& text )
 
 void Shell::wildcard( const string& path, vector< Id >& list )
 {
+	wildcardFind( path, list );
 }
 
 ///////////////////////////////////////////////////////////////////////////

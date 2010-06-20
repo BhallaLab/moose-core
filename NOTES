@@ -6355,6 +6355,17 @@ removed all getSetGet calls, replaced with memory-safe Finfo::strSet and
 Finfo::strGet calls in Finfo and all derived classes. Valgrind reports
 _still_ more leaks. Checkin 1894.
 Further fixes to ReadKkit, improved, still leaks. Checkin 1895.
-Yet more cleanup. Finally leaks gone.
+Yet more cleanup. Finally leaks gone. Checkin 1896.
 
+Now to get back to testing chem kinetics. For starters, 
+- run model, dump data, and compare with genesis.
+- Bring in solver to scan model tree and zombify it.
+- Test out solver too
+Then in no particular order:
+- Implement arbitrary math handler
+- Fix up compartmentalization
+- Implement readSBML
+- Parallelize
+
+Set up code to run model. At this point it just stalls.
 ============================================================================
