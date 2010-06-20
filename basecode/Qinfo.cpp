@@ -45,7 +45,7 @@ Qinfo::Qinfo( FuncId f, DataId srcIndex, unsigned int size )
 {;}
 */
 
-Qinfo::Qinfo( bool useSendTo, DataId srcIndex, unsigned int size )
+Qinfo::Qinfo( DataId srcIndex, unsigned int size, bool useSendTo )
 	:	
 		useSendTo_( useSendTo ), 
 		isForward_( 1 ), 

@@ -1202,8 +1202,8 @@ void testSharedMsg()
 	assert( tdata1->i2_ == 6002  );
 	assert( tdata2->i1_ == 1005  );
 	assert( tdata2->i2_ == 2006  );
-	assert( tdata1->numAcks_ == 4  ); // not good.
-	assert( tdata2->numAcks_ == 0  );
+	assert( tdata1->numAcks_ == 2  );
+	assert( tdata2->numAcks_ == 2  );
 	
 	t1.destroy();
 	t2.destroy();

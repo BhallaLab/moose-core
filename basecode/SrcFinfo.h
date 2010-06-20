@@ -84,8 +84,8 @@ template < class T > class SrcFinfo1: public SrcFinfo
 		// Will need to specialize for strings etc.
 		void send( Eref e, const ProcInfo* p, const T& arg ) const 
 		{
-			// Qinfo( useSendTo, eindex, size );
-			Qinfo q( 0, e.index(), sizeof( T ) );
+			// Qinfo( eindex, size, useSendTo );
+			Qinfo q( e.index(), sizeof( T ), 0 );
 			e.element()->asend( q, getBindIndex(), p, 
 				reinterpret_cast< const char* >( &arg ) );
 		}
@@ -97,8 +97,8 @@ template < class T > class SrcFinfo1: public SrcFinfo
 		void sendTo( Eref e, const ProcInfo* p,
 			const T& arg, const FullId& target ) const
 		{
-			// Qinfo( useSendTo, eindex, size );
-			Qinfo q( 1, e.index(), sizeof( T ) );
+			// Qinfo( eindex, size, useSendTo );
+			Qinfo q( e.index(), sizeof( T ), 1 );
 			e.element()->tsend( q, getBindIndex(), p, 
 				reinterpret_cast< const char* >( &arg ), target );
 		}
@@ -120,8 +120,8 @@ template <> class SrcFinfo1< string >: public SrcFinfo
 		{
 			Conv< string > s( arg );
 
-			// Qinfo( useSendTo, eindex, size );
-			Qinfo q( 0, e.index(), s.size() );
+			// Qinfo( eindex, size, useSendTo );
+			Qinfo q( e.index(), s.size(), 0 );
 			char* buf = new char[ s.size() ];
 			s.val2buf( buf );
 
@@ -133,7 +133,7 @@ template <> class SrcFinfo1< string >: public SrcFinfo
 			const string& arg, const FullId& target ) const
 		{
 			Conv< string > s( arg );
-			Qinfo q( 1, e.index(), s.size() );
+			Qinfo q( e.index(), s.size(), 1 );
 			char* buf = new char[ s.size() ];
 			s.val2buf( buf );
 
@@ -160,7 +160,7 @@ template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 		{
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
-			Qinfo q( 0, e.index(), a1.size() + a2.size() );
+			Qinfo q( e.index(), a1.size() + a2.size(), 0 );
 			char* temp = new char[ a1.size() + a2.size() ];
 			a1.val2buf( temp );
 			a2.val2buf( temp + a1.size() );
@@ -173,7 +173,7 @@ template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 		{
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
-			Qinfo q( 1, e.index(), a1.size() + a2.size() );
+			Qinfo q( e.index(), a1.size() + a2.size(), 1 );
 			char* temp = new char[ a1.size() + a2.size() ];
 			a1.val2buf( temp );
 			a2.val2buf( temp + a1.size() );
@@ -201,7 +201,7 @@ template < class T1, class T2, class T3 > class SrcFinfo3: public SrcFinfo
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
 			Conv< T3 > a3( arg3 );
-			Qinfo q( 0, e.index(), a1.size() + a2.size() + a3.size() );
+			Qinfo q( e.index(), a1.size() + a2.size() + a3.size(), 0 );
 			char* temp = new char[ a1.size() + a2.size() + a3.size() ];
 			a1.val2buf( temp );
 			a2.val2buf( temp + a1.size() );
@@ -216,7 +216,7 @@ template < class T1, class T2, class T3 > class SrcFinfo3: public SrcFinfo
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
 			Conv< T3 > a3( arg3 );
-			Qinfo q( 1, e.index(), a1.size() + a2.size() + a3.size() );
+			Qinfo q( e.index(), a1.size() + a2.size() + a3.size(), 1 );
 			char* temp = new char[ a1.size() + a2.size() + a3.size() ];
 			a1.val2buf( temp );
 			a2.val2buf( temp + a1.size() );
@@ -246,8 +246,8 @@ template < class T1, class T2, class T3, class T4 > class SrcFinfo4: public SrcF
 			Conv< T2 > a2( arg2 );
 			Conv< T3 > a3( arg3 );
 			Conv< T4 > a4( arg4 );
-			Qinfo q( 0, e.index(), 
-				a1.size() + a2.size() + a3.size() + a4.size() );
+			Qinfo q( e.index(), 
+				a1.size() + a2.size() + a3.size() + a4.size(), 0 );
 			char* temp = new char[ a1.size() + a2.size() + a3.size() + a4.size() ];
 			a1.val2buf( temp );
 			a2.val2buf( temp + a1.size() );
@@ -265,8 +265,8 @@ template < class T1, class T2, class T3, class T4 > class SrcFinfo4: public SrcF
 			Conv< T2 > a2( arg2 );
 			Conv< T3 > a3( arg3 );
 			Conv< T4 > a4( arg4 );
-			Qinfo q( 0, e.index(), 
-				a1.size() + a2.size() + a3.size() + a4.size() );
+			Qinfo q( e.index(), 
+				a1.size() + a2.size() + a3.size() + a4.size(), 1 );
 			char* temp = new char[ a1.size() + a2.size() + a3.size() + a4.size() ];
 			a1.val2buf( temp );
 			a2.val2buf( temp + a1.size() );
@@ -300,7 +300,7 @@ template < class T1, class T2, class T3, class T4, class T5 > class SrcFinfo5: p
 			Conv< T5 > a5( arg5 );
 			unsigned int totSize = 
 				a1.size() + a2.size() + a3.size() + a4.size() + a5.size();
-			Qinfo q( 0, e.index(), totSize );
+			Qinfo q( e.index(), totSize, 0 );
 			char* temp = new char[ totSize ];
 			a1.val2buf( temp );
 			a2.val2buf( temp + a1.size() );
@@ -323,7 +323,7 @@ template < class T1, class T2, class T3, class T4, class T5 > class SrcFinfo5: p
 			Conv< T5 > a5( arg5 );
 			unsigned int totSize = 
 				a1.size() + a2.size() + a3.size() + a4.size() + a5.size();
-			Qinfo q( 0, e.index(), totSize );
+			Qinfo q( e.index(), totSize, 1 );
 			char* temp = new char[ totSize ];
 			a1.val2buf( temp );
 			a2.val2buf( temp + a1.size() );

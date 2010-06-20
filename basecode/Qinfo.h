@@ -35,7 +35,7 @@ class Qinfo
 	public:
 		// Qinfo( FuncId f, DataId srcIndex, unsigned int size );
 
-		Qinfo( bool useSendTo, DataId srcIndex, unsigned int size );
+		Qinfo( DataId srcIndex, unsigned int size, bool useSendTo );
 
 		Qinfo( FuncId f, DataId srcIndex, 
 			unsigned int size, bool useSendTo );
