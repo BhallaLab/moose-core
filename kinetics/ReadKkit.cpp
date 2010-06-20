@@ -76,6 +76,33 @@ ReadKkit::ReadKkit()
 	;
 }
 
+/**
+ * The readcell function implements the old GENESIS cellreader
+ * functionality. Although it is really a parser operation, I
+ * put it here in Shell because the cell format is independent
+ * of parser and is likely to remain a legacy for a while.
+ */
+void ReadKkit::read(
+	const string& filename, 
+	const string& cellname,
+	Id pa )
+{
+	ifstream fin( filename.c_str() );
+	if (!fin){
+		cerr << "ReadKkit::read: could not open file " << filename << endl;
+		return;
+    }
+
+	baseId_ = pa;
+	basePath_ = pa.path();
+
+	vector< unsigned int > dimensions( 1, 1 );
+	// Id model = s->doCreate( "Neutral", pa, cellname, dimensions );
+	innerRead( fin );
+
+	assignCompartments();
+}
+
 void ReadKkit::innerRead( ifstream& fin )
 {
 	string line;
@@ -215,29 +242,6 @@ ReadKkit::ParseMode ReadKkit::readInit( const string& line )
 	return INIT;
 }
 
-/**
- * The readcell function implements the old GENESIS cellreader
- * functionality. Although it is really a parser operation, I
- * put it here in Shell because the cell format is independent
- * of parser and is likely to remain a legacy for a while.
- */
-void ReadKkit::read(
-	const string& filename, 
-	const string& cellname,
-	Id pa )
-{
-	ifstream fin( filename.c_str() );
-	if (!fin){
-		cerr << "ReadKkit::read: could not open file " << filename << endl;
-		return;
-    }
-
-	vector< unsigned int > dimensions( 1, 1 );
-	// Id model = s->doCreate( "Neutral", pa, cellname, dimensions );
-	innerRead( fin );
-
-	assignCompartments();
-}
 
 void ReadKkit::readData( const string& line )
 {
@@ -258,19 +262,21 @@ void ReadKkit::readData( const string& line )
 		loadtab( argv );
 }
 
-string pathTail( const string& path, string& head )
+string ReadKkit::pathTail( const string& path, string& head ) const
 {
 	string::size_type pos = path.find_last_of( "/" );
 	assert( pos != string::npos );
 
-	head = path.substr( 0, pos ); 
+	head = basePath_ + path.substr( 0, pos ); 
 	return path.substr( pos + 1 );
 }
 
+/*
 Id ReadKkit::findParent( const string& path ) const
 {
 	return 1;
 }
+*/
 
 void assignArgs( map< string, int >& argConv, const vector< string >& args )
 {
@@ -413,7 +419,7 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 	static vector< unsigned int > dim( 1, 1 );
 	string head;
 	string tail = pathTail( args[2], head );
-	Id pa = findParent( head );
+	Id pa = shell_->doFind( head );
 	assert ( pa != Id() );
 
 	double k1 = atof( args[ enzMap_[ "k1" ] ].c_str() );

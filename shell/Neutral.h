@@ -113,6 +113,12 @@ class Neutral: public Data
 		 * return ids of all the children in ret.
 		 */
 		static void children( Eref e, vector< Id >& ret );
+
+		/**
+		 * Finds the path of element e
+		 */
+		static string path( const Eref& e );
+
 	private:
 		// string name_;
 };

@@ -31,7 +31,6 @@ class ReadKkit
 		// Undump operations
 		//////////////////////////////////////////////////////////////////
 		
-		Id findParent( const string& path ) const;
 		void innerRead( ifstream& fin );
 		ParseMode readInit( const string& line );
 		void read( const string& filename, const string& cellname, 
@@ -73,18 +72,31 @@ class ReadKkit
 		void separateVols( Id mol, double vol );
 		void assignCompartments();
 
-		// static const Cinfo* initCinfo();
+		//////////////////////////////////////////////////////////////////
+		// Utility functions
+		//////////////////////////////////////////////////////////////////
+		
+		/**
+		 * Splits up kkit path into head and tail portions, 
+		 * tail is returned.
+		 * Note that this prepends the basePath to the head.
+		 */
+		string pathTail( const string& path, string& head ) const;
+
 	private:
-		double fastdt_;
-		double simdt_;
-		double controldt_;
-		double plotdt_;
-		double maxtime_;
-		double transientTime_;
-		bool useVariableDt_;
-		double defaultVol_;
-		unsigned int version_;
-		unsigned int initdumpVersion_;
+		string basePath_; /// Base path into which entire kkit model will go
+		Id baseId_; /// Base Id onto which entire kkit model will go.
+
+		double fastdt_; /// fast numerical timestep from kkit.
+		double simdt_;	/// regular numerical timestep from kkit.
+		double controldt_;	/// Timestep for updating control graphics
+		double plotdt_;		/// Timestep for updating plots
+		double maxtime_;	/// Simulation run time.
+		double transientTime_;	/// Time to run model at fastdt
+		bool useVariableDt_;	/// Use both fast and sim dts.
+		double defaultVol_;		/// Default volume for new compartments.
+		unsigned int version_;	/// KKit version.
+		unsigned int initdumpVersion_;	/// Initdump too has a version.
 
 		unsigned int numCompartments_;
 		unsigned int numMols_;

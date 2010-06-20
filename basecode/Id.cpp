@@ -62,7 +62,7 @@ string Id::id2str( Id id )
 // Function to convert it into its fully separated path.
 string Id::path( const string& separator) const 
 {
-	return "";
+	return Neutral::path( eref() );
 }
 
 /**

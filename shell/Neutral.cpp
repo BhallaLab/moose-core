@@ -219,29 +219,7 @@ Id Neutral::getChild( Eref e, const Qinfo* q, const string& name )
 
 string Neutral::getPath( Eref e, const Qinfo* q ) const
 {
-	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
-	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
-	static const FuncId pafid = pf2->getFid();
-
-	vector< FullId > pathVec;
-	FullId curr = e.fullId();
-	stringstream ss;
-
-	pathVec.push_back( curr );
-	while ( !( curr == FullId( Id(), 0 ) ) ) {
-		MsgId mid = curr.eref().element()->findCaller( pafid );
-		assert( mid != Msg::badMsg );
-		curr = Msg::getMsg( mid )->findOtherEnd( curr );
-		pathVec.push_back( curr );
-	}
-
-	ss << "/";
-	for ( int i = pathVec.size() - 2; i >= 0; --i ) {
-		ss << pathVec[i].eref();
-		if ( i > 0 )
-			ss << "/";
-	}
-	return ss.str();
+	return path( e );
 }
 
 string Neutral::getClass( Eref e, const Qinfo* q ) const
@@ -336,6 +314,34 @@ FullId Neutral::parent( const Eref& e )
 	assert( mid != Msg::badMsg );
 
 	return Msg::getMsg( mid )->findOtherEnd( e.fullId() );
+}
+
+// Static function
+string Neutral::path( const Eref& e )
+{
+	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
+	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
+	static const FuncId pafid = pf2->getFid();
+
+	vector< FullId > pathVec;
+	FullId curr = e.fullId();
+	stringstream ss;
+
+	pathVec.push_back( curr );
+	while ( !( curr == FullId( Id(), 0 ) ) ) {
+		MsgId mid = curr.eref().element()->findCaller( pafid );
+		assert( mid != Msg::badMsg );
+		curr = Msg::getMsg( mid )->findOtherEnd( curr );
+		pathVec.push_back( curr );
+	}
+
+	ss << "/";
+	for ( int i = pathVec.size() - 2; i >= 0; --i ) {
+		ss << pathVec[i].eref();
+		if ( i > 0 )
+			ss << "/";
+	}
+	return ss.str();
 }
 
 // Neutral does not have any fields.

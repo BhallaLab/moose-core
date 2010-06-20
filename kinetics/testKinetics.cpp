@@ -21,6 +21,7 @@ void testReadKkit()
 	*/
 	rk.read( "dend_v26.g", "dend", Id() );
 	Id kinetics = s->doFind( "/kinetics" );
+	assert( kinetics != Id() );
 
 	s->doDelete( kinetics );
 	cout << "." << flush;
