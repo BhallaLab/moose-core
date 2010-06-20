@@ -281,6 +281,7 @@ void Element::asend( Qinfo& q, BindIndex bindIndex,
 		msgBinding_[ bindIndex ].begin(); 
 		i != msgBinding_[ bindIndex ].end(); ++i ) {
 		const Msg* m = Msg::getMsg( i->mid );
+		q.setForward( m->isForward( this ) );
 		if ( m->isMsgHere( q ) ) {
 			q.assignQblock( m, p );
 			q.addToQ( p->threadId, *i, arg );
@@ -308,6 +309,7 @@ void Element::tsend( Qinfo& q, BindIndex bindIndex,
 		msgBinding_[ bindIndex ].begin(); 
 		i != msgBinding_[ bindIndex ].end(); ++i ) {
 		const Msg* m = Msg::getMsg( i->mid );
+		q.setForward( m->isForward( this ) );
 		if ( q.isForward() ) {
 			if ( m->e2() == e && m->isMsgHere( q ) ) {
 				q.assignQblock( m, p );

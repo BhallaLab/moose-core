@@ -47,7 +47,6 @@ class Msg
 		virtual bool isMsgHere( const Qinfo& q ) const {
 			return 1;
 		}
-
 		
 		/**
 		 * Execute func( arg ) on all relevant indices of target
@@ -112,6 +111,14 @@ class Msg
 		 */
 		virtual Msg* copy( Id origSrc, Id newSrc, Id newTgt,
 			FuncId fid, unsigned int b, unsigned int n ) const = 0;
+
+		/**
+		 * Checks if the message is going forward.
+		 */
+		bool isForward( const Element* src ) const {
+			return ( e1_ == src );
+		}
+
 
 		/**
 		 * Looks up the message on the global vector of Msgs. No checks,

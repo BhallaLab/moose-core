@@ -6368,4 +6368,18 @@ Then in no particular order:
 - Parallelize
 
 Set up code to run model. At this point it just stalls.
+Fixed the stall, now it crashes. It is calling process on a mol,
+even though the src of the message is a reac and the arguments do
+not seem to be right.
+One subtle possible issue that SharedMsgs can be added either way,
+but the code requires that the src and dest have a specific
+direction. This could get messy if we wanted to use one of the
+messages in a standalone way at the same time. For example, consider
+Mol::nOut. It could be the src message for several things, so it
+should always be on e1. Suppose its target thought the same in 
+a shared message. There would be confusion.
+I had earlier handled this simply by checking whether the src was
+e1. Replicated this approach. Lots of changes in SrcFinfo, Qinfo and so on.
+Compiles but crashes.
+
 ============================================================================

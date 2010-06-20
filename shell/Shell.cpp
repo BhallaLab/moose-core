@@ -91,6 +91,12 @@ static SrcFinfo3< string, string, unsigned int > requestUseClock(
 			"Tick # specifies which tick to be attached to the objects."
 			);
 
+static DestFinfo handleUseClock( "handleUseClock", 
+			"Deals with assignment of path to a given clock.",
+			new OpFunc3< Shell, string, string, unsigned int >( 
+				&Shell::handleUseClock )
+			);
+
 static DestFinfo create( "create", 
 			"create( class, parent, newElm, name, dimensions )",
 			new EpFunc5< Shell, string, Id, Id, string, vector< unsigned int > >( &Shell::create ) );
@@ -204,12 +210,12 @@ static DestFinfo handleSetClock( "handleSetClock",
 static Finfo* shellMaster[] = {
 	&requestCreate, &requestDelete, &requestQuit, &requestStart,
 	&requestAddMsg, &requestSet, &requestGet, &receiveGet, 
-	&requestMove, &requestCopy,
+	&requestMove, &requestCopy, &requestUseClock,
 	&handleAck };
 static Finfo* shellWorker[] = {
 	&create, &del, &handleQuit, &handleStart, 
 		&handleAddMsg, &handleSet, &handleGet, &relayGet, 
-		&handleMove, &handleCopy,
+		&handleMove, &handleCopy, &handleUseClock,
 	&ack };
 
 
@@ -425,7 +431,7 @@ void Shell::connectMasterMsg()
 
 void Shell::doQuit( )
 {
-	requestQuit.send( Id().eref(), &p_, 1 );
+	requestQuit.send( Id().eref(), &p_ );
 	// cout << myNode_ << ": Shell::doQuit: request sent\n";
 	while ( !quit_ )
 		Qinfo::mpiClearQ( &p_ );
@@ -437,7 +443,7 @@ void Shell::doStart( double runtime )
 {
 	initAck();
 	Eref sheller( shelle_, 0 );
-	requestStart.send( sheller, &p_, runtime, 1 );
+	requestStart.send( sheller, &p_, runtime );
 	// cout << myNode_ << ": Shell::doStart: request sent\n";
 	while ( isAckPending() ) {
 		Qinfo::mpiClearQ( &p_ );
@@ -452,7 +458,7 @@ void Shell::doUseClock( string path, string field, unsigned int tick )
 {
 	initAck();
 	Eref sheller( shelle_, 0 );
-	requestUseClock.send( sheller, &p_, path, field, tick, 1 );
+	requestUseClock.send( sheller, &p_, path, field, tick );
 	while ( isAckPending() ) {
 		Qinfo::mpiClearQ( &p_ );
 		process( &p_, sheller );
@@ -560,7 +566,7 @@ void Shell::process( const ProcInfo* p, const Eref& e )
 {
 	if ( isRunning_ ) {
 		start( runtime_ ); // This is a blocking call
-		ack.send( Eref( shelle_, 0 ), &p_, myNode_, OkStatus, 0 );
+		ack.send( Eref( shelle_, 0 ), &p_, myNode_, OkStatus );
 	}
 }
 
@@ -612,7 +618,7 @@ void Shell::handleStart( double runtime )
 	isRunning_ = 1;
 	runtime_ = runtime;
 	// start( runtime );
-	// ack.send( Eref( shelle_, 0 ), &p_, myNode_, OkStatus, 0 );
+	// ack.send( Eref( shelle_, 0 ), &p_, myNode_, OkStatus );
 }
 
 
@@ -633,7 +639,7 @@ void Shell::create( Eref e, const Qinfo* q,
 	innerCreate( type, parent, newElm, name, dimensions );
 	// cout << myNode_ << ": Shell::create inner Create done for element " << name << " id " << newElm << endl;
 //	if ( myNode_ != 0 )
-	ack.send( e, &p_, Shell::myNode(), OkStatus, 0 );
+	ack.send( e, &p_, Shell::myNode(), OkStatus );
 	// cout << myNode_ << ": Shell::create ack sent" << endl;
 }
 
@@ -715,7 +721,7 @@ void Shell::destroy( Eref e, const Qinfo* q, Id eid)
 	// eid.destroy();
 	// cout << myNode_ << ": Shell::destroy done for element id " << eid << endl;
 
-	ack.send( e, &p_, Shell::myNode(), OkStatus, 0 );
+	ack.send( e, &p_, Shell::myNode(), OkStatus );
 }
 
 
@@ -728,9 +734,9 @@ void Shell::handleAddMsg( string msgType, FullId src, string srcField,
 	FullId dest, string destField )
 {
 	if ( innerAddMsg( msgType, src, srcField, dest, destField ) )
-		ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus, 0 );
+		ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
 	else
-		ack.send( Eref( shelle_, 0), &p_, Shell::myNode(), ErrorStatus, 0);
+		ack.send( Eref( shelle_, 0), &p_, Shell::myNode(), ErrorStatus );
 }
 
 /**
@@ -741,9 +747,11 @@ bool Shell::innerAddMsg( string msgType, FullId src, string srcField,
 {
 	// cout << myNode_ << ", Shell::handleAddMsg" << "\n";
 	const Finfo* f1 = src.id()->cinfo()->findFinfo( srcField );
-	assert( f1 != 0 );
+	if ( f1 == 0 ) return 0;
+	// assert( f1 != 0 );
 	const Finfo* f2 = dest.id()->cinfo()->findFinfo( destField );
-	assert( f2 != 0 );
+	if ( f2 == 0 ) return 0;
+	// assert( f2 != 0 );
 	
 	// Should have been done before msgs request went out.
 	assert( f1->checkTarget( f2 ) );
@@ -765,13 +773,13 @@ bool Shell::innerAddMsg( string msgType, FullId src, string srcField,
 		cout << myNode_ << 
 			": Error: Shell::handleAddMsg: msgType not known: "
 			<< msgType << endl;
-		// ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus, 0 );
+		// ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus );
 		return 0;
 	}
 	if ( m ) {
 		if ( f1->addMsg( f2, m->mid(), src.id() ) ) {
 			latestMsgId_ = m->mid();
-			// ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus, 0 );
+			// ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
 			return 1;
 		}
 		delete m;
@@ -781,7 +789,7 @@ bool Shell::innerAddMsg( string msgType, FullId src, string srcField,
 			<< msgType << " from " << src.id()->getName() <<
 			" to " << dest.id()->getName() << endl;
 	return 1;
-//	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus, 0 );
+//	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus );
 }
 
 void Shell::handleMove( Id orig, Id newParent )
@@ -805,7 +813,7 @@ void Shell::handleMove( Id orig, Id newParent )
 		return;
 	}
 	
-	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus, 0 );
+	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
 }
 
 void Shell::handleUseClock( string path, string field, unsigned int tick)
@@ -816,17 +824,20 @@ void Shell::handleUseClock( string path, string field, unsigned int tick)
 		stringstream ss;
 		FullId tickId( Id( 2 ), DataId( 0, tick ) );
 		ss << "process" << tick;
-		bool ret = 
-			innerAddMsg( "oneToAll", tickId, ss.str(), FullId( *i, 0 ), 
+		// bool ret = 
+			innerAddMsg( "OneToAll", tickId, ss.str(), FullId( *i, 0 ), 
 			field);
+		// We just skip messages that don't work.
+		/*
 		if ( !ret ) {
 			cout << Shell::myNode() << "Error: Shell::handleUseClock: Messaging failed\n";
 			ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), 
-				ErrorStatus, 0 );
+				ErrorStatus );
 			return;
 		}
+		*/
 	}
-	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus, 0 );
+	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
 }
 
 void Shell::warning( const string& text )
@@ -970,7 +981,7 @@ void Shell::handleSet( Id id, DataId d, FuncId fid, PrepackedBuffer arg )
 	} else {
 		innerSet( er, fid, arg.data(), arg.dataSize() );
 	}
-	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus, 0 );
+	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
 	// We assume that the ack will get back to the master node no sooner
 	// than the field assignment. This is probably pretty safe. More to the
 	// point, the Parser thread won't be able to do anything else before
@@ -1094,7 +1105,7 @@ void Shell::handleGet( Id id, DataId index, FuncId fid )
 		FuncId retFunc = lowLevelReceiveGet.getFid();
 		lowLevelGet.send( sheller, &p_, retFunc );
 	} else {
-		ack.send( sheller, &p_, myNode_, OkStatus, 0 );
+		ack.send( sheller, &p_, myNode_, OkStatus );
 	}
 }
 

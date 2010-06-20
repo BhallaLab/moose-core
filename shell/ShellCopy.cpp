@@ -126,12 +126,12 @@ void Shell::handleCopy( vector< Id > args, string newName,
 	Element* e = innerCopyElements( args[0], args[1], args[2], n, tree );
 	if ( !e ) {
 		ack->send( 
-			Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus, 0 );
+			Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus );
 		return;
 	}
 	if ( newName != "" )
 		e->setName( newName );
 	//innerCopyData( orig, newParent );
 	innerCopyMsgs( tree, n, copyExtMsgs );
-	ack->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus, 0 );
+	ack->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
 }

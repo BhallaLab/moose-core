@@ -33,13 +33,12 @@ class Qinfo
 	friend void testSendSpike();
 	friend void testSparseMsg();
 	public:
-		Qinfo( FuncId f, DataId srcIndex, unsigned int size );
+		// Qinfo( FuncId f, DataId srcIndex, unsigned int size );
 
-		Qinfo( bool useSendTo, bool isForward,
-			DataId srcIndex, unsigned int size );
+		Qinfo( bool useSendTo, DataId srcIndex, unsigned int size );
 
 		Qinfo( FuncId f, DataId srcIndex, 
-			unsigned int size, bool useSendTo, bool isForward );
+			unsigned int size, bool useSendTo );
 
 		Qinfo();
 		// Qinfo( const char* buf );
@@ -56,11 +55,9 @@ class Qinfo
 			return isForward_;
 		}
 
-		/*
 		void setForward( bool isForward ) {
 			isForward_ = isForward;
 		}
-		*/
 
 
 		MsgId mid() const {

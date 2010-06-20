@@ -23,17 +23,17 @@ vector< vector< QueueBlock > > Qinfo::qBlock_;
 void hackForSendTo( const Qinfo* q, const char* buf );
 static const unsigned int BLOCKSIZE = 20000;
 
-Qinfo::Qinfo( FuncId f, DataId srcIndex, 
-	unsigned int size, bool useSendTo, bool isForward )
+Qinfo::Qinfo( FuncId f, DataId srcIndex, unsigned int size, bool useSendTo )
 	:	
 		useSendTo_( useSendTo ), 
-		isForward_( isForward ), 
+		isForward_( 1 ), 
 		m_( 0 ), 
 		f_( f ), 
 		srcIndex_( srcIndex ),
 		size_( size )
 {;}
 
+/*
 Qinfo::Qinfo( FuncId f, DataId srcIndex, unsigned int size )
 	:	
 		useSendTo_( 0 ), 
@@ -43,12 +43,12 @@ Qinfo::Qinfo( FuncId f, DataId srcIndex, unsigned int size )
 		srcIndex_( srcIndex ),
 		size_( size )
 {;}
+*/
 
-Qinfo::Qinfo( bool useSendTo, bool isForward,
-	DataId srcIndex, unsigned int size )
+Qinfo::Qinfo( bool useSendTo, DataId srcIndex, unsigned int size )
 	:	
 		useSendTo_( useSendTo ), 
-		isForward_( isForward ), 
+		isForward_( 1 ), 
 		m_( 0 ), 
 		f_( 0 ), 
 		srcIndex_( srcIndex ),

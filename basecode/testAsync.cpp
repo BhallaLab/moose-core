@@ -133,7 +133,7 @@ void insertIntoQ( )
 		// This simulates a sendTo
 		Conv< double > conv( x );
 		unsigned int size = conv.val2buf( buf );
-		Qinfo qi( 1, i, size + sizeof( DataId ), 1, 1 );
+		Qinfo qi( 1, i, size + sizeof( DataId ), 1 );
 
 		*reinterpret_cast< DataId* >( buf + size ) = DataId( i );
 
@@ -1078,14 +1078,14 @@ class Test: public Data
 		void handleS1( Eref e, const Qinfo* q, string s ) {
 			ProcInfo p;
 			s_ = s + s_;
-			s0.send( e, &p, 0 );
+			s0.send( e, &p );
 		}
 
 		void handleS2( Eref e, const Qinfo* q, int i1, int i2 ) {
 			ProcInfo p;
 			i1_ += 10 * i1;
 			i2_ += 10 * i2;
-			s0.send( e, &p, 0 );
+			s0.send( e, &p );
 		}
 
 		static Finfo* sharedVec[ 6 ];
@@ -1180,8 +1180,8 @@ void testSharedMsg()
 	Qinfo::clearQ( &p );
 
 	string arg2 = " goodbye ";
-	s1.send( t2.eref(), &p, arg2, 0 );
-	s2.send( t2.eref(), &p, 500, 600, 0 );
+	s1.send( t2.eref(), &p, arg2 );
+	s2.send( t2.eref(), &p, 500, 600 );
 
 	Qinfo::clearQ( &p );
 	Qinfo::clearQ( &p );
