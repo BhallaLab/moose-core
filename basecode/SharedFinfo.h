@@ -25,7 +25,10 @@ class SharedFinfo: public Finfo
 
 		void registerFinfo( Cinfo* c );
 
-		SetGet* getSetGet( const Eref& e ) const;
+		bool strSet( const Eref& tgt, const string& field, 
+			const string& arg ) const;
+		bool strGet( const Eref& tgt, const string& field, 
+			string& returnValue ) const;
 
 		/**
 		 * Checks that the type of target Finfo matches self, and is safe

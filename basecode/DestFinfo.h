@@ -21,7 +21,10 @@ class DestFinfo: public Finfo
 		~DestFinfo();
 		DestFinfo( const string& name, const string& doc,OpFunc* func );
 		void registerFinfo( Cinfo* c );
-		SetGet* getSetGet( const Eref& e) const;
+		bool strSet( const Eref& tgt, const string& field, 
+			const string& arg ) const;
+		bool strGet( const Eref& tgt, const string& field, 
+			string& returnValue ) const;
 		
 		const OpFunc* getOpFunc() const;
 		FuncId getFid() const;

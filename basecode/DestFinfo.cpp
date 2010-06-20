@@ -36,8 +36,15 @@ FuncId DestFinfo::getFid() const
 	return fid_;
 }
 
-// For now we bail. Later we can update OpFunc to dig up the correct SetGet
-SetGet* DestFinfo::getSetGet( const Eref& e ) const
+bool DestFinfo::strSet( 
+	const Eref& tgt, const string& field, const string& arg ) const 
+{
+	// For now we bail. Later we can update OpFunc to handle conversions.
+	return 0;
+}
+
+bool DestFinfo::strGet( 
+	const Eref& tgt, const string& field, string& returnValue ) const 
 {
 	return 0;
 }

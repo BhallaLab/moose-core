@@ -87,8 +87,14 @@ template < class T, class F > class FieldElementFinfo: public Finfo
 			c->registerPostCreationFinfo( this );
 		}
 
-		SetGet* getSetGet( const Eref& e ) const {
-			return 0;
+		bool strSet( const Eref& tgt, const string& field, 
+			const string& arg ) const {
+			return 0; // always fails
+		}
+
+		bool strGet( const Eref& tgt, const string& field, 
+			string& returnValue ) const {
+			return 0; // always fails
 		}
 
 	private:

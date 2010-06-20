@@ -23,16 +23,15 @@ class SrcFinfo: public Finfo
 
 		void registerFinfo( Cinfo* c );
 
-		SetGet* getSetGet( const Eref& e ) const {
-			return 0; // Always fails. 
+		bool strSet( const Eref& tgt, const string& field, 
+			const string& arg ) const {
+			return 0; // always fails
 		}
 
-		/*
-		void registerOpFuncs(
-			map< string, FuncId >& fnames, vector< OpFunc* >& funcs );
-
-		BindIndex registerBindIndex( BindIndex current );
-		*/
+		bool strGet( const Eref& tgt, const string& field, 
+			string& returnValue ) const {
+			return 0; // always fails
+		}
 
 		BindIndex getBindIndex() const {
 			return bindIndex_;

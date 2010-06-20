@@ -37,7 +37,14 @@ void SharedFinfo::registerFinfo( Cinfo* c )
 		c->registerFinfo( *i );
 }
 
-SetGet* SharedFinfo::getSetGet( const Eref& e ) const
+bool SharedFinfo::strSet( 
+	const Eref& tgt, const string& field, const string& arg ) const
+{
+	return 0;
+}
+
+bool SharedFinfo::strGet( 
+	const Eref& tgt, const string& field, string& returnValue ) const
 {
 	return 0;
 }

@@ -98,21 +98,11 @@ bool SetGet::strGet( const Eref& tgt, const string& field, string& ret )
 			endl;
 		return 0;
 	}
-	SetGet* sg = f->getSetGet( tgt );
-	if ( sg ) {
-		return sg->innerStrGet( tgt, field, ret );
-	} else {
-		cout << Shell::myNode() << ": Error: SetGet::strGet: " <<
-			tgt.element()->getName() << ":" << field << 
-			" does not support get operation" << endl;
-		return 0;
-	}
+	return f->strGet( tgt, field, ret );
 }
 
-bool SetGet::strSet( const Eref& dest, const string& field, const string& v)
+bool SetGet::strSet( const Eref& tgt, const string& field, const string& v)
 {
-	Eref tgt( dest );
-	
 	const Finfo* f = tgt.element()->cinfo()->findFinfo( field );
 	if ( !f ) {
 		cout << Shell::myNode() << ": Error: SetGet::strSet: Field " <<
@@ -120,13 +110,5 @@ bool SetGet::strSet( const Eref& dest, const string& field, const string& v)
 			endl;
 		return 0;
 	}
-	SetGet* sg = f->getSetGet( tgt );
-	if ( sg ) {
-		return sg->innerStrSet( tgt, field, v );
-	} else {
-		cout << Shell::myNode() << ": Error: SetGet::strSet: " <<
-			tgt.element()->getName() << ":" << field << 
-			" does not support set operation" << endl;
-		return 0;
-	}
+	return f->strSet( tgt, field, v );
 }

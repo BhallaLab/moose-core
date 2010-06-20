@@ -28,20 +28,22 @@ class Finfo
 		 * Assign function Ids, bindIndex and so on.
 		 */
 		virtual void registerFinfo( Cinfo* c ) = 0;
-		/**
-		 * For DestFinfos, this takes note of the OpFunc and generates
-		 * a FuncId. For SharedFinfos, it recurses down to all sub-Finfos.
-		virtual void registerOpFuncs( 
-			map< string, FuncId >& fm, vector< OpFunc* >& funcs ) = 0;
-		 */
 
 		/**
-		 * Creates a SetGet object of the type specified by the Finfo.
-		 * Must be freed after use.
-		 * Normally called only by SetGet::strGet and strSet.
+		 * Function to set this field using a string argument.
+		 * Returns true on success.
+		 * Normally called only from SetGet::strSet.
 		 */
-		virtual SetGet* getSetGet( const Eref& e ) const = 0;
-		
+		virtual bool strSet( const Eref& tgt, const string& field,
+			const string& arg ) const = 0;
+
+		/**
+		 * Function to return value of field into a string argument.
+		 * Returns true on success.
+		 * Normally called only from SetGet::strGet.
+		 */
+		virtual bool strGet( const Eref& tgt, const string& field,
+			string& returnValue ) const = 0;
 
 		/**
 		 * This function is called on each new Element after

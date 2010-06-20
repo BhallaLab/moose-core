@@ -46,9 +46,17 @@ template < class T, class F > class ElementValueFinfo: public Finfo
 			c->registerFinfo( set_ );
 			c->registerFinfo( get_ );
 		}
-		
-		SetGet* getSetGet( const Eref& e ) const {
-			return new Field< F >( e );
+
+		bool strSet( const Eref& tgt, const string& field, 
+			const string& arg ) const {
+			Field< F > sg( tgt );
+			return sg.innerStrSet( tgt, field, arg );
+		}
+
+		bool strGet( const Eref& tgt, const string& field, 
+			string& returnValue ) const {
+			Field< F > sg( tgt );
+			return sg.innerStrGet( tgt, field, returnValue );
 		}
 
 	private:
@@ -80,8 +88,15 @@ template < class T, class F > class ReadOnlyElementValueFinfo: public Finfo
 			c->registerFinfo( get_ );
 		}
 
-		SetGet* getSetGet( const Eref& e ) const {
-			return new Field< F >( e );
+		bool strSet( const Eref& tgt, const string& field, 
+			const string& arg ) const {
+			return 0;
+		}
+
+		bool strGet( const Eref& tgt, const string& field, 
+			string& returnValue ) const {
+			Field< F > sg( tgt );
+			return sg.innerStrGet( tgt, field, returnValue );
 		}
 
 	private:
