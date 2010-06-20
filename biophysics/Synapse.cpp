@@ -45,7 +45,6 @@ const Cinfo* Synapse::initCinfo()
 
 	static Cinfo synapseCinfo (
 		"Synapse",
-		// No base class, but eventually I guess it will be neutral.
 		Neutral::initCinfo(),
 		synapseFinfos,
 		sizeof( synapseFinfos ) / sizeof ( Finfo* ),

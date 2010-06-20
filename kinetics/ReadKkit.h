@@ -33,7 +33,7 @@ class ReadKkit
 		
 		void innerRead( ifstream& fin );
 		ParseMode readInit( const string& line );
-		void read( const string& filename, const string& cellname, 
+		Id read( const string& filename, const string& cellname, 
 			Id parent );
 		void readData( const string& line );
 		void undump( const vector< string >& args );
@@ -82,6 +82,11 @@ class ReadKkit
 		 * Note that this prepends the basePath to the head.
 		 */
 		string pathTail( const string& path, string& head ) const;
+
+		/**
+		 * make kinetics and graphs elements.
+		 */
+		void makeStandardElements();
 
 	private:
 		string basePath_; /// Base path into which entire kkit model will go

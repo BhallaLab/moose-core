@@ -82,7 +82,7 @@ ReadKkit::ReadKkit()
  * put it here in Shell because the cell format is independent
  * of parser and is likely to remain a legacy for a while.
  */
-void ReadKkit::read(
+Id ReadKkit::read(
 	const string& filename, 
 	const string& cellname,
 	Id pa )
@@ -90,17 +90,21 @@ void ReadKkit::read(
 	ifstream fin( filename.c_str() );
 	if (!fin){
 		cerr << "ReadKkit::read: could not open file " << filename << endl;
-		return;
+		return Id();
     }
 
-	baseId_ = pa;
-	basePath_ = pa.path();
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< unsigned int > dims( 1,1 );
+	Id base = s->doCreate( "Neutral", pa, cellname, dims );
+	assert( base != Id() );
 
-	vector< unsigned int > dimensions( 1, 1 );
-	// Id model = s->doCreate( "Neutral", pa, cellname, dimensions );
+	baseId_ = base;
+	basePath_ = base.path();
+
 	innerRead( fin );
 
 	assignCompartments();
+	return base;
 }
 
 void ReadKkit::innerRead( ifstream& fin )
@@ -182,6 +186,34 @@ void ReadKkit::innerRead( ifstream& fin )
 			endl;
 }
 
+void ReadKkit::makeStandardElements()
+{
+	Id kinetics = Neutral::child( baseId_.eref(), "kinetics" );
+	if ( kinetics == Id() ) {
+		vector< unsigned int > dims( 1, 1 );
+		kinetics = 
+		shell_->doCreate( "ChemCompt", baseId_, "kinetics", dims );
+	}
+	assert( kinetics != Id() );
+	assert( kinetics.eref().element()->getName() == "kinetics" );
+
+	Id graphs = Neutral::child( baseId_.eref(), "graphs" );
+	if ( graphs == Id() ) {
+		vector< unsigned int > dims( 1, 1 );
+		graphs = 
+		shell_->doCreate( "Neutral", baseId_, "graphs", dims );
+	}
+	assert( graphs != Id() );
+
+	Id moregraphs = Neutral::child( baseId_.eref(), "moregraphs" );
+	if ( moregraphs == Id() ) {
+		vector< unsigned int > dims( 1, 1 );
+		moregraphs = 
+		shell_->doCreate( "Neutral", baseId_, "moregraphs", dims );
+	}
+	assert( moregraphs != Id() );
+}
+
 ReadKkit::ParseMode ReadKkit::readInit( const string& line )
 {
 	vector< string > argv;
@@ -228,14 +260,7 @@ ReadKkit::ParseMode ReadKkit::readInit( const string& line )
 
 	if ( argv[0] == "initdump" ) {
 		initdumpVersion_ = atoi( argv[2].c_str() );
-		Id kinetics = Neutral::child( Id().eref(), "kinetics" );
-		if ( kinetics == Id() ) {
-			vector< unsigned int > dims( 1, 1 );
-			kinetics = 
-			shell_->doCreate( "ChemCompt", Id(), "kinetics", dims );
-		}
-		assert( kinetics != Id() );
-		assert( kinetics.eref().element()->getName() == "kinetics" );
+		makeStandardElements();
 		return DATA;
 	}
 
@@ -386,7 +411,7 @@ void ReadKkit::assignCompartments()
 {
 	static const double TINY = 1e-3;
 	double max = 0.0;
-	Id kinetics = Neutral::child( Id().eref(), "kinetics" );
+	Id kinetics = Neutral::child( baseId_.eref(), "kinetics" );
 	assert( kinetics != Id() );
 	for ( unsigned int i = 0 ; i < vols_.size(); ++i ) {
 		if ( max < vols_[i] )
@@ -566,8 +591,9 @@ Id ReadKkit::buildGraph( const vector< string >& args )
 	string tail = pathTail( args[2], head );
 
 	Id pa = shell_->doFind( head );
-	assert( pa == Id() );
+	assert( pa != Id() );
 	Id graph = shell_->doCreate( "Neutral", pa, tail, dim );
+	assert( graph != Id() );
 	numOthers_++;
 	return graph;
 }
@@ -582,6 +608,7 @@ Id ReadKkit::buildPlot( const vector< string >& args )
 	Id pa = shell_->doFind( head );
 	assert( pa != Id() );
 	Id plot = shell_->doCreate( "Table", pa, tail, dim );
+	assert( plot != Id() );
 
 	plotIds_[ args[2].substr( 10 ) ] = plot; 
 

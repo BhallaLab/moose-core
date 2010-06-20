@@ -6354,7 +6354,7 @@ This will require lots of changes. Checking in the fixes so far. Checkin 1893.
 removed all getSetGet calls, replaced with memory-safe Finfo::strSet and 
 Finfo::strGet calls in Finfo and all derived classes. Valgrind reports
 _still_ more leaks. Checkin 1894.
-Further fixes to ReadKkit, improved, still leaks.
-
+Further fixes to ReadKkit, improved, still leaks. Checkin 1895.
+Yet more cleanup. Finally leaks gone.
 
 ============================================================================
