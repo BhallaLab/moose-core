@@ -6343,5 +6343,13 @@ Wildcard.cpp:545. Checkin 1891.
 
 ============================================================================
 20 June 2010
-Cleared next round of unit tests for wildcards. This was painful.
+Cleared next round of unit tests for wildcards. This was painful. Checkin 1892.
+Minor issue: The wildcard tests for fields issue a warning. Don't want it.
+Valgrind is not at all happy.
+Cleared up two big issues, the deletion of the test trees for wildcards and
+for /kinetics. Remaining stuff is a lot of uncleared pointers from getSetGet.
+I think this can be replaced with a call to the function that uses getSetGet,
+(innerStrGet), rather than returning the pointer.
+This will require lots of changes. Checking in the fixes so far.
+
 ============================================================================

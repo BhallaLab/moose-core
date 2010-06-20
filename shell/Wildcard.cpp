@@ -570,52 +570,7 @@ void testWildcard()
 	wildcardTestFunc( el4, 12, "/a1/##[TYPE=IntFire]" );
 	wildcardTestFunc( el4, 12, "/##[TYPE=IntFire]" );
 
-	a1.destroy();
-	//assert( set( a1, "destroy" ) );
-	// Check that array is gone
-
-	/*
-	Field( "/classes/child_out" ).dest( flist );
-	Element** el2 = new Element*[ flist.size() ];
-	for ( i = 0; i < flist.size(); i++ )
-		el2[ i ] = flist[ i ].getElement();
-
-	wildcardTestFunc( el2, flist.size(), "/classes/##" );
-	wildcardTestFunc( el2, flist.size(), "/classes/#" );
-	wildcardTestFunc( el2, flist.size(), "/##[TYPE=Cinfo]" );
-	wildcardTestFunc( el2, flist.size(), "/##[ISA=Cinfo]" );
-	wildcardTestFunc( el2 + 2, 1, "/##[FIELD(name)=Cinfo]" );
-	wildcardTestFunc( el2 + 3, 1, "/##[FIELD(name)=ClockJob]" );
-	wildcardTestFunc( el2 + 4, 1, "/##[FIELD(name)==ClockTick]" );
-	wildcardTestFunc( el2, flist.size() - 1, 
-		"classes/##[FIELD(name)!=Tock]" );
-	cout << " done\n";
-
-	cout << "Checking wildcarding: Numerical Field tests";
-	flist.resize( 0 );
-	flist.push_back( Field( "/new_i1/value" ) );
-	flist.push_back( Field( "/i2/value" ) );
-	flist.push_back( Field( "/i3/value" ) );
-	flist.push_back( Field( "/i4/value" ) );
-	flist.push_back( Field( "/i7/value" ) );
-
-	Element** el3 = new Element*[ flist.size() ];
-	for ( i = 0; i < flist.size(); i++ )
-		el3[ i ] = flist[ i ].getElement();
-
-	wildcardTestFunc( el3, flist.size(), "/#[TYPE=Int]" );
-	wildcardTestFunc( el3, flist.size(), "/#[TYPE==Int]" );
-	wildcardTestFunc( el3, flist.size(), "/#[FIELD(value)!=3]" );
-	wildcardTestFunc( el3, 1, "/#[FIELD(value)>3]" );
-	wildcardTestFunc( el3, flist.size(), "/#[FIELD(value)>=0]" );
-	wildcardTestFunc( el3, flist.size(), "/#[FIELD(value)<10]" );
-	wildcardTestFunc( el3, flist.size(), "/#[FIELD(value)<=5]" );
-	wildcardTestFunc( el3, 1, "/#[FIELD(value)!=0]" );
-	wildcardTestFunc( el3 + 1, flist.size() - 1, "/#[FIELD(value)==0]");
-	wildcardTestFunc( el3 + 1, flist.size() - 1, "/#[FIELD(value)<5]");
-
-	cout << " done\n";
-	cout << "Wildcarding tests complete\n\n";
-	*/
+	//a1.destroy();
+	shell->doDelete( a1 );
 }
 

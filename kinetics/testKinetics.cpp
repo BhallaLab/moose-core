@@ -14,8 +14,15 @@ void testReadKkit()
 {
 	ReadKkit rk;
 	// rk.read( "test.g", "dend", 0 );
-	rk.read( "dend_v26.g", "dend", 0 );
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	/*
+	vector< unsigned int > dims( 1,1 );
+	Id base = s->doCreate( "Neutral", Id(), "base", dims );
+	*/
+	rk.read( "dend_v26.g", "dend", Id() );
+	Id kinetics = s->doFind( "/kinetics" );
 
+	s->doDelete( kinetics );
 	cout << "." << flush;
 }
 
