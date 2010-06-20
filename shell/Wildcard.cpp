@@ -405,6 +405,7 @@ void wildcardTestFunc( Id* elist, unsigned int ne, const string& path )
 			ne << ", found " << ret.size() << "\n";
 		assert( 0 );
 	}
+	sort( ret.begin(), ret.end() );
 	for ( unsigned int i = 0; i < ne ; i++ ) {
 		if ( elist[ i ] != ret[ i ] ) {
 			cout << "!\nAssert	" << path << ": item " << i << 
@@ -536,38 +537,38 @@ void testWildcard()
 	for ( i = 0 ; i < 100; i++ ) {
 		char name[10];
 		sprintf( name, "ch%ld", i );
-		el2[i] = shell->doCreate( "IntFire", c1, name, dims );
+		el2[i] = shell->doCreate( "Mdouble", c1, name, dims );
 		//el2[i] = Neutral::create( "HHChannel", name, c1->id(), Id::scratchId() );
-		Field< double >::set( el2[i].eref(), "Vm", i );
-		Field< double >::set( el2[i].eref(), "tau", i * 10 );
+		Field< double >::set( Eref( el2[i](), i ), "value", i );
 	}
 
 	wildcardTestFunc( el2, 100, "/a1/c1/##" );
 	wildcardTestFunc( el2, 100, "/a1/c1/#" );
 
-	wildcardTestFunc( el2, 100, "/a1/##[TYPE=IntFire]" );
-	wildcardTestFunc( el2, 0, "/a1/##[TYPE=Arith]" );
+	wildcardTestFunc( el2, 0, "/a1/##[TYPE=IntFire]" );
+	wildcardTestFunc( el2, 100, "/a1/##[TYPE=Mdouble]" );
+	wildcardTestFunc( el2, 50, "/a1/##[TYPE=Mdouble][FIELD(value)<50]" );
 
 	// Here we set up some thoroughly ugly nesting.
 	// Note the sequence: The wildcarding goes depth first,
 	// and then in order of creation.
 	Id el4[12];
 	i = 0;
-	el4[i] = shell->doCreate( "Mdouble", el2[0], "g0", dims ); ++i;
-	el4[i] = shell->doCreate( "Mdouble", el2[1], "g1", dims ); ++i;
-	el4[i] = shell->doCreate( "Mdouble", el2[1], "g2", dims ); ++i;
-	el4[i] = shell->doCreate( "Mdouble", el2[2], "g3", dims ); ++i;
-	el4[i] = shell->doCreate( "Mdouble", el2[2], "g4", dims ); ++i;
-	el4[i] = shell->doCreate( "Mdouble", el2[4], "g5", dims ); ++i;
-	el4[i] = shell->doCreate( "Mdouble", el2[5], "g6", dims ); ++i;
-	el4[i] = shell->doCreate( "Mdouble", el2[6], "g7", dims ); ++i;
-	el4[i] = shell->doCreate( "Mdouble", el2[1], "g8", dims ); ++i;
-	el4[i] = shell->doCreate( "Mdouble", el2[1], "g9", dims ); ++i;
-	el4[i] = shell->doCreate( "Mdouble", c2, "g10", dims ); ++i;
-	el4[i] = shell->doCreate( "Mdouble", c3, "g11", dims ); ++i;
+	el4[i] = shell->doCreate( "IntFire", el2[0], "g0", dims ); ++i;
+	el4[i] = shell->doCreate( "IntFire", el2[1], "g1", dims ); ++i;
+	el4[i] = shell->doCreate( "IntFire", el2[1], "g2", dims ); ++i;
+	el4[i] = shell->doCreate( "IntFire", el2[2], "g3", dims ); ++i;
+	el4[i] = shell->doCreate( "IntFire", el2[2], "g4", dims ); ++i;
+	el4[i] = shell->doCreate( "IntFire", el2[4], "g5", dims ); ++i;
+	el4[i] = shell->doCreate( "IntFire", el2[5], "g6", dims ); ++i;
+	el4[i] = shell->doCreate( "IntFire", el2[6], "g7", dims ); ++i;
+	el4[i] = shell->doCreate( "IntFire", el2[1], "g8", dims ); ++i;
+	el4[i] = shell->doCreate( "IntFire", el2[1], "g9", dims ); ++i;
+	el4[i] = shell->doCreate( "IntFire", c2, "g10", dims ); ++i;
+	el4[i] = shell->doCreate( "IntFire", c3, "g11", dims ); ++i;
 
-	wildcardTestFunc( el2, 12, "/a1/##[TYPE=HHGate]" );
-	wildcardTestFunc( el2, 12, "/##[TYPE=HHGate]" );
+	wildcardTestFunc( el4, 12, "/a1/##[TYPE=IntFire]" );
+	wildcardTestFunc( el4, 12, "/##[TYPE=IntFire]" );
 
 	a1.destroy();
 	//assert( set( a1, "destroy" ) );

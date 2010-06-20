@@ -20,9 +20,17 @@ const Cinfo* Mdouble::initCinfo()
 			&Mdouble::setThis,
 			&Mdouble::getThis
 		);
+		static ValueFinfo< Mdouble, double > valueFinfo(
+			"value",
+			"Access function for value field of Mdouble object,"
+			"which happens also to be the entire contents of the object.",
+			&Mdouble::setThis,
+			&Mdouble::getThis
+		);
 
 	static Finfo* mDoubleFinfos[] = {
 		&thisFinfo,	// Value
+		&valueFinfo,	// Value
 	};
 
 	static Cinfo mDoubleCinfo (

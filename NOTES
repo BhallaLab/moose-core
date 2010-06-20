@@ -6339,6 +6339,9 @@ Still struggling to get them to work.
 
 Now past the StrSet/StrGet unit tests, back to the wildcard tests.
 Slow but steady progress through wildcard tests. Currently at 
-Wildcard.cpp:545.
+Wildcard.cpp:545. Checkin 1891.
 
+============================================================================
+20 June 2010
+Cleared next round of unit tests for wildcards. This was painful.
 ============================================================================
