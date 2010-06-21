@@ -6391,7 +6391,7 @@ Enzyme model test working now. Checkin 1900.
 
 Thoughts on eliminating Data class and handling process and reinit:
 - The Data class is used only to provide 'process' calls to Tick. 
-- We actually also need to provie a reinit.
+- We actually also need to provide a reinit.
 - Earlier idea had been to use Dinfo to provide process and reinit.
 - Alternative: 
 	- use the regular message framework for setting up the 
@@ -6407,4 +6407,17 @@ Thoughts on eliminating Data class and handling process and reinit:
 	
 
 In the meantime, lots of cleanup to get simple test programs for enz, reac,
-mmenz to work. Now clears the Kholodenko.g model.
+mmenz to work. Now clears the Kholodenko.g model. Checkin 1901.
+
+Had a look at KineticHub. Almost all of its contents will vanish, since the
+DataHandler will be shared directly with the zombies and the zombie access
+functions will do all the necessary lookups. No messages will change either,
+except the Process ones.
+
+- It would be nice to have a notification (another message?) when a message
+	is added or removed. This will let me change the structure of a model
+	while keeping the solver informed.
+- I need a clean interface to the DataHandlers.
+
+
+Adding solver code. Created subdir ksolve.

@@ -213,6 +213,7 @@ SUBDIR = \
 	scheduling\
 	builtins\
 	kinetics \
+	ksolve \
 
 # Used for 'make clean'
 CLEANSUBDIR = $(SUBDIR) $(PARALLEL_DIR)
@@ -226,6 +227,7 @@ OBJLIBS =	\
 	scheduling/scheduling.o \
 	builtins/builtins.o \
 	kinetics/kinetics.o \
+	ksolve/ksolve.o \
 
 
 export CXX
