@@ -49,12 +49,14 @@ class Table: public Data
 		unsigned int getVecSize( ) const;
 
 		// bool isInside( double x, double y, double z );
+		void eprocess( Eref e, const Qinfo*q, ProcPtr p );
 
 		static const Cinfo* initCinfo();
 	private:
 		double threshold_;
 		double lastTime_;
 		unsigned int outputIndex_;
+		double input_;
 		vector< double > vec_;
 };
 

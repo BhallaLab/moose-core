@@ -106,13 +106,13 @@ const Cinfo* Reac::initCinfo()
 
 
 Reac::Reac( )
-	: kf_( 0.1 ), kb_( 0.2 )
+	: kf_( 0.1 ), kb_( 0.2 ), sub_( 0.0 ), prd_( 0.0 )
 {
 	;
 }
 
 Reac::Reac( double kf, double kb )
-	: kf_( kf ), kb_( kb )
+	: kf_( kf ), kb_( kb ), sub_( 0.0 ), prd_( 0.0 )
 {
 	;
 }

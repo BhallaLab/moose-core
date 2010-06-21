@@ -112,7 +112,7 @@ const Cinfo* MMenz::initCinfo()
 
 
 MMenz::MMenz( )
-	: Km_( 5 ), kcat_( 0.1 )
+	: Km_( 5 ), kcat_( 0.1 ), sub_( 0.0 ), enz_( 0.0 )
 {
 	;
 }
@@ -143,17 +143,17 @@ void MMenz::eprocess( Eref e, const Qinfo* q, ProcInfo* p )
 
 void MMenz::process( const ProcInfo* p, const Eref& e )
 {
-	double rate = enz_ * sub_ / ( Km_ + sub_ );
+	double rate = kcat_ * enz_ * sub_ / ( Km_ + sub_ );
 	toSub.send( e, p, 0, rate );
 	toPrd.send( e, p, rate, 0 );
 	
 	sub_ = 1.0;
-	enz_ = kcat_;
 }
 
 void MMenz::reinit( const Eref& e, const Qinfo*q, ProcInfo* p )
 {
-	;
+	sub_ = 0;
+	enz_ = 0;
 }
 
 //////////////////////////////////////////////////////////////

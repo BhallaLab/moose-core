@@ -6362,6 +6362,7 @@ Now to get back to testing chem kinetics. For starters,
 - Bring in solver to scan model tree and zombify it.
 - Test out solver too
 Then in no particular order:
+- Eliminate Data class
 - Implement arbitrary math handler
 - Fix up compartmentalization
 - Implement readSBML
@@ -6386,4 +6387,24 @@ Answers are wrong, though. Checkin 1899.
 
 ============================================================================
 21 June 2010
-Enzyme model test working now.
+Enzyme model test working now. Checkin 1900.
+
+Thoughts on eliminating Data class and handling process and reinit:
+- The Data class is used only to provide 'process' calls to Tick. 
+- We actually also need to provie a reinit.
+- Earlier idea had been to use Dinfo to provide process and reinit.
+- Alternative: 
+	- use the regular message framework for setting up the 
+		msgBinding_ entry on the Tick.
+	- Process becomes a shared msg with reinit.
+	- Tick goes explicitly to this entry and scans through it directly,
+		eschewing use of the queuing system.
+	- This keeps the infrastructure to the minimum, and also bypasses the
+		issues of putting process calls in the queue.
+	- This also makes it easy to handle reinit, init, and other arbitrary
+		target functions from process.
+	- When an Element is zombified its process msgs should be eliminated.
+	
+
+In the meantime, lots of cleanup to get simple test programs for enz, reac,
+mmenz to work. Now clears the Kholodenko.g model.

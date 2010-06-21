@@ -55,6 +55,10 @@ const Cinfo* Table::initCinfo()
 			"Argument 1 is filename, argument 2 is plotname",
 			new OpFunc2< Table, string, string >( &Table::xplot ) );
 
+		static DestFinfo process( "process",
+			"Handles process call, updates internal time stamp.",
+			new EpFunc1< Table, ProcPtr >( &Table::eprocess ) );
+
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
 		//////////////////////////////////////////////////////////////
@@ -100,7 +104,7 @@ const Cinfo* Table::initCinfo()
 static const Cinfo* tableCinfo = Table::initCinfo();
 
 Table::Table()
-	: threshold_( 0.0 ), lastTime_( 0.0 ), outputIndex_( 0 )
+	: threshold_( 0.0 ), lastTime_( 0.0 ), outputIndex_( 0 ), input_( 0.0 )
 {
 	;
 }
@@ -109,8 +113,15 @@ Table::Table()
 // MsgDest Definitions
 //////////////////////////////////////////////////////////////
 
+void Table::eprocess( Eref e, const Qinfo*q, ProcPtr p )
+{
+	process( p, e );
+}
+
 void Table::process( const ProcInfo* p, const Eref& e )
 {
+	/*
+	*/
 	lastTime_ = p->currTime;
 	if ( vec_.size() == 0 ) {
 		output.send( e, p, 0.0 );
@@ -126,16 +137,21 @@ void Table::process( const ProcInfo* p, const Eref& e )
 	outputLoop.send( e, p, vec_[ outputIndex_ % vec_.size() ] );
 
 	outputIndex_++;
+	// Need to send out a request for the data.
+	// vec_.push_back( input_ );
 }
 
 void Table::reinit()
 {
+	input_ = 0.0;
+	vec_.resize( 0 );
 	outputIndex_ = 0;
 	lastTime_ = 0;
 }
 
 void Table::input( double v )
 {
+	// input_ = v;
 	vec_.push_back( v );
 }
 

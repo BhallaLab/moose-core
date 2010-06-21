@@ -109,7 +109,7 @@ Id ReadKkit::read(
 
 void ReadKkit::run()
 {
-	shell_->setclock( 0, fastdt_, 0 );
+	shell_->setclock( 0, simdt_, 0 );
 	shell_->setclock( 1, controldt_, 0 );
 	shell_->setclock( 2, plotdt_, 0 );
 	string kinpath = basePath_ + "/kinetics/##";

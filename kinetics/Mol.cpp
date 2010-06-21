@@ -136,6 +136,8 @@ void Mol::process( const ProcInfo* p, const Eref& e )
 		n_ *= C + (A_ / B_ ) * ( 1.0 - C );
 	} else {
 		n_ += ( A_ - B_ ) * p->dt;
+		if ( n_ < 0.0 )
+			n_ = 0.0;
 	}
 
 	A_ = B_ = 0.0;
