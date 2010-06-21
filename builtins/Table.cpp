@@ -148,8 +148,8 @@ void Table::spike( double v )
 void Table::xplot( string fname, string plotname )
 {
 	ofstream fout( fname.c_str(), ios_base::app | ios_base::out );
-	fout << "%newplot\n";
-	fout << "%plotname " << plotname << "\n";
+	fout << "/newplot\n";
+	fout << "/plotname " << plotname << "\n";
 	for ( vector< double >::iterator i = vec_.begin(); i != vec_.end(); ++i)
 		fout << *i << endl;
 	fout << "\n";

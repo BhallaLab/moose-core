@@ -161,7 +161,7 @@ Enz::Enz( )
 
 void Enz::sub( double n )
 {
-	sub_ *= n;
+	r1_ *= n;
 }
 
 void Enz::prd( double n ) // dummy
@@ -171,12 +171,13 @@ void Enz::prd( double n ) // dummy
 
 void Enz::enz( double n ) // dummy
 {
-	sub_ *= n;
+	r1_ *= n;
 }
 
 void Enz::cplx( double n ) // dummy
 {
-	cplx_ *= n;
+	r2_ *= n;
+	r3_ *= n;
 }
 
 void Enz::eprocess( Eref e, const Qinfo* q, ProcInfo* p )
@@ -186,14 +187,14 @@ void Enz::eprocess( Eref e, const Qinfo* q, ProcInfo* p )
 
 void Enz::process( const ProcInfo* p, const Eref& e )
 {
-	toSub.send( e, p, cplx_, sub_ );
-	toPrd.send( e, p, prd_, 0 );
-	toEnz.send( e, p, prd_ + cplx_, sub_ );
-	toCplx.send( e, p, sub_, cplx_ );
+	toSub.send( e, p, r2_, r1_ );
+	toPrd.send( e, p, r3_, 0 );
+	toEnz.send( e, p, r3_ + r2_, r1_ );
+	toCplx.send( e, p, r1_, r3_ + r2_ );
 	
-	sub_ = k1_;
-	cplx_ = k2_;
-	prd_ = k3_;
+	r1_ = k1_;
+	r2_ = k2_;
+	r3_ = k3_;
 }
 
 void Enz::reinit( const Eref& e, const Qinfo*q, ProcInfo* p )

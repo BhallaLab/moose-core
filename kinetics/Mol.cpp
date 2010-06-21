@@ -172,7 +172,7 @@ double Mol::getN() const
 
 void Mol::setNinit( double v )
 {
-	nInit_ = v;
+	n_ = nInit_ = v;
 }
 
 double Mol::getNinit() const

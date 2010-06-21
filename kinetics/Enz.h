@@ -43,9 +43,9 @@ class Enz: public Data
 		double k1_;
 		double k2_;
 		double k3_;
-		double sub_;
-		double prd_;
-		double cplx_;
+		double r1_;
+		double r2_;
+		double r3_;
 };
 
 #endif // ENZ_H

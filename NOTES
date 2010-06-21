@@ -6382,6 +6382,8 @@ I had earlier handled this simply by checking whether the src was
 e1. Replicated this approach. Lots of changes in SrcFinfo, Qinfo and so on.
 Compiles but crashes. Checkin 1898.
 Progress. Now clears all unit tests and even the ReadKkit run.
-Answers are wrong, though.
+Answers are wrong, though. Checkin 1899.
 
 ============================================================================
+21 June 2010
+Enzyme model test working now.
