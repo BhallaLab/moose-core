@@ -163,7 +163,9 @@ void NeuromlReader::readModel( string filename,Id location )
    
    setupChannels(groupcableMap,cablesegMap,biophysicsunit);
    setupPools(groupcableMap,cablesegMap,biophysicsunit);
- // setupSynChannels(groupcableMap,cablesegMap);
+   unsigned int numsynchans =ncl_->getNumSynChannels();
+   if ( numsynchans != 0 )
+ 	setupSynChannels(groupcableMap,cablesegMap,numsynchans);
  #else
 	cout << "This version does not have NEUROML support." << endl; 
 #endif 
@@ -616,9 +618,9 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
 	}
 }
 
-void NeuromlReader::setupSynChannels(map< string,vector<string> > &groupcableMap,map< string,vector< string > > &cablesegMap)
+void NeuromlReader::setupSynChannels(map< string,vector<string> > &groupcableMap,map< string,vector< string > > &cablesegMap,unsigned int numsynchans)
 {
-	unsigned int numsynchans =ncl_->getNumSynChannels(); 
+	//unsigned int numsynchans =ncl_->getNumSynChannels(); 
 	static const Cinfo* synchanCinfo = initSynChanCinfo();
     	static const Finfo* synGbarFinfo = synchanCinfo->findFinfo( "Gbar" );
 	static const Finfo* synEkFinfo = synchanCinfo->findFinfo( "Ek" );
