@@ -189,17 +189,17 @@ class DataHandler
 		}
 		*/
 
+		const DinfoBase* dinfo() const
+		{
+			return dinfo_;
+		}
+
 	protected:
 		/**
 		 * Assigns the data field and indicates how many total entries
 		 * are present.
 		 */
 		virtual void setData( char* data, unsigned int numData ) = 0; 
-
-		const DinfoBase* dinfo() const
-		{
-			return dinfo_;
-		}
 
 
 		/**

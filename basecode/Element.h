@@ -24,16 +24,18 @@ class Element
 	friend void testSparseMsg();
 	public:
 		/**
-		 * Constructor
-		 * It would be nice to have shared data: e.g., thresh and tau for
-		 * IntFire. Common but not static.
-		 * Also think about parent-child hierarchy.
+		 * This constructor is used when making zombies. We want to have a
+		 * temporary Element for field access but nothing else, and it
+		 * should not mess with messages or Ids.
 		 */
+		Element( const Cinfo* c, DataHandler* d );
 
+		/// Regular constructor
 		Element( Id id, const Cinfo* c, const string& name,
 			const vector< unsigned int >& dimensions, 
 			bool isGlobal = 0 );
 
+		/// Regular constructor
 		Element( Id id, const Cinfo* c, const string& name,
 			DataHandler* dataHandler );
 
@@ -185,11 +187,17 @@ class Element
 		 */
 		 MsgId findCaller( FuncId fid ) const;
 
-		 /**
-		  * Returns the binding index of the specified entry.
-		  * Returns ~0 on failure.
-		  */
+		/**
+		 * Returns the binding index of the specified entry.
+		 * Returns ~0 on failure.
+		 */
 		 unsigned int findBinding( MsgFuncBinding b ) const;
+
+		/**
+		 * zombieSwap: replaces the Cinfo and DataHandler of the zombie.
+		 * Deletes old DataHandler first.
+		 */
+		void zombieSwap( const Cinfo* newCinfo, DataHandler* newDataHandler     );
 
 	private:
 		string name_;

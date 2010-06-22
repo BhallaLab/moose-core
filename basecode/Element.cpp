@@ -8,6 +8,18 @@
 **********************************************************************/
 
 #include "header.h"
+#include "DataHandlerWrapper.h"
+
+/**
+ * This version is used when making zombies. We want to have a
+ * temporary Element for field access but nothing else, and it
+ * should not mess with messages or Ids.
+ */
+Element::Element( const Cinfo* c, DataHandler* d )
+{
+	dataHandler_ = new DataHandlerWrapper( d );
+	cinfo_ = c;
+}
 
 Element::Element( Id id, const Cinfo* c, const string& name, 
 	const vector< unsigned int >& dimensions, bool isGlobal )
@@ -441,3 +453,13 @@ void Element::destroyElementTree( const vector< Id >& tree )
 		i->destroy();
 		// delete i->operator()();
 }
+
+void Element::zombieSwap( const Cinfo* newCinfo, DataHandler* newDataHandler )
+{
+	cinfo_ = newCinfo;
+	delete dataHandler_;
+	// DataHandler* oldDataHandler = dataHandler_;
+	dataHandler_ = newDataHandler;
+	// delete oldDataHandler_;
+}
+

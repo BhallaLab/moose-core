@@ -45,6 +45,8 @@ class ZombieMol: public Stoich
 		// utility funcs
 		//////////////////////////////////////////////////////////////////
 		unsigned int convertId ( Id id ) const;
+		void zombify( Element* solver, Element* orig );
+		void unzombify( Element* zombie ) const;
 
 		static const Cinfo* initCinfo();
 	private:

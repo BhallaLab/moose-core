@@ -6458,4 +6458,13 @@ Pending issues:
 
 Added in ZombieReac implementation. Checkin 1908.
 Added in ZombieEnz implementation. Checkin 1909.
-Added in ZombieMMenz implementation.
+Added in ZombieMMenz implementation. Checkin 1910.
+
+All this is good baseline stuff. Now the crux of the matter: swapping
+Elements. Simple approach is a Element::zombify function,
+to be called by the functions that scan the existing tree and put in the
+new one.
+
+Working on this. Mostly OK, except how do we decide what kind of DataHandler
+to build when unzombifying an Element? The preliminary code is in 
+ZombieMol.cpp and Element.cpp. Got the zombify stuff set up.

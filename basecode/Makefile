@@ -22,6 +22,7 @@ OBJ = \
 	OneDimHandler.o \
 	ZeroDimGlobalHandler.o \
 	OneDimGlobalHandler.o \
+	DataHandlerWrapper.o \
 	Eref.o	\
 	Finfo.o	\
 	DestFinfo.o	\
@@ -75,9 +76,11 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
+Element.o:	DataHandlerWrapper.h
 testAsync.o:	SparseMatrix.h SetGet.h
 SparseMsg.o:	SparseMatrix.h
 SetGet.o:	SetGet.h ../shell/Neutral.h
+DataHandlerWrapper.o: DataHandlerWrapper.h
 #TestBasecode.o:	Shell.h ShellWrapper.h
 
 .cpp.o:

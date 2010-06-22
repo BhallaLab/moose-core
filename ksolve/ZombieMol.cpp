@@ -13,7 +13,9 @@
 #include "KinSparseMatrix.h"
 #include "Stoich.h"
 #include "ZombieMol.h"
+#include "Mol.h"
 #include "ElementValueFinfo.h"
+#include "DataHandlerWrapper.h"
 
 #define EPSILON 1e-15
 
@@ -147,16 +149,6 @@ void ZombieMol::reinit( const Eref& e, const Qinfo*q, ProcInfo* p )
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
-unsigned int  ZombieMol::convertId( Id id ) const
-{
-	unsigned int i = id.value() - objMapStart_;
-	assert( i < objMap_.size() );
-	i = objMap_[i];
-	assert( i < S_.size() );
-	return i;
-}
-
-
 void ZombieMol::setN( Eref e, const Qinfo* q, double v )
 {
 	S_[ convertId( e.id() ) ] = v;
@@ -208,4 +200,54 @@ double ZombieMol::getDiffConst( Eref e, const Qinfo* q ) const
 {
 	// return diffConst_;
 	return 0;
+}
+
+//////////////////////////////////////////////////////////////
+// Zombie conversion functions.
+//////////////////////////////////////////////////////////////
+
+unsigned int  ZombieMol::convertId( Id id ) const
+{
+	unsigned int i = id.value() - objMapStart_;
+	assert( i < objMap_.size() );
+	i = objMap_[i];
+	assert( i < S_.size() );
+	return i;
+}
+
+// static func
+void ZombieMol::zombify( Element* solver, Element* orig )
+{
+	Element temp( zombieMolCinfo, solver->dataHandler() );
+	Eref zer( &temp, 0 );
+	Eref oer( orig, 0 );
+
+	ZombieMol* z = reinterpret_cast< ZombieMol* >( zer.data() );
+	Mol* m = reinterpret_cast< Mol* >( oer.data() );
+
+	z->setN( zer, 0, m->getN() );
+	z->setNinit( zer, 0, m->getNinit() );
+	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
+	orig->zombieSwap( zombieMolCinfo, dh );
+}
+
+// Static func
+void ZombieMol::unzombify( Element* zombie ) const
+{
+	Element temp( zombie->cinfo(), zombie->dataHandler() );
+	Eref zer( &temp, 0 );
+	Eref oer( zombie, 0 );
+
+	ZombieMol* z = reinterpret_cast< ZombieMol* >( zer.data() );
+
+	// Here I am unsure how to recreate the correct kind of data handler
+	// for the original. Do later.
+	DataHandler* dh = 0;
+
+	zombie->zombieSwap( Mol::initCinfo(), dh );
+
+	Mol* m = reinterpret_cast< Mol* >( oer.data() );
+
+	m->setN( z->getN( zer, 0 ) );
+	m->setNinit( z->getNinit( zer, 0 ) );
 }
