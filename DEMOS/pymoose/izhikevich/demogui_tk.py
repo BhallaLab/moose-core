@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jun 17 08:54:16 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Jun 18 20:04:05 2010 (+0530)
+# Last-Updated: Tue Jun 22 14:09:52 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 727
+#     Update #: 770
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -49,6 +49,7 @@
 
 import numpy
 from Tkinter import *
+import tkMessageBox
 from Izhikevich import IzhikevichDemo
 
 class CoordinateXform:
@@ -97,7 +98,17 @@ class CoordinateXform:
 
     def screen(self, x, y):
         """Convert cartesian coordinates to screen coordinates"""
-        return (x - self.xmin) * self.xscale, self.height - (y - self.ymin) * self.yscale
+    
+        xlist = (x - self.xmin) * self.xscale
+        ylist = self.height - (y - self.ymin) * self.yscale
+        if (isinstance(xlist, int) or isinstance(xlist, float)) and (isinstance(ylist, int) or isinstance(ylist, float)):
+            ret = (int(xlist), int(ylist))
+            return ret
+        elif isinstance(xlist, numpy.ndarray) and isinstance(ylist, numpy.ndarray):
+            return xlist.astype(numpy.int32), ylist.astype(numpy.int32)
+        else:
+            print 'Could not recognize data type of input coordinate: returning (None, None)'
+            return (None, None)
         
     def cartesian(self, x, y):
         """Convert screen coordinates to cartesian."""
@@ -127,8 +138,9 @@ class Tkplot(Canvas):
             ylist = numpy.array(data[1])
             color = data[2]
             (x_screen, y_screen) = self.axes.screen(xlist, ylist)
-            for ii in range(len(xlist)-1):
-                self.create_line(x_screen[ii], y_screen[ii], x_screen[ii+1], y_screen[ii+1], fill=color)
+            positions = numpy.dstack((x_screen, y_screen)).flatten().tolist()
+            numpy.savetxt('positions', positions)
+            self.create_line(positions, fill=color)
         self.update()
 
     def clear(self):
@@ -156,7 +168,6 @@ class Tkplot(Canvas):
         x = self.axes.xmin
         while x < self.axes.xmax:
             position = self.axes.screen(x, 0.0) 
-            # print position
             self.create_line(position[0], position[1], position[0], position[1] + 2,  fill=self.axiscolor)
             if self.ticklabel:
                 self.create_text(position[0] + 10, position[1] + 5, text='%g' % (x), anchor=N) # shift it a little right and down to make the text visible
@@ -170,7 +181,6 @@ class Tkplot(Canvas):
             y = y + self.yinterval
             
     def _do_update(self, event):
-        # print 'TkPlot: _do_update()'
         self.show()
 
 class IzhikevichGUI:
@@ -216,12 +226,16 @@ class IzhikevichGUI:
 
     def _run_model(self, event):
         key = event.widget['text']
-        (time, Vm, Im) = self.demo.simulate(key)
+        try:
+            (time, Vm, Im) = self.demo.simulate(key)
+        except NotImplementedError as (err, msg):
+            tkMessageBox.showinfo('%s' % (err), '%s' % (msg))
+            return
         length = len(time)
         self.plot.clear()
         self.plot.set_axes(-10, -150, time[length-1], 50, 10, 10)
         self.plot.plot(time, numpy.array(Vm) * 1e3)
-        self.plot.plot(time, numpy.array(Im) * 1e9 - 100)
+        self.plot.plot(time, numpy.array(Im) * 1e9 - 100, color='red')
         self.plot.show()
 
     def start(self):
