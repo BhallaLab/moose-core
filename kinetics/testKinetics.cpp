@@ -20,7 +20,7 @@ void testReadKkit()
 
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 	rk.run();
-	rk.dumpPlots( "dend.plot" );
+	// rk.dumpPlots( "dend.plot" );
 
 	s->doDelete( base );
 	cout << "." << flush;

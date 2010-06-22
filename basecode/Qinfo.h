@@ -189,6 +189,9 @@ class Qinfo
 			const char* arg );
 		void addSpecificTargetToQ( unsigned int threadId, MsgFuncBinding b, 
 			const char* arg, const DataId& target );
+
+		void assembleOntoQ( const MsgFuncBinding &b, 
+			const Element* e, const ProcInfo* p, const char* arg );
 	
 		/**
 		 * Organizes data going into outQ so that we know which

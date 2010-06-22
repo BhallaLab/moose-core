@@ -101,8 +101,10 @@ void Msg::process( const ProcInfo* p ) const
 
 const Msg* Msg::getMsg( MsgId m )
 {
+	/*
 	if ( m >= msg_.size() )
 		cout << Shell::myNode() << ": Msg::getMsg: Error: m = " << m << " >= msg_.size() = " << msg_.size() << endl;
+		*/
 	assert( m < msg_.size() );
 	return msg_[ m ];
 }

@@ -116,9 +116,6 @@ void ReadKkit::run()
 	string plotpath = basePath_ + "/graphs/##[TYPE=Table],/moregraphs/##[TYPE=Table]";
 	shell_->doUseClock( kinpath, "process", 0 );
 	shell_->doUseClock( plotpath, "process", 2 );
-	shell_->doStart( transientTime_ );
-	shell_->setclock( 0, simdt_, 0 );
-	shell_->doStart( maxtime_ - transientTime_ );
 	if ( useVariableDt_ ) {
 		shell_->setclock( 0, fastdt_, 0 );
 		shell_->doStart( transientTime_ );

@@ -110,15 +110,15 @@ class Element
 		 * by bindIndex, and queue specified in the ProcInfo.
 		 */
 		void asend( Qinfo& q, BindIndex bindIndex, 
-			const ProcInfo *p, const char* arg );
+			const ProcInfo *p, const char* arg ) const;
 
 		/**
 		 * Asynchronous send command, going to specific target Element/Data.
 		 * Adds Qinfo and data onto msg specified
 		 * by bindIndex, and queue specified in the ProcInfo.
 		 */
-		void tsend( Qinfo& q, BindIndex bindIndex, 
-			const ProcInfo *p, const char* arg, const FullId& target );
+		void tsend( Qinfo& q, BindIndex bindIndex, const ProcInfo *p, 
+			const char* arg, const FullId& target ) const;
 
 		/** 
 		 * Pushes the Msg mid onto the list.

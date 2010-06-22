@@ -274,18 +274,22 @@ Id Element::id() const
  * Msg info is also need to work out if Q entry is forward or back.
  */
 void Element::asend( Qinfo& q, BindIndex bindIndex, 
-	const ProcInfo *p, const char* arg )
+	const ProcInfo *p, const char* arg ) const
 {
 	assert ( bindIndex < msgBinding_.size() );
+	vector< MsgFuncBinding >::const_iterator end = 
+		msgBinding_[ bindIndex ].end();
 	for ( vector< MsgFuncBinding >::const_iterator i =
-		msgBinding_[ bindIndex ].begin(); 
-		i != msgBinding_[ bindIndex ].end(); ++i ) {
+		msgBinding_[ bindIndex ].begin(); i != end; ++i ) {
+		q.assembleOntoQ( *i, this, p, arg );
+		/*
 		const Msg* m = Msg::getMsg( i->mid );
 		q.setForward( m->isForward( this ) );
 		if ( m->isMsgHere( q ) ) {
 			q.assignQblock( m, p );
 			q.addToQ( p->threadId, *i, arg );
 		}
+		*/
 	}
 }
 
@@ -301,7 +305,7 @@ void Element::asend( Qinfo& q, BindIndex bindIndex,
  *
  */
 void Element::tsend( Qinfo& q, BindIndex bindIndex, 
-	const ProcInfo *p, const char* arg, const FullId& target )
+	const ProcInfo *p, const char* arg, const FullId& target ) const
 {
 	assert ( bindIndex < msgBinding_.size() );
 	Element *e = target.id();

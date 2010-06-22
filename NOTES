@@ -6420,4 +6420,26 @@ except the Process ones.
 - I need a clean interface to the DataHandlers.
 
 
-Adding solver code. Created subdir ksolve.
+Adding solver code. Created subdir ksolve. Checkin 1902.
+============================================================================
+22 June 2010
+A little benchmark: ran the kholodenko model for 60K sec at dt = 0.1.
+Identical run in GENESIS: 2.4 sec. MOOSE: 12 sec. Pretty heavy costs for
+the queued messaging. May be good to profile.
+
+Did so. Here is the top of the profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls   s/call   s/call  name    
+  9.78      0.88     0.88 22200390     0.00     0.00  Element::asend(Qinfo&, unsigned short, ProcInfo const*, char const*)
+  8.60      1.65     0.77 37200000     0.00     0.00  SingleMsg::exec(char const*, ProcInfo const*) const
+  7.54      2.32     0.68 37200390     0.00     0.00  Qinfo::addToQ(unsigned int, MsgFuncBinding, char const*)
+  6.59      2.91     0.59 37200390     0.00     0.00  Qinfo::assignQblock(Msg const*, ProcInfo const*)
+  6.20      3.47     0.56 37854727     0.00     0.00  std::vector<char, std::allocator<char> >::_M_fill_insert(__gnu_cxx::__normal_iterator<char*, std::vector<char, std::allocator<char> > >, unsigned long, char const&)
+  5.42      3.95     0.49 90001576     0.00     0.00  Msg::getMsg(unsigned int)
+  5.36      4.43     0.48  1236668     0.00     0.00  readBuf(char const*, ProcInfo const*)
+
+This is somewhat difficult to work on, as there isn't any single huge 
+bottleneck. Messed around with it a bit, but the improvement is negligible.
+Now MOOSE takes 11.5 sec. Anyway, checked it in for reference.

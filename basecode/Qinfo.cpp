@@ -610,7 +610,7 @@ void Qinfo::addSpecificTargetToQ( unsigned int threadId, MsgFuncBinding b,
  * 2 and higher are to other simGroups. Don't worry about yet
  */
 void Qinfo::assignQblock( const Msg* m, const ProcInfo* p )
-{	
+{
 	unsigned int threadIndex = p->threadId;
 	unsigned int offset = outQ_[ threadIndex ].size();
 	vector< QueueBlock >& qb = qBlock_[ threadIndex ];
@@ -649,5 +649,16 @@ void Qinfo::emptyAllQs()
 	for ( unsigned int i = 0; i < Shell::numCores(); ++i ) {
 		outQ_[i].resize( 0 );
 		qBlock_[i].resize(0);
+	}
+}
+
+void Qinfo::assembleOntoQ( const MsgFuncBinding& i, 
+	const Element* e, const ProcInfo *p, const char* arg )
+{
+	const Msg* m = Msg::getMsg( i.mid );
+	isForward_ = m->isForward( e );
+	if ( m->isMsgHere( *this ) ) {
+		assignQblock( m, p );
+		addToQ( p->threadId, i, arg );
 	}
 }
