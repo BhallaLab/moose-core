@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri May 28 14:42:33 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jun 17 09:49:19 2010 (+0530)
+# Last-Updated: Tue Jun 22 14:10:19 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 883
+#     Update #: 889
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -138,7 +138,7 @@ class IzhikevichDemo:
             
     def simulate(self, key):
         if key == 'accommodation':
-            raise Exception, 'Equation for u for the accommodating neuron is: u\' = a * b * (V + 65)\n Which different from the regular equation and cannot be obtained from the latter by any choice of a and b.'
+            raise NotImplementedError('Not Implemented', 'Equation for u for the accommodating neuron is:\n u\' = a * b * (V + 65)\n Which is different from the regular equation and cannot be obtained from the latter by any choice of a and b.')
             return
         self.setup(key)
         return self.run(key)
