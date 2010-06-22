@@ -134,12 +134,13 @@ void ReadCell::read(
 
 void ReadCell::innerRead( ifstream& fin )
 {
-	string line;
+    string read, line;
 	lineNum_ = 0;
 	string::size_type pos;
 	ParseStage parseMode = DATA;
-	while ( getline( fin, line ) ) {
+	while ( getline( fin, read ) ) {
 		lineNum_++;
+                line = trim(read);
 		if ( line.length() == 0 )
 				continue;
 		pos = line.find_first_not_of( "\t " );
