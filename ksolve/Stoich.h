@@ -34,13 +34,30 @@ class Stoich: public Data
 		void reinit( Eref e, const Qinfo* q, ProcInfo* p );
 
 		static const Cinfo* initCinfo();
-	private:
+	protected:
 		bool useOneWay_;
 		string path_;
 		vector< double > S_;
 		vector< double > Sinit_;
 		vector< double > v_;
 		KinSparseMatrix N_;
+
+		/**
+		 * Maps Ids to objects in the S_ and RateTerm vectors.
+		 * There will be holes in this map, but look up is very fast.
+		 * The calling Id must know what it wants to find: all it
+		 * gets back is an integer.
+		 * The alternative is to have multiple maps, but that is slower.
+		 * Assume no arrays. Each Mol/reac etc must be a unique
+		 * Element. Later we'll deal with diffusion.
+		 */
+		vector< unsigned int > objMap_;
+		/**
+		 * Minor efficiency: We will usually have a set of objects that are
+		 * nearly contiguous in the map. May as well start with the first of
+		 * them.
+		 */
+		unsigned int objMapStart_;
 };
 
 #endif	// _STOICH_H

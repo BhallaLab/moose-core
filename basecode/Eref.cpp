@@ -73,3 +73,8 @@ FullId Eref::fullId() const
 {
 	return FullId( e_->id(), i_ );
 }
+
+Id Eref::id() const
+{
+	return e_->id();
+}

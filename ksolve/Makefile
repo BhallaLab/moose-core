@@ -12,6 +12,7 @@ TARGET = ksolve.o
 OBJ = \
 	Stoich.o	\
 	KinSparseMatrix.o	\
+	ZombieMol.o \
 
 	
 	#KineticHub.o	\
@@ -28,6 +29,7 @@ $(OBJ)	: $(HEADERS)
 Stoich.o:	Stoich.h
 KineticHub.o:	KineticHub.h
 KinSparseMatrix.o:	KinSparseMatrix.h ../basecode/SparseMatrix.h
+ZombieMol.o:	ZombieMol.h Stoich.h KinSparseMatrix.h ../basecode/SparseMatrix.h ../basecode/ElementValueFinfo.h
 testKsolve.o:	Stoich.h KineticHub.h
 
 .cpp.o:

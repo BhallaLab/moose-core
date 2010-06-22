@@ -85,7 +85,15 @@ class Eref
 			return i_;
 		}
 
+		/**
+		 * Returns the FullId corresponding to the Eref. All info is kept.
+		 */
 		FullId fullId() const;
+
+		/**
+		 * Returns the Id corresponding to the Eref. Loses information.
+		 */
+		Id id() const;
 
 		/**
 		 * True if the data are on the current node
