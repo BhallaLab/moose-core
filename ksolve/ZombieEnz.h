@@ -39,6 +39,8 @@ class ZombieEnz: public Stoich
 		// Utility  funcs
 		//////////////////////////////////////////////////////////////////
 		unsigned int convertId ( Id id ) const;
+		static void zombify( Element* solver, Element* orig );
+		static void unzombify( Element* zombie );
 
 		static const Cinfo* initCinfo();
 	private:

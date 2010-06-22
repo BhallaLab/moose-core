@@ -14,6 +14,8 @@
 #include "Stoich.h"
 #include "ElementValueFinfo.h"
 #include "ZombieEnz.h"
+#include "Enz.h"
+#include "DataHandlerWrapper.h"
 
 static SrcFinfo2< double, double > toSub( 
 		"toSub", 
@@ -215,4 +217,43 @@ unsigned int  ZombieEnz::convertId( Id id ) const
 	i = objMap_[i];
 	assert( ( i + 1 ) < rates_.size() ); // enz uses two rate terms.
 	return i;
+}
+
+// static func
+void ZombieEnz::zombify( Element* solver, Element* orig )
+{
+	Element temp( zombieEnzCinfo, solver->dataHandler() );
+	Eref zer( &temp, 0 );
+	Eref oer( orig, 0 );
+
+	ZombieEnz* z = reinterpret_cast< ZombieEnz* >( zer.data() );
+	Enz* enz = reinterpret_cast< Enz* >( oer.data() );
+
+	z->setK1( zer, 0, enz->getK1() );
+	z->setK2( zer, 0, enz->getK2() );
+	z->setK3( zer, 0, enz->getK3() );
+	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
+	orig->zombieSwap( zombieEnzCinfo, dh );
+}
+
+// Static func
+void ZombieEnz::unzombify( Element* zombie )
+{
+	Element temp( zombie->cinfo(), zombie->dataHandler() );
+	Eref zer( &temp, 0 );
+	Eref oer( zombie, 0 );
+
+	ZombieEnz* z = reinterpret_cast< ZombieEnz* >( zer.data() );
+
+	// Here I am unsure how to recreate the correct kind of data handler
+	// for the original. Do later.
+	DataHandler* dh = 0;
+
+	zombie->zombieSwap( Enz::initCinfo(), dh );
+
+	Enz* m = reinterpret_cast< Enz* >( oer.data() );
+
+	m->setK1( z->getK1( zer, 0 ) );
+	m->setK2( z->getK2( zer, 0 ) );
+	m->setK3( z->getK3( zer, 0 ) );
 }

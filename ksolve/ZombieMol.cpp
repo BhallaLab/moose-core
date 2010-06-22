@@ -232,7 +232,7 @@ void ZombieMol::zombify( Element* solver, Element* orig )
 }
 
 // Static func
-void ZombieMol::unzombify( Element* zombie ) const
+void ZombieMol::unzombify( Element* zombie )
 {
 	Element temp( zombie->cinfo(), zombie->dataHandler() );
 	Eref zer( &temp, 0 );

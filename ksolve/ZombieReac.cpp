@@ -13,7 +13,9 @@
 #include "KinSparseMatrix.h"
 #include "Stoich.h"
 #include "ZombieReac.h"
+#include "Reac.h"
 #include "ElementValueFinfo.h"
+#include "DataHandlerWrapper.h"
 
 static SrcFinfo2< double, double > toSub( 
 		"toSub", 
@@ -169,4 +171,41 @@ unsigned int  ZombieReac::convertId( Id id ) const
 	i = objMap_[i];
 	assert( i < rates_.size() );
 	return i;
+}
+
+// static func
+void ZombieReac::zombify( Element* solver, Element* orig )
+{
+	Element temp( zombieReacCinfo, solver->dataHandler() );
+	Eref zer( &temp, 0 );
+	Eref oer( orig, 0 );
+
+	ZombieReac* z = reinterpret_cast< ZombieReac* >( zer.data() );
+	Reac* reac = reinterpret_cast< Reac* >( oer.data() );
+
+	z->setKf( zer, 0, reac->getKf() );
+	z->setKb( zer, 0, reac->getKb() );
+	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
+	orig->zombieSwap( zombieReacCinfo, dh );
+}
+
+// Static func
+void ZombieReac::unzombify( Element* zombie )
+{
+	Element temp( zombie->cinfo(), zombie->dataHandler() );
+	Eref zer( &temp, 0 );
+	Eref oer( zombie, 0 );
+
+	ZombieReac* z = reinterpret_cast< ZombieReac* >( zer.data() );
+
+	// Here I am unsure how to recreate the correct kind of data handler
+	// for the original. Do later.
+	DataHandler* dh = 0;
+
+	zombie->zombieSwap( Reac::initCinfo(), dh );
+
+	Reac* m = reinterpret_cast< Reac* >( oer.data() );
+
+	m->setKf( z->getKf( zer, 0 ) );
+	m->setKb( z->getKb( zer, 0 ) );
 }

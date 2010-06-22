@@ -14,6 +14,8 @@
 #include "Stoich.h"
 #include "ElementValueFinfo.h"
 #include "ZombieMMenz.h"
+#include "MMenz.h"
+#include "DataHandlerWrapper.h"
 
 static SrcFinfo2< double, double > toSub( 
 		"toSub", 
@@ -168,4 +170,41 @@ unsigned int  ZombieMMenz::convertId( Id id ) const
 	i = objMap_[i];
 	assert( i < rates_.size() );
 	return i;
+}
+
+// static func
+void ZombieMMenz::zombify( Element* solver, Element* orig )
+{
+	Element temp( zombieMMenzCinfo, solver->dataHandler() );
+	Eref zer( &temp, 0 );
+	Eref oer( orig, 0 );
+
+	ZombieMMenz* z = reinterpret_cast< ZombieMMenz* >( zer.data() );
+	MMenz* mmEnz = reinterpret_cast< MMenz* >( oer.data() );
+
+	z->setKm( zer, 0, mmEnz->getKm() );
+	z->setKcat( zer, 0, mmEnz->getKcat() );
+	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
+	orig->zombieSwap( zombieMMenzCinfo, dh );
+}
+
+// Static func
+void ZombieMMenz::unzombify( Element* zombie )
+{
+	Element temp( zombie->cinfo(), zombie->dataHandler() );
+	Eref zer( &temp, 0 );
+	Eref oer( zombie, 0 );
+
+	ZombieMMenz* z = reinterpret_cast< ZombieMMenz* >( zer.data() );
+
+	// Here I am unsure how to recreate the correct kind of data handler
+	// for the original. Do later.
+	DataHandler* dh = 0;
+
+	zombie->zombieSwap( MMenz::initCinfo(), dh );
+
+	MMenz* m = reinterpret_cast< MMenz* >( oer.data() );
+
+	m->setKm( z->getKm( zer, 0 ) );
+	m->setKcat( z->getKcat( zer, 0 ) );
 }

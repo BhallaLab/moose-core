@@ -39,6 +39,8 @@ class ZombieReac: public Stoich
 		// utility funcs
 		//////////////////////////////////////////////////////////////////
 		unsigned int convertId ( Id id ) const;
+		static void zombify( Element* solver, Element* orig );
+		static void unzombify( Element* zombie );
 
 		static const Cinfo* initCinfo();
 	private:
