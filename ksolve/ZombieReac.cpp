@@ -138,15 +138,6 @@ void ZombieReac::prd( double v )
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
-unsigned int  ZombieReac::convertId( Id id ) const
-{
-	unsigned int i = id.value() - objMapStart_;
-	assert( i < objMap_.size() );
-	i = objMap_[i];
-	assert( i < rates_.size() );
-	return i;
-}
-
 void ZombieReac::setKf( Eref e, const Qinfo* q, double v )
 {
 	rates_[ convertId( e.id() ) ]->setR1( v );
@@ -165,4 +156,17 @@ void ZombieReac::setKb( Eref e, const Qinfo* q, double v )
 double ZombieReac::getKb( Eref e, const Qinfo* q ) const
 {
 	return rates_[ convertId( e.id() ) ]->getR2();
+}
+
+//////////////////////////////////////////////////////////////
+// Utility function
+//////////////////////////////////////////////////////////////
+
+unsigned int  ZombieReac::convertId( Id id ) const
+{
+	unsigned int i = id.value() - objMapStart_;
+	assert( i < objMap_.size() );
+	i = objMap_[i];
+	assert( i < rates_.size() );
+	return i;
 }

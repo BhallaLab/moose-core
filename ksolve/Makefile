@@ -14,6 +14,7 @@ OBJ = \
 	KinSparseMatrix.o	\
 	ZombieMol.o \
 	ZombieReac.o \
+	ZombieEnz.o \
 
 	
 	#KineticHub.o	\
@@ -32,6 +33,7 @@ KineticHub.o:	KineticHub.h
 KinSparseMatrix.o:	KinSparseMatrix.h ../basecode/SparseMatrix.h
 ZombieMol.o:	ZombieMol.h Stoich.h KinSparseMatrix.h RateTerm.h ../basecode/SparseMatrix.h ../basecode/ElementValueFinfo.h
 ZombieReac.o:	ZombieReac.h Stoich.h KinSparseMatrix.h RateTerm.h ../basecode/SparseMatrix.h ../basecode/ElementValueFinfo.h
+ZombieEnz.o:	ZombieEnz.h Stoich.h KinSparseMatrix.h RateTerm.h ../basecode/SparseMatrix.h ../basecode/ElementValueFinfo.h
 testKsolve.o:	Stoich.h KineticHub.h
 
 .cpp.o:
