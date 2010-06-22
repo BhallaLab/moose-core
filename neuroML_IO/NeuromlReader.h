@@ -34,7 +34,7 @@ class NeuromlReader
 		double calcSurfaceArea(double length,double diameter);
 		/* Returns the volume of the compartment */
 		double calcVolume(double length,double diameter);
-		void setupSynChannels(map< string,vector<string> > &,map< string,vector< string > > &);
+		void setupSynChannels(map< string,vector<string> > &,map< string,vector< string > > &,unsigned int numsynchans);
 		void setupChannels(map< string,vector<string> > &,map< string,vector< string > > &,string unit);
 		void setupPools(map< string,vector<string> > &,map< string,vector< string > > &,string unit);
 	#endif	// USE_NEUROML	
