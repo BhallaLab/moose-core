@@ -6442,4 +6442,5 @@ Each sample counts as 0.01 seconds.
 
 This is somewhat difficult to work on, as there isn't any single huge 
 bottleneck. Messed around with it a bit, but the improvement is negligible.
-Now MOOSE takes 11.5 sec. Anyway, checked it in for reference.
+Now MOOSE takes 11.5 sec. Anyway, checked it in for reference. Checkin 1904.
+Cleaned out benchmarking stuff. 

@@ -178,7 +178,6 @@ int main( int argc, char** argv )
 	// ProcInfo p;
 	// Actually here we should launch off the thread doing
 	// Shell messaging/MPI, and yield control to the parser.
-	/*
 	if ( s->myNode() == 0 ) {
 		mpiTests();
 		// benchmarkTests();
@@ -186,8 +185,6 @@ int main( int argc, char** argv )
 	} else {
 		s->launchMsgLoop( shelle );
 	}
-	*/
-	testKinetics();
 
 	// cout << s->myNode() << ": Main: out of parser/MsgLoop\n";
 
