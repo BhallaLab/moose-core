@@ -40,6 +40,7 @@ class Stoich: public Data
 		vector< double > S_;
 		vector< double > Sinit_;
 		vector< double > v_;
+		vector< RateTerm* > rates_;
 		KinSparseMatrix N_;
 
 		/**

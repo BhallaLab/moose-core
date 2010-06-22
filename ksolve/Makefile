@@ -13,6 +13,7 @@ OBJ = \
 	Stoich.o	\
 	KinSparseMatrix.o	\
 	ZombieMol.o \
+	ZombieReac.o \
 
 	
 	#KineticHub.o	\
@@ -26,10 +27,11 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-Stoich.o:	Stoich.h
+Stoich.o:	Stoich.h RateTerm.h KinSparseMatrix.h ../basecode/SparseMatrix.h
 KineticHub.o:	KineticHub.h
 KinSparseMatrix.o:	KinSparseMatrix.h ../basecode/SparseMatrix.h
-ZombieMol.o:	ZombieMol.h Stoich.h KinSparseMatrix.h ../basecode/SparseMatrix.h ../basecode/ElementValueFinfo.h
+ZombieMol.o:	ZombieMol.h Stoich.h KinSparseMatrix.h RateTerm.h ../basecode/SparseMatrix.h ../basecode/ElementValueFinfo.h
+ZombieReac.o:	ZombieReac.h Stoich.h KinSparseMatrix.h RateTerm.h ../basecode/SparseMatrix.h ../basecode/ElementValueFinfo.h
 testKsolve.o:	Stoich.h KineticHub.h
 
 .cpp.o:

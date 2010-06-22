@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "RateTerm.h"
 #include "SparseMatrix.h"
 #include "KinSparseMatrix.h"
 #include "Stoich.h"

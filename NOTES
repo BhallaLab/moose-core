@@ -6444,3 +6444,16 @@ This is somewhat difficult to work on, as there isn't any single huge
 bottleneck. Messed around with it a bit, but the improvement is negligible.
 Now MOOSE takes 11.5 sec. Anyway, checked it in for reference. Checkin 1904.
 Cleaned out benchmarking stuff. Checkin 1905.
+
+Starting out on the ZombieMol. This turns out to be easy and clean to
+implement if it is subclassed from Stoich.  Checkin 1907.
+Pending issues:
+- Swapping out contents of Element for zombie
+- Stoich should handle arbitrary arrays, or explicitly take care of sims
+	where the molecules are going to turn into reac-diff vectors.
+	The latter is easier and far more powerful. Only the molecules
+	need to add dimensions: reacs remain fixed through the volume.
+	I need to then add the diffusive calculations.
+
+
+Added in ZombieReac implementation.
