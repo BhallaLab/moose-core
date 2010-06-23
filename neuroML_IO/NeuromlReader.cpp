@@ -34,9 +34,9 @@ void NeuromlReader::readModel( string filename,Id location )
    for ( unsigned int i = 0; i < pathUtil.size(); ++i )
    {
 	paths.push_back( pathUtil.getPath( i ) );
-	cout << "path is : " << pathUtil.getPath( i ) << endl;
+	//cout << "path is : " << pathUtil.getPath( i ) << endl;
    }
-   cout << "path size : " << pathUtil.size() << endl;
+   //cout << "path size : " << pathUtil.size() << endl;
    NBase::setPaths( paths );
    NBase nb;   
    ncl_= nb.readNeuroML (filename);
@@ -626,6 +626,10 @@ void NeuromlReader::setupSynChannels(map< string,vector<string> > &groupcableMap
 	static const Finfo* synEkFinfo = synchanCinfo->findFinfo( "Ek" );
 	static const Finfo* synTau1Finfo = synchanCinfo->findFinfo( "tau1" );
 	static const Finfo* synTau2Finfo = synchanCinfo->findFinfo( "tau2" );
+	static const Cinfo* mgblockCinfo = initMg_blockCinfo();
+	static const Finfo* CMgFinfo = mgblockCinfo->findFinfo( "CMg" );
+	static const Finfo* KMg_AFinfo = mgblockCinfo->findFinfo( "KMg_A" );
+	static const Finfo* KMg_BFinfo = mgblockCinfo->findFinfo( "KMg_B" );
 	map< string,vector<string> >::iterator cmap_iter;
     	map< string,vector<string> >::iterator smap_iter; 
 	if ( numsynchans != 0 ){
@@ -643,6 +647,22 @@ void NeuromlReader::setupSynChannels(map< string,vector<string> > &groupcableMap
 		::set< double >( synchannel_, synTau2Finfo, tau2 );
 		double ek = synchl->getReversal_Potential();
 		::set< double >( synchannel_, synEkFinfo, ek );
+		bool isblock = synchl->isMgblock();
+		if ( isblock == true ){
+			string blockpath = "/library/"+name;
+			Id blockid(blockpath);
+			mgblock_ = Neutral::create( "Mg_block","block",blockid,Id::scratchId() );
+			double mgconc = synchl->getMgConc();
+			double eta = synchl->getEta();
+			double gamma = synchl->getGamma();
+			double KMg_A = 1.0/eta;
+			double KMg_B = 1.0/gamma;
+			::set< double >( mgblock_, CMgFinfo, mgconc );
+			::set< double >( mgblock_, KMg_AFinfo, KMg_A );
+			::set< double >( mgblock_, KMg_BFinfo, KMg_B );
+			Eref(synchannel_).add("origChannel",mgblock_,"origChannel",ConnTainer::Default );
+			
+		}
 		std::vector< std::string > groups;
 		groups = synchl->getGroups();
 		vector< string > cId ;
@@ -672,8 +692,12 @@ void NeuromlReader::setupSynChannels(map< string,vector<string> > &groupcableMap
 			double gbar = gmax * sa;
 			::set< double >( synchannel_,synGbarFinfo,gbar );
 			Element* copyEl = synchannel_->copy(comptEl(),synchannel_->name());
-			Eref(comptEl()).add("channel",copyEl,"channel",ConnTainer::Default ); 
-		    }
+			Eref(comptEl()).add("channel",copyEl,"channel",ConnTainer::Default );
+			if ( isblock == true ){
+				Id child = Neutral::getChildByName(Eref(copyEl),"block");
+				Eref(comptEl()).add("channel",child(),"channel",ConnTainer::Default );
+			}
+		   }
 		}
 	}
 	}
