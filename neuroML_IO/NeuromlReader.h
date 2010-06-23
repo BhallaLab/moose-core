@@ -47,6 +47,7 @@ class NeuromlReader
 		Element* synchannel_;
 		Element* leak_;
 		Element* ionPool_;
+		Element* mgblock_;
 		static const double PI;
 		map< string,Id > segMap_;
 		map< string,string > NMsegMap_;
@@ -61,5 +62,6 @@ extern const Cinfo* initLeakageCinfo();
 extern const Cinfo* initSynChanCinfo();
 extern const Cinfo* initCaConcCinfo();
 extern const Cinfo* initInterpolCinfo();
+extern const Cinfo* initMg_blockCinfo();
 #endif // _NEUROMLREADER_H
 
