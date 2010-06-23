@@ -6469,4 +6469,12 @@ Working on this. Mostly OK, except how do we decide what kind of DataHandler
 to build when unzombifying an Element? The preliminary code is in 
 ZombieMol.cpp and Element.cpp. Got the zombify stuff set up. Checkin 1912.
 
-Put in zombify stuff in Reac, Enz and MMenz.
+Put in zombify stuff in Reac, Enz and MMenz. Checkin 1913.
+
+Other part of zombification: Scan path and figure out stoichiometry matrix
+from messages.
+============================================================================
+23 June 2010
+
+
+============================================================================

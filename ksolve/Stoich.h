@@ -22,8 +22,8 @@ class Stoich: public Data
 		void setOneWay( bool v );
 		bool getOneWay() const;
 
-		void setPath( string v );
-		string getPath() const;
+		void setPath( Eref e, const Qinfo* q, string v );
+		string getPath( Eref e, const Qinfo* q ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
@@ -59,6 +59,12 @@ class Stoich: public Data
 		 * them.
 		 */
 		unsigned int objMapStart_;
+		
+		/**
+		 * Number of variable molecules that the solver deals with.
+		 *
+		 */
+		unsigned int numVarMols_;
 };
 
 #endif	// _STOICH_H
