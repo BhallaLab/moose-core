@@ -7,9 +7,9 @@
 // Maintainer: 
 // Created: Fri Apr  3 17:52:55 2009 (+0530)
 // Version: 
-// Last-Updated: Mon May 31 17:37:52 2010 (+0530)
+// Last-Updated: Wed Jun 23 17:43:27 2010 (+0530)
 //           By: Subhasis Ray
-//     Update #: 33
+//     Update #: 34
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -92,6 +92,7 @@ class IzhikevichNrn
     double initU_;
     double sum_inject_;
     double Im_;
+    double savedVm_;
 };
 #endif
 
