@@ -450,7 +450,7 @@
 	</mml:cables>
     <!--Adding the biophysical parameters-->
         <biophysics units="SI Units">
-	  <bio:mechanism name="LeakConductance" type="Channel Mechanism" passive_conductance="true">
+          <bio:mechanism name="LeakConductance" type="Channel Mechanism" passive_conductance="true">
                 <bio:parameter name="e" value=" -0.06">
                     <bio:group>all</bio:group>
                 </bio:parameter>
@@ -461,39 +461,39 @@
           <bio:mechanism name="CaPool" type="Ion Concentration">
              <bio:parameter name="specific_current_scaling_factor" value="8.96e-3">
                 <bio:group>lat_14_3</bio:group>
-		<bio:group>lat_14_4</bio:group>
-		<bio:group>lat_14_5</bio:group>
-		<bio:group>lat_13_1</bio:group>
-		<bio:group>lat_11_4</bio:group>
-		<bio:group>lat_11_3</bio:group>
-		<bio:group>lat_14_2</bio:group>
-		<bio:group>lat_14_1</bio:group>
-		<bio:group>lat_13_2</bio:group>
-		<bio:group>lat_15_2</bio:group>
-		<bio:group>lat_14_11</bio:group>
-		<bio:group>lat_14_10</bio:group>
-		<bio:group>lat_15_1</bio:group>
-		<bio:group>lat_14_12</bio:group>
-		<bio:group>lat_14_7</bio:group>
-		<bio:group>lat_14_6</bio:group>
-		<bio:group>lat_14_9</bio:group>
-		<bio:group>lat_14_8</bio:group>
-		<bio:group>apical_13</bio:group>
-		<bio:group>basal_7</bio:group>
-		<bio:group>basal_6</bio:group>
-		<bio:group>apical_12</bio:group>
-		<bio:group>apical_11</bio:group>
-		<bio:group>basal_3</bio:group>
-		<bio:group>basal_2</bio:group>
-		<bio:group>basal_5</bio:group>
-		<bio:group>apical_17</bio:group>
-		<bio:group>apical_18</bio:group>
-		<bio:group>lat_11_1</bio:group>
-		<bio:group>lat_11_2</bio:group>
-		<bio:group>apical_14</bio:group>
-		<bio:group>basal_4</bio:group>
-		<bio:group>apical_16</bio:group>
-		<bio:group>apical_15</bio:group>
+                <bio:group>lat_14_4</bio:group>
+                <bio:group>lat_14_5</bio:group>
+                <bio:group>lat_13_1</bio:group>
+                <bio:group>lat_11_4</bio:group>
+                <bio:group>lat_11_3</bio:group>
+                <bio:group>lat_14_2</bio:group>
+                <bio:group>lat_14_1</bio:group>
+                <bio:group>lat_13_2</bio:group>
+                <bio:group>lat_15_2</bio:group>
+                <bio:group>lat_14_11</bio:group>
+                <bio:group>lat_14_10</bio:group>
+                <bio:group>lat_15_1</bio:group>
+                <bio:group>lat_14_12</bio:group>
+                <bio:group>lat_14_7</bio:group>
+                <bio:group>lat_14_6</bio:group>
+                <bio:group>lat_14_9</bio:group>
+                <bio:group>lat_14_8</bio:group>
+                <bio:group>apical_13</bio:group>
+                <bio:group>basal_7</bio:group>
+                <bio:group>basal_6</bio:group>
+                <bio:group>apical_12</bio:group>
+                <bio:group>apical_11</bio:group>
+                <bio:group>basal_3</bio:group>
+                <bio:group>basal_2</bio:group>
+                <bio:group>basal_5</bio:group>
+                <bio:group>apical_17</bio:group>
+                <bio:group>apical_18</bio:group>
+                <bio:group>lat_11_1</bio:group>
+                <bio:group>lat_11_2</bio:group>
+                <bio:group>apical_14</bio:group>
+                <bio:group>basal_4</bio:group>
+                <bio:group>apical_16</bio:group>
+                <bio:group>apical_15</bio:group>
              </bio:parameter>
            </bio:mechanism>
            <bio:mechanism name="CaPool" type="Ion Concentration">
@@ -511,61 +511,77 @@
                     <bio:group>apical_10</bio:group>
                 </bio:parameter>
            </bio:mechanism>
+           <bio:mechanism name="NMDA_Ca_conc" type="Ion Concentration">
+                <bio:parameter name="specific_current_scaling_factor" value="8.96e-3">
+                      <bio:group>spine_head_14_1</bio:group>
+                      <bio:group>spine_head_14_2</bio:group>
+                      <bio:group>spine_head_14_3</bio:group>
+                      <bio:group>spine_head_14_4</bio:group>
+                      <bio:group>spine_head_14_5</bio:group>
+                      <bio:group>spine_head_14_6</bio:group>
+                      <bio:group>spine_head_14_7</bio:group>
+                      <bio:group>spine_head_14_8</bio:group>
+                      <bio:group>spine_head_14_9</bio:group>
+                      <bio:group>spine_head_14_10</bio:group>
+                      <bio:group>spine_head_14_11</bio:group>
+                      <bio:group>spine_head_14_12</bio:group>
+                </bio:parameter>
+           </bio:mechanism>            
           <bio:mechanism name="CaConductance" type="Channel Mechanism">
                 <bio:parameter name="gmax" value="50.0">
                     <bio:group>basal_7</bio:group>
-		    <bio:group>basal_2</bio:group>
-		    <bio:group>basal_3</bio:group>
+		              <bio:group>basal_2</bio:group>
+		              <bio:group>basal_3</bio:group>
                 </bio:parameter>
            </bio:mechanism>
            <bio:mechanism name="CaConductance" type="Channel Mechanism">
               <bio:parameter name="gmax" value="70.0">
                 <bio:group>apical_11</bio:group>
-		<bio:group>lat_14_9</bio:group>
-		<bio:group>lat_14_6</bio:group>
-		<bio:group>apical_13</bio:group>
-		<bio:group>lat_14_8</bio:group>
-		<bio:group>apical_12</bio:group>
-		<bio:group>apical_15</bio:group>
-		<bio:group>apical_14</bio:group>
-		<bio:group>lat_11_2</bio:group>
-		<bio:group>apical_16</bio:group>
-		<bio:group>basal_4</bio:group>
-		<bio:group>apical_17</bio:group>
-		<bio:group>basal_5</bio:group>
-		<bio:group>lat_11_1</bio:group>
-		<bio:group>apical_18</bio:group>
-		<bio:group>lat_11_4</bio:group>
-		<bio:group>lat_11_3</bio:group>
-		<bio:group>lat_14_2</bio:group>
-		<bio:group>lat_14_1</bio:group>
-		<bio:group>lat_14_3</bio:group>
-		<bio:group>lat_14_4</bio:group>
-		<bio:group>lat_14_5</bio:group>
-		<bio:group>lat_13_1</bio:group>
-		<bio:group>lat_14_10</bio:group>
-		<bio:group>lat_15_1</bio:group>
-		<bio:group>lat_14_12</bio:group>
-		<bio:group>lat_14_7</bio:group>
-		<bio:group>lat_13_2</bio:group>
-		<bio:group>lat_15_2</bio:group>
-		<bio:group>lat_14_11</bio:group>
+                <bio:group>lat_14_9</bio:group>
+                <bio:group>lat_14_6</bio:group>
+                <bio:group>apical_13</bio:group>
+                <bio:group>lat_14_8</bio:group>
+                <bio:group>apical_12</bio:group>
+                <bio:group>apical_15</bio:group>
+                <bio:group>apical_14</bio:group>
+                <bio:group>lat_11_2</bio:group>
+                <bio:group>apical_16</bio:group>
+                <bio:group>basal_4</bio:group>
+                <bio:group>apical_17</bio:group>
+                <bio:group>basal_5</bio:group>
+                <bio:group>lat_11_1</bio:group>
+                <bio:group>apical_18</bio:group>
+                <bio:group>lat_11_4</bio:group>
+                <bio:group>lat_11_3</bio:group>
+                <bio:group>lat_14_2</bio:group>
+                <bio:group>lat_14_1</bio:group>
+                <bio:group>lat_14_3</bio:group>
+                <bio:group>lat_14_4</bio:group>
+                <bio:group>lat_14_5</bio:group>
+                <bio:group>lat_13_1</bio:group>
+                <bio:group>lat_14_10</bio:group>
+                <bio:group>lat_15_1</bio:group>
+                <bio:group>lat_14_12</bio:group>
+                <bio:group>lat_14_7</bio:group>
+                <bio:group>lat_13_2</bio:group>
+                <bio:group>lat_15_2</bio:group>
+                <bio:group>lat_14_11</bio:group>
               </bio:parameter>
            </bio:mechanism>
            <bio:mechanism name="CaConductance" type="Channel Mechanism">
               <bio:parameter name="gmax" value="60.0">
-                <bio:group>spine_head_14_11</bio:group>
-		<bio:group>spine_head_14_4</bio:group>
-		<bio:group>spine_head_14_12</bio:group>
-		<bio:group>spine_head_14_9</bio:group>
-		<bio:group>spine_head_14_1</bio:group>
-		<bio:group>spine_head_14_3</bio:group>
-		<bio:group>spine_head_14_2</bio:group>
-		<bio:group>spine_head_14_10</bio:group>
-		<bio:group>spine_head_14_8</bio:group>
-		<bio:group>spine_head_14_7</bio:group>
-		<bio:group>spine_head_14_5</bio:group>
-		<bio:group>spine_head_14_6</bio:group>
+                <bio:group>spine_head_14_1</bio:group>
+                  <bio:group>spine_head_14_2</bio:group>
+                  <bio:group>spine_head_14_3</bio:group>
+                  <bio:group>spine_head_14_4</bio:group>
+                  <bio:group>spine_head_14_5</bio:group>
+                  <bio:group>spine_head_14_6</bio:group>
+                  <bio:group>spine_head_14_7</bio:group>
+                  <bio:group>spine_head_14_8</bio:group>
+                  <bio:group>spine_head_14_9</bio:group>
+                  <bio:group>spine_head_14_10</bio:group>
+                  <bio:group>spine_head_14_11</bio:group>
+                  <bio:group>spine_head_14_12</bio:group>
              </bio:parameter>
            </bio:mechanism>
            <bio:mechanism name="CaConductance" type="Channel Mechanism">
@@ -576,7 +592,7 @@
            <bio:mechanism name="CaConductance" type="Channel Mechanism">
                 <bio:parameter name="gmax" value="80.0">
                    <bio:group>basal_8</bio:group>
-		   <bio:group>apical_10</bio:group>
+                    <bio:group>apical_10</bio:group>
                 </bio:parameter>
            </bio:mechanism>
            <bio:mechanism name="CaConductance" type="Channel Mechanism">
@@ -587,91 +603,91 @@
            <bio:mechanism name="K_AHPConductance" type="Channel Mechanism">
               <bio:parameter name="gmax" value="8.0">
                 <bio:group>lat_14_7</bio:group>
-		<bio:group>lat_13_2</bio:group>
-		<bio:group>lat_14_10</bio:group>
-		<bio:group>lat_15_1</bio:group>
-		<bio:group>lat_14_12</bio:group>
-		<bio:group>lat_15_2</bio:group>
-		<bio:group>basal_3</bio:group>
-		<bio:group>basal_2</bio:group>
-		<bio:group>lat_14_11</bio:group>
-		<bio:group>apical_11</bio:group>
-		<bio:group>lat_11_2</bio:group>
-		<bio:group>apical_14</bio:group>
-		<bio:group>apical_13</bio:group>
-		<bio:group>apical_17</bio:group>
-		<bio:group>basal_4</bio:group>
-		<bio:group>basal_7</bio:group>
-		<bio:group>apical_16</bio:group>
-		<bio:group>lat_14_6</bio:group>
-		<bio:group>lat_14_9</bio:group>
-		<bio:group>apical_15</bio:group>
-		<bio:group>apical_12</bio:group>
-		<bio:group>lat_14_8</bio:group>
-		<bio:group>lat_14_3</bio:group>
-		<bio:group>lat_14_1</bio:group>
-		<bio:group>lat_14_2</bio:group>
-		<bio:group>lat_13_1</bio:group>
-		<bio:group>lat_14_5</bio:group>
-		<bio:group>apical_18</bio:group>
-		<bio:group>lat_11_1</bio:group>
-		<bio:group>basal_5</bio:group>
-		<bio:group>lat_14_4</bio:group>
-		<bio:group>lat_11_4</bio:group>
-		<bio:group>lat_11_3</bio:group>
-		<bio:group>soma</bio:group>
-		<bio:group>basal_8</bio:group>
-		<bio:group>apical_10</bio:group>
-		<bio:group>basal_6</bio:group>
+                <bio:group>lat_13_2</bio:group>
+                <bio:group>lat_14_10</bio:group>
+                <bio:group>lat_15_1</bio:group>
+                <bio:group>lat_14_12</bio:group>
+                <bio:group>lat_15_2</bio:group>
+                <bio:group>basal_3</bio:group>
+                <bio:group>basal_2</bio:group>
+                <bio:group>lat_14_11</bio:group>
+                <bio:group>apical_11</bio:group>
+                <bio:group>lat_11_2</bio:group>
+                <bio:group>apical_14</bio:group>
+                <bio:group>apical_13</bio:group>
+                <bio:group>apical_17</bio:group>
+                <bio:group>basal_4</bio:group>
+                <bio:group>basal_7</bio:group>
+                <bio:group>apical_16</bio:group>
+                <bio:group>lat_14_6</bio:group>
+                <bio:group>lat_14_9</bio:group>
+                <bio:group>apical_15</bio:group>
+                <bio:group>apical_12</bio:group>
+                <bio:group>lat_14_8</bio:group>
+                <bio:group>lat_14_3</bio:group>
+                <bio:group>lat_14_1</bio:group>
+                <bio:group>lat_14_2</bio:group>
+                <bio:group>lat_13_1</bio:group>
+                <bio:group>lat_14_5</bio:group>
+                <bio:group>apical_18</bio:group>
+                <bio:group>lat_11_1</bio:group>
+                <bio:group>basal_5</bio:group>
+                <bio:group>lat_14_4</bio:group>
+                <bio:group>lat_11_4</bio:group>
+                <bio:group>lat_11_3</bio:group>
+                <bio:group>soma</bio:group>
+                <bio:group>basal_8</bio:group>
+                <bio:group>apical_10</bio:group>
+                <bio:group>basal_6</bio:group>
             </bio:parameter>
            </bio:mechanism>
            <bio:mechanism name="K_CConductance" type="Channel Mechanism">
               <bio:parameter name="gmax" value="50.0">
-                <bio:group>lat_14_7</bio:group>
-		<bio:group>lat_13_2</bio:group>
-		<bio:group>lat_14_10</bio:group>
-		<bio:group>lat_15_1</bio:group>
-		<bio:group>lat_14_12</bio:group>
-		<bio:group>lat_15_2</bio:group>
-		<bio:group>basal_3</bio:group>
-		<bio:group>basal_2</bio:group>
-		<bio:group>lat_14_11</bio:group>
-		<bio:group>apical_11</bio:group>
-		<bio:group>lat_11_2</bio:group>
-		<bio:group>apical_14</bio:group>
-		<bio:group>apical_13</bio:group>
-		<bio:group>apical_17</bio:group>
-		<bio:group>basal_4</bio:group>
-		<bio:group>apical_16</bio:group>
-		<bio:group>lat_14_6</bio:group>
-		<bio:group>lat_14_9</bio:group>
-		<bio:group>apical_15</bio:group>
-		<bio:group>apical_12</bio:group>
-		<bio:group>lat_14_8</bio:group>
-		<bio:group>lat_14_3</bio:group>
-		<bio:group>lat_14_1</bio:group>
-		<bio:group>lat_14_2</bio:group>
-		<bio:group>lat_13_1</bio:group>
-		<bio:group>lat_14_5</bio:group>
-		<bio:group>apical_18</bio:group>
-		<bio:group>lat_11_1</bio:group>
-		<bio:group>basal_5</bio:group>
-		<bio:group>basal_7</bio:group>
-		<bio:group>lat_14_4</bio:group>
-		<bio:group>lat_11_4</bio:group>
-		<bio:group>lat_11_3</bio:group>
+                  <bio:group>lat_14_7</bio:group>
+                  <bio:group>lat_13_2</bio:group>
+                  <bio:group>lat_14_10</bio:group>
+                  <bio:group>lat_15_1</bio:group>
+                  <bio:group>lat_14_12</bio:group>
+                  <bio:group>lat_15_2</bio:group>
+                  <bio:group>basal_3</bio:group>
+                  <bio:group>basal_2</bio:group>
+                  <bio:group>lat_14_11</bio:group>
+                  <bio:group>apical_11</bio:group>
+                  <bio:group>lat_11_2</bio:group>
+                  <bio:group>apical_14</bio:group>
+                  <bio:group>apical_13</bio:group>
+                  <bio:group>apical_17</bio:group>
+                  <bio:group>basal_4</bio:group>
+                  <bio:group>apical_16</bio:group>
+                  <bio:group>lat_14_6</bio:group>
+                  <bio:group>lat_14_9</bio:group>
+                  <bio:group>apical_15</bio:group>
+                  <bio:group>apical_12</bio:group>
+                  <bio:group>lat_14_8</bio:group>
+                  <bio:group>lat_14_3</bio:group>
+                  <bio:group>lat_14_1</bio:group>
+                  <bio:group>lat_14_2</bio:group>
+                  <bio:group>lat_13_1</bio:group>
+                  <bio:group>lat_14_5</bio:group>
+                  <bio:group>apical_18</bio:group>
+                  <bio:group>lat_11_1</bio:group>
+                  <bio:group>basal_5</bio:group>
+                  <bio:group>basal_7</bio:group>
+                  <bio:group>lat_14_4</bio:group>
+                  <bio:group>lat_11_4</bio:group>
+                  <bio:group>lat_11_3</bio:group>
              </bio:parameter>
            </bio:mechanism>
            <bio:mechanism name="K_CConductance" type="Channel Mechanism">
                 <bio:parameter name="gmax" value="100.0">
                     <bio:group>soma</bio:group>
-		    <bio:group>basal_6</bio:group>
+		                <bio:group>basal_6</bio:group>
                 </bio:parameter>
            </bio:mechanism>
            <bio:mechanism name="K_CConductance" type="Channel Mechanism">
                 <bio:parameter name="gmax" value="200.0">
                     <bio:group>apical_10</bio:group>
-		    <bio:group>basal_8</bio:group>
+		                <bio:group>basal_8</bio:group>
                 </bio:parameter>
            </bio:mechanism>
            <bio:mechanism name="NaConductance" type="Channel Mechanism">
@@ -682,7 +698,7 @@
            <bio:mechanism name="NaConductance" type="Channel Mechanism">
                 <bio:parameter name="gmax" value="150.0">
                     <bio:group>apical_10</bio:group>
-		    <bio:group>basal_8</bio:group>
+                    <bio:group>basal_8</bio:group>
                 </bio:parameter>
            </bio:mechanism>
            <bio:mechanism name="NaConductance" type="Channel Mechanism">
@@ -693,7 +709,7 @@
            <bio:mechanism name="NaConductance" type="Channel Mechanism">
                 <bio:parameter name="gmax" value="40.0">
                      <bio:group>apical_11</bio:group>
-		     <bio:group>lat_11_1</bio:group>
+                    <bio:group>lat_11_1</bio:group>
                 </bio:parameter>
            </bio:mechanism>
            <bio:mechanism name="NaConductance" type="Channel Mechanism">
@@ -704,38 +720,38 @@
            <bio:mechanism name="NaConductance" type="Channel Mechanism">
                 <bio:parameter name="gmax" value="25.0">
                     <bio:group>lat_13_2</bio:group>
-		    <bio:group>apical_13</bio:group>
-		    <bio:group>lat_13_1</bio:group>
+                    <bio:group>apical_13</bio:group>
+                    <bio:group>lat_13_1</bio:group>
                 </bio:parameter>
            </bio:mechanism>
            <bio:mechanism name="NaConductance" type="Channel Mechanism">
               <bio:parameter name="gmax" value="20.0">
                 <bio:group>lat_14_3</bio:group>
-		<bio:group>apical_15</bio:group>
-		<bio:group>lat_14_8</bio:group>
-		<bio:group>apical_16</bio:group>
-		<bio:group>lat_14_6</bio:group>
-		<bio:group>lat_14_9</bio:group>
-		<bio:group>lat_14_1</bio:group>
-		<bio:group>lat_11_4</bio:group>
-		<bio:group>lat_11_3</bio:group>
-		<bio:group>lat_14_7</bio:group>
-		<bio:group>lat_14_2</bio:group>
-		<bio:group>lat_14_5</bio:group>
-		<bio:group>lat_14_10</bio:group>
-		<bio:group>lat_15_2</bio:group>
-		<bio:group>lat_14_11</bio:group>
-		<bio:group>lat_15_1</bio:group>
-		<bio:group>lat_14_12</bio:group>
-		<bio:group>lat_11_2</bio:group>
-		<bio:group>apical_14</bio:group>
-		<bio:group>lat_14_4</bio:group>
-           </bio:parameter>
-           </bio:mechanism>
+                <bio:group>apical_15</bio:group>
+                <bio:group>lat_14_8</bio:group>
+                <bio:group>apical_16</bio:group>
+                <bio:group>lat_14_6</bio:group>
+                <bio:group>lat_14_9</bio:group>
+                <bio:group>lat_14_1</bio:group>
+                <bio:group>lat_11_4</bio:group>
+                <bio:group>lat_11_3</bio:group>
+                <bio:group>lat_14_7</bio:group>
+                <bio:group>lat_14_2</bio:group>
+                <bio:group>lat_14_5</bio:group>
+                <bio:group>lat_14_10</bio:group>
+                <bio:group>lat_15_2</bio:group>
+                <bio:group>lat_14_11</bio:group>
+                <bio:group>lat_15_1</bio:group>
+                <bio:group>lat_14_12</bio:group>
+                <bio:group>lat_11_2</bio:group>
+                <bio:group>apical_14</bio:group>
+                <bio:group>lat_14_4</bio:group>
+            </bio:parameter>
+          </bio:mechanism>
            <bio:mechanism name="NaConductance" type="Channel Mechanism">
                 <bio:parameter name="gmax" value="15.0">
                     <bio:group>apical_18</bio:group>
-		    <bio:group>apical_17</bio:group>
+		                <bio:group>apical_17</bio:group>
                 </bio:parameter>
            </bio:mechanism>
            <bio:mechanism name="K_DRConductance" type="Channel Mechanism">
@@ -745,41 +761,41 @@
            </bio:mechanism>
            <bio:mechanism name="K_DRConductance" type="Channel Mechanism">
               <bio:parameter name="gmax" value="50.0">
-		<bio:group>lat_14_9</bio:group>
-		<bio:group>lat_14_6</bio:group>
-		<bio:group>lat_11_1</bio:group>
-		<bio:group>apical_15</bio:group>
-		<bio:group>lat_14_8</bio:group>
-		<bio:group>apical_16</bio:group>
-		<bio:group>lat_15_1</bio:group>
-		<bio:group>lat_14_10</bio:group>
-		<bio:group>lat_14_5</bio:group>
-		<bio:group>lat_14_11</bio:group>
-		<bio:group>lat_15_2</bio:group>
-		<bio:group>lat_14_2</bio:group>
-		<bio:group>lat_11_4</bio:group>
-		<bio:group>lat_14_1</bio:group>
-		<bio:group>lat_14_7</bio:group>
-		<bio:group>lat_11_3</bio:group>
-		<bio:group>apical_13</bio:group>
-		<bio:group>lat_13_2</bio:group>
-		<bio:group>lat_14_4</bio:group>
-		<bio:group>apical_11</bio:group>
-		<bio:group>apical_12</bio:group>
-		<bio:group>lat_14_12</bio:group>
-		<bio:group>apical_18</bio:group>
-		<bio:group>apical_17</bio:group>
-		<bio:group>lat_13_1</bio:group>
-		<bio:group>apical_14</bio:group>
-		<bio:group>lat_14_3</bio:group>
-		<bio:group>lat_11_2</bio:group>
-		<bio:group>basal_7</bio:group>
+                <bio:group>lat_14_9</bio:group>
+                <bio:group>lat_14_6</bio:group>
+                <bio:group>lat_11_1</bio:group>
+                <bio:group>apical_15</bio:group>
+                <bio:group>lat_14_8</bio:group>
+                <bio:group>apical_16</bio:group>
+                <bio:group>lat_15_1</bio:group>
+                <bio:group>lat_14_10</bio:group>
+                <bio:group>lat_14_5</bio:group>
+                <bio:group>lat_14_11</bio:group>
+                <bio:group>lat_15_2</bio:group>
+                <bio:group>lat_14_2</bio:group>
+                <bio:group>lat_11_4</bio:group>
+                <bio:group>lat_14_1</bio:group>
+                <bio:group>lat_14_7</bio:group>
+                <bio:group>lat_11_3</bio:group>
+                <bio:group>apical_13</bio:group>
+                <bio:group>lat_13_2</bio:group>
+                <bio:group>lat_14_4</bio:group>
+                <bio:group>apical_11</bio:group>
+                <bio:group>apical_12</bio:group>
+                <bio:group>lat_14_12</bio:group>
+                <bio:group>apical_18</bio:group>
+                <bio:group>apical_17</bio:group>
+                <bio:group>lat_13_1</bio:group>
+                <bio:group>apical_14</bio:group>
+                <bio:group>lat_14_3</bio:group>
+                <bio:group>lat_11_2</bio:group>
+                <bio:group>basal_7</bio:group>
           </bio:parameter>
            </bio:mechanism>
            <bio:mechanism name="K_DRConductance" type="Channel Mechanism">
                 <bio:parameter name="gmax" value="100.0">
                      <bio:group>apical_10</bio:group>
-		     <bio:group>basal_8</bio:group>
+		                  <bio:group>basal_8</bio:group>
                 </bio:parameter>
            </bio:mechanism>
            <bio:mechanism name="K_DRConductance" type="Channel Mechanism">
@@ -792,54 +808,98 @@
                     <bio:group>soma</bio:group>
 		</bio:parameter>
            </bio:mechanism>
-	  <bio:mechanism name="K_AConductance" type="Channel Mechanism">
-              <bio:parameter name="gmax" value="100.0">
+	        <bio:mechanism name="K_AConductance" type="Channel Mechanism">
+            <bio:parameter name="gmax" value="100.0">
                 <bio:group>lat_14_4</bio:group>
-		<bio:group>lat_13_2</bio:group>
-		<bio:group>apical_11</bio:group>
-		<bio:group>lat_13_1</bio:group>
-		<bio:group>lat_14_1</bio:group>
-		<bio:group>lat_14_7</bio:group>
-		<bio:group>lat_11_3</bio:group>
-		<bio:group>apical_13</bio:group>
-		<bio:group>apical_14</bio:group>
-		<bio:group>lat_14_3</bio:group>
-		<bio:group>lat_11_2</bio:group>
-		<bio:group>apical_12</bio:group>
-		<bio:group>lat_14_12</bio:group>
-		<bio:group>apical_18</bio:group>
-		<bio:group>apical_17</bio:group>
-		<bio:group>lat_14_9</bio:group>
-		<bio:group>lat_14_8</bio:group>
-		<bio:group>apical_16</bio:group>
-		<bio:group>lat_15_1</bio:group>
-		<bio:group>lat_14_6</bio:group>
-		<bio:group>lat_11_1</bio:group>
-		<bio:group>lat_14_11</bio:group>
-		<bio:group>lat_15_2</bio:group>
-		<bio:group>lat_14_2</bio:group>
-		<bio:group>apical_15</bio:group>
-		<bio:group>lat_14_10</bio:group>
-		<bio:group>lat_11_4</bio:group>
-		<bio:group>lat_14_5</bio:group>
+                <bio:group>lat_13_2</bio:group>
+                <bio:group>apical_11</bio:group>
+                <bio:group>lat_13_1</bio:group>
+                <bio:group>lat_14_1</bio:group>
+                <bio:group>lat_14_7</bio:group>
+                <bio:group>lat_11_3</bio:group>
+                <bio:group>apical_13</bio:group>
+                <bio:group>apical_14</bio:group>
+                <bio:group>lat_14_3</bio:group>
+                <bio:group>lat_11_2</bio:group>
+                <bio:group>apical_12</bio:group>
+                <bio:group>lat_14_12</bio:group>
+                <bio:group>apical_18</bio:group>
+                <bio:group>apical_17</bio:group>
+                <bio:group>lat_14_9</bio:group>
+                <bio:group>lat_14_8</bio:group>
+                <bio:group>apical_16</bio:group>
+                <bio:group>lat_15_1</bio:group>
+                <bio:group>lat_14_6</bio:group>
+                <bio:group>lat_11_1</bio:group>
+                <bio:group>lat_14_11</bio:group>
+                <bio:group>lat_15_2</bio:group>
+                <bio:group>lat_14_2</bio:group>
+                <bio:group>apical_15</bio:group>
+                <bio:group>lat_14_10</bio:group>
+                <bio:group>lat_11_4</bio:group>
+                <bio:group>lat_14_5</bio:group>
              </bio:parameter>
            </bio:mechanism>
           <bio:spec_capacitance>
-                <bio:parameter value="0.03">
-                    <bio:group>all</bio:group>
-                </bio:parameter>
+              <bio:parameter value="0.03">
+                  <bio:group>all</bio:group>
+              </bio:parameter>
             </bio:spec_capacitance>
-            <bio:spec_axial_resistance>
-                <bio:parameter value="1.0">
-                    <bio:group>all</bio:group>
-                </bio:parameter>
+          <bio:spec_axial_resistance>
+              <bio:parameter value="1.0">
+                  <bio:group>all</bio:group>
+              </bio:parameter>
             </bio:spec_axial_resistance>
-            <bio:init_memb_potential>
-                <bio:parameter value="-0.06">
-                    <bio:group>all</bio:group>
-                </bio:parameter>
+          <bio:init_memb_potential>
+              <bio:parameter value="-0.06">
+                  <bio:group>all</bio:group>
+              </bio:parameter>
             </bio:init_memb_potential>
         </biophysics>
-    
-     </cell>
-</cells></neuroml>
+      <connectivity>
+          <net:potential_syn_loc synapse_type="NMDA" >
+                  <net:group>spine_head_14_1</net:group>
+                  <net:group>spine_head_14_2</net:group>
+                  <net:group>spine_head_14_3</net:group>
+                  <net:group>spine_head_14_4</net:group>
+                  <net:group>spine_head_14_5</net:group>
+                  <net:group>spine_head_14_6</net:group>
+                  <net:group>spine_head_14_7</net:group>
+                  <net:group>spine_head_14_8</net:group>
+                  <net:group>spine_head_14_9</net:group>
+                  <net:group>spine_head_14_10</net:group>
+                  <net:group>spine_head_14_11</net:group>
+                  <net:group>spine_head_14_12</net:group>
+        </net:potential_syn_loc>
+          <net:potential_syn_loc synapse_type="Ca_NMDA" >
+                <net:group>spine_head_14_1</net:group>
+                <net:group>spine_head_14_2</net:group>
+                <net:group>spine_head_14_3</net:group>
+                <net:group>spine_head_14_4</net:group>
+                <net:group>spine_head_14_5</net:group>
+                <net:group>spine_head_14_6</net:group>
+                <net:group>spine_head_14_7</net:group>
+                <net:group>spine_head_14_8</net:group>
+                <net:group>spine_head_14_9</net:group>
+                <net:group>spine_head_14_10</net:group>
+                <net:group>spine_head_14_11</net:group>
+                <net:group>spine_head_14_12</net:group>
+          </net:potential_syn_loc>
+          <net:potential_syn_loc synapse_type="glu" >
+                <net:group>spine_head_14_1</net:group>
+                <net:group>spine_head_14_2</net:group>
+                <net:group>spine_head_14_3</net:group>
+                <net:group>spine_head_14_4</net:group>
+                <net:group>spine_head_14_5</net:group>
+                <net:group>spine_head_14_6</net:group>
+                <net:group>spine_head_14_7</net:group>
+                <net:group>spine_head_14_8</net:group>
+                <net:group>spine_head_14_9</net:group>
+                <net:group>spine_head_14_10</net:group>
+                <net:group>spine_head_14_11</net:group>
+                <net:group>spine_head_14_12</net:group>
+          </net:potential_syn_loc>
+      </connectivity>
+    </cell>
+</cells>
+</neuroml>
