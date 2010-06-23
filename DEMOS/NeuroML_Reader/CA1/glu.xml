@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<channelml xmlns="http://morphml.org/channelml/schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:meta="http://morphml.org/metadata/schema" xsi:schemaLocation="http://morphml.org/channelml/schema  ../../Schemata/v1.6/Level2/ChannelML_v1.6.xsd" units="SI Units">
+    <synapse_type name="glu">
+        <status value="stable"/>
+        <doub_exp_syn max_conductance="700" rise_time="0.002" decay_time="0.009" reversal_potential="0"/>
+     </synapse_type>
+  </channelml>
