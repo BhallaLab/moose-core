@@ -10,9 +10,9 @@
 // Maintainer: 
 // Created: Fri Apr  3 18:00:50 2009 (+0530)
 // Version: 
-// Last-Updated: Fri Jun 11 13:49:37 2010 (+0530)
+// Last-Updated: Wed Jun 23 17:44:55 2010 (+0530)
 //           By: Subhasis Ray
-//     Update #: 257
+//     Update #: 273
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -207,7 +207,8 @@ IzhikevichNrn::IzhikevichNrn():
         initVm_(-0.065),// -65 mV
         initU_(-13.0), 
         sum_inject_(0.0),
-        Im_(0.0)
+        Im_(0.0),
+        savedVm_(-0.065)
 {}
 
 void IzhikevichNrn::setA(const Conn* conn, double value)
@@ -269,7 +270,7 @@ double IzhikevichNrn::getU(Eref e)
 
 double IzhikevichNrn::getVm(Eref e)
 {
-    return static_cast<IzhikevichNrn*>(e.data())->Vm_;
+    return static_cast<IzhikevichNrn*>(e.data())->savedVm_;
 }                             
 
 void IzhikevichNrn::setVmax(const Conn* conn, double value)    
@@ -346,23 +347,25 @@ void IzhikevichNrn::processFunc(const Conn* conn, ProcInfo proc)
 {
     double dt = proc->dt_;
     IzhikevichNrn* instance = static_cast<IzhikevichNrn*>(conn->data());
-    if (instance->Vm_ > instance->Vmax_){
+
+    instance->Vm_ += dt * ((instance->alpha_ * instance->Vm_ + instance->beta_) * instance->Vm_
+                           + instance->gamma_ - instance->u_ + 1e3 * instance->Rm_ * instance->sum_inject_);
+    instance->u_ += dt * instance->a_ * (instance->b_ * instance->Vm_ - instance->u_);
+    instance->Im_ = instance->sum_inject_;
+    instance->sum_inject_ = 0.0;
+    // This check is to ensure that checking Vm field will always
+    // return Vmax when Vm actually crosses Vmax.
+    if (instance->Vm_ >= instance->Vmax_){
         instance->Vm_ = instance->c_;
         instance->u_ += instance->d_;
+        instance->savedVm_ = instance->Vmax_;
         send1<double>(conn->target(), VmSrcSlot, instance->Vmax_);
         send1<double>(conn->target(), eventSrcSlot, proc->currTime_);
     } else {
-        double prevVm = instance->Vm_;
-        instance->Vm_ += dt * ((instance->alpha_ * instance->Vm_ + instance->beta_) * instance->Vm_
-                               + instance->gamma_ - instance->u_ + 1e3 * instance->Rm_ * instance->sum_inject_);
-        // (c * Rm * I) has unit of mV/ms. If I is in nA, Rm
-        // is 1e6 Ohm, then c has to be 1 ms^-1 = 1e3 s^-1, hence 1e3 * instance->Rm_ * instance->sum_inject_        
-        instance->u_ += dt * instance->a_ * (instance->b_ * prevVm - instance->u_);
+        instance->savedVm_ = instance->Vm_;
         send1<double>(conn->target(), VmSrcSlot, instance->Vm_);
-
     }
-    instance->Im_ = instance->sum_inject_;
-    instance->sum_inject_ = 0.0;
+ 
 }
 
 void IzhikevichNrn::reinitFunc(const Conn* conn, ProcInfo proc)

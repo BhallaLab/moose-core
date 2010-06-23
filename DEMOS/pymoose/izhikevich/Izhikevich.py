@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri May 28 14:42:33 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Jun 22 14:10:19 2010 (+0530)
+# Last-Updated: Wed Jun 23 18:17:06 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 889
+#     Update #: 910
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -70,26 +70,26 @@ class IzhikevichDemo:
     # 
     # They are all in whatever unit they were in the paper. Just before use we convert them to SI.
     parameters = {
-        "tonic_spiking":    ('A', 0.02  ,    0.2  ,   -65.0,     6.0  ,      14.0,      -70.0,  100.0), # Fig. 1.A
-        "phasic_spiking":   ('B', 0.02  ,    0.25 ,   -65.0,     6.0  ,      0.5,       -64.0,  200.0), # Fig. 1.B
-        "tonic_bursting":   ('C', 0.02  ,    0.2  ,   -50.0,     2.0  ,      15.0,      -70.0,  220.0), # Fig. 1.C
-        "phasic_bursting":  ('D', 0.02  ,    0.25 ,   -55.0,     0.05 ,      0.6,       -64.0,  200.0), # Fig. 1.D
-        "mixed_mode":       ('E', 0.02  ,    0.2  ,   -55.0,     4.0   ,     10.0,      -70.0,  160.0), # Fig. 1.E
-        "spike_freq_adapt": ('F', 0.01  ,    0.2  ,   -65.0,     8.0   ,     30.0,      -70.0,  85.0),  # Fig. 1.F # spike frequency adaptation
-        "Class_1":          ('G', 0.02  ,    -0.1 ,   -55.0,     6.0   ,     0,         -60.0,  300.0), # Fig. 1.G # Spikining Frequency increases with input strength
-        "Class_2":          ('H', 0.2   ,    0.26 ,   -65.0,     0.0   ,     0,         -64.0,  300.0), # Fig. 1.H # Produces high frequency spikes  
-        "spike_latency":    ('I', 0.02  ,    0.2  ,   -65.0,     6.0   ,     7.0,       -70.0,  100.0), # Fig. 1.I
-        "subthresh_osc":    ('J', 0.05  ,    0.26 ,   -60.0,     0.0   ,     0,         -62.0,  200.0), # Fig. 1.J # subthreshold oscillations
-        "resonator":        ('K', 0.1   ,    0.26 ,   -60.0,     -1.0  ,     0,         -62.0,  400.0), # Fig. 1.K 
-        "integrator":       ('L', 0.02  ,    -0.1 ,   -55.0,     6.0   ,     0,         -60.0,  100.0), # Fig. 1.L 
-        "rebound_spike":    ('M', 0.03  ,    0.25 ,   -60.0,     4.0   ,     -15,       -64.0,  200.0), # Fig. 1.M 
-        "rebound_burst":    ('N', 0.03  ,    0.25 ,   -52.0,     0.0   ,     -15,       -64.0,  200.0), # Fig. 1.N 
-        "thresh_var":       ('O', 0.03  ,    0.25 ,   -60.0,     4.0   ,     0,         -64.0,  100.0), # Fig. 1.O # threshold variability
-        "bistable":         ('P', 0.1   ,    0.26  ,  -60.0,     0.0   ,     1.24,      -61.0,  300.0), # Fig. 1.P 
-        "DAP":              ('Q', 1.15   ,    0.2  ,   -60.0,     -21.0 ,     20,        -70.0,  50.0), # Fig. 1.Q # Depolarizing after-potential - a had to be increased in order to reproduce the figure
-        "accommodation":    ('R', 0.02  ,    1.0  ,   -55.0,     4.0   ,     0,         -65.0,  400.0), # Fig. 1.R 
-        "iispike":          ('S', -0.02 ,    -1.0 ,   -60.0,     8.0   ,     75.0,      -63.8,  350.0), # Fig. 1.S # inhibition-induced spiking
-        "iiburst":          ('T', -0.026,    -1.0 ,   -45.0,     0.0   ,     75.0,      -63.8,  350.0)  # Fig. 1.T # inhibition-induced bursting
+        "tonic_spiking":    ['A', 0.02  ,    0.2  ,   -65.0,     6.0  ,      14.0,      -70.0,  100.0], # Fig. 1.A
+        "phasic_spiking":   ['B', 0.02  ,    0.25 ,   -65.0,     6.0  ,      0.5,       -64.0,  200.0], # Fig. 1.B
+        "tonic_bursting":   ['C', 0.02  ,    0.2  ,   -50.0,     2.0  ,      15.0,      -70.0,  220.0], # Fig. 1.C
+        "phasic_bursting":  ['D', 0.02  ,    0.25 ,   -55.0,     0.05 ,      0.6,       -64.0,  200.0], # Fig. 1.D
+        "mixed_mode":       ['E', 0.02  ,    0.2  ,   -55.0,     4.0   ,     10.0,      -70.0,  160.0], # Fig. 1.E
+        "spike_freq_adapt": ['F', 0.01  ,    0.2  ,   -65.0,     8.0   ,     30.0,      -70.0,  85.0 ],  # Fig. 1.F # spike frequency adaptation
+        "Class_1":          ['G', 0.02  ,    -0.1 ,   -55.0,     6.0   ,     0,         -60.0,  300.0], # Fig. 1.G # Spikining Frequency increases with input strength
+        "Class_2":          ['H', 0.2   ,    0.26 ,   -65.0,     0.0   ,     0,         -64.0,  300.0], # Fig. 1.H # Produces high frequency spikes  
+        "spike_latency":    ['I', 0.02  ,    0.2  ,   -65.0,     6.0   ,     7.0,       -70.0,  100.0], # Fig. 1.I
+        "subthresh_osc":    ['J', 0.05  ,    0.26 ,   -60.0,     0.0   ,     0,         -62.0,  200.0], # Fig. 1.J # subthreshold oscillations
+        "resonator":        ['K', 0.1   ,    0.26 ,   -60.0,     -1.0  ,     0,         -62.0,  400.0], # Fig. 1.K 
+        "integrator":       ['L', 0.02  ,    -0.1 ,   -55.0,     6.0   ,     0,         -60.0,  100.0], # Fig. 1.L 
+        "rebound_spike":    ['M', 0.03  ,    0.25 ,   -60.0,     4.0   ,     -15,       -64.0,  200.0], # Fig. 1.M 
+        "rebound_burst":    ['N', 0.03  ,    0.25 ,   -52.0,     0.0   ,     -15,       -64.0,  200.0], # Fig. 1.N 
+        "thresh_var":       ['O', 0.03  ,    0.25 ,   -60.0,     4.0   ,     0,         -64.0,  100.0], # Fig. 1.O # threshold variability
+        "bistable":         ['P', 0.1   ,    0.26  ,  -60.0,     0.0   ,     1.24,      -61.0,  300.0], # Fig. 1.P 
+        "DAP":              ['Q', 1.15   ,    0.2  ,   -60.0,     -21.0 ,     20,        -70.0,  50.0], # Fig. 1.Q # Depolarizing after-potential - a had to be increased in order to reproduce the figure
+        "accommodation":    ['R', 0.02  ,    1.0  ,   -55.0,     4.0   ,     0,         -65.0,  400.0], # Fig. 1.R 
+        "iispike":          ['S', -0.02 ,    -1.0 ,   -60.0,     8.0   ,     75.0,      -63.8,  350.0], # Fig. 1.S # inhibition-induced spiking
+        "iiburst":          ['T', -0.026,    -1.0 ,   -45.0,     0.0   ,     75.0,      -63.8,  350.0]  # Fig. 1.T # inhibition-induced bursting
     }
 
     documentation = {
@@ -119,11 +119,12 @@ class IzhikevichDemo:
         """Initialize the object."""
         self.neurons = {}
         self.Vm_tables = {}
+        self.u_tables = {}
         self.inject_tables = {}
         self.inputs = {}
         self.context = moose.PyMooseBase.getContext()
         self.simtime = 100e-3
-        self.dt = 1e-5
+        self.dt = 0.25e-3
         self.steps = int(self.simtime/self.dt)
         self.context.setClock(0, self.dt)
         self.context.setClock(1, self.dt)
@@ -146,11 +147,16 @@ class IzhikevichDemo:
     def run(self, key):
         try:
             Vm = self.Vm_tables[key]
+            u = self.u_tables[key]
         except KeyError, e:
             Vm = moose.Table(key + '_Vm')
             Vm.stepMode = 3
             Vm.connect('inputRequest', self.neurons[key], 'Vm')
+            utable = moose.Table(key + '_u')
+            utable.stepMode = 3
+            utable.connect('inputRequest', self.neurons[key], 'u')
             self.Vm_tables[key] = Vm
+            self.u_tables[key] = utable
         try:
             Im = self.inject_tables[key]
         except KeyError, e:
@@ -448,6 +454,7 @@ try:
         demo = IzhikevichDemo()
         (time, Vm, Im) = demo.simulate(key)
         title(IzhikevichDemo.parameters[key][0] + '. ' + key)
+        savetxt('Vm.plot', array(Vm))
         subplot(2,1,1)
         plot(time, array(Vm))
         subplot(2,1,2)
