@@ -10,15 +10,20 @@ class SynChannelDefinition
 		double max_conductance;
 		double rise_time;
 		double decay_time;
-		double reversal_potential;	
+		double reversal_potential;
+		double conc;
+		double eta;
+		double gamma;	
 		xmlDocPtr syndocptr;
 		xmlXPathContextPtr syncxtptr;
 		xmlTextReaderPtr synrdrptr;
 		bool setsynnamespaces;
+		
 	public:
 		SynChannelDefinition():
-			setsynnamespaces(false) 
+			setsynnamespaces(false)
 		{;}
+		bool isblock;
 		void readSynChlDefinition( std::string& filename);
 		const std::string& getChannel_type();		
 		void setChannel_type(const std::string& value );
@@ -33,6 +38,13 @@ class SynChannelDefinition
 		void setDecay_Time( double value );
 		double getReversal_Potential();
 		void setReversal_Potential( double value );
+		double getMgConc();
+		void setMgConc( double value );
+		double getEta();
+		void setEta( double value );
+		double getGamma();
+		void setGamma( double value );
+		
 
 };
 class SynChannel
@@ -55,6 +67,13 @@ class SynChannel
 		void setDecay_Time( double value );
 		double getReversal_Potential();
 		void setReversal_Potential( double value );
+		double getMgConc();
+		void setMgConc( double value );
+		double getEta();
+		void setEta( double value );
+		double getGamma();
+		void setGamma( double value );
+		bool isMgblock();
 	private:
 		string type;	
 		vector< string > groups;
