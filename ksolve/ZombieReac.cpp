@@ -213,8 +213,6 @@ void ZombieReac::zombify( Element* solver, Element* orig )
 	unsigned int rateIndex = z->convertIdToReacIndex( orig->id() );
 	z->rates_[ rateIndex ] = new BidirectionalReaction( forward, reverse );
 
-	z->setKf( zer, 0, reac->getKf() );
-	z->setKb( zer, 0, reac->getKb() );
 	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
 	orig->zombieSwap( zombieReacCinfo, dh );
 }

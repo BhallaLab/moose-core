@@ -6491,6 +6491,7 @@ specified Finfos. Replaced these in ZombieReac, seems OK. Yet
 to carry through on other Zombies. Checkin 1922.
 Next: Clean up zombies. Build the stoich matrix. Run. More unit tests.
 Cleaning up ZombieReac and ZombieMMenz. Checkin 1924.
-Cleaning up ZombieMol. 
+Cleaning up ZombieMol. Checkin 1925.
+Cleaning up ZombieEnz. 
 
 ============================================================================

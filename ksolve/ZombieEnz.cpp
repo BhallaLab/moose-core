@@ -178,50 +178,78 @@ void ZombieEnz::reinit( const Eref& e, const Qinfo*q, ProcInfo* p )
 
 void ZombieEnz::setK1( Eref e, const Qinfo* q, double v )
 {
-	rates_[ convertId( e.id() ) ]->setR1( v );
+	rates_[ convertIdToReacIndex( e.id() ) ]->setR1( v );
 }
 
 double ZombieEnz::getK1( Eref e, const Qinfo* q ) const
 {
-	return rates_[ convertId( e.id() ) ]->getR1();
+	return rates_[ convertIdToReacIndex( e.id() ) ]->getR1();
 }
 
 void ZombieEnz::setK2( Eref e, const Qinfo* q, double v )
 {
-	rates_[ convertId( e.id() ) ]->setR2( v );
+	rates_[ convertIdToReacIndex( e.id() ) ]->setR2( v );
 }
 
 double ZombieEnz::getK2( Eref e, const Qinfo* q ) const
 {
-	return rates_[ convertId( e.id() ) ]->getR2();
+	return rates_[ convertIdToReacIndex( e.id() ) ]->getR2();
 }
 
 void ZombieEnz::setK3( Eref e, const Qinfo* q, double v )
 {
-	rates_[ convertId( e.id() ) + 1 ]->setR1( v );
+	rates_[ convertIdToReacIndex( e.id() ) + 1 ]->setR1( v );
 }
 
 double ZombieEnz::getK3( Eref e, const Qinfo* q ) const
 {
-	return rates_[ convertId( e.id() ) + 1 ]->getR1();
+	return rates_[ convertIdToReacIndex( e.id() ) + 1 ]->getR1();
 }
 
 //////////////////////////////////////////////////////////////
 // Utility function
 //////////////////////////////////////////////////////////////
 
-unsigned int  ZombieEnz::convertId( Id id ) const
+ZeroOrder* ZombieEnz::makeHalfReaction( 
+	Element* orig, double rate, const SrcFinfo* finfo, Id enz ) const
 {
-	unsigned int i = id.value() - objMapStart_;
-	assert( i < objMap_.size() );
-	i = objMap_[i];
-	assert( ( i + 1 ) < rates_.size() ); // enz uses two rate terms.
-	return i;
+	vector< Id > mols;
+	unsigned int numReactants = orig->getOutputs( mols, finfo ); 
+	if ( enz != Id() ) // Used to add the enz to the reactants.
+		mols.push_back( enz );
+
+	ZeroOrder* rateTerm;
+	if ( numReactants == 1 ) {
+		rateTerm = 
+			new FirstOrder( rate, &S_[ convertIdToMolIndex( mols[0] ) ] );
+	} else if ( numReactants == 2 ) {
+		rateTerm = new SecondOrder( rate,
+				&S_[ convertIdToMolIndex( mols[0] ) ], 
+				&S_[ convertIdToMolIndex( mols[1] ) ] );
+	} else if ( numReactants > 2 ) {
+		vector< const double* > v;
+		for ( unsigned int i = 0; i < numReactants; ++i ) {
+			v.push_back( &S_[ convertIdToMolIndex( mols[i] ) ] );
+		}
+		rateTerm = new NOrder( rate, v );
+	} else {
+		cout << "Error: ZombieEnz::makeHalfReaction: zero reactants\n";
+	}
+	return rateTerm;
 }
 
 // static func
 void ZombieEnz::zombify( Element* solver, Element* orig )
 {
+	static const SrcFinfo* sub = dynamic_cast< const SrcFinfo* >(
+		Enz::initCinfo()->findFinfo( "toSub" ) );
+	static const SrcFinfo* prd = dynamic_cast< const SrcFinfo* >(
+		Enz::initCinfo()->findFinfo( "toPrd" ) );
+	static const SrcFinfo* enzFinfo = dynamic_cast< const SrcFinfo* >(
+		Enz::initCinfo()->findFinfo( "toEnz" ) );
+	static const SrcFinfo* cplx = dynamic_cast< const SrcFinfo* >(
+		Enz::initCinfo()->findFinfo( "toCplx" ) );
+
 	Element temp( orig->id(), zombieEnzCinfo, solver->dataHandler() );
 	Eref zer( &temp, 0 );
 	Eref oer( orig, 0 );
@@ -229,9 +257,18 @@ void ZombieEnz::zombify( Element* solver, Element* orig )
 	ZombieEnz* z = reinterpret_cast< ZombieEnz* >( zer.data() );
 	Enz* enz = reinterpret_cast< Enz* >( oer.data() );
 
-	z->setK1( zer, 0, enz->getK1() );
-	z->setK2( zer, 0, enz->getK2() );
-	z->setK3( zer, 0, enz->getK3() );
+	vector< Id > mols;
+	unsigned int numReactants = orig->getOutputs( mols, enzFinfo ); 
+	assert( numReactants == 1 );
+
+	ZeroOrder* r1 = z->makeHalfReaction( orig, enz->getK1(), sub, mols[0] );
+	ZeroOrder* r2 = z->makeHalfReaction( orig, enz->getK2(), cplx, Id() );
+	ZeroOrder* r3 = z->makeHalfReaction( orig, enz->getK3(), cplx, Id() );
+
+	unsigned int rateIndex = z->convertIdToReacIndex( orig->id() );
+	z->rates_[ rateIndex ] = new BidirectionalReaction( r1, r2 );
+	z->rates_[ rateIndex + 1 ] = r3;
+
 	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
 	orig->zombieSwap( zombieEnzCinfo, dh );
 }

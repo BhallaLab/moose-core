@@ -38,7 +38,9 @@ class ZombieEnz: public Stoich
 		//////////////////////////////////////////////////////////////////
 		// Utility  funcs
 		//////////////////////////////////////////////////////////////////
-		unsigned int convertId ( Id id ) const;
+		ZeroOrder* makeHalfReaction( 
+			Element* orig, double rate, const SrcFinfo* finfo, Id enz )
+			const;
 		static void zombify( Element* solver, Element* orig );
 		static void unzombify( Element* zombie );
 
