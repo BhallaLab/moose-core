@@ -217,6 +217,7 @@ ZeroOrder* ZombieEnz::makeHalfReaction(
 	unsigned int numReactants = orig->getOutputs( mols, finfo ); 
 	if ( enz != Id() ) // Used to add the enz to the reactants.
 		mols.push_back( enz );
+	numReactants = mols.size();
 
 	ZeroOrder* rateTerm;
 	if ( numReactants == 1 ) {
@@ -260,14 +261,39 @@ void ZombieEnz::zombify( Element* solver, Element* orig )
 	vector< Id > mols;
 	unsigned int numReactants = orig->getOutputs( mols, enzFinfo ); 
 	assert( numReactants == 1 );
+	Id enzId = mols[0];
 
-	ZeroOrder* r1 = z->makeHalfReaction( orig, enz->getK1(), sub, mols[0] );
+	ZeroOrder* r1 = z->makeHalfReaction( orig, enz->getK1(), sub, enzId );
 	ZeroOrder* r2 = z->makeHalfReaction( orig, enz->getK2(), cplx, Id() );
 	ZeroOrder* r3 = z->makeHalfReaction( orig, enz->getK3(), cplx, Id() );
 
 	unsigned int rateIndex = z->convertIdToReacIndex( orig->id() );
 	z->rates_[ rateIndex ] = new BidirectionalReaction( r1, r2 );
 	z->rates_[ rateIndex + 1 ] = r3;
+
+	vector< unsigned int > molIndex;
+	numReactants = r1->getReactants( molIndex, z->S_ ); // Substrates
+	for ( unsigned int i = 0; i < numReactants; ++i ) {
+		int temp = z->N_.get( molIndex[i], rateIndex );
+		z->N_.set( molIndex[i], rateIndex, temp - 1 );
+	}
+	numReactants = r2->getReactants( molIndex, z->S_ );
+	assert( numReactants == 1 ); // Should only be cplx as the only product
+	unsigned int cplxMol = molIndex[0];
+	z->N_.set( cplxMol, rateIndex, 1 );
+
+	// Now assign reaction 3. The complex is the only substrate here.
+	z->N_.set( cplxMol, rateIndex + 1, -1 );
+	// For the products, we go to the prd list directly.
+	numReactants = orig->getOutputs( mols, prd ); 
+	for ( unsigned int i = 0; i < numReactants; ++i ) {
+		unsigned int j = z->convertIdToMolIndex( mols[i] );
+		int temp = z->N_.get( j, rateIndex + 1 );
+		z->N_.set( j, rateIndex + 1, temp - 1 );
+	}
+	// Enz is also a product here.
+	unsigned int enzMol = z->convertIdToMolIndex( enzId );
+	z->N_.set( enzMol, rateIndex + 1, 1 );
 
 	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
 	orig->zombieSwap( zombieEnzCinfo, dh );

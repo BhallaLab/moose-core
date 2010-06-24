@@ -185,6 +185,7 @@ void Stoich::allocateModel( const vector< Id >& elist )
 	S_.resize( numVarMols_ + numBufMols, 0.0 );
 	Sinit_.resize( numVarMols_ + numBufMols, 0.0 );
 	rates_.resize( numReac_ );
+	N_.setSize( numVarMols_ + numBufMols, numReac_ );
 }
 
 void Stoich::zombifyModel( Eref& e, const vector< Id >& elist )
@@ -238,6 +239,7 @@ void Stoich::setPath( Eref e, const Qinfo* q, string v )
 
 	cout << "Zombified " << numVarMols_ << " Molecules, " <<
 		numReac_ << " reactions\n";
+	N_.print();
 }
 
 string Stoich::getPath( Eref e, const Qinfo* q ) const

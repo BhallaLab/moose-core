@@ -170,8 +170,11 @@ void ZombieMMenz::zombify( Element* solver, Element* orig )
 		MMenz::initCinfo()->findFinfo( "enz" ) );
 	static const SrcFinfo* sub = dynamic_cast< const SrcFinfo* >(
 		MMenz::initCinfo()->findFinfo( "toSub" ) );
+	static const SrcFinfo* prd = dynamic_cast< const SrcFinfo* >(
+		MMenz::initCinfo()->findFinfo( "toPrd" ) );
 	assert( enz );
 	assert( sub );
+	assert( prd );
 	vector< Id > mols;
 
 	Element temp( orig->id(), zombieMMenzCinfo, solver->dataHandler() );
@@ -203,6 +206,18 @@ void ZombieMMenz::zombify( Element* solver, Element* orig )
 	} else {
 		cout << "Error: ZombieMMenz::zombify: No substrates\n";
 		exit( 0 );
+	}
+
+	for ( unsigned int i = 0; i < num; ++i ) {
+		unsigned int molIndex = z->convertIdToMolIndex( mols[i] );
+		int temp = z->N_.get( molIndex, rateIndex );
+		z->N_.set( molIndex, rateIndex, temp - 1 );
+	}
+	num = orig->getOutputs( mols, prd );
+	for ( unsigned int i = 0; i < num; ++i ) {
+		unsigned int molIndex = z->convertIdToMolIndex( mols[i] );
+		int temp = z->N_.get( molIndex, rateIndex );
+		z->N_.set( molIndex, rateIndex, temp + 1 );
 	}
 
 	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );

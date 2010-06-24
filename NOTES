@@ -6492,6 +6492,11 @@ to carry through on other Zombies. Checkin 1922.
 Next: Clean up zombies. Build the stoich matrix. Run. More unit tests.
 Cleaning up ZombieReac and ZombieMMenz. Checkin 1924.
 Cleaning up ZombieMol. Checkin 1925.
-Cleaning up ZombieEnz. 
+Cleaning up ZombieEnz. Checkin 1926.
+
+Putting in the stoich matrix stuff. Printed it out, seems OK.
+Added in stoich matrix stuff for enzyme too. Printed out 
+barebones enzyme, seems OK. Handles the bigger dend_v26.g model,
+but I won't try to decipher the stoich matrix.
 
 ============================================================================
