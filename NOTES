@@ -6475,6 +6475,9 @@ Other part of zombification: Scan path and figure out stoichiometry matrix
 from messages.
 ============================================================================
 23 June 2010
+Stoich::setPath begins to handle traversal. Yet to deal with messages.
 
 
 ============================================================================
+24 June 2010
+Still working on traversal.

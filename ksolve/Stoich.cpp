@@ -130,24 +130,11 @@ bool Stoich::getOneWay() const
 	return useOneWay_;
 }
 
-void Stoich::setPath( Eref e, const Qinfo* q, string v )
+void Stoich::buildObjMap( const vector< Id >& elist )
 {
-	static const Cinfo* molCinfo = Mol::initCinfo();
-	static const Cinfo* reacCinfo = Reac::initCinfo();
-	static const Cinfo* enzCinfo = Enz::initCinfo();
-	static const Cinfo* mmEnzCinfo = MMenz::initCinfo();
-	if ( path_ != "" && path_ != v ) {
-		// unzombify( path_ );
-		cout << "Stoich::setPath: need to clear old path.\n";
-		return;
-	}
-	path_ = v;
-	vector< Id > elist;
-	Shell::wildcard( path_, elist );
-
 	objMapStart_ = ~0;
 	unsigned int maxId = 0;
-	for ( vector< Id >::iterator i = elist.begin(); i != elist.end(); ++i ){
+	for ( vector< Id >::const_iterator i = elist.begin(); i != elist.end(); ++i ){
 		if ( objMapStart_ > i->value() )
 			objMapStart_ = i->value();
 		if ( maxId < i->value() )
@@ -160,11 +147,18 @@ void Stoich::setPath( Eref e, const Qinfo* q, string v )
 		unsigned int index = elist[i].value();
 		objMap_[ index ] = i;
 	}
+}
 
+void Stoich::allocateModel( const vector< Id >& elist )
+{
+	static const Cinfo* molCinfo = Mol::initCinfo();
+	static const Cinfo* reacCinfo = Reac::initCinfo();
+	static const Cinfo* enzCinfo = Enz::initCinfo();
+	static const Cinfo* mmEnzCinfo = MMenz::initCinfo();
 	numVarMols_ = 0;
+	numReac_ = 0;
 	unsigned int numBufMols = 0;
-	unsigned int numReac = 0;
-	for ( vector< Id >::iterator i = elist.begin(); i != elist.end(); ++i ){
+	for ( vector< Id >::const_iterator i = elist.begin(); i != elist.end(); ++i ){
 		Element* ei = (*i)();
 		if ( ei->cinfo() == molCinfo ) {
 			++numVarMols_;
@@ -175,18 +169,26 @@ void Stoich::setPath( Eref e, const Qinfo* q, string v )
 		}
 		*/
 		if ( ei->cinfo() == reacCinfo || ei->cinfo() == mmEnzCinfo ) {
-			++numReac;
+			++numReac_;
 		}
 		if ( ei->cinfo() == enzCinfo ) {
-			numReac += 2;
+			numReac_ += 2;
 		}
 	}
 
 	S_.resize( numVarMols_ + numBufMols, 0.0 );
 	Sinit_.resize( numVarMols_ + numBufMols, 0.0 );
-	rates_.resize( numReac );
+	rates_.resize( numReac_ );
+}
 
-	for ( vector< Id >::iterator i = elist.begin(); i != elist.end(); ++i ){
+void Stoich::zombifyModel( Eref& e, const vector< Id >& elist )
+{
+	static const Cinfo* molCinfo = Mol::initCinfo();
+	static const Cinfo* reacCinfo = Reac::initCinfo();
+	static const Cinfo* enzCinfo = Enz::initCinfo();
+	static const Cinfo* mmEnzCinfo = MMenz::initCinfo();
+
+	for ( vector< Id >::const_iterator i = elist.begin(); i != elist.end(); ++i ){
 		Element* ei = (*i)();
 		if ( ei->cinfo() == molCinfo ) {
 			ZombieMol::zombify( e.element(), (*i)() );
@@ -206,10 +208,27 @@ void Stoich::setPath( Eref e, const Qinfo* q, string v )
 			ZombieMMenz::zombify( e.element(), (*i)() );
 		}
 	}
+}
 
-	
-	// scan to build up the zombies
-	// scan to find the messaging.
+void Stoich::buildStoichFromModel( const vector< Id >& elist )
+{
+}
+
+void Stoich::setPath( Eref e, const Qinfo* q, string v )
+{
+	if ( path_ != "" && path_ != v ) {
+		// unzombify( path_ );
+		cout << "Stoich::setPath: need to clear old path.\n";
+		return;
+	}
+	path_ = v;
+	vector< Id > elist;
+	Shell::wildcard( path_, elist );
+
+	buildObjMap( elist );
+	allocateModel( elist );
+	zombifyModel( e, elist );
+	buildStoichFromModel( elist );
 }
 
 string Stoich::getPath( Eref e, const Qinfo* q ) const

@@ -33,6 +33,15 @@ class Stoich: public Data
 		void eprocess( Eref e, const Qinfo* q, ProcInfo* p );
 		void reinit( Eref e, const Qinfo* q, ProcInfo* p );
 
+		//////////////////////////////////////////////////////////////////
+		// Model traversal and building functions
+		//////////////////////////////////////////////////////////////////
+		void buildObjMap( const vector< Id >& elist );
+		void allocateModel( const vector< Id >& elist );
+		void zombifyModel( Eref& e, const vector< Id >& elist );
+		void buildStoichFromModel( const vector< Id >& elist );
+
+		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 	protected:
 		bool useOneWay_;
@@ -65,6 +74,15 @@ class Stoich: public Data
 		 *
 		 */
 		unsigned int numVarMols_;
+
+		/**
+		 * Number of reactions in the solver model. This includes 
+		 * conversion reactions A + B <---> C
+		 * enzyme reactions E + S <---> E.S ---> E + P
+		 * and MM enzyme reactions rate = E.S.kcat / ( Km + S )
+		 * The enzyme reactions count as two reaction steps.
+		 */
+		unsigned int numReac_;
 };
 
 #endif	// _STOICH_H
