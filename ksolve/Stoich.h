@@ -36,7 +36,7 @@ class Stoich: public Data
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions
 		//////////////////////////////////////////////////////////////////
-		void buildObjMap( const vector< Id >& elist );
+		void allocateObjMap( const vector< Id >& elist );
 		void allocateModel( const vector< Id >& elist );
 		void zombifyModel( Eref& e, const vector< Id >& elist );
 		void buildStoichFromModel( const vector< Id >& elist );

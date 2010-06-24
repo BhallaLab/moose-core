@@ -130,7 +130,7 @@ bool Stoich::getOneWay() const
 	return useOneWay_;
 }
 
-void Stoich::buildObjMap( const vector< Id >& elist )
+void Stoich::allocateObjMap( const vector< Id >& elist )
 {
 	objMapStart_ = ~0;
 	unsigned int maxId = 0;
@@ -141,12 +141,15 @@ void Stoich::buildObjMap( const vector< Id >& elist )
 			maxId = i->value();
 	}
 	objMap_.resize(0);
-	objMap_.resize( maxId - objMapStart_, 0 );
+	objMap_.resize( 1 + maxId - objMapStart_, 0 );
+	assert( objMap_.size() >= elist.size() );
 
-	for ( unsigned int i = 0; i < elist.size(); ++i ){
-		unsigned int index = elist[i].value();
+	/*
+	for ( unsigned int i = 0; i < elist.size(); ++i ) {
+		unsigned int index = elist[i].value() - objMapStart_;
 		objMap_[ index ] = i;
 	}
+	*/
 }
 
 void Stoich::allocateModel( const vector< Id >& elist )
@@ -161,6 +164,7 @@ void Stoich::allocateModel( const vector< Id >& elist )
 	for ( vector< Id >::const_iterator i = elist.begin(); i != elist.end(); ++i ){
 		Element* ei = (*i)();
 		if ( ei->cinfo() == molCinfo ) {
+			objMap_[ i->value() - objMapStart_ ] = numVarMols_;
 			++numVarMols_;
 		}
 		/*
@@ -169,9 +173,11 @@ void Stoich::allocateModel( const vector< Id >& elist )
 		}
 		*/
 		if ( ei->cinfo() == reacCinfo || ei->cinfo() == mmEnzCinfo ) {
+			objMap_[ i->value() - objMapStart_ ] = numReac_;
 			++numReac_;
 		}
 		if ( ei->cinfo() == enzCinfo ) {
+			objMap_[ i->value() - objMapStart_ ] = numReac_;
 			numReac_ += 2;
 		}
 	}
@@ -202,10 +208,10 @@ void Stoich::zombifyModel( Eref& e, const vector< Id >& elist )
 			ZombieReac::zombify( e.element(), (*i)() );
 		}
 		else if ( ei->cinfo() == mmEnzCinfo ) {
-			ZombieEnz::zombify( e.element(), (*i)() );
+			ZombieMMenz::zombify( e.element(), (*i)() );
 		}
 		else if ( ei->cinfo() == enzCinfo ) {
-			ZombieMMenz::zombify( e.element(), (*i)() );
+			ZombieEnz::zombify( e.element(), (*i)() );
 		}
 	}
 }
@@ -225,10 +231,13 @@ void Stoich::setPath( Eref e, const Qinfo* q, string v )
 	vector< Id > elist;
 	Shell::wildcard( path_, elist );
 
-	buildObjMap( elist );
+	allocateObjMap( elist );
 	allocateModel( elist );
 	zombifyModel( e, elist );
 	buildStoichFromModel( elist );
+
+	cout << "Zombified " << numVarMols_ << " Molecules, " <<
+		numReac_ << " reactions\n";
 }
 
 string Stoich::getPath( Eref e, const Qinfo* q ) const

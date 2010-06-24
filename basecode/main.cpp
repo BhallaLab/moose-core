@@ -39,6 +39,7 @@ extern void testMpiShell();
 extern void testMsg();
 extern void testMpiMsg();
 extern void testKinetics();
+extern void testKsolve();
 
 extern void initMsgManagers();
 extern void destroyMsgManagers();
@@ -142,6 +143,7 @@ void nonMpiTests()
 		testBuiltins();
 		testShell();
 		testKinetics();
+		testKsolve();
 	}
 #endif
 }

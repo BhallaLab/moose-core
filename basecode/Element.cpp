@@ -15,17 +15,16 @@
  * temporary Element for field access but nothing else, and it
  * should not mess with messages or Ids.
  */
-Element::Element( const Cinfo* c, DataHandler* d )
+Element::Element( Id id, const Cinfo* c, DataHandler* d )
+	: id_( id ), cinfo_( c )
 {
 	dataHandler_ = new DataHandlerWrapper( d );
-	cinfo_ = c;
 }
 
 Element::Element( Id id, const Cinfo* c, const string& name, 
 	const vector< unsigned int >& dimensions, bool isGlobal )
 	:	name_( name ),
 		id_( id ),
-		sendBuf_( 0 ), 
 		cinfo_( c ), 
 		msgBinding_( c->numBindIndex() )
 {
@@ -65,7 +64,6 @@ Element::Element( Id id, const Cinfo* c, const string& name,
 	:	name_( name ),
 		id_( id ),
 		dataHandler_( dataHandler ),
-		sendBuf_( 0 ), 
 		cinfo_( c ), 
 		msgBinding_( c->numBindIndex() )
 {
@@ -78,7 +76,6 @@ Element::Element( Id id, const Element* orig, unsigned int n )
 		id_( id ),
 		dataHandler_( orig->dataHandler_->copy( 
 			n, orig->dataHandler_->isGlobal() ) ),
-		sendBuf_( 0 ), 
 		cinfo_( orig->cinfo_ ), 
 		msgBinding_( orig->cinfo_->numBindIndex() )
 {
@@ -88,7 +85,6 @@ Element::Element( Id id, const Element* orig, unsigned int n )
 
 Element::~Element()
 {
-	delete[] sendBuf_;
 	delete dataHandler_;
 	cinfo_ = 0; // A flag that the Element is doomed, used to avoid lookups when deleting Msgs.
 	for ( vector< vector< MsgFuncBinding > >::iterator i = msgBinding_.begin(); i != msgBinding_.end(); ++i ) {
@@ -136,6 +132,7 @@ void Element::process( const ProcInfo* p )
 	*/
 }
 
+/*
 double Element::sumBuf( SyncId slot, unsigned int i ) const
 {
 	vector< unsigned int >::const_iterator offset = 
@@ -193,6 +190,7 @@ void Element::ssend2( SyncId slot, unsigned int i, double v1, double v2 )
 	*sb++ = v1;
 	*sb = v2;
 }
+*/
 
 void Element::addMsg( MsgId m )
 {

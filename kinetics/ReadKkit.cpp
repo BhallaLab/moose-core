@@ -486,6 +486,7 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 
 	if ( isMM ) {
 		Id enz = shell_->doCreate( "MMenz", pa, tail, dim );
+		assert( enz != Id () );
 		string mmEnzPath = args[2].substr( 10 );
 		mmEnzIds_[ mmEnzPath ] = enz; 
 
@@ -498,6 +499,7 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 		return enz;
 	} else {
 		Id enz = shell_->doCreate( "Enz", pa, tail, dim );
+		assert( enz != Id () );
 		string enzPath = args[2].substr( 10 );
 		enzIds_[ enzPath ] = enz; 
 
@@ -508,6 +510,7 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 		string cplxName = tail + "_cplx";
 		string cplxPath = enzPath + "/" + cplxName;
 		Id cplx = shell_->doCreate( "Mol", enz, cplxName, dim );
+		assert( cplx != Id () );
 		molIds_[ cplxPath ] = enz; 
 		Field< double >::set( cplx.eref(), "nInit", nComplexInit );
 
@@ -536,6 +539,7 @@ Id ReadKkit::buildInfo( Id parent,
 {
 	static vector< unsigned int > dim( 1, 1 );
 	Id info = shell_->doCreate( "Neutral", parent, "info", dim );
+	assert( info != Id() );
 
 	/*
 	Id info = shell_->doCreate( "KkitInfo", parent, "info", dim );
@@ -561,6 +565,7 @@ Id ReadKkit::buildGroup( const vector< string >& args )
 	Id pa = shell_->doFind( head );
 	assert( pa != Id() );
 	Id group = shell_->doCreate( "Neutral", pa, tail, dim );
+	assert( group != Id() );
 	Id info = buildInfo( group, groupMap_, args );
 
 	numOthers_++;
@@ -582,6 +587,7 @@ Id ReadKkit::buildMol( const vector< string >& args )
 	double diffConst = atof( args[ molMap_[ "DiffConst" ] ].c_str() );
 
 	Id mol = shell_->doCreate( "Mol", pa, tail, dim );
+	assert( mol != Id() );
 	// skip the 10 chars of "/kinetics/"
 	molIds_[ args[2].substr( 10 ) ] = mol; 
 

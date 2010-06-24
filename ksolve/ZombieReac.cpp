@@ -176,7 +176,7 @@ unsigned int  ZombieReac::convertId( Id id ) const
 // static func
 void ZombieReac::zombify( Element* solver, Element* orig )
 {
-	Element temp( zombieReacCinfo, solver->dataHandler() );
+	Element temp( orig->id(), zombieReacCinfo, solver->dataHandler() );
 	Eref zer( &temp, 0 );
 	Eref oer( orig, 0 );
 
@@ -192,7 +192,7 @@ void ZombieReac::zombify( Element* solver, Element* orig )
 // Static func
 void ZombieReac::unzombify( Element* zombie )
 {
-	Element temp( zombie->cinfo(), zombie->dataHandler() );
+	Element temp( zombie->id(), zombie->cinfo(), zombie->dataHandler() );
 	Eref zer( &temp, 0 );
 	Eref oer( zombie, 0 );
 

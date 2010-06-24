@@ -26,9 +26,9 @@ class Element
 		/**
 		 * This constructor is used when making zombies. We want to have a
 		 * temporary Element for field access but nothing else, and it
-		 * should not mess with messages or Ids.
+		 * should not mess with messages.
 		 */
-		Element( const Cinfo* c, DataHandler* d );
+		Element( Id id, const Cinfo* c, DataHandler* d );
 
 		/// Regular constructor
 		Element( Id id, const Cinfo* c, const string& name,
@@ -73,27 +73,27 @@ class Element
 
 		/**
 		 * Return a single buffer entry specified by slot and eindex
-		 */
 		double oneBuf( SyncId slot, unsigned int i ) const;
+		 */
 
 		/**
 		 * Sum buffer entries in range specified by slot and eindex
-		 */
 		double sumBuf( SyncId slot, unsigned int i ) const;
+		 */
 
 		/**
 		 * return product of v with all buffer entries in range specified 
 		 * by slot and eindex. If none, return v.
-		 */
 		double prdBuf( SyncId slot, unsigned int i, double v ) const;
+		 */
 
 		/**
 		 * Get the buffer pointer specified by slot and eindex.
 		 * We assume that the message already defines exactly how many
 		 * bytes are to go, so we don't need to get the range of buffer
 		 * locations available to this message slot.
-		 */
 		double* getBufPtr( SyncId slot, unsigned int i );
+		 */
 
 		/**
 		 * Returns the DataHandler, which actually manages the data.
@@ -103,9 +103,9 @@ class Element
 		/**
 		 * We'll try these out as alternate Send functions, given that
 		 * the buffer is local.
-		 */
 		void ssend1( SyncId slot, unsigned int i, double v );
 		void ssend2( SyncId slot, unsigned int i, double v1, double v2 );
+		 */
 
 		/**
 		 * Asynchronous send command. Adds Qinfo and data onto msg specified
@@ -215,33 +215,33 @@ class Element
 		 * At creation time the objects know exactly how much buffer space
 		 * they need, from the Finfos.
 		 * Align as doubles because most fast data transfer is doubles.
-		 */
 		double* sendBuf_;
+		 */
 		
 
 		/**
 		 * This holds the pointers to the data buffers.
 		 * Align as doubles because most fast data transfer is doubles.
-		 */
 		vector< double* > procBuf_;
+		 */
 
 		/**
 		 * This looks up entries in the procBuf, based on msg slot and
 		 * Element index.
-		 */
 		vector< unsigned int > procBufRange_; // Size of this is static.
+		 */
 
 		/**
 		 * Number of outgoing sync msg slots. Used to work out indexing into
 		 * send buffer.
-		 */
 		unsigned int numSendSlots_;
+		 */
 
 		/**
 		 * Number of incoming sync msg slots. Used to work out indexing into
 		 * ProcBufRange.
-		 */
 		unsigned int numRecvSlots_;
+		 */
 
 		/**
 		 * This is the buffer for incoming async function requests to this 

@@ -16,10 +16,10 @@ OBJ = \
 	ZombieReac.o \
 	ZombieEnz.o \
 	ZombieMMenz.o \
+	testKsolve.o	\
 
 	
 	#KineticHub.o	\
-	#testKsolve.o	\
 	#Tab.o	\
 
 HEADERS = \
@@ -30,13 +30,14 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 Stoich.o:	Stoich.h RateTerm.h KinSparseMatrix.h ../basecode/SparseMatrix.h
-KineticHub.o:	KineticHub.h
 KinSparseMatrix.o:	KinSparseMatrix.h ../basecode/SparseMatrix.h
 ZombieMol.o:	ZombieMol.h Stoich.h KinSparseMatrix.h RateTerm.h ../basecode/SparseMatrix.h ../basecode/ElementValueFinfo.h
 ZombieReac.o:	ZombieReac.h Stoich.h KinSparseMatrix.h RateTerm.h ../basecode/SparseMatrix.h ../basecode/ElementValueFinfo.h
 ZombieEnz.o:	ZombieEnz.h Stoich.h KinSparseMatrix.h RateTerm.h ../basecode/SparseMatrix.h ../basecode/ElementValueFinfo.h
 ZombieMMenz.o:	ZombieMMenz.h Stoich.h KinSparseMatrix.h RateTerm.h ../basecode/SparseMatrix.h ../basecode/ElementValueFinfo.h
-testKsolve.o:	Stoich.h KineticHub.h
+testKsolve.o:	Stoich.h ../kinetics/ReadKkit.h ../shell/Shell.h
+
+#KineticHub.o:	KineticHub.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I.. -I../basecode -I../msg -I../kinetics $< -c
