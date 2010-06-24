@@ -118,79 +118,8 @@ void Element::setName( const string& val )
 void Element::process( const ProcInfo* p )
 {
 	dataHandler_->process( p, this );
-	/*
-	char* data = d_;
-	unsigned int start =
-		( numData_ * p->threadIndexInGroup ) / p->numThreadsInGroup;
-	unsigned int end =
-		( numData_ * ( p->threadIndexInGroup + 1) ) / p->numThreadsInGroup;
-	data += start * dataSize_;
-	for ( unsigned int i = start; i < end; ++i ) {
-		reinterpret_cast< Data* >( data )->process( p, Eref( this, i ) );
-		data += dataSize_;
-	}
-	*/
 }
 
-/*
-double Element::sumBuf( SyncId slot, unsigned int i ) const
-{
-	vector< unsigned int >::const_iterator offset = 
-		procBufRange_.begin() + slot + i * numRecvSlots_;
-	vector< double* >::const_iterator begin = 
-		procBuf_.begin() + *offset++;
-	vector< double* >::const_iterator end = 
-		procBuf_.begin() + *offset;
-	double ret = 0.0;
-	for ( vector< double* >::const_iterator i = begin; 
-		i != end; ++i )
-		ret += **i;
-	return ret;
-}
-
-double Element::prdBuf( SyncId slot, unsigned int i, double v )
-	const
-{
-	vector< unsigned int >::const_iterator offset = 
-		procBufRange_.begin() + slot + i * numRecvSlots_;
-	vector< double* >::const_iterator begin = 
-		procBuf_.begin() + *offset++;
-	vector< double* >::const_iterator end = 
-		procBuf_.begin() + *offset;
-	for ( vector< double* >::const_iterator i = begin;
-		i != end; ++i )
-		v *= **i;
-	return v;
-}
-
-double Element::oneBuf( SyncId slot, unsigned int i ) const
-{
-	// unsigned int offset = i * numData_ + slot;
-	unsigned int offset = slot + i * numRecvSlots_;
-	assert( offset + 1 < procBufRange_.size() );
-	return *procBuf_[ procBufRange_[ offset ] ];
-}
-
-double* Element::getBufPtr( SyncId slot, unsigned int i )
-{
-	// unsigned int offset = i * numData_ + slot;
-	unsigned int offset = slot + i * numRecvSlots_;
-	assert( offset + 1 < procBufRange_.size() );
-	return procBuf_[ procBufRange_[ offset ] ];
-}
-
-void Element::ssend1( SyncId slot, unsigned int i, double v )
-{
-	sendBuf_[ slot + i * numSendSlots_ ] = v;
-}
-
-void Element::ssend2( SyncId slot, unsigned int i, double v1, double v2 )
-{
-	double* sb = sendBuf_ + slot + i * numSendSlots_;
-	*sb++ = v1;
-	*sb = v2;
-}
-*/
 
 void Element::addMsg( MsgId m )
 {
@@ -292,14 +221,6 @@ void Element::asend( Qinfo& q, BindIndex bindIndex,
 	for ( vector< MsgFuncBinding >::const_iterator i =
 		msgBinding_[ bindIndex ].begin(); i != end; ++i ) {
 		q.assembleOntoQ( *i, this, p, arg );
-		/*
-		const Msg* m = Msg::getMsg( i->mid );
-		q.setForward( m->isForward( this ) );
-		if ( m->isMsgHere( q ) ) {
-			q.assignQblock( m, p );
-			q.addToQ( p->threadId, *i, arg );
-		}
-		*/
 	}
 }
 
@@ -456,8 +377,65 @@ void Element::zombieSwap( const Cinfo* newCinfo, DataHandler* newDataHandler )
 {
 	cinfo_ = newCinfo;
 	delete dataHandler_;
-	// DataHandler* oldDataHandler = dataHandler_;
 	dataHandler_ = newDataHandler;
-	// delete oldDataHandler_;
 }
 
+unsigned int Element::getOutputs( vector< Id >& ret, const SrcFinfo* finfo )
+	const
+{
+	assert( finfo ); // would like to check that finfo is on this.
+	const vector< MsgFuncBinding >* msgVec =
+		getMsgAndFunc( finfo->getBindIndex() );
+	ret.resize( 0 );
+	for ( unsigned int i = 0; i < msgVec->size(); ++i ) {
+		const Msg* m = Msg::getMsg( (*msgVec)[i].mid );
+		assert( m );
+		Id id = m->e2()->id();
+		if ( m->e2() == this )
+			id = m->e1()->id();
+		ret.push_back( id );
+	}
+	return ret.size();
+}
+
+unsigned int Element::getInputs( vector< Id >& ret, const DestFinfo* finfo )
+	const
+{
+	assert( finfo ); // would like to check that finfo is on src.
+	FuncId fid = finfo->getFid();
+	vector< MsgId > caller;
+	getInputMsgs( caller, fid );
+	for ( vector< MsgId >::iterator i = caller.begin(); 
+		i != caller.end(); ++i  ) {
+		const Msg* m = Msg::getMsg( *i );
+		assert( m );
+
+		Id id = m->e1()->id();
+		if ( m->e1() == this )
+			id = m->e2()->id();
+		ret.push_back( id );
+	}
+	return ret.size();
+}
+
+// May return multiple Msgs.
+unsigned int Element::getInputMsgs( vector< MsgId >& caller, FuncId fid)
+	const
+{
+	for ( vector< MsgId >::const_iterator i = m_.begin(); 
+		i != m_.end(); ++i )
+	{
+		const Msg* m = Msg::getMsg( *i );
+		const Element* src;
+		if ( m->e1() == this ) {
+			src = m->e2();
+		} else {
+			src = m->e1();
+		}
+		unsigned int ret = src->findBinding( MsgFuncBinding( *i, fid ) );
+		if ( ret != ~0U ) {
+			caller.push_back( *i );
+		}
+	}
+	return caller.size();
+}

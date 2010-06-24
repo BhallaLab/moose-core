@@ -42,7 +42,7 @@ class ZombieReac: public Stoich
 		unsigned int  getReactants( 
 			Element* orig, vector< unsigned int >& ret, bool isPrd ) const;
 		ZeroOrder* makeHalfReaction( 
-			Element* orig, double rate, bool isReverse ) const;
+			Element* orig, double rate, const SrcFinfo* finfo ) const;
 
 		static void zombify( Element* solver, Element* orig );
 		static void unzombify( Element* zombie );

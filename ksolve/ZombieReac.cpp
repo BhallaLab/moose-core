@@ -142,91 +142,49 @@ void ZombieReac::prd( double v )
 
 void ZombieReac::setKf( Eref e, const Qinfo* q, double v )
 {
-	rates_[ convertId( e.id() ) ]->setR1( v );
+	rates_[ convertIdToReacIndex( e.id() ) ]->setR1( v );
 }
 
 double ZombieReac::getKf( Eref e, const Qinfo* q ) const
 {
-	return rates_[ convertId( e.id() ) ]->getR1();
+	return rates_[ convertIdToReacIndex( e.id() ) ]->getR1();
 }
 
 void ZombieReac::setKb( Eref e, const Qinfo* q, double v )
 {
-	rates_[ convertId( e.id() ) ]->setR2( v );
+	rates_[ convertIdToReacIndex( e.id() ) ]->setR2( v );
 }
 
 double ZombieReac::getKb( Eref e, const Qinfo* q ) const
 {
-	return rates_[ convertId( e.id() ) ]->getR2();
+	return rates_[ convertIdToReacIndex( e.id() ) ]->getR2();
 }
 
 //////////////////////////////////////////////////////////////
 // Utility function
 //////////////////////////////////////////////////////////////
 
-unsigned int  ZombieReac::convertId( Id id ) const
-{
-	unsigned int i = id.value() - objMapStart_;
-	assert( i < objMap_.size() );
-	i = objMap_[i];
-	assert( i < rates_.size() );
-	return i;
-}
-
-unsigned int  ZombieReac::getReactants( 
-	Element* orig, vector< unsigned int >& ret, bool isPrd ) const
-{
-	static const SrcFinfo* sub = dynamic_cast< const SrcFinfo* >(
-		Reac::initCinfo()->findFinfo( "toSub" ) );
-	static const SrcFinfo* prd = dynamic_cast< const SrcFinfo* >(
-		Reac::initCinfo()->findFinfo( "toPrd" ) );
-	assert( sub );
-	assert( prd );
-	const SrcFinfo* finfo = sub;
-	if ( isPrd )
-		finfo = prd;
-	const vector< MsgFuncBinding >* msgVec = 
-		orig->getMsgAndFunc( finfo->getBindIndex() );
-
-	ret.resize( 0 );
-	for ( unsigned int i = 0; i < msgVec->size(); ++i ) {
-		const Msg* m = Msg::getMsg( (*msgVec)[i].mid );
-		assert( m );
-		Id id = m->e2()->id();
-		if ( m->e2() == orig )
-			id = m->e1()->id();
-		unsigned int i = id.value() - objMapStart_;
-		assert( i < objMap_.size() );
-		unsigned int index = objMap_[i];
-		assert( index < S_.size() );
-		ret.push_back( index );
-	}
-	return ret.size();
-}
-
 ZeroOrder* ZombieReac::makeHalfReaction( 
-	Element* orig, double rate, bool isReverse ) const
+	Element* orig, double rate, const SrcFinfo* finfo ) const
 {
-	vector< unsigned int > molIndex;
-	unsigned int numReactants = 
-		getReactants( orig, molIndex, isReverse ); 
+	vector< Id > mols;
+	unsigned int numReactants = orig->getOutputs( mols, finfo ); 
 	ZeroOrder* rateTerm;
 	if ( numReactants == 1 ) {
-		rateTerm = new FirstOrder( rate, &S_[ molIndex[0] ] );
+		rateTerm = 
+			new FirstOrder( rate, &S_[ convertIdToMolIndex( mols[0] ) ] );
 	} else if ( numReactants == 2 ) {
-		if ( molIndex[0] == molIndex[1] ) {
-			rateTerm = new StochSecondOrderSingleSubstrate( rate,
-				&S_[ molIndex[0] ] );
-		} else {
-			rateTerm = new SecondOrder( rate,
-				&S_[ molIndex[0] ], &S_[ molIndex[1] ] );
-		}
+		rateTerm = new SecondOrder( rate,
+				&S_[ convertIdToMolIndex( mols[0] ) ], 
+				&S_[ convertIdToMolIndex( mols[1] ) ] );
 	} else if ( numReactants > 2 ) {
 		vector< const double* > v;
 		for ( unsigned int i = 0; i < numReactants; ++i ) {
-			v.push_back( &S_[ molIndex[i] ] );
+			v.push_back( &S_[ convertIdToMolIndex( mols[i] ) ] );
 		}
 		rateTerm = new NOrder( rate, v );
+	} else {
+		cout << "Error: ZombieReac::makeHalfReaction: zero reactants\n";
 	}
 	return rateTerm;
 }
@@ -234,6 +192,14 @@ ZeroOrder* ZombieReac::makeHalfReaction(
 // static func
 void ZombieReac::zombify( Element* solver, Element* orig )
 {
+	static const SrcFinfo* sub = dynamic_cast< const SrcFinfo* >(
+		Reac::initCinfo()->findFinfo( "toSub" ) );
+	static const SrcFinfo* prd = dynamic_cast< const SrcFinfo* >(
+		Reac::initCinfo()->findFinfo( "toPrd" ) );
+	
+	assert( sub );
+	assert( prd );
+
 	Element temp( orig->id(), zombieReacCinfo, solver->dataHandler() );
 	Eref zer( &temp, 0 );
 	Eref oer( orig, 0 );
@@ -241,10 +207,10 @@ void ZombieReac::zombify( Element* solver, Element* orig )
 	ZombieReac* z = reinterpret_cast< ZombieReac* >( zer.data() );
 	Reac* reac = reinterpret_cast< Reac* >( oer.data() );
 
-	ZeroOrder* forward = z->makeHalfReaction( orig, reac->getKf(), 0 );
-	ZeroOrder* reverse = z->makeHalfReaction( orig, reac->getKb(), 1 );
+	ZeroOrder* forward = z->makeHalfReaction( orig, reac->getKf(), sub );
+	ZeroOrder* reverse = z->makeHalfReaction( orig, reac->getKb(), prd );
 
-	unsigned int rateIndex = z->convertId( orig->id() );
+	unsigned int rateIndex = z->convertIdToReacIndex( orig->id() );
 	z->rates_[ rateIndex ] = new BidirectionalReaction( forward, reverse );
 
 	z->setKf( zer, 0, reac->getKf() );

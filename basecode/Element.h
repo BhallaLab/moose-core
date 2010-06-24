@@ -7,6 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+class SrcFinfo;
 class Qinfo;
 /**
  * Have a single Element class, that uses an IndexRange. There can
@@ -60,11 +61,6 @@ class Element
 		void setName( const string& val );
 
 		/**
-		 * Here we build the array on the fly.
-		Element( const Data *prototype, unsigned int numEntries );
-		 */
-
-		/**
 		 * Examine process queue, data that is expected every timestep.
 		 * This function is done for all the local data entries in order.
 		 */
@@ -72,40 +68,9 @@ class Element
 
 
 		/**
-		 * Return a single buffer entry specified by slot and eindex
-		double oneBuf( SyncId slot, unsigned int i ) const;
-		 */
-
-		/**
-		 * Sum buffer entries in range specified by slot and eindex
-		double sumBuf( SyncId slot, unsigned int i ) const;
-		 */
-
-		/**
-		 * return product of v with all buffer entries in range specified 
-		 * by slot and eindex. If none, return v.
-		double prdBuf( SyncId slot, unsigned int i, double v ) const;
-		 */
-
-		/**
-		 * Get the buffer pointer specified by slot and eindex.
-		 * We assume that the message already defines exactly how many
-		 * bytes are to go, so we don't need to get the range of buffer
-		 * locations available to this message slot.
-		double* getBufPtr( SyncId slot, unsigned int i );
-		 */
-
-		/**
 		 * Returns the DataHandler, which actually manages the data.
 		 */
 		DataHandler* dataHandler() const;
-
-		/**
-		 * We'll try these out as alternate Send functions, given that
-		 * the buffer is local.
-		void ssend1( SyncId slot, unsigned int i, double v );
-		void ssend2( SyncId slot, unsigned int i, double v1, double v2 );
-		 */
 
 		/**
 		 * Asynchronous send command. Adds Qinfo and data onto msg specified
@@ -181,18 +146,45 @@ class Element
 		 */
 		Id id() const;
 
-		/**
-		 * Returns the Msg that calls the specified Fid, on current Element.
-		 * Returns 0 on failure.
-		 */
-		 MsgId findCaller( FuncId fid ) const;
 
+	/////////////////////////////////////////////////////////////////////
+	// Utility functions for message traversal
+	/////////////////////////////////////////////////////////////////////
 		/**
 		 * Returns the binding index of the specified entry.
 		 * Returns ~0 on failure.
 		 */
 		 unsigned int findBinding( MsgFuncBinding b ) const;
 
+		/**
+		 * Returns the first Msg that calls the specified Fid, 
+		 * on current Element.
+		 * Returns 0 on failure.
+		 */
+		 MsgId findCaller( FuncId fid ) const;
+
+		/** 
+		 * More general function. Fills up vector of MsgIds that call the
+		 * specified Fid on current Element. Returns # found
+		 */
+		unsigned int getInputMsgs( vector< MsgId >& caller, FuncId fid)
+		 	const;
+
+		/**
+		 * Fills in vector of Ids receiving messages from this SrcFinfo. 
+		 * Returns # found
+		 */
+		unsigned int getOutputs( vector< Id >& ret, const SrcFinfo* finfo )
+			const;
+
+		/**
+		 * Fills in vector of Ids sending messeges to this DestFinfo on
+		 * this Element. Returns # found
+		 */
+		unsigned int getInputs( vector< Id >& ret, const DestFinfo* finfo )
+			const;
+
+	/////////////////////////////////////////////////////////////////////
 		/**
 		 * zombieSwap: replaces the Cinfo and DataHandler of the zombie.
 		 * Deletes old DataHandler first.
@@ -208,47 +200,6 @@ class Element
 		 * This object stores and manages the actual data for the Element.
 		 */
 		DataHandler* dataHandler_;
-
-		/**
-		 * This is the data buffer used for outgoing sync messages from
-		 * objects on this Element.
-		 * At creation time the objects know exactly how much buffer space
-		 * they need, from the Finfos.
-		 * Align as doubles because most fast data transfer is doubles.
-		double* sendBuf_;
-		 */
-		
-
-		/**
-		 * This holds the pointers to the data buffers.
-		 * Align as doubles because most fast data transfer is doubles.
-		vector< double* > procBuf_;
-		 */
-
-		/**
-		 * This looks up entries in the procBuf, based on msg slot and
-		 * Element index.
-		vector< unsigned int > procBufRange_; // Size of this is static.
-		 */
-
-		/**
-		 * Number of outgoing sync msg slots. Used to work out indexing into
-		 * send buffer.
-		unsigned int numSendSlots_;
-		 */
-
-		/**
-		 * Number of incoming sync msg slots. Used to work out indexing into
-		 * ProcBufRange.
-		unsigned int numRecvSlots_;
-		 */
-
-		/**
-		 * This is the buffer for incoming async function requests to this 
-		 * Element. Entries are organized as Qinfo, data.
-		 * Qinfo explicitly stores the size of the data.
-		vector< char > q_; // incoming request queue.
-		 */
 
 		/**
 		 * Class information
@@ -268,11 +219,4 @@ class Element
 		 * pairs.
 		 */
 		vector< vector < MsgFuncBinding > > msgBinding_;
-
-		/**
-		 * High level messaging info, containing a declarative record of the
-		 * specification of the message including connectivity and
-		 * functionality. These are indices into a global vector.
-		 */
-//		vector< MsgSpecId >
 };

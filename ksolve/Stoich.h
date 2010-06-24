@@ -40,6 +40,8 @@ class Stoich: public Data
 		void allocateModel( const vector< Id >& elist );
 		void zombifyModel( Eref& e, const vector< Id >& elist );
 		void buildStoichFromModel( const vector< Id >& elist );
+		unsigned int convertIdToReacIndex( Id id ) const;
+		unsigned int convertIdToMolIndex( Id id ) const;
 
 		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();

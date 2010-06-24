@@ -6358,8 +6358,8 @@ Further fixes to ReadKkit, improved, still leaks. Checkin 1895.
 Yet more cleanup. Finally leaks gone. Checkin 1896.
 
 Now to get back to testing chem kinetics. For starters, 
-- run model, dump data, and compare with genesis.
-- Bring in solver to scan model tree and zombify it.
+* run model, dump data, and compare with genesis.
++ Bring in solver to scan model tree and zombify it.
 - Test out solver too
 Then in no particular order:
 - Eliminate Data class
@@ -6484,5 +6484,10 @@ Still working on traversal. Checkin 1918.
 Traversal coming along. Major updates including eliminating the Element
 calls relating to sync messaging. Not yet there, but checkin 1919.
 Putting in the RateTerm creation stuff for MMEnz. Checkin 1920.
+Putting in the RateTerm creation stuff for Reac. Checkin 1921.
+
+Put in general functions in Element for getInputs and getOutputs for
+specified Finfos. Replaced these in ZombieReac, seems OK. Yet
+to carry through on other Zombies.
 
 ============================================================================

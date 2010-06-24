@@ -244,3 +244,21 @@ string Stoich::getPath( Eref e, const Qinfo* q ) const
 {
 	return path_;
 }
+
+unsigned int Stoich::convertIdToMolIndex( Id id ) const
+{
+	unsigned int i = id.value() - objMapStart_;
+	assert( i < objMap_.size() );
+	i = objMap_[i];
+	assert( i < S_.size() );
+	return i;
+}
+
+unsigned int Stoich::convertIdToReacIndex( Id id ) const
+{
+	unsigned int i = id.value() - objMapStart_;
+	assert( i < objMap_.size() );
+	i = objMap_[i];
+	assert( i < rates_.size() );
+	return i;
+}
