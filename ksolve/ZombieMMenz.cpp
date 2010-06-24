@@ -141,28 +141,29 @@ void ZombieMMenz::reinit( const Eref& e, const Qinfo*q, ProcInfo* p )
 
 void ZombieMMenz::setKm( Eref e, const Qinfo* q, double v )
 {
-	rates_[ convertId( e.id() ) ]->setR1( v ); // First rate is Km
+	rates_[ convertIdToMolIndex( e.id() ) ]->setR1( v ); // First rate is Km
 }
 
 double ZombieMMenz::getKm( Eref e, const Qinfo* q ) const
 {
-	return rates_[ convertId( e.id() ) ]->getR1(); // First rate is Km
+	return rates_[ convertIdToMolIndex( e.id() ) ]->getR1(); // First rate is Km
 }
 
 void ZombieMMenz::setKcat( Eref e, const Qinfo* q, double v )
 {
-	rates_[ convertId( e.id() ) ]->setR2( v ); // Second rate is kcat
+	rates_[ convertIdToMolIndex( e.id() ) ]->setR2( v ); // Second rate is kcat
 }
 
 double ZombieMMenz::getKcat( Eref e, const Qinfo* q ) const
 {
-	return rates_[ convertId( e.id() ) ]->getR2(); // Second rate is kcat
+	return rates_[ convertIdToMolIndex( e.id() ) ]->getR2(); // Second rate is kcat
 }
 
 //////////////////////////////////////////////////////////////
 // Utility function
 //////////////////////////////////////////////////////////////
 
+/*
 unsigned int  ZombieMMenz::convertId( Id id ) const
 {
 	unsigned int i = id.value() - objMapStart_;
@@ -219,10 +220,19 @@ unsigned int ZombieMMenz::getEnzIndex( Element* orig ) const
 	assert( ret < S_.size() );
 	return ret;
 }
+*/
 
 // static func
 void ZombieMMenz::zombify( Element* solver, Element* orig )
 {
+	static const DestFinfo* enz = dynamic_cast< const DestFinfo* >(
+		MMenz::initCinfo()->findFinfo( "enz" ) );
+	static const SrcFinfo* sub = dynamic_cast< const SrcFinfo* >(
+		MMenz::initCinfo()->findFinfo( "toSub" ) );
+	assert( enz );
+	assert( sub );
+	vector< Id > mols;
+
 	Element temp( orig->id(), zombieMMenzCinfo, solver->dataHandler() );
 	Eref zer( &temp, 0 );
 	Eref oer( orig, 0 );
@@ -230,13 +240,30 @@ void ZombieMMenz::zombify( Element* solver, Element* orig )
 	ZombieMMenz* z = reinterpret_cast< ZombieMMenz* >( zer.data() );
 	MMenz* mmEnz = reinterpret_cast< MMenz* >( oer.data() );
 
-	const double* subPtr = &z->S_[ z->getSubIndex( orig ) ];
-	const double* enzPtr = &z->S_[ z->getEnzIndex( orig ) ];
-	unsigned int rateIndex = z->convertId( orig->id() );
+	unsigned int rateIndex = z->convertIdToReacIndex( orig->id() );
+	unsigned int num = orig->getInputs( mols, enz );
+	const double* enzPtr = &z->S_[ z->convertIdToMolIndex( mols[0] ) ];
 
-	z->rates_[ rateIndex ] = new MMEnzyme1( 
+	num = orig->getOutputs( mols, sub );
+	if ( num == 1 ) {
+		const double* subPtr = &z->S_[ z->convertIdToMolIndex( mols[0] ) ];
+		assert( num == 1 );
+		z->rates_[ rateIndex ] = new MMEnzyme1( 
 			mmEnz->getKm(), mmEnz->getKcat(),
 			enzPtr, subPtr );
+	} else if ( num > 1 ) {
+		vector< const double* > v;
+		for ( unsigned int i = 0; i < num; ++i )
+			v.push_back( &z->S_[ z->convertIdToMolIndex( mols[i] ) ] );
+		ZeroOrder* rateTerm = new NOrder( 1.0, v );
+		z->rates_[ rateIndex ] = new MMEnzyme( 
+			mmEnz->getKm(), mmEnz->getKcat(),
+			enzPtr, rateTerm );
+	} else {
+		cout << "Error: ZombieMMenz::zombify: No substrates\n";
+		exit( 0 );
+	}
+
 	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
 	orig->zombieSwap( zombieMMenzCinfo, dh );
 }

@@ -41,9 +41,9 @@ class ZombieMMenz: public Stoich
 		//////////////////////////////////////////////////////////////////
 		// Utility  funcs
 		//////////////////////////////////////////////////////////////////
-		unsigned int convertId ( Id id ) const;
-		unsigned int getSubIndex( Element* orig ) const;
-		unsigned int getEnzIndex( Element* orig ) const;
+		//unsigned int convertId ( Id id ) const;
+		//unsigned int getSubIndex( Element* orig ) const;
+		//unsigned int getEnzIndex( Element* orig ) const;
 
 		static void zombify( Element* solver, Element* orig );
 		static void unzombify( Element* zombie );

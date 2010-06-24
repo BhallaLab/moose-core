@@ -38,9 +38,11 @@ class ZombieReac: public Stoich
 		//////////////////////////////////////////////////////////////////
 		// utility funcs
 		//////////////////////////////////////////////////////////////////
-		unsigned int convertId ( Id id ) const;
+// 		unsigned int convertId ( Id id ) const;
+		/*
 		unsigned int  getReactants( 
 			Element* orig, vector< unsigned int >& ret, bool isPrd ) const;
+			*/
 		ZeroOrder* makeHalfReaction( 
 			Element* orig, double rate, const SrcFinfo* finfo ) const;
 
