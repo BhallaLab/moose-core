@@ -14,44 +14,69 @@
 #include "IonPool.h"
 #include "NCell.h"
 using namespace std;
-
+/**
+ * Sets xmlDocPtr of the containing document.  
+ */
 void NCell::setXmldoc(xmlDocPtr& doc)
 {
 	xmlDoc = doc;
 }
-
+/**
+ * Returns the xmlDocPtr of the containing document. 
+ */
 xmlDocPtr& NCell::getXmldoc()
 {
 	return xmlDoc;
 }
-
+/**
+ * Sets the xmlXPathContextPtr.
+ */
 void NCell::setContext(xmlXPathContextPtr& cnxt)
 {
 	context = cnxt;
 }
-
+/**
+ * Returns the xmlXPathContextPtr. 
+ */
 xmlXPathContextPtr& NCell::getContext()
 {
 	return context;
 }
-
+/**
+ * Sets the xmlTextReaderPtr. 
+ * 
+ */
 void NCell::setReaderptr(xmlTextReaderPtr& reader)
 {
 	readerPtr = reader;
 }
-
+/**
+ * Returns the xmlTextReaderPtr.
+ * 
+ */
 xmlTextReaderPtr& NCell::getReaderptr()
 {
 	return readerPtr;
 }
+/**
+ * Returns the value of the "lengthunits" attribute of this NCell. 
+ * LengthUnits which is specified in MorphML file.
+ */
 const std::string& NCell::getLengthUnits()
 {
 	return lengthunits;
 }
+/**
+ * Sets the value of the "lengthunits" attribute of this NCell. 
+ * LengthUnits which is specified in MorphML file.
+ */
 void NCell::setLengthUnits(const std::string& value )
 {
 	lengthunits = value;
 }
+/**
+ * Returns the "BiophysicsUnits" specified in MorphML file.
+ */
 string NCell::getBiophysicsUnits()
 {
 	xmlXPathObjectPtr result;
@@ -79,7 +104,11 @@ string NCell::getBiophysicsUnits()
 	}	
 	return unit;
 }
-/*  returns an xmlXPathObjectPtr to the result nodes */
+/**
+ * Returns xmlXPathObjectPtr to morphML node for the given path.
+ * The xmlPathObjectPtr returned by the function contains a set of nodes and 
+ * other information needed to iterate through the set and act on the results.
+*/
 xmlXPathObjectPtr NCell::getnodeset (xmlChar *xpath)
 {
         xmlXPathObjectPtr result;
@@ -101,7 +130,10 @@ xmlXPathObjectPtr NCell::getnodeset (xmlChar *xpath)
         }*/
         return result;
 }
-
+/**
+ * Predicate returning true or false depending on whether this NCell's  
+ * "setnamespaces" attribute has been set. 
+ */
 bool NCell::isSetNamespaces()
 {
 	return setnamespaces;
@@ -110,7 +142,10 @@ bool NCell::isSetNamespaces()
 {
 	return synapticChl;
 } */
-/* register all namespaces specified in the xml neuroml file */
+
+/**
+ *  Register the namespaces used in morphML file and returns 0 if success. 
+ */
 int NCell::register_namespaces()
 {
      int ret,r;
@@ -155,7 +190,9 @@ int NCell::register_namespaces()
      }
      return(r);
 }
-/* function to get the number of segments */
+/**
+ * Returns the number of segments in the NCell.
+ */
 unsigned int NCell::getNumSegments() 
 {
 	if (! isSetNamespaces() ){	
@@ -171,7 +208,10 @@ unsigned int NCell::getNumSegments()
  	return numSegments;
 	
 }
-/* function to get the number of cables */
+/**
+ * Returns the number of cables in the NCell.
+ * 
+ */
 unsigned int NCell::getNumCables() 
 {
 	xmlXPathObjectPtr result;
@@ -189,7 +229,10 @@ unsigned int NCell::getNumCables()
  	return numCables;
 	
 }
-
+/**
+ * Returns the number of channels in the NCell.
+ * 
+ */
 /* function to get the number of channels */
 unsigned int NCell::getNumChannels() 
 {
@@ -273,8 +316,10 @@ unsigned int NCell::getNumChannels()
 	}
  	return numChannels;
 }
-
-/* function to get the number of pools */
+/**
+ * Returns the number of calciumpools in the NCell. 
+ * 
+ */
 unsigned int NCell::getNumPools() 
 {
 	unsigned int numPool = 0;	
@@ -360,7 +405,10 @@ unsigned int NCell::getNumPools()
 	}
 	return numPool;
 }
-/* function to get the number of synaptic channels */
+/**
+ * Returns the number of synaptic channels in the NCell.
+ * 
+ */
 unsigned int NCell::getNumSynChannels() 
 {
 	xmlXPathObjectPtr result;
@@ -378,8 +426,10 @@ unsigned int NCell::getNumSynChannels()
 	return numSynChannels;
 	
 }
-
-/* function to get the init membrane potential */
+/**
+ * Returns the init membrane potential of the NCell.
+ * 
+ */
 double NCell::getInit_memb_potential() 
 {
 	double initVm;	
@@ -412,8 +462,10 @@ double NCell::getInit_memb_potential()
 	 return initVm;
 	
 }
-
-/* function to get the specific capacitance */
+/**
+ * Returns the specific capacitance of the NCell.
+ * 
+ */
 double NCell::getSpec_capacitance() 
 {
 	double CM;	
@@ -446,7 +498,10 @@ double NCell::getSpec_capacitance()
 	return CM;
 	
 }
-/* function to get the specific axial resistance */
+/**
+ * Returns the specific axial resistance of the NCell.
+ * 
+ */
 double NCell::getSpec_axial_resistance() 
 {
 	double RA;
@@ -479,7 +534,10 @@ double NCell::getSpec_axial_resistance()
 	   return RA;
 	
 }
-/* find nth Segment */
+/**
+ * Returns the object to nth segment. 
+ * 
+ */
 const Segment* NCell::getSegment(int n)
 {
   xmlXPathContextPtr context;
@@ -581,8 +639,10 @@ const Segment* NCell::getSegment(int n)
   xmlXPathFreeObject(result); 
   return &seg_;
 }
-
-/* find Segment with the given id */
+/**
+ * Returns the object to Segment with the given id. 
+ * 
+ */
 const Segment* NCell::getSegment(string id)
 {
   xmlXPathObjectPtr result;
@@ -684,8 +744,11 @@ const Segment* NCell::getSegment(string id)
   xmlXPathFreeObject(result); 
   return &seg_;
 }
-/* find nth Cable */
-const NCable * NCell::getCable(int n)
+/**
+ * Returns the object to nth NCable. 
+ * 
+ */
+const NCable* NCell::getCable(int n)
 {
 	xmlNodeSetPtr nodeset;
         xmlXPathObjectPtr result;
@@ -745,12 +808,19 @@ const NCable * NCell::getCable(int n)
      return &cab_;
 
 }
-/* find nth Channel */
+/**
+ * Returns the object to nth Channel. 
+ * 
+ */
 Channel* NCell::getChannel(int n)
 {
 	//chl_ = vec_channel[n];
 	return &vec_channel[n];
 }
+/**
+ * Returns the object to nth IonPool. 
+ * 
+ */
 IonPool* NCell::getPool(int n)
 {
 	return &vec_pool[n];
@@ -843,7 +913,10 @@ IonPool* NCell::getPool(int n)
    }
  return &chl_;
 }*/
-/* find nth Synaptic Channel */
+/**
+ * Returns the object to nth SynChannel. 
+ * 
+ */
 SynChannel* NCell::getSynChannel(int n)
 {
 	NCell c;	
@@ -872,7 +945,7 @@ SynChannel* NCell::getSynChannel(int n)
 	       if(cur->ns) { 
 		  char *type;
 		  type = (char *)xmlGetProp(cur, (const xmlChar *) "synapse_type"); 
-		  cout <<"syn type" << type << endl;
+		  //cout <<"syn type" << type << endl;
 		  synchl_.setSynType( type );
 	       }
 	     }

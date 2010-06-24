@@ -13,8 +13,10 @@
 #include "NCell.h"
 using namespace std;
 vector< string > NBase::paths_;
-
-/* this is supposed to be the first function to invoke. it takes filename and returns NCell class */
+/**
+ * This is supposed to be the first function to invoke to read the model. 
+ * Returns NCell object for a given filename.
+ */
 NCell* NBase::readNeuroML(string filename)
 {	
 	ifstream fin;
@@ -49,9 +51,18 @@ NCell* NBase::readNeuroML(string filename)
 	cell_.setReaderptr(readerPtr);
 	return &cell_;
 }
-
+/**
+ * It is MOOSE specific.  Sets the possible paths of MorphML file. 
+ */
 void NBase::setPaths( vector< string > paths )
-{ paths_ = paths; }
+{ 
+	paths_ = paths; 
+}
+/**
+ * It is MOOSE specific.  Returns the possible paths of MorphML file. 
+ */
 const vector< string >& NBase::getPaths()
-{ return paths_; }
+{ 
+	return paths_; 
+}
 
