@@ -1,9 +1,9 @@
 TARGET	   = neuroml
-INCLUDEDIR = /usr/include/libxml2
+INCLUDEDIR = /usr/include/libxml2/
 CXX        = g++
-CXXFLAGS   = -g -Wall
-LDFLAGS    = -L/usr/lib/
-LIBS       = -lxml2 
+CXXFLAGS   = -g -Wall 
+LDFLAGS    = 
+LIBS       = -lxml2 -L/usr/local/lib/
 
 # Get the processor architecture - i686 or x86_64
 MACHINE?=i686 
@@ -15,7 +15,6 @@ endif
 ifeq ($(OSTYPE),Linux)
 ifeq ($(MACHINE),x86_64)
 LIBS=-L/lib64 -L/usr/lib64 $(LIBS) 
-
 endif
 endif
 
@@ -36,8 +35,8 @@ HEADERS = \
 	Channel.h	\
 	NCable.h 	\
     SynChannel.h    \
-    IonPool.h	
-
+    IonPool.h	\
+	
 default: $(TARGET)
 
 $(OBJ): $(HEADERS)
@@ -54,7 +53,7 @@ IonPool.o:	NCell.h IonPool.h
 
 ifeq ($(TYPE),static)
 $(TARGET): $(OBJ) $(HEADERS)
-	$(LD) -r -o neuroml.o $(OBJ) $(LIBS) $(LDFLAGS)
+	$(LD) -r -o neuroml.o $(OBJ) 
 	ar rcs libneuroml.a neuroml.o
 	@echo "Created static library"
 endif

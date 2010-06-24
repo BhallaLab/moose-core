@@ -3,7 +3,7 @@
 
 using namespace std;
 
-class Point
+class NPoint
 {
 	
 	   	
@@ -43,7 +43,7 @@ class Segment
 		bool isSetParent() const;
 		bool isSetProximal() const;
 		const Segment* getSegment(string filename,string id);
-		Point proximal,distal;
+		NPoint proximal,distal;
 	protected:
 		std::string id;
 		std::string name;		
