@@ -370,31 +370,9 @@ class NOrder: public ZeroOrder
 class StochNOrder: public NOrder
 {
 	public:
-		StochNOrder( double k, vector< const double* > v )
-			: NOrder( k, v )
-		{
-			// Here we sort the y vector so that if there are repeated
-			// substrates, they are put consecutively. This lets us use
-			// the algorithm below to deal with repeats.
-			sort( v_.begin(), v_.end() );
-		}
+		StochNOrder( double k, vector< const double* > v );
 
-		double operator() () const {
-			double ret = k_;
-			vector< const double* >::const_iterator i;
-			const double* lasty = 0;
-			double y;
-			for ( i = v_.begin(); i != v_.end(); i++) {
-				assert( !isnan( **i ) );
-				if ( lasty == *i )
-					y -= 1.0;
-				else
-					y = **i;
-				ret *= y;
-				lasty = *i;
-			}
-			return ret;
-		}
+		double operator() () const;
 };
 
 extern class ZeroOrder* 

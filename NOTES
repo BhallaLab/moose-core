@@ -6481,5 +6481,7 @@ Stoich::setPath begins to handle traversal. Yet to deal with messages.
 ============================================================================
 24 June 2010
 Still working on traversal. Checkin 1918.
+Traversal coming along. Major updates including eliminating the Element
+calls relating to sync messaging. Not yet there, but checkin 1919.
 
 ============================================================================

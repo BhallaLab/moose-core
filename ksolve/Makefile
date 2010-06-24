@@ -16,6 +16,7 @@ OBJ = \
 	ZombieReac.o \
 	ZombieEnz.o \
 	ZombieMMenz.o \
+	RateTerm.o \
 	testKsolve.o	\
 
 	
@@ -36,6 +37,7 @@ ZombieReac.o:	ZombieReac.h Stoich.h KinSparseMatrix.h RateTerm.h ../basecode/Spa
 ZombieEnz.o:	ZombieEnz.h Stoich.h KinSparseMatrix.h RateTerm.h ../basecode/SparseMatrix.h ../basecode/ElementValueFinfo.h
 ZombieMMenz.o:	ZombieMMenz.h Stoich.h KinSparseMatrix.h RateTerm.h ../basecode/SparseMatrix.h ../basecode/ElementValueFinfo.h
 testKsolve.o:	Stoich.h ../kinetics/ReadKkit.h ../shell/Shell.h
+RateTerm.o:		RateTerm.h
 
 #KineticHub.o:	KineticHub.h
 
