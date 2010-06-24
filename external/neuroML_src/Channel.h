@@ -2,6 +2,10 @@
 #define _CHANNEL_H
 #include <map>	// Somehow this is needed in gcc 4.2.4, even if it is included in the .cpp file.
 using namespace std;
+/**
+ * 
+ * 
+ */
 struct Transition
 {
 	string name;
@@ -16,6 +20,10 @@ struct Transition
 	double xmax;
 	vector< double > tableEntry;
 };
+/**
+ * 
+ * 
+ */
 class Gate
 {
 	public:
@@ -42,6 +50,10 @@ class Gate
 		
 		
 };
+/**
+ * 
+ * 
+ */
 class ChannelDefinition
 {
 	private:
@@ -119,6 +131,10 @@ class ChannelDefinition
 		Gate* getGate(int n);
 		Gate gate;
 };
+/**
+ * 
+ * 
+ */
 class Channel
 {
 	public:

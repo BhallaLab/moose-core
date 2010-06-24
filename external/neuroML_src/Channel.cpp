@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 using namespace std;
-
 #include "NCell.h"
 #include "NBase.h"
 #include "Channel.h"
@@ -19,7 +18,11 @@ using namespace std;
 #include <fstream>
 
 map< std::string,ChannelDefinition >Channel::lookup_;
-/* returns xmlXPathObjectPtr for channelml nodes */
+/**
+ * Returns xmlXPathObjectPtr to channelML node for the given path.
+ * The xmlPathObjectPtr returned by the function contains a set of nodes and 
+ * other information needed to iterate through the set and act on the results.
+*/
 xmlXPathObjectPtr ChannelDefinition::getnodeset (xmlChar *xpath) 
 {
        xmlXPathObjectPtr result;
@@ -40,7 +43,9 @@ xmlXPathObjectPtr ChannelDefinition::getnodeset (xmlChar *xpath)
         }*/
         return result;
 }
-/* register namespaces in the channelml file */
+/**
+ * Register the namespaces used in channelML file and returns 0 if success.
+ */
 int ChannelDefinition::register_channelNamespaces() 
 {
     
@@ -79,10 +84,11 @@ int ChannelDefinition::register_channelNamespaces()
 	}
 	return(r);
 }
-
+/**
+ *  Reads in the definition for the given channelML file. 
+ */
 void ChannelDefinition::readDefinition( std::string& filename )
 {
-        
         docptr = xmlParseFile(&filename[0]);
   	cxtptr = xmlXPathNewContext(docptr);
   	rdrptr = xmlReaderForFile(filename.c_str(), NULL, 0);
@@ -216,7 +222,10 @@ void ChannelDefinition::readDefinition( std::string& filename )
 
    }
 }
-
+/**
+ * Returns the ChannelDefinition object corresponding to the channel.
+ * For now it is assumed that filename is channelname.xml 
+ */
 ChannelDefinition* Channel::lookupDefinition( const std::string& name )
 {	std::string filename = name + ".xml";
         ifstream fin;
@@ -247,32 +256,49 @@ ChannelDefinition* Channel::lookupDefinition( const std::string& name )
 	
 	
 }
+/**
+ * Sets the value of the "name" attribute of this Channel. 
+ */
 void Channel::setName( const std::string& value )
 {
 	name = value;
 	definition_ = lookupDefinition( value );
 	
 }
+/**
+ * Unsets the value of the "name" attribute of this Channel. 
+ */
 void Channel::unsetName( )
 {
 	name.erase();
 }
+/**
+ * Predicate returning true or false depending on whether this Channel's "name"
+ * attribute has been set. 
+ */
 bool Channel::isSetName () const
 {
    return (name.empty() == false);
 }
+/**
+ * Returns the value of the "name" attribute of this Channel. 
+ * 
+ */
 const std::string& Channel::getName() const
 {
 	return name;
 }
+
 double ChannelDefinition::getMax_v()
 {
 	return max_v;
 }
+
 void ChannelDefinition::setMax_v( double value )
 {
 	max_v = value;
 }
+
 double ChannelDefinition::getMin_v()
 {
 	return min_v;
@@ -281,147 +307,263 @@ void ChannelDefinition::setMin_v( double value )
 {
 	min_v = value;
 }
+
 double ChannelDefinition::getDivs()
 {
 	return divs;
 }
+
 void ChannelDefinition::setDivs( double value )
 {
 	divs = value;
 }
+/**
+ * Returns the value of the "max_v" attribute of this Channel.
+ * 
+ */
 double Channel::getMax_v()
 {
 	return definition_->getMax_v();
 }
+/**
+ * Sets the value of the "max_v" attribute of this Channel. 
+ * 
+ */
 void Channel::setMax_v( double value )
 {
 	definition_->setMax_v( value );
 }
+/**
+ * Returns the value of the "min_v" attribute of this Channel.
+ * 
+ */
 double Channel::getMin_v()
 {
 	return definition_->getMin_v();
 }
+/**
+ * Sets the value of the "min_v" attribute of this Channel. 
+ * 
+ */
 void Channel::setMin_v( double value )
 {
 	definition_->setMin_v( value );
 }
+/**
+ * Returns the value of the "divs" attribute of this Channel.
+ * 
+ */
 double Channel::getDivs()
 {
 	return definition_->getDivs();
 }
+/**
+ * Sets the value of the "divs" attribute of this Channel. 
+ * 
+ */
 void Channel::setDivs( double value )
 {
 	definition_->setDivs( value );
 }
-
+/**
+ * Sets the value of the "gmax" attribute of this Channel. 
+ * 
+ */
 void Channel::setGmax( double value )
 {
 	gmax = value;
 }
+/**
+ * Returns the value of the "gmax" attribute of this Channel.
+ * 
+ */
 const double Channel::getGmax() const
 {
 	return gmax;
 }
+/**
+ * Returns the value of the "segGroups" attribute of this Channel.
+ * 
+ */
 vector< string > Channel::getSegGroups() const
 {
 	return segGroups;
 }
+/**
+ * Sets the value of the "segGroups" attribute of this Channel. 
+ * 
+ */
 void Channel::setSegGroups( string seg )
 {
 	segGroups.push_back( seg );
 }
+/**
+ * 
+ * Unsets the value of the "segGroups" attribute of this Channel. 
+ */
 void Channel::unsetSegGroups()
 {
 	segGroups.clear();
 }
+/**
+ * Sets the value of the "groups" attribute of this Channel. 
+ * 
+ */
 void Channel::setGroups( string value )
 {
 	groups.push_back( value );
 }
+/**
+ * Returns the value of the "groups" attribute of this Channel.
+ * 
+ */
 vector < string > Channel::getGroups() const
 {
 	return groups;
 }
+/**
+ * Sets the value of the "passivecond" attribute of this Channel. 
+ * 
+ */
 void Channel::setPassivecond(bool value)
 {
  	passivecond = value;
 }
+/**
+ * Returns the value of the "passivecond" attribute of this Channel.
+ * 
+ */
 bool Channel::getPassivecond() const
 {
 	return passivecond;
 }
+/**
+ * Returns the value of the "channel_type" attribute of this Channel.
+ * 
+ */
 const std::string& Channel::getChannel_type()
 {
 	return definition_->getChannel_type();
 }
+/**
+ * Sets the value of the "channel_type" attribute of this Channel. 
+ * 
+ */
 void Channel::setChannel_type(const std::string& value )
 {
 	definition_->setChannel_type( value );
 }
+/**
+ * Returns the value of the "density" attribute of this Channel.
+ * 
+ */
 bool Channel::getDensity()
 {
 	return definition_->getDensity();
 }
+/**
+ * Sets the value of the "density" attribute of this Channel. 
+ * 
+ */
 void Channel::setDensity( bool value )
 {
 	definition_->setDensity( value );
 }
+/**
+ * Returns the value of the "claw" attribute of this Channel.
+ * 
+ */
 const std::string& Channel::getCond_law()
 {
 	return definition_->getCond_law();
 }
+/**
+ * Sets the value of the "claw" attribute of this Channel. 
+ * 
+ */
 void Channel::setCond_law(const std::string& value )
 {
 	definition_->setCond_law( value );
 }
+/**
+ * Returns the value of the "ion" attribute of this Channel.
+ * 
+ */
 const std::string& Channel::getIon()
 {
 	return definition_->getIon();
 }
+/**
+ * Sets the value of the "ion" attribute of this Channel. 
+ * 
+ */
 void Channel::setIon(const std::string& value )
 {
 	definition_->setIon( value );
 }
+/**
+ * Returns the value of the "erev" attribute of this Channel.
+ * 
+ */
 double Channel::getDefault_erev() 
 {
 	return definition_->getDefault_erev();
 }
+/**
+ * Sets the value of the "erev" attribute of this Channel. 
+ * 
+ */
 void Channel::setDefault_erev(double value )
 {
 	definition_->setDefault_erev( value );
 }
+/**
+ * Returns the value of the "gmax" attribute of this Channel.
+ * 
+ */
 double Channel::getDefault_gmax()
 {
 	return definition_->getDefault_gmax();
 }
+/**
+ * Sets the value of the "gmax" attribute of this Channel. 
+ * 
+ */
 void Channel::setDefault_gmax(double value )
 {
 	definition_->setDefault_gmax( value );
 }
+
 const std::string& ChannelDefinition::getChannel_type()
 {
 	return channel_type;
 }
+
 void ChannelDefinition::setChannel_type(const std::string& value )
 {
 	channel_type = value;
 }
+
 bool ChannelDefinition::getDensity()
 {
 	return density;
 }
+
 void ChannelDefinition::setDensity( bool value )
 {
 	density = value;
 }
+
 const std::string& ChannelDefinition::getCond_law()
 {
 	return claw;
 }
+
 void ChannelDefinition::setCond_law(const std::string& value )
 {
 	claw = value;
 }
+
 const std::string& ChannelDefinition::getIon()
 {
 	return ion;
@@ -430,14 +572,17 @@ void ChannelDefinition::setIon(const std::string& value )
 {
 	ion = value;
 }
+
 double ChannelDefinition::getDefault_erev() 
 {
 	return erev;
 }
+
 void ChannelDefinition::setDefault_erev(double value )
 {
 	erev = value;
 }
+
 double ChannelDefinition::getDefault_gmax()
 {
 	return gmax;
@@ -446,6 +591,7 @@ void ChannelDefinition::setDefault_gmax(double value )
 {
 	gmax = value;
 }
+
 const std::string& Gate::getX_variable()
 {
 	return x_variable;
@@ -454,30 +600,43 @@ void Gate::setX_variable(const std::string& value )
 {
 	x_variable = value;
 }
+/**
+ * Returns the value of the "name" attribute of this Channel.
+ * 
+ */
 const std::string& Gate::getY_variable()
 {
 	return y_variable;
 }
+/**
+ * Sets the value of the "name" attribute of this Channel. 
+ * 
+ */
 void Gate::setY_variable(const std::string& value )
 {
 	y_variable = value;
 }
+
 const std::string& Gate::getGateName()
 {
 	return gateName;
 }
+
 void Gate::setGateName(const std::string& value )
 {
 	gateName = value;
 }
+
 double Gate::getInstances()
 {
 	return instances;
 }
+
 void Gate::setInstances(double value )
 {
 	instances = value;
 }
+
 const std::string& Gate::getClosestateId()
 {
 	return closeId;
@@ -505,6 +664,7 @@ void ChannelDefinition::setConc_name(const std::string& value )
 {
 	conc_name = value;
 }*/
+
 const std::string& ChannelDefinition::getConc_ion()
 {
 	return conc_ion;
@@ -534,10 +694,12 @@ void ChannelDefinition::setVolt_Charge(double value )
 {
 	charge = value;
 }
+
 double ChannelDefinition::getDepen_Charge()
 {
 	return depen_charge;
 }
+
 void ChannelDefinition::setDepen_Charge(double value )
 {
 	depen_charge = value;
@@ -562,18 +724,22 @@ void ChannelDefinition::setMax_conc(double value )
 {
 	max_conc = value;
 }
+
 bool ChannelDefinition::isSetConc_dependence()
 {
 	return setconc_dependence;
 }
+
 bool ChannelDefinition::isSetCharge()
 {
  	return setCharge;
 }
+
 bool ChannelDefinition::getFixed_erev()
 {
 	return fixed_erev;
 }
+
 void ChannelDefinition::setFixed_erev( bool value )
 {
 	fixed_erev = value;
@@ -595,10 +761,12 @@ unsigned int ChannelDefinition::getNumGates()
         unsigned int numGates = (nodeset) ? nodeset->nodeNr : 0;
 	return numGates;
 }
+
 bool ChannelDefinition::issetChannelNamespaces() 
 {
 	return setchlnamespaces;
 }
+
 Gate* ChannelDefinition::getGate(int n)
 {
   xmlXPathObjectPtr result;
@@ -839,59 +1007,114 @@ Gate* ChannelDefinition::getGate(int n)
    }
    return &gate;	
 }
+/**
+ * Returns the value of the "x_variable" attribute of this Channel.
+ * 
+ */
 const std::string& Channel::getX_variable()
 {
 	return definition_->gate.getX_variable();
 }
+/**
+ * Sets the value of the "x_variable" attribute of this Channel. 
+ * 
+ */
 void Channel::setX_variable(const std::string& value )
 {
 	definition_->gate.setX_variable( value );
 }
+/**
+ * Returns the value of the "y_variable" attribute of this Channel.
+ * 
+ */
 const std::string& Channel::getY_variable()
 {
 	return definition_->gate.getY_variable();
 }
+/**
+ * 
+ * Sets the value of the "y_variable" attribute of this Channel. 
+ */
 void Channel::setY_variable(const std::string& value )
 {
 	definition_->gate.setY_variable( value );
 }
+/**
+ * Returns the value of the "gateName" attribute of this Channel.
+ * 
+ */
 const std::string& Channel::getGateName()
 {
 	return definition_->gate.getGateName();
 }
-
+/**
+ * Sets the value of the "gateName" attribute of this Channel. 
+ * 
+ */
 void Channel::setGateName(const std::string& value )
 {
 	definition_->gate.setGateName( value );
 }
+/**
+ * Returns the value of the "instances" attribute of this Channel.
+ * 
+ */
 double Channel::getInstances()
 {
 	return definition_->gate.getInstances();
 }
+/**
+ * 
+ * Sets the value of the "instances" attribute of this Channel. 
+ */
 void Channel::setInstances(double value )
 {
 	definition_->gate.setInstances( value );
 }
+/**
+ * Returns the value of the "closeId" attribute of this Channel.
+ * 
+ */
 const std::string& Channel::getClosestateId()
 {
 	return definition_->gate.getClosestateId();
 }
+/**
+ * Sets the value of the "closeId" attribute of this Channel. 
+ * 
+ */
 void Channel::setClosestateId(const std::string& value )
 {
 	definition_->gate.setClosestateId( value );
 }
+/**
+ * Returns the value of the "openId" attribute of this Channel.
+ * 
+ */
 const std::string& Channel::getOpenstateId()
 {
 	return definition_->gate.getOpenstateId();
 }
+/**
+ * Sets the value of the "openId" attribute of this Channel. 
+ * 
+ */
 void Channel::setOpenstateId(const std::string& value )
 {
 	definition_->gate.setOpenstateId( value );
 }
+/**
+ * Returns an object of Gate attribute of this Channel.
+ * 
+ */
 Gate* Channel::getGate(int n)
 {
 	return definition_->getGate(n);
 }
+/**
+ * Returns the number of gates in the Channel.
+ * 
+ */
 unsigned int Channel::getNumGates() 
 {
 	return definition_->getNumGates();
@@ -904,79 +1127,140 @@ void Channel::setConc_name(const std::string& value )
 {
 	definition_->setConc_name( value );
 }*/
+/**
+ * Returns the value of the "conc_ion" attribute of this Channel.
+ * 
+ */
 const std::string& Channel::getConc_ion()
 {
 	return definition_->getConc_ion();
 }
-
+/**
+ * Sets the value of the "conc_ion" attribute of this Channel. 
+ * 
+ */
 void Channel::setConc_ion(const std::string& value )
 {
 	definition_->setConc_ion( value );
 }
-
+/**
+ * Returns the value of the "variable_name" attribute of this Channel.
+ * 
+ */
 const std::string& Channel::getVariable_name()
 {
 	return definition_->getVariable_name();
 }
-
+/**
+ * Sets the value of the "variable_name" attribute of this Channel. 
+ * 
+ */
 void Channel::setVariable_name(const std::string& value )
 {
 	definition_->setVariable_name( value );
 }
-
+/**
+ * Returns the value of the "charge" attribute of this Channel.
+ * 
+ */
 double Channel::getVolt_Charge()
 {
 	return definition_->getVolt_Charge();
 }
-
+/**
+ * Sets the value of the "charge" attribute of this Channel. 
+ * 
+ */
 void Channel::setVolt_Charge(double value )
 {
 	definition_->setVolt_Charge( value );
 }
-
+/**
+ * Returns the value of the "min_conc" attribute of this Channel.
+ * 
+ */
 double Channel::getMin_conc()
 {
 	return definition_->getMin_conc();
 }
-
+/**
+ * Sets the value of the "min_conc" attribute of this Channel. 
+ * 
+ */
 void Channel::setMin_conc(double value )
 {
 	definition_->setMin_conc( value );
 }
-
+/**
+ * Returns the value of the "max_conc" attribute of this Channel.
+ * 
+ */
 double Channel::getMax_conc()
 {
 	return definition_->getMax_conc();
 }
-
+/**
+ * Sets the value of the "max_conc" attribute of this Channel. 
+ * 
+ */
 void Channel::setMax_conc(double value )
 {
 	definition_->setMax_conc( value );
 }
+/**
+ * Predicate returning true or false depending on whether this Channel's 
+ * "setconc_dependence" attribute has been set. 
+ * 
+ */
 bool Channel::isSetConc_dependence()
 {
 	return definition_->isSetConc_dependence();
 }
+/**
+ * Returns the value of the "fixed_erev" attribute of this Channel.
+ * 
+ */
 bool Channel::getFixed_erev()
 {
 	return definition_->getFixed_erev();
 }
+/**
+ * Sets the value of the "fixed_erev" attribute of this Channel. 
+ * 
+ */
 void Channel::setFixed_erev( bool value )
 {
 	definition_->setFixed_erev(value);
 }
+/**
+ * Returns the value of the "depen_charge" attribute of this Channel.
+ * 
+ */
 double Channel::getDepen_Charge()
 {
 	return definition_->getDepen_Charge();
 }
+/**
+ * Sets the value of the "depen_charge" attribute of this Channel. 
+ * 
+ */
 void Channel::setDepen_Charge(double value )
 {
 	definition_->setDepen_Charge(value);
 }
+/**
+ * Predicate returning true or false depending on whether this Channel's 
+ * "setCharge" attribute has been set. 
+ * 
+ */
 bool Channel::isSetCharge()
 {
  	return definition_->isSetCharge();
 }
+/**
+ * 
+ * Unsets the value of the "groups" attribute of this Channel. 
+ */
 void Channel::unsetGroups()
 {
 	groups.clear();
