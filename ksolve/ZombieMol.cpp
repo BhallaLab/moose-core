@@ -151,22 +151,22 @@ void ZombieMol::reinit( const Eref& e, const Qinfo*q, ProcInfo* p )
 
 void ZombieMol::setN( Eref e, const Qinfo* q, double v )
 {
-	S_[ convertId( e.id() ) ] = v;
+	S_[ convertIdToMolIndex( e.id() ) ] = v;
 }
 
 double ZombieMol::getN( Eref e, const Qinfo* q ) const
 {
-	return S_[ convertId( e.id() ) ];
+	return S_[ convertIdToMolIndex( e.id() ) ];
 }
 
 void ZombieMol::setNinit( Eref e, const Qinfo* q, double v )
 {
-	Sinit_[ convertId( e.id() ) ] = v;
+	Sinit_[ convertIdToMolIndex( e.id() ) ] = v;
 }
 
 double ZombieMol::getNinit( Eref e, const Qinfo* q ) const
 {
-	return Sinit_[ convertId( e.id() ) ];
+	return Sinit_[ convertIdToMolIndex( e.id() ) ];
 }
 
 void ZombieMol::setConc( Eref e, const Qinfo* q, double v )
@@ -205,15 +205,6 @@ double ZombieMol::getDiffConst( Eref e, const Qinfo* q ) const
 //////////////////////////////////////////////////////////////
 // Zombie conversion functions.
 //////////////////////////////////////////////////////////////
-
-unsigned int  ZombieMol::convertId( Id id ) const
-{
-	unsigned int i = id.value() - objMapStart_;
-	assert( i < objMap_.size() );
-	i = objMap_[i];
-	assert( i < S_.size() );
-	return i;
-}
 
 // static func
 void ZombieMol::zombify( Element* solver, Element* orig )

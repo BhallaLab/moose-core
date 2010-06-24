@@ -163,65 +163,6 @@ double ZombieMMenz::getKcat( Eref e, const Qinfo* q ) const
 // Utility function
 //////////////////////////////////////////////////////////////
 
-/*
-unsigned int  ZombieMMenz::convertId( Id id ) const
-{
-	unsigned int i = id.value() - objMapStart_;
-	assert( i < objMap_.size() );
-	i = objMap_[i];
-	assert( i < rates_.size() );
-	return i;
-}
-
-unsigned int ZombieMMenz::getSubIndex( Element* orig ) const
-{
-	static const SrcFinfo* sub = dynamic_cast< const SrcFinfo* >(
-		MMenz::initCinfo()->findFinfo( "toSub" ) );
-	assert( sub );
-	const vector< MsgFuncBinding >* subVec = 
-		orig->getMsgAndFunc( sub->getBindIndex() );
-
-	if ( subVec->size() == 1 ) {
-		const Msg* m = Msg::getMsg( (*subVec)[0].mid );
-		assert( m );
-
-		Id subId = m->e2()->id();
-		if ( m->e2() == orig )
-			subId = m->e1()->id();
-		unsigned int i = subId.value() - objMapStart_;
-		assert( i < objMap_.size() );
-		unsigned int ret = objMap_[i];
-		assert( ret < S_.size() );
-		return ret;
-	} else {
-		cout << "Cannot handle multi-substrate MM enzymes just yet\n";
-	}
-	return 0;
-}
-
-unsigned int ZombieMMenz::getEnzIndex( Element* orig ) const
-{
-	static const DestFinfo* enz = dynamic_cast< const DestFinfo* >(
-		MMenz::initCinfo()->findFinfo( "enz" ) );
-	assert( enz );
-
-	FuncId fid = enz->getFid();
-
-	MsgId mid = orig->findCaller( fid );
-	const Msg* m = Msg::getMsg( mid );
-	assert( m );
-
-	Id enzId = m->e1()->id();
-	if ( m->e1() == orig )
-		enzId = m->e2()->id();
-	unsigned int i = enzId.value() - objMapStart_;
-	assert( i < objMap_.size() );
-	unsigned int ret = objMap_[i];
-	assert( ret < S_.size() );
-	return ret;
-}
-*/
-
 // static func
 void ZombieMMenz::zombify( Element* solver, Element* orig )
 {

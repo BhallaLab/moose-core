@@ -6490,5 +6490,7 @@ Put in general functions in Element for getInputs and getOutputs for
 specified Finfos. Replaced these in ZombieReac, seems OK. Yet
 to carry through on other Zombies. Checkin 1922.
 Next: Clean up zombies. Build the stoich matrix. Run. More unit tests.
+Cleaning up ZombieReac and ZombieMMenz. Checkin 1924.
+Cleaning up ZombieMol. 
 
 ============================================================================
