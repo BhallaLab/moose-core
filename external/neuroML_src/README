@@ -26,6 +26,13 @@ and copy all the header files to ${MOOSE_SOURCE}/external/include/libneuroml usi
 mkdir ../include/neuroML
 cp *.h ../include/neuroML
 
-Now the moose compilation should work with the supplied Makefiles for neuroML_IO
+Also make sure that you remove any older copy of libneuroml.so in the usual library search path (/usr/lib, /usr/local/lib).
+Now the moose compilation should work with the supplied Makefiles for neuroML_IO.
+If you are using libneuroml as a dynamic library (for example, with pymoose), you have to either copy libneuroml.so to a location searched for libraries (like /usr/lib or /usr/local/lib) or add the location of libneuroml.so to LD_LIBRARY_PATH environment variable. For bash, this will be:
+
+export LD_LIBRARY_PATH=${MOOSE_SOURCE}/external/lib
+
+
+
 
 
