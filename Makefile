@@ -79,6 +79,7 @@ endif
 # Debug mode:
 ifeq ($(BUILD),debug)
 CXXFLAGS = -g -pthread -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
+USE_GSL = 1
 endif
 # Optimized mode:
 ifeq ($(BUILD),release)
@@ -234,6 +235,7 @@ export CXX
 export CXXFLAGS
 export LD
 export LIBS
+export USE_GSL
 
 moose: libs $(OBJLIBS) $(PARALLEL_LIB)
 	$(CXX) $(CXXFLAGS) $(OBJLIBS) $(PARALLEL_LIB) $(LIBS) -o moose

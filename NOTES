@@ -6506,6 +6506,6 @@ Need a clean way to exchange the data structures.
 ============================================================================
 25 June 2010
 First pass at GslIntegrator. Compiles but doesn't do anything as I haven't
-set the USE_GSL flag.
+set the USE_GSL flag. Checkin 1929.
 
 ============================================================================

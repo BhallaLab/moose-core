@@ -22,6 +22,10 @@
 #include "ZombieEnz.h"
 #include "ZombieMMenz.h"
 
+#ifdef USE_GSL
+#include <gsl/gsl_errno.h>
+#endif
+
 #define EPSILON 1e-15
 
 /*
@@ -373,12 +377,12 @@ int Stoich::gslFunc( double t, const double* y, double* yprime, void* s )
 
 int Stoich::innerGslFunc( double t, const double* y, double* yprime )
 {
-	nCall_++;
+	//nCall_++;
 //	if ( lasty_ != y ) { // should count to see how often this copy happens
 		// Copy the y array into the y_ vector.
 		memcpy( &S_[0], y, numVarMolsBytes_ );
-		lasty_ = y;
-		nCopy_++;
+		// lasty_ = y;
+	//	nCopy_++;
 //	}
 
 //	updateDynamicBuffers();

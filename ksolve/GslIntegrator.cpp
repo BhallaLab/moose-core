@@ -275,8 +275,8 @@ void GslIntegrator::stoich( Stoich* s )
 void GslIntegrator::eprocess( Eref e, const Qinfo* q, ProcInfo* info )
 {
 #ifdef USE_GSL
-	double nextt = info->currTime_ + info->dt_;
-	double t = info->currTime_;
+	double nextt = info->currTime + info->dt;
+	double t = info->currTime;
 	while ( t < nextt ) {
 		int status = gsl_odeiv_evolve_apply ( 
 			gslEvolve_, gslControl_, gslStep_, &gslSys_, 
