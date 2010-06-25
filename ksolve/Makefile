@@ -17,6 +17,7 @@ OBJ = \
 	ZombieEnz.o \
 	ZombieMMenz.o \
 	RateTerm.o \
+	GslIntegrator.o	\
 	testKsolve.o	\
 
 	
@@ -38,6 +39,7 @@ ZombieEnz.o:	ZombieEnz.h Stoich.h KinSparseMatrix.h RateTerm.h ../basecode/Spars
 ZombieMMenz.o:	ZombieMMenz.h Stoich.h KinSparseMatrix.h RateTerm.h ../basecode/SparseMatrix.h ../basecode/ElementValueFinfo.h
 testKsolve.o:	Stoich.h ../kinetics/ReadKkit.h ../shell/Shell.h
 RateTerm.o:		RateTerm.h
+GslIntegrator.o:	GslIntegrator.h Stoich.h RateTerm.h KinSparseMatrix.h ../basecode/SparseMatrix.h
 
 #KineticHub.o:	KineticHub.h
 

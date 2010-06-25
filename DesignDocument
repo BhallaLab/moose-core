@@ -488,6 +488,25 @@ FuncId 0 is a dummy function.
 
 ------------------------------------------------------------------------------
 Solvers
+Solvers take over operation of a number of regular objects. This is done
+by replacing the data and class info of the original, with special
+'Zombie' versions provided by the solver. Typically the data provided is
+a wrapper for the data of the solver itself, and the class info is a
+set of access functions that act on the data, with exactly the same interface
+as the original class. The messages of the zombified Element are left intact,
+with the possible exception of the 'process' message.
+
+To do zombification, the Element provides several handy functions:
+MsgId findCaller( fid ): Finds the first Msg that calls the specified fid.
+getInputMsgs( vector< MsgId >, Fid ): Finds all Msgs that call the fid.
+getOutputs< vector< Id >, const SrcFinfo* ): Finds all target Ids of the Src
+getInputs< vector< Id >, const DestFinfo* ): Finds all src Ids of the Dest
+zombieSwap( const Cinfo*, DataHandler* ): Replaces Cinfo and data on Element.
+
+The solver data class should provide utility functions for the Zombies to
+covert object Ids to lookup indices into the solver.
+
+
 Original Data is replaced completely with a solved version
 The Element uses a replacement Cinfo to handle this, so that the operation:
 	OpFunc Element::getOpFunc( funcId ); // asks Cinfo for opFunc.

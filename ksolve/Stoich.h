@@ -21,6 +21,7 @@ class Stoich: public Data
 
 		void setOneWay( bool v );
 		bool getOneWay() const;
+		double getNumVarMols() const;
 
 		void setPath( Eref e, const Qinfo* q, string v );
 		string getPath( Eref e, const Qinfo* q ) const;
@@ -39,9 +40,24 @@ class Stoich: public Data
 		void allocateObjMap( const vector< Id >& elist );
 		void allocateModel( const vector< Id >& elist );
 		void zombifyModel( Eref& e, const vector< Id >& elist );
-		void buildStoichFromModel( const vector< Id >& elist );
 		unsigned int convertIdToReacIndex( Id id ) const;
 		unsigned int convertIdToMolIndex( Id id ) const;
+
+		const double* S() const;
+		const double* Sinit() const;
+
+		//////////////////////////////////////////////////////////////////
+		// Compute functions
+		//////////////////////////////////////////////////////////////////
+		void updateV( );
+
+		void updateRates( vector< double>* yprime, double dt  );
+
+#ifdef USE_GSL
+		static int gslFunc( double t, const double* y, double* yprime, void* s );
+		int innerGslFunc( double t, const double* y, double* yprime );
+#endif // USE_GSL
+
 
 		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
@@ -76,6 +92,7 @@ class Stoich: public Data
 		 *
 		 */
 		unsigned int numVarMols_;
+		unsigned int numVarMolsBytes_;
 
 		/**
 		 * Number of reactions in the solver model. This includes 

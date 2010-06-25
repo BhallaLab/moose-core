@@ -6497,6 +6497,15 @@ Cleaning up ZombieEnz. Checkin 1926.
 Putting in the stoich matrix stuff. Printed it out, seems OK.
 Added in stoich matrix stuff for enzyme too. Printed out 
 barebones enzyme, seems OK. Handles the bigger dend_v26.g model,
-but I won't try to decipher the stoich matrix.
+but I won't try to decipher the stoich matrix. Checkin 1927.
+
+Now on to the solver proper. Added in the Stoich funcs to handle it.
+Need a clean way to exchange the data structures.
+
+
+============================================================================
+25 June 2010
+First pass at GslIntegrator. Compiles but doesn't do anything as I haven't
+set the USE_GSL flag.
 
 ============================================================================
