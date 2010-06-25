@@ -22,6 +22,16 @@ static SrcFinfo1< double > outputLoop (
 	"Sends data in vector in a loop, repeating as often as run continues"
 );
 
+static SrcFinfo1< FuncId > requestData(
+	"requestData",
+	"Sends request for a field to target object"
+);
+
+static DestFinfo recvDataBuf( "recvData",
+	"Handles data sent back following request",
+	new OpFunc1< Table, PrepackedBuffer >( &Table::recvData )
+);
+
 const Cinfo* Table::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
@@ -58,7 +68,6 @@ const Cinfo* Table::initCinfo()
 		static DestFinfo process( "process",
 			"Handles process call, updates internal time stamp.",
 			new EpFunc1< Table, ProcPtr >( &Table::eprocess ) );
-
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
 		//////////////////////////////////////////////////////////////
@@ -81,8 +90,10 @@ const Cinfo* Table::initCinfo()
 		&input,			// DestFinfo
 		&spike,			// DestFinfo
 		&xplot,			// DestFinfo
+		&recvDataBuf,		// DestFinfo
 		&output,		// SrcFinfo
 		&outputLoop,		// SrcFinfo
+		&requestData,		// SrcFinfo
 		&tableEntryFinfo,	// FieldElementFinfo
 	};
 
@@ -120,6 +131,7 @@ void Table::eprocess( Eref e, const Qinfo*q, ProcPtr p )
 
 void Table::process( const ProcInfo* p, const Eref& e )
 {
+	
 	/*
 	*/
 	lastTime_ = p->currTime;
@@ -137,8 +149,10 @@ void Table::process( const ProcInfo* p, const Eref& e )
 	outputLoop.send( e, p, vec_[ outputIndex_ % vec_.size() ] );
 
 	outputIndex_++;
-	// Need to send out a request for the data.
-	// vec_.push_back( input_ );
+
+	// send out a request for data. This magically comes back in the
+	// RecvDataBuf and is handled.
+	requestData.send( e, p, recvDataBuf.getFid() );
 }
 
 void Table::reinit()
@@ -208,3 +222,18 @@ unsigned int Table::getVecSize() const
 {
 	return vec_.size();
 }
+
+//////////////////////////////////////////////////////////////
+// Test for 'get'
+//////////////////////////////////////////////////////////////
+
+void Table::recvData( PrepackedBuffer pb )
+{
+	assert ( pb.dataSize() == sizeof( double ) );
+	double ret = *reinterpret_cast< const double* >( pb.data() );
+
+	vec_.push_back( ret );
+}
+
+
+//////////////////////////////////////////////////////////////

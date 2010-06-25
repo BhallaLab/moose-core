@@ -6517,7 +6517,13 @@ to harness the 'Get' command capabilities to do this. Examples:
 - Plot 'get' request:		Plot			Plot
 - GSL stoich request:		Shell or Manager	GslIntegrator.
 
-Seems to be getting close. But it dies.
+Defer for a bit. Focus on the solver. Seems to be getting close. But it dies.
 Turned out there was a sign flip for the Stoich matrix terms for Reac.
-Fixed. Runs. Does Kholodenko oscillatory model correctly.
+Fixed. Runs. Does Kholodenko oscillatory model correctly. Checkin 1932.
+
+Implemeinting hooks for Table to be able to request a datum,
+typically used when trying to plot values on distinct timesteps.
+Trying to compile...
+Compiled, clears tests without hanging, but need to test the new functions.
+
 ============================================================================

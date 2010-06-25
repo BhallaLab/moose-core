@@ -40,6 +40,7 @@ class Table: public Data
 		void input( double v );
 		void spike( double v );
 		void xplot( string file, string plotname );
+		void recvData( PrepackedBuffer pb );
 
 		//////////////////////////////////////////////////////////////////
 		// Lookup funcs for table
