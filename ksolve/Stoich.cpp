@@ -28,11 +28,10 @@
 
 #define EPSILON 1e-15
 
-/*
-static Finfo* reacShared[] = {
-	&reacDest, &nOut
-};
-*/
+static SrcFinfo1< Stoich* > plugin( 
+		"plugin", 
+		"Sends out Stoich pointer so that plugins can directly access fields and functions"
+	);
 
 const Cinfo* Stoich::initCinfo()
 {
@@ -85,6 +84,7 @@ const Cinfo* Stoich::initCinfo()
 		&useOneWay,		// Value
 		&nVarMols,		// Value
 		&path,			// Value
+		&plugin,		// SrcFinfo
 		&process,			// DestFinfo
 		&reinit,			// DestFinfo
 	};
@@ -106,6 +106,11 @@ const Cinfo* Stoich::initCinfo()
 static const Cinfo* stoichCinfo = Stoich::initCinfo();
 
 Stoich::Stoich()
+	: 
+		objMapStart_( 0 ),
+		numVarMols_( 0 ),
+		numVarMolsBytes_( 0 ),
+		numReac_( 0 )
 {;}
 
 //////////////////////////////////////////////////////////////
@@ -226,9 +231,11 @@ void Stoich::allocateModel( const vector< Id >& elist )
 		}
 	}
 
+	numVarMolsBytes_ = numVarMols_ * sizeof( double );
 	S_.resize( numVarMols_ + numBufMols, 0.0 );
 	Sinit_.resize( numVarMols_ + numBufMols, 0.0 );
 	rates_.resize( numReac_ );
+	v_.resize( numReac_, 0.0 );
 	N_.setSize( numVarMols_ + numBufMols, numReac_ );
 }
 

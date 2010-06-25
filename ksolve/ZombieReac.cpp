@@ -217,13 +217,13 @@ void ZombieReac::zombify( Element* solver, Element* orig )
 	unsigned int numReactants = forward->getReactants( molIndex, z->S_ );
 	for ( unsigned int i = 0; i < numReactants; ++i ) {
 		int temp = z->N_.get( molIndex[i], rateIndex );
-		z->N_.set( molIndex[i], rateIndex, temp + 1 );
+		z->N_.set( molIndex[i], rateIndex, temp - 1 );
 	}
 
 	numReactants = reverse->getReactants( molIndex, z->S_ );
 	for ( unsigned int i = 0; i < numReactants; ++i ) {
 		int temp = z->N_.get( molIndex[i], rateIndex );
-		z->N_.set( molIndex[i], rateIndex, temp - 1 );
+		z->N_.set( molIndex[i], rateIndex, temp + 1 );
 	}
 
 	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );

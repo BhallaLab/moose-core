@@ -6508,4 +6508,16 @@ Need a clean way to exchange the data structures.
 First pass at GslIntegrator. Compiles but doesn't do anything as I haven't
 set the USE_GSL flag. Checkin 1929.
 
+Fixed up USE_GSL flag. Compiles. Checkin 1930.
+
+Trying to set up message from Stoich to GSL. Like the plot messages, I want
+to harness the 'Get' command capabilities to do this. Examples:
+				Initiate		Handle return
+- Script/shell 'get' request:	Shell			Shell
+- Plot 'get' request:		Plot			Plot
+- GSL stoich request:		Shell or Manager	GslIntegrator.
+
+Seems to be getting close. But it dies.
+Turned out there was a sign flip for the Stoich matrix terms for Reac.
+Fixed. Runs. Does Kholodenko oscillatory model correctly.
 ============================================================================
