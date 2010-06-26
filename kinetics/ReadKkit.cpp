@@ -203,6 +203,7 @@ void ReadKkit::innerRead( ifstream& fin )
 		}
 	}
 	
+	/*
 	cout << " innerRead: " <<
 			lineNum_ << " lines read, " << 
 			numCompartments_ << " compartments, " << 
@@ -214,6 +215,7 @@ void ReadKkit::innerRead( ifstream& fin )
 			numPlot_ << " plots," <<
 			" PlotDt = " << plotdt_ <<
 			endl;
+			*/
 }
 
 void ReadKkit::makeStandardElements()
@@ -718,6 +720,7 @@ void ReadKkit::addmsg( const vector< string >& args)
 			innerAddMsg( src, mmEnzIds_, "prd", dest, molIds_, "reac" );
 	}
 	else if ( args[3] == "PLOT" ) { // Time-course output for molecule
-		innerAddMsg( src, molIds_, "nOut", dest, plotIds_, "input" );
+		// innerAddMsg( src, molIds_, "nOut", dest, plotIds_, "input" );
+		innerAddMsg( dest, plotIds_, "requestData", src, molIds_, "get_n" );
 	}
 }

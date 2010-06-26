@@ -161,9 +161,11 @@ void Stoich::setPath( Eref e, const Qinfo* q, string v )
 	allocateModel( elist );
 	zombifyModel( e, elist );
 
+	/*
 	cout << "Zombified " << numVarMols_ << " Molecules, " <<
 		numReac_ << " reactions\n";
 	N_.print();
+	*/
 }
 
 string Stoich::getPath( Eref e, const Qinfo* q ) const

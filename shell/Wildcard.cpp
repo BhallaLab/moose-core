@@ -420,9 +420,6 @@ void wildcardTestFunc( Id* elist, unsigned int ne, const string& path )
 void testWildcard()
 {
 	unsigned long i;
-	cout << "\nChecking wildcarding";
-
-	
 	string bb;
 	string ib;
 	findBraceContent( "foo[23][TYPE=Compartment]", bb, ib );
@@ -547,7 +544,7 @@ void testWildcard()
 
 	wildcardTestFunc( el2, 0, "/a1/##[TYPE=IntFire]" );
 	wildcardTestFunc( el2, 100, "/a1/##[TYPE=Mdouble]" );
-	wildcardTestFunc( el2, 50, "/a1/##[TYPE=Mdouble][FIELD(value)<50]" );
+	wildcardTestFunc( el2, 50, "/a1/c1/##[TYPE=Mdouble][FIELD(value)<50]" );
 
 	// Here we set up some thoroughly ugly nesting.
 	// Note the sequence: The wildcarding goes depth first,

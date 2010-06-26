@@ -85,9 +85,9 @@ void testGslIntegrator()
 	for ( unsigned int i = 0; i < 6000; ++i ) {
 		gi->eprocess( gsle, 0, &p );
 		p.currTime = i;
+			/*
 		cout << i << 
 			"	" << stoichData->S()[0] <<
-			/*
 			"	" << stoichData->S()[1] <<
 			"	" << stoichData->S()[2] <<
 			"	" << stoichData->S()[3] <<
@@ -102,8 +102,8 @@ void testGslIntegrator()
 			"	" << stoichData->S()[12] <<
 			"	" << stoichData->S()[13] <<
 			"	" << stoichData->S()[14] <<
-			*/
 			endl;
+			*/
 	}
 
 
