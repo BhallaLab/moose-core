@@ -195,7 +195,7 @@ void testTable()
 	}
 	unsigned int numEntries = Field< unsigned int >::get( 
 		tabid.eref(), "num_table" );
-	assert( numEntries = 100 );
+	assert( numEntries == 100 );
 	for ( unsigned int i = 0; i < 100; ++i ) {
 		Eref temp( tabentry(), DataId( 0, i ) );
 		double ret = Field< double >::get( temp, "value" );
@@ -210,11 +210,58 @@ void testTable()
 	cout << "." << flush;
 }
 
+/**
+ * Tests capacity to send a request for a field value to an object
+ */
+void testGetMsg()
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< unsigned int > dims( 1, 1 );
+	Id tabid = shell->doCreate( "Table", Id(), "tab", dims );
+	assert( tabid != Id() );
+	Id arithid = shell->doCreate( "Arith", Id(), "arith", dims );
+	assert( arithid != Id() );
+	// Table* t = reinterpret_cast< Table* >( tabid.eref().data() );
+	MsgId ret = shell->doAddMsg( "Single", 
+		tabid.eref().fullId(), "requestData",
+		arithid.eref().fullId(), "get_outputValue" );
+	assert( ret != Msg::badMsg );
+	ret = shell->doAddMsg( "Single", arithid.eref().fullId(), "output",
+		arithid.eref().fullId(), "arg1" );
+	assert( ret != Msg::badMsg );
+	SetGet1< double >::set( arithid.eref(), "arg1", 0.0 );
+	SetGet1< double >::set( arithid.eref(), "arg2", 2.0 );
+	shell->setclock( 0, 1, 0 );
+	shell->doUseClock( "/tab,/arith", "process", 0 );
+	shell->doStart( 100 );
+
+	unsigned int numEntries = Field< unsigned int >::get( 
+		tabid.eref(), "num_table" );
+	assert( numEntries == 100 );
+
+	Id tabentry( tabid.value() + 1 );
+	for ( unsigned int i = 0; i < 100; ++i ) {
+		Eref temp( tabentry(), DataId( 0, i ) );
+		double ret = Field< double >::get( temp, "value" );
+		assert( fabs( ret - 2 * ( i + 1 )  ) < 1e-6 );
+	}
+	/*
+	SetGet2< string, string >::set( 
+		tabid.eref(), "xplot", "testfile", "testplot" );
+	tabentry.destroy();
+		*/
+	arithid.destroy();
+	tabid.destroy();
+	cout << "." << flush;
+	
+}
+
 void testBuiltins()
 {
 	testArith();
 	testFibonacci();
 	testTable();
+	testGetMsg();
 }
 
 void testMpiBuiltins( )

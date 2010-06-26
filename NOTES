@@ -6527,3 +6527,6 @@ Trying to compile...
 Compiled, clears tests without hanging, but need to test the new functions.
 
 ============================================================================
+26 June 2010
+Implemented unit test for table to request a datum. A bit of a hack, but the
+whole 'get' system is a bit of a hack.

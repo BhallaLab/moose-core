@@ -224,7 +224,8 @@ template< class T, class A > class GetOpFunc: public OpFunc
 			{;}
 
 		bool checkFinfo( const Finfo* s ) const {
-			return dynamic_cast< const SrcFinfo1< A >* >( s );
+			return ( dynamic_cast< const SrcFinfo1< A >* >( s )
+			|| dynamic_cast< const SrcFinfo1< FuncId >* >( s ) );
 		}
 
 		bool checkSet( const SetGet* s ) const {

@@ -90,7 +90,8 @@ const Cinfo* Table::initCinfo()
 		&input,			// DestFinfo
 		&spike,			// DestFinfo
 		&xplot,			// DestFinfo
-		&recvDataBuf,		// DestFinfo
+		&recvDataBuf,	// DestFinfo
+		&process,		// DestFinfo
 		&output,		// SrcFinfo
 		&outputLoop,		// SrcFinfo
 		&requestData,		// SrcFinfo
@@ -135,6 +136,7 @@ void Table::process( const ProcInfo* p, const Eref& e )
 	/*
 	*/
 	lastTime_ = p->currTime;
+	requestData.send( e, p, recvDataBuf.getFid() );
 	if ( vec_.size() == 0 ) {
 		output.send( e, p, 0.0 );
 		outputLoop.send( e, p, 0.0 );
@@ -152,7 +154,6 @@ void Table::process( const ProcInfo* p, const Eref& e )
 
 	// send out a request for data. This magically comes back in the
 	// RecvDataBuf and is handled.
-	requestData.send( e, p, recvDataBuf.getFid() );
 }
 
 void Table::reinit()
