@@ -6359,8 +6359,8 @@ Yet more cleanup. Finally leaks gone. Checkin 1896.
 
 Now to get back to testing chem kinetics. For starters, 
 * run model, dump data, and compare with genesis.
-+ Bring in solver to scan model tree and zombify it.
-- Test out solver too
+* Bring in solver to scan model tree and zombify it.
+* Test out solver too
 Then in no particular order:
 - Eliminate Data class
 - Implement arbitrary math handler
@@ -6531,4 +6531,5 @@ Compiled, clears tests without hanging, but need to test the new functions.
 Implemented unit test for table to request a datum. A bit of a hack, but the
 whole 'get' system is a bit of a hack. Checkin 1936.
 
-Some cleanup of diagnostic messages during unit tests.
+Some cleanup of diagnostic messages during unit tests. Checkin 1937.
+Checking memory leaks using valgrind. Many fixes. 

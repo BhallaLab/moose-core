@@ -13,7 +13,7 @@ class GslIntegrator
 {
 	public:
 		GslIntegrator();
-
+		~GslIntegrator();
 
 ///////////////////////////////////////////////////
 // Field function definitions

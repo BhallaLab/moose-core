@@ -205,8 +205,9 @@ void testTable()
 	SetGet2< string, string >::set( 
 		tabid.eref(), "xplot", "testfile", "testplot" );
 		*/
-	tabentry.destroy();
-	tabid.destroy();
+	// tabentry.destroy();
+	// tabid.destroy();
+	shell->doDelete( tabid );
 	cout << "." << flush;
 }
 
@@ -250,8 +251,8 @@ void testGetMsg()
 		tabid.eref(), "xplot", "testfile", "testplot" );
 	tabentry.destroy();
 		*/
-	arithid.destroy();
-	tabid.destroy();
+	shell->doDelete( arithid );
+	shell->doDelete( tabid );
 	cout << "." << flush;
 	
 }

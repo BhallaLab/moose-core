@@ -127,8 +127,18 @@ GslIntegrator::GslIntegrator()
 	y_ = 0;
         gslEvolve_ = NULL;
         gslControl_ = NULL;
-        
-        
+}
+
+GslIntegrator::~GslIntegrator()
+{
+	if ( gslEvolve_ )
+		gsl_odeiv_evolve_free( gslEvolve_ );
+	if ( gslControl_ )
+		gsl_odeiv_control_free( gslControl_ );
+	if ( gslStep_ )
+		gsl_odeiv_step_free( gslStep_ );
+	if ( y_ )
+		delete[] y_;
 }
 
 ///////////////////////////////////////////////////
@@ -220,6 +230,7 @@ void GslIntegrator::stoich( Stoich* s )
 	nVarMols_ = s->getNumVarMols();
 	y_ = new double[ nVarMols_ ];
 	// dynamicBuffers_ = s->dynamicBuffers(); // filthy, just a ptr copy
+	// y_ = s->S();
 
 	memcpy( y_, s->Sinit(), nVarMols_ * sizeof( double ) );
 	for ( unsigned int i = 0; i < nVarMols_; ++i )

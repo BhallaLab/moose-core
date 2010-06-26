@@ -14,6 +14,7 @@ class Stoich: public Data
 {
 	public: 
 		Stoich();
+		~Stoich();
 
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
