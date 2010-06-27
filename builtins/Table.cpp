@@ -67,7 +67,7 @@ const Cinfo* Table::initCinfo()
 
 		static DestFinfo process( "process",
 			"Handles process call, updates internal time stamp.",
-			new EpFunc1< Table, ProcPtr >( &Table::eprocess ) );
+			new EpFunc1< Table, ProcPtr >( &Table:eprocess ) );
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
 		//////////////////////////////////////////////////////////////
@@ -127,15 +127,9 @@ Table::Table()
 
 void Table::eprocess( Eref e, const Qinfo*q, ProcPtr p )
 {
-	process( p, e );
-}
-
-void Table::process( const ProcInfo* p, const Eref& e )
-{
-	
-	/*
-	*/
 	lastTime_ = p->currTime;
+	// send out a request for data. This magically comes back in the
+	// RecvDataBuf and is handled.
 	requestData.send( e, p, recvDataBuf.getFid() );
 	if ( vec_.size() == 0 ) {
 		output.send( e, p, 0.0 );
@@ -151,9 +145,6 @@ void Table::process( const ProcInfo* p, const Eref& e )
 	outputLoop.send( e, p, vec_[ outputIndex_ % vec_.size() ] );
 
 	outputIndex_++;
-
-	// send out a request for data. This magically comes back in the
-	// RecvDataBuf and is handled.
 }
 
 void Table::reinit()

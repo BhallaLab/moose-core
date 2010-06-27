@@ -10,7 +10,7 @@
 #ifndef _STOICH_H
 #define _STOICH_H
 
-class Stoich: public Data
+class Stoich
 {
 	public: 
 		Stoich();
@@ -31,8 +31,7 @@ class Stoich: public Data
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
 
-		void process( const ProcInfo* p, const Eref& e );
-		void eprocess( Eref e, const Qinfo* q, ProcInfo* p );
+		void process( Eref e, const Qinfo* q, ProcInfo* p );
 		void reinit( Eref e, const Qinfo* q, ProcInfo* p );
 
 		//////////////////////////////////////////////////////////////////

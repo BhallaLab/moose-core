@@ -61,7 +61,7 @@ const Cinfo* IntFire::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static DestFinfo process( "process",
 			"Handles process call",
-			new EpFunc1< IntFire, ProcPtr >( &IntFire::eprocess ) );
+			new EpFunc1< IntFire, ProcPtr >( &IntFire::process ) );
 
 		//////////////////////////////////////////////////////////////
 		// FieldElementFinfo definition for Synapses
@@ -110,7 +110,7 @@ IntFire::IntFire( double thresh, double tau )
 	;
 }
 
-void IntFire::process( const ProcInfo* p, const Eref& e )
+void IntFire::process( Eref e, const Qinfo* q, ProcPtr p )
 {
 	/*
 	if ( e.index().data() % 100 == 0 ) {
@@ -177,13 +177,6 @@ void IntFire::process( const ProcInfo* p, const Eref& e )
 */
 }
 
-/**
- * This variant is called from the regular messaging.
- */
-void IntFire::eprocess( Eref e, const Qinfo* q, ProcPtr p )
-{
-	process( p, e );
-}
 
 /**
  * Inserts an event into the pendingEvents queue for spikes.
@@ -199,7 +192,7 @@ void IntFire::addSpike( DataId index, const double time )
 	pendingEvents_.push( s );
 }
 
-void IntFire::reinit( Eref& e )
+void IntFire::reinit( Eref e, const Qinfo* q, ProcPtr p )
 {
 	// pendingEvents_.resize( 0 );
 	while( !pendingEvents_.empty() )

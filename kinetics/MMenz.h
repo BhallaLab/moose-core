@@ -15,7 +15,7 @@
  * equation
  * V = kcat.[Etot].[S]/( Km + [S] )
  */
-class MMenz: public Data
+class MMenz
 {
 	public: 
 		MMenz();
@@ -33,9 +33,8 @@ class MMenz: public Data
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
 
-		void process( const ProcInfo* p, const Eref& e );
-		void eprocess( Eref e, const Qinfo* q, ProcInfo* p );
-		void reinit( const Eref& e, const Qinfo*q, ProcInfo* p );
+		void process( Eref e, const Qinfo* q, ProcInfo* p );
+		void reinit( Eref e, const Qinfo*q, ProcInfo* p );
 		void sub( double n );
 		void enz( double n );
 		void prd( double n );

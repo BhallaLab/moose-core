@@ -10,7 +10,7 @@
 #ifndef _MOL_H
 #define _MOL_H
 
-class Mol: public Data
+class Mol
 {
 	friend void testSyncArray( unsigned int size, unsigned int numThreads,
 		unsigned int method );
@@ -41,9 +41,8 @@ class Mol: public Data
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
 
-		void process( const ProcInfo* p, const Eref& e );
-		void eprocess( Eref e, const Qinfo* q, ProcInfo* p );
-		void reinit( const Eref& e, const Qinfo*q, ProcInfo* p );
+		void process( Eref e, const Qinfo* q, ProcInfo* p );
+		void reinit( Eref e, const Qinfo*q, ProcInfo* p );
 		void reac( double A, double B );
 
 		static const Cinfo* initCinfo();

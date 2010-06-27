@@ -10,7 +10,7 @@
 #ifndef _CHEM_COMPT_H
 #define _CHEM_COMPT_H
 
-class ChemCompt: public Data
+class ChemCompt
 {
 	public: 
 		ChemCompt();
@@ -27,8 +27,6 @@ class ChemCompt: public Data
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
-
-		void process( const ProcInfo* p, const Eref& e );
 
 		void extent( DataId di, double volume, double area, double perimeter );
 		//////////////////////////////////////////////////////////////////

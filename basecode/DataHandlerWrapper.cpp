@@ -66,9 +66,9 @@ unsigned int DataHandlerWrapper::numDimensions() const {
 	return parent_->numDimensions();
 }
 
-void DataHandlerWrapper::process( const ProcInfo* p, Element* e ) const
+void DataHandlerWrapper::process( const ProcInfo* p, Element* e, FuncId fid ) const
 {
-	parent_->process( p, e );
+	parent_->process( p, e, fid );
 }
 
 /**

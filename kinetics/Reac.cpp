@@ -61,7 +61,7 @@ const Cinfo* Reac::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static DestFinfo process( "process",
 			"Handles process call",
-			new EpFunc1< Reac, ProcPtr >( &Reac::eprocess ) );
+			new EpFunc1< Reac, ProcPtr >( &Reac::process ) );
 
 		static DestFinfo group( "group",
 			"Handle for group msgs. Doesn't do anything",
@@ -131,12 +131,7 @@ void Reac::prd( double v )
 	prd_ *= v;
 }
 
-void Reac::eprocess( Eref e, const Qinfo* q, ProcInfo* p )
-{
-	process( p, e );
-}
-
-void Reac::process( const ProcInfo* p, const Eref& e )
+void Reac::process( Eref e, const Qinfo* q, ProcInfo* p )
 {
 	toPrd.send( e, p, sub_, prd_ );
 	toSub.send( e, p, prd_, sub_ );
@@ -145,7 +140,7 @@ void Reac::process( const ProcInfo* p, const Eref& e )
 	prd_ = kb_;
 }
 
-void Reac::reinit( const Eref& e, const Qinfo*q, ProcInfo* p )
+void Reac::reinit( Eref e, const Qinfo*q, ProcInfo* p )
 {
 	;
 }

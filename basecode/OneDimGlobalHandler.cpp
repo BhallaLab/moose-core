@@ -63,35 +63,23 @@ DataHandler* OneDimGlobalHandler::copy( unsigned int n, bool toGlobal )
  * Here there is no node decomposition: all entries are present
  * on all nodes.
  */
-void OneDimGlobalHandler::process( const ProcInfo* p, Element* e ) const
+void OneDimGlobalHandler::process( const ProcInfo* p, Element* e, 
+	FuncId fid ) const
 {
 	char* temp = data_ + p->threadIndexInGroup * dinfo()->size();
 	unsigned int stride = dinfo()->size() * p->numThreadsInGroup;
 
+	const OpFunc* f = e->cinfo()->getOpFunc( fid );
+	const ProcOpFuncBase* pf = dynamic_cast< const ProcOpFuncBase* >( f );
+	assert( pf );
+
 	for ( unsigned int i = p->threadIndexInGroup; i < size_; 
 		i+= p->numThreadsInGroup )
 	{
-		reinterpret_cast< Data* >( temp )->process( p, Eref( e, i ) );
+		// reinterpret_cast< Data* >( temp )->process( p, Eref( e, i ) );
+		pf->proc( temp, Eref( e, i ), p );
 		temp += stride;
 	}
-
-/*
-
-
-	unsigned int tbegin = p->threadIndexInGroup;
-
-	unsigned int tbegin = numPerThread * p->threadIndexInGroup;
-	unsigned int tend = tbegin + numPerThread;
-	if ( tend > size_ ) 
-		tend = size_;
-
-	// for ( unsigned int i = 0; i != size_; ++i )
-	for ( unsigned int i = tbegin; i != tend_; ++i )
-	{
-		reinterpret_cast< Data* >( temp )->process( p, Eref( e, i ) );
-		temp += dinfo()->size();
-	}
-	*/
 }
 
 

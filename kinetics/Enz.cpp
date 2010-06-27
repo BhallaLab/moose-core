@@ -94,7 +94,7 @@ const Cinfo* Enz::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static DestFinfo process( "process",
 			"Handles process call",
-			new EpFunc1< Enz, ProcPtr >( &Enz::eprocess ) );
+			new EpFunc1< Enz, ProcPtr >( &Enz::process ) );
 
 		static DestFinfo group( "group",
 			"Handle for group msgs. Doesn't do anything",
@@ -180,12 +180,7 @@ void Enz::cplx( double n ) // dummy
 	r3_ *= n;
 }
 
-void Enz::eprocess( Eref e, const Qinfo* q, ProcInfo* p )
-{
-	process( p, e );
-}
-
-void Enz::process( const ProcInfo* p, const Eref& e )
+void Enz::process( Eref e, const Qinfo* q, ProcInfo* p )
 {
 	toSub.send( e, p, r2_, r1_ );
 	toPrd.send( e, p, r3_, 0 );
@@ -197,7 +192,7 @@ void Enz::process( const ProcInfo* p, const Eref& e )
 	r3_ = k3_;
 }
 
-void Enz::reinit( const Eref& e, const Qinfo*q, ProcInfo* p )
+void Enz::reinit( Eref e, const Qinfo*q, ProcInfo* p )
 {
 	;
 }

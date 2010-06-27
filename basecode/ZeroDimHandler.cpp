@@ -49,11 +49,17 @@ DataHandler* ZeroDimHandler::copy( unsigned int n, bool toGlobal )
 	}
 }
 
-void ZeroDimHandler::process( const ProcInfo* p, Element* e ) const
+void ZeroDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 {
 	if ( Shell::myNode() == 0 && 
-		p->threadIndexInGroup == p->numThreadsInGroup - 1 )
-		reinterpret_cast< Data* >( data_ )->process( p, Eref( e, 0 ) );
+		p->threadIndexInGroup == p->numThreadsInGroup - 1 ) {
+		// reinterpret_cast< Data* >( data_ )->process( p, Eref( e, 0 ) );
+
+		const OpFunc* f = e->cinfo()->getOpFunc( fid );
+		const ProcOpFuncBase* pf = dynamic_cast< const ProcOpFuncBase* >( f );
+		assert( pf );
+		pf->proc( data_, Eref( e, 0 ), p );
+	}
 }
 
 /**

@@ -122,12 +122,7 @@ Mol::Mol( double nInit)
 // MsgDest Definitions
 //////////////////////////////////////////////////////////////
 
-void Mol::eprocess( Eref e, const Qinfo* q, ProcInfo* p )
-{
-	process( p, e );
-}
-
-void Mol::process( const ProcInfo* p, const Eref& e )
+void Mol::process( Eref e, const Qinfo* q, ProcInfo* p )
 {
 	// double A = e.sumBuf( aSlot );
 	// double B = e.sumBuf( bSlot );
@@ -151,7 +146,7 @@ void Mol::reac( double A, double B )
 	B_ += B;
 }
 
-void Mol::reinit( const Eref& e, const Qinfo*q, ProcInfo* p )
+void Mol::reinit( Eref e, const Qinfo*q, ProcInfo* p )
 {
 	n_ = nInit_;
 

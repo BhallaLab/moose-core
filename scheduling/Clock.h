@@ -10,7 +10,7 @@
 #ifndef _CLOCK_H
 #define _CLOCK_H
 
-class Clock: public Data
+class Clock
 {
 	friend void setupTicks();
 	public:
@@ -67,8 +67,6 @@ class Clock: public Data
 		///////////////////////////////////////////////////////////
 		// Handles dt assignment from the child ticks.
 		void setDt( Eref e, const Qinfo* q, double dt );
-
-		void process( const ProcInfo* p, const Eref& e );
 
 		/**
 		 * Pushes the new Tick onto the TickPtr stack.

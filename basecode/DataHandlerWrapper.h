@@ -31,7 +31,7 @@ class DataHandlerWrapper: public DataHandler
 		/**
 		 * calls process on data, using threading info from the ProcInfo
 		 */
-		void process( const ProcInfo* p, Element* e ) const;
+		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
 
 		/**
 		 * Returns the data on the specified index.

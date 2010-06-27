@@ -11,15 +11,13 @@
 #define _INT_FIRE_H
 
 
-class IntFire: public Data
+class IntFire
 {
 	friend void testStandaloneIntFire();
 	friend void testSynapse();
 	public: 
 		IntFire();
 		IntFire( double thresh, double tau );
-		void process( const ProcInfo* p, const Eref& e );
-		void reinit( Eref& e );
 
 		/**
  		 * Inserts an event into the pendingEvents queue for spikes.
@@ -46,7 +44,8 @@ class IntFire: public Data
 		////////////////////////////////////////////////////////////////
 		// Dest Func
 		////////////////////////////////////////////////////////////////
-		void eprocess( Eref e, const Qinfo* q, ProcPtr p );
+		void process( Eref e, const Qinfo* q, ProcPtr p );
+		void reinit( Eref e, const Qinfo* q, ProcPtr p );
 
 		static const Cinfo* initCinfo();
 	private:

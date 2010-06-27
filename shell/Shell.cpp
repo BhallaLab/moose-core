@@ -562,7 +562,7 @@ Id Shell::doFind( const string& path ) const
 // DestFuncs
 ////////////////////////////////////////////////////////////////
 
-void Shell::process( const ProcInfo* p, const Eref& e )
+void Shell::process( Eref e, const Qinfo* q, ProcPtr p )
 {
 	if ( isRunning_ ) {
 		start( runtime_ ); // This is a blocking call

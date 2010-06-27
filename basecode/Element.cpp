@@ -115,9 +115,9 @@ void Element::setName( const string& val )
  * Thread1 handles ( numData_ / numThreads ) to (numData_*2 / numThreads)
  * and so on.
  */
-void Element::process( const ProcInfo* p )
+void Element::process( const ProcInfo* p, FuncId fid )
 {
-	dataHandler_->process( p, this );
+	dataHandler_->process( p, this, fid );
 }
 
 

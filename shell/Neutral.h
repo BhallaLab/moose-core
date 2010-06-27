@@ -10,13 +10,12 @@
 #ifndef _NEUTRAL_H
 #define _NEUTRAL_H
 
-class Neutral: public Data
+class Neutral
 {
 	public:
 		friend istream& operator >>( istream& s, Neutral& d );
 		friend ostream& operator <<( ostream& s, const Neutral& d );
 		Neutral();
-		void process( const ProcInfo* p, const Eref& e );
 
 		/////////////////////////////////////////////////////////////////
 		// Field access functions

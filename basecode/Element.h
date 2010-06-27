@@ -64,7 +64,7 @@ class Element
 		 * Examine process queue, data that is expected every timestep.
 		 * This function is done for all the local data entries in order.
 		 */
-		void process( const ProcInfo* p );
+		void process( const ProcInfo* p, FuncId fid );
 
 
 		/**

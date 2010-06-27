@@ -37,4 +37,4 @@ class ProcInfo
 		void* barrier2;
 };
 
-typedef ProcInfo* ProcPtr;
+typedef const ProcInfo* ProcPtr;

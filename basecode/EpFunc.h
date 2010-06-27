@@ -66,6 +66,40 @@ template< class T, class A > class EpFunc1: public OpFunc
 };
 
 /*
+template< class T > class ProcOpFunc: public OpFunc
+{
+	public:
+		ProcOpFunc( void ( T::*func )( Eref e, const Qinfo* q, ProcPtr ) )
+			: func_( func )
+			{;}
+
+		bool checkFinfo( const Finfo* s ) const {
+			return dynamic_cast< const SrcFinfo1< ProcPtr >* >( s );
+		}
+
+		bool checkSet( const SetGet* s ) const {
+			return dynamic_cast< const SetGet1< ProcPtr >* >( s );
+		}
+
+		// This could do with a whole lot of optimization to avoid
+		// copying data back and forth.
+		void op( Eref e, const char* buf ) const {
+			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
+			Conv< ProcPtr > arg1( buf + sizeof( Qinfo ) );
+			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1 ) ;
+		}
+
+		// This key extra function does Process calls.
+		void proc( char* obj, Eref e, ProcPtr p ) {
+			reinterpret_cast< T* >( obj )->func( e, 0, p );
+		}
+
+	private:
+		void ( T::*func_ )( Eref e, const Qinfo* q, ProcPtr ); 
+}
+*/
+
+/*
 template< class T > class RetFunc: public OpFunc
 {
 	public:

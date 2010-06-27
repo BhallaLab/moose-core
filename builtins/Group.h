@@ -9,12 +9,10 @@
 #ifndef _GROUP_H
 #define _GROUP_H
 
-class Group: public Data
+class Group
 {
 	public: 
 		Group();
-		void process( const ProcInfo* p, const Eref& e );
-
 		static const Cinfo* initCinfo();
 	private:
 };

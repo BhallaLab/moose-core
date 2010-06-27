@@ -10,7 +10,7 @@
 #ifndef _REAC_H
 #define _REAC_H
 
-class Reac: public Data
+class Reac
 {
 	public: 
 		Reac();
@@ -29,9 +29,8 @@ class Reac: public Data
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
 
-		void process( const ProcInfo* p, const Eref& e );
-		void eprocess( Eref e, const Qinfo* q, ProcInfo* p );
-		void reinit( const Eref& e, const Qinfo*q, ProcInfo* p );
+		void process( Eref e, const Qinfo* q, ProcInfo* p );
+		void reinit( Eref e, const Qinfo*q, ProcInfo* p );
 		void sub( double v );
 		void prd( double v );
 

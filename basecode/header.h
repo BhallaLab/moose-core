@@ -55,7 +55,6 @@ class Element;
 class Eref;
 class OpFunc;
 class Qinfo;
-class Data;
 class Cinfo;
 class SetGet;
 
@@ -67,7 +66,6 @@ class SetGet;
 #include "SimGroup.h"
 #include "ProcInfo.h"
 #include "Cinfo.h"
-#include "Data.h"
 #include "Msg.h"
 // #include "MsgManager.h"
 // #include "SingleMsg.h"
@@ -92,6 +90,7 @@ class SetGet;
 #include "OpFunc.h"
 #include "EpFunc.h"
 #include "UpFunc.h"
+#include "ProcOpFunc.h"
 #include "ValueFinfo.h"
 #include "SharedFinfo.h"
 #include "FieldElementFinfo.h"

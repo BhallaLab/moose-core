@@ -66,7 +66,7 @@ DataHandler* OneDimHandler::copy( unsigned int n, bool toGlobal )
 /**
  * Handles both the thread and node decomposition
  */
-void OneDimHandler::process( const ProcInfo* p, Element* e ) const
+void OneDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 {
 	/**
 	 * This is the variant with interleaved threads.
@@ -92,8 +92,18 @@ void OneDimHandler::process( const ProcInfo* p, Element* e ) const
 			p->numThreadsInGroup;
 	
 	char* temp = data_ + ( startIndex - start_ ) * dinfo()->size();
+	/*
 	for ( unsigned int i = startIndex; i != endIndex; ++i ) {
 		reinterpret_cast< Data* >( temp )->process( p, Eref( e, i ) );
+		temp += dinfo()->size();
+	}
+	*/
+
+	const OpFunc* f = e->cinfo()->getOpFunc( fid );
+	const ProcOpFuncBase* pf = dynamic_cast< const ProcOpFuncBase* >( f );
+	assert( pf );
+	for ( unsigned int i = startIndex; i != endIndex; ++i ) {
+		pf->proc( temp, Eref( e, i ), p );
 		temp += dinfo()->size();
 	}
 }

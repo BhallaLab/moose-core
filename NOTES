@@ -6532,4 +6532,53 @@ Implemented unit test for table to request a datum. A bit of a hack, but the
 whole 'get' system is a bit of a hack. Checkin 1936.
 
 Some cleanup of diagnostic messages during unit tests. Checkin 1937.
-Checking memory leaks using valgrind. Many fixes. 
+Checking memory leaks using valgrind. Many fixes. Checkin 1939
+
+From 20 June, we had this list, which I have extended with dependencies
+- Eliminate Data class			<- full reinit/proc msgs
+- Implement arbitrary math handler
+- Fix up compartmentalization
+- Array and diffusive kinetics		<- Multidim arrays
+- Implement readSBML
+- Parallelize				<- Fix scheduling
+- Fix scheduling 			<- full reinit/proc msgs
+- Try replacing y_ with S_		<- Benchmark solver 
+- complete ReadKkit			<- Buffers, Sumtotals
+
+============================================================================
+27 June 2010
+Lets start with the Data class.
+Q: Should I extend the process( Eref, Qinfo*, ProcPtr ) to have an extra
+argument to decide between reinit, process, and other stages?
+A: No. It is tempting but the other stage argument would need to be tracked
+	in the Tick. Messy.
+Q: Can I extend the SharedMsg with arbitrary extra msgs on the same line?
+	In other words, piggyback?
+A: Should be possible, but probably irrelevant, as different Ticks will
+	be doing other stages.
+
+There was a hiccup in the implementation because I had not fully worked
+out how to get the DataHandlers to call 'process' for all objects. Did an
+implementation, this is how it could go:
+- Create a ProcOpFunc<T>: public OpFunc
+- It does the usual OpFunc stuff, and has an extra function 
+	proc( char* obj, Eref e, ProcPtr p )
+	which does the type casting into T and then calls the T::*func
+	for the process/reinit/init and other actions.
+Pros and cons of this arrangement over earlier Data base class:
+- Can handle arbitrary # of functions of the Proc func form: proc, reinit, etc.
+	This can be hacked using Data, but not cleanly.
+- No Data base class needed
+- Need to maintain an entire specialized structure for process. This is true
+	for both versions, but more so for the Data base class.
+- Uglier. Typecasts etc during operations, though the Data form also needed
+	typecasts.
+- Possibly an extra operation or two. e->cinfo()->getOpFunc( fid ) as opposed to
+	the Data::process virtual function.
+- With the Data::process virtual function I could have passed in an extra
+	argument to specify which of the ops to do. Need to trickle back to the
+	calling Tick, and it would have to uniquely associate the correct func
+	number to it. Not too different from passing in an fid.
+Overall, items 1 and 3 are the crucial ones. Go with the conversion.
+
+

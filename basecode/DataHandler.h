@@ -53,7 +53,7 @@ class DataHandler
 		 * Goes through all the data resident on the local node, using
 		 * threading info from the ProcInfo
 		 */
-		virtual void process( const ProcInfo* p, Element* e ) const = 0;
+		virtual void process( const ProcInfo* p, Element* e, FuncId fid ) const = 0;
 
 		/**
 		 * Returns the data at one level up of indexing, in the special

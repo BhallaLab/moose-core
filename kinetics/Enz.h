@@ -10,7 +10,7 @@
 #ifndef _ENZ_H
 #define _ENZ_H
 
-class Enz: public Data
+class Enz
 {
 	public: 
 		Enz();
@@ -30,9 +30,8 @@ class Enz: public Data
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
 
-		void process( const ProcInfo* p, const Eref& e );
-		void eprocess( Eref e, const Qinfo* q, ProcInfo* p );
-		void reinit( const Eref& e, const Qinfo*q, ProcInfo* p );
+		void process( Eref e, const Qinfo* q, ProcInfo* p );
+		void reinit( Eref e, const Qinfo*q, ProcInfo* p );
 		void sub( double n );
 		void enz( double n );
 		void prd( double n );

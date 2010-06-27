@@ -46,14 +46,19 @@ DataHandler* ZeroDimGlobalHandler::copy( unsigned int n, bool toGlobal )
 }
 
 
-void ZeroDimGlobalHandler::process( const ProcInfo* p, Element* e ) const
+void ZeroDimGlobalHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 {
 	// We only want one thread to deal with this.
 	// In principle we could subdivide the zeroDim cases using
 	// the Element Id:
 	// if ( p->threadIndexInGroup == e->id()->value() % p->numThreadsinGroup)
-	if ( p->threadIndexInGroup == p->numThreadsInGroup - 1 )
-		reinterpret_cast< Data* >( data_ )->process( p, Eref( e, 0 ) );
+	if ( p->threadIndexInGroup == p->numThreadsInGroup - 1 ) {
+		const OpFunc* f = e->cinfo()->getOpFunc( fid );
+		const ProcOpFuncBase* pf = dynamic_cast< const ProcOpFuncBase* >( f );
+		assert( pf );
+		pf->proc( data_, Eref( e, 0 ), p );
+	//	reinterpret_cast< Data* >( data_ )->process( p, Eref( e, 0 ) );
+	}
 }
 
 bool ZeroDimGlobalHandler::isDataHere( DataId index ) const {

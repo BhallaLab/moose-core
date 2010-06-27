@@ -17,51 +17,6 @@ class Eref
 		Eref( Element* e, DataId index );
 
 		/**
-		 * returns the sum of all valid incoming entries
-		double sumBuf( SyncId slot );
-		 */
-
-		/**
-		 * Returns the product of all valid incoming entries
-		 * with v. If there are no entries, returns v
-		double prdBuf( SyncId slot, double v );
-		 */
-
-		/**
-		 * Returns the single specified entry
-		double oneBuf( SyncId slot );
-		 */
-
-		/**
-		 * Returns the memory location specified by slot.
-		 * Used for sends.
-		double* getBufPtr( SyncId slot );
-		 */
-
-		/**
-		 * Sends a double argument
-		void ssend1( SyncId src, double v );
-		 */
-
-		/**
-		 * Sends two double arguments
-		void ssend2( SyncId src, double v1, double v2 );
-		 */
-
-		/**
-		 * Asynchronous message send.
-		void asend( ConnId conn, FuncId func, const ProcInfo* p,
-			const char* arg, unsigned int size ) const;
-		 */
-
-		/**
-		 * Asynchronous send to a specific target.
-		void tsend( ConnId conn, FuncId func, DataId target, 
-			const ProcInfo* p,
-			const char* arg, unsigned int size ) const;
-		 */
-
-		/**
 		 * Returns data entry
 		 */
 		char* data();

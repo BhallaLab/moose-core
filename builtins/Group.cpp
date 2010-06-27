@@ -43,8 +43,3 @@ Group::Group()
 {
 	;
 }
-
-void Group::process( const ProcInfo* p, const Eref& e )
-{
-	;
-}

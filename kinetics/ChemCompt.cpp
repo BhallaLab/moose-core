@@ -92,11 +92,6 @@ ChemCompt::ChemCompt()
 // MsgDest Definitions
 //////////////////////////////////////////////////////////////
 
-void ChemCompt::process( const ProcInfo* p, const Eref& e )
-{
-;
-}
-
 /*
 bool ChemCompt::isInside( double x, double y, double z )
 {

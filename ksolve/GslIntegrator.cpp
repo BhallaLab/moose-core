@@ -74,9 +74,9 @@ const Cinfo* GslIntegrator::initCinfo()
 			new OpFunc1< GslIntegrator, Stoich* >( &GslIntegrator::stoich )
 		);
 
-		static DestFinfo eprocess( "process",
+		static DestFinfo process( "process",
 			"Handles process call",
-			new EpFunc1< GslIntegrator, ProcPtr >( &GslIntegrator::eprocess ) );
+			new EpFunc1< GslIntegrator, ProcPtr >( &GslIntegrator::process ) );
 		static DestFinfo reinit( "reinit",
 			"Handles reinit call",
 			new EpFunc1< GslIntegrator, ProcPtr >( &GslIntegrator::reinit ) );
@@ -91,7 +91,7 @@ const Cinfo* GslIntegrator::initCinfo()
 		&relativeAccuracy,	// Value
 		&absoluteAccuracy,	// Value
 		&stoich,			// DestFinfo
-		&eprocess,			// DestFinfo
+		&process,			// DestFinfo
 		&reinit,			// DestFinfo
 	};
 	
@@ -283,7 +283,7 @@ void GslIntegrator::stoich( Stoich* s )
  * The latter is harder to manage and works best if there is only this
  * one integrator running the simulation. Here we do the former.
  */
-void GslIntegrator::eprocess( Eref e, const Qinfo* q, ProcInfo* info )
+void GslIntegrator::process( Eref e, const Qinfo* q, ProcInfo* info )
 {
 #ifdef USE_GSL
 	double nextt = info->currTime + info->dt;

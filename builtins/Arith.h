@@ -9,12 +9,13 @@
 #ifndef _ARITH_H
 #define _ARITH_H
 
-class Arith: public Data
+class Arith
 {
 	friend void testCopyMsgOps();
 	public: 
 		Arith();
-		void process( const ProcInfo* p, const Eref& e );
+		void process( Eref e, const Qinfo *q, const ProcInfo* p );
+		void reinit( Eref e, const Qinfo *q, const ProcInfo* p );
 
 		/**
  		 * Inserts an event into the pendingEvents queue for spikes.

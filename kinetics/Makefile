@@ -19,8 +19,6 @@ OBJ = \
 	ReadKkit.o	\
 	testKinetics.o	\
 
-	#Tab.o	\
-
 HEADERS = \
 	../basecode/header.h \
 
@@ -28,14 +26,13 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-Mol.o:	Mol.h ../basecode/Data.h
-Reac.o:	Reac.h ../basecode/Data.h
-Enz.o:	Enz.h ../basecode/Data.h
-MMenz.o:	MMenz.h ../basecode/Data.h
-Boundary.o:	Boundary.h ../basecode/Data.h
-ChemCompt.o:	ChemCompt.h ../basecode/Data.h
+Mol.o:	Mol.h
+Reac.o:	Reac.h
+Enz.o:	Enz.h
+MMenz.o:	MMenz.h 
+Boundary.o:	Boundary.h
+ChemCompt.o:	ChemCompt.h
 ReadKkit.o:	ReadKkit.h
-Tab.o:	Tab.h ../basecode/Data.h
 testKinetics.o:	ReadKkit.h
 
 .cpp.o:

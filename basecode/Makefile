@@ -46,7 +46,6 @@ HEADERS = \
 	Cinfo.h \
 	PrepackedBuffer.h \
 	Conv.h \
-	Data.h \
 	DataId.h \
 	Dinfo.h \
 	DataHandler.h \

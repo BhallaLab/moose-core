@@ -65,7 +65,7 @@ const Cinfo* Stoich::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static DestFinfo process( "process",
 			"Handles process call",
-			new EpFunc1< Stoich, ProcPtr >( &Stoich::eprocess ) );
+			new EpFunc1< Stoich, ProcPtr >( &Stoich::process ) );
 		static DestFinfo reinit( "reinit",
 			"Handles reinint call",
 			new EpFunc1< Stoich, ProcPtr >( &Stoich::reinit ) );
@@ -124,12 +124,7 @@ Stoich::~Stoich()
 // MsgDest Definitions
 //////////////////////////////////////////////////////////////
 
-void Stoich::eprocess( Eref e, const Qinfo* q, ProcInfo* p )
-{
-	process( p, e );
-}
-
-void Stoich::process( const ProcInfo* p, const Eref& e )
+void Stoich::process( Eref e, const Qinfo* q, ProcInfo* p )
 {
 	;
 }

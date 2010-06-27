@@ -14,11 +14,10 @@ class ThreadInfo;
 
 enum AssignmentType { SINGLE, VECTOR, REPEAT };
 
-class Shell: public Data
+class Shell
 {
 	public:
 		Shell();
-		void process( const ProcInfo* p, const Eref& e );
 
 		///////////////////////////////////////////////////////////
 		// Field functions

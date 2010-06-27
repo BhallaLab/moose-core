@@ -7,7 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-class TestSched: public Data
+class TestSched
 {
 	public:
 		/** 
@@ -29,11 +29,7 @@ class TestSched: public Data
 			isInitPending_ = 1;
 		}
 
-		void process( const ProcInfo*p, const Eref& e );
-
-		void eprocess( Eref e, const Qinfo* q, ProcPtr p ) {
-			process( p, e );
-		}
+		void process( Eref e, const Qinfo* q, ProcPtr p );
 
 		static const Cinfo* initCinfo();
 	private:

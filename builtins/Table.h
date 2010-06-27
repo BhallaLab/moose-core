@@ -19,7 +19,7 @@
  * If the incoming message is a spike message, it thresholds
  * 	and stores the spike time.
  */
-class Table: public Data
+class Table
 {
 	public: 
 		Table();
@@ -34,7 +34,7 @@ class Table: public Data
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
 
-		void process( const ProcInfo* p, const Eref& e );
+		void process( Eref e, const Qinfo*q, ProcPtr p );
 		void reinit();
 
 		void input( double v );
@@ -48,9 +48,6 @@ class Table: public Data
 		double* lookupVec( unsigned int index );
 		void setVecSize( unsigned int num );
 		unsigned int getVecSize( ) const;
-
-		// bool isInside( double x, double y, double z );
-		void eprocess( Eref e, const Qinfo*q, ProcPtr p );
 
 		static const Cinfo* initCinfo();
 	private:

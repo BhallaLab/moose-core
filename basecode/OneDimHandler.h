@@ -35,7 +35,7 @@ class OneDimHandler: public DataHandler
 		 * calls process on data, using threading info from the ProcInfo,
 		 * and internal info about node decomposition.
 		 */
-		void process( const ProcInfo* p, Element* e ) const;
+		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
 
 		/**
 		 * Returns the data on the specified index.
