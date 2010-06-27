@@ -29,7 +29,7 @@ class TestSched
 			isInitPending_ = 1;
 		}
 
-		void process( Eref e, const Qinfo* q, ProcPtr p );
+		void process( const Eref& e, ProcPtr p );
 
 		static const Cinfo* initCinfo();
 	private:

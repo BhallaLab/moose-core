@@ -6581,4 +6581,6 @@ Pros and cons of this arrangement over earlier Data base class:
 	number to it. Not too different from passing in an fid.
 Overall, items 1 and 3 are the crucial ones. Go with the conversion.
 
-
+Conversion now compiles, but doesn't clear unit tests.
+Checkin 1941.
+Amazingly, just one more fix and the unit tests clear.

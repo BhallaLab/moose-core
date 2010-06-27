@@ -32,7 +32,7 @@ int TestSched::globalIndex_( 0 );
 
 static DestFinfo processFinfo( "process",
 	"handles process call",
-	new EpFunc1< TestSched, ProcPtr>( &TestSched::process ) );
+	new ProcOpFunc< TestSched >( &TestSched::process ) );
 const Cinfo* TestSched::initCinfo()
 {
 
@@ -53,7 +53,7 @@ const Cinfo* TestSched::initCinfo()
 
 static const Cinfo* testSchedCinfo = TestSched::initCinfo();
 
-void TestSched::process( Eref e, const Qinfo* q, ProcPtr p )
+void TestSched::process( const Eref& e, ProcPtr p )
 {
 	static const int timings[] = { 1, 2, 2, 2, 3, 3, 4, 4, 4, 
 		5, 5, 5, 6, 6, 6, 6, 7, 8, 8, 8, 9, 9, 10, 10, 10, 10, 10,
