@@ -67,7 +67,7 @@ const Cinfo* Table::initCinfo()
 
 		static DestFinfo process( "process",
 			"Handles process call, updates internal time stamp.",
-			new EpFunc1< Table, ProcPtr >( &Table:eprocess ) );
+			new ProcOpFunc< Table >( &Table::process ) );
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
 		//////////////////////////////////////////////////////////////
@@ -125,7 +125,7 @@ Table::Table()
 // MsgDest Definitions
 //////////////////////////////////////////////////////////////
 
-void Table::eprocess( Eref e, const Qinfo*q, ProcPtr p )
+void Table::process( const Eref& e, ProcPtr p )
 {
 	lastTime_ = p->currTime;
 	// send out a request for data. This magically comes back in the
@@ -147,7 +147,7 @@ void Table::eprocess( Eref e, const Qinfo*q, ProcPtr p )
 	outputIndex_++;
 }
 
-void Table::reinit()
+void Table::reinit( const Eref& e, ProcPtr p )
 {
 	input_ = 0.0;
 	vec_.resize( 0 );

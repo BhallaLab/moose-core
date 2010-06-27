@@ -34,8 +34,8 @@ class Table
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
 
-		void process( Eref e, const Qinfo*q, ProcPtr p );
-		void reinit();
+		void process( const Eref& e, ProcPtr p );
+		void reinit( const Eref& e, ProcPtr p );
 
 		void input( double v );
 		void spike( double v );

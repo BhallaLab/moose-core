@@ -673,7 +673,7 @@ void testSendSpike()
 	// ret = SetGet1< double >::set( e2, "Vm", 1.0 );
 	ProcInfo p;
 	p.dt = DT;
-	reinterpret_cast< IntFire* >(e2.data())->process( &p, e2 );
+	reinterpret_cast< IntFire* >(e2.data())->process( e2, &p );
 	// At this stage we have sent the spike, so e2.data::Vm should be -1e-7.
 	double Vm = reinterpret_cast< IntFire* >(e2.data())->getVm();
 	assert( fabs( Vm + 1e-7) < EPSILON );
@@ -692,7 +692,7 @@ void testSendSpike()
 	Eref synParent( e2.element(), 1 );
 	reinterpret_cast< IntFire* >(synParent.data())->setTau( TAU );
 
-	reinterpret_cast< IntFire* >(synParent.data())->process( &p, synParent);
+	reinterpret_cast< IntFire* >(synParent.data())->process( synParent, &p );
 	Vm = Field< double >::get( synParent, "Vm" );
 	assert( fabs( Vm - WEIGHT * ( 1.0 - DT / TAU ) ) < EPSILON );
 	// cout << "Vm = " << Vm << endl;
@@ -897,6 +897,10 @@ void testSparseMsg()
 	static const double connectionProbability = 0.1;
 	static const unsigned int runsteps = 5;
 	const Cinfo* ic = IntFire::initCinfo();
+	const Finfo* procFinfo = ic->findFinfo( "process" );
+	assert( procFinfo );
+	const DestFinfo* df = dynamic_cast< const DestFinfo* >( procFinfo );
+	assert( df );
 	// const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 1024;
 	vector< unsigned int > dims( 1, size );
@@ -983,7 +987,7 @@ void testSparseMsg()
 
 	for ( unsigned int i = 0; i < runsteps; ++i ) {
 		p.currTime += p.dt;
-		i2()->process( &p );
+		i2()->process( &p, df->getFid() );
 		unsigned int numWorkerThreads = 1;
 		unsigned int startThread = 1;
 		if ( Qinfo::numSimGroup() >= 2 ) {
@@ -1061,14 +1065,14 @@ void testUpValue()
  */
 
 static SrcFinfo0 s0( "s0", "");
-class Test: public Data
+class Test
 {
 	public:
 		Test()
 			: numAcks_( 0 )
 		{;}
 
-		void process( const ProcInfo* p, const Eref& e )
+		void process( const Eref& e, ProcPtr p )
 		{;}
 
 		void handleS0() {

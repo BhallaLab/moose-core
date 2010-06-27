@@ -337,7 +337,7 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 		i != m->end(); ++i ) {
 		// Element->dataHandler keeps track of which entry needs to be
 		// updated by which thread.
-		Msg::getMsg( i->mid )->process( info ); 
+		Msg::getMsg( i->mid )->process( info, i->fid ); 
 	}
 }
 

@@ -76,10 +76,10 @@ const Cinfo* GslIntegrator::initCinfo()
 
 		static DestFinfo process( "process",
 			"Handles process call",
-			new EpFunc1< GslIntegrator, ProcPtr >( &GslIntegrator::process ) );
+			new ProcOpFunc< GslIntegrator >( &GslIntegrator::process ) );
 		static DestFinfo reinit( "reinit",
 			"Handles reinit call",
-			new EpFunc1< GslIntegrator, ProcPtr >( &GslIntegrator::reinit ) );
+			new ProcOpFunc< GslIntegrator >( &GslIntegrator::reinit ) );
 		///////////////////////////////////////////////////////
 		// Shared definitions
 		///////////////////////////////////////////////////////
@@ -283,7 +283,7 @@ void GslIntegrator::stoich( Stoich* s )
  * The latter is harder to manage and works best if there is only this
  * one integrator running the simulation. Here we do the former.
  */
-void GslIntegrator::process( Eref e, const Qinfo* q, ProcInfo* info )
+void GslIntegrator::process( const Eref& e, ProcPtr info )
 {
 #ifdef USE_GSL
 	double nextt = info->currTime + info->dt;
@@ -307,7 +307,7 @@ void GslIntegrator::process( Eref e, const Qinfo* q, ProcInfo* info )
 #endif // USE_GSL
 }
 
-void GslIntegrator::reinit( Eref e, const Qinfo* q, ProcInfo* info )
+void GslIntegrator::reinit( const Eref& e, ProcPtr info )
 {
     // Everything is done in assignStoichFuncLocal
 	// But the init function should somehow move here.

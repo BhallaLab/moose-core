@@ -31,8 +31,8 @@ class Stoich
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
 
-		void process( Eref e, const Qinfo* q, ProcInfo* p );
-		void reinit( Eref e, const Qinfo* q, ProcInfo* p );
+		void process( const Eref& e, ProcPtr p );
+		void reinit( const Eref& e, ProcPtr p );
 
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions

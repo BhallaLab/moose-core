@@ -14,8 +14,8 @@ class Arith
 	friend void testCopyMsgOps();
 	public: 
 		Arith();
-		void process( Eref e, const Qinfo *q, const ProcInfo* p );
-		void reinit( Eref e, const Qinfo *q, const ProcInfo* p );
+		void process( const Eref& e, ProcPtr p );
+		void reinit( const Eref& e, ProcPtr p );
 
 		/**
  		 * Inserts an event into the pendingEvents queue for spikes.
@@ -37,7 +37,6 @@ class Arith
 		
 		void arg1( double v );
 		void arg2( double v );
-		void eprocess( Eref e, const Qinfo* q, ProcPtr p );
 
 		////////////////////////////////////////////////////////////////
 

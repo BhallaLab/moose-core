@@ -36,7 +36,7 @@ class Msg
 		/**
 		 * Calls Process on e1.
 		 */
-		virtual void process( const ProcInfo *p ) const;
+		virtual void process( const ProcInfo *p, FuncId fid ) const;
 
 		/**
 		 * Report if the msg accepts input from the DataId specified

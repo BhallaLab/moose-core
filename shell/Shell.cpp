@@ -447,7 +447,7 @@ void Shell::doStart( double runtime )
 	// cout << myNode_ << ": Shell::doStart: request sent\n";
 	while ( isAckPending() ) {
 		Qinfo::mpiClearQ( &p_ );
-		process( &p_, sheller );
+		process( sheller, &p_ );
 	}
 	// cout << Shell::myNode() << ": Shell::doStart(" << runtime << ")" << endl;
 	// Qinfo::reportQ();
@@ -461,7 +461,7 @@ void Shell::doUseClock( string path, string field, unsigned int tick )
 	requestUseClock.send( sheller, &p_, path, field, tick );
 	while ( isAckPending() ) {
 		Qinfo::mpiClearQ( &p_ );
-		process( &p_, sheller );
+		process( sheller, &p_ );
 	}
 }
 
@@ -562,7 +562,7 @@ Id Shell::doFind( const string& path ) const
 // DestFuncs
 ////////////////////////////////////////////////////////////////
 
-void Shell::process( Eref e, const Qinfo* q, ProcPtr p )
+void Shell::process( const Eref& e, ProcPtr p )
 {
 	if ( isRunning_ ) {
 		start( runtime_ ); // This is a blocking call

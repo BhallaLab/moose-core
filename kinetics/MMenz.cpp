@@ -66,7 +66,7 @@ const Cinfo* MMenz::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static DestFinfo process( "process",
 			"Handles process call",
-			new EpFunc1< MMenz, ProcPtr >( &MMenz::process ) );
+			new ProcOpFunc< MMenz >( &MMenz::process ) );
 
 		static DestFinfo group( "group",
 			"Handle for group msgs. Doesn't do anything",
@@ -136,7 +136,7 @@ void MMenz::enz( double n )
 	enz_ = n;
 }
 
-void MMenz::process( Eref e, const Qinfo* q, ProcInfo* p )
+void MMenz::process( const Eref& e, ProcPtr p )
 {
 	double rate = kcat_ * enz_ * sub_ / ( Km_ + sub_ );
 	toSub.send( e, p, 0, rate );
@@ -145,7 +145,7 @@ void MMenz::process( Eref e, const Qinfo* q, ProcInfo* p )
 	sub_ = 1.0;
 }
 
-void MMenz::reinit( Eref e, const Qinfo*q, ProcInfo* p )
+void MMenz::reinit( const Eref& e, ProcPtr p )
 {
 	sub_ = 0;
 	enz_ = 0;

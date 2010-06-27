@@ -78,7 +78,11 @@ const Cinfo* ZombieMol::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static DestFinfo process( "process",
 			"Handles process call",
-			new EpFunc1< ZombieMol, ProcPtr >( &ZombieMol::eprocess ) );
+			new ProcOpFunc< ZombieMol >( &ZombieMol::process ) );
+
+		static DestFinfo reinit( "reinit",
+			"Handles reinit call",
+			new ProcOpFunc< ZombieMol >( &ZombieMol::reinit ) );
 
 		static DestFinfo group( "group",
 			"Handle for grouping. Doesn't do anything.",
@@ -97,6 +101,7 @@ const Cinfo* ZombieMol::initCinfo()
 		&nInit,	// Value
 		&diffConst,	// Value
 		&process,			// DestFinfo
+		&reinit,			// DestFinfo
 		&group,			// DestFinfo
 		&reac,				// SharedFinfo
 	};
@@ -129,19 +134,13 @@ ZombieMol::~ZombieMol()
 //////////////////////////////////////////////////////////////
 
 // Doesn't do anything on its own.
-void ZombieMol::eprocess( Eref e, const Qinfo* q, ProcInfo* p )
-{
-}
+void ZombieMol::process( const Eref& e, ProcPtr p )
+{;}
 
-void ZombieMol::process( const ProcInfo* p, const Eref& e )
-{
-}
+void ZombieMol::reinit( const Eref& e, ProcPtr p )
+{;}
 
 void ZombieMol::reac( double A, double B )
-{
-}
-
-void ZombieMol::reinit( const Eref& e, const Qinfo*q, ProcInfo* p )
 {
 }
 

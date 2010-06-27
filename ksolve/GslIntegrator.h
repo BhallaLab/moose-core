@@ -32,8 +32,8 @@ class GslIntegrator
 // Dest function definitions
 ///////////////////////////////////////////////////
 
-		void process( Eref e, const Qinfo* q, ProcPtr info );
-		void reinit( Eref e, const Qinfo* q, ProcPtr info );
+		void process( const Eref& e, ProcPtr info );
+		void reinit( const Eref& e, ProcPtr info );
 
 		void stoich( Stoich* stoichVal );
 

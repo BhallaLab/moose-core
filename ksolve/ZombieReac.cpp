@@ -66,7 +66,11 @@ const Cinfo* ZombieReac::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static DestFinfo process( "process",
 			"Handles process call",
-			new EpFunc1< ZombieReac, ProcPtr >( &ZombieReac::eprocess ) );
+			new ProcOpFunc< ZombieReac >( &ZombieReac::process ) );
+
+		static DestFinfo reinit( "reinit",
+			"Handles reinit call",
+			new ProcOpFunc< ZombieReac >( &ZombieReac::reinit ) );
 
 		static DestFinfo group( "group",
 			"Handle for grouping. Doesn't do anything.",
@@ -88,6 +92,7 @@ const Cinfo* ZombieReac::initCinfo()
 		&kf,		// Value
 		&kb,		// Value
 		&process,	// DestFinfo
+		&reinit,	// DestFinfo
 		&sub,		// SharedFinfo
 		&prd,		// SharedFinfo
 	};
@@ -120,13 +125,12 @@ ZombieReac::~ZombieReac()
 //////////////////////////////////////////////////////////////
 
 // Doesn't do anything on its own.
-void ZombieReac::eprocess( Eref e, const Qinfo* q, ProcInfo* p )
-{
-}
+void ZombieReac::process( const Eref& e, ProcPtr p )
+{;}
 
-void ZombieReac::process( const ProcInfo* p, const Eref& e )
-{
-}
+void ZombieReac::reinit( const Eref& e, ProcPtr p )
+{;}
+
 
 void ZombieReac::sub( double v )
 {

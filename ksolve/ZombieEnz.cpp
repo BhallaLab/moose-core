@@ -99,7 +99,11 @@ const Cinfo* ZombieEnz::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static DestFinfo process( "process",
 			"Handles process call",
-			new EpFunc1< ZombieEnz, ProcPtr >( &ZombieEnz::eprocess ) );
+			new ProcOpFunc< ZombieEnz >( &ZombieEnz::process ) );
+
+		static DestFinfo reinit( "reinit",
+			"Handles reinit call",
+			new ProcOpFunc< ZombieEnz >( &ZombieEnz::reinit ) );
 
 		static DestFinfo group( "group",
 			"Handle for group msgs. Doesn't do anything",
@@ -163,13 +167,10 @@ ZombieEnz::ZombieEnz( )
 void ZombieEnz::dummy( double n ) // dummy
 {;}
 
-void ZombieEnz::eprocess( Eref e, const Qinfo* q, ProcInfo* p )
+void ZombieEnz::process( const Eref& e, ProcPtr p )
 {;}
 
-void ZombieEnz::process( const ProcInfo* p, const Eref& e )
-{;}
-
-void ZombieEnz::reinit( const Eref& e, const Qinfo*q, ProcInfo* p )
+void ZombieEnz::reinit( const Eref& e, ProcPtr p )
 {;}
 
 //////////////////////////////////////////////////////////////

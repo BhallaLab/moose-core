@@ -58,7 +58,7 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 			return ret;
 		}
 
-		void process( const ProcInfo* p, Element* e ) const 
+		void process( const ProcInfo* p, Element* e, FuncId fid ) const 
 		{
 			; // Fields don't do independent process?
 		}

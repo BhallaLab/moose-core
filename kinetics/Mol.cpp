@@ -71,7 +71,7 @@ const Cinfo* Mol::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static DestFinfo process( "process",
 			"Handles process call",
-			new EpFunc1< Mol, ProcPtr >( &Mol::eprocess ) );
+			new ProcOpFunc< Mol >( &Mol::process ) );
 
 		static DestFinfo group( "group",
 			"Handle for grouping. Doesn't do anything.",
@@ -122,7 +122,7 @@ Mol::Mol( double nInit)
 // MsgDest Definitions
 //////////////////////////////////////////////////////////////
 
-void Mol::process( Eref e, const Qinfo* q, ProcInfo* p )
+void Mol::process( const Eref& e, ProcPtr p )
 {
 	// double A = e.sumBuf( aSlot );
 	// double B = e.sumBuf( bSlot );
@@ -146,7 +146,7 @@ void Mol::reac( double A, double B )
 	B_ += B;
 }
 
-void Mol::reinit( Eref e, const Qinfo*q, ProcInfo* p )
+void Mol::reinit( const Eref& e, ProcPtr p )
 {
 	n_ = nInit_;
 

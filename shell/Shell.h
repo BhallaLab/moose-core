@@ -161,6 +161,8 @@ class Shell
 		////////////////////////////////////////////////////////////////
 		// Thread and MPI handling functions
 		////////////////////////////////////////////////////////////////
+
+		void process( const Eref& e, ProcPtr p );
 		
 		/**
 		 * Sets up master message that interconnects all shells on all

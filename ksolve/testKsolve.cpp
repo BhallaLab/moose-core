@@ -83,7 +83,7 @@ void testGslIntegrator()
 	assert( gi->getIsInitialized() );
 	Eref gsle( gsl.eref() );
 	for ( unsigned int i = 0; i < 6000; ++i ) {
-		gi->eprocess( gsle, 0, &p );
+		gi->process( gsle, &p );
 		p.currTime = i;
 			/*
 		cout << i << 

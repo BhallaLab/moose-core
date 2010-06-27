@@ -324,7 +324,9 @@ template< class A1, class A2 > class SetGet2: public SetGet
 			cout << "innerStrSet< A1, A2 >: string conversion not yet implemented\n";
 			A1 arg1;
 			A2 arg2;
-			Conv< A1 >::str2val( arg1, val );
+			string::size_type pos = val.find_first_of( "," );
+			Conv< A1 >::str2val( arg1, val.substr( 0, pos ) );
+			Conv< A2 >::str2val( arg2, val.substr( pos + 1 ) );
 			return set( dest, field, arg1, arg2 );
 		}
 

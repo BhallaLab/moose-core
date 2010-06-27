@@ -94,9 +94,9 @@ void Msg::clearQ() const
 }
 */
 
-void Msg::process( const ProcInfo* p ) const 
+void Msg::process( const ProcInfo* p, FuncId fid ) const 
 {
-	e2_->process( p );
+	e2_->process( p, fid );
 }
 
 const Msg* Msg::getMsg( MsgId m )

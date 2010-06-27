@@ -61,7 +61,7 @@ const Cinfo* IntFire::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static DestFinfo process( "process",
 			"Handles process call",
-			new EpFunc1< IntFire, ProcPtr >( &IntFire::process ) );
+			new ProcOpFunc< IntFire >( &IntFire::process ) );
 
 		//////////////////////////////////////////////////////////////
 		// FieldElementFinfo definition for Synapses
@@ -110,7 +110,7 @@ IntFire::IntFire( double thresh, double tau )
 	;
 }
 
-void IntFire::process( Eref e, const Qinfo* q, ProcPtr p )
+void IntFire::process( const Eref &e, ProcPtr p )
 {
 	/*
 	if ( e.index().data() % 100 == 0 ) {
@@ -192,7 +192,7 @@ void IntFire::addSpike( DataId index, const double time )
 	pendingEvents_.push( s );
 }
 
-void IntFire::reinit( Eref e, const Qinfo* q, ProcPtr p )
+void IntFire::reinit( const Eref& e, ProcPtr p )
 {
 	// pendingEvents_.resize( 0 );
 	while( !pendingEvents_.empty() )

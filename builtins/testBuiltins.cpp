@@ -32,14 +32,14 @@ void testArith()
 	data1_0->arg2( 0 );
 
 	ProcInfo p;
-	data1_0->process( &p, a1_0 );
+	data1_0->process( a1_0, &p );
 
 	assert( data1_0->getOutput() == 1 );
 
 	data1_0->arg1( 1 );
 	data1_0->arg2( 2 );
 
-	data1_0->process( &p, a1_0 );
+	data1_0->process( a1_0, &p );
 
 	assert( data1_0->getOutput() == 3 );
 

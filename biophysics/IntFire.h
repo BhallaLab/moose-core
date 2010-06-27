@@ -44,8 +44,8 @@ class IntFire
 		////////////////////////////////////////////////////////////////
 		// Dest Func
 		////////////////////////////////////////////////////////////////
-		void process( Eref e, const Qinfo* q, ProcPtr p );
-		void reinit( Eref e, const Qinfo* q, ProcPtr p );
+		void process( const Eref& e, ProcPtr p );
+		void reinit( const Eref&  e, ProcPtr p );
 
 		static const Cinfo* initCinfo();
 	private:

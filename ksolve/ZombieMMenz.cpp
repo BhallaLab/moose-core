@@ -71,7 +71,11 @@ const Cinfo* ZombieMMenz::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static DestFinfo process( "process",
 			"Handles process call",
-			new EpFunc1< ZombieMMenz, ProcPtr >( &ZombieMMenz::eprocess ) );
+			new ProcOpFunc< ZombieMMenz >( &ZombieMMenz::process ) );
+
+		static DestFinfo reinit( "reinit",
+			"Handles reinit call",
+			new ProcOpFunc< ZombieMMenz >( &ZombieMMenz::reinit ) );
 
 		static DestFinfo group( "group",
 			"Handle for group msgs. Doesn't do anything",
@@ -93,6 +97,7 @@ const Cinfo* ZombieMMenz::initCinfo()
 		&Km,	// Value
 		&kcat,	// Value
 		&process,			// DestFinfo
+		&reinit,			// DestFinfo
 		&enzDest,				// DestFinfo
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
@@ -126,13 +131,10 @@ ZombieMMenz::ZombieMMenz( )
 void ZombieMMenz::dummy( double n )
 {;}
 
-void ZombieMMenz::eprocess( Eref e, const Qinfo* q, ProcInfo* p )
+void ZombieMMenz::process( const Eref& e, ProcPtr p )
 {;}
 
-void ZombieMMenz::process( const ProcInfo* p, const Eref& e )
-{;}
-
-void ZombieMMenz::reinit( const Eref& e, const Qinfo*q, ProcInfo* p )
+void ZombieMMenz::reinit( const Eref& e, ProcPtr p )
 {;}
 
 //////////////////////////////////////////////////////////////

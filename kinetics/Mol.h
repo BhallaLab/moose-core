@@ -41,8 +41,8 @@ class Mol
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
 
-		void process( Eref e, const Qinfo* q, ProcInfo* p );
-		void reinit( Eref e, const Qinfo*q, ProcInfo* p );
+		void process( const Eref& e, ProcPtr p );
+		void reinit( const Eref& e, ProcPtr p );
 		void reac( double A, double B );
 
 		static const Cinfo* initCinfo();

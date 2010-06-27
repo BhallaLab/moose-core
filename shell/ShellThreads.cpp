@@ -90,7 +90,7 @@ void Shell::passThroughMsgQs( Element* shelle )
 	Qinfo::readQ( &p_ ); // execute stuff on inQ
 	Qinfo::readMpiQ( &p_ ); // execute stuff on mpiQ that came in alltoall
 	*/
-	shelle->process( &p_ );
+	process( Eref( shelle, 0 ), &p_ );
 }
 
 

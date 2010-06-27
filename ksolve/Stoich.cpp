@@ -65,10 +65,10 @@ const Cinfo* Stoich::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static DestFinfo process( "process",
 			"Handles process call",
-			new EpFunc1< Stoich, ProcPtr >( &Stoich::process ) );
+			new ProcOpFunc< Stoich >( &Stoich::process ) );
 		static DestFinfo reinit( "reinit",
 			"Handles reinint call",
-			new EpFunc1< Stoich, ProcPtr >( &Stoich::reinit ) );
+			new ProcOpFunc< Stoich >( &Stoich::reinit ) );
 
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
@@ -124,12 +124,12 @@ Stoich::~Stoich()
 // MsgDest Definitions
 //////////////////////////////////////////////////////////////
 
-void Stoich::process( Eref e, const Qinfo* q, ProcInfo* p )
+void Stoich::process( const Eref& e, ProcPtr p )
 {
 	;
 }
 
-void Stoich::reinit( Eref e, const Qinfo*q, ProcInfo* p )
+void Stoich::reinit( const Eref& e, ProcPtr p )
 {
 	;
 }

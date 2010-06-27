@@ -46,7 +46,7 @@ const Cinfo* Arith::initCinfo()
 
 		static DestFinfo process( "process",
 			"Handles process call",
-			new EpFunc1< Arith, ProcPtr >( &Arith::process ) );
+			new ProcOpFunc< Arith >( &Arith::process ) );
 
 		//////////////////////////////////////////////////////////////
 		// MsgSrc Definitions
@@ -82,7 +82,7 @@ Arith::Arith()
 	;
 }
 
-void Arith::process( Eref e, const Qinfo* q, ProcPtr p )
+void Arith::process( const Eref& e, ProcPtr p )
 {
 	output_ = arg1_ + arg2_; // Doing a hard-coded function.
 	output.send( e, p, output_ );

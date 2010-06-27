@@ -33,9 +33,8 @@ class ZombieMMenz: public Stoich
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
 
-		void process( const ProcInfo* p, const Eref& e );
-		void eprocess( Eref e, const Qinfo* q, ProcInfo* p );
-		void reinit( const Eref& e, const Qinfo*q, ProcInfo* p );
+		void process( const Eref& e, ProcPtr p );
+		void reinit( const Eref& e, ProcPtr p );
 		void dummy( double n );
 
 		//////////////////////////////////////////////////////////////////
