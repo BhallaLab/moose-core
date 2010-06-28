@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 16 05:41:58 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jun 17 06:58:17 2010 (+0530)
+# Last-Updated: Mon Jun 28 11:33:16 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 226
+#     Update #: 228
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -48,7 +48,6 @@
 from PyQt4 import QtGui, QtCore
 import PyQt4.Qwt5 as Qwt
 import numpy
-import pylab
 from Izhikevich import IzhikevichDemo
 
 
@@ -116,7 +115,7 @@ class IzhikevichGui(QtGui.QMainWindow):
             return
         (time, Vm, Im) = self.demo.simulate(key)
         Vm = numpy.array(Vm) * 1e3
-        Im = numpy.array(Im) * 1e9 - 120.0
+        Im = numpy.array(Im) * 1e9
         numpy.savetxt(key + '_Vm.plot', Vm)
         numpy.savetxt(key + '_Im.plot', Im)
         self.VmPlot.clear()
