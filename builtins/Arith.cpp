@@ -47,18 +47,28 @@ const Cinfo* Arith::initCinfo()
 		static DestFinfo process( "process",
 			"Handles process call",
 			new ProcOpFunc< Arith >( &Arith::process ) );
+		static DestFinfo reinit( "reinit",
+			"Handles reinit call",
+			new ProcOpFunc< Arith >( &Arith::reinit ) );
 
 		//////////////////////////////////////////////////////////////
-		// MsgSrc Definitions
+		// SharedFinfo Definitions
 		//////////////////////////////////////////////////////////////
+		static Finfo* procShared[] = {
+			&process, &reinit
+		};
+		static SharedFinfo proc( "proc",
+			"Shared message for process and reinit",
+			procShared, sizeof( procShared ) / sizeof( const Finfo* )
+		);
 
 	static Finfo* arithFinfos[] = {
 		&function,	// Value
 		&outputValue,	// Value
 		&arg1,		// DestFinfo
 		&arg2,		// DestFinfo
-		&process,	// DestFinfo
 		&output, 	// SrcFinfo
+		&proc		// SharedFinfo
 	};
 
 	static Cinfo arithCinfo (
@@ -86,6 +96,12 @@ void Arith::process( const Eref& e, ProcPtr p )
 {
 	output_ = arg1_ + arg2_; // Doing a hard-coded function.
 	output.send( e, p, output_ );
+}
+
+void Arith::reinit( const Eref& e, ProcPtr p )
+{
+	arg1_ = 0.0;
+	arg2_ = 0.0;
 }
 
 void Arith::arg1( const double arg )

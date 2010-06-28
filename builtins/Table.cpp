@@ -68,9 +68,19 @@ const Cinfo* Table::initCinfo()
 		static DestFinfo process( "process",
 			"Handles process call, updates internal time stamp.",
 			new ProcOpFunc< Table >( &Table::process ) );
+		static DestFinfo reinit( "reinit",
+			"Handles reinit call.",
+			new ProcOpFunc< Table >( &Table::reinit ) );
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
 		//////////////////////////////////////////////////////////////
+		static Finfo* procShared[] = {
+			&process, &reinit
+		};
+		static SharedFinfo proc( "proc",
+			"Shared message for process and reinit",
+			procShared, sizeof( procShared ) / sizeof( const Finfo* )
+		);
 
 		//////////////////////////////////////////////////////////////
 		// Field Element for the vector data
@@ -91,11 +101,11 @@ const Cinfo* Table::initCinfo()
 		&spike,			// DestFinfo
 		&xplot,			// DestFinfo
 		&recvDataBuf,	// DestFinfo
-		&process,		// DestFinfo
 		&output,		// SrcFinfo
 		&outputLoop,		// SrcFinfo
 		&requestData,		// SrcFinfo
 		&tableEntryFinfo,	// FieldElementFinfo
+		&proc,			// SharedFinfo
 	};
 
 	static Cinfo tableCinfo (

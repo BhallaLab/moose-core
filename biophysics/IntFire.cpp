@@ -62,6 +62,9 @@ const Cinfo* IntFire::initCinfo()
 		static DestFinfo process( "process",
 			"Handles process call",
 			new ProcOpFunc< IntFire >( &IntFire::process ) );
+		static DestFinfo reinit( "reinit",
+			"Handles reinit call",
+			new ProcOpFunc< IntFire >( &IntFire::reinit ) );
 
 		//////////////////////////////////////////////////////////////
 		// FieldElementFinfo definition for Synapses
@@ -72,6 +75,16 @@ const Cinfo* IntFire::initCinfo()
 			&IntFire::getSynapse,
 			&IntFire::setNumSynapses,
 			&IntFire::getNumSynapses
+		);
+		//////////////////////////////////////////////////////////////
+		// SharedFinfo Definitions
+		//////////////////////////////////////////////////////////////
+		static Finfo* procShared[] = {
+			&process, &reinit
+		};
+		static SharedFinfo proc( "proc",
+			"Shared message for process and reinit",
+			procShared, sizeof( procShared ) / sizeof( const Finfo* )
 		);
 
 	static Finfo* intFireFinfos[] = {

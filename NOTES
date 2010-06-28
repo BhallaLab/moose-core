@@ -6598,3 +6598,8 @@ schedule it.
 - Solver expanding into arrays with diffusion using RK
 - Parallellization of all this.
 - Multithreading of all this.
+============================================================================
+28 June.
+Consolidating process and reinit into a shared message. Done for
+kinetics and ksolve directories. Checkin 1948.
+
