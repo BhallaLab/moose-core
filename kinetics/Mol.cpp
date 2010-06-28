@@ -72,6 +72,9 @@ const Cinfo* Mol::initCinfo()
 		static DestFinfo process( "process",
 			"Handles process call",
 			new ProcOpFunc< Mol >( &Mol::process ) );
+		static DestFinfo reinit( "reinit",
+			"Handles reinit call",
+			new ProcOpFunc< Mol >( &Mol::reinit ) );
 
 		static DestFinfo group( "group",
 			"Handle for grouping. Doesn't do anything.",
@@ -84,14 +87,21 @@ const Cinfo* Mol::initCinfo()
 			"Connects to reaction",
 			reacShared, sizeof( reacShared ) / sizeof( const Finfo* )
 		);
+		static Finfo* procShared[] = {
+			&process, &reinit
+		};
+		static SharedFinfo proc( "proc",
+			"Shared message for process and reinit",
+			procShared, sizeof( procShared ) / sizeof( const Finfo* )
+		);
 
 	static Finfo* molFinfos[] = {
 		&n,	// Value
 		&nInit,	// Value
 		&diffConst,	// Value
-		&process,			// DestFinfo
 		&group,			// DestFinfo
 		&reac,				// SharedFinfo
+		&proc,				// SharedFinfo
 	};
 
 	static Cinfo molCinfo (
@@ -140,17 +150,17 @@ void Mol::process( const Eref& e, ProcPtr p )
 	nOut.send( e, p, n_ );
 }
 
-void Mol::reac( double A, double B )
-{
-	A_ += A;
-	B_ += B;
-}
-
 void Mol::reinit( const Eref& e, ProcPtr p )
 {
 	n_ = nInit_;
 
 	nOut.send( e, p, n_ );
+}
+
+void Mol::reac( double A, double B )
+{
+	A_ += A;
+	B_ += B;
 }
 
 //////////////////////////////////////////////////////////////

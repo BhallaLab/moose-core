@@ -86,8 +86,23 @@ The TickPtr is an intermediate wrapper for Ticks that helps to sort them
 efficiently.
 The Tick object is the one that connects to and calls operations on target
 Elements.
-Ticks call the 'process' function on Elements. This is built into the Element
-base class, and is the only function called directly. 
+Ticks call the 'process' function on Elements. This bypasses the queueing
+system, but uses the regular field definition system. There is a somewhat 
+specialised OpFunc: ProcOpFunc, which handes type conversions for calls 
+emerging from Ticks. This is the sequence:
+Tick::advance
+Iterate over all outgoing Process messages.
+	call Msg::process( procinfo, fid )
+		call e2->process( procinfo, fid );
+			call dataHandler->process( p, elm, fid )
+				Get the OpFunc corresponding to fid.
+				cast to ProcOpFuncBase, check.
+				Scan over the elm array indices
+				suitable for current thread.
+					call opFunc->proc( obj, eref, p)
+						Typecasts obj
+						calls obj->process( eref, p )
+						
 
 Ticks also call the global Qinfo::readQ() function. This handles all
 asynchronous message passing including spike events and setup calls.

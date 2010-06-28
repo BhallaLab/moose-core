@@ -95,15 +95,21 @@ const Cinfo* ZombieMol::initCinfo()
 			"Connects to reaction",
 			reacShared, sizeof( reacShared ) / sizeof( const Finfo* )
 		);
+		static Finfo* procShared[] = {
+			&process, &reinit
+		};
+		static SharedFinfo proc( "proc",
+			"Shared message for process and reinit",
+			procShared, sizeof( procShared ) / sizeof( const Finfo* )
+		);
 
 	static Finfo* zombieMolFinfos[] = {
 		&n,	// Value
 		&nInit,	// Value
 		&diffConst,	// Value
-		&process,			// DestFinfo
-		&reinit,			// DestFinfo
 		&group,			// DestFinfo
 		&reac,				// SharedFinfo
+		&proc,				// SharedFinfo
 	};
 
 	static Cinfo zombieMolCinfo (
@@ -141,8 +147,7 @@ void ZombieMol::reinit( const Eref& e, ProcPtr p )
 {;}
 
 void ZombieMol::reac( double A, double B )
-{
-}
+{;}
 
 //////////////////////////////////////////////////////////////
 // Field Definitions

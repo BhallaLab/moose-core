@@ -92,15 +92,21 @@ const Cinfo* ZombieMMenz::initCinfo()
 			"Connects to product molecule",
 			prdShared, sizeof( prdShared ) / sizeof( const Finfo* )
 		);
+		static Finfo* procShared[] = {
+			&process, &reinit
+		};
+		static SharedFinfo proc( "proc",
+			"Shared message for process and reinit",
+			procShared, sizeof( procShared ) / sizeof( const Finfo* )
+		);
 
 	static Finfo* mmEnzFinfos[] = {
 		&Km,	// Value
 		&kcat,	// Value
-		&process,			// DestFinfo
-		&reinit,			// DestFinfo
 		&enzDest,				// DestFinfo
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
+		&proc,				// SharedFinfo
 	};
 
 	static Cinfo zombieMMenzCinfo (

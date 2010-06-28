@@ -73,20 +73,20 @@ const Cinfo* Stoich::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
 		//////////////////////////////////////////////////////////////
-		/*
-		static SharedFinfo reac( "reac",
-			"Connects to reaction",
-			reacShared, sizeof( reacShared ) / sizeof( const Finfo* )
+		static Finfo* procShared[] = {
+			&process, &reinit
+		};
+		static SharedFinfo proc( "proc",
+			"Shared message for process and reinit",
+			procShared, sizeof( procShared ) / sizeof( const Finfo* )
 		);
-		*/
 
 	static Finfo* stoichFinfos[] = {
 		&useOneWay,		// Value
 		&nVarMols,		// Value
 		&path,			// Value
 		&plugin,		// SrcFinfo
-		&process,			// DestFinfo
-		&reinit,			// DestFinfo
+		&proc,			// SharedFinfo
 	};
 
 	static Cinfo stoichCinfo (

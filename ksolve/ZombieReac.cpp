@@ -87,14 +87,20 @@ const Cinfo* ZombieReac::initCinfo()
 			"Connects to substrate molecule",
 			prdShared, sizeof( prdShared ) / sizeof( const Finfo* )
 		);
+		static Finfo* procShared[] = {
+			&process, &reinit
+		};
+		static SharedFinfo proc( "proc",
+			"Shared message for process and reinit",
+			procShared, sizeof( procShared ) / sizeof( const Finfo* )
+		);
 
 	static Finfo* zombieReacFinfos[] = {
 		&kf,		// Value
 		&kb,		// Value
-		&process,	// DestFinfo
-		&reinit,	// DestFinfo
 		&sub,		// SharedFinfo
 		&prd,		// SharedFinfo
+		&proc,		// SharedFinfo
 	};
 
 	static Cinfo zombieReacCinfo (

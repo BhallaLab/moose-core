@@ -6535,7 +6535,7 @@ Some cleanup of diagnostic messages during unit tests. Checkin 1937.
 Checking memory leaks using valgrind. Many fixes. Checkin 1939
 
 From 20 June, we had this list, which I have extended with dependencies
-- Eliminate Data class			<- full reinit/proc msgs
+* Eliminate Data class			<- full reinit/proc msgs
 - Implement arbitrary math handler
 - Fix up compartmentalization
 - Array and diffusive kinetics		<- Multidim arrays
@@ -6583,4 +6583,18 @@ Overall, items 1 and 3 are the crucial ones. Go with the conversion.
 
 Conversion now compiles, but doesn't clear unit tests.
 Checkin 1941.
-Amazingly, just one more fix and the unit tests clear.
+Amazingly, just one more fix and the unit tests clear. Checkin 1942.
+
+I would like to also fix the passing of Eref as the
+full object. Better to pass by reference, though the compiler might
+be doing that anyway.
+
+Next, to fix scheduling, I need to standardize on a shared Finfo
+for Proc/Reinit and set up the scheduler to deal with this.
+- ReadKkit to default create the solver and stuff, and to
+schedule it.
+- Solver to remove process messages if present.
+- Solver expanding into arrays
+- Solver expanding into arrays with diffusion using RK
+- Parallellization of all this.
+- Multithreading of all this.

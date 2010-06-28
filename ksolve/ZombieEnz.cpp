@@ -128,16 +128,23 @@ const Cinfo* ZombieEnz::initCinfo()
 			"Connects to enz-sub complex molecule",
 			cplxShared, sizeof( cplxShared ) / sizeof( const Finfo* )
 		);
+		static Finfo* procShared[] = {
+			&process, &reinit
+		};
+		static SharedFinfo proc( "proc",
+			"Shared message for process and reinit",
+			procShared, sizeof( procShared ) / sizeof( const Finfo* )
+		);
 
 	static Finfo* zombieEnzFinfos[] = {
 		&k1,	// Value
 		&k2,	// Value
 		&k3,	// Value
-		&process,			// DestFinfo
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
 		&enz,				// SharedFinfo
 		&cplx,				// SharedFinfo
+		&proc,				// SharedFinfo
 	};
 
 	static Cinfo zombieEnzCinfo (

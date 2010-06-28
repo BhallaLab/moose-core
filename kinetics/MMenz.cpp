@@ -67,6 +67,9 @@ const Cinfo* MMenz::initCinfo()
 		static DestFinfo process( "process",
 			"Handles process call",
 			new ProcOpFunc< MMenz >( &MMenz::process ) );
+		static DestFinfo reinit( "reinit",
+			"Handles reinit call",
+			new ProcOpFunc< MMenz >( &MMenz::reinit ) );
 
 		static DestFinfo group( "group",
 			"Handle for group msgs. Doesn't do anything",
@@ -83,14 +86,21 @@ const Cinfo* MMenz::initCinfo()
 			"Connects to product molecule",
 			prdShared, sizeof( prdShared ) / sizeof( const Finfo* )
 		);
+		static Finfo* procShared[] = {
+			&process, &reinit
+		};
+		static SharedFinfo proc( "proc",
+			"Shared message for process and reinit",
+			procShared, sizeof( procShared ) / sizeof( const Finfo* )
+		);
 
 	static Finfo* mmEnzFinfos[] = {
 		&Km,	// Value
 		&kcat,	// Value
-		&process,			// DestFinfo
 		&enzDest,				// DestFinfo
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
+		&proc,				// SharedFinfo
 	};
 
 	static Cinfo mmEnzCinfo (
@@ -147,8 +157,8 @@ void MMenz::process( const Eref& e, ProcPtr p )
 
 void MMenz::reinit( const Eref& e, ProcPtr p )
 {
-	sub_ = 0;
-	enz_ = 0;
+	sub_ = 1.0;
+	enz_ = 0.0;
 }
 
 //////////////////////////////////////////////////////////////

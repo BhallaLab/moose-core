@@ -95,6 +95,9 @@ const Cinfo* Enz::initCinfo()
 		static DestFinfo process( "process",
 			"Handles process call",
 			new ProcOpFunc< Enz >( &Enz::process ) );
+		static DestFinfo reinit( "reinit",
+			"Handles reinit call",
+			new ProcOpFunc< Enz >( &Enz::reinit ) );
 
 		static DestFinfo group( "group",
 			"Handle for group msgs. Doesn't do anything",
@@ -119,16 +122,23 @@ const Cinfo* Enz::initCinfo()
 			"Connects to enz-sub complex molecule",
 			cplxShared, sizeof( cplxShared ) / sizeof( const Finfo* )
 		);
+		static Finfo* procShared[] = {
+			&process, &reinit
+		};
+		static SharedFinfo proc( "proc",
+			"Shared message for process and reinit",
+			procShared, sizeof( procShared ) / sizeof( const Finfo* )
+		);
 
 	static Finfo* enzFinfos[] = {
 		&k1,	// Value
 		&k2,	// Value
 		&k3,	// Value
-		&process,			// DestFinfo
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
 		&enz,				// SharedFinfo
 		&cplx,				// SharedFinfo
+		&proc,				// SharedFinfo
 	};
 
 	static Cinfo enzCinfo (
@@ -194,7 +204,9 @@ void Enz::process( const Eref& e, ProcPtr p )
 
 void Enz::reinit( const Eref& e, ProcPtr p )
 {
-	;
+	r1_ = k1_;
+	r2_ = k2_;
+	r3_ = k3_;
 }
 
 //////////////////////////////////////////////////////////////

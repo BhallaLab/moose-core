@@ -62,6 +62,9 @@ const Cinfo* Reac::initCinfo()
 		static DestFinfo process( "process",
 			"Handles process call",
 			new ProcOpFunc< Reac >( &Reac::process ) );
+		static DestFinfo reinit( "reinit",
+			"Handles reinit call",
+			new ProcOpFunc< Reac >( &Reac::reinit ) );
 
 		static DestFinfo group( "group",
 			"Handle for group msgs. Doesn't do anything",
@@ -78,13 +81,21 @@ const Cinfo* Reac::initCinfo()
 			"Connects to substrate molecule",
 			prdShared, sizeof( prdShared ) / sizeof( const Finfo* )
 		);
+		static Finfo* procShared[] = {
+			&process, &reinit
+		};
+		static SharedFinfo proc( "proc",
+			"Shared message for process and reinit",
+			procShared, sizeof( procShared ) / sizeof( const Finfo* )
+		);
+
 
 	static Finfo* reacFinfos[] = {
 		&kf,	// Value
 		&kb,	// Value
-		&process,			// DestFinfo
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
+		&proc,				// SharedFinfo
 	};
 
 	static Cinfo reacCinfo (

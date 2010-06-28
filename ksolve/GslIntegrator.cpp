@@ -19,21 +19,6 @@
 
 const Cinfo* GslIntegrator::initCinfo()
 {
-	////////////////////////////////////////////////////////////////
-	// DestFinfo Definitions
-	////////////////////////////////////////////////////////////////
-
-	/*
-	static Finfo* processShared[] =
-	{
-		new DestFinfo( "reinit",
-			Ftype1< ProcInfo >::global(),
-			RFCAST( &GslIntegrator::reinitFunc )),
-	};
-	static Finfo* process = new SharedFinfo( "process", processShared,
-		sizeof( processShared ) / sizeof( Finfo* ) );
-		*/
-
 		///////////////////////////////////////////////////////
 		// Field definitions
 		///////////////////////////////////////////////////////
@@ -83,6 +68,13 @@ const Cinfo* GslIntegrator::initCinfo()
 		///////////////////////////////////////////////////////
 		// Shared definitions
 		///////////////////////////////////////////////////////
+		static Finfo* procShared[] = {
+			&process, &reinit
+		};
+		static SharedFinfo proc( "proc",
+			"Shared message for process and reinit",
+			procShared, sizeof( procShared ) / sizeof( const Finfo* )
+		);
 
 	static Finfo* gslIntegratorFinfos[] =
 	{
@@ -91,8 +83,7 @@ const Cinfo* GslIntegrator::initCinfo()
 		&relativeAccuracy,	// Value
 		&absoluteAccuracy,	// Value
 		&stoich,			// DestFinfo
-		&process,			// DestFinfo
-		&reinit,			// DestFinfo
+		&proc,				// SharedFinfo
 	};
 	
 	static  Cinfo gslIntegratorCinfo(
