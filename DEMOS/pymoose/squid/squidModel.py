@@ -20,7 +20,7 @@ except ImportError:
 from squid import *
 
 import numpy
-import pylab
+
 
 EPSILON = numpy.finfo(float).eps
 class SquidModel(moose.Neutral):
