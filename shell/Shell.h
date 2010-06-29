@@ -49,7 +49,30 @@ class Shell
 
 		void doQuit( );
 
+		/**
+		 * Starts off simulation
+		 */
 		void doStart( double runtime );
+
+		/**
+		 * Reinitializes simulation: time goes to zero, all scheduled
+		 * objects are set to initial conditions. If simulation is
+		 * already running, first stops it.
+		 */
+		void doReinit();
+
+		/**
+		 * Cleanly stops simulation, ready to take up again from where
+		 * the stop occurred. Waits till current operations are done.
+		 */
+		void doStop();
+
+		/**
+		 * Terminate ongoing simulation, with prejudice.
+		 * Uncleanly stops simulation. Things may be in a mess with
+		 * different objects at different times, but it stops at once.
+		 */
+		void doTerminate();
 
 		/**
 		 * shifts orig Element to newParent.
@@ -102,6 +125,9 @@ class Shell
 		 * to acknowledge completion of op.
 		 */
 		void handleStart( double runTime );
+		void handleReinit();
+		void handleStop();
+		void handleTerminate();
 
 		void initAck();
 		void handleAck( unsigned int ackNode, unsigned int status );
@@ -316,6 +342,12 @@ class Shell
 		 * Used to coordinate threads especially when doing MPI.
 		 */
 		bool isRunning_;
+
+		/**
+		 * Flag to tell system to reinitialize. We use this to defer the
+		 * actual operation to the 'process' call for a clean reinit.
+		 */
+		bool doReinit_;
 		/**
 		 * Simulation run time
 		 */

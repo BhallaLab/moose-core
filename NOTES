@@ -6607,4 +6607,8 @@ Done for builtins and biophysics. Checkin 1949.
 Converting over to the consolidated form for Ticks. Croaks in unit tests.
 ============================================================================
 29 June.
-Tracked down bug. Unit tests now clear.
+Tracked down bug. Unit tests now clear. Checkin 1952.
+
+Applied the 'proc' shared message in unit tests. Croaks. This led to 
+consderable fixing up of the Shell control of scheduling, specifically,
+implementation of reinit, stop and terminate functions.

@@ -247,13 +247,15 @@ void testThreads()
 	assert( proc0 );
 	const SrcFinfo* sproc0 = dynamic_cast< const SrcFinfo* >( proc0 );
 	assert( sproc0 );
+	unsigned int b0 = sproc0->getBindIndex();
+	/*
 	const Finfo* proc1 = ticke->cinfo()->findFinfo( "process1" );
 	const SrcFinfo* sproc1 = dynamic_cast< const SrcFinfo* >( proc1 );
 	const Finfo* proc2 = ticke->cinfo()->findFinfo( "process2" );
 	const SrcFinfo* sproc2 = dynamic_cast< const SrcFinfo* >( proc2 );
-	unsigned int b0 = sproc0->getBindIndex();
 	unsigned int b1 = sproc1->getBindIndex();
 	unsigned int b2 = sproc2->getBindIndex();
+	*/
 	FuncId f( processFinfo.getFid() );
 	SingleMsg* m0 = new SingleMsg( er0, ts );
 	er0.element()->addMsgAndFunc( m0->mid(), f, 0 + b0 );

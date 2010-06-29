@@ -54,6 +54,7 @@ class Clock
 		void sortTickPtrs( pthread_mutex_t* sortMutex );
 		void step( Eref e, const Qinfo* q, unsigned int nsteps );
 		void stop( Eref e, const Qinfo* q );
+		void terminate( Eref e, const Qinfo* q );
 		void reinit( Eref e, const Qinfo* q );
 
 		/**

@@ -501,6 +501,15 @@ void Clock::stop(  Eref e, const Qinfo* q )
 }
 
 /**
+ * Does a disgraceful stop of the simulation, leaving it wherever it was.
+ * Cannot resume.
+ */
+void Clock::terminate(  Eref e, const Qinfo* q )
+{
+	isRunning_ = 0; // Later we will be more vigourous about killing it.
+}
+
+/**
  * Reinit is used to reinit the state of the scheduling system.
  * Should be done single-threaded.
  */

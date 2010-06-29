@@ -60,6 +60,21 @@ static SrcFinfo1< double > requestStart( "requestStart",
 			"Starts a simulation. Goes to all nodes including self."
 			"Initiates a callback to indicate completion of run."
 			);
+static SrcFinfo0 requestReinit( "requestReinit",
+			"requestReinit():"
+			"Reinits a simulation: sets to time 0."
+			"Goes to all nodes including self."
+			);
+static SrcFinfo0 requestStop( "requestStop",
+			"requestStop():"
+			"Gently stops a simulation after completing current ops."
+			"Goes to all nodes including self."
+			);
+static SrcFinfo0 requestTerminate( "requestTerminate",
+			"requestTerminate():"
+			"Violently stops a simulation, possibly leaving things half-done."
+			"Goes to all nodes including self."
+			);
 static SrcFinfo5< string, FullId, string, FullId, string > requestAddMsg( 
 			"requestAddMsg",
 			"requestAddMsg( type, src, srcField, dest, destField );"
@@ -117,6 +132,15 @@ static DestFinfo handleQuit( "handleQuit",
 static DestFinfo handleStart( "start", 
 			"Starts off a simulation for the specified run time, automatically partitioning among threads if the settings are right",
 			new OpFunc1< Shell, double >( & Shell::handleStart ) );
+static DestFinfo handleReinit( "reinit", 
+			"Reinitializes simulation, sets current time to zero, and puts all variables at initial conditions.",
+			new OpFunc0< Shell >( & Shell::handleReinit ) );
+static DestFinfo handleStop( "Stop", 
+			"Cleanly stops simulation. Lets current timestep complete. Can resume cleanly.",
+			new OpFunc0< Shell >( & Shell::handleStop ) );
+static DestFinfo handleTerminate( "Terminate", 
+			"Forcefully terminates simulation. Current timestep does not complete. Cannot resume cleanly.",
+			new OpFunc0< Shell >( & Shell::handleTerminate ) );
 			
 
 static DestFinfo handleAddMsg( "handleAddMsg", 
@@ -208,12 +232,14 @@ static DestFinfo handleSetClock( "handleSetClock",
 			*/
 
 static Finfo* shellMaster[] = {
-	&requestCreate, &requestDelete, &requestQuit, &requestStart,
+	&requestCreate, &requestDelete, &requestQuit, 
+	&requestStart, &requestReinit, &requestStop, &requestTerminate,
 	&requestAddMsg, &requestSet, &requestGet, &receiveGet, 
 	&requestMove, &requestCopy, &requestUseClock,
 	&handleAck };
 static Finfo* shellWorker[] = {
-	&create, &del, &handleQuit, &handleStart, 
+	&create, &del, &handleQuit, 
+		&handleStart, &handleReinit, &handleStop, &handleTerminate,
 		&handleAddMsg, &handleSet, &handleGet, &relayGet, 
 		&handleMove, &handleCopy, &handleUseClock,
 	&ack };
@@ -302,6 +328,7 @@ Shell::Shell()
 		barrier1_( 0 ),
 		barrier2_( 0 ),
 		isRunning_( 0 ),
+		doReinit_( 0 ),
 		runtime_( 0.0 ),
 		cwe_( Id() )
 {
@@ -454,6 +481,30 @@ void Shell::doStart( double runtime )
 	// cout << myNode_ << ": Shell::doStart: quitting\n";
 }
 
+void Shell::doReinit()
+{
+	initAck();
+	Eref sheller( shelle_, 0 );
+	requestReinit.send( sheller, &p_ );
+	// cout << myNode_ << ": Shell::doStart: request sent\n";
+	while ( isAckPending() ) {
+		Qinfo::mpiClearQ( &p_ );
+		process( sheller, &p_ );
+	}
+}
+
+void Shell::doStop()
+{
+	initAck();
+	Eref sheller( shelle_, 0 );
+	requestStop.send( sheller, &p_ );
+	// cout << myNode_ << ": Shell::doStart: request sent\n";
+	while ( isAckPending() ) {
+		Qinfo::mpiClearQ( &p_ );
+		process( sheller, &p_ );
+	}
+}
+
 void Shell::doUseClock( string path, string field, unsigned int tick )
 {
 	initAck();
@@ -564,8 +615,20 @@ Id Shell::doFind( const string& path ) const
 
 void Shell::process( const Eref& e, ProcPtr p )
 {
+	Id clockId( 1 );
+	Clock* clock = reinterpret_cast< Clock* >( clockId.eref().data() );
+	Qinfo q;
+
 	if ( isRunning_ ) {
 		start( runtime_ ); // This is a blocking call
+		if ( doReinit_ ) { // It may have been stopped by the reinit call
+			clock->reinit( clockId.eref(), &q );
+		}
+		ack.send( Eref( shelle_, 0 ), &p_, myNode_, OkStatus );
+		return;
+	} else if ( doReinit_ ) { 
+		isRunning_ = 0;
+		clock->reinit( clockId.eref(), &q );
 		ack.send( Eref( shelle_, 0 ), &p_, myNode_, OkStatus );
 	}
 }
@@ -617,8 +680,42 @@ void Shell::handleStart( double runtime )
 {
 	isRunning_ = 1;
 	runtime_ = runtime;
+	// The actual start operation is handed over to the process stage
+	// to avoid confusing the queue.
 	// start( runtime );
 	// ack.send( Eref( shelle_, 0 ), &p_, myNode_, OkStatus );
+}
+
+void Shell::handleReinit( )
+{
+	/*
+	Id clockId( 1 );
+	Clock* clock = reinterpret_cast< Clock* >( clockId.eref().data() );
+	Qinfo q;
+	clock->stop( clockId.eref(), &q );
+	*/
+	doReinit_ = 1;
+	handleStop();
+	// Hand over the reinit operation to the Shell::process function,
+	// to avoid confusing the queue.
+}
+
+void Shell::handleStop()
+{
+	Id clockId( 1 );
+	Clock* clock = reinterpret_cast< Clock* >( clockId.eref().data() );
+	Qinfo q;
+	isRunning_ = 0;
+	clock->stop( clockId.eref(), &q );
+}
+
+void Shell::handleTerminate()
+{
+	Id clockId( 1 );
+	Clock* clock = reinterpret_cast< Clock* >( clockId.eref().data() );
+	Qinfo q;
+	isRunning_ = 0;
+	clock->terminate( clockId.eref(), &q );
 }
 
 
@@ -820,10 +917,13 @@ void Shell::handleUseClock( string path, string field, unsigned int tick)
 {
 	vector< Id > list;
 	wildcard( path, list ); // By default scans only Elements.
+	string tickField = "process";
+	if ( field.substr( 0, 4 ) == "proc" || field.substr( 0, 4 ) == "Proc" )
+		field = tickField = "proc"; // Use the shared Msg with process and reinit.
 	for ( vector< Id >::iterator i = list.begin(); i != list.end(); ++i ) {
 		stringstream ss;
 		FullId tickId( Id( 2 ), DataId( 0, tick ) );
-		ss << "process" << tick;
+		ss << tickField << tick;
 		// bool ret = 
 			innerAddMsg( "OneToAll", tickId, ss.str(), FullId( *i, 0 ), 
 			field);

@@ -266,10 +266,13 @@ void Shell::start( double runtime )
 	Element* clocke = clockId();
 	Clock *clock = reinterpret_cast< Clock* >( clocke->dataHandler()->data( 0 ) );
 	Qinfo q;
+
+	/*
 	bool doReinit = 1;
 
 	if ( doReinit )
 		clock->reinit( clockId.eref(), &q ); 
+		*/
 		// Should be msg. Or perhaps not, as queue should be clear here.
 
 	if ( isSingleThreaded_ ) {
