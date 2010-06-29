@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 16 11:38:46 2009 (+0530)
 # Version: 
-# Last-Updated: Mon Feb 15 10:29:59 2010 (+0530)
+# Last-Updated: Tue Jun 29 12:22:06 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 883
+#     Update #: 884
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -224,7 +224,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
     def loadIzhikevich_Neurons_Tutorial(self):
 #     self.mooseHandler.load('../../DEMOS/pymoose/izhikevich/Izhikevich.py', 'MOOSE')
-        spath = sys.path[0] + '/../../DEMOS/pymoose/izhikevich/Izhikevich.py'
+        spath = sys.path[0] + '/../../DEMOS/pymoose/izhikevich/demogui_qt.py'
         self.mooseHandler.load(spath, 'MOOSE')
         
     def loadGLCellDemo(self):
