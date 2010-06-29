@@ -60,7 +60,7 @@ class Tick
 		 * itself, and to trigger reinit in all targets, and to go on
 		 * to the next tick
 		 */
-		void reinit( Eref e ) const;
+		void reinit( const Eref& e, ProcInfo* p ) const;
 
 		/**
 		 * A dummy function for handling messages incoming from parent

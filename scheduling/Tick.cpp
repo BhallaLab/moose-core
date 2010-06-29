@@ -22,36 +22,34 @@
 // of the Ticks.
 vector< SrcFinfo* > process;
 
-static SrcFinfo1< ProcPtr > proc0( "process0", "Process for Tick 0" );
-static SrcFinfo1< ProcPtr > proc1( "process1", "Process for Tick 1" );
-static SrcFinfo1< ProcPtr > proc2( "process2", "Process for Tick 2" );
-static SrcFinfo1< ProcPtr > proc3( "process3", "Process for Tick 3" );
-static SrcFinfo1< ProcPtr > proc4( "process4", "Process for Tick 4" );
-static SrcFinfo1< ProcPtr > proc5( "process5", "Process for Tick 5" );
-static SrcFinfo1< ProcPtr > proc6( "process6", "Process for Tick 6" );
-static SrcFinfo1< ProcPtr > proc7( "process7", "Process for Tick 7" );
-static SrcFinfo1< ProcPtr > proc8( "process8", "Process for Tick 8" );
-static SrcFinfo1< ProcPtr > proc9( "process9", "Process for Tick 9" );
+static SrcFinfo1< ProcPtr > process0( "process0", "Process for Tick 0" );
+static SrcFinfo1< ProcPtr > process1( "process1", "Process for Tick 1" );
+static SrcFinfo1< ProcPtr > process2( "process2", "Process for Tick 2" );
+static SrcFinfo1< ProcPtr > process3( "process3", "Process for Tick 3" );
+static SrcFinfo1< ProcPtr > process4( "process4", "Process for Tick 4" );
+static SrcFinfo1< ProcPtr > process5( "process5", "Process for Tick 5" );
+static SrcFinfo1< ProcPtr > process6( "process6", "Process for Tick 6" );
+static SrcFinfo1< ProcPtr > process7( "process7", "Process for Tick 7" );
+static SrcFinfo1< ProcPtr > process8( "process8", "Process for Tick 8" );
+static SrcFinfo1< ProcPtr > process9( "process9", "Process for Tick 9" );
 
-static SrcFinfo* procVec[] = {
-	&proc0, &proc1, &proc2, &proc3, &proc4, &proc5, &proc6, &proc7, &proc8, &proc9, };
+static SrcFinfo* processVec[] = {
+	&process0, &process1, &process2, &process3, &process4, &process5, &process6, &process7, &process8, &process9, };
 
-/*
-SrcFinfo* makeProcessFinfo()
-{
-	static int i = 0;
-	stringstream ss;
-	ss << "process" << i;
-	SrcFinfo* ret = 
-		new SrcFinfo1< ProcPtr > (
-			ss.str(),
-			"Calls Process on target Elements. Indexed by Tick#",
-		);
-	process.push_back( ret );
-	++i;
-	return ret;
-}
-*/
+static SrcFinfo1< ProcPtr > reinit0( "reinit0", "Reinit for Tick 0" );
+static SrcFinfo1< ProcPtr > reinit1( "reinit1", "Reinit for Tick 1" );
+static SrcFinfo1< ProcPtr > reinit2( "reinit2", "Reinit for Tick 2" );
+static SrcFinfo1< ProcPtr > reinit3( "reinit3", "Reinit for Tick 3" );
+static SrcFinfo1< ProcPtr > reinit4( "reinit4", "Reinit for Tick 4" );
+static SrcFinfo1< ProcPtr > reinit5( "reinit5", "Reinit for Tick 5" );
+static SrcFinfo1< ProcPtr > reinit6( "reinit6", "Reinit for Tick 6" );
+static SrcFinfo1< ProcPtr > reinit7( "reinit7", "Reinit for Tick 7" );
+static SrcFinfo1< ProcPtr > reinit8( "reinit8", "Reinit for Tick 8" );
+static SrcFinfo1< ProcPtr > reinit9( "reinit9", "Reinit for Tick 9" );
+
+static SrcFinfo* reinitVec[] = {
+	&reinit0, &reinit1, &reinit2, &reinit3, &reinit4, &reinit5, &reinit6, &reinit7, &reinit8, &reinit9, };
+
 
 const Cinfo* Tick::initCinfo()
 {
@@ -97,6 +95,28 @@ const Cinfo* Tick::initCinfo()
 			new EpFunc0< Tick >( &Tick::destroy ) );
 			*/
 
+	static Finfo* procShared0[] = { &process0, &reinit0 };
+	static Finfo* procShared1[] = { &process1, &reinit1 };
+	static Finfo* procShared2[] = { &process2, &reinit2 };
+	static Finfo* procShared3[] = { &process3, &reinit3 };
+	static Finfo* procShared4[] = { &process4, &reinit4 };
+	static Finfo* procShared5[] = { &process5, &reinit5 };
+	static Finfo* procShared6[] = { &process6, &reinit6 };
+	static Finfo* procShared7[] = { &process7, &reinit7 };
+	static Finfo* procShared8[] = { &process8, &reinit8 };
+	static Finfo* procShared9[] = { &process9, &reinit9 };
+
+	static SharedFinfo proc0( "proc0", "Shared proc/reinit message", procShared0, sizeof( procShared0 ) / sizeof( const Finfo* ) );
+	static SharedFinfo proc1( "proc1", "Shared proc/reinit message", procShared1, sizeof( procShared1 ) / sizeof( const Finfo* ) );
+	static SharedFinfo proc2( "proc2", "Shared proc/reinit message", procShared2, sizeof( procShared2 ) / sizeof( const Finfo* ) );
+	static SharedFinfo proc3( "proc3", "Shared proc/reinit message", procShared3, sizeof( procShared3 ) / sizeof( const Finfo* ) );
+	static SharedFinfo proc4( "proc4", "Shared proc/reinit message", procShared4, sizeof( procShared4 ) / sizeof( const Finfo* ) );
+	static SharedFinfo proc5( "proc5", "Shared proc/reinit message", procShared5, sizeof( procShared5 ) / sizeof( const Finfo* ) );
+	static SharedFinfo proc6( "proc6", "Shared proc/reinit message", procShared6, sizeof( procShared6 ) / sizeof( const Finfo* ) );
+	static SharedFinfo proc7( "proc7", "Shared proc/reinit message", procShared7, sizeof( procShared7 ) / sizeof( const Finfo* ) );
+	static SharedFinfo proc8( "proc8", "Shared proc/reinit message", procShared8, sizeof( procShared8 ) / sizeof( const Finfo* ) );
+	static SharedFinfo proc9( "proc9", "Shared proc/reinit message", procShared9, sizeof( procShared9 ) / sizeof( const Finfo* ) );
+
 	static Finfo* tickFinfos[] =
 	{
 		// Fields
@@ -104,7 +124,7 @@ const Cinfo* Tick::initCinfo()
 		&localdt,
 		&stage,
 		&path,
-		// SrcFinfos for process
+		// Shared SrcFinfos for process
 		&proc0,
 		&proc1,
 		&proc2,
@@ -173,11 +193,6 @@ bool Tick::operator==( const Tick& other ) const
  */
 void Tick::setDt( double newdt )
 {
-	/*
-	nextTime_ += newdt - dt_;
-	if ( nextTime_ < dt_ )
-		nextTime_ = dt_;
-	*/
 	dt_ = newdt;
 }
 /**
@@ -207,16 +222,6 @@ unsigned int Tick::getStage() const
 {
 	return stage_;
 }
-
-/**
- * nextTime is here to peek into when the tick is due to fire next.
- * Not clear if it should become private.
-double Tick::getNextTime() const
-{
-	// return nextTime_;
-	return 0.0;
-}
- */
 
 /**
  * set and get Path are problematic. Their goal is to assign the 
@@ -330,8 +335,8 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 	// March through Process calls for each scheduled Element.
 	// Note that there is a unique BindIndex for each tick.
 	// We preallocate 0 through 10 for this. May need to rethink.
-	assert( index_ < sizeof( procVec ) / sizeof( SrcFinfo* ) );
-	BindIndex b = procVec[ index_ ]->getBindIndex();
+	assert( index_ < sizeof( processVec ) / sizeof( SrcFinfo* ) );
+	BindIndex b = processVec[ index_ ]->getBindIndex();
 	const vector< MsgFuncBinding >* m = e->getMsgAndFunc( b );
 	for ( vector< MsgFuncBinding >::const_iterator i = m->begin();
 		i != m->end(); ++i ) {
@@ -347,13 +352,20 @@ void Tick::setIndex( unsigned int index )
 }
 
 /**
- * This sends out the call to reinit objects. It is virtualized
- * because derived classes (ParTick) need to do much more complicated
- * things to coordinate the reinit.
+ * This sends out the call to reinit objects.
  */
-void Tick::reinit( Eref e ) const
+void Tick::reinit( const Eref& e, ProcInfo* info ) const
 {
-	;
-	// nextTime_ = dt_;
-	// send1< ProcInfo >( e, reinitSlot, info );
+	info->dt = dt_;
+	info->currTime = 0;
+
+	assert( index_ < sizeof( reinitVec ) / sizeof( SrcFinfo* ) );
+	BindIndex b = reinitVec[ index_ ]->getBindIndex();
+	const vector< MsgFuncBinding >* m = e.element()->getMsgAndFunc( b );
+	for ( vector< MsgFuncBinding >::const_iterator i = m->begin();
+		i != m->end(); ++i ) {
+		// Element->dataHandler keeps track of which entry needs to be
+		// updated by which thread.
+		Msg::getMsg( i->mid )->process( info, i->fid ); 
+	}
 }

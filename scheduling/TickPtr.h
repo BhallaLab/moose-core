@@ -41,7 +41,7 @@ class TickPtr {
 		/**
 		 * Set to time = 0. So, nextTime_ = dt.
 		 */
-		void reinit( Eref e );
+		void reinit( const Eref& e, ProcInfo* p );
 		
 	private:
 		// Tick* ptr_;

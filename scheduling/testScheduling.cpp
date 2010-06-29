@@ -193,15 +193,15 @@ void setupTicks()
 	SingleMsg *m0 = new SingleMsg( er0, ts ); 
 	er0.element()->addMsgAndFunc( m0->mid(), f, 0 + b0 );
 	SingleMsg *m1 = new SingleMsg( er1, ts ); 
-	er1.element()->addMsgAndFunc( m1->mid(), f, 1 + b0 );
+	er1.element()->addMsgAndFunc( m1->mid(), f, 2 + b0 );
 	SingleMsg *m2 = new SingleMsg( er2, ts );
-	er2.element()->addMsgAndFunc( m2->mid(), f, 2 + b0 );
+	er2.element()->addMsgAndFunc( m2->mid(), f, 4 + b0 );
 	SingleMsg *m3 = new SingleMsg( er3, ts ); 
-	er3.element()->addMsgAndFunc( m3->mid(), f, 3 + b0 );
+	er3.element()->addMsgAndFunc( m3->mid(), f, 6 + b0 );
 	SingleMsg *m4 = new SingleMsg( er4, ts ); 
-	er4.element()->addMsgAndFunc( m4->mid(), f, 4 + b0 );
+	er4.element()->addMsgAndFunc( m4->mid(), f, 8 + b0 );
 	SingleMsg *m5 = new SingleMsg( er5, ts ); 
-	er5.element()->addMsgAndFunc( m5->mid(), f, 7 + b0 );
+	er5.element()->addMsgAndFunc( m5->mid(), f, 14 + b0 );
 
 	cdata->rebuild();
 
@@ -247,20 +247,26 @@ void testThreads()
 	assert( proc0 );
 	const SrcFinfo* sproc0 = dynamic_cast< const SrcFinfo* >( proc0 );
 	assert( sproc0 );
+	const Finfo* proc1 = ticke->cinfo()->findFinfo( "process1" );
+	const SrcFinfo* sproc1 = dynamic_cast< const SrcFinfo* >( proc1 );
+	const Finfo* proc2 = ticke->cinfo()->findFinfo( "process2" );
+	const SrcFinfo* sproc2 = dynamic_cast< const SrcFinfo* >( proc2 );
 	unsigned int b0 = sproc0->getBindIndex();
+	unsigned int b1 = sproc1->getBindIndex();
+	unsigned int b2 = sproc2->getBindIndex();
 	FuncId f( processFinfo.getFid() );
 	SingleMsg* m0 = new SingleMsg( er0, ts );
 	er0.element()->addMsgAndFunc( m0->mid(), f, 0 + b0 );
 	SingleMsg* m1 = new SingleMsg( er1, ts );
-	er1.element()->addMsgAndFunc( m1->mid(), f, 1 + b0 );
+	er1.element()->addMsgAndFunc( m1->mid(), f, 2 + b0 );
 	SingleMsg* m2 = new SingleMsg( er2, ts );
-	er2.element()->addMsgAndFunc( m2->mid(), f, 2 + b0 );
+	er2.element()->addMsgAndFunc( m2->mid(), f, 4 + b0 );
 	SingleMsg* m3 = new SingleMsg( er3, ts );
-	er3.element()->addMsgAndFunc( m3->mid(), f, 3 + b0 );
+	er3.element()->addMsgAndFunc( m3->mid(), f, 6 + b0 );
 	SingleMsg* m4 = new SingleMsg( er4, ts );
-	er4.element()->addMsgAndFunc( m4->mid(), f, 4 + b0 );
+	er4.element()->addMsgAndFunc( m4->mid(), f, 8 + b0 );
 	SingleMsg* m5 = new SingleMsg( er5, ts );
-	er5.element()->addMsgAndFunc( m5->mid(), f, 5 + b0 );
+	er5.element()->addMsgAndFunc( m5->mid(), f, 10 + b0 );
 	s->start( 10 );
 
 	// Qinfo::mergeQ( 0 ); // Need to clean up stuff.

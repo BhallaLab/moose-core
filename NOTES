@@ -6602,4 +6602,9 @@ schedule it.
 28 June.
 Consolidating process and reinit into a shared message. Done for
 kinetics and ksolve directories. Checkin 1948.
+Done for builtins and biophysics. Checkin 1949.
 
+Converting over to the consolidated form for Ticks. Croaks in unit tests.
+============================================================================
+29 June.
+Tracked down bug. Unit tests now clear.

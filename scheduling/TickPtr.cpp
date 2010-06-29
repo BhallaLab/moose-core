@@ -124,13 +124,13 @@ double TickPtr::getDt() const
 	return dt_;
 }
 
-void TickPtr::reinit( Eref e )
+void TickPtr::reinit( const Eref& e, ProcInfo* p )
 {
 	nextTime_ = dt_;
 	for ( vector< const Tick* >::iterator i = ticks_.begin(); 
 		i != ticks_.end(); ++i )
 	{
-		(*i)->reinit( e );
+		(*i)->reinit( e, p );
 	}
 }
 

@@ -512,10 +512,11 @@ void Clock::reinit( Eref e, const Qinfo* q )
 	nextTime_ = 0.0;
 	nSteps_ = 0;
 	currentStep_ = 0;
-	// more stuff.
+
+	Eref ticker( Id( 2 )(), 0 );
 	for ( vector< TickPtr >::iterator i = tickPtr_.begin();
 		i != tickPtr_.end(); ++i )
-		i->reinit( e );
+		i->reinit( ticker, &info_ );
 }
 
 /**
