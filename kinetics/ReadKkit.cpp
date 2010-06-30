@@ -84,7 +84,7 @@ ReadKkit::ReadKkit()
  */
 Id ReadKkit::read(
 	const string& filename, 
-	const string& cellname,
+	const string& modelname,
 	Id pa )
 {
 	ifstream fin( filename.c_str() );
@@ -95,7 +95,7 @@ Id ReadKkit::read(
 
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 	vector< unsigned int > dims( 1,1 );
-	Id base = s->doCreate( "Neutral", pa, cellname, dims );
+	Id base = s->doCreate( "Stoich", pa, modelname, dims );
 	assert( base != Id() );
 
 	baseId_ = base;
@@ -104,6 +104,9 @@ Id ReadKkit::read(
 	innerRead( fin );
 
 	assignCompartments();
+	s->setCwe( base );
+	Field< string >::set( base.eref(), "path", "./##" );
+	s->doReinit();
 	return base;
 }
 

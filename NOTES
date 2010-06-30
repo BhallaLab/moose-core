@@ -6611,4 +6611,11 @@ Tracked down bug. Unit tests now clear. Checkin 1952.
 
 Applied the 'proc' shared message in unit tests. Croaks. This led to 
 consderable fixing up of the Shell control of scheduling, specifically,
-implementation of reinit, stop and terminate functions.
+implementation of reinit, stop and terminate functions. Checkin 1956.
+
+============================================================================
+30 June.
+Set most objects to use the shared Msg "proc" rather than the old "process"
+message. Unit tests showed up a funny failure, finally tracked down to
+failure to clean up the 'doReinit_' flag within Shell. Fixed, now clears
+unit tests again.

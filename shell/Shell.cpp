@@ -623,12 +623,14 @@ void Shell::process( const Eref& e, ProcPtr p )
 		start( runtime_ ); // This is a blocking call
 		if ( doReinit_ ) { // It may have been stopped by the reinit call
 			clock->reinit( clockId.eref(), &q );
+			doReinit_ = 0;
 		}
 		ack.send( Eref( shelle_, 0 ), &p_, myNode_, OkStatus );
 		return;
 	} else if ( doReinit_ ) { 
 		isRunning_ = 0;
 		clock->reinit( clockId.eref(), &q );
+		doReinit_ = 0;
 		ack.send( Eref( shelle_, 0 ), &p_, myNode_, OkStatus );
 	}
 }

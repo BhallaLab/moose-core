@@ -444,7 +444,7 @@ void testShellSetGetVec()
 bool setupSched( Shell* shell, FullId& tick, Id dest )
 {
 	MsgId ret = shell->doAddMsg( "OneToAll", 
-		tick, "process0", FullId( dest, 0 ), "process" );
+		tick, "proc0", FullId( dest, 0 ), "proc" );
 	return ( ret != Msg::badMsg );
 }
 
@@ -452,30 +452,31 @@ bool checkOutput( Id e,
 	double v0, double v1, double v2, double v3, double v4 )
 {
 	bool ret = 1;
+	bool report = 0;
 	Eref e0( e(), 0 );
 	double val = Field< double >::get( e0, "outputValue" );
 	ret = ret && ( fabs( val - v0 ) < 1e-6 );
-	// cout << "( " << v0 << ", " << val << " ) ";
+	if (report) cout << "( " << v0 << ", " << val << " ) ";
 
 	Eref e1( e(), 1 );
 	val = Field< double >::get( e1, "outputValue" );
 	ret = ret && ( fabs( val - v1 ) < 1e-6 );
-	// cout << "( " << v1 << ", " << val << " ) ";
+	if (report) cout << "( " << v1 << ", " << val << " ) ";
 
 	Eref e2( e(), 2 );
 	val = Field< double >::get( e2, "outputValue" );
 	ret = ret && ( fabs( val - v2 ) < 1e-6 );
-	// cout << "( " << v2 << ", " << val << " ) ";
+	if (report) cout << "( " << v2 << ", " << val << " ) ";
 
 	Eref e3( e(), 3 );
 	val = Field< double >::get( e3, "outputValue" );
 	ret = ret && ( fabs( val - v3 ) < 1e-6 );
-	// cout << "( " << v3 << ", " << val << " ) ";
+	if (report) cout << "( " << v3 << ", " << val << " ) ";
 
 	Eref e4( e(), 4 );
 	val = Field< double >::get( e4, "outputValue" );
 	ret = ret && ( fabs( val - v4 ) < 1e-6 );
-	// cout << "( " << v4 << ", " << val << " )\n";
+	if (report) cout << "( " << v4 << ", " << val << " )\n";
 
 	return ret;
 }
@@ -595,8 +596,11 @@ void testShellAddMsg()
 	///////////////////////////////////////////////////////////
 	// Run it
 	///////////////////////////////////////////////////////////
+
+	// ret = checkOutput( a2, 1, 2, 3, 4, 5 );
 	
-	shell->doStart( 2 );
+	// shell->doReinit();
+	shell->doStart( 1 );
 
 	///////////////////////////////////////////////////////////
 	// Check output.
