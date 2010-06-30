@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Feb  4 20:34:34 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jun  2 16:56:44 2010 (+0530)
+# Last-Updated: Sat Jun 26 15:50:44 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 105
+#     Update #: 107
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -52,7 +52,7 @@ import moose
 
 SIMDT = 1e-5
 GLDT = 1e-2
-RUNTIME = 100e-3
+RUNTIME = 1000e-3
 
 morphs_dir = '../../../DEMOS/gl-demo/morphologies/'
 models = {'CA1':'ca1passive.p',
@@ -119,6 +119,7 @@ if __name__ == '__main__':
     print 'loaded morphology file'
     CONTEXT.setClock(0, SIMDT)
     CONTEXT.setClock(1, SIMDT)
+    CONTEXT.setClock(2, SIMDT)
     CONTEXT.setClock(4, GLDT)
     CONTEXT.useClock(4, '/#[TYPE=GLcell]')
     print 'Before reset'
