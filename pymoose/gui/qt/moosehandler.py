@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jan 28 17:28:22 2010 (+0530)
-#           By: subhasis ray
-#     Update #: 15
+# Last-Updated: Wed Jun 30 16:30:52 2010 (+0530)
+#           By: Subhasis Ray
+#     Update #: 22
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -55,10 +55,18 @@ class MooseHandler(object):
 	self._lib = moose.Neutral('/library')
 	self._proto = moose.Neutral('/proto')
 	self._data = moose.Neutral('/data')
+        self.fileTypes = {
+            'Genesis Script(*.g)':'GENESIS',
+            'SBML(*.xml *.bz2 *.zip *.gz)':'SBML',
+            'neuroML(*.xml)': 'NEUROML',
+        }
+
 
     def runGenesisCommand(self, cmd):
 	"""Runs a GENESIS command and returns the output string"""
 	self._context.runG(cmd)
-        return 'not implemented yet'
+        return 'In current PyMOOSE implementation running a GENESIS command does not return anything.'
+
+    
 # 
 # moosehandler.py ends here
