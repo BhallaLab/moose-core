@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Jun  7 00:54:52 2010 (+0530)
+# Last-Updated: Wed Jun 30 15:45:44 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 984
+#     Update #: 991
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -69,7 +69,7 @@ from glclientgui import GLClientGUI
 
 
 # These are the MOOSE GUI specific imports
-from objedit import ObjectFieldsModel
+from objectedit import ObjectFieldsModel
 from moosetree import *
 from mooseclasses import *
 from mooseglobals import MooseGlobals
@@ -185,7 +185,7 @@ class MainWindow(QtGui.QMainWindow):
         try:
             self.objFieldEditModel = self.objFieldEditorMap[obj.path]
         except KeyError:
-            print 'Key Error'
+            config.LOGGER.debug('No editor for this object: %s' % (obj.path))
             self.objFieldEditModel = ObjectFieldsModel(obj)
             self.objFieldEditorMap[obj.path] = self.objFieldEditModel
             if  hasattr(self, 'objFieldEditPanel'):
@@ -293,10 +293,10 @@ class MainWindow(QtGui.QMainWindow):
             self.mooseTreeAction.setChecked(True)
 
         if self.glClientDock.isHidden():
-            print 'Glclient is hidden'
+            # print 'Glclient is hidden'
             self.glClientAction.setChecked(False)
         else:
-            print 'Glclient is visible'
+            # print 'Glclient is visible'
             self.glClientAction.setChecked(True)
 
         if self.mooseClassesPanel.isHidden():
@@ -361,8 +361,7 @@ class MainWindow(QtGui.QMainWindow):
         index = self.objFieldEditModel.createIndex(row, 0)
         print index.row(), index.column()
         field_name = self.objFieldEditModel.data(index)        
-        # table = self.mooseHandler.createTableForMolecule(moose_object, field_name)
-        # print table.path
+        
         config.LOGGER.debug('plotThisFieldSlot - end')
 
     def resetSettings(self):
@@ -375,8 +374,3 @@ if __name__ == '__main__':
     mainWin.show()
     app.exec_()
 	
-
-
-
-# 
-# moosegui.py ends here
