@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jun 30 15:45:44 2010 (+0530)
+# Last-Updated: Wed Jun 30 16:34:55 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 991
+#     Update #: 1022
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -54,7 +54,7 @@ from PyQt4.Qt import Qt
 
 import config
 from glclientgui import GLClientGUI
-
+from filetypeutil import FileTypeChecker
 # The following line is for ease in development environment. Normal
 # users will have moose.py and _moose.so installed in some directory
 # in PYTHONPATH.  If you have these two files in /usr/local/moose, you
@@ -74,6 +74,8 @@ from moosetree import *
 from mooseclasses import *
 from mooseglobals import MooseGlobals
 from mooseshell import MooseShell
+from moosehandler import MooseHandler
+
 
 def makeModelTree(parent):
     mooseTree = MooseTreeWidget(parent)
@@ -116,6 +118,8 @@ class MainWindow(QtGui.QMainWindow):
             
     def __init__(self, interpreter=None, parent=None):
 	QtGui.QMainWindow.__init__(self, parent)
+
+        self.mooseHandler = MooseHandler()
         self.settings = config.get_settings()
         self.resize(800, 600)
         self.setDockOptions(self.AllowNestedDocks | self.AllowTabbedDocks | self.ForceTabbedDocks | self.AnimatedDocks)
@@ -229,6 +233,9 @@ class MainWindow(QtGui.QMainWindow):
         # TODO: the following actions are yet to be implemented.
         self.showDocAction = QtGui.QAction(self.tr('Documentation'), self)
         self.contextHelpAction = QtGui.QAction(self.tr('Context Help'), self)
+
+        self.loadModelAction = QtGui.QAction(self.tr('Load Model'), self)
+        self.connect(self.loadModelAction, QtCore.SIGNAL('triggered()'), self.popupLoadModelDialog)
         
     def runSquidDemo(self):
         QtGui.QMessageBox.information(self, 'Not yet incorporated', 'this demo is yet to be incorporated into moosegui')
@@ -249,6 +256,7 @@ class MainWindow(QtGui.QMainWindow):
         
     def makeMenu(self):
         self.fileMenu = QtGui.QMenu('&File', self)
+        self.fileMenu.addAction(self.loadModelAction)
         self.fileMenu.addAction(self.quitAction)
         self.fileMenu.addAction(self.resetSettingsAction)
         self.viewMenu = QtGui.QMenu('&View', self)
@@ -343,6 +351,7 @@ class MainWindow(QtGui.QMainWindow):
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.glClientDock)
         config.LOGGER.debug('createGLClientDock - end')
 
+
     def popupFieldMenu(self, clickpoint):
         print 'PopupFieldMenu'
         index = self.objFieldEditor.indexAt(clickpoint)
@@ -352,6 +361,34 @@ class MainWindow(QtGui.QMainWindow):
         self.actionPlotField = menu.addAction('Plot this field')
         self.connect(self.actionPlotField, QtCore.SIGNAL('triggered()'), self.plotThisFieldSlot)
         menu.popup(self.objFieldEditor.mapToGlobal(clickpoint))
+
+    def popupLoadModelDialog(self):
+        fileDialog = QtGui.QFileDialog(self)
+        fileDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
+        ffilter = ''
+        for key in sorted(self.mooseHandler.fileTypes.keys()):
+            ffilter = ffilter + key + ';;'
+        ffilter = ffilter[:-2]
+        fileDialog.setFilter(self.tr(ffilter))
+        # The following version gymnastic is because QFileDialog.selectNameFilter() was introduced in Qt 4.4
+        qtVersion = str(QtCore.QT_VERSION_STR).split('.')
+        major = int(qtVersion[0])
+        minor = int(qtVersion[1])
+        if (major > 4)or ((major == 4) and (minor >= 4)):
+            for key, value in self.mooseHandler.fileTypes.items():
+                if value == FileTypeChecker.type_genesis:
+                    fileDialog.selectNameFilter(key)
+                    break
+	if fileDialog.exec_():
+	    fileNames = fileDialog.selectedFiles()
+	    fileFilter = fileDialog.selectedFilter()
+	    fileType = self.mooseHandler.fileTypes[str(fileFilter)]
+# 	    print 'file type:', fileType
+	    directory = fileDialog.directory() # Potential bug: if user types the whole file path, does it work? - no but gives error message
+	    for fileName in fileNames: 
+# 		print fileName
+		self.loadModel(fileName, fileType)
+        
 
     def plotThisFieldSlot(self):
         config.LOGGER.debug('plotThisFieldSlot - start')
@@ -367,6 +404,7 @@ class MainWindow(QtGui.QMainWindow):
     def resetSettings(self):
         self.settings.clear()
 
+    
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     QtCore.QObject.connect(app, QtCore.SIGNAL('lastWindowClosed()'), app, QtCore.SLOT('quit()'))
