@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Sun Apr 12 14:05:01 2009 (+0530)
 # Version: 
-# Last-Updated: Sat Jun  5 16:36:43 2010 (+0530)
+# Last-Updated: Tue Jun 29 17:25:10 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 181
+#     Update #: 210
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -118,6 +118,7 @@ class MooseClassItem(QtGui.QListWidgetItem):
 class MooseClassWidget(QtGui.QToolBox):
     def __init__(self, *args):
         QtGui.QToolBox.__init__(self, *args)
+        layout = self.layout()
         self._listWidget = {}
         self._page = {}
         self._item = []
@@ -127,8 +128,9 @@ class MooseClassWidget(QtGui.QToolBox):
             except KeyError, e:
                 widget = QtGui.QListWidget(self)
                 self._listWidget[category] = widget
-                widget.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding))
-                widget.setLayout(QtGui.QVBoxLayout())
+                widget.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding))            
+                # widget.setLayout(QtGui.QVBoxLayout())
+                layout.addWidget(widget)
             item = MooseClassItem(class_name, category, widget)
             item.setToolTip(self.tr('<html>%s</html>' % (moose.PyMooseBase.getContext().description(class_name))))
             self._item.append(item)
@@ -141,6 +143,7 @@ class MooseClassWidget(QtGui.QToolBox):
             return self._listWidget.itervalues()
         else:
             return [self._listWidget[category]]
+
 
 if __name__ == '__main__':
     app = QtGui.QApplication([])
