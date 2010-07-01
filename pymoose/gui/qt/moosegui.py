@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  1 12:15:37 2010 (+0530)
+# Last-Updated: Thu Jul  1 13:48:03 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1035
+#     Update #: 1036
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -388,6 +388,7 @@ class MainWindow(QtGui.QMainWindow):
 	    for fileName in fileNames: 
 # 		print fileName
 		self.mooseHandler.loadModel(str(fileName), str(fileType))
+            self.modelTreeWidget.recreateTree()
         
 
     def plotThisFieldSlot(self):
