@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  1 12:09:38 2010 (+0530)
+# Last-Updated: Thu Jul  1 12:18:14 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 131
+#     Update #: 140
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -44,9 +44,13 @@
 # 
 
 # Code:
-import sys
-import moose
 
+import os
+import sys
+import re
+
+import moose
+import config
 class MooseHandler(object):
     """Access to MOOSE functionalities"""
     # A list keys for known filetypes Note that type_genesis includes
@@ -80,10 +84,10 @@ class MooseHandler(object):
         """Load a model from file."""
         directory = os.path.dirname(filename)
         moose.Property.addSimPath(directory)
-        config.LOGGER.info('SIMPATH modidied to: %s' (moose.Property.getSimPath()))
-        if filetype == type_genesis:
+        config.LOGGER.info('SIMPATH modidied to: %s' % (moose.Property.getSimPath()))
+        if filetype == MooseHandler.type_genesis:
             return self.loadGenesisModel(filename)
-        elif filetype == type_xml:
+        elif filetype == MooseHandler.type_xml:
             return self.loadXMLModel(filename)
 
 
@@ -99,7 +103,7 @@ class MooseHandler(object):
         filetype = MooseHandler.type_genesis
         kkit_pattern = 'include *kkit'
         in_comment = False
-        with openfile(filename, 'r') as infile:
+        with open(filename, 'r') as infile:
             sentence = ''
             in_sentence = False
             for line in infile:
@@ -126,7 +130,7 @@ class MooseHandler(object):
                 if re.search(kkit_pattern, sentence):
                     filetype = MooseHandler.type_kkit
                     break
-        self.context.loadG(filename)
+        self._context.loadG(filename)
         return filetype
         
     def loadXMLModel(self, filename):
