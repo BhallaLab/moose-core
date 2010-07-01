@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  1 16:20:04 2010 (+0530)
+# Last-Updated: Thu Jul  1 17:17:51 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 219
+#     Update #: 229
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -109,8 +109,8 @@ class MooseHandler(object):
     def loadModel(self, filename, filetype):
         """Load a model from file."""
         directory = os.path.dirname(filename)
-        moose.Property.addSimPath(directory)
         os.chdir(directory)
+        filename = os.path.basename(filename) # ideally this should not be required - but neuroML reader has a bug and gets a segmentation fault when given abosolute path.
         config.LOGGER.info('SIMPATH modidied to: %s' % (moose.Property.getSimPath()))
         if filetype == MooseHandler.type_genesis:
             return self.loadGenesisModel(filename)
@@ -179,6 +179,7 @@ class MooseHandler(object):
         self._saxhandler.model_type = None
         self._xmlreader.reset()
         if ret == MooseHandler.type_neuroml:
+            command = 'readNeuroML "%s" %s' % (filename, self._current_element.path)
             self._context.readNeuroML(filename, self._current_element.path)
         elif ret == MooseHandler.type_sbml:
             self._context.readSBML(filename, self._current_element.path)
