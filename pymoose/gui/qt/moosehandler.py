@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  1 12:18:14 2010 (+0530)
+# Last-Updated: Thu Jul  1 16:20:04 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 140
+#     Update #: 219
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -48,9 +48,31 @@
 import os
 import sys
 import re
+import xml.sax as sax
+import xml.sax.handler as saxhandler
+import xml.sax.xmlreader as saxreader
+import xml.sax.saxutils as saxutils
 
 import moose
 import config
+
+class MooseXMLHandler(saxhandler.ContentHandler):
+    def __init__(self):
+        saxhandler.ContentHandler.__init__(self)
+        self.model_type = None
+
+    def startElement(self, name, attrs):
+        """Signal the start of an element.
+
+        This method looks for neuroml/sbml tags to recognize the type of the model.
+        """
+        if name == 'sbml':
+            self.model_type = MooseHandler.type_sbml
+        elif name == 'neuroml':
+            self.model_type = MooseHandler.type_neuroml
+        else:
+            print name
+
 class MooseHandler(object):
     """Access to MOOSE functionalities"""
     # A list keys for known filetypes Note that type_genesis includes
@@ -73,7 +95,11 @@ class MooseHandler(object):
 	self._lib = moose.Neutral('/library')
 	self._proto = moose.Neutral('/proto')
 	self._data = moose.Neutral('/data')
-
+        self._current_element = moose.Neutral('/')
+        self._xmlreader = sax.make_parser()
+        self._saxhandler = MooseXMLHandler()
+        self._xmlreader.setContentHandler(self._saxhandler)
+        
         
     def runGenesisCommand(self, cmd):
 	"""Runs a GENESIS command and returns the output string"""
@@ -84,6 +110,7 @@ class MooseHandler(object):
         """Load a model from file."""
         directory = os.path.dirname(filename)
         moose.Property.addSimPath(directory)
+        os.chdir(directory)
         config.LOGGER.info('SIMPATH modidied to: %s' % (moose.Property.getSimPath()))
         if filetype == MooseHandler.type_genesis:
             return self.loadGenesisModel(filename)
@@ -143,7 +170,21 @@ class MooseHandler(object):
         support will be provided as the specification becomes stable.
 
         """
-        raise NotImplementedError('TODO: implement loading neuroML and SBML files.')
+        with open(filename, 'r') as xmlfile:
+            for line in xmlfile:
+                self._xmlreader.feed(line)
+                if self._saxhandler.model_type is not None:
+                    break
+        ret = self._saxhandler.model_type
+        self._saxhandler.model_type = None
+        self._xmlreader.reset()
+        if ret == MooseHandler.type_neuroml:
+            self._context.readNeuroML(filename, self._current_element.path)
+        elif ret == MooseHandler.type_sbml:
+            self._context.readSBML(filename, self._current_element.path)
+        
+        return ret    
+        
         
 
 # 
