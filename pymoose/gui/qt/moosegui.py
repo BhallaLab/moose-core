@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  1 00:40:07 2010 (+0530)
-#           By: subha
-#     Update #: 1028
+# Last-Updated: Thu Jul  1 11:57:16 2010 (+0530)
+#           By: Subhasis Ray
+#     Update #: 1031
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -351,9 +351,6 @@ class MainWindow(QtGui.QMainWindow):
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.glClientDock)
         config.LOGGER.debug('createGLClientDock - end')
 
-    def loadModel(self, fileType, fileName):
-    	"""Load model from file. This should be delegated to a separate class and MooseHandler."""							
-	raise NotImplementedError
 	
     def popupFieldMenu(self, clickpoint):
         print 'PopupFieldMenu'
@@ -385,12 +382,12 @@ class MainWindow(QtGui.QMainWindow):
 	if fileDialog.exec_():
 	    fileNames = fileDialog.selectedFiles()
 	    fileFilter = fileDialog.selectedFilter()
-	    fileType = self.mooseHandler.fileTypes[str(fileFilter)]
+	    fileType = self.mooseHandler.fileExtensionMap[str(fileFilter)]
 # 	    print 'file type:', fileType
 	    directory = fileDialog.directory() # Potential bug: if user types the whole file path, does it work? - no but gives error message
 	    for fileName in fileNames: 
 # 		print fileName
-		self.loadModel(fileName, fileType)
+		self.mooseHandler.loadModel(fileName, fileType)
         
 
     def plotThisFieldSlot(self):
