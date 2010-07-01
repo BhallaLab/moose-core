@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  1 11:57:16 2010 (+0530)
+# Last-Updated: Thu Jul  1 12:15:37 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1031
+#     Update #: 1035
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -366,7 +366,7 @@ class MainWindow(QtGui.QMainWindow):
         fileDialog = QtGui.QFileDialog(self)
         fileDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
         ffilter = ''
-        for key in sorted(self.mooseHandler.fileTypes.keys()):
+        for key in sorted(self.mooseHandler.fileExtensionMap.keys()):
             ffilter = ffilter + key + ';;'
         ffilter = ffilter[:-2]
         fileDialog.setFilter(self.tr(ffilter))
@@ -375,8 +375,8 @@ class MainWindow(QtGui.QMainWindow):
         major = int(qtVersion[0])
         minor = int(qtVersion[1])
         if (major > 4)or ((major == 4) and (minor >= 4)):
-            for key, value in self.mooseHandler.fileTypes.items():
-                if value == FileTypeChecker.type_genesis:
+            for key, value in self.mooseHandler.fileExtensionMap.items():
+                if value == MooseHandler.type_genesis:
                     fileDialog.selectNameFilter(key)
                     break
 	if fileDialog.exec_():
@@ -387,7 +387,7 @@ class MainWindow(QtGui.QMainWindow):
 	    directory = fileDialog.directory() # Potential bug: if user types the whole file path, does it work? - no but gives error message
 	    for fileName in fileNames: 
 # 		print fileName
-		self.mooseHandler.loadModel(fileName, fileType)
+		self.mooseHandler.loadModel(str(fileName), str(fileType))
         
 
     def plotThisFieldSlot(self):
