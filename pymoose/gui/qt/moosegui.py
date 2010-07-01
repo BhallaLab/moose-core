@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jun 30 16:34:55 2010 (+0530)
-#           By: Subhasis Ray
-#     Update #: 1022
+# Last-Updated: Thu Jul  1 00:40:07 2010 (+0530)
+#           By: subha
+#     Update #: 1028
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -209,7 +209,7 @@ class MainWindow(QtGui.QMainWindow):
 	self.objFieldEditPanel.show()
 
     def createGLCellWidget(self):
-        '''Create a GLCell object to show the currently selected cell'''
+    	"""Create a GLCell object to show the currently selected cell"""
         cellItem = self.modelTreeWidget.currentItem()
         cell = cellItem.getMooseObject()
         if not cell.className == 'Cell':
@@ -351,7 +351,10 @@ class MainWindow(QtGui.QMainWindow):
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.glClientDock)
         config.LOGGER.debug('createGLClientDock - end')
 
-
+    def loadModel(self, fileType, fileName):
+    	"""Load model from file. This should be delegated to a separate class and MooseHandler."""							
+	raise NotImplementedError
+	
     def popupFieldMenu(self, clickpoint):
         print 'PopupFieldMenu'
         index = self.objFieldEditor.indexAt(clickpoint)
