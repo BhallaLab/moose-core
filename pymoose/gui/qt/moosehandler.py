@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  1 17:17:51 2010 (+0530)
+# Last-Updated: Fri Jul  2 18:03:53 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 229
+#     Update #: 309
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -90,11 +90,22 @@ class MooseHandler(object):
         'Genesis Script(*.g)': type_genesis,
         'neuroML/SBML(*.xml *.bz2 *.zip *.gz)': type_xml,
         }
+    DEFAULT_SIMDT = 2.5e-5
+    DEFAULT_PLOTDT = 1e-4
+    DEFAULT_GLDT = 5e-4
+    DEFAULT_RUNTIME = 1e-1
+    DEFAULT_PLOTUPDATE_DT = 1e-1
+    simdt = DEFAULT_SIMDT
+    plotdt = DEFAULT_PLOTDT
+    gldt = DEFAULT_GLDT
+    runtime = DEFAULT_RUNTIME
+    plotupdate_dt = DEFAULT_PLOTUPDATE_DT
     def __init__(self):
 	self._context = moose.PyMooseBase.getContext()
 	self._lib = moose.Neutral('/library')
 	self._proto = moose.Neutral('/proto')
 	self._data = moose.Neutral('/data')
+        self._gl = moose.Neutral('/gl')
         self._current_element = moose.Neutral('/')
         self._xmlreader = sax.make_parser()
         self._saxhandler = MooseXMLHandler()
@@ -185,6 +196,55 @@ class MooseHandler(object):
             self._context.readSBML(filename, self._current_element.path)
         
         return ret    
+        
+
+    def doReset(self, simdt, plotdt, gldt):
+        """Reset moose.
+
+        simdt -- dt for simulation (step size for numerical
+        methods. Clock tick 0, 1 and 2 will have this dt.
+
+        plotdt -- time interval for recording data.
+
+        gldt -- time interval for OpenGL display.
+
+        We put all the table objects under /data on clock 3, all the
+        GLcell and GLview objects under /gl on clock 4.
+        
+        """
+        self._context.setClock(0, simdt)
+        self._context.setClock(1, simdt)
+        self._context.setClock(2, simdt)
+        self._context.setClock(3, plotdt)
+        self._context.setClock(4, gldt)
+        self._context.useClock(3, self._data.path + '/##[TYPE=Table]')
+        self._context.useClock(4, self._gl.path + '/##[TYPE=GLcell]')
+        self._context.useClock(4, self._gl.path + '/##[TYPE=GLview]')
+        MooseHandler.simdt = simdt
+        MooseHandler.plotdt = plotdt
+        MooseHandler.gldt = gldt
+        self._context.reset()
+
+    def doRun(self, time):
+        """Just runs the simulation. 
+
+        If time is float, it is absolute time in seconds.
+        If an integer, it is the number of time steps.
+
+        """
+        MooseHandler.runtime = time      
+        next_stop = MooseHandler.plotupdate_dt
+        while next_stop <= MooseHandler.runtime:
+            self._context.step(MooseHandler.plotupdate_dt)
+            next_stop = next_stop + MooseHandler.plotupdate_dt
+            # self.emit(QtCore.SIGNAL('updatePlots()'))
+            # TODO - emit a proper signal to update the plots.
+        time_left = MooseHandler.runtime + MooseHandler.plotupdate_dt - next_stop 
+        if MooseHandler.runtime < MooseHandler.plotupdate_dt:
+            time_left = MooseHandler.runtime
+        self._context.step(time_left)
+        # self.emit(QtCore.SIGNAL('updatePlots()'))
+        # TODO - emit a proper signal to update the plots.
         
         
 
