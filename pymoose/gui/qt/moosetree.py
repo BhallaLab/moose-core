@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 23 18:54:14 2009 (+0530)
 # Version: 
-# Last-Updated: Thu Feb  4 12:36:02 2010 (+0530)
+# Last-Updated: Fri Jul  2 11:03:27 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 144
+#     Update #: 145
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -70,6 +70,7 @@ class MooseTreeItem(QtGui.QTreeWidgetItem):
 	return self.mooseObj_
 
     def updateSlot(self, text):
+        print 'updateSlot -- ', self.mooseObj_.name
 	self.setText(0, QtCore.QString(self.mooseObj_.name))
 
 class MooseTreeWidget(QtGui.QTreeWidget):
