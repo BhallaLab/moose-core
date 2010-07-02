@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Jul  2 09:56:42 2010 (+0530)
+# Last-Updated: Fri Jul  2 18:04:45 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1040
+#     Update #: 1189
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -105,7 +105,6 @@ def makeAboutMooseLabel(parent):
              MooseGlobals.COPYRIGHT_TEXT, 
              MooseGlobals.LICENSE_TEXT, 
              MooseGlobals.ABOUT_TEXT)
-
         aboutMooseLabel = QtGui.QLabel(parent)
         aboutMooseLabel.setText(aboutText)
         aboutMooseLabel.setWordWrap(True)
@@ -117,21 +116,19 @@ class MainWindow(QtGui.QMainWindow):
             
     def __init__(self, interpreter=None, parent=None):
 	QtGui.QMainWindow.__init__(self, parent)
-
         self.mooseHandler = MooseHandler()
         self.settings = config.get_settings()
         self.resize(800, 600)
-        self.setDockOptions(self.AllowNestedDocks | self.AllowTabbedDocks | self.ForceTabbedDocks | self.AnimatedDocks)
-        
+        self.setDockOptions(self.AllowNestedDocks | self.AllowTabbedDocks | self.ForceTabbedDocks | self.AnimatedDocks)        
         # This is the element tree of MOOSE
         self.createMooseTreePanel()
         # List of classes - one can double click on any class to
         # create an instance under the currently selected element in
         # mooseTreePanel
         self.createMooseClassesPanel()
-
         # Create a widget to configure the glclient
         self.createGLClientDock()
+        self.createControlDock()
         # Connect the double-click event on modelTreeWidget items to
         # creation of the object editor.
         # TODO - will create a right-click menu
@@ -206,7 +203,7 @@ class MainWindow(QtGui.QMainWindow):
                      QtCore.SIGNAL('objectNameChanged(const QString&)'),
                      item.updateSlot)
         self.objFieldEditor.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.connect(self.objFieldEditor, QtCore.SIGNAL('customContextMenuRequested ( const QPoint&)'), self.popupFieldMenu)
+        # self.connect(self.objFieldEditor, QtCore.SIGNAL('customContextMenuRequested ( const QPoint&)'), self.popupFieldMenu)
         self.objFieldEditPanel.setWidget(self.objFieldEditor)
 	self.objFieldEditPanel.show()
 
@@ -235,15 +232,17 @@ class MainWindow(QtGui.QMainWindow):
         # TODO: the following actions are yet to be implemented.
         self.showDocAction = QtGui.QAction(self.tr('Documentation'), self)
         self.contextHelpAction = QtGui.QAction(self.tr('Context Help'), self)
-
         self.loadModelAction = QtGui.QAction(self.tr('Load Model'), self)
         self.connect(self.loadModelAction, QtCore.SIGNAL('triggered()'), self.popupLoadModelDialog)
+        # self.runAction = QtGui.QAction(self.tr('Run Simulation'), self)
+        # self.resetAction = QtGui.QAction(self.tr('Reset Simulation'), self)
+        
         
     def runSquidDemo(self):
-        QtGui.QMessageBox.information(self, 'Not yet incorporated', 'this demo is yet to be incorporated into moosegui')
+        QtGui.QMessageBox.information(self, 'Not yet incorporated', 'this demo is yet to be incorporated into new moosegui')
 
     def runIzhikevichDemo(self):
-        QtGui.QMessageBox.information(self, 'Not yet incorporated', 'this demo is yet to be incorporated into moosegui')
+        QtGui.QMessageBox.information(self, 'Not yet incorporated', 'this demo is yet to be incorporated into new moosegui')
     
     def makeDemosMenu(self):
         self.squidDemoAction = QtGui.QAction(self.tr('Squid Axon'), self)
@@ -269,8 +268,7 @@ class MainWindow(QtGui.QMainWindow):
         self.helpMenu = QtGui.QMenu('&Help', self)
         # TODO: code the actual functions
         self.helpMenu.addAction(self.showDocAction)
-        self.helpMenu.addAction(self.contextHelpAction)
- 
+        self.helpMenu.addAction(self.contextHelpAction) 
         self.demosMenu = self.makeDemosMenu()
         self.helpMenu.addMenu(self.demosMenu)
         self.menuBar().addMenu(self.fileMenu)
@@ -290,7 +288,6 @@ class MainWindow(QtGui.QMainWindow):
         layout_data = self.settings.value(config.KEY_WINDOW_LAYOUT).toByteArray()
         self.restoreGeometry(geo_data)
         self.restoreState(layout_data)
-
         # The checked state of the menu items do not remain stored
         # properly. Looks like something dependent on the sequence of
         # object creation. So after every restart the GLClient will be
@@ -301,19 +298,16 @@ class MainWindow(QtGui.QMainWindow):
             self.mooseTreeAction.setChecked(False)
         else:
             self.mooseTreeAction.setChecked(True)
-
         if self.glClientDock.isHidden():
             # print 'Glclient is hidden'
             self.glClientAction.setChecked(False)
         else:
             # print 'Glclient is visible'
             self.glClientAction.setChecked(True)
-
         if self.mooseClassesPanel.isHidden():
             self.mooseClassesAction.setChecked(False)
         else:
             self.mooseClassesAction.setChecked(True)
-
         if self.commandLineDock.isHidden():
             self.mooseShellAction.setChecked(False)
         else:
@@ -342,27 +336,48 @@ class MainWindow(QtGui.QMainWindow):
         config.LOGGER.debug('createGLClientDock - start')
         self.glClientWidget = GLClientGUI(self)
         config.LOGGER.debug('createGLClientDock - 1')
-        
         self.glClientDock = QtGui.QDockWidget('GL Client', self)
         config.LOGGER.debug('createGLClientDock - 2')
         self.glClientDock.setObjectName(self.tr('GLClient'))
         config.LOGGER.debug('createGLClientDock - 3')
         self.glClientDock.setWidget(self.glClientWidget)
         config.LOGGER.debug('createGLClientDock - 4')
-
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.glClientDock)
         config.LOGGER.debug('createGLClientDock - end')
 
-	
-    def popupFieldMenu(self, clickpoint):
-        print 'PopupFieldMenu'
-        index = self.objFieldEditor.indexAt(clickpoint)
-        data = self.objFieldEditModel.data(self.objFieldEditModel.createIndex(index.row(), 0))
-        print data
-        menu = QtGui.QMenu(self.objFieldEditor)
-        self.actionPlotField = menu.addAction('Plot this field')
-        self.connect(self.actionPlotField, QtCore.SIGNAL('triggered()'), self.plotThisFieldSlot)
-        menu.popup(self.objFieldEditor.mapToGlobal(clickpoint))
+    def createControlDock(self):
+        config.LOGGER.debug('Making control panel')
+        self.controlDock = QtGui.QDockWidget(self.tr('Simulation Control'), self)
+        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.controlDock)
+        self.controlPanel = QtGui.QFrame(self)
+        layout = QtGui.QGridLayout()
+        self.runtimeLabel = QtGui.QLabel(self.tr('Simulation Run Time (second):'), self.controlPanel)
+        self.runtimeText = QtGui.QLineEdit('%1.3e' % (MooseHandler.runtime), self.controlPanel)
+        self.resetButton = QtGui.QPushButton(self.tr('Reset'), self.controlPanel)
+        self.runButton = QtGui.QPushButton(self.tr('Run'), self.controlPanel)
+        self.simdtLabel = QtGui.QLabel(self.tr('Simulation timestep (second):'), self.controlPanel)
+        self.plotdtLabel = QtGui.QLabel(self.tr('Plotting timestep (second):'), self.controlPanel)
+        self.gldtLabel = QtGui.QLabel(self.tr('3D visualization timestep (second):'), self.controlPanel)
+        self.simdtText = QtGui.QLineEdit('%1.3e' % (MooseHandler.simdt), self.controlPanel)
+        self.plotdtText = QtGui.QLineEdit('%1.3e' % (MooseHandler.plotdt), self)
+        self.gldtText = QtGui.QLineEdit('%1.3e' % (MooseHandler.gldt), self.controlPanel)
+        self.overlayCheckBox = QtGui.QCheckBox(self.tr('Overlay plots'), self.controlPanel)
+        self.connect(self.runButton, QtCore.SIGNAL('clicked()'), self.runSlot)
+        self.connect(self.resetButton, QtCore.SIGNAL('clicked()'), self.resetSlot)
+        layout.addWidget(self.simdtLabel, 0,0)
+        layout.addWidget(self.simdtText, 0, 1)
+        layout.addWidget(self.plotdtLabel, 1, 0)
+        layout.addWidget(self.plotdtText, 1, 1)
+        layout.addWidget(self.gldtLabel, 2, 0)
+        layout.addWidget(self.gldtText, 2, 1)
+        layout.addWidget(self.overlayCheckBox, 3, 0)
+        layout.addWidget(self.runtimeLabel, 4, 0)
+        layout.addWidget(self.runtimeText, 4, 1)
+        layout.addWidget(self.resetButton, 5, 0)
+        layout.addWidget(self.runButton, 5, 1)
+        self.controlPanel.setLayout(layout)
+        self.controlDock.setWidget(self.controlPanel)
+
 
     def popupLoadModelDialog(self):
         fileDialog = QtGui.QFileDialog(self)
@@ -385,24 +400,11 @@ class MainWindow(QtGui.QMainWindow):
 	    fileNames = fileDialog.selectedFiles()
 	    fileFilter = fileDialog.selectedFilter()
 	    fileType = self.mooseHandler.fileExtensionMap[str(fileFilter)]
-# 	    print 'file type:', fileType
 	    directory = fileDialog.directory() # Potential bug: if user types the whole file path, does it work? - no but gives error message
 	    for fileName in fileNames: 
-# 		print fileName
 		self.mooseHandler.loadModel(str(fileName), str(fileType))
             self.modelTreeWidget.recreateTree()
-        
 
-    def plotThisFieldSlot(self):
-        config.LOGGER.debug('plotThisFieldSlot - start')
-        config.LOGGER.warning('Not ported this functionality yet.')
-        moose_object = self.modelTreeWidget.currentItem().getMooseObject()
-        row = self.objFieldEditor.currentIndex().row()
-        index = self.objFieldEditModel.createIndex(row, 0)
-        print index.row(), index.column()
-        field_name = self.objFieldEditModel.data(index)        
-        
-        config.LOGGER.debug('plotThisFieldSlot - end')
 
     def resetSettings(self):
         self.settings.clear()
@@ -410,7 +412,47 @@ class MainWindow(QtGui.QMainWindow):
     def setCurrentElement(self, item, column):
         """Set the current object of the mooseHandler"""
         self.mooseHandler._current_element = item.getMooseObject()
-    
+
+    def resetSlot(self):
+        """Get the dt-s from the UI and call the reset method in
+        MooseHandler
+        """
+        try:
+            simdt = float(str(self.simdtText.text()))
+        except ValueError, simdt_err:
+            print 'Error setting Simulation timestep:', simdt_err
+            simdt = MooseHandler.simdt
+            self.simdtText.setText('%1.3e' % (MooseHandler.simdt))
+        try:
+            plotdt = float(str(self.plotdtText.text()))
+        except ValueError, plotdt_err:
+            print 'Error setting Plotting timestep:', plotdt_err
+            plotdt = MooseHandler.plotdt
+            self.plotdtText.setText('%1.3e' % (MooseHandler.plotdt))
+        try:            
+            gldt = float(str(self.gldtText.text()))
+        except ValueError, gldt_err:
+            print 'Error setting 3D visualization time step:', gldt_err
+            gldt = MooseHandler.gldt
+            self.gldtText.setText('%1.3e' % (MooseHandler.gldt))
+        self.mooseHandler.doReset(simdt, plotdt, gldt)
+        # TODO - clear plots if hold is off.
+        # TODO - create the tables based on the fields to be plotted.
+        # This can be done by going through the objFieldEditorMap and 
+        # looking for the checkedFields for each editor.
+
+    def runSlot(self):
+        """Run the simulation.
+
+        TODO: This should also update plots in view.
+        """
+        try:
+            runtime = float(str(self.runtimeText.text()))
+        except ValueError:
+            runtime = MooseHandler.runtime
+            self.runtimeText.setText(str(runtime))
+        self.mooseHandler.doRun(runtime)
+
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     QtCore.QObject.connect(app, QtCore.SIGNAL('lastWindowClosed()'), app, QtCore.SLOT('quit()'))
