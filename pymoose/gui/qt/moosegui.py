@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  1 13:48:03 2010 (+0530)
+# Last-Updated: Fri Jul  2 09:56:42 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1036
+#     Update #: 1040
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -54,7 +54,6 @@ from PyQt4.Qt import Qt
 
 import config
 from glclientgui import GLClientGUI
-from filetypeutil import FileTypeChecker
 # The following line is for ease in development environment. Normal
 # users will have moose.py and _moose.so installed in some directory
 # in PYTHONPATH.  If you have these two files in /usr/local/moose, you
@@ -139,6 +138,9 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.modelTreeWidget, 
                      QtCore.SIGNAL('itemDoubleClicked(QTreeWidgetItem *, int)'),
                      self.makeObjectFieldEditor)
+        self.connect(self.modelTreeWidget, 
+                     QtCore.SIGNAL('itemClicked(QTreeWidgetItem *, int)'),
+                     self.setCurrentElement)
         # We use the objFieldEditorMap to store reference to cache the
         # model objects for moose objects.
         self.objFieldEditorMap = {}
@@ -405,6 +407,9 @@ class MainWindow(QtGui.QMainWindow):
     def resetSettings(self):
         self.settings.clear()
 
+    def setCurrentElement(self, item, column):
+        """Set the current object of the mooseHandler"""
+        self.mooseHandler._current_element = item.getMooseObject()
     
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
