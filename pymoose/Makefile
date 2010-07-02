@@ -37,6 +37,11 @@ CXXFLAGS+=-I../gl/src -DUSE_GL
 SWIGOPTS=-DUSE_GL
 endif
 
+ifeq ($(USE_NEUROML),1)
+CXXFLAGS+=-I../neuroML_IO -I../external/include -DUSE_NEUROML
+SWIGOPTS=-DUSE_NEUROML
+endif
+
 # The library location and flags for creating dll in Mac is different from Linux
 # Darwin may not have the OSTYPE environment variable defined in bash. Set OSTYPE=Darwin if required
 ifeq ($(OSTYPE),Darwin)
@@ -74,9 +79,8 @@ ifeq ($(USE_SBML),1)
 endif
 
 ifeq ($(USE_NEUROML),1)
-	OBJFILES := $(OBJFILES) ../neuroML_IO/neuroML_IO.o 
+	OBJFILES := $(OBJFILES) ../neuroML_IO/neuroML_IO.o
 	LIBS+= -L../external/lib/
-	OBJFILES :=  $(OBJFILES) ../neuroML_IO/neuroML_IO.o
 endif
 
 ifeq ($(USE_GL),1)
