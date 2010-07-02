@@ -19,8 +19,6 @@ namespace pymoose
     
         ~Neutral();
         const std::string& getType();
-        int __get_childSrc() const;
-        void __set_childSrc(int childSrc);
         int __get_child() const;
         void __set_child(int child);
     };

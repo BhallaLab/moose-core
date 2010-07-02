@@ -506,6 +506,11 @@ const std::string& PyMooseBase::__get_name() const
     return context_->getName(id_);
 }
 
+void PyMooseBase::__set_name(string name)
+{
+    context_->setField(id_, "name", name);
+}
+
 const int PyMooseBase::__get_index() const
 {
     int index = 0;
