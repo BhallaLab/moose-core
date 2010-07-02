@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 30 11:18:34 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jun 30 15:48:47 2010 (+0530)
+# Last-Updated: Fri Jul  2 11:13:46 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 264
+#     Update #: 271
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -137,7 +137,7 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
         elif index.column() == 1: # This is the value column
             self.mooseObject.setField(field, value)
             if field == 'name':
-                self.emit(QtCore.SIGNAL('objectNameChanged(cinst QString&)'), QtCore.QString(field))
+                self.emit(QtCore.SIGNAL('objectNameChanged(const QString&)'), QtCore.QString(field))
         elif index.column() == 2 and role == Qt.CheckStateRole: # Checkbox for plotting
             if self.fieldCheckFlags[self.fields[index.row()]] & Qt.ItemIsUserCheckable: # This field is checkable
                 self.fieldChecked[field] = not self.fieldChecked[field]
@@ -206,6 +206,14 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
 
     def columnCount(self, parent):
         return len(self._header)
+
+    @property
+    def checkedFields(self):
+        checked_fields = []
+        for field in self.fields:
+            if self.fieldChecked[field]:
+                checked_fields.append(field)
+        return checked_fields
 
 
 if __name__ == '__main__':
