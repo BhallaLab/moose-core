@@ -50,6 +50,7 @@ namespace pymoose
         const std::string& __get_path() const;   
         const Id* __get_id() const;
         const std::string& __get_name() const;
+        void __set_name(string name);
         const int __get_index() const;
         const int __get_dataMem() const;
         const int __get_msgMem() const;

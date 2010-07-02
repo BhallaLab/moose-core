@@ -122,6 +122,7 @@ enum {OUTGOING, INCOMING, INOUT};
         void readCell(std::string filename, std::string cellpath, std::vector <double> params);        
         void readCell(std::string fileName, std::string cellPath);
         void readSBML(std::string fileName, std::string modelPath);
+        void readNeuroML(std::string fileName, std::string modelPath);
         double getCurrentTime();
         bool exists(const Id& id);
         bool exists(std::string path);
