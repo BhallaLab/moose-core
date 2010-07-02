@@ -24,16 +24,7 @@ Neutral::Neutral(const Id& src, string path):PyMooseBase(src, path)
 
 Neutral::~Neutral(){}
 const std::string& Neutral::getType(){ return className_; }
-int Neutral::__get_childSrc() const
-{
-    int childSrc;
-    get < int > (id_(), "childSrc",childSrc);
-    return childSrc;
-}
-void Neutral::__set_childSrc( int childSrc )
-{
-    set < int > (id_(), "childSrc", childSrc);
-}
+
 int Neutral::__get_child() const
 {
     int child;
