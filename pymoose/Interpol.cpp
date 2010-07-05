@@ -199,6 +199,12 @@ void Interpol::tabFill(int xdivs, int mode)
     set <int, int> (id_(), "tabFill", xdivs, mode);    
 }
 
+vector<double> Interpol::__get_table()
+{    
+    return PyMooseBase::getContext()->getTableVector(id_);
+}
+
+#if 0
 #ifdef _USE_NUMPY// this was experimental and the relevant  functions should be either here or in moose.i in the xtend block. not both.
 PyObject* Interpol::__array_struct__()
 {
@@ -241,7 +247,7 @@ void Interpol::fillData(PyObject* args)
 }
 
 #endif //! USE_NUMPY
-
+#endif // !if 0
 #ifdef DO_UNIT_TESTS
 #include <cmath>
 using namespace std;
