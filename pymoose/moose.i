@@ -217,7 +217,7 @@ def doc(cls):
 /* Numpy interface for Interpol */
 %extend pymoose::Interpol{
 #ifdef USE_NUMPY
-PyObject* get__array_struct__()
+PyObject* __array_struct__()
 {
     PyArrayObject* result;
     int dimensions[1];
@@ -271,6 +271,7 @@ void fillData(PyObject* args)
 %attribute(pymoose::Interpol, double, dx, __get_dx, __set_dx)
 %attribute(pymoose::Interpol, double, sy, __get_sy, __set_sy)
 %attribute(pymoose::Interpol, int, calcMode, __get_calcMode, __set_calcMode)
+%attribute(pymoose::Interpol, const vector<double>&, table, __get_table)
 
 %include "TableIterator.h"
 %extend pymoose::TableIterator
