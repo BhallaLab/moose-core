@@ -1466,7 +1466,11 @@ void PyMooseContext::tabFill(const Id& table, int xdivs, int mode)
                                  setFieldSlot, table, "tabFill", argstr );
 }
 
-
+vector <double> PyMooseContext::getTableVector(const Id& table)
+{
+    get< vector < double > > (table(), "tableVector", dbls_);
+    return dbls_;
+}
 void PyMooseContext::readCell(string filename, string cellpath)
 {
     std::string command = "readcell " + filename + " " + cellpath;

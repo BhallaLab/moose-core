@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Jul  2 18:04:45 2010 (+0530)
+# Last-Updated: Mon Jul  5 21:43:50 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1189
+#     Update #: 1245
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -105,6 +105,7 @@ def makeAboutMooseLabel(parent):
              MooseGlobals.COPYRIGHT_TEXT, 
              MooseGlobals.LICENSE_TEXT, 
              MooseGlobals.ABOUT_TEXT)
+
         aboutMooseLabel = QtGui.QLabel(parent)
         aboutMooseLabel.setText(aboutText)
         aboutMooseLabel.setWordWrap(True)
@@ -144,9 +145,11 @@ class MainWindow(QtGui.QMainWindow):
         self.makeShellDock(interpreter)
         # By default, we show information about MOOSE in the central widget
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
-        self.aboutMooseLabel = makeAboutMooseLabel(self)
-        self.aboutMooseLabel.setSizePolicy(sizePolicy)
-        self.setCentralWidget(self.aboutMooseLabel)
+        self.centralPanel = QtGui.QMdiArea(self)
+        self.aboutMooseLabel = makeAboutMooseLabel(self.centralPanel)
+        self.centralPanel.addSubWindow(self.aboutMooseLabel)
+        self.setCentralWidget(self.centralPanel)        
+        # self.setCentralWidget(self.aboutMooseLabel)
         # We connect the double-click event on the class-list to
         # insertion of moose object in model tree.
         for listWidget in self.mooseClassesWidget.getClassListWidget():
@@ -350,6 +353,7 @@ class MainWindow(QtGui.QMainWindow):
         self.controlDock = QtGui.QDockWidget(self.tr('Simulation Control'), self)
         self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.controlDock)
         self.controlPanel = QtGui.QFrame(self)
+        self.controlPanel.setFrameStyle(QtGui.QFrame.StyledPanel | QtGui.QFrame.Plain)
         layout = QtGui.QGridLayout()
         self.runtimeLabel = QtGui.QLabel(self.tr('Simulation Run Time (second):'), self.controlPanel)
         self.runtimeText = QtGui.QLineEdit('%1.3e' % (MooseHandler.runtime), self.controlPanel)
@@ -378,6 +382,14 @@ class MainWindow(QtGui.QMainWindow):
         self.controlPanel.setLayout(layout)
         self.controlDock.setWidget(self.controlPanel)
 
+    def createPlotsPanel(self):
+        """Create the panel to put the plots in.
+
+        """
+        self.plotsPanel = QtGui.QFrame(self.tr('Plots'), self)
+        
+        
+        
 
     def popupLoadModelDialog(self):
         fileDialog = QtGui.QFileDialog(self)

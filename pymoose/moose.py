@@ -1502,6 +1502,10 @@ class PyMooseContext(object):
         """tabFill(self, Id table, int xdivs, int mode)"""
         return _moose.PyMooseContext_tabFill(*args)
 
+    def getTableVector(*args):
+        """getTableVector(self, Id table) -> double_vector"""
+        return _moose.PyMooseContext_getTableVector(*args)
+
     def setupAlpha(*args):
         """
         setupAlpha(self, string channel, string gate, double_vector parms)
@@ -2386,6 +2390,10 @@ class Interpol(PyMooseBase):
         """__set_calcMode(self, int calc_mode)"""
         return _moose.Interpol___set_calcMode(*args)
 
+    def __get_table(*args):
+        """__get_table(self) -> double_vector"""
+        return _moose.Interpol___get_table(*args)
+
     def dumpFile(*args):
         """
         dumpFile(self) -> string
@@ -2405,6 +2413,7 @@ class Interpol(PyMooseBase):
     dx = _swig_property(_moose.Interpol_dx_get, _moose.Interpol_dx_set)
     sy = _swig_property(_moose.Interpol_sy_get, _moose.Interpol_sy_set)
     calcMode = _swig_property(_moose.Interpol_calcMode_get, _moose.Interpol_calcMode_set)
+    table = _swig_property(_moose.Interpol_table_get)
 Interpol_swigregister = _moose.Interpol_swigregister
 Interpol_swigregister(Interpol)
 Interpol.className_ = _moose.cvar.Interpol_className_
