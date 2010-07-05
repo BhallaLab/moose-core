@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Jul  5 21:43:50 2010 (+0530)
+# Last-Updated: Tue Jul  6 03:25:27 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1245
+#     Update #: 1248
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -74,7 +74,7 @@ from mooseclasses import *
 from mooseglobals import MooseGlobals
 from mooseshell import MooseShell
 from moosehandler import MooseHandler
-
+from mooseplot import MoosePlot
 
 def makeModelTree(parent):
     mooseTree = MooseTreeWidget(parent)
@@ -148,6 +148,9 @@ class MainWindow(QtGui.QMainWindow):
         self.centralPanel = QtGui.QMdiArea(self)
         self.aboutMooseLabel = makeAboutMooseLabel(self.centralPanel)
         self.centralPanel.addSubWindow(self.aboutMooseLabel)
+        self.plotA = MoosePlot(self.centralPanel)
+        self.centralPanel.addSubWindow(self.plotA)
+
         self.setCentralWidget(self.centralPanel)        
         # self.setCentralWidget(self.aboutMooseLabel)
         # We connect the double-click event on the class-list to
