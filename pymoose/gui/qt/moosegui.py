@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Jul  6 18:25:08 2010 (+0530)
+# Last-Updated: Tue Jul  6 22:09:00 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1449
+#     Update #: 1547
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -100,11 +100,11 @@ def makeClassList(parent=None, mode=MooseGlobals.MODE_ADVANCED):
 
     
 class MainWindow(QtGui.QMainWindow):
-    default_plot_count = 4
+    default_plot_count = 1
     def __init__(self, interpreter=None, parent=None):
 	QtGui.QMainWindow.__init__(self, parent)
         self.mooseHandler = MooseHandler()
-        self.connect(self.mooseHandler, QtCore.SIGNAL('updatePlots()'), self.updatePlots)
+        self.connect(self.mooseHandler, QtCore.SIGNAL('updatePlots(float)'), self.updatePlots)
         self.settings = config.get_settings()
         self.resize(800, 600)
         self.setDockOptions(self.AllowNestedDocks | self.AllowTabbedDocks | self.ForceTabbedDocks | self.AnimatedDocks)        
@@ -133,17 +133,16 @@ class MainWindow(QtGui.QMainWindow):
         # By default, we show information about MOOSE in the central widget
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
         self.centralPanel = QtGui.QMdiArea(self)
-        # Add a dummy plot - for initial testing.
+        # plots is a list of available MoosePlot widgets.
         self.plots = []
-        for ii in range(MainWindow.default_plot_count):
-            self.plots.append(MoosePlot(self.centralPanel))
-            plotlabel = 'Plot %d' % (ii)
-            self.plots[-1].setObjectName(plotlabel)
-            self.centralPanel.addSubWindow(self.plots[-1])
+        # tablePlotMap is a maps all currently available tables to the
+        # plot widgets they belong to.
         self.tablePlotMap = {}
-        self.setCentralWidget(self.centralPanel)        
+        # Start with a default number of plot widgets
+        for ii in range(MainWindow.default_plot_count):
+            self.addPlotWindow()
+        self.setCentralWidget(self.centralPanel)
         self.centralPanel.tileSubWindows()
-        # self.setCentralWidget(self.aboutMooseLabel)
         # We connect the double-click event on the class-list to
         # insertion of moose object in model tree.
         for listWidget in self.mooseClassesWidget.getClassListWidget():
@@ -249,17 +248,20 @@ class MainWindow(QtGui.QMainWindow):
         self.mooseGLCellAction = QtGui.QAction(self.tr('GLCell'), self)
         self.connect(self.mooseGLCellAction, QtCore.SIGNAL('triggered()'), self.createGLCellWidget)
 
-        self.autoHideAction = QtGui.QAction(self.tr('Autohide during simulation'), self)
-        self.autoHideAction.setCheckable(True)
+        self.autoHideAction = QtGui.QAction(self.tr('Autohide during simulation'), self, checkable=True)
         self.autoHideAction.setChecked(True)
 
-        self.showRightBottomDocksAction = QtGui.QAction(self.tr('Right and Bottom Docks'), self)
-        self.showRightBottomDocksAction.setCheckable(True)
+        self.showRightBottomDocksAction = QtGui.QAction(self.tr('Right and Bottom Docks'), self, checkable=True, triggered=self.showRightBottomDocks)
         self.showRightBottomDocksAction.setChecked(False)
-        self.connect(self.showRightBottomDocksAction, QtCore.SIGNAL('toggled(bool)'), self.showRightBottomDocks)
 
-        self.tilePlotWindowsAction = QtGui.QAction(self.tr('Tile Plots'), self)
-        self.connect(self.tilePlotWindowsAction, QtCore.SIGNAL('triggered(bool)'), self.tilePlotWindows)
+        self.tilePlotWindowsAction = QtGui.QAction(self.tr('Tile Plots'), self, checkable=True, triggered=self.centralPanel.tileSubWindows)
+        self.cascadePlotWindowsAction = QtGui.QAction(self.tr('Cascade Plots'), self, checkable=True, triggered=self.centralPanel.cascadeSubWindows)
+        
+        self.subWindowLayoutActionGroup = QtGui.QActionGroup(self)
+        self.subWindowLayoutActionGroup.addAction(self.tilePlotWindowsAction)
+        self.subWindowLayoutActionGroup.addAction(self.cascadePlotWindowsAction)
+        self.subWindowLayoutActionGroup.setExclusive(True)
+        self.tilePlotWindowsAction.setChecked(True)
 
         self.quitAction = QtGui.QAction(self.tr('&Quit'), self)
         self.quitAction.setShortcut(QtGui.QKeySequence(self.tr('Ctrl+Q')))
@@ -273,6 +275,9 @@ class MainWindow(QtGui.QMainWindow):
         self.contextHelpAction = QtGui.QAction(self.tr('Context Help'), self)
         self.loadModelAction = QtGui.QAction(self.tr('Load Model'), self)
         self.connect(self.loadModelAction, QtCore.SIGNAL('triggered()'), self.popupLoadModelDialog)
+        
+        self.newPlotWindowAction = QtGui.QAction(self.tr('New Plot Window'), self)
+        self.connect(self.newPlotWindowAction, QtCore.SIGNAL('triggered(bool)'), self.addPlotWindow)
         # self.runAction = QtGui.QAction(self.tr('Run Simulation'), self)
         # self.resetAction = QtGui.QAction(self.tr('Reset Simulation'), self)
         
@@ -296,9 +301,11 @@ class MainWindow(QtGui.QMainWindow):
         
     def makeMenu(self):
         self.fileMenu = QtGui.QMenu('&File', self)
+        self.fileMenu.addAction(self.newPlotWindowAction)
         self.fileMenu.addAction(self.loadModelAction)
         self.fileMenu.addAction(self.quitAction)
         self.fileMenu.addAction(self.resetSettingsAction)
+
         self.viewMenu = QtGui.QMenu('&View', self)
         self.viewMenu.addAction(self.glClientAction)
         self.viewMenu.addAction(self.mooseTreeAction)
@@ -306,9 +313,11 @@ class MainWindow(QtGui.QMainWindow):
         self.viewMenu.addAction(self.mooseShellAction)
         self.viewMenu.addAction(self.autoHideAction)
         self.viewMenu.addAction(self.showRightBottomDocksAction)
+        self.viewMenu.addSeparator().setText('Layout Plot Windows')
         self.viewMenu.addAction(self.tilePlotWindowsAction)
+        self.viewMenu.addAction(self.cascadePlotWindowsAction)
+
         self.helpMenu = QtGui.QMenu('&Help', self)
-        # TODO: code the actual functions
         self.helpMenu.addAction(self.showDocAction)
         self.helpMenu.addAction(self.contextHelpAction) 
         self.demosMenu = self.makeDemosMenu()
@@ -428,13 +437,22 @@ class MainWindow(QtGui.QMainWindow):
         self.controlPanel.setLayout(layout)
         self.controlDock.setWidget(self.controlPanel)
 
-    def createPlotsPanel(self):
-        """Create the panel to put the plots in.
-
-        """
-        self.plotsPanel = QtGui.QFrame(self.tr('Plots'), self)
-        
-        
+    def addPlotWindow(self):
+        title = self.tr('Plot %d' % (len(self.plots)))
+        print 'addPlotWindow - adding plot', title
+        plotWindow = QtGui.QMainWindow()
+        plotWindow.setWindowTitle(title)
+        plot = MoosePlot(plotWindow)
+        plot.setObjectName(title)
+        plotWindow.setCentralWidget(plot)
+        self.plots.append(plot)
+        self.centralPanel.addSubWindow(plotWindow)
+        if hasattr(self, 'cascadePlotWindowsAction') and self.cascadePlotWindowsAction.isChecked():
+            self.centralPanel.cascadeSubWindows()
+        else:
+            print 'tiling'
+            self.centralPanel.tileSubWindows()
+        plotWindow.show()
         
 
     def popupLoadModelDialog(self):
@@ -528,9 +546,6 @@ class MainWindow(QtGui.QMainWindow):
             self.runtimeText.setText(str(runtime))
         self.mooseHandler.doRun(runtime)
 
-    def tilePlotWindows(self, checked):
-        self.centralPanel.tileSubWindows()
-
     def changeFieldPlotWidget(self, full_field_path, plotname):
         fieldpath = str(full_field_path)
         for plot in self.plots:
@@ -544,8 +559,10 @@ class MainWindow(QtGui.QMainWindow):
                     pass
                 self.tablePlotMap[table] = plot
 
-    def updatePlots(self):
-        print 'Update plots'
+    def updatePlots(self, currentTime):
+        for plot in self.plots:
+            plot.updatePlot(currentTime)
+        
         
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
