@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Jul  6 03:25:27 2010 (+0530)
+# Last-Updated: Tue Jul  6 12:40:28 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1248
+#     Update #: 1378
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -97,27 +97,13 @@ def makeClassList(parent=None, mode=MooseGlobals.MODE_ADVANCED):
 	print 'Error: makeClassList() - mode:', mode, 'is undefined.'
 
 
-def makeAboutMooseLabel(parent):
-        """Create a QLabel with basic info about MOOSE."""
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
-        aboutText = '<html><h3>%s</h3><p>%s</p><p>%s</p><p>%s</p></html>' % \
-            (MooseGlobals.TITLE_TEXT, 
-             MooseGlobals.COPYRIGHT_TEXT, 
-             MooseGlobals.LICENSE_TEXT, 
-             MooseGlobals.ABOUT_TEXT)
-
-        aboutMooseLabel = QtGui.QLabel(parent)
-        aboutMooseLabel.setText(aboutText)
-        aboutMooseLabel.setWordWrap(True)
-        aboutMooseLabel.setAlignment(Qt.AlignHCenter)
-        aboutMooseLabel.setSizePolicy(sizePolicy)
-        return aboutMooseLabel
     
 class MainWindow(QtGui.QMainWindow):
             
     def __init__(self, interpreter=None, parent=None):
 	QtGui.QMainWindow.__init__(self, parent)
         self.mooseHandler = MooseHandler()
+        self.connect(self.mooseHandler, QtCore.SIGNAL('updatePlots()'), self.updatePlots)
         self.settings = config.get_settings()
         self.resize(800, 600)
         self.setDockOptions(self.AllowNestedDocks | self.AllowTabbedDocks | self.ForceTabbedDocks | self.AnimatedDocks)        
@@ -146,12 +132,12 @@ class MainWindow(QtGui.QMainWindow):
         # By default, we show information about MOOSE in the central widget
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
         self.centralPanel = QtGui.QMdiArea(self)
-        self.aboutMooseLabel = makeAboutMooseLabel(self.centralPanel)
-        self.centralPanel.addSubWindow(self.aboutMooseLabel)
+        # Add a dummy plot - for initial testing.
         self.plotA = MoosePlot(self.centralPanel)
         self.centralPanel.addSubWindow(self.plotA)
-
+        self.plotA.resize(self.centralPanel.width()/2, self.centralPanel.height()/2)
         self.setCentralWidget(self.centralPanel)        
+        self.centralPanel.tileSubWindows()
         # self.setCentralWidget(self.aboutMooseLabel)
         # We connect the double-click event on the class-list to
         # insertion of moose object in model tree.
@@ -166,10 +152,36 @@ class MainWindow(QtGui.QMainWindow):
         # have been created
         self.loadLayout()
 
+    def makeAboutMooseLabel(self):
+            """Create a QLabel with basic info about MOOSE."""
+            sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
+            aboutText = '<html><h3 align="center">%s</h3><p>%s</p><p>%s</p><p>%s</p><p align="center">Home Page: <a href="%s">%s</a></p></html>' % \
+                (MooseGlobals.TITLE_TEXT, 
+                 MooseGlobals.COPYRIGHT_TEXT, 
+                 MooseGlobals.LICENSE_TEXT, 
+                 MooseGlobals.ABOUT_TEXT,
+                 MooseGlobals.WEBSITE,
+                 MooseGlobals.WEBSITE)
+            aboutMooseMessage = QtGui.QMessageBox.about(self, self.tr('About MOOSE'), self.tr(aboutText))
+            # aboutMooseLabel = QtGui.QLabel(dialog)
+            # aboutMooseLabel.setText(aboutText)
+            # aboutMooseLabel.setWordWrap(True)
+            # aboutMooseLabel.setAlignment(Qt.AlignHCenter)
+            # aboutMooseLabel.setSizePolicy(sizePolicy)
+            return aboutMooseMessage
 
     def quit(self):
         """Do cleanup, saving, etc. before quitting."""
         QtGui.qApp.closeAllWIndows()
+
+    def showRightBottomDocks(self, checked):
+        """Hides the widgets on right and bottom dock area"""
+        print 'Toggle'
+        for child in self.findChildren(QtGui.QDockWidget):
+            area = self.dockWidgetArea(child)
+            if ( area == QtCore.Qt.BottomDockWidgetArea) or \
+                    (area == QtCore.Qt.RightDockWidgetArea):
+                child.setVisible(checked)
 
     def insertMooseObjectSlot(self, item):
         """Create an object of class specified by item and insert it
@@ -228,11 +240,22 @@ class MainWindow(QtGui.QMainWindow):
         self.mooseShellAction = self.commandLineDock.toggleViewAction()
         self.mooseGLCellAction = QtGui.QAction(self.tr('GLCell'), self)
         self.connect(self.mooseGLCellAction, QtCore.SIGNAL('triggered()'), self.createGLCellWidget)
+
+        self.autoHideAction = QtGui.QAction(self.tr('Autohide Right and Bottom Docks'), self)
+        self.autoHideAction.setCheckable(True)
+        self.autoHideAction.setChecked(True)
+        # self.connect(self.autoHideAction, QtCore.SIGNAL('toggled(bool)'), self.autoHideSlot)
+
+        self.showRightBottomDocksAction = QtGui.QAction(self.tr('Right and Bottom Docks'), self)
+        self.showRightBottomDocksAction.setCheckable(True)
+        self.showRightBottomDocksAction.setChecked(False)
+        self.connect(self.showRightBottomDocksAction, QtCore.SIGNAL('toggled(bool)'), self.showRightBottomDocks)
+
         self.quitAction = QtGui.QAction(self.tr('&Quit'), self)
         self.quitAction.setShortcut(QtGui.QKeySequence(self.tr('Ctrl+Q')))
         self.connect(self.quitAction, QtCore.SIGNAL('triggered()'), QtGui.qApp, QtCore.SLOT('closeAllWindows()'))
         self.aboutMooseAction = QtGui.QAction(self.tr('&About'), self)
-        self.connect(self.aboutMooseAction, QtCore.SIGNAL('triggered()'), makeAboutMooseLabel)
+        self.connect(self.aboutMooseAction, QtCore.SIGNAL('triggered()'), self.makeAboutMooseLabel)
         self.resetSettingsAction = QtGui.QAction(self.tr('Reset Settings'), self)
         self.connect(self.resetSettingsAction, QtCore.SIGNAL('triggered()'), self.resetSettings)
         # TODO: the following actions are yet to be implemented.
@@ -271,12 +294,15 @@ class MainWindow(QtGui.QMainWindow):
         self.viewMenu.addAction(self.mooseTreeAction)
         self.viewMenu.addAction(self.mooseClassesAction)
         self.viewMenu.addAction(self.mooseShellAction)
+        self.viewMenu.addAction(self.autoHideAction)
+        self.viewMenu.addAction(self.showRightBottomDocksAction)
         self.helpMenu = QtGui.QMenu('&Help', self)
         # TODO: code the actual functions
         self.helpMenu.addAction(self.showDocAction)
         self.helpMenu.addAction(self.contextHelpAction) 
         self.demosMenu = self.makeDemosMenu()
         self.helpMenu.addMenu(self.demosMenu)
+        self.helpMenu.addAction(self.aboutMooseAction)
         self.menuBar().addMenu(self.fileMenu)
         self.menuBar().addMenu(self.viewMenu)
         self.menuBar().addMenu(self.helpMenu)
@@ -318,6 +344,7 @@ class MainWindow(QtGui.QMainWindow):
             self.mooseShellAction.setChecked(False)
         else:
             self.mooseShellAction.setChecked(True)
+    
 
 
     def createMooseClassesPanel(self):
@@ -354,12 +381,15 @@ class MainWindow(QtGui.QMainWindow):
     def createControlDock(self):
         config.LOGGER.debug('Making control panel')
         self.controlDock = QtGui.QDockWidget(self.tr('Simulation Control'), self)
+        self.controlDock.setObjectName(self.tr('Control Dock'))
         self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.controlDock)
         self.controlPanel = QtGui.QFrame(self)
         self.controlPanel.setFrameStyle(QtGui.QFrame.StyledPanel | QtGui.QFrame.Plain)
         layout = QtGui.QGridLayout()
         self.runtimeLabel = QtGui.QLabel(self.tr('Simulation Run Time (second):'), self.controlPanel)
         self.runtimeText = QtGui.QLineEdit('%1.3e' % (MooseHandler.runtime), self.controlPanel)
+        self.updateTimeLabel = QtGui.QLabel(self.tr('Update interval for plots (second):'), self.controlPanel)
+        self.updateTimeText = QtGui.QLineEdit('%1.3e' % (MooseHandler.plotupdate_dt), self.controlPanel)
         self.resetButton = QtGui.QPushButton(self.tr('Reset'), self.controlPanel)
         self.runButton = QtGui.QPushButton(self.tr('Run'), self.controlPanel)
         self.simdtLabel = QtGui.QLabel(self.tr('Simulation timestep (second):'), self.controlPanel)
@@ -380,8 +410,10 @@ class MainWindow(QtGui.QMainWindow):
         layout.addWidget(self.overlayCheckBox, 3, 0)
         layout.addWidget(self.runtimeLabel, 4, 0)
         layout.addWidget(self.runtimeText, 4, 1)
-        layout.addWidget(self.resetButton, 5, 0)
-        layout.addWidget(self.runButton, 5, 1)
+        layout.addWidget(self.updateTimeLabel, 5, 0)
+        layout.addWidget(self.updateTimeText, 5,1)
+        layout.addWidget(self.resetButton, 6, 0)
+        layout.addWidget(self.runButton, 6, 1)
         self.controlPanel.setLayout(layout)
         self.controlDock.setWidget(self.controlPanel)
 
@@ -450,7 +482,14 @@ class MainWindow(QtGui.QMainWindow):
             print 'Error setting 3D visualization time step:', gldt_err
             gldt = MooseHandler.gldt
             self.gldtText.setText('%1.3e' % (MooseHandler.gldt))
-        self.mooseHandler.doReset(simdt, plotdt, gldt)
+        try:
+            updateInterval = float(str(self.updateTimeText.text()))
+            if updateInterval < 0.0:
+                updateInterval = MooseHandler.plotupdate_dt
+        except ValueError:
+            updateInterval = MooseHandler.plotupdate_dt
+            self.updateTimeText.setText(str(updateInterval))
+        self.mooseHandler.doReset(simdt, plotdt, gldt, updateInterval)
         # TODO - clear plots if hold is off.
         # TODO - create the tables based on the fields to be plotted.
         # This can be done by going through the objFieldEditorMap and 
@@ -461,6 +500,8 @@ class MainWindow(QtGui.QMainWindow):
 
         TODO: This should also update plots in view.
         """
+        self.showRightBottomDocks(not self.autoHideAction.isChecked())
+        self.repaint()
         try:
             runtime = float(str(self.runtimeText.text()))
         except ValueError:
@@ -468,6 +509,9 @@ class MainWindow(QtGui.QMainWindow):
             self.runtimeText.setText(str(runtime))
         self.mooseHandler.doRun(runtime)
 
+    def updatePlots(self):
+        print 'Update plots'
+        
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     QtCore.QObject.connect(app, QtCore.SIGNAL('lastWindowClosed()'), app, QtCore.SLOT('quit()'))
