@@ -313,7 +313,7 @@ void Clock::setNumThreads( unsigned int num )
 
 // After reinit, nextTime for everything is set to its own dt.
 // Work out time for next clock, run until that
-void Clock::start(  Eref e, const Qinfo* q, double runTime )
+void Clock::start(  const Eref& e, const Qinfo* q, double runTime )
 {
 	static const double ROUNDING = 1.0000000001;
 	if ( tickPtr_.size() == 0 ) {
@@ -370,7 +370,7 @@ void Clock::sortTickPtrs( pthread_mutex_t* sortMutex )
 }
 
 // This version uses sortTickPtrs rather than a bunch of barriers.
-void Clock::tStart(  Eref e, const ThreadInfo* ti )
+void Clock::tStart(  const Eref& e, const ThreadInfo* ti )
 {
 	ProcInfo pinfo = info_; //We use an independent ProcInfo for each thread
 	pinfo.threadId = ti->threadId; // to manage separate threadIds.
@@ -484,7 +484,7 @@ void* Clock::threadStartFunc( void* threadInfo )
 	pthread_exit( NULL );
 }
 
-void Clock::step(  Eref e, const Qinfo* q, unsigned int nsteps )
+void Clock::step(  const Eref& e, const Qinfo* q, unsigned int nsteps )
 {
 	double endTime = info_.currTime + dt_ * nsteps;
 	sort( tickPtr_.begin(), tickPtr_.end() );
@@ -495,7 +495,7 @@ void Clock::step(  Eref e, const Qinfo* q, unsigned int nsteps )
  * Does a graceful stop of the simulation, leaving so it can continue
  * cleanly with another step or start command.
  */
-void Clock::stop(  Eref e, const Qinfo* q )
+void Clock::stop(  const Eref& e, const Qinfo* q )
 {
 	isRunning_ = 0;
 }
@@ -504,7 +504,7 @@ void Clock::stop(  Eref e, const Qinfo* q )
  * Does a disgraceful stop of the simulation, leaving it wherever it was.
  * Cannot resume.
  */
-void Clock::terminate(  Eref e, const Qinfo* q )
+void Clock::terminate(  const Eref& e, const Qinfo* q )
 {
 	isRunning_ = 0; // Later we will be more vigourous about killing it.
 }
@@ -513,7 +513,7 @@ void Clock::terminate(  Eref e, const Qinfo* q )
  * Reinit is used to reinit the state of the scheduling system.
  * Should be done single-threaded.
  */
-void Clock::reinit( Eref e, const Qinfo* q )
+void Clock::reinit( const Eref& e, const Qinfo* q )
 {
 	info_.currTime = 0.0;
 	runTime_ = 0.0;

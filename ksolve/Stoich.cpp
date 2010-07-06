@@ -148,7 +148,7 @@ bool Stoich::getOneWay() const
 	return useOneWay_;
 }
 
-void Stoich::setPath( Eref e, const Qinfo* q, string v )
+void Stoich::setPath( const Eref& e, const Qinfo* q, string v )
 {
 	if ( path_ != "" && path_ != v ) {
 		// unzombify( path_ );
@@ -170,7 +170,7 @@ void Stoich::setPath( Eref e, const Qinfo* q, string v )
 	*/
 }
 
-string Stoich::getPath( Eref e, const Qinfo* q ) const
+string Stoich::getPath( const Eref& e, const Qinfo* q ) const
 {
 	return path_;
 }
@@ -243,7 +243,7 @@ void Stoich::allocateModel( const vector< Id >& elist )
 	N_.setSize( numVarMols_ + numBufMols, numReac_ );
 }
 
-void Stoich::zombifyModel( Eref& e, const vector< Id >& elist )
+void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 {
 	static const Cinfo* molCinfo = Mol::initCinfo();
 	static const Cinfo* reacCinfo = Reac::initCinfo();

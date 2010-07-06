@@ -23,8 +23,8 @@ template < class T, class F > class ElementValueFinfo: public Finfo
 		}
 
 		ElementValueFinfo( const string& name, const string& doc, 
-			void ( T::*setFunc )( Eref, const Qinfo*, F ),
-			F ( T::*getFunc )( Eref, const Qinfo* ) const )
+			void ( T::*setFunc )( const Eref&, const Qinfo*, F ),
+			F ( T::*getFunc )( const Eref&, const Qinfo* ) const )
 			: Finfo( name, doc )
 		{
 				string setname = "set_" + name;
@@ -72,7 +72,7 @@ template < class T, class F > class ReadOnlyElementValueFinfo: public Finfo
 		}
 
 		ReadOnlyElementValueFinfo( const string& name, const string& doc, 
-			F ( T::*getFunc )( Eref e, const Qinfo* q ) const )
+			F ( T::*getFunc )( const Eref& e, const Qinfo* q ) const )
 			: Finfo( name, doc )
 		{
 				string getname = "get_" + name;

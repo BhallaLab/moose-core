@@ -44,44 +44,44 @@ class Neutral
 		/**
 		 * Field access functions for the name of the Element/Neutral
 		 */
-		void setName( Eref e, const Qinfo* q, string name );
-		string getName( Eref e, const Qinfo* q ) const;
+		void setName( const Eref& e, const Qinfo* q, string name );
+		string getName( const Eref& e, const Qinfo* q ) const;
 
 		/**
 		 * Simply returns own fullId
 		 */
-		FullId getFullId( Eref e, const Qinfo* q ) const;
+		FullId getFullId( const Eref& e, const Qinfo* q ) const;
 
 		/**
 		 * Looks up the full Id info for the parent of the current Element
 		 */
-		FullId getParent( Eref e, const Qinfo* q ) const;
+		FullId getParent( const Eref& e, const Qinfo* q ) const;
 
 		/**
 		 * Looks up all the Element children of the current Element
 		 */
-		vector< Id > getChildren( Eref e, const Qinfo* q ) const;
+		vector< Id > getChildren( const Eref& e, const Qinfo* q ) const;
 
 		/**
 		 * Builds a vector of all descendants of e
 		 */
-		unsigned int buildTree( Eref e, const Qinfo* q, 
+		unsigned int buildTree( const Eref& e, const Qinfo* q, 
 			vector< Id >& tree ) const;
 
 		/**
 		 * Traverses to root, building path.
 		 */
-		string getPath( Eref e, const Qinfo* q ) const;
+		string getPath( const Eref& e, const Qinfo* q ) const;
 
 		/**
 		 * Looks up the Class name of the current Element
 		 */
-		string getClass( Eref e, const Qinfo* q ) const;
+		string getClass( const Eref& e, const Qinfo* q ) const;
 
 		/**
 		 * Destroys Element and all children
 		 */
-		void destroy( Eref e, const Qinfo* q, int stage );
+		void destroy( const Eref& e, const Qinfo* q, int stage );
 		
 		////////////////////////////////////////////////////////////
 
@@ -93,7 +93,7 @@ class Neutral
 		/**
 		 * Looks up all the Element children of the current Element
 		 */
-		static vector< Id > children( Eref e );
+		static vector< Id > children( const Eref& e );
 
 		static FullId parent( const Eref& e );
 
@@ -111,7 +111,7 @@ class Neutral
 		/**
 		 * return ids of all the children in ret.
 		 */
-		static void children( Eref e, vector< Id >& ret );
+		static void children( const Eref& e, vector< Id >& ret );
 
 		/**
 		 * Finds the path of element e

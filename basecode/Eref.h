@@ -19,12 +19,12 @@ class Eref
 		/**
 		 * Returns data entry
 		 */
-		char* data();
+		char* data() const;
 
 		/**
 		 * Returns data entry of parent object of field array
 		 */
-		char* data1();
+		char* data1() const;
 
 		/**
 		 * Returns Element part

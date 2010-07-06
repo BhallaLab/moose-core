@@ -17,7 +17,7 @@
 template< class T > class EpFunc0: public OpFunc
 {
 	public:
-		EpFunc0( void ( T::*func )( Eref e, const Qinfo* q ) )
+		EpFunc0( void ( T::*func )( const Eref& e, const Qinfo* q ) )
 			: func_( func )
 			{;}
 
@@ -29,19 +29,19 @@ template< class T > class EpFunc0: public OpFunc
 			return dynamic_cast< const SetGet0* >( s );
 		}
 
-		void op( Eref e, const char* buf ) const {
+		void op( const Eref& e, const char* buf ) const {
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
 			(reinterpret_cast< T* >( e.data() )->*func_)( e, q ); 
 		}
 
 	private:
-		void ( T::*func_ )( Eref e, const Qinfo* q ); 
+		void ( T::*func_ )( const Eref& e, const Qinfo* q ); 
 };
 
 template< class T, class A > class EpFunc1: public OpFunc
 {
 	public:
-		EpFunc1( void ( T::*func )( Eref e, const Qinfo* q, A ) )
+		EpFunc1( void ( T::*func )( const Eref& e, const Qinfo* q, A ) )
 			: func_( func )
 			{;}
 
@@ -55,83 +55,20 @@ template< class T, class A > class EpFunc1: public OpFunc
 
 		// This could do with a whole lot of optimization to avoid
 		// copying data back and forth.
-		void op( Eref e, const char* buf ) const {
+		void op( const Eref& e, const char* buf ) const {
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
 			Conv< A > arg1( buf + sizeof( Qinfo ) );
 			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1 ) ;
 		}
 
 	private:
-		void ( T::*func_ )( Eref e, const Qinfo* q, A ); 
+		void ( T::*func_ )( const Eref& e, const Qinfo* q, A ); 
 };
-
-/*
-template< class T > class ProcOpFunc: public OpFunc
-{
-	public:
-		ProcOpFunc( void ( T::*func )( Eref e, const Qinfo* q, ProcPtr ) )
-			: func_( func )
-			{;}
-
-		bool checkFinfo( const Finfo* s ) const {
-			return dynamic_cast< const SrcFinfo1< ProcPtr >* >( s );
-		}
-
-		bool checkSet( const SetGet* s ) const {
-			return dynamic_cast< const SetGet1< ProcPtr >* >( s );
-		}
-
-		// This could do with a whole lot of optimization to avoid
-		// copying data back and forth.
-		void op( Eref e, const char* buf ) const {
-			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
-			Conv< ProcPtr > arg1( buf + sizeof( Qinfo ) );
-			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1 ) ;
-		}
-
-		// This key extra function does Process calls.
-		void proc( char* obj, Eref e, ProcPtr p ) {
-			reinterpret_cast< T* >( obj )->func( e, 0, p );
-		}
-
-	private:
-		void ( T::*func_ )( Eref e, const Qinfo* q, ProcPtr ); 
-}
-*/
-
-/*
-template< class T > class RetFunc: public OpFunc
-{
-	public:
-		RetFunc( void ( T::*func )( Eref e, const Qinfo* q, const char* arg ) )
-			: func_( func )
-			{;}
-
-		bool checkFinfo( const Finfo* s ) const {
-			return 1;
-		}
-
-		bool checkSet( const SetGet* s ) const {
-			return 1;
-		}
-
-		// This could do with a whole lot of optimization to avoid
-		// copying data back and forth.
-		void op( Eref e, const char* buf ) const {
-			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
-			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, buf + sizeof( Qinfo ) ) ;
-		}
-
-	private:
-		void ( T::*func_ )( Eref e, const Qinfo* q, const char* arg ); 
-};
-*/
-
 
 template< class T, class A1, class A2 > class EpFunc2: public OpFunc
 {
 	public:
-		EpFunc2( void ( T::*func )( Eref e, const Qinfo* q, A1, A2 ) )
+		EpFunc2( void ( T::*func )( const Eref& e, const Qinfo* q, A1, A2 ) )
 			: func_( func )
 			{;}
 
@@ -145,7 +82,7 @@ template< class T, class A1, class A2 > class EpFunc2: public OpFunc
 
 		// This could do with a whole lot of optimization to avoid
 		// copying data back and forth.
-		void op( Eref e, const char* buf ) const {
+		void op( const Eref& e, const char* buf ) const {
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
 			buf += sizeof( Qinfo );
 			Conv< A1 > arg1( buf );
@@ -154,14 +91,14 @@ template< class T, class A1, class A2 > class EpFunc2: public OpFunc
 		}
 
 	private:
-		void ( T::*func_ )( Eref e, const Qinfo* q, A1, A2 ); 
+		void ( T::*func_ )( const Eref& e, const Qinfo* q, A1, A2 ); 
 };
 
 template< class T, class A1, class A2, class A3 > class EpFunc3:
 	public OpFunc
 {
 	public:
-		EpFunc3( void ( T::*func )( Eref e, const Qinfo* q, A1, A2, A3 ) )
+		EpFunc3( void ( T::*func )( const Eref& e, const Qinfo* q, A1, A2, A3 ) )
 			: func_( func )
 			{;}
 
@@ -175,7 +112,7 @@ template< class T, class A1, class A2, class A3 > class EpFunc3:
 
 		// This could do with a whole lot of optimization to avoid
 		// copying data back and forth.
-		void op( Eref e, const char* buf ) const {
+		void op( const Eref& e, const char* buf ) const {
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
 			buf += sizeof( Qinfo );
 			Conv< A1 > arg1( buf );
@@ -186,14 +123,14 @@ template< class T, class A1, class A2, class A3 > class EpFunc3:
 		}
 
 	private:
-		void ( T::*func_ )( Eref e, const Qinfo* q, A1, A2, A3 ); 
+		void ( T::*func_ )( const Eref& e, const Qinfo* q, A1, A2, A3 ); 
 };
 
 template< class T, class A1, class A2, class A3, class A4 > class EpFunc4:
 	public OpFunc
 {
 	public:
-		EpFunc4( void ( T::*func )( Eref e, const Qinfo* q, A1, A2, A3, A4 ) )
+		EpFunc4( void ( T::*func )( const Eref& e, const Qinfo* q, A1, A2, A3, A4 ) )
 			: func_( func )
 			{;}
 
@@ -207,7 +144,7 @@ template< class T, class A1, class A2, class A3, class A4 > class EpFunc4:
 
 		// This could do with a whole lot of optimization to avoid
 		// copying data back and forth.
-		void op( Eref e, const char* buf ) const {
+		void op( const Eref& e, const char* buf ) const {
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
 			buf += sizeof( Qinfo );
 			Conv< A1 > arg1( buf );
@@ -219,14 +156,14 @@ template< class T, class A1, class A2, class A3, class A4 > class EpFunc4:
 		}
 
 	private:
-		void ( T::*func_ )( Eref e, const Qinfo* q, A1, A2, A3, A4 ); 
+		void ( T::*func_ )( const Eref& e, const Qinfo* q, A1, A2, A3, A4 ); 
 };
 
 template< class T, class A1, class A2, class A3, class A4, class A5 > class EpFunc5:
 	public OpFunc
 {
 	public:
-		EpFunc5( void ( T::*func )( Eref e, const Qinfo* q, A1, A2, A3, A4, A5 ) )
+		EpFunc5( void ( T::*func )( const Eref& e, const Qinfo* q, A1, A2, A3, A4, A5 ) )
 			: func_( func )
 			{;}
 
@@ -240,7 +177,7 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class EpFu
 
 		// This could do with a whole lot of optimization to avoid
 		// copying data back and forth.
-		void op( Eref e, const char* buf ) const {
+		void op( const Eref& e, const char* buf ) const {
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
 			buf += sizeof( Qinfo );
 			Conv< A1 > arg1( buf );
@@ -257,7 +194,7 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class EpFu
 		}
 
 	private:
-		void ( T::*func_ )( Eref e, const Qinfo* q, A1, A2, A3, A4, A5 ); 
+		void ( T::*func_ )( const Eref& e, const Qinfo* q, A1, A2, A3, A4, A5 ); 
 };
 
 /**
@@ -271,7 +208,7 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class EpFu
 template< class T, class A > class GetEpFunc: public OpFunc
 {
 	public:
-		GetEpFunc( A ( T::*func )( Eref e, const Qinfo* q ) const )
+		GetEpFunc( A ( T::*func )( const Eref& e, const Qinfo* q ) const )
 			: func_( func )
 			{;}
 
@@ -294,7 +231,7 @@ template< class T, class A > class GetEpFunc: public OpFunc
 		 * Finally, the data is copied back-and-forth about 3 times.
 		 * Wasteful, but the 'get' function is not to be heavily used.
 		 */
-		void op( Eref e, const char* buf ) const {
+		void op( const Eref& e, const char* buf ) const {
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
 			const A& ret = 
 				(( reinterpret_cast< T* >( e.data() ) )->*func_)( e, q );
@@ -306,7 +243,7 @@ template< class T, class A > class GetEpFunc: public OpFunc
 		}
 
 	private:
-		A ( T::*func_ )( Eref e, const Qinfo* q ) const;
+		A ( T::*func_ )( const Eref& e, const Qinfo* q ) const;
 };
 
 /**

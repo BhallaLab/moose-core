@@ -150,22 +150,22 @@ void ZombieReac::prd( double v )
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
-void ZombieReac::setKf( Eref e, const Qinfo* q, double v )
+void ZombieReac::setKf( const Eref& e, const Qinfo* q, double v )
 {
 	rates_[ convertIdToReacIndex( e.id() ) ]->setR1( v );
 }
 
-double ZombieReac::getKf( Eref e, const Qinfo* q ) const
+double ZombieReac::getKf( const Eref& e, const Qinfo* q ) const
 {
 	return rates_[ convertIdToReacIndex( e.id() ) ]->getR1();
 }
 
-void ZombieReac::setKb( Eref e, const Qinfo* q, double v )
+void ZombieReac::setKb( const Eref& e, const Qinfo* q, double v )
 {
 	rates_[ convertIdToReacIndex( e.id() ) ]->setR2( v );
 }
 
-double ZombieReac::getKb( Eref e, const Qinfo* q ) const
+double ZombieReac::getKb( const Eref& e, const Qinfo* q ) const
 {
 	return rates_[ convertIdToReacIndex( e.id() ) ]->getR2();
 }

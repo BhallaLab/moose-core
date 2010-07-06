@@ -6618,4 +6618,32 @@ implementation of reinit, stop and terminate functions. Checkin 1956.
 Set most objects to use the shared Msg "proc" rather than the old "process"
 message. Unit tests showed up a funny failure, finally tracked down to
 failure to clean up the 'doReinit_' flag within Shell. Fixed, now clears
-unit tests again.
+unit tests again. Checkin 1959.
+
+Plans on going to array stoich solver, leading soon to stupid diffusion
+calculations.
+- The S_ vector becomes a temporary holder for the current compartment.
+- The RateTerms and the vector V do not need to expand, and they can keep
+	pointing into the S_ vector.
+- updateV does not change what is there. 
+	However things get unpleasant on multithreads.
+- UpdateV is extended with a loop that fills in the diffusive flux. This
+	will need just another table for diffusion constants.
+- innerGslFunc cycles through multiple rounds of copying successive
+	compartments worth of data back and forth into S_, and doing
+	updateV each time.
+The issue with the above set is that it won't work on multithreads.
+
+Could consider the following bigger changes:
+- Replace the S_ vector with a pointer to the current chunk of the y_ vector.
+- Replace the RateTerm pointers with indices. This is slower but means
+	that they can be used multithreaded for different chunks of data.
+
+Refinements to updateV may still be relevant, but the details of how to
+set up compartment updates are not, given that we need to implement a
+completely different reac-diff solver. More important is to get the
+data structures right.
+
+============================================================================
+6 July 2010
+Went through converting function calls using Eref to using const Eref&.

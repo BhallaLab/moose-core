@@ -121,22 +121,22 @@ Neutral Neutral::getThis() const
 	return *this;
 }
 
-void Neutral::setName( Eref e, const Qinfo* q, string name )
+void Neutral::setName( const Eref& e, const Qinfo* q, string name )
 {
 	e.element()->setName( name );
 }
 
-string Neutral::getName( Eref e, const Qinfo* q ) const
+string Neutral::getName( const Eref& e, const Qinfo* q ) const
 {
 	return e.element()->getName();
 }
 
-FullId Neutral::getFullId( Eref e, const Qinfo* q ) const
+FullId Neutral::getFullId( const Eref& e, const Qinfo* q ) const
 {
 	return e.fullId();
 }
 
-FullId Neutral::getParent( Eref e, const Qinfo* q ) const
+FullId Neutral::getParent( const Eref& e, const Qinfo* q ) const
 {
 	return parent( e );
 	/*
@@ -154,7 +154,7 @@ FullId Neutral::getParent( Eref e, const Qinfo* q ) const
 /**
  * Gets Element children, not individual entries in the array.
  */
-vector< Id > Neutral::getChildren( Eref e, const Qinfo* q ) const
+vector< Id > Neutral::getChildren( const Eref& e, const Qinfo* q ) const
 {
 	vector< Id > ret;
 	children( e, ret );
@@ -162,7 +162,7 @@ vector< Id > Neutral::getChildren( Eref e, const Qinfo* q ) const
 }
 
 // Static function
-void Neutral::children( Eref e, vector< Id >& ret )
+void Neutral::children( const Eref& e, vector< Id >& ret )
 {
 	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
 	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
@@ -185,7 +185,7 @@ void Neutral::children( Eref e, vector< Id >& ret )
 
 /*
  * Gets specific named child
-Id Neutral::getChild( Eref e, const Qinfo* q, const string& name ) 
+Id Neutral::getChild( const Eref& e, const Qinfo* q, const string& name ) 
 {
 	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
 	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
@@ -212,17 +212,17 @@ Id Neutral::getChild( Eref e, const Qinfo* q, const string& name )
 */
 
 
-string Neutral::getPath( Eref e, const Qinfo* q ) const
+string Neutral::getPath( const Eref& e, const Qinfo* q ) const
 {
 	return path( e );
 }
 
-string Neutral::getClass( Eref e, const Qinfo* q ) const
+string Neutral::getClass( const Eref& e, const Qinfo* q ) const
 {
 	return e.element()->cinfo()->name();
 }
 
-unsigned int Neutral::buildTree( Eref e, const Qinfo* q, vector< Id >& tree )
+unsigned int Neutral::buildTree( const Eref& e, const Qinfo* q, vector< Id >& tree )
 	const 
 {
 	unsigned int ret = 1;
@@ -237,7 +237,7 @@ unsigned int Neutral::buildTree( Eref e, const Qinfo* q, vector< Id >& tree )
 // Stage 1: mark for deletion. This is done by setting cinfo = 0
 // Stage 2: Clear out outside-going msgs
 // Stage 3: delete self and attached msgs, 
-void Neutral::destroy( Eref e, const Qinfo* q, int stage )
+void Neutral::destroy( const Eref& e, const Qinfo* q, int stage )
 {
 	vector< Id > tree;
 	unsigned int numDescendants = buildTree( e, q, tree );

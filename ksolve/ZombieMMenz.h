@@ -24,10 +24,10 @@ class ZombieMMenz: public Stoich
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
 
-		void setKm( Eref e, const Qinfo* q, double v );
-		double getKm( Eref e, const Qinfo* q ) const;
-		void setKcat( Eref e, const Qinfo* q, double v );
-		double getKcat( Eref e, const Qinfo* q ) const;
+		void setKm( const Eref& e, const Qinfo* q, double v );
+		double getKm( const Eref& e, const Qinfo* q ) const;
+		void setKcat( const Eref& e, const Qinfo* q, double v );
+		double getKcat( const Eref& e, const Qinfo* q ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs

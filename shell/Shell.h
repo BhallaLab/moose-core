@@ -112,7 +112,7 @@ class Shell
 		///////////////////////////////////////////////////////////
 		// DestFinfo functions
 		///////////////////////////////////////////////////////////
-		void handleGet( Eref e, const Qinfo* q, const char* arg );
+		void handleGet( const Eref& e, const Qinfo* q, const char* arg );
 
 		/**
 		 * Sets of a simulation for duration runTime. Handles
@@ -135,10 +135,10 @@ class Shell
 
 		void handleQuit();
 
-		void create( Eref e, const Qinfo* q, 
+		void create( const Eref& e, const Qinfo* q, 
 			string type, Id parent, Id newElm, string name,
 			vector< unsigned int > dimensions );
-		void destroy( Eref e, const Qinfo* q, Id eid);
+		void destroy( const Eref& e, const Qinfo* q, Id eid);
 		void innerCreate( string type, Id parent, Id newElm, string name,
 			const vector< unsigned int >& dimensions );
 
@@ -357,8 +357,10 @@ class Shell
 		Id cwe_;
 };
 
+/*
 extern bool set( Eref& dest, const string& destField, const string& val );
 
 extern bool get( const Eref& dest, const string& destField );
+*/
 
 #endif // _SHELL_H

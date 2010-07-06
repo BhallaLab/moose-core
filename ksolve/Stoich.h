@@ -24,8 +24,8 @@ class Stoich
 		bool getOneWay() const;
 		double getNumVarMols() const;
 
-		void setPath( Eref e, const Qinfo* q, string v );
-		string getPath( Eref e, const Qinfo* q ) const;
+		void setPath( const Eref& e, const Qinfo* q, string v );
+		string getPath( const Eref& e, const Qinfo* q ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
@@ -39,7 +39,7 @@ class Stoich
 		//////////////////////////////////////////////////////////////////
 		void allocateObjMap( const vector< Id >& elist );
 		void allocateModel( const vector< Id >& elist );
-		void zombifyModel( Eref& e, const vector< Id >& elist );
+		void zombifyModel( const Eref& e, const vector< Id >& elist );
 		unsigned int convertIdToReacIndex( Id id ) const;
 		unsigned int convertIdToMolIndex( Id id ) const;
 

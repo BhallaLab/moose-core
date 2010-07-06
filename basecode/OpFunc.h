@@ -17,7 +17,7 @@ class OpFunc
 		{;}
 		virtual bool checkFinfo( const Finfo* s) const = 0;
 		virtual bool checkSet( const SetGet* s) const = 0;
-		virtual void op( Eref e, const char* buf ) const = 0;
+		virtual void op( const Eref& e, const char* buf ) const = 0;
 };
 
 // Should I template these off an integer for generating a family?
@@ -27,7 +27,7 @@ class OpFuncDummy: public OpFunc
 		OpFuncDummy();
 		bool checkFinfo( const Finfo* s) const;
 		bool checkSet( const SetGet* s) const;
-		void op( Eref e, const char* buf ) const;
+		void op( const Eref& e, const char* buf ) const;
 };
 
 template< class T > class OpFunc0: public OpFunc
@@ -49,7 +49,7 @@ template< class T > class OpFunc0: public OpFunc
 		 * Call function on T located at e.data(), which is a simple 
 		 * array lookup of the data_ vector using the Eref index.
 		 */
-		void op( Eref e, const char* buf ) const {
+		void op( const Eref& e, const char* buf ) const {
 			(reinterpret_cast< T* >( e.data() )->*func_)( );
 		}
 
@@ -72,7 +72,7 @@ template< class T, class A > class OpFunc1: public OpFunc
 			return dynamic_cast< const SetGet1< A >* >( s );
 		}
 
-		void op( Eref e, const char* buf ) const {
+		void op( const Eref& e, const char* buf ) const {
 			Conv< A > arg1( buf + sizeof( Qinfo ) );
 			(reinterpret_cast< T* >( e.data() )->*func_)( *arg1 );
 		}
@@ -96,7 +96,7 @@ template< class T, class A1, class A2 > class OpFunc2: public OpFunc
 			return dynamic_cast< const SetGet2< A1, A2 >* >( s );
 		}
 
-		void op( Eref e, const char* buf ) const {
+		void op( const Eref& e, const char* buf ) const {
 			buf += sizeof( Qinfo );
 			Conv< A1 > arg1( buf );
 			Conv< A2 > arg2( buf + arg1.size() );
@@ -123,7 +123,7 @@ template< class T, class A1, class A2, class A3 > class OpFunc3:
 			return dynamic_cast< const SetGet3< A1, A2, A3 >* >( s );
 		}
 
-		void op( Eref e, const char* buf ) const {
+		void op( const Eref& e, const char* buf ) const {
 			buf += sizeof( Qinfo );
 			Conv< A1 > arg1( buf );
 			buf += arg1.size();
@@ -154,7 +154,7 @@ template< class T, class A1, class A2, class A3, class A4 > class OpFunc4:
 			return dynamic_cast< const SetGet4< A1, A2, A3, A4 >* >( s );
 		}
 
-		void op( Eref e, const char* buf ) const {
+		void op( const Eref& e, const char* buf ) const {
 			buf += sizeof( Qinfo );
 			Conv< A1 > arg1( buf );
 			buf += arg1.size();
@@ -187,7 +187,7 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class OpFu
 			return dynamic_cast< const SetGet5< A1, A2, A3, A4, A5 >* >( s );
 		}
 
-		void op( Eref e, const char* buf ) const {
+		void op( const Eref& e, const char* buf ) const {
 			buf += sizeof( Qinfo );
 			Conv< A1 > arg1( buf );
 			buf += arg1.size();
@@ -243,7 +243,7 @@ template< class T, class A > class GetOpFunc: public OpFunc
 		 * Finally, the data is copied back-and-forth about 3 times.
 		 * Wasteful, but the 'get' function is not to be heavily used.
 		 */
-		void op( Eref e, const char* buf ) const {
+		void op( const Eref& e, const char* buf ) const {
 			const A& ret = 
 				(( reinterpret_cast< T* >( e.data() ) )->*func_)();
 			Conv<A> conv0( ret );

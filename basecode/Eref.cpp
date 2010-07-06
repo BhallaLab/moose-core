@@ -56,12 +56,12 @@ void Eref::ssend2( SyncId src, double v1, double v2 )
 }
 */
 
-char* Eref::data()
+char* Eref::data() const
 {
 	return e_->dataHandler()->data( i_ );
 }
 
-char* Eref::data1()
+char* Eref::data1() const
 {
 	return e_->dataHandler()->data1( i_ );
 }

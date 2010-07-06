@@ -74,34 +74,6 @@ Synapse::Synapse( const Synapse& other, double time )
 	;
 }
 
-/*
-void Synapse::clearQ( Eref e )
-{
-	const char* i = e.generalQ.begin();
-	while i != e.generalQ.end() {
-		// FuncId* fi = static_cast< FuncId* >( i );
-		// i += sizeof( FuncId );
-		// i += fi->doOperation( e, i );
-		// i += doOperation( *fi, e, i );
-		unsigned int op = *static_cast< const unsigned int* >( i );
-		i += sizeof( unsigned int );
-		i += this->opVec_[ op ]( e, i );
-			// opVec is set up statically, has the function ptrs.
-			// All are of the form f( Eref e, const char* i ).
-	}
-}
-*/
-
-/*
-unsigned int FuncId::doOperation( Eref e, char* i )
-{
-	unsigned int op = *static_cast< unsigned int* >( i );
-	i += sizeof( unsigned int );
-	return opVec_[ op ]( i ) + sizeof( unsigned int );
-}
-*/
-
-
 void Synapse::setWeight( const double v )
 {
 	weight_ = v;

@@ -1079,13 +1079,13 @@ class Test
 			numAcks_++;
 		}
 
-		void handleS1( Eref e, const Qinfo* q, string s ) {
+		void handleS1( const Eref& e, const Qinfo* q, string s ) {
 			ProcInfo p;
 			s_ = s + s_;
 			s0.send( e, &p );
 		}
 
-		void handleS2( Eref e, const Qinfo* q, int i1, int i2 ) {
+		void handleS2( const Eref& e, const Qinfo* q, int i1, int i2 ) {
 			ProcInfo p;
 			i1_ += 10 * i1;
 			i2_ += 10 * i2;

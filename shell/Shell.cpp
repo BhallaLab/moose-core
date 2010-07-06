@@ -730,7 +730,7 @@ void Shell::handleTerminate()
  * Element, but for now the num indicates the total # of array entries.
  * This gets a bit complicated if the Element is a multidim array.
  */
-void Shell::create( Eref e, const Qinfo* q, 
+void Shell::create( const Eref& e, const Qinfo* q, 
 	string type, Id parent, Id newElm, string name,
 	vector< unsigned int > dimensions )
 {
@@ -812,7 +812,7 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 	}
 }
 
-void Shell::destroy( Eref e, const Qinfo* q, Id eid)
+void Shell::destroy( const Eref& e, const Qinfo* q, Id eid)
 {
 	Neutral *n = reinterpret_cast< Neutral* >( e.data() );
 	assert( n );

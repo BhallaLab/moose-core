@@ -41,7 +41,7 @@ class Clock
 		/**
 		 * starts up a run to go for runTime without threading.
 		 */
-		void start( Eref e, const Qinfo* q, double runTime );
+		void start( const Eref& e, const Qinfo* q, double runTime );
 
 		/**
 		 * tStart starts up a run using threading. Is called independently
@@ -49,13 +49,13 @@ class Clock
 		 * # of worker threads. threadId 0 has a special meaning as it 
 		 * manages increments of current time.
 		 */
-		// void tStart(  Eref e, const Qinfo* q, double runTime, unsigned int threadId );
-		void tStart(  Eref e, const ThreadInfo* ti );
+		// void tStart(  const Eref& e, const Qinfo* q, double runTime, unsigned int threadId );
+		void tStart(  const Eref& e, const ThreadInfo* ti );
 		void sortTickPtrs( pthread_mutex_t* sortMutex );
-		void step( Eref e, const Qinfo* q, unsigned int nsteps );
-		void stop( Eref e, const Qinfo* q );
-		void terminate( Eref e, const Qinfo* q );
-		void reinit( Eref e, const Qinfo* q );
+		void step( const Eref& e, const Qinfo* q, unsigned int nsteps );
+		void stop( const Eref& e, const Qinfo* q );
+		void terminate( const Eref& e, const Qinfo* q );
+		void reinit( const Eref& e, const Qinfo* q );
 
 		/**
 		 * This utility function creates a tick on the assigned tickNum,
@@ -67,7 +67,7 @@ class Clock
 		// Tick handlers
 		///////////////////////////////////////////////////////////
 		// Handles dt assignment from the child ticks.
-		void setDt( Eref e, const Qinfo* q, double dt );
+		void setDt( const Eref& e, const Qinfo* q, double dt );
 
 		/**
 		 * Pushes the new Tick onto the TickPtr stack.

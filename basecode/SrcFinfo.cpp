@@ -51,13 +51,13 @@ SrcFinfo0::SrcFinfo0( const string& name, const string& doc )
 	: SrcFinfo( name, doc )
 { ; }
 
-void SrcFinfo0::send( Eref e, const ProcInfo* p ) const {
+void SrcFinfo0::send( const Eref& e, const ProcInfo* p ) const {
 	// Qinfo( eindex, size, useSendTo );
 	Qinfo q( e.index(), 0, 0 );
 	e.element()->asend( q, getBindIndex(), p, 0 ); // last arg is data
 }
 
-void SrcFinfo0::sendTo( Eref e, const ProcInfo* p, 
+void SrcFinfo0::sendTo( const Eref& e, const ProcInfo* p, 
 	const FullId& target ) const
 {
 	// Qinfo( eindex, size, useSendTo );

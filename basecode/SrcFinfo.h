@@ -65,8 +65,8 @@ class SrcFinfo0: public SrcFinfo
 		~SrcFinfo0() {;}
 		
 		// Will need to specialize for strings etc.
-		void send( Eref e, const ProcInfo* p ) const;
-		void sendTo( Eref e, const ProcInfo* p, const FullId& target) const;
+		void send( const Eref& e, const ProcInfo* p ) const;
+		void sendTo( const Eref& e, const ProcInfo* p, const FullId& target) const;
 
 	private:
 };
@@ -82,7 +82,7 @@ template < class T > class SrcFinfo1: public SrcFinfo
 			{ ; }
 
 		// Will need to specialize for strings etc.
-		void send( Eref e, const ProcInfo* p, const T& arg ) const 
+		void send( const Eref& e, const ProcInfo* p, const T& arg ) const 
 		{
 			// Qinfo( eindex, size, useSendTo );
 			Qinfo q( e.index(), sizeof( T ), 0 );
@@ -94,7 +94,7 @@ template < class T > class SrcFinfo1: public SrcFinfo
 		 * We know the data index but we also need to know the target 
 		 * Element or Msg, since there could be multiple ones. 
 		 */
-		void sendTo( Eref e, const ProcInfo* p,
+		void sendTo( const Eref& e, const ProcInfo* p,
 			const T& arg, const FullId& target ) const
 		{
 			// Qinfo( eindex, size, useSendTo );
@@ -116,7 +116,7 @@ template <> class SrcFinfo1< string >: public SrcFinfo
 			{ ; }
 
 		// Will need to specialize for strings etc.
-		void send( Eref e, const ProcInfo* p, const string& arg ) const
+		void send( const Eref& e, const ProcInfo* p, const string& arg ) const
 		{
 			Conv< string > s( arg );
 
@@ -129,7 +129,7 @@ template <> class SrcFinfo1< string >: public SrcFinfo
 			delete[] buf;
 		}
 
-		void sendTo( Eref e, const ProcInfo* p, 
+		void sendTo( const Eref& e, const ProcInfo* p, 
 			const string& arg, const FullId& target ) const
 		{
 			Conv< string > s( arg );
@@ -155,7 +155,7 @@ template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 
 		// This version is general but inefficient as it uses an extra
 		// memcpy in val2buf.
-		void send( Eref e, const ProcInfo* p,
+		void send( const Eref& e, const ProcInfo* p,
 			const T1& arg1, const T2& arg2 ) const
 		{
 			Conv< T1 > a1( arg1 );
@@ -168,7 +168,7 @@ template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 			delete[] temp;
 		}
 
-		void sendTo( Eref e, const ProcInfo* p,
+		void sendTo( const Eref& e, const ProcInfo* p,
 			const T1& arg1, const T2& arg2, const FullId& target ) const
 		{
 			Conv< T1 > a1( arg1 );
@@ -195,7 +195,7 @@ template < class T1, class T2, class T3 > class SrcFinfo3: public SrcFinfo
 			{ ; }
 
 		// Will need to specialize for strings etc.
-		void send( Eref e, const ProcInfo* p,
+		void send( const Eref& e, const ProcInfo* p,
 			const T1& arg1, const T2& arg2, const T3& arg3 ) const
 		{
 			Conv< T1 > a1( arg1 );
@@ -210,7 +210,7 @@ template < class T1, class T2, class T3 > class SrcFinfo3: public SrcFinfo
 			delete[] temp;
 		}
 
-		void sendTo( Eref e, DataId target, const ProcInfo* p,
+		void sendTo( const Eref& e, DataId target, const ProcInfo* p,
 			const T1& arg1, const T2& arg2, const T3& arg3 ) const
 		{
 			Conv< T1 > a1( arg1 );
@@ -238,7 +238,7 @@ template < class T1, class T2, class T3, class T4 > class SrcFinfo4: public SrcF
 			{ ; }
 
 		// Will need to specialize for strings etc.
-		void send( Eref e, const ProcInfo* p,
+		void send( const Eref& e, const ProcInfo* p,
 			const T1& arg1, const T2& arg2, 
 			const T3& arg3, const T4& arg4 ) const
 		{
@@ -257,7 +257,7 @@ template < class T1, class T2, class T3, class T4 > class SrcFinfo4: public SrcF
 			delete[] temp;
 		}
 
-		void sendTo( Eref e, const ProcInfo* p,
+		void sendTo( const Eref& e, const ProcInfo* p,
 			const T1& arg1, const T2& arg2, const T3& arg3, const T4& arg4,
 			const FullId& target ) const
 		{
@@ -289,7 +289,7 @@ template < class T1, class T2, class T3, class T4, class T5 > class SrcFinfo5: p
 			{ ; }
 
 		// Will need to specialize for strings etc.
-		void send( Eref e, const ProcInfo* p,
+		void send( const Eref& e, const ProcInfo* p,
 			const T1& arg1, const T2& arg2, const T3& arg3, const T4& arg4,
 			const T5& arg5 ) const
 		{
@@ -311,7 +311,7 @@ template < class T1, class T2, class T3, class T4, class T5 > class SrcFinfo5: p
 			delete[] temp;
 		}
 
-		void sendTo( Eref e, const ProcInfo* p,
+		void sendTo( const Eref& e, const ProcInfo* p,
 			const T1& arg1, const T2& arg2, const T3& arg3, const T4& arg4,
 			const T5& arg5,
 			const FullId& target ) const

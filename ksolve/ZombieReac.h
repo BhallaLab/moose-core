@@ -20,10 +20,10 @@ class ZombieReac: public Stoich
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
 
-		void setKf( Eref e, const Qinfo* q, double v );
-		double getKf( Eref e, const Qinfo* q ) const;
-		void setKb( Eref e, const Qinfo* q, double v );
-		double getKb( Eref e, const Qinfo* q ) const;
+		void setKf( const Eref& e, const Qinfo* q, double v );
+		double getKf( const Eref& e, const Qinfo* q ) const;
+		void setKb( const Eref& e, const Qinfo* q, double v );
+		double getKb( const Eref& e, const Qinfo* q ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs

@@ -20,17 +20,17 @@ class ZombieMol: public Stoich
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
 
-		void setN( Eref e, const Qinfo* q, double v );
-		double getN( Eref e, const Qinfo* q ) const;
-		void setNinit( Eref e, const Qinfo* q, double v );
-		double getNinit( Eref e, const Qinfo* q ) const;
-		void setDiffConst( Eref e, const Qinfo* q, double v );
-		double getDiffConst( Eref e, const Qinfo* q ) const;
+		void setN( const Eref& e, const Qinfo* q, double v );
+		double getN( const Eref& e, const Qinfo* q ) const;
+		void setNinit( const Eref& e, const Qinfo* q, double v );
+		double getNinit( const Eref& e, const Qinfo* q ) const;
+		void setDiffConst( const Eref& e, const Qinfo* q, double v );
+		double getDiffConst( const Eref& e, const Qinfo* q ) const;
 
-		void setConc( Eref e, const Qinfo* q, double v );
-		double getConc( Eref e, const Qinfo* q ) const;
-		void setConcInit( Eref e, const Qinfo* q, double v );
-		double getConcInit( Eref e, const Qinfo* q ) const;
+		void setConc( const Eref& e, const Qinfo* q, double v );
+		double getConc( const Eref& e, const Qinfo* q ) const;
+		void setConcInit( const Eref& e, const Qinfo* q, double v );
+		double getConcInit( const Eref& e, const Qinfo* q ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs

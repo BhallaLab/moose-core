@@ -19,12 +19,12 @@ class ZombieEnz: public Stoich
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
 
-		void setK1( Eref e, const Qinfo* q, double v );
-		double getK1( Eref e, const Qinfo* q ) const;
-		void setK2( Eref e, const Qinfo* q, double v );
-		double getK2( Eref e, const Qinfo* q ) const;
-		void setK3( Eref e, const Qinfo* q, double v );
-		double getK3( Eref e, const Qinfo* q ) const;
+		void setK1( const Eref& e, const Qinfo* q, double v );
+		double getK1( const Eref& e, const Qinfo* q ) const;
+		void setK2( const Eref& e, const Qinfo* q, double v );
+		double getK2( const Eref& e, const Qinfo* q ) const;
+		void setK3( const Eref& e, const Qinfo* q, double v );
+		double getK3( const Eref& e, const Qinfo* q ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs

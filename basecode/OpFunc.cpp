@@ -63,6 +63,6 @@ bool OpFuncDummy::checkSet( const SetGet* s ) const {
 	return dynamic_cast< const SetGet0* >( s );
 }
 
-void OpFuncDummy::op( Eref e, const char* buf ) const {
+void OpFuncDummy::op( const Eref& e, const char* buf ) const {
 	;
 }

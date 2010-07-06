@@ -147,22 +147,22 @@ void ZombieMMenz::reinit( const Eref& e, ProcPtr p )
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
-void ZombieMMenz::setKm( Eref e, const Qinfo* q, double v )
+void ZombieMMenz::setKm( const Eref& e, const Qinfo* q, double v )
 {
 	rates_[ convertIdToMolIndex( e.id() ) ]->setR1( v ); // First rate is Km
 }
 
-double ZombieMMenz::getKm( Eref e, const Qinfo* q ) const
+double ZombieMMenz::getKm( const Eref& e, const Qinfo* q ) const
 {
 	return rates_[ convertIdToMolIndex( e.id() ) ]->getR1(); // First rate is Km
 }
 
-void ZombieMMenz::setKcat( Eref e, const Qinfo* q, double v )
+void ZombieMMenz::setKcat( const Eref& e, const Qinfo* q, double v )
 {
 	rates_[ convertIdToMolIndex( e.id() ) ]->setR2( v ); // Second rate is kcat
 }
 
-double ZombieMMenz::getKcat( Eref e, const Qinfo* q ) const
+double ZombieMMenz::getKcat( const Eref& e, const Qinfo* q ) const
 {
 	return rates_[ convertIdToMolIndex( e.id() ) ]->getR2(); // Second rate is kcat
 }

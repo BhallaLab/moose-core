@@ -184,32 +184,32 @@ void ZombieEnz::reinit( const Eref& e, ProcPtr p )
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
-void ZombieEnz::setK1( Eref e, const Qinfo* q, double v )
+void ZombieEnz::setK1( const Eref& e, const Qinfo* q, double v )
 {
 	rates_[ convertIdToReacIndex( e.id() ) ]->setR1( v );
 }
 
-double ZombieEnz::getK1( Eref e, const Qinfo* q ) const
+double ZombieEnz::getK1( const Eref& e, const Qinfo* q ) const
 {
 	return rates_[ convertIdToReacIndex( e.id() ) ]->getR1();
 }
 
-void ZombieEnz::setK2( Eref e, const Qinfo* q, double v )
+void ZombieEnz::setK2( const Eref& e, const Qinfo* q, double v )
 {
 	rates_[ convertIdToReacIndex( e.id() ) ]->setR2( v );
 }
 
-double ZombieEnz::getK2( Eref e, const Qinfo* q ) const
+double ZombieEnz::getK2( const Eref& e, const Qinfo* q ) const
 {
 	return rates_[ convertIdToReacIndex( e.id() ) ]->getR2();
 }
 
-void ZombieEnz::setK3( Eref e, const Qinfo* q, double v )
+void ZombieEnz::setK3( const Eref& e, const Qinfo* q, double v )
 {
 	rates_[ convertIdToReacIndex( e.id() ) + 1 ]->setR1( v );
 }
 
-double ZombieEnz::getK3( Eref e, const Qinfo* q ) const
+double ZombieEnz::getK3( const Eref& e, const Qinfo* q ) const
 {
 	return rates_[ convertIdToReacIndex( e.id() ) + 1 ]->getR1();
 }

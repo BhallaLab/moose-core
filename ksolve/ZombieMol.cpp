@@ -153,54 +153,54 @@ void ZombieMol::reac( double A, double B )
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
-void ZombieMol::setN( Eref e, const Qinfo* q, double v )
+void ZombieMol::setN( const Eref& e, const Qinfo* q, double v )
 {
 	S_[ convertIdToMolIndex( e.id() ) ] = v;
 }
 
-double ZombieMol::getN( Eref e, const Qinfo* q ) const
+double ZombieMol::getN( const Eref& e, const Qinfo* q ) const
 {
 	return S_[ convertIdToMolIndex( e.id() ) ];
 }
 
-void ZombieMol::setNinit( Eref e, const Qinfo* q, double v )
+void ZombieMol::setNinit( const Eref& e, const Qinfo* q, double v )
 {
 	Sinit_[ convertIdToMolIndex( e.id() ) ] = v;
 }
 
-double ZombieMol::getNinit( Eref e, const Qinfo* q ) const
+double ZombieMol::getNinit( const Eref& e, const Qinfo* q ) const
 {
 	return Sinit_[ convertIdToMolIndex( e.id() ) ];
 }
 
-void ZombieMol::setConc( Eref e, const Qinfo* q, double v )
+void ZombieMol::setConc( const Eref& e, const Qinfo* q, double v )
 {
 	// n_ = v * size_;
 }
 
-double ZombieMol::getConc( Eref e, const Qinfo* q ) const
+double ZombieMol::getConc( const Eref& e, const Qinfo* q ) const
 {
 	// return n_ / size_;
 	return 0;
 }
 
-void ZombieMol::setConcInit( Eref e, const Qinfo* q, double v )
+void ZombieMol::setConcInit( const Eref& e, const Qinfo* q, double v )
 {
 	// nInit_ = v * size_;
 }
 
-double ZombieMol::getConcInit( Eref e, const Qinfo* q ) const
+double ZombieMol::getConcInit( const Eref& e, const Qinfo* q ) const
 {
 	// return nInit_ / size_;
 	return 0;
 }
 
-void ZombieMol::setDiffConst( Eref e, const Qinfo* q, double v )
+void ZombieMol::setDiffConst( const Eref& e, const Qinfo* q, double v )
 {
 	// diffConst_ = v;
 }
 
-double ZombieMol::getDiffConst( Eref e, const Qinfo* q ) const
+double ZombieMol::getDiffConst( const Eref& e, const Qinfo* q ) const
 {
 	// return diffConst_;
 	return 0;
