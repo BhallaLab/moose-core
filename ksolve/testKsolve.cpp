@@ -81,11 +81,21 @@ void testGslIntegrator()
 	plug->send( stoich.eref(), &p, stoichData );
 	Qinfo::mpiClearQ( &p );
 	assert( gi->getIsInitialized() );
+
+	s->setclock( 0, rk.getPlotDt(), 0 );
+	s->setclock( 1, rk.getPlotDt(), 0 );
+	s->setclock( 2, rk.getPlotDt(), 0 );
+	string gslpath = rk.getBasePath() + "/gsl";
+	string  plotpath = rk.getBasePath() + "/graphs/##[TYPE=Table],/moregraphs/##[TYPE=Table]";
+	s->doUseClock( gslpath, "process", 0 );
+	s->doUseClock( plotpath, "process", 2 );
+	s->doStart( rk.getMaxTime() );
+
+			/*
 	Eref gsle( gsl.eref() );
-	for ( unsigned int i = 0; i < 6000; ++i ) {
+	for ( double i = 0.0; i < rk.getMaxTime(); i += rk.getPlotDt() ) {
 		gi->process( gsle, &p );
 		p.currTime = i;
-			/*
 		cout << i << 
 			"	" << stoichData->S()[0] <<
 			"	" << stoichData->S()[1] <<
@@ -103,14 +113,14 @@ void testGslIntegrator()
 			"	" << stoichData->S()[13] <<
 			"	" << stoichData->S()[14] <<
 			endl;
-			*/
 	}
+			*/
 
 
 	/*
 	rk.run();
-	rk.dumpPlots( "dend.plot" );
 	*/
+	rk.dumpPlots( "gsl.plot" );
 
 	s->doDelete( base );
 	cout << "." << flush;

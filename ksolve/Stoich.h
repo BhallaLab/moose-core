@@ -44,6 +44,7 @@ class Stoich
 		unsigned int convertIdToMolIndex( Id id ) const;
 
 		const double* S() const;
+		double* varS();
 		const double* Sinit() const;
 
 		//////////////////////////////////////////////////////////////////

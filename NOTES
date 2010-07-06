@@ -6647,3 +6647,7 @@ data structures right.
 ============================================================================
 6 July 2010
 Went through converting function calls using Eref to using const Eref&.
+Checkin 1975.
+
+Some cleanup of ksolve tester. I had tried to use a ptr into the S_ vector 
+directly for the GSL routine, but it didn't work.

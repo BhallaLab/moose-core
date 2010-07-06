@@ -76,6 +76,33 @@ ReadKkit::ReadKkit()
 	;
 }
 
+//////////////////////////////////////////////////////////////////
+// Fields for readKkit
+//////////////////////////////////////////////////////////////////
+
+double ReadKkit::getMaxTime() const
+{
+	return maxtime_;
+}
+
+double ReadKkit::getPlotDt() const
+{
+	return plotdt_;
+}
+
+double ReadKkit::getDefaultVol() const
+{
+	return defaultVol_;
+}
+
+string ReadKkit::getBasePath() const
+{
+	return basePath_;
+}
+
+//////////////////////////////////////////////////////////////////
+// The read functions.
+//////////////////////////////////////////////////////////////////
 /**
  * The readcell function implements the old GENESIS cellreader
  * functionality. Although it is really a parser operation, I

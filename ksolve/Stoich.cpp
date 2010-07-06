@@ -353,6 +353,11 @@ const double* Stoich::S() const
 	return &S_[0];
 }
 
+double* Stoich::varS()
+{
+	return &S_[0];
+}
+
 const double* Stoich::Sinit() const
 {
 	return &Sinit_[0];
