@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Jul  6 22:09:00 2010 (+0530)
+# Last-Updated: Tue Jul  6 22:24:13 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1547
+#     Update #: 1548
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -447,12 +447,12 @@ class MainWindow(QtGui.QMainWindow):
         plotWindow.setCentralWidget(plot)
         self.plots.append(plot)
         self.centralPanel.addSubWindow(plotWindow)
+        plotWindow.show()
         if hasattr(self, 'cascadePlotWindowsAction') and self.cascadePlotWindowsAction.isChecked():
             self.centralPanel.cascadeSubWindows()
         else:
             print 'tiling'
             self.centralPanel.tileSubWindows()
-        plotWindow.show()
         
 
     def popupLoadModelDialog(self):
