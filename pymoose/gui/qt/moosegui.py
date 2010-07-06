@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Jul  6 12:40:28 2010 (+0530)
+# Last-Updated: Tue Jul  6 18:25:08 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1378
+#     Update #: 1449
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -48,6 +48,7 @@
 import sys
 import code
 from datetime import date
+from collections import defaultdict
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.Qt import Qt
@@ -68,7 +69,7 @@ from glclientgui import GLClientGUI
 
 
 # These are the MOOSE GUI specific imports
-from objectedit import ObjectFieldsModel
+from objectedit import ObjectFieldsModel, ObjectEditDelegate
 from moosetree import *
 from mooseclasses import *
 from mooseglobals import MooseGlobals
@@ -99,7 +100,7 @@ def makeClassList(parent=None, mode=MooseGlobals.MODE_ADVANCED):
 
     
 class MainWindow(QtGui.QMainWindow):
-            
+    default_plot_count = 4
     def __init__(self, interpreter=None, parent=None):
 	QtGui.QMainWindow.__init__(self, parent)
         self.mooseHandler = MooseHandler()
@@ -133,9 +134,13 @@ class MainWindow(QtGui.QMainWindow):
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
         self.centralPanel = QtGui.QMdiArea(self)
         # Add a dummy plot - for initial testing.
-        self.plotA = MoosePlot(self.centralPanel)
-        self.centralPanel.addSubWindow(self.plotA)
-        self.plotA.resize(self.centralPanel.width()/2, self.centralPanel.height()/2)
+        self.plots = []
+        for ii in range(MainWindow.default_plot_count):
+            self.plots.append(MoosePlot(self.centralPanel))
+            plotlabel = 'Plot %d' % (ii)
+            self.plots[-1].setObjectName(plotlabel)
+            self.centralPanel.addSubWindow(self.plots[-1])
+        self.tablePlotMap = {}
         self.setCentralWidget(self.centralPanel)        
         self.centralPanel.tileSubWindows()
         # self.setCentralWidget(self.aboutMooseLabel)
@@ -209,6 +214,7 @@ class MainWindow(QtGui.QMainWindow):
             config.LOGGER.debug('No editor for this object: %s' % (obj.path))
             self.objFieldEditModel = ObjectFieldsModel(obj)
             self.objFieldEditorMap[obj.path] = self.objFieldEditModel
+            self.connect(self.objFieldEditModel, QtCore.SIGNAL('plotWindowChanged(const QString&, const QString&)'), self.changeFieldPlotWidget)
             if  hasattr(self, 'objFieldEditPanel'):
                 self.objFieldEditPanel.setWindowTitle(self.tr(obj.name))
             else:
@@ -216,7 +222,9 @@ class MainWindow(QtGui.QMainWindow):
                 self.objFieldEditPanel.setObjectName(self.tr('MooseObjectFieldEdit'))
                 self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.objFieldEditPanel)
         self.objFieldEditor = QtGui.QTableView(self.objFieldEditPanel)            
-        self.objFieldEditor.setModel(self.objFieldEditModel)        
+        self.objFieldEditor.setModel(self.objFieldEditModel)
+        self.objFieldEditModel.plotNames += [plot.objectName() for plot in self.plots]
+        self.objFieldEditor.setItemDelegate(ObjectEditDelegate(self))
         self.connect(self.objFieldEditModel, 
                      QtCore.SIGNAL('objectNameChanged(const QString&)'),
                      item.updateSlot)
@@ -241,15 +249,17 @@ class MainWindow(QtGui.QMainWindow):
         self.mooseGLCellAction = QtGui.QAction(self.tr('GLCell'), self)
         self.connect(self.mooseGLCellAction, QtCore.SIGNAL('triggered()'), self.createGLCellWidget)
 
-        self.autoHideAction = QtGui.QAction(self.tr('Autohide Right and Bottom Docks'), self)
+        self.autoHideAction = QtGui.QAction(self.tr('Autohide during simulation'), self)
         self.autoHideAction.setCheckable(True)
         self.autoHideAction.setChecked(True)
-        # self.connect(self.autoHideAction, QtCore.SIGNAL('toggled(bool)'), self.autoHideSlot)
 
         self.showRightBottomDocksAction = QtGui.QAction(self.tr('Right and Bottom Docks'), self)
         self.showRightBottomDocksAction.setCheckable(True)
         self.showRightBottomDocksAction.setChecked(False)
         self.connect(self.showRightBottomDocksAction, QtCore.SIGNAL('toggled(bool)'), self.showRightBottomDocks)
+
+        self.tilePlotWindowsAction = QtGui.QAction(self.tr('Tile Plots'), self)
+        self.connect(self.tilePlotWindowsAction, QtCore.SIGNAL('triggered(bool)'), self.tilePlotWindows)
 
         self.quitAction = QtGui.QAction(self.tr('&Quit'), self)
         self.quitAction.setShortcut(QtGui.QKeySequence(self.tr('Ctrl+Q')))
@@ -296,6 +306,7 @@ class MainWindow(QtGui.QMainWindow):
         self.viewMenu.addAction(self.mooseShellAction)
         self.viewMenu.addAction(self.autoHideAction)
         self.viewMenu.addAction(self.showRightBottomDocksAction)
+        self.viewMenu.addAction(self.tilePlotWindowsAction)
         self.helpMenu = QtGui.QMenu('&Help', self)
         # TODO: code the actual functions
         self.helpMenu.addAction(self.showDocAction)
@@ -500,7 +511,15 @@ class MainWindow(QtGui.QMainWindow):
 
         TODO: This should also update plots in view.
         """
-        self.showRightBottomDocks(not self.autoHideAction.isChecked())
+        if self.autoHideAction.isChecked():
+            if self.commandLineDock.isVisible():
+                self.commandLineDock.setVisible(False)
+            if self.mooseClassesPanel.isVisible():
+                self.mooseClassesPanel.setVisible(False)
+            if self.glClientDock.isVisible():
+                self.glClientDock.setVisible(False)
+            if self.objFieldEditPanel.isVisible():
+                self.objFieldEditPanel.setVisible(False)
         self.repaint()
         try:
             runtime = float(str(self.runtimeText.text()))
@@ -508,6 +527,22 @@ class MainWindow(QtGui.QMainWindow):
             runtime = MooseHandler.runtime
             self.runtimeText.setText(str(runtime))
         self.mooseHandler.doRun(runtime)
+
+    def tilePlotWindows(self, checked):
+        self.centralPanel.tileSubWindows()
+
+    def changeFieldPlotWidget(self, full_field_path, plotname):
+        fieldpath = str(full_field_path)
+        for plot in self.plots:
+            if plotname == plot.objectName():
+                table = self.mooseHandler.addFieldTable(fieldpath)
+                plot.addTable(table)
+                try:
+                    oldplot = self.tablePlotMap[table]
+                    oldplot.removeTable(table)
+                except KeyError:
+                    pass
+                self.tablePlotMap[table] = plot
 
     def updatePlots(self):
         print 'Update plots'
