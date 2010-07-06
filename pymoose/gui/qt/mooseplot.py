@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul  5 21:35:09 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Jul  6 18:28:56 2010 (+0530)
+# Last-Updated: Tue Jul  6 21:09:33 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 254
+#     Update #: 298
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -85,17 +85,15 @@ class MoosePlot(Qwt.QwtPlot):
         self.xmin = 100.1
         self.curveTableMap = {} # curve -> moose table
         self.tableCurveMap = {} # moose table -> curve
-        title = Qwt.QwtText('Plot %d' % (self.plotNo))
-        if self.parent():
-            title.setFont(self.parent().font())
-        else:
-            title.setFont(QtGui.QFont('Helvetica', 18))
-
-        title.setFont(QtGui.QFont('Helvetica', 18))
-        print 'setting title', title.text()
-        print ' ----- '
-        print self.title().font().pointSize()
-        self.setTitle(title)
+        # title = Qwt.QwtText('Plot %d' % (self.plotNo), Qwt.QwtText.PlainText)        
+        # font = QtGui.QFont('Helvetica', 10)
+        # # font.setBold(True)
+        # font.setWeight(QtGui.QFont.Bold)
+        # title.setFont(font)
+        # print 'setting title', title.text()
+        # print ' ----- '
+        # print self.title().font().pointSize()
+        # self.setTitle(title)
         mY = Qwt.QwtPlotMarker()
         mY.setLabelAlignment(Qt.AlignRight | Qt.AlignTop)
         mY.setLineStyle(Qwt.QwtPlotMarker.HLine)
@@ -122,9 +120,7 @@ class MoosePlot(Qwt.QwtPlot):
         print xtitle.font().pointSize()
         self.setAxisTitle(Qwt.QwtPlot.xBottom, xtitle)
         self.setAxisTitle(Qwt.QwtPlot.yLeft, ytitle)
-        self.timer = self.startTimer(100)
 
-        # self.timer = self.startTimer(500)
 
     def alignScales(self):
         self.canvas().setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Plain)
@@ -136,6 +132,20 @@ class MoosePlot(Qwt.QwtPlot):
             scaleDraw = self.axisScaleDraw(ii)
             if scaleDraw:
                 scaleDraw.enableComponent(Qwt.QwtAbstractScaleDraw.Backbone, False)
+
+    def updatePlot(self, currentTime):
+        if currentTime > self.xmin * 1e-3:
+            self.xmin = currentTime * 1e3
+        for curve, table in self.curveTableMap.items():
+            tabLen = len(table)
+            print 'MoosePlot.updatePlot - table %s is of length %d.' % (table.path, tabLen)
+            if tabLen == 0:
+                continue
+            ydata = array(table.table)
+            xdata = linspace(0, currentTime, tabLen)
+            curve.setData(xdata, ydata)
+        print 'MoosePlot -- updatePlot: replotting'
+        self.replot()
 
     def timerEvent(self, e):
         # print 'Timer event'
@@ -158,6 +168,7 @@ class MoosePlot(Qwt.QwtPlot):
             xx = linspace(0.0, current_time * 1e3, len(table))
             yy = array(table.table)
             curve.setData(xx, yy)
+            print 'timer event', max(yy)
         self.replot()
 
     def addTable(self, table):
