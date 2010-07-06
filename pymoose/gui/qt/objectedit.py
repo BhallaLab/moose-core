@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 30 11:18:34 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Jul  2 11:13:46 2010 (+0530)
+# Last-Updated: Tue Jul  6 17:19:00 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 271
+#     Update #: 344
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -84,9 +84,9 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
         self._header = ('Field', 'Value', 'Plot')
         self.mooseObject = mooseObject
         self.fields = []
+        self.plotNames = ['None']
         self.fieldFlags = {}
-        self.fieldCheckFlags = {}
-        self.fieldChecked = {}
+        self.fieldPlotNameMap = {}
         try:
             classObject = eval('moose.' + self.mooseObject.className)
         except AttributeError:
@@ -104,21 +104,22 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
                 value = mooseObject.getField(fieldName)
                 try:
                     dummy = float(value)
-                    checkFlag = Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsUserCheckable
+                    checkFlag = Qt.ItemIsEnabled | Qt.ItemIsSelectable
+                    self.fieldPlotNameMap[fieldName] = self.plotNames[0]
                 except ValueError:
                     pass
-                    
+
             except SyntaxError, se:
                 config.LOGGER.error('%s' % (str(se)))
             except AttributeError, ae:
                 config.LOGGER.error('%s' % (str(ae)))
             self.fieldFlags[fieldName] = flag
-            self.fieldCheckFlags[fieldName] = checkFlag
-            self.fieldChecked[fieldName] = False
+            # self.fieldCheckFlags[fieldName] = checkFlag
+            # self.fieldChecked[fieldName] = False
             self.fields.append(fieldName)
             
         self.insertRows(0, len(self.fields))
-                
+
     def setData(self, index, value, role=Qt.EditRole):
         """Set field value or set plot flag.
 
@@ -138,11 +139,11 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
             self.mooseObject.setField(field, value)
             if field == 'name':
                 self.emit(QtCore.SIGNAL('objectNameChanged(const QString&)'), QtCore.QString(field))
-        elif index.column() == 2 and role == Qt.CheckStateRole: # Checkbox for plotting
-            if self.fieldCheckFlags[self.fields[index.row()]] & Qt.ItemIsUserCheckable: # This field is checkable
-                self.fieldChecked[field] = not self.fieldChecked[field]
-                self.emit(QtCore.SIGNAL('plotOptionToggled(const QString&)'), QtCore.QString(field))
-            else:
+        elif index.column() == 2 and role == Qt.EditRole: 
+            try:
+                self.fieldPlotNameMap[self.fields[index.row()]] = str(value)                
+                self.emit(QtCore.SIGNAL('plotWindowChanged(const QString&, const QString&)'), QtCore.QString(self.mooseObject.path + '/' + field), QtCore.QString(value))
+            except KeyError:
                 ret = False
         if ret:
             self.emit(QtCore.SIGNAL('dataChanged(const QModelIndex&, const QModelIndex&)'), index, index)
@@ -161,8 +162,11 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
             ret = QtCore.QVariant(QtCore.QString(field))
         elif index.column() == 1 and role == Qt.DisplayRole:
             ret = QtCore.QVariant(QtCore.QString(self.mooseObject.getField(field)))
-        elif index.column() == 2 and role == Qt.CheckStateRole and (self.fieldCheckFlags[field] & Qt.ItemIsUserCheckable):
-            ret = QtCore.QVariant(self.fieldChecked[field])
+        elif index.column() == 2 and role == Qt.DisplayRole:
+            try:
+                ret = QtCore.QVariant(self.fieldPlotNameMap[field])
+            except KeyError:
+                pass
         return ret
 
     
@@ -194,9 +198,11 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
                     flag = self.fieldFlags[self.fields[index.row()]]
                 except KeyError, e:
                     pass
-            elif index.column() == 2 and self.fieldCheckFlags[self.fields[index.row()]]:
+            elif index.column() == 2:
                 try:
-                    flag = self.fieldCheckFlags[self.fields[index.row()]]
+                    flag = self.fieldPlotNameMap[self.fields[index.row()]]
+                    if flag is not None:
+                        flag = Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable
                 except KeyError:
                     pass
         return flag
@@ -215,6 +221,38 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
                 checked_fields.append(field)
         return checked_fields
 
+class ObjectEditDelegate(QtGui.QItemDelegate):
+    """Delegate to handle object editor"""
+    def __init__(self, *args):
+        QtGui.QItemDelegate.__init__(self, *args)
+
+    def createEditor(self, parent, option, index):
+        """Override createEditor from parent class to show custom
+        combo box for the plot column."""
+        print 'Creating editor'
+        if index.column() == 2:
+            combobox = QtGui.QComboBox(parent)
+            combobox.addItems(index.model().plotNames)
+            combobox.setEditable(False)
+            print 'create Combobox'
+            return combobox
+        return QtGui.QItemDelegate.createEditor(self, parent, option, index)
+
+    def setEditorData(self, editor, index):
+        text = index.model().data(index, Qt.DisplayRole).toString()
+        if index.column == 2:
+            ii = editor.findText(text)
+            if ii == -1:
+                ii = 0
+            editor.setCurrentIndex(ii)
+        else:
+            QtGui.QItemDelegate.setEditorData(self, editor, index)
+
+    def setModelData(self, editor, model, index):
+        if index.column() == 2:
+            model.setData(index, QtCore.QVariant(editor.currentText()))
+        else:
+            QtGui.QItemDelegate.setModelData(self, editor, model, index)
 
 if __name__ == '__main__':
     app = QtGui.QApplication([])

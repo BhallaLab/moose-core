@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Jul  6 12:23:22 2010 (+0530)
+# Last-Updated: Tue Jul  6 18:21:50 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 318
+#     Update #: 360
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -47,6 +47,8 @@
 
 import os
 import sys
+import random
+
 import re
 import xml.sax as sax
 import xml.sax.handler as saxhandler
@@ -112,6 +114,9 @@ class MooseHandler(QtCore.QObject):
         self._xmlreader = sax.make_parser()
         self._saxhandler = MooseXMLHandler()
         self._xmlreader.setContentHandler(self._saxhandler)
+        self.fieldTableMap = {}
+        self._tableIndex = 0
+        self._tableSuffix = random.randint(1, 999)
         
         
     def runGenesisCommand(self, cmd):
@@ -227,6 +232,26 @@ class MooseHandler(QtCore.QObject):
         MooseHandler.gldt = gldt
         MooseHandler.plotupdate_dt = plotupdate_dt
         self._context.reset()
+
+    def addFieldTable(self, full_field_path):
+        """
+        adds a field to the list of fields to be plotted.
+
+        full_field_path -- complete path to the field.
+        """
+        try:
+            table = self.fieldTableMap[full_field_path]
+        except KeyError:
+            fstart = full_field_path.rfind('/')
+            fieldName = full_field_path[fstart+1:]
+            objPath =  full_field_path[:fstart]
+            table = moose.Table('%s_%d_%d' % (fieldName, self._tableSuffix, self._tableIndex), self._data)
+            self.fieldTableMap[full_field_path] = table
+            table.stepMode = 3
+            target = moose.Neutral(objPath)
+            table.connect('inputRequest', target, fieldName)
+            self._tableIndex += 1
+        return table
 
     def doRun(self, time):
         """Just runs the simulation. 
