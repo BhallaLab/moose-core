@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 27 16:45:38 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jan 27 17:30:45 2010 (+0530)
-#           By: subhasis ray
-#     Update #: 8
+# Last-Updated: Tue Jul  6 11:10:32 2010 (+0530)
+#           By: Subhasis Ray
+#     Update #: 9
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -52,7 +52,7 @@ class MooseGlobals:
     COPYRIGHT_TEXT = 'Copyright (C) 2003-%s Upinder S. Bhalla and NCBS.'  % (str(date.today().year))
     LICENSE_TEXT = 'It is made available under the terms of the GNU Lesser General Public License version 2.1. See the file COPYING.LIB for the full notice.'
     ABOUT_TEXT = 'MOOSE is a simulation environment for Computational Biology. It provides a general messaging framework. It is currently focused on facilitating neuronal and chemical kinetics simulations.'
-    
+    WEBSITE = 'http://moose.ncbs.res.in'
     # These constants are for selectig a GUI mode.
     MODE_ADVANCED = 0 # Everything is open to the user
     MODE_KKIT = 1     # Should imitate kinetikit

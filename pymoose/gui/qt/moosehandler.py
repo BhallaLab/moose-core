@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Jul  2 18:03:53 2010 (+0530)
+# Last-Updated: Tue Jul  6 12:23:22 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 309
+#     Update #: 318
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -53,6 +53,7 @@ import xml.sax.handler as saxhandler
 import xml.sax.xmlreader as saxreader
 import xml.sax.saxutils as saxutils
 
+from PyQt4 import QtCore
 import moose
 import config
 
@@ -73,7 +74,7 @@ class MooseXMLHandler(saxhandler.ContentHandler):
         else:
             print name
 
-class MooseHandler(object):
+class MooseHandler(QtCore.QObject):
     """Access to MOOSE functionalities"""
     # A list keys for known filetypes Note that type_genesis includes
     # kkit (both have same extension and we separate them only after
@@ -101,6 +102,7 @@ class MooseHandler(object):
     runtime = DEFAULT_RUNTIME
     plotupdate_dt = DEFAULT_PLOTUPDATE_DT
     def __init__(self):
+        QtCore.QObject.__init__(self)
 	self._context = moose.PyMooseBase.getContext()
 	self._lib = moose.Neutral('/library')
 	self._proto = moose.Neutral('/proto')
@@ -198,7 +200,7 @@ class MooseHandler(object):
         return ret    
         
 
-    def doReset(self, simdt, plotdt, gldt):
+    def doReset(self, simdt, plotdt, gldt, plotupdate_dt):
         """Reset moose.
 
         simdt -- dt for simulation (step size for numerical
@@ -223,6 +225,7 @@ class MooseHandler(object):
         MooseHandler.simdt = simdt
         MooseHandler.plotdt = plotdt
         MooseHandler.gldt = gldt
+        MooseHandler.plotupdate_dt = plotupdate_dt
         self._context.reset()
 
     def doRun(self, time):
@@ -237,16 +240,15 @@ class MooseHandler(object):
         while next_stop <= MooseHandler.runtime:
             self._context.step(MooseHandler.plotupdate_dt)
             next_stop = next_stop + MooseHandler.plotupdate_dt
-            # self.emit(QtCore.SIGNAL('updatePlots()'))
-            # TODO - emit a proper signal to update the plots.
+            self.emit(QtCore.SIGNAL('updatePlots()'))
         time_left = MooseHandler.runtime + MooseHandler.plotupdate_dt - next_stop 
         if MooseHandler.runtime < MooseHandler.plotupdate_dt:
             time_left = MooseHandler.runtime
         self._context.step(time_left)
-        # self.emit(QtCore.SIGNAL('updatePlots()'))
+        self.emit(QtCore.SIGNAL('updatePlots()'))
         # TODO - emit a proper signal to update the plots.
         
-        
+
 
 # 
 # moosehandler.py ends here
