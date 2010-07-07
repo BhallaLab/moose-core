@@ -6664,4 +6664,7 @@ works but need to clean up. Checkin 1980.
 
 Implemented Cinfo::isA function. Checkin 1981
 Incorporated into Wildcard.  Checkin 1982
-Added ZombieBufMol.
+Added ZombieBufMol. Checkin 1984.
+
+Fixes to Stoich and ZombieEnz, now it does buffered and regular enz reactions
+OK.

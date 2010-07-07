@@ -297,7 +297,7 @@ void ZombieEnz::zombify( Element* solver, Element* orig )
 	for ( unsigned int i = 0; i < numReactants; ++i ) {
 		unsigned int j = z->convertIdToMolIndex( mols[i] );
 		int temp = z->N_.get( j, rateIndex + 1 );
-		z->N_.set( j, rateIndex + 1, temp - 1 );
+		z->N_.set( j, rateIndex + 1, temp + 1 );
 	}
 	// Enz is also a product here.
 	unsigned int enzMol = z->convertIdToMolIndex( enzId );

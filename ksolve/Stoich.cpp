@@ -216,7 +216,7 @@ void Stoich::allocateModel( const vector< Id >& elist )
 	static const Cinfo* mmEnzCinfo = MMenz::initCinfo();
 	numVarMols_ = 0;
 	numReac_ = 0;
-	unsigned int numBufMols = 0;
+	vector< Id > bufMols;
 	for ( vector< Id >::const_iterator i = elist.begin(); i != elist.end(); ++i ){
 		Element* ei = (*i)();
 		if ( ei->cinfo() == molCinfo ) {
@@ -224,7 +224,7 @@ void Stoich::allocateModel( const vector< Id >& elist )
 			++numVarMols_;
 		}
 		if ( ei->cinfo() == bufMolCinfo ) {
-			++numBufMols;
+			bufMols.push_back( *i );
 		}
 		if ( ei->cinfo() == reacCinfo || ei->cinfo() == mmEnzCinfo ) {
 			objMap_[ i->value() - objMapStart_ ] = numReac_;
@@ -236,12 +236,18 @@ void Stoich::allocateModel( const vector< Id >& elist )
 		}
 	}
 
+	numBufMols_ = 0;
+	for ( vector< Id >::const_iterator i = bufMols.begin(); i != bufMols.end(); ++i ){
+		objMap_[ i->value() - objMapStart_ ] = numVarMols_ + numBufMols_;
+		++numBufMols_;
+	}
+
 	numVarMolsBytes_ = numVarMols_ * sizeof( double );
-	S_.resize( numVarMols_ + numBufMols, 0.0 );
-	Sinit_.resize( numVarMols_ + numBufMols, 0.0 );
+	S_.resize( numVarMols_ + numBufMols_, 0.0 );
+	Sinit_.resize( numVarMols_ + numBufMols_, 0.0 );
 	rates_.resize( numReac_ );
 	v_.resize( numReac_, 0.0 );
-	N_.setSize( numVarMols_ + numBufMols, numReac_ );
+	N_.setSize( numVarMols_ + numBufMols_, numReac_ );
 }
 
 void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
