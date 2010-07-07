@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 30 11:18:34 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Jul  6 17:19:00 2010 (+0530)
+# Last-Updated: Wed Jul  7 14:36:44 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 344
+#     Update #: 356
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -81,15 +81,19 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
 
         """
         QtCore.QAbstractTableModel.__init__(self, parent)
-        self._header = ('Field', 'Value', 'Plot')
         self.mooseObject = mooseObject
+        self._header = ('Field', 'Value', 'Plot')
         self.fields = []
         self.plotNames = ['None']
         self.fieldFlags = {}
         self.fieldPlotNameMap = {}
         try:
-            classObject = eval('moose.' + self.mooseObject.className)
+            className = 'moose.' + mooseObject.className
+            classObject = eval(className)
+            self.mooseObject = classObject(mooseObject.id)
+
         except AttributeError:
+            config.LOGGER.error('Could not wrap object %s into class %s' % (mooseObject.path, className))
             return
 
         for fieldName in self.mooseObject.getFieldList(moose.VALUE):
@@ -99,6 +103,7 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
             checkFlag = Qt.ItemIsEnabled
             try:
                 prop = eval('moose.' + self.mooseObject.__class__.__name__ + '.' + fieldName)
+                print self.mooseObject.path, prop, type(prop)
                 if (type(prop) is property) and prop.fset:
                     flag = flag | Qt.ItemIsEditable
                 value = mooseObject.getField(fieldName)

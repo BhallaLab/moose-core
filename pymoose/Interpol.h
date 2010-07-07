@@ -45,6 +45,9 @@ namespace pymoose
         string dumpFile() const;
         void dumpFile(string fileName, bool append = false);
         void tabFill(int xdivs, int mode);
+        void clear();
+        void push(double);
+        void pop();
 
       protected:
         // This constructor is for allowing derived type (Table) to
