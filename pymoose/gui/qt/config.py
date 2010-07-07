@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Feb 13 16:07:56 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jun  2 16:52:11 2010 (+0530)
+# Last-Updated: Wed Jul  7 14:34:42 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 102
+#     Update #: 104
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -80,7 +80,7 @@ def get_settings():
 
 LOG_FILENAME = 'moose.log'
 LOG_LEVEL = logging.DEBUG
-logging.basicConfig(filename=LOG_FILENAME, level=LOG_LEVEL, filemode='w')
+logging.basicConfig(filename=LOG_FILENAME, level=LOG_LEVEL, filemode='w', format='%(asctime)s %(levelname)s %(name)s %(filename)s %(funcName)s: %(lineno)d: %(message)s')
 LOGGER = logging.getLogger('moose')
 BENCHMARK_LOGGER = logging.getLogger('moose.benchmark')
 BENCHMARK_LOGGER.setLevel(logging.INFO)

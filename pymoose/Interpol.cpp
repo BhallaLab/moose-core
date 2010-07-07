@@ -199,6 +199,20 @@ void Interpol::tabFill(int xdivs, int mode)
     set <int, int> (id_(), "tabFill", xdivs, mode);    
 }
 
+void Interpol::clear()
+{
+    set(id_(), "clear");
+}
+
+void Interpol::push(double value)
+{
+    set<double>(id_(), "push", value);
+}
+
+void Interpol::pop()
+{
+    set(id_(), "pop");
+}
 vector<double> Interpol::__get_table()
 {    
     return PyMooseBase::getContext()->getTableVector(id_);

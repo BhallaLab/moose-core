@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Jul  6 22:24:13 2010 (+0530)
+# Last-Updated: Wed Jul  7 15:24:24 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1548
+#     Update #: 1564
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -519,15 +519,15 @@ class MainWindow(QtGui.QMainWindow):
             updateInterval = MooseHandler.plotupdate_dt
             self.updateTimeText.setText(str(updateInterval))
         self.mooseHandler.doReset(simdt, plotdt, gldt, updateInterval)
-        # TODO - clear plots if hold is off.
-        # TODO - create the tables based on the fields to be plotted.
-        # This can be done by going through the objFieldEditorMap and 
-        # looking for the checkedFields for each editor.
+        if not self.overlayCheckBox.isChecked():
+            for table, plot in self.tablePlotMap.items():
+                table.clear()
+                plot.updatePlot(0)
+                    
 
     def runSlot(self):
         """Run the simulation.
 
-        TODO: This should also update plots in view.
         """
         if self.autoHideAction.isChecked():
             if self.commandLineDock.isVisible():
@@ -536,14 +536,15 @@ class MainWindow(QtGui.QMainWindow):
                 self.mooseClassesPanel.setVisible(False)
             if self.glClientDock.isVisible():
                 self.glClientDock.setVisible(False)
-            if self.objFieldEditPanel.isVisible():
+            if hasattr(self, 'objFieldEditPanel') and self.objFieldEditPanel.isVisible():
                 self.objFieldEditPanel.setVisible(False)
-        self.repaint()
+            self.showRightBottomDocksAction.setChecked(False)
         try:
             runtime = float(str(self.runtimeText.text()))
         except ValueError:
             runtime = MooseHandler.runtime
             self.runtimeText.setText(str(runtime))
+        self.repaint()
         self.mooseHandler.doRun(runtime)
 
     def changeFieldPlotWidget(self, full_field_path, plotname):
