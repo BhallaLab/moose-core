@@ -51,6 +51,7 @@ class NeuromlReader
 		static const double PI;
 		map< string,Id > segMap_;
 		map< string,string > NMsegMap_;
+		 map< string,string >ionchlMap_;
 		NCell* ncl_;
 	#endif	// USE_NEUROML	
 };
