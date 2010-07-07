@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul  5 21:35:09 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jul  7 17:30:12 2010 (+0530)
+# Last-Updated: Wed Jul  7 17:34:20 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 333
+#     Update #: 335
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -85,6 +85,8 @@ class MoosePlot(Qwt.QwtPlot):
         self.curveTableMap = {} # curve -> moose table
         self.tableCurveMap = {} # moose table -> curve
         self.overlay = False
+        self.insertLegend(Qwt.QwtLegend())
+
         # self.setTitle('Plot %d' % (self.plotNo))
         mY = Qwt.QwtPlotMarker()
         mY.setLabelAlignment(Qt.AlignRight | Qt.AlignTop)
