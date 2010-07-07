@@ -1405,6 +1405,20 @@ void testSetGetExtField()
 	i1.destroy();
 }
 
+void testIsA()
+{
+	static const double EPSILON = 1e-9;
+	const Cinfo* n = Neutral::initCinfo();
+	const Cinfo* a = Arith::initCinfo();
+	assert( a->isA( "Arith" ) );
+	assert( a->isA( "Neutral" ) );
+	assert( !a->isA( "Fish" ) );
+	assert( !a->isA( "Synapse" ) );
+	assert( !n->isA( "Arith" ) );
+	assert( n->isA( "Neutral" ) );
+	cout << "." << flush;
+}
+
 void testAsync( )
 {
 	showFields();
@@ -1431,4 +1445,5 @@ void testAsync( )
 	testConvVector();
 	testMsgField();
 	testSetGetExtField();
+	testIsA();
 }

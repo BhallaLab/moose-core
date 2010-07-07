@@ -120,6 +120,12 @@ class Cinfo
 			 */
 			const DinfoBase* dinfo() const;
 
+			/**
+			 * Returns true if the current Cinfo is derived from
+			 * the ancestor
+			 */
+			bool isA( const string& ancestor ) const;
+
 		private:
 			const string name_;
 

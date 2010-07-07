@@ -157,6 +157,18 @@ const DinfoBase* Cinfo::dinfo() const
 {
 	return dinfo_;
 }
+
+bool Cinfo::isA( const string& ancestor ) const
+{
+	if ( ancestor == "Neutral" ) return 1;
+	const Cinfo* base = this;
+	while( base && base != Neutral::initCinfo() ) {
+		if ( ancestor == base->name_ )
+			return 1;
+		base = base->baseCinfo_;
+	}
+	return 0;
+}
 ////////////////////////////////////////////////////////////////////////
 // Private functions.
 ////////////////////////////////////////////////////////////////////////

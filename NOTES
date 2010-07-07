@@ -6657,7 +6657,10 @@ Trying to put in buffered molecules, the inheritance seems to be temperamental.
 7 July 2010
 Putting in BufMols. The test for this has thrown up a lot of bugs with
 scheduling, limitations of wildcarding, and so on. For now it
-works but need to clean up.
+works but need to clean up. Checkin 1980.
 - Make it so the 'ISA' flag in wildcards applies for ancestor classes too.
 - Get rid of 'stage' in ticks. Their index and dt should do.
 - Fix Gsl integrator to handle buffers.
+
+Implemented Cinfo::isA function.
+
