@@ -6662,5 +6662,5 @@ works but need to clean up. Checkin 1980.
 - Get rid of 'stage' in ticks. Their index and dt should do.
 - Fix Gsl integrator to handle buffers.
 
-Implemented Cinfo::isA function.
-
+Implemented Cinfo::isA function. Checkin 1981
+Incorporated into Wildcard. 

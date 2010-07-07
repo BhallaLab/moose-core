@@ -283,7 +283,11 @@ bool matchInsideBrace( Id id, const string& inside )
 			typeName = "HHChannel";
 		
 		bool isEqual;
-		isEqual = ( typeName == id()->cinfo()->name() );
+		if ( inside.substr( 0, 3 ) == "ISA" ) {
+			isEqual = id()->cinfo()->isA( typeName );
+		} else {
+			isEqual = ( typeName == id()->cinfo()->name() );
+		}
 		/*
 		map< string, string >::const_iterator iter = classNameMap.find( typeName );
 		if ( iter != classNameMap.end() )
@@ -496,7 +500,7 @@ void testWildcard()
 	assert( ret );
 	ret = matchInsideBrace( a1, "ISA!=Channel" );
 	assert( ret );
-	ret = matchInsideBrace( c3, "ISA!=Neutral" );
+	ret = matchInsideBrace( c3, "ISA==Neutral" ); // Everything is a Neutral
 	assert( ret );
 	ret = matchInsideBrace( c3, "ISA=Arith" );
 	assert( ret );
