@@ -94,6 +94,10 @@ class Stoich
 		 */
 		unsigned int numVarMols_;
 		unsigned int numVarMolsBytes_;
+		/**
+		 * Number of buffered molecules
+		 */
+		unsigned int numBufMols_;
 
 		/**
 		 * Number of reactions in the solver model. This includes 

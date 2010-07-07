@@ -14,10 +14,12 @@
 #include "KinSparseMatrix.h"
 #include "Stoich.h"
 #include "Mol.h"
+#include "BufMol.h"
 #include "Reac.h"
 #include "Enz.h"
 #include "MMenz.h"
 #include "ZombieMol.h"
+#include "ZombieBufMol.h"
 #include "ZombieReac.h"
 #include "ZombieEnz.h"
 #include "ZombieMMenz.h"
@@ -208,6 +210,7 @@ void Stoich::allocateObjMap( const vector< Id >& elist )
 void Stoich::allocateModel( const vector< Id >& elist )
 {
 	static const Cinfo* molCinfo = Mol::initCinfo();
+	static const Cinfo* bufMolCinfo = BufMol::initCinfo();
 	static const Cinfo* reacCinfo = Reac::initCinfo();
 	static const Cinfo* enzCinfo = Enz::initCinfo();
 	static const Cinfo* mmEnzCinfo = MMenz::initCinfo();
@@ -220,11 +223,9 @@ void Stoich::allocateModel( const vector< Id >& elist )
 			objMap_[ i->value() - objMapStart_ ] = numVarMols_;
 			++numVarMols_;
 		}
-		/*
 		if ( ei->cinfo() == bufMolCinfo ) {
 			++numBufMols;
 		}
-		*/
 		if ( ei->cinfo() == reacCinfo || ei->cinfo() == mmEnzCinfo ) {
 			objMap_[ i->value() - objMapStart_ ] = numReac_;
 			++numReac_;
@@ -246,6 +247,7 @@ void Stoich::allocateModel( const vector< Id >& elist )
 void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 {
 	static const Cinfo* molCinfo = Mol::initCinfo();
+	static const Cinfo* bufMolCinfo = BufMol::initCinfo();
 	static const Cinfo* reacCinfo = Reac::initCinfo();
 	static const Cinfo* enzCinfo = Enz::initCinfo();
 	static const Cinfo* mmEnzCinfo = MMenz::initCinfo();
@@ -255,11 +257,9 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 		if ( ei->cinfo() == molCinfo ) {
 			ZombieMol::zombify( e.element(), (*i)() );
 		}
-		/*
 		else if ( ei->cinfo() == bufMolCinfo ) {
 			ZombieBufMol::zombify( e.element(), (*i)() );
 		}
-		*/
 		else if ( ei->cinfo() == reacCinfo ) {
 			ZombieReac::zombify( e.element(), (*i)() );
 		}

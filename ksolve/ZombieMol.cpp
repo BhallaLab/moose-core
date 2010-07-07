@@ -19,20 +19,6 @@
 
 #define EPSILON 1e-15
 
-static SrcFinfo1< double > nOut( 
-		"nOut", 
-		"Sends out # of molecules on each timestep"
-);
-
-static DestFinfo reacDest( "reacDest",
-	"Handles reaction input",
-	new OpFunc2< ZombieMol, double, double >( &ZombieMol::reac )
-);
-
-static Finfo* reacShared[] = {
-	&reacDest, &nOut
-};
-
 const Cinfo* ZombieMol::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
@@ -88,9 +74,26 @@ const Cinfo* ZombieMol::initCinfo()
 			"Handle for grouping. Doesn't do anything.",
 			new OpFuncDummy() );
 
+		static DestFinfo reacDest( "reacDest",
+			"Handles reaction input",
+			new OpFunc2< ZombieMol, double, double >( &ZombieMol::reac )
+		);
+
+		//////////////////////////////////////////////////////////////
+		// SrcFinfo Definitions
+		//////////////////////////////////////////////////////////////
+		static SrcFinfo1< double > nOut( 
+				"nOut", 
+				"Sends out # of molecules on each timestep"
+		);
+
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
 		//////////////////////////////////////////////////////////////
+
+		static Finfo* reacShared[] = {
+			&reacDest, &nOut
+		};
 		static SharedFinfo reac( "reac",
 			"Connects to reaction",
 			reacShared, sizeof( reacShared ) / sizeof( const Finfo* )
