@@ -277,7 +277,8 @@ void NeuromlReader::setupPools(map< string,vector<string> > &groupcableMap,map< 
 			unsigned int numchls = channels.size();
 			for ( unsigned int i=0; i<numchls; i++ ){
 				string name = channels[ i ].name();
-				if ( name == "CaConductance" )
+				//if ( name == "CaConductance" )
+				 if ( ionchlMap_[name] == "ca" )
 				    channels[ i ].add("IkSrc",Eref(copyEl),"current",ConnTainer::Default ); 
 				int use_conc;
 				get< int >( channels[ i ], "useConcentration", use_conc );
@@ -327,7 +328,8 @@ void NeuromlReader::setupPools(map< string,vector<string> > &groupcableMap,map< 
 			unsigned int numchls = channels.size();
 			for ( unsigned int i=0; i<numchls; i++ ){
 				string name = channels[ i ].name();
-				if ( name == "CaConductance" )
+				//if ( name == "CaConductance" )
+				if ( ionchlMap_[name] == "ca" )
 				    channels[ i ].add("IkSrc",Eref(copyEl),"current",ConnTainer::Default ); 
 				int use_conc;
 				get< int >( channels[ i ], "useConcentration", use_conc );
@@ -378,6 +380,12 @@ void NeuromlReader::setupChannels(map< string,vector<string> > &groupcableMap,ma
                 if( it == channel_vec.end() ){
 		    channel_vec.push_back(name);
 		    //bool is2DChannel = chl->isSetConc_dependence();
+		    string cion = chl->getConc_ion();
+		    if ( cion != "" )
+                        ionchlMap_[name] = cion;
+		    string ion = chl->getIon();
+		    if ( ion != "" )
+                        ionchlMap_[name] = ion;
 		    bool is2DChannel  = false;
 		    bool passive = chl->getPassivecond();
 		    ek = chl->getDefault_erev();
