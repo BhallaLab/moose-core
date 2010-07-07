@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jul  7 15:24:24 2010 (+0530)
+# Last-Updated: Wed Jul  7 17:02:59 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1564
+#     Update #: 1575
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -419,6 +419,7 @@ class MainWindow(QtGui.QMainWindow):
         self.plotdtText = QtGui.QLineEdit('%1.3e' % (MooseHandler.plotdt), self)
         self.gldtText = QtGui.QLineEdit('%1.3e' % (MooseHandler.gldt), self.controlPanel)
         self.overlayCheckBox = QtGui.QCheckBox(self.tr('Overlay plots'), self.controlPanel)
+        
         self.connect(self.runButton, QtCore.SIGNAL('clicked()'), self.runSlot)
         self.connect(self.resetButton, QtCore.SIGNAL('clicked()'), self.resetSlot)
         layout.addWidget(self.simdtLabel, 0,0)
@@ -439,7 +440,6 @@ class MainWindow(QtGui.QMainWindow):
 
     def addPlotWindow(self):
         title = self.tr('Plot %d' % (len(self.plots)))
-        print 'addPlotWindow - adding plot', title
         plotWindow = QtGui.QMainWindow()
         plotWindow.setWindowTitle(title)
         plot = MoosePlot(plotWindow)
@@ -451,7 +451,6 @@ class MainWindow(QtGui.QMainWindow):
         if hasattr(self, 'cascadePlotWindowsAction') and self.cascadePlotWindowsAction.isChecked():
             self.centralPanel.cascadeSubWindows()
         else:
-            print 'tiling'
             self.centralPanel.tileSubWindows()
         
 
@@ -519,10 +518,10 @@ class MainWindow(QtGui.QMainWindow):
             updateInterval = MooseHandler.plotupdate_dt
             self.updateTimeText.setText(str(updateInterval))
         self.mooseHandler.doReset(simdt, plotdt, gldt, updateInterval)
-        if not self.overlayCheckBox.isChecked():
-            for table, plot in self.tablePlotMap.items():
-                table.clear()
-                plot.updatePlot(0)
+        for table, plot in self.tablePlotMap.items():
+            table.clear()
+            plot.setOverlay(self.overlayCheckBox.isChecked())
+            plot.reset()
                     
 
     def runSlot(self):

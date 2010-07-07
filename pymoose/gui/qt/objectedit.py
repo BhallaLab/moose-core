@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 30 11:18:34 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jul  7 14:36:44 2010 (+0530)
+# Last-Updated: Wed Jul  7 16:36:21 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 356
+#     Update #: 357
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -119,8 +119,6 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
             except AttributeError, ae:
                 config.LOGGER.error('%s' % (str(ae)))
             self.fieldFlags[fieldName] = flag
-            # self.fieldCheckFlags[fieldName] = checkFlag
-            # self.fieldChecked[fieldName] = False
             self.fields.append(fieldName)
             
         self.insertRows(0, len(self.fields))

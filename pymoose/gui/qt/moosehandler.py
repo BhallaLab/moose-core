@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Jul  6 21:07:34 2010 (+0530)
+# Last-Updated: Wed Jul  7 16:41:05 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 366
+#     Update #: 370
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -250,7 +250,7 @@ class MooseHandler(QtCore.QObject):
             table.stepMode = 3
             target = moose.Neutral(objPath)
             connected = table.connect('inputRequest', target, fieldName)
-            print 'MooseHandler.addFieldTable - Connected', table.path, 'to', target.path, '/', fieldName            
+            config.LOGGER.info('Connected %s to %s/%s' % (table.path, target.path, fieldName))
             self._tableIndex += 1
         return table
 
@@ -271,8 +271,7 @@ class MooseHandler(QtCore.QObject):
         if MooseHandler.runtime < MooseHandler.plotupdate_dt:
             time_left = MooseHandler.runtime
         self._context.step(time_left)
-        self.emit(QtCore.SIGNAL('updatePlots()'))
-        # TODO - emit a proper signal to update the plots.
+        self.emit(QtCore.SIGNAL('updatePlots(float)'), self._context.getCurrentTime())
         
 
 
