@@ -11,6 +11,7 @@ TARGET = kinetics.o
 
 OBJ = \
 	Mol.o	\
+	BufMol.o	\
 	Reac.o	\
 	Enz.o	\
 	MMenz.o	\
@@ -27,6 +28,7 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 Mol.o:	Mol.h
+BufMol.o:	Mol.h BufMol.h
 Reac.o:	Reac.h
 Enz.o:	Enz.h
 MMenz.o:	MMenz.h 

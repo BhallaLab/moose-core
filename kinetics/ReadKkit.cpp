@@ -140,14 +140,18 @@ Id ReadKkit::read(
 void ReadKkit::run()
 {
 	shell_->setclock( 0, simdt_, 0 );
-	shell_->setclock( 1, controldt_, 0 );
+	shell_->setclock( 1, simdt_, 1 );
 	shell_->setclock( 2, plotdt_, 0 );
-	string kinpath = basePath_ + "/kinetics/##";
+	string molpath = basePath_ + "/kinetics/##[ISA=Mol]";
+	string reacpath = basePath_ + "/kinetics/##[ISA!=Mol]";
 	string plotpath = basePath_ + "/graphs/##[TYPE=Table],/moregraphs/##[TYPE=Table]";
-	shell_->doUseClock( kinpath, "process", 0 );
+	shell_->doUseClock( molpath, "process", 0 );
+	shell_->doUseClock( reacpath, "process", 1 );
 	shell_->doUseClock( plotpath, "process", 2 );
+	shell_->doReinit();
 	if ( useVariableDt_ ) {
 		shell_->setclock( 0, fastdt_, 0 );
+		shell_->setclock( 1, fastdt_, 0 );
 		shell_->doStart( transientTime_ );
 		shell_->setclock( 0, simdt_, 0 );
 		shell_->doStart( maxtime_ - transientTime_ );
@@ -618,17 +622,21 @@ Id ReadKkit::buildMol( const vector< string >& args )
 	int slaveEnable = atoi( args[ molMap_[ "slave_enable" ] ].c_str() );
 	double diffConst = atof( args[ molMap_[ "DiffConst" ] ].c_str() );
 
-	Id mol = shell_->doCreate( "Mol", pa, tail, dim );
+	Id mol;
+	if ( slaveEnable == 0 ) {
+		mol = shell_->doCreate( "Mol", pa, tail, dim );
+	} else if ( slaveEnable & 4 ) {
+		mol = shell_->doCreate( "BufMol", pa, tail, dim );
+	} else {
+		cout << "ReadKkit::buildMol: Unknown slave_enable flag on " <<
+			args[2] << "\n";
+	}
 	assert( mol != Id() );
 	// skip the 10 chars of "/kinetics/"
 	molIds_[ args[2].substr( 10 ) ] = mol; 
 
 	Field< double >::set( mol.eref(), "nInit", nInit );
 	Field< double >::set( mol.eref(), "diffConst", diffConst );
-
-	if ( slaveEnable == 4 ) {
-		// Field< bool >::set( mol.eref(), "buffer", 1 );
-	}
 
 	separateVols( mol, vol );
 

@@ -12,19 +12,6 @@
 
 #define EPSILON 1e-15
 
-static SrcFinfo1< double > nOut( 
-		"nOut", 
-		"Sends out # of molecules on each timestep"
-);
-
-static DestFinfo reacDest( "reacDest",
-	"Handles reaction input",
-	new OpFunc2< Mol, double, double >( &Mol::reac )
-);
-
-static Finfo* reacShared[] = {
-	&reacDest, &nOut
-};
 
 const Cinfo* Mol::initCinfo()
 {
@@ -80,9 +67,26 @@ const Cinfo* Mol::initCinfo()
 			"Handle for grouping. Doesn't do anything.",
 			new OpFuncDummy() );
 
+		static DestFinfo reacDest( "reacDest",
+			"Handles reaction input",
+			new OpFunc2< Mol, double, double >( &Mol::reac )
+		);
+
+		//////////////////////////////////////////////////////////////
+		// SrcFinfo Definitions
+		//////////////////////////////////////////////////////////////
+
+		static SrcFinfo1< double > nOut( 
+				"nOut", 
+				"Sends out # of molecules on each timestep"
+		);
+
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
 		//////////////////////////////////////////////////////////////
+		static Finfo* reacShared[] = {
+			&reacDest, &nOut
+		};
 		static SharedFinfo reac( "reac",
 			"Connects to reaction",
 			reacShared, sizeof( reacShared ) / sizeof( const Finfo* )
@@ -119,6 +123,10 @@ const Cinfo* Mol::initCinfo()
 // Class definitions
 //////////////////////////////////////////////////////////////
 static const Cinfo* molCinfo = Mol::initCinfo();
+const SrcFinfo1< double >& nOut = 
+	*dynamic_cast< const SrcFinfo1< double >* >( 
+	molCinfo->findFinfo( "nOut" ) );
+
 
 Mol::Mol()
 	: n_( 0.0 ), nInit_( 0.0 ), size_( 1.0 ), A_( 0.0 ), B_( 0.0 )
