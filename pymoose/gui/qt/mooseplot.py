@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul  5 21:35:09 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Jul  6 21:09:33 2010 (+0530)
+# Last-Updated: Wed Jul  7 14:47:59 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 298
+#     Update #: 302
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -195,6 +195,10 @@ class MoosePlot(Qwt.QwtPlot):
             self.curveTableMap.pop(curve)
         except KeyError:
             pass
+
+    def clearCurves(self):
+        for curve in self.curveTableMap.keys():
+            curve.setData(zeros(1),zeros(1))
 
 import sys
 if __name__ == '__main__':
