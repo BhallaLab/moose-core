@@ -18,6 +18,7 @@ OBJ = \
 	Boundary.o	\
 	ChemCompt.o	\
 	ReadKkit.o	\
+	MathFunc.o	\
 	testKinetics.o	\
 
 HEADERS = \
@@ -35,6 +36,7 @@ MMenz.o:	MMenz.h
 Boundary.o:	Boundary.h
 ChemCompt.o:	ChemCompt.h
 ReadKkit.o:	ReadKkit.h
+MathFunc.o:	MathFunc.h
 testKinetics.o:	ReadKkit.h
 
 .cpp.o:

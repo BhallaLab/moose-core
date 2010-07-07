@@ -6660,11 +6660,24 @@ scheduling, limitations of wildcarding, and so on. For now it
 works but need to clean up. Checkin 1980.
 * Make it so the 'ISA' flag in wildcards applies for ancestor classes too.
 - Get rid of 'stage' in ticks. Their index and dt should do.
-- Fix Gsl integrator to handle buffers.
+* Fix Gsl integrator to handle buffers.
 
 Implemented Cinfo::isA function. Checkin 1981
 Incorporated into Wildcard.  Checkin 1982
 Added ZombieBufMol. Checkin 1984.
 
 Fixes to Stoich and ZombieEnz, now it does buffered and regular enz reactions
-OK.
+OK. Checkin 1985.
+I thought I was set for testing a big simulation, but ReadKkit croaks because
+it doesn't know how to handle SumTotals. Need to put in the arbitrary math
+expression calculator.
+
+Brought in Raamesh's MathFunc. It seems pretty complete.
+General idea:
+- Have a RateTerm wrapper for the MathFunc
+- Have another RateTerm table for handling updates that occur without 
+	integration, but affect molecules that the reactions may use.
+	e.g., sumtotals and tables
+
+
+
