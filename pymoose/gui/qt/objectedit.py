@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 30 11:18:34 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jul  7 16:36:21 2010 (+0530)
+# Last-Updated: Thu Jul  8 14:58:36 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 357
+#     Update #: 358
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -102,8 +102,7 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
             flag = Qt.ItemIsEnabled | Qt.ItemIsSelectable
             checkFlag = Qt.ItemIsEnabled
             try:
-                prop = eval('moose.' + self.mooseObject.__class__.__name__ + '.' + fieldName)
-                print self.mooseObject.path, prop, type(prop)
+                prop = eval('moose.' + self.mooseObject.__class__.__name__ + '.' + fieldName)                
                 if (type(prop) is property) and prop.fset:
                     flag = flag | Qt.ItemIsEditable
                 value = mooseObject.getField(fieldName)
