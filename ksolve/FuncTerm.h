@@ -21,10 +21,8 @@ class FuncTerm
 
 		/**
 		 * This function finds the reactant indices in the vector
-		 * S. It returns the number of substrates found, which are the
-		 * first entries in molIndex. The products are the remaining ones.
-		 * Note that it does NOT find products for unidirectional
-		 * reactions, which is a bit of a problem.
+		 * S. It returns the number of indices found, which are the
+		 * entries in molIndex.
 		 */
 		virtual unsigned int  getReactants( 
 			vector< unsigned int >& molIndex,

@@ -6698,4 +6698,7 @@ the messaging and the FuncTerm. Also will need to provide Zombification
 functionality.
 
 Implemented framework on solver side. Compiles, clear tests, but doesn't
-exercise any of the new code.
+exercise any of the new code. Checkin 1990.
+
+Implemented SumFunc as a standalone object. Not sure that the framework is
+suitable... let's see how it looks as I scale up.
