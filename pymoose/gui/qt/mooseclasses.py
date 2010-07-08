@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Sun Apr 12 14:05:01 2009 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  8 14:53:02 2010 (+0530)
+# Last-Updated: Thu Jul  8 15:56:40 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 218
+#     Update #: 219
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -50,7 +50,7 @@ import sys
 import moose
 from PyQt4 import QtCore, QtGui
 
-moose_category = ['base', 'builtins', 'biophysics', 'kinetics', 'device']
+moose_category = ['base', 'builtins', 'biophysics', 'kinetics', 'device', 'robots']
 moose_class = {'Neutral':'base', 
                'Tick':'base',
 
