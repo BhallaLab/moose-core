@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jul  7 16:41:05 2010 (+0530)
+# Last-Updated: Thu Jul  8 10:54:57 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 370
+#     Update #: 387
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -88,10 +88,12 @@ class MooseHandler(QtCore.QObject):
     type_xml = 'XML'
     type_neuroml = 'NEUROML'
     type_sbml = 'SBML'
+    type_python = 'PYTHON'
     # Map between file extension and known broad filetypes.
     fileExtensionMap = {
         'Genesis Script(*.g)': type_genesis,
         'neuroML/SBML(*.xml *.bz2 *.zip *.gz)': type_xml,
+        'Python script(*.py)': type_python
         }
     DEFAULT_SIMDT = 2.5e-5
     DEFAULT_PLOTDT = 1e-4
@@ -129,11 +131,15 @@ class MooseHandler(QtCore.QObject):
         directory = os.path.dirname(filename)
         os.chdir(directory)
         filename = os.path.basename(filename) # ideally this should not be required - but neuroML reader has a bug and gets a segmentation fault when given abosolute path.
-        config.LOGGER.info('SIMPATH modidied to: %s' % (moose.Property.getSimPath()))
+        moose.Property.addSimPath(directory)
         if filetype == MooseHandler.type_genesis:
             return self.loadGenesisModel(filename)
         elif filetype == MooseHandler.type_xml:
             return self.loadXMLModel(filename)
+        elif filetype == MooseHandler.type_python:
+            sys.path.append(directory)
+            return self.loadPythonScript(filename)
+        
 
 
     def loadGenesisModel(self, filename):
@@ -203,7 +209,12 @@ class MooseHandler(QtCore.QObject):
             self._context.readSBML(filename, self._current_element.path)
         
         return ret    
-        
+
+    def loadPythonScript(self, filename):
+        """Evaluate a python script."""
+        extension_start = filename.rfind('.py')
+        script = filename[:extension_start]
+        exec 'import %s' % (script)
 
     def doReset(self, simdt, plotdt, gldt, plotupdate_dt):
         """Reset moose.
