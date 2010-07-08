@@ -7,6 +7,9 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#ifndef _SUMFUNC_H
+#define _SUMFUNC_H
+
 /**
  * SumFunc.
  * This is the MOOSE class to sum together assorted inputs.
@@ -24,3 +27,4 @@ class SumFunc {
 		double result_;
 };
 
+#endif // _SUMFUNC_H

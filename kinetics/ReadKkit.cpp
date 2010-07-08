@@ -24,6 +24,8 @@ typedef int Id; // dummy
 */
 #include "header.h"
 #include "ReadKkit.h"
+#include "Mol.h"
+#include "FuncMol.h"
 
 const double ReadKkit::EPSILON = 1.0e-15;
 
@@ -652,6 +654,53 @@ Id ReadKkit::buildMol( const vector< string >& args )
 	return mol;
 }
 
+void ReadKkit::buildSumTotal( const string& src, const string& dest )
+{
+	map< string, Id >::iterator i = molIds_.find( dest );
+	assert( i != molIds_.end() );
+	Id destId = i->second;
+	
+	// Don't bother on buffered mol.
+	if ( destId()->cinfo()->isA( "BufMol" ) ) 
+		return;
+
+	Id sumId;
+	// Check if the mol has not yet been converted to handle SumTots.
+	if ( destId()->cinfo()->name() == "Mol" ) {
+		vector< unsigned int > dim( 1, 1 );
+		sumId = shell_->doCreate( "SumFunc", destId, "sumFunc", dim );
+		const DataHandler* orig = destId()->dataHandler();
+		DataHandler* dup = orig->copy( 1, orig->isGlobal() );
+	
+		// Turn dest into a FuncMol.
+		destId()->zombieSwap( FuncMol::initCinfo(), dup );
+	} else {
+		sumId = Neutral::child( destId.eref(), "sumFunc" );
+	}
+
+	if ( sumId == Id() ) {
+		cout << "Error: ReadKkit::buildSumTotal: could not make SumFunc on '"
+		<< dest << "'\n";
+		return;
+	}
+	
+	// Connect up messages
+	i = molIds_.find( src );
+	assert( i != molIds_.end() );
+	Id srcId = i->second;
+
+	bool ret = shell_->doAddMsg( "single", 
+		FullId( srcId, 0 ), "nOut",
+		FullId( sumId, 0 ), "input" ); 
+
+	ret = shell_->doAddMsg( "single", 
+		FullId( sumId, 0 ), "output",
+		FullId( destId, 0 ), "input" ); 
+
+	assert( ret );
+}
+	
+
 Id ReadKkit::buildGeometry( const vector< string >& args )
 {
 	Id geometry;
@@ -760,5 +809,8 @@ void ReadKkit::addmsg( const vector< string >& args)
 	else if ( args[3] == "PLOT" ) { // Time-course output for molecule
 		// innerAddMsg( src, molIds_, "nOut", dest, plotIds_, "input" );
 		innerAddMsg( dest, plotIds_, "requestData", src, molIds_, "get_n" );
+	}
+	else if ( args[3] == "SUMTOTAL" ) { // Summation function.
+		buildSumTotal( src, dest );
 	}
 }

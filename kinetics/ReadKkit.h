@@ -60,6 +60,7 @@ class ReadKkit
 		Id buildGeometry( const vector< string >& args );
 		Id buildInfo( Id parent, map< string, int >& m, 
 			const vector< string >& args );
+		void buildSumTotal( const string& src, const string& dest );
 
 		//////////////////////////////////////////////////////////////////
 		// Special ops in the model definition

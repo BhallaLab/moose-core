@@ -6701,4 +6701,10 @@ Implemented framework on solver side. Compiles, clear tests, but doesn't
 exercise any of the new code. Checkin 1990.
 
 Implemented SumFunc as a standalone object. Not sure that the framework is
-suitable... let's see how it looks as I scale up.
+suitable... let's see how it looks as I scale up. Checkin 1992.
+
+Implemented FuncMol as a derived class of Mol, designed to relay its input
+to the molecule count. Updated ReadKkit to deal with it. Correctly loads
+and runs model in ee mode, but the solver is yet to handle it.
+
+============================================================================
