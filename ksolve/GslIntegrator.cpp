@@ -7,14 +7,10 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
+#include "StoichHeaders.h"
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv.h>
-#include "RateTerm.h"
-#include "SparseMatrix.h"
-#include "KinSparseMatrix.h"
-#include "Stoich.h"
 #include "GslIntegrator.h"
 
 const Cinfo* GslIntegrator::initCinfo()

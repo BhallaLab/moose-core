@@ -7,12 +7,8 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
+#include "StoichHeaders.h"
 #include "ElementValueFinfo.h"
-#include "RateTerm.h"
-#include "SparseMatrix.h"
-#include "KinSparseMatrix.h"
-#include "Stoich.h"
 #include "Mol.h"
 #include "BufMol.h"
 #include "Reac.h"
@@ -217,20 +213,20 @@ void Stoich::allocateModel( const vector< Id >& elist )
 	numVarMols_ = 0;
 	numReac_ = 0;
 	vector< Id > bufMols;
+	vector< Id > funcMols;
 	for ( vector< Id >::const_iterator i = elist.begin(); i != elist.end(); ++i ){
 		Element* ei = (*i)();
 		if ( ei->cinfo() == molCinfo ) {
 			objMap_[ i->value() - objMapStart_ ] = numVarMols_;
 			++numVarMols_;
-		}
-		if ( ei->cinfo() == bufMolCinfo ) {
+		} else if ( ei->cinfo() == bufMolCinfo ) {
 			bufMols.push_back( *i );
-		}
-		if ( ei->cinfo() == reacCinfo || ei->cinfo() == mmEnzCinfo ) {
+		} else if ( ei->cinfo()->isA( "FuncBase" ) ) {
+			funcMols.push_back( *i );
+		} else if ( ei->cinfo() == reacCinfo || ei->cinfo() == mmEnzCinfo ){
 			objMap_[ i->value() - objMapStart_ ] = numReac_;
 			++numReac_;
-		}
-		if ( ei->cinfo() == enzCinfo ) {
+		} else if ( ei->cinfo() == enzCinfo ) {
 			objMap_[ i->value() - objMapStart_ ] = numReac_;
 			numReac_ += 2;
 		}
@@ -242,12 +238,19 @@ void Stoich::allocateModel( const vector< Id >& elist )
 		++numBufMols_;
 	}
 
+	numFuncMols_ = 0;
+	for ( vector< Id >::const_iterator i = funcMols.begin(); 
+		i != funcMols.end(); ++i ) {
+		objMap_[ i->value() - objMapStart_ ] = numFuncMols_++;
+	}
+
 	numVarMolsBytes_ = numVarMols_ * sizeof( double );
-	S_.resize( numVarMols_ + numBufMols_, 0.0 );
-	Sinit_.resize( numVarMols_ + numBufMols_, 0.0 );
+	S_.resize( numVarMols_ + numBufMols_ + numFuncMols_, 0.0 );
+	Sinit_.resize( numVarMols_ + numBufMols_ + numFuncMols_, 0.0 );
 	rates_.resize( numReac_ );
 	v_.resize( numReac_, 0.0 );
-	N_.setSize( numVarMols_ + numBufMols_, numReac_ );
+	funcs_.resize( numFuncMols_ );
+	N_.setSize( numVarMols_ + numBufMols_ + numFuncMols_, numReac_ );
 }
 
 void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
@@ -339,6 +342,25 @@ void Stoich::updateRates( vector< double>* yprime, double dt  )
 	}
 }
 
+// Update the function-computed molecule terms. These are not integrated,
+// but their values may be used by molecules that are.
+// The molecule vector S_ has a section for mathTerms. In this section
+// there is a one-to-one match between entries in S_ and MathTerm entries.
+void Stoich::updateFuncs( double t )
+{
+	vector< FuncTerm* >::const_iterator i;
+	vector< double >::iterator j = S_.begin() + numVarMols_;
+
+	for ( i = funcs_.begin(); i != funcs_.end(); i++)
+	{
+		*j++ = (**i)( t );
+		assert( !isnan( *( j-1 ) ) );
+	}
+}
+
+// Put in a similar updateVals() function to handle Math expressions.
+// Might update molecules, possibly even reac rates at some point.
+
 /**
  * Assigns n values for all molecules that have had their slave-enable
  * flag set _after_ the run started. Ugly hack, but convenient for 
@@ -408,6 +430,7 @@ int Stoich::innerGslFunc( double t, const double* y, double* yprime )
 //	}
 
 //	updateDynamicBuffers();
+	updateFuncs( t );
 
 	updateV();
 

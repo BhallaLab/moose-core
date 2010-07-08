@@ -7,11 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
-#include "RateTerm.h"
-#include "SparseMatrix.h"
-#include "KinSparseMatrix.h"
-#include "Stoich.h"
+#include "StoichHeaders.h"
 #include "ZombieReac.h"
 #include "Reac.h"
 #include "ElementValueFinfo.h"

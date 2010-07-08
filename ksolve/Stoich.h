@@ -50,7 +50,19 @@ class Stoich
 		//////////////////////////////////////////////////////////////////
 		// Compute functions
 		//////////////////////////////////////////////////////////////////
+		/**
+		 * Update the v_ vector for individual reaction velocities. Uses
+		 * hooks into the S_ vector for its arguments.
+		 */
 		void updateV( );
+
+		/**
+		 * Update all the function-computed molecule terms. These are not
+		 * integrated, but their values may be used by molecules that will
+		 * be integrated using the solver.
+		 * Uses hooks into the S_ vector for arguments other than t.
+		 */
+		void updateFuncs( double t );
 
 		void updateRates( vector< double>* yprime, double dt  );
 
@@ -65,14 +77,26 @@ class Stoich
 	protected:
 		bool useOneWay_;
 		string path_;
+
+		/**
+		 * This is the array of molecules. Of these, the first numVarMols_
+		 * are variables and are integrated using the ODE solver. 
+		 * The next numBufMols_ are fixed but can be changed by the script.
+		 * The next numFuncMols_ are computed using arbitrary functions of
+		 * any of the molecule levels, and the time.
+		 * The functions evaluate _before_ the ODE. 
+		 * The functions should not cascade as there is no guarantee of
+		 * execution order.
+		 */
 		vector< double > S_;
 		vector< double > Sinit_;
 		vector< double > v_;
 		vector< RateTerm* > rates_;
+		vector< FuncTerm* > funcs_;
 		KinSparseMatrix N_;
 
 		/**
-		 * Maps Ids to objects in the S_ and RateTerm vectors.
+		 * Maps Ids to objects in the S_, RateTerm, and FuncTerm vectors.
 		 * There will be holes in this map, but look up is very fast.
 		 * The calling Id must know what it wants to find: all it
 		 * gets back is an integer.
@@ -98,6 +122,10 @@ class Stoich
 		 * Number of buffered molecules
 		 */
 		unsigned int numBufMols_;
+		/**
+		 * Number of molecules whose values are computed by functions
+		 */
+		unsigned int numFuncMols_;
 
 		/**
 		 * Number of reactions in the solver model. This includes 

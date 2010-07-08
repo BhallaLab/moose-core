@@ -6,11 +6,7 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-#include "header.h"
-#include "RateTerm.h"
-#include "SparseMatrix.h"
-#include "KinSparseMatrix.h"
-#include "Stoich.h"
+#include "StoichHeaders.h"
 #include "ElementValueFinfo.h"
 #include "DataHandlerWrapper.h"
 

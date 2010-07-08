@@ -439,6 +439,7 @@ class BidirectionalReaction: public RateTerm
 		ZeroOrder* backward_;
 };
 
+/*
 class SumTotal
 {
 	public:
@@ -480,6 +481,7 @@ class SumTotal
 		double* target_;
 		vector< const double* > mol_;
 };
+*/
 
 /*
 class SumTotal: public RateTerm

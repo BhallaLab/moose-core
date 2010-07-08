@@ -18,6 +18,7 @@ OBJ = \
 	ZombieEnz.o \
 	ZombieMMenz.o \
 	RateTerm.o \
+	FuncTerm.o \
 	testKsolve.o	\
 
 	
@@ -26,7 +27,12 @@ OBJ = \
 
 HEADERS = \
 	../basecode/header.h \
-
+	../basecode/SparseMatrix.h \
+	../basecode/ElementValueFinfo.h \
+	Stoich.h \
+	RateTerm.h \
+	FuncTerm.h \
+	KinSparseMatrix.h \
 
 # The GSL library (GNU Scientific Library) provides a range of
 # numerical functions, which allow us to use various advanced integration
@@ -45,15 +51,16 @@ endif
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-Stoich.o:	Stoich.h RateTerm.h KinSparseMatrix.h ZombieMol.h ZombieReac.h ZombieBufMol.h ZombieEnz.h ZombieMMenz.h ../basecode/SparseMatrix.h ../kinetics/Mol.h ../kinetics/Reac.h ../kinetics/BufMol.h ../kinetics/Enz.h ../kinetics/MMenz.h
+Stoich.o:	ZombieMol.h ZombieReac.h ZombieBufMol.h ZombieEnz.h ZombieMMenz.h ../kinetics/Mol.h ../kinetics/Reac.h ../kinetics/BufMol.h ../kinetics/Enz.h ../kinetics/MMenz.h
 KinSparseMatrix.o:	KinSparseMatrix.h ../basecode/SparseMatrix.h
-ZombieMol.o:	ZombieMol.h Stoich.h KinSparseMatrix.h RateTerm.h ../basecode/SparseMatrix.h ../basecode/ElementValueFinfo.h
-ZombieBufMol.o:	ZombieMol.h ZombieBufMol.h Stoich.h KinSparseMatrix.h RateTerm.h ../basecode/SparseMatrix.h ../basecode/ElementValueFinfo.h
-ZombieReac.o:	ZombieReac.h Stoich.h KinSparseMatrix.h RateTerm.h ../basecode/SparseMatrix.h ../basecode/ElementValueFinfo.h
-ZombieEnz.o:	ZombieEnz.h Stoich.h KinSparseMatrix.h RateTerm.h ../basecode/SparseMatrix.h ../basecode/ElementValueFinfo.h
-ZombieMMenz.o:	ZombieMMenz.h Stoich.h KinSparseMatrix.h RateTerm.h ../basecode/SparseMatrix.h ../basecode/ElementValueFinfo.h
-testKsolve.o:	Stoich.h ../kinetics/ReadKkit.h ../shell/Shell.h
+ZombieMol.o:	ZombieMol.h
+ZombieBufMol.o:	ZombieMol.h ZombieBufMol.h
+ZombieReac.o:	ZombieReac.h
+ZombieEnz.o:	ZombieEnz.h
+ZombieMMenz.o:	ZombieMMenz.h
+testKsolve.o:	../kinetics/ReadKkit.h ../shell/Shell.h
 RateTerm.o:		RateTerm.h
+FuncTerm.o:		FuncTerm.h
 
 #KineticHub.o:	KineticHub.h
 

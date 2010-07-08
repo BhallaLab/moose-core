@@ -6678,6 +6678,24 @@ General idea:
 - Have another RateTerm table for handling updates that occur without 
 	integration, but affect molecules that the reactions may use.
 	e.g., sumtotals and tables
+Looked at the RateTerms. Don't really fit well with the MathFunc. I
+need a tighter form, say MathTerm, that handles the reactants and the
+function string. I should set up a dummy version to do the SumTotals first.
 
+Converted MathFunc over to current code base. Set up its unit test, it clears. 
+Checkin 1988.
 
+============================================================================
+8 July 2010
+Function handling taking shape. On the solver side, there will be a vector
+of FuncTerms to handle all functions. FuncTerms are the base class and have
+an operator()( double t ) so that they can accommodate functions of time
+as well as molecule levels.
 
+On the MOOSE object side, we need a base class FuncBase. This will basically
+encapsulate a FuncTerm of the appropriate type, and provide hooks between
+the messaging and the FuncTerm. Also will need to provide Zombification 
+functionality.
+
+Implemented framework on solver side. Compiles, clear tests, but doesn't
+exercise any of the new code.
