@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  8 14:55:34 2010 (+0530)
+# Last-Updated: Thu Jul  8 18:25:51 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1635
+#     Update #: 1734
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -223,7 +223,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.objFieldEditModel, 
                      QtCore.SIGNAL('objectNameChanged(const QString&)'),
                      item.updateSlot)
-        self.objFieldEditor.setContextMenuPolicy(Qt.CustomContextMenu)
+        # self.objFieldEditor.setContextMenuPolicy(Qt.CustomContextMenu)
         # self.connect(self.objFieldEditor, QtCore.SIGNAL('customContextMenuRequested ( const QPoint&)'), self.popupFieldMenu)
         self.objFieldEditPanel.setWidget(self.objFieldEditor)
 	self.objFieldEditPanel.show()
@@ -239,11 +239,14 @@ class MainWindow(QtGui.QMainWindow):
     def createActions(self):
         # The following actions are to toggle visibility of various widgets
         self.glClientAction = self.glClientDock.toggleViewAction()
+        self.glClientAction.setChecked(False)
         self.mooseTreeAction = self.mooseTreePanel.toggleViewAction()
         self.refreshMooseTreeAction = QtGui.QAction(self.tr('Refresh model tree'), self, triggered=self.modelTreeWidget.recreateTree)
         self.mooseClassesAction = self.mooseClassesPanel.toggleViewAction()
         self.mooseShellAction = self.commandLineDock.toggleViewAction()
+        self.mooseShellAction.setChecked(False)
         self.mooseGLCellAction = QtGui.QAction(self.tr('GLCell'), self)
+        self.mooseGLCellAction.setChecked(False)
         self.connect(self.mooseGLCellAction, QtCore.SIGNAL('triggered()'), self.createGLCellWidget)
 
         self.autoHideAction = QtGui.QAction(self.tr('Autohide during simulation'), self, checkable=True)
@@ -284,8 +287,10 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.resetSettingsAction, QtCore.SIGNAL('triggered()'), self.resetSettings)
         self.showDocAction = QtGui.QAction(self.tr('Documentation'), self)
         self.contextHelpAction = QtGui.QAction(self.tr('Context Help'), self)
-        # self.runAction = QtGui.QAction(self.tr('Run Simulation'), self)
-        # self.resetAction = QtGui.QAction(self.tr('Reset Simulation'), self)
+        self.runAction = QtGui.QAction(self.tr('Run Simulation'), self, triggered=self.runSlot)
+        self.resetAction = QtGui.QAction(self.tr('Reset Simulation'), self, triggered=self.resetSlot)
+
+        
         
         
     def runSquidDemo(self):
@@ -326,6 +331,10 @@ class MainWindow(QtGui.QMainWindow):
         self.viewMenu.addAction(self.tilePlotWindowsAction)
         self.viewMenu.addAction(self.cascadePlotWindowsAction)
 
+        self.runMenu = QtGui.QMenu(self.tr('Simulation control'), self)
+        self.runMenu.addAction(self.resetAction)
+        self.runMenu.addAction(self.runAction)
+
         self.helpMenu = QtGui.QMenu('&Help', self)
         self.helpMenu.addAction(self.showDocAction)
         self.helpMenu.addAction(self.contextHelpAction) 
@@ -334,7 +343,31 @@ class MainWindow(QtGui.QMainWindow):
         self.helpMenu.addAction(self.aboutMooseAction)
         self.menuBar().addMenu(self.fileMenu)
         self.menuBar().addMenu(self.viewMenu)
+        self.menuBar().addMenu(self.runMenu)
         self.menuBar().addMenu(self.helpMenu)
+
+    def createConnectionMenu(self, clickpoint):
+        # index = self.modelTreeWidget.indexAt(clickpoint)
+        mooseObject = self.modelTreeWidget.currentItem().getMooseObject()
+        self.connectionMenu = QtGui.QMenu(self.tr('Connect'), self.modelTreeWidget)
+        self.srcMenu = QtGui.QMenu(self.tr('Source Field'), self)
+        self.connectionMenu.addMenu(self.srcMenu)
+        self.destMenu = QtGui.QMenu(self.tr('Destination Field'), self)
+        self.connectionMenu.addMenu(self.destMenu)
+        self.connectActionGroup = QtGui.QActionGroup(self)
+        srcFields = self.mooseHandler.getSrcFields(mooseObject)
+        destFields = self.mooseHandler.getDestFields(mooseObject)
+        for field in srcFields:
+            action = QtGui.QAction(self.tr(field), self.connectActionGroup, triggered=self.setConnSrc)
+            action.setData(QtCore.QVariant(QtCore.QString(mooseObject.path + '/' + field)))
+            self.srcMenu.addAction(action)
+        for field in destFields:
+            action = QtGui.QAction(self.tr(field), self.connectActionGroup, triggered=self.setConnDest)
+            action.setData(QtCore.QVariant(QtCore.QString(mooseObject.path + '/' + field)))
+            self.destMenu.addAction(action)
+        self.connectActionGroup.setExclusive(True)
+        self.connectionMenu.popup(clickpoint)
+        
 
     def saveLayout(self):
         '''Save window layout'''
@@ -391,6 +424,8 @@ class MainWindow(QtGui.QMainWindow):
         self.mooseTreePanel.setObjectName(self.tr('MooseClassPanel'))
 	self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.mooseTreePanel)
 	self.modelTreeWidget = MooseTreeWidget(self.mooseTreePanel) 
+        self.modelTreeWidget.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.connect(self.modelTreeWidget, QtCore.SIGNAL('customContextMenuRequested ( const QPoint&)'), self.createConnectionMenu)
 	self.mooseTreePanel.setWidget(self.modelTreeWidget)
         config.LOGGER.debug('createMooseTreePanel - end')
         
@@ -552,7 +587,7 @@ class MainWindow(QtGui.QMainWindow):
         except ValueError:
             runtime = MooseHandler.runtime
             self.runtimeText.setText(str(runtime))
-        self.repaint()
+        self.update()
         self.mooseHandler.doRun(runtime)
 
     def changeFieldPlotWidget(self, full_field_path, plotname):
@@ -579,6 +614,21 @@ class MainWindow(QtGui.QMainWindow):
             self.shellWidget.setMode(MooseGlobals.CMD_MODE_GENESIS)
         else:
             config.LOGGER.error('Unknown action: %s' % (action.text()))
+
+    def setConnSrc(self):
+        sender = QtCore.QObject.sender()
+        path = str(sender.data().toString())
+        print 'setConnSrc', path
+        self.mooseHandler.setConnSrc(path)
+        self.mooseHandler.doConnect()
+
+    def setConnDest(self):
+        sender = QtCore.QObject.sender()
+        path = str(sender.data().toString())
+        print 'setConnDest', path
+        self.mooseHandler.setConnDest(path)
+        self.mooseHandler.doConnect()
+        
         
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
