@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul  5 21:35:09 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Jul  9 00:04:21 2010 (+0530)
+# Last-Updated: Fri Jul  9 03:25:33 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 493
+#     Update #: 511
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -115,11 +115,22 @@ class MoosePlot(Qwt.QwtPlot):
     def clearZoomStack(self):
         """Auto scale and clear the zoom stack
         """
-
         self.setAxisAutoScale(Qwt.QwtPlot.xBottom)
         self.setAxisAutoScale(Qwt.QwtPlot.yLeft)
         self.replot()
         self.zoomer.setZoomBase()
+
+    def reconfigureSelectedCurves(self, pen, symbol, style, attribute):
+        """Reconfigure the selected curves to use pen for line and
+        symbol for marking the data points."""
+        for item in self.itemList():
+            widget = self.legend().find(item)
+            if isinstance(widget, Qwt.QwtLegendItem) and widget.isChecked():
+                item.setPen(pen)
+                item.setSymbol(symbol)
+                item.setStyle(style)
+                item.setCurveAttribute(attribute)
+        self.replot()
 
     def fitSelectedPlots(self):
         for item in self.itemList():
@@ -128,11 +139,6 @@ class MoosePlot(Qwt.QwtPlot):
                 item.setCurveAttribute(Qwt.QwtPlotCurve.Fitted)
         self.replot()
             
-    def fitAllPlots(self):
-        for curve in self.curveTableMap.keys():
-            curve.setCurveAttribute(Qwt.QwtPlotCurve.Fitted)
-        self.replot()
-
     def showSelectedCurves(self, on):
         for item in self.itemList():
             widget = self.legend().find(item)
@@ -210,13 +216,14 @@ class MoosePlot(Qwt.QwtPlot):
             ydata = array(table.table)                
             xdata = linspace(0, currentTime, tabLen)
             curve.setData(xdata, ydata)
-            config.LOGGER.debug('x0 = %g, x[-1] = %g, y[0] = %g, y[-1] = %g' % (xdata[0], xdata[-1], ydata[0], ydata[-1]))
+            # config.LOGGER.debug('x0 = %g, x[-1] = %g, y[0] = %g, y[-1] = %g' % (xdata[0], xdata[-1], ydata[0], ydata[-1]))
         self.clearZoomStack()
 
     def addTable(self, table):
         try:
             curve = self.tableCurveMap[table]
         except KeyError:
+            print 'Adding table ', table.path
             curve = Qwt.QwtPlotCurve(table.name)
             curve.setPen(MoosePlot.colors[self.curveIndex])
             self.curveIndex = (self.curveIndex + 1) % len(MoosePlot.colors)
