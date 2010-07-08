@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  8 23:59:18 2010 (+0530)
+# Last-Updated: Fri Jul  9 03:51:21 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1741
+#     Update #: 1816
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -76,7 +76,7 @@ from mooseglobals import MooseGlobals
 from mooseshell import MooseShell
 from moosehandler import MooseHandler
 from mooseplot import MoosePlot
-
+from plotconfig import PlotConfig
 
 def makeClassList(parent=None, mode=MooseGlobals.MODE_ADVANCED):
     """Make a list of classes that can be used in current mode
@@ -135,11 +135,13 @@ class MainWindow(QtGui.QMainWindow):
         # tablePlotMap is a maps all currently available tables to the
         # plot widgets they belong to.
         self.tablePlotMap = {}
+        self.currentPlotWindow = None
         # Start with a default number of plot widgets
         for ii in range(MainWindow.default_plot_count):
             self.addPlotWindow()
         self.setCentralWidget(self.centralPanel)
         self.centralPanel.tileSubWindows()
+        self.centralPanel.subWindowActivated.connect(self.setCurrentPlotWindow)
         # We connect the double-click event on the class-list to
         # insertion of moose object in model tree.
         for listWidget in self.mooseClassesWidget.getClassListWidget():
@@ -264,6 +266,8 @@ class MainWindow(QtGui.QMainWindow):
         self.subWindowLayoutActionGroup.setExclusive(True)
         self.tilePlotWindowsAction.setChecked(True)
 
+        # Action to configure plots
+        self.configurePlotAction = QtGui.QAction(self.tr('Configure selected plots'), self, triggered=self.configurePlots)
         # Actions for file menu
         self.loadModelAction = QtGui.QAction(self.tr('Load Model'), self)
         self.connect(self.loadModelAction, QtCore.SIGNAL('triggered()'), self.popupLoadModelDialog)
@@ -311,7 +315,7 @@ class MainWindow(QtGui.QMainWindow):
         # TODO: create a class for the demos menu.
         
     def makeMenu(self):
-        self.fileMenu = QtGui.QMenu('&File', self)
+        self.fileMenu = QtGui.QMenu(self.tr('&File'), self)
         self.fileMenu.addAction(self.newPlotWindowAction)
         self.fileMenu.addAction(self.loadModelAction)
         self.shellModeMenu = self.fileMenu.addMenu(self.tr('Moose Shell mode'))
@@ -335,6 +339,11 @@ class MainWindow(QtGui.QMainWindow):
         self.runMenu.addAction(self.resetAction)
         self.runMenu.addAction(self.runAction)
 
+        print 'Adding plot menu'
+        self.plotMenu = QtGui.QMenu(self.tr('&Plot Settings'), self)
+        self.plotMenu.addAction(self.configurePlotAction)
+        print 'Added plot menu'
+
         self.helpMenu = QtGui.QMenu('&Help', self)
         self.helpMenu.addAction(self.showDocAction)
         self.helpMenu.addAction(self.contextHelpAction) 
@@ -344,6 +353,7 @@ class MainWindow(QtGui.QMainWindow):
         self.menuBar().addMenu(self.fileMenu)
         self.menuBar().addMenu(self.viewMenu)
         self.menuBar().addMenu(self.runMenu)
+        self.menuBar().addMenu(self.plotMenu)
         self.menuBar().addMenu(self.helpMenu)
 
     def createConnectionMenu(self, clickpoint):
@@ -490,12 +500,15 @@ class MainWindow(QtGui.QMainWindow):
         plot.setObjectName(title)
         plotWindow.setCentralWidget(plot)
         self.plots.append(plot)
-        self.centralPanel.addSubWindow(plotWindow)
+        subWindow = self.centralPanel.addSubWindow(plotWindow)
+        self.centralPanel.setActiveSubWindow(subWindow)
         plotWindow.show()
         if hasattr(self, 'cascadePlotWindowsAction') and self.cascadePlotWindowsAction.isChecked():
             self.centralPanel.cascadeSubWindows()
         else:
             self.centralPanel.tileSubWindows()
+        self.currentPlotWindow = plotWindow
+        return plotWindow
         
 
     def popupLoadModelDialog(self):
@@ -604,6 +617,7 @@ class MainWindow(QtGui.QMainWindow):
                 except KeyError:
                     pass
                 self.tablePlotMap[table] = plot
+                plot.replot()
 
     def updatePlots(self, currentTime):
         for plot in self.plots:
@@ -630,7 +644,31 @@ class MainWindow(QtGui.QMainWindow):
         print 'setConnDest', path
         self.mooseHandler.setConnDest(path)
         self.mooseHandler.doConnect()
-        
+
+    def configurePlots(self):
+        """Interactively allow the user to configure everything about
+        the plots."""
+        plotConfig = PlotConfig(self)
+        ret = plotConfig.exec_()
+        print ret, QtGui.QDialog.Accepted
+        if ret == QtGui.QDialog.Accepted:
+            pen = plotConfig.getPen()
+            symbol = plotConfig.getSymbol()
+            style = plotConfig.getStyle()
+            attribute = plotConfig.getAttribute()
+            activePlot = self.currentPlotWindow            
+            print 'Active plot', activePlot
+            plotName = activePlot.windowTitle() # The window title is the plot name
+            print 'configurePlots', plotName 
+            for plot in self.plots:
+                print '- configurePlots', plot.objectName()                 
+                if plot.objectName() == plotName:
+                    print plotName, ' reconfiguring'
+                    plot.reconfigureSelectedCurves(pen, symbol, style, attribute)
+                    break
+    def setCurrentPlotWindow(self, subWindow):
+        if subWindow:
+            self.currentPlotWindow = subWindow.widget()
         
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
