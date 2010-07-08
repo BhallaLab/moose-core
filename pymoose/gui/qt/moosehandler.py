@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  8 14:59:42 2010 (+0530)
+# Last-Updated: Thu Jul  8 17:49:07 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 390
+#     Update #: 435
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -119,7 +119,10 @@ class MooseHandler(QtCore.QObject):
         self.fieldTableMap = {}
         self._tableIndex = 0
         self._tableSuffix = random.randint(1, 999)
-        
+        self._connSrcObj = None
+        self._connDestObj = None
+        self._connSrcMsg = None
+        self._connDestMsg = None
         
     def runGenesisCommand(self, cmd):
 	"""Runs a GENESIS command and returns the output string"""
@@ -284,7 +287,47 @@ class MooseHandler(QtCore.QObject):
         self._context.step(time_left)
         self.emit(QtCore.SIGNAL('updatePlots(float)'), self._context.getCurrentTime())
         
+    def doConnect(self):
+        if self._connSrcObj and self._connDestObj and self._connSrcMsg and self._connDestMsg:
+            ret = self._connSrcObj.connect(srcMsg, self._connDestObj, self._destMsg)
+            self._connSrcObj = None
+            self._connDestObj = None
+            self._connSrcMsg = None
+            self._connDestMsg = None
 
+    def setConnSrc(self, fieldPath):
+        pos = fieldPath.rfind('/')
+        moosePath = fieldPath[:pos]
+        field = fieldPath[pos+1:]
+        self._connSrc = moose.Id(moosePath)
+        self._connSrcMsg = field
+
+    def setConnDest(self, fieldPath):
+        pos = fieldPath.rfind('/')
+        moosePath = fieldPath[:pos]
+        field = fieldPath[pos+1:]
+        self._connDest = moose.Id(moosePath)
+        self._connDestMsg = field
+
+    def getSrcFields(self, mooseObj):
+        srcFields = self._context.getFieldList(mooseObj.id, moose.FTYPE_SOURCE)
+        sharedFields = self._context.getFieldList(mooseObj.id, moose.FTYPE_SHARED)
+        ret = []
+        for field in srcFields:
+            ret.append(field)
+        for field in sharedFields:
+            ret.append(field)
+        return ret
+
+    def getDestFields(self, mooseObj):
+        destFields = self._context.getFieldList(mooseObj.id, moose.FTYPE_DEST)
+        sharedFields = self._context.getFieldList(mooseObj.id, moose.FTYPE_SHARED)
+        ret = []
+        for field in destFields:
+            ret.append(field)
+        for field in sharedFields:
+            ret.append(field)
+        return ret
 
 # 
 # moosehandler.py ends here
