@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  8 18:25:51 2010 (+0530)
+# Last-Updated: Thu Jul  8 23:59:18 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1734
+#     Update #: 1741
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -331,7 +331,7 @@ class MainWindow(QtGui.QMainWindow):
         self.viewMenu.addAction(self.tilePlotWindowsAction)
         self.viewMenu.addAction(self.cascadePlotWindowsAction)
 
-        self.runMenu = QtGui.QMenu(self.tr('Simulation control'), self)
+        self.runMenu = QtGui.QMenu(self.tr('Run'), self)
         self.runMenu.addAction(self.resetAction)
         self.runMenu.addAction(self.runAction)
 
@@ -587,10 +587,12 @@ class MainWindow(QtGui.QMainWindow):
         except ValueError:
             runtime = MooseHandler.runtime
             self.runtimeText.setText(str(runtime))
-        self.update()
+        self.updatePlots(runtime)
         self.mooseHandler.doRun(runtime)
 
     def changeFieldPlotWidget(self, full_field_path, plotname):
+        """Remove the plot for the specified field from the current
+        plot window and set it to the plotwindow with given name."""
         fieldpath = str(full_field_path)
         for plot in self.plots:
             if plotname == plot.objectName():
