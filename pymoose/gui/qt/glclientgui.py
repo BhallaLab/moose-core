@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Feb 13 16:01:54 2010 (+0530)
 # Version: 
-# Last-Updated: Sun Feb 14 00:11:15 2010 (+0530)
+# Last-Updated: Thu Jul  8 14:58:12 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 237
+#     Update #: 240
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -148,13 +148,13 @@ class GLClientGUI(QtGui.QWidget):
         if not self.port:
             self.port = config.GL_PORT
             self.settings.setValue(config.KEY_GL_PORT, self.port)
-            print 'new settings'
+            config.LOGGER.info('new settings')
         print unicode(self.settings.value(config.KEY_GL_PORT).toString())
         self.colormap = unicode(self.settings.value(config.KEY_GL_COLORMAP).toString())
         if not self.colormap:
             self.colormap = config.GL_DEFAULT_COLORMAP
         if not os.path.isfile(self.colormap):
-            print 'Colormap file not found:', self.colormap
+            config.LOGGER.error('Colormap file not found: %s' %( self.colormap))
             self.colormap = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Select Colormap File'))
         self.settings.setValue(config.KEY_GL_COLORMAP, self.colormap)
         self.executable = unicode(self.settings.value(config.KEY_GL_CLIENT_EXECUTABLE).toString()        )

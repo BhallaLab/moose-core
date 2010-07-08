@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  8 10:54:57 2010 (+0530)
+# Last-Updated: Thu Jul  8 14:59:42 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 387
+#     Update #: 390
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -74,7 +74,7 @@ class MooseXMLHandler(saxhandler.ContentHandler):
         elif name == 'neuroml':
             self.model_type = MooseHandler.type_neuroml
         else:
-            print name
+            pass
 
 class MooseHandler(QtCore.QObject):
     """Access to MOOSE functionalities"""
