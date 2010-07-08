@@ -46,16 +46,7 @@
 # Code:
 
 import sys
-from PyQt4 import QtCore, QtGui, Qsci
+for ii in range(10):
+	print 'hello'
 
-if __name__ == '__main__':
-    app = QtGui.QApplication(sys.argv)
-    shell = Qsci.QsciScintilla()
-    shell.setLexer(Qsci.QsciLexerPython(shell))
-    
-    shell.show()
-    app.exec_()
-
-
-# 
 # test.py ends here

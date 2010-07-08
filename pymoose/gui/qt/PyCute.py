@@ -109,7 +109,7 @@ class PyCute(QTextEdit):
         self.write('Type "copyright", "credits" or "license"'
                    ' for more information on Python.\n')
         self.write(message+'\n\n')
-        self.write('This is the standard Shell.\n')
+        # self.write('This is the standard Shell.\n')
         self.write(sys.ps1)
         
 
@@ -151,7 +151,7 @@ class PyCute(QTextEdit):
         self._clearLine()
         self.moveCursor(QTextCursor.End)
         while self.reading:
-            qApp.processOneEvent()
+            QtGui.qApp.processEvents(QtCore.QEventLoop.WaitForMoreEvents)
         if self.line.length() == 0:
             return '\n'
         else:
