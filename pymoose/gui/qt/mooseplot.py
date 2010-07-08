@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul  5 21:35:09 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jul  7 17:34:20 2010 (+0530)
+# Last-Updated: Thu Jul  8 14:57:27 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 335
+#     Update #: 337
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -101,7 +101,6 @@ class MoosePlot(Qwt.QwtPlot):
         else:
             xtitle.setFont(QtGui.QFont("Helvetica", 18))
             ytitle.setFont(QtGui.QFont("Helvetica", 18))
-        print xtitle.font().pointSize()
         self.setAxisTitle(Qwt.QwtPlot.xBottom, xtitle)
         self.setAxisTitle(Qwt.QwtPlot.yLeft, ytitle)
 

@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Jan 30 18:56:46 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  8 12:17:14 2010 (+0530)
+# Last-Updated: Thu Jul  8 14:39:21 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 145
+#     Update #: 146
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -106,10 +106,8 @@ class MooseShell(PyCute):
 
         config.LOGGER.debug(self.more)
         if self.more:
-            print 'More to go'
             self.write(sys.ps2)
         else:
-            print 'No more to go'
             self.write(sys.ps1)
             self.lines = []
         self._clearLine()
