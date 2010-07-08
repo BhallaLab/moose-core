@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jul  7 17:02:59 2010 (+0530)
+# Last-Updated: Thu Jul  8 11:44:13 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1575
+#     Update #: 1625
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -241,6 +241,7 @@ class MainWindow(QtGui.QMainWindow):
             return
 
     def createActions(self):
+        # The following actions are to toggle visibility of various widgets
         self.glClientAction = self.glClientDock.toggleViewAction()
         self.mooseTreeAction = self.mooseTreePanel.toggleViewAction()
         self.mooseClassesAction = self.mooseClassesPanel.toggleViewAction()
@@ -263,21 +264,29 @@ class MainWindow(QtGui.QMainWindow):
         self.subWindowLayoutActionGroup.setExclusive(True)
         self.tilePlotWindowsAction.setChecked(True)
 
-        self.quitAction = QtGui.QAction(self.tr('&Quit'), self)
-        self.quitAction.setShortcut(QtGui.QKeySequence(self.tr('Ctrl+Q')))
-        self.connect(self.quitAction, QtCore.SIGNAL('triggered()'), QtGui.qApp, QtCore.SLOT('closeAllWindows()'))
-        self.aboutMooseAction = QtGui.QAction(self.tr('&About'), self)
-        self.connect(self.aboutMooseAction, QtCore.SIGNAL('triggered()'), self.makeAboutMooseLabel)
-        self.resetSettingsAction = QtGui.QAction(self.tr('Reset Settings'), self)
-        self.connect(self.resetSettingsAction, QtCore.SIGNAL('triggered()'), self.resetSettings)
-        # TODO: the following actions are yet to be implemented.
-        self.showDocAction = QtGui.QAction(self.tr('Documentation'), self)
-        self.contextHelpAction = QtGui.QAction(self.tr('Context Help'), self)
+        # Actions for file menu
         self.loadModelAction = QtGui.QAction(self.tr('Load Model'), self)
         self.connect(self.loadModelAction, QtCore.SIGNAL('triggered()'), self.popupLoadModelDialog)
         
         self.newPlotWindowAction = QtGui.QAction(self.tr('New Plot Window'), self)
         self.connect(self.newPlotWindowAction, QtCore.SIGNAL('triggered(bool)'), self.addPlotWindow)
+        # Actions to switch the command line between python and genesis mode.
+        self.shellModeActionGroup = QtGui.QActionGroup(self)
+        self.pythonModeAction = QtGui.QAction(self.tr('Python'), self.shellModeActionGroup, checkable=True)
+        self.pythonModeAction.setChecked(True)
+        self.genesisModeAction = QtGui.QAction(self.tr('GENESIS'), self.shellModeActionGroup, checkable=True)
+        self.shellModeActionGroup.setExclusive(True)
+        self.connect(self.shellModeActionGroup, QtCore.SIGNAL('triggered(QAction*)'), self.changeShellMode)
+        self.quitAction = QtGui.QAction(self.tr('&Quit'), self)
+        self.quitAction.setShortcut(QtGui.QKeySequence(self.tr('Ctrl+Q')))
+        self.connect(self.quitAction, QtCore.SIGNAL('triggered()'), QtGui.qApp, QtCore.SLOT('closeAllWindows()'))
+        # Help menu actions
+        self.aboutMooseAction = QtGui.QAction(self.tr('&About'), self)
+        self.connect(self.aboutMooseAction, QtCore.SIGNAL('triggered()'), self.makeAboutMooseLabel)
+        self.resetSettingsAction = QtGui.QAction(self.tr('Reset Settings'), self)
+        self.connect(self.resetSettingsAction, QtCore.SIGNAL('triggered()'), self.resetSettings)
+        self.showDocAction = QtGui.QAction(self.tr('Documentation'), self)
+        self.contextHelpAction = QtGui.QAction(self.tr('Context Help'), self)
         # self.runAction = QtGui.QAction(self.tr('Run Simulation'), self)
         # self.resetAction = QtGui.QAction(self.tr('Reset Simulation'), self)
         
@@ -303,8 +312,10 @@ class MainWindow(QtGui.QMainWindow):
         self.fileMenu = QtGui.QMenu('&File', self)
         self.fileMenu.addAction(self.newPlotWindowAction)
         self.fileMenu.addAction(self.loadModelAction)
-        self.fileMenu.addAction(self.quitAction)
+        self.shellModeMenu = self.fileMenu.addMenu(self.tr('Moose Shell mode'))
+        self.shellModeMenu.addActions(self.shellModeActionGroup.actions())
         self.fileMenu.addAction(self.resetSettingsAction)
+        self.fileMenu.addAction(self.quitAction)
 
         self.viewMenu = QtGui.QMenu('&View', self)
         self.viewMenu.addAction(self.glClientAction)
@@ -313,7 +324,7 @@ class MainWindow(QtGui.QMainWindow):
         self.viewMenu.addAction(self.mooseShellAction)
         self.viewMenu.addAction(self.autoHideAction)
         self.viewMenu.addAction(self.showRightBottomDocksAction)
-        self.viewMenu.addSeparator().setText('Layout Plot Windows')
+        self.viewMenu.addSeparator().setText(self.tr('Layout Plot Windows'))
         self.viewMenu.addAction(self.tilePlotWindowsAction)
         self.viewMenu.addAction(self.cascadePlotWindowsAction)
 
@@ -562,7 +573,14 @@ class MainWindow(QtGui.QMainWindow):
     def updatePlots(self, currentTime):
         for plot in self.plots:
             plot.updatePlot(currentTime)
-        
+
+    def changeShellMode(self, action):
+        if action == self.pythonModeAction:
+            self.shellWidget.setMode(MooseGlobals.CMD_MODE_PYMOOSE)
+        elif action == self.genesisModeAction:
+            self.shellWidget.setMode(MooseGlobals.CMD_MODE_GENESIS)
+        else:
+            config.LOGGER.error('Unknown action: %s' % (action.text()))
         
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
