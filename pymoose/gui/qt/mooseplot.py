@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul  5 21:35:09 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  8 14:57:27 2010 (+0530)
+# Last-Updated: Fri Jul  9 00:04:21 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 337
+#     Update #: 493
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -48,9 +48,11 @@
 
 from PyQt4 import QtGui
 from PyQt4.Qt import Qt
+from PyQt4 import QtCore
 import PyQt4.Qwt5 as Qwt
 from PyQt4.Qwt5.anynumpy import *
 
+import config
 import moose
 
 class MoosePlot(Qwt.QwtPlot):
@@ -75,8 +77,6 @@ class MoosePlot(Qwt.QwtPlot):
     def __init__(self, *args):
         Qwt.QwtPlot.__init__(self, *args)
         self.plotNo = MoosePlot.plot_index
-        self.steptime = 1e-3
-        self.simtime = 100e-3
         MoosePlot.plot_index = MoosePlot.plot_index + 1
         self.curveIndex = 0
         self.setCanvasBackground(Qt.white)
@@ -85,15 +85,16 @@ class MoosePlot(Qwt.QwtPlot):
         self.curveTableMap = {} # curve -> moose table
         self.tableCurveMap = {} # moose table -> curve
         self.overlay = False
-        self.insertLegend(Qwt.QwtLegend())
-
+        legend = Qwt.QwtLegend()
+        legend.setItemMode(Qwt.QwtLegend.CheckableItem)
+        self.insertLegend(legend, Qwt.QwtPlot.RightLegend)
         # self.setTitle('Plot %d' % (self.plotNo))
         mY = Qwt.QwtPlotMarker()
         mY.setLabelAlignment(Qt.AlignRight | Qt.AlignTop)
         mY.setLineStyle(Qwt.QwtPlotMarker.HLine)
         mY.setYValue(0.0)
         mY.attach(self)
-        xtitle = Qwt.QwtText('Time (ms)')
+        xtitle = Qwt.QwtText('Time (s)')
         ytitle = Qwt.QwtText('Value')
         if self.parent():
             xtitle.setFont(self.parent().font())
@@ -103,7 +104,89 @@ class MoosePlot(Qwt.QwtPlot):
             ytitle.setFont(QtGui.QFont("Helvetica", 18))
         self.setAxisTitle(Qwt.QwtPlot.xBottom, xtitle)
         self.setAxisTitle(Qwt.QwtPlot.yLeft, ytitle)
+        self.zoomer = Qwt.QwtPlotZoomer(Qwt.QwtPlot.xBottom,
+                                   Qwt.QwtPlot.yLeft,
+                                   Qwt.QwtPicker.DragSelection,
+                                   Qwt.QwtPicker.AlwaysOn,
+                                   self.canvas())
+        self.zoomer.setRubberBandPen(QtGui.QPen(Qt.black))
+        self.zoomer.setTrackerPen(QtGui.QPen(Qt.black))
 
+    def clearZoomStack(self):
+        """Auto scale and clear the zoom stack
+        """
+
+        self.setAxisAutoScale(Qwt.QwtPlot.xBottom)
+        self.setAxisAutoScale(Qwt.QwtPlot.yLeft)
+        self.replot()
+        self.zoomer.setZoomBase()
+
+    def fitSelectedPlots(self):
+        for item in self.itemList():
+            widget = self.legend().find(item)
+            if isinstance(widget, Qwt.QwtLegendItem) and widget.isChecked():
+                item.setCurveAttribute(Qwt.QwtPlotCurve.Fitted)
+        self.replot()
+            
+    def fitAllPlots(self):
+        for curve in self.curveTableMap.keys():
+            curve.setCurveAttribute(Qwt.QwtPlotCurve.Fitted)
+        self.replot()
+
+    def showSelectedCurves(self, on):
+        for item in self.itemList():
+            widget = self.legend().find(item)
+            if isinstance(widget, Qwt.QwtLegendItem) and widget.isChecked():
+                item.setVisible(on)
+        self.replot()
+
+    def setLineStyleSelectedCurves(self, style=Qwt.QwtPlotCurve.NoCurve):        
+        for item in self.itemList():
+            widget = self.legend().find(item)
+            if isinstance(widget, Qwt.QwtLegendItem) and widget.isChecked():
+                item.setStyle(style)
+        self.replot()
+
+    def setSymbol(self, 
+                       symbolStyle=None, 
+                       brushColor=None, brushStyle=None, 
+                       penColor=None, penWidth=None, penStyle=None, 
+                       symbolHeight=None, symbolWidth=None):
+        """Set the symbol used in plotting.
+
+        This function gives overly flexible access to set the symbol
+        of all the properties of the currently selected curves. If any
+        parameter is left unspecified, the existing value of that
+        property of the symbol is maintained.
+
+        TODO: create a little plot-configuration widget to manipulate each
+        property of the selected curves visually. That should replace setting setSymbol amd setLineStyle.
+
+        """
+        for item in self.itemList():
+            widget = self.legend().find(item)
+            if isinstance(widget, Qwt.QwtLegendItem) and widget.isChecked():
+                oldSymbol = item.symbol()
+                if symbolStyle is None:
+                    symbolStyle = oldSymbol.style()
+                if brushColor is None:
+                    brushColor = oldSymbol.brush().color()
+                if brushStyle is None:
+                    brushStyle = oldSymbol.brush().style()
+                if penColor is None:
+                    penColor = oldSymbol.pen().color()
+                if penWidth is None:
+                    penWidth = oldSymbol.pen().width()
+                if penStyle is None:
+                    penStyle = oldSymbol.pen().style()
+                if symbolHeight is None:
+                    symbolHeight = oldSymbol.size().height()
+                if symbolWidth is None:
+                    symbolWidth = oldSymbol.size().width()
+                pen = QtGui.QPen(penColor, penWidth, penStyle)
+                symbol = Qwt.QwtSymbol(symbolStyle, oldSymbol.brush(), pen, QtCore.QSize(width, height)) 
+                item.setSymbol(symbol)
+        self.replot()
 
     def alignScales(self):
         self.canvas().setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Plain)
@@ -117,8 +200,9 @@ class MoosePlot(Qwt.QwtPlot):
                 scaleDraw.enableComponent(Qwt.QwtAbstractScaleDraw.Backbone, False)
 
     def updatePlot(self, currentTime):
-        if currentTime > self.xmin * 1e-3:
-            self.xmin = currentTime * 1e3
+        config.LOGGER.debug('update: %g' % (currentTime))
+        if currentTime > self.xmin:
+            self.xmin = currentTime
         for curve, table in self.curveTableMap.items():
             tabLen = len(table)
             if tabLen == 0:
@@ -126,7 +210,8 @@ class MoosePlot(Qwt.QwtPlot):
             ydata = array(table.table)                
             xdata = linspace(0, currentTime, tabLen)
             curve.setData(xdata, ydata)
-        self.replot()
+            config.LOGGER.debug('x0 = %g, x[-1] = %g, y[0] = %g, y[-1] = %g' % (xdata[0], xdata[-1], ydata[0], ydata[-1]))
+        self.clearZoomStack()
 
     def addTable(self, table):
         try:
@@ -138,14 +223,10 @@ class MoosePlot(Qwt.QwtPlot):
             self.curveTableMap[curve] = table
             self.tableCurveMap[table] = curve
             curve.attach(self)
-        current_time = moose.PyMooseBase.getContext().getCurrentTime() * 1e3
-        if current_time > self.xmin:
-            self.xmin = current_time
         if len(table) > 0:
             yy = array(table.table)
-            xx = linspace(0.0, current_time, len(yy))
+            xx = linspace(0.0, self.xmin, len(yy))
             curve.setData(xx, yy)
-        self.replot()
 
     def removeTable(self, table):
         try:
@@ -161,7 +242,6 @@ class MoosePlot(Qwt.QwtPlot):
     def reset(self):
         if not self.overlay:
             return
-
         table_list = []
         try:
             while self.tableCurveMap:

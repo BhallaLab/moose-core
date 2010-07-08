@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 30 11:18:34 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  8 14:58:36 2010 (+0530)
+# Last-Updated: Thu Jul  8 21:26:57 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 358
+#     Update #: 359
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -96,7 +96,7 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
             config.LOGGER.error('Could not wrap object %s into class %s' % (mooseObject.path, className))
             return
 
-        for fieldName in self.mooseObject.getFieldList(moose.VALUE):
+        for fieldName in self.mooseObject.getFieldList(moose.FTYPE_VALUE):
             if fieldName in ObjectFieldsModel.extra_fields:
                 continue
             flag = Qt.ItemIsEnabled | Qt.ItemIsSelectable
