@@ -11,14 +11,18 @@
 #include "ElementValueFinfo.h"
 #include "Mol.h"
 #include "BufMol.h"
+#include "FuncMol.h"
 #include "Reac.h"
 #include "Enz.h"
 #include "MMenz.h"
+#include "SumFunc.h"
 #include "ZombieMol.h"
 #include "ZombieBufMol.h"
+#include "ZombieFuncMol.h"
 #include "ZombieReac.h"
 #include "ZombieEnz.h"
 #include "ZombieMMenz.h"
+#include "ZombieSumFunc.h"
 
 #ifdef USE_GSL
 #include <gsl/gsl_errno.h>
@@ -207,13 +211,16 @@ void Stoich::allocateModel( const vector< Id >& elist )
 {
 	static const Cinfo* molCinfo = Mol::initCinfo();
 	static const Cinfo* bufMolCinfo = BufMol::initCinfo();
+	static const Cinfo* funcMolCinfo = FuncMol::initCinfo();
 	static const Cinfo* reacCinfo = Reac::initCinfo();
 	static const Cinfo* enzCinfo = Enz::initCinfo();
 	static const Cinfo* mmEnzCinfo = MMenz::initCinfo();
+	static const Cinfo* sumFuncCinfo = SumFunc::initCinfo();
 	numVarMols_ = 0;
 	numReac_ = 0;
 	vector< Id > bufMols;
 	vector< Id > funcMols;
+	unsigned int numFunc = 0;
 	for ( vector< Id >::const_iterator i = elist.begin(); i != elist.end(); ++i ){
 		Element* ei = (*i)();
 		if ( ei->cinfo() == molCinfo ) {
@@ -221,7 +228,7 @@ void Stoich::allocateModel( const vector< Id >& elist )
 			++numVarMols_;
 		} else if ( ei->cinfo() == bufMolCinfo ) {
 			bufMols.push_back( *i );
-		} else if ( ei->cinfo()->isA( "FuncBase" ) ) {
+		} else if ( ei->cinfo() == funcMolCinfo ) {
 			funcMols.push_back( *i );
 		} else if ( ei->cinfo() == reacCinfo || ei->cinfo() == mmEnzCinfo ){
 			objMap_[ i->value() - objMapStart_ ] = numReac_;
@@ -229,6 +236,9 @@ void Stoich::allocateModel( const vector< Id >& elist )
 		} else if ( ei->cinfo() == enzCinfo ) {
 			objMap_[ i->value() - objMapStart_ ] = numReac_;
 			numReac_ += 2;
+		} else if ( ei->cinfo() == sumFuncCinfo ){
+			objMap_[ i->value() - objMapStart_ ] = numFunc;
+			++numFunc;
 		}
 	}
 
@@ -238,11 +248,13 @@ void Stoich::allocateModel( const vector< Id >& elist )
 		++numBufMols_;
 	}
 
-	numFuncMols_ = 0;
+	numFuncMols_ = numVarMols_ + numBufMols_;
 	for ( vector< Id >::const_iterator i = funcMols.begin(); 
 		i != funcMols.end(); ++i ) {
 		objMap_[ i->value() - objMapStart_ ] = numFuncMols_++;
 	}
+	numFuncMols_ -= numVarMols_ + numBufMols_;
+	assert( numFunc == numFuncMols_ );
 
 	numVarMolsBytes_ = numVarMols_ * sizeof( double );
 	S_.resize( numVarMols_ + numBufMols_ + numFuncMols_, 0.0 );
@@ -257,9 +269,11 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 {
 	static const Cinfo* molCinfo = Mol::initCinfo();
 	static const Cinfo* bufMolCinfo = BufMol::initCinfo();
+	static const Cinfo* funcMolCinfo = FuncMol::initCinfo();
 	static const Cinfo* reacCinfo = Reac::initCinfo();
 	static const Cinfo* enzCinfo = Enz::initCinfo();
 	static const Cinfo* mmEnzCinfo = MMenz::initCinfo();
+	// static const Cinfo* sumFuncCinfo = SumFunc::initCinfo();
 
 	for ( vector< Id >::const_iterator i = elist.begin(); i != elist.end(); ++i ){
 		Element* ei = (*i)();
@@ -268,6 +282,9 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 		}
 		else if ( ei->cinfo() == bufMolCinfo ) {
 			ZombieBufMol::zombify( e.element(), (*i)() );
+		}
+		else if ( ei->cinfo() == funcMolCinfo ) {
+			ZombieFuncMol::zombify( e.element(), (*i)() );
 		}
 		else if ( ei->cinfo() == reacCinfo ) {
 			ZombieReac::zombify( e.element(), (*i)() );
@@ -299,6 +316,14 @@ unsigned int Stoich::convertIdToReacIndex( Id id ) const
 	return i;
 }
 
+unsigned int Stoich::convertIdToFuncIndex( Id id ) const
+{
+	unsigned int i = id.value() - objMapStart_;
+	assert( i < objMap_.size() );
+	i = objMap_[i];
+	assert( i < funcs_.size() );
+	return i;
+}
 
 
 

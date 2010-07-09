@@ -6705,6 +6705,8 @@ suitable... let's see how it looks as I scale up. Checkin 1992.
 
 Implemented FuncMol as a derived class of Mol, designed to relay its input
 to the molecule count. Updated ReadKkit to deal with it. Correctly loads
-and runs model in ee mode, but the solver is yet to handle it.
+and runs model in ee mode, but the solver is yet to handle it. Checkin 1995.
 
+At tail end of compiling ZombieSumFunc and colleagues, needed to get the
+data into the solver.
 ============================================================================

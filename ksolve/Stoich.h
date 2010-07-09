@@ -42,6 +42,7 @@ class Stoich
 		void zombifyModel( const Eref& e, const vector< Id >& elist );
 		unsigned int convertIdToReacIndex( Id id ) const;
 		unsigned int convertIdToMolIndex( Id id ) const;
+		unsigned int convertIdToFuncIndex( Id id ) const;
 
 		const double* S() const;
 		double* varS();

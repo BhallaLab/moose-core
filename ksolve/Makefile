@@ -14,9 +14,11 @@ OBJ = \
 	KinSparseMatrix.o	\
 	ZombieMol.o \
 	ZombieBufMol.o \
+	ZombieFuncMol.o \
 	ZombieReac.o \
 	ZombieEnz.o \
 	ZombieMMenz.o \
+	ZombieSumFunc.o \
 	RateTerm.o \
 	FuncTerm.o \
 	testKsolve.o	\
@@ -55,9 +57,11 @@ Stoich.o:	ZombieMol.h ZombieReac.h ZombieBufMol.h ZombieEnz.h ZombieMMenz.h ../k
 KinSparseMatrix.o:	KinSparseMatrix.h ../basecode/SparseMatrix.h
 ZombieMol.o:	ZombieMol.h
 ZombieBufMol.o:	ZombieMol.h ZombieBufMol.h
-ZombieReac.o:	ZombieReac.h
+ZombieFuncMol.o:	ZombieMol.h ZombieFuncMol.h ZombieSumFunc.h
+ZombieReac.o:	../kinetics/Reac.h ZombieReac.h
 ZombieEnz.o:	ZombieEnz.h
 ZombieMMenz.o:	ZombieMMenz.h
+ZombieSumFunc.o:	../kinetics/SumFunc.h ZombieSumFunc.h
 testKsolve.o:	../kinetics/ReadKkit.h ../shell/Shell.h
 RateTerm.o:		RateTerm.h
 FuncTerm.o:		FuncTerm.h
