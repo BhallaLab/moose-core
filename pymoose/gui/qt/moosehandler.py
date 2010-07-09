@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  8 17:49:07 2010 (+0530)
+# Last-Updated: Fri Jul  9 15:53:09 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 435
+#     Update #: 444
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -288,8 +288,10 @@ class MooseHandler(QtCore.QObject):
         self.emit(QtCore.SIGNAL('updatePlots(float)'), self._context.getCurrentTime())
         
     def doConnect(self):
+        ret = False
         if self._connSrcObj and self._connDestObj and self._connSrcMsg and self._connDestMsg:
-            ret = self._connSrcObj.connect(srcMsg, self._connDestObj, self._destMsg)
+            ret = self._connSrcObj.connect(self._connSrcMsg, self._connDestObj, self._connDestMsg)
+            print 'Connected %s/%s to %s/%s: ' % (self._connSrcObj.path, self._connSrcMsg, self._connDestObj.path, self._connDestMsg), ret
             self._connSrcObj = None
             self._connDestObj = None
             self._connSrcMsg = None
@@ -299,14 +301,14 @@ class MooseHandler(QtCore.QObject):
         pos = fieldPath.rfind('/')
         moosePath = fieldPath[:pos]
         field = fieldPath[pos+1:]
-        self._connSrc = moose.Id(moosePath)
+        self._connSrcObj = moose.Neutral(moosePath)
         self._connSrcMsg = field
 
     def setConnDest(self, fieldPath):
         pos = fieldPath.rfind('/')
         moosePath = fieldPath[:pos]
         field = fieldPath[pos+1:]
-        self._connDest = moose.Id(moosePath)
+        self._connDestObj = moose.Neutral(moosePath)
         self._connDestMsg = field
 
     def getSrcFields(self, mooseObj):
