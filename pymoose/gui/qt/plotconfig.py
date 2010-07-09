@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Jul  9 00:21:51 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Jul  9 03:30:42 2010 (+0530)
+# Last-Updated: Fri Jul  9 18:54:37 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 296
+#     Update #: 309
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -261,21 +261,25 @@ class PlotConfig(QtGui.QDialog):
         self.setLayout(layout)
 
     def setLineColor(self):
-        color = QtGui.QColorDialog.getColor(Qt.black, self)
+        currentColor = self.lineColorButton.palette().color(QtGui.QPalette.Background)
+        color = QtGui.QColorDialog.getColor(currentColor, self)
+        palette = QtGui.
         if color.isValid():
             self.lineColorButton.setText(color.name())
             self.lineColorButton.setPalette(QtGui.QPalette(color))
             self.currentLineColor = color
         
     def setSymbolPenColor(self):
-        color = QtGui.QColorDialog.getColor(Qt.black, self)
+        currentColor = self.symbolPenColorButton.palette().color(QtGui.QPalette.Background)
+        color = QtGui.QColorDialog.getColor(currentColor, self)
         if color.isValid():
             self.symbolPenColorButton.setText(color.name())
             self.symbolPenColorButton.setPalette(QtGui.QPalette(color))
             self.currentSymbolPenColor = color
 
     def setSymbolFillColor(self):
-        color = QtGui.QColorDialog.getColor(Qt.black, self)
+        currentColor = self.symbolFillColorButton.palette().color(QtGui.QPalette.Background)
+        color = QtGui.QColorDialog.getColor(currentColor, self)
         if color.isValid():
             self.symbolFillColorButton.setText(color.name())
             self.symbolFillColorButton.setPalette(QtGui.QPalette(color))
