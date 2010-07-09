@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Jul  9 16:01:00 2010 (+0530)
+# Last-Updated: Fri Jul  9 18:26:15 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2050
+#     Update #: 2057
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -154,6 +154,8 @@ class MainWindow(QtGui.QMainWindow):
         # Start with a default number of plot widgets
         for ii in range(MainWindow.default_plot_count):
             self.addPlotWindow()
+        self.plotConfig = PlotConfig(self)
+        self.plotConfig.setVisible(False)        
         self.setCentralWidget(self.centralPanel)
         self.centralPanel.tileSubWindows()
         self.centralPanel.subWindowActivated.connect(self.setCurrentPlotWindow)
@@ -432,7 +434,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.helpMenu = QtGui.QMenu('&Help', self)
         self.helpMenu.addAction(self.showDocAction)
-        self.helpMenu.addAction(self.contextHelpAction) 
+        self.helpMenu.addAction(self.contextHelpAction)
         self.demosMenu = self.makeDemosMenu()
         self.helpMenu.addMenu(self.demosMenu)
         self.helpMenu.addAction(self.aboutMooseAction)
@@ -741,14 +743,14 @@ class MainWindow(QtGui.QMainWindow):
     def configurePlots(self):
         """Interactively allow the user to configure everything about
         the plots."""
-        plotConfig = PlotConfig(self)
-        ret = plotConfig.exec_()
+        self.plotConfig.setVisible(True)
+        ret = self.plotConfig.exec_()
         print ret, QtGui.QDialog.Accepted
         if ret == QtGui.QDialog.Accepted:
-            pen = plotConfig.getPen()
-            symbol = plotConfig.getSymbol()
-            style = plotConfig.getStyle()
-            attribute = plotConfig.getAttribute()
+            pen = self.plotConfig.getPen()
+            symbol = self.plotConfig.getSymbol()
+            style = self.plotConfig.getStyle()
+            attribute = self.plotConfig.getAttribute()
             activePlot = self.currentPlotWindow            
             plotName = activePlot.windowTitle() # The window title is the plot name
             print 'configurePlots', plotName 
