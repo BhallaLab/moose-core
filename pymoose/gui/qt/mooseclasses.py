@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Sun Apr 12 14:05:01 2009 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  8 15:56:40 2010 (+0530)
+# Last-Updated: Fri Jul  9 20:20:39 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 219
+#     Update #: 220
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -46,7 +46,6 @@
 
 # Code:
 import sys
-#sys.path.append('..')
 import moose
 from PyQt4 import QtCore, QtGui
 
