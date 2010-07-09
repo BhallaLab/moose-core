@@ -6710,3 +6710,8 @@ and runs model in ee mode, but the solver is yet to handle it. Checkin 1995.
 At tail end of compiling ZombieSumFunc and colleagues, needed to get the
 data into the solver.
 ============================================================================
+9 July 2010
+Completed compilation, solver now sees it and seems to work. Checkin 1999.
+Tried with the bigger production model. ReadKkit still fails.
+
+Fixed ReadKkit, but the simulation resuts for dend_v26.g model are wrong.

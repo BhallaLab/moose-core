@@ -630,8 +630,9 @@ Id ReadKkit::buildMol( const vector< string >& args )
 	} else if ( slaveEnable & 4 ) {
 		mol = shell_->doCreate( "BufMol", pa, tail, dim );
 	} else {
-		cout << "ReadKkit::buildMol: Unknown slave_enable flag on " <<
-			args[2] << "\n";
+		mol = shell_->doCreate( "Mol", pa, tail, dim );
+		cout << "ReadKkit::buildMol: Unknown slave_enable flag '" << 
+			slaveEnable << "' on " << args[2] << "\n";
 	}
 	assert( mol != Id() );
 	// skip the 10 chars of "/kinetics/"
