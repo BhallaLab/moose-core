@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Jul  9 00:21:51 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Jul  9 18:54:37 2010 (+0530)
+# Last-Updated: Fri Jul  9 20:11:16 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 309
+#     Update #: 326
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -173,6 +173,7 @@ class PlotConfig(QtGui.QDialog):
         self.lineColorButton.setPalette(QtGui.QPalette(self.currentLineColor))
         self.lineColorButton.clicked.connect(self.setLineColor)
         self.lineColorButton.setAutoFillBackground(True)
+        self.lineColorButton.setObjectName('lineColorButton')
         layout.addWidget(self.lineColorButton, row, 1)
         
         row += 1
@@ -213,6 +214,7 @@ class PlotConfig(QtGui.QDialog):
         self.symbolPenColorButton = QtGui.QPushButton(self.currentSymbolPenColor.name(), self)
         self.symbolPenColorButton.clicked.connect(self.setSymbolPenColor)
         self.symbolPenColorButton.setPalette(QtGui.QPalette(self.currentSymbolPenColor))
+        self.symbolPenColorButton.setObjectName('symbolPenColorButton')
         self.symbolPenColorButton.setAutoFillBackground(True)
         layout.addWidget(self.symbolPenColorButton, row, 1)
 
@@ -231,6 +233,7 @@ class PlotConfig(QtGui.QDialog):
         self.symbolFillColorButton.clicked.connect(self.setSymbolFillColor)
         self.symbolFillColorButton.setPalette(QtGui.QPalette(self.currentSymbolFillColor))
         self.symbolFillColorButton.setAutoFillBackground(True)
+        self.symbolFillColorButton.setObjectName('symbolPenColorButton')
         layout.addWidget(self.symbolFillColorButton, row, 1)
 
         row += 1
@@ -263,26 +266,27 @@ class PlotConfig(QtGui.QDialog):
     def setLineColor(self):
         currentColor = self.lineColorButton.palette().color(QtGui.QPalette.Background)
         color = QtGui.QColorDialog.getColor(currentColor, self)
-        palette = QtGui.
         if color.isValid():
+            style = QtCore.QString('QPushButton#lineColorButton {background-color: %s}' % color.name())
+            self.lineColorButton.setStyleSheet(style)
             self.lineColorButton.setText(color.name())
-            self.lineColorButton.setPalette(QtGui.QPalette(color))
             self.currentLineColor = color
         
     def setSymbolPenColor(self):
         currentColor = self.symbolPenColorButton.palette().color(QtGui.QPalette.Background)
         color = QtGui.QColorDialog.getColor(currentColor, self)
         if color.isValid():
+            style = QtCore.QString('QPushButton#symbolPenColorButton {background-color: %s}' % color.name())
+            self.symbolPenColorButton.setStyleSheet(style)
             self.symbolPenColorButton.setText(color.name())
-            self.symbolPenColorButton.setPalette(QtGui.QPalette(color))
             self.currentSymbolPenColor = color
 
     def setSymbolFillColor(self):
         currentColor = self.symbolFillColorButton.palette().color(QtGui.QPalette.Background)
         color = QtGui.QColorDialog.getColor(currentColor, self)
         if color.isValid():
-            self.symbolFillColorButton.setText(color.name())
-            self.symbolFillColorButton.setPalette(QtGui.QPalette(color))
+            style = QtCore.QString('QPushButton#symbolFillColorButton {background-color: %s}' % color.name())
+            self.symbolFillColorButton.setStyleSheet(style)
             self.currentSymbolFillColor = color
 
     def getPen(self):
