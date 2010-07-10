@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Sat Jul 10 20:33:16 2010 (+0530)
-#           By: subha
-#     Update #: 474
+# Last-Updated: Sun Jul 11 01:30:17 2010 (+0530)
+#           By: Subhasis Ray
+#     Update #: 560
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -331,33 +331,112 @@ class MooseHandler(QtCore.QObject):
             ret.append(field)
         return ret
 
-    def makeGLCell(self, mooseObjPath, field, threshold, highvalue, lowvalue, vscale, bgColor, sync, port):
+    def makeGLCell(self, mooseObjPath, port, field=None, threshold=None, lowValue=None, highValue=None, vscale=None, bgColor=None, sync=None):
         """Make a GLcell instance.
         
         mooseObjPath -- path of the moose object to be monitored
         
-        field -- name of the field to be observed
+        port -- string representation of the port number for the client.
+        
+        field -- name of the field to be observed. Vm by default.
 
-        threshold -- threshold of the field value change that will be
-        taken up for visualization.
+        threshold -- the % change in the field value that will be
+        taken up for visualization. 1% by default.
 
+        highValue -- value represented by the last line of the
+        colourmap file. Any value of the field above this will be
+        represented by the colour corresponding to this value.
+
+        lowValue -- value represented by the first line of the
+        colourmap file. Any value of the field below this will be
+        represented by the colour corresponding to this value.
+
+        vscale -- Scaling of thickness for visualization of very thin
+        compartments. 
+
+        bgColor -- background colour of the visualization window.
+
+        sync -- Run simulation in sync with the visualization. If on,
+        it may slowdown the simulation.
         
         """
         glCellPath = 'gl_' + mooseObjPath.replace('/', '_')
         glCell = moose.GLcell(glCellPath)
         glCell.vizpath = mooseObjPath
-        glCell.attributeName = field
-        glCell.changeThreshold = threshold
-        glCell.highValue = highValue
-        glCell.lowValue = lowValue
-        glCell.VScale = vscale
-        glCell.bgColor = bgColor
-        glCell.syncMode = sync
         glCell.clientPort = port
+        if field is not None:
+            glCell.attributeName = field
+        if threshold is not None:
+            glCell.changeThreshold = threshold
+        if highValue is not None:
+            glCell.highValue = highValue
+        if lowValue is not None:
+            glCell.lowValue = lowValue
+        if vscale is not None:
+            glCell.VScale = vscale
+        if bgColor is not None:
+            glCell.bgColor = bgColor
+        if sync is not None:
+            glCell.syncMode = sync
         
-    def makeGLView(self, mooseObjPath, valueFieldMap):
-        raise NotImplementedError('TODO - this function needs to be completed.')
+    def makeGLView(self, mooseObjPath, port, fieldList, minValueList, maxValueList, colorFieldIndex, morphFieldIndex=None, grid=None, bgColor=None, sync=None):
+        """
+        Make a GLview object to visualize some field of a bunch of
+        moose elements.
         
+        mooseObjPath -- GENESIS-style path for elements to be
+        observed.
+
+        port -- port to use for communicating with the client.
+
+        fieldList -- list of fields to be observed.
+
+        minValueList -- minimum value for fields in fieldList. 
+
+        maxValueList -- maximum value for fields in fieldList.
+        
+        colorFieldIndex -- index of the field to be represented by the
+        colour of the 3-D shapes in visualization.
+
+        morphFieldIndex -- index of the field to be represented by the
+        size of the 3D shape.
+        
+        grid -- whether to put the 3D shapes in a grid or to use the
+        x, y, z coordinates in the objects for positioning them in
+        space.
+
+        bgColor -- background colour of visualization window.
+
+        sync -- synchronize simulation with visualization.
+
+        """
+        glViewPath = 'gl_' + mooseObjPath.replace('/', '_')
+        glView = moose.GLview(glViewPath)
+        glView.vizpath = mooseObjPath
+        glView.clientPort = port
+        if len(fieldList) > 5:
+            fieldList = fieldList[:5]
+
+        for ii in range(len(fieldList)):
+            visField = 'value%dField' % (ii+1)
+            setattr(glView, visField, fieldList[ii])
+            try:
+                setattr(glView, 'value%dMin' % (ii+1), minValueList[ii])
+                setattr(glView, 'value%dMax' % (ii+1), maxValueList[ii])
+            except IndexError:
+                break
+        glCell.colorVal = int(colorFieldIndex)
+        if morphFieldIndex is not None:
+            glView.morphVal = int(morphFieldIndex)
+        if grid and (grid != 'off'):
+            glView.gridMode = 'on'
+
+        if bgColor is not None:
+            glView.bgColor = bgColor
+
+        if sync and (sync != 'off'):
+            glView.syncMode = 'on'
+
         
     
 # 

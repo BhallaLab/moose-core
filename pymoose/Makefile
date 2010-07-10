@@ -34,12 +34,12 @@ endif
 
 ifeq ($(USE_GL),1)
 CXXFLAGS+=-I../gl/src -DUSE_GL
-SWIGOPTS=-DUSE_GL
+SWIGOPTS+=-DUSE_GL
 endif
 
 ifeq ($(USE_NEUROML),1)
 CXXFLAGS+=-I../neuroML_IO -I../external/include -DUSE_NEUROML
-SWIGOPTS=-DUSE_NEUROML
+SWIGOPTS+=-DUSE_NEUROML
 endif
 
 # The library location and flags for creating dll in Mac is different from Linux
