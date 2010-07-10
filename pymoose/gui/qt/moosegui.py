@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Jul  9 18:26:15 2010 (+0530)
+# Last-Updated: Fri Jul  9 21:23:30 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2057
+#     Update #: 2062
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -306,12 +306,13 @@ class MainWindow(QtGui.QMainWindow):
 
     def createGLCellWidget(self):
     	"""Create a GLCell object to show the currently selected cell"""
+        raise DeprecationWarning('This function is not implemented properly and is deprecated.')
         cellItem = self.modelTreeWidget.currentItem()
         cell = cellItem.getMooseObject()
         if not cell.className == 'Cell':
             QtGui.QMessageBox.information(self, self.tr('Incorrect type for GLCell'), self.tr('GLCell is for visualizing a cell. Please select one in the Tree view. Currently selected item is of ' + cell.className + ' class. Hover mouse over an item to see its class.'))
             return
-
+        
     def createActions(self):
         # The following actions are to toggle visibility of various widgets
         self.glClientAction = self.glClientDock.toggleViewAction()
