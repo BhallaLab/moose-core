@@ -1650,7 +1650,7 @@ double PyMooseContext::getCurrentTime()
 
 /**
    This function just picks up the ValueFinfo fields. As opposed to
-   getFieldList with FieldType = VALUE, this version gets all value
+   getFieldList with FieldType = FTYPE_VALUE, this version gets all value
    fields including the user-added ones (by addField call).
 */
 vector <string> PyMooseContext::getValueFieldList(Id id)
@@ -1664,7 +1664,7 @@ vector <string> PyMooseContext::getValueFieldList(Id id)
 
 /**
    This gets the field names in a vector according to field type. This
-   uses the statically initialized field names, so in case of VALUE
+   uses the statically initialized field names, so in case of FTYPE_VALUE
    fields, it does not retrieve the fields added later via addField
    call.
  */
@@ -1676,7 +1676,7 @@ vector<string> PyMooseContext::getFieldList(Id id, FieldType ftype)
     cinfo->listFinfos(finfoList);
 
     switch (ftype){
-        case VALUE:
+        case FTYPE_VALUE:
             for (int i = 0; i < finfoList.size(); ++i)
             {
                 const ValueFinfo* finfo = dynamic_cast<const ValueFinfo*>(finfoList[i]);
@@ -1685,7 +1685,7 @@ vector<string> PyMooseContext::getFieldList(Id id, FieldType ftype)
                 }
             }
             break;
-        case LOOKUP:
+        case FTYPE_LOOKUP:
             for (int i = 0; i < finfoList.size(); ++i)
             {
                 const LookupFinfo* finfo = dynamic_cast<const LookupFinfo*>(finfoList[i]);
@@ -1694,7 +1694,7 @@ vector<string> PyMooseContext::getFieldList(Id id, FieldType ftype)
                 }
             }
             break;
-        case SOURCE:
+        case FTYPE_SOURCE:
             for (int i = 0; i < finfoList.size(); ++i)
             {
                 const SrcFinfo* finfo = dynamic_cast<const SrcFinfo*>(finfoList[i]);
@@ -1703,7 +1703,7 @@ vector<string> PyMooseContext::getFieldList(Id id, FieldType ftype)
                 }
             }
             break;
-        case DEST:
+        case FTYPE_DEST:
             for (int i = 0; i < finfoList.size(); ++i)
             {
                 const DestFinfo* finfo = dynamic_cast<const DestFinfo*>(finfoList[i]);
@@ -1712,7 +1712,7 @@ vector<string> PyMooseContext::getFieldList(Id id, FieldType ftype)
                 }
             }
             break;
-        case SHARED:
+        case FTYPE_SHARED:
             for (int i = 0; i < finfoList.size(); ++i)
             {
                 const SharedFinfo* finfo = dynamic_cast<const SharedFinfo*>(finfoList[i]);
@@ -1726,7 +1726,7 @@ vector<string> PyMooseContext::getFieldList(Id id, FieldType ftype)
              implement name().
             */
         // 
-        // case SOLVE:
+        // case FTYPE_SOLVE:
         //     for (int i = 0; i < finfoList.size(); ++i)
         //     {
         //         const SolveFinfo* finfo = dynamic_cast<const SolveFinfo*>(finfoList[i]);
@@ -1735,7 +1735,7 @@ vector<string> PyMooseContext::getFieldList(Id id, FieldType ftype)
         //         }
         //     }
         //     break;
-        // case THIS:
+        // case FTYPE_THIS:
         //     for (int i = 0; i < finfoList.size(); ++i)
         //     {
         //         const ThisFinfo* finfo = dynamic_cast<const ThisFinfo*>(finfoList[i]);
@@ -1744,7 +1744,7 @@ vector<string> PyMooseContext::getFieldList(Id id, FieldType ftype)
         //         }
         //     }
         //     break;
-        // case GLOBAL:
+        // case FTYPE_GLOBAL:
         //     for (int i = 0; i < finfoList.size(); ++i)
         //     {
         //         const GlobalMarkerFinfo* finfo = dynamic_cast<const GlobalMarkerFinfo*>(finfoList[i]);
@@ -1753,7 +1753,7 @@ vector<string> PyMooseContext::getFieldList(Id id, FieldType ftype)
         //         }
         //     }
         //     break;
-        // case DEL:
+        // case FTYPE_DEL:
         //     for (int i = 0; i < finfoList.size(); ++i)
         //     {
         //         const DeletionFinfo* finfo = dynamic_cast<const DeletionMarkerFinfo*>(finfoList[i]);
@@ -1763,7 +1763,7 @@ vector<string> PyMooseContext::getFieldList(Id id, FieldType ftype)
         //     }
         //     break;
             
-        case ALL:
+        case FTYPE_ALL:
             for (int i = 0; i < finfoList.size(); ++i)
             {
                 fieldList.push_back(finfoList[i]->name());

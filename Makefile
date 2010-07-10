@@ -200,7 +200,7 @@ endif
 
 # To use NeuroML, pass USE_NeuroML=1 in make command line
 ifeq ($(USE_NEUROML),1)
-LIBS+= -lxml2 -lneuroml -L./external/lib/
+LIBS+= -lxml2 -lneuroml
 CXXFLAGS+=-DUSE_NEUROML
 endif
 
@@ -247,6 +247,7 @@ endif
 ifeq ($(USE_NEUROML),1)
 	NEUROML_DIR = neuroML_IO
 	NEUROML_LIB = neuroML_IO/neuroML_IO.o 
+	LIBS += -Lexternal/lib -lneuroml
 endif
 
 ifeq ($(USE_MUSIC),1)
