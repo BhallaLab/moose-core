@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Sat Jul 10 16:27:46 2010 (+0530)
-#           By: Subhasis Ray
-#     Update #: 445
+# Last-Updated: Sat Jul 10 20:33:16 2010 (+0530)
+#           By: subha
+#     Update #: 474
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -331,6 +331,34 @@ class MooseHandler(QtCore.QObject):
             ret.append(field)
         return ret
 
+    def makeGLCell(self, mooseObjPath, field, threshold, highvalue, lowvalue, vscale, bgColor, sync, port):
+        """Make a GLcell instance.
+        
+        mooseObjPath -- path of the moose object to be monitored
+        
+        field -- name of the field to be observed
+
+        threshold -- threshold of the field value change that will be
+        taken up for visualization.
+
+        
+        """
+        glCellPath = 'gl_' + mooseObjPath.replace('/', '_')
+        glCell = moose.GLcell(glCellPath)
+        glCell.vizpath = mooseObjPath
+        glCell.attributeName = field
+        glCell.changeThreshold = threshold
+        glCell.highValue = highValue
+        glCell.lowValue = lowValue
+        glCell.VScale = vscale
+        glCell.bgColor = bgColor
+        glCell.syncMode = sync
+        glCell.clientPort = port
+        
+    def makeGLView(self, mooseObjPath, valueFieldMap):
+        raise NotImplementedError('TODO - this function needs to be completed.')
+        
+        
     
 # 
 # moosehandler.py ends here
