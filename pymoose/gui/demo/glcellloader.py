@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Feb  4 20:34:34 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Feb  5 18:07:10 2010 (+0530)
+# Last-Updated: Sat Jun 26 15:48:53 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 103
+#     Update #: 131
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -52,9 +52,9 @@ import moose
 
 SIMDT = 1e-5
 GLDT = 1e-2
-RUNTIME = 100e-3
+RUNTIME = 1000e-3
 
-morphs_dir = '../../../DEMOS/gl-demo/morphologies/'
+morphs_dir = 'morphologies/'
 models = {'CA1':'ca1passive.p',
 	  'Mitral': 'mit.p',
 	  'Purkinje1': 'psmall.p',
@@ -67,24 +67,31 @@ CONTEXT = moose.PyMooseBase.getContext()
 class GLCellLoader(object):
     def __init__(self, cell_type, host='localhost', port='9999'):
 	'''Cell loader for glcell using glclient'''
-	filepath = morphs_dir + models[cell_type]
+        try:
+            filepath = morphs_dir + models[cell_type]
+        except KeyError:
+            print 'Error: Please specify one of the following cell types:'
+            for key in models:
+                print key
+            sys.exit(0)
 
         # Load the channel definitions from bulbchan.g
-        CONTEXT.loadG('../../../DEMOS/gl-demo/channels/bulbchan.g')
+        CONTEXT.loadG('compatibility.g')
+        CONTEXT.loadG('channels/bulbchan.g')
         cwe = CONTEXT.getCwe()
         CONTEXT.setCwe('/library')
         CONTEXT.runG('make_LCa3_mit_usb')
         CONTEXT.runG('make_Na_rat_smsnn')
-        CONTEXT.runG('make_Na2_rat_smsnn')
+        # CONTEXT.runG('make_Na2_rat_smsnn') # This channel does not work!
         CONTEXT.runG('make_KA_bsg_yka')
         CONTEXT.runG('make_KM_bsg_yka')
         CONTEXT.runG('make_K_mit_usb')
         CONTEXT.runG('make_K2_mit_usb')
-        # CONTEXT.runG('make_K_slow_usb')
+        # CONTEXT.runG('make_K_slow_usb')# This channel does not work!
         CONTEXT.runG('make_Na_mit_usb')
-        CONTEXT.runG('make_Na2_mit_usb')
-        # CONTEXT.runG('make_Ca_mit_conc')
-        # CONTEXT.runG('make_Kca_mit_usb')
+        # CONTEXT.runG('make_Na2_mit_usb')# This channel does not work!
+        # CONTEXT.runG('make_Ca_mit_conc')# This channel does not work!
+        # CONTEXT.runG('make_Kca_mit_usb')# This channel does not work!
         print 'created channels'
         CONTEXT.setCwe(cwe)
 	CONTEXT.readCell(filepath, cell_type)
@@ -102,14 +109,16 @@ class GLCellLoader(object):
 	self.glServer.loader = -0.1
 	if cell_type == 'Mitral':
             self.glServer.vscale = 10.0
-	# ** Assuming every cell has a top-level compartment called
-	# ** soma
+	#  Assuming every cell has a top-level compartment called
+	#  soma
 	self.pulsegen = moose.PulseGen('pg_' + cell_type)
 	self.pulsegen.firstDelay = 5e-3
 	self.pulsegen.firstWidth = 50e-3
 	self.pulsegen.firstLevel = 1e-9
 	self.pulsegen.connect('outputSrc', moose.Compartment(self.cell.path + '/soma'), 'injectMsg')
-
+        self.vmTable = moose.Table('Vm')
+        self.vmTable.stepMode = 3
+        self.vmTable.connect('inputRequest', moose.Compartment(self.cell.path + '/soma'), 'Vm')
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
@@ -119,12 +128,16 @@ if __name__ == '__main__':
     print 'loaded morphology file'
     CONTEXT.setClock(0, SIMDT)
     CONTEXT.setClock(1, SIMDT)
+    CONTEXT.setClock(2, SIMDT)
+    CONTEXT.setClock(3, SIMDT)
     CONTEXT.setClock(4, GLDT)
     CONTEXT.useClock(4, '/#[TYPE=GLcell]')
     print 'Before reset'
     CONTEXT.reset()
     print 'After reset'
     CONTEXT.step(RUNTIME)
+    print 'Finished simulation of %g' % (RUNTIME)
+    loader.vmTable.dumpFile('Vm.plot')
 
 # 
 # glcellloader.py ends here

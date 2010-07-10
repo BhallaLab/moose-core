@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Feb  4 20:34:34 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Feb  5 18:01:32 2010 (+0530)
+# Last-Updated: Sat Jun 26 15:46:24 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 126
+#     Update #: 129
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -117,6 +117,8 @@ if __name__ == '__main__':
     print 'loaded morphology file'
     CONTEXT.setClock(0, SIMDT)
     CONTEXT.setClock(1, SIMDT)
+    CONTEXT.setClock(2, SIMDT)
+    CONTEXT.setClock(3, SIMDT)
     CONTEXT.setClock(4, GLDT)
     CONTEXT.useClock(4, '/#[TYPE=GLview]')
     print 'Before reset'
