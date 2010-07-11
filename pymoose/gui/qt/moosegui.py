@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Sun Jul 11 15:27:37 2010 (+0530)
+# Last-Updated: Sun Jul 11 16:55:46 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2155
+#     Update #: 2176
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -80,6 +80,8 @@ from moosehandler import MooseHandler
 from mooseplot import MoosePlot
 from plotconfig import PlotConfig
 from glwizard import MooseGLWizard
+from firsttime import FirstTimeWizard
+
 
 def makeClassList(parent=None, mode=MooseGlobals.MODE_ADVANCED):
     """Make a list of classes that can be used in current mode
@@ -364,6 +366,8 @@ class MainWindow(QtGui.QMainWindow):
         
         self.newPlotWindowAction = QtGui.QAction(self.tr('New Plot Window'), self)
         self.connect(self.newPlotWindowAction, QtCore.SIGNAL('triggered(bool)'), self.addPlotWindow)
+        self.firstTimeWizardAction = QtGui.QAction(self.tr('FirstTime Configuration WIzard'), self)
+        self.firstTimeWizardAction.triggered.connect(self.startFirstTimeWizard)
 
         # Actions to switch the command line between python and genesis mode.
         self.shellModeActionGroup = QtGui.QActionGroup(self)
@@ -436,6 +440,7 @@ class MainWindow(QtGui.QMainWindow):
         self.fileMenu.addAction(self.loadModelAction)
         self.shellModeMenu = self.fileMenu.addMenu(self.tr('Moose Shell mode'))
         self.shellModeMenu.addActions(self.shellModeActionGroup.actions())
+        self.fileMenu.addAction(self.firstTimeWizardAction)
         self.fileMenu.addAction(self.resetSettingsAction)
         self.fileMenu.addAction(self.quitAction)
 
@@ -834,6 +839,10 @@ class MainWindow(QtGui.QMainWindow):
                 self.plots[1].addTable(graph)
             self.plots[1].replot()
 
+    def startFirstTimeWizard(self):
+        firstTimeWizard = FirstTimeWizard(self)
+        firstTimeWizard.show()
+
     def doQuit(self):
         self.mooseHandler.stopGL()
         QtGui.qApp.closeAllWindows()
@@ -841,6 +850,10 @@ class MainWindow(QtGui.QMainWindow):
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     QtCore.QObject.connect(app, QtCore.SIGNAL('lastWindowClosed()'), app, QtCore.SLOT('quit()'))
+    if not config.get_settings().contains(config.KEY_FIRSTTIME):
+        firstTimeWizard = FirstTimeWizard()
+        firstTimeWizard.setModal(QtCore.Qt.ApplicationModal)
+        firstTimeWizard.show()
     mainWin = MainWindow()
     mainWin.show()
     app.exec_()
