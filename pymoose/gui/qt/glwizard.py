@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Jul  9 21:23:39 2010 (+0530)
 # Version: 
-# Last-Updated: Sun Jul 11 13:44:46 2010 (+0530)
+# Last-Updated: Sun Jul 11 17:44:19 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 739
+#     Update #: 742
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -99,7 +99,7 @@ class MooseGLWizard(QtGui.QWizard):
         if not os.access(self._glClientExe, os.X_OK):
             self._glClientExe = QtGui.QFileDialog.getOpenFileName(self, 'Select GLClient Executable')
         if not os.access(self._glClientExe, os.X_OK):
-            QtGui.QMessageBox.critical(self, 'Please select the correct glclient executable. Make sure you have execution permission on the file.')
+            QtGui.QMessageBox.critical(self, 'No execute permission', 'Please select the correct glclient executable. Make sure you have execution permission on the file.')
         else:
             self._settings.setValue(config.KEY_GL_CLIENT_EXECUTABLE, self._glClientExe)
     
@@ -267,7 +267,7 @@ class MooseGLWizard(QtGui.QWizard):
         layout = QtGui.QGridLayout()
         currentRow = 0        
         layout.addWidget(wildCardLabel, currentRow, 0)
-        layout.addWidget(wildCardLineEdit, currentRow, 1)
+        layout.addWidget(wildCardLineEdit, currentRow, 1, 1, 3)
         currentRow += 1
         layout.addWidget(QtGui.QLabel('Enter Fields to Observe'), currentRow, 0, 1, 2)
         currentRow += 1
