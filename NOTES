@@ -6746,4 +6746,7 @@ but will have to defer.  Checkin 2013.
 
 Fixed a minor leak in Stoich, commented out MathFunc test. Valgrind now
 clean. This also means that the problem with the model above is not 
-memory-leak related.
+memory-leak related. Checkin 2014.
+
+Tracked problem down to Stoich.cpp. I had used the wrong offset for 
+updating the FuncMols. Now works with pkc model.

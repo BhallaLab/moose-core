@@ -379,7 +379,7 @@ void Stoich::updateRates( vector< double>* yprime, double dt  )
 void Stoich::updateFuncs( double t )
 {
 	vector< FuncTerm* >::const_iterator i;
-	vector< double >::iterator j = S_.begin() + numVarMols_;
+	vector< double >::iterator j = S_.begin() + numVarMols_ + numBufMols_;
 
 	for ( i = funcs_.begin(); i != funcs_.end(); i++)
 	{
