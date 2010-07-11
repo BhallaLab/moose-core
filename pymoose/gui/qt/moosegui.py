@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Jul  9 21:23:30 2010 (+0530)
+# Last-Updated: Sun Jul 11 12:10:55 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2062
+#     Update #: 2096
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -77,6 +77,7 @@ from mooseshell import MooseShell
 from moosehandler import MooseHandler
 from mooseplot import MoosePlot
 from plotconfig import PlotConfig
+from glwizard import MooseGLWizard
 
 def makeClassList(parent=None, mode=MooseGlobals.MODE_ADVANCED):
     """Make a list of classes that can be used in current mode
@@ -314,6 +315,7 @@ class MainWindow(QtGui.QMainWindow):
             return
         
     def createActions(self):
+        # Actions for view menu
         # The following actions are to toggle visibility of various widgets
         self.glClientAction = self.glClientDock.toggleViewAction()
         self.glClientAction.setChecked(False)
@@ -369,7 +371,13 @@ class MainWindow(QtGui.QMainWindow):
         # Quit action
         self.quitAction = QtGui.QAction(self.tr('&Quit'), self)
         self.quitAction.setShortcut(QtGui.QKeySequence(self.tr('Ctrl+Q')))
-        self.connect(self.quitAction, QtCore.SIGNAL('triggered()'), QtGui.qApp, QtCore.SLOT('closeAllWindows()'))
+        self.connect(self.quitAction, QtCore.SIGNAL('triggered()'), self.doQuit)
+
+        # Actions for 3D visualization
+        self.startGLWizardAction = QtGui.QAction(self.tr('Start GL&Wizard'), self)
+        self.connect(self.startGLWizardAction, QtCore.SIGNAL('triggered()'), self.startGLWizard)
+        self.stopGLAction = QtGui.QAction(self.tr('Stop G&L Visualization'), self)
+        self.connect(self.stopGLAction, QtCore.SIGNAL('triggered()'), self.mooseHandler.stopGL)
 
         # Help menu actions
         self.aboutMooseAction = QtGui.QAction(self.tr('&About'), self)
@@ -427,12 +435,16 @@ class MainWindow(QtGui.QMainWindow):
         self.runMenu.addAction(self.runAction)
 
 
-        self.editModelMenu = QtGui.QMenu(self.tr('&Model'), self)
+        self.editModelMenu = QtGui.QMenu(self.tr('&Edit Model'), self)
         self.editModelMenu.addAction(self.connectionDialogAction)
 
         self.plotMenu = QtGui.QMenu(self.tr('&Plot Settings'), self)
         self.plotMenu.addAction(self.configurePlotAction)
 
+        self.glMenu = QtGui.QMenu(self.tr('Open&GL'), self)
+        self.glMenu.addAction(self.startGLWizardAction)
+        self.glMenu.addAction(self.stopGLAction)
+                                  
         self.helpMenu = QtGui.QMenu('&Help', self)
         self.helpMenu.addAction(self.showDocAction)
         self.helpMenu.addAction(self.contextHelpAction)
@@ -444,6 +456,7 @@ class MainWindow(QtGui.QMainWindow):
         self.menuBar().addMenu(self.editModelMenu)
         self.menuBar().addMenu(self.runMenu)
         self.menuBar().addMenu(self.plotMenu)
+        self.menuBar().addMenu(self.glMenu)
         self.menuBar().addMenu(self.helpMenu)
 
     def createConnectionMenu(self, clickpoint):
@@ -777,6 +790,14 @@ class MainWindow(QtGui.QMainWindow):
     def setCurrentPlotWindow(self, subWindow):
         if subWindow:
             self.currentPlotWindow = subWindow.widget()
+
+    def startGLWizard(self):
+        self.glWizard = MooseGLWizard(self, self.mooseHandler)
+        self.glWizard.setVisible(True)
+
+    def doQuit(self):
+        self.mooseHandler.stopGL()
+        QtGui.qApp.closeAllWindows()
         
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
