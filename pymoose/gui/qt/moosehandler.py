@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Sun Jul 11 13:31:56 2010 (+0530)
+# Last-Updated: Sun Jul 11 15:11:35 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 698
+#     Update #: 708
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -504,8 +504,18 @@ class MooseHandler(QtCore.QObject):
         for port, client in self._portClientMap.items():
             client.stop()
         
-    
-            
+    def getKKitGraphs(self):
+        tableList = []
+        for table in moose.Neutral('/graphs').children():
+            tableList.append(table)
+        return tableList
+
+    def getKKitMoreGraphs(self):
+        tableList = []
+        for table in moose.Neutral('/moregraphs').children():
+            tableList.append(table)
+        return tableList
+        
         
 
     
