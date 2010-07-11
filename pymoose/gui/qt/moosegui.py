@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Sun Jul 11 16:55:46 2010 (+0530)
+# Last-Updated: Sun Jul 11 18:14:09 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2176
+#     Update #: 2220
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -122,8 +122,6 @@ class MainWindow(QtGui.QMainWindow):
         self.setDockOptions(self.AllowNestedDocks | self.AllowTabbedDocks | self.ForceTabbedDocks | self.AnimatedDocks)        
         # The following are for holding transient selections from
         # connection dialog
-        self._sourceSelectMode = False
-        self._destSelectMode = False
         self._srcElement = None
         self._destElement = None
         self._srcField = None
@@ -186,12 +184,10 @@ class MainWindow(QtGui.QMainWindow):
         self.connectionDialog.setWindowTitle(self.tr('Create Connection'))
         self.connectionDialog.setModal(False)
 
-        self.sourceButton = QtGui.QToolButton(self.connectionDialog)
-        self.sourceButton.setDefaultAction(self.setSourceSelectModeAction)
-
-        self.destButton = QtGui.QToolButton(self.connectionDialog)
-        self.destButton.setDefaultAction(self.setDestSelectModeAction)
-
+        self.sourceTree = MooseTreeWidget(self.connectionDialog)
+        self.destTree = MooseTreeWidget(self.connectionDialog)
+        self.sourceTree.itemClicked.connect(self.selectConnSource)
+        self.destTree.itemClicked.connect(self.selectConnDest)
         sourceFieldLabel = QtGui.QLabel(self.tr('Source Field'), self.connectionDialog)
         self.sourceFieldComboBox = QtGui.QComboBox(self.connectionDialog)
         
@@ -210,35 +206,25 @@ class MainWindow(QtGui.QMainWindow):
         self.connectionDialog.rejected.connect(self.cancelConnection)
 
         layout = QtGui.QGridLayout()
-        layout.addWidget(self.sourceButton, 0, 0)
-        layout.addWidget(self.sourceObjText, 1, 0)
-        layout.addWidget(sourceFieldLabel, 0, 1)
-        layout.addWidget(self.sourceFieldComboBox, 1, 1)
+        layout.addWidget(self.sourceTree, 0, 0, 5, 2)
+        layout.addWidget(self.sourceObjText, 6, 0)
+        layout.addWidget(sourceFieldLabel, 6, 1)
+        layout.addWidget(self.sourceFieldComboBox, 6, 2)
         sep = QtGui.QFrame(self.connectionDialog)
         sep.setFrameStyle(QtGui.QFrame.VLine | QtGui.QFrame.Sunken)
-        layout.addWidget(sep, 0, 2, -1, 1)
-        layout.addWidget(self.destButton, 0, 3)
-        layout.addWidget(self.destObjText, 1, 3)
-        layout.addWidget(destFieldLabel, 0, 4)
-        layout.addWidget(self.destFieldComboBox, 1, 4)
+        layout.addWidget(sep, 0, 3, -1, 1)
+        layout.addWidget(self.destTree, 0, 4, 5, 2)
+        layout.addWidget(self.destObjText, 6, 4)
+        layout.addWidget(destFieldLabel, 6, 5)
+        layout.addWidget(self.destFieldComboBox, 6, 6)
         
-        layout.addWidget(cancelButton, 2, 0)
-        layout.addWidget(okButton, 2, 1)
+        layout.addWidget(cancelButton, 8, 0)
+        layout.addWidget(okButton, 8, 4)
 
         self.connectionDialog.setLayout(layout)
         self.connectionDialog.show()
 
-    def setSourceSelectMode(self, on):
-        self._sourceSelectMode = on
-        self._destSelectMode = not on
-
-    def setDestSelectMode(self, on):
-        self._destSelectMode = on
-        self._sourceSelectMode = not on
-
     def cancelConnection(self):
-        self._destSelectMode = False
-        self._sourceSelectMode = False
         self._connSrcObject = None
         self._connDestObject = None
 
@@ -355,10 +341,6 @@ class MainWindow(QtGui.QMainWindow):
         
         # Action to create connections
         self.connectionDialogAction = QtGui.QAction(self.tr('&Connect elements'), self, triggered=self.makeConnectionPopup)
-        self.connectionActionGroup = QtGui.QActionGroup(self)
-        self.setSourceSelectModeAction = QtGui.QAction(self.tr('&Source element'), self.connectionActionGroup, checkable=True, triggered=self.setSourceSelectMode)        
-        self.setDestSelectModeAction =  QtGui.QAction(self.tr('&Target element'), self.connectionActionGroup, checkable=True, triggered=self.setDestSelectMode)
-        self.connectionActionGroup.setExclusive(True)
 
         # Actions for file menu
         self.loadModelAction = QtGui.QAction(self.tr('Load Model'), self)
@@ -676,14 +658,7 @@ class MainWindow(QtGui.QMainWindow):
         """Set the current object of the mooseHandler"""
         current_element = item.getMooseObject()
         self.mooseHandler._current_element = current_element
-        if self._sourceSelectMode:
-            self._srcElement = current_element
-            self.sourceObjText.setText(current_element.path)
-            self.sourceFieldComboBox.addItems(self.mooseHandler.getSrcFields(self._srcElement))
-        elif self._destSelectMode:
-            self._destElement = current_element
-            self.destObjText.setText(current_element.path)
-            self.destFieldComboBox.addItems(self.mooseHandler.getDestFields(self._destElement))
+
 
     def resetSlot(self):
         """Get the dt-s from the UI and call the reset method in
@@ -846,7 +821,15 @@ class MainWindow(QtGui.QMainWindow):
     def doQuit(self):
         self.mooseHandler.stopGL()
         QtGui.qApp.closeAllWindows()
-        
+
+    def selectConnSource(self, item, column):
+        self._srcElement = item.getMooseObject()
+        self.sourceObjText.setText(self._srcElement.path)
+        self.sourceFieldComboBox.addItems(self.mooseHandler.getSrcFields(self._srcElement))
+    def selectConnDest(self, item, column):
+        self._destElement = item.getMooseObject()
+        self.destObjText.setText(self._destElement.path)
+        self.destFieldComboBox.addItems(self.mooseHandler.getDestFields(self._destElement))
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     QtCore.QObject.connect(app, QtCore.SIGNAL('lastWindowClosed()'), app, QtCore.SLOT('quit()'))
