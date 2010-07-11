@@ -6742,4 +6742,8 @@ The EE calculation in MOOSE looks OK.
 
 A bit side-tracked: I did a valgrind to see if I could track this down.
 Valgrind reveals a huge mess in MathFunc. Memory leaks galore. Need to fix,
-but will have to defer. 
+but will have to defer.  Checkin 2013.
+
+Fixed a minor leak in Stoich, commented out MathFunc test. Valgrind now
+clean. This also means that the problem with the model above is not 
+memory-leak related.

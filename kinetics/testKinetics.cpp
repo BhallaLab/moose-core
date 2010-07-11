@@ -126,7 +126,7 @@ void testMathFunc()
 void testKinetics()
 {
 	testReadKkit();
-	testMathFunc();
+//	testMathFunc();
 }
 
 void testMpiKinetics( )

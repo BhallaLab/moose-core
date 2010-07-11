@@ -120,6 +120,10 @@ Stoich::~Stoich()
 	for ( vector< RateTerm* >::iterator i = rates_.begin();
 		i != rates_.end(); ++i )
 		delete *i;
+
+	for ( vector< FuncTerm* >::iterator i = funcs_.begin();
+		i != funcs_.end(); ++i )
+		delete *i;
 }
 
 //////////////////////////////////////////////////////////////
