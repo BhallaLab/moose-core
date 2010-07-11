@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Feb 13 16:07:56 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jul  7 14:34:42 2010 (+0530)
+# Last-Updated: Sun Jul 11 15:43:47 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 104
+#     Update #: 110
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -60,6 +60,7 @@ from PyQt4 import QtGui, QtCore
 
 settings = None
 
+KEY_FIRSTTIME = 'firsttime'
 # KEY_STATE_FILE = 'statefile'
 KEY_GL_COLORMAP = 'glclient/colormap'
 KEY_GL_PORT = 'glclient/port'
@@ -67,6 +68,8 @@ KEY_GL_CLIENT_EXECUTABLE = 'glclient/executable'
 
 KEY_WINDOW_GEOMETRY = 'main/geometry'
 KEY_WINDOW_LAYOUT = 'main/layout'
+KEY_RUNTIME_AUTOHIDE = 'main/rtautohide'
+KEY_DEMOS_DIR = 'main/demosdir'
 
 def get_settings():
     '''Initializes the QSettings for the application and returns it.'''
