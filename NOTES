@@ -6715,3 +6715,31 @@ Completed compilation, solver now sees it and seems to work. Checkin 1999.
 Tried with the bigger production model. ReadKkit still fails.
 
 Fixed ReadKkit, but the simulation resuts for dend_v26.g model are wrong.
+Checkin 2000.
+Looks like PKC-active has something funny going on. It is the target of
+the sumtoal. It is flat in the new MOOSE but rises steeply with the old one.
+
+============================================================================
+11 July
+The GSL version fails on the PKC model from DOQCS, acc48.g...
+
+		Genesis		GSL
+PKC-active	0.0719806	0
+PKC-cytosolic	0.825743	0.878
+PKC-basal*	0.0165155	0.0176
+PKC-Ca-memb*	0.0286744	0.0305
+PKC-Ca-AA*	0.00385561	0.00415
+PKC-DAG-memb*	0.00624439	3e-5
+PKC-AA*		0.00432258	0.0046
+PKC-DAG-AA*	0.0123681	6e-5
+Ca		0.08		0.08
+DAG		11		0.0569
+AA		5		5
+
+So, DAG is doing something odd.
+The EE calculation in MOOSE looks OK.
+
+
+A bit side-tracked: I did a valgrind to see if I could track this down.
+Valgrind reveals a huge mess in MathFunc. Memory leaks galore. Need to fix,
+but will have to defer. 

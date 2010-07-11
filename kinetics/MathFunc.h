@@ -42,7 +42,7 @@ class MathFunc {
     double getResult();
     void processFunc ( const Eref& e, ProcPtr info);
     void reinitFunc( const Eref& e, ProcPtr info );
-    void argFunc( double d );
+//     void argFunc( double d );
     void arg1Func( double d );
     void arg2Func( double d );
     void arg3Func( double d );

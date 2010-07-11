@@ -68,10 +68,12 @@ const Cinfo* MathFunc::initCinfo()
 			new ProcOpFunc< MathFunc >( &MathFunc::reinitFunc )
 		);
 	
+		/*
 		static DestFinfo args( "args",
 			"Handle args one at a time", 
 			new OpFunc1< MathFunc, double >( &MathFunc::argFunc )
 		);
+		*/
 	
 		static DestFinfo arg1( "arg1",
 			"Handle arg1",
@@ -108,7 +110,7 @@ const Cinfo* MathFunc::initCinfo()
 		&func,		// Value
 		&result,	// Value
 		&output,	// SrcFinfo
-		&args, 		// DestFinfo
+//		&args, 		// DestFinfo
 		&arg1, 		// DestFinfo
 		&arg2, 		// DestFinfo
 		&arg3, 		// DestFinfo
@@ -250,17 +252,23 @@ void MathFunc::reinitFunc( const Eref& e, ProcPtr info )
 // Other DestFinfo definitions
 //////////////////////////////////////////////////////////////////
 
+/*
 void MathFunc::argFunc( double d )
 {
-  v.push_back(&d); // Ugh. There is vector < double* > v_, and v both.
+  // v.push_back(&d); // Ugh. There is vector < double* > v_, and v both.
+  	// Ugh. Why is he storing a pointer to a temporary?
 }
+*/
 
 void MathFunc::arg1Func( double d )
 {
 	double *d1 = new double;
 	*d1 = d;
+	v.resize( 1 );
+	/*
 	while ( v.size() != 2)  // surely this should be 1?
 		v.push_back( &d ); // Upi Sez: I'm dubious about this.
+	*/
 	v[0] = d1;
 }
 

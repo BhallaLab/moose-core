@@ -274,6 +274,7 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 	static const Cinfo* enzCinfo = Enz::initCinfo();
 	static const Cinfo* mmEnzCinfo = MMenz::initCinfo();
 	// static const Cinfo* sumFuncCinfo = SumFunc::initCinfo();
+	// The FuncMol handles zombification of stuff coming in to it.
 
 	for ( vector< Id >::const_iterator i = elist.begin(); i != elist.end(); ++i ){
 		Element* ei = (*i)();
