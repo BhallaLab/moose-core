@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Sun Jul 11 01:30:17 2010 (+0530)
+# Last-Updated: Sun Jul 11 13:31:56 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 560
+#     Update #: 698
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -48,7 +48,7 @@
 import os
 import sys
 import random
-
+from collections import defaultdict
 import re
 import xml.sax as sax
 import xml.sax.handler as saxhandler
@@ -58,6 +58,8 @@ import xml.sax.saxutils as saxutils
 from PyQt4 import QtCore
 import moose
 import config
+from glclient import GLClient
+
 
 class MooseXMLHandler(saxhandler.ContentHandler):
     def __init__(self):
@@ -123,7 +125,12 @@ class MooseHandler(QtCore.QObject):
         self._connDestObj = None
         self._connSrcMsg = None
         self._connDestMsg = None
-        
+        # The follwoing maps for managing 3D visualization objects
+        self._portClientMap = {}
+        self._portPathMap = {}
+        self._pathPortMap = defaultdict(set)
+        self._portServerMap = {}
+
     def runGenesisCommand(self, cmd):
 	"""Runs a GENESIS command and returns the output string"""
 	self._context.runG(cmd)
@@ -360,24 +367,31 @@ class MooseHandler(QtCore.QObject):
         it may slowdown the simulation.
         
         """
-        glCellPath = 'gl_' + mooseObjPath.replace('/', '_')
-        glCell = moose.GLcell(glCellPath)
+        glCellPath = mooseObjPath.replace('/', '_')  + str(random.randint(0,999))
+        glCell = moose.GLcell(glCellPath, self._gl)
+        glCell.useClock(4)
         glCell.vizpath = mooseObjPath
-        glCell.clientPort = port
+        glCell.port = port
+        self._portPathMap[port] = mooseObjPath
+        self._pathPortMap[mooseObjPath].add(port)        
+        self._portServerMap[port] = glCell
+
         if field is not None:
-            glCell.attributeName = field
+            glCell.attribute = field
         if threshold is not None:
-            glCell.changeThreshold = threshold
+            glCell.threhold = threshold
         if highValue is not None:
-            glCell.highValue = highValue
+            glCell.highvalue = highValue
         if lowValue is not None:
-            glCell.lowValue = lowValue
+            glCell.lowvalue = lowValue
         if vscale is not None:
-            glCell.VScale = vscale
+            glCell.vscale = vscale
         if bgColor is not None:
-            glCell.bgColor = bgColor
+            glCell.bgcolor = bgColor
         if sync is not None:
-            glCell.syncMode = sync
+            glCell.sync = sync
+        print 'Created GLCiew for object', mooseObjPath, ' on port', port
+
         
     def makeGLView(self, mooseObjPath, port, fieldList, minValueList, maxValueList, colorFieldIndex, morphFieldIndex=None, grid=None, bgColor=None, sync=None):
         """
@@ -410,8 +424,12 @@ class MooseHandler(QtCore.QObject):
         sync -- synchronize simulation with visualization.
 
         """
-        glViewPath = 'gl_' + mooseObjPath.replace('/', '_')
-        glView = moose.GLview(glViewPath)
+        glViewPath = mooseObjPath.replace('/', '_') + str(random.randint(0,999))
+        glView = moose.GLview(glViewPath, self._gl)
+        glView.useClock(4)
+        self._portPathMap[port] = mooseObjPath
+        self._pathPortMap[mooseObjPath].add(port)        
+        self._portServerMap[port] = glView
         glView.vizpath = mooseObjPath
         glView.clientPort = port
         if len(fieldList) > 5:
@@ -421,23 +439,76 @@ class MooseHandler(QtCore.QObject):
             visField = 'value%dField' % (ii+1)
             setattr(glView, visField, fieldList[ii])
             try:
-                setattr(glView, 'value%dMin' % (ii+1), minValueList[ii])
-                setattr(glView, 'value%dMax' % (ii+1), maxValueList[ii])
+                setattr(glView, 'value%dmin' % (ii+1), minValueList[ii])
+                setattr(glView, 'value%dmax' % (ii+1), maxValueList[ii])
             except IndexError:
                 break
-        glCell.colorVal = int(colorFieldIndex)
+        glView.color_val = int(colorFieldIndex)
         if morphFieldIndex is not None:
-            glView.morphVal = int(morphFieldIndex)
+            glView.morph_val = int(morphFieldIndex)
         if grid and (grid != 'off'):
-            glView.gridMode = 'on'
+            glView.grid = 'on'
 
         if bgColor is not None:
-            glView.bgColor = bgColor
+            glView.bgcolor = bgColor
 
         if sync and (sync != 'off'):
-            glView.syncMode = 'on'
+            glView.sync = 'on'
 
+        print 'Created GLView', glView.path, 'for object', mooseObjPath, ' on port', port
+
+
+    def startGLClient(self, executable, port, mode, colormap):
+        """Start the glclient subprocess. 
+
+        executable -- path to the client program.
+
+        port -- network port used to communicate with the server.
+
+        mode -- The kind of moose GL-element to interact with (glcell or
+        glview)
         
+        colormap -- path to colormap file for 3D rendering.
+        
+        """
+        client = GLClient(executable, port, mode, colormap)
+        self._portClientMap[port] = client
+        print 'Created GLclient on port', port
+        return client
+        
+
+    def stopGLClientOnPort(self, port):
+        """Stop the glclient process listening to the specified
+        port."""
+        try:
+            client = self._portClientMap.pop(port)
+            client.stop()
+        except KeyError:
+            config.LOGGER.error('%s: port not used by any client' % (port))
+
+    def stopGLClientsOnObject(self, mooseObject):
+        """Stop the glclient processes listening to glcell/glview
+        objects on the specified moose object."""
+        path = mooseObject.path
+        try:
+            portSet = self._pathPortMap.pop(path)
+            for port in portSet:
+                self.stopGLClientOnPort(port)
+        except KeyError:
+            config.LOGGER.error('%s: no 3D visualization clients for this object.' % (path))
+
+    def stopGL(self):
+        """Make the dt of the clock on GLview and GLcell objects very
+        large. Kill all the GLClient processes"""
+        self._context.setClock(4, 1e10)
+        for port, client in self._portClientMap.items():
+            client.stop()
+        
+    
+            
+        
+
+    
     
 # 
 # moosehandler.py ends here

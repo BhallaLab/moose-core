@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Jul  9 21:23:39 2010 (+0530)
 # Version: 
-# Last-Updated: Sun Jul 11 01:31:40 2010 (+0530)
+# Last-Updated: Sun Jul 11 13:44:46 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 690
+#     Update #: 739
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -49,6 +49,8 @@
 # Code:
 
 import os
+import time
+
 from PyQt4.Qt import Qt
 from PyQt4 import QtCore, QtGui
 
@@ -73,7 +75,7 @@ class MooseGLWizard(QtGui.QWizard):
         self._mooseHandler = mooseHandler
         self.initSettings()
         self._port = MooseGLWizard.currentPort
-        self._targetObject = None
+        self._targetObject = moose.Neutral('/')
         MooseGLWizard.currentPort += 1
         glclientPage = self._makeGLClientPage()
         self.setPage(MooseGLWizard.pageIdMap['glclient'], glclientPage)
@@ -196,17 +198,17 @@ class MooseGLWizard(QtGui.QWizard):
         page.setSubTitle('Expand the model tree and select an element to observe in 3-D')
         layout = QtGui.QGridLayout()
         tree = MooseTreeWidget()
-        tree.itemClicked.connect(self._populateFieldsCombo)
+        tree.itemClicked.connect(self._setTargetObject)
 
         fieldsLabel = QtGui.QLabel(self.tr('&Field to observe'))
-        fieldsCombo = QtGui.QComboBox()
-        fieldsLabel.setBuddy(fieldsCombo)
+        fieldsLineEdit = QtGui.QLineEdit('Vm')
+        fieldsLabel.setBuddy(fieldsLineEdit)
 
         frame = QtGui.QFrame()
         frame.setLayout(QtGui.QHBoxLayout())
         frame.setFrameStyle(QtGui.QFrame.Raised | QtGui.QFrame.StyledPanel)
         frame.layout().addWidget(fieldsLabel)
-        frame.layout().addWidget(fieldsCombo)
+        frame.layout().addWidget(fieldsLineEdit)
 
         thresholdLabel = QtGui.QLabel(self.tr('&Threshold'))
         thresholdLineEdit = QtGui.QLineEdit('1')
@@ -237,13 +239,13 @@ class MooseGLWizard(QtGui.QWizard):
         layout.addWidget(highValueLineEdit, 6, 5)
         
         page.setLayout(layout)
-        page.registerField('glcellfield', fieldsCombo, 'currentText')
-        page.registerField('threshold', thresholdLineEdit, 'text')
-        page.registerField('vscale', vscaleLineEdit, 'text')
+        page.registerField('glcellfield', fieldsLineEdit)
+        page.registerField('threshold', thresholdLineEdit)
+        page.registerField('vscale', vscaleLineEdit)
         page.registerField('highValue', highValueLineEdit)
         page.registerField('lowValue', lowValueLineEdit)
 
-        self._fieldsCombo = fieldsCombo
+        self._fieldsLineEdit = fieldsLineEdit
         return page
 
     def _makeGLViewPage(self):
@@ -263,13 +265,18 @@ class MooseGLWizard(QtGui.QWizard):
         
 
         layout = QtGui.QGridLayout()
-        layout.addWidget(QtGui.QLabel('Enter Fields to Observe'), 0, 0, 1, 2)
-        layout.addWidget(QtGui.QLabel('Field #'), 1, 0)
-        layout.addWidget(QtGui.QLabel('FieldName'), 1, 1)
-        layout.addWidget(QtGui.QLabel('Minimum Value'), 1, 2)
-        layout.addWidget(QtGui.QLabel('Maximum Value'), 1, 3)
-        currentRow = 2
+        currentRow = 0        
+        layout.addWidget(wildCardLabel, currentRow, 0)
+        layout.addWidget(wildCardLineEdit, currentRow, 1)
+        currentRow += 1
+        layout.addWidget(QtGui.QLabel('Enter Fields to Observe'), currentRow, 0, 1, 2)
+        currentRow += 1
+        layout.addWidget(QtGui.QLabel('Field #'), currentRow, 0)
+        layout.addWidget(QtGui.QLabel('FieldName'), currentRow, 1)
+        layout.addWidget(QtGui.QLabel('Minimum Value'), currentRow, 2)
+        layout.addWidget(QtGui.QLabel('Maximum Value'), currentRow, 3)
         valueFieldMap = {}
+        currentRow += 1
         for ii in range(5):
             valueLabel = QtGui.QLabel(self.tr('Field# %d' % (ii+1)))
             fieldNameEdit = QtGui.QLineEdit()
@@ -316,19 +323,6 @@ class MooseGLWizard(QtGui.QWizard):
         page.registerField('grid', gridButton)
         return page
 
-    def _populateFieldsCombo(self, item, column):
-        mooseObject = item.getMooseObject()
-        fields = []
-        for field in mooseObject.getFieldList(moose.FTYPE_VALUE):
-            try:
-                value = float(mooseObject.getField(field))
-                fields.append(field)
-            except ValueError:
-                pass
-        self._fieldsCombo.clear()
-        self._fieldsCombo.addItems(fields)
-        self._targetObject = mooseObject
-
     def _setTargetObject(self, item, column):
         self._targetObject = item.getMooseObject()
 
@@ -345,11 +339,12 @@ class MooseGLWizard(QtGui.QWizard):
         bgColor = bgColor[1:]
         sync = 'on' if self.field('syncButton').toBool() else 'off'
         glcellMode = self.field('glcellMode').toBool()
-        port = self.field('port').toString()
-        glclient = self.field('glclient').toString()
-        colormap = self.field('colormap').toString()
+        port = str(self.field('port').toString())
+        glclient = str(self.field('glclient').toString())
+        colormap = str(self.field('colormap').toString())
         print '%s\n%s\n%d\n%s\n%s\n%s' % (bgColor, sync, glcellMode, port, glclient, colormap)
-        # TODO make the client first
+        client = self._mooseHandler.startGLClient(glclient, port, 'c' if glcellMode else 'v', colormap)
+        time.sleep(3)
         if glcellMode:
             try:
                 threshold = self.field('threshold').toDouble()
@@ -368,15 +363,15 @@ class MooseGLWizard(QtGui.QWizard):
             except:
                 vscale = None
             
-            
+            field = str(self.field('glcellfield').toString())
                 
-            self._mooseHandler.makeGLCell(self._targetObject.path, self._port, self.field('glcellfield'), threshold, lowValue, highValue, vscale, bgColor, sync)
+            self._mooseHandler.makeGLCell(self._targetObject.path, port, field, threshold, lowValue, highValue, vscale, bgColor, sync)
         else:
             field = []
             valueMin = []
             valueMax = []
             for ii in range(5):
-                field.append(self.field('fieldName%d' % (ii+1)).toString())
+                field.append(str(self.field('fieldName%d' % (ii+1)).toString()))
                 valueMin.append(self.field('valueMin%d' % (ii+1)).toDouble())
                 valueMax.append(self.field('valueMax%d' % (ii+1)).toDouble())
             colorFieldIndex = self.field('colorField').toInt()
@@ -384,9 +379,11 @@ class MooseGLWizard(QtGui.QWizard):
             grid = 'on' if self.field('grid').toBool() else 'off'
             self._mooseHandler.makeGLView(self._targetObject.path, self._port, field, valueMin, valueMax, colorFieldIndex, morphFieldIndex, grid, bgColor, sync)
 
+# from glcellloader import GLCellLoader
 if __name__ == '__main__':
-    app = QtGui.QApplication([])
+    app = QtGui.QApplication([])    
     widget = MooseGLWizard()
+    # loader = GLCellLoader(
     widget.show()
     app.exec_()
     
