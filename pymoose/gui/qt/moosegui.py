@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Jul 12 16:33:30 2010 (+0530)
+# Last-Updated: Mon Jul 12 18:17:42 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2243
+#     Update #: 2251
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -833,6 +833,9 @@ class MainWindow(QtGui.QMainWindow):
         self.destFieldComboBox.addItems(self.mooseHandler.getDestFields(self._destElement))
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
+    icon = QtGui.QIcon('moose_icon.png')
+    app.setWindowIcon(icon)
+
     QtCore.QObject.connect(app, QtCore.SIGNAL('lastWindowClosed()'), app, QtCore.SLOT('quit()'))
     if not config.get_settings().contains(config.KEY_FIRSTTIME):
         firstTimeWizard = FirstTimeWizard()
