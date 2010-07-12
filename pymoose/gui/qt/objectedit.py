@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 30 11:18:34 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  8 21:26:57 2010 (+0530)
+# Last-Updated: Mon Jul 12 16:25:14 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 359
+#     Update #: 361
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -231,12 +231,12 @@ class ObjectEditDelegate(QtGui.QItemDelegate):
     def createEditor(self, parent, option, index):
         """Override createEditor from parent class to show custom
         combo box for the plot column."""
-        print 'Creating editor'
+        # print 'Creating editor'
         if index.column() == 2:
             combobox = QtGui.QComboBox(parent)
             combobox.addItems(index.model().plotNames)
             combobox.setEditable(False)
-            print 'create Combobox'
+            # print 'create Combobox'
             return combobox
         return QtGui.QItemDelegate.createEditor(self, parent, option, index)
 
