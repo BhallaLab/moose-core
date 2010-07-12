@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Feb 13 16:01:54 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  8 14:58:12 2010 (+0530)
+# Last-Updated: Mon Jul 12 16:30:43 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 240
+#     Update #: 244
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -148,23 +148,22 @@ class GLClientGUI(QtGui.QWidget):
         if not self.port:
             self.port = config.GL_PORT
             self.settings.setValue(config.KEY_GL_PORT, self.port)
-            config.LOGGER.info('new settings')
         print unicode(self.settings.value(config.KEY_GL_PORT).toString())
         self.colormap = unicode(self.settings.value(config.KEY_GL_COLORMAP).toString())
         if not self.colormap:
             self.colormap = config.GL_DEFAULT_COLORMAP
-        if not os.path.isfile(self.colormap):
-            config.LOGGER.error('Colormap file not found: %s' %( self.colormap))
-            self.colormap = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Select Colormap File'))
+        # if not os.path.isfile(self.colormap):
+        #     config.LOGGER.error('Colormap file not found: %s' %( self.colormap))
+        #     self.colormap = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Select Colormap File'))
         self.settings.setValue(config.KEY_GL_COLORMAP, self.colormap)
         self.executable = unicode(self.settings.value(config.KEY_GL_CLIENT_EXECUTABLE).toString()        )
         if not self.executable:
             self.executable = config.GL_CLIENT_EXECUTABLE
-        if not os.access(self.executable, os.X_OK):        
-            self.executable = QtGui.QFileDialog.getOpenFileName(self, 'Select GLClient Executable')
+        # if not os.access(self.executable, os.X_OK):        
+        #     self.executable = QtGui.QFileDialog.getOpenFileName(self, 'Select GLClient Executable')
         self.settings.setValue(config.KEY_GL_CLIENT_EXECUTABLE, self.executable)
-        if not os.access(self.executable, os.X_OK):        
-            QtGui.QMessageBox.critical(self, 'GLClient executable', 'Please select the correct glclient executable. Make sure you have execute permission on this file')
+        # if not os.access(self.executable, os.X_OK):        
+        #     QtGui.QMessageBox.critical(self, 'GLClient executable', 'Please select the correct glclient executable. Make sure you have execute permission on this file')
 
 
         
