@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Jul  9 21:23:39 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Jul 12 11:58:39 2010 (+0530)
+# Last-Updated: Mon Jul 12 16:28:32 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 772
+#     Update #: 774
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -90,19 +90,21 @@ class MooseGLWizard(QtGui.QWizard):
         
         if not self._colormap:
             self._colormap = config.GL_DEFAULT_COLORMAP
-        if not os.path.isfile(self._colormap):
-            self._colormap = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Select Colormap File'))
+        # if not os.path.isfile(self._colormap):
+        #     self._colormap = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Select Colormap File'))
         self._settings.setValue(config.KEY_GL_COLORMAP, self._colormap)
         self._glClientExe = unicode(self._settings.value(config.KEY_GL_CLIENT_EXECUTABLE).toString())
         if not self._glClientExe:
             self._glClientExe = config.GL_CLIENT_EXECUTABLE
-        if not os.access(self._glClientExe, os.X_OK):
-            self._glClientExe = QtGui.QFileDialog.getOpenFileName(self, 'Select GLClient Executable')
-        if not os.access(self._glClientExe, os.X_OK):
-            QtGui.QMessageBox.critical(self, 'No execute permission', 'Please select the correct glclient executable. Make sure you have execution permission on the file.')
-        else:
-            self._settings.setValue(config.KEY_GL_CLIENT_EXECUTABLE, self._glClientExe)
-    
+        # if not self._glClientExe:
+        #     self._glClientExe = config.GL_CLIENT_EXECUTABLE
+        # if not os.access(self._glClientExe, os.X_OK):
+        #     self._glClientExe = QtGui.QFileDialog.getOpenFileName(self, 'Select GLClient Executable')
+        # if not os.access(self._glClientExe, os.X_OK):
+        #     QtGui.QMessageBox.critical(self, 'No execute permission', 'Please select the correct glclient executable. Make sure you have execution permission on the file.')
+        # else:
+        #     self._settings.setValue(config.KEY_GL_CLIENT_EXECUTABLE, self._glClientExe)
+        self._settings.setValue(config.KEY_GL_CLIENT_EXECUTABLE, self._glClientExe)
                                      
     def _makeGLClientPage(self):
         page = QtGui.QWizardPage(self)
