@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Sun Jul 11 18:14:09 2010 (+0530)
+# Last-Updated: Mon Jul 12 16:33:30 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2220
+#     Update #: 2243
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -646,8 +646,10 @@ class MainWindow(QtGui.QMainWindow):
 	    fileType = self.mooseHandler.fileExtensionMap[str(fileFilter)]
 	    directory = fileDialog.directory() # Potential bug: if user types the whole file path, does it work? - no but gives error message
 	    for fileName in fileNames: 
-		if self.mooseHandler.loadModel(str(fileName), str(fileType)) == MooseHandler.type_kkit:
+                modeltype  = self.mooseHandler.loadModel(str(fileName), str(fileType))
+		if modeltype == MooseHandler.type_kkit:
                     self.populateKKitPlots()
+                print 'Loaded model',  fileName, 'of type', modeltype
             self.modelTreeWidget.recreateTree()
 
 
@@ -749,14 +751,12 @@ class MainWindow(QtGui.QMainWindow):
     def setConnSrc(self):
         sender = QtCore.QObject.sender()
         path = str(sender.data().toString())
-        print 'setConnSrc', path
         self.mooseHandler.setConnSrc(path)
         self.mooseHandler.doConnect()
 
     def setConnDest(self):
         sender = QtCore.QObject.sender()
         path = str(sender.data().toString())
-        print 'setConnDest', path
         self.mooseHandler.setConnDest(path)
         self.mooseHandler.doConnect()
 
@@ -765,7 +765,7 @@ class MainWindow(QtGui.QMainWindow):
         the plots."""
         self.plotConfig.setVisible(True)
         ret = self.plotConfig.exec_()
-        print ret, QtGui.QDialog.Accepted
+        # print ret, QtGui.QDialog.Accepted
         if ret == QtGui.QDialog.Accepted:
             pen = self.plotConfig.getPen()
             symbol = self.plotConfig.getSymbol()
@@ -773,21 +773,21 @@ class MainWindow(QtGui.QMainWindow):
             attribute = self.plotConfig.getAttribute()
             activePlot = self.currentPlotWindow            
             plotName = activePlot.windowTitle() # The window title is the plot name
-            print 'configurePlots', plotName 
+            # print 'configurePlots', plotName 
             for plot in self.plots:
                 if plot.objectName() == plotName:
                     plot.reconfigureSelectedCurves(pen, symbol, style, attribute)
                     break
 
     def createConnection(self):
-        print 'Creating connection'
         if (self._srcElement is None) or (self._destElement is None):
             return
         src = self._srcElement.path + '/' + str(self.sourceFieldComboBox.currentText())
         dest = self._destElement.path + '/' + str(self.destFieldComboBox.currentText())
         self.mooseHandler.setConnSrc(src)
         self.mooseHandler.setConnDest(dest)
-        self.mooseHandler.doConnect()
+        ret = self.mooseHandler.doConnect()
+        print 'Connecting %s to %s: %s' % (src, dest, 'success' if ret else 'failed')        
         self._srcElement = None
         self._destElement = None
         
@@ -805,6 +805,7 @@ class MainWindow(QtGui.QMainWindow):
         graphs = self.mooseHandler.getKKitGraphs()
         for graph in graphs:
             self.plots[0].addTable(graph)
+            config.LOGGER.info('Adding plot ' + graph.path)
         self.plots[0].replot()
         moregraphs =self.mooseHandler.getKKitMoreGraphs()
         if len(moregraphs) > 0:
