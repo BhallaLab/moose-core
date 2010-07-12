@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Feb  4 14:52:22 2010 (+0530)
 # Version: 
-# Last-Updated: Sun Feb 14 00:06:18 2010 (+0530)
+# Last-Updated: Mon Jul 12 16:24:49 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 140
+#     Update #: 141
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -91,7 +91,7 @@ class GLClient(object):
         self.running = False
 
 if __name__ == '__main__':
-    print 'sys.argv:', sys.argv
+    # print 'sys.argv:', sys.argv
     options,args = getopt(sys.argv[1:], 'p:c:m:d:a:')
     opt_dict = dict(options)
     client = GLClient()
