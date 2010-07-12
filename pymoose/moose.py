@@ -6051,51 +6051,51 @@ class SigNeur(PyMooseBase):
         return _moose.SigNeur_getType(*args)
 
     def __get_cellProto(*args):
-        """__get_cellProto(self) -> Id"""
+        """__get_cellProto(self) -> string"""
         return _moose.SigNeur___get_cellProto(*args)
 
     def __set_cellProto(*args):
-        """__set_cellProto(self, Id cellProto)"""
+        """__set_cellProto(self, string cellProto)"""
         return _moose.SigNeur___set_cellProto(*args)
 
     def __get_spineProto(*args):
-        """__get_spineProto(self) -> Id"""
+        """__get_spineProto(self) -> string"""
         return _moose.SigNeur___get_spineProto(*args)
 
     def __set_spineProto(*args):
-        """__set_spineProto(self, Id spineProto)"""
+        """__set_spineProto(self, string spineProto)"""
         return _moose.SigNeur___set_spineProto(*args)
 
     def __get_dendProto(*args):
-        """__get_dendProto(self) -> Id"""
+        """__get_dendProto(self) -> string"""
         return _moose.SigNeur___get_dendProto(*args)
 
     def __set_dendProto(*args):
-        """__set_dendProto(self, Id dendProto)"""
+        """__set_dendProto(self, string dendProto)"""
         return _moose.SigNeur___set_dendProto(*args)
 
     def __get_somaProto(*args):
-        """__get_somaProto(self) -> Id"""
+        """__get_somaProto(self) -> string"""
         return _moose.SigNeur___get_somaProto(*args)
 
     def __set_somaProto(*args):
-        """__set_somaProto(self, Id somaProto)"""
+        """__set_somaProto(self, string somaProto)"""
         return _moose.SigNeur___set_somaProto(*args)
 
     def __get_cell(*args):
-        """__get_cell(self) -> Id"""
+        """__get_cell(self) -> string"""
         return _moose.SigNeur___get_cell(*args)
 
     def __get_spine(*args):
-        """__get_spine(self) -> Id"""
+        """__get_spine(self) -> string"""
         return _moose.SigNeur___get_spine(*args)
 
     def __get_dend(*args):
-        """__get_dend(self) -> Id"""
+        """__get_dend(self) -> string"""
         return _moose.SigNeur___get_dend(*args)
 
     def __get_soma(*args):
-        """__get_soma(self) -> Id"""
+        """__get_soma(self) -> string"""
         return _moose.SigNeur___get_soma(*args)
 
     def __get_cellMethod(*args):
