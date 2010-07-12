@@ -14,69 +14,71 @@ SigNeur::SigNeur(const Id& src, std::string name, Id& parent):PyMooseBase(src, n
 SigNeur::SigNeur(const Id& src, std::string path):PyMooseBase(src, path){}
 SigNeur::~SigNeur(){}
 const std::string& SigNeur::getType(){ return className_; }
-Id& SigNeur::__get_cellProto() const
+
+string SigNeur::__get_cellProto() const
 {
     Id cellProto;
     get < Id > (id_(), "cellProto", cellProto);
-    return cellProto;
+    return cellProto.path();
 }
-void SigNeur::__set_cellProto( Id& cellProto )
+void SigNeur::__set_cellProto( string cellProto )
 {
-    set < Id > (id_(), "cellProto", cellProto);
+    set < Id > (id_(), "cellProto", Id(cellProto));
 }
-Id& SigNeur::__get_spineProto() const
+string SigNeur::__get_spineProto() const
 {
     Id spineProto;
     get < Id > (id_(), "spineProto",spineProto);
-    return spineProto;
+    return spineProto.path();
 }
-void SigNeur::__set_spineProto( Id& spineProto )
+void SigNeur::__set_spineProto( string spineProto )
 {
-    set < Id > (id_(), "spineProto", spineProto);
+    set < Id > (id_(), "spineProto", Id(spineProto));
 }
-Id& SigNeur::__get_dendProto() const
+string SigNeur::__get_dendProto() const
 {
     Id dendProto;
-    get < Id > (id_(), "dendProto",dendProto);
-    return dendProto;
+    get < Id > (id_(), "dendProto", dendProto);
+    return dendProto.path();
 }
-void SigNeur::__set_dendProto( Id& dendProto )
+void SigNeur::__set_dendProto( string dendProto )
 {
-    set < Id > (id_(), "dendProto", dendProto);
+    set < Id > (id_(), "dendProto", Id(dendProto));
 }
-Id& SigNeur::__get_somaProto() const
+string SigNeur::__get_somaProto() const
 {
     Id somaProto;
     get < Id > (id_(), "somaProto",somaProto);
-    return somaProto;
+    return somaProto.path();
 }
-void SigNeur::__set_somaProto( Id& somaProto )
+void SigNeur::__set_somaProto( string somaProto )
 {
-    set < Id > (id_(), "somaProto", somaProto);
+    Id id = Id(somaProto);
+    set < Id > (id_(), "somaProto", id);
 }
-Id& SigNeur::__get_cell() const
+string SigNeur::__get_cell() const
 {
     Id cell;
     get < Id > (id_(), "cell",cell);
-    return cell;
+    return cell.path();
 }
-Id& SigNeur::__get_spine() const
+string SigNeur::__get_spine() const
 {
     Id spine;
     get < Id > (id_(), "spine",spine);
-    return spine;
+    return spine.path();
 }
-Id& SigNeur::__get_dend() const
+string SigNeur::__get_dend() const
 {
     Id dend;
     get < Id > (id_(), "dend",dend);
-    return dend;
+    return dend.path();
 }
-Id& SigNeur::__get_soma() const
+string SigNeur::__get_soma() const
 {
     Id soma;
     get < Id > (id_(), "soma",soma);
-    return soma;
+    return soma.path();
 }
 string SigNeur::__get_cellMethod() const
 {
