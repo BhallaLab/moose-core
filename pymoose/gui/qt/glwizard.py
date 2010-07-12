@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Jul  9 21:23:39 2010 (+0530)
 # Version: 
-# Last-Updated: Sun Jul 11 17:44:19 2010 (+0530)
+# Last-Updated: Mon Jul 12 11:58:39 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 742
+#     Update #: 772
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -230,13 +230,13 @@ class MooseGLWizard(QtGui.QWizard):
         layout.addWidget(tree, 0, 0, 5, 5)
         layout.addWidget(frame, 4, 5, 1, 3)
         layout.addWidget(thresholdLabel, 5, 0)
-        layout.addWidget(thresholdLineEdit, 5, 1)
+        layout.addWidget(thresholdLineEdit, 5, 1, 1, 2)
         layout.addWidget(vscaleLabel, 5, 3)
-        layout.addWidget(vscaleLineEdit, 5, 4)
-        layout.addWidget(lowValueLabel, 6, 1)
-        layout.addWidget(lowValueLineEdit, 6, 2)
-        layout.addWidget(highValueLabel, 6, 4)
-        layout.addWidget(highValueLineEdit, 6, 5)
+        layout.addWidget(vscaleLineEdit, 5, 4, 1, 2)
+        layout.addWidget(lowValueLabel, 6, 0)
+        layout.addWidget(lowValueLineEdit, 6, 1, 1, 2)
+        layout.addWidget(highValueLabel, 6, 3)
+        layout.addWidget(highValueLineEdit, 6, 4, 1, 2)
         
         page.setLayout(layout)
         page.registerField('glcellfield', fieldsLineEdit)
@@ -335,7 +335,7 @@ class MooseGLWizard(QtGui.QWizard):
             self._bgColorButton.setText(color.name())
 
     def createGLSlot(self):
-        bgColor = self._bgColorButton.palette().color(QtGui.QPalette.Background).name()
+        bgColor = str(self._bgColorButton.palette().color(QtGui.QPalette.Background).name())
         bgColor = bgColor[1:]
         sync = 'on' if self.field('syncButton').toBool() else 'off'
         glcellMode = self.field('glcellMode').toBool()
@@ -346,25 +346,20 @@ class MooseGLWizard(QtGui.QWizard):
         client = self._mooseHandler.startGLClient(glclient, port, 'c' if glcellMode else 'v', colormap)
         time.sleep(3)
         if glcellMode:
-            try:
-                threshold = self.field('threshold').toDouble()
-            except ValueError:
-                threshold = None
-            try:
-                highValue = self.field('highValue').toDouble()
-            except ValueError:
-                highValue = None
-            try:
-                lowValue = self.field('lowValue').toDouble()
-            except ValueError:
-                lowValue = None
-            try:
-                vscale = self.field('vscale').toDouble()
-            except:
-                vscale = None
-            
             field = str(self.field('glcellfield').toString())
+            (threshold, ok) = self.field('threshold').toFloat()
+            if not ok:
+                threshold = None
                 
+            (highValue, ok) = self.field('highValue').toFloat()
+            if not ok:
+                highValue = None
+            (lowValue, ok) = self.field('lowValue').toFloat()
+            if not ok:
+                lowValue = None
+            (vscale, ok) = self.field('vscale').toFloat()
+            if not ok:
+                vscale = None                
             self._mooseHandler.makeGLCell(self._targetObject.path, port, field, threshold, lowValue, highValue, vscale, bgColor, sync)
         else:
             field = []
@@ -372,10 +367,20 @@ class MooseGLWizard(QtGui.QWizard):
             valueMax = []
             for ii in range(5):
                 field.append(str(self.field('fieldName%d' % (ii+1)).toString()))
-                valueMin.append(self.field('valueMin%d' % (ii+1)).toDouble())
-                valueMax.append(self.field('valueMax%d' % (ii+1)).toDouble())
-            colorFieldIndex = self.field('colorField').toInt()
-            morphFieldIndex = self.field('morphField').toInt()
+                (valueMin, ok) = self.field('valueMin%d' % (ii+1)).toFloat()
+                if not ok:
+                    valueMin = 0.0
+                valueMin.append(valueMin)
+                (valueMax, ok) = self.field('valueMax%d' % (ii+1)).toFloat() 
+                if not ok:
+                    valueMax = 1.0
+                valueMax.append(valueMax)
+            (colorFieldIndex, ok) = self.field('colorField').toInt()
+            if not ok:
+                colorFieldIndex = 1
+            (morphFieldIndex, ok) = self.field('morphField').toInt()
+            if not ok:
+                morphFieldIndex = 1
             grid = 'on' if self.field('grid').toBool() else 'off'
             self._mooseHandler.makeGLView(self._targetObject.path, self._port, field, valueMin, valueMax, colorFieldIndex, morphFieldIndex, grid, bgColor, sync)
 
