@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Jul 12 11:36:32 2010 (+0530)
+# Last-Updated: Mon Jul 12 16:23:43 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 719
+#     Update #: 773
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -162,33 +162,43 @@ class MooseHandler(QtCore.QObject):
         Returns MooseHandler.type_genesis otherwise.
         """
         filetype = MooseHandler.type_genesis
-        kkit_pattern = 'include *kkit'
+        kkit_pattern = re.compile('include\s+kkit')
         in_comment = False
         with open(filename, 'r') as infile:
-            sentence = ''
-            in_sentence = False
-            for line in infile:
+            while True:
+                sentence = ''
+                in_sentence = False
+                line = infile.readline()
+                if not line:
+                    break
                 line = line.strip()
+                # print '#', line
                 if line.find('//') == 0: # skip c++ style comments
+                    # print 'c++ comment'
                     continue
                 comment_start = line.find('/*')
                 if comment_start >= 0:
                     in_comment = True
-                sentence = line[:comment_start] 
+                    line = line[:comment_start] 
+                in_sentence = line.endswith('\\')
                 while in_comment and line:
                     comment_end = line.find('*/')
                     if comment_end >= 0:
                         in_comment = False
-                        sentence = sentence + line[comment_end+2:] # add the rest of the line to sentence
+                        sentence = line[comment_end+2:] # add the rest of the line to sentence
                     line = infile.readline()
                     line = line.strip()
-                if in_sentence:
-                    sentence = sentence + line.strip('\\')
-                else:
-                    sentence = ''
-                if line and line.endswith('\\'):
-                    in_sentence = True                    
-                if re.search(kkit_pattern, sentence):
+                while line and in_sentence:
+                    sentence += line[:-1]
+                    line = infile.readline()
+                    if line:                    
+                        line = line.strip()
+                        in_sentence = line.endswith('\\')
+                if line: 
+                    sentence += line
+                iskkit = re.search(kkit_pattern, sentence)
+                # print iskkit, sentence
+                if iskkit:
                     filetype = MooseHandler.type_kkit
                     break
         self._context.loadG(filename)
@@ -298,7 +308,7 @@ class MooseHandler(QtCore.QObject):
         ret = False
         if self._connSrcObj and self._connDestObj and self._connSrcMsg and self._connDestMsg:
             ret = self._connSrcObj.connect(self._connSrcMsg, self._connDestObj, self._connDestMsg)
-            print 'Connected %s/%s to %s/%s: ' % (self._connSrcObj.path, self._connSrcMsg, self._connDestObj.path, self._connDestMsg), ret
+            # print 'Connected %s/%s to %s/%s: ' % (self._connSrcObj.path, self._connSrcMsg, self._connDestObj.path, self._connDestMsg), ret
             self._connSrcObj = None
             self._connDestObj = None
             self._connSrcMsg = None
@@ -367,7 +377,7 @@ class MooseHandler(QtCore.QObject):
         it may slowdown the simulation.
         
         """
-        print 'Parameter types:', 'port:', type(port), 'field:', type(field), 'threshold:', type(threshold), 'highValue:', type(highValue), highValue, 'lowValue:', type(lowValue), 'vscale:', type(vscale), 'bgColor:', type(bgColor), 'sync:', type(sync)
+        # print 'Parameter types:', 'port:', type(port), 'field:', type(field), 'threshold:', type(threshold), 'highValue:', type(highValue), highValue, 'lowValue:', type(lowValue), 'vscale:', type(vscale), 'bgColor:', type(bgColor), 'sync:', type(sync)
         glCellPath = mooseObjPath.replace('/', '_')  + str(random.randint(0,999))
         glCell = moose.GLcell(glCellPath, self._gl)
         glCell.useClock(4)
@@ -509,14 +519,18 @@ class MooseHandler(QtCore.QObject):
         
     def getKKitGraphs(self):
         tableList = []
-        for table in moose.Neutral('/graphs').children():
-            tableList.append(table)
+        for container in moose.Neutral('/graphs').children():
+            for child in moose.Neutral(container).children():
+                if moose.Neutral(child).className == 'Table':
+                    tableList.append(moose.Table(child))
         return tableList
 
     def getKKitMoreGraphs(self):
         tableList = []
-        for table in moose.Neutral('/moregraphs').children():
-            tableList.append(table)
+        for container in moose.Neutral('/moregraphs').children():
+            for child in moose.Neutral(container).children():
+                if child.className == 'Table':
+                    tableList.append(moose.Table(child))
         return tableList
         
         
