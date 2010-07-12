@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Sun Jul 11 15:11:35 2010 (+0530)
+# Last-Updated: Mon Jul 12 11:36:32 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 708
+#     Update #: 719
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -367,6 +367,7 @@ class MooseHandler(QtCore.QObject):
         it may slowdown the simulation.
         
         """
+        print 'Parameter types:', 'port:', type(port), 'field:', type(field), 'threshold:', type(threshold), 'highValue:', type(highValue), highValue, 'lowValue:', type(lowValue), 'vscale:', type(vscale), 'bgColor:', type(bgColor), 'sync:', type(sync)
         glCellPath = mooseObjPath.replace('/', '_')  + str(random.randint(0,999))
         glCell = moose.GLcell(glCellPath, self._gl)
         glCell.useClock(4)
@@ -378,19 +379,19 @@ class MooseHandler(QtCore.QObject):
 
         if field is not None:
             glCell.attribute = field
-        if threshold is not None:
+        if threshold is not None and isinstance(threshold, float):
             glCell.threhold = threshold
-        if highValue is not None:
+        if highValue is not None and isinstance(highValue, float):
             glCell.highvalue = highValue
-        if lowValue is not None:
+        if lowValue is not None and isinstance(lowValue, float):
             glCell.lowvalue = lowValue
-        if vscale is not None:
+        if vscale is not None and isinstance(vscale, float):
             glCell.vscale = vscale
         if bgColor is not None:
             glCell.bgcolor = bgColor
         if sync is not None:
             glCell.sync = sync
-        print 'Created GLCiew for object', mooseObjPath, ' on port', port
+        print 'Created GLCell for object', mooseObjPath, ' on port', port
 
         
     def makeGLView(self, mooseObjPath, port, fieldList, minValueList, maxValueList, colorFieldIndex, morphFieldIndex=None, grid=None, bgColor=None, sync=None):
@@ -439,8 +440,10 @@ class MooseHandler(QtCore.QObject):
             visField = 'value%dField' % (ii+1)
             setattr(glView, visField, fieldList[ii])
             try:
-                setattr(glView, 'value%dmin' % (ii+1), minValueList[ii])
-                setattr(glView, 'value%dmax' % (ii+1), maxValueList[ii])
+                if isinstance(minValueList[ii], float):
+                    setattr(glView, 'value%dmin' % (ii+1), minValueList[ii])
+                if isinstance(maxValueList[ii], float):
+                    setattr(glView, 'value%dmax' % (ii+1), maxValueList[ii])
             except IndexError:
                 break
         glView.color_val = int(colorFieldIndex)
