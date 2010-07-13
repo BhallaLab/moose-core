@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sun Jul 11 15:31:00 2010 (+0530)
 # Version: 
-# Last-Updated: Sun Jul 11 16:38:57 2010 (+0530)
+# Last-Updated: Tue Jul 13 11:25:45 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 133
+#     Update #: 145
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -55,9 +55,15 @@ class FirstTimeWizard(QtGui.QWizard):
     for the first time."""
     def __init__(self, parent=None):
         QtGui.QWizard.__init__(self, parent)
-        self._pymooseDemosDir = '/usr/share/doc/moose1.3/DEMOS/pymoose'
-        self._glclientPath = '/usr/bin/glclient'
-        self._colormapPath = '/usr/share/moose1.3/colormaps/rainbow2'
+        self._pymooseDemosDir = str(config.get_settings().value(config.KEY_DEMOS_DIR).toString())
+        if not self._pymooseDemosDir:
+            self._pymooseDemosDir = '/usr/share/doc/moose1.3/DEMOS/pymoose'
+        self._glclientPath = str(config.get_settings().value(config.KEY_GL_CLIENT_EXECUTABLE).toString())
+        if not self._glclientPath:
+            self._glclientPath = '/usr/bin/glclient'
+        self._colormapPath = str(config.get_settings().value(config.KEY_GL_COLORMAP).toString())
+        if not self._colormapPath:
+            self._colormapPath = '/usr/share/moose1.3/colormaps/rainbow2'
         self.addPage(self._createIntroPage())
         self.addPage(self._createDemosPage())
         self.addPage(self._createGLClientPage())
@@ -134,7 +140,7 @@ class FirstTimeWizard(QtGui.QWizard):
         return page 
 
     def _locateDemosDir(self):
-        self._pymooseDemosDir = unicode(QtGui.QFileDialog.getOpenFileName(self, 'PyMOOSE Demos Directory'))
+        self._pymooseDemosDir = unicode(QtGui.QFileDialog.getExistingDirectory(self, 'PyMOOSE Demos Directory'))
         self._demosDirLine.setText(self._pymooseDemosDir)
 
     def _locateGLClient(self):
@@ -150,7 +156,9 @@ class FirstTimeWizard(QtGui.QWizard):
         config.get_settings().setValue(config.KEY_GL_CLIENT_EXECUTABLE, self.field('glclient'))
         config.get_settings().setValue(config.KEY_DEMOS_DIR, self.field('demosdir'))
         config.get_settings().setValue(config.KEY_GL_COLORMAP, self.field('colormap'))
-        
+        print config.get_settings().value(config.KEY_DEMOS_DIR).toString()
+        print config.get_settings().value(config.KEY_GL_CLIENT_EXECUTABLE).toString()
+        print config.get_settings().value(config.KEY_GL_COLORMAP).toString()
         
         
         
