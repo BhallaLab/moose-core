@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Jul 13 10:53:09 2010 (+0530)
+# Last-Updated: Tue Jul 13 10:56:08 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2253
+#     Update #: 2254
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -46,6 +46,7 @@
 
 # Code:
 
+import os
 import sys
 import code
 import subprocess
