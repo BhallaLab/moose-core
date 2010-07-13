@@ -163,6 +163,7 @@ void Table::reinit( const Eref& e, ProcPtr p )
 	vec_.resize( 0 );
 	outputIndex_ = 0;
 	lastTime_ = 0;
+	requestData.send( e, p, recvDataBuf.getFid() );
 }
 
 void Table::input( double v )

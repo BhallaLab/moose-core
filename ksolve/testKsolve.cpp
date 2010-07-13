@@ -58,7 +58,8 @@ void testGslIntegrator()
 	assert( ret );
 
 	Id gsl = s->doCreate( "GslIntegrator", base, "gsl", dims );
-	MsgId mid = s->doAddMsg( "Single", 
+// 	MsgId mid = 
+	s->doAddMsg( "Single", 
 		FullId( stoich, 0 ), "plugin", 
 		FullId( gsl, 0 ), "stoich" );
 
@@ -85,6 +86,7 @@ void testGslIntegrator()
 	string  plotpath = rk.getBasePath() + "/graphs/##[TYPE=Table],/moregraphs/##[TYPE=Table]";
 	s->doUseClock( gslpath, "process", 0 );
 	s->doUseClock( plotpath, "process", 2 );
+	s->doReinit();
 	s->doStart( rk.getMaxTime() );
 
 			/*

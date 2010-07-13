@@ -6809,6 +6809,6 @@ Reduced problem to just one enzyme, in AConly.g
 Tracked it down. Unexpected: it was bad comment handling in ReadKkit.cpp,
 which was discarding lines with the string "*/". AC2*/kenz was therefore
 always discarded. Fixed this. The AConly.g file now matches, and so does the
-original dend_v26.g.
+original dend_v26.g. Checkin 2038.
 
 ============================================================================
