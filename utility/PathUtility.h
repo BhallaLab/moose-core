@@ -28,6 +28,7 @@ class PathUtility
     static const char* const PATH_SEPARATOR;
     static const char* const DIR_SEPARATOR;
     PathUtility(string paths);    
+    static bool isAbsolutePath(string path);
     void addPath(string paths);
     string getPath(int index);
     string getAllPaths();    
