@@ -1407,7 +1407,6 @@ void testSetGetExtField()
 
 void testIsA()
 {
-	static const double EPSILON = 1e-9;
 	const Cinfo* n = Neutral::initCinfo();
 	const Cinfo* a = Arith::initCinfo();
 	assert( a->isA( "Arith" ) );

@@ -156,6 +156,7 @@ void ReadKkit::run()
 		shell_->setclock( 1, fastdt_, 0 );
 		shell_->doStart( transientTime_ );
 		shell_->setclock( 0, simdt_, 0 );
+		shell_->setclock( 1, simdt_, 0 );
 		shell_->doStart( maxtime_ - transientTime_ );
 	} else {
 		shell_->doStart( maxtime_ );

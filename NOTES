@@ -6749,4 +6749,55 @@ clean. This also means that the problem with the model above is not
 memory-leak related. Checkin 2014.
 
 Tracked problem down to Stoich.cpp. I had used the wrong offset for 
-updating the FuncMols. Now works with pkc model.
+updating the FuncMols. Now works with pkc model. Checkin 2018.
+
+Checked again: dend model _still_ does not match up.
+============================================================================
+12 July
+The old moose does handle it OK. Going through mol by mol:
+Ca: OK
+DAG: OK
+AA: Goes down to zero in new code, initial part is OK
+CaN: OK
+AC2: OK
+cAMP: Way too low. About 3 orders of mag.
+CaM.Ca4: OK
+GTP-Ras: 10x too low.
+Raf-GTP-Ras: 50x too low.
+PKC-active: Starts OK, but fails to build up.
+PP1-active: OK
+tot-auton_CaMKII: OK
+tot-CaM-CaMKII: OK
+MAPK*: zero. 
+
+Tested the obvious possible problem from this list, of MMenz with a 
+buffered substrate. GSL is OK.
+
+Stripped off other stuff to make a model of AC, AC.g.
+This also shows a discrepancy but the other way:
+AC2*-Gs:	OK
+AC1-Gs:		OK
+AC1-CaM:	A little low
+AC2*:		OK
+cAMP:		3x too high.
+
+Removed the PDE stuff, to make model AC_noPDE.g. This matches up. Is it the
+PDE stuff on its own?
+
+Removed the Gs stuff, to make model AC_no_Gs.g. This does not match.
+cAMP:		3x too low (in gsl)
+AC2*:		OK
+AC1-CaM		OK, a bit of what looks like numerical error at ~5%.
+
+Removed AC1 also, to make model AC_no_GS_no_AC1.g. This is way off.
+cAMP:		None at all in gsl
+AC2*:		OK.
+
+Funny, the system doesnt seem to call the MMenz zombification routine.
+============================================================================
+13 July
+Compared the AC_no_GS_no_AC1.g output for ee and ksolve modes. The cAMP
+differs, and is wrong in both.
+Fixed difference between ee and gsl methods. Now cAMP is zero in both.
+
+============================================================================
