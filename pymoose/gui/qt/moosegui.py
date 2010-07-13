@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Jul 13 10:56:08 2010 (+0530)
+# Last-Updated: Tue Jul 13 11:32:58 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2254
+#     Update #: 2266
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -117,6 +117,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.mooseHandler, QtCore.SIGNAL('updatePlots(float)'), self.updatePlots)
         self.settings = config.get_settings()        
         self.demosDir = str(self.settings.value(config.KEY_DEMOS_DIR).toString())
+        print self.demosDir
         if not self.demosDir:
             self.demosDir = str(QtGui.QFileDialog.getExistingDirectory(self, 'Please select pymoose demos directory'))
         self.resize(800, 600)
@@ -385,19 +386,23 @@ class MainWindow(QtGui.QMainWindow):
         
         
     def runSquidDemo(self):
-        path = self.demosDir + '/squid/qtSquid.py'
+        path = os.path.join(self.demosDir, 'squid', 'qtSquid.py')
+        print path
         subprocess.call(['python', path])
 
     def runIzhikevichDemo(self):
-        path = self.demosDir + '/izhikevich/demogui_qt.py'
+        path = os.path.join(self.demosDir, 'izhikevich', 'demogui_qt.py')
+        print path
         subprocess.call(['python', path])
 
     def runGLCellDemo(self):
-        path = self.demosDir + '/gl/glcelldemo.py'
+        path = os.path.join(self.demosDir, 'gl', 'glcelldemo.py')
+        print path
         subprocess.call(['python', path], cwd=os.path.dirname(path))
 
     def runGLViewDemo(self):
-        path = self.demosDir + '/gl/glviewdemo.py'
+        path = os.path.join(self.demosDir, 'gl', 'glviewdemo.py')
+        print path
         subprocess.call(['python', path], cwd=os.path.dirname(path))
         
     
@@ -819,6 +824,7 @@ class MainWindow(QtGui.QMainWindow):
     def startFirstTimeWizard(self):
         firstTimeWizard = FirstTimeWizard(self)
         firstTimeWizard.show()
+        firstTimeWizard.accepted.connect(self.updatePaths)
 
     def doQuit(self):
         self.mooseHandler.stopGL()
@@ -828,10 +834,15 @@ class MainWindow(QtGui.QMainWindow):
         self._srcElement = item.getMooseObject()
         self.sourceObjText.setText(self._srcElement.path)
         self.sourceFieldComboBox.addItems(self.mooseHandler.getSrcFields(self._srcElement))
+
     def selectConnDest(self, item, column):
         self._destElement = item.getMooseObject()
         self.destObjText.setText(self._destElement.path)
         self.destFieldComboBox.addItems(self.mooseHandler.getDestFields(self._destElement))
+
+    def updatePaths(self):
+        self.demosDir = str(config.get_settings().value(config.KEY_DEMOS_DIR).toString())
+        
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     icon = QtGui.QIcon('moose_icon.png')
