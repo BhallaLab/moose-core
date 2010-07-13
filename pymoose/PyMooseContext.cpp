@@ -1063,6 +1063,12 @@ void PyMooseContext::move( const Id& object, const Id& dest, string new_name)
     send3< Id, Id, string >(
         myId_(), moveSlot, object, dest, new_name );
 }
+void PyMooseContext::move( string object, string dest, string new_name)
+{
+    Id src(object), dst(dest);
+    send3< Id, Id, string >(
+        myId_(), moveSlot, src, dst, new_name );
+}
 
 bool PyMooseContext::connect(const Id& src, string srcField, const Id& dest, string destField)
 {

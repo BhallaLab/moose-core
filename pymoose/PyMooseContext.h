@@ -105,6 +105,7 @@ enum {OUTGOING, INCOMING, INOUT};
         void copy(const Id& src, const Id& dest_parent, std::string new_name);
         Id deepCopy( const Id& object, const Id& dest, std::string new_name);    
         void move( const Id& object, const Id& dest, std::string new_name);
+        void move( string src, string dest, std::string new_name);
         bool connect(const Id& src, std::string srcField, const Id& dest, std::string destField);
         void setupAlpha( std::string channel, std::string gate, std::vector <double> parms );
         void setupAlpha(std::string channel, std::string gate, double AA, double AB, double AC, double AD, double AF, double BA, double BB, double BC, double BD, double BF, double size, double min, double max);
