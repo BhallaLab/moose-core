@@ -6214,6 +6214,10 @@ class SigNeur(PyMooseBase):
         """__set_dendExclude(self, string dendExclude)"""
         return _moose.SigNeur___set_dendExclude(*args)
 
+    def build(*args):
+        """build(self)"""
+        return _moose.SigNeur_build(*args)
+
     cellProto = _swig_property(_moose.SigNeur_cellProto_get, _moose.SigNeur_cellProto_set)
     spineProto = _swig_property(_moose.SigNeur_spineProto_get, _moose.SigNeur_spineProto_set)
     dendProto = _swig_property(_moose.SigNeur_dendProto_get, _moose.SigNeur_dendProto_set)
