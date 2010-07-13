@@ -6798,6 +6798,17 @@ Funny, the system doesnt seem to call the MMenz zombification routine.
 13 July
 Compared the AC_no_GS_no_AC1.g output for ee and ksolve modes. The cAMP
 differs, and is wrong in both.
-Fixed difference between ee and gsl methods. Now cAMP is zero in both.
+Fixed difference between ee and gsl methods. Now cAMP is zero in both. 
+	Checkin 2035.
+	- Can't be just MMenz. The Kholodenko oscillatory model works, and
+		is full of MMenz.
+	- Enz on its own and MMenz on its own work.
+
+Reduced problem to just one enzyme, in AConly.g
+
+Tracked it down. Unexpected: it was bad comment handling in ReadKkit.cpp,
+which was discarding lines with the string "*/". AC2*/kenz was therefore
+always discarded. Fixed this. The AConly.g file now matches, and so does the
+original dend_v26.g.
 
 ============================================================================

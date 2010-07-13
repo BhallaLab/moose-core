@@ -219,9 +219,7 @@ void ReadKkit::innerRead( ifstream& fin )
 			line = line.substr( 0, pos );
 		if ( line.substr( 0, 2 ) == "/*" ) {
 				parseMode = COMMENT;
-		} else if ( line.find( "*/" ) != string::npos ) {
-				parseMode = DATA;
-				continue;
+				line = line.substr( 2 );
 		}
 
 		if ( parseMode == COMMENT ) {
