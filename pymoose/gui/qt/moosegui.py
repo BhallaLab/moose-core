@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Jul 12 18:17:42 2010 (+0530)
+# Last-Updated: Tue Jul 13 10:53:09 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2251
+#     Update #: 2253
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -393,11 +393,11 @@ class MainWindow(QtGui.QMainWindow):
 
     def runGLCellDemo(self):
         path = self.demosDir + '/gl/glcelldemo.py'
-        subprocess.call(['python', path])
+        subprocess.call(['python', path], cwd=os.path.dirname(path))
 
     def runGLViewDemo(self):
         path = self.demosDir + '/gl/glviewdemo.py'
-        subprocess.call(['python', path])
+        subprocess.call(['python', path], cwd=os.path.dirname(path))
         
     
     def makeDemosMenu(self):
