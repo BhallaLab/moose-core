@@ -210,4 +210,9 @@ void SigNeur::__set_dendExclude( string dendExclude )
 {
     set < string > (id_(), "dendExclude", dendExclude);
 }
+
+void SigNeur::build()
+{
+    set(id_(), "build");
+}
 #endif

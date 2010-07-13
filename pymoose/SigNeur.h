@@ -54,6 +54,7 @@ namespace pymoose{
             void __set_dendInclude(string dendInclude);
             string __get_dendExclude() const;
             void __set_dendExclude(string dendExclude);
+        void build();
     };
 }
 #endif
