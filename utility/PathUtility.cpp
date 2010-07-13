@@ -86,6 +86,23 @@ void PathUtility::addPath(string paths)
          path_.push_back(path);
     }
 }
+
+/**
+   Check if given path is an absolute path. On *nix systems check if first
+   character is '/'. On windows, check if second character is ':', as in
+   "C:\path\to\file".
+*/
+bool PathUtility::isAbsolutePath(string path)
+{
+#if defined(unix) || defined(__unix__) || defined(__unix) || defined(__MACH__)
+    return path.find( DIR_SEPARATOR ) == 0;
+#elif defined(_WIN32) //if defined WINDOWS
+    return path.find( ":" ) == 1;
+#else
+#error System type is neither Unix nor Windows. Failing
+#endif // UNIX / WINDOWS
+}
+
 /**
    return index-th entry in list of directories in path.
 */
