@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Jul 13 11:32:58 2010 (+0530)
+# Last-Updated: Tue Jul 13 14:44:20 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2266
+#     Update #: 2267
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -414,7 +414,7 @@ class MainWindow(QtGui.QMainWindow):
         self.glCellDemoAction = QtGui.QAction(self.tr('GL Cell'), self)
         self.glCellDemoAction.triggered.connect(self.runGLCellDemo)
         self.glViewDemoAction = QtGui.QAction(self.tr('GL View'), self)
-        self.glViewDemoAction.triggered.connect(self.runGLCellDemo)
+        self.glViewDemoAction.triggered.connect(self.runGLViewDemo)
         menu = QtGui.QMenu('&Demos and Tutorials', self)
         menu.addAction(self.squidDemoAction)
         menu.addAction(self.IzhikevichDemoAction)
