@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Jul  9 21:23:39 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Jul 12 16:28:32 2010 (+0530)
+# Last-Updated: Wed Jul 14 14:31:30 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 774
+#     Update #: 786
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -81,7 +81,7 @@ class MooseGLWizard(QtGui.QWizard):
         self.setPage(MooseGLWizard.pageIdMap['glclient'], glclientPage)
         self.setPage(MooseGLWizard.pageIdMap['glcell'], self._makeGLCellPage())
         self.setPage(MooseGLWizard.pageIdMap['glview'], self._makeGLViewPage())
-        self.accepted.connect(self.createGLSlot)
+        self.connect(self, QtCore.SIGNAL('accepted()'), self.createGLSlot)
         
 
     def initSettings(self):
@@ -117,13 +117,13 @@ class MooseGLWizard(QtGui.QWizard):
         exeLabel = QtGui.QLabel(self.tr('&Executable of glclient:'))
         exeLineEdit = QtGui.QLineEdit(self.tr(self._glClientExe))
         exeButton = QtGui.QPushButton(self.tr('Browse'))
-        exeButton.clicked.connect(self._selectExeSlot)
+        self.connect(exeButton, QtCore.SIGNAL('clicked()'), self._selectExeSlot)
         exeLabel.setBuddy(exeButton)
 
         colormapLabel = QtGui.QLabel(self.tr('&Colormap File'))
         colormapLineEdit = QtGui.QLineEdit(self.tr(self._colormap))
         colormapButton = QtGui.QPushButton(self.tr('Browse'))
-        colormapButton.clicked.connect(self._selectColormapSlot)
+        self.connect(colormapButton, QtCore.SIGNAL('clicked()'), self._selectColormapSlot)
         colormapLabel.setBuddy(colormapButton)
 
         frame = QtGui.QFrame()
@@ -154,7 +154,7 @@ class MooseGLWizard(QtGui.QWizard):
         black = QtGui.QColor(Qt.black)
         styleStr = QtCore.QString('QPushButton#bgColorButton {background-color: %s}' % black.name())
         bgColorButton.setStyleSheet(styleStr)
-        bgColorButton.clicked.connect(self._chooseBackgroundColorSlot)
+        self.connect(bgColorButton, QtCore.SIGNAL('clicked()'), self._chooseBackgroundColorSlot)
         bgColorLabel.setBuddy(bgColorButton)
 
         layout = QtGui.QGridLayout(page)
@@ -200,7 +200,7 @@ class MooseGLWizard(QtGui.QWizard):
         page.setSubTitle('Expand the model tree and select an element to observe in 3-D')
         layout = QtGui.QGridLayout()
         tree = MooseTreeWidget()
-        tree.itemClicked.connect(self._setTargetObject)
+        self.connect(tree, QtCore.SIGNAL('itemClicked(QTreeWidgetItem&, int)'), self._setTargetObject)
 
         fieldsLabel = QtGui.QLabel(self.tr('&Field to observe'))
         fieldsLineEdit = QtGui.QLineEdit('Vm')
@@ -256,7 +256,7 @@ class MooseGLWizard(QtGui.QWizard):
         page.setTitle('Select GLView Target ')
         page.setSubTitle('Expand the model tree and select an element to observe in 3-D')
         tree = MooseTreeWidget()
-        tree.itemClicked.connect(self._setTargetObject)
+        self.connect(tree, QtCore.SIGNAL('itemClicked(QTreeWidgetItem&, int)'), self._setTargetObject)
 
         wildCardLabel = QtGui.QLabel(self.tr('&Wildcard for elements to observe'))
         wildCardLineEdit = QtGui.QLineEdit('##[CLASS=Compartment]')
@@ -349,17 +349,17 @@ class MooseGLWizard(QtGui.QWizard):
         time.sleep(3)
         if glcellMode:
             field = str(self.field('glcellfield').toString())
-            (threshold, ok) = self.field('threshold').toFloat()
+            (threshold, ok) = self.field('threshold').toDouble()
             if not ok:
                 threshold = None
                 
-            (highValue, ok) = self.field('highValue').toFloat()
+            (highValue, ok) = self.field('highValue').toDouble()
             if not ok:
                 highValue = None
-            (lowValue, ok) = self.field('lowValue').toFloat()
+            (lowValue, ok) = self.field('lowValue').toDouble()
             if not ok:
                 lowValue = None
-            (vscale, ok) = self.field('vscale').toFloat()
+            (vscale, ok) = self.field('vscale').toDouble()
             if not ok:
                 vscale = None                
             self._mooseHandler.makeGLCell(self._targetObject.path, port, field, threshold, lowValue, highValue, vscale, bgColor, sync)
@@ -369,11 +369,11 @@ class MooseGLWizard(QtGui.QWizard):
             valueMax = []
             for ii in range(5):
                 field.append(str(self.field('fieldName%d' % (ii+1)).toString()))
-                (valueMin, ok) = self.field('valueMin%d' % (ii+1)).toFloat()
+                (valueMin, ok) = self.field('valueMin%d' % (ii+1)).toDouble()
                 if not ok:
                     valueMin = 0.0
                 valueMin.append(valueMin)
-                (valueMax, ok) = self.field('valueMax%d' % (ii+1)).toFloat() 
+                (valueMax, ok) = self.field('valueMax%d' % (ii+1)).toDouble() 
                 if not ok:
                     valueMax = 1.0
                 valueMax.append(valueMax)
