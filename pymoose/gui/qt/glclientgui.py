@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Feb 13 16:01:54 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jul 14 14:34:20 2010 (+0530)
+# Last-Updated: Wed Jul 14 14:53:35 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 245
+#     Update #: 250
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -116,13 +116,13 @@ class GLClientGUI(QtGui.QWidget):
         self.new_port = self.portText.text()
         if str(self.new_port) != str(self.port):
             self.port = self.new_port
-            self.settings.setValue('port', self.port)
+            self.settings.setValue('port', QtCore.QVariant(self.port))
         self.new_colormap = unicode(self.colormapText.text())
         if self.new_colormap != self.colormap:
             self.colormap = self.new_colormap
         # if not os.path.isfile(self.colormap):
         #     self.colormap = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Select Colormap File'))
-        self.settings.setValue('colormap', self.colormap)
+        self.settings.setValue('colormap', QtCore.QVariant(self.colormap))
             
         self.new_executable = unicode(self.exeText.text())
         if self.executable != self.new_executable:
@@ -147,7 +147,7 @@ class GLClientGUI(QtGui.QWidget):
         self.port = unicode(self.settings.value(config.KEY_GL_PORT).toString())
         if not self.port:
             self.port = config.GL_PORT
-            self.settings.setValue(config.KEY_GL_PORT, self.port)
+            self.settings.setValue(config.KEY_GL_PORT, QtCore.QVariant(self.port))
         print unicode(self.settings.value(config.KEY_GL_PORT).toString())
         self.colormap = unicode(self.settings.value(config.KEY_GL_COLORMAP).toString())
         if not self.colormap:
@@ -155,13 +155,13 @@ class GLClientGUI(QtGui.QWidget):
         # if not os.path.isfile(self.colormap):
         #     config.LOGGER.error('Colormap file not found: %s' %( self.colormap))
         #     self.colormap = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Select Colormap File'))
-        self.settings.setValue(config.KEY_GL_COLORMAP, self.colormap)
+        self.settings.setValue(config.KEY_GL_COLORMAP, QtCore.QVariant(self.colormap))
         self.executable = unicode(self.settings.value(config.KEY_GL_CLIENT_EXECUTABLE).toString()        )
         if not self.executable:
             self.executable = config.GL_CLIENT_EXECUTABLE
         # if not os.access(self.executable, os.X_OK):        
         #     self.executable = QtGui.QFileDialog.getOpenFileName(self, 'Select GLClient Executable')
-        self.settings.setValue(config.KEY_GL_CLIENT_EXECUTABLE, self.executable)
+        self.settings.setValue(config.KEY_GL_CLIENT_EXECUTABLE, QtCore.QVariant(self.executable))
         # if not os.access(self.executable, os.X_OK):        
         #     QtGui.QMessageBox.critical(self, 'GLClient executable', 'Please select the correct glclient executable. Make sure you have execute permission on this file')
 
