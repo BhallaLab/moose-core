@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Jul  9 21:23:39 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jul 14 14:31:30 2010 (+0530)
+# Last-Updated: Wed Jul 14 14:55:07 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 786
+#     Update #: 787
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -104,7 +104,7 @@ class MooseGLWizard(QtGui.QWizard):
         #     QtGui.QMessageBox.critical(self, 'No execute permission', 'Please select the correct glclient executable. Make sure you have execution permission on the file.')
         # else:
         #     self._settings.setValue(config.KEY_GL_CLIENT_EXECUTABLE, self._glClientExe)
-        self._settings.setValue(config.KEY_GL_CLIENT_EXECUTABLE, self._glClientExe)
+        self._settings.setValue(config.KEY_GL_CLIENT_EXECUTABLE, QtCore.QVariant(self._glClientExe))
                                      
     def _makeGLClientPage(self):
         page = QtGui.QWizardPage(self)
