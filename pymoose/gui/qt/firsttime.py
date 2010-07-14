@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sun Jul 11 15:31:00 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jul 14 14:25:11 2010 (+0530)
+# Last-Updated: Wed Jul 14 14:54:52 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 149
+#     Update #: 150
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -152,7 +152,7 @@ class FirstTimeWizard(QtGui.QWizard):
         self._colormapLine.setText(self._colormapPath)
 
     def _finished(self):
-        config.get_settings().setValue(config.KEY_FIRSTTIME, False)
+        config.get_settings().setValue(config.KEY_FIRSTTIME, QtCore.QVariant(False))
         config.get_settings().setValue(config.KEY_GL_CLIENT_EXECUTABLE, self.field('glclient'))
         config.get_settings().setValue(config.KEY_DEMOS_DIR, self.field('demosdir'))
         config.get_settings().setValue(config.KEY_GL_COLORMAP, self.field('colormap'))
