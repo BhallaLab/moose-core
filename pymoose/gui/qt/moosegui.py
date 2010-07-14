@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jul 14 14:19:59 2010 (+0530)
+# Last-Updated: Wed Jul 14 14:46:24 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2282
+#     Update #: 2283
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -125,9 +125,9 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.mooseHandler, QtCore.SIGNAL('updatePlots(float)'), self.updatePlots)
         self.settings = config.get_settings()        
         self.demosDir = str(self.settings.value(config.KEY_DEMOS_DIR).toString())
-        print self.demosDir
-        if not self.demosDir:
-            self.demosDir = str(QtGui.QFileDialog.getExistingDirectory(self, 'Please select pymoose demos directory'))
+        # print self.demosDir
+        # if not self.demosDir:
+        #     self.demosDir = str(QtGui.QFileDialog.getExistingDirectory(self, 'Please select pymoose demos directory'))
         self.resize(800, 600)
         self.setDockOptions(self.AllowNestedDocks | self.AllowTabbedDocks | self.ForceTabbedDocks | self.AnimatedDocks)        
         # The following are for holding transient selections from
