@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jul 14 14:46:24 2010 (+0530)
+# Last-Updated: Wed Jul 14 14:59:36 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2283
+#     Update #: 2287
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -174,7 +174,7 @@ class MainWindow(QtGui.QMainWindow):
         self.plotConfig.setVisible(False)        
         self.setCentralWidget(self.centralPanel)
         self.centralPanel.tileSubWindows()
-        self.centralPanel.subWindowActivated.connect(self.setCurrentPlotWindow)
+        self.connect(self.centralPanel, QtCore.SIGNAL('subWindowActivated(QMdiSubWindow *)'), self.setCurrentPlotWindow)
         # We connect the double-click event on the class-list to
         # insertion of moose object in model tree.
         for listWidget in self.mooseClassesWidget.getClassListWidget():
