@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jul 14 10:14:15 2010 (+0530)
+# Last-Updated: Wed Jul 14 14:19:59 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2279
+#     Update #: 2282
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -208,9 +208,9 @@ class MainWindow(QtGui.QMainWindow):
         self.destObjText = QtGui.QLineEdit(self.connectionDialog)
 
         okButton = QtGui.QPushButton(self.tr('OK'), self.connectionDialog)
-        okButton.clicked.connect(self.connectionDialog.accept)
+        self.connect(okButton, QtCore.SIGNAL('clicked()'), self.connectionDialog.accept)
         cancelButton = QtGui.QPushButton(self.tr('Cancel'), self.connectionDialog)
-        cancelButton.clicked.connect(self.connectionDialog.reject)
+        self.connect(cancelButton, QtCore.SIGNAL('clicked()'), self.connectionDialog.reject)
 
         self.connectionDialog.accepted.connect(self.createConnection)
         self.connectionDialog.rejected.connect(self.cancelConnection)
@@ -832,7 +832,7 @@ class MainWindow(QtGui.QMainWindow):
     def startFirstTimeWizard(self):
         firstTimeWizard = FirstTimeWizard(self)
         firstTimeWizard.show()
-        firstTimeWizard.accepted.connect(self.updatePaths)
+        self.connect(firstTimeWizard, QtCore.SIGNAL('accepted()'), self.updatePaths)
 
     def doQuit(self):
         self.mooseHandler.stopGL()
