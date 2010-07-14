@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Jul 13 14:44:20 2010 (+0530)
+# Last-Updated: Wed Jul 14 10:14:15 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2267
+#     Update #: 2279
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -46,12 +46,20 @@
 
 # Code:
 
+from __future__ import with_statement    
+
 import os
 import sys
 import code
 import subprocess
 from datetime import date
 from collections import defaultdict
+
+
+python_version = sys.version_info
+required_version = (2,5)
+if  python_version[0] < required_version[0] or python_version[0] == required_version[0] and python_version[1] < required_version[1]:
+    raise 'Need Python version 2.5 or greater'
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.Qt import Qt
@@ -843,6 +851,8 @@ class MainWindow(QtGui.QMainWindow):
     def updatePaths(self):
         self.demosDir = str(config.get_settings().value(config.KEY_DEMOS_DIR).toString())
         
+
+
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     icon = QtGui.QIcon('moose_icon.png')
