@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Feb 13 16:01:54 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Jul 12 16:30:43 2010 (+0530)
+# Last-Updated: Wed Jul 14 14:34:20 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 244
+#     Update #: 245
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -120,15 +120,15 @@ class GLClientGUI(QtGui.QWidget):
         self.new_colormap = unicode(self.colormapText.text())
         if self.new_colormap != self.colormap:
             self.colormap = self.new_colormap
-        if not os.path.isfile(self.colormap):
-            self.colormap = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Select Colormap File'))
+        # if not os.path.isfile(self.colormap):
+        #     self.colormap = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Select Colormap File'))
         self.settings.setValue('colormap', self.colormap)
             
         self.new_executable = unicode(self.exeText.text())
         if self.executable != self.new_executable:
             self.executable = self.new_executable
-        if not os.access(self.executable, os.X_OK):
-            self.executable = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Select GLClient Executable'))
+        # if not os.access(self.executable, os.X_OK):
+        #     self.executable = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Select GLClient Executable'))
         if not os.access(self.executable, os.X_OK):
             QtGui.QMessageBox.critical(self, 'GLClient executable', 'Please select the correct glclient executable. Make sure you have execute permission on this file')            
         self.settings.endGroup()

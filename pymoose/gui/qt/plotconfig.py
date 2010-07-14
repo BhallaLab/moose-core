@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Jul  9 00:21:51 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Jul  9 20:11:16 2010 (+0530)
+# Last-Updated: Wed Jul 14 14:29:01 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 326
+#     Update #: 332
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -171,7 +171,7 @@ class PlotConfig(QtGui.QDialog):
 
         self.lineColorButton = QtGui.QPushButton(self.currentLineColor.name(), self)
         self.lineColorButton.setPalette(QtGui.QPalette(self.currentLineColor))
-        self.lineColorButton.clicked.connect(self.setLineColor)
+        self.connect(self.lineColorButton, QtCore.SIGNAL('clicked()'), self.setLineColor)
         self.lineColorButton.setAutoFillBackground(True)
         self.lineColorButton.setObjectName('lineColorButton')
         layout.addWidget(self.lineColorButton, row, 1)
@@ -212,7 +212,7 @@ class PlotConfig(QtGui.QDialog):
         layout.addWidget(self.symbolPenColorlabel, row, 0)
         
         self.symbolPenColorButton = QtGui.QPushButton(self.currentSymbolPenColor.name(), self)
-        self.symbolPenColorButton.clicked.connect(self.setSymbolPenColor)
+        self.connect(self.symbolPenColorButton, QtCore.SIGNAL('clicked()'), self.setSymbolPenColor)
         self.symbolPenColorButton.setPalette(QtGui.QPalette(self.currentSymbolPenColor))
         self.symbolPenColorButton.setObjectName('symbolPenColorButton')
         self.symbolPenColorButton.setAutoFillBackground(True)
@@ -230,7 +230,7 @@ class PlotConfig(QtGui.QDialog):
         layout.addWidget(self.symbolFillColorLabel, row, 0)
 
         self.symbolFillColorButton = QtGui.QPushButton(self.currentSymbolFillColor.name(), self)
-        self.symbolFillColorButton.clicked.connect(self.setSymbolFillColor)
+        self.connect(self.symbolFillColorButton, QtCore.SIGNAL('clicked()'), self.setSymbolFillColor)
         self.symbolFillColorButton.setPalette(QtGui.QPalette(self.currentSymbolFillColor))
         self.symbolFillColorButton.setAutoFillBackground(True)
         self.symbolFillColorButton.setObjectName('symbolPenColorButton')
@@ -252,11 +252,11 @@ class PlotConfig(QtGui.QDialog):
 
         row += 1
         self.cancelButton = QtGui.QPushButton(self.tr('Cancel'), self)
-        self.cancelButton.clicked.connect(self.reject)
+        self.connect(self.cancelButton, QtCore.SIGNAL('clicked()'), self.reject)
         layout.addWidget(self.cancelButton, row, 0)
 
         self.okButton = QtGui.QPushButton(self.tr('OK'), self)
-        self.okButton.clicked.connect(self.accept)
+        self.connect(self.okButton, QtCore.SIGNAL('clicked()'), self.accept)
         layout.addWidget(self.okButton, row, 1)
 
         self.okButton.setDefault(True)
