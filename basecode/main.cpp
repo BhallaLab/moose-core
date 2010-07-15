@@ -166,7 +166,8 @@ void mpiTests()
 
 void benchmarkTests()
 {
-	speedTestMultiNodeIntFireNetwork( 2048, 2000 );
+	// speedTestMultiNodeIntFireNetwork( 2048, 2000 );
+	testKsolve();
 }
 
 int main( int argc, char** argv )

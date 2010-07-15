@@ -12,6 +12,7 @@
 
 #define EPSILON 1e-15
 
+static const double NA = 6.023e23;
 
 const Cinfo* Mol::initCinfo()
 {
@@ -53,6 +54,16 @@ const Cinfo* Mol::initCinfo()
 			&Mol::getConcInit
 		);
 
+		static ReadOnlyValueFinfo< Mol, double > size(
+			"size",
+			"Size of compartment. Units are SI. "
+			"Utility field, the master size info is "
+			"stored on the compartment itself. For voxel-based spatial"
+			"models, the 'size' of the molecule at a given index is the"
+			"size of that voxel.",
+			&Mol::getSize
+		);
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -70,6 +81,12 @@ const Cinfo* Mol::initCinfo()
 		static DestFinfo reacDest( "reacDest",
 			"Handles reaction input",
 			new OpFunc2< Mol, double, double >( &Mol::reac )
+		);
+
+		static DestFinfo setSize( "setSize",
+			"Separate finfo to assign size, should only be used by compartment."
+			"Defaults to SI units of volume: m^3",
+			new OpFunc1< Mol, double >( &Mol::setSize )
 		);
 
 		//////////////////////////////////////////////////////////////
@@ -103,7 +120,11 @@ const Cinfo* Mol::initCinfo()
 		&n,	// Value
 		&nInit,	// Value
 		&diffConst,	// Value
+		&conc,	// Value
+		&concInit,	// Value
+		&size,	// Readonly Value
 		&group,			// DestFinfo
+		&setSize,			// DestFinfo
 		&reac,				// SharedFinfo
 		&proc,				// SharedFinfo
 	};
@@ -195,24 +216,24 @@ double Mol::getNinit() const
 	return nInit_;
 }
 
-void Mol::setConc( double v )
+void Mol::setConc( double c ) // Conc is given micromolar. Size is in m^3
 {
-	n_ = v * size_;
+	n_ = 1e-3 * NA * c * size_;
 }
 
-double Mol::getConc() const
+double Mol::getConc() const // Returns conc in micromolar.
 {
-	return n_ / size_;
+	return 1e3 * (n_ / NA) / size_;
 }
 
-void Mol::setConcInit( double v )
+void Mol::setConcInit( double c )
 {
-	nInit_ = v * size_;
+	nInit_ = 1e-3 * NA * c * size_;
 }
 
 double Mol::getConcInit() const
 {
-	return nInit_ / size_;
+	return 1e3 * ( nInit_ / NA ) / size_;
 }
 
 void Mol::setDiffConst( double v )
@@ -223,4 +244,14 @@ void Mol::setDiffConst( double v )
 double Mol::getDiffConst() const
 {
 	return diffConst_;
+}
+
+void Mol::setSize( double v )
+{
+	size_ = v;
+}
+
+double Mol::getSize() const
+{
+	return size_;
 }

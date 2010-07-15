@@ -6811,4 +6811,44 @@ which was discarding lines with the string "*/". AC2*/kenz was therefore
 always discarded. Fixed this. The AConly.g file now matches, and so does the
 original dend_v26.g. Checkin 2038.
 
+Fixed problem with missing first data point in plots. Added operation to
+request data at Table::reinint. Checkin 2040.
+
+Quick benchmark on dend_v26.g run for 2000 sec:
+current MOOSE: 97.5 sec, 
+old optiMOOSE: 87.5 sec 
+
+Unsure why there is this difference. All the work should be done by the
+gsl solver, which is the same.
+
+Next major cleanup is for volume handling and compartments.
+
+One fundamental issue here is that if I refer to a different Element for
+the volume in order to calculate conc, I do NOT want to use messaging to
+access the data. The queueing data transfer would cause scheduling issues.
+
+Another issue: explicit vs spatial indexing. I should really ask the system 
+what the conc is at a given point in space, rather than specify a compartment
+through indexing.
+
+Things to ask of a molecule:
+- n throughout the entire compartment
+- n in a subvolume based on the grid indexing
+- n in a specified region of space
+- conc likewise
+
 ============================================================================
+15 July.
+For some of the more complex cases, implement an 'inspector' object.
+For starters, just obtain local conc. Assume mol as a whole has access to
+vol info. Would like a object-wide field in the data handler, one that isn't
+duplicated when it becomes an array. At reinit this field is updated by the
+compartment. I could implement this by having a derived class with the global
+field. A temporary of this is created when the data is looked up, and the
+global field is filled in. This would involve some nasty memory management.
+
+For now, put in the extra double for the volume. Wasteful but the alternatives
+are not much better. Note that we have other similar things in the pipeline,
+like diffusion constant. Note also that all these go away when the solver
+gets rid of individual entries.
+

@@ -612,6 +612,7 @@ Id ReadKkit::buildGroup( const vector< string >& args )
 Id ReadKkit::buildMol( const vector< string >& args )
 {
 	static vector< unsigned int > dim( 1, 1 );
+	const double NA = 6.023e23;
 
 	string head;
 	string tail = pathTail( args[2], head );
@@ -620,6 +621,8 @@ Id ReadKkit::buildMol( const vector< string >& args )
 
 	double nInit = atof( args[ molMap_[ "nInit" ] ].c_str() );
 	double vol = atof( args[ molMap_[ "vol" ] ].c_str() );
+	// Vol was scaling factor to convert to uM.
+	vol = 1.0e3 / (NA * vol ); // Converts volscale to actual vol in SI
 	int slaveEnable = atoi( args[ molMap_[ "slave_enable" ] ].c_str() );
 	double diffConst = atof( args[ molMap_[ "DiffConst" ] ].c_str() );
 
@@ -630,8 +633,10 @@ Id ReadKkit::buildMol( const vector< string >& args )
 		mol = shell_->doCreate( "BufMol", pa, tail, dim );
 	} else {
 		mol = shell_->doCreate( "Mol", pa, tail, dim );
+		/*
 		cout << "ReadKkit::buildMol: Unknown slave_enable flag '" << 
 			slaveEnable << "' on " << args[2] << "\n";
+			*/
 	}
 	assert( mol != Id() );
 	// skip the 10 chars of "/kinetics/"
@@ -639,6 +644,7 @@ Id ReadKkit::buildMol( const vector< string >& args )
 
 	Field< double >::set( mol.eref(), "nInit", nInit );
 	Field< double >::set( mol.eref(), "diffConst", diffConst );
+	SetGet1< double >::set( mol.eref(), "setSize", vol );
 
 	separateVols( mol, vol );
 
@@ -807,8 +813,13 @@ void ReadKkit::addmsg( const vector< string >& args)
 			innerAddMsg( src, mmEnzIds_, "prd", dest, molIds_, "reac" );
 	}
 	else if ( args[3] == "PLOT" ) { // Time-course output for molecule
+		if ( args[4] == "Co" )
+			innerAddMsg( dest, plotIds_, "requestData", src, molIds_, "get_conc" );
+		else if ( args[4] == "n" )
 		// innerAddMsg( src, molIds_, "nOut", dest, plotIds_, "input" );
-		innerAddMsg( dest, plotIds_, "requestData", src, molIds_, "get_n" );
+			innerAddMsg( dest, plotIds_, "requestData", src, molIds_, "get_n" );
+		else
+			cout << "Unknown PLOT msg field '" << args[4] << "'\n";
 	}
 	else if ( args[3] == "SUMTOTAL" ) { // Summation function.
 		buildSumTotal( src, dest );

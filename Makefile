@@ -83,7 +83,8 @@ USE_GSL = 1
 endif
 # Optimized mode:
 ifeq ($(BUILD),release)
-CXXFLAGS  = -O3 -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER  
+CXXFLAGS  = -O3 -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER
+USE_GSL = 1
 endif
 # Profiling mode:
 ifeq ($(BUILD),profile)

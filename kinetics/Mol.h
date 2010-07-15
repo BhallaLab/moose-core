@@ -37,6 +37,14 @@ class Mol
 		void setConcInit( double v );
 		double getConcInit() const;
 
+		/**
+		 * Size is usually volume, but we also permit areal density
+		 * This should be slaved to the parent compartment and is not
+		 * meant to be set through field operations.
+		 */
+		void setSize( double v );
+		double getSize() const;
+
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
