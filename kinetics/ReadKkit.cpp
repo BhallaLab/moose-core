@@ -467,9 +467,13 @@ void ReadKkit::separateVols( Id mol, double vol )
 	static const double TINY = 1e-3;
 	for ( unsigned int i = 0 ; i < vols_.size(); ++i ) {
 		if ( fabs( vols_[i] - vol ) / ( vols_[i] + vol ) < TINY ) {
-			mols_[i].push_back( mol );
+			volCategories_[i].push_back( mol );
+			return;
 		}
 	}
+	vols_.push_back( vol );
+	vector< Id > temp( 1, mol );
+	volCategories_.push_back( temp );
 }
 
 // We assume that the biggest compartment contains all the rest.
@@ -518,7 +522,7 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 	double k2 = atof( args[ enzMap_[ "k2" ] ].c_str() );
 	double k3 = atof( args[ enzMap_[ "k3" ] ].c_str() );
 	double nComplexInit = atof( args[ enzMap_[ "nComplexInit" ] ].c_str());
-	double vol = atof( args[ enzMap_[ "vol" ] ].c_str());
+	// double vol = atof( args[ enzMap_[ "vol" ] ].c_str());
 	bool isMM = atoi( args[ enzMap_[ "usecomplex" ] ].c_str());
 
 	if ( isMM ) {
@@ -536,6 +540,7 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 		return enz;
 	} else {
 		Id enz = shell_->doCreate( "Enz", pa, tail, dim );
+		double parentVol = Field< double >::get( pa.eref(), "size" );
 		assert( enz != Id () );
 		string enzPath = args[2].substr( 10 );
 		enzIds_[ enzPath ] = enz; 
@@ -550,8 +555,9 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 		assert( cplx != Id () );
 		molIds_[ cplxPath ] = enz; 
 		Field< double >::set( cplx.eref(), "nInit", nComplexInit );
+		SetGet1< double >::set( cplx.eref(), "setSize", parentVol );
 
-		separateVols( cplx, vol );
+		separateVols( cplx, parentVol );
 
 		bool ret = shell_->doAddMsg( "single", 
 			FullId( enz, 0 ), "cplx",
@@ -612,7 +618,7 @@ Id ReadKkit::buildGroup( const vector< string >& args )
 Id ReadKkit::buildMol( const vector< string >& args )
 {
 	static vector< unsigned int > dim( 1, 1 );
-	const double NA = 6.023e23;
+	const double NA = 6.0e23; // Kkit uses 6e23 for NA.
 
 	string head;
 	string tail = pathTail( args[2], head );
@@ -620,9 +626,14 @@ Id ReadKkit::buildMol( const vector< string >& args )
 	assert( pa != Id() );
 
 	double nInit = atof( args[ molMap_[ "nInit" ] ].c_str() );
-	double vol = atof( args[ molMap_[ "vol" ] ].c_str() );
-	// Vol was scaling factor to convert to uM.
-	vol = 1.0e3 / (NA * vol ); // Converts volscale to actual vol in SI
+	double vsf = atof( args[ molMap_[ "vol" ] ].c_str() ); 
+	/**
+	 * vsf is vol scale factor, which is what GENESIS stores in 'vol' field
+	 * n = vsf * conc( uM )
+	 * Also, n = ( conc (uM) / 1e6 ) * NA * vol
+	 * so, vol = 1e6 * vsf / NA
+	 */
+	double vol = 1.0e3 * vsf / NA; // Converts volscale to actual vol in m^3
 	int slaveEnable = atoi( args[ molMap_[ "slave_enable" ] ].c_str() );
 	double diffConst = atof( args[ molMap_[ "DiffConst" ] ].c_str() );
 

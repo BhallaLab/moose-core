@@ -131,7 +131,7 @@ class ReadKkit
 		map< string, Id > plotIds_;
 
 		vector< double > vols_;
-		vector< vector< Id > > mols_;
+		vector< vector< Id > > volCategories_;
 		vector< Id > compartments_;
 
 		Shell* shell_;

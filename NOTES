@@ -6850,5 +6850,17 @@ global field is filled in. This would involve some nasty memory management.
 For now, put in the extra double for the volume. Wasteful but the alternatives
 are not much better. Note that we have other similar things in the pipeline,
 like diffusion constant. Note also that all these go away when the solver
-gets rid of individual entries.
+gets rid of individual entries. Checkin 2052.
+============================================================================
+16 July.
+Setting up scan for volumes for generation of compartments. Vol categorization
+code puts the test model dend_v26.g into 3 compartments, clearly incompatible:
+# cases		Vol		Notes
+129		2.767e-27	Likely the molecules as there were 129 of them
+				But the value is wrong. Should be 1e-15 m^3
+49		600000		Likely enzymes.
+5		1		?
+
+Fixed various issues here: the vol scaling is corrected, and the enzyme complex
+vols are set by that of the parent enzyme.
 
