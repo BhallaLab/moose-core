@@ -6862,5 +6862,74 @@ code puts the test model dend_v26.g into 3 compartments, clearly incompatible:
 5		1		?
 
 Fixed various issues here: the vol scaling is corrected, and the enzyme complex
-vols are set by that of the parent enzyme.
+vols are set by that of the parent enzyme. Checkin 2053.
 
+Now return to the issue of organizing compartments and groups.
+- Should 'containment' be represented by group hierarchy?
+- Should 'neighbour' be represented by peers?
+- Should compartmentalization take precedence over grouping?
+
+We have three kinds of tree structure to deal with:
+- Grouping
+- Containment
+- Neighbours.
+Can we merge the containment and neighbour tree structure? 
+	Should we treat a compartment as a single entity with an array of
+	parts that have diffusive coupling?
+	- It may have structure (spines, etc) that need to be positioned off
+	individual compt entries.
+
+No, I think we keep each of these distinct. There can be separate messages
+to keep track of each of these relationships.
+
+Options:
+1. Use current grouping as parent/child relationship.
+2. Use Containment as parent/child relationship
+3. Use above merged containment/neighbour tree as parent/child.
+4. Use tree hierarchy in whatever grouping seems sensible, let 
+	Containment/neighbour messages deal with themselves. By default
+	put containers in flat hierarchy like in neuron model defaults, but
+	this is not mandatory. 'Sensible' in this case also implies that
+	the grouping should be easy to array-ify.
+
+1. is simple for kkit use, but at odds with desired formalizing of containment.
+2. is good for SBML and other containment forms, but is not informative about
+	multiple array entries each containing something. 
+3. is probably not good to mix concepts. We want very clear-cut info from
+	the messaging.
+4. is free-form and puts the burden of organization on separate message-linked
+	trees.
+
+Use cases: 
+	Dendrite with linear diffusion and lots of spines
+	Presynaptic terminal with lots of vesicles
+	Neuron model paralleled to electrical model
+
+Seems like all of these can be done with option 2. Other levels of organization
+are all easy, and all that we have done is to state that the 'containment'
+concept is the primary one.
+
+For kkit conversions: 
+Largest compartment is not always container. Consider PSD and diffusive models.
+Thus, /kinetics should not be assumed to be a compartment. This, though, will
+make it extremely hard to handle backward compatibility in scripts.
+
+Option 4 it is then. The next thing is to standardize the location and
+organization of the grouping, container, and geometry objects.
+ReadKkit puts stuff under a specified modelname, which can be under any
+parent. 
+/pa/modelname/kinetics
+is where stuff now goes.
+So all these things should go under /pa/modelname:
+/pa/modelname/compartments		: Msg to all child Elements.
+/pa/modelname/geometry			: Msg from/to compartments
+/pa/modelname/grouping			: Msg to relevant child Elements.
+/pa/modelname/kinetics			: Neutral based groups and kinetic model
+
+============================================================================
+17 July.
+Put in first step at implementing the compartmental stuff. Molecules
+are adopted by their compartments. Seems OK.
+Should I also put reactions into compartments? See what SBML does.
+
+============================================================================

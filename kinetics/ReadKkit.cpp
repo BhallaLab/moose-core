@@ -255,18 +255,17 @@ void ReadKkit::innerRead( ifstream& fin )
 
 void ReadKkit::makeStandardElements()
 {
+	vector< unsigned int > dims( 1, 1 );
 	Id kinetics = Neutral::child( baseId_.eref(), "kinetics" );
 	if ( kinetics == Id() ) {
-		vector< unsigned int > dims( 1, 1 );
 		kinetics = 
-		shell_->doCreate( "ChemCompt", baseId_, "kinetics", dims );
+		shell_->doCreate( "Neutral", baseId_, "kinetics", dims );
 	}
 	assert( kinetics != Id() );
 	assert( kinetics.eref().element()->getName() == "kinetics" );
 
 	Id graphs = Neutral::child( baseId_.eref(), "graphs" );
 	if ( graphs == Id() ) {
-		vector< unsigned int > dims( 1, 1 );
 		graphs = 
 		shell_->doCreate( "Neutral", baseId_, "graphs", dims );
 	}
@@ -274,11 +273,31 @@ void ReadKkit::makeStandardElements()
 
 	Id moregraphs = Neutral::child( baseId_.eref(), "moregraphs" );
 	if ( moregraphs == Id() ) {
-		vector< unsigned int > dims( 1, 1 );
 		moregraphs = 
 		shell_->doCreate( "Neutral", baseId_, "moregraphs", dims );
 	}
 	assert( moregraphs != Id() );
+
+	Id compartments = Neutral::child( baseId_.eref(), "compartments" );
+	if ( compartments == Id() ) {
+		compartments = 
+		shell_->doCreate( "Neutral", baseId_, "compartments", dims );
+	}
+	assert( compartments != Id() );
+
+	Id geometry = Neutral::child( baseId_.eref(), "geometry" );
+	if ( geometry == Id() ) {
+		geometry = 
+		shell_->doCreate( "Neutral", baseId_, "geometry", dims );
+	}
+	assert( geometry != Id() );
+
+	Id groups = Neutral::child( baseId_.eref(), "groups" );
+	if ( groups == Id() ) {
+		groups = 
+		shell_->doCreate( "Neutral", baseId_, "groups", dims );
+	}
+	assert( groups != Id() );
 }
 
 ReadKkit::ParseMode ReadKkit::readInit( const string& line )
@@ -480,34 +499,44 @@ void ReadKkit::separateVols( Id mol, double vol )
 // This is not true in synapses, where they are adjacent.
 void ReadKkit::assignCompartments()
 {
-	static const double TINY = 1e-3;
 	double max = 0.0;
+	unsigned int maxi;
 	Id kinetics = Neutral::child( baseId_.eref(), "kinetics" );
 	assert( kinetics != Id() );
 	for ( unsigned int i = 0 ; i < vols_.size(); ++i ) {
-		if ( max < vols_[i] )
+		if ( max < vols_[i] ) {
 			max = vols_[i];
-	}
-
-	Field< double >::set( kinetics.eref(), "size", max );
-	vector< unsigned int > dims( 1, 1 );
-
-	for ( unsigned int i = 0 ; i < vols_.size(); ++i ) {
-		if ( fabs ( max - vols_[i] ) / (max + vols_[i] ) > TINY ) {
-			stringstream ss;
-			ss << "compartment_" << i;
-			Id compt = shell_->doCreate( 
-				"ChemCompartment", kinetics, ss.str(), dims );
-			compartments_.push_back( compt );
-		} else {
-			compartments_.push_back( kinetics );
+			maxi = i;
 		}
 	}
-	// Set up a map/vector of molecule Ids with their volumes.
-	// Associate each group with one or more volumes
-	// If more than one, then the group is split. This is done by
-	// making a duplicate with the same name on the appropriate compartment.
-	// Ignore any intermediate group nesting. Rare anyway.
+	
+	// Field< double >::set( kinetics.eref(), "size", max );
+	vector< unsigned int > dims( 1, 1 );
+
+	if ( vols_.size() == 1 )
+		return;
+	
+	for ( unsigned int i = 0 ; i < volCategories_.size(); ++i ) {
+		string name;
+		if ( i == maxi ) {
+			name = "main_compartment";
+		} else {
+			stringstream ss;
+			ss << "compartment_" << i;
+			name = ss.str();
+		}
+		Id compt = shell_->doCreate( 
+			"ChemCompt", baseId_, name, dims );
+		compartments_.push_back( compt );
+		for ( vector< Id >::iterator j = volCategories_[i].begin();
+			j != volCategories_[i].end(); ++j ) {
+			// get the group Ids that have a different vol in them
+			bool ret = shell_->doAddMsg( "single", 
+				FullId( compt, 0 ), "compartment",
+				FullId( *j, 0 ), "setSize" ); 
+			assert( ret != Msg::badMsg );
+		}
+	}
 }
 
 Id ReadKkit::buildEnz( const vector< string >& args )

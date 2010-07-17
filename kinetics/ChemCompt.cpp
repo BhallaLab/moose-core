@@ -11,6 +11,11 @@
 #include "Boundary.h"
 #include "ChemCompt.h"
 
+static SrcFinfo1< double > compartment( 
+		"compartment", 
+		"Tracks all molecules in the compartment, also updates with size."
+);
+
 static SrcFinfo0 requestSize( 
 		"requestSize", 
 		"Requests size from geometry. "
@@ -62,6 +67,8 @@ const Cinfo* ChemCompt::initCinfo()
 	static Finfo* chemComptFinfos[] = {
 		&size,	// Value
 		&dimensions,	// Value
+		&requestSize,	// SrcFinfo
+		&compartment,	// SrcFinfo
 		&group,			// DestFinfo
 	};
 
