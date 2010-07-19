@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Jul 12 16:23:43 2010 (+0530)
-#           By: Subhasis Ray
-#     Update #: 773
+# Last-Updated: Mon Jul 19 16:32:34 2010 (+0530)
+#           By: subha
+#     Update #: 774
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -315,6 +315,7 @@ class MooseHandler(QtCore.QObject):
             self._connDestObj = None
             self._connSrcMsg = None
             self._connDestMsg = None
+        return ret
 
     def setConnSrc(self, fieldPath):
         pos = fieldPath.rfind('/')
