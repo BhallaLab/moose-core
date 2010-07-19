@@ -41,5 +41,5 @@ openfile { outfile } w
 closefile { outfile }
 
 save_plots
-quit
+//quit
 
