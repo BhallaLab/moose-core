@@ -700,11 +700,14 @@ void NeuromlReader::setupSynChannels(map< string,vector<string> > &groupcableMap
 			double gbar = gmax * sa;
 			::set< double >( synchannel_,synGbarFinfo,gbar );
 			Element* copyEl = synchannel_->copy(comptEl(),synchannel_->name());
-			Eref(comptEl()).add("channel",copyEl,"channel",ConnTainer::Default );
 			if ( isblock == true ){
 				Id child = Neutral::getChildByName(Eref(copyEl),"block");
 				Eref(comptEl()).add("channel",child(),"channel",ConnTainer::Default );
 			}
+			else {
+				Eref(comptEl()).add("channel",copyEl,"channel",ConnTainer::Default );
+			}
+			
 		   }
 		}
 	}
