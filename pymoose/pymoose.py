@@ -106,6 +106,9 @@ def printtree(root, vchar='|', hchar='__', vcount=1, depth=0, prefix='', is_last
     is_last - for internal use - should not be explicitly passed.
 
     """
+    if isinstance(root, str) or isinstance(root, Id):
+        root = moose.Neutral(root)
+
     for i in range(vcount):
         print prefix
 
