@@ -6930,6 +6930,101 @@ So all these things should go under /pa/modelname:
 17 July.
 Put in first step at implementing the compartmental stuff. Molecules
 are adopted by their compartments. Seems OK.
-Should I also put reactions into compartments? See what SBML does.
+Should I also put reactions into compartments? See what SBML does. 
+Checkin 2054.
+
+From 28 June we had:
+- ReadKkit to default create the solver and stuff, and to
+schedule it.
+- Solver to remove process messages if present.
+- Solver expanding into arrays
+- Solver expanding into arrays with diffusion using RK
+- Parallellization of all this.
+- Multithreading of all this.
+
+1. I need to fix the naming. ChemCompt refers to a cellular compartment,
+	which may be spatially extended. I should have a separate naming
+	with the spatial compartment, which is internally uniform and is used
+	for numerical calculations. Let's call it voxel.
+2. Different cellular compartments are very likely to discretize differently.
+	They are even likely to use different solvers. So solvers should be
+	compartment-specific.
+3. If solvers are compartment-specific, then we need to set up a clean way
+	to interface between them. Brute force is forward Euler to estimate
+	fluxes. I've done a little calculation to work out a Crank-Nicolson
+	scheme with an intermediate transfer 'compartment' that doesn't
+	react, but I haven't figured out how to deal with the mol concs in it.
+
+
+Consider voxels A-1, A, A-1 where 
+	A is the inserted transfer voxel,
+	A-1 is the last voxel on the first compartment
+	A+1 is the first voxel on the second compartment.
+
+Explicit calculation:
+A(t+1) = A(t) + dt*( A-1(t) + A+1(t) - 2A(t) )
+
+Implicit calculation:
+A(t+1) = A(t) + dt*( A-1(t+1) + A+1(t+1) - 2A(t+1) )
+
+To make it Crank-Nicolson, we take the average of the above two. 
+
+For now, just use forward Euler for flux. Possibly exp Euler even.
+Each timestep, get 
+
+Flux = A-1(t)*D/dx - A+1(t)*D/dx
+
+vtot(A-1) = v - Flux
+vtot(A+1) = v + Flux
+
+Another complication: Stoich will need a different flux for each boundary.
+So boundaries have to be ElementFields. As an example, a branching dendrite
+will need 3 flux entries: one for parent, and two more for the two branches.
+
+Stoichs will have to match up the molecules that diffuse, and send out
+only those. This looks like a set of extra 'v' terms.
+
+Now that this is defined, I need to go back a couple of steps to set up
+array stoichs within a compartment. This is needed before I can figure out 
+how to deal with the end-terms for flux.
 
 ============================================================================
+18 July 2010
+Starting on array-ification of Stoich. 
+- For GslIntegrator, we now need to build a y_ vector big enough for entire
+	model.
+- For Stoich, we need to keep assiging S_ and passing in the correct
+	part of y_
+- For zombies, we need to access y_ rather than S_. 
+- Should we move the y_ vector into the Stoich?
+
+
+============================================================================
+19 July
+Did a first pass implementation. This further underlines the desirability
+of using indexing rather than pointers in RateTerms. Specifically, the
+loop begs to be parallelized, but can't be as long as the native data
+structure of the Stoich is being used for all calculations. This could
+be avoided with indexing, as we then only need to base the indices off
+different points in the mol conc vector. The remaining 
+difficulty with this idea is that in diffusive models, we need to look
+up buffer and func molecules in a different way from the variable 
+molecules. Offsets in mol Conc need to go to different parts of the 
+overall varMol vector, whereas the buffers and func mols can be shared.
+Options
+	- fold buffers/funcMols into the RateTerms?
+	- Have distinct kinds of RateTerms for buffered mols.
+	- Do memcopy into thread-unique buffers
+	- Put the buffer/func mols at the end of the entire varMol set.
+First two options will need multiple distinct kinds of RateTerms.
+Fourth option will work and will also deal with individual access to all fields.
+
+Anyway, get the first pass working first. This needs changes to GslIntegrator
+to move the y_ vector out of it into the Stoich.
+Did this, but more updates needed. The gsl output isn't coming because I
+had changed the 'Mol' class. Fixed that, but now I get all zeroes because the
+plot is trying to look up concentration, and the Stoich system doesn't
+currently keep track of volumes. So all the Zombies return 0.
+
+
+

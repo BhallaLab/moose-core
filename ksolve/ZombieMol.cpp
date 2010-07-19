@@ -55,6 +55,16 @@ const Cinfo* ZombieMol::initCinfo()
 			&ZombieMol::getConcInit
 		);
 
+		static ReadOnlyElementValueFinfo< ZombieMol, double > size(
+			"size",
+			"Size of compartment. Units are SI. "
+			"Utility field, the master size info is "
+			"stored on the compartment itself. For voxel-based spatial"
+			"models, the 'size' of the molecule at a given index is the"
+			"size of that voxel.",
+			&ZombieMol::getSize
+		);
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -73,6 +83,12 @@ const Cinfo* ZombieMol::initCinfo()
 		static DestFinfo reacDest( "reacDest",
 			"Handles reaction input",
 			new OpFunc2< ZombieMol, double, double >( &ZombieMol::reac )
+		);
+
+		static DestFinfo setSize( "setSize",
+			"Separate finfo to assign size, should only be used by compartment."
+			"Defaults to SI units of volume: m^3",
+			new EpFunc1< ZombieMol, double >( &ZombieMol::setSize )
 		);
 
 		//////////////////////////////////////////////////////////////
@@ -106,7 +122,11 @@ const Cinfo* ZombieMol::initCinfo()
 		&n,	// Value
 		&nInit,	// Value
 		&diffConst,	// Value
+		&conc,	// Value
+		&concInit,	// Value
+		&size,		// Value
 		&group,			// DestFinfo
+		&setSize,			// DestFinfo
 		&reac,				// SharedFinfo
 		&proc,				// SharedFinfo
 	};
@@ -202,6 +222,17 @@ void ZombieMol::setDiffConst( const Eref& e, const Qinfo* q, double v )
 double ZombieMol::getDiffConst( const Eref& e, const Qinfo* q ) const
 {
 	// return diffConst_;
+	return 0;
+}
+
+void ZombieMol::setSize( const Eref& e, const Qinfo* q, double v )
+{
+	// size_ = v;
+}
+
+double ZombieMol::getSize( const Eref& e, const Qinfo* q ) const
+{
+	// return size_;
 	return 0;
 }
 

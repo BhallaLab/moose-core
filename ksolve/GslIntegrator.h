@@ -47,7 +47,7 @@ class GslIntegrator
 		double* y_;
 		unsigned int nVarMols_;
 		void* stoich_;
-		const vector< unsigned int >* dynamicBuffers_;
+//		const vector< unsigned int >* dynamicBuffers_;
 
 		const gsl_odeiv_step_type* gslStepType_;
 		gsl_odeiv_step* gslStep_;

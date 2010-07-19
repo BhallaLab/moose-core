@@ -137,7 +137,8 @@ void Stoich::process( const Eref& e, ProcPtr p )
 
 void Stoich::reinit( const Eref& e, ProcPtr p )
 {
-	;
+	y_.assign( Sinit_.begin(), Sinit_.begin() + numVarMols_ );
+	S_ = Sinit_;
 }
 
 //////////////////////////////////////////////////////////////
@@ -168,6 +169,7 @@ void Stoich::setPath( const Eref& e, const Qinfo* q, string v )
 	allocateObjMap( elist );
 	allocateModel( elist );
 	zombifyModel( e, elist );
+	y_.assign( Sinit_.begin(), Sinit_.begin() + numVarMols_ );
 
 	/*
 	cout << "Zombified " << numVarMols_ << " Molecules, " <<
@@ -263,6 +265,7 @@ void Stoich::allocateModel( const vector< Id >& elist )
 	numVarMolsBytes_ = numVarMols_ * sizeof( double );
 	S_.resize( numVarMols_ + numBufMols_ + numFuncMols_, 0.0 );
 	Sinit_.resize( numVarMols_ + numBufMols_ + numFuncMols_, 0.0 );
+	y_.resize( numVarMols_ );
 	rates_.resize( numReac_ );
 	v_.resize( numReac_, 0.0 );
 	funcs_.resize( numFuncMols_ );
@@ -419,6 +422,11 @@ double* Stoich::varS()
 const double* Stoich::Sinit() const
 {
 	return &Sinit_[0];
+}
+
+double* Stoich::getY()
+{
+	return &y_[0];
 }
 
 #ifdef USE_GSL

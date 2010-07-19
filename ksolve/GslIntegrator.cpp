@@ -111,7 +111,7 @@ GslIntegrator::GslIntegrator()
 	absAccuracy_ = 1.0e-6;
 	relAccuracy_ = 1.0e-6;
 	internalStepSize_ = 1.0e-4;
-	y_ = 0;
+	// y_ = 0;
         gslEvolve_ = NULL;
         gslControl_ = NULL;
 }
@@ -124,9 +124,9 @@ GslIntegrator::~GslIntegrator()
 		gsl_odeiv_control_free( gslControl_ );
 	if ( gslStep_ )
 		gsl_odeiv_step_free( gslStep_ );
+	/*
 	if ( y_ )
 		delete[] y_;
-	/*
 		*/
 }
 
@@ -217,13 +217,14 @@ void GslIntegrator::stoich( Stoich* s )
 {
 #ifdef USE_GSL
 	nVarMols_ = s->getNumVarMols();
+	y_ = s->getY();
+	/*
 	y_ = new double[ nVarMols_ ];
-	// dynamicBuffers_ = s->dynamicBuffers(); // filthy, just a ptr copy
-	// y_ = s->varS();
 
 	memcpy( y_, s->Sinit(), nVarMols_ * sizeof( double ) );
 	for ( unsigned int i = 0; i < nVarMols_; ++i )
 		assert( !isnan( y_[ i ] ) && y_[i] >= 0.0 );
+		*/
 
 	isInitialized_ = 1;
         // Allocate GSL functions if not already allocated,

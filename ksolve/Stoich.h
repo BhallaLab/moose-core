@@ -47,6 +47,7 @@ class Stoich
 		const double* S() const;
 		double* varS();
 		const double* Sinit() const;
+		double* getY();
 
 		//////////////////////////////////////////////////////////////////
 		// Compute functions
@@ -91,10 +92,24 @@ class Stoich
 		 */
 		vector< double > S_;
 		vector< double > Sinit_;
+
+		/// v_ holds the rates of each reaction
 		vector< double > v_;
+
+		/// The RateTerms handle the update operations for reaction rate v_
 		vector< RateTerm* > rates_;
+
+		/// The FuncTerms handle mathematical ops on mol levels.
 		vector< FuncTerm* > funcs_;
+
+		/// N_ is the stoichiometry matrix.
 		KinSparseMatrix N_;
+
+		/**
+		 * y_ is working memory, only the variable molecule levels. 
+		 * Should be possible to replace with S.
+		 */
+		vector< double > y_;
 
 		/**
 		 * Maps Ids to objects in the S_, RateTerm, and FuncTerm vectors.

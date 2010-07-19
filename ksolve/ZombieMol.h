@@ -32,6 +32,9 @@ class ZombieMol: public Stoich
 		void setConcInit( const Eref& e, const Qinfo* q, double v );
 		double getConcInit( const Eref& e, const Qinfo* q ) const;
 
+		void setSize( const Eref& e, const Qinfo* q, double v );
+		double getSize( const Eref& e, const Qinfo* q ) const;
+
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
