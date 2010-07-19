@@ -3,7 +3,7 @@ INCLUDEDIR = /usr/include/libxml2/
 CXX        = g++
 CXXFLAGS   = -g -Wall 
 LDFLAGS    = 
-LIBS       = -lxml2 -L/usr/local/lib/
+LIBS       = -lxml2 -L/usr/lib/
 
 # Get the processor architecture - i686 or x86_64
 MACHINE?=i686 
