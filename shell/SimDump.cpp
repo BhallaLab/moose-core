@@ -102,18 +102,18 @@ SimDump::SimDump()
 	// eventually evolve out of these. Perhaps SBML.
 	sid.push_back( new SimDumpInfo(
 		"kpool", "Molecule", 
-		"DiffConst n nInit vol slave_enable", 
-		"D n nInit volumeScale slave_enable") );
+		"DiffConst n nInit vol slave_enable x y xtree_textfg_req", 
+		"D n nInit volumeScale slave_enable x y xtree_textfg_req") );
 	sid.push_back( new SimDumpInfo(
-		"kreac", "Reaction", "kf kb", "kf kb") );
+		"kreac", "Reaction", "kf kb x y xtree_textfg_req", "kf kb x y xtree_textfg_req") );
 	sid.push_back( new SimDumpInfo( "kenz", "Enzyme",
-		"k1 k2 k3 usecomplex nComplexInit",
-		"k1 k2 k3 mode nInitComplex") );
+		"k1 k2 k3 usecomplex nComplexInit x y xtree_textfg_req",
+		"k1 k2 k3 mode nInitComplex x y xtree_textfg_req") );
 	sid.push_back( new SimDumpInfo( "xtab", "Table",
 	"input output step_mode stepsize",
 	"input output stepmode stepsize" ) );
 
-	sid.push_back( new SimDumpInfo( "group", "KinCompt", "", "" ) );
+	sid.push_back( new SimDumpInfo( "group", "KinCompt", "x y", "x y" ) );
 	sid.push_back( new SimDumpInfo( "xgraph", "Neutral", "", "" ) );
 	sid.push_back( new SimDumpInfo( "xplot", "Table", "", "" ) );
 

@@ -39,7 +39,13 @@ class Molecule
 		static void setConcInit( const Conn* c, double value );
 		static double getD( Eref e );
 		static void setD( const Conn* c, double value );
-		
+		static double getX( Eref e );
+		static void setX( const Conn* c, double value );
+		static double getY( Eref e );
+		static void setY( const Conn* c, double value );
+		static string getColor( Eref e );
+		static void setColor( const Conn* c, string value );
+
 		///////////////////////////////////////////////////
 		// Dest function definitions
 		///////////////////////////////////////////////////
@@ -71,7 +77,9 @@ class Molecule
 		double B_;	/// Internal state variable
 		static const double EPSILON; /// Used for Exp Euler calculations
 		double D_;	/// Diffusion constant
-
+		double x_; //x co ordinate for display
+		double y_; //y co ordinate for display
+		string xtree_textfg_req_; //text color
 };
 
 // Used by the solver

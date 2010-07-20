@@ -80,6 +80,19 @@ const Cinfo* initKinComptCinfo()
 			"Number of dimensions of this compartment. Typically 3, "
 			"but for a membrane compartment we might have 2."
 		),
+		new ValueFinfo( "x", 
+			ValueFtype1< double >::global(),
+			GFCAST( &KinCompt::getX ), 
+			RFCAST( &KinCompt::setX ),
+			"X coordinate: for display."
+		),
+		new ValueFinfo( "y", 
+			ValueFtype1< double >::global(),
+			GFCAST( &KinCompt::getY ), 
+			RFCAST( &KinCompt::setY ),
+			"Y coordinate: for display."
+		),
+
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
@@ -275,7 +288,25 @@ unsigned int KinCompt::getNumDimensions( Eref e )
 {
 	return static_cast< KinCompt* >( e.data() )->numDimensions_;
 }
+void KinCompt::setX( const Conn* c, double value )
+{
+	static_cast< KinCompt* >( c->data() )->x_ = value;
+}
 
+double KinCompt::getX( Eref e )
+{
+	return static_cast< KinCompt* >( e.data() )->x_;
+}
+
+void KinCompt::setY( const Conn* c, double value )
+{
+	static_cast< KinCompt* >( c->data() )->y_ = value;
+}
+
+double KinCompt::getY( Eref e )
+{
+	return static_cast< KinCompt* >( e.data() )->y_;
+}
 
 ///////////////////////////////////////////////////
 // MsgDest functions.
