@@ -64,6 +64,25 @@ const Cinfo* initReactionCinfo()
 			GFCAST( &Reaction::getKb ), 
 			RFCAST( &Reaction::setKb ) 
 		),
+		new ValueFinfo( "x", 
+			ValueFtype1< double >::global(),
+			GFCAST( &Reaction::getX ), 
+			RFCAST( &Reaction::setX ),
+			"X coordinate: for display."
+		),
+		new ValueFinfo( "y", 
+			ValueFtype1< double >::global(),
+			GFCAST( &Reaction::getY ), 
+			RFCAST( &Reaction::setY ),
+			"Y coordinate: for display."
+		),
+		new ValueFinfo( "xtree_textfg_req", 
+			ValueFtype1< string >::global(),
+			GFCAST( &Reaction::getColor ), 
+			RFCAST( &Reaction::setColor ),
+			"Y coordinate: for display."
+		),
+
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
 	///////////////////////////////////////////////////////
@@ -205,6 +224,37 @@ double Reaction::getKb( Eref e )
 		return static_cast< Reaction* >( e.data() )->kb_ * volScale;
 	}
 }
+void Reaction::setX( const Conn* c, double value )
+{
+	static_cast< Reaction* >( c->data() )->x_ = value;
+}
+
+double Reaction::getX( Eref e )
+{
+	return static_cast< Reaction* >( e.data() )->x_;
+}
+
+void Reaction::setY( const Conn* c, double value )
+{
+	static_cast< Reaction* >( c->data() )->y_ = value;
+}
+
+double Reaction::getY( Eref e )
+{
+	return static_cast< Reaction* >( e.data() )->y_;
+}
+
+
+void Reaction::setColor( const Conn* c, string value )
+{
+	static_cast< Reaction* >( c->data() )->xtree_textfg_req_ = value;
+}
+
+string Reaction::getColor( Eref e )
+{
+	return static_cast< Reaction* >( e.data() )->xtree_textfg_req_;
+}
+
 
 /**
  * Ratio is ratio of new vol to old vol.
