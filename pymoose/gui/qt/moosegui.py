@@ -90,7 +90,7 @@ from mooseplot import MoosePlot
 from plotconfig import PlotConfig
 from glwizard import MooseGLWizard
 from firsttime import FirstTimeWizard
-
+from layout import Screen
 
 def makeClassList(parent=None, mode=MooseGlobals.MODE_ADVANCED):
     """Make a list of classes that can be used in current mode
@@ -158,6 +158,7 @@ class MainWindow(QtGui.QMainWindow):
         # model objects for moose objects.
         self.objFieldEditorMap = {}
         self.makeShellDock(interpreter)
+	
         # By default, we show information about MOOSE in the central widget
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
         self.centralPanel = QtGui.QMdiArea(self)
@@ -175,7 +176,8 @@ class MainWindow(QtGui.QMainWindow):
         self.setCentralWidget(self.centralPanel)
         self.centralPanel.tileSubWindows()
         self.connect(self.centralPanel, QtCore.SIGNAL('subWindowActivated(QMdiSubWindow *)'), self.setCurrentPlotWindow)
-        # We connect the double-click event on the class-list to
+
+	# We connect the double-click event on the class-list to
         # insertion of moose object in model tree.
         for listWidget in self.mooseClassesWidget.getClassListWidget():
             self.connect(listWidget, 
@@ -649,8 +651,13 @@ class MainWindow(QtGui.QMainWindow):
             self.centralPanel.tileSubWindows()
         self.currentPlotWindow = plotWindow
         return plotWindow
-        
 
+    def addLayoutWindow(self):
+        self.layout = Screen()
+        self.centralPanel.addSubWindow(self.layout)
+	self.centralPanel.tileSubWindows()
+        self.layout.show()
+    
     def popupLoadModelDialog(self):
         fileDialog = QtGui.QFileDialog(self)
         fileDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
@@ -677,6 +684,7 @@ class MainWindow(QtGui.QMainWindow):
                 modeltype  = self.mooseHandler.loadModel(str(fileName), str(fileType))
 		if modeltype == MooseHandler.type_kkit:
                     self.populateKKitPlots()
+		    self.addLayoutWindow()
                 print 'Loaded model',  fileName, 'of type', modeltype
             self.modelTreeWidget.recreateTree()
 
