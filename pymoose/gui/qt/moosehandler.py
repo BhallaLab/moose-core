@@ -541,7 +541,7 @@ class MooseHandler(QtCore.QObject):
         tableList = []
         for container in moose.Neutral('/moregraphs').children():
             for child in moose.Neutral(container).children():
-                if child.className == 'Table':
+                if moose.Neutral(child).className == 'Table':
                     tableList.append(moose.Table(child))
         return tableList
         
