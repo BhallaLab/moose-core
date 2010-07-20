@@ -7025,6 +7025,29 @@ Did this, but more updates needed. The gsl output isn't coming because I
 had changed the 'Mol' class. Fixed that, but now I get all zeroes because the
 plot is trying to look up concentration, and the Stoich system doesn't
 currently keep track of volumes. So all the Zombies return 0.
+Checkin 2060.
 
+============================================================================
+20 July
 
+Will need 3 modes of operation at least:
+1. general Stoich class, picks up entire simulation for GSL or Gillespie
+	calculation applied across whole model. This one will need to refer
+	to all of the compartments.
+2. Compartmental Stoich class. Fills in a single compartment and can
+	discretize it in various ways. May even take over from the Compartment
+	class. This one will have to provide flux terms for interfaces,
+	as well as do something sensible about reactions spanning boundaries.
+3. Compartmental nonStoich solvers, such as Smoldyn. Fills in a single
+	compartment and does whatever it does internally. May take over from
+	Compartment class. Provides flux terms.
 
+For starters we need to implement 1, to be able to load and run generic
+models. 
+Then we need to convert this and RateTerms to use array indices rather than
+pointers.
+Then we derive the compartmental Stoich class from it and set up to do
+1-D arrays with branching etc.
+
+Did item 1 which was to pick up all compartments and deal with the volume
+and conc stuff. This required several fixes in ReadKkit.

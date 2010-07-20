@@ -40,6 +40,8 @@ class Stoich
 		void allocateObjMap( const vector< Id >& elist );
 		void allocateModel( const vector< Id >& elist );
 		void zombifyModel( const Eref& e, const vector< Id >& elist );
+		void zombifyChemCompt( Id compt );
+
 		unsigned int convertIdToReacIndex( Id id ) const;
 		unsigned int convertIdToMolIndex( Id id ) const;
 		unsigned int convertIdToFuncIndex( Id id ) const;
@@ -92,6 +94,24 @@ class Stoich
 		 */
 		vector< double > S_;
 		vector< double > Sinit_;
+
+		/**
+		 * Lookup from each molecule to its parent compartment index
+		 */
+		vector< short > compartment_;
+
+		/**
+		 * Size of each compartment
+		 */
+		vector< double > compartmentSize_;
+
+		/**
+		 * Number of subdivisions of compartment. Actually should be
+		 * dimensions.
+		 */
+		vector< short > compartmentVoxels_;
+
+
 
 		/// v_ holds the rates of each reaction
 		vector< double > v_;

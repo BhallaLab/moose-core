@@ -15,6 +15,8 @@
 
 #define EPSILON 1e-15
 
+static const double NA = 6.023e23;
+
 const Cinfo* ZombieMol::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
@@ -192,26 +194,38 @@ double ZombieMol::getNinit( const Eref& e, const Qinfo* q ) const
 	return Sinit_[ convertIdToMolIndex( e.id() ) ];
 }
 
-void ZombieMol::setConc( const Eref& e, const Qinfo* q, double v )
+void ZombieMol::setConc( const Eref& e, const Qinfo* q, double conc )
 {
-	// n_ = v * size_;
+	unsigned int mol = convertIdToMolIndex( e.id() );
+	unsigned int index = compartment_[ mol ];
+	assert( index < compartmentSize_.size() );
+	S_[ mol ] = 1e-3 * NA * conc * compartmentSize_[ index ];
 }
 
 double ZombieMol::getConc( const Eref& e, const Qinfo* q ) const
 {
-	// return n_ / size_;
-	return 0;
+	unsigned int mol = convertIdToMolIndex( e.id() );
+	unsigned int index = compartment_[ mol ];
+	assert( index < compartmentSize_.size() );
+	assert( compartmentSize_[ index ] > 0.0 );
+	return 1e3 * S_[ mol ] / ( NA * compartmentSize_[ index ] );
 }
 
-void ZombieMol::setConcInit( const Eref& e, const Qinfo* q, double v )
+void ZombieMol::setConcInit( const Eref& e, const Qinfo* q, double conc )
 {
-	// nInit_ = v * size_;
+	unsigned int mol = convertIdToMolIndex( e.id() );
+	unsigned int index = compartment_[ mol ];
+	assert( index < compartmentSize_.size() );
+	Sinit_[ mol ] = 1e-3 * NA * conc * compartmentSize_[ index ];
 }
 
 double ZombieMol::getConcInit( const Eref& e, const Qinfo* q ) const
 {
-	// return nInit_ / size_;
-	return 0;
+	unsigned int mol = convertIdToMolIndex( e.id() );
+	unsigned int index = compartment_[ mol ];
+	assert( index < compartmentSize_.size() );
+	assert( compartmentSize_[ index ] > 0.0 );
+	return 1e3 * Sinit_[ mol ] / ( NA * compartmentSize_[ index ] );
 }
 
 void ZombieMol::setDiffConst( const Eref& e, const Qinfo* q, double v )
@@ -227,13 +241,15 @@ double ZombieMol::getDiffConst( const Eref& e, const Qinfo* q ) const
 
 void ZombieMol::setSize( const Eref& e, const Qinfo* q, double v )
 {
-	// size_ = v;
+	// Illegal operation.
 }
 
 double ZombieMol::getSize( const Eref& e, const Qinfo* q ) const
 {
-	// return size_;
-	return 0;
+	unsigned int mol = convertIdToMolIndex( e.id() );
+	unsigned int index = compartment_[ mol ];
+	assert( index < compartmentSize_.size() );
+	return compartmentSize_[ index ];
 }
 
 //////////////////////////////////////////////////////////////

@@ -53,7 +53,7 @@ endif
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-Stoich.o:	ZombieMol.h ZombieReac.h ZombieBufMol.h ZombieEnz.h ZombieMMenz.h ../kinetics/Mol.h ../kinetics/Reac.h ../kinetics/BufMol.h ../kinetics/Enz.h ../kinetics/MMenz.h
+Stoich.o:	ZombieMol.h ZombieReac.h ZombieBufMol.h ZombieEnz.h ZombieMMenz.h ../kinetics/Mol.h ../kinetics/Reac.h ../kinetics/BufMol.h ../kinetics/FuncMol.h ../kinetics/Enz.h ../kinetics/MMenz.h ../kinetics/Boundary.h ../kinetics/ChemCompt.h
 KinSparseMatrix.o:	KinSparseMatrix.h ../basecode/SparseMatrix.h
 ZombieMol.o:	ZombieMol.h
 ZombieBufMol.o:	ZombieMol.h ZombieBufMol.h

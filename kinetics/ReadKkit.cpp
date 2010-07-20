@@ -513,9 +513,6 @@ void ReadKkit::assignCompartments()
 	// Field< double >::set( kinetics.eref(), "size", max );
 	vector< unsigned int > dims( 1, 1 );
 
-	if ( vols_.size() == 1 )
-		return;
-	
 	for ( unsigned int i = 0 ; i < volCategories_.size(); ++i ) {
 		string name;
 		if ( i == maxi ) {
@@ -527,6 +524,7 @@ void ReadKkit::assignCompartments()
 		}
 		Id compt = shell_->doCreate( 
 			"ChemCompt", baseId_, name, dims );
+		Field< double >::set( compt.eref(), "size", vols_[i] );
 		compartments_.push_back( compt );
 		for ( vector< Id >::iterator j = volCategories_[i].begin();
 			j != volCategories_[i].end(); ++j ) {

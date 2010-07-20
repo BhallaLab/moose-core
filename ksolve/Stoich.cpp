@@ -16,6 +16,8 @@
 #include "Enz.h"
 #include "MMenz.h"
 #include "SumFunc.h"
+#include "Boundary.h"
+#include "ChemCompt.h"
 #include "ZombieMol.h"
 #include "ZombieBufMol.h"
 #include "ZombieFuncMol.h"
@@ -265,6 +267,7 @@ void Stoich::allocateModel( const vector< Id >& elist )
 	numVarMolsBytes_ = numVarMols_ * sizeof( double );
 	S_.resize( numVarMols_ + numBufMols_ + numFuncMols_, 0.0 );
 	Sinit_.resize( numVarMols_ + numBufMols_ + numFuncMols_, 0.0 );
+	compartment_.resize( numVarMols_ + numBufMols_ + numFuncMols_, 0.0 );
 	y_.resize( numVarMols_ );
 	rates_.resize( numReac_ );
 	v_.resize( numReac_, 0.0 );
@@ -280,6 +283,7 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 	static const Cinfo* reacCinfo = Reac::initCinfo();
 	static const Cinfo* enzCinfo = Enz::initCinfo();
 	static const Cinfo* mmEnzCinfo = MMenz::initCinfo();
+	static const Cinfo* chemComptCinfo = ChemCompt::initCinfo();
 	// static const Cinfo* sumFuncCinfo = SumFunc::initCinfo();
 	// The FuncMol handles zombification of stuff coming in to it.
 
@@ -303,7 +307,33 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 		else if ( ei->cinfo() == enzCinfo ) {
 			ZombieEnz::zombify( e.element(), (*i)() );
 		}
+		else if ( ei->cinfo() == chemComptCinfo ) {
+			zombifyChemCompt( *i ); // It retains its identity.
+			// ZombieChemCompt::zombify( e.element(), (*i)() );
+		}
 	}
+}
+
+void Stoich::zombifyChemCompt( Id compt )
+{
+	static const Cinfo* chemComptCinfo = ChemCompt::initCinfo();
+	static const Finfo* finfo = chemComptCinfo->findFinfo( "compartment" );
+	ChemCompt* c = reinterpret_cast< ChemCompt* >( compt.eref().data() );
+
+	Element* e = compt();
+	vector< Id > mols;
+	const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >( finfo );
+	assert( sf );
+	unsigned int numTgts = e->getOutputs( mols, sf );
+
+	for ( vector< Id >::iterator i = mols.begin(); i != mols.end(); ++i ) {
+		unsigned int m = convertIdToMolIndex( *i );
+		compartment_[ m ] = compartmentSize_.size();
+	}
+
+	assert( numTgts > 0 );
+
+	compartmentSize_.push_back( c->getSize() );
 }
 
 unsigned int Stoich::convertIdToMolIndex( Id id ) const
