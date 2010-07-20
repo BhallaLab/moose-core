@@ -407,13 +407,15 @@ class MooseHandler(QtCore.QObject):
         print 'Created GLCell for object', mooseObjPath, ' on port', port
 
         
-    def makeGLView(self, mooseObjPath, port, fieldList, minValueList, maxValueList, colorFieldIndex, morphFieldIndex=None, grid=None, bgColor=None, sync=None):
+    def makeGLView(self, mooseObjPath, wildcard, port, fieldList, minValueList, maxValueList, colorFieldIndex, morphFieldIndex=None, grid=None, bgColor=None, sync=None):
         """
         Make a GLview object to visualize some field of a bunch of
         moose elements.
         
         mooseObjPath -- GENESIS-style path for elements to be
         observed.
+
+	wildcard -- for selecting sub elements to be viewed
 
         port -- port to use for communicating with the client.
 
@@ -439,18 +441,25 @@ class MooseHandler(QtCore.QObject):
 
         """
         glViewPath = mooseObjPath.replace('/', '_') + str(random.randint(0,999))
+	print 'Created GLView object',  glViewPath
         glView = moose.GLview(glViewPath, self._gl)
         glView.useClock(4)
         self._portPathMap[port] = mooseObjPath
         self._pathPortMap[mooseObjPath].add(port)        
         self._portServerMap[port] = glView
         glView.vizpath = mooseObjPath
-        glView.clientPort = port
+	if  wildcard:
+	    glView.vizpath = glView.vizpath +  '/' + wildcard
+	print 'Set vizpath to', mooseObjPath
+	print 'client Port: ', port
+        glView.port = port
         if len(fieldList) > 5:
             fieldList = fieldList[:5]
 
         for ii in range(len(fieldList)):
-            visField = 'value%dField' % (ii+1)
+            visField = 'value%d' % (ii+1)
+	    if (not fieldList[ii]) or (len(fieldList[ii].strip()) == 0):
+		continue
             setattr(glView, visField, fieldList[ii])
             try:
                 if isinstance(minValueList[ii], float):
