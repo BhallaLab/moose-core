@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Jul  9 21:23:39 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Jul 20 12:20:39 2010 (+0530)
+# Last-Updated: Tue Jul 20 13:33:58 2010 (+0530)
 #           By: subha
-#     Update #: 794
+#     Update #: 798
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -342,9 +342,10 @@ class MooseGLWizard(QtGui.QWizard):
         sync = 'on' if self.field('syncButton').toBool() else 'off'
         glcellMode = self.field('glcellMode').toBool()
         port = str(self.field('port').toString())
+        self._port = port
         glclient = str(self.field('glclient').toString())
         colormap = str(self.field('colormap').toString())
-        print '%s\n%s\n%d\n%s\n%s\n%s' % (bgColor, sync, glcellMode, port, glclient, colormap)
+        print 'Starting client with the following parameters: background: %s\nsync: %s\nglCellMode: %d\nport: %s\nglclient: %s\ncolormap: %s' % (bgColor, sync, glcellMode, port, glclient, colormap)
         client = self._mooseHandler.startGLClient(glclient, port, 'c' if glcellMode else 'v', colormap)
         time.sleep(3)
         if glcellMode:
@@ -362,7 +363,7 @@ class MooseGLWizard(QtGui.QWizard):
             (vscale, ok) = self.field('vscale').toDouble()
             if not ok:
                 vscale = None                
-            self._mooseHandler.makeGLCell(self._targetObject.path, port, field, threshold, lowValue, highValue, vscale, bgColor, sync)
+            self._mooseHandler.makeGLCell(self._targetObject.path, self._port, field, threshold, lowValue, highValue, vscale, bgColor, sync)
         else:
             field = []
             valueMin = []
