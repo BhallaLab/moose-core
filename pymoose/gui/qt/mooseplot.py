@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul  5 21:35:09 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Jul  9 03:25:33 2010 (+0530)
-#           By: Subhasis Ray
-#     Update #: 511
+# Last-Updated: Tue Jul 20 16:43:18 2010 (+0530)
+#           By: subha
+#     Update #: 513
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -248,11 +248,12 @@ class MoosePlot(Qwt.QwtPlot):
 
     def reset(self):
         if not self.overlay:
+            self.updatePlot(0)
             return
         table_list = []
         try:
             while self.tableCurveMap:
-                (table, curve) = self.tableCurveMap.popitem()                
+                (table, curve) = self.tableCurveMap.popitem()
                 self.curveTableMap.pop(curve)
                 table_list.append(table)
         except KeyError:
