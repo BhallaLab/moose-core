@@ -42,7 +42,10 @@ class KinCompt
 		virtual void innerSetSize( Eref e, double value, bool ignoreRescale = 0 );
 		static unsigned int getNumDimensions( Eref e );
 		static void setNumDimensions( const Conn* c, unsigned int value );
-
+		static double getX( Eref e );
+		static void setX( const Conn* c, double value );
+		static double getY( Eref e );
+		static void setY( const Conn* c, double value );
 		///////////////////////////////////////////////////
 		// Message handlers
 		///////////////////////////////////////////////////
@@ -121,6 +124,10 @@ class KinCompt
 		 */
 		 unsigned int numAssigned_;
 		 unsigned int numMatching_;
+
+		double x_;		/// x coordinate for display
+		double y_;		/// y coordinate for display
+
 };
 
 // Used by the Smoldyn solver
