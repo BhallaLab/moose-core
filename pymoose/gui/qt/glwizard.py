@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Jul  9 21:23:39 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jul 14 14:55:07 2010 (+0530)
-#           By: Subhasis Ray
-#     Update #: 787
+# Last-Updated: Tue Jul 20 11:57:49 2010 (+0530)
+#           By: subha
+#     Update #: 790
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -369,14 +369,14 @@ class MooseGLWizard(QtGui.QWizard):
             valueMax = []
             for ii in range(5):
                 field.append(str(self.field('fieldName%d' % (ii+1)).toString()))
-                (valueMin, ok) = self.field('valueMin%d' % (ii+1)).toDouble()
+                (value, ok) = self.field('valueMin%d' % (ii+1)).toDouble()
                 if not ok:
-                    valueMin = 0.0
-                valueMin.append(valueMin)
-                (valueMax, ok) = self.field('valueMax%d' % (ii+1)).toDouble() 
+                    value = 0.0
+                valueMin.append(value)
+                (value, ok) = self.field('valueMax%d' % (ii+1)).toDouble() 
                 if not ok:
-                    valueMax = 1.0
-                valueMax.append(valueMax)
+                    value = 1.0
+                valueMax.append(value)
             (colorFieldIndex, ok) = self.field('colorField').toInt()
             if not ok:
                 colorFieldIndex = 1
