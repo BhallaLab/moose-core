@@ -200,7 +200,7 @@ class MooseGLWizard(QtGui.QWizard):
         page.setSubTitle('Expand the model tree and select an element to observe in 3-D')
         layout = QtGui.QGridLayout()
         tree = MooseTreeWidget()
-        self.connect(tree, QtCore.SIGNAL('itemClicked(QTreeWidgetItem&, int)'), self._setTargetObject)
+        self.connect(tree, QtCore.SIGNAL('itemClicked(QTreeWidgetItem*, int)'), self._setTargetObject)
 
         fieldsLabel = QtGui.QLabel(self.tr('&Field to observe'))
         fieldsLineEdit = QtGui.QLineEdit('Vm')
@@ -256,7 +256,7 @@ class MooseGLWizard(QtGui.QWizard):
         page.setTitle('Select GLView Target ')
         page.setSubTitle('Expand the model tree and select an element to observe in 3-D')
         tree = MooseTreeWidget()
-        self.connect(tree, QtCore.SIGNAL('itemClicked(QTreeWidgetItem&, int)'), self._setTargetObject)
+        self.connect(tree, QtCore.SIGNAL('itemClicked(QTreeWidgetItem*, int)'), self._setTargetObject)
 
         wildCardLabel = QtGui.QLabel(self.tr('&Wildcard for elements to observe'))
         wildCardLineEdit = QtGui.QLineEdit('##[CLASS=Compartment]')
@@ -284,7 +284,7 @@ class MooseGLWizard(QtGui.QWizard):
             fieldNameEdit = QtGui.QLineEdit()
             valueMinEdit = QtGui.QLineEdit()
             valueMaxEdit = QtGui.QLineEdit()
-            valueFieldMap[ii] = (valueLabel, fieldNameEdit, valueMinEdit, valueMaxEdit)
+            valueFieldMap[ii+1] = (valueLabel, fieldNameEdit, valueMinEdit, valueMaxEdit)
             layout.addWidget(valueLabel, currentRow, 0)
             layout.addWidget(fieldNameEdit, currentRow, 1)
             layout.addWidget(valueMinEdit, currentRow, 2)
@@ -320,6 +320,7 @@ class MooseGLWizard(QtGui.QWizard):
             page.registerField('fieldName%d' % (key), value[1])
             page.registerField('valueMin%d' % (key), value[2])
             page.registerField('valueMax%d' % (key), value[3])
+	page.registerField('wildcard', wildCardLineEdit)
         page.registerField('colorField', colorFieldCombo, 'currentText')
         page.registerField('morphField', morphFieldCombo, 'currentText')
         page.registerField('grid', gridButton)
@@ -327,6 +328,7 @@ class MooseGLWizard(QtGui.QWizard):
 
     def _setTargetObject(self, item, column):
         self._targetObject = item.getMooseObject()
+	print 'Target object set to:', self._targetObject.path
 
     def _chooseBackgroundColorSlot(self):
         currentColor = self._bgColorButton.palette().color(QtGui.QPalette.Background)
@@ -378,6 +380,7 @@ class MooseGLWizard(QtGui.QWizard):
                 if not ok:
                     value = 1.0
                 valueMax.append(value)
+	    wildcard = str(self.field('wildcard').toString())
             (colorFieldIndex, ok) = self.field('colorField').toInt()
             if not ok:
                 colorFieldIndex = 1
@@ -385,7 +388,7 @@ class MooseGLWizard(QtGui.QWizard):
             if not ok:
                 morphFieldIndex = 1
             grid = 'on' if self.field('grid').toBool() else 'off'
-            self._mooseHandler.makeGLView(self._targetObject.path, self._port, field, valueMin, valueMax, colorFieldIndex, morphFieldIndex, grid, bgColor, sync)
+            self._mooseHandler.makeGLView(self._targetObject.path, wildcard, self._port, field, valueMin, valueMax, colorFieldIndex, morphFieldIndex, grid, bgColor, sync)
 
 # from glcellloader import GLCellLoader
 if __name__ == '__main__':
