@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jul 14 14:59:36 2010 (+0530)
-#           By: Subhasis Ray
-#     Update #: 2287
+# Last-Updated: Tue Jul 20 16:30:41 2010 (+0530)
+#           By: subha
+#     Update #: 2292
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -198,8 +198,8 @@ class MainWindow(QtGui.QMainWindow):
 
         self.sourceTree = MooseTreeWidget(self.connectionDialog)
         self.destTree = MooseTreeWidget(self.connectionDialog)
-        self.sourceTree.itemClicked.connect(self.selectConnSource)
-        self.destTree.itemClicked.connect(self.selectConnDest)
+        self.connect(self.sourceTree, QtCore.SIGNAL('itemClicked(QAbstractTreeItem *, int)'), self.selectConnSource)
+        self.connect(self.destTree, QtCore.SIGNAL('itemClicked(QAbstractTreeItem*, int)'), self.selectConnDest)
         sourceFieldLabel = QtGui.QLabel(self.tr('Source Field'), self.connectionDialog)
         self.sourceFieldComboBox = QtGui.QComboBox(self.connectionDialog)
         
@@ -214,8 +214,8 @@ class MainWindow(QtGui.QMainWindow):
         cancelButton = QtGui.QPushButton(self.tr('Cancel'), self.connectionDialog)
         self.connect(cancelButton, QtCore.SIGNAL('clicked()'), self.connectionDialog.reject)
 
-        self.connectionDialog.accepted.connect(self.createConnection)
-        self.connectionDialog.rejected.connect(self.cancelConnection)
+        self.connect(self.connectionDialog, QtCore.SIGNAL('accepted()'), self.createConnection)
+        self.connect(self.connectionDialog, QtCore.SIGNAL('rejected()'), self.cancelConnection)
 
         layout = QtGui.QGridLayout()
         layout.addWidget(self.sourceTree, 0, 0, 5, 2)
@@ -729,6 +729,7 @@ class MainWindow(QtGui.QMainWindow):
             self.updateTimeText.setText(str(updateInterval))
         self.mooseHandler.doReset(simdt, plotdt, gldt, updateInterval)
         for table, plot in self.tablePlotMap.items():
+            print 'Clearing plot', table.name
             table.clear()
             plot.setOverlay(self.overlayCheckBox.isChecked())
             plot.reset()
