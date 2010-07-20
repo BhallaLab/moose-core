@@ -39,7 +39,13 @@ class Enzyme
 		static void setNinitComplex( const Conn* c, double value );
 		static double getConcInitComplex( Eref e );
 		static void setConcInitComplex( const Conn* c, double value );
-
+		static double getX( Eref e );
+		static void setX( const Conn* c, double value );
+		static double getY( Eref e );
+		static void setY( const Conn* c, double value );
+		static string getColor( Eref e );
+		static void setColor( const Conn* c, string value );
+		
 		///////////////////////////////////////////////////
 		// Shared message function definitions
 		///////////////////////////////////////////////////
@@ -82,6 +88,9 @@ class Enzyme
 		double sk1_;	
 		double Km_;
 		void (Enzyme::*procFunc_ )( Eref e );
+		double x_;		/// x coordinate for display
+		double y_;		/// y coordinate for display
+		string xtree_textfg_req_; //text color
 };
 
 // Used by the solver
