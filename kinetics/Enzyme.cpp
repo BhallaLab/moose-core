@@ -93,6 +93,24 @@ const Cinfo* initEnzymeCinfo()
 			GFCAST( &Enzyme::getConcInitComplex ), 
 			RFCAST( &Enzyme::setConcInitComplex )
 		),
+				new ValueFinfo( "x", 
+			ValueFtype1< double >::global(),
+			GFCAST( &Enzyme::getX ), 
+			RFCAST( &Enzyme::setX ),
+			"X coordinate: for display."
+		),
+		new ValueFinfo( "y", 
+			ValueFtype1< double >::global(),
+			GFCAST( &Enzyme::getY ), 
+			RFCAST( &Enzyme::setY ),
+			"Y coordinate: for display."
+		),
+		new ValueFinfo( "xtree_textfg_req", 
+			ValueFtype1< string >::global(),
+			GFCAST( &Enzyme::getColor ), 
+			RFCAST( &Enzyme::setColor ),
+			"text Color : for display."
+		),
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
@@ -449,6 +467,35 @@ void Enzyme::complexFunc( const Conn* c, double n )
 {
 	static_cast< Enzyme* >( c->data() )->sA_ *= n;
 	static_cast< Enzyme* >( c->data() )->pA_ *= n;
+}
+void Enzyme::setX( const Conn* c, double value )
+{
+	static_cast< Enzyme* >( c->data() )->x_ = value;
+}
+
+double Enzyme::getX( Eref e )
+{
+	return static_cast< Enzyme* >( e.data() )->x_;
+}
+
+void Enzyme::setY( const Conn* c, double value )
+{
+	static_cast< Enzyme* >( c->data() )->y_ = value;
+}
+
+double Enzyme::getY( Eref e )
+{
+	return static_cast< Enzyme* >( e.data() )->y_;
+}
+
+void Enzyme::setColor( const Conn* c, string value )
+{
+	static_cast< Enzyme* >( c->data() )->xtree_textfg_req_ = value;
+}
+
+string Enzyme::getColor( Eref e )
+{
+	return static_cast< Enzyme* >( e.data() )->xtree_textfg_req_;
 }
 
 ///////////////////////////////////////////////////

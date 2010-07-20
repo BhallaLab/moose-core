@@ -32,6 +32,12 @@ class Reaction
 		static double getKf( Eref e );
 		static void setKb( const Conn* c, double value );
 		static double getKb( Eref e );
+		static double getX( Eref e );
+		static void setX( const Conn* c, double value );
+		static double getY( Eref e );
+		static void setY( const Conn* c, double value );
+		static string getColor( Eref e );
+		static void setColor( const Conn* c, string value );
 		
 		///////////////////////////////////////////////////
 		// Shared message function definitions
@@ -63,6 +69,10 @@ class Reaction
 		double kb_;
 		double A_;
 		double B_;
+		double x_;
+		double y_;
+		string xtree_textfg_req_;
+
 };
 
 // Used by the solver

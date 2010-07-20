@@ -109,6 +109,25 @@ const Cinfo* initMoleculeCinfo()
 			RFCAST( &Molecule::setD ),
 			"Diffusion constant of molecule."
 		),
+		new ValueFinfo( "x", 
+			ValueFtype1< double >::global(),
+			GFCAST( &Molecule::getX ), 
+			RFCAST( &Molecule::setX ),
+			"X coordinate: for display."
+		),
+		new ValueFinfo( "y", 
+			ValueFtype1< double >::global(),
+			GFCAST( &Molecule::getY ), 
+			RFCAST( &Molecule::setY ),
+			"Y coordinate: for display."
+		),
+		new ValueFinfo( "xtree_textfg_req", 
+			ValueFtype1< string >::global(),
+			GFCAST( &Molecule::getColor ), 
+			RFCAST( &Molecule::setColor ),
+			"Y coordinate: for display."
+		),
+
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
@@ -357,7 +376,35 @@ double Molecule::getD( Eref e )
 {
 	return static_cast< Molecule* >( e.data() )->D_;
 }
+void Molecule::setX( const Conn* c, double value )
+{
+	static_cast< Molecule* >( c->data() )->x_ = value;
+}
 
+double Molecule::getX( Eref e )
+{
+	return static_cast< Molecule* >( e.data() )->x_;
+}
+
+void Molecule::setY( const Conn* c, double value )
+{
+	static_cast< Molecule* >( c->data() )->y_ = value;
+}
+
+double Molecule::getY( Eref e )
+{
+	return static_cast< Molecule* >( e.data() )->y_;
+}
+
+void Molecule::setColor( const Conn* c, string value )
+{
+	static_cast< Molecule* >( c->data() )->xtree_textfg_req_ = value;
+}
+
+string Molecule::getColor( Eref e )
+{
+	return static_cast< Molecule* >( e.data() )->xtree_textfg_req_;
+}
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
