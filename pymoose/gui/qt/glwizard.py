@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Jul  9 21:23:39 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Jul 20 13:33:58 2010 (+0530)
+# Last-Updated: Tue Jul 20 12:20:39 2010 (+0530)
 #           By: subha
-#     Update #: 798
+#     Update #: 794
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -105,10 +105,20 @@ class MooseGLWizard(QtGui.QWizard):
         # else:
         #     self._settings.setValue(config.KEY_GL_CLIENT_EXECUTABLE, self._glClientExe)
         self._settings.setValue(config.KEY_GL_CLIENT_EXECUTABLE, QtCore.QVariant(self._glClientExe))
+
+    def nextId(glClientPage):
+	if glClientPage.field('glcellMode').toBool():
+		return MooseGLWizard.pageIdMap['glcell']  
+	else:
+		return MooseGLWizard.pageIdMap['glview']
+
+    def nextIdFinal(glPage):
+	print 'nextIdFinal'
+	return -1	
                                      
     def _makeGLClientPage(self):
         page = QtGui.QWizardPage(self)
-        page.nextId = lambda glClientPage: MooseGLWizard.pageIdMap['glcell'] if glClientPage.field('glcellMode').toBool() else MooseGLWizard.pageIdMap['glview']
+        page.nextId = MooseGLWizard.nextId
 
 
         page.setTitle(self.tr('Configure Client'))
@@ -195,7 +205,8 @@ class MooseGLWizard(QtGui.QWizard):
 
     def _makeGLCellPage(self):
         page = QtGui.QWizardPage()
-        page.nextId = lambda glCellPage: -1
+        page.nextId = MooseGLWizard.nextIdFinal
+	page.setFinalPage(True)
         page.setTitle('Select GLCell Target ')
         page.setSubTitle('Expand the model tree and select an element to observe in 3-D')
         layout = QtGui.QGridLayout()
@@ -252,7 +263,8 @@ class MooseGLWizard(QtGui.QWizard):
 
     def _makeGLViewPage(self):
         page = QtGui.QWizardPage()
-        page.nextId = lambda glViewPage: -1
+        page.nextId = MooseGLWizard.nextIdFinal
+	page.setFinalPage(True)
         page.setTitle('Select GLView Target ')
         page.setSubTitle('Expand the model tree and select an element to observe in 3-D')
         tree = MooseTreeWidget()
@@ -328,7 +340,6 @@ class MooseGLWizard(QtGui.QWizard):
 
     def _setTargetObject(self, item, column):
         self._targetObject = item.getMooseObject()
-	print 'Target object set to:', self._targetObject.path
 
     def _chooseBackgroundColorSlot(self):
         currentColor = self._bgColorButton.palette().color(QtGui.QPalette.Background)
