@@ -188,10 +188,9 @@ def _genesis_xyc():
 		xycord_list[n].setX(float(xycord_list[n].getX())*alpha1)
 		xycord_list[n].setY(float(xycord_list[n].getY())*alpha1)
 
-
 	#I wanted all the value in the graph should be positive value so checking the max x and y value and adding
-	max_X = 0
-	max_Y = 0
+	max_X = 0.0
+	max_Y = 0.0
 	for n in range(len(xycord_list)):
 		
 		if(max_X > xycord_list[n].getX()):
@@ -199,7 +198,6 @@ def _genesis_xyc():
 
 		if(max_Y > xycord_list[n].getY()):
 			max_Y = xycord_list[n].getY()
-
 
 	for n in range(len(xycord_list)):
 		xycord_list[n].setX(float(xycord_list[n].getX())+abs(max_X))
