@@ -86,7 +86,7 @@ class MoosePlot(Qwt.QwtPlot):
         self.tableCurveMap = {} # moose table -> curve
         self.overlay = False
         legend = Qwt.QwtLegend()
-        legend.setItemMode(Qwt.QwtLegend.CheckableItem)
+        legend.setItemMode(Qwt.QwtLegend.ClickableItem)
         self.insertLegend(legend, Qwt.QwtPlot.RightLegend)
         # self.setTitle('Plot %d' % (self.plotNo))
         mY = Qwt.QwtPlotMarker()
@@ -111,6 +111,8 @@ class MoosePlot(Qwt.QwtPlot):
                                    self.canvas())
         self.zoomer.setRubberBandPen(QtGui.QPen(Qt.black))
         self.zoomer.setTrackerPen(QtGui.QPen(Qt.black))
+	QtCore.QObject.connect(self, QtCore.SIGNAL("legendClicked(QwtPlotItem *)"), self.plotItemClicked)
+
 
     def clearZoomStack(self):
         """Auto scale and clear the zoom stack
@@ -140,6 +142,7 @@ class MoosePlot(Qwt.QwtPlot):
         self.replot()
             
     def showSelectedCurves(self, on):
+	print "here in showselectedcurve"
         for item in self.itemList():
             widget = self.legend().find(item)
             if isinstance(widget, Qwt.QwtLegendItem) and widget.isChecked():
@@ -265,6 +268,22 @@ class MoosePlot(Qwt.QwtPlot):
         self.tableCurveMap.clear()
         self.curveTableMap.clear()
         QtGui.QwtPlotDict.detachItems(self)
+
+    def plotItemClicked(self,item):
+	
+	if(item.isVisible):
+		''' Initially all the item.isVisible is true'''
+		item.setVisible(not item.isVisible)
+                item.isVisible = False
+		item.setItemAttribute(Qwt.QwtPlotItem.AutoScale,False);	                 
+        else:
+                '''If the item.isVisible is made false (say hidden) here makes true'''
+                item.setVisible(not item.isVisible)
+                item.isVisible = True
+                item.setItemAttribute(Qwt.QwtPlotItem.AutoScale,True);	                 
+            
+	self.replot()
+ 		
 
 import sys
 if __name__ == '__main__':
