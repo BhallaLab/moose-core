@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 2.6)
 # set(data_structure_headers
 #   AckPickData.h
 #   GLcellResetData.h
@@ -46,7 +47,9 @@ set(glclient_sources
 #   SmoldynShapeData.h
 #   GLviewShape.h
 #   )
-set(client_osg_libs osg osgUtil osgDB osgGA osgViewer osgText OpenThreads)
-set(client_boost_libs boost_filesystem boost_system boost_serialization boost_thread)
-add_executable(glclient ${glclient_sources})
-target_link_libraries(glclient ${client_osg_libs} ${client_boost_libs})
+FIND_PACKAGE(Boost 1.40.0 COMPONENTS filesystem system serialization thread REQUIRED)
+FIND_PACKAGE(OpenSceneGraph 2.8.0 COMPONENTS osgDB osgUtil osgGA osgViewer osgText)
+INCLUDE_DIRECTORIES(${OPENSCENEGRAPH_INCLUDE_DIRS})
+ADD_EXECUTABLE(glclient ${glclient_sources})
+TARGET_LINK_LIBRARIES(glclient ${Boost_LIBRARIES} ${OPENSCENEGRAPH_LIBRARIES})
+
