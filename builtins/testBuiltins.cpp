@@ -88,7 +88,7 @@ void testFibonacci()
 	*/
 
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-	shell->setclock( 0, 1.0, 0 );
+	shell->doSetClock( 0, 1.0 );
 	Eref ticker = Id( 2 ).eref();
 
 	const Finfo* proc0Finfo = Tick::initCinfo()->findFinfo( "process0" );
@@ -158,7 +158,7 @@ void testMpiFibonacci()
 	assert( ret );
 	*/
 
-	shell->setclock( 0, 1.0, 0 );
+	shell->doSetClock( 0, 1.0 );
 	Eref ticker = Id( 2 ).eref();
 //	ret = OneToAllMsg::add( ticker, "process0", a1, "process" );
 //	assert( ret );
@@ -232,7 +232,7 @@ void testGetMsg()
 	assert( ret != Msg::badMsg );
 	SetGet1< double >::set( arithid.eref(), "arg1", 0.0 );
 	SetGet1< double >::set( arithid.eref(), "arg2", 2.0 );
-	shell->setclock( 0, 1, 0 );
+	shell->doSetClock( 0, 1 );
 	shell->doUseClock( "/tab,/arith", "process", 0 );
 	shell->doStart( 100 );
 

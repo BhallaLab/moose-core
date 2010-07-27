@@ -79,9 +79,9 @@ void testGslIntegrator()
 	Qinfo::mpiClearQ( &p );
 	assert( gi->getIsInitialized() );
 
-	s->setclock( 0, rk.getPlotDt(), 0 );
-	s->setclock( 1, rk.getPlotDt(), 0 );
-	s->setclock( 2, rk.getPlotDt(), 0 );
+	s->doSetClock( 0, rk.getPlotDt() );
+	s->doSetClock( 1, rk.getPlotDt() );
+	s->doSetClock( 2, rk.getPlotDt() );
 	string gslpath = rk.getBasePath() + "/gsl";
 	string  plotpath = rk.getBasePath() + "/graphs/##[TYPE=Table],/moregraphs/##[TYPE=Table]";
 	s->doUseClock( gslpath, "process", 0 );

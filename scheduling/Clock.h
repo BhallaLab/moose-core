@@ -28,8 +28,6 @@ class Clock
 
 		void setTickDt( DataId i, double v );
 		double getTickDt( DataId i ) const;
-		void setStage( DataId i, unsigned int  v );
-		unsigned int  getStage( DataId i ) const;
 		unsigned int getNumPendingThreads() const;
 		void setNumPendingThreads( unsigned int num );
 		unsigned int getNumThreads() const;
@@ -59,9 +57,9 @@ class Clock
 
 		/**
 		 * This utility function creates a tick on the assigned tickNum,
-		 * if necessary expanding the ticks_ array. Assigns dt and stage.
+		 * Assigns dt.
 		 */
-		void setupTick( unsigned int tickNum, double dt, unsigned int stage );
+		void setupTick( unsigned int tickNum, double dt );
 
 		///////////////////////////////////////////////////////////
 		// Tick handlers

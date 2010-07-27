@@ -292,7 +292,7 @@ class Shell
 		// Sets up clock ticks. Essentially is a call into the 
 		// Clock::setupTick function, but may be needed to be called from
 		// the parser so it is a Shell function too.
-		void setclock( unsigned int tickNum, double dt, unsigned int stage );
+		void doSetClock( unsigned int tickNum, double dt );
 
 		// Should set these up as streams so that we can build error
 		// messages similar to cout.

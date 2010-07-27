@@ -1031,17 +1031,18 @@ void testUpValue()
 	assert ( ticke != 0 );
 	assert ( ticke->getName() == "tick" );
 
-	assert( ticke->dataHandler()->numData() == 0 );
+	assert( ticke->dataHandler()->numData() == 10 );
+	/*
 	bool ret = Field< unsigned int >::set( clocker, "numTicks", size );
 	assert( ret );
-	assert( ticke->dataHandler()->numData() == size );
+	*/
 
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		DataId di( 0, i ); // DataId( data, field )
 		Eref te( ticke, di );
 		double dt = i;
-		ret = Field< double >::set( te, "dt", dt );
+		bool ret = Field< double >::set( te, "dt", dt );
 		assert( ret );
 		double val = Field< double >::get( te, "localdt" );
 		assert( fabs( dt - val ) < EPSILON );

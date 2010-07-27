@@ -141,9 +141,9 @@ Id ReadKkit::read(
 
 void ReadKkit::run()
 {
-	shell_->setclock( 0, simdt_, 0 );
-	shell_->setclock( 1, simdt_, 0 );
-	shell_->setclock( 2, plotdt_, 0 );
+	shell_->doSetClock( 0, simdt_ );
+	shell_->doSetClock( 1, simdt_ );
+	shell_->doSetClock( 2, plotdt_ );
 	string molpath = basePath_ + "/kinetics/##[ISA=Mol]";
 	string reacpath = basePath_ + "/kinetics/##[ISA!=Mol]";
 	string plotpath = basePath_ + "/graphs/##[TYPE=Table],/moregraphs/##[TYPE=Table]";
@@ -152,11 +152,11 @@ void ReadKkit::run()
 	shell_->doUseClock( plotpath, "process", 2 );
 	shell_->doReinit();
 	if ( useVariableDt_ ) {
-		shell_->setclock( 0, fastdt_, 0 );
-		shell_->setclock( 1, fastdt_, 0 );
+		shell_->doSetClock( 0, fastdt_ );
+		shell_->doSetClock( 1, fastdt_ );
 		shell_->doStart( transientTime_ );
-		shell_->setclock( 0, simdt_, 0 );
-		shell_->setclock( 1, simdt_, 0 );
+		shell_->doSetClock( 0, simdt_ );
+		shell_->doSetClock( 1, simdt_ );
 		shell_->doStart( maxtime_ - transientTime_ );
 	} else {
 		shell_->doStart( maxtime_ );

@@ -51,6 +51,8 @@ static SrcFinfo* reinitVec[] = {
 	&reinit0, &reinit1, &reinit2, &reinit3, &reinit4, &reinit5, &reinit6, &reinit7, &reinit8, &reinit9, };
 
 
+const unsigned int Tick::maxTicks = 10;
+
 const Cinfo* Tick::initCinfo()
 {
 	///////////////////////////////////////////////////////
@@ -68,12 +70,6 @@ const Cinfo* Tick::initCinfo()
 			"Timestep for this tick",
 			&Tick::setDt,
 			&Tick::getDt
-		);
-		static UpValueFinfo< Clock, unsigned int > stage(
-			"stage",
-			"Sequence number if multiple ticks have the same dt.",
-			&Clock::setStage,
-			&Clock::getStage
 		);
 		static ValueFinfo< Tick, string> path(
 			"path",
@@ -122,7 +118,6 @@ const Cinfo* Tick::initCinfo()
 		// Fields
 		&dt,
 		&localdt,
-		&stage,
 		&path,
 		// Shared SrcFinfos for process
 		&proc0,
@@ -157,7 +152,7 @@ static const Cinfo* tickCinfo = Tick::initCinfo();
 // Tick class definition functions
 ///////////////////////////////////////////////////
 Tick::Tick()
-	: dt_( 0.0 ), stage_( 0 )
+	: dt_( 0.0 ), index_( 0 )
 { ; }
 
 Tick::~Tick()
@@ -169,7 +164,7 @@ bool Tick::operator<( const Tick& other ) const
 
 	if ( dt_ < other.dt_ ) return 1;
 		if ( fabs( 1.0 - dt_ / other.dt_ ) < EPSILON && 
-			stage_ < other.stage_ )
+			index_ < other.index_ )
 			return 1;
 	return 0;
 }
@@ -177,7 +172,7 @@ bool Tick::operator<( const Tick& other ) const
 
 bool Tick::operator==( const Tick& other ) const
 {
-	return ( dt_ == other.dt_ && stage_ == other.stage_ );
+	return ( dt_ == other.dt_ && index_ == other.index_ );
 }
 
 ///////////////////////////////////////////////////
@@ -202,25 +197,6 @@ void Tick::setDt( double newdt )
 double Tick::getDt() const
 {
 	return dt_;
-}
-
-/**
- * This is called when stage is set on the local Tick.
- * Like the setDt, it has to ask the parent ClockJob to
- * re-sort the clock ticks to put them back in order.
- */
-void Tick::setStage( unsigned int v )
-{
-	stage_ = v;
-}
-
-/**
- * The getStage just looks up the local stage, much less involved than
- * the setStage function.
- */
-unsigned int Tick::getStage() const
-{
-	return stage_;
 }
 
 /**
@@ -259,7 +235,7 @@ void Tick::destroy( Eref e, const Qinfo* q )
  */
 void Tick::mpiAdvance( ProcInfo* info) const
 {
-	// cout << info->nodeIndexInGroup << "." << info->threadId << ": Tick::mpiAdvance (" << dt_ << ", " << stage_ << " ) at t= " << info->currTime << endl;
+	// cout << info->nodeIndexInGroup << "." << info->threadId << ": Tick::mpiAdvance (" << dt_ << ", " << index_ << " ) at t= " << info->currTime << endl;
 	assert( info->barrier1 );
 	assert( info->barrier2 );
 	int rc = pthread_barrier_wait(
@@ -289,7 +265,7 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 		mpiAdvance( info );
 		return;
 	}
-	// cout << Shell::myNode() << "." << info->threadId << ": Tick::advance (" << dt_ << ", " << stage_ << " ) at t= " << info->currTime << endl;
+	// cout << Shell::myNode() << "." << info->threadId << ": Tick::advance (" << dt_ << ", " << index_ << " ) at t= " << info->currTime << endl;
 	// Qinfo::reportQ();
 
 	/**

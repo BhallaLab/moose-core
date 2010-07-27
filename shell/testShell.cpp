@@ -324,12 +324,12 @@ void testShellParserStart()
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 
-	shell->setclock( 0, 5.0, 0 );
-	shell->setclock( 1, 2.0, 0 );
-	shell->setclock( 2, 2.0, 1 );
-	shell->setclock( 3, 1.0, 0 );
-	shell->setclock( 4, 3.0, 5 );
-	shell->setclock( 5, 5.0, 1 );
+	shell->doSetClock( 0, 5.0 );
+	shell->doSetClock( 1, 2.0 );
+	shell->doSetClock( 2, 2.0 );
+	shell->doSetClock( 3, 1.0 );
+	shell->doSetClock( 4, 3.0 );
+	shell->doSetClock( 5, 5.0 );
 
 
 	const Cinfo* testSchedCinfo = TestSched::initCinfo();
@@ -579,7 +579,7 @@ void testShellAddMsg()
 	///////////////////////////////////////////////////////////
 	// Set up scheduling
 	///////////////////////////////////////////////////////////
-	shell->setclock( 0, 1.0, 0 );
+	shell->doSetClock( 0, 1.0 );
 
 	FullId tick( Id( 2 ), 0 );
 	ret = setupSched( shell, tick, a1 ); assert( ret );
@@ -736,7 +736,7 @@ void testCopyMsgOps()
 	///////////////////////////////////////////////////////////
 	// Set up scheduling
 	///////////////////////////////////////////////////////////
-	shell->setclock( 0, 1.0, 0 );
+	shell->doSetClock( 0, 1.0 );
 
 	FullId tick( Id( 2 ), 0 );
 

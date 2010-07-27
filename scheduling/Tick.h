@@ -25,9 +25,6 @@ class Tick
 		///////////////////////////////////////////////////////
 		void setDt( double v );
 		double getDt() const;
-		void setStage( unsigned int v );
-		unsigned int getStage() const;
-		// double getNextTime() const;
 		void setPath( string v );
 		string getPath() const;
 
@@ -69,12 +66,14 @@ class Tick
 		void destroy( Eref e, const Qinfo* q );
 
 		///////////////////////////////////////////////////////
+		// Number of allocated ticks.
+		static const unsigned int maxTicks;
+
 		static const Cinfo* initCinfo();
 	private:
 		// bool running_;
 		// int callback_;
 		double dt_;
-		unsigned int stage_;
 
 		/**
 		 * This is the index of this Tick in the Tick array. It is needed 
@@ -82,25 +81,7 @@ class Tick
 		 * Process and clearQ.
 		 */
 		unsigned int index_; 
-		//double nextTime_;
-		//double nextTickTime_;
-		//bool next_; /// Flag to show if next_ tick is present
-		//bool terminate_;
 		string path_;/// \todo Perhaps we delete this field
 };
-
-/*
-class TickSrcFinfo: public SrcFinfo0
-{
-	public:
-		TickSrcFinfo( const string& name, const string& doc, ConnId c )
-			: SrcFinfo0( name, doc, c )
-		{;}
-		unsigned int registerConn( unsigned int current )
-		{
-			
-		}
-};
-*/
 
 #endif // _Tick_h

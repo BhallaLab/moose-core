@@ -100,10 +100,10 @@ const Cinfo* Clock::initCinfo()
 			&Clock::setNsteps,
 			&Clock::getNsteps
 		);
-		static ValueFinfo< Clock, unsigned int > numTicks( 
+		static ReadOnlyValueFinfo< Clock, unsigned int > numTicks( 
 			"numTicks",
 			"Number of clock ticks",
-			&Clock::setNumTicks,
+			// &Clock::setNumTicks,
 			&Clock::getNumTicks
 		);
 		static ValueFinfo< Clock, unsigned int > numPendingThreads( 
@@ -147,7 +147,7 @@ const Cinfo* Clock::initCinfo()
 
 		static DestFinfo setupTick( "setupTick", 
 			"Sets up a specific clock tick: args tick#, dt, stage",
-			new OpFunc3< Clock, unsigned int, double, unsigned int >(&Clock::setupTick )
+			new OpFunc2< Clock, unsigned int, double >(&Clock::setupTick )
 		);
 
 		static DestFinfo reinit( "reinit", 
@@ -222,8 +222,12 @@ Clock::Clock()
 	  isRunning_( 0 ),
 	  info_(),
 	  numPendingThreads_( 0 ),
-	  numThreads_( 0 )
-{;}
+	  numThreads_( 0 ),
+	  ticks_( Tick::maxTicks )
+{
+	for ( unsigned int i = 0; i < Tick::maxTicks; ++i )
+		ticks_[i].setIndex( i );
+}
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
@@ -553,39 +557,13 @@ double Clock::getTickDt( DataId i ) const
 }
 
 /**
- * This function handles any changes to stage in the ticks. This means
- * it must redo the ordering of the ticks and call a resched on them.
- */
-void Clock::setStage( DataId i, unsigned int val )
-{
-	if ( i.field() < ticks_.size() ) {
-		ticks_[ i.field() ].setStage( val ); 
-		rebuild();
-	} else {
-		cout << "Clock::setStage:: Tick " << i << " not found\n";
-	}
-}
-
-unsigned int Clock::getStage( DataId i ) const
-{
-	if ( i.field() < ticks_.size() ) {
-		return ticks_[ i.field() ].getStage(); 
-	} else {
-		cout << "Clock::getStage:: Tick " << i << " not found\n";
-	}
-	return 0;
-}
-
-/**
  * This function sets up a new tick, or reassigns an existing one.
  */
-void Clock::setupTick( unsigned int tickNum, double dt, unsigned int stage )
+void Clock::setupTick( unsigned int tickNum, double dt )
 {
-	if ( tickNum >= ticks_.size() ) {
-		ticks_.resize( tickNum + 1 );
-	}
+	assert( tickNum < Tick::maxTicks );
 	ticks_[ tickNum ].setDt( dt );
-	ticks_[ tickNum ].setStage( stage );
+	// ticks_[ tickNum ].setStage( stage );
 	rebuild();
 }
 
@@ -612,16 +590,8 @@ void Clock::rebuild()
 {
 	tickPtr_.clear();
 	for( unsigned int i = 0; i < ticks_.size(); ++i ) {
-		ticks_[i].setIndex( i );
-		addTick( &( ticks_[i] ) );
+		addTick( &( ticks_[i] ) ); // This fills in only ticks that are used
 	}
-	/*
-	for ( vector< Tick >::iterator i = ticks_.begin(); 
-		i != ticks_.end(); ++i)
-	{
-		addTick( &( *i ) );
-	}
-	*/
 	sort( tickPtr_.begin(), tickPtr_.end() );
 }
 

@@ -114,47 +114,37 @@ void setupTicks()
 	// bool ret = OneToAllMsg::add( clocker, "childTick", ticke, "parent" );
 	// assert( ret );
 
-	assert( ticke->dataHandler()->numData() == 0 );
+	assert( ticke->dataHandler()->numData() == 10 );
 
+	/*
 	bool ret = Field< unsigned int >::set( clocker, "numTicks", size );
 	Clock* clockData = reinterpret_cast< Clock* >( clocker.data() );
 	clockData->setNumTicks( size );
+	*/
 
 	// assert( ret );
 	// cout << Shell::myNode() << ": numTicks: " << ticke->dataHandler()->numData() << ", " << size << endl;
 	assert( ticke->dataHandler()->numData() == size );
 
 	Eref er0( ticke, DataId( 0, 2 ) );
-	ret = Field< double >::set( er0, "dt", 5.0);
-	assert( ret );
-	ret = Field< unsigned int >::set( er0, "stage", 0);
+	bool ret = Field< double >::set( er0, "dt", 5.0);
 	assert( ret );
 	Eref er1( ticke, DataId( 0, 1 ) );
 	ret = Field< double >::set( er1, "dt", 2.0);
 	assert( ret );
-	ret = Field< unsigned int >::set( er1, "stage", 0);
-	assert( ret );
 	Eref er2( ticke, DataId( 0, 0 ) );
 	ret = Field< double >::set( er2, "dt", 2.0);
-	assert( ret );
-	ret = Field< unsigned int >::set( er2, "stage", 1);
 	assert( ret );
 	Eref er3( ticke, DataId( 0, 3 ) );
 	ret = Field< double >::set( er3, "dt", 1.0);
 	assert( ret );
-	ret = Field< unsigned int >::set( er3, "stage", 0);
-	assert( ret );
 	Eref er4( ticke, DataId( 0, 4 ) );
 	ret = Field< double >::set( er4, "dt", 3.0);
-	assert( ret );
-	ret = Field< unsigned int >::set( er4, "stage", 5);
 	assert( ret );
 	// Note that here I put the tick on a different DataId. later it gets
 	// to sit on the appropriate Conn, when the SingleMsg is set up.
 	Eref er5( ticke, DataId( 0, 7 ) );
 	ret = Field< double >::set( er5, "dt", 5.0);
-	assert( ret );
-	ret = Field< unsigned int >::set( er5, "stage", 1);
 	assert( ret );
 
 	Clock* cdata = reinterpret_cast< Clock* >( clocker.data() );
@@ -173,8 +163,8 @@ void setupTicks()
 	assert( cdata->tickPtr_[3].ticks_.size() == 2 );
 
 	assert( cdata->tickPtr_[0].ticks_[0] == reinterpret_cast< const Tick* >( er3.data() ) );
-	assert( cdata->tickPtr_[1].ticks_[0] == reinterpret_cast< const Tick* >( er1.data() ) );
-	assert( cdata->tickPtr_[1].ticks_[1] == reinterpret_cast< const Tick* >( er2.data() ) );
+	assert( cdata->tickPtr_[1].ticks_[0] == reinterpret_cast< const Tick* >( er2.data() ) );
+	assert( cdata->tickPtr_[1].ticks_[1] == reinterpret_cast< const Tick* >( er1.data() ) );
 	assert( cdata->tickPtr_[2].ticks_[0] == reinterpret_cast< const Tick* >( er4.data() ) );
 	assert( cdata->tickPtr_[3].ticks_[0] == reinterpret_cast< const Tick* >( er0.data() ) );
 	assert( cdata->tickPtr_[3].ticks_[1] == reinterpret_cast< const Tick* >( er5.data() ) );
@@ -222,12 +212,12 @@ void testThreads()
 {
 	Element* se = Id()();
 	Shell* s = reinterpret_cast< Shell* >( se->dataHandler()->data( 0 ) );
-	s->setclock( 0, 5.0, 0 );
-	s->setclock( 1, 2.0, 0 );
-	s->setclock( 2, 2.0, 1 );
-	s->setclock( 3, 1.0, 0 );
-	s->setclock( 4, 3.0, 5 );
-	s->setclock( 5, 5.0, 1 );
+	s->doSetClock( 0, 5.0 );
+	s->doSetClock( 1, 2.0 );
+	s->doSetClock( 2, 2.0 );
+	s->doSetClock( 3, 1.0 );
+	s->doSetClock( 4, 3.0 );
+	s->doSetClock( 5, 5.0 );
 
 	vector< unsigned int > dims;
 	dims.push_back( 7 ); // A suitable number to test dispatch of Process calls during threading.
@@ -392,7 +382,7 @@ void testThreadIntFireNetwork()
 	// printGrid( i2(), "Vm", 0, thresh );
 	Element* se = Id()();
 	Shell* s = reinterpret_cast< Shell* >( se->dataHandler()->data( 0 ) );
-	s->setclock( 0, timestep, 0 );
+	s->doSetClock( 0, timestep );
 
 	IntFire* ifire100 = reinterpret_cast< IntFire* >( e2.element()->dataHandler()->data( 100 ) );
 	IntFire* ifire900 = reinterpret_cast< IntFire* >( e2.element()->dataHandler()->data( 900 ) );
@@ -534,7 +524,7 @@ void testMultiNodeIntFireNetwork()
 
 	shell->doAddMsg( "Single", er0.fullId(), "process0",
 		e2.fullId(), "process" );
-	shell->setclock( 0, timestep, 0 );
+	shell->doSetClock( 0, timestep );
 
 	double retVm100 = Field< double >::get( Eref( e2.element(), 100 ), "Vm" );
 	double retVm900 = Field< double >::get( Eref( e2.element(), 900 ), "Vm" );
@@ -677,7 +667,7 @@ void speedTestMultiNodeIntFireNetwork( unsigned int size, unsigned int runsteps 
 
 	shell->doAddMsg( "Single", er0.fullId(), "process0",
 		e2.fullId(), "process" );
-	shell->setclock( 0, timestep, 0 );
+	shell->doSetClock( 0, timestep );
 
 	shell->doStart( static_cast< double >( timestep * runsteps) + 0.0 );
 

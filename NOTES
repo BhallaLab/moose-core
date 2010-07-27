@@ -7070,5 +7070,11 @@ clock 1. Clock 0 seems OK to set.
 ============================================================================
 27 July
 Still struggling with the setclock issue. Some random cleanups in the vicinity
-of the problem, but they haven't helped.
+of the problem, but they haven't helped. Checkin 2093.
+
+Eliminated the Tick::stage field. Went through and cleaned up all the effects
+of this change, with the idea that a global clean of the tick handling code
+might fix the setclock bug. The scheduling unit tests clear with the new
+code, but the setclock issue with ReadKkit persists.
+
 ============================================================================

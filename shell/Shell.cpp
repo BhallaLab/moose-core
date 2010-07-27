@@ -266,8 +266,8 @@ const Cinfo* Shell::initCinfo()
 // Dest Finfos: Functions handled by Shell
 ////////////////////////////////////////////////////////////////
 		static DestFinfo setclock( "setclock", 
-			"Assigns clock ticks. Args: tick#, dt, stage",
-			new OpFunc3< Shell, unsigned int, double, unsigned int >( & Shell::setclock ) );
+			"Assigns clock ticks. Args: tick#, dt",
+			new OpFunc2< Shell, unsigned int, double >( & Shell::doSetClock ) );
 		static DestFinfo loadBalance( "loadBalance", 
 			"Set up load balancing",
 			new OpFunc0< Shell >( & Shell::loadBalance ) );
@@ -504,6 +504,18 @@ void Shell::doStop()
 		process( sheller, &p_ );
 	}
 }
+////////////////////////////////////////////////////////////////////////
+
+void Shell::doSetClock( unsigned int tickNum, double dt )
+{
+	Eref ce = Id( 1 ).eref();
+	assert( ce.element() );
+	// We do NOT go through the message queuing here, as the clock is
+	// always local and this operation fiddles with scheduling.
+
+	Clock* clock = reinterpret_cast< Clock* >( ce.data() );
+	clock->setupTick( tickNum, dt );
+}
 
 void Shell::doUseClock( string path, string field, unsigned int tick )
 {
@@ -515,6 +527,8 @@ void Shell::doUseClock( string path, string field, unsigned int tick )
 		process( sheller, &p_ );
 	}
 }
+
+////////////////////////////////////////////////////////////////////////
 
 void Shell::doMove( Id orig, Id newParent )
 {
@@ -1021,30 +1035,6 @@ const char* Shell::buf()
 	return (reinterpret_cast< Shell* >(shell->dataHandler()->data( 0 )) )->getBuf();
 }
 
-////////////////////////////////////////////////////////////////////////
-
-void Shell::setclock( unsigned int tickNum, double dt, unsigned int stage )
-{
-	Eref ce = Id( 1 ).eref();
-	assert( ce.element() );
-	bool ret = SetGet3< unsigned int, double, unsigned int >::set( 
-		ce, "setupTick", tickNum, dt, stage );
-	assert( ret );
-}
-
-/*
-Id Shell::id( const string& path )
-{
-	Id start;
-	if ( path[0] == '.' ) {
-		if ( path[1] == '.' && path[2] == '/' ) {
-			start = cwe_;
-		} else if path[1] == '/' {
-			start = cwe_;
-		}
-	}
-}
-*/
 
 ////////////////////////////////////////////////////////////////////////
 // Functions for handling field set/get and func calls
