@@ -70,6 +70,7 @@ const Cinfo* ChemCompt::initCinfo()
 		&requestSize,	// SrcFinfo
 		&compartment,	// SrcFinfo
 		&group,			// DestFinfo
+		&boundaryFinfo,	// FieldElementFinfo
 	};
 
 	static Cinfo chemComptCinfo (

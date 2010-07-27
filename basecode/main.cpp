@@ -143,7 +143,7 @@ void nonMpiTests()
 		testBuiltins();
 		testShell();
 		testKinetics();
-		testKsolve();
+	//	testKsolve();
 	}
 #endif
 }

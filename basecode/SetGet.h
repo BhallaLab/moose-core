@@ -315,13 +315,10 @@ template< class A1, class A2 > class SetGet2: public SetGet
 
 		/**
 		 * Blocking call using string conversion.
-		 * As yet we don't have 2 arg conversion from a single string.
-		 * So this is a dummy
 		 */
 		bool innerStrSet( const Eref& dest, const string& field, 
 			const string& val ) const
 		{
-			cout << "innerStrSet< A1, A2 >: string conversion not yet implemented\n";
 			A1 arg1;
 			A2 arg2;
 			string::size_type pos = val.find_first_of( "," );
@@ -366,13 +363,11 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 				Conv< A1 > conv1( arg1 );
 				Conv< A2 > conv2( arg2 );
 				Conv< A3 > conv3( arg3 );
-				unsigned int s1 = conv1.size();
-				unsigned int s1s2 = s1 + conv2.size();
-				unsigned int totSize = s1s2 + conv3.size();
+				unsigned int totSize = conv1.size() + conv2.size() + conv3.size();
 				char *temp = new char[ totSize ];
 				conv1.val2buf( temp );
-				conv2.val2buf( temp + s1 );
-				conv3.val2buf( temp + s1s2 );
+				conv2.val2buf( temp + conv1.size() );
+				conv3.val2buf( temp + conv1.size() + conv2.size() );
 				Shell::dispatchSet( tgt, fid, temp, totSize );
 				delete[] temp;
 				return 1;
@@ -390,17 +385,18 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 		{
 			cout << "innerStrSet< A1, A2, A3 >: string conversion not yet implemented\n";
 			A1 arg1;
-			// A2 arg2;
-			// A3 arg3;
-			Conv<A1>::str2val( arg1, val );
-			// return set( dest, field, arg1, arg2, arg3 );
+			A2 arg2;
+			A3 arg3;
+			string::size_type pos = val.find_first_of( "," );
+			Conv< A1 >::str2val( arg1, val.substr( 0, pos ) );
+			string temp = val.substr( pos + 1 );
+			pos = temp.find_first_of( "," );
+			Conv< A2 >::str2val( arg2, temp.substr( 0,pos ) );
+			Conv< A3 >::str2val( arg3, temp.substr( pos + 1 ) );
+			return set( dest, field, arg1, arg2, arg3 );
 			return 0;
 		}
 
-	//////////////////////////////////////////////////////////////////
-	//  The 'Get' calls for 2 args are currently undefined.
-	//////////////////////////////////////////////////////////////////
-	
 		/**
 		 * Terminating call using string conversion
 		 */

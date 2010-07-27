@@ -452,7 +452,7 @@ bool checkOutput( Id e,
 	double v0, double v1, double v2, double v3, double v4 )
 {
 	bool ret = 1;
-	bool report = 0;
+	bool report = 1;
 	Eref e0( e(), 0 );
 	double val = Field< double >::get( e0, "outputValue" );
 	ret = ret && ( fabs( val - v0 ) < 1e-6 );

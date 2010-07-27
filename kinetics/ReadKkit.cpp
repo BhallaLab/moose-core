@@ -142,7 +142,7 @@ Id ReadKkit::read(
 void ReadKkit::run()
 {
 	shell_->setclock( 0, simdt_, 0 );
-	shell_->setclock( 1, simdt_, 1 );
+	shell_->setclock( 1, simdt_, 0 );
 	shell_->setclock( 2, plotdt_, 0 );
 	string molpath = basePath_ + "/kinetics/##[ISA=Mol]";
 	string reacpath = basePath_ + "/kinetics/##[ISA!=Mol]";
@@ -529,7 +529,7 @@ void ReadKkit::assignCompartments()
 		for ( vector< Id >::iterator j = volCategories_[i].begin();
 			j != volCategories_[i].end(); ++j ) {
 			// get the group Ids that have a different vol in them
-			bool ret = shell_->doAddMsg( "single", 
+			MsgId ret = shell_->doAddMsg( "single", 
 				FullId( compt, 0 ), "compartment",
 				FullId( *j, 0 ), "setSize" ); 
 			assert( ret != Msg::badMsg );

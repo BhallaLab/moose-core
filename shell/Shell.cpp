@@ -1026,8 +1026,10 @@ const char* Shell::buf()
 void Shell::setclock( unsigned int tickNum, double dt, unsigned int stage )
 {
 	Eref ce = Id( 1 ).eref();
-	SetGet3< unsigned int, double, unsigned int >::set( ce, "setupTick",
-		tickNum, dt, stage );
+	assert( ce.element() );
+	bool ret = SetGet3< unsigned int, double, unsigned int >::set( 
+		ce, "setupTick", tickNum, dt, stage );
+	assert( ret );
 }
 
 /*
