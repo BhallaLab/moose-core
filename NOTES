@@ -7075,6 +7075,12 @@ of the problem, but they haven't helped. Checkin 2093.
 Eliminated the Tick::stage field. Went through and cleaned up all the effects
 of this change, with the idea that a global clean of the tick handling code
 might fix the setclock bug. The scheduling unit tests clear with the new
-code, but the setclock issue with ReadKkit persists.
+code, but the setclock issue with ReadKkit persists. Checkin 2094.
 
+The unit test clears if we run the test for 2 timesteps rather than 1. Seems
+that the key thing here is to clean up the execution of all ops in each
+timestep.
+
+With this, ran psd12.g. Now the gsl version works but the original one 
+doesn't.
 ============================================================================

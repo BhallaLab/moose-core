@@ -347,6 +347,11 @@ void Clock::start(  const Eref& e, const Qinfo* q, double runTime )
 		sort( tickPtr_.begin(), tickPtr_.end() );
 		nextTime = tickPtr_[1].getNextTime();
 	} 
+
+	// Just to test: need to move back into the ticks:
+	Qinfo::mpiClearQ( &info_ );
+	Qinfo::emptyAllQs();
+
 	isRunning_ = 0;
 }
 
