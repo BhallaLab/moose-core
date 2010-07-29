@@ -65,7 +65,7 @@ private:
 	bool implicit_;
 	bool variableDt_;
 	string description_;
-	static map< string, MethodInfo > methodMap_;
+    static map< string, MethodInfo >& methodMap();
 };
 
 #endif // _CELL_H
