@@ -21,9 +21,21 @@
 #include <cstdlib> // Required for g++ 4.3.2
 #include "ArgParser.h"
 
-map <char, string > ArgParser::option_;
-map <string, char> ArgParser::longShortMap_;
-vector <string> ArgParser::scriptArgs_;
+map <char, string >& ArgParser::option()
+{
+    static map <char, string >* option_ = new map<char, string>();
+    return *option_;
+}
+map <string, char>& ArgParser::longShortMap()
+{
+    static map<string, char> * longShortMap_ = new map<string, char>();
+    return *longShortMap_;
+}
+vector <string>& ArgParser::scriptArgs()
+{
+    static vector<string>* scriptArgs_ = new vector<string>();
+    return *scriptArgs_;
+}
 
     
 /**
@@ -35,6 +47,9 @@ vector <string> ArgParser::scriptArgs_;
 int ArgParser::parseArguments(int argc, char **argv)    
 {
     static bool inited = false;
+    static map <char, string> option_ = option();
+    static map<string, char> longShortMap_ = longShortMap();
+    static vector<string> scriptArgs_ = scriptArgs();
     if (!inited)
     {
         
@@ -154,25 +169,25 @@ int ArgParser::parseArguments(int argc, char **argv)
 
 string ArgParser::getConfigFile()
 {
-    map<char, string> :: const_iterator i = option_.find('c');
-    return ( i != option_.end() )? i->second : "";    
+    map<char, string> :: const_iterator i = option().find('c');
+    return ( i != option().end() )? i->second : "";    
 }
 string ArgParser::getSimPath()
 {
-    map<char, string> :: const_iterator i = option_.find('p');
-    return ( i != option_.end() )? i->second : "";    
+    map<char, string> :: const_iterator i = option().find('p');
+    return ( i != option().end() )? i->second : "";    
 }
 string ArgParser::getDocPath()
 {    
-    map<char, string> :: const_iterator i = option_.find('d');
-    return ( i != option_.end() )? i->second : "";    
+    map<char, string> :: const_iterator i = option().find('d');
+    return ( i != option().end() )? i->second : "";    
 }
 /**
    Get the list of script and the arguments to it
 */
 const vector<string> ArgParser::getScriptArgs()
 {
-    return scriptArgs_;
+    return scriptArgs();
 }
 
 #ifdef TEST_ARGPARSER // test main
