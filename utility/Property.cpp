@@ -33,7 +33,12 @@ const char* const Property::HOME = "HOME";
 
 const int Property::XML_FORMAT = 1;
 const int Property::PROP_FORMAT = 0;
-map <string, string> Property::properties_;
+map <string, string>& Property::properties()
+{
+    static map <string, string>* properties_ = new map<string, string>();
+    return *properties_;
+}
+
 PathUtility* Property::simpathHandler_ = new PathUtility(".");
 
 bool Property::initialized_ = false;
@@ -43,28 +48,28 @@ void Property::initDefaults()
     if (!simpathHandler_){
         simpathHandler_ = new PathUtility(".");
     }
-    properties_[AUTOSCHEDULE] = "true";
-    properties_[CREATESOLVER] = "true";
-    properties_[SIMPATH] = ".";
-    properties_[SIMNOTES] = "notes";
-    properties_[DOCPATH] = "doc";
-    properties_[HOME] = "~";    
+    properties()[AUTOSCHEDULE] = "true";
+    properties()[CREATESOLVER] = "true";
+    properties()[SIMPATH] = ".";
+    properties()[SIMNOTES] = "notes";
+    properties()[DOCPATH] = "doc";
+    properties()[HOME] = "~";    
     char * home = getenv(HOME);
     if (( home != NULL ) && (home[0] != '\0'))
     {
         simpathHandler_->addPath(string(home));
-        properties_[SIMPATH] = simpathHandler_->getAllPaths();
+        properties()[SIMPATH] = simpathHandler_->getAllPaths();
     }
 }
 
 string Property::getProperty(string key)
 {
-    return properties_[key];
+    return properties()[key];
 }
 
 void Property::setProperty(string key, string value)
 {
-    properties_[key] = value;
+    properties()[key] = value;
 }
 
 void Property::addSimPath(string path)
@@ -75,12 +80,12 @@ void Property::addSimPath(string path)
         simpathHandler_->addPath(path);
     }
     cout << simpathHandler_->getAllPaths() << endl;
-    properties_[SIMPATH] = simpathHandler_->getAllPaths();
+    properties()[SIMPATH] = simpathHandler_->getAllPaths();
 }
 
 const string Property::getSimPath()
 {
-    return properties_[SIMPATH];
+    return properties()[SIMPATH];
 }
 
 void Property::setSimPath(string paths)
@@ -90,7 +95,7 @@ void Property::setSimPath(string paths)
         delete simpathHandler_;
     }
     simpathHandler_ = new PathUtility(paths);
-    properties_[SIMPATH] = simpathHandler_->getAllPaths();
+    properties()[SIMPATH] = simpathHandler_->getAllPaths();
     cout << "changing simpath:" << paths << endl;
 
 }
@@ -110,7 +115,7 @@ void Property::readEnvironment()
 {
     map <string, string>::iterator i;
     
-    for ( i = properties_.begin(); i != properties_.end(); ++i )
+    for ( i = properties().begin(); i != properties().end(); ++i )
     {
         string key = i->first;
         char * env;
@@ -132,7 +137,7 @@ void Property::readEnvironment()
         if (( env != NULL ) && ( env[0] != '\0') ){
             // if environment variable exists, then it should override the defaults
             string value(env);            
-            properties_[key] = env;
+            properties()[key] = env;
         }
     }    
 }
@@ -165,7 +170,7 @@ void Property::initialize(string fileName, int format)
 int Property::readProperties(string fileName, int format)
 {
     int returnValue;
-    string simpath = properties_[SIMPATH];
+    string simpath = properties()[SIMPATH];
     
     if ( format == XML_FORMAT)
     {
@@ -176,10 +181,10 @@ int Property::readProperties(string fileName, int format)
         returnValue = readProp(fileName);
     }
     // append simpath from file to the existing simpath
-    if ((simpath != properties_[SIMPATH] )
-        && ( properties_[SIMPATH].length() > 0 ))
+    if ((simpath != properties()[SIMPATH] )
+        && ( properties()[SIMPATH].length() > 0 ))
     {
-        properties_[SIMPATH] = simpath+ PathUtility::PATH_SEPARATOR + properties_[SIMPATH];
+        properties()[SIMPATH] = simpath+ PathUtility::PATH_SEPARATOR + properties()[SIMPATH];
     }
     
     return returnValue;
@@ -307,7 +312,7 @@ int Property::readProp(string fileName)
             }
         }
         
-        properties_[key] = value;        
+        properties()[key] = value;        
     }
     return 0;    
 }
@@ -321,7 +326,7 @@ vector <string>& Property::getKeys()
     static vector<string> result;
     
     map <string, string> :: iterator i;
-    for ( i = properties_.begin(); i != properties_.end(); ++i )
+    for ( i = properties().begin(); i != properties().end(); ++i )
     {
         bool found = false;
         

@@ -39,21 +39,24 @@ class ArgParser
     
   private:
     ArgParser();
-    
-    /** This is the command line parameter flag - must start with a '-' .. following glib way */
-    static map <char, string> option_;
+    // option, longShortMap and scriptArgs have been converted from
+    // static variables to static
+    // methods returning reference to the contents of static pointers
+    // in order to avoid the static initialization fiasco.
+    /** Returns the command line parameter flag - must start with a '-' .. following glib way */
+    static map <char, string>& option();
     
     /**
-       This maps long options starting with "--" to short options starting with "-".
+       Returns the map for long options starting with "--" to short options starting with "-".
        Short options are single character.
     */
-    static map <string , char> longShortMap_;
+    static map <string , char>& longShortMap();
 
     /**
-       This is the script file, which is the last argument passed in
+       Returns the script file, which is the last argument passed in
        command line along with the arguments to the script.
     */
-    static vector <string> scriptArgs_;
+    static vector <string>& scriptArgs();
 
     
 };
