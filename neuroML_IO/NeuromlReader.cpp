@@ -6,6 +6,7 @@
 #include <neuroML/NCable.h>
 #include <neuroML/NCell.h>
 #include <neuroML/NBase.h>
+#include <neuroML/SynChannel.h>
 #include "Cable.h"
 #include "NeuromlReader.h"
 using namespace std;
