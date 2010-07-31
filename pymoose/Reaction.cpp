@@ -62,4 +62,41 @@ void Reaction::__set_scaleKb( double scaleKb )
 {
     set < double > (id_(), "scaleKb", scaleKb);
 }
+double Reaction::__get_x()
+{
+    double x;
+    get < double > (id_(), "x", x);
+    return x;
+}
+
+void Reaction::__set_x(double x)
+{
+    set < double > (id_(), "x", x);
+}
+
+double Reaction::__get_y()
+{
+    double y;
+    get < double > (id_(), "y", y);
+    return y;
+}
+
+void Reaction::__set_y(double y)
+{
+    set < double > (id_(), "y", y);
+}
+
+string Reaction::__get_xtreeTextFg()
+{
+    string xtreeTextFg;
+    get < string > (id_(), "xtree_textfg_req", xtreeTextFg);
+    return xtreeTextFg;
+}
+
+void Reaction::__set_xtreeTextFg(string xtreeTextFg)
+{
+    set < string > (id_(), "xtree_textfg_req", xtreeTextFg);
+}
+
+
 #endif

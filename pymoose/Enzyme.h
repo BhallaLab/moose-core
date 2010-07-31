@@ -30,14 +30,18 @@ namespace pymoose
         void __set_kcat(double kcat);
         bool __get_mode() const;
         void __set_mode(bool mode);
-        //     double,double __get_prd() const;
-//        void __set_prd(double,double prd);
         double __get_scaleKm() const;
         void __set_scaleKm(double scaleKm);
         double __get_scaleKcat() const;
         void __set_scaleKcat(double scaleKcat);
         double __get_intramol() const;
         void __set_intramol(double intramol);
+        double __get_x();
+        void __set_x(double x);
+        double __get_y();
+        void __set_y(double y);
+        string __get_xtreeTextFg();
+        void __set_xtreeTextFg(string xtreeTextFg);
     };
 }
 

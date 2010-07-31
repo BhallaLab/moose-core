@@ -26,6 +26,11 @@ namespace pymoose{
             void __set_size(double size);
             unsigned int __get_numDimensions() const;
             void __set_numDimensions(unsigned int numDimensions);
+        double __get_x();
+        void __set_x(double x);
+        double __get_y();
+        void __set_y(double y);
+
     };
 }
 #endif
