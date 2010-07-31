@@ -25,6 +25,13 @@ namespace pymoose
         void __set_scaleKf(double scaleKf);
         double __get_scaleKb() const;
         void __set_scaleKb(double scaleKb);
+        double __get_x();
+        void __set_x(double x);
+        double __get_y();
+        void __set_y(double y);
+        string __get_xtreeTextFg();
+        void __set_xtreeTextFg(string xtreeTextFg);
+        
     };
 }
 

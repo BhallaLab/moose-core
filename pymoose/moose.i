@@ -505,13 +505,18 @@ NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.se
 %attribute(pymoose::Enzyme, double, Km, __get_Km, __set_Km)
 %attribute(pymoose::Enzyme, double, kcat, __get_kcat, __set_kcat)
 %attribute(pymoose::Enzyme, bool, mode, __get_mode, __set_mode)
-//%attribute(pymoose::Enzyme, double,double, prd, __get_prd, __set_prd)
+%attribute(pymoose::Enzyme, double, x, __get_x, __set_x)
+%attribute(pymoose::Enzyme, double, y, __get_y, __set_y)
+%attribute(pymoose::Enzyme, string, xtreeTextFg, __get_xtreeTextFg, __set_xtreeTextFg)
 
 %include "Reaction.h"
 %attribute(pymoose::Reaction, double, kf, __get_kf, __set_kf)
 %attribute(pymoose::Reaction, double, kb, __get_kb, __set_kb)
 %attribute(pymoose::Reaction, double, scaleKf, __get_scaleKf, __set_scaleKf)
 %attribute(pymoose::Reaction, double, scaleKb, __get_scaleKb, __set_scaleKb)
+%attribute(pymoose::Reaction, double, x, __get_x, __set_x)
+%attribute(pymoose::Reaction, double, y, __get_y, __set_y)
+%attribute(pymoose::Reaction, string, xtreeTextFg, __get_xtreeTextFg, __set_xtreeTextFg)
 
 %include "Molecule.h"
 %attribute(pymoose::Molecule, double, nInit, __get_nInit, __set_nInit)
@@ -522,8 +527,10 @@ NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.se
 %attribute(pymoose::Molecule, double, conc, __get_conc, __set_conc)
 %attribute(pymoose::Molecule, double, concInit, __get_concInit, __set_concInit)
 %attribute(pymoose::Molecule, double, nSrc, __get_nSrc, __set_nSrc)
-//%attribute(pymoose::Molecule, double,double, prd, __get_prd, __set_prd)
 %attribute(pymoose::Molecule, double, sumTotal, __get_sumTotal, __set_sumTotal)
+%attribute(pymoose::Molecule, double, x, __get_x, __set_x)
+%attribute(pymoose::Molecule, double, y, __get_y, __set_y)
+%attribute(pymoose::Molecule, string, xtreeTextFg, __get_xtreeTextFg, __set_xtreeTextFg)
 
 /* %include "Enzyme.h"
 	#include "KineticHub.h"		
@@ -607,6 +614,8 @@ NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.se
 %attribute(pymoose::KinCompt, double, perimeter, __get_perimeter, __set_perimeter)
 %attribute(pymoose::KinCompt, double, size, __get_size, __set_size)
 %attribute(pymoose::KinCompt, unsigned int, numDimensions, __get_numDimensions, __set_numDimensions)
+%attribute(pymoose::KinCompt, double, x, __get_x, __set_x)
+%attribute(pymoose::KinCompt, double, y, __get_y, __set_y)
 
 %include "Panel.h"
 %attribute(pymoose::Panel, unsigned int, nPts, __get_nPts)

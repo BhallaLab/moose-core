@@ -33,10 +33,15 @@ namespace pymoose
         void __set_concInit(double concInit);
         double __get_nSrc() const;
         void __set_nSrc(double nSrc);
-//        double,double __get_prd() const;
-//        void __set_prd(double,double prd);
         double __get_sumTotal() const;
         void __set_sumTotal(double sumTotal);
+        double __get_x();
+        void __set_x(double x);
+        double __get_y();
+        void __set_y(double y);
+        string __get_xtreeTextFg();
+        void __set_xtreeTextFg(string xtreeTextFg);
+        
     };
 }
 
