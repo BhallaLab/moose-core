@@ -122,4 +122,41 @@ void Enzyme::__set_intramol( double intramol )
 {
     set < double > (id_(), "intramol", intramol);
 }
+
+double Enzyme::__get_x()
+{
+    double x;
+    get < double > (id_(), "x", x);
+    return x;
+}
+
+void Enzyme::__set_x(double x)
+{
+    set < double > (id_(), "x", x);
+}
+
+double Enzyme::__get_y()
+{
+    double y;
+    get < double > (id_(), "y", y);
+    return y;
+}
+
+void Enzyme::__set_y(double y)
+{
+    set < double > (id_(), "y", y);
+}
+
+string Enzyme::__get_xtreeTextFg()
+{
+    string xtreeTextFg;
+    get < string > (id_(), "xtree_textfg_req", xtreeTextFg);
+    return xtreeTextFg;
+}
+
+void Enzyme::__set_xtreeTextFg(string xtreeTextFg)
+{
+    set < string > (id_(), "xtree_textfg_req", xtreeTextFg);
+}
+
 #endif
