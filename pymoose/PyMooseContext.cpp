@@ -25,6 +25,7 @@ using namespace std;
 using namespace pymoose;
 
 extern unsigned int init(int& argc, char **& argv);
+extern void initSched();
 extern void initCinfos();
 extern const string& helpless();
 extern const string& getClassDoc(const string&, const string&);
@@ -696,12 +697,6 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
     context->genesisSli_ = genesisSli;
     context->myId_ = contextElement->id();
     context->setCwe(Element::root()->id() ); // set initial element = root
-    lookupGet<Id, string > (Element::root(), "lookupChild", context->scheduler_, "sched" );
-    if ( context->scheduler_.bad() )
-    {
-        cerr << "Scheduler not found" << endl;
-    }
-    
     Eref ref = shellId.eref();
     ret = ref.add( "parser", contextElement, "parser", ConnTainer::Default);// reconnect context
     assert(ret);
@@ -709,7 +704,7 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
     Id cj("/sched/cj");
     Id t0("/sched/cj/t0");
     Id t1("/sched/cj/t1");
-            
+    FuncVec::sortFuncVec();           
     setupDefaultSchedule(t0(), t1(), cj());
     context->genesisParseFinfo_ = context->genesisSli_->findFinfo("parse");
     assert(context->genesisParseFinfo_!=0);
