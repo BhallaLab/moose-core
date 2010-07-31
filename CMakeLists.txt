@@ -1151,7 +1151,7 @@ find_package(PyQt4 REQUIRED)
 if(PYQT4_FOUND)
   message("PyQt4 Found OK")
 else(PYQT4_FOUND) # This is not really fatal: but not yet sure of the policy about pymoose -- Subha
-  message(FATAL_ERROR "No PyQt4 found")
+  message(FATAL_ERROR "No PyQt4 found. UBUNTU/DEBIAN USERS: If you have PyQt4 installed and still are getting this error, then please install python-qt4-dev package.")
 endif(PYQT4_FOUND)
 #>> PyQt
 else(WANT_PYMOOSE)
