@@ -1154,6 +1154,12 @@ else(PYQT4_FOUND) # This is not really fatal: but not yet sure of the policy abo
   message(FATAL_ERROR "No PyQt4 found")
 endif(PYQT4_FOUND)
 #>> PyQt
+else(WANT_PYMOOSE)
+  get_property(moose_sources GLOBAL PROPERTY MOOSE_SOURCES_LIST)
+  message(STATUS SRCS=${moose_sources})
+  get_property(moose_external_libs GLOBAL PROPERTY MOOSE_EXTERNAL_LIBRARIES)
+  add_executable(moose ${moose_sources})
+  target_link_libraries(moose ${moose_external_libs})
 endif(WANT_PYMOOSE)
 
 ######################################################
