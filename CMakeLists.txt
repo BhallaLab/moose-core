@@ -794,9 +794,10 @@ endif(USE_NEUROML)
 if(WANT_PYMOOSE)
   set_property(GLOBAL APPEND PROPERTY MOOSE_SOURCES_LIST ${pymoose_sources})
 endif(WANT_PYMOOSE)
-  
-get_property(sources GLOBAL PROPERTY MOOSE_SOURCES_LIST)
-message( STATUS sources=${sources})
+
+if(GENERATE_WRAPPERS)
+  add_definitions(-DGENERATE_WRAPPERS)
+endif(GENERATE_WRAPPERS)
 
 # At the end of the day we need to add all subdirectories and the
 # top-lvel directory to compiler's include path. Blame the

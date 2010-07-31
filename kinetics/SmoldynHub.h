@@ -16,7 +16,7 @@
 
 // Forward declaration
 struct simstruct;
-
+class KinSparseMatrix;
 /**
  * SmoldynHub provides an interface between MOOSE and the internal
  * Smoldyn operations and data structures.
