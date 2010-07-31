@@ -1119,8 +1119,12 @@ endif(WIN32)
 
 ##############################################################################################################
 ########## Find Dependencies                                                                        ##########
-# if(WANT_PYMOOSE)
+if(WANT_PYMOOSE)
 # add_subdirectory(pymoose)
+find_package(PythonInterp REQUIRED)
+if (PYTHON_FOUND)
+  message(STATUS "Found Python: ${PYTHON_EXECUTABLE}")
+endif(PYTHON_FOUND)
 #<< Swig
 find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
@@ -1141,6 +1145,7 @@ swig_link_libraries(moose ${PYTHON_LIBRARIES} ${moose_external_libs})
 #>> Swig
 
 #<< PyQt
+
 set (PYQT4_MIN_VERSION "4.3.0")
 find_package(PyQt4 REQUIRED)
 if(PYQT4_FOUND)
@@ -1149,10 +1154,10 @@ else(PYQT4_FOUND) # This is not really fatal: but not yet sure of the policy abo
   message(FATAL_ERROR "No PyQt4 found")
 endif(PYQT4_FOUND)
 #>> PyQt
-# endif(WANT_PYMOOSE)
+endif(WANT_PYMOOSE)
 
 ######################################################
 # install(TARGTES moose ${INSTALL_TARGETS_DEFAULT_ARGS})
 set(DEFAULT_PY_SUBDIR share/pyshared)
-set(MOOSE_BIN_SUBDIR ${DEFAULT_BIN_SUBDIR}     CACHE STRING "Subdirectory where executables will be installed")
 set(MOOSE_PY_SUBDIR ${DEFAULT_PY_SUBDIR})
+set(MOOSE_BIN_SUBDIR ${DEFAULT_BIN_SUBDIR}     CACHE STRING "Subdirectory where executables will be installed")
