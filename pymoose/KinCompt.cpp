@@ -65,4 +65,30 @@ void KinCompt::__set_numDimensions( unsigned int numDimensions )
 {
     set < unsigned int > (id_(), "numDimensions", numDimensions);
 }
+
+double KinCompt::__get_x()
+{
+    double x;
+    get < double > (id_(), "x", x);
+    return x;
+}
+
+void KinCompt::__set_x(double x)
+{
+    set < double > (id_(), "x", x);
+}
+
+double KinCompt::__get_y()
+{
+    double y;
+    get < double > (id_(), "y", y);
+    return y;
+}
+
+void KinCompt::__set_y(double y)
+{
+    set < double > (id_(), "y", y);
+}
+
+
 #endif
