@@ -83,7 +83,8 @@ void testGslIntegrator()
 	s->doSetClock( 1, rk.getPlotDt() );
 	s->doSetClock( 2, rk.getPlotDt() );
 	string gslpath = rk.getBasePath() + "/gsl";
-	string  plotpath = rk.getBasePath() + "/graphs/##[TYPE=Table],/moregraphs/##[TYPE=Table]";
+	string  plotpath = rk.getBasePath() + "/graphs/##[TYPE=Table]," +
+		rk.getBasePath() + "/moregraphs/##[TYPE=Table]";
 	s->doUseClock( gslpath, "process", 0 );
 	s->doUseClock( plotpath, "process", 2 );
 	s->doReinit();

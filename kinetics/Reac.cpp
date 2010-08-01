@@ -153,7 +153,11 @@ void Reac::process( const Eref& e, ProcPtr p )
 
 void Reac::reinit( const Eref& e, ProcPtr p )
 {
-	;
+	// toPrd.send( e, p, sub_, prd_ );
+	// toSub.send( e, p, prd_, sub_ );
+
+	sub_ = kf_;
+	prd_ = kb_;
 }
 
 //////////////////////////////////////////////////////////////
@@ -162,7 +166,7 @@ void Reac::reinit( const Eref& e, ProcPtr p )
 
 void Reac::setKf( double v )
 {
-	kf_ = v;
+	sub_ = kf_ = v;
 }
 
 double Reac::getKf() const
@@ -172,7 +176,7 @@ double Reac::getKf() const
 
 void Reac::setKb( double v )
 {
-	kb_ = v;
+	prd_ = kb_ = v;
 }
 
 double Reac::getKb() const

@@ -150,11 +150,13 @@ const SrcFinfo1< double >& nOut =
 
 
 Mol::Mol()
-	: n_( 0.0 ), nInit_( 0.0 ), size_( 1.0 ), A_( 0.0 ), B_( 0.0 )
+	: n_( 0.0 ), nInit_( 0.0 ), size_( 1.0 ), diffConst_( 0.0 ),
+		A_( 0.0 ), B_( 0.0 )
 {;}
 
 Mol::Mol( double nInit)
-	: n_( 0.0 ), nInit_( nInit ), size_( 1.0 ), A_( 0.0 ), B_( 0.0 )
+	: n_( 0.0 ), nInit_( nInit ), size_( 1.0 ), diffConst_( 0.0 ),
+		A_( 0.0 ), B_( 0.0 )
 {;}
 
 //////////////////////////////////////////////////////////////
@@ -181,6 +183,7 @@ void Mol::process( const Eref& e, ProcPtr p )
 
 void Mol::reinit( const Eref& e, ProcPtr p )
 {
+	A_ = B_ = 0.0;
 	n_ = nInit_;
 
 	nOut.send( e, p, n_ );

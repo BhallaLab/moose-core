@@ -7079,8 +7079,101 @@ code, but the setclock issue with ReadKkit persists. Checkin 2094.
 
 The unit test clears if we run the test for 2 timesteps rather than 1. Seems
 that the key thing here is to clean up the execution of all ops in each
-timestep.
+timestep. This is still pending.
 
 With this, ran psd12.g. Now the gsl version works but the original one 
-doesn't.
+doesn't. Valgrind is clean.
+
+============================================================================
+29 July
+2 minor pending things before going to change the structure of the ksolver.
+- Find why only 4 graphs are being plotted. The ones on moregraphs are not.
+	I checked, and the plotpath is OK, and all 7 graphs are made.
+	There are issues with setting up lookup for PlotId
+	Fixed. Also fixed plotpath in dumpPlots. Oddly it dumps now for
+	EE but not GSL. Tracked down to another plotPath issue in testKsolve.
+- Find why the EE method fails in MOOSE
+	- works for enz.g
+	- Works for a reduced version of psd with only one compartment.
+	- Works for a reduced version of psd with one mol added in bigger compt.
+	- Works for a reduced version of psd with two mol added in bigger compt.
+	Started over with psd12.g
+	- Fails when the exocytosis step is removed.
+	- Fails when the PKA conc is set to zero.
+	- Fails when PKA is deleted.
+	- Fails when both exo and endo reactions are deleted. Now we have
+		no exchange between compts.
+	- Fails when dangling Ca and PKA are also deleted.
+	- Rebuilt plots. Now there is naming confusion in plots, and I need to
+		fix it. However, the underlying problem persists.
+		Call this one twocompt.g for reference.
+	- Removed M of the big compartment. Problem remains.
+	- Removed all reactions in big compartment, leaving just RP and M*
+		pools. Now output is all zero, not informative.
+	- Set init conc of M in small compartment to 1. Outputs still match.
+	- Set init conc of M* in big compartment to 1. Outputs still match.
+	- Set init conc of M in small compartment to 0. Outputs still match.
+	- Made a reac between Rp and M* in big compartment. Outputs still match.
+	- Set init conc of M* in big compartment to 0. Outputs still match.
+	- Replaced the reac between Rp and M* with an enz. Outputs now 
+		differ, but only by a factor of 2. Note that this means
+		that M* exceeds total init conc in the EE case.
+	- The enz above was in compartment B. Moved it to /kinetics.
+		No change, outputs as before.
+		differ, but only by a factor of 2.
+
+This gets tedious. Let me fix up the graphs for now.
+Fixed. But the problems with the EE calculations remain.
+
+Let's start removing the small compartment objects.
+	- Removed A/M*. Problem persists.
+	- Removed phosphatase. Problem persists.
+	- Removed kinase. Problem persists.
+	- Removed RP. Problem persists. Now we just have A/M. 
+	Save this reduced problem version as minimal.g
+	- Removed M as well. Now the A compartment is empty. Problem persists.
+	- Removed the A compartment. Problem persists. Copy to minimal.g
+	- Shuffled the order of definition of addmsgs to match those in enz.g
+		Problem persists.
+	- Shuffled the order of definition of pools to match those in enz.g.
+		Specifically, the kpool handling the enzyme is now first. Was
+		last. Problem persists.
+	- Plotted all molecules. Bizarre stuff happening with enz pool and
+		substrate, looks like jump at TRANSIENT_TIME. Are we just
+		running into numerical issues? The rates are not big.
+	
+	Reduced dts. The EE method now works, when there is no variable DT.
+	With same dts, where finedt == simdt, ran EE with variable DT. 
+	Still OK.
+	With simdt == 2x finedt, ran EE with variable DT. Still OK.
+	Still OK.
+	Ran in GENESIS with suggested dt of 0.01. Works fine. Fails in MOOSE.
+	So I have an error somewhere in the EE calculations. Ugh.
+
+
+During reinit:
+	Mol::reinit: n=ninit, A_ = B_ = 0, nout.send.
+	Enz::reinit: r1 = k1
+During messaging: 
+	Mol:: A and B increment on incoming A,B. Which doesn't happen.
+	Enz:: r1, r2 and r3 update on incoming n. This happens.
+Mol::proc1:  
+	Mol::proc: integrate then send. First integ is pointless.
+	Enz::proc: send, then reset r1. First send finally has data.
+During messaging: 
+	Mol:: A and B increment on incoming A,B
+	Enz:: r1, r2 and r3 update on incoming n
+
+To change: The Enz is on a later tick. It is executed only after
+all data from t0 has arrived. So we may as well start calculations
+right away.
+This doesn't work. Reverted.
+I checked if there is something bad happening with volumes. Doesn't seem to be.
+
+Derived another test case from the generic enz.g, simply by scaling
+volumes up by 1000x.
+
+Check what enz does on creation with its cplx molecule.
+Showed fields. Nothing obvious.
+Checked what the timing of the 'tick' is like. Seems OK.
 ============================================================================

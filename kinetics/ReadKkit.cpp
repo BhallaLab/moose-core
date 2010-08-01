@@ -146,7 +146,8 @@ void ReadKkit::run()
 	shell_->doSetClock( 2, plotdt_ );
 	string molpath = basePath_ + "/kinetics/##[ISA=Mol]";
 	string reacpath = basePath_ + "/kinetics/##[ISA!=Mol]";
-	string plotpath = basePath_ + "/graphs/##[TYPE=Table],/moregraphs/##[TYPE=Table]";
+	string plotpath = basePath_ + "/graphs/##[TYPE=Table]," + 
+		basePath_ + "/moregraphs/##[TYPE=Table]";
 	shell_->doUseClock( molpath, "process", 0 );
 	shell_->doUseClock( reacpath, "process", 1 );
 	shell_->doUseClock( plotpath, "process", 2 );
@@ -167,7 +168,8 @@ void ReadKkit::dumpPlots( const string& filename )
 {
 	// ofstream fout ( filename.c_str() );
 	vector< Id > plots;
-	string plotpath = basePath_ + "/graphs/##[TYPE=Table],/moregraphs/##[TYPE=Table]";
+	string plotpath = basePath_ + "/graphs/##[TYPE=Table]," + 
+		basePath_ + "/moregraphs/##[TYPE=Table]";
 	Shell::wildcard( plotpath, plots );
 	for ( vector< Id >::iterator i = plots.begin(); i != plots.end(); ++i )
 		SetGet2< string, string >::set( i->eref(), "xplot",
@@ -484,6 +486,12 @@ Id ReadKkit::buildReac( const vector< string >& args )
 void ReadKkit::separateVols( Id mol, double vol )
 {
 	static const double TINY = 1e-3;
+	/*
+	cout << mol << " vol = " << 
+		( reinterpret_cast< const Mol* >( mol.eref().data() ) )->getSize() <<
+		", v2 = " << vol << endl;
+		*/
+
 	for ( unsigned int i = 0 ; i < vols_.size(); ++i ) {
 		if ( fabs( vols_[i] - vol ) / ( vols_[i] + vol ) < TINY ) {
 			volCategories_[i].push_back( mol );
@@ -591,6 +599,9 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 			FullId( cplx, 0 ), "reac" ); 
 		assert( ret != Msg::badMsg );
 
+		// cplx()->showFields();
+		// enz()->showFields();
+		// pa()->showFields();
 		Id info = buildInfo( enz, enzMap_, args );
 		numEnz_++;
 		return enz;
@@ -772,14 +783,18 @@ Id ReadKkit::buildPlot( const vector< string >& args )
 	static vector< unsigned int > dim( 1, 1 );
 
 	string head;
-	string tail = pathTail( args[2], head );
+	string tail = pathTail( args[2], head ); // Name of plot
+	string temp;
+	string graph = pathTail( head, temp ); // Name of graph
 
 	Id pa = shell_->doFind( head );
 	assert( pa != Id() );
+
 	Id plot = shell_->doCreate( "Table", pa, tail, dim );
 	assert( plot != Id() );
 
-	plotIds_[ args[2].substr( 10 ) ] = plot; 
+	temp = graph + "/" + tail;
+	plotIds_[ temp ] = plot; 
 
 	numPlot_++;
 	return plot;
@@ -851,11 +866,16 @@ void ReadKkit::addmsg( const vector< string >& args)
 			innerAddMsg( src, mmEnzIds_, "prd", dest, molIds_, "reac" );
 	}
 	else if ( args[3] == "PLOT" ) { // Time-course output for molecule
+		string head;
+		string temp;
+		dest = pathTail( args[2], head );
+		string graph = pathTail( head, temp );
+		temp = graph + "/" + dest;
 		if ( args[4] == "Co" )
-			innerAddMsg( dest, plotIds_, "requestData", src, molIds_, "get_conc" );
+			innerAddMsg( temp, plotIds_, "requestData", src, molIds_, "get_conc" );
 		else if ( args[4] == "n" )
 		// innerAddMsg( src, molIds_, "nOut", dest, plotIds_, "input" );
-			innerAddMsg( dest, plotIds_, "requestData", src, molIds_, "get_n" );
+			innerAddMsg( temp, plotIds_, "requestData", src, molIds_, "get_n" );
 		else
 			cout << "Unknown PLOT msg field '" << args[4] << "'\n";
 	}

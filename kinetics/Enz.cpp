@@ -186,8 +186,8 @@ void Enz::enz( double n ) // dummy
 
 void Enz::cplx( double n ) // dummy
 {
-	r2_ *= n;
-	r3_ *= n;
+	r2_ = k2_ * n;
+	r3_ = k3_ * n;
 }
 
 void Enz::process( const Eref& e, ProcPtr p )
@@ -198,15 +198,18 @@ void Enz::process( const Eref& e, ProcPtr p )
 	toCplx.send( e, p, r1_, r3_ + r2_ );
 	
 	r1_ = k1_;
-	r2_ = k2_;
-	r3_ = k3_;
 }
 
 void Enz::reinit( const Eref& e, ProcPtr p )
 {
+	/*
+	toSub.send( e, p, r2_, r1_ );
+	toPrd.send( e, p, r3_, 0 );
+	toEnz.send( e, p, r3_ + r2_, r1_ );
+	toCplx.send( e, p, r1_, r3_ + r2_ );
+	*/
+
 	r1_ = k1_;
-	r2_ = k2_;
-	r3_ = k3_;
 }
 
 //////////////////////////////////////////////////////////////
@@ -215,7 +218,7 @@ void Enz::reinit( const Eref& e, ProcPtr p )
 
 void Enz::setK1( double v )
 {
-	k1_ = v;
+	r1_ = k1_ = v;
 }
 
 double Enz::getK1() const

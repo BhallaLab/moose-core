@@ -265,7 +265,7 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 		mpiAdvance( info );
 		return;
 	}
-	// cout << Shell::myNode() << "." << info->threadId << ": Tick::advance (" << dt_ << ", " << index_ << " ) at t= " << info->currTime << endl;
+	cout << Shell::myNode() << "." << info->threadId << ": Tick::advance (" << dt_ << ", " << index_ << " ) at t= " << info->currTime << endl;
 	// Qinfo::reportQ();
 
 	/**

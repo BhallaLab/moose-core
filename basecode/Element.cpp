@@ -311,9 +311,11 @@ void Element::showFields() const
 	cout << "Showing SrcFinfos: \n";
 	for ( unsigned int i = 0; i < srcVec.size(); ++i )
 		cout << i << ": " << srcVec[i]->name() << "	Bind=" << srcVec[i]->getBindIndex() << endl;
-	cout << "Showing DestFinfos: \n";
+	cout << "Showing " << destVec.size() << " DestFinfos: \n";
+	/*
 	for ( unsigned int i = 0; i < destVec.size(); ++i )
 		cout << i << ": " << destVec[i]->name() << "	FuncId=" << destVec[i]->getFid() << endl;
+		*/
 	cout << "Showing SharedFinfos: \n";
 	for ( unsigned int i = 0; i < sharedVec.size(); ++i ) {
 		cout << i << ": " << sharedVec[i]->name() << "	Src=[ ";
@@ -325,8 +327,13 @@ void Element::showFields() const
 		cout << " ]\n";
 	}
 	cout << "Listing ValueFinfos: \n";
-	for ( unsigned int i = 0; i < valueVec.size(); ++i )
-		cout << i << ": " << valueVec[i]->name() << endl;
+	Eref er = this->id().eref();
+	string val;
+	for ( unsigned int i = 0; i < valueVec.size(); ++i ) {
+			valueVec[i]->strGet( er, valueVec[i]->name(), val );
+		cout << i << ": " << valueVec[i]->name() << "	" <<
+			val << endl;
+	}
 }
 
 MsgId Element::findCaller( FuncId fid ) const
