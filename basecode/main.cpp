@@ -39,7 +39,7 @@ extern void testMpiShell();
 extern void testMsg();
 extern void testMpiMsg();
 extern void testKinetics();
-extern void testKsolve();
+extern void testKsolve( bool dumpData );
 
 extern void initMsgManagers();
 extern void destroyMsgManagers();
@@ -54,24 +54,26 @@ Id init( int argc, char** argv )
 	bool isSingleThreaded = 0;
 	bool isInfinite = 0;
 	int opt;
-	while ( ( opt = getopt( argc, argv, "shin:c:" ) ) != -1 ) {
+	while ( ( opt = getopt( argc, argv, "shin:c:b:" ) ) != -1 ) {
 		switch ( opt ) {
 			case 's': // Single threaded mode
 				isSingleThreaded = 1;
+				break;
+			case 'i' : // infinite loop, used for multinode debugging, to give gdb something to attach to.
+				isInfinite = 1;
+				break;
+			case 'n': // Multiple nodes
+				numNodes = atoi( optarg );
 				break;
 			case 'c': // Multiple cores per node
 				// Each node handles 
 				numCores = atoi( optarg );
 				break;
-			case 'n': // Multiple nodes
-				numNodes = atoi( optarg );
-				break;
-			case 'i' : // infinite loop, used for multinode debugging, to give gdb something to attach to.
-				isInfinite = 1;
+			case 'b': // Benchmark: handle later.
 				break;
 			case 'h': // help
 			default:
-				cout << "Usage: moose -singleThreaded -help -infiniteLoop -c numCores -n numNodes\n";
+				cout << "Usage: moose -singleThreaded -help -infiniteLoop -c numCores -n numNodes -benchmark [ksolve intFire]\n";
 				exit( 1 );
 		}
 	}
@@ -143,7 +145,7 @@ void nonMpiTests()
 		testBuiltins();
 		testShell();
 		testKinetics();
-		testKsolve();
+		testKsolve( 1 );
 	}
 #endif
 }
@@ -164,10 +166,23 @@ void mpiTests()
 #endif
 }
 
-void benchmarkTests()
+bool benchmarkTests( int argc, char** argv )
 {
-	// speedTestMultiNodeIntFireNetwork( 2048, 2000 );
-	testKsolve();
+	int opt;
+	optind = 0; // forces reinit of getopt
+	while ( ( opt = getopt( argc, argv, "b:" ) ) != -1 ) {
+		switch ( opt ) {
+			case 'b': // Benchmark
+				if ( string( "ksolve" ) == optarg  )
+					testKsolve( 0 );
+				if ( string( "intFire" ) == optarg  )
+					speedTestMultiNodeIntFireNetwork( 2048, 2000 );
+				cout << "Completed benchmark\n";
+				return 1;
+				break;
+		}
+	}
+	return 0;
 }
 
 int main( int argc, char** argv )
@@ -183,8 +198,8 @@ int main( int argc, char** argv )
 	// Shell messaging/MPI, and yield control to the parser.
 	if ( s->myNode() == 0 ) {
 		mpiTests();
-		// benchmarkTests();
-		s->launchParser();
+		if ( !benchmarkTests( argc, argv ) )
+			s->launchParser();
 	} else {
 		s->launchMsgLoop( shelle );
 	}

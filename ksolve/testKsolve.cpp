@@ -41,7 +41,7 @@ void testKsolveZombify()
 	cout << "." << flush;
 }
 
-void testGslIntegrator()
+void testGslIntegrator( bool dumpData )
 {
 	ReadKkit rk;
 	// rk.read( "test.g", "dend", 0 );
@@ -119,16 +119,17 @@ void testGslIntegrator()
 	/*
 	rk.run();
 	*/
-	rk.dumpPlots( "gsl.plot" );
+	if ( dumpData )
+		rk.dumpPlots( "gsl.plot" );
 
 	s->doDelete( base );
 	cout << "." << flush;
 }
 
-void testKsolve()
+void testKsolve( bool dumpData )
 {
 	testKsolveZombify();
-	testGslIntegrator();
+	testGslIntegrator( dumpData );
 }
 
 void testMpiKsolve()

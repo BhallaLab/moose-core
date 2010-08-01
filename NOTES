@@ -7235,4 +7235,16 @@ off.
 
 OK, worked. This took a long and weary time to fix, but I've now
 set policy for how to handle multi-stage process calculations.
+Checkin 2105.
 
+OK, now change gears to look at implications of indexing the stoich
+calculations, rather than direct pointer refs.
+Phase 1: Benchmarks of existing version.
+Binary		File		Runtime		Plotdt		User time
+moose_msg	Kholodenko.g	6e6		5		19.1
+moose_g3	Kholodenko.g	6e6		5		28.6
+moose_msg	Dend_v26.g	200		1		9.7
+moose_g3	Dend_v26.g	200		1		8.4
+
+
+============================================================================
