@@ -178,15 +178,15 @@ ZeroOrder* ZombieReac::makeHalfReaction(
 	ZeroOrder* rateTerm;
 	if ( numReactants == 1 ) {
 		rateTerm = 
-			new FirstOrder( rate, &S_[ convertIdToMolIndex( mols[0] ) ] );
+			new FirstOrder( rate, convertIdToMolIndex( mols[0] ) );
 	} else if ( numReactants == 2 ) {
 		rateTerm = new SecondOrder( rate,
-				&S_[ convertIdToMolIndex( mols[0] ) ], 
-				&S_[ convertIdToMolIndex( mols[1] ) ] );
+				convertIdToMolIndex( mols[0] ), 
+				convertIdToMolIndex( mols[1] ) );
 	} else if ( numReactants > 2 ) {
-		vector< const double* > v;
+		vector< unsigned int > v;
 		for ( unsigned int i = 0; i < numReactants; ++i ) {
-			v.push_back( &S_[ convertIdToMolIndex( mols[i] ) ] );
+			v.push_back( convertIdToMolIndex( mols[i] ) );
 		}
 		rateTerm = new NOrder( rate, v );
 	} else {
@@ -220,13 +220,13 @@ void ZombieReac::zombify( Element* solver, Element* orig )
 	z->rates_[ rateIndex ] = new BidirectionalReaction( forward, reverse );
 
 	vector< unsigned int > molIndex;
-	unsigned int numReactants = forward->getReactants( molIndex, z->S_ );
+	unsigned int numReactants = forward->getReactants( molIndex );
 	for ( unsigned int i = 0; i < numReactants; ++i ) {
 		int temp = z->N_.get( molIndex[i], rateIndex );
 		z->N_.set( molIndex[i], rateIndex, temp - 1 );
 	}
 
-	numReactants = reverse->getReactants( molIndex, z->S_ );
+	numReactants = reverse->getReactants( molIndex );
 	for ( unsigned int i = 0; i < numReactants; ++i ) {
 		int temp = z->N_.get( molIndex[i], rateIndex );
 		z->N_.set( molIndex[i], rateIndex, temp + 1 );

@@ -190,23 +190,23 @@ void ZombieMMenz::zombify( Element* solver, Element* orig )
 
 	unsigned int rateIndex = z->convertIdToReacIndex( orig->id() );
 	unsigned int num = orig->getInputs( mols, enz );
-	const double* enzPtr = &z->S_[ z->convertIdToMolIndex( mols[0] ) ];
+	unsigned int enzIndex = z->convertIdToMolIndex( mols[0] );
 
 	num = orig->getOutputs( mols, sub );
 	if ( num == 1 ) {
-		const double* subPtr = &z->S_[ z->convertIdToMolIndex( mols[0] ) ];
+		unsigned int subIndex = z->convertIdToMolIndex( mols[0] );
 		assert( num == 1 );
 		z->rates_[ rateIndex ] = new MMEnzyme1( 
 			mmEnz->getKm(), mmEnz->getKcat(),
-			enzPtr, subPtr );
+			enzIndex, subIndex );
 	} else if ( num > 1 ) {
-		vector< const double* > v;
+		vector< unsigned int > v;
 		for ( unsigned int i = 0; i < num; ++i )
-			v.push_back( &z->S_[ z->convertIdToMolIndex( mols[i] ) ] );
+			v.push_back( z->convertIdToMolIndex( mols[i] ) );
 		ZeroOrder* rateTerm = new NOrder( 1.0, v );
 		z->rates_[ rateIndex ] = new MMEnzyme( 
 			mmEnz->getKm(), mmEnz->getKcat(),
-			enzPtr, rateTerm );
+			enzIndex, rateTerm );
 	} else {
 		cout << "Error: ZombieMMenz::zombify: No substrates\n";
 		exit( 0 );

@@ -223,18 +223,18 @@ ZeroOrder* ZombieEnz::makeHalfReaction(
 		mols.push_back( enz );
 	numReactants = mols.size();
 
-	ZeroOrder* rateTerm;
+	ZeroOrder* rateTerm = 0;
 	if ( numReactants == 1 ) {
 		rateTerm = 
-			new FirstOrder( rate, &S_[ convertIdToMolIndex( mols[0] ) ] );
+			new FirstOrder( rate, convertIdToMolIndex( mols[0] ) );
 	} else if ( numReactants == 2 ) {
 		rateTerm = new SecondOrder( rate,
-				&S_[ convertIdToMolIndex( mols[0] ) ], 
-				&S_[ convertIdToMolIndex( mols[1] ) ] );
+				convertIdToMolIndex( mols[0] ), 
+				convertIdToMolIndex( mols[1] ) );
 	} else if ( numReactants > 2 ) {
-		vector< const double* > v;
+		vector< unsigned int > v;
 		for ( unsigned int i = 0; i < numReactants; ++i ) {
-			v.push_back( &S_[ convertIdToMolIndex( mols[i] ) ] );
+			v.push_back( convertIdToMolIndex( mols[i] ) );
 		}
 		rateTerm = new NOrder( rate, v );
 	} else {
@@ -276,12 +276,12 @@ void ZombieEnz::zombify( Element* solver, Element* orig )
 	z->rates_[ rateIndex + 1 ] = r3;
 
 	vector< unsigned int > molIndex;
-	numReactants = r1->getReactants( molIndex, z->S_ ); // Substrates
+	numReactants = r1->getReactants( molIndex ); // Substrates
 	for ( unsigned int i = 0; i < numReactants; ++i ) {
 		int temp = z->N_.get( molIndex[i], rateIndex );
 		z->N_.set( molIndex[i], rateIndex, temp - 1 );
 	}
-	numReactants = r2->getReactants( molIndex, z->S_ );
+	numReactants = r2->getReactants( molIndex );
 	assert( numReactants == 1 ); // Should only be cplx as the only product
 	unsigned int cplxMol = molIndex[0];
 	z->N_.set( cplxMol, rateIndex, 1 );

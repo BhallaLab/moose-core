@@ -378,10 +378,11 @@ void Stoich::updateV( )
 
 	vector< RateTerm* >::const_iterator i;
 	vector< double >::iterator j = v_.begin();
+	const double* S = &S_[0];
 
 	for ( i = rates_.begin(); i != rates_.end(); i++)
 	{
-		*j++ = (**i)();
+		*j++ = (**i)( S );
 		assert( !isnan( *( j-1 ) ) );
 	}
 

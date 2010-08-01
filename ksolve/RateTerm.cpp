@@ -17,7 +17,7 @@ using namespace std;
 
 const double RateTerm::EPSILON = 1.0e-6;
 
-StochNOrder::StochNOrder( double k, vector< const double* > v )
+StochNOrder::StochNOrder( double k, vector< unsigned int > v )
 	: NOrder( k, v )
 {
 	// Here we sort the y vector so that if there are repeated
@@ -26,17 +26,17 @@ StochNOrder::StochNOrder( double k, vector< const double* > v )
 	sort( v_.begin(), v_.end() );
 }
 
-double StochNOrder::operator() () const {
+double StochNOrder::operator() ( const double* S ) const {
 	double ret = k_;
-	vector< const double* >::const_iterator i;
-	const double* lasty = 0;
-	double y;
+	vector< unsigned int >::const_iterator i;
+	unsigned int lasty = 0;
+	double y = 0.0;
 	for ( i = v_.begin(); i != v_.end(); i++) {
-		assert( !isnan( **i ) );
+		assert( !isnan( S[ *i ] ) );
 		if ( lasty == *i )
 			y -= 1.0;
 		else
-			y = **i;
+			y = S[ *i ];
 		ret *= y;
 		lasty = *i;
 	}

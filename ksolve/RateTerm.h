@@ -20,7 +20,8 @@ class RateTerm
 	public:
 		RateTerm() {;}
 		virtual ~RateTerm() {;}
-		virtual double operator() () const = 0;
+		/// Computes the rate. The argument is the molecule array.
+		virtual double operator() ( const double* S ) const = 0;
 		virtual void setRates( double k1, double k2 ) = 0;
 		// These next 4 terms are used for talking back to the
 		// original rate objects in MOOSE
@@ -36,8 +37,7 @@ class RateTerm
 		 * reactions, which is a bit of a problem.
 		 */
 		virtual unsigned int  getReactants( 
-			vector< unsigned int >& molIndex,
-			const vector< double >& S ) const = 0;
+			vector< unsigned int >& molIndex ) const = 0;
 		static const double EPSILON;
 		virtual void rescaleVolume( double ratio ) = 0;
 };
@@ -98,57 +98,55 @@ class MMEnzyme1: public MMEnzymeBase
 {
 	public:
 		MMEnzyme1( double Km, double kcat, 
-			const double* enz, const double* sub )
+			unsigned int enz, unsigned int sub )
 			: MMEnzymeBase( Km, kcat ), enz_( enz ), sub_( sub )
 		{
 			;
 		}
 
-		double operator() () const {
-			assert( *sub_ >= -EPSILON );
-			return ( kcat_ * *sub_ * *enz_ ) / ( Km_ + *sub_ );
+		double operator() ( const double* S ) const {
+			assert( S[ sub_ ] >= -EPSILON );
+			return ( kcat_ * S[ sub_ ] * S[ enz_ ] ) / ( Km_ + S[ sub_ ] );
 		}
 
-		unsigned int getReactants( vector< unsigned int >& molIndex,
-			const vector< double >& S ) const {
+		unsigned int getReactants( vector< unsigned int >& molIndex ) const{
 			molIndex.resize( 2 );
-			molIndex[0] = enz_ - &S[0];
-			molIndex[1] = sub_ - &S[0];
+			molIndex[0] = enz_;
+			molIndex[1] = sub_;
 			return 2;
 		}
 
 	private:
-		const double *enz_;
-		const double *sub_;
+		unsigned int enz_;
+		unsigned int sub_;
 };
 
 class MMEnzyme: public MMEnzymeBase
 {
 	public:
 		MMEnzyme( double Km, double kcat, 
-			const double* enz, RateTerm* sub )
+			unsigned int enz, RateTerm* sub )
 			: MMEnzymeBase( Km, kcat ), enz_( enz ), substrates_( sub )
 		{
 			;
 		}
 
-		double operator() () const {
-			double sub = (*substrates_)();
+		double operator() ( const double* S ) const {
+			double sub = (*substrates_)( S );
 			// the subtrates_() operator returns the negative of 
 			// the conc product.
 			// Here we the overall rate.
 			assert( sub >= -EPSILON );
-			return ( sub * kcat_ * *enz_ ) / ( Km_ + sub );
+			return ( sub * kcat_ * S[ enz_ ] ) / ( Km_ + sub );
 		}
 
-		unsigned int getReactants( vector< unsigned int >& molIndex,
-			const vector< double >& S ) const {
-			substrates_->getReactants( molIndex, S );
-			molIndex.insert( molIndex.begin(), enz_ - &S[0] );
+		unsigned int getReactants( vector< unsigned int >& molIndex ) const{
+			substrates_->getReactants( molIndex );
+			molIndex.insert( molIndex.begin(), enz_ );
 			return molIndex.size();
 		}
 	private:
-		const double *enz_;
+		unsigned int enz_;
 		RateTerm* substrates_;
 };
 
@@ -165,8 +163,7 @@ class ExternReac: public RateTerm
 			; // Dummy function to keep compiler happy
 		}
 
-		unsigned int getReactants( vector< unsigned int >& molIndex,
-			const vector< double >& S ) const {
+		unsigned int getReactants( vector< unsigned int >& molIndex ) const{
 			molIndex.resize( 0 );
 			return 0;
 		}
@@ -187,7 +184,7 @@ class ZeroOrder: public RateTerm
 			assert( !isnan( k_ ) );
 		}
 
-		double operator() () const {
+		double operator() ( const double* S ) const {
 			assert( !isnan( k_ ) );
 			return k_;
 		}
@@ -218,8 +215,7 @@ class ZeroOrder: public RateTerm
 			return 0.0;
 		}
 		
-		unsigned int getReactants( vector< unsigned int >& molIndex,
-			const vector< double >& S ) const {
+		unsigned int getReactants( vector< unsigned int >& molIndex ) const{
 			molIndex.resize( 0 );
 			return 0;
 		}
@@ -234,19 +230,18 @@ class ZeroOrder: public RateTerm
 class FirstOrder: public ZeroOrder
 {
 	public:
-		FirstOrder( double k, const double* y )
+		FirstOrder( double k, unsigned int y )
 			: ZeroOrder( k ), y_( y )
 		{;}
 
-		double operator() () const {
-			assert( !isnan( *y_ ) );
-			return k_ * *y_;
+		double operator() ( const double* S ) const {
+			assert( !isnan( S[ y_ ] ) );
+			return k_ * S[ y_ ];
 		}
 
-		unsigned int getReactants( vector< unsigned int >& molIndex,
-			const vector< double >& S ) const {
+		unsigned int getReactants( vector< unsigned int >& molIndex ) const{
 			molIndex.resize( 1 );
-			molIndex[0] = y_ - &S[0];
+			molIndex[0] = y_;
 			return 1;
 		}
 
@@ -255,27 +250,26 @@ class FirstOrder: public ZeroOrder
 		}
 
 	private:
-		const double *y_;
+		unsigned int y_;
 };
 
 class SecondOrder: public ZeroOrder
 {
 	public:
-		SecondOrder( double k, const double* y1, const double* y2 )
+		SecondOrder( double k, unsigned int y1, unsigned int y2 )
 			: ZeroOrder( k ), y1_( y1 ), y2_( y2 )
 		{;}
 
-		double operator() () const {
-			assert( !isnan( *y1_ ) );
-			assert( !isnan( *y2_ ) );
-			return k_ * *y1_ * *y2_;
+		double operator() ( const double* S ) const {
+			assert( !isnan( S[ y1_ ] ) );
+			assert( !isnan( S[ y2_ ] ) );
+			return k_ * S[ y1_ ] * S[ y2_ ];
 		}
 
-		unsigned int getReactants( vector< unsigned int >& molIndex,
-			const vector< double >& S ) const {
+		unsigned int getReactants( vector< unsigned int >& molIndex ) const{
 			molIndex.resize( 2 );
-			molIndex[0] = y1_ - &S[0];
-			molIndex[1] = y2_ - &S[0];
+			molIndex[0] = y1_;
+			molIndex[1] = y2_;
 			return 2;
 		}
 
@@ -284,8 +278,8 @@ class SecondOrder: public ZeroOrder
 		}
 
 	private:
-		const double *y1_;
-		const double *y2_;
+		unsigned int y1_;
+		unsigned int y2_;
 };
 
 /**
@@ -298,21 +292,20 @@ class SecondOrder: public ZeroOrder
 class StochSecondOrderSingleSubstrate: public ZeroOrder
 {
 	public:
-		StochSecondOrderSingleSubstrate( double k, const double* y )
+		StochSecondOrderSingleSubstrate( double k, unsigned int y )
 			: ZeroOrder( k ), y_( y )
 		{;}
 
-		double operator() () const {
-			double y = *y_;
+		double operator() ( const double* S ) const {
+			double y = S[ y_ ];
 			assert( !isnan( y ) );
 			return k_ * ( y - 1 ) * y;
 		}
 
-		unsigned int getReactants( vector< unsigned int >& molIndex,
-			const vector< double >& S ) const {
+		unsigned int getReactants( vector< unsigned int >& molIndex ) const{
 			molIndex.resize( 2 );
-			molIndex[0] = y_ - &S[0];
-			molIndex[1] = y_ - &S[0];
+			molIndex[0] = y_;
+			molIndex[1] = y_;
 			return 2;
 		}
 
@@ -321,31 +314,29 @@ class StochSecondOrderSingleSubstrate: public ZeroOrder
 		}
 
 	private:
-		const double *y_;
+		const unsigned int y_;
 };
 
 class NOrder: public ZeroOrder
 {
 	public:
-		NOrder( double k, vector< const double* > v )
+		NOrder( double k, vector< unsigned int > v )
 			: ZeroOrder( k ), v_( v )
 		{;}
 
-		double operator() () const {
+		double operator() ( const double* S ) const {
 			double ret = k_;
-			vector< const double* >::const_iterator i;
+			vector< unsigned int >::const_iterator i;
 			for ( i = v_.begin(); i != v_.end(); i++) {
-				assert( !isnan( **i ) );
-				ret *= *( *i );
+				assert( !isnan( S[ *i ] ) );
+				ret *= S[ *i ];
 			}
 			return ret;
 		}
 
 		unsigned int getReactants( vector< unsigned int >& molIndex,
 			const vector< double >& S ) const {
-			molIndex.resize( v_.size() );
-			for ( unsigned int i = 0; i < v_.size(); i++ )
-				molIndex[i] = v_[i] - &S[0];
+			molIndex = v_;
 			return v_.size();
 		}
 
@@ -357,7 +348,7 @@ class NOrder: public ZeroOrder
 		}
 
 	protected:
-		vector< const double* > v_;
+		vector< unsigned int > v_;
 };
 
 /**
@@ -370,13 +361,13 @@ class NOrder: public ZeroOrder
 class StochNOrder: public NOrder
 {
 	public:
-		StochNOrder( double k, vector< const double* > v );
+		StochNOrder( double k, vector< unsigned int > v );
 
-		double operator() () const;
+		double operator() ( const double* S ) const;
 };
 
 extern class ZeroOrder* 
-	makeHalfReaction( double k, vector< const double*> v );
+	makeHalfReaction( double k, vector< unsigned int > v );
 
 class BidirectionalReaction: public RateTerm
 {
@@ -394,8 +385,8 @@ class BidirectionalReaction: public RateTerm
 			delete backward_;
 		}
 
-		double operator() () const {
-			return (*forward_)() - (*backward_)();
+		double operator() ( const double* S ) const {
+			return (*forward_)( S ) - (*backward_)( S );
 		}
 
 		void setRates( double kf, double kb ) {
@@ -419,12 +410,11 @@ class BidirectionalReaction: public RateTerm
 			return backward_->getR1();
 		}
 
-		unsigned int getReactants( vector< unsigned int >& molIndex,
-			const vector< double >& S ) const {
-			forward_->getReactants( molIndex, S );
+		unsigned int getReactants( vector< unsigned int >& molIndex ) const{
+			forward_->getReactants( molIndex );
 			unsigned int ret = molIndex.size();
 			vector< unsigned int > temp;
-			backward_->getReactants( temp, S );
+			backward_->getReactants( temp );
 			molIndex.insert( molIndex.end(), temp.begin(), temp.end() );
 			return ret;
 		}
@@ -438,88 +428,3 @@ class BidirectionalReaction: public RateTerm
 		ZeroOrder* forward_;
 		ZeroOrder* backward_;
 };
-
-/*
-class SumTotal
-{
-	public:
-		SumTotal() // Needed for array setup.
-		{;}
-
-		SumTotal( double* target, const vector< const double* >& mol )
-			: target_( target ), mol_( mol )
-		{;}
-
-		void sum() const {
-			double ret = 0.0;
-			for( vector< const double* >::const_iterator i = mol_.begin(); 
-				i != mol_.end(); i++ )
-				ret += **i;
-			*target_ = ret;
-			assert( !isnan( ret ) );
-		}
-
-		bool hasInput( vector< unsigned int >& molIndex, 
-			vector< double >& s ) const {
-			for( vector< unsigned int >::const_iterator i = 
-				molIndex.begin(); i != molIndex.end(); ++i )
-			{
-				double* tgt = &( s[ *i ] );
-				if ( find( mol_.begin(), mol_.end(), tgt ) != 
-					mol_.end() )
-				return 1;
-			}
-			return 0;
-		}
-
-		unsigned int target( vector< double >& s ) {
-			unsigned int ret = target_ - &s[0];
-			assert( ret < s.size() );
-			return ret;
-		}
-	private:
-		double* target_;
-		vector< const double* > mol_;
-};
-*/
-
-/*
-class SumTotal: public RateTerm
-{
-	public:
-		SumTotal( const vector< const double* >& mol )
-			: mol_( mol )
-		{;}
-
-		// Should be able to do an algorithm operation here.
-		double operator() () const {
-			double ret = 0.0;
-			for( vector< const double* >::const_iterator i = mol_.begin(); 
-				i != mol_.end(); i++ )
-				ret += **i;
-			return ret;
-		}
-
-		void setRates( double k1, double k2 )
-		{;}
-		// These next 4 terms are used for talking back to the
-		// original rate objects in MOOSE
-		virtual void setR1( double k1 )
-		{;}
-
-		virtual void setR2( double k2 )
-		{;}
-
-		double getR1() const
-		{
-			return 0.0;
-		}
-		
-		double getR2() const
-		{
-			return 0.0;
-		}
-	private:
-		vector< const double* > mol_;
-};
-*/

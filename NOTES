@@ -7242,9 +7242,18 @@ calculations, rather than direct pointer refs.
 Phase 1: Benchmarks of existing version.
 Binary		File		Runtime		Plotdt		User time
 moose_msg	Kholodenko.g	6e6		5		19.1
+moose_msg new	Kholodenko.g	6e6		5		19.9
 moose_g3	Kholodenko.g	6e6		5		28.6
 moose_msg	Dend_v26.g	200		1		9.7
+moose_msg new	Dend_v26.g	200		1		14.2
 moose_g3	Dend_v26.g	200		1		8.4
 
+Interesting divergence here. The smaller model runs way faster on current code,
+bigger model a bit slower.
+Checkin 2106.
+
+Now go through and reimplement Stoich and RateTerms to use indexing.
+Done. Looks like a pretty severe speed penalty specially with the bigger
+model.
 
 ============================================================================
