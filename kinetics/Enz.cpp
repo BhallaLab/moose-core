@@ -172,22 +172,26 @@ Enz::Enz( )
 void Enz::sub( double n )
 {
 	r1_ *= n;
+	// cout << "	sub: " << n;
 }
 
 void Enz::prd( double n ) // dummy
 {
 	;
+	// cout << "	prd: " << n;
 }
 
 void Enz::enz( double n ) // dummy
 {
 	r1_ *= n;
+	// cout << "	enz: " << n;
 }
 
 void Enz::cplx( double n ) // dummy
 {
 	r2_ = k2_ * n;
 	r3_ = k3_ * n;
+	// cout << "	cplx: " << n;
 }
 
 void Enz::process( const Eref& e, ProcPtr p )
@@ -196,19 +200,15 @@ void Enz::process( const Eref& e, ProcPtr p )
 	toPrd.send( e, p, r3_, 0 );
 	toEnz.send( e, p, r3_ + r2_, r1_ );
 	toCplx.send( e, p, r1_, r3_ + r2_ );
+
+	// cout << "	proc: " << r1_ << ", " << r2_ << ", " << r3_ << endl;
 	
 	r1_ = k1_;
 }
 
 void Enz::reinit( const Eref& e, ProcPtr p )
 {
-	/*
-	toSub.send( e, p, r2_, r1_ );
-	toPrd.send( e, p, r3_, 0 );
-	toEnz.send( e, p, r3_ + r2_, r1_ );
-	toCplx.send( e, p, r1_, r3_ + r2_ );
-	*/
-
+	// cout << "	reinit: " << r1_ << ", " << r2_ << ", " << r3_ << endl;
 	r1_ = k1_;
 }
 

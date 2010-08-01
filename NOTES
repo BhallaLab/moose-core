@@ -7177,3 +7177,62 @@ Check what enz does on creation with its cplx molecule.
 Showed fields. Nothing obvious.
 Checked what the timing of the 'tick' is like. Seems OK.
 ============================================================================
+01 Aug 2010
+
+Going to try again, this time just printing out values at each place each
+timestep. 
+In the meantime, checked in the updates as 2104.
+
+Printf debugging to the rescue. The problem seems to be that the reinit
+call sends out messages from all mols, and then the process call
+also sends out the same messages. The 'sub' function is therefore called
+twice for each molecule, doing a multiplication into the internal variable
+r1_ each time. During normal process operations r1 gets reinitialized, but
+not during this initial timestep problem. That is odd.
+
+OK, this is what the scheduling does:
+During reinit, it just calls reinit on all objects, in scheduled order.
+During process, it first deals with all the pending queue stuff, then 
+	calls process on all objects.
+
+So there is no clearing of pending stuff after reinit. If there are multiple
+sends during this phase, they all just pile up till the first 'process'.
+Should rethink and clean up.
+
+Can I keep all 'sends' within a timestep? No, the 'process' comes second
+and there will usually be spillover to the next timestep.
+
+in that case I may as well set up the rule that the only 'sends' that reinit
+is allowed to do are 'sends' that span timesteps.
+
+In reactions, the reacs and enzymes cannot send useful data till
+they have done their 'process'. So the sequence should be:
+
+REINIT:
+Molecule reinits and sends out data.
+
+PROCESS:
+Stage 0:
+	Reacs/Enz handle msgs
+	Reacs/Enz send update
+Stage 1:
+	Molecules handle msgs
+	Molecules send update.
+
+This also has implications for resume and cleanup of processing.
+It is cleaner to have a separate 'resume' or 'restart'
+function called when a sim is beginning or resuming. If so,
+reinit just sets boundary conditions.
+restart sends out the preliminary data to start the cycle.
+Should decide if reinit should fold in restart.
+Restart always needed when resuming simulation midstream.
+
+Another way to put it, is that at the end of any timestep, the
+system should be in a state where all pending data can be flushed,
+and where the state variables of the system can easily regenerate
+the messages needed to continue calculations where they were left
+off.
+
+OK, worked. This took a long and weary time to fix, but I've now
+set policy for how to handle multi-stage process calculations.
+

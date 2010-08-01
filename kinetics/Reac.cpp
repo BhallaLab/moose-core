@@ -153,9 +153,6 @@ void Reac::process( const Eref& e, ProcPtr p )
 
 void Reac::reinit( const Eref& e, ProcPtr p )
 {
-	// toPrd.send( e, p, sub_, prd_ );
-	// toSub.send( e, p, prd_, sub_ );
-
 	sub_ = kf_;
 	prd_ = kb_;
 }

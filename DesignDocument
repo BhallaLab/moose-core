@@ -54,6 +54,48 @@ This redesign does a lot of things differently from the earlier MOOSE messaging.
 ------------------------------------------------------------------------------
 Control flow.
 
+Developer design:
+Every object being scheduled has to provide a 'process' and a 'reinit' function,
+which are set up as a shared message, as per the following interface:
+
+static DestFinfo process( 
+	"process", "description", new ProcOpFunc< Class>( &Class::process ) );
+static DestFinfo reinit( 
+	"reinit", "description", new ProcOpFunc< Class>( &Class::reinit ) );
+static Finfo* procShared[] = { &process, &reinit };
+static SharedFinfo( "proc", "description", procShared, 
+	sizeof( procShared ) / sizeof( const Finfo* ) );
+
+These functions are called specially by the scheduler, and bypass the regular
+message queuing system.
+
+During Reinit, the initial conditions are set and state variables are sent out
+(see below). Reinit happens just at the start of the calculation.
+During Process, first all pending messages are cleared, then internal updates
+happen and data is sent out. Process is repeated once each timestep for each
+Element.
+Process even within the same timestep, can be strictly ordered by clock tick.
+In other words, the messages are handled and the internal updates are done
+within one clock tick, before the next is begun.
+
+Supposing you have two classes A and B. Class A has the state variables of
+the calculation, and class B computes rates of change and sends these back.
+We need to put these on separate clock ticks. When running, this
+is the sequence your classes should follow:
+
+REINIT:
+A reinits and sends out data, typically the state variables.
+
+PROCESS:
+Stage 0:
+        B handle msgs
+        B send update
+Stage 1:
+        A handle msgs
+        A send update.
+
+
+
 1. Scheduling.
 Shell::start( double runtime )
 	Sets up thread stuff

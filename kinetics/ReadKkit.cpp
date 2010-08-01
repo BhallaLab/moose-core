@@ -148,8 +148,8 @@ void ReadKkit::run()
 	string reacpath = basePath_ + "/kinetics/##[ISA!=Mol]";
 	string plotpath = basePath_ + "/graphs/##[TYPE=Table]," + 
 		basePath_ + "/moregraphs/##[TYPE=Table]";
-	shell_->doUseClock( molpath, "process", 0 );
-	shell_->doUseClock( reacpath, "process", 1 );
+	shell_->doUseClock( reacpath, "process", 0 );
+	shell_->doUseClock( molpath, "process", 1 );
 	shell_->doUseClock( plotpath, "process", 2 );
 	shell_->doReinit();
 	if ( useVariableDt_ ) {
