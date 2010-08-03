@@ -1,0 +1,307 @@
+/******************************************************************************
+ * File:            INSTALL
+ * Description:     Instructions to configure, build and install MOOSE
+ * Author:          Subhasis Ray
+ * E-mail:          ray dot subhasis at gmail dot com
+ * Created:         2010-08-03 11:00:13 (+0530)
+ ******************************************************************************/
+
+
+The current version of MOOSE uses a Makefile-based build. Here we
+shall describe the build process on UNIX systems (Linux/Mac/Solaris,
+etc.). For Windows systems there is a Visual Studio project inside the
+moose_vcpp2005 which can be loaded in Visual Studio to build the MOOSE
+binaries.
+
+
+0. PRE-REQUISITES
+================================================================================
+You need the following softwares:
+
+
+0.1. Essential softwares for compilation and linking
+-----------------------------------------------------
+
+* make (installed by default on most UNICES).
+
+* gcc
+
+* g++ 
+
+* ld
+
+* libstdc++
+
+* GNU Scientific Library (gsl)
+  
+
+
+0.2. Softwares required OpenGL-based 3D-Visualization (optional)
+-----------------------------------------------------------------
+
+If you want to enable 3-D visualization install the following:
+
+* OpenSceneGraph, Stable Release 2.8.0 or above
+(http://www.openscenegraph.org/projects/osg/wiki/Downloads)
+OpenSceneGraph must be built with PNG support to be able to export
+single and sequential screenshots in glclient.
+
+* Boost C++ libaries, Version 1.39.0: http://www.boost.org/users/download/
+
+Specifically the following Boost libraries are required:
+
+	     Serialization
+	     Thread
+	     Filesystem
+	     System 
+
+
+0.3. Softwares required to build Python bindings (PyMOOSE)
+-----------------------------------------------------------------
+To build PyMOOSE (moose as a Python module), you need 
+
+* SWIG (1.3.35 or later): http://www.swig.org
+
+* Python 2.5 or later
+
+* Python development libraries (python-devel package)
+
+
+0.4 Software required for running the  GUI
+-----------------------------------------------------------------
+
+The current moose gui is based on the Python bindings of the Qt
+library (PyQt). This uses the moose python module. Hence you will be
+building the PyMOOSE module and you need the software mentioned in
+section 0.3. You need the software mentioned in this subsection only
+when trying to run moosegui.py or some of the pymoose demos after you
+are done with building and installing PyMOOSE.
+
+* PyQt4 (version 4.3.0 or above):
+  http://www.riverbankcomputing.co.uk/software/pyqt/download
+
+* PyQwt5 (version 5.1 or above - there is a bug in 5.2.0 distributed
+  with Ubuntu, use the fix)
+
+* numpy
+
+* matplotlib (not required for the GUI itself, but many demos use this
+  to plot data).
+
+
+1. CONFIGURATION
+================================================================================
+Configuration has to be done by manually editing the Makefiles. You
+can take a look at the comments in the main Makefile (in this
+directory). In particular, you need to change some paths to reflect
+your environment. You may want to modify the following:
+
+* pymoose/Makefile: 
+  Line 28:: LIBS += -L/usr/lib -lpython2.6
+  
+  Replace "/usr/lib" with the location of your libpython2.x.so (x >= 5).
+
+  Replace "python2.6" with whatever python version you have installed
+  on your system (2.x where x >= 5).
+
+  Line 51:: CXXFLAGS +=-I/usr/include/python2.6 change
+  "/usr/include/python2.6" to whatever is the location of your python
+  include headers. If you have the GNU locate program installed, you
+  can use this command:
+
+  locate -e Python.h | grep 'Python\.h$' | sed 's/\/Python.h//'
+
+  This should print the directory containing Python.h. Replace
+  "/usr/include/python2.6" in the Makefile with this.
+
+* If you have installed any of the required libraries in a
+  non-standard location, add that to the list of directories to be
+  searched by modifying Line# 154 of the main Makefile:
+
+	 LIBS = -lm
+ 
+  should become LIBS = -lm -L{your library location}
+
+  For example, if you have installed OpenScenegraph in /opt/osg and
+  the library files (*.so/*.a) are located in /opt/osg/lib, then put:
+
+  LIBS = -lm -L/opt/osg/lib
+
+
+2. BUILD
+================================================================================
+There are two possible builds for moose. 
+
+* Stand-alone command line version, which can be built statically.
+
+* PyMOOSE - moose as a Python module - which requires dynamic linking.
+
+2.1. Stand-alone version
+--------------------------------------------------------------------------------
+* Just start a terminal, cd to this directory (containing this INSTALL
+file) and then enter:
+
+      make moose 
+
+This will build moose _without_ GL or neuroML support.
+
+* To build moose with OpenGL 3D-visualization support, you can use:
+
+      make moose USE_GL=1
+
+* To build with neuroML support, you have to build libneuroml first,
+which is available in external/neuroML_src directory. In the terminal
+enter the following:
+
+      cd external neuroML_src
+
+      make
+
+and this will create libneuroml.a in that directory. Now do:
+
+       cp ./*.h ../include/neuroML
+
+       cp ./libneuroml.a ../lib/
+
+Now change to this directory by:
+
+       cd ../..
+
+and type:
+
+       make moose USE_NEUROML=1 USE_GL=1
+
+The USE_GL flag can be skipped if you don't want 3D-visualization.
+
+2.2. PyMoose (python module for MOOSE)
+--------------------------------------------------------------------------------
+If you have built the static version before, you must cleanup before
+building pymoose, moose as python module.
+
+Enter the following in a terminal:
+
+      make clean
+      
+      rm pymoose/moose_wrap.cxx
+
+* Then to build PyMOOSE, enter:
+
+      make pymoose
+
+This will create just the python module without neuroML or OpenGL
+support. 
+
+* To build with OpenGL support, add the USE_GL=1 flag:
+ 
+      make pymoose USE_GL=1
+
+* To build with neuroML support, you have to first build libneuroml.
+
+
+     cd external/neuroML_src
+
+     make clean
+
+     make TYPE=dynamic
+
+
+Now copy the headers and the library file in their proper locations:
+
+    cp *.h ../include/neuroML
+
+    cp libneuroml.so ../lib
+
+
+Change to the top level directory:
+
+    cd ../..
+
+And make pymoose with neuroml support flag:
+
+    make pymoose USE_NEUROML=1 USE_GL=1
+
+Again, the USE_GL=1 flag is required only if you want 3-D
+visualization support.
+
+
+3. INSTALL
+================================================================================
+Depending on the build target you have chosen, the product of the
+build process will be a standalone executable or python module.
+
+ Stand-alone MOOSE:
+----------------------------------------------------------------------
+In the current directory a file called "moose" should have been
+created. Copy this to any location in your system PATH (you may need
+superuser privilages, i.e. "su root" or sudo):
+
+	 cp moose /usr/bin/
+
+ PyMOOSE
+----------------------------------------------------------------------
+There will be two files that are required. You have to copy them to
+any directory in your PYTHONPATH. For example,
+
+    cp pymoose/moose.py /usr/lib/python2.6/dist-packages/
+    cp pymoose/_moose.so /usr/lib/python2.6/dist-packages/
+
+There is an utility module for displaying modeltree and showmsg, etc.,
+
+    cp pymoose/pymoose.py /usr/lib/python2.6/dist-packages/
+
+
+ PyMOOSE GUI
+----------------------------------------------------------------------
+The Graphical User Interface for pymoose is all written in
+Python. They are in
+
+	pymoose/gui/qt directory.
+
+You can copy them to any location according to your convenience. For
+example:
+
+	cp -R pymoose/gui/qt ~/moosegui
+
+Then make the moosegui.py file executable:
+
+     	chmod +x ~/moosegui/moosegui.py
+
+Then you can create a symlink to this file in any location in your PATH.
+
+     	 ln -s ~/moosegui/moosegui.py /usr/local/bin
+
+Now you should be able to run in terminal:
+
+    	moosegui.py 
+
+and the gui window should pop up.
+
+* OpenGL visualization
+
+  If you have built moose with OpenGL support, then an executable will
+  be generated:
+
+	gl/src/glclient
+
+  Copy this to any location in your path:
+
+        cp gl/src/glclient /usr/bin
+
+  Now you can start the client for visualization by entering:
+
+        glclient
+
+  You will of course to run a simulation and connect that to this
+  client in order to use this client. See gl/Docs for further details.
+
+* neuroML support
+
+  If you built with USE_NEUROML=1 flag, then copy the libneuroml.so
+  and/or libneuroml.a to your system's library directory:
+
+  	 cp external/lib/libneuroml.a /usr/lib
+
+   or 
+
+  	 cp external/lib/libneuroml.so /usr/lib
+
