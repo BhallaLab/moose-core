@@ -334,8 +334,7 @@ class NOrder: public ZeroOrder
 			return ret;
 		}
 
-		unsigned int getReactants( vector< unsigned int >& molIndex,
-			const vector< double >& S ) const {
+		unsigned int getReactants( vector< unsigned int >& molIndex ) const{
 			molIndex = v_;
 			return v_.size();
 		}

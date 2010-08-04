@@ -89,6 +89,7 @@ endif
 # Profiling mode:
 ifeq ($(BUILD),profile)
 CXXFLAGS  = -O3 -pg -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER  
+USE_GSL = 1
 endif
 # Threading mode:
 ifeq ($(BUILD),thread)

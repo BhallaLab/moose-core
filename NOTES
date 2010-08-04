@@ -7254,6 +7254,119 @@ Checkin 2106.
 
 Now go through and reimplement Stoich and RateTerms to use indexing.
 Done. Looks like a pretty severe speed penalty specially with the bigger
+model. Checkin 2107. Let's see if I can track down the speed issue.
+
+Did profiling. Nothing obvious.
+
+============================================================================
+2 Aug
+Try more careful benchmarking. I started out with a really big model (acc81.g),
+except this gave me still more bizarre results, with the new MOOSE being
+astonishingly fast on it. Then another mid-size model.
+
+Binary: moose_msg new (with array indexing). On: Mishti: (Lenovo X301)
+	U9400@1.4GHz.
+
+File		#Mol	Runtime	Plotdt	t1	t2	t3	Comments
+Kholodenko.g	15	6e6	5	18.8	18.8	18.8	2.25 on 500s dt
+spine_v61c.g	104	500	10	18.5	18.6	18.5
+Dend_v26.g	129	200	1	14.0	13.9	14.0	Surprising slow	
+acc81.g		1050	200	1	12.6	12.6	12.6	Surprising fast
+
+Binary: moose_msg old (with array ptr lookup). On: Mishti: (Lenovo X301)
+Kholodenko.g	15	6e6	5	18.8	18.6	18.9	2.1s on 500s dt
+spine_v61c.g	104	500	10	13.7	13.7	13.7
+Dend_v26.g	129	200	1	9.5	9.5	9.5
+acc81.g		1050	200	1	12.6	12.5	12.5
+
+Binary: moose_g3 (Jul 21 64-bit build). On: Mishti: (Lenovo X301)
+Kholodenko.g	15	6e6	5	27.9	27.9	27.8	Surprising slow
+								2.2 on 500s dt
+spine_v61c.g	104	500	10	11.8	11.8	11.8
+Dend_v26.g	129	200	1	8.3	8.3	8.3	Eh?
+acc81.g		1050	200	1	28.4	30.4	28.6	Eh??
+
+These results are all over the place. The only consistent finding is that
+the old moose_msg binaries (pointer version) work faster than the new 
+array index variants. Sometimes by 50%, sometimes not at all. The old 
+moose_g3 binaries are all over the place, sometimes better still, 
+sometimes dreadful.  I really need to compile and run these on another machine.
+Just to be sure, I also went and compared the output of the calculations
+with those on Genesis. Seems OK.
+
+============================================================================
+4 Aug
+Now running benchmarks on Nehalem
+
+Binary: moose_msg new (with array indexing). On: Ghevar: (Xeon E5520@2.27GHz)
+
+File		#Mol	Runtime	Plotdt	t1	t2	t3	Comments
+Kholodenko.g	15	6e6	5	10.6	10.7	10.7	1.1s on 500s dt
+spine_v61c.g	104	500	10	10.6	10.6	10.6
+Dend_v26.g	129	200	1	8.7	8.7	8.7
+acc81.g		1050	200	1	8.8	8.9	8.9
+
+Binary: moose_msg old (with array ptr lookup, R2106). On: Ghevar
+Kholodenko.g	15	6e6	5	10.7	10.9	10.8	1.2s if plotdt=
+									500
+spine_v61c.g	104	500	10	7.7	7.7	7.7
+Dend_v26.g	129	200	1	5.8	5.8	5.8
+acc81.g		1050	200	1	8.9	8.9	8.9
+
+Binary: moose_g3 (Oct 14 2008 64-bit build). On: Ghevar
+Kholodenko.g	15	6e6	500	1.8	1.8	1.8	Note long plotdt
+spine_v61c.g	104	500	10	8.4	8.5	8.4
+Dend_v26.g	129	200	1	6.3	6.2	6.4
+acc81.g		1050	200	1	9.3	9.3	9.3
+
+
+Conclusions
+1. The array indexing does have a significant impact in medium-sized models.
+	This is between 30% and 50% slowdown.
+	My interpretation is that this is cache-related. Really small models
+	have everything in cache, or are otherwise limited. Really big models
+	are out of cache regardless.
+2. The new solver compares well with the old one in most cases.
+2a. The Kholodenko model initially gave odd results, but it turns out that
+	these were due to file dump time. Without it, things are comparable.
+
+Discussed with Subha, he doesn't have any additional insights other than
+agreeing that array indexing should not cause such a big speed hit.
+
+Let's do one more cycle of profiling to see if there is something else
+obvious happening.
+
+A lot of work later, turns out that the models are not producing exactly
+the same output. There are issues with the Ca handling, and the # of 
+calculations differ in the profiling. This may be the problem.
+Specifically, it looks like CaM-Ca4 is different and so are its downstream
+molecules. Possibly a high-order reaction bug.
+
+Working through by elimination of the pathways. The critical one seems not to
+be CaM, but PP2B.
+A bit more tracking, and I can get the discrepancy just with the PP2B (CaN)
 model.
+
+Reduced still further, it is just the two Ca binding steps, each of
+which is a reaction 2nd order in Ca. I get a steadily near linear
+increasing CaNAB-Ca2.Co with time in the 2107 checkin case.
+
+Tracked down to the single reaction 
+2 Ca + CaNAB <===> CaNAB
+with Kf 1000 and Kb 0.1. (kf in this vol of 1e-15 is 2.78e-9)
+
+Found error - nasty bug where virtual function args had been changed,,
+but the one for the derived class had not. So the default virtual func
+was being called and giving the wrong answer.
+With this fixed the timings are:
+
+Kholodenko.g	15	6e6	5	19.4	19.4	19.8	2.4 on 500s dt
+spine_v61c.g	104	500	10	13.4	13.4	13.4
+Dend_v26.g	129	200	1	9.7	9.7	9.7
+acc81.g		1050	200	1	12.7	12.7	12.8	Surprising fast
+
+These new times are almost exactly like the old (array pointer) ones.
+Also confirmed that the output now matches perfectly (md5sum) with the old
+one for the Dend_v26.g model. So we are in business.
 
 ============================================================================

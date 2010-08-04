@@ -54,7 +54,7 @@ Id init( int argc, char** argv )
 	bool isSingleThreaded = 0;
 	bool isInfinite = 0;
 	int opt;
-	while ( ( opt = getopt( argc, argv, "shin:c:b:" ) ) != -1 ) {
+	while ( ( opt = getopt( argc, argv, "shin:c:b:B:" ) ) != -1 ) {
 		switch ( opt ) {
 			case 's': // Single threaded mode
 				isSingleThreaded = 1;
@@ -70,6 +70,8 @@ Id init( int argc, char** argv )
 				numCores = atoi( optarg );
 				break;
 			case 'b': // Benchmark: handle later.
+				break;
+			case 'B': // Benchmark, dump data: handle later.
 				break;
 			case 'h': // help
 			default:
@@ -169,12 +171,15 @@ void mpiTests()
 bool benchmarkTests( int argc, char** argv )
 {
 	int opt;
+	bool doPlot = 0;
 	optind = 0; // forces reinit of getopt
-	while ( ( opt = getopt( argc, argv, "b:" ) ) != -1 ) {
+	while ( ( opt = getopt( argc, argv, "b:B:" ) ) != -1 ) {
 		switch ( opt ) {
+			case 'B': // Benchmark
+				doPlot = 1; // fall through to case b.
 			case 'b': // Benchmark
 				if ( string( "ksolve" ) == optarg  )
-					testKsolve( 0 );
+					testKsolve( doPlot );
 				if ( string( "intFire" ) == optarg  )
 					speedTestMultiNodeIntFireNetwork( 2048, 2000 );
 				cout << "Completed benchmark\n";
