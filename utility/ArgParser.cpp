@@ -47,9 +47,6 @@ vector <string>& ArgParser::scriptArgs()
 int ArgParser::parseArguments(int argc, char **argv)    
 {
     static bool inited = false;
-    static map <char, string> option_ = option();
-    static map<string, char> longShortMap_ = longShortMap();
-    static vector<string> scriptArgs_ = scriptArgs();
     if (!inited)
     {
         
@@ -59,27 +56,27 @@ int ArgParser::parseArguments(int argc, char **argv)
            or in the long format that starts with '--'.
         */
         
-        option_['c'] = "moose.prop"; // configuration file
-        longShortMap_["config-file"] = 'c';
-        option_['d'] = ""; // DOCPATH 
-        longShortMap_["docpath"] = 'd';
-        option_['h'] =
+        option()['c'] = "moose.prop"; // configuration file
+        longShortMap()["config-file"] = 'c';
+        option()['d'] = ""; // DOCPATH 
+        longShortMap()["docpath"] = 'd';
+        option()['h'] =
             "This is MOOSE : the Messaging Object Oriented Simulation Environment,\n"
             + string("You can run it as \n\t")
                 + string("moose")
-            + string(" [OPTION1 OPTION2 ... ] [SCRIPT_FILE]\n where OPTION_S can be any of the following -\n")
+            + string(" [OPTION1 OPTION2 ... ] [SCRIPT_FILE]\n where OPTION()S can be any of the following -\n")
             + string("\t-c, --config-file <config_file>  Read configuration from config_file\n")
             + string("\t-d, --docpath <doc_dir>          Search doc_dir for documentation\n")
             + string("\t-h, --help                       Show this help message and exit\n")
             + string("\t-p, --simpath <sim_path>         Search sim_path for include files.\n")
             + string("\t-m, --mpi_debug                  Halt in busy loop for MPI debugging.\n")
             + string("See MOOSE Documentation for further information (http://moose.sourceforge.net or http://moose.ncbs.res.in)");
-        longShortMap_["help"] = 'h';
+        longShortMap()["help"] = 'h';
         
-        option_['p'] = ""; // SIMPATH
-        longShortMap_["simpath"] = 'p';
-        option_['m'] = ""; // MPI_DEBUG
-        longShortMap_["mpi_debug"] = 'm';
+        option()['p'] = ""; // SIMPATH
+        longShortMap()["simpath"] = 'p';
+        option()['m'] = ""; // MPI_DEBUG
+        longShortMap()["mpi_debug"] = 'm';
     }
     if (( argc == 0 ) || ( argv == NULL ) )
     {
@@ -98,8 +95,8 @@ int ArgParser::parseArguments(int argc, char **argv)
             {
                 if ( argument[1] == '-' ) // long format
                 {
-                    map <string, char>::iterator it = longShortMap_.find(argument.substr(2));
-                    if ( it == longShortMap_.end())
+                    map <string, char>::iterator it = longShortMap().find(argument.substr(2));
+                    if ( it == longShortMap().end())
                     {
                         cerr << "ERROR: invalid argument " << argv[i] << endl
                              << "To get a list of allowed arguments, run MOOSE as: " << argv[0] << " -h" << endl;
@@ -124,8 +121,8 @@ int ArgParser::parseArguments(int argc, char **argv)
                      << "To get a list of allowed arguments, run MOOSE as: " << argv[0] << " -h" << endl;
                 return 1;
             }
-            map <char, string>::iterator it = option_.find(opt);
-            if ( it == option_.end())
+            map <char, string>::iterator it = option().find(opt);
+            if ( it == option().end())
             {
                 cerr << "ERROR: invalid argument " << argv[i] << endl
                      << "To get a list of allowed arguments, run MOOSE as: " << argv[0] << " -h" << endl;
@@ -133,7 +130,7 @@ int ArgParser::parseArguments(int argc, char **argv)
             }
             if (opt == 'h')
             {
-                cout << option_['h'] << endl;
+                cout << option()['h'] << endl;
                 exit( 0 );
             }
 
@@ -149,7 +146,7 @@ int ArgParser::parseArguments(int argc, char **argv)
                 return 1;                
             }
             string value(argv[i]);
-            option_[opt] = value;                
+            option()[opt] = value;                
         } // end if (argument[0] == '-')
         else{
             // first unpaired option starting with anything but '-'
@@ -157,10 +154,10 @@ int ArgParser::parseArguments(int argc, char **argv)
             // arguments following it arguments to the MOOSE script
             while ( ++i < argc )
             {
-                scriptArgs_.push_back(argument);     
+                scriptArgs().push_back(argument);     
                 argument = string(argv[i]);
             }
-            scriptArgs_.push_back(argument);
+            scriptArgs().push_back(argument);
         }            
     } // end for
         
