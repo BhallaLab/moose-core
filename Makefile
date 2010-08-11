@@ -94,7 +94,7 @@ USE_MUSIC?=0
 USE_CURSES?=0
 USE_GL?=0
 GENERATE_WRAPPERS?=0
-
+SVN?=0
 export BUILD
 export USE_GSL
 export USE_SBML
@@ -130,6 +130,14 @@ endif
 ifeq ($(BUILD),release)
 CXXFLAGS  = -O3 -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER 
 endif
+# Insert the svn revision no. into the code as a preprocessor macro
+ifneq ($(SVN),0)
+SVN_REVISION=$(shell svnversion)
+ifneq ($(SVN_REVISION),export)
+CXXFLAGS+=-DSVN_REVISION=\"$(SVN_REVISION)\"
+endif
+endif
+
 ##########################################################################
 #
 # MAC OS X compilation, Debug mode:
@@ -327,6 +335,7 @@ libs:
 	@echo "	USE_MUSIC:" $(USE_MUSIC)
 	@echo "	USE_CURSES:" $(USE_CURSES)
 	@echo "	USE_GL:" $(USE_GL)
+	@echo " SVN_REVISION:" $(SVN_REVISION)
 	@echo " GENERATE_WRAPPERS:" $(GENERATE_WRAPPERS)
 	@(for i in $(SUBDIR); do $(MAKE) -C $$i; done)
 	@echo "All Libs compiled"
