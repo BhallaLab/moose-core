@@ -9,6 +9,10 @@
 #ifndef _MOOSE_H
 #define _MOOSE_H
 
+#ifndef SVN_REVISION
+// indicates that we do not have svn revision no. associated
+#define SVN_REVISION "0"
+#endif
 /**
  * The moose.h header is used when one makes MOOSE classes. It is not
  * needed for the external MOOSE API used to control MOOSE and 
