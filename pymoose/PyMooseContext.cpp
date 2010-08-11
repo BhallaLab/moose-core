@@ -43,6 +43,8 @@ extern const Cinfo* initClockJobCinfo();
 extern const Cinfo* initTableCinfo();
 extern const Cinfo* initSchedulerCinfo();
 
+revision = SVN_REVISION;
+
 const Cinfo* initPyMooseContextCinfo()
 {
 	static Finfo* parserShared[] =
