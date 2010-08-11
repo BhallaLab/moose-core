@@ -3182,6 +3182,10 @@ float do_version( int argc, const char** const argv, Id s )
 	return 3.0;
 }
 
+char *do_revision(int argc, const char** const argv, Id s)
+{
+    return copyString(SVN_REVISION);
+}
 char** doArgv( int argc, const char** const argv, Id s )
 {
     cout << argv[0] << ": Not yet implemented!" << endl;
@@ -4386,6 +4390,7 @@ void GenesisParserWrapper::loadBuiltinCommands()
 	AddFunc( "pow", reinterpret_cast< slifunc>( do_pow ), "float" );
 	AddFunc( "abs", reinterpret_cast< slifunc>( do_abs ), "float" );
 	AddFunc( "version", reinterpret_cast< slifunc>( do_version ), "float");
+	AddFunc( "revision", reinterpret_cast< slifunc>( do_revision ), "char*");
 	AddFunc( "xshow", do_xshow, "void" );
 	AddFunc( "xhide", do_xhide, "void" );
 	AddFunc( "xshowontop", do_xshowontop, "void" );
