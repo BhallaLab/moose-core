@@ -25,8 +25,9 @@
 
 namespace pymoose
 {
-const float version = 3.0;
-const char *revision;
+const float version();
+const string revision();
+
 enum FieldType { FTYPE_ALL, FTYPE_VALUE, FTYPE_LOOKUP, FTYPE_SOURCE, FTYPE_DEST, FTYPE_SHARED, FTYPE_SOLVE, FTYPE_THIS, FTYPE_GLOBAL, FTYPE_DEL };
 enum {OUTGOING, INCOMING, INOUT};
     class PyMooseContext
