@@ -43,7 +43,7 @@ extern const Cinfo* initClockJobCinfo();
 extern const Cinfo* initTableCinfo();
 extern const Cinfo* initSchedulerCinfo();
 
-revision = SVN_REVISION;
+
 
 const Cinfo* initPyMooseContextCinfo()
 {
@@ -402,6 +402,14 @@ static const Slot createGateSlot =
 	initPyMooseContextCinfo()->getSlot( "parser.createGate" );
 
 
+const string pymoose::revision() 
+{
+    return SVN_REVISION;
+}
+const float pymoose::version() 
+{
+    return 3.0;
+}
 
 //////////////////////////
 // Static constants
