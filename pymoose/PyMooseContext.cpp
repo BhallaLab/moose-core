@@ -402,15 +402,6 @@ static const Slot createGateSlot =
 	initPyMooseContextCinfo()->getSlot( "parser.createGate" );
 
 
-const string pymoose::revision() 
-{
-    return SVN_REVISION;
-}
-const float pymoose::version() 
-{
-    return 3.0;
-}
-
 //////////////////////////
 // Static constants
 //////////////////////////
