@@ -1291,14 +1291,6 @@ def PathUtility_isAbsolutePath(*args):
   """PathUtility_isAbsolutePath(string path) -> bool"""
   return _moose.PathUtility_isAbsolutePath(*args)
 
-
-def version(*args):
-  """version() -> float"""
-  return _moose.version(*args)
-
-def revision(*args):
-  """revision() -> string"""
-  return _moose.revision(*args)
 FTYPE_ALL = _moose.FTYPE_ALL
 FTYPE_VALUE = _moose.FTYPE_VALUE
 FTYPE_LOOKUP = _moose.FTYPE_LOOKUP
@@ -1680,6 +1672,8 @@ class PyMooseContext(object):
     parallel = _swig_property(_moose.PyMooseContext_parallel_get, _moose.PyMooseContext_parallel_set)
 PyMooseContext_swigregister = _moose.PyMooseContext_swigregister
 PyMooseContext_swigregister(PyMooseContext)
+version = cvar.version
+revision = cvar.revision
 
 def PyMooseContext_recvCwe(*args):
   """PyMooseContext_recvCwe(Conn c, Id i)"""
