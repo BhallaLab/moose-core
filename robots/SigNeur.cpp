@@ -530,8 +530,9 @@ void SigNeur::schedule( Eref me )
 	SetConn c( Id::shellId().eref() );
 	Shell::setClock( &c, 0, cellDt_, 0 );
 	Shell::setClock( &c, 1, cellDt_, 1 );
-	Shell::setClock( &c, 2, sigDt_, 0 );
-	Shell::setClock( &c, 3, sigDt_, 1 );
+	Shell::setClock( &c, 2, cellDt_, 2 );
+	Shell::setClock( &c, 3, sigDt_, 0 );
+	Shell::setClock( &c, 4, sigDt_, 1 );
 
 	set< string >( cellId.eref(), "method", cellMethod_ );
 	set< string >( kinId.eref(), "method", dendMethod_ );
@@ -545,9 +546,9 @@ void SigNeur::schedule( Eref me )
 			set< string >( i->eref(), "method", spineMethod_ );
 	}
 
-	Shell::useClock( &c, "t2", "/sig/kinetics", "process" );
-	Shell::useClock( &c, "t2", "/sig/kinetics/solve/hub", "process" );
-	Shell::useClock( &c, "t2", "/sig/kinetics/solve/integ", "process" );
+	Shell::useClock( &c, "t3", "/sig/kinetics", "process" );
+	Shell::useClock( &c, "t3", "/sig/kinetics/solve/hub", "process" );
+	Shell::useClock( &c, "t3", "/sig/kinetics/solve/integ", "process" );
 
-	Shell::useClock( &c, "t3", "/sig/cell/##[][TYPE==Adaptor]", "process" );
+	Shell::useClock( &c, "t4", "/sig/cell/##[][TYPE==Adaptor]", "process" );
 }
