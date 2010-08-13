@@ -202,7 +202,7 @@ endif
 
 # To use SBML, pass USE_SBML=1 in make command line
 ifeq ($(USE_SBML),1)
-LIBS+= -lsbml 
+LIBS+= -lsbml
 CXXFLAGS+=-DUSE_SBML 
 endif
 
