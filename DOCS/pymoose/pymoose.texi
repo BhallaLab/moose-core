@@ -79,6 +79,7 @@ describing the classes of objects in MOOSE.
 * Introduction::        Introduction to MOOSE and PyMOOSE
 * Installation::        Installing (Py)MOOSE
 * Quick Start::         Quick Start
+* Detailed Guide::      In-Depth Guide to PyMOOSE
 * FAQ::                 Frequently Asked Questions
 * Index::               Index 
 @end menu
@@ -98,12 +99,15 @@ The full license text can be read here:
 
 @node Introduction
 @chapter Introduction to MOOSE and PyMOOSE
+Yet to be written.
 @pindex Introduction
 @cindex Introduction
 
 @include install.texi
 
 @include quickstart.texi
+
+@include detailed.texi
 
 @include faq.texi
 
