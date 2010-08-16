@@ -1035,6 +1035,10 @@ class Id(object):
         this = _moose.new_Id(*args)
         try: self.this.append(this)
         except: self.this = this
+    def __str__(*args):
+        """__str__(self) -> char"""
+        return _moose.Id___str__(*args)
+
 Id_swigregister = _moose.Id_swigregister
 Id_swigregister(Id)
 
