@@ -39,6 +39,7 @@ pymoose/Makefile to add this directory in the include search path with
 
 @node Configuration
 @section Configuration
+Yet to be written.
 
 @node Build/install
 @section Build/install
@@ -114,3 +115,4 @@ Useful for python interface developers.  The binary created with this
 
 @node Loading
 @section Loading
+Yet to be written.
