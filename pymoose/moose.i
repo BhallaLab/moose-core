@@ -146,6 +146,14 @@ def listproperty(getter=None, setter=None, deller=None):
 %ignore Id::eref;   
 
 %include "../basecode/Id.h"
+%extend Id {
+    char * __str__() {
+        static char tmp[256];
+        sprintf(tmp, "%d[%d]", $self->id(), $self->index());
+        return tmp;
+    }
+ }
+
 %include "../utility/Property.h"
 %include "../utility/PathUtility.h"
 
