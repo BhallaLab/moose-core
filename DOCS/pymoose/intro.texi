@@ -1,0 +1,3 @@
+@node Introduction, Installation, , Top
+@chapter Introduction to MOOSE and PyMOOSE
+Yet to be written
