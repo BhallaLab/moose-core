@@ -1,3 +1,19 @@
-@node Index, , FAQ, Top
+@node Index, , GNU Free Documentation License, Top
 @unnumbered Index
+
+@menu
+* Variable Index::              
+* Concept Index::               
+@end menu
+
+@node Variable Index, Concept Index, , Index
+@unnumbered Variable Index
+
+@printindex vr
+
+
+@node Concept Index, , Variable Index, Index
+@unnumbered Concept Index
+
+@printindex cp
 
