@@ -13,7 +13,7 @@ In this chapter we go through the internal details of PyMOOSE.
 @section Overview of PyMOOSE internals
 The entities in a MOOSE model are called @t{elements}. An @t{element}
 is an object of some MOOSE class. Each element has an unique identifier,
-called its @t{Id}.
+called its @code{id}.
 
 @node Model Tree
 @section Model Tree
@@ -22,8 +22,87 @@ Yet to be written.
 
 @node Id
 @section Id
-The unique identifier for each MOOSE object
-Yet to be written.
+@cindex Id
+The unique identifier for each MOOSE object is an Id. This is accessible
+as @code{id} field of pymoose objects. An Id object has two components, 
+@itemize
+@item id 
+      an unsigned integer. The method @code{id} returns this value. The
+      root element of the moose model tree always has the id 0.
+@item index
+      an unsigned integer giving the index number of
+      array-elements. For simple elements, it is 0. It is returned by
+      the method @code{index}.
+@end itemize
+
+When you print an @code{Id} object, it is printed in the form: @code{id[index]}
+
+Example:
+@samp{
+
+>>> my_root = moose.Neutral('/') # This creates the python object
+                                 # my_root wrapping the root element
+
+
+>>> print my_root.id
+
+0[0]
+
+>>> print my_root.id.id()
+
+0
+
+>>> print my_root.id.index()
+
+0
+
+}
+
+Even if you create multiple python objects wrapping the same moose
+element, you can always verify if the underlying moose element is the
+same by comparing their @code{id}s.
+
+Example:
+@code{
+
+>>> a = moose.Neutral('my_test_object')
+
+>>> b = moose.Neutral('my_test_object')
+
+>>> a.id == b.id
+
+True
+}
+
+Note that @code{id} is a more fundamental property than the path string
+of an object. The path string changes when you rename the object, but
+the @code{id} remains unchanged.
+
+Example:
+@code{
+
+>>> a = moose.Neutral('my_test_object')
+
+>>> print a.path
+
+/my_test_object
+
+>>> ii = a.id
+
+>>> a.name = 'your_test_object'
+
+>>> print a.path
+
+/your_test_object
+
+>>> ii == a.id
+
+True
+
+}
+
+To be completed.
+
 
 @node PyMooseBase
 @section PyMooseBase
