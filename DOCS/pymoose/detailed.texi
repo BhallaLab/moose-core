@@ -1,4 +1,4 @@
-@node Detailed Guide
+@node Detailed Guide, FAQ, Quick Start, Top
 @chapter In-Depth Guide to PyMOOSE
 In this chapter we go through the internal details of PyMOOSE.
 @menu
@@ -11,7 +11,9 @@ In this chapter we go through the internal details of PyMOOSE.
 
 @node Overview
 @section Overview of PyMOOSE internals
-Yet to be written.
+The entities in a MOOSE model are called @t{elements}. An @t{element}
+is an object of some MOOSE class. Each element has an unique identifier,
+called its @t{Id}.
 
 @node Model Tree
 @section Model Tree
