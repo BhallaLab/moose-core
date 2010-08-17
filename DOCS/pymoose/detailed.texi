@@ -17,12 +17,50 @@ called its @code{id}.
 
 @node Model Tree
 @section Model Tree
-All elements in MOOSE are part of a Tree structure.
-Yet to be written.
+@cindex Model Tree
+@cindex element
+@cindex root
+
+All elements in MOOSE are part of a tree structure. This is similar to
+the folder structure in the file system of your computer. Each entry in
+this tree is a moose object and we call it an @strong{element}. The top
+level element is called the @code{root}(represented as @samp{/}) element. Every element other
+than the @code{root} has a parent element. There are some predefined special
+elements that are used for management of the system. They are created
+when you startup moose (or @code{import} moose in Python). The following
+diagram shows this structure:
+
+@example
+@group
+root
+|
+|__ shell
+|  |
+|  |__ sli
+|  |
+|  |__ BaseContext
+|
+|__ sched
+|  |
+|  |__ cj
+|     |
+|     |__ t0
+|     |
+|     |__ t1
+|
+|__ library
+|
+|__ proto
+@end group
+@end example
+
+To be completed.
 
 @node Id
 @section Id
 @cindex Id
+@findex id
+@findex index
 The unique identifier for each MOOSE object is an Id. This is accessible
 as @code{id} field of pymoose objects. An Id object has two components, 
 @itemize
@@ -38,68 +76,58 @@ as @code{id} field of pymoose objects. An Id object has two components,
 When you print an @code{Id} object, it is printed in the form: @code{id[index]}
 
 Example:
-@samp{
+@example
+@group
 
 >>> my_root = moose.Neutral('/') # This creates the python object
                                  # my_root wrapping the root element
-
-
 >>> print my_root.id
-
 0[0]
-
 >>> print my_root.id.id()
-
 0
-
 >>> print my_root.id.index()
-
 0
 
-}
+@end group
+@end example
 
 Even if you create multiple python objects wrapping the same moose
 element, you can always verify if the underlying moose element is the
 same by comparing their @code{id}s.
 
 Example:
-@code{
+@example
+@group
 
 >>> a = moose.Neutral('my_test_object')
-
 >>> b = moose.Neutral('my_test_object')
-
 >>> a.id == b.id
-
 True
-}
+
+@end group
+@end example
 
 Note that @code{id} is a more fundamental property than the path string
 of an object. The path string changes when you rename the object, but
 the @code{id} remains unchanged.
 
 Example:
-@code{
+@example
+@group
 
 >>> a = moose.Neutral('my_test_object')
-
 >>> print a.path
-
 /my_test_object
-
 >>> ii = a.id
-
 >>> a.name = 'your_test_object'
-
 >>> print a.path
-
 /your_test_object
-
 >>> ii == a.id
-
 True
 
-}
+@end group
+@end example
+
 
 To be completed.
 
