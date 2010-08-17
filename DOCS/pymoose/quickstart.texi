@@ -1,4 +1,4 @@
-@node Quick Start
+@node Quick Start, Detailed Guide, Installation, Top
 @chapter Quick Start
 Yet to be written.
 
