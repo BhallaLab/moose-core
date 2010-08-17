@@ -1,17 +1,18 @@
-@node Installation
+@node Installation, Quick Start, Introduction, Top
 @chapter Installing (Py)MOOSE
-@cindex install
-@cindex installation
+
+@cindex install, installation
+
 MOOSE is available both as source code and platform-specific installer
 packages. However easy the platform-specific installers are to use,
 there may be issues with dependencies. Hence the most universal way of
 installing MOOSE is to build it from the sources.
 
 @menu
-* Prerequisites::
-* Configuration::
-* Build/install::
-* Loading::             Load moose module in Python
+* Prerequisites::       Software environment needed to build MOOSE
+* Configuration::       Configuring the build settings
+* Build/install::       Compiling and installing MOOSE
+* Loading::             Load the moose module in Python
 @end menu
 
 @node Prerequisites
@@ -113,6 +114,14 @@ Useful for python interface developers.  The binary created with this
 
 @end itemize
 
+The build process for pymoose generates two final output files in the
+@code{pymoose} directory: @code{moose.py} and @code{_moose.so}. Copy
+these to any location in your PYTHONPATH environment variable (for
+Python 2.6 you can copy them to @file{dist-packages} directory inside
+your python installation directory (for UNIX-like systems it is:
+@file{/usr/lib/python@{version@}} or @file{/usr/local/lib/python@{version@}}
+
 @node Loading
 @section Loading
-Yet to be written.
+
+Once you have 
