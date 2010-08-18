@@ -1,8 +1,10 @@
 #ifndef _pymoose_IntFire_h
 #define _pymoose_IntFire_h
 #include "PyMooseBase.h"
+#include "Neutral.h"
 namespace pymoose{
-    class IntFire : public PyMooseBase
+
+    class IntFire : public Neutral
     {      public:
         static const std::string className_;
         IntFire(Id id);

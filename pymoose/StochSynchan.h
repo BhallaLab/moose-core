@@ -19,6 +19,7 @@
 #define _pymoose_StochSynchan_h
 #include "PyMooseIterable.h"
 #include "PyMooseBase.h"
+#include "Neutral.h"
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //    Wrapper for StochSynchan class of MOOSE. It was created by
 //    modifiying the auto-generated wrappers manually. So do not edit
@@ -30,18 +31,18 @@ namespace pymoose
     class StochSynchan;
     typedef InnerPyMooseIterable<StochSynchan, unsigned int, double>  StochSynchanDoubleArray;
 
-    class StochSynchan : public PyMooseBase
+    class StochSynchan : public Neutral
     {    public:
         static const std::string className_;
         StochSynchan(Id id);
         StochSynchan(std::string path);
         StochSynchan(std::string name, Id parentId);
         StochSynchan(std::string name, PyMooseBase& parent);
-        StochSynchan(const StochSynchan& src,std::string name, PyMooseBase& parent);
-        StochSynchan(const StochSynchan& src,std::string name, Id& parent);
-        StochSynchan(const Id& src,std::string name, Id& parent);
-        StochSynchan(const StochSynchan& src,std::string path);
-        StochSynchan(const Id& src,std::string path);
+        StochSynchan( const StochSynchan& src, std::string name, PyMooseBase& parent);
+        StochSynchan( const StochSynchan& src, std::string name, Id& parent);
+        StochSynchan( const StochSynchan& src, std::string path);
+        StochSynchan( const Id& src, std::string name, Id& parent);
+        StochSynchan( const Id& src, std::string path);
         ~StochSynchan();
         const std::string& getType();
         double __get_Gbar() const;

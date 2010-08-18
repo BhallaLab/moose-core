@@ -1,8 +1,10 @@
 #ifndef _pymoose_DiffAmp_h
 #define _pymoose_DiffAmp_h
 #include "PyMooseBase.h"
+#include "Neutral.h"
 namespace pymoose{
-    class DiffAmp : public PyMooseBase
+
+    class DiffAmp : public Neutral
     {      public:
         static const std::string className_;
         DiffAmp(Id id);

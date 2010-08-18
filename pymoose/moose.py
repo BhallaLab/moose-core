@@ -1763,10 +1763,6 @@ class PyMooseBase(object):
         return _moose.PyMooseBase_getContext(*args)
 
     getContext = staticmethod(getContext)
-    def __get_fieldList(*args):
-        """__get_fieldList(self) -> string_vector"""
-        return _moose.PyMooseBase___get_fieldList(*args)
-
     def getField(*args):
         """getField(self, string name) -> string"""
         return _moose.PyMooseBase_getField(*args)
@@ -1777,7 +1773,6 @@ class PyMooseBase(object):
 
     def getFieldList(*args):
         """
-        getFieldList(self) -> string_vector
         getFieldList(self, FieldType ftype=FTYPE_ALL) -> string_vector
         getFieldList(self) -> string_vector
         """
@@ -1791,14 +1786,6 @@ class PyMooseBase(object):
         """
         return _moose.PyMooseBase_neighbours(*args)
 
-    def children(*args):
-        """children(self) -> Id_vector"""
-        return _moose.PyMooseBase_children(*args)
-
-    def __get_parent(*args):
-        """__get_parent(self) -> Id"""
-        return _moose.PyMooseBase___get_parent(*args)
-
     def __get_path(*args):
         """__get_path(self) -> string"""
         return _moose.PyMooseBase___get_path(*args)
@@ -1806,34 +1793,6 @@ class PyMooseBase(object):
     def __get_id(*args):
         """__get_id(self) -> Id"""
         return _moose.PyMooseBase___get_id(*args)
-
-    def __get_name(*args):
-        """__get_name(self) -> string"""
-        return _moose.PyMooseBase___get_name(*args)
-
-    def __set_name(*args):
-        """__set_name(self, string name)"""
-        return _moose.PyMooseBase___set_name(*args)
-
-    def __get_index(*args):
-        """__get_index(self) -> int"""
-        return _moose.PyMooseBase___get_index(*args)
-
-    def __get_dataMem(*args):
-        """__get_dataMem(self) -> int"""
-        return _moose.PyMooseBase___get_dataMem(*args)
-
-    def __get_msgMem(*args):
-        """__get_msgMem(self) -> int"""
-        return _moose.PyMooseBase___get_msgMem(*args)
-
-    def __get_node(*args):
-        """__get_node(self) -> int"""
-        return _moose.PyMooseBase___get_node(*args)
-
-    def __get_cpu(*args):
-        """__get_cpu(self) -> int"""
-        return _moose.PyMooseBase___get_cpu(*args)
 
     def addField(*args):
         """addField(self, string fieldName)"""
@@ -1922,17 +1881,9 @@ class PyMooseBase(object):
 
     initSimulation = staticmethod(initSimulation)
     id = _swig_property(_moose.PyMooseBase_id_get)
-    index = _swig_property(_moose.PyMooseBase_index_get)
-    parent = _swig_property(_moose.PyMooseBase_parent_get)
     className = _swig_property(_moose.PyMooseBase_className_get)
     author = _swig_property(_moose.PyMooseBase_author_get)
     description = _swig_property(_moose.PyMooseBase_description_get)
-    node = _swig_property(_moose.PyMooseBase_node_get)
-    cpu = _swig_property(_moose.PyMooseBase_cpu_get)
-    dataMem = _swig_property(_moose.PyMooseBase_dataMem_get)
-    msgMem = _swig_property(_moose.PyMooseBase_msgMem_get)
-    fieldList = _swig_property(_moose.PyMooseBase_fieldList_get)
-    name = _swig_property(_moose.PyMooseBase_name_get, _moose.PyMooseBase_name_set)
     path = _swig_property(_moose.PyMooseBase_path_get)
 PyMooseBase_swigregister = _moose.PyMooseBase_swigregister
 PyMooseBase_swigregister(PyMooseBase)
@@ -2011,7 +1962,8 @@ def doc(cls):
     elif isinstance(cls, PyMooseBase):
         return PyMooseBase.getContext().doc(cls.className)
     elif isinstance(cls, str):
-        return PyMooseBase.getContext().doc(cls)		
+        return PyMooseBase.getContext().doc(cls)
+                
 
 class Neutral(PyMooseBase):
     """Proxy of C++ Neutral class"""
@@ -2019,11 +1971,13 @@ class Neutral(PyMooseBase):
     __repr__ = _swig_repr
     def __init__(self, *args): 
         """
+        __init__(self, string className, string objectName, Id parentId) -> Neutral
+        __init__(self, string className, string path) -> Neutral
+        __init__(self, string className, string objectName, PyMooseBase parent) -> Neutral
         __init__(self, Id id) -> Neutral
         __init__(self, string path) -> Neutral
         __init__(self, string name, Id parentId) -> Neutral
         __init__(self, string name, PyMooseBase parent) -> Neutral
-        __init__(self, string path, string fileName) -> Neutral
         __init__(self, Neutral src, string name, PyMooseBase parent) -> Neutral
         __init__(self, Neutral src, string name, Id parent) -> Neutral
         __init__(self, Id src, string name, Id parent) -> Neutral
@@ -2039,20 +1993,69 @@ class Neutral(PyMooseBase):
         """getType(self) -> string"""
         return _moose.Neutral_getType(*args)
 
-    def __get_child(*args):
-        """__get_child(self) -> int"""
-        return _moose.Neutral___get_child(*args)
+    def __get_name(*args):
+        """__get_name(self) -> string"""
+        return _moose.Neutral___get_name(*args)
 
-    def __set_child(*args):
-        """__set_child(self, int child)"""
-        return _moose.Neutral___set_child(*args)
+    def __set_name(*args):
+        """__set_name(self, string name)"""
+        return _moose.Neutral___set_name(*args)
 
-    child = _swig_property(_moose.Neutral_child_get, _moose.Neutral_child_set)
+    def __get_index(*args):
+        """__get_index(self) -> int"""
+        return _moose.Neutral___get_index(*args)
+
+    def __get_parent(*args):
+        """__get_parent(self) -> Id"""
+        return _moose.Neutral___get_parent(*args)
+
+    def __get_class(*args):
+        """__get_class(self) -> string"""
+        return _moose.Neutral___get_class(*args)
+
+    def __get_childList(*args):
+        """__get_childList(self) -> Id_vector"""
+        return _moose.Neutral___get_childList(*args)
+
+    def children(*args):
+        """children(self) -> Id_vector"""
+        return _moose.Neutral_children(*args)
+
+    def __get_node(*args):
+        """__get_node(self) -> unsigned int"""
+        return _moose.Neutral___get_node(*args)
+
+    def __get_cpu(*args):
+        """__get_cpu(self) -> double"""
+        return _moose.Neutral___get_cpu(*args)
+
+    def __get_dataMem(*args):
+        """__get_dataMem(self) -> unsigned int"""
+        return _moose.Neutral___get_dataMem(*args)
+
+    def __get_msgMem(*args):
+        """__get_msgMem(self) -> unsigned int"""
+        return _moose.Neutral___get_msgMem(*args)
+
+    def __get_fieldList(*args):
+        """__get_fieldList(self) -> string_vector"""
+        return _moose.Neutral___get_fieldList(*args)
+
+    name = _swig_property(_moose.Neutral_name_get, _moose.Neutral_name_set)
+    index = _swig_property(_moose.Neutral_index_get)
+    parent = _swig_property(_moose.Neutral_parent_get)
+    className = _swig_property(_moose.Neutral_className_get)
+    childList = _swig_property(_moose.Neutral_childList_get)
+    node = _swig_property(_moose.Neutral_node_get)
+    cpu = _swig_property(_moose.Neutral_cpu_get)
+    dataMem = _swig_property(_moose.Neutral_dataMem_get)
+    msgMem = _swig_property(_moose.Neutral_msgMem_get)
+    fieldList = _swig_property(_moose.Neutral_fieldList_get)
 Neutral_swigregister = _moose.Neutral_swigregister
 Neutral_swigregister(Neutral)
 Neutral.className_ = _moose.cvar.Neutral_className_
 
-class Class(PyMooseBase):
+class Class(Neutral):
     """Proxy of C++ Class class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -2109,7 +2112,7 @@ Class_swigregister = _moose.Class_swigregister
 Class_swigregister(Class)
 Class.className_ = _moose.cvar.Class_className_
 
-class Cell(PyMooseBase):
+class Cell(Neutral):
     """Proxy of C++ Cell class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -2159,7 +2162,7 @@ Cell_swigregister = _moose.Cell_swigregister
 Cell_swigregister(Cell)
 Cell.className_ = _moose.cvar.Cell_className_
 
-class Tick(PyMooseBase):
+class Tick(Neutral):
     """Proxy of C++ Tick class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -2237,7 +2240,7 @@ Tick_swigregister = _moose.Tick_swigregister
 Tick_swigregister(Tick)
 Tick.className_ = _moose.cvar.Tick_className_
 
-class ClockJob(PyMooseBase):
+class ClockJob(Neutral):
     """Proxy of C++ ClockJob class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -2312,7 +2315,7 @@ def ClockJob_getClocks(*args):
   """ClockJob_getClocks() -> double_vector"""
   return _moose.ClockJob_getClocks(*args)
 
-class Interpol(PyMooseBase):
+class Interpol(Neutral):
     """Proxy of C++ Interpol class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -2561,7 +2564,7 @@ Table_swigregister = _moose.Table_swigregister
 Table_swigregister(Table)
 Table.className_ = _moose.cvar.Table_className_
 
-class SynChan(PyMooseBase):
+class SynChan(Neutral):
     """Proxy of C++ SynChan class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -2573,8 +2576,8 @@ class SynChan(PyMooseBase):
         __init__(self, string name, PyMooseBase parent) -> SynChan
         __init__(self, SynChan src, string name, PyMooseBase parent) -> SynChan
         __init__(self, SynChan src, string name, Id parent) -> SynChan
-        __init__(self, Id src, string name, Id parent) -> SynChan
         __init__(self, SynChan src, string path) -> SynChan
+        __init__(self, Id src, string name, Id parent) -> SynChan
         __init__(self, Id src, string path) -> SynChan
         """
         this = _moose.new_SynChan(*args)
@@ -2673,7 +2676,7 @@ SynChan.className_ = _moose.cvar.SynChan_className_
 SynChan.weight = listproperty(SynChan.getWeight, SynChan.setWeight)
 SynChan.delay = listproperty(SynChan.getDelay, SynChan.setDelay)                    
 
-class BinSynchan(PyMooseBase):
+class BinSynchan(Neutral):
     """Proxy of C++ BinSynchan class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -2843,7 +2846,7 @@ BinSynchan_swigregister = _moose.BinSynchan_swigregister
 BinSynchan_swigregister(BinSynchan)
 BinSynchan.className_ = _moose.cvar.BinSynchan_className_
 
-class StochSynchan(PyMooseBase):
+class StochSynchan(Neutral):
     """Proxy of C++ StochSynchan class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -2855,8 +2858,8 @@ class StochSynchan(PyMooseBase):
         __init__(self, string name, PyMooseBase parent) -> StochSynchan
         __init__(self, StochSynchan src, string name, PyMooseBase parent) -> StochSynchan
         __init__(self, StochSynchan src, string name, Id parent) -> StochSynchan
-        __init__(self, Id src, string name, Id parent) -> StochSynchan
         __init__(self, StochSynchan src, string path) -> StochSynchan
+        __init__(self, Id src, string name, Id parent) -> StochSynchan
         __init__(self, Id src, string path) -> StochSynchan
         """
         this = _moose.new_StochSynchan(*args)
@@ -3051,6 +3054,14 @@ class NMDAChan(SynChan):
         """__get_unblocked(self) -> double"""
         return _moose.NMDAChan___get_unblocked(*args)
 
+    def __get_saturation(*args):
+        """__get_saturation(self) -> double"""
+        return _moose.NMDAChan___get_saturation(*args)
+
+    def __set_saturation(*args):
+        """__set_saturation(self, double saturation)"""
+        return _moose.NMDAChan___set_saturation(*args)
+
     MgConc = _swig_property(_moose.NMDAChan_MgConc_get, _moose.NMDAChan_MgConc_set)
     unblocked = _swig_property(_moose.NMDAChan_unblocked_get)
 NMDAChan_swigregister = _moose.NMDAChan_swigregister
@@ -3115,7 +3126,7 @@ KinSynChan_swigregister = _moose.KinSynChan_swigregister
 KinSynChan_swigregister(KinSynChan)
 KinSynChan.className_ = _moose.cvar.KinSynChan_className_
 
-class SpikeGen(PyMooseBase):
+class SpikeGen(Neutral):
     """Proxy of C++ SpikeGen class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -3127,8 +3138,8 @@ class SpikeGen(PyMooseBase):
         __init__(self, string name, PyMooseBase parent) -> SpikeGen
         __init__(self, SpikeGen src, string name, PyMooseBase parent) -> SpikeGen
         __init__(self, SpikeGen src, string name, Id parent) -> SpikeGen
-        __init__(self, Id src, string name, Id parent) -> SpikeGen
         __init__(self, SpikeGen src, string path) -> SpikeGen
+        __init__(self, Id src, string name, Id parent) -> SpikeGen
         __init__(self, Id src, string path) -> SpikeGen
         """
         this = _moose.new_SpikeGen(*args)
@@ -3198,7 +3209,7 @@ SpikeGen_swigregister = _moose.SpikeGen_swigregister
 SpikeGen_swigregister(SpikeGen)
 SpikeGen.className_ = _moose.cvar.SpikeGen_className_
 
-class RandomSpike(PyMooseBase):
+class RandomSpike(Neutral):
     """Proxy of C++ RandomSpike class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -3210,8 +3221,8 @@ class RandomSpike(PyMooseBase):
         __init__(self, string name, PyMooseBase parent) -> RandomSpike
         __init__(self, RandomSpike src, string name, PyMooseBase parent) -> RandomSpike
         __init__(self, RandomSpike src, string name, Id parent) -> RandomSpike
-        __init__(self, Id src, string name, Id parent) -> RandomSpike
         __init__(self, RandomSpike src, string path) -> RandomSpike
+        __init__(self, Id src, string name, Id parent) -> RandomSpike
         __init__(self, Id src, string path) -> RandomSpike
         """
         this = _moose.new_RandomSpike(*args)
@@ -3295,7 +3306,7 @@ RandomSpike_swigregister = _moose.RandomSpike_swigregister
 RandomSpike_swigregister(RandomSpike)
 RandomSpike.className_ = _moose.cvar.RandomSpike_className_
 
-class PulseGen(PyMooseBase):
+class PulseGen(Neutral):
     """Proxy of C++ PulseGen class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -3307,8 +3318,8 @@ class PulseGen(PyMooseBase):
         __init__(self, string name, PyMooseBase parent) -> PulseGen
         __init__(self, PulseGen src, string name, PyMooseBase parent) -> PulseGen
         __init__(self, PulseGen src, string name, Id parent) -> PulseGen
-        __init__(self, Id src, string name, Id parent) -> PulseGen
         __init__(self, PulseGen src, string path) -> PulseGen
+        __init__(self, Id src, string name, Id parent) -> PulseGen
         __init__(self, Id src, string path) -> PulseGen
         """
         this = _moose.new_PulseGen(*args)
@@ -3415,7 +3426,7 @@ PulseGen_swigregister = _moose.PulseGen_swigregister
 PulseGen_swigregister(PulseGen)
 PulseGen.className_ = _moose.cvar.PulseGen_className_
 
-class Nernst(PyMooseBase):
+class Nernst(Neutral):
     """Proxy of C++ Nernst class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -3427,8 +3438,8 @@ class Nernst(PyMooseBase):
         __init__(self, string name, PyMooseBase parent) -> Nernst
         __init__(self, Nernst src, string name, PyMooseBase parent) -> Nernst
         __init__(self, Nernst src, string name, Id parent) -> Nernst
-        __init__(self, Id src, string name, Id parent) -> Nernst
         __init__(self, Nernst src, string path) -> Nernst
+        __init__(self, Id src, string name, Id parent) -> Nernst
         __init__(self, Id src, string path) -> Nernst
         """
         this = _moose.new_Nernst(*args)
@@ -3522,7 +3533,7 @@ Nernst_swigregister = _moose.Nernst_swigregister
 Nernst_swigregister(Nernst)
 Nernst.className_ = _moose.cvar.Nernst_className_
 
-class CaConc(PyMooseBase):
+class CaConc(Neutral):
     """Proxy of C++ CaConc class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -3623,20 +3634,23 @@ CaConc_swigregister = _moose.CaConc_swigregister
 CaConc_swigregister(CaConc)
 CaConc.className_ = _moose.cvar.CaConc_className_
 
-class HHGate(PyMooseBase):
+class HHGate(Neutral):
     """Proxy of C++ HHGate class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
     def __init__(self, *args): 
         """
+        __init__(self, string className, string name, Id parentId) -> HHGate
+        __init__(self, string className, string path) -> HHGate
+        __init__(self, string className, string objectName, PyMooseBase parent) -> HHGate
         __init__(self, Id id) -> HHGate
         __init__(self, string path) -> HHGate
         __init__(self, string name, Id parentId) -> HHGate
         __init__(self, string name, PyMooseBase parent) -> HHGate
         __init__(self, HHGate src, string name, PyMooseBase parent) -> HHGate
         __init__(self, HHGate src, string name, Id parent) -> HHGate
-        __init__(self, Id src, string name, Id parent) -> HHGate
         __init__(self, HHGate src, string path) -> HHGate
+        __init__(self, Id src, string name, Id parent) -> HHGate
         __init__(self, Id src, string path) -> HHGate
         """
         this = _moose.new_HHGate(*args)
@@ -3710,7 +3724,7 @@ HHGate_swigregister = _moose.HHGate_swigregister
 HHGate_swigregister(HHGate)
 HHGate.className_ = _moose.cvar.HHGate_className_
 
-class Leakage(PyMooseBase):
+class Leakage(Neutral):
     """Proxy of C++ Leakage class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -3771,12 +3785,15 @@ Leakage_swigregister = _moose.Leakage_swigregister
 Leakage_swigregister(Leakage)
 Leakage.className_ = _moose.cvar.Leakage_className_
 
-class HHChannel(PyMooseBase):
+class HHChannel(Neutral):
     """Proxy of C++ HHChannel class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
     def __init__(self, *args): 
         """
+        __init__(self, string className, string name, Id parentId) -> HHChannel
+        __init__(self, string className, string path) -> HHChannel
+        __init__(self, string className, string objectName, PyMooseBase parent) -> HHChannel
         __init__(self, Id id) -> HHChannel
         __init__(self, string path) -> HHChannel
         __init__(self, string name, Id parentId) -> HHChannel
@@ -3955,7 +3972,7 @@ HHChannel_swigregister = _moose.HHChannel_swigregister
 HHChannel_swigregister(HHChannel)
 HHChannel.className_ = _moose.cvar.HHChannel_className_
 
-class Mg_block(PyMooseBase):
+class Mg_block(Neutral):
     """Proxy of C++ Mg_block class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -3967,8 +3984,8 @@ class Mg_block(PyMooseBase):
         __init__(self, string name, PyMooseBase parent) -> Mg_block
         __init__(self, Mg_block src, string name, PyMooseBase parent) -> Mg_block
         __init__(self, Mg_block src, string name, Id parent) -> Mg_block
-        __init__(self, Id src, string name, Id parent) -> Mg_block
         __init__(self, Mg_block src, string path) -> Mg_block
+        __init__(self, Id src, string name, Id parent) -> Mg_block
         __init__(self, Id src, string path) -> Mg_block
         """
         this = _moose.new_Mg_block(*args)
@@ -4047,7 +4064,7 @@ Mg_block_swigregister = _moose.Mg_block_swigregister
 Mg_block_swigregister(Mg_block)
 Mg_block.className_ = _moose.cvar.Mg_block_className_
 
-class Compartment(PyMooseBase):
+class Compartment(Neutral):
     """Proxy of C++ Compartment class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -4303,7 +4320,7 @@ NeuroScan_swigregister = _moose.NeuroScan_swigregister
 NeuroScan_swigregister(NeuroScan)
 NeuroScan.className_ = _moose.cvar.NeuroScan_className_
 
-class HSolve(PyMooseBase):
+class HSolve(Neutral):
     """Proxy of C++ HSolve class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -4315,8 +4332,8 @@ class HSolve(PyMooseBase):
         __init__(self, string name, PyMooseBase parent) -> HSolve
         __init__(self, HSolve src, string name, PyMooseBase parent) -> HSolve
         __init__(self, HSolve src, string name, Id parent) -> HSolve
-        __init__(self, Id src, string name, Id parent) -> HSolve
         __init__(self, HSolve src, string path) -> HSolve
+        __init__(self, Id src, string name, Id parent) -> HSolve
         __init__(self, Id src, string path) -> HSolve
         """
         this = _moose.new_HSolve(*args)
@@ -4368,7 +4385,7 @@ HSolve_swigregister = _moose.HSolve_swigregister
 HSolve_swigregister(HSolve)
 HSolve.className_ = _moose.cvar.HSolve_className_
 
-class Kintegrator(PyMooseBase):
+class Kintegrator(Neutral):
     """Proxy of C++ Kintegrator class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -4380,8 +4397,8 @@ class Kintegrator(PyMooseBase):
         __init__(self, string name, PyMooseBase parent) -> Kintegrator
         __init__(self, Kintegrator src, string name, PyMooseBase parent) -> Kintegrator
         __init__(self, Kintegrator src, string name, Id parent) -> Kintegrator
-        __init__(self, Id src, string name, Id parent) -> Kintegrator
         __init__(self, Kintegrator src, string path) -> Kintegrator
+        __init__(self, Id src, string name, Id parent) -> Kintegrator
         __init__(self, Id src, string path) -> Kintegrator
         """
         this = _moose.new_Kintegrator(*args)
@@ -4397,23 +4414,21 @@ class Kintegrator(PyMooseBase):
         """__get_isInitiatilized(self) -> bool"""
         return _moose.Kintegrator___get_isInitiatilized(*args)
 
-    def __set_isInitiatilized(*args):
-        """__set_isInitiatilized(self, bool isInitiatilized)"""
-        return _moose.Kintegrator___set_isInitiatilized(*args)
+    def __get_method(*args):
+        """__get_method(self) -> string"""
+        return _moose.Kintegrator___get_method(*args)
 
-    def imethod(*args):
-        """
-        imethod(self) -> string
-        imethod(self, string ?) -> string
-        """
-        return _moose.Kintegrator_imethod(*args)
+    def __set_method(*args):
+        """__set_method(self, string method)"""
+        return _moose.Kintegrator___set_method(*args)
 
-    isInitiatilized = _swig_property(_moose.Kintegrator_isInitiatilized_get, _moose.Kintegrator_isInitiatilized_set)
+    isInitiatilized = _swig_property(_moose.Kintegrator_isInitiatilized_get)
+    integrate_method = _swig_property(_moose.Kintegrator_integrate_method_get, _moose.Kintegrator_integrate_method_set)
 Kintegrator_swigregister = _moose.Kintegrator_swigregister
 Kintegrator_swigregister(Kintegrator)
 Kintegrator.className_ = _moose.cvar.Kintegrator_className_
 
-class MathFunc(PyMooseBase):
+class MathFunc(Neutral):
     """Proxy of C++ MathFunc class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -4469,20 +4484,23 @@ MathFunc_swigregister = _moose.MathFunc_swigregister
 MathFunc_swigregister(MathFunc)
 MathFunc.className_ = _moose.cvar.MathFunc_className_
 
-class Stoich(PyMooseBase):
+class Stoich(Neutral):
     """Proxy of C++ Stoich class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
     def __init__(self, *args): 
         """
+        __init__(self, string className, string name, Id parentId) -> Stoich
+        __init__(self, string className, string path) -> Stoich
+        __init__(self, string className, string objectName, PyMooseBase parent) -> Stoich
         __init__(self, Id id) -> Stoich
         __init__(self, string path) -> Stoich
         __init__(self, string name, Id parentId) -> Stoich
         __init__(self, string name, PyMooseBase parent) -> Stoich
         __init__(self, Stoich src, string name, PyMooseBase parent) -> Stoich
         __init__(self, Stoich src, string name, Id parent) -> Stoich
-        __init__(self, Id src, string name, Id parent) -> Stoich
         __init__(self, Stoich src, string path) -> Stoich
+        __init__(self, Id src, string name, Id parent) -> Stoich
         __init__(self, Id src, string path) -> Stoich
         """
         this = _moose.new_Stoich(*args)
@@ -4498,65 +4516,33 @@ class Stoich(PyMooseBase):
         """__get_nMols(self) -> unsigned int"""
         return _moose.Stoich___get_nMols(*args)
 
-    def __set_nMols(*args):
-        """__set_nMols(self, unsigned int nMols)"""
-        return _moose.Stoich___set_nMols(*args)
-
     def __get_nVarMols(*args):
         """__get_nVarMols(self) -> unsigned int"""
         return _moose.Stoich___get_nVarMols(*args)
-
-    def __set_nVarMols(*args):
-        """__set_nVarMols(self, unsigned int nVarMols)"""
-        return _moose.Stoich___set_nVarMols(*args)
 
     def __get_nSumTot(*args):
         """__get_nSumTot(self) -> unsigned int"""
         return _moose.Stoich___get_nSumTot(*args)
 
-    def __set_nSumTot(*args):
-        """__set_nSumTot(self, unsigned int nSumTot)"""
-        return _moose.Stoich___set_nSumTot(*args)
-
     def __get_nBuffered(*args):
         """__get_nBuffered(self) -> unsigned int"""
         return _moose.Stoich___get_nBuffered(*args)
-
-    def __set_nBuffered(*args):
-        """__set_nBuffered(self, unsigned int nBuffered)"""
-        return _moose.Stoich___set_nBuffered(*args)
 
     def __get_nReacs(*args):
         """__get_nReacs(self) -> unsigned int"""
         return _moose.Stoich___get_nReacs(*args)
 
-    def __set_nReacs(*args):
-        """__set_nReacs(self, unsigned int nReacs)"""
-        return _moose.Stoich___set_nReacs(*args)
-
     def __get_nEnz(*args):
         """__get_nEnz(self) -> unsigned int"""
         return _moose.Stoich___get_nEnz(*args)
-
-    def __set_nEnz(*args):
-        """__set_nEnz(self, unsigned int nEnz)"""
-        return _moose.Stoich___set_nEnz(*args)
 
     def __get_nMMenz(*args):
         """__get_nMMenz(self) -> unsigned int"""
         return _moose.Stoich___get_nMMenz(*args)
 
-    def __set_nMMenz(*args):
-        """__set_nMMenz(self, unsigned int nMMenz)"""
-        return _moose.Stoich___set_nMMenz(*args)
-
     def __get_nExternalRates(*args):
         """__get_nExternalRates(self) -> unsigned int"""
         return _moose.Stoich___get_nExternalRates(*args)
-
-    def __set_nExternalRates(*args):
-        """__set_nExternalRates(self, unsigned int nExternalRates)"""
-        return _moose.Stoich___set_nExternalRates(*args)
 
     def __get_useOneWayReacs(*args):
         """__get_useOneWayReacs(self) -> bool"""
@@ -4566,20 +4552,17 @@ class Stoich(PyMooseBase):
         """__set_useOneWayReacs(self, bool useOneWayReacs)"""
         return _moose.Stoich___set_useOneWayReacs(*args)
 
-    def path(*args):
-        """
-        path(self) -> string
-        path(self, string path) -> string
-        """
-        return _moose.Stoich_path(*args)
+    def __get_targetPath(*args):
+        """__get_targetPath(self) -> string"""
+        return _moose.Stoich___get_targetPath(*args)
+
+    def __set_targetPath(*args):
+        """__set_targetPath(self, string path)"""
+        return _moose.Stoich___set_targetPath(*args)
 
     def __get_rateVectorSize(*args):
         """__get_rateVectorSize(self) -> unsigned int"""
         return _moose.Stoich___get_rateVectorSize(*args)
-
-    def __set_rateVectorSize(*args):
-        """__set_rateVectorSize(self, unsigned int rateVectorSize)"""
-        return _moose.Stoich___set_rateVectorSize(*args)
 
     nMols = _swig_property(_moose.Stoich_nMols_get)
     nVarMols = _swig_property(_moose.Stoich_nVarMols_get)
@@ -4590,12 +4573,13 @@ class Stoich(PyMooseBase):
     nMMenz = _swig_property(_moose.Stoich_nMMenz_get)
     nExternalRates = _swig_property(_moose.Stoich_nExternalRates_get)
     useOneWayReacs = _swig_property(_moose.Stoich_useOneWayReacs_get, _moose.Stoich_useOneWayReacs_set)
+    targetPath = _swig_property(_moose.Stoich_targetPath_get, _moose.Stoich_targetPath_set)
     rateVectorSize = _swig_property(_moose.Stoich_rateVectorSize_get)
 Stoich_swigregister = _moose.Stoich_swigregister
 Stoich_swigregister(Stoich)
 Stoich.className_ = _moose.cvar.Stoich_className_
 
-class KineticHub(PyMooseBase):
+class KineticHub(Neutral):
     """Proxy of C++ KineticHub class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -4607,8 +4591,8 @@ class KineticHub(PyMooseBase):
         __init__(self, string name, PyMooseBase parent) -> KineticHub
         __init__(self, KineticHub src, string name, PyMooseBase parent) -> KineticHub
         __init__(self, KineticHub src, string name, Id parent) -> KineticHub
-        __init__(self, Id src, string name, Id parent) -> KineticHub
         __init__(self, KineticHub src, string path) -> KineticHub
+        __init__(self, Id src, string name, Id parent) -> KineticHub
         __init__(self, Id src, string path) -> KineticHub
         """
         this = _moose.new_KineticHub(*args)
@@ -4620,51 +4604,30 @@ class KineticHub(PyMooseBase):
         """getType(self) -> string"""
         return _moose.KineticHub_getType(*args)
 
-    def __get_nMol(*args):
-        """__get_nMol(self) -> unsigned int"""
-        return _moose.KineticHub___get_nMol(*args)
-
-    def __set_nMol(*args):
-        """__set_nMol(self, unsigned int nMol)"""
-        return _moose.KineticHub___set_nMol(*args)
+    def __get_nVarMol(*args):
+        """__get_nVarMol(self) -> unsigned int"""
+        return _moose.KineticHub___get_nVarMol(*args)
 
     def __get_nReac(*args):
         """__get_nReac(self) -> unsigned int"""
         return _moose.KineticHub___get_nReac(*args)
 
-    def __set_nReac(*args):
-        """__set_nReac(self, unsigned int nReac)"""
-        return _moose.KineticHub___set_nReac(*args)
-
     def __get_nEnz(*args):
         """__get_nEnz(self) -> unsigned int"""
         return _moose.KineticHub___get_nEnz(*args)
-
-    def __set_nEnz(*args):
-        """__set_nEnz(self, unsigned int nEnz)"""
-        return _moose.KineticHub___set_nEnz(*args)
 
     def destroy(*args):
         """destroy(self)"""
         return _moose.KineticHub_destroy(*args)
 
-    def __get_molSum(*args):
-        """__get_molSum(self) -> double"""
-        return _moose.KineticHub___get_molSum(*args)
-
-    def __set_molSum(*args):
-        """__set_molSum(self, double molSum)"""
-        return _moose.KineticHub___set_molSum(*args)
-
-    nMol = _swig_property(_moose.KineticHub_nMol_get, _moose.KineticHub_nMol_set)
-    nReac = _swig_property(_moose.KineticHub_nReac_get, _moose.KineticHub_nReac_set)
-    nEnz = _swig_property(_moose.KineticHub_nEnz_get, _moose.KineticHub_nEnz_set)
-    molSum = _swig_property(_moose.KineticHub_molSum_get, _moose.KineticHub_molSum_set)
+    nVarMol = _swig_property(_moose.KineticHub_nVarMol_get)
+    nReac = _swig_property(_moose.KineticHub_nReac_get)
+    nEnz = _swig_property(_moose.KineticHub_nEnz_get)
 KineticHub_swigregister = _moose.KineticHub_swigregister
 KineticHub_swigregister(KineticHub)
 KineticHub.className_ = _moose.cvar.KineticHub_className_
 
-class Enzyme(PyMooseBase):
+class Enzyme(Neutral):
     """Proxy of C++ Enzyme class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -4798,7 +4761,7 @@ Enzyme_swigregister = _moose.Enzyme_swigregister
 Enzyme_swigregister(Enzyme)
 Enzyme.className_ = _moose.cvar.Enzyme_className_
 
-class Reaction(PyMooseBase):
+class Reaction(Neutral):
     """Proxy of C++ Reaction class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -4810,8 +4773,8 @@ class Reaction(PyMooseBase):
         __init__(self, string name, PyMooseBase parent) -> Reaction
         __init__(self, Reaction src, string name, PyMooseBase parent) -> Reaction
         __init__(self, Reaction src, string name, Id parent) -> Reaction
-        __init__(self, Id src, string name, Id parent) -> Reaction
         __init__(self, Reaction src, string path) -> Reaction
+        __init__(self, Id src, string name, Id parent) -> Reaction
         __init__(self, Id src, string path) -> Reaction
         """
         this = _moose.new_Reaction(*args)
@@ -4828,7 +4791,7 @@ class Reaction(PyMooseBase):
         return _moose.Reaction___get_kf(*args)
 
     def __set_kf(*args):
-        """__set_kf(self, double kf)"""
+        """__set_kf(self, double scaleKf)"""
         return _moose.Reaction___set_kf(*args)
 
     def __get_kb(*args):
@@ -4836,24 +4799,24 @@ class Reaction(PyMooseBase):
         return _moose.Reaction___get_kb(*args)
 
     def __set_kb(*args):
-        """__set_kb(self, double kb)"""
+        """__set_kb(self, double scaleKb)"""
         return _moose.Reaction___set_kb(*args)
 
-    def __get_scaleKf(*args):
-        """__get_scaleKf(self) -> double"""
-        return _moose.Reaction___get_scaleKf(*args)
+    def __get_Kf(*args):
+        """__get_Kf(self) -> double"""
+        return _moose.Reaction___get_Kf(*args)
 
-    def __set_scaleKf(*args):
-        """__set_scaleKf(self, double scaleKf)"""
-        return _moose.Reaction___set_scaleKf(*args)
+    def __set_Kf(*args):
+        """__set_Kf(self, double scaleKf)"""
+        return _moose.Reaction___set_Kf(*args)
 
-    def __get_scaleKb(*args):
-        """__get_scaleKb(self) -> double"""
-        return _moose.Reaction___get_scaleKb(*args)
+    def __get_Kb(*args):
+        """__get_Kb(self) -> double"""
+        return _moose.Reaction___get_Kb(*args)
 
-    def __set_scaleKb(*args):
-        """__set_scaleKb(self, double scaleKb)"""
-        return _moose.Reaction___set_scaleKb(*args)
+    def __set_Kb(*args):
+        """__set_Kb(self, double scaleKb)"""
+        return _moose.Reaction___set_Kb(*args)
 
     def __get_x(*args):
         """__get_x(self) -> double"""
@@ -4890,7 +4853,7 @@ Reaction_swigregister = _moose.Reaction_swigregister
 Reaction_swigregister(Reaction)
 Reaction.className_ = _moose.cvar.Reaction_className_
 
-class Molecule(PyMooseBase):
+class Molecule(Neutral):
     """Proxy of C++ Molecule class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -4902,8 +4865,8 @@ class Molecule(PyMooseBase):
         __init__(self, string name, PyMooseBase parent) -> Molecule
         __init__(self, Molecule src, string name, PyMooseBase parent) -> Molecule
         __init__(self, Molecule src, string name, Id parent) -> Molecule
-        __init__(self, Id src, string name, Id parent) -> Molecule
         __init__(self, Molecule src, string path) -> Molecule
+        __init__(self, Id src, string name, Id parent) -> Molecule
         __init__(self, Id src, string path) -> Molecule
         """
         this = _moose.new_Molecule(*args)
@@ -5246,7 +5209,7 @@ class Exponential(Probability):
 Exponential_swigregister = _moose.Exponential_swigregister
 Exponential_swigregister(Exponential)
 
-class RandGenerator(PyMooseBase):
+class RandGenerator(Neutral):
     """Proxy of C++ RandGenerator class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -5578,112 +5541,15 @@ NormalRng_swigregister = _moose.NormalRng_swigregister
 NormalRng_swigregister(NormalRng)
 NormalRng.className_ = _moose.cvar.NormalRng_className_
 
-class KineticManager(PyMooseBase):
-    """Proxy of C++ KineticManager class"""
-    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args): 
-        """
-        __init__(self, Id id) -> KineticManager
-        __init__(self, string path) -> KineticManager
-        __init__(self, string name, Id parentId) -> KineticManager
-        __init__(self, string name, PyMooseBase parent) -> KineticManager
-        __init__(self, KineticManager src, string name, PyMooseBase parent) -> KineticManager
-        __init__(self, KineticManager src, string name, Id parent) -> KineticManager
-        __init__(self, KineticManager src, string path) -> KineticManager
-        __init__(self, Id src, string name, Id parent) -> KineticManager
-        __init__(self, Id src, string path) -> KineticManager
-        """
-        this = _moose.new_KineticManager(*args)
-        try: self.this.append(this)
-        except: self.this = this
-    __swig_destroy__ = _moose.delete_KineticManager
-    __del__ = lambda self : None;
-    def getType(*args):
-        """getType(self) -> string"""
-        return _moose.KineticManager_getType(*args)
-
-    def __get_autoMode(*args):
-        """__get_autoMode(self) -> bool"""
-        return _moose.KineticManager___get_autoMode(*args)
-
-    def __set_autoMode(*args):
-        """__set_autoMode(self, bool autoMode)"""
-        return _moose.KineticManager___set_autoMode(*args)
-
-    def __get_stochastic(*args):
-        """__get_stochastic(self) -> bool"""
-        return _moose.KineticManager___get_stochastic(*args)
-
-    def __set_stochastic(*args):
-        """__set_stochastic(self, bool stochastic)"""
-        return _moose.KineticManager___set_stochastic(*args)
-
-    def __get_spatial(*args):
-        """__get_spatial(self) -> bool"""
-        return _moose.KineticManager___get_spatial(*args)
-
-    def __set_spatial(*args):
-        """__set_spatial(self, bool spatial)"""
-        return _moose.KineticManager___set_spatial(*args)
-
-    def __get_method(*args):
-        """__get_method(self) -> string"""
-        return _moose.KineticManager___get_method(*args)
-
-    def __set_method(*args):
-        """__set_method(self, string method)"""
-        return _moose.KineticManager___set_method(*args)
-
-    def __get_variableDt(*args):
-        """__get_variableDt(self) -> bool"""
-        return _moose.KineticManager___get_variableDt(*args)
-
-    def __get_singleParticle(*args):
-        """__get_singleParticle(self) -> bool"""
-        return _moose.KineticManager___get_singleParticle(*args)
-
-    def __get_multiscale(*args):
-        """__get_multiscale(self) -> bool"""
-        return _moose.KineticManager___get_multiscale(*args)
-
-    def __get_implicit(*args):
-        """__get_implicit(self) -> bool"""
-        return _moose.KineticManager___get_implicit(*args)
-
-    def __get_recommendedDt(*args):
-        """__get_recommendedDt(self) -> double"""
-        return _moose.KineticManager___get_recommendedDt(*args)
-
-    def __get_eulerError(*args):
-        """__get_eulerError(self) -> double"""
-        return _moose.KineticManager___get_eulerError(*args)
-
-    def __set_eulerError(*args):
-        """__set_eulerError(self, double eulerError)"""
-        return _moose.KineticManager___set_eulerError(*args)
-
-    autoMode = _swig_property(_moose.KineticManager_autoMode_get, _moose.KineticManager_autoMode_set)
-    stochastic = _swig_property(_moose.KineticManager_stochastic_get, _moose.KineticManager_stochastic_set)
-    spatial = _swig_property(_moose.KineticManager_spatial_get, _moose.KineticManager_spatial_set)
-    method = _swig_property(_moose.KineticManager_method_get, _moose.KineticManager_method_set)
-    variableDt = _swig_property(_moose.KineticManager_variableDt_get)
-    singleParticle = _swig_property(_moose.KineticManager_singleParticle_get)
-    multiscale = _swig_property(_moose.KineticManager_multiscale_get)
-    implicit = _swig_property(_moose.KineticManager_implicit_get)
-    description = _swig_property(_moose.KineticManager_description_get)
-    recommendedDt = _swig_property(_moose.KineticManager_recommendedDt_get)
-    eulerError = _swig_property(_moose.KineticManager_eulerError_get, _moose.KineticManager_eulerError_set)
-KineticManager_swigregister = _moose.KineticManager_swigregister
-KineticManager_swigregister(KineticManager)
-KineticManager.className_ = _moose.cvar.KineticManager_className_
-
-class KinCompt(PyMooseBase):
+class KinCompt(Neutral):
     """Proxy of C++ KinCompt class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
     def __init__(self, *args): 
         """
+        __init__(self, string className, string objectName, Id parentId) -> KinCompt
+        __init__(self, string className, string path) -> KinCompt
+        __init__(self, string className, string objectName, PyMooseBase parent) -> KinCompt
         __init__(self, Id id) -> KinCompt
         __init__(self, string path) -> KinCompt
         __init__(self, string name, Id parentId) -> KinCompt
@@ -5770,7 +5636,115 @@ KinCompt_swigregister = _moose.KinCompt_swigregister
 KinCompt_swigregister(KinCompt)
 KinCompt.className_ = _moose.cvar.KinCompt_className_
 
-class Panel(PyMooseBase):
+class KineticManager(KinCompt):
+    """Proxy of C++ KineticManager class"""
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        """
+        __init__(self, Id id) -> KineticManager
+        __init__(self, string path) -> KineticManager
+        __init__(self, string name, Id parentId) -> KineticManager
+        __init__(self, string name, PyMooseBase parent) -> KineticManager
+        __init__(self, KineticManager src, string name, PyMooseBase parent) -> KineticManager
+        __init__(self, KineticManager src, string name, Id parent) -> KineticManager
+        __init__(self, KineticManager src, string path) -> KineticManager
+        __init__(self, Id src, string name, Id parent) -> KineticManager
+        __init__(self, Id src, string path) -> KineticManager
+        """
+        this = _moose.new_KineticManager(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _moose.delete_KineticManager
+    __del__ = lambda self : None;
+    def getType(*args):
+        """getType(self) -> string"""
+        return _moose.KineticManager_getType(*args)
+
+    def __get_autoMode(*args):
+        """__get_autoMode(self) -> bool"""
+        return _moose.KineticManager___get_autoMode(*args)
+
+    def __set_autoMode(*args):
+        """__set_autoMode(self, bool autoMode)"""
+        return _moose.KineticManager___set_autoMode(*args)
+
+    def __get_stochastic(*args):
+        """__get_stochastic(self) -> bool"""
+        return _moose.KineticManager___get_stochastic(*args)
+
+    def __set_stochastic(*args):
+        """__set_stochastic(self, bool stochastic)"""
+        return _moose.KineticManager___set_stochastic(*args)
+
+    def __get_spatial(*args):
+        """__get_spatial(self) -> bool"""
+        return _moose.KineticManager___get_spatial(*args)
+
+    def __set_spatial(*args):
+        """__set_spatial(self, bool spatial)"""
+        return _moose.KineticManager___set_spatial(*args)
+
+    def __get_method(*args):
+        """__get_method(self) -> string"""
+        return _moose.KineticManager___get_method(*args)
+
+    def __set_method(*args):
+        """__set_method(self, string method)"""
+        return _moose.KineticManager___set_method(*args)
+
+    def __get_variableDt(*args):
+        """__get_variableDt(self) -> bool"""
+        return _moose.KineticManager___get_variableDt(*args)
+
+    def __get_singleParticle(*args):
+        """__get_singleParticle(self) -> bool"""
+        return _moose.KineticManager___get_singleParticle(*args)
+
+    def __get_multiscale(*args):
+        """__get_multiscale(self) -> bool"""
+        return _moose.KineticManager___get_multiscale(*args)
+
+    def __get_implicit(*args):
+        """__get_implicit(self) -> bool"""
+        return _moose.KineticManager___get_implicit(*args)
+
+    def __get_recommendedDt(*args):
+        """__get_recommendedDt(self) -> double"""
+        return _moose.KineticManager___get_recommendedDt(*args)
+
+    def __get_loadEstimate(*args):
+        """__get_loadEstimate(self) -> double"""
+        return _moose.KineticManager___get_loadEstimate(*args)
+
+    def __get_memEstimate(*args):
+        """__get_memEstimate(self) -> unsigned int"""
+        return _moose.KineticManager___get_memEstimate(*args)
+
+    def __get_eulerError(*args):
+        """__get_eulerError(self) -> double"""
+        return _moose.KineticManager___get_eulerError(*args)
+
+    def __set_eulerError(*args):
+        """__set_eulerError(self, double eulerError)"""
+        return _moose.KineticManager___set_eulerError(*args)
+
+    autoMode = _swig_property(_moose.KineticManager_autoMode_get, _moose.KineticManager_autoMode_set)
+    stochastic = _swig_property(_moose.KineticManager_stochastic_get, _moose.KineticManager_stochastic_set)
+    spatial = _swig_property(_moose.KineticManager_spatial_get, _moose.KineticManager_spatial_set)
+    method = _swig_property(_moose.KineticManager_method_get, _moose.KineticManager_method_set)
+    variableDt = _swig_property(_moose.KineticManager_variableDt_get)
+    singleParticle = _swig_property(_moose.KineticManager_singleParticle_get)
+    multiscale = _swig_property(_moose.KineticManager_multiscale_get)
+    implicit = _swig_property(_moose.KineticManager_implicit_get)
+    description = _swig_property(_moose.KineticManager_description_get)
+    recommendedDt = _swig_property(_moose.KineticManager_recommendedDt_get)
+    eulerError = _swig_property(_moose.KineticManager_eulerError_get, _moose.KineticManager_eulerError_set)
+KineticManager_swigregister = _moose.KineticManager_swigregister
+KineticManager_swigregister(KineticManager)
+KineticManager.className_ = _moose.cvar.KineticManager_className_
+
+class Panel(Neutral):
     """Proxy of C++ Panel class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -6001,7 +5975,7 @@ RectPanel_swigregister = _moose.RectPanel_swigregister
 RectPanel_swigregister(RectPanel)
 RectPanel.className_ = _moose.cvar.RectPanel_className_
 
-class Surface(PyMooseBase):
+class Surface(Neutral):
     """Proxy of C++ Surface class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -6035,7 +6009,7 @@ Surface_swigregister = _moose.Surface_swigregister
 Surface_swigregister(Surface)
 Surface.className_ = _moose.cvar.Surface_className_
 
-class Geometry(PyMooseBase):
+class Geometry(Neutral):
     """Proxy of C++ Geometry class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -6082,7 +6056,7 @@ Geometry_swigregister = _moose.Geometry_swigregister
 Geometry_swigregister(Geometry)
 Geometry.className_ = _moose.cvar.Geometry_className_
 
-class Adaptor(PyMooseBase):
+class Adaptor(Neutral):
     """Proxy of C++ Adaptor class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -6143,7 +6117,7 @@ Adaptor_swigregister = _moose.Adaptor_swigregister
 Adaptor_swigregister(Adaptor)
 Adaptor.className_ = _moose.cvar.Adaptor_className_
 
-class SigNeur(PyMooseBase):
+class SigNeur(Neutral):
     """Proxy of C++ SigNeur class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -6349,7 +6323,7 @@ SigNeur_swigregister = _moose.SigNeur_swigregister
 SigNeur_swigregister(SigNeur)
 SigNeur.className_ = _moose.cvar.SigNeur_className_
 
-class AscFile(PyMooseBase):
+class AscFile(Neutral):
     """Proxy of C++ AscFile class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -6374,29 +6348,65 @@ class AscFile(PyMooseBase):
         """getType(self) -> string"""
         return _moose.AscFile_getType(*args)
 
-    def __get_fileName(*args):
-        """__get_fileName(self) -> string"""
-        return _moose.AscFile___get_fileName(*args)
+    def __get_filename(*args):
+        """__get_filename(self) -> string"""
+        return _moose.AscFile___get_filename(*args)
 
-    def __set_fileName(*args):
-        """__set_fileName(self, string fileName)"""
-        return _moose.AscFile___set_fileName(*args)
+    def __set_filename(*args):
+        """__set_filename(self, string filename)"""
+        return _moose.AscFile___set_filename(*args)
 
-    def __get_appendFlag(*args):
-        """__get_appendFlag(self) -> int"""
-        return _moose.AscFile___get_appendFlag(*args)
+    def __get_append(*args):
+        """__get_append(self) -> int"""
+        return _moose.AscFile___get_append(*args)
 
-    def __set_appendFlag(*args):
-        """__set_appendFlag(self, int appendFlag)"""
-        return _moose.AscFile___set_appendFlag(*args)
+    def __set_append(*args):
+        """__set_append(self, int append)"""
+        return _moose.AscFile___set_append(*args)
 
-    fileName = _swig_property(_moose.AscFile_fileName_get, _moose.AscFile_fileName_set)
+    def __get_time(*args):
+        """__get_time(self) -> int"""
+        return _moose.AscFile___get_time(*args)
+
+    def __set_time(*args):
+        """__set_time(self, int time)"""
+        return _moose.AscFile___set_time(*args)
+
+    def __get_header(*args):
+        """__get_header(self) -> int"""
+        return _moose.AscFile___get_header(*args)
+
+    def __set_header(*args):
+        """__set_header(self, int header)"""
+        return _moose.AscFile___set_header(*args)
+
+    def __get_comment(*args):
+        """__get_comment(self) -> string"""
+        return _moose.AscFile___get_comment(*args)
+
+    def __set_comment(*args):
+        """__set_comment(self, string comment)"""
+        return _moose.AscFile___set_comment(*args)
+
+    def __get_delimiter(*args):
+        """__get_delimiter(self) -> string"""
+        return _moose.AscFile___get_delimiter(*args)
+
+    def __set_delimiter(*args):
+        """__set_delimiter(self, string delimiter)"""
+        return _moose.AscFile___set_delimiter(*args)
+
+    filename = _swig_property(_moose.AscFile_filename_get, _moose.AscFile_filename_set)
     appendFlag = _swig_property(_moose.AscFile_appendFlag_get, _moose.AscFile_appendFlag_set)
+    time = _swig_property(_moose.AscFile_time_get, _moose.AscFile_time_set)
+    header = _swig_property(_moose.AscFile_header_get, _moose.AscFile_header_set)
+    comment = _swig_property(_moose.AscFile_comment_get, _moose.AscFile_comment_set)
+    delimiter = _swig_property(_moose.AscFile_delimiter_get, _moose.AscFile_delimiter_set)
 AscFile_swigregister = _moose.AscFile_swigregister
 AscFile_swigregister(AscFile)
 AscFile.className_ = _moose.cvar.AscFile_className_
 
-class DifShell(PyMooseBase):
+class DifShell(Neutral):
     """Proxy of C++ DifShell class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -6529,7 +6539,7 @@ DifShell_swigregister = _moose.DifShell_swigregister
 DifShell_swigregister(DifShell)
 DifShell.className_ = _moose.cvar.DifShell_className_
 
-class GssaStoich(PyMooseBase):
+class GssaStoich(Stoich):
     """Proxy of C++ GssaStoich class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -6572,7 +6582,7 @@ GssaStoich_swigregister = _moose.GssaStoich_swigregister
 GssaStoich_swigregister(GssaStoich)
 GssaStoich.className_ = _moose.cvar.GssaStoich_className_
 
-class TauPump(PyMooseBase):
+class TauPump(Neutral):
     """Proxy of C++ TauPump class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -6655,7 +6665,398 @@ TauPump_swigregister = _moose.TauPump_swigregister
 TauPump_swigregister(TauPump)
 TauPump.className_ = _moose.cvar.TauPump_className_
 
-class TimeTable(PyMooseBase):
+class GLcell(Neutral):
+    """Proxy of C++ GLcell class"""
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        """
+        __init__(self, Id id) -> GLcell
+        __init__(self, string path) -> GLcell
+        __init__(self, string name, Id parentId) -> GLcell
+        __init__(self, string name, PyMooseBase parent) -> GLcell
+        __init__(self, GLcell src, string name, PyMooseBase parent) -> GLcell
+        __init__(self, GLcell src, string name, Id parent) -> GLcell
+        __init__(self, Id src, string path) -> GLcell
+        __init__(self, GLcell src, string path) -> GLcell
+        __init__(self, Id src, string name, Id parent) -> GLcell
+        """
+        this = _moose.new_GLcell(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _moose.delete_GLcell
+    __del__ = lambda self : None;
+    def getType(*args):
+        """getType(self) -> string"""
+        return _moose.GLcell_getType(*args)
+
+    def __get_vizpath(*args):
+        """__get_vizpath(self) -> string"""
+        return _moose.GLcell___get_vizpath(*args)
+
+    def __set_vizpath(*args):
+        """__set_vizpath(self, string vizpath)"""
+        return _moose.GLcell___set_vizpath(*args)
+
+    def __get_clientHost(*args):
+        """__get_clientHost(self) -> string"""
+        return _moose.GLcell___get_clientHost(*args)
+
+    def __set_clientHost(*args):
+        """__set_clientHost(self, string strClientHost)"""
+        return _moose.GLcell___set_clientHost(*args)
+
+    def __get_clientPort(*args):
+        """__get_clientPort(self) -> string"""
+        return _moose.GLcell___get_clientPort(*args)
+
+    def __set_clientPort(*args):
+        """__set_clientPort(self, string strClientPort)"""
+        return _moose.GLcell___set_clientPort(*args)
+
+    def __get_attributeName(*args):
+        """__get_attributeName(self) -> string"""
+        return _moose.GLcell___get_attributeName(*args)
+
+    def __set_attributeName(*args):
+        """__set_attributeName(self, string strAttributeName)"""
+        return _moose.GLcell___set_attributeName(*args)
+
+    def __get_changeThreshold(*args):
+        """__get_changeThreshold(self) -> double"""
+        return _moose.GLcell___get_changeThreshold(*args)
+
+    def __set_changeThreshold(*args):
+        """__set_changeThreshold(self, double changeThreshold)"""
+        return _moose.GLcell___set_changeThreshold(*args)
+
+    def __get_VScale(*args):
+        """__get_VScale(self) -> double"""
+        return _moose.GLcell___get_VScale(*args)
+
+    def __set_VScale(*args):
+        """__set_VScale(self, double vScale)"""
+        return _moose.GLcell___set_VScale(*args)
+
+    def __get_syncMode(*args):
+        """__get_syncMode(self) -> string"""
+        return _moose.GLcell___get_syncMode(*args)
+
+    def __set_syncMode(*args):
+        """__set_syncMode(self, string strSyncMode)"""
+        return _moose.GLcell___set_syncMode(*args)
+
+    def __get_bgColor(*args):
+        """__get_bgColor(self) -> string"""
+        return _moose.GLcell___get_bgColor(*args)
+
+    def __set_bgColor(*args):
+        """__set_bgColor(self, string strBgColor)"""
+        return _moose.GLcell___set_bgColor(*args)
+
+    def __get_highValue(*args):
+        """__get_highValue(self) -> double"""
+        return _moose.GLcell___get_highValue(*args)
+
+    def __set_highValue(*args):
+        """__set_highValue(self, double highValue)"""
+        return _moose.GLcell___set_highValue(*args)
+
+    def __get_lowValue(*args):
+        """__get_lowValue(self) -> double"""
+        return _moose.GLcell___get_lowValue(*args)
+
+    def __set_lowValue(*args):
+        """__set_lowValue(self, double lowValue)"""
+        return _moose.GLcell___set_lowValue(*args)
+
+    vizpath = _swig_property(_moose.GLcell_vizpath_get, _moose.GLcell_vizpath_set)
+    host = _swig_property(_moose.GLcell_host_get, _moose.GLcell_host_set)
+    port = _swig_property(_moose.GLcell_port_get, _moose.GLcell_port_set)
+    attribute = _swig_property(_moose.GLcell_attribute_get, _moose.GLcell_attribute_set)
+    threshold = _swig_property(_moose.GLcell_threshold_get, _moose.GLcell_threshold_set)
+    vscale = _swig_property(_moose.GLcell_vscale_get, _moose.GLcell_vscale_set)
+    sync = _swig_property(_moose.GLcell_sync_get, _moose.GLcell_sync_set)
+    bgcolor = _swig_property(_moose.GLcell_bgcolor_get, _moose.GLcell_bgcolor_set)
+    highvalue = _swig_property(_moose.GLcell_highvalue_get, _moose.GLcell_highvalue_set)
+    lowvalue = _swig_property(_moose.GLcell_lowvalue_get, _moose.GLcell_lowvalue_set)
+GLcell_swigregister = _moose.GLcell_swigregister
+GLcell_swigregister(GLcell)
+GLcell.className_ = _moose.cvar.GLcell_className_
+
+class GLview(Neutral):
+    """Proxy of C++ GLview class"""
+    thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        """
+        __init__(self, Id id) -> GLview
+        __init__(self, string path) -> GLview
+        __init__(self, string name, Id parentId) -> GLview
+        __init__(self, string name, PyMooseBase parent) -> GLview
+        __init__(self, GLview src, string name, PyMooseBase parent) -> GLview
+        __init__(self, GLview src, string name, Id parent) -> GLview
+        __init__(self, GLview src, string path) -> GLview
+        __init__(self, Id src, string path) -> GLview
+        __init__(self, Id src, string name, Id parent) -> GLview
+        """
+        this = _moose.new_GLview(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _moose.delete_GLview
+    __del__ = lambda self : None;
+    def getType(*args):
+        """getType(self) -> string"""
+        return _moose.GLview_getType(*args)
+
+    def __get_vizpath(*args):
+        """__get_vizpath(self) -> string"""
+        return _moose.GLview___get_vizpath(*args)
+
+    def __set_vizpath(*args):
+        """__set_vizpath(self, string vizpath)"""
+        return _moose.GLview___set_vizpath(*args)
+
+    def __get_clientHost(*args):
+        """__get_clientHost(self) -> string"""
+        return _moose.GLview___get_clientHost(*args)
+
+    def __set_clientHost(*args):
+        """__set_clientHost(self, string clientHost)"""
+        return _moose.GLview___set_clientHost(*args)
+
+    def __get_clientPort(*args):
+        """__get_clientPort(self) -> string"""
+        return _moose.GLview___get_clientPort(*args)
+
+    def __set_clientPort(*args):
+        """__set_clientPort(self, string clientPort)"""
+        return _moose.GLview___set_clientPort(*args)
+
+    def __get_relPath(*args):
+        """__get_relPath(self) -> string"""
+        return _moose.GLview___get_relPath(*args)
+
+    def __set_relPath(*args):
+        """__set_relPath(self, string relPath)"""
+        return _moose.GLview___set_relPath(*args)
+
+    def __get_value1Field(*args):
+        """__get_value1Field(self) -> string"""
+        return _moose.GLview___get_value1Field(*args)
+
+    def __set_value1Field(*args):
+        """__set_value1Field(self, string value1Field)"""
+        return _moose.GLview___set_value1Field(*args)
+
+    def __get_value1Min(*args):
+        """__get_value1Min(self) -> double"""
+        return _moose.GLview___get_value1Min(*args)
+
+    def __set_value1Min(*args):
+        """__set_value1Min(self, double value1Min)"""
+        return _moose.GLview___set_value1Min(*args)
+
+    def __get_value1Max(*args):
+        """__get_value1Max(self) -> double"""
+        return _moose.GLview___get_value1Max(*args)
+
+    def __set_value1Max(*args):
+        """__set_value1Max(self, double value1Max)"""
+        return _moose.GLview___set_value1Max(*args)
+
+    def __get_value2Field(*args):
+        """__get_value2Field(self) -> string"""
+        return _moose.GLview___get_value2Field(*args)
+
+    def __set_value2Field(*args):
+        """__set_value2Field(self, string value2Field)"""
+        return _moose.GLview___set_value2Field(*args)
+
+    def __get_value2Min(*args):
+        """__get_value2Min(self) -> double"""
+        return _moose.GLview___get_value2Min(*args)
+
+    def __set_value2Min(*args):
+        """__set_value2Min(self, double value2Min)"""
+        return _moose.GLview___set_value2Min(*args)
+
+    def __get_value2Max(*args):
+        """__get_value2Max(self) -> double"""
+        return _moose.GLview___get_value2Max(*args)
+
+    def __set_value2Max(*args):
+        """__set_value2Max(self, double value2Max)"""
+        return _moose.GLview___set_value2Max(*args)
+
+    def __get_value3Field(*args):
+        """__get_value3Field(self) -> string"""
+        return _moose.GLview___get_value3Field(*args)
+
+    def __set_value3Field(*args):
+        """__set_value3Field(self, string value3Field)"""
+        return _moose.GLview___set_value3Field(*args)
+
+    def __get_value3Min(*args):
+        """__get_value3Min(self) -> double"""
+        return _moose.GLview___get_value3Min(*args)
+
+    def __set_value3Min(*args):
+        """__set_value3Min(self, double value3Min)"""
+        return _moose.GLview___set_value3Min(*args)
+
+    def __get_value3Max(*args):
+        """__get_value3Max(self) -> double"""
+        return _moose.GLview___get_value3Max(*args)
+
+    def __set_value3Max(*args):
+        """__set_value3Max(self, double value3Max)"""
+        return _moose.GLview___set_value3Max(*args)
+
+    def __get_value4Field(*args):
+        """__get_value4Field(self) -> string"""
+        return _moose.GLview___get_value4Field(*args)
+
+    def __set_value4Field(*args):
+        """__set_value4Field(self, string value4Field)"""
+        return _moose.GLview___set_value4Field(*args)
+
+    def __get_value4Min(*args):
+        """__get_value4Min(self) -> double"""
+        return _moose.GLview___get_value4Min(*args)
+
+    def __set_value4Min(*args):
+        """__set_value4Min(self, double value4Min)"""
+        return _moose.GLview___set_value4Min(*args)
+
+    def __get_value4Max(*args):
+        """__get_value4Max(self) -> double"""
+        return _moose.GLview___get_value4Max(*args)
+
+    def __set_value4Max(*args):
+        """__set_value4Max(self, double value4Max)"""
+        return _moose.GLview___set_value4Max(*args)
+
+    def __get_value5Field(*args):
+        """__get_value5Field(self) -> string"""
+        return _moose.GLview___get_value5Field(*args)
+
+    def __set_value5Field(*args):
+        """__set_value5Field(self, string value5Field)"""
+        return _moose.GLview___set_value5Field(*args)
+
+    def __get_value5Min(*args):
+        """__get_value5Min(self) -> double"""
+        return _moose.GLview___get_value5Min(*args)
+
+    def __set_value5Min(*args):
+        """__set_value5Min(self, double value5Min)"""
+        return _moose.GLview___set_value5Min(*args)
+
+    def __get_value5Max(*args):
+        """__get_value5Max(self) -> double"""
+        return _moose.GLview___get_value5Max(*args)
+
+    def __set_value5Max(*args):
+        """__set_value5Max(self, double value5Max)"""
+        return _moose.GLview___set_value5Max(*args)
+
+    def __get_bgColor(*args):
+        """__get_bgColor(self) -> string"""
+        return _moose.GLview___get_bgColor(*args)
+
+    def __set_bgColor(*args):
+        """__set_bgColor(self, string bgColor)"""
+        return _moose.GLview___set_bgColor(*args)
+
+    def __get_syncMode(*args):
+        """__get_syncMode(self) -> string"""
+        return _moose.GLview___get_syncMode(*args)
+
+    def __set_syncMode(*args):
+        """__set_syncMode(self, string syncMode)"""
+        return _moose.GLview___set_syncMode(*args)
+
+    def __get_gridMode(*args):
+        """__get_gridMode(self) -> string"""
+        return _moose.GLview___get_gridMode(*args)
+
+    def __set_gridMode(*args):
+        """__set_gridMode(self, string gridMode)"""
+        return _moose.GLview___set_gridMode(*args)
+
+    def __get_colorVal(*args):
+        """__get_colorVal(self) -> unsigned int"""
+        return _moose.GLview___get_colorVal(*args)
+
+    def __set_colorVal(*args):
+        """__set_colorVal(self, unsigned int colorVal)"""
+        return _moose.GLview___set_colorVal(*args)
+
+    def __get_morphVal(*args):
+        """__get_morphVal(self) -> unsigned int"""
+        return _moose.GLview___get_morphVal(*args)
+
+    def __set_morphVal(*args):
+        """__set_morphVal(self, unsigned int morphVal)"""
+        return _moose.GLview___set_morphVal(*args)
+
+    def __get_xoffsetVal(*args):
+        """__get_xoffsetVal(self) -> unsigned int"""
+        return _moose.GLview___get_xoffsetVal(*args)
+
+    def __set_xoffsetVal(*args):
+        """__set_xoffsetVal(self, unsigned int xoffsetVal)"""
+        return _moose.GLview___set_xoffsetVal(*args)
+
+    def __get_yoffsetVal(*args):
+        """__get_yoffsetVal(self) -> unsigned int"""
+        return _moose.GLview___get_yoffsetVal(*args)
+
+    def __set_yoffsetVal(*args):
+        """__set_yoffsetVal(self, unsigned int yoffsetVal)"""
+        return _moose.GLview___set_yoffsetVal(*args)
+
+    def __get_zoffsetVal(*args):
+        """__get_zoffsetVal(self) -> unsigned int"""
+        return _moose.GLview___get_zoffsetVal(*args)
+
+    def __set_zoffsetVal(*args):
+        """__set_zoffsetVal(self, unsigned int zoffsetVal)"""
+        return _moose.GLview___set_zoffsetVal(*args)
+
+    vizpath = _swig_property(_moose.GLview_vizpath_get, _moose.GLview_vizpath_set)
+    host = _swig_property(_moose.GLview_host_get, _moose.GLview_host_set)
+    port = _swig_property(_moose.GLview_port_get, _moose.GLview_port_set)
+    relpath = _swig_property(_moose.GLview_relpath_get, _moose.GLview_relpath_set)
+    value1 = _swig_property(_moose.GLview_value1_get, _moose.GLview_value1_set)
+    value1min = _swig_property(_moose.GLview_value1min_get, _moose.GLview_value1min_set)
+    value1max = _swig_property(_moose.GLview_value1max_get, _moose.GLview_value1max_set)
+    value2 = _swig_property(_moose.GLview_value2_get, _moose.GLview_value2_set)
+    value2min = _swig_property(_moose.GLview_value2min_get, _moose.GLview_value2min_set)
+    value2max = _swig_property(_moose.GLview_value2max_get, _moose.GLview_value2max_set)
+    value3 = _swig_property(_moose.GLview_value3_get, _moose.GLview_value3_set)
+    value3min = _swig_property(_moose.GLview_value3min_get, _moose.GLview_value3min_set)
+    value3max = _swig_property(_moose.GLview_value3max_get, _moose.GLview_value3max_set)
+    value4 = _swig_property(_moose.GLview_value4_get, _moose.GLview_value4_set)
+    value4min = _swig_property(_moose.GLview_value4min_get, _moose.GLview_value4min_set)
+    value4max = _swig_property(_moose.GLview_value4max_get, _moose.GLview_value4max_set)
+    value5 = _swig_property(_moose.GLview_value5_get, _moose.GLview_value5_set)
+    value5min = _swig_property(_moose.GLview_value5min_get, _moose.GLview_value5min_set)
+    value5max = _swig_property(_moose.GLview_value5max_get, _moose.GLview_value5max_set)
+    bgcolor = _swig_property(_moose.GLview_bgcolor_get, _moose.GLview_bgcolor_set)
+    sync = _swig_property(_moose.GLview_sync_get, _moose.GLview_sync_set)
+    grid = _swig_property(_moose.GLview_grid_get, _moose.GLview_grid_set)
+    color_val = _swig_property(_moose.GLview_color_val_get, _moose.GLview_color_val_set)
+    morph_val = _swig_property(_moose.GLview_morph_val_get, _moose.GLview_morph_val_set)
+    xoffset_val = _swig_property(_moose.GLview_xoffset_val_get, _moose.GLview_xoffset_val_set)
+    yoffset_val = _swig_property(_moose.GLview_yoffset_val_get, _moose.GLview_yoffset_val_set)
+    zoffset_val = _swig_property(_moose.GLview_zoffset_val_get, _moose.GLview_zoffset_val_set)
+GLview_swigregister = _moose.GLview_swigregister
+GLview_swigregister(GLview)
+GLview.className_ = _moose.cvar.GLview_className_
+
+class TimeTable(Neutral):
     """Proxy of C++ TimeTable class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -6668,8 +7069,8 @@ class TimeTable(PyMooseBase):
         __init__(self, TimeTable src, string name, PyMooseBase parent) -> TimeTable
         __init__(self, TimeTable src, string name, Id parent) -> TimeTable
         __init__(self, TimeTable src, string path) -> TimeTable
-        __init__(self, Id src, string path) -> TimeTable
         __init__(self, Id src, string name, Id parent) -> TimeTable
+        __init__(self, Id src, string path) -> TimeTable
         """
         this = _moose.new_TimeTable(*args)
         try: self.this.append(this)
@@ -6737,7 +7138,7 @@ TimeTable_swigregister = _moose.TimeTable_swigregister
 TimeTable_swigregister(TimeTable)
 TimeTable.className_ = _moose.cvar.TimeTable_className_
 
-class RC(PyMooseBase):
+class RC(Neutral):
     """Proxy of C++ RC class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -6807,7 +7208,7 @@ RC_swigregister = _moose.RC_swigregister
 RC_swigregister(RC)
 RC.className_ = _moose.cvar.RC_className_
 
-class PIDController(PyMooseBase):
+class PIDController(Neutral):
     """Proxy of C++ PIDController class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -6880,6 +7281,22 @@ class PIDController(PyMooseBase):
         """__get_output(self) -> double"""
         return _moose.PIDController___get_output(*args)
 
+    def __get_error(*args):
+        """__get_error(self) -> double"""
+        return _moose.PIDController___get_error(*args)
+
+    def __get_integral(*args):
+        """__get_integral(self) -> double"""
+        return _moose.PIDController___get_integral(*args)
+
+    def __get_derivative(*args):
+        """__get_derivative(self) -> double"""
+        return _moose.PIDController___get_derivative(*args)
+
+    def __get_e_previous(*args):
+        """__get_e_previous(self) -> double"""
+        return _moose.PIDController___get_e_previous(*args)
+
     gain = _swig_property(_moose.PIDController_gain_get, _moose.PIDController_gain_set)
     saturation = _swig_property(_moose.PIDController_saturation_get, _moose.PIDController_saturation_set)
     command = _swig_property(_moose.PIDController_command_get, _moose.PIDController_command_set)
@@ -6891,7 +7308,7 @@ PIDController_swigregister = _moose.PIDController_swigregister
 PIDController_swigregister(PIDController)
 PIDController.className_ = _moose.cvar.PIDController_className_
 
-class DiffAmp(PyMooseBase):
+class DiffAmp(Neutral):
     """Proxy of C++ DiffAmp class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -6953,7 +7370,7 @@ DiffAmp_swigregister = _moose.DiffAmp_swigregister
 DiffAmp_swigregister(DiffAmp)
 DiffAmp.className_ = _moose.cvar.DiffAmp_className_
 
-class IntFire(PyMooseBase):
+class IntFire(Neutral):
     """Proxy of C++ IntFire class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -7068,7 +7485,7 @@ IntFire_swigregister = _moose.IntFire_swigregister
 IntFire_swigregister(IntFire)
 IntFire.className_ = _moose.cvar.IntFire_className_
 
-class IzhikevichNrn(PyMooseBase):
+class IzhikevichNrn(Neutral):
     """Proxy of C++ IzhikevichNrn class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -7189,6 +7606,14 @@ class IzhikevichNrn(PyMooseBase):
         """__set_gamma(self, double gamma)"""
         return _moose.IzhikevichNrn___set_gamma(*args)
 
+    def __get_Rm(*args):
+        """__get_Rm(self) -> double"""
+        return _moose.IzhikevichNrn___get_Rm(*args)
+
+    def __set_Rm(*args):
+        """__set_Rm(self, double Rm)"""
+        return _moose.IzhikevichNrn___set_Rm(*args)
+
     Vmax = _swig_property(_moose.IzhikevichNrn_Vmax_get, _moose.IzhikevichNrn_Vmax_set)
     c = _swig_property(_moose.IzhikevichNrn_c_get, _moose.IzhikevichNrn_c_set)
     d = _swig_property(_moose.IzhikevichNrn_d_get, _moose.IzhikevichNrn_d_set)
@@ -7206,7 +7631,7 @@ IzhikevichNrn_swigregister = _moose.IzhikevichNrn_swigregister
 IzhikevichNrn_swigregister(IzhikevichNrn)
 IzhikevichNrn.className_ = _moose.cvar.IzhikevichNrn_className_
 
-class GHK(PyMooseBase):
+class GHK(Neutral):
     """Proxy of C++ GHK class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -7304,7 +7729,7 @@ GHK_swigregister = _moose.GHK_swigregister
 GHK_swigregister(GHK)
 GHK.className_ = _moose.cvar.GHK_className_
 
-class HHChannel2D(PyMooseBase):
+class HHChannel2D(HHChannel):
     """Proxy of C++ HHChannel2D class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -7360,7 +7785,7 @@ HHChannel2D_swigregister = _moose.HHChannel2D_swigregister
 HHChannel2D_swigregister(HHChannel2D)
 HHChannel2D.className_ = _moose.cvar.HHChannel2D_className_
 
-class HHGate2D(PyMooseBase):
+class HHGate2D(HHGate):
     """Proxy of C++ HHGate2D class"""
     thisown = _swig_property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr

@@ -1,8 +1,10 @@
 #ifndef _pymoose_TauPump_h
 #define _pymoose_TauPump_h
 #include "PyMooseBase.h"
+#include "Neutral.h"
 namespace pymoose{
-    class TauPump : public PyMooseBase
+
+    class TauPump : public Neutral
     {      public:
         static const std::string className_;
         TauPump(Id id);

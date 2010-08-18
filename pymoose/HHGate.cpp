@@ -3,23 +3,18 @@
 #include "HHGate.h"
 using namespace pymoose;
 const std::string HHGate::className_ = "HHGate";
-HHGate::HHGate(Id id):PyMooseBase(id){}
-HHGate::HHGate(std::string path):PyMooseBase(className_, path){}
-HHGate::HHGate(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-HHGate::HHGate(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-HHGate::HHGate(const HHGate& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-
-HHGate::HHGate(const HHGate& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-HHGate::HHGate(const HHGate& src, std::string path):PyMooseBase(src, path)
-{
-}
-HHGate::HHGate(const Id& src, std::string path):PyMooseBase(src, path)
-{
-}
-
-HHGate::HHGate(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
-{
-}
+HHGate::HHGate(std::string className, std::string name, Id parentId): Neutral(className, name, parentId){}
+HHGate::HHGate(std::string className, std::string path): Neutral(className, path){}
+HHGate::HHGate(std::string className, std::string objectName, PyMooseBase& parent): Neutral(className, objectName, parent){}
+HHGate::HHGate(Id id):Neutral(id){}
+HHGate::HHGate(std::string path):Neutral(className_, path){}
+HHGate::HHGate(std::string name, Id parentId):Neutral(className_, name, parentId){}
+HHGate::HHGate(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+HHGate::HHGate(const HHGate& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+HHGate::HHGate(const HHGate& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+HHGate::HHGate(const HHGate& src, std::string path):Neutral(src, path){}
+HHGate::HHGate(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+HHGate::HHGate(const Id& src, std::string path):Neutral(src, path){}
 HHGate::~HHGate(){}
 const std::string& HHGate::getType(){ return className_; }
 

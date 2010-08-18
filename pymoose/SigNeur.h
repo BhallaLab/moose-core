@@ -1,8 +1,9 @@
 #ifndef _pymoose_SigNeur_h
 #define _pymoose_SigNeur_h
 #include "PyMooseBase.h"
+#include "Neutral.h"
 namespace pymoose{
-    class SigNeur : public PyMooseBase
+    class SigNeur : public Neutral
     {      public:
         static const std::string className_;
         SigNeur(Id id);

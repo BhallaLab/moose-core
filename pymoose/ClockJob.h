@@ -1,11 +1,11 @@
 #ifndef _pymoose_ClockJob_h
 #define _pymoose_ClockJob_h
 #include "PyMooseBase.h"
-namespace pymoose
-{
-    class ClockJob : public PyMooseBase
-    {
-      public:
+#include "Neutral.h"
+namespace pymoose{
+
+    class ClockJob : public Neutral
+    {      public:
         static const std::string className_;
         ClockJob(Id id);
         ClockJob(std::string path);

@@ -3,7 +3,6 @@
 #include "StochSynchan.h"
 using namespace pymoose;
 const std::string StochSynchan::className_ = "StochSynchan";
-
 const std::string& StochSynchan::getType(){ return className_; }
 double StochSynchan::__get_Gbar() const
 {
@@ -114,14 +113,14 @@ void StochSynchan::__set_modulator( double modulator )
 }
 
 // The following functions were manually inserted - so think twice before editing
-StochSynchan::StochSynchan(Id id):PyMooseBase(id)
+StochSynchan::StochSynchan(Id id):Neutral(id)
 {
     weight = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this, &StochSynchan::__get_weight, &StochSynchan::__set_weight);
     delay = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this,&StochSynchan::__get_delay, &StochSynchan::__set_delay);
     releaseP = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this,  &StochSynchan::__get_releaseP,  &StochSynchan::__set_releaseP);    
     releaseCount = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this,  &StochSynchan::__get_releaseCount,  &StochSynchan::__set_releaseCount);
 }
-StochSynchan::StochSynchan(std::string path):PyMooseBase(className_, path)
+StochSynchan::StochSynchan(std::string path):Neutral(className_, path)
 {
  
     weight = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this, &StochSynchan::__get_weight, &StochSynchan::__set_weight);
@@ -129,31 +128,31 @@ StochSynchan::StochSynchan(std::string path):PyMooseBase(className_, path)
     releaseP = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this,  &StochSynchan::__get_releaseP,  &StochSynchan::__set_releaseP);   
     releaseCount = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this,  &StochSynchan::__get_releaseCount,  &StochSynchan::__set_releaseCount);
 }
-StochSynchan::StochSynchan(std::string name, Id parentId):PyMooseBase(className_, name, parentId)
+StochSynchan::StochSynchan(std::string name, Id parentId):Neutral(className_, name, parentId)
 {    
     weight = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this, &StochSynchan::__get_weight, &StochSynchan::__set_weight);
     delay = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this,&StochSynchan::__get_delay, &StochSynchan::__set_delay);
     releaseP = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this,  &StochSynchan::__get_releaseP,  &StochSynchan::__set_releaseP);
     releaseCount = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this,  &StochSynchan::__get_releaseCount,  &StochSynchan::__set_releaseCount);
 }
-StochSynchan::StochSynchan(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent)
+StochSynchan::StochSynchan(std::string name, PyMooseBase& parent):Neutral(className_, name, parent)
 {    
      weight = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this, &StochSynchan::__get_weight, &StochSynchan::__set_weight);
     delay = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this,&StochSynchan::__get_delay, &StochSynchan::__set_delay);
     releaseP = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this,  &StochSynchan::__get_releaseP,  &StochSynchan::__set_releaseP);
     releaseCount = new InnerPyMooseIterable<StochSynchan, unsigned int, double > (this,  &StochSynchan::__get_releaseCount,  &StochSynchan::__set_releaseCount);
 }
-StochSynchan::StochSynchan(const StochSynchan& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
+StochSynchan::StochSynchan(const StochSynchan& src, std::string objectName,  PyMooseBase& parent):Neutral(src, objectName, parent){}
 
-StochSynchan::StochSynchan(const StochSynchan& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-StochSynchan::StochSynchan(const StochSynchan& src, std::string path):PyMooseBase(src, path)
+StochSynchan::StochSynchan(const StochSynchan& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+StochSynchan::StochSynchan(const StochSynchan& src, std::string path):Neutral(src, path)
 {
 }
 
-StochSynchan::StochSynchan(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
+StochSynchan::StochSynchan(const Id& src, string name, Id& parent):Neutral(src, name, parent)
 {
 }
-StochSynchan::StochSynchan(const Id& src, string path):PyMooseBase(src, path)
+StochSynchan::StochSynchan(const Id& src, string path):Neutral(src, path)
 {
 }
 StochSynchan::~StochSynchan()

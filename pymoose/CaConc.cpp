@@ -3,23 +3,15 @@
 #include "CaConc.h"
 using namespace pymoose;
 const std::string CaConc::className_ = "CaConc";
-CaConc::CaConc(Id id):PyMooseBase(id){}
-CaConc::CaConc(std::string path):PyMooseBase(className_, path){}
-CaConc::CaConc(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-CaConc::CaConc(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-CaConc::CaConc(const CaConc& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-
-CaConc::CaConc(const CaConc& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-CaConc::CaConc(const CaConc& src, std::string path):PyMooseBase(src, path)
-{
-}
-CaConc::CaConc(const Id& src, std::string path):PyMooseBase(src, path)
-{
-}
-
-CaConc::CaConc(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
-{
-}
+CaConc::CaConc(Id id):Neutral(id){}
+CaConc::CaConc(std::string path):Neutral(className_, path){}
+CaConc::CaConc(std::string name, Id parentId):Neutral(className_, name, parentId){}
+CaConc::CaConc(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+CaConc::CaConc(const CaConc& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+CaConc::CaConc(const CaConc& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+CaConc::CaConc(const CaConc& src, std::string path):Neutral(src, path){}
+CaConc::CaConc(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+CaConc::CaConc(const Id& src, std::string path):Neutral(src, path){}
 CaConc::~CaConc(){}
 const std::string& CaConc::getType(){ return className_; }
 double CaConc::__get_Ca() const

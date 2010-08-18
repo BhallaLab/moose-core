@@ -20,24 +20,24 @@
 #include "Cell.h"
 using namespace pymoose;
 const std::string Cell::className_ = "Cell";
-Cell::Cell(Id id):PyMooseBase(id){}
-Cell::Cell(std::string path):PyMooseBase(className_, path){}
-Cell::Cell(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-Cell::Cell(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-Cell::Cell(const Cell& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
+Cell::Cell(Id id):Neutral(id){}
+Cell::Cell(std::string path):Neutral(className_, path){}
+Cell::Cell(std::string name, Id parentId):Neutral(className_, name, parentId){}
+Cell::Cell(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+Cell::Cell(const Cell& src, std::string objectName,  PyMooseBase& parent):Neutral(src, objectName, parent){}
 
-Cell::Cell(const Cell& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-Cell::Cell(const Cell& src, std::string path):PyMooseBase(src, path)
+Cell::Cell(const Cell& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+Cell::Cell(const Cell& src, std::string path):Neutral(src, path)
 {
 }
 
-Cell::Cell(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
+Cell::Cell(const Id& src, string name, Id& parent):Neutral(src, name, parent)
 {
 }
-Cell::Cell(const Id& src, string path):PyMooseBase(src, path)
+Cell::Cell(const Id& src, string path):Neutral(src, path)
 {
 }
-Cell::Cell(std::string cellpath, std::string filepath):PyMooseBase(className_, cellpath, filepath)
+Cell::Cell(std::string cellpath, std::string filepath):Neutral(className_, cellpath, filepath)
 {
 }
 Cell::~Cell(){}

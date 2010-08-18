@@ -3,24 +3,15 @@
 #include "SynChan.h"
 using namespace pymoose;
 const std::string SynChan::className_ = "SynChan";
-SynChan::SynChan(Id id):PyMooseBase(id){}
-SynChan::SynChan(std::string path):PyMooseBase(className_, path){}
-SynChan::SynChan(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-SynChan::SynChan(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-SynChan::SynChan(const SynChan& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-
-SynChan::SynChan(const SynChan& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-SynChan::SynChan(const SynChan& src, std::string path):PyMooseBase(src, path)
-{
-}
-
-SynChan::SynChan(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
-{
-}
-SynChan::SynChan(const Id& src, string path):PyMooseBase(src, path)
-{
-}
-
+SynChan::SynChan(Id id):Neutral(id){}
+SynChan::SynChan(std::string path):Neutral(className_, path){}
+SynChan::SynChan(std::string name, Id parentId):Neutral(className_, name, parentId){}
+SynChan::SynChan(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+SynChan::SynChan(const SynChan& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+SynChan::SynChan(const SynChan& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+SynChan::SynChan(const SynChan& src, std::string path):Neutral(src, path){}
+SynChan::SynChan(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+SynChan::SynChan(const Id& src, std::string path):Neutral(src, path){}
 SynChan::~SynChan(){}
 const std::string& SynChan::getType(){ return className_; }
 double SynChan::__get_Gbar() const
@@ -134,18 +125,15 @@ void SynChan::setDelay( const unsigned int& index, double delay)
 
 //Manually edited
 // These are for allowing Table access to constructors in PyMooseBase
-SynChan::SynChan(std::string typeName, std::string objectName, Id parentId):
-    PyMooseBase(typeName, objectName, parentId)
+SynChan::SynChan(std::string typeName, std::string objectName, Id parentId): Neutral(typeName, objectName, parentId)
 {
 }
    
-SynChan::SynChan(std::string typeName, std::string path):
-    PyMooseBase(typeName, path)
+SynChan::SynChan(std::string typeName, std::string path): Neutral(typeName, path)
 {
 }
 
-SynChan::SynChan(std::string typeName, std::string objectName, PyMooseBase& parent):
-    PyMooseBase(typeName, objectName, parent)
+SynChan::SynChan(std::string typeName, std::string objectName, PyMooseBase& parent): Neutral(typeName, objectName, parent)
 {
 }
 

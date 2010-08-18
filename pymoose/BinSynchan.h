@@ -21,7 +21,7 @@
 #define _pymoose_BinSynchan_h
 #include "PyMooseIterable.h"
 #include "PyMooseBase.h"
-
+#include "Neutral.h"
 namespace pymoose
 {
     class BinSynchan;    
@@ -30,7 +30,7 @@ namespace pymoose
     class PyMooseBase;
     
 
-    class BinSynchan : public PyMooseBase
+    class BinSynchan : public Neutral
     {
       public:
         static const std::string className_;

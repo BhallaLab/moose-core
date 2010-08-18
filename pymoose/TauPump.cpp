@@ -3,15 +3,15 @@
 #include "TauPump.h"
 using namespace pymoose;
 const std::string TauPump::className_ = "TauPump";
-TauPump::TauPump(Id id):PyMooseBase(id){}
-TauPump::TauPump(std::string path):PyMooseBase(className_, path){}
-TauPump::TauPump(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-TauPump::TauPump(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-TauPump::TauPump(const TauPump& src, std::string objectName, PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-TauPump::TauPump(const TauPump& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-TauPump::TauPump(const TauPump& src, std::string path):PyMooseBase(src, path){}
-TauPump::TauPump(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
-TauPump::TauPump(const Id& src, std::string path):PyMooseBase(src, path){}
+TauPump::TauPump(Id id):Neutral(id){}
+TauPump::TauPump(std::string path):Neutral(className_, path){}
+TauPump::TauPump(std::string name, Id parentId):Neutral(className_, name, parentId){}
+TauPump::TauPump(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+TauPump::TauPump(const TauPump& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+TauPump::TauPump(const TauPump& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+TauPump::TauPump(const TauPump& src, std::string path):Neutral(src, path){}
+TauPump::TauPump(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+TauPump::TauPump(const Id& src, std::string path):Neutral(src, path){}
 TauPump::~TauPump(){}
 const std::string& TauPump::getType(){ return className_; }
 double TauPump::__get_pumpRate() const

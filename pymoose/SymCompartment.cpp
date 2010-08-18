@@ -11,6 +11,7 @@ SymCompartment::SymCompartment(const SymCompartment& src, std::string objectName
 SymCompartment::SymCompartment(const SymCompartment& src, std::string objectName, Id& parent):Compartment(src, objectName, parent){}
 SymCompartment::SymCompartment(const SymCompartment& src, std::string path):Compartment(src, path){}
 SymCompartment::SymCompartment(const Id& src, std::string name, Id& parent):Compartment(src, name, parent){}
+SymCompartment::SymCompartment(const Id& src, std::string path):Compartment(src, path){}
 SymCompartment::~SymCompartment(){}
 const std::string& SymCompartment::getType(){ return className_; }
 #endif
