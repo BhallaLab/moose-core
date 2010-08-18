@@ -1,8 +1,10 @@
 #ifndef _pymoose_IzhikevichNrn_h
 #define _pymoose_IzhikevichNrn_h
 #include "PyMooseBase.h"
+#include "Neutral.h"
+
 namespace pymoose{
-    class IzhikevichNrn : public PyMooseBase
+    class IzhikevichNrn : public Neutral
     {      public:
         static const std::string className_;
         IzhikevichNrn(Id id);
@@ -40,6 +42,8 @@ namespace pymoose{
             void __set_beta(double beta);
             double __get_gamma() const;
             void __set_gamma(double gamma);
+            double __get_Rm() const;
+            void __set_Rm(double Rm);
     };
 }
 #endif

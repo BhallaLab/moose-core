@@ -3,23 +3,15 @@
 #include "RandomSpike.h"
 using namespace pymoose;
 const std::string RandomSpike::className_ = "RandomSpike";
-RandomSpike::RandomSpike(Id id):PyMooseBase(id){}
-RandomSpike::RandomSpike(std::string path):PyMooseBase(className_, path){}
-RandomSpike::RandomSpike(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-RandomSpike::RandomSpike(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-RandomSpike::RandomSpike(const RandomSpike& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-
-RandomSpike::RandomSpike(const RandomSpike& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-RandomSpike::RandomSpike(const RandomSpike& src, std::string path):PyMooseBase(src, path)
-{
-}
-
-RandomSpike::RandomSpike(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
-{
-}
-RandomSpike::RandomSpike(const Id& src, string path):PyMooseBase(src, path)
-{
-}
+RandomSpike::RandomSpike(Id id):Neutral(id){}
+RandomSpike::RandomSpike(std::string path):Neutral(className_, path){}
+RandomSpike::RandomSpike(std::string name, Id parentId):Neutral(className_, name, parentId){}
+RandomSpike::RandomSpike(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+RandomSpike::RandomSpike(const RandomSpike& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+RandomSpike::RandomSpike(const RandomSpike& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+RandomSpike::RandomSpike(const RandomSpike& src, std::string path):Neutral(src, path){}
+RandomSpike::RandomSpike(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+RandomSpike::RandomSpike(const Id& src, std::string path):Neutral(src, path){}
 RandomSpike::~RandomSpike(){}
 const std::string& RandomSpike::getType(){ return className_; }
 double RandomSpike::__get_minAmp() const

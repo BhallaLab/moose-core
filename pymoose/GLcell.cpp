@@ -5,15 +5,15 @@
 using namespace pymoose;
 
 const std::string GLcell::className_ = "GLcell";
-GLcell::GLcell( Id id ) : PyMooseBase( id ) {}
-GLcell::GLcell( std::string path ) : PyMooseBase( className_, path ) {}
-GLcell::GLcell( std::string name, Id parentId ) : PyMooseBase( className_, name, parentId ) {}
-GLcell::GLcell( std::string name, PyMooseBase& parent ) : PyMooseBase( className_, name, parent ) {}
-GLcell::GLcell( const GLcell& src, std::string name, PyMooseBase& parent ) : PyMooseBase( src, name, parent ) {}
-GLcell::GLcell( const GLcell& src, std::string name, Id& parent ) : PyMooseBase( src, name, parent ) {}
-GLcell::GLcell( const GLcell& src, std::string path ) : PyMooseBase( src, path ) {}
-GLcell::GLcell( const Id& src, std::string path ) : PyMooseBase( src, path ) {}
-GLcell::GLcell( const Id& src, std::string name, Id& parent ) : PyMooseBase( src, name, parent ) {}
+GLcell::GLcell( Id id ) :Neutral( id ) {}
+GLcell::GLcell( std::string path ) :Neutral( className_, path ) {}
+GLcell::GLcell( std::string name, Id parentId ) :Neutral( className_, name, parentId ) {}
+GLcell::GLcell( std::string name, PyMooseBase& parent ) :Neutral( className_, name, parent ) {}
+GLcell::GLcell( const GLcell& src, std::string name, PyMooseBase& parent ) :Neutral( src, name, parent ) {}
+GLcell::GLcell( const GLcell& src, std::string name, Id& parent ) :Neutral( src, name, parent ) {}
+GLcell::GLcell( const GLcell& src, std::string path ) :Neutral( src, path ) {}
+GLcell::GLcell( const Id& src, std::string path ) :Neutral( src, path ) {}
+GLcell::GLcell( const Id& src, std::string name, Id& parent ) :Neutral( src, name, parent ) {}
 GLcell::~GLcell() {}
 const std::string& GLcell::getType() { return className_; }
 

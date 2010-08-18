@@ -4,16 +4,18 @@
 #include "Interpol.h"
 using namespace pymoose;
 const std::string HHChannel::className_ = "HHChannel";
-HHChannel::HHChannel(Id id):PyMooseBase(id){}
-HHChannel::HHChannel(std::string path):PyMooseBase(className_, path){}
-HHChannel::HHChannel(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-HHChannel::HHChannel(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-HHChannel::HHChannel(const HHChannel& src, std::string objectName, PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-HHChannel::HHChannel(const HHChannel& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-HHChannel::HHChannel(const HHChannel& src, std::string path):PyMooseBase(src, path){}
-HHChannel::HHChannel(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
-HHChannel::HHChannel(const Id& src, std::string path):PyMooseBase(src, path){}
-
+HHChannel::HHChannel(std::string className, std::string name, Id parentId): Neutral(className, name, parentId){}
+HHChannel::HHChannel(std::string className, std::string path): Neutral(className, path){}
+HHChannel::HHChannel(std::string className, std::string objectName, PyMooseBase& parent): Neutral(className, objectName, parent){}
+HHChannel::HHChannel(Id id):Neutral(id){}
+HHChannel::HHChannel(std::string path):Neutral(className_, path){}
+HHChannel::HHChannel(std::string name, Id parentId):Neutral(className_, name, parentId){}
+HHChannel::HHChannel(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+HHChannel::HHChannel(const HHChannel& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+HHChannel::HHChannel(const HHChannel& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+HHChannel::HHChannel(const HHChannel& src, std::string path):Neutral(src, path){}
+HHChannel::HHChannel(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+HHChannel::HHChannel(const Id& src, std::string path):Neutral(src, path){}
 HHChannel::~HHChannel(){}
 const std::string& HHChannel::getType(){ return className_; }
 double HHChannel::__get_Gbar() const

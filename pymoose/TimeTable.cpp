@@ -3,15 +3,15 @@
 #include "TimeTable.h"
 using namespace pymoose;
 const std::string TimeTable::className_ = "TimeTable";
-TimeTable::TimeTable(Id id):PyMooseBase(id){}
-TimeTable::TimeTable(std::string path):PyMooseBase(className_, path){}
-TimeTable::TimeTable(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-TimeTable::TimeTable(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-TimeTable::TimeTable(const TimeTable& src, std::string objectName, PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-TimeTable::TimeTable(const TimeTable& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-TimeTable::TimeTable(const TimeTable& src, std::string path):PyMooseBase(src, path){}
-TimeTable::TimeTable(const Id& src, std::string path):PyMooseBase(src, path){}
-TimeTable::TimeTable(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
+TimeTable::TimeTable(Id id):Neutral(id){}
+TimeTable::TimeTable(std::string path):Neutral(className_, path){}
+TimeTable::TimeTable(std::string name, Id parentId):Neutral(className_, name, parentId){}
+TimeTable::TimeTable(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+TimeTable::TimeTable(const TimeTable& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+TimeTable::TimeTable(const TimeTable& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+TimeTable::TimeTable(const TimeTable& src, std::string path):Neutral(src, path){}
+TimeTable::TimeTable(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+TimeTable::TimeTable(const Id& src, std::string path):Neutral(src, path){}
 TimeTable::~TimeTable(){}
 const std::string& TimeTable::getType(){ return className_; }
 double TimeTable::__get_maxTime() const

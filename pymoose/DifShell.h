@@ -1,8 +1,10 @@
 #ifndef _pymoose_DifShell_h
 #define _pymoose_DifShell_h
 #include "PyMooseBase.h"
+#include "Neutral.h"
 namespace pymoose{
-    class DifShell : public PyMooseBase
+
+    class DifShell : public Neutral
     {      public:
         static const std::string className_;
         DifShell(Id id);

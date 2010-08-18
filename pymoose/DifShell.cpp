@@ -3,16 +3,15 @@
 #include "DifShell.h"
 using namespace pymoose;
 const std::string DifShell::className_ = "DifShell";
-DifShell::DifShell(Id id):PyMooseBase(id){}
-DifShell::DifShell(std::string path):PyMooseBase(className_, path){}
-DifShell::DifShell(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-DifShell::DifShell(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-DifShell::DifShell(const DifShell& src, std::string objectName, PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-DifShell::DifShell(const DifShell& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-DifShell::DifShell(const DifShell& src, std::string path):PyMooseBase(src, path){}
-DifShell::DifShell(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
-DifShell::DifShell(const Id& src, std::string path):PyMooseBase(src, path){}
-
+DifShell::DifShell(Id id):Neutral(id){}
+DifShell::DifShell(std::string path):Neutral(className_, path){}
+DifShell::DifShell(std::string name, Id parentId):Neutral(className_, name, parentId){}
+DifShell::DifShell(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+DifShell::DifShell(const DifShell& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+DifShell::DifShell(const DifShell& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+DifShell::DifShell(const DifShell& src, std::string path):Neutral(src, path){}
+DifShell::DifShell(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+DifShell::DifShell(const Id& src, std::string path):Neutral(src, path){}
 DifShell::~DifShell(){}
 const std::string& DifShell::getType(){ return className_; }
 double DifShell::__get_C() const

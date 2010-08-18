@@ -1,8 +1,10 @@
 #ifndef _pymoose_Geometry_h
 #define _pymoose_Geometry_h
 #include "PyMooseBase.h"
+#include "Neutral.h"
 namespace pymoose{
-    class Geometry : public PyMooseBase
+
+    class Geometry : public Neutral
     {      public:
         static const std::string className_;
         Geometry(Id id);

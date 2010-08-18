@@ -3,16 +3,15 @@
 #include "IzhikevichNrn.h"
 using namespace pymoose;
 const std::string IzhikevichNrn::className_ = "IzhikevichNrn";
-IzhikevichNrn::IzhikevichNrn(Id id):PyMooseBase(id){}
-IzhikevichNrn::IzhikevichNrn(std::string path):PyMooseBase(className_, path){}
-IzhikevichNrn::IzhikevichNrn(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-IzhikevichNrn::IzhikevichNrn(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-IzhikevichNrn::IzhikevichNrn(const IzhikevichNrn& src, std::string objectName, PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-IzhikevichNrn::IzhikevichNrn(const IzhikevichNrn& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-IzhikevichNrn::IzhikevichNrn(const IzhikevichNrn& src, std::string path):PyMooseBase(src, path){}
-IzhikevichNrn::IzhikevichNrn(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
-IzhikevichNrn::IzhikevichNrn(const Id& src, std::string path):PyMooseBase(src, path){}
-
+IzhikevichNrn::IzhikevichNrn(Id id):Neutral(id){}
+IzhikevichNrn::IzhikevichNrn(std::string path):Neutral(className_, path){}
+IzhikevichNrn::IzhikevichNrn(std::string name, Id parentId):Neutral(className_, name, parentId){}
+IzhikevichNrn::IzhikevichNrn(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+IzhikevichNrn::IzhikevichNrn(const IzhikevichNrn& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+IzhikevichNrn::IzhikevichNrn(const IzhikevichNrn& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+IzhikevichNrn::IzhikevichNrn(const IzhikevichNrn& src, std::string path):Neutral(src, path){}
+IzhikevichNrn::IzhikevichNrn(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+IzhikevichNrn::IzhikevichNrn(const Id& src, std::string path):Neutral(src, path){}
 IzhikevichNrn::~IzhikevichNrn(){}
 const std::string& IzhikevichNrn::getType(){ return className_; }
 double IzhikevichNrn::__get_Vmax() const
@@ -136,5 +135,15 @@ double IzhikevichNrn::__get_gamma() const
 void IzhikevichNrn::__set_gamma( double gamma )
 {
     set < double > (id_(), "gamma", gamma);
+}
+double IzhikevichNrn::__get_Rm() const
+{
+    double Rm;
+    get < double > (id_(), "Rm",Rm);
+    return Rm;
+}
+void IzhikevichNrn::__set_Rm( double Rm )
+{
+    set < double > (id_(), "Rm", Rm);
 }
 #endif

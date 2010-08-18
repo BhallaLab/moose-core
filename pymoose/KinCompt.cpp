@@ -3,16 +3,20 @@
 #include "KinCompt.h"
 using namespace pymoose;
 const std::string KinCompt::className_ = "KinCompt";
-KinCompt::KinCompt(Id id):PyMooseBase(id){}
-KinCompt::KinCompt(std::string path):PyMooseBase(className_, path){}
-KinCompt::KinCompt(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-KinCompt::KinCompt(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-KinCompt::KinCompt(const KinCompt& src, std::string objectName, PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-KinCompt::KinCompt(const KinCompt& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-KinCompt::KinCompt(const KinCompt& src, std::string path):PyMooseBase(src, path){}
-KinCompt::KinCompt(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
-KinCompt::KinCompt(const Id& src, std::string path):PyMooseBase(src, path){}
 
+KinCompt::KinCompt(std::string className, std::string objectName, Id parentId):Neutral(className, objectName, parentId){}
+KinCompt::KinCompt(std::string className, std::string path):Neutral(className, path){}
+KinCompt::KinCompt(std::string className, std::string objectName, PyMooseBase& parent): Neutral(className, objectName, parent){}
+
+KinCompt::KinCompt(Id id):Neutral(id){}
+KinCompt::KinCompt(std::string path):Neutral(className_, path){}
+KinCompt::KinCompt(std::string name, Id parentId):Neutral(className_, name, parentId){}
+KinCompt::KinCompt(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+KinCompt::KinCompt(const KinCompt& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+KinCompt::KinCompt(const KinCompt& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+KinCompt::KinCompt(const KinCompt& src, std::string path):Neutral(src, path){}
+KinCompt::KinCompt(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+KinCompt::KinCompt(const Id& src, std::string path):Neutral(src, path){}
 KinCompt::~KinCompt(){}
 const std::string& KinCompt::getType(){ return className_; }
 double KinCompt::__get_volume() const

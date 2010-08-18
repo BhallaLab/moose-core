@@ -3,23 +3,15 @@
 #include "Nernst.h"
 using namespace pymoose;
 const std::string Nernst::className_ = "Nernst";
-Nernst::Nernst(Id id):PyMooseBase(id){}
-Nernst::Nernst(std::string path):PyMooseBase(className_, path){}
-Nernst::Nernst(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-Nernst::Nernst(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-Nernst::Nernst(const Nernst& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-
-Nernst::Nernst(const Nernst& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-Nernst::Nernst(const Nernst& src, std::string path):PyMooseBase(src, path)
-{
-}
-
-Nernst::Nernst(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
-{
-}
-Nernst::Nernst(const Id& src, string path):PyMooseBase(src, path)
-{
-}
+Nernst::Nernst(Id id):Neutral(id){}
+Nernst::Nernst(std::string path):Neutral(className_, path){}
+Nernst::Nernst(std::string name, Id parentId):Neutral(className_, name, parentId){}
+Nernst::Nernst(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+Nernst::Nernst(const Nernst& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+Nernst::Nernst(const Nernst& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+Nernst::Nernst(const Nernst& src, std::string path):Neutral(src, path){}
+Nernst::Nernst(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+Nernst::Nernst(const Id& src, std::string path):Neutral(src, path){}
 Nernst::~Nernst(){}
 const std::string& Nernst::getType(){ return className_; }
 double Nernst::__get_E() const

@@ -1,8 +1,10 @@
 #ifndef _pymoose_TimeTable_h
 #define _pymoose_TimeTable_h
 #include "PyMooseBase.h"
+#include "Neutral.h"
 namespace pymoose{
-    class TimeTable : public PyMooseBase
+
+    class TimeTable : public Neutral
     {      public:
         static const std::string className_;
         TimeTable(Id id);
@@ -12,8 +14,8 @@ namespace pymoose{
         TimeTable( const TimeTable& src, std::string name, PyMooseBase& parent);
         TimeTable( const TimeTable& src, std::string name, Id& parent);
         TimeTable( const TimeTable& src, std::string path);
-        TimeTable( const Id& src, std::string path);
         TimeTable( const Id& src, std::string name, Id& parent);
+        TimeTable( const Id& src, std::string path);
         ~TimeTable();
         const std::string& getType();
         double __get_maxTime() const;

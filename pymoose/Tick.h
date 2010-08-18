@@ -1,9 +1,10 @@
 #ifndef _pymoose_Tick_h
 #define _pymoose_Tick_h
 #include "PyMooseBase.h"
-namespace pymoose
-{
-    class Tick : public PyMooseBase
+#include "Neutral.h"
+namespace pymoose{
+
+    class Tick : public Neutral
     {    public:
         static const std::string className_;
         Tick(Id id);

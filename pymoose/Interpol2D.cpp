@@ -3,16 +3,15 @@
 #include "Interpol2D.h"
 using namespace pymoose;
 const std::string Interpol2D::className_ = "Interpol2D";
-Interpol2D::Interpol2D(Id id):PyMooseBase(id){}
-Interpol2D::Interpol2D(std::string path):PyMooseBase(className_, path){}
-Interpol2D::Interpol2D(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-Interpol2D::Interpol2D(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-Interpol2D::Interpol2D(const Interpol2D& src, std::string objectName, PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-Interpol2D::Interpol2D(const Interpol2D& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-Interpol2D::Interpol2D(const Interpol2D& src, std::string path):PyMooseBase(src, path){}
-Interpol2D::Interpol2D(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
-Interpol2D::Interpol2D(const Id& src, std::string path):PyMooseBase(src, path){}
-
+Interpol2D::Interpol2D(Id id):Interpol(id){}
+Interpol2D::Interpol2D(std::string path):Interpol(className_, path){}
+Interpol2D::Interpol2D(std::string name, Id parentId):Interpol(className_, name, parentId){}
+Interpol2D::Interpol2D(std::string name, PyMooseBase& parent):Interpol(className_, name, parent){}
+Interpol2D::Interpol2D(const Interpol2D& src, std::string objectName, PyMooseBase& parent):Interpol(src, objectName, parent){}
+Interpol2D::Interpol2D(const Interpol2D& src, std::string objectName, Id& parent):Interpol(src, objectName, parent){}
+Interpol2D::Interpol2D(const Interpol2D& src, std::string path):Interpol(src, path){}
+Interpol2D::Interpol2D(const Id& src, std::string name, Id& parent):Interpol(src, name, parent){}
+Interpol2D::Interpol2D(const Id& src, std::string path):Interpol(src, path){}
 Interpol2D::~Interpol2D(){}
 const std::string& Interpol2D::getType(){ return className_; }
 double Interpol2D::__get_ymin() const
