@@ -1,8 +1,10 @@
 #ifndef _pymoose_RC_h
 #define _pymoose_RC_h
 #include "PyMooseBase.h"
+#include "Neutral.h"
 namespace pymoose{
-    class RC : public PyMooseBase
+
+    class RC : public Neutral
     {      public:
         static const std::string className_;
         RC(Id id);

@@ -1,8 +1,10 @@
 #ifndef _pymoose_Surface_h
 #define _pymoose_Surface_h
 #include "PyMooseBase.h"
+#include "Neutral.h"
 namespace pymoose{
-    class Surface : public PyMooseBase
+
+    class Surface : public Neutral
     {      public:
         static const std::string className_;
         Surface(Id id);

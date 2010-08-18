@@ -3,9 +3,10 @@
 
 #include "PyMooseBase.h"
 
-namespace pymoose
-{
-	class GLcell : public PyMooseBase
+#include "Neutral.h"
+namespace pymoose{
+
+	class GLcell : public Neutral
 	{
 	public:
 		static const std::string className_;

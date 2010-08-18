@@ -3,23 +3,15 @@
 #include "PulseGen.h"
 using namespace pymoose;
 const std::string PulseGen::className_ = "PulseGen";
-PulseGen::PulseGen(Id id):PyMooseBase(id){}
-PulseGen::PulseGen(std::string path):PyMooseBase(className_, path){}
-PulseGen::PulseGen(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-PulseGen::PulseGen(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-PulseGen::PulseGen(const PulseGen& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-
-PulseGen::PulseGen(const PulseGen& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-PulseGen::PulseGen(const PulseGen& src, std::string path):PyMooseBase(src, path)
-{
-}
-
-PulseGen::PulseGen(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
-{
-}
-PulseGen::PulseGen(const Id& src, string path):PyMooseBase(src, path)
-{
-}
+PulseGen::PulseGen(Id id):Neutral(id){}
+PulseGen::PulseGen(std::string path):Neutral(className_, path){}
+PulseGen::PulseGen(std::string name, Id parentId):Neutral(className_, name, parentId){}
+PulseGen::PulseGen(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+PulseGen::PulseGen(const PulseGen& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+PulseGen::PulseGen(const PulseGen& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+PulseGen::PulseGen(const PulseGen& src, std::string path):Neutral(src, path){}
+PulseGen::PulseGen(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+PulseGen::PulseGen(const Id& src, std::string path):Neutral(src, path){}
 PulseGen::~PulseGen(){}
 const std::string& PulseGen::getType(){ return className_; }
 double PulseGen::__get_firstLevel() const

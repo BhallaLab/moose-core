@@ -3,16 +3,15 @@
 #include "Leakage.h"
 using namespace pymoose;
 const std::string Leakage::className_ = "Leakage";
-Leakage::Leakage(Id id):PyMooseBase(id){}
-Leakage::Leakage(std::string path):PyMooseBase(className_, path){}
-Leakage::Leakage(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-Leakage::Leakage(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-Leakage::Leakage(const Leakage& src, std::string objectName, PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-Leakage::Leakage(const Leakage& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-Leakage::Leakage(const Leakage& src, std::string path):PyMooseBase(src, path){}
-Leakage::Leakage(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
-Leakage::Leakage(const Id& src, std::string path):PyMooseBase(src, path){}
-
+Leakage::Leakage(Id id):Neutral(id){}
+Leakage::Leakage(std::string path):Neutral(className_, path){}
+Leakage::Leakage(std::string name, Id parentId):Neutral(className_, name, parentId){}
+Leakage::Leakage(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+Leakage::Leakage(const Leakage& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+Leakage::Leakage(const Leakage& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+Leakage::Leakage(const Leakage& src, std::string path):Neutral(src, path){}
+Leakage::Leakage(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+Leakage::Leakage(const Id& src, std::string path):Neutral(src, path){}
 Leakage::~Leakage(){}
 const std::string& Leakage::getType(){ return className_; }
 double Leakage::__get_Ek() const

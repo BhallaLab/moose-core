@@ -1,8 +1,9 @@
 #ifndef _pymoose_Leakage_h
 #define _pymoose_Leakage_h
 #include "PyMooseBase.h"
+#include "Neutral.h"
 namespace pymoose{
-    class Leakage : public PyMooseBase
+    class Leakage : public Neutral
     {      public:
         static const std::string className_;
         Leakage(Id id);

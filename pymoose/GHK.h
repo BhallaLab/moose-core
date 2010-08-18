@@ -1,8 +1,10 @@
 #ifndef _pymoose_GHK_h
 #define _pymoose_GHK_h
 #include "PyMooseBase.h"
+#include "Neutral.h"
 namespace pymoose{
-    class GHK : public PyMooseBase
+
+    class GHK : public Neutral
     {      public:
         static const std::string className_;
         GHK(Id id);

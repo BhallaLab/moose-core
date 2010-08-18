@@ -3,15 +3,15 @@
 #include "SigNeur.h"
 using namespace pymoose;
 const std::string SigNeur::className_ = "SigNeur";
-SigNeur::SigNeur(Id id):PyMooseBase(id){}
-SigNeur::SigNeur(std::string path):PyMooseBase(className_, path){}
-SigNeur::SigNeur(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-SigNeur::SigNeur(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-SigNeur::SigNeur(const SigNeur& src, std::string objectName, PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-SigNeur::SigNeur(const SigNeur& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-SigNeur::SigNeur(const SigNeur& src, std::string path):PyMooseBase(src, path){}
-SigNeur::SigNeur(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
-SigNeur::SigNeur(const Id& src, std::string path):PyMooseBase(src, path){}
+SigNeur::SigNeur(Id id):Neutral(id){}
+SigNeur::SigNeur(std::string path):Neutral(className_, path){}
+SigNeur::SigNeur(std::string name, Id parentId):Neutral(className_, name, parentId){}
+SigNeur::SigNeur(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+SigNeur::SigNeur(const SigNeur& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+SigNeur::SigNeur(const SigNeur& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+SigNeur::SigNeur(const SigNeur& src, std::string path):Neutral(src, path){}
+SigNeur::SigNeur(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+SigNeur::SigNeur(const Id& src, std::string path):Neutral(src, path){}
 SigNeur::~SigNeur(){}
 const std::string& SigNeur::getType(){ return className_; }
 

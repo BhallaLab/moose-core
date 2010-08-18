@@ -1,11 +1,11 @@
 #ifndef _pymoose_Enzyme_h
 #define _pymoose_Enzyme_h
 #include "PyMooseBase.h"
-namespace pymoose
-{
-    class Enzyme : public PyMooseBase
-    {
-      public:
+#include "Neutral.h"
+namespace pymoose{
+
+    class Enzyme : public Neutral
+    {      public:
         static const std::string className_;
         Enzyme(Id id);
         Enzyme(std::string path);

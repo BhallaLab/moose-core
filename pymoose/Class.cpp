@@ -20,24 +20,24 @@
 #include "Class.h"
 using namespace pymoose;
 const std::string pymoose::Class::className_ = "Class";
-pymoose::Class::Class(Id id):PyMooseBase(id){}
-pymoose::Class::Class(std::string path, std::string name):PyMooseBase(className_, path)
+pymoose::Class::Class(Id id):Neutral(id){}
+pymoose::Class::Class(std::string path, std::string name):Neutral(className_, path)
 {
     set <std::string> (id_(), "name", name);    
 }
-pymoose::Class::Class(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-pymoose::Class::Class(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-pymoose::Class::Class(const pymoose::Class& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
+pymoose::Class::Class(std::string name, Id parentId):Neutral(className_, name, parentId){}
+pymoose::Class::Class(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+pymoose::Class::Class(const pymoose::Class& src, std::string objectName,  PyMooseBase& parent):Neutral(src, objectName, parent){}
 
-pymoose::Class::Class(const pymoose::Class& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-pymoose::Class::Class(const pymoose::Class& src, std::string path):PyMooseBase(src, path)
+pymoose::Class::Class(const pymoose::Class& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+pymoose::Class::Class(const pymoose::Class& src, std::string path):Neutral(src, path)
 {
 }
-pymoose::Class::Class(const ::Id& src, std::string path):PyMooseBase(src, path)
+pymoose::Class::Class(const ::Id& src, std::string path):Neutral(src, path)
 {
 }
 
-pymoose::Class::Class(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
+pymoose::Class::Class(const Id& src, string name, Id& parent):Neutral(src, name, parent)
 {
 }
 pymoose::Class::~Class(){}

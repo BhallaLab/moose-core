@@ -1,21 +1,21 @@
 #ifndef _pymoose_HSolve_h
 #define _pymoose_HSolve_h
 #include "PyMooseBase.h"
-namespace pymoose
-{
-    class HSolve : public PyMooseBase
-    {
-      public:
+#include "Neutral.h"
+namespace pymoose{
+
+    class HSolve : public Neutral
+    {      public:
         static const std::string className_;
         HSolve(Id id);
         HSolve(std::string path);
         HSolve(std::string name, Id parentId);
         HSolve(std::string name, PyMooseBase& parent);
-        HSolve(const HSolve& src,std::string name, PyMooseBase& parent);
-        HSolve(const HSolve& src,std::string name, Id& parent);
-        HSolve(const Id& src,std::string name, Id& parent);
-        HSolve(const HSolve& src,std::string path);
-        HSolve(const Id& src,std::string path);
+        HSolve( const HSolve& src, std::string name, PyMooseBase& parent);
+        HSolve( const HSolve& src, std::string name, Id& parent);
+        HSolve( const HSolve& src, std::string path);
+        HSolve( const Id& src, std::string name, Id& parent);
+        HSolve( const Id& src, std::string path);
         ~HSolve();
         const std::string& getType();
     

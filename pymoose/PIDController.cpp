@@ -3,15 +3,15 @@
 #include "PIDController.h"
 using namespace pymoose;
 const std::string PIDController::className_ = "PIDController";
-PIDController::PIDController(Id id):PyMooseBase(id){}
-PIDController::PIDController(std::string path):PyMooseBase(className_, path){}
-PIDController::PIDController(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-PIDController::PIDController(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-PIDController::PIDController(const PIDController& src, std::string objectName, PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-PIDController::PIDController(const PIDController& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-PIDController::PIDController(const PIDController& src, std::string path):PyMooseBase(src, path){}
-PIDController::PIDController(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
-PIDController::PIDController(const Id& src, std::string path):PyMooseBase(src, path){}
+PIDController::PIDController(Id id):Neutral(id){}
+PIDController::PIDController(std::string path):Neutral(className_, path){}
+PIDController::PIDController(std::string name, Id parentId):Neutral(className_, name, parentId){}
+PIDController::PIDController(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+PIDController::PIDController(const PIDController& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+PIDController::PIDController(const PIDController& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+PIDController::PIDController(const PIDController& src, std::string path):Neutral(src, path){}
+PIDController::PIDController(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+PIDController::PIDController(const Id& src, std::string path):Neutral(src, path){}
 PIDController::~PIDController(){}
 const std::string& PIDController::getType(){ return className_; }
 double PIDController::__get_gain() const
@@ -75,5 +75,29 @@ double PIDController::__get_output() const
     double output;
     get < double > (id_(), "output",output);
     return output;
+}
+double PIDController::__get_error() const
+{
+    double error;
+    get < double > (id_(), "error",error);
+    return error;
+}
+double PIDController::__get_integral() const
+{
+    double integral;
+    get < double > (id_(), "integral",integral);
+    return integral;
+}
+double PIDController::__get_derivative() const
+{
+    double derivative;
+    get < double > (id_(), "derivative",derivative);
+    return derivative;
+}
+double PIDController::__get_e_previous() const
+{
+    double e_previous;
+    get < double > (id_(), "e_previous",e_previous);
+    return e_previous;
 }
 #endif

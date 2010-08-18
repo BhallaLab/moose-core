@@ -2,8 +2,9 @@
 #define _pymoose_Interpol2D_h
 #include "PyMooseBase.h"
 namespace pymoose{
-    class Interpol2D : public PyMooseBase
-    {      public:
+    class Interpol2D : public Interpol
+    {
+      public:
         static const std::string className_;
         Interpol2D(Id id);
         Interpol2D(std::string path);

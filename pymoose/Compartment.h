@@ -1,10 +1,10 @@
 #ifndef _pymoose_Compartment_h
 #define _pymoose_Compartment_h
 #include "PyMooseBase.h"
+#include "Neutral.h"
 namespace pymoose
 {
-    
-    class Compartment : public pymoose::PyMooseBase
+    class Compartment : public Neutral
     {
       public:
         static const std::string className_;
