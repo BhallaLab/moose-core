@@ -3,62 +3,19 @@
 #include "Panel.h"
 using namespace pymoose;
 const std::string Panel::className_ = "Panel";
-Panel::Panel(Id id):PyMooseBase(id){}
-Panel::Panel(std::string path):PyMooseBase(className_, path){}
-Panel::Panel(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-Panel::Panel(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-Panel::Panel(
-    const Panel& src,
-    std::string name,
-    PyMooseBase& parent)
-    :PyMooseBase(src, name, parent)
-{
-}
+Panel::Panel(std::string typeName, std::string objectName, Id parentId): Neutral(typeName, objectName, parentId){}
+Panel::Panel(std::string typeName, std::string path): Neutral(typeName, path){}
+Panel::Panel(std::string typeName, std::string objectName, PyMooseBase& parent): Neutral(typeName, objectName, parent){}
 
-Panel::Panel(
-    const Panel& src,
-    std::string name,
-    Id& parent)
-    :PyMooseBase(src, name, parent)
-{
-}
-
-Panel::Panel(
-    const Panel& src,
-    std::string path)
-    :PyMooseBase(src, path)
-{
-}
-
-Panel::Panel(
-    const Id& src,
-    std::string name,
-    Id& parent)
-    :PyMooseBase(src, name, parent)
-{
-}
-Panel::Panel(
-        const Id& src,
-        std::string path)
-        :PyMooseBase(src, path)
-{
-}
-Panel::Panel(std::string typeName, std::string objectName, Id parentId):
-    PyMooseBase(typeName, objectName, parentId)
-{
-}
-   
-Panel::Panel(std::string typeName, std::string path):
-    PyMooseBase(typeName, path)
-{
-}
-
-Panel::Panel(std::string typeName, std::string objectName, PyMooseBase& parent):
-    PyMooseBase(typeName, objectName, parent)
-{
-}
-
-
+Panel::Panel(Id id):Neutral(id){}
+Panel::Panel(std::string path):Neutral(className_, path){}
+Panel::Panel(std::string name, Id parentId):Neutral(className_, name, parentId){}
+Panel::Panel(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+Panel::Panel(const Panel& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+Panel::Panel(const Panel& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+Panel::Panel(const Panel& src, std::string path):Neutral(src, path){}
+Panel::Panel(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+Panel::Panel(const Id& src, std::string path):Neutral(src, path){}
 Panel::~Panel(){}
 const std::string& Panel::getType(){ return className_; }
 unsigned int Panel::__get_nPts() const
@@ -85,7 +42,7 @@ unsigned int Panel::__get_shapeId() const
     get < unsigned int > (id_(), "shapeId",shapeId);
     return shapeId;
 }
-const vector<double>& Panel::__get_coords() const
+vector<double> Panel::__get_coords() const
 {
     vector<double> coords;
     get < vector<double> > (id_(), "coords",coords);

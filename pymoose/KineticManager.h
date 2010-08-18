@@ -2,8 +2,10 @@
 #define _pymoose_KineticManager_h
 #include "PyMooseBase.h"
 namespace pymoose{
-    class KineticManager : public PyMooseBase
-    {      public:
+class KinCompt;
+    class KineticManager : public KinCompt
+    {
+      public:
         static const std::string className_;
         KineticManager(Id id);
         KineticManager(std::string path);
@@ -30,6 +32,8 @@ namespace pymoose{
             bool __get_implicit() const;
             string __get_description() const;
             double __get_recommendedDt() const;
+            double __get_loadEstimate() const;
+            unsigned int __get_memEstimate() const;
             double __get_eulerError() const;
             void __set_eulerError(double eulerError);
     };

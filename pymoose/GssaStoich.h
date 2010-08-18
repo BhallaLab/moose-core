@@ -1,8 +1,9 @@
 #ifndef _pymoose_GssaStoich_h
 #define _pymoose_GssaStoich_h
 #include "PyMooseBase.h"
+#include "Stoich.h"
 namespace pymoose{
-    class GssaStoich : public PyMooseBase
+    class GssaStoich : public Stoich
     {      public:
         static const std::string className_;
         GssaStoich(Id id);

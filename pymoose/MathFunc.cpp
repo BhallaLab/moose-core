@@ -3,23 +3,15 @@
 #include "MathFunc.h"
 using namespace pymoose;
 const std::string MathFunc::className_ = "MathFunc";
-MathFunc::MathFunc(Id id):PyMooseBase(id){}
-MathFunc::MathFunc(std::string path):PyMooseBase(className_, path){}
-MathFunc::MathFunc(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-MathFunc::MathFunc(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-MathFunc::MathFunc(const MathFunc& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-
-MathFunc::MathFunc(const MathFunc& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-MathFunc::MathFunc(const MathFunc& src, std::string path):PyMooseBase(src, path)
-{
-}
-
-MathFunc::MathFunc(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
-{
-}
-MathFunc::MathFunc(const Id& src, string path):PyMooseBase(src, path)
-{
-}
+MathFunc::MathFunc(Id id):Neutral(id){}
+MathFunc::MathFunc(std::string path):Neutral(className_, path){}
+MathFunc::MathFunc(std::string name, Id parentId):Neutral(className_, name, parentId){}
+MathFunc::MathFunc(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+MathFunc::MathFunc(const MathFunc& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+MathFunc::MathFunc(const MathFunc& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+MathFunc::MathFunc(const MathFunc& src, std::string path):Neutral(src, path){}
+MathFunc::MathFunc(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+MathFunc::MathFunc(const Id& src, std::string path):Neutral(src, path){}
 MathFunc::~MathFunc(){}
 const std::string& MathFunc::getType(){ return className_; }
 string MathFunc::__get_mathML() const

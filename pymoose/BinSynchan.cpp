@@ -32,7 +32,7 @@ const std::string BinSynchan::className_ = "BinSynchan";
   containing BinSynchan object and use its methods.  C++ is bad, very
   very bad in this area.
 */
-BinSynchan::BinSynchan(Id id):PyMooseBase(id)
+BinSynchan::BinSynchan(Id id):Neutral(id)
 {
     weight = new BinSynchanDoubleArray (this, &BinSynchan::__get_weight, &BinSynchan::__set_weight);
     delay = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this,&BinSynchan::__get_delay, &BinSynchan::__set_delay);
@@ -41,7 +41,7 @@ BinSynchan::BinSynchan(Id id):PyMooseBase(id)
     
     releaseCount = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this,  &BinSynchan::__get_releaseCount,  &BinSynchan::__set_releaseCount);
 }
-BinSynchan::BinSynchan(std::string path):PyMooseBase(className_, path)
+BinSynchan::BinSynchan(std::string path):Neutral(className_, path)
 {
  
     weight = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this, &BinSynchan::__get_weight, &BinSynchan::__set_weight);
@@ -50,7 +50,7 @@ BinSynchan::BinSynchan(std::string path):PyMooseBase(className_, path)
     releaseP = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this,  &BinSynchan::__get_releaseP,  &BinSynchan::__set_releaseP);   
     releaseCount = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this,  &BinSynchan::__get_releaseCount,  &BinSynchan::__set_releaseCount);
 }
-BinSynchan::BinSynchan(std::string name, Id parentId):PyMooseBase(className_, name, parentId)
+BinSynchan::BinSynchan(std::string name, Id parentId):Neutral(className_, name, parentId)
 {    
     weight = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this, &BinSynchan::__get_weight, &BinSynchan::__set_weight);
     delay = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this,&BinSynchan::__get_delay, &BinSynchan::__set_delay);
@@ -58,7 +58,7 @@ BinSynchan::BinSynchan(std::string name, Id parentId):PyMooseBase(className_, na
     releaseP = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this,  &BinSynchan::__get_releaseP,  &BinSynchan::__set_releaseP);
     releaseCount = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this,  &BinSynchan::__get_releaseCount,  &BinSynchan::__set_releaseCount);
 }
-BinSynchan::BinSynchan(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent)
+BinSynchan::BinSynchan(std::string name, PyMooseBase& parent):Neutral(className_, name, parent)
 {    
      weight = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this, &BinSynchan::__get_weight, &BinSynchan::__set_weight);
     delay = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this,&BinSynchan::__get_delay, &BinSynchan::__set_delay);
@@ -66,17 +66,17 @@ BinSynchan::BinSynchan(std::string name, PyMooseBase& parent):PyMooseBase(classN
     releaseP = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this,  &BinSynchan::__get_releaseP,  &BinSynchan::__set_releaseP);
     releaseCount = new InnerPyMooseIterable<BinSynchan, unsigned int, double > (this,  &BinSynchan::__get_releaseCount,  &BinSynchan::__set_releaseCount);
 }
-BinSynchan::BinSynchan(const BinSynchan& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
+BinSynchan::BinSynchan(const BinSynchan& src, std::string objectName,  PyMooseBase& parent):Neutral(src, objectName, parent){}
 
-BinSynchan::BinSynchan(const BinSynchan& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-BinSynchan::BinSynchan(const BinSynchan& src, std::string path):PyMooseBase(src, path)
+BinSynchan::BinSynchan(const BinSynchan& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+BinSynchan::BinSynchan(const BinSynchan& src, std::string path):Neutral(src, path)
 {
 }
-BinSynchan::BinSynchan(const Id& src, std::string path):PyMooseBase(src, path)
+BinSynchan::BinSynchan(const Id& src, std::string path):Neutral(src, path)
 {
 }
 
-BinSynchan::BinSynchan(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
+BinSynchan::BinSynchan(const Id& src, string name, Id& parent):Neutral(src, name, parent)
 {
 }
 

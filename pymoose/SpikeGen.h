@@ -1,20 +1,21 @@
 #ifndef _pymoose_SpikeGen_h
 #define _pymoose_SpikeGen_h
 #include "PyMooseBase.h"
-namespace pymoose
-{
-    class SpikeGen : public PyMooseBase
-    {    public:
+#include "Neutral.h"
+namespace pymoose{
+
+    class SpikeGen : public Neutral
+    {      public:
         static const std::string className_;
         SpikeGen(Id id);
         SpikeGen(std::string path);
         SpikeGen(std::string name, Id parentId);
         SpikeGen(std::string name, PyMooseBase& parent);
-        SpikeGen(const SpikeGen& src,std::string name, PyMooseBase& parent);
-        SpikeGen(const SpikeGen& src,std::string name, Id& parent);
-        SpikeGen(const Id& src,std::string name, Id& parent);
-        SpikeGen(const SpikeGen& src,std::string path);
-        SpikeGen(const Id& src,std::string path);
+        SpikeGen( const SpikeGen& src, std::string name, PyMooseBase& parent);
+        SpikeGen( const SpikeGen& src, std::string name, Id& parent);
+        SpikeGen( const SpikeGen& src, std::string path);
+        SpikeGen( const Id& src, std::string name, Id& parent);
+        SpikeGen( const Id& src, std::string path);
         ~SpikeGen();
         const std::string& getType();
         double __get_threshold() const;

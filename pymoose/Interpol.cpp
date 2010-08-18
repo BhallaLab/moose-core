@@ -13,36 +13,36 @@ using namespace pymoose;
 // We had to change the class name in order to avoid conflict with included moose class Interpol
 // But Interpol is the class name to be passed to base constructor
 const std::string Interpol::className_ = "Interpol";
-Interpol::Interpol(Id id):PyMooseBase(id){}
-Interpol::Interpol(std::string path):PyMooseBase("Interpol", path){}
-Interpol::Interpol(std::string name, Id parentId):PyMooseBase("Interpol", name, parentId){}
+Interpol::Interpol(Id id):Neutral(id){}
+Interpol::Interpol(std::string path):Neutral("Interpol", path){}
+Interpol::Interpol(std::string name, Id parentId):Neutral("Interpol", name, parentId){}
 Interpol::Interpol(
     std::string name,
     PyMooseBase& parent)
-    :PyMooseBase("Interpol", name, parent){}
+    :Neutral("Interpol", name, parent){}
 
 Interpol::Interpol(
     const Interpol& src,
     std::string objectName,
     PyMooseBase& parent)
-    :PyMooseBase(src, objectName, parent){}
+    :Neutral(src, objectName, parent){}
 
 Interpol::Interpol(
     const Interpol& src,
     std::string objectName,
     Id& parent)
-    :PyMooseBase(src, objectName, parent){}
+    :Neutral(src, objectName, parent){}
 
 Interpol::Interpol(
     const Interpol& src,
     std::string path)
-    :PyMooseBase(src, path)
+    :Neutral(src, path)
 {
 }
 Interpol::Interpol(
     const Id& src,
     std::string path)
-    :PyMooseBase(src, path)
+    :Neutral(src, path)
 {
 }
 
@@ -50,24 +50,21 @@ Interpol::Interpol(
     const Id& src,
     string name,
     Id& parent)
-    :PyMooseBase(src, name, parent)
+    :Neutral(src, name, parent)
 {
 }
 Interpol::~Interpol(){}
 //Manually edited
 // These are for allowing Table access to constructors in PyMooseBase
-Interpol::Interpol(std::string typeName, std::string objectName, Id parentId):
-    PyMooseBase(typeName, objectName, parentId)
+Interpol::Interpol(std::string typeName, std::string objectName, Id parentId): Neutral(typeName, objectName, parentId)
 {
 }
    
-Interpol::Interpol(std::string typeName, std::string path):
-    PyMooseBase(typeName, path)
+Interpol::Interpol(std::string typeName, std::string path): Neutral(typeName, path)
 {
 }
 
-Interpol::Interpol(std::string typeName, std::string objectName, PyMooseBase& parent):
-    PyMooseBase(typeName, objectName, parent)
+Interpol::Interpol(std::string typeName, std::string objectName, PyMooseBase& parent): Neutral(typeName, objectName, parent)
 {
 }
 

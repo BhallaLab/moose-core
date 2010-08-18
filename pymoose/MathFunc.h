@@ -1,9 +1,10 @@
 #ifndef _pymoose_MathFunc_h
 #define _pymoose_MathFunc_h
 #include "PyMooseBase.h"
-namespace pymoose
-{
-    class MathFunc : public PyMooseBase
+#include "Neutral.h"
+namespace pymoose{
+
+    class MathFunc : public Neutral
     {
       public:
         static const std::string className_;

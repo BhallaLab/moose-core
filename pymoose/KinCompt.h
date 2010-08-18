@@ -1,10 +1,15 @@
 #ifndef _pymoose_KinCompt_h
 #define _pymoose_KinCompt_h
 #include "PyMooseBase.h"
+#include "Neutral.h"
 namespace pymoose{
-    class KinCompt : public PyMooseBase
+
+    class KinCompt : public Neutral
     {      public:
         static const std::string className_;
+        KinCompt(std::string className, std::string objectName, Id parentId);
+        KinCompt(std::string className, std::string path);
+        KinCompt(std::string className, std::string objectName, PyMooseBase& parent);                  
         KinCompt(Id id);
         KinCompt(std::string path);
         KinCompt(std::string name, Id parentId);

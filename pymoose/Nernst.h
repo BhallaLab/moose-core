@@ -1,20 +1,21 @@
 #ifndef _pymoose_Nernst_h
 #define _pymoose_Nernst_h
 #include "PyMooseBase.h"
-namespace pymoose
-{
-    class Nernst : public PyMooseBase
-    {    public:
+#include "Neutral.h"
+namespace pymoose{
+
+    class Nernst : public Neutral
+    {      public:
         static const std::string className_;
         Nernst(Id id);
         Nernst(std::string path);
         Nernst(std::string name, Id parentId);
         Nernst(std::string name, PyMooseBase& parent);
-        Nernst(const Nernst& src,std::string name, PyMooseBase& parent);
-        Nernst(const Nernst& src,std::string name, Id& parent);
-        Nernst(const Id& src,std::string name, Id& parent);
-        Nernst(const Nernst& src,std::string path);
-        Nernst(const Id& src,std::string path);
+        Nernst( const Nernst& src, std::string name, PyMooseBase& parent);
+        Nernst( const Nernst& src, std::string name, Id& parent);
+        Nernst( const Nernst& src, std::string path);
+        Nernst( const Id& src, std::string name, Id& parent);
+        Nernst( const Id& src, std::string path);
         ~Nernst();
         const std::string& getType();
         double __get_E() const;

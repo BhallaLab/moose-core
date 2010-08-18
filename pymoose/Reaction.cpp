@@ -3,23 +3,15 @@
 #include "Reaction.h"
 using namespace pymoose;
 const std::string Reaction::className_ = "Reaction";
-Reaction::Reaction(Id id):PyMooseBase(id){}
-Reaction::Reaction(std::string path):PyMooseBase(className_, path){}
-Reaction::Reaction(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-Reaction::Reaction(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-Reaction::Reaction(const Reaction& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-
-Reaction::Reaction(const Reaction& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-Reaction::Reaction(const Reaction& src, std::string path):PyMooseBase(src, path)
-{
-}
-
-Reaction::Reaction(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
-{
-}
-Reaction::Reaction(const Id& src, string path):PyMooseBase(src, path)
-{
-}
+Reaction::Reaction(Id id):Neutral(id){}
+Reaction::Reaction(std::string path):Neutral(className_, path){}
+Reaction::Reaction(std::string name, Id parentId):Neutral(className_, name, parentId){}
+Reaction::Reaction(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+Reaction::Reaction(const Reaction& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+Reaction::Reaction(const Reaction& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+Reaction::Reaction(const Reaction& src, std::string path):Neutral(src, path){}
+Reaction::Reaction(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+Reaction::Reaction(const Id& src, std::string path):Neutral(src, path){}
 Reaction::~Reaction(){}
 const std::string& Reaction::getType(){ return className_; }
 double Reaction::__get_kf() const
@@ -42,25 +34,25 @@ void Reaction::__set_kb( double kb )
 {
     set < double > (id_(), "kb", kb);
 }
-double Reaction::__get_scaleKf() const
+double Reaction::__get_Kf() const
 {
-    double scaleKf;
-    get < double > (id_(), "scaleKf",scaleKf);
-    return scaleKf;
+    double Kf;
+    get < double > (id_(), "Kf",Kf);
+    return Kf;
 }
-void Reaction::__set_scaleKf( double scaleKf )
+void Reaction::__set_Kf( double Kf )
 {
-    set < double > (id_(), "scaleKf", scaleKf);
+    set < double > (id_(), "Kf", Kf);
 }
-double Reaction::__get_scaleKb() const
+double Reaction::__get_Kb() const
 {
-    double scaleKb;
-    get < double > (id_(), "scaleKb",scaleKb);
-    return scaleKb;
+    double Kb;
+    get < double > (id_(), "Kb",Kb);
+    return Kb;
 }
-void Reaction::__set_scaleKb( double scaleKb )
+void Reaction::__set_Kb( double Kb )
 {
-    set < double > (id_(), "scaleKb", scaleKb);
+    set < double > (id_(), "Kb", Kb);
 }
 double Reaction::__get_x()
 {

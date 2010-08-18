@@ -42,8 +42,8 @@
 	#include "Molecule.h"
 	#include "Reaction.h"
 	#include "Stoich.h"
-	#include "KineticManager.h"
 	#include "KinCompt.h"
+	#include "KineticManager.h"
 	#include "Panel.h"
 	#include "DiskPanel.h"
 	#include "CylPanel.h"
@@ -160,20 +160,10 @@ def listproperty(getter=None, setter=None, deller=None):
 %include "PyMooseContext.h"
 %include "PyMooseBase.h"
 %attribute(pymoose::PyMooseBase, Id*, id, __get_id)
-%attribute(pymoose::PyMooseBase, int, index, __get_index)
-%attribute(pymoose::PyMooseBase, Id*, parent, __get_parent)
 %attribute(pymoose::PyMooseBase, const std::string, className, __get_className)
 %attribute(pymoose::PyMooseBase, const std::string, author, __get_author)
 %attribute(pymoose::PyMooseBase, const std::string, description, __get_description)
-%attribute(pymoose::PyMooseBase, const int, node, __get_node)
-%attribute(pymoose::PyMooseBase, const int, cpu, __get_cpu)
-%attribute(pymoose::PyMooseBase, const int, dataMem, __get_dataMem)
-%attribute(pymoose::PyMooseBase, const int, msgMem, __get_msgMem)
-%attribute(pymoose::PyMooseBase, const std::vector<std::string>&, fieldList, __get_fieldList)
-%attribute(pymoose::PyMooseBase, std::string, name, __get_name, __set_name)
 %attribute(pymoose::PyMooseBase, const std::string, path, __get_path)
-
-
 %pythoncode %{
 from inspect import isclass
 
@@ -184,12 +174,23 @@ def doc(cls):
     elif isinstance(cls, PyMooseBase):
         return PyMooseBase.getContext().doc(cls.className)
     elif isinstance(cls, str):
-        return PyMooseBase.getContext().doc(cls)		
+        return PyMooseBase.getContext().doc(cls)
+                
 %} // !pythoncode
 	    
 
 %include "Neutral.h"
-%attribute(pymoose::Neutral, int, child, __get_child, __set_child)
+%attribute(pymoose::Neutral, string, name, __get_name, __set_name)
+%attribute(pymoose::Neutral, int, index, __get_index)
+%attribute(pymoose::Neutral, Id*, parent, __get_parent)
+%attribute(pymoose::Neutral, string, className, __get_className)
+%attribute(pymoose::Neutral, const vector<Id>&, childList, __get_childList)
+%attribute(pymoose::Neutral, unsigned int, node, __get_node)
+%attribute(pymoose::Neutral, double, cpu, __get_cpu)
+%attribute(pymoose::Neutral, unsigned int, dataMem, __get_dataMem)
+%attribute(pymoose::Neutral, unsigned int, msgMem, __get_msgMem)
+%attribute(pymoose::Neutral, const vector < string >&, fieldList, __get_fieldList)
+
 
 %include "Class.h"
 /* %attribute(pymoose::Class, std::string, name, __get_name, __set_name) */
@@ -479,8 +480,8 @@ NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.se
 %attribute(pymoose::HSolve, double, VHi, __get_VHi, __set_VHi)
 
 %include "Kintegrator.h"
-%attribute(pymoose::Kintegrator, bool, isInitiatilized, __get_isInitiatilized, __set_isInitiatilized)
-//%attribute(pymoose::Kintegrator, string, integrate_method, __get_method, __set_method)
+%attribute(pymoose::Kintegrator, bool, isInitiatilized, __get_isInitiatilized)
+%attribute(pymoose::Kintegrator, string, integrate_method, __get_method, __set_method)
 //%attribute_ref(Kintegrator, string, method)
 %include "MathFunc.h"
 %attribute(pymoose::MathFunc, string, mathML, __get_mathML, __set_mathML)
@@ -497,14 +498,13 @@ NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.se
 %attribute(pymoose::Stoich, unsigned int, nMMenz, __get_nMMenz)
 %attribute(pymoose::Stoich, unsigned int, nExternalRates, __get_nExternalRates)
 %attribute(pymoose::Stoich, bool, useOneWayReacs, __get_useOneWayReacs, __set_useOneWayReacs)
-//%attribute(pymoose::Stoich, string, path, __get_path, __set_path) -- path here is something different from element path
+%attribute(pymoose::Stoich, string, targetPath, __get_targetPath, __set_targetPath)// -- path here is something different from element path
 %attribute(pymoose::Stoich, unsigned int, rateVectorSize, __get_rateVectorSize)
 
 %include "KineticHub.h"
-%attribute(pymoose::KineticHub, unsigned int, nMol, __get_nMol, __set_nMol)
-%attribute(pymoose::KineticHub, unsigned int, nReac, __get_nReac, __set_nReac)
-%attribute(pymoose::KineticHub, unsigned int, nEnz, __get_nEnz, __set_nEnz)
-%attribute(pymoose::KineticHub, double, molSum, __get_molSum, __set_molSum)
+%attribute(pymoose::KineticHub, unsigned int, nVarMol, __get_nVarMol)
+%attribute(pymoose::KineticHub, unsigned int, nReac, __get_nReac)
+%attribute(pymoose::KineticHub, unsigned int, nEnz, __get_nEnz)
 
 %include "Enzyme.h"
 %attribute(pymoose::Enzyme, double, k1, __get_k1, __set_k1)
@@ -520,8 +520,8 @@ NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.se
 %include "Reaction.h"
 %attribute(pymoose::Reaction, double, kf, __get_kf, __set_kf)
 %attribute(pymoose::Reaction, double, kb, __get_kb, __set_kb)
-%attribute(pymoose::Reaction, double, scaleKf, __get_scaleKf, __set_scaleKf)
-%attribute(pymoose::Reaction, double, scaleKb, __get_scaleKb, __set_scaleKb)
+%attribute(pymoose::Reaction, double, scaleKf, __get_Kf, __set_Kf)
+%attribute(pymoose::Reaction, double, scaleKb, __get_Kb, __set_Kb)
 %attribute(pymoose::Reaction, double, x, __get_x, __set_x)
 %attribute(pymoose::Reaction, double, y, __get_y, __set_y)
 %attribute(pymoose::Reaction, string, xtreeTextFg, __get_xtreeTextFg, __set_xtreeTextFg)
@@ -540,20 +540,6 @@ NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.se
 %attribute(pymoose::Molecule, double, y, __get_y, __set_y)
 %attribute(pymoose::Molecule, string, xtreeTextFg, __get_xtreeTextFg, __set_xtreeTextFg)
 
-/* %include "Enzyme.h"
-	#include "KineticHub.h"		
-	#include "Kintegrator.h"
-	#include "Molecule.h"
-	#include "Reaction.h"
-	#include "Stoich.h"
-	#include "../kinetics/SparseMatrix.h"
-*/
-/*
-%include "TickTest.h"
-%include "Sched0.h"
-%include "Sched1.h"
-%include "Sched2.h"
-*/
 
 //**********************************
 // Random number related utilities *	
@@ -602,6 +588,14 @@ NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.se
 //************************************************
 // Chemical Kinetics classes
 //************************************************
+%include "KinCompt.h"
+%attribute(pymoose::KinCompt, double, volume, __get_volume, __set_volume)
+%attribute(pymoose::KinCompt, double, area, __get_area, __set_area)
+%attribute(pymoose::KinCompt, double, perimeter, __get_perimeter, __set_perimeter)
+%attribute(pymoose::KinCompt, double, size, __get_size, __set_size)
+%attribute(pymoose::KinCompt, unsigned int, numDimensions, __get_numDimensions, __set_numDimensions)
+%attribute(pymoose::KinCompt, double, x, __get_x, __set_x)
+%attribute(pymoose::KinCompt, double, y, __get_y, __set_y)
 
 %include "KineticManager.h"
 %attribute(pymoose::KineticManager, bool, autoMode, __get_autoMode, __set_autoMode)
@@ -616,14 +610,6 @@ NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.se
 %attribute(pymoose::KineticManager, double, recommendedDt, __get_recommendedDt)
 %attribute(pymoose::KineticManager, double, eulerError, __get_eulerError, __set_eulerError)
 
-%include "KinCompt.h"
-%attribute(pymoose::KinCompt, double, volume, __get_volume, __set_volume)
-%attribute(pymoose::KinCompt, double, area, __get_area, __set_area)
-%attribute(pymoose::KinCompt, double, perimeter, __get_perimeter, __set_perimeter)
-%attribute(pymoose::KinCompt, double, size, __get_size, __set_size)
-%attribute(pymoose::KinCompt, unsigned int, numDimensions, __get_numDimensions, __set_numDimensions)
-%attribute(pymoose::KinCompt, double, x, __get_x, __set_x)
-%attribute(pymoose::KinCompt, double, y, __get_y, __set_y)
 
 %include "Panel.h"
 %attribute(pymoose::Panel, unsigned int, nPts, __get_nPts)
@@ -674,8 +660,12 @@ NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.se
  %attribute(pymoose::SigNeur, string, dendExclude, __get_dendExclude, __set_dendExclude)
 
 %include "AscFile.h"
-%attribute(pymoose::AscFile, string, fileName, __get_fileName, __set_fileName)
-%attribute(pymoose::AscFile, int, appendFlag, __get_appendFlag, __set_appendFlag)
+%attribute(pymoose::AscFile, string, filename, __get_filename, __set_filename)
+%attribute(pymoose::AscFile, int, appendFlag, __get_append, __set_append)
+%attribute(pymoose::AscFile, int, time, __get_time, __set_time)
+%attribute(pymoose::AscFile, int, header, __get_header, __set_header)
+%attribute(pymoose::AscFile, string, comment, __get_comment, __set_comment)
+%attribute(pymoose::AscFile, string, delimiter, __get_delimiter, __set_delimiter)
 
 %include "DifShell.h"
 %attribute(pymoose::DifShell, double, C, __get_C)

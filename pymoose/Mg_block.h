@@ -1,22 +1,21 @@
 #ifndef _pymoose_Mg_block_h
 #define _pymoose_Mg_block_h
 #include "PyMooseBase.h"
-namespace pymoose
-{
+#include "Neutral.h"
+namespace pymoose{
 
-    class Mg_block : public PyMooseBase
-    {
-      public:
+    class Mg_block : public Neutral
+    {      public:
         static const std::string className_;
         Mg_block(Id id);
         Mg_block(std::string path);
         Mg_block(std::string name, Id parentId);
         Mg_block(std::string name, PyMooseBase& parent);
-        Mg_block(const Mg_block& src,std::string name, PyMooseBase& parent);
-        Mg_block(const Mg_block& src,std::string name, Id& parent);
-        Mg_block(const Id& src,std::string name, Id& parent);
-        Mg_block(const Mg_block& src,std::string path);
-        Mg_block(const Id& src,std::string path);
+        Mg_block( const Mg_block& src, std::string name, PyMooseBase& parent);
+        Mg_block( const Mg_block& src, std::string name, Id& parent);
+        Mg_block( const Mg_block& src, std::string path);
+        Mg_block( const Id& src, std::string name, Id& parent);
+        Mg_block( const Id& src, std::string path);
         ~Mg_block();
         const std::string& getType();
         double __get_KMg_A() const;
