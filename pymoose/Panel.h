@@ -1,8 +1,10 @@
 #ifndef _pymoose_Panel_h
 #define _pymoose_Panel_h
 #include "PyMooseBase.h"
+#include "Neutral.h"
 namespace pymoose{
-    class Panel : public PyMooseBase
+
+    class Panel : public Neutral
     {      public:
         static const std::string className_;
         Panel(Id id);
@@ -22,11 +24,11 @@ namespace pymoose{
 
         ~Panel();
         const std::string& getType();
-        unsigned int __get_nPts() const;
-        unsigned int __get_nDims() const;
-        unsigned int __get_nNeighbors() const;
-        unsigned int __get_shapeId() const;
-        const vector<double>& __get_coords() const;
+            unsigned int __get_nPts() const;
+            unsigned int __get_nDims() const;
+            unsigned int __get_nNeighbors() const;
+            unsigned int __get_shapeId() const;
+            vector < double > __get_coords() const;
     };
 }
 #endif

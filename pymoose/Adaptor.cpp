@@ -3,16 +3,15 @@
 #include "Adaptor.h"
 using namespace pymoose;
 const std::string Adaptor::className_ = "Adaptor";
-Adaptor::Adaptor(Id id):PyMooseBase(id){}
-Adaptor::Adaptor(std::string path):PyMooseBase(className_, path){}
-Adaptor::Adaptor(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-Adaptor::Adaptor(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-Adaptor::Adaptor(const Adaptor& src, std::string objectName, PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-Adaptor::Adaptor(const Adaptor& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-Adaptor::Adaptor(const Adaptor& src, std::string path):PyMooseBase(src, path){}
-Adaptor::Adaptor(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
-Adaptor::Adaptor(const Id& src, std::string path):PyMooseBase(src, path){}
-
+Adaptor::Adaptor(Id id):Neutral(id){}
+Adaptor::Adaptor(std::string path):Neutral(className_, path){}
+Adaptor::Adaptor(std::string name, Id parentId):Neutral(className_, name, parentId){}
+Adaptor::Adaptor(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+Adaptor::Adaptor(const Adaptor& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+Adaptor::Adaptor(const Adaptor& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+Adaptor::Adaptor(const Adaptor& src, std::string path):Neutral(src, path){}
+Adaptor::Adaptor(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+Adaptor::Adaptor(const Id& src, std::string path):Neutral(src, path){}
 Adaptor::~Adaptor(){}
 const std::string& Adaptor::getType(){ return className_; }
 double Adaptor::__get_inputOffset() const

@@ -1,19 +1,21 @@
 #ifndef _pymoose_PulseGen_h
 #define _pymoose_PulseGen_h
 #include "PyMooseBase.h"
+#include "Neutral.h"
 namespace pymoose{
-    class PulseGen : public PyMooseBase
+
+    class PulseGen : public Neutral
     {      public:
         static const std::string className_;
         PulseGen(Id id);
         PulseGen(std::string path);
         PulseGen(std::string name, Id parentId);
         PulseGen(std::string name, PyMooseBase& parent);
-        PulseGen(const PulseGen& src,std::string name, PyMooseBase& parent);
-        PulseGen(const PulseGen& src,std::string name, Id& parent);
-        PulseGen(const Id& src,std::string name, Id& parent);
-        PulseGen(const PulseGen& src,std::string path);
-        PulseGen(const Id& src,std::string path);
+        PulseGen( const PulseGen& src, std::string name, PyMooseBase& parent);
+        PulseGen( const PulseGen& src, std::string name, Id& parent);
+        PulseGen( const PulseGen& src, std::string path);
+        PulseGen( const Id& src, std::string name, Id& parent);
+        PulseGen( const Id& src, std::string path);
         ~PulseGen();
         const std::string& getType();
         double __get_firstLevel() const;

@@ -1,8 +1,10 @@
 #ifndef _pymoose_PIDController_h
 #define _pymoose_PIDController_h
 #include "PyMooseBase.h"
+#include "Neutral.h"
 namespace pymoose{
-    class PIDController : public PyMooseBase
+
+    class PIDController : public Neutral
     {      public:
         static const std::string className_;
         PIDController(Id id);
@@ -28,6 +30,10 @@ namespace pymoose{
             double __get_tauD() const;
             void __set_tauD(double tauD);
             double __get_output() const;
+            double __get_error() const;
+            double __get_integral() const;
+            double __get_derivative() const;
+            double __get_e_previous() const;
     };
 }
 #endif

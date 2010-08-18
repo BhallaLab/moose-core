@@ -3,21 +3,21 @@
 #include "Molecule.h"
 using namespace pymoose;
 const std::string Molecule::className_ = "Molecule";
-Molecule::Molecule(Id id):PyMooseBase(id){}
-Molecule::Molecule(std::string path):PyMooseBase(className_, path){}
-Molecule::Molecule(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-Molecule::Molecule(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-Molecule::Molecule(const Molecule& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
+Molecule::Molecule(Id id):Neutral(id){}
+Molecule::Molecule(std::string path):Neutral(className_, path){}
+Molecule::Molecule(std::string name, Id parentId):Neutral(className_, name, parentId){}
+Molecule::Molecule(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+Molecule::Molecule(const Molecule& src, std::string objectName,  PyMooseBase& parent):Neutral(src, objectName, parent){}
 
-Molecule::Molecule(const Molecule& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-Molecule::Molecule(const Molecule& src, std::string path):PyMooseBase(src, path)
+Molecule::Molecule(const Molecule& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+Molecule::Molecule(const Molecule& src, std::string path):Neutral(src, path)
 {
 }
 
-Molecule::Molecule(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
+Molecule::Molecule(const Id& src, string name, Id& parent):Neutral(src, name, parent)
 {
 }
-Molecule::Molecule(const Id& src, string path):PyMooseBase(src, path)
+Molecule::Molecule(const Id& src, string path):Neutral(src, path)
 {
 }
 Molecule::~Molecule(){}

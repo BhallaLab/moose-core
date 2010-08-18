@@ -1,8 +1,11 @@
 #ifndef _pymoose_HHChannel2D_h
 #define _pymoose_HHChannel2D_h
 #include "PyMooseBase.h"
+#include "HHChannel.h"
+
 namespace pymoose{
-    class HHChannel2D : public PyMooseBase
+class HHChannel;
+    class HHChannel2D : public HHChannel
     {      public:
         static const std::string className_;
         HHChannel2D(Id id);

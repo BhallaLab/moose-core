@@ -4,23 +4,15 @@
 using namespace pymoose;
 
 const std::string Tick::className_ = "Tick";
-Tick::Tick(Id id):PyMooseBase(id){}
-Tick::Tick(std::string path):PyMooseBase(className_, path){}
-Tick::Tick(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-Tick::Tick(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-Tick::Tick(const Tick& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-
-Tick::Tick(const Tick& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-Tick::Tick(const Tick& src, std::string path):PyMooseBase(src, path)
-{
-}
-Tick::Tick(const Id& src, std::string path):PyMooseBase(src, path)
-{
-}
-
-Tick::Tick(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
-{
-}
+Tick::Tick(Id id):Neutral(id){}
+Tick::Tick(std::string path):Neutral(className_, path){}
+Tick::Tick(std::string name, Id parentId):Neutral(className_, name, parentId){}
+Tick::Tick(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+Tick::Tick(const Tick& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+Tick::Tick(const Tick& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+Tick::Tick(const Tick& src, std::string path):Neutral(src, path){}
+Tick::Tick(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+Tick::Tick(const Id& src, std::string path):Neutral(src, path){}
 Tick::~Tick(){}
 const std::string& Tick::getType(){ return className_; }
 double Tick::__get_dt() const

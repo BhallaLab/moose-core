@@ -1,8 +1,10 @@
 #ifndef _pymoose_InterSolverFlux_h
 #define _pymoose_InterSolverFlux_h
 #include "PyMooseBase.h"
+#include "Neutral.h"
 namespace pymoose{
-    class InterSolverFlux : public PyMooseBase
+
+    class InterSolverFlux : public Neutral
     {      public:
         static const std::string className_;
         InterSolverFlux(Id id);

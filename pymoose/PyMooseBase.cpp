@@ -402,19 +402,6 @@ const std::string& PyMooseBase::__get_description() const
     return cinfo->description();
 }
 
-const std::vector<std::string> PyMooseBase::__get_fieldList() const
-{
-    return context_->getValueFieldList(id_);    
-}
-
-const std::vector<std::string> PyMooseBase::getFieldList() const
-{
-    std::string fields = PyMooseBase::getContext()->getField(this->id_, "fieldList");
-    std::vector<std::string> fieldList;
-    separateString( fields, fieldList,  ", ");
-    return fieldList;
-}
-
 const std::string& PyMooseBase::getField(std::string name) const
 {
     return PyMooseBase::getContext()->getField(this->id_, name);
@@ -444,44 +431,6 @@ const std::string& PyMooseBase::__get_className() const
     return context_->className(id_);
 }
 
-const Id* PyMooseBase::__get_parent() const 
-{
-    return &context_->getParent(id_);
-}
-
-const int PyMooseBase::__get_dataMem() const
-{
-    int dataMem;
-    get<int>(id_(),  "dataMem", dataMem);
-    return dataMem;
-}
-
-const int PyMooseBase::__get_msgMem() const 
-{
-    int msgMem;
-    get< int >(id_(), "msgMem", msgMem);
-    return msgMem;
-}
-
-const int PyMooseBase::__get_node() const
-{
-    int node;
-    get < int >(id_(), "node", node);
-    return node;
-}
-
-const int PyMooseBase::__get_cpu() const
-{
-    int cpu;
-    get < int > (id_(), "cpu", cpu);
-    return cpu;
-}
-
-const vector <Id> PyMooseBase::children() const
-{
-    return context_->getChildren(id_);
-}
-
 void PyMooseBase::addField(const std::string fieldName)
 {
     context_->addField(id_, fieldName);
@@ -495,28 +444,7 @@ const vector <Id> PyMooseBase::neighbours(const std::string& msgName, int direct
 {
     return context_->getNeighbours(id_, msgName, direction);
 }
-/*
-const map<Id, std::string> PyMooseBase::neighbourFields(const string& field)
-{
-    
-}
-*/
-const std::string& PyMooseBase::__get_name() const
-{
-    return context_->getName(id_);
-}
 
-void PyMooseBase::__set_name(string name)
-{
-    context_->setField(id_, "name", name);
-}
-
-const int PyMooseBase::__get_index() const
-{
-    int index = 0;
-    get<int>(id_(), "index", index);
-    return index;
-}
 void PyMooseBase::useClock(int clockNo, string func)
 {
     context_->useClock(clockNo, id_.path(), func);

@@ -15,6 +15,7 @@ namespace pymoose{
         SymCompartment( const SymCompartment& src, std::string name, Id& parent);
         SymCompartment( const SymCompartment& src, std::string path);
         SymCompartment( const Id& src, std::string name, Id& parent);
+        SymCompartment( const Id& src, std::string path);
         ~SymCompartment();
         const std::string& getType();
     };

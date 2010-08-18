@@ -1,20 +1,21 @@
 #ifndef _pymoose_RandomSpike_h
 #define _pymoose_RandomSpike_h
 #include "PyMooseBase.h"
+#include "Neutral.h"
 namespace pymoose{
-    class RandomSpike : public PyMooseBase
-    {
-      public:
+
+    class RandomSpike : public Neutral
+    {      public:
         static const std::string className_;
         RandomSpike(Id id);
         RandomSpike(std::string path);
         RandomSpike(std::string name, Id parentId);
         RandomSpike(std::string name, PyMooseBase& parent);
-        RandomSpike(const RandomSpike& src,std::string name, PyMooseBase& parent);
-        RandomSpike(const RandomSpike& src,std::string name, Id& parent);
-        RandomSpike(const Id& src,std::string name, Id& parent);
-        RandomSpike(const RandomSpike& src,std::string path);
-        RandomSpike(const Id& src,std::string path);
+        RandomSpike( const RandomSpike& src, std::string name, PyMooseBase& parent);
+        RandomSpike( const RandomSpike& src, std::string name, Id& parent);
+        RandomSpike( const RandomSpike& src, std::string path);
+        RandomSpike( const Id& src, std::string name, Id& parent);
+        RandomSpike( const Id& src, std::string path);
         ~RandomSpike();
         const std::string& getType();
         double __get_minAmp() const;

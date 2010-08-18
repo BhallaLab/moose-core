@@ -87,8 +87,8 @@ enum {OUTGOING, INCOMING, INOUT};
         const Id& getParent(Id id) const;
         const std::string& getPath(Id id) const;
         const std::string& getName(Id id) const;
-        std::vector <Id> getChildren(Id id);
-        std::vector <Id> getChildren(std::string path);    
+        const std::vector <Id>& getChildren(Id id);
+        const std::vector <Id>& getChildren(std::string path);    
         Id pathToId(std::string path, bool echo = true);
         /// set the seed for random number generator
         static void srandom(long seed);
@@ -141,7 +141,7 @@ enum {OUTGOING, INCOMING, INOUT};
         const std::string& description(const std::string className) const;
         const std::string& author(const std::string className) const;
         const std::string& doc(const std::string& className) const;
-        vector<Id> getNeighbours(Id object, const std::string& fieldName="*", int direction=INCOMING);
+        const vector<Id>& getNeighbours(Id object, const std::string& fieldName="*", int direction=INCOMING);
         vector <string> getValueFieldList(Id id);
         vector<string> getFieldList(Id id, FieldType ftype=FTYPE_ALL);        
 #ifdef DO_UNIT_TESTS    
