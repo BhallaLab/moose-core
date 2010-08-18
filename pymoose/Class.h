@@ -18,9 +18,11 @@
 #ifndef _pymoose_Class_h
 #define _pymoose_Class_h
 #include "PyMooseBase.h"
-namespace pymoose
-{
-    class Class : public PyMooseBase
+#include "Neutral.h"
+
+namespace pymoose{
+
+    class Class : public Neutral
     {
       public:
         static const std::string className_;

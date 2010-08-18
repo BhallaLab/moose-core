@@ -1,11 +1,15 @@
-
 #ifndef _pymoose_HHChannel_h
 #define _pymoose_HHChannel_h
 #include "PyMooseBase.h"
+#include "Neutral.h"
 namespace pymoose{
-    class HHChannel : public PyMooseBase
+
+    class HHChannel : public Neutral
     {      public:
         static const std::string className_;
+        HHChannel(std::string className, std::string name, Id parentId);
+        HHChannel(std::string className, std::string path);
+        HHChannel(std::string className, std::string objectName, PyMooseBase& parent); 
         HHChannel(Id id);
         HHChannel(std::string path);
         HHChannel(std::string name, Id parentId);

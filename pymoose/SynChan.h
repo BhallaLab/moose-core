@@ -1,21 +1,21 @@
 #ifndef _pymoose_SynChan_h
 #define _pymoose_SynChan_h
 #include "PyMooseBase.h"
-#include <biophysics/SynInfo.h>
-namespace pymoose
-{
-    class SynChan : public PyMooseBase
-    {    public:
+#include "Neutral.h"
+namespace pymoose{
+
+    class SynChan : public Neutral
+    {      public:
         static const std::string className_;
         SynChan(Id id);
         SynChan(std::string path);
         SynChan(std::string name, Id parentId);
         SynChan(std::string name, PyMooseBase& parent);
-        SynChan(const SynChan& src,std::string name, PyMooseBase& parent);
-        SynChan(const SynChan& src,std::string name, Id& parent);
-        SynChan(const Id& src,std::string name, Id& parent);
-        SynChan(const SynChan& src,std::string path);
-        SynChan(const Id& src,std::string path);
+        SynChan( const SynChan& src, std::string name, PyMooseBase& parent);
+        SynChan( const SynChan& src, std::string name, Id& parent);
+        SynChan( const SynChan& src, std::string path);
+        SynChan( const Id& src, std::string name, Id& parent);
+        SynChan( const Id& src, std::string path);
         ~SynChan();
         const std::string& getType();
         double __get_Gbar() const;

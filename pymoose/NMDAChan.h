@@ -22,6 +22,8 @@ namespace pymoose{
             double __get_MgConc() const;
             void __set_MgConc(double MgConc);
             double __get_unblocked() const;
+            double __get_saturation() const;
+            void __set_saturation(double saturation);
     };
 }
 #endif

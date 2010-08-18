@@ -3,24 +3,16 @@
 #include "RandGenerator.h"
 using namespace pymoose;
 const std::string RandGenerator::className_ = "RandGenerator";
-RandGenerator::RandGenerator(Id id):PyMooseBase(id){}
-RandGenerator::RandGenerator(string className, std::string path):PyMooseBase(className, path){}
-RandGenerator::RandGenerator(string className, std::string name, Id parentId):PyMooseBase(className, name, parentId){}
-RandGenerator::RandGenerator(string className, std::string name, PyMooseBase& parent):PyMooseBase(className, name, parent){}
-RandGenerator::RandGenerator(const RandGenerator& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-
-RandGenerator::RandGenerator(const RandGenerator& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-RandGenerator::RandGenerator(const RandGenerator& src, std::string path):PyMooseBase(src, path)
-{
-}
-
-RandGenerator::RandGenerator(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
-{
-}
-RandGenerator::RandGenerator(const Id& src, string path):PyMooseBase(src, path)
-{
-}
-//RandGenerator::~RandGenerator(){}
+RandGenerator::RandGenerator(Id id):Neutral(id){}
+RandGenerator::RandGenerator(std::string className, std::string path):Neutral(className, path){}
+RandGenerator::RandGenerator(std::string className, std::string name, Id parentId):Neutral(className, name, parentId){}
+RandGenerator::RandGenerator(std::string className, std::string name, PyMooseBase& parent):Neutral(className, name, parent){}
+RandGenerator::RandGenerator(const RandGenerator& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+RandGenerator::RandGenerator(const RandGenerator& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+RandGenerator::RandGenerator(const RandGenerator& src, std::string path):Neutral(src, path){}
+RandGenerator::RandGenerator(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+RandGenerator::RandGenerator(const Id& src, std::string path):Neutral(src, path){}
+// RandGenerator::~RandGenerator(){}
 const std::string& RandGenerator::getType(){ return className_; }
 double RandGenerator::__get_sample() const
 {

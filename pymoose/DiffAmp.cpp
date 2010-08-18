@@ -3,16 +3,15 @@
 #include "DiffAmp.h"
 using namespace pymoose;
 const std::string DiffAmp::className_ = "DiffAmp";
-DiffAmp::DiffAmp(Id id):PyMooseBase(id){}
-DiffAmp::DiffAmp(std::string path):PyMooseBase(className_, path){}
-DiffAmp::DiffAmp(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-DiffAmp::DiffAmp(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-DiffAmp::DiffAmp(const DiffAmp& src, std::string objectName, PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-DiffAmp::DiffAmp(const DiffAmp& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-DiffAmp::DiffAmp(const DiffAmp& src, std::string path):PyMooseBase(src, path){}
-DiffAmp::DiffAmp(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
-DiffAmp::DiffAmp(const Id& src, std::string path):PyMooseBase(src, path){}
-
+DiffAmp::DiffAmp(Id id):Neutral(id){}
+DiffAmp::DiffAmp(std::string path):Neutral(className_, path){}
+DiffAmp::DiffAmp(std::string name, Id parentId):Neutral(className_, name, parentId){}
+DiffAmp::DiffAmp(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+DiffAmp::DiffAmp(const DiffAmp& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+DiffAmp::DiffAmp(const DiffAmp& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+DiffAmp::DiffAmp(const DiffAmp& src, std::string path):Neutral(src, path){}
+DiffAmp::DiffAmp(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+DiffAmp::DiffAmp(const Id& src, std::string path):Neutral(src, path){}
 DiffAmp::~DiffAmp(){}
 const std::string& DiffAmp::getType(){ return className_; }
 double DiffAmp::__get_gain() const

@@ -3,16 +3,15 @@
 #include "GHK.h"
 using namespace pymoose;
 const std::string GHK::className_ = "GHK";
-GHK::GHK(Id id):PyMooseBase(id){}
-GHK::GHK(std::string path):PyMooseBase(className_, path){}
-GHK::GHK(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-GHK::GHK(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-GHK::GHK(const GHK& src, std::string objectName, PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-GHK::GHK(const GHK& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-GHK::GHK(const GHK& src, std::string path):PyMooseBase(src, path){}
-GHK::GHK(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
-GHK::GHK(const Id& src, std::string path):PyMooseBase(src, path){}
-
+GHK::GHK(Id id):Neutral(id){}
+GHK::GHK(std::string path):Neutral(className_, path){}
+GHK::GHK(std::string name, Id parentId):Neutral(className_, name, parentId){}
+GHK::GHK(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+GHK::GHK(const GHK& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+GHK::GHK(const GHK& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+GHK::GHK(const GHK& src, std::string path):Neutral(src, path){}
+GHK::GHK(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+GHK::GHK(const Id& src, std::string path):Neutral(src, path){}
 GHK::~GHK(){}
 const std::string& GHK::getType(){ return className_; }
 double GHK::__get_Ik() const

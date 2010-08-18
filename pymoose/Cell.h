@@ -18,10 +18,11 @@
 #ifndef _pymoose_Cell_h
 #define _pymoose_Cell_h
 #include "PyMooseBase.h"
+#include "Neutral.h"
 namespace pymoose
 {
     
-    class Cell : public PyMooseBase
+    class Cell : public Neutral
     {
       public:
         static const std::string className_;

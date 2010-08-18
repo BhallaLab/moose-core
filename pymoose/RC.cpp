@@ -3,15 +3,15 @@
 #include "RC.h"
 using namespace pymoose;
 const std::string RC::className_ = "RC";
-RC::RC(Id id):PyMooseBase(id){}
-RC::RC(std::string path):PyMooseBase(className_, path){}
-RC::RC(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-RC::RC(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-RC::RC(const RC& src, std::string objectName, PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-RC::RC(const RC& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-RC::RC(const RC& src, std::string path):PyMooseBase(src, path){}
-RC::RC(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}
-RC::RC(const Id& src, std::string path):PyMooseBase(src, path){}
+RC::RC(Id id):Neutral(id){}
+RC::RC(std::string path):Neutral(className_, path){}
+RC::RC(std::string name, Id parentId):Neutral(className_, name, parentId){}
+RC::RC(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+RC::RC(const RC& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+RC::RC(const RC& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+RC::RC(const RC& src, std::string path):Neutral(src, path){}
+RC::RC(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+RC::RC(const Id& src, std::string path):Neutral(src, path){}
 RC::~RC(){}
 const std::string& RC::getType(){ return className_; }
 double RC::__get_V0() const

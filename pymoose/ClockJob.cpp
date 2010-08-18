@@ -4,21 +4,21 @@
 #include "ClockJob.h"
 using namespace pymoose;
 const std::string ClockJob::className_ = "ClockJob";
-ClockJob::ClockJob(Id id):PyMooseBase(id){}
-ClockJob::ClockJob(std::string path):PyMooseBase(className_, path){}
-ClockJob::ClockJob(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-ClockJob::ClockJob(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-ClockJob::ClockJob(const ClockJob& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
+ClockJob::ClockJob(Id id):Neutral(id){}
+ClockJob::ClockJob(std::string path):Neutral(className_, path){}
+ClockJob::ClockJob(std::string name, Id parentId):Neutral(className_, name, parentId){}
+ClockJob::ClockJob(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+ClockJob::ClockJob(const ClockJob& src, std::string objectName,  PyMooseBase& parent):Neutral(src, objectName, parent){}
 
-ClockJob::ClockJob(const ClockJob& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-ClockJob::ClockJob(const ClockJob& src, std::string path):PyMooseBase(src, path)
+ClockJob::ClockJob(const ClockJob& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+ClockJob::ClockJob(const ClockJob& src, std::string path):Neutral(src, path)
 {
 }
-ClockJob::ClockJob(const Id& src, std::string path):PyMooseBase(src, path)
+ClockJob::ClockJob(const Id& src, std::string path):Neutral(src, path)
 {
 }
 
-ClockJob::ClockJob(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
+ClockJob::ClockJob(const Id& src, string name, Id& parent):Neutral(src, name, parent)
 {
 }
 ClockJob::~ClockJob(){}
@@ -39,10 +39,7 @@ double ClockJob::__get_currentTime() const
     get < double > (id_(), "currentTime",currentTime);
     return currentTime;
 }
-// void ClockJob::__set_currentTime( double currentTime )
-// {
-//     set < double > (id_(), "currentTime", currentTime);
-// }
+
 int ClockJob::__get_nsteps() const
 {
     int nsteps;

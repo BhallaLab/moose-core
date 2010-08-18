@@ -1,8 +1,10 @@
 #ifndef _pymoose_HHGate2D_h
 #define _pymoose_HHGate2D_h
 #include "PyMooseBase.h"
+#include "HHGate.h"
 namespace pymoose{
-    class HHGate2D : public PyMooseBase
+class HHGate;
+    class HHGate2D : public HHGate
     {      public:
         static const std::string className_;
         HHGate2D(Id id);

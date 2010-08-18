@@ -4,23 +4,15 @@
 using namespace pymoose;
 
 const std::string Compartment::className_ = "Compartment";
-Compartment::Compartment(Id id):PyMooseBase(id){}
-Compartment::Compartment(std::string path):PyMooseBase(className_, path){}
-Compartment::Compartment(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}
-Compartment::Compartment(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}
-Compartment::Compartment(const Compartment& src, std::string objectName,  PyMooseBase& parent):PyMooseBase(src, objectName, parent){}
-
-Compartment::Compartment(const Compartment& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}
-Compartment::Compartment(const Compartment& src, std::string path):PyMooseBase(src, path)
-{
-}
-Compartment::Compartment(const Id& src, std::string path):PyMooseBase(src, path)
-{
-}
-
-Compartment::Compartment(const Id& src, string name, Id& parent):PyMooseBase(src, name, parent)
-{
-}
+Compartment::Compartment(Id id):Neutral(id){}
+Compartment::Compartment(std::string path):Neutral(className_, path){}
+Compartment::Compartment(std::string name, Id parentId):Neutral(className_, name, parentId){}
+Compartment::Compartment(std::string name, PyMooseBase& parent):Neutral(className_, name, parent){}
+Compartment::Compartment(const Compartment& src, std::string objectName, PyMooseBase& parent):Neutral(src, objectName, parent){}
+Compartment::Compartment(const Compartment& src, std::string objectName, Id& parent):Neutral(src, objectName, parent){}
+Compartment::Compartment(const Compartment& src, std::string path):Neutral(src, path){}
+Compartment::Compartment(const Id& src, std::string name, Id& parent):Neutral(src, name, parent){}
+Compartment::Compartment(const Id& src, std::string path):Neutral(src, path){}
 Compartment::~Compartment(){}
 const std::string& Compartment::getType(){ return className_; }
 double Compartment::__get_Vm() const

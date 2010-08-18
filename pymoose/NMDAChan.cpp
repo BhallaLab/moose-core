@@ -40,4 +40,14 @@ double NMDAChan::__get_unblocked() const
     get < double > (id_(), "unblocked",unblocked);
     return unblocked;
 }
+double NMDAChan::__get_saturation() const
+{
+    double saturation;
+    get < double > (id_(), "saturation",saturation);
+    return saturation;
+}
+void NMDAChan::__set_saturation( double saturation )
+{
+    set < double > (id_(), "saturation", saturation);
+}
 #endif

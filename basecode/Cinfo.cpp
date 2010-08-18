@@ -186,15 +186,20 @@ void Cinfo::init( const string* doc,
               constructors and the common method getType()
               and the common field className.
             */
+            string baseClass = baseCinfo_? baseCinfo_->name() : "PyMooseBase";
             header << "#ifndef _pymoose_" << name() << "_h\n"
                    << "#define _pymoose_"<< name() << "_h\n"
-                   << "#include \"PyMooseBase.h\"\n"
-                
+                   << "#include \"" << baseClass << ".h\"\n"
                    << "namespace pymoose{\n"
-                   << "    class " << name() << " : public PyMooseBase\n"
-                   << "    {"
+                   << "    class PyMooseBase;\n"
+                   << "    class " << baseClass << ";\n"
+                   << "    class " << name() << " : public " << baseClass << endl
+                   << "    {\n"
                    << "      public:\n"
                    << "        static const std::string className_;\n"
+                   << "        " << name() << "(std::string className, std::string objectName, Id parentId);\n"
+                   << "        " << name() << "(std::string className, std::string path);\n"
+                   << "        " << name() << "(std::string className, std::string objectName, PyMooseBase& parent);\n"
                    << "        " << name() << "(Id id);\n"
                    << "        " << name() << "(std::string path);\n"
                    << "        " << name() << "(std::string name, Id parentId);\n"
@@ -212,15 +217,18 @@ void Cinfo::init( const string* doc,
                 << "#include \"" << name() << ".h\"\n"
                 << "using namespace pymoose;\n"             
                 << "const std::string "<< name() <<"::className_ = \"" << name() <<"\";\n"
-                << name() << "::" << name() << "(Id id):PyMooseBase(id){}\n"
-                << name() << "::" << name() <<"(std::string path):PyMooseBase(className_, path){}\n"
-                << name() << "::" << name() << "(std::string name, Id parentId):PyMooseBase(className_, name, parentId){}\n"
-                << name() << "::" << name() << "(std::string name, PyMooseBase& parent):PyMooseBase(className_, name, parent){}\n"
-                << name() << "::" << name() << "(const " << name() << "& src, std::string objectName, PyMooseBase& parent):PyMooseBase(src, objectName, parent){}\n"
-                << name() << "::" << name() << "(const " << name() << "& src, std::string objectName, Id& parent):PyMooseBase(src, objectName, parent){}\n"
-                << name() << "::" << name() << "(const " << name() << "& src, std::string path):PyMooseBase(src, path){}\n"
-                << name() << "::" << name() << "(const Id& src, std::string name, Id& parent):PyMooseBase(src, name, parent){}\n"
-                << name() << "::" << name() << "(const Id& src, std::string path):PyMooseBase(src, path){}\n"
+                << name() << "::" << name() << "(std::string className, std::string objectName, Id parentId):" << baseClass << "(className, objectName, parentId){}\n"
+                << name() << "::" << name() << "(std::string className, std::string path):" << baseClass << "(className, path){}\n"
+                << name() << "::" << name() << "(std::string className, std::string objectName, PyMooseBase& parent):" << baseClass << "(className, objectName, parent){}\n"
+                << name() << "::" << name() << "(Id id):" << baseClass << "(id){}\n"
+                << name() << "::" << name() <<"(std::string path):" << baseClass << "(className_, path){}\n"
+                << name() << "::" << name() << "(std::string name, Id parentId):" << baseClass << "(className_, name, parentId){}\n"
+                << name() << "::" << name() << "(std::string name, PyMooseBase& parent):" << baseClass << "(className_, name, parent){}\n"
+                << name() << "::" << name() << "(const " << name() << "& src, std::string objectName, PyMooseBase& parent):" << baseClass << "(src, objectName, parent){}\n"
+                << name() << "::" << name() << "(const " << name() << "& src, std::string objectName, Id& parent):" << baseClass << "(src, objectName, parent){}\n"
+                << name() << "::" << name() << "(const " << name() << "& src, std::string path):" << baseClass << "(src, path){}\n"
+                << name() << "::" << name() << "(const Id& src, std::string name, Id& parent):" << baseClass << "(src, name, parent){}\n"
+                << name() << "::" << name() << "(const Id& src, std::string path):" << baseClass << "(src, path){}\n"
                 << name() << "::~" << name() <<"(){}\n"
                 << "const std::string& "<< name() <<"::getType(){ return className_; }\n";
             swig << "%include \"" << name() << ".h\"\n";        
@@ -280,7 +288,7 @@ void Cinfo::init( const string* doc,
 #ifdef GENERATE_WRAPPERS
         if (created)
         {
-            header << "    };\n"
+            header << "    };\n\n"
                    << "}\n"
                    << "#endif" << endl;
             cpp << "#endif" << endl;

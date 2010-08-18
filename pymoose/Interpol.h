@@ -1,13 +1,15 @@
 #ifndef _pymoose_Interpol_h
 #define _pymoose_Interpol_h
 #include "PyMooseBase.h"
+#include "Neutral.h"
 
 namespace pymoose
 {
 
     class TableIterator;
+    class Neutral;
 
-    class Interpol : public PyMooseBase
+    class Interpol : public Neutral
     {
       public:    
         static const std::string className_;
