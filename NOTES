@@ -9128,4 +9128,21 @@ checked in as revision 1335.
 =============================================================================
 13 Aug 2010.
 Coming back to the trunk in order to fix up SigNeur clock handling. The
-current version does not deal properly with NeuroML compilaitions.
+current version does not deal properly with NeuroML compilations.
+Set SigNeur to assign clocks 0, 1, 2 to hsolve, and 3, 4 to signaling.
+Checkin as 2118.
+=============================================================================
+19 Aug 2010
+Issue with ordering of molecule identities for readout by zombies
+as compared to setup.
+When using SigNeur, setup is through KineticManager.
+The function that sets up the elist is 
+findDescendants( Eref manager, vector< Id >& ret )
+	which recursively gets the childList of each Element.
+This is extremely messy for arrays, but looks like it starts on
+index 0, traverses through tree, then does index 1 through tree,
+and so on.
+
+Put a 'sort' function in Stoich::rebuildMatrix to ensure that the
+incoming vector< Id > is independent of the algorithm used to build the
+tree. This seems to help.

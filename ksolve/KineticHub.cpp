@@ -614,6 +614,9 @@ void KineticHub::molConnectionFunc( const Conn* c,
 		molConnectionFuncLocal( c->target(), S, Sinit, elist );
 }
 
+KineticHub* getHubFromZombie( Eref e, const Finfo* srcFinfo,
+		unsigned int& index, Eref& hubE );
+
 void KineticHub::molConnectionFuncLocal( Eref hub,
 	       	vector< double >*  S, vector< double >*  Sinit, 
 		vector< Eref >*  elist )
@@ -639,6 +642,16 @@ void KineticHub::molConnectionFuncLocal( Eref hub,
 		zombify( hub, *i, molSolveFinfo, initMolZombieFinfo() );
 		redirectDynamicMessages( *i );
 	}
+
+	/*
+	for ( i = elist->begin(); i != elist->end(); i++ ) {
+		unsigned int molIndex;
+		Eref hubE;
+		KineticHub* kh = getHubFromZombie( *i, molSolveFinfo, molIndex, hubE );
+		cout << i->name() << "	" << molIndex << endl;
+	}
+	*/
+
 	// Here we should really set up a 'set' of mols to check if the
 	// sumTotMessage is coming from in or outside the tree.
 	// Since I'm hazy about the syntax, here I'm just using the elist.
@@ -654,6 +667,7 @@ void KineticHub::molConnectionFuncLocal( Eref hub,
 		redirectSrcMessages( hub, *i, nSrcHubFinfo, nSrcMolFinfo, 
 		i - elist->begin(), nSrcMap_, elist, 1 );
 	}
+
 }
 
 void KineticHub::rateSizeFunc(  const Conn* c,
