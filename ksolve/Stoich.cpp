@@ -619,6 +619,7 @@ void Stoich::rebuildMatrix( Eref stoich, vector< Id >& ret )
 	int mode;
 	bool isOK;
 	unsigned int numRates = 0;
+	sort( ret.begin(), ret.end() );
 	for ( i = ret.begin(); i != ret.end(); i++ ) {
 		if ( ( *i )()->cinfo()->isA( molCinfo ) ) {
 			isOK = get< int >( ( *i )(), "mode", mode );
