@@ -182,6 +182,25 @@ void SigNeur::setComptVols( Eref compt,
 }
 #endif
 
+#include "../element/Wildcard.h"
+void displayElists( const Element* orig, const Element* copy )
+{
+	vector< Id > olist;
+	vector< Id > clist;
+
+	unsigned int okids = allChildren( orig->id(), "", Id::AnyIndex, olist );
+	unsigned int ckids = allChildren( copy->id(), "", Id::AnyIndex, clist );
+	// Print out names of orig and copy
+	// do loop only up to highest common index
+	cout << "okids=" << okids << ", ckids=" << ckids << endl;
+	cout << "okids=" << orig->name() << ", ckids=" << copy->name() << endl;
+	unsigned int max = ( okids < ckids ) ? okids : ckids;
+	for ( unsigned int i =0; i < max; ++i ) {
+		cout << i << "	" << olist[i].path() << 
+			"	" << clist[i].path() << endl;
+	}
+}
+
 /*
  * This function copies a signaling model. It first traverses the model and
  * inserts any required diffusion reactions into the model. These are
@@ -216,6 +235,8 @@ Element* SigNeur::copySig( Id kinId, Id proto,
 		} else if ( num > 1 ) {
 			ret = ret->copyIntoArray( kinId, name, num );
 		}
+		// cout << "regular copy:\n";
+		// displayElists( proto(), ret );
 	}
 	return ret;
 }
@@ -254,6 +275,8 @@ Element* SigNeur::separateCopySig( Id kinId, Id proto,
 			}
 		}
 	}
+	// cout << "separate copy:\n";
+	// displayElists( proto(), ret );
 	return ret;
 }
 
