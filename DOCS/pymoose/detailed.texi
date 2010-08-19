@@ -5,8 +5,8 @@ In this chapter we go through the internal details of PyMOOSE.
 * Overview:: 
 * Model Tree::        All elements in MOOSE are part of a Tree structure
 * Id::                The unique identifier for each MOOSE object
-* PyMooseBase::       Common properties of all MOOSE classes
-* PyMooseContext::    Access to global functions
+* Neutral::           Common properties of all MOOSE classes
+* PyMooseContext::    The God object giving access to global functions
 @end menu
 
 @node Overview
@@ -24,11 +24,12 @@ called its @code{id}.
 All elements in MOOSE are part of a tree structure. This is similar to
 the folder structure in the file system of your computer. Each entry in
 this tree is a moose object and we call it an @strong{element}. The top
-level element is called the @code{root}(represented as @samp{/}) element. Every element other
-than the @code{root} has a parent element. There are some predefined special
-elements that are used for management of the system. They are created
-when you startup moose (or @code{import} moose in Python). The following
-diagram shows this structure:
+level element is called the @code{root} element (represented as
+@samp{/}). Every element other than @code{root} has a parent
+element. There are some predefined special elements that are used for
+management of the system. They are created when you startup moose (or
+@code{import} moose in Python). The following diagram shows this
+structure:
 
 @example
 @group
@@ -54,7 +55,7 @@ root
 @end group
 @end example
 
-To be completed.
+
 
 @node Id
 @section Id
@@ -129,13 +130,92 @@ True
 @end example
 
 
+@node Neutral
+@section Neutral
+@cindex Neutral
+@cindex base class
+@vindex className
+@vindex name
+@vindex index
+@vindex path
+@vindex parent
+@vindex cpu
+@vindex dataMem
+@vindex msgMem
+@vindex fieldList
+@vindex node
+
+@vindex author
+@vindex description
+
+@code{Neutral} captures the fundamental properties of all the MOOSE
+elements. If you are familiar with Object Oriented Programming, you can
+recognize that this is the base class of all moose classes whose
+instances can be in the model tree.@footnote{Not all classes in MOOSE
+are element-classes. The @code{Id} class, for example.} 
+
+The following fields are available in Neutral class and hence in all
+element classes:
+
+@table @samp
+@item className
+The name of the MOOSE class this object belongs to. The object-oriented
+design of MOOSE enables you to work with an element as if it was an
+instance of its superclass. You can wrap any element in a @code{Neutral}
+object but of course later you may need to find out the actual MOOSE
+class it belongs to. @code{className} is the way to go. 
+
+What about the @code{__class__} property in Python? The reason for
+having a separate @code{className} field is that MOOSE has its own
+system for class hierarchy. This is not necessarily visible to
+Python. Similarly, if you extend a MOOSE class in Python, it does not
+reach the underlying MOOSE class system. Extending MOOSE classes in
+Python is only useful for attaching additional information to it, but
+not for changing the underlying behaviour. For that you have to edit the
+C++ source code of MOOSE and recompile it, a task suited for the brave.
+
+@item name
+Name of the element. Two different objects may have the same name but
+siblings in the model tree should have different names. You can change
+the name of an object by assigning a new string value to this field.
+
+@item index
+MOOSE has two flavours of element: @code{simple element} and @code{array
+element}. A single entity is represented by a @code{simple element}
+whereas an @code{array element} represents a bunch of elements of the
+same kind. The @code{index} field indicates the position of this
+@code{Neutral} object in an @code{array element}. For @code{simple
+element}s it is @code{0}.
+
+@item parent
+The @code{Id} of the parent element of this object in the model tree.
+
+@item node
+This is the CPU node no. of on which this element is located. This is
+relevant only for parallel computers and PyMOOSE is yet to be adapted to
+such systems.
+
+@item fieldList
+Vector listing the fields in the MOOSE object. You can traverse it like
+a Python @code{list}. If you add a Python attribute to the object later,
+that will not be visible in this. Nor will that visible to MOOSE. The
+way to add a field to the underlying MOOSE object is to use the
+@code{addField} function of the @code{PyMooseContext}.
+      
+@item cpu
+Reports the cost of one clock tick, very roughly # of FLOPs.
+
+@item dataMem
+Memory used by data part of object
+
+@item msgMem
+Memory used by messaging (Element) part of object.
+
+
+@end table
+
+
 To be completed.
-
-
-@node PyMooseBase
-@section PyMooseBase
-Common properties of all MOOSE classes
-Yet to be written.
 
 @node PyMooseContext
 @section PyMooseContext

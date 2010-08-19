@@ -98,6 +98,4 @@ describing the classes of objects in MOOSE.
 @c Local Variables: 
 @c mode: texinfo
 @c TeX-master: t
-@c TeX-master: t
-@c TeX-master: t
 @c End: 
