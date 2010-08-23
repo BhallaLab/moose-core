@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 23 18:54:14 2009 (+0530)
 # Version: 
-# Last-Updated: Fri Jul  9 15:43:42 2010 (+0530)
+# Last-Updated: Mon Aug 23 21:10:35 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 149
+#     Update #: 184
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -52,6 +52,16 @@ import moose
 
 import config
 
+def pathMatches(oldpath, newname):
+    """Check if replacing the object name with newname in oldpath
+    corresponds to a valid object."""
+    old_parent_path_end = oldpath.rfind('/')
+    old_parent_path = oldpath[:old_parent_path_end]
+    newpath = old_parent_path + '/' + newname
+    print 'matchesPath', newpath
+    return config.context.exists(newpath)
+    
+
 class MooseTreeItem(QtGui.QTreeWidgetItem):
     def __init__(self, *args):
 	QtGui.QTreeWidgetItem.__init__(self, *args)
@@ -70,7 +80,7 @@ class MooseTreeItem(QtGui.QTreeWidgetItem):
     def getMooseObject(self):
 	return self.mooseObj_
 
-    def updateSlot(self, text):
+    def updateSlot(self):
 	self.setText(0, QtCore.QString(self.mooseObj_.name))
 
 class MooseTreeWidget(QtGui.QTreeWidget):
@@ -112,6 +122,11 @@ class MooseTreeWidget(QtGui.QTreeWidget):
             self.itemList.append(new_item)
         except AttributeError:
             config.LOGGER.error('%s: no such class in module moose' % (className))
+
+    def updateItemSlot(self, mooseObject):
+        for changedItem in (item for item in self.itemList if mooseObject.id == item.mooseObj_.id):
+            break
+        changedItem.updateSlot()
 
 if __name__ == '__main__':
     c = moose.Compartment("c")

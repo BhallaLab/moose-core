@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 30 11:18:34 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Jul 12 16:25:14 2010 (+0530)
+# Last-Updated: Mon Aug 23 20:26:19 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 361
+#     Update #: 364
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -140,7 +140,7 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
         elif index.column() == 1: # This is the value column
             self.mooseObject.setField(field, value)
             if field == 'name':
-                self.emit(QtCore.SIGNAL('objectNameChanged(const QString&)'), QtCore.QString(field))
+                self.emit(QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'), self.mooseObject)
         elif index.column() == 2 and role == Qt.EditRole: 
             try:
                 self.fieldPlotNameMap[self.fields[index.row()]] = str(value)                
