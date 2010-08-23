@@ -158,9 +158,9 @@ def listproperty(getter=None, setter=None, deller=None):
 %include "../utility/PathUtility.h"
 
 %include "PyMooseContext.h"
+%ignore className_;
 %include "PyMooseBase.h"
 %attribute(pymoose::PyMooseBase, Id*, id, __get_id)
-%attribute(pymoose::PyMooseBase, const std::string, className, __get_className)
 %attribute(pymoose::PyMooseBase, const std::string, author, __get_author)
 %attribute(pymoose::PyMooseBase, const std::string, description, __get_description)
 %attribute(pymoose::PyMooseBase, const std::string, path, __get_path)
@@ -183,7 +183,7 @@ def doc(cls):
 %attribute(pymoose::Neutral, string, name, __get_name, __set_name)
 %attribute(pymoose::Neutral, int, index, __get_index)
 %attribute(pymoose::Neutral, Id*, parent, __get_parent)
-%attribute(pymoose::Neutral, string, className, __get_className)
+%attribute(pymoose::Neutral, string, className, __get_class)
 %attribute(pymoose::Neutral, const vector<Id>&, childList, __get_childList)
 %attribute(pymoose::Neutral, unsigned int, node, __get_node)
 %attribute(pymoose::Neutral, double, cpu, __get_cpu)
