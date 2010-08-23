@@ -26,7 +26,6 @@ namespace pymoose
         
         virtual ~PyMooseBase();
 
-        const std::string& __get_className() const;
         const std::string& __get_author() const;
         const std::string& __get_description() const;
         static bool destroy(Id id);    
