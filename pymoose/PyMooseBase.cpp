@@ -426,11 +426,6 @@ const Id* PyMooseBase::__get_id() const
     return &id_;
 }
 
-const std::string& PyMooseBase::__get_className() const
-{
-    return context_->className(id_);
-}
-
 void PyMooseBase::addField(const std::string fieldName)
 {
     context_->addField(id_, fieldName);
