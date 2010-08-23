@@ -9146,3 +9146,8 @@ and so on.
 Put a 'sort' function in Stoich::rebuildMatrix to ensure that the
 incoming vector< Id > is independent of the algorithm used to build the
 tree. This seems to help.
+Checkin 2129.
+=============================================================================
+22 Aug 2010
+Implemented handling of SynChans in SigNeurAdaptor.cpp.
+=============================================================================
