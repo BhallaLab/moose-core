@@ -13,9 +13,13 @@
 #include "../element/Neutral.h"
 #include "../kinetics/Molecule.h"
 #include "../biophysics/HHChannel.h"
+// #include "../biophysics/SynInfo.h"
+// #include "../biophysics/SynChan.h"
 #include "../biophysics/CaConc.h"
 #include "SigNeur.h"
 #include "Adaptor.h"
+
+extern const Cinfo* initSynChanCinfo();
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -156,8 +160,27 @@ void adaptSig2Chan( TreeNode& t,
 		initMoleculeCinfo()->findFinfo( "nInit" );
 
 	// This isn't yet a separate destMsg. Again, issue with update.
-	static const Finfo* gbarFinfo =  
+	static const Finfo* hhChanGbarFinfo =  
 		initHHChannelCinfo()->findFinfo( "Gbar" );
+
+	static const Finfo* synChanGbarFinfo =  
+		initSynChanCinfo()->findFinfo( "Gbar" );
+
+
+	// Set up the correct Finfo. Complain if we try to connect up an 
+	// unknown chan type.
+	const Finfo* gbarFinfo = 0;
+	if ( chanId()->cinfo()->isA( initHHChannelCinfo() ) )
+		gbarFinfo = hhChanGbarFinfo;
+	if ( chanId()->cinfo()->isA( initSynChanCinfo() ) )
+		gbarFinfo = synChanGbarFinfo;
+	if ( gbarFinfo == 0 ) {
+		cout << "Error: attempt to set up adaptor from signaling to \n" <<
+		" biophysics for an unknown channel type: " << 
+		chanId()->cinfo()->name() << endl <<
+		"for channel " << chanId.path() << endl;
+		return;
+	}
 
 	// Look up matching molecule
 	map< string, Element* >::iterator i = m.find( mol );
@@ -166,6 +189,7 @@ void adaptSig2Chan( TreeNode& t,
 		// cout << "Adding adaptor from " << e->name() << " to " << chanId.path() << endl;
 		assert( t.sigStart >= offset );
 		assert( t.sigEnd - offset <= e->numEntries() );
+
 
 		// Create the adaptor
 		string name = "adapt_" + mol + "_2_" + chanId.eref().e->name();
