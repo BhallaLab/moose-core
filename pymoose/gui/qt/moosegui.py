@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Jul 20 16:30:41 2010 (+0530)
-#           By: subha
-#     Update #: 2292
+# Last-Updated: Mon Aug 23 21:09:27 2010 (+0530)
+#           By: Subhasis Ray
+#     Update #: 2304
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -150,7 +150,7 @@ class MainWindow(QtGui.QMainWindow):
         # TODO - will create a right-click menu
         self.connect(self.modelTreeWidget, 
                      QtCore.SIGNAL('itemDoubleClicked(QTreeWidgetItem *, int)'),
-                     self.makeObjectFieldEditor)
+                     self.makeObjEditorFromTreeItem)
         self.connect(self.modelTreeWidget, 
                      QtCore.SIGNAL('itemClicked(QTreeWidgetItem *, int)'),
                      self.setCurrentElement)
@@ -281,10 +281,14 @@ class MainWindow(QtGui.QMainWindow):
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.commandLineDock)
         self.commandLineDock.setObjectName('MooseCommandLine')
         return self.commandLineDock
-        
-    def makeObjectFieldEditor(self, item, column):
-        """Creates a table-editor for a selected object."""
+
+    def makeObjEditorFromTreeItem(self, item, column):
+        """Wraps makeObjectFieldEditor for use via a tree item"""
         obj = item.getMooseObject()
+        self.makeObjectFieldEditor(obj)
+
+    def makeObjectFieldEditor(self, obj):
+        """Creates a table-editor for a selected object."""
         try:
             self.objFieldEditModel = self.objFieldEditorMap[obj.path]
         except KeyError:
@@ -303,8 +307,8 @@ class MainWindow(QtGui.QMainWindow):
         self.objFieldEditModel.plotNames += [plot.objectName() for plot in self.plots]
         self.objFieldEditor.setItemDelegate(ObjectEditDelegate(self))
         self.connect(self.objFieldEditModel, 
-                     QtCore.SIGNAL('objectNameChanged(const QString&)'),
-                     item.updateSlot)
+                     QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'),
+                     self.modelTreeWidget.updateItemSlot)
         # self.objFieldEditor.setContextMenuPolicy(Qt.CustomContextMenu)
         # self.connect(self.objFieldEditor, QtCore.SIGNAL('customContextMenuRequested ( const QPoint&)'), self.popupFieldMenu)
         self.objFieldEditPanel.setWidget(self.objFieldEditor)
