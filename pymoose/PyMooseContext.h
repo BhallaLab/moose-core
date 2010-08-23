@@ -141,7 +141,7 @@ enum {OUTGOING, INCOMING, INOUT};
         const std::string& description(const std::string className) const;
         const std::string& author(const std::string className) const;
         const std::string& doc(const std::string& className) const;
-        const vector<Id>& getNeighbours(Id object, const std::string& fieldName="*", int direction=INCOMING);
+        const vector<Id>& getNeighbours(Id object, std::string fieldName="*", int direction=INCOMING);
         vector <string> getValueFieldList(Id id);
         vector<string> getFieldList(Id id, FieldType ftype=FTYPE_ALL);        
 #ifdef DO_UNIT_TESTS    
