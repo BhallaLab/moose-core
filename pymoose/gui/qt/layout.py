@@ -27,16 +27,19 @@ fm = QtGui.QFontMetrics(font)
 
 class Textitem(QtGui.QGraphicsTextItem):
 	def __init__(self,path):
-		tname = path[(path.rfind('/'))+1:len(path)]
-		QtGui.QGraphicsTextItem.__init__(self,tname)
-		self.sname=tname
-		self.spath=path
-		
+		self.path = path
+		self.mooseObj_ = moose.Neutral(self.path)
+		QtGui.QGraphicsTextItem.__init__(self,self.mooseObj_.name)
+		self.setTextInteractionFlags(QtCore.Qt.TextEditorInteraction)
+		#self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
+		self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
+
 	def mouseDoubleClickEvent(self, event):
-		pass
-		#print "I have double clicked " + self.spath
-		
-		
+		self.emit(QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.mooseObj_)
+	
+	def updateSlot(self):
+		self.setPlainText(QtCore.QString(self.mooseObj_.name))
+	
 class Lineitem(QtGui.QGraphicsLineItem):
 	def __init__(self,Xs,Ys,Xd,Yd,root):
 		QtGui.QGraphicsLineItem.__init__(self)
@@ -48,8 +51,8 @@ class Lineitem(QtGui.QGraphicsLineItem):
 
 class xycord_cl:
 	''' This Class keeps record of name, x & y co-ordinates and C->color of the model '''
-	def __init__(self,nme,x,y,c):
-		self.name=nme
+	def __init__(self,path,x,y,c):
+		self.path=path
 		self.x=x
 		self.y=y
 		self.c=c
@@ -63,8 +66,8 @@ class xycord_cl:
 
 class arrow_cl:
 	''' This Class keeps record for connecting arrows name,dir -> incoming (1) or outgoing (0)'''
-	def __init__(self,nam,d):
-		self.name = nam
+	def __init__(self,path,d):
+		self.path = path
 		self.dir = d
 		
 	def getName(self):	return self.name
@@ -117,9 +120,11 @@ def _genesis_xyc():
 	alpha =0
 	alpha1 =0
 	
-	for object in moose.Neutral('/kinetics').children():
-		if( (moose.Neutral(object)).className == 'KinCompt'):
-			for compobj in moose.Neutral(object.path()).children():
+	for id_ in moose.Neutral('/kinetics').children():
+		mooseObj = moose.Neutral(id_)
+		if( mooseObj.className == 'KinCompt'):
+			for compobj in moose.Neutral(id_.path()).children():
+				#mooseObje_ = moose.Neutral(compobj)
 				xycord_list.append(xycord_cl(compobj.path(),moose.Neutral(compobj).getField('x'),moose.Neutral(compobj).getField	('y'),moose.Neutral(compobj).getField('xtree_textfg_req')))
 			
 				if( (moose.Neutral(compobj)).className == 'Molecule'):
@@ -129,7 +134,7 @@ def _genesis_xyc():
 					if(len(Mol_list) != 0): Mol_dict[compobj.path()] = Mol_list
 	
 	
-					for enz in moose.Neutral(compobj.path()).children():
+					for enz in moose.Neutral(compobj).children():
 						#This will get path,x,y cordinates for the layout in xycord_list
 						xycord_list.append(xycord_cl(enz.path(),moose.Neutral(enz).getField('x'),moose.Neutral(enz).getField	('y'),moose.Neutral(enz).getField('xtree_textfg_req')))
 	 					#This will provide subtrate and product for the connection in SubPrd_dict
@@ -146,19 +151,19 @@ def _genesis_xyc():
 					if ( len(slist) != 0): SubPrd_dict[compobj.path()] = slist
 					
 						
-		elif( (moose.Neutral(object)).className == 'Neutral'):
+		elif( (moose.Neutral(id_)).className == 'Neutral'):
 			pass
 		else:
-			xycord_list.append(xycord_cl(object.path(),moose.Neutral(object).getField('x'),moose.Neutral(object).getField('y'),moose.Neutral(object).getField('xtree_textfg_req')))
-			if( (moose.Neutral(object)).className == 'Molecule'):
+			xycord_list.append(xycord_cl(id_.path(),moose.Neutral(id_).getField('x'),moose.Neutral(id_).getField('y'),moose.Neutral(id_).getField('xtree_textfg_req')))
+			if( (moose.Neutral(id_)).className == 'Molecule'):
 				Mol_list = []
-				for reactotal in moose.Neutral(object).neighbours('reac'): Mol_list +=[(arrow_cl(reactotal.path(),0))]
-				for enzprdtotal in moose.Neutral(object).neighbours('prd'): Mol_list +=[(arrow_cl(enzprdtotal.path(),0))]
-				if(len(Mol_list) != 0): Mol_dict[object.path()] = Mol_list
+				for reactotal in moose.Neutral(id_).neighbours('reac'): Mol_list +=[(arrow_cl(reactotal.path(),0))]
+				for enzprdtotal in moose.Neutral(id_).neighbours('prd'): Mol_list +=[(arrow_cl(enzprdtotal.path(),0))]
+				if(len(Mol_list) != 0): Mol_dict[id_.path()] = Mol_list
 	
 	
 				sumlist = []
-				for S_enz in moose.Neutral(object.path()).children():
+				for S_enz in moose.Neutral(id_).children():
 						xycord_list.append(xycord_cl(S_enz.path(),moose.Neutral(S_enz).getField('x'),moose.Neutral(S_enz).getField('y'),moose.Neutral(S_enz).getField('xtree_textfg_req')))
 						#This will provide subtrate and product for the connection in SubPrd_dict
 						slist = []
@@ -166,10 +171,10 @@ def _genesis_xyc():
 						for pobject in moose.Neutral(S_enz).neighbours('prd',0): slist+=[arrow_cl(pobject.path(),0)]
 						for pobject in moose.Neutral(S_enz).neighbours('enz',0): slist+=[arrow_cl(pobject.path(),0)]
 						if ( len(slist) != 0): 	                                 SubPrd_dict[S_enz.path()] = slist
-			elif( (moose.Neutral(object)).className == 'Reaction'):
+			elif( (moose.Neutral(id_)).className == 'Reaction'):
 					slist = []
-					for sobject in moose.Neutral(object).neighbours('sub', 0): slist+=[arrow_cl(sobject.path(),1)]
-					for pobject in moose.Neutral(object).neighbours('prd', 0): slist+=[arrow_cl(pobject.path(),0)]
+					for sobject in moose.Neutral(id_).neighbours('sub', 0): slist+=[arrow_cl(sobject.path(),1)]
+					for pobject in moose.Neutral(id_).neighbours('prd', 0): slist+=[arrow_cl(pobject.path(),0)]
 					if ( len(slist) != 0): 					   SubPrd_dict[object.path()] = slist
 				
 
@@ -177,7 +182,17 @@ def _genesis_xyc():
 	for m in range(len(xycord_list)):
 		for n in range (len(xycord_list)):
 			if(m != n):
-				alpha = overlap(float(xycord_list[m].getX()),float(xycord_list[m].getY()),fm.width(xycord_list[m].getName()[(xycord_list[m].getName().rfind('/'))+1:len(xycord_list[m].getName())]),float(xycord_list[n].getX()),float(xycord_list[n].getY()),fm.width(xycord_list[n].getName()[(xycord_list[n].getName().rfind('/'))+1:len(xycord_list[n].getName())]))       
+				src = xycord_list[m]
+ 				dest = xycord_list[n]
+ 				Src_X = src.getX()
+ 				Src_Y = src.getY()
+ 				Src_N = moose.Neutral(src.path).name
+ 				Des_X = dest.getX()
+ 				Des_Y = dest.getY()
+ 				Des_N = moose.Neutral(src.path).name
+
+				alpha = overlap(float(Src_X),float(Src_Y),fm.width(Src_N),float(Des_X),float(Des_Y),fm.width(Des_N))      
+
 				if(alpha1 < alpha): alpha1 = alpha
 			else: 
 				pass
@@ -205,7 +220,7 @@ def _genesis_xyc():
 
 	return xycord_list,SubPrd_dict,Mol_dict
 
-class Screen(QtGui.QWidget):
+class Scene(QtGui.QWidget):
 	def __init__(self,parent=None):
 		QtGui.QWidget.__init__(self,parent)
 		grid = QtGui.QGridLayout()
@@ -217,22 +232,33 @@ class Screen(QtGui.QWidget):
 		Mol_dict = {}
 		(xycord_list,SubPrd_dict,Mol_dict)  = _genesis_xyc()
 
-		self.DisplayText(xycord_list)
-		self.DisplayLine(xycord_list,SubPrd_dict,Mol_dict)
+		self.displayText(xycord_list)
+		self.displayLine(xycord_list,SubPrd_dict,Mol_dict)
 
 		view = QtGui.QGraphicsView(self.scene,self)
 		view.setScene(self.scene)
 		grid.addWidget(view,0,0)
+	
+	def updateItemSlot(self, mooseObject):
+	        for changedItem in (item for item in self.scene.items() if isinstance(item, Textitem) and mooseObject.id == item.mooseObj_.id):
+	            break
+	        changedItem.updateSlot()
 
-	def DisplayText(self,xycord_list):		
+		
+		
+	def emitItemtoEditor(self,mooseObject):
+		self.emit(QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"), mooseObject)
+
+	def displayText(self,xycord_list):		
 		#Add text items to screen
 		for item in xycord_list:
-			pItem = Textitem(item.getName())
+			pItem = Textitem(item.path)
 			pItem.setPos(item.getX(),item.getY())
 			pItem.setDefaultTextColor(QColor(item.getC()))
 			self.scene.addItem(pItem)
+			self.connect(pItem, QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"), self.emitItemtoEditor)
 
-	def DisplayLine(self,xycord_list,SubPrd_dict,Mol_dict):
+	def displayLine(self,xycord_list,SubPrd_dict,Mol_dict):
 		''' Drawing the lines for connectivity l,m of SubPrd_dict should be same as o,p of Mol_dict 
 				l	p
 				m	o	
@@ -242,17 +268,17 @@ class Screen(QtGui.QWidget):
 		for l,m in SubPrd_dict.iteritems():
 			number = number +1
 			for xy_items_sp in xycord_list:
-				if(xy_items_sp.getName() == l):
+				if(xy_items_sp.path == l):
 					break
 			for sp_items in m:
 				for o,p in Mol_dict.iteritems():
-					if(o == sp_items.getName()):
+					if(o == sp_items.path):
 						for xy_items_ml in xycord_list:
-							if(xy_items_ml.getName() == o):
+							if(xy_items_ml.path == o):
 								break
 						found = 0
 						for mol_items in p:
-							if(mol_items.getName() == l):
+							if(mol_items.path == l):
 								found = 1
 								#Source
 								xs = xy_items_sp.getX()
