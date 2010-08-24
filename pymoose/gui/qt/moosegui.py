@@ -90,7 +90,8 @@ from mooseplot import MoosePlot
 from plotconfig import PlotConfig
 from glwizard import MooseGLWizard
 from firsttime import FirstTimeWizard
-from layout import Screen
+#from layout import Screen
+import layout
 
 def makeClassList(parent=None, mode=MooseGlobals.MODE_ADVANCED):
     """Make a list of classes that can be used in current mode
@@ -309,6 +310,11 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.objFieldEditModel, 
                      QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'),
                      self.modelTreeWidget.updateItemSlot)
+	if hasattr(self, 'sceneLayout'):
+	        self.connect(self.objFieldEditModel, 
+        	             QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'),
+        	             self.sceneLayout.updateItemSlot)
+
         # self.objFieldEditor.setContextMenuPolicy(Qt.CustomContextMenu)
         # self.connect(self.objFieldEditor, QtCore.SIGNAL('customContextMenuRequested ( const QPoint&)'), self.popupFieldMenu)
         self.objFieldEditPanel.setWidget(self.objFieldEditor)
@@ -657,10 +663,11 @@ class MainWindow(QtGui.QMainWindow):
         return plotWindow
 
     def addLayoutWindow(self):
-        self.layout = Screen()
-        self.centralPanel.addSubWindow(self.layout)
+        self.sceneLayout = layout.Scene()
+	self.connect(self.sceneLayout, QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"), self.makeObjectFieldEditor)
+        self.centralPanel.addSubWindow(self.sceneLayout)
 	self.centralPanel.tileSubWindows()
-        self.layout.show()
+        self.sceneLayout.show()
     
     def popupLoadModelDialog(self):
         fileDialog = QtGui.QFileDialog(self)
