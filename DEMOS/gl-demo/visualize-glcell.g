@@ -86,8 +86,9 @@ setfield /gl0 sync off
 //=====================================
 setclock 0 {SIMDT}
 setclock 1 {SIMDT}
-setclock 2 {IODT}
-setclock 3 {VIZDT}
+setclock 2 {SIMDT}
+setclock 3 {IODT}
+setclock 4 {VIZDT}
 
 useclock /gl0 3
 
