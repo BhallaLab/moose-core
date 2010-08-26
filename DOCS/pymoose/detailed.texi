@@ -11,9 +11,83 @@ In this chapter we go through the internal details of PyMOOSE.
 
 @node Overview
 @section Overview of PyMOOSE internals
-The entities in a MOOSE model are called @t{elements}. An @t{element}
-is an object of some MOOSE class. Each element has an unique identifier,
-called its @code{id}.
+The entities in a MOOSE model are called @t{elements}. An @t{element} is
+an object of some MOOSE class. Elements are the basic building blocks of
+a model. You set the properties of the individual elements and connect
+them via messages to build a model.
+
+Each element has a unique identifier, called its @code{id}. PyMOOSE
+provides Pythonic wrappers around this id. For every MOOSE class, we
+have a corresponding Python class provided by PyMOOSE. This class
+essentially creates an illusion of mirrorring the MOOSE class via a set
+of properties which correspond to the fields in the MOOSE class. The
+main data contained in instances of the PyMOOSE classes is only a copy
+of the @code{id} of the original MOOSE object. All the fields are
+accessed via function calls using this @code{id} as the handle.
+
+MOOSE provides a class hierarchy which is closely imitated by the
+PyMOOSE classes. @code{Neutral} is the base class of all other
+classes. So instance of any other MOOSE class is also an instance of
+@code{Neutral} class. A Neutral object is most often used as a container
+of other objects.
+
+Major areas of focus in MOOSE are neuronal simulations and biochemical
+simulations. So many of the classes are for modeling these
+scenarios. Some of the commonly used classes in Neuronal models are:
+@itemize
+@item Compartment 
+-     models an isopotential fragment of a neuronal cable.
+@item HHChannel
+-     Hodgkin-Huxley-type ion channel.
+@item SynChan
+-     Synaptic channel.
+@item SpikeGen
+-     Spike generator. This models the presynaptic terminal and is
+      connected to the SynChan on the postsynaptic side.
+@item Cell
+-     Represents a single neuron. Practically it is a container for
+      connected compartments that constitute a neuron.
+@end itemize
+
+Commonly used classes in biochemistry/chemical kinetics models are:
+@itemize
+@item Molecule
+@item Enzyme
+@item Reaction
+@item KinCompt
+@end itemize
+
+Some classes are there to provide utilities and infrastructure for doing
+simulation experiments:
+@itemize
+@item Table
+@item AscFile
+@item TimeTable
+@item Random numbet generators 
+- a whole bunch of them to generate samples from various distributions.
+@end itemize
+
+@example
+Take, for example, a simple reaction: @code{A + B <---> C}. By
+convention, the rate of the forward reaction is represented by @i{Kf}
+and that of the backward reaction is represented by @i{Kb}.
+
+Now, @b{A}, @b{B} and @b{C} are molecular species and MOOSE provides the
+class @code{Molecule} to model them. The main property of a Molecule
+element is @i{n}, the number of molecules.
+
+As you will immediately recognize, just knowing the number of molecules
+does not help in calculating the progress of a chemical reaction with
+time. It is concentration that matters. But to obtain concentration from
+number of molecules, you need the volume of the container. This
+container is called a kinetic compartment, which need not be a real
+container, but any volume in space whithin which the molecules are
+homogeneously distributed. Kinetic compartments are represented by the
+class @code{KinCompt} in MOOSE. 
+
+TODO: to be completed with an walk-through to developing the simulation.
+@end example
+
 
 @node Model Tree
 @section Model Tree
@@ -80,13 +154,14 @@ Example:
 @example
 @group
 
->>> my_root = moose.Neutral('/') # This creates the python object
-                                 # my_root wrapping the root element
->>> print my_root.id
-0[0]
->>> print my_root.id.id()
-0
->>> print my_root.id.index()
+>>> foo = moose.Neutral('foo') # create a Neutral object called 'foo'
+>>> foo.id
+<moose.Id; proxy of <Swig Object of type 'Id *' at 0x248c6f8> >
+>>> print foo.id
+470[0]
+>>> print foo.id.id()
+470
+>>> print foo.id.index()
 0
 
 @end group
@@ -109,8 +184,8 @@ True
 @end example
 
 Note that @code{id} is a more fundamental property than the path string
-of an object. The path string changes when you rename the object, but
-the @code{id} remains unchanged.
+of an object. The path string changes when you change the name of the
+object, but the @code{id} remains unchanged.
 
 Example:
 @example
@@ -143,6 +218,7 @@ True
 @vindex dataMem
 @vindex msgMem
 @vindex fieldList
+@vindex childList
 @vindex node
 
 @vindex author
@@ -154,6 +230,80 @@ recognize that this is the base class of all moose classes whose
 instances can be in the model tree.@footnote{Not all classes in MOOSE
 are element-classes. The @code{Id} class, for example.} 
 
+Being the base class of all other MOOSE classes, properties of Neutral
+class is common to all MOOSE classes. A Neutral object can wrap any
+valid moose object. 
+
+You can construct a Neutral object in many ways. 
+@table @samp
+@item From a path string: 
+First, you can just
+give a path-string as the parameter to the constructor. If there is
+already an object with the given path, then you get a wrapper around the
+existing object. On the other hand, if no such object exists, it will
+try to create a new Neutral object with the given path. 
+@example
+@group
+
+>>> foo_neutral = moose.Neutral('/foo')
+>>> bar_neutral = moose.Neutral('/foo')
+>>> foo_neutral.path
+'/foo'
+>>> bar_neutral.path
+'/foo'
+>>> bar_neutral.name = 'bar'
+>>> foo_neutral.name
+'bar'
+
+@end group
+@end example
+
+As you can see in the above example, @code{bar_neutral} is just a
+wrapper around @code{foo_neutral} and thus changing a field in one of
+them will be reflected in the other.
+
+Note that when you specify a path to the constructor, it has to exist up
+to the parent object.
+
+@item From an @code{Id}:
+You can wrap the Id of any existing MOOSE object inside a
+@code{Neutral}. The following example shows a common idiom used for
+looping through the list of children of an object.
+@example @samp
+@group
+>>> root = moose.Neutral('/')
+>>> for child_id in root.childList:
+...     child_obj = moose.Neutral(child_id)
+...     print child_obj.path, 'is actually of class', child_obj.className
+... 
+/shell is actually of class Shell
+/sched is actually of class Neutral
+/library is actually of class Neutral
+/proto is actually of class Neutral
+@end group
+@end example
+@item Specifying a parent and name: 
+You can also give the name of the objct to be created and specify the
+parent. You can call the constructor like this:
+
+@code{>>> foo = moose.Neutral('foo', parent)}
+Here @code{parent} can be another PyMoose object or an @code{Id}. Thus,
+if the path of the parent is @code{'/bar'}, then path of @code{foo} will
+be:
+@code{'/bar/foo'}
+
+@item Copy an existing object: 
+You can also make a copy of an existing object. The constructor is
+called like:
+@code{foo = moose.Neutral(src, new_name, parent)}
+or @code{foo = moose.Neutral(src, path)}
+
+Here @code{src} can be another @code{Neutral} object or the @code{Id}
+thereof. @code{new_name} is a string specifying the name of the
+duplicate and parent is any PyMoose object or an Id. @code{path} is a
+string specifying the path of the duplicate object.
+
+@end table
 The following fields are available in Neutral class and hence in all
 element classes:
 
@@ -211,12 +361,14 @@ Memory used by data part of object
 @item msgMem
 Memory used by messaging (Element) part of object.
 
+@item childList
+Vector of @code{Id}s of the children of this object.
 
 @end table
 
-
-To be completed.
-
+The following are the functions available in @code{Neutral} class:
+@table @samp
+@end table
 @node PyMooseContext
 @section PyMooseContext
 One global object that provides access to global functions.
