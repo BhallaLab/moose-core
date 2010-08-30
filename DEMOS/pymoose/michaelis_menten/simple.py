@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Aug 30 11:54:20 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Aug 30 13:22:41 2010 (+0530)
+# Last-Updated: Mon Aug 30 13:56:03 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 85
+#     Update #: 110
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -51,16 +51,13 @@ import moose
 
 class MichaelisMenten(object):
     """A very simple Michaelis-Menten reaction"""
-    def __init__(self):
+    def __init__(self, mode=0):
         self.context = moose.PyMooseBase.getContext()
         self.kin_compt = moose.KinCompt('mm')
         self.enz_mol = moose.Molecule('enzMol', self.kin_compt)
         self.enzyme = moose.Enzyme('enzyme', self.enz_mol)
         self.substrate = moose.Molecule('substrate', self.kin_compt)
         self.product = moose.Molecule('product', self.kin_compt)
-        self.enzyme.connect('sub', self.substrate, 'reac')
-        self.enzyme.connect('prd', self.product, 'prd')
-        self.enz_mol.connect('reac', self.enzyme, 'enz')
         self.kin_compt.volume = 1.0
         self.substrate.concInit = 1.0
         self.product.concInit = 0.0
@@ -68,6 +65,18 @@ class MichaelisMenten(object):
         self.enzyme.k1 = 0.1
         self.enzyme.k2 = 0.4
         self.enzyme.k3 = 0.1
+        self.enzyme.mode = mode
+        print 'Set Enzyme.mode =', self.enzyme.mode
+        self.enz_complex = None
+        enz_complex_path = self.enzyme.path + '/enz_cplx'
+        if self.context.exists(enz_complex_path):
+            self.enz_complex = moose.Molecule(enz_complex_path)
+            print 'Found enzyme-substrate-complex at', enz_complex_path
+        else:
+            print 'No enzyme-substrate-complex at', enz_complex_path
+        self.enzyme.connect('sub', self.substrate, 'reac')
+        self.enzyme.connect('prd', self.product, 'prd')
+        self.enz_mol.connect('reac', self.enzyme, 'enz')
         self.data = moose.Neutral('/data')
         self.sub_conc_table = moose.Table('sub_conc_table', self.data)
         self.prd_conc_table = moose.Table('prd_conc_table', self.data)
@@ -125,8 +134,8 @@ class MichaelisMenten(object):
         
 
 if __name__ == '__main__':
-    mm = MichaelisMenten()
-    mm.run(10000)
+    mm = MichaelisMenten(0)
+    mm.run()
     
         
 
