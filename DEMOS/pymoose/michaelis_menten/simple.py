@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Aug 30 11:54:20 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Aug 30 13:56:03 2010 (+0530)
+# Last-Updated: Mon Aug 30 20:52:40 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 110
+#     Update #: 174
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -53,12 +53,15 @@ class MichaelisMenten(object):
     """A very simple Michaelis-Menten reaction"""
     def __init__(self, mode=0):
         self.context = moose.PyMooseBase.getContext()
+        self.data = moose.Neutral('/data')
         self.kin_compt = moose.KinCompt('mm')
         self.enz_mol = moose.Molecule('enzMol', self.kin_compt)
         self.enzyme = moose.Enzyme('enzyme', self.enz_mol)
         self.substrate = moose.Molecule('substrate', self.kin_compt)
         self.product = moose.Molecule('product', self.kin_compt)
-        self.kin_compt.volume = 1.0
+        self.enzyme.connect('sub', self.substrate, 'reac')
+        self.enzyme.connect('prd', self.product, 'prd')
+        self.enz_mol.connect('reac', self.enzyme, 'enz')
         self.substrate.concInit = 1.0
         self.product.concInit = 0.0
         self.enz_mol.concInit = 1.0
@@ -66,18 +69,26 @@ class MichaelisMenten(object):
         self.enzyme.k2 = 0.4
         self.enzyme.k3 = 0.1
         self.enzyme.mode = mode
-        print 'Set Enzyme.mode =', self.enzyme.mode
+        if mode == 0:
+            print 'Simulating in explicit mode.'
+        else:
+            print 'Simulating in implicit mode.'
+
         self.enz_complex = None
-        enz_complex_path = self.enzyme.path + '/enz_cplx'
+        self.enz_complex_table = None
+        self.enz_table = None
+        enz_complex_path = self.enzyme.path + '/' + self.enzyme.name + '_cplx'
         if self.context.exists(enz_complex_path):
             self.enz_complex = moose.Molecule(enz_complex_path)
+            self.enz_complex_table = moose.Table('enz_cplx_table', self.data)
+            self.enz_complex_table.stepMode = 3
+            self.enz_complex_table.connect('inputRequest', self.enz_complex, 'conc')
+            self.enz_table = moose.Table('enz_table', self.data)
+            self.enz_table.stepMode = 3
+            self.enz_table.connect('inputRequest', self.enz_mol, 'conc')
             print 'Found enzyme-substrate-complex at', enz_complex_path
         else:
             print 'No enzyme-substrate-complex at', enz_complex_path
-        self.enzyme.connect('sub', self.substrate, 'reac')
-        self.enzyme.connect('prd', self.product, 'prd')
-        self.enz_mol.connect('reac', self.enzyme, 'enz')
-        self.data = moose.Neutral('/data')
         self.sub_conc_table = moose.Table('sub_conc_table', self.data)
         self.prd_conc_table = moose.Table('prd_conc_table', self.data)
         self.sub_conc_table.stepMode = 3
@@ -96,8 +107,13 @@ class MichaelisMenten(object):
         self.context.reset()
         print 'After reset'
         self.context.step(self.simtime)
-        pylab.plot(np.array(self.prd_conc_table))
-        pylab.plot(np.array(self.sub_conc_table))
+        pylab.plot(np.array(self.prd_conc_table), label='Product')
+        pylab.plot(np.array(self.sub_conc_table), label='Substrate')
+        if self.enz_complex_table:
+            pylab.plot(np.array(self.enz_complex_table), label='Enzyme-Substrate-complex')
+        if self.enz_table:
+            pylab.plot(np.array(self.enz_table), label='Enzyme')
+        pylab.legend()
         pylab.show()
 
     def set_Km_slot(self, Km):
@@ -130,6 +146,16 @@ class MichaelisMenten(object):
     def set_dt_slot(self, dt):
         """For use by Qt classes to set integration time step"""
         self.dt = dt
+
+    def set_mode_slot(self, mode):
+        """For use by Qt classes to set implicit/explicit
+        Michaelis-Menten mode of the enzyme."""
+        if isinstance(mode, str):
+            if mode == 'implicit':
+                mode = True
+            else:
+                mode = False
+        self.enzyme.mode = mode
 
         
 
