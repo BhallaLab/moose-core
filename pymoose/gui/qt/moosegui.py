@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jul 22 18:02:15 2010 (+0530)
+# Last-Updated: Tue Jul 27 12:34:09 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2330
+#     Update #: 2359
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -364,7 +364,11 @@ class MainWindow(QtGui.QMainWindow):
         # Action to configure plots
         self.configurePlotAction = QtGui.QAction(self.tr('Configure selected plots'), self)
 	self.connect(self.configurePlotAction, QtCore.SIGNAL('triggered(bool)'), self.configurePlots)
-        
+        self.togglePlotVisibilityAction = QtGui.QAction(self.tr('Hide plots'), self)
+        self.togglePlotVisibilityAction.setCheckable(True)
+        self.togglePlotVisibilityAction.setChecked(False)
+        self.connect(self.togglePlotVisibilityAction, QtCore.SIGNAL('triggered(bool)'), self.togglePlotVisibility)
+
         # Action to create connections
         self.connectionDialogAction = QtGui.QAction(self.tr('&Connect elements'), self)
 	self.connect(self.connectionDialogAction, QtCore.SIGNAL('triggered()'), self.makeConnectionPopup)
@@ -407,9 +411,9 @@ class MainWindow(QtGui.QMainWindow):
         self.showDocAction = QtGui.QAction(self.tr('Documentation'), self)
         self.contextHelpAction = QtGui.QAction(self.tr('Context Help'), self)
         self.runAction = QtGui.QAction(self.tr('Run Simulation'), self)
-	self.connect(self.runAction, QtCore.SIGNAL('triggered(bool)'), self.runSlot)
-        self.resetAction = QtGui.QAction(self.tr('Reset Simulation'), self)
-	self.connect(self.resetAction, QtCore.SIGNAL('triggered()'), self.resetSlot)
+	self.connect(self.runAction, QtCore.SIGNAL('triggered(bool)'), self.resetAndRunSlot)
+        # self.resetAction = QtGui.QAction(self.tr('Reset Simulation'), self)
+	# self.connect(self.resetAction, QtCore.SIGNAL('triggered()'), self.resetSlot)
 
         
         
@@ -475,7 +479,7 @@ class MainWindow(QtGui.QMainWindow):
         self.viewMenu.addAction(self.cascadePlotWindowsAction)
 
         self.runMenu = QtGui.QMenu(self.tr('&Run'), self)
-        self.runMenu.addAction(self.resetAction)
+        # self.runMenu.addAction(self.resetAction)
         self.runMenu.addAction(self.runAction)
 
 
@@ -484,6 +488,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.plotMenu = QtGui.QMenu(self.tr('&Plot Settings'), self)
         self.plotMenu.addAction(self.configurePlotAction)
+        self.plotMenu.addAction(self.togglePlotVisibilityAction)
 
         self.glMenu = QtGui.QMenu(self.tr('Open&GL'), self)
         self.glMenu.addAction(self.startGLWizardAction)
@@ -612,7 +617,7 @@ class MainWindow(QtGui.QMainWindow):
         self.runtimeText = QtGui.QLineEdit('%1.3e' % (MooseHandler.runtime), self.controlPanel)
         self.updateTimeLabel = QtGui.QLabel(self.tr('Update interval for plots (second):'), self.controlPanel)
         self.updateTimeText = QtGui.QLineEdit('%1.3e' % (MooseHandler.plotupdate_dt), self.controlPanel)
-        self.resetButton = QtGui.QPushButton(self.tr('Reset'), self.controlPanel)
+        # self.resetButton = QtGui.QPushButton(self.tr('Reset'), self.controlPanel)
         self.runButton = QtGui.QPushButton(self.tr('Run'), self.controlPanel)
         self.simdtLabel = QtGui.QLabel(self.tr('Simulation timestep (second):'), self.controlPanel)
         self.plotdtLabel = QtGui.QLabel(self.tr('Plotting timestep (second):'), self.controlPanel)
@@ -622,8 +627,8 @@ class MainWindow(QtGui.QMainWindow):
         self.gldtText = QtGui.QLineEdit('%1.3e' % (MooseHandler.gldt), self.controlPanel)
         self.overlayCheckBox = QtGui.QCheckBox(self.tr('Overlay plots'), self.controlPanel)
         
-        self.connect(self.runButton, QtCore.SIGNAL('clicked()'), self.runSlot)
-        self.connect(self.resetButton, QtCore.SIGNAL('clicked()'), self.resetSlot)
+        self.connect(self.runButton, QtCore.SIGNAL('clicked()'), self.resetAndRunSlot)
+        # self.connect(self.resetButton, QtCore.SIGNAL('clicked()'), self.resetSlot)
         layout.addWidget(self.simdtLabel, 0,0)
         layout.addWidget(self.simdtText, 0, 1)
         layout.addWidget(self.plotdtLabel, 1, 0)
@@ -635,7 +640,7 @@ class MainWindow(QtGui.QMainWindow):
         layout.addWidget(self.runtimeText, 4, 1)
         layout.addWidget(self.updateTimeLabel, 5, 0)
         layout.addWidget(self.updateTimeText, 5,1)
-        layout.addWidget(self.resetButton, 6, 0)
+        # layout.addWidget(self.resetButton, 6, 0)
         layout.addWidget(self.runButton, 6, 1)
         self.controlPanel.setLayout(layout)
         self.controlDock.setWidget(self.controlPanel)
@@ -702,7 +707,7 @@ class MainWindow(QtGui.QMainWindow):
         self.mooseHandler._current_element = current_element
 
 
-    def resetSlot(self):
+    def _resetSlot(self):
         """Get the dt-s from the UI and call the reset method in
         MooseHandler
         """
@@ -739,7 +744,7 @@ class MainWindow(QtGui.QMainWindow):
             plot.reset()
                     
 
-    def runSlot(self):
+    def _runSlot(self):
         """Run the simulation.
 
         """
@@ -760,6 +765,10 @@ class MainWindow(QtGui.QMainWindow):
             self.runtimeText.setText(str(runtime))
         self.updatePlots(runtime)
         self.mooseHandler.doRun(runtime)
+
+    def resetAndRunSlot(self):
+        self._resetSlot()
+        self._runSlot()
 
     def changeFieldPlotWidget(self, full_field_path, plotname):
         """Remove the plot for the specified field from the current
@@ -819,6 +828,16 @@ class MainWindow(QtGui.QMainWindow):
                 if plot.objectName() == plotName:
                     plot.reconfigureSelectedCurves(pen, symbol, style, attribute)
                     break
+
+    def togglePlotVisibility(self, hide):
+        print 'Currently selected to hide?', hide
+        activePlot = self.currentPlotWindow            
+        plotName = activePlot.windowTitle() # The window title is the plot name
+        for plot in self.plots:
+            if plot.objectName() == plotName:
+                plot.showSelectedCurves(not hide)
+                break
+        
 
     def createConnection(self):
         if (self._srcElement is None) or (self._destElement is None):

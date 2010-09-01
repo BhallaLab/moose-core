@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Jul 23 10:13:09 2010 (+0530)
+# Last-Updated: Tue Jul 27 12:27:26 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 791
+#     Update #: 809
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -238,6 +238,27 @@ class MooseHandler(QtCore.QObject):
         script = filename[:extension_start]
         exec 'import %s' % (script)
 
+    def addFieldTable(self, full_field_path):
+        """
+        adds a field to the list of fields to be plotted.
+
+        full_field_path -- complete path to the field.
+        """
+        try:
+            table = self.fieldTableMap[full_field_path]
+        except KeyError:
+            fstart = full_field_path.rfind('/')
+            fieldName = full_field_path[fstart+1:]
+            objPath =  full_field_path[:fstart]
+            table = moose.Table('%s_%d_%d' % (fieldName, self._tableSuffix, self._tableIndex), self._data)
+            self.fieldTableMap[full_field_path] = table
+            table.stepMode = 3
+            target = moose.Neutral(objPath)
+            connected = table.connect('inputRequest', target, fieldName)
+            config.LOGGER.info('Connected %s to %s/%s' % (table.path, target.path, fieldName))
+            self._tableIndex += 1
+        return table
+
     def doReset(self, simdt, plotdt, gldt, plotupdate_dt):
         """Reset moose.
 
@@ -266,27 +287,6 @@ class MooseHandler(QtCore.QObject):
         MooseHandler.plotupdate_dt = plotupdate_dt
         self._context.reset()
 
-    def addFieldTable(self, full_field_path):
-        """
-        adds a field to the list of fields to be plotted.
-
-        full_field_path -- complete path to the field.
-        """
-        try:
-            table = self.fieldTableMap[full_field_path]
-        except KeyError:
-            fstart = full_field_path.rfind('/')
-            fieldName = full_field_path[fstart+1:]
-            objPath =  full_field_path[:fstart]
-            table = moose.Table('%s_%d_%d' % (fieldName, self._tableSuffix, self._tableIndex), self._data)
-            self.fieldTableMap[full_field_path] = table
-            table.stepMode = 3
-            target = moose.Neutral(objPath)
-            connected = table.connect('inputRequest', target, fieldName)
-            config.LOGGER.info('Connected %s to %s/%s' % (table.path, target.path, fieldName))
-            self._tableIndex += 1
-        return table
-
     def doRun(self, time):
         """Just runs the simulation. 
 
@@ -305,7 +305,41 @@ class MooseHandler(QtCore.QObject):
             time_left = MooseHandler.runtime
         self._context.step(time_left)
         self.emit(QtCore.SIGNAL('updatePlots(float)'), self._context.getCurrentTime())
-        
+
+    def doResetAbdRun(self, runtime, simdt=None, plotdt=None, gldt=None, plotupdate_dt=None):
+        """Reset and run the simulation.
+
+        This is to replace separate reset and run methods as two
+        separate steps to run a simulation is awkward for the
+        end-user.
+
+        """
+        if simdt is not None and isinstance(simdt, float):
+            MooseHandler.simdt = simdt
+        if plotdt is not None and isinstance(plotdt, float):
+            MooseHandler.plotdt_err = plotdt
+        if gldt is not None and isinstance(gldt, float):
+            MooseHandler.gldt = gldt
+        if plotupdate_dt is not None and isinstance(plotupdate_dt, float):
+            MooseHandler.plotupdate_dt = plotupdate_dt
+        if runtime is not None and isinstance(runtime, float):
+            MooseHandler.runtime = runtime
+            
+        self._context.setClock(0, MooseHandler.simdt)
+        self._context.setClock(1, MooseHandler.simdt)
+        self._context.setClock(2, MooseHandler.simdt)
+        self._context.setClock(3, MooseHandler.plotdt)
+        self._context.setClock(4, MooseHandler.gldt)
+        self._context.useClock(3, self._data.path + '/##[TYPE=Table]')
+        if self._context.exists('/graphs'):
+            self._context.useClock(3, '/graphs/##[TYPE=Table]')
+        if self._context.exists('/moregraphs'):
+            self._context.useClock(3, '/moregraphs/##[TYPE=Table]')            
+        self._context.useClock(4, self._gl.path + '/##[TYPE=GLcell]')
+        self._context.useClock(4, self._gl.path + '/##[TYPE=GLview]')
+        self._context.reset()
+        self.context.step(float(MooseHandler.runtime))
+
     def doConnect(self):
         ret = False
         if self._connSrcObj and self._connDestObj and self._connSrcMsg and self._connDestMsg:
