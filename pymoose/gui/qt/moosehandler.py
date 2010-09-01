@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Jul 19 16:32:34 2010 (+0530)
-#           By: subha
-#     Update #: 774
+# Last-Updated: Fri Jul 23 10:13:09 2010 (+0530)
+#           By: Subhasis Ray
+#     Update #: 791
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -380,7 +380,10 @@ class MooseHandler(QtCore.QObject):
         it may slowdown the simulation.
         
         """
-        # print 'Parameter types:', 'port:', type(port), 'field:', type(field), 'threshold:', type(threshold), 'highValue:', type(highValue), highValue, 'lowValue:', type(lowValue), 'vscale:', type(vscale), 'bgColor:', type(bgColor), 'sync:', type(sync)
+        print 'Parameter types:', 'port:', type(port), 'field:', type(field), 'threshold:', type(threshold), 'highValue:', type(highValue), highValue, 'lowValue:', type(lowValue), 'vscale:', type(vscale), 'bgColor:', type(bgColor), 'sync:', type(sync)
+        print 'Background colour:', bgColor
+        if not self._context.exists(mooseObjPath):
+            return None
         glCellPath = mooseObjPath.replace('/', '_')  + str(random.randint(0,999))
         glCell = moose.GLcell(glCellPath, self._gl)
         glCell.useClock(4)
@@ -405,7 +408,7 @@ class MooseHandler(QtCore.QObject):
         if sync is not None:
             glCell.sync = sync
         print 'Created GLCell for object', mooseObjPath, ' on port', port
-
+        return glCell
         
     def makeGLView(self, mooseObjPath, wildcard, port, fieldList, minValueList, maxValueList, colorFieldIndex, morphFieldIndex=None, grid=None, bgColor=None, sync=None):
         """
@@ -440,6 +443,8 @@ class MooseHandler(QtCore.QObject):
         sync -- synchronize simulation with visualization.
 
         """
+        if not self._context.exists(mooseObjPath):
+            return None
         glViewPath = mooseObjPath.replace('/', '_') + str(random.randint(0,999))
 	print 'Created GLView object',  glViewPath
         glView = moose.GLview(glViewPath, self._gl)
@@ -481,7 +486,7 @@ class MooseHandler(QtCore.QObject):
             glView.sync = 'on'
 
         print 'Created GLView', glView.path, 'for object', mooseObjPath, ' on port', port
-
+        return glView
 
     def startGLClient(self, executable, port, mode, colormap):
         """Start the glclient subprocess. 
@@ -497,6 +502,10 @@ class MooseHandler(QtCore.QObject):
         
         """
         client = GLClient(executable, port, mode, colormap)
+        ret = client.child.poll()
+        if ret is not None: # The child terminated immediately
+            print 'Child process exited with return code:', ret
+            return None
         self._portClientMap[port] = client
         print 'Created GLclient on port', port
         return client

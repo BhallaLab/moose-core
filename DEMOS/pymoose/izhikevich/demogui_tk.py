@@ -139,7 +139,6 @@ class Tkplot(Canvas):
             color = data[2]
             (x_screen, y_screen) = self.axes.screen(xlist, ylist)
             positions = numpy.dstack((x_screen, y_screen)).flatten().tolist()
-            numpy.savetxt('positions', positions)
             self.create_line(positions, fill=color)
         self.update()
 

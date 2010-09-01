@@ -454,7 +454,6 @@ try:
         demo = IzhikevichDemo()
         (time, Vm, Im) = demo.simulate(key)
         title(IzhikevichDemo.parameters[key][0] + '. ' + key)
-        savetxt('Vm.plot', array(Vm))
         subplot(2,1,1)
         plot(time, array(Vm))
         subplot(2,1,2)
