@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Aug 23 21:09:27 2010 (+0530)
+# Last-Updated: Thu Jul 22 18:02:15 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2304
+#     Update #: 2330
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -109,15 +109,6 @@ def makeClassList(parent=None, mode=MooseGlobals.MODE_ADVANCED):
     else:
 	print 'Error: makeClassList() - mode:', mode, 'is undefined.'
 
-
-# class ConnStruct:
-#     def __init__(self, srcElm=None, srcField=None, destElm=None, destField=None):
-#         self.srcElm = srcElm
-#         self.destElm = destElm
-#         self.srcField = srcField
-#         self.destField = destField
-
-
 class MainWindow(QtGui.QMainWindow):
     default_plot_count = 1
     def __init__(self, interpreter=None, parent=None):
@@ -131,6 +122,7 @@ class MainWindow(QtGui.QMainWindow):
         #     self.demosDir = str(QtGui.QFileDialog.getExistingDirectory(self, 'Please select pymoose demos directory'))
         self.resize(800, 600)
         self.setDockOptions(self.AllowNestedDocks | self.AllowTabbedDocks | self.ForceTabbedDocks | self.AnimatedDocks)        
+        self.setDockNestingEnabled(True)
         # The following are for holding transient selections from
         # connection dialog
         self._srcElement = None
@@ -148,7 +140,6 @@ class MainWindow(QtGui.QMainWindow):
         self.createControlDock()
         # Connect the double-click event on modelTreeWidget items to
         # creation of the object editor.
-        # TODO - will create a right-click menu
         self.connect(self.modelTreeWidget, 
                      QtCore.SIGNAL('itemDoubleClicked(QTreeWidgetItem *, int)'),
                      self.makeObjEditorFromTreeItem)
@@ -199,8 +190,8 @@ class MainWindow(QtGui.QMainWindow):
 
         self.sourceTree = MooseTreeWidget(self.connectionDialog)
         self.destTree = MooseTreeWidget(self.connectionDialog)
-        self.connect(self.sourceTree, QtCore.SIGNAL('itemClicked(QAbstractTreeItem *, int)'), self.selectConnSource)
-        self.connect(self.destTree, QtCore.SIGNAL('itemClicked(QAbstractTreeItem*, int)'), self.selectConnDest)
+        self.connect(self.sourceTree, QtCore.SIGNAL('itemClicked(QTreeWidgetItem *, int)'), self.selectConnSource)
+        self.connect(self.destTree, QtCore.SIGNAL('itemClicked(QTreeWidgetItem*, int)'), self.selectConnDest)
         sourceFieldLabel = QtGui.QLabel(self.tr('Source Field'), self.connectionDialog)
         self.sourceFieldComboBox = QtGui.QComboBox(self.connectionDialog)
         
@@ -254,10 +245,6 @@ class MainWindow(QtGui.QMainWindow):
             aboutMooseMessage = QtGui.QMessageBox.about(self, self.tr('About MOOSE'), self.tr(aboutText))
             return aboutMooseMessage
 
-    def quit(self):
-        """Do cleanup, saving, etc. before quitting."""
-        QtGui.qApp.closeAllWIndows()
-
     def showRightBottomDocks(self, checked):
         """Hides the widgets on right and bottom dock area"""
         for child in self.findChildren(QtGui.QDockWidget):
@@ -302,10 +289,18 @@ class MainWindow(QtGui.QMainWindow):
             else:
                 self.objFieldEditPanel = QtGui.QDockWidget(self.tr(obj.name), self)
                 self.objFieldEditPanel.setObjectName(self.tr('MooseObjectFieldEdit'))
-                self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.objFieldEditPanel)
-        self.objFieldEditor = QtGui.QTableView(self.objFieldEditPanel)            
+                if (config.QT_MAJOR_VERSION > 4) or ((config.QT_MAJOR_VERSION == 4) and (config.QT_MINOR_VERSION >= 5)):
+                    self.tabifyDockWidget(self.mooseClassesPanel, self.objFieldEditPanel)
+                else:
+                    self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.objFieldEditPanel)
+                self.restoreDockWidget(self.objFieldEditPanel)
+                
+        self.objFieldEditor = QtGui.QTableView(self.objFieldEditPanel)
         self.objFieldEditor.setModel(self.objFieldEditModel)
-        self.objFieldEditModel.plotNames += [plot.objectName() for plot in self.plots]
+        for plot in self.plots:
+            objName = plot.objectName()
+            if objName not in self.objFieldEditModel.plotNames :
+                self.objFieldEditModel.plotNames += [plot.objectName() for plot in self.plots]
         self.objFieldEditor.setItemDelegate(ObjectEditDelegate(self))
         self.connect(self.objFieldEditModel, 
                      QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'),
@@ -315,9 +310,8 @@ class MainWindow(QtGui.QMainWindow):
         	             QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'),
         	             self.sceneLayout.updateItemSlot)
 
-        # self.objFieldEditor.setContextMenuPolicy(Qt.CustomContextMenu)
-        # self.connect(self.objFieldEditor, QtCore.SIGNAL('customContextMenuRequested ( const QPoint&)'), self.popupFieldMenu)
         self.objFieldEditPanel.setWidget(self.objFieldEditor)
+        self.objFieldEditPanel.raise_()
 	self.objFieldEditPanel.show()
 
     def createGLCellWidget(self):
@@ -332,6 +326,7 @@ class MainWindow(QtGui.QMainWindow):
     def createActions(self):
         # Actions for view menu
         # The following actions are to toggle visibility of various widgets
+        self.controlDockAction = self.controlDock.toggleViewAction()
         self.glClientAction = self.glClientDock.toggleViewAction()
         self.glClientAction.setChecked(False)
         self.mooseTreeAction = self.mooseTreePanel.toggleViewAction()
@@ -467,6 +462,7 @@ class MainWindow(QtGui.QMainWindow):
         self.fileMenu.addAction(self.quitAction)
 
         self.viewMenu = QtGui.QMenu('&View', self)
+        self.viewMenu.addAction(self.controlDockAction)
         self.viewMenu.addAction(self.glClientAction)
         self.viewMenu.addAction(self.mooseTreeAction)
         self.viewMenu.addAction(self.refreshMooseTreeAction)
@@ -678,10 +674,7 @@ class MainWindow(QtGui.QMainWindow):
         ffilter = ffilter[:-2]
         fileDialog.setFilter(self.tr(ffilter))
         # The following version gymnastic is because QFileDialog.selectNameFilter() was introduced in Qt 4.4
-        qtVersion = str(QtCore.QT_VERSION_STR).split('.')
-        major = int(qtVersion[0])
-        minor = int(qtVersion[1])
-        if (major > 4)or ((major == 4) and (minor >= 4)):
+        if (config.QT_MAJOR_VERSION > 4) or ((config.QT_MAJOR_VERSION == 4) and (config.QT_MINOR_VERSION >= 4)):
             for key, value in self.mooseHandler.fileExtensionMap.items():
                 if value == MooseHandler.type_genesis:
                     fileDialog.selectNameFilter(key)
