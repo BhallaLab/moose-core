@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Feb  4 14:52:22 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Jul 12 16:24:49 2010 (+0530)
+# Last-Updated: Thu Jul 22 11:12:59 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 141
+#     Update #: 142
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -65,6 +65,7 @@ class GLClient(object):
 	self.opt_dict['-m'] = mode
 	self.opt_dict['-c'] = colormap
         self.executable = exe
+        self.child = None
         self.running = False
         self.run(self.opt_dict)
 
