@@ -64,7 +64,7 @@ class MichaelisMenten(object):
         self.enz_mol.connect('reac', self.enzyme, 'enz')
         self.substrate.concInit = 1.0
         self.product.concInit = 0.0
-        self.enz_mol.concInit = 1.0
+        self.enz_mol.concInit = 1e-3
         self.enzyme.k1 = 0.1
         self.enzyme.k2 = 0.4
         self.enzyme.k3 = 0.1
