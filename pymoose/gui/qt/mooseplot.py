@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul  5 21:35:09 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Jul 20 16:43:18 2010 (+0530)
-#           By: subha
-#     Update #: 513
+# Last-Updated: Wed Aug  4 11:45:35 2010 (+0530)
+#           By: Subhasis Ray
+#     Update #: 583
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -78,6 +78,7 @@ class MoosePlot(Qwt.QwtPlot):
         Qwt.QwtPlot.__init__(self, *args)
         self.plotNo = MoosePlot.plot_index
         MoosePlot.plot_index = MoosePlot.plot_index + 1
+        self.setAcceptDrops(True)
         self.curveIndex = 0
         self.setCanvasBackground(Qt.white)
         self.alignScales()
@@ -219,7 +220,6 @@ class MoosePlot(Qwt.QwtPlot):
             ydata = array(table.table)                
             xdata = linspace(0, currentTime, tabLen)
             curve.setData(xdata, ydata)
-            # config.LOGGER.debug('x0 = %g, x[-1] = %g, y[0] = %g, y[-1] = %g' % (xdata[0], xdata[-1], ydata[0], ydata[-1]))
         self.clearZoomStack()
 
     def addTable(self, table):
@@ -285,6 +285,56 @@ class MoosePlot(Qwt.QwtPlot):
 	self.replot()
  		
 
+=======
+    def dragEnterEvent(self, event):        
+        event.accept()
+
+    def dropEvent(self, event):
+        """Overrides QWidget's method to accept drops of fields from
+        ObjectEditor.
+
+        """
+        source = event.source()
+        # Should check that source is objectEditor - right now we don't have
+        # any other source for Plot, so don't bother.
+        model = source.model()
+        index = source.currentIndex()
+        if index.isValid():
+            # This is horrible code as I am peeping into the
+            # ObjectEditor's internals, but I don't have the time or
+            # patience to implement Drag objects for ObjectEditor.
+            fieldName = model.fields[index.row()]
+            fieldPath = model.mooseObject.path + '/' + fieldName
+            # Till now this file was decoupled from MooseHandler. Now
+            # I am going to break that for the sake of getting the job
+            # done quick and dirty.
+
+            # This is terrible code ... I would have been ashamed of
+            # this unless it was a brainless typing session to meet
+            # the immediate needs. I hope some day somebody with the
+            # time and skill to do "Software Engineering" will clean
+            # this mishmash of dependencies.
+            # -- Subha
+            table = self.mooseHandler.addFieldTable(fieldPath)
+            self.addTable(table)
+            # This also breaks the capability to move a plot from one
+            # plot window to another.
+
+class MoosePlotWindow(QtGui.QMdiSubWindow):
+    """This is to customize MDI sub window for our purpose.
+
+    In particular, we don't want anything to be deleted when the window is closed. 
+    
+    """
+    def __init__(self, *args):
+        QtGui.QMdiSubWindow.__init__(self, *args)
+        
+    def closeEvent(self, event):
+        self.emit(QtCore.SIGNAL('subWindowClosed()'))
+        self.hide()
+
+
+>>>>>>> .merge-right.r2111
 import sys
 if __name__ == '__main__':
     app = QtGui.QApplication([])
