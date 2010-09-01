@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Jul 27 12:34:09 2010 (+0530)
+# Last-Updated: Wed Aug  4 11:48:19 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2359
+#     Update #: 2416
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -86,7 +86,7 @@ from mooseclasses import *
 from mooseglobals import MooseGlobals
 from mooseshell import MooseShell
 from moosehandler import MooseHandler
-from mooseplot import MoosePlot
+from mooseplot import MoosePlot, MoosePlotWindow
 from plotconfig import PlotConfig
 from glwizard import MooseGLWizard
 from firsttime import FirstTimeWizard
@@ -156,11 +156,13 @@ class MainWindow(QtGui.QMainWindow):
         self.centralPanel = QtGui.QMdiArea(self)
         # plots is a list of available MoosePlot widgets.
         self.plots = []
+        self.plotWindows = []
         # tablePlotMap is a maps all currently available tables to the
         # plot widgets they belong to.
         self.tablePlotMap = {}
         self.currentPlotWindow = None
         # Start with a default number of plot widgets
+        self._visiblePlotWindowCount = 0
         for ii in range(MainWindow.default_plot_count):
             self.addPlotWindow()
         self.plotConfig = PlotConfig(self)
@@ -296,7 +298,11 @@ class MainWindow(QtGui.QMainWindow):
                 self.restoreDockWidget(self.objFieldEditPanel)
                 
         self.objFieldEditor = QtGui.QTableView(self.objFieldEditPanel)
+        self.objFieldEditor.setObjectName(obj.path) # This was for quick testing of drag and drop
         self.objFieldEditor.setModel(self.objFieldEditModel)
+        self.objFieldEditor.setEditTriggers(QtGui.QAbstractItemView.DoubleClicked
+                                 | QtGui.QAbstractItemView.SelectedClicked)
+        self.objFieldEditor.setDragEnabled(True)
         for plot in self.plots:
             objName = plot.objectName()
             if objName not in self.objFieldEditModel.plotNames :
@@ -320,7 +326,10 @@ class MainWindow(QtGui.QMainWindow):
         cellItem = self.modelTreeWidget.currentItem()
         cell = cellItem.getMooseObject()
         if not cell.className == 'Cell':
-            QtGui.QMessageBox.information(self, self.tr('Incorrect type for GLCell'), self.tr('GLCell is for visualizing a cell. Please select one in the Tree view. Currently selected item is of ' + cell.className + ' class. Hover mouse over an item to see its class.'))
+            QtGui.QMessageBox.information(self, self.tr('Incorrect type for GLCell'), 
+                                          self.tr('GLCell is for visualizing a cell. Please select one in the Tree view. Currently selected item is of ' 
+                                                  + cell.className 
+                                                  + ' class. Hover mouse over an item to see its class.'))
             return
         
     def createActions(self):
@@ -360,6 +369,10 @@ class MainWindow(QtGui.QMainWindow):
         self.subWindowLayoutActionGroup.addAction(self.cascadePlotWindowsAction)
         self.subWindowLayoutActionGroup.setExclusive(True)
         self.tilePlotWindowsAction.setChecked(True)
+        self.togglePlotWindowsAction = QtGui.QAction(self.tr('Plot windows'), self)
+        self.togglePlotWindowsAction.setCheckable(True)
+        self.togglePlotWindowsAction.setChecked(True)
+        self.connect(self.togglePlotWindowsAction, QtCore.SIGNAL('triggered(bool)'), self.setPlotWindowsVisible)
 
         # Action to configure plots
         self.configurePlotAction = QtGui.QAction(self.tr('Configure selected plots'), self)
@@ -477,7 +490,7 @@ class MainWindow(QtGui.QMainWindow):
         self.viewMenu.addSeparator().setText(self.tr('Layout Plot Windows'))
         self.viewMenu.addAction(self.tilePlotWindowsAction)
         self.viewMenu.addAction(self.cascadePlotWindowsAction)
-
+        self.viewMenu.addAction(self.togglePlotWindowsAction)
         self.runMenu = QtGui.QMenu(self.tr('&Run'), self)
         # self.runMenu.addAction(self.resetAction)
         self.runMenu.addAction(self.runAction)
@@ -647,21 +660,28 @@ class MainWindow(QtGui.QMainWindow):
 
     def addPlotWindow(self):
         title = self.tr('Plot %d' % (len(self.plots)))
-        plotWindow = QtGui.QMainWindow()
+        plotWindow = MoosePlotWindow()
         plotWindow.setWindowTitle(title)
         plot = MoosePlot(plotWindow)
+        plot.mooseHandler = self.mooseHandler
         plot.setObjectName(title)
-        plotWindow.setCentralWidget(plot)
+        plotWindow.setWidget(plot)
         self.plots.append(plot)
-        subWindow = self.centralPanel.addSubWindow(plotWindow)
-        self.centralPanel.setActiveSubWindow(subWindow)
+        self.centralPanel.addSubWindow(plotWindow)
+        plotWindow.setAcceptDrops(True)
+        self.connect(plotWindow, QtCore.SIGNAL('subWindowClosed()'), self.decrementSubWindowCount)
+        # self.plotWindows.append(plotWindow)
+        self.centralPanel.setActiveSubWindow(plotWindow)
         plotWindow.show()
-        if hasattr(self, 'cascadePlotWindowsAction') and self.cascadePlotWindowsAction.isChecked():
-            self.centralPanel.cascadeSubWindows()
-        else:
-            self.centralPanel.tileSubWindows()
+        self._visiblePlotWindowCount += 1
+        # if hasattr(self, 'cascadePlotWindowsAction') and self.cascadePlotWindowsAction.isChecked():
+        #     self.centralPanel.cascadeSubWindows()
+        # else:
+        #     self.centralPanel.tileSubWindows()
         self.currentPlotWindow = plotWindow
         return plotWindow
+    def setPlotWindowsVisible(self, on=True):
+        """Toggle visibility of plot windows.
 
     def addLayoutWindow(self):
         self.sceneLayout = layout.Scene()
@@ -670,6 +690,23 @@ class MainWindow(QtGui.QMainWindow):
 	self.centralPanel.tileSubWindows()
         self.sceneLayout.show()
     
+        """
+        print 'Setting plot windows visible:', on
+        if on:
+            for window in self.centralPanel.subWindowList():
+                window.show()
+            self._visiblePlotWindowCount = len(self.centralPanel.subWindowList())
+        else:
+            print 'Closing all subwindows'
+            self.centralPanel.closeAllSubWindows()
+            self._visiblePlotWindowCount = 0
+
+    def decrementSubWindowCount(self):
+        if self._visiblePlotWindowCount > 0:
+            self._visiblePlotWindowCount -= 1
+        if self._visiblePlotWindowCount == 0:
+            self.togglePlotWindowsAction.setChecked(False)
+
     def popupLoadModelDialog(self):
         fileDialog = QtGui.QFileDialog(self)
         fileDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
