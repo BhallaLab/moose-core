@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul  5 21:35:09 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Aug  4 11:45:35 2010 (+0530)
+# Last-Updated: Wed Sep  1 15:38:10 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 583
+#     Update #: 585
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -285,7 +285,6 @@ class MoosePlot(Qwt.QwtPlot):
 	self.replot()
  		
 
-=======
     def dragEnterEvent(self, event):        
         event.accept()
 
@@ -334,7 +333,6 @@ class MoosePlotWindow(QtGui.QMdiSubWindow):
         self.hide()
 
 
->>>>>>> .merge-right.r2111
 import sys
 if __name__ == '__main__':
     app = QtGui.QApplication([])
