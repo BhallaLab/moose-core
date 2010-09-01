@@ -233,7 +233,7 @@ class ObjectEditDelegate(QtGui.QItemDelegate):
         combo box for the plot column."""
         # print 'Creating editor'
         if index.column() == 2:
-            combobox = QtGui.QComboBox(parent)
+            combobox = QtGui.QComboBox(parent)        
             combobox.addItems(index.model().plotNames)
             combobox.setEditable(False)
             # print 'create Combobox'
