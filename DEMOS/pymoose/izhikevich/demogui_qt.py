@@ -116,8 +116,6 @@ class IzhikevichGui(QtGui.QMainWindow):
         (time, Vm, Im) = self.demo.simulate(key)
         Vm = numpy.array(Vm) * 1e3
         Im = numpy.array(Im) * 1e9
-        numpy.savetxt(key + '_Vm.plot', Vm)
-        numpy.savetxt(key + '_Im.plot', Im)
         self.VmPlot.clear()
         self.ImPlot.clear()
         curve = Qwt.QwtPlotCurve(self.tr(key + '_Vm'))

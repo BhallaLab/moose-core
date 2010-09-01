@@ -145,8 +145,8 @@ class TestNaMitralUSB(unittest.TestCase):
         inject_plot.useClock(2)  
         moose.PyMooseBase.getContext().reset()
         moose.PyMooseBase.getContext().step(self.sim_length)
-        channel_plot.dumpFile(channel_plot.name + ".pymoose.plot")
-        inject_plot.dumpFile(inject_plot.name + ".pymoose.plot")
+        # channel_plot.dumpFile(channel_plot.name + ".pymoose.plot")
+        # inject_plot.dumpFile(inject_plot.name + ".pymoose.plot")
 
 if __name__ == "__main__":
     unittest.main()
