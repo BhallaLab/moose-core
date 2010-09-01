@@ -4,9 +4,11 @@
 # code from different sources: mostly Scribus.
 
 cmake_minimum_required(VERSION 2.6)
+
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_COLOR_MAKEFILE ON)
-
+include(CPack) 
+include(InstallRequiredSystemLibraries)
 # We have some third-party CMake modules to find various packages.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeModules)
 
@@ -16,9 +18,6 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MOOSE: the multiscale object-oriented sim
 set(CPACK_PACKAGE_VERSION_MAJOR "1")
 set(CPACK_PACKAGE_VERSION_MINOR "3")
 set(CPACK_PACKAGE_VERSION_PATCH "0")
-set(CPACK_GENERATOR "tgz")
-set(CPACK_SOURCE_GENERATOR "TGZ")
-include(CPack) 
 
 set(VERSION_MAJOR 1)
 set(VERSION_MINOR 3)
