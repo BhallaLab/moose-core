@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 16 05:41:58 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Jun 28 11:33:16 2010 (+0530)
+# Last-Updated: Wed Aug  4 20:39:13 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 228
+#     Update #: 311
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -46,6 +46,7 @@
 # Code:
 
 from PyQt4 import QtGui, QtCore
+from PyQt4.Qt import Qt
 import PyQt4.Qwt5 as Qwt
 import numpy
 from Izhikevich import IzhikevichDemo
@@ -78,7 +79,6 @@ class IzhikevichGui(QtGui.QMainWindow):
                     key = self.figureNo[keys[index]]
                     button = self.buttons[key]
                     button.setToolTip(self.tr(IzhikevichDemo.documentation[key]))
-                    print 'Adding button ', button.text(), 'at (', ii, ',', jj, ')'
                     layout.addWidget(button, ii, jj)
                     self.connect(button, QtCore.SIGNAL('clicked()'), self.signalMapper, QtCore.SLOT('map()'))
                     self.signalMapper.setMapping(button, key)
@@ -95,9 +95,16 @@ class IzhikevichGui(QtGui.QMainWindow):
         self.ImPlot.setAxisTitle(Qwt.QwtPlot.yLeft, 'Im (nA)')
         self.vmPlotZoomer = self._make_zoomer(self.VmPlot)
         self.imPlotZoomer = self._make_zoomer(self.ImPlot)
+        self.descriptionWidget = QtGui.QLabel('Click any of the buttons to simulate and plot the corresponding neuron.')
+        self.descriptionWidget.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Sunken)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        self.descriptionWidget.setSizePolicy(sizePolicy)
+        self.VmPlot.setSizePolicy(sizePolicy)
+        self.ImPlot.setSizePolicy(sizePolicy)
         layout = QtGui.QVBoxLayout(self.demoFrame)
         layout.addWidget(self.VmPlot)
         layout.addWidget(self.ImPlot)
+        layout.addWidget(self.descriptionWidget)
         self.plotPanel.setLayout(layout)
         layout = QtGui.QVBoxLayout()
         layout.addWidget(self.plotPanel)
@@ -107,10 +114,18 @@ class IzhikevichGui(QtGui.QMainWindow):
 
     def _simulateAndPlot(self, key):
         key = str(key)
+        equationText = self.demo.getEquation(key).replace('\n', '<br/>')
+        doc = IzhikevichDemo.documentation[key].replace('\n', '<br/>')
+        text = '<b>%s:</b> %s<p><b>Equation:</b><br/> %s' % (key, doc, equationText)
+        self.descriptionWidget.setText(self.tr(text))
         if key == 'accommodation':
             mbox = QtGui.QMessageBox(self)
             mbox.setText(self.tr('Accommodation cannot be shown with regular Izhikevich model.'))
-            mbox.setDetailedText(self.tr('Equation for u for the accommodating neuron is: u\' = a * b * (V + 65)\n Which is different from the regular equation u\' = a * (b*V - u) and cannot be obtained from the latter by any choice of a and b.'))
+            mbox.setDetailedText(self.tr('\
+Equation for u for the accommodating neuron is: \
+u\' = a * b * (V + 65)\n Which is different from \
+the regular equation u\' = a * (b*V - u) and cannot \
+be obtained from the latter by any choice of a and b.'))
             mbox.show()
             return
         (time, Vm, Im) = self.demo.simulate(key)
@@ -130,6 +145,7 @@ class IzhikevichGui(QtGui.QMainWindow):
         self.vmPlotZoomer.setZoomBase()
         self.ImPlot.replot()
         self.VmPlot.replot()
+        
 
     def _make_zoomer(self, plot):
         zoomer = Qwt.QwtPlotZoomer(Qwt.QwtPlot.xBottom,

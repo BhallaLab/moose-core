@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri May 28 14:42:33 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jun 23 18:17:06 2010 (+0530)
+# Last-Updated: Wed Aug  4 20:34:46 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 910
+#     Update #: 985
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -93,27 +93,82 @@ class IzhikevichDemo:
     }
 
     documentation = {
-        "tonic_spiking":        'Neuron is normally silent but spikes when stimulated with a current injection.',
-        "phasic_spiking":       'Neuron fires a single spike only at the start of a current pulse.',
-        "tonic_bursting":       'Neuron is normally silent but produces bursts of spikes when stimulated with current injection.',
-        "phasic_bursting":      'Neuron is normally silent but produces a burst of spikes at the beginning of an input current pulse.',
-        "mixed_mode":           'Neuron fires a burst at the beginning of input current pulse, but then switches to tonic spiking.',
-        "spike_freq_adapt":     'Neuron fires spikes when a current injection is applied, but at a gradually reducing rate.',
-        "Class_1":              'Neuron fires low frequency spikes with weak input current injection.',
-        "Class_2":              'Neuron fires high frequency (40-200 Hz) spikes when stimulated with current injection.',
-        "spike_latency":        'The spike starts after a delay from the onset of current injection. The delay is dependent on strength of input.',
-        "subthresh_osc":        'Even at subthreshold inputs a neuron exhibits oscillatory membrane potential.',
-        "resonator":            'Neuron fires spike only when an input pulsetrain of a frequency similar to that of the neuron\'s subthreshold oscillatory frequency is applied.',
-        "integrator":           'The chances of the neuron firing increases with increase in the frequency of input pulse train.',
-        "rebound_spike":        'When the neuron is released from an inhibitory input, it fires a spike.',
-        "rebound_burst":        'When the neuron is released from an inhibitory input, it fires a burst of action potentials.',
-        "thresh_var":           'Depending on the previous input, the firing threshold of a neuron may change. In this example, the first input pulse does not produce spike, but when the same input is applied after an inhibitory input, it fires.',
-        "bistable":             'These neurons switch between two stable modes (resting and tonic spiking). The switch happens via an excitatory or inhibitory input.',
-        "DAP":                  'After firing a spike, the membrane potential shows a prolonged depolarized after-potential.',
-        "accommodation":        'These neurons do not respond to slowly rising input, but a sharp increase in input may cause firing.',
-        "iispike":              'These neurons fire in response to inhibitory input.',
-        "iiburst":              'These neurons show bursting in response to inhibitory input.'
-    }
+        "tonic_spiking":        """
+Neuron is normally silent but spikes when stimulated with a current injection.""",
+
+        "phasic_spiking":       """
+Neuron fires a single spike only at the start of a current pulse.""",
+
+        "tonic_bursting":       """
+Neuron is normally silent but produces bursts of spikes when
+stimulated with current injection.""",
+
+        "phasic_bursting":      """
+Neuron is normally silent but produces a burst of spikes at the
+beginning of an input current pulse.""",
+
+        "mixed_mode":           """
+Neuron fires a burst at the beginning of input current pulse, but then
+switches to tonic spiking.""",
+
+        "spike_freq_adapt":     """
+Neuron fires spikes when a current injection is applied, but at a
+gradually reducing rate.""",
+
+        "Class_1":              """
+Neuron fires low frequency spikes with weak input current injection.""",
+
+        "Class_2":              """
+Neuron fires high frequency (40-200 Hz) spikes when stimulated with
+current injection.""",
+
+        "spike_latency":        """
+The spike starts after a delay from the onset of current
+injection. The delay is dependent on strength of input.""",
+
+        "subthresh_osc":        """
+Even at subthreshold inputs a neuron exhibits oscillatory membrane potential.""",
+
+        "resonator":            """
+Neuron fires spike only when an input pulsetrain of a frequency
+ similar to that of the neuron's subthreshold oscillatory frequency is
+ applied.""",
+
+        "integrator":           """
+The chances of the neuron firing increases with increase in the frequency 
+of input pulse train.""",
+
+        "rebound_spike":        """
+When the neuron is released from an inhibitory input, it fires a spike.""",
+
+        "rebound_burst":        """
+When the neuron is released from an inhibitory input, it fires a burst
+ of action potentials.""",
+
+        "thresh_var":           """
+Depending on the previous input, the firing threshold of a neuron may
+change.  In this example, the first input pulse does not produce
+spike, but when the same input is applied after an inhibitory input,
+it fires.""",
+
+        "bistable":             """
+These neurons switch between two stable modes (resting and tonic spiking). 
+The switch happens via an excitatory or inhibitory input.""",
+
+        "DAP":                  """
+After firing a spike, the membrane potential shows a prolonged depolarized 
+after-potential.""",
+
+        "accommodation":        """
+These neurons do not respond to slowly rising input, but a sharp increase 
+in input may cause firing.""",
+
+        "iispike":              """
+These neurons fire in response to inhibitory input.""",
+
+        "iiburst":              """
+These neurons show bursting in response to inhibitory input."""
+        }
     
     def __init__(self):
         """Initialize the object."""
@@ -442,7 +497,11 @@ class IzhikevichDemo:
             t = t + self.dt
         input_table.connect('outputSrc', self._get_neuron(key), 'injectDest')
         return input_table
-        
+
+    def getEquation(self, key):
+        params = IzhikevichDemo.parameters[key]
+        equationText = "<i>v' = 0.04v^2 + 5v + 140 - u + I</i><br><i>u' = a(bv - u)</i><p>If <i>v >= 30 mV, v = c</i> and <i>u = u + d</i><br>where <i>a = %g</i>, <i>b = %g</i>, <i>c = %g</i> and <i>d = %g</i>."  % (params[1], params[2], params[3], params[4])
+        return equationText
         
 import sys
 try:
