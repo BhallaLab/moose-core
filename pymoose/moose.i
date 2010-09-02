@@ -152,6 +152,10 @@ def listproperty(getter=None, setter=None, deller=None):
         sprintf(tmp, "%d[%d]", $self->id(), $self->index());
         return tmp;
     }
+    %insert("python")%{
+        def __hash__(self):
+                return str(self).__hash__()
+    %}
  }
 
 %include "../utility/Property.h"
