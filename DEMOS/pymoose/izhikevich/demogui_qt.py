@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 16 05:41:58 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Aug  4 20:39:13 2010 (+0530)
-#           By: Subhasis Ray
-#     Update #: 311
+# Last-Updated: Thu Sep  2 12:26:56 2010 (+0530)
+#           By: subha
+#     Update #: 312
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -101,7 +101,7 @@ class IzhikevichGui(QtGui.QMainWindow):
         self.descriptionWidget.setSizePolicy(sizePolicy)
         self.VmPlot.setSizePolicy(sizePolicy)
         self.ImPlot.setSizePolicy(sizePolicy)
-        layout = QtGui.QVBoxLayout(self.demoFrame)
+        layout = QtGui.QVBoxLayout()
         layout.addWidget(self.VmPlot)
         layout.addWidget(self.ImPlot)
         layout.addWidget(self.descriptionWidget)
