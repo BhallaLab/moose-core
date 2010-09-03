@@ -364,7 +364,8 @@ NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.se
 //%template(StochSynchanDILookup) InnerPyMooseIterable < StochSynchan, unsigned int, double > ;
 %include "KinSynChan.h"
 %attribute(pymoose::KinSynChan, double, rInf, __get_rInf, __set_rInf)
-%attribute(pymoose::KinSynChan, double, tauR, __get_tauR, __set_tauR)
+%attribute(pymoose::KinSynChan, double, tau1, __get_tau1, __set_tau1)
+//%attribute(pymoose::KinSynChan, double, tauR, __get_tauR, __set_tauR)
 %attribute(pymoose::KinSynChan, double, pulseWidth, __get_pulseWidth, __set_pulseWidth)
 
 %include "SpikeGen.h"

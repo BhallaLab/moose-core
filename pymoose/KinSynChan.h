@@ -20,8 +20,8 @@ namespace pymoose{
         const std::string& getType();
             double __get_rInf() const;
             void __set_rInf(double rInf);
-            double __get_tauR() const;
-            void __set_tauR(double tauR);
+            double __get_tau1() const;
+            void __set_tau1(double tauR);
             double __get_pulseWidth() const;
             void __set_pulseWidth(double pulseWidth);
     };
