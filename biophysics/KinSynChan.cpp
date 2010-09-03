@@ -44,33 +44,35 @@ const Cinfo* initKinSynChanCinfo()
 {
 
     static Finfo* KinSynChanFinfos[] =
-            {
-                new ValueFinfo("rInf", ValueFtype1< double >::global(),
-                               GFCAST(&KinSynChan::getRinf),
-                               RFCAST(&KinSynChan::setRinf),
-                               "The fraction of bound receptors at steady state."),
-		// new ValueFinfo( "tau1", ValueFtype1< double >::global(),
-		// 	GFCAST( &SynChan::getTau1 ), 
-                //         RFCAST( &SynChan::setTau1 ),
-                //         "Decay time constant for the synaptic conductance. This corresponds to 1/beta in [Destexhe, Mainen and Sejnowski, 1994]. You can set this tau1 or rInf, one deciding the value of the other."
-		// ),
-		// new ValueFinfo( "tau2", ValueFtype1< double >::global(),
-		// 	GFCAST( &KinSynChan::getTau2 ), 
-                //         RFCAST( &KinSynChan::setTau2 ),
-                //         "Rise time constant for the synaptic conductance, it is the duration of the neuroTransmitter pulse. It is calculated using rInf and tau1 [See: Destexhe, Mainen and Sejnowski, 1994. It corresponds to tau_r in that paper]."
-		// ),
-                
-		new ValueFinfo( "tauR", ValueFtype1< double >::global(),
-			GFCAST( &SynChan::getTau2 ), 
-                        RFCAST( &SynChan::setTau2 ),
-                        "Rise time constant for the synaptic conductance, it is the duration of the neuroTransmitter pulse. It is calculated using rInf and tau1 [See: Destexhe, Mainen and Sejnowski, 1994. It corresponds to tau_r in that paper.]"
-		),
+        {
+            new ValueFinfo("rInf", ValueFtype1< double >::global(),
+                           GFCAST(&KinSynChan::getRinf),
+                           RFCAST(&KinSynChan::setRinf),
+                           "The fraction of bound receptors at steady state."),
+                           
+            new ValueFinfo( "tau1", ValueFtype1< double >::global(),
+             	GFCAST( &SynChan::getTau1 ), 
+                             RFCAST( &SynChan::setTau1 ),
+                             "Decay time constant for the synaptic conductance. This corresponds to 1/beta in [Destexhe, Mainen and Sejnowski, 1994]. You can set this tau1 or rInf, one deciding the value of the other."
+             ),
+             
+		    // new ValueFinfo( "tau2", ValueFtype1< double >::global(),
+		    // 	GFCAST( &KinSynChan::getTau2 ), 
+                    //         RFCAST( &KinSynChan::setTau2 ),
+                    //         "Rise time constant for the synaptic conductance. It is calculated using rInf and tau1 [See: Destexhe, Mainen and Sejnowski, 1994. It corresponds to tau_r in that paper]."
+		    // ),
+                    
+		    // new ValueFinfo( "tauR", ValueFtype1< double >::global(),
+			//    GFCAST( &SynChan::getTau2 ), 
+            //                RFCAST( &SynChan::setTau2 ),
+            //                "Rise time constant for the synaptic conductance. It is calculated using rInf and tau1 [See: Destexhe, Mainen and Sejnowski, 1994. It corresponds to tau_r in that paper.]"
+		    // ),
 
-		new ValueFinfo( "pulseWidth", ValueFtype1< double >::global(),
-			GFCAST( &KinSynChan::getPulseWidth ), 
-                        RFCAST( &KinSynChan::setPulseWidth ),
-                        "The duration of the neuroTransmitter pulse. [See: Destexhe, Mainen and Sejnowski, 1994. It corresponds to t1 in that paper.]"
-		),
+		    new ValueFinfo( "pulseWidth", ValueFtype1< double >::global(),
+			    GFCAST( &KinSynChan::getPulseWidth ), 
+                            RFCAST( &KinSynChan::setPulseWidth ),
+                            "The duration of the neuroTransmitter pulse. [See: Destexhe, Mainen and Sejnowski, 1994. It corresponds to t1 in that paper.]"
+		    ),
                 
                 ///////////////////////////////////////////////////////
                 // MsgSrc definitions
@@ -87,6 +89,7 @@ const Cinfo* initKinSynChanCinfo()
 		"Name", "KinSynChan",
 		"Author", "Aditya Gilra and Subhasis Ray, 2010, NCBS",
 		"Description", "KinSynChan: Synaptic channel incorporating kinetic model of receptor binding. "
+		        "From Destexhe, Mainen and Sejnowski, 1994"
 		        "Handles saturation of synapse. Incorporates weight and delay. Does not "
 				"handle activity-dependent modification, see HebbSynChan for that. "
 	};
@@ -119,13 +122,10 @@ static const Slot synapseSlot =
    Default constructor sets all the constant values in the expression
 */
 
-KinSynChan::KinSynChan():rInf_(1.0), pulseWidth_(1e-3)
+KinSynChan::KinSynChan():rInf_(1.0), pulseWidth_(1e-3), tau1_(1e-3)
 {
 }
 
-/**
-   set the Neurotransmitter pulse time for the pre-synaptic part of the channel.
-*/
 
 void KinSynChan::setRinf(const Conn* conn, double value)
 {
@@ -148,15 +148,44 @@ double KinSynChan::innerGetRinf()
     return rInf_;
 }
 
-void KinSynChan::innerSetTau2(double value)
+//void KinSynChan::innerSetTau2(double value)
+//{
+//    cout << "Warning: For KinSynChan, tau2 is calculated internally from rInf as: tau2 = (1 - rInf) * tau1." << endl;
+//}
+
+//double KinSynChan::innerGetTau2()
+//{
+//    return tau1_ * (1 - rInf_);
+//}
+
+/*
+    Decay time constant tau1=1/beta in Destexhe, Mainen and Sejnowski, 1994
+*/
+
+double KinSynChan::getTau1(Eref e)
 {
-    cout << "Warning: For KinSynChan, tau2 is calculated internally from rInf as: tau2 = (1 - rInf) * tau1." << endl;
+    return static_cast<KinSynChan*>(e.data())->innerGetTau1();
 }
 
-double KinSynChan::innerGetTau2()
+double KinSynChan::innerGetTau1()
 {
-    return tau1_ * (1 - rInf_);
+    return tau1_;
 }
+void KinSynChan::setTau1(const Conn* conn, double value)
+{
+    static_cast<KinSynChan*>(conn->data())->innerSetTau1(value);
+}
+
+void KinSynChan::innerSetTau1(double value)
+{
+    tau1_ = value;
+}
+
+
+/**
+   set the Neurotransmitter pulse time for the pre-synaptic part of the channel.
+*/
+
 double KinSynChan::getPulseWidth(Eref e)
 {
     return static_cast<KinSynChan*>(e.data())->innerGetPulseWidth();
