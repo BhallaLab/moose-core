@@ -57,15 +57,17 @@ class KinSynChan: public SynChan
     static void setPulseWidth(const Conn* conn, double value);
     static double getPulseWidth(Eref e);
     
-    // static void setTau1(const Conn* conn, double value);
-    // static double getTau1(Eref e);
-    // static void setTau2(const Conn* conn, double value);
-    // static double getTau2(Eref e);
+    static void setTau1(const Conn* conn, double value); // decay time constant after pulse is over
+    static double getTau1(Eref e);
+    //static void setTau2(const Conn* conn, double value);
+    //static double getTau2(Eref e);
   protected:
     void innerSetRinf(double value);
     double innerGetRinf();
-    double innerGetTau2();
-    void innerSetTau2(double value);
+    double innerGetTau1();
+    void innerSetTau1(double value);
+    //double innerGetTau2();
+    //void innerSetTau2(double value);
     void innerSetPulseWidth(double value);
     double innerGetPulseWidth();
     void innerProcessFunc(Eref e, ProcInfo info);
@@ -74,6 +76,8 @@ class KinSynChan: public SynChan
   protected:
     double rInf_; // r_infinty in Destexhe, Mainen, Sejnowski paper.
     double pulseWidth_; // t1 in  Destexhe, Mainen, Sejnowski paper.
+    double tau1_; // tau1 in Destexhe, Mainen, Sejnowski paper.
+    double tau2_; // tau2=tau_r = rise time constant in Destexhe, Mainen, Sejnowski paper. It is calculated internally from tau1 and rInf.
 };
 
 #endif
