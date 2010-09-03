@@ -24,15 +24,15 @@ void KinSynChan::__set_rInf( double rInf )
 {
     set < double > (id_(), "rInf", rInf);
 }
-double KinSynChan::__get_tauR() const
+double KinSynChan::__get_tau1() const
 {
-    double tauR;
-    get < double > (id_(), "tauR",tauR);
-    return tauR;
+    double tau1;
+    get < double > (id_(), "tau1",tau1);
+    return tau1;
 }
-void KinSynChan::__set_tauR( double tauR )
+void KinSynChan::__set_tau1( double tau1 )
 {
-    set < double > (id_(), "tauR", tauR);
+    set < double > (id_(), "tau1", tau1);
 }
 double KinSynChan::__get_pulseWidth() const
 {
