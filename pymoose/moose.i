@@ -32,7 +32,6 @@
 	#include "Leakage.h"
 	#include "HHChannel.h"
 	#include "Mg_block.h"
-	#include "Compartment.h"
 	#include "NeuroScan.h"
 	#include "HSolve.h"
 	#include "Enzyme.h"
