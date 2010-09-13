@@ -23,13 +23,14 @@ essentially creates an illusion of mirrorring the MOOSE class via a set
 of properties which correspond to the fields in the MOOSE class. The
 main data contained in instances of the PyMOOSE classes is only a copy
 of the @code{id} of the original MOOSE object. All the fields are
-accessed via function calls using this @code{id} as the handle.
+accessed on-demand via function calls using this @code{id} as the
+handle.
 
 MOOSE provides a class hierarchy which is closely imitated by the
-PyMOOSE classes. @code{Neutral} is the base class of all other
-classes. So instance of any other MOOSE class is also an instance of
-@code{Neutral} class. A Neutral object is most often used as a container
-of other objects.
+PyMOOSE classes. @code{Neutral} is at the top of the class hierarchy. So
+instance of any other MOOSE class is also an instance of @code{Neutral}
+class. A Neutral object is most often used as a container of other
+objects.
 
 Major areas of focus in MOOSE are neuronal simulations and biochemical
 simulations. So many of the classes are for modeling these
@@ -52,17 +53,24 @@ scenarios. Some of the commonly used classes in Neuronal models are:
 Commonly used classes in biochemistry/chemical kinetics models are:
 @itemize
 @item Molecule
+-     A pool of molecules.
 @item Enzyme
+-     An abstraction of enzymatic mechanism.
 @item Reaction
+-     A general chemical reaction with forward and backward rate constants.
 @item KinCompt
+-     A volume in space in which molecules exist/reactions take place.
 @end itemize
 
 Some classes are there to provide utilities and infrastructure for doing
 simulation experiments:
 @itemize
 @item Table
+-     A versatile list-like structure which allows interpolation,
+      data-recording, sending pre-assigned sequence of data at each time
+      step tp some target object and saving data to file.
 @item AscFile
-@item TimeTable
+-     A general text(ascii) file handle.
 @item Random numbet generators 
 - a whole bunch of them to generate samples from various distributions.
 @end itemize
@@ -204,6 +212,9 @@ True
 @end group
 @end example
 
+In addition, @code{Id} objects are hashable. Also, their hash is the
+hash of their string representation. Thus you can use them as keys in a
+@code{dict}.
 
 @node Neutral
 @section Neutral
@@ -362,14 +373,86 @@ Memory used by data part of object
 Memory used by messaging (Element) part of object.
 
 @item childList
-Vector of @code{Id}s of the children of this object.
+Vector of @code{Id}s of the children of this object. This is also
+available via @code{children()} method, which is retained for backward
+compatibility.
 
 @end table
 
-The following are the functions available in @code{Neutral} class:
-@table @samp
-@end table
+
 @node PyMooseContext
 @section PyMooseContext
-One global object that provides access to global functions.
-Yet to be written.
+
+One global object that provides access to global functions in PyMOOSE is
+the instance of PyMooseContext. It is available from the abstract base
+class of all PyMOOSE classes, PyMooseBase (which, being abstract, cannot
+be instantiated, but whose public properties are inherited throughout
+the class hierarchy).
+
+PyMooseContext should be considered a singleton. There should be only
+one instance of it at any given time. And usually this instamce is
+created at startup (when moose is imported for the first time).
+
+@example
+The standard way to access the context is:
+context = PyMooseBase.getContext()
+@end example
+
+The context object provides quite low level access to MOOSE. So you
+should be discriminate about using the functions available. There are
+some functions to control simulation which are very common and must
+accessed via the context object.
+@table @samp
+@item  setClock(clockNo, dt, stage=0)
+       set the clock no. specified by @code{clockNo} with time step
+       @code{dt} and stage @code{stage}.
+
+@item useClock(clockNo, path, func='process')
+      use clock specified by @code{clockNo} on @code{path}, which can be
+      a wildcard path, calling the internal function @code{func} of the
+      element class at each time step. The internal function is by
+      default 'process', which calculates the state of the object at the
+      end of the timestep.
+
+@item reset()
+      reset the simulation. This clears all recording Table objects that
+      have been scheduled on some clock, and usually sets things back to
+      initial values.
+
+@item step(time)
+      Run the simulation. If @code{time} is a @code{float}, it is taken
+      as the length of time to be simulated. Each clock in the
+      simulation proceeds by its @code{dt} until its @code{currentTime}
+      reaches or exceeds @code{time}.
+
+      If @code{time} is an integer, then it is taken as the number of
+      steps for the fastest clock in the system. Thus, if the fastest
+      clock in the system has @code{dt = 0.01} and @code{time = 10},
+      then this will run the simulation for 0.1 time units.
+
+@item readCell
+@item readSBML,
+@item readNeuroML, 
+@item getCurrentTime, 
+@item addField.
+@item loadG
+@item runG
+@item move
+@item exists
+@end table
+The following are more advanced methods and should be used with
+caution. Usually for each of them there is a more accessible counterpart
+as a member of the PyMooseBase object or its derivative. The methods in
+PyMooseContext are required only when there is no such counterpart.
+
+@table @samp
+@item getField
+@item setField
+@item getParent
+@item getPath
+@item getName
+@item getChildren
+@item copy
+
+@end table
+
