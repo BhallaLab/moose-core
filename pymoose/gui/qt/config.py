@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Feb 13 16:07:56 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jul 22 15:38:34 2010 (+0530)
+# Last-Updated: Mon Sep 13 09:57:03 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 116
+#     Update #: 129
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -53,13 +53,15 @@ GL_COLORMAP_GREY = 'grey'
 GL_COLORMAP_REDHOT = 'redhot'
 GL_DEFAULT_COLORMAP = 'colormaps/rainbow2'
 GL_PORT = '9999'
-
+import os
+import sys
+import tempfile
 import logging
 from PyQt4.Qt import Qt
 from PyQt4 import QtGui, QtCore
 
 settings = None
-
+TEMPDIR = tempfile.gettempdir()
 KEY_FIRSTTIME = 'firsttime'
 # KEY_STATE_FILE = 'statefile'
 KEY_GL_COLORMAP = 'glclient/colormap'
@@ -86,8 +88,8 @@ def get_settings():
     settings = QtCore.QSettings()
     return settings
 
-LOG_FILENAME = 'moose.log'
-LOG_LEVEL = logging.DEBUG
+LOG_FILENAME = os.path.join(TEMPDIR, 'moose.log')
+LOG_LEVEL = logging.ERROR
 logging.basicConfig(filename=LOG_FILENAME, level=LOG_LEVEL, filemode='w', format='%(asctime)s %(levelname)s %(name)s %(filename)s %(funcName)s: %(lineno)d: %(message)s')
 LOGGER = logging.getLogger('moose')
 BENCHMARK_LOGGER = logging.getLogger('moose.benchmark')
