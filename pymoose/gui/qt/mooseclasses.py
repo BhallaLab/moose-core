@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Sun Apr 12 14:05:01 2009 (+0530)
 # Version: 
-# Last-Updated: Fri Jul  9 20:20:39 2010 (+0530)
+# Last-Updated: Thu Sep  2 23:37:06 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 220
+#     Update #: 221
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -53,7 +53,7 @@ moose_category = ['base', 'builtins', 'biophysics', 'kinetics', 'device', 'robot
 moose_class = {'Neutral':'base', 
                'Tick':'base',
 
-               # biophysics direcypry
+               # biophysics directory
                  'BinSynchan':'biophysics',
 #                  'BioScan':'biophysics', # For hsolve internal use
                  'CaConc':'biophysics',
