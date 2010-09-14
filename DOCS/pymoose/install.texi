@@ -36,11 +36,20 @@ pymoose/Makefile to add this directory in the include search path with
 
 @r{GSL} provides integration methods for some classes in MOOSE.
 
+@item libsbml
+
+The default build requires @r{libsbml} to be installed. You can download
+it from SBML website @pxref(http://sbml.org).
+
+
 @end itemize
 
 @node Configuration
 @section Configuration
-Yet to be written.
+Right now all configuration is done by editing the @code{Makefile} of
+MOOSE. You can have some control over what all are included in the
+compilation by passing commandline arguments to @code{make}. These
+options are described in the next section (Build/install).
 
 @node Build/install
 @section Build/install
@@ -124,4 +133,11 @@ your python installation directory (for UNIX-like systems it is:
 @node Loading
 @section Loading
 
-Once you have 
+Once you have built and installed PyMOOSE, you can load it in the Python
+interpreter by the statement: @code{import moose}
+You should see a few informational outputs, ending with:
+@samp{SIMPATH = .:your_home_directory
+nnnn FuncVecs built for the first time}
+
+where @i{your_home_directory} stands for the full path of the user's
+home directory and @i{nnnn} stands for some number (2200 in my case).

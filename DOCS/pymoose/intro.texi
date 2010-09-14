@@ -1,3 +1,59 @@
 @node Introduction, Installation, Copying, Top
 @chapter Introduction to MOOSE and PyMOOSE
-Yet to be written
+@cindex element 
+MOOSE is a general purpose simulation environment, and PyMOOSE its
+incarnation as a Python module. MOOSE stands for Multiscale
+Object-Oriented Simulation Environment.
+
+The 'multiscale' comes from the fact that one can simulate systems
+spanning multiple scales: from a few molecules reacting with each other
+(Gillespie simulations) to large networks of neurons to simulate areas
+of the brain.
+
+It is object-oriented in the sense that it represents the simulation
+entities as instances of particular classes and these classes are
+organized in a hierarchy where a child inherits the properties of its
+parent.
+
+In MOOSE we often call the instances of each class @code{elements}
+(which are commonly called objects in Object Oriented Programming). They
+are the building blocks of a MOOSE model. Each element represents some
+entity from reality we want to model. An element has some fields whose
+values together consitute its state.
+
+@example
+As an illustration, consider a simple chemical reaction, say the
+oxidation of Nitric oxide(NO) to Nitrogen dioxide(NO2). There are some
+NO molecules and some O2 molecules and depending on the concentrations
+they react at certain rate to form NO2.
+
+The gases will be contained in some closed volume: we represent this
+with a @code{KinCompt} object. We set the @code{volume} of the
+@code{KinCompt} object.
+
+The pool of NO molecules will be modeled as @i{a} @code{Molecule} object
+and we set the number of molecules by setting the the field @code{n} of
+the Molecule object. Similarly, the pools of O2 and NO2 molecules will
+be modeled as @code{Molecule} objects (If initially there is no NO2, we
+set @code{n = 0} for it). When we set the number of molecules, the
+concentration is computed automatically from the volume of the
+@code{KinCompt} object. Alternatively, you can set the concentrations
+directly in the @code{conc} field of the @code{Molecule} objects.
+
+Now the reaction itself is determined by the forward and backward rate
+constants. The @code{Reaction} class is precisely for this. We create a
+@code{Reaction} object and set its @code{Kf} and @code{Kb} fields to the
+forward and backward rate constants.
+
+Now to connect up all these, we set some messages between particular
+fields of different objects. We have to setup the substrate and product
+relationships of the @code{Molecules} with the @code{Reaction}. This is
+done by connecting the @code{'reac'} message of the O2 and NO
+@code{Molecule} objects with @code{'sub'} message of the @code{Reaction}
+object and connecting the @code{'reac'} message of the NO2
+@code{Molecule} with the @code{'prd'} message of the @code{Reaction}
+object.
+
+Now when you reset and run the simulation, the @code{conc} field of each
+@code{Molecule} will be updated to the final concentrations.
+@end example
