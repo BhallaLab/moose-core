@@ -39,7 +39,7 @@ pymoose/Makefile to add this directory in the include search path with
 @item libsbml
 
 The default build requires @r{libsbml} to be installed. You can download
-it from SBML website @pxref(http://sbml.org).
+it from SBML website (@uref{http://sbml.org)}.
 
 
 @end itemize
@@ -136,8 +136,10 @@ your python installation directory (for UNIX-like systems it is:
 Once you have built and installed PyMOOSE, you can load it in the Python
 interpreter by the statement: @code{import moose}
 You should see a few informational outputs, ending with:
-@samp{SIMPATH = .:your_home_directory
-nnnn FuncVecs built for the first time}
+@example @samp
+SIMPATH = .:your_home_directory
+nnnn FuncVecs built for the first time
+@end example
 
 where @i{your_home_directory} stands for the full path of the user's
 home directory and @i{nnnn} stands for some number (2200 in my case).
