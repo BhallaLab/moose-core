@@ -280,7 +280,7 @@ SUBDIR = basecode connections maindir genesis_parser shell element scheduling \
 	randnum robots device $(GL_DIR) $(SBML_DIR) $(NEUROML_DIR) $(PARALLEL_DIR) $(MUSIC_DIR) 
 
 # Used for 'make clean'
-CLEANSUBDIR = $(SUBDIR) parallel music pymoose sbml_IO neuroML_IO
+CLEANSUBDIR = $(SUBDIR) gl/src sbml_IO neuroML_IO parallel music pymoose
 
 OBJLIBS =	\
 	basecode/basecode.o \
