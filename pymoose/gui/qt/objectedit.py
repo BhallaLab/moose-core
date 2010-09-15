@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 30 11:18:34 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Sep  1 15:37:11 2010 (+0530)
+# Last-Updated: Wed Sep 15 18:54:13 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 367
+#     Update #: 394
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -72,8 +72,8 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
                   visibility of these fields to advanced mode.
 
     """
-    extra_fields = ['parent', 'childList', 'fieldList']
-    sys_fields = ['node', 'cpu', 'dataMem', 'msgMem']
+    extra_fields = ['parent', 'childList', 'fieldList', 'name', 'index']
+    sys_fields = ['node', 'cpu', 'dataMem', 'msgMem', 'class']
 
     def __init__(self, mooseObject, parent=None):
         """Set up the model. 
@@ -113,7 +113,7 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
             return
 
         for fieldName in self.mooseObject.getFieldList(moose.FTYPE_VALUE):
-            if fieldName in ObjectFieldsModel.extra_fields:
+            if (fieldName in ObjectFieldsModel.extra_fields) or (fieldName in ObjectFieldsModel.sys_fields):
                 continue
             flag = Qt.ItemIsEnabled | Qt.ItemIsSelectable
             try:
@@ -127,14 +127,10 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
                     self.fieldPlotNameMap[fieldName] = self.plotNames[0]
                 except ValueError:
                     pass
-
-            except SyntaxError, se:
-                config.LOGGER.error('%s' % (str(se)))
-            except AttributeError, ae:
-                config.LOGGER.error('%s' % (str(ae)))
+            except Exception, e:
+                config.LOGGER.error("%s" % (e))
             self.fieldFlags[fieldName] = flag
-            self.fields.append(fieldName)
-            
+            self.fields.append(fieldName)            
         self.insertRows(0, len(self.fields))
 
     def setData(self, index, value, role=Qt.EditRole):
@@ -208,23 +204,19 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
         """
         flag = Qt.ItemIsEnabled
         if index.isValid():
+            try:
+                flag = self.fieldFlags[self.fields[index.row()]]
+            except KeyError:
+                flag = Qt.ItemIsEnabled
             if index.column() == 0:
-                flag = Qt.ItemIsEnabled | Qt.ItemIsSelectable
-            elif index.column() == 1:
-                try:
-                    flag = self.fieldFlags[self.fields[index.row()]]
-                except KeyError, e:
-                    pass
+                flag = flag & ~Qt.ItemIsEditable
             elif index.column() == 2:
                 try:
                     flag = self.fieldPlotNameMap[self.fields[index.row()]]
                     if flag is not None:
                         flag = Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable
                 except KeyError:
-                    pass
-            # First column is the field name - so not editable
-            if index.column() == 0: 
-                flag = flag & ( ~Qt.ItemIsEditable) 
+                    flag = Qt.ItemIsEnabled
         return flag
 
     def rowCount(self, parent):
