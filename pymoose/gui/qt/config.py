@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Feb 13 16:07:56 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Sep 13 09:57:03 2010 (+0530)
+# Last-Updated: Tue Sep 14 16:01:06 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 129
+#     Update #: 131
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -88,9 +88,10 @@ def get_settings():
     settings = QtCore.QSettings()
     return settings
 
-LOG_FILENAME = os.path.join(TEMPDIR, 'moose.log')
+# LOG_FILENAME = os.path.join(TEMPDIR, 'moose.log')
 LOG_LEVEL = logging.ERROR
-logging.basicConfig(filename=LOG_FILENAME, level=LOG_LEVEL, filemode='w', format='%(asctime)s %(levelname)s %(name)s %(filename)s %(funcName)s: %(lineno)d: %(message)s')
+# logging.basicConfig(filename=LOG_FILENAME, level=LOG_LEVEL, filemode='w', format='%(asctime)s %(levelname)s %(name)s %(filename)s %(funcName)s: %(lineno)d: %(message)s')
+logging.basicConfig(stream=sys.stdout, level=LOG_LEVEL, filemode='w', format='%(asctime)s %(levelname)s %(name)s %(filename)s %(funcName)s: %(lineno)d: %(message)s')
 LOGGER = logging.getLogger('moose')
 BENCHMARK_LOGGER = logging.getLogger('moose.benchmark')
 BENCHMARK_LOGGER.setLevel(logging.INFO)
