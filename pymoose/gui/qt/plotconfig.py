@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Jul  9 00:21:51 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jul 14 14:29:01 2010 (+0530)
+# Last-Updated: Wed Sep 15 20:23:14 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 332
+#     Update #: 337
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -233,7 +233,7 @@ class PlotConfig(QtGui.QDialog):
         self.connect(self.symbolFillColorButton, QtCore.SIGNAL('clicked()'), self.setSymbolFillColor)
         self.symbolFillColorButton.setPalette(QtGui.QPalette(self.currentSymbolFillColor))
         self.symbolFillColorButton.setAutoFillBackground(True)
-        self.symbolFillColorButton.setObjectName('symbolPenColorButton')
+        self.symbolFillColorButton.setObjectName('symbolFillColorButton')
         layout.addWidget(self.symbolFillColorButton, row, 1)
 
         row += 1
@@ -287,6 +287,7 @@ class PlotConfig(QtGui.QDialog):
         if color.isValid():
             style = QtCore.QString('QPushButton#symbolFillColorButton {background-color: %s}' % color.name())
             self.symbolFillColorButton.setStyleSheet(style)
+            self.symbolFillColorButton.setText(color.name())
             self.currentSymbolFillColor = color
 
     def getPen(self):

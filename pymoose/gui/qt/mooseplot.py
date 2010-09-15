@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul  5 21:35:09 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Sep  1 15:38:10 2010 (+0530)
+# Last-Updated: Wed Sep 15 21:54:46 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 585
+#     Update #: 594
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -87,7 +87,7 @@ class MoosePlot(Qwt.QwtPlot):
         self.tableCurveMap = {} # moose table -> curve
         self.overlay = False
         legend = Qwt.QwtLegend()
-        legend.setItemMode(Qwt.QwtLegend.ClickableItem)
+        legend.setItemMode(Qwt.QwtLegend.CheckableItem)
         self.insertLegend(legend, Qwt.QwtPlot.RightLegend)
         # self.setTitle('Plot %d' % (self.plotNo))
         mY = Qwt.QwtPlotMarker()
@@ -112,6 +112,7 @@ class MoosePlot(Qwt.QwtPlot):
                                    self.canvas())
         self.zoomer.setRubberBandPen(QtGui.QPen(Qt.black))
         self.zoomer.setTrackerPen(QtGui.QPen(Qt.black))
+        self.mooseHandler = None
 	QtCore.QObject.connect(self, QtCore.SIGNAL("legendClicked(QwtPlotItem *)"), self.plotItemClicked)
 
 
@@ -126,6 +127,7 @@ class MoosePlot(Qwt.QwtPlot):
     def reconfigureSelectedCurves(self, pen, symbol, style, attribute):
         """Reconfigure the selected curves to use pen for line and
         symbol for marking the data points."""
+        print 'Reconfiguring slected plots'
         for item in self.itemList():
             widget = self.legend().find(item)
             if isinstance(widget, Qwt.QwtLegendItem) and widget.isChecked():
@@ -143,11 +145,17 @@ class MoosePlot(Qwt.QwtPlot):
         self.replot()
             
     def showSelectedCurves(self, on):
-	print "here in showselectedcurve"
         for item in self.itemList():
             widget = self.legend().find(item)
             if isinstance(widget, Qwt.QwtLegendItem) and widget.isChecked():
                 item.setVisible(on)
+        self.replot()
+
+    def showAllCurves(self):
+        for item in self.itemList():
+            if isinstance(item, Qwt.QwtPlotCurve):
+                print item
+                item.setVisible(True)
         self.replot()
 
     def setLineStyleSelectedCurves(self, style=Qwt.QwtPlotCurve.NoCurve):        
