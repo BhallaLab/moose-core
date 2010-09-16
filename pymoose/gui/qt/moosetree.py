@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 23 18:54:14 2009 (+0530)
 # Version: 
-# Last-Updated: Mon Aug 23 21:10:35 2010 (+0530)
+# Last-Updated: Thu Sep 16 11:33:14 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 184
+#     Update #: 189
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -120,6 +120,7 @@ class MooseTreeWidget(QtGui.QTreeWidget):
             new_item.setMooseObject(new_obj)
             current.addChild(new_item)
             self.itemList.append(new_item)
+            self.emit(QtCore.SIGNAL('mooseObjectInserted(PyQt_PyObject)'), new_obj)
         except AttributeError:
             config.LOGGER.error('%s: no such class in module moose' % (className))
 
