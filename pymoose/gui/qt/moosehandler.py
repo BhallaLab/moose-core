@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Jul 27 12:27:26 2010 (+0530)
+# Last-Updated: Thu Sep 16 13:09:01 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 809
+#     Update #: 815
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -250,7 +250,9 @@ class MooseHandler(QtCore.QObject):
             fstart = full_field_path.rfind('/')
             fieldName = full_field_path[fstart+1:]
             objPath =  full_field_path[:fstart]
-            table = moose.Table('%s_%d_%d' % (fieldName, self._tableSuffix, self._tableIndex), self._data)
+            # tableName = '%s_%d_%d' % (fieldName, self._tableSuffix, self._tableIndex)
+            tableName = full_field_path[1:].replace('/', '_')
+            table = moose.Table(tableName, self._data)
             self.fieldTableMap[full_field_path] = table
             table.stepMode = 3
             target = moose.Neutral(objPath)
