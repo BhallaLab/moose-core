@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Sep 15 21:52:03 2010 (+0530)
+# Last-Updated: Thu Sep 16 12:56:00 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2447
+#     Update #: 2467
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -80,7 +80,7 @@ from glclientgui import GLClientGUI
 
 
 # These are the MOOSE GUI specific imports
-from objectedit import ObjectFieldsModel, ObjectEditDelegate
+from objectedit import ObjectFieldsModel, ObjectEditDelegate, ObjectEditView
 from moosetree import *
 from mooseclasses import *
 from mooseglobals import MooseGlobals
@@ -143,6 +143,9 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.modelTreeWidget, 
                      QtCore.SIGNAL('itemDoubleClicked(QTreeWidgetItem *, int)'),
                      self.makeObjEditorFromTreeItem)
+        self.connect(self.modelTreeWidget,
+                     QtCore.SIGNAL('mooseObjectInserted(PyQt_PyObject)'),
+                     self.makeObjectFieldEditor)
         self.connect(self.modelTreeWidget, 
                      QtCore.SIGNAL('itemClicked(QTreeWidgetItem *, int)'),
                      self.setCurrentElement)
@@ -173,10 +176,9 @@ class MainWindow(QtGui.QMainWindow):
 
 	# We connect the double-click event on the class-list to
         # insertion of moose object in model tree.
-        for listWidget in self.mooseClassesWidget.getClassListWidget():
-            self.connect(listWidget, 
-                         QtCore.SIGNAL('itemDoubleClicked(QListWidgetItem*)'), 
-                         self.insertMooseObjectSlot)
+        self.connect(self.mooseClassesWidget, 
+                     QtCore.SIGNAL('classNameDoubleClicked(PyQt_PyObject)'), 
+                     self.modelTreeWidget.insertMooseObjectSlot)
         self.connect(QtGui.qApp, QtCore.SIGNAL('lastWindowClosed()'), self.saveLayout)
         self.createActions()
         self.makeMenu()
@@ -255,12 +257,6 @@ class MainWindow(QtGui.QMainWindow):
                     (area == QtCore.Qt.RightDockWidgetArea):
                 child.setVisible(checked)
 
-    def insertMooseObjectSlot(self, item):
-        """Create an object of class specified by item and insert it
-        as a child of currently selected element in the MOOSE element
-        tree"""
-        className = item.text()
-        self.modelTreeWidget.insertMooseObjectSlot(className)
 
     def makeShellDock(self, interpreter=None, mode=MooseGlobals.CMD_MODE_PYMOOSE):
         """A MOOSE command line for GENESIS/Python interaction"""
@@ -280,11 +276,12 @@ class MainWindow(QtGui.QMainWindow):
     def makeObjectFieldEditor(self, obj):
         """Creates a table-editor for a selected object."""
         try:
-            self.objFieldEditModel = self.objFieldEditorMap[obj.path]
+            self.objFieldEditModel = self.objFieldEditorMap[obj.id]
+            config.LOGGER.debug('Found model %s for object %s' % (self.objFieldEditModel, obj.id))
         except KeyError:
             config.LOGGER.debug('No editor for this object: %s' % (obj.path))
             self.objFieldEditModel = ObjectFieldsModel(obj)
-            self.objFieldEditorMap[obj.path] = self.objFieldEditModel
+            self.objFieldEditorMap[obj.id] = self.objFieldEditModel
             self.connect(self.objFieldEditModel, QtCore.SIGNAL('plotWindowChanged(const QString&, const QString&)'), self.changeFieldPlotWidget)
             if  hasattr(self, 'objFieldEditPanel'):
                 self.objFieldEditPanel.setWindowTitle(self.tr(obj.name))
@@ -297,9 +294,10 @@ class MainWindow(QtGui.QMainWindow):
                     self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.objFieldEditPanel)
                 self.restoreDockWidget(self.objFieldEditPanel)
                 
-        self.objFieldEditor = QtGui.QTableView(self.objFieldEditPanel)
+        self.objFieldEditor = ObjectEditView(self.objFieldEditPanel)
         self.objFieldEditor.setObjectName(obj.path) # This was for quick testing of drag and drop
         self.objFieldEditor.setModel(self.objFieldEditModel)
+        config.LOGGER.debug('Set model to: %s' % (str(self.objFieldEditModel)))
         self.objFieldEditor.setEditTriggers(QtGui.QAbstractItemView.DoubleClicked
                                  | QtGui.QAbstractItemView.SelectedClicked)
         self.objFieldEditor.setDragEnabled(True)
