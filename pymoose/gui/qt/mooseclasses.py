@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Sun Apr 12 14:05:01 2009 (+0530)
 # Version: 
-# Last-Updated: Thu Sep  2 23:37:06 2010 (+0530)
+# Last-Updated: Thu Sep 16 11:28:28 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 221
+#     Update #: 230
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -134,6 +134,9 @@ class MooseClassWidget(QtGui.QToolBox):
             except KeyError, e:
                 widget = QtGui.QListWidget(self)
                 self._listWidget[category] = widget
+                self.connect(widget, 
+                         QtCore.SIGNAL('itemDoubleClicked(QListWidgetItem*)'), 
+                         self.signalItemDoubleClicked)
                 widget.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding))            
                 # widget.setLayout(QtGui.QVBoxLayout())
                 layout.addWidget(widget)
@@ -144,12 +147,17 @@ class MooseClassWidget(QtGui.QToolBox):
             widget = self._listWidget[category]            
             self.addItem(widget, category)
 
+
     def getClassListWidget(self, category='all'):
         if category == 'all':
             return self._listWidget.itervalues()
         else:
             return [self._listWidget[category]]
 
+    def signalItemDoubleClicked(self, item):
+        className = item.text()
+        print 'Creating instance of class', className
+        self.emit(QtCore.SIGNAL('classNameDoubleClicked(PyQt_PyObject)'), className)
 
 if __name__ == '__main__':
     app = QtGui.QApplication([])

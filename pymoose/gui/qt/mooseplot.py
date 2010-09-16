@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul  5 21:35:09 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Sep 15 21:54:46 2010 (+0530)
+# Last-Updated: Thu Sep 16 10:56:33 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 594
+#     Update #: 601
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -326,6 +326,7 @@ class MoosePlot(Qwt.QwtPlot):
             self.addTable(table)
             # This also breaks the capability to move a plot from one
             # plot window to another.
+            model.updatePlotField(index, self.objectName())
 
 class MoosePlotWindow(QtGui.QMdiSubWindow):
     """This is to customize MDI sub window for our purpose.

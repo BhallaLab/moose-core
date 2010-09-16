@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 30 11:18:34 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Sep 15 18:54:13 2010 (+0530)
+# Last-Updated: Thu Sep 16 12:54:32 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 394
+#     Update #: 428
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -72,7 +72,7 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
                   visibility of these fields to advanced mode.
 
     """
-    extra_fields = ['parent', 'childList', 'fieldList', 'name', 'index']
+    extra_fields = ['parent', 'childList', 'fieldList', 'index']
     sys_fields = ['node', 'cpu', 'dataMem', 'msgMem', 'class']
 
     def __init__(self, mooseObject, parent=None):
@@ -105,6 +105,7 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
         self.fieldPlotNameMap = {}
         try:
             className = 'moose.' + mooseObject.className
+            config.LOGGER.debug('Creating editor model for %s of class %s' % (mooseObject.path, className))
             classObject = eval(className)
             self.mooseObject = classObject(mooseObject.id)
 
@@ -113,6 +114,7 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
             return
 
         for fieldName in self.mooseObject.getFieldList(moose.FTYPE_VALUE):
+            config.LOGGER.debug('class: %s, python class: %s, path: %s, field: %s' % (self.mooseObject.className, self.mooseObject.__class__.__name__, self.mooseObject.path, fieldName))
             if (fieldName in ObjectFieldsModel.extra_fields) or (fieldName in ObjectFieldsModel.sys_fields):
                 continue
             flag = Qt.ItemIsEnabled | Qt.ItemIsSelectable
@@ -155,7 +157,7 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
         elif index.column() == 2 and role == Qt.EditRole: 
             try:
                 self.fieldPlotNameMap[self.fields[index.row()]] = str(value)                
-                self.emit(QtCore.SIGNAL('plotWindowChanged(const QString&, const QString&)'), QtCore.QString(self.mooseObject.path + '/' + field), QtCore.QString(value))
+                self.emit(QtCore.SIGNAL('plotWindowChanged(const QString&, const QString&)'), QtCore.QString(self.mooseObject.path + '/' + field, QtCore.QString(value)))
             except KeyError:
                 ret = False
         if ret:
@@ -174,6 +176,7 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
         if index.column() == 0 and role == Qt.DisplayRole:
             ret = QtCore.QVariant(QtCore.QString(field))
         elif index.column() == 1 and role == Qt.DisplayRole:
+            config.LOGGER.debug('Field: %s' % (field))
             ret = QtCore.QVariant(QtCore.QString(self.mooseObject.getField(field)))
         elif index.column() == 2 and role == Qt.DisplayRole:
             try:
@@ -233,6 +236,11 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
                 checked_fields.append(field)
         return checked_fields
 
+    def updatePlotField(self, index, plotWindowName):
+        self.fieldPlotNameMap[self.fields[index.row()]] = str(plotWindowName)                
+        self.emit(QtCore.SIGNAL('dataChanged(const QModelIndex&, const QModelIndex&)'), index, index)
+        print 'EMitted data chaNGED signal'
+        
 class ObjectEditDelegate(QtGui.QItemDelegate):
     """Delegate to handle object editor"""
     def __init__(self, *args):
@@ -265,6 +273,15 @@ class ObjectEditDelegate(QtGui.QItemDelegate):
             model.setData(index, QtCore.QVariant(editor.currentText()))
         else:
             QtGui.QItemDelegate.setModelData(self, editor, model, index)
+
+class ObjectEditView(QtGui.QTableView):
+    """Extension of QTableView in order to automate update of the plot field when a field is dragged and dropped on a plot"""
+    def __init__(self, *args):
+        QtGui.QTableView.__init__(self, *args)
+        
+    def dataChanged(self, tl, br):
+        QtGui.QTableView.dataChanged(self, tl, br)
+        self.viewport().update()
 
 
 if __name__ == '__main__':
