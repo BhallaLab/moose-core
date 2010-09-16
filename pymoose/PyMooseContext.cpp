@@ -875,7 +875,7 @@ void PyMooseContext::addField(Id objectId, string fieldname)
 
 const vector < Id >& PyMooseContext::getChildren(Id id)
 {
-    elist_.resize(0);
+    elist_.clear();
     if ( id() != NULL )
     {
         send1< Id >( myId_(), requestLeSlot, id );
@@ -890,7 +890,7 @@ const vector < Id >& PyMooseContext::getChildren(Id id)
 
 const vector < Id >& PyMooseContext::getChildren(string path)
 {
-    elist_.resize(0);    
+    elist_.clear();    
     Id id(path);
     
     /// \todo: Use better test for a bad path than this.
@@ -1196,6 +1196,7 @@ bool PyMooseContext::parseCopyMove( string src, string dest, Id s,
 */
 vector <string> PyMooseContext::getMessageList(Id obj, string field, bool incoming)
 {
+    elist_.clear();
     // The return message puts the elements in elist_ and the 
     // target field names in fieldValue_
     send3 < Id, string, bool > (myId_(), listMessagesSlot, obj, field, incoming);
@@ -1660,6 +1661,7 @@ vector <string> PyMooseContext::getValueFieldList(Id id)
     
     send2 <Id, string>(myId_(), requestFieldSlot, id, "fieldList");
     vector< string >::iterator i;
+    strings_.clear();
     separateString( fieldValue_, strings_, ", " );
     return strings_;
 }
@@ -1675,7 +1677,7 @@ vector<string> PyMooseContext::getFieldList(Id id, FieldType ftype)
     const Cinfo* cinfo = id()->cinfo();
     vector<const Finfo*> finfoList;
     cinfo->listFinfos(finfoList);
-
+    strings_.clear();
     switch (ftype){
         case FTYPE_VALUE:
             for (int i = 0; i < finfoList.size(); ++i)
