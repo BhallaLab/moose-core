@@ -112,9 +112,9 @@ static DestFinfo handleUseClock( "handleUseClock",
 				&Shell::handleUseClock )
 			);
 
-static DestFinfo create( "create", 
+static DestFinfo handleCreate( "create", 
 			"create( class, parent, newElm, name, dimensions )",
-			new EpFunc5< Shell, string, Id, Id, string, vector< unsigned int > >( &Shell::create ) );
+			new EpFunc5< Shell, string, Id, Id, string, vector< unsigned int > >( &Shell::handleCreate ) );
 
 static DestFinfo del( "delete", 
 			"Destroys Element, all its messages, and all its children. Args: Id",
@@ -238,7 +238,7 @@ static Finfo* shellMaster[] = {
 	&requestMove, &requestCopy, &requestUseClock,
 	&handleAck };
 static Finfo* shellWorker[] = {
-	&create, &del, &handleQuit, 
+	&handleCreate, &del, &handleQuit, 
 		&handleStart, &handleReinit, &handleStop, &handleTerminate,
 		&handleAddMsg, &handleSet, &handleGet, &relayGet, 
 		&handleMove, &handleCopy, &handleUseClock,
@@ -744,16 +744,16 @@ void Shell::handleTerminate()
  * Element, but for now the num indicates the total # of array entries.
  * This gets a bit complicated if the Element is a multidim array.
  */
-void Shell::create( const Eref& e, const Qinfo* q, 
+void Shell::handleCreate( const Eref& e, const Qinfo* q, 
 	string type, Id parent, Id newElm, string name,
 	vector< unsigned int > dimensions )
 {
-	// cout << myNode_ << ": In Shell::create for element " << name << " id " << newElm << ", dim = " << dimensions[0] << endl;
+	// cout << myNode_ << ": In Shell::handleCreate for element " << name << " id " << newElm << ", dim = " << dimensions[0] << endl;
 	innerCreate( type, parent, newElm, name, dimensions );
-	// cout << myNode_ << ": Shell::create inner Create done for element " << name << " id " << newElm << endl;
+	// cout << myNode_ << ": Shell::handleCreate inner Create done for element " << name << " id " << newElm << endl;
 //	if ( myNode_ != 0 )
 	ack.send( e, &p_, Shell::myNode(), OkStatus );
-	// cout << myNode_ << ": Shell::create ack sent" << endl;
+	// cout << myNode_ << ": Shell::handleCreate ack sent" << endl;
 }
 
 /// Utility function 
@@ -788,7 +788,7 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 		Element* pa = parent();
 		if ( !pa ) {
 			stringstream ss;
-			ss << "create: Parent Element'" << parent << "' not found. No Element created";
+			ss << "innerCreate: Parent Element'" << parent << "' not found. No Element created";
 			warning( ss.str() );
 			return;
 		}
@@ -796,7 +796,7 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 		const Finfo* f1 = pa->cinfo()->findFinfo( "childMsg" );
 		if ( !f1 ) {
 			stringstream ss;
-			ss << "create: Parent Element'" << parent << "' cannot handle children. No Element created";
+			ss << "innerCreate: Parent Element'" << parent << "' cannot handle children. No Element created";
 			warning( ss.str() );
 			return;
 		}
@@ -812,16 +812,15 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 		Msg* m = new OneToAllMsg( parent.eref(), ret );
 		assert( m );
 		if ( !f1->addMsg( f2, m->mid(), parent() ) ) {
-			cout << "create: Error: unable to add parent->child msg for " <<
+			cout << "innerCreate: Error: unable to add parent->child msg for " <<
 				name << "\n";
 			return;
 		}
 		*/
 
-		//ret = c->create( newElm, name, n, Element::Decomposition::Block );
 	} else {
 		stringstream ss;
-		ss << "create: Class '" << type << "' not known. No Element created";
+		ss << "innerCreate: Class '" << type << "' not known. No Element created";
 		warning( ss.str() );
 	}
 }

@@ -126,10 +126,11 @@ void testGslIntegrator( bool dumpData )
 	cout << "." << flush;
 }
 
+// To go into regression tests. Here I need to restrict to unit tests.
 void testKsolve( bool dumpData )
 {
-	testKsolveZombify();
-	testGslIntegrator( dumpData );
+	// testKsolveZombify();
+	// testGslIntegrator( dumpData );
 }
 
 void testMpiKsolve()

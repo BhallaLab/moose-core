@@ -41,6 +41,9 @@ class Table
 		void spike( double v );
 		void xplot( string file, string plotname );
 		void recvData( PrepackedBuffer pb );
+		void loadXplot( string fname, string plotname );
+		void loadCSV( 
+			string fname, int startLine, int colNum, char separator );
 
 		//////////////////////////////////////////////////////////////////
 		// Lookup funcs for table

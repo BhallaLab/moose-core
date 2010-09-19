@@ -108,7 +108,7 @@ string ReadKkit::getBasePath() const
 /**
  * The readcell function implements the old GENESIS cellreader
  * functionality. Although it is really a parser operation, I
- * put it here in Shell because the cell format is independent
+ * put it here in Kinetics because the cell format is independent
  * of parser and is likely to remain a legacy for a while.
  */
 Id ReadKkit::read(

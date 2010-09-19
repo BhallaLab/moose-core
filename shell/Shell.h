@@ -135,7 +135,7 @@ class Shell
 
 		void handleQuit();
 
-		void create( const Eref& e, const Qinfo* q, 
+		void handleCreate( const Eref& e, const Qinfo* q, 
 			string type, Id parent, Id newElm, string name,
 			vector< unsigned int > dimensions );
 		void destroy( const Eref& e, const Qinfo* q, Id eid);

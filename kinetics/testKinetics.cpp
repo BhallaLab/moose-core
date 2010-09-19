@@ -125,7 +125,7 @@ void testMathFunc()
 
 void testKinetics()
 {
-	testReadKkit();
+	// testReadKkit(); // To go into regression tests.
 //	testMathFunc();
 }
 

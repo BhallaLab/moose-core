@@ -58,6 +58,7 @@ class Qinfo;
 class Cinfo;
 class SetGet;
 
+#include "doubleEq.h"
 #include "Id.h"
 #include "DataId.h"
 #include "FullId.h"

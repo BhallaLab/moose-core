@@ -65,6 +65,19 @@ const Cinfo* Table::initCinfo()
 			"Argument 1 is filename, argument 2 is plotname",
 			new OpFunc2< Table, string, string >( &Table::xplot ) );
 
+		static DestFinfo loadCSV( "loadCSV",
+			"Reads a single column from a CSV file. "
+			"Arguments: filename, column#, starting row#, separator",
+			new OpFunc4< Table, string, int, int, char >( 
+				&Table::loadCSV ) );
+
+		static DestFinfo loadXplot( "loadXplot",
+			"Reads a single plot from an xplot file. "
+			"Arguments: filename, plotname"
+			"When the file has 2 columns, the 2nd column is loaded.",
+			new OpFunc2< Table, string, string >( 
+				&Table::loadXplot ) );
+
 		static DestFinfo process( "process",
 			"Handles process call, updates internal time stamp.",
 			new ProcOpFunc< Table >( &Table::process ) );
@@ -100,6 +113,8 @@ const Cinfo* Table::initCinfo()
 		&input,			// DestFinfo
 		&spike,			// DestFinfo
 		&xplot,			// DestFinfo
+		&loadCSV,			// DestFinfo
+		&loadXplot,			// DestFinfo
 		&recvDataBuf,	// DestFinfo
 		&output,		// SrcFinfo
 		&outputLoop,		// SrcFinfo
@@ -186,6 +201,107 @@ void Table::xplot( string fname, string plotname )
 	for ( vector< double >::iterator i = vec_.begin(); i != vec_.end(); ++i)
 		fout << *i << endl;
 	fout << "\n";
+}
+
+bool isNamedPlot( const string& line, const string& plotname )
+{
+	static const unsigned int len = strlen( "/plotname" ) ;
+	if ( line.size() < len + 2 )
+		return 0;
+	if ( line[0] == '/' && line[1] == 'p' ) {
+		string name = line.substr( strlen( "/plotname" ) );
+		string::size_type pos = name.find_first_not_of( " 	" );
+		if ( pos == string::npos ) {
+			cout << "Table::loadXplot: Malformed plotname line '" <<
+				line << "'\n";
+			return 0;
+		}
+		name = name.substr( pos );
+		if ( plotname == name )
+			return 1;
+	}
+	return 0;
+}
+
+/*
+bool lineHasExactlyTwoNumericalColumns( const string& line )
+{
+	istringstream sstream( line );
+	double y;
+
+	if ( sstream >> y ) {
+		if ( sstream >> y ) {
+			if ( sstream >> y ) {
+				return 0;
+			} else {
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+*/
+
+double getYcolumn( const string& line )
+{
+	istringstream sstream( line );
+	double y1 = 0.0;
+	double y2;
+	double y3;
+
+	if ( sstream >> y1 ) {
+		if ( sstream >> y2 ) {
+			if ( sstream >> y3 ) {
+				return y1;
+			} else {
+				return y2;
+			}
+		}
+	}
+	return y1;
+}
+
+void Table::loadXplot( string fname, string plotname )
+{
+	ifstream fin( fname.c_str() );
+	if ( !fin.good() ) {
+		cout << "Table::loadXplot: Failed to open file " << fname <<endl;
+		return;
+	}
+
+	string line;
+	// Here we advance to the first numerical line.
+	if ( plotname == "" ) // Just load starting from the 1st numerical line.
+	{
+		while ( fin.good() ) { // Break out of this loop if we find a number
+			getline( fin, line );
+			if ( isdigit( line[0] ) )
+				break;;
+			if ( line[0] == '-' && line.length() > 1 && isdigit( line[1] ) )
+				break;
+		}
+	} else { // Find plotname and then begin loading.
+		while ( fin.good() ) {
+			getline( fin, line );
+			if ( isNamedPlot ( line, plotname ) ) {
+				if ( !getline ( fin, line ) )
+					return;
+				getline( fin, line );
+				break;
+			}
+		}
+	}
+
+	vec_.resize( 0 );
+	do {
+		vec_.push_back( getYcolumn( line ) );
+		getline( fin, line );
+	} while ( fin.good() );
+}
+
+void Table::loadCSV( 
+	string fname, int startLine, int colNum, char separator )
+{
 }
 
 //////////////////////////////////////////////////////////////

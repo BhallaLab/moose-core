@@ -7363,10 +7363,173 @@ With this fixed the timings are:
 Kholodenko.g	15	6e6	5	19.4	19.4	19.8	2.4 on 500s dt
 spine_v61c.g	104	500	10	13.4	13.4	13.4
 Dend_v26.g	129	200	1	9.7	9.7	9.7
-acc81.g		1050	200	1	12.7	12.7	12.8	Surprising fast
+acc81.g		1050	200	1	12.7	12.7	12.8	
 
 These new times are almost exactly like the old (array pointer) ones.
 Also confirmed that the output now matches perfectly (md5sum) with the old
-one for the Dend_v26.g model. So we are in business.
+one for the Dend_v26.g model. So we are in business. No barrier to going
+ahead with the indexed approach to calculate diffusion models. Checkin 2112.
 
 ============================================================================
+10 Aug 2010
+Instead of trying to do different geometry calculations independently, I'll set
+up a data structure that keeps track of junctions. Each junction has a scaling
+factor derived from cross-section area and length of the compartment, and
+applies this individually to each diffusing molecule. Will need a bit more info
+for motors and non-uniform diffusion.
+
+class jn {
+	double scaling;
+	unsigned int vox1;
+	unsigned int vox2;
+};
+
+However, many of the jn entries could be generated on the fly based on higher-
+level knowledge of model shape and voxelization. # of entries is quite
+large, ~# voxels. 
+
+Other consideration is to make the representation general enough that other
+solution methods than Runge-Kutta could use it.
+
+Should I index the junctions as independent entities, or have the first 
+index refer to the first voxel? Issue of multiple references.
+
+Seems like
+a) All reactions within a compartment are the same. Same Stoich. 
+	- But we might use different solvers for the same compt
+	- We might want to share stoichs for different identical compts: spines.
+		- alternative is to treat them as diff geoms.
+b) Each compartment (ChemCompt) supplies an iterator to internal junctions.
+	Or a lookup function to let us get the relevant junctions within and
+	at the boundaries of the compartment.
+c) The compartment holds one or more geoms. 
+	- Used internally to figure out junctions
+	- Used externally to draw.
+d) Compts talk to each other by another set of junctions, implemented as
+	FieldElements. These contain info about how to exchange molecules,
+		and include mappings of mol indices between compts.
+e) Motors are a special case of inter-compt reactions. It is a bit premature
+	to specify them in full, but the general idea would be to use the
+	full SBML capabilities to define the reactions, and add in a scaling
+	using XA and L of each voxel. Don't mix up with the diffusive stuff.
+f) Buffered gradients. Another nasty one to specify. Tedious to
+	implement: a vector or func for init values, and housekeeping to
+	fit it into the numerical calculations with each voxel.
+
+Some specific cases:
+A neuron model could have four compts: the soma, the dendrites, the spines
+	and the psds
+	These would have special geometry refs that look at the neuronal 
+		morphology spec. Need to handle multiple separated geoms for
+		spines/psds.
+
+============================================================================
+10 Sep 2010
+We need another layer of info; specifying which solver to use where.
+Option 1: just use another compartment, even if the stoich is identical
+Option 2: Use the definition of cellular compartments as domains where 
+	reactions are the same (even if there are spatial gradients). Then
+	I need to subdivide the cellular compartment into numerical 
+	compartments.
+
+15 Sep 2010
+Note that either of these is messy. The model is being confounded with the
+algorithm. Alternatively one could argue that we are just setting the model
+up into domains of deterministic and stochastic behaviour.
+
+If we use option 2, then we really want the ability to use a higher-level
+spec to tell the system which algo to choose where. It could for example be 
+based on dendrite diameter, or it could be a simple geometrical spec.
+Big advantage is that I can swap around numerical approaches independent of
+basic model definition.
+
+I also need to build in the interface capabilities with other solvers: adaptors.
+
+chemCompt ------/ Model
+		/ Stoich
+		/ metaGeom ---/	Geoms
+		/ innerJunctions
+		/ outerJunctions
+		/ spatialReactions
+		/ spatialParameters
+		/ spatialAlgorithms [---/ GeomList]
+		/ adaptors[]
+
+Some details:
+	- metaGeom could refer to a class that takes a path to a neuronal model
+	and manages a chemical decomposition to match it. Or it could be
+	a vector of regular geoms. Has to provide discretization info. 
+		- Need a vector of discretization objects, which specify
+		gory details of junctions as well as a lot of the spatial stuff.
+		Also handle geoms. Hm.
+	- innerJunctions and outerJunctions need to refer to assorted geoms
+	as well as to discretization 
+
+
+============================================================================
+16 Sep 2010
+Subha and others are having difficulties with the current MOOSE. So I need
+to change gears and focus on getting the new base-code ready for adoption.
+
+Key issues:
+- Thread handling needs some cleanup
+	- Need to set up a separate GUI thread and possibly another for 
+		the openGL stuff. Or they could go out by MPI.
+	- Generic cleanup
+- Queue stuff needs cleanup
+	- See about streamlining the allocation into local/offnode queues.
+	- Have another look (later) at optimization. This is a big bottleneck.
+- Array handling and indexing and lookup needs some work
+	- need also to sort out policy for multidim arrays.
+		- Could just add ops for DataId to take a vector of 
+			indices and vector of sizes to compute linear index.
+		- Will need to add ArbDimGlobalHandler.
+		- Clean up numData assorted set of ops in DataHandler.
+	- Sort out field vs element array logic.
+- Unit testing
+	- Need to resurrect the whole bank of unit tests.
+- Create and copy need work, specially for arrays
+- Complete list of shell functions. This may need to provide an
+	interface to the Set/Get operations through strings.
+- Move may need work
+- All Shell functions need to be made thread and MPI-compatible
+- I need to build some unit tests at the Shell level for all operations,
+	and an automatic way of running them through multithread and
+	multinode and combinations thereof.
+- Proper Design Document
+- Fix up dimension junk in the create function: give a simpler version for
+	0 and 1 dim arrays.
+
+============================================================================
+18 Sep 2010
+Finally started to code. Renamed Shell::create into the more systematic
+Shell::handleCreate. Compiles. Turns out that I have an error now because
+I deleted a file 'foo.g' which the ReadKkit was using to test.
+Should separate out unit tests from regression tests.
+
+============================================================================
+19 Sep 2010
+
+Setting up MOOSE regression test system
+First order is to ensure that it can correctly load and run specific models.
+In addition, From Wikipedia:
+"Therefore, in most software development situations it is considered good 
+practice  that when a bug is located and fixed, a test that exposes the bug
+is recorded and regularly retested after subsequent changes to the program"
+
+For MOOSE, I'm putting this second kind of issue into both the regression and
+unit test mandates, as appropriate. The general scope of regresion tests
+is entire system function. The scope of unit tests is function of
+specific small subparts.
+
+I'll implement a function in Table to read in files including single and
+double-column xplot files, scanning through for a specific xplot name,
+and doing interpolation in due course.
+
+This needs a regression test.
+I need a regression test now for testing ReadKkit too.
+I need a regression test for testing ksolve too.
+So I've commented out these operations as they utilize an external model file
+	for their tests, and hence are more appropriate for regression testing.
+
+Finally, all compiles and clears _unit_ tests.

@@ -182,8 +182,29 @@ void testMpiFibonacci()
 	cout << "." << flush;
 }
 
+void testUtilsForLoadXplot()
+{
+	bool isNamedPlot( const string& line, const string& plotname );
+	double getYcolumn( const string& line );
+
+	assert( isNamedPlot( "/plotname foo", "foo" ) );
+	assert( !isNamedPlot( "/plotname foo", "bar" ) );
+	assert( !isNamedPlot( "/newplot", "bar" ) );
+	assert( !isNamedPlot( "", "bar" ) );
+	assert( !isNamedPlot( "1234.56", "bar" ) );
+
+	assert( doubleEq( getYcolumn( "123.456" ), 123.456 ) );
+	assert( doubleEq( getYcolumn( "987	123.456" ), 123.456 ) );
+	assert( doubleEq( getYcolumn( "987 23.456" ), 23.456 ) );
+	assert( doubleEq( getYcolumn( "987	 3.456" ), 3.456 ) );
+	assert( doubleEq( getYcolumn( "987	 0.456" ), 0.456 ) );
+	assert( doubleEq( getYcolumn( "987.6	 0.456	1111.1" ), 987.6 ) );
+	cout << "." << flush;
+}
+
 void testTable()
 {
+	testUtilsForLoadXplot();
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	vector< unsigned int > dims( 1, 1 );
 	Id tabid = shell->doCreate( "Table", Id(), "tab", dims );
