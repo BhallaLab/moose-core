@@ -45,6 +45,9 @@ extern void initMsgManagers();
 extern void destroyMsgManagers();
 extern void speedTestMultiNodeIntFireNetwork( 
 	unsigned int size, unsigned int runsteps );
+#ifdef DO_UNIT_TESTS
+void regressionTests();
+#endif
 
 Id init( int argc, char** argv )
 {
@@ -203,6 +206,9 @@ int main( int argc, char** argv )
 	// Shell messaging/MPI, and yield control to the parser.
 	if ( s->myNode() == 0 ) {
 		mpiTests();
+#ifdef DO_UNIT_TESTS
+		regressionTests();
+#endif
 		if ( !benchmarkTests( argc, argv ) )
 			s->launchParser();
 	} else {

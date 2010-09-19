@@ -93,7 +93,8 @@ const Cinfo* Table::initCinfo()
 		static DestFinfo compareXplot( "compareXplot",
 			"Reads a plot from an xplot file and compares with contents of Table."
 			"Result is put in 'output' field of table."
-			"Arguments: filename, plotname, comparison_operation",
+			"Arguments: filename, plotname, comparison_operation"
+			"Operations: rmsd (for RMSDifference), rmsr (RMSratio )",
 			new OpFunc3< Table, string, string, string >( 
 				&Table::compareXplot ) );
 

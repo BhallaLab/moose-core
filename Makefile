@@ -217,6 +217,7 @@ SUBDIR = \
 	builtins\
 	kinetics \
 	ksolve \
+	regressionTests \
 
 # Used for 'make clean'
 CLEANSUBDIR = $(SUBDIR) $(PARALLEL_DIR)
@@ -231,6 +232,7 @@ OBJLIBS =	\
 	builtins/builtins.o \
 	kinetics/kinetics.o \
 	ksolve/ksolve.o \
+	regressionTests/rt.o \
 
 
 export CXX

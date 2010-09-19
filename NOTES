@@ -7541,4 +7541,11 @@ low-level runtime calculations so it stays.
 
 Done. Implemented as a function wthin the table to avoid class proliferation.
 Does RMSdifference  and scaled RMS difference calculations. Use the latter
-for measuring goodness of fit in a dimensionless manner.
+for measuring goodness of fit in a dimensionless manner. Checkin 2180.
+
+With this in hand I can implement some regression tests. First to test
+the testers.
+
+I've now set up some of the framework for the regression tests. Still need
+to clean up the base Makefile so they are not compiled in at all unless
+a flag is set. Still the table test doesn't work.
