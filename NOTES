@@ -7532,4 +7532,13 @@ I need a regression test for testing ksolve too.
 So I've commented out these operations as they utilize an external model file
 	for their tests, and hence are more appropriate for regression testing.
 
-Finally, all compiles and clears _unit_ tests.
+Finally, all compiles and clears _unit_ tests. Checkin 2179.
+
+Next: Make a table comparison function or Class. Class it is, since there
+will be a range of parameters to assign for comparison. This is a bit
+redundant when considering the capabilities of NumPy, but we need it for
+low-level runtime calculations so it stays.
+
+Done. Implemented as a function wthin the table to avoid class proliferation.
+Does RMSdifference  and scaled RMS difference calculations. Use the latter
+for measuring goodness of fit in a dimensionless manner.

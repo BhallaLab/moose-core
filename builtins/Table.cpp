@@ -44,6 +44,18 @@ const Cinfo* Table::initCinfo()
 			&Table::getThreshold
 		);
 
+		static ReadOnlyValueFinfo< Table, double > outputValue(
+			"outputValue",
+			"Output value holding current table entry or output of a calculation",
+			&Table::getOutputValue
+		);
+
+		static ReadOnlyValueFinfo< Table, unsigned int > outputIndex(
+			"outputIndex",
+			"Index of current table entry",
+			&Table::getOutputIndex
+		);
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -78,6 +90,13 @@ const Cinfo* Table::initCinfo()
 			new OpFunc2< Table, string, string >( 
 				&Table::loadXplot ) );
 
+		static DestFinfo compareXplot( "compareXplot",
+			"Reads a plot from an xplot file and compares with contents of Table."
+			"Result is put in 'output' field of table."
+			"Arguments: filename, plotname, comparison_operation",
+			new OpFunc3< Table, string, string, string >( 
+				&Table::compareXplot ) );
+
 		static DestFinfo process( "process",
 			"Handles process call, updates internal time stamp.",
 			new ProcOpFunc< Table >( &Table::process ) );
@@ -109,12 +128,15 @@ const Cinfo* Table::initCinfo()
 
 	static Finfo* tableFinfos[] = {
 		&threshold,		// Value
+		&outputValue,	// ReadOnlyValue
+		&outputIndex,	// ReadOnlyValue
 		&group,			// DestFinfo
 		&input,			// DestFinfo
 		&spike,			// DestFinfo
 		&xplot,			// DestFinfo
 		&loadCSV,			// DestFinfo
 		&loadXplot,			// DestFinfo
+		&compareXplot,		// DestFinfo
 		&recvDataBuf,	// DestFinfo
 		&output,		// SrcFinfo
 		&outputLoop,		// SrcFinfo
@@ -159,13 +181,16 @@ void Table::process( const Eref& e, ProcPtr p )
 	if ( vec_.size() == 0 ) {
 		output.send( e, p, 0.0 );
 		outputLoop.send( e, p, 0.0 );
+		output_ = 0;
 		return;
 	}
 
 	if ( outputIndex_ < vec_.size() )
-		output.send( e, p, vec_[ outputIndex_ ] );
+		output_ = vec_[ outputIndex_ ];
 	else
-		output.send( e, p, vec_.back() );
+		output_ = vec_.back();
+
+	output.send( e, p, output_ );
 
 	outputLoop.send( e, p, vec_[ outputIndex_ % vec_.size() ] );
 
@@ -261,12 +286,12 @@ double getYcolumn( const string& line )
 	return y1;
 }
 
-void Table::loadXplot( string fname, string plotname )
+bool innerLoadXplot( string fname, string plotname, vector< double >& v )
 {
 	ifstream fin( fname.c_str() );
 	if ( !fin.good() ) {
-		cout << "Table::loadXplot: Failed to open file " << fname <<endl;
-		return;
+		cout << "Table::innerLoadXplot: Failed to open file " << fname <<endl;
+		return 0;
 	}
 
 	string line;
@@ -285,23 +310,100 @@ void Table::loadXplot( string fname, string plotname )
 			getline( fin, line );
 			if ( isNamedPlot ( line, plotname ) ) {
 				if ( !getline ( fin, line ) )
-					return;
+					return 0;
 				getline( fin, line );
 				break;
 			}
 		}
 	}
 
-	vec_.resize( 0 );
+	v.resize( 0 );
 	do {
-		vec_.push_back( getYcolumn( line ) );
+		v.push_back( getYcolumn( line ) );
 		getline( fin, line );
 	} while ( fin.good() );
+
+	return ( v.size() > 0 );
+}
+
+void Table::loadXplot( string fname, string plotname )
+{
+	if ( !innerLoadXplot( fname, plotname, vec_ ) ) {
+		cout << "Table::loadXplot: unable to load data from file " << fname <<endl;
+		return;
+	}
 }
 
 void Table::loadCSV( 
 	string fname, int startLine, int colNum, char separator )
 {
+}
+
+double getRMSDiff( const vector< double >& v1, const vector< double >& v2 )
+{
+	unsigned int size = ( v1.size() < v2.size() ) ? v1.size() : v2.size();
+	if ( size == 0 )
+		return 0;
+
+	double sumsq = 0;
+	for ( unsigned int i = 0; i < size; ++i ) {
+		double temp = v1[i] - v2[i];
+		sumsq += temp * temp;
+	}
+	return sqrt( sumsq / size );
+}
+
+double getRMS( const vector< double >& v )
+{
+	double sumsq = 0;
+	unsigned int size = v.size();
+	if ( size == 0 )
+		return 0;
+	for ( vector< double >::const_iterator i = v.begin(); i != v.end(); ++i)
+		sumsq += *i * *i;
+	
+	return sqrt( sumsq / size );
+}
+
+double getRMSRatio( const vector< double >& v1, const vector< double >& v2 )
+{
+	double r1 = getRMS( v1 );
+	double r2 = getRMS( v2 );
+	if ( r1 + r2 > 1e-20 )
+		return getRMSDiff( v1, v2 ) / (r1 + r2);
+	return 0;
+}
+
+string headop( const string& op )
+{
+	const unsigned int len = 5;
+	char temp[len];
+	unsigned int i = 0;
+	for ( i = 0; i < op.length() && i < len-1 ; ++i )
+		temp[i] = tolower( op[i] );
+	temp[i] = '\n';
+	return string( temp );
+}
+
+void Table::compareXplot( string fname, string plotname, string op )
+{
+	vector< double > temp;
+	if ( !innerLoadXplot( fname, plotname, temp ) ) {
+		cout << "Table::compareXplot: unable to load data from file " << fname <<endl;
+	}
+
+	string hop = headop( op );
+
+	if ( hop == "rmsd" ) { // RMSDifference
+		output_ = getRMSDiff( vec_, temp );
+	}
+
+	if ( hop == "rmsr" ) { // RMS ratio
+		output_ = getRMSRatio( vec_, temp );
+	}
+
+	if ( hop == "dotp" )
+		cout << "Table::compareXplot: DotProduct not yet done\n";
 }
 
 //////////////////////////////////////////////////////////////
@@ -316,6 +418,18 @@ void Table::setThreshold( double v )
 double Table::getThreshold() const
 {
 	return threshold_;
+}
+
+double Table::getOutputValue() const
+{
+	if ( outputIndex_ < vec_.size() )
+		return vec_[outputIndex_];
+	return 0;
+}
+
+unsigned int Table::getOutputIndex() const
+{
+	return outputIndex_;
 }
 
 //////////////////////////////////////////////////////////////

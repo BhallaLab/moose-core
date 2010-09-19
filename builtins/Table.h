@@ -29,6 +29,8 @@ class Table
 
 		void setThreshold( double v );
 		double getThreshold() const;
+		double getOutputValue() const;
+		unsigned int getOutputIndex() const;
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
@@ -44,6 +46,7 @@ class Table
 		void loadXplot( string fname, string plotname );
 		void loadCSV( 
 			string fname, int startLine, int colNum, char separator );
+		void compareXplot( string fname, string plotname, string op );
 
 		//////////////////////////////////////////////////////////////////
 		// Lookup funcs for table
@@ -56,6 +59,7 @@ class Table
 	private:
 		double threshold_;
 		double lastTime_;
+		double output_;
 		unsigned int outputIndex_;
 		double input_;
 		vector< double > vec_;

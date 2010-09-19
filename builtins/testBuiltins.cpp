@@ -202,9 +202,42 @@ void testUtilsForLoadXplot()
 	cout << "." << flush;
 }
 
+void testUtilsForCompareXplot()
+{
+	double getRMSDiff( const vector< double >& v1, const vector< double >& v2 );
+	double getRMS( const vector< double >& v );
+
+	double getRMSRatio( const vector< double >& v1, const vector< double >& v2 );
+
+	vector< double > v1;
+	vector< double > v2;
+	v1.push_back( 0 );
+	v1.push_back( 1 );
+	v1.push_back( 2 );
+
+	v2.push_back( 0 );
+	v2.push_back( 1 );
+	v2.push_back( 2 );
+
+	double r1 = sqrt( 5.0 / 3.0 );
+	double r2 = sqrt( 1.0 / 3.0 );
+
+	assert( doubleEq( getRMS( v1 ), r1 ) );
+	assert( doubleEq( getRMS( v2 ), r1 ) );
+	assert( doubleEq( getRMSDiff( v1, v2 ), 0 ) );
+	assert( doubleEq( getRMSRatio( v1, v2 ), 0 ) );
+
+	v2[2] = 3;
+	assert( doubleEq( getRMS( v2 ), sqrt( 10.0/3.0 ) ) );
+	assert( doubleEq( getRMSDiff( v1, v2 ), r2 ) );
+	assert( doubleEq( getRMSRatio( v1, v2 ), r2 / ( sqrt( 10.0/3.0 ) + r1 ) ) );
+	cout << "." << flush;
+}
+
 void testTable()
 {
 	testUtilsForLoadXplot();
+	testUtilsForCompareXplot();
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	vector< unsigned int > dims( 1, 1 );
 	Id tabid = shell->doCreate( "Table", Id(), "tab", dims );
