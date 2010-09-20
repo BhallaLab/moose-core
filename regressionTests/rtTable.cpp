@@ -20,10 +20,13 @@ void rtTable()
 
 	bool ok = SetGet::strSet( tab, "loadXplot", "tab1.xplot,plot1" );
 	assert( ok );
+
+	unsigned int size = Field< unsigned int >::get( tab, "size" );
+	assert( size == 10 );
+
 	ok = SetGet::strSet( tab, "compareXplot", "tab1.xplot,plot1,rmsr" );
 	assert( ok );
 	double val = Field< double >::get( tab, "outputValue" );
-	assert( ok );
 	assert( doubleEq( val, 0.0 ) );
 
 	shell->doDelete( tabid );

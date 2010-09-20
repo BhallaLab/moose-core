@@ -39,8 +39,7 @@ FuncId DestFinfo::getFid() const
 bool DestFinfo::strSet( 
 	const Eref& tgt, const string& field, const string& arg ) const 
 {
-	// For now we bail. Later we can update OpFunc to handle conversions.
-	return 0;
+	return func_->strSet( tgt, field, arg );
 }
 
 bool DestFinfo::strGet( 

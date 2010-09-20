@@ -7499,6 +7499,7 @@ Key issues:
 - Proper Design Document
 - Fix up dimension junk in the create function: give a simpler version for
 	0 and 1 dim arrays.
+- Treat arrayFieldElements so that we can easily look up their dimensiosn.
 
 ============================================================================
 18 Sep 2010
@@ -7553,3 +7554,12 @@ a flag is set. Still the table test doesn't work. Checkin 2181.
 The test doesn't work because I haven't fixed up StrSet and StrGet.
 Currently they go dangling from the DestFinfo. Need to decide if I should
 use the virtual forms or go direct to statics.
+============================================================================
+20 Sep 2010
+
+Implemented the StrSet. Involved fixing lots of functions and OpFunc derived
+classes. Checkins up to 2183.
+
+With that, the regression tests started to give real error messages. Fixed
+those.
+

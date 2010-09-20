@@ -56,6 +56,12 @@ const Cinfo* Table::initCinfo()
 			&Table::getOutputIndex
 		);
 
+		static ReadOnlyValueFinfo< Table, unsigned int > size(
+			"size",
+			"size of table",
+			&Table::getVecSize
+		);
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -131,6 +137,7 @@ const Cinfo* Table::initCinfo()
 		&threshold,		// Value
 		&outputValue,	// ReadOnlyValue
 		&outputIndex,	// ReadOnlyValue
+		&size,		// ReadOnlyValue
 		&group,			// DestFinfo
 		&input,			// DestFinfo
 		&spike,			// DestFinfo
@@ -312,7 +319,6 @@ bool innerLoadXplot( string fname, string plotname, vector< double >& v )
 			if ( isNamedPlot ( line, plotname ) ) {
 				if ( !getline ( fin, line ) )
 					return 0;
-				getline( fin, line );
 				break;
 			}
 		}
@@ -320,6 +326,8 @@ bool innerLoadXplot( string fname, string plotname, vector< double >& v )
 
 	v.resize( 0 );
 	do {
+		if ( line.length() == 0 || line == "/newplot" || line == "/plotname" )
+			break;
 		v.push_back( getYcolumn( line ) );
 		getline( fin, line );
 	} while ( fin.good() );
@@ -382,7 +390,7 @@ string headop( const string& op )
 	unsigned int i = 0;
 	for ( i = 0; i < op.length() && i < len-1 ; ++i )
 		temp[i] = tolower( op[i] );
-	temp[i] = '\n';
+	temp[i] = '\0';
 	return string( temp );
 }
 
