@@ -24,19 +24,19 @@ class SetGet
 		 * Assigns 'field' on 'tgt' to 'val', after doing necessary type
 		 * conversion from the string val. Returns 0 if it can't
 		 * handle it, which is unusual.
-		 */
-		virtual bool innerStrSet( const Eref& tgt, 
+		bool innerStrSet( const Eref& tgt, 
 			const string& field, const string& val ) const = 0;
+		 */
 
 		/**
 		 * Looks up field value on tgt, converts to string, and puts on 
 		 * 'ret'. Returns 0 if the class does not support 'get' operations,
 		 * which is usually the case. Fields are the exception.
-		 */
 		virtual bool innerStrGet( const Eref& tgt, 
 			const string& field, string& ret ) const {
 			return 0;
 		}
+		 */
 
 
 		/**
@@ -111,8 +111,8 @@ class SetGet0: public SetGet
 		/**
 		 * Blocking call using string conversion
 		 */
-		bool innerStrSet( const Eref& dest, const string& field, 
-			const string& val ) const
+		static bool innerStrSet( const Eref& dest, const string& field, 
+			const string& val )
 		{
 			return set( dest, field );
 		}
@@ -186,24 +186,12 @@ template< class A > class SetGet1: public SetGet
 		/**
 		 * Blocking call using string conversion
 		 */
-		bool innerStrSet( const Eref& dest, const string& field, 
-			const string& val ) const
+		static bool innerStrSet( const Eref& dest, const string& field, 
+			const string& val )
 		{
 			A arg;
 			Conv< A >::str2val( arg, val );
 			return set( dest, field, arg );
-		}
-
-		/**
-		 * Nonblocking 'set' call, using automatic string conversion into
-		 * arbitrary numbers of arguments.
-		 * There is a matching nonblocking set call with typed arguments.
-		 */
-		bool iStrSet( const string& field, const string& val )
-		{
-			A temp;
-			Conv< A >::str2val( temp, val );
-			return iSet( field, temp );
 		}
 };
 
@@ -240,8 +228,8 @@ template< class A > class Field: public SetGet1< A >
 		/**
 		 * Blocking call using string conversion
 		 */
-		bool innerStrSet( const Eref& dest, const string& field, 
-			const string& val ) const 
+		static bool innerStrSet( const Eref& dest, const string& field, 
+			const string& val )
 		{
 			A arg;
 			// Do NOT add 'set_' to the field name, as the 'set' func
@@ -268,8 +256,8 @@ template< class A > class Field: public SetGet1< A >
 		 * Blocking virtual call for finding a value and returning in a
 		 * string.
 		 */
-		bool innerStrGet( const Eref& dest, const string& field, 
-			string& str ) const
+		static bool innerStrGet( const Eref& dest, const string& field, 
+			string& str )
 		{
 			SetGet1< A > sg( dest );
 			string temp = "get_" + field;
@@ -316,8 +304,8 @@ template< class A1, class A2 > class SetGet2: public SetGet
 		/**
 		 * Blocking call using string conversion.
 		 */
-		bool innerStrSet( const Eref& dest, const string& field, 
-			const string& val ) const
+		static bool innerStrSet( const Eref& dest, const string& field, 
+			const string& val )
 		{
 			A1 arg1;
 			A2 arg2;
@@ -380,10 +368,9 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 		 * As yet we don't have 2 arg conversion from a single string.
 		 * So this is a dummy
 		 */
-		bool innerStrSet( const Eref& dest, const string& field, 
-			const string& val ) const 
+		static bool innerStrSet( const Eref& dest, const string& field, 
+			const string& val )
 		{
-			cout << "innerStrSet< A1, A2, A3 >: string conversion not yet implemented\n";
 			A1 arg1;
 			A2 arg2;
 			A3 arg3;
@@ -394,7 +381,6 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 			Conv< A2 >::str2val( arg2, temp.substr( 0,pos ) );
 			Conv< A3 >::str2val( arg3, temp.substr( pos + 1 ) );
 			return set( dest, field, arg1, arg2, arg3 );
-			return 0;
 		}
 
 		/**
@@ -451,15 +437,21 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 		 * As yet we don't have 2 arg conversion from a single string.
 		 * So this is a dummy
 		 */
-		bool innerStrSet( const Eref& dest, const string& field, 
-			const string& val ) const
+		static bool innerStrSet( const Eref& dest, const string& field, 
+			const string& val )
 		{
-			cout << "innerStrSet< A1, A2, A3, A4 >: string convertion not yet implemented\n";
 			A1 arg1;
 			A2 arg2;
 			A3 arg3;
 			A4 arg4;
-			Conv<A1>::str2val( arg1, val );
+			string::size_type pos = val.find_first_of( "," );
+			Conv< A1 >::str2val( arg1, val.substr( 0, pos ) );
+			string temp = val.substr( pos + 1 );
+			pos = temp.find_first_of( "," );
+			Conv< A2 >::str2val( arg2, temp.substr( 0, pos ) );
+			temp = temp.substr( pos + 1 );
+			Conv< A3 >::str2val( arg3, temp.substr( 0, pos ) );
+			Conv< A4 >::str2val( arg4, temp.substr( pos + 1 ) );
 			return set( dest, field, arg1, arg2, arg3, arg4 );
 		}
 
@@ -525,16 +517,24 @@ template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
 		 * As yet we don't have 2 arg conversion from a single string.
 		 * So this is a dummy
 		 */
-		bool innerStrSet( const Eref& dest, const string& field, 
-			const string& val ) const
+		static bool innerStrSet( const Eref& dest, const string& field, 
+			const string& val )
 		{
-			cout << "innerStrSet< A1, A2, A3, A4, A5 >: string convertion not yet implemented\n";
 			A1 arg1;
 			A2 arg2;
 			A3 arg3;
 			A4 arg4;
 			A5 arg5;
-			Conv<A1>::str2val( arg1, val );
+			string::size_type pos = val.find_first_of( "," );
+			Conv< A1 >::str2val( arg1, val.substr( 0, pos ) );
+			string temp = val.substr( pos + 1 );
+			pos = temp.find_first_of( "," );
+			Conv< A2 >::str2val( arg2, temp.substr( 0, pos ) );
+			temp = temp.substr( pos + 1 );
+			Conv< A3 >::str2val( arg3, temp.substr( 0, pos ) );
+			temp = temp.substr( pos + 1 );
+			Conv< A4 >::str2val( arg4, temp.substr( 0, pos ) );
+			Conv< A5 >::str2val( arg5, temp.substr( pos + 1 ) );
 			return set( dest, field, arg1, arg2, arg3, arg4, arg5 );
 		}
 	//////////////////////////////////////////////////////////////////

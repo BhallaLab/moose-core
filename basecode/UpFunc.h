@@ -34,6 +34,11 @@ template< class T > class UpFunc0: public OpFunc
 			return dynamic_cast< const SetGet0* >( s );
 		}
 
+		bool strSet( const Eref& tgt, 
+			const string& field, const string& arg ) const {
+			return SetGet0::innerStrSet( tgt, field, arg );
+		}
+
 		/**
 		 * Calls function on first dimension of data, using index as
 		 * argument.
@@ -58,6 +63,11 @@ template< class T, class A > class UpFunc1: public OpFunc
 
 		bool checkSet( const SetGet* s ) const {
 			return dynamic_cast< const SetGet1< A >* >( s );
+		}
+
+		bool strSet( const Eref& tgt, 
+			const string& field, const string& arg ) const {
+			return SetGet1< A >::innerStrSet( tgt, field, arg );
 		}
 
 		// This could do with a whole lot of optimization to avoid
@@ -88,6 +98,11 @@ template< class T, class A1, class A2 > class UpFunc2: public OpFunc
 			return dynamic_cast< const SetGet2< A1, A2 >* >( s );
 		}
 
+		bool strSet( const Eref& tgt, 
+			const string& field, const string& arg ) const {
+			return SetGet2< A1, A2 >::innerStrSet( tgt, field, arg );
+		}
+
 		void op( const Eref& e, const char* buf ) const {
 			buf += sizeof( Qinfo );
 			Conv< A1 > arg1( buf );
@@ -115,6 +130,11 @@ template< class T, class A1, class A2, class A3 > class UpFunc3:
 
 		bool checkSet( const SetGet* s ) const {
 			return dynamic_cast< const SetGet3< A1, A2, A3 >* >( s );
+		}
+
+		bool strSet( const Eref& tgt, 
+			const string& field, const string& arg ) const {
+			return SetGet3< A1, A2, A3 >::innerStrSet( tgt, field, arg );
 		}
 
 		void op( const Eref& e, const char* buf ) const {
@@ -148,6 +168,11 @@ template< class T, class A1, class A2, class A3, class A4 > class UpFunc4:
 			return dynamic_cast< const SetGet4< A1, A2, A3, A4 >* >( s );
 		}
 
+		bool strSet( const Eref& tgt, 
+			const string& field, const string& arg ) const {
+			return SetGet4< A1, A2, A3, A4 >::innerStrSet( tgt, field, arg );
+		}
+
 		void op( const Eref& e, const char* buf ) const {
 			buf += sizeof( Qinfo );
 			Conv< A1 > arg1( buf );
@@ -179,6 +204,11 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class UpFu
 
 		bool checkSet( const SetGet* s ) const {
 			return dynamic_cast< const SetGet5< A1, A2, A3, A4, A5 >* >( s );
+		}
+
+		bool strSet( const Eref& tgt, 
+			const string& field, const string& arg ) const {
+			return SetGet5< A1, A2, A3, A4, A5 >::innerStrSet( tgt, field, arg );
 		}
 
 		void op( const Eref& e, const char* buf ) const {
@@ -220,6 +250,11 @@ template< class T, class A > class GetUpFunc: public OpFunc
 
 		bool checkSet( const SetGet* s ) const {
 			return dynamic_cast< const SetGet1< A >* >( s );
+		}
+
+		bool strSet( const Eref& tgt, 
+			const string& field, const string& arg ) const {
+			return SetGet1< A >::innerStrSet( tgt, field, arg );
 		}
 
 		/**

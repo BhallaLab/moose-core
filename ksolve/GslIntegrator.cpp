@@ -51,8 +51,8 @@ const Cinfo* GslIntegrator::initCinfo()
 		// DestFinfo definitions
 		///////////////////////////////////////////////////////
 		static DestFinfo stoich( "stoich",
-			"Handle ptrs from Stoich",
-			new OpFunc1< GslIntegrator, Stoich* >( &GslIntegrator::stoich )
+			"Handle data from Stoich",
+			new OpFunc1< GslIntegrator, Id >( &GslIntegrator::stoich )
 		);
 
 		static DestFinfo process( "process",
@@ -213,9 +213,10 @@ void GslIntegrator::setInternalDt( double value )
  * This function should also set up the sizes, and it should be at 
  * allocate, not reinit time.
  */
-void GslIntegrator::stoich( Stoich* s )
+void GslIntegrator::stoich( Id stoichId )
 {
 #ifdef USE_GSL
+	Stoich* s = reinterpret_cast< Stoich* >( stoichId.eref().data() );
 	nVarMols_ = s->getNumVarMols();
 	y_ = s->getY();
 	/*

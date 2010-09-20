@@ -26,6 +26,8 @@ class PrepackedBuffer
 
 		PrepackedBuffer( const char* buf );
 
+		PrepackedBuffer();
+
 		~PrepackedBuffer();
 
 		const char* data() const {

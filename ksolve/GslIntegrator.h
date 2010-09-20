@@ -35,7 +35,7 @@ class GslIntegrator
 		void process( const Eref& e, ProcPtr info );
 		void reinit( const Eref& e, ProcPtr info );
 
-		void stoich( Stoich* stoichVal );
+		void stoich( Id stoichId );
 
 		static const Cinfo* initCinfo();
 	private:

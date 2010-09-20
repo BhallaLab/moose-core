@@ -40,6 +40,18 @@ template< class T > class ProcOpFunc: public ProcOpFuncBase
 			return dynamic_cast< const SetGet1< ProcPtr >* >( s );
 		}
 
+		bool strSet( const Eref& tgt,
+			const string& field, const string& arg ) const {
+			ProcInfo p;
+			stringstream ss( arg );
+			double dt = 1;
+			ss >> dt;
+			if ( dt <= 0 )
+				dt = 1;
+			p.dt = dt;
+			return SetGet1< ProcPtr >::set( tgt, field, &p );
+		}
+
 		// This could do with a whole lot of optimization to avoid
 		// copying data back and forth.
 		void op( const Eref& e, const char* buf ) const {

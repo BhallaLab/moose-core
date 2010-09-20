@@ -32,9 +32,9 @@
 
 #define EPSILON 1e-15
 
-static SrcFinfo1< Stoich* > plugin( 
+static SrcFinfo1< Id > plugin( 
 		"plugin", 
-		"Sends out Stoich pointer so that plugins can directly access fields and functions"
+		"Sends out Stoich Id so that plugins can directly access fields and functions"
 	);
 
 const Cinfo* Stoich::initCinfo()

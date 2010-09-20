@@ -17,6 +17,14 @@ class OpFunc
 		{;}
 		virtual bool checkFinfo( const Finfo* s) const = 0;
 		virtual bool checkSet( const SetGet* s) const = 0;
+
+		/**
+		 * Helper function for finding the correct type of SetGet template
+		 * in order to do the assignment.
+		 */
+		virtual bool strSet( const Eref& tgt, 
+			const string& field, const string& arg ) const = 0;
+
 		virtual void op( const Eref& e, const char* buf ) const = 0;
 };
 
@@ -27,6 +35,10 @@ class OpFuncDummy: public OpFunc
 		OpFuncDummy();
 		bool checkFinfo( const Finfo* s) const;
 		bool checkSet( const SetGet* s) const;
+
+		bool strSet( const Eref& tgt, 
+			const string& field, const string& arg ) const;
+
 		void op( const Eref& e, const char* buf ) const;
 };
 
@@ -43,6 +55,11 @@ template< class T > class OpFunc0: public OpFunc
 
 		bool checkSet( const SetGet* s ) const {
 			return dynamic_cast< const SetGet0* >( s );
+		}
+
+		bool strSet( const Eref& tgt, 
+			const string& field, const string& arg ) const {
+			return SetGet0::innerStrSet( tgt, field, arg );
 		}
 
 		/**
@@ -71,6 +88,11 @@ template< class T, class A > class OpFunc1: public OpFunc
 		bool checkSet( const SetGet* s ) const {
 			return dynamic_cast< const SetGet1< A >* >( s );
 		}
+		
+		bool strSet( const Eref& tgt, 
+			const string& field, const string& arg ) const {
+			return SetGet1< A >::innerStrSet( tgt, field, arg );
+		}
 
 		void op( const Eref& e, const char* buf ) const {
 			Conv< A > arg1( buf + sizeof( Qinfo ) );
@@ -94,6 +116,11 @@ template< class T, class A1, class A2 > class OpFunc2: public OpFunc
 
 		bool checkSet( const SetGet* s ) const {
 			return dynamic_cast< const SetGet2< A1, A2 >* >( s );
+		}
+		
+		bool strSet( const Eref& tgt, 
+			const string& field, const string& arg ) const {
+			return SetGet2< A1, A2 >::innerStrSet( tgt, field, arg );
 		}
 
 		void op( const Eref& e, const char* buf ) const {
@@ -121,6 +148,11 @@ template< class T, class A1, class A2, class A3 > class OpFunc3:
 
 		bool checkSet( const SetGet* s ) const {
 			return dynamic_cast< const SetGet3< A1, A2, A3 >* >( s );
+		}
+		
+		bool strSet( const Eref& tgt, 
+			const string& field, const string& arg ) const {
+			return SetGet3< A1, A2, A3 >::innerStrSet( tgt, field, arg );
 		}
 
 		void op( const Eref& e, const char* buf ) const {
@@ -152,6 +184,11 @@ template< class T, class A1, class A2, class A3, class A4 > class OpFunc4:
 
 		bool checkSet( const SetGet* s ) const {
 			return dynamic_cast< const SetGet4< A1, A2, A3, A4 >* >( s );
+		}
+		
+		bool strSet( const Eref& tgt, 
+			const string& field, const string& arg ) const {
+			return SetGet4< A1, A2, A3, A4 >::innerStrSet( tgt, field, arg );
 		}
 
 		void op( const Eref& e, const char* buf ) const {
@@ -185,6 +222,11 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class OpFu
 
 		bool checkSet( const SetGet* s ) const {
 			return dynamic_cast< const SetGet5< A1, A2, A3, A4, A5 >* >( s );
+		}
+		
+		bool strSet( const Eref& tgt, 
+			const string& field, const string& arg ) const {
+			return SetGet5< A1, A2, A3, A4, A5 >::innerStrSet( tgt, field, arg );
 		}
 
 		void op( const Eref& e, const char* buf ) const {
@@ -230,6 +272,11 @@ template< class T, class A > class GetOpFunc: public OpFunc
 
 		bool checkSet( const SetGet* s ) const {
 			return dynamic_cast< const SetGet1< A >* >( s );
+		}
+
+		bool strSet( const Eref& tgt, 
+			const string& field, const string& arg ) const {
+			return SetGet1< A >::innerStrSet( tgt, field, arg );
 		}
 
 		/**

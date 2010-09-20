@@ -7548,4 +7548,8 @@ the testers.
 
 I've now set up some of the framework for the regression tests. Still need
 to clean up the base Makefile so they are not compiled in at all unless
-a flag is set. Still the table test doesn't work.
+a flag is set. Still the table test doesn't work. Checkin 2181.
+
+The test doesn't work because I haven't fixed up StrSet and StrGet.
+Currently they go dangling from the DestFinfo. Need to decide if I should
+use the virtual forms or go direct to statics.

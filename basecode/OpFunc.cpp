@@ -63,6 +63,13 @@ bool OpFuncDummy::checkSet( const SetGet* s ) const {
 	return dynamic_cast< const SetGet0* >( s );
 }
 
+bool OpFuncDummy::strSet( const Eref& tgt,
+	const string& field, const string& arg ) const
+{
+	cout << "In OpFuncDummy::strSet. should not happen\n";
+	return 0;
+}
+
 void OpFuncDummy::op( const Eref& e, const char* buf ) const {
 	;
 }

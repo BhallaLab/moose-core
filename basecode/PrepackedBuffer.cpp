@@ -48,6 +48,13 @@ PrepackedBuffer::PrepackedBuffer( const char* buf )
 	memcpy( data_, buf + 2 * sizeof( unsigned int ), dataSize_ );
 }
 
+PrepackedBuffer::PrepackedBuffer() // Used to make StrSet happy
+	: dataSize_( 0 ), numEntries_( 0 ), individualDataSize_( 0 )
+{
+	data_ = new char[1];
+	data_[0] = '\0';
+}
+
 PrepackedBuffer::~PrepackedBuffer()
 {
 	delete[] data_;
