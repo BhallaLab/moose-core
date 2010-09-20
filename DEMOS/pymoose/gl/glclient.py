@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Feb  4 14:52:22 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Jul 13 11:36:09 2010 (+0530)
+# Last-Updated: Mon Sep 20 15:44:54 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 142
+#     Update #: 157
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -59,14 +59,20 @@ option_dict={'-p': '9999',
 
 
 class GLClient(object):
-    def __init__(self, exe=config.GL_CLIENT_EXECUTABLE, port=config.GL_PORT, mode='c', colormap=config.GL_DEFAULT_COLORMAP):
+    def __init__(self, exe=None, port=None, mode='c', colormap=None):
+        if exe is None:
+            exe = config.get_settings().value(config.KEY_GL_CLIENT_EXECUTABLE).toString()
+        if port is None:
+            port = config.get_settings().value(config.KEY_GL_PORT).toString()
+        if colormap is None:
+            colormap = config.get_settings().value(config.KEY_GL_COLORMAP).toString()
 	self.opt_dict = {}
-	self.opt_dict['-p'] = port
-	self.opt_dict['-m'] = mode
-	self.opt_dict['-c'] = colormap
-        self.executable = exe
+	self.opt_dict['-p'] = str(port)
+	self.opt_dict['-m'] = str(mode)
+	self.opt_dict['-c'] = str(colormap)
+        self.executable = str(exe)
         self.running = False
-        self.run(self.opt_dict)
+        self.run()
 
     def run(self, option_dict=None):
 	cmd = [self.executable]
@@ -79,6 +85,9 @@ class GLClient(object):
 	    cmd.extend([key, value])
             self.stop()
         self.running = True
+        print 'Executing client with the following command line:'
+        for item in cmd: print item, 
+        print
 	self.child = Popen(cmd)
 	return self.child
 
