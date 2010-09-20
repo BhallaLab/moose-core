@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Sep 16 12:56:00 2010 (+0530)
+# Last-Updated: Mon Sep 20 15:13:59 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2467
+#     Update #: 2480
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -395,6 +395,8 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.newPlotWindowAction, QtCore.SIGNAL('triggered(bool)'), self.addPlotWindow)
         self.firstTimeWizardAction = QtGui.QAction(self.tr('FirstTime Configuration WIzard'), self)
         self.connect(self.firstTimeWizardAction, QtCore.SIGNAL('triggered(bool)'), self.startFirstTimeWizard)
+        self.resetSettingsAction = QtGui.QAction(self.tr('Reset Settings'), self)
+        self.connect(self.resetSettingsAction, QtCore.SIGNAL('triggered()'), self.resetSettings)
 
         # Actions to switch the command line between python and genesis mode.
         self.shellModeActionGroup = QtGui.QActionGroup(self)
@@ -420,16 +422,20 @@ class MainWindow(QtGui.QMainWindow):
         # Help menu actions
         self.aboutMooseAction = QtGui.QAction(self.tr('&About'), self)
         self.connect(self.aboutMooseAction, QtCore.SIGNAL('triggered()'), self.makeAboutMooseLabel)
-        self.resetSettingsAction = QtGui.QAction(self.tr('Reset Settings'), self)
-        self.connect(self.resetSettingsAction, QtCore.SIGNAL('triggered()'), self.resetSettings)
         self.showDocAction = QtGui.QAction(self.tr('Documentation'), self)
         self.contextHelpAction = QtGui.QAction(self.tr('Context Help'), self)
+        
+        # Run menu action
         self.runAction = QtGui.QAction(self.tr('Run Simulation'), self)
 	self.connect(self.runAction, QtCore.SIGNAL('triggered(bool)'), self.resetAndRunSlot)
         # self.resetAction = QtGui.QAction(self.tr('Reset Simulation'), self)
 	# self.connect(self.resetAction, QtCore.SIGNAL('triggered()'), self.resetSlot)
 
-        
+    
+    def runMichaelisMentenDemo(self):
+        path = os.path.join(self.demosDir, 'michaelis_menten', 'guimichaelis.py')
+        print 'Going to run:', path
+        subprocess.call(['python', path])
         
         
     def runSquidDemo(self):
@@ -454,6 +460,8 @@ class MainWindow(QtGui.QMainWindow):
         
     
     def makeDemosMenu(self):
+        self.MichaelisMentenDemoAction = QtGui.QAction(self.tr('Michaelis-Menten reaction'), self)
+        self.connect(self.MichaelisMentenDemoAction, QtCore.SIGNAL('triggered()'), self.runMichaelisMentenDemo)
         self.squidDemoAction = QtGui.QAction(self.tr('Squid Axon'), self)
         self.connect(self.squidDemoAction, QtCore.SIGNAL('triggered()'), self.runSquidDemo)
         self.IzhikevichDemoAction = QtGui.QAction(self.tr('Izhikevich Model'), self)
@@ -463,6 +471,7 @@ class MainWindow(QtGui.QMainWindow):
         self.glViewDemoAction = QtGui.QAction(self.tr('GL View'), self)
         self.connect(self.glViewDemoAction, QtCore.SIGNAL('triggered(bool)'), self.runGLViewDemo)
         menu = QtGui.QMenu('&Demos and Tutorials', self)
+        menu.addAction(self.MichaelisMentenDemoAction)
         menu.addAction(self.squidDemoAction)
         menu.addAction(self.IzhikevichDemoAction)
         menu.addAction(self.glCellDemoAction)
