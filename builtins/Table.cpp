@@ -431,9 +431,7 @@ double Table::getThreshold() const
 
 double Table::getOutputValue() const
 {
-	if ( outputIndex_ < vec_.size() )
-		return vec_[outputIndex_];
-	return 0;
+	return output_;
 }
 
 unsigned int Table::getOutputIndex() const

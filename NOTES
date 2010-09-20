@@ -7561,5 +7561,7 @@ Implemented the StrSet. Involved fixing lots of functions and OpFunc derived
 classes. Checkins up to 2183.
 
 With that, the regression tests started to give real error messages. Fixed
-those.
+those. Checkin 2184.
 
+Added a few more regression tests for the Table. This revealed yet more
+bugs, including a nasty one for getting the outputValue. Fixed.
