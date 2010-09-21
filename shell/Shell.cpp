@@ -570,10 +570,12 @@ bool Shell::chopPath( const string& path, vector< string >& ret,
 	// .
 	// /
 	// ..
+	ret.resize( 0 );
+	if ( path.length() == 0 )
+		return 1; // Treat it as an absolute path
 
 	bool isAbsolute = 0;
 	string temp = path;
-	ret.resize( 0 );
 	if ( path[0] == separator ) {
 		isAbsolute = 1;
 		if ( path.length() == 1 )

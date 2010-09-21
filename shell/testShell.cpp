@@ -918,6 +918,12 @@ void testFindModelParent()
 	assert( modelName == "bar" );
 	modelName = "";
 
+	ok = findModelParent( zod, "/bar", parentId, modelName );
+	assert( ok );
+	assert( parentId == Id() );
+	assert( modelName == "bar" );
+	modelName = "";
+
 	ok = findModelParent( foo, "/foo/bar", parentId, modelName );
 	assert( ok );
 	assert( parentId == foo );

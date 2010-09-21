@@ -7578,4 +7578,9 @@ Turns out that Id::Id( const string& path, const string& separator )
 Implemented some unit tests for components of Shell::doLoadModel. Other
 parts will need regression tests.
 
+Checkin 2188.
+
+Worked through regression tests for checking file type and then for
+loading and running Kholodenko model using ReadKkit. Added a few
+more unit test cases for bugs that turned up.
 ============================================================================

@@ -12,13 +12,16 @@ TARGET = rt.o
 OBJ = \
 	regressionTest.o	\
 	rtTable.o	\
+	rtReadKkit.o	\
 
 HEADERS = \
-	../basecode/header.h
+	../basecode/header.h \
+	../shell/Shell.h
 
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
+rtReadKkit.o:	../kinetics/ReadKkit.h ../shell/LoadModels.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg -I../shell $< -c

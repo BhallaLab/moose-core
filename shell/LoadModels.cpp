@@ -10,17 +10,8 @@
 #include <fstream>
 #include "header.h"
 #include "Shell.h"
+#include "LoadModels.h" // For the ModelType enum.
 #include "../kinetics/ReadKkit.h"
-
-enum ModelType {
-	UNKNOWN,
-	KKIT,
-	DOTP,
-	SBML,
-	NEUROML,
-	NINEML,
-	SEDML
-};
 
 ModelType findModelType( string filename, ifstream& fin )
 {
@@ -31,7 +22,7 @@ ModelType findModelType( string filename, ifstream& fin )
 	getline( fin, line );
 	if ( line == "//genesis" ) {
 		getline( fin, line );
-		if ( line.substr( 0, 10 ) == "// kkit" )
+		if ( line.substr( 0, 7 ) == "// kkit" )
 			return KKIT;
 	}
 
@@ -51,6 +42,7 @@ ModelType findModelType( string filename, ifstream& fin )
  *		"foo"	where <cwe>/foo exists, and we want <cwe>/foo/model
  *	Second set: the last part of the path has the model name.
  *		"bar"	where we want	<cwe>/bar
+ *		"/bar"	where we want /bar
  *		"/foo/bar"	where we want /foo/bar
  *		"foo/bar"	where we want <cwe>/foo/bar
  */
@@ -84,7 +76,8 @@ bool findModelParent( Id cwe, const string& path,
 		assert( pos != string::npos );
 		string head = fullPath.substr( 0, pos );
 		Id ret( head );
-		if ( ret == Id() && head != "/" && head != "/root" )
+		// When head = "" it means paId should be root.
+		if ( ret == Id() && head != "" && head != "/root" )
 			return 0;
 		parentId = ret;
 		modelName = fullPath.substr( pos + 1 );

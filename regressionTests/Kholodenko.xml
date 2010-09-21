@@ -1,0 +1,555 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   DOQCS : http://doqcs.ncbs.res.in/ 
+   Accession Name = MAPK_osc 
+   Accession Number = 27 
+   Transcriber = Sridhar Hariharaputran, NCBS 
+   Developer = Boris N. Kholodenko 
+   Species = Xenopus 
+   Tissue = Oocyte extract 
+   Cell Compartment = Cytosol 
+   Notes = This MAPK model is based on <a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=pubmed&dopt=Abstract&list_uids=10712587">Boris N. Kholodenko Eur J Biochem. (2000) 267(6):1583-8</a> for data from Xenopus oocytes extracts. 
+ 
+    Note: All the concentrations are in micro Mole (uM)
+-->
+<sbml xmlns="http://www.sbml.org/sbml/level2" level="2" version="1">
+  <model id="testid" name="MAPK_osc">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+	     This MAPK model is based on &lt;a href = "http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&amp;db=pubmed&amp;dopt=Abstract&amp;list_uids=10712587"&gt;Boris N. Kholodenko Eur J Biochem. (2000) 267(6):1583-8&lt;/a&gt; for data from Xenopus extracts.
+          </body>
+    </notes>
+    <annotation xmlns:doqcs="http://www.doqcs.ncbs.res.in">
+      <doqcs:timestamp>Wed Oct 18 16:03:43 2006</doqcs:timestamp>
+      <doqcs:accesstype>pathway</doqcs:accesstype>
+      <doqcs:transcriber>Sridhar Hariharaputran, NCBS</doqcs:transcriber>
+      <doqcs:developer> Boris N. Kholodenko</doqcs:developer>
+      <doqcs:species>Xenopus</doqcs:species>
+      <doqcs:tissue>Oocyte extract</doqcs:tissue>
+      <doqcs:cellcompartment>Cytosol</doqcs:cellcompartment>
+      <doqcs:methodology>Hypothetical</doqcs:methodology>
+      <doqcs:model_implementation>Mathematically equivalent</doqcs:model_implementation>
+      <doqcs:model_validation>Qualitative predictions</doqcs:model_validation>
+    </annotation>
+    <listOfUnitDefinitions>
+     <unitDefinition id="uM1">
+      <listOfUnits>
+       <unit kind="litre" exponent="-1" multiplier="1" offset="0"/>
+       <unit kind="mole" scale="-6" multiplier="1" offset="0"/>
+      </listOfUnits>
+     </unitDefinition>
+     <unitDefinition id="vol_secINV">
+      <listOfUnits>
+       <unit kind="litre" multiplier="1" offset="0"/>
+       <unit kind="second" exponent="-1" multiplier="1" offset="0"/>
+      </listOfUnits>
+     </unitDefinition>
+     <unitDefinition id="vol_uMINVsecINV">
+      <listOfUnits>
+       <unit kind="litre" exponent="2" multiplier="1" offset="0"/>
+       <unit kind="mole" exponent="-1" scale="-6" multiplier="1" offset="0"/>
+       <unit kind="second" exponent="-1" multiplier="1" offset="0"/>
+      </listOfUnits>
+     </unitDefinition>
+     <unitDefinition id="substance">
+      <listOfUnits>
+       <unit kind="mole" scale="-6" multiplier="1" offset="0"/>
+      </listOfUnits>
+     </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="default_compartment" size="1e-18"/>
+      <compartment id="geometry" size="1.6667e-18"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="MAPK_slash_MAPK" compartment="geometry" initialConcentration="0.3"/>
+      <species id="MAPK_slash_MKKK" compartment="geometry" initialConcentration="0.1"/>
+      <species id="MAPK_slash_MKK" compartment="geometry" initialConcentration="0.3"/>
+      <species id="MAPK_slash_int1" compartment="geometry" initialConcentration="0.001"/>
+      <species id="MAPK_slash_MKKK_minus_P" compartment="geometry" initialConcentration="0"/>
+      <species id="MAPK_slash_int3" compartment="geometry" initialConcentration="0.001"/>
+      <species id="MAPK_slash_int5" compartment="geometry" initialConcentration="0.001"/>
+      <species id="MAPK_slash_MKK_minus_P" compartment="geometry" initialConcentration="0"/>
+      <species id="MAPK_slash_MAPK_minus_P" compartment="geometry" initialConcentration="0"/>
+      <species id="MAPK_slash_int2" compartment="geometry" initialConcentration="0.001"/>
+      <species id="MAPK_slash_int4" compartment="geometry" initialConcentration="0.001"/>
+      <species id="MAPK_slash_Ras_minus_MKKKK" compartment="geometry" initialConcentration="0.001"/>
+      <species id="MAPK_slash_inactiveRas_minus_MKKK" compartment="geometry" initialConcentration="0"/>
+      <species id="MAPK_slash_MKK_minus_PP" compartment="geometry" initialConcentration="0"/>
+      <species id="MAPK_slash_MAPK_minus_PP" compartment="geometry" initialConcentration="0"/>
+    </listOfSpecies>
+    <listOfReactions>
+      <reaction id="MAPK_slash_Neg_feedback">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+	     From Kholodenko, 2000 Eur J Biochem 267 the Kd is 9 nM. We use a rather fast Kf of 1/sec/uM so that equilibrium is maintained. 
+          </body>
+        </notes>
+        <listOfReactants>
+          <speciesReference species="MAPK_slash_MAPK_minus_PP"/>
+          <speciesReference species="MAPK_slash_Ras_minus_MKKKK"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="MAPK_slash_inactiveRas_minus_MKKK"/>
+        </listOfProducts>
+        <kineticLaw>
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+		kf*MAPK_slash_MAPK_minus_PP*MAPK_slash_Ras_minus_MKKKK-kb*MAPK_slash_inactiveRas_minus_MKKK
+	    </body>
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf </ci>
+                <ci> MAPK_slash_MAPK_minus_PP </ci>
+                <ci> MAPK_slash_Ras_minus_MKKKK </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kb </ci>
+                <ci> MAPK_slash_inactiveRas_minus_MKKK </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="kf" value="1.66666666666667e-18" units="vol_uMINVsecINV"/>
+            <parameter id="kb" value="1.5e-20" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="MAPK_slash_int1_slash_2" reversible="false">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+	     Km is 8nM and Vmax is 0.25nM.s-1 from 2000.
+          </body>
+        </notes>
+        <listOfReactants>
+          <speciesReference species="MAPK_slash_MKKK_minus_P"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="MAPK_slash_MKKK"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="MAPK_slash_int1"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+		kcat*MAPK_slash_int1*MAPK_slash_MKKK_minus_P/(Km+MAPK_slash_MKKK_minus_P)
+	    </body>
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> kcat </ci>
+                <ci> MAPK_slash_int1 </ci>
+                <ci> MAPK_slash_MKKK_minus_P </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> Km </ci>
+                <ci> MAPK_slash_MKKK_minus_P </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="kcat" value="4.16666666666667e-19" units="vol_secINV"/>
+            <parameter id="Km" value="0.008" units="uM1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="MAPK_slash_MKKK_minus_P_slash_3" reversible="false">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+	     Km is 15 nM and Vmax is 0.025s-1 from 2000
+          </body>
+        </notes>
+        <listOfReactants>
+          <speciesReference species="MAPK_slash_MKK"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="MAPK_slash_MKK_minus_P"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="MAPK_slash_MKKK_minus_P"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+		kcat*MAPK_slash_MKKK_minus_P*MAPK_slash_MKK/(Km+MAPK_slash_MKK)
+	    </body>
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> kcat </ci>
+                <ci> MAPK_slash_MKKK_minus_P </ci>
+                <ci> MAPK_slash_MKK </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> Km </ci>
+                <ci> MAPK_slash_MKK </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="kcat" value="4.16666666666667e-20" units="vol_secINV"/>
+            <parameter id="Km" value="0.01500006000024" units="uM1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="MAPK_slash_MKKK_minus_P_slash_4" reversible="false">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+	     Km is 15nM and Vmax is 0.025s-1 from 2000.
+          </body>
+        </notes>
+        <listOfReactants>
+          <speciesReference species="MAPK_slash_MKK_minus_P"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="MAPK_slash_MKK_minus_PP"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="MAPK_slash_MKKK_minus_P"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+		kcat*MAPK_slash_MKKK_minus_P*MAPK_slash_MKK_minus_P/(Km+MAPK_slash_MKK_minus_P)
+	    </body>
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> kcat </ci>
+                <ci> MAPK_slash_MKKK_minus_P </ci>
+                <ci> MAPK_slash_MKK_minus_P </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> Km </ci>
+                <ci> MAPK_slash_MKK_minus_P </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="kcat" value="4.16666666666667e-20" units="vol_secINV"/>
+            <parameter id="Km" value="0.01500006000024" units="uM1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="MAPK_slash_int3_slash_6" reversible="false">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+	     The Km is 15nM and the Vmax is 0.75nM.s-1 from 2000.
+          </body>
+        </notes>
+        <listOfReactants>
+          <speciesReference species="MAPK_slash_MKK_minus_P"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="MAPK_slash_MKK"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="MAPK_slash_int3"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+		kcat*MAPK_slash_int3*MAPK_slash_MKK_minus_P/(Km+MAPK_slash_MKK_minus_P)
+	    </body>
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> kcat </ci>
+                <ci> MAPK_slash_int3 </ci>
+                <ci> MAPK_slash_MKK_minus_P </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> Km </ci>
+                <ci> MAPK_slash_MKK_minus_P </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="kcat" value="1.25e-18" units="vol_secINV"/>
+            <parameter id="Km" value="0.015" units="uM1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="MAPK_slash_int5_slash_10" reversible="false">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+	     The Km is 15nM and Vmax is 0.5nM.s-1 from 2000
+          </body>
+        </notes>
+        <listOfReactants>
+          <speciesReference species="MAPK_slash_MAPK_minus_P"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="MAPK_slash_MAPK"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="MAPK_slash_int5"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+		kcat*MAPK_slash_int5*MAPK_slash_MAPK_minus_P/(Km+MAPK_slash_MAPK_minus_P)
+	    </body>
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> kcat </ci>
+                <ci> MAPK_slash_int5 </ci>
+                <ci> MAPK_slash_MAPK_minus_P </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> Km </ci>
+                <ci> MAPK_slash_MAPK_minus_P </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="kcat" value="8.33333333333333e-19" units="vol_secINV"/>
+            <parameter id="Km" value="0.0149997000059999" units="uM1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="MAPK_slash_int2_slash_5" reversible="false">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+	     The Km is 15nM and Vmax is 0.75nM.s-1 from Kholodenko, 2000 
+          </body>
+        </notes>
+        <listOfReactants>
+          <speciesReference species="MAPK_slash_MKK_minus_PP"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="MAPK_slash_MKK_minus_P"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="MAPK_slash_int2"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+		kcat*MAPK_slash_int2*MAPK_slash_MKK_minus_PP/(Km+MAPK_slash_MKK_minus_PP)
+	    </body>
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> kcat </ci>
+                <ci> MAPK_slash_int2 </ci>
+                <ci> MAPK_slash_MKK_minus_PP </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> Km </ci>
+                <ci> MAPK_slash_MKK_minus_PP </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="kcat" value="1.25e-18" units="vol_secINV"/>
+            <parameter id="Km" value="0.015" units="uM1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="MAPK_slash_int4_slash_9" reversible="false">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+	     The Km is 15nM and Vmax is 0.5nM.s-1 from 2000
+          </body>
+        </notes>
+        <listOfReactants>
+          <speciesReference species="MAPK_slash_MAPK_minus_PP"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="MAPK_slash_MAPK_minus_P"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="MAPK_slash_int4"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+		kcat*MAPK_slash_int4*MAPK_slash_MAPK_minus_PP/(Km+MAPK_slash_MAPK_minus_PP)
+	    </body>
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> kcat </ci>
+                <ci> MAPK_slash_int4 </ci>
+                <ci> MAPK_slash_MAPK_minus_PP </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> Km </ci>
+                <ci> MAPK_slash_MAPK_minus_PP </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="kcat" value="8.33333333333333e-19" units="vol_secINV"/>
+            <parameter id="Km" value="0.0149997000059999" units="uM1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="MAPK_slash_Ras_minus_MKKKK_slash_1" reversible="false">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+	     The Km is 10nM and Vmax is 2.5nM sec^-1. We assume that there is 1 nM of the Ras-MKKKK. From Kholodenko, 2000. If the enzymes are not flagged as Available, then this Km should be set to 0.1 to oscillations.
+          </body>
+        </notes>
+        <listOfReactants>
+          <speciesReference species="MAPK_slash_MKKK"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="MAPK_slash_MKKK_minus_P"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="MAPK_slash_Ras_minus_MKKKK"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+		kcat*MAPK_slash_Ras_minus_MKKKK*MAPK_slash_MKKK/(Km+MAPK_slash_MKKK)
+	    </body>
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> kcat </ci>
+                <ci> MAPK_slash_Ras_minus_MKKKK </ci>
+                <ci> MAPK_slash_MKKK </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> Km </ci>
+                <ci> MAPK_slash_MKKK </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="kcat" value="4.16666666666667e-18" units="vol_secINV"/>
+            <parameter id="Km" value="0.01" units="uM1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="MAPK_slash_MKK_minus_PP_slash_7" reversible="false">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+	     The Km is 15nM which is 0.015uM Vmax is 0.025s-1 from Kholodenko, 2000. 
+          </body>
+        </notes>
+        <listOfReactants>
+          <speciesReference species="MAPK_slash_MAPK"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="MAPK_slash_MAPK_minus_P"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="MAPK_slash_MKK_minus_PP"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+		kcat*MAPK_slash_MKK_minus_PP*MAPK_slash_MAPK/(Km+MAPK_slash_MAPK)
+	    </body>
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> kcat </ci>
+                <ci> MAPK_slash_MKK_minus_PP </ci>
+                <ci> MAPK_slash_MAPK </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> Km </ci>
+                <ci> MAPK_slash_MAPK </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="kcat" value="4.16666666666667e-20" units="vol_secINV"/>
+            <parameter id="Km" value="0.01500006000024" units="uM1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="MAPK_slash_MKK_minus_PP_slash_8" reversible="false">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+	     The Km is 15nM which is 0.015uM and Vmax is 0.025s-1 from Kholodenko, 2000 
+          </body>
+        </notes>
+        <listOfReactants>
+          <speciesReference species="MAPK_slash_MAPK_minus_P"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="MAPK_slash_MAPK_minus_PP"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="MAPK_slash_MKK_minus_PP"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+		kcat*MAPK_slash_MKK_minus_PP*MAPK_slash_MAPK_minus_P/(Km+MAPK_slash_MAPK_minus_P)
+	    </body>
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> kcat </ci>
+                <ci> MAPK_slash_MKK_minus_PP </ci>
+                <ci> MAPK_slash_MAPK_minus_P </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> Km </ci>
+                <ci> MAPK_slash_MAPK_minus_P </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="kcat" value="4.16666666666667e-20" units="vol_secINV"/>
+            <parameter id="Km" value="0.01500006000024" units="uM1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>
