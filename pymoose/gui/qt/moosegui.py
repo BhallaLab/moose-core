@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Sep 20 15:13:59 2010 (+0530)
+# Last-Updated: Tue Sep 21 23:39:49 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2480
+#     Update #: 2481
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -113,6 +113,7 @@ class MainWindow(QtGui.QMainWindow):
     default_plot_count = 1
     def __init__(self, interpreter=None, parent=None):
 	QtGui.QMainWindow.__init__(self, parent)
+        self.setWindowTitle('MOOSE GUI')
         self.mooseHandler = MooseHandler()
         self.connect(self.mooseHandler, QtCore.SIGNAL('updatePlots(float)'), self.updatePlots)
         self.settings = config.get_settings()        
