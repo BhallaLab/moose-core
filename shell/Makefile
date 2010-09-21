@@ -13,6 +13,7 @@ OBJ = \
 	Shell.o	\
 	ShellCopy.o	\
 	ShellThreads.o	\
+	LoadModels.o \
 	Neutral.o	\
 	Wildcard.o	\
 	testShell.o	\
@@ -27,6 +28,7 @@ $(OBJ)	: $(HEADERS)
 Shell.o:	Shell.h ../msg/AssignmentMsg.h Neutral.h ../scheduling/Clock.h
 ShellCopy.o:	Shell.h Neutral.h
 ShellThreads.o:	Shell.h Neutral.h ../scheduling/Clock.h
+LoadModels.o:	Shell.h Neutral.h
 Neutral.o:	Neutral.h ../basecode/ElementValueFinfo.h
 Wildcard.o:	Wildcard.h Shell.h Neutral.h ../basecode/ElementValueFinfo.h
 testShell.o:	Wildcard.h Shell.h Neutral.h ../scheduling/Tick.h ../scheduling/testScheduling.h ../builtins/Arith.h ../msg/MsgManager.h ../basecode/SparseMatrix.h ../msg/SparseMsg.h ../msg/SingleMsg.h

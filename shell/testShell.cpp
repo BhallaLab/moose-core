@@ -865,6 +865,74 @@ void testChopPath()
 	cout << "." << flush;
 }
 
+void testFindModelParent()
+{
+	bool findModelParent( Id cwe, const string& path,
+		Id& parentId, string& modelName );
+
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+
+	///////////////////////////////////////////////////////////
+	// Set up the objects.
+	///////////////////////////////////////////////////////////
+	vector< unsigned int > dimensions( 1, 1 );
+	Id foo = shell->doCreate( "Neutral", Id(), "foo", dimensions );
+	Id zod = shell->doCreate( "Neutral", Id(), "zod", dimensions );
+	Id foo2 = shell->doCreate( "Neutral", zod, "foo", dimensions );
+
+	// shell->setCwe( zod );
+
+	string modelName;
+	Id parentId;
+
+	//////////////// do not spec model name
+	bool ok = findModelParent( zod, "", parentId, modelName );
+	assert( ok );
+	assert( parentId == zod );
+	assert( modelName == "model" );
+	modelName = "";
+
+	ok = findModelParent( zod, "/", parentId, modelName );
+	assert( ok );
+	assert( parentId == Id() );
+	assert( modelName == "model" );
+	modelName = "";
+
+	ok = findModelParent( zod, "/foo", parentId, modelName );
+	assert( ok );
+	assert( parentId == foo );
+	assert( modelName == "model" );
+	modelName = "";
+
+	ok = findModelParent( zod, "foo", parentId, modelName );
+	assert( ok );
+	assert( parentId == foo2 );
+	assert( modelName == "model" );
+	modelName = "";
+
+	//////////////// spec model name too
+	ok = findModelParent( zod, "bar", parentId, modelName );
+	assert( ok );
+	assert( parentId == zod );
+	assert( modelName == "bar" );
+	modelName = "";
+
+	ok = findModelParent( foo, "/foo/bar", parentId, modelName );
+	assert( ok );
+	assert( parentId == foo );
+	assert( modelName == "bar" );
+	modelName = "";
+
+	ok = findModelParent( zod, "foo/bar", parentId, modelName );
+	assert( ok );
+	assert( parentId == foo2 );
+	assert( modelName == "bar" );
+	
+	shell->doDelete( parentId );
+	cout << "." << flush;
+}
+
 void testShell( )
 {
 	testChopPath();
@@ -886,4 +954,8 @@ void testMpiShell( )
 	testShellAddMsg();
 	testCopyMsgOps();
 	testWildcard();
+
+	// Stuff for doLoadModel
+	// testFindModelType(); //Moved to regression tests as it uses ext files
+	testFindModelParent();
 }

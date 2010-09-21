@@ -105,10 +105,14 @@ class Shell
 		void doUseClock( string path, string field, unsigned int tick );
 
 		/**
-		 * Looks up the Id specified by the given path, starting from
-		 * the specified Id.
-		Id doFind( Id start, const string& path ) const;
+		 * Loads in a model to a specified path.
+		 * Tries to figure out model type from fname or contents of file.
+		 * Currently knows about kkit,
+		 * Soon to learn .p, SBML, NeuroML.
+		 * Later to learn NineML
 		 */
+		 Id doLoadModel( const string& fname, const string& modelpath );
+
 		///////////////////////////////////////////////////////////
 		// DestFinfo functions
 		///////////////////////////////////////////////////////////

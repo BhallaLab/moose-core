@@ -7486,7 +7486,7 @@ Key issues:
 		- Will need to add ArbDimGlobalHandler.
 		- Clean up numData assorted set of ops in DataHandler.
 	- Sort out field vs element array logic.
-- Unit testing
++ Unit testing
 	- Need to resurrect the whole bank of unit tests.
 - Create and copy need work, specially for arrays
 - Complete list of shell functions. This may need to provide an
@@ -7564,4 +7564,18 @@ With that, the regression tests started to give real error messages. Fixed
 those. Checkin 2184.
 
 Added a few more regression tests for the Table. This revealed yet more
-bugs, including a nasty one for getting the outputValue. Fixed.
+bugs, including a nasty one for getting the outputValue. Fixed. Checkin 2185.
+
+At this point I think Tables are pretty well covered, and with them, many
+of the utilities needed for regression tests. On now to fix up
+some of the model-based regression tests.
+
+Need to implement a general Shell command to load in a model from a spec file.
+Shell::doLoadModel( fname, destpath );
+
+Turns out that Id::Id( const string& path, const string& separator )
+	has yet to be defined. Ugh. Fixed. 
+Implemented some unit tests for components of Shell::doLoadModel. Other
+parts will need regression tests.
+
+============================================================================

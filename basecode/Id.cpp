@@ -9,6 +9,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "../shell/Shell.h"
 
 //////////////////////////////////////////////////////////////
 //	Id creation
@@ -25,7 +26,9 @@ Id::Id( unsigned int id )
 
 Id::Id( const string& path, const string& separator )
 {
-	;
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	assert( shell );
+	id_ = shell->doFind( path ).id_;
 }
 
 /**
