@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Sep 21 23:39:49 2010 (+0530)
+# Last-Updated: Wed Sep 22 15:40:42 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2481
+#     Update #: 2482
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -705,6 +705,14 @@ class MainWindow(QtGui.QMainWindow):
             print 'Closing all subwindows'
             self.centralPanel.closeAllSubWindows()
             self._visiblePlotWindowCount = 0
+
+    def addLayoutWindow(self):
+        self.sceneLayout = layout.Scene()
+	self.connect(self.sceneLayout, QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"), self.makeObjectFieldEditor)
+        self.centralPanel.addSubWindow(self.sceneLayout)
+	self.centralPanel.tileSubWindows()
+        self.sceneLayout.show()
+    
 
     def decrementSubWindowCount(self):
         if self._visiblePlotWindowCount > 0:
