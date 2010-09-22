@@ -58,7 +58,7 @@ It contains an overview of how to use the PyMOOSE/PyQT GUI for MOOSE.
 @menu
 * Getting Started::             
 * Overview of the GUI window::  
-* Using the GUI::               
+* Loading a file in the GUI::   
 @end menu
 
 @node Getting Started, Overview of the GUI window, top, top
@@ -116,7 +116,7 @@ click @code{Finish}.
 
 @image{first_time_wizard_3, , , first-time wizard - page 4, png}
 
-@node Overview of the GUI window, Using the GUI, Getting Started, top
+@node Overview of the GUI window, Loading a file in the GUI, Getting Started, top
 @chapter Overview of the GUI window
 
 Once you are finished with the @code{First-time Wizard}, you will be
@@ -211,10 +211,10 @@ We discuss the different parts of this window below.
 
 @end table
 
-@node Using the GUI,  , Overview of the GUI window, top
-@chapter Using the GUI
+@node  Loading a file in the GUI,  , Overview of the GUI window, top
+@chapter Loading a file in the GUI
 
-@section Loading a file
+
 You can load an existing model into the GUI from the menu: File->Load
 Model.  
 
@@ -240,15 +240,44 @@ containing these commands from the @code{.g} file before loading in
 order to use the @code{Simulation Control} to run the simulation with
 custom time.
 
-In addition, the GUI recognizes @code{.g} files that contain kinetikit
-models. Kinetikit models have the commands to plot variables of
-interest. When you load the model, all these plots are added to the
-available plot window. For example, after I load @code{Kholodenko.g}
+@section Kinetikit models
+
+In addition to regular GENESIS scripts, the GUI recognizes @code{.g}
+files that contain kinetikit models. Kinetikit models have the commands
+to plot variables of interest. When you load the model, all these plots
+are added to the available plot window. Moreover, you get a graphical
+representation of the reaction network in the layout window and the
+plots in the Plot window. For example, after I load @code{Kholodenko.g}
 from @code{DEMOS/kholodenko} directory I get the following:
 
 @image{kholodenko, 6 in,,After loading the Kholodenko model in moosegui,
 png}
-      
+    
+You can double click any item in the layout window and that will open an
+editor(@code{Object Editor}) for the underlying MOOSE object on the
+right hand dock (on top of the @code{Class List}) will come up. The more
+general way of bringing up the @code{Object Editor} is to double click
+an item in the @code{Model Tree}.
+
+@image{object_editor, 6 in,,object editor, png}
+
+You can modify the properties of the objects (for example the initial
+concentration of a substrate) in the object editor.
+
+Normally the plot window is under the layout window. You can minimize
+the windows on top to view the ones below.
+
+@image{kholodenko_plots, 6 in, , kholodenko model - plots, png}
+
+
+@section SBML models
+To be completed.
+
+@section NeuroML models
+To be completed.
+
+
+
 @bye
 
 @c Local Variables: 
