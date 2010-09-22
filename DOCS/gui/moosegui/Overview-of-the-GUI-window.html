@@ -6,6 +6,7 @@
 <meta name="generator" content="makeinfo 4.13">
 <link title="Top" rel="start" href="index.html#Top">
 <link rel="prev" href="Getting-Started.html#Getting-Started" title="Getting Started">
+<link rel="next" href="Using-the-GUI.html#Using-the-GUI" title="Using the GUI">
 <link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
 <!--
 This manual is for MOOSE (version 1.3 ),
@@ -39,6 +40,7 @@ INDIA.
 <div class="node">
 <a name="Overview-of-the-GUI-window"></a>
 <p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Using-the-GUI.html#Using-the-GUI">Using the GUI</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="Getting-Started.html#Getting-Started">Getting Started</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
 <hr>
@@ -51,7 +53,79 @@ working with the <i>moosegui</i>.
 
    <p>We discuss the different parts of this window below.
 
-   <div class="block-image"><img src="moosegui.png" alt="moosegui"></div>
+   <div class="block-image"><img src="moosegui.png" alt="moosegui window"></div>
 
-</body></html>
+     <dl>
+<dt><dfn>Element Tree</dfn><dd>      The left-most dock area of the moosegui contains two tabs. The one
+      titled <code>Element Tree</code> contains the complete tree structure of
+      the MOOSE elements. The elements(objects) in MOOSE models are part
+      of a tree structure similar to the folder structure in your PC.
+
+     <p>You can click the little arrows to the left of the tree items to
+      expand the tree. When fully expanded, the element tree looks like
+      this:
+
+     <div class="block-image"><img src="element_tree.png" alt="moose element tree"></div>
+
+     <br><dt><dfn>Simulation Control</dfn><dd>
+
+     <p>This is the other tab in the left-most dock
+      window.
+
+     <div class="block-image"><img src="simulation_control.png" alt="simulation control"></div>
+
+     <p>Here you can specify the simulation time step, the time
+      step used for plotting and the timestep when using the 3D
+      visualization. The total run time of the simulation and the update
+      interval for plots is also specified here. When you are ready to
+      run a model, you can click the <code>Run</code> button here to carry out
+      the simulation for the specified time.
+
+     <br><dt><dfn>Plot Window</dfn><dd>      In the centre of the main moosegui window is the plot window. When
+      you run a simulation, you can plot  the variables of interest in
+      this area. This will be discussed in connection with the <code>Object
+      Editor</code> later.
+
+     <br><dt><dfn>MOOSE Classes</dfn><dd>
+      The right dock area contains a list of classes available in
+      MOOSE. They are categorized under different headings.
+
+     <div class="block-image"><img src="moose_classes.png" alt="moose classes"></div>
+
+     <p>Clicking a heading will
+      expand that category. Below is a short description of the
+      categories:
+          <dl>
+<dt><dfn>base</dfn><dd>      Basic classes.
+
+          <br><dt><dfn>builtins</dfn><dd>      Classes for some builtin utility functions.
+
+          <br><dt><dfn>biophysics</dfn><dd>      Classes used in simulation of biophysical entities. It includes
+      compartments for cable models of neurons, ion channels, synaptic
+      channels, etc.
+
+          <br><dt><dfn>kinetics</dfn><dd>      Classes for simulating biochemical entities. Includes molecule pool,
+      reaction, enzyme, etc.
+
+          <br><dt><dfn>device</dfn><dd>      Classes for simulating instrumentation. It includes rc-circuit,
+      pulse-egenrator, differential amplifier, PID controller.
+
+          <br><dt><dfn>robots</dfn><dd>      These are special purpose classes used in multiscale
+      models.
+
+     </dl>
+
+     <br><dt><dfn>MOOSE Shell</dfn><dd>
+      The MOOSE Shell at the bottom dock area provides an interpreter
+      where you can enter Python or GENESIS commands.
+
+     <div class="block-image"><img src="moose_shell.png" alt="moose shell"></div>
+
+     <p>The default interpreter is the Python interpreter. You can switch
+      to the GENESIS shell by selecting GENESIS from <code>File-&gt;MOOSE
+      Shell Mode</code> from the menu.
+
+   </dl>
+
+   </body></html>
 
