@@ -58,6 +58,7 @@ It contains an overview of how to use the PyMOOSE/PyQT GUI for MOOSE.
 @menu
 * Getting Started::             
 * Overview of the GUI window::  
+* Using the GUI::               
 @end menu
 
 @node Getting Started, Overview of the GUI window, top, top
@@ -98,8 +99,8 @@ Clicking @i{next} will take you to the next page to select the
 your @code{$@{PATH@}} (which is the case for installation from binary
 packages), then just glclient in the textbox will do. Otherwise, you
 will have to browse and select the executable file. If you compiled
-MOOSE from source with the USE_GL=1 option to @code{make}, it will be
-located in @code{@{moose-source@}/gl/src/glclient}.
+MOOSE from source with the @code{USE_GL=1} option to @code{make}, it
+will be located in @code{@{moose-source@}/gl/src/glclient}.
 
 
 @image{first_time_wizard_2, , , first-time wizard - page 3, png}
@@ -115,7 +116,7 @@ click @code{Finish}.
 
 @image{first_time_wizard_3, , , first-time wizard - page 4, png}
 
-@node Overview of the GUI window,  , Getting Started, top
+@node Overview of the GUI window, Using the GUI, Getting Started, top
 @chapter Overview of the GUI window
 
 Once you are finished with the @code{First-time Wizard}, you will be
@@ -123,7 +124,7 @@ working with the @i{moosegui}.
 
 We discuss the different parts of this window below.
 
-@image{moosegui, , , moosegui, png}
+@image{moosegui, 6 in, , moosegui window, png}
 
 @table @dfn
 
@@ -209,6 +210,44 @@ We discuss the different parts of this window below.
       Shell Mode} from the menu.
 
 @end table
+
+@node Using the GUI,  , Overview of the GUI window, top
+@chapter Using the GUI
+
+@section Loading a file
+You can load an existing model into the GUI from the menu: File->Load
+Model.  
+
+@image{load_model,,, load an existing model file in moosegui,
+png} 
+
+This will pop-up a file browser in which you can select the file you
+want to load. At the bottom of the file-browser you can select what type
+of model file you want to load. 
+
+@image{file_types,,, file typs recognized by MOOSE, png}
+
+The default is GENESIS script (.g), you
+can also choose NeuroML or SBML files (extension .xml).
+
+When you load a GENESIS script, it executes whatever is in the script
+using the built-in GENESIS-parser. Such a script can do much more than
+just loading the model. In particular, if the script contains
+@code{reset} and @code{step} commands, then the simulation will be
+executed and you will have to wait until the simulatioin is over to get
+control of the moosegui back. You may want to comment out the lines
+containing these commands from the @code{.g} file before loading in
+order to use the @code{Simulation Control} to run the simulation with
+custom time.
+
+In addition, the GUI recognizes @code{.g} files that contain kinetikit
+models. Kinetikit models have the commands to plot variables of
+interest. When you load the model, all these plots are added to the
+available plot window. For example, after I load @code{Kholodenko.g}
+from @code{DEMOS/kholodenko} directory I get the following:
+
+@image{kholodenko, 6 in,,After loading the Kholodenko model in moosegui,
+png}
       
 @bye
 
