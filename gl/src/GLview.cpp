@@ -803,10 +803,10 @@ void GLview::reinitFuncLocal( const Conn* c )
 		vector< Eref > ret;
 		children( id, ret, "GLshape" );
 
-		set< double >( ret[0], "color", 0.0 );
-		set< double >( ret[0], "len", 0.0 );
-		set< double >( ret[1], "color", 1.0 );
-		set< double >( ret[1], "len", 1.0 );
+		::set< double >( ret[0], "color", 0.0 );
+		::set< double >( ret[0], "len", 0.0 );
+		::set< double >( ret[1], "color", 1.0 );
+		::set< double >( ret[1], "len", 1.0 );
 	}
 	delete i;
 
