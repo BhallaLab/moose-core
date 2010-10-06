@@ -148,26 +148,6 @@ void OneDimHandler::setNumData1( unsigned int size )
 }
 
 /**
-* Assigns the sizes of all array field entries at once.
-* Ignore if 1 or 0 dimensions.
-*/
-void OneDimHandler::setNumData2( unsigned int start,
-	const vector< unsigned int >& sizes )
-{
-	;
-}
-
-/**
- * Looks up the sizes of all array field entries at once.
- * Ignore in this case
- */
-unsigned int OneDimHandler::getNumData2( vector< unsigned int >& sizes )
-	const
-{
-	return 0;
-}
-
-/**
  * Returns true if the node decomposition has the data on the
  * current node
  */
@@ -177,12 +157,6 @@ bool OneDimHandler::isDataHere( DataId index ) const {
 
 bool OneDimHandler::isAllocated() const {
 	return data_ != 0;
-}
-
-void OneDimHandler::allocate() {
-	if ( data_ )
-		dinfo()->destroyData( data_ );
-	data_ = reinterpret_cast< char* >( dinfo()->allocData( end_ - start_ ));
 }
 
 // Should really be 'start, end' rather than size. See setNumData1.

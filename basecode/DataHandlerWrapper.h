@@ -22,11 +22,23 @@ class DataHandlerWrapper: public DataHandler
 
 		~DataHandlerWrapper();
 
+		DataHandler* globalize();
+		DataHandler* unGlobalize();
+		void assimilateData( const char* data,
+			unsigned int begin, unsigned int end );
+		bool nodeBalance( unsigned int size );
+
 		/**
-		 * Make 'n' copies, doing appropriate node partitioning if
-		 * toGlobal is false.
+		 * Make a single identity copy, doing appropriate node 
+		 * partitioning if toGlobal is false.
 		 */
-		DataHandler* copy( unsigned int n, bool toGlobal ) const;
+		DataHandler* copy() const;
+
+		DataHandler* copyExpand( unsigned int copySize ) const;
+
+		DataHandler* copyToNewDim( unsigned int newDimSize ) const;
+
+		char* data( DataId index ) const;
 
 		/**
 		 * calls process on data, using threading info from the ProcInfo
@@ -34,64 +46,26 @@ class DataHandlerWrapper: public DataHandler
 		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
 
 		/**
-		 * Returns the data on the specified index.
-		 */
-		char* data( DataId index ) const;
-
-		/**
-		 * Returns the data at one level up of indexing.
-		 * Here there isn't any.
-		 */
-		char* data1( DataId index ) const;
-
-		/**
 		 * Returns the number of data entries.
 		 */
-		unsigned int numData() const;
-
-		/**
-		 * Returns the number of data entries at index 1.
-		 */
-		unsigned int numData1() const;
-
-		/**
-		 * Returns the number of data entries at index 2, if present.
-		 * For regular Elements and 1-D arrays this is always 1.
-		 */
-		 unsigned int numData2( unsigned int index1 ) const;
+		unsigned int totalEntries() const;
 
 		/**
 		 * Returns the number of dimensions of the data.
 		 */
 		unsigned int numDimensions() const;
 
-		/**
-		 * Assign # of entries in dimension 1. 
-		 * Ignore here
-		 */
-		void setNumData1( unsigned int size );
-		/**
-		 * Assigns the sizes of all array field entries at once.
-		 * This is ignored as the parent is readonly.
-		 */
-		void setNumData2( unsigned int start,
-			const vector< unsigned int >& sizes );
+		unsigned int sizeOfDim( unsigned int dim ) const;
 
-		/**
-		 * Looks up the sizes of all array field entries at once.
-		 * Ignored in this case, as there are none.
-		 * Returns the first index on this node, irrelevant here.
-		 */
-		unsigned int getNumData2( vector< unsigned int >& sizes ) const;
+		bool resize( vector< unsigned int > dims );
 
-		/**
-		 * Returns true always: it is a global.
-		 */
+		vector< unsigned int > multiDimIndex( unsigned int index )     const;
+		unsigned int linearIndex( 
+			const vector< unsigned int >& index ) const;
+
 		bool isDataHere( DataId index ) const;
 
 		virtual bool isAllocated() const;
-
-		void allocate();
 
 		bool isGlobal() const;
 
@@ -99,13 +73,9 @@ class DataHandlerWrapper: public DataHandler
 
 		iterator end() const;
 
-		/**
-		 * This is relevant only for the 2 D cases like
-		 * FieldDataHandlers.
-		 */
-		unsigned int startDim2index() const;
-
+	protected:
 		void setData( char* data, unsigned int numData );
+		unsigned int nextIndex( unsigned int index ) const;
 
 	private:
 		const DataHandler* parent_;

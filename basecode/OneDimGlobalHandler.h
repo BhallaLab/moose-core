@@ -21,12 +21,27 @@ class OneDimGlobalHandler: public DataHandler
 
 		~OneDimGlobalHandler();
 
+		DataHandler* globalize();
+
+		DataHandler* unGlobalize();
+
+		void assimilateData( const char* data,
+			unsigned int begin, unsigned int end );
+
+		virtual bool nodeBalance( unsigned int size ) {
+			return 0; // No change for the globals.
+		}
+
+		DataHandler* copy() const;
+
+		DataHandler* copyExpand( unsigned int copySize ) const;
+
+		DataHandler* copyToNewDim( unsigned int newDimSize ) const;
+
 		/**
-		 * Copies contents into a 2-D array.
-		 * If the copy is non-global, it does the usual node partitioning
-		 * scheme for multinode simulations.
+		 * Returns the data on the specified index.
 		 */
-		DataHandler* copy( unsigned int n, bool toGlobal ) const;
+		char* data( DataId index ) const;
 
 		/**
 		 * calls process on data, using threading info from the ProcInfo,
@@ -35,38 +50,11 @@ class OneDimGlobalHandler: public DataHandler
 		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
 
 		/**
-		 * Returns the data on the specified index.
-		 */
-		char* data( DataId index ) const;
-
-		/**
-		 * Returns the data at one level up of indexing. In this case it
-		 * just returns the data on the specified index.
-		 */
-		char* data1( DataId index ) const;
-
-		/**
 		 * Returns the number of data entries.
 		 */
-		unsigned int numData() const {
+		unsigned int totalEntries() const {
 			return size_;
 		}
-
-		/**
-		 * Returns the number of data entries at index 1.
-		 * For regular Elements this is identical to numData.
-		 */
-		unsigned int numData1() const {
-			return size_;
-		}
-
-		/**
-		 * Returns the number of data entries at index 2, if present.
-		 * For regular Elements and 1-D arrays this is always 1.
-		 */
-		 unsigned int numData2( unsigned int index1 ) const {
-		 	return 1;
-		 }
 
 		/**
 		 * Returns the number of dimensions of the data.
@@ -75,33 +63,24 @@ class OneDimGlobalHandler: public DataHandler
 			return 1;
 		}
 
-		/**
-		 * Assigns the size for the data dimension.
-		 */
-		void setNumData1( unsigned int size );
+		bool resize( vector< unsigned int > dims );
 
 		/**
-		 * Assigns the sizes of all array field entries at once.
-		 * Ignore in this case, as there are none.
+		 * Converts unsigned int into vector with index in each dimension
 		 */
-		void setNumData2( unsigned int start,
-			const vector< unsigned int >& sizes );
-
-		/**
-		 * Looks up the sizes of all array field entries at once.
-		 * Ignore in this case, as there are no array fields.
-		 */
-		unsigned int getNumData2( vector< unsigned int >& sizes ) const;
+		vector< unsigned int > multiDimIndex( unsigned int index ) const;
 
 		/**
 		 * Returns true if the node decomposition has the data on the
 		 * current node
 		 */
-		bool isDataHere( DataId index ) const;
+		bool isDataHere( DataId index ) const {
+			return 1;
+		}
 
-		bool isAllocated() const;
-
-		void allocate();
+		bool isAllocated() const {
+			return ( data_ != 0 );
+		}
 
 		bool isGlobal() const
 		{
@@ -109,37 +88,20 @@ class OneDimGlobalHandler: public DataHandler
 		}
 
 		iterator begin() const {
-			return 0;
+			return iterator( this, 0 );
 		}
 
 		iterator end() const {
-			return size_;
+			return iterator( this, size_ );
 		}
 
-		/**
-		 * Adds another entry to the data. Copies the info over.
-		 * Returns the index of the new data.
-		 * Some derived classes can't handle this. They return 0.
-		 */
-		unsigned int addOneEntry( const char* data );
-
-		/**
-		 * This is relevant only for the 2 D cases like
-		 * FieldDataHandlers.
-		 */
-		unsigned int startDim2index() const {
-			return 0;
+	protected:
+		void setData( char* data, unsigned int numData );
+		unsigned int nextIndex( unsigned int index ) const {
+			return index + 1;
 		}
-
-		void setData( char* data, unsigned int numData ) {
-			data_ = data;
-			reserve_ = size_ = numData;
-		}
-
-	private:
 		char* data_;
 		unsigned int size_;	// Number of data entries in the whole array
-		unsigned int reserve_; // Number of places actually allocated.
 };
 
 #endif	// _ONE_DIM_GLOBAL_HANDLER_H

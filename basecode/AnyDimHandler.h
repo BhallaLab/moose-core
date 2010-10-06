@@ -140,8 +140,12 @@ class AnyDimHandler: public DataHandler
 		iterator end() const;
 
 	protected:
+		/**
+		 * Assigns the data field and indicates how many total entries
+		 * are present.
+		 */
+		virtual void setData( char* data, unsigned int numData ) = 0; 
 		unsigned int nextIndex( unsigned int index ) const;
-		unsigned int G
 
 	private:
 		char* data_;

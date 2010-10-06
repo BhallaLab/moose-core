@@ -38,6 +38,28 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		~FieldDataHandler()
 		{;} // Don't delete data because the parent Element should do so.
 
+		DataHandler* globalize()
+		{
+			return 0;
+		}
+
+		DataHandler* unGlobalize()
+		{
+			return 0;
+		}
+
+		void assimilateData( const char* data,
+			unsigned int begin, unsigned int end )
+		{
+			;
+		}
+
+		bool nodeBalance( unsigned int size )
+		{
+			return 0;
+		}
+
+
 		/**
 		 * This really won't work, as it is just a hook to the parent
 		 * Data Handler. Need the duplicated Parent for this.
@@ -51,11 +73,21 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		 * 2nd dimension is now n. For multinodes does a hack by scaling
 		 * up all entries by n, rather than doing a clean repartitioning.
 		 */
-		DataHandler* copy( unsigned int n, bool toGlobal ) const
+		DataHandler* copy() const
 		{
 			FieldDataHandler< Parent, Field >* ret =
 				new FieldDataHandler< Parent, Field >( *this );
 			return ret;
+		}
+
+		DataHandler* copyExpand() const
+		{
+			return 0;
+		}
+
+		DataHandler* copyToNewDim( unsigned int newDimSize ) const
+		{
+			return 0;
 		}
 
 		void process( const ProcInfo* p, Element* e, FuncId fid ) const 
@@ -77,26 +109,17 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		}
 
 		/**
-		 * Returns the data at one level up of indexing. In this case it
-		 * returns the parent of the field.
-		 */
-		char* data1( DataId index ) const
-		{
-			return parentDataHandler_->data1( index );
-		}
-
-		/**
 		 * Returns the number of field entries.
-		 * This runs into trouble on multinodes.
-		 * I'll just return # on local node.
 		 */
-		unsigned int numData() const {
+		unsigned int totalEntries() const {
 			unsigned int ret = 0;
+			/*
 			for ( DataHandler::iterator i = parentDataHandler_->begin();
 				i != parentDataHandler_->end(); ++i ) {
 				char* pa = parentDataHandler_->data1( i );
 				ret += ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
 			}
+			*/
 
 			/*
 			unsigned int size = parentDataHandler_->numData1();
@@ -114,48 +137,30 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		}
 
 		/**
-		 * Returns the number of data entries in the whole object.
-		 * What is least surprising: To get the # of data entries of
-		 * the parent (current version) or to go one level nested and
-		 * get the # of field entries? In order to do the latter we need
-		 * an index, so I think it is out of the question.
-		 */
-		unsigned int numData1() const {
-			return parentDataHandler_->numData1();
-		}
-
-		/**
-		 * Returns the number of field entries on the data entry indicated
-		 * by index1, if present.
-		 * e.g., return the # of synapses on a given IntFire
-		 */
-		unsigned int numData2( unsigned int index1 ) const
-		{
-			char* pa = parentDataHandler_->data1( index1 );
-			if ( pa ) {
-				return ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
-			}
-			return 0;
-		}
-
-		/**
 		 * Returns the number of dimensions of the data.
 		 */
 		unsigned int numDimensions() const {
 			return 2;
 		}
 
+		unsigned int sizeOfDim( unsigned int dim ) const
+		{
+			return 0;
+		}
+
+
 		/**
 		 * Assigns size for first (data) dimension. This usually will not
 		 * be called here, but by the parent data Element.
 		 */
-		void setNumData1( unsigned int size ) {
-			cout << Shell::myNode() << ": FieldDataHandler::setNumData1: Error: Cannot set parent data size from Field\n";
+		bool resize( vector< unsigned int > dims )
+		{
+			cout << Shell::myNode() << ": FieldDataHandler::setNumData1: Error: Cannot resize from Field\n";
+			return 0;
 		}
 
 		/**
 		 * Assigns the sizes of all array field entries at once.
-		 */
 		void setNumData2( unsigned int start, 
 			const vector< unsigned int >& sizes ) {
 			assert ( sizes.size() == parentDataHandler_->numData() );
@@ -165,56 +170,9 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 				( ( reinterpret_cast< Parent* >( pa ) )->*setNumField_ )( sizes[i] );
 			}
 			start_ = start;
-
-/*
-			unsigned int size = parentDataHandler_->numData1();
-			assert( sizes.size() == size );
-			unsigned int start = 
-				 ( size * Shell::myNode() ) / Shell::numNodes();
-			unsigned int end = 
-				 ( size * ( 1 + Shell::myNode() ) ) / Shell::numNodes();
-
-			for ( unsigned int i = start; i < end; ++i ) {
-				char* pa = parentDataHandler_->data1( i );
-				( ( reinterpret_cast< Parent* >( pa ) )->*setNumField_ )( sizes[i] );
-			}
-			*/
 		}
-
-		/**
-		 * Looks up the sizes of all array field entries at once.
-		 * This is messy for multinode situations, because many/most
-		 * entries will be zero for the local node. So we just fill out
-		 * the entries that concern the local node. 
-		 * Returns the start index on the current node: this is not
-		 * possible to compute just from the node#.
 		 */
-		unsigned int getNumData2( vector< unsigned int >& sizes ) const
-		{
-			sizes.assign( parentDataHandler_->numData(), 0 );
-			for ( DataHandler::iterator i = parentDataHandler_->begin();
-				i != parentDataHandler_->end(); ++i ) {
-				char* pa = parentDataHandler_->data1( i );
-				sizes[i] =  
-				( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
-			}
 
-			/*
-			unsigned int size = parentDataHandler_->numData1();
-			unsigned int start = 
-				 ( size * Shell::myNode() ) / Shell::numNodes();
-			unsigned int end = 
-				 ( size * ( 1 + Shell::myNode() ) ) / Shell::numNodes();
-
-			for ( unsigned int i = start; i < end; ++i ) {
-				char* pa = parentDataHandler_->data1( i );
-				sizes.push_back( 
-				( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )()
-				);
-			}
-			*/
-			return start_;
-		}
 
 		/**
 		 * Returns true if the node decomposition has the data on the
@@ -226,14 +184,6 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 
 		bool isAllocated() const {
 			return parentDataHandler_->isAllocated();
-		}
-
-		/**
-		 * Again, this should really be done at the parent Element, not
-		 * here.
-		 */
-		void allocate() {
-			;
 		}
 
 		bool isGlobal() const
@@ -259,14 +209,15 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 			return parentDataHandler_;
 		}
 
-		unsigned int startDim2index() const {
-			return start_;
-		}
-
 	protected:
 		void setData( char* data, unsigned int numData ) {
 			;
 		}
+
+		unsigned int nextIndex( unsigned int index ) const {
+			return index + 1;
+		}
+
 	private:
 		const DataHandler* parentDataHandler_;
 		Field* ( Parent::*lookupField_ )( unsigned int );

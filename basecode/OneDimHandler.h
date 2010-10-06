@@ -14,7 +14,7 @@
  * This class manages the data part of Elements. It handles a one-
  * dimensional array.
  */
-class OneDimHandler: public DataHandler
+class OneDimHandler: public OneDimGlobalHandler
 {
 	public:
 		OneDimHandler( const DinfoBase* dinfo );
@@ -47,44 +47,13 @@ class OneDimHandler: public DataHandler
 		 */
 		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
 
-		/**
-		 * Returns the number of data entries.
-		 */
-		unsigned int totalEntries() const {
-			return size_;
-		}
-
-		/**
-		 * Returns the number of dimensions of the data.
-		 */
-		unsigned int numDimensions() const {
-			return 1;
-		}
-
-		void resize( unsigned int size );
-
-		/**
-		 * Assigns the sizes of all array field entries at once.
-		 * Ignore in this case, as there are none.
-		 */
-		void setNumData2( unsigned int start, 
-			const vector< unsigned int >& sizes );
-
-		/**
-		 * Looks up the sizes of all array field entries at once.
-		 * Ignore in this case, as there are no array fields.
-		 */
-		unsigned int getNumData2( vector< unsigned int >& sizes ) const;
+		bool resize( vector< unsigned int > dims );
 
 		/**
 		 * Returns true if the node decomposition has the data on the
 		 * current node
 		 */
 		bool isDataHere( DataId index ) const;
-
-		bool isAllocated() const;
-
-		void allocate();
 
 		bool isGlobal() const
 		{
@@ -103,8 +72,6 @@ class OneDimHandler: public DataHandler
 		void setData( char* data, unsigned int numData );
 
 	private:
-		char* data_;
-		unsigned int size_;	// Number of data entries in the whole array
 		unsigned int start_;	// Starting index of data, used in MPI.
 		unsigned int end_;	// Starting index of data, used in MPI.
 };
