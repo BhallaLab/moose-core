@@ -7488,6 +7488,7 @@ Key issues:
 	- Sort out field vs element array logic.
 + Unit testing
 	- Need to resurrect the whole bank of unit tests.
+	+ need to create regression tests driven by C++ for system-wide stuff.
 - Create and copy need work, specially for arrays
 - Complete list of shell functions. This may need to provide an
 	interface to the Set/Get operations through strings.
@@ -7583,4 +7584,142 @@ Checkin 2188.
 Worked through regression tests for checking file type and then for
 loading and running Kholodenko model using ReadKkit. Added a few
 more unit test cases for bugs that turned up.
+Checkin 2189.
+
+Now we have the base regression test framework working.
 ============================================================================
+23 Sep 2010
+Immediate two cleanups:
+- Array indexing, both elements and fields
+	- Always have array as linear array. The Data Handler currently 
+	does a lot of stuff to return different slices/indices of it. It
+	can probably generate an indexer class that the Shell uses to
+	make sense of the array index.
+	I would like to be able to index arrays by text strings too, but
+		not critical.
+	Options:
+		- Function that takes arbitrary args and generates linear index.
+		- Function that takes vector of uints like the dimensions vec.
+	Problems:
+		- Linear lookup of something with ragged arrays. 
+			Here we need to transform quickly from the linear
+			index to the multidimension one.
+		- Resizing arrays
+		Options:
+			Use rectangular dimension assumption.
+- Implement Shell::doResize to change dimensions of an Element.
+
+
+
+So the interface looks like this:
+	unsigned int linearIndex( vector< unsigned int > dimIndex );
+	unsigned int size( unsigned int dimension, vector< unsigned int > dimindex );
+	unsigned int numDimensions();
+
+	In addition the DataHandler needs generic functions for setting these
+	things. setSize would have to pass in a vector of sizes
+	Iterators.
+
+============================================================================
+30 Sep
+Slowly working on AnyDimHandler which is meant as a prototypical data handler
+that fully exercises the capability of DataDimensions class.
+Need to incorporate node allocation in AnyDimHandler::resize();
+
+Use case for 3-D array is obviously diffusion.
+
+
+Dangling functions for the AnyDimHandler:
+- copying to globals from non-global. This can be deferred. It requires
+	a way for all parts of the object to be consolidated. The Shell
+	may need to do an all-to-all send where each node sends out its
+	own data contents.
+
+An issue is: who sets multinode policy? Ideally should separate this out
+from the DataHandlers. Comes up because the copy and allocation operations 
+involve multinode decomposition. This decomposition will often need to
+talk to the shell:
+	Allocate: Need to decide 'start' and 'end' of the data chunk. More
+		generally, there may be many ways to chop up the data.
+		Should this policy be decided by different subclasses of
+		DataHandler, or should the DataHandlers just do this generally
+		and have the Shell tell them how data is done?
+	Copy into Globals: Shell needs to arrange that all nodes contribute
+		their data to the composite global
+	Copy into another dimensions: Typically will want to assemble
+		all entries into a block, and then duplicate this into the
+		new dimension so that each node gets one or more blocks.
+		But there are lots of policy issues such as the granularity
+		of the blocks and the # of nodes.
+
+Option 1: Proliferate DataHandlers to embody all this policy
+Option 2: Implement DataHandlers generally enough that they can handle any of
+	the policies, but leave the policy decisions to the Shell and up.
+
+What is in a policy?
+	-> Given a vector of dimensions, and N nodes with T threads each, 
+	which object indices should be on a given node? 
+	- Note that all threads have access to all the object indices on the
+		node. So the threads are needed to figure out policy, but we do
+		not subdivide objects by thread.
+	- Policy also depends on the messaging structure. But that is a still
+		higher-level decision, coming from the solver or model builder.
+Policy operations:
+	Allocation / resizing
+	Duplication/copy, including adding more dimensions
+	isDataHere... 
+	Looking up data from multidim index
+
+If we assume all DataHanders are n-dim arrays, then example policies are:
+	- linear block along data array: Easy to look up, matches the Id.
+	- cuboid block in n-dim array: good for neighbour connected models
+		- columns and other low-dim versions are variants of this.
+		- Spatial mapping need not match index mapping, but the
+		duplication of blocks in new dims is likely to retain structure.
+	- scattered entries along data array: Easy to resize. Hard to redim.
+		But redim is tricky anyway.
+	- Sticky dim0. This means that we try to keep objects on dim0 
+		(the fastest changing dim) together, as they are likely
+		highly connected. e.g., neurons in a cortical column or glom.
+
+Policy		Allocation	Lookup		IsDataHere	Resize	add dim
+Linear block	find start/end	[id - start]	start<=id<end	OK	hard
+scattered	1 + size/N	[id/N]		(id+offset)%N	OK	?
+cuboid block	size/N multidim	vec(id - start)	cuboid		Messy	Easy
+
+Sticky dim0:
+Linear block: as before, with start and end being calculated accordingly.
+scattered: 	dim0 * (1 + size/(N*dim0) )
+				dim0		((id + offset)/dim0)%N
+				
+
+Multilevel arrays:
+	Bulb model case
+		Compts in each cell are individual Elements, as each has
+			different channel composition.
+		Have a set of distinct prototype Cells, with their solvers.
+		Make arrays of each in order to set up one glom.
+		Have a set of distinct prototype gloms, each arrays of
+			assorted mitral and PG cells.
+			Say mit[0-7] in glomTypeA, mit[0-4] in glomTypeB
+		Make arrays of each of these gloms for whole bulb.
+			mit[0-500][0-7] in glomTypeAs, mit[0-600][0-4] in B.
+
+	This won't work with a single base array. Need to make two base mits.
+
+============================================================================
+5 Oct 2010
+AnyDimHandler taking shape, and I've begun the process of getting the newly
+defined interface into the base DataHandler class.
+
+Pending issue is to globalize or unglobalize DataHandlers, which also requires
+the ability to pass contents around. This is in principle also enough to
+do dynamic load balancing, but there are issues with the ordering.
+Specifically, if we want to shift some objects from node A to node B,
+we are likely to mess up the ordering of objects on the data handlers of both
+nodes.
+
+============================================================================
+6 Oct 2010
+Starting the compile process. Since there have been many incremental changes,
+I'll checkin things.

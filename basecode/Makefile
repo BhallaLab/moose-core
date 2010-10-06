@@ -18,6 +18,7 @@ TARGET = basecode.o
 
 OBJ = \
 	Element.o	\
+	AnyDimHandler.o \
 	ZeroDimHandler.o \
 	OneDimHandler.o \
 	ZeroDimGlobalHandler.o \
@@ -49,7 +50,9 @@ HEADERS = \
 	Conv.h \
 	DataId.h \
 	Dinfo.h \
+	DataDimensions.h \
 	DataHandler.h \
+	AnyDimHandler.h \
 	ZeroDimHandler.h \
 	OneDimHandler.h \
 	ZeroDimGlobalHandler.h \

@@ -62,6 +62,10 @@ void ZeroDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 	}
 }
 
+char* ZeroDimHandler::data( DataId index ) const {
+	return data_;
+}
+
 /**
  * Returns true if the node decomposition has the data on the
  * current node

@@ -20,8 +20,15 @@ class DinfoBase
 		virtual char* allocData( unsigned int numData ) const = 0;
 		virtual void destroyData( char* d ) const = 0;
 		virtual unsigned int size() const = 0;
-		virtual char* copyData( const char* orig, unsigned int numData,
-			unsigned int numCopies ) const = 0;
+
+		/**
+		 * Analogous to copying a vector into a bigger one. Repeat the
+		 * original data as many times as possible.
+		 * Destroys old data and allocates new.
+		 * returns new data.
+		 */
+		virtual char* copyData( const char* orig, unsigned int origSize,
+			unsigned int copySize ) const = 0;
 		/*
 		static unsigned int size( const D* value ) const = 0;
 		static unsigned int serialize( char* buf, const Data* d ) const = 0;
@@ -41,15 +48,23 @@ template< class D > class Dinfo: public DinfoBase
 			if ( numData == 0 )
 				return 0;
 			else 
-				return reinterpret_cast< char* >( new D[ numData ] );
+				return reinterpret_cast< char* >( new( nothrow) D[ numData ] );
 		}
 
-		char* copyData( const char* orig, unsigned int numData,
-			unsigned int numCopies ) const
+		char* copyData( const char* orig, unsigned int origSize,
+			unsigned int copySize ) const
 		{
-			if ( numData == 0 )
+			if ( origSize == 0 )
 				return 0;
+			D* ret = new( nothrow ) D[copySize];
+			if ( !ret )
+				return 0;
+			const D* origData = reinterpret_cast< const D* >( orig );
+			for ( unsigned int i = 0; i < copySize; ++i ) {
+				ret[ i ] = origData[ i % origSize ];
+			}
 
+			/*
 			D* ret = new D[ numData * numCopies ];
 			const D* origData = reinterpret_cast< const D* >( orig );
 			for ( unsigned int i = 0; i < numData; ++i ) {
@@ -57,6 +72,7 @@ template< class D > class Dinfo: public DinfoBase
 					ret[ i * numCopies + j ] = origData[ i ];
 				}
 			}
+			*/
 			return reinterpret_cast< char* >( ret );
 		}
 

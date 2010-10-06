@@ -7,29 +7,40 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _ZERO_DIM_HANDLER_H
-#define _ZERO_DIM_HANDLER_H
+#ifndef _ANY_DIM_HANDLER_H
+#define _ANY_DIM_HANDLER_H
 
 /**
- * This class manages the data part of Elements having just one
- * data entry.
+ * This class manages the data part of Elements. It handles arrays of
+ * any dimension.
  */
-class ZeroDimHandler: public DataHandler
+class AnyDimHandler: public DataHandler
 {
 	public:
-		ZeroDimHandler( const DinfoBase* dinfo )
-			: DataHandler( dinfo ), data_( 0 )
-		{;}
+		AnyDimHandler( const DinfoBase* dinfo );
+		AnyDimHandler( const AnyDimHandler* other );
+		~AnyDimHandler();
 
-		ZeroDimHandler( const ZeroDimHandler* other );
-
-		~ZeroDimHandler();
-
+		/**
+		 * Converts handler to its global version, where the same data is
+		 * present on all nodes. Ignored if already global.
+		 * returns true on success.
+		 */
 		DataHandler* globalize();
 
+		/**
+		 * Converts handler to its local version, where the data is 
+		 * partitioned between nodes based on the load balancing policy.
+		 * This is basically a matter of figuring out data range and
+		 * deleting other stuff.
+		 * Returns true on success.
+		 */
 		DataHandler* unGlobalize();
 
-		void assimilateData( const char* data,
+		/**
+		 * Incorporates provided data into already allocated space
+		 */
+		void assimilateData( const char* data, 
 			unsigned int begin, unsigned int end );
 
 		/**
@@ -65,25 +76,21 @@ class ZeroDimHandler: public DataHandler
 		 */
 		char* data( DataId index ) const;
 
-
 		/**
-		 * calls process on data, using threading info from the ProcInfo
+		 * calls process on data, using threading info from the ProcInfo,
+		 * and internal info about node decomposition.
 		 */
 		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
 
 		/**
-		 * Returns the number of data entries.
+		 * Returns the total number of data entries.
 		 */
-		unsigned int totalEntries() const {
-			return 1;
-		}
+		unsigned int totalEntries() const;
 
 		/**
 		 * Returns the number of dimensions of the data.
 		 */
-		unsigned int numDimensions() const {
-			return 0;
-		}
+		unsigned int numDimensions() const;
 
 		/**
 		 * Returns the number of data entries at any index.
@@ -112,37 +119,36 @@ class ZeroDimHandler: public DataHandler
 		 */
 		bool isDataHere( DataId index ) const;
 
+		/**
+		 * Returns true if data is allocated.
+		 */
 		bool isAllocated() const;
 
-		bool isGlobal() const
-		{
-			return 0;
-		}
+		/**
+		 * Returns true if data is global. Not so here.
+		 */
+		bool isGlobal() const;
 
-		iterator begin() const {
-			return iterator( this, 0 );
-		}
+		/**
+		 * Iterator to start of data
+		 */
+		iterator begin() const;
 
-		iterator end() const {
-			return iterator( this, 1 );
-		};
+		/**
+		 * Iterator to start of data
+		 */
+		iterator end() const;
 
 	protected:
-		unsigned int nextIndex( unsigned int index ) const
-		{
-			return 1;
-		}
-
-
-		void setData( char* data, unsigned int numData ) {
-			if ( data_ ) {
-				dinfo()->destroyData( data_ );
-			}
-			data_ = data;
-		}
+		unsigned int nextIndex( unsigned int index ) const;
+		unsigned int G
 
 	private:
 		char* data_;
+		unsigned int size_;	// Number of data entries in the whole array
+		unsigned int start_;	// Starting index of data, used in MPI.
+		unsigned int end_;	// Starting index of data, used in MPI.
+		DataDimensions dims_;
 };
 
-#endif // _ZERO_DIM_HANDLER_H
+#endif	// _ANY_DIM_HANDLER_H

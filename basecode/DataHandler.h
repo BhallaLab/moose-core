@@ -28,20 +28,54 @@ class DataHandler
 		{;}
 
 		/**
-		 * Makes 'n' copies of the contents of the current DataHandler.
-		 * if the toGlobal flag is true then the copies are globals.
-		 * If n is 1, then it is straightforward: every node gets a copy
-		 * of whatever it started out with.
-		 * If n > 1 and the original is zero dimension, then we bump up
-		 * a dimension and do the usual node allocation. For this we
-		 * need a way to get hold of the original data, but we'll assume
-		 * that the system has figured out this and put the data as a
-		 * Global.
-		 * If n > 1 and the original is 1 dimension, we need to figure out
-		 * but for starters, we use the existing node decomposition and
-		 * scale each up by n. It now becomes 2 dimensions.
+		 * Converts handler to its global version, where the same data is
+		 * present on all nodes. Ignored if already global.
+		 * returns true on success.
 		 */
-		virtual DataHandler* copy( unsigned int n, bool toGlobal) const = 0;
+		virtual DataHandler* globalize() = 0;
+
+		/**
+		 * Converts handler to its local version, where the data is 
+		 * partitioned between nodes based on the load balancing policy.
+		 * Returns true on success.
+		 */
+		virtual DataHandler* unGlobalize() = 0;
+
+		/**
+		 * Fills in data from other nodes, used when globalizing
+		 * and potentially when moving data between nodes.
+		 * Data Handler must already have been built and allocated.
+		 */
+		virtual void assimilateData( const char* data, 
+			unsigned int begin, unsigned int end ) = 0;
+
+		/**
+		 * Determines how to decompose data among nodes for specified size
+		 * Returns true if there is a change from the current configuration
+		 * Does NOT touch actual allocation.
+		 */
+		virtual bool nodeBalance( unsigned int size ) = 0;
+
+		/**
+		 * For copy we won't worry about global status. 
+		 * Instead define function: globalize above.
+		 * Version 1: Just copy as original
+		 */
+		virtual DataHandler* copy() const = 0;
+
+		/**
+		 * Version 2: Copy same dimensions but different # of entries.
+		 * The copySize is the total number of targets, 
+		 * here we need to figure out
+		 * what belongs on the current node.
+		 */
+		virtual DataHandler* copyExpand( unsigned int copySize ) const = 0;
+
+		/**
+		 * Version 3: Add another dimension when doing the copy.
+		 * Here too we figure out what is to be on current node for copy.
+		 */
+		virtual DataHandler* copyToNewDim( unsigned int newDimSize ) const = 0;
 
 		/**
 		 * Returns the data on the specified index.
@@ -56,47 +90,15 @@ class DataHandler
 		virtual void process( const ProcInfo* p, Element* e, FuncId fid ) const = 0;
 
 		/**
-		 * Returns the data at one level up of indexing, in the special
-		 * case where we have arrays of type X nested in an array of
-		 * type Y. This function returns the entry of type Y.
-		 * For a synapse on an IntFire, would
-		 * return the appropriate IntFire, rather than the synapse.
-		 * In other cases returns the data at the first index of DataId.
-		 *
-		 * Returns 0 if data not found at index.
-		 */
-		virtual char* data1( DataId index ) const = 0;
-
-
-		/**
-		 * Returns the number of data entries in the whole message,
+		 * Returns the number of data entries in the whole object,
 		 * not just what is present here on this node. If we have arrays of
 		 * type X nested in an array of type Y, then returns total # of X.
 		 * If we have a 2-D array of type X, returns total # of X.
-		 * If we have a vector of vectors of type X, returns total # of X.
+		 * Note that if we have a ragged array it still treats it as an
+		 * N-dimension array cuboid, and reports the product of all sides
+		 * rather than the sum of individual array counts.
 		 */
-		virtual unsigned int numData() const = 0;
-
-		/**
-		 * Returns the number of data entries at index 1.
-		 * For regular Elements this is identical to numData.
-		 * If we have 2-D arrays or vectors of vectors, this is the 
-		 * number of entries at the first index.
-		 * If we have arrays of type X nested in an array of type Y, this
-		 * is the number of Y.
-		 */
-		virtual unsigned int numData1() const = 0;
-
-		/**
-		 * Returns the number of data entries at index 2, if present.
-		 * For regular Elements and 1-D arrays this is always 1.
-		 * If we have 2-D arrays or vectors of vectors, this looks up
-		 * the first index and returns the # of array entries in it.
-		 * If we have arrays of type X nested in an array of type Y, this
-		 * looks up Y[ index ] and returns the number of entries of X
-		 * within it.
-		 */
-		 virtual unsigned int numData2( unsigned int index1 ) const = 0;
+		virtual unsigned int totalEntries() const = 0;
 
 		/**
 		 * Returns the number of dimensions of the data.
@@ -108,40 +110,27 @@ class DataHandler
 		virtual unsigned int numDimensions() const = 0;
 
 		/**
-		 * Assigns the # of entries in dimension 1.
-		 * Ignores if 0 dimensions.
-		 * Does not do any actual allocation: that waits till
-		 * the 'allocate' function.
+		 * Returns the number of data entries at any index.
 		 */
-		virtual void setNumData1( unsigned int size ) = 0;
+		virtual unsigned int sizeOfDim( unsigned int dim ) const = 0;
 
 		/**
-		 * Assigns the sizes of all array field entries at once.
-		 * The 'start' entry is needed for multinode setups because
-		 * one cannot compute the start index from node# alone.
-		 * Ignore if 1 or 0 dimensions.
-		 * The 'sizes' vector must be of length numData1.
-		 * In a FieldElement we can assign different array sizes
-		 * for each entry in the Element.
-		 * In a 2-D array we can do the equivalent.
-		 * Note that a single Element may have more than one array field.
-		 * However, each FieldElement instance will refer to just one of
-		 * these array fields, so there is no ambiguity.
+		 * Reallocates data. Data not preserved unless same # of dims
+		 * Returns 0 if it cannot handle the requested allocation.
 		 */
-		virtual void setNumData2( unsigned int start,
-			const vector< unsigned int >& sizes )
-			 = 0;
+		virtual bool resize( vector< unsigned int > dims );
 
-		/**
-		 * Looks up the sizes of all array field entries at once.
-		 * Ignored for 0 and 1 dimension Elements. 
-		 * Note that a single Element may have more than one array field.
-		 * However, each FieldElement instance will refer to just one of
-		 * these array fields, so there is no ambiguity.
-		 */
-		virtual unsigned int getNumData2( 
-			vector< unsigned int >& sizes ) const
-			= 0;
+		 /**
+		  * Converts unsigned int into vector with index in each dimension
+		  */
+		 virtual vector< unsigned int > multiDimIndex( unsigned int index ) const = 0;
+
+		 /**
+		  * Converts index vector into unsigned int. If there are indices
+		  * outside the dimension of the current data, then it returns 0?
+		  */
+		 virtual unsigned int linearIndex( 
+		 	const vector< unsigned int >& index ) const = 0;
 
 		/**
 		 * Returns true if the node decomposition has the data on the
@@ -155,39 +144,54 @@ class DataHandler
 		virtual bool isAllocated() const = 0;
 
 		/**
-		 * Allocates the data.
-		 */
-		virtual void allocate() = 0;
-
-		/**
 		 * True if the data is global on all nodes
 		 */
 		virtual bool isGlobal() const = 0;
 
-		typedef unsigned int iterator; // the ++i and i++ operators are already known.
+		/**
+		 * This class handles going through all data objects in turn.
+		 */
+		class iterator {
+			public: 
+				iterator( const iterator& other )
+					: dh_( other.dh_ ), index_( other.index_ )
+				{;}
+
+				iterator( const DataHandler* dh, unsigned int index )
+					: dh_( dh ), index_( index )
+				{;}
+
+				unsigned int index() const {
+					return index_;
+				}
+
+				iterator operator++() {
+					index_ = dh_->nextIndex( index_ );
+					return *this;
+				}
+
+				bool operator==( const iterator& other ) const
+				{
+					return ( index_ == other.index_ && dh_ == other.dh_ );
+				}
+
+				bool operator!=( const iterator& other ) const
+				{
+					return ( index_ != other.index_ || dh_ != other.dh_ );
+				}
+
+				char* operator* () const
+				{
+					return dh_->data( index_ );
+				}
+
+			private:
+				const DataHandler* dh_;
+				unsigned int index_;
+		};
 
 		virtual iterator begin() const = 0;
 		virtual iterator end() const = 0;
-
-		/**
-		 * Adds another entry to the data. Copies the info over.
-		 * Returns the index of the new data.
-		 * Some derived classes can't handle this. They return 0;
-		 */
-		virtual unsigned int addOneEntry( const char* data ) {
-			return 0;
-		}
-
-		/**
-		 * Returns the starting index for the second dimension
-		 */
-		virtual unsigned int startDim2index() const = 0;
-
-		/*
-		virtual const DataHandler* parentDataHandler() const {
-			return 0;
-		}
-		*/
 
 		const DinfoBase* dinfo() const
 		{
@@ -201,26 +205,10 @@ class DataHandler
 		 */
 		virtual void setData( char* data, unsigned int numData ) = 0; 
 
-
 		/**
-		 * Used to iterate over indices managed by DataHandler
-		 * to find those on the current node. A foreach would be nice.
-		class iterator {
-			public:
-				iterator( unsigned int start, const DataHandler *d )
-					: i( 0 )
-				{;}
-
-				iterator ++operator() {
-					return ++i;
-				}
-
-				iterator 
-			
-			private:
-				unsigned int i;
-		};
+		 * Used to march through the entries in this DataHandler
 		 */
+		virtual unsigned int nextIndex( unsigned int index ) const = 0;
 
 	private:
 		const DinfoBase* dinfo_;

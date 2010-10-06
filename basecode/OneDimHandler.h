@@ -21,15 +21,25 @@ class OneDimHandler: public DataHandler
 
 		~OneDimHandler();
 
+		DataHandler* globalize();
+
+		DataHandler* unGlobalize();
+
+		void assimilateData( const char* data,
+			unsigned int begin, unsigned int end );
+
+		virtual bool nodeBalance( unsigned int size );
+
+		DataHandler* copy() const;
+
+		DataHandler* copyExpand( unsigned int copySize ) const;
+
+		DataHandler* copyToNewDim( unsigned int newDimSize ) const;
+
 		/**
-		 * Copies contents into a 2-D array.
-		 * This fails if the copy is global, and the simulation is 
-		 * multinode, as we don't know how to get the other data.
-		 * This works through a hack if the copy is not global. The best
-		 * partitioning is not possible, so it uses the existing node
-		 * partitioning and just scales up by n.
+		 * Returns the data on the specified index.
 		 */
-		DataHandler* copy( unsigned int n, bool toGlobal ) const;
+		char* data( DataId index ) const;
 
 		/**
 		 * calls process on data, using threading info from the ProcInfo,
@@ -38,38 +48,11 @@ class OneDimHandler: public DataHandler
 		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
 
 		/**
-		 * Returns the data on the specified index.
-		 */
-		char* data( DataId index ) const;
-
-		/**
-		 * Returns the data at one level up of indexing. In this case it
-		 * just returns the data on the specified index.
-		 */
-		char* data1( DataId index ) const;
-
-		/**
 		 * Returns the number of data entries.
 		 */
-		unsigned int numData() const {
+		unsigned int totalEntries() const {
 			return size_;
 		}
-
-		/**
-		 * Returns the number of data entries at index 1.
-		 * For regular Elements this is identical to numData.
-		 */
-		unsigned int numData1() const {
-			return size_;
-		}
-
-		/**
-		 * Returns the number of data entries at index 2, if present.
-		 * For regular Elements and 1-D arrays this is always 1.
-		 */
-		 unsigned int numData2( unsigned int index1 ) const {
-		 	return 1;
-		 }
 
 		/**
 		 * Returns the number of dimensions of the data.
@@ -78,10 +61,7 @@ class OneDimHandler: public DataHandler
 			return 1;
 		}
 
-		/**
-		 * Assigns the size for the data dimension.
-		 */
-		void setNumData1( unsigned int size );
+		void resize( unsigned int size );
 
 		/**
 		 * Assigns the sizes of all array field entries at once.
@@ -112,21 +92,14 @@ class OneDimHandler: public DataHandler
 		}
 
 		iterator begin() const {
-			return start_;
+			return iterator( this, start_ );
 		}
 
 		iterator end() const {
-			return end_;
+			return iterator( this, end_ );
 		}
 
-		/**
-		 * This is relevant only for the 2 D cases like
-		 * FieldDataHandlers.
-		 */
-		unsigned int startDim2index() const {
-			return 0;
-		}
-
+	protected:
 		void setData( char* data, unsigned int numData );
 
 	private:
