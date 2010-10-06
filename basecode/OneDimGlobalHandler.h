@@ -63,12 +63,16 @@ class OneDimGlobalHandler: public DataHandler
 			return 1;
 		}
 
+		unsigned int sizeOfDim( unsigned int dim ) const;
+
 		bool resize( vector< unsigned int > dims );
 
 		/**
 		 * Converts unsigned int into vector with index in each dimension
 		 */
 		vector< unsigned int > multiDimIndex( unsigned int index ) const;
+
+		unsigned int linearIndex( const vector< unsigned int >& index ) const;
 
 		/**
 		 * Returns true if the node decomposition has the data on the
