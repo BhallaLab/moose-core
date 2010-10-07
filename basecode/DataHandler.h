@@ -158,7 +158,14 @@ class DataHandler
 					return index_;
 				}
 
+				// This does prefix increment.
 				iterator operator++() {
+					index_ = dh_->nextIndex( index_ );
+					return *this;
+				}
+
+				// Bizarre C++ convention to tell it to do postfix increment
+				iterator operator++( int ) {
 					index_ = dh_->nextIndex( index_ );
 					return *this;
 				}

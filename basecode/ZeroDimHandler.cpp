@@ -13,7 +13,7 @@ ZeroDimHandler::ZeroDimHandler( const DinfoBase* dinfo )
 	: ZeroDimGlobalHandler( dinfo )
 {;}
 
-ZeroDimHandler( const ZeroDimHandler* other )
+ZeroDimHandler::ZeroDimHandler( const ZeroDimHandler* other )
 	: ZeroDimGlobalHandler( other->dinfo() )
 {
 	data_ = dinfo()->copyData( other->data_, 1, 1 );
@@ -34,14 +34,16 @@ DataHandler* ZeroDimHandler::copyExpand( unsigned int copySize ) const
 	OneDimHandler* ret = new OneDimHandler( dinfo() );
 	vector< unsigned int > dims( 1, copySize );
 	ret->resize( dims );
-	for ( iterator i = ret->begin(); i != ret->end(); i++ )
-		*i = dinfo()->copyData( data_, 1, 1 );
+	for ( iterator i = ret->begin(); i != ret->end(); ++i ) {
+		char* temp = *i;
+		memcpy( temp, data_, dinfo()->size() );
+	}
 	return ret;
 }
 
 DataHandler* ZeroDimHandler::copyToNewDim( unsigned int newDimSize ) const
 {
-	return copyExpand( copySize );
+	return copyExpand( newDimSize );
 }
 
 
@@ -74,14 +76,9 @@ bool ZeroDimHandler::isAllocated() const {
 	return data_ != 0;
 }
 
-void ZeroDimHandler::allocate() {
-	if ( data_ ) 
-		dinfo()->destroyData( data_ );
-	data_ = reinterpret_cast< char* >( dinfo()->allocData( 1 ) );
-}
-
 DataHandler::iterator ZeroDimHandler::end() const
 {
 	// cout << Shell::myNode() << ": ZeroDimHandler Iterator\n";
-	return ( Shell::myNode() == 0 );
+	// end is same as begin except on node 1.
+	return iterator( this, ( Shell::myNode() == 0 ) );
 }

@@ -17,9 +17,7 @@
 class ZeroDimHandler: public ZeroDimGlobalHandler
 {
 	public:
-		ZeroDimHandler( const DinfoBase* dinfo )
-			: ZeroDimGlobalHandler( dinfo )
-		{;}
+		ZeroDimHandler( const DinfoBase* dinfo );
 
 		ZeroDimHandler( const ZeroDimHandler* other );
 
@@ -86,13 +84,7 @@ class ZeroDimHandler: public ZeroDimGlobalHandler
 			return 0;
 		}
 
-		iterator begin() const {
-			return iterator( this, 0 );
-		}
-
-		iterator end() const {
-			return iterator( this, 1 );
-		};
+		iterator end() const;
 
 	protected:
 		void setData( char* data, unsigned int numData ) {

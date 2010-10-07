@@ -78,11 +78,11 @@ void ZeroDimGlobalHandler::allocate() {
 DataHandler::iterator ZeroDimGlobalHandler::begin() const
 {
 	//cout << Shell::myNode() << ": ZeroDimGlobalHandler::begin\n";
-	return 0;
+	return iterator( this, 0 );
 }
 
 DataHandler::iterator ZeroDimGlobalHandler::end() const
 {
 	//cout << Shell::myNode() << ": ZeroDimGlobalHandler::end\n";
-	return 1;
+	return iterator( this, 1 );
 }
