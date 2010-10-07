@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "DataDimensions.h"
 #include "AnyDimGlobalHandler.h"
 
 AnyDimGlobalHandler( const DinfoBase* dinfo )
@@ -185,7 +186,7 @@ unsigned int AnyDimGlobalHandler::sizeOfDim( unsigned int dim ) const
 	return 0;
 }
 
-bool AnyDimGlobalHandler::resize( vector< unsigned int > dims )
+bool AnyDimGlobalHandler::resize( const vector< unsigned int >& dims )
 {
 	size_ = 1
 	for ( vector< unsigned int >::iterator i = dims.begin();
@@ -198,19 +199,14 @@ bool AnyDimGlobalHandler::resize( vector< unsigned int > dims )
 			data_ = reinterpret_cast< char* >( 
 				dinfo()->allocData( end_ - start_ ) );
 	}
+	dims_ = dims;
 	return ( data_ != 0 );
 }
 
-vector< unsigned int > multiDimIndex( unsigned int index ) const
+const vector< unsigned int >& dims() const 
 {
-	return dims_.multiDimIndex( index );
+	return dims_;
 }
-
-unsigned int linearIndex( const vector< unsigned int >& index ) const
-{
-	return dims_.linearIndex( index );
-}
-
 
 bool AnyDimGlobalHandler::isDataHere( DataId index ) const {
 	return ( index.data() >= start_ && index.data() < end_ );

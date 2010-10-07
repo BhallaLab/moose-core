@@ -21,9 +21,9 @@ class OneDimGlobalHandler: public DataHandler
 
 		~OneDimGlobalHandler();
 
-		DataHandler* globalize();
+		DataHandler* globalize() const;
 
-		DataHandler* unGlobalize();
+		DataHandler* unGlobalize() const;
 
 		void assimilateData( const char* data,
 			unsigned int begin, unsigned int end );
@@ -68,11 +68,9 @@ class OneDimGlobalHandler: public DataHandler
 		bool resize( vector< unsigned int > dims );
 
 		/**
-		 * Converts unsigned int into vector with index in each dimension
+		 * Returns dimensions of this data.
 		 */
-		vector< unsigned int > multiDimIndex( unsigned int index ) const;
-
-		unsigned int linearIndex( const vector< unsigned int >& index ) const;
+		vector< unsigned int > dims() const;
 
 		/**
 		 * Returns true if the node decomposition has the data on the

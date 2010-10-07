@@ -8,20 +8,20 @@
 **********************************************************************/
 
 #include "header.h"
+#include "DataDimensions.h"
+#include "AnyDimGlobalHandler.h"
 #include "AnyDimHandler.h"
 
-AnyDimHandler( const DinfoBase* dinfo )
-	: DataHandler( dinfo ),
-		data_( 0 ), size_( 0 ),
+AnyDimHandler::AnyDimHandler( const DinfoBase* dinfo )
+	: AnyDimGlobalHandler( dinfo ),
 		start_( 0 ), end_( 0 )
 {
 	;
 }
 
-AnyDimHandler( const AnyDimHandler* other )
-	: DataHandler( other->dinfo() ),
-		data_( 0 ), size_( other->size_ ),
-		start_( other->start_ ), end_( other->end_ ), dims_( other->dims_ )
+AnyDimHandler::AnyDimHandler( const AnyDimHandler* other )
+	: AnyDimGlobalHandler( other->dinfo() ),
+		start_( other->start_ ), end_( other->end_ )
 {
 	;
 }
@@ -38,7 +38,7 @@ AnyDimHandler::~AnyDimHandler()
 // come in till the Handler is created. Then the data arrives from other
 // nodes and is filled in using assimilateData.
 // 
-DataHandler* AnyDimHandler::globalize()
+DataHandler* AnyDimHandler::globalize() const
 {
 	AnyDimGlobalHandler* ret = new AnyDimGlobalHandler( dinfo() );
 	ret->resize( dims_ );
@@ -48,9 +48,10 @@ DataHandler* AnyDimHandler::globalize()
 	// with Shell
 }
 
-DataHandler* unGlobalize()
+DataHandler* AnyDimHandler::unGlobalize() const
 {
 	return copy(); // It is already unglobal. Do you want a copy?
+	/*
 	nodeBalance( size_ );
 	char* newData = dinfo()->copyData( 
 		data_ + start_ * dinfo->size(), end_ - start_, end_ - start_ );
@@ -58,6 +59,7 @@ DataHandler* unGlobalize()
 	data_ = newData;
 	isGlobal_ = 0;
 	return 1;
+	*/
 }
 
 // Must get data from the AnyDimGlobalHandler
@@ -184,29 +186,12 @@ char* AnyDimHandler::data( DataId index ) const
 {
 	if ( isDataHere( index ) )
 		return data_ + ( index.data() - start_ ) * dinfo()->size();
-	return;
-}
-
-unsigned int AnyDimHandler::totalEntries() const
-{
-	return size_;
-}
-
-unsigned int AnyDimHandler::numDimensions() const
-{
-	return dims_.size();
-}
-
-unsigned int AnyDimHandler::sizeOfDim( unsigned int dim ) const
-{
-	if ( dim < dims_.size() )
-		return dims_[dim];
 	return 0;
 }
 
 bool AnyDimHandler::resize( vector< unsigned int > dims )
 {
-	size_ = 1
+	size_ = 1;
 	for ( vector< unsigned int >::iterator i = dims.begin();
 		i != dims.end(); ++i ) {
 		size_ *= *i;
@@ -217,19 +202,9 @@ bool AnyDimHandler::resize( vector< unsigned int > dims )
 			data_ = reinterpret_cast< char* >( 
 				dinfo()->allocData( end_ - start_ ) );
 	}
+	dims_ = dims;
 	return ( data_ != 0 );
 }
-
-vector< unsigned int > multiDimIndex( unsigned int index ) const
-{
-	return dims_.multiDimIndex( index );
-}
-
-unsigned int linearIndex( const vector< unsigned int >& index ) const
-{
-	return dims_.linearIndex( index );
-}
-
 
 bool AnyDimHandler::isDataHere( DataId index ) const {
 	return ( index.data() >= start_ && index.data() < end_ );
@@ -242,7 +217,6 @@ bool AnyDimHandler::isAllocated() const
 
 bool AnyDimHandler::isGlobal() const
 {
-	// return ( Shell::numNodes() <= 1 || ( start_ == 0 && end_ == size_ ) );
 	return 0;
 }
 

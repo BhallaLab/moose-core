@@ -14,7 +14,7 @@
  * This class manages the data part of Elements. It handles arrays of
  * any dimension.
  */
-class AnyDimGlobalHandler: public DataGlobalHandler
+class AnyDimGlobalHandler: public DataHandler
 {
 	public:
 		AnyDimGlobalHandler( const DinfoBase* dinfo );
@@ -26,7 +26,7 @@ class AnyDimGlobalHandler: public DataGlobalHandler
 		 * present on all nodes. Ignored if already global.
 		 * returns true on success.
 		 */
-		DataHandler* globalize();
+		DataHandler* globalize() const;
 
 		/**
 		 * Converts handler to its local version, where the data is 
@@ -35,7 +35,7 @@ class AnyDimGlobalHandler: public DataGlobalHandler
 		 * deleting other stuff.
 		 * Returns true on success.
 		 */
-		DataHandler* unGlobalize();
+		DataHandler* unGlobalize() const;
 
 		/**
 		 * Incorporates provided data into already allocated space
@@ -54,7 +54,7 @@ class AnyDimGlobalHandler: public DataGlobalHandler
 		 * Instead define function: globalize above.
 		 * Version 1: Just copy as original
 		 */
-		DataGlobalHandler* copy() const;
+		DataHandler* copy() const;
 
 		/**
 		 * Version 2: Copy same dimensions but different # of entries.
@@ -62,13 +62,13 @@ class AnyDimGlobalHandler: public DataGlobalHandler
 		 * here we need to figure out
 		 * what belongs on the current node.
 		 */
-		DataGlobalHandler* copyExpand( unsigned int copySize ) const;
+		DataHandler* copyExpand( unsigned int copySize ) const;
 
 		/**
 		 * Version 3: Add another dimension when doing the copy.
 		 * Here too we figure out what is to be on current node for copy.
 		 */
-		DataGlobalHandler* copyToNewDim( unsigned int newDimSize ) const;
+		DataHandler* copyToNewDim( unsigned int newDimSize ) const;
 
 
 		/**
@@ -98,20 +98,14 @@ class AnyDimGlobalHandler: public DataGlobalHandler
 		unsigned int sizeOfDim( unsigned int dim ) const;
 
 		/**
+		 * Returns the dimensions vector
+		 */
+		vector< unsigned int > dims() const;
+
+		/**
 		 * Reallocates data. Data not preserved unless same # of dims
 		 */
 		bool resize( vector< unsigned int > dims );
-
-		 /**
-		  * Converts unsigned int into vector with index in each dimension
-		  */
-		 vector< unsigned int > multiDimIndex( unsigned int index ) const;
-
-		 /**
-		  * Converts index vector into unsigned int. If there are indices
-		  * outside the dimension of the current data, then it returns 0?
-		  */
-		 unsigned int linearIndex( const vector< unsigned int >& index ) const;
 
 		/**
 		 * Returns true if the node decomposition has the data on the
@@ -140,12 +134,12 @@ class AnyDimGlobalHandler: public DataGlobalHandler
 		iterator end() const;
 
 	protected:
+		void setData( char* data, unsigned int numData );
 		unsigned int nextIndex( unsigned int index ) const;
-
-	private:
 		char* data_;
 		unsigned int size_;	// Number of data entries in the whole array
-		DataDimensions dims_;
+		vector< unsigned int > dims_;
+	private:
 };
 
 #endif	// _ANY_DIM_GLOBAL_HANDLER_H

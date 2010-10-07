@@ -70,10 +70,11 @@ class DataDimensions
 		 vector< unsigned int > multiDimIndex( unsigned int index ) const
 		 {
 		 	vector< unsigned int > ret;
-		 	for ( i = 0; i < dims_.size(); ++i ) {
-				ret.push_back( index % dims[i] );
-				index /= dims[i];
+		 	for ( unsigned int i = 0; i < dims_.size(); ++i ) {
+				ret.push_back( index % dims_[i] );
+				index /= dims_[i];
 			}
+			return ret;
 		 }
 
 		 /**

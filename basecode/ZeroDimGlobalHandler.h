@@ -24,8 +24,8 @@ class ZeroDimGlobalHandler: public DataHandler
 
 		~ZeroDimGlobalHandler();
 
-		DataHandler* globalize();
-		DataHandler* unGlobalize();
+		DataHandler* globalize() const;
+		DataHandler* unGlobalize() const;
 		void assimilateData( const char* data,
 			unsigned int begin, unsigned int end );
 
@@ -76,10 +76,7 @@ class ZeroDimGlobalHandler: public DataHandler
 			return 0;
 		}
 
-		vector< unsigned int > multiDimIndex( unsigned int index ) const;
-
-		unsigned int linearIndex(
-		 	const vector< unsigned int >& index ) const;
+		vector< unsigned int > dims() const;
 
 		/**
 		 * Returns true always: it is a global.
@@ -108,8 +105,8 @@ class ZeroDimGlobalHandler: public DataHandler
 			return 1;
 		}
 
-	private:
 		char* data_;
+	private:
 };
 
 #endif // _ZERO_DIM_GLOBAL_HANDLER_H

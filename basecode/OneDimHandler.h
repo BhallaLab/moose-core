@@ -21,9 +21,9 @@ class OneDimHandler: public OneDimGlobalHandler
 
 		~OneDimHandler();
 
-		DataHandler* globalize();
+		DataHandler* globalize() const;
 
-		DataHandler* unGlobalize();
+		DataHandler* unGlobalize() const;
 
 		void assimilateData( const char* data,
 			unsigned int begin, unsigned int end );

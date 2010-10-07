@@ -9,45 +9,41 @@
 
 #include "header.h"
 
+ZeroDimHandler::ZeroDimHandler( const DinfoBase* dinfo )
+	: ZeroDimGlobalHandler( dinfo )
+{;}
+
+ZeroDimHandler( const ZeroDimHandler* other )
+	: ZeroDimGlobalHandler( other->dinfo() )
+{
+	data_ = dinfo()->copyData( other->data_, 1, 1 );
+}
+
 ZeroDimHandler::~ZeroDimHandler()
 {
 	dinfo()->destroyData( data_ );
 }
 
-DataHandler* ZeroDimHandler::copy( unsigned int n, bool toGlobal ) 
-	const
+DataHandler* ZeroDimHandler::copy() const
 {
-	if ( Shell::myNode() > 0 ) {
-		cout << Shell::myNode() << ": Error: ZeroDimHandler::copy: Should not call on multinode systems\n";
-		return 0;
-	}
-	if ( toGlobal ) {
-		if ( n <= 1 ) { // Don't need to boost dimension.
-			ZeroDimGlobalHandler* ret = new ZeroDimGlobalHandler( dinfo() );
-			ret->setData( dinfo()->copyData( data_, 1, 1 ), 1);
-			return ret;
-		} else {
-			OneDimGlobalHandler* ret = new OneDimGlobalHandler( dinfo() );
-			ret->setData( dinfo()->copyData( data_, 1, n ), n );
-			return ret;
-		}
-	} else {
-		if ( n <= 1 ) { // do copy only on node 0.
-			ZeroDimHandler* ret = new ZeroDimHandler( dinfo() );
-			if ( Shell::myNode() == 0 ) {
-				ret->setData( dinfo()->copyData( data_, 1, 1 ), 1 );
-			}
-			return ret;
-		} else {
-			OneDimHandler* ret = new OneDimHandler( dinfo() );
-			ret->setNumData1( n );
-			unsigned int size = ret->end() - ret->begin();
-			if ( size > 0 )
-			ret->setData( dinfo()->copyData( data_, 1, size ), size );
-			return ret;
-		}
-	}
+	return ( new ZeroDimHandler( this ) );
 }
+
+DataHandler* ZeroDimHandler::copyExpand( unsigned int copySize ) const
+{
+	OneDimHandler* ret = new OneDimHandler( dinfo() );
+	vector< unsigned int > dims( 1, copySize );
+	ret->resize( dims );
+	for ( iterator i = ret->begin(); i != ret->end(); i++ )
+		*i = dinfo()->copyData( data_, 1, 1 );
+	return ret;
+}
+
+DataHandler* ZeroDimHandler::copyToNewDim( unsigned int newDimSize ) const
+{
+	return copyExpand( copySize );
+}
+
 
 void ZeroDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 {

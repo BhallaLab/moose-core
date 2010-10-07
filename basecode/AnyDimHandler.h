@@ -14,7 +14,7 @@
  * This class manages the data part of Elements. It handles arrays of
  * any dimension.
  */
-class AnyDimHandler: public DataHandler
+class AnyDimHandler: public AnyDimGlobalHandler
 {
 	public:
 		AnyDimHandler( const DinfoBase* dinfo );
@@ -26,7 +26,7 @@ class AnyDimHandler: public DataHandler
 		 * present on all nodes. Ignored if already global.
 		 * returns true on success.
 		 */
-		DataHandler* globalize();
+		DataHandler* globalize() const;
 
 		/**
 		 * Converts handler to its local version, where the data is 
@@ -35,7 +35,7 @@ class AnyDimHandler: public DataHandler
 		 * deleting other stuff.
 		 * Returns true on success.
 		 */
-		DataHandler* unGlobalize();
+		DataHandler* unGlobalize() const;
 
 		/**
 		 * Incorporates provided data into already allocated space
@@ -83,35 +83,9 @@ class AnyDimHandler: public DataHandler
 		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
 
 		/**
-		 * Returns the total number of data entries.
-		 */
-		unsigned int totalEntries() const;
-
-		/**
-		 * Returns the number of dimensions of the data.
-		 */
-		unsigned int numDimensions() const;
-
-		/**
-		 * Returns the number of data entries at any index.
-		 */
-		unsigned int sizeOfDim( unsigned int dim ) const;
-
-		/**
 		 * Reallocates data. Data not preserved unless same # of dims
 		 */
 		bool resize( vector< unsigned int > dims );
-
-		 /**
-		  * Converts unsigned int into vector with index in each dimension
-		  */
-		 vector< unsigned int > multiDimIndex( unsigned int index ) const;
-
-		 /**
-		  * Converts index vector into unsigned int. If there are indices
-		  * outside the dimension of the current data, then it returns 0?
-		  */
-		 unsigned int linearIndex( const vector< unsigned int >& index ) const;
 
 		/**
 		 * Returns true if the node decomposition has the data on the
@@ -144,15 +118,12 @@ class AnyDimHandler: public DataHandler
 		 * Assigns the data field and indicates how many total entries
 		 * are present.
 		 */
-		virtual void setData( char* data, unsigned int numData ) = 0; 
+		void setData( char* data, unsigned int numData );
 		unsigned int nextIndex( unsigned int index ) const;
 
 	private:
-		char* data_;
-		unsigned int size_;	// Number of data entries in the whole array
 		unsigned int start_;	// Starting index of data, used in MPI.
 		unsigned int end_;	// Starting index of data, used in MPI.
-		DataDimensions dims_;
 };
 
 #endif	// _ANY_DIM_HANDLER_H

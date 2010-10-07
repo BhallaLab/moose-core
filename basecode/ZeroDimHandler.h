@@ -14,20 +14,20 @@
  * This class manages the data part of Elements having just one
  * data entry.
  */
-class ZeroDimHandler: public DataHandler
+class ZeroDimHandler: public ZeroDimGlobalHandler
 {
 	public:
 		ZeroDimHandler( const DinfoBase* dinfo )
-			: DataHandler( dinfo ), data_( 0 )
+			: ZeroDimGlobalHandler( dinfo )
 		{;}
 
 		ZeroDimHandler( const ZeroDimHandler* other );
 
 		~ZeroDimHandler();
 
-		DataHandler* globalize();
+		DataHandler* globalize() const;
 
-		DataHandler* unGlobalize();
+		DataHandler* unGlobalize() const;
 
 		void assimilateData( const char* data,
 			unsigned int begin, unsigned int end );
@@ -71,40 +71,7 @@ class ZeroDimHandler: public DataHandler
 		 */
 		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
 
-		/**
-		 * Returns the number of data entries.
-		 */
-		unsigned int totalEntries() const {
-			return 1;
-		}
-
-		/**
-		 * Returns the number of dimensions of the data.
-		 */
-		unsigned int numDimensions() const {
-			return 0;
-		}
-
-		/**
-		 * Returns the number of data entries at any index.
-		 */
-		unsigned int sizeOfDim( unsigned int dim ) const;
-
-		/**
-		 * Reallocates data. Data not preserved unless same # of dims
-		 */
 		bool resize( vector< unsigned int > dims );
-
-		 /**
-		  * Converts unsigned int into vector with index in each dimension
-		  */
-		 vector< unsigned int > multiDimIndex( unsigned int index ) const;
-
-		 /**
-		  * Converts index vector into unsigned int. If there are indices
-		  * outside the dimension of the current data, then it returns 0?
-		  */
-		 unsigned int linearIndex( const vector< unsigned int >& index ) const;
 
 		/**
 		 * Returns true if the node decomposition has the data on the
@@ -128,12 +95,6 @@ class ZeroDimHandler: public DataHandler
 		};
 
 	protected:
-		unsigned int nextIndex( unsigned int index ) const
-		{
-			return 1;
-		}
-
-
 		void setData( char* data, unsigned int numData ) {
 			if ( data_ ) {
 				dinfo()->destroyData( data_ );
@@ -142,7 +103,6 @@ class ZeroDimHandler: public DataHandler
 		}
 
 	private:
-		char* data_;
 };
 
 #endif // _ZERO_DIM_HANDLER_H

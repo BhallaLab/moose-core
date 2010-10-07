@@ -22,8 +22,8 @@ class DataHandlerWrapper: public DataHandler
 
 		~DataHandlerWrapper();
 
-		DataHandler* globalize();
-		DataHandler* unGlobalize();
+		DataHandler* globalize() const;
+		DataHandler* unGlobalize() const;
 		void assimilateData( const char* data,
 			unsigned int begin, unsigned int end );
 		bool nodeBalance( unsigned int size );
@@ -59,9 +59,7 @@ class DataHandlerWrapper: public DataHandler
 
 		bool resize( vector< unsigned int > dims );
 
-		vector< unsigned int > multiDimIndex( unsigned int index )     const;
-		unsigned int linearIndex( 
-			const vector< unsigned int >& index ) const;
+		vector< unsigned int > dims() const;
 
 		bool isDataHere( DataId index ) const;
 

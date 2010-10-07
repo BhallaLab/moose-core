@@ -32,14 +32,14 @@ class DataHandler
 		 * present on all nodes. Ignored if already global.
 		 * returns true on success.
 		 */
-		virtual DataHandler* globalize() = 0;
+		virtual DataHandler* globalize() const = 0;
 
 		/**
 		 * Converts handler to its local version, where the data is 
 		 * partitioned between nodes based on the load balancing policy.
 		 * Returns true on success.
 		 */
-		virtual DataHandler* unGlobalize() = 0;
+		virtual DataHandler* unGlobalize() const = 0;
 
 		/**
 		 * Fills in data from other nodes, used when globalizing
@@ -121,16 +121,9 @@ class DataHandler
 		virtual bool resize( vector< unsigned int > dims );
 
 		 /**
-		  * Converts unsigned int into vector with index in each dimension
+		  * Returns vector of dimensions.
 		  */
-		 virtual vector< unsigned int > multiDimIndex( unsigned int index ) const = 0;
-
-		 /**
-		  * Converts index vector into unsigned int. If there are indices
-		  * outside the dimension of the current data, then it returns 0?
-		  */
-		 virtual unsigned int linearIndex( 
-		 	const vector< unsigned int >& index ) const = 0;
+		 virtual vector< unsigned int > dims() const = 0;
 
 		/**
 		 * Returns true if the node decomposition has the data on the

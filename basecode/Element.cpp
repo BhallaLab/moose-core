@@ -8,6 +8,9 @@
 **********************************************************************/
 
 #include "header.h"
+#include "DataDimensions.h"
+#include "AnyDimGlobalHandler.h"
+#include "AnyDimHandler.h"
 #include "DataHandlerWrapper.h"
 
 /**
@@ -43,17 +46,18 @@ Element::Element( Id id, const Cinfo* c, const string& name,
 			dataHandler_ = new ZeroDimGlobalHandler( c->dinfo() );
 		else
 			dataHandler_ = new ZeroDimHandler( c->dinfo() );
-		dataHandler_->allocate();
 	} else if ( numRealDimensions == 1 ) {
 		if ( isGlobal )
 			dataHandler_ = new OneDimGlobalHandler( c->dinfo() );
 		else
 			dataHandler_ = new OneDimHandler( c->dinfo() );	
-		dataHandler_->setNumData1( dimensions[ 0 ] );
 	} else {
-		cout << "Don't yet have Two or higher DimHandler\n";
-		exit( 0 );
+		if ( isGlobal )
+			dataHandler_ = new AnyDimGlobalHandler( c->dinfo() );
+		else
+			dataHandler_ = new AnyDimHandler( c->dinfo() );	
 	}
+	dataHandler_->resize( dimensions );
 
 	id.bindIdToElement( this );
 	c->postCreationFunc( id, this );
@@ -74,8 +78,7 @@ Element::Element( Id id, const Cinfo* c, const string& name,
 Element::Element( Id id, const Element* orig, unsigned int n )
 	:	name_( orig->getName() ),
 		id_( id ),
-		dataHandler_( orig->dataHandler_->copy( 
-			n, orig->dataHandler_->isGlobal() ) ),
+		dataHandler_( orig->dataHandler_->copyToNewDim( n ) ),
 		cinfo_( orig->cinfo_ ), 
 		msgBinding_( orig->cinfo_->numBindIndex() )
 {
