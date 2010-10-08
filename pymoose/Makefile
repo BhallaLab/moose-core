@@ -24,7 +24,7 @@
 ############################################################################
 
 TARGET=pymoose
-CXXFLAGS+=-I/usr/local/include -I.. -I../basecode -I../connections -I../maindir -I../genesis_parser  -I../shell -I../element -I../scheduling -I../biophysics -I../hsolve -I../kinetics -I../ksolve -I../builtins -I../utility -I../randnum -I../robots -I../device
+CXXFLAGS+=-fno-strict-aliasing -I/usr/local/include -I.. -I../basecode -I../connections -I../maindir -I../genesis_parser  -I../shell -I../element -I../scheduling -I../biophysics -I../hsolve -I../kinetics -I../ksolve -I../builtins -I../utility -I../randnum -I../robots -I../device
 LIBS += -L/usr/lib -lpython2.6
 
 ifdef USE_NUMPY
