@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sun Feb 28 18:17:56 2010 (+0530)
 // Version: 
-// Last-Updated: Wed Mar 24 17:43:00 2010 (+0530)
+// Last-Updated: Fri Oct  8 16:05:10 2010 (+0530)
 //           By: Subhasis Ray
-//     Update #: 500
+//     Update #: 509
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -22,7 +22,9 @@
 
 // Change log:
 // 
-// 
+// 2010-10-08 16:04:33 (+0530) - switched tau1 and tau2 to maintain
+// compatibility with SynChan : tau1 is decay time constant and tau2
+// is rise time constant.
 // 
 // 
 // This program is free software; you can redistribute it and/or
@@ -107,8 +109,8 @@ const Cinfo* initNMDAChanCinfo()
                 " c * g(V, [Mg2+]o) * S(t) "
                 "where c is a scaling constant. "
                 "S(t) is the legand gated component of the conductance. It rises "
-                "linearly for t = tau1. Then decays exponentially with time constant "
-                "t = tau2. "
+                "linearly for t = tau2. Then decays exponentially with time constant "
+                "t = tau1. "
                 "g is a function of voltage and the extracellular [Mg2+] defined as: "
                 "1 / { 1 + (a1 + a2) * (a1 * B1 + a2 * B2)/ [A * a1 * (b1 + B1) + A * a2 * (b2 + B2)]} "
                 "a1 = 1e3 * exp( - c0 * V - c1) s^-1, c0 = 16.0 / V, c1 = 2.91 "
@@ -119,8 +121,8 @@ const Cinfo* initNMDAChanCinfo()
                 "B1 = 1e3 * exp(-c9) s^-1, c9 = 0.693 s^-1 "
                 "B2 = 1e3 * exp(-c10) s^-1, c10 = 3.101. "
                 "The behaviour of S(t) is as follows: "
-                "If a spike arrives, then the slope of the linear rise of S(t) is incremented by weight / tau1. "
-                "After tau1 time, this component is removed from the slope (reduced by weight/tau) "
+                "If a spike arrives, then the slope of the linear rise of S(t) is incremented by weight / tau2. "
+                "After tau2 time, this component is removed from the slope (reduced by weight/tau) "
                 "and added over to the rate of decay of S(t)."
                 , 
             };
@@ -173,8 +175,8 @@ NMDAChan::NMDAChan(): c0_(16.0),
                       unblocked_(0.0),
                       saturation_(DBL_MAX)
 {
-    tau1_ = 0.005;
-    tau2_ = 0.130;
+    tau2_ = 0.005;
+    tau1_ = 0.130;
     A_ = exp(-c8_);
     B1_ = exp(-c9_);
     B2_ = exp(-c10_);
@@ -323,7 +325,7 @@ void NMDAChan::innerProcessFunc(Eref e, ProcInfo info)
            oldEvents_.top().delay <= info->currTime_){
         SynInfo event = oldEvents_.top();
         oldEvents_.pop();
-        activation_ -= event.weight / tau1_;
+        activation_ -= event.weight / tau2_;
         x_ -= event.weight; 
         y_ += event.weight;
     }
@@ -331,8 +333,8 @@ void NMDAChan::innerProcessFunc(Eref e, ProcInfo info)
             pendingEvents_.top().delay <= info->currTime_ ) {
         SynInfo event = pendingEvents_.top();
         pendingEvents_.pop();
-        activation_ += event.weight / tau1_;
-        oldEvents_.push(event.event(tau1_));
+        activation_ += event.weight / tau2_;
+        oldEvents_.push(event.event(tau2_));
     }
     // TODO: May need to optimize these exponentiations
     double a1_ = exp(-c0_ * Vm_ - c1_);
@@ -374,7 +376,7 @@ void NMDAChan::innerReinitFunc(Eref e, ProcInfo info)
     unblocked_ = 0.0;
     activation_ = 0.0;
     modulation_ = 1.0;
-    decayFactor_ = exp(-info->dt_ / tau2_);
+    decayFactor_ = exp(-info->dt_ / tau1_);
     Ik_ = 0.0;
     updateNumSynapse( e );
     while(!pendingEvents_.empty()){
