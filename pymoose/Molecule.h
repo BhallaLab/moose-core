@@ -40,6 +40,8 @@ namespace pymoose{
         void __set_x(double x);
         double __get_y();
         void __set_y(double y);
+        double __get_D();
+        void __set_D(double d);
         string __get_xtreeTextFg();
         void __set_xtreeTextFg(string xtreeTextFg);
         
