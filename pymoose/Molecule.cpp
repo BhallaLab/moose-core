@@ -146,6 +146,17 @@ void Molecule::__set_y(double y)
 {
     set < double > (id_(), "y", y);
 }
+double Molecule::__get_D()
+{
+    double y;
+    get < double > (id_(), "D", y);
+    return y;
+}
+
+void Molecule::__set_D(double y)
+{
+    set < double > (id_(), "D", y);
+}
 
 string Molecule::__get_xtreeTextFg()
 {
