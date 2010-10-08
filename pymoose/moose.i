@@ -524,13 +524,14 @@ NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.se
 %include "Reaction.h"
 %attribute(pymoose::Reaction, double, kf, __get_kf, __set_kf)
 %attribute(pymoose::Reaction, double, kb, __get_kb, __set_kb)
-%attribute(pymoose::Reaction, double, scaleKf, __get_Kf, __set_Kf)
-%attribute(pymoose::Reaction, double, scaleKb, __get_Kb, __set_Kb)
+%attribute(pymoose::Reaction, double, Kf, __get_Kf, __set_Kf)
+%attribute(pymoose::Reaction, double, Kb, __get_Kb, __set_Kb)
 %attribute(pymoose::Reaction, double, x, __get_x, __set_x)
 %attribute(pymoose::Reaction, double, y, __get_y, __set_y)
 %attribute(pymoose::Reaction, string, xtreeTextFg, __get_xtreeTextFg, __set_xtreeTextFg)
 
 %include "Molecule.h"
+%attribute(pymoose::Molecule, double, D, __get_D, __set_D)
 %attribute(pymoose::Molecule, double, nInit, __get_nInit, __set_nInit)
 %attribute(pymoose::Molecule, double, volumeScale, __get_volumeScale, __set_volumeScale)
 %attribute(pymoose::Molecule, double, n, __get_n, __set_n)
