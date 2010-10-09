@@ -9,40 +9,40 @@
 
 #include "header.h"
 
+ZeroDimGlobalHandler::ZeroDimGlobalHandler( const DinfoBase* dinfo )
+	: DataHandler( dinfo ), data_( 0 )
+{;}
+
+ZeroDimGlobalHandler::ZeroDimGlobalHandler( const ZeroDimGlobalHandler* other )
+	: DataHandler( other->dinfo() ),
+		data_( other->dinfo()->copyData( other->data_, 1, 1 ) )
+{;}
+
 ZeroDimGlobalHandler::~ZeroDimGlobalHandler()
 {
 	dinfo()->destroyData( data_ );
 }
 
-DataHandler* ZeroDimGlobalHandler::copy( unsigned int n, bool toGlobal ) 
-	const
+DataHandler* ZeroDimGlobalHandler::copy() const
 {
-	if ( toGlobal ) {
-		if ( n <= 1 ) { // Don't need to boost dimension.
-			ZeroDimGlobalHandler* ret = new ZeroDimGlobalHandler( dinfo() );
-			ret->data_ = dinfo()->copyData( data_, 1, 1 );
-			return ret;
-		} else {
-			OneDimGlobalHandler* ret = new OneDimGlobalHandler( dinfo() );
-			ret->setData( dinfo()->copyData( data_, 1, n ), n );
-			return ret;
-		}
-	} else {
-		if ( n <= 1 ) { // do copy only on node 0.
-			ZeroDimHandler* ret = new ZeroDimHandler( dinfo() );
-			if ( Shell::myNode() == 0 ) {
-				ret->setData( dinfo()->copyData( data_, 1, 1 ), 1 );
-			}
-			return ret;
-		} else {
-			OneDimHandler* ret = new OneDimHandler( dinfo() );
-			ret->setNumData1( n );
-			unsigned int size = ret->end() - ret->begin();
-			if ( size > 0 )
-			ret->setData( dinfo()->copyData( data_, 1, size ), size );
-			return ret;
-		}
+	return ( new ZeroDimGlobalHandler( this ) );
+}
+
+DataHandler* ZeroDimGlobalHandler::copyExpand( unsigned int copySize ) const
+{
+	OneDimGlobalHandler* ret = new OneDimGlobalHandler( dinfo() );
+	vector< unsigned int > dims( 1, copySize );
+	ret->resize( dims );
+	for ( iterator i = ret->begin(); i != ret->end(); ++i ) {
+		char* temp = *i;
+		memcpy( temp, data_, dinfo()->size() );
 	}
+	return ret;
+}
+
+DataHandler* ZeroDimGlobalHandler::copyToNewDim( unsigned int newDimSize ) const
+{
+	return copyExpand( newDimSize );
 }
 
 
@@ -61,18 +61,8 @@ void ZeroDimGlobalHandler::process( const ProcInfo* p, Element* e, FuncId fid ) 
 	}
 }
 
-bool ZeroDimGlobalHandler::isDataHere( DataId index ) const {
-	return 1;
-}
-
 bool ZeroDimGlobalHandler::isAllocated() const {
 	return data_ != 0;
-}
-
-void ZeroDimGlobalHandler::allocate() {
-	if ( data_ ) 
-		dinfo()->destroyData( data_ );
-	data_ = reinterpret_cast< char* >( dinfo()->allocData( 1 ) );
 }
 
 DataHandler::iterator ZeroDimGlobalHandler::begin() const

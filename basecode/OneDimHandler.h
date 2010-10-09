@@ -18,6 +18,7 @@ class OneDimHandler: public OneDimGlobalHandler
 {
 	public:
 		OneDimHandler( const DinfoBase* dinfo );
+		OneDimHandler( const OneDimHandler* other );
 
 		~OneDimHandler();
 
@@ -54,6 +55,8 @@ class OneDimHandler: public OneDimGlobalHandler
 		 * current node
 		 */
 		bool isDataHere( DataId index ) const;
+
+		bool isAllocated() const;
 
 		bool isGlobal() const
 		{

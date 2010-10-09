@@ -18,9 +18,9 @@
 class ZeroDimGlobalHandler: public DataHandler
 {
 	public:
-		ZeroDimGlobalHandler( const DinfoBase* dinfo )
-			: DataHandler( dinfo ), data_( 0 )
-		{;}
+		ZeroDimGlobalHandler( const DinfoBase* dinfo );
+
+		ZeroDimGlobalHandler( const ZeroDimGlobalHandler* other );
 
 		~ZeroDimGlobalHandler();
 

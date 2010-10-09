@@ -201,7 +201,9 @@ class DataHandler
 	protected:
 		/**
 		 * Assigns the data field and indicates how many total entries
-		 * are present.
+		 * are present in the incoming data. Does NOT touch allocation.
+		 * If numData > num alloced, then fills in numAlloced.
+		 * Else fills in numData.
 		 */
 		virtual void setData( char* data, unsigned int numData ) = 0; 
 

@@ -18,6 +18,7 @@ class OneDimGlobalHandler: public DataHandler
 {
 	public:
 		OneDimGlobalHandler( const DinfoBase* dinfo );
+		OneDimGlobalHandler( const OneDimGlobalHandler* other );
 
 		~OneDimGlobalHandler();
 

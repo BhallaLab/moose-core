@@ -14,48 +14,57 @@ OneDimGlobalHandler::OneDimGlobalHandler( const DinfoBase* dinfo )
 			data_( 0 ), size_( 0 )
 {;}
 
+OneDimGlobalHandler::OneDimGlobalHandler( const OneDimGlobalHandler* other )
+		: DataHandler( other->dinfo() ), 
+			size_( other->size_ )
+{
+	data_ = dinfo()->copyData( other->data_, size_, size_ );
+}
+
 OneDimGlobalHandler::~OneDimGlobalHandler() {
 	dinfo()->destroyData( data_ );
 }
 
+DataHandler* OneDimGlobalHandler::copy() const
+{
+	return ( new OneDimGlobalHandler( this ) );
+}
 
-DataHandler* OneDimGlobalHandler::copy( unsigned int n, bool toGlobal )
+DataHandler* OneDimGlobalHandler::copyExpand( unsigned int copySize ) const
+{
+	OneDimGlobalHandler* ret = new OneDimGlobalHandler( dinfo() );
+	vector< unsigned int > dims( 1, copySize );
+	ret->resize( dims );
+	unsigned int s = size_ * dinfo()->size();
+	for ( unsigned int offset = 0; offset < copySize; offset += size_ ) {
+		if ( s > ( copySize - offset ) )
+			s = copySize - offset;
+		memcpy( ret->data_ + offset, data_, s * dinfo()->size() );
+	}
+	return ret;
+}
+
+/**
+ * Expand it into a 2-dimensional version of AnyDimGlobalHandler.
+ */
+DataHandler* OneDimGlobalHandler::copyToNewDim( unsigned int newDimSize ) 
 	const
 {
-	if ( n > 1 ) {
-		cout << Shell::myNode() << ": Error: OneDimGlobalHandler::copy: Cannot yet handle 2d arrays\n";
-		exit( 0 );
-	}
+	AnyDimGlobalHandler* ret = new AnyDimGlobalHandler( dinfo() );
+	vector< unsigned int > dims( 2 );
+	dims[1] = newDimSize;
+	dims[0] = size_
+	ret->resize( dims );
 
-	if ( toGlobal ) {
-		if ( n <= 1 ) { // Don't need to boost dimension.
-			OneDimGlobalHandler* ret = new OneDimGlobalHandler( dinfo() );
-			ret->size_ = size_;
-			ret->reserve_ = reserve_;
-			ret->data_ = dinfo()->copyData( data_, size_, 1 );
-			return ret;
-		} else {
-			OneDimGlobalHandler* ret = new OneDimGlobalHandler( dinfo() );
-			ret->setData( dinfo()->copyData( data_, size_, n ), size_ * n );
-			return ret;
-		}
-	} else {
-		if ( n <= 1 ) { // do copy only on node 0.
-			OneDimHandler* ret = new OneDimHandler( dinfo() );
-			ret->setNumData1( size_ );
-			ret->setData( dinfo()->copyData( data_, size_, 1 ), size_ );
-			return ret;
-		} else {
-			OneDimHandler* ret = new OneDimHandler( dinfo() );
-			unsigned int size = ret->end() - ret->begin();
-			if ( size > 0 ) {
-				ret->setNumData1( size_ * size );
-				ret->setData( dinfo()->copyData( data_, size_, n * size_ ), 
-					size_ * size );
-			}
-			return ret;
-		}
+	for ( unsigned int i = 0; i < wq
+
+
+
+	for ( iterator i = ret->begin(); i != ret->end(); ++i ) {
+		char* temp = *i;
+		memcpy( temp, data_, dinfo()->size() );
 	}
+	return ret;
 }
 
 /**

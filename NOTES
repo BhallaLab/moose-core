@@ -7731,3 +7731,11 @@ More fixes. Checkin 2201
 More fixes. Checkin 2201.
 
 More fixes, now compiles ZeroDimHandler.cpp.
+
+Continuing with fixes. Need to figure out how setData works. It has to be able
+to handle block assignments.
+
+============================================================================
+9 Oct 2010
+
+Slowly continuing with compilation.

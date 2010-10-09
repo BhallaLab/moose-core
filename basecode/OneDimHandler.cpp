@@ -10,58 +10,44 @@
 #include "header.h"
 
 OneDimHandler::OneDimHandler( const DinfoBase* dinfo )
-		: DataHandler( dinfo ), 
-			data_( 0 ), size_( 0 ), 
+		: OneDimGlobalHandler( dinfo ), 
 			start_( 0 ), end_( 0 )
 {;}
+
+OneDimHandler::OneDimHandler( const OneDimHandler* other )
+	: OneDimGlobalHandler( other ), 
+	  start_( other->start_ ),
+	  end_( other->end_ )
+{
+	unsigned int num = end_ - start_;
+	data_ = dinfo()->copyData( other->data_, num, num );
+}
 
 OneDimHandler::~OneDimHandler() {
 	dinfo()->destroyData( data_ );
 }
 
-DataHandler* OneDimHandler::copy( unsigned int n, bool toGlobal )
-	const
+DataHandler* OneDimHandler::copy() const
 {
-	if ( n > 1 ) {
-		cout << Shell::myNode() << ": Error: OneDimHandler::copy: Cannot yet handle 2d arrays\n";
-		exit( 0 );
-	}
-	if ( Shell::myNode() > 0 ) {
-		cout << Shell::myNode() << ": Error: OneDimHandler::copy: Cannot yet handle multinode simulations\n";
-		exit( 0 );
-	}
-
-	if ( toGlobal ) {
-		if ( n <= 1 ) { // Don't need to boost dimension.
-			OneDimGlobalHandler* ret = new OneDimGlobalHandler( dinfo() );
-//			ret->setNumData1( size_ );
-			ret->setData( dinfo()->copyData( data_, size_, 1 ), size_ );
-			return ret;
-		} else {
-			OneDimGlobalHandler* ret = new OneDimGlobalHandler( dinfo() );
-//			ret->setNumData1( n * size_ );
-			ret->setData( dinfo()->copyData( data_, size_, n ), size_ * n );
-			return ret;
-		}
-	} else {
-		if ( n <= 1 ) { // do copy only on node 0.
-			OneDimHandler* ret = new OneDimHandler( dinfo() );
-//			ret->setNumData1( size_ );
-			ret->setData( dinfo()->copyData( data_, size_, 1 ), size_ );
-			return ret;
-		} else {
-			OneDimHandler* ret = new OneDimHandler( dinfo() );
-			unsigned int size = ret->end() - ret->begin();
-			if ( size > 0 ) {
-//				ret->setNumData1( size_ * size );
-				ret->setData( dinfo()->copyData( data_, size_, size ), 
-					size_ * size );
-			}
-			return ret;
-		}
-	}
+	return ( new OneDimHandler( this ) );
 }
 
+DataHandler* OneDimHandler::copyExpand( unsigned int copySize ) const
+{
+	OneDimHandler* ret = new OneDimHandler( dinfo() );
+	vector< unsigned int > dims( 1, copySize );
+	ret->resize( dims );
+	for ( iterator i = ret->begin(); i != ret->end(); ++i ) {
+		char* temp = *i;
+		memcpy( temp, data_, dinfo()->size() );
+	}
+	return ret;
+}
+
+DataHandler* OneDimHandler::copyToNewDim( unsigned int newDimSize ) const
+{
+	return copyExpand( newDimSize );
+}
 
 /**
  * Handles both the thread and node decomposition
@@ -115,36 +101,33 @@ char* OneDimHandler::data( DataId index ) const {
 	return 0;
 }
 
-char* OneDimHandler::data1( DataId index ) const {
-	if ( isDataHere( index ) )
-		return data_ + ( index.data() - start_ ) * dinfo()->size();
-	return 0;
+bool OneDimHandler::nodeBalance( unsigned int size )
+{
+	unsigned int oldsize = size_;
+	size_ = size;
+	unsigned int start = ( size * Shell::myNode() ) / Shell::numNodes();
+	unsigned int end = ( size * ( 1 + Shell::myNode() ) ) / Shell::numNodes();
+	return ( size != oldsize || start != start_ || end != end_ );
 }
 
+
 /**
- * Assigns the size to use for the first (data) dimension
-* If data is allocated, resizes that.
-* If data is not allocated, does not touch it.
-* For now: allocate it every time.
+ * Resize if size has changed. Can't handle change in #dimensions though.
  */
-void OneDimHandler::setNumData1( unsigned int size )
+bool OneDimHandler::resize( vector< unsigned int > dims )
 {
-	size_ = size;
-	unsigned int start =
-		( size_ * Shell::myNode() ) / Shell::numNodes();
-	unsigned int end = 
-		( size_ * ( 1 + Shell::myNode() ) ) / Shell::numNodes();
-	// if ( data_ ) {
-		if ( start == start_ && end == end_ ) // already done
-			return;
-		// Otherwise reallocate.
+	if ( dims.size() != 1 ) {
+		cout << "OneDimHandler::Resize: Warning: Attempt to resize wrong # of dims " << dims.size() << "\n";
+		return 0;
+	}
+	size_ = dims[0];
+	if ( nodeBalance( size_ ) ) { // It has changed, so reallocate
 		if ( data_ )
 			dinfo()->destroyData( data_ );
 		data_ = reinterpret_cast< char* >( 
-			dinfo()->allocData( end - start ) );
-	// }
-	start_ = start;
-	end_ = end;
+			dinfo()->allocData( end_ - start_ ) );
+	}
+	return ( data_ != 0 );
 }
 
 /**
@@ -160,10 +143,21 @@ bool OneDimHandler::isAllocated() const {
 }
 
 // Should really be 'start, end' rather than size. See setNumData1.
-void OneDimHandler::setData( char* data, unsigned int size )
+void OneDimHandler::setData( char* data, unsigned int size, 
+	unsigned int startOffset )
 {
-	data_ = data; // Data is preallocated, so we only want to set the size.
+	unsigned int i = startOffset;
+	unsigned int j = startOffset + size;
+	if ( i > start_ )
+		j :wq
+		size -= startOffset - start_;
+	else
+		startOffset = start_;
+	if ( size < ( end_ - start_ ) ) {
+		memcpy( data_, data, size * dinfo()->size() );
+	} else if ( end_ > start_ ) {
+		size = end_ - start_;
+		memcpy( data_, data, size * dinfo()->size() );
+	}
 	size_ = size;
-	start_ = 0;
-	end_ = size;
 }
