@@ -133,8 +133,14 @@ class AnyDimGlobalHandler: public DataHandler
 		 */
 		iterator end() const;
 
+		/**
+		 * Assigns a block of data at the specified dimension and index in
+		 * that dimension. Returns true if all OK. No allocation.
+		 */
+		bool setDataBlock( const char* data, unsigned int numEntries, 
+			unsigned int dimNum, unsigned int dimIndex );
+
 	protected:
-		void setData( char* data, unsigned int numData );
 		unsigned int nextIndex( unsigned int index ) const;
 		char* data_;
 		unsigned int size_;	// Number of data entries in the whole array

@@ -8,6 +8,8 @@
 **********************************************************************/
 
 #include "header.h"
+#include "AnyDimGlobalHandler.h"
+#include "AnyDimHandler.h"
 
 OneDimHandler::OneDimHandler( const DinfoBase* dinfo )
 		: OneDimGlobalHandler( dinfo ), 
@@ -46,7 +48,17 @@ DataHandler* OneDimHandler::copyExpand( unsigned int copySize ) const
 
 DataHandler* OneDimHandler::copyToNewDim( unsigned int newDimSize ) const
 {
-	return copyExpand( newDimSize );
+	AnyDimHandler* ret = new AnyDimHandler( dinfo() );
+	vector< unsigned int > dims( 2 );
+	dims[1] = newDimSize;
+	dims[0] = size_;
+	ret->resize( dims );
+
+	for ( unsigned int i = 0; i < newDimSize; ++i ) {
+		// setDataBlock( const char* data, unsigned int dataSize, unsigned int dimNum, unsigned int dimIndex )
+		ret->setDataBlock( data_, size_, 1, i );
+	}
+	return ret;
 }
 
 /**
@@ -120,8 +132,7 @@ bool OneDimHandler::resize( vector< unsigned int > dims )
 		cout << "OneDimHandler::Resize: Warning: Attempt to resize wrong # of dims " << dims.size() << "\n";
 		return 0;
 	}
-	size_ = dims[0];
-	if ( nodeBalance( size_ ) ) { // It has changed, so reallocate
+	if ( nodeBalance( dims[0] ) ) { // It has changed, so reallocate
 		if ( data_ )
 			dinfo()->destroyData( data_ );
 		data_ = reinterpret_cast< char* >( 
@@ -142,22 +153,30 @@ bool OneDimHandler::isAllocated() const {
 	return data_ != 0;
 }
 
-// Should really be 'start, end' rather than size. See setNumData1.
-void OneDimHandler::setData( char* data, unsigned int size, 
-	unsigned int startOffset )
+/**
+ * Data is an entire data block with numEntries. We pick whatever entries
+ * should be put on current node. Return True if assignment happens.
+ * Point of uncertainty: We return False even if assignment would happen
+ * on some node other than this.
+ */
+bool OneDimHandler::setDataBlock( const char* data, 
+	unsigned int numEntries, 
+	unsigned int dimNum, unsigned int dimIndex )
 {
-	unsigned int i = startOffset;
-	unsigned int j = startOffset + size;
-	if ( i > start_ )
-		j :wq
-		size -= startOffset - start_;
-	else
-		startOffset = start_;
-	if ( size < ( end_ - start_ ) ) {
-		memcpy( data_, data, size * dinfo()->size() );
-	} else if ( end_ > start_ ) {
-		size = end_ - start_;
-		memcpy( data_, data, size * dinfo()->size() );
+	// Here the request is to set the whole array.
+	if ( dimNum == 0 && dimIndex == 0 && numEntries == size_ ) {
+		memcpy( data_, data + start_ * dinfo()->size(), 
+			( end_ - start_ ) * dinfo()->size() );
+		return 1;
 	}
-	size_ = size;
+
+	// Here the request is to set an individual entry
+	if ( dimNum == 0 && numEntries == 1 ) {
+		if ( dimIndex >= start_ && dimIndex < end_ ) {
+			memcpy( data_ + dimIndex * dinfo()->size(), data, 
+				dinfo()->size() );
+			return 1;
+		}
+	}
+	return 0;
 }

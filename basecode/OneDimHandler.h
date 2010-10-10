@@ -71,8 +71,10 @@ class OneDimHandler: public OneDimGlobalHandler
 			return iterator( this, end_ );
 		}
 
+		bool setDataBlock( const char* data, unsigned int numEntries, 
+			unsigned int dimNum, unsigned int dimIndex );
+
 	protected:
-		void setData( char* data, unsigned int numData );
 
 	private:
 		unsigned int start_;	// Starting index of data, used in MPI.

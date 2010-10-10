@@ -29,9 +29,7 @@ class OneDimGlobalHandler: public DataHandler
 		void assimilateData( const char* data,
 			unsigned int begin, unsigned int end );
 
-		virtual bool nodeBalance( unsigned int size ) {
-			return 0; // No change for the globals.
-		}
+		virtual bool nodeBalance( unsigned int size );
 
 		DataHandler* copy() const;
 
@@ -77,18 +75,11 @@ class OneDimGlobalHandler: public DataHandler
 		 * Returns true if the node decomposition has the data on the
 		 * current node
 		 */
-		bool isDataHere( DataId index ) const {
-			return 1;
-		}
+		bool isDataHere( DataId index ) const;
 
-		bool isAllocated() const {
-			return ( data_ != 0 );
-		}
+		bool isAllocated() const;
 
-		bool isGlobal() const
-		{
-			return 1;
-		}
+		bool isGlobal() const;
 
 		iterator begin() const {
 			return iterator( this, 0 );
@@ -98,8 +89,17 @@ class OneDimGlobalHandler: public DataHandler
 			return iterator( this, size_ );
 		}
 
+		/**
+		 * Assigns a block of data at the specified dimension and index in
+		 * that dimension. Here the dimNum has to be 0, but we can choose
+		 * to assign a single entry at a specific dimIndex, or a block of 
+		 * entries starting at 0 and going on to the end.
+		 * Returns true if all OK. No allocation.
+		 */
+		bool setDataBlock( const char* data, unsigned int numEntries, 
+			unsigned int dimNum, unsigned int dimIndex );
+
 	protected:
-		void setData( char* data, unsigned int numData );
 		unsigned int nextIndex( unsigned int index ) const {
 			return index + 1;
 		}

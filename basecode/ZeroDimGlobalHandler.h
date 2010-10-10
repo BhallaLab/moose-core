@@ -96,11 +96,15 @@ class ZeroDimGlobalHandler: public DataHandler
 
 		iterator end() const;
 
-	protected:
-		void setData( char* data, unsigned int numData ) {
-			data_ = data;
-		}
+		/**
+		 * General function to assign data in blocks. Here the
+		 * numEntries has to be 1, the dimNum has to be 0 and the dimIndex
+		 * has to be 0. Returns true if all this is OK.
+		 */
+		bool setDataBlock( const char* data, unsigned int numEntries, 
+			unsigned int dimNum, unsigned int dimIndex );
 
+	protected:
 		unsigned int nextIndex( unsigned int index ) const {
 			return 1;
 		}

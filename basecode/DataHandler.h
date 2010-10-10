@@ -198,14 +198,39 @@ class DataHandler
 			return dinfo_;
 		}
 
+		/**
+		 * Assigns block of data, which is a slice of 0 to n dimensions,
+		 * in a data handler of n dimensions. The block of data is a 
+		 * contiguous block in memory, and contains numEntries objects.
+		 * The target data block is at the dimNum dimension, and dimIndex
+		 * specifies the slice of data to replace.
+		 * Here the numEntries must equal the size of the entire slice of
+		 * data being replaced. In principle we could do treadmilling or
+		 * truncation to do the assignment, but let's start with something
+		 * simple that can be checked.
+		 * Note that the numEntries is the full slice, not the sub=part
+		 * that may be used on any given node. For example, if we have
+		 * 4 nodes and use every 4th location on any given node, the
+		 * data block passed in and numEntries nevertheless refer to the
+		 * entire data block.
+		 * Does not do any memory allocation.
+		 * Returns true if assignment OK, which means that numEntries was
+		 * correct.
+		 */
+		virtual bool setDataBlock( 
+			const char* data, unsigned int numEntries, 
+			unsigned int dimNum, unsigned int dimIndex );
+
+
 	protected:
 		/**
 		 * Assigns the data field and indicates how many total entries
 		 * are present in the incoming data. Does NOT touch allocation.
 		 * If numData > num alloced, then fills in numAlloced.
 		 * Else fills in numData.
-		 */
 		virtual void setData( char* data, unsigned int numData ) = 0; 
+		 */
+
 
 		/**
 		 * Used to march through the entries in this DataHandler

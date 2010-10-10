@@ -82,3 +82,16 @@ DataHandler::iterator ZeroDimHandler::end() const
 	// end is same as begin except on node 1.
 	return iterator( this, ( Shell::myNode() == 0 ) );
 }
+
+bool ZeroDimHandler::setDataBlock( 
+	const char* data, unsigned int numEntries, 
+	unsigned int dimNum, unsigned int dimIndex )
+{ 
+	if ( Shell::myNode() != 0 || !data_ )
+		return 0;
+	if ( numEntries == 1 && dimNum == 0 && dimIndex == 0 ) {
+		memcpy( data_, data, dinfo()->size() );
+		return 1;
+	}
+	return 0;
+}

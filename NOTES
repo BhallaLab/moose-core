@@ -7738,4 +7738,32 @@ to handle block assignments.
 ============================================================================
 9 Oct 2010
 
-Slowly continuing with compilation.
+Slowly continuing with compilation. Checkin 2207.
+
+Redid interface for setData, now it is setDataBlock and the constraints are
+set much more tightly.
+
+Issue: What to do in setDataBlock when copying into block that is decomposed
+among multiple nodes? See OneDimHandler::copyToNewDim for this situation.
+	- Should each individual part of the OneDimHandler be replicated 
+		newDimSize times? Actually at present this does NOT happen. 
+	- Should pass in an entire data block, or only the sparsely filled
+		data block on the current node? If the former, how?
+
+Usual scenario should be that we only copyToNewDim from a global.
+
+
+Some test functions:
+make test object global, add dimensions till a 4-dimensional thing.
+make test object local, add dimensions till a 4-dimensional thing.
+make test object global, add dimensions, and last dimension is decomposed.
+globalize model
+unglobalize model
+make 100 cells from a global prototype
+Make a planar (2-D) array of cells
+move some objects between nodes (part of load balance)
+
+============================================================================
+10 Oct 2010
+Compilation now past the DataHandler classes, and running into the expected
+issues in the rest of the code.

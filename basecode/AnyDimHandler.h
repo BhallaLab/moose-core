@@ -113,12 +113,15 @@ class AnyDimHandler: public AnyDimGlobalHandler
 		 */
 		iterator end() const;
 
-	protected:
 		/**
-		 * Assigns the data field and indicates how many total entries
-		 * are present.
+		 * Assigns a block of data at the specified dimension and index in
+		 * that dimension. Returns true if all OK. No allocation.
 		 */
-		void setData( char* data, unsigned int numData );
+		bool setDataBlock( const char* data, unsigned int numEntries, 
+			unsigned int dimNum, unsigned int dimIndex );
+
+	protected:
+
 		unsigned int nextIndex( unsigned int index ) const;
 
 	private:

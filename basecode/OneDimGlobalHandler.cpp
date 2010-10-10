@@ -8,6 +8,8 @@
 **********************************************************************/
 
 #include "header.h"
+#include "AnyDimGlobalHandler.h"
+#include "AnyDimHandler.h"
 
 OneDimGlobalHandler::OneDimGlobalHandler( const DinfoBase* dinfo )
 		: DataHandler( dinfo ), 
@@ -53,16 +55,12 @@ DataHandler* OneDimGlobalHandler::copyToNewDim( unsigned int newDimSize )
 	AnyDimGlobalHandler* ret = new AnyDimGlobalHandler( dinfo() );
 	vector< unsigned int > dims( 2 );
 	dims[1] = newDimSize;
-	dims[0] = size_
+	dims[0] = size_;
 	ret->resize( dims );
 
-	for ( unsigned int i = 0; i < wq
-
-
-
-	for ( iterator i = ret->begin(); i != ret->end(); ++i ) {
-		char* temp = *i;
-		memcpy( temp, data_, dinfo()->size() );
+	for ( unsigned int i = 0; i < newDimSize; ++i ) {
+		// setDataBlock( const char* data, unsigned int dataSize, unsigned int dimNum, unsigned int dimIndex )
+		ret->setDataBlock( data_, size_, 1, i );
 	}
 	return ret;
 }
@@ -96,44 +94,28 @@ char* OneDimGlobalHandler::data( DataId index ) const {
 	return data_ + index.data() * dinfo()->size();
 }
 
-char* OneDimGlobalHandler::data1( DataId index ) const {
-	return data_ + index.data() * dinfo()->size();
-}
-
-/**
- * Assigns the size to use for the first (data) dimension
-* If data is allocated, resizes that.
-* If data is not allocated, does not touch it.
-* For now: allocate it every time.
- */
-void OneDimGlobalHandler::setNumData1( unsigned int size )
+bool OneDimGlobalHandler::nodeBalance( unsigned int size )
 {
-	reserve_ = size_ = size;
-	if ( data_ )
-		dinfo()->destroyData( data_ );
-	data_ = reinterpret_cast< char* >( 
-		dinfo()->allocData( size ) );
+	if ( size == size_ )
+		return 0;
+	else
+		size_ = size;
+	return 1;
 }
 
-/**
-* Assigns the sizes of all array field entries at once.
-* Ignore if 1 or 0 dimensions.
-*/
-void OneDimGlobalHandler::setNumData2( unsigned int start,
-	const vector< unsigned int >& sizes )
+bool OneDimGlobalHandler::resize( vector< unsigned int > dims )
 {
-	;
-}
-
-/**
- * Looks up the sizes of all array field entries at once.
- * Returns the start index.
- * Ignore in this case
- */
-unsigned int OneDimGlobalHandler::getNumData2( 
-	vector< unsigned int >& sizes ) const
-{	
-	return 0;
+	if ( dims.size() != 1 ) {
+		cout << "OneDimGlobalHandler::Resize: Warning: Attempt to resize wrong # o    f dims " << dims.size() << "\n";
+		return 0;
+	}
+	if ( nodeBalance( dims[0] ) ) {
+		if ( data_ ) {
+			dinfo()->destroyData( data_ );
+			data_ = dinfo()->allocData( size_ );
+		}
+	}
+	return ( data_ != 0 );
 }
 
 /**
@@ -148,26 +130,6 @@ bool OneDimGlobalHandler::isAllocated() const {
 	return data_ != 0;
 }
 
-void OneDimGlobalHandler::allocate()
-{
-	if ( data_ )
-		dinfo()->destroyData( data_ );
-	data_ = reinterpret_cast< char* >( dinfo()->allocData( size_ ));
-	reserve_ = size_;
-}
-
-unsigned int OneDimGlobalHandler::addOneEntry( const char* data )
-{
-	if ( size_ == reserve_ ) {
-		reserve_ = size_ + 10;
-		char* temp = dinfo()->allocData( reserve_ );
-		if ( size_ > 0 ) {
-			memcpy( temp, data_, size_ * dinfo()->size() );
-			dinfo()->destroyData( data_ );
-			data_ = temp;
-		}
-	}
-	memcpy( data_ + size_ * dinfo()->size(), data, dinfo()->size() );
-	++size_;
-	return ( size_ - 1 );
+bool OneDimGlobalHandler::isGlobal() const {
+	return 1;
 }
