@@ -7766,4 +7766,53 @@ move some objects between nodes (part of load balance)
 ============================================================================
 10 Oct 2010
 Compilation now past the DataHandler classes, and running into the expected
-issues in the rest of the code.
+issues in the rest of the code. Checkin 2208.
+
+Now moving onto data1 as used in Eref and thence in many other places.
+It is to "Returns data entry of parent object of field array"
+Perhaps if I want the parent entry I should request the parent explicitly?
+But it is true it is rapidly obtained from the Ids.
+It is used in UpFunc.h, in cases where the parent object has to be called
+to execute a function in the child. The child is usually an array entry.
+Examples are syn input to an IntFire.
+
+Key issue is this: when we have an array of fields, then the data entries
+for the fields are distinct from the parental data entries, and the fields
+are within a C++ array on the parental data entries.
+
+Array of glom
+	-> Array of mit cells
+		-> Array of compts
+			-> array of channels (but these are different elements)
+				-> Array of syn inputs on receptors
+
+Elements associate messages and Finfos with data.
+	Except sometimes Elements are used to hold extended fields
+	and Elements sometimes hold other fields with subparts.
+	Here they still associate things with data...
+Finfo handles function types for Elements using OpFuncs.
+Messages associate functions with data.
+DataHandlers associate Elements with data.
+Dinfo handles data types for DataHandlers.
+Elements are looked up by Ids
+Data within an Element is looked up by DataIds.
+	This isn't fully right. The whole object is looked up by the DataId,
+	except that sometimes we also look up Fields with the DataId,
+	when it is a FieldElement.
+OpFuncs provide a common interface for arbitrary Object functions.
+
+============================================================================
+11 Oct 2010
+FieldDataHandlers vs regular DataHandlers
+When do we need the field data, and when the parent object data?
+	- For the purposes of OpFuncs we always need the parent object rather
+		than the field object, as the functions are based off the
+		parent. Could get rid of UpFuncs if this were resolved.
+============================================================================
+12 Oct 2010.
+Grind through all the files to figure out where the Eref::data() refers to the
+parent and where it refers to the field itself.
+
+Finally it compiles through the entire basecode directory.
+
+============================================================================

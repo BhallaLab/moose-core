@@ -496,14 +496,14 @@ void testSetGetSynapse()
 
 	assert( syn->dataHandler()->data( 0 ) == 0 );
 
-	assert( syn->dataHandler()->numData() == 0 );
+	assert( syn->dataHandler()->totalEntries() == 0 );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref e2( i2(), i );
 		bool ret = Field< unsigned int >::set( e2, "numSynapses", i );
 		assert( ret );
 	}
-	assert( syn->dataHandler()->numData() == ( size * (size - 1) ) / 2 );
-	// cout << "NumSyn = " << syn.numData() << endl;
+	assert( syn->dataHandler()->totalEntries() == ( size * (size - 1) ) / 2 );
+	// cout << "NumSyn = " << syn.totalEntries() << endl;
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
 		for ( unsigned int j = 0; j < i; ++j ) {
@@ -540,7 +540,7 @@ void testSetGetVec()
 	assert ( syn != 0 );
 	assert ( syn->getName() == "synapse" );
 
-	assert( syn->dataHandler()->numData() == 0 );
+	assert( syn->dataHandler()->totalEntries() == 0 );
 	vector< unsigned int > numSyn( size, 0 );
 	for ( unsigned int i = 0; i < size; ++i )
 		numSyn[i] = i;
@@ -549,7 +549,7 @@ void testSetGetVec()
 	// Here we test setting a 1-D vector
 	bool ret = Field< unsigned int >::setVec( e2, "numSynapses", numSyn );
 	assert( ret );
-	unsigned int nd = syn->dataHandler()->numData();
+	unsigned int nd = syn->dataHandler()->totalEntries();
 	assert( nd == ( size * (size - 1) ) / 2 );
 	// cout << "NumSyn = " << nd << endl;
 	
@@ -597,7 +597,7 @@ void testSetRepeat()
 	assert ( syn != 0 );
 	assert ( syn->getName() == "synapse" );
 
-	assert( syn->dataHandler()->numData() == 0 );
+	assert( syn->dataHandler()->totalEntries() == 0 );
 	vector< unsigned int > numSyn( size, 0 );
 	for ( unsigned int i = 0; i < size; ++i )
 		numSyn[i] = i;
@@ -606,7 +606,7 @@ void testSetRepeat()
 	// Here we test setting a 1-D vector
 	bool ret = Field< unsigned int >::setVec( e2, "numSynapses", numSyn );
 	assert( ret );
-	unsigned int nd = syn->dataHandler()->numData();
+	unsigned int nd = syn->dataHandler()->totalEntries();
 	assert( nd == ( size * (size - 1) ) / 2 );
 	// cout << "NumSyn = " << nd << endl;
 	
@@ -650,13 +650,13 @@ void testSendSpike()
 	assert ( syn != 0 );
 	assert ( syn->getName() == "synapse" );
 
-	assert( syn->dataHandler()->numData() == 0 );
+	assert( syn->dataHandler()->totalEntries() == 0 );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref er( i2(), i );
 		bool ret = Field< unsigned int >::set( er, "numSynapses", i );
 		assert( ret );
 	}
-	assert( syn->dataHandler()->numData() == ( size * (size - 1) ) / 2 );
+	assert( syn->dataHandler()->totalEntries() == ( size * (size - 1) ) / 2 );
 
 	DataId di( 1, 0 ); // DataId( data, field )
 	Eref syne( syn, di );
@@ -862,12 +862,12 @@ void testSparseMatrixBalance()
 void printGrid( Element* e, const string& field, double min, double max )
 {
 	static string icon = " .oO@";
-	unsigned int yside = sqrt( double ( e->dataHandler()->numData() ) );
-	unsigned int xside = e->dataHandler()->numData() / yside;
-	if ( e->dataHandler()->numData() % yside > 0 )
+	unsigned int yside = sqrt( double ( e->dataHandler()->totalEntries() ) );
+	unsigned int xside = e->dataHandler()->totalEntries() / yside;
+	if ( e->dataHandler()->totalEntries() % yside > 0 )
 		xside++;
 	
-	for ( unsigned int i = 0; i < e->dataHandler()->numData(); ++i ) {
+	for ( unsigned int i = 0; i < e->dataHandler()->totalEntries(); ++i ) {
 		if ( ( i % xside ) == 0 )
 			cout << endl;
 		Eref er( e, i );
@@ -919,7 +919,7 @@ void testSparseMsg()
 	assert ( syn != 0 );
 	assert ( syn->getName() == "synapse" );
 
-	assert( syn->dataHandler()->numData() == 0 );
+	assert( syn->dataHandler()->totalEntries() == 0 );
 
 	DataId di( 1, 0 ); // DataId( data, field )
 	Eref syne( syn, di );
@@ -938,7 +938,7 @@ void testSparseMsg()
 	sm->randomConnect( connectionProbability );
 	//sm->loadBalance( 1 );
 
-	unsigned int nd = syn->dataHandler()->numData();
+	unsigned int nd = syn->dataHandler()->totalEntries();
 //	cout << "Num Syn = " << nd << endl;
 	assert( nd == NUMSYN );
 	vector< double > temp( size, 0.0 );
@@ -964,8 +964,10 @@ void testSparseMsg()
 	weight.reserve( nd );
 	vector< double > delay;
 	delay.reserve( nd );
+	assert( syne.element()->dataHandler()->numDimensions() == 2 );
 	for ( unsigned int i = 0; i < size; ++i ) {
-		unsigned int numSyn = syne.element()->dataHandler()->numData2( i );
+		// unsigned int numSyn = syne.element()->dataHandler()->numData2( i );
+		unsigned int numSyn = syne.element()->dataHandler()->sizeOfDim( 1 );
 		for ( unsigned int j = 0; j < numSyn; ++j ) {
 			weight.push_back( mtrand() * weightMax );
 			delay.push_back( mtrand() * delayMax );
@@ -1031,7 +1033,7 @@ void testUpValue()
 	assert ( ticke != 0 );
 	assert ( ticke->getName() == "tick" );
 
-	assert( ticke->dataHandler()->numData() == 10 );
+	assert( ticke->dataHandler()->totalEntries() == 10 );
 	/*
 	bool ret = Field< unsigned int >::set( clocker, "numTicks", size );
 	assert( ret );

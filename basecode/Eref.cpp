@@ -61,11 +61,6 @@ char* Eref::data() const
 	return e_->dataHandler()->data( i_ );
 }
 
-char* Eref::data1() const
-{
-	return e_->dataHandler()->data1( i_ );
-}
-
 bool Eref::isDataHere() const
 {
 	return e_->dataHandler()->isDataHere( i_ );
