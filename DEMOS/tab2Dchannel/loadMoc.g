@@ -40,8 +40,9 @@ function make_Moczyd_KC
 		addfield Moczyd_KC addmsg1
 		setfield Moczyd_KC addmsg1 "../Ca_conc . CONCEN1 Ca"
 	else
-		int xdivs = 100
-		int ydivs = {xdivs}
+		// In MOOSE, one need not specify xdivs, ydivs since we are loading from file.
+		// int xdivs = 100
+		// int ydivs = {xdivs}
 		float xmin, xmax, ymin, ymax
 		xmin = -0.1; xmax = 0.05; ymin = 0.0; ymax = 0.0030 // x = Vm, y = [Ca]
 		int i, j
@@ -66,20 +67,18 @@ function make_Moczyd_KC
 			call Moczyd_KC TABCREATE X {xdivs} {xmin} {xmax} \
 				{ydivs} {ymin} {ymax}
 	*/
-
+			
+			// Need not specify xdivs, ydivs in MOOSE, if loading table from file.
 			setfield Moczyd_KC/xGate/A \
-				xdivs {xdivs} \
 				xmin {xmin} \
 				xmax {xmax} \
-				ydivs {ydivs} \
 				ymin {ymin} \
 				ymax {ymax}
 			
+			// Need not specify xdivs, ydivs in MOOSE, if loading table from file.
 			setfield Moczyd_KC/xGate/B \
-				xdivs {xdivs} \
 				xmin {xmin} \
 				xmax {xmax} \
-				ydivs {ydivs} \
 				ymin {ymin} \
 				ymax {ymax}
 		end
