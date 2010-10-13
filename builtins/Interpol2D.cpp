@@ -43,23 +43,11 @@ const Cinfo* initInterpol2DCinfo()
 			GFCAST( &Interpol2D::getDy ),
 			RFCAST( &Interpol2D::setDy )
 		),
-                new LookupFinfo( "table",
+		new LookupFinfo( "table",
 			LookupFtype< double, vector< unsigned int > >::global(),
 			GFCAST( &Interpol2D::getTable2D ),
 			RFCAST( &Interpol2D::setTable2D )
 		),		
-		new LookupFinfo( "table2D",
-			LookupFtype< double, vector< unsigned int > >::global(),
-			GFCAST( &Interpol2D::getTable2D ),
-			RFCAST( &Interpol2D::setTable2D )
-		),
-		
-		new LookupFinfo( "table2D",
-			LookupFtype< double, vector< unsigned int > >::global(),
-			GFCAST( &Interpol2D::getTable2D ),
-			RFCAST( &Interpol2D::setTable2D )
-		),
-		
 		new LookupFinfo( "table2D",
 			LookupFtype< double, vector< unsigned int > >::global(),
 			GFCAST( &Interpol2D::getTable2D ),
@@ -583,6 +571,14 @@ void Interpol2D::innerPrint(
 
 void Interpol2D::innerLoad( const string& fname, unsigned int skiplines )
 {
+	// Checking if xdivs/ydivs are different from default values. If they are,
+	// then issue a warning.
+	if ( xdivs() != 1 || ydivs() != 1 )
+		cerr << "Warning: Interpol2D::innerLoad: Loading 2-D table from '" <<
+			fname << "'. " <<
+			"'xdivs' and 'ydivs' need not be specified. If you have set these fields, "
+			"then they will be overridden while loading.\n";
+	
 	vector< double >::iterator i;
 	std::ifstream fin( fname.c_str() );
 	string line;
