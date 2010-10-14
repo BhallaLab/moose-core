@@ -100,9 +100,13 @@ void MsgManager::addMsg( MsgId mid, Id managerId )
 	Element* em = manager.element();
 	DataHandler* data = em->dataHandler();
 	MsgManager mm( mid );
-	unsigned int nextDataId = data->addOneEntry( 
-		reinterpret_cast< const char* >( &mm ) );
-	m->setDataId( nextDataId );
+	unsigned int oldSize = data->totalEntries();
+	vector< unsigned int > dims( 1, oldSize + 1 );
+	data->resize( dims ); // Preserves entries.
+	data->setDataBlock( reinterpret_cast< const char* >( &mm ),
+		1, 0, oldSize );
+	// unsigned int nextDataId = data->addOneEntry( reinterpret_cast< const char* >( &mm ) );
+	m->setDataId( oldSize );
 }
 
 // static func

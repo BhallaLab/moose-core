@@ -114,7 +114,7 @@ void setupTicks()
 	// bool ret = OneToAllMsg::add( clocker, "childTick", ticke, "parent" );
 	// assert( ret );
 
-	assert( ticke->dataHandler()->numData() == 10 );
+	assert( ticke->dataHandler()->totalEntries() == 10 );
 
 	/*
 	bool ret = Field< unsigned int >::set( clocker, "numTicks", size );
@@ -123,8 +123,8 @@ void setupTicks()
 	*/
 
 	// assert( ret );
-	// cout << Shell::myNode() << ": numTicks: " << ticke->dataHandler()->numData() << ", " << size << endl;
-	assert( ticke->dataHandler()->numData() == size );
+	// cout << Shell::myNode() << ": numTicks: " << ticke->dataHandler()->totalEntries() << ", " << size << endl;
+	assert( ticke->dataHandler()->totalEntries() == size );
 
 	Eref er0( ticke, DataId( 0, 2 ) );
 	bool ret = Field< double >::set( er0, "dt", 5.0);
@@ -307,7 +307,7 @@ void testThreadIntFireNetwork()
 	Element* syn = synId();
 	assert( syn->getName() == "synapse" );
 
-	assert( syn->dataHandler()->numData() == 0 );
+	assert( syn->dataHandler()->totalEntries() == 0 );
 
 	DataId di( 1, 0 ); // DataId( data, field )
 	Eref syne( syn, di );
@@ -330,7 +330,7 @@ void testThreadIntFireNetwork()
 	sm->randomConnect( connectionProbability );
 	sm->loadBalance( numThreads );
 
-	unsigned int nd = syn->dataHandler()->numData();
+	unsigned int nd = syn->dataHandler()->totalEntries();
 //	cout << "Num Syn = " << nd << endl;
 	assert( nd == NUMSYN );
 	vector< double > temp( size, 0.0 );
@@ -354,7 +354,7 @@ void testThreadIntFireNetwork()
 	vector< double > delay;
 	delay.reserve( nd );
 	for ( unsigned int i = 0; i < size; ++i ) {
-		unsigned int numSyn = syne.element()->dataHandler()->numData2( i );
+		unsigned int numSyn = syne.element()->dataHandler()->sizeOfDim( 0 );
 		for ( unsigned int j = 0; j < numSyn; ++j ) {
 			weight.push_back( mtrand() * weightMax );
 			delay.push_back( mtrand() * delayMax );
@@ -445,7 +445,7 @@ void testMultiNodeIntFireNetwork()
 	Element* syn = synId();
 	assert( syn->getName() == "synapse" );
 
-	assert( syn->dataHandler()->numData() == 0 );
+	assert( syn->dataHandler()->totalEntries() == 0 );
 
 	DataId di( 1, 0 ); // DataId( data, field )
 	Eref syne( syn, di );
@@ -465,6 +465,7 @@ void testMultiNodeIntFireNetwork()
 		connectionProbability, 5489UL );
 
 	SetGet1< unsigned int >::set( mer, "loadBalance", numThreads ); 
+	/*
 	vector< unsigned int > synArraySizes;
 	unsigned int start = syn->dataHandler()->getNumData2( synArraySizes );
 	// cout << "start = " << start << endl;
@@ -473,8 +474,9 @@ void testMultiNodeIntFireNetwork()
 		// if ( ( i % 100 ) == 0 ) cout << "i = " << i << "SynIndex = " << synIndex << endl;
 		synIndex += synArraySizes[i];
 	}
+	*/
 
-	unsigned int nd = syn->dataHandler()->numData();
+	unsigned int nd = syn->dataHandler()->totalEntries();
 	// cout << "Num Syn = " << nd << endl;
 	nd = 104576;
 
@@ -607,7 +609,7 @@ void speedTestMultiNodeIntFireNetwork( unsigned int size, unsigned int runsteps 
 	Element* syn = synId();
 	assert( syn->getName() == "synapse" );
 
-	assert( syn->dataHandler()->numData() == 0 );
+	assert( syn->dataHandler()->totalEntries() == 0 );
 
 	DataId di( 1, 0 ); // DataId( data, field )
 	Eref syne( syn, di );
@@ -630,7 +632,7 @@ void speedTestMultiNodeIntFireNetwork( unsigned int size, unsigned int runsteps 
 	vector< unsigned int > synArraySizes;
 	// unsigned int start = syn->dataHandler()->getNumData2( synArraySizes );
 
-	unsigned int nd = syn->dataHandler()->numData();
+	unsigned int nd = syn->dataHandler()->totalEntries();
 	nd = 104576;
 
 	vector< double > temp( size, 0.0 );

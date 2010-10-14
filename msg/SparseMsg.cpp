@@ -270,7 +270,7 @@ void SparseMsgWrapper::loadUnbalance()
 
 SparseMsg::SparseMsg( Element* e1, Element* e2 )
 	: Msg( e1, e2, id_ ),
-	matrix_( e1->dataHandler()->numData1(), e2->dataHandler()->numData1() )
+	matrix_( e1->dataHandler()->totalEntries(), e2->dataHandler()->totalEntries() )
 {
 	assert( e1->dataHandler()->numDimensions() == 1  && 
 		e2->dataHandler()->numDimensions() >= 1 );
@@ -286,10 +286,13 @@ unsigned int rowIndex( const Element* e, const DataId& d )
 	if ( e->dataHandler()->numDimensions() == 1 ) {
 		return d.data();
 	} else if ( e->dataHandler()->numDimensions() == 2 ) {
-		// This is a nasty case, hopefully very rare.
+		// rectangular grid, looking for index
+		unsigned int row = e->dataHandler()->sizeOfDim(0) * d.data();
+		/*
 		unsigned int row = 0;
 		for ( unsigned int i = 0; i < d.data(); ++i )
 			row += e->dataHandler()->numData2( i );
+		*/
 		return ( row + d.field() );
 	}
 	return 0;
@@ -380,14 +383,17 @@ unsigned int SparseMsg::randomConnect( double probability )
 	matrix_.clear();
 	unsigned int totalSynapses = 0;
 	unsigned int startSynapse = 0;
-	vector< unsigned int > sizes;
+	vector< unsigned int > sizes( nCols, 0 );
 	bool isFirstRound = 1;
 	unsigned int totSynNum = 0;
 
 	// SynElement* syn = dynamic_cast< SynElement* >( e2_ );
 	Element* syn = e2_;
-	syn->dataHandler()->getNumData2( sizes );
-	assert( sizes.size() == nCols );
+	// syn->dataHandler()->getNumData2( sizes );
+	// assert( sizes.size() == nCols );
+	assert( nCols == syn->dataHandler()->sizeOfDim( 0  ) );
+	// assert( nRows == syn->dataHandler()->sizeOfDim( 1 ) );
+
 
 	for ( unsigned int i = 0; i < nCols; ++i ) {
 		// Check if synapse is on local node
@@ -418,7 +424,15 @@ unsigned int SparseMsg::randomConnect( double probability )
 
 		matrix_.addRow( i, synIndex );
 	}
-	syn->dataHandler()->setNumData2( startSynapse, sizes );
+	// Here we figure out the largest # of syns and use it.
+	unsigned int biggest = *max_element( sizes.begin(), sizes.end() );
+	sizes.resize( 0 );
+	sizes.push_back( nCols );
+	sizes.push_back( biggest );
+	syn->dataHandler()->resize( sizes );
+
+
+	// syn->dataHandler()->setNumData2( startSynapse, sizes );
 	// cout << Shell::myNode() << ": sizes.size() = " << sizes.size() << ", ncols = " << nCols << ", startSynapse = " << startSynapse << endl;
 	matrix_.transpose();
 	return totalSynapses;

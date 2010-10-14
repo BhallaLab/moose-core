@@ -25,7 +25,7 @@ void testArith()
 	Eref a1_0( a1, 0 );
 	Eref a1_1( a1, 1 );
 
-	Arith* data1_0 = reinterpret_cast< Arith* >( a1->dataHandler()->data1( 0 ) );
+	Arith* data1_0 = reinterpret_cast< Arith* >( a1->dataHandler()->data( 0 ) );
 //	Arith* data1_1 = reinterpret_cast< Arith* >( a1->data1( 1 ) );
 
 	data1_0->arg1( 1 );
@@ -60,7 +60,7 @@ void testFibonacci()
 	Id a1id = Id::nextId();
 	Element* a1 = new Element( a1id, Arith::initCinfo(), "a1", dims );
 
-	Arith* data = reinterpret_cast< Arith* >( a1->dataHandler()->data1( 0 ) );
+	Arith* data = reinterpret_cast< Arith* >( a1->dataHandler()->data( 0 ) );
 	if ( data ) {
 		data->arg1( 0 );
 		data->arg2( 1 );
@@ -103,7 +103,7 @@ void testFibonacci()
 	unsigned int f2 = 0;
 	for ( unsigned int i = 0; i < numFib; ++i ) {
 		if ( a1->dataHandler()->isDataHere( i ) ) {
-			Arith* data = reinterpret_cast< Arith* >( a1->dataHandler()->data1( i ) );
+			Arith* data = reinterpret_cast< Arith* >( a1->dataHandler()->data( i ) );
 			// cout << Shell::myNode() << ": i = " << i << ", " << data->getOutput() << ", " << f1 << endl;
 			assert( data->getOutput() == f1 );
 		}
@@ -130,7 +130,7 @@ void testMpiFibonacci()
 
 	Element* a1 = new Element( a1id, Arith::initCinfo(), "a1", dims );
 
-	Arith* data = reinterpret_cast< Arith* >( a1->dataHandler()->data1( 0 ) );
+	Arith* data = reinterpret_cast< Arith* >( a1->dataHandler()->data( 0 ) );
 
 	if ( data ) {
 		data->arg1( 0 );
@@ -169,7 +169,7 @@ void testMpiFibonacci()
 	unsigned int f2 = 0;
 	for ( unsigned int i = 0; i < numFib; ++i ) {
 		if ( a1->dataHandler()->isDataHere( i ) ) {
-			Arith* data = reinterpret_cast< Arith* >( a1->dataHandler()->data1( i ) );
+			Arith* data = reinterpret_cast< Arith* >( a1->dataHandler()->data( i ) );
 			// cout << Shell::myNode() << ": i = " << i << ", " << data->getOutput() << ", " << f1 << endl;
 			assert( data->getOutput() == f1 );
 		}

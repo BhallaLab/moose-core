@@ -31,6 +31,7 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 				lookupField_( lookupField ),
 				getNumField_( getNumField ),
 				setNumField_( setNumField ),
+				size_( 1 ),
 				start_( 0 )
 
 		{;}
@@ -38,12 +39,12 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		~FieldDataHandler()
 		{;} // Don't delete data because the parent Element should do so.
 
-		DataHandler* globalize()
+		DataHandler* globalize() const
 		{
 			return 0;
 		}
 
-		DataHandler* unGlobalize()
+		DataHandler* unGlobalize() const
 		{
 			return 0;
 		}
@@ -80,7 +81,7 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 			return ret;
 		}
 
-		DataHandler* copyExpand() const
+		DataHandler* copyExpand( unsigned int copySize ) const
 		{
 			return 0;
 		}
@@ -140,12 +141,17 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		 * Returns the number of dimensions of the data.
 		 */
 		unsigned int numDimensions() const {
-			return 2;
+			// Should refine to include local dimensions.
+			// For now assume 1 dim.
+			return parentDataHandler_->numDimensions() + 1;
 		}
 
 		unsigned int sizeOfDim( unsigned int dim ) const
 		{
-			return 0;
+			if ( dim > 0 )
+				return parentDataHandler_->sizeOfDim( dim - 1 );
+			if ( dim == 0 )
+				return size_;
 		}
 
 
@@ -157,6 +163,13 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		{
 			cout << Shell::myNode() << ": FieldDataHandler::setNumData1: Error: Cannot resize from Field\n";
 			return 0;
+		}
+
+		vector< unsigned int > dims() const
+		{
+			vector< unsigned int > ret( parentDataHandler_->dims() );
+			ret.insert( ret.begin(), size_ );
+			return ret;
 		}
 
 		/**
@@ -194,15 +207,26 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		/**
 		 * This seems funny, but remember than begin() refers to the
 		 * data part on the index.
-		 * Don't want to permit iterating here, it will cause problems.
 		 */
 		iterator begin() const {
-			return parentDataHandler_->begin();
+			// Assume we start on 0. Easy to extend to starting at another
+			// index.
+			iterator ret( this, parentDataHandler_->begin().index() * size_ );
+			return ret;
 		}
 
-		// Don't want to permit iterating here, it will cause problems.
+		/**
+		 * This is the last valid field entry on the last valid data entry
+		 * on the parent data handler, expressed as a single int.
+		 * Index should perhaps be a long.
+		 */
 		iterator end() const {
-			return parentDataHandler_->end();
+			unsigned int paIndex = parentDataHandler_->end().index();
+			char* pa = parentDataHandler_->data( paIndex );
+			assert( pa );
+			unsigned int numHere = ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
+			iterator ret( this, paIndex * size_ + numHere );
+			return ret;
 		}
 
 		const DataHandler* parentDataHandler() const {
@@ -214,11 +238,26 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		 * that dimension. Returns true if all OK. No allocation.
 		 */
 		bool setDataBlock( const char* data, unsigned int numEntries, 
-			unsigned int dimNum, unsigned int dimIndex );
+			unsigned int dimNum, unsigned int dimIndex )
+		{
+			if ( dimNum == 0 ) { // Still to implement.
+				;
+			}
+			return 0;
+		}
 
 	protected:
 		unsigned int nextIndex( unsigned int index ) const {
-			return index + 1;
+			unsigned int paIndex = index / size_;
+			unsigned int fieldIndex = index % size_;
+			char* pa = parentDataHandler_->data( paIndex );
+			assert( pa );
+			unsigned int numHere = ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
+			if ( ( fieldIndex + 1 ) >= numHere ) {
+				return (paIndex + 1) * size_;
+			} else {
+				return index + 1;
+			}
 		}
 
 	private:
@@ -226,6 +265,7 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		Field* ( Parent::*lookupField_ )( unsigned int );
 		unsigned int ( Parent::*getNumField_ )() const;
 		void ( Parent::*setNumField_ )( unsigned int num );
+		unsigned int size_;
 		unsigned int start_;
 };
 

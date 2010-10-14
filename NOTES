@@ -7813,6 +7813,35 @@ When do we need the field data, and when the parent object data?
 Grind through all the files to figure out where the Eref::data() refers to the
 parent and where it refers to the field itself.
 
-Finally it compiles through the entire basecode directory.
+Finally it compiles through the entire basecode directory. Checkin 2209.
+
+Finally also we have a clear direction for the FieldDataHandler interface.
+Here we need to ensure that it has a similar iterator behaviour to the 
+regular DataHandlers. In other words, if we go from begin to end we should
+see all the field entries on all the Data that happens to be on current node.
+Would also like a way to jump partway into the data sequence, say the first
+field entry on Object[2][3]. This comes up in AssignVecMsg.cpp.
+
+Another thing came up: DataHandler::addOneEntry. Same as push_back. This
+is only used in one place, on the MsgManager.cpp. There are issues
+with doing this on non-globals, since the node allocation could get
+scrambled from the default. The MsgManager is a global, so this concern
+doesn't apply, but I shouldn't introduce a one-use feature.
+
+Got into the gory details of how we manage Elements corresponding to Msgs.
+Somewhat messy, let's see if there is a way to clean up. The fundamental 
+problem is that there are many Msg subclasses and each has its own fields,
+so one grand array of the whole lot will not work. The current approach has
+independent Manager for each subclass with an array of MsgIds, and then the
+Msg.h base class manages another static vector to help the msgs look up their
+index on their respective Managers.
+============================================================================
+13 Oct 2010.
+
+Bodged this to work by using resize and setDataBlock. This is horribly 
+inefficient, involves a reallocation and copy of the entire set of existing
+messages for the addition of each one. Will need to revisit.
+
+Got it to compile through the msg directory. Now stuck with Shell.
 
 ============================================================================
