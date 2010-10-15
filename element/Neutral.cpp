@@ -41,30 +41,37 @@ const Cinfo* initNeutralCinfo()
 	static Finfo* neutralFinfos[] = 
 	{
 		new ValueFinfo( "name", ValueFtype1< string >::global(),
-					reinterpret_cast< GetFunc >( &Neutral::getName ),
-					reinterpret_cast< RecvFunc >( &Neutral::setName )
+                                reinterpret_cast< GetFunc >( &Neutral::getName ),
+                                reinterpret_cast< RecvFunc >( &Neutral::setName ),
+                                "Name of the object."
+                                
 		),
 		new ValueFinfo( "index", ValueFtype1< int >::global(),
-					reinterpret_cast< GetFunc >( &Neutral::getIndex ),
-					&dummyFunc
+                                reinterpret_cast< GetFunc >( &Neutral::getIndex ),
+                                &dummyFunc,
+                                "Index of the object if it is an array element."
 		),
 		new ValueFinfo( "parent", ValueFtype1< Id >::global(),
-					reinterpret_cast< GetFunc >( &Neutral::getParent ),
-					&dummyFunc
+                                reinterpret_cast< GetFunc >( &Neutral::getParent ),
+                                &dummyFunc,
+                                "Parent object of this object."
 		),
 		new ValueFinfo( "class", ValueFtype1< string >::global(),
-					reinterpret_cast< GetFunc >( &Neutral::getClass ),
-					&dummyFunc
+                                reinterpret_cast< GetFunc >( &Neutral::getClass ),
+                                &dummyFunc,
+                                "Class of this object."
 		),
 		new ValueFinfo( "childList",
 				ValueFtype1< vector< Id > >::global(), 
 				reinterpret_cast< GetFunc>( &Neutral::getChildList ),
-				&dummyFunc
+				&dummyFunc,
+                                "List of children of this object."
 		),
 		new ValueFinfo( "node",
 				ValueFtype1< unsigned int >::global(),
 				reinterpret_cast< GetFunc>( &Neutral::getNode ),
-				&dummyFunc
+				&dummyFunc,
+                                "CPU Node in which this object resides."
 		),
 		new ValueFinfo( "cpu",
 				ValueFtype1< double >::global(), 
