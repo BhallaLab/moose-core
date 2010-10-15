@@ -280,7 +280,7 @@ to the parent object.
 You can wrap the Id of any existing MOOSE object inside a
 @code{Neutral}. The following example shows a common idiom used for
 looping through the list of children of an object.
-@example @samp
+@example 
 @group
 >>> root = moose.Neutral('/')
 >>> for child_id in root.childList:
