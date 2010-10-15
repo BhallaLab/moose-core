@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Feb 13 16:07:56 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Sep 14 16:01:06 2010 (+0530)
+# Last-Updated: Fri Oct 15 13:40:56 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 131
+#     Update #: 134
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -59,7 +59,7 @@ import tempfile
 import logging
 from PyQt4.Qt import Qt
 from PyQt4 import QtGui, QtCore
-
+import moose
 settings = None
 TEMPDIR = tempfile.gettempdir()
 KEY_FIRSTTIME = 'firsttime'
@@ -96,5 +96,6 @@ LOGGER = logging.getLogger('moose')
 BENCHMARK_LOGGER = logging.getLogger('moose.benchmark')
 BENCHMARK_LOGGER.setLevel(logging.INFO)
 
+context = moose.PyMooseBase.getContext()
 # 
 # config.py ends here
