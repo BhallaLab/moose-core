@@ -16,6 +16,7 @@ an object of some MOOSE class. Elements are the basic building blocks of
 a model. You set the properties of the individual elements and connect
 them via messages to build a model.
 
+@subsection Id - the unique identifier of each MOOSE object
 Each element has a unique identifier, called its @code{id}. PyMOOSE
 provides Pythonic wrappers around this id. For every MOOSE class, we
 have a corresponding Python class provided by PyMOOSE. This class
@@ -26,6 +27,7 @@ of the @code{id} of the original MOOSE object. All the fields are
 accessed on-demand via function calls using this @code{id} as the
 handle.
 
+@subsection Class hierarchy of MOOSE
 MOOSE provides a class hierarchy which is closely imitated by the
 PyMOOSE classes. @code{Neutral} is at the top of the class hierarchy. So
 instance of any other MOOSE class is also an instance of @code{Neutral}
@@ -71,9 +73,23 @@ simulation experiments:
       step tp some target object and saving data to file.
 @item AscFile
 -     A general text(ascii) file handle.
-@item Random numbet generators 
+@item Random number generators 
 - a whole bunch of them to generate samples from various distributions.
 @end itemize
+TODO: incorporate class-herarchy diagram
+
+@subsection Messaging
+Any complex model is composed of multiple components called
+@code{elements} which represent some well defined biological concept,
+like an ion-channel or an enzyme. The components of a model are
+connected to each other via messages. These messages allow state
+variables of one element to be seen by the other. For example, a
+synaptic channel has a conductance @code{g} which depends on the
+membrane potential @code{Vm} of a neuronal compartment. @code{Vm} on the
+other hand changes with change in @code{g}. Thus, we need a message
+sending @code{Vm} from compartment to synapse and a message sending
+@code{g} from synapse to compartment. These two messages are combined in
+another message, @code{channel}.
 
 @example
 Take, for example, a simple reaction: @code{A + B <---> C}. By
