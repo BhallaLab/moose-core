@@ -38,12 +38,6 @@ class AnyDimHandler: public AnyDimGlobalHandler
 		DataHandler* unGlobalize() const;
 
 		/**
-		 * Incorporates provided data into already allocated space
-		 */
-		void assimilateData( const char* data, 
-			unsigned int begin, unsigned int end );
-
-		/**
 		 * Determines how to decompose data among nodes for specified size
 		 * Returns true if there is a change from the current configuration
 		 */
@@ -114,11 +108,13 @@ class AnyDimHandler: public AnyDimGlobalHandler
 		iterator end() const;
 
 		/**
-		 * Assigns a block of data at the specified dimension and index in
-		 * that dimension. Returns true if all OK. No allocation.
+		 * Assigns a block of data at the specified location.
+		 * Returns true if all OK. No allocation.
 		 */
-		bool setDataBlock( const char* data, unsigned int numEntries, 
-			unsigned int dimNum, unsigned int dimIndex );
+		bool setDataBlock( const char* data, unsigned int numData,
+			const vector< unsigned int >& startIndex );
+		bool setDataBlock( const char* data, unsigned int numData,
+			unsigned int startIndex );
 
 	protected:
 

@@ -72,11 +72,13 @@ class DataHandlerWrapper: public DataHandler
 		iterator end() const;
 
 		/**
-		 * Assigns a block of data at the specified dimension and index in
-		 * that dimension. Returns true if all OK. No allocation.
+		 * Assigns a block of data at the specified location.
+		 * Returns true if all OK. No allocation.
 		 */
-		bool setDataBlock( const char* data, unsigned int numEntries, 
-			unsigned int dimNum, unsigned int dimIndex );
+		bool setDataBlock( const char* data, unsigned int numData,
+			const vector< unsigned int >& startIndex );
+		bool setDataBlock( const char* data, unsigned int numData,
+			unsigned int startIndex );
 
 	protected:
 		unsigned int nextIndex( unsigned int index ) const;

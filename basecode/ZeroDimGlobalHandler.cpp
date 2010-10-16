@@ -23,6 +23,16 @@ ZeroDimGlobalHandler::~ZeroDimGlobalHandler()
 	dinfo()->destroyData( data_ );
 }
 
+DataHandler* ZeroDimGlobalHandler::globalize() const
+{
+	return new ZeroDimGlobalHandler( this );
+}
+
+DataHandler* ZeroDimGlobalHandler::unGlobalize() const
+{
+	return 0;
+}
+
 DataHandler* ZeroDimGlobalHandler::copy() const
 {
 	return ( new ZeroDimGlobalHandler( this ) );
@@ -76,3 +86,28 @@ DataHandler::iterator ZeroDimGlobalHandler::end() const
 	//cout << Shell::myNode() << ": ZeroDimGlobalHandler::end\n";
 	return iterator( this, 1 );
 }
+
+bool ZeroDimGlobalHandler::setDataBlock(
+	const char* data, unsigned int numData,
+	const vector< unsigned int >& startIndex )
+{
+	if ( !isAllocated() ) return 0;
+	if ( numData != 1 ) return 0;
+	if ( startIndex.size() != 0 ) return 0;
+
+	memcpy( data_, data, dinfo()->size() );
+	return 1;
+}
+
+
+bool ZeroDimGlobalHandler::setDataBlock(
+	const char* data, unsigned int numData,
+	unsigned int startIndex )
+{
+	if ( !isAllocated() ) return 0;
+	if ( numData != 1 ) return 0;
+	if ( startIndex != 0 ) return 0;
+	memcpy( data_, data, dinfo()->size() );
+	return 1;
+}
+

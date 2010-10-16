@@ -40,10 +40,13 @@ AnyDimHandler::~AnyDimHandler()
 // 
 DataHandler* AnyDimHandler::globalize() const
 {
+	/*
 	AnyDimGlobalHandler* ret = new AnyDimGlobalHandler( dinfo() );
 	ret->resize( dims_ );
 	ret->assimilateData( data_, start_, end_ );
 	return ret; 
+	*/
+	return 0;
 	// For now we just pass on this. Will need significant stuff to do
 	// with Shell
 }
@@ -61,31 +64,6 @@ DataHandler* AnyDimHandler::unGlobalize() const
 	return 1;
 	*/
 }
-
-// Must get data from the AnyDimGlobalHandler
-// Data handler must have already been built and allocated.
-void AnyDimHandler::assimilateData( const char* data, 
-	unsigned int begin, unsigned int end )
-{
-	assert( begin == 0 );
-	assert( end == size_ );
-	memcpy( data_, data + start_ * dinfo()->size(), 
-		( end_ - start_ ) * dinfo()->size() );
-
-	/*
-	nodeBalance( end );
-	data_ = dinfo()->copyData( 
-		data + start_ * dinfo->size(), end_ - start_, end_ - start_ );
-		*/
-}
-
-/*
-void AnyDimHandler::packageData( PrepackedBuffer& buf ) const
-{
-	
-}
-*/
-
 
 /**
  * Determines how to decompose data among nodes for specified size
@@ -228,6 +206,36 @@ AnyDimHandler::iterator AnyDimHandler::begin() const
 AnyDimHandler::iterator AnyDimHandler::end() const
 {
 	return iterator( this, end_ );
+}
+
+bool AnyDimGlobalHandler::setDataBlock( 
+	const char* data, unsigned int numData,
+	const vector< unsigned int >& startIndex )
+{
+
+	DataDimensions dd( dims_ );
+	unsigned int start = dd.linearIndex( startIndex );
+	
+	return setDataBlock( data, numData, start );
+}
+
+bool AnyDimHandler::setDataBlock( const char* data, 
+	unsigned int numEntries,
+	unsigned int startIndex )
+{
+	if ( startIndex + numEntries > totalEntries() )
+		return 0;
+	unsigned int actualStart = start_;
+	if ( start_ < startIndex ) 
+		actualStart = startIndex;
+	unsigned int actualEnd = end_;
+	if ( actualEnd > startIndex + numEntries )
+		actualEnd = startIndex + numEntries;
+	if ( actualEnd > actualStart )
+		memcpy( data_ + (actualStart - start_) * dinfo()->size(),
+			data + ( actualStart - startIndex ) * dinfo()->size(),
+			( actualEnd - actualStart ) * dinfo()->size() );
+	return 0;
 }
 
 unsigned int AnyDimHandler::nextIndex( unsigned int index ) const

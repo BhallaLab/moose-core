@@ -26,9 +26,6 @@ class OneDimGlobalHandler: public DataHandler
 
 		DataHandler* unGlobalize() const;
 
-		void assimilateData( const char* data,
-			unsigned int begin, unsigned int end );
-
 		virtual bool nodeBalance( unsigned int size );
 
 		DataHandler* copy() const;
@@ -90,14 +87,13 @@ class OneDimGlobalHandler: public DataHandler
 		}
 
 		/**
-		 * Assigns a block of data at the specified dimension and index in
-		 * that dimension. Here the dimNum has to be 0, but we can choose
-		 * to assign a single entry at a specific dimIndex, or a block of 
-		 * entries starting at 0 and going on to the end.
+		 * Assigns a block of data at the specified location.
 		 * Returns true if all OK. No allocation.
 		 */
-		bool setDataBlock( const char* data, unsigned int numEntries, 
-			unsigned int dimNum, unsigned int dimIndex );
+		bool setDataBlock( const char* data, unsigned int numData,
+			const vector< unsigned int >& startIndex );
+		bool setDataBlock( const char* data, unsigned int numData,
+			unsigned int startIndex );
 
 	protected:
 		unsigned int nextIndex( unsigned int index ) const {

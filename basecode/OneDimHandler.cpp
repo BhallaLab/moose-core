@@ -154,13 +154,14 @@ bool OneDimHandler::isAllocated() const {
 }
 
 /**
- * Data is an entire data block with numEntries. We pick whatever entries
+ * Data is a continuous data block holding data from begin to end on the
+ * target slice on dimNum and dimIndex. We pick whatever entries
  * should be put on current node. Return True if assignment happens.
  * Point of uncertainty: We return False even if assignment would happen
  * on some node other than this.
  */
 bool OneDimHandler::setDataBlock( const char* data, 
-	unsigned int numEntries, 
+	unsigned int begin, unsigned int end,
 	unsigned int dimNum, unsigned int dimIndex )
 {
 	// Here the request is to set the whole array.

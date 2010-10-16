@@ -21,6 +21,7 @@ OBJ = \
 	AnyDimHandler.o \
 	ZeroDimHandler.o \
 	OneDimHandler.o \
+	AnyDimGlobalHandler.o \
 	ZeroDimGlobalHandler.o \
 	OneDimGlobalHandler.o \
 	DataHandlerWrapper.o \

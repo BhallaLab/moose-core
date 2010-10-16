@@ -26,8 +26,6 @@ class ZeroDimGlobalHandler: public DataHandler
 
 		DataHandler* globalize() const;
 		DataHandler* unGlobalize() const;
-		void assimilateData( const char* data,
-			unsigned int begin, unsigned int end );
 
 		bool nodeBalance( unsigned int size );
 
@@ -97,12 +95,14 @@ class ZeroDimGlobalHandler: public DataHandler
 		iterator end() const;
 
 		/**
-		 * General function to assign data in blocks. Here the
-		 * numEntries has to be 1, the dimNum has to be 0 and the dimIndex
+		 * Assigns a block of data at the specified location.
+		 * Here the numData has to be 1 and the startIndex
 		 * has to be 0. Returns true if all this is OK.
 		 */
-		bool setDataBlock( const char* data, unsigned int numEntries, 
-			unsigned int dimNum, unsigned int dimIndex );
+		bool setDataBlock( const char* data, unsigned int numData,
+			const vector< unsigned int >& startIndex );
+		bool setDataBlock( const char* data, unsigned int numData,
+			unsigned int startIndex );
 
 	protected:
 		unsigned int nextIndex( unsigned int index ) const {

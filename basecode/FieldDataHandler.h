@@ -49,12 +49,6 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 			return 0;
 		}
 
-		void assimilateData( const char* data,
-			unsigned int begin, unsigned int end )
-		{
-			;
-		}
-
 		bool nodeBalance( unsigned int size )
 		{
 			return 0;
@@ -234,15 +228,15 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		}
 
 		/**
-		 * Assigns a block of data at the specified dimension and index in
-		 * that dimension. Returns true if all OK. No allocation.
+		 * Assigns a block of data at the specified location.
+		 * Returns true if all OK. No allocation.
 		 */
-		bool setDataBlock( const char* data, unsigned int numEntries, 
-			unsigned int dimNum, unsigned int dimIndex )
-		{
-			if ( dimNum == 0 ) { // Still to implement.
-				;
-			}
+		bool setDataBlock( const char* data, unsigned int numData,
+			const vector< unsigned int >& startIndex ) {
+			return 0;
+		}
+		bool setDataBlock( const char* data, unsigned int numData,
+			unsigned int startIndex ) {
 			return 0;
 		}
 

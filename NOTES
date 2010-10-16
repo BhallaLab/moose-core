@@ -7845,3 +7845,115 @@ messages for the addition of each one. Will need to revisit.
 Got it to compile through the msg directory. Now stuck with Shell.
 
 ============================================================================
+14 Oct 2010
+Compiled through all files, then finds lots of undefined virtual functions
+in the various DataHandler subclasses. Checkin 2211.
+============================================================================
+15 Oct 2010
+
+- Check that all the Handler::Handler( Handler*) constructors alloc data
+- Replace assimilateData with setDataBlock
+
+Compilation coming along, working on eliminating 
+'assimilateData' and merging it into setDataBlock
+
+setDataBlock( const char* data, unsigned int begin, unsigned int end,
+	unsigned int dimNum, unsigned int dimIndex
+
+Use cases:
+To set a single value in a 0-dim dataset: 
+	setDataBlock( data, 0, 1, 0, 0)
+
+To set a single value at index 'i' in a 1-dim dataset: 
+	setDataBlock( data, i, i+1, 0, 0) or
+	setDataBlock( data, 0, 1, 0, i)
+
+To set a single value at index [i][j] in a 2-dim dataset:
+	setDataBlock( data, j, j+1, 1, i) or
+	setDataBlock( data, 0, 1, 0, i * numDim0 + j )
+
+I don't like this.
+Here is the logic. Suppose we have a DataHandler data[x][y][z]
+where sizes are 4, 5, 6.
+The z dimension varies the fastest.
+A zero dim slice would be [x1][y1][z1]: in other words, it fully specifies the
+	entry.
+A one dim slice would be [x1][y1]: It specifies x and y fully and z is the
+	slice dimension. This would have size 6.
+A 2-dim slice would be [x1]: It specifies a plane in y and z located at x1. 
+	This would have size 5*6 = 30.
+A 3-dim slice is silly, but it would be defined by a zero size slice vector.
+	This has size 4*5*6 = 120.
+
+Now within these slices, the setDataBlock function specifies a range in
+	the slice, which is assumed linearized.
+
+To set a single value in a 0-dim dataset: 
+	setDataBlock( data, 0, 1, {} ) where {} is an empty slice vector.
+
+To set a single value at z1 in a 1-dim dataset: 
+	setDataBlock( data, 0, 1, {z1} ) or
+	setDataBlock( data, z1, z1+1, {} )
+
+To set a single value at y1, z1 in a 2-dim dataset: 
+	setDataBlock( data, 0, 1, {y1,z1} ) or
+	setDataBlock( data, z1, z1+1, {y1} ) or
+	setDataBlock( data, y1*nz+z1, y1*nz+z1+1, {} )
+
+To set a single value at x1, y1, z1 in a 3-dim dataset: 
+	setDataBlock( data, 0, 1, {x1,y1,z1} )
+
+and so on. The preferred form is the first one in each case.
+
+To set a vector of values from z1 to z2 in a 1-dim dataset:
+	setDataBlock( data, z1, z2, {} )
+	setDataBlock( data, 0, z2 - z1, { z1 } ) We disallow this because it
+		makes the slice lookup ambiguous.
+
+To set a vector of values from z1 to z2 on y1 in a 2-dim dataset:
+	setDataBlock( data, z1, z2, {y1} )
+
+To set a vector of values from z1 to z2 on x1, y1 in a 3-dim dataset:
+	setDataBlock( data, z1, z2, {x1, y1} )
+
+To set a 2-d array of values from y1,z1 to y2, z2 on a 2-dim dataset:
+	Cannot do.
+
+To set a 2-d slice of values from y1,0 to y2,nz on a 2-dim dataset:
+	setDataBlock( data, y1*nz, (y2+1)*nz, {} )
+
+To set a 2-d slice of values from y1,0 to y2,nz on a 3-dim dataset at x1:
+	setDataBlock( data, y1*nz, (y2+1)*nz, {x1} )
+This does not really work so cleanly. 
+
+To set the complete 3-D block on a 3-d dataset:
+	setDataBlock( data, 0, nx*ny*nz, {} )
+
+Do these forms now permit arbitrary node decompositions to be merged into
+a single vector, e.g., for globalization? Not really. We'll need the global
+DataHandler to ask its localDataHandler counterpart to figure out how to put
+values into the correct places on a transfer vector, which is then copied
+in its entirety onto the GlobalDataHandler. Which brings us back to the
+assignData function.
+
+getSlice( numDimsInSlice, sliceStartDim, vector< unsigned int > slice
+	unsigned int sliceStartDim = slice.size();
+	unsigned int numDimsInSlice = dims_.size() - slice.size();
+
+This should give a slice of data including the lower (rightmost) indices.
+
+Trying it out in AnyDimGlobalHandler.cpp
+
+Decided against a recursive tree of DataHandlers for successive
+dimensions, at least for now.
+============================================================================
+16 Oct 2010
+Implementing simple version of setDataBlock :
+setDataBlock( const char* data, unsigned int numData,
+	const vector< unsigned int >& startIndex )
+setDataBlock( const char* data, unsigned int numData,
+	unsigned int startIndex )
+which just starts the data assignment at the specified startIndex.
+Lots of files changed, so I'm checking it in even though it doesn't
+yet compile.
+============================================================================

@@ -27,9 +27,6 @@ class ZeroDimHandler: public ZeroDimGlobalHandler
 
 		DataHandler* unGlobalize() const;
 
-		void assimilateData( const char* data,
-			unsigned int begin, unsigned int end );
-
 		/**
 		 * Determines how to decompose data among nodes for specified size
 		 * Returns true if there is a change from the current configuration
@@ -87,21 +84,14 @@ class ZeroDimHandler: public ZeroDimGlobalHandler
 		iterator end() const;
 
 		/**
-		 * General function to assign data in blocks. Here the
-		 * numEntries has to be 1, the dimNum has to be 0 and the dimIndex
+		 * Assigns a block of data at the specified location.
+		 * Here the numData has to be 1 and the startIndex
 		 * has to be 0. Returns true if all this is OK.
 		 */
-		bool setDataBlock( const char* data, unsigned int numEntries, 
-			unsigned int dimNum, unsigned int dimIndex );
-
-	protected:
-		void setData( char* data, unsigned int numData ) {
-			if ( data_ ) {
-				dinfo()->destroyData( data_ );
-			}
-			data_ = data;
-		}
-
+		bool setDataBlock( const char* data, unsigned int numData,
+			const vector< unsigned int >& startIndex );
+		bool setDataBlock( const char* data, unsigned int numData,
+			unsigned int startIndex );
 	private:
 };
 
