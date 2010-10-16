@@ -43,7 +43,7 @@ DataHandler* AnyDimGlobalHandler::unGlobalize() const
 	AnyDimHandler* ret = new AnyDimHandler( dinfo() );
 	// ret->nodeBalance( size_ );
 	ret->resize( dims_ );
-	ret->assimilateData( data_, 0, size_ );
+	ret->setDataBlock( data_, size_, 0 );
 	/*
 	unsigned int numLocal = ret->end_ - ret->start_;
 	char* newData = dinfo()->copyData( 
@@ -247,7 +247,7 @@ bool AnyDimGlobalHandler::setDataBlock(
 {
 
 	DataDimensions dd( dims_ );
-	unsigned int start = dd.linearIndex( index );
+	unsigned int start = dd.linearIndex( startIndex );
 	
 	return setDataBlock( data, numData, start );
 }
@@ -256,7 +256,7 @@ bool AnyDimGlobalHandler::setDataBlock(
 	const char* data, unsigned int numData,
 	unsigned int startIndex )
 {
-	if ( size < size_ ) {
+	if ( numData < size_ ) {
 		memcpy( data_ + startIndex * dinfo()->size(), data, 
 			numData * dinfo()->size() );
 		return 1;

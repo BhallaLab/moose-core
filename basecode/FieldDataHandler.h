@@ -144,8 +144,7 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		{
 			if ( dim > 0 )
 				return parentDataHandler_->sizeOfDim( dim - 1 );
-			if ( dim == 0 )
-				return size_;
+			return size_;
 		}
 
 
@@ -240,7 +239,6 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 			return 0;
 		}
 
-	protected:
 		unsigned int nextIndex( unsigned int index ) const {
 			unsigned int paIndex = index / size_;
 			unsigned int fieldIndex = index % size_;

@@ -29,6 +29,10 @@ DataHandler* DataHandlerWrapper::unGlobalize() const
 	return parent_->unGlobalize();
 }
 
+bool DataHandlerWrapper::nodeBalance( unsigned int size )
+{
+	return 0;
+}
 
 DataHandler* DataHandlerWrapper::copy() const
 {
@@ -106,7 +110,18 @@ DataHandler::iterator DataHandlerWrapper::end() const
 }
 
 bool DataHandlerWrapper::setDataBlock( const char* data, 
-	unsigned int numEntries, unsigned int dimNum, unsigned int dimIndex )
+	unsigned int numEntries, unsigned int startIndex )
 {
 	return 0;
+}
+
+bool DataHandlerWrapper::setDataBlock( const char* data, 
+	unsigned int numEntries, const vector< unsigned int >& startIndex )
+{
+	return 0;
+}
+
+unsigned int DataHandlerWrapper::nextIndex( unsigned int index ) const
+{
+	return parent_->nextIndex( index );
 }

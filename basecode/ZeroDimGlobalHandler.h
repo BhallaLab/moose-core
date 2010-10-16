@@ -69,10 +69,7 @@ class ZeroDimGlobalHandler: public DataHandler
 			return ( dim == 0 );
 		}
 
-		bool resize( vector< unsigned int > dims )
-		{
-			return 0;
-		}
+		bool resize( vector< unsigned int > dims );
 
 		vector< unsigned int > dims() const;
 
@@ -104,11 +101,11 @@ class ZeroDimGlobalHandler: public DataHandler
 		bool setDataBlock( const char* data, unsigned int numData,
 			unsigned int startIndex );
 
-	protected:
 		unsigned int nextIndex( unsigned int index ) const {
 			return 1;
 		}
 
+	protected:
 		char* data_;
 	private:
 };

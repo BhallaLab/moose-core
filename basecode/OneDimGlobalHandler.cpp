@@ -27,6 +27,21 @@ OneDimGlobalHandler::~OneDimGlobalHandler() {
 	dinfo()->destroyData( data_ );
 }
 
+DataHandler* OneDimGlobalHandler::globalize() const
+{
+	return copy();
+}
+
+
+DataHandler* OneDimGlobalHandler::unGlobalize() const
+{
+	OneDimHandler* ret = new OneDimHandler( dinfo() );
+	vector< unsigned int > dims( 1, size_ );
+	ret->resize( dims );
+	ret->setDataBlock( data_, size_, 0 );
+	return ret;
+}
+
 DataHandler* OneDimGlobalHandler::copy() const
 {
 	return ( new OneDimGlobalHandler( this ) );
@@ -60,7 +75,7 @@ DataHandler* OneDimGlobalHandler::copyToNewDim( unsigned int newDimSize )
 
 	for ( unsigned int i = 0; i < newDimSize; ++i ) {
 		// setDataBlock( const char* data, unsigned int dataSize, unsigned int dimNum, unsigned int dimIndex )
-		ret->setDataBlock( data_, size_, 1, i );
+		ret->setDataBlock( data_, size_, i * size_ );
 	}
 	return ret;
 }
@@ -89,6 +104,12 @@ void OneDimGlobalHandler::process( const ProcInfo* p, Element* e,
 	}
 }
 
+unsigned int OneDimGlobalHandler::sizeOfDim( unsigned int dim ) const
+{
+	if ( dim == 0 )
+		return size_;
+	return 0;
+}
 
 char* OneDimGlobalHandler::data( DataId index ) const {
 	return data_ + index.data() * dinfo()->size();
@@ -124,6 +145,13 @@ bool OneDimGlobalHandler::resize( vector< unsigned int > dims )
 	return ( data_ != 0 );
 }
 
+vector< unsigned int > OneDimGlobalHandler::dims() const
+{
+	vector< unsigned int > ret( 1, size_ );
+	return ret;
+}
+
+
 /**
  * Returns true if the node decomposition has the data on the
  * current node
@@ -137,5 +165,27 @@ bool OneDimGlobalHandler::isAllocated() const {
 }
 
 bool OneDimGlobalHandler::isGlobal() const {
+	return 1;
+}
+
+bool OneDimGlobalHandler::setDataBlock( 
+	const char* data, unsigned int numData,
+	const vector< unsigned int >& startIndex )
+{
+	if ( startIndex.size() > 1 ) return 0;
+	unsigned int s = 0;
+	if ( startIndex.size() == 1 )
+		s = startIndex[0];
+	return setDataBlock( data, numData, s );
+}
+
+bool OneDimGlobalHandler::setDataBlock( 
+	const char* data, unsigned int numData,
+	unsigned int startIndex )
+{
+	if ( !isAllocated() ) return 0;
+	if ( startIndex + numData > size_ ) return 0;
+	memcpy( data_ + startIndex * dinfo()->size(), 
+		data, numData* dinfo()->size() );
 	return 1;
 }

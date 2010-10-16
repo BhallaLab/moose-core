@@ -29,6 +29,17 @@ OneDimHandler::~OneDimHandler() {
 	dinfo()->destroyData( data_ );
 }
 
+DataHandler* OneDimHandler::globalize() const
+{
+	return 0; // Don't know yet how to do this.
+}
+
+DataHandler* OneDimHandler::unGlobalize() const
+{
+	return copy();
+}
+
+
 DataHandler* OneDimHandler::copy() const
 {
 	return ( new OneDimHandler( this ) );
@@ -56,7 +67,7 @@ DataHandler* OneDimHandler::copyToNewDim( unsigned int newDimSize ) const
 
 	for ( unsigned int i = 0; i < newDimSize; ++i ) {
 		// setDataBlock( const char* data, unsigned int dataSize, unsigned int dimNum, unsigned int dimIndex )
-		ret->setDataBlock( data_, size_, 1, i );
+		ret->setDataBlock( data_, size_, i * size_ );
 	}
 	return ret;
 }
@@ -153,31 +164,34 @@ bool OneDimHandler::isAllocated() const {
 	return data_ != 0;
 }
 
-/**
- * Data is a continuous data block holding data from begin to end on the
- * target slice on dimNum and dimIndex. We pick whatever entries
- * should be put on current node. Return True if assignment happens.
- * Point of uncertainty: We return False even if assignment would happen
- * on some node other than this.
- */
-bool OneDimHandler::setDataBlock( const char* data, 
-	unsigned int begin, unsigned int end,
-	unsigned int dimNum, unsigned int dimIndex )
+bool OneDimHandler::setDataBlock( const char* data, unsigned int numData,
+			const vector< unsigned int >& startIndex )
 {
-	// Here the request is to set the whole array.
-	if ( dimNum == 0 && dimIndex == 0 && numEntries == size_ ) {
-		memcpy( data_, data + start_ * dinfo()->size(), 
-			( end_ - start_ ) * dinfo()->size() );
-		return 1;
-	}
+	if ( startIndex.size() > 1 ) return 0;
+	unsigned int s = 0;
 
-	// Here the request is to set an individual entry
-	if ( dimNum == 0 && numEntries == 1 ) {
-		if ( dimIndex >= start_ && dimIndex < end_ ) {
-			memcpy( data_ + dimIndex * dinfo()->size(), data, 
-				dinfo()->size() );
-			return 1;
-		}
-	}
-	return 0;
+	if ( startIndex.size() == 1 )
+		s = startIndex[0];
+	
+	return setDataBlock( data, numData, s );
+}
+
+bool OneDimHandler::setDataBlock( const char* data, unsigned int numData,
+			unsigned int startIndex )
+{
+	if ( !isAllocated() ) return 0;
+
+	if ( startIndex + numData > size_ ) return 0;
+
+	unsigned int actualStart = start_;
+	if ( start_ < startIndex ) 
+		actualStart = startIndex;
+	unsigned int actualEnd = end_;
+	if ( actualEnd > startIndex + numData )
+		actualEnd = startIndex + numData;
+	if ( actualEnd > actualStart )
+		memcpy( data_ + (actualStart - start_) * dinfo()->size(),
+			data + ( actualStart - startIndex ) * dinfo()->size(),
+			( actualEnd - actualStart ) * dinfo()->size() );
+	return 1;
 }

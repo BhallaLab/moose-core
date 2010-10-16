@@ -33,6 +33,11 @@ DataHandler* ZeroDimGlobalHandler::unGlobalize() const
 	return 0;
 }
 
+bool ZeroDimGlobalHandler::nodeBalance( unsigned int size )
+{
+	return 0;
+}
+
 DataHandler* ZeroDimGlobalHandler::copy() const
 {
 	return ( new ZeroDimGlobalHandler( this ) );
@@ -69,6 +74,17 @@ void ZeroDimGlobalHandler::process( const ProcInfo* p, Element* e, FuncId fid ) 
 		pf->proc( data_, Eref( e, 0 ), p );
 	//	reinterpret_cast< Data* >( data_ )->process( p, Eref( e, 0 ) );
 	}
+}
+
+bool ZeroDimGlobalHandler::resize( vector< unsigned int > dims )
+{
+	return 0;
+}
+
+vector< unsigned int > ZeroDimGlobalHandler::dims() const
+{
+	static vector< unsigned int > ret;
+	return ret;
 }
 
 bool ZeroDimGlobalHandler::isAllocated() const {

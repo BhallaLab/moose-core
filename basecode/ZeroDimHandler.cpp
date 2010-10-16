@@ -16,12 +16,15 @@ ZeroDimHandler::ZeroDimHandler( const DinfoBase* dinfo )
 ZeroDimHandler::ZeroDimHandler( const ZeroDimHandler* other )
 	: ZeroDimGlobalHandler( other->dinfo() )
 {
-	data_ = dinfo()->copyData( other->data_, 1, 1 );
+	if ( Shell::myNode() == 0 )
+		data_ = dinfo()->copyData( other->data_, 1, 1 );
+	else
+		data_ = 0;
 }
 
 ZeroDimHandler::~ZeroDimHandler()
 {
-	dinfo()->destroyData( data_ );
+	// dinfo()->destroyData( data_ );
 }
 
 DataHandler* ZeroDimHandler::globalize() const
@@ -32,6 +35,11 @@ DataHandler* ZeroDimHandler::globalize() const
 DataHandler* ZeroDimHandler::unGlobalize() const
 {
 	return new ZeroDimHandler( this );
+}
+
+bool ZeroDimHandler::nodeBalance( unsigned int size )
+{
+	return 0;
 }
 
 DataHandler* ZeroDimHandler::copy() const
@@ -68,6 +76,11 @@ void ZeroDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 		assert( pf );
 		pf->proc( data_, Eref( e, 0 ), p );
 	}
+}
+
+bool ZeroDimHandler::resize( vector< unsigned int > dims )
+{
+	return 0; // never changes.
 }
 
 char* ZeroDimHandler::data( DataId index ) const {

@@ -208,7 +208,7 @@ AnyDimHandler::iterator AnyDimHandler::end() const
 	return iterator( this, end_ );
 }
 
-bool AnyDimGlobalHandler::setDataBlock( 
+bool AnyDimHandler::setDataBlock( 
 	const char* data, unsigned int numData,
 	const vector< unsigned int >& startIndex )
 {
@@ -235,7 +235,7 @@ bool AnyDimHandler::setDataBlock( const char* data,
 		memcpy( data_ + (actualStart - start_) * dinfo()->size(),
 			data + ( actualStart - startIndex ) * dinfo()->size(),
 			( actualEnd - actualStart ) * dinfo()->size() );
-	return 0;
+	return 1;
 }
 
 unsigned int AnyDimHandler::nextIndex( unsigned int index ) const

@@ -7955,5 +7955,7 @@ setDataBlock( const char* data, unsigned int numData,
 	unsigned int startIndex )
 which just starts the data assignment at the specified startIndex.
 Lots of files changed, so I'm checking it in even though it doesn't
-yet compile.
+yet compile. Checkin 2216.
+
+Compiled but does not link, the usual vtable issues for DataHandlers.
 ============================================================================

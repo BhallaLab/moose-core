@@ -24,8 +24,6 @@ class DataHandlerWrapper: public DataHandler
 
 		DataHandler* globalize() const;
 		DataHandler* unGlobalize() const;
-		void assimilateData( const char* data,
-			unsigned int begin, unsigned int end );
 		bool nodeBalance( unsigned int size );
 
 		/**
@@ -80,7 +78,6 @@ class DataHandlerWrapper: public DataHandler
 		bool setDataBlock( const char* data, unsigned int numData,
 			unsigned int startIndex );
 
-	protected:
 		unsigned int nextIndex( unsigned int index ) const;
 
 	private:

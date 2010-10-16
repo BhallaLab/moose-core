@@ -110,6 +110,7 @@ class DataHandler
 
 		/**
 		 * Returns the number of data entries at any index.
+		 * If 'dim' is greater than the number of dimensions, returns zero.
 		 */
 		virtual unsigned int sizeOfDim( unsigned int dim ) const = 0;
 
@@ -218,17 +219,6 @@ class DataHandler
 		virtual bool setDataBlock( 
 			const char* data, unsigned int numData,
 			unsigned int startIndex ) = 0;
-
-
-	protected:
-		/**
-		 * Assigns the data field and indicates how many total entries
-		 * are present in the incoming data. Does NOT touch allocation.
-		 * If numData > num alloced, then fills in numAlloced.
-		 * Else fills in numData.
-		virtual void setData( char* data, unsigned int numData ) = 0; 
-		 */
-
 
 		/**
 		 * Used to march through the entries in this DataHandler

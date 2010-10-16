@@ -116,8 +116,6 @@ class AnyDimHandler: public AnyDimGlobalHandler
 		bool setDataBlock( const char* data, unsigned int numData,
 			unsigned int startIndex );
 
-	protected:
-
 		unsigned int nextIndex( unsigned int index ) const;
 
 	private:

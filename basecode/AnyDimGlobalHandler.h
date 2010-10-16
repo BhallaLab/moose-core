@@ -136,8 +136,8 @@ class AnyDimGlobalHandler: public DataHandler
 		bool setDataBlock( const char* data, unsigned int numData,
 			unsigned int startIndex );
 
-	protected:
 		unsigned int nextIndex( unsigned int index ) const;
+	protected:
 		char* data_;
 		unsigned int size_;	// Number of data entries in the whole array
 		vector< unsigned int > dims_;
