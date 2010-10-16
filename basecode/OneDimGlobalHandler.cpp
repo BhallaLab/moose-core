@@ -130,17 +130,21 @@ bool OneDimGlobalHandler::resize( vector< unsigned int > dims )
 		cout << "OneDimGlobalHandler::Resize: Warning: Attempt to resize wrong # of dims " << dims.size() << "\n";
 		return 0;
 	}
+	if ( !data_ || size_ == 0 ) {
+		size_ = dims[0];
+		data_ = dinfo()->allocData( size_ );
+		return 1;
+	}
+
 	unsigned int oldsize = size_;
 	if ( nodeBalance( dims[0] ) ) {
-		if ( data_ ) {
-			char* newdata = dinfo()->allocData( size_ );
-			if ( size_ > oldsize )
-				memcpy( newdata, data_, oldsize * dinfo()->size() );
-			else
-				memcpy( newdata, data_, size_ * dinfo()->size() );
-			dinfo()->destroyData( data_ );
-			data_ = newdata;
-		}
+		char* newdata = dinfo()->allocData( size_ );
+		if ( size_ > oldsize )
+			memcpy( newdata, data_, oldsize * dinfo()->size() );
+		else
+			memcpy( newdata, data_, size_ * dinfo()->size() );
+		dinfo()->destroyData( data_ );
+		data_ = newdata;
 	}
 	return ( data_ != 0 );
 }

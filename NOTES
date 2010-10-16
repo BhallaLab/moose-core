@@ -7962,4 +7962,8 @@ Checkin 2217.
 
 Sorted the vtable issue as hinted on the discussion lists. Made a 
 DataHandler.cpp to define the only non-pure-virtual functions. Now compiles.
+Checkin 2218.
+
+Finally starting to go through unit tests and clean up the DataHandler code
+along the way.
 ============================================================================

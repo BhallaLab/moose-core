@@ -80,7 +80,10 @@ void ZeroDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 
 bool ZeroDimHandler::resize( vector< unsigned int > dims )
 {
-	return 0; // never changes.
+	if ( Shell::myNode() == 0 && !data_ ) {
+		data_ = dinfo()->allocData( 1 );
+	}
+	return 1;
 }
 
 char* ZeroDimHandler::data( DataId index ) const {

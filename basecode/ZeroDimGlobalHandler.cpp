@@ -78,7 +78,9 @@ void ZeroDimGlobalHandler::process( const ProcInfo* p, Element* e, FuncId fid ) 
 
 bool ZeroDimGlobalHandler::resize( vector< unsigned int > dims )
 {
-	return 0;
+	if ( !data_ )
+		data_ = dinfo()->allocData( 1 );
+	return 1;
 }
 
 vector< unsigned int > ZeroDimGlobalHandler::dims() const

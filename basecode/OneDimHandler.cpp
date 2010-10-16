@@ -143,6 +143,13 @@ bool OneDimHandler::resize( vector< unsigned int > dims )
 		cout << "OneDimHandler::Resize: Warning: Attempt to resize wrong # of dims " << dims.size() << "\n";
 		return 0;
 	}
+	if ( !data_ || size_ == 0 ) {
+		nodeBalance( dims[0] );
+		if ( start_ < end_ )
+		data_ = dinfo()->allocData( end_ - start_ );
+		return 1;
+	}
+
 	if ( nodeBalance( dims[0] ) ) { // It has changed, so reallocate
 		if ( data_ )
 			dinfo()->destroyData( data_ );
