@@ -2,11 +2,12 @@
 @chapter In-Depth Guide to PyMOOSE
 In this chapter we go through the internal details of PyMOOSE.
 @menu
-* Overview:: 
+* Overview::          A short overview of impotrant internals of PyMOOSE
 * Model Tree::        All elements in MOOSE are part of a Tree structure
 * Id::                The unique identifier for each MOOSE object
 * Neutral::           Common properties of all MOOSE classes
 * PyMooseContext::    The God object giving access to global functions
+* Messaging::         Details of messaging
 @end menu
 
 @node Overview
@@ -472,3 +473,17 @@ PyMooseContext are required only when there is no such counterpart.
 
 @end table
 
+@node Messaging
+@cindex connection
+@cindex message
+@subsection Source and Destination fields
+@cindex source field
+@cindex destination field
+Elements in a MOOSE model communicate with each other at runtime via
+messages. For example, to set up a constant current injection into a
+neuronal compartment, you want to connect a @code{PulseGen} object
+@code{pulsegen} to the @code{Compartment} object @code{comp}. In the
+definition of @code{PulseGen} class you have predefined source fields
+which tell what are the fields that can be transmitted out of the
+@code{pulsegen} object. Similarly, @code{Compartment} has a destination
+field where
