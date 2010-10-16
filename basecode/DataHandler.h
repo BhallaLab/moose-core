@@ -20,9 +20,7 @@
 class DataHandler
 {
 	public:
-		DataHandler( const DinfoBase* dinfo )
-			: dinfo_( dinfo )
-		{;}
+		DataHandler( const DinfoBase* dinfo );
 
 		/**
 		 * The respective DataHandler subclasses should also provide
@@ -30,9 +28,7 @@ class DataHandler
 		 * same type as an argument. This should allocate a copy
 		 * of the original data
 		 */
-
-		virtual ~DataHandler()
-		{;}
+		virtual ~DataHandler();
 
 		/**
 		 * Converts handler to its global version, where the same data is
@@ -118,7 +114,7 @@ class DataHandler
 		 * Reallocates data. Data not preserved unless same # of dims
 		 * Returns 0 if it cannot handle the requested allocation.
 		 */
-		virtual bool resize( vector< unsigned int > dims );
+		virtual bool resize( vector< unsigned int > dims ) = 0;
 
 		 /**
 		  * Returns vector of dimensions.

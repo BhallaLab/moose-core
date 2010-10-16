@@ -7958,4 +7958,8 @@ Lots of files changed, so I'm checking it in even though it doesn't
 yet compile. Checkin 2216.
 
 Compiled but does not link, the usual vtable issues for DataHandlers.
+Checkin 2217.
+
+Sorted the vtable issue as hinted on the discussion lists. Made a 
+DataHandler.cpp to define the only non-pure-virtual functions. Now compiles.
 ============================================================================

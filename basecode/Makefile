@@ -18,13 +18,14 @@ TARGET = basecode.o
 
 OBJ = \
 	Element.o	\
-	AnyDimHandler.o \
-	ZeroDimHandler.o \
-	OneDimHandler.o \
+	DataHandler.o \
 	AnyDimGlobalHandler.o \
 	ZeroDimGlobalHandler.o \
 	OneDimGlobalHandler.o \
 	DataHandlerWrapper.o \
+	AnyDimHandler.o \
+	ZeroDimHandler.o \
+	OneDimHandler.o \
 	Eref.o	\
 	Finfo.o	\
 	DestFinfo.o	\
