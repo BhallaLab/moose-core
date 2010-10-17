@@ -110,15 +110,16 @@ DataHandler::iterator DataHandlerWrapper::end() const
 }
 
 bool DataHandlerWrapper::setDataBlock( const char* data, 
-	unsigned int numEntries, unsigned int startIndex )
+	unsigned int numEntries, DataId startIndex ) const
 {
-	return 0;
+	return parent_->setDataBlock( data, numEntries, startIndex );
 }
 
-bool DataHandlerWrapper::setDataBlock( const char* data, 
-	unsigned int numEntries, const vector< unsigned int >& startIndex )
+bool DataHandlerWrapper::setDataBlock( 
+	const char* data, unsigned int numEntries, 
+	const vector< unsigned int >& startIndex ) const
 {
-	return 0;
+	return parent_->setDataBlock( data, numEntries, startIndex );
 }
 
 unsigned int DataHandlerWrapper::nextIndex( unsigned int index ) const

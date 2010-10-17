@@ -7965,5 +7965,28 @@ DataHandler.cpp to define the only non-pure-virtual functions. Now compiles.
 Checkin 2218.
 
 Finally starting to go through unit tests and clean up the DataHandler code
-along the way.
+along the way. Checkin 2219.
+
+============================================================================
+17 Oct 2010.
+Doing unit tests. Run into issue with size and indexing in FieldDataHandler.
+	Consider synapses being set up. The addition of a synapse may cause
+resizing of the dimensions of the FieldDataHandler, unless we hard-code in
+some limits here. This affects the way we index and identify entries.
+
+Approach 1: Don't index stuff this way. Don't ask for common size for
+field entry arrays. 
+	This gives the possibility of autonomous, ragged vectors for fields.
+	This gives up single-integer indexing.
+	This implies that all field arrays are on a single node, as it is
+	otherwise very hard to keep track.  This makes coding sense anyway, 
+		as fields are meant to be coded serially as parts of an
+		individual object.
+Approach 2: Put in callbacks for every function that resizes a field array,
+	to update the current field size. 
+	Note that this gets out of hand very quickly in a multinode array.
+
+Chose option 1, which is the older version anyway. This means that the
+setDataBlock index should be changed to a DataId. Done. Compiled, still 
+crashes. 
 ============================================================================

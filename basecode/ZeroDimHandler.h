@@ -89,9 +89,9 @@ class ZeroDimHandler: public ZeroDimGlobalHandler
 		 * has to be 0. Returns true if all this is OK.
 		 */
 		bool setDataBlock( const char* data, unsigned int numData,
-			const vector< unsigned int >& startIndex );
+			const vector< unsigned int >& startIndex ) const;
 		bool setDataBlock( const char* data, unsigned int numData,
-			unsigned int startIndex );
+			DataId startIndex ) const;
 	private:
 };
 

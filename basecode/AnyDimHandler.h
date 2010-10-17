@@ -112,9 +112,9 @@ class AnyDimHandler: public AnyDimGlobalHandler
 		 * Returns true if all OK. No allocation.
 		 */
 		bool setDataBlock( const char* data, unsigned int numData,
-			const vector< unsigned int >& startIndex );
+			const vector< unsigned int >& startIndex ) const;
 		bool setDataBlock( const char* data, unsigned int numData,
-			unsigned int startIndex );
+			DataId startIndex ) const;
 
 		unsigned int nextIndex( unsigned int index ) const;
 

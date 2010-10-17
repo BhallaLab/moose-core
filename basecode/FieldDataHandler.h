@@ -105,16 +105,17 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 
 		/**
 		 * Returns the number of field entries.
+		 * If parent is global the return value is also global.
+		 * If parent is local then it returns # on current node.
 		 */
 		unsigned int totalEntries() const {
 			unsigned int ret = 0;
-			/*
 			for ( DataHandler::iterator i = parentDataHandler_->begin();
 				i != parentDataHandler_->end(); ++i ) {
-				char* pa = parentDataHandler_->data1( i );
-				ret += ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
+				ret += 
+				( ( reinterpret_cast< Parent* >( *i ) )->*getNumField_ )();
 			}
-			*/
+
 
 			/*
 			unsigned int size = parentDataHandler_->numData1();
@@ -226,17 +227,44 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 			return parentDataHandler_;
 		}
 
+		bool setDataBlock( const char* data, unsigned int numData,
+			DataId did ) const 
+		{
+			if ( parentDataHandler_->isDataHere( did.data() ) ) {
+				char* temp = parentDataHandler_->data( did.data() );
+				assert( temp );
+				Parent* pa = reinterpret_cast< Parent* >( temp );
+
+				unsigned int numField = ( pa->*getNumField_ )();
+				unsigned int max = numData;
+				if ( did.field() + numData > numField  )
+					max = numField - did.field();
+				for ( unsigned int i = 0; i < max; ++i ) {
+					Field* f = ( pa->*lookupField_ )( did.field() + i );
+					*f = *reinterpret_cast< const Field* >( 
+						data + i * dinfo()->size() );
+				}
+			}
+			return 1;
+		}
+
 		/**
 		 * Assigns a block of data at the specified location.
 		 * Returns true if all OK. No allocation.
 		 */
 		bool setDataBlock( const char* data, unsigned int numData,
-			const vector< unsigned int >& startIndex ) {
-			return 0;
-		}
-		bool setDataBlock( const char* data, unsigned int numData,
-			unsigned int startIndex ) {
-			return 0;
+			const vector< unsigned int >& startIndex ) const
+		{
+			if ( startIndex.size() == 0 )
+				return setDataBlock( data, numData, 0 );
+			unsigned int fieldIndex = startIndex[0];
+			if ( startIndex.size() == 1 )
+				return setDataBlock( data, numData, DataId( 0, fieldIndex ) );
+			vector< unsigned int > temp = startIndex;
+			temp.pop_back(); // Get rid of fieldIndex.
+			DataDimensions dd( parentDataHandler_->dims() );
+			unsigned int paIndex = dd.linearIndex( temp );
+			return setDataBlock( data, numData, DataId( paIndex, fieldIndex ) );
 		}
 
 		unsigned int nextIndex( unsigned int index ) const {
@@ -258,6 +286,13 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		unsigned int ( Parent::*getNumField_ )() const;
 		void ( Parent::*setNumField_ )( unsigned int num );
 		unsigned int size_;
+		/**
+		 * This keeps track of the max # of fieldElements assigned. It is
+		 * analogous to the reserve size of a vector, but does not incur
+		 * any extra overhead in memory. This determines how the indexing
+		 * happens. As this gets rescaled every time new allocation happens
+		 */
+		unsigned int fieldSize_;
 		unsigned int start_;
 };
 

@@ -171,8 +171,9 @@ bool OneDimHandler::isAllocated() const {
 	return data_ != 0;
 }
 
-bool OneDimHandler::setDataBlock( const char* data, unsigned int numData,
-			const vector< unsigned int >& startIndex )
+bool OneDimHandler::setDataBlock( 
+	const char* data, unsigned int numData,
+	const vector< unsigned int >& startIndex ) const
 {
 	if ( startIndex.size() > 1 ) return 0;
 	unsigned int s = 0;
@@ -184,21 +185,21 @@ bool OneDimHandler::setDataBlock( const char* data, unsigned int numData,
 }
 
 bool OneDimHandler::setDataBlock( const char* data, unsigned int numData,
-			unsigned int startIndex )
+			DataId startIndex ) const
 {
 	if ( !isAllocated() ) return 0;
 
-	if ( startIndex + numData > size_ ) return 0;
+	if ( startIndex.data() + numData > size_ ) return 0;
 
 	unsigned int actualStart = start_;
-	if ( start_ < startIndex ) 
-		actualStart = startIndex;
+	if ( start_ < startIndex.data() ) 
+		actualStart = startIndex.data();
 	unsigned int actualEnd = end_;
-	if ( actualEnd > startIndex + numData )
-		actualEnd = startIndex + numData;
+	if ( actualEnd > startIndex.data() + numData )
+		actualEnd = startIndex.data() + numData;
 	if ( actualEnd > actualStart )
 		memcpy( data_ + (actualStart - start_) * dinfo()->size(),
-			data + ( actualStart - startIndex ) * dinfo()->size(),
+			data + ( actualStart - startIndex.data() ) * dinfo()->size(),
 			( actualEnd - actualStart ) * dinfo()->size() );
 	return 1;
 }

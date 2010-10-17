@@ -210,11 +210,11 @@ class DataHandler
 		 */
 		virtual bool setDataBlock( 
 			const char* data, unsigned int numData,
-			const vector< unsigned int >& startIndex ) = 0;
+			const vector< unsigned int >& startIndex ) const = 0;
 
 		virtual bool setDataBlock( 
 			const char* data, unsigned int numData,
-			unsigned int startIndex ) = 0;
+			DataId startIndex ) const = 0;
 
 		/**
 		 * Used to march through the entries in this DataHandler

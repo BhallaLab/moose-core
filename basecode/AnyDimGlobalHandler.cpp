@@ -243,7 +243,7 @@ bool AnyDimGlobalHandler::sliceInfo(
 
 bool AnyDimGlobalHandler::setDataBlock( 
 	const char* data, unsigned int numData,
-	const vector< unsigned int >& startIndex )
+	const vector< unsigned int >& startIndex ) const
 {
 
 	DataDimensions dd( dims_ );
@@ -254,10 +254,10 @@ bool AnyDimGlobalHandler::setDataBlock(
 
 bool AnyDimGlobalHandler::setDataBlock( 
 	const char* data, unsigned int numData,
-	unsigned int startIndex )
+	DataId startIndex ) const
 {
 	if ( numData < size_ ) {
-		memcpy( data_ + startIndex * dinfo()->size(), data, 
+		memcpy( data_ + startIndex.data() * dinfo()->size(), data, 
 			numData * dinfo()->size() );
 		return 1;
 	}

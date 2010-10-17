@@ -107,7 +107,7 @@ DataHandler::iterator ZeroDimGlobalHandler::end() const
 
 bool ZeroDimGlobalHandler::setDataBlock(
 	const char* data, unsigned int numData,
-	const vector< unsigned int >& startIndex )
+	const vector< unsigned int >& startIndex ) const
 {
 	if ( !isAllocated() ) return 0;
 	if ( numData != 1 ) return 0;
@@ -120,11 +120,11 @@ bool ZeroDimGlobalHandler::setDataBlock(
 
 bool ZeroDimGlobalHandler::setDataBlock(
 	const char* data, unsigned int numData,
-	unsigned int startIndex )
+	DataId startIndex ) const
 {
 	if ( !isAllocated() ) return 0;
 	if ( numData != 1 ) return 0;
-	if ( startIndex != 0 ) return 0;
+	if ( startIndex.data() != 0 ) return 0;
 	memcpy( data_, data, dinfo()->size() );
 	return 1;
 }

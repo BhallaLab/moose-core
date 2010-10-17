@@ -210,7 +210,7 @@ AnyDimHandler::iterator AnyDimHandler::end() const
 
 bool AnyDimHandler::setDataBlock( 
 	const char* data, unsigned int numData,
-	const vector< unsigned int >& startIndex )
+	const vector< unsigned int >& startIndex ) const
 {
 
 	DataDimensions dd( dims_ );
@@ -221,19 +221,19 @@ bool AnyDimHandler::setDataBlock(
 
 bool AnyDimHandler::setDataBlock( const char* data, 
 	unsigned int numEntries,
-	unsigned int startIndex )
+	DataId startIndex ) const
 {
-	if ( startIndex + numEntries > totalEntries() )
+	if ( startIndex.data() + numEntries > totalEntries() )
 		return 0;
 	unsigned int actualStart = start_;
-	if ( start_ < startIndex ) 
-		actualStart = startIndex;
+	if ( start_ < startIndex.data() ) 
+		actualStart = startIndex.data();
 	unsigned int actualEnd = end_;
-	if ( actualEnd > startIndex + numEntries )
-		actualEnd = startIndex + numEntries;
+	if ( actualEnd > startIndex.data() + numEntries )
+		actualEnd = startIndex.data() + numEntries;
 	if ( actualEnd > actualStart )
 		memcpy( data_ + (actualStart - start_) * dinfo()->size(),
-			data + ( actualStart - startIndex ) * dinfo()->size(),
+			data + ( actualStart - startIndex.data() ) * dinfo()->size(),
 			( actualEnd - actualStart ) * dinfo()->size() );
 	return 1;
 }

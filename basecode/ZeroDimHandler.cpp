@@ -111,7 +111,7 @@ DataHandler::iterator ZeroDimHandler::end() const
 
 bool ZeroDimHandler::setDataBlock( 
 	const char* data, unsigned int numData, 
-	const vector< unsigned int >& startIndex )
+	const vector< unsigned int >& startIndex ) const
 { 
 	if ( startIndex.size() != 0 ) return 0;
 	return setDataBlock( data, numData, 0 );
@@ -119,10 +119,10 @@ bool ZeroDimHandler::setDataBlock(
 
 bool ZeroDimHandler::setDataBlock( 
 	const char* data, unsigned int numData, 
-	unsigned int startIndex )
+	DataId startIndex ) const
 { 
 	if ( numData != 1 ) return 0;
-	if ( startIndex != 0 ) return 0;
+	if ( startIndex.data() != 0 ) return 0;
 	if ( !isAllocated() ) return 0;
 	if ( Shell::myNode() == 0 ) {
 		memcpy( data_, data, dinfo()->size() );

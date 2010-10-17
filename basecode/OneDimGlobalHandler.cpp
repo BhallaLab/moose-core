@@ -174,7 +174,7 @@ bool OneDimGlobalHandler::isGlobal() const {
 
 bool OneDimGlobalHandler::setDataBlock( 
 	const char* data, unsigned int numData,
-	const vector< unsigned int >& startIndex )
+	const vector< unsigned int >& startIndex ) const
 {
 	if ( startIndex.size() > 1 ) return 0;
 	unsigned int s = 0;
@@ -185,11 +185,11 @@ bool OneDimGlobalHandler::setDataBlock(
 
 bool OneDimGlobalHandler::setDataBlock( 
 	const char* data, unsigned int numData,
-	unsigned int startIndex )
+	DataId startIndex ) const
 {
 	if ( !isAllocated() ) return 0;
-	if ( startIndex + numData > size_ ) return 0;
-	memcpy( data_ + startIndex * dinfo()->size(), 
+	if ( startIndex.data() + numData > size_ ) return 0;
+	memcpy( data_ + startIndex.data() * dinfo()->size(), 
 		data, numData* dinfo()->size() );
 	return 1;
 }
