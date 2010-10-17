@@ -101,9 +101,7 @@ class ZeroDimGlobalHandler: public DataHandler
 		bool setDataBlock( const char* data, unsigned int numData,
 			DataId startIndex ) const;
 
-		unsigned int nextIndex( unsigned int index ) const {
-			return 1;
-		}
+		void nextIndex( DataId& index ) const;
 
 	protected:
 		char* data_;

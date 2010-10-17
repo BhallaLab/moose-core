@@ -146,23 +146,23 @@ class DataHandler
 					: dh_( other.dh_ ), index_( other.index_ )
 				{;}
 
-				iterator( const DataHandler* dh, unsigned int index )
+				iterator( const DataHandler* dh, const DataId& index )
 					: dh_( dh ), index_( index )
 				{;}
 
-				unsigned int index() const {
+				DataId index() const {
 					return index_;
 				}
 
 				// This does prefix increment.
 				iterator operator++() {
-					index_ = dh_->nextIndex( index_ );
+					dh_->nextIndex( index_ );
 					return *this;
 				}
 
 				// Bizarre C++ convention to tell it to do postfix increment
 				iterator operator++( int ) {
-					index_ = dh_->nextIndex( index_ );
+					dh_->nextIndex( index_ );
 					return *this;
 				}
 
@@ -183,10 +183,19 @@ class DataHandler
 
 			private:
 				const DataHandler* dh_;
-				unsigned int index_;
+				DataId index_;
 		};
 
+		/**
+		 * Iterator start point for going through all objects in the 
+		 * DataHandler.
+		 */
 		virtual iterator begin() const = 0;
+
+		/**
+		 * Iterator end point for going through all objects in the 
+		 * DataHandler.
+		 */
 		virtual iterator end() const = 0;
 
 		const DinfoBase* dinfo() const
@@ -219,7 +228,7 @@ class DataHandler
 		/**
 		 * Used to march through the entries in this DataHandler
 		 */
-		virtual unsigned int nextIndex( unsigned int index ) const = 0;
+		virtual void nextIndex( DataId& index ) const = 0;
 
 	private:
 		const DinfoBase* dinfo_;

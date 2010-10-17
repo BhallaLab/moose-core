@@ -78,7 +78,7 @@ class DataHandlerWrapper: public DataHandler
 		bool setDataBlock( const char* data, unsigned int numData,
 			DataId startIndex ) const;
 
-		unsigned int nextIndex( unsigned int index ) const;
+		void nextIndex( DataId& index ) const;
 
 	private:
 		const DataHandler* parent_;

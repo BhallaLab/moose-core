@@ -129,3 +129,7 @@ bool ZeroDimGlobalHandler::setDataBlock(
 	return 1;
 }
 
+void ZeroDimGlobalHandler::nextIndex( DataId& index ) const
+{
+	index.incrementDataIndex();
+}

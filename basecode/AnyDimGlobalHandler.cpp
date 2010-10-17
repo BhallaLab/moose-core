@@ -339,7 +339,7 @@ bool AnyDimGlobalHandler::setDataBlock( const char* data,
  */
 
 
-unsigned int AnyDimGlobalHandler::nextIndex( unsigned int index ) const
+void AnyDimGlobalHandler::nextIndex( DataId& index ) const
 {
-	return index + 1;
+	index.incrementDataIndex();
 }

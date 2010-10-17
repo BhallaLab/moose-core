@@ -49,6 +49,23 @@ class DataId {
 			return ( data_ == other.data_ && field_ == other.field_ );
 		}
 
+		bool operator!=( const DataId& other ) const {
+			return ( data_ != other.data_ || field_ != other.field_ );
+		}
+
+		void incrementDataIndex() {
+			++data_;
+		}
+
+		void rolloverFieldIndex() {
+			++data_;
+			field_ = 0;
+		}
+
+		void incrementFieldIndex() {
+			++field_;
+		}
+
 		/// Represents a bad dataId.
 		static const DataId& bad();
 

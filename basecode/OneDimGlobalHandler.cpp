@@ -193,3 +193,9 @@ bool OneDimGlobalHandler::setDataBlock(
 		data, numData* dinfo()->size() );
 	return 1;
 }
+
+
+void OneDimGlobalHandler::nextIndex( DataId& index ) const 
+{
+	index.incrementDataIndex();
+}

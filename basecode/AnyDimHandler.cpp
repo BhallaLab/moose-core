@@ -238,7 +238,3 @@ bool AnyDimHandler::setDataBlock( const char* data,
 	return 1;
 }
 
-unsigned int AnyDimHandler::nextIndex( unsigned int index ) const
-{
-	return index + 1;
-}

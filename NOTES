@@ -7988,5 +7988,13 @@ Approach 2: Put in callbacks for every function that resizes a field array,
 
 Chose option 1, which is the older version anyway. This means that the
 setDataBlock index should be changed to a DataId. Done. Compiled, still 
-crashes. 
+crashes.  Checkin 2221.
+
+in AssignVecMsg.cpp:exec around line 50: Issue is how to map
+entries in PrepackedBuffer pb to DataHandler entries, especially
+FieldDataHandlers. Fixed.
+
+Many bugs squashed, but still stuck on a test for setting a
+vector of synaptic fields, in testAsync.cpp:566.
+
 ============================================================================

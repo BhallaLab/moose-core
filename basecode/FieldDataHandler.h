@@ -198,34 +198,68 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 			return parentDataHandler_->isGlobal();
 		}
 
+		/////////////////////////////////////////////////////////////////
+		// Iterators
+		/////////////////////////////////////////////////////////////////
+
 		/**
-		 * This seems funny, but remember than begin() refers to the
-		 * data part on the index.
 		 */
 		iterator begin() const {
-			// Assume we start on 0. Easy to extend to starting at another
-			// index.
-			iterator ret( this, parentDataHandler_->begin().index() * size_ );
-			return ret;
+			for ( iterator i = parentDataHandler_->begin(); i !=
+				parentDataHandler_->end(); ++i ) {
+				char* pa = *i;
+				assert( pa );
+				unsigned int numHere = ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
+				if ( numHere != 0 )
+					return iterator( this, i.index() );
+			}
+			// Failed to find any valid index
+			return end();
 		}
 
 		/**
-		 * This is the last valid field entry on the last valid data entry
+		 * This is 1+(last valid field entry) on the last valid data entry
 		 * on the parent data handler, expressed as a single int.
-		 * Index should perhaps be a long.
 		 */
 		iterator end() const {
-			unsigned int paIndex = parentDataHandler_->end().index();
+			unsigned int paIndex = parentDataHandler_->end().index().data();
 			char* pa = parentDataHandler_->data( paIndex );
 			assert( pa );
 			unsigned int numHere = ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
-			iterator ret( this, paIndex * size_ + numHere );
-			return ret;
+			return iterator( this, DataId( paIndex, numHere ) );
 		}
+
+		void nextIndex( DataId& index ) const {
+			char* pa = parentDataHandler_->data( index );
+			assert( pa );
+			unsigned int numHere = ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
+			if ( index.field() < numHere ) {
+				index.incrementFieldIndex();
+				return;
+			}
+
+			index.rolloverFieldIndex();
+			for ( iterator i( parentDataHandler_, index.data() ); 
+				i != parentDataHandler_->end(); ++i ) {
+				index = i.index();
+				char* pa = *i;
+				assert( pa );
+				unsigned int numHere = ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
+				if ( numHere > 0 ) {
+					return;
+				}
+			}
+		}
+
+		/////////////////////////////////////////////////////////////////
 
 		const DataHandler* parentDataHandler() const {
 			return parentDataHandler_;
 		}
+
+		/////////////////////////////////////////////////////////////////
+		// setDataBlock stuff.
+		/////////////////////////////////////////////////////////////////
 
 		bool setDataBlock( const char* data, unsigned int numData,
 			DataId did ) const 
@@ -265,19 +299,6 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 			DataDimensions dd( parentDataHandler_->dims() );
 			unsigned int paIndex = dd.linearIndex( temp );
 			return setDataBlock( data, numData, DataId( paIndex, fieldIndex ) );
-		}
-
-		unsigned int nextIndex( unsigned int index ) const {
-			unsigned int paIndex = index / size_;
-			unsigned int fieldIndex = index % size_;
-			char* pa = parentDataHandler_->data( paIndex );
-			assert( pa );
-			unsigned int numHere = ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
-			if ( ( fieldIndex + 1 ) >= numHere ) {
-				return (paIndex + 1) * size_;
-			} else {
-				return index + 1;
-			}
 		}
 
 	private:

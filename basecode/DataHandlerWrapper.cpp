@@ -122,7 +122,7 @@ bool DataHandlerWrapper::setDataBlock(
 	return parent_->setDataBlock( data, numEntries, startIndex );
 }
 
-unsigned int DataHandlerWrapper::nextIndex( unsigned int index ) const
+void DataHandlerWrapper::nextIndex( DataId& index ) const
 {
-	return parent_->nextIndex( index );
+	parent_->nextIndex( index );
 }
