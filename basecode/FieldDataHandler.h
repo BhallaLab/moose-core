@@ -222,18 +222,21 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		 * on the parent data handler, expressed as a single int.
 		 */
 		iterator end() const {
+			return iterator( this, parentDataHandler_->end().index() );
+			/*
 			unsigned int paIndex = parentDataHandler_->end().index().data();
-			char* pa = parentDataHandler_->data( paIndex );
-			assert( pa );
-			unsigned int numHere = ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
-			return iterator( this, DataId( paIndex, numHere ) );
+			// char* pa = parentDataHandler_->data( paIndex );
+			// assert( pa );
+			// unsigned int numHere = ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
+			return iterator( this, DataId( paIndex, 0 ) );
+			*/
 		}
 
 		void nextIndex( DataId& index ) const {
 			char* pa = parentDataHandler_->data( index );
 			assert( pa );
 			unsigned int numHere = ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
-			if ( index.field() < numHere ) {
+			if ( index.field() + 1 < numHere ) {
 				index.incrementFieldIndex();
 				return;
 			}
@@ -249,6 +252,8 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 					return;
 				}
 			}
+			// If we fall out of this loop we must be at the end.
+			index = parentDataHandler_->end().index();
 		}
 
 		/////////////////////////////////////////////////////////////////

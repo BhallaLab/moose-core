@@ -7995,6 +7995,9 @@ entries in PrepackedBuffer pb to DataHandler entries, especially
 FieldDataHandlers. Fixed.
 
 Many bugs squashed, but still stuck on a test for setting a
-vector of synaptic fields, in testAsync.cpp:566.
+vector of synaptic fields, in testAsync.cpp:566. Incremental checkin 2222.
+
+Further bug squashing in FieldDataHandler iterators, now it clears the
+test for assigning Synaptic delay. More bugs loom.
 
 ============================================================================
