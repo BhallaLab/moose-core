@@ -486,4 +486,6 @@ neuronal compartment, you want to connect a @code{PulseGen} object
 definition of @code{PulseGen} class you have predefined source fields
 which tell what are the fields that can be transmitted out of the
 @code{pulsegen} object. Similarly, @code{Compartment} has a destination
-field where
+field where it can receive a current injection value. By connecting the
+source and the destination fields we set up communication between these
+two components.
