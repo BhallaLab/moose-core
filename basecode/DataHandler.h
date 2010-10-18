@@ -77,6 +77,14 @@ class DataHandler
 		 * Returns 0 if data not present on current node on specified index
 		 */
 		virtual char* data( DataId index ) const = 0;
+		
+		/**
+		 * Returns the data of the parent object on the specified index.
+		 * Usually this is identical to 'data', but for FieldDataHandlers
+		 * this is a different object.
+		 * Returns 0 if data not present on current node on specified index
+		 */
+		virtual char* parentData( DataId index ) const = 0;
 
 		/**
 		 * Goes through all the data resident on the local node, using

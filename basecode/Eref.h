@@ -22,6 +22,12 @@ class Eref
 		char* data() const;
 
 		/**
+		 * Returns data entry for parent object. Relevant for
+		 * FieldDataHandlers.
+		 */
+		char* parentData() const;
+
+		/**
 		 * Returns data entry of parent object of field array
 		 */
 

@@ -44,7 +44,7 @@ template< class T > class UpFunc0: public OpFunc
 		 * argument.
 		 */
 		void op( const Eref& e, const char* buf ) const {
-			(reinterpret_cast< T* >( e.data() )->*func_)( e.index() );
+			(reinterpret_cast< T* >( e.parentData() )->*func_)( e.index() );
 		}
 	private:
 		void ( T::*func_ )( DataId index ); 
@@ -75,7 +75,7 @@ template< class T, class A > class UpFunc1: public OpFunc
 		// buf is organized as Qinfo, args, optionally srcIndex.
 		void op( const Eref& e, const char* buf ) const {
 			Conv< A > arg1( buf + sizeof( Qinfo ) );
-			(reinterpret_cast< T* >( e.data() )->*func_)( 
+			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
 				e.index(), *arg1 );
 		}
 
@@ -108,7 +108,7 @@ template< class T, class A1, class A2 > class UpFunc2: public OpFunc
 			Conv< A1 > arg1( buf );
 			buf += arg1.size();
 			Conv< A2 > arg2( buf );
-			(reinterpret_cast< T* >( e.data() )->*func_)( 
+			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
 				e.index(), *arg1, *arg2 );
 		}
 
@@ -144,7 +144,7 @@ template< class T, class A1, class A2, class A3 > class UpFunc3:
 			Conv< A2 > arg2( buf );
 			buf += arg2.size();
 			Conv< A3 > arg3( buf );
-			(reinterpret_cast< T* >( e.data() )->*func_)( 
+			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
 				e.index(), *arg1, *arg2, *arg3 );
 		}
 
@@ -182,7 +182,7 @@ template< class T, class A1, class A2, class A3, class A4 > class UpFunc4:
 			Conv< A3 > arg3( buf );
 			buf += arg3.size();
 			Conv< A4 > arg4( buf );
-			(reinterpret_cast< T* >( e.data() )->*func_)( 
+			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
 				e.index(), *arg1, *arg2, *arg3, *arg4 );
 		}
 
@@ -222,7 +222,7 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class UpFu
 			Conv< A4 > arg4( buf );
 			buf += arg4.size();
 			Conv< A5 > arg5( buf );
-			(reinterpret_cast< T* >( e.data() )->*func_)( 
+			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
 				e.index(), *arg1, *arg2, *arg3, *arg4, *arg5 );
 		}
 
@@ -266,7 +266,7 @@ template< class T, class A > class GetUpFunc: public OpFunc
 		 * right to the Conn to send the data.
 		 */
 		void op( const Eref& e, const char* buf ) const {
-			const A& ret = (( reinterpret_cast< T* >( e.data() ) )->*func_)( e.index() );
+			const A& ret = (( reinterpret_cast< T* >( e.parentData() ) )->*func_)( e.index() );
 			Conv< A > arg( ret );
 			char* temp = new char[ arg.size() ];
 			arg.val2buf( temp );

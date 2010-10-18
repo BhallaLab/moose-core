@@ -104,6 +104,14 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		}
 
 		/**
+		 * Returns the parent object data on the specified index.
+		 */
+		char* parentData( DataId index ) const
+		{
+			return parentDataHandler_->data( index );
+		}
+
+		/**
 		 * Returns the number of field entries.
 		 * If parent is global the return value is also global.
 		 * If parent is local then it returns # on current node.

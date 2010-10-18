@@ -379,7 +379,6 @@ unsigned int SparseMsg::randomConnect( double probability )
 {
 	unsigned int nRows = matrix_.nRows(); // Sources
 	unsigned int nCols = matrix_.nColumns();	// Destinations
-	// matrix_.setSize( 0, nRows ); // we will transpose this later.
 	matrix_.clear();
 	unsigned int totalSynapses = 0;
 	unsigned int startSynapse = 0;

@@ -39,6 +39,11 @@ class DataHandlerWrapper: public DataHandler
 		char* data( DataId index ) const;
 
 		/**
+		 * Returns the parent object data on the specified index.
+		 */
+		char* parentData( DataId index ) const;
+
+		/**
 		 * calls process on data, using threading info from the ProcInfo
 		 */
 		void process( const ProcInfo* p, Element* e, FuncId fid ) const;

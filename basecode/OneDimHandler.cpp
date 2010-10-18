@@ -118,10 +118,16 @@ void OneDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 }
 
 
-char* OneDimHandler::data( DataId index ) const {
+char* OneDimHandler::data( DataId index ) const
+{
 	if ( isDataHere( index ) )
 		return data_ + ( index.data() - start_ ) * dinfo()->size();
 	return 0;
+}
+
+char* OneDimHandler::parentData( DataId index ) const
+{
+	return data( index );
 }
 
 bool OneDimHandler::nodeBalance( unsigned int size )

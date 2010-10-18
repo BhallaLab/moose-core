@@ -90,6 +90,10 @@ char* ZeroDimHandler::data( DataId index ) const {
 	return data_;
 }
 
+char* ZeroDimHandler::parentData( DataId index ) const {
+	return data_;
+}
+
 /**
  * Returns true if the node decomposition has the data on the
  * current node

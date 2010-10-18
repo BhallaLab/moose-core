@@ -111,8 +111,14 @@ unsigned int OneDimGlobalHandler::sizeOfDim( unsigned int dim ) const
 	return 0;
 }
 
-char* OneDimGlobalHandler::data( DataId index ) const {
+char* OneDimGlobalHandler::data( DataId index ) const
+{
 	return data_ + index.data() * dinfo()->size();
+}
+
+char* OneDimGlobalHandler::parentData( DataId index ) const
+{
+	return data( index );
 }
 
 bool OneDimGlobalHandler::nodeBalance( unsigned int size )

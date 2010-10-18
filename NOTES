@@ -7998,6 +7998,17 @@ Many bugs squashed, but still stuck on a test for setting a
 vector of synaptic fields, in testAsync.cpp:566. Incremental checkin 2222.
 
 Further bug squashing in FieldDataHandler iterators, now it clears the
-test for assigning Synaptic delay. More bugs loom.
+test for assigning Synaptic delay. More bugs loom. Checkin 2223.
+
 
 ============================================================================
+18 Oct 2010
+New bug turns out to be the confusion between parent data and field data
+in UpFunc. 
+Current approach: UpFunc uses special access functions to get at the parentData
+Option: use a special DataId::fieldId to indicate that the regular
+	OpFunc should return ordinary data. Otherwise OpFunc looks up field
+	data. 
+Decision: Too messy. Stay with current system. This means filling out
+	parentData() function in all DataHandlers.
+

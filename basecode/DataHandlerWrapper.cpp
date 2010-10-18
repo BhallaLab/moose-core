@@ -49,7 +49,13 @@ DataHandler* DataHandlerWrapper::copyToNewDim( unsigned int newDimSize ) const
 	return parent_->copyToNewDim( newDimSize );
 }
 
-char* DataHandlerWrapper::data( DataId index ) const {
+char* DataHandlerWrapper::data( DataId index ) const
+{
+	return parent_->data( index );
+}
+
+char* DataHandlerWrapper::parentData( DataId index ) const
+{
 	return parent_->data( index );
 }
 

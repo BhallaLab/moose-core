@@ -167,6 +167,11 @@ char* AnyDimHandler::data( DataId index ) const
 	return 0;
 }
 
+char* AnyDimHandler::parentData( DataId index ) const
+{
+	return data( index );
+}
+
 bool AnyDimHandler::resize( vector< unsigned int > dims )
 {
 	size_ = 1;
