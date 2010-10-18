@@ -45,6 +45,8 @@ class Enzyme
 		static void setY( const Conn* c, double value );
 		static string getColor( Eref e );
 		static void setColor( const Conn* c, string value );
+		static string getBgColor( Eref e );
+		static void setBgColor( const Conn* c, string value );
 		
 		///////////////////////////////////////////////////
 		// Shared message function definitions
@@ -91,6 +93,7 @@ class Enzyme
 		double x_;		/// x coordinate for display
 		double y_;		/// y coordinate for display
 		string xtree_textfg_req_; //text color
+		string xtree_fg_req_; //background color
 };
 
 // Used by the solver

@@ -93,7 +93,7 @@ const Cinfo* initEnzymeCinfo()
 			GFCAST( &Enzyme::getConcInitComplex ), 
 			RFCAST( &Enzyme::setConcInitComplex )
 		),
-				new ValueFinfo( "x", 
+		new ValueFinfo( "x", 
 			ValueFtype1< double >::global(),
 			GFCAST( &Enzyme::getX ), 
 			RFCAST( &Enzyme::setX ),
@@ -110,6 +110,12 @@ const Cinfo* initEnzymeCinfo()
 			GFCAST( &Enzyme::getColor ), 
 			RFCAST( &Enzyme::setColor ),
 			"text Color : for display."
+		),
+		new ValueFinfo( "xtree_fg_req", 
+			ValueFtype1< string >::global(),
+			GFCAST( &Enzyme::getBgColor ), 
+			RFCAST( &Enzyme::setBgColor ),
+			"background Color : for display."
 		),
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
@@ -496,6 +502,17 @@ void Enzyme::setColor( const Conn* c, string value )
 string Enzyme::getColor( Eref e )
 {
 	return static_cast< Enzyme* >( e.data() )->xtree_textfg_req_;
+}
+
+
+void Enzyme::setBgColor( const Conn* c, string value )
+{
+	static_cast< Enzyme* >( c->data() )->xtree_fg_req_ = value;
+}
+
+string Enzyme::getBgColor( Eref e )
+{
+	return static_cast< Enzyme* >( e.data() )->xtree_fg_req_;
 }
 
 ///////////////////////////////////////////////////
