@@ -8019,4 +8019,6 @@ Replaced parentData() with a simpler and more general option, to return
 
 Added DataHandler::setFieldArraySize and getFieldArraySize,
 	again as functions useful for FieldDataHandlers.
-	
+	Checkin 2226.
+
+Fixes to OneDimHandler::nodeBalance. Now clears testScheduling().

@@ -128,10 +128,12 @@ char* OneDimHandler::data( DataId index ) const
 bool OneDimHandler::nodeBalance( unsigned int size )
 {
 	unsigned int oldsize = size_;
+	unsigned int oldstart = start_;
+	unsigned int oldend = end_;
 	size_ = size;
-	unsigned int start = ( size * Shell::myNode() ) / Shell::numNodes();
-	unsigned int end = ( size * ( 1 + Shell::myNode() ) ) / Shell::numNodes();
-	return ( size != oldsize || start != start_ || end != end_ );
+	start_ = ( size * Shell::myNode() ) / Shell::numNodes();
+	end_ = ( size * ( 1 + Shell::myNode() ) ) / Shell::numNodes();
+	return ( size != oldsize || oldstart != start_ || oldend != end_ );
 }
 
 
