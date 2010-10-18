@@ -45,7 +45,8 @@ class Molecule
 		static void setY( const Conn* c, double value );
 		static string getColor( Eref e );
 		static void setColor( const Conn* c, string value );
-
+		static string getBgColor( Eref e );
+		static void setBgColor( const Conn* c, string value );
 		///////////////////////////////////////////////////
 		// Dest function definitions
 		///////////////////////////////////////////////////
@@ -80,6 +81,8 @@ class Molecule
 		double x_; //x co ordinate for display
 		double y_; //y co ordinate for display
 		string xtree_textfg_req_; //text color
+		string xtree_fg_req_; //text bgcolor
+
 };
 
 // Used by the solver
