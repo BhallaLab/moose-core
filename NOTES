@@ -8022,3 +8022,12 @@ Added DataHandler::setFieldArraySize and getFieldArraySize,
 	Checkin 2226.
 
 Fixes to OneDimHandler::nodeBalance. Now clears testScheduling().
+	Checkin 2228.
+
+Now it is stuck in the actual values from the IntFire network. Seems to
+be calling process and sending spikes and handling their arrival OK.
+
+Tracked down error in unit test for IntFire network, to bad assignment of
+weights and delays.  I had not used the
+correct function to find how many synapses needed weights/delays set.
+Now clears this unit test, more to go.

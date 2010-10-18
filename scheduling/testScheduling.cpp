@@ -354,12 +354,14 @@ void testThreadIntFireNetwork()
 	vector< double > delay;
 	delay.reserve( nd );
 	for ( unsigned int i = 0; i < size; ++i ) {
-		unsigned int numSyn = syne.element()->dataHandler()->sizeOfDim( 0 );
+		unsigned int numSyn = syne.element()->dataHandler()->getFieldArraySize( i );
 		for ( unsigned int j = 0; j < numSyn; ++j ) {
 			weight.push_back( mtrand() * weightMax );
 			delay.push_back( mtrand() * delayMax );
 		}
 	}
+	assert( syne.element()->dataHandler()->totalEntries() == weight.size());
+
 	ret = Field< double >::setVec( syne, "weight", weight );
 	assert( ret );
 	ret = Field< double >::setVec( syne, "delay", delay );
