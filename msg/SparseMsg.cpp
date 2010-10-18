@@ -270,10 +270,11 @@ void SparseMsgWrapper::loadUnbalance()
 
 SparseMsg::SparseMsg( Element* e1, Element* e2 )
 	: Msg( e1, e2, id_ ),
-	matrix_( e1->dataHandler()->totalEntries(), e2->dataHandler()->totalEntries() )
+	matrix_( e1->dataHandler()->parentDataHandler()->totalEntries(), 
+		e2->dataHandler()->parentDataHandler()->totalEntries() )
 {
-	assert( e1->dataHandler()->numDimensions() == 1  && 
-		e2->dataHandler()->numDimensions() >= 1 );
+	assert( e1->dataHandler()->parentDataHandler()->numDimensions() >= 1  && 
+		e2->dataHandler()->parentDataHandler()->numDimensions() >= 1 );
 }
 
 SparseMsg::~SparseMsg()
@@ -390,9 +391,11 @@ unsigned int SparseMsg::randomConnect( double probability )
 	Element* syn = e2_;
 	// syn->dataHandler()->getNumData2( sizes );
 	// assert( sizes.size() == nCols );
-	assert( nCols == syn->dataHandler()->sizeOfDim( 0  ) );
+	assert( nCols == syn->dataHandler()->parentDataHandler()->sizeOfDim( 0  ) );
 	// assert( nRows == syn->dataHandler()->sizeOfDim( 1 ) );
 
+	vector< unsigned int > dims( syn->dataHandler()->dims() );
+	assert( dims.size() > 1 );
 
 	for ( unsigned int i = 0; i < nCols; ++i ) {
 		// Check if synapse is on local node
@@ -418,17 +421,20 @@ unsigned int SparseMsg::randomConnect( double probability )
 			if ( r < probability )
 				++totSynNum;
 		}
-		sizes[ i ] = synNum;
+		syn->dataHandler()->setFieldArraySize( i, synNum );
+		// sizes[ i ] = synNum;
 		totalSynapses += synNum;
 
 		matrix_.addRow( i, synIndex );
 	}
+	/*
 	// Here we figure out the largest # of syns and use it.
 	unsigned int biggest = *max_element( sizes.begin(), sizes.end() );
 	sizes.resize( 0 );
 	sizes.push_back( nCols );
 	sizes.push_back( biggest );
 	syn->dataHandler()->resize( sizes );
+	*/
 
 
 	// syn->dataHandler()->setNumData2( startSynapse, sizes );

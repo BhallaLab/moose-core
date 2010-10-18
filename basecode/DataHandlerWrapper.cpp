@@ -54,11 +54,6 @@ char* DataHandlerWrapper::data( DataId index ) const
 	return parent_->data( index );
 }
 
-char* DataHandlerWrapper::parentData( DataId index ) const
-{
-	return parent_->data( index );
-}
-
 void DataHandlerWrapper::process( const ProcInfo* p, Element* e, FuncId fid ) const
 {
 	parent_->process( p, e, fid );

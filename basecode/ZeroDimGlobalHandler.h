@@ -46,13 +46,6 @@ class ZeroDimGlobalHandler: public DataHandler
 		}
 
 		/**
-		 * Returns the parent object data on the specified index.
-		 */
-		char* parentData( DataId index ) const {
-			return data_;
-		}
-
-		/**
 		 * calls process on data, using threading info from the ProcInfo
 		 */
 		void process( const ProcInfo* p, Element* e, FuncId fid ) const;

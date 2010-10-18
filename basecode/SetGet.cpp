@@ -51,15 +51,15 @@ bool SetGet::checkSet( const string& field, Eref& tgt, FuncId& fid ) const
 			f = child()->cinfo()->findFinfo( "set_this" );
 			assert( f ); // should always work as Neutral has the field.
 			if ( child()->dataHandler()->totalEntries() == 
-				e_.element()->dataHandler()->totalEntries() )
+				e_.element()->dataHandler()->totalEntries() ) {
 				tgt = Eref( child(), e_.index() );
 				if ( !tgt.isDataHere() )
 					return 0;
-			else if ( child()->dataHandler()->totalEntries() <= 1 )
+			} else if ( child()->dataHandler()->totalEntries() <= 1 ) {
 				tgt = Eref( child(), 0 );
 				if ( !tgt.isDataHere() )
 					return 0;
-			else {
+			} else {
 				cout << "SetGet::checkSet: child index mismatch\n";
 				return 0;
 			}

@@ -151,11 +151,6 @@ char* AnyDimGlobalHandler::data( DataId index ) const
 	return 0;
 }
 
-char* AnyDimGlobalHandler::parentData( DataId index ) const
-{
-	return data( index );
-}
-
 unsigned int AnyDimGlobalHandler::totalEntries() const
 {
 	return size_;

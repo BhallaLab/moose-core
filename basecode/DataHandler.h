@@ -77,14 +77,12 @@ class DataHandler
 		 * Returns 0 if data not present on current node on specified index
 		 */
 		virtual char* data( DataId index ) const = 0;
-		
+
 		/**
-		 * Returns the data of the parent object on the specified index.
-		 * Usually this is identical to 'data', but for FieldDataHandlers
-		 * this is a different object.
-		 * Returns 0 if data not present on current node on specified index
+		 * Returns DataHandler for the parent object. This applies to 
+		 * the FieldDataHandler; in all other cases it returns self.
 		 */
-		virtual char* parentData( DataId index ) const = 0;
+		virtual const DataHandler* parentDataHandler() const;
 
 		/**
 		 * Goes through all the data resident on the local node, using
@@ -123,6 +121,22 @@ class DataHandler
 		 * Returns 0 if it cannot handle the requested allocation.
 		 */
 		virtual bool resize( vector< unsigned int > dims ) = 0;
+
+		/**
+		 * Reallocates field data. This uses the object-specific resize
+		 * function, so we don't know what happens to old data.
+		 * Most objects dont' care about this. It is used by the
+		 * FieldDataHandler.
+		 */
+		virtual void setFieldArraySize(
+			unsigned int objectIndex, unsigned int size ) const;
+
+		/**
+		 * Looks up size of field data. Most objects don't have applicable
+		 * fields, and return zero. The FieldDataHandlers use it.
+		 */
+		virtual unsigned int getFieldArraySize( 
+			unsigned int objectIndex ) const;
 
 		 /**
 		  * Returns vector of dimensions.

@@ -125,11 +125,6 @@ char* OneDimHandler::data( DataId index ) const
 	return 0;
 }
 
-char* OneDimHandler::parentData( DataId index ) const
-{
-	return data( index );
-}
-
 bool OneDimHandler::nodeBalance( unsigned int size )
 {
 	unsigned int oldsize = size_;

@@ -104,14 +104,6 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		}
 
 		/**
-		 * Returns the parent object data on the specified index.
-		 */
-		char* parentData( DataId index ) const
-		{
-			return parentDataHandler_->data( index );
-		}
-
-		/**
 		 * Returns the number of field entries.
 		 * If parent is global the return value is also global.
 		 * If parent is local then it returns # on current node.
@@ -175,19 +167,25 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		}
 
 		/**
-		 * Assigns the sizes of all array field entries at once.
-		void setNumData2( unsigned int start, 
-			const vector< unsigned int >& sizes ) {
-			assert ( sizes.size() == parentDataHandler_->numData() );
-			for ( DataHandler::iterator i = parentDataHandler_->begin();
-				i != parentDataHandler_->end(); ++i ) {
-				char* pa = parentDataHandler_->data1( i );
-				( ( reinterpret_cast< Parent* >( pa ) )->*setNumField_ )( sizes[i] );
-			}
-			start_ = start;
-		}
+		 * Assigns the size of the field array on the specified object.
 		 */
+		void setFieldArraySize( 
+			unsigned int objectIndex, unsigned int size ) const
+		{
+			assert( objectIndex < parentDataHandler_->totalEntries() );
+			char* pa = parentDataHandler_->data( objectIndex );
+			( ( reinterpret_cast< Parent* >( pa ) )->*setNumField_ )( size);
+		}
 
+		/**
+		 * Looks up the size of the field array on the specified object
+		 */
+		unsigned int getFieldArraySize( unsigned int objectIndex ) const
+		{
+			assert( objectIndex < parentDataHandler_->totalEntries() );
+			char* pa = parentDataHandler_->data( objectIndex );
+			return ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
+		}
 
 		/**
 		 * Returns true if the node decomposition has the data on the
@@ -266,7 +264,8 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 
 		/////////////////////////////////////////////////////////////////
 
-		const DataHandler* parentDataHandler() const {
+		const DataHandler* parentDataHandler() const
+		{
 			return parentDataHandler_;
 		}
 

@@ -8012,3 +8012,11 @@ Option: use a special DataId::fieldId to indicate that the regular
 Decision: Too messy. Stay with current system. This means filling out
 	parentData() function in all DataHandlers.
 
+Replaced parentData() with a simpler and more general option, to return
+	parentDataHandler(). The default virtual function for this returns
+	self, and for the FieldDataHandler returns the parent.
+	Checkin 2224.
+
+Added DataHandler::setFieldArraySize and getFieldArraySize,
+	again as functions useful for FieldDataHandlers.
+	

@@ -15,3 +15,20 @@ DataHandler::DataHandler( const DinfoBase* dinfo )
 
 DataHandler::~DataHandler()
 {;}
+
+const DataHandler* DataHandler::parentDataHandler() const
+{
+	return this;
+}
+
+void DataHandler::setFieldArraySize( 
+	unsigned int objectIndex, unsigned int size ) const
+{
+	; // Default operation does nothing. Used only in FieldDataHandlers.
+}
+
+unsigned int DataHandler::getFieldArraySize( unsigned int objectIndex )
+	const
+{
+	return 0; // Default operation.
+}
