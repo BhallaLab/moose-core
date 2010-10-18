@@ -38,6 +38,8 @@ class Reaction
 		static void setY( const Conn* c, double value );
 		static string getColor( Eref e );
 		static void setColor( const Conn* c, string value );
+		static string getBgColor( Eref e );
+		static void setBgColor( const Conn* c, string value );
 		
 		///////////////////////////////////////////////////
 		// Shared message function definitions
@@ -72,6 +74,7 @@ class Reaction
 		double x_;
 		double y_;
 		string xtree_textfg_req_;
+		string xtree_fg_req_;
 
 };
 

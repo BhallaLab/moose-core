@@ -390,6 +390,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Actions for file menu
         self.loadModelAction = QtGui.QAction(self.tr('Load Model'), self)
+        self.loadModelAction.setShortcut(QtGui.QKeySequence(self.tr('Ctrl+L')))
         self.connect(self.loadModelAction, QtCore.SIGNAL('triggered()'), self.popupLoadModelDialog)
         
         self.newPlotWindowAction = QtGui.QAction(self.tr('New Plot Window'), self)
@@ -413,7 +414,7 @@ class MainWindow(QtGui.QMainWindow):
         self.quitAction = QtGui.QAction(self.tr('&Quit'), self)
         self.quitAction.setShortcut(QtGui.QKeySequence(self.tr('Ctrl+Q')))
         self.connect(self.quitAction, QtCore.SIGNAL('triggered()'), self.doQuit)
-
+	
         # Actions for 3D visualization
         self.startGLWizardAction = QtGui.QAction(self.tr('Start GL&Wizard'), self)
         self.connect(self.startGLWizardAction, QtCore.SIGNAL('triggered()'), self.startGLWizard)
@@ -707,7 +708,7 @@ class MainWindow(QtGui.QMainWindow):
             self._visiblePlotWindowCount = 0
 
     def addLayoutWindow(self):
-        self.sceneLayout = layout.Scene()
+        self.sceneLayout = layout.LayoutWidget()
 	self.connect(self.sceneLayout, QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"), self.makeObjectFieldEditor)
         self.centralPanel.addSubWindow(self.sceneLayout)
 	self.centralPanel.tileSubWindows()
