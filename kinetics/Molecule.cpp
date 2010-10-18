@@ -125,7 +125,13 @@ const Cinfo* initMoleculeCinfo()
 			ValueFtype1< string >::global(),
 			GFCAST( &Molecule::getColor ), 
 			RFCAST( &Molecule::setColor ),
-			"Y coordinate: for display."
+			"text color: for display."
+		),
+		new ValueFinfo( "xtree_fg_req", 
+			ValueFtype1< string >::global(),
+			GFCAST( &Molecule::getBgColor ), 
+			RFCAST( &Molecule::setBgColor ),
+			"text color: for display."
 		),
 
 	///////////////////////////////////////////////////////
@@ -405,6 +411,16 @@ string Molecule::getColor( Eref e )
 {
 	return static_cast< Molecule* >( e.data() )->xtree_textfg_req_;
 }
+void Molecule::setBgColor( const Conn* c, string value )
+{
+	static_cast< Molecule* >( c->data() )->xtree_fg_req_ = value;
+}
+
+string Molecule::getBgColor( Eref e )
+{
+	return static_cast< Molecule* >( e.data() )->xtree_fg_req_;
+}
+
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////

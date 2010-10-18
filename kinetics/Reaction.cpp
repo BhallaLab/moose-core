@@ -80,7 +80,13 @@ const Cinfo* initReactionCinfo()
 			ValueFtype1< string >::global(),
 			GFCAST( &Reaction::getColor ), 
 			RFCAST( &Reaction::setColor ),
-			"Y coordinate: for display."
+			"Text color: for display."
+		),
+		new ValueFinfo( "xtree_fg_req", 
+			ValueFtype1< string >::global(),
+			GFCAST( &Reaction::getBgColor ), 
+			RFCAST( &Reaction::setBgColor ),
+			"background color: for display."
 		),
 
 	///////////////////////////////////////////////////////
@@ -255,6 +261,15 @@ string Reaction::getColor( Eref e )
 	return static_cast< Reaction* >( e.data() )->xtree_textfg_req_;
 }
 
+void Reaction::setBgColor( const Conn* c, string value )
+{
+	static_cast< Reaction* >( c->data() )->xtree_fg_req_ = value;
+}
+
+string Reaction::getBgColor( Eref e )
+{
+	return static_cast< Reaction* >( e.data() )->xtree_fg_req_;
+}
 
 /**
  * Ratio is ratio of new vol to old vol.
