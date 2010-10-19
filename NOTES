@@ -8038,3 +8038,15 @@ Now clears this unit test, more to go.
 Fixed a problem with copies. It was always copying Elements to the next
 higher dimension, even for a single copy. Still need to test the next higher
 dimension copies, but I have reason to believe they will fail.
+Checkin 2230
+
+This actually clears the regression tests too. But I need to fix the regression
+tests so that they find the appropriate subdir for the data files
+automatically.
+
+Now on to some additional unit tests, such as the higher-dim copy.
+
+Implemented unit tests for many functions, including copy and higher-dim copy,
+for DataHandlers.
+
+============================================================================

@@ -1421,6 +1421,125 @@ void testIsA()
 	cout << "." << flush;
 }
 
+double* dptr( const DataHandler* dh, unsigned int i )
+{
+	return reinterpret_cast< double* >( dh->data( i ) );
+}
+
+void testDataCopyZero()
+{
+	double x = 3.14;
+	char* cx = reinterpret_cast< char* >( &x );
+	Dinfo< double > Ddbl;
+	ZeroDimGlobalHandler zd( &Ddbl );
+	bool ok;
+	vector< unsigned int > dim;
+	assert ( zd.isAllocated() == 0 );
+	ok = zd.resize( dim );
+	assert( ok );
+	assert ( zd.isAllocated() == 1 );
+	assert( zd.totalEntries() == 1 );
+	assert( zd.data( 0 ) != 0 );
+	assert( zd.numDimensions() == 0 );
+	assert( zd.dims().size() == 0 );
+
+	*dptr( &zd, 0 ) = 0.0;
+	assert( doubleEq( *dptr( &zd, 0 ), 0.0 ) );
+
+	ok = zd.setDataBlock( cx, 1, dim );
+	assert( doubleEq( *dptr( &zd, 0 ), x ) );
+
+	DataHandler* czd = zd.copy();
+	assert( dynamic_cast< ZeroDimGlobalHandler* >( czd ) != 0 );
+	assert ( czd->isAllocated() == 1 );
+	assert( czd->totalEntries() == 1 );
+	assert( doubleEq( *dptr( czd, 0 ), x ) );
+
+	DataHandler* czd1 = zd.copyExpand( 10 );
+	assert( dynamic_cast< OneDimGlobalHandler* >( czd1 ) != 0 );
+	assert ( czd1->isAllocated() == 1 );
+	assert( czd1->totalEntries() == 10 );
+	for ( unsigned int i = 0; i < 10; ++i )
+		assert( doubleEq( *dptr( czd1, i ), x ) );
+
+	DataHandler* czd2 = zd.copyToNewDim( 20 );
+	assert( dynamic_cast< OneDimGlobalHandler* >( czd2 ) != 0 );
+	assert ( czd2->isAllocated() == 1 );
+	assert( czd2->totalEntries() == 20 );
+	for ( unsigned int i = 0; i < 20; ++i )
+		assert( doubleEq( *dptr( czd2, i ), x ) );
+
+	cout << "." << flush;
+}
+
+void testDataCopyOne()
+{
+	double x = 2.718;
+	double y[10];
+	for ( unsigned int i = 0; i < 10; ++i )
+		y[i] = x * i;
+
+	char* cy = reinterpret_cast< char* >( y );
+	Dinfo< double > Ddbl;
+	OneDimGlobalHandler od( &Ddbl );
+	bool ok;
+	vector< unsigned int > dim;
+	dim.push_back( 10 );
+	assert ( od.isAllocated() == 0 );
+	ok = od.resize( dim );
+	assert( ok );
+	assert ( od.isAllocated() == 1 );
+	assert( od.totalEntries() == 10 );
+	assert( od.data( 0 ) != 0 );
+	assert( od.numDimensions() == 1 );
+	assert( od.dims().size() == 1 );
+	assert( od.dims()[0] == 10 );
+	assert( od.sizeOfDim(0) == 10 );
+	assert( od.sizeOfDim(1) == 0 );
+
+	*dptr( &od, 0 ) = 0.0;
+	assert( doubleEq( *dptr( &od, 0 ), 0.0 ) );
+	ok = od.setDataBlock( cy, 10, 0 );
+	for ( unsigned int i = 0; i < 10; ++i )
+		assert( doubleEq( *dptr( &od, i ), x * i ) );
+
+	DataHandler* cod = od.copy();
+	assert( dynamic_cast< OneDimGlobalHandler* >( cod ) != 0 );
+	assert ( cod->isAllocated() == 1 );
+	assert( cod->totalEntries() == 10 );
+	for ( unsigned int i = 0; i < 10; ++i )
+		assert( doubleEq( *dptr( &od, i ), x * i ) );
+
+	DataHandler* cod1 = od.copyExpand( 27 );
+	assert( dynamic_cast< OneDimGlobalHandler* >( cod1 ) != 0 );
+	assert ( cod1->isAllocated() == 1 );
+	assert( cod1->totalEntries() == 27 );
+	assert( cod1->numDimensions() == 1 );
+	assert( cod1->dims().size() == 1 );
+	assert( cod1->dims()[0] == 27 );
+	assert( cod1->totalEntries() == 27 );
+	assert( cod1->sizeOfDim(0) == 27 );
+	assert( cod1->sizeOfDim(1) == 0 );
+	for ( unsigned int i = 0; i < 27; ++i )
+		assert( doubleEq( *dptr( cod1, i ), x * ( i % 10 ) ) );
+
+	DataHandler* cod2 = od.copyToNewDim( 9 );
+	assert( dynamic_cast< AnyDimGlobalHandler* >( cod2 ) != 0 );
+	assert ( cod2->isAllocated() == 1 );
+	assert( cod2->totalEntries() == 90 );
+	assert( cod2->numDimensions() == 2 );
+	assert( cod2->dims().size() == 2 );
+	assert( cod2->dims()[0] == 10 );
+	assert( cod2->dims()[1] == 9 );
+	assert( cod2->totalEntries() == 90 );
+	assert( cod2->sizeOfDim(0) == 10 );
+	assert( cod2->sizeOfDim(1) == 9 );
+	assert( cod2->sizeOfDim(2) == 0 );
+	for ( unsigned int i = 0; i < 90; ++i )
+		assert( doubleEq( *dptr( cod2, i ), x * ( i % 10 ) ) );
+	cout << "." << flush;
+}
+
 void testAsync( )
 {
 	showFields();
@@ -1448,4 +1567,6 @@ void testAsync( )
 	testMsgField();
 	testSetGetExtField();
 	testIsA();
+	testDataCopyZero();
+	testDataCopyOne();
 }

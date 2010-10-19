@@ -170,16 +170,16 @@ unsigned int AnyDimGlobalHandler::sizeOfDim( unsigned int dim ) const
 
 bool AnyDimGlobalHandler::resize( vector< unsigned int > dims )
 {
-	size_ = 1;
+	unsigned int size = 1;
 	for ( vector< unsigned int >::iterator i = dims.begin();
 		i != dims.end(); ++i ) {
-		size_ *= *i;
+		size *= *i;
 	}
-	if ( nodeBalance( size_ ) ) { // It changed, reallocate
+	if ( nodeBalance( size ) ) { // It changed, reallocate
 		if ( data_ )
 			dinfo()->destroyData( data_ );
-			data_ = reinterpret_cast< char* >( 
-				dinfo()->allocData( size_ ) );
+
+		data_ = reinterpret_cast< char* >( dinfo()->allocData( size_ ) );
 	}
 	dims_ = dims;
 	return ( data_ != 0 );

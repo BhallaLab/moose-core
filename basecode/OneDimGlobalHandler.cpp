@@ -52,11 +52,12 @@ DataHandler* OneDimGlobalHandler::copyExpand( unsigned int copySize ) const
 	OneDimGlobalHandler* ret = new OneDimGlobalHandler( dinfo() );
 	vector< unsigned int > dims( 1, copySize );
 	ret->resize( dims );
-	unsigned int s = size_ * dinfo()->size();
+	unsigned int s = size_;
 	for ( unsigned int offset = 0; offset < copySize; offset += size_ ) {
 		if ( s > ( copySize - offset ) )
 			s = copySize - offset;
-		memcpy( ret->data_ + offset, data_, s * dinfo()->size() );
+		memcpy( ret->data_ + offset * dinfo()->size(), data_, 
+			s * dinfo()->size() );
 	}
 	return ret;
 }
