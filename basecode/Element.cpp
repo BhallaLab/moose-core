@@ -78,10 +78,14 @@ Element::Element( Id id, const Cinfo* c, const string& name,
 Element::Element( Id id, const Element* orig, unsigned int n )
 	:	name_( orig->getName() ),
 		id_( id ),
-		dataHandler_( orig->dataHandler_->copyToNewDim( n ) ),
 		cinfo_( orig->cinfo_ ), 
 		msgBinding_( orig->cinfo_->numBindIndex() )
 {
+	if ( n <= 1 ) {
+		dataHandler_ = orig->dataHandler_->copy();
+	} else {
+		dataHandler_ = orig->dataHandler_->copyToNewDim( n );
+	}
 	id.bindIdToElement( this );
 	cinfo_->postCreationFunc( id, this );
 }
