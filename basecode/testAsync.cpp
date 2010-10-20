@@ -1540,6 +1540,126 @@ void testDataCopyOne()
 	cout << "." << flush;
 }
 
+void testDataCopyAny()
+{
+	static const unsigned int n0 = 5;
+	static const unsigned int n1 = 4;
+	static const unsigned int n2 = 3;
+	unsigned int k = 0;
+	double y[n1][n0];
+	for ( unsigned int i = 0; i < n1; ++i )
+		for ( unsigned int j = 0; j < n0; ++j )
+			y[i][j] = k++;
+	/*
+	0	1	2	3	4
+	5	6	7	8	9
+	10	11	12	13	14
+	15	16	17	18	19
+	*/
+
+	char* cy = reinterpret_cast< char* >( y );
+	Dinfo< double > Ddbl;
+	AnyDimGlobalHandler ad( &Ddbl );
+	bool ok;
+	vector< unsigned int > dim;
+	dim.push_back( n0 );
+	dim.push_back( n1 );
+	assert ( ad.isAllocated() == 0 );
+	ok = ad.resize( dim );
+	assert( ok );
+	assert ( ad.isAllocated() == 1 );
+	assert( ad.totalEntries() == n0 * n1 );
+	assert( ad.data( 0 ) != 0 );
+	assert( ad.numDimensions() == 2 );
+	assert( ad.dims().size() == 2 );
+	assert( ad.dims()[0] == n0 );
+	assert( ad.dims()[1] == n1 );
+	assert( ad.sizeOfDim(0) == n0 );
+	assert( ad.sizeOfDim(1) == n1 );
+	assert( ad.sizeOfDim(2) == 0 );
+
+	*dptr( &ad, 0 ) = 0.0;
+	assert( doubleEq( *dptr( &ad, 0 ), 0.0 ) );
+	ok = ad.setDataBlock( cy, n0 * n1, 0 );
+	assert( ok );
+	for ( unsigned int i = 0; i < n1; ++i )
+		for ( unsigned int j = 0; j < n0; ++j )
+			assert( doubleEq( *dptr( &ad, i * n0 + j ), i * n0 + j ) );
+
+	DataHandler* cad = ad.copy();
+	assert( dynamic_cast< AnyDimGlobalHandler* >( cad ) != 0 );
+	assert ( cad->isAllocated() == 1 );
+	assert( cad->totalEntries() == n0 * n1 );
+	assert( cad->numDimensions() == 2 );
+	for ( unsigned int i = 0; i < n1; ++i )
+		for ( unsigned int j = 0; j < n0; ++j )
+			assert( doubleEq( *dptr( cad, i * n0 + j ), i * n0 + j ));
+
+	/*
+	0	1	2	3	4	0	1
+	5	6	7	8	9	5	6
+	10	11	12	13	14	10	11
+	15	16	17	18	19	15	16
+
+	0	1	2	3	4	5	6
+	7	8	9	10	11	12	13
+	14	15	16	17	18	19	20
+	21	22	23	24	25	26	27
+	*/
+
+	DataHandler* cad1 = ad.copyExpand( 27 );
+	assert( cad1 == 0 ); // Do not permit non-multiple expansions.
+	cad1 = ad.copyExpand( 28 ); // A multiple of dim1 == n1 == 4
+		// Now dim0 becomes 7.
+	assert( dynamic_cast< AnyDimGlobalHandler* >( cad1 ) != 0 );
+	assert ( cad1->isAllocated() == 1 );
+	assert( cad1->totalEntries() == 28 );
+	assert( cad1->numDimensions() == 2 );
+	assert( cad1->dims().size() == 2 );
+	assert( cad1->dims()[0] == 7 );
+	assert( cad1->dims()[1] == n1 );
+	assert( cad1->sizeOfDim(0) == 7 );
+	assert( cad1->sizeOfDim(1) == n1 );
+	assert( cad1->sizeOfDim(2) == 0 );
+	for ( unsigned int i = 0; i < n1; ++i ) {
+		for ( unsigned int j = 0; j < 7; ++j ) {
+			unsigned int k = j % n0;
+			assert( doubleEq( *dptr( cad1, i * 7 + j ), i * n0 + k ) );
+			// cout << *dptr( cad1, i * 7 + j ) << "	";
+		}
+	}
+
+	DataHandler* cad2 = ad.copyToNewDim( n2 );
+	assert( dynamic_cast< AnyDimGlobalHandler* >( cad2 ) != 0 );
+	assert ( cad2->isAllocated() == 1 );
+	assert( cad2->totalEntries() == n0 * n1 * n2 );
+	assert( cad2->numDimensions() == 3 );
+	assert( cad2->dims().size() == 3 );
+	assert( cad2->dims()[0] == n0 );
+	assert( cad2->dims()[1] == n1 );
+	assert( cad2->dims()[2] == n2 );
+	assert( cad2->sizeOfDim(0) == n0 );
+	assert( cad2->sizeOfDim(1) == n1 );
+	assert( cad2->sizeOfDim(2) == n2 );
+	assert( cad2->sizeOfDim(3) == 0 );
+	for ( unsigned int i = 0; i < n2; ++i ) {
+		for ( unsigned int j = 0; j < n1; ++j ) {
+			for ( unsigned int k = 0; k < n0; ++k ) {
+				assert( doubleEq( 
+					*dptr( cad2, i * n0 * n1 + j * n0 + k ), 
+					j * n0 + k )
+				);
+			}
+		}
+	}
+
+	delete cad;
+	delete cad1;
+	delete cad2;
+
+	cout << "." << flush;
+}
+
 void testAsync( )
 {
 	showFields();
@@ -1569,4 +1689,5 @@ void testAsync( )
 	testIsA();
 	testDataCopyZero();
 	testDataCopyOne();
+	testDataCopyAny();
 }

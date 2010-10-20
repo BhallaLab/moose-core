@@ -8047,6 +8047,36 @@ automatically.
 Now on to some additional unit tests, such as the higher-dim copy.
 
 Implemented unit tests for many functions, including copy and higher-dim copy,
-for DataHandlers.
+for DataHandlers. Checkin 2231.
+
+More unit tests, now for AnyDimGlobalHandlers. A bit stuck on the
+semantics of the copyExpand function. Which dimension does it expand? Or should
+I skip it altogether?
+
+============================================================================
+20 Oct 2010
+Always expand dimension 0. This is what the 1-dim handler does, and we'll
+continue it.
+
+So if we have a 2-D array[3][4]
+
+01	02	03	04
+05	06	07	08
+09	10	11	12
+
+and we want to expand it to [3][7], we would get:
+
+01	02	03	04	01	02	03
+05	06	07	08	05	06	07
+09	10	11	12	09	10	11
+
+and so on.
+
+The problem here is that the internal ordering of the data is as listed in
+the numbers. I can't just copy a block over.
+
+Finally sorted this out, and did some more fixes to 
+AnyDimGlobalHandler::copyToNewDim. Now it clears the unit tests and
+regression tests.
 
 ============================================================================
