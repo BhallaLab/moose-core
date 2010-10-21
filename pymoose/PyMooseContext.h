@@ -79,7 +79,7 @@ enum {OUTGOING, INCOMING, INOUT};
         void loadG(std::string script); /// load a GENESIS script file
         void runG(std::string statement); /// run a GENESIS statement
         
-        std::string& getField(Id, std::string);
+        const std::string& getField(Id, std::string);
         void setField(Id, std::string, std::string);
         std::vector <std::string> getMessageList(Id obj, std::string field, bool incoming);
         std::vector <std::string> getMessageList(Id obj, bool incoming);
