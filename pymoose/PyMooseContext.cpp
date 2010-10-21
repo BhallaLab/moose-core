@@ -611,7 +611,7 @@ void PyMooseContext::setCwe(string path)
    @param fieldName - name of the field to be retrieved
    @returns the string representation of the field value
 */
-string& PyMooseContext::getField(Id objectId, string fieldName)
+const string& PyMooseContext::getField(Id objectId, string fieldName)
 {
     send2<Id, string >(myId_(), requestFieldSlot, objectId, fieldName);
     return fieldValue_;
