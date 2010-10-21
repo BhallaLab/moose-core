@@ -116,7 +116,7 @@
 %template(Id_vector) std::vector<Id>;
 
 %pythoncode %{
-    
+
 def listproperty(getter=None, setter=None, deller=None):
     """Adds property attributes that behave like lists or 
     dictionaries but use underlying function calls for getter and
@@ -168,6 +168,8 @@ def listproperty(getter=None, setter=None, deller=None):
 %attribute(pymoose::PyMooseBase, const std::string, description, __get_description)
 %attribute(pymoose::PyMooseBase, const std::string, path, __get_path)
 %pythoncode %{
+
+context = PyMooseBase.getContext()    
 from inspect import isclass
 
 def doc(cls):
