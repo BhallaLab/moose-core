@@ -20,7 +20,7 @@ class OneDimHandler: public OneDimGlobalHandler
 		OneDimHandler( const DinfoBase* dinfo );
 		OneDimHandler( const OneDimHandler* other );
 
-		~OneDimHandler();
+//		~OneDimHandler();
 
 		DataHandler* globalize() const;
 

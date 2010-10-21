@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include <unistd.h> // need Windows-specific stuff too.
 
 
 void rtTable();
@@ -16,8 +17,17 @@ void rtReadKkit();
 
 void regressionTests()
 {
+	char* cwd = get_current_dir_name();
+	string currdir = cwd;
+	free( cwd );
+	if ( currdir.substr( currdir.find_last_of( "/" ) ) != 
+		"/regressionTests" ) {
+		cout << "\nNot in regression test directory, so skipping them\n";
+		return;
+	}
 	cout << "\nRegression Tests:";
 	rtTable();
 	rtFindModelType();
 	rtReadKkit();
+	cout << endl;
 }

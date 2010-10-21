@@ -17,18 +17,21 @@ OneDimHandler::OneDimHandler( const DinfoBase* dinfo )
 {;}
 
 OneDimHandler::OneDimHandler( const OneDimHandler* other )
-	: OneDimGlobalHandler( other ), 
+	: OneDimGlobalHandler( other->dinfo() ), 
 	  start_( other->start_ ),
 	  end_( other->end_ )
 {
+    size_ = other->size_;
 	unsigned int num = end_ - start_;
 	data_ = dinfo()->copyData( other->data_, num, num );
 }
 
+/*
 OneDimHandler::~OneDimHandler()
 {
 	; // The parent class destroys the data.
 }
+*/
 
 DataHandler* OneDimHandler::globalize() const
 {

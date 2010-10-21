@@ -1469,6 +1469,10 @@ void testDataCopyZero()
 	for ( unsigned int i = 0; i < 20; ++i )
 		assert( doubleEq( *dptr( czd2, i ), x ) );
 
+	delete czd;
+	delete czd1;
+	delete czd2;
+
 	cout << "." << flush;
 }
 
@@ -1537,6 +1541,10 @@ void testDataCopyOne()
 	assert( cod2->sizeOfDim(2) == 0 );
 	for ( unsigned int i = 0; i < 90; ++i )
 		assert( doubleEq( *dptr( cod2, i ), x * ( i % 10 ) ) );
+
+	delete cod;
+	delete cod1;
+	delete cod2;
 	cout << "." << flush;
 }
 

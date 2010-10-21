@@ -162,12 +162,10 @@ void nonMpiTests()
 void mpiTests()
 {
 #ifdef DO_UNIT_TESTS
-	// if ( Shell::numNodes() > 1 ) {
 		testMpiMsg();
 		testMpiShell();
 		testMpiBuiltins();
 		testMpiScheduling();
-	// }
 #endif
 }
 
@@ -201,7 +199,6 @@ int main( int argc, char** argv )
 	Element* shelle = shellId();
 	Shell* s = reinterpret_cast< Shell* >( shelle->dataHandler()->data( 0 ) );
 	nonMpiTests();
-	// ProcInfo p;
 	// Actually here we should launch off the thread doing
 	// Shell messaging/MPI, and yield control to the parser.
 	if ( s->myNode() == 0 ) {

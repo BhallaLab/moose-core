@@ -8077,6 +8077,31 @@ the numbers. I can't just copy a block over.
 
 Finally sorted this out, and did some more fixes to 
 AnyDimGlobalHandler::copyToNewDim. Now it clears the unit tests and
-regression tests.
+regression tests. Checkin as 2232.
+
+Next step is to do a valgrind.
+
+============================================================================
+21 Oct 2010.
+Fun with valgrind. Most of it is not freeing up test copies of DataHandlers.
+Fixed these, one baffling one remains where it is not clear where the
+call originates.
+
+Put in a useful check for current directory to tell the system not to do
+regression tests if it isn't in the right place. Then used this with
+valgrind to see if the puzzling leak is in regression tests. It isn't.
+
+Dropping individual unit tests:
+testAsync, testMsg, testBuiltins, testShell, testKinetics, testKsolve,
+in fact all of nonMpi tests are clear.
+Looks like it is in the mpiTests. Either in testMpiMsg and testMpiShell.
+Not in testMpiMsg. Confirmed testMpiShell. Now subdividing that.
+Not in first half. Nor First 8.
+It is in the testCopyMsgOps function.
+Doesn't have to do with running the copy. Doesn't have to do with
+scheduling the copy. Making the copy is the problem.
+Tracked it down to the OneDimHandler calling allocation constructor of its 
+parent class, so that both were allocating data. Fixed. Cleaning up.
+Now valgrind is happy with all the unit tests.
 
 ============================================================================

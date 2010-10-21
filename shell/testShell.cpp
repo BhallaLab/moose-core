@@ -935,7 +935,9 @@ void testFindModelParent()
 	assert( parentId == foo2 );
 	assert( modelName == "bar" );
 	
-	shell->doDelete( parentId );
+	shell->doDelete( foo );
+	shell->doDelete( foo2 );
+	shell->doDelete( zod );
 	cout << "." << flush;
 }
 
@@ -962,6 +964,5 @@ void testMpiShell( )
 	testWildcard();
 
 	// Stuff for doLoadModel
-	// testFindModelType(); //Moved to regression tests as it uses ext files
 	testFindModelParent();
 }
