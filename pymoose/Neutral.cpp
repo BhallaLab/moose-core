@@ -85,7 +85,7 @@ unsigned int Neutral::__get_msgMem() const
     get < unsigned int > (id_(), "msgMem",msgMem);
     return msgMem;
 }
-vector < string > Neutral::__get_fieldList() const
+const vector < string >& Neutral::__get_fieldList() const
 {
     return getContext()->getValueFieldList(id_);
 }

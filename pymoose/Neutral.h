@@ -32,7 +32,7 @@ namespace pymoose
             double __get_cpu() const;
             unsigned int __get_dataMem() const;
             unsigned int __get_msgMem() const;
-             vector < string > __get_fieldList() const;
+            const vector < string >& __get_fieldList() const;
     };
 }
 
