@@ -8165,5 +8165,10 @@ Used the upper/lower bound as they set a nice range within the for loop.
 A few other threading dependencies of messages surfaced, dealt with.
 I've now fixed up the threading dependency in SingleMsg and SparseMsg.
 Diagonal and OneToAll and OneToOne all need this fix and matching tests.
+Checkin 2239.
+Set up threading balancing in OneToAll msgs. Seems to work. The problem
+with the existing test is that even if multiple assignments are done on
+different threads, they just overwrite each other, so there is no record
+of redundant value assignments.
 
 ============================================================================

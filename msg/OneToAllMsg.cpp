@@ -33,30 +33,21 @@ OneToAllMsg::~OneToAllMsg()
 void OneToAllMsg::exec( const char* arg, const ProcInfo *p ) const
 {
 	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
+	unsigned int threadIndex = ( mid() + p->threadIndexInGroup ) % p->numThreadsInGroup;
 	if ( q->isForward() ) {
 		DataHandler::iterator end = e2_->dataHandler()->end();
 		const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
-			for ( DataHandler::iterator i = e2_->dataHandler()->begin();
-				i != end; ++i )
-				f->op( Eref( e2_, i.index() ), arg );
-		/*
-		if ( e2_->dataHandler()->numDimensions() == 1 ) {
-			DataHandler::iterator end = e2_->dataHandler()->end();
-			for ( DataHandler::iterator i = e2_->dataHandler()->begin();
-				i != end; ++i )
-				f->op( Eref( e2_, i.index() ), arg );
-		} else if ( e2_->dataHandler()->numDimensions() == 2 ) {
-			// The first dimension is partitioned between nodes
-			DataHandler::iterator end = e2_->dataHandler()->end();
-			for ( DataHandler::iterator i = e2_->dataHandler()->begin();
-				i != end; ++i ) {
-				for ( unsigned int j = 0; j < e2_->dataHandler()->numData2( i ); ++j )
-					f->op( Eref( e2_, DataId( i, j ) ), arg );
+		for ( DataHandler::iterator i = e2_->dataHandler()->begin();
+			i != end; ++i ) {
+			if ( ( ++threadIndex == p->numThreadsInGroup ) ) {
+			// Partition portions of target among threads.
+					f->op( Eref( e2_, i.index() ), arg );
+					threadIndex = 0;
 			}
 		}
-		*/
 	} else {
-		if ( e1_->dataHandler()->isDataHere( i1_ ) ) {
+		// More or less randomly, one thread will deal with this.
+		if ( threadIndex == 0 && e1_->dataHandler()->isDataHere( i1_ ) ) {
 			const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
 			f->op( Eref( e1_, i1_ ), arg );
 		}
