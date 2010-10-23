@@ -8102,6 +8102,35 @@ Doesn't have to do with running the copy. Doesn't have to do with
 scheduling the copy. Making the copy is the problem.
 Tracked it down to the OneDimHandler calling allocation constructor of its 
 parent class, so that both were allocating data. Fixed. Cleaning up.
-Now valgrind is happy with all the unit tests.
+Now valgrind is happy with all the unit tests. Checkin 2233.
 
 ============================================================================
+22 Oct 2010
+How does MOOSE decide which Qblock to put stuff in?
+	Checks if the message dest is a global
+	Checks if the Msg is a setMsg
+	Checks if the Msg is between shells
+	Msg::isMsgHere: returns true if msg accepts input from specified DataId
+These are all known when the Msg is created. So we don't need a separate
+assignQblock function
+
+How does MOOSE put stuff in Qs?
+Qinfo::addToQ
+Qinfo::addSpecificTargetToQ
+Qinfo::assembleOntoQ
+
+Which Queues are there?
+- One outQ for each thread.
+- One localQ for msging within current node.
+- One inQ per group.
+
+Currently there is a lot of copying back and forth.
+We should have a double-buffering system where the in and outQs swap 
+between cycles.
+
+Also the Msgs already have enough info to put data in the correct queue.
+
+Aim: Stuff goes into queue. Then queues swap. Q becomes readonly and stuff
+is read from it.
+
+Issues: Data may need to go to multiple Qs. Then we should have a globalQ.

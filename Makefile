@@ -59,7 +59,6 @@ ifndef BUILD
 BUILD=debug
 endif
 
-# PLATFORM (= Linux, win32, Darwin)
 #If using mac uncomment the following lines
 # PLATFORM=mac
 #export PLATFORM
@@ -184,9 +183,10 @@ LIBS += -lcurses
 CXXFLAGS+= -DUSE_CURSES
 endif
 # For 64 bit Linux systems add paths to 64 bit libraries 
-ifeq ($(OSTYPE),Linux)
+ifeq ($(OSTYPE),linux)
+CXXFLAGS += -DLINUX
 ifeq ($(MACHINE),x86_64)
-LIBS=-L/lib64 -L/usr/lib64 $(LIBS) 
+LIBS+= -L/lib64 -L/usr/lib64
 endif
 endif
 

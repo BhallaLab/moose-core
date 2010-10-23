@@ -49,14 +49,74 @@ extern void speedTestMultiNodeIntFireNetwork(
 void regressionTests();
 #endif
 
+//////////////////////////////////////////////////////////////////
+// System-dependent function here
+//////////////////////////////////////////////////////////////////
+
+unsigned int getNumCores()
+{
+	unsigned int numCPU = 1;
+#ifdef WIN_32
+	SYSTEM_INFO sysinfo;
+	GetSystemInfo( &sysinfo );
+
+	numCPU = sysinfo.dwNumberOfProcessors;
+#endif
+
+#ifdef LINUX
+	numCPU = sysconf( _SC_NPROCESSORS_ONLN );
+#endif
+
+#ifdef MACOSX
+	nt mib[4];
+	size_t len; 
+
+	/* set the mib for hw.ncpu */
+	mib[0] = CTL_HW;
+	mib[1] = HW_AVAILCPU;  // alternatively, try HW_NCPU;
+
+	/* get the number of CPUs from the system */
+	sysctl(mib, 2, &numCPU, &len, NULL, 0);
+
+	if( numCPU < 1 ) 
+	{
+		mib[1] = HW_NCPU;
+		sysctl( mib, 2, &numCPU, &len, NULL, 0 );
+		if( numCPU < 1 )
+		{
+		numCPU = 1;
+		}
+	}
+#endif
+	return numCPU;
+}
+
+//////////////////////////////////////////////////////////////////
+
 Id init( int argc, char** argv )
 {
-	int numCores = 1;
+	int numCores = getNumCores();
 	int numNodes = 1;
 	int myNode = 0;
 	bool isSingleThreaded = 0;
 	bool isInfinite = 0;
 	int opt;
+#ifdef USE_MPI
+	int provided;
+	MPI_Init_thread( &argc, &argv, MPI_THREAD_SERIALIZED, &provided );
+
+	MPI_Comm_size( MPI_COMM_WORLD, &numNodes );
+	MPI_Comm_rank( MPI_COMM_WORLD, &myNode );
+	if ( provided < MPI_THREAD_SERIALIZED && myNode == 0 ) {
+		cout << "Warning: This MPI implementation does not like multithreading: " << provided << "\n";
+	}
+	// myNode = MPI::COMM_WORLD.Get_rank();
+#endif
+	cout << "on node " << myNode << ", numNodes = " << numNodes << ", numCores = " << numCores << endl;
+	/**
+	 * Here we allow the user to override the automatic identification
+	 * of processor configuration
+	 */
 	while ( ( opt = getopt( argc, argv, "shin:c:b:B:" ) ) != -1 ) {
 		switch ( opt ) {
 			case 's': // Single threaded mode
@@ -82,18 +142,6 @@ Id init( int argc, char** argv )
 				exit( 1 );
 		}
 	}
-#ifdef USE_MPI
-	int provided;
-	MPI_Init_thread( &argc, &argv, MPI_THREAD_SERIALIZED, &provided );
-
-	MPI_Comm_size( MPI_COMM_WORLD, &numNodes );
-	MPI_Comm_rank( MPI_COMM_WORLD, &myNode );
-	if ( provided < MPI_THREAD_SERIALIZED && myNode == 0 ) {
-		cout << "Warning: This MPI implementation does not like multithreading: " << provided << "\n";
-	}
-	// myNode = MPI::COMM_WORLD.Get_rank();
-	// cout << "on node " << myNode << ", numNodes = " << numNodes << endl;
-#endif
 
 	Msg::initNull();
 	Id shellId;

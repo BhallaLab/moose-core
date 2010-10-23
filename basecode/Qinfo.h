@@ -190,6 +190,10 @@ class Qinfo
 		void addSpecificTargetToQ( unsigned int threadId, MsgFuncBinding b, 
 			const char* arg, const DataId& target );
 
+		/**
+		 * Utility function that checks if Msg is local, and if so,
+		 * assigns Qblock and adds the data to a suitable Queue.
+		 */
 		void assembleOntoQ( const MsgFuncBinding &b, 
 			const Element* e, const ProcInfo* p, const char* arg );
 	
