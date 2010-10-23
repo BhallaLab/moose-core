@@ -103,6 +103,9 @@ Id init( int argc, char** argv )
 	int opt;
 #ifdef USE_MPI
 	int provided;
+	// OpenMPI does not use argc or argv.
+	// unsigned int temp_argc = 1;
+	//MPI_Init_thread( &temp_argc, &argv, MPI_THREAD_SERIALIZED, &provided );
 	MPI_Init_thread( &argc, &argv, MPI_THREAD_SERIALIZED, &provided );
 
 	MPI_Comm_size( MPI_COMM_WORLD, &numNodes );
@@ -112,7 +115,6 @@ Id init( int argc, char** argv )
 	}
 	// myNode = MPI::COMM_WORLD.Get_rank();
 #endif
-	cout << "on node " << myNode << ", numNodes = " << numNodes << ", numCores = " << numCores << endl;
 	/**
 	 * Here we allow the user to override the automatic identification
 	 * of processor configuration
@@ -142,6 +144,7 @@ Id init( int argc, char** argv )
 				exit( 1 );
 		}
 	}
+	cout << "on node " << myNode << ", numNodes = " << numNodes << ", numCores = " << numCores << endl;
 
 	Msg::initNull();
 	Id shellId;
@@ -222,7 +225,7 @@ bool benchmarkTests( int argc, char** argv )
 	int opt;
 	bool doPlot = 0;
 	optind = 0; // forces reinit of getopt
-	while ( ( opt = getopt( argc, argv, "b:B:" ) ) != -1 ) {
+	while ( ( opt = getopt( argc, argv, "shin:c:b:B:" ) ) != -1 ) {
 		switch ( opt ) {
 			case 'B': // Benchmark
 				doPlot = 1; // fall through to case b.

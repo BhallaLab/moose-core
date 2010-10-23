@@ -8134,3 +8134,11 @@ Aim: Stuff goes into queue. Then queues swap. Q becomes readonly and stuff
 is read from it.
 
 Issues: Data may need to go to multiple Qs. Then we should have a globalQ.
+
+============================================================================
+23 Oct 2010
+Added in default checking of # cores and # nodes.
+Now unit tests fail as my laptop has 2 cores. Checkin 2237.
+
+Minor cleanup in argument handling.
+============================================================================
