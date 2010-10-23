@@ -8140,5 +8140,30 @@ Issues: Data may need to go to multiple Qs. Then we should have a globalQ.
 Added in default checking of # cores and # nodes.
 Now unit tests fail as my laptop has 2 cores. Checkin 2237.
 
-Minor cleanup in argument handling.
+Minor cleanup in argument handling. Checkin 2238.
+
+Tracked down error when I run with 2 cores. The sparseMatrix does ugly stuff
+for load balancing in sparseMatrixBalance. This has to be eliminated. The
+memory layout should be independent of # of threads. Any clever stuff for
+subsets of the data should be done in other ways.
+Here we want any given targetThread to access a subset of colIndex:
+targetThread = ( colIndex[j] * numThreads) / ncols;
+In other words, we ignore colIndex entries that do not fit this criterion:
+colIndex[j] == ( targetThread * ncols ) ) / numThreads.
+All the terms can be precomputed so it is a simple comparison.
+
+targetThread	ncols	numThreads	colIndex
+0		27	4		0
+1		27	4		6
+2		27	4		13
+3		27	4		20
+
+So we will need an upper and lower bound for each thread to decide if to use
+the colIndex. Or just use the comparison above.
+
+Used the upper/lower bound as they set a nice range within the for loop.
+A few other threading dependencies of messages surfaced, dealt with.
+I've now fixed up the threading dependency in SingleMsg and SparseMsg.
+Diagonal and OneToAll and OneToOne all need this fix and matching tests.
+
 ============================================================================

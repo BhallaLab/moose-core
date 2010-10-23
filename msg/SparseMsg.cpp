@@ -84,16 +84,6 @@ const Cinfo* SparseMsgWrapper::initCinfo()
 		new OpFunc0< SparseMsgWrapper >( 
 		&SparseMsgWrapper::transpose ) );
 
-	static DestFinfo loadBalance( "loadBalance",
-		"Decomposes the sparse matrix for threaded operation",
-		new OpFunc1< SparseMsgWrapper, unsigned int >( 
-		&SparseMsgWrapper::loadBalance ) );
-
-	static DestFinfo loadUnbalance( "loadUnbalance",
-		"Converts the threaded matrix back into single-thread form",
-		new OpFunc0< SparseMsgWrapper >( 
-		&SparseMsgWrapper::loadUnbalance ) );
-
 ////////////////////////////////////////////////////////////////////////
 // Assemble it all.
 ////////////////////////////////////////////////////////////////////////
@@ -109,8 +99,6 @@ const Cinfo* SparseMsgWrapper::initCinfo()
 		&unsetEntry,		//dest
 		&clear,				//dest
 		&transpose,			//dest
-		&loadBalance,		//dest
-		&loadUnbalance		//dest
 	};
 
 	static Cinfo sparseMsgCinfo (
@@ -245,24 +233,6 @@ void SparseMsgWrapper::transpose()
 	}
 }
 
-void SparseMsgWrapper::loadBalance( unsigned int numThreads )
-{
-	Msg* m = Msg::safeGetMsg( getMid() );
-	SparseMsg* pm = dynamic_cast< SparseMsg *>( m );
-	if ( pm ) {
-		pm->loadBalance( numThreads );
-	}
-}
-
-void SparseMsgWrapper::loadUnbalance()
-{
-	Msg* m = Msg::safeGetMsg( getMid() );
-	SparseMsg* pm = dynamic_cast< SparseMsg *>( m );
-	if ( pm ) {
-		pm->loadUnbalance();
-	}
-}
-
 //////////////////////////////////////////////////////////////////
 //    Here are the actual class functions
 //////////////////////////////////////////////////////////////////
@@ -315,7 +285,14 @@ void SparseMsg::exec( const char* arg, const ProcInfo *p ) const
 
 		// This is the crucial line where we define which subset of data
 		// can be accessed by this thread.
-		row = row * p->numThreadsInGroup + p->threadIndexInGroup;
+		// row = row * p->numThreadsInGroup + p->threadIndexInGroup;
+
+		unsigned int colStart = 
+			( p->threadIndexInGroup * matrix_.nColumns() ) / 
+			p->numThreadsInGroup;
+		unsigned int colEnd = 
+			( (p->threadIndexInGroup + 1) * matrix_.nColumns() ) / 
+			p->numThreadsInGroup;
 
 		const unsigned int* fieldIndex;
 		const unsigned int* colIndex;
@@ -341,6 +318,11 @@ void SparseMsg::exec( const char* arg, const ProcInfo *p ) const
 
 		// J counts over all the column entries, i.e., all targets.
 		for ( unsigned int j = 0; j < n; ++j ) {
+			if ( colIndex[j] < colStart )
+				continue;
+			if ( colIndex[j] >= colEnd )
+				break;
+			
 			Eref tgt( e2_, DataId( colIndex[j], fieldIndex[j] ) );
 			/*
 			if ( colIndex[j] % 100 == 0 ) {
@@ -441,64 +423,6 @@ unsigned int SparseMsg::randomConnect( double probability )
 	// cout << Shell::myNode() << ": sizes.size() = " << sizes.size() << ", ncols = " << nCols << ", startSynapse = " << startSynapse << endl;
 	matrix_.transpose();
 	return totalSynapses;
-}
-
-
-// Utility function for doing load balance
-void sparseMatrixBalance( 
-	unsigned int numThreads, SparseMatrix< unsigned int >& matrix )
-{
-	if ( numThreads <= 1 )
-		return;
-	SparseMatrix< unsigned int > temp = matrix;
-	unsigned int nrows = matrix.nRows();
-	unsigned int ncols = matrix.nColumns();
-
-	matrix.setSize( numThreads * nrows, ncols ); // Clear and reallocate
-
-	for ( unsigned int i = 0; i < temp.nRows(); ++i )
-	{
-		const unsigned int* entry; // I thought it was DataIds.
-		const unsigned int* colIndex;
-		unsigned int numEntries = temp.getRow( i, &entry, &colIndex );
-		vector< vector< unsigned int > > splitEntry( numThreads );
-		vector< vector< unsigned int > > splitColIndex( numThreads );
-		for ( unsigned int j = 0; j < numEntries; ++j ) {
-			unsigned int targetThread = ( colIndex[j] * numThreads) / ncols;
-			assert( targetThread < numThreads );
-			splitEntry[ targetThread ].push_back( entry[ j ] );
-			splitColIndex[ targetThread ].push_back( colIndex[ j ] );
-		}
-		for ( unsigned int j = 0; j < numThreads; ++j ) {
-			matrix.addRow( i * numThreads + j,
-				splitEntry[ j ], splitColIndex[ j ] );
-		}
-	}
-}
-
-/**
- * loadBalance: 
- * Splits up the sparse matrix so that any given colIndex will occur
- * only on one subset. This ensures that only a single thread will 
- * ever write to a give target, specified by that colIndex.
- *
- * The subsets are accessed sequentially: For source Element 0 we do 
- * thread0, thread1, thread2...
- * then again for source Element 1 we do thread0, thread1, thread2 ...
- * and so on.
- *
- */
-void SparseMsg::loadBalance( unsigned int numThreads )
-{
-	sparseMatrixBalance( numThreads, matrix_ );
-	numThreads_ = numThreads;
-}
-
-// Need a restore function to convert the load-balanced form back into
-// the regular sparse matrix.
-void SparseMsg::loadUnbalance()
-{
-	;
 }
 
 Id SparseMsg::id() const

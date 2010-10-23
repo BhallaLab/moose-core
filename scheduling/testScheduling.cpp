@@ -328,7 +328,7 @@ void testThreadIntFireNetwork()
 	assert( f1 && f2 );
 	f1->addMsg( f2, sm->mid(), t2 );
 	sm->randomConnect( connectionProbability );
-	sm->loadBalance( numThreads );
+	// sm->loadBalance( numThreads );
 
 	unsigned int nd = syn->dataHandler()->totalEntries();
 //	cout << "Num Syn = " << nd << endl;
@@ -466,8 +466,8 @@ void testMultiNodeIntFireNetwork()
 	SetGet2< double, long >::set( mer, "setRandomConnectivity", 
 		connectionProbability, 5489UL );
 
-	SetGet1< unsigned int >::set( mer, "loadBalance", numThreads ); 
 	/*
+	SetGet1< unsigned int >::set( mer, "loadBalance", numThreads ); 
 	vector< unsigned int > synArraySizes;
 	unsigned int start = syn->dataHandler()->getNumData2( synArraySizes );
 	// cout << "start = " << start << endl;
@@ -630,7 +630,7 @@ void speedTestMultiNodeIntFireNetwork( unsigned int size, unsigned int runsteps 
 	SetGet2< double, long >::set( mer, "setRandomConnectivity", 
 		connectionProbability, 5489UL );
 
-	SetGet1< unsigned int >::set( mer, "loadBalance", numThreads ); 
+	// SetGet1< unsigned int >::set( mer, "loadBalance", numThreads ); 
 	vector< unsigned int > synArraySizes;
 	// unsigned int start = syn->dataHandler()->getNumData2( synArraySizes );
 

@@ -830,8 +830,13 @@ void testSparseMatrix2()
 	cout << "." << flush;
 }
 
+/** 
+ * Need to recast this for the intact version of sparse matrix 
+ * balancing.
+ */
 void testSparseMatrixBalance()
 {
+/*
 	SparseMatrix< unsigned int > m( 3, 6 );
 	unsigned int nRows = m.nRows();
 	unsigned int nCols = m.nColumns();
@@ -857,6 +862,7 @@ void testSparseMatrixBalance()
 	}
 
 	cout << "." << flush;
+	*/
 }
 
 void printGrid( Element* e, const string& field, double min, double max )
@@ -1687,7 +1693,7 @@ void testAsync( )
 	testSendSpike();
 	testSparseMatrix();
 	testSparseMatrix2();
-	testSparseMatrixBalance();
+	// testSparseMatrixBalance();
 	testSparseMsg();
 	testUpValue();
 	testSharedMsg();

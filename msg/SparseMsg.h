@@ -53,9 +53,6 @@ class SparseMsg: public Msg
 		
 		unsigned int randomConnect( double probability );
 
-		void loadBalance( unsigned int numThreads );
-		void loadUnbalance();
-
 		Id id() const;
 
 		FullId findOtherEnd( FullId end ) const;
@@ -72,9 +69,6 @@ class SparseMsg: public Msg
 		unsigned int nrows_; // The original size of the matrix.
 		static Id id_; // The Element that manages Sparse Msgs.
 };
-
-extern void sparseMatrixBalance( 
-	unsigned int numThreads, SparseMatrix< unsigned int >& matrix );
 
 class SparseMsgWrapper: public MsgManager
 {
@@ -100,8 +94,6 @@ class SparseMsgWrapper: public MsgManager
 		unsigned int getNumEntries() const;
 		void clear();
 		void transpose();
-		void loadBalance( unsigned int numThreads );
-		void loadUnbalance();
 
 		static const Cinfo* initCinfo();
 	private:
