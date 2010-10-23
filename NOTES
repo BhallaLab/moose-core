@@ -8170,5 +8170,7 @@ Set up threading balancing in OneToAll msgs. Seems to work. The problem
 with the existing test is that even if multiple assignments are done on
 different threads, they just overwrite each other, so there is no record
 of redundant value assignments.
+Set it up for OneToOne and Diagnonal Msgs too. I think all the Msgs have been
+covered
 
 ============================================================================

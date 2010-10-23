@@ -34,20 +34,23 @@ void DiagonalMsg::exec( const char* arg, const ProcInfo *p ) const
 {
 	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
 
-	if ( q->isForward() ) {
-		int src = q->srcIndex().data();
-		int dest = src + stride_;
-		if ( dest >= 0 && e2_->dataHandler()->isDataHere( dest ) ) {
-			const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
-			f->op( Eref( e2_, dest ), arg );
-		}
-	} else {
-		// Here we are stuck a bit. I will assume srcIndex is now for e2.
-		int src = q->srcIndex().data();
-		int dest = src - stride_;
-		if ( dest >= 0 && e1_->dataHandler()->isDataHere( dest ) ) {
-			const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
-			f->op( Eref( e1_, dest ), arg );
+	int src = q->srcIndex().data();
+	if ( ( src + mid() + p->threadIndexInGroup ) % 
+		p->numThreadsInGroup == 0 )
+	{ 
+		if ( q->isForward() ) {
+			int dest = src + stride_;
+			if ( dest >= 0 && e2_->dataHandler()->isDataHere( dest ) ) {
+				const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
+				f->op( Eref( e2_, dest ), arg );
+			}
+		} else {
+			// Here we are stuck a bit. I will assume srcIndex is now for e2
+			int dest = src - stride_;
+			if ( dest >= 0 && e1_->dataHandler()->isDataHere( dest ) ) {
+				const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
+				f->op( Eref( e1_, dest ), arg );
+			}
 		}
 	}
 }

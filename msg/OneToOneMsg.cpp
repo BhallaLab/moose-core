@@ -64,15 +64,19 @@ void OneToOneMsg::exec( const char* arg, const ProcInfo* p ) const
 {
 	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
 	unsigned int src = q->srcIndex().data(); // will also be dest index.
-	if ( q->isForward() ) {
-		if ( e2_->dataHandler()->isDataHere( src ) ) {
-			const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
-			f->op( Eref( e2_, q->srcIndex() ), arg );
-		}
-	} else {
-		if ( e1_->dataHandler()->isDataHere( src ) ) {
-			const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
-			f->op( Eref( e1_, q->srcIndex() ), arg );
+	if ( ( src + mid() + p->threadIndexInGroup ) % 
+		p->numThreadsInGroup == 0 )
+	{
+		if ( q->isForward() ) {
+			if ( e2_->dataHandler()->isDataHere( src ) ) {
+				const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
+				f->op( Eref( e2_, q->srcIndex() ), arg );
+			}
+		} else {
+			if ( e1_->dataHandler()->isDataHere( src ) ) {
+				const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
+				f->op( Eref( e1_, q->srcIndex() ), arg );
+			}
 		}
 	}
 }
