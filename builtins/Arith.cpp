@@ -37,12 +37,16 @@ const Cinfo* Arith::initCinfo()
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
 		static DestFinfo arg1( "arg1",
-			"Handles argument 1",
+			"Handles argument 1. This just assigns it",
 			new OpFunc1< Arith, double >( &Arith::arg1 ) );
 
 		static DestFinfo arg2( "arg2",
-			"Handles argument 2",
+			"Handles argument 2. This just assigns it",
 			new OpFunc1< Arith, double >( &Arith::arg2 ) );
+
+		static DestFinfo arg3( "arg3",
+			"Handles argument 3. This sums in each input, and clears each clock tick.",
+			new OpFunc1< Arith, double >( &Arith::arg3 ) );
 
 		static DestFinfo process( "process",
 			"Handles process call",
@@ -67,6 +71,7 @@ const Cinfo* Arith::initCinfo()
 		&outputValue,	// Value
 		&arg1,		// DestFinfo
 		&arg2,		// DestFinfo
+		&arg3,		// DestFinfo
 		&output, 	// SrcFinfo
 		&proc		// SharedFinfo
 	};
@@ -87,21 +92,23 @@ static const Cinfo* arithCinfo = Arith::initCinfo();
 Arith::Arith()
 	: function_( "sum" ), 
 	output_( 0.0 ),
-	arg1_( 0.0 ), arg2_( 0.0 )
+	arg1_( 0.0 ), arg2_( 0.0 ), arg3_( 0.0 )
 {
 	;
 }
 
 void Arith::process( const Eref& e, ProcPtr p )
 {
-	output_ = arg1_ + arg2_; // Doing a hard-coded function.
+	output_ = arg1_ + arg2_ + arg3_; // Doing a hard-coded function.
 	output.send( e, p, output_ );
+	arg3_ = 0.0;
 }
 
 void Arith::reinit( const Eref& e, ProcPtr p )
 {
 	arg1_ = 0.0;
 	arg2_ = 0.0;
+	arg3_ = 0.0;
 }
 
 void Arith::arg1( const double arg )
@@ -112,6 +119,11 @@ void Arith::arg1( const double arg )
 void Arith::arg2( const double arg )
 {
 	arg2_ = arg;
+}
+
+void Arith::arg3( const double arg )
+{
+	arg3_ += arg;
 }
 
 void Arith::setFunction( const string v )

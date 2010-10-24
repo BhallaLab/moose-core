@@ -8171,6 +8171,18 @@ with the existing test is that even if multiple assignments are done on
 different threads, they just overwrite each other, so there is no record
 of redundant value assignments.
 Set it up for OneToOne and Diagnonal Msgs too. I think all the Msgs have been
-covered
+covered. Checkin 2241.
 
+I already have a nice test for messaging, with the one limitation that it does
+not catch cases where the same value is set more than once. With this fixed
+I should look at cleaning up the queueing for multiple threads.
+Also should decide about thread-groups and node-groups concepts: is it
+simply too early to worry about them?
 ============================================================================
+24 Oct 2010
+
+Need to smoothen out Shell::start, stop, continue, reinit and reset.
+
+First: Implemented a couple of more complete tests for oneToAll and sparse
+msgs. These stress out the threading. Current implementation clears it.
+Changes made in Arith.cpp and testShell.cpp.

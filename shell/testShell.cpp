@@ -507,6 +507,12 @@ void testShellAddMsg()
 	Id e1 = shell->doCreate( "Arith", Id(), "e1", dimensions );
 	Id e2 = shell->doCreate( "Arith", Id(), "e2", dimensions );
 
+	Id f1 = shell->doCreate( "Arith", Id(), "f1", dimensions );
+	Id f2 = shell->doCreate( "Arith", Id(), "f2", dimensions );
+
+	Id g1 = shell->doCreate( "Arith", Id(), "g1", dimensions );
+	Id g2 = shell->doCreate( "Arith", Id(), "g2", dimensions );
+
 	///////////////////////////////////////////////////////////
 	// Set up initial conditions
 	///////////////////////////////////////////////////////////
@@ -524,33 +530,37 @@ void testShellAddMsg()
 	assert( ret );
 	ret = SetGet1< double >::setVec( e1.eref(), "arg1", init ); // 12345
 	assert( ret );
+	ret = SetGet1< double >::setVec( f1.eref(), "arg1", init ); // 12345
+	assert( ret );
+	ret = SetGet1< double >::setVec( g1.eref(), "arg1", init ); // 12345
+	assert( ret );
 
 	///////////////////////////////////////////////////////////
 	// Set up messaging
 	///////////////////////////////////////////////////////////
 	// Should give 04000
 	MsgId m1 = shell->doAddMsg( "Single", 
-		FullId( a1, 3 ), "output", FullId( a2, 1 ), "arg1" );
+		FullId( a1, 3 ), "output", FullId( a2, 1 ), "arg3" );
 	assert( m1 != Msg::badMsg );
 
 	// Should give 33333
 	MsgId m2 = shell->doAddMsg( "OneToAll", 
-		FullId( b1, 2 ), "output", FullId( b2, 0 ), "arg1" );
+		FullId( b1, 2 ), "output", FullId( b2, 0 ), "arg3" );
 	assert( m2 != Msg::badMsg );
 
 	// Should give 12345
 	MsgId m3 = shell->doAddMsg( "OneToOne", 
-		FullId( c1, 0 ), "output", FullId( c2, 0 ), "arg1" );
+		FullId( c1, 0 ), "output", FullId( c2, 0 ), "arg3" );
 	assert( m3 != Msg::badMsg );
 
 	// Should give 01234
 	MsgId m4 = shell->doAddMsg( "Diagonal", 
-		FullId( d1, 0 ), "output", FullId( d2, 0 ), "arg1" );
+		FullId( d1, 0 ), "output", FullId( d2, 0 ), "arg3" );
 	assert( m4 != Msg::badMsg );
 
 	// Should give 54321
 	MsgId m5 = shell->doAddMsg( "Sparse", 
-		FullId( e1, 0 ), "output", FullId( e2, 0 ), "arg1" );
+		FullId( e1, 0 ), "output", FullId( e2, 0 ), "arg3" );
 	assert( m5 != Msg::badMsg );
 
 	const Msg* m5p = Msg::getMsg( m5 );
@@ -572,8 +582,28 @@ void testShellAddMsg()
 		m5er, "setEntry", 4, 0, 0 );
 	assert( ret );
 
-	// ret = SetGet1< unsigned int >::set( m5er, "loadBalance", Shell::numCores() );
-	assert( ret );
+	// Should give 15 15 15 15 15
+	for ( unsigned int i = 0; i < 5; ++i ) {
+		MsgId m6 = shell->doAddMsg( "OneToAll", 
+			FullId( f1, i ), "output", FullId( f2, i ), "arg3" );
+		assert( m6 != Msg::badMsg );
+	}
+
+	// Should give 14 13 12 11 10
+	MsgId m7 = shell->doAddMsg( "Sparse", 
+		FullId( g1, 0 ), "output", FullId( g2, 0 ), "arg3" );
+	assert( m7 != Msg::badMsg );
+	const Msg* m7p = Msg::getMsg( m7 );
+	Eref m7er = m7p->manager( m7p->id() );
+	for ( unsigned int i = 0; i < 5; ++i ) {
+		for ( unsigned int j = 0; j < 5; ++j ) {
+			if ( i != j ) {
+				ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
+				m7er, "setEntry", i, j, 0 );
+				assert( ret );
+			}
+		}
+	}
 	
 	///////////////////////////////////////////////////////////
 	// Set up scheduling
@@ -591,6 +621,10 @@ void testShellAddMsg()
 	ret = setupSched( shell, tick, d2 ); assert( ret );
 	ret = setupSched( shell, tick, e1 ); assert( ret );
 	ret = setupSched( shell, tick, e2 ); assert( ret );
+	ret = setupSched( shell, tick, f1 ); assert( ret );
+	ret = setupSched( shell, tick, f2 ); assert( ret );
+	ret = setupSched( shell, tick, g1 ); assert( ret );
+	ret = setupSched( shell, tick, g2 ); assert( ret );
 
 	///////////////////////////////////////////////////////////
 	// Run it
@@ -617,6 +651,10 @@ void testShellAddMsg()
 	assert( ret );
 	ret = checkOutput( e2, 5, 4, 3, 2, 1 );
 	assert( ret );
+	ret = checkOutput( f2, 15, 15, 15, 15, 15 );
+	assert( ret );
+	ret = checkOutput( g2, 14, 13, 12, 11, 10 );
+	assert( ret );
 
 	///////////////////////////////////////////////////////////
 	// Clean up.
@@ -631,6 +669,10 @@ void testShellAddMsg()
 	shell->doDelete( d2 );
 	shell->doDelete( e1 );
 	shell->doDelete( e2 );
+	shell->doDelete( f1 );
+	shell->doDelete( f2 );
+	shell->doDelete( g1 );
+	shell->doDelete( g2 );
 
 	cout << "." << flush;
 }

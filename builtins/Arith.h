@@ -37,6 +37,7 @@ class Arith
 		
 		void arg1( double v );
 		void arg2( double v );
+		void arg3( double v );
 
 		////////////////////////////////////////////////////////////////
 
@@ -46,6 +47,7 @@ class Arith
 		double output_; // Store the output so we can examine it.
 		double arg1_;	// Argument 1
 		double arg2_;	// Argument 2
+		double arg3_;	// Argument 2
 };
 
 #endif // _ARITH_H
