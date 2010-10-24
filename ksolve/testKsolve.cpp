@@ -7,6 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#include <sys/time.h>
 #include "StoichHeaders.h"
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
@@ -16,11 +17,13 @@
 #include "GslIntegrator.h"
 #include "../shell/Shell.h"
 
-void testKsolveZombify()
+static const double TOLERANCE = 1e-6;
+
+// This is a regression test
+void testKsolveZombify( string modelFile )
 {
 	ReadKkit rk;
-	// rk.read( "test.g", "dend", 0 );
-	Id base = rk.read( "foo.g", "dend", Id() );
+	Id base = rk.read( modelFile, "dend", Id() );
 	assert( base != Id() );
 	// Id kinetics = s->doFind( "/kinetics" );
 
@@ -41,98 +44,89 @@ void testKsolveZombify()
 	cout << "." << flush;
 }
 
-void testGslIntegrator( bool dumpData )
+/**
+ * Benchmarks assorted models: both time and values. Returns 
+ * time it takes to run the model.
+ * modelName is the base name of the model
+ * plotName is of the form "conc1/foo.Co"
+ * simTime is the time 
+ */
+ double testGslIntegrator( string modelName, string plotName,
+ 	double plotDt, double simTime )
 {
 	ReadKkit rk;
-	// rk.read( "test.g", "dend", 0 );
-	Id base = rk.read( "foo.g", "dend", Id() );
+	Id base = rk.read( modelName + ".g" , "model", Id() );
 	assert( base != Id() );
 	// Id kinetics = s->doFind( "/kinetics" );
 
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 	vector< unsigned int > dims( 1, 1 );
+	/*
 	Id stoich = s->doCreate( "Stoich", base, "stoich", dims );
 	assert( stoich != Id() );
-	string temp = "/dend/##";
+	string temp = "/model/##";
 	bool ret = Field<string>::set( stoich.eref(), "path", temp );
 	assert( ret );
+	*/
+	Id stoich = base;
 
 	Id gsl = s->doCreate( "GslIntegrator", base, "gsl", dims );
-// 	MsgId mid = 
-	s->doAddMsg( "Single", 
+	MsgId mid = s->doAddMsg( "Single", 
 		FullId( stoich, 0 ), "plugin", 
 		FullId( gsl, 0 ), "stoich" );
+	assert( mid != Msg::badMsg );
 
+	/*
 	const Finfo* f = Stoich::initCinfo()->findFinfo( "plugin" );
 	assert( f );
 	const SrcFinfo1< Stoich* >* plug = 
 		dynamic_cast< const SrcFinfo1< Stoich* >* >( f );
 	assert( plug );
-
 	Stoich* stoichData = reinterpret_cast< Stoich* >( stoich.eref().data() );
 	GslIntegrator* gi = reinterpret_cast< GslIntegrator* >( gsl.eref().data() );
+	*/
+
 	ProcInfo p;
 	p.dt = 1.0;
 	p.currTime = 0;
 
-	plug->send( stoich.eref(), &p, stoichData );
-	Qinfo::mpiClearQ( &p );
-	assert( gi->getIsInitialized() );
+	// plug->send( stoich.eref(), &p, stoichData );
+	// Qinfo::mpiClearQ( &p );
+	bool ret = SetGet1< Id >::set( gsl.eref(), "stoich", stoich );
+	assert( ret );
+	ret = Field< bool >::get( gsl.eref(), "isInitialized" );
+	assert( ret );
+	// assert( gi->getIsInitialized() );
 
-	s->doSetClock( 0, rk.getPlotDt() );
-	s->doSetClock( 1, rk.getPlotDt() );
-	s->doSetClock( 2, rk.getPlotDt() );
+	s->doSetClock( 0, plotDt );
+	s->doSetClock( 1, plotDt );
+	s->doSetClock( 2, plotDt );
 	string gslpath = rk.getBasePath() + "/gsl";
 	string  plotpath = rk.getBasePath() + "/graphs/##[TYPE=Table]," +
 		rk.getBasePath() + "/moregraphs/##[TYPE=Table]";
 	s->doUseClock( gslpath, "process", 0 );
 	s->doUseClock( plotpath, "process", 2 );
+	struct timeval tv0;
+	struct timeval tv1;
+	gettimeofday( &tv0, 0 );
 	s->doReinit();
-	s->doStart( rk.getMaxTime() );
+	s->doStart( simTime );
+	gettimeofday( &tv1, 0 );
 
-			/*
-	Eref gsle( gsl.eref() );
-	for ( double i = 0.0; i < rk.getMaxTime(); i += rk.getPlotDt() ) {
-		gi->process( gsle, &p );
-		p.currTime = i;
-		cout << i << 
-			"	" << stoichData->S()[0] <<
-			"	" << stoichData->S()[1] <<
-			"	" << stoichData->S()[2] <<
-			"	" << stoichData->S()[3] <<
-			"	" << stoichData->S()[4] <<
-			"	" << stoichData->S()[5] <<
-			"	" << stoichData->S()[6] <<
-			"	" << stoichData->S()[7] <<
-			"	" << stoichData->S()[8] <<
-			"	" << stoichData->S()[9] <<
-			"	" << stoichData->S()[10] <<
-			"	" << stoichData->S()[11] <<
-			"	" << stoichData->S()[12] <<
-			"	" << stoichData->S()[13] <<
-			"	" << stoichData->S()[14] <<
-			endl;
+	if ( plotName.length() > 0 ) {
+		Id plotId( string( "/model/graphs/" ) + plotName );
+		assert( plotId != Id() );
+		bool ok = SetGet::strSet( plotId.eref(), "compareXplot",
+			modelName + ".plot,/graphs/" + plotName + ",rmsr" );
+		assert( ok );
+		double rmsr = Field< double >::get( plotId.eref(), "outputValue" );
+		assert( rmsr < TOLERANCE );
 	}
-			*/
-
-
-	/*
-	rk.run();
-	*/
-	if ( dumpData )
-		rk.dumpPlots( "gsl.plot" );
 
 	s->doDelete( base );
 	cout << "." << flush;
-}
-
-// To go into regression tests. Here I need to restrict to unit tests.
-void testKsolve( bool dumpData )
-{
-	// testKsolveZombify();
-	// testGslIntegrator( dumpData );
-}
-
-void testMpiKsolve()
-{
+	double sret = tv1.tv_sec - tv0.tv_sec;
+	double uret = tv1.tv_usec;
+	uret -= tv0.tv_usec;
+	return sret + 1e-6 * uret;
 }

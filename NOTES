@@ -8186,3 +8186,11 @@ Need to smoothen out Shell::start, stop, continue, reinit and reset.
 First: Implemented a couple of more complete tests for oneToAll and sparse
 msgs. These stress out the threading. Current implementation clears it.
 Changes made in Arith.cpp and testShell.cpp.
+Checkin 2242.
+
+Setting up benchmarks in regression test directory so that we can
+load in and run real models.
+Fixes to Ksolver following assorted changes that were not tracked in
+the earlier unit tests.
+
+============================================================================

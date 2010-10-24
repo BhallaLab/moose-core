@@ -13,6 +13,7 @@ OBJ = \
 	regressionTest.o	\
 	rtTable.o	\
 	rtReadKkit.o	\
+	benchmarkTests.o	\
 
 HEADERS = \
 	../basecode/header.h \

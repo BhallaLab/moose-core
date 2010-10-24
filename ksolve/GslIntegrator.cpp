@@ -19,7 +19,7 @@ const Cinfo* GslIntegrator::initCinfo()
 		// Field definitions
 		///////////////////////////////////////////////////////
 		static ReadOnlyValueFinfo< GslIntegrator, bool > isInitialized( 
-			"isInitiatilized", 
+			"isInitialized", 
 			"True if the Stoich message has come in to set parms",
 			&GslIntegrator::getIsInitialized
 		);

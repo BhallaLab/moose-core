@@ -39,7 +39,6 @@ extern void testMpiShell();
 extern void testMsg();
 extern void testMpiMsg();
 extern void testKinetics();
-extern void testKsolve( bool dumpData );
 
 extern void initMsgManagers();
 extern void destroyMsgManagers();
@@ -48,6 +47,7 @@ extern void speedTestMultiNodeIntFireNetwork(
 #ifdef DO_UNIT_TESTS
 void regressionTests();
 #endif
+bool benchmarkTests( int argc, char** argv );
 
 //////////////////////////////////////////////////////////////////
 // System-dependent function here
@@ -201,7 +201,6 @@ void nonMpiTests()
 		testBuiltins();
 		testShell();
 		testKinetics();
-		testKsolve( 1 );
 	}
 #endif
 }
@@ -218,28 +217,6 @@ void mpiTests()
 		testMpiBuiltins();
 		testMpiScheduling();
 #endif
-}
-
-bool benchmarkTests( int argc, char** argv )
-{
-	int opt;
-	bool doPlot = 0;
-	optind = 0; // forces reinit of getopt
-	while ( ( opt = getopt( argc, argv, "shin:c:b:B:" ) ) != -1 ) {
-		switch ( opt ) {
-			case 'B': // Benchmark
-				doPlot = 1; // fall through to case b.
-			case 'b': // Benchmark
-				if ( string( "ksolve" ) == optarg  )
-					testKsolve( doPlot );
-				if ( string( "intFire" ) == optarg  )
-					speedTestMultiNodeIntFireNetwork( 2048, 2000 );
-				cout << "Completed benchmark\n";
-				return 1;
-				break;
-		}
-	}
-	return 0;
 }
 
 int main( int argc, char** argv )
