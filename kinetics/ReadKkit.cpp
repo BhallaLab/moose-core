@@ -134,7 +134,7 @@ Id ReadKkit::read(
 
 	assignCompartments();
 	s->setCwe( base );
-	Field< string >::set( base.eref(), "path", "./##" );
+	Field< string >::set( base.eref(), "path", "##" );
 	s->doReinit();
 	return base;
 }

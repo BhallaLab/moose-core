@@ -18,7 +18,7 @@ extern void speedTestMultiNodeIntFireNetwork(
 void testKsolve()
 {
 	double ktime1 = testGslIntegrator( "Kholodenko", "conc1/MAPK-PP.Co",
-		10.0, 1e6 );
+		10.0, 1e4 );
 	cout << "Kholodenko		" << ktime1 << endl;
 }
 

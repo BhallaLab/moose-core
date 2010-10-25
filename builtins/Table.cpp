@@ -99,8 +99,11 @@ const Cinfo* Table::initCinfo()
 		static DestFinfo compareXplot( "compareXplot",
 			"Reads a plot from an xplot file and compares with contents of Table."
 			"Result is put in 'output' field of table."
+			"If the comparison fails (e.g., due to zero entries), the "
+			"return value is -1."
 			"Arguments: filename, plotname, comparison_operation"
-			"Operations: rmsd (for RMSDifference), rmsr (RMSratio )",
+			"Operations: rmsd (for RMSDifference), rmsr (RMSratio ), "
+			"dotp (Dot product, not yet implemented).",
 			new OpFunc3< Table, string, string, string >( 
 				&Table::compareXplot ) );
 
@@ -352,7 +355,7 @@ double getRMSDiff( const vector< double >& v1, const vector< double >& v2 )
 {
 	unsigned int size = ( v1.size() < v2.size() ) ? v1.size() : v2.size();
 	if ( size == 0 )
-		return 0;
+		return -1;
 
 	double sumsq = 0;
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -367,7 +370,7 @@ double getRMS( const vector< double >& v )
 	double sumsq = 0;
 	unsigned int size = v.size();
 	if ( size == 0 )
-		return 0;
+		return -1;
 	for ( vector< double >::const_iterator i = v.begin(); i != v.end(); ++i)
 		sumsq += *i * *i;
 	
@@ -378,9 +381,11 @@ double getRMSRatio( const vector< double >& v1, const vector< double >& v2 )
 {
 	double r1 = getRMS( v1 );
 	double r2 = getRMS( v2 );
+	if ( v1.size() == 0 || v2.size() == 0 )
+		return -1;
 	if ( r1 + r2 > 1e-20 )
 		return getRMSDiff( v1, v2 ) / (r1 + r2);
-	return 0;
+	return -1;
 }
 
 string headop( const string& op )

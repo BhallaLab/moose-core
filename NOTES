@@ -8191,6 +8191,19 @@ Checkin 2242.
 Setting up benchmarks in regression test directory so that we can
 load in and run real models.
 Fixes to Ksolver following assorted changes that were not tracked in
-the earlier unit tests.
+the earlier unit tests. 
+Checkin 2243.
+
+The benchmark throws up more undiagnosed errors. Turns out the GslIntegrator
+isn't working. Also turns out that the apparently OK regression tests on 
+readKkit were not catching the fact that the simulations had not run at all.
 
 ============================================================================
+25 Oct 2010
+Tracked down problem: The wildcard system fails with a path of the form
+"./##". I think it will handle just "##". Need to fix and put in unit tests.
+
+Put that in, also had to sort out scheduling. Now it computes, but the
+values differ from the reference file. After checking with the old MOOSE,
+it seems like there is still some difference, but it is small.
+- Still croaks for 3 threads, in interesting ways.

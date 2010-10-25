@@ -22,7 +22,7 @@ class Stoich
 
 		void setOneWay( bool v );
 		bool getOneWay() const;
-		double getNumVarMols() const;
+		unsigned int getNumVarMols() const;
 
 		void setPath( const Eref& e, const Qinfo* q, string v );
 		string getPath( const Eref& e, const Qinfo* q ) const;

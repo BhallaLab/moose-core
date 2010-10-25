@@ -71,12 +71,12 @@ void testKsolveZombify( string modelFile )
 	Id stoich = base;
 
 	Id gsl = s->doCreate( "GslIntegrator", base, "gsl", dims );
+	/*
 	MsgId mid = s->doAddMsg( "Single", 
 		FullId( stoich, 0 ), "plugin", 
 		FullId( gsl, 0 ), "stoich" );
 	assert( mid != Msg::badMsg );
 
-	/*
 	const Finfo* f = Stoich::initCinfo()->findFinfo( "plugin" );
 	assert( f );
 	const SrcFinfo1< Stoich* >* plug = 
@@ -96,7 +96,6 @@ void testKsolveZombify( string modelFile )
 	assert( ret );
 	ret = Field< bool >::get( gsl.eref(), "isInitialized" );
 	assert( ret );
-	// assert( gi->getIsInitialized() );
 
 	s->doSetClock( 0, plotDt );
 	s->doSetClock( 1, plotDt );

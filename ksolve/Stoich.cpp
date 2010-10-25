@@ -51,7 +51,7 @@ const Cinfo* Stoich::initCinfo()
 			&Stoich::getOneWay
 		);
 
-		static ReadOnlyValueFinfo< Stoich, double > nVarMols(
+		static ReadOnlyValueFinfo< Stoich, unsigned int > nVarMols(
 			"nVarMols",
 			"Number of variable molecules in the reac system",
 			&Stoich::getNumVarMols
@@ -185,7 +185,7 @@ string Stoich::getPath( const Eref& e, const Qinfo* q ) const
 	return path_;
 }
 
-double Stoich::getNumVarMols() const
+unsigned int Stoich::getNumVarMols() const
 {
 	return numVarMols_;
 }
