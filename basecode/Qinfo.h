@@ -205,12 +205,12 @@ class Qinfo
 		void assignQblock( const Msg* m, const ProcInfo* p );
 		
 	private:
-		bool useSendTo_;	// true if the msg is to a single target DataId.
-		bool isForward_; // True if the msg is from e1 to e2.
-		MsgId m_;
-		FuncId f_;
-		DataId srcIndex_; // DataId of src.
-		unsigned int size_; // size of argument in bytes.
+		bool useSendTo_;	/// true if msg is to a single target DataId.
+		bool isForward_; /// True if the msg is from e1 to e2.
+		MsgId m_;		/// Unique lookup Id for Msg.
+		FuncId f_;		/// Unique lookup Id for function.
+		DataId srcIndex_; /// DataId of src.
+		unsigned int size_; /// size of argument in bytes. Zero is allowed.
 
 		/**
 		 * outQ is one per worker thread. The immediate output goes into

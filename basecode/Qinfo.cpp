@@ -184,6 +184,7 @@ void readBuf(const char* begin, const ProcInfo* proc )
 			hackForSendTo( qi, buf );
 		} else {
 			const Msg* m = Msg::getMsg( qi->mid() );
+			assert( m );
 			m->exec( buf, proc );
 		}
 		buf += sizeof( Qinfo ) + qi->size();

@@ -8206,4 +8206,22 @@ Tracked down problem: The wildcard system fails with a path of the form
 Put that in, also had to sort out scheduling. Now it computes, but the
 values differ from the reference file. After checking with the old MOOSE,
 it seems like there is still some difference, but it is small.
-- Still croaks for 3 threads, in interesting ways.
+Checkin 2244.
+- Still croaks for 2 and 3 threads, in interesting and diverse ways.
+
+Put in a couple of assertions in Qinfo::readBuf. Size fails.
+
+============================================================================
+26 Oct 2010
+After a few tests, it seems that there are various modes of failure of the
+multithread calculations. One is that the simulation doesn't do enough
+steps. Other is that the queue points to a null message. 
+Seems to work OK on single-thread calculations.
+Oddly, all this is with the solver in place so the amount of messaging is 
+quite small. Should do another test with much heavier messaging to stress
+the queueing.
+
+I need to decide if I should try to fix current code or just do the planned
+queue reimplementation.
+
+============================================================================
