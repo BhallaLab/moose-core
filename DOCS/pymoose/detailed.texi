@@ -2,12 +2,13 @@
 @chapter In-Depth Guide to PyMOOSE
 In this chapter we go through the internal details of PyMOOSE.
 @menu
-* Overview::          A short overview of impotrant internals of PyMOOSE
-* Model Tree::        All elements in MOOSE are part of a Tree structure
-* Id::                The unique identifier for each MOOSE object
-* Neutral::           Common properties of all MOOSE classes
-* PyMooseContext::    The God object giving access to global functions
-* Messaging::         Details of messaging
+* Overview::                    A short overview of impotrant internals of PyMOOSE
+* Model Tree::                  All elements in MOOSE are part of a Tree structure
+* Id::                          The unique identifier for each MOOSE object
+* Neutral::                     Common properties of all MOOSE classes
+* PyMooseContext::              The God object giving access to global functions
+* Messaging::                   How to setup communication between elements in a model
+* Running GENESIS scripts in Python::  How to run GENESIS-2 commands/scripts in Python
 @end menu
 
 @node Overview
@@ -474,6 +475,7 @@ PyMooseContext are required only when there is no such counterpart.
 @end table
 
 @node Messaging
+@section Messaging
 @cindex connection
 @cindex message
 @subsection Source and Destination fields
@@ -489,3 +491,29 @@ which tell what are the fields that can be transmitted out of the
 field where it can receive a current injection value. By connecting the
 source and the destination fields we set up communication between these
 two components.
+
+@node Running GENESIS scripts in Python
+@section Running GENESIS scripts in Python
+@cindex GENESIS script
+There are two commands in PyMOOSE that allows you to run legacy GENESIS
+commands inside Python. These are @code{loadG} and @code{runG}. If you
+have a file @code{script.g} containing a GENESIS script, then you can
+execute the contents of it by invoking: 
+
+@code{context.loadG(script.g)}
+
+where context is the singleton PyMooseContext object (can be obtained
+via: @code{context = moose.PyMooseBase.getContext()}).
+
+Sometimes it is useful to access the MOOSE objects via the GENESIS
+commands. This is because for some classes, the Python wrappers may not
+be up to date, or it may just be ease of use. In those cases, just to
+carry out a single command, you can use
+@code{context.runG('@{genesis-command@}')}.
+
+For example, to display the messages on an element specified by the path
+@code{/my_element}, you can use: 
+@group 
+@code{context.runG('showmsg /my_element')} 
+@end group.
+
