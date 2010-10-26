@@ -492,6 +492,33 @@ field where it can receive a current injection value. By connecting the
 source and the destination fields we set up communication between these
 two components.
 
+The syntax for connecting source and destination messages is simple:
+@code{@{source-object@}.connect(@{source-field@}, @{target-object@},
+@{target-field@})}
+
+With the current example, it will be:
+
+@code{pulsegen.connect('outputSrc', comp, 'injectMsg')}
+
+A very common yet confusing scenario is when you want to record the
+value of some state variable periodically. This is achieved by using
+@code{Table} objects. The confusing bit here is that the table object is
+used as a source, not a destination. The relevant source-field is
+@code{inputRequest} and the destination-field is the field to be
+recorded. This is a special case as the fields to be recorded are not
+destination fields, but value fields, which do not usually participate
+in messaging. Also, to use the Table object as an output buffer, you
+have to set the stepMode field to @code{3} (TAB_BUF).
+
+Thus, to record the membrane potential Vm from our compartment, we can
+issue the following statements:
+
+@group
+table = moose.Table('/Vm_tbl')
+table.stepMode = 3
+table.connect('inputRequest', comp, 'Vm')
+@end group
+
 @node Running GENESIS scripts in Python
 @section Running GENESIS scripts in Python
 @cindex GENESIS script
