@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 30 11:18:34 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Oct 15 14:29:40 2010 (+0530)
+# Last-Updated: Thu Oct 28 15:39:42 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 445
+#     Update #: 446
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -174,7 +174,7 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
         ret = None
         field = self.fields[index.row()]        
         if role == Qt.ToolTipRole:
-            return self.tr('<html>' + config.context.doc(self.mooseObject.className + '.' + str(field)).replace(chr(27) + '[1m', '<b>').replace(chr(27) + '[0m', '</b>') + '</html>')
+            return self.tr('<html>' + moose.context.doc(self.mooseObject.className + '.' + str(field)).replace(chr(27) + '[1m', '<b>').replace(chr(27) + '[0m', '</b>') + '</html>')
         if index.column() == 0 and role == Qt.DisplayRole:
             ret = QtCore.QVariant(QtCore.QString(field))
         elif index.column() == 1 and role == Qt.DisplayRole:
