@@ -14,7 +14,7 @@ import moose
 dir(moose)
 
 c = moose.PyMooseBase.getContext()
-c.loadG('/home/lab13/Genesis_file/acc59.g')
+c.loadG('/home/lab13/Genesis_file/gfile/test_27oct.g')
 #c.loadG('/home/lab13/trunk/DEMOS/kholodenko/Kholodenko.g')
 
 app = QtGui.QApplication(sys.argv)
@@ -34,8 +34,8 @@ class Textitem(QtGui.QGraphicsTextItem):
 		self.mooseObj_ = moose.Neutral(path)
 		self.layoutWidgetpt = layoutwidget
 		QtGui.QGraphicsTextItem.__init__(self,self.mooseObj_.name)
-		#self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
-
+		self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
+		self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges, 1);
 
 	def mouseDoubleClickEvent(self, event):
 		self.emit(QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.mooseObj_)
@@ -78,7 +78,7 @@ class LayoutWidget(QtGui.QWidget):
 			self.moosetext_dict[itemid] = pItem 	
 		
 		scale_Cord = int(self.cordTransform(self.itemList,self.moosetext_dict))
-		
+
 		#Adding moose Object to scene and then adding to scene to view
 		for item in self.itemList:
 			pItem = Textitem(self,item.path)
@@ -129,18 +129,16 @@ class LayoutWidget(QtGui.QWidget):
 					des = self.moosetext_dict[item.id]
 					source = moose.Neutral(pobject)
 					self.lineCord(src,des,self.screen,item)
-		test = self.screen.itemsBoundingRect()
-		print ">",test,test.center()
 		view = QtGui.QGraphicsView(self.screen,self)
 		view.setScene(self.screen)
-		#view.ensureVisible(50,50)
 		grid.addWidget(view,0,0)
 
 	def updateItemSlot(self, mooseObject):
 	        for changedItem in (item for item in self.screen.items() if isinstance(item, Textitem) and mooseObject.id == item.mooseObj_.id):
 	            break
 	        changedItem.updateSlot()
-		
+
+
 	def emitItemtoEditor(self,mooseObject):
 		self.emit(QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"), mooseObject)		
 
