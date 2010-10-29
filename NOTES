@@ -8220,8 +8220,96 @@ Seems to work OK on single-thread calculations.
 Oddly, all this is with the solver in place so the amount of messaging is 
 quite small. Should do another test with much heavier messaging to stress
 the queueing.
+Checkin 2245.
 
 I need to decide if I should try to fix current code or just do the planned
 queue reimplementation.
+
+Checked all the messages, they do have the thread-specificity in exec().
+
+A closer look at the threaded messaging. This is sketched out on pg 59 
+of the paper lab notebook.
+
+Outcomes:
+1. There has to be a defined mapping of each object onto a given thread
+for the Msg::exec. This has to work across messages: If there are 10 messages
+coming into an object, all of them must be on the same thread or there will
+be errors. Message threading has to be reworked to do this.
+	- The obvious way to do this is to hash the Id and the DataId::data()
+	indices together (addition would do). Use something like
+	thread = (id+dataid) % numThreadsInGroup. This is simple but gives
+	a messy and inefficient way to go through non-contiguous sequences 
+	such as SparseMsg. We would have to check every entry. 
+	It would be faster to have bounds. But probably a small cost.
+		- Alternately, we could subclass off the SparseMsg to pull out
+		thread-specific subsets. This is fast regardless of the 
+		iteration scheme. It is similar to what I did earlier and
+		shares its problems. Could be done much more cleanly.
+	- The other way is to use just the dataId, assuming we know max dataId:
+	start = ( thread * maxDataId ) / numThreadsInGroup
+	end = ( (thread + 1 ) * maxDataId ) / numThreadsInGroup
+	This is likely to overload stuff onto thread 0 because many 
+	Elements are singletons.
+	- For complex objects like solvers, the solver itself may want to
+	do the thread partitioning. One way around it is to make a new kind of
+	ZeroDimHandler that knows that 'process' should be called on
+	all threads.
+
+2. There are 2 phases in each tick, each separated by barriers:
+	- Phase 1: Tick::advance->Msg::process->Element::process->
+		DataHandler::process. The DataHandler does the thread splitting.
+		Each message output goes as follows:
+		SrcFinfo->Element::asend->Qinfo::addToQ. 
+		The message knows which Queue to put stuff into (see below)
+		Each Queue set has individual queues for each thread.
+	- Barrier 1: This terminates the 'process' call. It also, atomically,
+		swaps outQs with inQs; outG with inG. The handling of
+		outMPI and inMPI is more complex, discussed below.
+	- Phase 2: Qinfo::readQ->Msg::exec calls. Here the Msgs scan through
+		their targets, often many of them. The Msg::exec is called
+		on all Msgs from all threads, the Msgs have to partition
+		which subset of target objects they will handle on each thread.
+		Note that the newly swapped outQ may be used already.
+	- Barrier 2: This terminates the Qinfo::readQ->Msg::exec calls.
+3. We need 3 sets of Qs, each with one queue per thread. These are:
+	- within-group queues: outQ and inQ
+	- Between-group queues: outG and inG
+	- Off-node queues with possibly slow tick rates: outMPI and inMPI
+		- The outMPI accumulates data till this node comes to its turn
+		to send data. Then it does an MPI_Bcast.
+			- There is a tradeoff here as it will accumulate
+			_everything_ in outQ and outG. Memory vs. frequency
+			of clearing.
+			- We can do the MPI_Bcast for an entire cycle, till
+			the next barrier1, since the outQ and outG will 
+			handle data accumulation. But then it must sync.
+			Most likely it will do this between barrier 1 and 2,
+			since this gives the inMPI time to collect info
+			between barrier 2 and 1.
+		- The inMPI will typically get input from other nodes every
+		cycle. It can receive data between Barrier 2 and Barrier 1
+	- If we have to have tighter sync between nodes, we'll have to
+		replace accumulation and MPI_Bcast with MPI_Allgather. In
+		the original code I also have an MPI_Barrier. 
+		- Here the 'sends' will still have to go between barriers 1
+		and 2, and we'll have to insert a third Barrier to deal with
+		the received ext data. 
+		- Much more memory efficient, as we can use inQ and inG
+		directly for the 'sends', and only have to maintain suitable
+		inMPI queues for the incoming data from other nodes.
+
+4. Still need to sort out comms between other threads such as the Shell
+	and the GUIs. Probably just go on the outG/inG queues.
+
+============================================================================
+28 Oct 2010
+Implemented mapping of all targets of Msg::exec onto specific objects
+defined by threadNumber. Encapsulated this function into ProcInfo::execThread
+since ProcInfo knows about threads and it is always present when doing exec.
+Fixed up all Msgs to use the ProcInfo::execThread to decide which targets to
+call.
+
+When all compiled, it still clears stuff with 1 thread, but starts falling
+apart in the regression tests with more than 1 thread.
 
 ============================================================================

@@ -282,63 +282,20 @@ void SparseMsg::exec( const char* arg, const ProcInfo *p ) const
 		unsigned int row = rowIndex( e1_, q->srcIndex() );
 		// unsigned int oldRow = row;
 
-
-		// This is the crucial line where we define which subset of data
-		// can be accessed by this thread.
-		// row = row * p->numThreadsInGroup + p->threadIndexInGroup;
-
-		unsigned int colStart = 
-			( p->threadIndexInGroup * matrix_.nColumns() ) / 
-			p->numThreadsInGroup;
-		unsigned int colEnd = 
-			( (p->threadIndexInGroup + 1) * matrix_.nColumns() ) / 
-			p->numThreadsInGroup;
-
 		const unsigned int* fieldIndex;
 		const unsigned int* colIndex;
 		unsigned int n = matrix_.getRow( row, &fieldIndex, &colIndex );
 
-		/*
-		if ( oldRow % 100 == 0 ) {
-			cout << Shell::myNode() << "." << p->threadIndexInGroup << 
-				": row = " << oldRow << 
-				", Trow = " << row <<
-				", n = " << n << 
-				", t = " << p->currTime <<
-				endl;
-		}
-		for ( unsigned int j = 0; j < n; ++j ) {
-			cout << Shell::myNode() << "." << p->threadIndexInGroup << 
-			": " << oldRow << 
-			" colindex[" << j << "] = " << colIndex[j] <<
-			", fieldindex[" << j << "] = " << fieldIndex[j] << 
-			endl << flush;
-		}
-		*/
-
 		// J counts over all the column entries, i.e., all targets.
 		for ( unsigned int j = 0; j < n; ++j ) {
-			if ( colIndex[j] < colStart )
-				continue;
-			if ( colIndex[j] >= colEnd )
-				break;
-			
-			Eref tgt( e2_, DataId( colIndex[j], fieldIndex[j] ) );
-			/*
-			if ( colIndex[j] % 100 == 0 ) {
-				cout << Shell::myNode() << "." << p->threadIndexInGroup << 
-				":Sparse exec    [" << colIndex[j] << 
-				"," << fieldIndex[j] << 
-				"], target here = " << tgt.isDataHere() <<
-				", t = " << p->currTime << endl << flush;
+			if ( p->execThread( e2_->id(), colIndex[j] ) ) {
+				Eref tgt( e2_, DataId( colIndex[j], fieldIndex[j] ) );
+				if ( tgt.isDataHere() )
+					f->op( tgt, arg );
 			}
-			*/
-			if ( tgt.isDataHere() )
-				f->op( tgt, arg );
 		}
-	} else  if ( p->threadIndexInGroup == 0 ) {
-		// Avoid using this back operation! Currently we don't
-		// even try to do it backward with threading.
+	} else {
+		// Avoid using this back operation!
 		// Note that we do NOT use the fieldIndex going backward. It is
 		// assumed that e1 does not have fieldArrays.
 		const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
@@ -347,9 +304,11 @@ void SparseMsg::exec( const char* arg, const ProcInfo *p ) const
 		vector< unsigned int > rowIndex;
 		unsigned int n = matrix_.getColumn( column, fieldIndex, rowIndex );
 		for ( unsigned int j = 0; j < n; ++j ) {
-			Eref tgt( e1_, DataId( rowIndex[j] ) );
-			if ( tgt.isDataHere() )
-				f->op( tgt, arg );
+			if ( p->execThread( e1_->id(), rowIndex[j] ) ) {
+				Eref tgt( e1_, DataId( rowIndex[j] ) );
+				if ( tgt.isDataHere() )
+					f->op( tgt, arg );
+			}
 		}
 	}
 }

@@ -35,6 +35,16 @@ class ProcInfo
 		bool isMpiThread;
 		void* barrier1;
 		void* barrier2;
+		/**
+		 * This utility function sets policy for which thread to use
+		 * for Msg::exec, given any Id/DataId. 
+		 * Returns true when the specified Id/DataId should be executed
+		 * on current thread.
+		 */
+		inline bool execThread( Id id, unsigned int dataIndex ) const {
+			return threadIndexInGroup == 
+				( ( id.value() + dataIndex ) % numThreadsInGroup );
+		}
 };
 
 typedef const ProcInfo* ProcPtr;
