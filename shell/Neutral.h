@@ -48,6 +48,12 @@ class Neutral
 		string getName( const Eref& e, const Qinfo* q ) const;
 
 		/**
+		 * Field access functions for the group of the Element
+		 */
+		void setGroup( const Eref& e, const Qinfo* q, unsigned int val );
+		unsigned int getGroup( const Eref& e, const Qinfo* q ) const;
+
+		/**
 		 * Simply returns own fullId
 		 */
 		FullId getFullId( const Eref& e, const Qinfo* q ) const;

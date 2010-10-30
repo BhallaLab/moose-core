@@ -8274,6 +8274,15 @@ be errors. Message threading has to be reworked to do this.
 3. We need 3 sets of Qs, each with one queue per thread. These are:
 	- within-group queues: outQ and inQ
 	- Between-group queues: outG and inG
+		This isn't right. We need an outQ and inQ equivalent for 
+		every group if it is to be a computational group. If on the 
+		other hand we have a single computational group, then this
+		could work. If the definition of a group is a set of highly
+		interconnected objects for which we should do all-to-all
+		communication, then we will need multiple computational groups
+		for large models. We do want to have independent buffers
+		for the all-to-all MPI transfers, but these will be merged
+		with respect to threads.
 	- Off-node queues with possibly slow tick rates: outMPI and inMPI
 		- The outMPI accumulates data till this node comes to its turn
 		to send data. Then it does an MPI_Bcast.
@@ -8297,6 +8306,12 @@ be errors. Message threading has to be reworked to do this.
 		- Much more memory efficient, as we can use inQ and inG
 		directly for the 'sends', and only have to maintain suitable
 		inMPI queues for the incoming data from other nodes.
+	- How do we assign groups? If Elements have group info then we could
+		do this. But we haven't formalized groups to this level yet.
+		Clearly the whole Element would be in a group.
+		Perhaps there could be a grouping Element and all children of it
+		are in its group.
+
 
 4. Still need to sort out comms between other threads such as the Shell
 	and the GUIs. Probably just go on the outG/inG queues.
@@ -8311,5 +8326,96 @@ call.
 
 When all compiled, it still clears stuff with 1 thread, but starts falling
 apart in the regression tests with more than 1 thread.
+
+============================================================================
+29 Oct 2010
+Checkin 2253.
+
+While the current decomposition seems clean, it is also very inefficient 
+especially when the # of threads scales up. At present the approach is to
+test every putative target object to see if it is in line for execution
+on the current thread. Note also that the thread assignment of an object
+during message Q clearing is completely independent of the thread assignment
+during 'process'.
+
+Which is the earliest we can partition between threads?
+	- The obvious place is at the Msg level, since the Msgs know which
+	are the target objects. 
+		- Problem is that a whole lot of queue grinding and Msg
+		checking will have to be done for every msg to find which
+		ones are on the current thread.
+		- One level of efficency is to preselect the groups of objects 
+		to be executed on each thread, within each message. This will 
+		be relevant for OneToAll and Sparse Msgs. For others I don't
+		see a way around the scan-and-check approach.
+	- A much nicer place would be at the queue level, so we avoid 
+	scanning at all if it isn't going to be executed on the current thread.
+	Possibly at the time we do the Element::asend, we could check with the
+	Msg to decide where to assign the queue entry. But now we have a 
+	proliferation of queues.
+	- An intermediate approach is to put some thread info in the Queue
+	data struct (header) for the msg, so we can skip some msgs before
+	going to Msg::exec and all the associated processing. Question is,
+	does this become too much of a corner case? It would apply when the
+	dest is local, and when it is a single Msg.
+Summary and conclusion:
+	The idea of messages is to postpone the divergence of data flow to 
+	the Msg::exec stage. So queue grinding should not be the rate limiting
+	step, even at high thread counts. For now stick with the current 
+	approach of scanning into all messages.
+
+See above. There are also concerns about the grouping design, which would
+result in proliferation of outQs/inQs. 
+
+Option 1:
+	Single block of outQs (one outQ per thread) and a threaded memcpy
+	phase when each msg is sorted into respective inQs, one inQ per _group_.
+	This requires that we put some group/Q identification stuff into the 
+	Qinfo header so we can very quickly read through and assign.
+	The threaded memcpy phase will need care to avoid stepping
+	on parts of memory used by other threads.
+
+Option 2:
+	Emphasize threads over groups. Sort the inQs by thread, as figured
+	from target object set. This requires a bit more info about the
+	target object and Msg, but again this is feasible at the stage when 
+	the outQs are being filled.
+	Problem here is that many Msgs, esp. OneToAll and Sparse, will have 
+	multiple target objects sitting on different threads.
+	Option is to subdivide these, but this could well happen within the
+	Msg itself, where it would be cleaner.
+
+Option 3:
+	Have outQs subdivided both by thread and by group. There will be lots,
+	but this eliminates subsequent sorting by group, and we can reuse
+	the outQs as InQs without memcpy.
+
+In all these cases, especially case 3, it would be nice to be able to put all 
+thread-sections of the queue into a single contiguous memory block for MPI
+transfers. To do this we want:
+- A single big block of memory
+- Separate pointers into this block, managed by each queue.
+- A good estimate of size of queue so we avoid
+	- reallocation
+	- blank spaces in final data transmission.
+- a dumy queue entry to fill in the blanks, to indicate how much space to 
+	skip before next queue entry.
+
+I think Option 3 is the cleanest and most susceptible to streamlining.
+Here we want separate blocks of data for each group.
+
+Steps:
+	1. Implement Qvec to provide the contiguous data block.
+	2. Associate groups with Elements
+	3. Fix up message sending and receiving to use Qvec
+	4. See if it works.
+	5. Recode thread handling
+	6. See if it works
+	7. Clean up SendTo
+
+Done 2. Compiles, clears unit tests. Not hard.
+Implementing changes in Qinfo. Implemented Qvec.h, need to do Qvec.cpp.
+Need to scan through Qinvo.cpp, replacing old code with the 
+updated code using Qvecs..
 
 ============================================================================

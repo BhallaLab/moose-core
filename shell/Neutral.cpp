@@ -30,6 +30,15 @@ const Cinfo* Neutral::initCinfo()
 		&Neutral::setName, 
 		&Neutral::getName );
 
+	static ElementValueFinfo< Neutral, unsigned int > group( 
+		"group",
+		"Computational group in which object belongs. Assumed to require"
+		"high density message traffic, and queues are organized "
+		"according to group. Groups are inherited from parent but one" 
+		"can select any of the extant groups to use for an Element",
+		&Neutral::setGroup, 
+		&Neutral::getGroup );
+
 	// Should be renamed to myId
 	static ReadOnlyElementValueFinfo< Neutral, FullId > me( 
 		"me",
@@ -129,6 +138,16 @@ void Neutral::setName( const Eref& e, const Qinfo* q, string name )
 string Neutral::getName( const Eref& e, const Qinfo* q ) const
 {
 	return e.element()->getName();
+}
+
+void Neutral::setGroup( const Eref& e, const Qinfo* q, unsigned int val )
+{
+	e.element()->setGroup( val );
+}
+
+unsigned int Neutral::getGroup( const Eref& e, const Qinfo* q ) const
+{
+	return e.element()->getGroup();
 }
 
 FullId Neutral::getFullId( const Eref& e, const Qinfo* q ) const

@@ -776,6 +776,7 @@ bool Shell::adopt( Id parent, Id child ) {
 			parent()->getName() << " to " << child()->getName() << "\n";
 		return 0;
 	}
+	child()->setGroup( parent()->getGroup() );
 	return 1;
 }
 

@@ -83,6 +83,10 @@ unsigned int Qinfo::addSimGroup( unsigned short numThreads,
 	SimGroup sg( numThreads, si, numNodes );
 	g_.push_back( sg );
 
+	e1_.push_back( new Qvec( numThreads ) );
+	e2_.push_back( new Qvec( numThreads ) );
+
+	/*
 	inQ_.resize( g_.size() );
 
 	mpiQ_.resize( g_.size() );
@@ -93,6 +97,7 @@ unsigned int Qinfo::addSimGroup( unsigned short numThreads,
 	for ( unsigned int i = 0; i < numThreads; ++i ) {
 		outQ_[i + si].reserve( BLOCKSIZE );
 	}
+	*/
 	return ng;
 }
 
@@ -224,10 +229,6 @@ void Qinfo::readLocalQ( const ProcInfo* proc )
 	assert( localQ_.size() >= sizeof( unsigned int ) );
 	char* buf = &localQ_[0];
 	readBuf( buf, proc );
-	/*
-	unsigned int *bufsize = reinterpret_cast< unsigned int* >( buf);
-	*bufsize = 0;
-	*/
 }
 
 /**
@@ -242,21 +243,6 @@ void Qinfo::readMpiQ( const ProcInfo* proc )
 	assert( proc );
 	assert( proc->groupId < mpiQ_.size() );
 	vector< char >& q = mpiQ_[ proc->groupId ];
-	/*
-	cout << "in Qinfo::readMpiQ on node " << proc->nodeIndexInGroup <<
-		", qsize = " << q.size() << endl;
-	*/
-
-	/*
-	unsigned int *bufsize = reinterpret_cast< unsigned int* >( &q[0] );
-	if ( *bufsize > BLOCKSIZE ) { // giant message.
-		readBuf( &q[0], proc );
-		*bufsize = 0;
-		cout << Shell::myNode() << ": readMpiQ: intercepted giant msg\n";
-		Qinfo::reportQ();
-		return;
-	}
-	*/
 	for ( unsigned int i = 0; i < proc->numNodesInGroup; ++i ) {
 		if ( i != proc->nodeIndexInGroup ) {
 			char* buf = &q[0] + BLOCKSIZE * i;

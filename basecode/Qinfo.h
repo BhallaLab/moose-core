@@ -118,6 +118,7 @@ class Qinfo
 		 */
 		static void readQ( const ProcInfo* proc );
 
+
 		/**
 		 * Read the localQ.
 		 */
@@ -203,6 +204,11 @@ class Qinfo
 		 * each block is to be.
 		 */
 		void assignQblock( const Msg* m, const ProcInfo* p );
+
+		/**
+		 * Exchanges inQ and outQ. Called in barrier1 leading into Phase 2.
+		 */
+		void swapQs();
 		
 	private:
 		bool useSendTo_;	/// true if msg is to a single target DataId.
@@ -212,6 +218,30 @@ class Qinfo
 		DataId srcIndex_; /// DataId of src.
 		unsigned int size_; /// size of argument in bytes. Zero is allowed.
 
+		/**
+		 * outQ_ is the buffer in which messages get queued. The Qvec
+		 * class deals with threading issues.
+		 * There are as many entries as there are simulation groups.
+		 * In computation phase 2 the outQ swaps with the inQ, and the 
+		 * inQ is used to read the data that had accumulated in the outQ.
+		 */
+		vector< Qvec >* outQ_;
+
+		/**
+		 * inQ_ is the buffer that holds data to be read out in order to
+		 * deliver the messages to the target.
+		 */
+		vector< Qvec >* inQ_;
+
+		/**
+		 * These are the actual allocated locations of the vectors
+		 * underlying the inQ and outQ.
+		 */
+		vector< Qvec > q1_;
+		vector< Qvec > q2_;
+		
+
+#if 0
 		/**
 		 * outQ is one per worker thread. The immediate output goes into
 		 * the outQs which are later consolidated.
@@ -240,6 +270,7 @@ class Qinfo
 		 * It is populated by examining outQ for local-only messages.
 		 */
 		static vector< char > localQ_;
+#endif
 
 		/**
 		 * This keeps track of which data go into which queue.

@@ -19,7 +19,7 @@
  * should not mess with messages or Ids.
  */
 Element::Element( Id id, const Cinfo* c, DataHandler* d )
-	: id_( id ), cinfo_( c )
+	: id_( id ), cinfo_( c ), group_( 0 )
 {
 	dataHandler_ = new DataHandlerWrapper( d );
 }
@@ -29,6 +29,7 @@ Element::Element( Id id, const Cinfo* c, const string& name,
 	:	name_( name ),
 		id_( id ),
 		cinfo_( c ), 
+		group_( 0 ),
 		msgBinding_( c->numBindIndex() )
 {
 	unsigned int numRealDimensions = 0;
@@ -69,6 +70,7 @@ Element::Element( Id id, const Cinfo* c, const string& name,
 		id_( id ),
 		dataHandler_( dataHandler ),
 		cinfo_( c ), 
+		group_( 0 ),
 		msgBinding_( c->numBindIndex() )
 {
 	id.bindIdToElement( this );
@@ -79,6 +81,7 @@ Element::Element( Id id, const Element* orig, unsigned int n )
 	:	name_( orig->getName() ),
 		id_( id ),
 		cinfo_( orig->cinfo_ ), 
+		group_( orig->group_ ),
 		msgBinding_( orig->cinfo_->numBindIndex() )
 {
 	if ( n <= 1 ) {
@@ -114,6 +117,16 @@ const string& Element::getName() const
 void Element::setName( const string& val )
 {
 	name_ = val;
+}
+
+unsigned int Element::getGroup() const
+{
+	return group_;
+}
+
+void Element::setGroup( unsigned int val )
+{
+	group_ = val;
 }
 
 /**

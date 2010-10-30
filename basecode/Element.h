@@ -59,6 +59,16 @@ class Element
 		 * Changes name of Element
 		 */
 		void setName( const string& val );
+		
+		/**
+		 * Returns group in which Element belongs
+		 */
+		unsigned int getGroup() const;
+		
+		/**
+		 * Changes group of Element
+		 */
+		void setGroup( unsigned int val );
 
 		/**
 		 * Examine process queue, data that is expected every timestep.
@@ -194,7 +204,7 @@ class Element
 	private:
 		string name_;
 
-		Id id_; // The current way of accessing Id.
+		Id id_; /// Stores the unique identifier for Element.
 
 		/**
 		 * This object stores and manages the actual data for the Element.
@@ -205,6 +215,13 @@ class Element
 		 * Class information
 		 */
 		const Cinfo* cinfo_;
+
+		/**
+		 * Identifies which closely-connected group the Element is in.
+		 * Each Group is assumed to have dense message traffic internally,
+		 * and uses MPI_Allgather to exchange data.
+		 */
+		 unsigned int group_;
 
 		/**
 		 * Message vector. This is the low-level messaging information.
