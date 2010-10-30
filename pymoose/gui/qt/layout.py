@@ -3,7 +3,7 @@ import os
 from PyQt4 import QtGui,QtCore,Qt
 from operator import itemgetter, attrgetter
 import math
-
+import config
 import moose
 '''
 print os.getcwd()
@@ -35,7 +35,8 @@ class Textitem(QtGui.QGraphicsTextItem):
 		self.layoutWidgetpt = layoutwidget
 		QtGui.QGraphicsTextItem.__init__(self,self.mooseObj_.name)
 		self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
-		self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges, 1);
+		if config.QT_MINOR_VERSION >= 6:
+			self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges, 1)
 
 	def mouseDoubleClickEvent(self, event):
 		self.emit(QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.mooseObj_)
