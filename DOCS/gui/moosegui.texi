@@ -29,7 +29,7 @@ Documentation License.''
 @title MOOSE GUI
 @subtitle How to use the Graphical User Interface for MOOSE
 @subtitle Version 1.3
-@author Subhasis Ray (@email{subhasis@@ncbs.res.in})
+@author Subhasis Ray (@email{subhasis  at ncbs dot res dot in})
 @page
 @vskip 0pt plus 1filll
 @insertcopying
@@ -120,7 +120,9 @@ click @code{Finish}.
 @chapter Overview of the GUI window
 
 Once you are finished with the @code{First-time Wizard}, you will be
-working with the @i{moosegui}.
+working with the @i{moosegui}. Even if you cancel the wizard the first
+time, you can go back to it and change the settings. It can be accessed
+from the @code{File->First time wizard} menu.
 
 We discuss the different parts of this window below.
 
@@ -271,10 +273,24 @@ the windows on top to view the ones below.
 
 
 @section SBML models
-To be completed.
+Just like GENESIS models, you can select SBML model in the drop down and
+load an SBML file. The main difference is that here you don't get the
+reaction network layout. Also, GENESIS kinetikit files come with
+predefined plots. But SBML does not handle plotting and
+visualization. So in this case (and in general) you have to plot the
+variables yourself. First you have to double click the object whose
+field you want to plot in the @code{Model Tree}. This will open the
+object editor with list of available fields. Now you can plot a field by
+either left-clicking on the field and dragging it to the plot widget and
+releasing the mouse button, or by clicking in the the @code{Plot} column
+twice and then selecting 'Plot 0' from the drop down. When you have
+multiple plot widgets, you can select where it should be plotted from
+this drop-down.
 
 @section NeuroML models
-To be completed.
+Currently MOOSE has partial support for NeuroML models. You can load a
+model from the ``Load File'' dialog and selecting NeuroML format from the
+file type drop down.
 
 
 
