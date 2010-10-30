@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 30 11:18:34 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Oct 28 15:39:42 2010 (+0530)
+# Last-Updated: Sat Oct 30 16:31:03 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 446
+#     Update #: 449
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -157,7 +157,7 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
         elif index.column() == 2 and role == Qt.EditRole: 
             try:
                 self.fieldPlotNameMap[self.fields[index.row()]] = str(value)                
-                self.emit(QtCore.SIGNAL('plotWindowChanged(const QString&, const QString&)'), QtCore.QString(self.mooseObject.path + '/' + field, QtCore.QString(value)))
+                self.emit(QtCore.SIGNAL('plotWindowChanged(const QString&, const QString&)'), QtCore.QString(self.mooseObject.path + '/' + field), QtCore.QString(value))
             except KeyError:
                 ret = False
         if ret:
@@ -241,7 +241,7 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
     def updatePlotField(self, index, plotWindowName):
         self.fieldPlotNameMap[self.fields[index.row()]] = str(plotWindowName)                
         self.emit(QtCore.SIGNAL('dataChanged(const QModelIndex&, const QModelIndex&)'), index, index)
-        print 'EMitted data chaNGED signal'
+
         
 class ObjectEditDelegate(QtGui.QItemDelegate):
     """Delegate to handle object editor"""
