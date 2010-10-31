@@ -13,10 +13,10 @@
 #endif
 
 // Declaration of static field
-vector< vector< char > > Qinfo::inQ_;
-vector< vector< char > > Qinfo::outQ_;
-vector< vector< char > > Qinfo::mpiQ_;
-vector< char > Qinfo::localQ_;
+vector< Qvec > Qinfo::q1_;
+vector< Qvec > Qinfo::q2_;
+vector< Qvec >* Qinfo::inQ_ = &Qinfo::q1_;
+vector< Qvec >* Qinfo::outQ_ = &Qinfo::q2_;
 vector< SimGroup > Qinfo::g_;
 vector< vector< QueueBlock > > Qinfo::qBlock_;
 
@@ -32,18 +32,6 @@ Qinfo::Qinfo( FuncId f, DataId srcIndex, unsigned int size, bool useSendTo )
 		srcIndex_( srcIndex ),
 		size_( size )
 {;}
-
-/*
-Qinfo::Qinfo( FuncId f, DataId srcIndex, unsigned int size )
-	:	
-		useSendTo_( 0 ), 
-		isForward_( 1 ), 
-		m_( 0 ), 
-		f_( f ), 
-		srcIndex_( srcIndex ),
-		size_( size )
-{;}
-*/
 
 Qinfo::Qinfo( DataId srcIndex, unsigned int size, bool useSendTo )
 	:	
@@ -83,8 +71,8 @@ unsigned int Qinfo::addSimGroup( unsigned short numThreads,
 	SimGroup sg( numThreads, si, numNodes );
 	g_.push_back( sg );
 
-	e1_.push_back( new Qvec( numThreads ) );
-	e2_.push_back( new Qvec( numThreads ) );
+	q1_.push_back( Qvec( numThreads ) );
+	q2_.push_back( Qvec( numThreads ) );
 
 	/*
 	inQ_.resize( g_.size() );
@@ -129,49 +117,6 @@ void hackForSendTo( const Qinfo* q, const char* buf )
 	func->op( Eref( tgt, *tgtIndex ), buf );
 }
 
-void Qinfo::clearQ( const ProcInfo* proc )
-{
-	mergeQ( proc->groupId );
-	if ( 0 ) {
-		sendRootToAll( proc );
-		readLocalQ( proc );
-		readQ( proc );
-		readMpiQ( proc );
-	} else {
-		readLocalQ( proc );
-		readQ( proc );
-	}
-	// inQ_[ proc->groupId ].resize( BLOCKSIZE );
-	// *reinterpret_cast< unsigned int* >( &inQ_[ proc->groupId ][0] ) = 0;
-}
-
-void Qinfo::mpiClearQ( const ProcInfo* proc )
-{
-	// cout << proc->nodeIndexInGroup << ": Qinfo::mpiClearQ: numNodes= " << proc->numNodesInGroup << "\n";
-	mergeQ( proc->groupId );
-
-	/*
-	if ( Shell::myNode() == 1 )
-		Qinfo::reportQ();
-		*/
-
-	if ( proc->numNodesInGroup > 1 ) {
-		sendRootToAll( proc );
-		readLocalQ( proc );
-		readQ( proc );
-		if ( Shell::myNode() == 0 )
-			readMpiQ( proc );
-		else
-			readRootQ( proc );
-		// cout << Shell::myNode() << ": Done readMpiQ\n";
-	} else {
-		readLocalQ( proc );
-		readQ( proc );
-	}
-	// inQ_[ proc->groupId ].resize( BLOCKSIZE );
-	// *reinterpret_cast< unsigned int* >( &inQ_[ proc->groupId ][0] ) = 0;
-}
-
 void readBuf(const char* begin, const ProcInfo* proc )
 {
 	const char* buf = begin;
@@ -205,63 +150,35 @@ void readBuf(const char* begin, const ProcInfo* proc )
 void Qinfo::readQ( const ProcInfo* proc )
 {
 	assert( proc );
-	assert( proc->groupId < inQ_.size() );
-	vector< char >& q = inQ_[ proc->groupId ];
-	assert( q.size() >= sizeof( unsigned int ) );
-	char* buf = &q[0];
-	readBuf( buf, proc );
-	/*
-	unsigned int *bufsize = reinterpret_cast< unsigned int* >( buf);
-	*bufsize = 0;
-	*/
-}
-
-/** 
- * Static func
- * In this variant we just go through the local Q.
- * The localQ is readonly here, and the code design means that
- * localQ is never updated while this function operates.
- * Thread safe as it is readonly in the Queue.
- */ 
-void Qinfo::readLocalQ( const ProcInfo* proc )
-{
-	assert( proc );
-	assert( localQ_.size() >= sizeof( unsigned int ) );
-	char* buf = &localQ_[0];
-	readBuf( buf, proc );
+	assert( proc->groupId < inQ_->size() );
+	readBuf( ( *inQ_ )[ proc->groupId ].data(), proc );
 }
 
 /**
  * Static func. 
  * Deliver the contents of the mpiQ to target objects
- * Not thread safe. To run multithreaded, requires that
- * the messages have been subdivided on a per-thread basis to avoid 
- * overwriting each others targets.
+ * Assumes that the Msgs invoked by readBuf handle the thread safety.
  */
 void Qinfo::readMpiQ( const ProcInfo* proc )
 {
 	assert( proc );
 	assert( proc->groupId < mpiQ_.size() );
-	vector< char >& q = mpiQ_[ proc->groupId ];
+	const Qvec& q = mpiQ_[ proc->groupId ];
 	for ( unsigned int i = 0; i < proc->numNodesInGroup; ++i ) {
 		if ( i != proc->nodeIndexInGroup ) {
-			char* buf = &q[0] + BLOCKSIZE * i;
-			assert( q.size() >= sizeof( unsigned int ) + BLOCKSIZE * i );
-			unsigned int *bufsize = reinterpret_cast< unsigned int* >( buf);
-			readBuf( buf, proc );
-			/*
-			if ( *bufsize > 0 ) {
-				cout << "On (" << proc->nodeIndexInGroup << 
-					", " << proc->threadIndexInGroup << 
-					"): got msg of size " << *bufsize << endl;
-
+			const char* buf = q.data() + BLOCKSIZE * i;
+			assert( q.allocatedSize() >= sizeof( unsigned int ) + BLOCKSIZE * i );
+			const unsigned int *bufsize = 
+				reinterpret_cast< const unsigned int* >( buf);
+			if ( *bufsize > BLOCKSIZE ) { // Giant message
+				// Do something.
+				exit( 0 );
+			} else {
+				readBuf( buf, proc );
 			}
-			*/
-			if ( *bufsize > BLOCKSIZE ) // Giant message
-
-			*bufsize = 0;  // Will have to alter to deal with threads
 		}
 	}
+	mpiQ_[proc->groupId].clear();
 }
 
 /**
@@ -271,16 +188,11 @@ void Qinfo::readMpiQ( const ProcInfo* proc )
  * Not thread safe. To run multithreaded, requires that
  * the messages have been subdivided on a per-thread basis to avoid 
  * overwriting each others targets.
- */
 void Qinfo::readRootQ( const ProcInfo* proc )
 {
 	assert( proc );
 	assert( proc->groupId < mpiQ_.size() );
 	vector< char >& q = mpiQ_[ 0 ];
-	/*
-	cout << "in Qinfo::readMpiQ on node " << proc->nodeIndexInGroup <<
-		", qsize = " << q.size() << endl;
-	*/
 
 	unsigned int *bufsize = reinterpret_cast< unsigned int* >( &q[0] );
 	readBuf( &q[0], proc );
@@ -289,19 +201,37 @@ void Qinfo::readRootQ( const ProcInfo* proc )
 	// Qinfo::reportQ();
 	return;
 }
+ */
 
 /**
- * Static func. Not thread safe.
- * Merge out all outQs from a group into its inQ. This clears out inQ
- * before filling it, and clears out the outQs after putting them into inQ.
+ * Exchanges inQs and outQs. Also stitches together thread blocks on
+ * the inQ so that the readBuf function will go through as a single 
+ * unit.
+ * Static func. Not thread safe. Must be done on single thread,
+ * protected by barrier so that it happens at a defined point for all
+ * threads.
  */
-void Qinfo::mergeQ( unsigned int groupId )
+void Qinfo::swapQ()
 {
+	if ( inQ_ == &q2_ ) {
+		inQ_ = &q1_;
+		outQ_ = &q2_;
+	} else {
+		inQ_ = &q2_;
+		outQ_ = &q1_;
+	}
+	for ( vector< Qvec >::iterator i = inQ_->begin(); 
+		i != inQ_->end(); ++i )
+	{
+		i->stitch();
+	}
+
+	/*
 	assert( groupId < g_.size() );
 	SimGroup& g = g_[ groupId ];
 	// unsigned int j = g.startThread;
 	// assert( j + g.numThreads <= outQ_.size() );
-	vector< char >& inQ = inQ_[ groupId ];
+	const Qvec& inQ = (*inQ_)[ groupId ];
 
 	inQ.resize( sizeof( unsigned int ) );
 	*( reinterpret_cast< unsigned int* >( &inQ[0] ) ) = 0;
@@ -326,6 +256,7 @@ void Qinfo::mergeQ( unsigned int groupId )
 	}
 	*reinterpret_cast< unsigned int* >( &inQ[0] ) = inQ.size();
 	*reinterpret_cast< unsigned int* >( &localQ_[0] ) = localQ_.size();
+	*/
 }
 
 /**
@@ -345,11 +276,11 @@ void Qinfo::sendAllToAll( const ProcInfo* proc )
 	if ( proc->numNodesInGroup == 1 )
 		return;
 	// cout << proc->nodeIndexInGroup << ", " << proc->threadId << ": Qinfo::sendAllToAll\n";
-	assert( mpiQ_[ proc->groupId ].size() >= BLOCKSIZE * proc->numNodesInGroup );
+	assert( mpiQ_[proc->groupId].allocatedSize() >= 
+		BLOCKSIZE * proc->numNodesInGroup );
 #ifdef USE_MPI
-	inQ_[proc->groupId ].resize( BLOCKSIZE );
-	char* sendbuf = &inQ_[ proc->groupId ][0];
-	char* recvbuf = &mpiQ_[ proc->groupId ][0];
+	const char* sendbuf = inQ_->data();
+	char* recvbuf = mpiQ_.writableData();
 	//assert ( inQ_[ proc->groupId ].size() == BLOCKSIZE );
 
 	MPI_Barrier( MPI_COMM_WORLD );
@@ -372,7 +303,6 @@ void Qinfo::sendAllToAll( const ProcInfo* proc )
  * The function is used only by the Shell thread.
  * the MPI::Alltoall function doesn't work here because it partitions out
  * the send buffer into pieces targetted for each other node. 
- */
 void Qinfo::sendRootToAll( const ProcInfo* proc )
 {
 	if ( proc->numNodesInGroup == 1 )
@@ -381,10 +311,6 @@ void Qinfo::sendRootToAll( const ProcInfo* proc )
 	// cout << "ng = " << g_.size() << ", ninQ= " << inQ_[0].size() << ", nmpiQ = " << mpiQ_[0].size() << " proc->groupId =  " << proc->groupId  << " s1 = " << mpiQ_[ proc->groupId ].size() << " s2 = " << BLOCKSIZE * proc->numNodesInGroup;
 	assert( mpiQ_[ proc->groupId ].size() >= BLOCKSIZE * proc->numNodesInGroup );
 #ifdef USE_MPI
-	/*
-	if ( inQ_[proc->groupId].size() < BLOCKSIZE )
-		inQ_[proc->groupId].resize( BLOCKSIZE );
-		*/
 	char* sendbuf = &inQ_[ proc->groupId ][0];
 	char* recvbuf = &mpiQ_[ proc->groupId ][0];
 //	assert ( inQ_[ proc->groupId ].size() == BLOCKSIZE );
@@ -435,28 +361,18 @@ void Qinfo::sendRootToAll( const ProcInfo* proc )
 			sendbuf, BLOCKSIZE, MPI_CHAR, 
 			recvbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
 	}
-	/*
-	if ( *recvbufSize > BLOCKSIZE ) {
-		// cout << Shell::myNode() << "." << proc->threadIndexInGroup << ": BigMsg: recvbufsize = " << *recvbufSize << ", sendbufsize = " << *sendbufSize << "\n";
-
-		// Qinfo::reportQ();
-		// cout << Shell::myNode() << ": Q reporting done\n";
-	}
-	*/
 	// cout << Shell::myNode() << "." << proc->threadIndexInGroup << ": Gathered stuff via mpi, recvbufsize = " << *recvbufSize << ", sendbufsize = " << *sendbufSize << "\n";
 #endif
 }
+*/
 
-unsigned int inQsize( const vector< char >& q ) {
-	if ( q.size() < sizeof( unsigned int ) )
-		return 0;
-	const char *temp =  &q[0];
-	return *reinterpret_cast< const unsigned int* >( temp );
-}
-
-void innerReportQ( const char* buf, unsigned int bufsize )
+void innerReportQ( const Qvec& qv, const string& name )
 {
-	const char* end = buf + bufsize;
+	cout << Shell::myNode() << ": Reporting " << name << ". size=" <<
+		qv.usedSize() << endl;
+	
+	const char* buf = qv.data();
+	const char* end = qv.data() + qv.usedSize();
 	while ( buf < end ) {
 		const Qinfo *q = reinterpret_cast< const Qinfo* >( buf );
 		const Msg *m = Msg::safeGetMsg( q->mid() );
@@ -483,89 +399,32 @@ void innerReportQ( const char* buf, unsigned int bufsize )
 void Qinfo::reportQ()
 {
 	cout << Shell::myNode() << ":	inQ: ";
-	for ( unsigned int i = 0; i < inQ_.size(); ++i )
-		cout << "[" << i << "]=" << inQsize( inQ_[i] ) << "	";
+	for ( unsigned int i = 0; i < inQ_->size(); ++i )
+		cout << "[" << i << "]=" << ( *inQ_ )[i].usedSize() << "	";
 	cout << "outQ: ";
-	for ( unsigned int i = 0; i < outQ_.size(); ++i )
-		cout << "[" << i << "]=" << outQ_[i].size() << "	";
+	for ( unsigned int i = 0; i < outQ_->size(); ++i )
+		cout << "[" << i << "]=" << (*outQ_ )[i].usedSize() << "	";
 	cout << "mpiQ: ";
 	for ( unsigned int i = 0; i < mpiQ_.size(); ++i ) {
-		unsigned int size = *(reinterpret_cast< unsigned int *>( &mpiQ_[i][0] ) );
+		unsigned int size = mpiQ_[i].usedSize();
 		cout << "[" << i << "]=" << size << "	";
 	}
-	cout << "localQ: " << localQ_.size() << endl;
+	cout << endl;
 
-	if ( inQ_.size() > 0 && inQ_[0].size() > 0 ) {
-		const char* buf = &inQ_[0][0];
-		unsigned int bufsize = *reinterpret_cast< const unsigned int* >( buf );
-		if ( bufsize > sizeof( unsigned int ) ) {
-			cout << Shell::myNode() << ": Reporting inQ[0]\n";
-			bufsize -= sizeof( unsigned int );
-			innerReportQ( buf + sizeof( unsigned int ), bufsize );
-		}
-	}
-
-	if ( inQ_.size() > 1 && inQ_[1].size() > 0 ) {
-		const char* buf = &inQ_[1][0];
-		unsigned int bufsize = *reinterpret_cast< const unsigned int* >( buf );
-		if ( bufsize > sizeof( unsigned int ) ) {
-			cout << Shell::myNode() << ": Reporting inQ[1]\n";
-			bufsize -= sizeof( unsigned int );
-			innerReportQ( buf + sizeof( unsigned int ), bufsize );
-		}
-	}
-
-	if ( localQ_.size() > sizeof( unsigned int ) ) {
-		const char* buf = &localQ_[0];
-		unsigned int bufsize = *reinterpret_cast< const unsigned int* >( buf );
-		if ( bufsize > 0 ) {
-			cout << Shell::myNode() << ": Reporting localQ\n";
-			bufsize -= sizeof( unsigned int );
-			innerReportQ( buf + sizeof( unsigned int ), bufsize );
-		}
-	}
-
-	if ( outQ_.size() > 0 ) {
-		if ( outQ_[0].size() > 0 ) {
-			cout << Shell::myNode() << ": Reporting outQ[0]\n";
-			innerReportQ( &( outQ_[0][0] ), outQ_[0].size() );
-		}
-	}
-	if ( mpiQ_.size() > 0 && mpiQ_[0].size() > 0 ) {
-		const char* buf = &mpiQ_[0][0];
-		unsigned int bufsize = *reinterpret_cast< const unsigned int* >( buf );
-		if ( bufsize > sizeof( unsigned int ) ) {
-			bufsize -= sizeof( unsigned int );
-			cout << Shell::myNode() << ": Reporting mpiQ[0]\n";
-			innerReportQ( buf + sizeof( unsigned int ), bufsize );
-		}
-	}
-	if ( mpiQ_.size() > 1 && mpiQ_[1].size() > 0 ) {
-		const char* buf = &mpiQ_[1][0];
-		unsigned int bufsize = *reinterpret_cast< const unsigned int* >( buf );
-		if ( bufsize > sizeof( unsigned int ) ) {
-			bufsize -= sizeof( unsigned int );
-			cout << Shell::myNode() << ": Reporting mpiQ[1]\n";
-			innerReportQ( buf + sizeof( unsigned int ), bufsize );
-		}
-	}
+	if ( inQ_->size() > 0 ) innerReportQ( (*inQ_)[0], "inQ[0]" );
+	if ( inQ_->size() > 1 ) innerReportQ( (*inQ_)[1], "inQ[1]" );
+	if ( outQ_->size() > 0 ) innerReportQ( (*outQ_)[0], "outQ[0]" );
+	if ( outQ_->size() > 1 ) innerReportQ( (*outQ_)[1], "outQ[1]" );
+	if ( mpiQ_.size() > 0 ) innerReportQ( mpiQ_[0], "mpiQ[0]" );
+	if ( mpiQ_.size() > 1 ) innerReportQ( mpiQ_[1], "mpiQ[1]" );
 }
 
-void Qinfo::addToQ( unsigned int threadId, MsgFuncBinding b, 
+void Qinfo::addToQ( const ProcInfo* p, MsgFuncBinding b, 
 	const char* arg )
 {
-	assert( threadId < outQ_.size() );
-
-	vector< char >& q = outQ_[threadId];
-	unsigned int origSize = q.size();
 	m_ = b.mid;
 	f_ = b.fid;
-	q.resize( origSize + sizeof( Qinfo ) + size_ );
-	char* pos = &( q[origSize] );
-	memcpy( pos, this, sizeof( Qinfo ) );
-	// ( reinterpret_cast< Qinfo* >( pos ) )->setForward( isForward );
-	// cout << Shell::myNode() << ": Qinfo::addToQ: size_ = " << size_ << endl;
-	memcpy( pos + sizeof( Qinfo ), arg, size_ );
+	(*outQ_)[p->groupId].push_back( p->threadNumInGroup, this, arg );
 }
 
 void Qinfo::addSpecificTargetToQ( unsigned int threadId, MsgFuncBinding b, 
@@ -627,18 +486,13 @@ void Qinfo::assignQblock( const Msg* m, const ProcInfo* p )
 
 void Qinfo::emptyAllQs()
 {
-	for ( unsigned int i = 0; i < g_.size(); ++i ) {
-		inQ_[i].resize( sizeof( unsigned int ) );
-		*( reinterpret_cast< unsigned int* >( &inQ_[i][0] ) ) = 4;
-	}
-	localQ_.resize( sizeof( unsigned int ) );
-	*( reinterpret_cast< unsigned int* >( &localQ_[0] ) ) = 4;
-	for ( unsigned int i = 0; i < Shell::numCores(); ++i ) {
-		outQ_[i].resize( 0 );
-		qBlock_[i].resize(0);
-	}
+	for ( vector< Qvec >::iterator i = q1_.begin(); i != q1_end(); ++i )
+		i->clear();
+	for ( vector< Qvec >::iterator i = q2_.begin(); i != q2_end(); ++i )
+		i->clear();
 }
 
+/*
 void Qinfo::assembleOntoQ( const MsgFuncBinding& i, 
 	const Element* e, const ProcInfo *p, const char* arg )
 {
@@ -649,3 +503,4 @@ void Qinfo::assembleOntoQ( const MsgFuncBinding& i,
 		addToQ( p->threadId, i, arg );
 	}
 }
+*/

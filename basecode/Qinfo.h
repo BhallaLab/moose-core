@@ -7,6 +7,9 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+/// Forward declaration of Qvec.
+class Qvec;
+
 /**
  * This little class keeps track of blocks of data destined for different
  * queues.
@@ -102,60 +105,35 @@ class Qinfo
 		static const SimGroup* simGroup( unsigned int index );
 
 		/**
-		 * Legacy utility function. The proc must specify the correct
-		 * group. clearQ merges all outQs in the group into its inQ,
-		 * then reads the inQ, and then clears the inQ.
-		 */
-		static void clearQ( const ProcInfo *proc );
-
-		/**
-		 * Variant that also takes care of internode stuff.
-		 */
-		static void mpiClearQ( const ProcInfo *proc );
-
-		/**
-		 * Read the inQ specified by the ProcInfo.
+		 * Read the inQ. Meant to run on all the sim threads.
+		 * The Messages internally ensure thread safety by segregating
+		 * target Objects.
 		 */
 		static void readQ( const ProcInfo* proc );
 
-
 		/**
-		 * Read the localQ.
-		 */
-		static void readLocalQ( const ProcInfo* proc );
-
-		/**
-		 * Read the MPI Q
+		 * Read the MPI Q. Similar to readQ, except that the data source
+		 * has arrived from off-node.
 		 */
 		static void readMpiQ( const ProcInfo* proc );
 
 		/**
 		 * Read the MPI Q in contexts where only the message from the
 		 * root Element should be considered.
-		 */
 		static void readRootQ( const ProcInfo* proc );
+		 */
 
 		/**
-		 * Merge all outQs from a group into its inQ.
+		 * Exchange inQ and outQ.
+		 * Must be protected by a mutex as it affects data on
+		 * all threads.
 		 */
-		static void mergeQ( unsigned int groupId );
+		static void swapQ();
 
 		/**
 		 * Clears out contents of all qs, correspondingly the qBlock.
 		 */
 		static void emptyAllQs();
-
-		/**
-		 * Load a buffer of data into an inQ. Assumes threading has been
-		 * dealt with.
-		static void loadQ( Qid qId, const char* buf, unsigned int length );
-		 */
-
-		/**
-		 * Dump an inQ into a buffer of data. Again, assumes threading has
-		 * been dealt with. Basically a memcpy.
-		static unsigned int dumpQ( Qid qid, char* buf );
-		 */
 
 		/**
 		 * Send contents of specified inQ to all nodes using MPI
@@ -165,8 +143,8 @@ class Qinfo
 		/**
 		 * Send contents of root inQ to all nodes using MPI, gather
 		 * their pending return functions.
-		 */
 		static void sendRootToAll( const ProcInfo* proc );
+		 */
 
 		/**
 		 * Handles the case where the system wants to send a msg to
@@ -184,10 +162,10 @@ class Qinfo
 		 * Add data to the queue. This is non-static, since we will also
 		 * put the current Qinfo on the queue as a header.
 		 * The arg will just be memcopied onto the queue, so avoid
-		 * pointers. Possibly add size as an argument
+		 * pointers. The Qinfo must already know its size.
 		 */
-		void addToQ( unsigned int threadId, MsgFuncBinding b, 
-			const char* arg );
+		void addToQ( const ProcInfo* p, MsgFuncBinding b, const char* arg );
+
 		void addSpecificTargetToQ( unsigned int threadId, MsgFuncBinding b, 
 			const char* arg, const DataId& target );
 
@@ -225,20 +203,32 @@ class Qinfo
 		 * In computation phase 2 the outQ swaps with the inQ, and the 
 		 * inQ is used to read the data that had accumulated in the outQ.
 		 */
-		vector< Qvec >* outQ_;
+		static vector< Qvec >* outQ_;
 
 		/**
 		 * inQ_ is the buffer that holds data to be read out in order to
 		 * deliver the messages to the target.
 		 */
-		vector< Qvec >* inQ_;
+		static vector< Qvec >* inQ_;
 
 		/**
 		 * These are the actual allocated locations of the vectors
 		 * underlying the inQ and outQ.
+		 * The number of entries in the vectors is equal to the number
+		 * of simulation groups, which have close message coupling
+		 * requiring all-to-all MPI communications.
 		 */
-		vector< Qvec > q1_;
-		vector< Qvec > q2_;
+		static vector< Qvec > q1_;
+		static vector< Qvec > q2_;
+
+		/**
+		 * This handles incoming data from MPI. At this point it
+		 * is not meant to be filled locally, but if we move to
+		 * a system of staggered Bcast sends then we may need to
+		 * maintain mpiInQ and mpiOutQ. Currently the outgoing
+		 * data is sent each timestep from the inQ.
+		 */
+		static vector< Qvec > mpiQ_;
 		
 
 #if 0

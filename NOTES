@@ -8415,7 +8415,62 @@ Steps:
 
 Done 2. Compiles, clears unit tests. Not hard.
 Implementing changes in Qinfo. Implemented Qvec.h, need to do Qvec.cpp.
-Need to scan through Qinvo.cpp, replacing old code with the 
-updated code using Qvecs..
+Need to scan through Qinfo.cpp, replacing old code with the 
+updated code using Qvecs.
+
+============================================================================
+30 Oct 2010
+Checkin 2256.
+Trying to compile with Qvecs.
+Wrote out another scheduling/queueing/Messaging/MPI block diagram,
+pg 61.
+Need to work how scheduling (different ticks, different dts) will mesh with
+the queues and specially if we do all queues in each tick, or not. The
+key issue is that there is no point at which both the inQ and outQ are empty. 
+So there will always be leftover operations from the previous Process cycle.
+If we change ticks at barrier 3 (before phase 1) then the leftover ops will
+execute somewhere in the subsequent phase 2.
+If we want to end a simulation cleanly, we need to carry on one more cycle
+but without doing the exec in phase1. Even with this it is conceivable that
+we could have a Msg destination calling Send, which in turn calls another
+Send and further that this could go on indefinitely in a loop. A more
+concrete case: Suppose we have a plot request on tick 3, and this is the
+last tick called. Then we have:
+(Previous phase: Plot::send)
+Phase 1, last cycle of simtime:		Phase 2, last cycle of simtime
+Plot::process ->SrcFinfo::Send->	Tick::advance->ReadQ->Msg::exec
+Element::asend->Qinfo::addToQ->outQ	Send request arrives at target.
+destination is target.			Target puts data in outQ
+
+Phase 1, first cycle after simtime	Phase 2, first cycle after simtime
+	Process not executed.		Either Tick::advance->ReadQ->Msg::exec
+					or a special wrap-up call to Phase 2
+					ReadQ->Msg::exec-> puts data into plot
+
+============================================================================
+31 Oct 2010
+
+This is one simple case. One could imagine further levels of regression, such
+as a further pushing of the data from the Table into graphics.
+
+One way out of this is to have the Phase 2 (and possibly Phase 3 ) continue 
+indefinitely as part of the regular event loop. In this scenario the system
+would continue throughout with all 3 phases, and trigger calls to the Clock
+to initiate the TickPtr::advance operation during phase 1 only when the
+simulation was happening. 
+The drawback of this is that it will keep crunching heavily even when sitting
+around waiting for the user to wake up. Perhaps put in
+a small 'wait' during Phase1 when we are not doing Process. Anyway, like MPI,
+the goal isn't to be efficient during idle, but during processing.
+
+The other aspect of this analysis was to see how the system would cope with
+different clock ticks. Seems that the key part is that the Ticks have to
+insert the appropriate Phase1 into an ongoing event loop with Phase 2 and 3.
+I don't think the dangling operations are critical, but we can insert a
+requirement that Process-triggered operations should be one-hop if they are
+to be delivered in the next timestep.
+
+
+Deep into compilation, specifically working through Qinfo.
 
 ============================================================================

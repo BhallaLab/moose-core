@@ -240,7 +240,7 @@ void Element::asend( Qinfo& q, BindIndex bindIndex,
 		msgBinding_[ bindIndex ].end();
 	for ( vector< MsgFuncBinding >::const_iterator i =
 		msgBinding_[ bindIndex ].begin(); i != end; ++i ) {
-		q.assembleOntoQ( *i, this, p, arg );
+		q.addToQ( p, *i, arg );
 	}
 }
 

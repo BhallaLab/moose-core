@@ -73,6 +73,7 @@ class SetGet;
 // #include "OneToOneMsg.h"
 // #include "OneToAllMsg.h"
 #include "MsgFuncBinding.h"
+#include "Qvec.h"
 #include "Qinfo.h"
 #include "Dinfo.h"
 #include "DataHandler.h"
