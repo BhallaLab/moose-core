@@ -3,7 +3,7 @@
  * Description:     Implements utility functions to open files
  *                  with error checking
  * Author:          Subhasis Ray
- * E-mail:          subhasis@ncbs.res.in
+ * E-mail:          subhasis at ncbs dot res dot in
  * Created:         2007-04-22 02:33:58
  ********************************************************************/
 #ifndef _FILECHECK_CPP

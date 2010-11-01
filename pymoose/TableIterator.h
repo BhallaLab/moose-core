@@ -2,7 +2,7 @@
  * File:            TableIterator.h
  * Description:      
  * Author:          Subhasis Ray
- * E-mail:          subhasis@ncbs.res.in
+ * E-mail:          subhasis at ncbs dot res dot in
  * Created:         2007-04-25 16:52:58
  ********************************************************************/
 #ifndef _TABLEITERATOR_H

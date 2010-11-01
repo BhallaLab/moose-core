@@ -4,7 +4,7 @@
  *                      created by modifying the generated class
  *                      declaration.
  * Author:          Subhasis Ray
- * E-mail:          ray.subhasis@gmail.com
+ * E-mail:          subhasis at ncbs dot res dot in
  * Created:         2007-12-03 10:56:28
  ********************************************************************/
 /**********************************************************************

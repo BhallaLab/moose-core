@@ -54,14 +54,4 @@ void Interpol2D::__set_dy( double dy )
 {
     set < double > (id_(), "dy", dy);
 }
-none Interpol2D::__get_tableVector2D() const
-{
-    none tableVector2D;
-    get < none > (id_(), "tableVector2D",tableVector2D);
-    return tableVector2D;
-}
-void Interpol2D::__set_tableVector2D( none tableVector2D )
-{
-    set < none > (id_(), "tableVector2D", tableVector2D);
-}
 #endif
