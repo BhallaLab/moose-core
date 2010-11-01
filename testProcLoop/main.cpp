@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include <iostream>
+#include <vector>
 #include <unistd.h>
 #include <mpi.h>
 #include <pthread.h>
@@ -15,6 +16,88 @@
 #include <stdlib.h>
 
 using namespace std;
+
+class ProcInfo {
+	public:
+		ProcInfo()
+			: 
+				threadIndexInGroup( 0 ),
+				numThreadsInGroup( 1 ),
+				groupId( 0 ),
+				myNode( 0 ),
+				numNodes( 1 )
+		{;}
+
+		unsigned int threadIndexInGroup;
+		unsigned int numThreadsInGroup;
+		unsigned int groupId;
+		unsigned int myNode;
+		unsigned int numNodes;
+};
+
+void* reportGraphics( void* info )
+{
+	ProcInfo *p = reinterpret_cast< ProcInfo* >( info );
+	cout << "reportGraphics on " << p->myNode << ":" << 
+		p->threadIndexInGroup << endl;
+	pthread_exit( NULL );
+}
+
+void* process( void* info )
+{
+	ProcInfo *p = reinterpret_cast< ProcInfo* >( info );
+	cout << "process on " << p->myNode << ":" << 
+		p->threadIndexInGroup << endl;
+
+	pthread_exit( NULL );
+}
+
+void launchThreads( int numNodes, int numCores, int myNode )
+{
+	pthread_attr_t attr;
+	pthread_attr_init( &attr );
+	pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_JOINABLE );
+	pthread_t gThread;
+	if ( myNode == 0 ) { // Launch graphics thread only on node 0.
+		ProcInfo p;
+		// pthread_barrier_t barrier1;
+		int rc = pthread_create(&gThread, NULL, reportGraphics, 
+			(void *)&p );
+		if ( rc )
+			cout << "Error: return code from pthread_create: " << rc << endl;
+	}
+
+	vector< ProcInfo > p( numCores );
+	pthread_t* threads = new pthread_t[ numCores ];
+
+	for ( int i = 0; i < numCores; ++i ) {
+		p[i].numThreadsInGroup = numCores;
+		p[i].threadIndexInGroup = i;
+		p[i].myNode = myNode;
+		int rc = pthread_create( threads + i, NULL, process, 
+			(void *)&p[i] );
+		if ( rc )
+			cout << "Error: return code from pthread_create: " << rc << endl;
+	}
+
+	// clean up
+	for ( int i = 0; i < numCores; ++i ) {
+		void* status;
+		int ret = pthread_join( threads[i], &status );
+		if ( ret )
+			cout << "Error: Unable to join threads\n";
+	}
+
+	if ( myNode == 0 ) { // clean up graphics thread only on node 0.
+		void* status;
+		int ret = pthread_join( gThread, &status );
+		if ( ret )
+			cout << "Error: Unable to join threads\n";
+	}
+
+	delete[] threads;
+	pthread_attr_destroy( &attr );
+}
 
 int main( int argc, char** argv )
 {
@@ -41,6 +124,22 @@ int main( int argc, char** argv )
 
 	cout << "on node " << myNode << ", numNodes = " << numNodes << ", numCores = " << numCores << endl;
 
+	launchThreads( numNodes, numCores, myNode );
+
+
 	MPI_Finalize();
 	return 0;
 }
+
+
+/*
+loop( void* threadid )
+{
+	process
+	barrier1
+	local exec
+	barrier2
+	offnode exec
+	barrier3
+}
+*/

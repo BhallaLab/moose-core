@@ -8543,5 +8543,7 @@ Discussed with Subha. He feels that PyQt can run on a separate thread from
 the scripting (blocking) thread. So I'll go ahead with the design.
 
 Maybe set up prototype as a standalone pgm.
-This is in testProcLoop.
+This is in testProcLoop. Checkin 2273.
 
+Added the thread and node initialization stuff. 
+Compiles, runs with debug messages.
