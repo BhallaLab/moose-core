@@ -2,7 +2,7 @@
  * File:            PyMooseContext.cpp
  * Description:      
  * Author:          Subhasis Ray
- * E-mail:          ray.subhasis@gmail.com
+ * E-mail:          subhasis at ncbs dot res dot in
  * Created:         2007-03-12 03:412
  ********************************************************************/
 #ifndef _PYMOOSE_CONTEXT_CPP

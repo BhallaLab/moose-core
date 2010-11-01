@@ -2,7 +2,7 @@
  * File:            TestPyMoose.cpp
  * Description:      
  * Author:          Subhasis Ray
- * E-mail:          ray.subhasis@gmail.com
+ * E-mail:          subhasis at ncbs dot res dot in
  * Created:         2008-01-08 04:37:58
  ********************************************************************/
 /**********************************************************************

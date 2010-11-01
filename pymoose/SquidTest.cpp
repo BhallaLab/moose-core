@@ -5,7 +5,7 @@
  *                      try debugging the python interpreter running
  *                      squid.py
  * Author:          Subhasis Ray
- * E-mail:          ray.subhasis@gmail.com
+ * E-mail:          subhasis at ncbs dot res dot in
  * Created:         2007-07-04 17:08:44
  ********************************************************************/
 #include "pymoose.h"
