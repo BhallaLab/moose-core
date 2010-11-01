@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Nov  1 13:53:36 2010 (+0530)
+# Last-Updated: Mon Nov  1 15:09:23 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2519
+#     Update #: 2526
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -432,7 +432,8 @@ class MainWindow(QtGui.QMainWindow):
         self.aboutMooseAction = QtGui.QAction(self.tr('&About'), self)
         self.connect(self.aboutMooseAction, QtCore.SIGNAL('triggered()'), self.makeAboutMooseLabel)
         self.showDocAction = QtGui.QAction(self.tr('Documentation'), self)
-        self.contextHelpAction = QtGui.QAction(self.tr('Context Help'), self)
+        self.connect(self.showDocAction, QtCore.SIGNAL('triggered()'), self.browseDocumentation)
+        # self.contextHelpAction = QtGui.QAction(self.tr('Context Help'), self)
         
         # Run menu action
         self.runAction = QtGui.QAction(self.tr('Run Simulation'), self)
@@ -528,7 +529,7 @@ class MainWindow(QtGui.QMainWindow):
                                   
         self.helpMenu = QtGui.QMenu('&Help', self)
         self.helpMenu.addAction(self.showDocAction)
-        self.helpMenu.addAction(self.contextHelpAction)
+        # self.helpMenu.addAction(self.contextHelpAction)
         self.demosMenu = self.makeDemosMenu()
         self.helpMenu.addMenu(self.demosMenu)
         self.helpMenu.addAction(self.aboutMooseAction)
@@ -964,6 +965,9 @@ class MainWindow(QtGui.QMainWindow):
 
     def renameObjFieldEditPanel(self, mooseObject):
         self.objFieldEditPanel.setWindowTitle(mooseObject.name)
+
+    def browseDocumentation(self):
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl(QtCore.QString(config.MOOSE_DOC_URL)))
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)

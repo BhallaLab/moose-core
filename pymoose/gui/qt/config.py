@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Feb 13 16:07:56 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Oct 15 13:40:56 2010 (+0530)
+# Last-Updated: Mon Nov  1 15:10:37 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 134
+#     Update #: 141
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -77,6 +77,8 @@ KEY_DEMOS_DIR = 'main/demosdir'
 QT_VERSION = str(QtCore.QT_VERSION_STR).split('.')
 QT_MAJOR_VERSION = int(QT_VERSION[0])
 QT_MINOR_VERSION = int(QT_VERSION[1])
+
+MOOSE_DOC_URL = 'http://moose.ncbs.res.in/content/view/5/6/'
 
 def get_settings():
     '''Initializes the QSettings for the application and returns it.'''
