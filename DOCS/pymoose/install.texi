@@ -136,7 +136,7 @@ your python installation directory (for UNIX-like systems it is:
 Once you have built and installed PyMOOSE, you can load it in the Python
 interpreter by the statement: @code{import moose}
 You should see a few informational outputs, ending with:
-@example @samp
+@example
 SIMPATH = .:your_home_directory
 nnnn FuncVecs built for the first time
 @end example
