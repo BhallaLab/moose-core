@@ -277,23 +277,46 @@ Just like GENESIS models, you can select SBML model in the drop down and
 load an SBML file. The main difference is that here you don't get the
 reaction network layout. Also, GENESIS kinetikit files come with
 predefined plots. But SBML does not handle plotting and
-visualization. So in this case (and in general) you have to plot the
-variables yourself. First you have to double click the object whose
-field you want to plot in the @code{Model Tree}. This will open the
-object editor with list of available fields. Now you can plot a field by
-either left-clicking on the field and dragging it to the plot widget and
-releasing the mouse button, or by clicking in the the @code{Plot} column
-twice and then selecting 'Plot 0' from the drop down. When you have
-multiple plot widgets, you can select where it should be plotted from
-this drop-down.
+visualization. 
 
 @section NeuroML models
 Currently MOOSE has partial support for NeuroML models. You can load a
 model from the ``Load File'' dialog and selecting NeuroML format from the
-file type drop down.
+file type drop down. The elements in the model are generated as children
+of the currently selected element in the @code{Model Tree}. So, you can
+create the model under a new element by 
+@enumerate
+@item creating a new @code{Neutral} element
+@item then selecting the newly created element.
+@item then loading a model using the file menu
+@end enumerate
 
+@menu
+* Recording and plotting data::  
+@end menu
 
+@node Recording and plotting data,  , Loading a file in the GUI, Loading a file in the GUI
+@section Recording and plotting field values over simulation time
+@cindex Table
 
+Elements of the @code{Table} class are used in MOOSE are used for
+recording data. @code{Table} is a versatile class: it can serves as (1)
+an interpolation table, (2) a function generator (3) a recording table,
+depending on what stepmode you set. But in the @b{moosegui} you do not
+need to create the @code{Table} explicitly to record data. You can
+simply drag and drop fields in MOOSE elements to a plot window in order
+to plot it. The steps are:
+@enumerate
+@item You have to double click the object whose field you want
+to plot in the @code{Model Tree}. This will open the object editor with
+list of available fields.
+@item Now you can plot a field by either left-clicking on the field and
+dragging it to the plot widget and releasing the mouse button, 
+@item or 
+by clicking in the the @code{Plot} column twice and then selecting 'Plot
+0' from the drop down. When you have multiple plot widgets, you can
+select where it should be plotted from this drop-down.
+@end enumerate
 @bye
 
 @c Local Variables: 
