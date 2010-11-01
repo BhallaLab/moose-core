@@ -2,7 +2,7 @@
  * File:            BinSynchan.cpp
  * Description:      
  * Author:          Subhasis Ray
- * E-mail:          ray.subhasis@gmail.com
+ * E-mail:          subhasis at ncbs dot res dot in
  * Created:         2007-12-03 15:14:58
  ********************************************************************/
 /**********************************************************************
