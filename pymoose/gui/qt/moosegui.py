@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Sep 22 15:40:42 2010 (+0530)
+# Last-Updated: Mon Nov  1 13:53:36 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2482
+#     Update #: 2519
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -197,9 +197,11 @@ class MainWindow(QtGui.QMainWindow):
         self.destTree = MooseTreeWidget(self.connectionDialog)
         self.connect(self.sourceTree, QtCore.SIGNAL('itemClicked(QTreeWidgetItem *, int)'), self.selectConnSource)
         self.connect(self.destTree, QtCore.SIGNAL('itemClicked(QTreeWidgetItem*, int)'), self.selectConnDest)
+        sourceObjLabel = QtGui.QLabel(self.tr('Selected Source'))
         sourceFieldLabel = QtGui.QLabel(self.tr('Source Field'), self.connectionDialog)
         self.sourceFieldComboBox = QtGui.QComboBox(self.connectionDialog)
-        
+
+        destObjLabel = QtGui.QLabel(self.tr('Selected Destination'))        
         destFieldLabel = QtGui.QLabel(self.tr('Target Field'), self.connectionDialog)
         self.destFieldComboBox = QtGui.QComboBox(self.connectionDialog)
 
@@ -216,19 +218,21 @@ class MainWindow(QtGui.QMainWindow):
 
         layout = QtGui.QGridLayout()
         layout.addWidget(self.sourceTree, 0, 0, 5, 2)
-        layout.addWidget(self.sourceObjText, 6, 0)
-        layout.addWidget(sourceFieldLabel, 6, 1)
-        layout.addWidget(self.sourceFieldComboBox, 6, 2)
+        layout.addWidget(sourceObjLabel, 6, 0)
+        layout.addWidget(self.sourceObjText, 6, 1, 1, 2)
+        layout.addWidget(sourceFieldLabel, 7, 0)
+        layout.addWidget(self.sourceFieldComboBox, 7, 1)
         sep = QtGui.QFrame(self.connectionDialog)
         sep.setFrameStyle(QtGui.QFrame.VLine | QtGui.QFrame.Sunken)
         layout.addWidget(sep, 0, 3, -1, 1)
         layout.addWidget(self.destTree, 0, 4, 5, 2)
-        layout.addWidget(self.destObjText, 6, 4)
-        layout.addWidget(destFieldLabel, 6, 5)
-        layout.addWidget(self.destFieldComboBox, 6, 6)
+        layout.addWidget(destObjLabel, 6, 4)
+        layout.addWidget(self.destObjText, 6, 5, 1, 2)
+        layout.addWidget(destFieldLabel, 7, 4)
+        layout.addWidget(self.destFieldComboBox, 7, 5)
         
-        layout.addWidget(cancelButton, 8, 0)
-        layout.addWidget(okButton, 8, 4)
+        layout.addWidget(cancelButton, 9, 0)
+        layout.addWidget(okButton, 9, 4)
 
         self.connectionDialog.setLayout(layout)
         self.connectionDialog.show()
@@ -264,6 +268,7 @@ class MainWindow(QtGui.QMainWindow):
         self.commandLineDock = QtGui.QDockWidget(self.tr('MOOSE Shell'), self)
         self.commandLineDock.setObjectName(self.tr('MooseShell'))
         self.shellWidget = MooseShell(interpreter)
+        self.shellWidget.setFrameStyle(QtGui.QFrame.Raised | QtGui.QFrame.StyledPanel)
         self.commandLineDock.setWidget(self.shellWidget)
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.commandLineDock)
         self.commandLineDock.setObjectName('MooseCommandLine')
@@ -284,9 +289,7 @@ class MainWindow(QtGui.QMainWindow):
             self.objFieldEditModel = ObjectFieldsModel(obj)
             self.objFieldEditorMap[obj.id] = self.objFieldEditModel
             self.connect(self.objFieldEditModel, QtCore.SIGNAL('plotWindowChanged(const QString&, const QString&)'), self.changeFieldPlotWidget)
-            if  hasattr(self, 'objFieldEditPanel'):
-                self.objFieldEditPanel.setWindowTitle(self.tr(obj.name))
-            else:
+            if  not hasattr(self, 'objFieldEditPanel'):
                 self.objFieldEditPanel = QtGui.QDockWidget(self.tr(obj.name), self)
                 self.objFieldEditPanel.setObjectName(self.tr('MooseObjectFieldEdit'))
                 if (config.QT_MAJOR_VERSION > 4) or ((config.QT_MAJOR_VERSION == 4) and (config.QT_MINOR_VERSION >= 5)):
@@ -294,9 +297,12 @@ class MainWindow(QtGui.QMainWindow):
                 else:
                     self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.objFieldEditPanel)
                 self.restoreDockWidget(self.objFieldEditPanel)
+            self.connect(self.objFieldEditModel, QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'), self.renameObjFieldEditPanel)
+            
                 
         self.objFieldEditor = ObjectEditView(self.objFieldEditPanel)
-        self.objFieldEditor.setObjectName(obj.path) # This was for quick testing of drag and drop
+        self.objFieldEditor.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Raised)
+        self.objFieldEditor.setObjectName(str(obj.id)) # Assuming Id will not change in the lifetime of the object - something that might break in future version.
         self.objFieldEditor.setModel(self.objFieldEditModel)
         config.LOGGER.debug('Set model to: %s' % (str(self.objFieldEditModel)))
         self.objFieldEditor.setEditTriggers(QtGui.QAbstractItemView.DoubleClicked
@@ -316,6 +322,7 @@ class MainWindow(QtGui.QMainWindow):
         	             self.sceneLayout.updateItemSlot)
 
         self.objFieldEditPanel.setWidget(self.objFieldEditor)
+        self.objFieldEditPanel.setWindowTitle(self.tr(obj.name))
         self.objFieldEditPanel.raise_()
 	self.objFieldEditPanel.show()
 
@@ -955,6 +962,8 @@ class MainWindow(QtGui.QMainWindow):
 	print 'Demos directory', self.demosDir
         
 
+    def renameObjFieldEditPanel(self, mooseObject):
+        self.objFieldEditPanel.setWindowTitle(mooseObject.name)
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
