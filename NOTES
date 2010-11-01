@@ -8546,4 +8546,6 @@ Maybe set up prototype as a standalone pgm.
 This is in testProcLoop. Checkin 2273.
 
 Added the thread and node initialization stuff. 
-Compiles, runs with debug messages.
+Compiles, runs with debug messages. Checkin 2274.
+
+Added skeleton for barriers.

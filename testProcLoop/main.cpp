@@ -33,6 +33,10 @@ class ProcInfo {
 		unsigned int groupId;
 		unsigned int myNode;
 		unsigned int numNodes;
+
+		pthread_barrier_t* barrier1;
+		pthread_barrier_t* barrier2;
+		pthread_barrier_t* barrier3;
 };
 
 void* reportGraphics( void* info )
@@ -49,6 +53,14 @@ void* process( void* info )
 	cout << "process on " << p->myNode << ":" << 
 		p->threadIndexInGroup << endl;
 
+	for( unsigned int i = 0; i < 100; ++i ) {
+		int rc = pthread_barrier_wait( p->barrier1 );
+		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+		rc = pthread_barrier_wait( p->barrier2 );
+		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+		rc = pthread_barrier_wait( p->barrier3 );
+		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+	}
 	pthread_exit( NULL );
 }
 
@@ -57,6 +69,16 @@ void launchThreads( int numNodes, int numCores, int myNode )
 	pthread_attr_t attr;
 	pthread_attr_init( &attr );
 	pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_JOINABLE );
+	pthread_barrier_t barrier1;
+	pthread_barrier_t barrier2;
+	pthread_barrier_t barrier3;
+	int ret = pthread_barrier_init( &barrier1, NULL, numCores );
+	assert( ret == 0 );
+	ret = pthread_barrier_init( &barrier2, NULL, numCores );
+	assert( ret == 0 );
+	ret = pthread_barrier_init( &barrier3, NULL, numCores );
+	assert( ret == 0 );
+
 	pthread_t gThread;
 	if ( myNode == 0 ) { // Launch graphics thread only on node 0.
 		ProcInfo p;
@@ -74,6 +96,9 @@ void launchThreads( int numNodes, int numCores, int myNode )
 		p[i].numThreadsInGroup = numCores;
 		p[i].threadIndexInGroup = i;
 		p[i].myNode = myNode;
+		p[i].barrier1 = &barrier1;
+		p[i].barrier2 = &barrier2;
+		p[i].barrier3 = &barrier3;
 		int rc = pthread_create( threads + i, NULL, process, 
 			(void *)&p[i] );
 		if ( rc )
