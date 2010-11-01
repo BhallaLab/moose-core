@@ -2,7 +2,7 @@
  * File:            StochSynchan.h
  * Description:      
  * Author:          Subhasis Ray
- * E-mail:          ray.subhasis@gmail.com
+ * E-mail:          subhasis at ncbs dot res dot in
  * Created:         2007-12-06 12:22:43
  ********************************************************************/
 /**********************************************************************
