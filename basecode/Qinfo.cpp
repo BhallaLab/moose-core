@@ -424,29 +424,20 @@ void Qinfo::addToQ( const ProcInfo* p, MsgFuncBinding b,
 {
 	m_ = b.mid;
 	f_ = b.fid;
-	(*outQ_)[p->groupId].push_back( p->threadNumInGroup, this, arg );
+	(*outQ_)[p->groupId].push_back( p->threadIndexInGroup, this, arg );
 }
 
-void Qinfo::addSpecificTargetToQ( unsigned int threadId, MsgFuncBinding b, 
+void Qinfo::addSpecificTargetToQ( const ProcInfo* p, MsgFuncBinding b, 
 	const char* arg, const DataId& target )
 {
-	assert( threadId < outQ_.size() );
-
-	unsigned int temp = size_;
-	// Expand local size to accommodate FullId for target of msg.
-	size_ += sizeof( DataId );
-
-	vector< char >& q = outQ_[threadId];
-	unsigned int origSize = q.size();
 	m_ = b.mid;
 	f_ = b.fid;
-	q.resize( origSize + sizeof( Qinfo ) + size_ );
-	char* pos = &( q[origSize] );
-	memcpy( pos, this, sizeof( Qinfo ) );
-	pos += sizeof( Qinfo );
-	memcpy( pos, arg, temp );
-	pos += temp;
-	memcpy( pos, &target, sizeof( DataId ) );
+	char* temp = new char[ size_ + sizeof( DataId ) ];
+	memcpy( temp, arg, size_ );
+	memcpy( temp + size_, &target, sizeof( DataId ) );
+	size_ += sizeof( DataId );
+	(*outQ_)[p->groupId].push_back( p->threadIndexInGroup, this, arg );
+	delete[] temp;
 }
 
 /**
@@ -486,9 +477,9 @@ void Qinfo::assignQblock( const Msg* m, const ProcInfo* p )
 
 void Qinfo::emptyAllQs()
 {
-	for ( vector< Qvec >::iterator i = q1_.begin(); i != q1_end(); ++i )
+	for ( vector< Qvec >::iterator i = q1_.begin(); i != q1_.end(); ++i )
 		i->clear();
-	for ( vector< Qvec >::iterator i = q2_.begin(); i != q2_end(); ++i )
+	for ( vector< Qvec >::iterator i = q2_.begin(); i != q2_.end(); ++i )
 		i->clear();
 }
 

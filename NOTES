@@ -8463,6 +8463,10 @@ around waiting for the user to wake up. Perhaps put in
 a small 'wait' during Phase1 when we are not doing Process. Anyway, like MPI,
 the goal isn't to be efficient during idle, but during processing.
 
+Note that if I do this I have to change how the Shell parser functions deal
+with the event loop. Either use a a conditional wait in each such function,
+or keep starting and restarting the event loop.
+
 The other aspect of this analysis was to see how the system would cope with
 different clock ticks. Seems that the key part is that the Ticks have to
 insert the appropriate Phase1 into an ongoing event loop with Phase 2 and 3.
@@ -8470,8 +8474,74 @@ I don't think the dangling operations are critical, but we can insert a
 requirement that Process-triggered operations should be one-hop if they are
 to be delivered in the next timestep.
 
-
 Deep into compilation, specifically working through Qinfo.
 Checkin 2263.
 
+Done with Qinfo.cpp, but we need clearQ for SetGet. Need to work through
+this one.
+
+Pending:
+SetGet::completeSet() ::clearQ. What to do about this?
+
+I need to implement the scheduling framework somewhere.
+- Clock: Good place to do scheduling, but odd place for a generic func.
+- Shell: Good place for interactions between parser thread and sim threads.
+	Adequate place for system-wide scheduling ops. 
+- Qinfo: All the queues are here, but it is an odd place to do scheduling.
+
+Let's put it in Shell.
+Going through the process. If I use clock::advance then it will be
+quite inefficient to cycle up to the required tick every dt. Question is,
+will this be a significant slowdown or is the flexibility worth it?
+Considering the huge amount of stuff being done every dt, I don't think this
+cost should be a consideration. Will benchmark and see later.
+
+For all the clearQ legacy calls, what we really need is a call that posts
+a conditional wait till the main loop clears one cycle. Or two, if we're
+concerned about returns from off-node queries.
+
+How to do this? This is related to the original problem of how to deal with
+blocking on simulations and appropriate waits for completion in shell commands.
+Have our inner loop check the 
+
+We cannot have SetGet operations take place off-cycle, as they insert 
+messages into the queue. They should occur safely in phase 2 but not
+elsewhere.
+
 ============================================================================
+1 Nov 2010
+Three cases of interaction with inner loop:
+- Set/Get operations.
+- Shell calls that will need transmission to other nodes and possibly 
+	lots of work on remote nodes. Design avoids remote nodes talking to
+	each other for most setup ops.
+- Processing.
+
+Q: Does the Shell/parser thread also run through the main event loop?
+- Also runs on main event loop: will limit processing and will lock 
+	shell updates to sim updates. So discard this option.
+- No, runs separately. Here we provide a few key functions to achieve 
+	clean meshing: 
+	- Set/Get: they forward stuff into Shell::dispatchSet/Get. These
+		issue 'send' commands, see below.
+	- Shell operations: do<Function>. These issue send commands. The 'send'
+	commands therefore need to be protected such that they are
+	issued during phase 1. Then we need to have a conditional wait till
+	some flag of completion is returned, to ensure strict serial behaviour
+	of a sequence of setup calls.
+	- Process: Here the 'send' command just tells the clock that it is
+	to begin advancing. Again, a flag for completion is needed.
+	Current flag is from the 'isAckPending' system, which wraps a loop
+	for testing responses from all nodes.
+
+The test for completion flag works by sending in a ack message back to the
+Shell. These acks are counted till all nodes have returned.
+The way to change this would be to have a condition_wait on the isAckPending
+flag.
+
+Discussed with Subha. He feels that PyQt can run on a separate thread from
+the scripting (blocking) thread. So I'll go ahead with the design.
+
+Maybe set up prototype as a standalone pgm.
+This is in testProcLoop.
+

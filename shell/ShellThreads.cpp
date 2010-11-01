@@ -358,3 +358,23 @@ void Shell::start( double runtime )
 	pthread_barrier_destroy( &barrier2 );
 	pthread_mutex_destroy( &sortMutex );
 }
+
+Shell::singleLoop( const ProcInfo* proc )
+{
+	// Phase 1.
+	clock->advance( proc ); // Advances stuff one tick.
+
+	// Special barrier with embedded atomic func to swap inQ and outQ
+	swapBarrier(); 
+
+	// Phase 2.
+	Qinfo::readQ( proc );
+
+	if ( numNodes > 1 ) {
+		barrier() // regular barrier
+		Qinfo::mpiReadQ( proc );
+	}
+
+	barrier() // regular barrier.
+
+}

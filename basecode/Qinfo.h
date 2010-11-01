@@ -166,7 +166,7 @@ class Qinfo
 		 */
 		void addToQ( const ProcInfo* p, MsgFuncBinding b, const char* arg );
 
-		void addSpecificTargetToQ( unsigned int threadId, MsgFuncBinding b, 
+		void addSpecificTargetToQ( const ProcInfo* p, MsgFuncBinding b, 
 			const char* arg, const DataId& target );
 
 		/**

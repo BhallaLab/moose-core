@@ -33,7 +33,7 @@ void SetGet::setShell()
 void SetGet::completeSet() const
 {
 	// e_.element()->clearQ();
-	Qinfo::clearQ( Shell::procInfo() );
+	// Qinfo::clearQ( Shell::procInfo() );
 }
 
 bool SetGet::checkSet( const string& field, Eref& tgt, FuncId& fid ) const

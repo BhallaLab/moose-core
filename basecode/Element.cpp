@@ -268,13 +268,13 @@ void Element::tsend( Qinfo& q, BindIndex bindIndex,
 		if ( q.isForward() ) {
 			if ( m->e2() == e && m->isMsgHere( q ) ) {
 				q.assignQblock( m, p );
-				q.addSpecificTargetToQ( p->threadId, *i, arg, target.dataId );
+				q.addSpecificTargetToQ( p, *i, arg, target.dataId );
 				return;
 			}
 		} else {
 			if ( m->e1() == e && m->isMsgHere( q ) ) {
 				q.assignQblock( m, p );
-				q.addSpecificTargetToQ( p->threadId, *i, arg, target.dataId );
+				q.addSpecificTargetToQ( p, *i, arg, target.dataId );
 				return;
 			}
 		}
