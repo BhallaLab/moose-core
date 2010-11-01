@@ -11,7 +11,7 @@
  *                      for this weight needs to belong to a class
  *                      that has __setitem__ and __getitem__ methods.
  * Author:          Subhasis Ray
- * E-mail:          ray.subhasis@gmail.com
+ * E-mail:          subhasis at ncbs dot res dot in
  * Created:         2007-12-03 11:14:47
  ********************************************************************/
 /**********************************************************************

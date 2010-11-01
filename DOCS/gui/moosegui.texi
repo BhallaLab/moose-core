@@ -42,7 +42,9 @@ Documentation License.''
 @node top, Getting Started, (dir), (dir)
 @top MOOSE GUI
 
-This manual is for MOOSE (version 1.3).
+This manual is for MOOSE (version 1.3). It will be undergoing additioins
+and corrections. Please keep visiting the the MOOSE website to see the
+latest version.
 
 It contains an overview of how to use the PyMOOSE/PyQT GUI for MOOSE.
 
@@ -59,6 +61,8 @@ It contains an overview of how to use the PyMOOSE/PyQT GUI for MOOSE.
 * Getting Started::             
 * Overview of the GUI window::  
 * Loading a file in the GUI::   
+* Recording and plotting data::  
+* Adding elements in a model::  
 @end menu
 
 @node Getting Started, Overview of the GUI window, top, top
@@ -163,7 +167,7 @@ We discuss the different parts of this window below.
       this area. This will be discussed in connection with the @code{Object
       Editor} later.
 
-@item MOOSE Classes
+@item MOOSE Classes @anchor{moose-classes-widget}
 
       The right dock area contains a list of classes available in
       MOOSE. They are categorized under different headings.
@@ -200,6 +204,9 @@ We discuss the different parts of this window below.
 
 @end table
 
+If you hover the cursor over any class name in the list, a tool-tip text
+with a brief documentation of the class will show up.
+
 @item MOOSE Shell
       
       The MOOSE Shell at the bottom dock area provides an interpreter
@@ -213,7 +220,7 @@ We discuss the different parts of this window below.
 
 @end table
 
-@node  Loading a file in the GUI,  , Overview of the GUI window, top
+@node  Loading a file in the GUI, Recording and plotting data, Overview of the GUI window, top
 @chapter Loading a file in the GUI
 
 
@@ -295,8 +302,8 @@ create the model under a new element by
 * Recording and plotting data::  
 @end menu
 
-@node Recording and plotting data,  , Loading a file in the GUI, Loading a file in the GUI
-@section Recording and plotting field values over simulation time
+@node Recording and plotting data, Adding elements in a model, Loading a file in the GUI, top
+@chapter Recording and plotting field values over simulation time
 @cindex Table
 
 Elements of the @code{Table} class are used in MOOSE are used for
@@ -316,6 +323,55 @@ dragging it to the plot widget and releasing the mouse button,
 by clicking in the the @code{Plot} column twice and then selecting 'Plot
 0' from the drop down. When you have multiple plot widgets, you can
 select where it should be plotted from this drop-down.
+@end enumerate
+
+@node Adding elements in a model,  , Recording and plotting data, top
+@chapter Adding elements in a model
+
+@section Adding a new element in the @code{Model Tree}
+You can add a new element in a model by using the class list on the
+right hand side pane in moosegui @pxref{moose-classes-widget,,Moose
+Classes}. Double clicking the class name will create a new element in
+the @code{Model Tree} under the currently selected element and also open
+the @code{Object Editor} widget for the new element. The element will
+have the same name as the class name. It is up to you to rename it to
+something more appropriate. To do so edit the @code{name} field in the
+@code{Object Editor}.
+
+
+@section Connecting elements via messages
+Just creating an element may not be sufficient for any complex
+model. You need to enable this model to talk to other elements during a
+simulation. This is done via messages. 
+To do this,
+@enumerate
+@item Click @code{Edit Model} in the menu bar and select @code{Connect
+Elements}.
+
+@image{connect_0_lowres, 15 cm, 10 cm, Connect elements - menu item,
+png}
+
+ This will pop up a window with two panes. The left pane is for
+selecting the source of the message, the right for the destination of
+the message. Both has a model tree and drop-down menu for the message
+field.
+
+@image{connect_1_lowres, 15 cm, 10 cm, Connect elements - popup,
+png}
+
+@item Select source
+In the left pane, expand the @code{Model Tree} and select the element
+which will be the source of the message. Once you select the element,
+the drop-down menu labeled @code{Source Field} will be populated. You
+have to select the appropriate source field here.
+
+@image{connect_2_lowres, 15 cm, 10 cm, Connect elements - select source,
+png}
+
+@item Select Destination
+Similar to selecting source, you have to select the destination element
+and the target field in the right pane.
+@item Click OK to actually make the connection.
 @end enumerate
 @bye
 

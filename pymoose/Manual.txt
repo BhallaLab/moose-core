@@ -3,7 +3,7 @@
  * File:            GtoPy.txt
  * Description:      
  * Author:          Subhasis Ray
- * E-mail:          ray.subhasis@gmail.com
+ * E-mail:          subhasis at ncbs dot res dot in
  * Created:         2007-05-07 17:46:02
  ********************************************************************/
 

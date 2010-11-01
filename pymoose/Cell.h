@@ -2,7 +2,7 @@
  * File:            Cell.h
  * Description:      
  * Author:          Subhasis Ray
- * E-mail:          ray.subhasis@gmail.com
+ * E-mail:          subhasis at ncbs dot res dot in
  * Created:         2007-10-24 15:54:26
  ********************************************************************/
 /**********************************************************************

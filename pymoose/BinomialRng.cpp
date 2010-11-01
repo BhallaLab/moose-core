@@ -5,7 +5,7 @@
  *                      classes. It has been manually modified from
  *                      the generated class definition.
  * Author:          Subhasis Ray
- * E-mail:          ray.subhasis@gmail.com
+ * E-mail:          subhasis at ncbs dot res dot in
  * Created:         2007-11-30 20:20:09
  ********************************************************************/
 /**********************************************************************

@@ -3,7 +3,7 @@
  * Description:     Declares utility functions for opening files
  *                  with check for prior existence and errors.
  * Author:          Subhasis Ray
- * E-mail:          subhasis@ncbs.res.in
+ * E-mail:          subhasis at ncbs dot res dot in
  * Created:         2007-04-11 12:28:00
  ********************************************************************/
 #ifndef _FILECHECK_H
