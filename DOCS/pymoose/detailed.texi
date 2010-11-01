@@ -508,16 +508,20 @@ used as a source, not a destination. The relevant source-field is
 recorded. This is a special case as the fields to be recorded are not
 destination fields, but value fields, which do not usually participate
 in messaging. Also, to use the Table object as an output buffer, you
-have to set the stepMode field to @code{3} (TAB_BUF).
+have to set the stepMode field to @code{TAB_BUF}.
 
 Thus, to record the membrane potential Vm from our compartment, we can
 issue the following statements:
 
+@example
 @group
+
 table = moose.Table('/Vm_tbl')
 table.stepMode = 3
 table.connect('inputRequest', comp, 'Vm')
+
 @end group
+@end example
 
 @node Running GENESIS scripts in Python
 @section Running GENESIS scripts in Python
@@ -540,7 +544,7 @@ carry out a single command, you can use
 
 For example, to display the messages on an element specified by the path
 @code{/my_element}, you can use: 
-@group 
+
 @code{context.runG('showmsg /my_element')} 
-@end group.
+
 
