@@ -8568,4 +8568,8 @@ checking the threadId?
 While mulling on that I've gone one step further to have the
 system set up to send info around using queues. Separated out the
 EventLoop stuff into a separate .cpp file. 
+
+Set up to insert entries into the queue. This works now for one node,
+one thread, but doesn't do anything for more.
+
 ============================================================================

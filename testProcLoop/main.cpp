@@ -15,9 +15,12 @@
 #include <cassert>
 #include <stdlib.h>
 #include "ProcInfo.h"
+#include "Tracker.h"
 
 using namespace std;
+void addToOutQ( const ProcInfo* p, const Tracker* t );
 void* eventLoop( void* info );
+void allocQs();
 
 void* reportGraphics( void* info )
 {
@@ -62,6 +65,11 @@ void launchThreads( int numNodes, int numCores, int myNode )
 		p[i].barrier1 = &barrier1;
 		p[i].barrier2 = &barrier2;
 		p[i].barrier3 = &barrier3;
+
+		if ( myNode == 0 ) {
+			Tracker t( numNodes, numCores, Rule( i % 4 ) );
+			addToOutQ( &p[i], &t );
+		}
 		int rc = pthread_create( threads + i, NULL, eventLoop, 
 			(void *)&p[i] );
 		if ( rc )
@@ -112,6 +120,7 @@ int main( int argc, char** argv )
 
 	cout << "on node " << myNode << ", numNodes = " << numNodes << ", numCores = " << numCores << endl;
 
+	allocQs();
 	launchThreads( numNodes, numCores, myNode );
 
 

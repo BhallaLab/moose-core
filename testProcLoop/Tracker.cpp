@@ -7,14 +7,18 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#include <iostream>
 #include "Tracker.h"
+
+using namespace std;
 
 Tracker::Tracker( int numNodes, int numThreads, Rule rule )
 	: 
 		numHops_( 0 ),
 		numNodes_( numNodes ),
 		numThreads_( numThreads ),
-		trajectoryRule_( rule )
+		trajectoryRule_( rule ),
+		stop_( 0 )
 {
 	for ( unsigned int i = 0; i < HistorySize; ++i ) {
 		recentNodes_[i] = recentThreads_[i] = 0;
@@ -27,30 +31,28 @@ Tracker::Tracker( int numNodes, int numThreads, Rule rule )
 	}
 }
 
-// Returns 0 if it has landed in an incorrect place.
-bool Tracker::updateHistory( int node, int thread )
-{
-	if ( numHops_ == 0 ) {
-		firstNode_ = node;
-		firstThread_ = thread;
-	} else {
-		int expectedNode = 0;
-		int expectedThread = 0;
+Tracker::Tracker()
+	:
+		numHops_( 0 ),
+		numNodes_( 0 ),
+		numThreads_( 0 ),
+		trajectoryRule_( raster0 ),
+		stop_( 1 )
+{;}
 
-		--numHops_; // go back to check history
-		nextHop( expectedNode, expectedThread );
-		++numHops_; // return to present.
-		if ( expectedNode != node || expectedThread != thread )
-			return 0;
-	}
-	recentNodes_[ numHops_ % HistorySize ] = node;
-	recentThreads_[ numHops_ % HistorySize ] = thread;
+// Returns 0 if it has landed in an incorrect place.
+void Tracker::setNextHop()
+{
+	int nextNode;
+	int nextThread;
+	nextHop( nextNode, nextThread );
+	recentNodes_[ numHops_ % HistorySize ] = nextNode;
+	recentThreads_[ numHops_ % HistorySize ] = nextThread;
 	++numHops_;
-	return 1;
 }
 
 // Currently always returns 1
-bool Tracker::nextHop( int& nextNode, int& nextThread )
+bool Tracker::nextHop( int& nextNode, int& nextThread ) const
 {
 	int lastNode = recentNodes_[ numHops_ % HistorySize ];
 	int lastThread = recentThreads_[ numHops_ % HistorySize ];
@@ -94,3 +96,33 @@ bool Tracker::nextHop( int& nextNode, int& nextThread )
 	}
 	return 1;
 }
+
+bool Tracker::stop() const
+{
+	return stop_;
+}
+
+void Tracker::setStop( bool val ) 
+{
+	stop_ = val;
+}
+
+int Tracker::node() const
+{
+	return recentNodes_[ numHops_ % HistorySize ];
+}
+
+int Tracker::thread() const
+{
+	return recentThreads_[ numHops_ % HistorySize ];
+}
+
+void Tracker::print() const
+{
+	unsigned int lastIndex = 0;
+	if ( numHops_ > 0 )
+		lastIndex = (numHops_ - 1) % HistorySize;
+	cout << "Tracker on (" << recentNodes_[ lastIndex ] << ":" <<
+		recentThreads_[ lastIndex ] << "), hop=" << numHops_ << endl;
+}
+

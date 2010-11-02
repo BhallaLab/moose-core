@@ -25,20 +25,45 @@ enum Rule { raster0, raster90, raster180, raster270 };
 class Tracker
 {
 	public:
+		Tracker();
+
 		Tracker( int numNodes, int numThreads, Rule rule );
 
 		/**
-		 * Adds latest hop to history. It knows what to expect, so it
-		 * returns 0 if it has ended up somewhere unexpected.
-		 * On the first hop it is OK with any values to come in.
+		 * Assigns next thread/node to go to, and pushes it into its history.
 		 */
-		bool updateHistory( int node, int thread );
+		void setNextHop();
 
 		/**
-		 * Using trajectory rule, decides where to go next. Returns 0 if
-		 * it is to terminate.
+		 * Figure out next node and next thread.
 		 */
-		bool nextHop( int& nextNode, int& nextThread );
+		bool nextHop( int& nextNode, int& nextThread ) const;
+
+		/**
+		 * Return True if this is the end of the Track.
+		 */
+		bool stop() const;
+
+		/**
+		 * Assign stop field for Tracker
+		 */
+		void setStop( bool val );
+
+		/** 
+		 * Return current node it should be on
+		 */
+		int node() const;
+
+		/** 
+		 * Return current thread it should be on
+		 */
+		int thread() const;
+
+		/**
+		 * Prints out status of tracker
+		 */
+		void print() const;
+
 	private:
 		// Node:thread of last 10 visits
 		int recentNodes_[ HistorySize ];
@@ -55,4 +80,5 @@ class Tracker
 		int numThreads_;
 
 		Rule trajectoryRule_;
+		bool stop_;
 };
