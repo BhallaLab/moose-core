@@ -31,8 +31,10 @@ TARGET = lt
 
 OBJ = \
 	main.o	\
+	Tracker.o \
 
 HEADERS = \
+	Tracker.h
 
 default: $(TARGET)
 

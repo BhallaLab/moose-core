@@ -8548,4 +8548,14 @@ This is in testProcLoop. Checkin 2273.
 Added the thread and node initialization stuff. 
 Compiles, runs with debug messages. Checkin 2274.
 
-Added skeleton for barriers.
+Added skeleton for barriers. Checkin 2275.
+============================================================================
+2 Nov 2010
+Design now for the data transfer on the queues.
+- Needs to track where it has been
+	- A listing of last few nodes and threads
+	- A count of total touchdowns on any given node/thread
+- Needs to track originator
+- Needs a (fixed) trajectory rule.
+
+Implemented Tracker class to do this. Compiles, not yet tested.
