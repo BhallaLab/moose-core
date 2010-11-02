@@ -10,9 +10,9 @@ class CaConc : public Neutral
 {
   public:
     static const std::string className_;
-    CaConc(::Id id);
+    CaConc(Id id);
     CaConc(std::string path);
-    CaConc(std::string name, ::Id parentId);
+    CaConc(std::string name, Id parentId);
     CaConc(std::string name, pymoose::PyMooseBase& parent);
     CaConc(const CaConc& src,std::string name, PyMooseBase& parent);
     CaConc(const CaConc& src,std::string name, Id& parent);
