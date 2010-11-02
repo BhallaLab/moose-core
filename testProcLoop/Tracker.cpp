@@ -122,7 +122,8 @@ void Tracker::print() const
 	unsigned int lastIndex = 0;
 	if ( numHops_ > 0 )
 		lastIndex = (numHops_ - 1) % HistorySize;
-	cout << "Tracker on (" << recentNodes_[ lastIndex ] << ":" <<
+	cout << "Tracker rule " << trajectoryRule_ << 
+		" on (" << recentNodes_[ lastIndex ] << ":" <<
 		recentThreads_[ lastIndex ] << "), hop=" << numHops_ << endl;
 }
 

@@ -8570,6 +8570,9 @@ system set up to send info around using queues. Separated out the
 EventLoop stuff into a separate .cpp file. 
 
 Set up to insert entries into the queue. This works now for one node,
-one thread, but doesn't do anything for more.
+one thread, but doesn't do anything for more. Checkin 2302.
+
+Now it inserts entries into queue and prints out where they are
+at each tick. So far MPI messaging not deployed.
 
 ============================================================================

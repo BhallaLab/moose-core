@@ -108,7 +108,9 @@ void* eventLoop( void* info )
 	for( unsigned int i = 0; i < 10; ++i ) {
 		// Phase 1
 		process( p );
-		swapQ();
+		if ( p->threadIndexInGroup == 0 ) {
+			swapQ();
+		}
 		int rc = pthread_barrier_wait( p->barrier1 );
 		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 

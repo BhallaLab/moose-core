@@ -68,6 +68,7 @@ void launchThreads( int numNodes, int numCores, int myNode )
 
 		if ( myNode == 0 ) {
 			Tracker t( numNodes, numCores, Rule( i % 4 ) );
+			t.setNextHop();
 			addToOutQ( &p[i], &t );
 		}
 		int rc = pthread_create( threads + i, NULL, eventLoop, 
