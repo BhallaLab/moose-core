@@ -174,9 +174,8 @@ We discuss the different parts of this window below.
 
 @image{moose_classes,,,moose classes, png}
 
- Clicking a heading will
-      expand that category. Below is a short description of the
-      categories:
+      Clicking a heading will expand that category. Below is a short
+      description of the categories:
 @table @dfn
 
 @item base 
