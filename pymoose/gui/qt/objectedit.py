@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 30 11:18:34 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Nov  2 07:04:44 2010 (+0530)
+# Last-Updated: Tue Nov  2 09:16:47 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 452
+#     Update #: 483
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -74,7 +74,19 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
     """
     extra_fields = ['parent', 'childList', 'fieldList', 'index', 'xtree_textfg_req', 'xtree_fg_req','nInitComplex','concInitComplex', 'step_mode', 'tableVector']
     sys_fields = ['node', 'cpu', 'dataMem', 'msgMem', 'class']
-
+    moose_py_fieldname_map = {'step_mode': 'stepMode',
+                              'stepmode': 'stepMode',
+                              'lambda': 'lambda_',
+                              'calc_mode': 'calcMode',
+                              'abs_refract':'absRefractT',
+                              'stepsize': 'stepSize'}
+    py_moose_fieldname_map = {'stepMode': 'step_mode',
+                              'calcMode': 'calc_mode',
+                              'lambda_': 'lambda',
+                              'absRefractT': 'abs_refract',
+                              'stepSize': 'stepsize'
+                              }
+    
     def __init__(self, mooseObject, parent=None):
         """Set up the model. 
 
@@ -117,9 +129,13 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
             config.LOGGER.debug('class: %s, python class: %s, path: %s, field: %s' % (self.mooseObject.className, self.mooseObject.__class__.__name__, self.mooseObject.path, fieldName))
             if (fieldName in ObjectFieldsModel.extra_fields) or (fieldName in ObjectFieldsModel.sys_fields):
                 continue
+            if fieldName in ObjectFieldsModel.moose_py_fieldname_map.keys():
+                pyFieldName = ObjectFieldsModel.moose_py_fieldname_map[fieldName]
+            else:
+                pyFieldName = fieldName
             flag = Qt.ItemIsEnabled | Qt.ItemIsSelectable
             try:
-                prop = eval('moose.' + self.mooseObject.__class__.__name__ + '.' + fieldName)                
+                prop = eval('moose.' + self.mooseObject.__class__.__name__ + '.' + pyFieldName)
                 if (type(prop) is property) and prop.fset:
                     flag = flag | Qt.ItemIsEditable
                 value = mooseObject.getField(fieldName)
@@ -131,8 +147,9 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
                     pass
             except Exception, e:
                 config.LOGGER.error("%s" % (e))
-            self.fieldFlags[fieldName] = flag
-            self.fields.append(fieldName)            
+
+            self.fieldFlags[pyFieldName] = flag
+            self.fields.append(pyFieldName)            
         self.insertRows(0, len(self.fields))
 
     def setData(self, index, value, role=Qt.EditRole):
@@ -151,6 +168,10 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
         if index.column() == 0: # This is the fieldname
             ret = False
         elif index.column() == 1: # This is the value column
+            try:
+                field = ObjectFieldsModel.py_moose_fieldname_map[field]
+            except KeyError:
+                pass
             self.mooseObject.setField(field, value)
             if field == 'name':
                 self.emit(QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'), self.mooseObject)
@@ -174,11 +195,15 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
         ret = None
         field = self.fields[index.row()]        
         if role == Qt.ToolTipRole:
-            return self.tr('<html>' + moose.context.doc(self.mooseObject.className + '.' + str(field)).replace(chr(27) + '[1m', '<b>').replace(chr(27) + '[0m', '</b>') + '</html>')
+            return self.tr('<html>' + moose.context.doc(self.mooseObject.className + '.' + str(field)).replace(chr(27) + '[1m', '<b>').replace(chr(27) + '[0m', '</b>') + '</html>') # This is to remove special characters used for pretty printing in terminals
         if index.column() == 0 and role == Qt.DisplayRole:
             ret = QtCore.QVariant(QtCore.QString(field))
         elif index.column() == 1 and role == Qt.DisplayRole:
             config.LOGGER.debug('Field: %s' % (field))
+            try:
+                field = ObjectFieldsModel.py_moose_fieldname_map[field]
+            except KeyError:
+                pass
             ret = QtCore.QVariant(QtCore.QString(self.mooseObject.getField(field)))
         elif index.column() == 2 and role == Qt.DisplayRole:
             try:
