@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Sep 16 13:09:01 2010 (+0530)
+# Last-Updated: Tue Nov  2 03:13:24 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 815
+#     Update #: 846
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -99,11 +99,18 @@ class MooseHandler(QtCore.QObject):
         'neuroML/SBML(*.xml *.bz2 *.zip *.gz)': type_xml,
         'Python script(*.py)': type_python
         }
-    DEFAULT_SIMDT = 2.5e-5
-    DEFAULT_PLOTDT = 1e-4
-    DEFAULT_GLDT = 5e-4
-    DEFAULT_RUNTIME = 1e-1
+    DEFAULT_SIMDT = 2.5e-4
+    DEFAULT_PLOTDT = 2e-3
+    DEFAULT_GLDT = 50e-3
+    DEFAULT_RUNTIME = 1.0
     DEFAULT_PLOTUPDATE_DT = 1e-1
+
+    DEFAULT_SIMDT_KKIT = 0.1
+    DEFAULT_RUNTIME_KKIT = 100.0
+    DEFAULT_PLOTDT_KKIT = 1.0
+    DEFAULT_PLOTUPDATE_DT_KKIT = 5.0
+    DEFAULT_GLDT_KKIT = 5.0
+    
     simdt = DEFAULT_SIMDT
     plotdt = DEFAULT_PLOTDT
     gldt = DEFAULT_GLDT
@@ -201,7 +208,7 @@ class MooseHandler(QtCore.QObject):
                 iskkit = re.search(kkit_pattern, sentence)
                 # print iskkit, sentence
                 if iskkit:
-                    filetype = MooseHandler.type_kkit
+                    filetype = MooseHandler.type_kkit                    
                     break
         self._context.loadG(filename)
         return filetype
@@ -308,7 +315,7 @@ class MooseHandler(QtCore.QObject):
         self._context.step(time_left)
         self.emit(QtCore.SIGNAL('updatePlots(float)'), self._context.getCurrentTime())
 
-    def doResetAbdRun(self, runtime, simdt=None, plotdt=None, gldt=None, plotupdate_dt=None):
+    def doResetAndRun(self, runtime, simdt=None, plotdt=None, gldt=None, plotupdate_dt=None):
         """Reset and run the simulation.
 
         This is to replace separate reset and run methods as two
@@ -340,7 +347,17 @@ class MooseHandler(QtCore.QObject):
         self._context.useClock(4, self._gl.path + '/##[TYPE=GLcell]')
         self._context.useClock(4, self._gl.path + '/##[TYPE=GLview]')
         self._context.reset()
-        self.context.step(float(MooseHandler.runtime))
+        MooseHandler.runtime = runtime      
+        next_stop = MooseHandler.plotupdate_dt
+        while next_stop <= MooseHandler.runtime:
+            self._context.step(MooseHandler.plotupdate_dt)
+            next_stop = next_stop + MooseHandler.plotupdate_dt
+            self.emit(QtCore.SIGNAL('updatePlots(float)'), self._context.getCurrentTime())
+        time_left = MooseHandler.runtime + MooseHandler.plotupdate_dt - next_stop 
+        if MooseHandler.runtime < MooseHandler.plotupdate_dt:
+            time_left = MooseHandler.runtime
+        self._context.step(time_left)
+        self.emit(QtCore.SIGNAL('updatePlots(float)'), self._context.getCurrentTime())
 
     def doConnect(self):
         ret = False

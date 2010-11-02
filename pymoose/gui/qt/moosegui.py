@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Nov  1 15:09:23 2010 (+0530)
+# Last-Updated: Tue Nov  2 03:19:38 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2526
+#     Update #: 2551
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -754,6 +754,7 @@ class MainWindow(QtGui.QMainWindow):
                     self.populateKKitPlots()
 		    self.addLayoutWindow()
                 print 'Loaded model',  fileName, 'of type', modeltype
+            self.updateDefaultTimes(modeltype)
             self.modelTreeWidget.recreateTree()
 
 
@@ -968,6 +969,17 @@ class MainWindow(QtGui.QMainWindow):
 
     def browseDocumentation(self):
         QtGui.QDesktopServices.openUrl(QtCore.QUrl(QtCore.QString(config.MOOSE_DOC_URL)))
+
+    def updateDefaultTimes(self, modeltype):
+        self.simdtText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_SIMDT)))
+        if (modeltype == MooseHandler.type_kkit) or (modeltype == MooseHandler.type_sbml):
+            self.simdtText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_SIMDT_KKIT)))
+            self.plotdtText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_PLOTDT_KKIT)))
+            self.gldtText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_GLDT_KKIT)))
+            self.runtimeText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_RUNTIME_KKIT)))
+            self.updateTimeText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_PLOTUPDATE_DT_KKIT)))
+            
+            
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
