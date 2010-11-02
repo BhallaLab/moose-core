@@ -8559,3 +8559,13 @@ Design now for the data transfer on the queues.
 - Needs a (fixed) trajectory rule.
 
 Implemented Tracker class to do this. Compiles, not yet tested.
+Checkin 2279.
+
+Should I make multiple event looops with different sets of ops in them
+or should I just have the proc and exec ops and do the rest through
+checking the threadId?
+
+While mulling on that I've gone one step further to have the
+system set up to send info around using queues. Separated out the
+EventLoop stuff into a separate .cpp file. 
+============================================================================

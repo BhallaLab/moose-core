@@ -32,9 +32,11 @@ TARGET = lt
 OBJ = \
 	main.o	\
 	Tracker.o \
+	EventLoop.o \
 
 HEADERS = \
-	Tracker.h
+	Tracker.h \
+	ProcInfo.h
 
 default: $(TARGET)
 
