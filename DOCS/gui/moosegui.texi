@@ -63,6 +63,7 @@ It contains an overview of how to use the PyMOOSE/PyQT GUI for MOOSE.
 * Loading a file in the GUI::   
 * Recording and plotting data::  
 * Adding elements in a model::  
+* Getting help::                
 @end menu
 
 @node Getting Started, Overview of the GUI window, top, top
@@ -324,7 +325,7 @@ by clicking in the the @code{Plot} column twice and then selecting 'Plot
 select where it should be plotted from this drop-down.
 @end enumerate
 
-@node Adding elements in a model,  , Recording and plotting data, top
+@node Adding elements in a model, Getting help, Recording and plotting data, top
 @chapter Adding elements in a model
 
 @section Adding a new element in the @code{Element Tree}
@@ -372,6 +373,25 @@ Similar to selecting source, you have to select the destination element
 and the target field in the right pane.
 @item Click OK to actually make the connection.
 @end enumerate
+
+@node Getting help,  , Adding elements in a model, top
+@chapter Getting help in MOOSE
+The documentation for MOOSE is work under progress. You can get some
+contextual information in the tool tip text (popped up by hovering the
+mouse cursor above a class in @code{Class List} or a field in
+@code{Object Editor}. Moreover you can get detailed documentation on a
+class by calling moose.doc() function on the class in the @code{MOOSE
+Shell}.
+@example
+print moose.doc(moose.HHChannel)
+print moose.doc('HHChannel.channel')
+@end example
+
+Note that the documentation is formatted with special characters for
+printing in a terminal. Thus you have to call @code{print} on the
+returned string.
+
+
 @bye
 
 @c Local Variables: 
