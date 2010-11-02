@@ -3,7 +3,7 @@
 In this chapter we go through the internal details of PyMOOSE.
 @menu
 * Overview::                    A short overview of impotrant internals of PyMOOSE
-* Model Tree::                  All elements in MOOSE are part of a Tree structure
+* Element Tree::                  All elements in MOOSE are part of a Tree structure
 * Id::                          The unique identifier for each MOOSE object
 * Neutral::                     Common properties of all MOOSE classes
 * PyMooseContext::              The God object giving access to global functions
@@ -115,16 +115,17 @@ TODO: to be completed with an walk-through to developing the simulation.
 @end example
 
 
-@node Model Tree
-@section Model Tree
-@cindex Model Tree
+@node Element Tree
+@section Element Tree
+@cindex Element Tree
 @cindex element
 @cindex root
 
-All elements in MOOSE are part of a tree structure. This is similar to
-the folder structure in the file system of your computer. Each entry in
-this tree is a moose object and we call it an @strong{element}. The top
-level element is called the @code{root} element (represented as
+All elements in MOOSE are part of a tree structure. We call this
+@code{Element Tree} or @code{Element Tree}. This is similar to the folder
+structure in the file system of your computer. Each entry in this tree
+is a moose object and we call it an @strong{element}. The top level
+element is called the @code{root} element (represented as
 @samp{/}). Every element other than @code{root} has a parent
 element. There are some predefined special elements that are used for
 management of the system. They are created when you startup moose (or
