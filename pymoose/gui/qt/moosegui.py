@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Nov  2 11:10:09 2010 (+0530)
+# Last-Updated: Tue Nov  2 17:32:18 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2575
+#     Update #: 2581
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -282,6 +282,9 @@ class MainWindow(QtGui.QMainWindow):
 
     def makeObjectFieldEditor(self, obj):
         """Creates a table-editor for a selected object."""
+        if obj.className == 'Shell' or obj.className == 'PyMooseContext' or obj.className == 'GenesisParser':
+            print '%s of class %s is a system object and not to be edited in object editor.' % (obj.path, obj.className)
+            return
         try:
             self.objFieldEditModel = self.objFieldEditorMap[obj.id]
             config.LOGGER.debug('Found model %s for object %s' % (self.objFieldEditModel, obj.id))
