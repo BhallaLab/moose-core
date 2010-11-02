@@ -33,7 +33,7 @@ pymoose::Class::Class(const pymoose::Class& src, std::string objectName, Id& par
 pymoose::Class::Class(const pymoose::Class& src, std::string path):Neutral(src, path)
 {
 }
-pymoose::Class::Class(const ::Id& src, std::string path):Neutral(src, path)
+pymoose::Class::Class(const Id& src, std::string path):Neutral(src, path)
 {
 }
 
