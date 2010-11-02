@@ -265,7 +265,7 @@ You can double click any item in the layout window and that will open an
 editor(@code{Object Editor}) for the underlying MOOSE object on the
 right hand dock (on top of the @code{Class List}) will come up. The more
 general way of bringing up the @code{Object Editor} is to double click
-an item in the @code{Model Tree}.
+an item in the @code{Element Tree}.
 
 @image{object_editor, 6 in,,object editor, png}
 
@@ -289,7 +289,7 @@ visualization.
 Currently MOOSE has partial support for NeuroML models. You can load a
 model from the ``Load File'' dialog and selecting NeuroML format from the
 file type drop down. The elements in the model are generated as children
-of the currently selected element in the @code{Model Tree}. So, you can
+of the currently selected element in the @code{Element Tree}. So, you can
 create the model under a new element by 
 @enumerate
 @item creating a new @code{Neutral} element
@@ -314,7 +314,7 @@ simply drag and drop fields in MOOSE elements to a plot window in order
 to plot it. The steps are:
 @enumerate
 @item You have to double click the object whose field you want
-to plot in the @code{Model Tree}. This will open the object editor with
+to plot in the @code{Element Tree}. This will open the object editor with
 list of available fields.
 @item Now you can plot a field by either left-clicking on the field and
 dragging it to the plot widget and releasing the mouse button, 
@@ -327,11 +327,11 @@ select where it should be plotted from this drop-down.
 @node Adding elements in a model,  , Recording and plotting data, top
 @chapter Adding elements in a model
 
-@section Adding a new element in the @code{Model Tree}
+@section Adding a new element in the @code{Element Tree}
 You can add a new element in a model by using the class list on the
 right hand side pane in moosegui @pxref{moose-classes-widget,,Moose
 Classes}. Double clicking the class name will create a new element in
-the @code{Model Tree} under the currently selected element and also open
+the @code{Element Tree} under the currently selected element and also open
 the @code{Object Editor} widget for the new element. The element will
 have the same name as the class name. It is up to you to rename it to
 something more appropriate. To do so edit the @code{name} field in the
@@ -359,7 +359,7 @@ field.
 png}
 
 @item Select source
-In the left pane, expand the @code{Model Tree} and select the element
+In the left pane, expand the @code{Element Tree} and select the element
 which will be the source of the message. Once you select the element,
 the drop-down menu labeled @code{Source Field} will be populated. You
 have to select the appropriate source field here.
