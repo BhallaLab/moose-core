@@ -431,6 +431,7 @@ NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.se
 %include "HHChannel.h"
 %attribute(pymoose::HHChannel, double, Gbar, __get_Gbar, __set_Gbar)
 %attribute(pymoose::HHChannel, double, Ek, __get_Ek, __set_Ek)
+%attribute(pymoose::HHChannel, double, Ik, __get_Ik)
 %attribute(pymoose::HHChannel, double, Gk, __get_Gk, __set_Gk)
 %attribute(pymoose::HHChannel, double, Xpower, __get_Xpower, __set_Xpower)
 %attribute(pymoose::HHChannel, double, Ypower, __get_Ypower, __set_Ypower)
