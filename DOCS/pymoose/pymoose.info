@@ -21,7 +21,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: pymoose.info,  Node: Top,  Next: Copying,  Prev: (dir),  Up: (dir)
+File: pymoose.info,  Node: Top,  Prev: (dir),  Up: (dir)
 
 PyMOOSE: Python module for MOOSE Simulation
 *******************************************
@@ -366,7 +366,7 @@ In this chapter we go through the internal details of PyMOOSE.
 * Menu:
 
 * Overview::                    A short overview of impotrant internals of PyMOOSE
-* Model Tree::                  All elements in MOOSE are part of a Tree structure
+* Element Tree::                  All elements in MOOSE are part of a Tree structure
 * Id::                          The unique identifier for each MOOSE object
 * Neutral::                     Common properties of all MOOSE classes
 * PyMooseContext::              The God object giving access to global functions
@@ -374,7 +374,7 @@ In this chapter we go through the internal details of PyMOOSE.
 * Running GENESIS scripts in Python::  How to run GENESIS-2 commands/scripts in Python
 
 
-File: pymoose.info,  Node: Overview,  Next: Model Tree,  Up: Detailed Guide
+File: pymoose.info,  Node: Overview,  Next: Element Tree,  Up: Detailed Guide
 
 5.1 Overview of PyMOOSE internals
 =================================
@@ -481,19 +481,20 @@ messages are combined in another message, `channel'.
      TODO: to be completed with an walk-through to developing the simulation.
 
 
-File: pymoose.info,  Node: Model Tree,  Next: Id,  Prev: Overview,  Up: Detailed Guide
+File: pymoose.info,  Node: Element Tree,  Next: Id,  Prev: Overview,  Up: Detailed Guide
 
-5.2 Model Tree
-==============
+5.2 Element Tree
+================
 
-All elements in MOOSE are part of a tree structure. This is similar to
-the folder structure in the file system of your computer. Each entry
-in this tree is a moose object and we call it an *element*. The top
-level element is called the `root' element (represented as `/').
-Every element other than `root' has a parent element. There are some
-predefined special elements that are used for management of the
-system. They are created when you startup moose (or `import' moose in
-Python). The following diagram shows this structure:
+All elements in MOOSE are part of a tree structure. We call this
+`Element Tree' or `Element Tree'. This is similar to the folder
+structure in the file system of your computer. Each entry in this tree
+is a moose object and we call it an *element*. The top level element
+is called the `root' element (represented as `/'). Every element
+other than `root' has a parent element. There are some predefined
+special elements that are used for management of the system. They are
+created when you startup moose (or `import' moose in Python). The
+following diagram shows this structure:
 
      root
      |
@@ -516,7 +517,7 @@ Python). The following diagram shows this structure:
      |__ proto
 
 
-File: pymoose.info,  Node: Id,  Next: Neutral,  Prev: Model Tree,  Up: Detailed Guide
+File: pymoose.info,  Node: Id,  Next: Neutral,  Prev: Element Tree,  Up: Detailed Guide
 
 5.3 Id
 ======
@@ -1372,7 +1373,8 @@ Concept Index
 * base class:                            Neutral.             (line 6)
 * connection:                            Messaging.           (line 6)
 * destination field:                     Messaging.           (line 9)
-* element:                               Model Tree.          (line 6)
+* element:                               Element Tree.        (line 6)
+* Element Tree:                          Element Tree.        (line 6)
 * field:                                 Modeling for simulation.
                                                               (line 6)
 * GENESIS script:                        Running GENESIS scripts in Python.
@@ -1382,11 +1384,10 @@ Concept Index
 * message:                               Messaging.           (line 6)
 * model:                                 Modeling for simulation.
                                                               (line 6)
-* Model Tree:                            Model Tree.          (line 6)
 * Neutral:                               Neutral.             (line 6)
 * object:                                Modeling for simulation.
                                                               (line 6)
-* root:                                  Model Tree.          (line 6)
+* root:                                  Element Tree.        (line 6)
 * simulation:                            Modeling for simulation.
                                                               (line 6)
 * source field:                          Messaging.           (line 9)
@@ -1395,29 +1396,29 @@ Concept Index
 
 Tag Table:
 Node: Top844
-Node: Copying2483
-Node: Introduction3255
-Node: Modeling for simulation4071
-Ref: Modeling for simulation-Footnote-18488
-Node: Installation8586
-Node: Prerequisites9231
-Node: Configuration10001
-Node: Build/install10399
-Node: Loading13478
-Node: Quick Start13974
-Node: Detailed Guide14099
-Node: Overview14885
-Node: Model Tree19535
-Node: Id20434
-Node: Neutral22216
-Ref: Neutral-Footnote-127796
-Node: PyMooseContext27879
-Node: Messaging30485
-Node: Running GENESIS scripts in Python32372
-Node: FAQ33382
-Node: GNU Free Documentation License33565
-Node: Index56019
-Node: Variable Index56164
-Node: Concept Index57219
+Node: Copying2467
+Node: Introduction3239
+Node: Modeling for simulation4055
+Ref: Modeling for simulation-Footnote-18472
+Node: Installation8570
+Node: Prerequisites9215
+Node: Configuration9985
+Node: Build/install10383
+Node: Loading13462
+Node: Quick Start13958
+Node: Detailed Guide14083
+Node: Overview14871
+Node: Element Tree19523
+Node: Id20475
+Node: Neutral22259
+Ref: Neutral-Footnote-127839
+Node: PyMooseContext27922
+Node: Messaging30528
+Node: Running GENESIS scripts in Python32415
+Node: FAQ33425
+Node: GNU Free Documentation License33608
+Node: Index56062
+Node: Variable Index56207
+Node: Concept Index57262
 
 End Tag Table
