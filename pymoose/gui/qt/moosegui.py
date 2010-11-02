@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Nov  2 04:29:14 2010 (+0530)
+# Last-Updated: Tue Nov  2 08:36:57 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2563
+#     Update #: 2572
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -113,6 +113,7 @@ class MainWindow(QtGui.QMainWindow):
     default_plot_count = 1
     def __init__(self, interpreter=None, parent=None):
 	QtGui.QMainWindow.__init__(self, parent)
+        self.settingsReset = False
         self.setWindowTitle('MOOSE GUI')
         self.mooseHandler = MooseHandler()
         self.connect(self.mooseHandler, QtCore.SIGNAL('updatePlots(float)'), self.updatePlots)
@@ -137,7 +138,7 @@ class MainWindow(QtGui.QMainWindow):
         # mooseTreePanel
         self.createMooseClassesPanel()
         # Create a widget to configure the glclient
-        self.createGLClientDock()
+        # self.createGLClientDock()
         self.createControlDock()
         # Connect the double-click event on modelTreeWidget items to
         # creation of the object editor.
@@ -267,7 +268,7 @@ class MainWindow(QtGui.QMainWindow):
         """A MOOSE command line for GENESIS/Python interaction"""
         self.commandLineDock = QtGui.QDockWidget(self.tr('MOOSE Shell'), self)
         self.commandLineDock.setObjectName(self.tr('MooseShell'))
-        self.shellWidget = MooseShell(interpreter)
+        self.shellWidget = MooseShell(interpreter, message='MOOSE Version %s' % (moose.version))
         self.shellWidget.setFrameStyle(QtGui.QFrame.Raised | QtGui.QFrame.StyledPanel)
         self.commandLineDock.setWidget(self.shellWidget)
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.commandLineDock)
@@ -342,8 +343,8 @@ class MainWindow(QtGui.QMainWindow):
         # Actions for view menu
         # The following actions are to toggle visibility of various widgets
         self.controlDockAction = self.controlDock.toggleViewAction()
-        self.glClientAction = self.glClientDock.toggleViewAction()
-        self.glClientAction.setChecked(False)
+        # self.glClientAction = self.glClientDock.toggleViewAction()
+        # self.glClientAction.setChecked(False)
         self.mooseTreeAction = self.mooseTreePanel.toggleViewAction()
         self.refreshMooseTreeAction = QtGui.QAction(self.tr('Refresh model tree'), self)
 	self.connect(self.refreshMooseTreeAction, QtCore.SIGNAL('triggered(bool)'), self.modelTreeWidget.recreateTree)
@@ -502,7 +503,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.viewMenu = QtGui.QMenu('&View', self)
         self.viewMenu.addAction(self.controlDockAction)
-        self.viewMenu.addAction(self.glClientAction)
+        # self.viewMenu.addAction(self.glClientAction)
         self.viewMenu.addAction(self.mooseTreeAction)
         self.viewMenu.addAction(self.refreshMooseTreeAction)
         self.viewMenu.addAction(self.mooseClassesAction)
@@ -568,6 +569,8 @@ class MainWindow(QtGui.QMainWindow):
         
     def saveLayout(self):
         '''Save window layout'''
+        if self.settingsReset:
+            return
         geo_data = self.saveGeometry()
         layout_data = self.saveState()
         self.settings.setValue(config.KEY_WINDOW_GEOMETRY, QtCore.QVariant(geo_data))
@@ -592,12 +595,12 @@ class MainWindow(QtGui.QMainWindow):
             self.mooseTreeAction.setChecked(False)
         else:
             self.mooseTreeAction.setChecked(True)
-        if self.glClientDock.isHidden():
-            # print 'Glclient is hidden'
-            self.glClientAction.setChecked(False)
-        else:
-            # print 'Glclient is visible'
-            self.glClientAction.setChecked(True)
+        # if self.glClientDock.isHidden():
+        #     # print 'Glclient is hidden'
+        #     self.glClientAction.setChecked(False)
+        # else:
+        #     # print 'Glclient is visible'
+        #     self.glClientAction.setChecked(True)
         if self.mooseClassesPanel.isHidden():
             self.mooseClassesAction.setChecked(False)
         else:
@@ -763,6 +766,7 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def resetSettings(self):
+        self.settingsReset = True
         self.settings.clear()
 
     def setCurrentElement(self, item, column):
@@ -817,8 +821,8 @@ class MainWindow(QtGui.QMainWindow):
                 self.commandLineDock.setVisible(False)
             if self.mooseClassesPanel.isVisible():
                 self.mooseClassesPanel.setVisible(False)
-            if self.glClientDock.isVisible():
-                self.glClientDock.setVisible(False)
+            # if self.glClientDock.isVisible():
+            #     self.glClientDock.setVisible(False)
             if hasattr(self, 'objFieldEditPanel') and self.objFieldEditPanel.isVisible():
                 self.objFieldEditPanel.setVisible(False)
             self.showRightBottomDocksAction.setChecked(False)

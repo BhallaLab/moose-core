@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 30 11:18:34 2010 (+0530)
 # Version: 
-# Last-Updated: Sat Oct 30 16:31:03 2010 (+0530)
+# Last-Updated: Tue Nov  2 07:04:44 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 449
+#     Update #: 452
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -72,7 +72,7 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
                   visibility of these fields to advanced mode.
 
     """
-    extra_fields = ['parent', 'childList', 'fieldList', 'index', 'xtree_textfg_req', 'xtree_fg_req','nInitComplex','concInitComplex']
+    extra_fields = ['parent', 'childList', 'fieldList', 'index', 'xtree_textfg_req', 'xtree_fg_req','nInitComplex','concInitComplex', 'step_mode', 'tableVector']
     sys_fields = ['node', 'cpu', 'dataMem', 'msgMem', 'class']
 
     def __init__(self, mooseObject, parent=None):
