@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Nov  2 03:19:38 2010 (+0530)
+# Last-Updated: Tue Nov  2 04:25:13 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2551
+#     Update #: 2559
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -436,10 +436,12 @@ class MainWindow(QtGui.QMainWindow):
         # self.contextHelpAction = QtGui.QAction(self.tr('Context Help'), self)
         
         # Run menu action
-        self.runAction = QtGui.QAction(self.tr('Run Simulation'), self)
+        self.runAction = QtGui.QAction(self.tr('Run Simulation'), self)        
 	self.connect(self.runAction, QtCore.SIGNAL('triggered(bool)'), self.resetAndRunSlot)
         # self.resetAction = QtGui.QAction(self.tr('Reset Simulation'), self)
 	# self.connect(self.resetAction, QtCore.SIGNAL('triggered()'), self.resetSlot)
+        self.continueRunAction = QtGui.QAction(self.tr('Continue simulation'), self)
+        self.connect(self.continueRunAction, QtCore.SIGNAL('triggered()'), self._runSlot)
 
     
     def runMichaelisMentenDemo(self):
@@ -514,6 +516,7 @@ class MainWindow(QtGui.QMainWindow):
         self.runMenu = QtGui.QMenu(self.tr('&Run'), self)
         # self.runMenu.addAction(self.resetAction)
         self.runMenu.addAction(self.runAction)
+        self.runMenu.addAction(self.continueRunAction)
 
 
         self.editModelMenu = QtGui.QMenu(self.tr('&Edit Model'), self)
