@@ -15,7 +15,7 @@ copy of the license is included in the section entitled "GNU Free
 Documentation License."
 
  -->
-<!-- Created on November, 2 2010 by texi2html 1.78 -->
+<!-- Created on November, 3 2010 by texi2html 1.78 -->
 <!--
 Written by: Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -100,6 +100,8 @@ Documentation License.&rdquo;
 <tr><td align="left" valign="top"><a href="#SEC7">4. Recording and plotting field values over simulation time</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">  
 </td></tr>
 <tr><td align="left" valign="top"><a href="#SEC8">5. Adding elements in a model</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">  
+</td></tr>
+<tr><td align="left" valign="top"><a href="#SEC11">6. Getting help in MOOSE</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">                
 </td></tr>
 </table>
 
@@ -504,7 +506,7 @@ select where it should be plotted from this drop-down.
 <td valign="middle" align="left"> &nbsp; </td>
 <td valign="middle" align="left">[<a href="#SEC7" title="Beginning of this chapter or previous chapter"> &lt;&lt; </a>]</td>
 <td valign="middle" align="left">[<a href="#SEC_Top" title="Up section"> Up </a>]</td>
-<td valign="middle" align="left">[ &gt;&gt; ]</td>
+<td valign="middle" align="left">[<a href="#SEC11" title="Next chapter"> &gt;&gt; </a>]</td>
 <td valign="middle" align="left"> &nbsp; </td>
 <td valign="middle" align="left"> &nbsp; </td>
 <td valign="middle" align="left"> &nbsp; </td>
@@ -524,7 +526,7 @@ select where it should be plotted from this drop-down.
 <td valign="middle" align="left"> &nbsp; </td>
 <td valign="middle" align="left">[<a href="#SEC8" title="Beginning of this chapter or previous chapter"> &lt;&lt; </a>]</td>
 <td valign="middle" align="left">[<a href="#SEC8" title="Up section"> Up </a>]</td>
-<td valign="middle" align="left">[ &gt;&gt; ]</td>
+<td valign="middle" align="left">[<a href="#SEC11" title="Next chapter"> &gt;&gt; </a>]</td>
 <td valign="middle" align="left"> &nbsp; </td>
 <td valign="middle" align="left"> &nbsp; </td>
 <td valign="middle" align="left"> &nbsp; </td>
@@ -548,11 +550,11 @@ something more appropriate. To do so edit the <code>name</code> field in the
 <a name="SEC10"></a>
 <table cellpadding="1" cellspacing="1" border="0">
 <tr><td valign="middle" align="left">[<a href="#SEC9" title="Previous section in reading order"> &lt; </a>]</td>
-<td valign="middle" align="left">[ &gt; ]</td>
+<td valign="middle" align="left">[<a href="#SEC11" title="Next section in reading order"> &gt; </a>]</td>
 <td valign="middle" align="left"> &nbsp; </td>
 <td valign="middle" align="left">[<a href="#SEC8" title="Beginning of this chapter or previous chapter"> &lt;&lt; </a>]</td>
 <td valign="middle" align="left">[<a href="#SEC8" title="Up section"> Up </a>]</td>
-<td valign="middle" align="left">[ &gt;&gt; ]</td>
+<td valign="middle" align="left">[<a href="#SEC11" title="Next chapter"> &gt;&gt; </a>]</td>
 <td valign="middle" align="left"> &nbsp; </td>
 <td valign="middle" align="left"> &nbsp; </td>
 <td valign="middle" align="left"> &nbsp; </td>
@@ -593,6 +595,45 @@ Similar to selecting source, you have to select the destination element
 and the target field in the right pane.
 </li><li> Click OK to actually make the connection.
 </li></ol>
+
+<hr size="6">
+<a name="Getting-help"></a>
+<a name="SEC11"></a>
+<table cellpadding="1" cellspacing="1" border="0">
+<tr><td valign="middle" align="left">[<a href="#SEC10" title="Previous section in reading order"> &lt; </a>]</td>
+<td valign="middle" align="left">[ &gt; ]</td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left">[<a href="#SEC8" title="Beginning of this chapter or previous chapter"> &lt;&lt; </a>]</td>
+<td valign="middle" align="left">[<a href="#SEC_Top" title="Up section"> Up </a>]</td>
+<td valign="middle" align="left">[ &gt;&gt; ]</td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left">[<a href="#SEC_Top" title="Cover (top) of document">Top</a>]</td>
+<td valign="middle" align="left">[<a href="#SEC_Contents" title="Table of contents">Contents</a>]</td>
+<td valign="middle" align="left">[Index]</td>
+<td valign="middle" align="left">[<a href="#SEC_About" title="About (help)"> ? </a>]</td>
+</tr></table>
+<h1 class="chapter"> 6. Getting help in MOOSE </h1>
+<p>The documentation for MOOSE is work under progress. You can get some
+contextual information in the tool tip text (popped up by hovering the
+mouse cursor above a class in <code>Class List</code> or a field in
+<code>Object Editor</code>. 
+<img src="./moose_class_tooltip_lowres.png" alt="moose class tooltip">
+<img src="./moose_field_tooltip_lowres.png" alt="moose field tooltip">
+Moreover you can get detailed documentation on a
+class by calling moose.doc() function on the class in the <code>MOOSE
+Shell</code>.
+</p><table><tr><td>&nbsp;</td><td><pre class="example">print moose.doc(moose.HHChannel)
+print moose.doc('HHChannel.channel')
+</pre></td></tr></table>
+
+<p>Note that the documentation is formatted with special characters for
+printing in a terminal. Thus you have to call <code>print</code> on the
+returned string.
+</p>
+
 <hr size="6">
 <a name="SEC_Contents"></a>
 <table cellpadding="1" cellspacing="1" border="0">
@@ -618,8 +659,8 @@ and the target field in the right pane.
   <ul class="toc">
     <li><a name="TOC9" href="#SEC9">5.1 Adding a new element in the <code>Element Tree</code></a></li>
     <li><a name="TOC10" href="#SEC10">5.2 Connecting elements via messages</a></li>
-  </ul>
-</li>
+  </ul></li>
+  <li><a name="TOC11" href="#SEC11">6. Getting help in MOOSE</a></li>
 </ul>
 </div>
 <hr size="1">
@@ -632,7 +673,7 @@ and the target field in the right pane.
 </tr></table>
 <h1>About This Document</h1>
 <p>
-  This document was generated by <em>Subhasis Ray</em> on <em>November, 2 2010</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.78</em></a>.
+  This document was generated by <em>Subhasis Ray</em> on <em>November, 3 2010</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.78</em></a>.
 </p>
 <p>
   The buttons in the navigation panels have the following meaning:
@@ -734,7 +775,7 @@ and the target field in the right pane.
 <hr size="1">
 <p>
  <font size="-1">
-  This document was generated by <em>Subhasis Ray</em> on <em>November, 2 2010</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.78</em></a>.
+  This document was generated by <em>Subhasis Ray</em> on <em>November, 3 2010</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.78</em></a>.
  </font>
  <br>
 
