@@ -379,7 +379,11 @@ and the target field in the right pane.
 The documentation for MOOSE is work under progress. You can get some
 contextual information in the tool tip text (popped up by hovering the
 mouse cursor above a class in @code{Class List} or a field in
-@code{Object Editor}. Moreover you can get detailed documentation on a
+@code{Object Editor}. 
+@image{moose_class_tooltip_lowres, 15 cm, 10 cm, moose class
+tooltip,png}
+@image{moose_field_tooltip_lowres, 15 cm, 10 cm, moose field tooltip,png}
+Moreover you can get detailed documentation on a
 class by calling moose.doc() function on the class in the @code{MOOSE
 Shell}.
 @example
