@@ -26,5 +26,6 @@ class ProcInfo {
 		pthread_barrier_t* barrier1;
 		pthread_barrier_t* barrier2;
 		pthread_barrier_t* barrier3;
+		FuncBarrier* barrier0;
 };
 

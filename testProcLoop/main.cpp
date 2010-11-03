@@ -14,6 +14,7 @@
 #include <pthread.h>
 #include <cassert>
 #include <stdlib.h>
+#include "FuncBarrier.h"
 #include "ProcInfo.h"
 #include "Tracker.h"
 
@@ -21,6 +22,7 @@ using namespace std;
 void addToOutQ( const ProcInfo* p, const Tracker* t );
 void* eventLoop( void* info );
 void allocQs();
+void swapQ();
 
 void* reportGraphics( void* info )
 {
@@ -38,6 +40,7 @@ void launchThreads( int numNodes, int numCores, int myNode )
 	pthread_barrier_t barrier1;
 	pthread_barrier_t barrier2;
 	pthread_barrier_t barrier3;
+	FuncBarrier barrier0( numCores, &swapQ );
 	int ret = pthread_barrier_init( &barrier1, NULL, numCores );
 	assert( ret == 0 );
 	ret = pthread_barrier_init( &barrier2, NULL, numCores );
@@ -65,6 +68,7 @@ void launchThreads( int numNodes, int numCores, int myNode )
 		p[i].barrier1 = &barrier1;
 		p[i].barrier2 = &barrier2;
 		p[i].barrier3 = &barrier3;
+		p[i].barrier0 = &barrier0;
 
 		if ( myNode == 0 ) {
 			Tracker t( numNodes, numCores, Rule( i % 4 ) );

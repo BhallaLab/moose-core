@@ -57,13 +57,14 @@ void FuncBarrier::wait()
 		(*op_)();	
 
 		status = pthread_cond_broadcast( &cond_ );
-		assert( status );
+		assert( status == 0 );
 	} else {
+		--threadsRemaining_;
 		int cancel;
 		pthread_setcancelstate( PTHREAD_CANCEL_DISABLE, &cancel );
 		while ( loop == numLoops_ ) {
 			status = pthread_cond_wait( &cond_, &mutex_ );
-			assert( status );
+			assert( status == 0 );
 		}
 		int dummy;
 		pthread_setcancelstate( cancel, &dummy );

@@ -14,6 +14,7 @@
 #include <pthread.h>
 #include <cassert>
 #include <stdlib.h>
+#include "FuncBarrier.h"
 #include "ProcInfo.h"
 #include "Tracker.h"
 
@@ -105,9 +106,16 @@ void* eventLoop( void* info )
 	cout << "eventLoop on " << p->myNode << ":" << 
 		p->threadIndexInGroup << endl;
 
+	int rc;
+
 	for( unsigned int i = 0; i < 10; ++i ) {
 		// Phase 1
 		process( p );
+
+/*
+		*/
+		p->barrier0->wait();
+		/*
 		if ( p->threadIndexInGroup == 0 ) {
 			swapQ();
 		}
@@ -117,8 +125,9 @@ void* eventLoop( void* info )
 		// his code is to put the swapQ operation in for the last 
 		// thread into the barrier, so that swapQ is atomic wrt the
 		// barrier.
-		int rc = pthread_barrier_wait( p->barrier1 );
+		rc = pthread_barrier_wait( p->barrier1 );
 		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+		*/
 
 		// Phase 2
 		exec( p, inQ );
