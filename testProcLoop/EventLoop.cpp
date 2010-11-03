@@ -111,15 +111,31 @@ void* eventLoop( void* info )
 		if ( p->threadIndexInGroup == 0 ) {
 			swapQ();
 		}
+
+		// Here we put in the explicit barrier construct from
+		// Butenhof's book ch7. The only modification we need to
+		// his code is to put the swapQ operation in for the last 
+		// thread into the barrier, so that swapQ is atomic wrt the
+		// barrier.
 		int rc = pthread_barrier_wait( p->barrier1 );
 		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 
 		// Phase 2
 		exec( p, inQ );
+		// Here we use the stock pthreads barrier, whose performance is
+		// pretty dismal. Worth comparing with the Butenhof barrier. I
+		// earlier wrote a nasty barrier that does a busy-loop but was
+		// _much_ faster.
 		rc = pthread_barrier_wait( p->barrier2 );
 		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 
 		// Phase 3
+		// The allgather approach is not going to scale well: 
+		// For N nodes mpiQ needs to set aside N*sizeof(inQ). 
+		// Instead, do N bcast calls and interleave with the processing
+		// for the data received on the previous bcast call.
+		// If we can permit slower internode data transfer then the #
+		// of bcast calls goes down.
 		exec( p, mpiQ );
 		rc = pthread_barrier_wait( p->barrier3 );
 		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );

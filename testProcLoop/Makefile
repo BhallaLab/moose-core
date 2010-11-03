@@ -33,10 +33,12 @@ OBJ = \
 	main.o	\
 	Tracker.o \
 	EventLoop.o \
+	FuncBarrier.o \
 
 HEADERS = \
 	Tracker.h \
-	ProcInfo.h
+	ProcInfo.h \
+	FuncBarrier.h
 
 default: $(TARGET)
 

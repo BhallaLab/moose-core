@@ -8573,6 +8573,9 @@ Set up to insert entries into the queue. This works now for one node,
 one thread, but doesn't do anything for more. Checkin 2302.
 
 Now it inserts entries into queue and prints out where they are
-at each tick. So far MPI messaging not deployed.
+at each tick. So far MPI messaging not deployed. Checkin 2303.
 
 ============================================================================
+3 Nov 2010
+Implementing a barrier that has a function to execute while the threads
+are waiting, when the last thread is coming through.
