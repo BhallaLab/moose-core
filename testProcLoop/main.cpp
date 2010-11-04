@@ -21,8 +21,10 @@
 using namespace std;
 void addToOutQ( const ProcInfo* p, const Tracker* t );
 void* eventLoop( void* info );
+void* mpiEventLoop( void* info );
 void allocQs();
 void swapQ();
+void swapMpiQ();
 
 void* reportGraphics( void* info )
 {
@@ -37,15 +39,20 @@ void launchThreads( int numNodes, int numCores, int myNode )
 	pthread_attr_t attr;
 	pthread_attr_init( &attr );
 	pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_JOINABLE );
-	pthread_barrier_t barrier1;
-	pthread_barrier_t barrier2;
+	int numThreads = numCores + 1; // Add one for the MPI thread.
+	// pthread_barrier_t barrier1;
+	// pthread_barrier_t barrier2;
+	FuncBarrier barrier1( numThreads, &swapQ );
+	FuncBarrier barrier2( numThreads, &swapMpiQ );
 	pthread_barrier_t barrier3;
-	FuncBarrier barrier0( numCores, &swapQ );
-	int ret = pthread_barrier_init( &barrier1, NULL, numCores );
+	int ret;
+	/*
+	ret = pthread_barrier_init( &barrier1, NULL, numCores );
 	assert( ret == 0 );
 	ret = pthread_barrier_init( &barrier2, NULL, numCores );
 	assert( ret == 0 );
-	ret = pthread_barrier_init( &barrier3, NULL, numCores );
+	*/
+	ret = pthread_barrier_init( &barrier3, NULL, numThreads );
 	assert( ret == 0 );
 
 	pthread_t gThread;
@@ -58,31 +65,38 @@ void launchThreads( int numNodes, int numCores, int myNode )
 			cout << "Error: return code from pthread_create: " << rc << endl;
 	}
 
-	vector< ProcInfo > p( numCores );
-	pthread_t* threads = new pthread_t[ numCores ];
+	vector< ProcInfo > p( numCores + 1 );
+	// An extra thread is used by MPI.
+	pthread_t* threads = new pthread_t[ numCores + 1 ];
 
-	for ( int i = 0; i < numCores; ++i ) {
+	for ( int i = 0; i < numThreads; ++i ) {
 		p[i].numThreadsInGroup = numCores;
 		p[i].threadIndexInGroup = i;
 		p[i].myNode = myNode;
+		p[i].numNodes = numNodes;
 		p[i].barrier1 = &barrier1;
 		p[i].barrier2 = &barrier2;
 		p[i].barrier3 = &barrier3;
-		p[i].barrier0 = &barrier0;
 
-		if ( myNode == 0 ) {
-			Tracker t( numNodes, numCores, Rule( i % 4 ) );
-			t.setNextHop();
-			addToOutQ( &p[i], &t );
+		if ( i < numCores ) {
+			if ( myNode == 0 && i == 0 ) { // For now just set off rule 0
+				Tracker t( numNodes, numCores, Rule( i % 4 ) );
+				t.setNextHop();
+				addToOutQ( &p[i], &t );
+			}
+			int rc = pthread_create( threads + i, NULL, eventLoop, 
+				(void *)&p[i] );
+			assert( rc == 0 );
+		} else if ( i == numCores ) { // mpiThread stufff.
+			int rc = pthread_create( 
+				threads + numCores, NULL, mpiEventLoop, (void *)&p[i] );
+			assert( rc == 0 );
 		}
-		int rc = pthread_create( threads + i, NULL, eventLoop, 
-			(void *)&p[i] );
-		if ( rc )
-			cout << "Error: return code from pthread_create: " << rc << endl;
 	}
 
-	// clean up
-	for ( int i = 0; i < numCores; ++i ) {
+
+	// clean up. Add an extra time round loop for the MPI thread.
+	for ( int i = 0; i < numThreads; ++i ) {
 		void* status;
 		int ret = pthread_join( threads[i], &status );
 		if ( ret )

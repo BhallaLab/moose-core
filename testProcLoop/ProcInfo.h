@@ -23,9 +23,10 @@ class ProcInfo {
 		unsigned int myNode;
 		unsigned int numNodes;
 
-		pthread_barrier_t* barrier1;
-		pthread_barrier_t* barrier2;
+		// pthread_barrier_t* barrier1;
+		// pthread_barrier_t* barrier2;
+		FuncBarrier* barrier1;
+		FuncBarrier* barrier2;
 		pthread_barrier_t* barrier3;
-		FuncBarrier* barrier0;
 };
 

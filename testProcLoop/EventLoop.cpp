@@ -24,7 +24,8 @@ using namespace std;
 
 static char* inQ;
 static char* outQ;
-static char* mpiQ;
+static char* mpiInQ;
+static char* mpiRecvQ;
 static int pos[maxThreads]; // Count # of entries on outQ on this thread
 static int offset[maxThreads]; // Offset in buffer for this thread.
 
@@ -34,12 +35,12 @@ void allocQs()
 {
 	inQ = reinterpret_cast< char* >( new Tracker[ QSIZE ] );
 	outQ = reinterpret_cast< char* >( new Tracker[ QSIZE ] );
-	mpiQ = reinterpret_cast< char* >( new Tracker[ QSIZE ] );
+	mpiInQ = reinterpret_cast< char* >( new Tracker[ QSIZE ] );
+	mpiRecvQ = reinterpret_cast< char* >( new Tracker[ QSIZE ] );
 	for ( int i = 0; i < maxThreads; ++i ) {
 		pos[i] = 0;
 		offset[i] = ( i * QSIZE ) / maxThreads;
 	}
-
 }
 
 void process( const ProcInfo* p )
@@ -73,6 +74,16 @@ void swapQ()
 		t[ pos[i] + offset[i] ].setStop( 1 );
 		pos[i] = 0;
 	}
+}
+
+/**
+ * Must be protected by mutex
+ */
+void swapMpiQ()
+{
+	char* temp = mpiInQ;
+	mpiInQ = mpiRecvQ;
+	mpiRecvQ = temp;
 }
 
 /**
@@ -111,32 +122,14 @@ void* eventLoop( void* info )
 	for( unsigned int i = 0; i < 10; ++i ) {
 		// Phase 1
 		process( p );
+		// This custom barrier also carries out the swap operation 
+		// internally.
+		p->barrier1->wait();
 
-/*
-		*/
-		p->barrier0->wait();
-		/*
-		if ( p->threadIndexInGroup == 0 ) {
-			swapQ();
-		}
-
-		// Here we put in the explicit barrier construct from
-		// Butenhof's book ch7. The only modification we need to
-		// his code is to put the swapQ operation in for the last 
-		// thread into the barrier, so that swapQ is atomic wrt the
-		// barrier.
-		rc = pthread_barrier_wait( p->barrier1 );
-		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
-		*/
-
-		// Phase 2
+		// Phase 2. Here we clean up all the local node Msgs.
+		// In parallel, the MPI data transfer begins by broadcasting
+		// contents of inQ on node 0.
 		exec( p, inQ );
-		// Here we use the stock pthreads barrier, whose performance is
-		// pretty dismal. Worth comparing with the Butenhof barrier. I
-		// earlier wrote a nasty barrier that does a busy-loop but was
-		// _much_ faster.
-		rc = pthread_barrier_wait( p->barrier2 );
-		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 
 		// Phase 3
 		// The allgather approach is not going to scale well: 
@@ -145,7 +138,16 @@ void* eventLoop( void* info )
 		// for the data received on the previous bcast call.
 		// If we can permit slower internode data transfer then the #
 		// of bcast calls goes down.
-		exec( p, mpiQ );
+		for ( unsigned int j = 0; j < p->numNodes; ++j ) {
+			p->barrier2->wait(); // This barrier swaps mpiInQ and mpiOutQ
+			if ( j != p->myNode )
+				exec( p, mpiInQ );
+		}
+
+		// Here we use the stock pthreads barrier, whose performance is
+		// pretty dismal. Worth comparing with the Butenhof barrier. I
+		// earlier wrote a nasty barrier that does a busy-loop but was
+		// _much_ faster.
 		rc = pthread_barrier_wait( p->barrier3 );
 		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 	}
@@ -155,29 +157,42 @@ void* eventLoop( void* info )
 
 
 /*
+ * Happens on the one thread doing MPI stuff.
+ */
 void* mpiEventLoop( void* info )
 {
 	ProcInfo *p = reinterpret_cast< ProcInfo* >( info );
 	cout << "mpiEventLoop on " << p->myNode << ":" << 
 		p->threadIndexInGroup << endl;
+	/*
+		*/
 
-	for( unsigned int i = 0; i < 100; ++i ) {
-		// Phase 1: do nothing
-		int rc = pthread_barrier_wait( p->barrier1 );
-		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+	for( unsigned int i = 0; i < 10; ++i ) {
+		// Phase 1: do nothing. But we must wait for barrier 0 to clear,
+		// because we need inQ to be settled before broadcasting it.
+		p->barrier1->wait();
 
-		// Phase 2: Exchange MPI data. InQ has just become available.
-		mpiSend( p, inQ, mpiQ );
-		rc = pthread_barrier_wait( p->barrier2 );
-		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+		// Phase 2, 3. Now we loop around barrier 2 till all nodes have
+		// sent data and the data has been received and processed.
+		// On the process threads the inQ/mpiInQ is busy being executed.
+		for ( unsigned int j = 0; j < p->numNodes; ++j ) {
+			if ( p->myNode == j )
+				MPI_Bcast( inQ, QSIZE * sizeof( Tracker ), MPI_CHAR, j, MPI_COMM_WORLD );
+			else 
+				MPI_Bcast( mpiRecvQ, QSIZE * sizeof( Tracker ), MPI_CHAR, j, MPI_COMM_WORLD );
+			p->barrier2->wait(); // This barrier swaps mpiInQ and mpiRecvQ
+		}
 
-		// Phase 3: Do nothing.
-		rc = pthread_barrier_wait( p->barrier3 );
+		// Phase 3: Read and execute the arrived MPI data on all threads 
+		// except the one which just sent it out.
+		// On this thread, we just wait till the final barrier.
+		int rc = pthread_barrier_wait( p->barrier3 );
 		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 	}
 	pthread_exit( NULL );
 }
 
+/*
 void* shellEventLoop( void* info )
 {
 	ProcInfo *p = reinterpret_cast< ProcInfo* >( info );

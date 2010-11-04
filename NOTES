@@ -8578,4 +8578,43 @@ at each tick. So far MPI messaging not deployed. Checkin 2303.
 ============================================================================
 3 Nov 2010
 Implementing a barrier that has a function to execute while the threads
-are waiting, when the last thread is coming through.
+are waiting, when the last thread is coming through. Checkin 2307.
+
+Using FuncBarrier, after a bit of debugging seems OK. Checkin 2308.
+
+Now into the MPI stuff. Looks like the MPI_Allgather will be
+awkward as it requires us to have ready a big target buffer. 
+Try MPI_Bcast.
+
+Phase 2: exec inQ on all nodes.
+	Send out MPI_Bcast with inQ[0] contents on all nodes
+	Recv it on inMpiQ1 (mpiRecvQ swaps with mpiInQ )
+	Barrier
+
+Phase 3: exec inMPIQ1 on all nodes except node 0.
+	Send out MPI_Bcast with inQ[1] contents to all nodes
+	Recv it on inMPIQ2
+	Barrier
+
+Phase 3: exec inMPIQ2 on all nodes except node 1.
+	Send out MPI_Bcast with inQ[2] contents to all nodes
+	Recv it on inMPIQ1
+	Barrier
+	.
+	.
+	.
+
+Phase 3: exec inMPIQ2 on all nodes except node N-2.
+	Send out MPI_Bcast with inQ[N-1] contents to all nodes
+	Recv it on inMPIQ1
+	Barrier
+
+	exec inMPIQ1 on all nodes except node N-1, which is last node.
+
+	Barrier before we go around again to phase 1 (process).
+
+============================================================================
+4 Nov 2010
+Begun implementation and testing of MPI event loop. This compiles and runs
+without crashes, but the tracker isn't going where it should.
+============================================================================
