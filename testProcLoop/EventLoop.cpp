@@ -13,6 +13,7 @@
 #include "header.h"
 
 #define QSIZE maxNodes * maxThreads
+#define NLOOP 100
 
 using namespace std;
 
@@ -111,7 +112,7 @@ void* eventLoop( void* info )
 
 	int rc;
 
-	for( unsigned int i = 0; i < 10; ++i ) {
+	for( unsigned int i = 0; i < NLOOP; ++i ) {
 		// Phase 1
 		process( p );
 		// This custom barrier also carries out the swap operation 
@@ -159,7 +160,7 @@ void* mpiEventLoop( void* info )
 	/*
 		*/
 
-	for( unsigned int i = 0; i < 10; ++i ) {
+	for( unsigned int i = 0; i < NLOOP; ++i ) {
 		// Phase 1: do nothing. But we must wait for barrier 0 to clear,
 		// because we need inQ to be settled before broadcasting it.
 		p->barrier1->wait();
@@ -191,7 +192,7 @@ void* shellEventLoop( void* info )
 	cout << "mpiEventLoop on " << p->myNode << ":" << 
 		p->threadIndexInGroup << endl;
 
-	for( unsigned int i = 0; i < 100; ++i ) {
+	for( unsigned int i = 0; i < NLOOP; ++i ) {
 		// Phase 1: Data from parser into server loop
 		// Mutex lock. 
 		// Check flag for data arrival, if so, put into

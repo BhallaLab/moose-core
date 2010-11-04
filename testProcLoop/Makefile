@@ -21,8 +21,10 @@ endif
 endif
 
 # Here we automagically change compilers to deal with MPI.
+# The long form is needed on the gj cluster
 ifdef USE_MPI
 	CXX = mpicxx
+#	CXX = /usr/local/mvapich2/bin/mpicxx
 else
 	CXX = g++
 endif
