@@ -22,9 +22,9 @@ using namespace std;
 void addToOutQ( const ProcInfo* p, const Tracker* t );
 void* eventLoop( void* info );
 void* mpiEventLoop( void* info );
-void allocQs();
-void swapQ();
-void swapMpiQ();
+extern void allocQs();
+extern void swapQ();
+extern void swapMpiQ();
 
 void* reportGraphics( void* info )
 {

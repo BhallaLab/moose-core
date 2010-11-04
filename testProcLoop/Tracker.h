@@ -75,7 +75,7 @@ class Tracker
 		int firstThread_;
 
 		// Sum of counts of of visits on each Node:thread combination
-		int touchdowns_[ maxNodes ][ maxThreads ];
+		// int touchdowns_[ maxNodes ][ maxThreads ];
 		int numNodes_;
 		int numThreads_;
 

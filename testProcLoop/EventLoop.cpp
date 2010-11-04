@@ -18,7 +18,7 @@
 #include "ProcInfo.h"
 #include "Tracker.h"
 
-#define QSIZE 256
+#define QSIZE maxNodes * maxThreads
 
 using namespace std;
 
@@ -28,8 +28,6 @@ static char* mpiInQ;
 static char* mpiRecvQ;
 static int pos[maxThreads]; // Count # of entries on outQ on this thread
 static int offset[maxThreads]; // Offset in buffer for this thread.
-
-void addToOutQ( const ProcInfo* p, const Tracker* t );
 
 void allocQs()
 {

@@ -24,11 +24,13 @@ Tracker::Tracker( int numNodes, int numThreads, Rule rule )
 		recentNodes_[i] = recentThreads_[i] = 0;
 	}
 
+	/*
 	for ( unsigned int i = 0; i < maxNodes; ++i ) {
 		for ( unsigned int j = 0; j < maxThreads; ++j ) {
 			touchdowns_[ i ][ j ] = 0;
 		}
 	}
+	*/
 }
 
 Tracker::Tracker()
@@ -44,7 +46,7 @@ void Tracker::setNextHop()
 {
 	int nextNode;
 	int nextThread;
-	++touchdowns_[ node() ][ thread() ];
+	// ++touchdowns_[ node() ][ thread() ];
 	nextHop( nextNode, nextThread );
 	++numHops_;
 	recentNodes_[ numHops_ % HistorySize ] = nextNode;
