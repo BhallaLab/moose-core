@@ -8616,5 +8616,9 @@ Phase 3: exec inMPIQ2 on all nodes except node N-2.
 ============================================================================
 4 Nov 2010
 Begun implementation and testing of MPI event loop. This compiles and runs
-without crashes, but the tracker isn't going where it should.
+without crashes, but the tracker isn't going where it should. Checkin 2309.
+
+Fix to routine that advances tracker position. Now it seems OK for 
+multiple threads, multiple nodes.
+
 ============================================================================

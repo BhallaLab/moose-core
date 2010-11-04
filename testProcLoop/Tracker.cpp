@@ -40,22 +40,24 @@ Tracker::Tracker()
 		stop_( 1 )
 {;}
 
-// Returns 0 if it has landed in an incorrect place.
 void Tracker::setNextHop()
 {
 	int nextNode;
 	int nextThread;
+	++touchdowns_[ node() ][ thread() ];
 	nextHop( nextNode, nextThread );
+	++numHops_;
 	recentNodes_[ numHops_ % HistorySize ] = nextNode;
 	recentThreads_[ numHops_ % HistorySize ] = nextThread;
-	++numHops_;
 }
 
 // Currently always returns 1
 bool Tracker::nextHop( int& nextNode, int& nextThread ) const
 {
-	int lastNode = recentNodes_[ numHops_ % HistorySize ];
-	int lastThread = recentThreads_[ numHops_ % HistorySize ];
+	int lastNode = node();
+	int lastThread = thread();
+	nextNode = lastNode;
+	nextThread = lastThread;
 	switch ( trajectoryRule_ ) {
 		case raster0: 
 			nextThread = lastThread + 1;

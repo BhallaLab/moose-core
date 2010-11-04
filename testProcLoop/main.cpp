@@ -70,7 +70,9 @@ void launchThreads( int numNodes, int numCores, int myNode )
 	pthread_t* threads = new pthread_t[ numCores + 1 ];
 
 	for ( int i = 0; i < numThreads; ++i ) {
-		p[i].numThreadsInGroup = numCores;
+		// Note that here we put # of compute cores, not total threads.
+		p[i].numThreadsInGroup = numCores; 
+
 		p[i].threadIndexInGroup = i;
 		p[i].myNode = myNode;
 		p[i].numNodes = numNodes;
@@ -81,7 +83,6 @@ void launchThreads( int numNodes, int numCores, int myNode )
 		if ( i < numCores ) {
 			if ( myNode == 0 && i == 0 ) { // For now just set off rule 0
 				Tracker t( numNodes, numCores, Rule( i % 4 ) );
-				t.setNextHop();
 				addToOutQ( &p[i], &t );
 			}
 			int rc = pthread_create( threads + i, NULL, eventLoop, 
