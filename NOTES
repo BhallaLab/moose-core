@@ -8621,5 +8621,5 @@ without crashes, but the tracker isn't going where it should. Checkin 2309.
 Fix to routine that advances tracker position. Now it seems OK for 
 multiple threads, multiple nodes. Checkin 2310.
 
-Some more cleanups.
+Some more cleanups. Checkin 2313
 ============================================================================

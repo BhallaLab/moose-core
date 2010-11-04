@@ -13,12 +13,6 @@
 #include "header.h"
 
 using namespace std;
-void addToOutQ( const ProcInfo* p, const Tracker* t );
-void* eventLoop( void* info );
-void* mpiEventLoop( void* info );
-extern void allocQs();
-extern void swapQ();
-extern void swapMpiQ();
 
 void* reportGraphics( void* info )
 {
@@ -93,14 +87,14 @@ void launchThreads( int numNodes, int numCores, int myNode )
 	// clean up. Add an extra time round loop for the MPI thread.
 	for ( int i = 0; i < numThreads; ++i ) {
 		void* status;
-		int ret = pthread_join( threads[i], &status );
+		ret = pthread_join( threads[i], &status );
 		if ( ret )
 			cout << "Error: Unable to join threads\n";
 	}
 
 	if ( myNode == 0 ) { // clean up graphics thread only on node 0.
 		void* status;
-		int ret = pthread_join( gThread, &status );
+		ret = pthread_join( gThread, &status );
 		if ( ret )
 			cout << "Error: Unable to join threads\n";
 	}
@@ -142,15 +136,3 @@ int main( int argc, char** argv )
 	return 0;
 }
 
-
-/*
-loop( void* threadid )
-{
-	process
-	barrier1
-	local exec
-	barrier2
-	offnode exec
-	barrier3
-}
-*/
