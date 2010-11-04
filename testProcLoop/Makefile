@@ -36,6 +36,7 @@ OBJ = \
 	FuncBarrier.o \
 
 HEADERS = \
+	header.h \
 	Tracker.h \
 	ProcInfo.h \
 	FuncBarrier.h

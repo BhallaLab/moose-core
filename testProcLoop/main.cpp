@@ -7,16 +7,10 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include <iostream>
-#include <vector>
 #include <unistd.h>
 #include <mpi.h>
-#include <pthread.h>
-#include <cassert>
 #include <stdlib.h>
-#include "FuncBarrier.h"
-#include "ProcInfo.h"
-#include "Tracker.h"
+#include "header.h"
 
 using namespace std;
 void addToOutQ( const ProcInfo* p, const Tracker* t );
