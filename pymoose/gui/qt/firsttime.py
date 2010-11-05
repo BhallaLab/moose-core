@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sun Jul 11 15:31:00 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Jul 14 14:54:52 2010 (+0530)
+# Last-Updated: Fri Nov  5 10:24:49 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 150
+#     Update #: 151
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -72,7 +72,7 @@ class FirstTimeWizard(QtGui.QWizard):
 
     def _createIntroPage(self):
         page = QtGui.QWizardPage(self)
-        page.setTitle('Before we start, let us create an initial settings. Click Next to continue.')
+        page.setTitle('Before we start, let us verify the initial settings. Click Next to continue.')
         page.setSubTitle('In the next three pages you can select custom locations for the <i>pymoose demos directory</i>, <i>glclient</i> executable and <i>colormap</i> file for 3D visualization.')
         label = QtGui.QLabel(self.tr('<html><h3 align="center">%s</h3><p>%s</p><p>%s</p><p>%s</p><p align="center">Home Page: <a href="%s">%s</a></p></html>' % \
                 (MooseGlobals.TITLE_TEXT, 
