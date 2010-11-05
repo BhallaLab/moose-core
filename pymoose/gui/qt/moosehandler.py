@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Nov  2 03:13:24 2010 (+0530)
+# Last-Updated: Fri Nov  5 11:17:11 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 846
+#     Update #: 848
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -607,7 +607,12 @@ class MooseHandler(QtCore.QObject):
                     tableList.append(moose.Table(child))
         return tableList
         
-        
+    def getDataTables(self):
+        tableList = []
+        for table in self._data.children():
+            if moose.Neutral(table).className == 'Table':
+                tableList.append(moose.Table(table))
+        return tableList
 
     
     
