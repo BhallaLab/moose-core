@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Nov  2 17:32:18 2010 (+0530)
+# Last-Updated: Fri Nov  5 11:18:44 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2581
+#     Update #: 2593
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -761,9 +761,10 @@ class MainWindow(QtGui.QMainWindow):
 	    for fileName in fileNames: 
                 modeltype  = self.mooseHandler.loadModel(str(fileName), str(fileType))
 		if modeltype == MooseHandler.type_kkit:
-                    self.populateKKitPlots()
 		    self.addLayoutWindow()
                 print 'Loaded model',  fileName, 'of type', modeltype
+            self.populateKKitPlots()
+            self.populateDataPlots()
             self.updateDefaultTimes(modeltype)
             self.modelTreeWidget.recreateTree()
 
@@ -951,6 +952,14 @@ class MainWindow(QtGui.QMainWindow):
                 self.plots[1].addTable(graph)
             self.plots[1].replot()
 
+    def populateDataPlots(self):
+        """Create plots for all Table objects in /data element"""
+        tables = self.mooseHandler.getDataTables()
+        for table in tables:
+            self.plots[0].addTable(table)
+            config.LOGGER.info('Added plot ' + table.path)
+        self.plots[0].replot()
+
     def startFirstTimeWizard(self):
         firstTimeWizard = FirstTimeWizard(self)
         firstTimeWizard.show()
@@ -989,7 +998,7 @@ class MainWindow(QtGui.QMainWindow):
             self.gldtText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_GLDT_KKIT)))
             self.runtimeText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_RUNTIME_KKIT)))
             self.updateTimeText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_PLOTUPDATE_DT_KKIT)))
-            
+
             
 
 if __name__ == '__main__':
