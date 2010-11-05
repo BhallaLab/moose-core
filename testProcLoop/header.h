@@ -18,6 +18,9 @@
 extern void addToOutQ( const ProcInfo* p, const Tracker* t );
 extern void* eventLoop( void* info );
 extern void* mpiEventLoop( void* info );
+extern void* shellEventLoop( void* info );
 extern void allocQs();
 extern void swapQ();
 extern void swapMpiQ();
+extern bool isAckPending();
+

@@ -8622,5 +8622,117 @@ Fix to routine that advances tracker position. Now it seems OK for
 multiple threads, multiple nodes. Checkin 2310.
 
 Some more cleanups. Checkin 2313
+At this point it runs nicely on the cluster, with up to 100 'nodes'. 
+But it is excruciatingly slow. Clearly I will have to put in a variety of
+message passing formats, such as the memory intensive allGather.
+
+Next step: put in a thread for the Shell to talk to. In the testProcLoop
+this will be a function which lets the main system put in a new Tracker,
+and to query the system for tracker positions.
+
+============================================================================
+5 Nov 2010
+
+Current system:
+	- Shell::doOp
+		initAck
+		op.send
+		while isAckPending {
+			clearQ
+		}
+	- set
+		SetGet< type >
+		checkSet
+		type conversions into a temp buffer
+		Shell::dispatchSet
+		Shell::innerDispatchSet
+		requestSet.send() to the target shell.
+			Shell::handleSet on target shell
+			Shell::innerSet
+				create AssignmentMsg and tie to target
+				shelle_->asend() data.
+
+	- get
+		Field< type > (derived from SetGet1< type > )
+		Shell::dispatchGet
+		Find field, type checks.
+		innerDispatchGet
+		initAck
+		requestGet.send
+		while isAckPending
+			clearQ
+		..........................................................
+			Shell::handleGet
+			make new AssignmentMsg and tie to target
+			lowLevelGet.send
+				Goes to target object, asks for data return
+				GetOpFunc::op
+					Gets data from object
+					Converts to buffer
+					fieldOp on buffer
+						Puts data into prepacked buffer
+						Finds incoming Msg
+						Synthesizes return Qinfo
+						Adds return to Q going to shell
+				
+			(now waiting for the return value )
+			Shell::recvGet
+				sets getBuf size for return value
+				copy return value from PrepackedBuffer into 
+				getBuf on Shell.
+				handleAck: Adds another to the returned acks
+		..........................................................
+		Eventually all the acks are back and isAckPending clears
+		innerDispatchGet returns the getBuf
+		in Field< type >::get
+			take ptr to returned getBuf
+			Convert it 
+			return converted value.
+
+1. Inserting a request without a wait, such as a 'set' call.
+	- In Shell/parser loop:
+		Do all the stuff up to the point where it needs to 'send' data
+		pthread_mutex_lock( &shell_set_mutex );
+			Shell::op.send();
+		pthread_mutex_unlock( &shell_set_mutex );
+	- In shellEventLoop:
+		Simply protect the barrier with a mutex. This ensures that
+		the swap operation does not happen when the 'send' is done.
+		pthread_mutex_lock( &shell_set_mutex );
+			p->barrier1()
+		pthread_mutex_unlock( &shell_set_mutex );
+
+2. Inserting a blocking request, such as a call to create an object.
+	- In Shell/parser loop:
+		Do all the stuff up to the point where it needs to 'send' data
+		pthread_mutex_lock( &shell_set_mutex );
+			parser_block = 1;
+			Shell::initAck()
+			Shell::op.send();
+			while ( isAckPending() )
+				pthread_cond_wait( &cond_variable, &shell_op_mutex );
+			parser_block = 0;
+		pthread_mutex_unlock( &shell_set_mutex );
+
+	- In shellEventLoop:
+		Protect the barrier with a mutex. This ensures that
+		the swap operation does not happen when the 'send' is done.
+		pthread_mutex_lock( &shell_set_mutex );
+			p->barrier1()
+			if ( parser_block && !isAckPending() )
+				pthread_cond_signal( &cond_variable );
+		pthread_mutex_unlock( &shell_set_mutex );
+
+3. Handling a 'get' call, which is a blocking request followed by a 
+	transfer of data to the caller.
+	Same as above only the Shell/parser loop collects the data from
+	the Shell buffer when it carries on with the Field::get call.
+	Note that this assumes that there will be no other data tranfers
+	using the Shell buffer. This is safe provided we never use the
+	'get' call within the code. 
+
+
+Implemented this, but not yet the actual Shell input to its eventLoop.
+Compiled and runs.
 
 ============================================================================

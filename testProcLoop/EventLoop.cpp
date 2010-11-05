@@ -23,6 +23,7 @@ static char* mpiInQ;
 static char* mpiRecvQ;
 static int pos[maxThreads]; // Count # of entries on outQ on this thread
 static int offset[maxThreads]; // Offset in buffer for this thread.
+static bool blockingParserCall;
 
 void allocQs()
 {
@@ -34,6 +35,7 @@ void allocQs()
 		pos[i] = 0;
 		offset[i] = ( i * QSIZE ) / maxThreads;
 	}
+	blockingParserCall = 0;
 }
 
 void process( const ProcInfo* p )
@@ -157,8 +159,6 @@ void* mpiEventLoop( void* info )
 	ProcInfo *p = reinterpret_cast< ProcInfo* >( info );
 	cout << "mpiEventLoop on " << p->myNode << ":" << 
 		p->threadIndexInGroup << endl;
-	/*
-		*/
 
 	for( unsigned int i = 0; i < NLOOP; ++i ) {
 		// Phase 1: do nothing. But we must wait for barrier 0 to clear,
@@ -185,35 +185,35 @@ void* mpiEventLoop( void* info )
 	pthread_exit( NULL );
 }
 
+bool isAckPending()
+{
+	return 0;
+}
+
 /*
+ * Happens on the one thread doing Shell stuff.
+ */
 void* shellEventLoop( void* info )
 {
 	ProcInfo *p = reinterpret_cast< ProcInfo* >( info );
-	cout << "mpiEventLoop on " << p->myNode << ":" << 
+	cout << "shellEventLoop on " << p->myNode << ":" << 
 		p->threadIndexInGroup << endl;
 
 	for( unsigned int i = 0; i < NLOOP; ++i ) {
-		// Phase 1: Data from parser into server loop
-		// Mutex lock. 
-		// Check flag for data arrival, if so, put into
-		// Q for group 0 which deals with off-node stuff. 
-		// Mutex unlock
-		int rc = pthread_barrier_wait( p->barrier1 );
-		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+		// Phase 1: Protect the barrier (actually, the swap call)
+		// with a mutex so that the Shell doesn't insert data into outQ
+		// while things are changing. Note that this outQ is in the
+		// Shell group and thus is safe from the other threads.
+		pthread_mutex_lock( p->shellSendMutex );
+			p->barrier1->wait();
+			if ( blockingParserCall && !isAckPending() ) {
+				pthread_cond_signal( p->parserBlockCond );
+			}
+		pthread_mutex_unlock( p->shellSendMutex );
 
-		// Phase 2: Data from server to parser
-		// Mutex lock
-		// Copy the InQ for Group0 over to parser thread, or something.
-
-		// Phase 2: do nothing.
-		mpiSend( p, inQ, mpiQ );
-		rc = pthread_barrier_wait( p->barrier2 );
-		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
-
-		// Phase 3: Do nothing.
-		rc = pthread_barrier_wait( p->barrier3 );
-		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
+		// Phase 2, 3. Here we simply ignore barriers 2 and 3 as they
+		// do not matter for the Shell. This takes a little
+		// care when initializing the threads, but saves time.
 	}
 	pthread_exit( NULL );
 }
-*/

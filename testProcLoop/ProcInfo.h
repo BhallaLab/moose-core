@@ -28,5 +28,7 @@ class ProcInfo {
 		FuncBarrier* barrier1;
 		FuncBarrier* barrier2;
 		pthread_barrier_t* barrier3;
+		pthread_mutex_t* shellSendMutex;
+		pthread_cond_t* parserBlockCond;
 };
 

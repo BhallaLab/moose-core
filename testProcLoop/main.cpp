@@ -28,22 +28,28 @@ void launchThreads( int numNodes, int numCores, int myNode )
 	pthread_attr_init( &attr );
 	pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_JOINABLE );
 	int numThreads = numCores + 1; // Add one for the MPI thread.
-	// pthread_barrier_t barrier1;
-	// pthread_barrier_t barrier2;
-	FuncBarrier barrier1( numThreads, &swapQ );
+
+	// Extra thread on barrier 1 for parser control on node 0 
+	// (the main thread here).
+	int numBarrier1Threads = numThreads + ( myNode == 0 );
+
+	FuncBarrier barrier1( numBarrier1Threads, &swapQ );
 	FuncBarrier barrier2( numThreads, &swapMpiQ );
 	pthread_barrier_t barrier3;
 	int ret;
-	/*
-	ret = pthread_barrier_init( &barrier1, NULL, numCores );
+	pthread_t gThread;
+	pthread_mutex_t shellSendMutex;
+	pthread_cond_t parserBlockCond;
+
+	ret = pthread_mutex_init( &shellSendMutex, NULL );
 	assert( ret == 0 );
-	ret = pthread_barrier_init( &barrier2, NULL, numCores );
+
+	ret = pthread_cond_init( &parserBlockCond, NULL );
 	assert( ret == 0 );
-	*/
+
 	ret = pthread_barrier_init( &barrier3, NULL, numThreads );
 	assert( ret == 0 );
 
-	pthread_t gThread;
 	if ( myNode == 0 ) { // Launch graphics thread only on node 0.
 		ProcInfo p;
 		// pthread_barrier_t barrier1;
@@ -53,11 +59,11 @@ void launchThreads( int numNodes, int numCores, int myNode )
 			cout << "Error: return code from pthread_create: " << rc << endl;
 	}
 
-	vector< ProcInfo > p( numCores + 1 );
-	// An extra thread is used by MPI.
-	pthread_t* threads = new pthread_t[ numCores + 1 ];
+	vector< ProcInfo > p( numBarrier1Threads );
+	// An extra thread is used by MPI, and on node 0, yet another for Shell
+	pthread_t* threads = new pthread_t[ numBarrier1Threads ];
 
-	for ( int i = 0; i < numThreads; ++i ) {
+	for ( int i = 0; i < numBarrier1Threads; ++i ) {
 		// Note that here we put # of compute cores, not total threads.
 		p[i].numThreadsInGroup = numCores; 
 
@@ -67,8 +73,10 @@ void launchThreads( int numNodes, int numCores, int myNode )
 		p[i].barrier1 = &barrier1;
 		p[i].barrier2 = &barrier2;
 		p[i].barrier3 = &barrier3;
+		p[i].shellSendMutex = &shellSendMutex;
+		p[i].parserBlockCond = &parserBlockCond;
 
-		if ( i < numCores ) {
+		if ( i < numCores ) { // These are the compute threads
 			if ( myNode == 0 && i == 0 ) { // For now just set off rule 0
 				Tracker t( numNodes, numCores, Rule( i % 4 ) );
 				addToOutQ( &p[i], &t );
@@ -78,14 +86,18 @@ void launchThreads( int numNodes, int numCores, int myNode )
 			assert( rc == 0 );
 		} else if ( i == numCores ) { // mpiThread stufff.
 			int rc = pthread_create( 
-				threads + numCores, NULL, mpiEventLoop, (void *)&p[i] );
+				threads + i, NULL, mpiEventLoop, (void *)&p[i] );
+			assert( rc == 0 );
+		} else if ( i == numThreads ) { // shellThread stuff.
+			int rc = pthread_create( 
+				threads + i, NULL, shellEventLoop, (void *)&p[i] );
 			assert( rc == 0 );
 		}
 	}
 
 
 	// clean up. Add an extra time round loop for the MPI thread.
-	for ( int i = 0; i < numThreads; ++i ) {
+	for ( int i = 0; i < numBarrier1Threads; ++i ) {
 		void* status;
 		ret = pthread_join( threads[i], &status );
 		if ( ret )
@@ -101,6 +113,9 @@ void launchThreads( int numNodes, int numCores, int myNode )
 
 	delete[] threads;
 	pthread_attr_destroy( &attr );
+	ret = pthread_mutex_destroy( &shellSendMutex );
+	ret = pthread_cond_destroy( &parserBlockCond );
+	assert( ret == 0 );
 }
 
 int main( int argc, char** argv )
