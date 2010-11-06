@@ -15,6 +15,7 @@
 // Declaration of static field
 vector< Qvec > Qinfo::q1_;
 vector< Qvec > Qinfo::q2_;
+vector< Qvec > Qinfo::mpiQ_;
 vector< Qvec >* Qinfo::inQ_ = &Qinfo::q1_;
 vector< Qvec >* Qinfo::outQ_ = &Qinfo::q2_;
 vector< SimGroup > Qinfo::g_;
@@ -445,7 +446,6 @@ void Qinfo::addSpecificTargetToQ( const ProcInfo* p, MsgFuncBinding b,
  * 0 is inQ, going to all nodes in group
  * 1 is local, going only to current node.
  * 2 and higher are to other simGroups. Don't worry about yet
- */
 void Qinfo::assignQblock( const Msg* m, const ProcInfo* p )
 {
 	unsigned int threadIndex = p->threadId;
@@ -474,6 +474,7 @@ void Qinfo::assignQblock( const Msg* m, const ProcInfo* p )
 		}
 	}
 }
+ */
 
 void Qinfo::emptyAllQs()
 {
@@ -495,3 +496,15 @@ void Qinfo::assembleOntoQ( const MsgFuncBinding& i,
 	}
 }
 */
+
+// Static function. Dummy for now.
+void Qinfo::clearQ( const ProcInfo* p )
+{
+	;
+}
+
+// Static function. Deprecated. Dummy for now.
+void Qinfo::mpiClearQ( const ProcInfo* p )
+{
+	;
+}

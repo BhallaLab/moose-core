@@ -30,8 +30,9 @@ class Qvec
 		void push_back( unsigned int thread, const Qinfo* q, const char* arg );
 
 		/**
-		 * Clear out all the thread data. This just zeroes out the 
-		 * respective block sizes.
+		 * Clear out all the thread data. It does so without changing
+		 * the spacing between blocks, so that the historical buffer size
+		 * is preserved.
 		 */
 		void clear();
 
@@ -69,6 +70,10 @@ class Qvec
 		 */
 		unsigned int allocatedSize() const;
 
+		/**
+		 * test function for Qvec
+		 */
+		static void testQvec();
 	private:
 		unsigned int numThreads_;
 
@@ -90,7 +95,7 @@ class Qvec
 		/**
 		 * Number of bytes between thread blocks.
 		 * Threads may step on each other's toes when writing to 
-		 * contiguous memory. This buffer protects against this.
+		 * adjacent memory. This buffer protects against this.
 		 */
 		static const unsigned int threadOverlapProtection;
 
@@ -98,5 +103,5 @@ class Qvec
 		 * Assigns preliminary size allocation. Each thread gets the same
 		 * initial block.
 		 */
-		static const unsigned int reserveSizeForEachThread;
+		static const unsigned int threadQreserve;
 };

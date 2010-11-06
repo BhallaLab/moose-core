@@ -8751,3 +8751,20 @@ threads. Checkin 2325.
 
 Added adjustable time for system to wait when testing master thread control
 calls, equivalent to parser calls. Need a longish time as MPI can be slow.
+Checkin 2326.
+This clears tests on up to 60 nodes and assorted threads on the cluster.
+
+So, with this I'm ready to go back and start fixing up scheduling on the
+Msg branch of MOOSE.
+
+1. Fix up Qvec, make some solid unit tests for it.
+2. Change Clock scheduling so it can be activated as a single operation 
+	within the thread-handling loop. The current arrangement has the
+	thread-handling looop deeply nested in the clock scheduling.
+	Make some new unit test for the revised scheduling.
+3. Fix up main() so it calls the new threading stuff
+4. Implement the new threading/MPI stuff.
+
+
+Starting on 1. Qvec has been fleshed out. Compiles. Gets up to the Qvec
+test, which is still empty.

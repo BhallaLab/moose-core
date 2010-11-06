@@ -35,6 +35,7 @@ OBJ = \
 	Id.o \
 	FullId.o \
 	Qinfo.o \
+	Qvec.o \
 	DataId.o \
 	SetGet.o \
 	OpFunc.o \
@@ -73,6 +74,7 @@ HEADERS = \
 	EpFunc.h \
 	ProcInfo.h \
 	Qinfo.h \
+	Qvec.h \
 	SrcFinfo.h \
 	ValueFinfo.h \
 	SharedFinfo.h \

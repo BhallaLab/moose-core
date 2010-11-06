@@ -81,7 +81,7 @@ void* Shell::msgLoop( void* shellePtr )
 // processing threads.
 void Shell::passThroughMsgQs( Element* shelle )
 {
-	Qinfo::mpiClearQ( &p_ );
+	// Qinfo::mpiClearQ( &p_ );
 	/*
 	Qinfo::mergeQ( 0 ); // Fill up inQ
 	p_.numNodesInGroup = numNodes_;
@@ -359,7 +359,8 @@ void Shell::start( double runtime )
 	pthread_mutex_destroy( &sortMutex );
 }
 
-Shell::singleLoop( const ProcInfo* proc )
+/*
+void Shell::singleLoop( const ProcInfo* proc )
 {
 	// Phase 1.
 	clock->advance( proc ); // Advances stuff one tick.
@@ -378,3 +379,4 @@ Shell::singleLoop( const ProcInfo* proc )
 	barrier() // regular barrier.
 
 }
+*/

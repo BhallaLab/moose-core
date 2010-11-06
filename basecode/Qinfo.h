@@ -172,21 +172,23 @@ class Qinfo
 		/**
 		 * Utility function that checks if Msg is local, and if so,
 		 * assigns Qblock and adds the data to a suitable Queue.
-		 */
 		void assembleOntoQ( const MsgFuncBinding &b, 
 			const Element* e, const ProcInfo* p, const char* arg );
+		 */
 	
 		/**
 		 * Organizes data going into outQ so that we know which
 		 * execution queue the data is due to end up in, and how big
 		 * each block is to be.
-		 */
 		void assignQblock( const Msg* m, const ProcInfo* p );
+		 */
 
 		/**
-		 * Exchanges inQ and outQ. Called in barrier1 leading into Phase 2.
+		 * Used to work through the queues when the background
+		 * threads are not running.
 		 */
-		void swapQs();
+		static void clearQ( const ProcInfo* p );
+		static void mpiClearQ( const ProcInfo* p );
 		
 	private:
 		bool useSendTo_;	/// true if msg is to a single target DataId.

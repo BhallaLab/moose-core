@@ -140,7 +140,7 @@ void insertIntoQ( )
 		MsgFuncBinding b( m->mid(), fid );
 
 		// addToQ( threadIndex, Binding, argbuf )
-		qi.assignQblock( m, &p );
+		// qi.assignQblock( m, &p );
 		qi.addToQ( 0, b, buf );
 	}
 	Qinfo::clearQ( &p );
@@ -1678,6 +1678,7 @@ void testAsync( )
 {
 	showFields();
 	testPrepackedBuffer();
+	Qvec::testQvec();
 	insertIntoQ();
 	testSendMsg();
 	testCreateMsg();

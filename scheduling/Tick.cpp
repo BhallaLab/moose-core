@@ -280,7 +280,7 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 	// Start updating inQ
 	// Have to ensure mpiThread does not do anything with inQ for a bit.
 	if ( info->threadIndexInGroup == 0 ) {
-		Qinfo::mergeQ( info->groupId ); 
+		// Qinfo::mergeQ( info->groupId ); 
 		// cout << "Tick::advance: t = " << info->currTime;
 	}
 		
@@ -291,7 +291,7 @@ void Tick::advance( Element* e, ProcInfo* info ) const
 	}
 	// Set off mpiThread for MPI_alltoall data exchange of inQ
 	
-	Qinfo::readLocalQ( info ); // March through localQ.
+	// Qinfo::readLocalQ( info ); // March through localQ.
 	Qinfo::readQ( info ); // March through inQ. Each thread magically deals
 		// with updates needed by its own Process calls, and none other.
 		// The Msgs do this partitioning.
