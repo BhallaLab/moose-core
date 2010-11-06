@@ -99,6 +99,8 @@ void exec( const ProcInfo* p, const char* q )
 		// return 0;
 	for ( unsigned int i = 0; i < p->numThreadsInGroup; ++i ) {
 		for ( const Tracker* j = t + offset[i]; j->stop() != 1; ++j ) {
+			if ( j->rule() == endit )
+				keepGoing = 0;
 			if ( j->node() == static_cast< int >( p->myNode ) &&
 				j->thread() == static_cast< int >( p->threadIndexInGroup ) )
 			{
@@ -106,8 +108,6 @@ void exec( const ProcInfo* p, const char* q )
 				k.setNextHop();
 				k.print();
 				addToOutQ( p, &k );
-				if ( k.rule() == endit )
-					keepGoing = 0; // In MOOSE we'd tell the clock to halt.
 			}
 		}
 	}
@@ -239,9 +239,14 @@ void* shellEventLoop( void* info )
 			}
 		pthread_mutex_unlock( p->shellSendMutex );
 
-		// Phase 2, 3. Here we simply ignore barriers 2 and 3 as they
+		// Phase 2. Here we simply ignore barrier 2 as they
 		// do not matter for the Shell. This takes a little
 		// care when initializing the threads, but saves time.
+
+		// Phase 3: We need to block here to ensure that the endit
+		// call is encapsulated within the current cycle.
+		int rc = pthread_barrier_wait( p->barrier3 );
+		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 	}
 	pthread_exit( NULL );
 }

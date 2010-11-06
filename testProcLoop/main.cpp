@@ -48,7 +48,7 @@ void launchThreads( int numNodes, int numCores, int myNode )
 	ret = pthread_cond_init( &parserBlockCond, NULL );
 	assert( ret == 0 );
 
-	ret = pthread_barrier_init( &barrier3, NULL, numThreads );
+	ret = pthread_barrier_init( &barrier3, NULL, numBarrier1Threads );
 	assert( ret == 0 );
 
 	if ( myNode == 0 ) { // Launch graphics thread only on node 0.

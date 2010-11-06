@@ -8742,4 +8742,9 @@ Make an implementation for the Shell input. Compiles but hangs.
 Checkin 2321
 
 Some progress on Shell input. Now it handles message insertion and termination 
-correctly for multiple threads, but not multiple nodes.
+correctly for multiple threads, but not multiple nodes. Checkin 2324.
+
+Turns out that the condition for quitting was quite tricky. I need to get
+the info out to all nodes and be sure it is acted upon, within 1 cycle.
+Sort of hacked it in here. Works for various combinations of nodes and
+threads.
