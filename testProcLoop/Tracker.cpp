@@ -97,6 +97,15 @@ bool Tracker::nextHop( int& nextNode, int& nextThread ) const
 					nextThread = numThreads_ - 1;
 			}
 			break;
+		default:
+			nextThread = lastThread + 1;
+			if ( nextThread == numThreads_ ) {
+				nextThread = 0;
+				nextNode = lastNode + 1;
+				if ( nextNode == numNodes_ )
+					nextNode = 0;
+			}
+			break;
 	}
 	return 1;
 }
@@ -131,3 +140,8 @@ void Tracker::print() const
 		recentThreads_[ lastIndex ] << "), hop=" << numHops_ << endl;
 }
 
+
+unsigned int Tracker::numHops() const
+{
+	return numHops_;
+}

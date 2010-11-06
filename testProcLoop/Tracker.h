@@ -21,7 +21,7 @@
  * angles.
  */
 
-enum Rule { raster0, raster90, raster180, raster270 };
+enum Rule { raster0, raster90, raster180, raster270, endit };
 class Tracker
 {
 	public:
@@ -63,6 +63,11 @@ class Tracker
 		 * Prints out status of tracker
 		 */
 		void print() const;
+
+		/**
+		 * returns number of hops done so far.
+		 */
+		unsigned int numHops() const;
 
 	private:
 		// Node:thread of last 10 visits

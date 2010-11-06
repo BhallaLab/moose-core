@@ -23,4 +23,4 @@ extern void allocQs();
 extern void swapQ();
 extern void swapMpiQ();
 extern bool isAckPending();
-
+extern void setBlockingParserCall( bool val );

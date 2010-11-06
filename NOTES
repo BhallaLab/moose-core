@@ -8733,6 +8733,8 @@ Current system:
 
 
 Implemented this, but not yet the actual Shell input to its eventLoop.
-Compiled and runs.
+Compiled and runs. Checkin 2320.
+
+Make an implementation for the Shell input. Compiles but hangs.
 
 ============================================================================

@@ -13,7 +13,7 @@
 #include "header.h"
 
 #define QSIZE maxNodes * maxThreads
-#define NLOOP 100
+#define NLOOP 1000
 
 using namespace std;
 
@@ -92,6 +92,8 @@ void swapMpiQ()
 void exec( const ProcInfo* p, const char* q )
 {
 	const Tracker* t = reinterpret_cast< const Tracker* >( q );
+	// if ( t->rule == endit )
+		// return 0;
 	for ( unsigned int i = 0; i < p->numThreadsInGroup; ++i ) {
 		for ( const Tracker* j = t + offset[i]; j->stop() != 1; ++j ) {
 			if ( j->node() == static_cast< int >( p->myNode ) &&
@@ -104,6 +106,7 @@ void exec( const ProcInfo* p, const char* q )
 			}
 		}
 	}
+	// return 1;
 }
 
 void* eventLoop( void* info )
@@ -114,7 +117,9 @@ void* eventLoop( void* info )
 
 	int rc;
 
-	for( unsigned int i = 0; i < NLOOP; ++i ) {
+	// while( keepGoing )
+	for( unsigned int i = 0; i < NLOOP; ++i )
+	{
 		// Phase 1
 		process( p );
 		// This custom barrier also carries out the swap operation 
@@ -187,7 +192,13 @@ void* mpiEventLoop( void* info )
 
 bool isAckPending()
 {
-	return 0;
+	Tracker* newt = reinterpret_cast< Tracker* >( outQ );
+	return ( newt->numHops() < 100 );
+}
+
+void setBlockingParserCall( bool val )
+{
+	blockingParserCall = val;
 }
 
 /*

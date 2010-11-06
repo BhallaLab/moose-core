@@ -13,6 +13,7 @@
 #include "header.h"
 
 using namespace std;
+void runParserStuff( const ProcInfo* p );
 
 void* reportGraphics( void* info )
 {
@@ -95,6 +96,8 @@ void launchThreads( int numNodes, int numCores, int myNode )
 		}
 	}
 
+	if ( myNode == 0 )
+			runParserStuff( &p[ numBarrier1Threads - 1 ] );
 
 	// clean up. Add an extra time round loop for the MPI thread.
 	for ( int i = 0; i < numBarrier1Threads; ++i ) {
@@ -116,6 +119,33 @@ void launchThreads( int numNodes, int numCores, int myNode )
 	ret = pthread_mutex_destroy( &shellSendMutex );
 	ret = pthread_cond_destroy( &parserBlockCond );
 	assert( ret == 0 );
+}
+
+void runParserStuff( const ProcInfo* p )
+{
+	assert( p->myNode == 0 );
+	Tracker t( p->numNodes, p->numThreadsInGroup, raster90 );
+	ProcInfo temp( *p );
+	temp.threadIndexInGroup = 0;
+	usleep( 500000 );
+	pthread_mutex_lock( p->shellSendMutex );
+		setBlockingParserCall( 1 );
+		addToOutQ( &temp, &t ); // equivalent to 'send' call.
+		while ( isAckPending() )
+			pthread_cond_wait( p->parserBlockCond, p->shellSendMutex );
+		setBlockingParserCall( 0 );
+	pthread_mutex_unlock( p->shellSendMutex );
+	usleep( 500000 );
+
+	Tracker tend( p->numNodes, p->numThreadsInGroup, endit );
+	pthread_mutex_lock( p->shellSendMutex );
+		setBlockingParserCall( 1 );
+		addToOutQ( &temp, &tend ); // equivalent to 'send' call.
+		while ( isAckPending() )
+			pthread_cond_wait( p->parserBlockCond, p->shellSendMutex );
+		setBlockingParserCall( 0 );
+	pthread_mutex_unlock( p->shellSendMutex );
+	usleep( 500000 );
 }
 
 int main( int argc, char** argv )
