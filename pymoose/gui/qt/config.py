@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Feb 13 16:07:56 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Nov  2 06:13:08 2010 (+0530)
+# Last-Updated: Sat Nov  6 12:32:50 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 142
+#     Update #: 143
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -87,7 +87,7 @@ def get_settings():
 	QtCore.QCoreApplication.setOrganizationName('NCBS')
 	QtCore.QCoreApplication.setOrganizationDomain('ncbs.res.in')
 	QtCore.QCoreApplication.setApplicationName('MOOSE')
-    settings = QtCore.QSettings()
+        settings = QtCore.QSettings()
     return settings
 
 # LOG_FILENAME = os.path.join(TEMPDIR, 'moose.log')
