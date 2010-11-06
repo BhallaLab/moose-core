@@ -13,7 +13,7 @@
 #include "header.h"
 
 #define QSIZE maxNodes * maxThreads
-#define NLOOP 1000
+#define NLOOP 10000000
 
 using namespace std;
 
@@ -24,6 +24,8 @@ static char* mpiRecvQ;
 static int pos[maxThreads]; // Count # of entries on outQ on this thread
 static int offset[maxThreads]; // Offset in buffer for this thread.
 static bool blockingParserCall;
+static int nack;
+static bool keepGoing;
 
 void allocQs()
 {
@@ -36,11 +38,12 @@ void allocQs()
 		offset[i] = ( i * QSIZE ) / maxThreads;
 	}
 	blockingParserCall = 0;
+	keepGoing = 1;
 }
 
 void process( const ProcInfo* p )
 {
-	;
+	nack++;
 }
 
 /**
@@ -103,6 +106,8 @@ void exec( const ProcInfo* p, const char* q )
 				k.setNextHop();
 				k.print();
 				addToOutQ( p, &k );
+				if ( k.rule() == endit )
+					keepGoing = 0; // In MOOSE we'd tell the clock to halt.
 			}
 		}
 	}
@@ -117,8 +122,8 @@ void* eventLoop( void* info )
 
 	int rc;
 
-	// while( keepGoing )
-	for( unsigned int i = 0; i < NLOOP; ++i )
+	while( keepGoing )
+	// for( unsigned int i = 0; i < NLOOP; ++i )
 	{
 		// Phase 1
 		process( p );
@@ -165,7 +170,9 @@ void* mpiEventLoop( void* info )
 	cout << "mpiEventLoop on " << p->myNode << ":" << 
 		p->threadIndexInGroup << endl;
 
-	for( unsigned int i = 0; i < NLOOP; ++i ) {
+	while( keepGoing )
+// 	for( unsigned int i = 0; i < NLOOP; ++i )
+	{
 		// Phase 1: do nothing. But we must wait for barrier 0 to clear,
 		// because we need inQ to be settled before broadcasting it.
 		p->barrier1->wait();
@@ -190,10 +197,18 @@ void* mpiEventLoop( void* info )
 	pthread_exit( NULL );
 }
 
+void initAck()
+{
+	nack = 0;
+}
+
 bool isAckPending()
 {
+	return ( nack > 5 ); // arbitrarily require 5 cycles.
+	/*
 	Tracker* newt = reinterpret_cast< Tracker* >( outQ );
 	return ( newt->numHops() < 100 );
+	*/
 }
 
 void setBlockingParserCall( bool val )
@@ -210,7 +225,9 @@ void* shellEventLoop( void* info )
 	cout << "shellEventLoop on " << p->myNode << ":" << 
 		p->threadIndexInGroup << endl;
 
-	for( unsigned int i = 0; i < NLOOP; ++i ) {
+	while( keepGoing )
+	// for( unsigned int i = 0; i < NLOOP; ++i )
+	{
 		// Phase 1: Protect the barrier (actually, the swap call)
 		// with a mutex so that the Shell doesn't insert data into outQ
 		// while things are changing. Note that this outQ is in the

@@ -8738,3 +8738,8 @@ Compiled and runs. Checkin 2320.
 Make an implementation for the Shell input. Compiles but hangs.
 
 ============================================================================
+6 Nov 2010
+Checkin 2321
+
+Some progress on Shell input. Now it handles message insertion and termination 
+correctly for multiple threads, but not multiple nodes.

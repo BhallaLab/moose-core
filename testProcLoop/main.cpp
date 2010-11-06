@@ -130,6 +130,7 @@ void runParserStuff( const ProcInfo* p )
 	usleep( 500000 );
 	pthread_mutex_lock( p->shellSendMutex );
 		setBlockingParserCall( 1 );
+		initAck();
 		addToOutQ( &temp, &t ); // equivalent to 'send' call.
 		while ( isAckPending() )
 			pthread_cond_wait( p->parserBlockCond, p->shellSendMutex );
@@ -140,6 +141,7 @@ void runParserStuff( const ProcInfo* p )
 	Tracker tend( p->numNodes, p->numThreadsInGroup, endit );
 	pthread_mutex_lock( p->shellSendMutex );
 		setBlockingParserCall( 1 );
+		initAck();
 		addToOutQ( &temp, &tend ); // equivalent to 'send' call.
 		while ( isAckPending() )
 			pthread_cond_wait( p->parserBlockCond, p->shellSendMutex );

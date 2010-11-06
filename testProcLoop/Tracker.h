@@ -69,6 +69,11 @@ class Tracker
 		 */
 		unsigned int numHops() const;
 
+		/**
+		 * Returns rule used by Trajectory, specifically used for endit.
+		 */
+		Rule rule() const;
+
 	private:
 		// Node:thread of last 10 visits
 		int recentNodes_[ HistorySize ];

@@ -97,14 +97,12 @@ bool Tracker::nextHop( int& nextNode, int& nextThread ) const
 					nextThread = numThreads_ - 1;
 			}
 			break;
+			
+		case endit:
 		default:
-			nextThread = lastThread + 1;
-			if ( nextThread == numThreads_ ) {
-				nextThread = 0;
-				nextNode = lastNode + 1;
-				if ( nextNode == numNodes_ )
-					nextNode = 0;
-			}
+			nextNode = lastNode + 1;
+			if ( nextNode == numNodes_ )
+				nextNode = 0;
 			break;
 	}
 	return 1;
@@ -135,13 +133,20 @@ void Tracker::print() const
 	unsigned int lastIndex = 0;
 	if ( numHops_ > 0 )
 		lastIndex = (numHops_ - 1) % HistorySize;
-	cout << "Tracker rule " << trajectoryRule_ << 
+	if ( numHops_ % 100 == 0 ) {
+		cout << "Tracker rule " << trajectoryRule_ << 
 		" on (" << recentNodes_[ lastIndex ] << ":" <<
 		recentThreads_[ lastIndex ] << "), hop=" << numHops_ << endl;
+	}
 }
 
 
 unsigned int Tracker::numHops() const
 {
 	return numHops_;
+}
+
+Rule Tracker::rule() const
+{
+	return trajectoryRule_;
 }
