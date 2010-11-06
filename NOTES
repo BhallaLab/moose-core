@@ -8767,4 +8767,7 @@ Msg branch of MOOSE.
 
 
 Starting on 1. Qvec has been fleshed out. Compiles. Gets up to the Qvec
-test, which is still empty.
+test, which is still empty. Checkin 2327.
+
+Added many tests for Qvec, many bugs squashed along the way. Next to add
+test for the 'Qvec::stich' function.

@@ -63,7 +63,7 @@ class Qvec
 		 * the last thread. There will usually be gaps in between, 
 		 * paddedout using dummy Qinfos to skip over the gaps.
 		 */
-		unsigned int usedSize() const;
+		unsigned int dataQsize() const;
 
 		/**
 		 * Returns allocated size of entire data vector in bytes.

@@ -370,10 +370,10 @@ void Qinfo::sendRootToAll( const ProcInfo* proc )
 void innerReportQ( const Qvec& qv, const string& name )
 {
 	cout << Shell::myNode() << ": Reporting " << name << ". size=" <<
-		qv.usedSize() << endl;
+		qv.dataQsize() << endl;
 	
 	const char* buf = qv.data();
-	const char* end = qv.data() + qv.usedSize();
+	const char* end = qv.data() + qv.dataQsize();
 	while ( buf < end ) {
 		const Qinfo *q = reinterpret_cast< const Qinfo* >( buf );
 		const Msg *m = Msg::safeGetMsg( q->mid() );
@@ -401,13 +401,13 @@ void Qinfo::reportQ()
 {
 	cout << Shell::myNode() << ":	inQ: ";
 	for ( unsigned int i = 0; i < inQ_->size(); ++i )
-		cout << "[" << i << "]=" << ( *inQ_ )[i].usedSize() << "	";
+		cout << "[" << i << "]=" << ( *inQ_ )[i].dataQsize() << "	";
 	cout << "outQ: ";
 	for ( unsigned int i = 0; i < outQ_->size(); ++i )
-		cout << "[" << i << "]=" << (*outQ_ )[i].usedSize() << "	";
+		cout << "[" << i << "]=" << (*outQ_ )[i].dataQsize() << "	";
 	cout << "mpiQ: ";
 	for ( unsigned int i = 0; i < mpiQ_.size(); ++i ) {
-		unsigned int size = mpiQ_[i].usedSize();
+		unsigned int size = mpiQ_[i].dataQsize();
 		cout << "[" << i << "]=" << size << "	";
 	}
 	cout << endl;
