@@ -12,6 +12,11 @@
 #include <stdlib.h>
 #include "header.h"
 
+// Sets how long (in usec) the system waits between commands inserted 
+// by the master thread.
+// May need to make it bigger for slow multiproc systems.
+#define SLEEPY_TIME 2000000
+
 using namespace std;
 void runParserStuff( const ProcInfo* p );
 
@@ -127,7 +132,7 @@ void runParserStuff( const ProcInfo* p )
 	Tracker t( p->numNodes, p->numThreadsInGroup, raster90 );
 	ProcInfo temp( *p );
 	temp.threadIndexInGroup = 0;
-	usleep( 500000 );
+	usleep( SLEEPY_TIME );
 	pthread_mutex_lock( p->shellSendMutex );
 		setBlockingParserCall( 1 );
 		initAck();
@@ -136,7 +141,7 @@ void runParserStuff( const ProcInfo* p )
 			pthread_cond_wait( p->parserBlockCond, p->shellSendMutex );
 		setBlockingParserCall( 0 );
 	pthread_mutex_unlock( p->shellSendMutex );
-	usleep( 500000 );
+	usleep( SLEEPY_TIME );
 
 	Tracker tend( p->numNodes, p->numThreadsInGroup, endit );
 	pthread_mutex_lock( p->shellSendMutex );
@@ -147,7 +152,7 @@ void runParserStuff( const ProcInfo* p )
 			pthread_cond_wait( p->parserBlockCond, p->shellSendMutex );
 		setBlockingParserCall( 0 );
 	pthread_mutex_unlock( p->shellSendMutex );
-	usleep( 500000 );
+	usleep( SLEEPY_TIME );
 }
 
 int main( int argc, char** argv )

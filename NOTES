@@ -8747,4 +8747,7 @@ correctly for multiple threads, but not multiple nodes. Checkin 2324.
 Turns out that the condition for quitting was quite tricky. I need to get
 the info out to all nodes and be sure it is acted upon, within 1 cycle.
 Sort of hacked it in here. Works for various combinations of nodes and
-threads.
+threads. Checkin 2325.
+
+Added adjustable time for system to wait when testing master thread control
+calls, equivalent to parser calls. Need a longish time as MPI can be slow.
