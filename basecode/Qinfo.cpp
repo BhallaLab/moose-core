@@ -380,26 +380,37 @@ void Qinfo::sendRootToAll( const ProcInfo* proc )
 
 void innerReportQ( const Qvec& qv, const string& name )
 {
-	cout << Shell::myNode() << ": Reporting " << name << ". size=" <<
-		qv.dataQsize() << endl;
+	if ( qv.totalNumEntries() == 0 )
+		return;
+	cout << endl << Shell::myNode() << ": Reporting " << name << 
+		". threads=" << qv.numThreads() << ", sizes: "; 
+	for ( unsigned int i = 0; i < qv.numThreads(); ++i ) {
+		if ( i > 0 )
+			cout << ", ";
+		cout << qv.numEntries( i );
+	}
+	cout << endl;
 	
 	const char* buf = qv.data();
 	const char* end = qv.data() + qv.dataQsize();
 	while ( buf < end ) {
 		const Qinfo *q = reinterpret_cast< const Qinfo* >( buf );
-		const Msg *m = Msg::safeGetMsg( q->mid() );
-		if ( m ) {
-			cout << "Q::MsgId = " << q->mid() << 
-				", FuncId = " << q->fid() <<
-				", srcIndex = " << q->srcIndex() << 
-				", size = " << q->size() <<
-				", src = " << m->e1()->getName() << 
-				", dest = " << m->e2()->getName() << endl;
-		} else {
-			cout << "Q::MsgId = " << q->mid() << " (points to bad Msg)" <<
-				", FuncId = " << q->fid() <<
-				", srcIndex = " << q->srcIndex() << 
-				", size = " << q->size() << endl;
+		if ( !q->isDummy() ) {
+			const Msg *m = Msg::safeGetMsg( q->mid() );
+			if ( m ) {
+				cout << "Q::MsgId = " << q->mid() << 
+					", FuncId = " << q->fid() <<
+					", srcIndex = " << q->srcIndex() << 
+					", size = " << q->size() <<
+					", isForward = " << q->isForward() << 
+					", e1 = " << m->e1()->getName() << 
+					", e2 = " << m->e2()->getName() << endl;
+			} else {
+				cout << "Q::MsgId = " << q->mid() << " (points to bad Msg)" <<
+					", FuncId = " << q->fid() <<
+					", srcIndex = " << q->srcIndex() << 
+					", size = " << q->size() << endl;
+			}
 		}
 		buf += q->size() + sizeof( Qinfo );
 	}
@@ -412,13 +423,13 @@ void Qinfo::reportQ()
 {
 	cout << Shell::myNode() << ":	inQ: ";
 	for ( unsigned int i = 0; i < inQ_->size(); ++i )
-		cout << "[" << i << "]=" << ( *inQ_ )[i].dataQsize() << "	";
+		cout << "[" << i << "]=" << ( *inQ_ )[i].totalNumEntries() << "	";
 	cout << "outQ: ";
 	for ( unsigned int i = 0; i < outQ_->size(); ++i )
-		cout << "[" << i << "]=" << (*outQ_ )[i].dataQsize() << "	";
+		cout << "[" << i << "]=" << (*outQ_ )[i].totalNumEntries() << "	";
 	cout << "mpiQ: ";
 	for ( unsigned int i = 0; i < mpiQ_.size(); ++i ) {
-		unsigned int size = mpiQ_[i].dataQsize();
+		unsigned int size = mpiQ_[i].totalNumEntries();
 		cout << "[" << i << "]=" << size << "	";
 	}
 	cout << endl;
@@ -513,7 +524,9 @@ void Qinfo::clearQ( const ProcInfo* p )
 {
 	swapQ();
 	readQ( p );
-	emptyAllQs();
+	for ( vector< Qvec >::iterator i = outQ_->begin(); 
+		i != outQ_->end(); ++i )
+		i->clear();
 }
 
 // Static function. Deprecated. Dummy for now.

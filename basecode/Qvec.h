@@ -71,6 +71,21 @@ class Qvec
 		unsigned int allocatedSize() const;
 
 		/**
+		 * Returns number of threads handled by Qvec.
+		 */
+		unsigned int numThreads() const;
+
+		/**
+		 * Returns number of message Q entries on given thread
+		 */
+		unsigned int numEntries( unsigned int threadNum ) const;
+
+		/**
+		 * Returns total number of message Q entries on all threads
+		 */
+		unsigned int totalNumEntries() const;
+
+		/**
 		 * test function for Qvec
 		 */
 		static void testQvec();

@@ -313,6 +313,60 @@ void testInnerSet()
 	delete i2();
 }
 
+void testInnerGet() // Actually works on Shell::handleGet.
+{
+	const Cinfo* ac = Arith::initCinfo();
+	unsigned int size = 100;
+	string arg;
+	Id i2 = Id::nextId();
+	vector< unsigned int > dims( 1, size );
+	Element* ret = new Element( i2, ac, "test2", dims, 1 );
+	assert( ret );
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+	ProcInfo p;
+
+	Eref e2 = i2.eref();
+	const Finfo* finfo = ret->cinfo()->findFinfo( "get_name" );
+	assert( finfo );
+	FuncId f1 = dynamic_cast< const DestFinfo* >( finfo )->getFid();
+	shell->handleGet( i2, DataId( 0 ), f1 );
+	Qinfo::clearQ( &p ); // The request goes to the target Element
+	Qinfo::clearQ( &p ); // The response comes back to the Shell
+	Qinfo::clearQ( &p ); // Response is relayed back to the node 0 Shell
+	Conv< string > conv( shell->getBuf() );
+	assert( *conv == "test2" );
+
+	// string val = Field< string >::get( e2, "name" );
+	// assert( val == "test2" );
+	ret->setName( "HupTwoThree" );
+	shell->handleGet( i2, DataId( 0 ), f1 );
+	Qinfo::clearQ( &p ); // The request goes to the target Element
+	Qinfo::clearQ( &p ); // The response comes back to the Shell
+	Qinfo::clearQ( &p ); // Response is relayed back to the node 0 Shell
+	Conv< string > conv2( shell->getBuf() );
+	assert( *conv2 == "HupTwoThree" );
+
+	// val = Field< string >::get( e2, "name" );
+	// assert( val == "HupTwoThree" );
+	
+	for ( unsigned int i = 0; i < size; ++i ) {
+		double temp = i * 3;
+		reinterpret_cast< Arith* >(e2.element()->dataHandler()->data( i ))->setOutput( temp );
+	}
+
+	for ( unsigned int i = 0; i < size; ++i ) {
+		Eref dest( e2.element(), i );
+
+		double val = Field< double >::get( dest, "outputValue" );
+		double temp = i * 3;
+		assert( fabs( val - temp ) < 1e-8 );
+	}
+
+	cout << "." << flush;
+	delete i2();
+}
+
 void testStrSet()
 {
 	const Cinfo* ac = Arith::initCinfo();
@@ -352,6 +406,7 @@ void testStrSet()
 	delete i2();
 }
 
+/*
 void testGet()
 {
 	const Cinfo* ac = Arith::initCinfo();
@@ -388,6 +443,7 @@ void testGet()
 	cout << "." << flush;
 	delete i2();
 }
+*/
 
 void testStrGet()
 {
@@ -1710,7 +1766,7 @@ void testAsync( )
 	testSendMsg();
 	testCreateMsg();
 	testInnerSet();
-	testGet();
+	testInnerGet();
 	testSetGet();
 	testSetGetDouble();
 	testSetGetSynapse();

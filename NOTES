@@ -8807,6 +8807,11 @@ changing the general 'asend' command for the message to a 'tsend' command
 so that the target is uniquely specified. Oops, this won't work because the
 Element for the target isn't uniquely specified. Anyway, this got me to fix
 tsend. Reverted back to the immediate completion of the Set command.
+Checkin 2332.
+
+Trying to get the next unit test, for Get, to work. This has entailed a 
+diversion to the Qinfo::reportQ() which is now much more informative.
+The testInnerGet still doesn't work.
 
 
 

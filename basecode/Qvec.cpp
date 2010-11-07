@@ -95,6 +95,36 @@ unsigned int Qvec::allocatedSize() const
 	return data_.size();
 }
 
+unsigned int Qvec::numThreads() const
+{
+	return numThreads_;
+}
+
+unsigned int Qvec::numEntries( unsigned int threadNum ) const
+{
+	assert( threadNum < numThreads_ );
+	assert( threadBlockStart_.size() == 1 + numThreads_ );
+	assert( threadBlockEnd_.size() == numThreads_ );
+	const char* pos = &data_[ threadBlockStart_[ threadNum ] ];
+	const char* end = &data_[ threadBlockEnd_[ threadNum ] ];
+
+	unsigned int ret = 0;
+	while ( pos < end ) {
+		const Qinfo* q = reinterpret_cast< const Qinfo* >( pos );
+		pos += sizeof( Qinfo ) + q->size();
+		++ret;
+	}
+	return ret;
+}
+
+unsigned int Qvec::totalNumEntries() const
+{
+	unsigned int ret = 0;
+	for ( unsigned int i = 0; i < numThreads_; ++i )
+		ret += numEntries( i );
+	return ret;
+}
+
 // static function
 void Qvec::testQvec()
 {

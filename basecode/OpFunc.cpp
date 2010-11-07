@@ -43,7 +43,7 @@ void fieldOp( const Eref& e, const char* buf,
 
 	MsgFuncBinding mfb( q->mid(), retFunc );
 	Qinfo retq( retFunc, e.index(), totSize, 0 );
-	retq.setForward( !retq.isForward() );
+	retq.setForward( 0 );
 	// retq.assignQblock( Msg::getMsg( q->mid() ), Shell::procInfo() );
 	retq.addToQ( Shell::procInfo(), mfb, temp );
 	delete[] temp;
