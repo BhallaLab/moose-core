@@ -1094,8 +1094,13 @@ void Shell::dispatchSet( const Eref& tgt, FuncId fid, const char* args,
 {
 	Eref sheller = Id().eref();
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-	PrepackedBuffer buf( args, size );
-	s->innerDispatchSet( sheller, tgt, fid, buf );
+	if ( s->isSingleThreaded_ ) {
+		s->innerSet( tgt, fid, args, size );
+		Qinfo::clearQ( s->procInfo() );
+	} else {
+		PrepackedBuffer buf( args, size );
+		s->innerDispatchSet( sheller, tgt, fid, buf );
+	}
 }
 
 // regular function, does the actual dispatching.
@@ -1161,8 +1166,16 @@ const char* Shell::dispatchGet( const Eref& e, const string& field,
 	}
 
 	if ( df->getOpFunc()->checkSet( sg ) ) { // Type validation
-		Eref sheller = Id().eref();
-		return s->innerDispatchGet( sheller, tgt, df->getFid() );
+		if ( s->isSingleThreaded_ ) {
+			s->handleGet( tgt.id(), tgt.index(), df->getFid() );
+			Qinfo::clearQ( s->procInfo() ); // phase 1: request to tgt elem
+			Qinfo::clearQ( s->procInfo() ); // phase 2: response to relay
+			Qinfo::clearQ( s->procInfo() ); // phase 3: data arrives.
+			return s->getBuf();
+		} else {
+			Eref sheller = Id().eref();
+			return s->innerDispatchGet( sheller, tgt, df->getFid() );
+		}
 	} else {
 		cout << s->myNode() << ": Error: Shell::dispatchGet: type mismatch for field " << field << " on " << tgt << endl;
 	}

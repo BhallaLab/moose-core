@@ -191,11 +191,17 @@ Id init( int argc, char** argv )
  * These tests are meant to run on individual nodes, and should
  * not invoke MPI calls. They should not be run when MPI is running
  */
-void nonMpiTests()
+void nonMpiTests( Shell* s )
 {
 #ifdef DO_UNIT_TESTS
-	if ( Shell::numNodes() == 1 ) {
+	if ( Shell::myNode() == 0 ) {
+		unsigned int numNodes = s->numNodes();
+		unsigned int numCores = s->numCores();
+		if ( numCores > 0 )
+		// s->setHardware( isSingleThreaded, numCores, numNodes, myNode );
+		s->setHardware( 1, 1, 1, 0 );
 		testAsync();
+		s->setHardware( (numCores == 1), numCores, numNodes, 0 );
 		testMsg();
 		testScheduling();
 		testBuiltins();
@@ -226,7 +232,7 @@ int main( int argc, char** argv )
 	// spawn a lot of other stuff.
 	Element* shelle = shellId();
 	Shell* s = reinterpret_cast< Shell* >( shelle->dataHandler()->data( 0 ) );
-	nonMpiTests();
+	nonMpiTests( s );
 	// Actually here we should launch off the thread doing
 	// Shell messaging/MPI, and yield control to the parser.
 	if ( s->myNode() == 0 ) {

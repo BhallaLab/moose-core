@@ -8757,7 +8757,7 @@ This clears tests on up to 60 nodes and assorted threads on the cluster.
 So, with this I'm ready to go back and start fixing up scheduling on the
 Msg branch of MOOSE.
 
-1. Fix up Qvec, make some solid unit tests for it.
+1* Fix up Qvec, make some solid unit tests for it.
 2. Change Clock scheduling so it can be activated as a single operation 
 	within the thread-handling loop. The current arrangement has the
 	thread-handling looop deeply nested in the clock scheduling.
@@ -8814,7 +8814,11 @@ diversion to the Qinfo::reportQ() which is now much more informative.
 The testInnerGet still doesn't work. Checkin 2333.
 
 Fixed up sequencing in Qinfo::clearQ. Now it works. Completed the remainder 
-of the testInnerGet.
+of the testInnerGet. Checkin 2334.
 
-
+Gave in to the mass of unit tests, and put in a test for single-thread mode
+on the Shell dispatchSet and dispatchGet functions. Also configured the main
+code so that the testAsync is called withthe Shell::isSingleThreaded set to
+true. With this the system now clears several more tests. Need to put in the
+single-thread test in a few more places.
 

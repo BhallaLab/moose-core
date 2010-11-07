@@ -377,6 +377,36 @@ void testInnerGet() // Actually works on Shell::handleGet.
 	delete i2();
 }
 
+void testSetGet()
+{
+	const Cinfo* ac = Arith::initCinfo();
+	unsigned int size = 100;
+	vector< unsigned int > dims( 1, size );
+	string arg;
+	Id i2 = Id::nextId();
+	Element* ret = new Element( i2, ac, "test2", dims, 1 );
+	assert( ret );
+	
+	for ( unsigned int i = 0; i < size; ++i ) {
+		Eref e2( i2(), i );
+		double x = i * 3.14;
+		bool ret = Field< double >::set( e2, "outputValue", x );
+		assert( ret );
+		double val = reinterpret_cast< Arith* >(e2.data())->getOutput();
+		assert( fabs( val - x ) < 1e-8 );
+	}
+
+	for ( unsigned int i = 0; i < size; ++i ) {
+		Eref e2( i2(), i );
+		double x = i * 3.14;
+		double ret = Field< double >::get( e2, "outputValue" );
+		assert( fabs( ret - x ) < 1e-8 );
+	}
+
+	cout << "." << flush;
+	delete i2();
+}
+
 void testStrSet()
 {
 	const Cinfo* ac = Arith::initCinfo();
@@ -416,7 +446,6 @@ void testStrSet()
 	delete i2();
 }
 
-/*
 void testGet()
 {
 	const Cinfo* ac = Arith::initCinfo();
@@ -453,7 +482,6 @@ void testGet()
 	cout << "." << flush;
 	delete i2();
 }
-*/
 
 void testStrGet()
 {
@@ -496,37 +524,6 @@ void testStrGet()
 	delete i2();
 }
 
-void testSetGet()
-{
-	const Cinfo* ac = Arith::initCinfo();
-	unsigned int size = 100;
-	vector< unsigned int > dims( 1, size );
-	string arg;
-	Id i2 = Id::nextId();
-	// bool ret = nc->create( i2, "test2", size );
-	Element* ret = new Element( i2, ac, "test2", dims, 1 );
-	assert( ret );
-
-	
-	for ( unsigned int i = 0; i < size; ++i ) {
-		Eref e2( i2(), i );
-		double x = i * 3.14;
-		bool ret = Field< double >::set( e2, "outputValue", x );
-		assert( ret );
-		double val = reinterpret_cast< Arith* >(e2.data())->getOutput();
-		assert( fabs( val - x ) < 1e-8 );
-	}
-
-	for ( unsigned int i = 0; i < size; ++i ) {
-		Eref e2( i2(), i );
-		double x = i * 3.14;
-		double ret = Field< double >::get( e2, "outputValue" );
-		assert( fabs( ret - x ) < 1e-8 );
-	}
-
-	cout << "." << flush;
-	delete i2();
-}
 
 void testSetGetDouble()
 {
