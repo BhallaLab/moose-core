@@ -252,8 +252,14 @@ void testCreateMsg()
 	delete i2();
 }
 
-void testSet()
+/**
+ * This tests the low-level Set functions, that do not involve off-node
+ * messaging.
+ */
+void testInnerSet()
 {
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 	const Cinfo* ac = Arith::initCinfo();
 	unsigned int size = 100;
 	vector< unsigned int > dims( 1, size );
@@ -266,19 +272,40 @@ void testSet()
 	Eref e2 = i2.eref();
 
 	assert( ret->getName() == "test2" );
-	Field< string >::set( e2, "name", "NewImprovedTest" );
+	const Finfo* finfo = ret->cinfo()->findFinfo( "set_name" );
+	assert( finfo );
+	FuncId f1 = dynamic_cast< const DestFinfo* >( finfo )->getFid();
+	Conv< string > conv( "NewImprovedTest" );
+	char* args = new char[ conv.size() ];
+	conv.val2buf( args );
+	shell->innerSet( e2, f1, args, conv.size() );
+	delete[] args;
+	Qinfo::clearQ( &p );
+	// Field< string >::set( e2, "name", "NewImprovedTest" );
 	assert( ret->getName() == "NewImprovedTest" );
 	
+
+	finfo = ret->cinfo()->findFinfo( "set_outputValue" );
+	assert( finfo );
+	FuncId f2 = dynamic_cast< const DestFinfo* >( finfo )->getFid();
+
 	for ( unsigned int i = 0; i < size; ++i ) {
+		char args[100];
 		double x = sqrt( i );
+		Conv< double > conv( x );
 		Eref dest( e2.element(), i );
-		SetGet1< double >::set( dest, "set_outputValue", x );
+		// char* args = new char[ conv.size() ];
+		conv.val2buf( args );
+		shell->innerSet( dest, f2, args, conv.size() );
+	// 	SetGet1< double >::set( dest, "set_outputValue", x );
 	}
+	Qinfo::clearQ( &p );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double temp = sqrt( i );
 		double val = reinterpret_cast< Arith* >(e2.element()->dataHandler()->data( i ))->getOutput();
-		assert( fabs( val - temp ) < 1e-6 );
+		assert( doubleEq( val, temp ) );
+		// assert( fabs( val - temp ) < 1e-6 );
 	}
 
 	cout << "." << flush;
@@ -1682,7 +1709,7 @@ void testAsync( )
 	insertIntoQ();
 	testSendMsg();
 	testCreateMsg();
-	testSet();
+	testInnerSet();
 	testGet();
 	testSetGet();
 	testSetGetDouble();

@@ -1064,8 +1064,8 @@ void Shell::innerSet( const Eref& er, FuncId fid, const char* args,
 		Msg* m = new AssignmentMsg( Eref( shelle_, 0 ), er, Msg::setMsg );
 		shelle_->addMsgAndFunc( m->mid(), fid, lowLevelGet.getBindIndex() );
 	
-		Qinfo q( fid, size, 0 );
-		shelle_->asend( q, lowLevelGet.getBindIndex(), &p_, args );
+		Qinfo q( fid, size, 1 );
+		shelle_->tsend( q, lowLevelGet.getBindIndex(), &p_, args, er.fullId() );
 	}
 }
 

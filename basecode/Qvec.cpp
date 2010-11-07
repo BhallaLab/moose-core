@@ -66,8 +66,9 @@ void Qvec::stitch()
 		unsigned int remainingSize = 
 			threadBlockStart_[ i + 1 ] - threadBlockEnd_[i];
 		assert( remainingSize >= sizeof( Qinfo ) );
+		char* data = &data_[ threadBlockEnd_[i] ];
 		Qinfo q = Qinfo::makeDummy( remainingSize - sizeof( Qinfo ) );
-		memcpy( &data_[ threadBlockEnd_[i] ], &q, remainingSize );
+		memcpy( data, &q, sizeof( Qinfo ) );
 	}
 }
 

@@ -95,13 +95,14 @@ class Cinfo
 			/**
 			 * Finds Finfo by name in the list for this class, 
 			 * ignoring any element-specific fields.
+			 * Returns 0 on failure.
 			 */
 			const Finfo* findFinfo( const string& name) const;
 
 			/**
 			 * Finds the funcId by name. Returns 0 on failure.
-			 */
 			const FuncId findFuncId( const string& name) const;
+			 */
 
 			/**
 			 * Number of SrcMsgs in total. Each has a unique number to

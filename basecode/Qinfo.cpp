@@ -448,7 +448,7 @@ void Qinfo::addSpecificTargetToQ( const ProcInfo* p, MsgFuncBinding b,
 	memcpy( temp, arg, size_ );
 	memcpy( temp + size_, &target, sizeof( DataId ) );
 	size_ += sizeof( DataId );
-	(*outQ_)[p->groupId].push_back( p->threadIndexInGroup, this, arg );
+	(*outQ_)[p->groupId].push_back( p->threadIndexInGroup, this, temp );
 	delete[] temp;
 }
 
@@ -513,6 +513,7 @@ void Qinfo::clearQ( const ProcInfo* p )
 {
 	swapQ();
 	readQ( p );
+	emptyAllQs();
 }
 
 // Static function. Deprecated. Dummy for now.

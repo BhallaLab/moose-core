@@ -8785,5 +8785,20 @@ that handles things simply but locally.
 Did that with a simple variant of Qinfo::clearQ that just does the swapQ
 and then readBuf. Now it clears a few more unit tests, till it
 gets to SetGet. Then it hangs waiting for isAckPending, because
-the mpiClearQ is currently an empty function.
+the mpiClearQ is currently an empty function. Checkin 2330.
+
+Need a bit of redesign here. We have two levels of Set/Get:
+	- The Shell operations which need to be able to access any field on any
+		node. This needs the entire messaging loop stuff to be
+		operational.
+	- A local version which operates only on local node and handles its
+		own updates of the queues. Used mostly for testing.
+		If this is strictly local node then we don't even need the
+		queues. We can go straight to the Element pointer.
+		The risk with this is that it isn't thread-safe. There isn't
+		even a ProcInfo to tell the function the thread context.
+
+Stick with the current design of Set/Get, but in the unit tests don't go into
+the off-node operations and instead test the Shell::innerSet.
+After much bugfixing and messing around, clears this test. 
 
