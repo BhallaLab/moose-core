@@ -8800,5 +8800,13 @@ Need a bit of redesign here. We have two levels of Set/Get:
 
 Stick with the current design of Set/Get, but in the unit tests don't go into
 the off-node operations and instead test the Shell::innerSet.
-After much bugfixing and messing around, clears this test. 
+After much bugfixing and messing around, clears this test. Checkin 2331.
+One key change here is that now the system does NOT wait for individual
+Set operations to clear before returning. It just queues them up. This required
+changing the general 'asend' command for the message to a 'tsend' command
+so that the target is uniquely specified. Oops, this won't work because the
+Element for the target isn't uniquely specified. Anyway, this got me to fix
+tsend. Reverted back to the immediate completion of the Set command.
+
+
 

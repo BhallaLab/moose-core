@@ -298,8 +298,8 @@ void testInnerSet()
 		conv.val2buf( args );
 		shell->innerSet( dest, f2, args, conv.size() );
 	// 	SetGet1< double >::set( dest, "set_outputValue", x );
+		Qinfo::clearQ( &p );
 	}
-	Qinfo::clearQ( &p );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double temp = sqrt( i );
