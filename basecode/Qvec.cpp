@@ -66,7 +66,7 @@ void Qvec::stitch()
 		unsigned int remainingSize = 
 			threadBlockStart_[ i + 1 ] - threadBlockEnd_[i];
 		assert( remainingSize >= sizeof( Qinfo ) );
-		Qinfo q( 0, remainingSize, 0 );
+		Qinfo q = Qinfo::makeDummy( remainingSize - sizeof( Qinfo ) );
 		memcpy( &data_[ threadBlockEnd_[i] ], &q, remainingSize );
 	}
 }
@@ -97,8 +97,8 @@ unsigned int Qvec::allocatedSize() const
 // static function
 void Qvec::testQvec()
 {
-	static const unsigned int dat1size = 1234;
-	static const unsigned int dat2size = 12;
+	static const unsigned int bigDataSize = 1234;
+	static const unsigned int smallDataSize = 12;
 	Qvec q( 4 );
 	assert( q.threadBlockStart_.size() == 5 );
 	assert( q.threadBlockEnd_.size() == 4 );
@@ -108,8 +108,8 @@ void Qvec::testQvec()
 	assert( q.data() == &( q.data_[0] ) );
 	
 	char *buf = new char[5000];
-	Qinfo qi( 0, dat1size, buf );
-	unsigned int datasize = sizeof( Qinfo ) + dat1size;
+	Qinfo qi( 0, bigDataSize, buf );
+	unsigned int datasize = sizeof( Qinfo ) + bigDataSize;
 
 	assert( q.threadBlockStart_[0] == 0 );
 	assert( q.threadBlockStart_[1] == threadQreserve );
@@ -137,8 +137,8 @@ void Qvec::testQvec()
 	assert( q.threadBlockEnd_[3] == threadQreserve * 4 + datasize );
 
 	//// Put some more data (small) on thread 0.
-	Qinfo qiSmall( 0, dat2size, buf );
-	unsigned int datasizeSmall = sizeof( Qinfo ) + dat2size;
+	Qinfo qiSmall( 0, smallDataSize, buf );
+	unsigned int datasizeSmall = sizeof( Qinfo ) + smallDataSize;
 	q.push_back( 0, &qiSmall, buf );
 	////
 	assert( q.dataQsize() == 4 * threadQreserve + datasize );
@@ -154,8 +154,8 @@ void Qvec::testQvec()
 	assert( q.threadBlockEnd_[2] == threadQreserve * 3 + datasize );
 	assert( q.threadBlockEnd_[3] == threadQreserve * 4 + datasize );
 
-	//// Put some data on thread 1
-	q.push_back( 1, &qiSmall, buf );
+	//// Put some data on thread 2
+	q.push_back( 2, &qiSmall, buf );
 	////
 	assert( q.dataQsize() == 4 * threadQreserve + datasize );
 	assert( q.allocatedSize() == 5 * threadQreserve + datasize );
@@ -166,21 +166,91 @@ void Qvec::testQvec()
 	assert( q.threadBlockStart_[3] == threadQreserve * 4 + datasize );
 	assert( q.threadBlockStart_[4] == threadQreserve * 5 + datasize );
 	assert( q.threadBlockEnd_[0] == datasize + datasizeSmall );
-	assert( q.threadBlockEnd_[1] == 
-		threadQreserve * 2 + datasize + datasizeSmall  );
-	assert( q.threadBlockEnd_[2] == threadQreserve * 3 + datasize );
+	assert( q.threadBlockEnd_[1] == threadQreserve * 2 + datasize );
+	assert( q.threadBlockEnd_[2] == 
+		threadQreserve * 3 + datasize + datasizeSmall  );
 	assert( q.threadBlockEnd_[3] == threadQreserve * 4 + datasize );
 
 	const char* data = q.data();
 	const Qinfo* temp = reinterpret_cast< const Qinfo* >( data );
-	assert( temp->size() == dat1size );
+	assert( temp->size() == bigDataSize );
 	temp = reinterpret_cast< const Qinfo* >( data + datasize );
-	assert( temp->size() == dat2size );
+	assert( temp->size() == smallDataSize );
 
-	temp = reinterpret_cast< const Qinfo* >( data + q.threadBlockStart_[1] );
-	assert( temp->size() == dat2size );
+	temp = reinterpret_cast< const Qinfo* >( data + q.threadBlockStart_[2] );
+	assert( temp->size() == smallDataSize );
+	/////// Put some data on thread 1, requiring that the data on thread2
+	// shift over.
+	q.push_back( 1, &qi, buf );
+	assert( q.dataQsize() == 5 * threadQreserve + 2 * datasize );
+	assert( q.allocatedSize() == 6 * threadQreserve + 2 * datasize );
+	assert( q.threadBlockStart_.size() == 5 );
+	assert( q.threadBlockStart_[0] == 0 );
+	assert( q.threadBlockStart_[1] == threadQreserve * 2 + datasize );
+	assert( q.threadBlockStart_[2] == threadQreserve * 4 + 2 * datasize );
+	assert( q.threadBlockStart_[3] == threadQreserve * 5 + 2 * datasize );
+	assert( q.threadBlockStart_[4] == threadQreserve * 6 + 2 * datasize );
+	assert( q.threadBlockEnd_[0] == datasize + datasizeSmall );
+	assert( q.threadBlockEnd_[1] == threadQreserve * 2 + 2 * datasize );
+	assert( q.threadBlockEnd_[2] == 
+		threadQreserve * 4 + 2 * datasize + datasizeSmall  );
+	assert( q.threadBlockEnd_[3] == threadQreserve * 5 + 2 * datasize );
+
+	data = q.data();
+	temp = reinterpret_cast< const Qinfo* >( data );
+	assert( temp->size() == bigDataSize );
+	temp = reinterpret_cast< const Qinfo* >( data + datasize );
+	assert( temp->size() == smallDataSize );
+
+	temp = reinterpret_cast< const Qinfo* >( data + q.threadBlockStart_[1]);
+	assert( temp->size() == bigDataSize );
+
+	temp = reinterpret_cast< const Qinfo* >( data + q.threadBlockStart_[2]);
+	assert( temp->size() == smallDataSize );
+
 
 	/////// Now check function of the 'stitch' command.
+	q.stitch();
+
+	// start data for thread 0.
+	data = q.data();
+	temp = reinterpret_cast< const Qinfo* >( data );
+	assert( temp->size() == bigDataSize );
+
+	data += sizeof( Qinfo ) + temp->size();
+	temp = reinterpret_cast< const Qinfo* >( data );
+	assert( temp->size() == smallDataSize );
+
+	data += sizeof( Qinfo ) + temp->size();
+	temp = reinterpret_cast< const Qinfo* >( data );
+	assert( temp->isDummy() );
+	assert( temp->size() == 2 * threadQreserve - 2 * sizeof( Qinfo ) - smallDataSize ); 
+	
+	// start data for thread 1.
+	data += sizeof( Qinfo ) + temp->size();
+	temp = reinterpret_cast< const Qinfo* >( data );
+	assert( temp->size() == bigDataSize );
+
+	data += sizeof( Qinfo ) + temp->size();
+	temp = reinterpret_cast< const Qinfo* >( data );
+	assert( temp->isDummy() );
+	assert( temp->size() == 2 * threadQreserve - sizeof( Qinfo ) ); 
+	
+	// start data for thread 2.
+	data += sizeof( Qinfo ) + temp->size();
+	temp = reinterpret_cast< const Qinfo* >( data );
+	assert( temp->size() == smallDataSize );
+
+	data += sizeof( Qinfo ) + temp->size();
+	temp = reinterpret_cast< const Qinfo* >( data );
+	assert( temp->isDummy() );
+	assert( temp->size() == threadQreserve - 2 * sizeof( Qinfo ) - smallDataSize ); 
+	
+	// start data for thread 3.
+	data += sizeof( Qinfo ) + temp->size();
+	temp = reinterpret_cast< const Qinfo* >( data );
+	assert( temp->isDummy() );
+	assert( temp->size() == threadQreserve - sizeof( Qinfo ) );
 
 	delete[] buf;
 

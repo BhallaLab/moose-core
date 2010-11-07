@@ -46,16 +46,38 @@ class Qinfo
 		Qinfo();
 		// Qinfo( const char* buf );
 
+		/**
+		 * This is a special constructor to return dummy Qs.
+		 * Only used in Qvec::stitch.
+		 */
+		static Qinfo makeDummy( unsigned int size );
+
 		void setMsgId( MsgId m ) {
 			m_ = m;
 		}
 
+		/**
+		 * Returns true if the data is to go to a specific one among
+		 * all the message targets. 
+		 */
 		bool useSendTo() const {
 			return useSendTo_;
 		}
 
+		/**
+		 * Returns true if the direction of the message is from
+		 * e1 to e2.
+		 */
 		bool isForward() const {
 			return isForward_;
+		}
+
+		/**
+		 * Returns true if the Qinfo is inserted just for padding, and
+		 * the data is not meant to be processed.
+		 */
+		bool isDummy() const {
+			return isDummy_;
 		}
 
 		void setForward( bool isForward ) {
@@ -81,10 +103,34 @@ class Qinfo
 			return srcIndex_;
 		}
 
+		/**
+		 * size() returns the length of the data segment managed by this 
+		 * Qinfo, and immediately following it. Note that the total
+		 * length in memory of of this entire queue entry is 
+		 * sizeof( Qinfo ) + Qinfo::size()
+		 */
 		unsigned int size() const {
 			return size_;
 		}
 
+		/**
+		 * Add data to the queue. This is non-static, since we will also
+		 * put the current Qinfo on the queue as a header.
+		 * The arg will just be memcopied onto the queue, so avoid
+		 * pointers. The Qinfo must already know its size.
+		 */
+		void addToQ( const ProcInfo* p, MsgFuncBinding b, const char* arg );
+
+		/**
+		 * This adds the data to the queue and then an additional
+		 * sizeof( DataId ) block to specify target DataId.
+		 */
+		void addSpecificTargetToQ( const ProcInfo* p, MsgFuncBinding b, 
+			const char* arg, const DataId& target );
+
+		//////////////////////////////////////////////////////////////
+		// From here, static funcs handling the Queues.
+		//////////////////////////////////////////////////////////////
 
 		/**
 		 * Set up a SimGroup which keeps track of grouping information, and
@@ -158,16 +204,6 @@ class Qinfo
 		 */
 		static void reportQ();
 
-		/**
-		 * Add data to the queue. This is non-static, since we will also
-		 * put the current Qinfo on the queue as a header.
-		 * The arg will just be memcopied onto the queue, so avoid
-		 * pointers. The Qinfo must already know its size.
-		 */
-		void addToQ( const ProcInfo* p, MsgFuncBinding b, const char* arg );
-
-		void addSpecificTargetToQ( const ProcInfo* p, MsgFuncBinding b, 
-			const char* arg, const DataId& target );
 
 		/**
 		 * Utility function that checks if Msg is local, and if so,
@@ -193,6 +229,7 @@ class Qinfo
 	private:
 		bool useSendTo_;	/// true if msg is to a single target DataId.
 		bool isForward_; /// True if the msg is from e1 to e2.
+		bool isDummy_; /// True if the Queue entry is a dummy and not used.
 		MsgId m_;		/// Unique lookup Id for Msg.
 		FuncId f_;		/// Unique lookup Id for function.
 		DataId srcIndex_; /// DataId of src.
