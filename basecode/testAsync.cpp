@@ -141,7 +141,7 @@ void insertIntoQ( )
 
 		// addToQ( threadIndex, Binding, argbuf )
 		// qi.assignQblock( m, &p );
-		qi.addToQ( 0, b, buf );
+		qi.addToQ( &p, b, buf );
 	}
 	Qinfo::clearQ( &p );
 

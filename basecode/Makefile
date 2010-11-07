@@ -43,7 +43,6 @@ OBJ = \
 	PrepackedBuffer.o \
 	doubleEq.o \
 	main.o	\
-	testSync.o	\
 	testAsync.o	\
 
 HEADERS = \

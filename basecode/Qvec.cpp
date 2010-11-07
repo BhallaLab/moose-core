@@ -254,5 +254,5 @@ void Qvec::testQvec()
 
 	delete[] buf;
 
-	cout << "+" << flush;
+	cout << "." << flush;
 }

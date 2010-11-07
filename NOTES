@@ -8764,6 +8764,8 @@ Msg branch of MOOSE.
 	Make some new unit test for the revised scheduling.
 3. Fix up main() so it calls the new threading stuff
 4. Implement the new threading/MPI stuff.
+5. Figure out how to retrofit the old unit tests that rely on Set/Get and
+	other queue-dependent operations.
 
 
 Starting on 1. Qvec has been fleshed out. Compiles. Gets up to the Qvec
@@ -8774,4 +8776,14 @@ test for the 'Qvec::stitch' function. Checkin 2328.
 
 ============================================================================
 7 Nov 2010
-Added tests for Qvec::stitch. Seems OK.
+Added tests for Qvec::stitch. Seems OK. Checkin 2329.
+
+I really would like to be able to clear the old unit tests, even though they
+have this nasty dependency on all the queue stuff. Let's set up a clearQ
+that handles things simply but locally.
+
+Did that with a simple variant of Qinfo::clearQ that just does the swapQ
+and then readBuf. Now it clears a few more unit tests, till it
+gets to SetGet. Then it hangs waiting for isAckPending, because
+the mpiClearQ is currently an empty function.
+

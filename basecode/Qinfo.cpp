@@ -129,25 +129,23 @@ void hackForSendTo( const Qinfo* q, const char* buf )
 	func->op( Eref( tgt, *tgtIndex ), buf );
 }
 
-void readBuf(const char* begin, const ProcInfo* proc )
+void readBuf(const Qvec& qv, const ProcInfo* proc )
 {
-	const char* buf = begin;
-	unsigned int bufsize = *reinterpret_cast< const unsigned int* >( buf );
-	/*
-	if ( bufsize != 36 && proc->numNodesInGroup > 1 && proc->groupId == 0 )
-		cout << "In readBuf on " << proc->nodeIndexInGroup << ", bufsize = " << bufsize << endl;
-		*/
-	const char* end = buf + bufsize;
-	buf += sizeof( unsigned int );
+	const char* buf = qv.data();
+	// unsigned int bufsize = *reinterpret_cast< const unsigned int* >( buf );
+	const char* end = buf + qv.dataQsize();
+	// buf += sizeof( unsigned int );
 	while ( buf < end )
 	{
 		const Qinfo *qi = reinterpret_cast< const Qinfo* >( buf );
-		if ( qi->useSendTo() ) {
-			hackForSendTo( qi, buf );
-		} else {
-			const Msg* m = Msg::getMsg( qi->mid() );
-			assert( m );
-			m->exec( buf, proc );
+		if ( !qi->isDummy() ) {
+			if ( qi->useSendTo() ) {
+				hackForSendTo( qi, buf );
+			} else {
+				const Msg* m = Msg::getMsg( qi->mid() );
+				assert( m );
+				m->exec( buf, proc );
+			}
 		}
 		buf += sizeof( Qinfo ) + qi->size();
 	}
@@ -163,7 +161,7 @@ void Qinfo::readQ( const ProcInfo* proc )
 {
 	assert( proc );
 	assert( proc->groupId < inQ_->size() );
-	readBuf( ( *inQ_ )[ proc->groupId ].data(), proc );
+	readBuf( ( *inQ_ )[ proc->groupId ], proc );
 }
 
 /**
@@ -173,6 +171,7 @@ void Qinfo::readQ( const ProcInfo* proc )
  */
 void Qinfo::readMpiQ( const ProcInfo* proc )
 {
+	/*
 	assert( proc );
 	assert( proc->groupId < mpiQ_.size() );
 	const Qvec& q = mpiQ_[ proc->groupId ];
@@ -191,6 +190,7 @@ void Qinfo::readMpiQ( const ProcInfo* proc )
 		}
 	}
 	mpiQ_[proc->groupId].clear();
+	*/
 }
 
 /**
@@ -511,7 +511,8 @@ void Qinfo::assembleOntoQ( const MsgFuncBinding& i,
 // Static function. Dummy for now.
 void Qinfo::clearQ( const ProcInfo* p )
 {
-	;
+	swapQ();
+	readQ( p );
 }
 
 // Static function. Deprecated. Dummy for now.
