@@ -8811,7 +8811,10 @@ Checkin 2332.
 
 Trying to get the next unit test, for Get, to work. This has entailed a 
 diversion to the Qinfo::reportQ() which is now much more informative.
-The testInnerGet still doesn't work.
+The testInnerGet still doesn't work. Checkin 2333.
+
+Fixed up sequencing in Qinfo::clearQ. Now it works. Completed the remainder 
+of the testInnerGet.
 
 
 

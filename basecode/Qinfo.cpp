@@ -519,14 +519,17 @@ void Qinfo::assembleOntoQ( const MsgFuncBinding& i,
 }
 */
 
-// Static function. Dummy for now.
+// Static function. Used only during single-thread tests, when the
+// main thread-handling loop is inactive.
+// Called after all the 'send' functions have been done. Typically just
+// one is pending.
 void Qinfo::clearQ( const ProcInfo* p )
 {
 	swapQ();
-	readQ( p );
 	for ( vector< Qvec >::iterator i = outQ_->begin(); 
 		i != outQ_->end(); ++i )
 		i->clear();
+	readQ( p );
 }
 
 // Static function. Deprecated. Dummy for now.

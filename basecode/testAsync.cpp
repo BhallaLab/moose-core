@@ -355,12 +355,22 @@ void testInnerGet() // Actually works on Shell::handleGet.
 		reinterpret_cast< Arith* >(e2.element()->dataHandler()->data( i ))->setOutput( temp );
 	}
 
+	finfo = ret->cinfo()->findFinfo( "get_outputValue" );
+	assert( finfo );
+	FuncId f2 = dynamic_cast< const DestFinfo* >( finfo )->getFid();
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref dest( e2.element(), i );
 
-		double val = Field< double >::get( dest, "outputValue" );
+		shell->handleGet( i2, DataId( i ), f2 );
+		Qinfo::clearQ( &p ); // The request goes to the target Element
+		Qinfo::clearQ( &p ); // The response comes back to the Shell
+		Qinfo::clearQ( &p ); // Response is relayed back to the node 0 Shell
+		Conv< double > conv3( shell->getBuf() );
 		double temp = i * 3;
-		assert( fabs( val - temp ) < 1e-8 );
+		assert( doubleEq( *conv3 , temp ) );
+
+	// 	double val = Field< double >::get( dest, "outputValue" );
+		// assert( fabs( val - temp ) < 1e-8 );
 	}
 
 	cout << "." << flush;
