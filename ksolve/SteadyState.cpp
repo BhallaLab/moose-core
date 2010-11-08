@@ -551,6 +551,10 @@ void SteadyState::setupSSmatrix()
 	rank_ = myGaussianDecomp( LU_ );
 
 	unsigned int nConsv = nVarMols_ - rank_;
+	if ( nConsv == 0 ) {
+		cout << "SteadyState::setupSSmatrix(): Number of conserved species == 0. Aborting\n";
+		return;
+	}
 	
 	if ( Nr_ ) { // Clear out old one.
 		gsl_matrix_free( Nr_ );
