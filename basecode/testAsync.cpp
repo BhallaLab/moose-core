@@ -768,10 +768,11 @@ void testSendSpike()
 	double Vm = reinterpret_cast< IntFire* >(e2.data())->getVm();
 	assert( fabs( Vm + 1e-7) < EPSILON );
 	// Test that the spike message is in the queue.
-	assert( Qinfo::outQ_[0].size() == sizeof( Qinfo ) + sizeof( double ) );
+	assert( Qinfo::outQ_->size() > 0 ); // Number of groups.
+	assert( (*Qinfo::outQ_)[0].totalNumEntries() == 1 );
 
 	Qinfo::clearQ( &p );
-	assert( Qinfo::outQ_[0].size() == 0 );
+	assert( (*Qinfo::outQ_)[0].totalNumEntries() == 0 );
 
 	/*
 	// Warning: the 'get' function calls clearQ also.
@@ -1092,10 +1093,8 @@ void testSparseMsg()
 			numWorkerThreads = Qinfo::simGroup( 1 )->numThreads;
 			startThread = Qinfo::simGroup( 1 )->startThread;
 		}
-		unsigned int totOutqEntries = 0;
-		for ( unsigned int j = 0; j < numWorkerThreads; ++j )
-			totOutqEntries += Qinfo::outQ_[ j ].size();
-		assert( totOutqEntries / ( sizeof( Qinfo ) + sizeof( double ) ) == qSize[i] );
+		unsigned int totOutqEntries = ( *Qinfo::outQ_ )[ 0 ].totalNumEntries();
+		assert( totOutqEntries == qSize[i] );
 		// cout << i << ": " << totOutqEntries / ( sizeof( Qinfo ) + sizeof( double ) ) << endl << endl ;
 		// cout << p.currTime << "	" << ifire100->getVm() << "	" << ifire900->getVm() << endl;
 		// cout << "T = " << p.currTime << ", Q size = " << Qinfo::q_[0].size() << endl;

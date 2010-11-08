@@ -8822,3 +8822,13 @@ code so that the testAsync is called withthe Shell::isSingleThreaded set to
 true. With this the system now clears several more tests. Need to put in the
 single-thread test in a few more places. Checkin 2335.
 
+============================================================================
+8 Nov 2010
+Struggled a bit with setVec tests. Got side-tracked into cleaning up a hack
+in the AssignVecMsg::exec function, which entailed adding a new version of op()
+all the OpFunc classes. This turned out to fix the original problem too.
+Checkin 2337.
+
+Further efforts on cleaning up shared message handling. The isForward flag
+wasn't being set.
+
