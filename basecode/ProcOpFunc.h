@@ -60,6 +60,11 @@ template< class T > class ProcOpFunc: public ProcOpFuncBase
 			(reinterpret_cast< T* >( e.data() )->*func_)( e, *arg1 ) ;
 		}
 
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+			Conv< ProcPtr > arg1( buf );
+			(reinterpret_cast< T* >( e.data() )->*func_)( e, *arg1 ) ;
+		}
+
 
 		// This key extra function does Process calls.
 		void proc( char* obj, const Eref& e, ProcPtr p ) const {

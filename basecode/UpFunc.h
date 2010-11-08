@@ -46,6 +46,10 @@ template< class T > class UpFunc0: public OpFunc
 		void op( const Eref& e, const char* buf ) const {
 			(reinterpret_cast< T* >( e.parentData() )->*func_)( e.index() );
 		}
+
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+			(reinterpret_cast< T* >( e.parentData() )->*func_)( e.index() );
+		}
 	private:
 		void ( T::*func_ )( DataId index ); 
 };
@@ -75,6 +79,12 @@ template< class T, class A > class UpFunc1: public OpFunc
 		// buf is organized as Qinfo, args, optionally srcIndex.
 		void op( const Eref& e, const char* buf ) const {
 			Conv< A > arg1( buf + sizeof( Qinfo ) );
+			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
+				e.index(), *arg1 );
+		}
+
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+			Conv< A > arg1( buf );
 			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
 				e.index(), *arg1 );
 		}
@@ -112,6 +122,14 @@ template< class T, class A1, class A2 > class UpFunc2: public OpFunc
 				e.index(), *arg1, *arg2 );
 		}
 
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+			Conv< A1 > arg1( buf );
+			buf += arg1.size();
+			Conv< A2 > arg2( buf );
+			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
+				e.index(), *arg1, *arg2 );
+		}
+
 	private:
 		void ( T::*func_ )( DataId, A1, A2 ); 
 };
@@ -139,6 +157,16 @@ template< class T, class A1, class A2, class A3 > class UpFunc3:
 
 		void op( const Eref& e, const char* buf ) const {
 			buf += sizeof( Qinfo );
+			Conv< A1 > arg1( buf );
+			buf += arg1.size();
+			Conv< A2 > arg2( buf );
+			buf += arg2.size();
+			Conv< A3 > arg3( buf );
+			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
+				e.index(), *arg1, *arg2, *arg3 );
+		}
+
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
 			Conv< A1 > arg1( buf );
 			buf += arg1.size();
 			Conv< A2 > arg2( buf );
@@ -186,6 +214,18 @@ template< class T, class A1, class A2, class A3, class A4 > class UpFunc4:
 				e.index(), *arg1, *arg2, *arg3, *arg4 );
 		}
 
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+			Conv< A1 > arg1( buf );
+			buf += arg1.size();
+			Conv< A2 > arg2( buf );
+			buf += arg2.size();
+			Conv< A3 > arg3( buf );
+			buf += arg3.size();
+			Conv< A4 > arg4( buf );
+			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
+				e.index(), *arg1, *arg2, *arg3, *arg4 );
+		}
+
 	private:
 		void ( T::*func_ )( DataId, A1, A2, A3, A4 ); 
 };
@@ -213,6 +253,20 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class UpFu
 
 		void op( const Eref& e, const char* buf ) const {
 			buf += sizeof( Qinfo );
+			Conv< A1 > arg1( buf );
+			buf += arg1.size();
+			Conv< A2 > arg2( buf );
+			buf += arg2.size();
+			Conv< A3 > arg3( buf );
+			buf += arg3.size();
+			Conv< A4 > arg4( buf );
+			buf += arg4.size();
+			Conv< A5 > arg5( buf );
+			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
+				e.index(), *arg1, *arg2, *arg3, *arg4, *arg5 );
+		}
+
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
 			Conv< A1 > arg1( buf );
 			buf += arg1.size();
 			Conv< A2 > arg2( buf );
@@ -266,31 +320,19 @@ template< class T, class A > class GetUpFunc: public OpFunc
 		 * right to the Conn to send the data.
 		 */
 		void op( const Eref& e, const char* buf ) const {
+			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
+			buf += sizeof( Qinfo );
+			this->op( e, q, buf );
+		}
+
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
 			const A& ret = (( reinterpret_cast< T* >( e.parentData() ) )->*func_)( e.index() );
 			Conv< A > arg( ret );
 			char* temp = new char[ arg.size() ];
 			arg.val2buf( temp );
-			fieldOp( e, buf, temp, arg.size() );
+			fieldOp( e, q, buf, temp, arg.size() );
 			delete[] temp;
 		}
-		/*
-		void op( const Eref& e, const char* buf ) const {
-			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
-			buf += sizeof( Qinfo );
-		    FuncId retFunc = *reinterpret_cast< const FuncId* >( buf );
-			const A& ret = (( reinterpret_cast< T* >( e.data() ) )->*func_)( e.index() );
-			Conv< A > arg( ret );
-
-			Qinfo retq( retFunc, e.index(), arg.size(),
-				1, !q->isForward() );
-			char* temp = new char[ retq.size() ];
-			arg.val2buf( temp );
-			MsgFuncBinding mfb( q->mid(), retFunc );
-			retq.addSpecificTargetToQ( Shell::procInfo()->outQid, mfb, 
-				temp, q->srcIndex() );
-			delete[] temp;
-		}
-		*/
 
 	private:
 		A ( T::*func_ )( DataId ) const;

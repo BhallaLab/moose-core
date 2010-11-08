@@ -48,9 +48,7 @@ void AssignVecMsg::exec( const char* arg, const ProcInfo *p ) const
 				// so we need to pick selected entries from it.
 				// Note also that this is independent of the # of dimensions
 				// or whether the DataHandler is a FieldDataHandler.
-				f->op( Eref( e2_, i.index() ), pb[j] - sizeof( Qinfo ) );
-				// This is nasty. We assume that none of the op funcs
-				// will actually use the Qinfo. 
+				f->op( Eref( e2_, i.index() ), q, pb[j] );
 				j++;
 		}
 	}

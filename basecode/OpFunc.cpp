@@ -12,11 +12,11 @@
 /**
  * Used to do the serious argument juggling in GetOpFunc::op
  */
-void fieldOp( const Eref& e, const char* buf, 
+void fieldOp( const Eref& e, const Qinfo* q, const char* buf, 
 	const char* data, unsigned int size )
 {
-	const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
-	buf += sizeof( Qinfo );
+	// const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
+	// buf += sizeof( Qinfo );
 	FuncId retFunc = *reinterpret_cast< const FuncId* >( buf );
 
 	PrepackedBuffer pb( data, size );
@@ -71,5 +71,10 @@ bool OpFuncDummy::strSet( const Eref& tgt,
 }
 
 void OpFuncDummy::op( const Eref& e, const char* buf ) const {
+	;
+}
+
+void OpFuncDummy::op( const Eref& e, const Qinfo* q, 
+	const char* buf ) const {
 	;
 }

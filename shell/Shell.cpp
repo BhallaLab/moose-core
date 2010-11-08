@@ -1110,8 +1110,6 @@ void Shell::innerDispatchSet( Eref& sheller, const Eref& tgt,
 	Id tgtId( tgt.element()->id() );
 	initAck();
 	requestSet.send( sheller, &p_,  tgtId, tgt.index(), fid, buf );
-	// requestSetAck.send( sheller, &p_, 1 );
-
 	while ( isAckPending() )
 		Qinfo::mpiClearQ( &p_ );
 }
@@ -1122,7 +1120,12 @@ void Shell::dispatchSetVec( const Eref& tgt, FuncId fid,
 {
 	Eref sheller = Id().eref();
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-	s->innerDispatchSet( sheller, tgt, fid, pb );
+	if ( s->isSingleThreaded_ ) {
+		s->innerSetVec( tgt, fid, pb );
+		Qinfo::clearQ( s->procInfo() );
+	} else {
+		s->innerDispatchSet( sheller, tgt, fid, pb );
+	}
 }
 
 /**

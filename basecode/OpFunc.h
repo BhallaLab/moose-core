@@ -10,6 +10,9 @@
 #ifndef _OPFUNC_H
 #define _OPFUNC_H
 
+extern void fieldOp( const Eref& e, const Qinfo* q, const char* buf, 
+	const char* data, unsigned int size );
+
 class OpFunc
 {
 	public:
@@ -26,6 +29,8 @@ class OpFunc
 			const string& field, const string& arg ) const = 0;
 
 		virtual void op( const Eref& e, const char* buf ) const = 0;
+
+		virtual void op( const Eref& e, const Qinfo* q, const char* buf ) const = 0;
 };
 
 // Should I template these off an integer for generating a family?
@@ -40,6 +45,7 @@ class OpFuncDummy: public OpFunc
 			const string& field, const string& arg ) const;
 
 		void op( const Eref& e, const char* buf ) const;
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const;
 };
 
 template< class T > class OpFunc0: public OpFunc
@@ -68,6 +74,10 @@ template< class T > class OpFunc0: public OpFunc
 		 */
 		void op( const Eref& e, const char* buf ) const {
 			(reinterpret_cast< T* >( e.data() )->*func_)( );
+		}
+
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+			(reinterpret_cast< T* >( e.data() )->*func_)();
 		}
 
 	private:
@@ -99,6 +109,11 @@ template< class T, class A > class OpFunc1: public OpFunc
 			(reinterpret_cast< T* >( e.data() )->*func_)( *arg1 );
 		}
 
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+			Conv< A > arg1( buf );
+			(reinterpret_cast< T* >( e.data() )->*func_)( *arg1 );
+		}
+
 	private:
 		void ( T::*func_ )( A ); 
 };
@@ -125,6 +140,12 @@ template< class T, class A1, class A2 > class OpFunc2: public OpFunc
 
 		void op( const Eref& e, const char* buf ) const {
 			buf += sizeof( Qinfo );
+			Conv< A1 > arg1( buf );
+			Conv< A2 > arg2( buf + arg1.size() );
+			(reinterpret_cast< T* >( e.data() )->*func_)( *arg1, *arg2 );
+		}
+
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
 			Conv< A1 > arg1( buf );
 			Conv< A2 > arg2( buf + arg1.size() );
 			(reinterpret_cast< T* >( e.data() )->*func_)( *arg1, *arg2 );
@@ -166,6 +187,16 @@ template< class T, class A1, class A2, class A3 > class OpFunc3:
 				*arg1, *arg2, *arg3 );
 		}
 
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+			Conv< A1 > arg1( buf );
+			buf += arg1.size();
+			Conv< A2 > arg2( buf );
+			buf += arg2.size();
+			Conv< A3 > arg3( buf );
+			(reinterpret_cast< T* >( e.data() )->*func_)( 
+				*arg1, *arg2, *arg3 );
+		}
+
 	private:
 		void ( T::*func_ )( A1, A2, A3 ); 
 };
@@ -193,6 +224,18 @@ template< class T, class A1, class A2, class A3, class A4 > class OpFunc4:
 
 		void op( const Eref& e, const char* buf ) const {
 			buf += sizeof( Qinfo );
+			Conv< A1 > arg1( buf );
+			buf += arg1.size();
+			Conv< A2 > arg2( buf );
+			buf += arg2.size();
+			Conv< A3 > arg3( buf );
+			buf += arg3.size();
+			Conv< A4 > arg4( buf );
+			(reinterpret_cast< T* >( e.data() )->*func_)( 
+				*arg1, *arg2, *arg3, *arg4 );
+		}
+
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
 			Conv< A1 > arg1( buf );
 			buf += arg1.size();
 			Conv< A2 > arg2( buf );
@@ -244,13 +287,23 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class OpFu
 				*arg1, *arg2, *arg3, *arg4, *arg5 );
 		}
 
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+			Conv< A1 > arg1( buf );
+			buf += arg1.size();
+			Conv< A2 > arg2( buf );
+			buf += arg2.size();
+			Conv< A3 > arg3( buf );
+			buf += arg3.size();
+			Conv< A4 > arg4( buf );
+			buf += arg4.size();
+			Conv< A5 > arg5( buf );
+			(reinterpret_cast< T* >( e.data() )->*func_)( 
+				*arg1, *arg2, *arg3, *arg4, *arg5 );
+		}
+
 	private:
 		void ( T::*func_ )( A1, A2, A3, A4, A5 ); 
 };
-
-extern void fieldOp( const Eref& e, const char* buf, 
-	const char* data, unsigned int size );
-
 
 /**
  * This specialized OpFunc is for returning a single field value
@@ -291,12 +344,18 @@ template< class T, class A > class GetOpFunc: public OpFunc
 		 * Wasteful, but the 'get' function is not to be heavily used.
 		 */
 		void op( const Eref& e, const char* buf ) const {
+			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
+			buf += sizeof( Qinfo );
+			this->op( e, q, buf );
+		}
+
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
 			const A& ret = 
 				(( reinterpret_cast< T* >( e.data() ) )->*func_)();
 			Conv<A> conv0( ret );
 			char* temp0 = new char[ conv0.size() ];
 			conv0.val2buf( temp0 );
-			fieldOp( e, buf, temp0, conv0.size() );
+			fieldOp( e, q, buf, temp0, conv0.size() );
 			delete[] temp0;
 		}
 

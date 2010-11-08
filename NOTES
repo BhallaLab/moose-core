@@ -8820,5 +8820,5 @@ Gave in to the mass of unit tests, and put in a test for single-thread mode
 on the Shell dispatchSet and dispatchGet functions. Also configured the main
 code so that the testAsync is called withthe Shell::isSingleThreaded set to
 true. With this the system now clears several more tests. Need to put in the
-single-thread test in a few more places.
+single-thread test in a few more places. Checkin 2335.
 

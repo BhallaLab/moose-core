@@ -39,6 +39,10 @@ template< class T > class EpFunc0: public OpFunc
 			(reinterpret_cast< T* >( e.data() )->*func_)( e, q ); 
 		}
 
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+			(reinterpret_cast< T* >( e.data() )->*func_)( e, q ); 
+		}
+
 	private:
 		void ( T::*func_ )( const Eref& e, const Qinfo* q ); 
 };
@@ -68,6 +72,11 @@ template< class T, class A > class EpFunc1: public OpFunc
 		void op( const Eref& e, const char* buf ) const {
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
 			Conv< A > arg1( buf + sizeof( Qinfo ) );
+			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1 ) ;
+		}
+
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+			Conv< A > arg1( buf );
 			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1 ) ;
 		}
 
@@ -105,6 +114,12 @@ template< class T, class A1, class A2 > class EpFunc2: public OpFunc
 			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2 ) ;
 		}
 
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+			Conv< A1 > arg1( buf );
+			Conv< A2 > arg2( buf + arg1.size() );
+			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2 ) ;
+		}
+
 	private:
 		void ( T::*func_ )( const Eref& e, const Qinfo* q, A1, A2 ); 
 };
@@ -135,6 +150,14 @@ template< class T, class A1, class A2, class A3 > class EpFunc3:
 		void op( const Eref& e, const char* buf ) const {
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
 			buf += sizeof( Qinfo );
+			Conv< A1 > arg1( buf );
+			Conv< A2 > arg2( buf + arg1.size() );
+			Conv< A3 > arg3( buf + arg1.size() + arg2.size() );
+			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, 
+				*arg1, *arg2, *arg3 ) ;
+		}
+
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
 			Conv< A1 > arg1( buf );
 			Conv< A2 > arg2( buf + arg1.size() );
 			Conv< A3 > arg3( buf + arg1.size() + arg2.size() );
@@ -180,6 +203,15 @@ template< class T, class A1, class A2, class A3, class A4 > class EpFunc4:
 				*arg1, *arg2, *arg3, *arg4 ) ;
 		}
 
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+			Conv< A1 > arg1( buf );
+			Conv< A2 > arg2( buf + arg1.size() );
+			Conv< A3 > arg3( buf + arg1.size() + arg2.size() );
+			Conv< A4 > arg4( buf + arg1.size() + arg2.size() + arg3.size());
+			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, 
+				*arg1, *arg2, *arg3, *arg4 ) ;
+		}
+
 	private:
 		void ( T::*func_ )( const Eref& e, const Qinfo* q, A1, A2, A3, A4 ); 
 };
@@ -210,6 +242,20 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class EpFu
 		void op( const Eref& e, const char* buf ) const {
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
 			buf += sizeof( Qinfo );
+			Conv< A1 > arg1( buf );
+			buf += arg1.size();
+			Conv< A2 > arg2( buf );
+			buf += arg2.size();
+			Conv< A3 > arg3( buf );
+			buf += arg3.size();
+			Conv< A4 > arg4( buf );
+			buf += arg4.size();
+			Conv< A5 > arg5( buf );
+			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, 
+				*arg1, *arg2, *arg3, *arg4, *arg5 ) ;
+		}
+
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
 			Conv< A1 > arg1( buf );
 			buf += arg1.size();
 			Conv< A2 > arg2( buf );
@@ -268,63 +314,22 @@ template< class T, class A > class GetEpFunc: public OpFunc
 		 */
 		void op( const Eref& e, const char* buf ) const {
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
+			buf += sizeof( Qinfo );
+			op( e, q, buf );
+		}
+
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
 			const A& ret = 
 				(( reinterpret_cast< T* >( e.data() ) )->*func_)( e, q );
 			Conv<A> conv0( ret );
 			char* temp0 = new char[ conv0.size() ];
 			conv0.val2buf( temp0 );
-			fieldOp( e, buf, temp0, conv0.size() );
+			fieldOp( e, q, buf, temp0, conv0.size() );
 			delete[] temp0;
 		}
 
 	private:
 		A ( T::*func_ )( const Eref& e, const Qinfo* q ) const;
 };
-
-/**
- * This specialized EpFunc is for looking up a single field value using
- * an argument such as a name or an index.
- * It generates an opFunc that takes a single argument:
- * FuncId of the function on the object that requested the
- * value. The EpFunc then sends back a message with the info.
- * After analyzing the call structure it seems like we can't get the
- * argument in to this through the Set/Get format. The Shell, which
- * dispatches the request, doesn't have the hooks to do this.
- * So we roll this back for now.
- *
-template< class T, class A, class L > class LookupEpFunc: public OpFunc
-{
-	public:
-		LookupEpFunc( A ( T::*func )( Eref e, const Qinfo* q, L index ) const )
-			: func_( func )
-			{;}
-
-		bool checkFinfo( const Finfo* s ) const {
-			return dynamic_cast< const SrcFinfo1< A >* >( s );
-		}
-
-		bool checkSet( const SetGet* s ) const {
-			return dynamic_cast< const SetGet1< A >* >( s );
-		}
-
-		void op( Eref e, const char* buf ) const {
-			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
-			buf += sizeof( Qinfo );
-			Conv< L > index( buf );
-
-			const A& ret = 
-				(( reinterpret_cast< T* >( e.data() ) )->*func_)( e, q,
-					*index );
-			Conv<A> conv0( ret );
-			char* temp0 = new char[ conv0.size() ];
-			conv0.val2buf( temp0 );
-			fieldOp( e, buf, temp0, conv0.size() );
-			delete[] temp0;
-		}
-
-	private:
-		A ( T::*func_ )( Eref e, const Qinfo* q, L index ) const;
-};
-*/
 
 #endif //_EPFUNC_H
