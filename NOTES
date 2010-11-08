@@ -9150,4 +9150,13 @@ Checkin 2129.
 =============================================================================
 22 Aug 2010
 Implemented handling of SynChans in SigNeurAdaptor.cpp.
+Checkin 2131.
 =============================================================================
+27 Aug 2010
+untar the pymoose_binaries.tar
+and execute pymoose.sh
+=============================================================================
+8 Nov 2010
+Put in a check for kinetic models where the rank = nVarMols. This is an 
+extremely improbable situation and might reflect a bug in the model itself,
+but should not cause the simulator to crash.
