@@ -65,3 +65,13 @@ Msg* AssignmentMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 	assert( 0 );
 	return 0;
 }
+
+void AssignmentMsg::addToQ( const Element* src, Qinfo& q,
+	const ProcInfo* p, MsgFuncBinding i, const char* arg ) const
+{
+	if ( e1_ == src && i1_ == q.srcIndex() ) {
+		q.addToQforward( p, i, arg );
+	} else if ( e2_ == src && i2_ == q.srcIndex() ) {
+		q.addToQbackward( p, i, arg );
+	}
+}

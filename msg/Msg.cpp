@@ -129,3 +129,13 @@ void Msg::setDataId( unsigned int di ) const
 	assert( lookupDataId_.size() > mid_ );
 	lookupDataId_[ mid_ ] = di;
 }
+
+void Msg::addToQ( const Element* src, Qinfo& q,
+	const ProcInfo* p, MsgFuncBinding i, const char* arg ) const
+{
+	if ( e1_ == src ) {
+		q.addToQforward( p, i, arg );
+	} else {
+		q.addToQbackward( p, i, arg ); 
+	}
+}

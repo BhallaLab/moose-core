@@ -30,6 +30,8 @@ class OneToOneMsg: public Msg
 
 		Msg* copy( Id origSrc, Id newSrc, Id newTgt,
 			FuncId fid, unsigned int b, unsigned int n ) const;
+
+		// Uses default addToQ function.
 	private:
 		static Id id_;
 };

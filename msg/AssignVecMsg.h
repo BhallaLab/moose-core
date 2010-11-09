@@ -31,6 +31,9 @@ class AssignVecMsg: public Msg
 
 		Msg* copy( Id origSrc, Id newSrc, Id newTgt,
 			FuncId fid, unsigned int b, unsigned int n ) const;
+
+		void addToQ( const Element* src, Qinfo& q, const ProcInfo* p,
+			MsgFuncBinding i, const char* arg ) const;
 	private:
 		DataId i1_;
 

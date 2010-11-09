@@ -45,6 +45,8 @@ class DiagonalMsg: public Msg
 		Msg* copy( Id origSrc, Id newSrc, Id newTgt,
 			FuncId fid, unsigned int b, unsigned int n ) const;
 
+		// The addToQ function is inherited from base class
+
 		void setStride( int stride );
 		int getStride() const;
 	private:

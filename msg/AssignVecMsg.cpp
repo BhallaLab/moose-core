@@ -81,3 +81,13 @@ Msg* AssignVecMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 	assert( 0 );
 	return 0;
 }
+
+void AssignVecMsg::addToQ( const Element* src, Qinfo& q,
+	const ProcInfo* p, MsgFuncBinding i, const char* arg ) const
+{
+	if ( e1_ == src && i1_ == q.srcIndex() ) {
+		q.addToQforward( p, i, arg );
+	} else if ( e2_ == src ) { // Not sure if we should allow back_msg here.
+		q.addToQbackward( p, i, arg ); 
+	}
+}

@@ -1050,7 +1050,8 @@ void Shell::innerSetVec( const Eref& er, FuncId fid, const PrepackedBuffer& arg 
 	char* temp = new char[ arg.size() ];
 	arg.conv2buf( temp );
 
-	Qinfo q( fid, arg.size(), 0 );
+	// Qinfo( funcId, srcIndex, size, useSendTo )
+	Qinfo q( fid, 0, arg.size(), 0 );
 	shelle_->asend( q, lowLevelGet.getBindIndex(), &p_, temp );
 
 	delete[] temp;
@@ -1064,7 +1065,8 @@ void Shell::innerSet( const Eref& er, FuncId fid, const char* args,
 		Msg* m = new AssignmentMsg( Eref( shelle_, 0 ), er, Msg::setMsg );
 		shelle_->addMsgAndFunc( m->mid(), fid, lowLevelGet.getBindIndex() );
 	
-		Qinfo q( fid, size, 0 );
+		// Qinfo( funcId, srcIndex, size, useSendTo )
+		Qinfo q( fid, 0, size, 0 ); // Shell has index 0 for now.
 		shelle_->asend( q, lowLevelGet.getBindIndex(), &p_, args );
 	}
 }

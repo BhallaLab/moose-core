@@ -80,10 +80,11 @@ class Qinfo
 			return isDummy_;
 		}
 
+		/*
 		void setForward( bool isForward ) {
 			isForward_ = isForward;
 		}
-
+		*/
 
 		MsgId mid() const {
 			return m_;
@@ -118,15 +119,21 @@ class Qinfo
 		 * put the current Qinfo on the queue as a header.
 		 * The arg will just be memcopied onto the queue, so avoid
 		 * pointers. The Qinfo must already know its size.
+		 * This variant sets the isForward flag to True.
 		 */
-		void addToQ( const ProcInfo* p, MsgFuncBinding b, const char* arg );
+		void addToQforward( const ProcInfo* p, MsgFuncBinding b, const char* arg );
+
+		/**
+		 * Adds data to the queue with the isForward flag set to False.
+		 */
+		void addToQbackward( const ProcInfo* p, MsgFuncBinding b, const char* arg );
 
 		/**
 		 * This adds the data to the queue and then an additional
 		 * sizeof( DataId ) block to specify target DataId.
 		 */
 		void addSpecificTargetToQ( const ProcInfo* p, MsgFuncBinding b, 
-			const char* arg, const DataId& target );
+			const char* arg, const DataId& target, bool isForward );
 
 		//////////////////////////////////////////////////////////////
 		// From here, static funcs handling the Queues.

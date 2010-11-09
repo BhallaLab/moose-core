@@ -230,7 +230,6 @@ Id Element::id() const
  * Eref::index() and size assigned.
  * ProcInfo is used only for p->qId?
  * Qinfo needs to have funcid put in, and Msg Id.
- * Msg info is also need to work out if Q entry is forward or back.
  */
 void Element::asend( Qinfo& q, BindIndex bindIndex, 
 	const ProcInfo *p, const char* arg ) const
@@ -240,8 +239,9 @@ void Element::asend( Qinfo& q, BindIndex bindIndex,
 		msgBinding_[ bindIndex ].end();
 	for ( vector< MsgFuncBinding >::const_iterator i =
 		msgBinding_[ bindIndex ].begin(); i != end; ++i ) {
-		q.setForward( Msg::getMsg( i->mid )->isForward( this ) );
-		q.addToQ( p, *i, arg );
+		Msg::getMsg( i->mid )->addToQ( this, q, p, *i, arg );
+			// the Msg needs to figure out direction of msg, and also
+			// whether to add to the queue at all.
 	}
 }
 
@@ -265,17 +265,20 @@ void Element::tsend( Qinfo& q, BindIndex bindIndex,
 		msgBinding_[ bindIndex ].begin(); 
 		i != msgBinding_[ bindIndex ].end(); ++i ) {
 		const Msg* m = Msg::getMsg( i->mid );
-		q.setForward( m->isForward( this ) );
+		// q.setForward( m->isForward( this ) );
 		if ( q.isForward() ) {
-			if ( m->e2() == e && m->isMsgHere( q ) ) {
-				// q.assignQblock( m, p );
-				q.addSpecificTargetToQ( p, *i, arg, target.dataId );
+			if ( m->e2() == e ) {
+			// Earlier I also tested that the caller matched the Msg DataId entry: m->isMsgHere( q ). Now this is skipped.
+				q.addSpecificTargetToQ( p, *i, arg, target.dataId,
+					m->isForward( this ) );
 				return;
 			}
 		} else {
-			if ( m->e1() == e && m->isMsgHere( q ) ) {
+			if ( m->e1() == e ) {
+			// Earlier I also tested that the caller matched the Msg DataId entry: m->isMsgHere( q ). Now this is skipped.
 				// q.assignQblock( m, p );
-				q.addSpecificTargetToQ( p, *i, arg, target.dataId );
+				q.addSpecificTargetToQ( p, *i, arg, target.dataId,
+					m->isForward( this ) );
 				return;
 			}
 		}

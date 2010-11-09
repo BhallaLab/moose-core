@@ -141,7 +141,7 @@ void insertIntoQ( )
 
 		// addToQ( threadIndex, Binding, argbuf )
 		// qi.assignQblock( m, &p );
-		qi.addToQ( &p, b, buf );
+		qi.addToQforward( &p, b, buf );
 	}
 	Qinfo::clearQ( &p );
 
@@ -197,7 +197,7 @@ void testSendMsg()
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double temp = i + i * i;
 		double val = reinterpret_cast< Arith* >(e2.element()->dataHandler()->data( i ))->getOutput();
-		assert( fabs( val - temp ) < 1e-8 );
+		assert( doubleEq( val, temp ) );
 	}
 	cout << "." << flush;
 

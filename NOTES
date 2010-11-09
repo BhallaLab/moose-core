@@ -8826,9 +8826,16 @@ single-thread test in a few more places. Checkin 2335.
 8 Nov 2010
 Struggled a bit with setVec tests. Got side-tracked into cleaning up a hack
 in the AssignVecMsg::exec function, which entailed adding a new version of op()
-all the OpFunc classes. This turned out to fix the original problem too.
+in all the OpFunc classes. This turned out to fix the original problem too.
 Checkin 2337.
 
 Further efforts on cleaning up shared message handling. The isForward flag
-wasn't being set.
+wasn't being set. Checkin 2338. Now stuck with testAsync::testMsgField.
 
+============================================================================
+9 Nov 2010
+Ran into a nasty problem with not checking the source when sending messages.
+This crops up in cases where the message is point-to-point, so only specific
+source indices are permitted to send the data. This led to some cleanups in
+the Msg and queue setup code, to make it harder to ignore essential flags
+when sending messages. Now it clears all the unit tests in testAsync.cpp.

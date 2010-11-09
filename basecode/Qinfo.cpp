@@ -442,19 +442,30 @@ void Qinfo::reportQ()
 	if ( mpiQ_.size() > 1 ) innerReportQ( mpiQ_[1], "mpiQ[1]" );
 }
 
-void Qinfo::addToQ( const ProcInfo* p, MsgFuncBinding b, 
+void Qinfo::addToQforward( const ProcInfo* p, MsgFuncBinding b, 
 	const char* arg )
 {
 	m_ = b.mid;
 	f_ = b.fid;
+	isForward_ = 1;
+	(*outQ_)[p->groupId].push_back( p->threadIndexInGroup, this, arg );
+}
+
+void Qinfo::addToQbackward( const ProcInfo* p, MsgFuncBinding b, 
+	const char* arg )
+{
+	m_ = b.mid;
+	f_ = b.fid;
+	isForward_ = 0;
 	(*outQ_)[p->groupId].push_back( p->threadIndexInGroup, this, arg );
 }
 
 void Qinfo::addSpecificTargetToQ( const ProcInfo* p, MsgFuncBinding b, 
-	const char* arg, const DataId& target )
+	const char* arg, const DataId& target, bool isForward )
 {
 	m_ = b.mid;
 	f_ = b.fid;
+	isForward_ = isForward;
 	char* temp = new char[ size_ + sizeof( DataId ) ];
 	memcpy( temp, arg, size_ );
 	memcpy( temp + size_, &target, sizeof( DataId ) );

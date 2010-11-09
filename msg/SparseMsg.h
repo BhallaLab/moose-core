@@ -60,6 +60,8 @@ class SparseMsg: public Msg
 		Msg* copy( Id origSrc, Id newSrc, Id newTgt,
 			FuncId fid, unsigned int b, unsigned int n ) const;
 
+		// Uses default addToQ function.
+
 		void setMatrix( const SparseMatrix< unsigned int >& m );
 		SparseMatrix< unsigned int >& getMatrix();
 

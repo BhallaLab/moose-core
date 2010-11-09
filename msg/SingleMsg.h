@@ -20,7 +20,7 @@ class SingleMsg: public Msg
 
 		void exec( const char* arg, const ProcInfo* p) const;
 
-		bool isMsgHere( const Qinfo& q ) const;
+		// bool isMsgHere( const Qinfo& q ) const;
 
 		DataId i1() const;
 		DataId i2() const;
@@ -35,6 +35,9 @@ class SingleMsg: public Msg
 
 		Msg* copy( Id origSrc, Id newSrc, Id newTgt,
 			FuncId fid, unsigned int b, unsigned int n ) const;
+		
+		void addToQ( const Element* src, Qinfo& q, 
+			const ProcInfo* p, MsgFuncBinding i, const char* arg ) const;
 
 	private:
 		static void setId( Id id );

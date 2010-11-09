@@ -43,10 +43,10 @@ class Msg
 		 * in the Qinfo. Note that the direction of the message is also
 		 * important to know in order to figure this out.
 		 * Usually the answer is yes, regardless of DataId.
-		 */
 		virtual bool isMsgHere( const Qinfo& q ) const {
 			return 1;
 		}
+		 */
 		
 		/**
 		 * Execute func( arg ) on all relevant indices of target
@@ -114,11 +114,21 @@ class Msg
 
 		/**
 		 * Checks if the message is going forward.
+		 * Now merged into Msg::addToQ for most cases.
 		 */
 		bool isForward( const Element* src ) const {
 			return ( e1_ == src );
 		}
 
+		/**
+		 * This function sorts out message direction and whether it should
+		 * be added to the Queue at all. There is a default implementation
+		 * in which it always adds the message to the queue, but this has to
+		 * specialized for any Msg subclass which has specific inputs.
+		 */
+		virtual void addToQ( const Element* src, Qinfo& q, 
+			const ProcInfo* p, MsgFuncBinding i, const char* arg ) 
+			const;
 
 		/**
 		 * Looks up the message on the global vector of Msgs. No checks,
