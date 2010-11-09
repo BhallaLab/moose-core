@@ -57,6 +57,7 @@ class OpFunc;
 class Qinfo;
 class Cinfo;
 class SetGet;
+class FuncBarrier;
 
 #include "doubleEq.h"
 #include "Id.h"

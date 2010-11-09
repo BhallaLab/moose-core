@@ -133,8 +133,29 @@ class Shell
 		void handleStop();
 		void handleTerminate();
 
+		/**
+ 		 * Initialize acks. This call should be done before the 'send' goes 
+ 		 * out, because with the wonders of threading we might get a 
+		 * response to the 'send' before this call is executed.
+ 		 * This MUST be followed by a waitForAck call.
+ 		 */
 		void initAck();
+
+		/**
+ 		 * test for completion of request. This MUST be preceded by an
+ 		 * initAck call.
+ 		 */
+		void waitForAck();
+
+		/**
+ 		 * Generic handler for ack msgs from various nodes. Keeps track of
+ 		 * which nodes have responded.
+ 		 */
 		void handleAck( unsigned int ackNode, unsigned int status );
+
+		/**
+ 		 * Test for receipt of acks from all nodes
+ 		 */ 
 		bool isAckPending() const;
 
 		void handleQuit();
@@ -146,7 +167,6 @@ class Shell
 		void innerCreate( string type, Id parent, Id newElm, string name,
 			const vector< unsigned int >& dimensions );
 
-		// void addmsg( Id src, Id dest, string srcfield, string destfield );
 		/**
 		 * Connects src to dest on appropriate fields, with specified
 		 * msgType. 
@@ -317,9 +337,20 @@ class Shell
 		void setShellElement( Element* shelle );
 
 		const char* getBuf() const;
+
+		/**
+ 		 * Static global, returns contents of shell buffer.
+ 		 */
 		static const char* buf();
+
+		/// Static func for returning the ProcInfo of the shell.
 		static const ProcInfo* procInfo();
 
+		/**
+ 		 * static func.
+ 		 * Chops up the names in the path into the vector of strings. 
+ 		 * Returns true if it starts at '/'.
+ 		 */
 		static bool chopPath( const string& path, vector< string >& ret,
 			char separator = '/' );
 
@@ -330,14 +361,57 @@ class Shell
 		vector< char > getBuf_;
 		MsgId latestMsgId_; // Hack to communicate newly made MsgIds.
 		bool quit_;
+
+		/**
+		 * Flag: True when system is operating in single threaded mode.
+		 * Used primarily for unit tests.
+		 */
 		bool isSingleThreaded_;
+
+		/**
+		 * Flag: True when the parser thread is blocked waiting for 
+		 * some system call to be handled by the threading and the 
+		 * MPI connected nodes.
+		 */
+		bool isBlockedOnParser_;
+
+		/**
+		 * Pthreads mutex for synchronizing parser calls with underlying
+		 * thread work cycle. Void here so we can compile without pthreads.
+		 */
+		void* parserMutex_; 
+
+		/**
+		 * Pthreads conditional for synchronizing parser calls with 
+		 * thread work cycle. Void here so we can compile without pthreads.
+		 */
+		void* parserBlockCond_; 
+
+		/**
+		 * Number of CPU cores in system. Specifies how many working threads
+		 * will be assigned. Additional threads are created for parser
+		 * and graphics.
+		 */
 		static unsigned int numCores_;
+
+		/**
+		 * Number of nodes in MPI-based system. Each node may have many
+		 * threads.
+		 */
 		static unsigned int numNodes_;
+
+		/**
+		 * Identifier for current node
+		 */
 		static unsigned int myNode_;
+
+		/**
+		 * Shell owns its own ProcInfo, has global thread/node info.
+		 * Used to talk to parser and for thread specification in
+		 * setup operations.
+		 */
 		static ProcInfo p_; 
-			// Shell owns its own ProcInfo, has global thread/node info.
-			// Used to talk to parser and for thread specification in
-			// setup operations.
+
 		unsigned int numAcks_;
 		vector< unsigned int > acked_;
 		void* barrier1_;

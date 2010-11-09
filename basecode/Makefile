@@ -41,6 +41,7 @@ OBJ = \
 	OpFunc.o \
 	SparseMatrix.o \
 	PrepackedBuffer.o \
+	FuncBarrier.o \
 	doubleEq.o \
 	main.o	\
 	testAsync.o	\
@@ -88,6 +89,7 @@ testAsync.o:	SparseMatrix.h SetGet.h
 SparseMsg.o:	SparseMatrix.h
 SetGet.o:	SetGet.h ../shell/Neutral.h
 DataHandlerWrapper.o: DataHandlerWrapper.h
+FuncBarrier.o:	FuncBarrier.h
 #TestBasecode.o:	Shell.h ShellWrapper.h
 
 .cpp.o:

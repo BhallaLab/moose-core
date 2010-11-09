@@ -8839,3 +8839,8 @@ This crops up in cases where the message is point-to-point, so only specific
 source indices are permitted to send the data. This led to some cleanups in
 the Msg and queue setup code, to make it harder to ignore essential flags
 when sending messages. Now it clears all the unit tests in testAsync.cpp.
+Checkin 2339.
+
+In order to clear further unit tests, we need to run ShellParser type commands
+like doCreate and doAddMsg. This required cleaning up their parser blocking
+functions and incorporating design for future threads.

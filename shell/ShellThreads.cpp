@@ -25,6 +25,42 @@
 
 #define USE_NODES 1
 
+/**
+ * Initialize acks. This call should be done before the 'send' goes out,
+ * because with the wonders of threading we might get a response to the
+ * 'send' before this call is executed.
+ * This MUST be followed by a waitForAck call.
+ */
+void Shell::initAck()
+{
+	numAcks_ = 0;
+	if ( !isSingleThreaded_ ) {
+		pthread_mutex_lock( 
+			reinterpret_cast< pthread_mutex_t * >( parserMutex_ ) );
+		isBlockedOnParser_ = 1;
+		acked_.assign( numNodes_, 0 );
+	}
+}
+
+/**
+ * test for completion of request. This MUST be preceded by an initAck
+ * call.
+ */
+void Shell::waitForAck()
+{
+	if ( isSingleThreaded_ ) {
+		Qinfo::clearQ( &p_ );
+	} else {
+		while ( isAckPending() )
+			pthread_cond_wait( 
+				reinterpret_cast< pthread_cond_t * >( parserBlockCond_ ), 
+				reinterpret_cast< pthread_mutex_t * >( parserMutex_ ) );
+		isBlockedOnParser_ = 0;
+		pthread_mutex_unlock( 
+			reinterpret_cast< pthread_mutex_t * >( parserMutex_ ) );
+	}
+}
+
 void Shell::setRunning( bool value )
 {
 	isRunning_ = value;

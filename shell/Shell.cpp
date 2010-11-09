@@ -355,33 +355,17 @@ void Shell::setShellElement( Element* shelle )
 Id Shell::doCreate( string type, Id parent, string name, vector< unsigned int > dimensions )
 {
 	Id ret = Id::nextId();
-	initAck(); // Always put the init before the request.
-	// Here we would do the 'send' on an internode msg to do the actual
-	// Create.
-	requestCreate.send( Id().eref(), &p_, type, parent, ret, name, dimensions );
-	// innerCreate( type, parent, ret, name );
-	// cout << myNode_ << ": Shell::doCreate: request sent\n";
-
-	// Now we wait till all nodes are done.
-	while ( isAckPending() )
-		Qinfo::mpiClearQ( &p_ );
-	
-	// Here we might choose to check if success on all nodes.
-	// cout << myNode_ << ": Shell::doCreate: ack received\n";
-	
+	initAck(); // Nasty thread stuff happens here for multithread mode.
+		requestCreate.send( Id().eref(), &p_, type, parent, ret, name, dimensions );
+	waitForAck();
 	return ret;
 }
 
 bool Shell::doDelete( Id i )
 {
 	initAck();
-	requestDelete.send( Id().eref(), &p_, i );
-	// cout << myNode_ << ": Shell::doDelete: request sent\n";
-	// Now we wait till all nodes are done.
-	while ( isAckPending() )
-		Qinfo::mpiClearQ( &p_ );
-	// cout << myNode_ << ": Shell::doDelete: ack received\n";
-
+		requestDelete.send( Id().eref(), &p_, i );
+	waitForAck();
 	return 1;
 }
 
@@ -413,13 +397,11 @@ MsgId Shell::doAddMsg( const string& msgType,
 		cout << myNode_ << ": Shell::doAddMsg: Error: Src/Dest Msg type mismatch: " << srcField << "/" << destField << endl;
 		return Msg::badMsg;
 	}
-
 	initAck();
 	requestAddMsg.send( Eref( shelle_, 0 ), &p_, 
 		msgType, src, srcField, dest, destField );
-	while ( isAckPending() )
-		Qinfo::mpiClearQ( &p_ );
-
+		Qinfo::clearQ( &p_ );
+	waitForAck();
 	return latestMsgId_;
 }
 
@@ -458,24 +440,17 @@ void Shell::connectMasterMsg()
 
 void Shell::doQuit( )
 {
-	requestQuit.send( Id().eref(), &p_ );
-	// cout << myNode_ << ": Shell::doQuit: request sent\n";
-	while ( !quit_ )
-		Qinfo::mpiClearQ( &p_ );
-//	Qinfo::mpiClearQ( &p_ );
-	// cout << myNode_ << ": Shell::doQuit: quitting\n";
+	initAck();
+		requestQuit.send( Id().eref(), &p_ );
+	waitForAck();
 }
 
 void Shell::doStart( double runtime )
 {
-	initAck();
 	Eref sheller( shelle_, 0 );
-	requestStart.send( sheller, &p_, runtime );
-	// cout << myNode_ << ": Shell::doStart: request sent\n";
-	while ( isAckPending() ) {
-		Qinfo::mpiClearQ( &p_ );
-		process( sheller, &p_ );
-	}
+	initAck();
+		requestStart.send( sheller, &p_, runtime );
+	waitForAck();
 	// cout << Shell::myNode() << ": Shell::doStart(" << runtime << ")" << endl;
 	// Qinfo::reportQ();
 	// cout << myNode_ << ": Shell::doStart: quitting\n";
@@ -483,26 +458,18 @@ void Shell::doStart( double runtime )
 
 void Shell::doReinit()
 {
-	initAck();
 	Eref sheller( shelle_, 0 );
-	requestReinit.send( sheller, &p_ );
-	// cout << myNode_ << ": Shell::doStart: request sent\n";
-	while ( isAckPending() ) {
-		Qinfo::mpiClearQ( &p_ );
-		process( sheller, &p_ );
-	}
+	initAck();
+		requestReinit.send( sheller, &p_ );
+	waitForAck();
 }
 
 void Shell::doStop()
 {
-	initAck();
 	Eref sheller( shelle_, 0 );
-	requestStop.send( sheller, &p_ );
-	// cout << myNode_ << ": Shell::doStart: request sent\n";
-	while ( isAckPending() ) {
-		Qinfo::mpiClearQ( &p_ );
-		process( sheller, &p_ );
-	}
+	initAck();
+		requestStop.send( sheller, &p_ );
+	waitForAck();
 }
 ////////////////////////////////////////////////////////////////////////
 
@@ -519,13 +486,10 @@ void Shell::doSetClock( unsigned int tickNum, double dt )
 
 void Shell::doUseClock( string path, string field, unsigned int tick )
 {
-	initAck();
 	Eref sheller( shelle_, 0 );
-	requestUseClock.send( sheller, &p_, path, field, tick );
-	while ( isAckPending() ) {
-		Qinfo::mpiClearQ( &p_ );
-		process( sheller, &p_ );
-	}
+	initAck();
+		requestUseClock.send( sheller, &p_, path, field, tick );
+	waitForAck();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -547,12 +511,10 @@ void Shell::doMove( Id orig, Id newParent )
 		
 	}
 	// Put in check here that newParent is not a child of orig.
-	initAck();
 	Eref sheller( shelle_, 0 );
-	requestMove.send( sheller, &p_, orig, newParent );
-	while ( isAckPending() ) {
-		Qinfo::mpiClearQ( &p_ );
-	}
+	initAck();
+		requestMove.send( sheller, &p_, orig, newParent );
+	waitForAck();
 }
 
 /**
@@ -976,18 +938,6 @@ void Shell::wildcard( const string& path, vector< Id >& list )
 ///////////////////////////////////////////////////////////////////////////
 // Functions for handling acks for blocking Shell function calls.
 ///////////////////////////////////////////////////////////////////////////
-
-/**
- * Initialize acks. This call should be done before the 'send' goes out,
- * because with the wonders of threading we might get a response to the
- * 'send' before this call is executed.
- */
-void Shell::initAck()
-{
-	acked_.assign( numNodes_, 0 );
-	numAcks_ = 0;
-	// Could put in timeout check here.
-}
 
 /**
  * Generic handler for ack msgs from various nodes. Keeps track of
