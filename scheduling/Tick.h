@@ -77,6 +77,13 @@ class Tick
 		void reinit( const Eref& e, ProcInfo* p ) const;
 
 		/**
+		 * Different version of reinit function. Designed for being called
+		 * in multithread context, where ProcInfo carries info for current
+		 * thread.
+		 */
+		void reinit( ProcInfo* p ) const;
+
+		/**
 		 * A dummy function for handling messages incoming from parent
 		 * Clock
 		 */

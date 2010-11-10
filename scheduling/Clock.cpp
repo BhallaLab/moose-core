@@ -220,6 +220,7 @@ Clock::Clock()
 	  currentStep_( 0 ), 
 	  dt_( 1.0 ), 
 	  isRunning_( 0 ),
+	  doingReinit_( 0 ),
 	  info_(),
 	  numPendingThreads_( 0 ),
 	  numThreads_( 0 ),
@@ -613,24 +614,140 @@ void Clock::rebuild()
 // the major solvers will do their internal updates for this period, and
 // their data interchange can be on this slower timescale. Still longer
 // intervals come out from the slower ticks.
+//
+// The sequence of events is:
+// processPhase1
+// Barrier1
+// processPhase2
+// clearQ
+// Barrier2
+// MPI clearQ
+// Barrier 3
 ///////////////////////////////////////////////////
 
-// After reinit, nextTime for everything is set to its own dt.
-// Advance system state by one clock tick. This may be a subset of
-// one timestep, as there may be multiple clock ticks within one dt.
-void Clock::advance(  ProcInfo *p )
+/**
+ * The processPhase1 operation is called on every thread in the main event 
+ * loop, during phase1 of the loop. This has to drive thread-specific 
+ * calculations on all scheduled objects.
+ */
+void Clock::processPhase1( ProcInfo* info ) const
 {
-	// Here we have multiple tickPtrs to deal with.
-	if ( p->currTime > endTime_ ) {
-		// Send out alert 
+	if ( isRunning_ )
+		advancePhase1( info );
+	else if ( doingReinit_ )
+		reinitPhase1( info );
+}
+
+void Clock::processPhase2( ProcInfo* info )
+{
+		if ( isRunning_ )
+			advancePhase2( info );
+		else if ( doingReinit_ )
+			reinitPhase2( info );
+	/*
+	if ( info->threadIndexInGroup == 0 ) {
+	}
+	*/
+}
+
+/////////////////////////////////////////////////////////////////////
+// Scheduling the 'process' operation for scheduled objects.
+// Three functions are involved: the handler for the start function,
+// the advancePhase1 and advancePhase2.
+/////////////////////////////////////////////////////////////////////
+
+/**
+ * This has to happen on a single thread, whatever the Clock is assigned to.
+ * Start has to happen gracefully: If the simulation was stopped for any
+ * reason, it has to pick up where it left off.
+ * runtime_ is the additional time to run the simulation. This is a little
+ * odd when the simulation has stopped halfway through a clock tick.
+ */
+void Clock::handleStart( double runtime )
+{
+	static const double ROUNDING = 1.0000000001;
+	if ( isRunning_ ) {
+		cout << "Clock::handleStart: Warning: simulation already in progress.\n Command ignored\n";
 		return;
 	}
-	if ( tickPtr_.size() > 1 ) {
+	runTime_ = runtime;
+	endTime_ = runtime * ROUNDING + currentTime_;
+	isRunning_ = 1;
+}
+
+// Advance system state by one clock tick. This may be a subset of
+// one timestep, as there may be multiple clock ticks within one dt.
+// This simply distributes the call to all scheduled objects
+void Clock::advancePhase1(  ProcInfo *p ) const
+{
+	tickPtr_[0].advancePhase1( p );
+}
+
+// In phase 2 we need to do the updates to the Clock object, especially
+// sorting the TickPtrs. This also is when we find out if the simulation
+// is finished.
+void Clock::advancePhase2(  ProcInfo *p )
+{
+	if ( p->threadIndexInGroup == 0 && tickPtr_.size() > 1 ) {
+		tickPtr_[0].advancePhase2( p );
 		sort( tickPtr_.begin(), tickPtr_.end() );
-		tickPtr_[0].advance( p );
-	} else if ( tickPtr_.size() == 1 ) {
-		tickPtr_[0].advance( p ); // This internally updates p->currTime
-	} else if ( tickPtr_.size() == 0 ) {
-		p->currTime = endTime_;
+		currentTime_ = tickPtr_[0].getNextTime();
+		if ( currentTime_ > endTime_ ) {
+			Id clockId( 1 );
+			isRunning_ = 0;
+			finished.send( clockId.eref(), p );
+		}
 	}
 }
+
+/////////////////////////////////////////////////////////////////////
+// Scheduling the 'reinit' operation for scheduled objects.
+// Three functions are involved: the handler for the reinit function,
+// and the reinitPhase1 and reinitPhase2.
+/////////////////////////////////////////////////////////////////////
+
+/**
+ * This is the dest function that sets off the reinit.
+ */
+void Clock::handleReinit()
+{
+	info_.currTime = 0.0;
+	runTime_ = 0.0;
+	currentTime_ = 0.0;
+	nextTime_ = 0.0;
+	nSteps_ = 0;
+	currentStep_ = 0;
+	isRunning_ = 0;
+	doingReinit_ = 1;
+}
+
+
+/**
+ * Reinit is used to reinit the state of the scheduling system.
+ * This version is meant to be done through the multithread scheduling
+ * loop.
+ */
+void Clock::reinitPhase1( ProcInfo* info ) const
+{
+	for ( vector< TickPtr >::const_iterator i = tickPtr_.begin();
+		i != tickPtr_.end(); ++i ) {
+		i->reinitPhase1( info );
+	}
+}
+
+void Clock::reinitPhase2( ProcInfo* info )
+{
+	info_.currTime = 0.0;
+	if ( info->threadIndexInGroup == 0 ) {
+		doingReinit_ = 0;
+		for ( vector< TickPtr >::iterator i = tickPtr_.begin();
+			i != tickPtr_.end(); ++i ) {
+			i->reinitPhase2( info );
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////////////////
+// Here we set up the message handlers
+////////////////////////////////////////////////////////////////////////
+

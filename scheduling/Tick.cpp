@@ -377,3 +377,22 @@ void Tick::advance( ProcInfo* info ) const
 		Msg::getMsg( i->mid )->process( info, i->fid ); 
 	}
 }
+
+/**
+ * This sends out the call to reinit objects.
+ */
+void Tick::reinit( ProcInfo* info ) const
+{
+	info->dt = dt_;
+	info->currTime = 0;
+
+	assert( index_ < sizeof( reinitVec ) / sizeof( SrcFinfo* ) );
+	BindIndex b = reinitVec[ index_ ]->getBindIndex();
+	const vector< MsgFuncBinding >* m = ticke_->getMsgAndFunc( b );
+	for ( vector< MsgFuncBinding >::const_iterator i = m->begin();
+		i != m->end(); ++i ) {
+		// Element->dataHandler keeps track of which entry needs to be
+		// updated by which thread.
+		Msg::getMsg( i->mid )->process( info, i->fid ); 
+	}
+}

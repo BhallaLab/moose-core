@@ -139,15 +139,36 @@ void TickPtr::reinit( const Eref& e, ProcInfo* p )
 // New version here.
 ///////////////////////////////////////////////////////////////////////
 
-void TickPtr::advance( ProcInfo* p ) 
+void TickPtr::advancePhase1( ProcInfo* p ) const
 {
 	p->dt = dt_;
 	p->currTime = nextTime_;
 	assert( ticks_.size() > 0 );
 	( *tickerator_ )->advance( p ); // Move one tick along.
+}
+
+// This modifies the TickPtr, has to happen on a single thread and
+// safely isolated from the multithread ops in advancePhase1.
+void TickPtr::advancePhase2( ProcInfo* p ) 
+{
 	++tickerator_;
 	if ( tickerator_ == ticks_.end() ) {
 		tickerator_ = ticks_.begin(); 
 		nextTime_ += dt_;
 	}
+}
+
+void TickPtr::reinitPhase1( ProcInfo* p ) const
+{
+	for ( vector< const Tick* >::const_iterator i = ticks_.begin(); 
+		i != ticks_.end(); ++i )
+	{
+		(*i)->reinit( p );
+	}
+}
+
+void TickPtr::reinitPhase2( ProcInfo* p )
+{
+	nextTime_ = dt_;
+	tickerator_ = ticks_.begin();
 }

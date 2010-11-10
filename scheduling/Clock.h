@@ -82,14 +82,41 @@ class Clock
 		 */
 		Tick* getTick( unsigned int i );
 
+		///////////////////////////////////////////////////////////////
+		// Stuff for new scheduling.
+		///////////////////////////////////////////////////////////////
+
 		/**
 		 * Advance system state by one clock tick. This may be a subset of
 		 * one timestep, as there may be multiple clock ticks within one dt.
 		 * This is meant to be run in parallel on multiple threads. The
 		 * ProcInfo carries info about thread. 
 		 */
-		void advance( ProcInfo* p );
+		void advancePhase1( ProcInfo* p ) const;
+		void advancePhase2( ProcInfo* p );
+		/// dest function for message to start simulation.
+		void handleStart( double runtime );
 
+		/**
+		 * Reinit is used to reinit the state of the scheduling system.
+		 * This version is meant to be done through the multithread 
+		 * scheduling loop. It has to do this to initialize ProcInfo 
+		 * properly.
+		 */
+		void reinitPhase1( ProcInfo* p ) const;
+		void reinitPhase2( ProcInfo* p );
+		/// dest function for message to trigger reinit.
+		void handleReinit();
+
+
+		/**
+		 * The process functions are the interface presented by the Clock
+		 * to the multithread process loop.
+		 */
+		void processPhase1( ProcInfo* p ) const;
+		void processPhase2( ProcInfo* p );
+
+		///////////////////////////////////////////////////////////////
 		unsigned int getNumTicks() const;
 		void setNumTicks( unsigned int num );
 		void setBarrier( void* barrier1, void* barrier2 );
@@ -104,7 +131,16 @@ class Clock
 		unsigned int nSteps_;
 		unsigned int currentStep_;
 		double dt_; /// The minimum dt among all ticks.
+
+		/**
+		 * True while a process job is running
+		 */
 		bool isRunning_;
+
+		/**
+		 * True while the system is doing a reinit
+		 */
+		bool doingReinit_;
 		ProcInfo info_;
 		unsigned int numPendingThreads_;
 		unsigned int numThreads_;

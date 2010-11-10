@@ -35,13 +35,28 @@ class TickPtr {
 		 */
 		void advance( Element* e, ProcInfo* p, double endTime );
 
+		///////////////////////////////////////////////////////////////
+		// Stuff for new scheduling.
+		///////////////////////////////////////////////////////////////
+
 		/**
 		 * New version of 'advance', used in the new multithread scheduling.
 		 * Here we move ahead by one tick only. This may be a subset of
 		 * one timestep if there are multiple ticks.
 		 */
-		void advance( ProcInfo* p );
+		void advancePhase1( ProcInfo* p ) const;
+		void advancePhase2( ProcInfo* p );
 
+		/**
+		 * New version of 'reinit'. This happens in two phases: where we
+		 * send the reinit call out to all scheduled objects, and when
+		 * we update internal state variables of the TickPtr.
+		 */
+		void reinitPhase1( ProcInfo* p ) const;
+		void reinitPhase2( ProcInfo* p );
+
+
+		///////////////////////////////////////////////////////////////
 		double getNextTime() const;
 		double getDt() const;
 

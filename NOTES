@@ -8856,4 +8856,16 @@ may be a subset of a full timestep if there are multiple ticks within a
 timestep. Need to make some low-level unit tests. Checkin 2341.
 
 Incorporated automatic assignment of parent Element to all Ticks, needed to
-iterate through the messages going out from the Tick.
+iterate through the messages going out from the Tick. Checkin 2342.
+
+Next: reinit, start, unit tests; then multinode/multithread start/stop/reinit.
+
+To do reinit etc we cannot hold any state variables in the 
+Clock, TickPtr or Tick, since multiple threads use them. These variables
+will have to be in the ProcInfo, or to be advanced in Phase 2.
+
+Separated the different levels of 'advance' and 'reinit' functions into 
+phase1 (spread op among many nodes ) and phase2 (assign clock/Tick values).
+This now compiles.
+
+============================================================================
