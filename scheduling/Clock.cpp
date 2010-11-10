@@ -225,8 +225,11 @@ Clock::Clock()
 	  numThreads_( 0 ),
 	  ticks_( Tick::maxTicks )
 {
-	for ( unsigned int i = 0; i < Tick::maxTicks; ++i )
+	Element* ticke = Id( 2 )();
+	for ( unsigned int i = 0; i < Tick::maxTicks; ++i ) {
 		ticks_[i].setIndex( i );
+		ticks_[i].setElement( ticke );
+	}
 }
 ///////////////////////////////////////////////////
 // Field function definitions

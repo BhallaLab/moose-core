@@ -329,6 +329,11 @@ void Tick::setIndex( unsigned int index )
 	index_ = index;
 }
 
+void Tick::setElement( const Element* e ) 
+{
+	ticke_ = e;
+}
+
 /**
  * This sends out the call to reinit objects.
  */

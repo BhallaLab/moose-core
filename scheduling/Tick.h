@@ -63,6 +63,13 @@ class Tick
 		void setIndex( unsigned int index );
 
 		/**
+		 * This assigns the parent Element of this Tick.
+		 * It is used by the Tick to iterate through target messages
+		 * when calling Process.
+		 */
+		void setElement( const Element* e );
+
+		/**
 		 * Reinit is used to set the simulation time back to zero for
 		 * itself, and to trigger reinit in all targets, and to go on
 		 * to the next tick
@@ -97,7 +104,7 @@ class Tick
 		 * The object needs to keep track of its own Element in order
 		 * to traverse the process message list.
 		 */
-		Element* ticke_;
+		const Element* ticke_;
 };
 
 #endif // _Tick_h

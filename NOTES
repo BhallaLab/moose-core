@@ -8853,4 +8853,7 @@ Time to tackle item #2 above, the scheduling.
 Working on scheduling. A skeleton of a function chain from Clock::advance
 is now in place and compiles. This advances the simulation by one Tick, which
 may be a subset of a full timestep if there are multiple ticks within a
-timestep. Need to make some low-level unit tests.
+timestep. Need to make some low-level unit tests. Checkin 2341.
+
+Incorporated automatic assignment of parent Element to all Ticks, needed to
+iterate through the messages going out from the Tick.
