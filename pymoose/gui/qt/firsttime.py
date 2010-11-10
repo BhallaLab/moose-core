@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sun Jul 11 15:31:00 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Nov  5 10:24:49 2010 (+0530)
+# Last-Updated: Wed Nov 10 07:11:40 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 151
+#     Update #: 153
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -156,10 +156,7 @@ class FirstTimeWizard(QtGui.QWizard):
         config.get_settings().setValue(config.KEY_GL_CLIENT_EXECUTABLE, self.field('glclient'))
         config.get_settings().setValue(config.KEY_DEMOS_DIR, self.field('demosdir'))
         config.get_settings().setValue(config.KEY_GL_COLORMAP, self.field('colormap'))
-        print config.get_settings().value(config.KEY_DEMOS_DIR).toString()
-        print config.get_settings().value(config.KEY_GL_CLIENT_EXECUTABLE).toString()
-        print config.get_settings().value(config.KEY_GL_COLORMAP).toString()
-        
+	config.get_settings().sync()      
         
         
 if __name__ == '__main__':
