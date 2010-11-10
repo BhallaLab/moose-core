@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Nov  5 11:18:44 2010 (+0530)
+# Last-Updated: Wed Nov 10 07:08:48 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2593
+#     Update #: 2594
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -360,7 +360,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.autoHideAction = QtGui.QAction(self.tr('Autohide during simulation'), self)
 	self.autoHideAction.setCheckable(True)
-        self.autoHideAction.setChecked(self.settings.value(config.KEY_RUNTIME_AUTOHIDE).toBool())
+        self.autoHideAction.setChecked(config.get_settings().value(config.KEY_RUNTIME_AUTOHIDE).toBool())
 
         self.showRightBottomDocksAction = QtGui.QAction(self.tr('Right and Bottom Docks'), self)
 	self.showRightBottomDocksAction.setCheckable(True)
@@ -406,7 +406,7 @@ class MainWindow(QtGui.QMainWindow):
         
         self.newPlotWindowAction = QtGui.QAction(self.tr('New Plot Window'), self)
         self.connect(self.newPlotWindowAction, QtCore.SIGNAL('triggered(bool)'), self.addPlotWindow)
-        self.firstTimeWizardAction = QtGui.QAction(self.tr('FirstTime Configuration WIzard'), self)
+        self.firstTimeWizardAction = QtGui.QAction(self.tr('FirstTime Configuration Wizard'), self)
         self.connect(self.firstTimeWizardAction, QtCore.SIGNAL('triggered(bool)'), self.startFirstTimeWizard)
         self.resetSettingsAction = QtGui.QAction(self.tr('Reset Settings'), self)
         self.connect(self.resetSettingsAction, QtCore.SIGNAL('triggered()'), self.resetSettings)
@@ -576,16 +576,16 @@ class MainWindow(QtGui.QMainWindow):
             return
         geo_data = self.saveGeometry()
         layout_data = self.saveState()
-        self.settings.setValue(config.KEY_WINDOW_GEOMETRY, QtCore.QVariant(geo_data))
-        self.settings.setValue(config.KEY_WINDOW_LAYOUT, QtCore.QVariant(layout_data))
-        self.settings.setValue(config.KEY_RUNTIME_AUTOHIDE, QtCore.QVariant(self.autoHideAction.isChecked()))
-        self.settings.setValue(config.KEY_DEMOS_DIR, QtCore.QVariant(self.demosDir))
+        config.get_settings().setValue(config.KEY_WINDOW_GEOMETRY, QtCore.QVariant(geo_data))
+        config.get_settings().setValue(config.KEY_WINDOW_LAYOUT, QtCore.QVariant(layout_data))
+        config.get_settings().setValue(config.KEY_RUNTIME_AUTOHIDE, QtCore.QVariant(self.autoHideAction.isChecked()))
+        config.get_settings().setValue(config.KEY_DEMOS_DIR, QtCore.QVariant(self.demosDir))
                               
 
     def loadLayout(self):
         '''Load the window layout.'''
-        geo_data = self.settings.value(config.KEY_WINDOW_GEOMETRY).toByteArray()
-        layout_data = self.settings.value(config.KEY_WINDOW_LAYOUT).toByteArray()
+        geo_data = config.get_settings().value(config.KEY_WINDOW_GEOMETRY).toByteArray()
+        layout_data = config.get_settings().value(config.KEY_WINDOW_LAYOUT).toByteArray()
         self.restoreGeometry(geo_data)
         self.restoreState(layout_data)
         # The checked state of the menu items do not remain stored
@@ -771,7 +771,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def resetSettings(self):
         self.settingsReset = True
-        self.settings.clear()
+        config.get_settings().clear()
 
     def setCurrentElement(self, item, column):
         """Set the current object of the mooseHandler"""
@@ -961,9 +961,10 @@ class MainWindow(QtGui.QMainWindow):
         self.plots[0].replot()
 
     def startFirstTimeWizard(self):
+	print 'Starting first time wizard'
         firstTimeWizard = FirstTimeWizard(self)
-        firstTimeWizard.show()
         self.connect(firstTimeWizard, QtCore.SIGNAL('accepted()'), self.updatePaths)
+        firstTimeWizard.show()
 
     def doQuit(self):
         self.mooseHandler.stopGL()
@@ -981,7 +982,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def updatePaths(self):
         self.demosDir = str(config.get_settings().value(config.KEY_DEMOS_DIR).toString())
-	print 'Demos directory', self.demosDir
+	config.LOGGER.info('Demos directory: %s' % self.demosDir)
         
 
     def renameObjFieldEditPanel(self, mooseObject):
@@ -1007,11 +1008,12 @@ if __name__ == '__main__':
     app.setWindowIcon(icon)
 
     QtCore.QObject.connect(app, QtCore.SIGNAL('lastWindowClosed()'), app, QtCore.SLOT('quit()'))
+    mainWin = MainWindow()
     if not config.get_settings().contains(config.KEY_FIRSTTIME):
         firstTimeWizard = FirstTimeWizard()
         firstTimeWizard.setModal(QtCore.Qt.ApplicationModal)
+	firstTimeWizard.connect(firstTimeWizard, QtCore.SIGNAL('accepted()'), mainWin.updatePaths)
         firstTimeWizard.show()
-    mainWin = MainWindow()
     mainWin.show()
     app.exec_()
 	
