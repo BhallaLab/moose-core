@@ -600,3 +600,34 @@ void Clock::rebuild()
 	sort( tickPtr_.begin(), tickPtr_.end() );
 }
 
+
+///////////////////////////////////////////////////
+// These are the new scheduling base functions. 
+// Here the clock is advanced one step on each cycle of the main loop.
+// This means that a single tick advances one step.
+// The clock advance is whatever is the minimum messaging interval.
+// For typical simulations this is around 1 to 5 msec. The idea is that
+// the major solvers will do their internal updates for this period, and
+// their data interchange can be on this slower timescale. Still longer
+// intervals come out from the slower ticks.
+///////////////////////////////////////////////////
+
+// After reinit, nextTime for everything is set to its own dt.
+// Advance system state by one clock tick. This may be a subset of
+// one timestep, as there may be multiple clock ticks within one dt.
+void Clock::advance(  ProcInfo *p )
+{
+	// Here we have multiple tickPtrs to deal with.
+	if ( p->currTime > endTime_ ) {
+		// Send out alert 
+		return;
+	}
+	if ( tickPtr_.size() > 1 ) {
+		sort( tickPtr_.begin(), tickPtr_.end() );
+		tickPtr_[0].advance( p );
+	} else if ( tickPtr_.size() == 1 ) {
+		tickPtr_[0].advance( p ); // This internally updates p->currTime
+	} else if ( tickPtr_.size() == 0 ) {
+		p->currTime = endTime_;
+	}
+}

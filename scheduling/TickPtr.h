@@ -35,6 +35,13 @@ class TickPtr {
 		 */
 		void advance( Element* e, ProcInfo* p, double endTime );
 
+		/**
+		 * New version of 'advance', used in the new multithread scheduling.
+		 * Here we move ahead by one tick only. This may be a subset of
+		 * one timestep if there are multiple ticks.
+		 */
+		void advance( ProcInfo* p );
+
 		double getNextTime() const;
 		double getDt() const;
 
@@ -49,6 +56,7 @@ class TickPtr {
 		double dt_;
 		double nextTime_; // Upcoming time
 		vector< const Tick* > ticks_;	// Pointer to each Tick.
+		vector< const Tick* >::iterator tickerator_;
 		static double EPSILON;
 };
 

@@ -135,3 +135,19 @@ void TickPtr::reinit( const Eref& e, ProcInfo* p )
 }
 
 
+///////////////////////////////////////////////////////////////////////
+// New version here.
+///////////////////////////////////////////////////////////////////////
+
+void TickPtr::advance( ProcInfo* p ) 
+{
+	p->dt = dt_;
+	p->currTime = nextTime_;
+	assert( ticks_.size() > 0 );
+	( *tickerator_ )->advance( p ); // Move one tick along.
+	++tickerator_;
+	if ( tickerator_ == ticks_.end() ) {
+		tickerator_ = ticks_.begin(); 
+		nextTime_ += dt_;
+	}
+}

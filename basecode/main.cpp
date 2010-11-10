@@ -201,12 +201,12 @@ void nonMpiTests( Shell* s )
 		// s->setHardware( isSingleThreaded, numCores, numNodes, myNode );
 		s->setHardware( 1, 1, 1, 0 );
 		testAsync();
-		s->setHardware( (numCores == 1), numCores, numNodes, 0 );
 		testMsg();
+		testShell();
 		testScheduling();
 		testBuiltins();
-		testShell();
 		testKinetics();
+		s->setHardware( (numCores == 1), numCores, numNodes, 0 );
 	}
 #endif
 }

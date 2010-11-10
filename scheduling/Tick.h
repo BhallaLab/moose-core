@@ -40,6 +40,16 @@ class Tick
 		void advance( Element* e, ProcInfo* p ) const;
 
 		/**
+		 * New version of 'advance'
+ 		 * This function is called to advance this one tick through one
+		 * 'process' cycle. It is called in parallel on multiple threads,
+		 * and the thread information is in the ProcInfo. It is the job of
+		 * the target Elements to examine the ProcInfo and assign subsets
+		 * of the object array to do the process operation.
+		 */
+		void advance( ProcInfo* p ) const;
+
+		/**
 		 * This runs in parallel with 'advance' on the extra thread
 		 * dedicated to dealing with MPI data transfer.
 		 */
@@ -81,7 +91,13 @@ class Tick
 		 * Process and clearQ.
 		 */
 		unsigned int index_; 
-		string path_;/// \todo Perhaps we delete this field
+// 		string path_;/// \todo Perhaps we delete this field
+
+		/**
+		 * The object needs to keep track of its own Element in order
+		 * to traverse the process message list.
+		 */
+		Element* ticke_;
 };
 
 #endif // _Tick_h

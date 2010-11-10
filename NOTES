@@ -8844,3 +8844,13 @@ Checkin 2339.
 In order to clear further unit tests, we need to run ShellParser type commands
 like doCreate and doAddMsg. This required cleaning up their parser blocking
 functions and incorporating design for future threads.
+
+Now it gets stuck, as expected, with the scheduling. It has cleared the
+basecode unit tests, the messaging tests, and the Shell stuff. 
+Time to tackle item #2 above, the scheduling.
+============================================================================
+10 Nov 2010
+Working on scheduling. A skeleton of a function chain from Clock::advance
+is now in place and compiles. This advances the simulation by one Tick, which
+may be a subset of a full timestep if there are multiple ticks within a
+timestep. Need to make some low-level unit tests.

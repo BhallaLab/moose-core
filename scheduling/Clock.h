@@ -82,6 +82,14 @@ class Clock
 		 */
 		Tick* getTick( unsigned int i );
 
+		/**
+		 * Advance system state by one clock tick. This may be a subset of
+		 * one timestep, as there may be multiple clock ticks within one dt.
+		 * This is meant to be run in parallel on multiple threads. The
+		 * ProcInfo carries info about thread. 
+		 */
+		void advance( ProcInfo* p );
+
 		unsigned int getNumTicks() const;
 		void setNumTicks( unsigned int num );
 		void setBarrier( void* barrier1, void* barrier2 );
@@ -92,6 +100,7 @@ class Clock
 		double runTime_;
 		double currentTime_;
 		double nextTime_;
+		double endTime_;
 		unsigned int nSteps_;
 		unsigned int currentStep_;
 		double dt_; /// The minimum dt among all ticks.

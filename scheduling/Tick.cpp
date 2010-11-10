@@ -71,12 +71,14 @@ const Cinfo* Tick::initCinfo()
 			&Tick::setDt,
 			&Tick::getDt
 		);
+		/*
 		static ValueFinfo< Tick, string> path(
 			"path",
 			"Wildcard path of objects managed by this tick",
 			&Tick::setPath,
 			&Tick::getPath
 		);
+		*/
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
@@ -118,7 +120,7 @@ const Cinfo* Tick::initCinfo()
 		// Fields
 		&dt,
 		&localdt,
-		&path,
+		// &path,
 		// Shared SrcFinfos for process
 		&proc0,
 		&proc1,
@@ -203,7 +205,6 @@ double Tick::getDt() const
  * set and get Path are problematic. Their goal is to assign the 
  * targets for this Tick. As framed, they fit in with the older
  * GENESIS syntax. For now, put in dummy functions.
- */
 void Tick::setPath( string v )
 {
 	path_ = v;
@@ -214,6 +215,7 @@ string Tick::getPath() const
 {
 	return path_;
 }
+ */
 
 ///////////////////////////////////////////////////
 // Dest function definitions
@@ -342,6 +344,31 @@ void Tick::reinit( const Eref& e, ProcInfo* info ) const
 		i != m->end(); ++i ) {
 		// Element->dataHandler keeps track of which entry needs to be
 		// updated by which thread.
+		Msg::getMsg( i->mid )->process( info, i->fid ); 
+	}
+}
+
+////////////////////////////////////////////////////////////////////////
+// New version here
+////////////////////////////////////////////////////////////////////////
+
+/**
+ * This function is called to advance this one tick through one 'process'
+ * cycle. It is called in parallel on multiple threads, and the thread
+ * info is in the ProcInfo. It is the job of the target Elements to
+ * examine the ProcInfo and assign subsets of the object array to do
+ * the process operation.
+ */
+void Tick::advance( ProcInfo* info ) const
+{
+	// March through Process calls for each scheduled Element.
+	// Note that there is a unique BindIndex for each tick.
+	// We preallocate 0 through 10 for this.
+	assert( index_ < sizeof( processVec ) / sizeof( SrcFinfo* ) );
+	BindIndex b = processVec[ index_ ]->getBindIndex();
+	const vector< MsgFuncBinding >* m = ticke_->getMsgAndFunc( b );
+	for ( vector< MsgFuncBinding >::const_iterator i = m->begin();
+		i != m->end(); ++i ) {
 		Msg::getMsg( i->mid )->process( info, i->fid ); 
 	}
 }
