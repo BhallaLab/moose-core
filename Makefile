@@ -179,6 +179,8 @@ ifeq ($(USE_MUSIC),1)
 USE_MPI = 1 # Automatically enable MPI if USE_MUSIC is on (doesn't seem to work though.)
 CXXFLAGS += -DUSE_MUSIC
 LIBS += -lmusic
+MUSIC_DIR = music
+MUSIC_LIB = music/music.o
 endif
 
 # The -DMPICH_IGNORE_CXX_SEEK flag is because of a bug in the
@@ -188,6 +190,9 @@ endif
 ifeq ($(USE_MPI),1)
 # CXXFLAGS += -DUSE_MPI
 CXXFLAGS += -DUSE_MPI -DMPICH_IGNORE_CXX_SEEK
+CXX = mpicxx
+PARALLEL_DIR = parallel
+PARALLEL_LIB = parallel/parallel.o
 endif
 
 #use this for readline library
@@ -204,12 +209,19 @@ endif
 ifeq ($(USE_SBML),1)
 LIBS+= -lsbml
 CXXFLAGS+=-DUSE_SBML 
+SBML_DIR = sbml_IO
+SBML_LIB = sbml_IO/sbml_IO.o 
 endif
 
 # To use NeuroML, pass USE_NeuroML=1 in make command line
 ifeq ($(USE_NEUROML),1)
-LIBS+= -lxml2 -lneuroml
+LIBS+= -lxml2 -lneuroml  -Lexternal/neuroML_src
 CXXFLAGS+=-DUSE_NEUROML
+NEUROML_DIR = neuroML_IO
+NEUROML_LIB = neuroML_IO/neuroML_IO.o
+LIBNEUROML_SRC = external/neuroML_src
+LIBNEUROML_DYNAMIC = external/neuroML_src/libneuroml.so
+LIBNEUROML_STATIC = external/neuroML_src/libneuroml.a
 endif
 
 # To compile with readline support pass USE_READLINE=1 in make command line
@@ -247,31 +259,6 @@ LIBS=-L/lib64 -L/usr/lib64 $(LIBS)
 endif
 endif
 
-ifeq ($(USE_SBML),1)
-	SBML_DIR = sbml_IO
-	SBML_LIB = sbml_IO/sbml_IO.o 
-endif
-
-ifeq ($(USE_NEUROML),1)
-	NEUROML_DIR = neuroML_IO
-	NEUROML_LIB = neuroML_IO/neuroML_IO.o 
-	LIBS += -Lexternal/lib -lneuroml
-endif
-
-ifeq ($(USE_MUSIC),1)
-	MUSIC_DIR = music
-	MUSIC_LIB = music/music.o
-endif
-
-# Here we automagically change compilers to deal with MPI.
-ifeq ($(USE_MPI),1)
-	CXX = mpicxx
-	PARALLEL_DIR = parallel
-	PARALLEL_LIB = parallel/parallel.o
-else
-	CXX = g++
-#	CXX = CC	# Choose between Solaris CC and g++ on a Solaris machine
-endif
 
 LD = ld
 
@@ -280,7 +267,7 @@ SUBDIR = basecode connections maindir genesis_parser shell element scheduling \
 	randnum robots device $(GL_DIR) $(SBML_DIR) $(NEUROML_DIR) $(PARALLEL_DIR) $(MUSIC_DIR) 
 
 # Used for 'make clean'
-CLEANSUBDIR = $(SUBDIR) gl/src sbml_IO neuroML_IO parallel music pymoose
+CLEANSUBDIR = $(SUBDIR) gl/src sbml_IO neuroML_IO parallel music pymoose $(LIBNEUROML_SRC)
 
 OBJLIBS =	\
 	basecode/basecode.o \
@@ -311,7 +298,7 @@ export CXXFLAGS
 export LD
 export LIBS
 
-moose: libs $(OBJLIBS) 
+moose: libs $(OBJLIBS) $(LIBNEUROML_STATIC)
 	$(CXX) $(CXXFLAGS) $(OBJLIBS) $(LIBS) -o moose 
 	@echo "Moose compilation finished"
 
@@ -319,10 +306,20 @@ libmoose.so: libs
 	$(CXX) -G $(LIBS) -o libmoose.so
 	@echo "Created dynamic library"
 
-pymoose: CXXFLAGS += -DPYMOOSE -fPIC 
-pymoose: SUBDIR += pymoose
-pymoose: libs $(OBJLIBS) 
+.PHONEY : pymoose
+
+pymoose: CXXFLAGS+= -DPYMOOSE -fPIC 
+pymoose: SUBDIR+= pymoose	
+pymoose: libs $(OBJLIBS) $(LIBNEUROML_DYNAMIC)	
 	$(MAKE) -C $@
+	cp pymoose/moose.py pymoose/_moose.so ./
+
+$(LIBNEUROML_DYNAMIC): 
+	$(MAKE) -C $(LIBNEUROML_SRC) TYPE=dynamic
+
+$(LIBNEUROML_STATIC):
+	$(MAKE) -C $(LIBNEUROML_SRC) TYPE=static
+
 
 libs:
 	@echo "Compiling with flags:"
@@ -340,10 +337,8 @@ libs:
 	@(for i in $(SUBDIR); do $(MAKE) -C $$i; done)
 	@echo "All Libs compiled"
 
-mpp: preprocessor/*.cpp preprocessor/*.h
-	@( rm -f mpp; cd preprocessor; make CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)"; ln mpp ..; cd ..)
 
-default: moose mpp
+default: moose 
 
 clean:
 	@(for i in $(CLEANSUBDIR) ; do $(MAKE) -C $$i clean;  done)
