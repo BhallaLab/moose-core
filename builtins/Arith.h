@@ -12,6 +12,7 @@
 class Arith
 {
 	friend void testCopyMsgOps();
+	friend void testTicks();
 	public: 
 		Arith();
 		void process( const Eref& e, ProcPtr p );

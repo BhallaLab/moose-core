@@ -13,6 +13,7 @@
 // text wildcard list of targets, and possibly manipulate it.
 class Tick
 {
+	friend void testTicks();
 	public:
 		Tick();
 		virtual ~Tick();

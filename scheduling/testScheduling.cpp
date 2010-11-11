@@ -20,11 +20,78 @@
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
 #include "SingleMsg.h"
+#include "../builtins/Arith.h"
 #include "../randnum/randnum.h"
 
 pthread_mutex_t TestSched::mutex_;
 bool TestSched::isInitPending_( 1 );
 int TestSched::globalIndex_( 0 );
+
+/**
+ * Used to test Tick operation specially with the new process design, where
+ * the entire clock sequence is done one tick at a time in parallel from
+ * the multithread process loop.
+ * Note that ticks cannot be made independently; they are sub-elements
+ * of the Clock.
+ */
+void testTicks()
+{
+	Eref sheller( Id().eref() );
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+	vector< unsigned int > dims( 1, 1 );
+	Id clockId = shell->doCreate( "Clock", Id(), "tclock", dims );
+	Id tickId = Id( clockId.value() + 1 );
+	Id arithId = shell->doCreate( "Arith", clockId, "arith", dims );
+	ProcInfo p;
+
+	MsgId m1 = shell->doAddMsg( "Single", 
+		FullId( tickId, 0 ), "proc0", FullId( arithId, 0 ), "proc" );
+	// Qinfo::clearQ( &p );
+	assert( m1 != Msg::badMsg );
+
+	vector< Id > msgDests;
+	const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >( 
+		Tick::initCinfo()->findFinfo( "process0" ) );
+	assert( sf );
+	tickId()->getOutputs( msgDests, sf );
+	assert( msgDests.size() == 1 );
+	assert( msgDests[0] == arithId );
+
+	bool ret = Field< double >::set( tickId.eref(), "dt", 5.0);
+	assert( ret );
+
+	Tick* t0 = reinterpret_cast< Tick* >( tickId.eref().data() );
+	assert( doubleEq( 5.0, t0->dt_ ) );
+
+	// By default it gets hard-code set to the systiem tick Element, so
+	// we need to reassign it here for this test.
+	t0->ticke_ = tickId(); 
+
+	Arith* a0 = reinterpret_cast< Arith* >( arithId.eref().data() );
+	a0->arg1_ = 123.4;
+	a0->arg2_ = 7;
+	a0->arg3_ = 9;
+
+	t0->reinit( &p );
+	assert( doubleEq( 0, a0->arg1_ ) );
+	assert( doubleEq( 0, a0->arg2_ ) );
+	assert( doubleEq( 0, a0->arg3_ ) );
+
+	a0->arg1_ = 123.4;
+	a0->arg2_ = 7;
+	a0->arg3_ = 9;
+
+	t0->advance( &p );
+	assert( doubleEq( 123.4, a0->arg1_ ) );
+	assert( doubleEq( 7, a0->arg2_ ) );
+	assert( doubleEq( 0, a0->arg3_ ) );
+	assert( doubleEq( 139.4, a0->output_ ) );
+
+	clockId.destroy();
+
+	cout << "." << flush;
+}
+
 
 //////////////////////////////////////////////////////////////////////
 // Setting up a class for testing scheduling.
@@ -692,6 +759,7 @@ void speedTestMultiNodeIntFireNetwork( unsigned int size, unsigned int runsteps 
 
 void testScheduling()
 {
+	testTicks();
 	setupTicks();
 	testThreads();
 	testThreadIntFireNetwork();

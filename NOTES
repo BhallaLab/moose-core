@@ -8866,6 +8866,14 @@ will have to be in the ProcInfo, or to be advanced in Phase 2.
 
 Separated the different levels of 'advance' and 'reinit' functions into 
 phase1 (spread op among many nodes ) and phase2 (assign clock/Tick values).
-This now compiles.
+This now compiles. Checkin 2345.
+============================================================================
+11 Nov 2010
+For some reason I have no messages registering when I try to run Tick::reinit,
+even though the messages do turn up when I query the Element directly.
+
+Figured it out: At creation time the Clock hard-codes the Tick::ticke_ field
+to the system Tick. Had to undo this to get the testTicks() unit test set to
+work.
 
 ============================================================================

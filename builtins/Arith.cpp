@@ -109,6 +109,7 @@ void Arith::reinit( const Eref& e, ProcPtr p )
 	arg1_ = 0.0;
 	arg2_ = 0.0;
 	arg3_ = 0.0;
+	output_ = 0.0;
 }
 
 void Arith::arg1( const double arg )
