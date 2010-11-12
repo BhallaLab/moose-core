@@ -8893,3 +8893,7 @@ Checkin 2350.
 
 Fixed a minor problem with the return value for Clock::getCurrentTime().
 Now clears the setupTicks unit test.
+
+Turns out there were multiple dependency problems when I did a make clean and
+recompile. Fixed. Also split the scheduling tests so that the recent
+single-thread tests are in a separate function, testSingleThreadScheduling.

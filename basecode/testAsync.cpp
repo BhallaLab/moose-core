@@ -24,6 +24,7 @@
 #include "OneToOneMsg.h"
 #include "../randnum/randnum.h"
 #include "../scheduling/Tick.h"
+#include "../scheduling/TickMgr.h"
 #include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
 

@@ -13,6 +13,7 @@
 #include <queue>
 #include <unistd.h> // for getopt
 #include "../scheduling/Tick.h"
+#include "../scheduling/TickMgr.h"
 #include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
 #include "DiagonalMsg.h"
@@ -30,6 +31,7 @@ extern void testAsync();
 extern void testSyncArray( unsigned int size, unsigned int numThreads,
 	unsigned int method );
 extern void testShell();
+extern void testSingleThreadScheduling();
 extern void testScheduling();
 extern void testBuiltins();
 
@@ -203,9 +205,10 @@ void nonMpiTests( Shell* s )
 		testAsync();
 		testMsg();
 		testShell();
-		testScheduling();
+		testSingleThreadScheduling();
 		testBuiltins();
 		testKinetics();
+		testScheduling();
 		s->setHardware( (numCores == 1), numCores, numNodes, 0 );
 	}
 #endif

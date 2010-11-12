@@ -758,11 +758,14 @@ void speedTestMultiNodeIntFireNetwork( unsigned int size, unsigned int runsteps 
 	shell->doDelete( i2 );
 	shell->doQuit();
 }
-
-void testScheduling()
+void testSingleThreadScheduling()
 {
 	testTicks();
 	setupTicks();
+}
+
+void testScheduling()
+{
 	testThreads();
 	testThreadIntFireNetwork();
 	testMultiNodeIntFireNetwork();

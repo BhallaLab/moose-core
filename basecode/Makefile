@@ -85,7 +85,7 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 Element.o:	DataHandlerWrapper.h
-testAsync.o:	SparseMatrix.h SetGet.h
+testAsync.o:	SparseMatrix.h SetGet.h ../scheduling/Clock.h ../scheduling/Tick.h ../scheduling/TickPtr.h ../scheduling/TickMgr.h
 SparseMsg.o:	SparseMatrix.h
 SetGet.o:	SetGet.h ../shell/Neutral.h
 DataHandlerWrapper.o: DataHandlerWrapper.h

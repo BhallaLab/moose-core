@@ -11,6 +11,7 @@
 #include "DiagonalMsg.h"
 #include "OneToAllMsg.h"
 #include "../scheduling/Tick.h"
+#include "../scheduling/TickMgr.h"
 #include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
 #include "Arith.h"
