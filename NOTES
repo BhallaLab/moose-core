@@ -8888,3 +8888,8 @@ data structure, and each time the entire ticks_ vector was being rebuilt.
 Messy. I need to make a container that just has a pointer, which is what
 TickPtr was originally meant to do.
 
+Did it. Cleaned up. Now tests go a little further before croaking.
+Checkin 2350.
+
+Fixed a minor problem with the return value for Clock::getCurrentTime().
+Now clears the setupTicks unit test.

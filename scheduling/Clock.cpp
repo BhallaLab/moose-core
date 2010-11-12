@@ -253,7 +253,7 @@ double Clock::getRunTime() const
 
 double Clock::getCurrentTime() const
 {
-	return info_.currTime;
+	return currentTime_;
 }
 
 /**
@@ -667,7 +667,7 @@ void Clock::processPhase2( ProcInfo* info )
  */
 void Clock::handleStart( double runtime )
 {
-	static const double ROUNDING = 1.0000000001;
+	static const double ROUNDING = 0.9999999999;
 	if ( isRunning_ ) {
 		cout << "Clock::handleStart: Warning: simulation already in progress.\n Command ignored\n";
 		return;
