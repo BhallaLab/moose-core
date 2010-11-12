@@ -145,9 +145,26 @@ class Clock
 		unsigned int numPendingThreads_;
 		unsigned int numThreads_;
 		int callback_;
+		/**
+		 * TickPtr contains pointers to tickMgr and is used to sort.
+		 */
 		vector< TickPtr > tickPtr_;
+
+		/**
+		 * TickMgr groups together Ticks with the same dt. Within this
+		 * group, the Ticks are ordered by their index in the main ticks_
+		 * vector. However, this order doesn't change so it does not
+		 * need to be resorted every step increment.
+		 */
+		vector< TickMgr > tickMgr_;
+
+		/**
+		 * Ticks are sub-elements and send messages to sets of target
+		 * Elements that handle calculations in which update order does
+		 * not matter. 
+		 */
 		vector< Tick > ticks_;
-		TickPtr* tp0_;
+		TickMgr* tp0_;
 };
 
 #endif // _CLOCK_H

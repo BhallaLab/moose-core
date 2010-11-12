@@ -61,6 +61,7 @@
 #include <pthread.h>
 #include "header.h"
 #include "Tick.h"
+#include "TickMgr.h"
 #include "TickPtr.h"
 #include "ThreadInfo.h"
 #include "Clock.h"
@@ -328,7 +329,7 @@ void Clock::start(  const Eref& e, const Qinfo* q, double runTime )
 		info_.currTime += runTime;
 		return;
 	}
-	info_.currTime = tickPtr_[0].getNextTime() - tickPtr_[0].getDt();
+	info_.currTime = tickPtr_[0].mgr()->getNextTime() - tickPtr_[0].mgr()->getDt();
 	double endTime = runTime * ROUNDING + info_.currTime;
 	isRunning_ = 1;
 
@@ -338,18 +339,18 @@ void Clock::start(  const Eref& e, const Qinfo* q, double runTime )
 	Element* ticke = tickId();
 
 	if ( tickPtr_.size() == 1 ) {
-		tickPtr_[0].advance( ticke, &info_, endTime );
+		tickPtr_[0].mgr()->advance( ticke, &info_, endTime );
 		return;
 	}
 
 	// Here we have multiple tick times, need to do the sorting.
 	sort( tickPtr_.begin(), tickPtr_.end() );
-	double nextTime = tickPtr_[1].getNextTime();
-	while ( isRunning_ && tickPtr_[0].getNextTime() < endTime ) {
+	double nextTime = tickPtr_[1].mgr()->getNextTime();
+	while ( isRunning_ && tickPtr_[0].mgr()->getNextTime() < endTime ) {
 		// This advances all ticks with this dt in order, till nextTime.
-		tickPtr_[0].advance( ticke, &info_, nextTime * ROUNDING );
+		tickPtr_[0].mgr()->advance( ticke, &info_, nextTime * ROUNDING );
 		sort( tickPtr_.begin(), tickPtr_.end() );
-		nextTime = tickPtr_[1].getNextTime();
+		nextTime = tickPtr_[1].mgr()->getNextTime();
 	} 
 
 	// Just to test: need to move back into the ticks:
@@ -372,8 +373,8 @@ void Clock::sortTickPtrs( pthread_mutex_t* sortMutex )
 		numPendingThreads_++;
 		if ( numPendingThreads_ == 1 ) { // The first thread through should do this.
 			sort( tickPtr_.begin(), tickPtr_.end() );
-			nextTime_ = tickPtr_[1].getNextTime();
-			tp0_ = &tickPtr_[ 0 ];
+			nextTime_ = tickPtr_[1].mgr()->getNextTime();
+			tp0_ = tickPtr_[ 0 ].mgr();
 			// Someone else may modify isRunning_: don't touch.
 		} 
 		if ( numPendingThreads_ >= numThreads_ )
@@ -411,7 +412,6 @@ void Clock::tStart(  const Eref& e, const ThreadInfo* ti )
 		}
 		return;
 	}
-	// double previousTime = tickPtr_[0].getNextTime() - tickPtr_[0].getDt();
 	double previousTime = 0.0;
 	if ( ti->threadId == 0 ) {
 		//info_.currTime = previousTime;
@@ -431,7 +431,7 @@ void Clock::tStart(  const Eref& e, const ThreadInfo* ti )
 	Element* ticke = Id( 2 )();
 
 	if ( tickPtr_.size() == 1 ) {
-		tickPtr_[0].advance( ticke, &pinfo, endTime );
+		tickPtr_[0].mgr()->advance( ticke, &pinfo, endTime );
 		if ( ti->threadId == 0 ) {
 			info_ = pinfo; // Do we use info outside? Shouldn't.
 			isRunning_ = 0;
@@ -538,7 +538,7 @@ void Clock::reinit( const Eref& e, const Qinfo* q )
 	Eref ticker( Id( 2 )(), 0 );
 	for ( vector< TickPtr >::iterator i = tickPtr_.begin();
 		i != tickPtr_.end(); ++i )
-		i->reinit( ticker, &info_ );
+		i->mgr()->reinit( ticker, &info_ );
 }
 
 /**
@@ -586,18 +586,20 @@ void Clock::addTick( Tick* t )
 
 	if ( t->getDt() < EPSILON )
 		return;
-	for ( vector< TickPtr >::iterator j = tickPtr_.begin(); 
-		j != tickPtr_.end(); ++j)
+	for ( vector< TickMgr >::iterator j = tickMgr_.begin(); 
+		j != tickMgr_.end(); ++j)
 	{
 		if ( j->addTick( t ) )
 			return;
 	}
-	tickPtr_.push_back( t );
+	tickMgr_.push_back( t );
+	tickPtr_.push_back( TickPtr( &tickMgr_.back() ) );
 }
 
 void Clock::rebuild()
 {
 	tickPtr_.clear();
+	tickMgr_.clear();
 	for( unsigned int i = 0; i < ticks_.size(); ++i ) {
 		addTick( &( ticks_[i] ) ); // This fills in only ticks that are used
 	}
@@ -680,7 +682,7 @@ void Clock::handleStart( double runtime )
 // This simply distributes the call to all scheduled objects
 void Clock::advancePhase1(  ProcInfo *p ) const
 {
-	tickPtr_[0].advancePhase1( p );
+	tickPtr_[0].mgr()->advancePhase1( p );
 }
 
 // In phase 2 we need to do the updates to the Clock object, especially
@@ -689,9 +691,9 @@ void Clock::advancePhase1(  ProcInfo *p ) const
 void Clock::advancePhase2(  ProcInfo *p )
 {
 	if ( p->threadIndexInGroup == 0 && tickPtr_.size() > 1 ) {
-		tickPtr_[0].advancePhase2( p );
+		tickPtr_[0].mgr()->advancePhase2( p );
 		sort( tickPtr_.begin(), tickPtr_.end() );
-		currentTime_ = tickPtr_[0].getNextTime();
+		currentTime_ = tickPtr_[0].mgr()->getNextTime();
 		if ( currentTime_ > endTime_ ) {
 			Id clockId( 1 );
 			isRunning_ = 0;
@@ -731,23 +733,20 @@ void Clock::reinitPhase1( ProcInfo* info ) const
 {
 	for ( vector< TickPtr >::const_iterator i = tickPtr_.begin();
 		i != tickPtr_.end(); ++i ) {
-		i->reinitPhase1( info );
+		i->mgr()->reinitPhase1( info );
 	}
 }
 
 void Clock::reinitPhase2( ProcInfo* info )
 {
-	info_.currTime = 0.0;
+	info->currTime = 0.0;
 	if ( info->threadIndexInGroup == 0 ) {
 		doingReinit_ = 0;
 		for ( vector< TickPtr >::iterator i = tickPtr_.begin();
 			i != tickPtr_.end(); ++i ) {
-			i->reinitPhase2( info );
+			i->mgr()->reinitPhase2( info );
 		}
+		sort( tickPtr_.begin(), tickPtr_.end() );
 	}
 }
-
-////////////////////////////////////////////////////////////////////////
-// Here we set up the message handlers
-////////////////////////////////////////////////////////////////////////
 

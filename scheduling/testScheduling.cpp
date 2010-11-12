@@ -9,6 +9,7 @@
 
 #include "header.h"
 #include "Tick.h"
+#include "TickMgr.h"
 #include "TickPtr.h"
 #include "Clock.h"
 #include "testScheduling.h"
@@ -65,7 +66,7 @@ void testTicks()
 
 	// By default it gets hard-code set to the systiem tick Element, so
 	// we need to reassign it here for this test.
-	t0->ticke_ = tickId(); 
+	t0->setElement( tickId() ); 
 
 	Arith* a0 = reinterpret_cast< Arith* >( arithId.eref().data() );
 	a0->arg1_ = 123.4;
@@ -175,21 +176,13 @@ void setupTicks()
 	Element* ticke = tickId();
 	assert( ticke->getName() == "tick" );
 
-	// FieldElement< Tick, Clock, &Clock::getTick > ticke( tc, clocke, &Clock::getNumTicks, &Clock::setNumTicks );
 	unsigned int size = 10;
 
-	// bool ret = OneToAllMsg::add( clocker, "childTick", ticke, "parent" );
-	// assert( ret );
+	for ( unsigned int i = 0; i < size; ++i ) {
+		Eref er( ticke, DataId( 0, i ) );
+		reinterpret_cast< Tick* >( er.data() )->setElement( ticke );
+	}
 
-	assert( ticke->dataHandler()->totalEntries() == 10 );
-
-	/*
-	bool ret = Field< unsigned int >::set( clocker, "numTicks", size );
-	Clock* clockData = reinterpret_cast< Clock* >( clocker.data() );
-	clockData->setNumTicks( size );
-	*/
-
-	// assert( ret );
 	// cout << Shell::myNode() << ": numTicks: " << ticke->dataHandler()->totalEntries() << ", " << size << endl;
 	assert( ticke->dataHandler()->totalEntries() == size );
 
@@ -216,25 +209,25 @@ void setupTicks()
 
 	Clock* cdata = reinterpret_cast< Clock* >( clocker.data() );
 	assert( cdata->tickPtr_.size() == 4 );
-	assert( fabs( cdata->tickPtr_[0].dt_ - 1.0 ) < EPSILON );
-	assert( fabs( cdata->tickPtr_[1].dt_ - 2.0 ) < EPSILON );
-	assert( fabs( cdata->tickPtr_[2].dt_ - 3.0 ) < EPSILON );
-	assert( fabs( cdata->tickPtr_[3].dt_ - 5.0 ) < EPSILON );
-	assert( fabs( cdata->tickPtr_[0].nextTime_ - 1.0 ) < EPSILON );
-	assert( fabs( cdata->tickPtr_[1].nextTime_ - 2.0 ) < EPSILON );
-	assert( fabs( cdata->tickPtr_[2].nextTime_ - 3.0 ) < EPSILON );
-	assert( fabs( cdata->tickPtr_[3].nextTime_ - 5.0 ) < EPSILON );
-	assert( cdata->tickPtr_[0].ticks_.size() == 1 );
-	assert( cdata->tickPtr_[1].ticks_.size() == 2 );
-	assert( cdata->tickPtr_[2].ticks_.size() == 1 );
-	assert( cdata->tickPtr_[3].ticks_.size() == 2 );
+	assert( fabs( cdata->tickPtr_[0].mgr()->dt_ - 1.0 ) < EPSILON );
+	assert( fabs( cdata->tickPtr_[1].mgr()->dt_ - 2.0 ) < EPSILON );
+	assert( fabs( cdata->tickPtr_[2].mgr()->dt_ - 3.0 ) < EPSILON );
+	assert( fabs( cdata->tickPtr_[3].mgr()->dt_ - 5.0 ) < EPSILON );
+	assert( fabs( cdata->tickPtr_[0].mgr()->nextTime_ - 1.0 ) < EPSILON );
+	assert( fabs( cdata->tickPtr_[1].mgr()->nextTime_ - 2.0 ) < EPSILON );
+	assert( fabs( cdata->tickPtr_[2].mgr()->nextTime_ - 3.0 ) < EPSILON );
+	assert( fabs( cdata->tickPtr_[3].mgr()->nextTime_ - 5.0 ) < EPSILON );
+	assert( cdata->tickPtr_[0].mgr()->ticks_.size() == 1 );
+	assert( cdata->tickPtr_[1].mgr()->ticks_.size() == 2 );
+	assert( cdata->tickPtr_[2].mgr()->ticks_.size() == 1 );
+	assert( cdata->tickPtr_[3].mgr()->ticks_.size() == 2 );
 
-	assert( cdata->tickPtr_[0].ticks_[0] == reinterpret_cast< const Tick* >( er3.data() ) );
-	assert( cdata->tickPtr_[1].ticks_[0] == reinterpret_cast< const Tick* >( er2.data() ) );
-	assert( cdata->tickPtr_[1].ticks_[1] == reinterpret_cast< const Tick* >( er1.data() ) );
-	assert( cdata->tickPtr_[2].ticks_[0] == reinterpret_cast< const Tick* >( er4.data() ) );
-	assert( cdata->tickPtr_[3].ticks_[0] == reinterpret_cast< const Tick* >( er0.data() ) );
-	assert( cdata->tickPtr_[3].ticks_[1] == reinterpret_cast< const Tick* >( er5.data() ) );
+	assert( cdata->tickPtr_[0].mgr()->ticks_[0] == reinterpret_cast< const Tick* >( er3.data() ) );
+	assert( cdata->tickPtr_[1].mgr()->ticks_[0] == reinterpret_cast< const Tick* >( er2.data() ) );
+	assert( cdata->tickPtr_[1].mgr()->ticks_[1] == reinterpret_cast< const Tick* >( er1.data() ) );
+	assert( cdata->tickPtr_[2].mgr()->ticks_[0] == reinterpret_cast< const Tick* >( er4.data() ) );
+	assert( cdata->tickPtr_[3].mgr()->ticks_[0] == reinterpret_cast< const Tick* >( er0.data() ) );
+	assert( cdata->tickPtr_[3].mgr()->ticks_[1] == reinterpret_cast< const Tick* >( er5.data() ) );
 
 	Id tsid = Id::nextId();
 	Element* tse = new Element( tsid, testSchedCinfo, "tse", dims, 1 );
@@ -262,16 +255,25 @@ void setupTicks()
 
 	cdata->rebuild();
 
-	Qinfo q( 0, 0, 8 ); // Not really used in the 'start' function.
-	cdata->start( clocker, &q, runtime );
+	ProcInfo p;
+	cdata->handleReinit();
+	assert( cdata->doingReinit_ == 1 );
+	cdata->reinitPhase1( &p );
+	assert( cdata->doingReinit_ == 1 );
+	cdata->reinitPhase2( &p );
+	assert( cdata->doingReinit_ == 0 );
 
-	assert( fabs( cdata->getCurrentTime() - runtime ) < 1e-6 );
+	cdata->handleStart( runtime );
+	while ( cdata->isRunning_ ) {
+		cdata->advancePhase1( &p );
+		cdata->advancePhase2( &p );
+	}
+
+	assert( doubleEq( cdata->getCurrentTime(), runtime ) );
 
 	tickId.destroy();
 	clock.destroy();
 	tsid.destroy();
-	// tickId.destroy();
-	// cout << "done setupTicks\n";
 	cout << "." << flush;
 }
 

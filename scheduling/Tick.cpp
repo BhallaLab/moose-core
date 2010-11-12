@@ -8,6 +8,7 @@
 **********************************************************************/
 #include "header.h"
 #include "Tick.h"
+#include "TickMgr.h"
 #include "TickPtr.h"
 #include "Clock.h"
 

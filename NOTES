@@ -8874,6 +8874,17 @@ even though the messages do turn up when I query the Element directly.
 
 Figured it out: At creation time the Clock hard-codes the Tick::ticke_ field
 to the system Tick. Had to undo this to get the testTicks() unit test set to
-work.
+work. Checkin 2348.
+I don't like the hard-coding. Remove that. Done.
+
+Some progress. The hold up is now in handling of the tickerator_, which gets
+set to 0x20 during TickPtr::advance.
 
 ============================================================================
+12 Nov 2010.
+Looked closely at why the iterator was messed up in TickPtr. Turns out
+to be a symptom of a fairly big goof-up: I was sorting the entire TickPtr
+data structure, and each time the entire ticks_ vector was being rebuilt.
+Messy. I need to make a container that just has a pointer, which is what
+TickPtr was originally meant to do.
+

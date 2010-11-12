@@ -14,32 +14,28 @@ using namespace std;
 #include <pthread.h>
 #include "header.h"
 #include "Tick.h"
-#include "TickPtr.h"
+#include "TickMgr.h"
 
-double TickPtr::EPSILON = 1.0e-9;
+double TickMgr::EPSILON = 1.0e-9;
 
 static bool tickPtrCmp ( const Tick* i, const Tick* j) 
 { 
 	return ( *i < *j );
 }
 
-TickPtr::TickPtr()
+TickMgr::TickMgr()
 	: dt_( 1.0 ), nextTime_( 1.0 )
 	// assumes zero size of ticks_ vector
 {;}
 		
-TickPtr::TickPtr( Tick* ptr )
+TickMgr::TickMgr( Tick* ptr )
 	: dt_( ptr->getDt() ), nextTime_( ptr->getDt() )
 {
 	ticks_.push_back( ptr );
 }
 
-bool TickPtr::operator<( const TickPtr other ) const {
-	return ( nextTime_ < other.nextTime_ );
-}
-
 /**
-* Add a tick to the specified TickPtr, provided dt is OK.
+* Add a tick to the specified TickMgr, provided dt is OK.
 * The new tick is positioned right away, according to stage.
 * This is inefficient, but we don't expect to have many ticks,
 * typically under 10.
@@ -47,18 +43,23 @@ bool TickPtr::operator<( const TickPtr other ) const {
 * something with the ProcInfo if we need to.
 * Returns true if the dt matches and the add was successful.
 */
-bool TickPtr::addTick( const Tick* t )
+bool TickMgr::addTick( const Tick* t )
 {
 	if ( t->getDt() < EPSILON )
 		return 0;
 	if ( ticks_.size() == 0 ) {
 		ticks_.push_back( t );
 		nextTime_ = dt_ = t->getDt();
+		tickerator_ = ticks_.begin();
 		return 1;
 	}
-	if ( fabs( t->getDt() - dt_ ) < EPSILON ) {
+
+	// if ( fabs( t->getDt() - dt_ ) < EPSILON )
+	if ( doubleEq( t->getDt(), dt_ ) ) 
+	{
 		ticks_.push_back( t );
 		sort( ticks_.begin(), ticks_.end(), tickPtrCmp );
+		tickerator_ = ticks_.begin();
 		return 1;
 	}
 	return 0;
@@ -71,7 +72,7 @@ bool TickPtr::addTick( const Tick* t )
  * Slightly modified to use a local variable to make it thread-friendly.
  */
 /*
-void TickPtr::advance( Element* e, ProcInfo* p, double endTime ) {
+void TickMgr::advance( Element* e, ProcInfo* p, double endTime ) {
 	while ( nextTime_ < endTime ) {
 		p->currTime = nextTime_;
 		for ( vector< const Tick* >::iterator i = ticks_.begin(); 
@@ -86,11 +87,11 @@ void TickPtr::advance( Element* e, ProcInfo* p, double endTime ) {
 
 // procInfo is independent for each thread, need to ensure it is updated
 // before doing 'advance'.
-void TickPtr::advance( Element* e, ProcInfo* p, double endTime ) 
+void TickMgr::advance( Element* e, ProcInfo* p, double endTime ) 
 {
 	p->dt = dt_;
 	double nt = nextTime_; // use an independent timer for each thread.
-	// cout << "TickPtr::advance: nextTime_ = " << nextTime_ << ", endTime = " << endTime << ", thread = " << p->threadId << endl;
+	// cout << "TickMgr::advance: nextTime_ = " << nextTime_ << ", endTime = " << endTime << ", thread = " << p->threadId << endl;
 	while ( nt < endTime ) {
 		p->currTime = nt;
 		nt += dt_;
@@ -114,17 +115,17 @@ void TickPtr::advance( Element* e, ProcInfo* p, double endTime )
 	*/
 }
 
-double TickPtr::getNextTime() const
+double TickMgr::getNextTime() const
 {
 	return nextTime_;
 }
 
-double TickPtr::getDt() const
+double TickMgr::getDt() const
 {
 	return dt_;
 }
 
-void TickPtr::reinit( const Eref& e, ProcInfo* p )
+void TickMgr::reinit( const Eref& e, ProcInfo* p )
 {
 	nextTime_ = dt_;
 	for ( vector< const Tick* >::iterator i = ticks_.begin(); 
@@ -139,7 +140,7 @@ void TickPtr::reinit( const Eref& e, ProcInfo* p )
 // New version here.
 ///////////////////////////////////////////////////////////////////////
 
-void TickPtr::advancePhase1( ProcInfo* p ) const
+void TickMgr::advancePhase1( ProcInfo* p ) const
 {
 	p->dt = dt_;
 	p->currTime = nextTime_;
@@ -147,9 +148,9 @@ void TickPtr::advancePhase1( ProcInfo* p ) const
 	( *tickerator_ )->advance( p ); // Move one tick along.
 }
 
-// This modifies the TickPtr, has to happen on a single thread and
+// This modifies the TickMgr, has to happen on a single thread and
 // safely isolated from the multithread ops in advancePhase1.
-void TickPtr::advancePhase2( ProcInfo* p ) 
+void TickMgr::advancePhase2( ProcInfo* p ) 
 {
 	++tickerator_;
 	if ( tickerator_ == ticks_.end() ) {
@@ -158,7 +159,7 @@ void TickPtr::advancePhase2( ProcInfo* p )
 	}
 }
 
-void TickPtr::reinitPhase1( ProcInfo* p ) const
+void TickMgr::reinitPhase1( ProcInfo* p ) const
 {
 	for ( vector< const Tick* >::const_iterator i = ticks_.begin(); 
 		i != ticks_.end(); ++i )
@@ -167,7 +168,7 @@ void TickPtr::reinitPhase1( ProcInfo* p ) const
 	}
 }
 
-void TickPtr::reinitPhase2( ProcInfo* p )
+void TickMgr::reinitPhase2( ProcInfo* p )
 {
 	nextTime_ = dt_;
 	tickerator_ = ticks_.begin();

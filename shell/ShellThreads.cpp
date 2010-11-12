@@ -19,6 +19,7 @@
 
 // Want to separate out this search path into the Makefile options
 #include "../scheduling/Tick.h"
+#include "../scheduling/TickMgr.h"
 #include "../scheduling/TickPtr.h"
 #include "../scheduling/ThreadInfo.h"
 #include "../scheduling/Clock.h"
