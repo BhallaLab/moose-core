@@ -184,6 +184,13 @@ class Qinfo
 		static void swapQ();
 
 		/**
+		 * Exchange mpiInQ and mpiRecvQ.
+		 * Must be protected by a mutex as it affects data on
+		 * all threads.
+		 */
+		static void swapMpiQ();
+
+		/**
 		 * Clears out contents of all qs, correspondingly the qBlock.
 		 */
 		static void emptyAllQs();

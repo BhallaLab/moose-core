@@ -8897,3 +8897,10 @@ Now clears the setupTicks unit test.
 Turns out there were multiple dependency problems when I did a make clean and
 recompile. Fixed. Also split the scheduling tests so that the recent
 single-thread tests are in a separate function, testSingleThreadScheduling.
+Checkin 2357.
+
+Starting big overhaul of event loop  in ProcessLoop.cpp.
+============================================================================
+13 Nov 2010
+Begun compilation of the overhauled code. I've put it into Shell.
+============================================================================

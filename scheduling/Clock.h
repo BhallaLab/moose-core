@@ -28,10 +28,12 @@ class Clock
 
 		void setTickDt( DataId i, double v );
 		double getTickDt( DataId i ) const;
+		/*
 		unsigned int getNumPendingThreads() const;
 		void setNumPendingThreads( unsigned int num );
 		unsigned int getNumThreads() const;
 		void setNumThreads( unsigned int num );
+		*/
 		
 		//////////////////////////////////////////////////////////
 		//  Dest functions
@@ -40,16 +42,6 @@ class Clock
 		 * starts up a run to go for runTime without threading.
 		 */
 		void start( const Eref& e, const Qinfo* q, double runTime );
-
-		/**
-		 * tStart starts up a run using threading. Is called independently
-		 * on each worker thread. threadId starts from 0 and goes up to
-		 * # of worker threads. threadId 0 has a special meaning as it 
-		 * manages increments of current time.
-		 */
-		// void tStart(  const Eref& e, const Qinfo* q, double runTime, unsigned int threadId );
-		void tStart(  const Eref& e, const ThreadInfo* ti );
-		void sortTickPtrs( pthread_mutex_t* sortMutex );
 		void step( const Eref& e, const Qinfo* q, unsigned int nsteps );
 		void stop( const Eref& e, const Qinfo* q );
 		void terminate( const Eref& e, const Qinfo* q );
@@ -121,6 +113,8 @@ class Clock
 		void setNumTicks( unsigned int num );
 		void setBarrier( void* barrier1, void* barrier2 );
 
+		bool keepLooping() const;
+
 		static void* threadStartFunc( void* threadInfo );
 		static const Cinfo* initCinfo();
 	private:
@@ -145,6 +139,12 @@ class Clock
 		unsigned int numPendingThreads_;
 		unsigned int numThreads_;
 		int callback_;
+
+		/**
+		 * True while main event loop continues
+		 */
+		bool keepLooping_;
+
 		/**
 		 * TickPtr contains pointers to tickMgr and is used to sort.
 		 */

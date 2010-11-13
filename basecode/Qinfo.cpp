@@ -238,37 +238,10 @@ void Qinfo::swapQ()
 		i->stitch();
 	}
 
-	/*
-	assert( groupId < g_.size() );
-	SimGroup& g = g_[ groupId ];
-	// unsigned int j = g.startThread;
-	// assert( j + g.numThreads <= outQ_.size() );
-	const Qvec& inQ = (*inQ_)[ groupId ];
-
-	inQ.resize( sizeof( unsigned int ) );
-	*( reinterpret_cast< unsigned int* >( &inQ[0] ) ) = 0;
-	localQ_.resize( sizeof( unsigned int ) );
-	*( reinterpret_cast< unsigned int* >( &localQ_[0] ) ) = 0;
-	for ( unsigned int i = 0; i < g.numThreads; ++i ) {
-	//	unsigned int outQindex = i + g.startThread;
-		unsigned int outQindex = i;
-		vector< QueueBlock >& qb = qBlock_[outQindex];
-		vector< char >::iterator begin = outQ_[outQindex].begin();
-		for ( unsigned int j = 0; j < qb.size(); ++j ) {
-			if ( qb[j].whichQ == 0 ) {
-				inQ.insert( inQ.end(), begin + qb[j].startOffset, 
-					begin + qb[j].startOffset + qb[j].size );
-			} else {
-				localQ_.insert( localQ_.end(), begin + qb[j].startOffset, 
-					begin + qb[j].startOffset + qb[j].size );
-			}
-		}
-		outQ_[outQindex].resize( 0 );
-		qb.resize( 0 );
+	for ( vector< Qvec >::iterator i = outQ_->begin(); 
+		i != outQ_->end(); ++i ) {
+		i->clear();
 	}
-	*reinterpret_cast< unsigned int* >( &inQ[0] ) = inQ.size();
-	*reinterpret_cast< unsigned int* >( &localQ_[0] ) = localQ_.size();
-	*/
 }
 
 /**
@@ -537,9 +510,6 @@ void Qinfo::assembleOntoQ( const MsgFuncBinding& i,
 void Qinfo::clearQ( const ProcInfo* p )
 {
 	swapQ();
-	for ( vector< Qvec >::iterator i = outQ_->begin(); 
-		i != outQ_->end(); ++i )
-		i->clear();
 	readQ( p );
 }
 

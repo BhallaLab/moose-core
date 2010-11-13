@@ -10,7 +10,11 @@
 #ifndef _SHELL_H
 #define _SHELL_H
 
-class ThreadInfo;
+class FuncBarrier;
+// class pthread_barrier_t;
+// class pthread_mutex_t;
+// class pthread_cond_t;
+// class pthread_attr_t;
 
 enum AssignmentType { SINGLE, VECTOR, REPEAT };
 
@@ -231,36 +235,31 @@ class Shell
 		static unsigned int numNodes();
 		static unsigned int numCores();
 
-		void initThreadInfo( vector< ThreadInfo >& ti,
-		Element* clocke, Qinfo* q,
-		pthread_mutex_t* sortMutex, double runtime );
-
 		/**
 		 * Stub for eventual function to handle load balancing. This must
 		 * be called to set up default groups.
 		 */
 		void loadBalance();
 
-		/**
-		 * Function to execute on the mpiThread. Deals with
-		 * all MPI transactions. I am keeping it on a single thread
-		 * because different MPI implementations vary in their thread-
-		 * safety.
-		 */
-		static void* mpiThreadFunc( void* shellPtr );
-
 		void launchParser();
 
-		void launchMsgLoop( Element* shelle );
-		/**
-		 * Thread func for handling msgs.
-		 */
-		void* msgLoop( void* shelle );
-
-		void passThroughMsgQs( Element* shelle );
-
-
 		void setRunning( bool value );
+
+		bool inBlockingParserCall() const;
+
+		/**
+		 * This function sets up the threading for the entire system.
+		 * It creates all the worker threads and the threads for
+		 * handling MPI and handling shell requests.
+		 */
+		void launchThreads();
+
+		/**
+		 * This function closes up shop with all the threads.
+		 */
+		void joinThreads();
+
+		pthread_mutex_t* parserMutex() const; 
 
 		////////////////////////////////////////////////////////////////
 		// Functions for handling field Set/Get operations
@@ -376,18 +375,6 @@ class Shell
 		bool isBlockedOnParser_;
 
 		/**
-		 * Pthreads mutex for synchronizing parser calls with underlying
-		 * thread work cycle. Void here so we can compile without pthreads.
-		 */
-		void* parserMutex_; 
-
-		/**
-		 * Pthreads conditional for synchronizing parser calls with 
-		 * thread work cycle. Void here so we can compile without pthreads.
-		 */
-		void* parserBlockCond_; 
-
-		/**
 		 * Number of CPU cores in system. Specifies how many working threads
 		 * will be assigned. Additional threads are created for parser
 		 * and graphics.
@@ -412,10 +399,32 @@ class Shell
 		 */
 		static ProcInfo p_; 
 
+		vector< ProcInfo > threadProcs_;
+
+		/**
+		 * Array of threads, initialized in launchThreads.
+		 */
+		pthread_t* threads_;
+		pthread_t* gThread_; /// graphics thread.
+		pthread_attr_t *attr_;
+
 		unsigned int numAcks_;
 		vector< unsigned int > acked_;
-		void* barrier1_;
-		void* barrier2_;
+		FuncBarrier* barrier1_;
+		FuncBarrier* barrier2_;
+		pthread_barrier_t* barrier3_;
+
+		/**
+		 * Pthreads mutex for synchronizing parser calls with underlying
+		 * thread work cycle. Void here so we can compile without pthreads.
+		 */
+		pthread_mutex_t* parserMutex_; 
+
+		/**
+		 * Pthreads conditional for synchronizing parser calls with 
+		 * thread work cycle. Void here so we can compile without pthreads.
+		 */
+		pthread_cond_t* parserBlockCond_; 
 		/**
 		 * Used to coordinate threads especially when doing MPI.
 		 */

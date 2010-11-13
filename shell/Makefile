@@ -13,6 +13,7 @@ OBJ = \
 	Shell.o	\
 	ShellCopy.o	\
 	ShellThreads.o	\
+	ProcessLoop.o	\
 	LoadModels.o \
 	Neutral.o	\
 	Wildcard.o	\
@@ -28,6 +29,7 @@ $(OBJ)	: $(HEADERS)
 Shell.o:	Shell.h ../msg/AssignmentMsg.h Neutral.h ../scheduling/Clock.h
 ShellCopy.o:	Shell.h Neutral.h
 ShellThreads.o:	Shell.h Neutral.h ../scheduling/Clock.h
+ProcessLoop.o:	Shell.h FuncBarrier.h
 LoadModels.o:	Shell.h Neutral.h
 Neutral.o:	Neutral.h ../basecode/ElementValueFinfo.h
 Wildcard.o:	Wildcard.h Shell.h Neutral.h ../basecode/ElementValueFinfo.h

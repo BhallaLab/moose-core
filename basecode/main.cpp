@@ -246,7 +246,7 @@ int main( int argc, char** argv )
 		if ( !benchmarkTests( argc, argv ) )
 			s->launchParser();
 	} else {
-		s->launchMsgLoop( shelle );
+		s->launchThreads();
 	}
 
 	// cout << s->myNode() << ": Main: out of parser/MsgLoop\n";
