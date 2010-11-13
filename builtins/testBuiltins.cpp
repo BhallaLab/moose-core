@@ -315,8 +315,12 @@ void testGetMsg()
 void testBuiltins()
 {
 	testArith();
-	testFibonacci();
 	testTable();
+}
+
+void testBuiltinsProcess()
+{
+	testFibonacci();
 	testGetMsg();
 }
 

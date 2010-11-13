@@ -31,9 +31,10 @@ extern void testAsync();
 extern void testSyncArray( unsigned int size, unsigned int numThreads,
 	unsigned int method );
 extern void testShell();
-extern void testSingleThreadScheduling();
 extern void testScheduling();
+extern void testSchedulingProcess();
 extern void testBuiltins();
+extern void testBuiltinsProcess();
 
 extern void testMpiScheduling();
 extern void testMpiBuiltins();
@@ -191,7 +192,9 @@ Id init( int argc, char** argv )
 
 /**
  * These tests are meant to run on individual nodes, and should
- * not invoke MPI calls. They should not be run when MPI is running
+ * not invoke MPI calls. They should not be run when MPI is running.
+ * These tests do not use the threaded/MPI event loop and are the most
+ * basic of the set.
  */
 void nonMpiTests( Shell* s )
 {
@@ -205,13 +208,22 @@ void nonMpiTests( Shell* s )
 		testAsync();
 		testMsg();
 		testShell();
-		testSingleThreadScheduling();
+		testScheduling();
 		testBuiltins();
 		testKinetics();
-		testScheduling();
 		s->setHardware( (numCores == 1), numCores, numNodes, 0 );
 	}
 #endif
+}
+
+/**
+ * These tests involve the threaded/MPI process loop and are the next
+ * level of tests.
+ */
+void processTests( Shell* s )
+{
+	testSchedulingProcess();
+	testBuiltinsProcess();
 }
 
 /**
@@ -235,21 +247,22 @@ int main( int argc, char** argv )
 	// spawn a lot of other stuff.
 	Element* shelle = shellId();
 	Shell* s = reinterpret_cast< Shell* >( shelle->dataHandler()->data( 0 ) );
-	nonMpiTests( s );
-	// Actually here we should launch off the thread doing
-	// Shell messaging/MPI, and yield control to the parser.
+	nonMpiTests( s ); // These tests do not need the process loop.
+
+	/*
+	s->launchThreads(); // Here we set off the thread/MPI process loop.
 	if ( s->myNode() == 0 ) {
 		mpiTests();
 #ifdef DO_UNIT_TESTS
 		regressionTests();
 #endif
-		if ( !benchmarkTests( argc, argv ) )
-			s->launchParser();
-	} else {
-		s->launchThreads();
+		if ( benchmarkTests( argc, argv ) )
+		s->doQuit();
 	}
-
-	// cout << s->myNode() << ": Main: out of parser/MsgLoop\n";
+	
+	// Somehow we need to return control to our parser. Then we clean up
+	s->joinThreads();
+	*/
 
 	shellId.destroy();
 	Id(1).destroy();

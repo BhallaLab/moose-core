@@ -8906,5 +8906,8 @@ Begun compilation of the overhauled code. I've put it into Shell.
 Checkin 2358.
 
 Got it to compile. It goes to the same place as last time in the unit tests.
+Checkin 2359.
 
+Now I've separated out unit tests that require the process loop. It clears 
+these.
 ============================================================================
