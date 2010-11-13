@@ -213,10 +213,8 @@ Clock::Clock()
 	  numThreads_( 0 ),
 	  ticks_( Tick::maxTicks )
 {
-	Element* ticke = Id( 2 )();
 	for ( unsigned int i = 0; i < Tick::maxTicks; ++i ) {
 		ticks_[i].setIndex( i );
-		ticks_[i].setElement( ticke );
 	}
 }
 ///////////////////////////////////////////////////
@@ -421,11 +419,23 @@ void Clock::addTick( Tick* t )
 			return;
 	}
 	tickMgr_.push_back( t );
-	tickPtr_.push_back( TickPtr( &tickMgr_.back() ) );
+	// This is messy. The push_back has invalidated all earlier pointers.
+	tickPtr_.clear();
+	for ( vector< TickMgr >::iterator j = tickMgr_.begin(); 
+		j != tickMgr_.end(); ++j)
+	{
+		tickPtr_.push_back( TickPtr( &( *j ) ) );
+	}
 }
 
 void Clock::rebuild()
 {
+	Element* ticke = Id( 2 )();
+	for ( unsigned int i = 0; i < Tick::maxTicks; ++i ) {
+		ticks_[i].setIndex( i );
+		ticks_[i].setElement( ticke );
+	}
+
 	tickPtr_.clear();
 	tickMgr_.clear();
 	for( unsigned int i = 0; i < ticks_.size(); ++i ) {

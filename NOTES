@@ -8909,5 +8909,9 @@ Got it to compile. It goes to the same place as last time in the unit tests.
 Checkin 2359.
 
 Now I've separated out unit tests that require the process loop. It clears 
-these.
+these. Checkin 2360.
+
+This lets me have a go with valgrind... memory errors everywhere!
+Cleared out two of the nastiest run-time errors. Still lots of leaks.
+
 ============================================================================
