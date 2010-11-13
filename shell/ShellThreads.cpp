@@ -159,11 +159,16 @@ pthread_mutex_t* Shell::parserMutex() const
 {
 	return parserMutex_;
 }
+pthread_cond_t* Shell::parserBlockCond() const
+{
+	return parserBlockCond_;
+}
 
 bool Shell::inBlockingParserCall() const
 {
 	return isBlockedOnParser_;
 }
+
 
 ////////////////////////////////////////////////////////////////////////
 // Functions for setting off clocked processes.

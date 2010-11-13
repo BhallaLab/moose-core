@@ -28,12 +28,6 @@ class Clock
 
 		void setTickDt( DataId i, double v );
 		double getTickDt( DataId i ) const;
-		/*
-		unsigned int getNumPendingThreads() const;
-		void setNumPendingThreads( unsigned int num );
-		unsigned int getNumThreads() const;
-		void setNumThreads( unsigned int num );
-		*/
 		
 		//////////////////////////////////////////////////////////
 		//  Dest functions

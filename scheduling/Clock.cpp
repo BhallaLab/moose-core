@@ -107,18 +107,6 @@ const Cinfo* Clock::initCinfo()
 			// &Clock::setNumTicks,
 			&Clock::getNumTicks
 		);
-		static ValueFinfo< Clock, unsigned int > numPendingThreads( 
-			"numPendingThreads",
-			"Number of threads still to update",
-			&Clock::setNumPendingThreads,
-			&Clock::getNumPendingThreads
-		);
-		static ValueFinfo< Clock, unsigned int > numThreads( 
-			"numThreads",
-			"Number of threads",
-			&Clock::setNumThreads,
-			&Clock::getNumThreads
-		);
 		static ReadOnlyValueFinfo< Clock, unsigned int > currentStep( 
 			"currentStep",
 			"Current simulation step",
@@ -173,8 +161,6 @@ const Cinfo* Clock::initCinfo()
 		&currentTime,
 		&nsteps,
 		&numTicks,
-		&numPendingThreads,
-		&numThreads,
 		&currentStep,
 		// SrcFinfos
 		&tickSrc,
@@ -295,27 +281,6 @@ void Clock::setNumTicks( unsigned int num )
 	rebuild();
 }
 
-unsigned int Clock::getNumPendingThreads() const
-{
-	return numPendingThreads_;
-}
-
-void Clock::setNumPendingThreads( unsigned int num )
-{
-	numPendingThreads_ = num;
-}
-
-unsigned int Clock::getNumThreads() const
-{
-	return numThreads_;
-}
-
-void Clock::setNumThreads( unsigned int num )
-{
-	numThreads_ = num;
-	info_.numThreads = num;
-}
-
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
@@ -358,143 +323,6 @@ void Clock::start(  const Eref& e, const Qinfo* q, double runTime )
 	Qinfo::emptyAllQs();
 
 	isRunning_ = 0;
-}
-
-
-// Problem: how do we set up 'numPendingThreads_'? Must do in the parent
-// thread.
-// Sets up the tick Ptrs as the first thread goes through. Resets the
-// counting variable after all are through. Requires that there is a
-// barrier or equivalent downstream, to ensure that any given thread
-// doesn't come back to this function before all other threads are done.
-void Clock::sortTickPtrs( pthread_mutex_t* sortMutex )
-{
-	pthread_mutex_lock( sortMutex );
-		numPendingThreads_++;
-		if ( numPendingThreads_ == 1 ) { // The first thread through should do this.
-			sort( tickPtr_.begin(), tickPtr_.end() );
-			nextTime_ = tickPtr_[1].mgr()->getNextTime();
-			tp0_ = tickPtr_[ 0 ].mgr();
-			// Someone else may modify isRunning_: don't touch.
-		} 
-		if ( numPendingThreads_ >= numThreads_ )
-			numPendingThreads_ = 0;
-	pthread_mutex_unlock( sortMutex );
-	// cout << "Clock::sortTickPtrs: numPending = " << numPendingThreads_ << ", nextTime_ = " << nextTime_ << endl;
-}
-
-// This version uses sortTickPtrs rather than a bunch of barriers.
-void Clock::tStart(  const Eref& e, const ThreadInfo* ti )
-{
-	ProcInfo pinfo = info_; //We use an independent ProcInfo for each thread
-	pinfo.threadId = ti->threadId; // to manage separate threadIds.
-	pinfo.threadIndexInGroup = ti->threadIndexInGroup;
-	pinfo.isMpiThread = ( ti->threadIndexInGroup == ~0U );
-	pinfo.nodeIndexInGroup = ti->nodeIndexInGroup;
-	assert( ti->groupId < Qinfo::numSimGroup() );
-	pinfo.numThreadsInGroup = Qinfo::simGroup( ti->groupId )->numThreads;
-	pinfo.numNodesInGroup = Qinfo::simGroup( ti->groupId )->numNodes;
-	pinfo.groupId = ti->groupId;
-	//pinfo.outQid = ti->outQid;
-	assert( pinfo.numThreads == numThreads_ );
-	static const double ROUNDING = 1.0000000001;
-
-	if ( info_.barrier1 ) {
-		int rc = pthread_barrier_wait(
-		reinterpret_cast< pthread_barrier_t* >( info_.barrier1 ) );
-		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
-	}
-
-	if ( tickPtr_.size() == 0 ) {
-		if ( ti->threadId == 0 ) {
-			info_.currTime += ti->runtime;
-			isRunning_ = 0;
-		}
-		return;
-	}
-	double previousTime = 0.0;
-	if ( ti->threadId == 0 ) {
-		//info_.currTime = previousTime;
-		isRunning_ = 1;
-	}
-	double endTime = ti->runtime * ROUNDING + previousTime;
-
-	/*
-	cout << Shell::myNode() << "." << ti->threadIndexInGroup << 
-		": numThr=" << pinfo.numThreadsInGroup << 
-		", endTime= " << endTime << 
-		", prevousTime= " << previousTime << 
-		", currTime = " << info_.currTime <<
-		endl << flush;
-		*/;
-
-	Element* ticke = Id( 2 )();
-
-	if ( tickPtr_.size() == 1 ) {
-		tickPtr_[0].mgr()->advance( ticke, &pinfo, endTime );
-		if ( ti->threadId == 0 ) {
-			info_ = pinfo; // Do we use info outside? Shouldn't.
-			isRunning_ = 0;
-		}
-		// cout << Shell::myNode() << ": TickPtr.size() == 1\n";
-		// cout << Shell::myNode() << ": Emptying queuueueueues\n";
-		// This one is not needed. Qinfo::mpiClearQ( &pinfo ); // Clear up dangling messages in queue.
-		Qinfo::emptyAllQs();
-		// Qinfo::reportQ();
-		/*
-		*/
-		return;
-	}
-
-	sortTickPtrs( ti->sortMutex ); // Sets up nextTime_ and tp0_.
-	if ( info_.barrier1 ) {
-		int rc = pthread_barrier_wait(
-		reinterpret_cast< pthread_barrier_t* >( info_.barrier1 ) );
-		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
-	}
-	
-	while ( isRunning_ && tp0_->getNextTime() < endTime ) {
-		// This advances all ticks with this dt in order, till nextTime.
-		// It has a barrier within: essential for the sortTickPtrs to work.
-		tp0_->advance( ticke, &pinfo, nextTime_ * ROUNDING );
-		// cout << "Advance at " << nextTime_ << " on thread " << ti->threadId << endl;
-		sortTickPtrs( ti->sortMutex ); // Sets up nextTime_ and tp0_.
-	}
-	/*
-	Qinfo::mpiClearQ( &pinfo ); // Clear up dangling messages in queue.
-	Qinfo::mergeQ( pinfo.groupId ); // Clear up dangling messages in queue.
-	Qinfo::mergeQ( 1 ); // Clear up dangling messages in queue.
-	cout << Shell::myNode() << ": Emptying queuueueueues\n";
-	Qinfo::emptyAllQs();
-	*/
-	if ( ti->threadId == 0 ) {
-		info_ = pinfo;
-		isRunning_ = 0;
-	}
-	// Qinfo::reportQ();
-	// Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-	// s->setRunning( 0 );
-}
-
-void Clock::setBarrier( void* barrier1, void* barrier2 )
-{
-	// info_.barrier1 = barrier1;
-	// info_.barrier2 = barrier2;
-}
-
-// Static function used to pass into pthread_create
-void* Clock::threadStartFunc( void* threadInfo )
-{
-	ThreadInfo* ti = reinterpret_cast< ThreadInfo* >( threadInfo );
-	Id clockId( 1 );
-	Element* clocke = clockId();
-	Clock* clock = reinterpret_cast< Clock* >( clocke->dataHandler()->data( 0 ) );
-	Eref clocker( clockId.eref() );
-	// cout << "Start thread " << ti->threadId << " threadIndex in Group " << ti->threadIndexInGroup << endl;
-	clock->tStart( clocker, ti );
-	// cout << "End thread " << ti->threadId << " with runtime " << ti->runtime << endl;
-
-	pthread_exit( NULL );
 }
 
 void Clock::step(  const Eref& e, const Qinfo* q, unsigned int nsteps )

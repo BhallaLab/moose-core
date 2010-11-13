@@ -244,6 +244,11 @@ void Qinfo::swapQ()
 	}
 }
 
+void Qinfo::swapMpiQ()
+{
+	// dummy func for now.
+}
+
 /**
  * Static func.
  * Used for simulation time data transfer. Symmetric across all nodes.

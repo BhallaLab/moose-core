@@ -8903,4 +8903,8 @@ Starting big overhaul of event loop  in ProcessLoop.cpp.
 ============================================================================
 13 Nov 2010
 Begun compilation of the overhauled code. I've put it into Shell.
+Checkin 2358.
+
+Got it to compile. It goes to the same place as last time in the unit tests.
+
 ============================================================================

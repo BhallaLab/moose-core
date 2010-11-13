@@ -131,7 +131,7 @@ void* shellEventLoop( void* info )
 		pthread_mutex_lock( shell->parserMutex() );
 			p->barrier1->wait();
 			if ( shell->inBlockingParserCall() && !shell->isAckPending() ) {
-				pthread_cond_signal( p->parserBlockCond() );
+				pthread_cond_signal( shell->parserBlockCond() );
 			}
 		pthread_mutex_unlock( shell->parserMutex() );
 
@@ -161,19 +161,18 @@ void* reportGraphics( void* info )
 
 void Shell::launchThreads()
 {
-	pthread_attr_t attr;
 	attr_ = new pthread_attr_t;
 	pthread_attr_init( attr_ );
 	pthread_attr_setdetachstate( attr_, PTHREAD_CREATE_JOINABLE );
-	int numThreads = numCores_ + 1; // Add one for the MPI thread.
+	unsigned int numThreads = numCores_ + 1; // Add one for the MPI thread.
 
 	// Extra thread on barrier 1 for parser control on node 0 
 	// (the main thread here).
-	int numBarrier1Threads = numThreads + ( myNode_ == 0 );
+	unsigned int numBarrier1Threads = numThreads + ( myNode_ == 0 );
 
 	barrier1_ = new FuncBarrier( numBarrier1Threads, &Qinfo::swapQ );
-	barrier2 = new FuncBarrier( numThreads, &swapMpiQ );
-	barrier3 = new FuncBarrier( numThreads );
+	barrier2_ = new FuncBarrier( numThreads, &Qinfo::swapMpiQ );
+	barrier3_ = new FuncBarrier( numThreads );
 	// barrier3 = new pthread_barrier_t;
 	int ret;
 	pthread_t gThread;
@@ -181,14 +180,14 @@ void Shell::launchThreads()
 	parserMutex_ = new pthread_mutex_t; // Assign the Shell variables.
 	parserBlockCond_ = new pthread_cond_t;
 
-	ret = pthread_mutex_init( parser_mutex_, NULL );
+	ret = pthread_mutex_init( parserMutex_, NULL );
 	assert( ret == 0 );
 
 	ret = pthread_cond_init( parserBlockCond_, NULL );
 	assert( ret == 0 );
 
-	ret = pthread_barrier_init( &barrier3, NULL, numBarrier1Threads );
-	assert( ret == 0 );
+	// ret = pthread_barrier_init( barrier3, NULL, numBarrier1Threads );
+	// assert( ret == 0 );
 
 	if ( myNode_ == 0 ) { // Launch graphics thread only on node 0.
 		ProcInfo p;
@@ -204,7 +203,7 @@ void Shell::launchThreads()
 	// pthread_t* threads = new pthread_t[ numBarrier1Threads ];
 	threads_ = new pthread_t[ numBarrier1Threads ];
 
-	for ( int i = 0; i < numBarrier1Threads; ++i ) {
+	for ( unsigned int i = 0; i < numBarrier1Threads; ++i ) {
 		// Note that here we put # of compute cores, not total threads.
 		p[i].numThreadsInGroup = numCores_; 
 
@@ -214,16 +213,15 @@ void Shell::launchThreads()
 		p[i].barrier1 = barrier1_;
 		p[i].barrier2 = barrier2_;
 		p[i].barrier3 = barrier3_;
-		p[i].shellSendMutex = &shellSendMutex;
-		p[i].parserBlockCond = &parserBlockCond;
 
-		if ( i < numCores_ ) { // These are the compute threads
-			int rc = pthread_create( threads_ + i, NULL, eventLoop, 
+		// These are the compute threads
+		if ( i < numCores_ ) { 
+			int rc = pthread_create( threads_ + i, NULL, eventLoopForBcast, 
 				(void *)&p[i] );
 			assert( rc == 0 );
 		} else if ( i == numCores_ ) { // mpiThread stufff.
 			int rc = pthread_create( 
-				threads_ + i, NULL, mpiEventLoop, (void *)&p[i] );
+				threads_ + i, NULL, mpiEventLoopForBcast, (void *)&p[i] );
 			assert( rc == 0 );
 		} else if ( i == numThreads ) { // shellThread stuff.
 			int rc = pthread_create( 
@@ -231,16 +229,13 @@ void Shell::launchThreads()
 			assert( rc == 0 );
 		}
 	}
-	if ( myNode_ == 0 )
-		return &p[ numBarrier1Threads -1 ];
-	
-	return 0;
 }
 
 void Shell::joinThreads()
 {
 	int numThreads = numCores_ + 1; // Add one for the MPI thread.
 	int numBarrier1Threads = numThreads + ( myNode_ == 0 );
+	int ret;
 
 	for ( int i = 0; i < numBarrier1Threads; ++i ) {
 		void* status;
@@ -251,7 +246,7 @@ void Shell::joinThreads()
 
 	if ( myNode_ == 0 ) { // clean up graphics thread only on node 0.
 		void* status;
-		ret = pthread_join( gThread, &status );
+		ret = pthread_join( *gThread_, &status );
 		if ( ret )
 			cout << "Error: Unable to join threads\n";
 	}

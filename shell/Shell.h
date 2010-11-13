@@ -261,6 +261,8 @@ class Shell
 
 		pthread_mutex_t* parserMutex() const; 
 
+		pthread_cond_t* parserBlockCond() const; 
+
 		////////////////////////////////////////////////////////////////
 		// Functions for handling field Set/Get operations
 		////////////////////////////////////////////////////////////////
@@ -412,7 +414,7 @@ class Shell
 		vector< unsigned int > acked_;
 		FuncBarrier* barrier1_;
 		FuncBarrier* barrier2_;
-		pthread_barrier_t* barrier3_;
+		FuncBarrier* barrier3_;
 
 		/**
 		 * Pthreads mutex for synchronizing parser calls with underlying
