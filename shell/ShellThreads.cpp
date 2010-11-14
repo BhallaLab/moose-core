@@ -53,13 +53,20 @@ void Shell::waitForAck()
 		Qinfo::clearQ( &p_ );
 	} else {
 		while ( isAckPending() )
-			pthread_cond_wait( 
-				reinterpret_cast< pthread_cond_t * >( parserBlockCond_ ), 
-				reinterpret_cast< pthread_mutex_t * >( parserMutex_ ) );
+			pthread_cond_wait( parserBlockCond_, parserMutex_ );
 		isBlockedOnParser_ = 0;
-		pthread_mutex_unlock( 
-			reinterpret_cast< pthread_mutex_t * >( parserMutex_ ) );
+		pthread_mutex_unlock( parserMutex_ );
 	}
+}
+
+/**
+ * Test for receipt of acks from all nodes
+ */ 
+bool Shell::isAckPending() const
+{
+	// Put in timeout check here. At this point we would inspect the
+	// acked vector to see which is last.
+	return ( numAcks_ < numNodes_ );
 }
 
 void Shell::setRunning( bool value )

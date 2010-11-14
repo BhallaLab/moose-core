@@ -8956,4 +8956,10 @@ specified group.
 
 For now we'll put everthing in group 0 and just do broadcasts to all nodes.
 Need to get things working.
+Checkin 2362.
 
+Fixed a couple of nasty threading bugs. One was that I had initialized one of
+the barriers to the wrong number of threads. The other was that I had not
+terminated an initAck with an waitForAck function in a couple of Shell 
+functions. Now it unpredictably crashes with a couple of different
+errors in different places, but further along.

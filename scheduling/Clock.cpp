@@ -476,6 +476,11 @@ bool Clock::keepLooping() const
 	return keepLooping_;
 }
 
+void Clock::setLoopingState( bool val )
+{
+	keepLooping_ = val;
+}
+
 /**
  * The processPhase1 operation is called on every thread in the main event 
  * loop, during phase1 of the loop. This has to drive thread-specific 

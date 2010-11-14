@@ -108,6 +108,7 @@ class Clock
 		void setBarrier( void* barrier1, void* barrier2 );
 
 		bool keepLooping() const;
+		void setLoopingState( bool val );
 
 		static void* threadStartFunc( void* threadInfo );
 		static const Cinfo* initCinfo();

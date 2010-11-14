@@ -26,17 +26,15 @@ Id Shell::doCopy( Id orig, Id newParent, string newName, unsigned int n, bool co
 		return Id();
 	}
 
-	initAck();
 	Eref sheller( shelle_, 0 );
 	Id newElm = Id::nextId();
 	vector< Id > args;
 	args.push_back( orig );
 	args.push_back( newParent );
 	args.push_back( newElm );
-	requestCopy->send( sheller, &p_, args, newName , n, copyExtMsg);
-	while ( isAckPending() ) {
-		Qinfo::mpiClearQ( &p_ );
-	}
+	initAck();
+		requestCopy->send( sheller, &p_, args, newName , n, copyExtMsg);
+	waitForAck();
 
 	return newElm;
 }

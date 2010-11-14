@@ -159,6 +159,9 @@ void* reportGraphics( void* info )
 	pthread_exit( NULL );
 }
 
+//////////////////////////////////////////////////////////////////////////
+// This function sets up the threading for the process loop.
+//////////////////////////////////////////////////////////////////////////
 void Shell::launchThreads()
 {
 	attr_ = new pthread_attr_t;
@@ -172,8 +175,7 @@ void Shell::launchThreads()
 
 	barrier1_ = new FuncBarrier( numBarrier1Threads, &Qinfo::swapQ );
 	barrier2_ = new FuncBarrier( numThreads, &Qinfo::swapMpiQ );
-	barrier3_ = new FuncBarrier( numThreads );
-	// barrier3 = new pthread_barrier_t;
+	barrier3_ = new FuncBarrier( numBarrier1Threads );
 	int ret;
 	pthread_t gThread;
 
@@ -185,6 +187,10 @@ void Shell::launchThreads()
 
 	ret = pthread_cond_init( parserBlockCond_, NULL );
 	assert( ret == 0 );
+
+	Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );
+	clock->setLoopingState( 1 );
+	
 
 	// ret = pthread_barrier_init( barrier3, NULL, numBarrier1Threads );
 	// assert( ret == 0 );

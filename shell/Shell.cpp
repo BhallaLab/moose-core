@@ -326,6 +326,7 @@ Shell::Shell()
 		quit_( 0 ), 
 		isSingleThreaded_( 0 ),
 		numAcks_( 0 ),
+		acked_( 1, 0 ),
 		barrier1_( 0 ),
 		barrier2_( 0 ),
 		isRunning_( 0 ),
@@ -957,7 +958,7 @@ void Shell::wildcard( const string& path, vector< Id >& list )
  */
 void Shell::handleAck( unsigned int ackNode, unsigned int status )
 {
-	assert( ackNode <= numNodes_ );
+	assert( ackNode < numNodes_ );
 	acked_[ ackNode ] = status;
 		// Here we could also check which node(s) are last, in order to do
 		// some dynamic load balancing.
@@ -966,16 +967,6 @@ void Shell::handleAck( unsigned int ackNode, unsigned int status )
 		cout << myNode_ << ": Shell::handleAck: Error: status = " <<
 			status << " from node " << ackNode << endl;
 	}
-}
-
-/**
- * Test for receipt of acks from all nodes
- */ 
-bool Shell::isAckPending() const
-{
-	// Put in timeout check here. At this point we would inspect the
-	// acked vector to see which is last.
-	return ( numAcks_ < numNodes_ );
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1073,9 +1064,8 @@ void Shell::innerDispatchSet( Eref& sheller, const Eref& tgt,
 {
 	Id tgtId( tgt.element()->id() );
 	initAck();
-	requestSet.send( sheller, &p_,  tgtId, tgt.index(), fid, buf );
-	while ( isAckPending() )
-		Qinfo::mpiClearQ( &p_ );
+		requestSet.send( sheller, &p_,  tgtId, tgt.index(), fid, buf );
+	waitForAck();
 }
 
 // Static function.
@@ -1157,11 +1147,8 @@ const char* Shell::innerDispatchGet( const Eref& sheller, const Eref& tgt,
 	FuncId fid )
 {
 	initAck();
-	requestGet.send( sheller, &p_, tgt.element()->id(), tgt.index(), fid );
-
-	while ( isAckPending() )
-		Qinfo::mpiClearQ( &p_ );
-	
+		requestGet.send( sheller, &p_, tgt.element()->id(), tgt.index(), fid );
+	waitForAck();
 	return &getBuf_[0];
 }
 
