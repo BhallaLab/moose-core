@@ -66,6 +66,8 @@
 #include "ThreadInfo.h"
 #include "Clock.h"
 
+static const unsigned int OkStatus = ~0; // From Shell.cpp
+
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
@@ -77,6 +79,12 @@ static SrcFinfo0 tickSrc(
 static SrcFinfo0 finished( 
 		"finished",
 		"Signal for completion of run"
+	);
+
+static SrcFinfo2< unsigned int, unsigned int > ack( 
+		"ack",
+		"Acknowledgement signal for receipt/completion of function."
+		"Goes back to Shell on master node"
 	);
 
 const Cinfo* Clock::initCinfo()
@@ -123,12 +131,6 @@ const Cinfo* Clock::initCinfo()
 			"Sets off the simulation for the specified duration",
 			new OpFunc1< Clock, double >(&Clock::handleStart )
 		);
-		/*
-		static DestFinfo start( "start", 
-			"Sets off the simulation for the specified duration",
-			new EpFunc1< Clock, double >(&Clock::start )
-		);
-		*/
 
 		static DestFinfo step( "step", 
 			"Sets off the simulation for the specified # of steps",
@@ -141,13 +143,24 @@ const Cinfo* Clock::initCinfo()
 		);
 
 		static DestFinfo setupTick( "setupTick", 
-			"Sets up a specific clock tick: args tick#, dt, stage",
+			"Sets up a specific clock tick: args tick#, dt",
 			new OpFunc2< Clock, unsigned int, double >(&Clock::setupTick )
 		);
 
 		static DestFinfo reinit( "reinit", 
 			"Zeroes out all ticks, starts at t = 0",
 			new EpFunc0< Clock >(&Clock::reinit )
+		);
+		static Finfo* clockControlFinfos[] = {
+			&start, &step, &stop, &setupTick, &reinit, &ack,
+		};
+	///////////////////////////////////////////////////////
+	// SharedFinfo for Shell to control Clock
+	///////////////////////////////////////////////////////
+		static SharedFinfo clockControl( "clockControl",
+			"Controls all scheduling aspects of Clock, usually from Shell",
+			clockControlFinfos, 
+			sizeof( clockControlFinfos ) / sizeof( Finfo* )
 		);
 	///////////////////////////////////////////////////////
 	// FieldElementFinfo definition for ticks.
@@ -172,11 +185,15 @@ const Cinfo* Clock::initCinfo()
 		&tickSrc,
 		&finished,
 		// DestFinfos
+		/*
 		&start,
 		&step,
 		&stop,
 		&setupTick,
 		&reinit,
+		*/
+		// Shared Finfos
+		&clockControl,
 		// FieldElementFinfo
 		&tickFinfo,
 	};
@@ -526,6 +543,10 @@ void Clock::handleStart( double runtime )
 		cout << "Clock::handleStart: Warning: simulation already in progress.\n Command ignored\n";
 		return;
 	}
+	if ( tickPtr_.size() == 0 || tickPtr_[0].mgr() == 0 ) {
+		cout << "Clock::handleStart: Warning: simulation not yet initialized.\n Command ignored\n";
+		return;
+	}
 	runTime_ = runtime;
 	endTime_ = runtime * ROUNDING + currentTime_;
 	isRunning_ = 1;
@@ -552,6 +573,7 @@ void Clock::advancePhase2(  ProcInfo *p )
 			Id clockId( 1 );
 			isRunning_ = 0;
 			finished.send( clockId.eref(), p );
+			ack.send( clockId.eref(), p, p->nodeIndexInGroup, OkStatus );
 		}
 	}
 }
@@ -582,6 +604,7 @@ void Clock::handleReinit()
  * Reinit is used to reinit the state of the scheduling system.
  * This version is meant to be done through the multithread scheduling
  * loop.
+ * In phase1 it calls reinit on all target Elements.
  */
 void Clock::reinitPhase1( ProcInfo* info ) const
 {
@@ -591,6 +614,9 @@ void Clock::reinitPhase1( ProcInfo* info ) const
 	}
 }
 
+/**
+ * In phase2 it initializes internal TickMgr state variables.
+ */
 void Clock::reinitPhase2( ProcInfo* info )
 {
 	info->currTime = 0.0;
@@ -601,6 +627,8 @@ void Clock::reinitPhase2( ProcInfo* info )
 			i->mgr()->reinitPhase2( info );
 		}
 		sort( tickPtr_.begin(), tickPtr_.end() );
+		Id clockId( 1 );
+		ack.send( clockId.eref(), info, info->nodeIndexInGroup, OkStatus );
 	}
 }
 

@@ -8962,4 +8962,12 @@ Fixed a couple of nasty threading bugs. One was that I had initialized one of
 the barriers to the wrong number of threads. The other was that I had not
 terminated an initAck with an waitForAck function in a couple of Shell 
 functions. Now it unpredictably crashes with a couple of different
-errors in different places, but further along.
+errors in different places, but further along. Checkin 2363.
+
+Still inching further. It crashes in testShell:testShellAddMsg because
+it requires a reinit before a start. That has been patched over but it
+needs an internal automatic reinit to avoid this issue.
+
+Added a SharedMsg between Shell and Clock as they have a lot of functions
+to call. Implemented ack callbacks in Clock, but it still doesn't work for
+reinit. So the test still stalls.

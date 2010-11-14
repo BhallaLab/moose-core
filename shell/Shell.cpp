@@ -42,7 +42,7 @@ static SrcFinfo5< string, Id, Id, string, vector< unsigned int > > requestCreate
 			);
 
 static SrcFinfo2< unsigned int, unsigned int > ack( "ack",
-			"ack( unsigned int node# ):"
+			"ack( unsigned int node#, unsigned int status ):"
 			"Acknowledges receipt and completion of a command on a worker node."
 			"Goes back only to master node."
 			);
@@ -61,16 +61,32 @@ static SrcFinfo1< double > requestStart( "requestStart",
 			"Starts a simulation. Goes to all nodes including self."
 			"Initiates a callback to indicate completion of run."
 			);
-static SrcFinfo0 requestReinit( "requestReinit",
-			"requestReinit():"
-			"Reinits a simulation: sets to time 0."
+static SrcFinfo1< unsigned int > requestStep( "requestStep",
+			"requestStep():"
+			"Advances a simulation for the specified # of steps."
 			"Goes to all nodes including self."
 			);
 static SrcFinfo0 requestStop( "requestStop",
 			"requestStop():"
 			"Gently stops a simulation after completing current ops."
+			"After this op it is save to do 'start' again, and it will"
+			"resume where it left off"
 			"Goes to all nodes including self."
 			);
+static SrcFinfo2< unsigned int, double > requestSetupTick( 
+			"requestSetupTick",
+			"requestSetupTick():"
+			"Asks the Clock to coordinate the assignment of a specific"
+			"clock tick. Args: Tick#, dt."
+			"Goes to all nodes including self."
+			);
+static SrcFinfo0 requestReinit( "requestReinit",
+			"requestReinit():"
+			"Reinits a simulation: sets to time 0."
+			"If simulation is running it stops it first."
+			"Goes to all nodes including self."
+			);
+
 static SrcFinfo0 requestTerminate( "requestTerminate",
 			"requestTerminate():"
 			"Violently stops a simulation, possibly leaving things half-done."
@@ -245,6 +261,11 @@ static Finfo* shellWorker[] = {
 		&handleMove, &handleCopy, &handleUseClock,
 	&ack };
 
+static Finfo* clockControlFinfos[] = 
+{
+	&requestStart, &requestStep, &requestStop, &requestSetupTick,
+	&requestReinit, &handleAck
+};
 
 const Cinfo* Shell::initCinfo()
 {
@@ -282,8 +303,13 @@ const Cinfo* Shell::initCinfo()
 			"Handles commands arriving from master shell on node 0."
 			"Sends out acknowledgements from them.",
 			shellWorker, sizeof( shellWorker ) / sizeof( const Finfo* )
-		);
 
+		);
+		static SharedFinfo clockControl( "clockControl",
+			"Controls the system Clock",
+			clockControlFinfos, 
+			sizeof( clockControlFinfos ) / sizeof( const Finfo* )
+		);
 	
 	static Finfo* shellFinfos[] = {
 		&name,
@@ -305,6 +331,7 @@ const Cinfo* Shell::initCinfo()
 ////////////////////////////////////////////////////////////////
 		&master,
 		&worker,
+		&clockControl,
 	};
 
 	static Cinfo shellCinfo (
@@ -436,8 +463,8 @@ void Shell::connectMasterMsg()
 		}
 	}
 	Id clockId( 1 );
-	bool ret = innerAddMsg( "Single", FullId( shellId, 0 ), "requestStart", 
-		FullId( clockId, 0 ), "start" );
+	bool ret = innerAddMsg( "Single", FullId( shellId, 0 ), "clockControl", 
+		FullId( clockId, 0 ), "clockControl" );
 	assert( ret );
 	// innerAddMsg( string msgType, FullId src, string srcField, FullId dest, string destField )
 }
@@ -452,6 +479,9 @@ void Shell::doQuit( )
 void Shell::doStart( double runtime )
 {
 	Eref sheller( shelle_, 0 );
+	// Check if sim not yet initialized. Do it if needed.
+
+	// Then actually run simulation.
 	initAck();
 		requestStart.send( sheller, &p_, runtime );
 	waitForAck();
