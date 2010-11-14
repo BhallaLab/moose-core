@@ -121,8 +121,14 @@ const Cinfo* Clock::initCinfo()
 	///////////////////////////////////////////////////////
 		static DestFinfo start( "start", 
 			"Sets off the simulation for the specified duration",
+			new OpFunc1< Clock, double >(&Clock::handleStart )
+		);
+		/*
+		static DestFinfo start( "start", 
+			"Sets off the simulation for the specified duration",
 			new EpFunc1< Clock, double >(&Clock::start )
 		);
+		*/
 
 		static DestFinfo step( "step", 
 			"Sets off the simulation for the specified # of steps",

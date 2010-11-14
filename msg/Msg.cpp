@@ -57,7 +57,6 @@ Msg::Msg( Element* e1, Element* e2, MsgId mid, Id managerId )
 
 Msg::~Msg()
 {
-	// MsgManager::dropMsg( mid_ );
 	msg_[ mid_ ] = 0;
 	e1_->dropMsg( mid_ );
 	e2_->dropMsg( mid_ );
@@ -87,13 +86,6 @@ void Msg::initNull()
 	lookupDataId_.push_back( 0 ); // for setMsg, which is a OneToOne msg.
 }
 
-/*
-void Msg::clearQ() const 
-{
-	e2_->clearQ();
-}
-*/
-
 void Msg::process( const ProcInfo* p, FuncId fid ) const 
 {
 	e2_->process( p, fid );
@@ -101,10 +93,6 @@ void Msg::process( const ProcInfo* p, FuncId fid ) const
 
 const Msg* Msg::getMsg( MsgId m )
 {
-	/*
-	if ( m >= msg_.size() )
-		cout << Shell::myNode() << ": Msg::getMsg: Error: m = " << m << " >= msg_.size() = " << msg_.size() << endl;
-		*/
 	assert( m < msg_.size() );
 	return msg_[ m ];
 }

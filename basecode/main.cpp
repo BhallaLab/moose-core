@@ -180,7 +180,7 @@ Id init( int argc, char** argv )
 	s->setShellElement( shelle );
 	s->setHardware( isSingleThreaded, numCores, numNodes, myNode );
 	s->loadBalance();
-	Shell::connectMasterMsg();
+	s->connectMasterMsg();
 	// Msg* m = new OneToOneMsg( shelle, shelle );
 	// assert ( m != 0 );
 	
@@ -249,19 +249,22 @@ int main( int argc, char** argv )
 	Shell* s = reinterpret_cast< Shell* >( shelle->dataHandler()->data( 0 ) );
 	nonMpiTests( s ); // These tests do not need the process loop.
 
-	/*
 	s->launchThreads(); // Here we set off the thread/MPI process loop.
 	if ( s->myNode() == 0 ) {
-		mpiTests();
 #ifdef DO_UNIT_TESTS
+		mpiTests();
 		regressionTests();
 #endif
-		if ( benchmarkTests( argc, argv ) )
-		s->doQuit();
+		// These are outside unit tests because they happen in optimized
+		// mode, using a command-line argument. As soon as they are done
+		// the system quits, in order to estimate timing.
+		if ( benchmarkTests( argc, argv ) ) 
+			s->doQuit();
 	}
 	
 	// Somehow we need to return control to our parser. Then we clean up
 	s->joinThreads();
+	/*
 	*/
 
 	shellId.destroy();

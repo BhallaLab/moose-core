@@ -117,6 +117,13 @@ class Shell
 		 */
 		 Id doLoadModel( const string& fname, const string& modelpath );
 
+		/**
+		 * Works through internal queue of operations that modify the
+		 * structure of the simulation. These operations have to be 
+		 * carefully separated from any other functions or messaging,
+		 * so this happens while all other threads are blocked. 
+		 */
+		static void clearRestructuringQ();
 		///////////////////////////////////////////////////////////
 		// DestFinfo functions
 		///////////////////////////////////////////////////////////
@@ -220,9 +227,9 @@ class Shell
 		
 		/**
 		 * Sets up master message that interconnects all shells on all
-		 * nodes
+		 * nodes, and other initialization of basic messages.
 		 */
-		static void connectMasterMsg();
+		void connectMasterMsg();
 		/**
 		 * Assigns the hardware availability. Assumes that each node will
 		 * have the same number of cores available.

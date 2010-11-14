@@ -74,13 +74,13 @@ void Qvec::stitch()
 
 const char* Qvec::data() const
 {
-	assert( data_.size() > threadQreserve );
+	assert( data_.size() >= threadQreserve );
 	return &data_[0];
 }
 
 char* Qvec::writableData()
 {
-	assert( data_.size() > threadQreserve );
+	assert( data_.size() >= threadQreserve );
 	return &data_[0];
 }
 

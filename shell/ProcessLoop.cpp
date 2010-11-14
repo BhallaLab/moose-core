@@ -229,6 +229,7 @@ void Shell::launchThreads()
 			assert( rc == 0 );
 		}
 	}
+	cout << "Calling thread\n";
 }
 
 void Shell::joinThreads()

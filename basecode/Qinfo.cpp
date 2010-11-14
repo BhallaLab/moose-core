@@ -116,17 +116,20 @@ const SimGroup* Qinfo::simGroup( unsigned int index )
 // Note that it does not advance the buffer.
 void hackForSendTo( const Qinfo* q, const char* buf )
 {
-	const DataId* tgtIndex = 
-		reinterpret_cast< const DataId* >( buf + sizeof( Qinfo ) +
-		q->size() - sizeof( DataId ) );
-
-	Element* tgt;
-	if ( q->isForward() )
-		tgt = Msg::getMsg( q->mid() )->e2();
-	else 
-		tgt = Msg::getMsg( q->mid() )->e1();
-	const OpFunc* func = tgt->cinfo()->getOpFunc( q->fid() );
-	func->op( Eref( tgt, *tgtIndex ), buf );
+	const Msg *m = Msg::getMsg( q->mid() );
+	if ( m ) { // may be 0 if model restructured before msg delivery.
+		const DataId* tgtIndex = 
+			reinterpret_cast< const DataId* >( buf + sizeof( Qinfo ) +
+			q->size() - sizeof( DataId ) );
+	
+		Element* tgt;
+		if ( q->isForward() )
+			tgt = m->e2();
+		else 
+			tgt = m->e1();
+		const OpFunc* func = tgt->cinfo()->getOpFunc( q->fid() );
+		func->op( Eref( tgt, *tgtIndex ), buf );
+	}
 }
 
 void readBuf(const Qvec& qv, const ProcInfo* proc )
@@ -143,8 +146,10 @@ void readBuf(const Qvec& qv, const ProcInfo* proc )
 				hackForSendTo( qi, buf );
 			} else {
 				const Msg* m = Msg::getMsg( qi->mid() );
-				assert( m );
-				m->exec( buf, proc );
+				// m may be 0 if a Msg or Element has been cleared between
+				// the sending of the Msg and its receipt.
+				if ( m )
+					m->exec( buf, proc );
 			}
 		}
 		buf += sizeof( Qinfo ) + qi->size();
@@ -161,7 +166,8 @@ void Qinfo::readQ( const ProcInfo* proc )
 {
 	assert( proc );
 	assert( proc->groupId < inQ_->size() );
-	readBuf( ( *inQ_ )[ proc->groupId ], proc );
+	for ( unsigned int i = 0; i < inQ_->size(); ++i )
+		readBuf( ( *inQ_ )[ i ], proc );
 }
 
 /**
@@ -194,28 +200,6 @@ void Qinfo::readMpiQ( const ProcInfo* proc )
 }
 
 /**
- * Static func. 
- * Deliver the contents of the mpiQ to target objects,
- * used in sending data between roots.
- * Not thread safe. To run multithreaded, requires that
- * the messages have been subdivided on a per-thread basis to avoid 
- * overwriting each others targets.
-void Qinfo::readRootQ( const ProcInfo* proc )
-{
-	assert( proc );
-	assert( proc->groupId < mpiQ_.size() );
-	vector< char >& q = mpiQ_[ 0 ];
-
-	unsigned int *bufsize = reinterpret_cast< unsigned int* >( &q[0] );
-	readBuf( &q[0], proc );
-	*bufsize = 0;
-	// cout << Shell::myNode() << ": readRootQ\n";
-	// Qinfo::reportQ();
-	return;
-}
- */
-
-/**
  * Exchanges inQs and outQs. Also stitches together thread blocks on
  * the inQ so that the readBuf function will go through as a single 
  * unit.
@@ -225,6 +209,10 @@ void Qinfo::readRootQ( const ProcInfo* proc )
  */
 void Qinfo::swapQ()
 {
+	// This happens here protected by the barrier, so that operations that
+	// change the structure of the model can occur without risk of 
+	// affecting ongoing messaging.
+	Shell::clearRestructuringQ();
 	if ( inQ_ == &q2_ ) {
 		inQ_ = &q1_;
 		outQ_ = &q2_;

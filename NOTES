@@ -8913,5 +8913,47 @@ these. Checkin 2360.
 
 This lets me have a go with valgrind... memory errors everywhere!
 Cleared out two of the nastiest run-time errors. Still lots of leaks.
+Checkin 2361.
+
+Trying to get 'start' to work. I need to settle on a design for how the
+acks are sent (always from shell?) and how shells connect to other shells and
+clocks.
 
 ============================================================================
+14 Nov 2010
+Two ways to handle Shell operations that manipulate the model structure:
+- Implement dummy Msgs and DataHandlers for moved or deleted msgs/objects,
+	that cleanly intercept and ignore all calls for a cycle or two, 
+	till the queues are flushed. Then the actual delete happens.
+- Add some extra processing to the swapQ function to clear out any pending
+	structural operations in the Shell. Then scan the soon-to-be InQ
+	and clean out entries that would impinge on deleted objects, etc.
+	This will require a way to further queue operations for the Shell to
+	handle during its process.
+	Or it will require that I build in a check for valid msg and dest in
+	each ReadQ step. This is much easier. Anything that removes an 
+	Element or Msg will end up clearing out the Msg ptr from Msg::getMsg.
+	If the Element has just been moved the Msg goes with it.
+
+I prefer the second option, using the generic check for valid Msg.
+
+For Shell functions that talk to other objects: Set and Get have to be
+relayed through the local node Shell. A permanent message to the Clock
+may not be a bad thing for run/stop/reinit and so on. These can proceed
+through the regular messaging.
+
+First, need to set up some tests of the functioning of the ProcessLoop.
+I would like to set up some reporter objects and inject operation requests.
+
+Still need to sort out groups. Need new unit tests for those as well.
+This simply requires that each msg puts its output into the Qvec for the
+specified group.
+
+	Group 0: Includes all nodes. All messages to and from Shells:
+		the master msg to other shells, and the clock controls. Any
+		display I/O messages too?
+	Group 1: Any subset of Elements under group 1.
+
+For now we'll put everthing in group 0 and just do broadcasts to all nodes.
+Need to get things working.
+

@@ -429,14 +429,16 @@ void Shell::connectMasterMsg()
 	Msg* m = 0;
 		m = new OneToOneMsg( shelle, shelle );
 	if ( m ) {
-		if ( f1->addMsg( f2, m->mid(), shelle ) ) {
-			return;
-		} else {
+		if ( !f1->addMsg( f2, m->mid(), shelle ) ) {
 			cout << "Error: failed in Shell::connectMasterMsg()\n";
 			delete m; // Nasty, but rare.
 		}
 	}
-	exit( 0 ); // Bad!
+	Id clockId( 1 );
+	bool ret = innerAddMsg( "Single", FullId( shellId, 0 ), "requestStart", 
+		FullId( clockId, 0 ), "start" );
+	assert( ret );
+	// innerAddMsg( string msgType, FullId src, string srcField, FullId dest, string destField )
 }
 
 void Shell::doQuit( )
@@ -587,11 +589,20 @@ Id Shell::doFind( const string& path ) const
 	return curr;
 }
 
-
+/// Static func.
+void Shell::clearRestructuringQ()
+{
+	// cout << "o";
+}
 ////////////////////////////////////////////////////////////////
 // DestFuncs
 ////////////////////////////////////////////////////////////////
 
+/**
+ * The process call happens at a time when there are no more incoming
+ * msgs to the Shell making their way through the message system.
+ * However, there may be outgoing msgs queued up.
+ */
 void Shell::process( const Eref& e, ProcPtr p )
 {
 	Id clockId( 1 );
