@@ -8970,4 +8970,20 @@ needs an internal automatic reinit to avoid this issue.
 
 Added a SharedMsg between Shell and Clock as they have a lot of functions
 to call. Implemented ack callbacks in Clock, but it still doesn't work for
-reinit. So the test still stalls.
+reinit. So the test still stalls. Checkin 2364.
+============================================================================
+15 Nov 2010
+Hangs:
+main thread: Shell::waitForAck: cond_wait.
+eventLoopForBcast: barrier3
+eventLoopForBcast: barrier3
+mpiEventLoopForBcast: barrier3
+shellEventLoop: barrier3.
+
+Turns out that the various threads are still looping. We just are not
+able to get out of the cond_wait. The ack is still pending.
+The handleAck never gets triggered. Looks like
+the reinit function is never sending back an ack.
+Need to check if Clock::reinitPhase2 ever gets to ack.send.
+
+============================================================================

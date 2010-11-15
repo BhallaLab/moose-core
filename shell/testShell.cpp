@@ -452,7 +452,7 @@ bool checkOutput( Id e,
 	double v0, double v1, double v2, double v3, double v4 )
 {
 	bool ret = 1;
-	bool report = 0;
+	bool report = 1;
 	Eref e0( e(), 0 );
 	double val = Field< double >::get( e0, "outputValue" );
 	ret = ret && ( fabs( val - v0 ) < 1e-6 );
@@ -534,6 +534,17 @@ void testShellAddMsg()
 	assert( ret );
 	ret = SetGet1< double >::setVec( g1.eref(), "arg1", init ); // 12345
 	assert( ret );
+
+	const Arith* a10obj = reinterpret_cast< Arith* >( Eref( a1(), 0 ).data() );
+	const Arith* a11obj = reinterpret_cast< Arith* >( Eref( a1(), 1 ).data() );
+	const Arith* a12obj = reinterpret_cast< Arith* >( Eref( a1(), 2 ).data() );
+	const Arith* a13obj = reinterpret_cast< Arith* >( Eref( a1(), 3 ).data() );
+	const Arith* a14obj = reinterpret_cast< Arith* >( Eref( a1(), 4 ).data() );
+	assert( doubleEq( a10obj->getArg1(), 1 ) );
+	assert( doubleEq( a11obj->getArg1(), 2 ) );
+	assert( doubleEq( a12obj->getArg1(), 3 ) );
+	assert( doubleEq( a13obj->getArg1(), 4 ) );
+	assert( doubleEq( a14obj->getArg1(), 5 ) );
 
 	///////////////////////////////////////////////////////////
 	// Set up messaging
@@ -984,6 +995,7 @@ void testFindModelParent()
 void testShell( )
 {
 	testChopPath();
+	testTreeTraversal();
 //	testCreateDelete();
 	// testShellParserQuit();
 }

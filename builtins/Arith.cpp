@@ -146,3 +146,8 @@ double Arith::getOutput() const
 {
 	return output_;
 }
+
+double Arith::getArg1() const
+{
+	return arg1_;
+}

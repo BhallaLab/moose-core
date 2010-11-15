@@ -149,7 +149,8 @@ const Cinfo* Clock::initCinfo()
 
 		static DestFinfo reinit( "reinit", 
 			"Zeroes out all ticks, starts at t = 0",
-			new EpFunc0< Clock >(&Clock::reinit )
+	// 		new EpFunc0< Clock >(&Clock::reinit )
+	 		new OpFunc0< Clock >(&Clock::handleReinit )
 		);
 		static Finfo* clockControlFinfos[] = {
 			&start, &step, &stop, &setupTick, &reinit, &ack,
@@ -565,9 +566,10 @@ void Clock::advancePhase1(  ProcInfo *p ) const
 // is finished.
 void Clock::advancePhase2(  ProcInfo *p )
 {
-	if ( p->threadIndexInGroup == 0 && tickPtr_.size() > 1 ) {
+	if ( p->threadIndexInGroup == 0 ) {
 		tickPtr_[0].mgr()->advancePhase2( p );
-		sort( tickPtr_.begin(), tickPtr_.end() );
+		if ( tickPtr_.size() > 1 )
+			sort( tickPtr_.begin(), tickPtr_.end() );
 		currentTime_ = tickPtr_[0].mgr()->getNextTime();
 		if ( currentTime_ > endTime_ ) {
 			Id clockId( 1 );

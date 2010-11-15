@@ -253,6 +253,7 @@ int main( int argc, char** argv )
 	if ( s->myNode() == 0 ) {
 #ifdef DO_UNIT_TESTS
 		mpiTests();
+		processTests( s );
 		regressionTests();
 #endif
 		// These are outside unit tests because they happen in optimized
