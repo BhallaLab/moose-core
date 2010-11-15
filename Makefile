@@ -314,7 +314,7 @@ libmoose.so: libs
 
 pymoose: CXXFLAGS += -DPYMOOSE -fPIC -I/usr/include/python2.6
 pymoose: SUBDIR += pymoose	
-pymoose: OBJLIBS += pymoose/pymoose.o
+pymoose: OBJLIBS := pymoose/pymoose.o $(OBJLIBS)
 pymoose: LIBS += -lpython2.6
 pymoose: _moose.so	
 
