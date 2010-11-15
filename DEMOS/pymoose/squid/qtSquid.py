@@ -405,7 +405,6 @@ class QtSquid(QtGui.QMainWindow):
     # time being I shall go for backward compatibility.
     def resetSlot(self):
         """Reset the simulation"""
-        print "resetSlot"
         if not self.overlay:
             print "Overlay is off. Clearing all plots."
             self.runCount = -1
@@ -449,7 +448,6 @@ class QtSquid(QtGui.QMainWindow):
             paramDict["temperature"] = float(self.temperatureEdit.text())
             paramDict["naConc"] = float(self.naConcEdit.text())
             paramDict["kConc"] = float(self.kConcEdit.text())
-            print '### Doing reset for IClamp'
             self.squidModel.doResetForIClamp(paramDict)
         else:
             print "Voltage clamp"
@@ -494,7 +492,6 @@ class QtSquid(QtGui.QMainWindow):
 
     def runSlot(self):
         """Run the simulation"""
-        print "runSlot"
         runtime = 1e-3*float(self.runTimeEdit.text())
         self.squidModel.doRun(runtime)
         # Convert the tables into numpy arrays. 
@@ -539,7 +536,6 @@ class QtSquid(QtGui.QMainWindow):
 
     def statePlotSlot(self):
         """Show state plot"""
-        print "statePlotSlot"
         if self.statePlotWindow.isVisible():
             self.statePlotWindow.hide()
         else:
@@ -548,7 +544,6 @@ class QtSquid(QtGui.QMainWindow):
     def statePlotXSlot(self, newValue):
         self.statePlotX = str(newValue)
         key = self.statePlotX + "-" + self.statePlotY
-        print self.statePlotX, self.statePlotY, self.statePlotParams.keys()
         self.statePlot.setAxisTitle(Qwt.QwtPlot.xBottom, self.statePlotX)
         self.statePlot.setAxisTitle(Qwt.QwtPlot.yLeft, self.statePlotY)
 
@@ -559,7 +554,6 @@ class QtSquid(QtGui.QMainWindow):
     def statePlotYSlot(self, newValue):
         self.statePlotY = str(newValue)
         key = self.statePlotX + "-" + self.statePlotY
-        print self.statePlotX, self.statePlotY, self.statePlotParams.keys()
         self.statePlot.setAxisTitle(Qwt.QwtPlot.xBottom, self.statePlotX)
         self.statePlot.setAxisTitle(Qwt.QwtPlot.yLeft, self.statePlotY)
         self.addCurve(self.statePlot, key, STATEPLOT_COLORMAP[key],
@@ -567,14 +561,12 @@ class QtSquid(QtGui.QMainWindow):
         self.statePlot.replot()
 
     def clearStatePlotSlot(self):
-        print "clearStatePlotSlot"
         if hasattr(self, "statePlot"):
             self.statePlot.clear()
             self.statePlot.replot()
 
     def overlaySlot(self):
         """Toggle overlay state"""
-        print "overlaySlot"
         if self.overlayAction.isChecked():
             self.overlay = True
         else:
@@ -596,19 +588,12 @@ class QtSquid(QtGui.QMainWindow):
         else:
             self.plotPanel.show()
 
-    def closeEvent(self, event):
-        """Overriding QWidget.closeEvent() in order to close all other
-        windows
-        """
-        windowList = QtGui.qApp.topLevelWidgets()
-        for window in windowList:
-            if window != self:
-                window.close()
-        QtGui.qApp.quit()
+
 
     
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
+    app.connect(app, QtCore.SIGNAL('lastWindowClosed()'), app, QtCore.SLOT('quit()'))
     qtSquid = QtSquid()
     qtSquid.show()
     sys.exit(app.exec_())
