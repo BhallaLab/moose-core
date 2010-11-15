@@ -23,7 +23,7 @@
 #
 ############################################################################
 
-TARGET=pymoose
+TARGET=pymoose.o
 CXXFLAGS+=-fno-strict-aliasing -I/usr/local/include -I.. -I../basecode -I../connections -I../maindir -I../genesis_parser  -I../shell -I../element -I../scheduling -I../biophysics -I../hsolve -I../kinetics -I../ksolve -I../builtins -I../utility -I../randnum -I../robots -I../device
 LIBS += -L/usr/lib -lpython2.6
 
@@ -38,7 +38,7 @@ SWIGOPTS+=-DUSE_GL
 endif
 
 ifeq ($(USE_NEUROML),1)
-CXXFLAGS+=-I../neuroML_IO -I../external/include -DUSE_NEUROML
+CXXFLAGS+=-I../neuroML_IO -I../external/neuroML_src -DUSE_NEUROML
 SWIGOPTS+=-DUSE_NEUROML
 endif
 
@@ -46,45 +46,10 @@ endif
 # Darwin may not have the OSTYPE environment variable defined in bash. Set OSTYPE=Darwin if required
 ifeq ($(OSTYPE),Darwin)
 	CXXFLAGS+=-bundle -fno-common /usr/bin/python -flat_namespace -undefined suppress -I/Library/Frameworks/Python.framework/Versions/2.6/include/python2.6
-	LDFLAGS+=-bundle -fno-common -L/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/config/
+	export LDFLAGS+=-bundle -fno-common -L/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/config/
 else # this is for unix like systems - change /usr/include/Python2.6 to the directory where Python.h is located
 	CXXFLAGS +=-I/usr/include/python2.6
-	LDFLAGS+=-shared
-endif
-
-OBJFILES := ../basecode/basecode.o \
-	../element/element.o \
-	../shell/shell.o \
-	../builtins/builtins.o \
-	../biophysics/biophysics.o \
-	../scheduling/scheduling.o \
-	../maindir/init.o	\
-	../maindir/initCinfos.o	\
-	../connections/connections.o \
-	../utility/utility.o	\
-	../randnum/randnum.o	\
-	../maindir/init.o	\
-	../connections/connections.o \
-	../genesis_parser/SLI.o	\
-	../kinetics/kinetics.o	\
-	../hsolve/hsolve.o	\
-	../ksolve/ksolve.o	\
-	../device/device.o \
-	../robots/robots.o	\
-
-
-
-ifeq ($(USE_SBML),1)
-	OBJFILES := $(OBJFILES) ../sbml_IO/sbml_IO.o
-endif
-
-ifeq ($(USE_NEUROML),1)
-	OBJFILES := $(OBJFILES) ../neuroML_IO/neuroML_IO.o
-	LIBS+= -L../external/lib/
-endif
-
-ifeq ($(USE_GL),1)
-	OBJFILES := $(OBJFILES) ../gl/src/GLcell.o ../gl/src/GLview.o ../gl/src/GLshape.o
+	export LDFLAGS+=-shared
 endif
 
 OBJ = PyMooseBase.o \
@@ -242,33 +207,19 @@ HEADERS=PyMooseUtil.h \
 	SigNeur.h	\
 
 
-#TEST_MAIN = TestPyMoose.o
-
-#testPyMoose: $(OBJ) $(OBJFILES) $(HEADERS) $(TEST_MAIN)
-#	$(CXX) $(CXXFLAGS) -o $@ $^
-
 
 default: $(TARGET)
 
-.PHONY: pymoose
+
 .PHONY: clean
 
-pymoose: _moose.so moose.py #testPyMoose 
-
-ifeq ($(OSTYPE),Darwin)
-_moose.so: moose_wrap.o $(OBJFILES) $(OBJ) 
-	$(CXX) $(LDFLAGS) -o $@  $(LIBS) $^ 
-endif
-
-ifneq ($(OSTYPE),Darwin)
-_moose.so: moose_wrap.o $(OBJ) $(OBJFILES)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS)
-endif
+$(TARGET): moose.py moose_wrap.o $(OBJ) $(HEADERS)
+	$(LD)  -r -o $(TARGET) $(OBJ) moose_wrap.o
 
 moose_wrap.o: moose_wrap.cxx
 	$(CXX) $(CXXFLAGS) -c $^ -o $@
 
-moose.py moose_wrap.cxx: moose.i $(HEADERS) $(OBJ)
+moose.py moose_wrap.cxx: moose.i $(HEADERS)
 	swig -modern -c++ -python -threads $(SWIGOPTS) moose.i
 
 # This is not required - gnumake does it by implicit rule
