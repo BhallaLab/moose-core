@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Nov 10 07:08:48 2010 (+0530)
+# Last-Updated: Mon Nov 15 09:53:58 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2594
+#     Update #: 2598
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -436,6 +436,8 @@ class MainWindow(QtGui.QMainWindow):
         self.aboutMooseAction = QtGui.QAction(self.tr('&About'), self)
         self.connect(self.aboutMooseAction, QtCore.SIGNAL('triggered()'), self.makeAboutMooseLabel)
         self.showDocAction = QtGui.QAction(self.tr('Documentation'), self)
+        self.reportBugAction = QtGui.QAction(self.tr('Report a bug'), self)
+        self.connect(self.reportBugAction, QtCore.SIGNAL('triggered()'), self.openBugsPage)
         self.connect(self.showDocAction, QtCore.SIGNAL('triggered()'), self.browseDocumentation)
         # self.contextHelpAction = QtGui.QAction(self.tr('Context Help'), self)
         
@@ -540,6 +542,7 @@ class MainWindow(QtGui.QMainWindow):
         self.demosMenu = self.makeDemosMenu()
         self.helpMenu.addMenu(self.demosMenu)
         self.helpMenu.addAction(self.aboutMooseAction)
+        self.helpMenu.addAction(self.reportBugAction)
         self.menuBar().addMenu(self.fileMenu)
         self.menuBar().addMenu(self.viewMenu)
         self.menuBar().addMenu(self.editModelMenu)
@@ -990,6 +993,9 @@ class MainWindow(QtGui.QMainWindow):
 
     def browseDocumentation(self):
         QtGui.QDesktopServices.openUrl(QtCore.QUrl(QtCore.QString(config.MOOSE_DOC_URL)))
+
+    def openBugsPage(self):
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl(QtCore.QString(config.MOOSE_REPORT_BUG_URL)))
 
     def updateDefaultTimes(self, modeltype):
         self.simdtText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_SIMDT)))

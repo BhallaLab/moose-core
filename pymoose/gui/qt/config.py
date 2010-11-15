@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Feb 13 16:07:56 2010 (+0530)
 # Version: 
-# Last-Updated: Sat Nov  6 12:32:50 2010 (+0530)
+# Last-Updated: Mon Nov 15 09:53:00 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 143
+#     Update #: 145
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -79,6 +79,7 @@ QT_MAJOR_VERSION = int(QT_VERSION[0])
 QT_MINOR_VERSION = int(QT_VERSION[1])
 
 MOOSE_DOC_URL = 'http://moose.ncbs.res.in/content/view/5/6/'
+MOOSE_REPORT_BUG_URL = 'http://sourceforge.net/tracker/?func=add&group_id=165660&atid=836272'
 
 def get_settings():
     '''Initializes the QSettings for the application and returns it.'''
