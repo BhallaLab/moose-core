@@ -104,10 +104,10 @@ class SquidModel(moose.Neutral):
         # Tables for recording current and voltage clamp current.
         # injections We have to maintain two tables as MOOSE does not
         # report the correct Compartment injection current.
-        self._iClampInjectTable = moose.Table('IClampInject')
+        self._iClampInjectTable = moose.Table('IClampInject', self._data)
         self._iClampInjectTable.stepMode = 3
         self._iClampInjectTable.connect("inputRequest", self._iClamp, "output")
-        self._vClampInjectTable = moose.Table('VClampInject')
+        self._vClampInjectTable = moose.Table('VClampInject', self._data)
         self._vClampInjectTable.stepMode = 3
         self._vClampInjectTable.connect("inputRequest", self._PID, "output")
         
@@ -116,7 +116,6 @@ class SquidModel(moose.Neutral):
         self._pulseGen.trigMode = 0
 
         if paramDict is None: # Default values
-            print '$$$ paramDict is None'
             self._pulseGen.firstLevel = 0.1e-6
             self._pulseGen.firstDelay = 0.005
             self._pulseGen.firstWidth = 0.040
@@ -124,8 +123,6 @@ class SquidModel(moose.Neutral):
             self._pulseGen.secondDelay = 1e8
             self._pulseGen.secondWidth = 0.0
         else:
-            print '$$$ paramDict is :' , paramDict
-
             self._pulseGen.firstLevel = paramDict["firstLevel"]
             self._pulseGen.firstWidth = paramDict["firstWidth"]
             self._pulseGen.firstDelay = paramDict["firstDelay"]
@@ -186,7 +183,6 @@ class SquidModel(moose.Neutral):
         return self._hParamTable
 
     def iInjectTable(self):
-        print '%%%%%%%%', self._iInjectTable.path
         return self._iInjectTable
 
     def pulseGen(self):
@@ -235,7 +231,6 @@ class SquidModel(moose.Neutral):
         self._PID.tauI = self.simDt() * 2
         self._PID.tauD = self.simDt()
         print 'PID tauD', self._PID.tauD
-        print paramDict
         self.getContext().reset()
         if paramDict is not None and paramDict["singlePulse"]:
             self._pulseGen.trigMode = 1
@@ -264,9 +259,7 @@ class SquidModel(moose.Neutral):
 
         runTime - total simulation time - must be greater than the total duration of the current injection
         """
-        print '$$$ reset for IClamp'
         if paramDict is not None:
-            print '$$ paramdict is:', paramDict
             simDt = paramDict["simDt"]
             plotDt = paramDict["plotDt"]
             if plotDt < 0.0:

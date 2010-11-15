@@ -209,13 +209,15 @@ endif
 ifeq ($(USE_SBML),1)
 LIBS+= -lsbml
 CXXFLAGS+=-DUSE_SBML 
+LDFLAGS += -L/usr/lib
 SBML_DIR = sbml_IO
 SBML_LIB = sbml_IO/sbml_IO.o 
 endif
 
 # To use NeuroML, pass USE_NeuroML=1 in make command line
 ifeq ($(USE_NEUROML),1)
-LIBS+= -lxml2 -lneuroml  -Lexternal/neuroML_src
+LIBS+= -lxml2 -lneuroml
+LDFLAGS+= -Lexternal/neuroML_src
 CXXFLAGS+=-DUSE_NEUROML
 NEUROML_DIR = neuroML_IO
 NEUROML_LIB = neuroML_IO/neuroML_IO.o
@@ -238,7 +240,8 @@ endif
 
 # To compile with OpenSceneGraph support and enable 'GLcell', 'GLview' pass USE_GL=1 in make command line
 ifeq ($(USE_GL),1)
-	LIBS += -losg -losgDB -lOpenThreads -L/usr/local/lib -lboost_serialization
+	LIBS += -losg -losgDB -lOpenThreads -lboost_serialization
+	LDFLAGS += -L/usr/local/lib 
 	CXXFLAGS += -DUSE_GL -I. -Ibasecode
 	GL_DIR = gl/src
 	GLCELL_LIB = gl/src/GLcell.o
@@ -255,7 +258,7 @@ endif
 # For 64 bit Linux systems add paths to 64 bit libraries 
 ifeq ($(OSTYPE),Linux)
 ifeq ($(MACHINE),x86_64)
-LIBS=-L/lib64 -L/usr/lib64 $(LIBS) 
+LDFLAGS +=-L/lib64 -L/usr/lib64
 endif
 endif
 
@@ -296,10 +299,11 @@ OBJLIBS =	\
 export CXX
 export CXXFLAGS
 export LD
+export LDFLAGS
 export LIBS
 
 moose: libs $(OBJLIBS) $(LIBNEUROML_STATIC)
-	$(CXX) $(CXXFLAGS) $(OBJLIBS) $(LIBS) -o moose 
+	$(CXX) $(LDFLAGS) $(CXXFLAGS) $(OBJLIBS) $(LIBS) -o moose 
 	@echo "Moose compilation finished"
 
 libmoose.so: libs
@@ -308,11 +312,15 @@ libmoose.so: libs
 
 .PHONEY : pymoose
 
-pymoose: CXXFLAGS+= -DPYMOOSE -fPIC 
-pymoose: SUBDIR+= pymoose	
-pymoose: libs $(OBJLIBS) $(LIBNEUROML_DYNAMIC)	
-	$(MAKE) -C $@
-	cp pymoose/moose.py pymoose/_moose.so ./
+pymoose: CXXFLAGS += -DPYMOOSE -fPIC -I/usr/include/python2.6
+pymoose: SUBDIR += pymoose	
+pymoose: OBJLIBS += pymoose/pymoose.o
+pymoose: LIBS += -lpython2.6
+pymoose: _moose.so	
+
+_moose.so: libs $(OBJLIBS) $(LIBNEUROML_DYNAMIC) 
+	$(CXX) -shared $(LDFLAGS) $(CXXFLAGS) -o $@ $(OBJLIBS) $(LIBS)
+	cp pymoose/moose.py ./
 
 $(LIBNEUROML_DYNAMIC): 
 	$(MAKE) -C $(LIBNEUROML_SRC) TYPE=dynamic
@@ -334,6 +342,7 @@ libs:
 	@echo "	USE_GL:" $(USE_GL)
 	@echo " SVN_REVISION:" $(SVN_REVISION)
 	@echo " GENERATE_WRAPPERS:" $(GENERATE_WRAPPERS)
+	@echo " LDFLAGS:" $(LDFLAGS)
 	@(for i in $(SUBDIR); do $(MAKE) -C $$i; done)
 	@echo "All Libs compiled"
 
