@@ -448,33 +448,71 @@ bool setupSched( Shell* shell, FullId& tick, Id dest )
 	return ( ret != Msg::badMsg );
 }
 
+bool checkArg1( Id e, 
+	double v0, double v1, double v2, double v3, double v4 )
+{
+	bool ret = 1;
+	bool report = 1;
+	Eref e0( e(), 0 );
+	double val = reinterpret_cast< Arith* >( e0.data() )->getArg1();
+	ret = ret && ( fabs( val - v0 ) < 1e-6 );
+	if (report) cout << "( " << v0 << ", " << val << " ) ";
+
+	Eref e1( e(), 1 );
+	val = reinterpret_cast< Arith* >( e1.data() )->getArg1();
+	ret = ret && ( fabs( val - v1 ) < 1e-6 );
+	if (report) cout << "( " << v1 << ", " << val << " ) ";
+
+	Eref e2( e(), 2 );
+	val = reinterpret_cast< Arith* >( e2.data() )->getArg1();
+	ret = ret && ( fabs( val - v2 ) < 1e-6 );
+	if (report) cout << "( " << v2 << ", " << val << " ) ";
+
+	Eref e3( e(), 3 );
+	val = reinterpret_cast< Arith* >( e3.data() )->getArg1();
+	ret = ret && ( fabs( val - v3 ) < 1e-6 );
+	if (report) cout << "( " << v3 << ", " << val << " ) ";
+
+	Eref e4( e(), 4 );
+	val = reinterpret_cast< Arith* >( e4.data() )->getArg1();
+	ret = ret && ( fabs( val - v4 ) < 1e-6 );
+	if (report) cout << "( " << v4 << ", " << val << " )\n";
+
+	return ret;
+}
+
 bool checkOutput( Id e, 
 	double v0, double v1, double v2, double v3, double v4 )
 {
 	bool ret = 1;
 	bool report = 1;
 	Eref e0( e(), 0 );
-	double val = Field< double >::get( e0, "outputValue" );
+	double val = reinterpret_cast< Arith* >( e0.data() )->getOutput();
+	// double val = Field< double >::get( e0, "outputValue" );
 	ret = ret && ( fabs( val - v0 ) < 1e-6 );
 	if (report) cout << "( " << v0 << ", " << val << " ) ";
 
 	Eref e1( e(), 1 );
-	val = Field< double >::get( e1, "outputValue" );
+	// val = Field< double >::get( e1, "outputValue" );
+	val = reinterpret_cast< Arith* >( e1.data() )->getOutput();
 	ret = ret && ( fabs( val - v1 ) < 1e-6 );
 	if (report) cout << "( " << v1 << ", " << val << " ) ";
 
 	Eref e2( e(), 2 );
-	val = Field< double >::get( e2, "outputValue" );
+	// val = Field< double >::get( e2, "outputValue" );
+	val = reinterpret_cast< Arith* >( e2.data() )->getOutput();
 	ret = ret && ( fabs( val - v2 ) < 1e-6 );
 	if (report) cout << "( " << v2 << ", " << val << " ) ";
 
 	Eref e3( e(), 3 );
-	val = Field< double >::get( e3, "outputValue" );
+	// val = Field< double >::get( e3, "outputValue" );
+	val = reinterpret_cast< Arith* >( e3.data() )->getOutput();
 	ret = ret && ( fabs( val - v3 ) < 1e-6 );
 	if (report) cout << "( " << v3 << ", " << val << " ) ";
 
 	Eref e4( e(), 4 );
-	val = Field< double >::get( e4, "outputValue" );
+	// val = Field< double >::get( e4, "outputValue" );
+	val = reinterpret_cast< Arith* >( e4.data() )->getOutput();
 	ret = ret && ( fabs( val - v4 ) < 1e-6 );
 	if (report) cout << "( " << v4 << ", " << val << " )\n";
 
@@ -545,6 +583,10 @@ void testShellAddMsg()
 	assert( doubleEq( a12obj->getArg1(), 3 ) );
 	assert( doubleEq( a13obj->getArg1(), 4 ) );
 	assert( doubleEq( a14obj->getArg1(), 5 ) );
+
+	ret = checkArg1( a1, 1, 2, 3, 4, 5 );
+	ret = checkArg1( b1, 1, 2, 3, 4, 5 );
+	ret = checkArg1( c1, 1, 2, 3, 4, 5 );
 
 	///////////////////////////////////////////////////////////
 	// Set up messaging
@@ -641,10 +683,19 @@ void testShellAddMsg()
 	// Run it
 	///////////////////////////////////////////////////////////
 
-	// ret = checkOutput( a2, 1, 2, 3, 4, 5 );
+	cout << "Before reinit\n";
+	ret = checkArg1( a1, 1, 2, 3, 4, 5 );
+	ret = checkArg1( b1, 1, 2, 3, 4, 5 );
+	ret = checkArg1( c1, 1, 2, 3, 4, 5 );
 	
 	shell->doReinit();
+	cout << "After reinit\n";
+	ret = checkArg1( a1, 1, 2, 3, 4, 5 );
+	ret = checkArg1( b1, 1, 2, 3, 4, 5 );
+	ret = checkArg1( c1, 1, 2, 3, 4, 5 );
+
 	shell->doStart( 2 );
+	cout << "After Start\n";
 
 	///////////////////////////////////////////////////////////
 	// Check output.

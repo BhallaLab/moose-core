@@ -8984,6 +8984,29 @@ Turns out that the various threads are still looping. We just are not
 able to get out of the cond_wait. The ack is still pending.
 The handleAck never gets triggered. Looks like
 the reinit function is never sending back an ack.
-Need to check if Clock::reinitPhase2 ever gets to ack.send.
+Need to check if Clock::reinitPhase2 ever gets to ack.send. This needed
+fixing, fixed it. Checkin 2368.
+
+Working on the process function and other operations that
+take place after testShell.cpp:647 (shell->doStart( 2 )).
+Confirmed that at least some of it is safely getting to the Clock::process. 
+
+============================================================================
+16 Nov 2010
+Into thread debugging mess.
+- System sometimes fails at copyTree test.
+- System sometimes applies reinit operation in testShell.cpp:testShellAddMsg
+	but sometimes does not.
+- System sometimes starts up process, sometimes goes right ahead into the
+	output comparison.
+
+Need to go through this one step at a time. First fix up memory leaks and
+bad accesses using valgrind.
+Fixed one memory leak, turned out to be a misunderstanding of
+how Id::destroy works. It does NOT clear out children. To do that
+you need to use the Shell or Neutral destroy command.
+
+This cleans up the system, it clears the basic unit tests without
+any memory leaks.
 
 ============================================================================

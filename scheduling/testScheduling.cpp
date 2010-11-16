@@ -88,7 +88,18 @@ void testTicks()
 	assert( doubleEq( 0, a0->arg3_ ) );
 	assert( doubleEq( 139.4, a0->output_ ) );
 
+	const Msg* m = Msg::getMsg( m1 );
+	assert( m != 0 );
+	assert( tickId() != 0 );
+	assert( clockId() != 0 );
 	clockId.destroy();
+	assert( tickId() != 0 );
+	tickId.destroy();
+	arithId.destroy();
+	assert( clockId() == 0 );
+	assert( tickId() == 0 );
+	m = Msg::getMsg( m1 );
+	assert( m == 0 );
 
 	cout << "." << flush;
 }

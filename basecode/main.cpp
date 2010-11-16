@@ -249,12 +249,12 @@ int main( int argc, char** argv )
 	Shell* s = reinterpret_cast< Shell* >( shelle->dataHandler()->data( 0 ) );
 	nonMpiTests( s ); // These tests do not need the process loop.
 
-	s->launchThreads(); // Here we set off the thread/MPI process loop.
+//	s->launchThreads(); // Here we set off the thread/MPI process loop.
 	if ( s->myNode() == 0 ) {
 #ifdef DO_UNIT_TESTS
-		mpiTests();
-		processTests( s );
-		regressionTests();
+//		mpiTests();
+//		processTests( s );
+//		regressionTests();
 #endif
 		// These are outside unit tests because they happen in optimized
 		// mode, using a command-line argument. As soon as they are done
@@ -264,9 +264,7 @@ int main( int argc, char** argv )
 	}
 	
 	// Somehow we need to return control to our parser. Then we clean up
-	s->joinThreads();
-	/*
-	*/
+//	s->joinThreads();
 
 	shellId.destroy();
 	Id(1).destroy();
