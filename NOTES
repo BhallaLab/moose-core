@@ -9007,6 +9007,81 @@ how Id::destroy works. It does NOT clear out children. To do that
 you need to use the Shell or Neutral destroy command.
 
 This cleans up the system, it clears the basic unit tests without
-any memory leaks.
+any memory leaks. Checkin 2369.
 
+Looked at the copyTree test failure. Printf debug it as it is rare. This
+is the error condition:
+.me = 4009628519[1076094549:1633825638]; fullid constructed= 77
+.me = 4009628519[1076094549:1633825638]; fullid constructed= 77
+
+It generates the same outlandish numbers each time it croaks. These numbers are
+NOT the same as FullId::bad(), which is 
+bad = 0[4294967295:4294967295]
+
+I'm doing testTreeTraversal both before and during the running of the 
+processLoop. It has this problem only during the processLoop.
+
+Checked if all the elements themselves have been correctly created
+by Shell::doCreate before this error. Seems good.
+
+Tried to put the initAck inside a protective mutex. Doesn't help.
 ============================================================================
+17 Nov 2010
+Drew out a thread/barrier diagram, and this shows up a major problem.
+I need to ensure that messages are inserted into the outQ by the parser
+thread only when the worker threads are halted. This means that it has
+to be done within one of the barriers, preferably during the 
+Qinfo::swapQ function which inserts inside barrier1. Alternatively I could
+put the parser sends into a separate outQ which gets merged in during the
+swapQ. Need to integrate this thread scheduling with handling the model
+modifying ops by the Shell.
+See sketch on pg 66 of pen/paper notes.
+
+For getting parser operations into the processLoop:
+	- Have a separate Qvec for the shell 'send' operations.
+	We could have swapQ grab a mutex and within its protection, put the
+	parserQ contents into an outQ if needed. 
+	- Or, Put the parser stuff into a special portion of the outQ Qvec 
+	for the shell 'send' operations. The special part of the Qvec is
+	indexed by the ProcInfo that belongs to the shell, so that none of
+	the worker threads step on it.
+	Here we will have to protect barrier 1 with a mutex as we do now, so
+	that parser calls don't try to dumpt data while the swapQ happens.
+
+	Both of these options rely on using special outQ info from the local
+	ProcInfo of the Shell. Both also require a mutex.
+	Seems like we
+	Decision: I think the first option is better.
+About executing stuff by the shell:
+	- Nothing happens in phase 1.
+	- Shell handles incoming msgs in its own thread, in phase 2. A few of
+	these (like returns for 'get' calls) proceed right away. Others 
+	are flagged for protected execution.
+	Or, we could put the shell into the regular process/execute cycle.
+	I prefer the latter.
+	Here we use EpFuncs on the Shell, and push-back the Qinfo arguments,
+	as these point to locations in memory for the start of each message
+	block. So our secondary queue is a vector of Qinfo* which is
+	then converted back into OpFuncs for the shell to execute. Ugly.
+	- During one of the protected barriers, possibly barrier 1 which does
+	lots of other stuff, the shell scans through pending jobs if any. Note
+	that this will mostly happen during setup.
+		- The Shell functions that handle the EpFuncs must operate in
+		either of two modes: one to accumulate their contents into
+		the shellQ, and the other to actually execute the operations.
+
+See sketch on pg 67 of pen/paper notes.
+
+Steps:
+* Implement ShellQ in a special Qvec. Just put it in group 0,
+	and separate out the main event loop into group 1.
+* Implement (in Qinfo) a special Q for structural Shell calls.
+* Go through Shell calls, convert to EpFuncs if they are structural.
+	Then set up so that they dump stuff to the structuralQ unless they
+	are within barrier1.
+* Update SwapQ to check the structuralQ and call the funcs if needed.
+- Fix silly ProcInfo names to myNode, myGroup, myThread, and so on.
+- Test.
+
+Implemented most of the steps, compiles, fails now in first pass 
+unit tests.

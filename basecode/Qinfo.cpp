@@ -12,7 +12,8 @@
 #include <mpi.h>
 #endif
 
-// Declaration of static field
+// Declaration of static fields
+bool Qinfo::isSafeForStructuralOps_ = 0;
 vector< Qvec > Qinfo::q1_;
 vector< Qvec > Qinfo::q2_;
 vector< Qvec > Qinfo::mpiQ_;
@@ -20,6 +21,7 @@ vector< Qvec >* Qinfo::inQ_ = &Qinfo::q1_;
 vector< Qvec >* Qinfo::outQ_ = &Qinfo::q2_;
 vector< SimGroup > Qinfo::g_;
 vector< vector< QueueBlock > > Qinfo::qBlock_;
+vector< const char* > Qinfo::structuralQ_;
 
 void hackForSendTo( const Qinfo* q, const char* buf );
 static const unsigned int BLOCKSIZE = 20000;
@@ -86,18 +88,6 @@ unsigned int Qinfo::addSimGroup( unsigned short numThreads,
 	q1_.push_back( Qvec( numThreads ) );
 	q2_.push_back( Qvec( numThreads ) );
 
-	/*
-	inQ_.resize( g_.size() );
-
-	mpiQ_.resize( g_.size() );
-	mpiQ_.back().resize( BLOCKSIZE * numNodes );
-
-	outQ_.resize( si + numThreads );
-	qBlock_.resize( si + numThreads );
-	for ( unsigned int i = 0; i < numThreads; ++i ) {
-		outQ_[i + si].reserve( BLOCKSIZE );
-	}
-	*/
 	return ng;
 }
 
@@ -110,6 +100,29 @@ const SimGroup* Qinfo::simGroup( unsigned int index )
 {
 	assert( index < g_.size() );
 	return &( g_[index] );
+}
+
+void Qinfo::clearStructuralQ()
+{
+	isSafeForStructuralOps_ = 1;
+	for ( vector< const char* >::iterator i = structuralQ_.begin(); 
+		i != structuralQ_.end(); ++i ) {
+		const char* buf = *i;
+		const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
+		const Msg *m = Msg::getMsg( q->mid() );
+		if ( m ) { // may be 0 if model restructured before msg delivery.
+			Element* tgt;
+			if ( q->isForward() )
+				tgt = m->e2();
+			else 
+				tgt = m->e1();
+			assert( tgt == Id()() ); // The tgt should be the shell
+			const OpFunc* func = tgt->cinfo()->getOpFunc( q->fid() );
+			func->op( Eref( tgt, 0 ), buf );
+		}
+	}
+	isSafeForStructuralOps_ = 0;
+	structuralQ_.resize( 0 );
 }
 
 // local func
@@ -212,7 +225,7 @@ void Qinfo::swapQ()
 	// This happens here protected by the barrier, so that operations that
 	// change the structure of the model can occur without risk of 
 	// affecting ongoing messaging.
-	Shell::clearRestructuringQ();
+	clearStructuralQ(); // static function.
 	if ( inQ_ == &q2_ ) {
 		inQ_ = &q1_;
 		outQ_ = &q2_;
@@ -271,78 +284,6 @@ void Qinfo::sendAllToAll( const ProcInfo* proc )
 	// cout << "\n\nGathered stuff via mpi, on node = " << proc->nodeIndexInGroup << ", size = " << *reinterpret_cast< unsigned int* >( recvbuf ) << "\n";
 #endif
 }
-
-/**
- * Static func.
- * Here the root node tells all other nodes what to do, using a Bcast.
- * It then reads back all their responses. The function is meant to
- * be run on all nodes, and it partitions out the work according to
- * node#.
- * The function is used only by the Shell thread.
- * the MPI::Alltoall function doesn't work here because it partitions out
- * the send buffer into pieces targetted for each other node. 
-void Qinfo::sendRootToAll( const ProcInfo* proc )
-{
-	if ( proc->numNodesInGroup == 1 )
-		return;
-	// cout << proc->nodeIndexInGroup << ", " << proc->threadId << ": Qinfo::sendRootToAll\n";
-	// cout << "ng = " << g_.size() << ", ninQ= " << inQ_[0].size() << ", nmpiQ = " << mpiQ_[0].size() << " proc->groupId =  " << proc->groupId  << " s1 = " << mpiQ_[ proc->groupId ].size() << " s2 = " << BLOCKSIZE * proc->numNodesInGroup;
-	assert( mpiQ_[ proc->groupId ].size() >= BLOCKSIZE * proc->numNodesInGroup );
-#ifdef USE_MPI
-	char* sendbuf = &inQ_[ proc->groupId ][0];
-	char* recvbuf = &mpiQ_[ proc->groupId ][0];
-//	assert ( inQ_[ proc->groupId ].size() == BLOCKSIZE );
-	assert ( inQ_[ proc->groupId ].size() >= sizeof( unsigned int ) );
-	// Send out data from master node.
-		// cout << "\n\nEntering sendRootToAll barrier, on node = " << proc->nodeIndexInGroup << endl;
-	MPI_Barrier( MPI_COMM_WORLD );
-		// cout << "Exiting sendRootToAll barrier, on node = " << proc->nodeIndexInGroup << endl;
-	if ( proc->nodeIndexInGroup == 0 ) {
-		// cout << "\n\nSending stuff via mpi, on node = " << proc->nodeIndexInGroup << ", size = " << *reinterpret_cast< unsigned int* >( sendbuf ) << "\n";
-		MPI_Bcast( 
-			sendbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
-		// cout << "\n\nSent stuff via mpi, on node = " << proc->nodeIndexInGroup << ", ret = " << ret << endl;
-		unsigned int bufsize = *( reinterpret_cast< unsigned int* >( sendbuf ) );
-		if ( bufsize > BLOCKSIZE ) {
-			// cout << Shell::myNode() << "." << proc->threadIndexInGroup << ": Sending Large MPI_Bcast of size = " << bufsize << endl;
-			MPI_Bcast( 
-				sendbuf, bufsize, MPI_CHAR, 0, MPI_COMM_WORLD );
-		}
-	} else {
-		// cout << "\n\nStarting Recv via mpi, on node = " << proc->nodeIndexInGroup << endl;
-		MPI_Bcast( 
-			recvbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
-		// cout << "\n\nRecvd stuff via mpi, on node = " << proc->nodeIndexInGroup << ", size = " << *reinterpret_cast< unsigned int* >( recvbuf ) << "\n";
-		unsigned int bufsize = *( reinterpret_cast< unsigned int* >( recvbuf ) );
-		if ( bufsize > BLOCKSIZE ) {
-			// cout << Shell::myNode() << "." << proc->threadIndexInGroup << ": Recv Large MPI_Bcast of size = " << bufsize << " on group " << proc->groupId << endl;
-			mpiQ_[ proc->groupId ].resize( bufsize );
-			recvbuf = &mpiQ_[ proc->groupId ][0];
-			MPI_Bcast( 
-				recvbuf, bufsize, MPI_CHAR, 0, MPI_COMM_WORLD );
-		}
-	}
-
-//	unsigned int* sendbufSize = reinterpret_cast< unsigned int* >( sendbuf);
-//	unsigned int* recvbufSize = reinterpret_cast< unsigned int* >( recvbuf);
-
-	// Recieve data into recvbuf of node0 from sendbuf of all other nodes
-	// cout << Shell::myNode() << "." << proc->threadIndexInGroup << ": About to Gather stuff via mpi, recvbufsize = " << *recvbufSize << ", sendbufsize = " << *sendbufSize << "\n";
-	if ( proc->nodeIndexInGroup == 0 ) {
-		static char dummySendbuf[BLOCKSIZE];
-		*reinterpret_cast< unsigned int* >( dummySendbuf ) = 4;
-		MPI_Gather( 
-			dummySendbuf, BLOCKSIZE, MPI_CHAR, 
-			recvbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
-	} else {
-		MPI_Gather( 
-			sendbuf, BLOCKSIZE, MPI_CHAR, 
-			recvbuf, BLOCKSIZE, MPI_CHAR, 0, MPI_COMM_WORLD );
-	}
-	// cout << Shell::myNode() << "." << proc->threadIndexInGroup << ": Gathered stuff via mpi, recvbufsize = " << *recvbufSize << ", sendbufsize = " << *sendbufSize << "\n";
-#endif
-}
-*/
 
 void innerReportQ( const Qvec& qv, const string& name )
 {
@@ -426,6 +367,14 @@ void Qinfo::addToQbackward( const ProcInfo* p, MsgFuncBinding b,
 	(*outQ_)[p->groupId].push_back( p->threadIndexInGroup, this, arg );
 }
 
+bool Qinfo::addToStructuralQ() const
+{
+	if ( isSafeForStructuralOps_ )
+		return 0;
+	structuralQ_.push_back( reinterpret_cast< const char* >( this ) );
+	return 1;
+}
+
 void Qinfo::addSpecificTargetToQ( const ProcInfo* p, MsgFuncBinding b, 
 	const char* arg, const DataId& target, bool isForward )
 {
@@ -440,41 +389,6 @@ void Qinfo::addSpecificTargetToQ( const ProcInfo* p, MsgFuncBinding b,
 	delete[] temp;
 }
 
-/**
- * Three blocks: 
- * 0 is inQ, going to all nodes in group
- * 1 is local, going only to current node.
- * 2 and higher are to other simGroups. Don't worry about yet
-void Qinfo::assignQblock( const Msg* m, const ProcInfo* p )
-{
-	unsigned int threadIndex = p->threadId;
-	unsigned int offset = outQ_[ threadIndex ].size();
-	vector< QueueBlock >& qb = qBlock_[ threadIndex ];
-	if ( // Figure out if msg should go in local queue.
-		m->mid() == Msg::setMsg ||
-		( 
-			( m->mid() != 2 ) && // mid of 2 is between shells on diff nodes
-			(
-				( isForward_ && m->e2()->dataHandler()->isGlobal() )  ||
-				( !isForward_ && m->e1()->dataHandler()->isGlobal() )
-			)
-		)
-	) { // Put in queue 1, which is localQ.
-		if ( qb.size() > 0 && qb.back().whichQ == 1 ) { // Extend qb.back
-			qb.back().size += size_ + sizeof( Qinfo );
-		} else {
-			qb.push_back( QueueBlock( 1, offset, size_ + sizeof( Qinfo ) ));
-		}
-	} else { // Put in queue 0, which is inQ, which goes to other nodes.
-		if ( qb.size() > 0 && qb.back().whichQ == 0 ) { // Extend qb.back
-			qb.back().size += size_ + sizeof( Qinfo );
-		} else {
-			qb.push_back( QueueBlock( 0, offset, size_ + sizeof( Qinfo ) ));
-		}
-	}
-}
- */
-
 void Qinfo::emptyAllQs()
 {
 	for ( vector< Qvec >::iterator i = q1_.begin(); i != q1_.end(); ++i )
@@ -482,19 +396,6 @@ void Qinfo::emptyAllQs()
 	for ( vector< Qvec >::iterator i = q2_.begin(); i != q2_.end(); ++i )
 		i->clear();
 }
-
-/*
-void Qinfo::assembleOntoQ( const MsgFuncBinding& i, 
-	const Element* e, const ProcInfo *p, const char* arg )
-{
-	const Msg* m = Msg::getMsg( i.mid );
-	isForward_ = m->isForward( e );
-	if ( m->isMsgHere( *this ) ) {
-		assignQblock( m, p );
-		addToQ( p->threadId, i, arg );
-	}
-}
-*/
 
 // Static function. Used only during single-thread tests, when the
 // main thread-handling loop is inactive.

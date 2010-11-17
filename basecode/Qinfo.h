@@ -129,6 +129,16 @@ class Qinfo
 		void addToQbackward( const ProcInfo* p, MsgFuncBinding b, const char* arg );
 
 		/**
+		 * Adds an existing queue entry into the structuralQ, for later
+		 * execution when it is safe to do so.
+		 * This is not thread-safe, should only be called by the Shell.
+		 * Returns true if it added the entry.
+		 * Returns false if it was in the Qinfo::clearStructuralQ function
+		 * and wants the calling function to actually operate on the queue.
+		 */
+		bool addToStructuralQ() const;
+
+		/**
 		 * This adds the data to the queue and then an additional
 		 * sizeof( DataId ) block to specify target DataId.
 		 */
@@ -239,7 +249,17 @@ class Qinfo
 		 */
 		static void clearQ( const ProcInfo* p );
 		static void mpiClearQ( const ProcInfo* p );
-		
+
+		/**
+		 * Works through any requests for structural changes to the model.
+		 * This includes creation, deletion,
+		 * resizing, and movement of Elements and Msgs. These functions
+		 * must be carried out at a time when nothing else is being
+		 * computed, and no iterators are pending. Currently happens during
+		 * swapQ, and is serial and single-threaded.
+		 */
+		static void clearStructuralQ();
+
 	private:
 		bool useSendTo_;	/// true if msg is to a single target DataId.
 		bool isForward_; /// True if the msg is from e1 to e2.
@@ -248,6 +268,13 @@ class Qinfo
 		FuncId f_;		/// Unique lookup Id for function.
 		DataId srcIndex_; /// DataId of src.
 		unsigned int size_; /// size of argument in bytes. Zero is allowed.
+
+		/**
+		 * Ugly flag to tell Shell functions if the simulation should
+		 * actually compute structural operations, or if it should just
+		 * stuff them into a buffer.
+		 */
+		static bool isSafeForStructuralOps_;
 
 		/**
 		 * outQ_ is the buffer in which messages get queued. The Qvec
@@ -275,6 +302,16 @@ class Qinfo
 		static vector< Qvec > q2_;
 
 		/**
+		 * This contains pointers to Queue entries requesting functions that
+		 * change the model structure. This includes creation, deletion,
+		 * resizing, and movement of Elements and Msgs. These functions
+		 * must be carried out at a time when nothing else is being
+		 * computed, and no iterators are pending. Currently happens during
+		 * swapQ, and is serial and single-threaded.
+		 */
+		static vector< const char* > structuralQ_;
+
+		/**
 		 * This handles incoming data from MPI. At this point it
 		 * is not meant to be filled locally, but if we move to
 		 * a system of staggered Bcast sends then we may need to
@@ -283,38 +320,6 @@ class Qinfo
 		 */
 		static vector< Qvec > mpiQ_;
 		
-
-#if 0
-		/**
-		 * outQ is one per worker thread. The immediate output goes into
-		 * the outQs which are later consolidated.
-		 */
-		static vector< vector< char > > outQ_;
-
-		/**
-		 * inQ is one per SimGroup. It becomes a readonly vector once
-		 * consolidated, and all the threads in the group read from it.
-		 * Each inQ has a header of sizeof( unsigned int ) that contains
-		 * the buffer size, in bytes. This size INCLUDES the header.
-		 */
-		static vector< vector< char > > inQ_;
-
-		/**
-		 * There are numCores mpiQ blocks per SimGroup, but the blocks
-		 * for each SimGroup are arranged as one long linear array.
-		 */
-		static vector< vector< char > > mpiQ_;
-
-		/**
-		 * This is a single, simple queue that lives only on the local node.
-		 * It is for messages that are not going even to other elements
-		 * in the same SimGroup.
-		 * Examples are SetGet messages, and messages to globals.
-		 * It is populated by examining outQ for local-only messages.
-		 */
-		static vector< char > localQ_;
-#endif
-
 		/**
 		 * This keeps track of which data go into which queue.
 		 * This accompanies each outQ. At the time messages are dumped

@@ -68,17 +68,27 @@ void testTreeTraversal()
 	vector< unsigned int > dimensions;
 	dimensions.push_back( 1 );
 	Id f1 = shell->doCreate( "Neutral", Id(), "f1", dimensions );
+	assert( f1 != Id() );
 	Id f2a = shell->doCreate( "Neutral", f1, "f2a", dimensions );
+	assert( f2a != Id() );
 	Id f2b = shell->doCreate( "Neutral", f1, "f2b", dimensions );
+	assert( f2b != Id() );
 	Id f2c = shell->doCreate( "Neutral", f1, "f2c", dimensions );
+	assert( f2c != Id() );
 	Id f3aa = shell->doCreate( "Neutral", f2a, "f3aa", dimensions );
+	assert( f3aa != Id() );
 	Id f3ab = shell->doCreate( "Neutral", f2a, "f3ab", dimensions );
+	assert( f3ab != Id() );
 	Id f3ba = shell->doCreate( "Neutral", f2b, "f3ba", dimensions );
+	assert( f3ba != Id() );
 
 	////////////////////////////////////////////////////////////////
 	// Checking for own Ids
 	////////////////////////////////////////////////////////////////
 	FullId me = Field< FullId >::get( f3aa.eref(), "me" );
+	cout << "me = " << me << 
+		"; fullid constructed= " << FullId( f3aa, 0 ) << endl;
+	cout << "bad = " << FullId::bad() << endl;
 	assert( me == FullId( f3aa, 0 ) );
 	me = Field< FullId >::get( f3ba.eref(), "me" );
 	assert( me == FullId( f3ba, 0 ) );

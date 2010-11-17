@@ -125,7 +125,7 @@ static SrcFinfo3< string, string, unsigned int > requestUseClock(
 
 static DestFinfo handleUseClock( "handleUseClock", 
 			"Deals with assignment of path to a given clock.",
-			new OpFunc3< Shell, string, string, unsigned int >( 
+			new EpFunc3< Shell, string, string, unsigned int >( 
 				&Shell::handleUseClock )
 			);
 
@@ -162,7 +162,7 @@ static DestFinfo handleTerminate( "Terminate",
 
 static DestFinfo handleAddMsg( "handleAddMsg", 
 			"Makes a msg",
-			new OpFunc5< Shell, string, FullId, string, FullId, string >
+			new EpFunc5< Shell, string, FullId, string, FullId, string >
 				( & Shell::handleAddMsg ) );
 
 static DestFinfo handleSet( "handleSet", 
@@ -223,7 +223,7 @@ static SrcFinfo3< unsigned int, unsigned int, PrepackedBuffer > relayGet(
 static DestFinfo handleMove( "move", 
 		"handleMove( Id orig, Id newParent ): "
 		"moves an Element to a new parent",
-	new OpFunc2< Shell, Id, Id >( & Shell::handleMove ) );
+	new EpFunc2< Shell, Id, Id >( & Shell::handleMove ) );
 
 static DestFinfo handleCopy( "handleCopy", 
 		"handleCopy( vector< Id > args, string newName, unsigned int nCopies, bool copyExtMsgs ): "
@@ -232,7 +232,7 @@ static DestFinfo handleCopy( "handleCopy",
 		" May also expand out the original into nCopies copies."
 		" Normally all messages within the copy tree are also copied. "
 		" If the flag copyExtMsgs is true, then all msgs going out are also copied.",
-			new OpFunc4< Shell, vector< Id >, string, unsigned int, bool >( 
+			new EpFunc4< Shell, vector< Id >, string, unsigned int, bool >( 
 				& Shell::handleCopy ) );
 
 /*
@@ -755,6 +755,8 @@ void Shell::handleCreate( const Eref& e, const Qinfo* q,
 	string type, Id parent, Id newElm, string name,
 	vector< unsigned int > dimensions )
 {
+	if ( q->addToStructuralQ() )
+		return;
 	// cout << myNode_ << ": In Shell::handleCreate for element " << name << " id " << newElm << ", dim = " << dimensions[0] << endl;
 	innerCreate( type, parent, newElm, name, dimensions );
 	// cout << myNode_ << ": Shell::handleCreate inner Create done for element " << name << " id " << newElm << endl;
@@ -835,6 +837,9 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 
 void Shell::destroy( const Eref& e, const Qinfo* q, Id eid)
 {
+	if ( q->addToStructuralQ() )
+		return;
+
 	Neutral *n = reinterpret_cast< Neutral* >( e.data() );
 	assert( n );
 	n->destroy( eid.eref(), 0, 0 );
@@ -850,9 +855,12 @@ void Shell::destroy( const Eref& e, const Qinfo* q, Id eid)
  * inner function to build message trees, so we don't want it to emit
  * multiple acks.
  */
-void Shell::handleAddMsg( string msgType, FullId src, string srcField, 
+void Shell::handleAddMsg( const Eref& e, const Qinfo* q,
+	string msgType, FullId src, string srcField, 
 	FullId dest, string destField )
 {
+	if ( q->addToStructuralQ() )
+		return;
 	if ( innerAddMsg( msgType, src, srcField, dest, destField ) )
 		ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
 	else
@@ -912,7 +920,8 @@ bool Shell::innerAddMsg( string msgType, FullId src, string srcField,
 //	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus );
 }
 
-void Shell::handleMove( Id orig, Id newParent )
+void Shell::handleMove( const Eref& e, const Qinfo* q,
+	Id orig, Id newParent )
 {
 	static const Finfo* pf = Neutral::initCinfo()->findFinfo( "parentMsg" );
 	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
@@ -921,6 +930,9 @@ void Shell::handleMove( Id orig, Id newParent )
 
 	assert( !( orig == Id() ) );
 	assert( !( newParent() == 0 ) );
+
+	if ( q->addToStructuralQ() )
+		return;
 
 	MsgId mid = orig()->findCaller( pafid );
 	Msg::deleteMsg( mid );
@@ -936,8 +948,11 @@ void Shell::handleMove( Id orig, Id newParent )
 	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
 }
 
-void Shell::handleUseClock( string path, string field, unsigned int tick)
+void Shell::handleUseClock( const Eref& e, const Qinfo* q,
+	string path, string field, unsigned int tick)
 {
+	if ( q->addToStructuralQ() )
+		return;
 	vector< Id > list;
 	wildcard( path, list ); // By default scans only Elements.
 	string tickField = "process";
@@ -985,7 +1000,8 @@ void Shell::wildcard( const string& path, vector< Id >& list )
 /**
  * Generic handler for ack msgs from various nodes. Keeps track of
  * which nodes have responded.
- */
+ * This has been moved to ShellThreads.cpp, because that is 
+ * where the other ack related functions live.
 void Shell::handleAck( unsigned int ackNode, unsigned int status )
 {
 	assert( ackNode < numNodes_ );
@@ -998,6 +1014,7 @@ void Shell::handleAck( unsigned int ackNode, unsigned int status )
 			status << " from node " << ackNode << endl;
 	}
 }
+ */
 
 ////////////////////////////////////////////////////////////////////////
 // Some static utility functions

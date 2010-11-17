@@ -193,14 +193,16 @@ class Shell
 		 * msgType. 
 		 * This wrapper function sends the ack back to the master node.
 		 */
-		void handleAddMsg( string msgType, 
+		void handleAddMsg( const Eref& e, const Qinfo* q,
+			string msgType, 
 			FullId src, string srcField, 
 			FullId dest, string destField);
 
 		/**
 		 * Moves Element orig onto the newParent.
 		 */
-		void handleMove( Id orig, Id newParent );
+		void handleMove( const Eref& e, const Qinfo* q,
+			Id orig, Id newParent );
 
 		/**
 		 * Deep copy of source element to target, renaming it to newName.
@@ -211,13 +213,15 @@ class Shell
 		 * Normally only copies msgs within the tree, but if the flag
 		 * copyExtMsgs is true then it copies external Msgs too.
 		 */
-		void handleCopy( vector< Id > args, string newName, unsigned int n, 
+		void handleCopy( const Eref& e, const Qinfo* q,
+			vector< Id > args, string newName, unsigned int n, 
 			bool copyExtMsgs );
 
 		/**
 		 * Sets up scheduling for elements on the path.
 		 */
-		void handleUseClock( string path, string field, unsigned int tick );
+		void handleUseClock( const Eref& e, const Qinfo* q,
+			string path, string field, unsigned int tick );
 
 		////////////////////////////////////////////////////////////////
 		// Thread and MPI handling functions

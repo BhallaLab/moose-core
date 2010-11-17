@@ -26,6 +26,10 @@
 
 #define USE_NODES 1
 
+///////////////////////////////////////////////////////////////////
+// First we have a few funcs which deal with acks coming in from
+// different nodes to indicate completion of a function.
+///////////////////////////////////////////////////////////////////
 /**
  * Initialize acks. This call should be done before the 'send' goes out,
  * because with the wonders of threading we might get a response to the
@@ -34,12 +38,14 @@
  */
 void Shell::initAck()
 {
-	numAcks_ = 0;
-	if ( !isSingleThreaded_ ) {
-		pthread_mutex_lock( 
-			reinterpret_cast< pthread_mutex_t * >( parserMutex_ ) );
-		isBlockedOnParser_ = 1;
-		acked_.assign( numNodes_, 0 );
+	if ( isSingleThreaded_ ) {
+		numAcks_ = 0; 
+	} else {
+		pthread_mutex_lock( parserMutex_ );
+			// Note that we protect this in the mutex in the threaded mode.
+			numAcks_ = 0;
+			isBlockedOnParser_ = 1;
+			acked_.assign( numNodes_, 0 );
 	}
 }
 
@@ -69,10 +75,30 @@ bool Shell::isAckPending() const
 	return ( numAcks_ < numNodes_ );
 }
 
+/**
+ * Generic handler for ack msgs from various nodes. Keeps track of
+ * which nodes have responded.
+ */
+void Shell::handleAck( unsigned int ackNode, unsigned int status )
+{
+	assert( ackNode < numNodes_ );
+	acked_[ ackNode ] = status;
+		// Here we could also check which node(s) are last, in order to do
+		// some dynamic load balancing.
+	++numAcks_;
+	if ( status != OkStatus ) {
+		cout << myNode_ << ": Shell::handleAck: Error: status = " <<
+			status << " from node " << ackNode << endl;
+	}
+}
+
+
 void Shell::setRunning( bool value )
 {
 	isRunning_ = value;
 }
+
+///////////////////////////////////////////////////////////////////
 
 /**
  * Launches Parser. Blocking when the parser blocks.
@@ -103,19 +129,10 @@ void Shell::setHardware(
 		// Create the parser and the gui threads.
 		numCores_ = numCores;
 		numNodes_ = numNodes;
-		// The zero queue is for system calls. Then there is one queue
-		// per local thread. Each off-node gets another queue.
-		// Note the more complex 'group' orgn for
-		// eventual highly multithreaded architectures, discussed in
-		// NOTES 10 Dec 2009.
-		// Qinfo::setNumQs( numCores_ + numNodes_, 1024 );
-		//
-		// Create thread for managing MPI. Different MPI implementations
-		// have different degrees of thread support, so I'll just put
-		// the whole MPI handling loop on one thread. The MPI stuff is all 
-		// non-blocking so the thread just goes around checking for message
-		// completion, setting flags and dispatching stuff.
-		
+		/// The Zero Qvec is for parser calls into the system. Only the
+		/// shell should use this queue, and it really only kicks in on 
+		/// node 0.
+		/// The One and higher Qvecs are for compute groups.
 	} else {
 		numCores_ = 1;
 		numNodes_ = 1;
@@ -124,6 +141,7 @@ void Shell::setHardware(
 	myNode_ = myNode;
 	p_.numNodesInGroup = numNodes_;
 	p_.nodeIndexInGroup = myNode;
+	p_.groupId = 0;
 	acked_.resize( numNodes, 0 );
 }
 
@@ -140,13 +158,11 @@ void Shell::loadBalance()
 	//
 	// Note that the messages have to be rebuilt after this call.
 	// Note that this function is called independently on each node.
-	/*
 	if ( !isSingleThreaded_ ) {
-		// for ( unsigned int i = 0; i < numNodes_; ++i )
-			//These are the worker threads.
-			Qinfo::addSimGroup( numCores_, numNodes_ );
+		// Add the basic process group as group 1.
+		// More sophisticated balancing to come.
+		Qinfo::addSimGroup( numCores_, numNodes_ );
 	}
-	*/
 }
 
 unsigned int Shell::numCores()

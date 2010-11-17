@@ -108,7 +108,8 @@ void innerCopyMsgs( map< Id, Id >& tree, unsigned int n, bool copyExtMsgs )
 	}
 }
 
-void Shell::handleCopy( vector< Id > args, string newName,
+void Shell::handleCopy( const Eref& er, const Qinfo* q,
+	vector< Id > args, string newName,
 	unsigned int n, bool copyExtMsgs )
 {
 	static const Finfo* ackf = 
@@ -117,6 +118,9 @@ void Shell::handleCopy( vector< Id > args, string newName,
 		ack = dynamic_cast< const SrcFinfo2< unsigned int, unsigned int >* >( ackf );
 	assert( ackf );
 	assert( ack );
+
+	if ( q->addToStructuralQ() )
+		return;
 
 	map< Id, Id > tree;
 	// args are orig, newParent, newElm.
