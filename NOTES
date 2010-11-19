@@ -9084,4 +9084,36 @@ Steps:
 - Test.
 
 Implemented most of the steps, compiles, fails now in first pass 
-unit tests.
+unit tests. Checkin 2370.
+
+There is some problem in how acks are generated. The code passes the
+wait place (in single thread unit test mode) As far as I can tell the ack
+does not emanate from the handleCreate function. 
+
+Put a breakpoint on all 15 ack.sends. Turns out it isn't just these,
+but the lowLevelGet.send reaches recvGet, which calls handleAck.
+internally. 
+
+============================================================================
+18 Nov 2010
+Finally tracked down this ugly bug. Turns out it was some ack events
+inserted into the queues some two unit tests previously, in 
+testScheduling.cpp:setupTicks. Added some clearQ calls and that fixed it.
+Now it is stuck back where it used to be, in testShell.cpp:testShellAddMsg.
+This is at first order just that the call isn't going out to the Clock.
+
+Went into the execution. Turns out that there are two messages
+going out from the Tick to each target.
+
+Tracked this down to a clearQ in doAddMsg just after sending out the
+request, before waitForAck. Fixed. Now it doesn't go to process at all.
+
+Checked that there are exactly 14 process messages made, one for
+each target Arith Element. This is now part of the unit test, and though
+it clears this, the process is not called on the targets.
+
+Should I try calling the Clock directly to start it?
+Tried. Still doesn't work.
+
+The Clock::handleStart isn't good to access directly as it will change the
+'isRunning_' flag at any point, out of sync with the process phases.

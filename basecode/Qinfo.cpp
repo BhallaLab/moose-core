@@ -406,9 +406,3 @@ void Qinfo::clearQ( const ProcInfo* p )
 	swapQ();
 	readQ( p );
 }
-
-// Static function. Deprecated. Dummy for now.
-void Qinfo::mpiClearQ( const ProcInfo* p )
-{
-	;
-}

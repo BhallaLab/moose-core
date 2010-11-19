@@ -248,7 +248,6 @@ class Qinfo
 		 * threads are not running.
 		 */
 		static void clearQ( const ProcInfo* p );
-		static void mpiClearQ( const ProcInfo* p );
 
 		/**
 		 * Works through any requests for structural changes to the model.

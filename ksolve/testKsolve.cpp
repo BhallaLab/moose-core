@@ -91,7 +91,6 @@ void testKsolveZombify( string modelFile )
 	p.currTime = 0;
 
 	// plug->send( stoich.eref(), &p, stoichData );
-	// Qinfo::mpiClearQ( &p );
 	bool ret = SetGet1< Id >::set( gsl.eref(), "stoich", stoich );
 	assert( ret );
 	ret = Field< bool >::get( gsl.eref(), "isInitialized" );

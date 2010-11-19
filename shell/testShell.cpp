@@ -13,6 +13,9 @@
 #include <mpi.h>
 #endif
 #include "../scheduling/Tick.h"
+#include "../scheduling/TickMgr.h"
+#include "../scheduling/TickPtr.h"
+#include "../scheduling/Clock.h"
 #include "../scheduling/testScheduling.h"
 
 #include "../builtins/Arith.h"
@@ -86,9 +89,6 @@ void testTreeTraversal()
 	// Checking for own Ids
 	////////////////////////////////////////////////////////////////
 	FullId me = Field< FullId >::get( f3aa.eref(), "me" );
-	cout << "me = " << me << 
-		"; fullid constructed= " << FullId( f3aa, 0 ) << endl;
-	cout << "bad = " << FullId::bad() << endl;
 	assert( me == FullId( f3aa, 0 ) );
 	me = Field< FullId >::get( f3ba.eref(), "me" );
 	assert( me == FullId( f3ba, 0 ) );
@@ -674,6 +674,14 @@ void testShellAddMsg()
 	shell->doSetClock( 0, 1.0 );
 
 	FullId tick( Id( 2 ), 0 );
+	// I want to compare the # of process msgs before and after.
+	vector< Id > tgts;
+	const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >(
+		Tick::initCinfo()->findFinfo( "process0" ) );
+	assert( sf );
+	unsigned int numTgts = tick.eref().element()->getOutputs( tgts, 
+		sf );
+	assert( numTgts == 0 );
 	ret = setupSched( shell, tick, a1 ); assert( ret );
 	ret = setupSched( shell, tick, a2 ); assert( ret );
 	ret = setupSched( shell, tick, b1 ); assert( ret );
@@ -688,6 +696,9 @@ void testShellAddMsg()
 	ret = setupSched( shell, tick, f2 ); assert( ret );
 	ret = setupSched( shell, tick, g1 ); assert( ret );
 	ret = setupSched( shell, tick, g2 ); assert( ret );
+
+	numTgts = tick.eref().element()->getOutputs( tgts, sf );
+	assert( numTgts == 14 );
 
 	///////////////////////////////////////////////////////////
 	// Run it
@@ -704,7 +715,10 @@ void testShellAddMsg()
 	ret = checkArg1( b1, 1, 2, 3, 4, 5 );
 	ret = checkArg1( c1, 1, 2, 3, 4, 5 );
 
-	shell->doStart( 2 );
+	// shell->doStart( 2 );
+
+	Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );
+	clock->handleStart( 2 );
 	cout << "After Start\n";
 
 	///////////////////////////////////////////////////////////

@@ -429,7 +429,7 @@ MsgId Shell::doAddMsg( const string& msgType,
 	initAck();
 	requestAddMsg.send( Eref( shelle_, 0 ), &p_, 
 		msgType, src, srcField, dest, destField );
-		Qinfo::clearQ( &p_ );
+	//	Qinfo::clearQ( &p_ );
 	waitForAck();
 	return latestMsgId_;
 }

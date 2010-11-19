@@ -341,7 +341,7 @@ void Clock::start(  const Eref& e, const Qinfo* q, double runTime )
 	} 
 
 	// Just to test: need to move back into the ticks:
-	Qinfo::mpiClearQ( &info_ );
+	Qinfo::clearQ( &info_ );
 	Qinfo::emptyAllQs();
 
 	isRunning_ = 0;

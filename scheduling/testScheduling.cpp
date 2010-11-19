@@ -281,6 +281,9 @@ void setupTicks()
 	}
 
 	assert( doubleEq( cdata->getCurrentTime(), runtime ) );
+	// Get rid of pending events in the queues.
+	Qinfo::clearQ( &p );
+	Qinfo::clearQ( &p );
 
 	tickId.destroy();
 	clock.destroy();

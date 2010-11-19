@@ -56,7 +56,8 @@ void Shell::initAck()
 void Shell::waitForAck()
 {
 	if ( isSingleThreaded_ ) {
-		Qinfo::clearQ( &p_ );
+		while ( isAckPending() )
+			Qinfo::clearQ( &p_ );
 	} else {
 		while ( isAckPending() )
 			pthread_cond_wait( parserBlockCond_, parserMutex_ );
