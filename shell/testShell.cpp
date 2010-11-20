@@ -707,7 +707,7 @@ void testShellAddMsg()
 	// Run it
 	///////////////////////////////////////////////////////////
 
-	shell->doStart( 4 );
+	shell->doStart( 2 );
 
 	Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );
 	/*
@@ -723,7 +723,7 @@ void testShellAddMsg()
 	///////////////////////////////////////////////////////////
 	
 	ret = checkOutput( a2, 0, 4, 0, 0, 0 );
-	// assert( ret );
+	assert( ret );
 	ret = checkOutput( b1, 1, 2, 3, 4, 5 );
 	assert( ret );
 	ret = checkOutput( b2, 3, 3, 3, 3, 3 );
@@ -900,7 +900,7 @@ void testCopyMsgOps()
 	// Run it
 	///////////////////////////////////////////////////////////
 
-	shell->doStart( 3 );
+	shell->doStart( 2 );
 
 	///////////////////////////////////////////////////////////
 	// Check output.

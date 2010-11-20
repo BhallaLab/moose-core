@@ -622,6 +622,7 @@ void testMultiNodeIntFireNetwork()
 	shell->doAddMsg( "Single", er0.fullId(), "process0",
 		e2.fullId(), "process" );
 	shell->doSetClock( 0, timestep );
+	shell->doReinit();
 
 	double retVm100 = Field< double >::get( Eref( e2.element(), 100 ), "Vm" );
 	double retVm900 = Field< double >::get( Eref( e2.element(), 900 ), "Vm" );

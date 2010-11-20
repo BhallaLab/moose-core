@@ -654,7 +654,8 @@ void Clock::advancePhase2(  ProcInfo *p )
 		tickPtr_[0].mgr()->advancePhase2( p );
 		if ( tickPtr_.size() > 1 )
 			sort( tickPtr_.begin(), tickPtr_.end() );
-		currentTime_ = tickPtr_[0].mgr()->getNextTime();
+		currentTime_ = tickPtr_[0].mgr()->getNextTime() - 
+			tickPtr_[0].mgr()->getDt();
 		if ( currentTime_ > endTime_ ) {
 			Id clockId( 1 );
 			procState_ = StopOnly;

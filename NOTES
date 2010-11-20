@@ -9216,5 +9216,21 @@ of vector push_backs and messing up. This is because the AssignmentMsg
 does not do a check on threads in the exec func. Fixed for AssignmentMsg
 as well as AssignVecMsg. Also OneToOneMsg had a bug related to this, fixed.
 Now it crashes somewhat further on, looking like the non-reinit bug again.
+Checkin 2377.
+
+Yes, it was non-reinit. Now it clears the doStart, but the resultant 
+numbers differ. Obvious issue is how many steps actually happen, something
+there were already issues with in the testShellAddMsg function.
+
+I've gone back and fixed the match between # steps and runtime. Now in 
+testShell.cpp:testCopyMsgOps() and testShellAddMsg()
+I can get by with doStart( 2 ), which does 2 'advances:
+Phase 1: Reinit = 1;	advance = 2;	null = 1844
+Phase 2: Reinit = 1;	advance = 2;	null = 1844
+
+The 2 is essential: First call to process, in phase1, sends out the 
+output_field of a1, b1, c1, etc. This arrives by phase 2 of the first cycle.
+However, the output_ field of a2, b2, c2 etc is not updated till the second
+call to Process.
 
 ============================================================================
