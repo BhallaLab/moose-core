@@ -71,8 +71,8 @@ static const unsigned int OkStatus = ~0; // From Shell.cpp
 /// Microseconds to sleep when not processing.
 static const unsigned int SleepyTime = 50000; 
 
-/// Flag to tell Clock to stop running.
-bool Clock::flipRunning_ = 0;
+/// Flag to tell Clock how to alter state gracefully in process loop.
+Clock::ProcState Clock::procState_ = NoChange;
 
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
@@ -369,10 +369,12 @@ void Clock::step(  const Eref& e, const Qinfo* q, unsigned int nsteps )
 /**
  * Does a graceful stop of the simulation, leaving so it can continue
  * cleanly with another step or start command.
+ * This function can be called safely from any thread, provided it is
+ * not within barrier3.
  */
 void Clock::stop(  const Eref& e, const Qinfo* q )
 {
-	isRunning_ = 0;
+	procState_ = StopOnly;
 }
 
 /**
@@ -536,6 +538,64 @@ void Clock::processPhase2( ProcInfo* info )
 		++countNull2_;
 }
 
+/**
+ * Static function, used to flip flags to start or end a simulation. 
+ * It is used as the within-barrier function of barrier 3.
+ * This has to be in the barrier as we are altering a Clock field which
+ * the 'process' flag depends on.
+ * Six cases:
+ * 	- Do nothing
+ * 	- Reinit only
+ *	- Reinit followed by start
+ *	- Start only
+ *	- Stop only
+ *	- Stop followed by Reinit.
+ * Some of these cases need additional intermediate steps, since the reinit
+ * flag has to turn itself off after one cycle.
+ */
+void Clock::checkProcState()
+{
+	if ( procState_ == NoChange ) { // Most common 
+		return;
+	}
+
+	Id clockId( 1 );
+	assert( clockId() );
+	Clock* clock = reinterpret_cast< Clock* >( clockId.eref().data() );
+
+	switch ( procState_ ) {
+		case TurnOnReinit:
+			clock->doingReinit_ = 1;
+		//	procState_ = TurnOffReinit;
+		break;
+		case TurnOffReinit:
+			clock->doingReinit_ = 0;
+			procState_ = NoChange;
+		break;
+		case ReinitThenStart:
+			clock->doingReinit_ = 1;
+			procState_ = StartOnly;
+		break;
+		case StartOnly:
+			clock->doingReinit_ = 0;
+			clock->isRunning_ = 1;
+			procState_ = NoChange;
+		break;
+		case StopOnly:
+			clock->isRunning_ = 0;
+			procState_ = NoChange;
+		break;
+		case StopThenReinit:
+			clock->isRunning_ = 0;
+			clock->doingReinit_ = 1;
+		//	procState_ = TurnOffReinit;
+		break;
+		case NoChange:
+		default:
+		break;
+	}
+}
+
 /////////////////////////////////////////////////////////////////////
 // Scheduling the 'process' operation for scheduled objects.
 // Three functions are involved: the handler for the start function,
@@ -566,7 +626,10 @@ void Clock::handleStart( double runtime )
 	runTime_ = runtime;
 	endTime_ = runtime * ROUNDING + currentTime_;
 	// isRunning_ = 1; // Can't touch this here, instead defer to barrier3
-	flipRunning_ = 1; // This tells the clock to start in barrier3.
+	if ( tickPtr_.size() != tickMgr_.size() )
+		procState_ = ReinitThenStart;
+	else
+		procState_ = StartOnly;
 }
 
 // Advance system state by one clock tick. This may be a subset of
@@ -594,29 +657,12 @@ void Clock::advancePhase2(  ProcInfo *p )
 		currentTime_ = tickPtr_[0].mgr()->getNextTime();
 		if ( currentTime_ > endTime_ ) {
 			Id clockId( 1 );
-			flipRunning_ = 1;
+			procState_ = StopOnly;
 			// isRunning_ = 0; // Should not set this flag here, it affects other threads.
 			finished.send( clockId.eref(), p );
 			ack.send( clockId.eref(), p, p->nodeIndexInGroup, OkStatus );
 		}
 		++countAdvance2_;
-	}
-}
-
-/**
- * Static function, used to flip flags to start or end a simulation. 
- * It is used as the within-barrier function of barrier 3.
- * This has to be in the barrier as we are altering a Clock field which
- * the 'process' flag depends on.
- */
-void Clock::checkStartOrStop()
-{
-	if ( flipRunning_ ) { // A static variable of the Clock
-		Id clockId( 1 );
-		assert( clockId() );
-		Clock* clock = reinterpret_cast< Clock* >( clockId.eref().data() );
-		clock->isRunning_ = !clock->isRunning_;
-		flipRunning_ = 0;
 	}
 }
 
@@ -637,8 +683,13 @@ void Clock::handleReinit()
 	nextTime_ = 0.0;
 	nSteps_ = 0;
 	currentStep_ = 0;
-	isRunning_ = 0;
-	doingReinit_ = 1;
+	if ( isRunning_ )
+		procState_ = StopThenReinit;
+	else
+		procState_ = TurnOnReinit;
+	// flipReinit_ = 1; // This tells the clock to reinit in barrier3.
+	// doingReinit_ = 1; // Can't do this here, may mess up other threads.
+	// isRunning_ = 0; // Can't do this here either.
 }
 
 
@@ -665,7 +716,7 @@ void Clock::reinitPhase2( ProcInfo* info )
 {
 	info->currTime = 0.0;
 	if ( info->threadIndexInGroup == 0 ) {
-		doingReinit_ = 0;
+		// doingReinit_ = 0; //Cannot touch this here, affects other threads
 		for ( vector< TickPtr >::iterator i = tickPtr_.begin();
 			i != tickPtr_.end(); ++i ) {
 			i->mgr()->reinitPhase2( info );
@@ -673,9 +724,9 @@ void Clock::reinitPhase2( ProcInfo* info )
 		sort( tickPtr_.begin(), tickPtr_.end() );
 		Id clockId( 1 );
 		ack.send( clockId.eref(), info, info->nodeIndexInGroup, OkStatus );
-	}
-	if ( info->threadIndexInGroup == 0 )
+		procState_ = TurnOffReinit;
 		++countReinit2_;
+	}
 }
 
 

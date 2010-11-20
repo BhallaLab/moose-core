@@ -130,6 +130,9 @@ void* shellEventLoop( void* info )
 		// Shell group and thus is safe from the other threads.
 		pthread_mutex_lock( shell->parserMutex() );
 			p->barrier1->wait();
+			// We only want to signal if it is waiting, AND if
+			// we have gotten enough acks done. It is the job of the
+			// rest of the event loop to deal with the acks.
 			if ( shell->inBlockingParserCall() && !shell->isAckPending() ) {
 				pthread_cond_signal( shell->parserBlockCond() );
 			}
@@ -174,7 +177,7 @@ void Shell::launchThreads()
 
 	barrier1_ = new FuncBarrier( numBarrier1Threads, &Qinfo::swapQ );
 	barrier2_ = new FuncBarrier( numThreads, &Qinfo::swapMpiQ );
-	barrier3_ = new FuncBarrier( numBarrier1Threads, &Clock::checkStartOrStop );
+	barrier3_ = new FuncBarrier( numBarrier1Threads, &Clock::checkProcState );
 	int ret;
 	pthread_t gThread;
 

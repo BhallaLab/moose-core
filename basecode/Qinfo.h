@@ -168,6 +168,11 @@ class Qinfo
 		static const SimGroup* simGroup( unsigned int index );
 
 		/**
+		 * Clears out all sim groups.
+		 */
+		static void clearSimGroups();
+
+		/**
 		 * Read the inQ. Meant to run on all the sim threads.
 		 * The Messages internally ensure thread safety by segregating
 		 * target Objects.

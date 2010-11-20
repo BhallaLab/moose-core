@@ -268,23 +268,25 @@ void setupTicks()
 
 	ProcInfo p;
 	cdata->handleReinit();
-	assert( cdata->doingReinit_ == 1 );
+	assert( Clock::procState_ == Clock::TurnOnReinit ); 
 	cdata->reinitPhase1( &p );
-	assert( cdata->doingReinit_ == 1 );
+	assert( Clock::procState_ == Clock::TurnOnReinit ); 
 	cdata->reinitPhase2( &p );
+	assert( Clock::procState_ == Clock::TurnOffReinit ); 
+	Clock::procState_ = Clock::NoChange;
 	assert( cdata->doingReinit_ == 0 );
 
 	cdata->handleStart( runtime );
 
 	// Normally flipRunning_ signals the system to flip the isRunning flag
-	assert( Clock::flipRunning_ ); 
-	Clock::flipRunning_ = 0;
+	assert( Clock::procState_ == Clock::StartOnly ); 
+	Clock::procState_ = Clock::NoChange;
 
-	while ( !cdata->flipRunning_ ) {
+	while ( Clock::procState_ == Clock::NoChange ) {
 		cdata->advancePhase1( &p );
 		cdata->advancePhase2( &p );
 	}
-	Clock::flipRunning_ = 0;
+	Clock::procState_ = Clock::NoChange;
 
 	assert( doubleEq( cdata->getCurrentTime(), runtime ) );
 	// Get rid of pending events in the queues.
@@ -550,7 +552,9 @@ void testMultiNodeIntFireNetwork()
 		FullId( synId, 0 ), "addSpike" );
 	
 	const Msg* m = Msg::getMsg( mid );
+	assert( m );
 	Eref mer = m->manager( m->id() );
+	assert( mer.element() );
 
 	SetGet2< double, long >::set( mer, "setRandomConnectivity", 
 		connectionProbability, 5489UL );

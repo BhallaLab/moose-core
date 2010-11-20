@@ -13,6 +13,15 @@
 class Clock
 {
 	friend void setupTicks();
+		enum ProcState { 
+			NoChange, 
+			TurnOnReinit,
+			TurnOffReinit,
+			ReinitThenStart, 
+			StartOnly, 
+			StopOnly, 
+			StopThenReinit
+		};
 	public:
 		Clock();
 
@@ -35,15 +44,21 @@ class Clock
 		/**
 		 * starts up a run to go for runTime without threading.
 		 */
+		// Deprecated
 		void start( const Eref& e, const Qinfo* q, double runTime );
+		// Needs modification.
 		void step( const Eref& e, const Qinfo* q, unsigned int nsteps );
 		void stop( const Eref& e, const Qinfo* q );
+
+		// Deprecated
 		void terminate( const Eref& e, const Qinfo* q );
+		// Deprecated
 		void reinit( const Eref& e, const Qinfo* q );
 
 		/**
 		 * This utility function creates a tick on the assigned tickNum,
 		 * Assigns dt.
+		 * Must only be called at a thread-safe time.
 		 */
 		void setupTick( unsigned int tickNum, double dt );
 
@@ -115,10 +130,11 @@ class Clock
 		/**
 		 * Static function, used to flip flags to start or end simulation. 
 		 * It is used as the within-barrier function of barrier 3.
-		 * This has to be in the barrier as we are altering a Clock field
-		 * which the 'process' flag depends on.
+		 * This has to be in the barrier as we are altering Clock fields
+		 * doingReinit_ and isRunning_,
+		 * which the 'process' operation depends on.
 		 */
-		static void checkStartOrStop();
+		static void checkProcState();
 
 		// static void* threadStartFunc( void* threadInfo );
 		static const Cinfo* initCinfo();
@@ -172,8 +188,8 @@ class Clock
 
 		/**
 		 * This points to the current TickMgr first in line for execution
-		 */
 		TickMgr* tp0_;
+		 */
 
 		/**
 		 * Counters to keep track of number of passes through each process
@@ -187,9 +203,10 @@ class Clock
 		unsigned int countAdvance2_;
 
 		/**
-		 * Global flag to tell Clock that it has to stop running. 
+		 * Global flag to tell Clock how to change process state next cycle
 		 */
-		static bool flipRunning_;
+		static ProcState procState_;
+
 };
 
 #endif // _CLOCK_H

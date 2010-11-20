@@ -125,7 +125,6 @@ void Shell::setHardware(
 	unsigned int myNode )
 {
 	isSingleThreaded_ = isSingleThreaded;
-	Qinfo::addSimGroup( numCores, numNodes ); // This is the shell group.
 	if ( !isSingleThreaded ) {
 		// Create the parser and the gui threads.
 		numCores_ = numCores;
@@ -159,6 +158,8 @@ void Shell::loadBalance()
 	//
 	// Note that the messages have to be rebuilt after this call.
 	// Note that this function is called independently on each node.
+	Qinfo::clearSimGroups();
+	Qinfo::addSimGroup( numCores_, numNodes_ ); // This is the shell group.
 	if ( !isSingleThreaded_ ) {
 		// Add the basic process group as group 1.
 		// More sophisticated balancing to come.

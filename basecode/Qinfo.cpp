@@ -91,15 +91,23 @@ unsigned int Qinfo::addSimGroup( unsigned short numThreads,
 	return ng;
 }
 
+// Static function
 unsigned int Qinfo::numSimGroup()
 {
 	return g_.size();
 }
 
+// Static function
 const SimGroup* Qinfo::simGroup( unsigned int index )
 {
 	assert( index < g_.size() );
 	return &( g_[index] );
+}
+
+// Static function
+void Qinfo::clearSimGroups()
+{
+	g_.clear();
 }
 
 /**

@@ -701,12 +701,14 @@ const char* Shell::getBuf() const
 
 void Shell::handleStart( double runtime )
 {
+	/*
 	isRunning_ = 1;
 	runtime_ = runtime;
 	// The actual start operation is handed over to the process stage
 	// to avoid confusing the queue.
 	// start( runtime );
 	// ack.send( Eref( shelle_, 0 ), &p_, myNode_, OkStatus );
+	*/
 }
 
 void Shell::handleReinit( )
@@ -717,28 +719,34 @@ void Shell::handleReinit( )
 	Qinfo q;
 	clock->stop( clockId.eref(), &q );
 	*/
+	/*
 	doReinit_ = 1;
 	handleStop();
+	*/
 	// Hand over the reinit operation to the Shell::process function,
 	// to avoid confusing the queue.
 }
 
 void Shell::handleStop()
 {
+/*
 	Id clockId( 1 );
 	Clock* clock = reinterpret_cast< Clock* >( clockId.eref().data() );
 	Qinfo q;
 	isRunning_ = 0;
 	clock->stop( clockId.eref(), &q );
+	*/
 }
 
 void Shell::handleTerminate()
 {
+	/*
 	Id clockId( 1 );
 	Clock* clock = reinterpret_cast< Clock* >( clockId.eref().data() );
 	Qinfo q;
 	isRunning_ = 0;
 	clock->terminate( clockId.eref(), &q );
+	*/
 }
 
 

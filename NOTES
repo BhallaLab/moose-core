@@ -9185,11 +9185,28 @@ is called before Shell::doStart(). Need to have an internal check in
 Clock::handleStart to do its own reinit. 
 Anyway, at this point it clears all the Shell unit tests, including runs
 through the process loop. Although issues remain, this is a major step further. 
+Checkin 2374.
 
 Pending issues:
 	- # of advances vs. runtime, and # of cycles needed to send msgs and
 	clear tests.
 	- Reinit flag needs thread protection, same as isRunning_ flag.
 	- Clock::handleStart should check if it has been reinited.
+
+Worked on all 3 above. New, much more complete structure for dealing with
+Clock reinit, start, and stop requests safely. Still gets stuck.
+Seems to be going through 4 Qvecs in inQ and outQ. This is wrong. Even though
+it may have nothing to do with the problem, I'll see if fixing it helps.
+Fixed. Doesn't help. Still gets stuck in Shell::doReinit in an infinite loop
+waiting for an ack.
+
+Figured it out. Shell sends an additional mail to itself which messes up
+some of the calls. Now the code passes this reinit, but then croaks on the 
+processing.
+
+Fixed this too. It was that the new, functional reinit was clearing out all 
+the initial values I had set. Same problem also came up in the similar test
+on the copied element tree and messages, testShell:testCopyMsgOps().
+With these cleared it goes further still in the unit tests.
 
 ============================================================================
