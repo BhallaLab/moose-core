@@ -154,8 +154,7 @@ void* shellEventLoop( void* info )
 void* reportGraphics( void* info )
 {
 	ProcInfo *p = reinterpret_cast< ProcInfo* >( info );
-	cout << "reportGraphics on " << p->nodeIndexInGroup << ":" << 
-		p->threadIndexInGroup << endl;
+	// cout << "reportGraphics on " << p->nodeIndexInGroup << ":" << p->threadIndexInGroup << endl;
 	pthread_exit( NULL );
 }
 

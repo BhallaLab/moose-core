@@ -250,6 +250,12 @@ class Qinfo
 		static void clearQ( const ProcInfo* p );
 
 		/**
+		 * isQempty: returns true if there is nothing waiting in
+		 * any of the queues.
+		static bool isQempty();
+		 */
+
+		/**
 		 * Works through any requests for structural changes to the model.
 		 * This includes creation, deletion,
 		 * resizing, and movement of Elements and Msgs. These functions

@@ -68,6 +68,10 @@
 
 static const unsigned int OkStatus = ~0; // From Shell.cpp
 
+/// Microseconds to sleep when not processing.
+static const unsigned int SleepyTime = 50000; 
+
+
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
@@ -235,7 +239,13 @@ Clock::Clock()
 	  info_(),
 	  numPendingThreads_( 0 ),
 	  numThreads_( 0 ),
-	  ticks_( Tick::maxTicks )
+	  ticks_( Tick::maxTicks ),
+		countNull1_( 0 ),
+		countNull2_( 0 ),
+		countReinit1_( 0 ),
+		countReinit2_( 0 ),
+		countAdvance1_( 0 ),
+		countAdvance2_ ( 0 )
 {
 	for ( unsigned int i = 0; i < Tick::maxTicks; ++i ) {
 		ticks_[i].setIndex( i );
@@ -504,24 +514,24 @@ void Clock::setLoopingState( bool val )
  * loop, during phase1 of the loop. This has to drive thread-specific 
  * calculations on all scheduled objects.
  */
-void Clock::processPhase1( ProcInfo* info ) const
+void Clock::processPhase1( ProcInfo* info )
 {
 	if ( isRunning_ )
 		advancePhase1( info );
 	else if ( doingReinit_ )
 		reinitPhase1( info );
+	else if ( info->threadIndexInGroup == 0 )
+		++countNull1_;
 }
 
 void Clock::processPhase2( ProcInfo* info )
 {
-		if ( isRunning_ )
-			advancePhase2( info );
-		else if ( doingReinit_ )
-			reinitPhase2( info );
-	/*
-	if ( info->threadIndexInGroup == 0 ) {
-	}
-	*/
+	if ( isRunning_ )
+		advancePhase2( info );
+	else if ( doingReinit_ )
+		reinitPhase2( info );
+	else if ( info->threadIndexInGroup == 0 )
+		++countNull2_;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -556,9 +566,12 @@ void Clock::handleStart( double runtime )
 // Advance system state by one clock tick. This may be a subset of
 // one timestep, as there may be multiple clock ticks within one dt.
 // This simply distributes the call to all scheduled objects
-void Clock::advancePhase1(  ProcInfo *p ) const
+void Clock::advancePhase1(  ProcInfo *p )
 {
 	tickPtr_[0].mgr()->advancePhase1( p );
+	if ( p->threadIndexInGroup == 0 ) {
+		++countAdvance1_;
+	}
 }
 
 // In phase 2 we need to do the updates to the Clock object, especially
@@ -577,6 +590,7 @@ void Clock::advancePhase2(  ProcInfo *p )
 			finished.send( clockId.eref(), p );
 			ack.send( clockId.eref(), p, p->nodeIndexInGroup, OkStatus );
 		}
+		++countAdvance2_;
 	}
 }
 
@@ -608,12 +622,14 @@ void Clock::handleReinit()
  * loop.
  * In phase1 it calls reinit on all target Elements.
  */
-void Clock::reinitPhase1( ProcInfo* info ) const
+void Clock::reinitPhase1( ProcInfo* info )
 {
 	for ( vector< TickPtr >::const_iterator i = tickPtr_.begin();
 		i != tickPtr_.end(); ++i ) {
 		i->mgr()->reinitPhase1( info );
 	}
+	if ( info->threadIndexInGroup == 0 )
+		++countReinit1_;
 }
 
 /**
@@ -632,5 +648,17 @@ void Clock::reinitPhase2( ProcInfo* info )
 		Id clockId( 1 );
 		ack.send( clockId.eref(), info, info->nodeIndexInGroup, OkStatus );
 	}
+	if ( info->threadIndexInGroup == 0 )
+		++countReinit2_;
 }
 
+
+void Clock::printCounts() const
+{
+	cout << "Phase 1: Reinit = " << countReinit1_ <<
+		";	advance = " << countAdvance1_ <<
+		";	null = " << countNull1_ << endl;
+	cout << "Phase 2: Reinit = " << countReinit2_ <<
+		";	advance = " << countAdvance2_ <<
+		";	null = " << countNull2_ << endl;
+}

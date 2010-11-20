@@ -78,7 +78,7 @@ class Clock
 		 * This is meant to be run in parallel on multiple threads. The
 		 * ProcInfo carries info about thread. 
 		 */
-		void advancePhase1( ProcInfo* p ) const;
+		void advancePhase1( ProcInfo* p );
 		void advancePhase2( ProcInfo* p );
 		/// dest function for message to start simulation.
 		void handleStart( double runtime );
@@ -89,7 +89,7 @@ class Clock
 		 * scheduling loop. It has to do this to initialize ProcInfo 
 		 * properly.
 		 */
-		void reinitPhase1( ProcInfo* p ) const;
+		void reinitPhase1( ProcInfo* p );
 		void reinitPhase2( ProcInfo* p );
 		/// dest function for message to trigger reinit.
 		void handleReinit();
@@ -99,7 +99,7 @@ class Clock
 		 * The process functions are the interface presented by the Clock
 		 * to the multithread process loop.
 		 */
-		void processPhase1( ProcInfo* p ) const;
+		void processPhase1( ProcInfo* p );
 		void processPhase2( ProcInfo* p );
 
 		///////////////////////////////////////////////////////////////
@@ -109,6 +109,8 @@ class Clock
 
 		bool keepLooping() const;
 		void setLoopingState( bool val );
+
+		void printCounts() const;
 
 		static void* threadStartFunc( void* threadInfo );
 		static const Cinfo* initCinfo();
@@ -160,6 +162,12 @@ class Clock
 		 */
 		vector< Tick > ticks_;
 		TickMgr* tp0_;
+		unsigned int countNull1_;
+		unsigned int countNull2_;
+		unsigned int countReinit1_;
+		unsigned int countReinit2_;
+		unsigned int countAdvance1_;
+		unsigned int countAdvance2_;
 };
 
 #endif // _CLOCK_H
