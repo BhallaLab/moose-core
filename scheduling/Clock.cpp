@@ -71,6 +71,8 @@ static const unsigned int OkStatus = ~0; // From Shell.cpp
 /// Microseconds to sleep when not processing.
 static const unsigned int SleepyTime = 50000; 
 
+/// Flag to tell Clock to stop running.
+bool Clock::flipRunning_ = 0;
 
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
@@ -546,6 +548,9 @@ void Clock::processPhase2( ProcInfo* info )
  * reason, it has to pick up where it left off.
  * runtime_ is the additional time to run the simulation. This is a little
  * odd when the simulation has stopped halfway through a clock tick.
+ * Note that this is executed during the generic phase2 or phase3, in
+ * parallel with lots of other threads. We cannot touch any fields that may
+ * affect other threads.
  */
 void Clock::handleStart( double runtime )
 {
@@ -560,7 +565,8 @@ void Clock::handleStart( double runtime )
 	}
 	runTime_ = runtime;
 	endTime_ = runtime * ROUNDING + currentTime_;
-	isRunning_ = 1;
+	// isRunning_ = 1; // Can't touch this here, instead defer to barrier3
+	flipRunning_ = 1; // This tells the clock to start in barrier3.
 }
 
 // Advance system state by one clock tick. This may be a subset of
@@ -577,6 +583,8 @@ void Clock::advancePhase1(  ProcInfo *p )
 // In phase 2 we need to do the updates to the Clock object, especially
 // sorting the TickPtrs. This also is when we find out if the simulation
 // is finished.
+// Note that this function happens when lots of other threads are doing
+// things. So it cannot touch any fields which might affect other threads.
 void Clock::advancePhase2(  ProcInfo *p )
 {
 	if ( p->threadIndexInGroup == 0 ) {
@@ -586,11 +594,29 @@ void Clock::advancePhase2(  ProcInfo *p )
 		currentTime_ = tickPtr_[0].mgr()->getNextTime();
 		if ( currentTime_ > endTime_ ) {
 			Id clockId( 1 );
-			isRunning_ = 0;
+			flipRunning_ = 1;
+			// isRunning_ = 0; // Should not set this flag here, it affects other threads.
 			finished.send( clockId.eref(), p );
 			ack.send( clockId.eref(), p, p->nodeIndexInGroup, OkStatus );
 		}
 		++countAdvance2_;
+	}
+}
+
+/**
+ * Static function, used to flip flags to start or end a simulation. 
+ * It is used as the within-barrier function of barrier 3.
+ * This has to be in the barrier as we are altering a Clock field which
+ * the 'process' flag depends on.
+ */
+void Clock::checkStartOrStop()
+{
+	if ( flipRunning_ ) { // A static variable of the Clock
+		Id clockId( 1 );
+		assert( clockId() );
+		Clock* clock = reinterpret_cast< Clock* >( clockId.eref().data() );
+		clock->isRunning_ = !clock->isRunning_;
+		flipRunning_ = 0;
 	}
 }
 

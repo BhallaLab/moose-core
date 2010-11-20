@@ -715,13 +715,16 @@ void testShellAddMsg()
 	ret = checkArg1( b1, 1, 2, 3, 4, 5 );
 	ret = checkArg1( c1, 1, 2, 3, 4, 5 );
 
-	// shell->doStart( 2 );
+	shell->doStart( 3 );
 
 	Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );
+	/*
 	clock->handleStart( 50 );
 	sleep( 1 );
+	*/
 	clock->printCounts();
 	cout << "After Start\n";
+	Qinfo::reportQ();
 
 	///////////////////////////////////////////////////////////
 	// Check output.
@@ -902,13 +905,14 @@ void testCopyMsgOps()
 	///////////////////////////////////////////////////////////
 	const Arith* a1obj = reinterpret_cast< const Arith* >( kids[0].eref().data() );
 	for (unsigned int i = 0; i < 5; ++i )
-		assert( fabs( a1obj[i].arg1_ - init[i] ) < 1e-6 );
+		assert( doubleEq( a1obj[i].arg1_, init[i] ) );
 
 	///////////////////////////////////////////////////////////
 	// Run it
 	///////////////////////////////////////////////////////////
 	
-	shell->doStart( 2 );
+	shell->doReinit();
+	shell->doStart( 3 );
 
 	///////////////////////////////////////////////////////////
 	// Check output.

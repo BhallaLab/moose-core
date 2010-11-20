@@ -102,6 +102,10 @@ const SimGroup* Qinfo::simGroup( unsigned int index )
 	return &( g_[index] );
 }
 
+/**
+ * This is called within barrier1 of the ProcessLoop. It isn't
+ * thread-safe, relies on the location of the call to achieve safety.
+ */
 void Qinfo::clearStructuralQ()
 {
 	isSafeForStructuralOps_ = 1;
@@ -226,6 +230,7 @@ void Qinfo::swapQ()
 	// change the structure of the model can occur without risk of 
 	// affecting ongoing messaging.
 	clearStructuralQ(); // static function.
+
 	if ( inQ_ == &q2_ ) {
 		inQ_ = &q1_;
 		outQ_ = &q2_;
@@ -367,6 +372,13 @@ void Qinfo::addToQbackward( const ProcInfo* p, MsgFuncBinding b,
 	(*outQ_)[p->groupId].push_back( p->threadIndexInGroup, this, arg );
 }
 
+/**
+ * This is called by the 'handle<op>' functions in Shell. So it is always
+ * either in phase2/3, or within clearStructuralQ() which is on a single 
+ * thread inside Barrier1.
+ * Note that the 'isSafeForStructuralOps' flag is only ever touched in 
+ * clearStructuralQ().
+ */
 bool Qinfo::addToStructuralQ() const
 {
 	if ( isSafeForStructuralOps_ )

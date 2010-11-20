@@ -112,7 +112,15 @@ class Clock
 
 		void printCounts() const;
 
-		static void* threadStartFunc( void* threadInfo );
+		/**
+		 * Static function, used to flip flags to start or end simulation. 
+		 * It is used as the within-barrier function of barrier 3.
+		 * This has to be in the barrier as we are altering a Clock field
+		 * which the 'process' flag depends on.
+		 */
+		static void checkStartOrStop();
+
+		// static void* threadStartFunc( void* threadInfo );
 		static const Cinfo* initCinfo();
 	private:
 		double runTime_;
@@ -161,13 +169,27 @@ class Clock
 		 * not matter. 
 		 */
 		vector< Tick > ticks_;
+
+		/**
+		 * This points to the current TickMgr first in line for execution
+		 */
 		TickMgr* tp0_;
+
+		/**
+		 * Counters to keep track of number of passes through each process
+		 * phase. Useful for debugging, and load balancing in due course.
+		 */
 		unsigned int countNull1_;
 		unsigned int countNull2_;
 		unsigned int countReinit1_;
 		unsigned int countReinit2_;
 		unsigned int countAdvance1_;
 		unsigned int countAdvance2_;
+
+		/**
+		 * Global flag to tell Clock that it has to stop running. 
+		 */
+		static bool flipRunning_;
 };
 
 #endif // _CLOCK_H

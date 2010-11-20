@@ -153,7 +153,7 @@ void* shellEventLoop( void* info )
 
 void* reportGraphics( void* info )
 {
-	ProcInfo *p = reinterpret_cast< ProcInfo* >( info );
+	// ProcInfo *p = reinterpret_cast< ProcInfo* >( info );
 	// cout << "reportGraphics on " << p->nodeIndexInGroup << ":" << p->threadIndexInGroup << endl;
 	pthread_exit( NULL );
 }
@@ -174,7 +174,7 @@ void Shell::launchThreads()
 
 	barrier1_ = new FuncBarrier( numBarrier1Threads, &Qinfo::swapQ );
 	barrier2_ = new FuncBarrier( numThreads, &Qinfo::swapMpiQ );
-	barrier3_ = new FuncBarrier( numBarrier1Threads );
+	barrier3_ = new FuncBarrier( numBarrier1Threads, &Clock::checkStartOrStop );
 	int ret;
 	pthread_t gThread;
 

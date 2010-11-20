@@ -9143,11 +9143,53 @@ This is a OneToAll msg, let me check the execution logic...
 
 Yup, there was an error in the OneToAll msg logic. When I fixed this it clears
 all of the messaging tests in testShell.cpp:testShellAddMsg(). Note that at
-this point I'm still using the 'spleep' call to ensure that the messages
-get through.
+this point I'm still using the 'sleep' call to ensure that the messages
+get through. Checkin 2373.
 
 I wonder if this might mess up the scheduling too, since the messages 
 from the Ticks are OneToAll. Checked code. No, doesn't seem like it. 
 Next: See if I can now get the system to work properly with shell::doStart().
+Doesn't. Confirmed it doesn't work even if I put the 'sleep' call back in.
+
+Went back to shell::doStart( runtime );
+Now tried changing runtime. This is interesting.
+For runtime of 3, it fails. Clock::printCounts() reports:
+Phase 1: Reinit = 0;	advance = 1;	null = 2011
+Phase 2: Reinit = 1;	advance = 2;	null = 2008
+
+For runtime of 4, it works. Clock::printCounts() reports:
+Phase 1: Reinit = 0;	advance = 2;	null = 1767
+Phase 2: Reinit = 1;	advance = 3;	null = 1764
+
+Discovered another thread problem. The start and stop from processing were
+not happening in a thread-safe manner, as the handler function is processed
+in parallel with lots of other threads. Set up a global flag to notify the
+clock of requests to change isRunning_, and I actually do the change of this
+key flag within barrier3 where it is safe from messing with anything else.
+
+After this I'm still not quite there.
+For runtime of 3, it works. Clock::printCounts() reports:
+Phase 1: Reinit = 0;	advance = 2;	null = 1766
+Phase 2: Reinit = 1;	advance = 2;	null = 1764
+
+but, for runtime of 2, it fails. Clock::printCounts() reports:
+Phase 1: Reinit = 0;	advance = 1;	null = 1715
+Phase 2: Reinit = 1;	advance = 1;	null = 1713
+
+Note that now the # of advance cycles matches between phase1 and phase2.
+I also see it is possible to barf at reinit. Same issue.
+
+Another issue revealed in testShell.cpp:testCopyMsgOps, which uses a similar
+set of messages to test copying. It clears this only if the Shell::doReinit()
+is called before Shell::doStart(). Need to have an internal check in 
+Clock::handleStart to do its own reinit. 
+Anyway, at this point it clears all the Shell unit tests, including runs
+through the process loop. Although issues remain, this is a major step further. 
+
+Pending issues:
+	- # of advances vs. runtime, and # of cycles needed to send msgs and
+	clear tests.
+	- Reinit flag needs thread protection, same as isRunning_ flag.
+	- Clock::handleStart should check if it has been reinited.
 
 ============================================================================

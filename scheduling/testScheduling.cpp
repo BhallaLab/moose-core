@@ -275,10 +275,16 @@ void setupTicks()
 	assert( cdata->doingReinit_ == 0 );
 
 	cdata->handleStart( runtime );
-	while ( cdata->isRunning_ ) {
+
+	// Normally flipRunning_ signals the system to flip the isRunning flag
+	assert( Clock::flipRunning_ ); 
+	Clock::flipRunning_ = 0;
+
+	while ( !cdata->flipRunning_ ) {
 		cdata->advancePhase1( &p );
 		cdata->advancePhase2( &p );
 	}
+	Clock::flipRunning_ = 0;
 
 	assert( doubleEq( cdata->getCurrentTime(), runtime ) );
 	// Get rid of pending events in the queues.
