@@ -30,13 +30,15 @@ void AssignmentMsg::exec( const char* arg, const ProcInfo *p ) const
 {
 	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
 
-	if ( q->isForward() && e2_->dataHandler()->isDataHere( i2_ ) ) {
+	if ( q->isForward() && e2_->dataHandler()->isDataHere( i2_ ) &&
+		p->execThread( e2_->id(), i2_.data() ) ) {
 		const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
 		f->op( Eref( e2_, i2_ ), arg );
 		return;
 	} 
 
-	if ( !q->isForward() && e1_->dataHandler()->isDataHere( i1_ ) ) {
+	if ( !q->isForward() && e1_->dataHandler()->isDataHere( i1_ ) &&
+		p->execThread( e1_->id(), i1_.data() ) ) {
 		const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
 		f->op( Eref( e1_, i1_ ), arg );
 	}

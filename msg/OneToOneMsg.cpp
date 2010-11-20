@@ -73,7 +73,7 @@ void OneToOneMsg::exec( const char* arg, const ProcInfo* p ) const
 		}
 	} else {
 		if ( e1_->dataHandler()->isDataHere( src ) &&
-			p->execThread( e2_->id(), src ) )
+			p->execThread( e1_->id(), src ) )
 		{
 			const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
 			f->op( Eref( e1_, q->srcIndex() ), arg );

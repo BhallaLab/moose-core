@@ -41,6 +41,7 @@ void AssignVecMsg::exec( const char* arg, const ProcInfo *p ) const
 		unsigned int j = 0;
 		for ( DataHandler::iterator i = d2->begin(); i != d2->end(); ++i )
 		{
+			if ( p->execThread( e2_->id(),i.index().data() ) ) {
 				// unsigned int j = i.index();
 				// Note that j might not go in sequential order, as it
 				// depends on locally allocated parts of the vector.
@@ -49,10 +50,12 @@ void AssignVecMsg::exec( const char* arg, const ProcInfo *p ) const
 				// Note also that this is independent of the # of dimensions
 				// or whether the DataHandler is a FieldDataHandler.
 				f->op( Eref( e2_, i.index() ), q, pb[j] );
-				j++;
+			}
+			j++;
 		}
 	}
-	if ( !q->isForward() && e1_->dataHandler()->isDataHere( i1_ ) ) {
+	if ( !q->isForward() && e1_->dataHandler()->isDataHere( i1_ ) &&
+		p->execThread( e1_->id(), i1_.data() ) ) {
 		const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
 		f->op( Eref( e1_, i1_ ), arg );
 	}

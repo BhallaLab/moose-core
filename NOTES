@@ -9208,5 +9208,13 @@ Fixed this too. It was that the new, functional reinit was clearing out all
 the initial values I had set. Same problem also came up in the similar test
 on the copied element tree and messages, testShell:testCopyMsgOps().
 With these cleared it goes further still in the unit tests.
+Checkin 2376.
+
+Next place it crashes is SparseMsg.cpp:randomConnect. It is simply that
+multiple threads are calling the function at the same time, doing lots
+of vector push_backs and messing up. This is because the AssignmentMsg
+does not do a check on threads in the exec func. Fixed for AssignmentMsg
+as well as AssignVecMsg. Also OneToOneMsg had a bug related to this, fixed.
+Now it crashes somewhat further on, looking like the non-reinit bug again.
 
 ============================================================================

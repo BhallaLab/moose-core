@@ -262,6 +262,7 @@ template < class T > class SparseMatrix
 		void addRow( unsigned int rowNum, const vector< T >& row ) {
 			assert( rowNum < nrows_ );
 			assert( rowStart_.size() == (nrows_ + 1 ) );
+			assert( N_.size() == colIndex_.size() );
 			for ( unsigned int i = 0; i < ncolumns_; ++i ) {
 				if ( row[i] != T( ~0 ) ) {
 					N_.push_back( row[i] );
@@ -283,6 +284,8 @@ template < class T > class SparseMatrix
 			assert( rowNum < nrows_ );
 			assert( rowStart_.size() == (nrows_ + 1 ) );
 			assert( rowStart_[ rowNum ] == N_.size() );
+			assert( entry.size() == colIndexArg.size() );
+			assert( N_.size() == colIndex_.size() );
 			N_.insert( N_.end(), entry.begin(), entry.end() );
 			colIndex_.insert( colIndex_.end(), 
 				colIndexArg.begin(), colIndexArg.end() );
