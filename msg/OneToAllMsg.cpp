@@ -105,7 +105,7 @@ void OneToAllMsg::addToQ( const Element* src, Qinfo& q,
 {
 	if ( e1_ == src && i1_ == q.srcIndex() ) {
 		q.addToQforward( p, i, arg );
-	} else {
+	} else if ( e1_ != src ) {
 		q.addToQbackward( p, i, arg ); 
 	}
 }

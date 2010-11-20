@@ -718,7 +718,9 @@ void testShellAddMsg()
 	// shell->doStart( 2 );
 
 	Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );
-	clock->handleStart( 2 );
+	clock->handleStart( 50 );
+	sleep( 1 );
+	clock->printCounts();
 	cout << "After Start\n";
 
 	///////////////////////////////////////////////////////////

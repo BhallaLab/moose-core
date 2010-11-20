@@ -9120,3 +9120,34 @@ The Clock::handleStart isn't good to access directly as it will change the
 Checkin 2371.
 
 ============================================================================
+20 Nov 2010.
+Added some diagnostic fields to count number of passes through various
+phases of the process loop. Also added Clock::printCounts() to print them.
+Checkin 2372.
+
+This shows that the system always does one pass through phase2 before
+croaking. Phase 1 is unpredictable. It is hit rarely, about 10% of the time,
+and sometimes does both reinit and advance, and sometimes only advance.
+
+Changed the runtime to 30. printCounts reports erratic numbers of passes 
+through the 'advance' phases, from 1 to 29. In all cases the output stalls.
+Interestingly, when I put printCount in the code itself right after 
+clock->handleStart(), it always reports 0 (10/10 times).
+
+OK, that makes sense. I'm just carrying on in this thread regardless of what
+happens in the main loop. Perhaps a sleep call is needed.
+
+Progress! Now it clears the first comparison. In the second message, onto b2,
+it looks like b1[2] is getting all the input values and summing them... 
+This is a OneToAll msg, let me check the execution logic...
+
+Yup, there was an error in the OneToAll msg logic. When I fixed this it clears
+all of the messaging tests in testShell.cpp:testShellAddMsg(). Note that at
+this point I'm still using the 'spleep' call to ensure that the messages
+get through.
+
+I wonder if this might mess up the scheduling too, since the messages 
+from the Ticks are OneToAll. Checked code. No, doesn't seem like it. 
+Next: See if I can now get the system to work properly with shell::doStart().
+
+============================================================================
