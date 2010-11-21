@@ -20,7 +20,8 @@ class Clock
 			ReinitThenStart, 
 			StartOnly, 
 			StopOnly, 
-			StopThenReinit
+			StopThenReinit,
+			QuitProcessLoop
 		};
 	public:
 		Clock();
@@ -54,6 +55,12 @@ class Clock
 		void terminate( const Eref& e, const Qinfo* q );
 		// Deprecated
 		void reinit( const Eref& e, const Qinfo* q );
+
+		/**
+		 * Quit the main event loop gracefully. It will wait till all
+		 * threads and nodes are at barrier3 before going.
+		 */
+		void handleQuit();
 
 		/**
 		 * This utility function creates a tick on the assigned tickNum,

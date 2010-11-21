@@ -588,6 +588,10 @@ void testMultiNodeIntFireNetwork()
 	// cout << "Num Syn = " << nd << endl;
 	nd = 104576;
 
+	// Here we have an interesting problem. The mtRand might be called
+	// by multiple threads if the above Set call is not complete.
+	usleep( 1000000);
+
 	// This fails on multinodes.
 	// assert( nd == NUMSYN );
 	vector< double > temp( size, 0.0 );
@@ -625,7 +629,7 @@ void testMultiNodeIntFireNetwork()
 	for ( unsigned int i = 0; i < size; i+= 100 ) {
 		double wt = Field< double >::get( 
 			Eref( syne.element(), DataId( i, 0 ) ), "weight" );
-		assert( fabs( wt - weight[ synIndices[ i / 100 ] ] ) < 1e-6 );
+		assert( doubleEq( wt, weight[ synIndices[ i / 100 ] ] ) );
 		// cout << "Actual wt = " << wt << ", expected = " << weight[ synIndices[ i / 100 ] ] << endl;
 	}
 

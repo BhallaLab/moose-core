@@ -176,7 +176,6 @@ void Shell::launchThreads()
 	barrier2_ = new FuncBarrier( numThreads, &Qinfo::swapMpiQ );
 	barrier3_ = new FuncBarrier( numBarrier1Threads, &Clock::checkProcState );
 	int ret;
-	pthread_t gThread;
 
 	parserMutex_ = new pthread_mutex_t; // Assign the Shell variables.
 	parserBlockCond_ = new pthread_cond_t;
@@ -190,18 +189,6 @@ void Shell::launchThreads()
 	Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );
 	clock->setLoopingState( 1 );
 	
-
-	// ret = pthread_barrier_init( barrier3, NULL, numBarrier1Threads );
-	// assert( ret == 0 );
-
-	if ( myNode_ == 0 ) { // Launch graphics thread only on node 0.
-		ProcInfo p;
-		// pthread_barrier_t barrier1;
-		int rc = pthread_create(&gThread, NULL, reportGraphics, 
-			reinterpret_cast< void* >( &p ) );
-		if ( rc )
-			cout << "Error: return code from pthread_create: " << rc << endl;
-	}
 	threadProcs_.resize( numBarrier1Threads );
 	vector< ProcInfo >& p = threadProcs_;
 	// An extra thread is used by MPI, and on node 0, yet another for Shell
@@ -234,7 +221,6 @@ void Shell::launchThreads()
 			assert( rc == 0 );
 		}
 	}
-	// cout << "Calling thread\n";
 }
 
 void Shell::joinThreads()
@@ -246,13 +232,6 @@ void Shell::joinThreads()
 	for ( int i = 0; i < numBarrier1Threads; ++i ) {
 		void* status;
 		ret = pthread_join( threads_[i], &status );
-		if ( ret )
-			cout << "Error: Unable to join threads\n";
-	}
-
-	if ( myNode_ == 0 ) { // clean up graphics thread only on node 0.
-		void* status;
-		ret = pthread_join( *gThread_, &status );
 		if ( ret )
 			cout << "Error: Unable to join threads\n";
 	}

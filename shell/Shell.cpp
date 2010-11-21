@@ -142,10 +142,6 @@ static DestFinfo handleAck( "handleAck",
 			new OpFunc2< Shell, unsigned int, unsigned int >( 
 				& Shell::handleAck ) );
 
-static DestFinfo handleQuit( "handleQuit", 
-			"quit(): Quits simulation.",
-			new OpFunc0< Shell >( & Shell::handleQuit ) );
-
 static DestFinfo handleStart( "start", 
 			"Starts off a simulation for the specified run time, automatically partitioning among threads if the settings are right",
 			new OpFunc1< Shell, double >( & Shell::handleStart ) );
@@ -249,13 +245,13 @@ static DestFinfo handleSetClock( "handleSetClock",
 			*/
 
 static Finfo* shellMaster[] = {
-	&requestCreate, &requestDelete, &requestQuit, 
+	&requestCreate, &requestDelete,
 	&requestStart, &requestReinit, &requestStop, &requestTerminate,
 	&requestAddMsg, &requestSet, &requestGet, &receiveGet, 
 	&requestMove, &requestCopy, &requestUseClock,
 	&handleAck };
 static Finfo* shellWorker[] = {
-	&handleCreate, &del, &handleQuit, 
+	&handleCreate, &del,
 		&handleStart, &handleReinit, &handleStop, &handleTerminate,
 		&handleAddMsg, &handleSet, &handleGet, &relayGet, 
 		&handleMove, &handleCopy, &handleUseClock,
@@ -264,7 +260,7 @@ static Finfo* shellWorker[] = {
 static Finfo* clockControlFinfos[] = 
 {
 	&requestStart, &requestStep, &requestStop, &requestSetupTick,
-	&requestReinit, &handleAck
+	&requestReinit, &requestQuit, &handleAck
 };
 
 const Cinfo* Shell::initCinfo()
@@ -277,12 +273,6 @@ const Cinfo* Shell::initCinfo()
 			"Name of object", 
 			&Shell::setName, 
 			&Shell::getName );
-
-	static ValueFinfo< Shell, bool > quit( 
-			"quit",
-			"Flag to tell the system to quit", 
-			&Shell::setQuit, 
-			&Shell::getQuit );
 
 ////////////////////////////////////////////////////////////////
 // Dest Finfos: Functions handled by Shell
@@ -313,7 +303,6 @@ const Cinfo* Shell::initCinfo()
 	
 	static Finfo* shellFinfos[] = {
 		&name,
-		&quit,
 		&lowLevelReceiveGet,
 		&setclock,
 		&loadBalance,
@@ -350,7 +339,6 @@ static const Cinfo* shellCinfo = Shell::initCinfo();
 
 Shell::Shell()
 	: name_( "" ),
-		quit_( 0 ), 
 		isSingleThreaded_( 0 ),
 		numAcks_( 0 ),
 		acked_( 1, 0 ),
@@ -471,9 +459,9 @@ void Shell::connectMasterMsg()
 
 void Shell::doQuit( )
 {
-	initAck();
-		requestQuit.send( Id().eref(), &p_ );
-	waitForAck();
+	// No acks needed: the next call from parser should be to 
+	// exit parser itself.
+	requestQuit.send( Id().eref(), &p_ );
 }
 
 void Shell::doStart( double runtime )
@@ -680,21 +668,6 @@ void Shell::setCwe( Id val )
 Id Shell::getCwe() const
 {
 	return cwe_;
-}
-
-void Shell::setQuit( bool val )
-{
-	quit_ = val;
-}
-
-bool Shell::getQuit() const
-{
-	return quit_;
-}
-
-void Shell::handleQuit()
-{
-	quit_ = 1;
 }
 
 const char* Shell::getBuf() const

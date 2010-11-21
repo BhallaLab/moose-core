@@ -158,8 +158,16 @@ const Cinfo* Clock::initCinfo()
 	// 		new EpFunc0< Clock >(&Clock::reinit )
 	 		new OpFunc0< Clock >(&Clock::handleReinit )
 		);
+
+		static DestFinfo quit( "quit",
+			"Quits the main event loop, whether or not a simulation is"
+			"still running.",
+	 		new OpFunc0< Clock >(&Clock::handleQuit )
+		);
+
+
 		static Finfo* clockControlFinfos[] = {
-			&start, &step, &stop, &setupTick, &reinit, &ack,
+			&start, &step, &stop, &setupTick, &reinit, &quit, &ack,
 		};
 	///////////////////////////////////////////////////////
 	// SharedFinfo for Shell to control Clock
@@ -369,6 +377,12 @@ void Clock::stop(  const Eref& e, const Qinfo* q )
 {
 	procState_ = StopOnly;
 }
+
+void Clock::handleQuit()
+{
+	procState_ = QuitProcessLoop;
+}
+
 
 /**
  * Does a disgraceful stop of the simulation, leaving it wherever it was.
@@ -584,6 +598,9 @@ void Clock::checkProcState()
 			clock->isRunning_ = 0;
 			clock->doingReinit_ = 1;
 		//	procState_ = TurnOffReinit;
+		break;
+		case QuitProcessLoop:
+			clock->keepLooping_ = 0;
 		break;
 		case NoChange:
 		default:

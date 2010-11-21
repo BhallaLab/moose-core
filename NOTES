@@ -9290,4 +9290,17 @@ Checkin 2380.
 This had more issues with doReinit. Now it clears it, and that is the last
 of this set of tests. Also clears regression tests. The system then stalls
 because we don't have a way to tell the process loop to close now.
+Checkin 2381.
+
+Going systematically through the # of threads. At 5 threads I get a 
+sporadic failure in testScheduling.cpp:testMultiNodeIntFireNetwork, on the
+weights again. I suspect it is that the assignment of weights through the
+non-blocking set call is taking a while on some process thread, and in the
+meantime the parser thread moves on to use mtrand again for other things.
+I've put in a test usleep to see if this diagnosis is correct.
+
+Parenthetically I decided to fix up the 'quit' call, which easily fits in
+the framework for the clock to do things with the event loop. That now works
+too.
+
 ============================================================================

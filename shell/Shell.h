@@ -28,8 +28,6 @@ class Shell
 		///////////////////////////////////////////////////////////
 		void setName( string name );
 		string getName() const;
-		void setQuit( bool val );
-		bool getQuit() const;
 		void setCwe( Id cwe );
 		Id getCwe() const;
 
@@ -168,8 +166,6 @@ class Shell
  		 * Test for receipt of acks from all nodes
  		 */ 
 		bool isAckPending() const;
-
-		void handleQuit();
 
 		void handleCreate( const Eref& e, const Qinfo* q, 
 			string type, Id parent, Id newElm, string name,
@@ -372,7 +368,6 @@ class Shell
 		Element* shelle_; // It is useful for the Shell to have this.
 		vector< char > getBuf_;
 		MsgId latestMsgId_; // Hack to communicate newly made MsgIds.
-		bool quit_;
 
 		/**
 		 * Flag: True when system is operating in single threaded mode.

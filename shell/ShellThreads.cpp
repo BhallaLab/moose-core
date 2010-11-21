@@ -107,13 +107,15 @@ void Shell::setRunning( bool value )
 void Shell::launchParser()
 {
 	Id shellId;
+	bool quit = 0;
 	
 	cout << "moose : " << flush;
-	while ( !getQuit() ) {
+	while ( !quit ) {
 		string temp;
 		cin >> temp;
 		if ( temp == "quit" || temp == "q" ) {
 			doQuit();
+			quit = 1;
 		}
 	}
 	cout << "\nQuitting Moose\n" << flush;
