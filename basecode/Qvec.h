@@ -90,33 +90,8 @@ class Qvec
 		 */
 		static void testQvec();
 	private:
-		unsigned int numThreads_;
+		vector< vector< char > > data_;
 
-
-		vector < char > data_;
-
-		/**
-		 * Index of start of each chunk of data for each thread
-		 * Used only when filling up data, and when stitching
-		 * together the thread sections for reading.
-		 */
-		vector < unsigned int > threadBlockStart_;
-
-		/**
-		 * Index of end of each chunk of data for each thread
-		 */
-		vector < unsigned int > threadBlockEnd_;
-
-		/**
-		 * Number of bytes between thread blocks.
-		 * Threads may step on each other's toes when writing to 
-		 * adjacent memory. This buffer protects against this.
-		 */
-		static const unsigned int threadOverlapProtection;
-
-		/**
-		 * Assigns preliminary size allocation. Each thread gets the same
-		 * initial block.
-		 */
+		vector< char > linearData_;
 		static const unsigned int threadQreserve;
 };

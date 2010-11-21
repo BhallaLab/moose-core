@@ -9231,6 +9231,43 @@ Phase 2: Reinit = 1;	advance = 2;	null = 1844
 The 2 is essential: First call to process, in phase1, sends out the 
 output_field of a1, b1, c1, etc. This arrives by phase 2 of the first cycle.
 However, the output_ field of a2, b2, c2 etc is not updated till the second
-call to Process.
+call to Process. 
+Checkin 2378.
+
+============================================================================
+21 Nov 2010.
+Rare crash: in Qvec.cpp:47
+
+Realized I had a lot of crashes in Qvec. After some fiddling around, saw at
+least one of the problems: in Qvec::push_back, I do reallocation of the
+whole vector if the incoming data gets too big. This will cause problems if
+another thread is doing a memcpy into the same data_ buffer.
+
+Here I have contradictory requirements. Let's assess them:
+- Thread safety: I need to be able to push_back into the Qvec on different 
+	threads at the same time.
+- Single buffer: For sending to another node, I need to provide a single big
+	buffer with all thread data.
+- Memory efficiency: If we have a big contiguous buffer, there shouldn't be
+	big holes in it.
+
+Here we have 2 basic solutions:
+- Use a single contiguous memory chunk with portions for each thread.
+	-- Thread safety requires mutexes for every insert.
+	- Single buffer is built in, but have to 'stitch' thread sections 
+		together. Bad side-effect is that we MPI send the holes too.
+	- Memory efficiency is dubious, will need periodic garbage collection.
+- Use a separate data vector for each thread.
+	+ Thread safe.
+	-- Will need memcpys for consolidating into inQ
+	. Memory efficient to the extent that the C++ vectors are.
+
+So it looks pretty clear-cut. Will need to shift to a separate data vector
+for each thread, within the overal Qvec data structure.
+
+Did complete overhaul of Qvec. Thanks to the wonders of modular design,
+it worked as soon as it compiled. Cleared its own internal unit test too.
+Fixes the funny memory bugs with Qvec, but now we're back to the values 
+computed by the IntFire network.
 
 ============================================================================

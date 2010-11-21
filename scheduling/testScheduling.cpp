@@ -428,6 +428,9 @@ void testThreadIntFireNetwork()
 	for ( unsigned int i = 0; i < size; ++i )
 		temp[i] = mtrand() * Vmax;
 
+	double initVm100 = temp[100];
+	double initVm900 = temp[900];
+
 	bool ret = Field< double >::setVec( e2, "Vm", temp );
 	assert( ret );
 
@@ -479,6 +482,9 @@ void testThreadIntFireNetwork()
 
 	IntFire* ifire100 = reinterpret_cast< IntFire* >( e2.element()->dataHandler()->data( 100 ) );
 	IntFire* ifire900 = reinterpret_cast< IntFire* >( e2.element()->dataHandler()->data( 900 ) );
+
+	assert( doubleEq( ifire100->getVm(), initVm100 ) );
+	assert( doubleEq( ifire900->getVm(), initVm900 ) );
 
 	// Does reinit too.
 	s->start( static_cast< double >( timestep * runsteps) + 0.1 );
