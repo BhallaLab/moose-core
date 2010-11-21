@@ -285,22 +285,28 @@ void testGetMsg()
 	ret = shell->doAddMsg( "Single", arithid.eref().fullId(), "output",
 		arithid.eref().fullId(), "arg1" );
 	assert( ret != Msg::badMsg );
-	SetGet1< double >::set( arithid.eref(), "arg1", 0.0 );
-	SetGet1< double >::set( arithid.eref(), "arg2", 2.0 );
 	shell->doSetClock( 0, 1 );
 	shell->doUseClock( "/tab,/arith", "process", 0 );
-	shell->doStart( 100 );
-
 	unsigned int numEntries = Field< unsigned int >::get( 
 		tabid.eref(), "num_table" );
-	assert( numEntries == 100 );
+	assert( numEntries == 0 );
+	shell->doReinit();
+	SetGet1< double >::set( arithid.eref(), "arg1", 0.0 );
+	SetGet1< double >::set( arithid.eref(), "arg2", 2.0 );
+	shell->doStart( 100 );
+
+	numEntries = Field< unsigned int >::get( 
+		tabid.eref(), "num_table" );
+	assert( numEntries == 101 ); // One for reinit call, 100 for process.
 
 	Id tabentry( tabid.value() + 1 );
 	for ( unsigned int i = 0; i < 100; ++i ) {
 		Eref temp( tabentry(), DataId( 0, i ) );
 		double ret = Field< double >::get( temp, "value" );
-		assert( fabs( ret - 2 * ( i + 1 )  ) < 1e-6 );
+		assert( doubleEq( ret, 2 * i ) );
 	}
+
+	// Perhaps I should do another test without reinit.
 	/*
 	SetGet2< string, string >::set( 
 		tabid.eref(), "xplot", "testfile", "testplot" );

@@ -9284,6 +9284,10 @@ just clean out old ones.
 
 Fixed things up by replacing the iterator TickMgr::tickerator_ 
 with an integer index. This clears the fibonacci unit test for builtins.
-Now fails at the getMsg test.
+Now fails at the getMsg test. 
+Checkin 2380.
 
+This had more issues with doReinit. Now it clears it, and that is the last
+of this set of tests. Also clears regression tests. The system then stalls
+because we don't have a way to tell the process loop to close now.
 ============================================================================
