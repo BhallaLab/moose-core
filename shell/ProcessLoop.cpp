@@ -24,8 +24,7 @@
 void* eventLoopForBcast( void* info )
 {
 	ProcInfo *p = reinterpret_cast< ProcInfo* >( info );
-	cout << "eventLoop on " << p->nodeIndexInGroup << ":" << 
-		p->threadIndexInGroup << endl;
+	// cout << "eventLoop on " << p->nodeIndexInGroup << ":" << p->threadIndexInGroup << endl;
 	Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );
 
 	while( clock->keepLooping() )
@@ -76,8 +75,7 @@ void* eventLoopForBcast( void* info )
 void* mpiEventLoopForBcast( void* info )
 {
 	ProcInfo *p = reinterpret_cast< ProcInfo* >( info );
-	cout << "mpiEventLoop on " << p->nodeIndexInGroup << ":" << 
-		p->threadIndexInGroup << endl;
+	// cout << "mpiEventLoop on " << p->nodeIndexInGroup << ":" << p->threadIndexInGroup << endl;
 
 	Clock* clock = reinterpret_cast< Clock* >( Id( 1 ).eref().data() );
 	while( clock->keepLooping() )
@@ -116,8 +114,7 @@ void* mpiEventLoopForBcast( void* info )
 void* shellEventLoop( void* info )
 {
 	ProcInfo *p = reinterpret_cast< ProcInfo* >( info );
-	cout << "shellEventLoop on " << p->nodeIndexInGroup << ":" << 
-		p->threadIndexInGroup << endl;
+	// cout << "shellEventLoop on " << p->nodeIndexInGroup << ":" << p->threadIndexInGroup << endl;
 
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );
@@ -237,7 +234,7 @@ void Shell::launchThreads()
 			assert( rc == 0 );
 		}
 	}
-	cout << "Calling thread\n";
+	// cout << "Calling thread\n";
 }
 
 void Shell::joinThreads()

@@ -509,13 +509,18 @@ void Shell::doStop()
 
 void Shell::doSetClock( unsigned int tickNum, double dt )
 {
+	/*
 	Eref ce = Id( 1 ).eref();
 	assert( ce.element() );
 	// We do NOT go through the message queuing here, as the clock is
 	// always local and this operation fiddles with scheduling.
-
 	Clock* clock = reinterpret_cast< Clock* >( ce.data() );
 	clock->setupTick( tickNum, dt );
+	*/
+	Eref sheller( shelle_, 0 );
+//	initAck();
+		requestSetupTick.send( sheller, &p_, tickNum, dt );
+	// waitForAck();
 }
 
 void Shell::doUseClock( string path, string field, unsigned int tick )

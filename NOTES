@@ -9268,6 +9268,22 @@ for each thread, within the overal Qvec data structure.
 Did complete overhaul of Qvec. Thanks to the wonders of modular design,
 it worked as soon as it compiled. Cleared its own internal unit test too.
 Fixes the funny memory bugs with Qvec, but now we're back to the values 
-computed by the IntFire network.
+computed by the IntFire network. Checkin 2379.
+
+Those were fixed by changing the call to Shell::doStart.
+
+Now we're back to the problem of the Start happening without a reinit.
+Tracked it down to this: the number of TickPtrs and TickMgrs on the clock is
+more than actually used in the model. The old ones haven't been cleared out
+when rerunning a new model. The old ones haven't properly inited the 
+tickerator.
+
+I should just have the 'start' function do an automatic scan to make sure
+that no ticks etc are dangling. Doesn't need to alter the existing settings,
+just clean out old ones.
+
+Fixed things up by replacing the iterator TickMgr::tickerator_ 
+with an integer index. This clears the fibonacci unit test for builtins.
+Now fails at the getMsg test.
 
 ============================================================================

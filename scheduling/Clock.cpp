@@ -192,13 +192,6 @@ const Cinfo* Clock::initCinfo()
 		&tickSrc,
 		&finished,
 		// DestFinfos
-		/*
-		&start,
-		&step,
-		&stop,
-		&setupTick,
-		&reinit,
-		*/
 		// Shared Finfos
 		&clockControl,
 		// FieldElementFinfo
@@ -389,6 +382,7 @@ void Clock::terminate(  const Eref& e, const Qinfo* q )
 /**
  * Reinit is used to reinit the state of the scheduling system.
  * Should be done single-threaded.
+ * Deprecated version here.
  */
 void Clock::reinit( const Eref& e, const Qinfo* q )
 {
@@ -438,6 +432,7 @@ void Clock::setupTick( unsigned int tickNum, double dt )
 	ticks_[ tickNum ].setDt( dt );
 	// ticks_[ tickNum ].setStage( stage );
 	rebuild();
+	// ack.send( clockId.eref(), p, p->nodeIndexInGroup, OkStatus );
 }
 
 ///////////////////////////////////////////////////
@@ -626,7 +621,8 @@ void Clock::handleStart( double runtime )
 	runTime_ = runtime;
 	endTime_ = runtime * ROUNDING + currentTime_;
 	// isRunning_ = 1; // Can't touch this here, instead defer to barrier3
-	if ( tickPtr_.size() != tickMgr_.size() )
+	if ( tickPtr_.size() == 0 || tickPtr_.size() != tickMgr_.size() || 
+		!tickPtr_[0].mgr()->isInited() )
 		procState_ = ReinitThenStart;
 	else
 		procState_ = StartOnly;

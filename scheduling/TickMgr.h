@@ -62,6 +62,11 @@ class TickMgr {
 		 * Set to time = 0. So, nextTime_ = dt.
 		 */
 		void reinit( const Eref& e, ProcInfo* p );
+
+		/**
+		 * True if tickerator_ has not been set to something sensible
+		 */
+		bool isInited() const;
 		
 	private:
 		// Tick* ptr_;
@@ -69,7 +74,8 @@ class TickMgr {
 		double dt_;
 		double nextTime_; // Upcoming time
 		vector< const Tick* > ticks_;	// Pointer to each Tick.
-		vector< const Tick* >::iterator tickerator_;
+		unsigned int tickerator_;
+		// vector< const Tick* >::iterator tickerator_;
 		static double EPSILON;
 };
 

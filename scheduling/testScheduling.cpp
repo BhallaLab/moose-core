@@ -424,18 +424,16 @@ void testThreadIntFireNetwork()
 	unsigned int nd = syn->dataHandler()->totalEntries();
 //	cout << "Num Syn = " << nd << endl;
 	assert( nd == NUMSYN );
-	vector< double > temp( size, 0.0 );
+	vector< double > initVm( size, 0.0 );
 	for ( unsigned int i = 0; i < size; ++i )
-		temp[i] = mtrand() * Vmax;
+		initVm[i] = mtrand() * Vmax;
 
-	double initVm100 = temp[100];
-	double initVm900 = temp[900];
+	double initVm100 = initVm[100];
+	double initVm900 = initVm[900];
 
-	bool ret = Field< double >::setVec( e2, "Vm", temp );
-	assert( ret );
+	bool ret;
 
-	temp.clear();
-	temp.resize( size, thresh );
+	vector< double > temp( size, thresh );
 	ret = Field< double >::setVec( e2, "thresh", temp );
 	assert( ret );
 	temp.clear();
@@ -479,17 +477,26 @@ void testThreadIntFireNetwork()
 	Element* se = Id()();
 	Shell* s = reinterpret_cast< Shell* >( se->dataHandler()->data( 0 ) );
 	s->doSetClock( 0, timestep );
+	s->doReinit();
+
+	ret = Field< double >::setVec( e2, "Vm", initVm );
+	assert( ret );
 
 	IntFire* ifire100 = reinterpret_cast< IntFire* >( e2.element()->dataHandler()->data( 100 ) );
 	IntFire* ifire900 = reinterpret_cast< IntFire* >( e2.element()->dataHandler()->data( 900 ) );
 
+	// Sometimes fails here if the setVec has not had time to complete
+	// on the process threads.
+	usleep( 50000 );
 	assert( doubleEq( ifire100->getVm(), initVm100 ) );
 	assert( doubleEq( ifire900->getVm(), initVm900 ) );
 
 	// Does reinit too.
-	s->start( static_cast< double >( timestep * runsteps) + 0.1 );
-	assert( fabs( ifire100->getVm() - Vm100 ) < 1e-6 );
-	assert( fabs( ifire900->getVm() - Vm900 ) < 1e-6 );
+	// s->start( static_cast< double >( timestep * runsteps) + 0.1 );
+	s->doStart( timestep * runsteps );
+
+	assert( doubleEq( ifire100->getVm(), Vm100 ) );
+	assert( doubleEq( ifire900->getVm(), Vm900 ) );
 
 	// cout << "Done ThreadIntFireNetwork" << flush;
 	cout << "." << flush;

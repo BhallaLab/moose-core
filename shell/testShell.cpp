@@ -462,7 +462,7 @@ bool checkArg1( Id e,
 	double v0, double v1, double v2, double v3, double v4 )
 {
 	bool ret = 1;
-	bool report = 1;
+	bool report = 0;
 	Eref e0( e(), 0 );
 	double val = reinterpret_cast< Arith* >( e0.data() )->getArg1();
 	ret = ret && ( fabs( val - v0 ) < 1e-6 );
@@ -495,7 +495,7 @@ bool checkOutput( Id e,
 	double v0, double v1, double v2, double v3, double v4 )
 {
 	bool ret = 1;
-	bool report = 1;
+	bool report = 0;
 	Eref e0( e(), 0 );
 	double val = reinterpret_cast< Arith* >( e0.data() )->getOutput();
 	// double val = Field< double >::get( e0, "outputValue" );
@@ -709,14 +709,9 @@ void testShellAddMsg()
 
 	shell->doStart( 2 );
 
-	Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );
-	/*
-	clock->handleStart( 50 );
-	sleep( 1 );
-	*/
-	clock->printCounts();
-	cout << "After Start\n";
-	Qinfo::reportQ();
+	// Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );
+	// clock->printCounts();
+	// Qinfo::reportQ();
 
 	///////////////////////////////////////////////////////////
 	// Check output.
