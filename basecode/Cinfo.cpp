@@ -169,6 +169,19 @@ bool Cinfo::isA( const string& ancestor ) const
 	}
 	return 0;
 }
+
+void Cinfo::reportFids() const
+{
+	for ( map< string, Finfo*>::const_iterator i = finfoMap_.begin();
+		i != finfoMap_.end(); ++i ) {
+		const DestFinfo* df = dynamic_cast< const DestFinfo* >(
+			i->second );
+		if ( df ) {
+			cout << df->getFid() << "	" << df->name() << endl;
+		}
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////
 // Private functions.
 ////////////////////////////////////////////////////////////////////////

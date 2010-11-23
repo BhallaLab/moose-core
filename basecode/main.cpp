@@ -263,7 +263,8 @@ int main( int argc, char** argv )
 			s->doQuit();
 	}
 	
-	s->launchParser(); // Here we set off a little event loop to poll user input. It deals with the doQuit call too.
+	s->doQuit();
+//	s->launchParser(); // Here we set off a little event loop to poll user input. It deals with the doQuit call too.
 	// s->doQuit();
 	// Somehow we need to return control to our parser. Then we clean up
 	s->joinThreads();

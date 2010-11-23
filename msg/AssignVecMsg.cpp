@@ -11,6 +11,9 @@
 #include "MsgManager.h"
 #include "AssignVecMsg.h"
 
+// Defined in AssignmentMsg.cpp
+extern void sendAckBack( const ProcInfo* p, MsgId mid, DataId i2 );
+
 Id AssignVecMsg::id_;
 
 AssignVecMsg::AssignVecMsg( Eref e1, Element* e2, MsgId mid )
@@ -53,6 +56,8 @@ void AssignVecMsg::exec( const char* arg, const ProcInfo *p ) const
 			}
 			j++;
 		}
+		if ( p->threadIndexInGroup == 0 )
+			sendAckBack( p, q->mid(), 0 );
 	}
 	if ( !q->isForward() && e1_->dataHandler()->isDataHere( i1_ ) &&
 		p->execThread( e1_->id(), i1_.data() ) ) {

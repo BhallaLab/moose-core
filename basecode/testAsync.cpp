@@ -394,14 +394,15 @@ void testSetGet()
 		bool ret = Field< double >::set( e2, "outputValue", x );
 		assert( ret );
 		double val = reinterpret_cast< Arith* >(e2.data())->getOutput();
-		assert( fabs( val - x ) < 1e-8 );
+		assert( doubleEq( val, x ) );
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref e2( i2(), i );
 		double x = i * 3.14;
 		double ret = Field< double >::get( e2, "outputValue" );
-		assert( fabs( ret - x ) < 1e-8 );
+		ProcInfo p;
+		assert( doubleEq( ret, x ) );
 	}
 
 	cout << "." << flush;

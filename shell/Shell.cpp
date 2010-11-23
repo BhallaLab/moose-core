@@ -208,7 +208,8 @@ static DestFinfo lowLevelReceiveGet( "lowLevelReceiveGet",
 static DestFinfo receiveGet( "receiveGet", 
 	"receiveGet( Uint node#, Uint status, PrepackedBuffer data )"
 	"Function on master shell that handles the value relayed from worker.",
-	new OpFunc3< Shell, unsigned int, unsigned int, PrepackedBuffer >( &Shell::recvGet )
+	// new OpFunc3< Shell, unsigned int, unsigned int, PrepackedBuffer >( &Shell::recvGet )
+	new OpFunc1< Shell, PrepackedBuffer >( &Shell::recvGet )
 );
 
 static SrcFinfo3< unsigned int, unsigned int, PrepackedBuffer > relayGet(
@@ -247,13 +248,13 @@ static DestFinfo handleSetClock( "handleSetClock",
 static Finfo* shellMaster[] = {
 	&requestCreate, &requestDelete,
 	&requestStart, &requestReinit, &requestStop, &requestTerminate,
-	&requestAddMsg, &requestSet, &requestGet, &receiveGet, 
+	&requestAddMsg, &requestSet, &requestGet,
 	&requestMove, &requestCopy, &requestUseClock,
 	&handleAck };
 static Finfo* shellWorker[] = {
 	&handleCreate, &del,
 		&handleStart, &handleReinit, &handleStop, &handleTerminate,
-		&handleAddMsg, &handleSet, &handleGet, &relayGet, 
+		&handleAddMsg, &handleSet, &handleGet,
 		&handleMove, &handleCopy, &handleUseClock,
 	&ack };
 
@@ -303,6 +304,7 @@ const Cinfo* Shell::initCinfo()
 	
 	static Finfo* shellFinfos[] = {
 		&name,
+		&receiveGet,
 		&lowLevelReceiveGet,
 		&setclock,
 		&loadBalance,
@@ -1065,11 +1067,10 @@ void Shell::handleSet( Id id, DataId d, FuncId fid, PrepackedBuffer arg )
 	} else {
 		innerSet( er, fid, arg.data(), arg.dataSize() );
 	}
-	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
-	// We assume that the ack will get back to the master node no sooner
-	// than the field assignment. This is probably pretty safe. More to the
-	// point, the Parser thread won't be able to do anything else before
-	// the field assignment is done.
+	// ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
+	// Now the ack has to come from the AssignmentMsg::exec or the
+	// AssignVecMsg::exec. These are better because the ack only comes
+	// after the assignment is completed.
 }
 
 // Static function, used for developer-code triggered SetGet functions.
@@ -1082,13 +1083,15 @@ void Shell::dispatchSet( const Eref& tgt, FuncId fid, const char* args,
 {
 	Eref sheller = Id().eref();
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	/*
 	if ( s->isSingleThreaded_ ) {
 		s->innerSet( tgt, fid, args, size );
 		Qinfo::clearQ( s->procInfo() );
 	} else {
+	}
+	*/
 		PrepackedBuffer buf( args, size );
 		s->innerDispatchSet( sheller, tgt, fid, buf );
-	}
 }
 
 // regular function, does the actual dispatching.
@@ -1107,12 +1110,14 @@ void Shell::dispatchSetVec( const Eref& tgt, FuncId fid,
 {
 	Eref sheller = Id().eref();
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	/*
 	if ( s->isSingleThreaded_ ) {
 		s->innerSetVec( tgt, fid, pb );
 		Qinfo::clearQ( s->procInfo() );
 	} else {
-		s->innerDispatchSet( sheller, tgt, fid, pb );
 	}
+	*/
+		s->innerDispatchSet( sheller, tgt, fid, pb );
 }
 
 /**
@@ -1156,6 +1161,7 @@ const char* Shell::dispatchGet( const Eref& e, const string& field,
 	}
 
 	if ( df->getOpFunc()->checkSet( sg ) ) { // Type validation
+		/*
 		if ( s->isSingleThreaded_ ) {
 			s->handleGet( tgt.id(), tgt.index(), df->getFid() );
 			Qinfo::clearQ( s->procInfo() ); // phase 1: request to tgt elem
@@ -1163,9 +1169,10 @@ const char* Shell::dispatchGet( const Eref& e, const string& field,
 			Qinfo::clearQ( s->procInfo() ); // phase 3: data arrives.
 			return s->getBuf();
 		} else {
+		}
+		*/
 			Eref sheller = Id().eref();
 			return s->innerDispatchGet( sheller, tgt, df->getFid() );
-		}
 	} else {
 		cout << s->myNode() << ": Error: Shell::dispatchGet: type mismatch for field " << field << " on " << tgt << endl;
 	}
@@ -1198,24 +1205,34 @@ void Shell::handleGet( Id id, DataId index, FuncId fid )
 		shelle_->clearBinding( lowLevelGet.getBindIndex() );
 		Msg* m = new AssignmentMsg( sheller, tgt, Msg::setMsg );
 		shelle_->addMsgAndFunc( m->mid(), fid, lowLevelGet.getBindIndex() );
-		FuncId retFunc = lowLevelReceiveGet.getFid();
+		// FuncId retFunc = lowLevelReceiveGet.getFid();
+		FuncId retFunc = receiveGet.getFid();
 		lowLevelGet.send( sheller, &p_, retFunc );
 	} else {
 		ack.send( sheller, &p_, myNode_, OkStatus );
 	}
 }
 
+void Shell::recvGet( PrepackedBuffer pb )
+{
+	if ( myNode_ == 0 ) {
+		getBuf_.resize( pb.dataSize() );
+		memcpy( &getBuf_[0], pb.data(), pb.dataSize() );
+	}
+}
+/*
 void Shell::recvGet( 
 	unsigned int node, unsigned int status, PrepackedBuffer pb )
 {
 	if ( myNode_ == 0 ) {
 		getBuf_.resize( pb.dataSize() );
 		memcpy( &getBuf_[0], pb.data(), pb.dataSize() );
-		handleAck( node, status );
+		// handleAck( node, status );
 	} else {
 		// cout << myNode_ << ": Error: Shell::recvGet: should never be called except on node 0\n";
 	}
 }
+*/
 
 void Shell::lowLevelRecvGet( PrepackedBuffer pb )
 {

@@ -127,6 +127,11 @@ class Cinfo
 			 */
 			bool isA( const string& ancestor ) const;
 
+			/**
+			 * Utility function for debugging
+			 */
+			void reportFids() const;
+
 		private:
 			const string name_;
 
@@ -139,6 +144,12 @@ class Cinfo
 			BindIndex numBindIndex_;
 
 			map< string, Finfo* > finfoMap_;
+
+			/**
+			 * These are special Finfos which have to be invoked
+			 * after the Element is created, and their postCreationFuncs
+			 * called. They are typically things like FieldElementFinfos.
+			 */
 			vector< const Finfo* > postCreationFinfos_;
 			vector< const OpFunc* > funcs_;
 //			map< string, FuncId > opFuncNames_;

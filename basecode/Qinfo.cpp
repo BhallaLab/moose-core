@@ -311,8 +311,13 @@ void innerReportQ( const Qvec& qv, const string& name )
 	}
 	cout << endl;
 	
-	const char* buf = qv.data();
-	const char* end = qv.data() + qv.dataQsize();
+	Qvec temp( qv );
+	temp.stitch(); // This is a bit of a hack. The qv.data etc are not
+	// valid till stitch is called. I can't touch qv, and in any case
+	// I should not, since it might invalidate pointers. So we copy it
+	// to a temporary.
+	const char* buf = temp.data();
+	const char* end = temp.data() + temp.dataQsize();
 	while ( buf < end ) {
 		const Qinfo *q = reinterpret_cast< const Qinfo* >( buf );
 		if ( !q->isDummy() ) {

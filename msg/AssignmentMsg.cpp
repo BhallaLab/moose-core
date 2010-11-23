@@ -26,6 +26,24 @@ AssignmentMsg::~AssignmentMsg()
 	MsgManager::dropMsg( mid() );
 }
 
+void sendAckBack( const ProcInfo* p, MsgId mid, DataId i2 )
+{
+	static const Finfo* ackFinfo = 
+		Shell::initCinfo()->findFinfo( "handleAck" );
+	static const DestFinfo* df = 
+		dynamic_cast< const DestFinfo* >( ackFinfo );
+	static const FuncId ackFid = df->getFid();
+
+	assert( df );
+	Qinfo retq( ackFid, i2, 2 * sizeof( unsigned int ), 0 );
+	MsgFuncBinding mfb( mid, ackFid );
+
+	unsigned int ack[2];
+	ack[0] = Shell::myNode();
+	ack[1] = Shell::OkStatus;
+	retq.addToQbackward( p, mfb, reinterpret_cast< char* >( ack ) );
+}
+
 void AssignmentMsg::exec( const char* arg, const ProcInfo *p ) const
 {
 	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
@@ -34,6 +52,12 @@ void AssignmentMsg::exec( const char* arg, const ProcInfo *p ) const
 		p->execThread( e2_->id(), i2_.data() ) ) {
 		const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
 		f->op( Eref( e2_, i2_ ), arg );
+
+		// Would like to only send ack back if it is a 'set' function.
+		// The trouble with doing this in the 'get' function is that it
+		// gets to the Shell before the various relay messages do.
+		// maybe bypass the relays too?
+		sendAckBack( p, q->mid(), i2_ );
 		return;
 	} 
 

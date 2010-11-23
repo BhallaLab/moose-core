@@ -25,22 +25,6 @@ void fieldOp( const Eref& e, const Qinfo* q, const char* buf,
 	char* temp = new char[ totSize ];
 	conv.val2buf( temp );
 
-	/*
-	// Flag arguments: useSendTo = 1, and flip the isForward flag.
-	Conv< unsigned int > conv1( Shell::myNode() );
-	Conv< unsigned int > conv2( Shell::OkStatus );
-	// This costs 2 copy operations. Wasteful, but who cares.
-	Conv< PrepackedBuffer > conv3( pb );
-	unsigned int totSize = 
-		conv1.size() + conv2.size() + conv3.size();
-
-	char* temp = new char[ totSize ];
-	char* tbuf = temp;
-	conv1.val2buf( tbuf ); tbuf += conv1.size();
-	conv2.val2buf( tbuf ); tbuf += conv2.size();
-	conv3.val2buf( tbuf ); tbuf += conv3.size();
-	*/
-
 	MsgFuncBinding mfb( q->mid(), retFunc );
 	Qinfo retq( retFunc, e.index(), totSize, 0 );
 	retq.addToQbackward( Shell::procInfo(), mfb, temp );

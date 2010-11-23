@@ -315,8 +315,8 @@ class Shell
 
 		void handleGet( Id id, DataId index, FuncId fid );
 
-		void recvGet( unsigned int node, unsigned int status, 
-			PrepackedBuffer pb );
+		// void recvGet( unsigned int node, unsigned int status, PrepackedBuffer pb );
+		void recvGet( PrepackedBuffer pb );
 
 		void lowLevelRecvGet( PrepackedBuffer pb );
 

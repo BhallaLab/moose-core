@@ -9302,5 +9302,79 @@ I've put in a test usleep to see if this diagnosis is correct.
 Parenthetically I decided to fix up the 'quit' call, which easily fits in
 the framework for the clock to do things with the event loop. That now works
 too.
+Checkin 2382.
+
+Using the quit call I was able to set up a test loop to see how often the
+system fails when a 1 sec usleep is in place after the call to set up
+the randomly connected network. 0/47 failures.
+
+13 /29 failures without the usleep. Pretty clear outcome.
+
+Messing around with sending an ack for Set functions.  I've implemented
+an ack call in AssignmentMsg (or AssignVecMsg)::exec stage. This fails because
+'get' calls have their own ack, and this same exec stage is used both for set
+and get. Thus we end up with extra acks floating around, causing problems.
+
+- Need to differentiate between 'get' functions and 'set' functions at the
+	AssignmentMsg (or AssignVecMsg)::exec stage. Reason is that the
+	'get' functions currently return the data internally and don't want the
+	extra ack.send.
+- Should be possible to put a much simpler wrapper on the getfunc and convert
+	its return value within this AssignmentMsg::exec, into a buffer. Then
+	it could go back using the same code as sends the ack back for Set.
+
+============================================================================
+22 Nov 2010
+Outline for Set/Get without using intervening message creation:
+Parser (node0) -> outQ for parser -> Parser pauses in WaitForAck
+-> data mutex protection -> inQ -> MPI_Bcast ->
+ReadQ -> Special Qinfo option to make temp Msg that isn't attached at either
+end -> temp Msg delivers call minding data location and thread -> 
+	\ Get function converts data if on target
+	\ Get function sends ack if off target
+	\ Set function sends ack in all cases.
+-> temp Msg cleared -> data or ack goes onto outQ -> swapQ -> inQ -> 
+MPI_Bcast -> 
+ReadQ -> Special Qinfo option to make temp Msg -> temp Msg delivers call 
+only on node 0, minding thread -> Shell handles return call ->
+	\ may deposit data in case of 'get'
+	\ Always triggers handleAck both for set and get.
+-> Exit from waitForAck.	
+
+Another level of messiness: which thread to use to send ack back? If we
+pick one, how do we know that all threads have completed? I guess that the
+'send' will only take place after the threads hit a barrier, so any one
+would do.
+
+Looking at code, it would be nice to generalize to use the same templates for
+the whole lot. This means to treat functions generally as
+template< class R, class A1, class A2... > func( A1 arg1, A2 arg2 ... )
+
+Things might get problematic if we have R as a void. Turns out this can be
+dealt with using template specializations. Made little test program in
+subdirectory testVoidReturn.
+
+Also it might be possible to consolidate a lot of different template headers
+if we set up the OpFuncs in the same classes as SetGet. What of the
+different kinds of OpFunc, though? There are OpFuncs, UpFuncs and EpFuncs.
+Eventually even the Dinfo might be done here.
+
+Lots of possibilities, but for now I just want to get the system to work.
+
+Had some trouble with unit tests because of debris in the queue following
+the new acks in Set. Slowly clearing through these.
+
+After getting very down and dirty with the queues and appropriate msg
+acks, it suddenly works and clears all tests. Even with 5 and 11 threads.
+In addition, I have eliminated one level of message bouncing in the 
+Get function, so that the queue entry with the data goes right back to the
+calling Shell, without an intermediate relay. So big progress here.
+
+Next step is to try to check this in, over a very unreliable internet
+connection. 
+
+Then I can move onto testing on multiple nodes.
+From there it is benchmarks, scaling and the like, while Subha brings in the
+Python parser.
 
 ============================================================================

@@ -590,7 +590,7 @@ void testMultiNodeIntFireNetwork()
 
 	// Here we have an interesting problem. The mtRand might be called
 	// by multiple threads if the above Set call is not complete.
-	usleep( 1000000);
+	// usleep( 1000000);
 
 	// This fails on multinodes.
 	// assert( nd == NUMSYN );
