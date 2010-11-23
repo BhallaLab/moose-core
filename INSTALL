@@ -39,6 +39,7 @@ depending on your distribution)
 * GNU Scientific Library (gsl)
   
 * libsbml (this can be turned off by USE_SBML=0 flag): http://sbml.org/Software/libSBML
+  version 3.4.1 should be used.
 
 
 0.2. Softwares required OpenGL-based 3D-Visualization (optional)
