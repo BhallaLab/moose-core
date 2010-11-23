@@ -136,11 +136,11 @@ class Shell
 		/**
 		 * Wrapper for the start function. This adds the call back
 		 * to acknowledge completion of op.
-		 */
 		void handleStart( double runTime );
 		void handleReinit();
 		void handleStop();
 		void handleTerminate();
+		 */
 
 		/**
  		 * Initialize acks. This call should be done before the 'send' goes 

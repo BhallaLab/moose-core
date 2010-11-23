@@ -142,20 +142,6 @@ static DestFinfo handleAck( "handleAck",
 			new OpFunc2< Shell, unsigned int, unsigned int >( 
 				& Shell::handleAck ) );
 
-static DestFinfo handleStart( "start", 
-			"Starts off a simulation for the specified run time, automatically partitioning among threads if the settings are right",
-			new OpFunc1< Shell, double >( & Shell::handleStart ) );
-static DestFinfo handleReinit( "reinit", 
-			"Reinitializes simulation, sets current time to zero, and puts all variables at initial conditions.",
-			new OpFunc0< Shell >( & Shell::handleReinit ) );
-static DestFinfo handleStop( "Stop", 
-			"Cleanly stops simulation. Lets current timestep complete. Can resume cleanly.",
-			new OpFunc0< Shell >( & Shell::handleStop ) );
-static DestFinfo handleTerminate( "Terminate", 
-			"Forcefully terminates simulation. Current timestep does not complete. Cannot resume cleanly.",
-			new OpFunc0< Shell >( & Shell::handleTerminate ) );
-			
-
 static DestFinfo handleAddMsg( "handleAddMsg", 
 			"Makes a msg",
 			new EpFunc5< Shell, string, FullId, string, FullId, string >
@@ -232,28 +218,13 @@ static DestFinfo handleCopy( "handleCopy",
 			new EpFunc4< Shell, vector< Id >, string, unsigned int, bool >( 
 				& Shell::handleCopy ) );
 
-/*
-static SrcFinfo3< unsigned int, double, unsigned int > requestSetClock(
-			"requestSetClock",
-			"requestSetClock( tickNum, dt, unsigned int stage )"
-		);
-
-static DestFinfo handleSetClock( "handleSetClock", 
-			"handleSetClock( unsigned int tickNum, double dt, unsigned int stage )",
-			new OpFunc3< Shell, unsigned int, double, unsigned int >(
-				&shell::handleSetClock )
-			);
-			*/
-
 static Finfo* shellMaster[] = {
 	&requestCreate, &requestDelete,
-	&requestStart, &requestReinit, &requestStop, &requestTerminate,
 	&requestAddMsg, &requestSet, &requestGet,
 	&requestMove, &requestCopy, &requestUseClock,
 	&handleAck };
 static Finfo* shellWorker[] = {
 	&handleCreate, &del,
-		&handleStart, &handleReinit, &handleStop, &handleTerminate,
 		&handleAddMsg, &handleSet, &handleGet,
 		&handleMove, &handleCopy, &handleUseClock,
 	&ack };
@@ -314,7 +285,6 @@ const Cinfo* Shell::initCinfo()
 ////////////////////////////////////////////////////////////////
 
 		&requestGet,
-		// &requestSet,
 		&lowLevelSet,
 		&lowLevelGet,
 ////////////////////////////////////////////////////////////////
@@ -679,56 +649,6 @@ const char* Shell::getBuf() const
 	return 0;
 }
 
-void Shell::handleStart( double runtime )
-{
-	/*
-	isRunning_ = 1;
-	runtime_ = runtime;
-	// The actual start operation is handed over to the process stage
-	// to avoid confusing the queue.
-	// start( runtime );
-	// ack.send( Eref( shelle_, 0 ), &p_, myNode_, OkStatus );
-	*/
-}
-
-void Shell::handleReinit( )
-{
-	/*
-	Id clockId( 1 );
-	Clock* clock = reinterpret_cast< Clock* >( clockId.eref().data() );
-	Qinfo q;
-	clock->stop( clockId.eref(), &q );
-	*/
-	/*
-	doReinit_ = 1;
-	handleStop();
-	*/
-	// Hand over the reinit operation to the Shell::process function,
-	// to avoid confusing the queue.
-}
-
-void Shell::handleStop()
-{
-/*
-	Id clockId( 1 );
-	Clock* clock = reinterpret_cast< Clock* >( clockId.eref().data() );
-	Qinfo q;
-	isRunning_ = 0;
-	clock->stop( clockId.eref(), &q );
-	*/
-}
-
-void Shell::handleTerminate()
-{
-	/*
-	Id clockId( 1 );
-	Clock* clock = reinterpret_cast< Clock* >( clockId.eref().data() );
-	Qinfo q;
-	isRunning_ = 0;
-	clock->terminate( clockId.eref(), &q );
-	*/
-}
-
 
 /**
  * This function handles the message request to create an Element.
@@ -805,16 +725,6 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 		Element* ret = new Element( newElm, c, name, dimensions );
 		assert( ret );
 		adopt( parent, newElm );
-
-		/*
-		Msg* m = new OneToAllMsg( parent.eref(), ret );
-		assert( m );
-		if ( !f1->addMsg( f2, m->mid(), parent() ) ) {
-			cout << "innerCreate: Error: unable to add parent->child msg for " <<
-				name << "\n";
-			return;
-		}
-		*/
 
 	} else {
 		stringstream ss;
@@ -982,27 +892,10 @@ void Shell::wildcard( const string& path, vector< Id >& list )
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// Functions for handling acks for blocking Shell function calls.
+// Functions for handling acks for blocking Shell function calls are
+// moved to ShellThreads.cpp
 ///////////////////////////////////////////////////////////////////////////
 
-/**
- * Generic handler for ack msgs from various nodes. Keeps track of
- * which nodes have responded.
- * This has been moved to ShellThreads.cpp, because that is 
- * where the other ack related functions live.
-void Shell::handleAck( unsigned int ackNode, unsigned int status )
-{
-	assert( ackNode < numNodes_ );
-	acked_[ ackNode ] = status;
-		// Here we could also check which node(s) are last, in order to do
-		// some dynamic load balancing.
-	++numAcks_;
-	if ( status != OkStatus ) {
-		cout << myNode_ << ": Shell::handleAck: Error: status = " <<
-			status << " from node " << ackNode << endl;
-	}
-}
- */
 
 ////////////////////////////////////////////////////////////////////////
 // Some static utility functions
@@ -1083,15 +976,8 @@ void Shell::dispatchSet( const Eref& tgt, FuncId fid, const char* args,
 {
 	Eref sheller = Id().eref();
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-	/*
-	if ( s->isSingleThreaded_ ) {
-		s->innerSet( tgt, fid, args, size );
-		Qinfo::clearQ( s->procInfo() );
-	} else {
-	}
-	*/
-		PrepackedBuffer buf( args, size );
-		s->innerDispatchSet( sheller, tgt, fid, buf );
+	PrepackedBuffer buf( args, size );
+	s->innerDispatchSet( sheller, tgt, fid, buf );
 }
 
 // regular function, does the actual dispatching.
@@ -1110,14 +996,7 @@ void Shell::dispatchSetVec( const Eref& tgt, FuncId fid,
 {
 	Eref sheller = Id().eref();
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-	/*
-	if ( s->isSingleThreaded_ ) {
-		s->innerSetVec( tgt, fid, pb );
-		Qinfo::clearQ( s->procInfo() );
-	} else {
-	}
-	*/
-		s->innerDispatchSet( sheller, tgt, fid, pb );
+	s->innerDispatchSet( sheller, tgt, fid, pb );
 }
 
 /**
@@ -1161,16 +1040,6 @@ const char* Shell::dispatchGet( const Eref& e, const string& field,
 	}
 
 	if ( df->getOpFunc()->checkSet( sg ) ) { // Type validation
-		/*
-		if ( s->isSingleThreaded_ ) {
-			s->handleGet( tgt.id(), tgt.index(), df->getFid() );
-			Qinfo::clearQ( s->procInfo() ); // phase 1: request to tgt elem
-			Qinfo::clearQ( s->procInfo() ); // phase 2: response to relay
-			Qinfo::clearQ( s->procInfo() ); // phase 3: data arrives.
-			return s->getBuf();
-		} else {
-		}
-		*/
 			Eref sheller = Id().eref();
 			return s->innerDispatchGet( sheller, tgt, df->getFid() );
 	} else {
@@ -1205,7 +1074,6 @@ void Shell::handleGet( Id id, DataId index, FuncId fid )
 		shelle_->clearBinding( lowLevelGet.getBindIndex() );
 		Msg* m = new AssignmentMsg( sheller, tgt, Msg::setMsg );
 		shelle_->addMsgAndFunc( m->mid(), fid, lowLevelGet.getBindIndex() );
-		// FuncId retFunc = lowLevelReceiveGet.getFid();
 		FuncId retFunc = receiveGet.getFid();
 		lowLevelGet.send( sheller, &p_, retFunc );
 	} else {
@@ -1220,19 +1088,6 @@ void Shell::recvGet( PrepackedBuffer pb )
 		memcpy( &getBuf_[0], pb.data(), pb.dataSize() );
 	}
 }
-/*
-void Shell::recvGet( 
-	unsigned int node, unsigned int status, PrepackedBuffer pb )
-{
-	if ( myNode_ == 0 ) {
-		getBuf_.resize( pb.dataSize() );
-		memcpy( &getBuf_[0], pb.data(), pb.dataSize() );
-		// handleAck( node, status );
-	} else {
-		// cout << myNode_ << ": Error: Shell::recvGet: should never be called except on node 0\n";
-	}
-}
-*/
 
 void Shell::lowLevelRecvGet( PrepackedBuffer pb )
 {

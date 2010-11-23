@@ -34,10 +34,6 @@ void AssignVecMsg::exec( const char* arg, const ProcInfo *p ) const
 
 	if ( q->isForward() ) {
 		PrepackedBuffer pb( arg + sizeof( Qinfo ) );
-		/*
-		if ( pb.dataSize() == 0 )
-			Qinfo::reportQ();
-		*/
 		// cout << Shell::myNode() << ": AssignVecMsg::exec: pb.size = " << pb.size() << ", dataSize = " << pb.dataSize() << ", numEntries = " << pb.numEntries() << endl;
 		DataHandler* d2 = e2_->dataHandler();
 		const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );

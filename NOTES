@@ -9378,3 +9378,9 @@ From there it is benchmarks, scaling and the like, while Subha brings in the
 Python parser.
 
 ============================================================================
+23 Nov 2010
+Checkin 2383.
+Minor cleanups to code especially Shell handlers for functions that are now
+dealt directly by Clock. Got rid of a couple of test directories.
+
+============================================================================
