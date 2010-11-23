@@ -16,7 +16,11 @@ binaries.
 
 0. PRE-REQUISITES
 ================================================================================
-You need the following softwares:
+You need the following softwares: 
+
+(NOTE: For all C/C++ libraries, you need the include headers as well,
+this are usually packaged as {libraryname}-dev or {libraryname}-devel
+depending on your distribution)
 
 
 0.1. Essential softwares for compilation and linking
@@ -34,6 +38,7 @@ You need the following softwares:
 
 * GNU Scientific Library (gsl)
   
+* libsbml (this can be turned off by USE_SBML=0 flag): http://sbml.org/Software/libSBML
 
 
 0.2. Softwares required OpenGL-based 3D-Visualization (optional)
