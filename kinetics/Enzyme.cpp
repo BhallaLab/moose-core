@@ -15,12 +15,6 @@
 
 extern double getVolScale( Eref e ); // defined in KinCompt.cpp
 
-/*
- * Defining Inf. Used to initialize some fields (x & y display coordinates)
- * to an 'uninitialized' state. Could also use NaN = ( 0.0 / 0.0 ).
- */
-static const double Inf = 1.0 / 0.0;
-
 const Cinfo* initEnzymeCinfo()
 {
 	static Finfo* processShared[] =
@@ -220,7 +214,7 @@ static const Slot prdSlot =
 Enzyme::Enzyme()
 	: k1_(0.1), k2_(0.4), k3_(0.1),sk1_(1.0), Km_( 5.0 ),
 		procFunc_( &Enzyme::implicitProcFunc ),
-		x_( Inf ), y_( Inf )	// Initializing to an 'uninitialized' state.
+		x_( NAN ), y_( NAN )	// Initializing to an 'uninitialized' state.
 {
 	;
 }
