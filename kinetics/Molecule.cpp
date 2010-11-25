@@ -17,12 +17,6 @@
 const double Molecule::EPSILON = 1.0e-15;
 const double Molecule::NA = 6.02214179e23; // Avogadro's constant
 
-/*
- * Defining Inf. Used to initialize some fields (x & y display coordinates)
- * to an 'uninitialized' state. Could also use NaN = ( 0.0 / 0.0 ).
- */
-static const double Inf = 1.0 / 0.0;
-
 const Cinfo* initMoleculeCinfo()
 {
 	static Finfo* processShared[] =
@@ -231,8 +225,8 @@ Molecule::Molecule()
 	A_( 0.0 ),
 	B_( 0.0 ),
 	D_( 0.0 ),
-	x_( Inf ),	// Initializing to an 'uninitialized' state.
-	y_( Inf )	// Initializing to an 'uninitialized' state.
+	x_( NAN ),	// Initializing to an 'uninitialized' state.
+	y_( NAN )	// Initializing to an 'uninitialized' state.
 {
 		;
 }
