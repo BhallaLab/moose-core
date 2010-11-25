@@ -13,6 +13,12 @@
 
 extern double getVolScale( Eref e ); // defined in KinCompt.cpp
 
+/*
+ * Defining Inf. Used to initialize some fields (x & y display coordinates)
+ * to an 'uninitialized' state. Could also use NaN = ( 0.0 / 0.0 ).
+ */
+static const double Inf = 1.0 / 0.0;
+
 const Cinfo* initReactionCinfo()
 {
 	static Finfo* processShared[] =
@@ -143,6 +149,20 @@ static const Slot substrateSlot =
 	initReactionCinfo()->getSlot( "sub.reac" );
 static const Slot productSlot =
 	initReactionCinfo()->getSlot( "prd.reac" );
+
+///////////////////////////////////////////////////
+// Class function definitions
+///////////////////////////////////////////////////
+
+Reaction::Reaction()
+	:
+	kf_( 0.1 ),
+	kb_( 0.1 ),
+	x_( Inf ),	// Initializing to an 'uninitialized' state.
+	y_( Inf )	// Initializing to an 'uninitialized' state.
+{
+		;
+}
 
 ///////////////////////////////////////////////////
 // Field function definitions
