@@ -14,11 +14,7 @@ class Reaction
 {
 	friend class ReactionWrapper;
 	public:
-		Reaction()
-		{
-			kf_ = 0.1;
-			kb_ = 0.1;
-		}
+		Reaction();
 
 
 		///////////////////////////////////////////////////
