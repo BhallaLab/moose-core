@@ -1089,12 +1089,14 @@ void testSparseMsg()
 	for ( unsigned int i = 0; i < runsteps; ++i ) {
 		p.currTime += p.dt;
 		i2()->process( &p, df->getFid() );
-		unsigned int numWorkerThreads = 1;
-		unsigned int startThread = 1;
+		// unsigned int numWorkerThreads = 1;
+		// unsigned int startThread = 1;
+		/*
 		if ( Qinfo::numSimGroup() >= 2 ) {
 			numWorkerThreads = Qinfo::simGroup( 1 )->numThreads;
 			startThread = Qinfo::simGroup( 1 )->startThread;
 		}
+		*/
 		unsigned int totOutqEntries = ( *Qinfo::outQ_ )[ 0 ].totalNumEntries();
 		assert( totOutqEntries == qSize[i] );
 		// cout << i << ": " << totOutqEntries / ( sizeof( Qinfo ) + sizeof( double ) ) << endl << endl ;

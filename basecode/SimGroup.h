@@ -37,30 +37,50 @@ typedef unsigned short Qid;
  */
 class SimGroup {
 	public: 
-		SimGroup( unsigned short nt, unsigned short si, unsigned short nn )
-			: numThreads( nt ), startThread( si ), numNodes( nn )
+		SimGroup( unsigned short startNode, unsigned short endNode_,
+			unsigned int bufSize )
+			: startNode_( startNode ), endNode_( endNode_ ), 
+			bufSize_( bufSize )
 			{;}
-		unsigned short numThreads; // Number of threads in this group.
-		unsigned short startThread; // Index of first thread, used for inQ.
-		unsigned short numNodes; // Number of nodes in this group.
-
-		/**
-		 * returns Qid for the thread specified within this group
-		Qid outQ( unsiged int relativeThreadId ) const {
-			assert( relativeThreadId < numThreads );
-			return startIndex + threadId + 1;
+		unsigned short startNode() const {
+			return startNode_;
 		}
-		 */
+		unsigned short endNode() const {
+			return startNode_;
+		}
 
+		unsigned int bufSize() const {
+			return bufSize_;
+		}
+
+		void setBufSize( unsigned int val ) {
+			bufSize_ = val;
+		}
 
 		/**
 		 * returns Qid for the absolute threadId
-		 */
 		Qid outQ( unsigned int threadId, unsigned int groupIndex ) const {
 			Qid ret = threadId + groupIndex + 1;
-			assert( ret - startThread < numThreads );
+			assert( ret - startThread_ < numThreads );
 			return( ret );
 		}
-		// Stuff here for off-node queues.
+		 */
+	private:
+		/**
+		 * Starting node index for this group
+		 */
+		unsigned short startNode_;
+		/**
+		 * End node index for this group. 1+last node in group.
+		 */
+		unsigned short endNode_;
+
+		/**
+		 * Current data buffer size for MPI data transfers in this group
+		 * We assume that all nodes within group use equal data sizes.
+		 * This number goes up and down based on recent traffic.
+		 */
+		unsigned int bufSize_;
+
 };
 

@@ -65,55 +65,6 @@ bool TickMgr::addTick( const Tick* t )
 	return 0;
 }
 
-/**
- * Advance the simulation till the specified end time, without
- * worrying about other dts.
- * The Eref e has to refer to the Tick, not the clock.
- * Slightly modified to use a local variable to make it thread-friendly.
- */
-/*
-void TickMgr::advance( Element* e, ProcInfo* p, double endTime ) {
-	while ( nextTime_ < endTime ) {
-		p->currTime = nextTime_;
-		for ( vector< const Tick* >::iterator i = ticks_.begin(); 
-			i != ticks_.end(); ++i )
-		{
-			(*i)->advance( e, p );
-		}
-		nextTime_ += dt_;
-	}
-}
-*/
-
-// procInfo is independent for each thread, need to ensure it is updated
-// before doing 'advance'.
-void TickMgr::advance( Element* e, ProcInfo* p, double endTime ) 
-{
-	p->dt = dt_;
-	double nt = nextTime_; // use an independent timer for each thread.
-	// cout << "TickMgr::advance: nextTime_ = " << nextTime_ << ", endTime = " << endTime << ", thread = " << p->threadId << endl;
-	while ( nt < endTime ) {
-		p->currTime = nt;
-		nt += dt_;
-
-		for ( vector< const Tick* >::iterator i = ticks_.begin(); 
-			i != ticks_.end(); ++i )
-		{
-			(*i)->advance( e, p ); // This calls barrier just before clearQ.
-		}
-	}
-
-	if ( p->threadId == 0 ) {
-		nextTime_ = nt;
-	}
-	if ( p->barrier1 ) {
-		int rc = pthread_barrier_wait( 
-			reinterpret_cast< pthread_barrier_t* >( p->barrier1 ) );
-		assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
-	}
-	/*
-	*/
-}
 
 double TickMgr::getNextTime() const
 {

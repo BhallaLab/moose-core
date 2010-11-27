@@ -34,13 +34,6 @@ class Tick
 		///////////////////////////////////////////////////////
 
 		/**
-		 * This advances the simulation by its timestep, for the Elements
-		 * managed by this Tick. It first calls clearQ on them all, then
-		 * calls Process.
-		 */
-		void advance( Element* e, ProcInfo* p ) const;
-
-		/**
 		 * New version of 'advance'
  		 * This function is called to advance this one tick through one
 		 * 'process' cycle. It is called in parallel on multiple threads,
@@ -49,12 +42,6 @@ class Tick
 		 * of the object array to do the process operation.
 		 */
 		void advance( ProcInfo* p ) const;
-
-		/**
-		 * This runs in parallel with 'advance' on the extra thread
-		 * dedicated to dealing with MPI data transfer.
-		 */
-		void mpiAdvance( ProcInfo* p ) const;
 
 		/**
 		 * This assigns the index of this Tick in the array. This index

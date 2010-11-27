@@ -16,11 +16,15 @@
 bool Qinfo::isSafeForStructuralOps_ = 0;
 vector< Qvec > Qinfo::q1_;
 vector< Qvec > Qinfo::q2_;
-vector< Qvec > Qinfo::mpiQ_;
 vector< Qvec >* Qinfo::inQ_ = &Qinfo::q1_;
 vector< Qvec >* Qinfo::outQ_ = &Qinfo::q2_;
+
+Qvec Qinfo::mpiQ1_;
+Qvec Qinfo::mpiQ2_;
+Qvec* Qinfo::mpiInQ_;
+Qvec* Qinfo::mpiRecvQ_;
+
 vector< SimGroup > Qinfo::g_;
-vector< vector< QueueBlock > > Qinfo::qBlock_;
 vector< const char* > Qinfo::structuralQ_;
 
 void hackForSendTo( const Qinfo* q, const char* buf );
@@ -74,21 +78,26 @@ Qinfo Qinfo::makeDummy( unsigned int size )
  * numThreads is the number of threads present in this group on this node.
  * Returns the group number of the new group.
  * have that because it will require updates to messages.
+ * Returns number of new sim group.
  */
 unsigned int Qinfo::addSimGroup( unsigned short numThreads, 
 	unsigned short numNodes )
 {
+	const unsigned int DefaultMpiBufSize = 1000; // bytes.
+	/*
 	unsigned short ng = g_.size();
 	unsigned short si = 0;
 	if ( ng > 0 )
 		si = g_[ng - 1].startThread + g_[ng - 1].numThreads;
-	SimGroup sg( numThreads, si, numNodes );
+	*/
+	// For starters, just put this group on all nodes.
+	SimGroup sg( 0, numNodes, DefaultMpiBufSize );
 	g_.push_back( sg );
 
 	q1_.push_back( Qvec( numThreads ) );
 	q2_.push_back( Qvec( numThreads ) );
 
-	return ng;
+	return g_.size() - 1;
 }
 
 // Static function
@@ -159,9 +168,18 @@ void hackForSendTo( const Qinfo* q, const char* buf )
 
 void readBuf(const Qvec& qv, const ProcInfo* proc )
 {
+	if ( qv.allocatedSize() < Qvec::HeaderSize )
+		return;
 	const char* buf = qv.data();
-	// unsigned int bufsize = *reinterpret_cast< const unsigned int* >( buf );
-	const char* end = buf + qv.dataQsize();
+
+	unsigned int bufsize = qv.mpiArrivedDataSize();
+	const char* end = buf + bufsize;
+	unsigned int pendingSize = qv.mpiPendingDataSize();
+	Qinfo::doMpiStats( bufsize, pendingSize ); // Need zone info too.
+
+	// If on current node, then check bufsize
+	// assert( srcNode != Shell::myNode() || bufsize == qv.dataQsize() );
+
 	// buf += sizeof( unsigned int );
 	while ( buf < end )
 	{
@@ -179,6 +197,15 @@ void readBuf(const Qvec& qv, const ProcInfo* proc )
 		}
 		buf += sizeof( Qinfo ) + qi->size();
 	}
+}
+
+/**
+ * Static func.  Placeholder for now.
+ * Will want to analyze data traffic and periodically tweak buffer
+ * sizes
+ */
+void Qinfo::doMpiStats( unsigned int bufsize, unsigned int pendingSize )
+{
 }
 
 /** 
@@ -199,29 +226,18 @@ void Qinfo::readQ( const ProcInfo* proc )
  * Static func. 
  * Deliver the contents of the mpiQ to target objects
  * Assumes that the Msgs invoked by readBuf handle the thread safety.
+ * Checks the data block size in case it is over the regular
+ * blocksize allocated for the current node.
  */
-void Qinfo::readMpiQ( const ProcInfo* proc )
+void Qinfo::readMpiQ( const ProcInfo* proc, unsigned int node )
 {
-	/*
 	assert( proc );
-	assert( proc->groupId < mpiQ_.size() );
-	const Qvec& q = mpiQ_[ proc->groupId ];
-	for ( unsigned int i = 0; i < proc->numNodesInGroup; ++i ) {
-		if ( i != proc->nodeIndexInGroup ) {
-			const char* buf = q.data() + BLOCKSIZE * i;
-			assert( q.allocatedSize() >= sizeof( unsigned int ) + BLOCKSIZE * i );
-			const unsigned int *bufsize = 
-				reinterpret_cast< const unsigned int* >( buf);
-			if ( *bufsize > BLOCKSIZE ) { // Giant message
-				// Do something.
-				exit( 0 );
-			} else {
-				readBuf( buf, proc );
-			}
-		}
-	}
-	mpiQ_[proc->groupId].clear();
-	*/
+	// assert( proc->groupId < mpiQ_.size() );
+	readBuf( *mpiInQ_, proc );
+
+	if ( proc->nodeIndexInGroup == 0 && mpiInQ_->isBigBlock() ) 
+		// Clock::requestBigBlock( proc->groupId, node );
+		;
 }
 
 /**
@@ -258,9 +274,21 @@ void Qinfo::swapQ()
 	}
 }
 
+/**
+ * Need to allocate space for incoming block
+ * Still pending: need a way to decide which SimGroup is
+ * coming in.
+ */
 void Qinfo::swapMpiQ()
 {
-	// dummy func for now.
+	if ( mpiInQ_ == &mpiQ2_ ) {
+		mpiInQ_ = &mpiQ1_;
+		mpiRecvQ_ = &mpiQ2_;
+	} else {
+		mpiInQ_ = &mpiQ2_;
+		mpiRecvQ_ = &mpiQ1_;
+	}
+	mpiRecvQ_->resizeLinearData( Qinfo::simGroup( 1 )->bufSize() );
 }
 
 /**
@@ -280,9 +308,9 @@ void Qinfo::sendAllToAll( const ProcInfo* proc )
 	if ( proc->numNodesInGroup == 1 )
 		return;
 	// cout << proc->nodeIndexInGroup << ", " << proc->threadId << ": Qinfo::sendAllToAll\n";
-	assert( mpiQ_[proc->groupId].allocatedSize() >= 
-		BLOCKSIZE * proc->numNodesInGroup );
+	assert( mpiRecvQ_->allocatedSize() >= BLOCKSIZE );
 #ifdef USE_MPI
+	assert( inQ_.size() == mpiQ_.size() );
 	const char* sendbuf = inQ_->data();
 	char* recvbuf = mpiQ_.writableData();
 	//assert ( inQ_[ proc->groupId ].size() == BLOCKSIZE );
@@ -353,18 +381,14 @@ void Qinfo::reportQ()
 	for ( unsigned int i = 0; i < outQ_->size(); ++i )
 		cout << "[" << i << "]=" << (*outQ_ )[i].totalNumEntries() << "	";
 	cout << "mpiQ: ";
-	for ( unsigned int i = 0; i < mpiQ_.size(); ++i ) {
-		unsigned int size = mpiQ_[i].totalNumEntries();
-		cout << "[" << i << "]=" << size << "	";
-	}
 	cout << endl;
 
 	if ( inQ_->size() > 0 ) innerReportQ( (*inQ_)[0], "inQ[0]" );
 	if ( inQ_->size() > 1 ) innerReportQ( (*inQ_)[1], "inQ[1]" );
 	if ( outQ_->size() > 0 ) innerReportQ( (*outQ_)[0], "outQ[0]" );
 	if ( outQ_->size() > 1 ) innerReportQ( (*outQ_)[1], "outQ[1]" );
-	if ( mpiQ_.size() > 0 ) innerReportQ( mpiQ_[0], "mpiQ[0]" );
-	if ( mpiQ_.size() > 1 ) innerReportQ( mpiQ_[1], "mpiQ[1]" );
+	if ( mpiInQ_ ) innerReportQ( *mpiInQ_, "mpiInQ" );
+	if ( mpiRecvQ_ ) innerReportQ( *mpiRecvQ_, "mpiRecvQ" );
 }
 
 void Qinfo::addToQforward( const ProcInfo* p, MsgFuncBinding b, 

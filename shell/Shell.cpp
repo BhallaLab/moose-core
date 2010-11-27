@@ -598,9 +598,13 @@ void Shell::clearRestructuringQ()
  * The process call happens at a time when there are no more incoming
  * msgs to the Shell making their way through the message system.
  * However, there may be outgoing msgs queued up.
+ * Deprecated. This is now replaced with the Qinfo::struturalQ_
+ * which keeps track of any operations with structural implications.
+ * These are executed in swapQ
  */
 void Shell::process( const Eref& e, ProcPtr p )
 {
+/*
 	Id clockId( 1 );
 	Clock* clock = reinterpret_cast< Clock* >( clockId.eref().data() );
 	Qinfo q;
@@ -619,6 +623,7 @@ void Shell::process( const Eref& e, ProcPtr p )
 		doReinit_ = 0;
 		ack.send( Eref( shelle_, 0 ), &p_, myNode_, OkStatus );
 	}
+*/
 }
 
 

@@ -51,10 +51,18 @@ void* eventLoopForBcast( void* info )
 		// for the data received on the previous bcast call.
 		// If we can permit slower internode data transfer then the #
 		// of bcast calls goes down.
-		for ( unsigned int j = 0; j < p->numNodesInGroup; ++j ) {
-			p->barrier2->wait(); // This barrier swaps mpiInQ and mpiOutQ
-			if ( j != p->nodeIndexInGroup )
-				Qinfo::readMpiQ( p );
+
+		for ( unsigned int i = 0; i < Qinfo::numSimGroup(); ++i ) {
+			for ( unsigned int j = Qinfo::simGroup( i )->startNode();
+				j < Qinfo::simGroup( i )->endNode(); ++j )
+			{
+				p->barrier2->wait(); // This barrier swaps mpiInQ and mpiRecvQ
+				// This internally checks if we are within the allowed
+				// blocksize for this buffer. If not, it pushes up a call
+				// to the Clock to schedule another cycle to finish of the
+				// data transfer.
+				Qinfo::readMpiQ( p, j ); 
+			}
 		}
 
 		// Here we use the stock pthreads barrier, whose performance is

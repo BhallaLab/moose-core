@@ -25,14 +25,6 @@ class TickMgr {
 		 */
 		bool addTick( const Tick* t );
 
-		// Won't bother with a clear function, just rebuild the whole lot.
-
-		/**
-		 * Advance the simulation till the specified end time, without
-		 * worrying about other dts.
-		 */
-		void advance( Element* e, ProcInfo* p, double endTime );
-
 		///////////////////////////////////////////////////////////////
 		// Stuff for new scheduling.
 		///////////////////////////////////////////////////////////////

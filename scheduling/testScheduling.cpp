@@ -403,10 +403,12 @@ void testThreadIntFireNetwork()
 	DataId di( 1, 0 ); // DataId( data, field )
 	Eref syne( syn, di );
 
+	/*
 	unsigned int numThreads = 1;
 	if ( Qinfo::numSimGroup() >= 2 ) {
 		numThreads = Qinfo::simGroup( 1 )->numThreads;
 	}
+	*/
 	/*
 	bool ret = SparseMsg::add( e2.element(), "spike", syn, "addSpike", 
 		connectionProbability, numThreads ); // Include group id as an arg. 
@@ -556,10 +558,12 @@ void testMultiNodeIntFireNetwork()
 	DataId di( 1, 0 ); // DataId( data, field )
 	Eref syne( syn, di );
 
+	/*
 	unsigned int numThreads = 1;
 	if ( Qinfo::numSimGroup() >= 2 ) {
 		numThreads = Qinfo::simGroup( 1 )->numThreads;
 	}
+	*/
 
 	MsgId mid = shell->doAddMsg( "Sparse", e2.fullId(), "spike",
 		FullId( synId, 0 ), "addSpike" );
@@ -727,10 +731,12 @@ void speedTestMultiNodeIntFireNetwork( unsigned int size, unsigned int runsteps 
 	DataId di( 1, 0 ); // DataId( data, field )
 	Eref syne( syn, di );
 
+	/*
 	unsigned int numThreads = 1;
 	if ( Qinfo::numSimGroup() >= 2 ) {
 		numThreads = Qinfo::simGroup( 1 )->numThreads;
 	}
+	*/
 
 	MsgId mid = shell->doAddMsg( "Sparse", e2.fullId(), "spike",
 		FullId( synId, 0 ), "addSpike" );

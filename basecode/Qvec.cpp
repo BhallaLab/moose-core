@@ -9,6 +9,12 @@
 #include "header.h"
 
 const unsigned int Qvec::threadQreserve = 128;
+const unsigned int Qvec::HeaderSize = 2 * sizeof( unsigned int );
+
+Qvec::Qvec()
+{
+	;
+}
 
 Qvec::Qvec( unsigned int numThreads )
 {
@@ -40,9 +46,18 @@ void Qvec::stitch()
 	unsigned int totSize = 0;
 	for ( unsigned int i = 0; i < data_.size(); ++i )
 		totSize += data_[i].size();
-	linearData_.resize( totSize );
+	if ( totSize == 0 ) {
+		linearData_.resize( 0 );
+		return;
+	}
+		
+	linearData_.resize( HeaderSize + totSize );
+	unsigned int *mpiDataSize = 
+		reinterpret_cast< unsigned int* >( &linearData_[0] );
+	mpiDataSize[0] = linearData_.size(); // Arrived data
+	mpiDataSize[1] = 0; // Pending data.
 
-	totSize = 0;
+	totSize = HeaderSize;
 	for ( unsigned int i = 0; i < data_.size(); ++i ) {
 		char* pos = &linearData_[ totSize ];
 		memcpy( pos, &( data_[i][0] ), data_[i].size() );
@@ -50,19 +65,24 @@ void Qvec::stitch()
 	}
 }
 
+// This has to be protected by a check on the data size.
 const char* Qvec::data() const
 {
-	return &linearData_[0];
+	assert( linearData_.size() > HeaderSize );
+	return &linearData_[ HeaderSize ];
 }
 
 char* Qvec::writableData()
 {
+	assert( linearData_.size() > HeaderSize );
 	return &linearData_[0];
 }
 
 unsigned int Qvec::dataQsize() const
 {
-	return linearData_.size();
+	if ( linearData_.size() >= HeaderSize )
+		return linearData_.size() - HeaderSize;
+	return 0;
 }
 
 unsigned int Qvec::allocatedSize() const
@@ -98,6 +118,35 @@ unsigned int Qvec::totalNumEntries() const
 	return ret;
 }
 
+bool Qvec::isBigBlock() const
+{
+	assert( linearData_.size() > HeaderSize );
+	const unsigned int *mpiDataSize = 
+		reinterpret_cast< const unsigned int* >( &linearData_[0] );
+	return ( mpiDataSize[1] == 0 );
+}
+
+unsigned int  Qvec::mpiArrivedDataSize() const
+{
+	assert( linearData_.size() > HeaderSize );
+	const unsigned int *mpiDataSize = 
+		reinterpret_cast< const unsigned int* >( &linearData_[0] );
+	return ( mpiDataSize[0] );
+}
+
+unsigned int  Qvec::mpiPendingDataSize() const
+{
+	assert( linearData_.size() > HeaderSize );
+	const unsigned int *mpiDataSize = 
+		reinterpret_cast< const unsigned int* >( &linearData_[0] );
+	return ( mpiDataSize[1] );
+}
+
+void Qvec::resizeLinearData( unsigned int size )
+{
+	linearData_.resize( size );
+}
+
 // static function
 void Qvec::testQvec()
 {
@@ -106,8 +155,6 @@ void Qvec::testQvec()
 	Qvec q( 4 );
 	assert( q.dataQsize() == 0 );
 	assert( q.allocatedSize() == 0 );
-	assert( q.data() == q.writableData() );
-	assert( q.data() == &( q.linearData_[0] ) );
 	
 	char *buf = new char[5000];
 	Qinfo qi( 0, bigDataSize, buf );
@@ -124,7 +171,10 @@ void Qvec::testQvec()
 	assert( q.allocatedSize() == 0 );
 	q.stitch();
 	assert( q.dataQsize() == datasize );
-	assert( q.allocatedSize() == datasize );
+	assert( q.allocatedSize() == datasize + HeaderSize );
+
+	assert( q.data() == q.writableData() + HeaderSize );
+	assert( q.data() == &( q.linearData_[ HeaderSize ] ) );
 
 	//// Put some more data (small) on thread 0.
 	Qinfo qiSmall( 0, smallDataSize, buf );
@@ -134,10 +184,10 @@ void Qvec::testQvec()
 	assert( q.numEntries( 0 ) == 2 );
 	assert( q.totalNumEntries() == 2 );
 	assert( q.dataQsize() == datasize );
-	assert( q.allocatedSize() == datasize );
+	assert( q.allocatedSize() == datasize + HeaderSize );
 	q.stitch();
 	assert( q.dataQsize() == datasize + datasizeSmall );
-	assert( q.allocatedSize() == datasize + datasizeSmall );
+	assert( q.allocatedSize() == datasize + datasizeSmall + HeaderSize );
 
 	//// Put some data on thread 2
 	q.push_back( 2, &qiSmall, buf );
@@ -146,10 +196,10 @@ void Qvec::testQvec()
 	assert( q.numEntries( 2 ) == 1 );
 	assert( q.totalNumEntries() == 3 );
 	assert( q.dataQsize() == datasize + datasizeSmall );
-	assert( q.allocatedSize() == datasize + datasizeSmall );
+	assert( q.allocatedSize() == datasize + datasizeSmall + HeaderSize );
 	q.stitch();
 	assert( q.dataQsize() == datasize + 2 * datasizeSmall );
-	assert( q.allocatedSize() == datasize + 2 * datasizeSmall );
+	assert( q.allocatedSize() == datasize + 2 * datasizeSmall + HeaderSize );
 
 	const char* data = q.data();
 	const Qinfo* temp = reinterpret_cast< const Qinfo* >( data );
@@ -168,7 +218,8 @@ void Qvec::testQvec()
 	assert( q.numEntries( 2 ) == 1 );
 	assert( q.totalNumEntries() == 4 );
 	assert( q.dataQsize() == 2 * datasize + 2 * datasizeSmall );
-	assert( q.allocatedSize() == 2 * datasize + 2 * datasizeSmall );
+	assert( q.allocatedSize() == 2 * datasize + 2 * datasizeSmall + 
+		HeaderSize );
 
 	data = q.data();
 	temp = reinterpret_cast< const Qinfo* >( data );

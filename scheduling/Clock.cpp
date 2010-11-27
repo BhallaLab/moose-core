@@ -140,12 +140,12 @@ const Cinfo* Clock::initCinfo()
 
 		static DestFinfo step( "step", 
 			"Sets off the simulation for the specified # of steps",
-			new EpFunc1< Clock, unsigned int >(&Clock::step )
+			new OpFunc1< Clock, unsigned int >(&Clock::handleStep )
 		);
 
 		static DestFinfo stop( "stop", 
 			"Halts the simulation, with option to restart seamlessly",
-			new EpFunc0< Clock >(&Clock::stop )
+			new OpFunc0< Clock >(&Clock::stop )
 		);
 
 		static DestFinfo setupTick( "setupTick", 
@@ -320,60 +320,13 @@ void Clock::setNumTicks( unsigned int num )
 // Dest function definitions
 ///////////////////////////////////////////////////
 
-// After reinit, nextTime for everything is set to its own dt.
-// Work out time for next clock, run until that
-void Clock::start(  const Eref& e, const Qinfo* q, double runTime )
-{
-	static const double ROUNDING = 1.0000000001;
-	if ( tickPtr_.size() == 0 ) {
-		info_.currTime += runTime;
-		return;
-	}
-	info_.currTime = tickPtr_[0].mgr()->getNextTime() - tickPtr_[0].mgr()->getDt();
-	double endTime = runTime * ROUNDING + info_.currTime;
-	isRunning_ = 1;
-
-	/// Should actually use a lookup for child, or even postCreate Id.
-	// Element* ticke = Id( 2 )();
-	Id tickId( e.element()->id().value() + 1 );
-	Element* ticke = tickId();
-
-	if ( tickPtr_.size() == 1 ) {
-		tickPtr_[0].mgr()->advance( ticke, &info_, endTime );
-		return;
-	}
-
-	// Here we have multiple tick times, need to do the sorting.
-	sort( tickPtr_.begin(), tickPtr_.end() );
-	double nextTime = tickPtr_[1].mgr()->getNextTime();
-	while ( isRunning_ && tickPtr_[0].mgr()->getNextTime() < endTime ) {
-		// This advances all ticks with this dt in order, till nextTime.
-		tickPtr_[0].mgr()->advance( ticke, &info_, nextTime * ROUNDING );
-		sort( tickPtr_.begin(), tickPtr_.end() );
-		nextTime = tickPtr_[1].mgr()->getNextTime();
-	} 
-
-	// Just to test: need to move back into the ticks:
-	Qinfo::clearQ( &info_ );
-	Qinfo::emptyAllQs();
-
-	isRunning_ = 0;
-}
-
-void Clock::step(  const Eref& e, const Qinfo* q, unsigned int nsteps )
-{
-	double endTime = info_.currTime + dt_ * nsteps;
-	sort( tickPtr_.begin(), tickPtr_.end() );
-	start( e, q, endTime );
-}
-
 /**
  * Does a graceful stop of the simulation, leaving so it can continue
  * cleanly with another step or start command.
  * This function can be called safely from any thread, provided it is
  * not within barrier3.
  */
-void Clock::stop(  const Eref& e, const Qinfo* q )
+void Clock::stop()
 {
 	procState_ = StopOnly;
 }
@@ -381,36 +334,6 @@ void Clock::stop(  const Eref& e, const Qinfo* q )
 void Clock::handleQuit()
 {
 	procState_ = QuitProcessLoop;
-}
-
-
-/**
- * Does a disgraceful stop of the simulation, leaving it wherever it was.
- * Cannot resume.
- */
-void Clock::terminate(  const Eref& e, const Qinfo* q )
-{
-	isRunning_ = 0; // Later we will be more vigourous about killing it.
-}
-
-/**
- * Reinit is used to reinit the state of the scheduling system.
- * Should be done single-threaded.
- * Deprecated version here.
- */
-void Clock::reinit( const Eref& e, const Qinfo* q )
-{
-	info_.currTime = 0.0;
-	runTime_ = 0.0;
-	currentTime_ = 0.0;
-	nextTime_ = 0.0;
-	nSteps_ = 0;
-	currentStep_ = 0;
-
-	Eref ticker( Id( 2 )(), 0 );
-	for ( vector< TickPtr >::iterator i = tickPtr_.begin();
-		i != tickPtr_.end(); ++i )
-		i->mgr()->reinit( ticker, &info_ );
 }
 
 /**
@@ -489,6 +412,7 @@ void Clock::rebuild()
 		addTick( &( ticks_[i] ) ); // This fills in only ticks that are used
 	}
 	sort( tickPtr_.begin(), tickPtr_.end() );
+	dt_ = tickPtr_[0].mgr()->getDt();
 }
 
 
@@ -643,6 +567,12 @@ void Clock::handleStart( double runtime )
 		procState_ = ReinitThenStart;
 	else
 		procState_ = StartOnly;
+}
+
+void Clock::handleStep( unsigned int numSteps )
+{
+	double runtime = dt_ * numSteps;
+	handleStart( runtime );
 }
 
 // Advance system state by one clock tick. This may be a subset of

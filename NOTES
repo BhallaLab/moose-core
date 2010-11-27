@@ -9382,5 +9382,71 @@ Python parser.
 Checkin 2383.
 Minor cleanups to code especially Shell handlers for functions that are now
 dealt directly by Clock. Got rid of a couple of test directories.
+Checkin 2384.
+
+Now setting up the MPI data transfer buffers. Some issues:
+- Need to transfer either the size or the # of Qinfo entries, right at the
+	start of the data block. Since I use InQ to send out data, this means
+	that InQ has to begin with this info. Can be done during the 'stitch'
+	command.
+- Need to use a different set of functions for the swapMpiQ:
+	- Instead of stitching together data, we want to keep the data_ 
+	vector of buffers empty.
+	- We need to ensure that the linearData_ buffer is of the right data
+	transfer size.
+- Need to deal with pre-assigned data transfer sizes in MPI.
+	- Need to track distribution of actual inQ sizes for outgoing data
+	- Need to dynamically resize buffer and transfer sizes to avoid
+		fallback but not to have too much overhead.
+	- Need to have a fallback mechanism for transfers bigger than 
+		allocated data.
+	- If there is a reasonable proportion of zero size transfers, should
+		be able to skip those. More cleanly if there are simply
+		zero messages between any two zones/groups.
+		- If there are messages but they are rare, skipping gets
+		complicated. We would need to go through the master node
+		to relay info if there is a rare message, somehow stall
+		everyone, notify the tgt nodes, and then send the message.
+		Or we could have it done through MPI_Irecv which would normally
+		pass through, but if data were pending could take action.
+		Here again there are synchronization issues.
+- Deal with node and group handling.
+	- add yet another looping layer for the nodes in the eventLoopForBcast.
+	- Or we assume that any node other than node 0 is in only one group. 
+	- Or put node 0 in its own, none-processing group, and the other 
+		nodes belong in processing groups.
+	- May need a sparse matrix to indicate connectivity of groups of nodes.
+	- In the old GENESIS this was called 'zones'
+	- Cases: 
+		- All in one zone, 
+		- multiple zones on one node (for a big SMP system)
+		- Each node is in one zone only (for a big MPI cluster)
+		- The case of each node having multiple zones is strange,
+			since one would like to put the dense communications
+			within a node.
+			This would typically only happen on node0 if we
+			were very short of nodes.
+
+
+============================================================================
+25 Nov 2010
+
+For starters, assume:
+	Group/Zone 0 connects to all nodes.
+	Group/Zone 1 connects to all nodes.
+
+Setting up hook functions for managing size of MPI transfers including
+overflow if the block size is bigger than allocated.
+
+How to signify? We need to always transfer the actual data size in the
+current buffer. If a big block we would need to also send the total block
+size. The originating node # is nice to know, but it is available from
+the Recv context and does not have to be in the buffer.
+
+
+Need to have separate size reporting functions in Qvec: for the total
+buffer size and for the data component of it.
+
+Now it compiles, but the grouping stuff has put the allocations all in a mess.
 
 ============================================================================

@@ -43,18 +43,10 @@ class Clock
 		//  Dest functions
 		//////////////////////////////////////////////////////////
 		/**
-		 * starts up a run to go for runTime without threading.
+		 * Halts running simulation gracefully, letting it restart 
+		 * wherever it left off from.
 		 */
-		// Deprecated
-		void start( const Eref& e, const Qinfo* q, double runTime );
-		// Needs modification.
-		void step( const Eref& e, const Qinfo* q, unsigned int nsteps );
-		void stop( const Eref& e, const Qinfo* q );
-
-		// Deprecated
-		void terminate( const Eref& e, const Qinfo* q );
-		// Deprecated
-		void reinit( const Eref& e, const Qinfo* q );
+		void stop();
 
 		/**
 		 * Quit the main event loop gracefully. It will wait till all
@@ -102,8 +94,11 @@ class Clock
 		 */
 		void advancePhase1( ProcInfo* p );
 		void advancePhase2( ProcInfo* p );
-		/// dest function for message to start simulation.
+		/// dest function for message to run simulation for specified time
 		void handleStart( double runtime );
+
+		/// dest function for message to run simulation for specified steps
+		void handleStep( unsigned int steps );
 
 		/**
 		 * Reinit is used to reinit the state of the scheduling system.

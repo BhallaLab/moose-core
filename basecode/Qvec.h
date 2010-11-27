@@ -19,6 +19,8 @@
 class Qvec
 {
 	public:
+		Qvec();
+
 		Qvec( unsigned int numThreads ); /// Create and allocate Qvec
 
 		/**
@@ -45,28 +47,30 @@ class Qvec
 		void stitch();
 
 		/**
-		 * Returns start of data block. Must NOT be used concurrently
+		 * Returns start of data block, which is after the header block.
+		 * Must NOT be used concurrently
 		 * with push_back, as the data will be messed up.
 		 */
 		const char* data() const;
 
 		/**
-		 * Returns start of data block. Used for MPI data transfers
-		 * which need the data block address to write into
+		 * Returns very start of buffer, at the header block. 
+		 * Used for MPI data transfers
+		 * which need the address to write into.
 		 */
 		char* writableData();
 
 		/**
 		 * Returns size in bytes of used data block. Note that the
-		 * internal allocation may be bigger. Also note that this size
-		 * is from the start of the data on thread0 to the end of data on
-		 * the last thread. There will usually be gaps in between, 
-		 * paddedout using dummy Qinfos to skip over the gaps.
+		 * internal allocation may be bigger. This is only the data
+		 * part of the buffer, and the actual buffer size will also
+		 * include some space for a header.
 		 */
 		unsigned int dataQsize() const;
 
 		/**
 		 * Returns allocated size of entire data vector in bytes.
+		 * This includes space available for header plus data.
 		 */
 		unsigned int allocatedSize() const;
 
@@ -86,12 +90,56 @@ class Qvec
 		unsigned int totalNumEntries() const;
 
 		/**
+		 * Allocate space on the linear buffer. Used to set up for 
+		 * receiving data through MPI. This sets up the entire buffer
+		 * size, which will be used for header plus data.
+		 */
+		 void resizeLinearData( unsigned int size );
+
+		 /**
+		  * Report whether the current recved block is incomplete, and
+		  * we should expect a big block still to come.
+		  */
+		 bool isBigBlock() const;
+
+		 /**
+		  * Reads header of linearData_ to report how much data
+		  * actually came. This is the total size in bytes 
+		  * of the header block plus the data block,
+		  */
+		 unsigned int mpiArrivedDataSize() const;
+
+		 /**
+		  * Reads header of linearData_ to report how much data
+		  * is still due to come. Should normally be zero, otherwise
+		  * a special second cycle of data transfer is needed.
+		  * This is the total size of the next data block, including its
+		  * header.
+		  */
+		 unsigned int mpiPendingDataSize() const;
+
+		/**
 		 * test function for Qvec
 		 */
 		static void testQvec();
+
+		/**
+		 * Size of header block that holds extra info for MPI transfers
+		 * Currently just two unsigned ints, for the post-header size 
+		 * in bytes, and for the pending size.
+		 */
+		static const unsigned int HeaderSize;
 	private:
 		vector< vector< char > > data_;
 
+		/**
+		 * This contains message queued data all lined up for internode
+		 * transfer and also for rapidly scanning through on all local
+		 * threads. The first two ints are the current data block size
+		 * and the total data block size. In internode data transfers
+		 * the data transfer size is predetermined, so sometimes we will
+		 * have to send an extra block.
+		 */
 		vector< char > linearData_;
 		static const unsigned int threadQreserve;
 };

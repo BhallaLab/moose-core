@@ -10,23 +10,6 @@
 /// Forward declaration of Qvec.
 class Qvec;
 
-/**
- * This little class keeps track of blocks of data destined for different
- * queues.
- */
-class QueueBlock {
-	public:
-		QueueBlock()
-			: whichQ( 0), startOffset( 0 ), size( 0 )
-		{;}
-
-		QueueBlock( short wq, unsigned int so, unsigned int si )
-			: whichQ( wq), startOffset( so ), size( si )
-		{;}
-		short whichQ;
-		unsigned int startOffset; // Position of data wrt start of Q.
-		unsigned int size; // size in bytes
-};
 
 /**
  * This class manages information going into and out of the async queue.
@@ -183,7 +166,7 @@ class Qinfo
 		 * Read the MPI Q. Similar to readQ, except that the data source
 		 * has arrived from off-node.
 		 */
-		static void readMpiQ( const ProcInfo* proc );
+		static void readMpiQ( const ProcInfo* proc, unsigned int node );
 
 		/**
 		 * Read the MPI Q in contexts where only the message from the
@@ -214,12 +197,6 @@ class Qinfo
 		 * Send contents of specified inQ to all nodes using MPI
 		 */
 		static void sendAllToAll( const ProcInfo* proc );
-
-		/**
-		 * Send contents of root inQ to all nodes using MPI, gather
-		 * their pending return functions.
-		static void sendRootToAll( const ProcInfo* proc );
-		 */
 
 		/**
 		 * Handles the case where the system wants to send a msg to
@@ -254,11 +231,7 @@ class Qinfo
 		 */
 		static void clearQ( const ProcInfo* p );
 
-		/**
-		 * isQempty: returns true if there is nothing waiting in
-		 * any of the queues.
-		static bool isQempty();
-		 */
+		static void doMpiStats( unsigned int bufsize, unsigned int pendingSize );
 
 		/**
 		 * Works through any requests for structural changes to the model.
@@ -301,6 +274,20 @@ class Qinfo
 		 */
 		static vector< Qvec >* inQ_;
 
+		/*
+		 * This handles incoming data from MPI. It is used as a buffer
+		 * for the MPI_Bcast or other calls to dump internode data into.
+		 * Currently the outgoing data is sent each timestep from the inQ.
+		 */
+		static Qvec* mpiRecvQ_;
+
+		/**
+		 * This handles data that has arrived from MPI on the previous
+		 * transfer, and is now stable so it can be read through.
+		 * Equivalent in this role to the inQ_.
+		 */
+		static Qvec* mpiInQ_;
+
 		/**
 		 * These are the actual allocated locations of the vectors
 		 * underlying the inQ and outQ.
@@ -312,6 +299,20 @@ class Qinfo
 		static vector< Qvec > q2_;
 
 		/**
+		 * These are the actual allocated locations of the vectors
+		 * underlying the mpiRecvQ and mpiInQ.
+		 * We only need one Qvec for each, since at any given time one
+		 * node will be sending in data and we'll be processing the
+		 * arrived data from the previous node. Note that we send data
+		 * one node at a time, and if the current node is the source of
+		 * more than one group, it sends only one group at a time.
+		 * Once the data is in, it does not care about originating
+		 * node/group since all threads chew on it anyway.
+		 */
+		static Qvec mpiQ1_;
+		static Qvec mpiQ2_;
+
+		/**
 		 * This contains pointers to Queue entries requesting functions that
 		 * change the model structure. This includes creation, deletion,
 		 * resizing, and movement of Elements and Msgs. These functions
@@ -320,23 +321,6 @@ class Qinfo
 		 * swapQ, and is serial and single-threaded.
 		 */
 		static vector< const char* > structuralQ_;
-
-		/**
-		 * This handles incoming data from MPI. At this point it
-		 * is not meant to be filled locally, but if we move to
-		 * a system of staggered Bcast sends then we may need to
-		 * maintain mpiInQ and mpiOutQ. Currently the outgoing
-		 * data is sent each timestep from the inQ.
-		 */
-		static vector< Qvec > mpiQ_;
-		
-		/**
-		 * This keeps track of which data go into which queue.
-		 * This accompanies each outQ. At the time messages are dumped
-		 * into outQ, the Msgs need to assign suitable queues.
-		 * Each Qblock has start, size, and target queue.
-		 */
-		static vector< vector< QueueBlock > > qBlock_;
 
 		static vector< SimGroup > g_; // Information about grouping.
 };
