@@ -172,7 +172,7 @@ void readBuf(const Qvec& qv, const ProcInfo* proc )
 		return;
 	const char* buf = qv.data();
 
-	unsigned int bufsize = qv.mpiArrivedDataSize();
+	unsigned int bufsize = qv.dataQsize();
 	const char* end = buf + bufsize;
 	unsigned int pendingSize = qv.mpiPendingDataSize();
 	Qinfo::doMpiStats( bufsize, pendingSize ); // Need zone info too.

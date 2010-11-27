@@ -411,6 +411,8 @@ void Clock::rebuild()
 	for( unsigned int i = 0; i < ticks_.size(); ++i ) {
 		addTick( &( ticks_[i] ) ); // This fills in only ticks that are used
 	}
+	if ( tickPtr_.size() == 0 ) // Nothing happening in any of the ticks.
+		return;
 	sort( tickPtr_.begin(), tickPtr_.end() );
 	dt_ = tickPtr_[0].mgr()->getDt();
 }

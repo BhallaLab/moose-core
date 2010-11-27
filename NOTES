@@ -9450,3 +9450,8 @@ buffer size and for the data component of it.
 Now it compiles, but the grouping stuff has put the allocations all in a mess.
 
 ============================================================================
+27 Nov 2010
+Checkin 2391.
+Ground through the unit tests, now all clear again.
+
+============================================================================

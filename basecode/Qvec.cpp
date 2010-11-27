@@ -81,7 +81,8 @@ char* Qvec::writableData()
 unsigned int Qvec::dataQsize() const
 {
 	if ( linearData_.size() >= HeaderSize )
-		return linearData_.size() - HeaderSize;
+		return *reinterpret_cast< const unsigned int* >( &linearData_[0] ) -
+			HeaderSize;
 	return 0;
 }
 

@@ -96,14 +96,18 @@ void* mpiEventLoopForBcast( void* info )
 		// Phase 2, 3. Now we loop around barrier 2 till all nodes have
 		// sent data and the data has been received and processed.
 		// On the process threads the inQ/mpiInQ is busy being executed.
-		for ( unsigned int j = 0; j < p->numNodesInGroup; ++j ) {
+		for ( unsigned int i = 0; i < Qinfo::numSimGroup(); ++i ) {
+			for ( unsigned int j = Qinfo::simGroup( i )->startNode();
+				j < Qinfo::simGroup( i )->endNode(); ++j )
+			{
 #ifdef USE_MPI
-			if ( p->nodeIndexInGroup == j )
-				MPI_Bcast( inQ, QSIZE * sizeof( Tracker ), MPI_CHAR, j, MPI_COMM_WORLD );
-			else 
-				MPI_Bcast( mpiRecvQ, QSIZE * sizeof( Tracker ), MPI_CHAR, j, MPI_COMM_WORLD );
+				if ( p->nodeIndexInGroup == j )
+					MPI_Bcast( inQ, QSIZE * sizeof( Tracker ), MPI_CHAR, j, MPI_COMM_WORLD );
+				else 
+					MPI_Bcast( mpiRecvQ, QSIZE * sizeof( Tracker ), MPI_CHAR, j, MPI_COMM_WORLD );
 #endif
-			p->barrier2->wait(); // This barrier swaps mpiInQ and mpiRecvQ
+				p->barrier2->wait(); // This barrier swaps mpiInQ and mpiRecvQ
+			}
 		}
 
 		// Phase 3: Read and execute the arrived MPI data on all threads 
