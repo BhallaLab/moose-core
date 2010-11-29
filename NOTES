@@ -9478,3 +9478,7 @@ $1 = 0
 (gdb) p HeaderSize
 $2 = 8
 
+============================================================================
+29 Nov 2010
+
+Some more cleanup, got to work on single node again.

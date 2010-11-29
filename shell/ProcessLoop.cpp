@@ -28,7 +28,7 @@ void* eventLoopForBcast( void* info )
 	ProcInfo *p = reinterpret_cast< ProcInfo* >( info );
 	cout << "eventLoop on " << p->nodeIndexInGroup << ":" << p->threadIndexInGroup << endl;
 	Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );
-	unsigned int loopNum = 0;
+	// unsigned int loopNum = 0;
 
 	while( clock->keepLooping() )
 	// for( unsigned int i = 0; i < NLOOP; ++i )
@@ -38,7 +38,7 @@ void* eventLoopForBcast( void* info )
 		clock->processPhase1( p );
 		// This custom barrier also carries out the swap operation 
 		// internally.
-		cout << Shell::myNode() << ":" << p->threadIndexInGroup << ":	phase1 :	" << loopNum << "\n";
+		// cout << Shell::myNode() << ":" << p->threadIndexInGroup << ":	phase1 :	" << loopNum << "\n";
 		p->barrier1->wait(); // Within this func, inQ and outQ are swapped.
 
 		// Phase 2.
@@ -56,19 +56,21 @@ void* eventLoopForBcast( void* info )
 		// If we can permit slower internode data transfer then the #
 		// of bcast calls goes down.
 
-		for ( unsigned int i = 0; i < Qinfo::numSimGroup(); ++i ) {
-			for ( unsigned int j = Qinfo::simGroup( i )->startNode();
-				j < Qinfo::simGroup( i )->endNode(); ++j )
-			{
-				p->barrier2->wait(); // This barrier swaps mpiInQ and mpiRecvQ
-				// This internally checks if we are within the allowed
-				// blocksize for this buffer. If not, it pushes up a call
-				// to the Clock to schedule another cycle to finish of the
-				// data transfer.
-				Qinfo::readMpiQ( p, j ); 
+		if ( Shell::numNodes() > 1 ) {
+			for ( unsigned int i = 0; i < Qinfo::numSimGroup(); ++i ) {
+				for ( unsigned int j = Qinfo::simGroup( i )->startNode();
+					j < Qinfo::simGroup( i )->endNode(); ++j )
+				{
+					p->barrier2->wait(); // This barrier swaps mpiInQ and mpiRecvQ
+					// This internally checks if we are within the allowed
+					// blocksize for this buffer. If not, it pushes up a call
+					// to the Clock to schedule another cycle to finish of the
+					// data transfer.
+					Qinfo::readMpiQ( p, j ); 
+				}
 			}
 		}
-		cout << Shell::myNode() << ":" << p->threadIndexInGroup << ":	phase3 :	" << loopNum++ << "\n";
+		// cout << Shell::myNode() << ":" << p->threadIndexInGroup << ":	phase3 :	" << loopNum++ << "\n";
 
 		// Here we use the stock pthreads barrier, whose performance is
 		// pretty dismal. Worth comparing with the Butenhof barrier. I
@@ -189,7 +191,9 @@ void Shell::launchThreads()
 	attr_ = new pthread_attr_t;
 	pthread_attr_init( attr_ );
 	pthread_attr_setdetachstate( attr_, PTHREAD_CREATE_JOINABLE );
-	unsigned int numThreads = numCores_ + 1; // Add one for the MPI thread.
+
+	// Add one for the MPI thread if we have multiple nodes.
+	unsigned int numThreads = numCores_ + ( numNodes_ > 1 ); 
 
 	// Extra thread on barrier 1 for parser control on node 0 
 	// (the main thread here).
@@ -229,12 +233,11 @@ void Shell::launchThreads()
 		p[i].barrier2 = barrier2_;
 		p[i].barrier3 = barrier3_;
 
-		// These are the compute threads
-		if ( i < numCores_ ) { 
+		if ( i < numCores_ ) { // These are the compute threads
 			int rc = pthread_create( threads_ + i, NULL, eventLoopForBcast, 
 				(void *)&p[i] );
 			assert( rc == 0 );
-		} else if ( i == numCores_ ) { // mpiThread stufff.
+		} else if ( numNodes_ > 1 && i == numCores_ ) { // mpiThread stufff.
 			int rc = pthread_create( 
 				threads_ + i, NULL, mpiEventLoopForBcast, (void *)&p[i] );
 			assert( rc == 0 );
@@ -248,7 +251,8 @@ void Shell::launchThreads()
 
 void Shell::joinThreads()
 {
-	int numThreads = numCores_ + 1; // Add one for the MPI thread.
+	// Add one for the MPI thread if needed.
+	int numThreads = numCores_ + ( numNodes_ > 1 ); 
 	int numBarrier1Threads = numThreads + ( myNode_ == 0 );
 	int ret;
 

@@ -22,7 +22,7 @@ vector< Qvec >* Qinfo::outQ_ = &Qinfo::q2_;
 Qvec Qinfo::mpiQ1_;
 Qvec Qinfo::mpiQ2_;
 Qvec* Qinfo::mpiInQ_ = &mpiQ1_;
-Qvec* Qinfo::mpiRecvQ = &mpiQ2_;
+Qvec* Qinfo::mpiRecvQ_ = &mpiQ2_;
 
 vector< SimGroup > Qinfo::g_;
 vector< const char* > Qinfo::structuralQ_;
@@ -481,6 +481,6 @@ char* Qinfo::mpiRecvQbuf()
 // static func. Typically only called during setup in Shell::setHardware.
 void Qinfo::initMpiQs()
 {
-	mpiQ1.resizeLinearData( BLOCKSIZE );
-	mpiQ2.resizeLinearData( BLOCKSIZE );
+	mpiQ1_.resizeLinearData( BLOCKSIZE );
+	mpiQ2_.resizeLinearData( BLOCKSIZE );
 }
