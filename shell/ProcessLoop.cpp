@@ -21,11 +21,14 @@
 #include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
 
+static const unsigned int BLOCKSIZE = 20000; // duplicate defn, other in Qinfo.cpp
+
 void* eventLoopForBcast( void* info )
 {
 	ProcInfo *p = reinterpret_cast< ProcInfo* >( info );
-	// cout << "eventLoop on " << p->nodeIndexInGroup << ":" << p->threadIndexInGroup << endl;
+	cout << "eventLoop on " << p->nodeIndexInGroup << ":" << p->threadIndexInGroup << endl;
 	Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );
+	unsigned int loopNum = 0;
 
 	while( clock->keepLooping() )
 	// for( unsigned int i = 0; i < NLOOP; ++i )
@@ -35,6 +38,7 @@ void* eventLoopForBcast( void* info )
 		clock->processPhase1( p );
 		// This custom barrier also carries out the swap operation 
 		// internally.
+		cout << Shell::myNode() << ":" << p->threadIndexInGroup << ":	phase1 :	" << loopNum << "\n";
 		p->barrier1->wait(); // Within this func, inQ and outQ are swapped.
 
 		// Phase 2.
@@ -64,6 +68,7 @@ void* eventLoopForBcast( void* info )
 				Qinfo::readMpiQ( p, j ); 
 			}
 		}
+		cout << Shell::myNode() << ":" << p->threadIndexInGroup << ":	phase3 :	" << loopNum++ << "\n";
 
 		// Here we use the stock pthreads barrier, whose performance is
 		// pretty dismal. Worth comparing with the Butenhof barrier. I
@@ -83,11 +88,10 @@ void* eventLoopForBcast( void* info )
 void* mpiEventLoopForBcast( void* info )
 {
 	ProcInfo *p = reinterpret_cast< ProcInfo* >( info );
-	// cout << "mpiEventLoop on " << p->nodeIndexInGroup << ":" << p->threadIndexInGroup << endl;
+	cout << "mpiEventLoop on " << p->nodeIndexInGroup << ":" << p->threadIndexInGroup << endl;
 
 	Clock* clock = reinterpret_cast< Clock* >( Id( 1 ).eref().data() );
 	while( clock->keepLooping() )
-// 	for( unsigned int i = 0; i < NLOOP; ++i )
 	{
 		// Phase 1: do nothing. But we must wait for barrier 0 to clear,
 		// because we need inQ to be settled before broadcasting it.
@@ -97,14 +101,21 @@ void* mpiEventLoopForBcast( void* info )
 		// sent data and the data has been received and processed.
 		// On the process threads the inQ/mpiInQ is busy being executed.
 		for ( unsigned int i = 0; i < Qinfo::numSimGroup(); ++i ) {
+			char temp[BLOCKSIZE]; 
+			// I need to do this because InQ might not have allocated the
+			// whole data transfer size. Later can fine-tune.
+			assert( Qinfo::inQsendSize(i) <= BLOCKSIZE );
+			memcpy( temp, Qinfo::inQ(i), Qinfo::inQsendSize(i) );
+			// memcpy( temp, (*inQ_)[i].writeableData(), (*inQ_)[i].allocatedSize() );
 			for ( unsigned int j = Qinfo::simGroup( i )->startNode();
 				j < Qinfo::simGroup( i )->endNode(); ++j )
 			{
 #ifdef USE_MPI
 				if ( p->nodeIndexInGroup == j )
-					MPI_Bcast( inQ, QSIZE * sizeof( Tracker ), MPI_CHAR, j, MPI_COMM_WORLD );
+					MPI_Bcast( temp, BLOCKSIZE, MPI_CHAR, j, MPI_COMM_WORLD );
 				else 
-					MPI_Bcast( mpiRecvQ, QSIZE * sizeof( Tracker ), MPI_CHAR, j, MPI_COMM_WORLD );
+					MPI_Bcast( Qinfo::mpiRecvQbuf(), BLOCKSIZE, MPI_CHAR, j, MPI_COMM_WORLD );
+					// MPI_Bcast( mpiRecvQ_->writeableData(), BLOCKSIZE, MPI_CHAR, j, MPI_COMM_WORLD );
 #endif
 				p->barrier2->wait(); // This barrier swaps mpiInQ and mpiRecvQ
 			}
@@ -126,7 +137,7 @@ void* mpiEventLoopForBcast( void* info )
 void* shellEventLoop( void* info )
 {
 	ProcInfo *p = reinterpret_cast< ProcInfo* >( info );
-	// cout << "shellEventLoop on " << p->nodeIndexInGroup << ":" << p->threadIndexInGroup << endl;
+	cout << "shellEventLoop on " << p->nodeIndexInGroup << ":" << p->threadIndexInGroup << endl;
 
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );

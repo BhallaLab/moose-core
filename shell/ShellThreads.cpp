@@ -126,6 +126,8 @@ void Shell::setHardware(
 	bool isSingleThreaded, unsigned int numCores, unsigned int numNodes,
 	unsigned int myNode )
 {
+	if ( numNodes > 1 )
+		Qinfo::initMpiQs();
 	isSingleThreaded_ = isSingleThreaded;
 	if ( !isSingleThreaded ) {
 		// Create the parser and the gui threads.
@@ -196,6 +198,11 @@ pthread_cond_t* Shell::parserBlockCond() const
 bool Shell::inBlockingParserCall() const
 {
 	return isBlockedOnParser_;
+}
+
+bool Shell::isSingleThreaded() const
+{
+	return isSingleThreaded_;
 }
 
 

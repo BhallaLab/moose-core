@@ -21,8 +21,8 @@ vector< Qvec >* Qinfo::outQ_ = &Qinfo::q2_;
 
 Qvec Qinfo::mpiQ1_;
 Qvec Qinfo::mpiQ2_;
-Qvec* Qinfo::mpiInQ_;
-Qvec* Qinfo::mpiRecvQ_;
+Qvec* Qinfo::mpiInQ_ = &mpiQ1_;
+Qvec* Qinfo::mpiRecvQ = &mpiQ2_;
 
 vector< SimGroup > Qinfo::g_;
 vector< const char* > Qinfo::structuralQ_;
@@ -94,8 +94,10 @@ unsigned int Qinfo::addSimGroup( unsigned short numThreads,
 	SimGroup sg( 0, numNodes, DefaultMpiBufSize );
 	g_.push_back( sg );
 
-	q1_.push_back( Qvec( numThreads ) );
-	q2_.push_back( Qvec( numThreads ) );
+	Qvec qv( numThreads );
+
+	q1_.push_back( qv );
+	q2_.push_back( qv );
 
 	return g_.size() - 1;
 }
@@ -305,6 +307,7 @@ void Qinfo::swapMpiQ()
  */
 void Qinfo::sendAllToAll( const ProcInfo* proc )
 {
+/*
 	if ( proc->numNodesInGroup == 1 )
 		return;
 	// cout << proc->nodeIndexInGroup << ", " << proc->threadId << ": Qinfo::sendAllToAll\n";
@@ -324,6 +327,7 @@ void Qinfo::sendAllToAll( const ProcInfo* proc )
 		MPI_COMM_WORLD );
 	// cout << "\n\nGathered stuff via mpi, on node = " << proc->nodeIndexInGroup << ", size = " << *reinterpret_cast< unsigned int* >( recvbuf ) << "\n";
 #endif
+*/
 }
 
 void innerReportQ( const Qvec& qv, const string& name )
@@ -454,4 +458,29 @@ void Qinfo::clearQ( const ProcInfo* p )
 {
 	swapQ();
 	readQ( p );
+}
+
+// static func
+const char* Qinfo::inQ( unsigned int group )
+{
+	return 0;
+}
+
+// static func
+unsigned int Qinfo::inQsendSize( unsigned int group )
+{
+	return 0;
+}
+
+// static func
+char* Qinfo::mpiRecvQbuf()
+{
+	return mpiRecvQ_->writableData();
+}
+
+// static func. Typically only called during setup in Shell::setHardware.
+void Qinfo::initMpiQs()
+{
+	mpiQ1.resizeLinearData( BLOCKSIZE );
+	mpiQ2.resizeLinearData( BLOCKSIZE );
 }

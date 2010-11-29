@@ -46,7 +46,7 @@ class SimGroup {
 			return startNode_;
 		}
 		unsigned short endNode() const {
-			return startNode_;
+			return endNode_;
 		}
 
 		unsigned int bufSize() const {

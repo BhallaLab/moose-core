@@ -252,7 +252,22 @@ class Shell
 
 		void setRunning( bool value );
 
+		/**
+	 	 * True when the parser is in a call which is being blocked becaus
+		 * it requires the event loop to complete some actions.
+		 */
 		bool inBlockingParserCall() const;
+
+		/**
+		 * True in single-threaded mode. This is a special mode of
+		 * the system in which it does not start up the event loop
+		 * at all, and the whole thing operates on one thread, which
+		 * is ultimately under the control of the parser.
+		 * Note that this is distinct from running on one core. It is
+		 * possible, and even recommended, to run in multithread mode
+		 * even when the system has just one core to run it on.
+		 */
+		bool isSingleThreaded() const;
 
 		/**
 		 * This function sets up the threading for the entire system.

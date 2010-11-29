@@ -9452,6 +9452,29 @@ Now it compiles, but the grouping stuff has put the allocations all in a mess.
 ============================================================================
 27 Nov 2010
 Checkin 2391.
-Ground through the unit tests, now all clear again.
+Ground through the unit tests, now all clear again. Checkin 2392.
+
+Ground through again, this time with an MPI build. The code now
+clears the single node unit tests but not with 2 nodes.
 
 ============================================================================
+28 Nov 2010.
+Run into a difficult bug with threading. When I have a single
+core defined, it croaks randomly. All symptoms point to a threading
+error. It is OK with > 1 core. Also fails in a similar manner in
+multinode mode.
+
+After much struggle, finally tracked it down with the help of valgrind.
+Turns out that I was confusing 1 core with SingleThread mode. With this
+fixed, the system now works correctly with 1 core as well. However, the
+single-thread mode (moose -s ) hangs in testShellAddMsg, when it calls the
+Reinit function.
+
+Some more fixes later, this is the situation:
+0x00000000004cd7c7 in Qvec::isBigBlock (this=0x8a09e0) at Qvec.cpp:124
+124             assert( linearData_.size() > HeaderSize );
+(gdb) p linearData_.size()
+$1 = 0
+(gdb) p HeaderSize
+$2 = 8
+

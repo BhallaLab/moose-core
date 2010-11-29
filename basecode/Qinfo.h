@@ -233,6 +233,11 @@ class Qinfo
 
 		static void doMpiStats( unsigned int bufsize, unsigned int pendingSize );
 
+		static const char* inQ( unsigned int group );
+		static unsigned int inQsendSize( unsigned int group );
+
+		static char* mpiRecvQbuf();
+
 		/**
 		 * Works through any requests for structural changes to the model.
 		 * This includes creation, deletion,
@@ -242,6 +247,12 @@ class Qinfo
 		 * swapQ, and is serial and single-threaded.
 		 */
 		static void clearStructuralQ();
+
+		/**
+		 * Does an initial allocation of space for data transfer in 
+		 * the MPIQs.
+		 */
+		static void initMpiQs();
 
 	private:
 		bool useSendTo_;	/// true if msg is to a single target DataId.

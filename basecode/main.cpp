@@ -202,6 +202,7 @@ void nonMpiTests( Shell* s )
 	if ( Shell::myNode() == 0 ) {
 		unsigned int numNodes = s->numNodes();
 		unsigned int numCores = s->numCores();
+		bool isSingleThreaded = s->isSingleThreaded();
 		if ( numCores > 0 )
 		// s->setHardware( isSingleThreaded, numCores, numNodes, myNode );
 		s->setHardware( 1, 1, 1, 0 );
@@ -211,7 +212,7 @@ void nonMpiTests( Shell* s )
 		testScheduling();
 		testBuiltins();
 		testKinetics();
-		s->setHardware( (numCores == 1), numCores, numNodes, 0 );
+		s->setHardware( isSingleThreaded, numCores, numNodes, 0 );
 	}
 #endif
 }
@@ -249,7 +250,8 @@ int main( int argc, char** argv )
 	Shell* s = reinterpret_cast< Shell* >( shelle->dataHandler()->data( 0 ) );
 	nonMpiTests( s ); // These tests do not need the process loop.
 
-	s->launchThreads(); // Here we set off the thread/MPI process loop.
+	if ( !s->isSingleThreaded() )
+		s->launchThreads(); // Here we set off the thread/MPI process loop.
 	if ( s->myNode() == 0 ) {
 #ifdef DO_UNIT_TESTS
 		mpiTests();
@@ -261,13 +263,14 @@ int main( int argc, char** argv )
 		// the system quits, in order to estimate timing.
 		if ( benchmarkTests( argc, argv ) ) 
 			s->doQuit();
+		s->launchParser(); // Here we set off a little event loop to poll user input. It deals with the doQuit call too.
 	}
 	
-	s->doQuit();
-//	s->launchParser(); // Here we set off a little event loop to poll user input. It deals with the doQuit call too.
+//	s->doQuit();
 	// s->doQuit();
 	// Somehow we need to return control to our parser. Then we clean up
-	s->joinThreads();
+	if ( !s->isSingleThreaded() )
+		s->joinThreads();
 
 	shellId.destroy();
 	Id(1).destroy();

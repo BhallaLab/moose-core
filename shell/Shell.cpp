@@ -312,6 +312,7 @@ static const Cinfo* shellCinfo = Shell::initCinfo();
 Shell::Shell()
 	: name_( "" ),
 		isSingleThreaded_( 0 ),
+		isBlockedOnParser_( 0 ),
 		numAcks_( 0 ),
 		acked_( 1, 0 ),
 		barrier1_( 0 ),
