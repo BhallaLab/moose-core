@@ -231,12 +231,34 @@ class Qinfo
 		 */
 		static void clearQ( const ProcInfo* p );
 
-		static void doMpiStats( unsigned int bufsize, unsigned int pendingSize );
+		/**
+		 * Dummy function, in due course will monitor data transfer
+		 * stats and figure out the best data transfer size for each
+		 * group as it goes along.
+		 */
+		static void doMpiStats( unsigned int bufsize, const ProcInfo* p );
 
-		static const char* inQ( unsigned int group );
-		static unsigned int inQsendSize( unsigned int group );
+		/**
+		 * Returns a pointer to the data buffer in the specified inQ
+		 * Cannot be a const because the MPI call expects a variable.
+		 */
+		static char* inQ( unsigned int group );
 
+		/**
+		 * Looks up size of data buffer in specifid inQ
+		 */
+		static unsigned int inQdataSize( unsigned int group );
+
+		/**
+		 * Returns a pointer to the block of memory on the mpiRecvQ.
+		 */
 		static char* mpiRecvQbuf();
+
+		/**
+		 * Expands the memory allocation on mpiRecvQ to handle outsize
+		 * data packets
+		 */
+		static void expandMpiRecvQbuf( unsigned int size );
 
 		/**
 		 * Works through any requests for structural changes to the model.

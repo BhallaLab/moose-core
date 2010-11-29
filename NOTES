@@ -9486,5 +9486,13 @@ Checkin 2394.
 It still doesn't clear all unit tests in single-thread mode. Defer.
 
 Now working on cleaning up stuff so valgrind is happy. Mostly minor
-stuff in cleaning up the pthread variables.
+stuff in cleaning up the pthread variables. Checkin 2395.
+
+With this sorted, back to the MPI issues. It promptly crashes.
+
+Some more work on MPI. Added in fix for big data packets. Now it doesn't 
+crash, just hangs. For reasons I don't understand, it keeps going around the
+event loop even when one of the nodes is halted using GDB. Instead it should
+block at the MPI_Bcast call.
+
 ============================================================================

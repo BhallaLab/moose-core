@@ -103,20 +103,16 @@ class Qvec
 		 bool isBigBlock() const;
 
 		 /**
-		  * Reads header of linearData_ to report how much data
-		  * actually came. This is the total size in bytes 
+		  * Reads header of linearData_ to report how much data has come.
+		  * This is the total size in bytes 
 		  * of the header block plus the data block,
 		  */
 		 unsigned int mpiArrivedDataSize() const;
 
 		 /**
-		  * Reads header of linearData_ to report how much data
-		  * is still due to come. Should normally be zero, otherwise
-		  * a special second cycle of data transfer is needed.
-		  * This is the total size of the next data block, including its
-		  * header.
+		  * Assigns values to mpiArrivedDataSize
 		  */
-		 unsigned int mpiPendingDataSize() const;
+		 void setMpiDataSize( unsigned int arrived );
 
 		/**
 		 * test function for Qvec

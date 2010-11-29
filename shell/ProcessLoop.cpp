@@ -101,21 +101,34 @@ void* mpiEventLoopForBcast( void* info )
 		// sent data and the data has been received and processed.
 		// On the process threads the inQ/mpiInQ is busy being executed.
 		for ( unsigned int i = 0; i < Qinfo::numSimGroup(); ++i ) {
-			char temp[BLOCKSIZE]; 
-			// I need to do this because InQ might not have allocated the
-			// whole data transfer size. Later can fine-tune.
-			assert( Qinfo::inQsendSize(i) <= BLOCKSIZE );
-			memcpy( temp, Qinfo::inQ(i), Qinfo::inQsendSize(i) );
-			// memcpy( temp, (*inQ_)[i].writeableData(), (*inQ_)[i].allocatedSize() );
 			for ( unsigned int j = Qinfo::simGroup( i )->startNode();
 				j < Qinfo::simGroup( i )->endNode(); ++j )
 			{
 #ifdef USE_MPI
-				if ( p->nodeIndexInGroup == j )
-					MPI_Bcast( temp, BLOCKSIZE, MPI_CHAR, j, MPI_COMM_WORLD );
-				else 
-					MPI_Bcast( Qinfo::mpiRecvQbuf(), BLOCKSIZE, MPI_CHAR, j, MPI_COMM_WORLD );
-					// MPI_Bcast( mpiRecvQ_->writeableData(), BLOCKSIZE, MPI_CHAR, j, MPI_COMM_WORLD );
+				cout << Shell::myNode() << ":" << p->nodeIndexInGroup <<
+					"	: mpiEventLoop, (numSimGroup, tgtNode) = (" << 
+						i << ", " << j << ")\n";
+				if ( p->nodeIndexInGroup == j ) {
+					MPI_Bcast( Qinfo::inQ( i ), BLOCKSIZE, MPI_CHAR, j, 
+						MPI_COMM_WORLD );
+					unsigned int actualSize = 
+						*reinterpret_cast< unsigned int* >( Qinfo::inQ(i) );
+					if ( actualSize > BLOCKSIZE )
+						MPI_Bcast( Qinfo::inQ( i ), actualSize, MPI_CHAR, j,
+							MPI_COMM_WORLD );
+				} else {
+					MPI_Bcast( Qinfo::mpiRecvQbuf(), BLOCKSIZE, MPI_CHAR, j,
+						MPI_COMM_WORLD );
+					unsigned int actualSize = 
+						*reinterpret_cast< unsigned int* >(
+						Qinfo::mpiRecvQbuf() );
+					if ( actualSize > BLOCKSIZE ) {
+						Qinfo::expandMpiRecvQbuf( actualSize );
+						MPI_Bcast( Qinfo::mpiRecvQbuf(), actualSize, 
+							MPI_CHAR, j, MPI_COMM_WORLD );
+					}
+				}
+
 #endif
 				p->barrier2->wait(); // This barrier swaps mpiInQ and mpiRecvQ
 			}

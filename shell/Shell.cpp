@@ -671,9 +671,8 @@ void Shell::handleCreate( const Eref& e, const Qinfo* q,
 {
 	if ( q->addToStructuralQ() )
 		return;
-	// cout << myNode_ << ": In Shell::handleCreate for element " << name << " id " << newElm << ", dim = " << dimensions[0] << endl;
 	innerCreate( type, parent, newElm, name, dimensions );
-	// cout << myNode_ << ": Shell::handleCreate inner Create done for element " << name << " id " << newElm << endl;
+	cout << myNode_ << ": Shell::handleCreate inner Create done for element " << name << " id " << newElm << endl;
 //	if ( myNode_ != 0 )
 	ack.send( e, &p_, Shell::myNode(), OkStatus );
 	// cout << myNode_ << ": Shell::handleCreate ack sent" << endl;

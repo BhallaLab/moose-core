@@ -170,14 +170,14 @@ void hackForSendTo( const Qinfo* q, const char* buf )
 
 void readBuf(const Qvec& qv, const ProcInfo* proc )
 {
-	if ( qv.allocatedSize() < Qvec::HeaderSize )
-		return;
+	assert( qv.allocatedSize() >= Qvec::HeaderSize &&
+		qv.mpiArrivedDataSize() >= Qvec::HeaderSize );
 	const char* buf = qv.data();
 
-	unsigned int bufsize = qv.dataQsize();
+	// unsigned int bufsize = qv.dataQsize();
+	unsigned int bufsize = qv.mpiArrivedDataSize() - Qvec::HeaderSize;
 	const char* end = buf + bufsize;
-	unsigned int pendingSize = qv.mpiPendingDataSize();
-	Qinfo::doMpiStats( bufsize, pendingSize ); // Need zone info too.
+	Qinfo::doMpiStats( bufsize, proc ); // Need zone info too.
 
 	// If on current node, then check bufsize
 	// assert( srcNode != Shell::myNode() || bufsize == qv.dataQsize() );
@@ -206,7 +206,7 @@ void readBuf(const Qvec& qv, const ProcInfo* proc )
  * Will want to analyze data traffic and periodically tweak buffer
  * sizes
  */
-void Qinfo::doMpiStats( unsigned int bufsize, unsigned int pendingSize )
+void Qinfo::doMpiStats( unsigned int bufsize, const ProcInfo* proc )
 {
 }
 
@@ -235,6 +235,7 @@ void Qinfo::readMpiQ( const ProcInfo* proc, unsigned int node )
 {
 	assert( proc );
 	// assert( proc->groupId < mpiQ_.size() );
+	// cout << Shell::myNode() << ":" << proc->threadIndexInGroup << "	mpi data transf = " << mpiInQ_->mpiArrivedDataSize() << endl;
 	readBuf( *mpiInQ_, proc );
 
 	if ( proc->nodeIndexInGroup == 0 && mpiInQ_->isBigBlock() ) 
@@ -290,7 +291,8 @@ void Qinfo::swapMpiQ()
 		mpiInQ_ = &mpiQ2_;
 		mpiRecvQ_ = &mpiQ1_;
 	}
-	mpiRecvQ_->resizeLinearData( Qinfo::simGroup( 1 )->bufSize() );
+	// mpiRecvQ_->resizeLinearData( Qinfo::simGroup( 1 )->bufSize() );
+	mpiRecvQ_->resizeLinearData( BLOCKSIZE );
 }
 
 /**
@@ -461,15 +463,17 @@ void Qinfo::clearQ( const ProcInfo* p )
 }
 
 // static func
-const char* Qinfo::inQ( unsigned int group )
+char* Qinfo::inQ( unsigned int group )
 {
-	return 0;
+	assert( group < inQ_->size() );
+	return (*inQ_)[ group ].writableData();
 }
 
 // static func
-unsigned int Qinfo::inQsendSize( unsigned int group )
+unsigned int Qinfo::inQdataSize( unsigned int group )
 {
-	return 0;
+	assert( group < inQ_->size() );
+	return (*inQ_)[ group ].mpiArrivedDataSize();
 }
 
 // static func
@@ -478,9 +482,17 @@ char* Qinfo::mpiRecvQbuf()
 	return mpiRecvQ_->writableData();
 }
 
+// static func
+void Qinfo::expandMpiRecvQbuf( unsigned int size )
+{
+	mpiRecvQ_->resizeLinearData( size );
+}
+
 // static func. Typically only called during setup in Shell::setHardware.
 void Qinfo::initMpiQs()
 {
 	mpiQ1_.resizeLinearData( BLOCKSIZE );
+	mpiQ1_.setMpiDataSize( 0 );
 	mpiQ2_.resizeLinearData( BLOCKSIZE );
+	mpiQ2_.setMpiDataSize( 0 );
 }
