@@ -9493,6 +9493,20 @@ With this sorted, back to the MPI issues. It promptly crashes.
 Some more work on MPI. Added in fix for big data packets. Now it doesn't 
 crash, just hangs. For reasons I don't understand, it keeps going around the
 event loop even when one of the nodes is halted using GDB. Instead it should
-block at the MPI_Bcast call.
+block at the MPI_Bcast call. Revisited this, it now seems to block
+properly in the event loop. Checkin 2396.
+Data comes to other node, but it doesn't get to the shell 
+handleCreate function as it should.
+
+Found it does get there, but it never clears the Qinfo::addToStructuralQ
+command.
+I think the issue is this: clearStructuralQ is called in barrier 1. The MPI 
+Qs are all set up _and cleared_ in phase 2/3, in a little loop through 
+different SimGroups. So, by the time barrier1 comes around again, 
+the original MPI queue it pointed to will likely have been overwritten by
+some other group. Note that this won't happen for the local node queue.
+I need to make separate storage for the structural Q.
+Did it. That seems to fix a lot of things. Now the code gets much further,
+including lots of multinode stuff, before crashing.
 
 ============================================================================

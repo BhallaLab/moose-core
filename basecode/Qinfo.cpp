@@ -25,7 +25,7 @@ Qvec* Qinfo::mpiInQ_ = &mpiQ1_;
 Qvec* Qinfo::mpiRecvQ_ = &mpiQ2_;
 
 vector< SimGroup > Qinfo::g_;
-vector< const char* > Qinfo::structuralQ_;
+vector< char > Qinfo::structuralQ_;
 
 void hackForSendTo( const Qinfo* q, const char* buf );
 static const unsigned int BLOCKSIZE = 20000;
@@ -128,6 +128,27 @@ void Qinfo::clearSimGroups()
 void Qinfo::clearStructuralQ()
 {
 	isSafeForStructuralOps_ = 1;
+	const char* begin = &( structuralQ_[0] );
+	const char* end = begin + structuralQ_.size();
+	const char* buf = begin;
+	while ( buf < end ) {
+		const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
+		const Msg *m = Msg::getMsg( q->mid() );
+		if ( m ) { // may be 0 if model restructured before msg delivery.
+			Element* tgt;
+			if ( q->isForward() )
+				tgt = m->e2();
+			else 
+				tgt = m->e1();
+			assert( tgt == Id()() ); // The tgt should be the shell
+			const OpFunc* func = tgt->cinfo()->getOpFunc( q->fid() );
+			func->op( Eref( tgt, 0 ), buf );
+		}
+		buf += sizeof( Qinfo ) + q->size();
+	}
+
+/*
+
 	for ( vector< const char* >::iterator i = structuralQ_.begin(); 
 		i != structuralQ_.end(); ++i ) {
 		const char* buf = *i;
@@ -144,6 +165,7 @@ void Qinfo::clearStructuralQ()
 			func->op( Eref( tgt, 0 ), buf );
 		}
 	}
+*/
 	isSafeForStructuralOps_ = 0;
 	structuralQ_.resize( 0 );
 }
@@ -235,7 +257,9 @@ void Qinfo::readMpiQ( const ProcInfo* proc, unsigned int node )
 {
 	assert( proc );
 	// assert( proc->groupId < mpiQ_.size() );
-	// cout << Shell::myNode() << ":" << proc->threadIndexInGroup << "	mpi data transf = " << mpiInQ_->mpiArrivedDataSize() << endl;
+	if ( mpiInQ_->mpiArrivedDataSize() > Qvec::HeaderSize )
+		cout << Shell::myNode() << ":" << proc->threadIndexInGroup << "	mpi data transf = " << mpiInQ_->mpiArrivedDataSize() << endl;
+
 	readBuf( *mpiInQ_, proc );
 
 	if ( proc->nodeIndexInGroup == 0 && mpiInQ_->isBigBlock() ) 
@@ -426,7 +450,10 @@ bool Qinfo::addToStructuralQ() const
 {
 	if ( isSafeForStructuralOps_ )
 		return 0;
-	structuralQ_.push_back( reinterpret_cast< const char* >( this ) );
+	const char* begin = reinterpret_cast< const char* >( this );
+	const char* end = begin + sizeof( Qinfo ) + size_;
+	structuralQ_.insert( structuralQ_.end(), begin, end );
+	// structuralQ_.push_back( reinterpret_cast< const char* >( this ) );
 	return 1;
 }
 

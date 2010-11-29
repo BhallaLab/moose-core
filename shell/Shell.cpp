@@ -322,7 +322,8 @@ Shell::Shell()
 		runtime_( 0.0 ),
 		cwe_( Id() )
 {
-	;
+	cout << myNode() << ": fids\n";
+	shellCinfo->reportFids();
 }
 
 void Shell::setShellElement( Element* shelle )
@@ -422,7 +423,13 @@ void Shell::connectMasterMsg()
 			cout << "Error: failed in Shell::connectMasterMsg()\n";
 			delete m; // Nasty, but rare.
 		}
+	} else {
+		cout << Shell::myNode() << ": Error: failed in Shell::connectMasterMsg()\n";
+		exit( 0 );
 	}
+	cout << Shell::myNode() << ": Shell::connectMasterMsg gave id: " <<
+		m->mid() << "\n";
+
 	Id clockId( 1 );
 	bool ret = innerAddMsg( "Single", FullId( shellId, 0 ), "clockControl", 
 		FullId( clockId, 0 ), "clockControl" );
@@ -669,10 +676,10 @@ void Shell::handleCreate( const Eref& e, const Qinfo* q,
 	string type, Id parent, Id newElm, string name,
 	vector< unsigned int > dimensions )
 {
+	cout << myNode_ << ": Shell::handleCreate inner Create done for element " << name << " id " << newElm << endl;
 	if ( q->addToStructuralQ() )
 		return;
 	innerCreate( type, parent, newElm, name, dimensions );
-	cout << myNode_ << ": Shell::handleCreate inner Create done for element " << name << " id " << newElm << endl;
 //	if ( myNode_ != 0 )
 	ack.send( e, &p_, Shell::myNode(), OkStatus );
 	// cout << myNode_ << ": Shell::handleCreate ack sent" << endl;

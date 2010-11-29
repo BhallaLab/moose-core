@@ -353,7 +353,7 @@ class Qinfo
 		 * computed, and no iterators are pending. Currently happens during
 		 * swapQ, and is serial and single-threaded.
 		 */
-		static vector< const char* > structuralQ_;
+		static vector< char > structuralQ_;
 
 		static vector< SimGroup > g_; // Information about grouping.
 };

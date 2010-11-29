@@ -61,6 +61,7 @@ void* eventLoopForBcast( void* info )
 				for ( unsigned int j = Qinfo::simGroup( i )->startNode();
 					j < Qinfo::simGroup( i )->endNode(); ++j )
 				{
+					// cout << Shell::myNode() << ":" << p->nodeIndexInGroup << "	: eventLoop, (numSimGroup, tgtNode) = (" << i << ", " << j << ")\n";
 					p->barrier2->wait(); // This barrier swaps mpiInQ and mpiRecvQ
 					// This internally checks if we are within the allowed
 					// blocksize for this buffer. If not, it pushes up a call
@@ -105,9 +106,7 @@ void* mpiEventLoopForBcast( void* info )
 				j < Qinfo::simGroup( i )->endNode(); ++j )
 			{
 #ifdef USE_MPI
-				cout << Shell::myNode() << ":" << p->nodeIndexInGroup <<
-					"	: mpiEventLoop, (numSimGroup, tgtNode) = (" << 
-						i << ", " << j << ")\n";
+				// cout << Shell::myNode() << ":" << p->nodeIndexInGroup << "	: mpiEventLoop, (numSimGroup, tgtNode) = (" << i << ", " << j << ")\n";
 				if ( p->nodeIndexInGroup == j ) {
 					MPI_Bcast( Qinfo::inQ( i ), BLOCKSIZE, MPI_CHAR, j, 
 						MPI_COMM_WORLD );
@@ -170,6 +169,7 @@ void* shellEventLoop( void* info )
 				pthread_cond_signal( shell->parserBlockCond() );
 			}
 		pthread_mutex_unlock( shell->parserMutex() );
+		// cout << Shell::myNode() << ":" << p->nodeIndexInGroup << "	: shellEventLoop\n";
 
 		// Phase 2. Here we simply ignore barrier 2 as it
 		// does not matter for the Shell. This takes a little
