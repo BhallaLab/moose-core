@@ -72,10 +72,8 @@ void* eventLoopForBcast( void* info )
 		}
 		// cout << Shell::myNode() << ":" << p->threadIndexInGroup << ":	phase3 :	" << loopNum++ << "\n";
 
-		// Here we use the stock pthreads barrier, whose performance is
-		// pretty dismal. Worth comparing with the Butenhof barrier. I
-		// earlier wrote a nasty barrier that does a busy-loop but was
-		// _much_ faster.
+		// This barrier handles the state transitions for clock scheduling
+		// as its internal protected function.
 		p->barrier3->wait();
 		// rc = pthread_barrier_wait( p->barrier3 );
 		// assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
@@ -267,7 +265,14 @@ void Shell::joinThreads()
 	pthread_attr_destroy( attr_ );
 	delete attr_;
 	ret = pthread_mutex_destroy( parserMutex_ );
+	delete parserMutex_;
 	ret = pthread_cond_destroy( parserBlockCond_ );
+	delete parserBlockCond_;
+
+	delete barrier1_;
+	delete barrier2_;
+	delete barrier3_;
+
 	assert( ret == 0 );
 }
 

@@ -9482,3 +9482,9 @@ $2 = 8
 29 Nov 2010
 
 Some more cleanup, got to work on single node again.
+Checkin 2394.
+It still doesn't clear all unit tests in single-thread mode. Defer.
+
+Now working on cleaning up stuff so valgrind is happy. Mostly minor
+stuff in cleaning up the pthread variables.
+============================================================================
