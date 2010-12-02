@@ -64,6 +64,7 @@ void OneToOneMsg::exec( const char* arg, const ProcInfo* p ) const
 {
 	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
 	unsigned int src = q->srcIndex().data(); // will also be dest index.
+	/*
 	cout << Shell::myNode() << ":" << p->threadIndexInGroup << 
 		"	: OneToOneMsg::exec with " << q->size() << " bytes, from " <<
 		e1_->getName() << "[" << q->srcIndex() << "]" <<
@@ -73,6 +74,7 @@ void OneToOneMsg::exec( const char* arg, const ProcInfo* p ) const
 		e2_->dataHandler()->isDataHere( src ) << "), execThread=(" <<
 		p->execThread( e1_->id(), src ) << "," <<
 		p->execThread( e2_->id(), src ) << "), fid = " << q->fid() << "\n";
+		*/
 	if ( q->isForward() ) {
 		if ( e2_->dataHandler()->isDataHere( src ) &&
 			p->execThread( e2_->id(), src ) )

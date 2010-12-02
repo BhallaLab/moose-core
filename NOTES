@@ -9507,6 +9507,48 @@ the original MPI queue it pointed to will likely have been overwritten by
 some other group. Note that this won't happen for the local node queue.
 I need to make separate storage for the structural Q.
 Did it. That seems to fix a lot of things. Now the code gets much further,
-including lots of multinode stuff, before crashing.
+including lots of multinode stuff, before crashing. Checkin 2397.
 
 ============================================================================
+30 Nov 2010
+Tracking down problem on multinode. It is happening in a get call to find the
+parent of a newly created object, in testShell::testMove.
+Two bugs for starters:
+- Both nodes report isDataHere is true. If the object is a ZeroDimHandler,
+	only node 0 should report this.
+	Seems that the object is a ZeroDimGlobalHandler on node 1, and
+	a ZeroDimHandler on node 0. Odd.
+- Node 1 parent not assigned, reports Id() instead.
+
+Looking at Shell::innerCreate. Oddly, the 'adopt' function does the right thing
+on both nodes and creates the appropriate one-to-all message at a low-level. 
+I need to check how the 'parent' function works.
+	Looking at the 'parent' function. Seems reasonable. Need to follow up
+	with the message tracing part in the debugger.
+
+Looking at Element::new Element. Oddly, this seems to set up both with the
+isGlobal flag at zero and the correct ZeroDimDataHandler.
+
+============================================================================
+1 Dec 2010
+One clue: On node 1, the Element that gets passed to Neutral::getParent is
+not the same as the one created. Instead the Element points to the Shell.
+So something got lost on the way here.
+
+Examined the actual calls arriving in Shell::handleGet and recvGet. Turns out
+that two calls come in to recvGet on node 0: one with the correct data,
+and the other with a null Id. RecvGet declines a call on node 1 as well.
+Also extra calls get to handleAck on both node 0 and 1.
+
+I wonder if the issue is that both groups are sending out data at this point
+to all nodes. We need to make it so that for any target node, only one 
+group at a time is allowed to transmit data.
+
+One issue: Looks like Shell::handleGet is issuing an extra ack in cases where
+the data is not present. This happens because the AssignmentMsg::exec
+is already returning an ack in all cases after the op which in this case
+is the get or set function on the tgt Element.
+
+Removed the extra ack.send in handleGet. Now the system hangs earlier.
+This is in testShell.cpp:91, testTreeTraversal. Again, this is 
+a 'get' function.

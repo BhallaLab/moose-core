@@ -8,9 +8,11 @@
 **********************************************************************/
 
 #include "header.h"
+/*
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
+*/
 
 // Declaration of static fields
 bool Qinfo::isSafeForStructuralOps_ = 0;
@@ -258,7 +260,7 @@ void Qinfo::readMpiQ( const ProcInfo* proc, unsigned int node )
 	assert( proc );
 	// assert( proc->groupId < mpiQ_.size() );
 	if ( mpiInQ_->mpiArrivedDataSize() > Qvec::HeaderSize )
-		cout << Shell::myNode() << ":" << proc->threadIndexInGroup << "	mpi data transf = " << mpiInQ_->mpiArrivedDataSize() << endl;
+		// cout << Shell::myNode() << ":" << proc->threadIndexInGroup << "	mpi data transf = " << mpiInQ_->mpiArrivedDataSize() << endl;
 
 	readBuf( *mpiInQ_, proc );
 

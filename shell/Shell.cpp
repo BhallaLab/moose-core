@@ -676,7 +676,7 @@ void Shell::handleCreate( const Eref& e, const Qinfo* q,
 	string type, Id parent, Id newElm, string name,
 	vector< unsigned int > dimensions )
 {
-	cout << myNode_ << ": Shell::handleCreate inner Create done for element " << name << " id " << newElm << endl;
+	// cout << myNode_ << ": Shell::handleCreate inner Create done for element " << name << " id " << newElm << endl;
 	if ( q->addToStructuralQ() )
 		return;
 	innerCreate( type, parent, newElm, name, dimensions );
