@@ -48,16 +48,17 @@ void AssignmentMsg::exec( const char* arg, const ProcInfo *p ) const
 {
 	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
 
-	if ( q->isForward() && e2_->dataHandler()->isDataHere( i2_ ) &&
-		p->execThread( e2_->id(), i2_.data() ) ) {
-		const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
-		f->op( Eref( e2_, i2_ ), arg );
-
-		// Would like to only send ack back if it is a 'set' function.
-		// The trouble with doing this in the 'get' function is that it
-		// gets to the Shell before the various relay messages do.
-		// maybe bypass the relays too?
-		sendAckBack( p, q->mid(), i2_ );
+	if ( q->isForward() ) {
+		if ( e2_->dataHandler()->isDataHere( i2_ ) &&
+			p->execThread( e2_->id(), i2_.data() ) )
+		{
+			const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
+			f->op( Eref( e2_, i2_ ), arg );
+		}
+		// Whether or not this node or thread handled it, we do need to
+		// send back an ack from the node. So do it on thread 0.
+		if ( p->threadIndexInGroup == 0 )
+			sendAckBack( p, q->mid(), i2_ );
 		return;
 	} 
 

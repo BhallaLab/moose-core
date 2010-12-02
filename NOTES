@@ -9552,3 +9552,27 @@ is the get or set function on the tgt Element.
 Removed the extra ack.send in handleGet. Now the system hangs earlier.
 This is in testShell.cpp:91, testTreeTraversal. Again, this is 
 a 'get' function.
+============================================================================
+2 Dec 2010
+After much checking, turns out that the ack in handleGet was OK. Now it
+hangs in the original place, the testMove() function, in the same way,
+with an (0,0) id returned instead of the actual object parent.
+Checkin 2398.
+OK, I think I've tracked it down. The problem comes up because the
+lowLevelGet.send call goes to all nodes. It should really only be handled
+on the local node. Similar issue will happen for set.
+
+One solution, which I did earlier, is to make zone0 exclusively for node-local
+messages. This leaves the question of how to send parser calls to other
+threads.
+Another option is to have the local node set/get call (innerSet and
+handleGet respectively) only set up the AssignmentMsg, and not do the send. The
+send call is the job of node 0 only. This makes sense specially when
+we use vector assignment.
+
+I think this works. I've now cleared the unit test hurdle that had me stuck
+for a long time, and it now croaks in testShellSetGet.
+Very odd, it actually clears 50 of the assignments... aha, here we have
+node decomposition issues.
+
+============================================================================

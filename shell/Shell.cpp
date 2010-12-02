@@ -940,28 +940,32 @@ void Shell::innerSetVec( const Eref& er, FuncId fid, const PrepackedBuffer& arg 
 	shelle_->clearBinding ( lowLevelGet.getBindIndex() );
 	Msg* m = new AssignVecMsg( Eref( shelle_, 0 ), er.element(), Msg::setMsg );
 	shelle_->addMsgAndFunc( m->mid(), fid, lowLevelGet.getBindIndex() );
-	char* temp = new char[ arg.size() ];
-	arg.conv2buf( temp );
+	if ( myNode_ == 0 ) {
+		char* temp = new char[ arg.size() ];
+		arg.conv2buf( temp );
 
 	// Qinfo( funcId, srcIndex, size, useSendTo )
-	Qinfo q( fid, 0, arg.size(), 0 );
-	shelle_->asend( q, lowLevelGet.getBindIndex(), &p_, temp );
+		Qinfo q( fid, 0, arg.size(), 0 );
+		shelle_->asend( q, lowLevelGet.getBindIndex(), &p_, temp );
 
-	delete[] temp;
+		delete[] temp;
+	}
 }
 
 void Shell::innerSet( const Eref& er, FuncId fid, const char* args, 
 	unsigned int size )
 {
-	if ( er.isDataHere() ) {
+	// if ( er.isDataHere() ) {
 		shelle_->clearBinding ( lowLevelGet.getBindIndex() );
 		Msg* m = new AssignmentMsg( Eref( shelle_, 0 ), er, Msg::setMsg );
 		shelle_->addMsgAndFunc( m->mid(), fid, lowLevelGet.getBindIndex() );
 	
-		// Qinfo( funcId, srcIndex, size, useSendTo )
+	// Qinfo( funcId, srcIndex, size, useSendTo )
+	if ( myNode_ == 0 ) {
 		Qinfo q( fid, 0, size, 0 ); // Shell has index 0 for now.
 		shelle_->asend( q, lowLevelGet.getBindIndex(), &p_, args );
 	}
+	// }
 }
 
 void Shell::handleSet( Id id, DataId d, FuncId fid, PrepackedBuffer arg )
@@ -1082,15 +1086,18 @@ void Shell::handleGet( Id id, DataId index, FuncId fid )
 {
 	Eref sheller( shelle_, 0 );
 	Eref tgt( id(), index );
-	if ( id()->dataHandler()->isDataHere( index ) ) {
+//	if ( id()->dataHandler()->isDataHere( index ) ) {
 		shelle_->clearBinding( lowLevelGet.getBindIndex() );
 		Msg* m = new AssignmentMsg( sheller, tgt, Msg::setMsg );
 		shelle_->addMsgAndFunc( m->mid(), fid, lowLevelGet.getBindIndex() );
 		FuncId retFunc = receiveGet.getFid();
+	if ( myNode_ == 0 )
 		lowLevelGet.send( sheller, &p_, retFunc );
+	/*
 	} else {
 		ack.send( sheller, &p_, myNode_, OkStatus );
 	}
+	*/
 }
 
 void Shell::recvGet( PrepackedBuffer pb )

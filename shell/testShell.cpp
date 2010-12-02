@@ -415,13 +415,14 @@ void testShellSetGet()
 	}
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double x = Field< double >::get( Eref( a1(), i ), "outputValue" );
-		assert( fabs( x - i * i ) < 1e-6 );
+		assert( doubleEq( x, i * i ) );
 	}
 	bool ret = SetGet1< double >::setVec( Eref( a1(), 0 ), "set_outputValue", val );
 	assert( ret );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double x = Field< double >::get( Eref( a1(), i ), "outputValue" );
-		assert( fabs( x - i * i * i ) < 1e-6 );
+		cout << i << "	x=" << x << "	i^3=" << i * i * i << endl;
+		assert( doubleEq( x, i * i * i ) );
 	}
 
 	shell->doDelete( a1 );
