@@ -214,7 +214,7 @@ static const Slot prdSlot =
 Enzyme::Enzyme()
 	: k1_(0.1), k2_(0.4), k3_(0.1),sk1_(1.0), Km_( 5.0 ),
 		procFunc_( &Enzyme::implicitProcFunc ),
-		x_( NAN ), y_( NAN )	// Initializing to an 'uninitialized' state.
+		x_( 0.0 ), y_( 0.0 )
 {
 	;
 }
