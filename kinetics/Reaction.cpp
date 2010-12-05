@@ -152,8 +152,8 @@ Reaction::Reaction()
 	:
 	kf_( 0.1 ),
 	kb_( 0.1 ),
-	x_( NAN ),	// Initializing to an 'uninitialized' state.
-	y_( NAN )	// Initializing to an 'uninitialized' state.
+	x_( 0.0 ),
+	y_( 0.0 )
 {
 		;
 }

@@ -225,8 +225,8 @@ Molecule::Molecule()
 	A_( 0.0 ),
 	B_( 0.0 ),
 	D_( 0.0 ),
-	x_( NAN ),	// Initializing to an 'uninitialized' state.
-	y_( NAN )	// Initializing to an 'uninitialized' state.
+	x_( 0.0 ),
+	y_( 0.0 )
 {
 		;
 }
