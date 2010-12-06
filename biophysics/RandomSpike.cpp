@@ -80,6 +80,10 @@ const Cinfo* initRandomSpikeCinfo()
                           RFCAST( &RandomSpike::setMaxAmp)),
             new DestFinfo("minmaxDest", Ftype2<double, double>::global(),
                           RFCAST( & RandomSpike::setMinMaxAmp)),
+            new DestFinfo("isiDest", Ftype1<double>::global(),
+                          RFCAST( &RandomSpike::setISI),
+                          "Interspike interval setting. The output of a random number generator \
+can be connected to this and used as the interspike interval."),
         };
     	static SchedInfo schedInfo[] = { { process, 0, 1 } };
 	static string doc[] =
@@ -114,6 +118,7 @@ RandomSpike::RandomSpike()
     state_ = 0.0;
     absRefract_ = 0.0;
     lastEvent_ = 0.0;
+    isi_ = -1.0;
 }
 
 
@@ -202,6 +207,13 @@ double RandomSpike::getLastEvent(Eref e)
     ASSERT( obj != NULL, "RandomSpike::getLastEvent(Eref ) - target data pointer is NULL." );
     return obj->lastEvent_;    
 }
+
+void RandomSpike::setISI(const Conn* c, double value)
+{
+    RandomSpike* obj = static_cast<RandomSpike*> (c->data());
+    ASSERT(obj != NULL, "RandomSpike::setISI(const Conn*, double) - target data pointer is NULL.");
+    obj->isi_ = value;        
+}
 void RandomSpike::setReset(const Conn* c, int value)
 {
     RandomSpike* obj = static_cast<RandomSpike*> (c->data());
@@ -236,7 +248,8 @@ void RandomSpike::reinitFunc( const Conn* c, ProcInfo p )
     RandomSpike* obj = static_cast<RandomSpike*> (c->data());
     ASSERT( obj != NULL, "RandomSpike::reinitFunc(const Conn*, ProcInfo) - target data pointer is NULL.");
     obj->state_ = obj->resetValue_;
-    obj->lastEvent_ = - ( obj->absRefract_);    
+    obj->lastEvent_ = - ( obj->absRefract_);
+    obj->isi_ = -1.0;
 }
 
 void RandomSpike::innerProcessFunc(const Conn* c, ProcInfo p)
@@ -252,7 +265,14 @@ void RandomSpike::innerProcessFunc(const Conn* c, ProcInfo p)
         return;
     }
 
-    double prob = rate_*p->dt_;
+    double prob = 0.0;
+    if (isi_ >= 0.0){ // this is being fed by an RNG
+        if ((lastEvent_ + isi_ - t >= 0.0) && (lastEvent_ + isi_ - t < p->dt_)){
+            prob = 1.0;
+        }
+    } else {
+        prob = rate_*p->dt_;
+    }
     if ( prob >= 1 || prob > mtrand())
     {
         lastEvent_ = t;

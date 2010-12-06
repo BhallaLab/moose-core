@@ -22,16 +22,6 @@ ExponentialRng::ExponentialRng(const Id& src, string name, Id& parent):RandGener
 }
 ExponentialRng::~ExponentialRng(){}
 const std::string& ExponentialRng::getType(){ return className_; }
-double ExponentialRng::__get_mean() const
-{
-    double mean;
-    get < double > (id_(), "mean",mean);
-    return mean;
-}
-void ExponentialRng::__set_mean( double mean )
-{
-    set < double > (id_(), "mean", mean);
-}
 int ExponentialRng::__get_method() const
 {
     int method;

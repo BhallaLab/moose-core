@@ -55,7 +55,8 @@ class RandomSpike
     static double getLastEvent(Eref e);
     static void setReset(const Conn* c, int value);
     static int getReset(Eref e);
-    static void setMinMaxAmp(const Conn* c, double min, double max);    
+    static void setMinMaxAmp(const Conn* c, double min, double max);
+    static void setISI(const Conn* c, double value);
     static void processFunc(const Conn* c, ProcInfo p);
     void innerProcessFunc(const Conn* c, ProcInfo p);
     static void reinitFunc(const Conn* c, ProcInfo p);
@@ -70,7 +71,8 @@ class RandomSpike
     double resetValue_;
     double state_;
     double absRefract_;
-    double lastEvent_;    
+    double lastEvent_;
+    double isi_;
 };
 
     
