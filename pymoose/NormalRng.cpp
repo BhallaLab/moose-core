@@ -22,26 +22,6 @@ NormalRng::NormalRng(const Id& src, string path):RandGenerator(src, path)
 }
 NormalRng::~NormalRng(){}
 const std::string& NormalRng::getType(){ return className_; }
-double NormalRng::__get_mean() const
-{
-    double mean;
-    get < double > (id_(), "mean",mean);
-    return mean;
-}
-void NormalRng::__set_mean( double mean )
-{
-    set < double > (id_(), "mean", mean);
-}
-double NormalRng::__get_variance() const
-{
-    double variance;
-    get < double > (id_(), "variance",variance);
-    return variance;
-}
-void NormalRng::__set_variance( double variance )
-{
-    set < double > (id_(), "variance", variance);
-}
 int NormalRng::__get_method() const
 {
     int method;
