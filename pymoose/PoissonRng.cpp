@@ -22,14 +22,4 @@ PoissonRng::PoissonRng(const Id& src, string path):RandGenerator(src, path)
 }
 PoissonRng::~PoissonRng(){}
 const std::string& PoissonRng::getType(){ return className_; }
-double PoissonRng::__get_mean() const
-{
-    double mean;
-    get < double > (id_(), "mean",mean);
-    return mean;
-}
-void PoissonRng::__set_mean( double mean )
-{
-    set < double > (id_(), "mean", mean);
-}
 #endif

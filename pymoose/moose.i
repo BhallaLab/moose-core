@@ -568,12 +568,10 @@ NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.se
 
 %include "RandGenerator.h"
 %attribute(pymoose::RandGenerator, double, sample, __get_sample)
-%attribute(pymoose::RandGenerator, double, mean, __get_mean)
+%attribute(pymoose::RandGenerator, double, mean, __get_mean, __set_mean)
 %attribute(pymoose::RandGenerator, double, variance, __get_variance)
 
 %include "UniformRng.h"
-%attribute(pymoose::UniformRng, double, mean, __get_mean)
-%attribute(pymoose::UniformRng, double, variance, __get_variance)
 %attribute(pymoose::UniformRng, double, min, __get_min, __set_min)
 %attribute(pymoose::UniformRng, double, max, __get_max, __set_max)
 
@@ -582,7 +580,6 @@ NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.se
 %attribute(pymoose::GammaRng, double, theta, __get_theta, __set_theta)
 
 %include "ExponentialRng.h"
-%attribute(pymoose::ExponentialRng, double, mean, __get_mean, __set_mean)
 %attribute(pymoose::ExponentialRng, int, method, __get_method, __set_method)
 
 %include "BinomialRng.h"
@@ -590,11 +587,8 @@ NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.se
 %attribute(pymoose::BinomialRng, double, p, __get_p, __set_p)
 
 %include "PoissonRng.h"
-%attribute(pymoose::PoissonRng, double, mean, __get_mean, __set_mean)
 
 %include "NormalRng.h"
-%attribute(pymoose::NormalRng, double, mean, __get_mean, __set_mean)
-%attribute(pymoose::NormalRng, double, variance, __get_variance, __set_variance)
 %attribute(pymoose::NormalRng, int, method, __get_method, __set_method)
 
 //************************************************

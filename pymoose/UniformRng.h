@@ -19,8 +19,6 @@ namespace pymoose
 
         ~UniformRng();
         const std::string& getType();
-        double __get_mean() const;
-        double __get_variance() const;
         double __get_min() const;
         void __set_min(double min);
         double __get_max() const;
