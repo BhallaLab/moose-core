@@ -17,10 +17,6 @@ namespace pymoose
         NormalRng(const Id& src,std::string path);
         ~NormalRng();
         const std::string& getType();
-        double __get_mean() const;
-        void __set_mean(double mean);
-        double __get_variance() const;
-        void __set_variance(double variance);
         int __get_method() const;
         void __set_method(int method);
     };
