@@ -17,8 +17,6 @@ namespace pymoose
         PoissonRng(const Id& src,std::string path);
         ~PoissonRng();
         const std::string& getType();
-        double __get_mean() const;
-        void __set_mean(double mean);
     };
 }
 

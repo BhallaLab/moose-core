@@ -24,18 +24,6 @@ UniformRng::UniformRng(const Id& src, string name, Id& parent):RandGenerator(src
 
 UniformRng::~UniformRng(){}
 const std::string& UniformRng::getType(){ return className_; }
-double UniformRng::__get_mean() const
-{
-    double mean;
-    get < double > (id_(), "mean",mean);
-    return mean;
-}
-double UniformRng::__get_variance() const
-{
-    double variance;
-    get < double > (id_(), "variance",variance);
-    return variance;
-}
 double UniformRng::__get_min() const
 {
     double min;

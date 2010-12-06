@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sun Feb 28 18:17:56 2010 (+0530)
 // Version: 
-// Last-Updated: Fri Oct  8 16:05:10 2010 (+0530)
+// Last-Updated: Tue Nov 16 17:49:43 2010 (+0530)
 //           By: Subhasis Ray
-//     Update #: 509
+//     Update #: 510
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -122,7 +122,7 @@ const Cinfo* initNMDAChanCinfo()
                 "B2 = 1e3 * exp(-c10) s^-1, c10 = 3.101. "
                 "The behaviour of S(t) is as follows: "
                 "If a spike arrives, then the slope of the linear rise of S(t) is incremented by weight / tau2. "
-                "After tau2 time, this component is removed from the slope (reduced by weight/tau) "
+                "After tau2 time, this component is removed from the slope (reduced by weight/tau1) "
                 "and added over to the rate of decay of S(t)."
                 , 
             };
