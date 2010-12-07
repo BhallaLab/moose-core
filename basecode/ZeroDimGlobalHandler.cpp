@@ -96,13 +96,13 @@ bool ZeroDimGlobalHandler::isAllocated() const {
 DataHandler::iterator ZeroDimGlobalHandler::begin() const
 {
 	//cout << Shell::myNode() << ": ZeroDimGlobalHandler::begin\n";
-	return iterator( this, 0 );
+	return iterator( this, 0, 0 );
 }
 
 DataHandler::iterator ZeroDimGlobalHandler::end() const
 {
 	//cout << Shell::myNode() << ": ZeroDimGlobalHandler::end\n";
-	return iterator( this, 1 );
+	return iterator( this, 1, 1 );
 }
 
 bool ZeroDimGlobalHandler::setDataBlock(
@@ -129,7 +129,9 @@ bool ZeroDimGlobalHandler::setDataBlock(
 	return 1;
 }
 
-void ZeroDimGlobalHandler::nextIndex( DataId& index ) const
+void ZeroDimGlobalHandler::nextIndex( DataId& index, 
+	unsigned int& linearIndex ) const
 {
 	index.incrementDataIndex();
+	++linearIndex;
 }

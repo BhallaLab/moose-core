@@ -616,7 +616,6 @@ void testSetGetSynapse()
 
 void testSetGetVec()
 {
-	static const double EPSILON = 1e-9;
 	const Cinfo* ic = IntFire::initCinfo();
 	// const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 100;
@@ -661,9 +660,9 @@ void testSetGetVec()
 			DataId di( i, j );
 			Eref syne( syn, di );
 			double temp = i * 1000 + j ;
-			assert( 
-			fabs ( reinterpret_cast< Synapse* >(syne.data())->getDelay() - temp ) <
-				EPSILON ); 
+			assert( doubleEq( 
+				reinterpret_cast< Synapse* >(syne.data())->getDelay(), 
+				temp ) );
 		}
 	}
 	cout << "." << flush;

@@ -9572,7 +9572,105 @@ we use vector assignment.
 
 I think this works. I've now cleared the unit test hurdle that had me stuck
 for a long time, and it now croaks in testShellSetGet.
+Checkin 2399.
 Very odd, it actually clears 50 of the assignments... aha, here we have
-node decomposition issues.
+node decomposition issues. Since we've already confirmed the single entry
+set/get on all nodes, it is likely to be the setVec.
+
+============================================================================
+3 Dec. 
+Not much progress. The assignment seems to get messed up as expected,
+because of bad handling of target object indexing in AssignVecMsg::exec.
+
+============================================================================
+4 Dec. 
+Sorting out the indexing. I need to maintain parallel indices in 
+DataHandler::iterator: one vecIndex, and one regular DataId index.
+This entails maintaining a correct start_ and end_ integer index in
+FieldDataHandler specially, but possibly also in other objects, so that 
+they can quickly figure out their internal integer indices.
+============================================================================
+5 Dec. 
+Working on the loose ends of FieldArrays. The problem is that it is a ragged
+array, but I would like to be able to do vector assignments to the entire 
+array. Other data handlers support this and it is a generally good idea in 
+terms of model set up. The current interface is
+
+setFieldArraySize( objectIndex, size );
+unsigned int getFieldArraySize( objectIndex );
+
+The issue is that to set data blocks I need to know start field indices on
+each node. The parent DataHandler can figure out if the object is on the
+current node, but it takes a full data traversal to find the start field
+index. Strongly argues for each node having always current values of start
+indices for fields, for linear array lookup.
+
+Option 1:
+	Change assignment data interface so that we always assign the whole 
+	thing:
+	setFieldArraySize( vector< unsigned int >& fieldArraySize );
+	This will go to all nodes and they can update each entry as needed.
+	May be overkill but in terms of data transfer we would need to 
+	cascade data from one node to the next, which is worse.
+
+Option 2:
+	Provide increment in data size rather than absolute value, 
+	let all nodes figure out how to alter their indexing.
+	setFieldArraySize( objectIndex, int deltaSize );
+	This is more compact but messy because it assumes that we know
+	original size. Will need to maintain that on master node, which spoils
+	symmetry across nodes.
+	Will need feedback function to master node in case we run into negative
+	indices. 
+	Will also need another function to set sizes in the first place.
+
+Option 3:
+	Force it into a regular array framework. Use the largest dim of the
+	ragged array, add a bit for expansion, and deem this the size of the
+	system. When sending out the value definitions, pad out the rest with
+	zeroes or come up with a padded vector data struct. Within this it is 
+	the job of the individual FieldDataHandlers to pick the correct
+	subset of data. Handles expandability well: will allow growth of 
+	individual array dims without any change to the other nodes. Will need
+	a way to feed back info to master node when we run into limits.
+	Either that or maintain all sizes on master node, which is also ugly,
+	and possibly impractical.
+	Will need to alter a whole lot of unit tests.
+
+Option 4:
+	Bearing in mind that all calls go globally, have each node maintain
+	the size of each object entry. This will require a vector of size
+	numParentObjects on each node. Poor scaling.
+
+Option 5:
+	Have each node maintain its own start field index, and feed back to the
+	master node so that this index remains current if there is any 
+	operation that inserts fields.
+	
+One way out of the issue with rescaling sizes on master node is for the
+relevant commands to include an explicit cycle where each node is asked for
+its max dimension, and then when the data comes back, for the master node to
+send out a resize command to all worker nodes.
+
+On the same lines, we could also have the initiating command ask each node for
+its # of entries, and then send back a vector with the start entry for each.
+
+I would normally go for option 5, as being the leanest of them all. Problem
+comes in when we have simulations which dynamically (and locally) add synapses.
+This is way in the future though.
+
+============================================================================
+6 Dec.
+Slowly starting on option 5. In FieldDataHandler::setDataBlock.
+May need to change constructor for iterator in all objects.
+============================================================================
+7 Dec.
+Looking at the setDataBlock function. This is extremely hard to handle
+using Option 5. Option 3 can do it easily. May have to bite the bullet and
+use that.
+
+Mostly done here, but still need to put in handlers to set the 
+FieldDataHandler::fieldDimension_. This is what the system will have to use to
+ensure that the fieldDimension is larger than any field array size.
 
 ============================================================================

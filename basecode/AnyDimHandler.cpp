@@ -198,14 +198,14 @@ bool AnyDimHandler::isGlobal() const
 	return 0;
 }
 
-AnyDimHandler::iterator AnyDimHandler::begin() const
+DataHandler::iterator AnyDimHandler::begin() const
 {
-	return iterator( this, start_ );
+	return DataHandler::iterator( this, start_, start_ );
 }
 
-AnyDimHandler::iterator AnyDimHandler::end() const
+DataHandler::iterator AnyDimHandler::end() const
 {
-	return iterator( this, end_ );
+	return DataHandler::iterator( this, end_, end_ );
 }
 
 bool AnyDimHandler::setDataBlock( 

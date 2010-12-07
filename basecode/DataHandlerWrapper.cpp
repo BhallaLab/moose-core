@@ -123,7 +123,8 @@ bool DataHandlerWrapper::setDataBlock(
 	return parent_->setDataBlock( data, numEntries, startIndex );
 }
 
-void DataHandlerWrapper::nextIndex( DataId& index ) const
+void DataHandlerWrapper::nextIndex( DataId& index, 
+	unsigned int& linearIndex ) const
 {
-	parent_->nextIndex( index );
+	parent_->nextIndex( index, linearIndex );
 }

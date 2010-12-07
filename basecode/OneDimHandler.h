@@ -61,11 +61,11 @@ class OneDimHandler: public OneDimGlobalHandler
 		}
 
 		iterator begin() const {
-			return iterator( this, start_ );
+			return iterator( this, start_, start_ );
 		}
 
 		iterator end() const {
-			return iterator( this, end_ );
+			return iterator( this, end_, end_ );
 		}
 
 		/**

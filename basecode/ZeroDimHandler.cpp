@@ -106,7 +106,8 @@ DataHandler::iterator ZeroDimHandler::end() const
 {
 	// cout << Shell::myNode() << ": ZeroDimHandler Iterator\n";
 	// end is same as begin except on node 1.
-	return iterator( this, ( Shell::myNode() == 0 ) );
+	unsigned int i = ( Shell::myNode() == 0 );
+	return iterator( this, i, i );
 }
 
 bool ZeroDimHandler::setDataBlock( 

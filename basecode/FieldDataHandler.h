@@ -31,8 +31,7 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 				lookupField_( lookupField ),
 				getNumField_( getNumField ),
 				setNumField_( setNumField ),
-				size_( 1 ),
-				start_( 0 )
+				fieldDimension_( 1 )
 
 		{;}
 
@@ -145,7 +144,7 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		{
 			if ( dim > 0 )
 				return parentDataHandler_->sizeOfDim( dim - 1 );
-			return size_;
+			return fieldDimension_;
 		}
 
 
@@ -159,10 +158,14 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 			return 0;
 		}
 
+		/**
+		 * Returns the dimensions of this. The Field dimension is on 
+		 * index 0.
+		 */
 		vector< unsigned int > dims() const
 		{
 			vector< unsigned int > ret( parentDataHandler_->dims() );
-			ret.insert( ret.begin(), size_ );
+			ret.insert( ret.begin(), fieldDimension_ );
 			return ret;
 		}
 
@@ -173,8 +176,12 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 			unsigned int objectIndex, unsigned int size ) const
 		{
 			assert( objectIndex < parentDataHandler_->totalEntries() );
-			char* pa = parentDataHandler_->data( objectIndex );
-			( ( reinterpret_cast< Parent* >( pa ) )->*setNumField_ )( size);
+
+			if ( parentDataHandler_->isDataHere( objectIndex ) ) {
+				char* pa = parentDataHandler_->data( objectIndex );
+				( ( reinterpret_cast< Parent* >( pa ) )->*setNumField_ )( 
+					size);
+			}
 		}
 
 		/**
@@ -186,6 +193,44 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 			char* pa = parentDataHandler_->data( objectIndex );
 			return ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
 		}
+
+		/**
+		 * Looks up the biggest field array size on the current node
+		 */
+		unsigned int biggestFieldArraySize() const
+		{
+			unsigned int ret = 0;
+			for ( iterator i = parentDataHandler_->begin(); i !=
+				parentDataHandler_->end(); ++i )
+			{
+				char* pa = *i;
+				assert( pa );
+				unsigned int numHere = ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
+				if ( numHere > ret )
+					ret = numHere;
+			}
+			return ret;
+		}
+
+		/**
+		 * Assignems the fieldDimension. Checks that it is bigger than the
+		 * biggest size on this node.
+		 */
+		void setFieldDimension( unsigned int size )
+		{
+			int i = biggestFieldArraySize();
+			assert( i < size );
+			fieldDimension_ = size;
+		}
+
+
+		// Deprecated
+		/*
+		void setNodeStart( unsigned int start )
+		{
+			start_ = start;
+		}
+		*/
 
 		/**
 		 * Returns true if the node decomposition has the data on the
@@ -217,7 +262,8 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 				assert( pa );
 				unsigned int numHere = ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
 				if ( numHere != 0 )
-					return iterator( this, i.index() );
+					return iterator( this, i.index(), 
+						i.index().data() * fieldDimension_ );
 			}
 			// Failed to find any valid index
 			return end();
@@ -228,7 +274,8 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		 * on the parent data handler, expressed as a single int.
 		 */
 		iterator end() const {
-			return iterator( this, parentDataHandler_->end().index() );
+			return iterator( this, parentDataHandler_->end().index(), 
+				parentDataHandler_->end().index().data() * fieldDimension_);
 			/*
 			unsigned int paIndex = parentDataHandler_->end().index().data();
 			// char* pa = parentDataHandler_->data( paIndex );
@@ -238,23 +285,26 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 			*/
 		}
 
-		void nextIndex( DataId& index ) const {
+		void nextIndex( DataId& index, unsigned int& linearIndex ) const {
 			char* pa = parentDataHandler_->data( index );
 			assert( pa );
 			unsigned int numHere = ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
 			if ( index.field() + 1 < numHere ) {
 				index.incrementFieldIndex();
+				++linearIndex;
 				return;
 			}
 
 			index.rolloverFieldIndex();
-			for ( iterator i( parentDataHandler_, index.data() ); 
+			unsigned int j = index.data();
+			for ( iterator i( parentDataHandler_, j, j * fieldDimension_ ); 
 				i != parentDataHandler_->end(); ++i ) {
 				index = i.index();
 				char* pa = *i;
 				assert( pa );
 				unsigned int numHere = ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
 				if ( numHere > 0 ) {
+					linearIndex = index.data() * fieldDimension_;
 					return;
 				}
 			}
@@ -270,14 +320,15 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		}
 
 		/////////////////////////////////////////////////////////////////
-		// setDataBlock stuff.
+		// setDataBlock stuff. Defer implementation for now.
 		/////////////////////////////////////////////////////////////////
 
 		bool setDataBlock( const char* data, unsigned int numData,
-			DataId did ) const 
+			DataId startIndex ) const 
 		{
-			if ( parentDataHandler_->isDataHere( did.data() ) ) {
-				char* temp = parentDataHandler_->data( did.data() );
+			/*
+			if ( parentDataHandler_->isDataHere( startIndex.data() ) ) {
+				char* temp = parentDataHandler_->data( startIndex.data() );
 				assert( temp );
 				Parent* pa = reinterpret_cast< Parent* >( temp );
 
@@ -292,6 +343,8 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 				}
 			}
 			return 1;
+			*/
+			return 0;
 		}
 
 		/**
@@ -301,6 +354,7 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		bool setDataBlock( const char* data, unsigned int numData,
 			const vector< unsigned int >& startIndex ) const
 		{
+		/*
 			if ( startIndex.size() == 0 )
 				return setDataBlock( data, numData, 0 );
 			unsigned int fieldIndex = startIndex[0];
@@ -311,6 +365,8 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 			DataDimensions dd( parentDataHandler_->dims() );
 			unsigned int paIndex = dd.linearIndex( temp );
 			return setDataBlock( data, numData, DataId( paIndex, fieldIndex ) );
+			*/
+			return 0;
 		}
 
 	private:
@@ -318,15 +374,13 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 		Field* ( Parent::*lookupField_ )( unsigned int );
 		unsigned int ( Parent::*getNumField_ )() const;
 		void ( Parent::*setNumField_ )( unsigned int num );
-		unsigned int size_;
 		/**
 		 * This keeps track of the max # of fieldElements assigned. It is
 		 * analogous to the reserve size of a vector, but does not incur
 		 * any extra overhead in memory. This determines how the indexing
-		 * happens. As this gets rescaled every time new allocation happens
+		 * happens.
 		 */
-		unsigned int fieldSize_;
-		unsigned int start_;
+		unsigned int fieldDimension_;
 };
 
 #endif	// _FIELD_DATA_HANDLER_H

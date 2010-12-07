@@ -95,4 +95,4 @@ class DataDimensions
 		vector< unsigned int > dims_;
 };
 
-#endif	// _DATA_HANDLER_H
+#endif	// _DATA_DIMENSIONS_H

@@ -37,20 +37,17 @@ void AssignVecMsg::exec( const char* arg, const ProcInfo *p ) const
 		// cout << Shell::myNode() << ": AssignVecMsg::exec: pb.size = " << pb.size() << ", dataSize = " << pb.dataSize() << ", numEntries = " << pb.numEntries() << endl;
 		DataHandler* d2 = e2_->dataHandler();
 		const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
-		unsigned int j = 0;
 		for ( DataHandler::iterator i = d2->begin(); i != d2->end(); ++i )
 		{
 			if ( p->execThread( e2_->id(),i.index().data() ) ) {
-				// unsigned int j = i.index();
 				// Note that j might not go in sequential order, as it
 				// depends on locally allocated parts of the vector.
 				// But we assume that pb[j] has the entire data block and
 				// so we need to pick selected entries from it.
 				// Note also that this is independent of the # of dimensions
 				// or whether the DataHandler is a FieldDataHandler.
-				f->op( Eref( e2_, i.index() ), q, pb[j] );
+				f->op( Eref( e2_, i.index() ), q, pb[ i.linearIndex() ] );
 			}
-			j++;
 		}
 		if ( p->threadIndexInGroup == 0 )
 			sendAckBack( p, q->mid(), 0 );

@@ -272,12 +272,12 @@ bool AnyDimGlobalHandler::isGlobal() const
 
 AnyDimGlobalHandler::iterator AnyDimGlobalHandler::begin() const
 {
-	return iterator( this, 0 );
+	return iterator( this, 0, 0 );
 }
 
 AnyDimGlobalHandler::iterator AnyDimGlobalHandler::end() const
 {
-	return iterator( this, size_ );
+	return iterator( this, size_, size_ );
 }
 
 /**
@@ -403,7 +403,9 @@ bool AnyDimGlobalHandler::setDataBlock( const char* data,
  */
 
 
-void AnyDimGlobalHandler::nextIndex( DataId& index ) const
+void AnyDimGlobalHandler::nextIndex( 
+	DataId& index, unsigned int& linearIndex ) const
 {
 	index.incrementDataIndex();
+	++linearIndex;
 }

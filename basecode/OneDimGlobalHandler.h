@@ -79,11 +79,11 @@ class OneDimGlobalHandler: public DataHandler
 		bool isGlobal() const;
 
 		iterator begin() const {
-			return iterator( this, 0 );
+			return iterator( this, 0, 0 );
 		}
 
 		iterator end() const {
-			return iterator( this, size_ );
+			return iterator( this, size_, size_ );
 		}
 
 		/**
@@ -95,7 +95,7 @@ class OneDimGlobalHandler: public DataHandler
 		bool setDataBlock( const char* data, unsigned int numData,
 			DataId startIndex ) const;
 
-		void nextIndex( DataId& index ) const;
+		void nextIndex( DataId& index, unsigned int& linearIndex ) const;
 
 	protected:
 		char* data_;

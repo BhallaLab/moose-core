@@ -116,7 +116,7 @@ class AnyDimHandler: public AnyDimGlobalHandler
 		bool setDataBlock( const char* data, unsigned int numData,
 			DataId startIndex ) const;
 
-// Inherit from AnyDimGlobalHandler:	void nextIndex( DataId& index ) const;
+// Inherit from AnyDimGlobalHandler: void nextIndex( DataId& index, unsigned int& linearIndex ) const;
 
 	private:
 		unsigned int start_;	// Starting index of data, used in MPI.

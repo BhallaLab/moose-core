@@ -196,6 +196,7 @@ bool OneDimHandler::setDataBlock( const char* data, unsigned int numData,
 {
 	if ( !isAllocated() ) return 0;
 
+	// Check if the data block requested goes out of range.
 	if ( startIndex.data() + numData > size_ ) return 0;
 
 	unsigned int actualStart = start_;

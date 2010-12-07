@@ -165,26 +165,47 @@ class DataHandler
 		class iterator {
 			public: 
 				iterator( const iterator& other )
-					: dh_( other.dh_ ), index_( other.index_ )
+					: dh_( other.dh_ ), index_( other.index_ ),
+					linearIndex_( other.linearIndex_ )
 				{;}
 
-				iterator( const DataHandler* dh, const DataId& index )
-					: dh_( dh ), index_( index )
+				iterator( const DataHandler* dh, const DataId& index,
+					unsigned int linearIndex )
+					: 
+						dh_( dh ), 
+						index_( index ),
+						linearIndex_( linearIndex )
 				{;}
 
+				/**
+				 * This is the DataId index of this entry, completely
+				 * specifying both the object index and the field index.
+				 */
 				DataId index() const {
 					return index_;
+				}
+				
+				/**
+				 * This provides the linear index of this entry.
+				 * If one were to iterate through all the entries and
+				 * count how many have passed, this would be the linear
+				 * index. With the exception of the FieldDataHandler
+				 * and other possible ragged array structures. In these
+				 * cases the linear index jumps.
+				 */
+				unsigned int linearIndex() const {
+					return linearIndex_;
 				}
 
 				// This does prefix increment.
 				iterator operator++() {
-					dh_->nextIndex( index_ );
+					dh_->nextIndex( index_, linearIndex_ );
 					return *this;
 				}
 
 				// Bizarre C++ convention to tell it to do postfix increment
 				iterator operator++( int ) {
-					dh_->nextIndex( index_ );
+					dh_->nextIndex( index_, linearIndex_ );
 					return *this;
 				}
 
@@ -205,7 +226,18 @@ class DataHandler
 
 			private:
 				const DataHandler* dh_;
+
+				/**
+				 * This field manages the current DataId handled in the
+				 * iterator.
+				 */
 				DataId index_;
+
+				/**
+				 * This field tracks the current linear index, which is
+				 * an unrolled integer index
+				 */
+				unsigned int linearIndex_;
 		};
 
 		/**
@@ -238,6 +270,9 @@ class DataHandler
 		 * If the Handler is doing node decomposition, then this function
 		 * takes the full data array, and picks out of it only those
 		 * fields that belong on current node.
+		 * Some Handlers handle ragged arrays. The DataBlock is defined
+		 * to be a cuboid, so it is up to the Handler to select the
+		 * appropriate subset of the cuboid to use.
 		 */
 		virtual bool setDataBlock( 
 			const char* data, unsigned int numData,
@@ -250,7 +285,8 @@ class DataHandler
 		/**
 		 * Used to march through the entries in this DataHandler
 		 */
-		virtual void nextIndex( DataId& index ) const = 0;
+		virtual void nextIndex( 
+			DataId& index, unsigned int& linearIndex ) const = 0;
 
 	private:
 		const DinfoBase* dinfo_;

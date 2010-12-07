@@ -197,7 +197,9 @@ bool OneDimGlobalHandler::setDataBlock(
 }
 
 
-void OneDimGlobalHandler::nextIndex( DataId& index ) const 
+void OneDimGlobalHandler::nextIndex( DataId& index,
+	unsigned int& linearIndex ) const
 {
 	index.incrementDataIndex();
+	++linearIndex;
 }
