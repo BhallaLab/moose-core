@@ -162,7 +162,7 @@ unsigned int FieldDataHandlerBase::biggestFieldArraySize() const
 void FieldDataHandlerBase::setFieldDimension( unsigned int size )
 {
 	unsigned int i = biggestFieldArraySize();
-	assert( i < size );
+	assert( i <= size );
 	fieldDimension_ = size;
 }
 

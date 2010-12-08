@@ -9699,4 +9699,22 @@ of other functions too.
 ============================================================================
 8 Dec 2010
 Implemented FieldDataHandlerBase class. Now compiles and crashes
-in the same place on the unit tests.
+in the same place on the unit tests. Checkin 2403.
+
+Sequence:
+Call to setNumField
+	- This sets a flag in the FieldDataHandlerBase warning that this
+		may need updating. I could just update it each time, but it 
+		would be bad in the case of a SetVec.
+	- The field is set
+	- Would like, after exit from the assignmsg loop, to check if there
+		is any stuff to update. 
+Also I want to maintain a 'reserve' size so that I don't have to change
+
+Immediate test is to use the already compiled low-level functions and
+set up the system.
+
+This is proceeding well. Steadily clearing many of the unit tests, the
+new indexing is simple but takes an extra couple of steps over the earlier
+form.
+============================================================================

@@ -617,6 +617,23 @@ void testMultiNodeIntFireNetwork()
 	ret = Field< double >::setVec( e2, "refractoryPeriod", temp );
 	assert( ret );
 
+	FieldDataHandlerBase* fd = dynamic_cast< FieldDataHandlerBase* >(
+		syne.element()->dataHandler() );
+	assert( fd );
+	unsigned int fieldSize = fd->biggestFieldArraySize();
+	fd->setFieldDimension( fieldSize );
+	vector< double > weight( size * fieldSize, 0.0 );
+	vector< double > delay( size * fieldSize, 0.0 );
+	for ( unsigned int i = 0; i < size; ++i ) {
+		unsigned int numSyn = fd->getFieldArraySize( i );
+		unsigned int k = i * fieldSize;
+		for ( unsigned int j = 0; j < numSyn; ++j ) {
+			weight[ k + j ] = mtrand() * weightMax;
+			delay[ k + j ] = mtrand() * delayMax;
+		}
+	}
+
+	/*
 	vector< double > weight;
 	weight.reserve( nd );
 	vector< double > delay;
@@ -625,6 +642,7 @@ void testMultiNodeIntFireNetwork()
 		weight.push_back( mtrand() * weightMax );
 		delay.push_back( mtrand() * delayMax );
 	}
+	*/
 	ret = Field< double >::setVec( syne, "weight", weight );
 	assert( ret );
 	ret = Field< double >::setVec( syne, "delay", delay );
@@ -633,7 +651,8 @@ void testMultiNodeIntFireNetwork()
 	for ( unsigned int i = 0; i < size; i+= 100 ) {
 		double wt = Field< double >::get( 
 			Eref( syne.element(), DataId( i, 0 ) ), "weight" );
-		assert( doubleEq( wt, weight[ synIndices[ i / 100 ] ] ) );
+		assert( doubleEq( wt, weight[ i * fieldSize ] ) );
+		// assert( doubleEq( wt, weight[ synIndices[ i / 100 ] ] ) );
 		// cout << "Actual wt = " << wt << ", expected = " << weight[ synIndices[ i / 100 ] ] << endl;
 	}
 

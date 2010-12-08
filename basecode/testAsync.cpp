@@ -632,6 +632,12 @@ void testSetGetVec()
 	assert ( syn->getName() == "synapse" );
 
 	assert( syn->dataHandler()->totalEntries() == 0 );
+
+	FieldDataHandlerBase* fd = dynamic_cast< FieldDataHandlerBase *>( 
+		syn->dataHandler() );
+	assert( fd );
+	assert( fd->totalEntries() == 0 );
+
 	vector< unsigned int > numSyn( size, 0 );
 	for ( unsigned int i = 0; i < size; ++i )
 		numSyn[i] = i;
@@ -643,12 +649,14 @@ void testSetGetVec()
 	unsigned int nd = syn->dataHandler()->totalEntries();
 	assert( nd == ( size * (size - 1) ) / 2 );
 	// cout << "NumSyn = " << nd << endl;
-
+	assert( fd->totalEntries() == nd );
 	
+	assert( fd->biggestFieldArraySize() == size - 1 );
+	fd->setFieldDimension( size );
 	// Here we test setting a 2-D array with different dims on each axis.
-	vector< double > delay( nd, 0.0 );
-	unsigned int k = 0;
+	vector< double > delay( size * size, 0.0 );
 	for ( unsigned int i = 0; i < size; ++i ) {
+		unsigned int k = i * size;
 		for ( unsigned int j = 0; j < i; ++j ) {
 			delay[k++] = i * 1000 + j;
 		}
@@ -1036,10 +1044,17 @@ void testSparseMsg()
 	f1->addMsg( f2, sm->mid(), t2 );
 	sm->randomConnect( connectionProbability );
 	//sm->loadBalance( 1 );
+	FieldDataHandlerBase* fd = dynamic_cast< FieldDataHandlerBase* >(
+		syne.element()->dataHandler() );
+	assert( fd );
+	unsigned int fieldSize = fd->biggestFieldArraySize();
+	// cout << "fieldSize = " << fieldSize << endl;
+	fd->setFieldDimension( fieldSize );
 
 	unsigned int nd = syn->dataHandler()->totalEntries();
 //	cout << "Num Syn = " << nd << endl;
 	assert( nd == NUMSYN );
+
 	vector< double > temp( size, 0.0 );
 	for ( unsigned int i = 0; i < size; ++i )
 		temp[i] = mtrand() * Vmax;
@@ -1059,6 +1074,19 @@ void testSparseMsg()
 	ret = Field< double >::setVec( e2, "refractoryPeriod", temp );
 	assert( ret );
 
+	vector< double > weight( size * fieldSize, 0.0 );
+	vector< double > delay( size * fieldSize, 0.0 );
+	assert( syne.element()->dataHandler()->numDimensions() == 2 );
+	for ( unsigned int i = 0; i < size; ++i ) {
+		// unsigned int numSyn = syne.element()->dataHandler()->numData2( i );
+		unsigned int numSyn = fd->getFieldArraySize( i );
+		unsigned int k = i * fieldSize;
+		for ( unsigned int j = 0; j < numSyn; ++j ) {
+			weight[ k + j ] = mtrand() * weightMax;
+			delay[ k + j ] = mtrand() * delayMax;
+		}
+	}
+	/*
 	vector< double > weight;
 	weight.reserve( nd );
 	vector< double > delay;
@@ -1072,6 +1100,7 @@ void testSparseMsg()
 			delay.push_back( mtrand() * delayMax );
 		}
 	}
+	*/
 	ret = Field< double >::setVec( syne, "weight", weight );
 	assert( ret );
 	ret = Field< double >::setVec( syne, "delay", delay );

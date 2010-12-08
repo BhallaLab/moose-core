@@ -421,7 +421,7 @@ void testShellSetGet()
 	assert( ret );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double x = Field< double >::get( Eref( a1(), i ), "outputValue" );
-		cout << i << "	x=" << x << "	i^3=" << i * i * i << endl;
+		// cout << i << "	x=" << x << "	i^3=" << i * i * i << endl;
 		assert( doubleEq( x, i * i * i ) );
 	}
 
