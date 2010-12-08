@@ -91,6 +91,7 @@ class FuncBarrier;
 #include "Conv.h"
 #include "SrcFinfo.h"
 #include "../shell/Shell.h"
+#include "FieldDataHandlerBase.h"
 #include "FieldDataHandler.h"
 #include "SetGet.h"
 #include "OpFunc.h"

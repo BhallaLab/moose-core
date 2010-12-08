@@ -43,6 +43,11 @@ template < class T, class F > class FieldElementFinfo: public Finfo
 				getNumField_( getNumField )
 		{
 				string setname = "set_num_" + name;
+				// setNumField is a tricky operation, because it may require
+				// cross-node rescaling of the 
+				// FieldDataHandler::fieldDimension. To acheive this we
+				// wrap the setNumField in something more interesting
+				// than a simple OpFunc.
 				setNum_ = new DestFinfo(
 					setname,
 					"Assigns number of field entries in field array.",

@@ -9673,4 +9673,30 @@ Mostly done here, but still need to put in handlers to set the
 FieldDataHandler::fieldDimension_. This is what the system will have to use to
 ensure that the fieldDimension is larger than any field array size.
 
+Compiles now but doesn't clear unit tests. Checkin 2402.
+
+I think I see where to intervene. The FieldElementFinfo handles a
+setNumField function. Currently this just does the assignment, but it could
+also be templated around so as to call the Shell to check the size of the
+Field arrays, and update if needed. Quite involved for such a seemingly
+simple assignment.
+The alternative is to explicitly code the request for updates into
+the 'setNumField' functions every time. Not good.
+
+The postCreationFunc creates the FieldDataHandler that we
+want to use, but it isn't handy for giving the DataHandler. Better
+to use a template to wrap the existing setNumField operation,
+which is currently handled by the regular OpFunc1.
+If we make this into an EpFunc1 we should be able to find the
+Eref and from this its Ids. How to find the Eref/Id owning the
+FieldData struct? This is needed to pass to
+Shell::doUpdateFieldArrayDimension( Id fieldId );
+
+Will have also to make a FieldDataHandlerBase class to provide
+a common interface esp for updating the fieldDimension, and a lot
+of other functions too.
+
 ============================================================================
+8 Dec 2010
+Implemented FieldDataHandlerBase class. Now compiles and crashes
+in the same place on the unit tests.

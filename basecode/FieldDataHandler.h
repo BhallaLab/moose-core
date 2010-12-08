@@ -18,7 +18,7 @@
  * that extracts the field from the parent.
  */
 
-template< class Parent, class Field > class FieldDataHandler: public DataHandler
+template< class Parent, class Field > class FieldDataHandler: public FieldDataHandlerBase
 {
 	public:
 		FieldDataHandler( const DinfoBase* dinfo,
@@ -26,32 +26,15 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 			Field* ( Parent::*lookupField )( unsigned int ),
 			unsigned int ( Parent::*getNumField )() const,
 			void ( Parent::*setNumField )( unsigned int num ) )
-			: DataHandler( dinfo ),
-				parentDataHandler_( parentDataHandler ),
+			: 
+				FieldDataHandlerBase( dinfo , parentDataHandler ),
 				lookupField_( lookupField ),
 				getNumField_( getNumField ),
-				setNumField_( setNumField ),
-				fieldDimension_( 1 )
-
+				setNumField_( setNumField )
 		{;}
 
 		~FieldDataHandler()
 		{;} // Don't delete data because the parent Element should do so.
-
-		DataHandler* globalize() const
-		{
-			return 0;
-		}
-
-		DataHandler* unGlobalize() const
-		{
-			return 0;
-		}
-
-		bool nodeBalance( unsigned int size )
-		{
-			return 0;
-		}
 
 
 		/**
@@ -74,259 +57,52 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 			return ret;
 		}
 
-		DataHandler* copyExpand( unsigned int copySize ) const
-		{
-			return 0;
-		}
-
-		DataHandler* copyToNewDim( unsigned int newDimSize ) const
-		{
-			return 0;
-		}
-
-		void process( const ProcInfo* p, Element* e, FuncId fid ) const 
-		{
-			; // Fields don't do independent process?
-		}
-
 		/**
-		 * Returns the data on the specified index.
+		 * Returns the pointer to the field entry at fieldIndex, on the
+		 * parent data entry at data.
 		 */
-		char* data( DataId index ) const
+		char* lookupField( char* data, unsigned int fieldIndex ) const
 		{
-			char* pa = parentDataHandler_->data( index );
-			if ( pa ) {
-				Field* s = ( ( reinterpret_cast< Parent* >( pa ) )->*lookupField_ )( index.field() );
+			if ( data ) {
+				Parent* pa = reinterpret_cast< Parent* >( data );
+				Field* s = ( pa->*lookupField_ )( fieldIndex );
 				return reinterpret_cast< char* >( s );
 			}
 			return 0;
 		}
 
 		/**
-		 * Returns the number of field entries.
-		 * If parent is global the return value is also global.
-		 * If parent is local then it returns # on current node.
+		 * Assigns the number of field entries on parent data entry.
 		 */
-		unsigned int totalEntries() const {
-			unsigned int ret = 0;
-			for ( DataHandler::iterator i = parentDataHandler_->begin();
-				i != parentDataHandler_->end(); ++i ) {
-				ret += 
-				( ( reinterpret_cast< Parent* >( *i ) )->*getNumField_ )();
+		void setNumField( char* data, unsigned int size ) const
+		{
+			if ( data ) {
+				Parent* pa = reinterpret_cast< Parent* >( data );
+				( pa->*setNumField_ )( size );
 			}
-
-
-			/*
-			unsigned int size = parentDataHandler_->numData1();
-			unsigned int start = 
-				 ( size * Shell::myNode() ) / Shell::numNodes();
-			unsigned int end = 
-				 ( size * ( 1 + Shell::myNode() ) ) / Shell::numNodes();
-
-			for ( unsigned int i = start; i < end; ++i ) {
-				char* pa = parentDataHandler_->data1( i );
-				ret += ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
-			}
-			*/
-			return ret;
 		}
 
 		/**
-		 * Returns the number of dimensions of the data.
+		 * Returns the number of field entries on parent data entry.
 		 */
-		unsigned int numDimensions() const {
-			// Should refine to include local dimensions.
-			// For now assume 1 dim.
-			return parentDataHandler_->numDimensions() + 1;
-		}
-
-		unsigned int sizeOfDim( unsigned int dim ) const
+		unsigned int getNumField( const char* data ) const
 		{
-			if ( dim > 0 )
-				return parentDataHandler_->sizeOfDim( dim - 1 );
-			return fieldDimension_;
-		}
-
-
-		/**
-		 * Assigns size for first (data) dimension. This usually will not
-		 * be called here, but by the parent data Element.
-		 */
-		bool resize( vector< unsigned int > dims )
-		{
-			cout << Shell::myNode() << ": FieldDataHandler::setNumData1: Error: Cannot resize from Field\n";
+			if ( data ) {
+				const Parent* pa = reinterpret_cast< const Parent* >( data );
+				return ( pa->*getNumField_ )();
+			}
 			return 0;
 		}
 
-		/**
-		 * Returns the dimensions of this. The Field dimension is on 
-		 * index 0.
-		 */
-		vector< unsigned int > dims() const
-		{
-			vector< unsigned int > ret( parentDataHandler_->dims() );
-			ret.insert( ret.begin(), fieldDimension_ );
-			return ret;
-		}
-
-		/**
-		 * Assigns the size of the field array on the specified object.
-		 */
-		void setFieldArraySize( 
-			unsigned int objectIndex, unsigned int size ) const
-		{
-			assert( objectIndex < parentDataHandler_->totalEntries() );
-
-			if ( parentDataHandler_->isDataHere( objectIndex ) ) {
-				char* pa = parentDataHandler_->data( objectIndex );
-				( ( reinterpret_cast< Parent* >( pa ) )->*setNumField_ )( 
-					size);
-			}
-		}
-
-		/**
-		 * Looks up the size of the field array on the specified object
-		 */
-		unsigned int getFieldArraySize( unsigned int objectIndex ) const
-		{
-			assert( objectIndex < parentDataHandler_->totalEntries() );
-			char* pa = parentDataHandler_->data( objectIndex );
-			return ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
-		}
-
-		/**
-		 * Looks up the biggest field array size on the current node
-		 */
-		unsigned int biggestFieldArraySize() const
-		{
-			unsigned int ret = 0;
-			for ( iterator i = parentDataHandler_->begin(); i !=
-				parentDataHandler_->end(); ++i )
-			{
-				char* pa = *i;
-				assert( pa );
-				unsigned int numHere = ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
-				if ( numHere > ret )
-					ret = numHere;
-			}
-			return ret;
-		}
-
-		/**
-		 * Assignems the fieldDimension. Checks that it is bigger than the
-		 * biggest size on this node.
-		 */
-		void setFieldDimension( unsigned int size )
-		{
-			int i = biggestFieldArraySize();
-			assert( i < size );
-			fieldDimension_ = size;
-		}
-
-
-		// Deprecated
-		/*
-		void setNodeStart( unsigned int start )
-		{
-			start_ = start;
-		}
-		*/
-
-		/**
-		 * Returns true if the node decomposition has the data on the
-		 * current node
-		 */
-		bool isDataHere( DataId index ) const {
-			return parentDataHandler_->isDataHere( index );
-		}
-
-		bool isAllocated() const {
-			return parentDataHandler_->isAllocated();
-		}
-
-		bool isGlobal() const
-		{
-			return parentDataHandler_->isGlobal();
-		}
-
-		/////////////////////////////////////////////////////////////////
-		// Iterators
-		/////////////////////////////////////////////////////////////////
-
-		/**
-		 */
-		iterator begin() const {
-			for ( iterator i = parentDataHandler_->begin(); i !=
-				parentDataHandler_->end(); ++i ) {
-				char* pa = *i;
-				assert( pa );
-				unsigned int numHere = ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
-				if ( numHere != 0 )
-					return iterator( this, i.index(), 
-						i.index().data() * fieldDimension_ );
-			}
-			// Failed to find any valid index
-			return end();
-		}
-
-		/**
-		 * This is 1+(last valid field entry) on the last valid data entry
-		 * on the parent data handler, expressed as a single int.
-		 */
-		iterator end() const {
-			return iterator( this, parentDataHandler_->end().index(), 
-				parentDataHandler_->end().index().data() * fieldDimension_);
-			/*
-			unsigned int paIndex = parentDataHandler_->end().index().data();
-			// char* pa = parentDataHandler_->data( paIndex );
-			// assert( pa );
-			// unsigned int numHere = ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
-			return iterator( this, DataId( paIndex, 0 ) );
-			*/
-		}
-
-		void nextIndex( DataId& index, unsigned int& linearIndex ) const {
-			char* pa = parentDataHandler_->data( index );
-			assert( pa );
-			unsigned int numHere = ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
-			if ( index.field() + 1 < numHere ) {
-				index.incrementFieldIndex();
-				++linearIndex;
-				return;
-			}
-
-			index.rolloverFieldIndex();
-			unsigned int j = index.data();
-			for ( iterator i( parentDataHandler_, j, j * fieldDimension_ ); 
-				i != parentDataHandler_->end(); ++i ) {
-				index = i.index();
-				char* pa = *i;
-				assert( pa );
-				unsigned int numHere = ( ( reinterpret_cast< Parent* >( pa ) )->*getNumField_ )();
-				if ( numHere > 0 ) {
-					linearIndex = index.data() * fieldDimension_;
-					return;
-				}
-			}
-			// If we fall out of this loop we must be at the end.
-			index = parentDataHandler_->end().index();
-		}
-
-		/////////////////////////////////////////////////////////////////
-
-		const DataHandler* parentDataHandler() const
-		{
-			return parentDataHandler_;
-		}
 
 		/////////////////////////////////////////////////////////////////
 		// setDataBlock stuff. Defer implementation for now.
 		/////////////////////////////////////////////////////////////////
 
+			/*
 		bool setDataBlock( const char* data, unsigned int numData,
 			DataId startIndex ) const 
 		{
-			/*
 			if ( parentDataHandler_->isDataHere( startIndex.data() ) ) {
 				char* temp = parentDataHandler_->data( startIndex.data() );
 				assert( temp );
@@ -343,18 +119,18 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 				}
 			}
 			return 1;
-			*/
 			return 0;
 		}
+			*/
 
 		/**
 		 * Assigns a block of data at the specified location.
 		 * Returns true if all OK. No allocation.
 		 */
+		/*
 		bool setDataBlock( const char* data, unsigned int numData,
 			const vector< unsigned int >& startIndex ) const
 		{
-		/*
 			if ( startIndex.size() == 0 )
 				return setDataBlock( data, numData, 0 );
 			unsigned int fieldIndex = startIndex[0];
@@ -365,22 +141,14 @@ template< class Parent, class Field > class FieldDataHandler: public DataHandler
 			DataDimensions dd( parentDataHandler_->dims() );
 			unsigned int paIndex = dd.linearIndex( temp );
 			return setDataBlock( data, numData, DataId( paIndex, fieldIndex ) );
-			*/
 			return 0;
 		}
+			*/
 
 	private:
-		const DataHandler* parentDataHandler_;
 		Field* ( Parent::*lookupField_ )( unsigned int );
 		unsigned int ( Parent::*getNumField_ )() const;
 		void ( Parent::*setNumField_ )( unsigned int num );
-		/**
-		 * This keeps track of the max # of fieldElements assigned. It is
-		 * analogous to the reserve size of a vector, but does not incur
-		 * any extra overhead in memory. This determines how the indexing
-		 * happens.
-		 */
-		unsigned int fieldDimension_;
 };
 
 #endif	// _FIELD_DATA_HANDLER_H

@@ -643,6 +643,7 @@ void testSetGetVec()
 	unsigned int nd = syn->dataHandler()->totalEntries();
 	assert( nd == ( size * (size - 1) ) / 2 );
 	// cout << "NumSyn = " << nd << endl;
+
 	
 	// Here we test setting a 2-D array with different dims on each axis.
 	vector< double > delay( nd, 0.0 );
