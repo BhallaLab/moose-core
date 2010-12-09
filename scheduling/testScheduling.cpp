@@ -442,7 +442,25 @@ void testThreadIntFireNetwork()
 	temp.resize( size, refractoryPeriod );
 	ret = Field< double >::setVec( e2, "refractoryPeriod", temp );
 	assert( ret );
-
+	FieldDataHandlerBase* fd = dynamic_cast< FieldDataHandlerBase *>(
+		syn->dataHandler() );
+	assert( fd );
+	unsigned int fieldSize = fd->biggestFieldArraySize();
+	fd->setFieldDimension( fieldSize );
+	vector< double > weight( size * fieldSize, 0.0 );
+	vector< double > delay( size * fieldSize, 0.0 );
+	unsigned int numTotSyn = 0;
+	for ( unsigned int i = 0; i < size; ++i ) {
+		unsigned int numSyn = fd->getFieldArraySize( i );
+		unsigned int k = i * fieldSize;
+		for ( unsigned int j = 0; j < numSyn; ++j ) {
+			weight[ k + j ] = mtrand() * weightMax;
+			delay[ k + j ] = mtrand() * delayMax;
+			++numTotSyn;
+		}
+	}
+	assert ( numTotSyn == nd );
+	/*
 	vector< double > weight;
 	weight.reserve( nd );
 	vector< double > delay;
@@ -455,6 +473,7 @@ void testThreadIntFireNetwork()
 		}
 	}
 	assert( syne.element()->dataHandler()->totalEntries() == weight.size());
+	*/
 
 	ret = Field< double >::setVec( syne, "weight", weight );
 	assert( ret );
@@ -465,8 +484,6 @@ void testThreadIntFireNetwork()
 	Element* ticke = Id( 2 )();
 	Eref er0( ticke, DataId( 0, 0 ) );
 
-	/*
-	*/
 	SingleMsg* m = new SingleMsg( er0, e2 );
 	const Finfo* p1 = Tick::initCinfo()->findFinfo( "process0" );
 	const Finfo* p2 = ic->findFinfo( "process" );
@@ -487,14 +504,9 @@ void testThreadIntFireNetwork()
 	IntFire* ifire100 = reinterpret_cast< IntFire* >( e2.element()->dataHandler()->data( 100 ) );
 	IntFire* ifire900 = reinterpret_cast< IntFire* >( e2.element()->dataHandler()->data( 900 ) );
 
-	// Sometimes fails here if the setVec has not had time to complete
-	// on the process threads.
-	usleep( 50000 );
 	assert( doubleEq( ifire100->getVm(), initVm100 ) );
 	assert( doubleEq( ifire900->getVm(), initVm900 ) );
 
-	// Does reinit too.
-	// s->start( static_cast< double >( timestep * runsteps) + 0.1 );
 	s->doStart( timestep * runsteps );
 
 	assert( doubleEq( ifire100->getVm(), Vm100 ) );
@@ -526,11 +538,13 @@ void testMultiNodeIntFireNetwork()
 	static const unsigned int runsteps = 5;
 	// These are the starting indices of synapses on
 	// IntFire[0], [100], [200], ...
+	/*
 	static unsigned int synIndices[] = {
 		0, 10355, 20696, 30782, 41080,
 		51226, 61456, 71579, 81765, 92060,
 		102178,
 	};
+	*/
 	// static const unsigned int runsteps = 1000;
 	// const Cinfo* ic = IntFire::initCinfo();
 	// const Cinfo* sc = Synapse::initCinfo();
@@ -624,14 +638,17 @@ void testMultiNodeIntFireNetwork()
 	fd->setFieldDimension( fieldSize );
 	vector< double > weight( size * fieldSize, 0.0 );
 	vector< double > delay( size * fieldSize, 0.0 );
+	unsigned int numTotSyn = 0;
 	for ( unsigned int i = 0; i < size; ++i ) {
 		unsigned int numSyn = fd->getFieldArraySize( i );
 		unsigned int k = i * fieldSize;
 		for ( unsigned int j = 0; j < numSyn; ++j ) {
 			weight[ k + j ] = mtrand() * weightMax;
 			delay[ k + j ] = mtrand() * delayMax;
+			++numTotSyn;
 		}
 	}
+	assert ( numTotSyn == nd );
 
 	/*
 	vector< double > weight;

@@ -9716,5 +9716,11 @@ set up the system.
 
 This is proceeding well. Steadily clearing many of the unit tests, the
 new indexing is simple but takes an extra couple of steps over the earlier
-form.
+form. Checkin 2404.
+Currently debugging testScheduling.cpp around line 448
+============================================================================
+9 Dec 2010
+Fixed FieldDataHandlerBase usage, specifically, the implementation of 
+FieldDimension in such ragged arrays. Now clears unit tests.
+
 ============================================================================
