@@ -9847,5 +9847,9 @@ Could imagine this being used for counting molecules in voxels in a spatial
 sim. Also to estimate efields at specific recording sites. Basically all 
 are cases where a single Element needs to collate something across all entries.
 
+Fixing up testReduce to do this. First, checkin old version as 2406.
+Rebuilt testReduce. New version seems to work on 1 node but dies on more.
+I was able to run it on 3 nodes and got different results a lot of the time.
+
 
 ============================================================================

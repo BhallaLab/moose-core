@@ -22,7 +22,9 @@ class Element
 		{;}
 
 		vector< unsigned int > values;
-		void setValMax( unsigned int index );
+		unsigned int maxReduce( unsigned int begin, unsigned int end);
+
+		unsigned int nodeMax;
 };
 
 Element e;
@@ -61,30 +63,21 @@ void getMaxOnThread( unsigned int v, bool isLast )
 	}
 }
 
-void Element::setValMax( unsigned int index )
+// Thread safe, runs on all threads with different ranges.
+unsigned int Element::maxReduce( unsigned int begin, unsigned int end
+	)
 {
-	assert ( index < numObjects );
-	threadReduce( &getMaxOnThread, values[index] );
-}
-
-void threadReduce( void( *func )( unsigned int, bool ), unsigned int v )
-{
-	int status = pthread_mutex_lock( &mutex );
-	assert( status == 0 );
-	if ( threadsRemaining == 0 ) {
-		threadsRemaining = numThreads;
-		( *func )( v, 1 ); 
-	} else {
-		--threadsRemaining;
-		( *func )( v, 0 );
+	assert ( begin < numObjects && end <= numObjects );
+	unsigned int max = 0;
+	for ( unsigned int i = begin; i < end; ++i ) {
+		if ( max < values[i] )
+			max = values[i];
 	}
+	int status = pthread_mutex_lock( &mutex );
+		assert( status == 0 );
+		if ( nodeMax < max )
+			nodeMax = max;
 	pthread_mutex_unlock( &mutex );
-
-	// Only reason to do this here is that we don't want the nodeReduce to
-	// be activated in a mutex. Even that might not be so bad.
-	// if ( threadsRemaining == numThreads ) // True only after all are done.
-		// ( *func )( e, v, 1 ); 
-	
 }
 
 unsigned int nodeReduce(
@@ -102,10 +95,8 @@ void* threadFunc( void* info )
 	unsigned int myThread = reinterpret_cast< unsigned long >( info );
 	unsigned int start = ( numObjects * myThread ) / numThreads;
 	unsigned int end = ( numObjects * ( myThread + 1 ) ) / numThreads;
-	
-	for( unsigned int i = start; i < end; ++i ) {
-		e.setValMax( i );
-	}
+
+	e.maxReduce( start, end );
 }
 
 int main( int argc, char** argv )
@@ -121,6 +112,7 @@ int main( int argc, char** argv )
 	assert( status == 0 );
 
 	e.values.resize( numObjects );
+	e.nodeMax = 0;
 
 	int provided;
 	MPI_Init_thread( &argc, &argv, MPI_THREAD_SERIALIZED, &provided );
@@ -145,6 +137,9 @@ int main( int argc, char** argv )
 	}
 	delete[] threads;
 	pthread_mutex_destroy( &mutex );
+
+	unsigned int ret = nodeReduce( &getMaxOnNode, e.nodeMax );
+	cout << myNode << ": max= " << ret << endl;
 
 	MPI_Finalize();
 }
