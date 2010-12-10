@@ -238,7 +238,37 @@ void IntFire::setNumSynapses( const unsigned int v )
 {
 	assert( v < 10000000 );
 	synapses_.resize( v );
+	threadReduce< unsigned int >( er, getMaxNumSynapses, v );
 }
+
+void IntFire::getMaxNumSynapses( const Eref& er, unsigned int v, 
+	bool isLast )
+{
+	static int max;
+
+	if ( v > max ) max = v;
+
+	if ( isLast ) {
+		nodeReduce< unsigned int >( er, setSynapseDimension, max );
+		max = 0;
+	}
+}
+
+void IntFire::setSynapseDimension( const Eref& er, unsigned int v,
+	bool isLast )
+{
+	static int max;
+
+	if ( v > max ) max = v;
+
+	if ( isLast ) {
+		FieldDataHandlerBase* fd = dynamic_cast< FieldDataHandlerBase* >(
+			er.element()->dataHandler() );
+		fd->setFieldDimension( max );
+		max = 0;
+	}
+}
+
 
 double IntFire::getVm() const
 {

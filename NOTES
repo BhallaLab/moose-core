@@ -9721,6 +9721,131 @@ Currently debugging testScheduling.cpp around line 448
 ============================================================================
 9 Dec 2010
 Fixed FieldDataHandlerBase usage, specifically, the implementation of 
-FieldDimension in such ragged arrays. Now clears unit tests.
+FieldDimension in such ragged arrays. Now clears unit tests. Checkin 2405.
+
+How to tell system to send back FieldDimension request to Shell: I see a
+way to do this by setting a flag in the FieldDataHandler, and checking it
+in AssignVecMsg/AssignmentMsg at the time the ack would normally be sent.
+Question is, can we generalize to any op and any callback?
+
+- Could readily send back just a different ack call.
+- Harder to send back, as we would like to do here, a call with specific 
+	data added. Here we want to send back the updated 
+	biggestFieldDimension value.
+- However, the ack return contains the node and status info. We could
+	replace the status info with an identifier indicating what the
+	Shell should do. A somewhat ugly option, in principle the fid
+	should deal with it.
+- How often will we want to send some extra request back?
+	- When a local function call requires global updates, like here.
+		We are treating the arraySize as a field, though actually it
+		might be set up at a lower level so as to hard-code the
+		subsequent check for biggestFieldDimension.
+	- Whenever we want to report an error cleanly, rather than bailing.
+- Note that these return calls centralize the response to the situation,
+	as they require the Shell to have a function to deal with it.
+
+An altogether different approach is to have the field receipient function
+do something to respond. Here we have IntFire::setNumSynapses, which
+obviously knows it has to do something. The sticking point here wasn't 
+adding in a message, it was that we would have huge numbers of return 
+messages flooding the system following a single call to setVec. We would
+like a way to 'reduce' these messages and send a single call off-node.
+- Ideally this should not even involve the Shell, and should go to the
+	IntFire Element on each node to give it the info that it has to work out
+	to decide how to update the fieldDimension. 
+	setNumSynapses-> sendLocal( synapses_.size() ); -> findBiggestSize ->
+		send( biggestSize )
+
+- It is a little odd in that the IntFire would have a mandatory msg to itself.
+	It could in principle go to an Element-wide assignment call. Here
+	we run into threading issues, and the question of how the final
+	tally will be taken.
+- If I go through the regular messaging system, the operation will no longer
+	be atomic and other calls may intervene that mess up the system.
+	I may need a way to tell the system not to send the ack just yet.
+- Could implement a special SendToSelf function that takes the ProcInfo
+	and deals with the threads using a mutex, and also
+	guarantees that a second target function will be executed when the
+	last thread concludes. May as well call this a threadReduce operation.
+	- Generates biggestSize for the given node using threadReduce, 
+		sends Msg out.
+	- recipient scans through all 'biggestSize' candidates from all nodes
+		and figures out how to update its local fields appropriately.
+		recipient sends out deferred ack to Shell.
+	
+	Instead of msg to self, perhaps we could do as a 'set' assignment call.
+	No, there will be a huge number of these calls coming in, one from each
+	node.
+	- Could implement a nodeReduce operation which creates a dummy Msg
+	within an object for doing this data transfer, and then removes the
+	Msg when the call is done.
+	- May even wish to have a compositeReduce function which deals with
+	the threads and the nodes all together. Conceptually:
+		send out some data ( current object numSynapses )
+		threadInputFunc(input from each thread): operate on it
+		threadOutputFunc(1 per node): reduce data and send to all nodes
+		nodeInputFunc(input from each node): Operate on received data
+		nodeOutputFunc( 1 per node ): Reduce data, do something with it.
+	Remaining issue is the ack.
+
+	If we do the nodeReduce in a distinct call, we might be able to
+	complete the whole thing within the original cycle.
+
+Let's first test out threadReduce and nodeReduce in a standalone program.
+
+============================================================================
+10 Dec.
+Wrote, compiled using
+	mpicxx -g reduce.cpp
+
+The simple approach doesn't work. Issues:
+- We need to have a separate function call after each thread has done its 
+	assignments, so as to be able to collate the entries. 
+	- This separate call will trigger the threadReduce and later steps.
+	- It has to come on each thread.
+	- The AssignmentMsg::exec or AssignVecMsg::exec func should call it
+	around the time the ack is called.
+
+- We need a way to have a temporary data struct on each thread, that holds
+	the running total of whatever reduction operation is in progress.
+- The original dest function needs to know which thread it is on. 
+	- This info is there in the exec function that calls the dest operation,
+	but procInfo is not normally passed in.
+
+Perhaps the general function we are looking for is to be able to set
+	Element-wide fields like name and this size, from individual
+	object functions. Has to be conditional, and has to be efficient
+	so as to handle lots of objects on different threads, and has to
+	deal with inter-node synchronization.
+	The most we can pass back is a fid indicating what function to call.
+
+A related issue here: How do we assign Element-wide field values, taking into
+account the threads? The current design assumes that all fields are object 
+fields and can be partitioned between threads. But the name and possibly 
+various allocations will cause problems. ElementValueFinfo and EpFunc 
+will need to change to handle this.
+
+Note that our framework should also be usable by the SparseMsg::randomConnect
+function.
+
+Suppose we design a higher-level function to handle these cases. The components
+are:
+	- Set or setVec 
+	- A threadReduce operation, which could be specified as an object 
+		operation.
+		This is tricky because we need to juggle threads to find total
+	- A node reduce operation using allGather. 
+		This needs to take individual data values from the threadReduce
+		and pass to all nodes, followed by collating of all node input
+		on each node.
+	- Doing something with the result.
+
+The randomConnect will need the latter two.
+
+Could imagine this being used for counting molecules in voxels in a spatial
+sim. Also to estimate efields at specific recording sites. Basically all 
+are cases where a single Element needs to collate something across all entries.
+
 
 ============================================================================
