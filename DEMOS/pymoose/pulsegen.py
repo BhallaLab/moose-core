@@ -8,6 +8,13 @@ except ImportError:
     import sys
     sys.exit(1)
 
+has_pylab = True
+try:
+    import pylab
+    from matplotlib import numpy
+except ImportError:
+    print 'Could not import pylab. Will only save ascii files. Install matplotlib to see plots directly.'
+
 RUNTIME = 200.0
 SIMDT = 1.0
 
@@ -93,6 +100,23 @@ plot1.dumpFile("pulse1.plot")
 plot2.dumpFile("pulse2.plot")
 plotGate.dumpFile("gate.plot")
 plotTrig.dumpFile("trig.plot")
+if has_pylab:
+    pylab.subplot(511)
+    pylab.plot(numpy.array(plot0))
+    pylab.title('Free Run')
+    pylab.subplot(512)
+    pylab.plot(numpy.array(plot1))
+    pylab.title('Triggered (below)')
+    pylab.subplot(513)
+    pylab.plot(numpy.array(plotTrig))
+    pylab.title('Free Running Trigger')
+    pylab.subplot(514)
+    pylab.plot(numpy.array(plot2))
+    pylab.title('Gated (below)')
+    pylab.subplot(515)
+    pylab.plot(numpy.array(plotGate))
+    pylab.title('Free Running Gate')
+    pylab.show()
 print '----------------------------------------------------------'
 print 'pulsegen.py: data saved in pulse0.plot, pulse1.plot, pulse2.plot, gate.plot and trig.plot'
 print "pulsegen.py: finished simulation"
