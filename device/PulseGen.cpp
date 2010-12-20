@@ -304,7 +304,7 @@ void PulseGen::setPulseDelay(const Conn* c, int index, double delay)
     index == 0? obj->firstDelay_ = delay: obj->secondDelay_ = delay;
 }
 
-void PulseGen::inputFunc(const Conn* c, int value)
+void PulseGen::inputFunc(const Conn* c, double value)
 {
     PulseGen* obj = static_cast<PulseGen*> (c->data());
     ASSERT( obj != NULL, "PulseGen::inputFunc(const Conn*, int) - target data pointer is NULL.");

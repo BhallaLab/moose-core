@@ -46,6 +46,7 @@ pulse1.secondWidth = 5.0
 pulse1.secondDelay = 8.0
 pulse1.baseLevel = 10.0
 pulse1.trigMode = 1
+pulse1.trigTime = 0.0
 trig.connect("outputSrc", pulse1, "input")
 
 # Gated pulse
@@ -101,6 +102,7 @@ plot2.dumpFile("pulse2.plot")
 plotGate.dumpFile("gate.plot")
 plotTrig.dumpFile("trig.plot")
 if has_pylab:
+    fig = pylab.figure()
     pylab.subplot(511)
     pylab.plot(numpy.array(plot0))
     pylab.title('Free Run')
