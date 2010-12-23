@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Sun Apr 12 14:05:01 2009 (+0530)
 # Version: 
-# Last-Updated: Thu Sep 16 11:28:28 2010 (+0530)
+# Last-Updated: Thu Dec 23 17:01:56 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 230
+#     Update #: 231
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -103,7 +103,7 @@ moose_class = {'Neutral':'base',
                  'MathFunc':'kinetics',
                  'Molecule':'kinetics',
                  'Panel':'kinetics',
-                 'Particle':'kinetics',
+                 # 'Particle':'kinetics',
                  'Reaction':'kinetics',
                  'RectPanel':'kinetics',
                  # 'SmoldynHub':'kinetics',
