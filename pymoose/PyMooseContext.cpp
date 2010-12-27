@@ -891,18 +891,22 @@ const vector < Id >& PyMooseContext::getChildren(Id id)
 const vector < Id >& PyMooseContext::getChildren(string path)
 {
     elist_.clear();    
-    Id id(path);
-    
-    /// \todo: Use better test for a bad path than this.
+    Id id(path);        
     if ( id.bad() )
     {
-        cerr << "ERROR:  PyMooseContext::getChildren(string path) - This path seems to be invalid" << endl;
+        send2< string, bool >( myId_(), requestWildcardListSlot, path, true);
         return elist_;
     }
     send1< Id >( myId_(), requestLeSlot, id );
     return elist_;
 }
 
+const vector<Id> & PyMooseContext::getWildcardList(string path, bool breadthFirst=true)
+{
+    elist_.clear();
+    send2<string, bool>(myId_(), requestWildcardListSlot, path, breadthFirst);
+    return elist_;
+}
 void PyMooseContext::srandom(long seed)
 {
     mtseed(seed);
