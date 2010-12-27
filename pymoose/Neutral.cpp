@@ -28,11 +28,17 @@ Neutral::Neutral(const Id& src, string path):PyMooseBase(src, path)
 Neutral::~Neutral(){}
 const std::string& Neutral::getType(){ return className_; }
 
-vector<Id> Neutral::children()
+vector<Id> Neutral::children(string path=".", bool breadthFirst=true)
 {
-    // duplicate code as __get_childList for backward compatibility
     vector<Id> childList;
-    get < vector<Id> > (id_(), "childList",childList);
+    if (path.length() > 0){
+        if (breadthFirst &&
+            ((path[0] == '.') && ((path.length() == 2 && path[1] == '/') || (path.length() == 1)))){
+            get < vector<Id> > (id_(), "childList",childList);
+        } else {
+            childList = getContext()->getWildcardList(path, breadthFirst);
+        }
+    }
     return childList;
 }
 string  Neutral::__get_name() const
