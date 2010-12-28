@@ -27,7 +27,7 @@ namespace pymoose
             const Id* __get_parent() const;
             const string&  __get_class() const;
             const vector<Id>& __get_childList() const;
-            vector<Id> children(string path=".", bool breadthFirst=true);
+            vector<Id> children(string path=".", bool ordered=true);
             unsigned int __get_node() const;
             double __get_cpu() const;
             unsigned int __get_dataMem() const;
