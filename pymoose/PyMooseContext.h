@@ -28,8 +28,31 @@ namespace pymoose
 const float version = 3.0;
 const string revision = SVN_REVISION;
 
-enum FieldType { FTYPE_ALL, FTYPE_VALUE, FTYPE_LOOKUP, FTYPE_SOURCE, FTYPE_DEST, FTYPE_SHARED, FTYPE_SOLVE, FTYPE_THIS, FTYPE_GLOBAL, FTYPE_DEL };
-enum {OUTGOING, INCOMING, INOUT};
+/// Enumerations for field types.
+   
+enum FieldType { FTYPE_ALL, /// Wildcard to match all field types.
+                 FTYPE_VALUE, /// Value field
+                 FTYPE_LOOKUP, /// Lookup field - such as a lookup table
+                 FTYPE_SOURCE, /// Source field - used for connecting to a destination field
+                 FTYPE_DEST, /// Destination field - source field connects here
+                 FTYPE_SHARED, /// shared field - source and
+                               /// destination combined - connects to another shared field
+                 FTYPE_SOLVE, /// solve field - special purpose field for solvers
+                 FTYPE_THIS,  /// special purpose field
+                 FTYPE_GLOBAL, /// special purpose field
+                 FTYPE_DEL /// special purpose field
+};
+/// Enumeration for specifying the trigMode of PulseGen objects
+enum { FREE_RUN, /// generate periodic pulses - no need for input
+       EXT_TRIG, /// generate a pulse only if input switches from zero to nonzero
+       EXT_GATE /// generate periodic pulses as long as input is high.
+};
+
+/// Enumeration for message direction
+enum { OUTGOING, /// Messages for which the current object is a source.
+       INCOMING, /// Messages for which current object is a destination.
+       INOUT /// Union of OUTGOING and INCOMING messages.
+};
     class PyMooseContext
     {
       public:
