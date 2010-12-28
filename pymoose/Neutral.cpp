@@ -28,7 +28,7 @@ Neutral::Neutral(const Id& src, string path):PyMooseBase(src, path)
 Neutral::~Neutral(){}
 const std::string& Neutral::getType(){ return className_; }
 
-vector<Id> Neutral::children(string path=".", bool breadthFirst=true)
+vector<Id> Neutral::children(string path, bool breadthFirst)
 {
     vector<Id> childList;
     if (path.length() > 0){
