@@ -28,6 +28,32 @@ Neutral::Neutral(const Id& src, string path):PyMooseBase(src, path)
 Neutral::~Neutral(){}
 const std::string& Neutral::getType(){ return className_; }
 
+/**
+   returns the children of this object.
+
+   \param path -- a string pattern for the child path. It can be left
+   empty - when all the elements directly under the current element
+   will be returned. If it is a wild card, all descendants matching
+   this wild card will be returned.
+   In genesis/moose convention the following wildcards can be noted:
+
+   "#" - matches all the direct discendants
+   "##" - matches all descendants
+   "#[TYPE={type}] - matches all direct descendants of the specified
+   type, e.g., "#[TYPE=Table]" will match all elements of Table class
+   directly under the current element.
+   "##[TYPE={type}] - matches all descendants of of class {type}.
+
+   Generally, "#{rule}" will return a list of direct descndants that
+   match rule and "##{rule}" will recursively reaverse the element
+   tree and return all descendants that match rulr.
+   
+   "#[Class={type}]" is synonymous with "#[TYPE={type}]"
+   "##[Class={typr}]" is synonymous with "##[TYPE={type}]"
+   
+   \param breadthFirst -- whether to generate the child-list in a
+   breadth first manner or not (depth first). Default is true.
+ */
 vector<Id> Neutral::children(string path, bool breadthFirst)
 {
     vector<Id> childList;
@@ -36,6 +62,7 @@ vector<Id> Neutral::children(string path, bool breadthFirst)
             ((path[0] == '.') && ((path.length() == 2 && path[1] == '/') || (path.length() == 1)))){
             get < vector<Id> > (id_(), "childList",childList);
         } else {
+            string new_path = this->__get_path() + (path[0] == '/'? "": "/") + path;
             childList = getContext()->getWildcardList(path, breadthFirst);
         }
     }
