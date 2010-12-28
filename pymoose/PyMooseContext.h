@@ -89,7 +89,7 @@ enum {OUTGOING, INCOMING, INOUT};
         const std::string& getName(Id id) const;
         const std::vector <Id>& getChildren(Id id);
         const std::vector <Id>& getChildren(std::string path);
-        const std::vector <Id> & getWildcardList(std::string path, bool breadthFirst);
+        const std::vector <Id> & getWildcardList(std::string path, bool ordered);
         Id pathToId(std::string path, bool echo = true);
         /// set the seed for random number generator
         static void srandom(long seed);
