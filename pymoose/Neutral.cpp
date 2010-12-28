@@ -59,12 +59,12 @@ vector<Id> Neutral::children(string path, bool ordered)
 {
     vector<Id> childList;
     if (path.length() > 0){
-        if (breadthFirst &&
+        if (ordered &&
             ((path[0] == '.') && ((path.length() == 2 && path[1] == '/') || (path.length() == 1)))){
             get < vector<Id> > (id_(), "childList",childList);
         } else {
             string new_path = this->__get_path() + (path[0] == '/'? "": "/") + path;
-            childList = getContext()->getWildcardList(path, breadthFirst);
+            childList = getContext()->getWildcardList(path, ordered);
         }
     }
     return childList;
