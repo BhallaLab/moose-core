@@ -36,33 +36,56 @@ const Cinfo* initPulseGenCinfo()
         {
             new ValueFinfo("firstLevel", ValueFtype1<double>::global(),
                            GFCAST( &PulseGen::getFirstLevel),
-                           RFCAST( &PulseGen::setFirstLevel)),
+                           RFCAST( &PulseGen::setFirstLevel),
+                           "Amplitude of the first pulse output."),
             new ValueFinfo("firstWidth", ValueFtype1<double>::global(),
                            GFCAST( &PulseGen::getFirstWidth),
-                           RFCAST( &PulseGen::setFirstWidth)),
+                           RFCAST( &PulseGen::setFirstWidth),
+                           "Duration of the first pulse output."),
             new ValueFinfo("firstDelay", ValueFtype1<double>::global(),
                            GFCAST( &PulseGen::getFirstDelay),
-                           RFCAST( &PulseGen::setFirstDelay)),
+                           RFCAST( &PulseGen::setFirstDelay),
+                           "Delay to first pulse output. In FREE RUN mode, this is the interval" \
+                           "from the end of the previous pulse till the start of the first pulse." \
+                           "In case of TRIGGERED mode, this is how long it takes to start the "
+                           "triggered pulse after the start of the triggering pulse."
+
+                           "NOTE: If another triggering pulse comes before the triggered pulse "
+                           "was generated, the triggered pulse will be lost as the last trigger "
+                           "time is reset to the latest one and the pulsegen never reaches a state "
+                           "where the time interval since the last trigger input never crosses "
+                           "firstDelay."),
             
     
             new ValueFinfo("secondLevel", ValueFtype1<double>::global(),
                            GFCAST( &PulseGen::getSecondLevel),
-                           RFCAST( &PulseGen::setSecondLevel)),
+                           RFCAST( &PulseGen::setSecondLevel),
+                           "Amplitude of the second pulse. Default value: 0"),
             new ValueFinfo("secondWidth", ValueFtype1<double>::global(),
                            GFCAST( &PulseGen::getSecondWidth),
-                           RFCAST( &PulseGen::setSecondWidth)),
+                           RFCAST( &PulseGen::setSecondWidth),
+                           "Duration of the second pulse. Default value: 0"),
             new ValueFinfo("secondDelay", ValueFtype1<double>::global(),
                            GFCAST( &PulseGen::getSecondDelay),
-                           RFCAST( &PulseGen::setSecondDelay)),
+                           RFCAST( &PulseGen::setSecondDelay),
+                           "Time interval between first and second pulse. If 0, there will be no "
+                           "second pulse. Default value: 0"),
             new ValueFinfo("baseLevel", ValueFtype1<double>::global(),
                            GFCAST( &PulseGen::getBaseLevel),
-                           RFCAST( &PulseGen::setBaseLevel)),
+                           RFCAST( &PulseGen::setBaseLevel),
+                           "Baseline output (when no pulse is being generated). Default value: 0."),
             new ValueFinfo("output", ValueFtype1<double>::global(),
                            GFCAST( &PulseGen::getOutput),
-                           &dummyFunc),            
+                           &dummyFunc,
+                           "Pulse output."),            
             new ValueFinfo("trigTime", ValueFtype1<double>::global(),
                            GFCAST( &PulseGen::getTrigTime),
-                           RFCAST( &PulseGen::setTrigTime)),
+                           RFCAST( &PulseGen::setTrigTime),
+                           "Time since last time the input switched from 0 to non-zero. This is "
+                           "supposed to be an internal variable, but old GENESIS scripts use this "
+                           "field to generate a single pulse. If you set trigTime to a negative "
+                           "value after reset, a single output will be generated at firstDelay "
+                           "time."),
             
             new ValueFinfo("trigMode", ValueFtype1<int>::global(),
                            GFCAST( &PulseGen::getTrigMode),
