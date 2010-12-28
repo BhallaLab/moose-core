@@ -901,10 +901,10 @@ const vector < Id >& PyMooseContext::getChildren(string path)
     return elist_;
 }
 
-const vector<Id> & PyMooseContext::getWildcardList(string path, bool breadthFirst=true)
+const vector<Id> & PyMooseContext::getWildcardList(string path, bool ordered=true)
 {
     elist_.clear();
-    send2<string, bool>(myId_(), requestWildcardListSlot, path, breadthFirst);
+    send2<string, bool>(myId_(), requestWildcardListSlot, path, ordered);
     return elist_;
 }
 void PyMooseContext::srandom(long seed)

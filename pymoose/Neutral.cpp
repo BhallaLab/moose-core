@@ -51,10 +51,11 @@ const std::string& Neutral::getType(){ return className_; }
    "#[Class={type}]" is synonymous with "#[TYPE={type}]"
    "##[Class={typr}]" is synonymous with "##[TYPE={type}]"
    
-   \param breadthFirst -- whether to generate the child-list in a
-   breadth first manner or not (depth first). Default is true.
+   \param ordered -- whether the child list should be sorted. Default
+   is true. If false, the list is sorted in terms of the pointers -
+   creating an apparently random list.
  */
-vector<Id> Neutral::children(string path, bool breadthFirst)
+vector<Id> Neutral::children(string path, bool ordered)
 {
     vector<Id> childList;
     if (path.length() > 0){
