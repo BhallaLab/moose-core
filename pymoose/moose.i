@@ -117,19 +117,38 @@
 
 %pythoncode %{
 
-def listproperty(getter=None, setter=None, deller=None):
+def listproperty(getter=None, setter=None, deller=None, len=None):
     """Adds property attributes that behave like lists or 
     dictionaries but use underlying function calls for getter and
     setter: For example, SynChan.weight, SynChan.delay
     """
-
+    class iter(object):
+        def __init__(self, obj):
+	    self._obj = obj
+            self.cur = 0
+        def __iter__(self):
+            return self
+        def next(self):
+	    if self.cur == len(self._obj):
+               raise StopIteration()
+            value = getter(self._obj, self.cur)
+            self.cur += 1
+            return value
     class _proxy(object):
         def __init__(self, obj):
             self._obj = obj
         def __getitem__(self, index):
             return getter(self._obj, index)
+        # Note the order of index and value
+        # This is reverse of MOOSE lookupSet.
+        # Take care to to switch the order in C++
+        # function implementing setter.
         def __setitem__(self, index, value):
             setter(self._obj, index, value)
+        def __len__(self):
+            return len(self._obj)
+        def __iter__(self):
+            return iter(self._obj)
     return property(_proxy)
 %}
 
@@ -332,6 +351,7 @@ void fillData(PyObject* args)
 %attribute(pymoose::SynChan, double, Gk, __get_Gk, __set_Gk)
 %attribute(pymoose::SynChan, double, Ik, __get_Ik)
 %attribute(pymoose::SynChan, unsigned int, numSynapses, __get_numSynapses)
+/// This is special - using list property
 %pythoncode %{
 SynChan.weight = listproperty(SynChan.getWeight, SynChan.setWeight)
 SynChan.delay = listproperty(SynChan.getDelay, SynChan.setDelay)                    
@@ -403,7 +423,12 @@ NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.se
 %attribute(pymoose::PulseGen, double, trigTime, __get_trigTime, __set_trigTime)
 %attribute(pymoose::PulseGen, int, trigMode, __get_trigMode, __set_trigMode)
 %attribute(pymoose::PulseGen, int, prevInput, __get_prevInput)
-
+%attribute(pymoose::PulseGen, int, count, getCount, setCount)
+%pythoncode %{ 
+PulseGen.width = listproperty(PulseGen.getWidth, PulseGen.setWidth, len=PulseGen.getCount)
+PulseGen.delay = listproperty(PulseGen.getDelay, PulseGen.setDelay, len=PulseGen.getCount)
+PulseGen.level = listproperty(PulseGen.getLevel, PulseGen.setLevel, len=PulseGen.getCount)
+%}
 %include "Nernst.h"
 %attribute(pymoose::Nernst, double, E, __get_E)
 %attribute(pymoose::Nernst, double, Temperature, __get_Temperature, __set_Temperature)
