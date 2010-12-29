@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Wed Dec 22 09:49:27 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Dec 22 16:22:22 2010 (+0530)
+# Last-Updated: Wed Dec 29 20:46:28 2010 (+0530)
 #           By: Subhasis Ray
-#     Update #: 352
+#     Update #: 388
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -38,7 +38,13 @@ from PyQt4 import Qwt5 as Qwt
 import numpy
 import moose
 
-
+RUNTIME = 200
+TRIGGER_FIRST_LEVEL = 20
+TRIGGER_FIRST_DELAY = 5
+TRIGGER_FIRST_WIDTH = 1
+PULSE_FIRST_LEVEL = 50
+PULSE_FIRST_DELAY = 15
+PULSE_FIRST_WIDTH = 3
 class PulseGenWidget(QtGui.QWidget):
     """This widget contains a PulseGen object and a bunch of sliders
     and buttons to control its properties.
@@ -203,6 +209,9 @@ class PulseGenDemo(QtGui.QWidget):
         self.runButton = QtGui.QPushButton('Run')
         self.runtimeLabel = QtGui.QLabel('Runtime')
         self.runtimeSlider = QtGui.QSlider()
+        self.runtimeSlider.setMaximum(RUNTIME)
+        self.runtimeSlider.setMinimum(0)
+        self.runtimeSlider.setSliderPosition(RUNTIME)
         runControlWidget = QtGui.QFrame()
         layout = QtGui.QVBoxLayout()
         layout.addWidget(self.runButton)
@@ -212,9 +221,16 @@ class PulseGenDemo(QtGui.QWidget):
         runControlWidget.setSizePolicy(QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Minimum)
         pulsegen_gb = QtGui.QGroupBox('PulseGen')
         self.pulseGenWidget = PulseGenWidget('PulseGen', pulsegen_gb)
+        self.pulseGenWidget.firstDelaySlider.setSliderPosition(PULSE_FIRST_DELAY)
+        self.pulseGenWidget.firstWidthSlider.setSliderPosition(PULSE_FIRST_WIDTH)
+        self.pulseGenWidget.firstLevelSlider.setSliderPosition(PULSE_FIRST_LEVEL)
+        self.pulseGenWidget.triggeredButton.setChecked(True)
         pulsegen_gb.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
         trigger_gb = QtGui.QGroupBox('Trigger')
         self.triggerWidget = PulseGenWidget('Trigger', parent=trigger_gb)
+        self.triggerWidget.firstDelaySlider.setSliderPosition(TRIGGER_FIRST_DELAY)
+        self.triggerWidget.firstWidthSlider.setSliderPosition(TRIGGER_FIRST_WIDTH)
+        self.triggerWidget.firstLevelSlider.setSliderPosition(TRIGGER_FIRST_LEVEL)
         trigger_gb.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
         
         layout = QtGui.QVBoxLayout()
@@ -256,7 +272,7 @@ class PulseGenDemo(QtGui.QWidget):
         self.connect(self.runtimeSlider, QtCore.SIGNAL('valueChanged(int)'), self.setRuntime)
         self.connect(self.runButton, QtCore.SIGNAL('clicked()'), self.doRun)
 
-        self.runtime = 1.0
+        self.runtime = RUNTIME * 1.0
 
     def setRuntime(self, value):
         self.runtime = value * 1.0
@@ -273,6 +289,7 @@ if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     # widget = PulseGenWidget()
     widget = PulseGenDemo()
+    widget.resize(800, 600)
     # print '#', widget.pulseGenWidget
     # widget.table.connect('inputRequest', widget.pulseGenWidget.pulsegen, 'output')
     widget.show()

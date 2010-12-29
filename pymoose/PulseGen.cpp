@@ -117,4 +117,49 @@ int PulseGen::__get_prevInput() const
     get < int > (id_(), "prevInput",prevInput);
     return prevInput;
 }
+int PulseGen::getCount() const
+{
+    int count;
+    get < int > (id_(), "count",count);
+    return count;
+}
+void PulseGen::setCount( int count )
+{
+    set < int > (id_(), "count", count);
+}
+
+double PulseGen::getDelay(int index)
+{
+    double delay;
+    lookupGet <double, int>(id_(), "delay", delay, index);
+    return delay;
+}
+
+double PulseGen::getWidth(int index)
+{
+    double width;
+    lookupGet <double, int>(id_(), "width", width, index);
+    return width;
+}
+
+double PulseGen::getLevel(int index)
+{
+    double level;
+    lookupGet <double, int>(id_(), "level", level, index);
+    return level;
+}
+
+void PulseGen::setDelay(int index, double delay)
+{
+    lookupSet< double, int>(id_(), "delay", delay, index);
+}
+void PulseGen::setWidth(int index, double width)
+{
+    lookupSet< double, int>(id_(), "width", width, index);
+}
+void PulseGen::setLevel(int index, double level)
+{
+    lookupSet< double, int>(id_(), "level", level, index);
+}
+
 #endif

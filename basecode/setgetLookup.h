@@ -24,7 +24,11 @@ template < class T1, class T2 > bool lookupSet(
 		return lf->lookupSet( e, f, v, index );
 	}
 	cout << "Error: lookupSet( " << e.e->name() << "." << e.i << ", " << 
-		f->name() << " T ): Finfo type mismatch\n";
+		f->name() << " T ): Finfo type mismatch." <<
+                " Expected: " << f->ftype()->getTemplateParameters() <<
+                ". Received: " << Ftype::full_type(typeid(T1)) << ", " <<
+                Ftype::full_type(typeid(T2)) << "\n";
+
 	return 0;
 }
 
@@ -59,7 +63,10 @@ template < class T1, class T2 > bool lookupGet(
 		return lf->lookupGet( e, f, v, index );
 	}
 	cout << "Error: lookupGet( " << e.e->name() << "." << e.i << 
-		", " << f->name() << " T1, T2 ): Finfo Type mismatch\n";
+		", " << f->name() << " T1, T2 ): Finfo Type mismatch." <<
+                " Expected: " << f->ftype()->getTemplateParameters() <<
+                ". Received: " << Ftype::full_type(typeid(T1)) << ", " <<
+                Ftype::full_type(typeid(T2)) << "\n";
 	return 0;
 }
 

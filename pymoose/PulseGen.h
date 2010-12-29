@@ -38,6 +38,15 @@ namespace pymoose{
         int __get_trigMode() const;
         void __set_trigMode(int trigMode);
         int __get_prevInput() const;
+        void setCount(int count);
+        int getCount() const;
+        
+        void setDelay(int index, double value);
+        double getDelay(int index);
+        void setLevel(int index, double value);
+        double getLevel(int index);
+        void setWidth(int index, double value);
+        double getWidth(int index);        
     };
 }
 
