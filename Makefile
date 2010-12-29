@@ -340,9 +340,9 @@ libs:
 	@echo "	USE_MUSIC:" $(USE_MUSIC)
 	@echo "	USE_CURSES:" $(USE_CURSES)
 	@echo "	USE_GL:" $(USE_GL)
-	@echo " SVN_REVISION:" $(SVN_REVISION)
-	@echo " GENERATE_WRAPPERS:" $(GENERATE_WRAPPERS)
-	@echo " LDFLAGS:" $(LDFLAGS)
+	@echo "	SVN_REVISION:" $(SVN_REVISION)
+	@echo "	GENERATE_WRAPPERS:" $(GENERATE_WRAPPERS)
+	@echo "	LDFLAGS:" $(LDFLAGS)
 	@(for i in $(SUBDIR); do $(MAKE) -C $$i; done)
 	@echo "All Libs compiled"
 
