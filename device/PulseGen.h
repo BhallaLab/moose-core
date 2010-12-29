@@ -81,21 +81,33 @@ class PulseGen
     // Message dest functions.
     //////////////////////////////////////////////////////////////////
     static void inputFunc(const Conn* c, double input);
-    static void setPulseLevel(const Conn* c, int pulseNo, double level);
-    static void setPulseWidth(const Conn* c, int pulseNo, double width);
-    static void setPulseDelay(const Conn* c, int pulseNo, double delay);
-    void innerProcessFunc( const Conn* c, ProcInfo p );
+    /// The following three are for lookup (valuefinfos - where index
+    /// comes after value.
+    static void setLevel(const Conn* c, double level, const int& pulseNo);
+    static void setWidth(const Conn* c, double width, const int& pulseNo);
+    static void setDelay(const Conn* c, double delay, const int& pulseNo);
+    /// The following three are for dest messages - which have order
+    /// of parameters: index, value in GENESIS.
+    static void setLevelFunc(const Conn* c, int pulseNo, double level);
+    static void setWidthFunc(const Conn* c, int pulseNo, double width);
+    static void setDelayFunc(const Conn* c, int pulseNo, double delay);
+    
     static void processFunc( const Conn* c, ProcInfo p );
     static void reinitFunc( const Conn* c, ProcInfo p );
-
-  private:
-    double firstLevel_;
-    double firstWidth_;
-    double firstDelay_;
+    static void setCount(const Conn* c, int count);
+    static int getCount(Eref e);
+    static double getWidth(Eref e, const int& index);
+    static double getDelay(Eref e, const int& index);
+    static double getLevel(Eref e, const int& index);
     
-    double secondLevel_;
-    double secondWidth_;
-    double secondDelay_;
+  protected:
+    void innerProcessFunc( const Conn* c, ProcInfo p );    
+    
+  private:
+    vector <double> delay_;
+    vector <double> level_;
+    vector <double> width_;
+
     
     double output_;
     double baseLevel_;
