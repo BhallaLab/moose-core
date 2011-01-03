@@ -535,10 +535,10 @@ void PulseGen::innerProcessFunc(const Conn* c, ProcInfo p)
     for (unsigned int ii = 0; ii < width_.size(); ++ii){
         if (phase < delay_[ii]){ // we are in the baseline area - before ii-th pulse
             output_ = baseLevel_;
-            return;
+            break;
         } else if (phase < delay_[ii] + width_[ii]){ // we are inside th ii-th pulse
             output_ = level_[ii];
-            return;
+            break;
         }
         phase -= delay_[ii];
     }
