@@ -54,14 +54,14 @@ const Cinfo* initSynChanCinfo()
                         "Reversal potential for the synaptic channel."        
 		),
 		new ValueFinfo( "tau1", ValueFtype1< double >::global(),
-			GFCAST( &SynChan::getTau1 ), 
+                        GFCAST( &SynChan::getTau1 ), 
                         RFCAST( &SynChan::setTau1 ),
-                        "Decay time constant for the synaptic conductance, tau1 >= tau2."
+                        "First time constant for the synaptic conductance."
 		),
 		new ValueFinfo( "tau2", ValueFtype1< double >::global(),
 			GFCAST( &SynChan::getTau2 ), 
                         RFCAST( &SynChan::setTau2 ),
-                        "Rise time constant for the synaptic conductance, tau1 >= tau2."
+                        "Second time constant for the synaptic conductance." 
 		),
 		new ValueFinfo( "normalizeWeights", 
 			ValueFtype1< bool >::global(),
@@ -145,8 +145,29 @@ const Cinfo* initSynChanCinfo()
 		"Author", "Upinder S. Bhalla, 2007, NCBS",
 		"Description", "SynChan: Synaptic channel incorporating weight and delay. Does not "
 				"handle activity-dependent modification, see HebbSynChan for that. "
-				"Very similiar to the old synchan from GENESIS.", 
-	};
+				"Very similiar to the old synchan from GENESIS."
+                                "\n\n"
+				"A spike coming into the 'synapse' destination field of the SynChan "
+				"causes a temporary increase in its conductance. If the SynChan is "
+				"connected to a compartment via a channel message, and the reversal "
+				"potential of the SynChan is different from the compartment's membrane "
+				"potential, ionic current flows through the SynChan into/out of the "
+				"compartment."
+				"\n"
+				"Generally, the conductance has the time course:"
+				"\n"
+				"Gk = Gbar * A * (exp(-t/tau1) - exp(-t/tau2))/(tau1 - tau2)"
+				"\n\n"
+				"Here A is a constant to make the maximum value of Gk be Gbar."
+				"\n"
+				"When tau1 = tau2, it is used as the time to peak, and the synaptic"
+				"conductance has a time course:"
+				"\n"                
+				"Gk = Gbar * (t/tau1) * exp( 1 - t/tau1)."
+				"\n\n"
+				"When tau2 = 0, the synaptic conductance rises instantaneously and "
+				"undergoes an exponential decay with time constant tau1.", 
+		};
 
 	static Cinfo SynChanCinfo(
 		doc,
