@@ -4,11 +4,11 @@ from PyQt4 import QtGui,QtCore,Qt
 from operator import itemgetter, attrgetter
 
 import math
-import config
-
 import moose
 
 '''
+#import config
+
 print os.getcwd()
 os.chdir('/home/lab13/trunk/pymoose/gui')
 sys.path.append('/home/lab13/trunk/pymoose/')
@@ -18,7 +18,7 @@ dir(moose)
 
 c = moose.PyMooseBase.getContext()
 
-c.loadG('/home/lab13/Genesis_file/gfile/acc18.g')
+c.loadG('/home/lab13/Genesis_file/gfile/acc13.g')
 #c.loadG('/home/lab13/trunk/DEMOS/kholodenko/Kholodenko.g')
 
 app = QtGui.QApplication(sys.argv)
@@ -63,7 +63,6 @@ class LayoutWidget(QtGui.QWidget):
 	def __init__(self,parent=None):
 		QtGui.QWidget.__init__(self,parent)
 		grid = QtGui.QGridLayout()
-		#self.setAcceptDrops(True)
 		self.setLayout(grid)
 		self.screen = QtGui.QGraphicsScene(self)
 		self.screen.setBackgroundBrush(QtGui.QColor(230,230,219,120))
@@ -87,6 +86,7 @@ class LayoutWidget(QtGui.QWidget):
 				break
 		
 		if allZero:
+			#This is check which version of kkit, b'cos anything below kkit8 didn't had xyz co-ordinates
 			msgBox = QtGui.QMessageBox()
 			msgBox.setText("The Layout module works for kkit version 8 or higher.")
 			msgBox.setStandardButtons(QtGui.QMessageBox.Ok)
@@ -97,9 +97,11 @@ class LayoutWidget(QtGui.QWidget):
 			#Adding moose Object to scene to get scene bounding reaction for spacing the coordinates
 			for item in self.itemList:
 				pItem = Textitem(self,item.path)
+				
 				x = float(item.getField('x'))
 				y = float(item.getField('y'))
 				pItem.setPos(x,y)
+				print "hhe",pItem.sceneBoundingRect()
 				itemid = item.id
 				
 				#moosetext_dict[] is created to get the text's sceneBoundingRect
@@ -118,7 +120,7 @@ class LayoutWidget(QtGui.QWidget):
 				y = float(item.getField('y'))*-(scale_Cord)
 				pItem.setPos(x,y)
 				pItem.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
-				pItem.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges, 1)
+				#pItem.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges, 1)
 				self.connect(pItem, QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
 				self.connect(pItem, QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"), self.emitItemtoEditor)
 				itemid = item.id
@@ -138,7 +140,6 @@ class LayoutWidget(QtGui.QWidget):
 				
 				self.screen.addItem(pItem)
 
-				
 			#connecting substrate,product to reaction and Enzyme
 			self.lineItem_dict = {}
 			self.object2line = {}
@@ -182,15 +183,15 @@ class LayoutWidget(QtGui.QWidget):
 
 	def keyPressEvent(self,event):
 		#For Zooming
-		key = event.key()
-		
 		for item in self.screen.items():
 			if isinstance (item, Textitem):
 				if((self.view.matrix().m11()<=1.0)and(self.view.matrix().m22() <=1.0)):
 					item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, True)
 				else:
 					item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, False)
-
+					
+		key = event.key()
+		
 		if key == QtCore.Qt.Key_A:
 			self.view.resetMatrix()
 	
@@ -207,14 +208,13 @@ class LayoutWidget(QtGui.QWidget):
 		#If the item position changes, the corresponding arrow also changes here
 		listItem = []
 		for listItem in (v for k,v in self.object2line.items() if k.mooseObj_.id == mooseObject.id ):
+			if len(listItem):
+				for ql,va in listItem:
+					srcdes = self.lineItem_dict[ql]
+					arrow = self.calArrow(srcdes[0],srcdes[1])
+					ql.setPolygon(arrow)
 			break
-		
-		if len(listItem):
-			for ql,va in listItem:
-				srcdes = self.lineItem_dict[ql]
-				arrow = self.calArrow(srcdes[0],srcdes[1])
-				ql.setPolygon(arrow)
-				
+
 	def lineCord(self,src,des,screen,source,object2line,lineItem_dict):
 		if( (src == "") & (des == "") ):
 			print "Source or destination is missing or incorrect"
@@ -371,8 +371,9 @@ class LayoutWidget(QtGui.QWidget):
 			self.setupItem(childObj,itemlist)
 
 	def cordTransform(self,itemslist,mooseItemdict):
-		alpha =0
-		alpha1 =0
+		#here alpha is calculated to multipy the coordinates with, so that the each items spreads out
+		alpha = 0
+		alpha1 = 0
 		for m in range(len(itemslist)):
 			for n in range(len(itemslist)):
 				if(m != n):
@@ -391,58 +392,30 @@ class LayoutWidget(QtGui.QWidget):
 					desY = des_Scenebounding.y()
 					desW = des_Scenebounding.right()-des_Scenebounding.left()
 					desH = des_Scenebounding.bottom()-des_Scenebounding.top()
-
-					#Checking for overlap of items
-					alpha = self.overLap(float(srcX),float(srcY),srcW,srcH,float(desX),float(desY),desW,desH)	
+					
+					t = src_Scenebounding.intersects(des_Scenebounding)
+					if t:
+						sfx = 0
+						sfy = 0
+						if((desX - srcX)!= 0):	sfx = ( float(srcW)/abs(desX-srcX))
+						if((desY - srcY)!= 0):	sfy = ( float(srcH)/abs(desY-srcY))
+						if((sfx != 0) and (sfy != 0)):
+							if( sfx < sfy):		alpha = sfx
+							elif (sfy < sfx):	alpha = sfy
+							else:			alpha = 0
+						elif (sfx == 0): alpha = sfy
+						elif (sfy == 0): alpha = sfx
+						else:		 alpha =0
+					else:
+						pass
+					
 					if(alpha1 < alpha): alpha1 = alpha
-					else:	pass
-			
+					
 				else: 
 					pass
+		alpha1=alpha1+1
 		return(alpha1)
 
-	def rectBoundry(self,x0,y0,wi,hi,px,py,wj,hj):
-		if( (px >= x0) and (px <= x0 +wi) and (py >= y0) and (py <=y0+hj) ):		return 1
-		else:		return 0
-
-	def cal_Alpha(self,XI0,YI0,WI,HI,XI1,YI1):
-		sfx = 0
-		sfy = 0
-		if(XI1-XI0 != 0):		sfx = ( float(WI)/abs(XI1-XI0) )
-		if(YI1-YI0 != 0):		sfy = ( float(HI)/abs(YI1-YI0) )
-
-		if((sfx != 0) and (sfy != 0)):
-			if( sfx < sfy):		return sfx
-			elif (sfy < sfx):	return sfy
-			else:			return 0
-		elif (sfx == 0): return sfy
-		elif (sfy == 0): return sfx
-		else:		 return 0
-
-	def overLap(self,xi0,yi0,wi,hi,xj0,yj0,wj,hj):
-		fact = 0
-		previous = 0
-		present_alp = 0
-		fact = self.overLapfact(xi0,yi0,wi,hi,xj0,yj0,wj,hj,fact)
-		if(fact == 1):
-			present_alp = self.cal_Alpha(xi0,yi0,wi,hi,xj0,yj0)
-
-		if(previous < present_alp): previous = present_alp
-
-		return present_alp
-	def overLapfact(self,xi0,yi0,wi,hi,xj0,yj0,wj,hj,fact):
-	
-		if(fact == 0):
-			fact = self.rectBoundry(xi0,yi0,wi,hi,xj0,yj0,wj,hj)
-			if(fact == 0):
-				fact = self.rectBoundry(xi0,yi0,wi,hi,xj0,yj0+hj,wj,hj)
-				if(fact == 0):
-					fact = self.rectBoundry(xi0,yi0,wi,hi,xj0+wj,yj0,wj,hj)
-					if(fact == 0):
-						fact = self.rectBoundry(xi0,yi0,wi,hi,xj0+wj,yj0+hj,wj,hj)
-			
-		return fact
-		
 if __name__ == "__main__":
 	#app = QtGui.QApplication(sys.argv)
 	dt = LayoutWidget()
