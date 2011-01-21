@@ -328,11 +328,15 @@ They are listed below:
 
 
    The build process for pymoose generates two final output files in
-the `pymoose' directory: `moose.py' and `_moose.so'. Copy these to
+the top level directory: `moose.py' and `_moose.so'. Copy these to
 any location in your PYTHONPATH environment variable (for Python 2.6
 you can copy them to `dist-packages' directory inside your python
 installation directory (for UNIX-like systems it is:
 `/usr/lib/python{version}' or `/usr/local/lib/python{version}'
+Additionally, there is a file with some utility functions
+`pymoose/pymoose.py'. It has functions like `showmsg', `printtree',
+etc. You may copy this file along with moose.py to use these
+functions.
 
 
 File: pymoose.info,  Node: Loading,  Prev: Build/install,  Up: Installation
@@ -1404,21 +1408,21 @@ Node: Installation8570
 Node: Prerequisites9215
 Node: Configuration9985
 Node: Build/install10383
-Node: Loading13462
-Node: Quick Start13958
-Node: Detailed Guide14083
-Node: Overview14871
-Node: Element Tree19523
-Node: Id20475
-Node: Neutral22259
-Ref: Neutral-Footnote-127839
-Node: PyMooseContext27922
-Node: Messaging30528
-Node: Running GENESIS scripts in Python32415
-Node: FAQ33425
-Node: GNU Free Documentation License33608
-Node: Index56062
-Node: Variable Index56207
-Node: Concept Index57262
+Node: Loading13660
+Node: Quick Start14156
+Node: Detailed Guide14281
+Node: Overview15069
+Node: Element Tree19721
+Node: Id20673
+Node: Neutral22457
+Ref: Neutral-Footnote-128037
+Node: PyMooseContext28120
+Node: Messaging30726
+Node: Running GENESIS scripts in Python32613
+Node: FAQ33623
+Node: GNU Free Documentation License33806
+Node: Index56260
+Node: Variable Index56405
+Node: Concept Index57460
 
 End Tag Table
