@@ -14,4 +14,14 @@ HHGate2D::HHGate2D(const Id& src, std::string name, Id& parent):HHGate(src, name
 HHGate2D::HHGate2D(const Id& src, std::string path):HHGate(src, path){}
 HHGate2D::~HHGate2D(){}
 const std::string& HHGate2D::getType(){ return className_; }
+// Manually edited part
+Interpol2D* HHGate2D::__get_A() const
+{
+    return new Interpol2D(PyMooseBase::pathToId(this->__get_path()+"/A"));    
+}
+Interpol2D* HHGate2D::__get_B() const
+{
+    return new Interpol2D(PyMooseBase::pathToId(this->__get_path()+"/B"));
+}
+// till here
 #endif
