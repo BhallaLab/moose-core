@@ -2,6 +2,7 @@
 #define _pymoose_HHGate2D_h
 #include "PyMooseBase.h"
 #include "HHGate.h"
+#include "Interpol2D.h"
 namespace pymoose{
 class HHGate;
     class HHGate2D : public HHGate
@@ -17,6 +18,8 @@ class HHGate;
         HHGate2D( const Id& src, std::string name, Id& parent);
 	HHGate2D( const Id& src, std::string path);
         ~HHGate2D();
+        Interpol2D* __get_A() const;
+        Interpol2D* __get_B() const;        
         const std::string& getType();
     };
 }
