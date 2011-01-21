@@ -124,11 +124,15 @@ Useful for python interface developers.  The binary created with this
 @end itemize
 
 The build process for pymoose generates two final output files in the
-@code{pymoose} directory: @code{moose.py} and @code{_moose.so}. Copy
+top level directory: @code{moose.py} and @code{_moose.so}. Copy
 these to any location in your PYTHONPATH environment variable (for
 Python 2.6 you can copy them to @file{dist-packages} directory inside
 your python installation directory (for UNIX-like systems it is:
 @file{/usr/lib/python@{version@}} or @file{/usr/local/lib/python@{version@}}
+Additionally, there is a file with some utility functions
+@file{pymoose/pymoose.py}. It has functions like @code{showmsg},
+@code{printtree}, etc. You may copy this file along with moose.py to use
+these functions.
 
 @node Loading
 @section Loading
