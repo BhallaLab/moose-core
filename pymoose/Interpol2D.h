@@ -1,6 +1,8 @@
 #ifndef _pymoose_Interpol2D_h
 #define _pymoose_Interpol2D_h
 #include "PyMooseBase.h"
+#include "pymoose/Interpol.h"
+
 namespace pymoose{
     class Interpol2D : public Interpol
     {
@@ -17,16 +19,16 @@ namespace pymoose{
 	Interpol2D( const Id& src, std::string path);
         ~Interpol2D();
         const std::string& getType();
-            double __get_ymin() const;
-            void __set_ymin(double ymin);
-            double __get_ymax() const;
-            void __set_ymax(double ymax);
-            int __get_ydivs() const;
-            void __set_ydivs(int ydivs);
-            double __get_dy() const;
-            void __set_dy(double dy);
-            none __get_tableVector2D() const;
-            void __set_tableVector2D(none tableVector2D);
+        double __get_ymin() const;
+        void __set_ymin(double ymin);
+        double __get_ymax() const;
+        void __set_ymax(double ymax);
+        int __get_ydivs() const;
+        void __set_ydivs(int ydivs);
+        double __get_dy() const;
+        void __set_dy(double dy);
+        double getTableValue(unsigned int row, unsigned int col);
+        void setTableValue(unsigned int row, unsigned int col, double value);
     };
 }
 #endif
