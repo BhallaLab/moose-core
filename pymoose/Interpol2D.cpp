@@ -1,6 +1,7 @@
 #ifndef _pymoose_Interpol2D_cpp
 #define _pymoose_Interpol2D_cpp
-#include "Interpol2D.h"
+
+#include "pymoose/Interpol2D.h"
 using namespace pymoose;
 const std::string Interpol2D::className_ = "Interpol2D";
 Interpol2D::Interpol2D(Id id):Interpol(id){}
@@ -54,4 +55,23 @@ void Interpol2D::__set_dy( double dy )
 {
     set < double > (id_(), "dy", dy);
 }
+
+double Interpol2D::getTableValue(unsigned int row, unsigned int col)
+{
+    vector<unsigned int> index;
+    index.push_back(row);
+    index.push_back(col);
+    double value;
+    lookupGet< double, vector< unsigned int > >(id_(), "table2D", value, index);
+    return value;
+}
+
+void Interpol2D::setTableValue(unsigned int row, unsigned int col, double value)
+{
+    vector<unsigned int> index;
+    index.push_back(row);
+    index.push_back(col);
+    lookupSet< double, vector< unsigned int > >(id_(), "table2D", value, index);
+}
+
 #endif
