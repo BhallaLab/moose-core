@@ -47,6 +47,9 @@ namespace pymoose
         string dumpFile() const;
         void dumpFile(string fileName, bool append = false);
         void tabFill(int xdivs, int mode);
+        void load(string fileName, unsigned int skiplines);
+        // double lookup(double index);
+        // void appendTableVector(vector<double> vec);
         void clear();
         void push(double);
         void pop();

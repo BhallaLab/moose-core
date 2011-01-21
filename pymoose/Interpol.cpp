@@ -191,6 +191,11 @@ void Interpol::dumpFile( string fileName, bool append )
     }    
 }
 
+void Interpol::load(string fileName, unsigned int skiplines)
+{
+    set<string, unsigned int>(id_(), "load", fileName, skiplines);
+}
+
 void Interpol::tabFill(int xdivs, int mode)
 {
     set <int, int> (id_(), "tabFill", xdivs, mode);    
