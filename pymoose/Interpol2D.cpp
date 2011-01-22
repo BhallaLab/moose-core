@@ -62,7 +62,11 @@ double Interpol2D::getTableValue(unsigned int row, unsigned int col)
     index.push_back(row);
     index.push_back(col);
     double value;
-    lookupGet< double, vector< unsigned int > >(id_(), "table2D", value, index);
+    // Minor bug in LookupFinfo::match - if I put table2D instead, I
+    // get an error: Error: LookupFinfo::match: bad indexing: table2D
+    // as the function matches the 'table' part and assumes 2D to be
+    // an index. It should instead check for '['.
+    lookupGet< double, vector< unsigned int > >(id_(), "table", value, index);
     return value;
 }
 
@@ -71,7 +75,7 @@ void Interpol2D::setTableValue(unsigned int row, unsigned int col, double value)
     vector<unsigned int> index;
     index.push_back(row);
     index.push_back(col);
-    lookupSet< double, vector< unsigned int > >(id_(), "table2D", value, index);
+    lookupSet< double, vector< unsigned int > >(id_(), "table", value, index);
 }
 
 #endif
