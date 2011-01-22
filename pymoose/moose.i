@@ -16,6 +16,7 @@
 	#include "Tick.h" 
 	#include "ClockJob.h" 
 	#include "Interpol.h"
+    	#include "Interpol2D.h"
 	#include "TableIterator.h"
 	#include "Table.h"
 	#include "SynChan.h"
@@ -307,6 +308,12 @@ void fillData(PyObject* args)
 %attribute(pymoose::Interpol, int, calc_mode, __get_calcMode, __set_calcMode)
 %attribute(pymoose::Interpol, const vector<double>&, table, __get_table)
 
+%include "Interpol2D.h"
+%attribute(pymoose::Interpol2D, double, ymin, __get_ymin, __set_ymin)
+%attribute(pymoose::Interpol2D, double, ymax, __get_ymax, __set_ymax)
+%attribute(pymoose::Interpol2D, int, ydivs, __get_ydivs, __set_ydivs)
+%attribute(pymoose::Interpol2D, double, dy, __get_dy, __set_dy)
+
 %include "TableIterator.h"
 %extend pymoose::TableIterator
 {	%insert("python")%{
@@ -470,8 +477,36 @@ PulseGen.level = listproperty(PulseGen.getLevel, PulseGen.setLevel, len=PulseGen
 %attribute(pymoose::HHChannel, double, Z, __get_Z, __set_Z)
 %attribute(pymoose::HHChannel, double, instant, __get_instant, __set_instant)
 %attribute(pymoose::HHChannel, int, useConcentration, __get_useConcentration, __set_useConcentration)
+%extend pymoose::HHChannel {
+%pythoncode %{
+    def __get_xGate(self):
+        if self.Xpower != 0:
+            return HHGate('xGate', self)
+        else:
+            return None
 
-
+    def __get_yGate(self):
+        if self.Ypower != 0:
+            return HHGate('yGate', self)
+        else:
+            return None
+    def __get_zGate(self):
+        if self.Zpower != 0:
+            return HHGate('zGate', self)
+        else:
+            return None
+%}
+     // If we put it in the same "%pythoncode %{" block as the
+     // methods, the attribute names gate truncated (I guess SWIG
+     // replaces the first four characters with spaces for matching
+     // indentation or something):
+     // 'xGate' becomes 'e', 'HHChannel' becomes 'annel'
+%pythoncode %{     
+xGate = property(__get_xGate)
+yGate = property(__get_yGate)
+zGate = property(__get_zGate)
+%}
+}
 %include "Mg_block.h"
 %attribute(pymoose::Mg_block, double, KMg_A, __get_KMg_A, __set_KMg_A)
 %attribute(pymoose::Mg_block, double, KMg_B, __get_KMg_B, __set_KMg_B)
@@ -833,11 +868,36 @@ PulseGen.level = listproperty(PulseGen.getLevel, PulseGen.setLevel, len=PulseGen
 %attribute(pymoose::GHK, double, Cin, __get_Cin, __set_Cin)
 %attribute(pymoose::GHK, double, Cout, __get_Cout, __set_Cout)
 %attribute(pymoose::GHK, double, valency, __get_valency, __set_valency)
-
-
+%include "HHGate2D.h"
+%attribute(pymoose::HHGate2D, Interpol2D*, A, __get_A)
+%attribute(pymoose::HHGate2D, Interpol2D*, B, __get_B)
 
 %include "HHChannel2D.h"
 %attribute(pymoose::HHChannel2D, string, Xindex, __get_Xindex, __set_Xindex)
 %attribute(pymoose::HHChannel2D, string, Yindex, __get_Yindex, __set_Yindex)
 %attribute(pymoose::HHChannel2D, string, Zindex, __get_Zindex, __set_Zindex)
-%include "HHGate2D.h"
+%extend pymoose::HHChannel2D {
+%pythoncode %{
+    def __get_xGate(self):
+        if self.Xpower != 0:
+            return HHGate2D('xGate', self)
+        else:
+            return None
+
+    def __get_yGate(self):
+        if self.Ypower != 0:
+            return HHGate2D('yGate', self)
+        else:
+            return None
+    def __get_zGate(self):
+        if self.Zpower != 0:
+            return HHGate2D('zGate', self)
+        else:
+            return None
+%}
+%pythoncode %{     
+xGate = property(__get_xGate)
+yGate = property(__get_yGate)
+zGate = property(__get_zGate)                    
+%}
+}
