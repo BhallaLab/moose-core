@@ -35,21 +35,26 @@ unsigned int numThreads;
 int numNodes;
 int myNode;
 unsigned int numObjects;
+unsigned int numObjectsOnThisNode;
 
 void threadReduce( void( *func )( unsigned int, bool ), unsigned int );
 unsigned int nodeReduce( 
 	unsigned int ( *func )( unsigned int*, unsigned int ), unsigned int );
 
-unsigned int getMaxOnNode( unsigned int *v, unsigned int num )
+/**
+ * Finds the max value on the array v, which has numNodes entries
+ */
+unsigned int getMaxOnNode( const unsigned int *v, unsigned int numNodes )
 {
 	int max = 0;
-	for ( unsigned int i = 0; i < num; ++i ) {
+	for ( unsigned int i = 0; i < numNodes; ++i ) {
 		if ( max < v[i] )
 			max = v[i];
 	}
 	return max;
 }
 
+/*
 void getMaxOnThread( unsigned int v, bool isLast )
 {
 	static int max = 0;
@@ -62,12 +67,12 @@ void getMaxOnThread( unsigned int v, bool isLast )
 		max = 0;
 	}
 }
+*/
 
 // Thread safe, runs on all threads with different ranges.
-unsigned int Element::maxReduce( unsigned int begin, unsigned int end
-	)
+unsigned int Element::maxReduce( unsigned int begin, unsigned int end )
 {
-	assert ( begin < numObjects && end <= numObjects );
+	assert ( begin < numObjectsOnThisNode && end <= numObjectsOnThisNode );
 	unsigned int max = 0;
 	for ( unsigned int i = begin; i < end; ++i ) {
 		if ( max < values[i] )
@@ -80,11 +85,16 @@ unsigned int Element::maxReduce( unsigned int begin, unsigned int end
 	pthread_mutex_unlock( &mutex );
 }
 
+/**
+ * Not thread safe: should run only on master thread
+ */
 unsigned int nodeReduce(
-	unsigned int( *func )( unsigned int*, unsigned int ), unsigned int v )
+	unsigned int( *func )( const unsigned int*, unsigned int ), unsigned int v )
 {
 	unsigned int *recvBuf = new unsigned int[ numNodes ];
-	MPI_Allgather( &v, 1, MPI_UNSIGNED, recvBuf, numNodes, MPI_UNSIGNED, MPI_COMM_WORLD );
+	// cout << "in nodeReduce numNodes = " << numNodes << endl;
+	unsigned int sendbuf = v;
+	MPI_Allgather( &sendbuf, 1, MPI_UNSIGNED, recvBuf, 1, MPI_UNSIGNED, MPI_COMM_WORLD );
 	unsigned int ret = ( *func )( recvBuf, numNodes );
 	delete[] recvBuf;
 	return ret;
@@ -93,8 +103,9 @@ unsigned int nodeReduce(
 void* threadFunc( void* info )
 {
 	unsigned int myThread = reinterpret_cast< unsigned long >( info );
-	unsigned int start = ( numObjects * myThread ) / numThreads;
-	unsigned int end = ( numObjects * ( myThread + 1 ) ) / numThreads;
+	assert( myThread < numThreads );
+	unsigned int start = ( numObjectsOnThisNode * myThread ) / numThreads;
+	unsigned int end = ( numObjectsOnThisNode * ( myThread + 1 ) ) / numThreads;
 
 	e.maxReduce( start, end );
 }
@@ -111,17 +122,31 @@ int main( int argc, char** argv )
 	int status = pthread_mutex_init( &mutex, NULL );
 	assert( status == 0 );
 
-	e.values.resize( numObjects );
-	e.nodeMax = 0;
 
-	int provided;
+	int provided = 0;
 	MPI_Init_thread( &argc, &argv, MPI_THREAD_SERIALIZED, &provided );
 	MPI_Comm_size( MPI_COMM_WORLD, &numNodes );
 	MPI_Comm_rank( MPI_COMM_WORLD, &myNode );
 
-	srandom( 12345 + myNode );
-	for ( unsigned int i = 0; i < numObjects; ++i )
-		e.values[i] = random();
+
+	unsigned int start = ( numObjects * myNode )/ numNodes;
+	unsigned int end = ( numObjects * ( myNode + 1 ) )/ numNodes;
+	cout << "numNodes = " << numNodes << ", myNode = " << myNode << 
+		", start = " << start << ", end = " << end << endl;
+	numObjectsOnThisNode = end - start;
+	e.values.resize( numObjectsOnThisNode );
+	e.nodeMax = 0;
+
+	srandom( 12345 );
+	for ( unsigned int i = 0; i < numObjects; ++i ) {
+		unsigned int r = random();
+		if ( i >= start && i < end )
+			e.values[i - start] = r;
+	}
+
+	bool loop = 0;
+	while (loop)
+		;
 
 	pthread_t* threads = new pthread_t[ numThreads ];
 	for( unsigned int i = 0; i < numThreads; ++i ) {

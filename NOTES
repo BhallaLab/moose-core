@@ -9851,5 +9851,20 @@ Fixing up testReduce to do this. First, checkin old version as 2406.
 Rebuilt testReduce. New version seems to work on 1 node but dies on more.
 I was able to run it on 3 nodes and got different results a lot of the time.
 
+Checkin 2407.
+
+============================================================================
+24 Jan 2011
+Back to work on this. The compilation command line is mpic++ -g reduce.cpp
+
+- Set it so that numObjects now specifies total # in entire calculation, not
+	# on local node. This change also cleans up the rand # generation
+	so that it is independent of the node decomposition.
+
+This is working on 1 and 2 nodes with assorted # of threads, croaks on 3 nodes.
+
+Fixed. It was a misinterpretation of the calling syntax for MPI_allgather.
+The number specifying how many incoming values there are refers to the #
+from each node, not the total #. This bug held me up for a long time.
 
 ============================================================================
