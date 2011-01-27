@@ -82,6 +82,11 @@ class AnyDimGlobalHandler: public DataHandler
 		unsigned int totalEntries() const;
 
 		/**
+		 * Returns the number of data entries on local node.
+		 */
+		unsigned int localEntries() const;
+
+		/**
 		 * Returns the number of dimensions of the data.
 		 */
 		unsigned int numDimensions() const;

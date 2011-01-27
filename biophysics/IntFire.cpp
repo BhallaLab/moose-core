@@ -238,9 +238,10 @@ void IntFire::setNumSynapses( const unsigned int v )
 {
 	assert( v < 10000000 );
 	synapses_.resize( v );
-	threadReduce< unsigned int >( er, getMaxNumSynapses, v );
+	// threadReduce< unsigned int >( er, getMaxNumSynapses, v );
 }
 
+/*
 void IntFire::getMaxNumSynapses( const Eref& er, unsigned int v, 
 	bool isLast )
 {
@@ -268,6 +269,7 @@ void IntFire::setSynapseDimension( const Eref& er, unsigned int v,
 		max = 0;
 	}
 }
+*/
 
 
 double IntFire::getVm() const

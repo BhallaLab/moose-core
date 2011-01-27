@@ -63,13 +63,44 @@ char* FieldDataHandlerBase::data( DataId index ) const
  * If parent is global the return value is also global.
  * If parent is local then it returns # on current node.
  */
-unsigned int FieldDataHandlerBase::totalEntries() const {
+unsigned int FieldDataHandlerBase::totalEntries() const
+{
+	return parentDataHandler_->totalEntries() * fieldDimension_;
+}
+
+/**
+ * Returns the number of field entries.
+ * If parent is global the return value is also global.
+ * If parent is local then it returns # on current node.
+ */
+unsigned int FieldDataHandlerBase::localEntries() const
+{
 	unsigned int ret = 0;
 	for ( DataHandler::iterator i = parentDataHandler_->begin();
 		i != parentDataHandler_->end(); ++i ) {
 		ret += getNumField( *i );
 	}
 	return ret;
+}
+
+/**
+ * Returns a single number corresponding to the DataId.
+ * Note that this does NOT compact the number in the case of
+ * ragged arrays. It instead treats the indexing as if on a
+ * square matrix.
+ */
+unsigned int FieldDataHandlerBase::linearIndex( const DataId& d ) const
+{
+	return d.data() * fieldDimension_ + d.field();
+}
+
+/**
+ * Returns the DataId corresponding to a single index.
+ */
+DataId FieldDataHandlerBase::dataId( unsigned int linearIndex) const
+{
+	return DataId( linearIndex / fieldDimension_, 
+		linearIndex % fieldDimension_ );
 }
 
 /**
@@ -138,7 +169,7 @@ unsigned int FieldDataHandlerBase::getFieldArraySize( unsigned int objectIndex )
 }
 
 /**
- * Looks up the biggest field array size on the current node
+ * Looks up the biggest field array size on all nodes.
  */
 unsigned int FieldDataHandlerBase::biggestFieldArraySize() const
 {
@@ -152,6 +183,25 @@ unsigned int FieldDataHandlerBase::biggestFieldArraySize() const
 		if ( numHere > ret )
 			ret = numHere;
 	}
+
+	// Here it would be nice to get FieldArraySize from all nodes. 
+	// But we can't do this here as we don't know for sure that the
+	// current function will be called on all nodes.
+	// ret = Shell::reduceInt( ret ); 
+	return ret;
+}
+
+/**
+ * This func gets the FieldArraySize from all nodes and updates
+ * fieldDimension to the largest.
+ * MUST be called on all nodes in sync.
+ */
+unsigned int FieldDataHandlerBase::syncFieldArraySize()
+{
+	unsigned int ret = biggestFieldArraySize();
+	ret = Shell::reduceInt( ret ); 
+	if ( fieldDimension_ < ret )
+		fieldDimension_ = ret;
 	return ret;
 }
 

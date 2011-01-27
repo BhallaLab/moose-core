@@ -632,6 +632,8 @@ void testShellAddMsg()
 			}
 		}
 	}
+
+	cout << shell->myNode() << ": testShellAddMsg 1" << endl;
 	
 	///////////////////////////////////////////////////////////
 	// Set up scheduling
@@ -669,7 +671,9 @@ void testShellAddMsg()
 	// Set up initial conditions
 	///////////////////////////////////////////////////////////
 	
+	cout << shell->myNode() << ": testShellAddMsg 2" << endl;
 	shell->doReinit();
+	cout << shell->myNode() << ": testShellAddMsg 3" << endl;
 
 	vector< double > init; // 12345
 	for ( unsigned int i = 1; i < 6; ++i )
@@ -694,11 +698,21 @@ void testShellAddMsg()
 	const Arith* a12obj = reinterpret_cast< Arith* >( Eref( a1(), 2 ).data() );
 	const Arith* a13obj = reinterpret_cast< Arith* >( Eref( a1(), 3 ).data() );
 	const Arith* a14obj = reinterpret_cast< Arith* >( Eref( a1(), 4 ).data() );
+	for ( unsigned int i = 0; i < 5; ++i ) {
+		cout << shell->myNode() << ": data here for (a1," << i << "): "
+			<< Eref( a1(), i ).isDataHere() << endl;
+	}
+	cout << shell->myNode() << ": testShellAddMsg 3.5" << endl;
 	assert( doubleEq( a10obj->getArg1(), 1 ) );
+	cout << shell->myNode() << ": testShellAddMsg 3.6" << endl;
 	assert( doubleEq( a11obj->getArg1(), 2 ) );
+	cout << shell->myNode() << ": testShellAddMsg 3.7" << endl;
 	assert( doubleEq( a12obj->getArg1(), 3 ) );
+	cout << shell->myNode() << ": testShellAddMsg 3.8" << endl;
 	assert( doubleEq( a13obj->getArg1(), 4 ) );
+	cout << shell->myNode() << ": testShellAddMsg 3.9" << endl;
 	assert( doubleEq( a14obj->getArg1(), 5 ) );
+	cout << shell->myNode() << ": testShellAddMsg 3.91" << endl;
 
 	ret = checkArg1( a1, 1, 2, 3, 4, 5 );
 	ret = checkArg1( b1, 1, 2, 3, 4, 5 );
@@ -708,7 +722,9 @@ void testShellAddMsg()
 	// Run it
 	///////////////////////////////////////////////////////////
 
+	cout << shell->myNode() << ": testShellAddMsg 4" << endl;
 	shell->doStart( 2 );
+	cout << shell->myNode() << ": testShellAddMsg 5" << endl;
 
 	// Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );
 	// clock->printCounts();

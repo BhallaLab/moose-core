@@ -46,6 +46,11 @@ class Eref
 		}
 
 		/**
+		 * Returns a linear conversion of DataId
+		 */
+		unsigned int linearIndex() const;
+
+		/**
 		 * Returns the FullId corresponding to the Eref. All info is kept.
 		 */
 		FullId fullId() const;

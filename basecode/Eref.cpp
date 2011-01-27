@@ -48,3 +48,15 @@ Id Eref::id() const
 {
 	return e_->id();
 }
+
+unsigned int Eref::linearIndex() const
+{
+	if ( e_ == 0 || i_ == DataId::bad() )
+		return 0;
+	if ( i_.data() == 0 && i_.field() == 0 )
+		return 0;
+	if ( i_.data() == DataId::anyPart() || i_.field() == DataId::anyPart() )
+		return 0;
+
+	return e_->dataHandler()->linearIndex( i_ );
+}

@@ -58,6 +58,29 @@ class ZeroDimGlobalHandler: public DataHandler
 		}
 
 		/**
+		 * Returns the number of data entries on local node.
+		 */
+		unsigned int localEntries() const {
+			return 1;
+		}
+
+		/**
+		 * Returns a number corresponding to DataId. Since this DataHandler
+		 * does not permit any index more than zero, we return zero.
+		 */
+		unsigned int linearIndex( const DataId& d ) const {
+			return 0;
+		}
+
+		/**
+		 * Returns the DataId corresponding to the specified linear index.
+		 * Again, we return zero since that is the only legal value.
+		 */
+		DataId dataId( unsigned int linearIndex) const {
+			return DataId( 0 );
+		}
+
+		/**
 		 * Returns the number of dimensions of the data.
 		 */
 		unsigned int numDimensions() const {

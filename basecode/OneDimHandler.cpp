@@ -122,6 +122,11 @@ void OneDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 }
 
 
+unsigned int OneDimHandler::localEntries() const
+{
+	return end_ - start_;
+}
+
 char* OneDimHandler::data( DataId index ) const
 {
 	if ( isDataHere( index ) )

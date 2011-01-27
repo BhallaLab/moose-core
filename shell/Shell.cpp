@@ -195,7 +195,7 @@ static DestFinfo receiveGet( "receiveGet",
 	"receiveGet( Uint node#, Uint status, PrepackedBuffer data )"
 	"Function on master shell that handles the value relayed from worker.",
 	// new OpFunc3< Shell, unsigned int, unsigned int, PrepackedBuffer >( &Shell::recvGet )
-	new OpFunc1< Shell, PrepackedBuffer >( &Shell::recvGet )
+	new EpFunc1< Shell, PrepackedBuffer >( &Shell::recvGet )
 );
 
 static SrcFinfo3< unsigned int, unsigned int, PrepackedBuffer > relayGet(
@@ -311,6 +311,7 @@ static const Cinfo* shellCinfo = Shell::initCinfo();
 
 Shell::Shell()
 	: name_( "" ),
+		gettingVector_( 0 ),
 		isSingleThreaded_( 0 ),
 		isBlockedOnParser_( 0 ),
 		numAcks_( 0 ),
@@ -322,8 +323,9 @@ Shell::Shell()
 		runtime_( 0.0 ),
 		cwe_( Id() )
 {
-	cout << myNode() << ": fids\n";
-	shellCinfo->reportFids();
+	// cout << myNode() << ": fids\n";
+	// shellCinfo->reportFids();
+	getBuf_.resize( 1, 0 );
 }
 
 void Shell::setShellElement( Element* shelle )
@@ -655,11 +657,9 @@ Id Shell::getCwe() const
 	return cwe_;
 }
 
-const char* Shell::getBuf() const
+const vector< char* >& Shell::getBuf() const
 {
-	if ( getBuf_.size() > 0 )
-		return &( getBuf_[0] );
-	return 0;
+	return getBuf_;
 }
 
 
@@ -921,7 +921,6 @@ const ProcInfo* Shell::procInfo()
 
 /**
  * Static global, returns contents of shell buffer.
- */
 const char* Shell::buf() 
 {
 	static Id shellid;
@@ -929,6 +928,7 @@ const char* Shell::buf()
 	assert( shell );
 	return (reinterpret_cast< Shell* >(shell->dataHandler()->data( 0 )) )->getBuf();
 }
+ */
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -1021,10 +1021,14 @@ void Shell::dispatchSetVec( const Eref& tgt, FuncId fid,
  * Should only be issued from master node.
  * This is a blocking function and returns only when the job is done.
  */
-const char* Shell::dispatchGet( const Eref& e, const string& field, 
-	const SetGet* sg )
+const vector< char* >& Shell::dispatchGet( 
+	const Eref& e, const string& field, 
+	const SetGet* sg, unsigned int& retEntries )
 {
+	static vector< char* > badRet( 1 );
+	badRet[0] = 0;
 	Eref tgt( e );
+	retEntries = 0; // in case function fails.
 	const Finfo* gf = tgt.element()->cinfo()->findFinfo( field );
 	if ( !gf ) {	// Could be a child Element. Field name changes.
 		string f2 = field.substr( 4 );
@@ -1044,7 +1048,7 @@ const char* Shell::dispatchGet( const Eref& e, const string& field,
 			else {
 				cout << myNode() << 
 					": Error: Shell::dispatchGet: child index mismatch\n";
-				return 0;
+				return badRet;
 			}
 		}
 	}
@@ -1052,29 +1056,55 @@ const char* Shell::dispatchGet( const Eref& e, const string& field,
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 	if ( !df ) {
 		cout << s->myNode() << ": Error: Shell::dispatchGet: field '" << field << "' not found on " << tgt << endl;
-		return 0;
+		return badRet;
 	}
 
 	if ( df->getOpFunc()->checkSet( sg ) ) { // Type validation
 			Eref sheller = Id().eref();
-			return s->innerDispatchGet( sheller, tgt, df->getFid() );
+
+			// Later we need to fine-tune to handle lookup of fields on
+			// one object, or a specific field on any object, or even
+			// sub-dimensions. For now, just the whole lot.
+			if ( tgt.index() == DataId::any() )
+				retEntries = tgt.element()->dataHandler()->totalEntries();
+			else
+				retEntries = 1;
+			/*
+			if ( tgt.index().data() == DataId::anyPart() ) {
+				if ( tgt.index().field() == DataId::anyPart() )
+					retSize = tgt.element()->dataHandler()->totalEntries();
+				else
+					retSize = tgt.element()->dataHandler()->totalEntries();
+			} else {
+				if ( tgt.index().field() == DataId::anyPart() )
+					retSize = tgt.element()->dataHandler()->totalEntries();
+			}
+			*/
+			return s->innerDispatchGet( sheller, tgt, df->getFid(),
+				retEntries );
 	} else {
 		cout << s->myNode() << ": Error: Shell::dispatchGet: type mismatch for field " << field << " on " << tgt << endl;
 	}
-	return 0;
+	return badRet;
 }
 
 /**
  * Tells all nodes to dig up specified field, if object is present on node.
  * Not thread safe: this should only run on master node.
  */
-const char* Shell::innerDispatchGet( const Eref& sheller, const Eref& tgt, 
-	FuncId fid )
+const vector< char* >& Shell::innerDispatchGet( 
+	const Eref& sheller, const Eref& tgt, 
+	FuncId fid, unsigned int retEntries )
 {
+	clearGetBuf();
+	gettingVector_ = (retEntries > 1 );
 	initAck();
 		requestGet.send( sheller, &p_, tgt.element()->id(), tgt.index(), fid );
 	waitForAck();
-	return &getBuf_[0];
+
+	assert( getBuf_.size() == retEntries );
+
+	return getBuf_;
 }
 
 
@@ -1100,17 +1130,43 @@ void Shell::handleGet( Id id, DataId index, FuncId fid )
 	*/
 }
 
-void Shell::recvGet( PrepackedBuffer pb )
+void Shell::recvGet( const Eref& e, const Qinfo* q, PrepackedBuffer pb )
 {
 	if ( myNode_ == 0 ) {
-		getBuf_.resize( pb.dataSize() );
-		memcpy( &getBuf_[0], pb.data(), pb.dataSize() );
+		if ( gettingVector_ ) {
+			assert( q->mid() != Msg::badMsg );
+			Element* tgtElement = Msg::getMsg( q->mid() )->e2();
+			Eref tgt( tgtElement, q->srcIndex() );
+			assert ( tgt.linearIndex() < getBuf_.size() );
+			char*& c = getBuf_[ tgt.linearIndex() ];
+			c = new char[ pb.dataSize() ];
+			memcpy( c, pb.data(), pb.dataSize() );
+		} else  {
+			assert ( getBuf_.size() == 1 );
+			char*& c = getBuf_[ 0 ];
+			c = new char[ pb.dataSize() ];
+			memcpy( c, pb.data(), pb.dataSize() );
+		}
 	}
 }
 
 void Shell::lowLevelRecvGet( PrepackedBuffer pb )
 {
+	cout << "Shell::lowLevelRecvGet: If this is being used, then fix\n";
 	relayGet.send( Eref( shelle_, 0 ), &p_, myNode(), OkStatus, pb );
 }
 
 ////////////////////////////////////////////////////////////////////////
+
+void Shell::clearGetBuf()
+{
+	for ( vector< char* >::iterator i = getBuf_.begin(); 
+		i != getBuf_.end(); ++i )
+	{
+		if ( *i != 0 ) {
+			delete[] *i;
+			*i = 0;
+		}
+	}
+	getBuf_.resize( 1, 0 );
+}

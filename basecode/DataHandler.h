@@ -102,6 +102,27 @@ class DataHandler
 		virtual unsigned int totalEntries() const = 0;
 
 		/**
+		 * Returns the actual number of data entries used on the 
+		 * object, on current node. Here if we have a ragged array then
+		 * it only counts the sum of the individual array counts
+		 * So, adding localEntries over all nodes does not necessarily
+		 * give totalEntries.
+		 */
+		virtual unsigned int localEntries() const = 0;
+
+		/**
+		 * Returns a single number corresponding to the DataId.
+		 * Usually it is just the data part of the DataId, but it gets
+		 * interesting for the FieldDataHandler.
+		 */
+		virtual unsigned int linearIndex( const DataId& d ) const;
+
+		/**
+		 * Returns the DataId corresponding to a single index.
+		 */
+		virtual DataId dataId( unsigned int linearIndex) const;
+
+		/**
 		 * Returns the number of dimensions of the data.
 		 * 0 if there is a single entry.
 		 * 1 if it is a 1-D array

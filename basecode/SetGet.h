@@ -247,9 +247,31 @@ template< class A > class Field: public SetGet1< A >
 		{ 
 			SetGet1< A > sg( dest );
 			string temp = "get_" + field;
-			const char* ret = Shell::dispatchGet( dest, temp, &sg );
-			Conv< A > conv( ret );
+			unsigned int numRetEntries = 0;
+			const vector< char* >& ret = 
+				Shell::dispatchGet( dest, temp, &sg, numRetEntries );
+			assert( numRetEntries == 1 );
+			Conv< A > conv( ret[0] );
 			return *conv;
+		}
+
+		/**
+		 * Blocking call that returns a vector of values
+		 */
+		static void getVec( 
+			const Eref& dest, const string& field, vector< A >& vec )
+		{
+			SetGet1< A > sg( dest );
+			string temp = "get_" + field;
+			unsigned int numRetEntries;
+			const vector< char* >& ret = 
+				Shell::dispatchGet( dest, temp, &sg, numRetEntries );
+
+			vec.resize( numRetEntries );
+			for ( unsigned int i = 0; i < numRetEntries; ++i ) {
+				Conv< A > conv( ret[i] );
+				vec[i] = *conv;
+			}
 		}
 
 		/**
@@ -261,8 +283,11 @@ template< class A > class Field: public SetGet1< A >
 		{
 			SetGet1< A > sg( dest );
 			string temp = "get_" + field;
-			const char* ret = Shell::dispatchGet( dest, temp, &sg );
-			Conv< A > conv( ret );
+			unsigned int numEntries = 0;
+			const vector< char* > & ret = 
+				Shell::dispatchGet( dest, temp, &sg, numEntries );
+			assert( numEntries == 1 );
+			Conv< A > conv( ret[0] );
 			Conv<A>::val2str( str, *conv );
 			return 1;
 		}

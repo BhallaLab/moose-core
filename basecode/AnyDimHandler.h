@@ -64,6 +64,11 @@ class AnyDimHandler: public AnyDimGlobalHandler
 		 */
 		DataHandler* copyToNewDim( unsigned int newDimSize ) const;
 
+		/**
+		 * Returns the actual number of data entries used on the 
+		 * object, on current node.
+		 */
+		unsigned int localEntries() const;
 
 		/**
 		 * Returns the data on the specified index.

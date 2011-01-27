@@ -9866,5 +9866,105 @@ This is working on 1 and 2 nodes with assorted # of threads, croaks on 3 nodes.
 Fixed. It was a misinterpretation of the calling syntax for MPI_allgather.
 The number specifying how many incoming values there are refers to the #
 from each node, not the total #. This bug held me up for a long time.
+Checkin 2427.
 
 ============================================================================
+25 Jan 2011
+Need to get mpd running to test the reduce function on many nodes.
+Did this on GJ.
+Needed to clean up zombie processes to do so. Wrote "kill_mpd" which
+marches through to kill stuff.
+Then to run the test, I use:
+/usr/local/mvapich2/bin/mpiexec -machinefile /home/bhalla/mpd.63hosts -np 60 a.out 1000000 4
+which gives max= 2147483534
+on all nodes. So it seems OK.
+
+More fundamentally: I need a function that is easy to invoke from our regular
+object functions, that can deal with 'reduce' operations. Possible approach:
+- Generic 'set' function is called on all nodes.
+- Function calls threadReduce operation using ProcInfo argument to specify
+	thread#. 
+	- ThreadReduce is templated
+	- ThreadReduce combines info from each thread safely
+- When all threads are done (in other words, system is within the next barrier)
+	the ThreadReduce queue triggers nodeReduce.
+	- when nodeReduce is done with the allgather, it does a final 
+	assignment to a field, which may be on many objects on many nodes.
+		- This is a templated class function available as fid?
+		- This is done serially.
+	
+Use cases:			Thread op	Node op			Notes
+	Updating numSynapses. 	get max #	Update DataHandler
+	Smoldyn: mols in vol	add up mols	Update each volume
+	Setting Element name	Do nothing	Assign Element name	?
+	Efield calculation	Sum contribs	Assign Efield		use msg
+
+The alternative to all of this is to subsequently issue a regular messaging
+call to do the updates.
+In either case the field needs some special handling to deal with fallout onto
+other regular fields and DataHandler fields.
+
+An issue with the regular approach is that it is poor at handling reduce-type
+operations. It would get a big vector and then serially digest it. So it is 
+worth building in reduce operations as a standard feature. Since we want
+transparent parallelization, this means a certain structure:
+
+	- a function, for doing the op, whatever it is.
+	- An argument specifying a field to scan over
+	- Another function for doing something with the op, such as assigning
+		a value in an object.
+
+It would be nice to have the reduce function be completely independent of 
+	any prior class, something like an 'algorithm'. Or to have the
+	reduce function be handled by a specific instance of a class...
+More generally, it would be nice to have ops that take one set of objects/fields
+	as arguments for a function in another. 
+Here we are getting perhaps too general. The first task is to get the connection
+set up to work.
+	
+Working on it. Implemented Shell::reduceInt, but it isn't
+used yet. Put printf debugging to pin down line at which the
+code currently croaks, in testShell.cpp:706.
+
+============================================================================
+26 Jan 2011
+Implemented a utility function
+FieldDataHandlerBase::unsigned int syncFieldArraySize();
+which gets FieldArraySize from all nodes.
+
+============================================================================
+27 Jan 2011
+One option is to maintain a flag on each object to indicate whether its
+fieldArraySize is valid or not. Certain functions don't care, but if a
+function does need to update the value it should happen automatically.
+First, check manual operation.
+
+Zeroth: track down crash. Turns out to be a simple matter of trying
+to access a field that is on another node.
+This may be a good time to implement a 'getVec' function.
+
+Currently fiddling with Shell::recvGet, trying to work out how best to 
+handle the random order of incoming parts of the getVec. I think it best
+to find the linear index of the source Eref, and plug in the entries in the
+right order right away. There is a bit of a niggle in doing this if I want
+to handle strings and other variable size returns.
+
+Need:
+*Func to get linear index from Eref
+* Cleanup of DataHandler to report linearIndex
+* Cleanup of DataHandler to report local and total entries.
+* Cleanup of get and getVec to use the getBufVec
+* Cleanup of get and getVec to empty out the getBufVec when done
+* Shell fields to hold isRecvVec_,
+* Replace getBuf_ with getBufVec_ everywhere.
+* fix up Shell::dispatchGet
+
+Got it to compile. Fails rather soon in unit tests.
+
+Check if we still need lowLevelRecvGet.
+Deprecate Shell::name_
+Fill in the Handle operation to select AssignVecMsg.
+Put in some unit tests for GetVec
+Go back to Set and SetVec to generalize wrt strings and subparts of vectors.
+
+

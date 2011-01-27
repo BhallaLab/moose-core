@@ -198,6 +198,7 @@ endif
 # Here we automagically change compilers to deal with MPI.
 ifdef USE_MPI
 	CXX = mpicxx
+#	CXX = /usr/local/mvapich2/bin/mpicxx
 #	PARALLEL_DIR = parallel
 #	PARALLEL_LIB = parallel/parallel.o
 else

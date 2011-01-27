@@ -67,6 +67,13 @@ unsigned int DataHandlerWrapper::totalEntries() const {
 }
 
 /**
+ * Returns the number of data entries on local node.
+ */
+unsigned int DataHandlerWrapper::localEntries() const {
+	return parent_->localEntries();
+}
+
+/**
  * Returns the number of dimensions of the data.
  */
 unsigned int DataHandlerWrapper::numDimensions() const {

@@ -53,6 +53,11 @@ class DataId {
 			return ( data_ != other.data_ || field_ != other.field_ );
 		}
 
+		bool operator<( const DataId& other ) const {
+			return ( data_ < other.data_ || (
+				data_ == other.data_ && field_ < other.field_ ) );
+		}
+
 		void incrementDataIndex() {
 			++data_;
 		}
@@ -71,6 +76,9 @@ class DataId {
 
 		/// Represents any dataId: a wildcard for any data index.
 		static const DataId& any();
+
+		/// Returns the 'any' value to compare with data and field parts
+		static const unsigned int anyPart();
 	
 	private:
 		unsigned int data_;

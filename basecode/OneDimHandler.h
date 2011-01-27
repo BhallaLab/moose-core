@@ -45,6 +45,12 @@ class OneDimHandler: public OneDimGlobalHandler
 		 */
 		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
 
+		/**
+		 * Returns the number of data entries on local node,
+		 * overriding inherited version.
+		 */
+		unsigned int localEntries() const;
+
 		bool resize( vector< unsigned int > dims );
 
 		/**

@@ -78,6 +78,11 @@ void ZeroDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 	}
 }
 
+unsigned int ZeroDimHandler::localEntries() const {
+	return ( Shell::myNode() == 0 );
+}
+
+
 bool ZeroDimHandler::resize( vector< unsigned int > dims )
 {
 	if ( Shell::myNode() == 0 && !data_ ) {

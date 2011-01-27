@@ -65,6 +65,12 @@ class ZeroDimHandler: public ZeroDimGlobalHandler
 		 */
 		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
 
+		/**
+		 * Returns the number of data entries on local node.
+		 * One only if current node is zero.
+		 */
+		unsigned int localEntries() const;
+
 		bool resize( vector< unsigned int > dims );
 
 		/**

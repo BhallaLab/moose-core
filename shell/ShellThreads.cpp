@@ -12,7 +12,9 @@
  */
 
 #include <pthread.h>
-// #include <mpi.h>
+#ifdef USE_MPI
+#include <mpi.h>
+#endif
 #include "header.h"
 #include "Shell.h"
 #include "Dinfo.h"
@@ -214,4 +216,28 @@ void Shell::start( double runtime )
 {
 	/* Send msg to Clock
 	*/
+}
+
+////////////////////////////////////////////////////////////////////////
+// Functions using MPI
+////////////////////////////////////////////////////////////////////////
+
+// Static function
+unsigned int Shell::reduceInt( unsigned int val )
+{
+#ifdef USE_MPI
+	unsigned int max = 0;
+	unsigned int *recvBuf = new unsigned int [ numNodes_ ];
+	MPI_Allgather( &val, 1, MPI_UNSIGNED, recvBuf, 1, MPI_UNSIGNED, 
+		MPI_COMM_WORLD );
+	for ( unsigned int i = 0; i < numNodes_; ++i ) {
+		if ( max < recvBuf[i] )
+			max = recvBuf[i];
+	}
+	delete[] recvBuf;
+	return max;
+
+#else
+	return val;
+#endif
 }

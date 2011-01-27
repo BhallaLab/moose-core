@@ -32,3 +32,13 @@ unsigned int DataHandler::getFieldArraySize( unsigned int objectIndex )
 {
 	return 0; // Default operation.
 }
+
+unsigned int DataHandler::linearIndex( const DataId& d ) const
+{
+	return d.data();
+}
+
+DataId DataHandler::dataId( unsigned int i ) const
+{
+	return DataId( i );
+}

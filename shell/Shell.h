@@ -285,6 +285,11 @@ class Shell
 
 		pthread_cond_t* parserBlockCond() const; 
 
+		/**
+		 * Checks for highest 'val' on all nodes
+		 */
+		static unsigned int reduceInt( unsigned int val );
+
 		////////////////////////////////////////////////////////////////
 		// Functions for handling field Set/Get operations
 		////////////////////////////////////////////////////////////////
@@ -322,16 +327,18 @@ class Shell
 		void innerDispatchSet( Eref& sheller, const Eref& er, 
 			FuncId fid, const PrepackedBuffer& arg );
 
-		static const char* dispatchGet( 
-			const Eref& tgt, const string& field, const SetGet* sg );
+		static const vector< char* >& dispatchGet( 
+			const Eref& tgt, const string& field, const SetGet* sg,
+			unsigned int& numGetEntries );
 
-		const char* innerDispatchGet( 
-			const Eref& sheller, const Eref& tgt, FuncId tgtFid );
+		const vector< char* >& innerDispatchGet( 
+			const Eref& sheller, const Eref& tgt, FuncId tgtFid,
+			unsigned int numGetEntries );
 
 		void handleGet( Id id, DataId index, FuncId fid );
 
 		// void recvGet( unsigned int node, unsigned int status, PrepackedBuffer pb );
-		void recvGet( PrepackedBuffer pb );
+		void recvGet( const Eref& e, const Qinfo* q, PrepackedBuffer pb );
 
 		void lowLevelRecvGet( PrepackedBuffer pb );
 
@@ -359,12 +366,13 @@ class Shell
 		// Initialization function, used only in main.cpp:init()
 		void setShellElement( Element* shelle );
 
-		const char* getBuf() const;
+		const vector< char* >& getBuf() const;
+		void clearGetBuf();
 
 		/**
  		 * Static global, returns contents of shell buffer.
- 		 */
 		static const char* buf();
+ 		 */
 
 		/// Static func for returning the ProcInfo of the shell.
 		static const ProcInfo* procInfo();
@@ -379,9 +387,19 @@ class Shell
 
 		static void wildcard( const string& path, vector< Id >& list );
 	private:
-		string name_;
+		string name_; // shouldn't this be deprecated?
+
 		Element* shelle_; // It is useful for the Shell to have this.
-		vector< char > getBuf_;
+
+		/**
+		 * Buffer into which return values from the 'get' command are placed
+		 * Only index 0 is used for any single-value 'get' call.
+		 * If it was the 'getVec' command then the array is filled up
+		 */
+		vector< char* > getBuf_;
+
+		bool gettingVector_;
+
 		MsgId latestMsgId_; // Hack to communicate newly made MsgIds.
 
 		/**

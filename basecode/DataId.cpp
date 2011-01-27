@@ -30,6 +30,11 @@ const DataId& DataId::bad() {
 }
 
 const DataId& DataId::any() {
-	static DataId any_( ~0U, ~0U );
+	static DataId any_( ~1U, ~1U );
 	return any_;
+}
+
+const unsigned int DataId::anyPart()
+{
+	return ~1U;
 }

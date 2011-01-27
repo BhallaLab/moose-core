@@ -48,9 +48,12 @@ class OneDimGlobalHandler: public DataHandler
 		/**
 		 * Returns the number of data entries.
 		 */
-		unsigned int totalEntries() const {
-			return size_;
-		}
+		unsigned int totalEntries() const;
+
+		/**
+		 * Returns the number of data entries on local node.
+		 */
+		unsigned int localEntries() const;
 
 		/**
 		 * Returns the number of dimensions of the data.

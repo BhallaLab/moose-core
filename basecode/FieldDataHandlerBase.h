@@ -72,6 +72,25 @@ class FieldDataHandlerBase: public DataHandler
 		unsigned int totalEntries() const;
 
 		/**
+		 * Returns the number of field entries on local node.
+		 */
+		unsigned int localEntries() const;
+
+		/**
+		 * Returns a single number corresponding to the DataId.
+		 * Overrides the default behaviour as we need to take into account
+		 * the dimensions for the field part of the DataId
+		 */
+		unsigned int linearIndex( const DataId& d ) const;
+
+		/**
+		 * Returns the DataId corresponding to a single index.
+		 * Overrides the default behaviour as we need to take into account
+		 * the dimensions for the field part of the DataId
+		 */
+		DataId dataId( unsigned int linearIndex) const;
+
+		/**
 		 * Returns the number of dimensions of the data.
 		 */
 		unsigned int numDimensions() const;
@@ -112,6 +131,11 @@ class FieldDataHandlerBase: public DataHandler
 		 * Implemented in derived classes.
 		 */
 		unsigned int biggestFieldArraySize() const;
+
+		/**
+		 * This func gets the FieldArraySize from all nodes and updates
+		 */
+		unsigned int syncFieldArraySize();
 
 		/**
 		 * Assigns the fieldDimension. Checks that it is bigger than the

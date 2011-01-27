@@ -105,6 +105,15 @@ void OneDimGlobalHandler::process( const ProcInfo* p, Element* e,
 	}
 }
 
+unsigned int OneDimGlobalHandler::totalEntries() const {
+	return size_;
+}
+
+unsigned int OneDimGlobalHandler::localEntries() const {
+	return size_;
+}
+
+
 unsigned int OneDimGlobalHandler::sizeOfDim( unsigned int dim ) const
 {
 	if ( dim == 0 )

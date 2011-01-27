@@ -160,6 +160,11 @@ void AnyDimHandler::process( const ProcInfo* p, Element* e, FuncId fid )
 	}
 }
 
+unsigned int AnyDimHandler::localEntries() const
+{
+	return end_ - start_;
+}
+
 char* AnyDimHandler::data( DataId index ) const
 {
 	if ( isDataHere( index ) )

@@ -221,6 +221,11 @@ unsigned int AnyDimGlobalHandler::totalEntries() const
 	return size_;
 }
 
+unsigned int AnyDimGlobalHandler::localEntries() const
+{
+	return size_;
+}
+
 unsigned int AnyDimGlobalHandler::numDimensions() const
 {
 	return dims_.size();
