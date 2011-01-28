@@ -195,7 +195,7 @@ void setupTicks()
 	}
 
 	// cout << Shell::myNode() << ": numTicks: " << ticke->dataHandler()->totalEntries() << ", " << size << endl;
-	assert( ticke->dataHandler()->totalEntries() == size );
+	assert( ticke->dataHandler()->localEntries() == size );
 
 	Eref er0( ticke, DataId( 0, 2 ) );
 	bool ret = Field< double >::set( er0, "dt", 5.0);
@@ -398,7 +398,8 @@ void testThreadIntFireNetwork()
 	Element* syn = synId();
 	assert( syn->getName() == "synapse" );
 
-	assert( syn->dataHandler()->totalEntries() == 0 );
+	assert( syn->dataHandler()->totalEntries() == size );
+	assert( syn->dataHandler()->localEntries() == 0 );
 
 	DataId di( 1, 0 ); // DataId( data, field )
 	Eref syne( syn, di );
@@ -423,7 +424,7 @@ void testThreadIntFireNetwork()
 	sm->randomConnect( connectionProbability );
 	// sm->loadBalance( numThreads );
 
-	unsigned int nd = syn->dataHandler()->totalEntries();
+	unsigned int nd = syn->dataHandler()->localEntries();
 //	cout << "Num Syn = " << nd << endl;
 	assert( nd == NUMSYN );
 	vector< double > initVm( size, 0.0 );
@@ -567,7 +568,8 @@ void testMultiNodeIntFireNetwork()
 	Element* syn = synId();
 	assert( syn->getName() == "synapse" );
 
-	assert( syn->dataHandler()->totalEntries() == 0 );
+	assert( syn->dataHandler()->totalEntries() == size );
+	assert( syn->dataHandler()->localEntries() == 0 );
 
 	DataId di( 1, 0 ); // DataId( data, field )
 	Eref syne( syn, di );
@@ -590,6 +592,11 @@ void testMultiNodeIntFireNetwork()
 	SetGet2< double, long >::set( mer, "setRandomConnectivity", 
 		connectionProbability, 5489UL );
 
+	FieldDataHandlerBase * fdh =
+		static_cast< FieldDataHandlerBase *>( syn->dataHandler() );
+	fdh->syncFieldArraySize();
+	assert( fdh->biggestFieldArraySize() == 134 );
+
 	/*
 	SetGet1< unsigned int >::set( mer, "loadBalance", numThreads ); 
 	vector< unsigned int > synArraySizes;
@@ -602,9 +609,11 @@ void testMultiNodeIntFireNetwork()
 	}
 	*/
 
-	unsigned int nd = syn->dataHandler()->totalEntries();
+	unsigned int nd = syn->dataHandler()->localEntries();
+	assert( syn->dataHandler()->totalEntries() == size * 134 );
+	assert( nd == 104576 );
 	// cout << "Num Syn = " << nd << endl;
-	nd = 104576;
+	// nd = 104576;
 
 	// Here we have an interesting problem. The mtRand might be called
 	// by multiple threads if the above Set call is not complete.
