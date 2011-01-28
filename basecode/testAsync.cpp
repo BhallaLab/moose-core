@@ -591,13 +591,18 @@ void testSetGetSynapse()
 
 	assert( syn->dataHandler()->data( 0 ) == 0 );
 
-	assert( syn->dataHandler()->totalEntries() == 0 );
+	assert( syn->dataHandler()->totalEntries() == 100 );
+	assert( syn->dataHandler()->localEntries() == 0 );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref e2( i2(), i );
 		bool ret = Field< unsigned int >::set( e2, "numSynapses", i );
 		assert( ret );
 	}
-	assert( syn->dataHandler()->totalEntries() == ( size * (size - 1) ) / 2 );
+	assert( syn->dataHandler()->localEntries() == ( size * (size - 1) ) / 2 );
+	FieldDataHandlerBase * fdh =
+		static_cast< FieldDataHandlerBase *>( syn->dataHandler() );
+	fdh->syncFieldArraySize();
+	assert( syn->dataHandler()->totalEntries() == 9900 );
 	// cout << "NumSyn = " << syn.totalEntries() << endl;
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -634,12 +639,13 @@ void testSetGetVec()
 	assert ( syn != 0 );
 	assert ( syn->getName() == "synapse" );
 
-	assert( syn->dataHandler()->totalEntries() == 0 );
+	assert( syn->dataHandler()->localEntries() == 0 );
+	assert( syn->dataHandler()->totalEntries() == 100 );
 
 	FieldDataHandlerBase* fd = dynamic_cast< FieldDataHandlerBase *>( 
 		syn->dataHandler() );
 	assert( fd );
-	assert( fd->totalEntries() == 0 );
+	assert( fd->localEntries() == 0 );
 
 	vector< unsigned int > numSyn( size, 0 );
 	for ( unsigned int i = 0; i < size; ++i )
@@ -649,13 +655,14 @@ void testSetGetVec()
 	// Here we test setting a 1-D vector
 	bool ret = Field< unsigned int >::setVec( e2, "numSynapses", numSyn );
 	assert( ret );
-	unsigned int nd = syn->dataHandler()->totalEntries();
+	unsigned int nd = syn->dataHandler()->localEntries();
 	assert( nd == ( size * (size - 1) ) / 2 );
 	// cout << "NumSyn = " << nd << endl;
-	assert( fd->totalEntries() == nd );
+	assert( fd->localEntries() == nd );
 	
 	assert( fd->biggestFieldArraySize() == size - 1 );
 	fd->setFieldDimension( size );
+	assert ( fd->totalEntries() == size * size );
 	// Here we test setting a 2-D array with different dims on each axis.
 	vector< double > delay( size * size, 0.0 );
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -700,7 +707,8 @@ void testSetRepeat()
 	assert ( syn != 0 );
 	assert ( syn->getName() == "synapse" );
 
-	assert( syn->dataHandler()->totalEntries() == 0 );
+	assert( syn->dataHandler()->totalEntries() == size );
+	assert( syn->dataHandler()->localEntries() == 0 );
 	vector< unsigned int > numSyn( size, 0 );
 	for ( unsigned int i = 0; i < size; ++i )
 		numSyn[i] = i;
@@ -709,7 +717,8 @@ void testSetRepeat()
 	// Here we test setting a 1-D vector
 	bool ret = Field< unsigned int >::setVec( e2, "numSynapses", numSyn );
 	assert( ret );
-	unsigned int nd = syn->dataHandler()->totalEntries();
+	assert( syn->dataHandler()->totalEntries() == size );
+	unsigned int nd = syn->dataHandler()->localEntries();
 	assert( nd == ( size * (size - 1) ) / 2 );
 	// cout << "NumSyn = " << nd << endl;
 	
@@ -753,13 +762,18 @@ void testSendSpike()
 	assert ( syn != 0 );
 	assert ( syn->getName() == "synapse" );
 
-	assert( syn->dataHandler()->totalEntries() == 0 );
+	assert( syn->dataHandler()->totalEntries() == size );
+	assert( syn->dataHandler()->localEntries() == 0 );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref er( i2(), i );
 		bool ret = Field< unsigned int >::set( er, "numSynapses", i );
 		assert( ret );
 	}
-	assert( syn->dataHandler()->totalEntries() == ( size * (size - 1) ) / 2 );
+	FieldDataHandlerBase * fdh =
+		static_cast< FieldDataHandlerBase *>( syn->dataHandler() );
+	fdh->syncFieldArraySize();
+	assert( fdh->localEntries() == ( size * (size - 1) ) / 2 );
+	assert( fdh->totalEntries() == size * ( size - 1) );
 
 	DataId di( 1, 0 ); // DataId( data, field )
 	Eref syne( syn, di );
@@ -1029,7 +1043,8 @@ void testSparseMsg()
 	assert ( syn != 0 );
 	assert ( syn->getName() == "synapse" );
 
-	assert( syn->dataHandler()->totalEntries() == 0 );
+	assert( syn->dataHandler()->localEntries() == 0 );
+	assert( syn->dataHandler()->totalEntries() == size );
 
 	DataId di( 1, 0 ); // DataId( data, field )
 	Eref syne( syn, di );
@@ -1050,11 +1065,12 @@ void testSparseMsg()
 	FieldDataHandlerBase* fd = dynamic_cast< FieldDataHandlerBase* >(
 		syne.element()->dataHandler() );
 	assert( fd );
+	fd->syncFieldArraySize();
 	unsigned int fieldSize = fd->biggestFieldArraySize();
 	// cout << "fieldSize = " << fieldSize << endl;
 	fd->setFieldDimension( fieldSize );
 
-	unsigned int nd = syn->dataHandler()->totalEntries();
+	unsigned int nd = syn->dataHandler()->localEntries();
 //	cout << "Num Syn = " << nd << endl;
 	assert( nd == NUMSYN );
 
@@ -1164,6 +1180,11 @@ void testUpValue()
 	assert ( ticke != 0 );
 	assert ( ticke->getName() == "tick" );
 
+	assert( ticke->dataHandler()->localEntries() == 10 );
+	assert( ticke->dataHandler()->totalEntries() == 1 );
+	FieldDataHandlerBase * fdh =
+		static_cast< FieldDataHandlerBase *>( ticke->dataHandler() );
+	fdh->syncFieldArraySize();
 	assert( ticke->dataHandler()->totalEntries() == 10 );
 	/*
 	bool ret = Field< unsigned int >::set( clocker, "numTicks", size );

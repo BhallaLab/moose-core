@@ -9959,12 +9959,20 @@ Need:
 * Replace getBuf_ with getBufVec_ everywhere.
 * fix up Shell::dispatchGet
 
-Got it to compile. Fails rather soon in unit tests.
+Got it to compile. Fails rather soon in unit tests. Checkin 2429.
+Incrementally fixing up unit tests.
 
 Check if we still need lowLevelRecvGet.
 Deprecate Shell::name_
 Fill in the Handle operation to select AssignVecMsg.
 Put in some unit tests for GetVec
 Go back to Set and SetVec to generalize wrt strings and subparts of vectors.
+
+============================================================================
+28 Jan 2011
+Marching through testAsync.cpp cleaning up assertions, mostly to do with the
+new distinction between DataHandler::totalEntries and DataHandler::localEntries.
+
+Got it to clear testAsync, more assertions of the same kind pending elsewhere.
 
 
