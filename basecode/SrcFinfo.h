@@ -72,6 +72,7 @@ class SrcFinfo0: public SrcFinfo
 };
 
 
+// Should specialize for major cases like doubles.
 template < class T > class SrcFinfo1: public SrcFinfo
 {
 	public:
@@ -84,10 +85,12 @@ template < class T > class SrcFinfo1: public SrcFinfo
 		// Will need to specialize for strings etc.
 		void send( const Eref& e, const ProcInfo* p, const T& arg ) const 
 		{
-			// Qinfo( eindex, size, useSendTo );
-			Qinfo q( e.index(), sizeof( T ), 0 );
-			e.element()->asend( q, getBindIndex(), p, 
-				reinterpret_cast< const char* >( &arg ) );
+			Conv< T > a( arg );
+			Qinfo q( e.index(), a.size(), 0 );
+			char* temp = new char[ a.size() ];
+			a.val2buf( temp );
+			e.element()->asend( q, getBindIndex(), p, temp );
+			delete[] temp;
 		}
 
 		/**
@@ -97,10 +100,96 @@ template < class T > class SrcFinfo1: public SrcFinfo
 		void sendTo( const Eref& e, const ProcInfo* p,
 			const T& arg, const FullId& target ) const
 		{
+			Conv< T > a( arg );
+			Qinfo q( e.index(), a.size(), 1 );
+			char* temp = new char[ a.size() ];
+			a.val2buf( temp );
+			e.element()->tsend( q, getBindIndex(), p, temp, target );
+			delete[] temp;
+		}
+
+	private:
+};
+
+template <> class SrcFinfo1< double >: public SrcFinfo
+{
+	public:
+		~SrcFinfo1() {;}
+
+		SrcFinfo1( const string& name, const string& doc ) 
+			: SrcFinfo( name, doc )
+			{ ; }
+
+		void send( const Eref& e, const ProcInfo* p, double arg ) const
+		{
 			// Qinfo( eindex, size, useSendTo );
-			Qinfo q( e.index(), sizeof( T ), 1 );
+			Qinfo q( e.index(), sizeof( double ), 0 );
+			e.element()->asend( q, getBindIndex(), p, 
+				reinterpret_cast< const char* >( &arg ) );
+		}
+
+		void sendTo( const Eref& e, const ProcInfo* p, 
+			const string& arg, const FullId& target ) const
+		{
+			Qinfo q( e.index(), sizeof( double ), 1 );
 			e.element()->tsend( q, getBindIndex(), p, 
-				reinterpret_cast< const char* >( &arg ), target );
+				reinterpret_cast< const char* >( &arg ), target  );
+		}
+
+	private:
+};
+
+template <> class SrcFinfo1< unsigned int >: public SrcFinfo
+{
+	public:
+		~SrcFinfo1() {;}
+
+		SrcFinfo1( const string& name, const string& doc ) 
+			: SrcFinfo( name, doc )
+			{ ; }
+
+		void send( const Eref& e, const ProcInfo* p, unsigned int arg ) const
+		{
+			// Qinfo( eindex, size, useSendTo );
+			Qinfo q( e.index(), sizeof( unsigned int ), 0 );
+			e.element()->asend( q, getBindIndex(), p, 
+				reinterpret_cast< const char* >( &arg ) );
+		}
+
+		void sendTo( const Eref& e, const ProcInfo* p, 
+			const string& arg, const FullId& target ) const
+		{
+			Qinfo q( e.index(), sizeof( unsigned int ), 1 );
+			e.element()->tsend( q, getBindIndex(), p, 
+				reinterpret_cast< const char* >( &arg ), target  );
+		}
+
+	private:
+};
+
+template <> class SrcFinfo1< int >: public SrcFinfo
+{
+	public:
+		~SrcFinfo1() {;}
+
+		SrcFinfo1( const string& name, const string& doc ) 
+			: SrcFinfo( name, doc )
+			{ ; }
+
+		void send( const Eref& e, const ProcInfo* p, int arg ) const
+		{
+			// Qinfo( eindex, size, useSendTo );
+			Qinfo q( e.index(), sizeof( int ), 0 );
+			e.element()->asend( q, getBindIndex(), p, 
+				reinterpret_cast< const char* >( &arg ) );
+		}
+
+		void sendTo( const Eref& e, const ProcInfo* p, 
+			const string& arg, const FullId& target ) const
+		{
+			Qinfo q( e.index(), sizeof( int ), 1 );
+			e.element()->tsend( q, getBindIndex(), p, 
+				reinterpret_cast< const char* >( &arg ), target  );
 		}
 
 	private:
@@ -144,6 +233,7 @@ template <> class SrcFinfo1< string >: public SrcFinfo
 	private:
 };
 
+// Specialize for doubles.
 template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 {
 	public:
@@ -179,6 +269,45 @@ template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 			a2.val2buf( temp + a1.size() );
 			e.element()->tsend( q, getBindIndex(), p, temp, target );
 			delete[] temp;
+		}
+
+	private:
+};
+
+// Specialize for doubles.
+template <> class SrcFinfo2< double, double >: public SrcFinfo
+{
+	public:
+		~SrcFinfo2() {;}
+
+		SrcFinfo2( const string& name, const string& doc ) 
+			: SrcFinfo( name, doc )
+			{ ; }
+
+		// This version is general but inefficient as it uses an extra
+		// memcpy in val2buf.
+		void send( const Eref& e, const ProcInfo* p,
+			double arg1, double arg2 ) const
+		{
+			static const unsigned int sz = sizeof( double ) + sizeof( double );
+			Qinfo q( e.index(), sz, 0 );
+			double temp[2];
+			temp[0] = arg1;
+			temp[1] = arg2;
+			e.element()->asend( q, getBindIndex(), p, 
+				reinterpret_cast< const char* >( temp ) );
+		}
+
+		void sendTo( const Eref& e, const ProcInfo* p,
+			double arg1, double arg2, const FullId& target ) const
+		{
+			static const unsigned int sz = sizeof( double ) + sizeof( double );
+			Qinfo q( e.index(), sz, 1 );
+			double temp[2];
+			temp[0] = arg1;
+			temp[1] = arg2;
+			e.element()->tsend( q, getBindIndex(), p,
+				reinterpret_cast< const char* >( temp ), target );
 		}
 
 	private:

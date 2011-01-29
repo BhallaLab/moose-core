@@ -125,7 +125,7 @@ class Shell
 		///////////////////////////////////////////////////////////
 		// DestFinfo functions
 		///////////////////////////////////////////////////////////
-		void handleGet( const Eref& e, const Qinfo* q, const char* arg );
+		// void handleGet( const Eref& e, const Qinfo* q, const char* arg );
 
 		/**
 		 * Sets of a simulation for duration runTime. Handles
@@ -297,18 +297,18 @@ class Shell
 
 		/**
 		 * Local node function to assign a single entry in target object
-		 */
 		void innerSet( const Eref& er, FuncId fid, const char* args,
 			unsigned int size );
+		 */
 
 		/**
 		 * Local node function to assign all entries in an array target
 		 * object. The target object may be decomposed between nodes,
 		 * this function has to figure out which part of the array to
 		 * use for which entry.
-		 */
 		void innerSetVec( const Eref& er, FuncId fid, 
 			const PrepackedBuffer& arg );
+		 */
 
 
 		/**
@@ -335,7 +335,8 @@ class Shell
 			const Eref& sheller, const Eref& tgt, FuncId tgtFid,
 			unsigned int numGetEntries );
 
-		void handleGet( Id id, DataId index, FuncId fid );
+		void handleGet( Id id, DataId index, FuncId fid, 
+			unsigned int numTgt );
 
 		// void recvGet( unsigned int node, unsigned int status, PrepackedBuffer pb );
 		void recvGet( const Eref& e, const Qinfo* q, PrepackedBuffer pb );

@@ -53,7 +53,8 @@ void AssignmentMsg::exec( const char* arg, const ProcInfo *p ) const
 			p->execThread( e2_->id(), i2_.data() ) )
 		{
 			const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
-			f->op( Eref( e2_, i2_ ), arg );
+			PrepackedBuffer pb( arg + sizeof( Qinfo ) );
+			f->op( Eref( e2_, i2_ ), q, pb.data() );
 		}
 		// Whether or not this node or thread handled it, we do need to
 		// send back an ack from the node. So do it on thread 0.

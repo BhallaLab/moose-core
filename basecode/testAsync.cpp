@@ -276,14 +276,16 @@ void testInnerSet()
 	const Finfo* finfo = ret->cinfo()->findFinfo( "set_name" );
 	assert( finfo );
 	FuncId f1 = dynamic_cast< const DestFinfo* >( finfo )->getFid();
-	Conv< string > conv( "NewImprovedTest" );
+	Conv< string > conv( "New Improved Test" );
 	char* args = new char[ conv.size() ];
 	conv.val2buf( args );
-	shell->innerSet( e2, f1, args, conv.size() );
+	PrepackedBuffer pb( args, conv.size() );
+	shell->handleSet( i2, e2.index(), f1, pb );
+	// shell->innerSet( e2, f1, args, conv.size() );
 	delete[] args;
 	Qinfo::clearQ( &p );
 	// Field< string >::set( e2, "name", "NewImprovedTest" );
-	assert( ret->getName() == "NewImprovedTest" );
+	assert( ret->getName() == "New Improved Test" );
 	
 
 	finfo = ret->cinfo()->findFinfo( "set_outputValue" );
@@ -297,7 +299,9 @@ void testInnerSet()
 		Eref dest( e2.element(), i );
 		// char* args = new char[ conv.size() ];
 		conv.val2buf( args );
-		shell->innerSet( dest, f2, args, conv.size() );
+		PrepackedBuffer pb( args, conv.size() );
+		shell->handleSet( dest.id(), dest.index(), f2, pb );
+	//	shell->innerSet( dest, f2, args, conv.size() );
 	// 	SetGet1< double >::set( dest, "set_outputValue", x );
 		Qinfo::clearQ( &p );
 	}
@@ -331,7 +335,7 @@ void testInnerGet() // Actually works on Shell::handleGet.
 	const Finfo* finfo = ret->cinfo()->findFinfo( "get_name" );
 	assert( finfo );
 	FuncId f1 = dynamic_cast< const DestFinfo* >( finfo )->getFid();
-	shell->handleGet( i2, DataId( 0 ), f1 );
+	shell->handleGet( i2, DataId( 0 ), f1, 1 );
 	Qinfo::clearQ( &p ); // The request goes to the target Element
 	Qinfo::clearQ( &p ); // The response comes back to the Shell
 	Qinfo::clearQ( &p ); // Response is relayed back to the node 0 Shell
@@ -342,7 +346,7 @@ void testInnerGet() // Actually works on Shell::handleGet.
 	// string val = Field< string >::get( e2, "name" );
 	// assert( val == "test2" );
 	ret->setName( "HupTwoThree" );
-	shell->handleGet( i2, DataId( 0 ), f1 );
+	shell->handleGet( i2, DataId( 0 ), f1, 1 );
 	Qinfo::clearQ( &p ); // The request goes to the target Element
 	Qinfo::clearQ( &p ); // The response comes back to the Shell
 	Qinfo::clearQ( &p ); // Response is relayed back to the node 0 Shell
@@ -364,7 +368,7 @@ void testInnerGet() // Actually works on Shell::handleGet.
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref dest( e2.element(), i );
 
-		shell->handleGet( i2, DataId( i ), f2 );
+		shell->handleGet( i2, DataId( i ), f2, 1 );
 		Qinfo::clearQ( &p ); // The request goes to the target Element
 		Qinfo::clearQ( &p ); // The response comes back to the Shell
 		Qinfo::clearQ( &p ); // Response is relayed back to the node 0 Shell
@@ -655,6 +659,15 @@ void testSetGetVec()
 	// Here we test setting a 1-D vector
 	bool ret = Field< unsigned int >::setVec( e2, "numSynapses", numSyn );
 	assert( ret );
+
+
+	vector< unsigned int > getSyn;
+	Eref tempE( e2.element(), DataId::any() );
+	Field< unsigned int >::getVec( tempE, "numSynapses", getSyn );
+	assert (getSyn.size() == size );
+	for ( unsigned int i = 0; i < size; ++i )
+		assert( getSyn[i] == i );
+
 	unsigned int nd = syn->dataHandler()->localEntries();
 	assert( nd == ( size * (size - 1) ) / 2 );
 	// cout << "NumSyn = " << nd << endl;

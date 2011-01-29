@@ -153,6 +153,7 @@ static DestFinfo handleSet( "handleSet",
 				&Shell::handleSet )
 			);
 
+/// Probably can get rid of it.
 static SrcFinfo0 lowLevelSet(
 			"lowLevelSet",
 			"lowlevelSet():"
@@ -167,20 +168,34 @@ static SrcFinfo0 lowLevelSet(
  * 	receiveGet->completeGet
  */
 
-static SrcFinfo3< Id, DataId, FuncId > requestGet( "requestGet",
-			"Function to request another Element for a value" );
+static SrcFinfo4< Id, DataId, FuncId, unsigned int > requestGet( 
+			"requestGet",
+			"Function to request another Element for a value."
+			"Args: Id of target, DataId of target, "
+			"FuncId identifying field, int to specify # of entries to get."
+			);
 
 static DestFinfo handleGet( "handleGet", 
 			"handleGet( Id elementId, DataId index, FuncId fid )"
 			"Deals with requestGet, to get specified field from any node.",
-			new OpFunc3< Shell, Id, DataId, FuncId >( 
+			new OpFunc4< Shell, Id, DataId, FuncId, unsigned int >( 
 				&Shell::handleGet )
 			);
+/*
 static SrcFinfo1< FuncId > lowLevelGet(
 			"lowLevelGet",
 			"lowlevelGet():"
 			"Low-level SrcFinfo. Not for external use, internally used as"
 			"a handle to request a value from target field."
+);
+*/
+
+static SrcFinfo1< PrepackedBuffer > lowLevelSetGet(
+			"lowLevelSetGet",
+			"lowlevelSetGet():"
+			"Low-level SrcFinfo. Not for external use, internally used as"
+			"a handle to set or get a single or vector value from "
+			" target field."
 );
 
 // This function is called by directly inserting entries into the queue,
@@ -285,8 +300,8 @@ const Cinfo* Shell::initCinfo()
 ////////////////////////////////////////////////////////////////
 
 		&requestGet,
-		&lowLevelSet,
-		&lowLevelGet,
+//		&lowLevelSet,
+		&lowLevelSetGet,
 ////////////////////////////////////////////////////////////////
 //  Shared msg
 ////////////////////////////////////////////////////////////////
@@ -935,9 +950,10 @@ const char* Shell::buf()
 // Functions for handling field set/get and func calls
 ////////////////////////////////////////////////////////////////////////
 
+/*
 void Shell::innerSetVec( const Eref& er, FuncId fid, const PrepackedBuffer& arg )
 {
-	shelle_->clearBinding ( lowLevelGet.getBindIndex() );
+	shelle_->clearBinding ( lowLevelAssign.getBindIndex() );
 	Msg* m = new AssignVecMsg( Eref( shelle_, 0 ), er.element(), Msg::setMsg );
 	shelle_->addMsgAndFunc( m->mid(), fid, lowLevelGet.getBindIndex() );
 	if ( myNode_ == 0 ) {
@@ -967,19 +983,24 @@ void Shell::innerSet( const Eref& er, FuncId fid, const char* args,
 	}
 	// }
 }
+*/
 
 void Shell::handleSet( Id id, DataId d, FuncId fid, PrepackedBuffer arg )
 {
 	Eref er( id(), d );
+	shelle_->clearBinding ( lowLevelSetGet.getBindIndex() );
+	Eref sheller( shelle_, 0 );
+	Msg* m;
+	
 	if ( arg.isVector() ) {
-		innerSetVec( er, fid, arg );
+		m = new AssignVecMsg( sheller, er.element(), Msg::setMsg );
 	} else {
-		innerSet( er, fid, arg.data(), arg.dataSize() );
+		m = new AssignmentMsg( sheller, er, Msg::setMsg );
+		// innerSet( er, fid, arg.data(), arg.dataSize() );
 	}
-	// ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
-	// Now the ack has to come from the AssignmentMsg::exec or the
-	// AssignVecMsg::exec. These are better because the ack only comes
-	// after the assignment is completed.
+	shelle_->addMsgAndFunc( m->mid(), fid, lowLevelSetGet.getBindIndex() );
+	if ( myNode_ == 0 )
+		lowLevelSetGet.send( sheller, &p_, arg );
 }
 
 // Static function, used for developer-code triggered SetGet functions.
@@ -1099,7 +1120,8 @@ const vector< char* >& Shell::innerDispatchGet(
 	clearGetBuf();
 	gettingVector_ = (retEntries > 1 );
 	initAck();
-		requestGet.send( sheller, &p_, tgt.element()->id(), tgt.index(), fid );
+		requestGet.send( sheller, &p_, tgt.element()->id(), tgt.index(), 
+			fid, retEntries );
 	waitForAck();
 
 	assert( getBuf_.size() == retEntries );
@@ -1112,22 +1134,34 @@ const vector< char* >& Shell::innerDispatchGet(
  * This operates on the worker node. It handles the Get request from
  * the master node, and dispatches if need to the local object.
  */
-void Shell::handleGet( Id id, DataId index, FuncId fid )
+void Shell::handleGet( Id id, DataId index, FuncId fid, 
+	unsigned int numTgt )
 {
 	Eref sheller( shelle_, 0 );
 	Eref tgt( id(), index );
-//	if ( id()->dataHandler()->isDataHere( index ) ) {
-		shelle_->clearBinding( lowLevelGet.getBindIndex() );
-		Msg* m = new AssignmentMsg( sheller, tgt, Msg::setMsg );
-		shelle_->addMsgAndFunc( m->mid(), fid, lowLevelGet.getBindIndex() );
-		FuncId retFunc = receiveGet.getFid();
-	if ( myNode_ == 0 )
-		lowLevelGet.send( sheller, &p_, retFunc );
-	/*
+	FuncId retFunc = receiveGet.getFid();
+
+	shelle_->clearBinding( lowLevelSetGet.getBindIndex() );
+	if ( numTgt > 1 ) {
+		Msg* m = new AssignVecMsg( sheller, tgt.element(), Msg::setMsg );
+		shelle_->addMsgAndFunc( m->mid(), fid, lowLevelSetGet.getBindIndex() );
+		if ( myNode_ == 0 ) {
+			//Need to find numTgt
+			vector< FuncId > rf( numTgt, retFunc );
+			const char* temp = reinterpret_cast< const char* >( &rf[0] );
+			PrepackedBuffer pb( temp, sizeof( FuncId ), numTgt );
+			lowLevelSetGet.send( sheller, &p_, pb );
+		}
 	} else {
-		ack.send( sheller, &p_, myNode_, OkStatus );
+		Msg* m = new AssignmentMsg( sheller, tgt, Msg::setMsg );
+		shelle_->addMsgAndFunc( m->mid(), fid, lowLevelSetGet.getBindIndex());
+		if ( myNode_ == 0 ) {
+			PrepackedBuffer pb( 
+				reinterpret_cast< const char* >( &retFunc), 
+				sizeof( FuncId ) );
+			lowLevelSetGet.send( sheller, &p_, pb );
+		}
 	}
-	*/
 }
 
 void Shell::recvGet( const Eref& e, const Qinfo* q, PrepackedBuffer pb )

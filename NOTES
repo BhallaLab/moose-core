@@ -9976,3 +9976,44 @@ new distinction between DataHandler::totalEntries and DataHandler::localEntries.
 Got it to clear testAsync, more assertions of the same kind pending elsewhere.
 Checkin 2430.
 
+Got it to clear all unit tests. But I anticipate problems in multinode.
+Valgrind reports 8 bytes lost, due to delayed claearing of the getBuf.
+
+Also I expect issues with getvec on globals: replicating input. Probably
+already happens with regular 'get' call.
+
+Implementing the getVec now.
+
+It hangs in an apparent infinite loop. Qinfo::reportQ shows that the
+appropriate Q entries are in fact present at the start of things.
+
+Tracked things down to the point of executing the retun function on the Shell.
+The function id (fid) is 0, which seems to mean delete, which seems 
+erroneous. This is set in AssignVecMsg.cpp:57 from q->fid, which I need to
+further track back.
+
+============================================================================
+29 Jan 2011
+I think I've tracked down the problem with getVec: The AssignVecMsg expects a 
+PrepackedBuffer with all the fids in it as an argument.
+Arguably this is silly, as we want to use a single Fid here.
+	- Could extend PrepackedBuffer to return a single value for all indices,
+		as an option. Messy.
+	- Could just fill up PrepackedBuffer as a vector with identical fids
+		in the whole thing. Wasteful.
+
+More generally, there is some ugliness in how the arguments are passed in
+innerSet and innerSetVec, one of which uses Prepacked buffer and the other 
+postpones it. Likewise HandleSet does things in an unpleasant way. This should
+be cleaned up.
+
+Get rid of lowLevelSet... I don't think it is used.
+
+Got many changes to compile, but doesn't yet work.
+
+Tried to check in but SourceForge has reset all passwords and I have to 
+re-register.
+
+A bit more work. Uncovered a nasty old bug with SrcFinfo1 in particular,
+which was still using sizeof( T ) rather than the Conv code. Now it
+clears this particular problem with Set, but more pending.
