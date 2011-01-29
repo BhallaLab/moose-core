@@ -148,7 +148,7 @@ void insertIntoQ( )
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double val = ( reinterpret_cast< Arith* >(e2.element()->dataHandler()->data( i )) )->getOutput();
-		assert( fabs( val - i * i ) < 1e-8 );
+		assert( doubleEq( val, i * i ) );
 	}
 	cout << "." << flush;
 
@@ -310,7 +310,6 @@ void testInnerSet()
 		double temp = sqrt( i );
 		double val = reinterpret_cast< Arith* >(e2.element()->dataHandler()->data( i ))->getOutput();
 		assert( doubleEq( val, temp ) );
-		// assert( fabs( val - temp ) < 1e-6 );
 	}
 
 	cout << "." << flush;
@@ -378,7 +377,6 @@ void testInnerGet() // Actually works on Shell::handleGet.
 		shell->clearGetBuf();
 
 	// 	double val = Field< double >::get( dest, "outputValue" );
-		// assert( fabs( val - temp ) < 1e-8 );
 	}
 
 	cout << "." << flush;
@@ -438,7 +436,7 @@ void testStrSet()
 		double x = sqrt( i );
 		Eref dest( e2.element(), i );
 		stringstream ss;
-		ss << setw( 7 ) << x;
+		ss << setw( 10 ) << x;
 		ok = SetGet::strSet( dest, "outputValue", ss.str() );
 		assert( ok );
 		// SetGet1< double >::set( dest, "set_outputValue", x );
@@ -448,6 +446,7 @@ void testStrSet()
 		double temp = sqrt( i );
 		double val = reinterpret_cast< Arith* >( Eref( i2(), i ).data() )->getOutput();
 		assert( fabs( val - temp ) < 1e-5 );
+		// DoubleEq won't work here because string is truncated.
 	}
 
 	cout << "." << flush;
@@ -485,7 +484,7 @@ void testGet()
 
 		double val = Field< double >::get( dest, "outputValue" );
 		double temp = i * 3;
-		assert( fabs( val - temp ) < 1e-8 );
+		assert( doubleEq( val, temp ) );
 	}
 
 	cout << "." << flush;
@@ -527,6 +526,7 @@ void testStrGet()
 		double conv = atof( val.c_str() );
 		double temp = i * 3;
 		assert( fabs( conv - temp ) < 1e-5 );
+		// DoubleEq won't work here because string is truncated.
 	}
 
 	cout << "." << flush;
@@ -536,7 +536,6 @@ void testStrGet()
 
 void testSetGetDouble()
 {
-	static const double EPSILON = 1e-9;
 	const Cinfo* ic = IntFire::initCinfo();
 	unsigned int size = 100;
 	vector< unsigned int > dims( 1, size );
@@ -556,15 +555,14 @@ void testSetGetDouble()
 		bool ret = Field< double >::set( e2, "Vm", temp );
 		assert( ret );
 		assert( 
-			fabs ( reinterpret_cast< IntFire* >(e2.data())->getVm() - temp ) <
-				EPSILON ); 
+			doubleEq ( reinterpret_cast< IntFire* >(e2.data())->getVm() , temp ) );
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref e2( i2(), i );
 		double temp = i;
 		double ret = Field< double >::get( e2, "Vm" );
-		assert( fabs ( temp - ret ) < EPSILON );
+		assert( doubleEq( temp, ret ) );
 	}
 
 	cout << "." << flush;
@@ -574,7 +572,6 @@ void testSetGetDouble()
 
 void testSetGetSynapse()
 {
-	static const double EPSILON = 1e-9;
 	const Cinfo* ic = IntFire::initCinfo();
 	// const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 100;
@@ -617,8 +614,7 @@ void testSetGetSynapse()
 			bool ret = Field< double >::set( syne, "delay", temp );
 			assert( ret );
 			assert( 
-			fabs ( reinterpret_cast< Synapse* >(syne.data())->getDelay() - temp ) <
-				EPSILON ); 
+			doubleEq( reinterpret_cast< Synapse* >(syne.data())->getDelay() , temp ) );
 		}
 	}
 	cout << "." << flush;
@@ -715,7 +711,6 @@ void testSetGetVec()
 
 void testSetRepeat()
 {
-	static const double EPSILON = 1e-9;
 	const Cinfo* ic = IntFire::initCinfo();
 	// const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 100;
@@ -754,9 +749,9 @@ void testSetRepeat()
 		for ( unsigned int j = 0; j < i; ++j ) {
 			DataId di( i, j );
 			Eref syne( syn, di );
-			assert( 
-			fabs ( reinterpret_cast< Synapse* >(syne.data())->getDelay() - 123.0 ) <
-				EPSILON ); 
+			assert( doubleEq( 
+				reinterpret_cast< Synapse* >(syne.data())->getDelay(), 
+				123.0 ) );
 		}
 	}
 	cout << "." << flush;
@@ -766,7 +761,6 @@ void testSetRepeat()
 
 void testSendSpike()
 {
-	static const double EPSILON = 1e-9;
 	static const double WEIGHT = -1.0;
 	static const double TAU = 1.0;
 	static const double DT = 0.1;
@@ -817,7 +811,7 @@ void testSendSpike()
 	reinterpret_cast< IntFire* >(e2.data())->process( e2, &p );
 	// At this stage we have sent the spike, so e2.data::Vm should be -1e-7.
 	double Vm = reinterpret_cast< IntFire* >(e2.data())->getVm();
-	assert( fabs( Vm + 1e-7) < EPSILON );
+	assert( doubleEq( Vm, -1e-7 ) );
 	// Test that the spike message is in the queue.
 	assert( Qinfo::outQ_->size() > 0 ); // Number of groups.
 	assert( (*Qinfo::outQ_)[0].totalNumEntries() == 1 );
@@ -836,7 +830,7 @@ void testSendSpike()
 
 	reinterpret_cast< IntFire* >(synParent.data())->process( synParent, &p );
 	Vm = Field< double >::get( synParent, "Vm" );
-	assert( fabs( Vm - WEIGHT * ( 1.0 - DT / TAU ) ) < EPSILON );
+	assert( doubleEq( Vm , WEIGHT * ( 1.0 - DT / TAU ) ) );
 	// cout << "Vm = " << Vm << endl;
 	cout << "." << flush;
 	delete i3();
@@ -1188,7 +1182,6 @@ void testSparseMsg()
 
 void testUpValue()
 {
-	static const double EPSILON = 1e-9;
 	const Cinfo* cc = Clock::initCinfo();
 	// const Cinfo* tc = Tick::initCinfo();
 	unsigned int size = 10;
@@ -1223,13 +1216,13 @@ void testUpValue()
 		bool ret = Field< double >::set( te, "dt", dt );
 		assert( ret );
 		double val = Field< double >::get( te, "localdt" );
-		assert( fabs( dt - val ) < EPSILON );
+		assert( doubleEq( dt, val ) );
 
 		dt *= 10.0;
 		ret = Field< double >::set( te, "localdt", dt );
 		assert( ret );
 		val = Field< double >::get( te, "dt" );
-		assert( fabs( dt - val ) < EPSILON );
+		assert( doubleEq( dt, val ) );
 	}
 	cout << "." << flush;
 	delete tickId();
@@ -1471,9 +1464,9 @@ void testMsgField()
 	Eref tgt3( i2(), 3 );
 	Eref tgt8( i2(), 8 );
 	double val = reinterpret_cast< Arith* >( tgt3.data() )->getOutput();
-	assert( fabs( val - 5 * 42 ) < 1e-8 );
+	assert( doubleEq( val, 5 * 42 ) );
 	val = reinterpret_cast< Arith* >( tgt8.data() )->getOutput();
-	assert( fabs( val ) < 1e-8 );
+	assert( doubleEq( val, 0 ) );
 
 	// Now change I1 and I2, rerun, and check.
 	sm->setI1( 9 );
@@ -1484,9 +1477,9 @@ void testMsgField()
 	}
 	Qinfo::clearQ( &p );
 	val = reinterpret_cast< Arith* >( tgt3.data() )->getOutput();
-	assert( fabs( val - 5 * 42 ) < 1e-8 );
+	assert( doubleEq( val, 5 * 42 ) );
 	val = reinterpret_cast< Arith* >( tgt8.data() )->getOutput();
-	assert( fabs( val - 9000 ) < 1e-8 );
+	assert( doubleEq( val, 9000 ) );
 
 	cout << "." << flush;
 
@@ -1496,7 +1489,6 @@ void testMsgField()
 
 void testSetGetExtField()
 {
-	static const double EPSILON = 1e-9;
 	const Cinfo* nc = Neutral::initCinfo();
 	const Cinfo* rc = Mdouble::initCinfo();
 	unsigned int size = 100;
@@ -1544,13 +1536,13 @@ void testSetGetExtField()
 		double temp2  = temp * temp;
 
 		double v = reinterpret_cast< Mdouble* >(a.data() )->getThis();
-		assert( fabs ( v - temp ) < EPSILON ); 
+		assert( doubleEq( v, temp ) );
 
 		v = reinterpret_cast< Mdouble* >(b.data() )->getThis();
-		assert( fabs( v - temp2 ) < EPSILON );
+		assert( doubleEq( v, temp2 ) );
 
 		v = reinterpret_cast< Mdouble* >( c.data() )->getThis();
-		assert( fabs( v - ( temp2 - temp ) ) < EPSILON );
+		assert( doubleEq( v, temp2 - temp ) );
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -1560,13 +1552,13 @@ void testSetGetExtField()
 		double temp = i;
 		double temp2  = temp * temp;
 		double ret = Field< double >::get( a, "x" );
-		assert( fabs ( temp - ret ) < EPSILON );
+		assert( doubleEq( temp, ret ) );
 		
 		ret = Field< double >::get( b, "y" );
-		assert( fabs ( temp2 - ret ) < EPSILON );
+		assert( doubleEq( temp2, ret ) );
 
 		ret = Field< double >::get( a, "z" );
-		assert( fabs ( (temp2 - temp) - ret ) < EPSILON );
+		assert( doubleEq( temp2 - temp, ret ) );
 		// cout << i << "	" << ret << "	temp2 = " << temp2 << endl;
 	}
 

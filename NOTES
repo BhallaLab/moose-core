@@ -10033,4 +10033,6 @@ Checkin 2434, 2435.
 Added another unit test for getVec, this time for all the delays in a ragged
 array of synapses. Works first time.
 
+Cleaned up a lot of tests for zero in testAsync.cpp, now using the
+doubleEq function.
 ============================================================================
