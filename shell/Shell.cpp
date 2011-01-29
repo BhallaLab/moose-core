@@ -1119,6 +1119,7 @@ const vector< char* >& Shell::innerDispatchGet(
 {
 	clearGetBuf();
 	gettingVector_ = (retEntries > 1 );
+	getBuf_.resize( retEntries );
 	initAck();
 		requestGet.send( sheller, &p_, tgt.element()->id(), tgt.index(), 
 			fid, retEntries );

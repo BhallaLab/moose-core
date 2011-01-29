@@ -10017,3 +10017,10 @@ re-register.
 A bit more work. Uncovered a nasty old bug with SrcFinfo1 in particular,
 which was still using sizeof( T ) rather than the Conv code. Now it
 clears this particular problem with Set, but more pending.
+
+Checkin now works. Revision 2432.
+
+Fixed another few bugs, now it clears the unit test for getVec. Need to
+do another few tests of this in other contexts, specially for the syn weights.
+
+============================================================================
