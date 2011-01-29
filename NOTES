@@ -10023,4 +10023,8 @@ Checkin now works. Revision 2432.
 Fixed another few bugs, now it clears the unit test for getVec. Need to
 do another few tests of this in other contexts, specially for the syn weights.
 
+Checkin 2433.
+
+Valgrind still happy except for that lost buffer entry.
+
 ============================================================================

@@ -26,8 +26,6 @@ class Shell
 		///////////////////////////////////////////////////////////
 		// Field functions
 		///////////////////////////////////////////////////////////
-		void setName( string name );
-		string getName() const;
 		void setCwe( Id cwe );
 		Id getCwe() const;
 
@@ -132,15 +130,6 @@ class Shell
 		 * cases including single-thread, multithread, and multinode
 		 */
 		void start( double runTime );
-
-		/**
-		 * Wrapper for the start function. This adds the call back
-		 * to acknowledge completion of op.
-		void handleStart( double runTime );
-		void handleReinit();
-		void handleStop();
-		void handleTerminate();
-		 */
 
 		/**
  		 * Initialize acks. This call should be done before the 'send' goes 
@@ -294,23 +283,6 @@ class Shell
 		// Functions for handling field Set/Get operations
 		////////////////////////////////////////////////////////////////
 
-
-		/**
-		 * Local node function to assign a single entry in target object
-		void innerSet( const Eref& er, FuncId fid, const char* args,
-			unsigned int size );
-		 */
-
-		/**
-		 * Local node function to assign all entries in an array target
-		 * object. The target object may be decomposed between nodes,
-		 * this function has to figure out which part of the array to
-		 * use for which entry.
-		void innerSetVec( const Eref& er, FuncId fid, 
-			const PrepackedBuffer& arg );
-		 */
-
-
 		/**
 		 * Local node function that orchestrates the assignment. It picks
 		 * the assignment mode to operate the appropriate innerSet 
@@ -338,10 +310,7 @@ class Shell
 		void handleGet( Id id, DataId index, FuncId fid, 
 			unsigned int numTgt );
 
-		// void recvGet( unsigned int node, unsigned int status, PrepackedBuffer pb );
 		void recvGet( const Eref& e, const Qinfo* q, PrepackedBuffer pb );
-
-		void lowLevelRecvGet( PrepackedBuffer pb );
 
 		////////////////////////////////////////////////////////////////
 		// Sets up clock ticks. Essentially is a call into the 
@@ -369,11 +338,6 @@ class Shell
 
 		const vector< char* >& getBuf() const;
 		void clearGetBuf();
-
-		/**
- 		 * Static global, returns contents of shell buffer.
-		static const char* buf();
- 		 */
 
 		/// Static func for returning the ProcInfo of the shell.
 		static const ProcInfo* procInfo();

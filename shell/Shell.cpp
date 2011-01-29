@@ -153,14 +153,6 @@ static DestFinfo handleSet( "handleSet",
 				&Shell::handleSet )
 			);
 
-/// Probably can get rid of it.
-static SrcFinfo0 lowLevelSet(
-			"lowLevelSet",
-			"lowlevelSet():"
-			"Low-level SrcFinfo. Not for external use, internally used as"
-			"a handle to assign a value on target field."
-);
-
 
 /**
  * Sequence is:
@@ -181,14 +173,6 @@ static DestFinfo handleGet( "handleGet",
 			new OpFunc4< Shell, Id, DataId, FuncId, unsigned int >( 
 				&Shell::handleGet )
 			);
-/*
-static SrcFinfo1< FuncId > lowLevelGet(
-			"lowLevelGet",
-			"lowlevelGet():"
-			"Low-level SrcFinfo. Not for external use, internally used as"
-			"a handle to request a value from target field."
-);
-*/
 
 static SrcFinfo1< PrepackedBuffer > lowLevelSetGet(
 			"lowLevelSetGet",
@@ -198,18 +182,9 @@ static SrcFinfo1< PrepackedBuffer > lowLevelSetGet(
 			" target field."
 );
 
-// This function is called by directly inserting entries into the queue,
-// when getting a value.
-static DestFinfo lowLevelReceiveGet( "lowLevelReceiveGet", 
-	"lowLevelReceiveGet( PrepackedBuffer data )"
-	"Function on worker node Shell to handle the value returned by object.",
-	new OpFunc1< Shell, PrepackedBuffer >( &Shell::lowLevelRecvGet )
-);
-
 static DestFinfo receiveGet( "receiveGet", 
 	"receiveGet( Uint node#, Uint status, PrepackedBuffer data )"
 	"Function on master shell that handles the value relayed from worker.",
-	// new OpFunc3< Shell, unsigned int, unsigned int, PrepackedBuffer >( &Shell::recvGet )
 	new EpFunc1< Shell, PrepackedBuffer >( &Shell::recvGet )
 );
 
@@ -255,11 +230,13 @@ const Cinfo* Shell::initCinfo()
 ////////////////////////////////////////////////////////////////
 // Value Finfos
 ////////////////////////////////////////////////////////////////
+	/*
 	static ValueFinfo< Shell, string > name( 
 			"name",
 			"Name of object", 
 			&Shell::setName, 
 			&Shell::getName );
+			*/
 
 ////////////////////////////////////////////////////////////////
 // Dest Finfos: Functions handled by Shell
@@ -289,9 +266,7 @@ const Cinfo* Shell::initCinfo()
 		);
 	
 	static Finfo* shellFinfos[] = {
-		&name,
 		&receiveGet,
-		&lowLevelReceiveGet,
 		&setclock,
 		&loadBalance,
 
@@ -300,7 +275,6 @@ const Cinfo* Shell::initCinfo()
 ////////////////////////////////////////////////////////////////
 
 		&requestGet,
-//		&lowLevelSet,
 		&lowLevelSetGet,
 ////////////////////////////////////////////////////////////////
 //  Shared msg
@@ -652,6 +626,7 @@ void Shell::process( const Eref& e, ProcPtr p )
 }
 
 
+/*
 void Shell::setName( string name )
 {
 	name_ = name;
@@ -661,6 +636,7 @@ string Shell::getName() const
 {
 	return name_;
 }
+*/
 
 void Shell::setCwe( Id val )
 {
@@ -1185,11 +1161,13 @@ void Shell::recvGet( const Eref& e, const Qinfo* q, PrepackedBuffer pb )
 	}
 }
 
+/*
 void Shell::lowLevelRecvGet( PrepackedBuffer pb )
 {
 	cout << "Shell::lowLevelRecvGet: If this is being used, then fix\n";
 	relayGet.send( Eref( shelle_, 0 ), &p_, myNode(), OkStatus, pb );
 }
+*/
 
 ////////////////////////////////////////////////////////////////////////
 
