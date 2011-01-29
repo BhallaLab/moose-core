@@ -9962,9 +9962,9 @@ Need:
 Got it to compile. Fails rather soon in unit tests. Checkin 2429.
 Incrementally fixing up unit tests.
 
-Check if we still need lowLevelRecvGet.
-Deprecate Shell::name_
-Fill in the Handle operation to select AssignVecMsg.
+* Check if we still need lowLevelRecvGet.
+* Deprecate Shell::name_
+* Fill in the Handle operation to select AssignVecMsg.
 Put in some unit tests for GetVec
 Go back to Set and SetVec to generalize wrt strings and subparts of vectors.
 
@@ -10028,6 +10028,9 @@ Checkin 2433.
 Valgrind still happy except for that lost buffer entry.
 
 Cleanup of many deprecated funcs in Shell.
-Checkin 2434
+Checkin 2434, 2435.
+
+Added another unit test for getVec, this time for all the delays in a ragged
+array of synapses. Works first time.
 
 ============================================================================
