@@ -299,7 +299,7 @@ static const Cinfo* shellCinfo = Shell::initCinfo();
 
 
 Shell::Shell()
-	: name_( "" ),
+	: 
 		gettingVector_( 0 ),
 		isSingleThreaded_( 0 ),
 		isBlockedOnParser_( 0 ),
@@ -625,18 +625,6 @@ void Shell::process( const Eref& e, ProcPtr p )
 */
 }
 
-
-/*
-void Shell::setName( string name )
-{
-	name_ = name;
-}
-
-string Shell::getName() const
-{
-	return name_;
-}
-*/
 
 void Shell::setCwe( Id val )
 {

@@ -352,8 +352,6 @@ class Shell
 
 		static void wildcard( const string& path, vector< Id >& list );
 	private:
-		string name_; // shouldn't this be deprecated?
-
 		Element* shelle_; // It is useful for the Shell to have this.
 
 		/**
@@ -363,6 +361,10 @@ class Shell
 		 */
 		vector< char* > getBuf_;
 
+		/**
+		 * Flag, used by the 'get' subsystem which maintains a buffer for
+		 * returned value. True when the returned value is a vector.
+		 */
 		bool gettingVector_;
 
 		MsgId latestMsgId_; // Hack to communicate newly made MsgIds.

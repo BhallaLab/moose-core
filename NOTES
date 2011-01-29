@@ -10027,4 +10027,7 @@ Checkin 2433.
 
 Valgrind still happy except for that lost buffer entry.
 
+Cleanup of many deprecated funcs in Shell.
+Checkin 2434
+
 ============================================================================
