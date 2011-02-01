@@ -328,6 +328,11 @@ template< class T, class A > class GetEpFunc: public OpFunc
 			delete[] temp0;
 		}
 
+		A reduceOp( const Eref& e ) const {
+			Qinfo q; // Dummy.
+			return ( reinterpret_cast< T* >( e.data() )->*func_)( e, &q );
+		}
+
 	private:
 		A ( T::*func_ )( const Eref& e, const Qinfo* q ) const;
 };

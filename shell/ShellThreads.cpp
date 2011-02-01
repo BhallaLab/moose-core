@@ -241,3 +241,21 @@ unsigned int Shell::reduceInt( unsigned int val )
 	return val;
 #endif
 }
+
+void Shell::handleSync( const Eref& e, const Qinfo* q, Id elm )
+{
+	static const Finfo* ackf = 
+		Shell::initCinfo()->findFinfo( "ack" );
+	static const SrcFinfo2< unsigned int, unsigned int >* 
+		ack = dynamic_cast< const SrcFinfo2< unsigned int, unsigned int >* >( ackf );
+	assert( ackf );
+	assert( ack );
+
+	assert( elm != Id() && elm() != 0 );
+	FieldDataHandlerBase* fdh = dynamic_cast< FieldDataHandlerBase *>(
+		elm()->dataHandler() );
+	if ( fdh ) 
+		fdh->syncFieldArraySize();
+
+	ack->send( e, &p_, Shell::myNode(), OkStatus );
+}

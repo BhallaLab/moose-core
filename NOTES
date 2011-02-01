@@ -9965,7 +9965,7 @@ Incrementally fixing up unit tests.
 * Check if we still need lowLevelRecvGet.
 * Deprecate Shell::name_
 * Fill in the Handle operation to select AssignVecMsg.
-Put in some unit tests for GetVec
+* Put in some unit tests for GetVec
 Go back to Set and SetVec to generalize wrt strings and subparts of vectors.
 
 ============================================================================
@@ -10034,5 +10034,190 @@ Added another unit test for getVec, this time for all the delays in a ragged
 array of synapses. Works first time.
 
 Cleaned up a lot of tests for zero in testAsync.cpp, now using the
-doubleEq function.
+doubleEq function. Checkin 2437
+
+Started off on mpi debugging. First problem is in testAsync.cpp:605
+which tries to syncFieldArraySize. This fails because the call has to be
+executed on all nodes, while this is running just on node 0.
+============================================================================
+30 Jan 2011
+
+Setting up Shell::handleSync. It occurs to me that this could also be a 
+Neutral function, and thus work on all Elements using the 'set' interface.
+For now let's see the usage patterns.
+
+This still doesn't run. It gets stuck in a race condition, competing between
+the main MPI_broadcast used for the normal internode comms, 
+and the MPI_allgather used for the sync.
+
+May need to do the clumsy way after all.
+
+- Functions that alter dimension fields set a flag.
+	- nodebalance?
+	- setNumField
+	- setFieldArraySize
+	- setFieldDimension
+	
+- Functions that rely on the fieldDimension check this flag
+	- totalEntries()
+	- linearIndex( const DataId& )
+	- dataId( unsigned int linearIndex )
+	- sizeOfDim( unsigned int dim ) may need this for field dims
+	- biggestFieldArraySize
+	- globalize probably doesn't
+
+  Note that the flag can be figured out on the master node: doesn't need 
+  additional communication.
+  Then: Implement a Shell function that intervenes whenever one of the the 
+  dependent functions tries to run in the presence of the flag.
+- doSyncDimension
+	- Send call to all nodes: a 'reduceGet' call.
+		- reduceGet is propagated down to all threads and objects
+			using a variant of AssignVecMsg
+			- The usual 'get' function extracts a value, but
+			instead of dumping it into the queue, it sends it
+			somehow into the reduce function.
+		- Reduce function operates on values from objects on each thread
+		- Same reduce function operates on values from each thread.
+		- The reduced value is put at a single location on the node
+		- This value is propagated to master node, on the lines of
+			the usual 'get' call. One value per node.
+			- In principle each node could accumulate values from
+			all other nodes, and avoid consolidation on master.
+		- Same reduce function reduces values from different nodes.
+	- The single reduced value is now propagated to all nodes in a 'set'
+		command.
+		- May need to have a specialization of 'set' as well to 
+		deal with assignments to Element fields.
+
+
+Two key concepts:
+	- A way to reduce return values from many threads and objects
+	- A way to direct assignments to Element fields like dimension, name.
+
+============================================================================
+31 Jan 2011
+Outline of reduce operation approach, revisited.
+
+- Data structures:
+	- A reduceQ[numThreads] on each node, holding Reduce entries:
+	- A ReduceFinfo that generates the type-specified Reduce class,
+		as a ReduceBase ptr.
+		- Takes the Get fid from the reduced object to set up the
+			Reduce object.
+		- Digests the completed ReduceBase ptr to update internals.
+		- This is located on a distinct object from the one to be 
+			reduced, and it can operate on any field of the correct
+			type on any object.
+	- A Reduce class with the following API:
+		- Derived from Reduce base class.
+		- Created using the regular 'get' operation.
+		- Has to hold the typed Get func for the object.
+		- Has to generically call this func internally using a
+			ReduceBase ptr and an arg for the object.
+		- Op to scan through vector of self entries, keeping
+			internal tally of reduced value(s)
+			- Or return a ptr to the reduced data, also used below
+		- Pass size and data so that reduceQ can call MPI_allgather(?)
+		- Generate a data transfer component?
+		- Scan through MPI_allgather data for final reduce
+	- A way to harvest reduced data and dispatch using msg.send call.
+	- A ReduceMsg that has a special exec function. I would prefer it not
+		depend on any new msg type, so we can deploy to any target.
+		Otherwise make it like AssignVec.
+- System initiates call through the usual 'Set/Get' mechanism
+	- On each thread, in ReduceMsg::exec, a new Reduce is appended to the 
+		ReduceQ.
+	- The Reduce digests input from each object on its thread.
+	- During or after the Barrier, on a single thread, all the Reduce
+		entries are digested. One Reduce takes each of the others
+		as arguments and reduces them.
+	- We now have a single composite Reduce per node. If we're within
+		the Barrier we could do an MPI_allgather. If not we could
+		send the Reduced data to the master node, like a getVec call.
+		Options:
+		- Barrier/MPI_allgather: We now complete the Reduce operation by
+			doing a 'set' call. This makes the whole Reduce process
+			a bit like message passing.
+		- Barrier/MPI_allgather: We complete the Reduce operation by
+			sending data back to Shell, like a 'get' call.
+			Here we would want to do something else with the data,
+			typically with a script. So the Reduce op is more like
+			a ReduceGet.
+			- Doesn't work because data takes arbitrary types.
+			Much better to dump it into an Element that can be
+			interrogated through the regular interfaces.
+		- Barrier/MPI_allgather: The Reduce operation is completed
+			by a 'set' call on the original Element(s). If the
+			Reduce operation is provided by the Element it can
+			be done internally.
+		- post-Barrier on thread 1: First two options above are OK.
+			Third option is dubious because of threading.
+		- Convert the whole Reduce operation to a Msg.
+			This is great conceptually, but how do we 'get' the
+			reduced value into the script for once-off operations?
+			- Make the target of the Msg be the Reduce class?
+
+Summary of user view of the process:
+	- There is always a dest object for the Reduce operation. This dest
+	object is a regular class and among its other attributes, defines the
+	Reduce op. So we can build up a set of reduce operators and use them
+	in different contexts. Efields come to mind.
+	- getReduce does a once-off reduction but not into the Shell, instead
+	into the Reduce object.
+	- There are also message Reduce options where the operation happens
+	periodically, or is initiated by the target Reduce object.
+	- For the FieldDataHandler, we just have a Reduce operation within
+	the Handler itself. So Reduce looks like one of the Finfo types?
+
+============================================================================
+1 Feb 2011
+Skeleton code now taking shape.
+
+Data structures:
+- ReduceFinfo which stores the digestFunc from its parent class.
+	The digestFunc takes the final ReduceBase object and incorporates it
+	into internal fields.
+	API:
+	ReduceFinfo< T, F, R >( name, doc, digestFunc )
+	ReduceBase* makeReduce( const OpFunc* f )
+		Creates a new specific Reduce object, does typechecking with
+		the OpFunc to be sure that the reduced variable(s) are OK.
+	digestReduce( const ReduceBase* r, char* object)
+		Executes the digestFunc.
+	Creates a SrcFinfo to trigger the reduce call.
++ ReduceBase which defines the API for the specific Reduce subclasses
+	primaryReduce( Element*, DataId ) // reduces from original objects
+	secondaryReduce( const Reduce* other ) // Reduces from other ReduceBases
++ Reduce subclasses store all internal variables used during reduction.
+	Also store a pointer to the function that extracts the original
+	variable from objects.
+- A GetOpFunc::reduceOp( const Eref& e ) const;
+	This additional templated func in GetOpFunc and related subclasses
+	returns the reduced variable when given the object.
+
+Call sequence:
+- Set up originating class with ReduceFinfo.
+- Create a ReduceMsg from originator object to array of reducees
+	This ReduceMsg has the originating ReduceFinfo ptr.
+- Trigger call along this Msg.
+- Usual dispatch of call through messaging to all nodes and threads.
+- ReduceMsg::exec, called in Phase 2 and 3 as usual.
+	Creates a Reduce instance for each thread, and bungs it onto the 
+		reduceQ. At this time it also puts the originator and its Finfo
+	Scans through all reducees, doing the primaryReduce
+- Clear Reduce queue. This is in Barrier 3
+	- Scan through the queue, merging entries
+	- Send out MPI_Allgather or MPI_Gather 
+	- Scan through node returns, merging entries
+	- Use the originator ptr and rfb to do digestReduce.
+
+- Eliminate ReduceMsg if this was a once-off op.
+
+Astonishingly, this all takes place within a single cycle.
+
+Now, let's see if it works.
+
+Implementing: ReduceBase.h. Finally compiles in and clears
+unit tests. It isn't being used yet.
 ============================================================================

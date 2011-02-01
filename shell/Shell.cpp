@@ -188,6 +188,8 @@ static DestFinfo receiveGet( "receiveGet",
 	new EpFunc1< Shell, PrepackedBuffer >( &Shell::recvGet )
 );
 
+/** Deprecated?
+*/
 static SrcFinfo3< unsigned int, unsigned int, PrepackedBuffer > relayGet(
 	"relayGet",
 	"relayGet( node, status, data ): Passes 'get' data back to master node"
@@ -208,15 +210,29 @@ static DestFinfo handleCopy( "handleCopy",
 			new EpFunc4< Shell, vector< Id >, string, unsigned int, bool >( 
 				& Shell::handleCopy ) );
 
+static SrcFinfo1< Id > requestSync(
+			"sync",
+			"sync( ElementId );"
+			"Synchronizes Element data indexing across all nodes."
+			"Used when distributed ops like message setup might set up"
+			"different #s of data entries on Elements on different nodes."
+			);
+static DestFinfo handleSync( "handleSync", 
+		"handleSync( Id Element): "
+		"Synchronizes DataHandler indexing across nodes",
+	new EpFunc1< Shell, Id >( & Shell::handleSync ) );
+
 static Finfo* shellMaster[] = {
 	&requestCreate, &requestDelete,
 	&requestAddMsg, &requestSet, &requestGet,
 	&requestMove, &requestCopy, &requestUseClock,
+	&requestSync,
 	&handleAck };
 static Finfo* shellWorker[] = {
 	&handleCreate, &del,
 		&handleAddMsg, &handleSet, &handleGet,
 		&handleMove, &handleCopy, &handleUseClock,
+		&handleSync,
 	&ack };
 
 static Finfo* clockControlFinfos[] = 
@@ -588,6 +604,22 @@ Id Shell::doFind( const string& path ) const
 void Shell::clearRestructuringQ()
 {
 	// cout << "o";
+}
+
+/**
+ * This function synchronizes values on the DataHandler across 
+ * nodes. Used following functions that might lead to mismatches.
+ * 
+ * For starters it works on the FieldArray size, which affects
+ * total entries as well as indexing. This field is altered
+ * following synaptic setup, for example.
+ */
+void Shell::doSyncDataHandler( Id elm )
+{
+	Eref sheller( shelle_, 0 );
+	initAck();
+		requestSync.send( sheller, &p_, elm  );
+	waitForAck();
 }
 ////////////////////////////////////////////////////////////////
 // DestFuncs

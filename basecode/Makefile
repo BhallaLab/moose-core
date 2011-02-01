@@ -44,6 +44,7 @@ OBJ = \
 	PrepackedBuffer.o \
 	FuncBarrier.o \
 	doubleEq.o \
+	ReduceBase.o \
 	main.o	\
 	testAsync.o	\
 
@@ -82,6 +83,7 @@ HEADERS = \
 	SharedFinfo.h \
 	FieldElementFinfo.h \
 	MsgFuncBinding.h \
+	ReduceBase.h \
 
 default: $(TARGET)
 

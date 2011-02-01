@@ -114,6 +114,16 @@ class Shell
 		 Id doLoadModel( const string& fname, const string& modelpath );
 
 		/**
+ 		 * This function synchronizes values on the DataHandler across 
+ 		 * nodes. Used following functions that might lead to mismatches.
+ 		 * 
+ 		 * For starters it works on the FieldArray size, which affects
+ 		 * total entries as well as indexing. This field is altered
+ 		 * following synaptic setup, for example.
+ 		 */
+		void doSyncDataHandler( Id elm );
+
+		/**
 		 * Works through internal queue of operations that modify the
 		 * structure of the simulation. These operations have to be 
 		 * carefully separated from any other functions or messaging,
@@ -188,6 +198,11 @@ class Shell
 		 */
 		void handleMove( const Eref& e, const Qinfo* q,
 			Id orig, Id newParent );
+
+		/**
+		 * Handles sync of DataHandler indexing across nodes
+		 */
+		void handleSync( const Eref& e, const Qinfo* q, Id elm );
 
 		/**
 		 * Deep copy of source element to target, renaming it to newName.

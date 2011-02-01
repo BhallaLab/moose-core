@@ -594,15 +594,23 @@ void testSetGetSynapse()
 
 	assert( syn->dataHandler()->totalEntries() == 100 );
 	assert( syn->dataHandler()->localEntries() == 0 );
+	// could/should use SetVec here.
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref e2( i2(), i );
 		bool ret = Field< unsigned int >::set( e2, "numSynapses", i );
 		assert( ret );
 	}
 	assert( syn->dataHandler()->localEntries() == ( size * (size - 1) ) / 2 );
+
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+	shell->doSyncDataHandler( synId );
+
+/*
 	FieldDataHandlerBase * fdh =
 		static_cast< FieldDataHandlerBase *>( syn->dataHandler() );
 	fdh->syncFieldArraySize();
+	*/
 	assert( syn->dataHandler()->totalEntries() == 9900 );
 	// cout << "NumSyn = " << syn.totalEntries() << endl;
 	

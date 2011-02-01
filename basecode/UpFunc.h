@@ -334,6 +334,11 @@ template< class T, class A > class GetUpFunc: public OpFunc
 			delete[] temp;
 		}
 
+		A reduceOp( const Eref& e ) const {
+			return ( ( reinterpret_cast< T* >( e.parentData() ) )->*func_)(
+				e.index() );
+		}
+
 	private:
 		A ( T::*func_ )( DataId ) const;
 };
