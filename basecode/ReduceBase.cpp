@@ -18,12 +18,12 @@ ReduceBase::~ReduceBase()
 /////////////////////////////////////////////////////////////////////////
 
 // The function is set up by a suitable SetGet templated wrapper.
-ReduceStats::ReduceStats( double (*func)( const Eref& e ) )
+ReduceStats::ReduceStats( const GetOpFuncBase< double >* gof )
 	: 
 		sum_( 0.0 ),
 		sumsq_( 0.0 ),
 		count_( 0 ),
-		func_( func )
+		gof_( gof )
 {;}
 
 ReduceStats::~ReduceStats()
@@ -31,7 +31,7 @@ ReduceStats::~ReduceStats()
 
 void ReduceStats::primaryReduce( const Eref& e )
 {
-	double x = (func_)( e );
+	double x = gof_->reduceOp( e );
 	sum_ += x;
 	sumsq_ += x * x;
 	count_++;

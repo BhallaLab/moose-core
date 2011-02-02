@@ -37,7 +37,7 @@ class ReduceStats: public ReduceBase
 {
 	public:
 		// The function is set up by a suitable SetGet templated wrapper.
-		ReduceStats( double (*func)( const Eref& e ) );
+		ReduceStats( const GetOpFuncBase< double >* gof );
 		~ReduceStats();
 
 		void primaryReduce( const Eref& e );
@@ -49,6 +49,7 @@ class ReduceStats: public ReduceBase
 		double sum_;
 		double sumsq_;
 		unsigned int count_;
-		double (*func_)( const Eref& e );
+		const GetOpFuncBase< double >* gof_;
+		// double (*func_)( const Eref& e );
 };
 #endif // REDUCE_BASE_H

@@ -10220,4 +10220,10 @@ Now, let's see if it works.
 
 Implementing: ReduceBase.h. Finally compiles in and clears
 unit tests. It isn't being used yet.
+Checkin 2439.
+
+Some headaches with type matching in ReduceFinfo.h
 ============================================================================
+2 Feb 2011
+Implemented a first pass of ReduceFinfo as well. The whole thing compiles
+and clears the non-parallel unit tests.

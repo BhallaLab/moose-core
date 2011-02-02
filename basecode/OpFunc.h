@@ -33,6 +33,13 @@ class OpFunc
 		virtual void op( const Eref& e, const Qinfo* q, const char* buf ) const = 0;
 };
 
+template< class A > class GetOpFuncBase: public OpFunc
+{
+	public: 
+		virtual A reduceOp( const Eref& e ) const = 0;
+		
+};
+
 // Should I template these off an integer for generating a family?
 class OpFuncDummy: public OpFunc
 {
@@ -311,7 +318,7 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class OpFu
  * FuncId of the function on the object that requested the
  * value. The OpFunc then sends back a message with the info.
  */
-template< class T, class A > class GetOpFunc: public OpFunc
+template< class T, class A > class GetOpFunc: public GetOpFuncBase< A >
 {
 	public:
 		GetOpFunc( A ( T::*func )() const )

@@ -84,6 +84,7 @@ HEADERS = \
 	FieldElementFinfo.h \
 	MsgFuncBinding.h \
 	ReduceBase.h \
+	ReduceFinfo.h \
 
 default: $(TARGET)
 
