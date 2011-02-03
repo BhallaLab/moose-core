@@ -17,6 +17,8 @@
 #include "AssignVecMsg.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
+#include "ReduceMsg.h"
+#include "ReduceFinfo.h"
 #include "Shell.h"
 #include "Dinfo.h"
 #include "Wildcard.h"
@@ -818,6 +820,11 @@ bool Shell::innerAddMsg( string msgType, FullId src, string srcField,
 		m = new OneToAllMsg( src.eref(), dest.id() );
 	} else if ( msgType == "OneToOne" || msgType == "oneToOne" ) {
 		m = new OneToOneMsg( src.id(), dest.id() );
+	} else if ( msgType == "Reduce" || msgType == "reduce" ) {
+		const ReduceFinfoBase* rfb = 
+			dynamic_cast< const ReduceFinfoBase* >( f1 );
+		assert( rfb );
+		m = new ReduceMsg( src.eref(), dest.eref().element(), rfb );
 	} else {
 		cout << myNode_ << 
 			": Error: Shell::handleAddMsg: msgType not known: "

@@ -10,10 +10,13 @@
 #ifndef REDUCE_BASE_H
 #define REDUCE_BASE_H
 
+class ReduceFinfoBase;
+
 class ReduceBase
 {
 	public:
 		ReduceBase();
+		ReduceBase( const Eref& er, const ReduceFinfoBase* rfb );
 		virtual ~ReduceBase();
 
 		/**
@@ -27,7 +30,29 @@ class ReduceBase
 		 * Reduces contents of other (identical) Reduce subclasses.
 		 */
 		virtual void secondaryReduce( const ReduceBase* other ) = 0;
+
+		/**
+		 * Reports whether we are on the same Eref
+		 */
+		bool sameEref( const ReduceBase* other ) const;
+
+		/**
+		 * Collects data from all nodes to get the simulation-wide
+		 * reduced value.
+		 * Returns true if the object is global, or if the object was on
+		 * current node. In this situation we would expect to do the 
+		 * assignResult step too.
+		 */
+		bool reduceNodes();
+
+		/**
+		 * Assigns the completed calculation to the object that requested 
+		 * it, using the ReduceFinfoBase::digestReduce function.
+		 */
+		void assignResult() const;
 	private:
+		Eref er_;
+		const ReduceFinfoBase* rfb_;
 };
 
 // Here we try it without a type dependence
@@ -37,7 +62,8 @@ class ReduceStats: public ReduceBase
 {
 	public:
 		// The function is set up by a suitable SetGet templated wrapper.
-		ReduceStats( const GetOpFuncBase< double >* gof );
+		ReduceStats( const Eref& er, const ReduceFinfoBase* rfb,
+			const GetOpFuncBase< double >* gof );
 		~ReduceStats();
 
 		void primaryReduce( const Eref& e );
@@ -52,4 +78,5 @@ class ReduceStats: public ReduceBase
 		const GetOpFuncBase< double >* gof_;
 		// double (*func_)( const Eref& e );
 };
+
 #endif // REDUCE_BASE_H

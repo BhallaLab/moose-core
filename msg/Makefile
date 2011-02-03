@@ -19,6 +19,7 @@ OBJ = \
 	OneToOneMsg.o	\
 	SingleMsg.o	\
 	SparseMsg.o	\
+	ReduceMsg.o	\
 	testMsg.o	\
 
 HEADERS = \
@@ -36,7 +37,8 @@ OneToAll.o:	OneToAll.h
 OneToOne.o:	OneToOne.h
 SingleMsg.o:	SingleMsg.h
 SparseMsg.o:	SparseMsg.h
-testMsg.o: AssignmentMsg.h AssignVecMsg.h DiagonalMsg.h MsgManager.h OneToAllMsg.h OneToOneMsg.h SingleMsg.h SparseMsg.h
+ReduceMsg.o:	ReduceMsg.h
+testMsg.o: AssignmentMsg.h AssignVecMsg.h DiagonalMsg.h MsgManager.h OneToAllMsg.h OneToOneMsg.h SingleMsg.h SparseMsg.h ReduceMsg.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode $< -c

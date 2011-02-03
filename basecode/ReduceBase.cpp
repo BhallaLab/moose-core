@@ -10,16 +10,39 @@
 #include "header.h"
 #include "ReduceBase.h"
 
-ReduceBase::ReduceBase()
+ReduceBase::ReduceBase() // To keep vectors happy
+	: er_( Id().eref() ), rfb_( 0 )
+{;}
+
+ReduceBase::ReduceBase( const Eref& er, const ReduceFinfoBase* rfb )
+	: er_( er ), rfb_( rfb )
 {;}
 
 ReduceBase::~ReduceBase()
 {;}
+
+bool ReduceBase::sameEref( const ReduceBase* other ) const
+{
+	return ( rfb_ == other->rfb_ && 
+		er_.element() == other->er_.element() && er_.index() == other->er_.index()  );
+}
+
+bool ReduceBase::reduceNodes()
+{
+	return 0; // dummy for now
+}
+
+void ReduceBase::assignResult() const
+{
+	; // dummy for now.
+}
 /////////////////////////////////////////////////////////////////////////
 
 // The function is set up by a suitable SetGet templated wrapper.
-ReduceStats::ReduceStats( const GetOpFuncBase< double >* gof )
+ReduceStats::ReduceStats( const Eref& er, const ReduceFinfoBase* rfb, 
+	const GetOpFuncBase< double >* gof )
 	: 
+		ReduceBase( er, rfb ),
 		sum_( 0.0 ),
 		sumsq_( 0.0 ),
 		count_( 0 ),

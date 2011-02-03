@@ -7,8 +7,10 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-/// Forward declaration of Qvec.
+/// Forward declarations
 class Qvec;
+class ReduceFinfoBase;
+class ReduceBase;
 
 
 /**
@@ -276,6 +278,20 @@ class Qinfo
 		 */
 		static void initMpiQs();
 
+		/**
+		 * Adds an entry to the ReduceQ. If the Eref is a new one it 
+		 * creates a new Q entry with slots for each thread, otherwise
+		 * just fills in the appropriate thread on an existing entry.
+		 * I expect that these will be quite rare.
+		 */
+		static void addToReduceQ( ReduceBase* r, unsigned int threadIndex );
+
+		/**
+		 * Marches through reduceQ executing pending operations and finally
+		 * freeing the Reduce entries and zeroing out the queue.
+		 */
+		static void clearReduceQ( unsigned int numThreads );
+
 	private:
 		bool useSendTo_;	/// true if msg is to a single target DataId.
 		bool isForward_; /// True if the msg is from e1 to e2.
@@ -356,4 +372,14 @@ class Qinfo
 		static vector< char > structuralQ_;
 
 		static vector< SimGroup > g_; // Information about grouping.
+
+		/**
+		 * The reduceQ manages requests to 'reduce' data from many sources.
+		 * This Q has to keep track of running totals on each thread, then
+		 * it digests them across threads and finally across nodes.
+		 * The initial running total begins at phase2/3 of the process 
+		 * loop, on many threads. The final summation is done in barrier3.
+		 * After barrier3 the reduceQ_ should be empty.
+		 */
+		static vector< vector< ReduceBase* > > reduceQ_;
 };

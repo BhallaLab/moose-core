@@ -10195,6 +10195,10 @@ Data structures:
 - A GetOpFunc::reduceOp( const Eref& e ) const;
 	This additional templated func in GetOpFunc and related subclasses
 	returns the reduced variable when given the object.
+- ReduceMsg 
+	- does a special set of ops on all targets, 
+	- similar iteration as AssignMsgVec
+	- stores ReduceFinfoBase ptr which it needs to make the Reduce object
 
 Call sequence:
 - Set up originating class with ReduceFinfo.
@@ -10226,4 +10230,18 @@ Some headaches with type matching in ReduceFinfo.h
 ============================================================================
 2 Feb 2011
 Implemented a first pass of ReduceFinfo as well. The whole thing compiles
-and clears the non-parallel unit tests.
+and clears the non-parallel unit tests. Checkin 2440.
+Still to put in:
+	- Creation of ReduceMsg
+	- Connecting up to ReduceMsg
+	- Setting up ReduceQ
+	- Setting up stuff to do in Barrier 3 to clear ReduceQ
+How to test:
+	- Do a stats analysis on a table using Reduce.
+	- Count synapses.
+
+Started on creation of ReduceMsg: both the class definition and the hook from
+Shell for its creation from the script. 
+============================================================================
+3 Feb 2001
+Implemented ReduceMsg, ReduceQ, got it to mesh together and compile.

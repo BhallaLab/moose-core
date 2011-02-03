@@ -12,15 +12,17 @@
 class ReduceFinfoBase: public SrcFinfo0
 {
 	public:
-		virtual ReduceBase* makeReduce( const OpFunc* f ) = 0;
-		virtual void digestReduce( const ReduceBase* r );
+		virtual ReduceBase* makeReduce( const Element* e, DataId i, 
+			const OpFunc* f ) const = 0;
+		virtual void digestReduce( const Eref& er, const ReduceBase* r ) 
+			const = 0;
 };
 
 template < class T, class F, class R > class ReduceFinfo: public ReduceFinfoBase
 {
 	public:
 		~ReduceFinfo() {
-			delete trig_;
+			;
 		}
 
 		ReduceFinfo( const string& name, const string& doc, 
@@ -39,7 +41,8 @@ template < class T, class F, class R > class ReduceFinfo: public ReduceFinfoBase
 			*/
 		}
 
-		ReduceBase* makeReduce( const OpFunc* f )
+		ReduceBase* makeReduce( const Element* e, DataId i, 
+			const OpFunc* f ) const
 		{
 			// Some type checking here for the return type of the func
 			const GetOpFuncBase< F >* gof = 
@@ -53,19 +56,23 @@ template < class T, class F, class R > class ReduceFinfo: public ReduceFinfoBase
 			}
 			*/
 			assert( gof );
-			R* ret = new R( &( gof::reduceOp() ) );
+			Eref er( e, i );
+			R* ret = new R( er, this, gof->reduceOp() );
 			return ret;
 		}
 
-		void digestReduce( const ReduceBase* r ) {
+		void digestReduce( const Eref& er, const ReduceBase* r ) {
 			const R* reduce = dynamic_cast< const R* >( r );
 			assert( reduce );
+			 
+			T* obj = reinterpret_cast< T* >( er.data() );
 
-			obj->(*digest_)( reduce );
+			(obj->*digestFunc_)( reduce );
 		}
 
 		void registerFinfo( Cinfo* c ) {
-			c->registerFinfo( trig_ );
+			;
+			// c->registerFinfo( trig_ );
 		}
 
 		bool addMsg( const Finfo* target, MsgId mid, Element* src ) const;

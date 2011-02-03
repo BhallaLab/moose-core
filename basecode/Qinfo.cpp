@@ -8,6 +8,8 @@
 **********************************************************************/
 
 #include "header.h"
+#include "ReduceFinfo.h"
+#include "ReduceBase.h"
 /*
 #ifdef USE_MPI
 #include <mpi.h>
@@ -20,6 +22,7 @@ vector< Qvec > Qinfo::q1_;
 vector< Qvec > Qinfo::q2_;
 vector< Qvec >* Qinfo::inQ_ = &Qinfo::q1_;
 vector< Qvec >* Qinfo::outQ_ = &Qinfo::q2_;
+vector< vector< ReduceBase* > > Qinfo::reduceQ_;
 
 Qvec Qinfo::mpiQ1_;
 Qvec Qinfo::mpiQ2_;
@@ -524,4 +527,79 @@ void Qinfo::initMpiQs()
 	mpiQ1_.setMpiDataSize( 0 );
 	mpiQ2_.resizeLinearData( BLOCKSIZE );
 	mpiQ2_.setMpiDataSize( 0 );
+}
+
+/////////////////////////////////////////////////////////////////////
+// Stuff for ReduceQ
+/////////////////////////////////////////////////////////////////////
+
+		/**
+		 * Adds an entry to the ReduceQ. If the Eref is a new one it 
+		 * creates a new Q entry with slots for each thread, otherwise
+		 * just fills in the appropriate thread on an existing entry.
+		 * I expect that these will be quite rare.
+		 */
+// static func:
+void Qinfo::addToReduceQ( ReduceBase* r, unsigned int threadIndex )
+	/*
+	const Eref& er, const ReduceFinfoBase* rfb, ReduceBase* r, 
+	unsigned int threadIndex )
+	*/
+{
+	reduceQ_[ threadIndex ].push_back( r );
+}
+
+/**
+ * Utility function used below
+ */
+const ReduceBase* findMatchingReduceEntry( 
+	const ReduceBase* start, vector< ReduceBase* >& vec, unsigned int i )
+{
+	// Usually the entry will be at i
+	assert( i < vec.size() );
+	if ( start->sameEref( vec[i] ) )
+		return vec[i];
+	for ( unsigned int k = 0; k < vec.size(); ++k ) {
+		if ( i == k )
+			continue;
+		if ( start->sameEref( vec[k] ) )
+			return vec[k];
+	}
+	return 0;
+}
+
+/**
+ * Marches through reduceQ executing pending operations and finally
+ * freeing the Reduce entries and zeroing out the queue.
+ */
+//static func
+void Qinfo::clearReduceQ( unsigned int numThreads )
+{
+	if ( reduceQ_.size() == 0 ) {
+		reduceQ_.resize( numThreads );
+		return;
+	}
+	assert( reduceQ_.size() == numThreads );
+
+	for ( unsigned int i = 0; i < reduceQ_[0].size(); ++i ) {
+		ReduceBase* start = reduceQ_[0][i];
+		for ( unsigned int j = 0; j < numThreads ; ++j ) {
+			const ReduceBase* r = findMatchingReduceEntry(
+				start, reduceQ_[j], i );
+			assert( r );
+			start->secondaryReduce( r );
+		}
+		// At this point start has all the info from the current node.
+		// The reduceNodes returns 0 if the assignment should happen only
+		// on another node. Sometimes the assignment happens on all nodes.
+		if ( start->reduceNodes() ) {
+			start->assignResult();
+		}
+	}
+	for ( unsigned int j = 0; j < reduceQ_.size(); ++j ) {
+		for ( unsigned int k = 0; k < reduceQ_.size(); ++k ) {
+			delete reduceQ_[j][k];
+		}
+		reduceQ_[j].resize( 0 );
+	}
 }
