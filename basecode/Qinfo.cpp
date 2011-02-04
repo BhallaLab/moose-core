@@ -597,7 +597,7 @@ void Qinfo::clearReduceQ( unsigned int numThreads )
 		}
 	}
 	for ( unsigned int j = 0; j < reduceQ_.size(); ++j ) {
-		for ( unsigned int k = 0; k < reduceQ_.size(); ++k ) {
+		for ( unsigned int k = 0; k < reduceQ_[j].size(); ++k ) {
 			delete reduceQ_[j][k];
 		}
 		reduceQ_[j].resize( 0 );

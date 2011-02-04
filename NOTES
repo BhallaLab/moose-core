@@ -10243,5 +10243,14 @@ How to test:
 Started on creation of ReduceMsg: both the class definition and the hook from
 Shell for its creation from the script. 
 ============================================================================
-3 Feb 2001
+3 Feb 2011
 Implemented ReduceMsg, ReduceQ, got it to mesh together and compile.
+Checkin 2441.
+============================================================================
+4 Feb 2011
+Added Qinfo::clearReduceQ to Clock::checkProcState, which is the 
+function executed during Barrier3. This compiles easily and clears
+unit tests, still not testing its functionality though.
+
+
+============================================================================

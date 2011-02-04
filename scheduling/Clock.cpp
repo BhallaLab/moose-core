@@ -532,6 +532,7 @@ void Clock::checkProcState()
 		default:
 		break;
 	}
+	Qinfo::clearReduceQ( Shell::numCores() );
 }
 
 /////////////////////////////////////////////////////////////////////
