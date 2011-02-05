@@ -490,6 +490,9 @@ void Clock::processPhase2( ProcInfo* info )
  */
 void Clock::checkProcState()
 {
+	/// Handle pending Reduce operations.
+	Qinfo::clearReduceQ( Shell::numCores() );
+
 	if ( procState_ == NoChange ) { // Most common 
 		return;
 	}
@@ -532,7 +535,6 @@ void Clock::checkProcState()
 		default:
 		break;
 	}
-	Qinfo::clearReduceQ( Shell::numCores() );
 }
 
 /////////////////////////////////////////////////////////////////////

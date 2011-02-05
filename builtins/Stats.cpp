@@ -133,7 +133,7 @@ void Stats::reinit( const Eref& e, ProcPtr p )
 void Stats::trig( const Eref& e, const Qinfo* q )
 {
 	ProcInfo p;
-	reduce.send( e, &p );
+	reduce.send( e, &p, 0 );
 }
 ///////////////////////////////////////////////////////////////////////////
 // Reduce func
@@ -143,7 +143,7 @@ void Stats::digest( const ReduceStats* arg )
 	num_ = arg->count();
 	sum_ = arg->sum();
 	mean_ = ( num_ > 0 ) ? sum_/num_ : sum_;
-	sdev_ = sqrt( ( arg->sumsq() - sum_ * sum_ ) / num_ );
+	sdev_ = sqrt( ( sum_ * sum_ - arg->sumsq() ) / num_ );
 }
 
 ///////////////////////////////////////////////////////////////////////////

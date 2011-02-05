@@ -583,7 +583,7 @@ void Qinfo::clearReduceQ( unsigned int numThreads )
 
 	for ( unsigned int i = 0; i < reduceQ_[0].size(); ++i ) {
 		ReduceBase* start = reduceQ_[0][i];
-		for ( unsigned int j = 0; j < numThreads ; ++j ) {
+		for ( unsigned int j = 1; j < numThreads ; ++j ) {
 			const ReduceBase* r = findMatchingReduceEntry(
 				start, reduceQ_[j], i );
 			assert( r );

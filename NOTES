@@ -10259,3 +10259,15 @@ Now to set up MPI operations in ReduceBase::reduceNodes.
 Code now in place. The MPI code isn't yet tested, will begin with doing the
 reduce ops on a single node. Still to do are the unit tests with suitable
 objects. Checkin 2443.
+
+Added in Stats object to test Reduce ops. This revealed lots of bugs in 
+the other Reduce code. Now compiles and clears unit tests, still to
+test the Reduce ops themselves. Checkin 2444.
+
+Built the test function in testBuiltins.cpp. This 
+successfully triggers activity in ReduceMsg.cpp but clearReduceQ
+is not being called.
+
+Completed the unit test, and after some debugging it finally works on 1 node
+with a selection of 1 to 11 threads.
+============================================================================

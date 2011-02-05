@@ -16,6 +16,9 @@
 #include "../scheduling/Clock.h"
 #include "Arith.h"
 #include "Table.h"
+#include "../biophysics/Synapse.h"
+#include <queue>
+#include "../biophysics/IntFire.h"
 
 void testArith()
 {
@@ -318,6 +321,89 @@ void testGetMsg()
 	
 }
 
+void testStatsReduce()
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	const Cinfo* ic = IntFire::initCinfo();
+	// const Cinfo* sc = Synapse::initCinfo();
+	unsigned int size = 100;
+	vector< unsigned int > dims( 1, size );
+	string arg;
+	Id i2 = Id::nextId();
+	Id i3( i2.value() + 1 );
+	// bool ret = ic->create( i2, "test2", size );
+	Element* temp = new Element( i2, ic, "test2", dims, 1 );
+	assert( temp );
+	Id synId( i2.value() + 1 );
+	Element* syn = synId();
+	assert ( syn != 0 );
+	assert ( syn->getName() == "synapse" );
+
+	assert( syn->dataHandler()->localEntries() == 0 );
+	assert( syn->dataHandler()->totalEntries() == 100 );
+
+	FieldDataHandlerBase* fd = dynamic_cast< FieldDataHandlerBase *>( 
+		syn->dataHandler() );
+	assert( fd );
+	assert( fd->localEntries() == 0 );
+
+	vector< unsigned int > numSyn( size, 0 );
+	for ( unsigned int i = 0; i < size; ++i )
+		numSyn[i] = i;
+	
+	Eref e2( i2(), 0 );
+	// Here we test setting a 1-D vector
+	bool ret = Field< unsigned int >::setVec( e2, "numSynapses", numSyn );
+	assert( ret );
+
+	assert( fd->biggestFieldArraySize() == size - 1 );
+	fd->setFieldDimension( size );
+	assert ( fd->totalEntries() == size * size );
+	// Here we test setting a 2-D array with different dims on each axis.
+	vector< double > delay( size * size, 0.0 );
+	double sum = 0.0;
+	double sumsq = 0.0;
+	unsigned int num = 0;
+	for ( unsigned int i = 0; i < size; ++i ) {
+		unsigned int k = i * size;
+		for ( unsigned int j = 0; j < i; ++j ) {
+			double x = i * 1000 + j;
+			sum += x;
+			sumsq += x * x;
+			++num;
+			delay[k++] = x;
+		}
+	}
+
+	ret = Field< double >::setVec( Eref( syn, 0 ), "delay", delay );
+	Eref syner( syn, DataId::any() );
+
+	dims[0] = 1;
+	Id statsid = shell->doCreate( "Stats", Id(), "stats", dims );
+
+
+	MsgId mid = shell->doAddMsg( "Reduce", 
+		statsid.eref().fullId(), "reduce",
+		syner.fullId(), "get_delay" );
+	assert( mid != Msg::badMsg );
+	/*
+	shell->doSetClock( 0, 1 );
+	shell->doReinit();
+	shell->doStart( 1 );
+	*/
+	SetGet0::set( statsid.eref(), "trig" );
+	double x = Field< double >::get( statsid.eref(), "sum" );
+	assert( doubleEq( x, sum ) );
+	unsigned int i = Field< unsigned int >::get( statsid.eref(), "num" );
+	assert( i == num );
+	x = Field< double >::get( statsid.eref(), "sdev" );
+	assert( doubleEq( x, sqrt( ( sum * sum - sumsq ) /num ) ) );
+
+	cout << "." << flush;
+	delete i3();
+	delete i2();
+}
+
 void testBuiltins()
 {
 	testArith();
@@ -328,6 +414,7 @@ void testBuiltinsProcess()
 {
 	testFibonacci();
 	testGetMsg();
+	testStatsReduce();
 }
 
 void testMpiBuiltins( )

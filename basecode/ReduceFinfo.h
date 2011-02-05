@@ -9,14 +9,14 @@
 #ifndef _REDUCE_FINFO_H
 #define _REDUCE_FINFO_H
 
-class ReduceFinfoBase: public SrcFinfo0
+class ReduceFinfoBase: public SrcFinfo1< FuncId >
 {
 	public:
 		~ReduceFinfoBase()
 		{;}
 
 		ReduceFinfoBase( const string& name, const string& doc )
-			: SrcFinfo0( name, doc )
+			: SrcFinfo1< FuncId >( name, doc )
 		{;}
 		virtual ReduceBase* makeReduce( Element* e, DataId i, 
 			const OpFunc* f ) const = 0;

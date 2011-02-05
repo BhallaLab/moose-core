@@ -41,7 +41,7 @@ bool ReduceBase::reduceNodes()
 	delete[] recvBuf;
 #endif
 	
-	return 0; // dummy for now
+	return er_.isDataHere(); // Do we need to assign the result here?
 }
 
 void ReduceBase::assignResult() const
