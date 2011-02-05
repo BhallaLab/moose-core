@@ -24,6 +24,8 @@
 #ifndef _FIELD_ELEMENT_FINFO_H
 #define _FIELD_ELEMENT_FINFO_H
 
+bool adopt( Id parent, Id child );
+
 template < class T, class F > class FieldElementFinfo: public Finfo
 {
 	public:
@@ -83,7 +85,7 @@ template < class T, class F > class FieldElementFinfo: public Finfo
 					parentElm->dataHandler(),
 					lookupField_, getNumField_, setNumField_ )
 			);
-			Shell::adopt( parent, kid );
+			adopt( parent, kid );
 		}
 
 		void registerFinfo( Cinfo* c ) {

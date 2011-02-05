@@ -12,10 +12,12 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv.h>
-#include "ReadKkit.h"
 #include "ElementValueFinfo.h"
 #include "GslIntegrator.h"
+#include "ReduceBase.h"
+#include "ReduceMax.h"
 #include "../shell/Shell.h"
+#include "ReadKkit.h"
 
 static const double TOLERANCE = 1e-6;
 

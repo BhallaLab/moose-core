@@ -12,6 +12,10 @@
 #include "AnyDimGlobalHandler.h"
 #include "AnyDimHandler.h"
 
+#include "ReduceBase.h"
+#include "ReduceMax.h"
+#include "../shell/Shell.h"
+
 AnyDimHandler::AnyDimHandler( const DinfoBase* dinfo )
 	: AnyDimGlobalHandler( dinfo ),
 		start_( 0 ), end_( 0 )

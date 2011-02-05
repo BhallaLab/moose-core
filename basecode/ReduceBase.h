@@ -72,9 +72,9 @@ class ReduceBase
 		const ReduceFinfoBase* rfb_;
 };
 
-// Here we try it without a type dependence
-// The whole class is suitable to be passed around, but the func_
-// must be ignored.
+/**
+ * Reduces a double to its stats: mean, sdev, and # of counts.
+ */
 class ReduceStats: public ReduceBase
 {
 	public:

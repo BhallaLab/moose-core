@@ -10,6 +10,8 @@
 #include "header.h"
 #include "ReduceFinfo.h"
 #include "ReduceBase.h"
+#include "ReduceMax.h"
+#include "../shell/Shell.h"
 /*
 #ifdef USE_MPI
 #include <mpi.h>

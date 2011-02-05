@@ -16,6 +16,8 @@
 #include <mpi.h>
 #endif
 #include "header.h"
+#include "ReduceBase.h"
+#include "ReduceMax.h"
 #include "Shell.h"
 #include "Dinfo.h"
 

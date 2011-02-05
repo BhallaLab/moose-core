@@ -10269,5 +10269,17 @@ successfully triggers activity in ReduceMsg.cpp but clearReduceQ
 is not being called.
 
 Completed the unit test, and after some debugging it finally works on 1 node
-with a selection of 1 to 11 threads.
+with a selection of 1 to 11 threads. Checkin 2445.
+
+Now to implement ReduceMaxUint for the synapse array sizes.
+
+Working on it. Templated a ReduceMax class to do the calculation. Plugged
+it into Shell. 
+
+This led to all sorts of compilation headaches. Rather foolishly I decided to
+simply remove Shell from header.h to resolve these. This required update of
+nearly 50 files. Finally compiles and clears unit tests. While at it I also
+split of the Set/Get code from the Shell, into a separate ShellSetGet.cpp
+file.
+
 ============================================================================

@@ -9,6 +9,9 @@
 
 #include "header.h"
 #include "SetGet.h"
+#include "ReduceBase.h"
+#include "ReduceMax.h"
+#include "../shell/Shell.h"
 
 /*
 Eref SetGet::shelle_( 0, 0 );
@@ -35,6 +38,30 @@ void SetGet::completeSet() const
 	// e_.element()->clearQ();
 	// Qinfo::clearQ( Shell::procInfo() );
 }
+
+//////////////////////////////////////////////////////////////////////
+// A group of functions to forward dispatch commands to the Shell.
+//////////////////////////////////////////////////////////////////////
+
+void SetGet::dispatchSet( const Eref& er, FuncId fid, 
+	const char* args, unsigned int size )
+{
+	Shell::dispatchSet( er, fid, args, size );
+}
+
+void SetGet::dispatchSetVec( const Eref& er, FuncId fid, 
+	const PrepackedBuffer& arg )
+{
+	Shell::dispatchSetVec( er, fid, arg );
+}
+
+const vector< char* >& SetGet::dispatchGet( 
+	const Eref& er, const string& field,
+	const SetGet* sg, unsigned int& numGetEntries )
+{
+	return Shell::dispatchGet( er, field, sg, numGetEntries );
+}
+//////////////////////////////////////////////////////////////////////
 
 bool SetGet::checkSet( const string& field, Eref& tgt, FuncId& fid ) const
 {

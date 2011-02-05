@@ -12,6 +12,7 @@ TARGET = shell.o
 OBJ = \
 	Shell.o	\
 	ShellCopy.o	\
+	ShellSetGet.o	\
 	ShellThreads.o	\
 	ProcessLoop.o	\
 	LoadModels.o \
@@ -21,13 +22,16 @@ OBJ = \
 
 HEADERS = \
 	../basecode/header.h \
+	../basecode/ReduceBase.h \
+	../basecode/ReduceMax.h \
 
 
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-Shell.o:	Shell.h ../msg/AssignmentMsg.h Neutral.h ../scheduling/Clock.h
+Shell.o:	Shell.h ../msg/AssignmentMsg.h Neutral.h ../scheduling/Clock.h 
 ShellCopy.o:	Shell.h Neutral.h
+ShellSetGet.o:	Shell.h
 ShellThreads.o:	Shell.h Neutral.h ../scheduling/Clock.h
 ProcessLoop.o:	Shell.h FuncBarrier.h
 LoadModels.o:	Shell.h Neutral.h

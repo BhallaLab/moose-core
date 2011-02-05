@@ -74,7 +74,21 @@ class SetGet
 		 */
 		void completeSet() const;
 
-		char* buf();
+	
+		/// Adapter function, just forwards to Shell::dispatchSet
+		static void dispatchSet( const Eref& er, FuncId fid, 
+			const char* args, unsigned int size );
+
+		/// Adapter function, just forwards to Shell::dispatchSet
+		static void dispatchSetVec( const Eref& er, FuncId fid, 
+			const PrepackedBuffer& arg );
+
+		/// Adapter function, just forwards to Shell::dispatchSet
+		static const vector< char* >& dispatchGet( 
+			const Eref& er, const string& field,
+			const SetGet* sg, unsigned int& numGetEntries );
+
+		///  char* buf();
 
 	private:
 		Eref e_;
@@ -96,7 +110,7 @@ class SetGet0: public SetGet
 			FuncId fid;
 			Eref tgt( dest );
 			if ( sg.checkSet( field, tgt, fid ) ) {
-				Shell::dispatchSet( tgt, fid, "", 0 );
+				dispatchSet( tgt, fid, "", 0 );
 				/*
 				sg.iSetInner( fid, "", 0 );
 
@@ -137,7 +151,7 @@ template< class A > class SetGet1: public SetGet
 				Conv< A > conv( arg );
 				char *temp = new char[ conv.size() ];
 				conv.val2buf( temp );
-				Shell::dispatchSet( tgt, fid, temp, conv.size() );
+				dispatchSet( tgt, fid, temp, conv.size() );
 				delete[] temp;
 				return 1;
 			}
@@ -167,7 +181,7 @@ template< class A > class SetGet1: public SetGet
 				const char* data = reinterpret_cast< const char* >( &arg[0] );
 				PrepackedBuffer pb( data, arg.size() * sizeof( A ), 
 					arg.size() ) ;
-				Shell::dispatchSetVec( tgt, fid, pb );
+				dispatchSetVec( tgt, fid, pb );
 				return 1;
 			}
 			return 0;
@@ -249,7 +263,7 @@ template< class A > class Field: public SetGet1< A >
 			string temp = "get_" + field;
 			unsigned int numRetEntries = 0;
 			const vector< char* >& ret = 
-				Shell::dispatchGet( dest, temp, &sg, numRetEntries );
+				dispatchGet( dest, temp, &sg, numRetEntries );
 			assert( numRetEntries == 1 );
 			Conv< A > conv( ret[0] );
 			return *conv;
@@ -265,7 +279,7 @@ template< class A > class Field: public SetGet1< A >
 			string temp = "get_" + field;
 			unsigned int numRetEntries;
 			const vector< char* >& ret = 
-				Shell::dispatchGet( dest, temp, &sg, numRetEntries );
+				dispatchGet( dest, temp, &sg, numRetEntries );
 
 			vec.resize( numRetEntries );
 			for ( unsigned int i = 0; i < numRetEntries; ++i ) {
@@ -285,7 +299,7 @@ template< class A > class Field: public SetGet1< A >
 			string temp = "get_" + field;
 			unsigned int numEntries = 0;
 			const vector< char* > & ret = 
-				Shell::dispatchGet( dest, temp, &sg, numEntries );
+				dispatchGet( dest, temp, &sg, numEntries );
 			assert( numEntries == 1 );
 			Conv< A > conv( ret[0] );
 			Conv<A>::val2str( str, *conv );
@@ -318,7 +332,7 @@ template< class A1, class A2 > class SetGet2: public SetGet
 				char *temp = new char[ conv1.size() + conv2.size() ];
 				conv1.val2buf( temp );
 				conv2.val2buf( temp + conv1.size() );
-				Shell::dispatchSet( tgt, fid, temp, 
+				dispatchSet( tgt, fid, temp, 
 					conv1.size() + conv2.size() );
 				delete[] temp;
 				return 1;
@@ -381,7 +395,7 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 				conv1.val2buf( temp );
 				conv2.val2buf( temp + conv1.size() );
 				conv3.val2buf( temp + conv1.size() + conv2.size() );
-				Shell::dispatchSet( tgt, fid, temp, totSize );
+				dispatchSet( tgt, fid, temp, totSize );
 				delete[] temp;
 				return 1;
 			}
@@ -450,7 +464,7 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 				conv2.val2buf( temp + s1 );
 				conv3.val2buf( temp + s1s2 );
 				conv4.val2buf( temp + s1s2s3 );
-				Shell::dispatchSet( tgt, fid, temp, totSize );
+				dispatchSet( tgt, fid, temp, totSize );
 				delete[] temp;
 				return 1;
 			}
@@ -529,7 +543,7 @@ template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
 					conv3.size() );
 				conv5.val2buf( temp + conv1.size() + conv2.size() + 
 					conv3.size() + conv4.size() );
-				Shell::dispatchSet( tgt, fid, temp, totSize );
+				dispatchSet( tgt, fid, temp, totSize );
 
 				delete[] temp;
 				return 1;

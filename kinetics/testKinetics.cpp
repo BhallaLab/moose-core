@@ -8,8 +8,12 @@
 **********************************************************************/
 
 #include "header.h"
-#include "ReadKkit.h"
 #include "MathFunc.h"
+
+#include "ReduceBase.h"
+#include "ReduceMax.h"
+#include "../shell/Shell.h"
+#include "ReadKkit.h"
 
 void testReadKkit()
 {

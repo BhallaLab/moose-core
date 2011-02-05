@@ -10,22 +10,15 @@
 
 #include <iomanip>
 #include <fstream>
-/*
-#include <iostream>
-#include <vector>
-#include <string>
-#include <sstream>
-#include <map>
-#include <cassert>
-#include <stdlib.h>
-
-using namespace std;
-typedef int Id; // dummy
-*/
 #include "header.h"
-#include "ReadKkit.h"
 #include "Mol.h"
 #include "FuncMol.h"
+
+#include "ReduceBase.h"
+#include "ReduceMax.h"
+#include "../shell/Shell.h"
+
+#include "ReadKkit.h"
 
 const double ReadKkit::EPSILON = 1.0e-15;
 

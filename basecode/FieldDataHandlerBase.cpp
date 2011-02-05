@@ -9,6 +9,10 @@
 
 #include "header.h"
 
+#include "ReduceBase.h"
+#include "ReduceMax.h"
+#include "../shell/Shell.h"
+
 FieldDataHandlerBase::FieldDataHandlerBase( 
 	const DinfoBase* dinfo, const DataHandler* parentDataHandler )
 			: DataHandler( dinfo ),

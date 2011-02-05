@@ -18,6 +18,11 @@ class FuncBarrier;
 
 enum AssignmentType { SINGLE, VECTOR, REPEAT };
 
+extern SrcFinfo1< PrepackedBuffer >* lowLevelSetGet();
+extern SrcFinfo4< Id, DataId, FuncId, PrepackedBuffer >* requestSet();
+extern SrcFinfo4< Id, DataId, FuncId, unsigned int >* requestGet();
+extern DestFinfo* receiveGet();
+
 class Shell
 {
 	public:
@@ -357,6 +362,9 @@ class Shell
 		/// Static func for returning the ProcInfo of the shell.
 		static const ProcInfo* procInfo();
 
+		/// Digests outcome of calculation for max index of ragged array
+		void digestReduceMax( const ReduceMax< unsigned int >* arg );
+
 		/**
  		 * static func.
  		 * Chops up the names in the path into the vector of strings. 
@@ -465,6 +473,9 @@ class Shell
 
 		/// Current working Element
 		Id cwe_;
+
+		/// Return value from reduceMax calculation for array sizes.
+		unsigned int maxIndex_;
 };
 
 /*

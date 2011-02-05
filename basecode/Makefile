@@ -33,6 +33,7 @@ OBJ = \
 	Cinfo.o	\
 	SrcFinfo.o \
 	SharedFinfo.o \
+	FieldElementFinfo.o \
 	Id.o \
 	FullId.o \
 	Qinfo.o \

@@ -24,6 +24,10 @@
 #include "../builtins/Arith.h"
 #include "../randnum/randnum.h"
 
+#include "ReduceBase.h"
+#include "ReduceMax.h"
+#include "../shell/Shell.h"
+
 pthread_mutex_t TestSched::mutex_;
 bool TestSched::isInitPending_( 1 );
 int TestSched::globalIndex_( 0 );

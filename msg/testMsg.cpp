@@ -10,6 +10,10 @@
 #include "header.h"
 #include "../builtins/Arith.h"
 
+#include "ReduceBase.h"
+#include "ReduceMax.h"
+#include "../shell/Shell.h"
+
 void testAssortedMsg()
 {
 	Eref sheller = Id().eref();

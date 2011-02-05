@@ -90,7 +90,6 @@ class FuncBarrier;
 #include "PrepackedBuffer.h"
 #include "Conv.h"
 #include "SrcFinfo.h"
-#include "../shell/Shell.h"
 #include "FieldDataHandlerBase.h"
 #include "FieldDataHandler.h"
 #include "SetGet.h"

@@ -66,6 +66,10 @@
 #include "ThreadInfo.h"
 #include "Clock.h"
 
+#include "ReduceBase.h"
+#include "ReduceMax.h"
+#include "../shell/Shell.h"
+
 static const unsigned int OkStatus = ~0; // From Shell.cpp
 
 /// Microseconds to sleep when not processing.

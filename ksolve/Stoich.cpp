@@ -26,6 +26,10 @@
 #include "ZombieMMenz.h"
 #include "ZombieSumFunc.h"
 
+#include "ReduceBase.h"
+#include "ReduceMax.h"
+#include "../shell/Shell.h"
+
 #ifdef USE_GSL
 #include <gsl/gsl_errno.h>
 #endif

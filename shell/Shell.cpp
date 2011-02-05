@@ -19,6 +19,8 @@
 #include "SparseMsg.h"
 #include "ReduceMsg.h"
 #include "ReduceFinfo.h"
+#include "ReduceBase.h"
+#include "ReduceMax.h"
 #include "Shell.h"
 #include "Dinfo.h"
 #include "Wildcard.h"
@@ -101,11 +103,17 @@ static SrcFinfo5< string, FullId, string, FullId, string > requestAddMsg(
 			"Initiates a callback to indicate completion of operation."
 			"Goes to all nodes including self."
 			); 
-static SrcFinfo4< Id, DataId, FuncId, PrepackedBuffer > requestSet(
+
+SrcFinfo4< Id, DataId, FuncId, PrepackedBuffer >* requestSet()
+{
+	static SrcFinfo4< Id, DataId, FuncId, PrepackedBuffer > temp(
 			"requestSet",
 			"requestSet( tgtId, tgtDataId, tgtFieldId, value ):"
 			"Assigns a value on target field."
 			);
+	return &temp;
+}
+
 static SrcFinfo2< Id, Id > requestMove(
 			"move",
 			"move( origId, newParent);"
@@ -162,12 +170,16 @@ static DestFinfo handleSet( "handleSet",
  * 	receiveGet->completeGet
  */
 
-static SrcFinfo4< Id, DataId, FuncId, unsigned int > requestGet( 
+SrcFinfo4< Id, DataId, FuncId, unsigned int >* requestGet()
+{
+	static SrcFinfo4< Id, DataId, FuncId, unsigned int > temp( 
 			"requestGet",
 			"Function to request another Element for a value."
 			"Args: Id of target, DataId of target, "
 			"FuncId identifying field, int to specify # of entries to get."
 			);
+	return &temp;
+}
 
 static DestFinfo handleGet( "handleGet", 
 			"handleGet( Id elementId, DataId index, FuncId fid )"
@@ -176,19 +188,25 @@ static DestFinfo handleGet( "handleGet",
 				&Shell::handleGet )
 			);
 
-static SrcFinfo1< PrepackedBuffer > lowLevelSetGet(
+SrcFinfo1< PrepackedBuffer >* lowLevelSetGet() {
+	static SrcFinfo1< PrepackedBuffer > temp(
 			"lowLevelSetGet",
 			"lowlevelSetGet():"
 			"Low-level SrcFinfo. Not for external use, internally used as"
 			"a handle to set or get a single or vector value from "
 			" target field."
-);
+	);
+	return &temp;
+}
 
-static DestFinfo receiveGet( "receiveGet", 
-	"receiveGet( Uint node#, Uint status, PrepackedBuffer data )"
-	"Function on master shell that handles the value relayed from worker.",
-	new EpFunc1< Shell, PrepackedBuffer >( &Shell::recvGet )
-);
+DestFinfo* receiveGet() {
+	static DestFinfo temp( "receiveGet", 
+		"receiveGet( Uint node#, Uint status, PrepackedBuffer data )"
+		"Function on master shell that handles the value relayed from worker.",
+		new EpFunc1< Shell, PrepackedBuffer >( &Shell::recvGet )
+	);
+	return &temp;
+}
 
 /** Deprecated?
 */
@@ -226,7 +244,7 @@ static DestFinfo handleSync( "handleSync",
 
 static Finfo* shellMaster[] = {
 	&requestCreate, &requestDelete,
-	&requestAddMsg, &requestSet, &requestGet,
+	&requestAddMsg, requestSet(), requestGet(),
 	&requestMove, &requestCopy, &requestUseClock,
 	&requestSync,
 	&handleAck };
@@ -242,6 +260,13 @@ static Finfo* clockControlFinfos[] =
 	&requestStart, &requestStep, &requestStop, &requestSetupTick,
 	&requestReinit, &requestQuit, &handleAck
 };
+
+static ReduceFinfo< Shell, unsigned int, ReduceMax< unsigned int > > 
+	reduce(
+		"reduce",
+		"Look up maximum value of an index, here ragged array size.",
+		&Shell::digestReduceMax
+);
 
 const Cinfo* Shell::initCinfo()
 {
@@ -284,7 +309,7 @@ const Cinfo* Shell::initCinfo()
 		);
 	
 	static Finfo* shellFinfos[] = {
-		&receiveGet,
+		receiveGet(),
 		&setclock,
 		&loadBalance,
 
@@ -292,8 +317,8 @@ const Cinfo* Shell::initCinfo()
 //  Predefined Msg Src and MsgDests.
 ////////////////////////////////////////////////////////////////
 
-		&requestGet,
-		&lowLevelSetGet,
+		requestGet(),
+		lowLevelSetGet(),
 ////////////////////////////////////////////////////////////////
 //  Shared msg
 ////////////////////////////////////////////////////////////////
@@ -948,7 +973,12 @@ const char* Shell::buf()
 }
  */
 
+void Shell::digestReduceMax( const ReduceMax< unsigned int >* arg )
+{
+	maxIndex_ = arg->max();
+}
 
+#if 0
 ////////////////////////////////////////////////////////////////////////
 // Functions for handling field set/get and func calls
 ////////////////////////////////////////////////////////////////////////
@@ -1175,3 +1205,4 @@ void Shell::clearGetBuf()
 	}
 	getBuf_.resize( 1, 0 );
 }
+#endif

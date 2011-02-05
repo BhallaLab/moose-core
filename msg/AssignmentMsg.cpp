@@ -11,6 +11,10 @@
 #include "MsgManager.h"
 #include "AssignmentMsg.h"
 
+#include "ReduceBase.h"
+#include "ReduceMax.h"
+#include "../shell/Shell.h"
+
 Id AssignmentMsg::id_;
 
 AssignmentMsg::AssignmentMsg( Eref e1, Eref e2, MsgId mid )

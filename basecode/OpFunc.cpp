@@ -8,6 +8,9 @@
 **********************************************************************/
 
 #include "header.h"
+#include "ReduceBase.h"
+#include "ReduceMax.h"
+#include "../shell/Shell.h"
 
 /**
  * Used to do the serious argument juggling in GetOpFunc::op

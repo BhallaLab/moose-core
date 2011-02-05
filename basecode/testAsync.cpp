@@ -28,6 +28,10 @@
 #include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
 
+#include "ReduceBase.h"
+#include "ReduceMax.h"
+#include "../shell/Shell.h"
+
 void showFields()
 {
 	const Cinfo* nc = Neutral::initCinfo();
