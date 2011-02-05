@@ -103,3 +103,18 @@ void ReduceStats::tertiaryReduce( const char* other )
 	data_.sumsq_ += d->sumsq_;
 	data_.count_ += d->count_;
 }
+
+double ReduceStats::sum() const
+{
+	return data_.sum_;
+}
+
+double ReduceStats::sumsq() const
+{
+	return data_.sumsq_;
+}
+
+unsigned int ReduceStats::count() const
+{
+	return data_.count_;
+}

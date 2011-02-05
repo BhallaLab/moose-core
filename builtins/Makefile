@@ -15,6 +15,7 @@ OBJ = \
 	Mdouble.o	\
 	Table.o	\
 	TableEntry.o	\
+	Stats.o	\
 	testBuiltins.o	\
 
 HEADERS = \
@@ -29,7 +30,8 @@ Group.o:	Group.h
 Mdouble.o:		Mdouble.h
 Table.o:		Table.h TableEntry.h
 TableEntry.o:		TableEntry.h
-testBuiltins.o:	Group.h Arith.h ../msg/DiagonalMsg.h
+Stats.o:	Stats.h
+testBuiltins.o:	Group.h Arith.h Stats.h ../msg/DiagonalMsg.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg $< -c

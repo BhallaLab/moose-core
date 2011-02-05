@@ -12,7 +12,13 @@
 class ReduceFinfoBase: public SrcFinfo0
 {
 	public:
-		virtual ReduceBase* makeReduce( const Element* e, DataId i, 
+		~ReduceFinfoBase()
+		{;}
+
+		ReduceFinfoBase( const string& name, const string& doc )
+			: SrcFinfo0( name, doc )
+		{;}
+		virtual ReduceBase* makeReduce( Element* e, DataId i, 
 			const OpFunc* f ) const = 0;
 		virtual void digestReduce( const Eref& er, const ReduceBase* r ) 
 			const = 0;
@@ -28,7 +34,7 @@ template < class T, class F, class R > class ReduceFinfo: public ReduceFinfoBase
 		ReduceFinfo( const string& name, const string& doc, 
 			void ( T::*digestFunc )( const R* arg ) )
 			
-			: 	SrcFinfo0( name, doc ),
+			: 	ReduceFinfoBase( name, doc ),
 				digestFunc_( digestFunc )
 		{
 			;
@@ -41,7 +47,7 @@ template < class T, class F, class R > class ReduceFinfo: public ReduceFinfoBase
 			*/
 		}
 
-		ReduceBase* makeReduce( const Element* e, DataId i, 
+		ReduceBase* makeReduce( Element* e, DataId i, 
 			const OpFunc* f ) const
 		{
 			// Some type checking here for the return type of the func
@@ -56,8 +62,8 @@ template < class T, class F, class R > class ReduceFinfo: public ReduceFinfoBase
 			}
 			*/
 			assert( gof );
-			Eref er( e, i );
-			R* ret = new R( er, this, gof->reduceOp() );
+			const Eref er( e, i );
+			R* ret = new R( er, this, gof );
 			return ret;
 		}
 
@@ -75,7 +81,7 @@ template < class T, class F, class R > class ReduceFinfo: public ReduceFinfoBase
 			// c->registerFinfo( trig_ );
 		}
 
-		bool addMsg( const Finfo* target, MsgId mid, Element* src ) const;
+		// bool addMsg( const Finfo* target, MsgId mid, Element* src ) const;
 
 	private:
 		// SrcFinfo* trig_;

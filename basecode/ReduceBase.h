@@ -32,6 +32,23 @@ class ReduceBase
 		virtual void secondaryReduce( const ReduceBase* other ) = 0;
 
 		/**
+		 * Reduces contents of internal data form expressed as char*.
+		 * Used for internode data reduction.
+		 */
+		virtual void tertiaryReduce( const char* data ) = 0;
+
+		/**
+		 * Expresses internal data in a char* form, used as to transfer
+		 * data between nodes for internode reduction.
+		 */
+		virtual const char* data() const = 0;
+
+		/**
+		 * Size of internal data, in bytes.
+		 */
+		virtual unsigned int dataSize() const = 0;
+
+		/**
 		 * Reports whether we are on the same Eref
 		 */
 		bool sameEref( const ReduceBase* other ) const;
@@ -71,20 +88,36 @@ class ReduceStats: public ReduceBase
 		// Must not use other::func_
 		void secondaryReduce( const ReduceBase* other );
 
+		
 		void tertiaryReduce( const char* data );
 
 		const char* data() const;
 
 		unsigned int dataSize() const;
 
+		/// Sum of data values, used for mean and sdev.
+		double sum() const;
+
+		/// Sum of squares of data values. Used for sdev.
+		double sumsq() const;
+
+		/// Number of data values reduced.
+		unsigned int count() const;
+
 	private:
+		/**
+		 * This little internal structure is the essential reduction data
+		 * and is all that is transferred between nodes when doing internode
+		 * data reduction.
+		 */
 		struct ReduceDataType {
-			double sum_;
-			double sumsq_;
-			unsigned int count_;
+			double sum_; /// Sum of data values. Used for mean and sdev.
+			double sumsq_; /// Sum of squares of data values. Used for sdev
+			unsigned int count_; /// Number of data values reduced.
 		} data_;
+
+		/// OpFunc that contains function to extract data value from eref.
 		const GetOpFuncBase< double >* gof_;
-		// double (*func_)( const Eref& e );
 };
 
 #endif // REDUCE_BASE_H
