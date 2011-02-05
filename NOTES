@@ -10250,7 +10250,12 @@ Checkin 2441.
 4 Feb 2011
 Added Qinfo::clearReduceQ to Clock::checkProcState, which is the 
 function executed during Barrier3. This compiles easily and clears
-unit tests, still not testing its functionality though.
+unit tests, still not testing its functionality though. Checkin 2442.
 
-
+Now to set up MPI operations in ReduceBase::reduceNodes.
 ============================================================================
+5 Feb 2011
+
+Code now in place. The MPI code isn't yet tested, will begin with doing the
+reduce ops on a single node. Still to do are the unit tests with suitable
+objects.

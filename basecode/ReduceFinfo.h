@@ -61,7 +61,7 @@ template < class T, class F, class R > class ReduceFinfo: public ReduceFinfoBase
 			return ret;
 		}
 
-		void digestReduce( const Eref& er, const ReduceBase* r ) {
+		void digestReduce( const Eref& er, const ReduceBase* r ) const {
 			const R* reduce = dynamic_cast< const R* >( r );
 			assert( reduce );
 			 

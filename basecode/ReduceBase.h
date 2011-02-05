@@ -71,10 +71,18 @@ class ReduceStats: public ReduceBase
 		// Must not use other::func_
 		void secondaryReduce( const ReduceBase* other );
 
+		void tertiaryReduce( const char* data );
+
+		const char* data() const;
+
+		unsigned int dataSize() const;
+
 	private:
-		double sum_;
-		double sumsq_;
-		unsigned int count_;
+		struct ReduceDataType {
+			double sum_;
+			double sumsq_;
+			unsigned int count_;
+		} data_;
 		const GetOpFuncBase< double >* gof_;
 		// double (*func_)( const Eref& e );
 };

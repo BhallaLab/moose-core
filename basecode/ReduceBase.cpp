@@ -9,6 +9,7 @@
 
 #include "header.h"
 #include "ReduceBase.h"
+#include "ReduceFinfo.h"
 
 ReduceBase::ReduceBase() // To keep vectors happy
 	: er_( Id().eref() ), rfb_( 0 )
@@ -29,13 +30,25 @@ bool ReduceBase::sameEref( const ReduceBase* other ) const
 
 bool ReduceBase::reduceNodes()
 {
+#ifdef USE_MPI
+	char* recvBuf = new char[ Shell::numNodes() * this->dataSize() ];
+	MPI_Allgather( this->data(), this->dataSize(), MPI_CHAR, 
+		recvBuf, this->dataSize(), MPI_CHAR, 
+		MPI_COMM_WORLD );
+	for ( unsigned int i = 0; i < numNodes_; ++i ) {
+		this->tertiaryReduce( recvBuf[ i * this->dataSize() ] );
+	}
+	delete[] recvBuf;
+#endif
+	
 	return 0; // dummy for now
 }
 
 void ReduceBase::assignResult() const
 {
-	; // dummy for now.
+	rfb_->digestReduce( er_, this );
 }
+
 /////////////////////////////////////////////////////////////////////////
 
 // The function is set up by a suitable SetGet templated wrapper.
@@ -43,21 +56,32 @@ ReduceStats::ReduceStats( const Eref& er, const ReduceFinfoBase* rfb,
 	const GetOpFuncBase< double >* gof )
 	: 
 		ReduceBase( er, rfb ),
-		sum_( 0.0 ),
-		sumsq_( 0.0 ),
-		count_( 0 ),
 		gof_( gof )
-{;}
+{
+	data_.sum_ = 0.0;
+	data_.sumsq_ = 0.0;
+	data_.count_ = 0 ;
+}
 
 ReduceStats::~ReduceStats()
 {;}
 
+const char* ReduceStats::data() const
+{
+	return reinterpret_cast< const char* >( &data_ );
+}
+
+unsigned int ReduceStats::dataSize() const
+{
+	return sizeof( ReduceDataType );
+}
+
 void ReduceStats::primaryReduce( const Eref& e )
 {
 	double x = gof_->reduceOp( e );
-	sum_ += x;
-	sumsq_ += x * x;
-	count_++;
+	data_.sum_ += x;
+	data_.sumsq_ += x * x;
+	data_.count_++;
 }
 
 // Must not use other::func_
@@ -65,7 +89,17 @@ void ReduceStats::secondaryReduce( const ReduceBase* other )
 {
 	const ReduceStats* r = dynamic_cast< const ReduceStats* >( other );
 	assert( r );
-	sum_ += r->sum_;
-	sumsq_ += r->sumsq_;
-	count_ += r->count_;
+	data_.sum_ += r->data_.sum_;
+	data_.sumsq_ += r->data_.sumsq_;
+	data_.count_ += r->data_.count_;
+}
+
+// Must not use other::func_
+void ReduceStats::tertiaryReduce( const char* other )
+{
+	const ReduceDataType* d = reinterpret_cast< const ReduceDataType* >( other );
+	assert( d );
+	data_.sum_ += d->sum_;
+	data_.sumsq_ += d->sumsq_;
+	data_.count_ += d->count_;
 }
