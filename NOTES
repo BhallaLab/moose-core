@@ -10290,7 +10290,9 @@ Some cleanups in printf debugging lines. Checkin 2447.
 
 Now into the core code for updating Data Handlers. Unit test in 
 testAsync.cpp:: testSetGetSynapse. 
-compiles but doesn't clear tests.
+compiles but doesn't clear tests. Checkin 2448.
 
+This didn't work either, since the test is before the ProcessLoop is running.
+I need another test.
 
 ============================================================================

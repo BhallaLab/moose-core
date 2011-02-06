@@ -987,5 +987,6 @@ const ProcInfo* Shell::procInfo()
 void Shell::digestReduceMax( const ReduceMax< unsigned int >* arg )
 {
 	maxIndex_ = arg->max();
+	ack()->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
 }
 

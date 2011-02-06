@@ -203,7 +203,7 @@ unsigned int FieldDataHandlerBase::biggestFieldArraySize() const
 unsigned int FieldDataHandlerBase::syncFieldArraySize()
 {
 	unsigned int ret = biggestFieldArraySize();
-	ret = Shell::reduceInt( ret ); 
+	// ret = Shell::reduceInt( ret ); 
 	if ( fieldDimension_ < ret )
 		fieldDimension_ = ret;
 	return ret;

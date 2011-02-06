@@ -263,15 +263,18 @@ void Shell::handleSync( const Eref& e, const Qinfo* q, Id elm, FuncId fid )
 		*/
 
 	assert( elm != Id() && elm() != 0 );
+	/*
 	FieldDataHandlerBase* fdh = dynamic_cast< FieldDataHandlerBase *>(
 		elm()->dataHandler() );
+		*/
 	const ReduceFinfoBase* rfb = reduceArraySizeFinfo();
 	shelle_->clearBinding( rfb->getBindIndex() );
-	if ( fdh && rfb )  {
+	if ( rfb )  {
 		Msg * m = new ReduceMsg( e, elm(), rfb );
 		shelle_->addMsgAndFunc( m->mid(), fid, rfb->getBindIndex() );
 		if ( myNode_ == 0 )
 			rfb->send( Eref( shelle_, 0 ), &p_, 0 );
 	}
-	ack()->send( e, &p_, Shell::myNode(), OkStatus );
+	// We don't send an ack, instead the digest function does the update.
+	// ack()->send( e, &p_, Shell::myNode(), OkStatus );
 }

@@ -176,6 +176,10 @@ Id init( int argc, char** argv )
 	assert( clockId == Id( 1 ) );
 	assert( tickId == Id( 2 ) );
 
+	// This will be initialized within the Process loop, and better there
+	// as it flags attempts to call the Reduce operations before ProcessLoop
+	// Qinfo::clearReduceQ( numCores ); // Initialize the ReduceQ entry.
+
 	initMsgManagers();
 
 	// SetGet::setShell();
