@@ -10232,12 +10232,12 @@ Some headaches with type matching in ReduceFinfo.h
 Implemented a first pass of ReduceFinfo as well. The whole thing compiles
 and clears the non-parallel unit tests. Checkin 2440.
 Still to put in:
-	- Creation of ReduceMsg
-	- Connecting up to ReduceMsg
-	- Setting up ReduceQ
-	- Setting up stuff to do in Barrier 3 to clear ReduceQ
+	* Creation of ReduceMsg
+	* Connecting up to ReduceMsg
+	* Setting up ReduceQ
+	* Setting up stuff to do in Barrier 3 to clear ReduceQ
 How to test:
-	- Do a stats analysis on a table using Reduce.
+	* Do a stats analysis on a table using Reduce.
 	- Count synapses.
 
 Started on creation of ReduceMsg: both the class definition and the hook from
@@ -10279,7 +10279,11 @@ it into Shell.
 This led to all sorts of compilation headaches. Rather foolishly I decided to
 simply remove Shell from header.h to resolve these. This required update of
 nearly 50 files. Finally compiles and clears unit tests. While at it I also
-split of the Set/Get code from the Shell, into a separate ShellSetGet.cpp
-file.
+split off the Set/Get code from the Shell.cpp, into a separate ShellSetGet.cpp
+file. Checkin 2446.
+
+Next to set up automatic fixing array sizes.
 
 ============================================================================
+6 Feb 2011
+Some cleanups in printf debugging lines.

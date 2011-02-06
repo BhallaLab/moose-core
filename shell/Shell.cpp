@@ -262,9 +262,12 @@ static Finfo* clockControlFinfos[] =
 };
 
 static ReduceFinfo< Shell, unsigned int, ReduceMax< unsigned int > > 
-	reduce(
-		"reduce",
-		"Look up maximum value of an index, here ragged array size.",
+	reduceArraySize(
+		"reduceArraySize",
+		"Look up maximum value of an index, here ragged array size,"
+		"across many nodes, and assign uniformly to all nodes. Normally"
+		"followed by an operation to assign the size to the object that"
+		"was resized.",
 		&Shell::digestReduceMax
 );
 
@@ -319,6 +322,7 @@ const Cinfo* Shell::initCinfo()
 
 		requestGet(),
 		lowLevelSetGet(),
+		&reduceArraySize,
 ////////////////////////////////////////////////////////////////
 //  Shared msg
 ////////////////////////////////////////////////////////////////
