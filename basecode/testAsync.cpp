@@ -582,7 +582,6 @@ void testSetGetSynapse()
 	vector< unsigned int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
-	Id i3( i2.value() + 1 );
 	// bool ret = ic->create( i2, "test2", size );
 	Element* temp = new Element( i2, ic, "test2", dims, 1 );
 	assert( temp );
@@ -608,7 +607,11 @@ void testSetGetSynapse()
 
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-	shell->doSyncDataHandler( synId );
+
+	const Finfo* f = IntFire::initCinfo()->findFinfo( "get_numSynapses" );
+	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
+	assert( df );
+	shell->doSyncDataHandler( i2, df->getFid() );
 
 /*
 	FieldDataHandlerBase * fdh =
@@ -630,7 +633,7 @@ void testSetGetSynapse()
 		}
 	}
 	cout << "." << flush;
-	delete i3();
+	delete synId();
 	delete i2();
 }
 

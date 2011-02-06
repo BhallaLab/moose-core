@@ -10286,4 +10286,11 @@ Next to set up automatic fixing array sizes.
 
 ============================================================================
 6 Feb 2011
-Some cleanups in printf debugging lines.
+Some cleanups in printf debugging lines. Checkin 2447.
+
+Now into the core code for updating Data Handlers. Unit test in 
+testAsync.cpp:: testSetGetSynapse. 
+compiles but doesn't clear tests.
+
+
+============================================================================

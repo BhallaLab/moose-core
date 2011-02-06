@@ -18,6 +18,8 @@
 #include "header.h"
 #include "ReduceBase.h"
 #include "ReduceMax.h"
+#include "ReduceFinfo.h"
+#include "ReduceMsg.h"
 #include "Shell.h"
 #include "Dinfo.h"
 
@@ -244,20 +246,32 @@ unsigned int Shell::reduceInt( unsigned int val )
 #endif
 }
 
-void Shell::handleSync( const Eref& e, const Qinfo* q, Id elm )
+void Shell::handleSync( const Eref& e, const Qinfo* q, Id elm, FuncId fid )
 {
-	static const Finfo* ackf = 
+	/*
+	static const Finfo* ackf = ack();
 		Shell::initCinfo()->findFinfo( "ack" );
 	static const SrcFinfo2< unsigned int, unsigned int >* 
 		ack = dynamic_cast< const SrcFinfo2< unsigned int, unsigned int >* >( ackf );
 	assert( ackf );
 	assert( ack );
+	*/
+
+	/* May need to protect the function.
+	if ( q->addToStructuralQ() )
+		return;
+		*/
 
 	assert( elm != Id() && elm() != 0 );
 	FieldDataHandlerBase* fdh = dynamic_cast< FieldDataHandlerBase *>(
 		elm()->dataHandler() );
-	if ( fdh ) 
-		fdh->syncFieldArraySize();
-
-	ack->send( e, &p_, Shell::myNode(), OkStatus );
+	const ReduceFinfoBase* rfb = reduceArraySizeFinfo();
+	shelle_->clearBinding( rfb->getBindIndex() );
+	if ( fdh && rfb )  {
+		Msg * m = new ReduceMsg( e, elm(), rfb );
+		shelle_->addMsgAndFunc( m->mid(), fid, rfb->getBindIndex() );
+		if ( myNode_ == 0 )
+			rfb->send( Eref( shelle_, 0 ), &p_, 0 );
+	}
+	ack()->send( e, &p_, Shell::myNode(), OkStatus );
 }

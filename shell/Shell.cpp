@@ -45,11 +45,15 @@ static SrcFinfo5< string, Id, Id, string, vector< unsigned int > > requestCreate
 			"Goes to all nodes including self."
 			);
 
-static SrcFinfo2< unsigned int, unsigned int > ack( "ack",
+SrcFinfo2< unsigned int, unsigned int >* ack()
+{
+	static SrcFinfo2< unsigned int, unsigned int > temp( "ack",
 			"ack( unsigned int node#, unsigned int status ):"
 			"Acknowledges receipt and completion of a command on a worker node."
 			"Goes back only to master node."
 			);
+	return &temp;
+}
 
 static SrcFinfo1< Id  > requestDelete( "requestDelete",
 			"requestDelete( doomedElement ):"
@@ -147,10 +151,14 @@ static DestFinfo del( "delete",
 			"Destroys Element, all its messages, and all its children. Args: Id",
 			new EpFunc1< Shell, Id >( & Shell::destroy ) );
 
-static DestFinfo handleAck( "handleAck", 
+DestFinfo* handleAck()
+{
+	static DestFinfo temp( "handleAck", 
 			"Keeps track of # of acks to a blocking shell command. Arg: Source node num.",
 			new OpFunc2< Shell, unsigned int, unsigned int >( 
 				& Shell::handleAck ) );
+	return &temp;
+}
 
 static DestFinfo handleAddMsg( "handleAddMsg", 
 			"Makes a msg",
@@ -230,46 +238,54 @@ static DestFinfo handleCopy( "handleCopy",
 			new EpFunc4< Shell, vector< Id >, string, unsigned int, bool >( 
 				& Shell::handleCopy ) );
 
-static SrcFinfo1< Id > requestSync(
+static SrcFinfo2< Id, FuncId > requestSync(
 			"sync",
-			"sync( ElementId );"
+			"sync( ElementId, FuncId );"
 			"Synchronizes Element data indexing across all nodes."
 			"Used when distributed ops like message setup might set up"
 			"different #s of data entries on Elements on different nodes."
+			"The ElementId is the element being synchronized."
+			"The FuncId is the 'get' function for the synchronized field."
 			);
 static DestFinfo handleSync( "handleSync", 
 		"handleSync( Id Element): "
-		"Synchronizes DataHandler indexing across nodes",
-	new EpFunc1< Shell, Id >( & Shell::handleSync ) );
+		"Synchronizes DataHandler indexing across nodes"
+		"The ElementId is the element being synchronized."
+		"The FuncId is the 'get' function for the synchronized field.",
+	new EpFunc2< Shell, Id, FuncId >( & Shell::handleSync ) );
 
 static Finfo* shellMaster[] = {
 	&requestCreate, &requestDelete,
 	&requestAddMsg, requestSet(), requestGet(),
 	&requestMove, &requestCopy, &requestUseClock,
 	&requestSync,
-	&handleAck };
+	handleAck() };
 static Finfo* shellWorker[] = {
 	&handleCreate, &del,
 		&handleAddMsg, &handleSet, &handleGet,
 		&handleMove, &handleCopy, &handleUseClock,
 		&handleSync,
-	&ack };
+	ack() };
 
 static Finfo* clockControlFinfos[] = 
 {
 	&requestStart, &requestStep, &requestStop, &requestSetupTick,
-	&requestReinit, &requestQuit, &handleAck
+	&requestReinit, &requestQuit, handleAck()
 };
 
-static ReduceFinfo< Shell, unsigned int, ReduceMax< unsigned int > > 
-	reduceArraySize(
+ReduceFinfoBase* reduceArraySizeFinfo()
+{
+	static ReduceFinfo< Shell, unsigned int, ReduceMax< unsigned int > > 
+		reduceArraySize(
 		"reduceArraySize",
 		"Look up maximum value of an index, here ragged array size,"
 		"across many nodes, and assign uniformly to all nodes. Normally"
 		"followed by an operation to assign the size to the object that"
 		"was resized.",
 		&Shell::digestReduceMax
-);
+	);
+	return &reduceArraySize;
+}
 
 const Cinfo* Shell::initCinfo()
 {
@@ -322,7 +338,7 @@ const Cinfo* Shell::initCinfo()
 
 		requestGet(),
 		lowLevelSetGet(),
-		&reduceArraySize,
+		reduceArraySizeFinfo(),
 ////////////////////////////////////////////////////////////////
 //  Shared msg
 ////////////////////////////////////////////////////////////////
@@ -644,12 +660,14 @@ void Shell::clearRestructuringQ()
  * For starters it works on the FieldArray size, which affects
  * total entries as well as indexing. This field is altered
  * following synaptic setup, for example.
+ * The elm is the Element to synchronize
+ * the FuncId is the 'get' function on the array size field.
  */
-void Shell::doSyncDataHandler( Id elm )
+void Shell::doSyncDataHandler( Id elm, FuncId sizeField )
 {
 	Eref sheller( shelle_, 0 );
 	initAck();
-		requestSync.send( sheller, &p_, elm  );
+		requestSync.send( sheller, &p_, elm, sizeField );
 	waitForAck();
 }
 ////////////////////////////////////////////////////////////////
@@ -723,7 +741,7 @@ void Shell::handleCreate( const Eref& e, const Qinfo* q,
 		return;
 	innerCreate( type, parent, newElm, name, dimensions );
 //	if ( myNode_ != 0 )
-	ack.send( e, &p_, Shell::myNode(), OkStatus );
+	ack()->send( e, &p_, Shell::myNode(), OkStatus );
 	// cout << myNode_ << ": Shell::handleCreate ack sent" << endl;
 }
 
@@ -798,7 +816,7 @@ void Shell::destroy( const Eref& e, const Qinfo* q, Id eid)
 	// eid.destroy();
 	// cout << myNode_ << ": Shell::destroy done for element id " << eid << endl;
 
-	ack.send( e, &p_, Shell::myNode(), OkStatus );
+	ack()->send( e, &p_, Shell::myNode(), OkStatus );
 }
 
 
@@ -814,9 +832,9 @@ void Shell::handleAddMsg( const Eref& e, const Qinfo* q,
 	if ( q->addToStructuralQ() )
 		return;
 	if ( innerAddMsg( msgType, src, srcField, dest, destField ) )
-		ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
+		ack()->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
 	else
-		ack.send( Eref( shelle_, 0), &p_, Shell::myNode(), ErrorStatus );
+		ack()->send( Eref( shelle_, 0), &p_, Shell::myNode(), ErrorStatus );
 }
 
 /**
@@ -902,7 +920,7 @@ void Shell::handleMove( const Eref& e, const Qinfo* q,
 		return;
 	}
 	
-	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
+	ack()->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
 }
 
 void Shell::handleUseClock( const Eref& e, const Qinfo* q,
@@ -932,7 +950,7 @@ void Shell::handleUseClock( const Eref& e, const Qinfo* q,
 		}
 		*/
 	}
-	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
+	ack()->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
 }
 
 void Shell::warning( const string& text )
@@ -966,247 +984,8 @@ const ProcInfo* Shell::procInfo()
 	return &p_;
 }
 
-/**
- * Static global, returns contents of shell buffer.
-const char* Shell::buf() 
-{
-	static Id shellid;
-	static Element* shell = shellid();
-	assert( shell );
-	return (reinterpret_cast< Shell* >(shell->dataHandler()->data( 0 )) )->getBuf();
-}
- */
-
 void Shell::digestReduceMax( const ReduceMax< unsigned int >* arg )
 {
 	maxIndex_ = arg->max();
 }
 
-#if 0
-////////////////////////////////////////////////////////////////////////
-// Functions for handling field set/get and func calls
-////////////////////////////////////////////////////////////////////////
-
-void Shell::handleSet( Id id, DataId d, FuncId fid, PrepackedBuffer arg )
-{
-	Eref er( id(), d );
-	shelle_->clearBinding ( lowLevelSetGet.getBindIndex() );
-	Eref sheller( shelle_, 0 );
-	Msg* m;
-	
-	if ( arg.isVector() ) {
-		m = new AssignVecMsg( sheller, er.element(), Msg::setMsg );
-	} else {
-		m = new AssignmentMsg( sheller, er, Msg::setMsg );
-		// innerSet( er, fid, arg.data(), arg.dataSize() );
-	}
-	shelle_->addMsgAndFunc( m->mid(), fid, lowLevelSetGet.getBindIndex() );
-	if ( myNode_ == 0 )
-		lowLevelSetGet.send( sheller, &p_, arg );
-}
-
-// Static function, used for developer-code triggered SetGet functions.
-// Should only be issued from master node.
-// This is a blocking function, and returns only when the job is done.
-// mode = 0 is single value set, mode = 1 is vector set, mode = 2 is
-// to set the entire target array to a single value.
-void Shell::dispatchSet( const Eref& tgt, FuncId fid, const char* args,
-	unsigned int size )
-{
-	Eref sheller = Id().eref();
-	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-	PrepackedBuffer buf( args, size );
-	s->innerDispatchSet( sheller, tgt, fid, buf );
-}
-
-// regular function, does the actual dispatching.
-void Shell::innerDispatchSet( Eref& sheller, const Eref& tgt, 
-	FuncId fid, const PrepackedBuffer& buf )
-{
-	Id tgtId( tgt.element()->id() );
-	initAck();
-		requestSet.send( sheller, &p_,  tgtId, tgt.index(), fid, buf );
-	waitForAck();
-}
-
-// Static function.
-void Shell::dispatchSetVec( const Eref& tgt, FuncId fid, 
-	const PrepackedBuffer& pb )
-{
-	Eref sheller = Id().eref();
-	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-	s->innerDispatchSet( sheller, tgt, fid, pb );
-}
-
-/**
- * Returns buffer containing desired data.
- * Static function, used for developer-code triggered SetGet functions.
- * Should only be issued from master node.
- * This is a blocking function and returns only when the job is done.
- */
-const vector< char* >& Shell::dispatchGet( 
-	const Eref& e, const string& field, 
-	const SetGet* sg, unsigned int& retEntries )
-{
-	static vector< char* > badRet( 1 );
-	badRet[0] = 0;
-	Eref tgt( e );
-	retEntries = 0; // in case function fails.
-	const Finfo* gf = tgt.element()->cinfo()->findFinfo( field );
-	if ( !gf ) {	// Could be a child Element. Field name changes.
-		string f2 = field.substr( 4 );
-		Id child = Neutral::child( tgt, f2 );
-		if ( child == Id() ) {
-			cout << myNode() << 
-				": Error: Shell::dispatchGet: No field or child named '" <<
-				field << "' was found\n";
-		} else {
-			gf = child()->cinfo()->findFinfo( "get_this" );
-			assert( gf ); // Neutral has get_this, so all derived should too
-			if ( child()->dataHandler()->totalEntries() ==
-				e.element()->dataHandler()->totalEntries() )
-				tgt = Eref( child(), e.index() );
-			else if ( child()->dataHandler()->totalEntries() <= 1 )
-				tgt = Eref( child(), 0 );
-			else {
-				cout << myNode() << 
-					": Error: Shell::dispatchGet: child index mismatch\n";
-				return badRet;
-			}
-		}
-	}
-	const DestFinfo * df = dynamic_cast< const DestFinfo* >( gf );
-	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-	if ( !df ) {
-		cout << s->myNode() << ": Error: Shell::dispatchGet: field '" << field << "' not found on " << tgt << endl;
-		return badRet;
-	}
-
-	if ( df->getOpFunc()->checkSet( sg ) ) { // Type validation
-			Eref sheller = Id().eref();
-
-			// Later we need to fine-tune to handle lookup of fields on
-			// one object, or a specific field on any object, or even
-			// sub-dimensions. For now, just the whole lot.
-			if ( tgt.index() == DataId::any() )
-				retEntries = tgt.element()->dataHandler()->totalEntries();
-			else
-				retEntries = 1;
-			/*
-			if ( tgt.index().data() == DataId::anyPart() ) {
-				if ( tgt.index().field() == DataId::anyPart() )
-					retSize = tgt.element()->dataHandler()->totalEntries();
-				else
-					retSize = tgt.element()->dataHandler()->totalEntries();
-			} else {
-				if ( tgt.index().field() == DataId::anyPart() )
-					retSize = tgt.element()->dataHandler()->totalEntries();
-			}
-			*/
-			return s->innerDispatchGet( sheller, tgt, df->getFid(),
-				retEntries );
-	} else {
-		cout << s->myNode() << ": Error: Shell::dispatchGet: type mismatch for field " << field << " on " << tgt << endl;
-	}
-	return badRet;
-}
-
-/**
- * Tells all nodes to dig up specified field, if object is present on node.
- * Not thread safe: this should only run on master node.
- */
-const vector< char* >& Shell::innerDispatchGet( 
-	const Eref& sheller, const Eref& tgt, 
-	FuncId fid, unsigned int retEntries )
-{
-	clearGetBuf();
-	gettingVector_ = (retEntries > 1 );
-	getBuf_.resize( retEntries );
-	initAck();
-		requestGet.send( sheller, &p_, tgt.element()->id(), tgt.index(), 
-			fid, retEntries );
-	waitForAck();
-
-	assert( getBuf_.size() == retEntries );
-
-	return getBuf_;
-}
-
-
-/**
- * This operates on the worker node. It handles the Get request from
- * the master node, and dispatches if need to the local object.
- */
-void Shell::handleGet( Id id, DataId index, FuncId fid, 
-	unsigned int numTgt )
-{
-	Eref sheller( shelle_, 0 );
-	Eref tgt( id(), index );
-	FuncId retFunc = receiveGet.getFid();
-
-	shelle_->clearBinding( lowLevelSetGet.getBindIndex() );
-	if ( numTgt > 1 ) {
-		Msg* m = new AssignVecMsg( sheller, tgt.element(), Msg::setMsg );
-		shelle_->addMsgAndFunc( m->mid(), fid, lowLevelSetGet.getBindIndex() );
-		if ( myNode_ == 0 ) {
-			//Need to find numTgt
-			vector< FuncId > rf( numTgt, retFunc );
-			const char* temp = reinterpret_cast< const char* >( &rf[0] );
-			PrepackedBuffer pb( temp, sizeof( FuncId ), numTgt );
-			lowLevelSetGet.send( sheller, &p_, pb );
-		}
-	} else {
-		Msg* m = new AssignmentMsg( sheller, tgt, Msg::setMsg );
-		shelle_->addMsgAndFunc( m->mid(), fid, lowLevelSetGet.getBindIndex());
-		if ( myNode_ == 0 ) {
-			PrepackedBuffer pb( 
-				reinterpret_cast< const char* >( &retFunc), 
-				sizeof( FuncId ) );
-			lowLevelSetGet.send( sheller, &p_, pb );
-		}
-	}
-}
-
-void Shell::recvGet( const Eref& e, const Qinfo* q, PrepackedBuffer pb )
-{
-	if ( myNode_ == 0 ) {
-		if ( gettingVector_ ) {
-			assert( q->mid() != Msg::badMsg );
-			Element* tgtElement = Msg::getMsg( q->mid() )->e2();
-			Eref tgt( tgtElement, q->srcIndex() );
-			assert ( tgt.linearIndex() < getBuf_.size() );
-			char*& c = getBuf_[ tgt.linearIndex() ];
-			c = new char[ pb.dataSize() ];
-			memcpy( c, pb.data(), pb.dataSize() );
-		} else  {
-			assert ( getBuf_.size() == 1 );
-			char*& c = getBuf_[ 0 ];
-			c = new char[ pb.dataSize() ];
-			memcpy( c, pb.data(), pb.dataSize() );
-		}
-	}
-}
-
-/*
-void Shell::lowLevelRecvGet( PrepackedBuffer pb )
-{
-	cout << "Shell::lowLevelRecvGet: If this is being used, then fix\n";
-	relayGet.send( Eref( shelle_, 0 ), &p_, myNode(), OkStatus, pb );
-}
-*/
-
-////////////////////////////////////////////////////////////////////////
-
-void Shell::clearGetBuf()
-{
-	for ( vector< char* >::iterator i = getBuf_.begin(); 
-		i != getBuf_.end(); ++i )
-	{
-		if ( *i != 0 ) {
-			delete[] *i;
-			*i = 0;
-		}
-	}
-	getBuf_.resize( 1, 0 );
-}
-#endif

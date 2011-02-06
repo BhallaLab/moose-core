@@ -22,6 +22,8 @@ extern SrcFinfo1< PrepackedBuffer >* lowLevelSetGet();
 extern SrcFinfo4< Id, DataId, FuncId, PrepackedBuffer >* requestSet();
 extern SrcFinfo4< Id, DataId, FuncId, unsigned int >* requestGet();
 extern DestFinfo* receiveGet();
+extern ReduceFinfoBase* reduceArraySizeFinfo();
+extern SrcFinfo2< unsigned int, unsigned int >* ack();
 
 class Shell
 {
@@ -126,7 +128,7 @@ class Shell
  		 * total entries as well as indexing. This field is altered
  		 * following synaptic setup, for example.
  		 */
-		void doSyncDataHandler( Id elm );
+		void doSyncDataHandler( Id elm, FuncId fid );
 
 		/**
 		 * Works through internal queue of operations that modify the
@@ -207,7 +209,7 @@ class Shell
 		/**
 		 * Handles sync of DataHandler indexing across nodes
 		 */
-		void handleSync( const Eref& e, const Qinfo* q, Id elm );
+		void handleSync( const Eref& e, const Qinfo* q, Id elm, FuncId fid);
 
 		/**
 		 * Deep copy of source element to target, renaming it to newName.

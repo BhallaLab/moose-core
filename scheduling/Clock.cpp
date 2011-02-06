@@ -91,11 +91,13 @@ static SrcFinfo0 finished(
 		"Signal for completion of run"
 	);
 
+/*
 static SrcFinfo2< unsigned int, unsigned int > ack( 
 		"ack",
 		"Acknowledgement signal for receipt/completion of function."
 		"Goes back to Shell on master node"
 	);
+	*/
 
 const Cinfo* Clock::initCinfo()
 {
@@ -171,7 +173,7 @@ const Cinfo* Clock::initCinfo()
 
 
 		static Finfo* clockControlFinfos[] = {
-			&start, &step, &stop, &setupTick, &reinit, &quit, &ack,
+			&start, &step, &stop, &setupTick, &reinit, &quit, ack(),
 		};
 	///////////////////////////////////////////////////////
 	// SharedFinfo for Shell to control Clock
@@ -613,7 +615,7 @@ void Clock::advancePhase2(  ProcInfo *p )
 			procState_ = StopOnly;
 			// isRunning_ = 0; // Should not set this flag here, it affects other threads.
 			finished.send( clockId.eref(), p );
-			ack.send( clockId.eref(), p, p->nodeIndexInGroup, OkStatus );
+			ack()->send( clockId.eref(), p, p->nodeIndexInGroup, OkStatus );
 		}
 		++countAdvance2_;
 	}
@@ -676,7 +678,7 @@ void Clock::reinitPhase2( ProcInfo* info )
 		}
 		sort( tickPtr_.begin(), tickPtr_.end() );
 		Id clockId( 1 );
-		ack.send( clockId.eref(), info, info->nodeIndexInGroup, OkStatus );
+		ack()->send( clockId.eref(), info, info->nodeIndexInGroup, OkStatus );
 		procState_ = TurnOffReinit;
 		++countReinit2_;
 	}
