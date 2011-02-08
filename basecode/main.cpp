@@ -161,33 +161,38 @@ Id init( int argc, char** argv )
 	// Shell::initCinfo()->create( shellId, "root", 1 );
 
 	Id clockId = Id::nextId();
+
+	Shell* s = reinterpret_cast< Shell* >( shellId.eref().data() );
+	s->setShellElement( shelle );
+	s->setHardware( isSingleThreaded, numCores, numNodes, myNode );
+	s->loadBalance();
+
 	// Clock::initCinfo()->create( clockId, "clock", 1 );
 	// Element* clocke = 
-		new Element( clockId, Clock::initCinfo(), "clock", dims, 1 );
+	new Element( clockId, Clock::initCinfo(), "clock", dims, 1 );
 	// Clock::initCinfo()->postCreationFunc( clockId, clocke );
 	// Should put this initialization stuff within the Clock creation
 	// step. This means I need to add an optional init func into the Cinfo
 	// constructor, or to add the init func as a virtual func in Data.
 	Id tickId( 2 );
 	assert( tickId() != 0 );
+	assert( tickId.value() == 2 );
 	assert( tickId()->getName() == "tick" ) ;
 
 	assert ( shellId == Id() );
 	assert( clockId == Id( 1 ) );
 	assert( tickId == Id( 2 ) );
 
+// 	initMsgManagers(); // This is now done within the MsgManager::addMsg.
+
+	s->connectMasterMsg();
+
 	// This will be initialized within the Process loop, and better there
 	// as it flags attempts to call the Reduce operations before ProcessLoop
 	// Qinfo::clearReduceQ( numCores ); // Initialize the ReduceQ entry.
 
-	initMsgManagers();
 
 	// SetGet::setShell();
-	Shell* s = reinterpret_cast< Shell* >( shellId.eref().data() );
-	s->setShellElement( shelle );
-	s->setHardware( isSingleThreaded, numCores, numNodes, myNode );
-	s->loadBalance();
-	s->connectMasterMsg();
 	// Msg* m = new OneToOneMsg( shelle, shelle );
 	// assert ( m != 0 );
 	

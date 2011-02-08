@@ -17,6 +17,7 @@
 #include "OneToAllMsg.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
+#include "ReduceMsg.h"
 
 const Cinfo* MsgManager::initCinfo()
 {
@@ -92,33 +93,6 @@ MsgId MsgManager::getMid() const
 	return mid_;
 }
 
-// static func
-void MsgManager::addMsg( MsgId mid, Id managerId )
-{
-	const Msg* m = Msg::getMsg( mid );
-	Eref manager = m->manager( managerId );
-	Element* em = manager.element();
-	DataHandler* data = em->dataHandler();
-	MsgManager mm( mid );
-	unsigned int oldSize = data->totalEntries();
-	vector< unsigned int > dims( 1, oldSize + 1 );
-	data->resize( dims ); // Preserves entries.
-	data->setDataBlock( reinterpret_cast< const char* >( &mm ),
-		1, oldSize );
-	// unsigned int nextDataId = data->addOneEntry( reinterpret_cast< const char* >( &mm ) );
-	m->setDataId( oldSize );
-}
-
-// static func
-void MsgManager::dropMsg( MsgId mid )
-{
-	const Msg* m = Msg::getMsg( mid );
-	Eref manager = m->manager( m->id() );
-	MsgManager* mm = reinterpret_cast< MsgManager* >( manager.data() );
-	mm->setMid( 0 );
-	m->setDataId( 0 );
-}
-
 Id msgManagerId;
 
 void initMsgManagers()
@@ -145,6 +119,46 @@ void initMsgManagers()
 	new Element( AssignmentMsg::id_, SingleMsgWrapper::initCinfo(), "assignmentMsg", dims, 1 );
 	AssignVecMsg::id_ = Id::nextId();
 	new Element( AssignVecMsg::id_, SingleMsgWrapper::initCinfo(), "assignVecMsg", dims, 1 );
+	ReduceMsg::id_ = Id::nextId();
+	new Element( ReduceMsg::id_, SingleMsgWrapper::initCinfo(), "ReduceMsg", dims, 1 );
+}
+
+
+// static func
+void MsgManager::addMsg( MsgId mid, Id managerId )
+{
+	// mid == 2 is a special case for initialization.
+	// It happens when we are creating the Clock element, after
+	// the Tick has been created, but before its messaging
+	// occurs.
+	if ( mid == 2 ) {
+		initMsgManagers();
+	} else if ( managerId == 0 ) {
+		cout << "Error: MsgManager::addMsg: managerId == 0. You haven't defined the id for this message class\n";
+		assert( 0 );
+	}
+	const Msg* m = Msg::getMsg( mid );
+	Eref manager = m->manager( managerId );
+	Element* em = manager.element();
+	DataHandler* data = em->dataHandler();
+	MsgManager mm( mid );
+	unsigned int oldSize = data->totalEntries();
+	vector< unsigned int > dims( 1, oldSize + 1 );
+	data->resize( dims ); // Preserves entries.
+	data->setDataBlock( reinterpret_cast< const char* >( &mm ),
+		1, oldSize );
+	// unsigned int nextDataId = data->addOneEntry( reinterpret_cast< const char* >( &mm ) );
+	m->setDataId( oldSize );
+}
+
+// static func
+void MsgManager::dropMsg( MsgId mid )
+{
+	const Msg* m = Msg::getMsg( mid );
+	Eref manager = m->manager( m->id() );
+	MsgManager* mm = reinterpret_cast< MsgManager* >( manager.data() );
+	mm->setMid( 0 );
+	m->setDataId( 0 );
 }
 
 void destroyMsgManagers()

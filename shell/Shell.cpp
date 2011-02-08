@@ -663,13 +663,23 @@ void Shell::clearRestructuringQ()
  * The elm is the Element to synchronize
  * the FuncId is the 'get' function on the array size field.
  */
-void Shell::doSyncDataHandler( Id elm, FuncId sizeField )
+void Shell::doSyncDataHandler( Id elm, FuncId sizeField, Id tgt )
 {
+	FieldDataHandlerBase* fb = 
+		dynamic_cast< FieldDataHandlerBase* >( tgt()->dataHandler() );
+	if ( !fb ) {
+		cout << myNode_ << ": Shell::doSyncDataHandler:Error: target '" <<
+			tgt.path() << "' is not a FieldElement\n";
+		return;
+	}
 	Eref sheller( shelle_, 0 );
 	initAck();
 		requestSync.send( sheller, &p_, elm, sizeField );
 	waitForAck();
+	// Now the data is back, assign the field.
+	fb->setFieldDimension( maxIndex_ );
 }
+
 ////////////////////////////////////////////////////////////////
 // DestFuncs
 ////////////////////////////////////////////////////////////////
@@ -684,26 +694,6 @@ void Shell::doSyncDataHandler( Id elm, FuncId sizeField )
  */
 void Shell::process( const Eref& e, ProcPtr p )
 {
-/*
-	Id clockId( 1 );
-	Clock* clock = reinterpret_cast< Clock* >( clockId.eref().data() );
-	Qinfo q;
-
-	if ( isRunning_ ) {
-		start( runtime_ ); // This is a blocking call
-		if ( doReinit_ ) { // It may have been stopped by the reinit call
-			clock->reinit( clockId.eref(), &q );
-			doReinit_ = 0;
-		}
-		ack.send( Eref( shelle_, 0 ), &p_, myNode_, OkStatus );
-		return;
-	} else if ( doReinit_ ) { 
-		isRunning_ = 0;
-		clock->reinit( clockId.eref(), &q );
-		doReinit_ = 0;
-		ack.send( Eref( shelle_, 0 ), &p_, myNode_, OkStatus );
-	}
-*/
 }
 
 
@@ -782,18 +772,6 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 			warning( ss.str() );
 			return;
 		}
-		/*
-		const Finfo* f1 = pa->cinfo()->findFinfo( "childMsg" );
-		if ( !f1 ) {
-			stringstream ss;
-			ss << "innerCreate: Parent Element'" << parent << "' cannot handle children. No Element created";
-			warning( ss.str() );
-			return;
-		}
-		const Finfo* f2 = Neutral::initCinfo()->findFinfo( "parentMsg" );
-		assert( f2 );
-		// cout << myNode_ << ": Shell::innerCreate newElmId= " << newElm << endl;
-		*/
 		Element* ret = new Element( newElm, c, name, dimensions );
 		assert( ret );
 		adopt( parent, newElm );

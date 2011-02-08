@@ -127,8 +127,10 @@ class Shell
  		 * For starters it works on the FieldArray size, which affects
  		 * total entries as well as indexing. This field is altered
  		 * following synaptic setup, for example.
+		 * The elm and fid specify the field containing the array size. The
+		 * tgt specifies the Element which has to be modified.
  		 */
-		void doSyncDataHandler( Id elm, FuncId fid );
+		void doSyncDataHandler( Id elm, FuncId fid, Id tgt );
 
 		/**
 		 * Works through internal queue of operations that modify the

@@ -10293,6 +10293,80 @@ testAsync.cpp:: testSetGetSynapse.
 compiles but doesn't clear tests. Checkin 2448.
 
 This didn't work either, since the test is before the ProcessLoop is running.
-I need another test.
+I need another test. Checkin 2449.
+
+Implemented it in testShell. Getting close. Now need to
+get the reduced value back into the Element->DataHandler from
+the Shell. Note that the value has to go into 
+FieldDataHandlerBase::fieldDimension_
+using the call FieldDataHandlerBase::setFieldDimension.
+
+Looking more closely at what is needed to get the value to the right place.
+First: How does the synapse array size get set?
+- Directly by assigning setNumSynapses, on the parent.
+- Indirectly by randomConnect and other functions that operate on the
+	FieldDataHandler belonging to the synapse. These functions call 
+	FieldDataHandlerBase::setFieldArraySize which calls the setNumField
+	function with the parentDataHandler pointer. The setNumField
+	function then calls the setNumField function pointer, which in this
+	case is again setNumSynapses.
+
+- Options: 
+	- Add setFieldDimension as a func passed into the FieldElementFinfo
+		Will need to change call args for identifying field to
+		Shell::doSyncFieldArray, to pass in FieldElementFinfo as well.
+		We already need to pass in the setNumSynapse fid.
+	- Add a ptr to the parentDataHandler to indicate fields.
+		Bad idea, we may have many such fields.
+		
+The FieldElementFinfo which we refer to for setNumSynapses,
+in its postCreationFunc, creates the Element and the FieldDataHandler
+for the synapses. We want these to do the setFieldDimension.
+In many cases the child Element id is 1 more than the parent, but not
+if the parent has multiple FieldDatas.
+============================================================================
+8 Feb 2011
+The FieldDataHandler is the one that needs to keep track of current indexing,
+so we'll put the updating operations in it. 
+We need to get from it: size of array
+We need to put in it: Dimension of FieldDataHandler.
+	The first is a user-accessible field.
+	The second should be hidden.
+Shell dealings with dimension are a bit unusual for the reduce operations.
+Normally we'd expect the destination element to be the end of the story, but
+here we need to go back and put the reduced value in target Elements.
+
+Seems to clear this issue, but now crashes later on in an odd place.
+Valgrind isn't able to diagnose.
+Was stuck for a while, but gdb 'watch' function saves the day:
+
+Breakpoint 1, init (argc=1, argv=0x7fffffffe7f8) at main.cpp:187
+187             s->setShellElement( shelle );
+(gdb) p s
+$1 = (Shell *) 0x82da98
+(gdb) p shelle
+$2 = (Element *) 0x82d820
+(gdb) p &(s->shelle_)
+$3 = (Element **) 0x82da98
+(gdb) watch *0x82da98
+Hardware watchpoint 2: *0x82da98
+
+This ran at full speed, and found the problem in the destructor for
+ReduceMsg, which would have been very hard to diagnose any other way.
+
+May be running into a bad fallback when creating message manager.
+The msg manager for the ReduceMsg seems to have the same ptr as the Shell.
+
+This has turned into a big mess, since we need the MsgManagers to set up any
+messages, but the Clock sets up tick children and each wants to set their
+own child ids. See grunge in main.cpp around line 170.
+
+Finally got it to work with a really messy little hack to put the 
+initMsgManagers function within the MsgManager::addMsg function, and test
+for the mid coming when the Tick is connected to its parent Clock. There are
+other ways to do the same thing, all unpleasant. Now clears all unit tests,
+for 1 to 11 cores.
+
+So now we're clear to go on to multinode tests.
 
 ============================================================================

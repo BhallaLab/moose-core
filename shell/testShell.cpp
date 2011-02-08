@@ -1065,6 +1065,48 @@ void testFindModelParent()
 	cout << "." << flush;
 }
 
+void testSyncSynapseSize()
+{
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+	const Finfo* f = Cinfo::find( "IntFire" )->findFinfo( "get_numSynapses" );
+	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
+	assert( df );
+	unsigned int size = 1000;
+	vector< unsigned int > dims( 1, size );
+	Id neuronId = shell->doCreate( "IntFire", Id(), "neurons", dims );
+	Id synId( neuronId.value() + 1 );
+	Element* syn = synId();
+
+	// Element should exist even if data doesn't
+	assert ( syn != 0 );
+	assert ( syn->getName() == "synapse" ); 
+
+	assert( syn->dataHandler()->data( 0 ) == 0 );
+
+	assert( syn->dataHandler()->totalEntries() == size );
+	assert( syn->dataHandler()->localEntries() == 0 );
+	vector< unsigned int > ns( size, 0 );
+	for ( unsigned int i = 0; i < size; ++i )
+		ns[i] = i;
+	bool ret = Field< unsigned int >::setVec( 
+		neuronId.eref(), "numSynapses", ns );
+	assert( ret );
+	// Here we check local entries
+	/*
+	DataHandler::iterator begin = syn->dataHandler()->begin();
+	DataHandler::iterator end = syn->dataHandler()->end();
+	assert( syn->dataHandler()->localEntries() == ( size * (size - 1) ) / 2 );
+	*/
+
+	shell->doSyncDataHandler( neuronId, df->getFid(), synId );
+
+	assert( syn->dataHandler()->totalEntries() == size * (size - 1 ) );
+	// cout << "NumSyn = " << syn.totalEntries() << endl;
+	shell->doDelete( neuronId );
+	cout << "." << flush;
+}
+
 void testShell( )
 {
 	testChopPath();
@@ -1087,6 +1129,7 @@ void testMpiShell( )
 	testShellAddMsg();
 	testCopyMsgOps();
 	testWildcard();
+	testSyncSynapseSize();
 
 	// Stuff for doLoadModel
 	testFindModelParent();
