@@ -33,6 +33,11 @@ const Cinfo* Arith::initCinfo()
 			&Arith::setOutput,
 			&Arith::getOutput
 		);
+		static ReadOnlyValueFinfo< Arith, double > arg1Value(
+			"arg1Value",
+			"Value of arg1 as computed last timestep.",
+			&Arith::getArg1
+		);
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -69,6 +74,7 @@ const Cinfo* Arith::initCinfo()
 	static Finfo* arithFinfos[] = {
 		&function,	// Value
 		&outputValue,	// Value
+		&arg1Value,	// ReadOnly value
 		&arg1,		// DestFinfo
 		&arg2,		// DestFinfo
 		&arg3,		// DestFinfo

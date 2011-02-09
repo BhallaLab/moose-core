@@ -498,7 +498,23 @@ bool checkOutput( Id e,
 	double v0, double v1, double v2, double v3, double v4 )
 {
 	bool ret = 1;
-	bool report = 0;
+	bool report = 1;
+
+	vector< double > correct;
+	correct.push_back( v0 );
+	correct.push_back( v1 );
+	correct.push_back( v2 );
+	correct.push_back( v3 );
+	correct.push_back( v4 );
+	vector< double > retVec;
+	Field< double >::getVec( Eref( e(), DataId::any() ), "outputValue", retVec );
+
+	for ( unsigned int i = 0; i < 5; ++i ) {
+		ret = ret & doubleEq( retVec[i], correct[i] );
+		if (report) cout << "( " << correct[i] << ", " << retVec[i] << " ) ";
+	}
+
+/*
 	Eref e0( e(), 0 );
 	double val = reinterpret_cast< Arith* >( e0.data() )->getOutput();
 	// double val = Field< double >::get( e0, "outputValue" );
@@ -528,7 +544,7 @@ bool checkOutput( Id e,
 	val = reinterpret_cast< Arith* >( e4.data() )->getOutput();
 	ret = ret && ( fabs( val - v4 ) < 1e-6 );
 	if (report) cout << "( " << v4 << ", " << val << " )\n";
-
+*/
 	return ret;
 }
 
@@ -691,26 +707,53 @@ void testShellAddMsg()
 	ret = SetGet1< double >::setVec( g1.eref(), "arg1", init ); // 12345
 	assert( ret );
 
+	/*
 	const Arith* a10obj = reinterpret_cast< Arith* >( Eref( a1(), 0 ).data() );
 	const Arith* a11obj = reinterpret_cast< Arith* >( Eref( a1(), 1 ).data() );
 	const Arith* a12obj = reinterpret_cast< Arith* >( Eref( a1(), 2 ).data() );
 	const Arith* a13obj = reinterpret_cast< Arith* >( Eref( a1(), 3 ).data() );
 	const Arith* a14obj = reinterpret_cast< Arith* >( Eref( a1(), 4 ).data() );
+	*/
 	/*
 	for ( unsigned int i = 0; i < 5; ++i ) {
 		cout << shell->myNode() << ": data here for (a1," << i << "): "
 			<< Eref( a1(), i ).isDataHere() << endl;
 	}
 	*/
+	/*
 	assert( doubleEq( a10obj->getArg1(), 1 ) );
 	assert( doubleEq( a11obj->getArg1(), 2 ) );
 	assert( doubleEq( a12obj->getArg1(), 3 ) );
 	assert( doubleEq( a13obj->getArg1(), 4 ) );
 	assert( doubleEq( a14obj->getArg1(), 5 ) );
+	*/
 
+	assert( doubleEq( Field< double >::get( Eref( a1(), 0 ), "arg1Value" ), 1 ) );
+	assert( doubleEq( Field< double >::get( Eref( a1(), 1 ), "arg1Value" ), 2 ) );
+	assert( doubleEq( Field< double >::get( Eref( a1(), 2 ), "arg1Value" ), 3 ) );
+	assert( doubleEq( Field< double >::get( Eref( a1(), 3 ), "arg1Value" ), 4 ) );
+	assert( doubleEq( Field< double >::get( Eref( a1(), 4 ), "arg1Value" ), 5 ) );
+
+	vector< double > retVec( 0 );
+	Field< double >::getVec( Eref( a1(), DataId::any() ), "arg1Value", retVec );
+	for ( unsigned int i = 0; i < 5; ++i )
+		assert( doubleEq( retVec[i], i + 1 ) );
+
+	retVec.resize( 0 );
+	Field< double >::getVec( Eref( b1(), DataId::any() ), "arg1Value", retVec );
+	for ( unsigned int i = 0; i < 5; ++i )
+		assert( doubleEq( retVec[i], i + 1 ) );
+
+	retVec.resize( 0 );
+	Field< double >::getVec( Eref( c1(), DataId::any() ), "arg1Value", retVec );
+	for ( unsigned int i = 0; i < 5; ++i )
+		assert( doubleEq( retVec[i], i + 1 ) );
+
+	/*
 	ret = checkArg1( a1, 1, 2, 3, 4, 5 );
 	ret = checkArg1( b1, 1, 2, 3, 4, 5 );
 	ret = checkArg1( c1, 1, 2, 3, 4, 5 );
+	*/
 
 	///////////////////////////////////////////////////////////
 	// Run it

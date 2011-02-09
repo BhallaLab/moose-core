@@ -10378,4 +10378,11 @@ what it should be. This suggested a simple fix: the
 ReduceBase::reduceNodes() function was calling tertiary reduce on the
 node 0 object as well as other nodes, thus doubling its value. Fixed
 range of iteration, and it now clears single node unit tests.
+Checkin 2451.
 
+Finally onto multinode tests. Cleared the earlier crashes due to attempts
+to access objects that were decomposed off the master node. In doing so
+reconfirmed that the GetVec function works, and works across nodes. Now
+stuck in the interesting and crucial place where I test internode messaging
+using each of the message types.
+============================================================================

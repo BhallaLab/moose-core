@@ -18,8 +18,8 @@
 void fieldOp( const Eref& e, const Qinfo* q, const char* buf, 
 	const char* data, unsigned int size )
 {
-	if ( Shell::myNode() != 0 )
-		return;
+	// This doesn't make sense: it prevents return values from off master.
+	// if ( Shell::myNode() != 0 ) return;
 	// const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
 	// buf += sizeof( Qinfo );
 	FuncId retFunc = *reinterpret_cast< const FuncId* >( buf );
