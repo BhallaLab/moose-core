@@ -10,6 +10,13 @@
 #include "header.h"
 #include "ReduceBase.h"
 #include "ReduceFinfo.h"
+#ifdef USE_MPI
+#include <mpi.h>
+#include "ReduceMax.h"
+#include "ReduceBase.h"
+#include "ReduceMsg.h"
+#include "../shell/Shell.h"
+#endif
 
 ReduceBase::ReduceBase() // To keep vectors happy
 	: er_( Id().eref() ), rfb_( 0 )
@@ -32,11 +39,13 @@ bool ReduceBase::reduceNodes()
 {
 #ifdef USE_MPI
 	char* recvBuf = new char[ Shell::numNodes() * this->dataSize() ];
-	MPI_Allgather( this->data(), this->dataSize(), MPI_CHAR, 
+	char* sendBuf = new char[ this->dataSize() ];
+	memcpy( sendBuf, this->data(), this->dataSize() );
+	MPI_Allgather( sendBuf, this->dataSize(), MPI_CHAR, 
 		recvBuf, this->dataSize(), MPI_CHAR, 
 		MPI_COMM_WORLD );
-	for ( unsigned int i = 0; i < numNodes_; ++i ) {
-		this->tertiaryReduce( recvBuf[ i * this->dataSize() ] );
+	for ( unsigned int i = 1; i < Shell::numNodes(); ++i ) {
+		this->tertiaryReduce( recvBuf + i * this->dataSize() );
 	}
 	delete[] recvBuf;
 #endif

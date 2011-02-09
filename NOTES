@@ -10365,8 +10365,17 @@ Finally got it to work with a really messy little hack to put the
 initMsgManagers function within the MsgManager::addMsg function, and test
 for the mid coming when the Tick is connected to its parent Clock. There are
 other ways to do the same thing, all unpleasant. Now clears all unit tests,
-for 1 to 11 cores.
+for 1 to 11 cores. Checkin 2450.
 
-So now we're clear to go on to multinode tests.
+So now we're clear to go on to multinode tests. 
 
+The base MPI compile took a bit of fixing. Then it fails to clear
+unit tests.
 ============================================================================
+9 Feb 2011
+A look at the assertion failure revealed that the stats total was twice
+what it should be. This suggested a simple fix: the
+ReduceBase::reduceNodes() function was calling tertiary reduce on the
+node 0 object as well as other nodes, thus doubling its value. Fixed
+range of iteration, and it now clears single node unit tests.
+
