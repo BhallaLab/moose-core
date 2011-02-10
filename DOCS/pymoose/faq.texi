@@ -1,3 +1,80 @@
-@node FAQ, GNU Free Documentation License, Detailed Guide, Top
+@node FAQ
 @chapter Frequently Asked Questions
-TO BE COMPLETED.
+@menu
+* How do I load a model?::      
+@end menu
+
+@node How do I load a model?,  , FAQ, FAQ
+@section How do I load a model?
+There are various formats that a model can be in. MOOSE recognizes
+GENESIS cell prototypes ('.p' files), SBML and neuroML files. Moreover, a GENESIS script
+('.g' file) can be loaded in PyMOOSE. Here is a small description of these:
+
+@menu
+* How do I load a GENESIS prototype file?::  
+* How do I load an SBML file?::  
+* How do I load a neuroML file?::  
+@end menu
+
+@node How do I load a GENESIS prototype file?, How do I load an SBML file?, How do I load a model?, How do I load a model?
+@subsection How do I load GENESIS prototype file?
+There is a text file format used by GENESIS to define prototypes for
+neuronal models. The details of this format can be found in GENESIS
+documentation for @code{readcell}. 
+
+Briefly, the main content of files in this format is a sequence of rows
+corresponding to compartments that constitute the cell model. In each
+row, you have the compartment name, its parent compartment's name,
+position of the starting point the compartment (optionally the end
+point), diameter of the compartment (the spatial dimensions are in
+microns for position and diameter), followed by a list of channels and
+their conductance densities(in SI unit, Siemens/m^2).
+
+The channels are recognized by their names and the actual channel
+prototype definitions must be loaded under @code{/lib} before loading
+the prototype file. Otherwise that channel will not be inserted on the
+compartments.
+
+Once you have created prototypes for the channels, the @code{readCell}
+function in @code{PyMooseContext} can be called to load the cell
+prototype. For instance,
+@example
+moose.context.readCell('/usr/share/doc/moose/DEMOS/axon/axon.p', '/axon')
+@end example
+
+will load read the prototype described in the file
+@code{/usr/share/doc/moose/DEMOS/axon/axon.p} as the cell @code{/axon}.
+
+@node How do I load an SBML file?, How do I load a neuroML file?, How do I load a GENESIS prototype file?, How do I load a model?
+@subsection How do I load an SBML file?
+SBML stands for systems biology markup language. This is an XML based
+file format for defining computational models in systems biology. More
+information can be found at the official website:
+@uref{http://sbml.org/, http://sbml.org/}.
+
+You can load SBML models using the @code{readSBML(filepath,
+elementpath)} function in @code{PyMooseContext} class.
+
+For example,
+
+@example
+moose.context.readSBML('/usr/share/moose/DEMOS/sbml_Reader/acc88.xml', '/acc88')
+@end example
+
+will load the model defined in acc88.xml file under a container @code{/acc88}.
+
+@node How do I load a neuroML file?,  , How do I load an SBML file?, How do I load a model?
+@subsection How do I load a neuroML file?
+
+neuroML is an XML-based format for defining neuronal models. You can
+find out more about neuroML at its website:
+@uref{http://www.neuroml.org/, http://www.neuroml.org/}. MOOSE is capable
+of reading some levels of neuroML model definition. You can use the
+@code{readNeuroML} function in PyMooseContext to load a neuroML model in
+MOOSE:
+@example
+moose.context.readNeuroML('/usr/share/moose/DEMOS/NeuroML_Reader/CA1/Ca1.xml', '/ca1')
+@end example
+to load the model defined in Ca1.xml into a Cell object '/ca1'.
+
+
