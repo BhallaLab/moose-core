@@ -2,8 +2,9 @@ import sys
 import os
 from PyQt4 import QtGui,QtCore,Qt
 from operator import itemgetter, attrgetter
-
+import config
 import math
+
 import moose
 
 '''
@@ -18,37 +19,39 @@ dir(moose)
 
 c = moose.PyMooseBase.getContext()
 
-c.loadG('/home/lab13/Genesis_file/gfile/acc13.g')
+c.loadG('/home/lab13/Genesis_file/gfile/acc25.g')
 #c.loadG('/home/lab13/trunk/DEMOS/kholodenko/Kholodenko.g')
 
 app = QtGui.QApplication(sys.argv)
-'''
 
+'''
 class Textitem(QtGui.QGraphicsTextItem):
 	def __init__(self,layoutwidget,path):
 		self.mooseObj_ = moose.Neutral(path)
 		self.layoutWidgetpt = layoutwidget
 		QtGui.QGraphicsTextItem.__init__(self,self.mooseObj_.name)
 		self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
-		
+		if config.QT_MINOR_VERSION >= 6:
+		 	self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges, 1) 
+		 	
 	def mouseDoubleClickEvent(self, event):
 		self.emit(QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.mooseObj_)
 	
 	def mousePressEvent(self, event):
 		QtGui.QGraphicsTextItem.mousePressEvent(self, event)
 		if event.button() == QtCore.Qt.LeftButton:
-			self.startpos = event.scenePos()
+			self.startingPos = event.scenePos()
 		
 	def mouseMoveEvent(self,event):
 		QtGui.QGraphicsTextItem.mouseMoveEvent(self, event)
 		if event.buttons() == QtCore.Qt.LeftButton:
-			self.endpos = event.scenePos()
-			if ((self.endpos.x()-self.startpos.x() != 0) |(self.endpos.y()-self.startpos.y() != 0)):
+			self.endingPos = event.scenePos()
+			if ((self.endingPos.x()-self.startingPos.x() != 0) |(self.endingPos.y()-self.startingPos.y() != 0)):
 				self.emit(QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.mooseObj_)
 
 	def mouseReleaseEvent(self, event):
 		QtGui.QGraphicsTextItem.mouseReleaseEvent(self, event)
-
+	
 	def updateSlot(self):
 		if(self.mooseObj_.className == 'Enzyme'):
 			textColor = "<html><body bgcolor='black'>"+self.mooseObj_.name+"</body></html>"
@@ -56,7 +59,70 @@ class Textitem(QtGui.QGraphicsTextItem):
 		else:
 			textColor = self.mooseObj_.getField('xtree_fg_req')
 			self.layoutWidgetpt.colorCheck(self,self.mooseObj_,textColor,"background")
+			
+class Graphicalview(QtGui.QGraphicsView):
+	def __init__(self,scenewidget):
+		self.sceneWidgetpt = scenewidget
+		QtGui.QGraphicsView.__init__(self,self.sceneWidgetpt)
+		self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
+		self.setScene(self.sceneWidgetpt)
+		self.rubberBandactive = False
 
+		
+	def mousePressEvent(self, event):
+		QtGui.QGraphicsView.mousePressEvent(self, event)
+		if event.buttons() == QtCore.Qt.LeftButton:
+			self.startingPos = QtCore.QPointF()
+			self.startingPos = event.pos()
+			self.startScenepos = self.mapToScene(self.startingPos)
+			
+			deviceTransform = self.viewportTransform()
+			if config.QT_MINOR_VERSION >= 6:
+				''' deviceTransform needs to be provided if the scene contains items that ignore transformations,
+					which was introduced in 4.6
+				'''
+				if ( self.sceneWidgetpt.itemAt(self.startScenepos,deviceTransform) == None):
+					self.rubberBandactive = True
+			else:
+				''' for below  Qt4.6 there is no view transform for itemAt 
+				     and if view is zoom out below 50%  and if textitem object is moved, 
+				     along moving the item, zooming also happens.
+				'''
+				if ( self.sceneWidgetpt.itemAt(self.startScenepos) == None):
+					self.rubberBandactive = True
+	
+			
+	def mouseMoveEvent(self,event):
+		QtGui.QGraphicsView.mouseMoveEvent(self, event)
+
+							
+	def mouseReleaseEvent(self, event):
+		QtGui.QGraphicsView.mouseReleaseEvent(self, event)
+
+		if((event.button() == QtCore.Qt.LeftButton) and (self.rubberBandactive == True)):
+			self.endingPos = QtCore.QPoint(0,0)
+			self.endingPos = event.pos()
+			self.endScenepos = self.mapToScene(self.endingPos)
+			w = (self.endScenepos.x()-self.startScenepos.x())
+			h = (self.endScenepos.y()-self.startScenepos.y())
+			vTransform = self.viewportTransform()
+			if( w > 0  and h >0):
+				self.rubberbandlist = self.sceneWidgetpt.items(self.startScenepos.x(),self.startScenepos.y(),w,h, Qt.Qt.IntersectsItemShape)
+				if (len(self.rubberbandlist) > 0):
+					self.fitInView(self.startScenepos.x(),self.startScenepos.y(),w,h,Qt.Qt.KeepAspectRatio)
+					if((self.matrix().m11()>=1.0)and(self.matrix().m22() >=1.0)):
+						for item in ( Txtitem for Txtitem in self.sceneWidgetpt.items() if isinstance (Txtitem, Textitem)):
+							item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, False)
+			else:
+				self.rubberbandlist = self.sceneWidgetpt.items(self.endScenepos.x(),self.endScenepos.y(),abs(w),abs(h), Qt.Qt.IntersectsItemShape)
+				if (len(self.rubberbandlist) > 0):	
+					self.fitInView(self.endScenepos.x(),self.endScenepos.y(),abs(w),abs(h),Qt.Qt.KeepAspectRatio)
+					if((self.matrix().m11()>=1.0)and(self.matrix().m22() >=1.0)):
+						for item in ( Txtitem for Txtitem in self.sceneWidgetpt.items() if isinstance (Txtitem, Textitem)):
+							item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, False)		
+							
+		self.rubberBandactive = False
+		
 class Widgetvisibility(Exception):pass
 
 class LayoutWidget(QtGui.QWidget):
@@ -97,11 +163,9 @@ class LayoutWidget(QtGui.QWidget):
 			#Adding moose Object to scene to get scene bounding reaction for spacing the coordinates
 			for item in self.itemList:
 				pItem = Textitem(self,item.path)
-				
 				x = float(item.getField('x'))
 				y = float(item.getField('y'))
 				pItem.setPos(x,y)
-				print "hhe",pItem.sceneBoundingRect()
 				itemid = item.id
 				
 				#moosetext_dict[] is created to get the text's sceneBoundingRect
@@ -119,8 +183,7 @@ class LayoutWidget(QtGui.QWidget):
 				x = float(item.getField('x'))*(scale_Cord)
 				y = float(item.getField('y'))*-(scale_Cord)
 				pItem.setPos(x,y)
-				pItem.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
-				#pItem.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges, 1)
+				
 				self.connect(pItem, QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
 				self.connect(pItem, QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"), self.emitItemtoEditor)
 				itemid = item.id
@@ -139,7 +202,7 @@ class LayoutWidget(QtGui.QWidget):
 					self.colorCheck(pItem,item,textBgcolor,"background")
 				
 				self.screen.addItem(pItem)
-
+				
 			#connecting substrate,product to reaction and Enzyme
 			self.lineItem_dict = {}
 			self.object2line = {}
@@ -171,8 +234,9 @@ class LayoutWidget(QtGui.QWidget):
 						des_id = item.id
 						self.lineCord(src,des,self.screen,item,self.object2line,self.lineItem_dict)
 			
-			self.view = QtGui.QGraphicsView(self.screen,self)
+			self.view = Graphicalview(self.screen)
 			self.view.setScene(self.screen)
+			self.view.centerOn(self.screen.sceneRect().center())
 			grid.addWidget(self.view,0,0)
 			
 	def updateItemSlot(self, mooseObject):
@@ -183,6 +247,7 @@ class LayoutWidget(QtGui.QWidget):
 
 	def keyPressEvent(self,event):
 		#For Zooming
+		
 		for item in self.screen.items():
 			if isinstance (item, Textitem):
 				if((self.view.matrix().m11()<=1.0)and(self.view.matrix().m22() <=1.0)):
@@ -197,10 +262,10 @@ class LayoutWidget(QtGui.QWidget):
 	
 		elif key == QtCore.Qt.Key_Plus:
 			self.view.scale(1.1,1.1)
-
+			
 		elif key == QtCore.Qt.Key_Minus:
 			self.view.scale(1/1.1,1/1.1)		
-	
+			
 	def emitItemtoEditor(self,mooseObject):
 		self.emit(QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"), mooseObject)		
 
@@ -374,6 +439,13 @@ class LayoutWidget(QtGui.QWidget):
 		#here alpha is calculated to multipy the coordinates with, so that the each items spreads out
 		alpha = 0
 		alpha1 = 0
+		for t in range(len(itemslist)):
+			src = itemslist[t]
+			self.pitemsrc = mooseItemdict[src.id]
+			src_Scenebounding = self.pitemsrc.sceneBoundingRect()
+			srcX = src_Scenebounding.x()
+			srcY = src_Scenebounding.y()
+			#print "item bounding",srcX,srcY,src.name,srcX+srcW,srcY+srcH
 		for m in range(len(itemslist)):
 			for n in range(len(itemslist)):
 				if(m != n):
