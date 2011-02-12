@@ -10462,13 +10462,22 @@ Looking at the code for the add message, it is clear that a lot of the error
 checking should be shifted to the top level doAddMsg function.
 
 Stages
-+ Make 6-argument EpFunc, SrcFinfo, SetGet
-- Place into code, compile
-- Move error checking up into doAddMsg.
-- do MsgId generation in doAddMsg after assorted checks.
-- Alter handleAddMsg and innerAddMsg 
-- Alter Msg::msg to take the MsgId argument.
-- Alter Shell::AddMasterMsg to pass in a msgId for the new msgs.
-- Alter Shell::handleUseClock to pass in a msgId for the new msgs.
+* Make 6-argument EpFunc, SrcFinfo, SetGet
+* Place into code, compile
+x Move error checking up into doAddMsg.
+* do MsgId generation in doAddMsg after assorted checks.
+* Make sure that the assignment Mid is set up first and correctly to 1.
+* Alter handleAddMsg and innerAddMsg 
+* Alter Msg::msg to take the MsgId argument.
+* Alter Shell::AddMasterMsg to pass in a msgId for the new msgs.
+* Alter Shell::handleUseClock to pass in a msgId for the new msgs.
+* Msg id handling on other nodes will lag, so new msg creation funcs coming in 
+	to worker nodes will need to expand msgids there.
+- Do a valgrind to see where things are stuck.
 
 
+Got 6-arg funcs in, now code compiles. Checkin 2455.
+
+Trying to get it to run. Clears most tests but fails in 
+processTests:testBuiltinsProcess:testGetMsg.
+Since I have so many changes done I'll check this in.

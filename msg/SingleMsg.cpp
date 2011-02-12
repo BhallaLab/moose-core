@@ -131,8 +131,8 @@ void SingleMsgWrapper::setI2( DataId di )
 // Here is the SingleMsg code
 /////////////////////////////////////////////////////////////////////
 
-SingleMsg::SingleMsg( Eref e1, Eref e2 )
-	: Msg( e1.element(), e2.element(), id_ ),
+SingleMsg::SingleMsg( MsgId mid, Eref e1, Eref e2 )
+	: Msg( mid, e1.element(), e2.element(), id_ ),
 	i1_( e1.index() ), 
 	i2_( e2.index() )
 {
@@ -234,9 +234,9 @@ Msg* SingleMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 	if ( n <= 1 ) {
 		SingleMsg* ret;
 		if ( orig == e1() )
-			ret = new SingleMsg( Eref( newSrc(), i1_ ), Eref( newTgt(), i2_ ) );
+			ret = new SingleMsg( Msg::nextMsgId(), Eref( newSrc(), i1_ ), Eref( newTgt(), i2_ ) );
 		else if ( orig == e2() )
-			ret = new SingleMsg( Eref( newTgt(), i1_ ), Eref( newSrc(), i2_ ) );
+			ret = new SingleMsg( Msg::nextMsgId(), Eref( newTgt(), i1_ ), Eref( newSrc(), i2_ ) );
 		else
 			assert( 0 );
 		ret->e1()->addMsgAndFunc( ret->mid(), fid, b );

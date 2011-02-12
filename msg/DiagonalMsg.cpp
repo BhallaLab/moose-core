@@ -13,8 +13,8 @@
 
 Id DiagonalMsg::id_;
 
-DiagonalMsg::DiagonalMsg( Element* e1, Element* e2 )
-	: Msg( e1, e2, id_ ), stride_( 1 )
+DiagonalMsg::DiagonalMsg( MsgId mid, Element* e1, Element* e2 )
+	: Msg( mid, e1, e2, id_ ), stride_( 1 )
 {
 	;
 }
@@ -99,9 +99,9 @@ Msg* DiagonalMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 	if ( n <= 1 ) {
 		DiagonalMsg* ret;
 		if ( orig == e1() )
-			ret = new DiagonalMsg( newSrc(), newTgt() );
+			ret = new DiagonalMsg( Msg::nextMsgId(), newSrc(), newTgt() );
 		else if ( orig == e2() )
-			ret = new DiagonalMsg( newTgt(), newSrc() );
+			ret = new DiagonalMsg( Msg::nextMsgId(), newTgt(), newSrc() );
 		else
 			assert( 0 );
 		ret->setStride( stride_ );

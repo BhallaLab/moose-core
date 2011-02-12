@@ -361,12 +361,18 @@ void testShellParserStart()
 
 	// No idea what FuncId to use here. Assume 0.
 	FuncId f( 0 );
-	SingleMsg m0( er0, ts ); er0.element()->addMsgAndFunc( m0.mid(), f, 0 );
-	SingleMsg m1( er1, ts ); er1.element()->addMsgAndFunc( m1.mid(), f, 1 );
-	SingleMsg m2( er2, ts ); er2.element()->addMsgAndFunc( m2.mid(), f, 2 );
-	SingleMsg m3( er3, ts ); er3.element()->addMsgAndFunc( m3.mid(), f, 3 );
-	SingleMsg m4( er4, ts ); er4.element()->addMsgAndFunc( m4.mid(), f, 4 );
-	SingleMsg m5( er5, ts ); er5.element()->addMsgAndFunc( m5.mid(), f, 5 );
+	SingleMsg m0( Msg::nextMsgId(), er0, ts ); 
+	er0.element()->addMsgAndFunc( m0.mid(), f, 0 );
+	SingleMsg m1( Msg::nextMsgId(), er1, ts ); 
+	er1.element()->addMsgAndFunc( m1.mid(), f, 1 );
+	SingleMsg m2( Msg::nextMsgId(), er2, ts ); 
+	er2.element()->addMsgAndFunc( m2.mid(), f, 2 );
+	SingleMsg m3( Msg::nextMsgId(), er3, ts ); 
+	er3.element()->addMsgAndFunc( m3.mid(), f, 3 );
+	SingleMsg m4( Msg::nextMsgId(), er4, ts ); 
+	er4.element()->addMsgAndFunc( m4.mid(), f, 4 );
+	SingleMsg m5( Msg::nextMsgId(), er5, ts ); 
+	er5.element()->addMsgAndFunc( m5.mid(), f, 5 );
 
 	if ( shell->myNode() != 0 )
 		return;

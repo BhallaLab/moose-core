@@ -41,6 +41,7 @@ Id Shell::doCopy( Id orig, Id newParent, string newName, unsigned int n, bool co
 	return newElm;
 }
 
+/// Runs in parallel on all nodes.
 Element* innerCopyElements( Id orig, Id newParent, Id newElm, 
 	unsigned int n, map< Id, Id >& tree )
 {

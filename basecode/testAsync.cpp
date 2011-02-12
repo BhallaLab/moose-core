@@ -128,7 +128,7 @@ void insertIntoQ( )
 	Eref e1 = i1.eref();
 	Eref e2 = i2.eref();
 
-	Msg* m = new SingleMsg( e1, e2 );
+	Msg* m = new SingleMsg( Msg::nextMsgId(), e1, e2 );
 	ProcInfo p;
 
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -184,7 +184,7 @@ void testSendMsg()
 	Eref e1 = i1.eref();
 	Eref e2 = i2.eref();
 
-	Msg* m = new OneToOneMsg( e1.element(), e2.element() );
+	Msg* m = new OneToOneMsg( Msg::nextMsgId(), e1.element(), e2.element() );
 
 	
 	ProcInfo p;
@@ -229,7 +229,7 @@ void testCreateMsg()
 	Eref e2 = i2.eref();
 	ProcInfo p;
 
-	OneToOneMsg *m = new OneToOneMsg( e1.element(), e2.element() );
+	OneToOneMsg *m = new OneToOneMsg( Msg::nextMsgId(), e1.element(), e2.element() );
 	assert( m );
 	const Finfo* f1 = ac->findFinfo( "output" );
 	assert( f1 );
@@ -814,7 +814,7 @@ void testSendSpike()
 	Eref syne( syn, di );
 	reinterpret_cast< Synapse* >(syne.data())->setWeight( WEIGHT );
 
-	SingleMsg *m = new SingleMsg( e2, syne );
+	SingleMsg *m = new SingleMsg( Msg::nextMsgId(), e2, syne );
 	const Finfo* f1 = ic->findFinfo( "spike" );
 	const Finfo* f2 = Synapse::initCinfo()->findFinfo( "addSpike" );
 	bool ret = f1->addMsg( f2, m->mid(), e2.element() );
@@ -1089,7 +1089,7 @@ void testSparseMsg()
 	bool ret = SparseMsg::add( e2.element(), "spike", syn, "addSpike", 
 		connectionProbability );
 	*/
-	SparseMsg* sm = new SparseMsg( e2.element(), syn );
+	SparseMsg* sm = new SparseMsg( Msg::nextMsgId(), e2.element(), syn );
 	assert( sm );
 	const Finfo* f1 = ic->findFinfo( "spike" );
 	const Finfo* f2 = Synapse::initCinfo()->findFinfo( "addSpike" );
@@ -1354,7 +1354,7 @@ void testSharedMsg()
 	
 	const Finfo* shareFinfo = Test::initCinfo()->findFinfo( "shared" );
 	assert( shareFinfo != 0 );
-	Msg* m = new OneToOneMsg( t1(), t2() );
+	Msg* m = new OneToOneMsg( Msg::nextMsgId(), t1(), t2() );
 	assert( m != 0 );
 	bool ret = shareFinfo->addMsg( shareFinfo, m->mid(), t1() );
 	assert( ret );
@@ -1450,7 +1450,7 @@ void testMsgField()
 	Eref e1 = i1.eref();
 	Eref e2 = i2.eref();
 
-	Msg* m = new SingleMsg( Eref( i1(), 5 ), Eref( i2(), 3 ) );
+	Msg* m = new SingleMsg( Msg::nextMsgId(), Eref( i1(), 5 ), Eref( i2(), 3 ) );
 	ProcInfo p;
 
 	Id msgElmId = m->id();

@@ -15,8 +15,8 @@
 
 Id ReduceMsg::id_;
 
-ReduceMsg::ReduceMsg( Eref e1, Element* e2, const ReduceFinfoBase* rfb  )
-	: Msg( e1.element(), e2, id_ ),
+ReduceMsg::ReduceMsg( MsgId mid, Eref e1, Element* e2, const ReduceFinfoBase* rfb  )
+	: Msg( mid, e1.element(), e2, id_ ),
 		i1_( e1.index() ),
 		rfb_( rfb )
 {

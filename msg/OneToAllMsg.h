@@ -19,7 +19,7 @@ class OneToAllMsg: public Msg
 {
 	friend void initMsgManagers();
 	public:
-		OneToAllMsg( Eref e1, Element* e2 );
+		OneToAllMsg( MsgId mid, Eref e1, Element* e2 );
 		~OneToAllMsg();
 
 		void exec( const char* arg, const ProcInfo* p ) const;

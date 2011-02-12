@@ -49,8 +49,8 @@ static const Cinfo* oneToOneMsgCinfo = OneToOneMsgWrapper::initCinfo();
 
 //////////////////////////////////////////////////////////////////////
 
-OneToOneMsg::OneToOneMsg( Element* e1, Element* e2 )
-	: Msg( e1, e2, id_ )
+OneToOneMsg::OneToOneMsg( MsgId mid, Element* e1, Element* e2 )
+	: Msg( mid, e1, e2, id_ )
 {
 	;
 }
@@ -114,9 +114,9 @@ Msg* OneToOneMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 	// This works both for 1-copy and for n-copies
 	OneToOneMsg* ret;
 	if ( orig == e1() )
-		ret = new OneToOneMsg( newSrc(), newTgt() );
+		ret = new OneToOneMsg( Msg::nextMsgId(), newSrc(), newTgt() );
 	else if ( orig == e2() )
-		ret = new OneToOneMsg( newTgt(), newSrc() );
+		ret = new OneToOneMsg( Msg::nextMsgId(), newTgt(), newSrc() );
 	else
 		assert( 0 );
 	ret->e1()->addMsgAndFunc( ret->mid(), fid, b );

@@ -19,7 +19,8 @@ class ReduceMsg: public Msg
 {
 	friend void initMsgManagers(); // for initializing Id.
 	public:
-		ReduceMsg( Eref e1, Element* e2, const ReduceFinfoBase* rfb );
+		ReduceMsg( MsgId mid, Eref e1, Element* e2, 
+			const ReduceFinfoBase* rfb );
 		~ReduceMsg();
 
 		void exec( const char* arg, const ProcInfo* p) const;

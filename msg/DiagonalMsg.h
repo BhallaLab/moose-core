@@ -28,7 +28,7 @@ class DiagonalMsg: public Msg
 {
 	friend void initMsgManagers(); // for initializing Id.
 	public:
-		DiagonalMsg( Element* e1, Element* e2 );
+		DiagonalMsg( MsgId mid, Element* e1, Element* e2 );
 		~DiagonalMsg();
 
 		void exec( const char* arg, const ProcInfo* p ) const;

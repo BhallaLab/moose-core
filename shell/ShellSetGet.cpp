@@ -38,9 +38,9 @@ void Shell::handleSet( Id id, DataId d, FuncId fid, PrepackedBuffer arg )
 	Msg* m;
 	
 	if ( arg.isVector() ) {
-		m = new AssignVecMsg( sheller, er.element(), Msg::setMsg );
+		m = new AssignVecMsg( Msg::setMsg, sheller, er.element() );
 	} else {
-		m = new AssignmentMsg( sheller, er, Msg::setMsg );
+		m = new AssignmentMsg( Msg::setMsg, sheller, er );
 		// innerSet( er, fid, arg.data(), arg.dataSize() );
 	}
 	shelle_->addMsgAndFunc( m->mid(), fid, lowLevelSetGet()->getBindIndex() );
@@ -189,7 +189,7 @@ void Shell::handleGet( Id id, DataId index, FuncId fid,
 
 	shelle_->clearBinding( lowLevelSetGet()->getBindIndex() );
 	if ( numTgt > 1 ) {
-		Msg* m = new AssignVecMsg( sheller, tgt.element(), Msg::setMsg );
+		Msg* m = new AssignVecMsg( Msg::setMsg, sheller, tgt.element() );
 		shelle_->addMsgAndFunc( m->mid(), fid, lowLevelSetGet()->getBindIndex() );
 		if ( myNode_ == 0 ) {
 			//Need to find numTgt
@@ -199,7 +199,7 @@ void Shell::handleGet( Id id, DataId index, FuncId fid,
 			lowLevelSetGet()->send( sheller, &p_, pb );
 		}
 	} else {
-		Msg* m = new AssignmentMsg( sheller, tgt, Msg::setMsg );
+		Msg* m = new AssignmentMsg( Msg::setMsg, sheller, tgt );
 		shelle_->addMsgAndFunc( m->mid(), fid, lowLevelSetGet()->getBindIndex());
 		if ( myNode_ == 0 ) {
 			PrepackedBuffer pb( 

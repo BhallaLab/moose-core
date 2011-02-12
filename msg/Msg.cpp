@@ -19,19 +19,15 @@ vector< unsigned int > Msg::lookupDataId_;
 const MsgId Msg::badMsg = 0;
 const MsgId Msg::setMsg = 1;
 
-Msg::Msg( Element* e1, Element* e2, Id managerId )
-	: e1_( e1 ), e2_( e2 )
+Msg::Msg( MsgId mid, Element* e1, Element* e2, Id managerId )
+	: mid_( mid), e1_( e1 ), e2_( e2 )
 {
-	if ( garbageMsg_.size() > 0 ) {
-		mid_ = garbageMsg_.back();
-		garbageMsg_.pop_back();
-		msg_[mid_] = this;
-		lookupDataId_[ mid_ ] = 0;
-	} else {
-		mid_ = msg_.size();
-		msg_.push_back( this );
-		lookupDataId_.push_back( 0 );
+	assert( mid_ < msg_.size() );
+	if ( mid_ >= msg_.size() ) {
+		msg_.resize( mid + 1, 0 );
+		lookupDataId_.resize( mid + 1, 0 );
 	}
+	msg_[mid_] = this;
 	e1->addMsg( mid_ );
 	e2->addMsg( mid_ );
 	MsgManager::addMsg( mid_, managerId );
@@ -40,7 +36,7 @@ Msg::Msg( Element* e1, Element* e2, Id managerId )
 /**
  * This sets up the set/get msg. It should be called first of all,
  * at init time.
- */
+ * Deprecated.
 Msg::Msg( Element* e1, Element* e2, MsgId mid, Id managerId )
 	: e1_( e1 ), e2_( e2 ), mid_( mid )
 {
@@ -54,6 +50,7 @@ Msg::Msg( Element* e1, Element* e2, MsgId mid, Id managerId )
 	e2->addMsg( mid );
 	MsgManager::addMsg( mid_, managerId );
 }
+ */
 
 Msg::~Msg()
 {
@@ -63,6 +60,24 @@ Msg::~Msg()
 
 	if ( mid_ > 1 )
 		garbageMsg_.push_back( mid_ );
+}
+
+/**
+ * Returns a MsgId for assigning to a new Msg.
+ */
+MsgId Msg::nextMsgId()
+{
+	MsgId ret;
+	if ( garbageMsg_.size() > 0 ) {
+		ret = garbageMsg_.back();
+		garbageMsg_.pop_back();
+		lookupDataId_[ ret ] = 0;
+	} else {
+		ret = msg_.size();
+		msg_.push_back( 0 );
+		lookupDataId_.push_back( 0 );
+	}
+	return ret;
 }
 
 void Msg::deleteMsg( MsgId mid )
@@ -80,10 +95,9 @@ void Msg::deleteMsg( MsgId mid )
 void Msg::initNull()
 {
 	assert( msg_.size() == 0 );
-	msg_.push_back( 0 ); // for badMsg
-	msg_.push_back( 0 ); // for setMsg
-	lookupDataId_.push_back( 0 ); // for badmsg
-	lookupDataId_.push_back( 0 ); // for setMsg, which is a OneToOne msg.
+	assert( lookupDataId_.size() == 0 );
+	nextMsgId(); // Set aside entry 0 for badMsg;
+	nextMsgId(); // Set aside entry 1 for setMsg;
 }
 
 void Msg::process( const ProcInfo* p, FuncId fid ) const 

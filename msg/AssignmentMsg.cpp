@@ -17,8 +17,8 @@
 
 Id AssignmentMsg::id_;
 
-AssignmentMsg::AssignmentMsg( Eref e1, Eref e2, MsgId mid )
-	: Msg( e1.element(), e2.element(), mid, id_ ),
+AssignmentMsg::AssignmentMsg( MsgId mid, Eref e1, Eref e2 )
+	: Msg( mid, e1.element(), e2.element(), id_ ),
 	i1_( e1.index() ), 
 	i2_( e2.index() )
 {

@@ -255,17 +255,17 @@ void setupTicks()
 	const SrcFinfo* sproc0 = dynamic_cast< const SrcFinfo* >( proc0 );
 	assert( sproc0 );
 	unsigned int b0 = sproc0->getBindIndex();
-	SingleMsg *m0 = new SingleMsg( er0, ts ); 
+	SingleMsg *m0 = new SingleMsg( Msg::nextMsgId(), er0, ts ); 
 	er0.element()->addMsgAndFunc( m0->mid(), f, 0 + b0 );
-	SingleMsg *m1 = new SingleMsg( er1, ts ); 
+	SingleMsg *m1 = new SingleMsg( Msg::nextMsgId(), er1, ts ); 
 	er1.element()->addMsgAndFunc( m1->mid(), f, 2 + b0 );
-	SingleMsg *m2 = new SingleMsg( er2, ts );
+	SingleMsg *m2 = new SingleMsg( Msg::nextMsgId(), er2, ts );
 	er2.element()->addMsgAndFunc( m2->mid(), f, 4 + b0 );
-	SingleMsg *m3 = new SingleMsg( er3, ts ); 
+	SingleMsg *m3 = new SingleMsg( Msg::nextMsgId(), er3, ts ); 
 	er3.element()->addMsgAndFunc( m3->mid(), f, 6 + b0 );
-	SingleMsg *m4 = new SingleMsg( er4, ts ); 
+	SingleMsg *m4 = new SingleMsg( Msg::nextMsgId(), er4, ts ); 
 	er4.element()->addMsgAndFunc( m4->mid(), f, 8 + b0 );
-	SingleMsg *m5 = new SingleMsg( er5, ts ); 
+	SingleMsg *m5 = new SingleMsg( Msg::nextMsgId(), er5, ts ); 
 	er5.element()->addMsgAndFunc( m5->mid(), f, 14 + b0 );
 
 	cdata->rebuild();
@@ -342,17 +342,17 @@ void testThreads()
 	unsigned int b2 = sproc2->getBindIndex();
 	*/
 	FuncId f( processFinfo.getFid() );
-	SingleMsg* m0 = new SingleMsg( er0, ts );
+	SingleMsg* m0 = new SingleMsg( Msg::nextMsgId(), er0, ts );
 	er0.element()->addMsgAndFunc( m0->mid(), f, 0 + b0 );
-	SingleMsg* m1 = new SingleMsg( er1, ts );
+	SingleMsg* m1 = new SingleMsg( Msg::nextMsgId(), er1, ts );
 	er1.element()->addMsgAndFunc( m1->mid(), f, 2 + b0 );
-	SingleMsg* m2 = new SingleMsg( er2, ts );
+	SingleMsg* m2 = new SingleMsg( Msg::nextMsgId(), er2, ts );
 	er2.element()->addMsgAndFunc( m2->mid(), f, 4 + b0 );
-	SingleMsg* m3 = new SingleMsg( er3, ts );
+	SingleMsg* m3 = new SingleMsg( Msg::nextMsgId(), er3, ts );
 	er3.element()->addMsgAndFunc( m3->mid(), f, 6 + b0 );
-	SingleMsg* m4 = new SingleMsg( er4, ts );
+	SingleMsg* m4 = new SingleMsg( Msg::nextMsgId(), er4, ts );
 	er4.element()->addMsgAndFunc( m4->mid(), f, 8 + b0 );
-	SingleMsg* m5 = new SingleMsg( er5, ts );
+	SingleMsg* m5 = new SingleMsg( Msg::nextMsgId(), er5, ts );
 	er5.element()->addMsgAndFunc( m5->mid(), f, 10 + b0 );
 	s->start( 10 );
 
@@ -419,7 +419,7 @@ void testThreadIntFireNetwork()
 		connectionProbability, numThreads ); // Include group id as an arg. 
 	assert( ret );
 	*/
-	SparseMsg* sm = new SparseMsg( e2.element(), syn );
+	SparseMsg* sm = new SparseMsg( Msg::nextMsgId(), e2.element(), syn );
 	assert( sm );
 	const Finfo* f1 = ic->findFinfo( "spike" );
 	const Finfo* f2 = Synapse::initCinfo()->findFinfo( "addSpike" );
@@ -489,7 +489,7 @@ void testThreadIntFireNetwork()
 	Element* ticke = Id( 2 )();
 	Eref er0( ticke, DataId( 0, 0 ) );
 
-	SingleMsg* m = new SingleMsg( er0, e2 );
+	SingleMsg* m = new SingleMsg( Msg::nextMsgId(), er0, e2 );
 	const Finfo* p1 = Tick::initCinfo()->findFinfo( "process0" );
 	const Finfo* p2 = ic->findFinfo( "process" );
 	ret = p1->addMsg( p2, m->mid(), ticke );

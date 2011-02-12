@@ -342,7 +342,7 @@ string Neutral::path( const Eref& e )
 	stringstream ss;
 
 	pathVec.push_back( curr );
-	while ( !( curr == FullId( Id(), 0 ) ) ) {
+	while ( curr.id != Id() ) {
 		MsgId mid = curr.eref().element()->findCaller( pafid );
 		assert( mid != Msg::badMsg );
 		curr = Msg::getMsg( mid )->findOtherEnd( curr );

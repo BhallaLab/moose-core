@@ -444,7 +444,7 @@ MsgId Shell::doAddMsg( const string& msgType,
 		return Msg::badMsg;
 	}
 	initAck();
-	MsgId mid( 0 ); //dummy 
+	MsgId mid = Msg::nextMsgId();
 	requestAddMsg.send( Eref( shelle_, 0 ), &p_, 
 		msgType, mid, src, srcField, dest, destField );
 	//	Qinfo::clearQ( &p_ );
@@ -473,7 +473,7 @@ void Shell::connectMasterMsg()
 	}
 
 	Msg* m = 0;
-		m = new OneToOneMsg( shelle, shelle );
+		m = new OneToOneMsg( Msg::nextMsgId(), shelle, shelle );
 	if ( m ) {
 		if ( !f1->addMsg( f2, m->mid(), shelle ) ) {
 			cout << "Error: failed in Shell::connectMasterMsg()\n";
@@ -487,8 +487,8 @@ void Shell::connectMasterMsg()
 		m->mid() << "\n";
 
 	Id clockId( 1 );
-	MsgId mid( 0 );
-	bool ret = innerAddMsg( "Single", mid, FullId( shellId, 0 ), "clockControl", 
+	bool ret = innerAddMsg( "Single", Msg::nextMsgId(), 
+		FullId( shellId, 0 ), "clockControl", 
 		FullId( clockId, 0 ), "clockControl" );
 	assert( ret );
 	// innerAddMsg( string msgType, FullId src, string srcField, FullId dest, string destField )
@@ -738,7 +738,11 @@ void Shell::handleCreate( const Eref& e, const Qinfo* q,
 	// cout << myNode_ << ": Shell::handleCreate ack sent" << endl;
 }
 
-/// Utility function 
+/**
+ * Utility function. Attaches child element to parent element.
+ * Must only be called from functions executing in parallel on all nodes,
+ * as it does a local message addition
+ */
 bool Shell::adopt( Id parent, Id child ) {
 	static const Finfo* pf = Neutral::initCinfo()->findFinfo( "parentMsg" );
 	// static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
@@ -749,7 +753,7 @@ bool Shell::adopt( Id parent, Id child ) {
 	assert( !( child == Id() ) );
 	assert( !( parent() == 0 ) );
 
-	Msg* m = new OneToAllMsg( parent.eref(), child() );
+	Msg* m = new OneToAllMsg( Msg::nextMsgId(), parent.eref(), child() );
 	assert( m );
 	if ( !f1->addMsg( pf, m->mid(), parent() ) ) {
 		cout << "move: Error: unable to add parent->child msg from " <<
@@ -761,7 +765,7 @@ bool Shell::adopt( Id parent, Id child ) {
 }
 
 /**
- * This function actually creates the object.
+ * This function actually creates the object. Runs on all nodes.
  */
 void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 	const vector< unsigned int >& dimensions )
@@ -840,20 +844,20 @@ bool Shell::innerAddMsg( string msgType, MsgId mid,
 
 	Msg *m = 0;
 	if ( msgType == "diagonal" || msgType == "Diagonal" ) {
-		m = new DiagonalMsg( src.id(), dest.id() );
+		m = new DiagonalMsg( mid, src.id(), dest.id() );
 	} else if ( msgType == "sparse" || msgType == "Sparse" ) {
-		m = new SparseMsg( src.id(), dest.id() );
+		m = new SparseMsg( mid, src.id(), dest.id() );
 	} else if ( msgType == "Single" || msgType == "single" ) {
-		m = new SingleMsg( src.eref(), dest.eref() );
+		m = new SingleMsg( mid, src.eref(), dest.eref() );
 	} else if ( msgType == "OneToAll" || msgType == "oneToAll" ) {
-		m = new OneToAllMsg( src.eref(), dest.id() );
+		m = new OneToAllMsg( mid, src.eref(), dest.id() );
 	} else if ( msgType == "OneToOne" || msgType == "oneToOne" ) {
-		m = new OneToOneMsg( src.id(), dest.id() );
+		m = new OneToOneMsg( mid, src.id(), dest.id() );
 	} else if ( msgType == "Reduce" || msgType == "reduce" ) {
 		const ReduceFinfoBase* rfb = 
 			dynamic_cast< const ReduceFinfoBase* >( f1 );
 		assert( rfb );
-		m = new ReduceMsg( src.eref(), dest.eref().element(), rfb );
+		m = new ReduceMsg( mid, src.eref(), dest.eref().element(), rfb );
 	} else {
 		cout << myNode_ << 
 			": Error: Shell::handleAddMsg: msgType not known: "
@@ -894,7 +898,8 @@ void Shell::handleMove( const Eref& e, const Qinfo* q,
 	MsgId mid = orig()->findCaller( pafid );
 	Msg::deleteMsg( mid );
 
-	Msg* m = new OneToAllMsg( newParent.eref(), orig() );
+	// Reuse the old msgid.
+	Msg* m = new OneToAllMsg( mid, newParent.eref(), orig() );
 	assert( m );
 	if ( !f1->addMsg( pf, m->mid(), newParent() ) ) {
 		cout << "move: Error: unable to add parent->child msg from " <<

@@ -20,7 +20,7 @@ class AssignmentMsg: public Msg
 {
 	friend void initMsgManagers(); // for initializing Id.
 	public:
-		AssignmentMsg( Eref e1, Eref e2, MsgId mid );
+		AssignmentMsg( MsgId mid, Eref e1, Eref e2 );
 		~AssignmentMsg();
 
 		void exec( const char* arg, const ProcInfo* p) const;

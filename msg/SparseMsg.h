@@ -46,7 +46,7 @@ class SparseMsg: public Msg
 {
 	friend void initMsgManagers(); // for initializing Id.
 	public:
-		SparseMsg( Element* e1, Element* e2 );
+		SparseMsg( MsgId mid, Element* e1, Element* e2 );
 		~SparseMsg();
 
 		void exec( const char* arg, const ProcInfo* p ) const;

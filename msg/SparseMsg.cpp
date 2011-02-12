@@ -238,8 +238,8 @@ void SparseMsgWrapper::transpose()
 //////////////////////////////////////////////////////////////////
 
 
-SparseMsg::SparseMsg( Element* e1, Element* e2 )
-	: Msg( e1, e2, id_ ),
+SparseMsg::SparseMsg( MsgId mid, Element* e1, Element* e2 )
+	: Msg( mid, e1, e2, id_ ),
 	matrix_( e1->dataHandler()->parentDataHandler()->totalEntries(), 
 		e2->dataHandler()->parentDataHandler()->totalEntries() )
 {
@@ -430,9 +430,9 @@ Msg* SparseMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 	if ( n <= 1 ) {
 		SparseMsg* ret;
 		if ( orig == e1() )
-			ret = new SparseMsg( newSrc(), newTgt() );
+			ret = new SparseMsg( Msg::nextMsgId(), newSrc(), newTgt() );
 		else if ( orig == e2() )
-			ret = new SparseMsg( newTgt(), newSrc() );
+			ret = new SparseMsg( Msg::nextMsgId(), newTgt(), newSrc() );
 		else
 			assert( 0 );
 		ret->setMatrix( matrix_ );

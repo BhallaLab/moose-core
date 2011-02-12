@@ -14,9 +14,9 @@
 Id OneToAllMsg::id_;
 
 
-OneToAllMsg::OneToAllMsg( Eref e1, Element* e2 )
+OneToAllMsg::OneToAllMsg( MsgId mid, Eref e1, Element* e2 )
 	: 
-		Msg( e1.element(), e2, id_ ),
+		Msg( mid, e1.element(), e2, id_ ),
 		i1_( e1.index() )
 {
 	;
@@ -86,9 +86,9 @@ Msg* OneToAllMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 	if ( n <= 1 ) {
 		OneToAllMsg* ret;
 		if ( orig == e1() )
-			ret = new OneToAllMsg( Eref( newSrc(), i1_ ), newTgt() );
+			ret = new OneToAllMsg( Msg::nextMsgId(), Eref( newSrc(), i1_ ), newTgt() );
 		else if ( orig == e2() )
-			ret = new OneToAllMsg( Eref( newTgt(), i1_ ), newSrc() );
+			ret = new OneToAllMsg( Msg::nextMsgId(), Eref( newTgt(), i1_ ), newSrc() );
 		else
 			assert( 0 );
 		ret->e1()->addMsgAndFunc( ret->mid(), fid, b );

@@ -270,7 +270,7 @@ void Shell::handleSync( const Eref& e, const Qinfo* q, Id elm, FuncId fid )
 	const ReduceFinfoBase* rfb = reduceArraySizeFinfo();
 	shelle_->clearBinding( rfb->getBindIndex() );
 	if ( rfb )  {
-		Msg * m = new ReduceMsg( e, elm(), rfb );
+		Msg * m = new ReduceMsg( Msg::setMsg, e, elm(), rfb );
 		shelle_->addMsgAndFunc( m->mid(), fid, rfb->getBindIndex() );
 		if ( myNode_ == 0 )
 			rfb->send( Eref( shelle_, 0 ), &p_, 0 );

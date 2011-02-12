@@ -18,10 +18,16 @@
 class Msg
 {
 	public:
-		Msg( Element* e1, Element* e2, Id managerId );
+		/// Constructor
+		Msg( MsgId mid, Element* e1, Element* e2, Id managerId );
 
-		Msg( Element* e1, Element* e2, MsgId mid, Id managerId );
+		/// Destructor
 		virtual ~Msg();
+
+		/**
+ 		 * Returns a MsgId for assigning to a new Msg.
+ 		 */
+		static MsgId nextMsgId();
 
 		/**
 		 * Deletes a message identified by its mid.
@@ -154,9 +160,10 @@ class Msg
 		static const MsgId setMsg;
 
 	protected:
-		Element* e1_;
-		Element* e2_;
-		MsgId mid_; // Index of this msg on the msg_ vector.
+		MsgId mid_; /// Index of this Msg on the msg_ vector.
+
+		Element* e1_; /// Element 1 attached to Msg.
+		Element* e2_; /// Element 2 attached to Msg.
 
 		/// Manages all Msgs in the system.
 		static vector< Msg* > msg_;

@@ -20,7 +20,7 @@ class AssignVecMsg: public Msg
 {
 	friend void initMsgManagers(); // for initializing Id.
 	public:
-		AssignVecMsg( Eref e1, Element* e2, MsgId mid );
+		AssignVecMsg( MsgId mid, Eref e1, Element* e2 );
 		~AssignVecMsg();
 
 		void exec( const char* arg, const ProcInfo* p) const;

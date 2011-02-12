@@ -16,8 +16,8 @@ extern void sendAckBack( const ProcInfo* p, MsgId mid, DataId i2 );
 
 Id AssignVecMsg::id_;
 
-AssignVecMsg::AssignVecMsg( Eref e1, Element* e2, MsgId mid )
-	: Msg( e1.element(), e2, mid, id_ ),
+AssignVecMsg::AssignVecMsg( MsgId mid, Eref e1, Element* e2 )
+	: Msg( mid, e1.element(), e2, id_ ),
 	i1_( e1.index() )
 {
 	;

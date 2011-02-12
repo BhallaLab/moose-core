@@ -15,7 +15,7 @@ class SingleMsg: public Msg
 {
 	friend void initMsgManagers(); // for initializing Id.
 	public:
-		SingleMsg( Eref e1, Eref e2 );
+		SingleMsg( MsgId mid, Eref e1, Eref e2 );
 		~SingleMsg();
 
 		void exec( const char* arg, const ProcInfo* p) const;
