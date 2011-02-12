@@ -148,17 +148,17 @@ void SingleMsg::exec( const char* arg, const ProcInfo *p ) const
 {
 	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
 
-	cout <<  p->nodeIndexInGroup << "." << p->threadIndexInGroup << ": " << e2_->getName() << ", " << i2_;
+	// cout <<  p->nodeIndexInGroup << "." << p->threadIndexInGroup << ": " << e2_->getName() << ", " << i2_;
 	/// This partitions the messages between threads.
 	if ( q->isForward() && e2_->dataHandler()->isDataHere( i2_ ) &&
 		p->execThread( e2_->id(), i2_.data() ) )
 	{
 			const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
-			cout << ": called\n";
+			//cout << ": called\n";
 			f->op( Eref( e2_, i2_ ), arg );
 			return;
 	} 
-		cout << ": NOT called\n";
+		// cout << ": NOT called\n";
 	
 	if ( !q->isForward() && e1_->dataHandler()->isDataHere( i1_ ) &&
 		p->execThread( e1_->id(), i1_.data() ) )

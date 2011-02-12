@@ -10480,4 +10480,19 @@ Got 6-arg funcs in, now code compiles. Checkin 2455.
 
 Trying to get it to run. Clears most tests but fails in 
 processTests:testBuiltinsProcess:testGetMsg.
-Since I have so many changes done I'll check this in.
+Since I have so many changes done I'll check this in. Checkin 2457.
+
+Gdb is having trouble here. 
+With some printf debugging I get:
+0.0: reinit[0] binding = (0,26)
+0.0: reinit[0] binding = (0,19)
+0.1: reinit[0] binding = (0,26)
+
+so we have a problem with the mids again.
+Turned out that the Shell.cpp:handleUseClock had not been fixed to use
+Msg::nextMsgId, and was just passing in 0.
+Now it is OK and clears unit tests:
+0.0: reinit[0] binding = (122,19)
+0.1: reinit[0] binding = (131,26)
+0.1: reinit[0] binding = (122,19)
+

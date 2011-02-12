@@ -76,6 +76,7 @@ double TickMgr::getDt() const
 	return dt_;
 }
 
+/*
 void TickMgr::reinit( const Eref& e, ProcInfo* p )
 {
 	nextTime_ = dt_;
@@ -85,6 +86,7 @@ void TickMgr::reinit( const Eref& e, ProcInfo* p )
 		(*i)->reinit( e, p );
 	}
 }
+*/
 
 bool TickMgr::isInited() const 
 {

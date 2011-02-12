@@ -245,7 +245,6 @@ void Tick::setElement( const Element* e )
 
 /**
  * This sends out the call to reinit objects.
- */
 void Tick::reinit( const Eref& e, ProcInfo* info ) const
 {
 	info->dt = dt_;
@@ -261,6 +260,7 @@ void Tick::reinit( const Eref& e, ProcInfo* info ) const
 		Msg::getMsg( i->mid )->process( info, i->fid ); 
 	}
 }
+ */
 
 ////////////////////////////////////////////////////////////////////////
 // New version here
@@ -300,6 +300,9 @@ void Tick::reinit( ProcInfo* info ) const
 	const vector< MsgFuncBinding >* m = ticke_->getMsgAndFunc( b );
 	for ( vector< MsgFuncBinding >::const_iterator i = m->begin();
 		i != m->end(); ++i ) {
+		cout << info->nodeIndexInGroup << "." << info->threadIndexInGroup <<
+			": reinit[" << index_ << "] binding = (" 
+				<< i->mid << "," << i->fid << ")\n";
 		// Element->dataHandler keeps track of which entry needs to be
 		// updated by which thread.
 		Msg::getMsg( i->mid )->process( info, i->fid ); 

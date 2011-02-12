@@ -910,8 +910,6 @@ void Shell::handleMove( const Eref& e, const Qinfo* q,
 	ack()->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
 }
 
-/** This will need to change to pass in a MsgId
-*/
 void Shell::handleUseClock( const Eref& e, const Qinfo* q,
 	string path, string field, unsigned int tick)
 {
@@ -926,10 +924,10 @@ void Shell::handleUseClock( const Eref& e, const Qinfo* q,
 		stringstream ss;
 		FullId tickId( Id( 2 ), DataId( 0, tick ) );
 		ss << tickField << tick;
-		MsgId mid( 0 );
 		// bool ret = 
-			innerAddMsg( "OneToAll", mid, tickId, ss.str(), FullId( *i, 0 ), 
-			field);
+		innerAddMsg( "OneToAll", Msg::nextMsgId(), 
+			tickId, ss.str(), 
+			FullId( *i, 0 ), field);
 		// We just skip messages that don't work.
 		/*
 		if ( !ret ) {

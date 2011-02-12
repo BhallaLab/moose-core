@@ -61,8 +61,8 @@ class Tick
 		 * Reinit is used to set the simulation time back to zero for
 		 * itself, and to trigger reinit in all targets, and to go on
 		 * to the next tick
-		 */
 		void reinit( const Eref& e, ProcInfo* p ) const;
+		 */
 
 		/**
 		 * Different version of reinit function. Designed for being called
