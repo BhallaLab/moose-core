@@ -10,20 +10,20 @@ set xlabel 'Time (s)'
 set ylabel 'Gk (S)'
 
 p \
- 'output/mgblock.Gk.-70.genesis.plot' every ::400::800 u (($0)+400)*dt:1 with line title 'Genesis: -70mV', \
- 'output/mgblock.Gk.-50.genesis.plot' every ::400::800 u (($0)+400)*dt:1 with line title 'Genesis: -50mV', \
- 'output/mgblock.Gk.-30.genesis.plot' every ::400::800 u (($0)+400)*dt:1 with line title 'Genesis: -30mV', \
- 'output/mgblock.Gk.-10.genesis.plot' every ::400::800 u (($0)+400)*dt:1 with line title 'Genesis: -10mV', \
- 'output/mgblock.Gk.10.genesis.plot' every ::400::800 u (($0)+400)*dt:1 with line title 'Genesis: 10mV', \
- 'output/mgblock.Gk.30.genesis.plot' every ::400::800 u (($0)+400)*dt:1 with line title 'Genesis: 30mV', \
- 'output/mgblock.Gk.50.genesis.plot' every ::400::800 u (($0)+400)*dt:1 with line title 'Genesis: 50mV', \
- 'output/mgblock.Gk.-70.moose.plot' every 5::401::800 u (($0)*5+400)*dt:1 with points title 'Moose: -70mV', \
- 'output/mgblock.Gk.-50.moose.plot' every 5::401::800 u (($0)*5+400)*dt:1 with points title 'Moose: -50mV', \
- 'output/mgblock.Gk.-30.moose.plot' every 5::401::800 u (($0)*5+400)*dt:1 with points title 'Moose: -30mV', \
- 'output/mgblock.Gk.-10.moose.plot' every 5::401::800 u (($0)*5+400)*dt:1 with points title 'Moose: -10mV', \
- 'output/mgblock.Gk.10.moose.plot' every 5::401::800 u (($0)*5+400)*dt:1 with points title 'Moose: 10mV', \
- 'output/mgblock.Gk.30.moose.plot' every 5::401::800 u (($0)*5+400)*dt:1 with points title 'Moose: 30mV', \
- 'output/mgblock.Gk.50.moose.plot' every 5::401::800 u (($0)*5+400)*dt:1 with points title 'Moose: 50mV'
+ 'output/mgblock.Gk.1.genesis.plot' every ::::10000 u ($0)*dt:1 with line title 'Genesis: -70mV', \
+ 'output/mgblock.Gk.2.genesis.plot' every ::::10000 u ($0)*dt:1 with line title 'Genesis: -50mV', \
+ 'output/mgblock.Gk.3.genesis.plot' every ::::10000 u ($0)*dt:1 with line title 'Genesis: -30mV', \
+ 'output/mgblock.Gk.4.genesis.plot' every ::::10000 u ($0)*dt:1 with line title 'Genesis: -10mV', \
+ 'output/mgblock.Gk.5.genesis.plot' every ::::10000 u ($0)*dt:1 with line title 'Genesis: 10mV', \
+ 'output/mgblock.Gk.6.genesis.plot' every ::::10000 u ($0)*dt:1 with line title 'Genesis: 30mV', \
+ 'output/mgblock.Gk.7.genesis.plot' every ::::10000 u ($0)*dt:1 with line title 'Genesis: 50mV', \
+ 'output/mgblock.Gk.1.moose.plot' every 100::::10000 u (($0)*100)*dt:1 with points title 'Moose: -70mV', \
+ 'output/mgblock.Gk.2.moose.plot' every 100::::10000 u (($0)*100)*dt:1 with points title 'Moose: -50mV', \
+ 'output/mgblock.Gk.3.moose.plot' every 100::::10000 u (($0)*100)*dt:1 with points title 'Moose: -30mV', \
+ 'output/mgblock.Gk.4.moose.plot' every 100::::10000 u (($0)*100)*dt:1 with points title 'Moose: -10mV', \
+ 'output/mgblock.Gk.5.moose.plot' every 100::::10000 u (($0)*100)*dt:1 with points title 'Moose: 10mV', \
+ 'output/mgblock.Gk.6.moose.plot' every 100::::10000 u (($0)*100)*dt:1 with points title 'Moose: 30mV', \
+ 'output/mgblock.Gk.7.moose.plot' every 100::::10000 u (($0)*100)*dt:1 with points title 'Moose: 50mV'
 
 pause mouse key "Any key to continue.\n"
 
@@ -41,10 +41,10 @@ set xlabel 'Time (s)'
 set ylabel 'Gk (S)'
 
 p \
- 'output/syn.Gk.-70.genesis.plot' every ::400::800 u (($0)+400)*dt:1 with line title 'Genesis: -70mV', \
- 'output/syn.Gk.50.genesis.plot' every ::400::800 u (($0)+400)*dt:1 with line title 'Genesis: 50mV', \
- 'output/syn.Gk.-70.moose.plot' every 5::401::800 u (($0)*5+400)*dt:1 with points title 'Moose: -70mV', \
- 'output/syn.Gk.50.moose.plot' every 5::401::800 u (($0)*5+400)*dt:1 with points title 'Moose: 50mV'
+ 'output/syn.Gk.1.genesis.plot' every ::::10000 u ($0)*dt:1 with line title 'Genesis: -70mV', \
+ 'output/syn.Gk.7.genesis.plot' every ::::10000 u ($0)*dt:1 with line title 'Genesis: 50mV', \
+ 'output/syn.Gk.1.moose.plot' every 100::::10000 u (($0)*100)*dt:1 with points title 'Moose: -70mV', \
+ 'output/syn.Gk.7.moose.plot' every 100::::10000 u (($0)*100)*dt:1 with points title 'Moose: 50mV'
 
 pause mouse key "Any key to continue.\n"
 
@@ -62,20 +62,20 @@ set xlabel 'Time (s)'
 set ylabel 'Vm (mV)'
 
 p \
- 'output/c2.Vm.-70.genesis.plot' u ($0)*dt:1 with line title 'Genesis: -70mV', \
- 'output/c2.Vm.-50.genesis.plot' u ($0)*dt:1 with line title 'Genesis: -50mV', \
- 'output/c2.Vm.-30.genesis.plot' u ($0)*dt:1 with line title 'Genesis: -30mV', \
- 'output/c2.Vm.-10.genesis.plot' u ($0)*dt:1 with line title 'Genesis: -10mV', \
- 'output/c2.Vm.10.genesis.plot' u ($0)*dt:1 with line title 'Genesis: 10mV', \
- 'output/c2.Vm.30.genesis.plot' u ($0)*dt:1 with line title 'Genesis: 30mV', \
- 'output/c2.Vm.50.genesis.plot' u ($0)*dt:1 with line title 'Genesis: 50mV', \
- 'output/c2.Vm.-70.moose.plot' every 50::1 u ($0)*50*dt:1 with points title 'Moose: -70mV', \
- 'output/c2.Vm.-50.moose.plot' every 50::1 u ($0)*50*dt:1 with points title 'Moose: -50mV', \
- 'output/c2.Vm.-30.moose.plot' every 50::1 u ($0)*50*dt:1 with points title 'Moose: -30mV', \
- 'output/c2.Vm.-10.moose.plot' every 50::1 u ($0)*50*dt:1 with points title 'Moose: -10mV', \
- 'output/c2.Vm.10.moose.plot' every 50::1 u ($0)*50*dt:1 with points title 'Moose: 10mV', \
- 'output/c2.Vm.30.moose.plot' every 50::1 u ($0)*50*dt:1 with points title 'Moose: 30mV', \
- 'output/c2.Vm.50.moose.plot' every 50::1 u ($0)*50*dt:1 with points title 'Moose: 50mV'
+ 'output/c2.Vm.1.genesis.plot' u ($0)*dt:1 with line title 'Genesis: -70mV', \
+ 'output/c2.Vm.2.genesis.plot' u ($0)*dt:1 with line title 'Genesis: -50mV', \
+ 'output/c2.Vm.3.genesis.plot' u ($0)*dt:1 with line title 'Genesis: -30mV', \
+ 'output/c2.Vm.4.genesis.plot' u ($0)*dt:1 with line title 'Genesis: -10mV', \
+ 'output/c2.Vm.5.genesis.plot' u ($0)*dt:1 with line title 'Genesis: 10mV', \
+ 'output/c2.Vm.6.genesis.plot' u ($0)*dt:1 with line title 'Genesis: 30mV', \
+ 'output/c2.Vm.7.genesis.plot' u ($0)*dt:1 with line title 'Genesis: 50mV', \
+ 'output/c2.Vm.1.moose.plot' every 1000 u ($0)*1000*dt:1 with points title 'Moose: -70mV', \
+ 'output/c2.Vm.2.moose.plot' every 1000 u ($0)*1000*dt:1 with points title 'Moose: -50mV', \
+ 'output/c2.Vm.3.moose.plot' every 1000 u ($0)*1000*dt:1 with points title 'Moose: -30mV', \
+ 'output/c2.Vm.4.moose.plot' every 1000 u ($0)*1000*dt:1 with points title 'Moose: -10mV', \
+ 'output/c2.Vm.5.moose.plot' every 1000 u ($0)*1000*dt:1 with points title 'Moose: 10mV', \
+ 'output/c2.Vm.6.moose.plot' every 1000 u ($0)*1000*dt:1 with points title 'Moose: 30mV', \
+ 'output/c2.Vm.7.moose.plot' every 1000 u ($0)*1000*dt:1 with points title 'Moose: 50mV'
 
 pause mouse key "Any key to continue.\n"
 
