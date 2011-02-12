@@ -589,4 +589,92 @@ template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
 		}
 };
 
+/**
+ * SetGet6 handles 6-argument Sets. It does not deal with Gets.
+ */
+template< class A1, class A2, class A3, class A4, class A5, class A6 > class SetGet6:
+	public SetGet
+{
+	public:
+		SetGet6( const Eref& dest )
+			: SetGet( dest )
+		{;}
+
+		/**
+		 * Blocking, typed 'Set' call
+		 */
+		static bool set( const Eref& dest, const string& field, 
+			A1 arg1, A2 arg2, A3 arg3, A4 arg4, A5 arg5, A6 arg6 )
+		{
+			SetGet6< A1, A2, A3, A4, A5, A6 > sg( dest );
+			FuncId fid;
+			Eref tgt( dest );
+			if ( sg.checkSet( field, tgt, fid ) ) {
+				Conv< A1 > conv1( arg1 );
+				Conv< A2 > conv2( arg2 );
+				Conv< A3 > conv3( arg3 );
+				Conv< A4 > conv4( arg4 );
+				Conv< A5 > conv5( arg5 );
+				Conv< A6 > conv6( arg6 );
+				unsigned int totSize = conv1.size() + conv2.size() +
+					conv3.size() + conv4.size() + conv5.size() + conv6.size();
+				char *temp = new char[ totSize ];
+				conv1.val2buf( temp );
+				conv2.val2buf( temp + conv1.size() );
+				conv3.val2buf( temp + conv1.size() + conv2.size() );
+				conv4.val2buf( temp + conv1.size() + conv2.size() + 
+					conv3.size() );
+				conv5.val2buf( temp + conv1.size() + conv2.size() + 
+					conv3.size() + conv4.size() );
+				conv6.val2buf( temp + conv1.size() + conv2.size() + 
+					conv3.size() + conv4.size() + conv5.size() );
+				dispatchSet( tgt, fid, temp, totSize );
+
+				delete[] temp;
+				return 1;
+			}
+			return 0;
+		}
+
+		/**
+		 * Blocking call using string conversion.
+		 * As yet we don't have 2 arg conversion from a single string.
+		 * So this is a dummy
+		 */
+		static bool innerStrSet( const Eref& dest, const string& field, 
+			const string& val )
+		{
+			A1 arg1;
+			A2 arg2;
+			A3 arg3;
+			A4 arg4;
+			A5 arg5;
+			A6 arg6;
+			string::size_type pos = val.find_first_of( "," );
+			Conv< A1 >::str2val( arg1, val.substr( 0, pos ) );
+			string temp = val.substr( pos + 1 );
+			pos = temp.find_first_of( "," );
+			Conv< A2 >::str2val( arg2, temp.substr( 0, pos ) );
+			temp = temp.substr( pos + 1 );
+			Conv< A3 >::str2val( arg3, temp.substr( 0, pos ) );
+			temp = temp.substr( pos + 1 );
+			Conv< A4 >::str2val( arg4, temp.substr( 0, pos ) );
+			temp = temp.substr( pos + 1 );
+			Conv< A5 >::str2val( arg5, temp.substr( 0, pos ) );
+			Conv< A6 >::str2val( arg6, temp.substr( pos + 1 ) );
+			return set( dest, field, arg1, arg2, arg3, arg4, arg5, arg6 );
+		}
+	//////////////////////////////////////////////////////////////////
+	//  The 'Get' calls for 2 args are currently undefined.
+	//////////////////////////////////////////////////////////////////
+	
+		/**
+		 * Terminating call using string conversion
+		 */
+		string harvestStrGet() const
+		{ 
+			return "";
+		}
+};
+
 #endif // _SETGET_H

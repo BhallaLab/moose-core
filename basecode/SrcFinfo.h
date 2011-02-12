@@ -466,4 +466,68 @@ template < class T1, class T2, class T3, class T4, class T5 > class SrcFinfo5: p
 	private:
 };
 
+
+template < class T1, class T2, class T3, class T4, class T5, class T6 > class SrcFinfo6: public SrcFinfo
+{
+	public:
+		~SrcFinfo6() {;}
+
+		SrcFinfo6( const string& name, const string& doc ) 
+			: SrcFinfo( name, doc )
+			{ ; }
+
+		// Will need to specialize for strings etc.
+		void send( const Eref& e, const ProcInfo* p,
+			const T1& arg1, const T2& arg2, const T3& arg3, const T4& arg4,
+			const T5& arg5, const T6& arg6 ) const
+		{
+			Conv< T1 > a1( arg1 );
+			Conv< T2 > a2( arg2 );
+			Conv< T3 > a3( arg3 );
+			Conv< T4 > a4( arg4 );
+			Conv< T5 > a5( arg5 );
+			Conv< T6 > a6( arg6 );
+			unsigned int totSize = 
+				a1.size() + a2.size() + a3.size() + 
+				a4.size() + a5.size() + a6.size();
+			Qinfo q( e.index(), totSize, 0 );
+			char* temp = new char[ totSize ];
+			a1.val2buf( temp );
+			a2.val2buf( temp + a1.size() );
+			a3.val2buf( temp + a1.size() + a2.size() );
+			a4.val2buf( temp + a1.size() + a2.size() + a3.size() );
+			a5.val2buf( temp + a1.size() + a2.size() + a3.size() + a4.size() );
+			a6.val2buf( temp + a1.size() + a2.size() + a3.size() + a4.size() + a5.size() );
+			e.element()->asend( q, getBindIndex(), p, temp );
+			delete[] temp;
+		}
+
+		void sendTo( const Eref& e, const ProcInfo* p,
+			const T1& arg1, const T2& arg2, const T3& arg3, const T4& arg4,
+			const T5& arg5, const T6& arg6,
+			const FullId& target ) const
+		{
+			Conv< T1 > a1( arg1 );
+			Conv< T2 > a2( arg2 );
+			Conv< T3 > a3( arg3 );
+			Conv< T4 > a4( arg4 );
+			Conv< T5 > a5( arg5 );
+			Conv< T6 > a6( arg6 );
+			unsigned int totSize = 
+				a1.size() + a2.size() + a3.size() + a4.size() + a5.size() + a6.size();
+			Qinfo q( e.index(), totSize, 1 );
+			char* temp = new char[ totSize ];
+			a1.val2buf( temp );
+			a2.val2buf( temp + a1.size() );
+			a3.val2buf( temp + a1.size() + a2.size() );
+			a4.val2buf( temp + a1.size() + a2.size() + a3.size() );
+			a5.val2buf( temp + a1.size() + a2.size() + a3.size() + a4.size() );
+			a6.val2buf( temp + a1.size() + a2.size() + a3.size() + a4.size() + a5.size() );
+			e.element()->tsend( q, getBindIndex(), p, temp, target );
+			delete[] temp;
+		}
+
+	private:
+};
+
 #endif // _SRC_FINFO_H

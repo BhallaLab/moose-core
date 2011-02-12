@@ -188,7 +188,7 @@ class Shell
 		 * This inner function does NOT send an ack. Returns true on 
 		 * success
 		 */
-		bool innerAddMsg( string msgType, 
+		bool innerAddMsg( string msgType, MsgId mid,
 			FullId src, string srcField, 
 			FullId dest, string destField);
 
@@ -198,7 +198,7 @@ class Shell
 		 * This wrapper function sends the ack back to the master node.
 		 */
 		void handleAddMsg( const Eref& e, const Qinfo* q,
-			string msgType, 
+			string msgType, MsgId mid,
 			FullId src, string srcField, 
 			FullId dest, string destField);
 

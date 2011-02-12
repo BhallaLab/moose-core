@@ -100,7 +100,8 @@ static SrcFinfo0 requestTerminate( "requestTerminate",
 			"Violently stops a simulation, possibly leaving things half-done."
 			"Goes to all nodes including self."
 			);
-static SrcFinfo5< string, FullId, string, FullId, string > requestAddMsg( 
+static SrcFinfo6< string, MsgId, FullId, string, FullId, string > 
+		requestAddMsg( 
 			"requestAddMsg",
 			"requestAddMsg( type, src, srcField, dest, destField );"
 			"Creates specified Msg between specified Element on all nodes."
@@ -162,7 +163,7 @@ DestFinfo* handleAck()
 
 static DestFinfo handleAddMsg( "handleAddMsg", 
 			"Makes a msg",
-			new EpFunc5< Shell, string, FullId, string, FullId, string >
+			new EpFunc6< Shell, string, MsgId, FullId, string, FullId, string >
 				( & Shell::handleAddMsg ) );
 
 static DestFinfo handleSet( "handleSet", 
@@ -443,8 +444,9 @@ MsgId Shell::doAddMsg( const string& msgType,
 		return Msg::badMsg;
 	}
 	initAck();
+	MsgId mid( 0 ); //dummy 
 	requestAddMsg.send( Eref( shelle_, 0 ), &p_, 
-		msgType, src, srcField, dest, destField );
+		msgType, mid, src, srcField, dest, destField );
 	//	Qinfo::clearQ( &p_ );
 	waitForAck();
 	return latestMsgId_;
@@ -485,7 +487,8 @@ void Shell::connectMasterMsg()
 		m->mid() << "\n";
 
 	Id clockId( 1 );
-	bool ret = innerAddMsg( "Single", FullId( shellId, 0 ), "clockControl", 
+	MsgId mid( 0 );
+	bool ret = innerAddMsg( "Single", mid, FullId( shellId, 0 ), "clockControl", 
 		FullId( clockId, 0 ), "clockControl" );
 	assert( ret );
 	// innerAddMsg( string msgType, FullId src, string srcField, FullId dest, string destField )
@@ -804,12 +807,12 @@ void Shell::destroy( const Eref& e, const Qinfo* q, Id eid)
  * multiple acks.
  */
 void Shell::handleAddMsg( const Eref& e, const Qinfo* q,
-	string msgType, FullId src, string srcField, 
+	string msgType, MsgId mid, FullId src, string srcField, 
 	FullId dest, string destField )
 {
 	if ( q->addToStructuralQ() )
 		return;
-	if ( innerAddMsg( msgType, src, srcField, dest, destField ) )
+	if ( innerAddMsg( msgType, mid, src, srcField, dest, destField ) )
 		ack()->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
 	else
 		ack()->send( Eref( shelle_, 0), &p_, Shell::myNode(), ErrorStatus );
@@ -818,7 +821,8 @@ void Shell::handleAddMsg( const Eref& e, const Qinfo* q,
 /**
  * The actual function that adds messages. Does NOT send an ack.
  */
-bool Shell::innerAddMsg( string msgType, FullId src, string srcField, 
+bool Shell::innerAddMsg( string msgType, MsgId mid,
+	FullId src, string srcField, 
 	FullId dest, string destField )
 {
 	// cout << myNode_ << ", Shell::handleAddMsg" << "\n";
@@ -901,6 +905,8 @@ void Shell::handleMove( const Eref& e, const Qinfo* q,
 	ack()->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
 }
 
+/** This will need to change to pass in a MsgId
+*/
 void Shell::handleUseClock( const Eref& e, const Qinfo* q,
 	string path, string field, unsigned int tick)
 {
@@ -915,8 +921,9 @@ void Shell::handleUseClock( const Eref& e, const Qinfo* q,
 		stringstream ss;
 		FullId tickId( Id( 2 ), DataId( 0, tick ) );
 		ss << tickField << tick;
+		MsgId mid( 0 );
 		// bool ret = 
-			innerAddMsg( "OneToAll", tickId, ss.str(), FullId( *i, 0 ), 
+			innerAddMsg( "OneToAll", mid, tickId, ss.str(), FullId( *i, 0 ), 
 			field);
 		// We just skip messages that don't work.
 		/*

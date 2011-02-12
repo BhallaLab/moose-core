@@ -312,6 +312,64 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class OpFu
 		void ( T::*func_ )( A1, A2, A3, A4, A5 ); 
 };
 
+template< class T, class A1, class A2, class A3, class A4, class A5, class A6 > class OpFunc6: 
+	public OpFunc
+{
+	public:
+		OpFunc6( void ( T::*func )( A1, A2, A3, A4, A5, A6 ) )
+			: func_( func )
+			{;}
+
+		bool checkFinfo( const Finfo* s ) const {
+			return dynamic_cast< const SrcFinfo6< A1, A2, A3, A4, A5, A6 >* >( s );
+		}
+
+		bool checkSet( const SetGet* s ) const {
+			return dynamic_cast< const SetGet6< A1, A2, A3, A4, A5, A6 >* >( s );
+		}
+		
+		bool strSet( const Eref& tgt, 
+			const string& field, const string& arg ) const {
+			return SetGet6< A1, A2, A3, A4, A5, A6 >::innerStrSet( tgt, field, arg );
+		}
+
+		void op( const Eref& e, const char* buf ) const {
+			buf += sizeof( Qinfo );
+			Conv< A1 > arg1( buf );
+			buf += arg1.size();
+			Conv< A2 > arg2( buf );
+			buf += arg2.size();
+			Conv< A3 > arg3( buf );
+			buf += arg3.size();
+			Conv< A4 > arg4( buf );
+			buf += arg4.size();
+			Conv< A5 > arg5( buf );
+			buf += arg5.size();
+			Conv< A6 > arg6( buf );
+			(reinterpret_cast< T* >( e.data() )->*func_)( 
+				*arg1, *arg2, *arg3, *arg4, *arg5, *arg6 );
+		}
+
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+			Conv< A1 > arg1( buf );
+			buf += arg1.size();
+			Conv< A2 > arg2( buf );
+			buf += arg2.size();
+			Conv< A3 > arg3( buf );
+			buf += arg3.size();
+			Conv< A4 > arg4( buf );
+			buf += arg4.size();
+			Conv< A5 > arg5( buf );
+			buf += arg5.size();
+			Conv< A6 > arg6( buf );
+			(reinterpret_cast< T* >( e.data() )->*func_)( 
+				*arg1, *arg2, *arg3, *arg4, *arg5, *arg6 );
+		}
+
+	private:
+		void ( T::*func_ )( A1, A2, A3, A4, A5, A6 ); 
+};
+
 /**
  * This specialized OpFunc is for returning a single field value
  * It generates an opFunc that takes a single argument:

@@ -10384,5 +10384,91 @@ Finally onto multinode tests. Cleared the earlier crashes due to attempts
 to access objects that were decomposed off the master node. In doing so
 reconfirmed that the GetVec function works, and works across nodes. Now
 stuck in the interesting and crucial place where I test internode messaging
-using each of the message types.
+using each of the message types. Checkin 2452.
+
+Struggling through the messaging on 2 nodes, 1 thread. 
+- On node 1, the target indices and function for target b2 seem OK.
+- Qinfo reports sensible stuff on each node.
+- The process call on Arith seem to work OK, but isn't picking up the signal.
+
 ============================================================================
+10 Feb 2011.
+
+- Did extensive printf debugging. Looks like the SingleMsg simply isn't
+	calling the Arith::arg3() assignment operation.
+- The a1->a2 Q entry isn't invoked on node0, but is invoked on node 1.
+
+Looked at the calling code. No obvious issue. Got to trace.
+Perhaps nodes other than node 0 are unable to send regular message stuff
+	back. Note that the Get does work across nodes, but there the
+	Q entry is inserted directly.
+I tried monitoring data transfers between nodes. Clearly there are data
+transfers happening. Why should the SingleMsg data not be there? Why should
+the OneToAllMsg data get scrambled?
+
+Will need to write a func to scan the Qs for Q entries destined
+for the suspect msgs, and display contents.
+
+I think there is a problem in Qinfo::reportQ, it isn't reporting 
+the mpiQs.
+============================================================================
+11 Feb 2011.
+Fixed bug in reportQ.
+
+Finally can see what is going on. The bad messages originate on node 1 and
+are OK in the originating inQ:
+1: Reporting inQ[1]. threads=1, sizes: 17
+Q::MsgId = 19, FuncId = 17, srcIndex = 3:0, size = 8, isForward = 1, e1 = a1, e2 = a2
+Q::MsgId = 20, FuncId = 17, srcIndex = 2:0, size = 8, isForward = 1, e1 = b1, e2 = b2
+Q::MsgId = 21, FuncId = 17, srcIndex = 2:0, size = 8, isForward = 1, e1 = c1, e2 = c2
+...
+
+But when it gets to node 0 the first two are bad:
+0: Reporting mpiInQ. Size = 544
+Q::MsgId = 19, FuncId = 17, srcIndex = 3:0, size = 8, isForward = 1, e1 = root, e2 = e2
+Q::MsgId = 20, FuncId = 17, srcIndex = 2:0, size = 8, isForward = 1, e1 = root, e2 = b1
+Q::MsgId = 21, FuncId = 17, srcIndex = 2:0, size = 8, isForward = 1, e1 = c1, e2 = c2
+...
+The remaining ones are OK.
+
+Is someone altering the Msg pointed to by MsgId = 19 and 20?
+Note that the other appear OK.
+
+How are MsgIds guaranteed to be the same across different nodes?
+
+============================================================================
+12 Feb 2011
+
+Confirmed that MsgId misalignment is the root of all bugs. Stepped through the
+testShell::testShellAddMsg and found that the first two messages (to a2 and b2)
+have different msgIds for node0 and node1. The rest are identical,
+thanks to the garbage collection I've put in for msgIds.
+
+Will need to go through the message assignment logic. 
+- Unit tests do a lot of node0 local stuff, and scramble MsgIds.
+- In Elements and Ids, I assign Ids from the master node. Should I do for MsgId?
+- Alternative is to send out a msgId cleaning function after unit tests.
+
+Decided: 
+	1. Will have a msgId cleaning function called when unit tests are done.
+	2. Shell::doAddMsg will generate the msgIds, just as the doCreate does.
+		These msgIds will be propagated to all nodes.
+	3. At present no other function is allowed to make messages.
+
+Minor issue with this neat resolution is that the Shell::handleAddMsg already
+has 5 message arguments, the max. Will need to consolidate.
+
+Looking at the code for the add message, it is clear that a lot of the error
+checking should be shifted to the top level doAddMsg function.
+
+Stages
++ Make 6-argument EpFunc, SrcFinfo, SetGet
+- Place into code, compile
+- Move error checking up into doAddMsg.
+- do MsgId generation in doAddMsg after assorted checks.
+- Alter handleAddMsg and innerAddMsg 
+- Alter Msg::msg to take the MsgId argument.
+- Alter Shell::AddMasterMsg to pass in a msgId for the new msgs.
+- Alter Shell::handleUseClock to pass in a msgId for the new msgs.
+
+

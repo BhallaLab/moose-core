@@ -119,6 +119,7 @@ void* mpiEventLoopForBcast( void* info )
 					if ( actualSize > BLOCKSIZE )
 						MPI_Bcast( Qinfo::inQ( i ), actualSize, MPI_CHAR, j,
 							MPI_COMM_WORLD );
+				// cout << Shell::myNode() << ":" << p->nodeIndexInGroup << "	: mpiEventLoop outgoing, actualSize= " << actualSize << ", DestNode=" << j << ")\n";
 				} else {
 					MPI_Bcast( Qinfo::mpiRecvQbuf(), BLOCKSIZE, MPI_CHAR, j,
 						MPI_COMM_WORLD );
@@ -130,6 +131,7 @@ void* mpiEventLoopForBcast( void* info )
 						MPI_Bcast( Qinfo::mpiRecvQbuf(), actualSize, 
 							MPI_CHAR, j, MPI_COMM_WORLD );
 					}
+				// cout << Shell::myNode() << ":" << p->nodeIndexInGroup << "	: mpiEventLoop incoming, actualSize= " << actualSize << ", DestNode=" << j << ")\n";
 				}
 
 #endif

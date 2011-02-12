@@ -103,9 +103,16 @@ Arith::Arith()
 	;
 }
 
+static bool doReport = 0;
 void Arith::process( const Eref& e, ProcPtr p )
 {
 	output_ = arg1_ + arg2_ + arg3_; // Doing a hard-coded function.
+	if ( doReport ) {
+		cout << p->nodeIndexInGroup << "." << 
+			p->threadIndexInGroup << ": " <<
+			e.element()->getName() << ", " << e.fullId() << "		" << 
+			arg3_ << "	" << &arg3_ << endl;
+	}
 	output.send( e, p, output_ );
 	arg3_ = 0.0;
 }
@@ -130,6 +137,8 @@ void Arith::arg2( const double arg )
 
 void Arith::arg3( const double arg )
 {
+	if ( doReport )
+		cout << arg << "	" << &arg3_ << endl;
 	arg3_ += arg;
 }
 

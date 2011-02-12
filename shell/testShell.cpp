@@ -508,6 +508,7 @@ bool checkOutput( Id e,
 	correct.push_back( v4 );
 	vector< double > retVec;
 	Field< double >::getVec( Eref( e(), DataId::any() ), "outputValue", retVec );
+	assert( retVec.size() == 5 );
 
 	for ( unsigned int i = 0; i < 5; ++i ) {
 		ret = ret & doubleEq( retVec[i], correct[i] );
@@ -769,9 +770,17 @@ void testShellAddMsg()
 	// Check output.
 	///////////////////////////////////////////////////////////
 	
-	ret = checkOutput( a2, 0, 4, 0, 0, 0 );
+	ret = checkOutput( a1, 1, 2, 3, 4, 5 );
 	assert( ret );
 	ret = checkOutput( b1, 1, 2, 3, 4, 5 );
+	assert( ret );
+	ret = checkOutput( c1, 1, 2, 3, 4, 5 );
+	assert( ret );
+	ret = checkOutput( d1, 1, 2, 3, 4, 5 );
+	assert( ret );
+	ret = checkOutput( e1, 1, 2, 3, 4, 5 );
+	assert( ret );
+	ret = checkOutput( a2, 0, 4, 0, 0, 0 );
 	assert( ret );
 	ret = checkOutput( b2, 3, 3, 3, 3, 3 );
 	assert( ret );

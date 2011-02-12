@@ -365,24 +365,40 @@ void Qinfo::sendAllToAll( const ProcInfo* proc )
 
 void innerReportQ( const Qvec& qv, const string& name )
 {
-	if ( qv.totalNumEntries() == 0 )
-		return;
-	cout << endl << Shell::myNode() << ": Reporting " << name << 
-		". threads=" << qv.numThreads() << ", sizes: "; 
-	for ( unsigned int i = 0; i < qv.numThreads(); ++i ) {
-		if ( i > 0 )
-			cout << ", ";
-		cout << qv.numEntries( i );
-	}
-	cout << endl;
+	bool isMpi = ( name.substr( 0, 3 ) == "mpi" );
+	const char* buf = 0;
+	const char* end = 0;
+	if ( isMpi ) {
+		if ( qv.allocatedSize() > Qvec::HeaderSize ) {
+			cout << endl << Shell::myNode() << ": Reporting " << name << 
+				". Size = " << qv.dataQsize() << endl; 
+			buf = qv.data();
+			end = qv.data() + qv.dataQsize();
+		} else {
+			cout << endl << Shell::myNode() << ": Reporting " << name << 
+				". Size = " << 0 << endl; 
+		}
+	} else {
+		if ( qv.totalNumEntries() == 0 )
+			return;
+		cout << endl << Shell::myNode() << ": Reporting " << name << 
+			". threads=" << qv.numThreads() << ", sizes: "; 
+		for ( unsigned int i = 0; i < qv.numThreads(); ++i ) {
+			if ( i > 0 )
+				cout << ", ";
+			cout << qv.numEntries( i );
+		}
+		cout << endl;
 	
-	Qvec temp( qv );
-	temp.stitch(); // This is a bit of a hack. The qv.data etc are not
-	// valid till stitch is called. I can't touch qv, and in any case
-	// I should not, since it might invalidate pointers. So we copy it
-	// to a temporary.
-	const char* buf = temp.data();
-	const char* end = temp.data() + temp.dataQsize();
+		Qvec temp( qv );
+		temp.stitch(); // This is a bit of a hack. The qv.data etc are not
+		// valid till stitch is called. I can't touch qv, and in any case
+		// I should not, since it might invalidate pointers. So we copy it
+		// to a temporary.
+		buf = temp.data();
+		end = temp.data() + temp.dataQsize();
+	}
+
 	while ( buf < end ) {
 		const Qinfo *q = reinterpret_cast< const Qinfo* >( buf );
 		if ( !q->isDummy() ) {
