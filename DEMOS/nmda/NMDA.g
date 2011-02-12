@@ -34,9 +34,9 @@ int USE_SOLVER = 1
  */
 int VOLTAGE_CLAMP_POSTSYNAPTIC_COMPARTMENT = 1
 
-float POST_SYNAPTIC_VM_MIN = -70.0
-float POST_SYNAPTIC_VM_MAX = 50.0
-float POST_SYNAPTIC_VM_STEP = 20.0
+float POST_SYNAPTIC_VM_MIN = -70.0e-3
+float POST_SYNAPTIC_VM_MAX = 50.0e-3
+float POST_SYNAPTIC_VM_STEP = 20.0e-3
 
 str OUTPUT_DIR = "output"
 
@@ -58,9 +58,8 @@ str OUTPUT_DIR = "output"
 
 float SIMDT = 50e-6
 float IODT = 50e-6
-float SIMLENGTH = 0.05
-float INJECT = 1.0e-10
-float EREST_ACT = -0.065
+float SIMLENGTH = 0.5
+float STIM_TIME = 0.05
 
 //=====================================
 // Creating objects
@@ -124,8 +123,8 @@ setfield /c1/spike \
 //------------------
 float Ek = 0.0
 float gmax = 1e-7
-float tau1 = 1e-3
-float tau2 = 1e-3
+float tau1 = 20e-3
+float tau2 = 40e-3
 
 create synchan /c2/syn
 setfield /c2/syn \
@@ -147,7 +146,7 @@ setfield /c2/syn \
 
 float CMg = 2                       // [Mg] in mM
 float eta = 0.33                    // per mM
-float gamma = 0.2                   // per Volt
+float gamma = 60                   // per Volt
 
 create Mg_block /c2/syn/mgblock
 setfield /c2/syn/mgblock \
@@ -228,13 +227,13 @@ function run_and_write( post_synaptic_vm, syn_file, mgblock_file, vm_file )
 	setfield /c2 initVm {post_synaptic_vm}
 	
 	reset
-	step {SIMLENGTH / 2} -time
+	step {STIM_TIME} -time
 	setfield /c1 Em 1.0
 	setfield /c1 Vm 1.0
 	step
 	setfield /c1 Em -1.0
 	setfield /c1 Vm -1.0
-	step {SIMLENGTH / 2} -time
+	step {SIMLENGTH - STIM_TIME} -time
 	
 	////////////////////////////////////////////////////////////////////////////////
 	//  Write Plots
@@ -258,6 +257,7 @@ function run_and_write( post_synaptic_vm, syn_file, mgblock_file, vm_file )
 	tab2file {vm_file} /data/Vm table
 end
 
+int vi = 1
 str extension
 if ( MOOSE )
 	extension = ".moose.plot"
@@ -266,12 +266,13 @@ else
 end
 float vm = POST_SYNAPTIC_VM_MIN
 while ( vm <= POST_SYNAPTIC_VM_MAX )
-	str syn_file = { OUTPUT_DIR } @ "/syn.Gk." @ { vm } @ { extension }
-	str mgblock_file = { OUTPUT_DIR } @ "/mgblock.Gk." @ { vm } @ { extension }
-	str vm_file = { OUTPUT_DIR } @ "/c2.Vm." @ { vm } @ { extension }
+	str syn_file = { OUTPUT_DIR } @ "/syn.Gk." @ { vi } @ { extension }
+	str mgblock_file = { OUTPUT_DIR } @ "/mgblock.Gk." @ { vi } @ { extension }
+	str vm_file = { OUTPUT_DIR } @ "/c2.Vm." @ { vi } @ { extension }
 	
 	run_and_write { vm } { syn_file } { mgblock_file } { vm_file }
 	vm = vm + POST_SYNAPTIC_VM_STEP
+	vi = vi + 1
 end
 
 echo "
