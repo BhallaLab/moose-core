@@ -10611,3 +10611,4 @@ just-deleted MsgId. Now I generate a new MsgId for the new parent->child msg.
 Things now seem to work. Perhaps the reused MsgId was also put into the garbage
 handler for Msgs, and then got doubly assigned.
 
+Checkin 2461.

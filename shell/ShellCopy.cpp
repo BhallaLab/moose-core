@@ -51,17 +51,7 @@ Element* innerCopyElements( Id orig, Id newParent, Id newElm,
 	Element* e = new Element( newElm, orig(), n );
 	assert( e );
 	Shell::adopt( newParent, newElm );
-	cout << Shell::myNode() << ": Copy: orig= " << orig << 
-		", newParent = " << newParent << ", newElm = " << newElm << endl;
-	/*
-	Msg* m = new OneToAllMsg( newParent.eref(), e );
-	assert( m );
-	if ( !cf->addMsg( pf, m->mid(), newParent() ) ) {
-		cout << "copy: Error: unable to add parent->child msg from " <<
-			newParent()->getName() << " to " << e->getName() << "\n";
-		return 0;
-	}
-	*/
+	// cout << Shell::myNode() << ": Copy: orig= " << orig << ", newParent = " << newParent << ", newElm = " << newElm << endl;
 	tree[ orig ] = e->id();
 
 	const Neutral* origData = reinterpret_cast< const Neutral* >(

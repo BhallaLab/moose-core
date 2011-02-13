@@ -124,7 +124,7 @@ void Id::bindIdToElement( Element* e )
 		*/
 		// kick, scream, and shout.
 	elements()[ id_ ] = e;
-	cout << "Id::bindIdToElement '" << e->getName() << "' = " << id_ << endl;
+	// cout << "Id::bindIdToElement '" << e->getName() << "' = " << id_ << endl;
 }
 
 /*
@@ -139,7 +139,7 @@ Id Id::create( Element* e )
 void Id::destroy() const
 {
 	if ( elements()[ id_ ] ) {
-	cout << "Id::destroy '" << elements()[ id_ ]->getName() << "' = " << id_ << endl;
+	// cout << "Id::destroy '" << elements()[ id_ ]->getName() << "' = " << id_ << endl;
 		delete elements()[ id_ ];
 		elements()[ id_ ] = 0;
 		// Put id_ on 'available' list

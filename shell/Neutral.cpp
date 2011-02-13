@@ -260,9 +260,11 @@ void Neutral::destroy( const Eref& e, const Qinfo* q, int stage )
 {
 	vector< Id > tree;
 	unsigned int numDescendants = buildTree( e, q, tree );
+	/*
 	cout << "Neutral::destroy: id = " << e.id() << 
 		", name = " << e.element()->getName() <<
 		", numDescendants = " << numDescendants << endl;
+		*/
 	assert( numDescendants == tree.size() );
 	Element::destroyElementTree( tree );
 }
