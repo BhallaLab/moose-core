@@ -225,6 +225,46 @@ void testDescendant()
 	cout << "." << flush;
 }
 
+/// Test the Neutral::children and buildTree
+void testChildren()
+{
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+
+	vector< unsigned int > dimensions;
+	dimensions.push_back( 1 );
+	Id f1 = shell->doCreate( "Neutral", Id(), "f1", dimensions );
+	Id f2a = shell->doCreate( "Neutral", f1, "f2a", dimensions );
+	Id f2b = shell->doCreate( "Neutral", f1, "f2b", dimensions );
+	Id f3 = shell->doCreate( "Neutral", f2a, "f3", dimensions );
+	Id f4a = shell->doCreate( "Neutral", f3, "f4a", dimensions );
+	Id f4b = shell->doCreate( "Neutral", f3, "f4b", dimensions );
+
+	Neutral* f1Data = reinterpret_cast< Neutral* >( f1.eref().data() );
+
+	vector< Id > kids;
+ 	f1Data->children( f1.eref(), kids );
+	assert( kids.size() == 2 );
+	assert( kids[0] == f2a );
+	assert( kids[1] == f2b );
+
+	vector< Id > tree;
+	Qinfo q;
+	// Neutral::buildTree is depth-first.
+	int num = f1Data->buildTree( f1.eref(), &q, tree );
+	assert( num == 6 );
+	assert( tree.size() == 6 );
+	assert( tree[0] == f1 );
+	assert( tree[1] == f2a );
+	assert( tree[2] == f3 );
+	assert( tree[3] == f4a );
+	assert( tree[4] == f4b );
+	assert( tree[5] == f2b );
+
+	shell->doDelete( f1 );
+	cout << "." << flush;
+}
+
 void testMove()
 {
 	Eref sheller = Id().eref();
@@ -1169,6 +1209,7 @@ void testShell( )
 {
 	testChopPath();
 	testTreeTraversal();
+	testChildren();
 //	testCreateDelete();
 	// testShellParserQuit();
 }

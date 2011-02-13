@@ -51,6 +51,8 @@ Element* innerCopyElements( Id orig, Id newParent, Id newElm,
 	Element* e = new Element( newElm, orig(), n );
 	assert( e );
 	Shell::adopt( newParent, newElm );
+	cout << Shell::myNode() << ": Copy: orig= " << orig << 
+		", newParent = " << newParent << ", newElm = " << newElm << endl;
 	/*
 	Msg* m = new OneToAllMsg( newParent.eref(), e );
 	assert( m );

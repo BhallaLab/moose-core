@@ -10496,3 +10496,90 @@ Now it is OK and clears unit tests:
 0.1: reinit[0] binding = (131,26)
 0.1: reinit[0] binding = (122,19)
 
+Checkin 2458.
+============================================================================
+13 Feb 2011
+Now running tests with MPI. As usual, using
+mpirun -np 2 -c 1 
+to avoid any multithreading issues.
+
+It first complains about an apparent double deletion of an 
+Element in testShell.cpp:325, which is the testCopy function.
+	Warning: Id::destroy: 94 already zeroed
+For this lets check the assignment of Ids.
+
+Then it dies a few tests later.
+
+Used printf debugging to understand the problem with 
+	Warning: Id::destroy: 94 already zeroed.
+
+Get (for 2 nodes):
+Id::bindIdToElement 'f4b' = 94
+Id::destroy 'f4b' = 94
+Warning: Id::destroy: 94 already zeroed
+Id::bindIdToElement 'f4b' = 94
+Id::destroy 'f4b' = 94
+Warning: Id::destroy: 94 already zeroed
+
+
+
+Surprisingly, it is not double deletion.
+Someone is stepping on it? Will have to put a 'watch' on the memory location.
+Tried it, doesn't work for mpi.
+Recoded to give the vector a reserve capacity. Will try a 'watch' on the
+reserved location.
+
+Did so. Worked. Showed something that I should have seen from the printf
+listing above: it is indeed double deletion. The id 94 is being deleted
+twice, the first time fine and the second time is caught.
+
+Checked when the two deletions occur. Printfs on the copy command show that
+the copy of id 94 is 98. Surprisingly, the two deletions of 94 occur 
+immediately after each other, and have nothing to do with the deletion of
+98. Does the childlist duplicate an entry?
+
+Here is a new trace using printf debugging from the Neutral::destroy command:
+	Id::bindIdToElement 'f1' = 89
+	Id::bindIdToElement 'f2a' = 90
+	Id::bindIdToElement 'f2b' = 91
+	Id::bindIdToElement 'f3' = 92
+	Id::bindIdToElement 'f4a' = 93
+	Id::bindIdToElement 'f4b' = 94
+	Id::bindIdToElement 'f2a' = 95
+	1: Copy: orig= 90, newParent = 0, newElm = 95
+	Id::bindIdToElement 'f3' = 96
+	1: Copy: orig= 92, newParent = 95, newElm = 96
+	Id::bindIdToElement 'f4a' = 97
+	1: Copy: orig= 93, newParent = 96, newElm = 97
+	Id::bindIdToElement 'f4b' = 98
+	1: Copy: orig= 94, newParent = 96, newElm = 98
+*	Neutral::destroy: id = 89, name = f1, numDescendants = 6
+	Id::destroy 'f1' = 89
+	Id::destroy 'f2a' = 90
+*	Id::destroy 'f3' = 92
+	Id::destroy 'f4a' = 93
+	Id::destroy 'f4b' = 94
+	Warning: Id::destroy: 94 already zeroed
+	Neutral::destroy: id = 95, name = TheElephantsAreLoose, numDescendants = 4
+	Id::destroy 'TheElephantsAreLoose' = 95
+	Id::destroy 'f3' = 96
+	Id::destroy 'f4a' = 97
+	Id::destroy 'f4b' = 98
+	
+Note specially what happens at the starred lines: There are 6 descendants
+(which is correct), but the descendant 91: f2b has gone missing. Why has
+f2b become disconnected?
+
+Ah, one interesting and important point: I get the same error message
+and diagnostics on a single node, with 1 or 2 threads. Same symptoms. So
+it isn't related to the messaging. Good, I can separate out the issues.
+Let me first put in a few assertions to make sure that I catch this bug
+in the future.
+
+These assertions show that the problem is either with Neutral::buildTree or with
+the child list itself.
+
+Since this has turned out to be a potential error, I've made a separate unit
+test to these ops: testShell:testChildren(). Now it clears this test: it turns
+out the tree is done depth-first. The original bug with the warning about
+the descendant remains.

@@ -111,8 +111,12 @@ Id Id::nextId()
 
 void Id::bindIdToElement( Element* e )
 {
-	if ( elements().size() <= id_ )
+	if ( elements().size() <= id_ ) {
+		if ( elements().size() % 1000 == 0 ) {
+			elements().reserve( elements().size() + 1000 );
+		}
 		elements().resize( id_ + 1, 0 );
+	}
 	assert( elements()[ id_ ] == 0 );
 	/*
 	if ( elements()[ id_ ] != 0 )
@@ -120,6 +124,7 @@ void Id::bindIdToElement( Element* e )
 		*/
 		// kick, scream, and shout.
 	elements()[ id_ ] = e;
+	cout << "Id::bindIdToElement '" << e->getName() << "' = " << id_ << endl;
 }
 
 /*
@@ -134,6 +139,7 @@ Id Id::create( Element* e )
 void Id::destroy() const
 {
 	if ( elements()[ id_ ] ) {
+	cout << "Id::destroy '" << elements()[ id_ ]->getName() << "' = " << id_ << endl;
 		delete elements()[ id_ ];
 		elements()[ id_ ] = 0;
 		// Put id_ on 'available' list
