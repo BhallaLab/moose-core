@@ -898,8 +898,7 @@ void Shell::handleMove( const Eref& e, const Qinfo* q,
 	MsgId mid = orig()->findCaller( pafid );
 	Msg::deleteMsg( mid );
 
-	// Reuse the old msgid.
-	Msg* m = new OneToAllMsg( mid, newParent.eref(), orig() );
+	Msg* m = new OneToAllMsg( Msg::nextMsgId(), newParent.eref(), orig() );
 	assert( m );
 	if ( !f1->addMsg( pf, m->mid(), newParent() ) ) {
 		cout << "move: Error: unable to add parent->child msg from " <<

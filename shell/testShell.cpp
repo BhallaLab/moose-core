@@ -277,46 +277,67 @@ void testMove()
 
 	vector< unsigned int > dimensions;
 	dimensions.push_back( 1 );
+	/*
 	Id f1 = shell->doCreate( "Neutral", Id(), "f1", dimensions );
 	Id f2a = shell->doCreate( "Neutral", f1, "f2a", dimensions );
 	Id f2b = shell->doCreate( "Neutral", f1, "f2b", dimensions );
 	Id f3aa = shell->doCreate( "Neutral", f2a, "f3aa", dimensions );
+	*/
 
-	FullId pa = Field< FullId >::get( f3aa.eref(), "parent" );
-	assert( pa == FullId( f2a, 0 ) );
+	Id f1 = shell->doCreate( "Neutral", Id(), "f1", dimensions );
+	Id f2a = shell->doCreate( "Neutral", f1, "f2a", dimensions );
+	Id f2b = shell->doCreate( "Neutral", f1, "f2b", dimensions );
+	Id f3 = shell->doCreate( "Neutral", f2a, "f3", dimensions );
+	Id f4a = shell->doCreate( "Neutral", f3, "f4a", dimensions );
+	Id f4b = shell->doCreate( "Neutral", f3, "f4b", dimensions );
+	verifyKids( f1, f2a, f2b, f3, f4a, f4b );
+
+	FullId pa = Field< FullId >::get( f4a.eref(), "parent" );
+	assert( pa == FullId( f3, 0 ) );
 	pa = Field< FullId >::get( f2a.eref(), "parent" );
 	assert( pa == FullId( f1, 0 ) );
-	string path = Field< string >::get( f3aa.eref(), "path" );
-	assert( path == "/f1/f2a/f3aa" );
+	string path = Field< string >::get( f4a.eref(), "path" );
+	assert( path == "/f1/f2a/f3/f4a" );
 	Neutral* f1data = reinterpret_cast< Neutral* >( f1.eref().data() );
 
 	vector< Id > kids = f1data->getChildren( f1.eref(), 0 );
 	assert( kids.size() == 2 );
+	assert( kids[0] == f2a );
+	assert( kids[1] == f2b );
 
-	Neutral* f2adata = reinterpret_cast< Neutral* >( f2a.eref().data() );
-	kids = f2adata->getChildren( f2a.eref(), 0 );
-	assert( kids.size() == 1 );
+	Neutral* f3data = reinterpret_cast< Neutral* >( f3.eref().data() );
+	kids = f3data->getChildren( f3.eref(), 0 );
+	assert( kids.size() == 2 );
+	assert( kids[0] == f4a );
+	assert( kids[1] == f4b );
 
 	//////////////////////////////////////////////////////////////////
-	shell->doMove( f3aa, f1 );
+	shell->doMove( f4a, f1 );
 	//////////////////////////////////////////////////////////////////
 
-	pa = Field< FullId >::get( f3aa.eref(), "parent" );
+	pa = Field< FullId >::get( f4a.eref(), "parent" );
 	assert( pa == FullId( f1, 0 ) );
 
 	kids = f1data->getChildren( f1.eref(), 0 );
 	assert( kids.size() == 3 );
-	kids = f2adata->getChildren( f2a.eref(), 0 );
-	assert( kids.size() == 0 );
+	assert( kids[0] == f2a );
+	assert( kids[1] == f2b );
+	assert( kids[2] == f4a );
+	kids = f3data->getChildren( f3.eref(), 0 );
+	assert( kids.size() == 1 );
+	assert( kids[0] == f4b );
 
-	shell->doMove( f2b, f3aa );
-	pa = Field< FullId >::get( f2b.eref(), "parent" );
-	assert( pa == FullId( f3aa, 0 ) );
-	path = Field< string >::get( f2b.eref(), "path" );
-	assert( path == "/f1/f3aa/f2b" );
+	//////////////////////////////////////////////////////////////////
+	shell->doMove( f2a, f4a );
+	//////////////////////////////////////////////////////////////////
+	pa = Field< FullId >::get( f2a.eref(), "parent" );
+	assert( pa == FullId( f4a, 0 ) );
+	path = Field< string >::get( f4b.eref(), "path" );
+	assert( path == "/f1/f4a/f2a/f3/f4b" );
 
-	assert( f2b == f1data->child( f3aa.eref(), "f2b" ) );
-	assert( f3aa == f1data->child( f1.eref(), "f3aa" ) );
+	kids = f1data->getChildren( f1.eref(), 0 );
+	assert( kids[0] == f2b );
+	assert( kids[1] == f4a );
 
 	shell->doDelete( f1 );
 	cout << "." << flush;

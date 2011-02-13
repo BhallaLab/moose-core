@@ -10599,3 +10599,15 @@ Clue: When I move the same testChildren() function after testMove(),
 the problem appears in testChildren. Move may be doing bad things.
 Confirmed: when testChildren is put just before testMove() it is OK. Run just
 afterwards and it fails. Nasty.
+Checked this in as 2460 as a reference for this bug, before I begin to
+tighten up the testMove test.
+
+Changed the testMove, but again it doesn't fail on its own, but instead causes
+downstream errors in testCopy. This is another interesting error, testCopy
+goes into an infinite loop, which depends on testMove being there ahead of it.
+
+Fixed a little shortcut I had made in Shell::handleMove, where I reused the
+just-deleted MsgId. Now I generate a new MsgId for the new parent->child msg.
+Things now seem to work. Perhaps the reused MsgId was also put into the garbage
+handler for Msgs, and then got doubly assigned.
+
