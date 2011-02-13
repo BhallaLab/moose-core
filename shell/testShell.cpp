@@ -225,23 +225,10 @@ void testDescendant()
 	cout << "." << flush;
 }
 
-/// Test the Neutral::children and buildTree
-void testChildren()
+/// Utility function to check a commonly used tree structure
+void verifyKids( Id f1, Id f2a, Id f2b, Id f3, Id f4a, Id f4b )
 {
-	Eref sheller = Id().eref();
-	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-
-	vector< unsigned int > dimensions;
-	dimensions.push_back( 1 );
-	Id f1 = shell->doCreate( "Neutral", Id(), "f1", dimensions );
-	Id f2a = shell->doCreate( "Neutral", f1, "f2a", dimensions );
-	Id f2b = shell->doCreate( "Neutral", f1, "f2b", dimensions );
-	Id f3 = shell->doCreate( "Neutral", f2a, "f3", dimensions );
-	Id f4a = shell->doCreate( "Neutral", f3, "f4a", dimensions );
-	Id f4b = shell->doCreate( "Neutral", f3, "f4b", dimensions );
-
 	Neutral* f1Data = reinterpret_cast< Neutral* >( f1.eref().data() );
-
 	vector< Id > kids;
  	f1Data->children( f1.eref(), kids );
 	assert( kids.size() == 2 );
@@ -260,6 +247,24 @@ void testChildren()
 	assert( tree[3] == f4a );
 	assert( tree[4] == f4b );
 	assert( tree[5] == f2b );
+}
+
+/// Test the Neutral::children and buildTree
+void testChildren()
+{
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+
+	vector< unsigned int > dimensions;
+	dimensions.push_back( 1 );
+	Id f1 = shell->doCreate( "Neutral", Id(), "f1", dimensions );
+	Id f2a = shell->doCreate( "Neutral", f1, "f2a", dimensions );
+	Id f2b = shell->doCreate( "Neutral", f1, "f2b", dimensions );
+	Id f3 = shell->doCreate( "Neutral", f2a, "f3", dimensions );
+	Id f4a = shell->doCreate( "Neutral", f3, "f4a", dimensions );
+	Id f4b = shell->doCreate( "Neutral", f3, "f4b", dimensions );
+
+	verifyKids( f1, f2a, f2b, f3, f4a, f4b );
 
 	shell->doDelete( f1 );
 	cout << "." << flush;
@@ -331,6 +336,8 @@ void testCopy()
 	Id f4a = shell->doCreate( "Neutral", f3, "f4a", dimensions );
 	Id f4b = shell->doCreate( "Neutral", f3, "f4b", dimensions );
 
+	verifyKids( f1, f2a, f2b, f3, f4a, f4b );
+
 	FullId pa = Field< FullId >::get( f3.eref(), "parent" );
 	assert( pa == FullId( f2a, 0 ) );
 	pa = Field< FullId >::get( f2a.eref(), "parent" );
@@ -341,6 +348,8 @@ void testCopy()
 	//////////////////////////////////////////////////////////////////
 	Id dupf2a = shell->doCopy( f2a, Id(), "TheElephantsAreLoose", 1, 0 );
 	//////////////////////////////////////////////////////////////////
+
+	verifyKids( f1, f2a, f2b, f3, f4a, f4b );
 
 	assert( dupf2a != Id() );
 	// pa = Field< FullId >::get( dupf2a.eref(), "parent" );
@@ -1220,6 +1229,7 @@ void testMpiShell( )
 {
 	testShellParserCreateDelete();
 	testTreeTraversal();
+	testChildren();
 	testDescendant();
 	testMove();
 	testCopy();

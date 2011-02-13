@@ -10576,10 +10576,26 @@ it isn't related to the messaging. Good, I can separate out the issues.
 Let me first put in a few assertions to make sure that I catch this bug
 in the future.
 
-These assertions show that the problem is either with Neutral::buildTree or with
-the child list itself.
+These assertions show that the problem is either with Neutral::buildTree or
+with the Neutral::children() function itself.
 
 Since this has turned out to be a potential error, I've made a separate unit
 test to these ops: testShell:testChildren(). Now it clears this test: it turns
 out the tree is done depth-first. The original bug with the warning about
-the descendant remains.
+the descendant remains. Checkin 2459.
+
+Going back to the problem with the deletes. The problem does NOT crop up in
+testChildren, which sets up exactly the same little tree. Some funny
+scrambling seems to happen when copying.
+
+This gets still more confusing. In testCopy, even before the copy is done,
+the second child of f1 (f2b) has gone missing and is replaced by the id of
+f4b. The same sequence of creations clears the testChildren.
+
+Checked if the precise location in the elements() vector matters. Doesn't.
+Checked with valgrind. Nothing happens.
+
+Clue: When I move the same testChildren() function after testMove(), 
+the problem appears in testChildren. Move may be doing bad things.
+Confirmed: when testChildren is put just before testMove() it is OK. Run just
+afterwards and it fails. Nasty.
