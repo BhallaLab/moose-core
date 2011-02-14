@@ -1,10 +1,11 @@
-@node FAQ
+@node FAQ, , , Top
 @chapter Frequently Asked Questions
 @menu
 * How do I load a model?::      
+* How do I record field 'xyz' from and object?::  
 @end menu
 
-@node How do I load a model?,  , FAQ, FAQ
+@node How do I load a model?, How do I record field 'xyz' from and object?, FAQ, FAQ
 @section How do I load a model?
 There are various formats that a model can be in. MOOSE recognizes
 GENESIS cell prototypes ('.p' files), SBML and neuroML files. Moreover, a GENESIS script
@@ -77,4 +78,45 @@ moose.context.readNeuroML('/usr/share/moose/DEMOS/NeuroML_Reader/CA1/Ca1.xml', '
 @end example
 to load the model defined in Ca1.xml into a Cell object '/ca1'.
 
+@node How do I record field 'xyz' from and object?,  , How do I load a model?, FAQ
+@section How do I record field 'xyz' from and object?
+The @code{Table} class serves for recording data in MOOSE. @code{Table}
+is a multipurpose class, capable of acting as an interpolation table,
+function generator as well as a data recorder.
 
+For recording the value of fields that represent continuous variables,
+during a simulation, you have to connect the @code{inputRequest} field
+of a @code{Table} object to the corresponding value field on the target
+object, and set the step mode of the table object to @code{TAB_BUF}
+(=3).
+
+@example
+xyz_table = moose.Table('/data/xyz_table')
+xyz_table.stepMode = moose.TAB_BUF
+xyz_table.connect('inputRequest', target_object, 'xyz')
+@end example
+
+@subsection How do I record spike events?
+If you only want to record some threshold crossing events, like neuronal
+spikes, then you can use @code{TAB_SPIKE} (=4) mode. In this case, the
+@code{stepSize} field of the table is used as the threshold for the
+target field to be recorded.
+
+@example
+spike_table = moose.Table('/data/spike_table')
+spike_table.step_mode = moose.TAB_SPIKE 
+spike_table.connect('inputRequest', soma, 'Vm')
+spike_table.stepSize = 0.1
+@end example
+
+In the above example, soma is a neuronal compartment (instance of
+@code{Compartment} class). @code{spike_table} will have an entry of the
+current simulated time every time membrane potential @code{Vm} of
+@code{soma} crosses 0.1 Volt (assuming you are using SI system through
+out).
+
+@c Local Variables: 
+@c mode: texinfo
+@c TeX-master: "pymoose"
+@c TeX-master: "pymoose"
+@c End: 

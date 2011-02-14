@@ -15,4 +15,4 @@ TARGET: $(SOURCE)
 default: TARGET
 
 clean:
-	rm pymoose.info
+	rm *.info *.tp *.vr *.aux *.fn *.fns *.pg *.log *.toc
