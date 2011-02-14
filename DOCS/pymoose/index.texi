@@ -1,4 +1,4 @@
-@node Index, , GNU Free Documentation License, Top
+@node Index, Variable Index, , Top
 @unnumbered Index
 
 @menu
@@ -6,7 +6,7 @@
 * Concept Index::               
 @end menu
 
-@node Variable Index, Concept Index, , Index
+@node Variable Index, Concept Index, Index, Index
 @unnumbered Variable Index
 
 @printindex vr
@@ -17,3 +17,8 @@
 
 @printindex cp
 
+
+@c Local Variables: 
+@c mode: texinfo
+@c TeX-master: "pymoose"
+@c End: 
