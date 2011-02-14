@@ -20,7 +20,6 @@ class ReduceMsg: public Msg
 {
 	friend void Msg::initMsgManagers(); // for initializing Id.
 	public:
-		ReduceMsg(); // Used for the Dinfo template only.
 		ReduceMsg( MsgId mid, Eref e1, Element* e2, 
 			const ReduceFinfoBase* rfb );
 		~ReduceMsg();

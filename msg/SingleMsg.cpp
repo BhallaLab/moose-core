@@ -16,14 +16,6 @@ Id SingleMsg::managerId_;
 // Here is the SingleMsg code
 /////////////////////////////////////////////////////////////////////
 
-SingleMsg::SingleMsg()
-	: Msg( 0, 0, 0, SingleMsg::managerId_ ),
-	i1_( 0 ),
-	i2_( 0 )
-{
-	;
-}
-
 SingleMsg::SingleMsg( MsgId mid, Eref e1, Eref e2 )
 	: Msg( mid, e1.element(), e2.element(), SingleMsg::managerId_ ),
 	i1_( e1.index() ), 

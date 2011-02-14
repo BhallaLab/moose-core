@@ -16,14 +16,6 @@
 
 Id AssignmentMsg::managerId_;
 
-AssignmentMsg::AssignmentMsg()
-	: Msg( 0, 0, 0, AssignmentMsg::managerId_ ),
-	i1_( 0 ),
-	i2_( 0 )
-{
-	;
-}
-
 AssignmentMsg::AssignmentMsg( MsgId mid, Eref e1, Eref e2 )
 	: Msg( mid, e1.element(), e2.element(), AssignmentMsg::managerId_ ),
 	i1_( e1.index() ), 

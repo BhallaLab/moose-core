@@ -28,7 +28,6 @@ class DiagonalMsg: public Msg
 {
 	friend void Msg::initMsgManagers(); // for initializing Id.
 	public:
-		DiagonalMsg(); // Used for the Dinfo template only.
 		DiagonalMsg( MsgId mid, Element* e1, Element* e2 );
 		~DiagonalMsg();
 

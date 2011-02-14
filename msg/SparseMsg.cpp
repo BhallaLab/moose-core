@@ -193,12 +193,6 @@ void SparseMsg::transpose()
 //////////////////////////////////////////////////////////////////
 
 
-SparseMsg::SparseMsg()
-	: Msg( 0, 0, 0, SparseMsg::managerId_ )
-{
-	;
-}
-
 SparseMsg::SparseMsg( MsgId mid, Element* e1, Element* e2 )
 	: Msg( mid, e1, e2, SparseMsg::managerId_ ),
 	matrix_( e1->dataHandler()->parentDataHandler()->totalEntries(), 

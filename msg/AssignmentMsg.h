@@ -20,7 +20,6 @@ class AssignmentMsg: public Msg
 {
 	friend void Msg::initMsgManagers(); // for initializing Id.
 	public:
-		AssignmentMsg(); // Used for the Dinfo template only.
 		AssignmentMsg( MsgId mid, Eref e1, Eref e2 );
 		~AssignmentMsg();
 

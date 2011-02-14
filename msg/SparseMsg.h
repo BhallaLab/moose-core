@@ -46,7 +46,6 @@ class SparseMsg: public Msg
 {
 	friend void Msg::initMsgManagers(); // for initializing Id.
 	public:
-		SparseMsg(); // Only for use for Dinfo definition.
 		SparseMsg( MsgId mid, Element* e1, Element* e2 );
 		~SparseMsg();
 

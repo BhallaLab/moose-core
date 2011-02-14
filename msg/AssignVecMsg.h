@@ -20,7 +20,6 @@ class AssignVecMsg: public Msg
 {
 	friend void Msg::initMsgManagers(); // for initializing Id.
 	public:
-		AssignVecMsg(); // Used for the Dinfo template only.
 		AssignVecMsg( MsgId mid, Eref e1, Element* e2 );
 		~AssignVecMsg();
 

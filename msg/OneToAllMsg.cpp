@@ -12,14 +12,6 @@
 
 Id OneToAllMsg::managerId_;
 
-OneToAllMsg::OneToAllMsg()
-	: 
-		Msg( 0, 0, 0, OneToAllMsg::managerId_ ),
-		i1_( 0 )
-{
-	;
-}
-
 OneToAllMsg::OneToAllMsg( MsgId mid, Eref e1, Element* e2 )
 	: 
 		Msg( mid, e1.element(), e2, OneToAllMsg::managerId_ ),

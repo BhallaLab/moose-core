@@ -10717,3 +10717,11 @@ Let's instead create some dummy field here to keep Dinfo happy, but never use
 it.
 That works. I can now go back and get rid of the silly null constructors for
 Msgs. Checkin 2467.
+
+Replaced the usual Element constructor with one that explicitly takes
+DataHandler argument. With this, I can pass in a MsgDataHandler. Now the
+unit tests clear. Checkin 2468.
+
+Cleaned out the null constructors for the various Msg subclasses. 
+Now it compiles, clears unit tests, and also clears the messaging tests in
+MPI mode. Dies shortly afterward, apparently in testCopyMsgOps.

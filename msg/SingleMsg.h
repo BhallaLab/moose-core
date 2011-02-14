@@ -15,7 +15,6 @@ class SingleMsg: public Msg
 {
 	friend void Msg::initMsgManagers(); // for initializing Id.
 	public:
-		SingleMsg();
 		SingleMsg( MsgId mid, Eref e1, Eref e2 );
 		~SingleMsg();
 

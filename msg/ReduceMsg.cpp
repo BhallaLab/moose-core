@@ -14,14 +14,6 @@
 
 Id ReduceMsg::managerId_;
 
-ReduceMsg::ReduceMsg()
-	: Msg( 0, 0, 0, ReduceMsg::managerId_ ),
-		i1_( 0 ),
-		rfb_( 0 )
-{
-	;
-}
-
 ReduceMsg::ReduceMsg( MsgId mid, Eref e1, Element* e2, const ReduceFinfoBase* rfb  )
 	: Msg( mid, e1.element(), e2, ReduceMsg::managerId_ ),
 		i1_( e1.index() ),

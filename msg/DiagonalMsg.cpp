@@ -12,13 +12,6 @@
 
 Id DiagonalMsg::managerId_;
 
-DiagonalMsg::DiagonalMsg()
-	: Msg( 0, 0, 0, DiagonalMsg::managerId_ ),
-	stride_( 0 )
-{
-	;
-}
-
 DiagonalMsg::DiagonalMsg( MsgId mid, Element* e1, Element* e2 )
 	: Msg( mid, e1, e2, DiagonalMsg::managerId_ ), 
 	stride_( 1 )

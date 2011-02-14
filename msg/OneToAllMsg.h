@@ -19,7 +19,6 @@ class OneToAllMsg: public Msg
 {
 	friend void Msg::initMsgManagers(); // for initializing Id.
 	public:
-		OneToAllMsg(); // Used for the Dinfo template only.
 		OneToAllMsg( MsgId mid, Eref e1, Element* e2 );
 		~OneToAllMsg();
 
