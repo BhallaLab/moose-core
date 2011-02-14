@@ -65,16 +65,9 @@ class SparseMsg: public Msg
 		void setMatrix( const SparseMatrix< unsigned int >& m );
 		SparseMatrix< unsigned int >& getMatrix();
 
-	private:
-		SparseMatrix< unsigned int > matrix_;
-		unsigned int numThreads_; // Number of threads to partition
-		unsigned int nrows_; // The original size of the matrix.
-		static Id id_; // The Element that manages Sparse Msgs.
-};
-
-class SparseMsgWrapper: public MsgManager
-{
-	public:
+		/////////////////////////////////////////////////////////////////
+		// Here we define the Element interface functions for SparseMsg
+		/////////////////////////////////////////////////////////////////
 		void setRandomConnectivity( double probability, long seed );
 		double getProbability() const;
 		void setProbability( double value );
@@ -98,9 +91,14 @@ class SparseMsgWrapper: public MsgManager
 		void transpose();
 
 		static const Cinfo* initCinfo();
+
 	private:
+		SparseMatrix< unsigned int > matrix_;
+		unsigned int numThreads_; // Number of threads to partition
+		unsigned int nrows_; // The original size of the matrix.
 		double p_;
 		unsigned long seed_;
+		static Id id_; // The Element that manages Sparse Msgs.
 };
 
 #endif // _SPARSE_MSG_H

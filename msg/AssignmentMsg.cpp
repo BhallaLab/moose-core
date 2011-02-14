@@ -107,3 +107,58 @@ void AssignmentMsg::addToQ( const Element* src, Qinfo& q,
 		q.addToQbackward( p, i, arg );
 	}
 }
+
+///////////////////////////////////////////////////////////////////////
+// Here we set up the MsgManager portion of the class.
+///////////////////////////////////////////////////////////////////////
+
+const Cinfo* AssignmentMsg::initCinfo()
+{
+	///////////////////////////////////////////////////////////////////
+	// Field definitions.
+	///////////////////////////////////////////////////////////////////
+	static ReadOnlyValueFinfo< AssignmentMsg, DataId > i1(
+		"i1",
+		"DataId of source Element.",
+		&AssignmentMsg::getI1
+	);
+	static ReadOnlyValueFinfo< AssignmentMsg, DataId > i2(
+		"i2",
+		"Id of source Element.",
+		&AssignmentMsg::getI2
+	);
+
+	static Finfo* msgFinfos[] = {
+		&i1,		// readonly value
+		&i2,		// readonly value
+	};
+
+	static Cinfo msgCinfo (
+		"Msg",	// name
+		Msg::initCinfo(),				// base class
+		msgFinfos,
+		sizeof( msgFinfos ) / sizeof( Finfo* ),	// num Fields
+		new Dinfo< AssignmentMsg >()
+	);
+
+	return &msgCinfo;
+}
+
+static const Cinfo* assignmentMsgCinfo = AssignmentMsg::initCinfo();
+
+/**
+ * Return the first DataId
+ */
+DataId AssignmentMsg::getI1() const
+{
+	return i1_;
+}
+
+/**
+ * Return the second DataId
+ */
+DataId AssignmentMsg::getI2() const
+{
+	return i2_;
+}
+

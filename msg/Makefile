@@ -14,7 +14,6 @@ OBJ = \
 	AssignmentMsg.o	\
 	AssignVecMsg.o	\
 	DiagonalMsg.o	\
-	MsgManager.o	\
 	OneToAllMsg.o	\
 	OneToOneMsg.o	\
 	SingleMsg.o	\
@@ -32,7 +31,6 @@ $(OBJ)	: $(HEADERS)
 AssignmentMsg.o:	AssignmentMsg.h
 AssignVecMsg.o:	AssignVecMsg.h
 DiagonalMsg.o:	DiagonalMsg.h
-MsgManager.o:	MsgManager.h
 OneToAll.o:	OneToAll.h
 OneToOne.o:	OneToOne.h
 SingleMsg.o:	SingleMsg.h

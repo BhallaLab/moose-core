@@ -39,21 +39,6 @@ class SingleMsg: public Msg
 		void addToQ( const Element* src, Qinfo& q, 
 			const ProcInfo* p, MsgFuncBinding i, const char* arg ) const;
 
-	private:
-		static void setId( Id id );
-		DataId i1_;
-		DataId i2_;
-		static Id id_;
-};
-
-class SingleMsgWrapper: public MsgManager
-{
-	public:
-		/*
-		Id getE1() const;
-		Id getE2() const;
-		*/
-
 		void setI1( DataId di );
 		DataId getI1() const;
 
@@ -62,7 +47,10 @@ class SingleMsgWrapper: public MsgManager
 
 		static const Cinfo* initCinfo();
 	private:
-		// MsgId mid_;
+		static void setId( Id id );
+		DataId i1_;
+		DataId i2_;
+		static Id id_;
 };
 
 #endif // _SINGLE_MSG_H

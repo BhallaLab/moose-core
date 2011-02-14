@@ -7,27 +7,29 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _ONE_DIM_GLOBAL_HANDLER_H
-#define _ONE_DIM_GLOBAL_HANDLER_H
+#ifndef _MSG_DATA_HANDLER_H
+#define _MSG_DATA_HANDLER_H
 
 /**
- * This class manages the data part of Elements. It handles a one-
- * dimensional array.
+ * This class manages the Element interface for msgs.
  */
-class OneDimGlobalHandler: public DataHandler
+class MsgDataHandler: public DataHandler
 {
 	public:
-		OneDimGlobalHandler( const DinfoBase* dinfo );
-		OneDimGlobalHandler( const OneDimGlobalHandler* other );
+		MsgDataHandler( const DinfoBase* dinfo );
 
-		~OneDimGlobalHandler();
+		MsgDataHandler( const MsgDataHandler* other );
+
+		~MsgDataHandler();
 
 		DataHandler* globalize() const;
-
 		DataHandler* unGlobalize() const;
 
 		bool nodeBalance( unsigned int size );
 
+		/**
+		 * Make a single copy
+		 */
 		DataHandler* copy() const;
 
 		DataHandler* copyExpand( unsigned int copySize ) const;
@@ -40,8 +42,7 @@ class OneDimGlobalHandler: public DataHandler
 		char* data( DataId index ) const;
 
 		/**
-		 * calls process on data, using threading info from the ProcInfo,
-		 * and internal info about node decomposition.
+		 * calls process on data, using threading info from the ProcInfo
 		 */
 		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
 
@@ -55,43 +56,44 @@ class OneDimGlobalHandler: public DataHandler
 		 */
 		unsigned int localEntries() const;
 
+		// Inherited. Returns data part of DataId. 
+		// unsigned int linearIndex( const DataId& d ) const;
+
+		/**
+		 * Returns the DataId corresponding to the specified linear index.
+		 * Again, inherited. Returns the linearIndex as the data part.
+		 */
+		// DataId dataId( unsigned int linearIndex) const;
+
 		/**
 		 * Returns the number of dimensions of the data.
 		 */
-		unsigned int numDimensions() const {
-			return 1;
-		}
+		unsigned int numDimensions() const;
 
 		unsigned int sizeOfDim( unsigned int dim ) const;
 
 		bool resize( vector< unsigned int > dims );
 
-		/**
-		 * Returns dimensions of this data.
-		 */
 		vector< unsigned int > dims() const;
 
 		/**
-		 * Returns true if the node decomposition has the data on the
-		 * current node
+		 * Returns true always: it is a global.
 		 */
 		bool isDataHere( DataId index ) const;
 
-		bool isAllocated() const;
+		/// Return true: msgs are always allocated.
+		virtual bool isAllocated() const;
 
 		bool isGlobal() const;
 
-		iterator begin() const {
-			return iterator( this, 0, 0 );
-		}
+		iterator begin() const;
 
-		iterator end() const {
-			return iterator( this, size_, size_ );
-		}
+		iterator end() const;
 
 		/**
 		 * Assigns a block of data at the specified location.
-		 * Returns true if all OK. No allocation.
+		 * Here the numData has to be 1 and the startIndex
+		 * has to be 0. Returns true if all this is OK.
 		 */
 		bool setDataBlock( const char* data, unsigned int numData,
 			const vector< unsigned int >& startIndex ) const;
@@ -102,7 +104,7 @@ class OneDimGlobalHandler: public DataHandler
 
 	protected:
 		char* data_;
-		unsigned int size_;	// Number of data entries in the whole array
+	private:
 };
 
-#endif	// _ONE_DIM_GLOBAL_HANDLER_H
+#endif // _MSG_DATA_HANDLER_H

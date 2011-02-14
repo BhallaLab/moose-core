@@ -8,49 +8,37 @@
 **********************************************************************/
 
 #include "header.h"
-#include "MsgManager.h"
+#include "AssignmentMsg.h"
+#include "AssignVecMsg.h"
+#include "SingleMsg.h"
+#include "DiagonalMsg.h"
+#include "OneToOneMsg.h"
+#include "OneToAllMsg.h"
+#include "SparseMatrix.h"
+#include "SparseMsg.h"
+#include "ReduceMsg.h"
 
 ///////////////////////////////////////////////////////////////////////////
 
 // Static field declaration.
 vector< Msg* > Msg::msg_;
 vector< MsgId > Msg::garbageMsg_;
-vector< unsigned int > Msg::lookupDataId_;
 const MsgId Msg::badMsg = 0;
 const MsgId Msg::setMsg = 1;
+Id MsgManagerId_;
 
 Msg::Msg( MsgId mid, Element* e1, Element* e2, Id managerId )
 	: mid_( mid), e1_( e1 ), e2_( e2 )
 {
-	assert( mid_ < msg_.size() );
+	// assert( mid_ < msg_.size() );
 	if ( mid_ >= msg_.size() ) {
 		msg_.resize( mid + 1, 0 );
-		lookupDataId_.resize( mid + 1, 0 );
 	}
 	msg_[mid_] = this;
 	e1->addMsg( mid_ );
 	e2->addMsg( mid_ );
 	MsgManager::addMsg( mid_, managerId );
 }
-
-/**
- * This sets up the set/get msg. It should be called first of all,
- * at init time.
- * Deprecated.
-Msg::Msg( Element* e1, Element* e2, MsgId mid, Id managerId )
-	: e1_( e1 ), e2_( e2 ), mid_( mid )
-{
-	if ( msg_.size() < mid )
-		msg_.resize( mid + 1 );
-	assert( msg_[mid] == 0 );
-	assert( lookupDataId_[mid] == 0 );
-	msg_[mid] = this;
-	lookupDataId_[ mid_ ] = 0;
-	e1->addMsg( mid );
-	e2->addMsg( mid );
-	MsgManager::addMsg( mid_, managerId );
-}
- */
 
 Msg::~Msg()
 {
@@ -71,11 +59,9 @@ MsgId Msg::nextMsgId()
 	if ( garbageMsg_.size() > 0 ) {
 		ret = garbageMsg_.back();
 		garbageMsg_.pop_back();
-		lookupDataId_[ ret ] = 0;
 	} else {
 		ret = msg_.size();
 		msg_.push_back( 0 );
-		lookupDataId_.push_back( 0 );
 	}
 	return ret;
 }
@@ -95,7 +81,6 @@ void Msg::deleteMsg( MsgId mid )
 void Msg::initNull()
 {
 	assert( msg_.size() == 0 );
-	assert( lookupDataId_.size() == 0 );
 	nextMsgId(); // Set aside entry 0 for badMsg;
 	nextMsgId(); // Set aside entry 1 for setMsg;
 }
@@ -122,15 +107,16 @@ Msg* Msg::safeGetMsg( MsgId m )
 
 Eref Msg::manager( Id id ) const
 {
-	assert( lookupDataId_.size() > mid_ );
-	return Eref( id(), lookupDataId_[ mid_ ] );
+	return Eref( id(), mid_ );
 }
 
+/*
 void Msg::setDataId( unsigned int di ) const
 {
 	assert( lookupDataId_.size() > mid_ );
 	lookupDataId_[ mid_ ] = di;
 }
+*/
 
 void Msg::addToQ( const Element* src, Qinfo& q,
 	const ProcInfo* p, MsgFuncBinding i, const char* arg ) const
@@ -140,4 +126,102 @@ void Msg::addToQ( const Element* src, Qinfo& q,
 	} else {
 		q.addToQbackward( p, i, arg ); 
 	}
+}
+
+// Static func
+unsigned int Msg::numMsgs()
+{
+	return msg_.size();
+}
+
+/**
+ * Return the first element id
+ */
+Id Msg::getE1() const
+{
+	return e1_.id();
+}
+
+/**
+ * Return the second element id
+ */
+Id Msg::getE2() const
+{
+	return e2_.id();
+}
+
+///////////////////////////////////////////////////////////////////////////
+// Here we set up the Element related stuff for Msgs.
+///////////////////////////////////////////////////////////////////////////
+
+const Cinfo* Msg::initCinfo()
+{
+	///////////////////////////////////////////////////////////////////
+	// Field definitions.
+	///////////////////////////////////////////////////////////////////
+	static ReadOnlyValueFinfo< Msg, Id > e1(
+		"e1",
+		"Id of source Element.",
+		&Msg::getE1
+	);
+	static ReadOnlyValueFinfo< Msg, Id > e2(
+		"e2",
+		"Id of source Element.",
+		&Msg::getE2
+	);
+
+	static Finfo* msgFinfos[] = {
+		&e1,		// readonly value
+		&e2,		// readonly value
+	};
+
+	static Cinfo msgCinfo (
+		"Msg",	// name
+		Neutral::initCinfo(),				// base class
+		msgFinfos,
+		sizeof( msgFinfos ) / sizeof( Finfo* ),	// num Fields
+		new Dinfo< Msg >()
+	);
+
+	return &msgCinfo;
+}
+
+static const Cinfo* msgCinfo = Msg::initCinfo();
+
+// Static func
+void Msg::initMsgManagers()
+{
+	vector< unsigned int > dims( 1, 1 );
+
+	// This is to be the parent of all the msg managers.
+	msgManagerId_ = Id::nextId();
+	new Element( msgManagerId_, Neutral::initCinfo(), "Msgs", dims, 1 );
+	Shell::adopt( Id(), msgManagerId_ );
+
+	SingleMsg::id_ = Id::nextId();
+	new Element( SingleMsg::id_, SingleMsg::initCinfo(), "singleMsg", dims, 1 );
+	Shell::adopt( Id(), SingleMsg::id_ );
+
+	OneToOneMsg::id_ = Id::nextId();
+	new Element( OneToOneMsg::id_, OneToOneMsg::initCinfo(), "oneToOneMsg", dims, 1 );
+	Shell::adopt( Id(), OneToOneMsg::id_ );
+
+	OneToAllMsg::id_ = Id::nextId();
+	new Element( OneToAllMsg::id_, OneToAllMsg::initCinfo(), "oneToAllMsg", dims, 1 );
+	Shell::adopt( Id(), OneToAllMsg::id_ );
+	DiagonalMsg::id_ = Id::nextId();
+	new Element( DiagonalMsg::id_, DiagonalMsg::initCinfo(), "diagonalMsg", dims, 1 );
+	Shell::adopt( Id(), DiagonalMsg::id_ );
+	SparseMsg::id_ = Id::nextId();
+	new Element( SparseMsg::id_, SparseMsg::initCinfo(), "sparseMsg", dims, 1 );
+	Shell::adopt( Id(), SparseMsg::id_ );
+	AssignmentMsg::id_ = Id::nextId();
+	new Element( AssignmentMsg::id_, AssignmentMsg::initCinfo(), "assignmentMsg", dims, 1 );
+	Shell::adopt( Id(), AssignmentMsg::id_ );
+	AssignVecMsg::id_ = Id::nextId();
+	new Element( AssignVecMsg::id_, AssignVecMsg::initCinfo(), "assignVecMsg", dims, 1 );
+	Shell::adopt( Id(), AssignVecMsg::id_ );
+	ReduceMsg::id_ = Id::nextId();
+	new Element( ReduceMsg::id_, ReduceMsg::initCinfo(), "ReduceMsg", dims, 1 );
+	Shell::adopt( Id(), ReduceMsg::id_ );
 }

@@ -20,39 +20,39 @@ Id SparseMsg::id_;
 //    MOOSE wrapper functions for field access.
 //////////////////////////////////////////////////////////////////
 
-const Cinfo* SparseMsgWrapper::initCinfo()
+const Cinfo* SparseMsg::initCinfo()
 {
 	///////////////////////////////////////////////////////////////////
 	// Field definitions.
 	///////////////////////////////////////////////////////////////////
-	static ReadOnlyValueFinfo< SparseMsgWrapper, unsigned int > numRows(
+	static ReadOnlyValueFinfo< SparseMsg, unsigned int > numRows(
 		"numRows",
 		"Number of rows in matrix.",
-		&SparseMsgWrapper::getNumRows
+		&SparseMsg::getNumRows
 	);
-	static ReadOnlyValueFinfo< SparseMsgWrapper, unsigned int > numColumns(
+	static ReadOnlyValueFinfo< SparseMsg, unsigned int > numColumns(
 		"numColumns",
 		"Number of columns in matrix.",
-		&SparseMsgWrapper::getNumColumns
+		&SparseMsg::getNumColumns
 	);
-	static ReadOnlyValueFinfo< SparseMsgWrapper, unsigned int > numEntries(
+	static ReadOnlyValueFinfo< SparseMsg, unsigned int > numEntries(
 		"numEntries",
 		"Number of Entries in matrix.",
-		&SparseMsgWrapper::getNumEntries
+		&SparseMsg::getNumEntries
 	);
 
-	static ValueFinfo< SparseMsgWrapper, double > probability(
+	static ValueFinfo< SparseMsg, double > probability(
 		"probability",
 		"connection probability for random connectivity.",
-		&SparseMsgWrapper::setProbability,
-		&SparseMsgWrapper::getProbability
+		&SparseMsg::setProbability,
+		&SparseMsg::getProbability
 	);
 
-	static ValueFinfo< SparseMsgWrapper, long > seed(
+	static ValueFinfo< SparseMsg, long > seed(
 		"seed",
 		"Random number seed for generating probabilistic connectivity.",
-		&SparseMsgWrapper::setSeed,
-		&SparseMsgWrapper::getSeed
+		&SparseMsg::setSeed,
+		&SparseMsg::getSeed
 	);
 
 ////////////////////////////////////////////////////////////////////////
@@ -61,28 +61,28 @@ const Cinfo* SparseMsgWrapper::initCinfo()
 
 	static DestFinfo setRandomConnectivity( "setRandomConnectivity",
 		"Assigns connectivity with specified probability and seed",
-		new OpFunc2< SparseMsgWrapper, double, long >( 
-		&SparseMsgWrapper::setRandomConnectivity ) );
+		new OpFunc2< SparseMsg, double, long >( 
+		&SparseMsg::setRandomConnectivity ) );
 
 	static DestFinfo setEntry( "setEntry",
 		"Assigns single row,column value",
-		new OpFunc3< SparseMsgWrapper, unsigned int, unsigned int, unsigned int >( 
-		&SparseMsgWrapper::setEntry ) );
+		new OpFunc3< SparseMsg, unsigned int, unsigned int, unsigned int >( 
+		&SparseMsg::setEntry ) );
 
 	static DestFinfo unsetEntry( "unsetEntry",
 		"Clears single row,column entry",
-		new OpFunc2< SparseMsgWrapper, unsigned int, unsigned int >( 
-		&SparseMsgWrapper::unsetEntry ) );
+		new OpFunc2< SparseMsg, unsigned int, unsigned int >( 
+		&SparseMsg::unsetEntry ) );
 
 	static DestFinfo clear( "clear",
 		"Clears out the entire matrix",
-		new OpFunc0< SparseMsgWrapper >( 
-		&SparseMsgWrapper::clear ) );
+		new OpFunc0< SparseMsg >( 
+		&SparseMsg::clear ) );
 
 	static DestFinfo transpose( "transpose",
 		"Transposes the sparse matrix",
-		new OpFunc0< SparseMsgWrapper >( 
-		&SparseMsgWrapper::transpose ) );
+		new OpFunc0< SparseMsg >( 
+		&SparseMsg::transpose ) );
 
 ////////////////////////////////////////////////////////////////////////
 // Assemble it all.
@@ -106,131 +106,87 @@ const Cinfo* SparseMsgWrapper::initCinfo()
 		MsgManager::initCinfo(),		// base class
 		sparseMsgFinfos,
 		sizeof( sparseMsgFinfos ) / sizeof( Finfo* ),	// num Fields
-		new Dinfo< SparseMsgWrapper >()
+		new Dinfo< SparseMsg >()
 	);
 
 	return &sparseMsgCinfo;
 }
 
-static const Cinfo* sparseMsgCinfo = SparseMsgWrapper::initCinfo();
+static const Cinfo* sparseMsgCinfo = SparseMsg::initCinfo();
 
 //////////////////////////////////////////////////////////////////
 //    Value Fields
 //////////////////////////////////////////////////////////////////
-void SparseMsgWrapper::setProbability ( double probability )
+void SparseMsg::setProbability ( double probability )
 {
-	Msg* m = Msg::safeGetMsg( getMid() );
-	SparseMsg* pm = dynamic_cast< SparseMsg *>( m );
-	if ( pm ) {
-		p_ = probability;
-		mtseed( seed_ );
-		pm->randomConnect( probability );
-	}
+	p_ = probability;
+	mtseed( seed_ );
+	randomConnect( probability );
 }
 
-double SparseMsgWrapper::getProbability ( ) const
+double SparseMsg::getProbability ( ) const
 {
 	return p_;
 }
 
-void SparseMsgWrapper::setSeed ( long seed )
+void SparseMsg::setSeed ( long seed )
 {
-	Msg* m = Msg::safeGetMsg( getMid() );
-	SparseMsg* pm = dynamic_cast< SparseMsg *>( m );
-	if ( pm ) {
-		seed_ = seed;
-		mtseed( seed_ );
-		pm->randomConnect( p_ );
-	}
+	seed_ = seed;
+	mtseed( seed_ );
+	randomConnect( p_ );
 }
 
-long SparseMsgWrapper::getSeed () const
+long SparseMsg::getSeed () const
 {
 	return seed_;
 }
 
-unsigned int SparseMsgWrapper::getNumRows() const
+unsigned int SparseMsg::getNumRows() const
 {
-	Msg* m = Msg::safeGetMsg( getMid() );
-	SparseMsg* pm = dynamic_cast< SparseMsg *>( m );
-	if ( pm ) {
-		return pm->getMatrix().nRows();
-	}
-	return 0;
+	return getMatrix().nRows();
 }
 
-unsigned int SparseMsgWrapper::getNumColumns() const
+unsigned int SparseMsg::getNumColumns() const
 {
-	Msg* m = Msg::safeGetMsg( getMid() );
-	SparseMsg* pm = dynamic_cast< SparseMsg *>( m );
-	if ( pm ) {
-		return pm->getMatrix().nColumns();
-	}
-	return 0;
+	return getMatrix().nColumns();
 }
 
-unsigned int SparseMsgWrapper::getNumEntries() const
+unsigned int SparseMsg::getNumEntries() const
 {
-	Msg* m = Msg::safeGetMsg( getMid() );
-	SparseMsg* pm = dynamic_cast< SparseMsg *>( m );
-	if ( pm ) {
-		return pm->getMatrix().nEntries();
-	}
-	return 0;
+	return getMatrix().nEntries();
 }
 
 //////////////////////////////////////////////////////////////////
 //    DestFields
 //////////////////////////////////////////////////////////////////
 
-void SparseMsgWrapper::setRandomConnectivity(
-	double probability, long seed )
+void SparseMsg::setRandomConnectivity( double probability, long seed )
 {
-	Msg* m = Msg::safeGetMsg( getMid() );
-	SparseMsg* pm = dynamic_cast< SparseMsg* >( m );
-	if ( pm ) {
-		p_ = probability;
-		seed_ = seed;
-		mtseed( seed );
-		pm->randomConnect( probability );
-	}
+	p_ = probability;
+	seed_ = seed;
+	mtseed( seed );
+	randomConnect( probability );
 }
 
-void SparseMsgWrapper::setEntry(
+void SparseMsg::setEntry(
 	unsigned int row, unsigned int column, unsigned int value )
 {
-	Msg* m = Msg::safeGetMsg( getMid() );
-	SparseMsg* pm = dynamic_cast< SparseMsg *>( m );
-	if ( pm ) {
-		pm->getMatrix().set( row, column, value );
-	}
+	matrix_.set( row, column, value );
 }
 
-void SparseMsgWrapper::unsetEntry( unsigned int row, unsigned int column )
+void SparseMsg::unsetEntry( unsigned int row, unsigned int column )
 {
-	Msg* m = Msg::safeGetMsg( getMid() );
-	SparseMsg* pm = dynamic_cast< SparseMsg *>( m );
-	if ( pm ) {
-		pm->getMatrix().unset( row, column );
-	}
+	matrix_.unset( row, column );
 }
 
-void SparseMsgWrapper::clear()
+void SparseMsg::clear()
 {
-	Msg* m = Msg::safeGetMsg( getMid() );
-	SparseMsg* pm = dynamic_cast< SparseMsg *>( m );
-	if ( pm ) {
-		pm->getMatrix().clear();
-	}
+	matrix_.clear();
 }
 
-void SparseMsgWrapper::transpose()
+void SparseMsg::transpose()
 {
-	Msg* m = Msg::safeGetMsg( getMid() );
-	SparseMsg* pm = dynamic_cast< SparseMsg *>( m );
-	if ( pm ) {
-		pm->getMatrix().transpose();
-	}
+	matrix_.transpose();
 }
 
 //////////////////////////////////////////////////////////////////
@@ -273,6 +229,7 @@ void SparseMsg::exec( const char* arg, const ProcInfo *p ) const
 {
 	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
 	// arg += sizeof( Qinfo );
+	bool report = 1;
 
 	/**
 	 * The system is really optimized for data from e1 to e2.
@@ -286,14 +243,20 @@ void SparseMsg::exec( const char* arg, const ProcInfo *p ) const
 		const unsigned int* colIndex;
 		unsigned int n = matrix_.getRow( row, &fieldIndex, &colIndex );
 
+		if ( e1_->getName() == "test2" )
+			report = 0;
+
+		if ( report ) cout << p->nodeIndexInGroup << "." << p->threadIndexInGroup << ": SparseMsg " << e1_->getName() << "->" << e2_->getName() << ", row= " << row << ": entries= ";
 		// J counts over all the column entries, i.e., all targets.
 		for ( unsigned int j = 0; j < n; ++j ) {
+			if ( report ) cout << "(" << colIndex[j] << "," << fieldIndex[j] << ")";
 			if ( p->execThread( e2_->id(), colIndex[j] ) ) {
 				Eref tgt( e2_, DataId( colIndex[j], fieldIndex[j] ) );
 				if ( tgt.isDataHere() )
 					f->op( tgt, arg );
 			}
 		}
+		if ( report ) cout << "\n";
 	} else {
 		// Avoid using this back operation!
 		// Note that we do NOT use the fieldIndex going backward. It is

@@ -103,7 +103,7 @@ class ZeroDimGlobalHandler: public DataHandler
 			return 1;
 		}
 
-		virtual bool isAllocated() const;
+		bool isAllocated() const;
 
 		bool isGlobal() const
 		{

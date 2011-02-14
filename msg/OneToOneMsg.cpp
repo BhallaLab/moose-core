@@ -122,3 +122,34 @@ Msg* OneToOneMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 	ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
 	return ret;
 }
+
+///////////////////////////////////////////////////////////////////////
+// Here we set up the MsgManager portion of the class.
+///////////////////////////////////////////////////////////////////////
+
+const Cinfo* OneToAllMsg::initCinfo()
+{
+	///////////////////////////////////////////////////////////////////
+	// Field definitions. Nothing here.
+	///////////////////////////////////////////////////////////////////
+
+	static Cinfo msgCinfo (
+		"Msg",	// name
+		Msg::initCinfo(),				// base class
+		0,								// Finfo array
+		0,								// Num Fields
+		new Dinfo< OneToAllMsg >()
+	);
+
+	return &msgCinfo;
+}
+
+static const Cinfo* oneToAllMsgCinfo = OneToAllMsg::initCinfo();
+
+/**
+ * Return the first DataId
+ */
+DataId OneToAllMsg::getI1() const
+{
+	return i1_;
+}

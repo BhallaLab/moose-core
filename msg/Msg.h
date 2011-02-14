@@ -68,12 +68,13 @@ class Msg
 		/**
 		 * Return the Eref of the managing object.
 		 */
-		virtual Eref manager( Id id ) const;
+		Eref manager( Id id ) const;
 
 		/**
 		 * Fills in the specified dataId for this msg.
-		 */
+		 * Deprecated
 		void setDataId( unsigned int di ) const;
+		 */
 
 		/**
 		 * Return the first element
@@ -88,6 +89,16 @@ class Msg
 		Element* e2() const {
 			return e2_;
 		}
+
+		/**
+		 * Return the first element id
+		 */
+		 Id getE1() const;
+
+		/**
+		 * Return the second element id
+		 */
+		 Id getE2() const;
 
 		/**
 		 * return the Msg Id.
@@ -150,6 +161,11 @@ class Msg
 		static Msg* safeGetMsg( MsgId m );
 
 		/**
+		 * Reports total # of msgs defined.
+		 */
+		static unsigned int numMsgs();
+
+		/**
 		 * The zero MsgId, used as the error value.
 		 */
 		static const MsgId badMsg;
@@ -159,6 +175,17 @@ class Msg
 		 */
 		static const MsgId setMsg;
 
+		/**
+		 * Set up the Msg to be accessed like an Element
+		 * Although the bare Msg class is never seen, we will use it
+		 * as a base class and set up some common fields here.
+		 */
+		static const Cinfo* initCinfo();
+
+		/**
+		 * Sets up the Element managers for each of the Msg classes
+		 */
+		static void initMsgManagers();
 	protected:
 		MsgId mid_; /// Index of this Msg on the msg_ vector.
 
@@ -181,8 +208,13 @@ class Msg
 		 * Used to find and set
 		 * msg fields. We only need the data part of the DataId, so this
 		 * is just an unsigned int.
-		 */
 		static vector< unsigned int > lookupDataId_;
+		 */
+
+		/**
+		 * Keeps track of the Id of the parent of all the MsgManager Elms.
+		 */
+		static Id msgManagerId_;
 };
 
 #endif // _MSG_H

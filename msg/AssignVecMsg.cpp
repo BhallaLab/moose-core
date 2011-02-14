@@ -92,3 +92,43 @@ void AssignVecMsg::addToQ( const Element* src, Qinfo& q,
 		q.addToQbackward( p, i, arg ); 
 	}
 }
+
+///////////////////////////////////////////////////////////////////////
+// Here we set up the MsgManager portion of the class.
+///////////////////////////////////////////////////////////////////////
+
+const Cinfo* AssignVecMsg::initCinfo()
+{
+	///////////////////////////////////////////////////////////////////
+	// Field definitions.
+	///////////////////////////////////////////////////////////////////
+	static ReadOnlyValueFinfo< AssignVecMsg, DataId > i1(
+		"i1",
+		"DataId of source Element.",
+		&AssignVecMsg::getI1
+	);
+
+	static Finfo* msgFinfos[] = {
+		&i1,		// readonly value
+	};
+
+	static Cinfo msgCinfo (
+		"Msg",	// name
+		Msg::initCinfo(),				// base class
+		msgFinfos,
+		sizeof( msgFinfos ) / sizeof( Finfo* ),	// num Fields
+		new Dinfo< AssignVecMsg >()
+	);
+
+	return &msgCinfo;
+}
+
+static const Cinfo* assignmentMsgCinfo = AssignVecMsg::initCinfo();
+
+/**
+ * Return the first DataId
+ */
+DataId AssignVecMsg::getI1() const
+{
+	return i1_;
+}

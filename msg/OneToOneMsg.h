@@ -31,18 +31,10 @@ class OneToOneMsg: public Msg
 		Msg* copy( Id origSrc, Id newSrc, Id newTgt,
 			FuncId fid, unsigned int b, unsigned int n ) const;
 
-		// Uses default addToQ function.
-	private:
-		static Id id_;
-};
-
-// No extra fields compared to the MsgManager.
-class OneToOneMsgWrapper: public MsgManager
-{
-	public:
+		/// Setup function for Element-style access to Msg fields.
 		static const Cinfo* initCinfo();
 	private:
-		// MsgId mid_;
+		static Id id_;
 };
 
 #endif // _ONE_TO_ONE_MSG_H

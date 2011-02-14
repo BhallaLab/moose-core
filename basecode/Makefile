@@ -27,6 +27,7 @@ OBJ = \
 	ZeroDimHandler.o \
 	OneDimHandler.o \
 	FieldDataHandlerBase.o \
+	MsgDataHandler.o \
 	Eref.o	\
 	Finfo.o	\
 	DestFinfo.o	\
@@ -66,6 +67,7 @@ HEADERS = \
 	OneDimGlobalHandler.h \
 	FieldDataHandlerBase.h \
 	FieldDataHandler.h \
+	MsgDataHandler.h \
 	Element.h \
 	Eref.h \
 	Finfo.h \

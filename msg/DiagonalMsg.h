@@ -45,10 +45,24 @@ class DiagonalMsg: public Msg
 		Msg* copy( Id origSrc, Id newSrc, Id newTgt,
 			FuncId fid, unsigned int b, unsigned int n ) const;
 
-		// The addToQ function is inherited from base class
-
+		/**
+		 * The stride is the increment to the src DataId that gives the dest
+		 * DataId. It can be positive or negative, but bounds checking
+		 * takes place and it does not wrap around.
+		 * This function assigns the stride.
+		 */
 		void setStride( int stride );
+
+		/**
+		 * The stride is the increment to the src DataId that gives the dest
+		 * DataId. It can be positive or negative, but bounds checking
+		 * takes place and it does not wrap around.
+		 * This function reads the stride.
+		 */
 		int getStride() const;
+
+		/// Setup function for Element-style access to Msg fields.
+		static const Cinfo* initCinfo();
 	private:
 		int stride_; // Increment between targets.
 		unsigned int numThreads_;

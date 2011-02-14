@@ -34,6 +34,15 @@ class AssignmentMsg: public Msg
 
 		void addToQ( const Element* src, Qinfo& q, const ProcInfo* p,
 			MsgFuncBinding i, const char* arg ) const;
+
+		/// Return the first DataId
+		DataId getI1() const;
+
+		/// Return the second DataId
+		DataId getI2() const;
+
+		/// Setup function for Element-style access to Msg fields.
+		static const Cinfo* initCinfo();
 	private:
 		DataId i1_;
 		DataId i2_;

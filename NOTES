@@ -10612,3 +10612,97 @@ Things now seem to work. Perhaps the reused MsgId was also put into the garbage
 handler for Msgs, and then got doubly assigned.
 
 Checkin 2461.
+
+Cleaned up some printf debugging.  Checkin 2462. 
+
+Now back to mpi test. Still fails, as far as I can make out it is in the
+same testShell.cpp:testShellAddMsg. Seems to die in just making the
+test OneToOne msg, with a assertion failure in Msg.cpp on node1.
+Looked at it.  This assertion failure is because the remote-assigned 
+messages are likely to be bigger than the already allocated msg vec size.
+Need to provide a cleaner way to fill up.
+
+With this fix I now have it fail a bit further along, while testing
+the results of the messaging. Progress!
+
+Further good news: The output matches for cases a through d,
+representing Single, OneToAll, OneToOne and Diagonal msgs. The
+Sparse msg has failed on the off-node portion.
+
+Put in some printf debugging, result is very simple: there are no entries
+in the SparseMsg table on node 1.
+
+More debugging, turns out that the values never get set. The MsgManager::getMid
+call returns a badMid value so the setEntry call never finds the associated
+Msg. Need to figure out how the mid value gets set.
+
+It is set when the message is created. For some reason we have different
+entries in node0 and node1. But the value assigned seems OK.
+
+We have a discrepancy in the data handler for the SparseMsg Element.
+It claims to be global (from its isGlobal function), but has 3 entries on 
+node1 and 5 on node0.
+
+What should it do?
+
+The data handler for the Manager Element of any message contains just the MsgId.
+The different Manager Elements each hold arrays of these MsgIds.
+There is a static vector of unsigned ints, Msg::lookUpDataId_, indexed by 
+msgid, to look up the dataIds for each msg. So:
+Msg to DataId: Msg::lookUpDataId_[msg->msgid]
+
+object to msg: Msg::safeGetMsg( getMid() );
+where the getMid function just returns the mid_ value of the MsgManager.
+Then the derived MsgManager, such as SparseMsgWrapper, typecasts the Msg to
+the appropriate type and does stuff with it.
+
+For this to work, the object indexing and msg indexing must be identical
+across nodes. Msg Indexing has just been fixed up after a lot of effort.
+Looks like the object indexing isn't consistent. By making temporary 
+SparseMsgs during unit tests in single-node mode, we would have added
+extra entries. 
+
+How does this mess things up? The DataId that looks up the MsgManager object
+comes from the Msg::lookupDataId of the master node. This is misaligned if
+the master node has been doing other stuff.
+
+How to fix?
+- Eliminate lookupDataId and all data in the Msgmanager, and just have them
+	a zero dim case with a virtual index by mid. It converts this to the
+	appropriate type.
+	In other words their DataId.data is just the MsgId.
+	- This fails as soon as we want to store extra information about each
+	Msg, such as the random seed or the connectivity info.
+	- But the info could just as well be stored in the Msg itself. So the
+	typecasting trick would work.
+	- Will need to make a new class of DataHandler, MsgDataHandler, to
+	do the nasty lookup.
+	- There is some pending oddness about how to deal with iteration.
+		- Successive MsgIds may belong to different Msg types, so 
+		ideally we would like to iterate only through msgs of the 
+		correct type. We could go back to an auxiliary array but would
+		return to issues of sync between nodes.
+		- A global vector of MsgTypeId[ MsgId ] could address this.
+		Still will need to know which type we are at the DataHandler 
+		level.
+	- Related issue is how to prevent attempts to look up an arbitrary
+		DataId/MsgId index into a specific MsgDataHandler. 
+		Should be able to return a dummy entry by doing the typecast.
+
+
+Starting on this. Lots to do.
+	+ Arrange to call Msg::initMsgManagers at the right time.
+	+ Fix initMsgManagers so that the new ids are adopted by the parent.
+	+ Merge in Wrapper and Msg functions for all msgs
+	+ eliminate MsgManager stuff from makefile
+============================================================================
+14 Feb 2011
+
+Setting up initMsgManagers. Because we have a simpler interface, 
+I don't need to do the earlier acrobatics to fit the MsgManagers 
+in after the Clock and Tick are defined but before any messages 
+are sent.
+
+Done the first pass coding, now to compile this mess.
+Compiles through basecode directory. Time to checkin.
+

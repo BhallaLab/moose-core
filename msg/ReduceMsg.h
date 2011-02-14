@@ -11,8 +11,9 @@
 #define _REDUCE_MSG_H
 
 /**
- * This is a specialized msg type used during field set and gets. It is
- * always anchored at e1 to the Shell, and at e2 to the actual target.
+ * This is a specialized msg type used to carry out 'reduce' operations
+ * where a data value is condensed from all individual object entries.
+ * The reduction happens across threads and nodes. 
  */
 
 class ReduceMsg: public Msg
@@ -34,6 +35,12 @@ class ReduceMsg: public Msg
 
 		void addToQ( const Element* src, Qinfo& q, const ProcInfo* p,
 			MsgFuncBinding i, const char* arg ) const;
+
+		/// Return the first DataId
+		DataId getI1() const;
+
+		/// Setup function for Element-style access to Msg fields.
+		static const Cinfo* initCinfo();
 	private:
 		DataId i1_;
 

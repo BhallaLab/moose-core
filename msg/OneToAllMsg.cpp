@@ -109,3 +109,43 @@ void OneToAllMsg::addToQ( const Element* src, Qinfo& q,
 		q.addToQbackward( p, i, arg ); 
 	}
 }
+
+///////////////////////////////////////////////////////////////////////
+// Here we set up the MsgManager portion of the class.
+///////////////////////////////////////////////////////////////////////
+
+const Cinfo* OneToAllMsg::initCinfo()
+{
+	///////////////////////////////////////////////////////////////////
+	// Field definitions.
+	///////////////////////////////////////////////////////////////////
+	static ReadOnlyValueFinfo< OneToAllMsg, DataId > i1(
+		"i1",
+		"DataId of source Element.",
+		&OneToAllMsg::getI1
+	);
+
+	static Finfo* msgFinfos[] = {
+		&i1,		// readonly value
+	};
+
+	static Cinfo msgCinfo (
+		"Msg",	// name
+		Msg::initCinfo(),				// base class
+		msgFinfos,
+		sizeof( msgFinfos ) / sizeof( Finfo* ),	// num Fields
+		new Dinfo< OneToAllMsg >()
+	);
+
+	return &msgCinfo;
+}
+
+static const Cinfo* assignmentMsgCinfo = OneToAllMsg::initCinfo();
+
+/**
+ * Return the first DataId
+ */
+DataId OneToAllMsg::getI1() const
+{
+	return i1_;
+}

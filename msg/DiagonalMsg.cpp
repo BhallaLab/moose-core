@@ -113,3 +113,39 @@ Msg* DiagonalMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 		return 0;
 	}
 }
+
+///////////////////////////////////////////////////////////////////////
+// Here we set up the MsgManager portion of the class.
+///////////////////////////////////////////////////////////////////////
+
+const Cinfo* DiagonalMsg::initCinfo()
+{
+	///////////////////////////////////////////////////////////////////
+	// Field definitions.
+	///////////////////////////////////////////////////////////////////
+	static ValueFinfo< DiagonalMsg, int > stride(
+		"stride",
+		"The stride is the increment to the src DataId that gives the"
+		"dest DataId. "
+		"It can be positive or negative, but bounds checking"
+		"takes place and it does not wrap around.",
+		&DiagonalMsg::setStride,
+		&DiagonalMsg::getStride,
+	);
+
+	static Finfo* msgFinfos[] = {
+		&stride,		// value
+	};
+
+	static Cinfo msgCinfo (
+		"Msg",	// name
+		Msg::initCinfo(),				// base class
+		msgFinfos,
+		sizeof( msgFinfos ) / sizeof( Finfo* ),	// num Fields
+		new Dinfo< DiagonalMsg >()
+	);
+
+	return &msgCinfo;
+}
+
+static const Cinfo* assignmentMsgCinfo = DiagonalMsg::initCinfo();

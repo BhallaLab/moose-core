@@ -167,9 +167,9 @@ Id init( int argc, char** argv )
 	s->setHardware( isSingleThreaded, numCores, numNodes, myNode );
 	s->loadBalance();
 
-	// Clock::initCinfo()->create( clockId, "clock", 1 );
 	// Element* clocke = 
 	new Element( clockId, Clock::initCinfo(), "clock", dims, 1 );
+
 	// Clock::initCinfo()->postCreationFunc( clockId, clocke );
 	// Should put this initialization stuff within the Clock creation
 	// step. This means I need to add an optional init func into the Cinfo
@@ -183,9 +183,12 @@ Id init( int argc, char** argv )
 	assert( clockId == Id( 1 ) );
 	assert( tickId == Id( 2 ) );
 
-// 	initMsgManagers(); // This is now done within the MsgManager::addMsg.
+	/// Sets up the Elements that represent each class of Msg.
+	Msg::initMsgManagers();
 
 	s->connectMasterMsg();
+
+	Shell::adopt( shellId, clockId );
 
 	// This will be initialized within the Process loop, and better there
 	// as it flags attempts to call the Reduce operations before ProcessLoop

@@ -103,3 +103,43 @@ void ReduceMsg::addToQ( const Element* src, Qinfo& q,
 		q.addToQbackward( p, i, arg ); 
 	}
 }
+
+///////////////////////////////////////////////////////////////////////
+// Here we set up the MsgManager portion of the class.
+///////////////////////////////////////////////////////////////////////
+
+const Cinfo* ReduceMsg::initCinfo()
+{
+	///////////////////////////////////////////////////////////////////
+	// Field definitions.
+	///////////////////////////////////////////////////////////////////
+	static ReadOnlyValueFinfo< ReduceMsg, DataId > i1(
+		"i1",
+		"DataId of source Element.",
+		&ReduceMsg::getI1
+	);
+
+	static Finfo* msgFinfos[] = {
+		&i1,		// readonly value
+	};
+
+	static Cinfo msgCinfo (
+		"Msg",	// name
+		Msg::initCinfo(),				// base class
+		msgFinfos,
+		sizeof( msgFinfos ) / sizeof( Finfo* ),	// num Fields
+		new Dinfo< ReduceMsg >()
+	);
+
+	return &msgCinfo;
+}
+
+static const Cinfo* reduceMsgCinfo = ReduceMsg::initCinfo();
+
+/**
+ * Return the first DataId
+ */
+DataId ReduceMsg::getI1() const
+{
+	return i1_;
+}

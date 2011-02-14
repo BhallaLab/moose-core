@@ -739,7 +739,7 @@ void Shell::handleCreate( const Eref& e, const Qinfo* q,
 }
 
 /**
- * Utility function. Attaches child element to parent element.
+ * Static utility function. Attaches child element to parent element.
  * Must only be called from functions executing in parallel on all nodes,
  * as it does a local message addition
  */
