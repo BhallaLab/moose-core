@@ -1,4 +1,4 @@
-@node Introduction, Installation, Copying, Top
+@node Introduction, , , Top
 @chapter Introduction to MOOSE and PyMOOSE
 
 MOOSE is a general purpose simulation environment, and PyMOOSE its
