@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "MsgManager.h"
 #include "ReduceBase.h"
 #include "ReduceFinfo.h"
 #include "ReduceMsg.h"
@@ -33,7 +32,7 @@ ReduceMsg::ReduceMsg( MsgId mid, Eref e1, Element* e2, const ReduceFinfoBase* rf
 
 ReduceMsg::~ReduceMsg()
 {
-	MsgManager::dropMsg( mid() );
+	;
 }
 
 void ReduceMsg::exec( const char* arg, const ProcInfo *p ) const

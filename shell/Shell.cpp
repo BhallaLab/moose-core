@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "MsgManager.h"
 #include "SingleMsg.h"
 #include "DiagonalMsg.h"
 #include "OneToOneMsg.h"

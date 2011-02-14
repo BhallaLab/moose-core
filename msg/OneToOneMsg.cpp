@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "MsgManager.h"
 #include "OneToOneMsg.h"
 
 Id OneToOneMsg::managerId_;
@@ -28,7 +27,7 @@ OneToOneMsg::OneToOneMsg( MsgId mid, Element* e1, Element* e2 )
 
 OneToOneMsg::~OneToOneMsg()
 {
-	MsgManager::dropMsg( mid() );
+	;
 }
 
 void OneToOneMsg::exec( const char* arg, const ProcInfo* p ) const

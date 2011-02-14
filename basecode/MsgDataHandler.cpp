@@ -148,6 +148,15 @@ bool MsgDataHandler::isGlobal() const {
 	return 1;
 }
 
+
+DataHandler::iterator MsgDataHandler::begin() const {
+	return iterator( this, 0, 0 );
+}
+
+DataHandler::iterator MsgDataHandler::end() const {
+	return iterator( this, 1, 1 );
+}
+
 // Illegal
 bool MsgDataHandler::setDataBlock( 
 	const char* data, unsigned int numData,

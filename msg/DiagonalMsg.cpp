@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "MsgManager.h"
 #include "DiagonalMsg.h"
 
 Id DiagonalMsg::managerId_;
@@ -29,7 +28,7 @@ DiagonalMsg::DiagonalMsg( MsgId mid, Element* e1, Element* e2 )
 
 DiagonalMsg::~DiagonalMsg()
 {
-	MsgManager::dropMsg( mid() );
+	;
 }
 
 /**

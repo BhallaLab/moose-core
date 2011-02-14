@@ -29,7 +29,7 @@ vector< Msg* > Msg::msg_;
 vector< MsgId > Msg::garbageMsg_;
 const MsgId Msg::badMsg = 0;
 const MsgId Msg::setMsg = 1;
-Id MsgManagerId_;
+Id Msg::msgManagerId_;
 
 Msg::Msg( MsgId mid, Element* e1, Element* e2, Id managerId )
 	: mid_( mid), e1_( e1 ), e2_( e2 )

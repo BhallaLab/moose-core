@@ -21,7 +21,6 @@
 #include "../scheduling/testScheduling.h"
 
 #include "../builtins/Arith.h"
-#include "MsgManager.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
 #include "SingleMsg.h"

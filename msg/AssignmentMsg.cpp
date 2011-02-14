@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "MsgManager.h"
 #include "AssignmentMsg.h"
 
 #include "ReduceBase.h"
@@ -35,7 +34,7 @@ AssignmentMsg::AssignmentMsg( MsgId mid, Eref e1, Eref e2 )
 
 AssignmentMsg::~AssignmentMsg()
 {
-	MsgManager::dropMsg( mid() );
+	;
 }
 
 void sendAckBack( const ProcInfo* p, MsgId mid, DataId i2 )

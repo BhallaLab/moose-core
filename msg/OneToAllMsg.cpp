@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "MsgManager.h"
 #include "OneToAllMsg.h"
 
 Id OneToAllMsg::managerId_;
@@ -31,7 +30,7 @@ OneToAllMsg::OneToAllMsg( MsgId mid, Eref e1, Element* e2 )
 
 OneToAllMsg::~OneToAllMsg()
 {
-	MsgManager::dropMsg( mid() );
+	;
 }
 
 /**

@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "MsgManager.h"
 #include "SingleMsg.h"
 
 Id SingleMsg::managerId_;
@@ -35,7 +34,7 @@ SingleMsg::SingleMsg( MsgId mid, Eref e1, Eref e2 )
 
 SingleMsg::~SingleMsg()
 {
-	MsgManager::dropMsg( mid() );
+	;
 }
 
 void SingleMsg::exec( const char* arg, const ProcInfo *p ) const

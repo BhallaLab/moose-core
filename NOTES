@@ -10706,3 +10706,6 @@ are sent.
 Done the first pass coding, now to compile this mess.
 Compiles through basecode directory. Time to checkin.
 
+Now compiles through but doesn't link. Checkin 2464.
+
+Now compiles and links but doesn't run.

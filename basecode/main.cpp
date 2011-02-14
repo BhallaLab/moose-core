@@ -17,7 +17,6 @@
 #include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
 #include "DiagonalMsg.h"
-#include "MsgManager.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
 #include "AssignmentMsg.h"
@@ -290,7 +289,7 @@ int main( int argc, char** argv )
 	shellId.destroy();
 	Id(1).destroy();
 	Id(2).destroy();
-	destroyMsgManagers();
+//	destroyMsgManagers();
 #ifdef USE_MPI
 	MPI_Finalize();
 #endif

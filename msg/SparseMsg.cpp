@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "MsgManager.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
 #include "../randnum/randnum.h"
@@ -103,7 +102,7 @@ const Cinfo* SparseMsg::initCinfo()
 
 	static Cinfo sparseMsgCinfo (
 		"SparseMsg",					// name
-		MsgManager::initCinfo(),		// base class
+		Msg::initCinfo(),			// base class
 		sparseMsgFinfos,
 		sizeof( sparseMsgFinfos ) / sizeof( Finfo* ),	// num Fields
 		new Dinfo< SparseMsg >()
@@ -211,7 +210,7 @@ SparseMsg::SparseMsg( MsgId mid, Element* e1, Element* e2 )
 
 SparseMsg::~SparseMsg()
 {
-	MsgManager::dropMsg( mid() );
+	;
 }
 
 unsigned int rowIndex( const Element* e, const DataId& d )

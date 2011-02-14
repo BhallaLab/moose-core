@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "MsgManager.h"
 #include "AssignVecMsg.h"
 
 // Defined in AssignmentMsg.cpp
@@ -32,7 +31,7 @@ AssignVecMsg::AssignVecMsg( MsgId mid, Eref e1, Element* e2 )
 
 AssignVecMsg::~AssignVecMsg()
 {
-	MsgManager::dropMsg( mid() );
+	;
 }
 
 void AssignVecMsg::exec( const char* arg, const ProcInfo *p ) const
