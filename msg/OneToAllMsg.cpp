@@ -136,11 +136,11 @@ const Cinfo* OneToAllMsg::initCinfo()
 	};
 
 	static Cinfo msgCinfo (
-		"Msg",	// name
+		"OneToAllMsg",	// name
 		Msg::initCinfo(),				// base class
 		msgFinfos,
 		sizeof( msgFinfos ) / sizeof( Finfo* ),	// num Fields
-		new Dinfo< OneToAllMsg >()
+		new Dinfo< short >()
 	);
 
 	return &msgCinfo;

@@ -105,7 +105,7 @@ const Cinfo* SparseMsg::initCinfo()
 		Msg::initCinfo(),			// base class
 		sparseMsgFinfos,
 		sizeof( sparseMsgFinfos ) / sizeof( Finfo* ),	// num Fields
-		new Dinfo< SparseMsg >()
+		new Dinfo< short >()
 	);
 
 	return &sparseMsgCinfo;

@@ -10708,4 +10708,12 @@ Compiles through basecode directory. Time to checkin.
 
 Now compiles through but doesn't link. Checkin 2464.
 
-Now compiles and links but doesn't run.
+Now compiles and links but doesn't run. Checkin 2466.
+
+The problem is that when we try to create the MsgManager Elements, there is
+an automatic allocation of the Msg. This causes problems with the basic
+constructors.
+Let's instead create some dummy field here to keep Dinfo happy, but never use 
+it.
+That works. I can now go back and get rid of the silly null constructors for
+Msgs.

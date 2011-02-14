@@ -145,11 +145,11 @@ const Cinfo* DiagonalMsg::initCinfo()
 	};
 
 	static Cinfo msgCinfo (
-		"Msg",	// name
+		"DiagonalMsg",	// name
 		Msg::initCinfo(),				// base class
 		msgFinfos,
 		sizeof( msgFinfos ) / sizeof( Finfo* ),	// num Fields
-		new Dinfo< DiagonalMsg >()
+		new Dinfo< short >()
 	);
 
 	return &msgCinfo;

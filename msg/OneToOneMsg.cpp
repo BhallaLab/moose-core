@@ -104,11 +104,11 @@ const Cinfo* OneToOneMsg::initCinfo()
 	///////////////////////////////////////////////////////////////////
 
 	static Cinfo msgCinfo (
-		"Msg",	// name
+		"OneToOneMsg",	// name
 		Msg::initCinfo(),				// base class
 		0,								// Finfo array
 		0,								// Num Fields
-		new Dinfo< OneToOneMsg >()
+		new Dinfo< short >()
 	);
 
 	return &msgCinfo;

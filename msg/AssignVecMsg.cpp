@@ -119,11 +119,11 @@ const Cinfo* AssignVecMsg::initCinfo()
 	};
 
 	static Cinfo msgCinfo (
-		"Msg",	// name
+		"AssignVecMsg",	// name
 		Msg::initCinfo(),				// base class
 		msgFinfos,
 		sizeof( msgFinfos ) / sizeof( Finfo* ),	// num Fields
-		new Dinfo< AssignVecMsg >()
+		new Dinfo< short >()
 	);
 
 	return &msgCinfo;

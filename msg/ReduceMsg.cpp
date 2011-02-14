@@ -131,11 +131,11 @@ const Cinfo* ReduceMsg::initCinfo()
 	};
 
 	static Cinfo msgCinfo (
-		"Msg",	// name
+		"ReduceMsg",	// name
 		Msg::initCinfo(),				// base class
 		msgFinfos,
 		sizeof( msgFinfos ) / sizeof( Finfo* ),	// num Fields
-		new Dinfo< ReduceMsg >()
+		new Dinfo< short >()
 	);
 
 	return &msgCinfo;

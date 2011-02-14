@@ -141,11 +141,11 @@ const Cinfo* AssignmentMsg::initCinfo()
 	};
 
 	static Cinfo msgCinfo (
-		"Msg",	// name
+		"AssignmentMsg",	// name
 		Msg::initCinfo(),				// base class
 		msgFinfos,
 		sizeof( msgFinfos ) / sizeof( Finfo* ),	// num Fields
-		new Dinfo< AssignmentMsg >()
+		new Dinfo< short >()
 	);
 
 	return &msgCinfo;

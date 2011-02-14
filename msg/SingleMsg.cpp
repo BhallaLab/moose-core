@@ -168,7 +168,7 @@ const Cinfo* SingleMsg::initCinfo()
 		Msg::initCinfo(),		// base class
 		singleMsgFinfos,
 		sizeof( singleMsgFinfos ) / sizeof( Finfo* ),	// num Fields
-		new Dinfo< SingleMsg >()
+		new Dinfo< short >()
 	);
 
 	return &singleMsgCinfo;

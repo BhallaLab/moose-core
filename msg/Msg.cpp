@@ -195,7 +195,7 @@ static const Cinfo* msgCinfo = Msg::initCinfo();
 // Static func
 void Msg::initMsgManagers()
 {
-	vector< unsigned int > dims( 1, 1 );
+	vector< unsigned int > dims( 1, 0 );
 
 	// This is to be the parent of all the msg managers.
 	msgManagerId_ = Id::nextId();
