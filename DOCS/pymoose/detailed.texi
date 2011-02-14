@@ -1,9 +1,9 @@
-@node Detailed Guide, FAQ, Quick Start, Top
+@node Detailed Guide, , , Top
 @chapter In-Depth Guide to PyMOOSE
 In this chapter we go through the internal details of PyMOOSE.
 @menu
 * Overview::                    A short overview of impotrant internals of PyMOOSE
-* Element Tree::                  All elements in MOOSE are part of a Tree structure
+* Element Tree::                All elements in MOOSE are part of a Tree structure
 * Id::                          The unique identifier for each MOOSE object
 * Neutral::                     Common properties of all MOOSE classes
 * PyMooseContext::              The God object giving access to global functions
@@ -11,7 +11,7 @@ In this chapter we go through the internal details of PyMOOSE.
 * Running GENESIS scripts in Python::  How to run GENESIS-2 commands/scripts in Python
 @end menu
 
-@node Overview
+@node Overview, Element Tree, Detailed Guide, Detailed Guide
 @section Overview of PyMOOSE internals
 The entities in a MOOSE model are called @t{elements}. An @t{element} is
 an object of some MOOSE class. Elements are the basic building blocks of
@@ -115,7 +115,7 @@ TODO: to be completed with an walk-through to developing the simulation.
 @end example
 
 
-@node Element Tree
+@node Element Tree, Id, Overview, Detailed Guide
 @section Element Tree
 @cindex Element Tree
 @cindex element
@@ -158,7 +158,7 @@ root
 
 
 
-@node Id
+@node Id, Neutral, Element Tree, Detailed Guide
 @section Id
 @cindex Id
 @findex id
@@ -235,7 +235,7 @@ In addition, @code{Id} objects are hashable. Also, their hash is the
 hash of their string representation. Thus you can use them as keys in a
 @code{dict}.
 
-@node Neutral
+@node Neutral, PyMooseContext, Id, Detailed Guide
 @section Neutral
 @cindex Neutral
 @cindex base class
@@ -399,7 +399,7 @@ compatibility.
 @end table
 
 
-@node PyMooseContext
+@node PyMooseContext, Messaging, Neutral, Detailed Guide
 @section PyMooseContext
 
 One global object that provides access to global functions in PyMOOSE is
@@ -475,7 +475,7 @@ PyMooseContext are required only when there is no such counterpart.
 
 @end table
 
-@node Messaging
+@node Messaging, Running GENESIS scripts in Python, PyMooseContext, Detailed Guide
 @section Messaging
 @cindex connection
 @cindex message
@@ -524,7 +524,7 @@ table.connect('inputRequest', comp, 'Vm')
 @end group
 @end example
 
-@node Running GENESIS scripts in Python
+@node Running GENESIS scripts in Python,  , Messaging, Detailed Guide
 @section Running GENESIS scripts in Python
 @cindex GENESIS script
 There are two commands in PyMOOSE that allows you to run legacy GENESIS
@@ -549,3 +549,8 @@ For example, to display the messages on an element specified by the path
 @code{context.runG('showmsg /my_element')} 
 
 
+
+@c Local Variables: 
+@c mode: texinfo
+@c TeX-master: "pymoose"
+@c End: 
