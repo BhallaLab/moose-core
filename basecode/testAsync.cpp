@@ -1453,18 +1453,17 @@ void testMsgField()
 	Msg* m = new SingleMsg( Msg::nextMsgId(), Eref( i1(), 5 ), Eref( i2(), 3 ) );
 	ProcInfo p;
 
-	Id msgElmId = m->id();
+	Id msgElmId = m->managerId();
 
 	Element *msgElm = msgElmId();
 
 	assert( msgElm->getName() == "singleMsg" );
 
-	Eref msgEr = m->manager( msgElmId );
+	Eref msgEr = m->manager();
 
-	MsgManager* mm = reinterpret_cast< MsgManager* >( msgEr.data() );
-	assert( mm );
-	assert ( mm->getMid() == m->mid() );
-	SingleMsgWrapper *sm = reinterpret_cast< SingleMsgWrapper* >( mm );
+	SingleMsg* sm = reinterpret_cast< SingleMsg* >( msgEr.data() );
+	assert( sm );
+	assert ( sm == m );
 	assert( sm->getI1() == DataId( 5 ) );
 	assert( sm->getI2() == DataId( 3 ) );
 	

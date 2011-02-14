@@ -17,14 +17,15 @@
  */
 class OneToOneMsg: public Msg
 {
-	friend void initMsgManagers();
+	friend void Msg::initMsgManagers(); // for initializing Id.
 	public:
+		OneToOneMsg(); // Used for the Dinfo template only.
 		OneToOneMsg( MsgId mid, Element* e1, Element* e2 );
 		~OneToOneMsg();
 
 		void exec( const char* arg, const ProcInfo* p) const;
 
-		Id id() const;
+		Id managerId() const;
 
 		FullId findOtherEnd( FullId end ) const;
 
@@ -34,7 +35,7 @@ class OneToOneMsg: public Msg
 		/// Setup function for Element-style access to Msg fields.
 		static const Cinfo* initCinfo();
 	private:
-		static Id id_;
+		static Id managerId_;
 };
 
 #endif // _ONE_TO_ONE_MSG_H

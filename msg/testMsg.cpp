@@ -88,7 +88,7 @@ void testAssortedMsg()
 	assert( m5 != Msg::badMsg );
 
 	const Msg* m5p = Msg::getMsg( m5 );
-	Eref m5er = m5p->manager( m5p->id() );
+	Eref m5er = m5p->manager();
 
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
 		m5er, "setEntry", 0, 4, 0 );

@@ -13,8 +13,9 @@
 
 class SingleMsg: public Msg
 {
-	friend void initMsgManagers(); // for initializing Id.
+	friend void Msg::initMsgManagers(); // for initializing Id.
 	public:
+		SingleMsg();
 		SingleMsg( MsgId mid, Eref e1, Eref e2 );
 		~SingleMsg();
 
@@ -25,11 +26,8 @@ class SingleMsg: public Msg
 		DataId i1() const;
 		DataId i2() const;
 
-		void setI1( DataId di );
-		void setI2( DataId di );
-
 		// returns the id of the managing Element.
-		Id id() const;
+		Id managerId() const;
 
 		FullId findOtherEnd( FullId end ) const;
 
@@ -47,10 +45,9 @@ class SingleMsg: public Msg
 
 		static const Cinfo* initCinfo();
 	private:
-		static void setId( Id id );
 		DataId i1_;
 		DataId i2_;
-		static Id id_;
+		static Id managerId_;
 };
 
 #endif // _SINGLE_MSG_H

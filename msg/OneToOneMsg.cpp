@@ -11,46 +11,17 @@
 #include "MsgManager.h"
 #include "OneToOneMsg.h"
 
-Id OneToOneMsg::id_;
+Id OneToOneMsg::managerId_;
 
-const Cinfo* OneToOneMsgWrapper::initCinfo()
+OneToOneMsg::OneToOneMsg()
+	: 
+		Msg( 0, 0, 0, OneToOneMsg::managerId_ )
 {
-	///////////////////////////////////////////////////////////////////
-	// Field definitions.
-	///////////////////////////////////////////////////////////////////
-	static ReadOnlyValueFinfo< OneToOneMsgWrapper, Id > element1(
-		"e1",
-		"Id of source Element.",
-		&OneToOneMsgWrapper::getE1
-	);
-	static ReadOnlyValueFinfo< OneToOneMsgWrapper, Id > element2(
-		"e2",
-		"Id of source Element.",
-		&OneToOneMsgWrapper::getE2
-	);
-
-	static Finfo* oneToOneMsgFinfos[] = {
-		&element1,		// readonly value
-		&element2,		// readonly value
-	};
-
-	static Cinfo oneToOneMsgCinfo (
-		"OneToOneMsg",					// name
-		MsgManager::initCinfo(),		// base class
-		oneToOneMsgFinfos,
-		sizeof( oneToOneMsgFinfos ) / sizeof( Finfo* ),	// num Fields
-		new Dinfo< OneToOneMsgWrapper >()
-	);
-
-	return &oneToOneMsgCinfo;
+	;
 }
 
-static const Cinfo* oneToOneMsgCinfo = OneToOneMsgWrapper::initCinfo();
-
-//////////////////////////////////////////////////////////////////////
-
 OneToOneMsg::OneToOneMsg( MsgId mid, Element* e1, Element* e2 )
-	: Msg( mid, e1, e2, id_ )
+	: Msg( mid, e1, e2, OneToOneMsg::managerId_ )
 {
 	;
 }
@@ -92,9 +63,9 @@ void OneToOneMsg::exec( const char* arg, const ProcInfo* p ) const
 	}
 }
 
-Id OneToOneMsg::id() const
+Id OneToOneMsg::managerId() const
 {
-	return id_;
+	return OneToOneMsg::managerId_;
 }
 
 FullId OneToOneMsg::findOtherEnd( FullId f ) const
@@ -127,7 +98,7 @@ Msg* OneToOneMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 // Here we set up the MsgManager portion of the class.
 ///////////////////////////////////////////////////////////////////////
 
-const Cinfo* OneToAllMsg::initCinfo()
+const Cinfo* OneToOneMsg::initCinfo()
 {
 	///////////////////////////////////////////////////////////////////
 	// Field definitions. Nothing here.
@@ -138,18 +109,11 @@ const Cinfo* OneToAllMsg::initCinfo()
 		Msg::initCinfo(),				// base class
 		0,								// Finfo array
 		0,								// Num Fields
-		new Dinfo< OneToAllMsg >()
+		new Dinfo< OneToOneMsg >()
 	);
 
 	return &msgCinfo;
 }
 
-static const Cinfo* oneToAllMsgCinfo = OneToAllMsg::initCinfo();
+static const Cinfo* oneToOneMsgCinfo = OneToOneMsg::initCinfo();
 
-/**
- * Return the first DataId
- */
-DataId OneToAllMsg::getI1() const
-{
-	return i1_;
-}

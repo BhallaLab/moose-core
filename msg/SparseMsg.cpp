@@ -14,7 +14,7 @@
 #include "../randnum/randnum.h"
 #include "../biophysics/Synapse.h"
 
-Id SparseMsg::id_;
+Id SparseMsg::managerId_;
 
 //////////////////////////////////////////////////////////////////
 //    MOOSE wrapper functions for field access.
@@ -143,17 +143,17 @@ long SparseMsg::getSeed () const
 
 unsigned int SparseMsg::getNumRows() const
 {
-	return getMatrix().nRows();
+	return matrix_.nRows();
 }
 
 unsigned int SparseMsg::getNumColumns() const
 {
-	return getMatrix().nColumns();
+	return matrix_.nColumns();
 }
 
 unsigned int SparseMsg::getNumEntries() const
 {
-	return getMatrix().nEntries();
+	return matrix_.nEntries();
 }
 
 //////////////////////////////////////////////////////////////////
@@ -194,8 +194,14 @@ void SparseMsg::transpose()
 //////////////////////////////////////////////////////////////////
 
 
+SparseMsg::SparseMsg()
+	: Msg( 0, 0, 0, SparseMsg::managerId_ )
+{
+	;
+}
+
 SparseMsg::SparseMsg( MsgId mid, Element* e1, Element* e2 )
-	: Msg( mid, e1, e2, id_ ),
+	: Msg( mid, e1, e2, SparseMsg::managerId_ ),
 	matrix_( e1->dataHandler()->parentDataHandler()->totalEntries(), 
 		e2->dataHandler()->parentDataHandler()->totalEntries() )
 {
@@ -347,9 +353,9 @@ unsigned int SparseMsg::randomConnect( double probability )
 	return totalSynapses;
 }
 
-Id SparseMsg::id() const
+Id SparseMsg::managerId() const
 {
-	return id_;
+	return SparseMsg::managerId_;
 }
 
 void SparseMsg::setMatrix( const SparseMatrix< unsigned int >& m )

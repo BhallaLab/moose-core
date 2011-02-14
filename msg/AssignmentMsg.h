@@ -18,14 +18,15 @@
 
 class AssignmentMsg: public Msg
 {
-	friend void initMsgManagers(); // for initializing Id.
+	friend void Msg::initMsgManagers(); // for initializing Id.
 	public:
+		AssignmentMsg(); // Used for the Dinfo template only.
 		AssignmentMsg( MsgId mid, Eref e1, Eref e2 );
 		~AssignmentMsg();
 
 		void exec( const char* arg, const ProcInfo* p) const;
 
-		Id id() const;
+		Id managerId() const;
 
 		FullId findOtherEnd( FullId end ) const;
 
@@ -46,7 +47,7 @@ class AssignmentMsg: public Msg
 	private:
 		DataId i1_;
 		DataId i2_;
-		static Id id_;
+		static Id managerId_;
 };
 
 #endif // _ASSIGNMENT_MSG_H

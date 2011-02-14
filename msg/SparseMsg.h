@@ -44,8 +44,9 @@
  */
 class SparseMsg: public Msg
 {
-	friend void initMsgManagers(); // for initializing Id.
+	friend void Msg::initMsgManagers(); // for initializing Id.
 	public:
+		SparseMsg(); // Only for use for Dinfo definition.
 		SparseMsg( MsgId mid, Element* e1, Element* e2 );
 		~SparseMsg();
 
@@ -53,17 +54,24 @@ class SparseMsg: public Msg
 		
 		unsigned int randomConnect( double probability );
 
-		Id id() const;
+		Id managerId() const;
 
 		FullId findOtherEnd( FullId end ) const;
 
 		Msg* copy( Id origSrc, Id newSrc, Id newTgt,
 			FuncId fid, unsigned int b, unsigned int n ) const;
 
-		// Uses default addToQ function.
-
+		/**
+		 * Assigns the whole connection matrix
+		 */
 		void setMatrix( const SparseMatrix< unsigned int >& m );
+
+		/**
+		 * Returns the connection matrix
+		 */
 		SparseMatrix< unsigned int >& getMatrix();
+
+		// Uses default addToQ function.
 
 		/////////////////////////////////////////////////////////////////
 		// Here we define the Element interface functions for SparseMsg
@@ -74,8 +82,6 @@ class SparseMsg: public Msg
 
 		long getSeed() const;
 		void setSeed( long value );
-
-		void setMatrix( const SparseMatrix< unsigned int >& m );
 
 		void setEntry( unsigned int row, unsigned int column, 
 			unsigned int value );
@@ -98,7 +104,7 @@ class SparseMsg: public Msg
 		unsigned int nrows_; // The original size of the matrix.
 		double p_;
 		unsigned long seed_;
-		static Id id_; // The Element that manages Sparse Msgs.
+		static Id managerId_; // The Element that manages Sparse Msgs.
 };
 
 #endif // _SPARSE_MSG_H

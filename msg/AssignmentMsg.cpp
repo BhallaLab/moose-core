@@ -15,10 +15,18 @@
 #include "ReduceMax.h"
 #include "../shell/Shell.h"
 
-Id AssignmentMsg::id_;
+Id AssignmentMsg::managerId_;
+
+AssignmentMsg::AssignmentMsg()
+	: Msg( 0, 0, 0, AssignmentMsg::managerId_ ),
+	i1_( 0 ),
+	i2_( 0 )
+{
+	;
+}
 
 AssignmentMsg::AssignmentMsg( MsgId mid, Eref e1, Eref e2 )
-	: Msg( mid, e1.element(), e2.element(), id_ ),
+	: Msg( mid, e1.element(), e2.element(), AssignmentMsg::managerId_ ),
 	i1_( e1.index() ), 
 	i2_( e2.index() )
 {
@@ -74,9 +82,9 @@ void AssignmentMsg::exec( const char* arg, const ProcInfo *p ) const
 	}
 }
 
-Id AssignmentMsg::id() const
+Id AssignmentMsg::managerId() const
 {
-	return id_;
+	return AssignmentMsg::managerId_;
 }
 
 FullId AssignmentMsg::findOtherEnd( FullId f ) const

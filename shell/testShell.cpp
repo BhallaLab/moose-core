@@ -687,7 +687,7 @@ void testShellAddMsg()
 	assert( m5 != Msg::badMsg );
 
 	const Msg* m5p = Msg::getMsg( m5 );
-	Eref m5er = m5p->manager( m5p->id() );
+	Eref m5er = m5p->manager();
 
 	bool ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
 		m5er, "setEntry", 0, 4, 0 );
@@ -717,7 +717,7 @@ void testShellAddMsg()
 		FullId( g1, 0 ), "output", FullId( g2, 0 ), "arg3" );
 	assert( m7 != Msg::badMsg );
 	const Msg* m7p = Msg::getMsg( m7 );
-	Eref m7er = m7p->manager( m7p->id() );
+	Eref m7er = m7p->manager();
 	for ( unsigned int i = 0; i < 5; ++i ) {
 		for ( unsigned int j = 0; j < 5; ++j ) {
 			if ( i != j ) {
@@ -970,7 +970,7 @@ void testCopyMsgOps()
 	assert( m5 != Msg::badMsg );
 
 	const Msg* m5p = Msg::getMsg( m5 );
-	Eref m5er = m5p->manager( m5p->id() );
+	Eref m5er = m5p->manager();
 
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
 		m5er, "setEntry", 0, 4, 0 );

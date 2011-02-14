@@ -590,7 +590,7 @@ void testMultiNodeIntFireNetwork()
 	
 	const Msg* m = Msg::getMsg( mid );
 	assert( m );
-	Eref mer = m->manager( m->id() );
+	Eref mer = m->manager();
 	assert( mer.element() );
 
 	SetGet2< double, long >::set( mer, "setRandomConnectivity", 
@@ -791,7 +791,7 @@ void speedTestMultiNodeIntFireNetwork( unsigned int size, unsigned int runsteps 
 		FullId( synId, 0 ), "addSpike" );
 	
 	const Msg* m = Msg::getMsg( mid );
-	Eref mer = m->manager( m->id() );
+	Eref mer = m->manager();
 
 	SetGet2< double, long >::set( mer, "setRandomConnectivity", 
 		connectionProbability, 5489UL );

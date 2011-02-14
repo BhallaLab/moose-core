@@ -17,8 +17,9 @@
 
 class OneToAllMsg: public Msg
 {
-	friend void initMsgManagers();
+	friend void Msg::initMsgManagers(); // for initializing Id.
 	public:
+		OneToAllMsg(); // Used for the Dinfo template only.
 		OneToAllMsg( MsgId mid, Eref e1, Element* e2 );
 		~OneToAllMsg();
 
@@ -27,7 +28,7 @@ class OneToAllMsg: public Msg
 
 		bool isMsgHere( const Qinfo& q ) const;
 
-		Id id() const;
+		Id managerId() const;
 
 		FullId findOtherEnd( FullId end ) const;
 
@@ -44,7 +45,7 @@ class OneToAllMsg: public Msg
 		static const Cinfo* initCinfo();
 	private:
 		DataId i1_;
-		static Id id_;
+		static Id managerId_;
 };
 
 

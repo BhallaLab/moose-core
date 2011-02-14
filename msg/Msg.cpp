@@ -18,6 +18,10 @@
 #include "SparseMsg.h"
 #include "ReduceMsg.h"
 
+#include "ReduceBase.h"
+#include "ReduceMax.h"
+#include "../shell/Shell.h"
+
 ///////////////////////////////////////////////////////////////////////////
 
 // Static field declaration.
@@ -37,7 +41,6 @@ Msg::Msg( MsgId mid, Element* e1, Element* e2, Id managerId )
 	msg_[mid_] = this;
 	e1->addMsg( mid_ );
 	e2->addMsg( mid_ );
-	MsgManager::addMsg( mid_, managerId );
 }
 
 Msg::~Msg()
@@ -105,9 +108,9 @@ Msg* Msg::safeGetMsg( MsgId m )
 	return 0;
 }
 
-Eref Msg::manager( Id id ) const
+Eref Msg::manager() const
 {
-	return Eref( id(), mid_ );
+	return Eref( ( this->managerId() )(), DataId( mid_ ) );
 }
 
 /*
@@ -139,7 +142,7 @@ unsigned int Msg::numMsgs()
  */
 Id Msg::getE1() const
 {
-	return e1_.id();
+	return e1_->id();
 }
 
 /**
@@ -147,7 +150,7 @@ Id Msg::getE1() const
  */
 Id Msg::getE2() const
 {
-	return e2_.id();
+	return e2_->id();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -180,7 +183,8 @@ const Cinfo* Msg::initCinfo()
 		Neutral::initCinfo(),				// base class
 		msgFinfos,
 		sizeof( msgFinfos ) / sizeof( Finfo* ),	// num Fields
-		new Dinfo< Msg >()
+		0
+		// new Dinfo< Msg >()
 	);
 
 	return &msgCinfo;
@@ -196,32 +200,33 @@ void Msg::initMsgManagers()
 	// This is to be the parent of all the msg managers.
 	msgManagerId_ = Id::nextId();
 	new Element( msgManagerId_, Neutral::initCinfo(), "Msgs", dims, 1 );
+
+	SingleMsg::managerId_ = Id::nextId();
+	new Element( SingleMsg::managerId_, SingleMsg::initCinfo(), "singleMsg", dims, 1 );
+
 	Shell::adopt( Id(), msgManagerId_ );
+	Shell::adopt( msgManagerId_, SingleMsg::managerId_ );
 
-	SingleMsg::id_ = Id::nextId();
-	new Element( SingleMsg::id_, SingleMsg::initCinfo(), "singleMsg", dims, 1 );
-	Shell::adopt( Id(), SingleMsg::id_ );
+	OneToOneMsg::managerId_ = Id::nextId();
+	new Element( OneToOneMsg::managerId_, OneToOneMsg::initCinfo(), "oneToOneMsg", dims, 1 );
+	Shell::adopt( msgManagerId_, OneToOneMsg::managerId_ );
 
-	OneToOneMsg::id_ = Id::nextId();
-	new Element( OneToOneMsg::id_, OneToOneMsg::initCinfo(), "oneToOneMsg", dims, 1 );
-	Shell::adopt( Id(), OneToOneMsg::id_ );
-
-	OneToAllMsg::id_ = Id::nextId();
-	new Element( OneToAllMsg::id_, OneToAllMsg::initCinfo(), "oneToAllMsg", dims, 1 );
-	Shell::adopt( Id(), OneToAllMsg::id_ );
-	DiagonalMsg::id_ = Id::nextId();
-	new Element( DiagonalMsg::id_, DiagonalMsg::initCinfo(), "diagonalMsg", dims, 1 );
-	Shell::adopt( Id(), DiagonalMsg::id_ );
-	SparseMsg::id_ = Id::nextId();
-	new Element( SparseMsg::id_, SparseMsg::initCinfo(), "sparseMsg", dims, 1 );
-	Shell::adopt( Id(), SparseMsg::id_ );
-	AssignmentMsg::id_ = Id::nextId();
-	new Element( AssignmentMsg::id_, AssignmentMsg::initCinfo(), "assignmentMsg", dims, 1 );
-	Shell::adopt( Id(), AssignmentMsg::id_ );
-	AssignVecMsg::id_ = Id::nextId();
-	new Element( AssignVecMsg::id_, AssignVecMsg::initCinfo(), "assignVecMsg", dims, 1 );
-	Shell::adopt( Id(), AssignVecMsg::id_ );
-	ReduceMsg::id_ = Id::nextId();
-	new Element( ReduceMsg::id_, ReduceMsg::initCinfo(), "ReduceMsg", dims, 1 );
-	Shell::adopt( Id(), ReduceMsg::id_ );
+	OneToAllMsg::managerId_ = Id::nextId();
+	new Element( OneToAllMsg::managerId_, OneToAllMsg::initCinfo(), "oneToAllMsg", dims, 1 );
+	Shell::adopt( msgManagerId_, OneToAllMsg::managerId_ );
+	DiagonalMsg::managerId_ = Id::nextId();
+	new Element( DiagonalMsg::managerId_, DiagonalMsg::initCinfo(), "diagonalMsg", dims, 1 );
+	Shell::adopt( msgManagerId_, DiagonalMsg::managerId_ );
+	SparseMsg::managerId_ = Id::nextId();
+	new Element( SparseMsg::managerId_, SparseMsg::initCinfo(), "sparseMsg", dims, 1 );
+	Shell::adopt( msgManagerId_, SparseMsg::managerId_ );
+	AssignmentMsg::managerId_ = Id::nextId();
+	new Element( AssignmentMsg::managerId_, AssignmentMsg::initCinfo(), "assignmentMsg", dims, 1 );
+	Shell::adopt( msgManagerId_, AssignmentMsg::managerId_ );
+	AssignVecMsg::managerId_ = Id::nextId();
+	new Element( AssignVecMsg::managerId_, AssignVecMsg::initCinfo(), "assignVecMsg", dims, 1 );
+	Shell::adopt( msgManagerId_, AssignVecMsg::managerId_ );
+	ReduceMsg::managerId_ = Id::nextId();
+	new Element( ReduceMsg::managerId_, ReduceMsg::initCinfo(), "ReduceMsg", dims, 1 );
+	Shell::adopt( msgManagerId_, ReduceMsg::managerId_ );
 }

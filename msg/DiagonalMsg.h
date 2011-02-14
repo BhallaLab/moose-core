@@ -26,8 +26,9 @@
  */
 class DiagonalMsg: public Msg
 {
-	friend void initMsgManagers(); // for initializing Id.
+	friend void Msg::initMsgManagers(); // for initializing Id.
 	public:
+		DiagonalMsg(); // Used for the Dinfo template only.
 		DiagonalMsg( MsgId mid, Element* e1, Element* e2 );
 		~DiagonalMsg();
 
@@ -38,7 +39,7 @@ class DiagonalMsg: public Msg
 			Element* e2, const string& destField, int stride );
 			*/
 
-		Id id() const;
+		Id managerId() const;
 
 		FullId findOtherEnd( FullId end ) const;
 
@@ -67,7 +68,7 @@ class DiagonalMsg: public Msg
 		int stride_; // Increment between targets.
 		unsigned int numThreads_;
 		unsigned int numNodes_;
-		static Id id_;
+		static Id managerId_;
 };
 
 #endif // _DIAGONAL_MSG_H

@@ -13,10 +13,18 @@
 #include "ReduceFinfo.h"
 #include "ReduceMsg.h"
 
-Id ReduceMsg::id_;
+Id ReduceMsg::managerId_;
+
+ReduceMsg::ReduceMsg()
+	: Msg( 0, 0, 0, ReduceMsg::managerId_ ),
+		i1_( 0 ),
+		rfb_( 0 )
+{
+	;
+}
 
 ReduceMsg::ReduceMsg( MsgId mid, Eref e1, Element* e2, const ReduceFinfoBase* rfb  )
-	: Msg( mid, e1.element(), e2, id_ ),
+	: Msg( mid, e1.element(), e2, ReduceMsg::managerId_ ),
 		i1_( e1.index() ),
 		rfb_( rfb )
 {
@@ -70,9 +78,9 @@ Then use the rfb and elm info to assign the value using
 
 */
 
-Id ReduceMsg::id() const
+Id ReduceMsg::managerId() const
 {
-	return id_;
+	return ReduceMsg::managerId_;
 }
 
 FullId ReduceMsg::findOtherEnd( FullId f ) const

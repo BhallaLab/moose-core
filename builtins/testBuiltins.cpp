@@ -148,14 +148,14 @@ void testMpiFibonacci()
 	MsgId mid1 = shell->doAddMsg( "Diagonal", 
 		FullId( a1id, 0 ), "output", FullId( a1id, 0 ), "arg1" );
 	const Msg* m1 = Msg::getMsg( mid1 );
-	Eref er1 = m1->manager( m1->id() );
+	Eref er1 = m1->manager();
 	bool ret = Field< int >::set( er1, "stride", 1 );
 	assert( ret );
 
 	MsgId mid2 = shell->doAddMsg( "Diagonal", 
 		FullId( a1id, 0 ), "output", FullId( a1id, 0 ), "arg2" );
 	const Msg* m2 = Msg::getMsg( mid2 );
-	Eref er2 = m2->manager( m2->id() );
+	Eref er2 = m2->manager();
 	ret = Field< int >::set( er2, "stride", 2 );
 	assert( ret );
 	

@@ -11,10 +11,18 @@
 #include "MsgManager.h"
 #include "DiagonalMsg.h"
 
-Id DiagonalMsg::id_;
+Id DiagonalMsg::managerId_;
+
+DiagonalMsg::DiagonalMsg()
+	: Msg( 0, 0, 0, DiagonalMsg::managerId_ ),
+	stride_( 0 )
+{
+	;
+}
 
 DiagonalMsg::DiagonalMsg( MsgId mid, Element* e1, Element* e2 )
-	: Msg( mid, e1, e2, id_ ), stride_( 1 )
+	: Msg( mid, e1, e2, DiagonalMsg::managerId_ ), 
+	stride_( 1 )
 {
 	;
 }
@@ -55,9 +63,9 @@ void DiagonalMsg::exec( const char* arg, const ProcInfo *p ) const
 	}
 }
 
-Id DiagonalMsg::id() const
+Id DiagonalMsg::managerId() const
 {
-	return id_;
+	return DiagonalMsg::managerId_;
 }
 
 void DiagonalMsg::setStride( int stride )
@@ -130,7 +138,7 @@ const Cinfo* DiagonalMsg::initCinfo()
 		"It can be positive or negative, but bounds checking"
 		"takes place and it does not wrap around.",
 		&DiagonalMsg::setStride,
-		&DiagonalMsg::getStride,
+		&DiagonalMsg::getStride
 	);
 
 	static Finfo* msgFinfos[] = {

@@ -11,14 +11,22 @@
 #include "MsgManager.h"
 #include "SingleMsg.h"
 
-Id SingleMsg::id_;
+Id SingleMsg::managerId_;
 
 /////////////////////////////////////////////////////////////////////
 // Here is the SingleMsg code
 /////////////////////////////////////////////////////////////////////
 
+SingleMsg::SingleMsg()
+	: Msg( 0, 0, 0, SingleMsg::managerId_ ),
+	i1_( 0 ),
+	i2_( 0 )
+{
+	;
+}
+
 SingleMsg::SingleMsg( MsgId mid, Eref e1, Eref e2 )
-	: Msg( mid, e1.element(), e2.element(), id_ ),
+	: Msg( mid, e1.element(), e2.element(), SingleMsg::managerId_ ),
 	i1_( e1.index() ), 
 	i2_( e2.index() )
 {
@@ -74,25 +82,9 @@ DataId SingleMsg::i2() const
 	return i2_;
 }
 
-void SingleMsg::setI1( DataId di )
+Id SingleMsg::managerId() const 
 {
-	i1_ = di;
-}
-
-void SingleMsg::setI2( DataId di )
-{
-	i2_ = di;
-}
-
-Id SingleMsg::id() const 
-{
-	return id_;
-}
-
-/// Static function used during initialization
-void SingleMsg::setId( Id id )
-{
-	id_ = id;
+	return SingleMsg::managerId_;
 }
 
 FullId SingleMsg::findOtherEnd( FullId f ) const

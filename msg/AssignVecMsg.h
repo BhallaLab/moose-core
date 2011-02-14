@@ -18,14 +18,15 @@
 
 class AssignVecMsg: public Msg
 {
-	friend void initMsgManagers(); // for initializing Id.
+	friend void Msg::initMsgManagers(); // for initializing Id.
 	public:
+		AssignVecMsg(); // Used for the Dinfo template only.
 		AssignVecMsg( MsgId mid, Eref e1, Element* e2 );
 		~AssignVecMsg();
 
 		void exec( const char* arg, const ProcInfo* p) const;
 
-		Id id() const;
+		Id managerId() const;
 
 		FullId findOtherEnd( FullId end ) const;
 
@@ -43,7 +44,7 @@ class AssignVecMsg: public Msg
 	private:
 		DataId i1_;
 
-		static Id id_;
+		static Id managerId_;
 };
 
 #endif // _ASSIGN_VEC_MSG_H

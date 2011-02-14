@@ -14,10 +14,17 @@
 // Defined in AssignmentMsg.cpp
 extern void sendAckBack( const ProcInfo* p, MsgId mid, DataId i2 );
 
-Id AssignVecMsg::id_;
+Id AssignVecMsg::managerId_;
+
+AssignVecMsg::AssignVecMsg()
+	: Msg( 0, 0, 0, AssignVecMsg::managerId_ ),
+	i1_( 0 )
+{
+	;
+}
 
 AssignVecMsg::AssignVecMsg( MsgId mid, Eref e1, Element* e2 )
-	: Msg( mid, e1.element(), e2, id_ ),
+	: Msg( mid, e1.element(), e2, AssignVecMsg::managerId_ ),
 	i1_( e1.index() )
 {
 	;
@@ -59,9 +66,9 @@ void AssignVecMsg::exec( const char* arg, const ProcInfo *p ) const
 	}
 }
 
-Id AssignVecMsg::id() const
+Id AssignVecMsg::managerId() const
 {
-	return id_;
+	return AssignVecMsg::managerId_;
 }
 
 FullId AssignVecMsg::findOtherEnd( FullId f ) const

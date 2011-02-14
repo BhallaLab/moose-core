@@ -61,14 +61,15 @@ class Msg
 
 		/**
 		 * Return the Id of the managing Element. Each derived Msg class
-		 * has its own manager. This is predefined at initialization.
+		 * has its own manager as a static field. This is predefined at
+		 * initialization.
 		 */
-		virtual Id id() const = 0;
+		virtual Id managerId() const = 0;
 
 		/**
 		 * Return the Eref of the managing object.
 		 */
-		Eref manager( Id id ) const;
+		Eref manager() const;
 
 		/**
 		 * Fills in the specified dataId for this msg.

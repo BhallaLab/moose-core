@@ -11,12 +11,19 @@
 #include "MsgManager.h"
 #include "OneToAllMsg.h"
 
-Id OneToAllMsg::id_;
+Id OneToAllMsg::managerId_;
 
+OneToAllMsg::OneToAllMsg()
+	: 
+		Msg( 0, 0, 0, OneToAllMsg::managerId_ ),
+		i1_( 0 )
+{
+	;
+}
 
 OneToAllMsg::OneToAllMsg( MsgId mid, Eref e1, Element* e2 )
 	: 
-		Msg( mid, e1.element(), e2, id_ ),
+		Msg( mid, e1.element(), e2, OneToAllMsg::managerId_ ),
 		i1_( e1.index() )
 {
 	;
@@ -60,9 +67,9 @@ bool OneToAllMsg::isMsgHere( const Qinfo& q ) const
 	return 1; // Going the other way, any of the indices can send the msg.
 }
 
-Id OneToAllMsg::id() const
+Id OneToAllMsg::managerId() const
 {
-	return id_;
+	return OneToAllMsg::managerId_;
 }
 
 FullId OneToAllMsg::findOtherEnd( FullId f ) const
