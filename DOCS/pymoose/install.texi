@@ -1,4 +1,4 @@
-@node Installation, Quick Start, Introduction, Top
+@node Installation, , , Top
 @chapter Installing (Py)MOOSE
 
 @cindex install, installation
@@ -147,3 +147,8 @@ nnnn FuncVecs built for the first time
 
 where @i{your_home_directory} stands for the full path of the user's
 home directory and @i{nnnn} stands for some number (2200 in my case).
+
+@c Local Variables: 
+@c mode: texinfo
+@c TeX-master: "pymoose"
+@c End: 

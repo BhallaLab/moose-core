@@ -63,7 +63,7 @@ describing the classes of objects in MOOSE.
 * Index::                       Index
 
 
-File: pymoose.info,  Node: Copying,  Next: Introduction,  Prev: Top,  Up: Top
+File: pymoose.info,  Node: Copying,  Up: Top
 
 1 Copying this document
 ***********************
@@ -83,7 +83,7 @@ INDIA.
      in the section entitled "GNU Free Documentation License."
 
 
-File: pymoose.info,  Node: Introduction,  Next: Installation,  Prev: Copying,  Up: Top
+File: pymoose.info,  Node: Introduction,  Up: Top
 
 2 Introduction to MOOSE and PyMOOSE
 ***********************************
@@ -196,7 +196,7 @@ time.
 of Physics to other sciences
 
 
-File: pymoose.info,  Node: Installation,  Next: Quick Start,  Prev: Introduction,  Up: Top
+File: pymoose.info,  Node: Installation,  Up: Top
 
 3 Installing (Py)MOOSE
 **********************
@@ -354,13 +354,13 @@ few informational outputs, ending with:
 home directory and nnnn stands for some number (2200 in my case).
 
 
-File: pymoose.info,  Node: Quick Start,  Next: Detailed Guide,  Prev: Installation,  Up: Top
+File: pymoose.info,  Node: Quick Start,  Up: Top
 
 4 Quick Start
 *************
 
 
-File: pymoose.info,  Node: Detailed Guide,  Next: FAQ,  Prev: Quick Start,  Up: Top
+File: pymoose.info,  Node: Detailed Guide,  Up: Top
 
 5 In-Depth Guide to PyMOOSE
 ***************************
@@ -370,7 +370,7 @@ In this chapter we go through the internal details of PyMOOSE.
 * Menu:
 
 * Overview::                    A short overview of impotrant internals of PyMOOSE
-* Element Tree::                  All elements in MOOSE are part of a Tree structure
+* Element Tree::                All elements in MOOSE are part of a Tree structure
 * Id::                          The unique identifier for each MOOSE object
 * Neutral::                     Common properties of all MOOSE classes
 * PyMooseContext::              The God object giving access to global functions
@@ -378,7 +378,7 @@ In this chapter we go through the internal details of PyMOOSE.
 * Running GENESIS scripts in Python::  How to run GENESIS-2 commands/scripts in Python
 
 
-File: pymoose.info,  Node: Overview,  Next: Element Tree,  Up: Detailed Guide
+File: pymoose.info,  Node: Overview,  Next: Element Tree,  Prev: Detailed Guide,  Up: Detailed Guide
 
 5.1 Overview of PyMOOSE internals
 =================================
@@ -886,15 +886,139 @@ the path `/my_element', you can use:
    `context.runG('showmsg /my_element')'
 
 
-File: pymoose.info,  Node: FAQ,  Next: GNU Free Documentation License,  Prev: Detailed Guide,  Up: Top
+File: pymoose.info,  Node: FAQ,  Up: Top
 
 6 Frequently Asked Questions
 ****************************
 
-TO BE COMPLETED.
+* Menu:
+
+* How do I load a model?::
+* How do I record field 'xyz' from and object?::
 
 
-File: pymoose.info,  Node: GNU Free Documentation License,  Next: Index,  Prev: FAQ,  Up: Top
+File: pymoose.info,  Node: How do I load a model?,  Next: How do I record field 'xyz' from and object?,  Prev: FAQ,  Up: FAQ
+
+6.1 How do I load a model?
+==========================
+
+There are various formats that a model can be in. MOOSE recognizes
+GENESIS cell prototypes ('.p' files), SBML and neuroML files.
+Moreover, a GENESIS script ('.g' file) can be loaded in PyMOOSE. Here
+is a small description of these:
+
+* Menu:
+
+* How do I load a GENESIS prototype file?::
+* How do I load an SBML file?::
+* How do I load a neuroML file?::
+
+
+File: pymoose.info,  Node: How do I load a GENESIS prototype file?,  Next: How do I load an SBML file?,  Prev: How do I load a model?,  Up: How do I load a model?
+
+6.1.1 How do I load GENESIS prototype file?
+-------------------------------------------
+
+There is a text file format used by GENESIS to define prototypes for
+neuronal models. The details of this format can be found in GENESIS
+documentation for `readcell'.
+
+   Briefly, the main content of files in this format is a sequence of
+rows corresponding to compartments that constitute the cell model. In
+each row, you have the compartment name, its parent compartment's
+name, position of the starting point the compartment (optionally the
+end point), diameter of the compartment (the spatial dimensions are in
+microns for position and diameter), followed by a list of channels and
+their conductance densities(in SI unit, Siemens/m^2).
+
+   The channels are recognized by their names and the actual channel
+prototype definitions must be loaded under `/lib' before loading the
+prototype file. Otherwise that channel will not be inserted on the
+compartments.
+
+   Once you have created prototypes for the channels, the `readCell'
+function in `PyMooseContext' can be called to load the cell
+prototype. For instance,
+     moose.context.readCell('/usr/share/doc/moose/DEMOS/axon/axon.p', '/axon')
+
+   will load read the prototype described in the file
+`/usr/share/doc/moose/DEMOS/axon/axon.p' as the cell `/axon'.
+
+
+File: pymoose.info,  Node: How do I load an SBML file?,  Next: How do I load a neuroML file?,  Prev: How do I load a GENESIS prototype file?,  Up: How do I load a model?
+
+6.1.2 How do I load an SBML file?
+---------------------------------
+
+SBML stands for systems biology markup language. This is an XML based
+file format for defining computational models in systems biology. More
+information can be found at the official website: http://sbml.org/
+(http://sbml.org/).
+
+   You can load SBML models using the `readSBML(filepath,
+elementpath)' function in `PyMooseContext' class.
+
+   For example,
+
+     moose.context.readSBML('/usr/share/moose/DEMOS/sbml_Reader/acc88.xml', '/acc88')
+
+   will load the model defined in acc88.xml file under a container
+`/acc88'.
+
+
+File: pymoose.info,  Node: How do I load a neuroML file?,  Prev: How do I load an SBML file?,  Up: How do I load a model?
+
+6.1.3 How do I load a neuroML file?
+-----------------------------------
+
+neuroML is an XML-based format for defining neuronal models. You can
+find out more about neuroML at its website: http://www.neuroml.org/
+(http://www.neuroml.org/). MOOSE is capable of reading some levels of
+neuroML model definition. You can use the `readNeuroML' function in
+PyMooseContext to load a neuroML model in MOOSE:
+     moose.context.readNeuroML('/usr/share/moose/DEMOS/NeuroML_Reader/CA1/Ca1.xml', '/ca1')
+   to load the model defined in Ca1.xml into a Cell object '/ca1'.
+
+
+File: pymoose.info,  Node: How do I record field 'xyz' from and object?,  Prev: How do I load a model?,  Up: FAQ
+
+6.2 How do I record field 'xyz' from and object?
+================================================
+
+The `Table' class serves for recording data in MOOSE. `Table' is a
+multipurpose class, capable of acting as an interpolation table,
+function generator as well as a data recorder.
+
+   For recording the value of fields that represent continuous
+variables, during a simulation, you have to connect the
+`inputRequest' field of a `Table' object to the corresponding value
+field on the target object, and set the step mode of the table object
+to `TAB_BUF' (=3).
+
+     xyz_table = moose.Table('/data/xyz_table')
+     xyz_table.stepMode = moose.TAB_BUF
+     xyz_table.connect('inputRequest', target_object, 'xyz')
+
+6.2.1 How do I record spike events?
+-----------------------------------
+
+If you only want to record some threshold crossing events, like
+neuronal spikes, then you can use `TAB_SPIKE' (=4) mode. In this
+case, the `stepSize' field of the table is used as the threshold for
+the target field to be recorded.
+
+     spike_table = moose.Table('/data/spike_table')
+     spike_table.step_mode = moose.TAB_SPIKE
+     spike_table.connect('inputRequest', soma, 'Vm')
+     spike_table.stepSize = 0.1
+
+   In the above example, soma is a neuronal compartment (instance of
+`Compartment' class). `spike_table' will have an entry of the current
+simulated time every time membrane potential `Vm' of `soma' crosses
+0.1 Volt (assuming you are using SI system through out).
+
+
+File: pymoose.info,  Node: GNU Free Documentation License,  Up: Top
 
 Appendix A GNU Free Documentation License.
 ******************************************
@@ -1332,7 +1456,7 @@ free software license, such as the GNU General Public License, to
 permit their use in free software.
 
 
-File: pymoose.info,  Node: Index,  Prev: GNU Free Documentation License,  Up: Top
+File: pymoose.info,  Node: Index,  Next: Variable Index,  Up: Top
 
 Index
 *****
@@ -1343,7 +1467,7 @@ Index
 * Concept Index::
 
 
-File: pymoose.info,  Node: Variable Index,  Next: Concept Index,  Up: Index
+File: pymoose.info,  Node: Variable Index,  Next: Concept Index,  Prev: Index,  Up: Index
 
 Variable Index
 **************
@@ -1401,28 +1525,33 @@ Concept Index
 Tag Table:
 Node: Top844
 Node: Copying2467
-Node: Introduction3239
-Node: Modeling for simulation4055
-Ref: Modeling for simulation-Footnote-18472
-Node: Installation8570
-Node: Prerequisites9215
-Node: Configuration9985
-Node: Build/install10383
-Node: Loading13660
-Node: Quick Start14156
-Node: Detailed Guide14281
-Node: Overview15069
-Node: Element Tree19721
-Node: Id20673
-Node: Neutral22457
-Ref: Neutral-Footnote-128037
-Node: PyMooseContext28120
-Node: Messaging30726
-Node: Running GENESIS scripts in Python32613
-Node: FAQ33623
-Node: GNU Free Documentation License33806
-Node: Index56260
-Node: Variable Index56405
-Node: Concept Index57460
+Node: Introduction3206
+Node: Modeling for simulation3985
+Ref: Modeling for simulation-Footnote-18402
+Node: Installation8500
+Node: Prerequisites9104
+Node: Configuration9874
+Node: Build/install10272
+Node: Loading13549
+Node: Quick Start14045
+Node: Detailed Guide14126
+Node: Overview14880
+Node: Element Tree19555
+Node: Id20507
+Node: Neutral22291
+Ref: Neutral-Footnote-127871
+Node: PyMooseContext27954
+Node: Messaging30560
+Node: Running GENESIS scripts in Python32447
+Node: FAQ33457
+Node: How do I load a model?33646
+Node: How do I load a GENESIS prototype file?34182
+Node: How do I load an SBML file?35648
+Node: How do I load a neuroML file?36410
+Node: How do I record field 'xyz' from and object?37092
+Node: GNU Free Documentation License38667
+Node: Index61095
+Node: Variable Index61224
+Node: Concept Index62293
 
 End Tag Table
