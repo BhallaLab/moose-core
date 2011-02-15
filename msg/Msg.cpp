@@ -60,6 +60,7 @@ Msg::~Msg()
 MsgId Msg::nextMsgId()
 {
 	MsgId ret;
+	/*
 	if ( garbageMsg_.size() > 0 ) {
 		ret = garbageMsg_.back();
 		garbageMsg_.pop_back();
@@ -67,6 +68,9 @@ MsgId Msg::nextMsgId()
 		ret = msg_.size();
 		msg_.push_back( 0 );
 	}
+	*/
+	ret = msg_.size();
+	msg_.push_back( 0 );
 	return ret;
 }
 

@@ -242,7 +242,7 @@ void SparseMsg::exec( const char* arg, const ProcInfo *p ) const
 		const unsigned int* colIndex;
 		unsigned int n = matrix_.getRow( row, &fieldIndex, &colIndex );
 
-		if ( e1_->getName() == "test2" )
+		// if ( e1_->getName() == "test2" )
 			report = 0;
 
 		if ( report ) cout << p->nodeIndexInGroup << "." << p->threadIndexInGroup << ": SparseMsg " << e1_->getName() << "->" << e2_->getName() << ", row= " << row << ": entries= ";

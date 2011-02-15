@@ -754,6 +754,11 @@ bool Shell::adopt( Id parent, Id child ) {
 
 	Msg* m = new OneToAllMsg( Msg::nextMsgId(), parent.eref(), child() );
 	assert( m );
+
+	cout << myNode_ << ", Shell::adopt: mid = " << m->mid() <<
+		", pa =" << parent << "." << parent()->getName() << 
+		", kid=" << child << "." << child()->getName() << "\n";
+
 	if ( !f1->addMsg( pf, m->mid(), parent() ) ) {
 		cout << "move: Error: unable to add parent->child msg from " <<
 			parent()->getName() << " to " << child()->getName() << "\n";
@@ -828,7 +833,10 @@ bool Shell::innerAddMsg( string msgType, MsgId mid,
 	FullId src, string srcField, 
 	FullId dest, string destField )
 {
-	// cout << myNode_ << ", Shell::handleAddMsg" << "\n";
+	cout << myNode_ << ", Shell::handleAddMsg: " << 
+		msgType << ", " << mid <<
+		", src =" << src << "." << srcField << 
+		", dest =" << dest << "." << destField << "\n";
 	const Finfo* f1 = src.id()->cinfo()->findFinfo( srcField );
 	if ( f1 == 0 ) return 0;
 	// assert( f1 != 0 );

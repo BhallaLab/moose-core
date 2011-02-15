@@ -573,7 +573,7 @@ bool checkOutput( Id e,
 	double v0, double v1, double v2, double v3, double v4 )
 {
 	bool ret = 1;
-	bool report = 1;
+	bool report = 0;
 
 	vector< double > correct;
 	correct.push_back( v0 );
@@ -589,38 +589,6 @@ bool checkOutput( Id e,
 		ret = ret & doubleEq( retVec[i], correct[i] );
 		if (report) cout << "( " << correct[i] << ", " << retVec[i] << " ) ";
 	}
-
-/*
-	Eref e0( e(), 0 );
-	double val = reinterpret_cast< Arith* >( e0.data() )->getOutput();
-	// double val = Field< double >::get( e0, "outputValue" );
-	ret = ret && ( fabs( val - v0 ) < 1e-6 );
-	if (report) cout << "( " << v0 << ", " << val << " ) ";
-
-	Eref e1( e(), 1 );
-	// val = Field< double >::get( e1, "outputValue" );
-	val = reinterpret_cast< Arith* >( e1.data() )->getOutput();
-	ret = ret && ( fabs( val - v1 ) < 1e-6 );
-	if (report) cout << "( " << v1 << ", " << val << " ) ";
-
-	Eref e2( e(), 2 );
-	// val = Field< double >::get( e2, "outputValue" );
-	val = reinterpret_cast< Arith* >( e2.data() )->getOutput();
-	ret = ret && ( fabs( val - v2 ) < 1e-6 );
-	if (report) cout << "( " << v2 << ", " << val << " ) ";
-
-	Eref e3( e(), 3 );
-	// val = Field< double >::get( e3, "outputValue" );
-	val = reinterpret_cast< Arith* >( e3.data() )->getOutput();
-	ret = ret && ( fabs( val - v3 ) < 1e-6 );
-	if (report) cout << "( " << v3 << ", " << val << " ) ";
-
-	Eref e4( e(), 4 );
-	// val = Field< double >::get( e4, "outputValue" );
-	val = reinterpret_cast< Arith* >( e4.data() )->getOutput();
-	ret = ret && ( fabs( val - v4 ) < 1e-6 );
-	if (report) cout << "( " << v4 << ", " << val << " )\n";
-*/
 	return ret;
 }
 
@@ -783,27 +751,6 @@ void testShellAddMsg()
 	ret = SetGet1< double >::setVec( g1.eref(), "arg1", init ); // 12345
 	assert( ret );
 
-	/*
-	const Arith* a10obj = reinterpret_cast< Arith* >( Eref( a1(), 0 ).data() );
-	const Arith* a11obj = reinterpret_cast< Arith* >( Eref( a1(), 1 ).data() );
-	const Arith* a12obj = reinterpret_cast< Arith* >( Eref( a1(), 2 ).data() );
-	const Arith* a13obj = reinterpret_cast< Arith* >( Eref( a1(), 3 ).data() );
-	const Arith* a14obj = reinterpret_cast< Arith* >( Eref( a1(), 4 ).data() );
-	*/
-	/*
-	for ( unsigned int i = 0; i < 5; ++i ) {
-		cout << shell->myNode() << ": data here for (a1," << i << "): "
-			<< Eref( a1(), i ).isDataHere() << endl;
-	}
-	*/
-	/*
-	assert( doubleEq( a10obj->getArg1(), 1 ) );
-	assert( doubleEq( a11obj->getArg1(), 2 ) );
-	assert( doubleEq( a12obj->getArg1(), 3 ) );
-	assert( doubleEq( a13obj->getArg1(), 4 ) );
-	assert( doubleEq( a14obj->getArg1(), 5 ) );
-	*/
-
 	assert( doubleEq( Field< double >::get( Eref( a1(), 0 ), "arg1Value" ), 1 ) );
 	assert( doubleEq( Field< double >::get( Eref( a1(), 1 ), "arg1Value" ), 2 ) );
 	assert( doubleEq( Field< double >::get( Eref( a1(), 2 ), "arg1Value" ), 3 ) );
@@ -825,11 +772,6 @@ void testShellAddMsg()
 	for ( unsigned int i = 0; i < 5; ++i )
 		assert( doubleEq( retVec[i], i + 1 ) );
 
-	/*
-	ret = checkArg1( a1, 1, 2, 3, 4, 5 );
-	ret = checkArg1( b1, 1, 2, 3, 4, 5 );
-	ret = checkArg1( c1, 1, 2, 3, 4, 5 );
-	*/
 
 	///////////////////////////////////////////////////////////
 	// Run it
@@ -989,7 +931,6 @@ void testCopyMsgOps()
 
 	// ret = SetGet1< unsigned int >::set( m5er, "loadBalance", Shell::numCores() );
 	assert( ret );
-	
 
 	FullId tick( Id( 2 ), 0 );
 
@@ -998,7 +939,6 @@ void testCopyMsgOps()
 	///////////////////////////////////////////////////////////
 
 	Id pa2 = shell->doCopy( pa, Id(), "pa2", 1, 0 );
-	// Id pa3 = shell->doCopy( pa, Id(), "pa2", 10, 0 );
 
 	///////////////////////////////////////////////////////////
 	// Pull out the child Ids.
@@ -1022,10 +962,11 @@ void testCopyMsgOps()
 	assert( kids[j]()->getName() == "e1" ); ++j;
 	assert( kids[j]()->getName() == "e2" ); ++j;
 
-
-	const Arith* a1obj = reinterpret_cast< const Arith* >( kids[0].eref().data() );
+	vector< double > retVec;
+	Field< double >::getVec( Eref( kids[0](), DataId::any() ), "arg1Value", retVec );
+	assert( retVec.size() == 5 );
 	for (unsigned int i = 0; i < 5; ++i )
-		assert( doubleEq( a1obj[i].arg1_, init[i] ) );
+		assert( doubleEq( retVec[i], init[i] ) );
 
 	///////////////////////////////////////////////////////////
 	// Run it

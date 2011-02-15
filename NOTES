@@ -10725,3 +10725,94 @@ unit tests clear. Checkin 2468.
 Cleaned out the null constructors for the various Msg subclasses. 
 Now it compiles, clears unit tests, and also clears the messaging tests in
 MPI mode. Dies shortly afterward, apparently in testCopyMsgOps.
+Checkin 2469.
+
+The problem isn't in execution, it is the copy operation itself.
+The target element isn't found in 
+ShellCopy::innerCopyMsgs, which dies around line 94.
+
+With some printf debugging it seems that the copy tree is missing one pair
+on node 1. A smaller earlier copy went fine.
+
+[We're going to have trouble with copy for Elements like enzymes which make
+their own children.]
+
+Looked at the previous function where the copy tree is built. 
+ShellCopy:InnerCopyElements
+
+An error there:
+1: ice, pa = 0, pair= (129,140)
+1: ice, pa = 140, pair= (130,141)
+1: ice, pa = 140, pair= (131,142)
+1: ice, pa = 140, pair= (132,143)
+1: ice, pa = 140, pair= (133,144)
+1: ice, pa = 140, pair= (134,145)
+1: ice, pa = 140, pair= (139,146)
+1: ice, pa = 140, pair= (136,147)
+1: ice, pa = 140, pair= (137,148)
+1: ice, pa = 140, pair= (138,149)
+1: ice, pa = 140, pair= (139,150)
+
+(the node0 cases are OK).
+Note how the 6th one has a jump in the first entry. It is also repeated at
+the last entry.
+============================================================================
+15 Feb 2011
+Some more printf debugging. The original (source) tree of Elements itself isn't 
+set up correctly on node 1.
+
+1: handleCopy: ntree= 11
+(0, 129) pa
+(1, 130) a1
+(2, 131) a2
+(3, 132) b1
+(4, 133) b2
+(5, 134) c1
+(6, 139) e2
+(7, 136) d1
+(8, 137) d2
+(9, 138) e1
+(10, 139) e2
+
+Look at entries 6 and 10. Entry 6 should be c2, #135.
+The c1->c2 message is a OneToOne.
+All the subsequent Elements are children of pa.
+
+Checked if this oddity is dependent on the messages set up in the test.
+Yes, it is. I commented out the messages and c2 reappeared on the list.
+The Copy operation still failed, though. If I comment out the SparseMsg
+set up as well then the copy operation is happy. A bit more compiling and
+commenting later, it seems that if any message is there at all, the Copy
+operation fails. Fails at the usual place, innerCopyMsgs, when it can't
+find the original Element at either end of the message being copied.
+More printfs show that the message in question is not garbled, but misplaced:
+
+1: innerCopyMsg orig = (130, a1), e1 = (0, root), e2 = (140, pa2), fid = 15, mid = 36
+The fid and mid are OK, but the msg contents differ from those on node 0:
+0: innerCopyMsg orig = (130, a1), e1 = (130, a1), e2 = (131, a2), fid = 15, mid = 36
+
+The erroneous msg on node 1 is the one created by the copy command itself 
+for the base of the newly-formed tree:
+Id pa2 = shell->doCopy( pa, Id(), "pa2", 1, 0 );
+This would use the Shell::adopt function which uses the risky Msg::nextMsgId
+function on its own. What has happened seems to be that this has been done
+before the Shell::doAddMsg function has reached node 1. The doAddMsg
+function generates the msgId on the master node.
+
+More printf debugging.
+
+I think the issue isn't ordering, it is just that when a msgId is claimed
+by the master node, the local node Msg garbage collector isn't informed 
+and it is still able to generate the same msg entry from the garbage list. 
+Maybe should abolish the garbage collection for msg ids.
+
+To be strictly correct with regards to Ids, would have to build the entire 
+copied structure on the master node, then transmit the Element and msg Ids over.
+This will have its own complexities.
+
+Got rid of MsgId garbage collection. Now it clears the unit test for 
+creation of the copy, as well as the messaging in copies.
+
+Dies a bit later though, in testScheduling.
+
+============================================================================
