@@ -100,15 +100,15 @@ PyMooseBase::PyMooseBase(std::string className, std::string objectName, Id paren
     if (!id_.bad())
     {
 #ifndef NDEBUG
-        cerr << "Info: PyMooseBase::PyMooseBase(" << className << ", " <<  path << ") - ";
+        // cerr << "Info: PyMooseBase::PyMooseBase(" << className << ", " <<  path << ") - ";
         
-        if ( path == getSeparator() || path == (getSeparator()+"root"))
-        {
-            cerr << "Returning the predefined root element." << endl;
-        } else 
-        {
-            cerr << "Returning already existing object." << endl;
-        }
+        // if ( path == getSeparator() || path == (getSeparator()+"root"))
+        // {
+        //     cerr << "Returning the predefined root element." << endl;
+        // } else 
+        // {
+        //     cerr << "Returning already existing object." << endl;
+        // }
 #endif
         return;
     }
@@ -147,17 +147,17 @@ PyMooseBase::PyMooseBase(std::string className, std::string path)
     id_ = PyMooseBase::pathToId(path,false);
     if (!id_.bad())
     {
-#ifndef NDEBUG
-        cerr << "Info: PyMooseBase::PyMooseBase(" << className << ", " <<  path << ") - ";
+// #ifndef NDEBUG
+//         cerr << "Info: PyMooseBase::PyMooseBase(" << className << ", " <<  path << ") - ";
         
-        if ( path == getSeparator() || path == (getSeparator()+"root"))
-        {
-            cerr << "Returning the predefined root element." << endl;
-        } else 
-        {
-            cerr << "Returning already existing object." << endl;
-        }
-#endif
+//         if ( path == getSeparator() || path == (getSeparator()+"root"))
+//         {
+//             cerr << "Returning the predefined root element." << endl;
+//         } else 
+//         {
+//             cerr << "Returning already existing object." << endl;
+//         }
+// #endif
         return;
     }
 
@@ -216,15 +216,15 @@ PyMooseBase::PyMooseBase(std::string className, std::string objectName, PyMooseB
     if (!id_.bad())
     {
 #ifndef NDEBUG
-        cerr << "Info: PyMooseBase::PyMooseBase(" << className << ", " <<  path << ") - ";
+        // cerr << "Info: PyMooseBase::PyMooseBase(" << className << ", " <<  path << ") - ";
         
-        if ( path == getSeparator() || path == (getSeparator()+"root"))
-        {
-            cerr << "Returning the predefined root element." << endl;
-        } else 
-        {
-            cerr << "Returning already existing object." << endl;
-        }
+        // if ( path == getSeparator() || path == (getSeparator()+"root"))
+        // {
+        //     cerr << "Returning the predefined root element." << endl;
+        // } else 
+        // {
+        //     cerr << "Returning already existing object." << endl;
+        // }
 #endif
         return;
     }
@@ -244,18 +244,18 @@ PyMooseBase::PyMooseBase(std::string className, std::string path, std::string fi
     id_ = PyMooseBase::pathToId(path,false);
     if (!id_.bad())
     {
-#ifndef NDEBUG
-        cerr << "Info: PyMooseBase::PyMooseBase(" << className << ", " <<  path << ") - ";
+// #ifndef NDEBUG
+//         cerr << "Info: PyMooseBase::PyMooseBase(" << className << ", " <<  path << ") - ";
         
-        if ( path == getSeparator() || path == (getSeparator()+"root"))
-        {
-            cout << "Returning the predefined root element." << endl;
-        }
-        else 
-        {
-            cout << "Returning already existing object." << endl;
-        }
-#endif
+//         if ( path == getSeparator() || path == (getSeparator()+"root"))
+//         {
+//             cout << "Returning the predefined root element." << endl;
+//         }
+//         else 
+//         {
+//             cout << "Returning already existing object." << endl;
+//         }
+// #endif
         return;
     }
     context_->readCell(fileName, path);
@@ -297,9 +297,9 @@ PyMooseBase::PyMooseBase(const PyMooseBase& src, std::string path)
         myName = path.substr(name_start+1);
         
         parentPath = path.substr(0,name_start);
-#ifndef NDEBUG
-    cout << "PyMooseBase(const PyMooseBase& src, string path): myName = " << myName << ", parentPath = " << parentPath << endl;
-#endif
+// #ifndef NDEBUG
+//     cout << "PyMooseBase(const PyMooseBase& src, string path): myName = " << myName << ", parentPath = " << parentPath << endl;
+// #endif
         Id parentId = context_->pathToId(parentPath, false);
         if (parentId.bad()){
             cerr << "Error: PyMooseBase::PyMooseBase(const PyMooseBase& src, std::string path) -- parent object: " << parentPath << " not found." << endl;
