@@ -9,7 +9,7 @@
 @section How do I load a model?
 There are various formats that a model can be in. MOOSE recognizes
 GENESIS cell prototypes ('.p' files), SBML and neuroML files. Moreover, a GENESIS script
-('.g' file) can be loaded in PyMOOSE. Here is a small description of these:
+('.g' file) can be loaded in PyMOOSE. Here is a brief description of these:
 
 @menu
 * How do I load a GENESIS prototype file?::  
@@ -19,6 +19,7 @@ GENESIS cell prototypes ('.p' files), SBML and neuroML files. Moreover, a GENESI
 
 @node How do I load a GENESIS prototype file?, How do I load an SBML file?, How do I load a model?, How do I load a model?
 @subsection How do I load GENESIS prototype file?
+@cindex prototype
 There is a text file format used by GENESIS to define prototypes for
 neuronal models. The details of this format can be found in GENESIS
 documentation for @code{readcell}. 
@@ -114,6 +115,10 @@ In the above example, soma is a neuronal compartment (instance of
 current simulated time every time membrane potential @code{Vm} of
 @code{soma} crosses 0.1 Volt (assuming you are using SI system through
 out).
+
+@node Can I do XYZ available in GENESIS using PyMOOSE?
+@section Can I do XYZ available in GENESIS using PyMOOSE?
+@xref{Backward Compatibility}.
 
 @c Local Variables: 
 @c mode: texinfo

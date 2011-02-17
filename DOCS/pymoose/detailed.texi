@@ -122,7 +122,7 @@ TODO: to be completed with an walk-through to developing the simulation.
 @cindex root
 
 All elements in MOOSE are part of a tree structure. We call this
-@code{Element Tree} or @code{Element Tree}. This is similar to the folder
+@code{Element Tree} or @code{Model Tree}. This is similar to the folder
 structure in the file system of your computer. Each entry in this tree
 is a moose object and we call it an @strong{element}. The top level
 element is called the @code{root} element (represented as
@@ -168,7 +168,7 @@ as @code{id} field of pymoose objects. An Id object has two components,
 @itemize
 @item id 
       an unsigned integer. The method @code{id} returns this value. The
-      root element of the moose model tree always has the id 0.
+      root element of the moose element tree always has the id 0.
 @item index
       an unsigned integer giving the index number of
       array-elements. For simple elements, it is 0. It is returned by
@@ -231,9 +231,9 @@ True
 @end group
 @end example
 
-In addition, @code{Id} objects are hashable. Also, their hash is the
-hash of their string representation. Thus you can use them as keys in a
-@code{dict}.
+In addition, any @code{Id} object is hashable. The hash is computed as
+the hash of its string representation. Thus you can use them as keys in
+a @code{dict}.
 
 @node Neutral, PyMooseContext, Id, Detailed Guide
 @section Neutral
@@ -257,11 +257,11 @@ hash of their string representation. Thus you can use them as keys in a
 @code{Neutral} captures the fundamental properties of all the MOOSE
 elements. If you are familiar with Object Oriented Programming, you can
 recognize that this is the base class of all moose classes whose
-instances can be in the model tree.@footnote{Not all classes in MOOSE
+instances can be in the element tree.@footnote{Not all classes in MOOSE
 are element-classes. The @code{Id} class, for example.} 
 
-Being the base class of all other MOOSE classes, properties of Neutral
-class is common to all MOOSE classes. A Neutral object can wrap any
+Being the base class of all other MOOSE classes, properties of @code{Neutral}
+class is common to all MOOSE classes. A @code{Neutral} object can wrap any
 valid moose object. 
 
 You can construct a Neutral object in many ways. 
@@ -271,7 +271,7 @@ First, you can just
 give a path-string as the parameter to the constructor. If there is
 already an object with the given path, then you get a wrapper around the
 existing object. On the other hand, if no such object exists, it will
-try to create a new Neutral object with the given path. 
+try to create a new @code{Neutral} object with the given path. 
 @example
 @group
 
@@ -356,7 +356,7 @@ C++ source code of MOOSE and recompile it, a task suited for the brave.
 
 @item name
 Name of the element. Two different objects may have the same name but
-siblings in the model tree should have different names. You can change
+siblings in the element tree should have different names. You can change
 the name of an object by assigning a new string value to this field.
 
 @item index
@@ -368,7 +368,7 @@ same kind. The @code{index} field indicates the position of this
 element}s it is @code{0}.
 
 @item parent
-The @code{Id} of the parent element of this object in the model tree.
+The @code{Id} of the parent element of this object in the element tree.
 
 @item node
 This is the CPU node no. of on which this element is located. This is

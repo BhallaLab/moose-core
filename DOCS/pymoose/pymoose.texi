@@ -70,6 +70,7 @@ describing the classes of objects in MOOSE.
 * Installation::                Installing PyMOOSE
 * Quick Start::                 Quick Start Guide
 * Detailed Guide::              Detailed Guide to PyMOOSE
+* Backward Compatibility::      Backward compatibility with GENESIS
 * FAQ::                         Frequently Asked Questions
 
 * GNU Free Documentation License::  
@@ -86,6 +87,8 @@ describing the classes of objects in MOOSE.
 @include quickstart.texi
 
 @include detailed.texi
+
+@include backcompat.texi
 
 @include faq.texi
 
