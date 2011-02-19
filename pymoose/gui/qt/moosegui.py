@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Nov 15 09:53:58 2010 (+0530)
+# Last-Updated: Sat Feb 19 12:29:50 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2598
+#     Update #: 2631
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -743,7 +743,7 @@ class MainWindow(QtGui.QMainWindow):
             self.togglePlotWindowsAction.setChecked(False)
 
     def popupLoadModelDialog(self):
-        fileDialog = QtGui.QFileDialog(self)
+        fileDialog = QtGui.QFileDialog(self)        
         fileDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
         ffilter = ''
         for key in sorted(self.mooseHandler.fileExtensionMap.keys()):
@@ -756,13 +756,29 @@ class MainWindow(QtGui.QMainWindow):
                 if value == MooseHandler.type_genesis:
                     fileDialog.selectNameFilter(key)
                     break
+        targetPanel = QtGui.QFrame(fileDialog)
+        targetPanel.setLayout(QtGui.QVBoxLayout())
+        targetTree = MooseTreeWidget(fileDialog)
+        currentPath = self.mooseHandler._current_element.path
+        for item in targetTree.itemList:
+            if item.getMooseObject().path == currentPath:
+                targetTree.setCurrentItem(item)
+        targetLabel = QtGui.QLabel('Target Element')
+        targetText = QtGui.QLineEdit(fileDialog)
+        targetText.setText(currentPath)
+        targetPanel.layout().addWidget(targetLabel)
+        targetPanel.layout().addWidget(targetText)
+        layout = fileDialog.layout()
+        layout.addWidget(targetTree)
+        layout.addWidget(targetPanel)
+        self.connect(targetTree, QtCore.SIGNAL('itemClicked(QTreeWidgetItem *, int)'), lambda item, column: targetText.setText(item.getMooseObject().path))
 	if fileDialog.exec_():
 	    fileNames = fileDialog.selectedFiles()
 	    fileFilter = fileDialog.selectedFilter()
 	    fileType = self.mooseHandler.fileExtensionMap[str(fileFilter)]
 	    directory = fileDialog.directory() # Potential bug: if user types the whole file path, does it work? - no but gives error message
 	    for fileName in fileNames: 
-                modeltype  = self.mooseHandler.loadModel(str(fileName), str(fileType))
+                modeltype  = self.mooseHandler.loadModel(str(fileName), str(fileType), str(targetText.text()))
 		if modeltype == MooseHandler.type_kkit:
 		    self.addLayoutWindow()
                 print 'Loaded model',  fileName, 'of type', modeltype
