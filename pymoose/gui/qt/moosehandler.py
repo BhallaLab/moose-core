@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Nov  5 11:17:11 2010 (+0530)
+# Last-Updated: Sat Feb 19 11:26:30 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 848
+#     Update #: 867
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -145,23 +145,23 @@ class MooseHandler(QtCore.QObject):
 	self._context.runG(cmd)
         return 'In current PyMOOSE implementation running a GENESIS command does not return anything.'
 
-    def loadModel(self, filename, filetype):
+    def loadModel(self, filename, filetype, target='/'):
         """Load a model from file."""
         directory = os.path.dirname(filename)
         os.chdir(directory)
         filename = os.path.basename(filename) # ideally this should not be required - but neuroML reader has a bug and gets a segmentation fault when given abosolute path.
         moose.Property.addSimPath(directory)
         if filetype == MooseHandler.type_genesis:
-            return self.loadGenesisModel(filename)
+            return self.loadGenesisModel(filename, target)
         elif filetype == MooseHandler.type_xml:
-            return self.loadXMLModel(filename)
+            return self.loadXMLModel(filename, target)
         elif filetype == MooseHandler.type_python:
             sys.path.append(directory)
             return self.loadPythonScript(filename)
         
 
 
-    def loadGenesisModel(self, filename):
+    def loadGenesisModel(self, filename, target):
         """Load a model specified in a GENESIS Script.
 
         If the file is a kinetikit model (the criterion is 'include
@@ -210,10 +210,13 @@ class MooseHandler(QtCore.QObject):
                 if iskkit:
                     filetype = MooseHandler.type_kkit                    
                     break
+        current = self._context.getCwe()
+        self._context.setCwe(target)
         self._context.loadG(filename)
+        self._context.setCwe(current)        
         return filetype
         
-    def loadXMLModel(self, filename):
+    def loadXMLModel(self, filename, target):
         """Load a model in some XML format. 
 
         Looks inside the XML to figure out if this is a neuroML or an
@@ -232,10 +235,9 @@ class MooseHandler(QtCore.QObject):
         self._saxhandler.model_type = None
         self._xmlreader.reset()
         if ret == MooseHandler.type_neuroml:
-            command = 'readNeuroML "%s" %s' % (filename, self._current_element.path)
-            self._context.readNeuroML(filename, self._current_element.path)
+            self._context.readNeuroML(filename, target)
         elif ret == MooseHandler.type_sbml:
-            self._context.readSBML(filename, self._current_element.path)
+            self._context.readSBML(filename, target)
         
         return ret    
 
