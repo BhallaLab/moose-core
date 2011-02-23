@@ -593,6 +593,7 @@ class QtSquid(QtGui.QMainWindow):
     
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
+    QtGui.qApp = app
     app.connect(app, QtCore.SIGNAL('lastWindowClosed()'), app, QtCore.SLOT('quit()'))
     qtSquid = QtSquid()
     qtSquid.show()
