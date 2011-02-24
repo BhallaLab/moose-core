@@ -736,8 +736,8 @@ map< string, string >& sliDestLookup()
 	// Some messages for compartments.
 	dest[ "AXIAL Vm" ] = "raxial";
 	dest[ "AXIAL previous_state" ] = "raxial";
-	dest[ "RAXIAL Ra Vm" ] = "axial";
-	dest[ "RAXIAL Ra previous_state" ] = "axial";
+	dest[ "RAXIAL Ra Vm" ] = "";//"axial";
+	dest[ "RAXIAL Ra previous_state" ] = ""; //"axial";
 	dest[ "INJECT output" ] = "injectMsg";
 	
 	// Some messages for channels.
