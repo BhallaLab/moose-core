@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Sat Feb 19 12:29:50 2011 (+0530)
+# Last-Updated: Fri Feb 25 11:24:19 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2631
+#     Update #: 2635
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -631,7 +631,8 @@ class MainWindow(QtGui.QMainWindow):
 	self.mooseTreePanel = QtGui.QDockWidget(self.tr('Element Tree'), self)
         self.mooseTreePanel.setObjectName(self.tr('MooseClassPanel'))
 	self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.mooseTreePanel)
-	self.modelTreeWidget = MooseTreeWidget(self.mooseTreePanel) 
+	self.modelTreeWidget = MooseTreeWidget(self.mooseTreePanel)
+        self.modelTreeWidget.setMooseHandler(self.mooseHandler)
         self.modelTreeWidget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.connect(self.modelTreeWidget, QtCore.SIGNAL('customContextMenuRequested ( const QPoint&)'), self.createConnectionMenu)
 	self.mooseTreePanel.setWidget(self.modelTreeWidget)
@@ -796,6 +797,7 @@ class MainWindow(QtGui.QMainWindow):
         """Set the current object of the mooseHandler"""
         current_element = item.getMooseObject()
         self.mooseHandler._current_element = current_element
+        
 
 
     def _resetSlot(self):

@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun 23 18:54:14 2009 (+0530)
 # Version: 
-# Last-Updated: Fri Feb 25 10:55:34 2011 (+0530)
+# Last-Updated: Fri Feb 25 11:25:01 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 190
+#     Update #: 203
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -91,6 +91,10 @@ class MooseTreeWidget(QtGui.QTreeWidget):
 	self.itemList = []
 	self.setupTree(self.rootObject, self, self.itemList)
         self.setCurrentItem(self.itemList[0]) # Make root the default item
+        self.mooseHandler = None
+
+    def setMooseHandler(self, handler):
+        self.mooseHandler = handler
 
     def setupTree(self, mooseObject, parent, itemlist):
 	item = MooseTreeItem(parent)
@@ -99,13 +103,15 @@ class MooseTreeWidget(QtGui.QTreeWidget):
 	for child in mooseObject.children():
 	    childObj = moose.Neutral(child)
 	    self.setupTree(childObj, item, itemlist)
-
+        
 	return item
 
     def recreateTree(self):
         self.clear()
         self.itemList = []
         self.setupTree(moose.Neutral('/'), self, self.itemList)
+        if self.mooseHandler:
+            self.setCurrentItem(self.mooseHandler.getCurrentElement())
 
     def insertMooseObjectSlot(self, class_name):
         """Creates an instance of the class class_name and inserts it
@@ -123,6 +129,21 @@ class MooseTreeWidget(QtGui.QTreeWidget):
             self.emit(QtCore.SIGNAL('mooseObjectInserted(PyQt_PyObject)'), new_obj)
         except AttributeError:
             config.LOGGER.error('%s: no such class in module moose' % (class_name))
+
+    def setCurrentItem(self, item):
+        if isinstance(item, QtGui.QTreeWidgetItem):
+            QtGui.QTreeWidget.setCurrentItem(self, item)
+        elif isinstance(item, moose.PyMooseBase):
+            for entry in self.itemList:
+                if entry.getMooseObject().path == item.path:
+                    QtGui.QTreeWidget.setCurrentItem(self, entry)
+        elif isinstance(item, str):
+            for entry in self.itemList:
+                if entry.getMooseObject().path == item:
+                    QtGui.QTreeWidget.setCurrentItem(self, entry)
+        else:
+            raise Exception('Expected QTreeWidgetItem/moose object/string. Got: %s' % (type(item)))
+
 
     def updateItemSlot(self, mooseObject):
         for changedItem in (item for item in self.itemList if mooseObject.id == item.mooseObj_.id):
