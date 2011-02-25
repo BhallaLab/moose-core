@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jan 28 15:08:29 2010 (+0530)
 # Version: 
-# Last-Updated: Sat Feb 19 11:26:30 2011 (+0530)
+# Last-Updated: Fri Feb 25 11:18:27 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 867
+#     Update #: 868
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -139,6 +139,9 @@ class MooseHandler(QtCore.QObject):
         self._portPathMap = {}
         self._pathPortMap = defaultdict(set)
         self._portServerMap = {}
+
+    def getCurrentElement(self):
+        return self._current_element
 
     def runGenesisCommand(self, cmd):
 	"""Runs a GENESIS command and returns the output string"""
