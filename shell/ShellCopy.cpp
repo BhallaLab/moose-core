@@ -54,8 +54,7 @@ Element* innerCopyElements( Id orig, Id newParent, Id newElm,
 	// cout << Shell::myNode() << ": Copy: orig= " << orig << ", newParent = " << newParent << ", newElm = " << newElm << endl;
 	tree[ orig ] = e->id();
 
-	cout << Shell::myNode() << ": ice, pa = " << newParent << 
-		", pair= (" << orig << "," << e->id() << ")\n";
+	// cout << Shell::myNode() << ": ice, pa = " << newParent << ", pair= (" << orig << "," << e->id() << ")\n";
 
 	const Neutral* origData = reinterpret_cast< const Neutral* >(
 		orig.eref().data() );
@@ -75,12 +74,14 @@ void innerCopyMsgs( map< Id, Id >& tree, unsigned int n, bool copyExtMsgs )
 	assert( cf );
 	assert( cf2 );
 
+	/*
 	cout << endl << Shell::myNode() << ": innerCopyMsg ";
 	for ( map< Id, Id >::const_iterator i = tree.begin(); 
 		i != tree.end(); ++i ) {
 		cout << " (" << i->first << "," << i->second << ") ";
 	}
 	cout << endl;
+	*/
 	for ( map< Id, Id >::const_iterator i = tree.begin(); 
 		i != tree.end(); ++i ) {
 		Element *e = i->first.operator()();
@@ -94,11 +95,13 @@ void innerCopyMsgs( map< Id, Id >& tree, unsigned int n, bool copyExtMsgs )
 					MsgId mid = k->mid;
 					const Msg* m = Msg::getMsg( mid );
 					assert( m );
+	/*
 	cout << endl << Shell::myNode() << ": innerCopyMsg orig = (" <<
 		e->id() << ", " << e->getName() << "), e1 = (" <<
 		m->e1()->id() << ", " << m->e1()->getName() << "), e2 = (" <<
 		m->e2()->id() << ", " << m->e2()->getName() << "), fid = " <<
 		k->fid << ", mid = " << k->mid << endl;
+		*/
 					map< Id, Id >::const_iterator tgt;
 					if ( m->e1() == e ) {
 						tgt = tree.find( m->e2()->id() );
@@ -117,7 +120,7 @@ void innerCopyMsgs( map< Id, Id >& tree, unsigned int n, bool copyExtMsgs )
 	}
 }
 
-#define CHECK_TREE
+// #define CHECK_TREE
 
 void Shell::handleCopy( const Eref& er, const Qinfo* q,
 	vector< Id > args, string newName,
