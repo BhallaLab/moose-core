@@ -462,12 +462,24 @@ void Qinfo::addToQbackward( const ProcInfo* p, MsgFuncBinding b,
 	(*outQ_)[p->groupId].push_back( p->threadIndexInGroup, this, arg );
 }
 
+/// Static func.
+void Qinfo::disableStructuralQ()
+{
+	isSafeForStructuralOps_ = 1;
+}
+
+/// static func
+void Qinfo::enableStructuralQ()
+{
+	isSafeForStructuralOps_ = 0;
+}
+
 /**
  * This is called by the 'handle<op>' functions in Shell. So it is always
  * either in phase2/3, or within clearStructuralQ() which is on a single 
  * thread inside Barrier1.
  * Note that the 'isSafeForStructuralOps' flag is only ever touched in 
- * clearStructuralQ().
+ * clearStructuralQ(), except in the unit tests.
  */
 bool Qinfo::addToStructuralQ() const
 {

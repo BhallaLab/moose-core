@@ -292,6 +292,20 @@ class Qinfo
 		 */
 		static void clearReduceQ( unsigned int numThreads );
 
+		/**
+		 * Sets the isSafeForStructuralOps_ flag.
+		 * Helper function used by the async unit tests.
+		 * Not to be used elsewhere.
+		 */
+		static void disableStructuralQ();
+
+		/**
+		 * Zeroes the isSafeForStructuralOps_ flag.
+		 * Helper function used by the async unit tests.
+		 * Not to be used elsewhere.
+		 */
+		static void enableStructuralQ();
+
 	private:
 		bool useSendTo_;	/// true if msg is to a single target DataId.
 		bool isForward_; /// True if the msg is from e1 to e2.

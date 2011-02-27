@@ -283,7 +283,9 @@ void testInnerSet()
 	char* args = new char[ conv.size() ];
 	conv.val2buf( args );
 	PrepackedBuffer pb( args, conv.size() );
-	shell->handleSet( i2, e2.index(), f1, pb );
+	Qinfo q;
+	Qinfo::disableStructuralQ();
+	shell->handleSet( sheller, &q, i2, e2.index(), f1, pb );
 	// shell->innerSet( e2, f1, args, conv.size() );
 	delete[] args;
 	Qinfo::clearQ( &p );
@@ -303,7 +305,8 @@ void testInnerSet()
 		// char* args = new char[ conv.size() ];
 		conv.val2buf( args );
 		PrepackedBuffer pb( args, conv.size() );
-		shell->handleSet( dest.id(), dest.index(), f2, pb );
+		Qinfo::disableStructuralQ();
+		shell->handleSet( sheller, &q, dest.id(), dest.index(), f2, pb );
 	//	shell->innerSet( dest, f2, args, conv.size() );
 	// 	SetGet1< double >::set( dest, "set_outputValue", x );
 		Qinfo::clearQ( &p );
@@ -337,7 +340,9 @@ void testInnerGet() // Actually works on Shell::handleGet.
 	const Finfo* finfo = ret->cinfo()->findFinfo( "get_name" );
 	assert( finfo );
 	FuncId f1 = dynamic_cast< const DestFinfo* >( finfo )->getFid();
-	shell->handleGet( i2, DataId( 0 ), f1, 1 );
+	Qinfo q;
+	Qinfo::disableStructuralQ();
+	shell->handleGet( sheller, &q, i2, DataId( 0 ), f1, 1 );
 	Qinfo::clearQ( &p ); // The request goes to the target Element
 	Qinfo::clearQ( &p ); // The response comes back to the Shell
 	Qinfo::clearQ( &p ); // Response is relayed back to the node 0 Shell
@@ -348,7 +353,8 @@ void testInnerGet() // Actually works on Shell::handleGet.
 	// string val = Field< string >::get( e2, "name" );
 	// assert( val == "test2" );
 	ret->setName( "HupTwoThree" );
-	shell->handleGet( i2, DataId( 0 ), f1, 1 );
+	Qinfo::disableStructuralQ();
+	shell->handleGet( sheller, &q, i2, DataId( 0 ), f1, 1 );
 	Qinfo::clearQ( &p ); // The request goes to the target Element
 	Qinfo::clearQ( &p ); // The response comes back to the Shell
 	Qinfo::clearQ( &p ); // Response is relayed back to the node 0 Shell
@@ -370,7 +376,8 @@ void testInnerGet() // Actually works on Shell::handleGet.
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref dest( e2.element(), i );
 
-		shell->handleGet( i2, DataId( i ), f2, 1 );
+		Qinfo::disableStructuralQ();
+		shell->handleGet( sheller, &q, i2, DataId( i ), f2, 1 );
 		Qinfo::clearQ( &p ); // The request goes to the target Element
 		Qinfo::clearQ( &p ); // The response comes back to the Shell
 		Qinfo::clearQ( &p ); // Response is relayed back to the node 0 Shell

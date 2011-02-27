@@ -11027,3 +11027,21 @@ Msg.cpp m< msg_size assertion: 		8 failure
 testCopyMsgOps				2 failure
 quit exit				1 failure
 
+Checkin 2482.
+
+Attempt 1: Put in the test for 'addToStructuralQ' into 
+each of the handleSet and handleGet functions. This had cascade
+effects in other places to deal with the changed arguments to the
+functions. 
+In 38 cycles these are the outcomes:
+quit exit				1 failure
+Segv					2 failure
+Msg.cpp m< msg_size assertion: 		1 failure
+testShellAddMsg 			2 failure
+testCopyMsgOps				2 failure
+
+So it looks like this has helped significantly with the 
+	Msg.cpp m < msg_size assertion issue. Other failures look about
+	the same, and may well be separate issues.
+
+

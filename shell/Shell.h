@@ -312,7 +312,8 @@ class Shell
 		 * the assignment mode to operate the appropriate innerSet 
 		 * function.
 		 */
-		void handleSet( Id id, DataId d, FuncId fid, PrepackedBuffer arg );
+		void handleSet( const Eref& e, const Qinfo*q,
+			Id id, DataId d, FuncId fid, PrepackedBuffer arg );
 
 		static void dispatchSet( const Eref& er, FuncId fid, 
 			const char* args, unsigned int size );
@@ -331,8 +332,8 @@ class Shell
 			const Eref& sheller, const Eref& tgt, FuncId tgtFid,
 			unsigned int numGetEntries );
 
-		void handleGet( Id id, DataId index, FuncId fid, 
-			unsigned int numTgt );
+		void handleGet( const Eref& e, const Qinfo*q,
+			Id id, DataId index, FuncId fid, unsigned int numTgt );
 
 		void recvGet( const Eref& e, const Qinfo* q, PrepackedBuffer pb );
 
