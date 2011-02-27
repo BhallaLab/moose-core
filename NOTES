@@ -11044,4 +11044,52 @@ So it looks like this has helped significantly with the
 	Msg.cpp m < msg_size assertion issue. Other failures look about
 	the same, and may well be separate issues.
 
+Checkin 2483.
+Looked for other cases where structural calls were not thread-safe.
+The innerAddMsg call is protected by the Qinfo::addToStructuralQ()
+except for the Shell::connectMasterMsg function, and that is called
+in a single-thread region of the code anyway.
+
+May need to have a closer look at the getVec and setVec.
+
+Trying first to persuade the system to crash in gdb. After 10 or
+so cycles it fails with the Msg.cpp error. This is
+in one of the 11 worker threads, but looks like 8 other of the worker
+threads have the same problem.
+The Qinfo in readBuf is garbled in its msgId, funcId and srcIndex,
+and has a supposed size of zero. Oddly its booleans are OK, they
+usually go bad in pointer errors.
+The calling test is testShellAddMsg in testShell.cpp:771, this is
+a getVec call. 
+I have a funny odd-number size in the buffer. I wonder if this is
+permitted. Name length is not the issue.
+Did a printf debug line. It happens, but rarely. One place is in 
+testShell.cpp: testCopy.
+Second place is in 
+testShell.cpp:testCopyMsgOps.
+Both times it is precisely in the shell::doCopy command.
+OK, the reason may be that one of the arguments is a bool.
+Do we have an alignment issue here?
+
+Despite the odd-numbered qinfo size, the test runs completed.
+
+Got it to fail again. This time it was again after a copy, but the
+actual error happened in a getVec call.
+
+Let's try putting in a template specialization for 
+Conv< bool >
+so it uses at least 4 bytes.
+
+This does avoid the odd-number buffers.
+
+In 40 cycles these are the outcomes:
+testShellAddMsg:		4 failures (all off values returned by getVec)
+testCopyMsgOps:			2 failures (off value returned by getVec)
+Msg.cpp m < msg_.size()		1 failure (Q entry was odd sized here).
+quit exit			1 failure
+
+Well, this is strong correlative support for the idea that the odd-sized
+queue entries are associated with bad data. The number of failures hasn't
+changed though. It is also strong support for continuing issues with 
+getVec.
 

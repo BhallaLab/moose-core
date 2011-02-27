@@ -27,13 +27,24 @@
 template< class T > class Conv
 {
 	public:
+		/**
+		 * Constructs a conv object from a binary buffer, which is presumed
+		 * filled by a complementary conversion at the sender.
+		 */
 		Conv( const char* buf )
 		{
+			// By default the inner representation is just another char*
+			// pointer.
 			// Can make this more compact for things smaller than a ptr.
 			// Worth trying as a default for speed.
 			val_ = buf;
 		}
 
+		/**
+		 * Constructs a conv object from a reference to the original
+		 * object of type T. By default the conv object just records the
+		 * pointer of the object.
+		 */ 
 		Conv( const T& arg )
 		{
 			val_ = reinterpret_cast< const char* >( &arg );
@@ -44,6 +55,9 @@ template< class T > class Conv
 			return sizeof( T );
 		}
 
+		/**
+		 * Returns the value of the converted object
+		 */
 		const T operator*() const {
 			if ( val_ == 0 ) {
 				return T();
@@ -64,11 +78,19 @@ template< class T > class Conv
 			return sizeof( T );
 		}
 
+		/**
+		 * Default conversion from string just puts the string
+		 * into the char* pointer.
+		 */
 		static void str2val( T& val, const string& s ) {
 			istringstream is( s );
 			is >> val;
 		}
 
+		/**
+		 * Default conversion into string just puts the char* representation
+		 * into the string. Arguably a bad way to do it.
+		 */
 		static void val2str( string& s, const T& val ) {
 			stringstream ss;
 			ss << val;
@@ -125,6 +147,59 @@ template<> class Conv< string >
 		}
 	private:
 		string val_;
+};
+
+/**
+ * The template specialization of Conv< bool > sets up alignment on
+ * word boundaries by storing the bool as an int. 
+ */
+template<> class Conv< bool >
+{
+	public:
+		/// Constructor assumes that the buffer points to an int.
+		Conv( const char* buf )
+		{
+			assert( buf );
+			val_ = *reinterpret_cast< const int* >( buf );
+		}
+
+		/// Constructor uses implicit conversion of bool to int.
+		Conv( const bool& arg )
+			: val_( arg )
+		{;}
+
+		/**
+		 * This is the size used in the serialized form.
+		 */
+		unsigned int size() const
+		{
+			return sizeof( int );
+		}
+
+		const bool operator*() const {
+			return val_;
+		}
+
+		unsigned int val2buf( char* buf ) const {
+			*reinterpret_cast< int* >( buf ) = val_;
+			return sizeof( int );
+		}
+
+		static void str2val( bool& val, const string& s ) {
+			if ( s == "0" || s == "false" || s == "False" )
+				val = 0;
+			else
+				val = 1;
+		}
+
+		static void val2str( string& s, const bool& val ) {
+			if ( val )
+				s = "1";
+			else
+				s = "0";
+		}
+	private:
+		int val_;
 };
 
 template<> class Conv< PrepackedBuffer >
