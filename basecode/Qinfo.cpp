@@ -227,6 +227,11 @@ void readBuf(const Qvec& qv, const ProcInfo* proc )
 			}
 		}
 		buf += sizeof( Qinfo ) + qi->size();
+		if ( qi->size() % 2 != 0 ) {
+			cout << proc->nodeIndexInGroup << "." << 
+				proc->threadIndexInGroup << ": readBuf is odd sized: " <<
+				qi->size() << endl;
+		}
 	}
 }
 
