@@ -167,7 +167,7 @@ static DestFinfo handleAddMsg( "handleAddMsg",
 
 static DestFinfo handleSet( "handleSet", 
 			"Deals with request, to set specified field on any node to a value.",
-			new OpFunc4< Shell, Id, DataId, FuncId, PrepackedBuffer >( 
+			new EpFunc4< Shell, Id, DataId, FuncId, PrepackedBuffer >( 
 				&Shell::handleSet )
 			);
 
@@ -192,7 +192,7 @@ SrcFinfo4< Id, DataId, FuncId, unsigned int >* requestGet()
 static DestFinfo handleGet( "handleGet", 
 			"handleGet( Id elementId, DataId index, FuncId fid )"
 			"Deals with requestGet, to get specified field from any node.",
-			new OpFunc4< Shell, Id, DataId, FuncId, unsigned int >( 
+			new EpFunc4< Shell, Id, DataId, FuncId, unsigned int >( 
 				&Shell::handleGet )
 			);
 

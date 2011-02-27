@@ -30,8 +30,11 @@
 // Functions for handling field set/get and func calls
 ////////////////////////////////////////////////////////////////////////
 
-void Shell::handleSet( Id id, DataId d, FuncId fid, PrepackedBuffer arg )
+void Shell::handleSet( const Eref& e, const Qinfo* q, 
+	Id id, DataId d, FuncId fid, PrepackedBuffer arg )
 {
+	if ( q->addToStructuralQ() )
+		return;
 	Eref er( id(), d );
 	shelle_->clearBinding ( lowLevelSetGet()->getBindIndex() );
 	Eref sheller( shelle_, 0 );
@@ -180,9 +183,12 @@ const vector< char* >& Shell::innerDispatchGet(
  * This operates on the worker node. It handles the Get request from
  * the master node, and dispatches if need to the local object.
  */
-void Shell::handleGet( Id id, DataId index, FuncId fid, 
-	unsigned int numTgt )
+void Shell::handleGet( const Eref& e, const Qinfo* q, 
+	Id id, DataId index, FuncId fid, unsigned int numTgt )
 {
+	if ( q->addToStructuralQ() )
+		return;
+
 	Eref sheller( shelle_, 0 );
 	Eref tgt( id(), index );
 	FuncId retFunc = receiveGet()->getFid();
