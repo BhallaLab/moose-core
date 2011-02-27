@@ -482,8 +482,7 @@ void Shell::connectMasterMsg()
 		cout << Shell::myNode() << ": Error: failed in Shell::connectMasterMsg()\n";
 		exit( 0 );
 	}
-	cout << Shell::myNode() << ": Shell::connectMasterMsg gave id: " <<
-		m->mid() << "\n";
+	// cout << Shell::myNode() << ": Shell::connectMasterMsg gave id: " << m->mid() << "\n";
 
 	Id clockId( 1 );
 	bool ret = innerAddMsg( "Single", Msg::nextMsgId(), 
@@ -755,9 +754,7 @@ bool Shell::adopt( Id parent, Id child ) {
 	Msg* m = new OneToAllMsg( Msg::nextMsgId(), parent.eref(), child() );
 	assert( m );
 
-	cout << myNode_ << ", Shell::adopt: mid = " << m->mid() <<
-		", pa =" << parent << "." << parent()->getName() << 
-		", kid=" << child << "." << child()->getName() << "\n";
+	// cout << myNode_ << ", Shell::adopt: mid = " << m->mid() << ", pa =" << parent << "." << parent()->getName() << ", kid=" << child << "." << child()->getName() << "\n";
 
 	if ( !f1->addMsg( pf, m->mid(), parent() ) ) {
 		cout << "move: Error: unable to add parent->child msg from " <<
@@ -833,10 +830,12 @@ bool Shell::innerAddMsg( string msgType, MsgId mid,
 	FullId src, string srcField, 
 	FullId dest, string destField )
 {
+	/*
 	cout << myNode_ << ", Shell::handleAddMsg: " << 
 		msgType << ", " << mid <<
 		", src =" << src << "." << srcField << 
 		", dest =" << dest << "." << destField << "\n";
+		*/
 	const Finfo* f1 = src.id()->cinfo()->findFinfo( srcField );
 	if ( f1 == 0 ) return 0;
 	// assert( f1 != 0 );

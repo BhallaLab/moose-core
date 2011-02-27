@@ -10814,5 +10814,216 @@ Got rid of MsgId garbage collection. Now it clears the unit test for
 creation of the copy, as well as the messaging in copies.
 
 Dies a bit later though, in testScheduling.
+Checkin 2470.
+
+Cleaned out a whole lot of printf debugging messages. Checkin 2471
+
+It goes OK to the same point for 1,2,3,4 nodes. I've incorporated the 
+local count of synapses into the unit tests. Oddly for 8 nodes it fails
+with the assertions on biggest field array size. 
+
+For the smaller number of nodes it fails when checking weights. I suspect
+it is just an array misalignment.
+
+Checked, not an obvious aligmnment issue. Here is some output 
+from  mpirun -np 2 ./moose -c 1
+in testScheduling.cpp:testMultiNodeIntFireNetwork.
+
+Got wt = 0.00347109, correct = 0.00347109
+Got wt = 0.0106652, correct = 0
+Got wt = 0.0191519, correct = 0
+Got wt = 0, correct = 0
+Got wt = 0, correct = 0
+Got wt = 0.00509742, correct = 0
+
+Very odd. Why is the 'correct' vector, which is something we set up
+directly in the C++code, going to zero?
+
+Now it transpires that the vector has already got the zeros. Should track.
 
 ============================================================================
+16 Feb 2011
+I've gotten to an unpleasant random bug point. The program crashes with 
+different error messages at different points. 
+Single thread: never seems to crash.
+2 threads: Crashes in one of two possible places:
+	- One place is triggered by getVec. The immediate problem
+	is a bad value for the MsgId in hackForSendTo
+	- Second place is digesting the output of the getVec, when the # of
+	synapses are being counted. Printf debug shows that most of the
+	returned vec is empty, though the size is right.
+
+Checked, it has the same symptoms when recompiled without MPI.
+Is it some earlier funtion leaving droppings?
+	
+============================================================================
+17 Feb 2011
+The testMultiNodeIntFireNetwork function gets called twice, once for the 
+regular scheduling, and once for MPI. The program crashes with either or both
+present.
+If both are eliminated, the program sometimes makes it through to the end,
+but on some runs it crashes.
+
+============================================================================
+18 Feb 2011
+Checked whether syncFieldArraySize() is the problem. Commented it out,
+reran. Still dies, both places as above.
+
+============================================================================
+20 Feb 2011
+Commented out all the IntFireNetwork runs. 
+Now it clears the run with two threads, usually, but croaks (usually)
+with more than that.
+
+Commented out the testSchedulingProcess and the
+testMpiScheduling from the main. Now it clears all combinations...
+Actually no, it still manages to fail sometimes.
+
+============================================================================
+21 Feb.
+Qinfo ptr is bad in Qinfo::readQ->readBuf->hackForSendTo.
+Some garbage is coming out of the queue.
+Possibly even out of the Qvec argument of readBuf.
+
+============================================================================
+22 Feb
+Some places to look:
+- AssignmentMsg.cpp:sendAckBack. This seems to behave properly in using the
+addToQbackward function using a sensible procinfo.
+- Qinfo::hackForSendTo. Never did like this, maybe temporarily put the
+	tgt id in the Qinfo or somehow add it to the args.
+
+Some debug/tracing later, there seems to be a problem in the contents of the
+Qvec. Did the Reduce opertion put junk there?
+
+Checked insertion of ops into ReduceQ. That is OK, happens on separate
+index.
+
+As it turns out, at this point the Shell:;reduceInt is commented out...
+in FieldDataHandlerBase::syncFieldArraySize()
+was this the non-functional version?
+============================================================================
+23 Feb
+Yes, this was the version that didn't work. The actual logic goes through
+ReduceMsg::exec.
+
+Looking in Qinfo::clearReduceQ. Things look mostly OK, exept that the
+address of the two ReduceQ entries are in completely different ranges. 
+Something odd happening here.
+
+Went through trying to eliminate all calls to the Reduce functionality.
+Got rid of the call to reduceStats in testBuiltins.cpp, and the call to 
+shell::doSyncDataHandler in testSyncSynapseSize() in testShell.cpp.
+I still have problems.
+
+Now it looks like I may have to revert to an earlier version of MOOSE
+to figure out what has broken.
+
+============================================================================
+24 Feb
+Checkin 2478 as a reference commit to return to once the threading issue is
+identified. The last thread-clean version seems to have been 2450.
+
+Checked this out. Compiled it, confirmed it runs well with 1 to 11 cores.
+Now to figure out what fundamental things have changed.
+
+Process loop:
+	Only shifted around one commented out line.
+Shell calls: Seems reasonable. testShell.cpp has been massively changed.
+	But we still get errors in other tests even if it is not called.
+Set/Get messaging: Seems OK. Only changes are in Element interface.
+OpFuncs and EpFuncs and SetGet.h.: These have had an extra template with 
+	up to 6 args. Seems OK, but this is a particularly sensitive section.
+	Are there any I'm missing? Also checked Conv.h, that is clean.
+Finfos.
+	SrcFinfo just has a new template for 6 args. Looks OK. Others seem
+		unchanged. None of the .cpps have changed.
+Handlers: No change, except the new MsgDataHandler.
+Qinfo: Looks OK. Almost all changes are to reportQ
+Msgs:  .hs look sensible, mostly the simple API changes.
+	.cpps: Msg needs checking. Seems Ok.
+		SingleMsg:106c234, 108c236: OK.
+Scheduling: All changes seem to be in testScheduling.cpp
+[Reduce operation]. I've looked at this a lot already.
+
+Summary: No obvious slip-up in the new code.
+
+Next: Systematically block out the tests from the main, to see if the problem
+can be put down to a subset of them.
+
+============================================================================
+25 Feb
+Changes made after 2450:
+2451: Fix ReduceBase::reduceNodes() to tertiary reduce not on starting node.
+2452: Fixing multinode tests, using GetVec instead of direct ptr access.
+	Here I realized issue with MsgId alignment.
+2455: 6 arg funcs implemented
+2457: Working through unit tests
+2458: Silly bugfix to use Msg::nextMsgId
+2459: Various printf debugs, added a unit test testShell::testChildren
+2460: Debugging sequence of calling testMove.
+2461: Fixed reuse of MsgIds
+2462: cleaned up printf debugging
+	Here I realized issue with MsgDataHandlers, and redid using direct
+	MsgId as DataId for the handlers.
+2464-2466: compilation, linking
+2467: Got rid of null constructor for Msg.
+2468: Making MsgDataHandlers. This version clears unit tests, see if it
+	handles multiple cores.
+2469: Works through the first MPI unit tests
+2470: Got rid of MsgId garbage collection.
+2471: Got rid of some printf debugging. Clears some unit tests. This is
+	where the threading bugs became obvious.
+2478: Reference commit, still has the threading bugs.
+
+Looked closely at the garbage collection. Doesn't seem like a likely problem.
+Should simply go back and find where the problems start.
+============================================================================
+26 Feb
+Revisited checkin 2468. This usually runs and is OK with as many as 11 cores,
+but does fail sometimes. When it does so the symptoms are similar to those
+we saw with 2478. I also saw a failure in the message test following a copy.
+One difference is that in the message lookup failures, it seems like the
+Qinfo isn't bad, which it was in the 2478 errors.
+
+Some numbers: v2450 ran 12 times with 11 threads without error
+v2469 ran 14 times with 11 threads, 2 errors.
+v2470 ran 18 times with 11 threads. about 4 errors that look like 
+	clock startup failures, and 2 that look like a message problem
+Current (2478): fails every time with 11 threads. 
+	About half with the NUM_TOT_SYN assertion failure, and half before that
+	with the messaging failure.
+
+Cleaned up printf debugging from 2470. 
+Out of 24 trials (moose -c 11) we have:
+- 1 error: testShell.cpp:795 in testShellAddMsg.
+- 1 error: testShell.cpp:768 in testShellAddMsg. These are both after a getVec
+- 3 error: Msg.cpp: getMsg( MsgId ). Another bad msgId.
+- 1 error: Simple segmentation fault. No idea where.
+
+I wonder if getVec is the root cause of it all. Let's redo the tests
+with a single thread, moose -c 1. Out of 10 runs,
+- 1 error: testScheduling.cpp:516: testThreadIntFireNetwork (after a setVec)
+I don't understand this. Without threads, it should be deterministic. 
+
+Next: work on the stuff from v2470. 
+	- Put in a loop to test SetVec and GetVec with an eye to their
+	reliability
+	- Consider if there is a better way to do the return from Get and 
+	GetVec than the hack. Maybe even expand Qinfo.
+============================================================================
+27 Feb
+Start with a new branch using rev 2470. 
+I want to have the threading stuff completely clean before going 
+on to the internode stuff.
+
+I've called this branch threadMsg. It is rev 2481. Shifting this
+file and other operations over there.
+
+Fixed up error messages. running with -c 11.
+in 30 cycles these are the outcomes: 
+testShellAddMsg: 			4 failures
+Msg.cpp m< msg_size assertion: 		8 failure
+testCopyMsgOps				2 failure
+quit exit				1 failure
+
