@@ -168,6 +168,13 @@ void* shellEventLoop( void* info )
 		// Shell group and thus is safe from the other threads.
 		pthread_mutex_lock( shell->parserMutex() );
 			p->barrier1->wait();
+
+			// Here we signal if the waitForGetAck has asked for another
+			// cycle, and that cycle is now complete.
+			if ( shell->anotherCycleFlag_ ) {
+				shell->anotherCycleFlag_ = 0;
+				pthread_cond_signal( shell->parserBlockCond() );
+			}
 			// We only want to signal if it is waiting, AND if
 			// we have gotten enough acks done. It is the job of the
 			// rest of the event loop to deal with the acks.

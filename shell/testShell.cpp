@@ -589,6 +589,11 @@ bool checkOutput( Id e,
 		ret = ret & doubleEq( retVec[i], correct[i] );
 		if (report) cout << "( " << correct[i] << ", " << retVec[i] << " ) ";
 	}
+	if ( !ret ) {
+		for ( unsigned int i = 0; i < 5; ++i ) {
+			cout << "( " << correct[i] << ", " << retVec[i] << " ) ";
+		}
+	}
 	return ret;
 }
 

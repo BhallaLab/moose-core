@@ -138,17 +138,6 @@ const vector< char* >& Shell::dispatchGet(
 				retEntries = tgt.element()->dataHandler()->totalEntries();
 			else
 				retEntries = 1;
-			/*
-			if ( tgt.index().data() == DataId::anyPart() ) {
-				if ( tgt.index().field() == DataId::anyPart() )
-					retSize = tgt.element()->dataHandler()->totalEntries();
-				else
-					retSize = tgt.element()->dataHandler()->totalEntries();
-			} else {
-				if ( tgt.index().field() == DataId::anyPart() )
-					retSize = tgt.element()->dataHandler()->totalEntries();
-			}
-			*/
 			return s->innerDispatchGet( sheller, tgt, df->getFid(),
 				retEntries );
 	} else {
@@ -165,13 +154,16 @@ const vector< char* >& Shell::innerDispatchGet(
 	const Eref& sheller, const Eref& tgt, 
 	FuncId fid, unsigned int retEntries )
 {
+	// static timespec sleepTime = { 0, 10000}; // 0.1 msec.
+	// static timespec sleepRem;
 	clearGetBuf();
 	gettingVector_ = (retEntries > 1 );
 	getBuf_.resize( retEntries );
+	numGetVecReturns_ = 0;
 	initAck();
 		requestGet()->send( sheller, &p_, tgt.element()->id(), tgt.index(), 
 			fid, retEntries );
-	waitForAck();
+	waitForGetAck();
 
 	assert( getBuf_.size() == retEntries );
 
@@ -227,12 +219,18 @@ void Shell::recvGet( const Eref& e, const Qinfo* q, PrepackedBuffer pb )
 			char*& c = getBuf_[ tgt.linearIndex() ];
 			c = new char[ pb.dataSize() ];
 			memcpy( c, pb.data(), pb.dataSize() );
+			/*
+			cout << "Shell::recvGet[" << tgt.linearIndex() << "]= (" << 
+				pb.dataSize() << ", " <<  
+				*reinterpret_cast< const double* >( c ) << ")\n";
+				*/
 		} else  {
 			assert ( getBuf_.size() == 1 );
 			char*& c = getBuf_[ 0 ];
 			c = new char[ pb.dataSize() ];
 			memcpy( c, pb.data(), pb.dataSize() );
 		}
+		++numGetVecReturns_;
 	}
 }
 

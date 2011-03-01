@@ -11082,7 +11082,7 @@ so it uses at least 4 bytes.
 
 This does avoid the odd-number buffers.
 
-In 40 cycles these are the outcomes:
+In 40 cycles of "./moose -c 11" these are the outcomes:
 testShellAddMsg:		4 failures (all off values returned by getVec)
 testCopyMsgOps:			2 failures (off value returned by getVec)
 Msg.cpp m < msg_.size()		1 failure (Q entry was odd sized here).
@@ -11092,4 +11092,167 @@ Well, this is strong correlative support for the idea that the odd-sized
 queue entries are associated with bad data. The number of failures hasn't
 changed though. It is also strong support for continuing issues with 
 getVec.
+Checkin 2484.
 
+Put in a printf to report what the returned vector is like in cases
+where it fails:
+In 47 runs:
+void testShellAddMsg(): Assertion `ret' failed.
+( 3, 3 ) ( 3, 3 ) ( 3, 0 ) ( 3, 3 ) ( 3, 0 )
+
+void testCopyMsgOps(): Assertion `ret' failed.
+( 5, 5 ) ( 4, 4 ) ( 3, 2 ) ( 2, 0 ) ( 1, 1 )
+
+void testShellAddMsg(): Assertion `ret' failed.
+( 1, 0 ) ( 2, 2 ) ( 3, 3 ) ( 4, 4 ) ( 5, 5 )
+
+void testShellAddMsg(): Assertion `ret' failed.
+( 14, 14 ) ( 13, 13 ) ( 12, 0 ) ( 11, 15 ) ( 10, 10 )
+
+void testShellAddMsg(): Assertion `ret' failed.
+( 14, 0 ) ( 13, 13 ) ( 12, 12 ) ( 11, 11 ) ( 10, 10 )
+
+testCopyMsgOps(): Assertion `ret' failed.
+( 5, 5 ) ( 4, 4 ) ( 3, 3 ) ( 2, 2 ) ( 1, 5 )
+
+Also had a several more cases where readbuf was odd sized: it was 1
+in all of these cases.
+
+So what it looks like is that the bad getVec values can be either
+just zeros, or can also be scrambled indices. Also we tend to get
+just one or two bad values in any given case.
+Note that we are _not_ getting outrageous values that we would
+expect from a bad pointer. Looks more like misplaced good values.
+
+In the initAck/waitForAck pair on a single node with many
+threads, is it possible to return before all threads are done?
+If so, we may simply need to defer the ack from the getVec till
+all entries are in...
+============================================================================
+28 Feb
+Putting in an additional test on getVec to ensure all entries come in.
+I wonder if it might be good to have for the regular 'get' call.
+As I suspected: it tends to hang. The problem in this test case is that
+retEntries is bigger than the number that are supposed to come back.
+Tracked it down. The problem is that we use dataHandler::totalEntries
+to get the retEntries. However, the number of used entries is frequently
+smaller than totalEntries. Additionally, totalEntries itself needs a 
+complicated call to fill up. So we would like a self-correcting way of 
+keeping track of the arrival of all getVec values.
+
+Options:
+	- for getVec, call another function to look up # of entries on 
+	each node (localEntries) and compare that with the # that have 
+	already come in.
+	Strictly speaking, it should be enough to do another get/return 
+	sequence to guarantee that all have come in.
+	This is hard to set up because we don't know what would be a suitable 
+	second fid to use to send the second message.
+	- Put the # of expected entries on the ack itself.
+	This is certainly doable. The Assignment vec knows how many have
+	gone out and can return the total. But it would expand the API.
+	Also will need to subclass AssignGetVecMsg off AssignVecMsg to
+	do special things in the exec function. Tedious.
+	- Alter the AssignVecMsg returns so that it returns the # on each node
+	as part of the returned fields. This is messy and won't add anything
+	to the previous option.
+	- I can set up a dummy function for the Get and GetVec functions
+	to call to wind up the threads.
+	- I can wait for the ack in a single-thread (barrier) region of
+	execution, so that all the threads are done. Has to be barrier3
+	since we need all nodes in.
+
+Also need to do something similar for assignment msg: we really need
+to guarantee that a value has come back before carrying on.
+
+
+Implemented something like the last option: I made a variant on the
+waitForAck function that forces another cycle through Process.
+
+In 32 cycles of "./moose -c 11" these are the outcomes:
+testShellAddMsg:		5 failures (all off values returned by getVec)
+Msg.cpp m < msg_.size()		2 failure (Q entry was odd sized here).
+segv				1 failure
+
+No improvement.
+
+Need to verify that it is indeed doing another cycle.
+
+============================================================================
+1 March
+Verified: Another cycle is happening.
+Furthermore, verified that the whole list gets done in the first cycle, I
+don't see any exceptions.
+Also managed to get the thing to fail despite the getVec having returned
+all the values:
+
+...
+Shell::waitForGetAck: # getVecReturns = (0, 5, 5)
+Shell::waitForGetAck: # getVecReturns = (0, 5, 5)
+moose: testShell.cpp:808: void testShellAddMsg(): Assertion `ret' failed.
+( 3, 3 ) ( 3, 3 ) ( 3, 3 ) ( 3, 0 ) ( 3, 0 ) Abort
+
+So on both counts it looks like the error is not the # of data packets put in
+the queue, but either in their contents, or how they are read.
+
+OK, more clues. I replicated the segv, seems like some getBuf_ entries
+have not been allocated (are 0x0). Others are fine.
+
+Revisited the printf debug, and this time there is a clear shortfall in # of 
+entries come into the getBuf_, despite the extra pthread_cond_wait. Looked
+at the logic of it more closely, and there is a possible flaw. Redid.
+
+20 tries of ./moose -c 11:
+Failed exit			1 failure
+segv				1 failure. Informative. Looks like
+	the # of incoming entries was OK, but one was duplicated.
+Another segv was confusing. Printfs all over the place.
+Yet another suggests that despite all my efforts, we still have not 
+	recieved all the inputs.
+
+Implemented a -q option to get MOOSE to quit rather than go to command line
+after execution. Used to run a loop to test the failures.
+ 
+set i = 0
+while ( $i < 40 )
+while? echo $i
+while? echo $i >> zug
+while? ./moose -c 11 -q >> zug
+while? @ i = $i + 1
+while? end
+
+Outcome: 
+Segvs: 4
+Assertions on returned getVec: 2
+
+Modified a bit so I can track # of returned values in case segvs are due to
+too few returned entries.
+In this run of 40 tries, I get 4 segvs. In two of them the # of reported
+acks is 15, not 5. Rest seem OK.
+
+Did again with a cleaned up test, traps the likely segvs with an assertion.
+In 40 turns there are 7 traps:
+
+Shell::waitForGetAck: #= 4
+( 0, 1) ( 1, 0x0)       ( 2, 3) ( 3, 4) 
+
+Shell::waitForGetAck: #= 5
+( 0, 3) ( 1, 1) ( 2, 2) ( 3, 0x0)       ( 4, 4) 
+
+Shell::waitForGetAck: #= 3
+( 0, 0x0)       ( 1, 4) ( 2, 0x0)       
+
+Shell::waitForGetAck: #= 5
+( 0, 1) ( 1, 2) ( 2, 0x0)       ( 3, 4) ( 4, 5) 
+
+Shell::waitForGetAck: #= 5
+( 0, 1) ( 1, 2) ( 2, 3) ( 3, 0x0)       ( 4, 5) 
+
+Shell::waitForGetAck: #= 15
+( 0, 0) ( 1, 4) ( 2, 0) ( 3, 0) ( 4, 0x0)       ( 5, 0x0)       ( 6, 0x0)       ( 7, 0x0)       ( 8, 0x0)       ( 9, 0x0)       ( 10, 0x0)      ( 11, 0x0)      ( 12, 0x0)      ( 13, 0x0)      ( 14, 0x0)      
+
+Shell::waitForGetAck: #= 5
+( 0, 0x0)       ( 1, 3) ( 2, 0) ( 3, 3) ( 4, 3) 
+
+So that summarizes the problem. As there have been many changes, we
+checkin this version.

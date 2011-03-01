@@ -73,6 +73,46 @@ void Shell::waitForAck()
 }
 
 /**
+ * test for completion of request, after a full cycle. Used for get and
+ * getVec calls where we may have the ack come before the data on
+ * the first cycle.
+ * This MUST be preceded by an initAck call.
+ */
+void Shell::waitForGetAck()
+{
+	if ( isSingleThreaded_ ) {
+		while ( isAckPending() )
+			Qinfo::clearQ( &p_ );
+	} else {
+		while ( isAckPending() )
+			pthread_cond_wait( parserBlockCond_, parserMutex_ );
+		isBlockedOnParser_ = 0;
+		// Now we have cleared the first cycle in the shellEventLoop.
+		// The mutex is now locked again.
+		// So we wait to go around again:
+		anotherCycleFlag_ = 1;
+		while ( anotherCycleFlag_ )
+			pthread_cond_wait( parserBlockCond_, parserMutex_ );
+		pthread_mutex_unlock( parserMutex_ );
+		if ( numGetVecReturns_ > 1 ) {
+			cout << "Shell::waitForGetAck: #= " << numGetVecReturns_ << endl << flush;
+			bool isBad = 0;
+			for ( unsigned int i = 0; i < numGetVecReturns_; ++i ) {
+				if ( getBuf_[i] == 0 )  {
+					cout << "( " << i << ", 0x0)	";
+					isBad = 1;
+				} else {
+					cout << "( " << i << ", " << *reinterpret_cast< const double* >( getBuf_[i] ) << ")	";
+				}
+			}
+			cout << endl;
+			if ( isBad ) 
+				assert( 0 );
+		}
+	}
+}
+
+/**
  * Test for receipt of acks from all nodes
  */ 
 bool Shell::isAckPending() const
@@ -85,6 +125,8 @@ bool Shell::isAckPending() const
 /**
  * Generic handler for ack msgs from various nodes. Keeps track of
  * which nodes have responded.
+ * The value is used optionally in things like getVec, to return # of
+ * entries.
  */
 void Shell::handleAck( unsigned int ackNode, unsigned int status )
 {
