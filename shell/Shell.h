@@ -165,6 +165,14 @@ class Shell
 		void waitForAck();
 
 		/**
+		 * test for completion of 'Get' request. In multithread mode, 
+		 * we require the system to go through another process cycle 
+		 * to ensure that all return values have arrived.
+		 * Like the waitForAck(), we MUST precede this by an initAck call.
+		 */
+		void waitForGetAck();
+
+		/**
  		 * Generic handler for ack msgs from various nodes. Keeps track of
  		 * which nodes have responded.
  		 */
@@ -379,6 +387,13 @@ class Shell
 			char separator = '/' );
 
 		static void wildcard( const string& path, vector< Id >& list );
+
+		/**
+		 * Flag: True when the waitForGetAck has requested that the 
+		 * ProcessLoop go around one more time to harvest pending queue
+		 * entries from other threads.
+		 */
+		bool anotherCycleFlag_;
 	private:
 		Element* shelle_; // It is useful for the Shell to have this.
 
@@ -395,6 +410,12 @@ class Shell
 		 */
 		bool gettingVector_;
 
+		/**
+		 * Counter, used by the 'get' subsystem in order to keep track of
+		 * number of returned values, especially for getVec.
+		 */
+		unsigned int numGetVecReturns_;
+
 		MsgId latestMsgId_; // Hack to communicate newly made MsgIds.
 
 		/**
@@ -409,6 +430,7 @@ class Shell
 		 * MPI connected nodes.
 		 */
 		bool isBlockedOnParser_;
+
 
 		/**
 		 * Number of CPU cores in system. Specifies how many working threads

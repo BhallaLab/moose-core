@@ -363,7 +363,9 @@ static const Cinfo* shellCinfo = Shell::initCinfo();
 
 Shell::Shell()
 	: 
+		anotherCycleFlag_( 0 ),
 		gettingVector_( 0 ),
+		numGetVecReturns_( 0 ),
 		isSingleThreaded_( 0 ),
 		isBlockedOnParser_( 0 ),
 		numAcks_( 0 ),

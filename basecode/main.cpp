@@ -96,6 +96,7 @@ unsigned int getNumCores()
 	return numCPU;
 }
 
+bool quitFlag = 0;
 //////////////////////////////////////////////////////////////////
 
 Id init( int argc, char** argv )
@@ -124,7 +125,7 @@ Id init( int argc, char** argv )
 	 * Here we allow the user to override the automatic identification
 	 * of processor configuration
 	 */
-	while ( ( opt = getopt( argc, argv, "shin:c:b:B:" ) ) != -1 ) {
+	while ( ( opt = getopt( argc, argv, "shiqn:c:b:B:" ) ) != -1 ) {
 		switch ( opt ) {
 			case 's': // Single threaded mode
 				isSingleThreaded = 1;
@@ -143,9 +144,12 @@ Id init( int argc, char** argv )
 				break;
 			case 'B': // Benchmark, dump data: handle later.
 				break;
+			case 'q': // quit immediately after completion.
+				quitFlag = 1;
+				break;
 			case 'h': // help
 			default:
-				cout << "Usage: moose -singleThreaded -help -infiniteLoop -c numCores -n numNodes -benchmark [ksolve intFire]\n";
+				cout << "Usage: moose -singleThreaded -help -infiniteLoop -quit -c numCores -n numNodes -benchmark [ksolve intFire]\n";
 				exit( 1 );
 		}
 	}
@@ -275,13 +279,12 @@ int main( int argc, char** argv )
 		// These are outside unit tests because they happen in optimized
 		// mode, using a command-line argument. As soon as they are done
 		// the system quits, in order to estimate timing.
-		if ( benchmarkTests( argc, argv ) ) 
+		if ( benchmarkTests( argc, argv ) || quitFlag )
 			s->doQuit();
-		s->launchParser(); // Here we set off a little event loop to poll user input. It deals with the doQuit call too.
+		else 
+			s->launchParser(); // Here we set off a little event loop to poll user input. It deals with the doQuit call too.
 	}
 	
-//	s->doQuit();
-	// s->doQuit();
 	// Somehow we need to return control to our parser. Then we clean up
 	if ( !s->isSingleThreaded() )
 		s->joinThreads();
