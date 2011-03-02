@@ -368,6 +368,7 @@ Shell::Shell()
 		numGetVecReturns_( 0 ),
 		isSingleThreaded_( 0 ),
 		isBlockedOnParser_( 0 ),
+		threadProcs_(1),
 		numAcks_( 0 ),
 		acked_( 1, 0 ),
 		barrier1_( 0 ),
@@ -961,6 +962,12 @@ void Shell::error( const string& text )
 void Shell::wildcard( const string& path, vector< Id >& list )
 {
 	wildcardFind( path, list );
+}
+
+const ProcInfo* Shell::getProcInfo( unsigned int index ) const
+{
+	assert( index < threadProcs_.size() );
+	return &( threadProcs_[index] );
 }
 
 ///////////////////////////////////////////////////////////////////////////

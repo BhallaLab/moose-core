@@ -50,6 +50,9 @@ void sendAckBack( const ProcInfo* p, MsgId mid, DataId i2 )
 void AssignmentMsg::exec( const char* arg, const ProcInfo *p ) const
 {
 	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
+	// Cannot do this. The q is const.
+	// q->setProcInfo( p ); 
+	// Tell the q which ProcInfo we are on. Used in 'get' calls
 
 	if ( q->isForward() ) {
 		if ( e2_->dataHandler()->isDataHere( i2_ ) &&

@@ -18,6 +18,7 @@ class ProcInfo
 				nodeIndexInGroup( 0 ),
 				numNodesInGroup( 1 ), 
 				groupId( 0 ),
+				procIndex( 0 ),
 				isMpiThread( 0 ),
 				barrier1( 0 ),
 				barrier2( 0 )
@@ -32,6 +33,7 @@ class ProcInfo
 		unsigned int nodeIndexInGroup;
 		unsigned int numNodesInGroup;
 		unsigned int groupId;
+		unsigned int procIndex; // Look up for this Proc on Shell::getProc
 		bool isMpiThread;
 		FuncBarrier* barrier1;
 		FuncBarrier* barrier2;
