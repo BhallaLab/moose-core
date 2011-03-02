@@ -90,8 +90,8 @@ void Shell::waitForGetAck()
 		// Now we have cleared the first cycle in the shellEventLoop.
 		// The mutex is now locked again.
 		// So we wait to go around again:
-		anotherCycleFlag_ = 1;
-		while ( anotherCycleFlag_ )
+		anotherCycleFlag_ = 2;
+		while ( anotherCycleFlag_ > 0 )
 			pthread_cond_wait( parserBlockCond_, parserMutex_ );
 		pthread_mutex_unlock( parserMutex_ );
 		if ( numGetVecReturns_ > 1 ) {

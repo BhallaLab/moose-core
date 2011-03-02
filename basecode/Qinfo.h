@@ -34,8 +34,9 @@ class Qinfo
 		/**
 		 * This is a special constructor to return dummy Qs.
 		 * Only used in Qvec::stitch.
-		 */
+		 * Deprecated
 		static Qinfo makeDummy( unsigned int size );
+		 */
 
 		void setMsgId( MsgId m ) {
 			m_ = m;
@@ -58,18 +59,14 @@ class Qinfo
 		}
 
 		/**
+		 * Deprecated
 		 * Returns true if the Qinfo is inserted just for padding, and
 		 * the data is not meant to be processed.
 		 */
 		bool isDummy() const {
-			return isDummy_;
+			return 0;
+			// return isDummy_;
 		}
-
-		/*
-		void setForward( bool isForward ) {
-			isForward_ = isForward;
-		}
-		*/
 
 		MsgId mid() const {
 			return m_;
@@ -130,6 +127,17 @@ class Qinfo
 		void addSpecificTargetToQ( const ProcInfo* p, MsgFuncBinding b, 
 			const char* arg, const DataId& target, bool isForward );
 
+
+		/**
+		 * This assigns temporary storage in the Qinfo for thread
+		 * identifiers.
+		 */
+		void setProcInfo( const ProcInfo* p );
+
+		/**
+		 * This extracts the procinfo.
+		 */
+		const ProcInfo* getProcInfo() const;
 		//////////////////////////////////////////////////////////////
 		// From here, static funcs handling the Queues.
 		//////////////////////////////////////////////////////////////
@@ -214,20 +222,6 @@ class Qinfo
 
 
 		/**
-		 * Utility function that checks if Msg is local, and if so,
-		 * assigns Qblock and adds the data to a suitable Queue.
-		void assembleOntoQ( const MsgFuncBinding &b, 
-			const Element* e, const ProcInfo* p, const char* arg );
-		 */
-	
-		/**
-		 * Organizes data going into outQ so that we know which
-		 * execution queue the data is due to end up in, and how big
-		 * each block is to be.
-		void assignQblock( const Msg* m, const ProcInfo* p );
-		 */
-
-		/**
 		 * Used to work through the queues when the background
 		 * threads are not running.
 		 */
@@ -309,11 +303,16 @@ class Qinfo
 	private:
 		bool useSendTo_;	/// true if msg is to a single target DataId.
 		bool isForward_; /// True if the msg is from e1 to e2.
-		bool isDummy_; /// True if the Queue entry is a dummy and not used.
+
+		// Deprecated
+		// bool isDummy_; /// True if the Queue entry is a dummy and not used.
+
 		MsgId m_;		/// Unique lookup Id for Msg.
 		FuncId f_;		/// Unique lookup Id for function.
 		DataId srcIndex_; /// DataId of src.
 		unsigned int size_; /// size of argument in bytes. Zero is allowed.
+
+		unsigned short procIndex_; /// Which thread does Q entry go to?
 
 		/**
 		 * Ugly flag to tell Shell functions if the simulation should

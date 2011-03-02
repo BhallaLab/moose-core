@@ -29,13 +29,15 @@ AssignVecMsg::~AssignVecMsg()
 
 void AssignVecMsg::exec( const char* arg, const ProcInfo *p ) const
 {
-	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
+	const Qinfo *oldq = ( reinterpret_cast < const Qinfo * >( arg ) );
+	Qinfo q( *oldq );
+	q.setProcInfo( p ); // Tell the q which ProcInfo we are on.
 
-	if ( q->isForward() ) {
+	if ( q.isForward() ) {
 		PrepackedBuffer pb( arg + sizeof( Qinfo ) );
 		// cout << Shell::myNode() << ": AssignVecMsg::exec: pb.size = " << pb.size() << ", dataSize = " << pb.dataSize() << ", numEntries = " << pb.numEntries() << endl;
 		DataHandler* d2 = e2_->dataHandler();
-		const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
+		const OpFunc* f = e2_->cinfo()->getOpFunc( q.fid() );
 		for ( DataHandler::iterator i = d2->begin(); i != d2->end(); ++i )
 		{
 			if ( p->execThread( e2_->id(),i.index().data() ) ) {
@@ -45,15 +47,15 @@ void AssignVecMsg::exec( const char* arg, const ProcInfo *p ) const
 				// so we need to pick selected entries from it.
 				// Note also that this is independent of the # of dimensions
 				// or whether the DataHandler is a FieldDataHandler.
-				f->op( Eref( e2_, i.index() ), q, pb[ i.linearIndex() ] );
+				f->op( Eref( e2_, i.index() ), &q, pb[ i.linearIndex() ] );
 			}
 		}
 		if ( p->threadIndexInGroup == 0 )
-			sendAckBack( p, q->mid(), 0 );
+			sendAckBack( p, q.mid(), 0 );
 	}
-	if ( !q->isForward() && e1_->dataHandler()->isDataHere( i1_ ) &&
+	if ( !q.isForward() && e1_->dataHandler()->isDataHere( i1_ ) &&
 		p->execThread( e1_->id(), i1_.data() ) ) {
-		const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
+		const OpFunc* f = e1_->cinfo()->getOpFunc( q.fid() );
 		f->op( Eref( e1_, i1_ ), arg );
 	}
 }

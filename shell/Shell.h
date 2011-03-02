@@ -375,6 +375,8 @@ class Shell
 		/// Static func for returning the ProcInfo of the shell.
 		static const ProcInfo* procInfo();
 
+		const ProcInfo* getProcInfo( unsigned int index ) const;
+
 		/// Digests outcome of calculation for max index of ragged array
 		void digestReduceMax( const ReduceMax< unsigned int >* arg );
 
@@ -393,7 +395,7 @@ class Shell
 		 * ProcessLoop go around one more time to harvest pending queue
 		 * entries from other threads.
 		 */
-		bool anotherCycleFlag_;
+		unsigned int anotherCycleFlag_;
 	private:
 		Element* shelle_; // It is useful for the Shell to have this.
 

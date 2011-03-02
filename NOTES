@@ -11255,4 +11255,71 @@ Shell::waitForGetAck: #= 5
 ( 0, 0x0)       ( 1, 3) ( 2, 0) ( 3, 3) ( 4, 3) 
 
 So that summarizes the problem. As there have been many changes, we
-checkin this version.
+checkin this version. Checkin 2486.
+
+Printing debug messagesfor each thread to ensure it goes around
+event loop. It does. But! Many instances of the same
+threadIndexInGroup being used more than once. So often that I 
+wonder how the calculations ever work.
+
+Clue: There are always 12 calls to eventLoopForBcast.
+There are 11 threads.
+But, there are a couple of other Groups. Let's print those.
+No, we're always in Group 1.
+Here is an example:
+another Cycle in shellEventLoop
+2:1  another Cycle in eventLoopForBcast
+1:1  another Cycle in eventLoopForBcast
+3:1  another Cycle in eventLoopForBcast
+4:1  another Cycle in eventLoopForBcast
+5:1  another Cycle in eventLoopForBcast
+6:1  another Cycle in eventLoopForBcast
+7:1  another Cycle in eventLoopForBcast
+8:1  another Cycle in eventLoopForBcast
+7:1  another Cycle in eventLoopForBcast
+8:1  another Cycle in eventLoopForBcast
+9:1  another Cycle in eventLoopForBcast
+10:1  another Cycle in eventLoopForBcast
+
+Note that here 7 and 8 are repeated twice, and 0 is missing.
+
+OK, I see it, and also the reason why this has not worked. The flag
+(Shell::anotherCycleFlag_) is set on a thread (shellEventLoop) that is
+running in parallel with the eventLoop threads. It may get set before
+one of the others has had time to stop at the barrier; and it may remain
+set while one of the others loops around the barrier again.
+I think I will have to move the test for blocking parser calls into
+barrier3, which is the only place where the worker threads are cleared.
+
+============================================================================
+2 March
+First: let's force it to do two cycles through the loop.
+
+In 40 turns there are 7 fails:						# fail
+ShellThreads.cpp:110: Shell::waitForGetAck():	4
+Msg.cpp: m< msg_size()				3
+
+So the numbers are unchanged. Looks like the problem isn't in handling
+incoming entries, but in sending them.
+Tried to look at Qinfo::reportQ(): Q is empty at the point of segv.
+
+Could do a printf on AssignVecMsg::exec inner loop to be sure it is
+calling Op for all index entries. This should be OK...
+
+Check that Op itself does the right thing wrt sending data.
+
+Possible issue here: OpFunc.cpp:fieldOp uses the Shell::procInfo(),
+not the individual procInfos that are thread safe.
+
+After much fiddling, I have fixed it so that the fieldOps send data back
+into the thread that handles the call. It works! 
+In 40 runs of ./moose -c 11 there is just 1 segv, this happens before 
+any of the calls that test getVec.
+
+The current implementation leaves the single 'get' call to be done using
+the default ProcInfo for the shell. I think this too may be causing
+these (rare) problems.
+
+Also should now go back and see if the cond_wait is needed after all.
+
+============================================================================

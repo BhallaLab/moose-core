@@ -41,42 +41,48 @@ Qinfo::Qinfo( FuncId f, DataId srcIndex, unsigned int size, bool useSendTo )
 	:	
 		useSendTo_( useSendTo ), 
 		isForward_( 1 ), 
-		isDummy_( 0 ), 
+		// isDummy_( 0 ), 
 		m_( 0 ), 
 		f_( f ), 
 		srcIndex_( srcIndex ),
-		size_( size )
+		size_( size ),
+		procIndex_( 0 )
 {;}
 
 Qinfo::Qinfo( DataId srcIndex, unsigned int size, bool useSendTo )
 	:	
 		useSendTo_( useSendTo ), 
 		isForward_( 1 ), 
-		isDummy_( 0 ), 
+		// isDummy_( 0 ), 
 		m_( 0 ), 
 		f_( 0 ), 
 		srcIndex_( srcIndex ),
-		size_( size )
+		size_( size ),
+		procIndex_( 0 )
 {;}
 
 Qinfo::Qinfo()
 	:	
 		useSendTo_( 0 ), 
 		isForward_( 1 ), 
-		isDummy_( 0 ), 
+		// isDummy_( 0 ), 
 		m_( 0 ), 
 		f_( 0 ), 
 		srcIndex_( 0 ),
-		size_( 0 )
+		size_( 0 ),
+		procIndex_( 0 )
 {;}
 
 /// Static function
+// deprecated
+/*
 Qinfo Qinfo::makeDummy( unsigned int size )
 {
 	Qinfo ret( 0, size, 0 ) ;
-	ret.isDummy_ = 1;
+	// ret.isDummy_ = 1;
 	return ret;
 }
+*/
 
 /**
  * Static func: Sets up a SimGroup to keep track of thread and node
@@ -637,4 +643,16 @@ void Qinfo::clearReduceQ( unsigned int numThreads )
 		}
 		reduceQ_[j].resize( 0 );
 	}
+}
+
+void Qinfo::setProcInfo( const ProcInfo* p )
+{
+	procIndex_ = p->procIndex;
+}
+
+const ProcInfo* Qinfo::getProcInfo() const
+{
+	Eref sheller = Id().eref();
+	const Shell* s = reinterpret_cast< const Shell* >( sheller.data() );
+	return s->getProcInfo( procIndex_ );
 }
