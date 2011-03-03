@@ -94,6 +94,8 @@ void Shell::waitForGetAck()
 		while ( anotherCycleFlag_ > 0 )
 			pthread_cond_wait( parserBlockCond_, parserMutex_ );
 		pthread_mutex_unlock( parserMutex_ );
+		/*
+		** This was here for debugging.
 		if ( numGetVecReturns_ > 1 ) {
 			cout << myNode_ << ": Shell::waitForGetAck: #= " << numGetVecReturns_ << endl << flush;
 			bool isBad = 0;
@@ -109,6 +111,7 @@ void Shell::waitForGetAck()
 			if ( isBad ) 
 				assert( 0 );
 		}
+		*/
 	}
 }
 
