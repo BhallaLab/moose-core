@@ -11401,5 +11401,7 @@ calls so they stay on the local node.
 
 This fixes this bug. Now the MPI stuff goes on till the old problem, where
 we have to count synapses across nodes.
+Checkin 2489.
 
+Cleaned up lots of printf debugging.
 ============================================================================
