@@ -223,22 +223,27 @@ void Msg::initMsgManagers()
 	new Element( OneToAllMsg::managerId_, OneToAllMsg::initCinfo(), 
 		"oneToAllMsg", new MsgDataHandler( &dummyDinfo ) );
 	Shell::adopt( msgManagerId_, OneToAllMsg::managerId_ );
+
 	DiagonalMsg::managerId_ = Id::nextId();
 	new Element( DiagonalMsg::managerId_, DiagonalMsg::initCinfo(), 
 		"diagonalMsg", new MsgDataHandler( &dummyDinfo ) );
 	Shell::adopt( msgManagerId_, DiagonalMsg::managerId_ );
+
 	SparseMsg::managerId_ = Id::nextId();
 	new Element( SparseMsg::managerId_, SparseMsg::initCinfo(), 
 		"sparseMsg", new MsgDataHandler( &dummyDinfo ) );
 	Shell::adopt( msgManagerId_, SparseMsg::managerId_ );
+
 	AssignmentMsg::managerId_ = Id::nextId();
 	new Element( AssignmentMsg::managerId_, AssignmentMsg::initCinfo(),
 		"assignmentMsg", new MsgDataHandler( &dummyDinfo ) );
 	Shell::adopt( msgManagerId_, AssignmentMsg::managerId_ );
+
 	AssignVecMsg::managerId_ = Id::nextId();
 	new Element( AssignVecMsg::managerId_, AssignVecMsg::initCinfo(),
 		"assignVecMsg", new MsgDataHandler( &dummyDinfo ) );
 	Shell::adopt( msgManagerId_, AssignVecMsg::managerId_ );
+
 	ReduceMsg::managerId_ = Id::nextId();
 	new Element( ReduceMsg::managerId_, ReduceMsg::initCinfo(),
 		"ReduceMsg", new MsgDataHandler( &dummyDinfo ) );

@@ -326,6 +326,8 @@ template< class T, class A > class GetUpFunc: public OpFunc
 		}
 
 		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+			if ( skipWorkerNodeGlobal( e ) )
+				return;
 			const A& ret = (( reinterpret_cast< T* >( e.parentData() ) )->*func_)( e.index() );
 			Conv< A > arg( ret );
 			char* temp = new char[ arg.size() ];

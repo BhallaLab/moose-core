@@ -253,9 +253,13 @@ void mpiTests()
 {
 #ifdef DO_UNIT_TESTS
 		testMpiMsg();
+		cout << "|" << flush;
 		testMpiShell();
+		cout << "||" << flush;
 		testMpiBuiltins();
+		cout << "|||" << flush;
 		testMpiScheduling();
+		cout << "||||" << flush;
 #endif
 }
 

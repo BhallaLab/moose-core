@@ -11350,4 +11350,56 @@ Can I now go back to multinode work?
 3 March.
 Since this has caused so much trouble, I will first set up to run some heavier
 tests on the big multicore machines: gj and ghevar. If it clears all those then
-proceed to MPI build.
+proceed to MPI build. Checkin 2488.
+
+Here is an error from gj:
+17
+moose: testBuiltins.cpp:307: void testGetMsg(): Assertion `numEntries == 101' failed.
+Abort
+
+But ghevar was clear for the first 40.
+
+These tests were for 11 threads. Redoing now with 17:
+
+ghevar: Stalled after 5, no diagnostics. Then reran and it got to 6 and stalled.
+Then reran and it got to 16 and stalled. At this point I remembered that the
+script dumps output to a file, checked that. Seems like the code dies at the
+joinThreads in main.cpp; well after all the unit tests. Next cycle only 0,
+stalled same place. Next cycle 5, stalled same place. QED.
+
+gj: Marched through all 40 without problems. Then another set of 40 also OK.
+
+Summary: Most of the bugs seem clear, but there is some problem with clean
+closing of threads.
+
+Looked at this, managed to trap it on ghevar once. This happens when
+one of the threads has gotten into barrier1, while the rest are waiting on 
+barrier3. The master thread waits in pthread_join.
+Also managed to catch a crash on testBuiltins.cpp:300:testBuiltinsProcess.
+which calls shell->doReinit(). It goes in Shell::waitForAck:69, which is a
+pthread_cond_wait.
+
+I'm not sure what to do with these. I tried many many more cycles to repeat
+either one, and it did not oblige. 
+
+Proceeding with MPI compilation. 
+doing: mpirun -np 2 ./moose -c 1
+Immediate, reproducible crash in Shell::waitForGetAck(). 
+A GetVec is only seeing 2 values, and at least one is bad.
+Control: works fine with ./moose -c 11 -q
+
+Odd issue: AssignGetVecMsg is not compiled in. Maybe I should remove it, I
+don't think it is actually used.
+
+One clue: The crash in waitForGetAck expects exactly as many returns
+as there are nodes. Doesn't worry about # of threads per node.
+
+Tracked it down by multiple layers of printfs. Turns out to be a simple
+'get' call on the root element (for its path). I think that each node is
+sending in a response (clue above). Need to find a way to restrict such
+calls so they stay on the local node.
+
+This fixes this bug. Now the MPI stuff goes on till the old problem, where
+we have to count synapses across nodes.
+
+============================================================================
