@@ -273,8 +273,11 @@ int main( int argc, char** argv )
 	if ( s->myNode() == 0 ) {
 #ifdef DO_UNIT_TESTS
 		mpiTests();
+		cout << "dun1\n" << flush;
 		processTests( s );
+		cout << "dun2\n" << flush;
 		regressionTests();
+		cout << "dun3\n" << flush;
 #endif
 		// These are outside unit tests because they happen in optimized
 		// mode, using a command-line argument. As soon as they are done
@@ -283,15 +286,19 @@ int main( int argc, char** argv )
 			s->doQuit();
 		else 
 			s->launchParser(); // Here we set off a little event loop to poll user input. It deals with the doQuit call too.
+		cout << "dun4\n" << flush;
 	}
 	
 	// Somehow we need to return control to our parser. Then we clean up
 	if ( !s->isSingleThreaded() )
 		s->joinThreads();
 
+	cout << "dun5\n" << flush;
+
 	shellId.destroy();
 	Id(1).destroy();
 	Id(2).destroy();
+	cout << "dun6\n" << flush;
 //	destroyMsgManagers();
 #ifdef USE_MPI
 	MPI_Finalize();
