@@ -11321,5 +11321,33 @@ the default ProcInfo for the shell. I think this too may be causing
 these (rare) problems.
 
 Also should now go back and see if the cond_wait is needed after all.
+Checkin 2487.
 
+First stop: put in an equivalent procInfo handler for regular Gets, for
+testing purposes. This is just for testing purposes as it will slow down
+operations in real use. There are a couple of ways to avoid the slow down
+should the test work: 
+	- Add ProcInfo argument to ops
+	- Add a special message for single 'get' calls.
+
+Test was good for 50 cycles, then on 51 it stalled presumably at the
+automatic quit. Then it ran again for 37 cycles before stalling.
+Then 68. So distinct progress but there is still a stall.
+
+Looked at the diagnostics file. It seems to go all the way through
+and stop just before printing out the note about the regression
+tests.
+
+Also got an assertion fail in testMultiNodeIntFireNetwork().
+Rerunning with some printfs so I can pin down where the stall failure 
+happens. This goes cleanly through 120 runs without error.
+
+Recompiled with a new option to do unit tests with optimization.
+Compiles, runs, but I don't see the occasional stall with 80 runs.
+
+Can I now go back to multinode work?
 ============================================================================
+3 March.
+Since this has caused so much trouble, I will first set up to run some heavier
+tests on the big multicore machines: gj and ghevar. If it clears all those then
+proceed to MPI build.
