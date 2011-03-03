@@ -381,6 +381,8 @@ template< class T, class A > class GetEpFunc: public OpFunc
 		}
 
 		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+			if ( skipWorkerNodeGlobal( e ) )
+				return;
 			const A& ret = 
 				(( reinterpret_cast< T* >( e.data() ) )->*func_)( e, q );
 			Conv<A> conv0( ret );

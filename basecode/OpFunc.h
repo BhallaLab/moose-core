@@ -12,6 +12,7 @@
 
 extern void fieldOp( const Eref& e, const Qinfo* q, const char* buf, 
 	const char* data, unsigned int size );
+extern bool skipWorkerNodeGlobal( const Eref& e );
 
 class OpFunc
 {
@@ -415,6 +416,8 @@ template< class T, class A > class GetOpFunc: public GetOpFuncBase< A >
 		}
 
 		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+			if ( skipWorkerNodeGlobal( e ) )
+				return;
 			const A& ret = 
 				(( reinterpret_cast< T* >( e.data() ) )->*func_)();
 			Conv<A> conv0( ret );

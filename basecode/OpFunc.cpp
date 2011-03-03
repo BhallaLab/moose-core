@@ -18,10 +18,7 @@
 void fieldOp( const Eref& e, const Qinfo* q, const char* buf, 
 	const char* data, unsigned int size )
 {
-	// This doesn't make sense: it prevents return values from off master.
-	// if ( Shell::myNode() != 0 ) return;
-	// const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
-	// buf += sizeof( Qinfo );
+
 	FuncId retFunc = *reinterpret_cast< const FuncId* >( buf );
 
 	PrepackedBuffer pb( data, size );
@@ -34,6 +31,18 @@ void fieldOp( const Eref& e, const Qinfo* q, const char* buf,
 	Qinfo retq( retFunc, e.index(), totSize, 0 );
 	retq.addToQbackward( q->getProcInfo(), mfb, temp );
 	delete[] temp;
+}
+
+/**
+ * Used to check if the Eref e should be sending any data back to
+ * the master node.
+ * We avoid sending data back to master node from globals,
+ * as the global object will also send data back.
+ */
+ bool skipWorkerNodeGlobal( const Eref& e )
+ {
+	return ( Shell::myNode() != 0 && 
+		e.element()->dataHandler()->isGlobal() );
 }
 
 //////////////////////////////////////////////////////////////////

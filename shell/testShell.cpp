@@ -108,7 +108,7 @@ void testTreeTraversal()
 	pa = Field< FullId >::get( f1.eref(), "parent" );
 	assert( pa == FullId( Id(), 0 ) );
 
-	cout << "." << flush;
+	cout << ".1" << flush;
 
 	////////////////////////////////////////////////////////////////
 	// Checking for child Id lists
@@ -131,30 +131,37 @@ void testTreeTraversal()
 	kids = Field< vector< Id > >::get( f2c.eref(), "children" );
 	assert( kids.size() == 0 );
 
-	cout << "." << flush;
+	cout << ".2" << flush;
 
 	////////////////////////////////////////////////////////////////
 	// Checking path string generation.
 	////////////////////////////////////////////////////////////////
 	string path = Field< string >::get( f3aa.eref(), "path" );
+	cout << "a" << flush;
 	assert( path == "/f1/f2a/f3aa" );
 	path = Field< string >::get( f3ab.eref(), "path" );
+	cout << "b" << flush;
 	assert( path == "/f1/f2a/f3ab" );
 	path = Field< string >::get( f3ba.eref(), "path" );
+	cout << "c" << flush;
 	assert( path == "/f1/f2b/f3ba" );
 
 	path = Field< string >::get( f2a.eref(), "path" );
+	cout << "d" << flush;
 	assert( path == "/f1/f2a" );
 	path = Field< string >::get( f2b.eref(), "path" );
+	cout << "e" << flush;
 	assert( path == "/f1/f2b" );
 	path = Field< string >::get( f2c.eref(), "path" );
+	cout << "f" << flush;
 	assert( path == "/f1/f2c" );
 	path = Field< string >::get( f1.eref(), "path" );
+	cout << "g" << flush;
 	assert( path == "/f1" );
 	path = Field< string >::get( Id().eref(), "path" );
 	assert( path == "/" );
 
-	cout << "." << flush;
+	cout << ".3" << flush;
 	////////////////////////////////////////////////////////////////
 	// Checking finding Ids from path
 	////////////////////////////////////////////////////////////////
@@ -177,7 +184,7 @@ void testTreeTraversal()
 	assert( shell->doFind( "f3ba/../../f2a/f3aa" ) == f3aa );
 	assert( shell->doFind( "../f2a/f3ab" ) == f3ab );
 	
-	cout << "." << flush;
+	cout << ".4" << flush;
 	////////////////////////////////////////////////////////////////
 	// Checking getChild
 	////////////////////////////////////////////////////////////////
@@ -187,7 +194,7 @@ void testTreeTraversal()
 	assert( f2c == Neutral::child( f1.eref(), "f2c" ) );
 
 	shell->doDelete( f1 );
-	cout << "." << flush;
+	cout << ".5" << flush;
 }
 
 /// Test the Neutral::isDescendant

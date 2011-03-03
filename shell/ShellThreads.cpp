@@ -95,7 +95,7 @@ void Shell::waitForGetAck()
 			pthread_cond_wait( parserBlockCond_, parserMutex_ );
 		pthread_mutex_unlock( parserMutex_ );
 		if ( numGetVecReturns_ > 1 ) {
-			cout << "Shell::waitForGetAck: #= " << numGetVecReturns_ << endl << flush;
+			cout << myNode_ << ": Shell::waitForGetAck: #= " << numGetVecReturns_ << endl << flush;
 			bool isBad = 0;
 			for ( unsigned int i = 0; i < numGetVecReturns_; ++i ) {
 				if ( getBuf_[i] == 0 )  {
