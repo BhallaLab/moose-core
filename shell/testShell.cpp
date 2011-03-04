@@ -1172,7 +1172,7 @@ void testSyncSynapseSize()
 	assert( syn->dataHandler()->localEntries() == ( size * (size - 1) ) / 2 );
 	*/
 
-	shell->doSyncDataHandler( neuronId, df->getFid(), synId );
+	shell->doSyncDataHandler( neuronId, "get_numSynapses", synId );
 
 	assert( syn->dataHandler()->totalEntries() == size * (size - 1 ) );
 	// cout << "NumSyn = " << syn.totalEntries() << endl;

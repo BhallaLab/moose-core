@@ -85,6 +85,13 @@ class Neutral
 		string getClass( const Eref& e, const Qinfo* q ) const;
 
 		/**
+		 * Access function for the fieldDimension of the data handler
+		 * for the Element. Ignored for objects that are not Fields.
+		 */
+		void setFieldDimension( const Eref& e, const Qinfo* q, unsigned int val );
+		unsigned int getFieldDimension( const Eref& e, const Qinfo* q ) const;
+
+		/**
 		 * Destroys Element and all children
 		 */
 		void destroy( const Eref& e, const Qinfo* q, int stage );

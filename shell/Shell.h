@@ -130,7 +130,7 @@ class Shell
 		 * The elm and fid specify the field containing the array size. The
 		 * tgt specifies the Element which has to be modified.
  		 */
-		void doSyncDataHandler( Id elm, FuncId fid, Id tgt );
+		void doSyncDataHandler( Id elm, const string& sizeField, Id tgt );
 
 		/**
 		 * Works through internal queue of operations that modify the
@@ -378,7 +378,8 @@ class Shell
 		const ProcInfo* getProcInfo( unsigned int index ) const;
 
 		/// Digests outcome of calculation for max index of ragged array
-		void digestReduceMax( const ReduceMax< unsigned int >* arg );
+		void digestReduceMax( 
+			const Eref& er, const ReduceMax< unsigned int >* arg );
 
 		/**
  		 * static func.

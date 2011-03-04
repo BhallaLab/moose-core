@@ -42,3 +42,16 @@ DataId DataHandler::dataId( unsigned int i ) const
 {
 	return DataId( i );
 }
+
+/**
+ * Default operations for non-FieldDataHandlers
+ */
+void DataHandler::setFieldDimension( unsigned int size )
+{
+	;
+}
+
+unsigned int DataHandler::getFieldDimension() const
+{
+	return 0;
+}

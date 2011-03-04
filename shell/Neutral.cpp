@@ -64,6 +64,17 @@ const Cinfo* Neutral::initCinfo()
 		"class",
 		"Class Name of object", 
 			&Neutral::getClass );
+
+	static ElementValueFinfo< Neutral, unsigned int > fieldDimension( 
+		"fieldDimension",
+		"Max size of the dimension of the array of fields."
+		"Applicable specially for ragged arrays of fields, "
+		"where each object may have a different number of fields. "
+		"Must be larger than the size of any of the ragger arrays."
+		"Normally is only assigned from Shell::doSyncDataHandler.",
+			&Neutral::setFieldDimension,
+			&Neutral::getFieldDimension
+		);
 	/////////////////////////////////////////////////////////////////
 	// SrcFinfos
 	/////////////////////////////////////////////////////////////////
@@ -90,6 +101,7 @@ const Cinfo* Neutral::initCinfo()
 		&children,
 		&path,
 		&className,
+		&fieldDimension,
 	};
 
 	/////////////////////////////////////////////////////////////////
@@ -239,6 +251,19 @@ string Neutral::getPath( const Eref& e, const Qinfo* q ) const
 string Neutral::getClass( const Eref& e, const Qinfo* q ) const
 {
 	return e.element()->cinfo()->name();
+}
+
+
+void Neutral::setFieldDimension( const Eref& e, const Qinfo* q, 
+	unsigned int size )
+{
+	e.element()->dataHandler()->setFieldDimension( size );
+}
+
+unsigned int Neutral::getFieldDimension( 
+	const Eref& e, const Qinfo* q ) const
+{
+	return e.element()->dataHandler()->getFieldDimension();
 }
 
 unsigned int Neutral::buildTree( const Eref& e, const Qinfo* q, vector< Id >& tree )

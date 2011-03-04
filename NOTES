@@ -11403,5 +11403,32 @@ This fixes this bug. Now the MPI stuff goes on till the old problem, where
 we have to count synapses across nodes.
 Checkin 2489.
 
-Cleaned up lots of printf debugging.
+Cleaned up lots of printf debugging. Checkin 2490.
+
+Progressed a bit. Now the issue is set/get of weights into the
+array of synapses. Looks like values put in are not the same as those
+read out. 
+
+fdh->syncFieldArraySize at line 887 doesnt assign field values
+except on current node.
+
+In the throes of fixing. Problem points:
+
+Shell::doSyncDataHandler: should have different args. Did skel code
+Shell::doSyncDataHandler: should call setFieldDimension on all nodes.
+testScheduling.cpp:653 Putting in Shell::doSyncDataHandler.
+
+============================================================================
+
+4 March.
+The IntFire isn't setting up a ReduceFinfo to handle the updates on the
+Synapse dimension.
+
+Tracked things down. The Shell::doSyncDataHandler directly deals with the
+object, first doing the reduce, then using the returned value to set 
+a new Neutral::fieldDimension value field.
+
+Now it clears the tests for weight assignments across nodes and synapses.
+Assertion failure at the output of the calculation.
+
 ============================================================================

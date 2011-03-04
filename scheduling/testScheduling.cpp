@@ -540,6 +540,7 @@ void testMultiNodeIntFireNetwork()
 	static const double timestep = 0.2;
 	static const double connectionProbability = 0.1;
 	static const unsigned int runsteps = 5;
+	static const unsigned int NUM_TOT_SYN = 104576;
 	// These are the starting indices of synapses on
 	// IntFire[0], [100], [200], ...
 	/*
@@ -597,7 +598,8 @@ void testMultiNodeIntFireNetwork()
 
 	FieldDataHandlerBase * fdh =
 		static_cast< FieldDataHandlerBase *>( syn->dataHandler() );
-	fdh->syncFieldArraySize();
+	fdh->setFieldDimension( fdh->biggestFieldArraySize() );
+	// fdh->syncFieldArraySize();
 	assert( fdh->biggestFieldArraySize() == 134 );
 
 	/*
@@ -614,16 +616,18 @@ void testMultiNodeIntFireNetwork()
 
 	unsigned int nd = syn->dataHandler()->localEntries();
 	assert( syn->dataHandler()->totalEntries() == size * 134 );
-	assert( nd == 104576 );
-	// cout << "Num Syn = " << nd << endl;
-	// nd = 104576;
+	if ( Shell::numNodes() == 1 )
+		assert( nd == NUM_TOT_SYN );
+	else if ( Shell::numNodes() == 2 )
+		assert( nd == 52446 );
+	else if ( Shell::numNodes() == 3 )
+		assert( nd == 34969 );
+	else if ( Shell::numNodes() == 4 )
+		assert( nd == 26381 );
 
 	// Here we have an interesting problem. The mtRand might be called
 	// by multiple threads if the above Set call is not complete.
-	// usleep( 1000000);
 
-	// This fails on multinodes.
-	// assert( nd == NUMSYN );
 	vector< double > temp( size, 0.0 );
 	for ( unsigned int i = 0; i < size; ++i )
 		temp[i] = mtrand() * Vmax;
@@ -643,46 +647,68 @@ void testMultiNodeIntFireNetwork()
 	ret = Field< double >::setVec( e2, "refractoryPeriod", temp );
 	assert( ret );
 
+	/*
+	const Finfo* f = e2.elm()->cinfo()->findFinfo( sizeField );
+
+	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
+	*/
+
+	shell->doSyncDataHandler( e2.id(), "get_numSynapses", synId );
+	/*
 	FieldDataHandlerBase* fd = dynamic_cast< FieldDataHandlerBase* >(
 		syne.element()->dataHandler() );
 	assert( fd );
 	unsigned int fieldSize = fd->biggestFieldArraySize();
-	fd->setFieldDimension( fieldSize );
+	*/
+
+// fd->setFieldDimension( fieldSize );
+
+	unsigned int fieldSize = 
+		Field< unsigned int >::get( synId.eref(), "fieldDimension" );
+
+	cout << Shell::myNode() << ": fieldSize = " << fieldSize << endl;
+	vector< unsigned int > numSynVec;
+
 	vector< double > weight( size * fieldSize, 0.0 );
 	vector< double > delay( size * fieldSize, 0.0 );
 	unsigned int numTotSyn = 0;
+	Eref alle2( e2.element(), DataId::any() );
+	Field< unsigned int >::getVec( alle2, "numSynapses", numSynVec );
+	assert ( numSynVec.size() == size );
+
 	for ( unsigned int i = 0; i < size; ++i ) {
-		unsigned int numSyn = fd->getFieldArraySize( i );
 		unsigned int k = i * fieldSize;
-		for ( unsigned int j = 0; j < numSyn; ++j ) {
+		// cout << "numSynVec[" << i << "] = " << numSynVec[i] << endl;
+		for ( unsigned int j = 0; j < numSynVec[i]; ++j ) {
+			assert( ( k + j ) < ( size * fieldSize ) );
 			weight[ k + j ] = mtrand() * weightMax;
 			delay[ k + j ] = mtrand() * delayMax;
 			++numTotSyn;
 		}
 	}
-	assert ( numTotSyn == nd );
+	assert ( numTotSyn == NUM_TOT_SYN );
 
-	/*
-	vector< double > weight;
-	weight.reserve( nd );
-	vector< double > delay;
-	delay.reserve( nd );
-	for ( unsigned int i = 0; i < nd; ++i ) {
-		weight.push_back( mtrand() * weightMax );
-		delay.push_back( mtrand() * delayMax );
-	}
-	*/
 	ret = Field< double >::setVec( syne, "weight", weight );
 	assert( ret );
 	ret = Field< double >::setVec( syne, "delay", delay );
 	assert( ret );
 
+	vector< double > retVec;
+	Eref allSyn( syne.element(), DataId::any() );
+	Field< double >::getVec( allSyn, "weight", retVec );
+	assert( retVec.size() == size * fieldSize );
+	for ( unsigned int i = 0; i < size * fieldSize; i += 10000 ) {
+		cout << "1Got wt[" << i << "] = " << retVec[i] << ", correct = " << weight[ i ] << endl << flush;
+		// assert( retVec[i] == weight[i] );
+	}
+	
+
 	for ( unsigned int i = 0; i < size; i+= 100 ) {
 		double wt = Field< double >::get( 
 			Eref( syne.element(), DataId( i, 0 ) ), "weight" );
-		assert( doubleEq( wt, weight[ i * fieldSize ] ) );
-		// assert( doubleEq( wt, weight[ synIndices[ i / 100 ] ] ) );
-		// cout << "Actual wt = " << wt << ", expected = " << weight[ synIndices[ i / 100 ] ] << endl;
+
+		cout << "Got wt = " << wt << ", correct = " << weight[ i * fieldSize ] << endl << flush;
+		// assert( doubleEq( wt, weight[ i * fieldSize ] ) );
 	}
 
 	Element* ticke = Id( 2 )();

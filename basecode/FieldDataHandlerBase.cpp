@@ -199,7 +199,7 @@ unsigned int FieldDataHandlerBase::biggestFieldArraySize() const
  * This func gets the FieldArraySize from all nodes and updates
  * fieldDimension to the largest.
  * MUST be called on all nodes in sync.
- */
+ * Deprecated
 unsigned int FieldDataHandlerBase::syncFieldArraySize()
 {
 	unsigned int ret = biggestFieldArraySize();
@@ -208,6 +208,7 @@ unsigned int FieldDataHandlerBase::syncFieldArraySize()
 		fieldDimension_ = ret;
 	return ret;
 }
+ */
 
 /**
  * Assigns the fieldDimension. Checks that it is bigger than the
@@ -218,6 +219,14 @@ void FieldDataHandlerBase::setFieldDimension( unsigned int size )
 	unsigned int i = biggestFieldArraySize();
 	assert( i <= size );
 	fieldDimension_ = size;
+}
+
+/**
+ * Returns fieldDimension
+ */
+unsigned int FieldDataHandlerBase::getFieldDimension( ) const
+{
+	return fieldDimension_;
 }
 
 /**

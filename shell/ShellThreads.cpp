@@ -271,6 +271,7 @@ void Shell::start( double runtime )
 // Functions using MPI
 ////////////////////////////////////////////////////////////////////////
 
+/*
 // Static function
 unsigned int Shell::reduceInt( unsigned int val )
 {
@@ -290,6 +291,7 @@ unsigned int Shell::reduceInt( unsigned int val )
 	return val;
 #endif
 }
+*/
 
 void Shell::handleSync( const Eref& e, const Qinfo* q, Id elm, FuncId fid )
 {
