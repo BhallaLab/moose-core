@@ -625,7 +625,8 @@ void testSetGetSynapse()
 	*/
 	FieldDataHandlerBase * fdh =
 		static_cast< FieldDataHandlerBase *>( syn->dataHandler() );
-	fdh->syncFieldArraySize();
+	fdh->setFieldDimension( fdh->biggestFieldArraySize() );
+	// fdh->syncFieldArraySize();
 	assert( syn->dataHandler()->totalEntries() == 9900 );
 	// cout << "NumSyn = " << syn.totalEntries() << endl;
 	
@@ -812,7 +813,8 @@ void testSendSpike()
 	}
 	FieldDataHandlerBase * fdh =
 		static_cast< FieldDataHandlerBase *>( syn->dataHandler() );
-	fdh->syncFieldArraySize();
+	fdh->setFieldDimension( fdh->biggestFieldArraySize() );
+	// fdh->syncFieldArraySize();
 	assert( fdh->localEntries() == ( size * (size - 1) ) / 2 );
 	assert( fdh->totalEntries() == size * ( size - 1) );
 
@@ -1106,7 +1108,8 @@ void testSparseMsg()
 	FieldDataHandlerBase* fd = dynamic_cast< FieldDataHandlerBase* >(
 		syne.element()->dataHandler() );
 	assert( fd );
-	fd->syncFieldArraySize();
+	fd->setFieldDimension( fd->biggestFieldArraySize() );
+	// fd->syncFieldArraySize();
 	unsigned int fieldSize = fd->biggestFieldArraySize();
 	// cout << "fieldSize = " << fieldSize << endl;
 	fd->setFieldDimension( fieldSize );
@@ -1224,7 +1227,8 @@ void testUpValue()
 	assert( ticke->dataHandler()->totalEntries() == 1 );
 	FieldDataHandlerBase * fdh =
 		static_cast< FieldDataHandlerBase *>( ticke->dataHandler() );
-	fdh->syncFieldArraySize();
+	fdh->setFieldDimension( fdh->biggestFieldArraySize() );
+	// fdh->syncFieldArraySize();
 	assert( ticke->dataHandler()->totalEntries() == 10 );
 	/*
 	bool ret = Field< unsigned int >::set( clocker, "numTicks", size );

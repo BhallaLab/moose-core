@@ -32,7 +32,7 @@ template < class T, class F, class R > class ReduceFinfo: public ReduceFinfoBase
 		}
 
 		ReduceFinfo( const string& name, const string& doc, 
-			void ( T::*digestFunc )( const R* arg ) )
+			void ( T::*digestFunc )( const Eref& er, const R* arg ) )
 			
 			: 	ReduceFinfoBase( name, doc ),
 				digestFunc_( digestFunc )
@@ -73,7 +73,7 @@ template < class T, class F, class R > class ReduceFinfo: public ReduceFinfoBase
 			 
 			T* obj = reinterpret_cast< T* >( er.data() );
 
-			(obj->*digestFunc_)( reduce );
+			(obj->*digestFunc_)( er, reduce );
 		}
 
 		void registerFinfo( Cinfo* c ) {
@@ -85,7 +85,7 @@ template < class T, class F, class R > class ReduceFinfo: public ReduceFinfoBase
 
 	private:
 		// SrcFinfo* trig_;
-		void ( T::*digestFunc_ )( const R* arg );
+		void ( T::*digestFunc_ )( const Eref& er, const R* arg );
 };
 
 #endif // _REDUCE_FINFO_H

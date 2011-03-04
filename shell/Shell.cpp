@@ -666,7 +666,46 @@ void Shell::clearRestructuringQ()
  * following synaptic setup, for example.
  * The elm is the Element to synchronize
  * the FuncId is the 'get' function on the array size field.
+ * The tgt is the FieldElement to synchronize. Need to specify this because
+ * in principle a given elm could have multiple FieldElements.
+ * Should replace FuncId with string name of field.
  */
+void Shell::doSyncDataHandler( Id elm, const string& sizeField, Id tgt )
+{
+	const Finfo* f = elm()->cinfo()->findFinfo( sizeField );
+	if ( !f ) {
+		cout << myNode() << ": Shell::doSyncDataHandler: Error, field '" <<
+			sizeField << "' not found on " << elm.path() << "\n";
+		return;
+	}
+	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
+	if ( !df ) {
+		cout << myNode() << ": Shell::doSyncDataHandler: Error, field '" <<
+			sizeField << "' not a DestFinfo on " << elm.path() << "\n";
+		return;
+	}
+	FuncId sizeFid = df->getFid();
+
+	FieldDataHandlerBase* fb = 
+		dynamic_cast< FieldDataHandlerBase* >( tgt()->dataHandler() );
+	if ( !fb ) {
+		cout << myNode_ << ": Shell::doSyncDataHandler:Error: target '" <<
+			tgt.path() << "' is not a FieldElement\n";
+		return;
+	}
+	Eref sheller( shelle_, 0 );
+	initAck();
+		requestSync.send( sheller, &p_, elm, sizeFid );
+	waitForAck();
+	// Now the data is back, assign the field.
+	Field< unsigned int >::set( tgt.eref(), "fieldDimension", maxIndex_ );
+
+	// This old version is inadequate, since the other nodes also need to have the
+	// field assigned.
+	// fb->setFieldDimension( maxIndex_ );
+}
+
+/*
 void Shell::doSyncDataHandler( Id elm, FuncId sizeField, Id tgt )
 {
 	FieldDataHandlerBase* fb = 
@@ -681,8 +720,11 @@ void Shell::doSyncDataHandler( Id elm, FuncId sizeField, Id tgt )
 		requestSync.send( sheller, &p_, elm, sizeField );
 	waitForAck();
 	// Now the data is back, assign the field.
+	// This is inadequate, since the other nodes also need to have the
+	// field assigned.
 	fb->setFieldDimension( maxIndex_ );
 }
+*/
 
 ////////////////////////////////////////////////////////////////
 // DestFuncs
@@ -986,9 +1028,11 @@ const ProcInfo* Shell::procInfo()
 	return &p_;
 }
 
-void Shell::digestReduceMax( const ReduceMax< unsigned int >* arg )
+void Shell::digestReduceMax( 
+	const Eref& er, const ReduceMax< unsigned int >* arg )
 {
 	maxIndex_ = arg->max();
-	ack()->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
+	// ack()->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
+	ack()->send( er, &p_, Shell::myNode(), OkStatus );
 }
 

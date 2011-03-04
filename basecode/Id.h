@@ -32,7 +32,6 @@ class Id
 
 		/**
 		 * Returns an id found by traversing the specified path
-		 * May go off-node to find it.
 		 */
 		Id( const std::string& path, const std::string& separator = "/" );
 
@@ -71,7 +70,6 @@ class Id
 		//////////////////////////////////////////////////////////////
 		/**
 		 * Returns the full pathname of the object on the id.
-		 * This may go off-node to look for the object.
 		 */
 		std::string path( const std::string& separator = "/" ) const;
 

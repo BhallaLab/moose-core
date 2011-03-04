@@ -159,6 +159,20 @@ class DataHandler
 		virtual unsigned int getFieldArraySize( 
 			unsigned int objectIndex ) const;
 
+		/**
+		 * Access functions for the FieldDimension. Applicable for 
+		 * FieldDataHandlers, which typically manage a ragged array of 
+		 * field vectors, belonging to each object in the data array.
+		 * The FieldDimension provides a consistent range for indexing
+		 * into this ragged array, and it must be bigger than any of the
+		 * individual object array sizes.
+		 * non FieldDataHandlers return 0 as the dimension and ignore
+		 * the 'setFieldDimension' call.
+		 */
+		virtual void setFieldDimension( unsigned int size );
+		virtual unsigned int getFieldDimension() const;
+
+
 		 /**
 		  * Returns vector of dimensions.
 		  */

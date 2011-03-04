@@ -138,7 +138,7 @@ void Stats::trig( const Eref& e, const Qinfo* q )
 ///////////////////////////////////////////////////////////////////////////
 // Reduce func
 ///////////////////////////////////////////////////////////////////////////
-void Stats::digest( const ReduceStats* arg )
+void Stats::digest( const Eref& er, const ReduceStats* arg )
 {
 	num_ = arg->count();
 	sum_ = arg->sum();

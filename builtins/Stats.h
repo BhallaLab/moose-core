@@ -39,7 +39,7 @@ class Stats
 		////////////////////////////////////////////////////////////////
 		// Reduce func
 		////////////////////////////////////////////////////////////////
-		void digest( const ReduceStats* arg );
+		void digest( const Eref& er, const ReduceStats* arg );
 
 		static const Cinfo* initCinfo();
 	private:
