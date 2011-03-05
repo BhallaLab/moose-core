@@ -44,6 +44,7 @@ template < class T, class F > class ElementValueFinfo: public Finfo
 
 		void registerFinfo( Cinfo* c ) {
 			c->registerFinfo( set_ );
+			// c->registerElementField( set->getFid() );
 			c->registerFinfo( get_ );
 		}
 

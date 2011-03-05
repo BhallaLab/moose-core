@@ -56,7 +56,8 @@ void AssignmentMsg::exec( const char* arg, const ProcInfo *p ) const
 	// Tell the q which ProcInfo we are on. Used in 'get' calls
 
 	if ( q->isForward() ) {
-		if ( e2_->dataHandler()->isDataHere( i2_ ) &&
+		if ( ( e2_->dataHandler()->isDataHere( i2_ ) || 
+			q->fid() < 12 ) && // Hack. There are 12 ElementFields.
 			p->execThread( e2_->id(), i2_.data() ) )
 		{
 			const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );

@@ -263,6 +263,8 @@ void Shell::launchThreads()
 		p[i].barrier3 = barrier3_;
 		p[i].procIndex = i;
 
+	cout << myNode_ << "." << i << ": ptr= " << &( p[i] ) <<
+		", Shell::procInfo = " << &p_ << " setting up procs\n";
 		if ( i < numCores_ ) { // These are the compute threads
 			int rc = pthread_create( threads_ + i, NULL, eventLoopForBcast, 
 				(void *)&p[i] );

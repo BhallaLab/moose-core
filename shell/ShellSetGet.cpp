@@ -219,6 +219,13 @@ void Shell::recvGet( const Eref& e, const Qinfo* q, PrepackedBuffer pb )
 			char*& c = getBuf_[ tgt.linearIndex() ];
 			c = new char[ pb.dataSize() ];
 			memcpy( c, pb.data(), pb.dataSize() );
+/*
+if ( tgt.linearIndex() > 68570 && tgt.linearIndex() < 68640 ) {
+	cout << "linearIndex = " << tgt.linearIndex() << 
+		", DataId: " << q->srcIndex() << 
+		", val = " << *reinterpret_cast< const double* >( c ) << endl;
+}
+*/
 			// cout << myNode_ << ": Shell::recvGet[" << tgt.linearIndex() << "]= (" << pb.dataSize() << ", " <<  *reinterpret_cast< const double* >( c ) << ")\n";
 		} else  {
 			assert ( getBuf_.size() == 1 );

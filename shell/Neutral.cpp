@@ -15,14 +15,8 @@
 const Cinfo* Neutral::initCinfo()
 {
 	/////////////////////////////////////////////////////////////////
-	// Value Finfos
+	// Element Value Finfos
 	/////////////////////////////////////////////////////////////////
-	static ValueFinfo< Neutral, Neutral > thisFinfo (
-		"this",
-		"Access function for entire object",
-		&Neutral::setThis,
-		&Neutral::getThis
-	);
 
 	static ElementValueFinfo< Neutral, string > name( 
 		"name",
@@ -75,6 +69,16 @@ const Cinfo* Neutral::initCinfo()
 			&Neutral::setFieldDimension,
 			&Neutral::getFieldDimension
 		);
+
+	/////////////////////////////////////////////////////////////////
+	// Value Finfos
+	/////////////////////////////////////////////////////////////////
+	static ValueFinfo< Neutral, Neutral > thisFinfo (
+		"this",
+		"Access function for entire object",
+		&Neutral::setThis,
+		&Neutral::getThis
+	);
 	/////////////////////////////////////////////////////////////////
 	// SrcFinfos
 	/////////////////////////////////////////////////////////////////
