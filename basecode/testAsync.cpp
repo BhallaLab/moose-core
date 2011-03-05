@@ -1998,6 +1998,7 @@ void testFieldDataHandler()
 	for ( unsigned int k = 1; k < 301; ++k ) {
 		assert( i.index() == DataId( 301, k ) );
 		assert( i.linearIndex() == 301 * 399 + k );
+		assert( fdh.linearIndex( i.index() ) == i.linearIndex() );
 		i++;
 	}
 

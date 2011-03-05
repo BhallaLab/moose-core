@@ -11450,3 +11450,49 @@ value with a field index.
 Let's see if I have some unit tests for DataHandler node decomposition.
 Nope. So setting them up in testAsync.cpp.
 ============================================================================
+
+5 March
+Made unit tests for OneDim and Field DataHandlers, especially with regard
+to their iterators and how. Looks good. Checkin 2492.
+
+Given that I now am sure about what goes on with these, why do we still
+get bad weight sequences in the unit test testMultiNodeIntFireNetwork()?
+
+I'll printf debug the info in the DataHandlers on each node.
+
+Checked: The values that come into Shell::recvGet are correctly
+	handled. Indices and data values match with the read-out from
+	getVec. So the error is upstream of this.
+Checked: The start index on the stuff coming into Shell::recvGet
+	is correct. That is, there is the right gap of a number of index
+	values that are empty.
+Checked: The indices on stuff coming into the AssignVecMsg.
+	This is in progress. Now it is not printing out node#
+
+Found problem, probably underlies other issues. The fieldDimension has not
+been set on node 1. The 'set' command needs to figure out when a field is
+global even if the object is not. Tricky.
+
+I really need to keep track of three kinds of fields:
+- Regular ones, which are on the objects, which are on the elements.
+	These are global or not depending on whether the DataHandler is.
+- Element fields, which are on the Elements and are therefore global
+	regardless of the DataHandler
+	Actually such fields are already done as ElementValueFinfo.
+	Need to avoid sending a response from the get operations unless they
+	are on node 0. This was done in OpFunc.cpp:skipWorkerNodeGlobal,
+	but that will need to be extended.
+	However, do need to call the 'set' operations on all nodes.
+- Shared Data fields, which are a category I haven't implemented yet. These are
+	fields of which one instance exists for each Element, regardless
+	of how big the object array is. To some extent the extended fields
+	(which are child elements) do this job.
+
+Implemented a really disgusting hack: The ElementFields are all on Neutral,
+and they are the first few. Assuming all classes derive from Neutrals, it is
+easy to identify functions from ElementFields by their fids. I've just put
+in a test for ( q->fid < 12 ) and it works. That is, it clears the test for
+getting weights across nodes. 
+
+============================================================================
+
