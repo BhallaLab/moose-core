@@ -16,6 +16,8 @@
  */
 class OneDimHandler: public OneDimGlobalHandler
 {
+	friend void testOneDimHandler();
+	friend void testFieldDataHandler();
 	public:
 		OneDimHandler( const DinfoBase* dinfo );
 		OneDimHandler( const OneDimHandler* other );
@@ -26,7 +28,8 @@ class OneDimHandler: public OneDimGlobalHandler
 
 		DataHandler* unGlobalize() const;
 
-		virtual bool nodeBalance( unsigned int size );
+		bool innerNodeBalance( unsigned int size, 
+			unsigned int myNode, unsigned int numNodes );
 
 		DataHandler* copy() const;
 

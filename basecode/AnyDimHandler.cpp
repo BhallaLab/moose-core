@@ -12,10 +12,6 @@
 #include "AnyDimGlobalHandler.h"
 #include "AnyDimHandler.h"
 
-#include "ReduceBase.h"
-#include "ReduceMax.h"
-#include "../shell/Shell.h"
-
 AnyDimHandler::AnyDimHandler( const DinfoBase* dinfo )
 	: AnyDimGlobalHandler( dinfo ),
 		start_( 0 ), end_( 0 )
@@ -73,14 +69,15 @@ DataHandler* AnyDimHandler::unGlobalize() const
  * Determines how to decompose data among nodes for specified size
  * Returns true if there is a change from the current configuration
  */
-bool AnyDimHandler::nodeBalance( unsigned int size )
+bool AnyDimHandler::innerNodeBalance( unsigned int size,
+	unsigned int myNode, unsigned int numNodes )
 {
 	unsigned int oldsize = size_;
 	size_ = size;
 	unsigned int start =
-		( size * Shell::myNode() ) / Shell::numNodes();
+		( size * myNode ) / numNodes;
 	unsigned int end = 
-		( size * ( 1 + Shell::myNode() ) ) / Shell::numNodes();
+		( size * ( 1 + myNode ) ) / numNodes;
 	return ( size != oldsize || start != start_ || end != end_ );
 }
 

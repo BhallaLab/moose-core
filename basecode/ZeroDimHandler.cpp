@@ -41,7 +41,8 @@ DataHandler* ZeroDimHandler::unGlobalize() const
 	return new ZeroDimHandler( this );
 }
 
-bool ZeroDimHandler::nodeBalance( unsigned int size )
+bool ZeroDimHandler::innerNodeBalance( unsigned int size,
+	unsigned int myNode, unsigned int numNodes )
 {
 	return 0;
 }

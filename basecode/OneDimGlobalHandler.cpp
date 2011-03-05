@@ -126,7 +126,8 @@ char* OneDimGlobalHandler::data( DataId index ) const
 	return data_ + index.data() * dinfo()->size();
 }
 
-bool OneDimGlobalHandler::nodeBalance( unsigned int size )
+bool OneDimGlobalHandler::innerNodeBalance( unsigned int size,
+	unsigned int myNode, unsigned int numNodes )
 {
 	if ( size == size_ )
 		return 0;

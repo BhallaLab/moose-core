@@ -26,7 +26,8 @@ class OneDimGlobalHandler: public DataHandler
 
 		DataHandler* unGlobalize() const;
 
-		bool nodeBalance( unsigned int size );
+		bool innerNodeBalance( unsigned int size,
+			unsigned int myNode, unsigned int numNodes );
 
 		DataHandler* copy() const;
 

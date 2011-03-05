@@ -25,7 +25,8 @@ class MsgDataHandler: public DataHandler
 		DataHandler* globalize() const;
 		DataHandler* unGlobalize() const;
 
-		bool nodeBalance( unsigned int size );
+		bool innerNodeBalance( unsigned int size,
+			unsigned int myNode, unsigned int numNodes );
 
 		/**
 		 * Make a single copy

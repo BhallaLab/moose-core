@@ -697,6 +697,10 @@ void testMultiNodeIntFireNetwork()
 	Eref allSyn( syne.element(), DataId::any() );
 	Field< double >::getVec( allSyn, "weight", retVec );
 	assert( retVec.size() == size * fieldSize );
+	for ( unsigned int i = fieldSize* ( size /2 - 2 ); i < fieldSize * ( size / 2 + 2 ); i++ ) {
+		cout << "0Got wt[" << i << "] = " << retVec[i] << ", correct = " << weight[ i ] << endl << flush;
+	}
+
 	for ( unsigned int i = 0; i < size * fieldSize; i += 10000 ) {
 		cout << "1Got wt[" << i << "] = " << retVec[i] << ", correct = " << weight[ i ] << endl << flush;
 		// assert( retVec[i] == weight[i] );

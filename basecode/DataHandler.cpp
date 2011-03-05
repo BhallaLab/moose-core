@@ -8,6 +8,9 @@
 **********************************************************************/
 
 #include "header.h"
+#include "ReduceBase.h"
+#include "ReduceMax.h"
+#include "../shell/Shell.h"
 
 DataHandler::DataHandler( const DinfoBase* dinfo )
 	: dinfo_( dinfo )
@@ -54,4 +57,10 @@ void DataHandler::setFieldDimension( unsigned int size )
 unsigned int DataHandler::getFieldDimension() const
 {
 	return 0;
+}
+
+
+bool DataHandler::nodeBalance( unsigned int size )
+{
+	return this->innerNodeBalance( size, Shell::myNode(), Shell::numNodes() );
 }
