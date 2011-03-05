@@ -38,17 +38,18 @@ void AssignVecMsg::exec( const char* arg, const ProcInfo *p ) const
 		// cout << Shell::myNode() << ": AssignVecMsg::exec: pb.size = " << pb.size() << ", dataSize = " << pb.dataSize() << ", numEntries = " << pb.numEntries() << endl;
 		DataHandler* d2 = e2_->dataHandler();
 		const OpFunc* f = e2_->cinfo()->getOpFunc( q.fid() );
-cout << p->nodeIndexInGroup << "." << p->threadIndexInGroup << 
-	": AssignVecMsg: e2 field dim = " << d2->getFieldDimension() << endl;
+// cout << p->nodeIndexInGroup << "." << p->threadIndexInGroup << ": AssignVecMsg: e2 field dim = " << d2->getFieldDimension() << endl;
 		for ( DataHandler::iterator i = d2->begin(); i != d2->end(); ++i )
 		{
 			if ( p->execThread( e2_->id(),i.index().data() ) ) {
 
+/*
 if ( i.linearIndex() > 68570 && i.linearIndex() < 68640 ) {
 	cout << p->nodeIndexInGroup << "." << p->threadIndexInGroup << 
 	": linearIndex=" << i.linearIndex() << ", DataId: " << i.index() << 
 	", ptr = " << p << endl;
 }	
+*/
 
 				// Note that j might not go in sequential order, as it
 				// depends on locally allocated parts of the vector.

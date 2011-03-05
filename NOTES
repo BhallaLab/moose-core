@@ -11492,7 +11492,7 @@ Implemented a really disgusting hack: The ElementFields are all on Neutral,
 and they are the first few. Assuming all classes derive from Neutrals, it is
 easy to identify functions from ElementFields by their fids. I've just put
 in a test for ( q->fid < 12 ) and it works. That is, it clears the test for
-getting weights across nodes. 
+getting weights across nodes. Checkin 2493.
 
 ============================================================================
 
