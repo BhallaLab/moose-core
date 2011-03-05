@@ -33,7 +33,8 @@ DataHandler* ZeroDimGlobalHandler::unGlobalize() const
 	return 0;
 }
 
-bool ZeroDimGlobalHandler::nodeBalance( unsigned int size )
+bool ZeroDimGlobalHandler::innerNodeBalance( unsigned int size,
+	unsigned int myNode, unsigned int numNodes )
 {
 	return 0;
 }

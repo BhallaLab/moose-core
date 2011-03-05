@@ -28,6 +28,11 @@ class DataHandler
 		 * same type as an argument. This should allocate a copy
 		 * of the original data
 		 */
+
+
+		/**
+		 * The destructor has to destroy the data contents.
+		 */
 		virtual ~DataHandler();
 
 		/**
@@ -48,8 +53,20 @@ class DataHandler
 		 * Determines how to decompose data among nodes for specified size
 		 * Returns true if there is a change from the current configuration
 		 * Does NOT touch actual allocation.
+		 * This form of the function is just a front-end for the inner
+		 * function, as this talks to the Shell object to find node info.
 		 */
-		virtual bool nodeBalance( unsigned int size ) = 0;
+		bool nodeBalance( unsigned int size );
+
+		/**
+		 * Determines how to decompose data among nodes for specified size
+		 * Returns true if there is a change from the current configuration
+		 * Does NOT touch actual allocation.
+		 * This inner function is self-contained and is independent of the
+		 * Shell. Each subclass of DataHandler has to supply this.
+		 */
+		virtual bool innerNodeBalance( unsigned int size, 
+			unsigned int myNode, unsigned int numNodes ) = 0;
 
 		/**
 		 * For copy we won't worry about global status. 

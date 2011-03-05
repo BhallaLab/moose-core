@@ -24,7 +24,8 @@ class FieldDataHandlerBase: public DataHandler
 		DataHandler* globalize() const;
 		DataHandler* unGlobalize() const;
 
-		bool nodeBalance( unsigned int size );
+		bool innerNodeBalance( unsigned int size,
+			unsigned int myNode, unsigned int numNodes );
 
 		/// We don't implement the copy() func, left to the derived class
 		// DataHandler* copy() const

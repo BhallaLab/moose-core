@@ -29,7 +29,8 @@ DataHandler* DataHandlerWrapper::unGlobalize() const
 	return parent_->unGlobalize();
 }
 
-bool DataHandlerWrapper::nodeBalance( unsigned int size )
+bool DataHandlerWrapper::innerNodeBalance( unsigned int size,
+	unsigned int myNode, unsigned int numNodes )
 {
 	return 0;
 }

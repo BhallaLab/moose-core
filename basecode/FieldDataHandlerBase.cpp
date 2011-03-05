@@ -33,7 +33,8 @@ DataHandler* FieldDataHandlerBase::unGlobalize() const
 	return 0;
 }
 
-bool FieldDataHandlerBase::nodeBalance( unsigned int size )
+bool FieldDataHandlerBase::innerNodeBalance( unsigned int size,
+	unsigned int myNode, unsigned int numNodes )
 {
 	return 0;
 }
@@ -163,13 +164,16 @@ void FieldDataHandlerBase::setFieldArraySize(
 }
 
 /**
- * Looks up the size of the field array on the specified object
+ * Looks up the size of the local field array on the specified object
  */
 unsigned int FieldDataHandlerBase::getFieldArraySize( unsigned int objectIndex ) const
 {
 	assert( objectIndex < parentDataHandler_->totalEntries() );
-	char* pa = parentDataHandler_->data( objectIndex );
-	return getNumField( pa );
+	if ( parentDataHandler_->isDataHere( objectIndex ) ) {
+		char* pa = parentDataHandler_->data( objectIndex );
+		return getNumField( pa );
+	}
+	return 0;
 }
 
 /**

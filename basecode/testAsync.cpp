@@ -1862,6 +1862,156 @@ void testDataCopyAny()
 	cout << "." << flush;
 }
 
+void testOneDimHandler()
+{
+	Dinfo< int > dummyDinfo;
+	OneDimHandler odh( &dummyDinfo );
+	// nodeBalance( size, myNode, numNodes );
+	// Check start and end entries.
+	// Here we have 1000 entries on 10 nodes. Should be divided as
+	// 0 to 99, then 100 to 199, and so on.
+	// These would refer to the 'data' part of the DataId.
+	odh.innerNodeBalance( 1000, 0, 10 );
+	assert( odh.start_ == 0 );
+	assert( odh.end_ == 100 );
+
+	odh.innerNodeBalance( 1000, 1, 10 );
+	assert( odh.start_ == 100 );
+	assert( odh.end_ == 200 );
+
+	odh.innerNodeBalance( 1000, 9, 10 );
+	assert( odh.start_ == 900 );
+	assert( odh.end_ == 1000 );
+
+	// Next, test the iterators
+	OneDimHandler::iterator i = odh.begin();
+	assert ( i.index() == 900 );
+	assert( i.linearIndex() == 900 );
+
+	OneDimHandler::iterator end = odh.end();
+	assert( end.index() == 1000 );
+	assert( end.linearIndex() == 1000 );
+
+	++i;
+	assert ( i.index() == 901 );
+	assert( i.linearIndex() == 901 );
+	
+	cout << "." << flush;
+}
+
+void testFieldDataHandler()
+{
+	Dinfo< IntFire > dinfo1;
+	Dinfo< Synapse > dinfo2;
+	OneDimHandler odh( &dinfo1 );
+	// Check start and end entries.
+	// Here we have 1000 entries on 10 nodes. Should be divided as
+	// 0 to 99, then 100 to 199, and so on.
+	// These would refer to the 'data' part of the DataId.
+
+	unsigned int numNeurons = 1000;
+	unsigned int numNodes = 10;
+
+
+	// nodeBalance( size, myNode, numNodes );
+	odh.innerNodeBalance( numNeurons, 3, numNodes );
+	assert( odh.start_ == 300 );
+	assert( odh.end_ == 400 );
+
+	assert( odh.isAllocated() == 0 );
+
+	vector< unsigned int > dims( 1, numNeurons );
+
+	// The original resize function takes node info from Shell, so I can't
+	// use that here in this test. 
+	// odh.resize( dims );
+	// So here I use a function from inside the OneDimHandler.
+	odh.data_ = odh.dinfo()->allocData( odh.end_ - odh.start_ );
+
+	assert( odh.isAllocated() == 1 );
+	assert( odh.totalEntries() == numNeurons );
+	assert( odh.localEntries() == numNeurons / numNodes );
+	assert( odh.isDataHere( 0 ) == 0 );
+	assert( odh.isDataHere( 300 ) == 1 );
+	assert( odh.isDataHere( 399 ) == 1 );
+	assert( odh.isDataHere( 400 ) == 0 );
+	assert( odh.isDataHere( 999 ) == 0 );
+
+	// Next, test the iterators
+	OneDimHandler::iterator i = odh.begin();
+	assert ( i.index() == 300 );
+	assert( i.linearIndex() == 300 );
+
+	OneDimHandler::iterator end = odh.end();
+	assert( end.index() == 400 );
+	assert( end.linearIndex() == 400 );
+
+	++i;
+	assert ( i.index() == 301 );
+	assert( i.linearIndex() == 301 );
+
+	// Next, put in the FieldDataHandler.
+
+	FieldDataHandler< IntFire, Synapse > fdh( &dinfo2, &odh, 
+		&IntFire::getSynapse,
+		&IntFire::getNumSynapses,
+		&IntFire::setNumSynapses
+	);
+
+	vector< unsigned int > numSynVec( numNeurons, 0 );	
+	for ( unsigned int k = 0; k < numNeurons; ++k )
+		fdh.setFieldArraySize( k, k );
+
+	for ( unsigned int k = 0; k < numNeurons; ++k ) {
+		if ( k >= odh.start_ && k < odh.end_ )
+			assert( fdh.getFieldArraySize( k ) == k );
+		else
+			assert( fdh.getFieldArraySize( k ) == 0 );
+	}
+
+	assert( fdh.biggestFieldArraySize() == 399 );
+
+	fdh.setFieldDimension( 399 );
+	assert( fdh.getFieldDimension() == 399 );
+
+	i = fdh.begin();
+	assert( i.index() == DataId( 300, 0 ) );
+	assert( i.linearIndex() == 300 * 399 );
+	i++;
+
+	assert( i.index() == DataId( 300, 1 ) );
+	assert( i.linearIndex() == 300 * 399 + 1 );
+	for ( unsigned int k = 2; k < 300; ++k )
+		i++;
+
+	assert( i.index() == DataId( 300, 299 ) );
+	assert( i.linearIndex() == 300 * 399 + 299 );
+
+	i++;
+	assert( i.index() == DataId( 301, 0 ) );
+	assert( i.linearIndex() == 301 * 399 );
+
+	i++;
+	assert( i.index() == DataId( 301, 1 ) );
+	assert( i.linearIndex() == 301 * 399 + 1 );
+
+	for ( unsigned int k = 1; k < 301; ++k ) {
+		assert( i.index() == DataId( 301, k ) );
+		assert( i.linearIndex() == 301 * 399 + k );
+		i++;
+	}
+
+	assert( i.index() == DataId( 302, 0 ) );
+	assert( i.linearIndex() == 302 * 399 );
+
+
+	end = fdh.end();
+	assert( end.index() == DataId( 400, 0 ) );
+	assert( end.linearIndex() == 400 * 399 );
+	
+	cout << "." << flush;
+}
+
 void testAsync( )
 {
 	showFields();
@@ -1893,4 +2043,6 @@ void testAsync( )
 	testDataCopyZero();
 	testDataCopyOne();
 	testDataCopyAny();
+	testOneDimHandler();
+	testFieldDataHandler();
 }

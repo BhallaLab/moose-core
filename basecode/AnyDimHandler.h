@@ -41,7 +41,8 @@ class AnyDimHandler: public AnyDimGlobalHandler
 		 * Determines how to decompose data among nodes for specified size
 		 * Returns true if there is a change from the current configuration
 		 */
-		bool nodeBalance( unsigned int size );
+		bool innerNodeBalance( unsigned int size,
+			unsigned int myNode, unsigned int numNodes );
 
 		/**
 		 * For copy we won't worry about global status. 

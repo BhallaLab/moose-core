@@ -11429,6 +11429,24 @@ object, first doing the reduce, then using the returned value to set
 a new Neutral::fieldDimension value field.
 
 Now it clears the tests for weight assignments across nodes and synapses.
-Assertion failure at the output of the calculation.
+Assertion failure at the output of the calculation. Checkin 2491.
 
+A closer look at the output shows that the weights still are not right. It
+just isn't doing an assertion check on them. testScheduling.cpp:700
+
+
+Printing out lots of the data to show the point at which the extracted field
+values disagree with what was stored. It is identical up to the halfway
+point (so that would be objects decomposed onto node0). Then it starts out
+at the position for the second half, with zero entries 
+(hence, no values put where they should go), and when the values do start
+coming they are not the ones expected there.
+Suggests something bad with indexing in DataHandler. What is odd is that it
+isn't symmetric: whatever wrong indexing put in a value, should also be
+apparent when we read out the value. Except that the readout is indexed
+by the object linear index due to the way we have each entry send out its
+value with a field index.
+
+Let's see if I have some unit tests for DataHandler node decomposition.
+Nope. So setting them up in testAsync.cpp.
 ============================================================================

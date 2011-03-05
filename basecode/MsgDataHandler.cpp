@@ -119,7 +119,8 @@ unsigned int MsgDataHandler::sizeOfDim( unsigned int dim ) const
 	return 0;
 }
 
-bool MsgDataHandler::nodeBalance( unsigned int size )
+bool MsgDataHandler::innerNodeBalance( unsigned int size,
+	unsigned int myNode, unsigned int numNodes )
 {
 	return 0;
 }

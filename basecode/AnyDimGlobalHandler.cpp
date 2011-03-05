@@ -59,7 +59,8 @@ DataHandler* AnyDimGlobalHandler::unGlobalize() const
  * Determines how to decompose data among nodes for specified size
  * Returns true if there is a change from the current configuration
  */
-bool AnyDimGlobalHandler::nodeBalance( unsigned int size )
+bool AnyDimGlobalHandler::innerNodeBalance( unsigned int size,
+	unsigned int myNode, unsigned int numNodes )
 {
 	unsigned int oldsize = size_;
 	size_ = size;
