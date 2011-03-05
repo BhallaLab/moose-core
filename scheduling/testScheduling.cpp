@@ -428,8 +428,17 @@ void testThreadIntFireNetwork()
 	// sm->loadBalance( numThreads );
 
 	unsigned int nd = syn->dataHandler()->localEntries();
-//	cout << "Num Syn = " << nd << endl;
-	assert( nd == NUMSYN );
+	// assert( syn->dataHandler()->totalEntries() == size * 134 );
+	if ( Shell::numNodes() == 1 )
+		assert( nd == NUMSYN );
+	else if ( Shell::numNodes() == 2 )
+		assert( nd == 52446 );
+	else if ( Shell::numNodes() == 3 )
+		assert( nd == 34969 );
+	else if ( Shell::numNodes() == 4 )
+		assert( nd == 26381 );
+
+
 	vector< double > initVm( size, 0.0 );
 	for ( unsigned int i = 0; i < size; ++i )
 		initVm[i] = mtrand() * Vmax;
@@ -666,7 +675,7 @@ void testMultiNodeIntFireNetwork()
 	unsigned int fieldSize = 
 		Field< unsigned int >::get( synId.eref(), "fieldDimension" );
 
-	cout << Shell::myNode() << ": fieldSize = " << fieldSize << endl;
+	// cout << Shell::myNode() << ": fieldSize = " << fieldSize << endl;
 	vector< unsigned int > numSynVec;
 
 	vector< double > weight( size * fieldSize, 0.0 );
@@ -701,11 +710,11 @@ void testMultiNodeIntFireNetwork()
 	for ( unsigned int i = fieldSize* ( size /2 - 2 ); i < fieldSize * ( size / 2 + 2 ); i++ ) {
 		cout << "0Got wt[" << i << "] = " << retVec[i] << ", correct = " << weight[ i ] << endl << flush;
 	}
-	*/
 
-	for ( unsigned int i = 0; i < size * fieldSize; i += 10000 ) {
 		cout << "1Got wt[" << i << "] = " << retVec[i] << ", correct = " << weight[ i ] << endl << flush;
-		// assert( retVec[i] == weight[i] );
+	*/
+	for ( unsigned int i = 0; i < size * fieldSize; i += 10000 ) {
+		 assert( retVec[i] == weight[i] );
 	}
 	
 
@@ -713,8 +722,8 @@ void testMultiNodeIntFireNetwork()
 		double wt = Field< double >::get( 
 			Eref( syne.element(), DataId( i, 0 ) ), "weight" );
 
-		cout << "Got wt = " << wt << ", correct = " << weight[ i * fieldSize ] << endl << flush;
-		// assert( doubleEq( wt, weight[ i * fieldSize ] ) );
+		// cout << "Got wt = " << wt << ", correct = " << weight[ i * fieldSize ] << endl << flush;
+		assert( doubleEq( wt, weight[ i * fieldSize ] ) );
 	}
 
 	Element* ticke = Id( 2 )();

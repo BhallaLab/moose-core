@@ -158,9 +158,7 @@ bool OneDimHandler::innerNodeBalance( unsigned int size,
 	start_ = ( size * myNode ) / numNodes;
 	end_ = ( size * ( 1 + myNode ) ) / numNodes;
 
-	cout << "OneDimHandler::innerNodeBalance( " << size_ << ", " <<
-		start_ << ", " << end_ << "), fieldDimension = " << 
-			getFieldDimension() << "\n";
+	// cout << "OneDimHandler::innerNodeBalance( " << size_ << ", " << start_ << ", " << end_ << "), fieldDimension = " << getFieldDimension() << "\n";
 
 	return ( size != oldsize || oldstart != start_ || oldend != end_ );
 }
