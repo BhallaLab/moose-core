@@ -153,14 +153,14 @@ void testMpiFibonacci()
 	*/
 
 	MsgId mid1 = shell->doAddMsg( "Diagonal", 
-		FullId( a1id, 0 ), "output", FullId( a1id, 0 ), "arg1" );
+		ObjId( a1id, 0 ), "output", ObjId( a1id, 0 ), "arg1" );
 	const Msg* m1 = Msg::getMsg( mid1 );
 	Eref er1 = m1->manager();
 	bool ret = Field< int >::set( er1, "stride", 1 );
 	assert( ret );
 
 	MsgId mid2 = shell->doAddMsg( "Diagonal", 
-		FullId( a1id, 0 ), "output", FullId( a1id, 0 ), "arg2" );
+		ObjId( a1id, 0 ), "output", ObjId( a1id, 0 ), "arg2" );
 	const Msg* m2 = Msg::getMsg( mid2 );
 	Eref er2 = m2->manager();
 	ret = Field< int >::set( er2, "stride", 2 );
@@ -301,11 +301,11 @@ void testGetMsg()
 	assert( arithid != Id() );
 	// Table* t = reinterpret_cast< Table* >( tabid.eref().data() );
 	MsgId ret = shell->doAddMsg( "Single", 
-		tabid.eref().fullId(), "requestData",
-		arithid.eref().fullId(), "get_outputValue" );
+		tabid.eref().objId(), "requestData",
+		arithid.eref().objId(), "get_outputValue" );
 	assert( ret != Msg::badMsg );
-	ret = shell->doAddMsg( "Single", arithid.eref().fullId(), "output",
-		arithid.eref().fullId(), "arg1" );
+	ret = shell->doAddMsg( "Single", arithid.eref().objId(), "output",
+		arithid.eref().objId(), "arg1" );
 	assert( ret != Msg::badMsg );
 	shell->doSetClock( 0, 1 );
 	shell->doUseClock( "/tab,/arith", "process", 0 );
@@ -403,8 +403,8 @@ void testStatsReduce()
 
 
 	MsgId mid = shell->doAddMsg( "Reduce", 
-		statsid.eref().fullId(), "reduce",
-		syner.fullId(), "get_delay" );
+		statsid.eref().objId(), "reduce",
+		syner.objId(), "get_delay" );
 	assert( mid != Msg::badMsg );
 	/*
 	shell->doSetClock( 0, 1 );
@@ -481,8 +481,8 @@ void testMpiStatsReduce()
 
 
 	MsgId mid = shell->doAddMsg( "Reduce", 
-		statsid.eref().fullId(), "reduce",
-		syner.fullId(), "get_delay" );
+		statsid.eref().objId(), "reduce",
+		syner.objId(), "get_delay" );
 	assert( mid != Msg::badMsg );
 	SetGet0::set( statsid.eref(), "trig" );
 	double x = Field< double >::get( statsid.eref(), "sum" );

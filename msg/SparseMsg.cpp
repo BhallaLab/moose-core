@@ -361,7 +361,7 @@ SparseMatrix< unsigned int >& SparseMsg::getMatrix( )
 	return matrix_;
 }
 
-FullId SparseMsg::findOtherEnd( FullId f ) const
+ObjId SparseMsg::findOtherEnd( ObjId f ) const
 {
 	if ( f.id() == e1() ) {
 		const unsigned int* entry;
@@ -369,20 +369,20 @@ FullId SparseMsg::findOtherEnd( FullId f ) const
 		unsigned int num = matrix_.getRow( f.dataId.data(),
 			&entry, &colIndex );
 		if ( num > 0 ) { // Return the first matching entry.
-			return FullId( e2()->id(), DataId( colIndex[0], entry[0] ) );
+			return ObjId( e2()->id(), DataId( colIndex[0], entry[0] ) );
 		}
-		return FullId( e2()->id(), DataId::bad() );
+		return ObjId( e2()->id(), DataId::bad() );
 	} else if ( f.id() == e2() ) { // Bad! Slow! Avoid!
 		vector< unsigned int > entry;
 		vector< unsigned int > rowIndex;
 		unsigned int num = matrix_.getColumn( f.dataId.data(), 
 			entry, rowIndex );
 		if ( num > 0 ) { // Return the first matching entry.
-			return FullId( e1()->id(), DataId( rowIndex[0], entry[0] ) );
+			return ObjId( e1()->id(), DataId( rowIndex[0], entry[0] ) );
 		}
-		return FullId( e1()->id(), DataId::bad() );
+		return ObjId( e1()->id(), DataId::bad() );
 	}
-	return FullId::bad();
+	return ObjId::bad();
 }
 
 Msg* SparseMsg::copy( Id origSrc, Id newSrc, Id newTgt,

@@ -63,18 +63,18 @@ Id OneToAllMsg::managerId() const
 	return OneToAllMsg::managerId_;
 }
 
-FullId OneToAllMsg::findOtherEnd( FullId f ) const
+ObjId OneToAllMsg::findOtherEnd( ObjId f ) const
 {
 	if ( f.id() == e1() ) {
 		if ( f.dataId == i1_ )
-			return FullId( e2()->id(), 0 );
+			return ObjId( e2()->id(), 0 );
 		else
-			return FullId( e2()->id(), DataId::bad() );
+			return ObjId( e2()->id(), DataId::bad() );
 	} else if ( f.id() == e2() ) {
-		return FullId( e1()->id(), i1_ );
+		return ObjId( e1()->id(), i1_ );
 	}
 	
-	return FullId::bad();
+	return ObjId::bad();
 }
 
 Msg* OneToAllMsg::copy( Id origSrc, Id newSrc, Id newTgt,

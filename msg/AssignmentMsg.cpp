@@ -83,15 +83,15 @@ Id AssignmentMsg::managerId() const
 	return AssignmentMsg::managerId_;
 }
 
-FullId AssignmentMsg::findOtherEnd( FullId f ) const
+ObjId AssignmentMsg::findOtherEnd( ObjId f ) const
 {
 	if ( f.id() == e1() ) {
-		return FullId( e2()->id(), i2_ );
+		return ObjId( e2()->id(), i2_ );
 	}
 	if ( f.id() == e2() ) {
-		return FullId( e1()->id(), i1_ );
+		return ObjId( e1()->id(), i1_ );
 	}
-	return FullId::bad();
+	return ObjId::bad();
 }
 
 /// Dummy. We should never be copying assignment messages.

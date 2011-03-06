@@ -95,7 +95,7 @@ class Element
 		 * by bindIndex, and queue specified in the ProcInfo.
 		 */
 		void tsend( Qinfo& q, BindIndex bindIndex, const ProcInfo *p, 
-			const char* arg, const FullId& target ) const;
+			const char* arg, const ObjId& target ) const;
 
 		/** 
 		 * Pushes the Msg mid onto the list.

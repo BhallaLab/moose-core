@@ -248,7 +248,7 @@ void Element::asend( Qinfo& q, BindIndex bindIndex,
 /*
  * Asynchronous send to specific target.
  * Scan through potential targets, figure out direction, 
- * copy over FullId to sit in specially assigned space on queue.
+ * copy over ObjId to sit in specially assigned space on queue.
  *
  * This may seem easier to do if we don't even bother with the Msg,
  * and just plug in the queue entry.
@@ -257,7 +257,7 @@ void Element::asend( Qinfo& q, BindIndex bindIndex,
  *
  */
 void Element::tsend( Qinfo& q, BindIndex bindIndex, 
-	const ProcInfo *p, const char* arg, const FullId& target ) const
+	const ProcInfo *p, const char* arg, const ObjId& target ) const
 {
 	assert ( bindIndex < msgBinding_.size() );
 	Element *e = target.id();

@@ -110,7 +110,7 @@ void Arith::process( const Eref& e, ProcPtr p )
 	if ( doReport ) {
 		cout << p->nodeIndexInGroup << "." << 
 			p->threadIndexInGroup << ": " <<
-			e.element()->getName() << ", " << e.fullId() << "		" << 
+			e.element()->getName() << ", " << e.objId() << "		" << 
 			arg3_ << "	" << &arg3_ << endl;
 	}
 	output.send( e, p, output_ );

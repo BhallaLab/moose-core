@@ -11571,5 +11571,41 @@ Brahma said: Well, after hearing ten thousand explanations, a fool is no
 wiser.  But an intelligent man needs only two thousand five hundred.
                 -- The Mahabharata
 
+Checkin 2500.
+
+Still need to convert the basic set and get calls to use Ids.
+
+When I get in to the lab, I need to run the multinode stuff
+on gj to see how it scales.
+Also need to build a really big regression test for multinode runs.
+
+Documentation.
+For python:
+	API: Shell::do<name> commands
+	SetGet
+	Traversal fields from Neutral
+	Wildcard operations
+For making new classes:
+	Example class
+	List and description of Finfos
+	Explanation of Cinfo usage.
+For making new solvers:
+	Example ksolve
+	Zombie principles.
+
+Need better name for FullId, whose short form confuses with FuncId
+ObjId (oid) :	OK but the FullId Goes beyond object to field Object.
+Considered several others, but ObjId it is.
+
+Used Id names are:
+fid: FuncId
+id: Element Id.
+did: DataId
+mid: MsgId
+Possibly confusing one is cid, for Cinfo Id (though it isn't used)
+oid: ObjId.
+
+Made the change. Simple but tedious as it affects many files.
+
 
 ============================================================================

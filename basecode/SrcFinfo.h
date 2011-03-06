@@ -66,7 +66,7 @@ class SrcFinfo0: public SrcFinfo
 		
 		// Will need to specialize for strings etc.
 		void send( const Eref& e, const ProcInfo* p ) const;
-		void sendTo( const Eref& e, const ProcInfo* p, const FullId& target) const;
+		void sendTo( const Eref& e, const ProcInfo* p, const ObjId& target) const;
 
 	private:
 };
@@ -98,7 +98,7 @@ template < class T > class SrcFinfo1: public SrcFinfo
 		 * Element or Msg, since there could be multiple ones. 
 		 */
 		void sendTo( const Eref& e, const ProcInfo* p,
-			const T& arg, const FullId& target ) const
+			const T& arg, const ObjId& target ) const
 		{
 			Conv< T > a( arg );
 			Qinfo q( e.index(), a.size(), 1 );
@@ -129,7 +129,7 @@ template <> class SrcFinfo1< double >: public SrcFinfo
 		}
 
 		void sendTo( const Eref& e, const ProcInfo* p, 
-			const string& arg, const FullId& target ) const
+			const string& arg, const ObjId& target ) const
 		{
 			Qinfo q( e.index(), sizeof( double ), 1 );
 			e.element()->tsend( q, getBindIndex(), p, 
@@ -157,7 +157,7 @@ template <> class SrcFinfo1< unsigned int >: public SrcFinfo
 		}
 
 		void sendTo( const Eref& e, const ProcInfo* p, 
-			const string& arg, const FullId& target ) const
+			const string& arg, const ObjId& target ) const
 		{
 			Qinfo q( e.index(), sizeof( unsigned int ), 1 );
 			e.element()->tsend( q, getBindIndex(), p, 
@@ -185,7 +185,7 @@ template <> class SrcFinfo1< int >: public SrcFinfo
 		}
 
 		void sendTo( const Eref& e, const ProcInfo* p, 
-			const string& arg, const FullId& target ) const
+			const string& arg, const ObjId& target ) const
 		{
 			Qinfo q( e.index(), sizeof( int ), 1 );
 			e.element()->tsend( q, getBindIndex(), p, 
@@ -219,7 +219,7 @@ template <> class SrcFinfo1< string >: public SrcFinfo
 		}
 
 		void sendTo( const Eref& e, const ProcInfo* p, 
-			const string& arg, const FullId& target ) const
+			const string& arg, const ObjId& target ) const
 		{
 			Conv< string > s( arg );
 			Qinfo q( e.index(), s.size(), 1 );
@@ -259,7 +259,7 @@ template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 		}
 
 		void sendTo( const Eref& e, const ProcInfo* p,
-			const T1& arg1, const T2& arg2, const FullId& target ) const
+			const T1& arg1, const T2& arg2, const ObjId& target ) const
 		{
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
@@ -299,7 +299,7 @@ template <> class SrcFinfo2< double, double >: public SrcFinfo
 		}
 
 		void sendTo( const Eref& e, const ProcInfo* p,
-			double arg1, double arg2, const FullId& target ) const
+			double arg1, double arg2, const ObjId& target ) const
 		{
 			static const unsigned int sz = sizeof( double ) + sizeof( double );
 			Qinfo q( e.index(), sz, 1 );
@@ -388,7 +388,7 @@ template < class T1, class T2, class T3, class T4 > class SrcFinfo4: public SrcF
 
 		void sendTo( const Eref& e, const ProcInfo* p,
 			const T1& arg1, const T2& arg2, const T3& arg3, const T4& arg4,
-			const FullId& target ) const
+			const ObjId& target ) const
 		{
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
@@ -443,7 +443,7 @@ template < class T1, class T2, class T3, class T4, class T5 > class SrcFinfo5: p
 		void sendTo( const Eref& e, const ProcInfo* p,
 			const T1& arg1, const T2& arg2, const T3& arg3, const T4& arg4,
 			const T5& arg5,
-			const FullId& target ) const
+			const ObjId& target ) const
 		{
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
@@ -505,7 +505,7 @@ template < class T1, class T2, class T3, class T4, class T5, class T6 > class Sr
 		void sendTo( const Eref& e, const ProcInfo* p,
 			const T1& arg1, const T2& arg2, const T3& arg3, const T4& arg4,
 			const T5& arg5, const T6& arg6,
-			const FullId& target ) const
+			const ObjId& target ) const
 		{
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );

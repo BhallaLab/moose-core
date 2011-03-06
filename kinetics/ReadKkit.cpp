@@ -531,8 +531,8 @@ void ReadKkit::assignCompartments()
 			j != volCategories_[i].end(); ++j ) {
 			// get the group Ids that have a different vol in them
 			MsgId ret = shell_->doAddMsg( "single", 
-				FullId( compt, 0 ), "compartment",
-				FullId( *j, 0 ), "setSize" ); 
+				ObjId( compt, 0 ), "compartment",
+				ObjId( *j, 0 ), "setSize" ); 
 			assert( ret != Msg::badMsg );
 		}
 	}
@@ -588,8 +588,8 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 		separateVols( cplx, parentVol );
 
 		bool ret = shell_->doAddMsg( "single", 
-			FullId( enz, 0 ), "cplx",
-			FullId( cplx, 0 ), "reac" ); 
+			ObjId( enz, 0 ), "cplx",
+			ObjId( cplx, 0 ), "reac" ); 
 		assert( ret != Msg::badMsg );
 
 		// cplx()->showFields();
@@ -738,12 +738,12 @@ void ReadKkit::buildSumTotal( const string& src, const string& dest )
 	Id srcId = i->second;
 
 	bool ret = shell_->doAddMsg( "single", 
-		FullId( srcId, 0 ), "nOut",
-		FullId( sumId, 0 ), "input" ); 
+		ObjId( srcId, 0 ), "nOut",
+		ObjId( sumId, 0 ), "input" ); 
 
 	ret = shell_->doAddMsg( "single", 
-		FullId( sumId, 0 ), "output",
-		FullId( destId, 0 ), "input" ); 
+		ObjId( sumId, 0 ), "output",
+		ObjId( destId, 0 ), "input" ); 
 
 	assert( ret );
 }
@@ -819,8 +819,8 @@ void ReadKkit::innerAddMsg(
 
 	// dest mol is substrate of src reac
 	bool ret = shell_->doAddMsg( "single", 
-		FullId( srcId, 0 ), srcMsg,
-		FullId( destId, 0 ), destMsg ); 
+		ObjId( srcId, 0 ), srcMsg,
+		ObjId( destId, 0 ), destMsg ); 
 	assert( ret != Msg::badMsg );
 }
 

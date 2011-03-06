@@ -42,11 +42,6 @@ typedef unsigned int FuncId;
 typedef unsigned int MsgId;
 
 /**
- * Looks up Synchronous messages on elements
- */
-typedef unsigned int SyncId;
-
-/**
  * Index into Element::vector< vector< MsgFuncBinding > > msgBinding_;
  */
 typedef unsigned short BindIndex;
@@ -62,7 +57,7 @@ class FuncBarrier;
 #include "doubleEq.h"
 #include "Id.h"
 #include "DataId.h"
-#include "FullId.h"
+#include "ObjId.h"
 #include "Finfo.h"
 #include "DestFinfo.h"
 #include "SimGroup.h"

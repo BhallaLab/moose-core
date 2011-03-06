@@ -51,9 +51,9 @@ class Eref
 		unsigned int linearIndex() const;
 
 		/**
-		 * Returns the FullId corresponding to the Eref. All info is kept.
+		 * Returns the ObjId corresponding to the Eref. All info is kept.
 		 */
-		FullId fullId() const;
+		ObjId objId() const;
 
 		/**
 		 * Returns the Id corresponding to the Eref. Loses information.
