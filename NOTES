@@ -11562,4 +11562,14 @@ Tried to fix the hang, that made the threaded code crash. Commented it out.
 Shouldn't get bogged down here. It is important to fix this, but more important
 to get the base code ready for the big API merge. 
 
+Checkin 2499.
+
+Converted argument in setVec and setRepeat to an Id. Compiles, clears unit
+tests.
+
+Brahma said: Well, after hearing ten thousand explanations, a fool is no
+wiser.  But an intelligent man needs only two thousand five hundred.
+                -- The Mahabharata
+
+
 ============================================================================

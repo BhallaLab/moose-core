@@ -494,7 +494,7 @@ void testShellSetGet()
 		double x = Field< double >::get( Eref( a1(), i ), "outputValue" );
 		assert( doubleEq( x, i * i ) );
 	}
-	bool ret = SetGet1< double >::setVec( Eref( a1(), 0 ), "set_outputValue", val );
+	bool ret = SetGet1< double >::setVec( a1, "set_outputValue", val );
 	assert( ret );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double x = Field< double >::get( Eref( a1(), i ), "outputValue" );
@@ -741,19 +741,19 @@ void testShellAddMsg()
 	vector< double > init; // 12345
 	for ( unsigned int i = 1; i < 6; ++i )
 		init.push_back( i );
-	ret = SetGet1< double >::setVec( a1.eref(), "arg1", init ); // 12345
+	ret = SetGet1< double >::setVec( a1, "arg1", init ); // 12345
 	assert( ret );
-	ret = SetGet1< double >::setVec( b1.eref(), "arg1", init ); // 12345
+	ret = SetGet1< double >::setVec( b1, "arg1", init ); // 12345
 	assert( ret );
-	ret = SetGet1< double >::setVec( c1.eref(), "arg1", init ); // 12345
+	ret = SetGet1< double >::setVec( c1, "arg1", init ); // 12345
 	assert( ret );
-	ret = SetGet1< double >::setVec( d1.eref(), "arg1", init ); // 12345
+	ret = SetGet1< double >::setVec( d1, "arg1", init ); // 12345
 	assert( ret );
-	ret = SetGet1< double >::setVec( e1.eref(), "arg1", init ); // 12345
+	ret = SetGet1< double >::setVec( e1, "arg1", init ); // 12345
 	assert( ret );
-	ret = SetGet1< double >::setVec( f1.eref(), "arg1", init ); // 12345
+	ret = SetGet1< double >::setVec( f1, "arg1", init ); // 12345
 	assert( ret );
-	ret = SetGet1< double >::setVec( g1.eref(), "arg1", init ); // 12345
+	ret = SetGet1< double >::setVec( g1, "arg1", init ); // 12345
 	assert( ret );
 
 	assert( doubleEq( Field< double >::get( Eref( a1(), 0 ), "arg1Value" ), 1 ) );
@@ -875,15 +875,15 @@ void testCopyMsgOps()
 	vector< double > init; // 12345
 	for ( unsigned int i = 1; i < 6; ++i )
 		init.push_back( i );
-	ret = SetGet1< double >::setVec( a1.eref(), "arg1", init ); // 12345
+	ret = SetGet1< double >::setVec( a1, "arg1", init ); // 12345
 	assert( ret );
-	ret = SetGet1< double >::setVec( b1.eref(), "arg1", init ); // 12345
+	ret = SetGet1< double >::setVec( b1, "arg1", init ); // 12345
 	assert( ret );
-	ret = SetGet1< double >::setVec( c1.eref(), "arg1", init ); // 12345
+	ret = SetGet1< double >::setVec( c1, "arg1", init ); // 12345
 	assert( ret );
-	ret = SetGet1< double >::setVec( d1.eref(), "arg1", init ); // 12345
+	ret = SetGet1< double >::setVec( d1, "arg1", init ); // 12345
 	assert( ret );
-	ret = SetGet1< double >::setVec( e1.eref(), "arg1", init ); // 12345
+	ret = SetGet1< double >::setVec( e1, "arg1", init ); // 12345
 	assert( ret );
 
 
@@ -1162,8 +1162,7 @@ void testSyncSynapseSize()
 	vector< unsigned int > ns( size, 0 );
 	for ( unsigned int i = 0; i < size; ++i )
 		ns[i] = i;
-	bool ret = Field< unsigned int >::setVec( 
-		neuronId.eref(), "numSynapses", ns );
+	bool ret = Field< unsigned int >::setVec( neuronId, "numSynapses", ns);
 	assert( ret );
 	// Here we check local entries
 	/*
