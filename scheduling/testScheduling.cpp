@@ -597,8 +597,8 @@ void testMultiNodeIntFireNetwork()
 	vector< double > weight( size * fieldSize, 0.0 );
 	vector< double > delay( size * fieldSize, 0.0 );
 	unsigned int numTotSyn = 0;
-	Eref alle2( e2.element(), DataId::any() );
-	Field< unsigned int >::getVec( alle2, "numSynapses", numSynVec );
+	// Eref alle2( e2.element(), DataId::any() );
+	Field< unsigned int >::getVec( i2, "numSynapses", numSynVec );
 	assert ( numSynVec.size() == size );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -619,8 +619,8 @@ void testMultiNodeIntFireNetwork()
 	assert( ret );
 
 	vector< double > retVec;
-	Eref allSyn( syne.element(), DataId::any() );
-	Field< double >::getVec( allSyn, "weight", retVec );
+	// Eref allSyn( syne.element(), DataId::any() );
+	Field< double >::getVec( synId, "weight", retVec );
 	assert( retVec.size() == size * fieldSize );
 	/*
 	for ( unsigned int i = fieldSize* ( size /2 - 2 ); i < fieldSize * ( size / 2 + 2 ); i++ ) {

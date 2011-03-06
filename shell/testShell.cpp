@@ -582,7 +582,7 @@ bool checkOutput( Id e,
 	correct.push_back( v3 );
 	correct.push_back( v4 );
 	vector< double > retVec;
-	Field< double >::getVec( Eref( e(), DataId::any() ), "outputValue", retVec );
+	Field< double >::getVec( e, "outputValue", retVec );
 	assert( retVec.size() == 5 );
 
 	for ( unsigned int i = 0; i < 5; ++i ) {
@@ -763,17 +763,17 @@ void testShellAddMsg()
 	assert( doubleEq( Field< double >::get( Eref( a1(), 4 ), "arg1Value" ), 5 ) );
 
 	vector< double > retVec( 0 );
-	Field< double >::getVec( Eref( a1(), DataId::any() ), "arg1Value", retVec );
+	Field< double >::getVec( a1, "arg1Value", retVec );
 	for ( unsigned int i = 0; i < 5; ++i )
 		assert( doubleEq( retVec[i], i + 1 ) );
 
 	retVec.resize( 0 );
-	Field< double >::getVec( Eref( b1(), DataId::any() ), "arg1Value", retVec );
+	Field< double >::getVec( b1, "arg1Value", retVec );
 	for ( unsigned int i = 0; i < 5; ++i )
 		assert( doubleEq( retVec[i], i + 1 ) );
 
 	retVec.resize( 0 );
-	Field< double >::getVec( Eref( c1(), DataId::any() ), "arg1Value", retVec );
+	Field< double >::getVec( c1, "arg1Value", retVec );
 	for ( unsigned int i = 0; i < 5; ++i )
 		assert( doubleEq( retVec[i], i + 1 ) );
 
@@ -968,7 +968,7 @@ void testCopyMsgOps()
 	assert( kids[j]()->getName() == "e2" ); ++j;
 
 	vector< double > retVec;
-	Field< double >::getVec( Eref( kids[0](), DataId::any() ), "arg1Value", retVec );
+	Field< double >::getVec( kids[0], "arg1Value", retVec );
 	assert( retVec.size() == 5 );
 	for (unsigned int i = 0; i < 5; ++i )
 		assert( doubleEq( retVec[i], init[i] ) );

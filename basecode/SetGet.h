@@ -272,14 +272,14 @@ template< class A > class Field: public SetGet1< A >
 		/**
 		 * Blocking call that returns a vector of values
 		 */
-		static void getVec( 
-			const Eref& dest, const string& field, vector< A >& vec )
+		static void getVec( Id dest, const string& field, vector< A >& vec )
 		{
-			SetGet1< A > sg( dest );
+			SetGet1< A > sg( dest.eref() );
 			string temp = "get_" + field;
 			unsigned int numRetEntries;
 			const vector< char* >& ret = 
-				dispatchGet( dest, temp, &sg, numRetEntries );
+				dispatchGet( Eref( dest(), DataId::any() ), 
+					temp, &sg, numRetEntries );
 
 			vec.resize( numRetEntries );
 			for ( unsigned int i = 0; i < numRetEntries; ++i ) {

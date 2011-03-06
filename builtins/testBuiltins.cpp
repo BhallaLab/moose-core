@@ -182,8 +182,7 @@ void testMpiFibonacci()
 	shell->doStart( numFib );
 
 	vector< double > retVec;
-	Field< double >::getVec( Eref( a1id(), DataId::any() ), 
-		"outputValue", retVec );
+	Field< double >::getVec( a1id, "outputValue", retVec );
 	assert( retVec.size() == numFib );
 
 	unsigned int f1 = 1;
