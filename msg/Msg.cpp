@@ -31,6 +31,7 @@ vector< MsgId > Msg::garbageMsg_;
 const MsgId Msg::badMsg = 0;
 const MsgId Msg::setMsg = 1;
 Id Msg::msgManagerId_;
+vector< Id > msgMgrs;
 
 Msg::Msg( MsgId mid, Element* e1, Element* e2, Id managerId )
 	: mid_( mid), e1_( e1 ), e2_( e2 )
@@ -213,39 +214,55 @@ void Msg::initMsgManagers()
 
 	Shell::adopt( Id(), msgManagerId_ );
 	Shell::adopt( msgManagerId_, SingleMsg::managerId_ );
+	msgMgrs.push_back( SingleMsg::managerId_ );
 
 	OneToOneMsg::managerId_ = Id::nextId();
 	new Element( OneToOneMsg::managerId_, OneToOneMsg::initCinfo(),
 		"oneToOneMsg", new MsgDataHandler( &dummyDinfo ) );
 	Shell::adopt( msgManagerId_, OneToOneMsg::managerId_ );
+	msgMgrs.push_back( OneToOneMsg::managerId_ );
 
 	OneToAllMsg::managerId_ = Id::nextId();
 	new Element( OneToAllMsg::managerId_, OneToAllMsg::initCinfo(), 
 		"oneToAllMsg", new MsgDataHandler( &dummyDinfo ) );
 	Shell::adopt( msgManagerId_, OneToAllMsg::managerId_ );
+	msgMgrs.push_back( OneToAllMsg::managerId_ );
 
 	DiagonalMsg::managerId_ = Id::nextId();
 	new Element( DiagonalMsg::managerId_, DiagonalMsg::initCinfo(), 
 		"diagonalMsg", new MsgDataHandler( &dummyDinfo ) );
 	Shell::adopt( msgManagerId_, DiagonalMsg::managerId_ );
+	msgMgrs.push_back( DiagonalMsg::managerId_ );
 
 	SparseMsg::managerId_ = Id::nextId();
 	new Element( SparseMsg::managerId_, SparseMsg::initCinfo(), 
 		"sparseMsg", new MsgDataHandler( &dummyDinfo ) );
 	Shell::adopt( msgManagerId_, SparseMsg::managerId_ );
+	msgMgrs.push_back( SparseMsg::managerId_ );
 
 	AssignmentMsg::managerId_ = Id::nextId();
 	new Element( AssignmentMsg::managerId_, AssignmentMsg::initCinfo(),
 		"assignmentMsg", new MsgDataHandler( &dummyDinfo ) );
 	Shell::adopt( msgManagerId_, AssignmentMsg::managerId_ );
+	msgMgrs.push_back( AssignmentMsg::managerId_ );
 
 	AssignVecMsg::managerId_ = Id::nextId();
 	new Element( AssignVecMsg::managerId_, AssignVecMsg::initCinfo(),
 		"assignVecMsg", new MsgDataHandler( &dummyDinfo ) );
 	Shell::adopt( msgManagerId_, AssignVecMsg::managerId_ );
+	msgMgrs.push_back( AssignVecMsg::managerId_ );
 
 	ReduceMsg::managerId_ = Id::nextId();
 	new Element( ReduceMsg::managerId_, ReduceMsg::initCinfo(),
 		"ReduceMsg", new MsgDataHandler( &dummyDinfo ) );
 	Shell::adopt( msgManagerId_, ReduceMsg::managerId_ );
+	msgMgrs.push_back( ReduceMsg::managerId_ );
+
+	msgMgrs.push_back( msgManagerId_ );
+}
+
+void destroyMsgManagers()
+{
+	for ( vector< Id >::iterator i = msgMgrs.begin(); i != msgMgrs.end(); ++i)
+		i->destroy();
 }
