@@ -11542,5 +11542,9 @@ Checkin 2496.
 
 Implemented the MPI version, testMpiStatsReduce. Works with up to
 4 cores X 4 nodes.
+Checkin 2497.
+
+Converted argument in getVec to an Id. First step in a long process to convert
+all the SetGet calls to Ids. Compiles, clears unit tests.
 
 ============================================================================

@@ -683,7 +683,7 @@ void testSetGetVec()
 
 	vector< unsigned int > getSyn;
 	Eref tempE( e2.element(), DataId::any() );
-	Field< unsigned int >::getVec( tempE, "numSynapses", getSyn );
+	Field< unsigned int >::getVec( i2, "numSynapses", getSyn );
 	assert (getSyn.size() == size );
 	for ( unsigned int i = 0; i < size; ++i )
 		assert( getSyn[i] == i );
@@ -719,7 +719,7 @@ void testSetGetVec()
 	}
 	Eref syne( syn, DataId::any() );
 	vector< double > delayVec;
-	Field< double >::getVec( syne, "delay", delayVec );
+	Field< double >::getVec( synId, "delay", delayVec );
 	assert( delayVec.size() == size * size );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		for ( unsigned int j = 0; j < i; ++j ) {
