@@ -70,26 +70,26 @@ int DiagonalMsg::getStride() const
 	return stride_;
 }
 
-FullId DiagonalMsg::findOtherEnd( FullId f ) const
+ObjId DiagonalMsg::findOtherEnd( ObjId f ) const
 {
 	if ( f.id() == e1() ) {
 		int i2 = f.dataId.data() + stride_;
 		if ( i2 >= 0 ) {
 			unsigned int ui2 = i2;
 			if ( ui2 < e2()->dataHandler()->totalEntries() )
-				return FullId( e2()->id(), DataId( ui2, f.dataId.field() ) );
+				return ObjId( e2()->id(), DataId( ui2, f.dataId.field() ) );
 		}
-		return FullId( e2()->id(), DataId::bad() );
+		return ObjId( e2()->id(), DataId::bad() );
 	} else if ( f.id() == e2() ) {
 		int i1 = f.dataId.data() - stride_;
 		if ( i1 >= 0 ) {
 			unsigned int ui1 = i1;
 			if ( ui1 < e1()->dataHandler()->totalEntries() )
-				return FullId( e1()->id(), DataId( ui1, f.dataId.field() ));
+				return ObjId( e1()->id(), DataId( ui1, f.dataId.field() ));
 		}
-		return FullId( e1()->id(), DataId::bad() );
+		return ObjId( e1()->id(), DataId::bad() );
 	}
-	return FullId::bad();
+	return ObjId::bad();
 }
 
 Msg* DiagonalMsg::copy( Id origSrc, Id newSrc, Id newTgt,

@@ -10,10 +10,10 @@
 
 #include "header.h"
 //////////////////////////////////////////////////////////////
-//	FullId I/O 
+//	ObjId I/O 
 //////////////////////////////////////////////////////////////
 
-ostream& operator <<( ostream& s, const FullId& i )
+ostream& operator <<( ostream& s, const ObjId& i )
 {
 	if ( i.dataId.data() == 0 && i.dataId.field() == 0 )
 		s << i.id;
@@ -25,24 +25,24 @@ ostream& operator <<( ostream& s, const FullId& i )
 /**
  * need to complete implementation
  */
-istream& operator >>( istream& s, FullId& i )
+istream& operator >>( istream& s, ObjId& i )
 {
 	s >> i.id;
 	return s;
 }
 
-Eref FullId::eref() const
+Eref ObjId::eref() const
 {
 	return Eref( id(), dataId );
 }
 
-bool FullId::operator==( const FullId& other ) const
+bool ObjId::operator==( const ObjId& other ) const
 {
 	return ( id == other.id && dataId == other.dataId );
 }
 
-const FullId& FullId::bad()
+const ObjId& ObjId::bad()
 {
-	static FullId bad_( Id(), DataId::bad() );
+	static ObjId bad_( Id(), DataId::bad() );
 	return bad_;
 }

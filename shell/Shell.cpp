@@ -99,7 +99,7 @@ static SrcFinfo0 requestTerminate( "requestTerminate",
 			"Violently stops a simulation, possibly leaving things half-done."
 			"Goes to all nodes including self."
 			);
-static SrcFinfo6< string, MsgId, FullId, string, FullId, string > 
+static SrcFinfo6< string, MsgId, ObjId, string, ObjId, string > 
 		requestAddMsg( 
 			"requestAddMsg",
 			"requestAddMsg( type, src, srcField, dest, destField );"
@@ -162,7 +162,7 @@ DestFinfo* handleAck()
 
 static DestFinfo handleAddMsg( "handleAddMsg", 
 			"Makes a msg",
-			new EpFunc6< Shell, string, MsgId, FullId, string, FullId, string >
+			new EpFunc6< Shell, string, MsgId, ObjId, string, ObjId, string >
 				( & Shell::handleAddMsg ) );
 
 static DestFinfo handleSet( "handleSet", 
@@ -423,8 +423,8 @@ bool Shell::doDelete( Id i )
 }
 
 MsgId Shell::doAddMsg( const string& msgType, 
-	FullId src, const string& srcField, 
-	FullId dest, const string& destField )
+	ObjId src, const string& srcField, 
+	ObjId dest, const string& destField )
 {
 	if ( !src.id() ) {
 		cout << myNode_ << ": Error: Shell::doAddMsg: src not found\n";
@@ -494,10 +494,10 @@ void Shell::connectMasterMsg()
 
 	Id clockId( 1 );
 	bool ret = innerAddMsg( "Single", Msg::nextMsgId(), 
-		FullId( shellId, 0 ), "clockControl", 
-		FullId( clockId, 0 ), "clockControl" );
+		ObjId( shellId, 0 ), "clockControl", 
+		ObjId( clockId, 0 ), "clockControl" );
 	assert( ret );
-	// innerAddMsg( string msgType, FullId src, string srcField, FullId dest, string destField )
+	// innerAddMsg( string msgType, ObjId src, string srcField, ObjId dest, string destField )
 }
 
 void Shell::doQuit( )
@@ -862,8 +862,8 @@ void Shell::destroy( const Eref& e, const Qinfo* q, Id eid)
  * multiple acks.
  */
 void Shell::handleAddMsg( const Eref& e, const Qinfo* q,
-	string msgType, MsgId mid, FullId src, string srcField, 
-	FullId dest, string destField )
+	string msgType, MsgId mid, ObjId src, string srcField, 
+	ObjId dest, string destField )
 {
 	if ( q->addToStructuralQ() )
 		return;
@@ -877,8 +877,8 @@ void Shell::handleAddMsg( const Eref& e, const Qinfo* q,
  * The actual function that adds messages. Does NOT send an ack.
  */
 bool Shell::innerAddMsg( string msgType, MsgId mid,
-	FullId src, string srcField, 
-	FullId dest, string destField )
+	ObjId src, string srcField, 
+	ObjId dest, string destField )
 {
 	/*
 	cout << myNode_ << ", Shell::handleAddMsg: " << 
@@ -977,12 +977,12 @@ void Shell::handleUseClock( const Eref& e, const Qinfo* q,
 		field = tickField = "proc"; // Use the shared Msg with process and reinit.
 	for ( vector< Id >::iterator i = list.begin(); i != list.end(); ++i ) {
 		stringstream ss;
-		FullId tickId( Id( 2 ), DataId( 0, tick ) );
+		ObjId tickId( Id( 2 ), DataId( 0, tick ) );
 		ss << tickField << tick;
 		// bool ret = 
 		innerAddMsg( "OneToAll", Msg::nextMsgId(), 
 			tickId, ss.str(), 
-			FullId( *i, 0 ), field);
+			ObjId( *i, 0 ), field);
 		// We just skip messages that don't work.
 		/*
 		if ( !ret ) {

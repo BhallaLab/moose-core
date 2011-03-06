@@ -49,7 +49,7 @@ void testTicks()
 	ProcInfo p;
 
 	MsgId m1 = shell->doAddMsg( "Single", 
-		FullId( tickId, 0 ), "proc0", FullId( arithId, 0 ), "proc" );
+		ObjId( tickId, 0 ), "proc0", ObjId( arithId, 0 ), "proc" );
 	// Qinfo::clearQ( &p );
 	assert( m1 != Msg::badMsg );
 
@@ -537,8 +537,8 @@ void testMultiNodeIntFireNetwork()
 	DataId di( 1, 0 ); // DataId( data, field )
 	Eref syne( syn, di );
 
-	MsgId mid = shell->doAddMsg( "Sparse", e2.fullId(), "spike",
-		FullId( synId, 0 ), "addSpike" );
+	MsgId mid = shell->doAddMsg( "Sparse", e2.objId(), "spike",
+		ObjId( synId, 0 ), "addSpike" );
 	
 	const Msg* m = Msg::getMsg( mid );
 	assert( m );
@@ -645,8 +645,8 @@ void testMultiNodeIntFireNetwork()
 	Element* ticke = Id( 2 )();
 	Eref er0( ticke, DataId( 0, 0 ) );
 
-	shell->doAddMsg( "Single", er0.fullId(), "process0",
-		e2.fullId(), "process" );
+	shell->doAddMsg( "Single", er0.objId(), "process0",
+		e2.objId(), "process" );
 	shell->doSetClock( 0, timestep );
 	shell->doReinit();
 
@@ -742,8 +742,8 @@ void speedTestMultiNodeIntFireNetwork( unsigned int size, unsigned int runsteps 
 	}
 	*/
 
-	MsgId mid = shell->doAddMsg( "Sparse", e2.fullId(), "spike",
-		FullId( synId, 0 ), "addSpike" );
+	MsgId mid = shell->doAddMsg( "Sparse", e2.objId(), "spike",
+		ObjId( synId, 0 ), "addSpike" );
 	
 	const Msg* m = Msg::getMsg( mid );
 	Eref mer = m->manager();
@@ -790,8 +790,8 @@ void speedTestMultiNodeIntFireNetwork( unsigned int size, unsigned int runsteps 
 	Element* ticke = Id( 2 )();
 	Eref er0( ticke, DataId( 0, 0 ) );
 
-	shell->doAddMsg( "Single", er0.fullId(), "process0",
-		e2.fullId(), "process" );
+	shell->doAddMsg( "Single", er0.objId(), "process0",
+		e2.objId(), "process" );
 	shell->doSetClock( 0, timestep );
 
 	shell->doStart( static_cast< double >( timestep * runsteps) + 0.0 );

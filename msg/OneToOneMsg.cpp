@@ -60,14 +60,14 @@ Id OneToOneMsg::managerId() const
 	return OneToOneMsg::managerId_;
 }
 
-FullId OneToOneMsg::findOtherEnd( FullId f ) const
+ObjId OneToOneMsg::findOtherEnd( ObjId f ) const
 {
 	if ( f.id() == e1() )
-		return FullId( e2()->id(), f.dataId );
+		return ObjId( e2()->id(), f.dataId );
 	else if ( f.id() == e2() )
-		return FullId( e1()->id(), f.dataId );
+		return ObjId( e1()->id(), f.dataId );
 	
-	return FullId::bad();
+	return ObjId::bad();
 }
 
 Msg* OneToOneMsg::copy( Id origSrc, Id newSrc, Id newTgt,

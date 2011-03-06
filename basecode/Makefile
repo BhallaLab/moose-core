@@ -36,7 +36,7 @@ OBJ = \
 	SharedFinfo.o \
 	FieldElementFinfo.o \
 	Id.o \
-	FullId.o \
+	ObjId.o \
 	Qinfo.o \
 	Qvec.o \
 	DataId.o \
@@ -73,7 +73,7 @@ HEADERS = \
 	Finfo.h \
 	DestFinfo.h \
 	Id.h \
-	FullId.h \
+	ObjId.h \
 	../msg/Msg.h \
 	OpFunc.h \
 	EpFunc.h \

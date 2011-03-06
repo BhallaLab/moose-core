@@ -58,7 +58,7 @@ void SrcFinfo0::send( const Eref& e, const ProcInfo* p ) const {
 }
 
 void SrcFinfo0::sendTo( const Eref& e, const ProcInfo* p, 
-	const FullId& target ) const
+	const ObjId& target ) const
 {
 	// Qinfo( eindex, size, useSendTo );
 	Qinfo q( e.index(), 0, 1 );

@@ -75,15 +75,15 @@ Id AssignVecMsg::managerId() const
 	return AssignVecMsg::managerId_;
 }
 
-FullId AssignVecMsg::findOtherEnd( FullId f ) const
+ObjId AssignVecMsg::findOtherEnd( ObjId f ) const
 {
 	if ( f.id() == e1() ) {
-		return FullId( e2()->id(), 0 );
+		return ObjId( e2()->id(), 0 );
 	}
 	if ( f.id() == e2() ) {
-		return FullId( e1()->id(), i1_ );
+		return ObjId( e1()->id(), i1_ );
 	}
-	return FullId::bad();
+	return ObjId::bad();
 }
 
 /// Dummy. We should never be copying assignment messages.

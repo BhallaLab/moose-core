@@ -78,22 +78,22 @@ Id SingleMsg::managerId() const
 	return SingleMsg::managerId_;
 }
 
-FullId SingleMsg::findOtherEnd( FullId f ) const
+ObjId SingleMsg::findOtherEnd( ObjId f ) const
 {
 	if ( f.id() == e1() ) {
 		if ( f.dataId == i1_ )
-			return FullId( e2()->id(), i2_ );
+			return ObjId( e2()->id(), i2_ );
 		else
-			return FullId( e2()->id(), DataId::bad() );
+			return ObjId( e2()->id(), DataId::bad() );
 	}
 	else if ( f.id() == e2() ) {
 		if ( f.dataId == i2_ )
-			return FullId( e1()->id(), i1_ );
+			return ObjId( e1()->id(), i1_ );
 		else
-			return FullId( e1()->id(), DataId::bad() );
+			return ObjId( e1()->id(), DataId::bad() );
 	}
 	
-	return FullId::bad();
+	return ObjId::bad();
 }
 
 Msg* SingleMsg::copy( Id origSrc, Id newSrc, Id newTgt,

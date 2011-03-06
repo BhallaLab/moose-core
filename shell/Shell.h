@@ -52,8 +52,8 @@ class Shell
 		 * to pass to the specified msgType.
 		 */
 		MsgId doAddMsg( const string& msgType, 
-			FullId src, const string& srcField, 
-			FullId dest, const string& destField);
+			ObjId src, const string& srcField, 
+			ObjId dest, const string& destField);
 
 		void doQuit( );
 
@@ -198,8 +198,8 @@ class Shell
 		 * success
 		 */
 		bool innerAddMsg( string msgType, MsgId mid,
-			FullId src, string srcField, 
-			FullId dest, string destField);
+			ObjId src, string srcField, 
+			ObjId dest, string destField);
 
 		/**
 		 * Connects src to dest on appropriate fields, with specified
@@ -208,8 +208,8 @@ class Shell
 		 */
 		void handleAddMsg( const Eref& e, const Qinfo* q,
 			string msgType, MsgId mid,
-			FullId src, string srcField, 
-			FullId dest, string destField);
+			ObjId src, string srcField, 
+			ObjId dest, string destField);
 
 		/**
 		 * Moves Element orig onto the newParent.

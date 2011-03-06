@@ -39,9 +39,9 @@ bool Eref::isDataHere() const
 	return e_->dataHandler()->isDataHere( i_ );
 }
 
-FullId Eref::fullId() const
+ObjId Eref::objId() const
 {
-	return FullId( e_->id(), i_ );
+	return ObjId( e_->id(), i_ );
 }
 
 Id Eref::id() const

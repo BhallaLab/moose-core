@@ -64,27 +64,27 @@ void testAssortedMsg()
 	///////////////////////////////////////////////////////////
 	// Should give 04000
 	MsgId m1 = shell->doAddMsg( "Single", 
-		FullId( a1, 3 ), "output", FullId( a2, 1 ), "arg1" );
+		ObjId( a1, 3 ), "output", ObjId( a2, 1 ), "arg1" );
 	assert( m1 != Msg::badMsg );
 
 	// Should give 33333
 	MsgId m2 = shell->doAddMsg( "OneToAll", 
-		FullId( b1, 2 ), "output", FullId( b2, 0 ), "arg1" );
+		ObjId( b1, 2 ), "output", ObjId( b2, 0 ), "arg1" );
 	assert( m2 != Msg::badMsg );
 
 	// Should give 12345
 	MsgId m3 = shell->doAddMsg( "OneToOne", 
-		FullId( c1, 0 ), "output", FullId( c2, 0 ), "arg1" );
+		ObjId( c1, 0 ), "output", ObjId( c2, 0 ), "arg1" );
 	assert( m3 != Msg::badMsg );
 
 	// Should give 01234
 	MsgId m4 = shell->doAddMsg( "Diagonal", 
-		FullId( d1, 0 ), "output", FullId( d2, 0 ), "arg1" );
+		ObjId( d1, 0 ), "output", ObjId( d2, 0 ), "arg1" );
 	assert( m4 != Msg::badMsg );
 
 	// Should give 54321
 	MsgId m5 = shell->doAddMsg( "Sparse", 
-		FullId( e1, 0 ), "output", FullId( e2, 0 ), "arg1" );
+		ObjId( e1, 0 ), "output", ObjId( e2, 0 ), "arg1" );
 	assert( m5 != Msg::badMsg );
 
 	const Msg* m5p = Msg::getMsg( m5 );
@@ -116,77 +116,77 @@ void testAssortedMsg()
 	// Test traversal
 	///////////////////////////////////////////////////////////
 	// Single
-	FullId f = Msg::getMsg( m1 )->findOtherEnd( FullId( a1, 3 ) );
-	assert( f == FullId( a2, 1 ) );
+	ObjId f = Msg::getMsg( m1 )->findOtherEnd( ObjId( a1, 3 ) );
+	assert( f == ObjId( a2, 1 ) );
 
-	f = Msg::getMsg( m1 )->findOtherEnd( FullId( a2, 1 ) );
-	assert( f == FullId( a1, 3 ) );
+	f = Msg::getMsg( m1 )->findOtherEnd( ObjId( a2, 1 ) );
+	assert( f == ObjId( a1, 3 ) );
 
-	f = Msg::getMsg( m1 )->findOtherEnd( FullId( a1, 0 ) );
-	assert( f == FullId( a2, DataId::bad() ) );
+	f = Msg::getMsg( m1 )->findOtherEnd( ObjId( a1, 0 ) );
+	assert( f == ObjId( a2, DataId::bad() ) );
 
-	f = Msg::getMsg( m1 )->findOtherEnd( FullId( a2, 0 ) );
-	assert( f == FullId( a1, DataId::bad() ) );
+	f = Msg::getMsg( m1 )->findOtherEnd( ObjId( a2, 0 ) );
+	assert( f == ObjId( a1, DataId::bad() ) );
 
-	f = Msg::getMsg( m1 )->findOtherEnd( FullId( b2, 1 ) );
-	assert( f == FullId::bad() );
+	f = Msg::getMsg( m1 )->findOtherEnd( ObjId( b2, 1 ) );
+	assert( f == ObjId::bad() );
 
 	// OneToAll
-	f = Msg::getMsg( m2 )->findOtherEnd( FullId( b1, 2 ) );
-	assert( f == FullId( b2, 0 ) );
+	f = Msg::getMsg( m2 )->findOtherEnd( ObjId( b1, 2 ) );
+	assert( f == ObjId( b2, 0 ) );
 
-	f = Msg::getMsg( m2 )->findOtherEnd( FullId( b2, 0 ) );
-	assert( f == FullId( b1, 2 ) );
-	f = Msg::getMsg( m2 )->findOtherEnd( FullId( b2, 1 ) );
-	assert( f == FullId( b1, 2 ) );
-	f = Msg::getMsg( m2 )->findOtherEnd( FullId( b2, 2 ) );
-	assert( f == FullId( b1, 2 ) );
-	f = Msg::getMsg( m2 )->findOtherEnd( FullId( b2, 3 ) );
-	assert( f == FullId( b1, 2 ) );
-	f = Msg::getMsg( m2 )->findOtherEnd( FullId( b2, 4 ) );
-	assert( f == FullId( b1, 2 ) );
+	f = Msg::getMsg( m2 )->findOtherEnd( ObjId( b2, 0 ) );
+	assert( f == ObjId( b1, 2 ) );
+	f = Msg::getMsg( m2 )->findOtherEnd( ObjId( b2, 1 ) );
+	assert( f == ObjId( b1, 2 ) );
+	f = Msg::getMsg( m2 )->findOtherEnd( ObjId( b2, 2 ) );
+	assert( f == ObjId( b1, 2 ) );
+	f = Msg::getMsg( m2 )->findOtherEnd( ObjId( b2, 3 ) );
+	assert( f == ObjId( b1, 2 ) );
+	f = Msg::getMsg( m2 )->findOtherEnd( ObjId( b2, 4 ) );
+	assert( f == ObjId( b1, 2 ) );
 
-	f = Msg::getMsg( m2 )->findOtherEnd( FullId( b1, 0 ) );
-	assert( f == FullId( b2, DataId::bad() ) );
+	f = Msg::getMsg( m2 )->findOtherEnd( ObjId( b1, 0 ) );
+	assert( f == ObjId( b2, DataId::bad() ) );
 
-	f = Msg::getMsg( m2 )->findOtherEnd( FullId( a2, 1 ) );
-	assert( f == FullId::bad() );
+	f = Msg::getMsg( m2 )->findOtherEnd( ObjId( a2, 1 ) );
+	assert( f == ObjId::bad() );
 
 	// OneToOne
 	for ( unsigned int i = 0; i < 5; ++i ) {
-		f = Msg::getMsg( m3 )->findOtherEnd( FullId( c1, i ) );
-		assert( f == FullId( c2, i ) );
-		f = Msg::getMsg( m3 )->findOtherEnd( FullId( c2, i ) );
-		assert( f == FullId( c1, i ) );
+		f = Msg::getMsg( m3 )->findOtherEnd( ObjId( c1, i ) );
+		assert( f == ObjId( c2, i ) );
+		f = Msg::getMsg( m3 )->findOtherEnd( ObjId( c2, i ) );
+		assert( f == ObjId( c1, i ) );
 	}
-	f = Msg::getMsg( m3 )->findOtherEnd( FullId( a2, 1 ) );
-	assert( f == FullId::bad() );
+	f = Msg::getMsg( m3 )->findOtherEnd( ObjId( a2, 1 ) );
+	assert( f == ObjId::bad() );
 
 	// Diagonal
 	for ( unsigned int i = 0; i < 4; ++i ) {
-		f = Msg::getMsg( m4 )->findOtherEnd( FullId( d1, i ) );
-		assert( f == FullId( d2, i + 1 ) );
-		f = Msg::getMsg( m4 )->findOtherEnd( FullId( d2, i + 1 ) );
-		assert( f == FullId( d1, i ) );
+		f = Msg::getMsg( m4 )->findOtherEnd( ObjId( d1, i ) );
+		assert( f == ObjId( d2, i + 1 ) );
+		f = Msg::getMsg( m4 )->findOtherEnd( ObjId( d2, i + 1 ) );
+		assert( f == ObjId( d1, i ) );
 	}
-	f = Msg::getMsg( m4 )->findOtherEnd( FullId( d1, 4 ) );
-	assert( f == FullId( d2, DataId::bad() ) );
-	f = Msg::getMsg( m4 )->findOtherEnd( FullId( d2, 0 ) );
-	assert( f == FullId( d1, DataId::bad() ) );
+	f = Msg::getMsg( m4 )->findOtherEnd( ObjId( d1, 4 ) );
+	assert( f == ObjId( d2, DataId::bad() ) );
+	f = Msg::getMsg( m4 )->findOtherEnd( ObjId( d2, 0 ) );
+	assert( f == ObjId( d1, DataId::bad() ) );
 
-	f = Msg::getMsg( m4 )->findOtherEnd( FullId( a2, 1 ) );
-	assert( f == FullId::bad() );
+	f = Msg::getMsg( m4 )->findOtherEnd( ObjId( a2, 1 ) );
+	assert( f == ObjId::bad() );
 
 	// Sparse
 	for ( unsigned int i = 0; i < 5; ++i ) {
-		f = Msg::getMsg( m5 )->findOtherEnd( FullId( e1, i ) );
-		assert( f == FullId( e2, 4 - i ) );
-		f = Msg::getMsg( m5 )->findOtherEnd( FullId( e2, i ) );
-		assert( f == FullId( e1, 4 - i ) );
+		f = Msg::getMsg( m5 )->findOtherEnd( ObjId( e1, i ) );
+		assert( f == ObjId( e2, 4 - i ) );
+		f = Msg::getMsg( m5 )->findOtherEnd( ObjId( e2, i ) );
+		assert( f == ObjId( e1, 4 - i ) );
 	}
 
-	f = Msg::getMsg( m5 )->findOtherEnd( FullId( a2, 1 ) );
-	assert( f == FullId::bad() );
+	f = Msg::getMsg( m5 )->findOtherEnd( ObjId( a2, 1 ) );
+	assert( f == ObjId::bad() );
 
 	cout << "." << flush;
 

@@ -29,7 +29,7 @@ class OneToAllMsg: public Msg
 
 		Id managerId() const;
 
-		FullId findOtherEnd( FullId end ) const;
+		ObjId findOtherEnd( ObjId end ) const;
 
 		Msg* copy( Id origSrc, Id newSrc, Id newTgt,
 			FuncId fid, unsigned int b, unsigned int n ) const;

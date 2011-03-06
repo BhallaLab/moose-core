@@ -114,11 +114,11 @@ class Msg
 		 * But in some complex msgs we need to figure out
 		 * DataIds that match with the target.
 		 * In many-to-one cases we just return the first entry.
-		 * If no Element match, return FullId( Id(), DataId::bad() )
+		 * If no Element match, return ObjId( Id(), DataId::bad() )
 		 * If Element e matches but not DataId, return 
-		 * FullId( e.id(), DataId::bad() )
+		 * ObjId( e.id(), DataId::bad() )
 		 */
-		virtual FullId findOtherEnd( FullId ) const = 0;
+		virtual ObjId findOtherEnd( ObjId ) const = 0;
 
 		/**
 		 * Make a copy of this Msg. The original msg was on
