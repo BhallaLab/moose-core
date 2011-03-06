@@ -11538,4 +11538,9 @@ Put in a test for numNodes, now unit tests clear. Need to go
 back and put in an MPI version, but 
 THIS IS THE FIRST FULL VERSION THAT CLEARS ALL TESTS WITH THREADING AND MPI.
 
+Checkin 2496.
 
+Implemented the MPI version, testMpiStatsReduce. Works with up to
+4 cores X 4 nodes.
+
+============================================================================
