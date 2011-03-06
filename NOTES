@@ -11546,5 +11546,20 @@ Checkin 2497.
 
 Converted argument in getVec to an Id. First step in a long process to convert
 all the SetGet calls to Ids. Compiles, clears unit tests.
+Checkin 2498.
+
+Doing valgrind. Not happy. The MsgManagers need to be cleaned out.
+Did that. There is still stuff leaking. I think I need to clear some of the
+getBuffers in the final throes of destroying the Shell.
+
+That helps too, but still losing memory. Try doing single-threaded.
+That didn't work, it wasn't really single. I think there are just some things
+created in the unit tests that don't get deleted.
+
+./moose -s hangs, that would have been the way to find the leaks.
+Tried to fix the hang, that made the threaded code crash. Commented it out.
+
+Shouldn't get bogged down here. It is important to fix this, but more important
+to get the base code ready for the big API merge. 
 
 ============================================================================

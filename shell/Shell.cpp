@@ -383,6 +383,11 @@ Shell::Shell()
 	getBuf_.resize( 1, 0 );
 }
 
+Shell::~Shell()
+{
+	clearGetBuf();
+}
+
 void Shell::setShellElement( Element* shelle )
 {
 	shelle_ = shelle;

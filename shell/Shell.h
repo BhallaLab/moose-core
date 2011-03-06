@@ -29,6 +29,7 @@ class Shell
 {
 	public:
 		Shell();
+		~Shell();
 
 		///////////////////////////////////////////////////////////
 		// Field functions
