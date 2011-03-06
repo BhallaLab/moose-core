@@ -426,6 +426,79 @@ void testStatsReduce()
 	delete i2();
 }
 
+void testMpiStatsReduce()
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	unsigned int size = 100;
+	vector< unsigned int > dims( 1, size );
+	Id i2 = shell->doCreate( "IntFire", Id(), "test2", dims );
+	Id synId( i2.value() + 1 );
+	// bool ret = ic->create( i2, "test2", size );
+	Element* syn = synId();
+	assert ( syn != 0 );
+	assert ( syn->getName() == "synapse" );
+
+	assert( syn->dataHandler()->localEntries() == 0 );
+	assert( syn->dataHandler()->totalEntries() == 100 );
+	Eref syner( syn, 0 );
+
+	FieldDataHandlerBase* fd = dynamic_cast< FieldDataHandlerBase *>( 
+		syn->dataHandler() );
+	assert( fd );
+	assert( fd->localEntries() == 0 );
+
+	vector< unsigned int > numSyn( size, 0 );
+	for ( unsigned int i = 0; i < size; ++i )
+		numSyn[i] = i;
+	
+	Eref e2( i2(), 0 );
+	bool ret = Field< unsigned int >::setVec( e2, "numSynapses", numSyn );
+	assert( ret );
+
+	// This calculation only works for node 0, with the present (implicit)
+	// decomposition scheme.
+	assert( fd->biggestFieldArraySize() == size/Shell::numNodes() - 1 );
+	Field< unsigned int >::set( syner, "fieldDimension", size );
+	assert ( fd->totalEntries() == size * size );
+	// Here we test setting a 2-D array with different dims on each axis.
+	vector< double > delay( size * size, 0.0 );
+	double sum = 0.0;
+	double sumsq = 0.0;
+	unsigned int num = 0;
+	for ( unsigned int i = 0; i < size; ++i ) {
+		unsigned int k = i * size;
+		for ( unsigned int j = 0; j < i; ++j ) {
+			double x = i * 1000 + j;
+			sum += x;
+			sumsq += x * x;
+			++num;
+			delay[k++] = x;
+		}
+	}
+
+	ret = Field< double >::setVec( syner, "delay", delay );
+
+	dims[0] = 1;
+	Id statsid = shell->doCreate( "Stats", Id(), "stats", dims );
+
+
+	MsgId mid = shell->doAddMsg( "Reduce", 
+		statsid.eref().fullId(), "reduce",
+		syner.fullId(), "get_delay" );
+	assert( mid != Msg::badMsg );
+	SetGet0::set( statsid.eref(), "trig" );
+	double x = Field< double >::get( statsid.eref(), "sum" );
+	assert( doubleEq( x, sum ) );
+	unsigned int i = Field< unsigned int >::get( statsid.eref(), "num" );
+	assert( i == num );
+	x = Field< double >::get( statsid.eref(), "sdev" );
+	assert( doubleEq( x, sqrt( ( sum * sum - sumsq ) /num ) ) );
+
+	delete synId();
+	delete i2();
+	cout << "." << flush;
+}
+
 void testBuiltins()
 {
 	testArith();
@@ -441,6 +514,6 @@ void testBuiltinsProcess()
 
 void testMpiBuiltins( )
 {
-	//Need to update
  	testMpiFibonacci();
+	testMpiStatsReduce();
 }
