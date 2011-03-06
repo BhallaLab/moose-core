@@ -11516,4 +11516,26 @@ but uses the cleaner function for setting the seed during the
 the connections. So seeds are OK.
 
 Now clears this test, but dies a bit later in testBuiltins.cpp:testFibonacci.
+Checkin 2495.
+
+Looked at testFibonacci. Same issue: need to use the ShellAPI to get this
+to behave on multiple nodes. I'll do the test for multinode operation here too.
+I already have a testMpiFibonacci in place. Unfortunately it needs some fixes
+itself.
+
+Should go through and fix all Set/Get calls to use FullIds rather than Erefs.
+This is needed as the calls are API functions and work across nodes.
+
+Should make getVec always do the whole vec, not requiring the DataId::any.
+In fact it should take the Id as the argument so there is no question of 
+specifying the DataId.
+
+For now, still going through crashes with MPI.
+Fixed testMpiFibonacci.
+Latest problem is with testStatsReduce, which is also
+a single-node specific function.
+Put in a test for numNodes, now unit tests clear. Need to go
+back and put in an MPI version, but 
+THIS IS THE FIRST FULL VERSION THAT CLEARS ALL TESTS WITH THREADING AND MPI.
+
 

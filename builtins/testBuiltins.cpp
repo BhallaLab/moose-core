@@ -62,6 +62,8 @@ void testArith()
  */
 void testFibonacci()
 {
+	if ( Shell::numNodes() > 1 )
+		return;
 	unsigned int numFib = 20;
 	vector< unsigned int > dims( 1, numFib );
 
@@ -133,17 +135,22 @@ void testMpiFibonacci()
 	unsigned int numFib = 20;
 	vector< unsigned int > dims( 1, numFib );
 
-	Id a1id = Id::nextId();
+	// Id a1id = Id::nextId();
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 
-	Element* a1 = new Element( a1id, Arith::initCinfo(), "a1", dims );
+	Id a1id = shell->doCreate( "Arith", Id(), "a1", dims );
+	// Element* a1 = new Element( a1id, Arith::initCinfo(), "a1", dims );
+	SetGet1< double >::set( a1id.eref(), "arg1", 0 );
+	SetGet1< double >::set( a1id.eref(), "arg2", 1 );
 
+	/*
 	Arith* data = reinterpret_cast< Arith* >( a1->dataHandler()->data( 0 ) );
 
 	if ( data ) {
 		data->arg1( 0 );
 		data->arg2( 1 );
 	}
+	*/
 
 	MsgId mid1 = shell->doAddMsg( "Diagonal", 
 		FullId( a1id, 0 ), "output", FullId( a1id, 0 ), "arg1" );
@@ -170,17 +177,26 @@ void testMpiFibonacci()
 	Eref ticker = Id( 2 ).eref();
 //	ret = OneToAllMsg::add( ticker, "process0", a1, "process" );
 //	assert( ret );
+	shell->doUseClock( "/a1", "process", 0 );
 
 	shell->doStart( numFib );
+
+	vector< double > retVec;
+	Field< double >::getVec( Eref( a1id(), DataId::any() ), 
+		"outputValue", retVec );
+	assert( retVec.size() == numFib );
 
 	unsigned int f1 = 1;
 	unsigned int f2 = 0;
 	for ( unsigned int i = 0; i < numFib; ++i ) {
+		/*
 		if ( a1->dataHandler()->isDataHere( i ) ) {
 			Arith* data = reinterpret_cast< Arith* >( a1->dataHandler()->data( i ) );
 			// cout << Shell::myNode() << ": i = " << i << ", " << data->getOutput() << ", " << f1 << endl;
 			assert( data->getOutput() == f1 );
 		}
+		*/
+		assert( doubleEq( retVec[i], f1 ) );
 		unsigned int temp = f1;
 		f1 = temp + f2;
 		f2 = temp;
@@ -327,6 +343,8 @@ void testGetMsg()
 
 void testStatsReduce()
 {
+	if ( Shell::numNodes() > 1 )
+		return;
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	const Cinfo* ic = IntFire::initCinfo();
 	// const Cinfo* sc = Synapse::initCinfo();
@@ -424,5 +442,5 @@ void testBuiltinsProcess()
 void testMpiBuiltins( )
 {
 	//Need to update
-// 	testMpiFibonacci();
+ 	testMpiFibonacci();
 }
