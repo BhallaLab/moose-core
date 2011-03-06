@@ -385,6 +385,13 @@ void testThreadIntFireNetwork()
 	unsigned int size = 1024;
 	string arg;
 
+	/**
+	 * Cannot run this function on multiple nodes as it does low-level
+	 * Element and Msg creation.
+	 */
+	if ( Shell::numNodes() != 1 ) // Cannot run this function on multinodes
+		return;
+
 	// Qinfo::mergeQ( 0 );
 
 	mtseed( 5489UL ); // The default value, but better to be explicit.
@@ -396,7 +403,6 @@ void testThreadIntFireNetwork()
 	assert( t2 );
 
 	Eref e2 = i2.eref();
-	// FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
 	Id synId( i2.value() + 1 );
 	Element* syn = synId();
 	assert( syn->getName() == "synapse" );
@@ -407,17 +413,6 @@ void testThreadIntFireNetwork()
 	DataId di( 1, 0 ); // DataId( data, field )
 	Eref syne( syn, di );
 
-	/*
-	unsigned int numThreads = 1;
-	if ( Qinfo::numSimGroup() >= 2 ) {
-		numThreads = Qinfo::simGroup( 1 )->numThreads;
-	}
-	*/
-	/*
-	bool ret = SparseMsg::add( e2.element(), "spike", syn, "addSpike", 
-		connectionProbability, numThreads ); // Include group id as an arg. 
-	assert( ret );
-	*/
 	SparseMsg* sm = new SparseMsg( Msg::nextMsgId(), e2.element(), syn );
 	assert( sm );
 	const Finfo* f1 = ic->findFinfo( "spike" );
@@ -425,19 +420,9 @@ void testThreadIntFireNetwork()
 	assert( f1 && f2 );
 	f1->addMsg( f2, sm->mid(), t2 );
 	sm->randomConnect( connectionProbability );
-	// sm->loadBalance( numThreads );
 
 	unsigned int nd = syn->dataHandler()->localEntries();
-	// assert( syn->dataHandler()->totalEntries() == size * 134 );
-	if ( Shell::numNodes() == 1 )
-		assert( nd == NUMSYN );
-	else if ( Shell::numNodes() == 2 )
-		assert( nd == 52446 );
-	else if ( Shell::numNodes() == 3 )
-		assert( nd == 34969 );
-	else if ( Shell::numNodes() == 4 )
-		assert( nd == 26381 );
-
+	assert( nd == NUMSYN );
 
 	vector< double > initVm( size, 0.0 );
 	for ( unsigned int i = 0; i < size; ++i )
@@ -473,20 +458,6 @@ void testThreadIntFireNetwork()
 		}
 	}
 	assert ( numTotSyn == nd );
-	/*
-	vector< double > weight;
-	weight.reserve( nd );
-	vector< double > delay;
-	delay.reserve( nd );
-	for ( unsigned int i = 0; i < size; ++i ) {
-		unsigned int numSyn = syne.element()->dataHandler()->getFieldArraySize( i );
-		for ( unsigned int j = 0; j < numSyn; ++j ) {
-			weight.push_back( mtrand() * weightMax );
-			delay.push_back( mtrand() * delayMax );
-		}
-	}
-	assert( syne.element()->dataHandler()->totalEntries() == weight.size());
-	*/
 
 	ret = Field< double >::setVec( syne, "weight", weight );
 	assert( ret );
@@ -502,7 +473,6 @@ void testThreadIntFireNetwork()
 	const Finfo* p2 = ic->findFinfo( "process" );
 	ret = p1->addMsg( p2, m->mid(), ticke );
 
-	// ret = SingleMsg::add( er0, "process0", e2, "process" );
 	assert( ret );
 
 	// printGrid( i2(), "Vm", 0, thresh );
@@ -538,9 +508,6 @@ void testMultiNodeIntFireNetwork()
 	// Known value from single-thread run, at t = 1 sec.
 	static const double Vm100 = 0.0857292;
 	static const double Vm900 = 0.107449;
-	// static const double Vm100 = 0.10124059893763067;
-	// static const double Vm900 = 0.091409481280996352;
-	// static const unsigned int NUMSYN = 104576;
 	static const double thresh = 0.2;
 	static const double Vmax = 1.0;
 	static const double refractoryPeriod = 0.4;
@@ -550,33 +517,16 @@ void testMultiNodeIntFireNetwork()
 	static const double connectionProbability = 0.1;
 	static const unsigned int runsteps = 5;
 	static const unsigned int NUM_TOT_SYN = 104576;
-	// These are the starting indices of synapses on
-	// IntFire[0], [100], [200], ...
-	/*
-	static unsigned int synIndices[] = {
-		0, 10355, 20696, 30782, 41080,
-		51226, 61456, 71579, 81765, 92060,
-		102178,
-	};
-	*/
-	// static const unsigned int runsteps = 1000;
-	// const Cinfo* ic = IntFire::initCinfo();
-	// const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 1024;
 	string arg;
 	Eref sheller( Id().eref() );
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-
-	// Qinfo::mergeQ( 0 );
-
-	//mtseed( 5489UL ); // The default value, but better to be explicit.
 
 	vector< unsigned int > dims( 1, size );
 	Id i2 = shell->doCreate( "IntFire", Id(), "test2", dims );
 	assert( i2()->getName() == "test2" );
 	Eref e2 = i2.eref();
 
-	// FieldElement< Synapse, IntFire, &IntFire::synapse > syn( sc, i2(), &IntFire::getNumSynapses, &IntFire::setNumSynapses );
 	Id synId( i2.value() + 1 );
 	Element* syn = synId();
 	assert( syn->getName() == "synapse" );
@@ -586,13 +536,6 @@ void testMultiNodeIntFireNetwork()
 
 	DataId di( 1, 0 ); // DataId( data, field )
 	Eref syne( syn, di );
-
-	/*
-	unsigned int numThreads = 1;
-	if ( Qinfo::numSimGroup() >= 2 ) {
-		numThreads = Qinfo::simGroup( 1 )->numThreads;
-	}
-	*/
 
 	MsgId mid = shell->doAddMsg( "Sparse", e2.fullId(), "spike",
 		FullId( synId, 0 ), "addSpike" );
@@ -608,20 +551,7 @@ void testMultiNodeIntFireNetwork()
 	FieldDataHandlerBase * fdh =
 		static_cast< FieldDataHandlerBase *>( syn->dataHandler() );
 	fdh->setFieldDimension( fdh->biggestFieldArraySize() );
-	// fdh->syncFieldArraySize();
 	assert( fdh->biggestFieldArraySize() == 134 );
-
-	/*
-	SetGet1< unsigned int >::set( mer, "loadBalance", numThreads ); 
-	vector< unsigned int > synArraySizes;
-	unsigned int start = syn->dataHandler()->getNumData2( synArraySizes );
-	// cout << "start = " << start << endl;
-	unsigned int synIndex = start;
-	for ( unsigned int i = 0; i < size; ++i ) {
-		// if ( ( i % 100 ) == 0 ) cout << "i = " << i << "SynIndex = " << synIndex << endl;
-		synIndex += synArraySizes[i];
-	}
-	*/
 
 	unsigned int nd = syn->dataHandler()->localEntries();
 	assert( syn->dataHandler()->totalEntries() == size * 134 );
@@ -656,21 +586,7 @@ void testMultiNodeIntFireNetwork()
 	ret = Field< double >::setVec( e2, "refractoryPeriod", temp );
 	assert( ret );
 
-	/*
-	const Finfo* f = e2.elm()->cinfo()->findFinfo( sizeField );
-
-	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
-	*/
-
 	shell->doSyncDataHandler( e2.id(), "get_numSynapses", synId );
-	/*
-	FieldDataHandlerBase* fd = dynamic_cast< FieldDataHandlerBase* >(
-		syne.element()->dataHandler() );
-	assert( fd );
-	unsigned int fieldSize = fd->biggestFieldArraySize();
-	*/
-
-// fd->setFieldDimension( fieldSize );
 
 	unsigned int fieldSize = 
 		Field< unsigned int >::get( synId.eref(), "fieldDimension" );
@@ -748,7 +664,6 @@ void testMultiNodeIntFireNetwork()
 	assert( fabs( retVm900 - Vm900 ) < 1e-6 );
 
 	cout << "." << flush;
-	// shell->doDelete( synId );
 	shell->doDelete( i2 );
 }
 	

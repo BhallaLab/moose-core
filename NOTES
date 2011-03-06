@@ -11494,5 +11494,26 @@ easy to identify functions from ElementFields by their fids. I've just put
 in a test for ( q->fid < 12 ) and it works. That is, it clears the test for
 getting weights across nodes. Checkin 2493.
 
+Nowit clears the critical testMultiNodeIntFireNetwork. Still has trouble,
+but later. Checkin 2494.
+
 ============================================================================
+6 March 2011
+The crash was in testThreadIntFireNetwork, and it was simply
+that this test was strictly single-node: it created Elements locally.
+
+Looking to compare funcitonality of testThreadIntFireNetwork and
+testMultiNodeIntFireNetwork. They are equivalent, it is just that the first
+uses local Element and Msg creation calls, but the latter uses the proper 
+Shell API. So I've just set up a check that bypasses the 
+testThreadIntFireNetwork when the simulator is running on more than one node.
+
+One issue is that of random seeds across nodes. I need to be able to
+seed all nodes equivalently.
+The testMultiNodeIntFireNetwork simply comments out the mtseed call,
+but uses the cleaner function for setting the seed during the
+"setRandomConnectivity" call to the SparseMsg Manager that defines
+the connections. So seeds are OK.
+
+Now clears this test, but dies a bit later in testBuiltins.cpp:testFibonacci.
 
