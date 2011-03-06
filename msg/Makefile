@@ -36,7 +36,7 @@ OneToOne.o:	OneToOne.h
 SingleMsg.o:	SingleMsg.h
 SparseMsg.o:	SparseMsg.h
 ReduceMsg.o:	ReduceMsg.h
-testMsg.o: AssignmentMsg.h AssignVecMsg.h DiagonalMsg.h OneToAllMsg.h OneToOneMsg.h SingleMsg.h SparseMsg.h ReduceMsg.h
+testMsg.o: AssignmentMsg.h AssignVecMsg.h DiagonalMsg.h OneToAllMsg.h OneToOneMsg.h SingleMsg.h SparseMsg.h ReduceMsg.h ../basecode/SetGet.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode $< -c

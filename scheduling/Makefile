@@ -25,7 +25,7 @@ $(OBJ)	: $(HEADERS)
 Clock.o:	Tick.h TickPtr.h TickMgr.h Clock.h
 Tick.o:	Tick.h TickPtr.h TickMgr.h Clock.h
 TickMgr.o:	Tick.h TickMgr.h
-testScheduling.o:	Tick.h TickPtr.h Clock.h
+testScheduling.o:	Tick.h TickPtr.h Clock.h ../basecode/SetGet.h
 
 
 .cpp.o:

@@ -677,7 +677,7 @@ void testSetGetVec()
 	
 	Eref e2( i2(), 0 );
 	// Here we test setting a 1-D vector
-	bool ret = Field< unsigned int >::setVec( e2, "numSynapses", numSyn );
+	bool ret = Field< unsigned int >::setVec( i2, "numSynapses", numSyn );
 	assert( ret );
 
 
@@ -706,7 +706,7 @@ void testSetGetVec()
 	}
 
 	Eref se( syn, 0 );
-	ret = Field< double >::setVec( se, "delay", delay );
+	ret = Field< double >::setVec( synId, "delay", delay );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		for ( unsigned int j = 0; j < i; ++j ) {
 			DataId di( i, j );
@@ -758,7 +758,7 @@ void testSetRepeat()
 	
 	Eref e2( i2(), 0 );
 	// Here we test setting a 1-D vector
-	bool ret = Field< unsigned int >::setVec( e2, "numSynapses", numSyn );
+	bool ret = Field< unsigned int >::setVec( i2, "numSynapses", numSyn );
 	assert( ret );
 	assert( syn->dataHandler()->totalEntries() == size );
 	unsigned int nd = syn->dataHandler()->localEntries();
@@ -767,7 +767,7 @@ void testSetRepeat()
 	
 	// Here we test setting a 2-D array with different dims on each axis.
 	Eref se( syn, 0 );
-	ret = Field< double >::setRepeat( se, "delay", 123.0 );
+	ret = Field< double >::setRepeat( synId, "delay", 123.0 );
 	assert( ret );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		for ( unsigned int j = 0; j < i; ++j ) {
@@ -1122,7 +1122,7 @@ void testSparseMsg()
 	for ( unsigned int i = 0; i < size; ++i )
 		temp[i] = mtrand() * Vmax;
 
-	bool ret = Field< double >::setVec( e2, "Vm", temp );
+	bool ret = Field< double >::setVec( i2, "Vm", temp );
 	assert( ret );
 	/*
 	for ( unsigned int i = 0; i < 40; ++i )
@@ -1130,11 +1130,11 @@ void testSparseMsg()
 		*/
 	temp.clear();
 	temp.resize( size, thresh );
-	ret = Field< double >::setVec( e2, "thresh", temp );
+	ret = Field< double >::setVec( i2, "thresh", temp );
 	assert( ret );
 	temp.clear();
 	temp.resize( size, refractoryPeriod );
-	ret = Field< double >::setVec( e2, "refractoryPeriod", temp );
+	ret = Field< double >::setVec( i2, "refractoryPeriod", temp );
 	assert( ret );
 
 	vector< double > weight( size * fieldSize, 0.0 );
@@ -1164,9 +1164,9 @@ void testSparseMsg()
 		}
 	}
 	*/
-	ret = Field< double >::setVec( syne, "weight", weight );
+	ret = Field< double >::setVec( synId, "weight", weight );
 	assert( ret );
-	ret = Field< double >::setVec( syne, "delay", delay );
+	ret = Field< double >::setVec( synId, "delay", delay );
 	assert( ret );
 
 	// printGrid( i2(), "Vm", 0, thresh );
@@ -1551,7 +1551,7 @@ void testSetGetExtField()
 		vec.push_back( temp2 - temp );
 	}
 
-	ret = Field< double >::setVec( Eref( e1, 0 ), "z", vec );
+	ret = Field< double >::setVec( i1, "z", vec );
 	assert( ret );
 
 	for ( unsigned int i = 0; i < size; ++i ) {

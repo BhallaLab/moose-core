@@ -31,7 +31,7 @@ Mdouble.o:		Mdouble.h
 Table.o:		Table.h TableEntry.h
 TableEntry.o:		TableEntry.h
 Stats.o:	Stats.h
-testBuiltins.o:	Group.h Arith.h Stats.h ../msg/DiagonalMsg.h
+testBuiltins.o:	Group.h Arith.h Stats.h ../msg/DiagonalMsg.h ../basecode/SetGet.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg $< -c

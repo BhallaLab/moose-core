@@ -351,7 +351,6 @@ void testStatsReduce()
 	vector< unsigned int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
-	Id i3( i2.value() + 1 );
 	// bool ret = ic->create( i2, "test2", size );
 	Element* temp = new Element( i2, ic, "test2", dims, 1 );
 	assert( temp );
@@ -374,7 +373,7 @@ void testStatsReduce()
 	
 	Eref e2( i2(), 0 );
 	// Here we test setting a 1-D vector
-	bool ret = Field< unsigned int >::setVec( e2, "numSynapses", numSyn );
+	bool ret = Field< unsigned int >::setVec( i2, "numSynapses", numSyn );
 	assert( ret );
 
 	assert( fd->biggestFieldArraySize() == size - 1 );
@@ -396,7 +395,7 @@ void testStatsReduce()
 		}
 	}
 
-	ret = Field< double >::setVec( Eref( syn, 0 ), "delay", delay );
+	ret = Field< double >::setVec( synId, "delay", delay );
 	Eref syner( syn, DataId::any() );
 
 	dims[0] = 1;
@@ -421,7 +420,7 @@ void testStatsReduce()
 	assert( doubleEq( x, sqrt( ( sum * sum - sumsq ) /num ) ) );
 
 	cout << "." << flush;
-	delete i3();
+	delete synId();
 	delete i2();
 }
 
@@ -451,7 +450,7 @@ void testMpiStatsReduce()
 		numSyn[i] = i;
 	
 	Eref e2( i2(), 0 );
-	bool ret = Field< unsigned int >::setVec( e2, "numSynapses", numSyn );
+	bool ret = Field< unsigned int >::setVec( i2, "numSynapses", numSyn );
 	assert( ret );
 
 	// This calculation only works for node 0, with the present (implicit)
@@ -475,7 +474,7 @@ void testMpiStatsReduce()
 		}
 	}
 
-	ret = Field< double >::setVec( syner, "delay", delay );
+	ret = Field< double >::setVec( synId, "delay", delay );
 
 	dims[0] = 1;
 	Id statsid = shell->doCreate( "Stats", Id(), "stats", dims );

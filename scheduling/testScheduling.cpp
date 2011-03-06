@@ -434,11 +434,11 @@ void testThreadIntFireNetwork()
 	bool ret;
 
 	vector< double > temp( size, thresh );
-	ret = Field< double >::setVec( e2, "thresh", temp );
+	ret = Field< double >::setVec( i2, "thresh", temp );
 	assert( ret );
 	temp.clear();
 	temp.resize( size, refractoryPeriod );
-	ret = Field< double >::setVec( e2, "refractoryPeriod", temp );
+	ret = Field< double >::setVec( i2, "refractoryPeriod", temp );
 	assert( ret );
 	FieldDataHandlerBase* fd = dynamic_cast< FieldDataHandlerBase *>(
 		syn->dataHandler() );
@@ -459,9 +459,9 @@ void testThreadIntFireNetwork()
 	}
 	assert ( numTotSyn == nd );
 
-	ret = Field< double >::setVec( syne, "weight", weight );
+	ret = Field< double >::setVec( synId, "weight", weight );
 	assert( ret );
-	ret = Field< double >::setVec( syne, "delay", delay );
+	ret = Field< double >::setVec( synId, "delay", delay );
 	assert( ret );
 
 
@@ -481,7 +481,7 @@ void testThreadIntFireNetwork()
 	s->doSetClock( 0, timestep );
 	s->doReinit();
 
-	ret = Field< double >::setVec( e2, "Vm", initVm );
+	ret = Field< double >::setVec( i2, "Vm", initVm );
 	assert( ret );
 
 	IntFire* ifire100 = reinterpret_cast< IntFire* >( e2.element()->dataHandler()->data( 100 ) );
@@ -574,16 +574,16 @@ void testMultiNodeIntFireNetwork()
 	double origVm100 = temp[100];
 	double origVm900 = temp[900];
 
-	bool ret = Field< double >::setVec( e2, "Vm", temp );
+	bool ret = Field< double >::setVec( i2, "Vm", temp );
 	assert( ret );
 
 	temp.clear();
 	temp.resize( size, thresh );
-	ret = Field< double >::setVec( e2, "thresh", temp );
+	ret = Field< double >::setVec( i2, "thresh", temp );
 	assert( ret );
 	temp.clear();
 	temp.resize( size, refractoryPeriod );
-	ret = Field< double >::setVec( e2, "refractoryPeriod", temp );
+	ret = Field< double >::setVec( i2, "refractoryPeriod", temp );
 	assert( ret );
 
 	shell->doSyncDataHandler( e2.id(), "get_numSynapses", synId );
@@ -613,9 +613,9 @@ void testMultiNodeIntFireNetwork()
 	}
 	assert ( numTotSyn == NUM_TOT_SYN );
 
-	ret = Field< double >::setVec( syne, "weight", weight );
+	ret = Field< double >::setVec( synId, "weight", weight );
 	assert( ret );
-	ret = Field< double >::setVec( syne, "delay", delay );
+	ret = Field< double >::setVec( synId, "delay", delay );
 	assert( ret );
 
 	vector< double > retVec;
@@ -762,16 +762,16 @@ void speedTestMultiNodeIntFireNetwork( unsigned int size, unsigned int runsteps 
 	for ( unsigned int i = 0; i < size; ++i )
 		temp[i] = mtrand() * Vmax;
 
-	bool ret = Field< double >::setVec( e2, "Vm", temp );
+	bool ret = Field< double >::setVec( i2, "Vm", temp );
 	assert( ret );
 
 	temp.clear();
 	temp.resize( size, thresh );
-	ret = Field< double >::setVec( e2, "thresh", temp );
+	ret = Field< double >::setVec( i2, "thresh", temp );
 	assert( ret );
 	temp.clear();
 	temp.resize( size, refractoryPeriod );
-	ret = Field< double >::setVec( e2, "refractoryPeriod", temp );
+	ret = Field< double >::setVec( i2, "refractoryPeriod", temp );
 	assert( ret );
 
 	vector< double > weight;
@@ -782,9 +782,9 @@ void speedTestMultiNodeIntFireNetwork( unsigned int size, unsigned int runsteps 
 		weight.push_back( 2.0 * ( mtrand() - 0.5 ) * weightMax );
 		delay.push_back( mtrand() * delayMax );
 	}
-	ret = Field< double >::setVec( syne, "weight", weight );
+	ret = Field< double >::setVec( synId, "weight", weight );
 	assert( ret );
-	ret = Field< double >::setVec( syne, "delay", delay );
+	ret = Field< double >::setVec( synId, "delay", delay );
 	assert( ret );
 
 	Element* ticke = Id( 2 )();

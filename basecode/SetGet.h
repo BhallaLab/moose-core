@@ -168,12 +168,12 @@ template< class A > class SetGet1: public SetGet
 		 * This variant requires that all vector entries have the same
 		 * size. Strings won't work.
 		 */
-		static bool setVec( const Eref& dest, const string& field, 
+		static bool setVec( Id destId, const string& field, 
 			const vector< A >& arg )
 		{
-			SetGet1< A > sg( dest );
+			Eref tgt = destId.eref();
+			SetGet1< A > sg( tgt );
 			FuncId fid;
-			Eref tgt( dest );
 			if ( arg.size() == 0 )
 				return 0;
 
@@ -190,11 +190,11 @@ template< class A > class SetGet1: public SetGet
 		/**
 		 * Sets all target array values to the single value
 		 */
-		static bool setRepeat( const Eref& dest, const string& field, 
+		static bool setRepeat( Id destId, const string& field, 
 			const A& arg )
 		{
 			vector< A >temp ( 1, arg );
-			return setVec( dest, field, temp );
+			return setVec( destId, field, temp );
 		}
 
 		/**
@@ -225,18 +225,18 @@ template< class A > class Field: public SetGet1< A >
 			return SetGet1< A >::set( dest, temp, arg );
 		}
 
-		static bool setVec( const Eref& dest, const string& field, 
+		static bool setVec( Id destId, const string& field, 
 			const vector< A >& arg )
 		{
 			string temp = "set_" + field;
-			return SetGet1< A >::setVec( dest, temp, arg );
+			return SetGet1< A >::setVec( destId, temp, arg );
 		}
 
-		static bool setRepeat( const Eref& dest, const string& field, 
+		static bool setRepeat( Id destId, const string& field, 
 			A arg )
 		{
 			string temp = "set_" + field;
-			return SetGet1< A >::setRepeat( dest, temp, arg );
+			return SetGet1< A >::setRepeat( destId, temp, arg );
 		}
 
 		/**

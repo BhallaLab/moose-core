@@ -48,15 +48,15 @@ void testAssortedMsg()
 	vector< double > init; // 12345
 	for ( unsigned int i = 1; i < 6; ++i )
 		init.push_back( i );
-	ret = SetGet1< double >::setVec( a1.eref(), "arg1", init ); // 12345
+	ret = SetGet1< double >::setVec( a1, "arg1", init ); // 12345
 	assert( ret );
-	ret = SetGet1< double >::setVec( b1.eref(), "arg1", init ); // 12345
+	ret = SetGet1< double >::setVec( b1, "arg1", init ); // 12345
 	assert( ret );
-	ret = SetGet1< double >::setVec( c1.eref(), "arg1", init ); // 12345
+	ret = SetGet1< double >::setVec( c1, "arg1", init ); // 12345
 	assert( ret );
-	ret = SetGet1< double >::setVec( d1.eref(), "arg1", init ); // 12345
+	ret = SetGet1< double >::setVec( d1, "arg1", init ); // 12345
 	assert( ret );
-	ret = SetGet1< double >::setVec( e1.eref(), "arg1", init ); // 12345
+	ret = SetGet1< double >::setVec( e1, "arg1", init ); // 12345
 	assert( ret );
 
 	///////////////////////////////////////////////////////////
