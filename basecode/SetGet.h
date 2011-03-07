@@ -13,8 +13,8 @@
 class SetGet
 {
 	public:
-		SetGet( const Eref& e )
-			: e_( e )
+		SetGet( const ObjId& oid )
+			: oid_( oid )
 		{;}
 
 		virtual ~SetGet()
@@ -24,7 +24,7 @@ class SetGet
 		 * Assigns 'field' on 'tgt' to 'val', after doing necessary type
 		 * conversion from the string val. Returns 0 if it can't
 		 * handle it, which is unusual.
-		bool innerStrSet( const Eref& tgt, 
+		bool innerStrSet( const ObjId& tgt, 
 			const string& field, const string& val ) const = 0;
 		 */
 
@@ -32,7 +32,7 @@ class SetGet
 		 * Looks up field value on tgt, converts to string, and puts on 
 		 * 'ret'. Returns 0 if the class does not support 'get' operations,
 		 * which is usually the case. Fields are the exception.
-		virtual bool innerStrGet( const Eref& tgt, 
+		virtual bool innerStrGet( const ObjId& tgt, 
 			const string& field, string& ret ) const {
 			return 0;
 		}
@@ -40,7 +40,7 @@ class SetGet
 
 
 		/**
-		 * Tgt is passed in as the destination Eref. May be changed inside,
+		 * Tgt is passed in as the destination ObjId. May be changed inside,
 		 * if the function determines that it should be directed to a 
 		 * child Element acting as a Value.
 		 * Checks arg # and types for a 'set' call. Can be zero to 3 args.
@@ -48,20 +48,20 @@ class SetGet
 		 * Utility function to check that the target field matches this
 		 * source type, and to look up and pass back the fid.
 		 */
-		bool checkSet( const string& field, Eref& tgt, FuncId& fid ) const;
+		bool checkSet( const string& field, ObjId& tgt, FuncId& fid ) const;
 
 //////////////////////////////////////////////////////////////////////
 		/**
 		 * Blocking 'get' call, returning into a string.
 		 * There is a matching 'get<T> call, returning appropriate type.
 		 */
-		static bool strGet( const Eref& tgt, const string& field, string& ret );
+		static bool strGet( const ObjId& tgt, const string& field, string& ret );
 
 		/**
 		 * Blocking 'set' call, using automatic string conversion
 		 * There is a matching blocking set call with typed arguments.
 		 */
-		static bool strSet( const Eref& dest, const string& field, const string& val );
+		static bool strSet( const ObjId& dest, const string& field, const string& val );
 
 		
 		/**
@@ -76,39 +76,39 @@ class SetGet
 
 	
 		/// Adapter function, just forwards to Shell::dispatchSet
-		static void dispatchSet( const Eref& er, FuncId fid, 
+		static void dispatchSet( const ObjId& oid, FuncId fid, 
 			const char* args, unsigned int size );
 
 		/// Adapter function, just forwards to Shell::dispatchSet
-		static void dispatchSetVec( const Eref& er, FuncId fid, 
+		static void dispatchSetVec( const ObjId& oid, FuncId fid, 
 			const PrepackedBuffer& arg );
 
 		/// Adapter function, just forwards to Shell::dispatchSet
 		static const vector< char* >& dispatchGet( 
-			const Eref& er, const string& field,
+			const ObjId& oid, const string& field,
 			const SetGet* sg, unsigned int& numGetEntries );
 
 		///  char* buf();
 
 	private:
-		Eref e_;
+		ObjId oid_;
 };
 
 class SetGet0: public SetGet
 {
 	public:
-		SetGet0( const Eref& dest )
+		SetGet0( const ObjId& dest )
 			: SetGet( dest )
 		{;}
 
 		/**
 		 * Blocking, typed 'Set' call
 		 */
-		static bool set( const Eref& dest, const string& field )
+		static bool set( const ObjId& dest, const string& field )
 		{
 			SetGet0 sg( dest );
 			FuncId fid;
-			Eref tgt( dest );
+			ObjId tgt( dest );
 			if ( sg.checkSet( field, tgt, fid ) ) {
 				dispatchSet( tgt, fid, "", 0 );
 				/*
@@ -125,7 +125,7 @@ class SetGet0: public SetGet
 		/**
 		 * Blocking call using string conversion
 		 */
-		static bool innerStrSet( const Eref& dest, const string& field, 
+		static bool innerStrSet( const ObjId& dest, const string& field, 
 			const string& val )
 		{
 			return set( dest, field );
@@ -135,18 +135,18 @@ class SetGet0: public SetGet
 template< class A > class SetGet1: public SetGet
 {
 	public:
-		SetGet1( const Eref& dest )
+		SetGet1( const ObjId& dest )
 			: SetGet( dest )
 		{;}
 
 		/**
 		 * Blocking, typed 'Set' call
 		 */
-		static bool set( const Eref& dest, const string& field, A arg )
+		static bool set( const ObjId& dest, const string& field, A arg )
 		{
 			SetGet1< A > sg( dest );
 			FuncId fid;
-			Eref tgt( dest );
+			ObjId tgt( dest );
 			if ( sg.checkSet( field, tgt, fid ) ) {
 				Conv< A > conv( arg );
 				char *temp = new char[ conv.size() ];
@@ -171,7 +171,7 @@ template< class A > class SetGet1: public SetGet
 		static bool setVec( Id destId, const string& field, 
 			const vector< A >& arg )
 		{
-			Eref tgt = destId.eref();
+			ObjId tgt = destId.eref();
 			SetGet1< A > sg( tgt );
 			FuncId fid;
 			if ( arg.size() == 0 )
@@ -200,7 +200,7 @@ template< class A > class SetGet1: public SetGet
 		/**
 		 * Blocking call using string conversion
 		 */
-		static bool innerStrSet( const Eref& dest, const string& field, 
+		static bool innerStrSet( const ObjId& dest, const string& field, 
 			const string& val )
 		{
 			A arg;
@@ -212,14 +212,14 @@ template< class A > class SetGet1: public SetGet
 template< class A > class Field: public SetGet1< A >
 {
 	public:
-		Field( const Eref& dest )
+		Field( const ObjId& dest )
 			: SetGet1< A >( dest )
 		{;}
 
 		/**
 		 * Blocking, typed 'Set' call
 		 */
-		static bool set( const Eref& dest, const string& field, A arg )
+		static bool set( const ObjId& dest, const string& field, A arg )
 		{
 			string temp = "set_" + field;
 			return SetGet1< A >::set( dest, temp, arg );
@@ -242,7 +242,7 @@ template< class A > class Field: public SetGet1< A >
 		/**
 		 * Blocking call using string conversion
 		 */
-		static bool innerStrSet( const Eref& dest, const string& field, 
+		static bool innerStrSet( const ObjId& dest, const string& field, 
 			const string& val )
 		{
 			A arg;
@@ -257,7 +257,7 @@ template< class A > class Field: public SetGet1< A >
 		/**
 		 * Blocking call using typed values
 		 */
-		static A get( const Eref& dest, const string& field)
+		static A get( const ObjId& dest, const string& field)
 		{ 
 			SetGet1< A > sg( dest );
 			string temp = "get_" + field;
@@ -278,7 +278,7 @@ template< class A > class Field: public SetGet1< A >
 			string temp = "get_" + field;
 			unsigned int numRetEntries;
 			const vector< char* >& ret = 
-				dispatchGet( Eref( dest(), DataId::any() ), 
+				dispatchGet( ObjId( dest, DataId::any() ), 
 					temp, &sg, numRetEntries );
 
 			vec.resize( numRetEntries );
@@ -292,7 +292,7 @@ template< class A > class Field: public SetGet1< A >
 		 * Blocking virtual call for finding a value and returning in a
 		 * string.
 		 */
-		static bool innerStrGet( const Eref& dest, const string& field, 
+		static bool innerStrGet( const ObjId& dest, const string& field, 
 			string& str )
 		{
 			SetGet1< A > sg( dest );
@@ -313,19 +313,19 @@ template< class A > class Field: public SetGet1< A >
 template< class A1, class A2 > class SetGet2: public SetGet
 {
 	public:
-		SetGet2( const Eref& dest )
+		SetGet2( const ObjId& dest )
 			: SetGet( dest )
 		{;}
 
 		/**
 		 * Blocking, typed 'Set' call
 		 */
-		static bool set( const Eref& dest, const string& field, 
+		static bool set( const ObjId& dest, const string& field, 
 			A1 arg1, A2 arg2 )
 		{
 			SetGet2< A1, A2 > sg( dest );
 			FuncId fid;
-			Eref tgt( dest );
+			ObjId tgt( dest );
 			if ( sg.checkSet( field, tgt, fid ) ) {
 				Conv< A1 > conv1( arg1 );
 				Conv< A2 > conv2( arg2 );
@@ -343,7 +343,7 @@ template< class A1, class A2 > class SetGet2: public SetGet
 		/**
 		 * Blocking call using string conversion.
 		 */
-		static bool innerStrSet( const Eref& dest, const string& field, 
+		static bool innerStrSet( const ObjId& dest, const string& field, 
 			const string& val )
 		{
 			A1 arg1;
@@ -373,19 +373,19 @@ template< class A1, class A2 > class SetGet2: public SetGet
 template< class A1, class A2, class A3 > class SetGet3: public SetGet
 {
 	public:
-		SetGet3( const Eref& dest )
+		SetGet3( const ObjId& dest )
 			: SetGet( dest )
 		{;}
 
 		/**
 		 * Blocking, typed 'Set' call
 		 */
-		static bool set( const Eref& dest, const string& field, 
+		static bool set( const ObjId& dest, const string& field, 
 			A1 arg1, A2 arg2, A3 arg3 )
 		{
 			SetGet3< A1, A2, A3 > sg( dest );
 			FuncId fid;
-			Eref tgt( dest );
+			ObjId tgt( dest );
 			if ( sg.checkSet( field, tgt, fid ) ) {
 				Conv< A1 > conv1( arg1 );
 				Conv< A2 > conv2( arg2 );
@@ -407,7 +407,7 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 		 * As yet we don't have 2 arg conversion from a single string.
 		 * So this is a dummy
 		 */
-		static bool innerStrSet( const Eref& dest, const string& field, 
+		static bool innerStrSet( const ObjId& dest, const string& field, 
 			const string& val )
 		{
 			A1 arg1;
@@ -437,19 +437,19 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 {
 	public:
-		SetGet4( const Eref& dest )
+		SetGet4( const ObjId& dest )
 			: SetGet( dest )
 		{;}
 
 		/**
 		 * Blocking, typed 'Set' call
 		 */
-		static bool set( const Eref& dest, const string& field, 
+		static bool set( const ObjId& dest, const string& field, 
 			A1 arg1, A2 arg2, A3 arg3, A4 arg4 )
 		{
 			SetGet4< A1, A2, A3, A4 > sg( dest );
 			FuncId fid;
-			Eref tgt( dest );
+			ObjId tgt( dest );
 			if ( sg.checkSet( field, tgt, fid ) ) {
 				Conv< A1 > conv1( arg1 );
 				Conv< A2 > conv2( arg2 );
@@ -476,7 +476,7 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 		 * As yet we don't have 2 arg conversion from a single string.
 		 * So this is a dummy
 		 */
-		static bool innerStrSet( const Eref& dest, const string& field, 
+		static bool innerStrSet( const ObjId& dest, const string& field, 
 			const string& val )
 		{
 			A1 arg1;
@@ -514,19 +514,19 @@ template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
 	public SetGet
 {
 	public:
-		SetGet5( const Eref& dest )
+		SetGet5( const ObjId& dest )
 			: SetGet( dest )
 		{;}
 
 		/**
 		 * Blocking, typed 'Set' call
 		 */
-		static bool set( const Eref& dest, const string& field, 
+		static bool set( const ObjId& dest, const string& field, 
 			A1 arg1, A2 arg2, A3 arg3, A4 arg4, A5 arg5 )
 		{
 			SetGet5< A1, A2, A3, A4, A5 > sg( dest );
 			FuncId fid;
-			Eref tgt( dest );
+			ObjId tgt( dest );
 			if ( sg.checkSet( field, tgt, fid ) ) {
 				Conv< A1 > conv1( arg1 );
 				Conv< A2 > conv2( arg2 );
@@ -556,7 +556,7 @@ template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
 		 * As yet we don't have 2 arg conversion from a single string.
 		 * So this is a dummy
 		 */
-		static bool innerStrSet( const Eref& dest, const string& field, 
+		static bool innerStrSet( const ObjId& dest, const string& field, 
 			const string& val )
 		{
 			A1 arg1;
@@ -596,19 +596,19 @@ template< class A1, class A2, class A3, class A4, class A5, class A6 > class Set
 	public SetGet
 {
 	public:
-		SetGet6( const Eref& dest )
+		SetGet6( const ObjId& dest )
 			: SetGet( dest )
 		{;}
 
 		/**
 		 * Blocking, typed 'Set' call
 		 */
-		static bool set( const Eref& dest, const string& field, 
+		static bool set( const ObjId& dest, const string& field, 
 			A1 arg1, A2 arg2, A3 arg3, A4 arg4, A5 arg5, A6 arg6 )
 		{
 			SetGet6< A1, A2, A3, A4, A5, A6 > sg( dest );
 			FuncId fid;
-			Eref tgt( dest );
+			ObjId tgt( dest );
 			if ( sg.checkSet( field, tgt, fid ) ) {
 				Conv< A1 > conv1( arg1 );
 				Conv< A2 > conv2( arg2 );
@@ -641,7 +641,7 @@ template< class A1, class A2, class A3, class A4, class A5, class A6 > class Set
 		 * As yet we don't have 2 arg conversion from a single string.
 		 * So this is a dummy
 		 */
-		static bool innerStrSet( const Eref& dest, const string& field, 
+		static bool innerStrSet( const ObjId& dest, const string& field, 
 			const string& val )
 		{
 			A1 arg1;

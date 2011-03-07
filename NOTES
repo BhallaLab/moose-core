@@ -11606,6 +11606,13 @@ Possibly confusing one is cid, for Cinfo Id (though it isn't used)
 oid: ObjId.
 
 Made the change. Simple but tedious as it affects many files.
+Checkin 2501
 
+Working on eliminating Erefs from SetGet. As expected, vast
+numbers of files need to be fixed. Mostly compiles through basecode now,
+currently done midway through testAsync.cpp.
 
 ============================================================================
+7 March 2011
+Because of the huge number of changes, I'm putting in a mid-stream checkin
+as the SetGet changes work through the compilation process.

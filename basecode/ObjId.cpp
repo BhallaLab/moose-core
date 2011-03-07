@@ -46,3 +46,18 @@ const ObjId& ObjId::bad()
 	static ObjId bad_( Id(), DataId::bad() );
 	return bad_;
 }
+
+bool ObjId::isDataHere() const
+{
+	return id()->dataHandler()->isDataHere( dataId );
+}
+
+char* ObjId::data() const
+{
+	return id()->dataHandler()->data( dataId );
+}
+
+Element* ObjId::element() const
+{
+	return id();
+}

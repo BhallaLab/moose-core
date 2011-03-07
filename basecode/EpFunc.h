@@ -31,7 +31,7 @@ template< class T > class EpFunc0: public OpFunc
 
 		bool strSet( const Eref& tgt,
 			const string& field, const string& arg ) const {
-			return SetGet0::innerStrSet( tgt, field, arg );
+			return SetGet0::innerStrSet( tgt.objId(), field, arg );
 		}
 
 		void op( const Eref& e, const char* buf ) const {
@@ -64,7 +64,7 @@ template< class T, class A > class EpFunc1: public OpFunc
 
 		bool strSet( const Eref& tgt,
 			const string& field, const string& arg ) const {
-			return SetGet1< A >::innerStrSet( tgt, field, arg );
+			return SetGet1< A >::innerStrSet( tgt.objId(), field, arg );
 		}
 
 		// This could do with a whole lot of optimization to avoid
@@ -101,7 +101,7 @@ template< class T, class A1, class A2 > class EpFunc2: public OpFunc
 
 		bool strSet( const Eref& tgt,
 			const string& field, const string& arg ) const {
-			return SetGet2< A1, A2 >::innerStrSet( tgt, field, arg );
+			return SetGet2< A1, A2 >::innerStrSet( tgt.objId(), field, arg );
 		}
 
 		// This could do with a whole lot of optimization to avoid
@@ -142,7 +142,7 @@ template< class T, class A1, class A2, class A3 > class EpFunc3:
 
 		bool strSet( const Eref& tgt,
 			const string& field, const string& arg ) const {
-			return SetGet3< A1, A2, A3 >::innerStrSet( tgt, field, arg );
+			return SetGet3< A1, A2, A3 >::innerStrSet( tgt.objId(), field, arg );
 		}
 
 		// This could do with a whole lot of optimization to avoid
@@ -187,7 +187,7 @@ template< class T, class A1, class A2, class A3, class A4 > class EpFunc4:
 
 		bool strSet( const Eref& tgt,
 			const string& field, const string& arg ) const {
-			return SetGet4< A1, A2, A3, A4 >::innerStrSet( tgt, field, arg );
+			return SetGet4< A1, A2, A3, A4 >::innerStrSet( tgt.objId(), field, arg );
 		}
 
 		// This could do with a whole lot of optimization to avoid
@@ -234,7 +234,7 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class EpFu
 
 		bool strSet( const Eref& tgt,
 			const string& field, const string& arg ) const {
-			return SetGet5< A1, A2, A3, A4, A5 >::innerStrSet( tgt, field, arg );
+			return SetGet5< A1, A2, A3, A4, A5 >::innerStrSet( tgt.objId(), field, arg );
 		}
 
 		// This could do with a whole lot of optimization to avoid
@@ -291,7 +291,7 @@ template< class T, class A1, class A2, class A3, class A4, class A5, class A6 > 
 
 		bool strSet( const Eref& tgt,
 			const string& field, const string& arg ) const {
-			return SetGet6< A1, A2, A3, A4, A5, A6 >::innerStrSet( tgt, field, arg );
+			return SetGet6< A1, A2, A3, A4, A5, A6 >::innerStrSet( tgt.objId(), field, arg );
 		}
 
 		// This could do with a whole lot of optimization to avoid
@@ -360,7 +360,7 @@ template< class T, class A > class GetEpFunc: public OpFunc
 
 		bool strSet( const Eref& tgt,
 			const string& field, const string& arg ) const {
-			return SetGet1< A >::innerStrSet( tgt, field, arg );
+			return SetGet1< A >::innerStrSet( tgt.objId(), field, arg );
 		}
 
 		/**
