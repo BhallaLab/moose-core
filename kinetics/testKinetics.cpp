@@ -50,72 +50,72 @@ void testMathFunc()
 	assert( m != 0 );
 	ProcInfo p;
 	double d = 0;
-	Field< string >::set( mid.eref(), "function", "f(x, y, z) = x + y*z" );
-	SetGet1< double >::set( mid.eref(), "arg1", 1.0 );
-	SetGet1< double >::set( mid.eref(), "arg2", 2.0 );
-	SetGet1< double >::set( mid.eref(), "arg3", 3.0 );
+	Field< string >::set( mid, "function", "f(x, y, z) = x + y*z" );
+	SetGet1< double >::set( mid, "arg1", 1.0 );
+	SetGet1< double >::set( mid, "arg2", 2.0 );
+	SetGet1< double >::set( mid, "arg3", 3.0 );
 
 	// SetGet1< ProcPtr >::set( mid.eref(), "process", &p );
 
 	math->processFunc( mid.eref(), &p );
 
-	d = Field< double >::get( mid.eref(), "result" );
+	d = Field< double >::get( mid, "result" );
 
 	assert ( isClose( d, 7.0, tolerance ) );
 	
 	/*mml function*/
 	
-	Field< string >::set( mid.eref(), "mathML", 
+	Field< string >::set( mid, "mathML", 
 		"<eq/> <apply><ci type=\"function\"> f </ci> <ci> x </ci> <ci> y </ci></apply><apply><plus/>  <ci>x</ci>  <apply><times/><ci>y</ci>  <cn>57</cn> </apply></apply> " );
-	SetGet1< double >::set( mid.eref(), "arg1", 1.0 );
-	SetGet1< double >::set( mid.eref(), "arg2", 2.0 );
+	SetGet1< double >::set( mid, "arg1", 1.0 );
+	SetGet1< double >::set( mid, "arg2", 2.0 );
 
 	// SetGet1< ProcPtr >::set( mid.eref(), "process", &p );
 	math->processFunc( mid.eref(), &p );
-	d = Field< double >::get( mid.eref(), "result" );
+	d = Field< double >::get( mid, "result" );
 	assert ( isClose( d, 115.0, tolerance ) );
 	
 	/*A formula from Tyson paper*/
-	Field< string >::set( mid.eref(), "function", 
+	Field< string >::set( mid, "function", 
 		"f(PP1T, CycE, CycA, CycB) = PP1T/(1 + 0.02*(2.33*(CycE+ CycA) + 1.2E1*CycB))");
-	SetGet1< double >::set( mid.eref(), "arg1", 1);
-	SetGet1< double >::set( mid.eref(), "arg2", 2);
-	SetGet1< double >::set( mid.eref(), "arg3", 3);
-	SetGet1< double >::set( mid.eref(), "arg4", 4);
+	SetGet1< double >::set( mid, "arg1", 1);
+	SetGet1< double >::set( mid, "arg2", 2);
+	SetGet1< double >::set( mid, "arg3", 3);
+	SetGet1< double >::set( mid, "arg4", 4);
 
 	// SetGet1< ProcPtr >::set( mid.eref(), "process", &p );
 	math->processFunc( mid.eref(), &p );
 	// MathFunc::processFunc( &c, &p);
 
-	d = Field< double >::get( mid.eref(), "result" );
+	d = Field< double >::get( mid, "result" );
 	assert (
 		isClose( d, 1/(1+0.02*(2.33*(2 + 3)+1.2E1*4)), tolerance )
 	);
 	
-	Field< string >::set( mid.eref(), "function", 
+	Field< string >::set( mid, "function", 
 		"f(ERG, DRG) = 0.5*(0.1*ERG + ((0.2*(DRG/0.3)^2)/(1 + (DRG/0.3)^2)))");
-	SetGet1< double >::set( mid.eref(), "arg1", 1);
-	SetGet1< double >::set( mid.eref(), "arg2", 2);
+	SetGet1< double >::set( mid, "arg1", 1);
+	SetGet1< double >::set( mid, "arg2", 2);
 	// MathFunc::processFunc( &c, &p);
 	math->processFunc( mid.eref(), &p );
 	// SetGet1< ProcPtr >::set( mid.eref(), "process", &p );
 
-	d = Field< double >::get( mid.eref(), "result" );
+	d = Field< double >::get( mid, "result" );
 	assert (
 		isClose( d, 0.5*(0.1*1 + (0.2*(2/0.3)*(2/0.3))/(1 + (2/0.3)*(2/0.3))), tolerance )
 	);
 	
 	/*Another formula form Tyson paper*/
 	/*f(ERG, DRG) = 0.5(0.1*ERG + (0.2*(DRG/0.3)^2)/(1 + (DRG/0.3)^2))*/
-	Field< string >::set( mid.eref(), "mathML", 
+	Field< string >::set( mid, "mathML", 
 		"<eq/> <apply> <ci type=\"function\"> f </ci> <ci> ERG </ci> <ci> DRG </ci> </apply> <apply><times/> <cn>0.5</cn> <apply><plus/> <apply><times/> <cn>0.1</cn> <ci>ERG<ci> </apply> <apply><divide/> <apply><times/> <cn>0.2</cn> <apply><power/> <apply><divide/> <ci>DRG</ci> <cn>0.3</cn> </apply> <cn>2</cn> </apply> </apply> <apply><plus/> <cn>1</cn> <apply><power/> <apply><divide/> <ci>DRG</ci> <cn>0.3</cn> </apply> <cn>2</cn> </apply> </apply> </apply> </apply> </apply>" );
-	SetGet1< double >::set( mid.eref(), "arg1", 1);
-	SetGet1< double >::set( mid.eref(), "arg2", 2);
+	SetGet1< double >::set( mid, "arg1", 1);
+	SetGet1< double >::set( mid, "arg2", 2);
 	// MathFunc::processFunc( &c, &p);
 // 	SetGet1< ProcPtr >::set( mid.eref(), "process", &p );
 	math->processFunc( mid.eref(), &p );
 
-	d = Field< double >::get( mid.eref(), "result" );
+	d = Field< double >::get( mid, "result" );
 	//cout << d << endl;
 	//cout << 0.5*(0.1*1 + (0.2*(2/0.3)*(2/0.3))/(1 + (2/0.3)*(2/0.3))) << endl;
 	assert (
