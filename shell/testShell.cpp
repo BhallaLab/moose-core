@@ -26,23 +26,6 @@
 #include "SingleMsg.h"
 #include "Wildcard.h"
 
-void testCreateDelete()
-{
-	
-	Eref ser = Id().eref();
-	Id testId = Id::nextId();
-	vector< unsigned int > dimensions;
-	dimensions.push_back( 1 );
-	// Need to get the id back so that I can delete it later.
-	bool ret = SetGet5< string, Id, Id, string, vector< unsigned int > >::set( ser, "create", "Neutral", Id(), testId , "testCreate", dimensions );
-	assert( ret );
-
-	ret = SetGet1< Id >::set( ser, "delete", testId );
-	assert( ret );
-
-	cout << "." << flush;
-}
-
 
 /**
  * Tests Create and Delete calls issued through the parser interface,
@@ -89,23 +72,23 @@ void testTreeTraversal()
 	////////////////////////////////////////////////////////////////
 	// Checking for own Ids
 	////////////////////////////////////////////////////////////////
-	ObjId me = Field< ObjId >::get( f3aa.eref(), "me" );
+	ObjId me = Field< ObjId >::get( f3aa, "me" );
 	assert( me == ObjId( f3aa, 0 ) );
-	me = Field< ObjId >::get( f3ba.eref(), "me" );
+	me = Field< ObjId >::get( f3ba, "me" );
 	assert( me == ObjId( f3ba, 0 ) );
-	me = Field< ObjId >::get( f2c.eref(), "me" );
+	me = Field< ObjId >::get( f2c, "me" );
 	assert( me == ObjId( f2c, 0 ) );
 
 	////////////////////////////////////////////////////////////////
 	// Checking for parent Ids
 	////////////////////////////////////////////////////////////////
-	ObjId pa = Field< ObjId >::get( f3aa.eref(), "parent" );
+	ObjId pa = Field< ObjId >::get( f3aa, "parent" );
 	assert( pa == ObjId( f2a, 0 ) );
-	pa = Field< ObjId >::get( f3ab.eref(), "parent" );
+	pa = Field< ObjId >::get( f3ab, "parent" );
 	assert( pa == ObjId( f2a, 0 ) );
-	pa = Field< ObjId >::get( f2b.eref(), "parent" );
+	pa = Field< ObjId >::get( f2b, "parent" );
 	assert( pa == ObjId( f1, 0 ) );
-	pa = Field< ObjId >::get( f1.eref(), "parent" );
+	pa = Field< ObjId >::get( f1, "parent" );
 	assert( pa == ObjId( Id(), 0 ) );
 
 	cout << "." << flush;
@@ -113,22 +96,22 @@ void testTreeTraversal()
 	////////////////////////////////////////////////////////////////
 	// Checking for child Id lists
 	////////////////////////////////////////////////////////////////
-	vector< Id > kids = Field< vector< Id > >::get( f1.eref(), "children" );
+	vector< Id > kids = Field< vector< Id > >::get( f1, "children" );
 	assert( kids.size() == 3 );
 	assert( kids[0] == f2a );
 	assert( kids[1] == f2b );
 	assert( kids[2] == f2c );
 
-	kids = Field< vector< Id > >::get( f2a.eref(), "children" );
+	kids = Field< vector< Id > >::get( f2a, "children" );
 	assert( kids.size() == 2 );
 	assert( kids[0] == f3aa );
 	assert( kids[1] == f3ab );
 	
-	kids = Field< vector< Id > >::get( f2b.eref(), "children" );
+	kids = Field< vector< Id > >::get( f2b, "children" );
 	assert( kids.size() == 1 );
 	assert( kids[0] == f3ba );
 
-	kids = Field< vector< Id > >::get( f2c.eref(), "children" );
+	kids = Field< vector< Id > >::get( f2c, "children" );
 	assert( kids.size() == 0 );
 
 	cout << "." << flush;
@@ -136,22 +119,22 @@ void testTreeTraversal()
 	////////////////////////////////////////////////////////////////
 	// Checking path string generation.
 	////////////////////////////////////////////////////////////////
-	string path = Field< string >::get( f3aa.eref(), "path" );
+	string path = Field< string >::get( f3aa, "path" );
 	assert( path == "/f1/f2a/f3aa" );
-	path = Field< string >::get( f3ab.eref(), "path" );
+	path = Field< string >::get( f3ab, "path" );
 	assert( path == "/f1/f2a/f3ab" );
-	path = Field< string >::get( f3ba.eref(), "path" );
+	path = Field< string >::get( f3ba, "path" );
 	assert( path == "/f1/f2b/f3ba" );
 
-	path = Field< string >::get( f2a.eref(), "path" );
+	path = Field< string >::get( f2a, "path" );
 	assert( path == "/f1/f2a" );
-	path = Field< string >::get( f2b.eref(), "path" );
+	path = Field< string >::get( f2b, "path" );
 	assert( path == "/f1/f2b" );
-	path = Field< string >::get( f2c.eref(), "path" );
+	path = Field< string >::get( f2c, "path" );
 	assert( path == "/f1/f2c" );
-	path = Field< string >::get( f1.eref(), "path" );
+	path = Field< string >::get( f1, "path" );
 	assert( path == "/f1" );
-	path = Field< string >::get( Id().eref(), "path" );
+	path = Field< string >::get( Id(), "path" );
 	assert( path == "/" );
 
 	cout << "." << flush;
@@ -291,11 +274,11 @@ void testMove()
 	Id f4b = shell->doCreate( "Neutral", f3, "f4b", dimensions );
 	verifyKids( f1, f2a, f2b, f3, f4a, f4b );
 
-	ObjId pa = Field< ObjId >::get( f4a.eref(), "parent" );
+	ObjId pa = Field< ObjId >::get( f4a, "parent" );
 	assert( pa == ObjId( f3, 0 ) );
-	pa = Field< ObjId >::get( f2a.eref(), "parent" );
+	pa = Field< ObjId >::get( f2a, "parent" );
 	assert( pa == ObjId( f1, 0 ) );
-	string path = Field< string >::get( f4a.eref(), "path" );
+	string path = Field< string >::get( f4a, "path" );
 	assert( path == "/f1/f2a/f3/f4a" );
 	Neutral* f1data = reinterpret_cast< Neutral* >( f1.eref().data() );
 
@@ -314,7 +297,7 @@ void testMove()
 	shell->doMove( f4a, f1 );
 	//////////////////////////////////////////////////////////////////
 
-	pa = Field< ObjId >::get( f4a.eref(), "parent" );
+	pa = Field< ObjId >::get( f4a, "parent" );
 	assert( pa == ObjId( f1, 0 ) );
 
 	kids = f1data->getChildren( f1.eref(), 0 );
@@ -329,9 +312,9 @@ void testMove()
 	//////////////////////////////////////////////////////////////////
 	shell->doMove( f2a, f4a );
 	//////////////////////////////////////////////////////////////////
-	pa = Field< ObjId >::get( f2a.eref(), "parent" );
+	pa = Field< ObjId >::get( f2a, "parent" );
 	assert( pa == ObjId( f4a, 0 ) );
-	path = Field< string >::get( f4b.eref(), "path" );
+	path = Field< string >::get( f4b, "path" );
 	assert( path == "/f1/f4a/f2a/f3/f4b" );
 
 	kids = f1data->getChildren( f1.eref(), 0 );
@@ -358,11 +341,11 @@ void testCopy()
 
 	verifyKids( f1, f2a, f2b, f3, f4a, f4b );
 
-	ObjId pa = Field< ObjId >::get( f3.eref(), "parent" );
+	ObjId pa = Field< ObjId >::get( f3, "parent" );
 	assert( pa == ObjId( f2a, 0 ) );
-	pa = Field< ObjId >::get( f2a.eref(), "parent" );
+	pa = Field< ObjId >::get( f2a, "parent" );
 	assert( pa == ObjId( f1, 0 ) );
-	string path = Field< string >::get( f3.eref(), "path" );
+	string path = Field< string >::get( f3, "path" );
 	assert( path == "/f1/f2a/f3" );
 
 	//////////////////////////////////////////////////////////////////
@@ -372,7 +355,7 @@ void testCopy()
 	verifyKids( f1, f2a, f2b, f3, f4a, f4b );
 
 	assert( dupf2a != Id() );
-	// pa = Field< ObjId >::get( dupf2a.eref(), "parent" );
+	// pa = Field< ObjId >::get( dupf2a, "parent" );
 	// assert( pa == ObjId( f1, 0 ) );
 	assert( dupf2a()->getName() == "TheElephantsAreLoose" );
 	Neutral* f2aDupData = reinterpret_cast< Neutral* >( dupf2a.eref().data() );
@@ -487,17 +470,17 @@ void testShellSetGet()
 	// cout << Shell::myNode() << ": testShellSetGet: data here = (" << a1()->dataHandler()->begin() << " to " << a1()->dataHandler()->end() << ")" << endl;
 	for ( unsigned int i = 0; i < size; ++i ) {
 		val.push_back( i * i * i ); // use i^3 as a simple test.
-		bool ret = SetGet1< double >::set( Eref( a1(), i ), "set_outputValue", i * i );
+		bool ret = SetGet1< double >::set( ObjId( a1, i ), "set_outputValue", i * i );
 		assert( ret );
 	}
 	for ( unsigned int i = 0; i < size; ++i ) {
-		double x = Field< double >::get( Eref( a1(), i ), "outputValue" );
+		double x = Field< double >::get( ObjId( a1, i ), "outputValue" );
 		assert( doubleEq( x, i * i ) );
 	}
 	bool ret = SetGet1< double >::setVec( a1, "set_outputValue", val );
 	assert( ret );
 	for ( unsigned int i = 0; i < size; ++i ) {
-		double x = Field< double >::get( Eref( a1(), i ), "outputValue" );
+		double x = Field< double >::get( ObjId( a1, i ), "outputValue" );
 		// cout << i << "	x=" << x << "	i^3=" << i * i * i << endl;
 		assert( doubleEq( x, i * i * i ) );
 	}
@@ -660,21 +643,22 @@ void testShellAddMsg()
 
 	const Msg* m5p = Msg::getMsg( m5 );
 	Eref m5er = m5p->manager();
+	ObjId m5oid = m5er.objId();
 
 	bool ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5er, "setEntry", 0, 4, 0 );
+		m5oid, "setEntry", 0, 4, 0 );
 	assert( ret );
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5er, "setEntry", 1, 3, 0 );
+		m5oid, "setEntry", 1, 3, 0 );
 	assert( ret );
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5er, "setEntry", 2, 2, 0 );
+		m5oid, "setEntry", 2, 2, 0 );
 	assert( ret );
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5er, "setEntry", 3, 1, 0 );
+		m5oid, "setEntry", 3, 1, 0 );
 	assert( ret );
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5er, "setEntry", 4, 0, 0 );
+		m5oid, "setEntry", 4, 0, 0 );
 	assert( ret );
 
 	// Should give 15 15 15 15 15
@@ -694,7 +678,7 @@ void testShellAddMsg()
 		for ( unsigned int j = 0; j < 5; ++j ) {
 			if ( i != j ) {
 				ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-				m7er, "setEntry", i, j, 0 );
+				m7er.objId(), "setEntry", i, j, 0 );
 				assert( ret );
 			}
 		}
@@ -756,11 +740,11 @@ void testShellAddMsg()
 	ret = SetGet1< double >::setVec( g1, "arg1", init ); // 12345
 	assert( ret );
 
-	assert( doubleEq( Field< double >::get( Eref( a1(), 0 ), "arg1Value" ), 1 ) );
-	assert( doubleEq( Field< double >::get( Eref( a1(), 1 ), "arg1Value" ), 2 ) );
-	assert( doubleEq( Field< double >::get( Eref( a1(), 2 ), "arg1Value" ), 3 ) );
-	assert( doubleEq( Field< double >::get( Eref( a1(), 3 ), "arg1Value" ), 4 ) );
-	assert( doubleEq( Field< double >::get( Eref( a1(), 4 ), "arg1Value" ), 5 ) );
+	assert( doubleEq( Field< double >::get( ObjId( a1, 0 ), "arg1Value" ), 1 ) );
+	assert( doubleEq( Field< double >::get( ObjId( a1, 1 ), "arg1Value" ), 2 ) );
+	assert( doubleEq( Field< double >::get( ObjId( a1, 2 ), "arg1Value" ), 3 ) );
+	assert( doubleEq( Field< double >::get( ObjId( a1, 3 ), "arg1Value" ), 4 ) );
+	assert( doubleEq( Field< double >::get( ObjId( a1, 4 ), "arg1Value" ), 5 ) );
 
 	vector< double > retVec( 0 );
 	Field< double >::getVec( a1, "arg1Value", retVec );
@@ -917,21 +901,22 @@ void testCopyMsgOps()
 
 	const Msg* m5p = Msg::getMsg( m5 );
 	Eref m5er = m5p->manager();
+	ObjId m5oid = m5er.objId();
 
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5er, "setEntry", 0, 4, 0 );
+		m5oid, "setEntry", 0, 4, 0 );
 	assert( ret );
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5er, "setEntry", 1, 3, 0 );
+		m5oid, "setEntry", 1, 3, 0 );
 	assert( ret );
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5er, "setEntry", 2, 2, 0 );
+		m5oid, "setEntry", 2, 2, 0 );
 	assert( ret );
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5er, "setEntry", 3, 1, 0 );
+		m5oid, "setEntry", 3, 1, 0 );
 	assert( ret );
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5er, "setEntry", 4, 0, 0 );
+		m5oid, "setEntry", 4, 0, 0 );
 	assert( ret );
 
 	// ret = SetGet1< unsigned int >::set( m5er, "loadBalance", Shell::numCores() );
@@ -948,7 +933,7 @@ void testCopyMsgOps()
 	///////////////////////////////////////////////////////////
 	// Pull out the child Ids.
 	///////////////////////////////////////////////////////////
-	vector< Id > kids = Field< vector< Id > >::get( pa2.eref(), "children");
+	vector< Id > kids = Field< vector< Id > >::get( pa2, "children");
 	assert ( kids.size() == 10 );
 	for ( unsigned int i = 0; i < kids.size(); ++i ) {
 		ret = setupSched( shell, tick, kids[i] ); 
@@ -1184,7 +1169,6 @@ void testShell( )
 	testChopPath();
 	testTreeTraversal();
 	testChildren();
-//	testCreateDelete();
 	// testShellParserQuit();
 }
 

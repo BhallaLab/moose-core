@@ -140,8 +140,8 @@ void testMpiFibonacci()
 
 	Id a1id = shell->doCreate( "Arith", Id(), "a1", dims );
 	// Element* a1 = new Element( a1id, Arith::initCinfo(), "a1", dims );
-	SetGet1< double >::set( a1id.eref(), "arg1", 0 );
-	SetGet1< double >::set( a1id.eref(), "arg2", 1 );
+	SetGet1< double >::set( a1id, "arg1", 0 );
+	SetGet1< double >::set( a1id, "arg2", 1 );
 
 	/*
 	Arith* data = reinterpret_cast< Arith* >( a1->dataHandler()->data( 0 ) );
@@ -156,14 +156,14 @@ void testMpiFibonacci()
 		ObjId( a1id, 0 ), "output", ObjId( a1id, 0 ), "arg1" );
 	const Msg* m1 = Msg::getMsg( mid1 );
 	Eref er1 = m1->manager();
-	bool ret = Field< int >::set( er1, "stride", 1 );
+	bool ret = Field< int >::set( er1.objId(), "stride", 1 );
 	assert( ret );
 
 	MsgId mid2 = shell->doAddMsg( "Diagonal", 
 		ObjId( a1id, 0 ), "output", ObjId( a1id, 0 ), "arg2" );
 	const Msg* m2 = Msg::getMsg( mid2 );
 	Eref er2 = m2->manager();
-	ret = Field< int >::set( er2, "stride", 2 );
+	ret = Field< int >::set( er2.objId(), "stride", 2 );
 	assert( ret );
 	
 	/*
@@ -271,10 +271,10 @@ void testTable()
 		t->input( sqrt( i ) );
 	}
 	unsigned int numEntries = Field< unsigned int >::get( 
-		tabid.eref(), "num_table" );
+		tabid, "num_table" );
 	assert( numEntries == 100 );
 	for ( unsigned int i = 0; i < 100; ++i ) {
-		Eref temp( tabentry(), DataId( 0, i ) );
+		ObjId temp( tabentry, DataId( 0, i ) );
 		double ret = Field< double >::get( temp, "value" );
 		assert( fabs( ret - sqrt( i ) ) < 1e-6 );
 	}
@@ -310,20 +310,19 @@ void testGetMsg()
 	shell->doSetClock( 0, 1 );
 	shell->doUseClock( "/tab,/arith", "process", 0 );
 	unsigned int numEntries = Field< unsigned int >::get( 
-		tabid.eref(), "num_table" );
+		tabid, "num_table" );
 	assert( numEntries == 0 );
 	shell->doReinit();
-	SetGet1< double >::set( arithid.eref(), "arg1", 0.0 );
-	SetGet1< double >::set( arithid.eref(), "arg2", 2.0 );
+	SetGet1< double >::set( arithid, "arg1", 0.0 );
+	SetGet1< double >::set( arithid, "arg2", 2.0 );
 	shell->doStart( 100 );
 
-	numEntries = Field< unsigned int >::get( 
-		tabid.eref(), "num_table" );
+	numEntries = Field< unsigned int >::get( tabid, "num_table" );
 	assert( numEntries == 101 ); // One for reinit call, 100 for process.
 
 	Id tabentry( tabid.value() + 1 );
 	for ( unsigned int i = 0; i < 100; ++i ) {
-		Eref temp( tabentry(), DataId( 0, i ) );
+		ObjId temp( tabentry, DataId( 0, i ) );
 		double ret = Field< double >::get( temp, "value" );
 		assert( doubleEq( ret, 2 * i ) );
 	}
@@ -411,12 +410,12 @@ void testStatsReduce()
 	shell->doReinit();
 	shell->doStart( 1 );
 	*/
-	SetGet0::set( statsid.eref(), "trig" );
-	double x = Field< double >::get( statsid.eref(), "sum" );
+	SetGet0::set( statsid, "trig" );
+	double x = Field< double >::get( statsid, "sum" );
 	assert( doubleEq( x, sum ) );
-	unsigned int i = Field< unsigned int >::get( statsid.eref(), "num" );
+	unsigned int i = Field< unsigned int >::get( statsid, "num" );
 	assert( i == num );
-	x = Field< double >::get( statsid.eref(), "sdev" );
+	x = Field< double >::get( statsid, "sdev" );
 	assert( doubleEq( x, sqrt( ( sum * sum - sumsq ) /num ) ) );
 
 	cout << "." << flush;
@@ -456,7 +455,7 @@ void testMpiStatsReduce()
 	// This calculation only works for node 0, with the present (implicit)
 	// decomposition scheme.
 	assert( fd->biggestFieldArraySize() == size/Shell::numNodes() - 1 );
-	Field< unsigned int >::set( syner, "fieldDimension", size );
+	Field< unsigned int >::set( synId, "fieldDimension", size );
 	assert ( fd->totalEntries() == size * size );
 	// Here we test setting a 2-D array with different dims on each axis.
 	vector< double > delay( size * size, 0.0 );
@@ -484,12 +483,12 @@ void testMpiStatsReduce()
 		statsid.eref().objId(), "reduce",
 		syner.objId(), "get_delay" );
 	assert( mid != Msg::badMsg );
-	SetGet0::set( statsid.eref(), "trig" );
-	double x = Field< double >::get( statsid.eref(), "sum" );
+	SetGet0::set( statsid, "trig" );
+	double x = Field< double >::get( statsid, "sum" );
 	assert( doubleEq( x, sum ) );
-	unsigned int i = Field< unsigned int >::get( statsid.eref(), "num" );
+	unsigned int i = Field< unsigned int >::get( statsid, "num" );
 	assert( i == num );
-	x = Field< double >::get( statsid.eref(), "sdev" );
+	x = Field< double >::get( statsid, "sdev" );
 	assert( doubleEq( x, sqrt( ( sum * sum - sumsq ) /num ) ) );
 
 	delete synId();
