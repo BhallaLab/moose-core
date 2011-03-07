@@ -91,24 +91,24 @@ void testAssortedMsg()
 	Eref m5er = m5p->manager();
 
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5er, "setEntry", 0, 4, 0 );
+		m5er.objId(), "setEntry", 0, 4, 0 );
 	assert( ret );
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5er, "setEntry", 1, 3, 0 );
+		m5er.objId(), "setEntry", 1, 3, 0 );
 	assert( ret );
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5er, "setEntry", 2, 2, 0 );
+		m5er.objId(), "setEntry", 2, 2, 0 );
 	assert( ret );
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5er, "setEntry", 3, 1, 0 );
+		m5er.objId(), "setEntry", 3, 1, 0 );
 	assert( ret );
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5er, "setEntry", 4, 0, 0 );
+		m5er.objId(), "setEntry", 4, 0, 0 );
 	assert( ret );
 
 	/*
 	ret = SetGet1< unsigned int >::set(
-		m5er, "loadBalance", Shell::numCores() );
+		m5er.objId(), "loadBalance", Shell::numCores() );
 		*/
 	assert( ret );
 

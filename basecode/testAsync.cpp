@@ -1049,7 +1049,8 @@ void printGrid( Element* e, const string& field, double min, double max )
 		if ( ( i % xside ) == 0 )
 			cout << endl;
 		Eref er( e, i );
-		double Vm = Field< double >::get( er, field );
+		ObjId oid( e->id(), i );
+		double Vm = Field< double >::get( oid, field );
 		int shape = 5.0 * ( Vm - min ) / ( max - min );
 		if ( shape > 4 )
 			shape = 4;
@@ -1249,17 +1250,17 @@ void testUpValue()
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		DataId di( 0, i ); // DataId( data, field )
-		Eref te( ticke, di );
+		ObjId oid( tickId, di );
 		double dt = i;
-		bool ret = Field< double >::set( te, "dt", dt );
+		bool ret = Field< double >::set( oid, "dt", dt );
 		assert( ret );
-		double val = Field< double >::get( te, "localdt" );
+		double val = Field< double >::get( oid, "localdt" );
 		assert( doubleEq( dt, val ) );
 
 		dt *= 10.0;
-		ret = Field< double >::set( te, "localdt", dt );
+		ret = Field< double >::set( oid, "localdt", dt );
 		assert( ret );
-		val = Field< double >::get( te, "dt" );
+		val = Field< double >::get( oid, "dt" );
 		assert( doubleEq( dt, val ) );
 	}
 	cout << "." << flush;
@@ -1551,8 +1552,10 @@ void testSetGetExtField()
 
 	vector< double > vec;
 	for ( unsigned int i = 0; i < size; ++i ) {
-		Eref a( e1, i );
-		Eref b( e1, size - i - 1 );
+		ObjId a( i1, i );
+		ObjId b( i1, size - i - 1);
+		// Eref a( e1, i );
+		// Eref b( e1, size - i - 1 );
 		double temp = i;
 		ret = Field< double >::set( a, "x", temp );
 		assert( ret );
@@ -1566,9 +1569,14 @@ void testSetGetExtField()
 	assert( ret );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
+		/*
 		Eref a( e2, i );
 		Eref b( e3, size - i - 1 );
 		Eref c( e4, i );
+		*/
+		ObjId a( i2, i );
+		ObjId b( i3, size - i - 1 );
+		ObjId c( i4, i );
 		double temp = i;
 		double temp2  = temp * temp;
 
@@ -1583,8 +1591,10 @@ void testSetGetExtField()
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
-		Eref a( e1, i );
-		Eref b( e1, size - i - 1 );
+		// Eref a( e1, i );
+		// Eref b( e1, size - i - 1 );
+		ObjId a( i1, i );
+		ObjId b( i1, size - i - 1 );
 
 		double temp = i;
 		double temp2  = temp * temp;

@@ -171,7 +171,7 @@ template< class A > class SetGet1: public SetGet
 		static bool setVec( Id destId, const string& field, 
 			const vector< A >& arg )
 		{
-			ObjId tgt = destId.eref();
+			ObjId tgt( destId, 0 );
 			SetGet1< A > sg( tgt );
 			FuncId fid;
 			if ( arg.size() == 0 )
@@ -274,7 +274,7 @@ template< class A > class Field: public SetGet1< A >
 		 */
 		static void getVec( Id dest, const string& field, vector< A >& vec )
 		{
-			SetGet1< A > sg( dest.eref() );
+			SetGet1< A > sg( ObjId( dest, 0 ) );
 			string temp = "get_" + field;
 			unsigned int numRetEntries;
 			const vector< char* >& ret = 

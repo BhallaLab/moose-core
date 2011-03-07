@@ -673,7 +673,6 @@ void Shell::clearRestructuringQ()
  * the FuncId is the 'get' function on the array size field.
  * The tgt is the FieldElement to synchronize. Need to specify this because
  * in principle a given elm could have multiple FieldElements.
- * Should replace FuncId with string name of field.
  */
 void Shell::doSyncDataHandler( Id elm, const string& sizeField, Id tgt )
 {
@@ -703,33 +702,8 @@ void Shell::doSyncDataHandler( Id elm, const string& sizeField, Id tgt )
 		requestSync.send( sheller, &p_, elm, sizeFid );
 	waitForAck();
 	// Now the data is back, assign the field.
-	Field< unsigned int >::set( tgt.eref(), "fieldDimension", maxIndex_ );
-
-	// This old version is inadequate, since the other nodes also need to have the
-	// field assigned.
-	// fb->setFieldDimension( maxIndex_ );
+	Field< unsigned int >::set( ObjId( tgt, 0 ), "fieldDimension", maxIndex_ );
 }
-
-/*
-void Shell::doSyncDataHandler( Id elm, FuncId sizeField, Id tgt )
-{
-	FieldDataHandlerBase* fb = 
-		dynamic_cast< FieldDataHandlerBase* >( tgt()->dataHandler() );
-	if ( !fb ) {
-		cout << myNode_ << ": Shell::doSyncDataHandler:Error: target '" <<
-			tgt.path() << "' is not a FieldElement\n";
-		return;
-	}
-	Eref sheller( shelle_, 0 );
-	initAck();
-		requestSync.send( sheller, &p_, elm, sizeField );
-	waitForAck();
-	// Now the data is back, assign the field.
-	// This is inadequate, since the other nodes also need to have the
-	// field assigned.
-	fb->setFieldDimension( maxIndex_ );
-}
-*/
 
 ////////////////////////////////////////////////////////////////
 // DestFuncs
