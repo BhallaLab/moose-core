@@ -127,7 +127,7 @@ Id ReadKkit::read(
 
 	assignCompartments();
 	s->setCwe( base );
-	Field< string >::set( base.eref(), "path", "##" );
+	Field< string >::set( base, "path", "##" );
 	s->doReinit();
 	return base;
 }
@@ -165,7 +165,7 @@ void ReadKkit::dumpPlots( const string& filename )
 		basePath_ + "/moregraphs/##[TYPE=Table]";
 	Shell::wildcard( plotpath, plots );
 	for ( vector< Id >::iterator i = plots.begin(); i != plots.end(); ++i )
-		SetGet2< string, string >::set( i->eref(), "xplot",
+		SetGet2< string, string >::set( *i, "xplot",
 			filename, (*i)()->getName() );
 }
 
@@ -467,8 +467,8 @@ Id ReadKkit::buildReac( const vector< string >& args )
 	Id reac = shell_->doCreate( "Reac", pa, tail, dim );
 	reacIds_[ args[2].substr( 10 ) ] = reac; 
 
-	Field< double >::set( reac.eref(), "kf", kf );
-	Field< double >::set( reac.eref(), "kb", kb );
+	Field< double >::set( reac, "kf", kf );
+	Field< double >::set( reac, "kb", kb );
 
 	Id info = buildInfo( reac, reacMap_, args );
 
@@ -525,7 +525,7 @@ void ReadKkit::assignCompartments()
 		}
 		Id compt = shell_->doCreate( 
 			"ChemCompt", baseId_, name, dims );
-		Field< double >::set( compt.eref(), "size", vols_[i] );
+		Field< double >::set( compt, "size", vols_[i] );
 		compartments_.push_back( compt );
 		for ( vector< Id >::iterator j = volCategories_[i].begin();
 			j != volCategories_[i].end(); ++j ) {
@@ -561,29 +561,29 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 
 		assert( k1 > EPSILON );
 		double Km = ( k2 + k3 ) / k1;
-		Field< double >::set( enz.eref(), "Km", Km );
-		Field< double >::set( enz.eref(), "kcat", k3 );
+		Field< double >::set( enz, "Km", Km );
+		Field< double >::set( enz, "kcat", k3 );
 		Id info = buildInfo( enz, enzMap_, args );
 		numMMenz_++;
 		return enz;
 	} else {
 		Id enz = shell_->doCreate( "Enz", pa, tail, dim );
-		double parentVol = Field< double >::get( pa.eref(), "size" );
+		double parentVol = Field< double >::get( pa, "size" );
 		assert( enz != Id () );
 		string enzPath = args[2].substr( 10 );
 		enzIds_[ enzPath ] = enz; 
 
-		Field< double >::set( enz.eref(), "k1", k1 );
-		Field< double >::set( enz.eref(), "k2", k2 );
-		Field< double >::set( enz.eref(), "k3", k3 );
+		Field< double >::set( enz, "k1", k1 );
+		Field< double >::set( enz, "k2", k2 );
+		Field< double >::set( enz, "k3", k3 );
 
 		string cplxName = tail + "_cplx";
 		string cplxPath = enzPath + "/" + cplxName;
 		Id cplx = shell_->doCreate( "Mol", enz, cplxName, dim );
 		assert( cplx != Id () );
 		molIds_[ cplxPath ] = enz; 
-		Field< double >::set( cplx.eref(), "nInit", nComplexInit );
-		SetGet1< double >::set( cplx.eref(), "setSize", parentVol );
+		Field< double >::set( cplx, "nInit", nComplexInit );
+		SetGet1< double >::set( cplx, "setSize", parentVol );
 
 		separateVols( cplx, parentVol );
 
@@ -684,9 +684,9 @@ Id ReadKkit::buildMol( const vector< string >& args )
 	// skip the 10 chars of "/kinetics/"
 	molIds_[ args[2].substr( 10 ) ] = mol; 
 
-	Field< double >::set( mol.eref(), "nInit", nInit );
-	Field< double >::set( mol.eref(), "diffConst", diffConst );
-	SetGet1< double >::set( mol.eref(), "setSize", vol );
+	Field< double >::set( mol, "nInit", nInit );
+	Field< double >::set( mol, "diffConst", diffConst );
+	SetGet1< double >::set( mol, "setSize", vol );
 
 	separateVols( mol, vol );
 

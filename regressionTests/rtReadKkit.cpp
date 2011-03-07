@@ -43,13 +43,13 @@ void rtReadKkit()
 	Id kineticId = shell->doLoadModel( "Kholodenko.g", "/rkktest" );
 	assert( kineticId != Id() );
 	unsigned int numVarMols = Field< unsigned int >::get( 
-		kineticId.eref(), "nVarMols" );
+		kineticId, "nVarMols" );
 	assert ( numVarMols == 15 );
 
 	Id gsl = shell->doCreate( "GslIntegrator", kineticId, "gsl", dims );
-	bool ret = SetGet1< Id >::set( gsl.eref(), "stoich", kineticId );
+	bool ret = SetGet1< Id >::set( gsl, "stoich", kineticId );
 	assert( ret );
-	ret = Field< bool >::get( gsl.eref(), "isInitialized" );
+	ret = Field< bool >::get( gsl, "isInitialized" );
 	assert( ret );
 
 	shell->doSetClock( 0, 10 );
@@ -63,7 +63,7 @@ void rtReadKkit()
 
 	Id plotId( "/rkktest/graphs/conc1/MAPK-PP.Co" );
 	assert( plotId != Id() );
-	unsigned int size = Field< unsigned int >::get( plotId.eref(), "size" );
+	unsigned int size = Field< unsigned int >::get( plotId, "size" );
 	assert( size == 501 ); // Note that dt was 10.
 	
 	/*
@@ -71,16 +71,16 @@ void rtReadKkit()
 		plotId.eref(), "compareXplot", "Kholodenko.plot,/graphs/conc1/MAPK-PP.Co,rmsr" );
 		*/
 	bool ok = SetGet3< string, string, string >::set(
-		plotId.eref(), "compareXplot", "Kholodenko.plot", 
+		plotId, "compareXplot", "Kholodenko.plot", 
 		"/graphs/conc1/MAPK-PP.Co", "rmsr" );
 	assert( ok );
 
 	ok = SetGet2< string, string >::set(
-		plotId.eref(), "xplot", "check.plot", "MAPK-PP.plot" );
+		plotId, "xplot", "check.plot", "MAPK-PP.plot" );
 	assert( ok );
 
 	// Returns -1 on failure, otherwise the (positive) rms ratio.
-	double val = Field< double >::get( plotId.eref(), "outputValue" );
+	double val = Field< double >::get( plotId, "outputValue" );
 	assert( val >= 0 && val < TOLERANCE );
 
 	/////////////////////////////////////////////////////////////////////
