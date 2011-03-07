@@ -445,6 +445,9 @@ void testThreadIntFireNetwork()
 	assert( fd );
 	unsigned int fieldSize = fd->biggestFieldArraySize();
 	fd->setFieldDimension( fieldSize );
+	assert( fieldSize == 134 );
+	assert( fd->totalEntries() == size * 134 );
+
 	vector< double > weight( size * fieldSize, 0.0 );
 	vector< double > delay( size * fieldSize, 0.0 );
 	unsigned int numTotSyn = 0;
@@ -548,13 +551,18 @@ void testMultiNodeIntFireNetwork()
 	SetGet2< double, long >::set( mer.objId(), "setRandomConnectivity", 
 		connectionProbability, 5489UL );
 
+	/*
+	* Cannot do this for multiple nodes: the local node may not have the
+	* case where there are 134 entries.
+	*
 	FieldDataHandlerBase * fdh =
 		static_cast< FieldDataHandlerBase *>( syn->dataHandler() );
 	fdh->setFieldDimension( fdh->biggestFieldArraySize() );
 	assert( fdh->biggestFieldArraySize() == 134 );
+	assert( syn->dataHandler()->totalEntries() == size * 134 );
+	*/
 
 	unsigned int nd = syn->dataHandler()->localEntries();
-	assert( syn->dataHandler()->totalEntries() == size * 134 );
 	if ( Shell::numNodes() == 1 )
 		assert( nd == NUM_TOT_SYN );
 	else if ( Shell::numNodes() == 2 )
@@ -590,6 +598,7 @@ void testMultiNodeIntFireNetwork()
 
 	unsigned int fieldSize = 
 		Field< unsigned int >::get( synId, "fieldDimension" );
+	assert( fieldSize == 134 );
 
 	// cout << Shell::myNode() << ": fieldSize = " << fieldSize << endl;
 	vector< unsigned int > numSynVec;
