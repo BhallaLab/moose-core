@@ -11621,3 +11621,9 @@ Now through basecode, msg and working on compilation through shell.
 Checkin 2503
 
 More compilation, now through scheduling and builtins. Checkin 2504.
+
+More compilation, now done and clears unit tests. Checkin 2505.
+
+Tried regression tests. Turns out that GSL is not compiled with this. 
+Fixed compilation flags, recompiled. Now it clears regression tests too.
+

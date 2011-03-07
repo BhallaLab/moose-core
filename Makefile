@@ -93,18 +93,21 @@ endif
 # Threading mode:
 ifeq ($(BUILD),thread)
 CXXFLAGS  = -O3 -pthread -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER  
+USE_GSL = 1
 endif
 
 # MPI mode:
 ifeq ($(BUILD),mpi)
 CXXFLAGS  = -g -pthread -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
 USE_MPI = 1
+USE_GSL = 1
 endif
 
 # optimized MPI mode:
 ifeq ($(BUILD),ompi)
 CXXFLAGS  = -O3 -pthread -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER
 USE_MPI = 1
+USE_GSL = 1
 endif
 
 # optimised mode but with unit tests.
