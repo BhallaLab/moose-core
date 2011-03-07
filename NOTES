@@ -11626,4 +11626,14 @@ More compilation, now done and clears unit tests. Checkin 2505.
 
 Tried regression tests. Turns out that GSL is not compiled with this. 
 Fixed compilation flags, recompiled. Now it clears regression tests too.
+Checkin 2506.
+
+Ran on ghevar (8/16 thread Intel Nehalem) and gj (4-core Opteron).
+Ghevar crashes when run with more than 6 nodes (mpirun -np 6 ./moose -c 1 ).
+It is perfectly happy doing mpirun -np 6 ./moose -c 8 for a total of 48 
+processes.
+
+gj is happy up to 4 'nodes', then hangs for more.
+
+These seem to be different issues.
 
