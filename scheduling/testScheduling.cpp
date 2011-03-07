@@ -61,7 +61,7 @@ void testTicks()
 	assert( msgDests.size() == 1 );
 	assert( msgDests[0] == arithId );
 
-	bool ret = Field< double >::set( tickId.eref(), "dt", 5.0);
+	bool ret = Field< double >::set( tickId, "dt", 5.0);
 	assert( ret );
 
 	Tick* t0 = reinterpret_cast< Tick* >( tickId.eref().data() );
@@ -200,24 +200,24 @@ void setupTicks()
 	// cout << Shell::myNode() << ": numTicks: " << ticke->dataHandler()->totalEntries() << ", " << size << endl;
 	assert( ticke->dataHandler()->localEntries() == size );
 
-	Eref er0( ticke, DataId( 0, 2 ) );
+	ObjId er0( tickId, DataId( 0, 2 ) );
 	bool ret = Field< double >::set( er0, "dt", 5.0);
 	assert( ret );
-	Eref er1( ticke, DataId( 0, 1 ) );
+	ObjId er1( tickId, DataId( 0, 1 ) );
 	ret = Field< double >::set( er1, "dt", 2.0);
 	assert( ret );
-	Eref er2( ticke, DataId( 0, 0 ) );
+	ObjId er2( tickId, DataId( 0, 0 ) );
 	ret = Field< double >::set( er2, "dt", 2.0);
 	assert( ret );
-	Eref er3( ticke, DataId( 0, 3 ) );
+	ObjId er3( tickId, DataId( 0, 3 ) );
 	ret = Field< double >::set( er3, "dt", 1.0);
 	assert( ret );
-	Eref er4( ticke, DataId( 0, 4 ) );
+	ObjId er4( tickId, DataId( 0, 4 ) );
 	ret = Field< double >::set( er4, "dt", 3.0);
 	assert( ret );
 	// Note that here I put the tick on a different DataId. later it gets
 	// to sit on the appropriate Conn, when the SingleMsg is set up.
-	Eref er5( ticke, DataId( 0, 7 ) );
+	ObjId er5( tickId, DataId( 0, 7 ) );
 	ret = Field< double >::set( er5, "dt", 5.0);
 	assert( ret );
 
@@ -254,17 +254,17 @@ void setupTicks()
 	const SrcFinfo* sproc0 = dynamic_cast< const SrcFinfo* >( proc0 );
 	assert( sproc0 );
 	unsigned int b0 = sproc0->getBindIndex();
-	SingleMsg *m0 = new SingleMsg( Msg::nextMsgId(), er0, ts ); 
+	SingleMsg *m0 = new SingleMsg( Msg::nextMsgId(), er0.eref(), ts ); 
 	er0.element()->addMsgAndFunc( m0->mid(), f, 0 + b0 );
-	SingleMsg *m1 = new SingleMsg( Msg::nextMsgId(), er1, ts ); 
+	SingleMsg *m1 = new SingleMsg( Msg::nextMsgId(), er1.eref(), ts ); 
 	er1.element()->addMsgAndFunc( m1->mid(), f, 2 + b0 );
-	SingleMsg *m2 = new SingleMsg( Msg::nextMsgId(), er2, ts );
+	SingleMsg *m2 = new SingleMsg( Msg::nextMsgId(), er2.eref(), ts );
 	er2.element()->addMsgAndFunc( m2->mid(), f, 4 + b0 );
-	SingleMsg *m3 = new SingleMsg( Msg::nextMsgId(), er3, ts ); 
+	SingleMsg *m3 = new SingleMsg( Msg::nextMsgId(), er3.eref(), ts ); 
 	er3.element()->addMsgAndFunc( m3->mid(), f, 6 + b0 );
-	SingleMsg *m4 = new SingleMsg( Msg::nextMsgId(), er4, ts ); 
+	SingleMsg *m4 = new SingleMsg( Msg::nextMsgId(), er4.eref(), ts ); 
 	er4.element()->addMsgAndFunc( m4->mid(), f, 8 + b0 );
-	SingleMsg *m5 = new SingleMsg( Msg::nextMsgId(), er5, ts ); 
+	SingleMsg *m5 = new SingleMsg( Msg::nextMsgId(), er5.eref(), ts ); 
 	er5.element()->addMsgAndFunc( m5->mid(), f, 14 + b0 );
 
 	cdata->rebuild();
@@ -545,7 +545,7 @@ void testMultiNodeIntFireNetwork()
 	Eref mer = m->manager();
 	assert( mer.element() );
 
-	SetGet2< double, long >::set( mer, "setRandomConnectivity", 
+	SetGet2< double, long >::set( mer.objId(), "setRandomConnectivity", 
 		connectionProbability, 5489UL );
 
 	FieldDataHandlerBase * fdh =
@@ -589,7 +589,7 @@ void testMultiNodeIntFireNetwork()
 	shell->doSyncDataHandler( e2.id(), "get_numSynapses", synId );
 
 	unsigned int fieldSize = 
-		Field< unsigned int >::get( synId.eref(), "fieldDimension" );
+		Field< unsigned int >::get( synId, "fieldDimension" );
 
 	// cout << Shell::myNode() << ": fieldSize = " << fieldSize << endl;
 	vector< unsigned int > numSynVec;
@@ -636,7 +636,7 @@ void testMultiNodeIntFireNetwork()
 
 	for ( unsigned int i = 0; i < size; i+= 100 ) {
 		double wt = Field< double >::get( 
-			Eref( syne.element(), DataId( i, 0 ) ), "weight" );
+			ObjId( synId, DataId( i, 0 ) ), "weight" );
 
 		// cout << "Got wt = " << wt << ", correct = " << weight[ i * fieldSize ] << endl << flush;
 		assert( doubleEq( wt, weight[ i * fieldSize ] ) );
@@ -650,14 +650,14 @@ void testMultiNodeIntFireNetwork()
 	shell->doSetClock( 0, timestep );
 	shell->doReinit();
 
-	double retVm100 = Field< double >::get( Eref( e2.element(), 100 ), "Vm" );
-	double retVm900 = Field< double >::get( Eref( e2.element(), 900 ), "Vm" );
+	double retVm100 = Field< double >::get( ObjId( i2, 100 ), "Vm" );
+	double retVm900 = Field< double >::get( ObjId( i2, 900 ), "Vm" );
 	assert( fabs( retVm100 - origVm100 ) < 1e-6 );
 	assert( fabs( retVm900 - origVm900 ) < 1e-6 );
 
 	shell->doStart( static_cast< double >( timestep * runsteps) + 0.0 );
-	retVm100 = Field< double >::get( Eref( e2.element(), 100 ), "Vm" );
-	retVm900 = Field< double >::get( Eref( e2.element(), 900 ), "Vm" );
+	retVm100 = Field< double >::get( ObjId( i2, 100 ), "Vm" );
+	retVm900 = Field< double >::get( ObjId( i2, 900 ), "Vm" );
 
 	// cout << "MultiNodeIntFireNetwork: Vm100 = " << retVm100 << ", " << Vm100 << "; Vm900 = " << retVm900 << ", " << Vm900 << endl;
 	assert( fabs( retVm100 - Vm100 ) < 1e-6 );
@@ -742,13 +742,13 @@ void speedTestMultiNodeIntFireNetwork( unsigned int size, unsigned int runsteps 
 	}
 	*/
 
-	MsgId mid = shell->doAddMsg( "Sparse", e2.objId(), "spike",
+	MsgId mid = shell->doAddMsg( "Sparse", i2, "spike",
 		ObjId( synId, 0 ), "addSpike" );
 	
 	const Msg* m = Msg::getMsg( mid );
 	Eref mer = m->manager();
 
-	SetGet2< double, long >::set( mer, "setRandomConnectivity", 
+	SetGet2< double, long >::set( mer.objId(), "setRandomConnectivity", 
 		connectionProbability, 5489UL );
 
 	// SetGet1< unsigned int >::set( mer, "loadBalance", numThreads ); 

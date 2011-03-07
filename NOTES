@@ -11618,3 +11618,6 @@ Because of the huge number of changes, I'm putting in a mid-stream checkin
 as the SetGet changes work through the compilation process. Checkin 2502.
 
 Now through basecode, msg and working on compilation through shell.
+Checkin 2503
+
+

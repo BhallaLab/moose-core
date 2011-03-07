@@ -37,6 +37,10 @@ class ObjId
 			: id( i ), dataId( d )
 		{;}
 
+		ObjId( Id i )
+			: id( i ), dataId( 0 )
+		{;}
+
 		static const ObjId& bad();
 
 		/**
