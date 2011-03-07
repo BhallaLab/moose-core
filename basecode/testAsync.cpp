@@ -404,18 +404,18 @@ void testSetGet()
 	assert( ret );
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
-		Eref e2( i2(), i );
+		ObjId oid( i2, i );
 		double x = i * 3.14;
-		bool ret = Field< double >::set( e2, "outputValue", x );
+		bool ret = Field< double >::set( oid, "outputValue", x );
 		assert( ret );
-		double val = reinterpret_cast< Arith* >(e2.data())->getOutput();
+		double val = reinterpret_cast< Arith* >(oid.data())->getOutput();
 		assert( doubleEq( val, x ) );
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
-		Eref e2( i2(), i );
+		ObjId oid( i2, i );
 		double x = i * 3.14;
-		double ret = Field< double >::get( e2, "outputValue" );
+		double ret = Field< double >::get( oid, "outputValue" );
 		ProcInfo p;
 		assert( doubleEq( ret, x ) );
 	}
@@ -438,13 +438,14 @@ void testStrSet()
 	Eref e2 = i2.eref();
 
 	assert( ret->getName() == "test2" );
-	bool ok = SetGet::strSet( e2, "name", "NewImprovedTest" );
+	bool ok = SetGet::strSet( ObjId( i2, 0 ), "name", "NewImprovedTest" );
 	assert( ok );
 	assert( ret->getName() == "NewImprovedTest" );
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double x = sqrt( i );
-		Eref dest( e2.element(), i );
+		// Eref dest( e2.element(), i );
+		ObjId dest( i2, i );
 		stringstream ss;
 		ss << setw( 10 ) << x;
 		ok = SetGet::strSet( dest, "outputValue", ss.str() );
@@ -476,21 +477,23 @@ void testGet()
 	// Element* shell = Id()();
 	ProcInfo p;
 
-	Eref e2 = i2.eref();
+	// Eref e2 = i2.eref();
+	ObjId oid( i2, 0 );
 
-	string val = Field< string >::get( e2, "name" );
+	string val = Field< string >::get( oid, "name" );
 	assert( val == "test2" );
 	ret->setName( "HupTwoThree" );
-	val = Field< string >::get( e2, "name" );
+	val = Field< string >::get( oid, "name" );
 	assert( val == "HupTwoThree" );
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double temp = i * 3;
-		reinterpret_cast< Arith* >(e2.element()->dataHandler()->data( i ))->setOutput( temp );
+		reinterpret_cast< Arith* >(oid.element()->dataHandler()->data( i ))->setOutput( temp );
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
-		Eref dest( e2.element(), i );
+		// Eref dest( e2.element(), i );
+		ObjId dest( i2, i );
 
 		double val = Field< double >::get( dest, "outputValue" );
 		double temp = i * 3;
@@ -513,24 +516,26 @@ void testStrGet()
 	// Element* shell = Id()();
 	ProcInfo p;
 
-	Eref e2 = i2.eref();
+	// Eref e2 = i2.eref();
+	ObjId oid( i2, 0 );
 
 	string val;
-	bool ok = SetGet::strGet( e2, "name", val );
+	bool ok = SetGet::strGet( oid, "name", val );
 	assert( ok );
 	assert( val == "test2" );
 	ret->setName( "HupTwoThree" );
-	ok = SetGet::strGet( e2, "name", val );
+	ok = SetGet::strGet( oid, "name", val );
 	assert( ok );
 	assert( val == "HupTwoThree" );
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double temp = i * 3;
-		reinterpret_cast< Arith* >( Eref( i2(), i ).data() )->setOutput( temp );
+		reinterpret_cast< Arith* >( ObjId( i2, i ).data() )->setOutput( temp );
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
-		Eref dest( e2.element(), i );
+		// Eref dest( e2.element(), i );
+		ObjId dest( i2, i );
 		ok = SetGet::strGet( dest, "outputValue", val );
 		assert( ok );
 		double conv = atof( val.c_str() );
@@ -560,18 +565,20 @@ void testSetGetDouble()
 
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
-		Eref e2( i2(), i );
+		// Eref e2( i2(), i );
+		ObjId oid( i2, i );
 		double temp = i;
-		bool ret = Field< double >::set( e2, "Vm", temp );
+		bool ret = Field< double >::set( oid, "Vm", temp );
 		assert( ret );
 		assert( 
-			doubleEq ( reinterpret_cast< IntFire* >(e2.data())->getVm() , temp ) );
+			doubleEq ( reinterpret_cast< IntFire* >(oid.data())->getVm() , temp ) );
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
-		Eref e2( i2(), i );
+		// Eref e2( i2(), i );
+		ObjId oid( i2, i );
 		double temp = i;
-		double ret = Field< double >::get( e2, "Vm" );
+		double ret = Field< double >::get( oid, "Vm" );
 		assert( doubleEq( temp, ret ) );
 	}
 
@@ -605,8 +612,9 @@ void testSetGetSynapse()
 	assert( syn->dataHandler()->localEntries() == 0 );
 	// could/should use SetVec here.
 	for ( unsigned int i = 0; i < size; ++i ) {
-		Eref e2( i2(), i );
-		bool ret = Field< unsigned int >::set( e2, "numSynapses", i );
+		// Eref e2( i2(), i );
+		ObjId oid( i2, i );
+		bool ret = Field< unsigned int >::set( oid, "numSynapses", i );
 		assert( ret );
 	}
 	assert( syn->dataHandler()->localEntries() == ( size * (size - 1) ) / 2 );
@@ -633,12 +641,13 @@ void testSetGetSynapse()
 	for ( unsigned int i = 0; i < size; ++i ) {
 		for ( unsigned int j = 0; j < i; ++j ) {
 			DataId di( i, j );
-			Eref syne( syn, di );
+			// Eref syne( syn, di );
+			ObjId synoid( synId, di );
 			double temp = i * 1000 + j ;
-			bool ret = Field< double >::set( syne, "delay", temp );
+			bool ret = Field< double >::set( synoid, "delay", temp );
 			assert( ret );
 			assert( 
-			doubleEq( reinterpret_cast< Synapse* >(syne.data())->getDelay() , temp ) );
+			doubleEq( reinterpret_cast< Synapse* >(synoid.data())->getDelay() , temp ) );
 		}
 	}
 	cout << "." << flush;
@@ -807,8 +816,9 @@ void testSendSpike()
 	assert( syn->dataHandler()->totalEntries() == size );
 	assert( syn->dataHandler()->localEntries() == 0 );
 	for ( unsigned int i = 0; i < size; ++i ) {
-		Eref er( i2(), i );
-		bool ret = Field< unsigned int >::set( er, "numSynapses", i );
+		// Eref er( i2(), i );
+		ObjId oid( i2, i );
+		bool ret = Field< unsigned int >::set( oid, "numSynapses", i );
 		assert( ret );
 	}
 	FieldDataHandlerBase * fdh =
@@ -850,10 +860,11 @@ void testSendSpike()
 	assert( fabs( Vm + 1e-7) < EPSILON );
 	*/
 
-	Eref synParent( e2.element(), 1 );
+	// Eref synParent( e2.element(), 1 );
+	ObjId synParent( i2, 1 );
 	reinterpret_cast< IntFire* >(synParent.data())->setTau( TAU );
 
-	reinterpret_cast< IntFire* >(synParent.data())->process( synParent, &p );
+	reinterpret_cast< IntFire* >(synParent.data())->process( synParent.eref(), &p );
 	Vm = Field< double >::get( synParent, "Vm" );
 	assert( doubleEq( Vm , WEIGHT * ( 1.0 - DT / TAU ) ) );
 	// cout << "Vm = " << Vm << endl;

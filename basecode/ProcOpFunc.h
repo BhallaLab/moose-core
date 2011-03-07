@@ -49,7 +49,7 @@ template< class T > class ProcOpFunc: public ProcOpFuncBase
 			if ( dt <= 0 )
 				dt = 1;
 			p.dt = dt;
-			return SetGet1< ProcPtr >::set( tgt, field, &p );
+			return SetGet1< ProcPtr >::set( tgt.objId(), field, &p );
 		}
 
 		// This could do with a whole lot of optimization to avoid

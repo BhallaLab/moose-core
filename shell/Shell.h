@@ -324,21 +324,21 @@ class Shell
 		void handleSet( const Eref& e, const Qinfo*q,
 			Id id, DataId d, FuncId fid, PrepackedBuffer arg );
 
-		static void dispatchSet( const Eref& er, FuncId fid, 
+		static void dispatchSet( const ObjId& oid, FuncId fid, 
 			const char* args, unsigned int size );
 
-		static void dispatchSetVec( const Eref& er, FuncId fid, 
+		static void dispatchSetVec( const ObjId& oid, FuncId fid, 
 			const PrepackedBuffer& arg );
 
-		void innerDispatchSet( Eref& sheller, const Eref& er, 
+		void innerDispatchSet( Eref& sheller, const ObjId& oid, 
 			FuncId fid, const PrepackedBuffer& arg );
 
 		static const vector< char* >& dispatchGet( 
-			const Eref& tgt, const string& field, const SetGet* sg,
+			const ObjId& tgt, const string& field, const SetGet* sg,
 			unsigned int& numGetEntries );
 
 		const vector< char* >& innerDispatchGet( 
-			const Eref& sheller, const Eref& tgt, FuncId tgtFid,
+			const Eref& sheller, const ObjId& tgt, FuncId tgtFid,
 			unsigned int numGetEntries );
 
 		void handleGet( const Eref& e, const Qinfo*q,

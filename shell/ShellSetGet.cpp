@@ -56,7 +56,7 @@ void Shell::handleSet( const Eref& e, const Qinfo* q,
 // This is a blocking function, and returns only when the job is done.
 // mode = 0 is single value set, mode = 1 is vector set, mode = 2 is
 // to set the entire target array to a single value.
-void Shell::dispatchSet( const Eref& tgt, FuncId fid, const char* args,
+void Shell::dispatchSet( const ObjId& tgt, FuncId fid, const char* args,
 	unsigned int size )
 {
 	Eref sheller = Id().eref();
@@ -66,17 +66,16 @@ void Shell::dispatchSet( const Eref& tgt, FuncId fid, const char* args,
 }
 
 // regular function, does the actual dispatching.
-void Shell::innerDispatchSet( Eref& sheller, const Eref& tgt, 
+void Shell::innerDispatchSet( Eref& sheller, const ObjId& tgt, 
 	FuncId fid, const PrepackedBuffer& buf )
 {
-	Id tgtId( tgt.element()->id() );
 	initAck();
-		requestSet()->send( sheller, &p_,  tgtId, tgt.index(), fid, buf );
+		requestSet()->send( sheller, &p_, tgt.id, tgt.index(), fid, buf );
 	waitForAck();
 }
 
 // Static function.
-void Shell::dispatchSetVec( const Eref& tgt, FuncId fid, 
+void Shell::dispatchSetVec( const ObjId& tgt, FuncId fid, 
 	const PrepackedBuffer& pb )
 {
 	Eref sheller = Id().eref();
@@ -91,17 +90,17 @@ void Shell::dispatchSetVec( const Eref& tgt, FuncId fid,
  * This is a blocking function and returns only when the job is done.
  */
 const vector< char* >& Shell::dispatchGet( 
-	const Eref& e, const string& field, 
+	const ObjId& oid, const string& field, 
 	const SetGet* sg, unsigned int& retEntries )
 {
 	static vector< char* > badRet( 1 );
 	badRet[0] = 0;
-	Eref tgt( e );
+	ObjId tgt( oid );
 	retEntries = 0; // in case function fails.
 	const Finfo* gf = tgt.element()->cinfo()->findFinfo( field );
 	if ( !gf ) {	// Could be a child Element. Field name changes.
 		string f2 = field.substr( 4 );
-		Id child = Neutral::child( tgt, f2 );
+		Id child = Neutral::child( tgt.eref(), f2 );
 		if ( child == Id() ) {
 			cout << myNode() << 
 				": Error: Shell::dispatchGet: No field or child named '" <<
@@ -111,9 +110,9 @@ const vector< char* >& Shell::dispatchGet(
 			assert( gf ); // Neutral has get_this, so all derived should too
 			if ( child()->dataHandler()->totalEntries() ==
 				e.element()->dataHandler()->totalEntries() )
-				tgt = Eref( child(), e.index() );
+				tgt = ObjId( child, oid.dataId );
 			else if ( child()->dataHandler()->totalEntries() <= 1 )
-				tgt = Eref( child(), 0 );
+				tgt = ObjId( child, 0 );
 			else {
 				cout << myNode() << 
 					": Error: Shell::dispatchGet: child index mismatch\n";
@@ -134,7 +133,7 @@ const vector< char* >& Shell::dispatchGet(
 			// Later we need to fine-tune to handle lookup of fields on
 			// one object, or a specific field on any object, or even
 			// sub-dimensions. For now, just the whole lot.
-			if ( tgt.index() == DataId::any() )
+			if ( tgt.dataId == DataId::any() )
 				retEntries = tgt.element()->dataHandler()->totalEntries();
 			else
 				retEntries = 1;
@@ -151,7 +150,7 @@ const vector< char* >& Shell::dispatchGet(
  * Not thread safe: this should only run on master node.
  */
 const vector< char* >& Shell::innerDispatchGet( 
-	const Eref& sheller, const Eref& tgt, 
+	const Eref& sheller, const ObjId& tgt, 
 	FuncId fid, unsigned int retEntries )
 {
 	// static timespec sleepTime = { 0, 10000}; // 0.1 msec.
@@ -161,7 +160,7 @@ const vector< char* >& Shell::innerDispatchGet(
 	getBuf_.resize( retEntries );
 	numGetVecReturns_ = 0;
 	initAck();
-		requestGet()->send( sheller, &p_, tgt.element()->id(), tgt.index(), 
+		requestGet()->send( sheller, &p_, tgt.element()->id(), tgt.dataId, 
 			fid, retEntries );
 	waitForGetAck();
 

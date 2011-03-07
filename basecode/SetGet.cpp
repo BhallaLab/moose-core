@@ -43,34 +43,34 @@ void SetGet::completeSet() const
 // A group of functions to forward dispatch commands to the Shell.
 //////////////////////////////////////////////////////////////////////
 
-void SetGet::dispatchSet( const Eref& er, FuncId fid, 
+void SetGet::dispatchSet( const ObjId& oid, FuncId fid, 
 	const char* args, unsigned int size )
 {
-	Shell::dispatchSet( er, fid, args, size );
+	Shell::dispatchSet( oid, fid, args, size );
 }
 
-void SetGet::dispatchSetVec( const Eref& er, FuncId fid, 
+void SetGet::dispatchSetVec( const ObjId& oid, FuncId fid, 
 	const PrepackedBuffer& arg )
 {
-	Shell::dispatchSetVec( er, fid, arg );
+	Shell::dispatchSetVec( oid, fid, arg );
 }
 
 const vector< char* >& SetGet::dispatchGet( 
-	const Eref& er, const string& field,
+	const ObjId& oid, const string& field,
 	const SetGet* sg, unsigned int& numGetEntries )
 {
-	return Shell::dispatchGet( er, field, sg, numGetEntries );
+	return Shell::dispatchGet( oid, field, sg, numGetEntries );
 }
 //////////////////////////////////////////////////////////////////////
 
-bool SetGet::checkSet( const string& field, Eref& tgt, FuncId& fid ) const
+bool SetGet::checkSet( const string& field, ObjId& tgt, FuncId& fid ) const
 {
 	// string field = "set_" + destField;
-	const Finfo* f = e_.element()->cinfo()->findFinfo( field );
+	const Finfo* f = oid_.element()->cinfo()->findFinfo( field );
 	if ( !f ) { // Could be a child element? Note that field name will 
 		// change from set_<name> to just <name>
 		string f2 = field.substr( 4 );
-		Id child = Neutral::child( e_, f2 );
+		Id child = Neutral::child( oid_.eref(), f2 );
 		if ( child == Id() ) {
 			cout << "Error: SetGet:checkSet:: No field or child named '" <<
 				field << "' was found\n";
@@ -78,12 +78,12 @@ bool SetGet::checkSet( const string& field, Eref& tgt, FuncId& fid ) const
 			f = child()->cinfo()->findFinfo( "set_this" );
 			assert( f ); // should always work as Neutral has the field.
 			if ( child()->dataHandler()->totalEntries() == 
-				e_.element()->dataHandler()->totalEntries() ) {
-				tgt = Eref( child(), e_.index() );
+				oid_.element()->dataHandler()->totalEntries() ) {
+				tgt = ObjId( child, oid_.dataId );
 				if ( !tgt.isDataHere() )
 					return 0;
 			} else if ( child()->dataHandler()->totalEntries() <= 1 ) {
-				tgt = Eref( child(), 0 );
+				tgt = ObjId( child, 0 );
 				if ( !tgt.isDataHere() )
 					return 0;
 			} else {
@@ -92,7 +92,7 @@ bool SetGet::checkSet( const string& field, Eref& tgt, FuncId& fid ) const
 			}
 		}
 	} else {
-		tgt = e_;
+		tgt = oid_;
 	}
 	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
 	if ( !df )
@@ -101,10 +101,10 @@ bool SetGet::checkSet( const string& field, Eref& tgt, FuncId& fid ) const
 	fid = df->getFid();
 	const OpFunc* func = df->getOpFunc();
 
-// 	fid = e_.element()->cinfo()->getOpFuncId( field );
-//	const OpFunc* func = e_.element()->cinfo()->getOpFunc( fid );
+// 	fid = oid_.element()->cinfo()->getOpFuncId( field );
+//	const OpFunc* func = oid_.element()->cinfo()->getOpFunc( fid );
 	if ( !func ) {
-		cout << "set::Failed to find " << e_ << "." << field << endl;
+		cout << "set::Failed to find " << oid_ << "." << field << endl;
 		return 0;
 	}
 
@@ -112,7 +112,7 @@ bool SetGet::checkSet( const string& field, Eref& tgt, FuncId& fid ) const
 	if ( func->checkSet( this ) ) {
 		return 1;
 	} else {
-		cout << "set::Type mismatch" << e_ << "." << field << endl;
+		cout << "set::Type mismatch" << oid_ << "." << field << endl;
 		return 0;
 	}
 }
@@ -120,7 +120,7 @@ bool SetGet::checkSet( const string& field, Eref& tgt, FuncId& fid ) const
 /////////////////////////////////////////////////////////////////////////
 
 // Static function
-bool SetGet::strGet( const Eref& tgt, const string& field, string& ret )
+bool SetGet::strGet( const ObjId& tgt, const string& field, string& ret )
 {
 	const Finfo* f = tgt.element()->cinfo()->findFinfo( field );
 	if ( !f ) {
@@ -129,10 +129,10 @@ bool SetGet::strGet( const Eref& tgt, const string& field, string& ret )
 			endl;
 		return 0;
 	}
-	return f->strGet( tgt, field, ret );
+	return f->strGet( tgt.eref(), field, ret );
 }
 
-bool SetGet::strSet( const Eref& tgt, const string& field, const string& v)
+bool SetGet::strSet( const ObjId& tgt, const string& field, const string& v)
 {
 	const Finfo* f = tgt.element()->cinfo()->findFinfo( field );
 	if ( !f ) {
@@ -141,5 +141,5 @@ bool SetGet::strSet( const Eref& tgt, const string& field, const string& v)
 			endl;
 		return 0;
 	}
-	return f->strSet( tgt, field, v );
+	return f->strSet( tgt.eref(), field, v );
 }

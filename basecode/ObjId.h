@@ -50,6 +50,21 @@ class ObjId
 		bool operator==( const ObjId& other ) const;
 
 		/**
+		 * True if the data is present on the current node.
+		 */
+		bool isDataHere() const;
+
+		/**
+		 * Returns data entry for this object
+		 */
+		char* data() const;
+
+		/**
+		 * Returns Element part
+		 */
+		Element* element() const;
+
+		/**
 		 * Here are the data values.
 		 */
 		Id id; 
