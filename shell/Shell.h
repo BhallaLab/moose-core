@@ -40,10 +40,22 @@ class Shell
 		///////////////////////////////////////////////////////////
 		// Parser functions
 		///////////////////////////////////////////////////////////
+
+		/**
+		 * Create an Element. Returns its id.
+		 * type: Specifies classname of Objects in Element.
+		 * parent: Id of parent element
+		 * name: Name to be used for identifying Element.
+		 * dimensions: Size of array in any # of dimensions.
+		 */
 		Id doCreate( string type, Id parent, string name, 
 			vector< unsigned int > dimensions );
 
-		bool doDelete( Id i );
+		/**
+		 * Delete specified Element and all its children and all 
+		 * Msgs connected to it.
+		 */
+		bool doDelete( Id id );
 
 		/**
 		 * Sets up a Message of specified type.
@@ -55,10 +67,14 @@ class Shell
 			ObjId src, const string& srcField, 
 			ObjId dest, const string& destField);
 
+		/**
+		 * Cleanly quits simulation, wrapping up all nodes and threads.
+		 */
 		void doQuit( );
 
 		/**
-		 * Starts off simulation
+		 * Starts off simulation, to run for 'runtime' more than current
+		 * time.
 		 */
 		void doStart( double runtime );
 
@@ -83,7 +99,8 @@ class Shell
 		void doTerminate();
 
 		/**
-		 * shifts orig Element to newParent.
+		 * shifts orig Element (including offspring) to newParent. All old 
+		 * hierarchy, data, Msgs etc are preserved below the orig.
 		 */
 		void doMove( Id orig, Id newParent );
 

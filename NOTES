@@ -11636,4 +11636,25 @@ processes.
 gj is happy up to 4 'nodes', then hangs for more.
 
 These seem to be different issues.
+Fixed the issue on ghevar: it was an invalid check on # entries on a local
+dataHandler, in testMultiNodeIntFireNetwork(). Now works, and ghevar
+has just done 32 simulated nodes. 
+Checkin 2507.
+This is the reference codebase I think for bringing the versions back
+together.
+
+Set off on gj with 48 nodes x 4 cores. This went very slowly indeed, 
+and it failed with the Sparse matrix transpose.
+
+Tried again on gj with 48 nodes x 1 cores. This went very slowly too, 
+and it also failed with the Sparse matrix transpose.
+
+To run it on gj:
+/usr/local/mvapich2/bin/mpirun -np 48 ./moose
+
+Before that, to start up mpi: source start_63_mpd
+To check if it is running on all nodes: mpdtrace
+To clean up the mess: source kill_mpd.
+
+
 
