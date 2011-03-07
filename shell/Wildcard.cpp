@@ -64,7 +64,7 @@ static bool wildcardFieldComparison( Id id, const string& mid )
 	*/
 	string actualValue;
 
-	bool ret = SetGet::strGet( id.eref(), fieldName, actualValue );
+	bool ret = SetGet::strGet( ObjId( id, 0 ), fieldName, actualValue );
 	if ( ret == 0 )
 		return 0;
 	if ( op == "==" || op == "=" )
@@ -510,7 +510,7 @@ void testWildcard()
 	ret = matchInsideBrace( c3, "TYPE=membrane" );
 	assert( !ret );
 
-	Field<double>::set( c3.eref(), "outputValue", 123.5 );
+	Field<double>::set( ObjId( c3, 0 ), "outputValue", 123.5 );
 	ret = matchInsideBrace( c3, "FIELD(outputValue)=123.5" );
 	assert( ret );
 	ret = matchInsideBrace( c3, "FIELD(outputValue)==123.5" );
@@ -543,7 +543,7 @@ void testWildcard()
 		sprintf( name, "ch%ld", i );
 		el2[i] = shell->doCreate( "Mdouble", c1, name, dims );
 		//el2[i] = Neutral::create( "HHChannel", name, c1->id(), Id::scratchId() );
-		Field< double >::set( Eref( el2[i](), i ), "value", i );
+		Field< double >::set( ObjId( el2[i], i ), "value", i );
 	}
 
 	wildcardTestFunc( el2, 100, "/a1/c1/##" );

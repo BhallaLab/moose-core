@@ -70,7 +70,7 @@ void Shell::innerDispatchSet( Eref& sheller, const ObjId& tgt,
 	FuncId fid, const PrepackedBuffer& buf )
 {
 	initAck();
-		requestSet()->send( sheller, &p_, tgt.id, tgt.index(), fid, buf );
+		requestSet()->send( sheller, &p_, tgt.id, tgt.dataId, fid, buf );
 	waitForAck();
 }
 
@@ -109,7 +109,7 @@ const vector< char* >& Shell::dispatchGet(
 			gf = child()->cinfo()->findFinfo( "get_this" );
 			assert( gf ); // Neutral has get_this, so all derived should too
 			if ( child()->dataHandler()->totalEntries() ==
-				e.element()->dataHandler()->totalEntries() )
+				oid.element()->dataHandler()->totalEntries() )
 				tgt = ObjId( child, oid.dataId );
 			else if ( child()->dataHandler()->totalEntries() <= 1 )
 				tgt = ObjId( child, 0 );

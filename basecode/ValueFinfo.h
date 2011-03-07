@@ -44,14 +44,14 @@ template < class T, class F > class ValueFinfo: public Finfo
 
 		bool strSet( const Eref& tgt, const string& field, 
 			const string& arg ) const {
-			Field< F > sg( tgt );
-			return sg.innerStrSet( tgt, field, arg );
+			Field< F > sg( tgt.objId() );
+			return sg.innerStrSet( tgt.objId(), field, arg );
 		}
 
 		bool strGet( const Eref& tgt, const string& field, 
 			string& returnValue ) const {
-			Field< F > sg( tgt );
-			return sg.innerStrGet( tgt, field, returnValue );
+			Field< F > sg( tgt.objId() );
+			return sg.innerStrGet( tgt.objId(), field, returnValue );
 		}
 
 	private:
@@ -93,8 +93,8 @@ template < class T, class F > class ReadOnlyValueFinfo: public Finfo
 
 		bool strGet( const Eref& tgt, const string& field, 
 			string& returnValue ) const {
-			Field< F > sg( tgt );
-			return sg.innerStrGet( tgt, field, returnValue );
+			Field< F > sg( tgt.objId() );
+			return sg.innerStrGet( tgt.objId(), field, returnValue );
 		}
 
 	private:
@@ -145,14 +145,14 @@ template < class T, class F > class UpValueFinfo: public Finfo
 
 		bool strSet( const Eref& tgt, const string& field, 
 			const string& arg ) const {
-			Field< F > sg( tgt );
-			return sg.innerStrSet( tgt, field, arg );
+			Field< F > sg( tgt.objId() );
+			return sg.innerStrSet( tgt.objId(), field, arg );
 		}
 
 		bool strGet( const Eref& tgt, const string& field, 
 			string& returnValue ) const {
-			Field< F > sg( tgt );
-			return sg.innerStrGet( tgt, field, returnValue );
+			Field< F > sg( tgt.objId() );
+			return sg.innerStrGet( tgt.objId(), field, returnValue );
 		}
 
 	private:
