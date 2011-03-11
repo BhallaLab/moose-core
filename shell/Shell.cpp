@@ -292,13 +292,16 @@ const Cinfo* Shell::initCinfo()
 ////////////////////////////////////////////////////////////////
 // Value Finfos
 ////////////////////////////////////////////////////////////////
-	/*
-	static ValueFinfo< Shell, string > name( 
-			"name",
-			"Name of object", 
-			&Shell::setName, 
-			&Shell::getName );
-			*/
+	static ReadOnlyValueFinfo< Shell, bool > isRunning( 
+			"isRunning",
+			"Flag: Checks if simulation is in progress",
+			&Shell::isRunning );
+
+	static ValueFinfo< Shell, Id > cwe( 
+			"cwe",
+			"Current working Element",
+			&Shell::setCwe,
+			&Shell::getCwe );
 
 ////////////////////////////////////////////////////////////////
 // Dest Finfos: Functions handled by Shell
@@ -373,7 +376,6 @@ Shell::Shell()
 		acked_( 1, 0 ),
 		barrier1_( 0 ),
 		barrier2_( 0 ),
-		isRunning_( 0 ),
 		doReinit_( 0 ),
 		runtime_( 0.0 ),
 		cwe_( Id() )
@@ -517,8 +519,14 @@ void Shell::doStart( double runtime )
 		requestStart.send( sheller, &p_, runtime );
 	waitForAck();
 	// cout << Shell::myNode() << ": Shell::doStart(" << runtime << ")" << endl;
-	// Qinfo::reportQ();
-	// cout << myNode_ << ": Shell::doStart: quitting\n";
+}
+
+void Shell::doNonBlockingStart( double runtime )
+{
+	Eref sheller( shelle_, 0 );
+	// Check if sim not yet initialized. Do it if needed.
+
+	requestStart.send( sheller, &p_, runtime );
 }
 
 void Shell::doReinit()
@@ -730,6 +738,14 @@ void Shell::setCwe( Id val )
 Id Shell::getCwe() const
 {
 	return cwe_;
+}
+
+bool Shell::isRunning() const
+{
+	Id clockId( 1 );
+	assert( clockId() != 0 );
+
+	return ( reinterpret_cast< const Clock* >( clockId.eref().data() ) )->isRunning();
 }
 
 const vector< char* >& Shell::getBuf() const

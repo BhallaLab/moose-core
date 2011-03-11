@@ -11639,8 +11639,7 @@ These seem to be different issues.
 Fixed the issue on ghevar: it was an invalid check on # entries on a local
 dataHandler, in testMultiNodeIntFireNetwork(). Now works, and ghevar
 has just done 32 simulated nodes. 
-Checkin 2507.
-This is the reference codebase I think for bringing the versions back
+Checkin 2507.  This is the reference codebase I think for bringing the versions back
 together.
 
 Set off on gj with 48 nodes x 4 cores. This went very slowly indeed, 
@@ -11657,4 +11656,7 @@ To check if it is running on all nodes: mpdtrace
 To clean up the mess: source kill_mpd.
 
 
+For the lab people to use: added in some documentation  in Shell.h and in 
+the Docs subdir.
+Checkin 2508.
 

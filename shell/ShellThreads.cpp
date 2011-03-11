@@ -149,12 +149,6 @@ void Shell::handleAck( unsigned int ackNode, unsigned int status )
 	}
 }
 
-
-void Shell::setRunning( bool value )
-{
-	isRunning_ = value;
-}
-
 ///////////////////////////////////////////////////////////////////
 
 /**
