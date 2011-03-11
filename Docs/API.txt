@@ -91,6 +91,8 @@ void doQuit();
 
 void doStart( double runtime );
 
+void doNonBlockingStart( double runtime );
+
 void doReinit();
 
 void doStop();
@@ -104,9 +106,20 @@ Id doCopyId orig, Id newParent, string newName,
 
 Id doFind( const string& path ) const
 
+void doSetClock( unsigned int tickNum, double dt )
+
 void doUseClock( string path, string field, unsigned int tick );
 
 Id doLoadModel( const string& fname, const string& modelpath );
 
 void doSyncDataHandler( Id elm, const string& sizeField, Id tgt );
 
+
+5. Important fields of important objects.
+
+5.1. Shell object. This is the root object, '/' or '/root'.
+This has the following fields of note:
+	- bool isRunning: ReadOnlyValue
+	- Id cwe: Regular value. 
+
+5.2 Neutral. These fields are shared by all objects.

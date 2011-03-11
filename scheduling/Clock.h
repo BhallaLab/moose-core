@@ -124,9 +124,24 @@ class Clock
 		void setNumTicks( unsigned int num );
 		void setBarrier( void* barrier1, void* barrier2 );
 
+		/**
+		 * Flag: True when the Process loop is still going around
+		 */
 		bool keepLooping() const;
+		/**
+		 * Assign state for Process loop
+		 */
 		void setLoopingState( bool val );
 
+		/**
+		 * Flag: True when the simulation is still running.
+		 */
+		bool isRunning() const;
+
+		/**
+		 * Diagnostic: reports the numbe rof times around different phases
+		 * of the Process loop
+		 */
 		void printCounts() const;
 
 		/**

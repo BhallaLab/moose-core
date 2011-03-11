@@ -34,8 +34,20 @@ class Shell
 		///////////////////////////////////////////////////////////
 		// Field functions
 		///////////////////////////////////////////////////////////
+		/**
+		 * Assigns the current working Element of the Shell
+		 */
 		void setCwe( Id cwe );
+
+		/**
+		 * Returns the current working Element of the Shell
+		 */
 		Id getCwe() const;
+
+		/**
+		 * Returns flag to indicate whether simulation is still running
+		 */
+		bool isRunning() const;
 
 		///////////////////////////////////////////////////////////
 		// Parser functions
@@ -74,9 +86,21 @@ class Shell
 
 		/**
 		 * Starts off simulation, to run for 'runtime' more than current
-		 * time.
+		 * time. This version is blocking, and returns only when the 
+		 * simulation is done.
 		 */
 		void doStart( double runtime );
+
+		/**
+		 * Starts off simulation, to run for 'runtime' more than current
+		 * time. This version returns at once, and the parser can go
+		 * on to do other things. It has to check with the 
+		 * Shell::isRunning function (accessible as a MOOSE field)
+		 * to find out if it is finished. Can call 'doStop', 'doTerminate'
+		 * or 'doReinit' at any time to stop the run with increasing
+		 * levels of prejudice.
+		 */
+		void doNonBlockingStart( double runtime );
 
 		/**
 		 * Reinitializes simulation: time goes to zero, all scheduled
@@ -288,8 +312,6 @@ class Shell
 		void loadBalance();
 
 		void launchParser();
-
-		void setRunning( bool value );
 
 		/**
 	 	 * True when the parser is in a call which is being blocked becaus
@@ -504,10 +526,6 @@ class Shell
 		 * thread work cycle. Void here so we can compile without pthreads.
 		 */
 		pthread_cond_t* parserBlockCond_; 
-		/**
-		 * Used to coordinate threads especially when doing MPI.
-		 */
-		bool isRunning_;
 
 		/**
 		 * Flag to tell system to reinitialize. We use this to defer the
