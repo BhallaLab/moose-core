@@ -435,4 +435,76 @@ template< class T, class A > class GetOpFunc: public GetOpFuncBase< A >
 		A ( T::*func_ )() const;
 };
 
+/**
+ * This specialized OpFunc is for looking up a single field value
+ * using a single argument.
+ * It generates an opFunc that takes two arguments:
+ * 1. FuncId of the function on the object that requested the value. 
+ * 2. Index or other identifier to do the look up.
+ * The OpFunc then sends back a message with the info.
+ * Here T is the class that owns the function.
+ * A is the return type
+ * L is the lookup index.
+ */
+template< class T, class A, class L > class GetOpFunc1: public GetOpFuncBase< A >
+{
+	public:
+		GetOpFunc1( A ( T::*func )( L ) const )
+			: func_( func )
+			{;}
+
+		bool checkFinfo( const Finfo* s ) const {
+			return ( dynamic_cast< const SrcFinfo1< A >* >( s )
+			|| dynamic_cast< const SrcFinfo2< FuncId, L >* >( s ) );
+		}
+
+		bool checkSet( const SetGet* s ) const {
+			return dynamic_cast< const SetGet1< A >* >( s );
+		}
+
+		bool strSet( const Eref& tgt, 
+			const string& field, const string& arg ) const {
+			return SetGet1< A >::innerStrSet( tgt.objId(), field, arg );
+		}
+
+		/**
+		 * The buf just contains the funcid on the src element that is
+		 * ready to receive the returned data.
+		 * Also we are returning the data along the Msg that brought in
+		 * the request, so we don't need to scan through all Msgs in
+		 * the Element to find the right one.
+		 * So we bypass the usual SrcFinfo::sendTo, and instead go
+		 * right to the Qinfo::addToQ to send off data.
+		 * Finally, the data is copied back-and-forth about 3 times.
+		 * Wasteful, but the 'get' function is not to be heavily used.
+		 */
+		void op( const Eref& e, const char* buf ) const {
+			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
+			buf += sizeof( Qinfo );
+			this->op( e, q, buf );
+		}
+
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+			if ( skipWorkerNodeGlobal( e ) )
+				return;
+			Conv< L > conv1( buf + sizeof( FuncId ) );
+			const A& ret = 
+				(( reinterpret_cast< T* >( e.data() ) )->*func_)( *conv1 );
+			Conv<A> conv0( ret );
+			char* temp0 = new char[ conv0.size() ];
+			conv0.val2buf( temp0 );
+			fieldOp( e, q, buf, temp0, conv0.size() );
+			delete[] temp0;
+		}
+
+		/// ReduceOp is not really permissible for this class.
+		A reduceOp( const Eref& e ) const {
+			L dummy;
+			return ( reinterpret_cast< T* >( e.data() )->*func_)( dummy );
+		}
+
+	private:
+		A ( T::*func_ )( L ) const;
+};
+
 #endif // _OPFUNC_H

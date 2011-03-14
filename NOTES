@@ -11697,3 +11697,18 @@ looking up Finfo lists, documentation, etc. Showfield would also find this
 useful.
 
 ============================================================================
+14 March 2011.
+
+Checkin 2524 with yesterday's messaging inspection fields, unit tests, and
+docs.
+
+Subha confirms that it would be useful to get a list of targets connected to
+a specific field on an object.
+
+To make this happen I need to have a 'get' call which takes an argument for
+lookup. This will be generally useful, for example in table lookups.
+
+Put in skeleton code for this. The OpFunc and SetGet template parts are
+done, but some nasty Shell code remains.
+
+============================================================================

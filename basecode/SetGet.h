@@ -79,14 +79,20 @@ class SetGet
 		static void dispatchSet( const ObjId& oid, FuncId fid, 
 			const char* args, unsigned int size );
 
-		/// Adapter function, just forwards to Shell::dispatchSet
+		/// Adapter function, just forwards to Shell::dispatchSetVec
 		static void dispatchSetVec( const ObjId& oid, FuncId fid, 
 			const PrepackedBuffer& arg );
 
-		/// Adapter function, just forwards to Shell::dispatchSet
+		/// Adapter function, just forwards to Shell::dispatchGet
 		static const vector< char* >& dispatchGet( 
 			const ObjId& oid, const string& field,
 			const SetGet* sg, unsigned int& numGetEntries );
+
+		/// Adapter function, forwards to Shell::dispatchLookupGet
+		static const vector< char* >& dispatchLookupGet( 
+			const ObjId& oid, const string& field,
+			char* indexBuf, const SetGet* sg, 
+			unsigned int& numGetEntries );
 
 		///  char* buf();
 
@@ -364,6 +370,148 @@ template< class A1, class A2 > class SetGet2: public SetGet
 		string harvestStrGet() const
 		{ 
 			return "";
+		}
+};
+
+/**
+ * LookupField handles fields that have an index arguments. Examples include
+ * arrays and maps.
+ * The first argument in the 'Set' is the index, the second the value.
+ * The first and only argument in the 'get' is the index.
+ * Here A is the type of the value, and L the lookup index.
+ * 
+ */
+template< class L, class A > class LookupField: public SetGet2< L, A >
+{
+	public:
+		LookupField( const ObjId& dest )
+			: SetGet2< L, A >( dest )
+		{;}
+
+		/**
+		 * Blocking, typed 'Set' call
+		 */
+		static bool set( const ObjId& dest, const string& field, 
+			L index, A arg )
+		{
+			string temp = "set_" + field;
+			return SetGet2< L, A >::set( dest, temp, index, arg );
+		}
+
+		/**
+		 * We're faking setVec. There isn't really a good matching
+		 * operation, nor do I feel it is likely to be needed often,
+		 * so it is done by marching through all the
+		 * individual assignments.
+		 */
+		static bool setVec( Id destId, const string& field, 
+			const vector< L >& index, const vector< A >& arg )
+		{
+			string temp = "set_" + field;
+			unsigned int max = index.size();
+			if ( max > arg.size() ) 
+				max = arg.size();
+			bool ret = 1;
+			for ( unsigned int i = 0; i < max; ++i )
+				ret &= 
+					SetGet2< L, A >::set( destId, temp, index[i], arg[i] );
+			return ret;
+		}
+
+		/**
+		 * Faking setRepeat too. Just plugs into setVec.
+		 */
+		static bool setRepeat( Id destId, const string& field, 
+			const vector< L >& index, A arg )
+		{
+			vector< A > avec( index.size(), arg );
+			return setVec( destId, field, index, avec );
+		}
+
+		/**
+		 * Blocking call using string conversion
+		 */
+		static bool innerStrSet( const ObjId& dest, const string& field, 
+			const string& indexStr, const string& val )
+		{
+			L index;
+			Conv< L >::str2val( index, indexStr );
+
+			A arg;
+			// Do NOT add 'set_' to the field name, as the 'set' func
+			// does it anyway.
+			Conv< A >::str2val( arg, val );
+			return set( dest, field, index, arg );
+		}
+
+	//////////////////////////////////////////////////////////////////
+
+		/**
+		 * Blocking call using typed values
+		 */
+		static A get( const ObjId& dest, const string& field, L index )
+		{ 
+			SetGet1< A > sg( dest );
+			Conv< L > convL( index );
+			char *indexBuf = new char[ convL.size() ];
+			convL.val2buf( indexBuf );
+
+			string temp = "get_" + field;
+			unsigned int numRetEntries = 0;
+			const vector< char* >& ret = 
+				dispatchLookupGet( dest, temp, indexBuf, &sg, numRetEntries );
+			assert( numRetEntries == 1 );
+			Conv< A > conv( ret[0] );
+			return *conv;
+		}
+
+		/**
+		 * Blocking call that returns a vector of values
+		 */
+		static void getVec( Id dest, const string& field, 
+			vector< L >& index, vector< A >& vec )
+		{
+			SetGet1< A > sg( ObjId( dest, 0 ) );
+			Conv< vector< L > > convL( index );
+			char *indexBuf = new char[ convL.size() ];
+			convL.val2buf( indexBuf );
+
+			string temp = "get_" + field;
+			unsigned int numRetEntries;
+			const vector< char* >& ret = 
+				dispatchLookupGet( ObjId( dest, DataId::any() ), 
+					temp, indexBuf, 
+					&sg, numRetEntries );
+
+			vec.resize( numRetEntries );
+			for ( unsigned int i = 0; i < numRetEntries; ++i ) {
+				Conv< A > conv( ret[i] );
+				vec[i] = *conv;
+			}
+		}
+
+		/**
+		 * Blocking virtual call for finding a value and returning in a
+		 * string.
+		 */
+		static bool innerStrGet( const ObjId& dest, const string& field, 
+			const string& indexStr, string& str )
+		{
+			SetGet1< A > sg( dest );
+			L index;
+			Conv< L >::str2val( index, indexStr );
+			Conv< L > convL( index );
+			char *indexBuf = new char[ convL.size() ];
+			convL.val2buf( indexBuf );
+
+			string temp = "get_" + field;
+			unsigned int numRetEntries = 0;
+			const vector< char* > & ret = 
+				dispatchLookupGet( dest, temp, indexBuf, &sg, numRetEntries );
+			assert( numRetEntries == 1 );
+			Conv< A > conv( ret[0] );
+			Conv<A>::val2str( str, *conv );
+			return 1;
 		}
 };
 
