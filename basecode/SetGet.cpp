@@ -61,6 +61,13 @@ const vector< char* >& SetGet::dispatchGet(
 {
 	return Shell::dispatchGet( oid, field, sg, numGetEntries );
 }
+
+const vector< char* >& SetGet::dispatchLookupGet( 
+	const ObjId& oid, const string& field, char* indexBuf,
+	const SetGet* sg, unsigned int& numGetEntries )
+{
+	// return Shell::dispatchGet( oid, field, sg, numGetEntries );
+}
 //////////////////////////////////////////////////////////////////////
 
 bool SetGet::checkSet( const string& field, ObjId& tgt, FuncId& fid ) const
