@@ -18,6 +18,7 @@
 class OneToAllMsg: public Msg
 {
 	friend void Msg::initMsgManagers(); // for initializing Id.
+	friend void testGetMsgs(); // test func
 	public:
 		OneToAllMsg( MsgId mid, Eref e1, Element* e2 );
 		~OneToAllMsg();

@@ -70,6 +70,28 @@ const Cinfo* Neutral::initCinfo()
 			&Neutral::getFieldDimension
 		);
 
+	static ReadOnlyElementValueFinfo< Neutral, vector< ObjId > > msgOut( 
+		"msgOut",
+		"Messages going out from this Element", 
+			&Neutral::getOutgoingMsgs );
+
+	static ReadOnlyElementValueFinfo< Neutral, vector< ObjId > > msgIn( 
+		"msgIn",
+		"Messages coming in to this Element", 
+			&Neutral::getIncomingMsgs );
+
+	/*
+	static ReadOnlyElementValueFinfo1< Neutral, vector< Id >, string > msgSrc( 
+		"msgSrc",
+		"Source Ids of Messages coming into this Element on specified field", 
+			&Neutral::getMsgSourceIds );
+
+	static ReadOnlyElementValueFinfo1< Neutral, vector< Id >, string > msgDest( 
+		"msgDest",
+		"Destination Ids of Messages from this Element on specified field", 
+			&Neutral::getMsgTargetIds );
+*/
+
 	/////////////////////////////////////////////////////////////////
 	// Value Finfos
 	/////////////////////////////////////////////////////////////////
@@ -106,6 +128,9 @@ const Cinfo* Neutral::initCinfo()
 		&path,
 		&className,
 		&fieldDimension,
+		&msgOut,
+		&msgIn,
+
 	};
 
 	/////////////////////////////////////////////////////////////////
@@ -269,6 +294,67 @@ unsigned int Neutral::getFieldDimension(
 {
 	return e.element()->dataHandler()->getFieldDimension();
 }
+
+vector< ObjId > Neutral::getOutgoingMsgs( 
+	const Eref& e, const Qinfo* q ) const
+{
+	vector< ObjId > ret;
+	unsigned int numBindIndex = e.element()->cinfo()->numBindIndex();
+
+	for ( unsigned int i = 0; i < numBindIndex; ++i ) {
+		const vector< MsgFuncBinding >* v = 
+			e.element()->getMsgAndFunc( i );
+		if ( v ) {
+			for ( vector< MsgFuncBinding >::const_iterator mb = v->begin();
+				mb != v->end(); ++mb ) {
+				const Msg* m = Msg::getMsg( mb->mid );
+				assert( m );
+				ret.push_back( m->manager().objId() );
+			}
+		}
+	}
+	return ret;
+}
+
+vector< ObjId > Neutral::getIncomingMsgs( 
+	const Eref& e, const Qinfo* q ) const
+{
+	vector< ObjId > ret;
+	const vector< MsgId >& msgIn = e.element()->msgIn();
+
+	for (unsigned int i = 0; i < msgIn.size(); ++i ) {
+		const Msg* m = Msg::getMsg( msgIn[i] );
+			assert( m );
+			if ( m->e2() == e.element() && m->mid() != Msg::setMsg )
+				ret.push_back( m->manager().objId() );
+	}
+	return ret;
+}
+
+vector< Id > Neutral::getMsgTargetIds( const Eref& e, const Qinfo* q, const string& field ) const
+{
+	vector< Id > ret;
+	const Finfo* f = e.element()->cinfo()->findFinfo( field );
+	const SrcFinfo* srcFinfo = dynamic_cast< const SrcFinfo* >( f );
+	if ( srcFinfo ) {
+		e.element()->getOutputs( ret, srcFinfo );
+	}
+	return ret;
+}
+
+
+vector< Id > Neutral::getMsgSourceIds( const Eref& e, const Qinfo* q, const string& field ) const
+{
+	vector< Id > ret;
+	const Finfo* f = e.element()->cinfo()->findFinfo( field );
+	const DestFinfo* destFinfo = dynamic_cast< const DestFinfo* >( f );
+	if ( destFinfo ) {
+		e.element()->getInputs( ret, destFinfo );
+	}
+	return ret;
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 unsigned int Neutral::buildTree( const Eref& e, const Qinfo* q, vector< Id >& tree )
 	const 

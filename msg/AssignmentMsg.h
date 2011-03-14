@@ -19,6 +19,7 @@
 class AssignmentMsg: public Msg
 {
 	friend void Msg::initMsgManagers(); // for initializing Id.
+	friend void testGetMsgs(); // test func
 	public:
 		AssignmentMsg( MsgId mid, Eref e1, Eref e2 );
 		~AssignmentMsg();

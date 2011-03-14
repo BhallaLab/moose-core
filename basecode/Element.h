@@ -166,6 +166,11 @@ class Element
 		 */
 		 unsigned int findBinding( MsgFuncBinding b ) const;
 
+		 /**
+		  * Returns all incoming Msgs.
+		  */
+		 const vector< MsgId >& msgIn() const;
+
 		/**
 		 * Returns the first Msg that calls the specified Fid, 
 		 * on current Element.

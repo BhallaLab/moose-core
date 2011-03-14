@@ -54,6 +54,37 @@ class Neutral
 		unsigned int getGroup( const Eref& e, const Qinfo* q ) const;
 
 		/**
+		 * Readonly field access function for getting all outgoing Msgs.
+		 */
+		vector< ObjId > getOutgoingMsgs(
+			const Eref& e, const Qinfo* q ) const;
+
+		/**
+		 * Readonly field access function for getting all incoming Msgs.
+		 */
+		vector< ObjId > getIncomingMsgs(
+			const Eref& e, const Qinfo* q ) const;
+
+		/**
+		 * Readonly field access function for getting source Ids
+		 * that sent a Msg to the current Id.
+		 * Field is specified by its name.
+		 * Returns an empty vector if it fails.
+		 */
+		vector< Id > getMsgTargetIds( 
+			const Eref& e, const Qinfo* q, const string& field ) const;
+
+		/**
+		 * Readonly field access function for getting destination Ids
+		 * that receive Msgs from the current Id.
+		 * Field is specified by its name.
+		 * Returns an empty vector if it fails.
+		 */
+		vector< Id > getMsgSourceIds(
+			const Eref& e, const Qinfo* q, const string& field ) const;
+
+
+		/**
 		 * Simply returns own ObjId
 		 */
 		ObjId getObjId( const Eref& e, const Qinfo* q ) const;
