@@ -11660,3 +11660,40 @@ For the lab people to use: added in some documentation  in Shell.h and in
 the Docs subdir.
 Checkin 2508.
 
+============================================================================
+11 March 2011
+Added isRunning and cwe MOOSE fields to Shell.
+Checkin 2516.
+
+Next, provide some message access functions. Two approaches: One to put it
+in the Neutral fields. Two, to provide a shell function to do it. I think the
+Neutral is the cleanest. Should just return a vector of ObjIds that match
+criteria, these being the MsgHandlers.
+
+Need to figure out how to run doxygen.
+
+In the meantime, implementing message traversal operations.
+Still to compile.
+
+============================================================================
+12 March 2011
+Compiled Neutral::getOutgoingMsgs and getIncomingMsgs as new fields.
+getMsgTargetIds is compiled but I don't yet have a way to specify
+'get' calls with an argument for the field name to which the
+Msg is to connect.
+Also need to put in unit tests. Setting those up.
+
+============================================================================
+13 March 2011
+First set of tests, for outgoing msgs, fine. Incoming are confusing as it
+reports 7 msgs rather than 1 I was expecting. Turns out that I had 
+misunderstood the usage of the Element::m_ vector, which actually keeps
+track of all msgs. Also some cleanup needed to eliminate the AssignmentMsg
+from the returned msg lists, as it comes and goes and its targets change
+all the time. Now clears a good set of tests.
+
+Should create an Element for ClassFinfos, as I had earlier. Useful for
+looking up Finfo lists, documentation, etc. Showfield would also find this
+useful.
+
+============================================================================
