@@ -195,9 +195,21 @@ template< class A > class SetGet1: public SetGet
 				return 0;
 
 			if ( sg.checkSet( field, tgt, fid ) ) {
-				const char* data = reinterpret_cast< const char* >( &arg[0] );
-				PrepackedBuffer pb( data, arg.size() * sizeof( A ), 
-					arg.size() ) ;
+				unsigned int totalArgSize = 0;
+				for ( unsigned int i = 0; i < arg.size(); ++i ) {
+					Conv< A > conv( arg[i] );
+					totalArgSize += conv.size();
+				}
+				char* data = new char[ totalArgSize ];
+				char* temp = data;
+
+				for ( unsigned int i = 0; i < arg.size(); ++i ) {
+					Conv< A > conv( arg[i] );
+					conv.val2buf( temp );
+					temp += conv.size();
+				}
+
+				PrepackedBuffer pb( data, totalArgSize, arg.size() ) ;
 				dispatchSetVec( tgt, fid, pb );
 				return 1;
 			}
@@ -412,20 +424,31 @@ template< class A1, class A2 > class SetGet2: public SetGet
 			ObjId tgt( destId, 0 );
 			SetGet2< A1, A2 > sg( tgt );
 			FuncId fid;
-			if ( arg1.size() == 0 || arg1.size() != arg2.size() )
-				return 0;
-			unsigned int totalSize = 
-				arg1.size() * ( sizeof( A1 ) + sizeof( A2 ) );
 			if ( sg.checkSet( field, tgt, fid ) ) {
+				unsigned int size = arg1.size();
+				if ( size > arg2.size() ) 
+					size = arg2.size();
+				if ( size == 0 )
+					return 0;
+				unsigned int totalSize = 0;
+				for ( unsigned int i = 0; i < size; ++i ) {
+					Conv< A1 > a1( arg1[i] );
+					Conv< A2 > a2( arg2[i] );
+					totalSize += a1.size() + a2.size();
+				}
+	
 				char* data = new char[ totalSize ];
 				char* temp = data;
-				for ( unsigned int i = 0; i < arg1.size(); ++i ) {
-					memcpy( temp, &arg1[i], sizeof( A1 ) );
-					temp += sizeof( A1 );
-					memcpy( temp, &arg2[i], sizeof( A2 ) );
-					temp += sizeof( A2 );
+				for ( unsigned int i = 0; i < size; ++i ) {
+					Conv< A1 > a1( arg1[i] );
+					a1.val2buf( temp );
+					temp += a1.size();
+	
+					Conv< A2 > a2( arg2[i] );
+					a2.val2buf( temp );
+					temp += a2.size();
 				}
-				PrepackedBuffer pb( data, totalSize, arg1.size() );
+				PrepackedBuffer pb( data, totalSize, size );
 				dispatchSetVec( tgt, fid, pb );
 				delete[] data;
 				return 1;
@@ -606,15 +629,20 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 				sg.checkSet( fullFieldName, tgt, fid );
 			if ( numRetEntries > 0 ) {
 				FuncId retFuncId = receiveGet()->getFid();
-				unsigned int totalArgSize = 
-					index.size() * ( sizeof( FuncId ) + sizeof( L ) );
+				unsigned int totalArgSize = index.size() * sizeof( FuncId );
+				for ( unsigned int i = 0; i < index.size(); ++i ) {
+					Conv< L > conv( index[i] );
+					totalArgSize += conv.size();
+				}
+
 				char* data = new char[ totalArgSize ];
 				char* temp = data;
 				for ( unsigned int i = 0; i < index.size(); ++i ) {
 					memcpy( temp, &retFuncId, sizeof( FuncId ) );
 					temp += sizeof( FuncId );
-					memcpy( temp, &index[i], sizeof( L ) );
-					temp += sizeof( L );
+					Conv< L > conv( index[i] );
+					conv.val2buf( temp );
+					temp += conv.size();
 				}
 				PrepackedBuffer pb( data, totalArgSize, index.size() );
 				delete[] data;
