@@ -11778,8 +11778,9 @@ Implemented the LookupValueFinfo and put it in the Arith to test in due course.
 Now compiles. Checkin 2531.
 
 Implemented unit test, clears it. Added a couple of lines to the API.txt 
-Doc file.
+Doc file. Checkin 2532.
 
 Next: Fix the string handling of PrepackedBuffer.
+Then: Set up fields in Neutral for accessing messages and child Elements.
 
 ============================================================================
