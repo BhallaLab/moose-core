@@ -742,6 +742,35 @@ void testSetGetVec()
 	delete i2();
 }
 
+void test2ArgSetVec()
+{
+	const Cinfo* ac = Arith::initCinfo();
+	unsigned int size = 100;
+	vector< unsigned int > dims( 1, size );
+	string arg;
+	Id i2 = Id::nextId();
+	Element* ret = new Element( i2, ac, "test2", dims, 1 );
+	assert( ret );
+
+	vector< double > arg1( size );
+	vector< double > arg2( size );
+	for ( unsigned int i = 0; i < size; ++i ) {
+		arg1[i] = i;
+		arg2[i] = 100 * ( 100 - i );
+	}
+
+	SetGet2< double, double >::setVec( i2, "arg1x2", arg1, arg2 );
+	
+	for ( unsigned int i = 0; i < size; ++i ) {
+		ObjId oid( i2, i );
+		double x = i * 100 * ( 100 - i );
+		double val = reinterpret_cast< Arith* >(oid.data())->getOutput();
+		assert( doubleEq( val, x ) );
+	}
+	cout << "." << flush;
+	delete i2();
+}
+
 void testSetRepeat()
 {
 	const Cinfo* ic = IntFire::initCinfo();
@@ -2048,6 +2077,7 @@ void testAsync( )
 	testSetGetDouble();
 	testSetGetSynapse();
 	testSetGetVec();
+	test2ArgSetVec();
 	testSetRepeat();
 	testStrSet();
 	testStrGet();

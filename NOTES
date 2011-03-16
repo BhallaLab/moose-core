@@ -11741,5 +11741,24 @@ testSetGetExtField.
 
 Found and fixed issue with extFields.
 Now clears the unit tests. Surprisingly painless for such a major change.
+Checkin 2529.
 
+Doing a recompile with MPI flags, to make sure it still works across nodes.
+OK, still works. Tested with up to (nodes X threads) = 7x2 , 4x4.
+
+Second step: Design for SetGet2::setVec. Here we need a consistent way to pass 
+in array arguments.
+Given the way the Prepacked Buffer already chunks out the indices, it is pretty
+clear: at each index we need a block of memory that has the arguments for that
+index in sequence. Everything in the downstream code is already set up to
+handle this. Just need to fill in the PrepackedBuffer suitably.
+
+Next I also need to go and fix how setVec deals with putting string vectors
+into the PrepackedBuffer.
+
+Could also ask the Prepacked buffer to provide an allocated char* buffer to put
+stuff into so I don't have to do an extra memcpy and memory allocation.
+
+
+Implemented SetGet2::setVec and its unit test. OK.
 ============================================================================

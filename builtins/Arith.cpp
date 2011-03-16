@@ -53,6 +53,10 @@ const Cinfo* Arith::initCinfo()
 			"Handles argument 3. This sums in each input, and clears each clock tick.",
 			new OpFunc1< Arith, double >( &Arith::arg3 ) );
 
+		static DestFinfo arg1x2( "arg1x2",
+			"Store the product of the two arguments in output_",
+			new OpFunc2< Arith, double, double >( &Arith::arg1x2 ) );
+
 		static DestFinfo process( "process",
 			"Handles process call",
 			new ProcOpFunc< Arith >( &Arith::process ) );
@@ -78,6 +82,7 @@ const Cinfo* Arith::initCinfo()
 		&arg1,		// DestFinfo
 		&arg2,		// DestFinfo
 		&arg3,		// DestFinfo
+		&arg1x2,	// DestFinfo
 		&output, 	// SrcFinfo
 		&proc		// SharedFinfo
 	};
@@ -142,6 +147,12 @@ void Arith::arg3( const double arg )
 	arg3_ += arg;
 }
 
+void Arith::arg1x2( double a1, double a2 )
+{
+	output_ = a1 * a2;
+}
+
+
 void Arith::setFunction( const string v )
 {
 	function_ = v;
@@ -165,4 +176,17 @@ double Arith::getOutput() const
 double Arith::getArg1() const
 {
 	return arg1_;
+}
+
+double Arith::getIdentifiedArg( unsigned int i ) const
+{
+	if ( i == 0 )
+		return output_;
+	if ( i == 1 )
+		return arg1_;
+	if ( i == 2 )
+		return arg2_;
+	if ( i == 3 )
+		return arg3_;
+	return 0;
 }
