@@ -74,6 +74,11 @@ ObjId: Composite of Id and DataId. Allows you to uniquely identify any entity
 		vector< double > oldYcoord; // Do not need to allocate.
 		Field< double >::getVec( id, "ycoord", oldYcoord );
 
+		7. To set/get LookupFields, that is fields which have an index
+			to lookup:
+		double x = LookupField< unsigned int, double >::get( objId, field, index );
+		LookupField< unsigned int, double >::set( objId, field, index, value );
+
 	There are lots of other variants here.
 
 4. Shell commands to use: the ones that start with 'do'.

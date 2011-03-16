@@ -1652,6 +1652,53 @@ void testSetGetExtField()
 	i1.destroy();
 }
 
+void testLookupSetGet()
+{
+	const Cinfo* ac = Arith::initCinfo();
+	unsigned int size = 100;
+	string arg;
+	Id i2 = Id::nextId();
+	vector< unsigned int > dims( 1, size );
+	Element* elm = new Element( i2, ac, "test2", dims, 1 );
+	assert( elm );
+	ObjId obj( i2, 0 );
+
+	Arith* arith = reinterpret_cast< Arith* >(obj.data() );
+	for ( unsigned int i = 0; i < 4; ++i )
+		arith->setIdentifiedArg( i, 0 );
+	for ( unsigned int i = 0; i < 4; ++i )
+		assert( doubleEq( 0, arith->getIdentifiedArg( i ) ) );
+
+	LookupField< unsigned int, double >::set( obj, "anyValue", 0, 100 );
+	LookupField< unsigned int, double >::set( obj, "anyValue", 1, 101 );
+	LookupField< unsigned int, double >::set( obj, "anyValue", 2, 102 );
+	LookupField< unsigned int, double >::set( obj, "anyValue", 3, 103 );
+
+	assert( doubleEq( arith->getOutput(), 100 ) );
+	assert( doubleEq( arith->getArg1(), 101 ) );
+	assert( doubleEq( arith->getIdentifiedArg( 2 ), 102 ) );
+	assert( doubleEq( arith->getIdentifiedArg( 3 ), 103 ) );
+
+	for ( unsigned int i = 0; i < 4; ++i )
+		arith->setIdentifiedArg( i, 17 * i + 3 );
+
+	double ret = LookupField< unsigned int, double >::get(
+		obj, "anyValue", 0 );
+	assert( doubleEq( ret, 3 ) );
+
+	ret = LookupField< unsigned int, double >::get( obj, "anyValue", 1 );
+	assert( doubleEq( ret, 20 ) );
+
+	ret = LookupField< unsigned int, double >::get( obj, "anyValue", 2 );
+	assert( doubleEq( ret, 37 ) );
+
+	ret = LookupField< unsigned int, double >::get( obj, "anyValue", 3 );
+	assert( doubleEq( ret, 54 ) );
+	
+	cout << "." << flush;
+	i2.destroy();
+}
+
 void testIsA()
 {
 	const Cinfo* n = Neutral::initCinfo();
@@ -2081,6 +2128,7 @@ void testAsync( )
 	testSetRepeat();
 	testStrSet();
 	testStrGet();
+	testLookupSetGet();
 	testSendSpike();
 	testSparseMatrix();
 	testSparseMatrix2();
