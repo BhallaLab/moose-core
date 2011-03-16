@@ -11775,8 +11775,10 @@ scanning through an array of objects.
 
 Need to now put in unit tests for all these cases.
 Implemented the LookupValueFinfo and put it in the Arith to test in due course.
-Now compiles.
+Now compiles. Checkin 2531.
 
+Implemented unit test, clears it. Added a couple of lines to the API.txt 
+Doc file.
 
 Next: Fix the string handling of PrepackedBuffer.
 
