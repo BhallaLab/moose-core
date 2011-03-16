@@ -11711,4 +11711,35 @@ lookup. This will be generally useful, for example in table lookups.
 Put in skeleton code for this. The OpFunc and SetGet template parts are
 done, but some nasty Shell code remains.
 
+Checkin 2526.
+
+This was the easy part. For the Shell code it may actually be better to go 
+with the handleSet type operations using a prepacked buffer to provide the args. 
+It would be pretty ugly to adapt the current dispatchGet and handleGet.
+
+============================================================================
+15 March
+Things to match up:
+
+Type of return value, type of Get function.
+Type of arguments, arguments in Get function (which are passed through Set).
+
+Things are taking shape. Need to make sure the new Shell::dispatchGet is
+in the header, and the old ones are out.
+
+Need to work on SetGet2 (at least) to enable setVec. Need it for the 
+LookupField. Could go further with this and have Field1, Field2, etc.
+
+First step: Get compilation and unit tests to work with the new variant of
+the 'dispatchGet' logic, which uses the Set calls.
+
+Compilation done
+Unit tests: now stuck in testAsync.cpp:1602 which is to do with
+testSetGetExtField.
+============================================================================
+16 March
+
+Found and fixed issue with extFields.
+Now clears the unit tests. Surprisingly painless for such a major change.
+
 ============================================================================

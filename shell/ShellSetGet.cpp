@@ -83,6 +83,7 @@ void Shell::dispatchSetVec( const ObjId& tgt, FuncId fid,
 	s->innerDispatchSet( sheller, tgt, fid, pb );
 }
 
+#if 0
 /**
  * Returns buffer containing desired data.
  * Static function, used for developer-code triggered SetGet functions.
@@ -145,10 +146,11 @@ const vector< char* >& Shell::dispatchGet(
 	return badRet;
 }
 
+#endif
+
 /**
  * Tells all nodes to dig up specified field, if object is present on node.
  * Not thread safe: this should only run on master node.
- */
 const vector< char* >& Shell::innerDispatchGet( 
 	const Eref& sheller, const ObjId& tgt, 
 	FuncId fid, unsigned int retEntries )
@@ -165,6 +167,26 @@ const vector< char* >& Shell::innerDispatchGet(
 	waitForGetAck();
 
 	assert( getBuf_.size() == retEntries );
+
+	return getBuf_;
+}
+ */
+
+const vector< char* >& Shell::dispatchGet( 
+	const Eref& sheller, 
+	const ObjId& tgt, FuncId fid,
+	const PrepackedBuffer& buf )
+{
+	clearGetBuf();
+	gettingVector_ = ( buf.numEntries() >= 1 );
+	if ( gettingVector_ )
+		getBuf_.resize( buf.numEntries() );
+	else
+		getBuf_.resize( 1 );
+	numGetVecReturns_ = 0;
+	initAck();
+		requestSet()->send( sheller, &p_, tgt.id, tgt.dataId, fid, buf );
+	waitForGetAck();
 
 	return getBuf_;
 }

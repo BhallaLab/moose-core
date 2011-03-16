@@ -390,7 +390,7 @@ template< class T, class A > class GetOpFunc: public GetOpFuncBase< A >
 		}
 
 		bool checkSet( const SetGet* s ) const {
-			return dynamic_cast< const SetGet1< A >* >( s );
+			return dynamic_cast< const Field< A >* >( s );
 		}
 
 		bool strSet( const Eref& tgt, 
@@ -459,7 +459,8 @@ template< class T, class A, class L > class GetOpFunc1: public GetOpFuncBase< A 
 		}
 
 		bool checkSet( const SetGet* s ) const {
-			return dynamic_cast< const SetGet1< A >* >( s );
+			return dynamic_cast< const LookupField< L, A >* >( s );
+			// Need to modify in case a message is coming in.
 		}
 
 		bool strSet( const Eref& tgt, 
