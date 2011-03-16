@@ -16,14 +16,23 @@ class PrepackedBuffer
 {
 	public:
 		/**
-		 * Constructor. Here dataSize is the size of the data, not that
-		 * of the entire data structure.
+		 * Constructor. 
+		 * Here data is a pointer to the entire data block.
+		 * dataSize is the size of the entire data block to be transferred,
+		 *  dataSize = individualDataSize * numEntries.
+		 * numEntries is the # of array entries. For non-arrays it defaults
+		 * to 0.
 		 */
 		PrepackedBuffer( const char* data, unsigned int dataSize, 
 			unsigned int numEntries = 0 );
 
 		PrepackedBuffer( const PrepackedBuffer& other );
 
+		/**
+		 * Constructor
+		 * Here the char buffer is a serialized version of the 
+		 * Prepacked buffer
+		 */
 		PrepackedBuffer( const char* buf );
 
 		PrepackedBuffer();

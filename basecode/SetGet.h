@@ -40,15 +40,18 @@ class SetGet
 
 
 		/**
+		 * Utility function to check that the target field matches this
+		 * source type, to look up and pass back the fid, and to return
+		 * the number of targetEntries.
 		 * Tgt is passed in as the destination ObjId. May be changed inside,
 		 * if the function determines that it should be directed to a 
 		 * child Element acting as a Value.
 		 * Checks arg # and types for a 'set' call. Can be zero to 3 args.
-		 * Returns true if good. Passes back found fid.
-		 * Utility function to check that the target field matches this
-		 * source type, and to look up and pass back the fid.
+		 * Returns # of tgts if good. This is 0 if bad. 
+		 * Passes back found fid.
 		 */
-		bool checkSet( const string& field, ObjId& tgt, FuncId& fid ) const;
+		unsigned int checkSet( 
+			const string& field, ObjId& tgt, FuncId& fid ) const;
 
 //////////////////////////////////////////////////////////////////////
 		/**
@@ -85,14 +88,22 @@ class SetGet
 
 		/// Adapter function, just forwards to Shell::dispatchGet
 		static const vector< char* >& dispatchGet( 
-			const ObjId& oid, const string& field,
-			const SetGet* sg, unsigned int& numGetEntries );
+			const ObjId& oid, FuncId fid,
+			const PrepackedBuffer& arg );
+
+		/*
+		static const vector< char* >& dispatchGetVec( 
+			const ObjId& oid, FuncId fid,
+			const char* args, unsigned int size );
+			*/
 
 		/// Adapter function, forwards to Shell::dispatchLookupGet
+		/*
 		static const vector< char* >& dispatchLookupGet( 
 			const ObjId& oid, const string& field,
 			char* indexBuf, const SetGet* sg, 
 			unsigned int& numGetEntries );
+			*/
 
 		///  char* buf();
 
@@ -265,14 +276,32 @@ template< class A > class Field: public SetGet1< A >
 		 */
 		static A get( const ObjId& dest, const string& field)
 		{ 
-			SetGet1< A > sg( dest );
-			string temp = "get_" + field;
-			unsigned int numRetEntries = 0;
-			const vector< char* >& ret = 
-				dispatchGet( dest, temp, &sg, numRetEntries );
-			assert( numRetEntries == 1 );
-			Conv< A > conv( ret[0] );
-			return *conv;
+			Field< A > sg( dest );
+			ObjId tgt( dest );
+			FuncId fid;
+
+			string fullFieldName = "get_" + field;
+			if ( sg.checkSet( fullFieldName, tgt, fid ) ) {
+				FuncId retFuncId = receiveGet()->getFid();
+				PrepackedBuffer buf( 
+					reinterpret_cast< const char* >( &retFuncId ), 
+					sizeof( FuncId ) );
+				const vector< char* >& ret = 
+					SetGet::dispatchGet( tgt, fid, buf );
+				if ( ret.size() == 1 ) {
+					Conv< A > conv( ret[0] );
+					return *conv;
+				}
+			}
+			return A();
+			/*
+			Conv< FuncId > args( retFuncId );
+			char *temp = new char[ args.size() ];
+			args.val2buf( temp );
+			const char* ret = dispatchGet( &sg, dest, fullFieldName, buf, 
+				args.size() );
+			delete[] temp;
+			*/
 		}
 
 		/**
@@ -280,27 +309,46 @@ template< class A > class Field: public SetGet1< A >
 		 */
 		static void getVec( Id dest, const string& field, vector< A >& vec )
 		{
-			SetGet1< A > sg( ObjId( dest, 0 ) );
-			string temp = "get_" + field;
-			unsigned int numRetEntries;
-			const vector< char* >& ret = 
-				dispatchGet( ObjId( dest, DataId::any() ), 
-					temp, &sg, numRetEntries );
+			Field< A > sg( ObjId( dest, 0 ) );
+			ObjId tgt( dest );
+			FuncId fid;
 
-			vec.resize( numRetEntries );
-			for ( unsigned int i = 0; i < numRetEntries; ++i ) {
-				Conv< A > conv( ret[i] );
-				vec[i] = *conv;
+			string fullFieldName = "get_" + field;
+			unsigned int numRetEntries = 
+				sg.checkSet( fullFieldName, tgt, fid );
+			if ( numRetEntries > 0 ) {
+				FuncId retFuncId = receiveGet()->getFid();
+				vector< FuncId > fidVec( numRetEntries, retFuncId );
+
+				PrepackedBuffer pb( 
+					reinterpret_cast< const char* >( &fidVec[0] ), 
+					numRetEntries * sizeof( FuncId ), numRetEntries );
+
+				const vector< char* >& ret = SetGet::dispatchGet( 
+					dest, fid, pb );
+
+				assert( ret.size() == numRetEntries );
+				vec.resize( numRetEntries );
+				for ( unsigned int i = 0; i < numRetEntries; ++i ) {
+					Conv< A > conv( ret[i] );
+					vec[i] = *conv;
+				}
+				return;
 			}
+			vec.resize( 0 );
 		}
 
+
 		/**
-		 * Blocking virtual call for finding a value and returning in a
+		 * Blocking call for finding a value and returning in a
 		 * string.
 		 */
 		static bool innerStrGet( const ObjId& dest, const string& field, 
 			string& str )
 		{
+			Conv< A >::val2str( str, get( dest, field ) );
+			return 1;
+			/*
 			SetGet1< A > sg( dest );
 			string temp = "get_" + field;
 			unsigned int numEntries = 0;
@@ -310,6 +358,7 @@ template< class A > class Field: public SetGet1< A >
 			Conv< A > conv( ret[0] );
 			Conv<A>::val2str( str, *conv );
 			return 1;
+			*/
 		}
 };
 
@@ -385,11 +434,11 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 {
 	public:
 		LookupField( const ObjId& dest )
-			: SetGet2< L, A >( dest )
+			: LookupField< L, A >( dest )
 		{;}
 
 		/**
-		 * Blocking, typed 'Set' call
+		 * Blocking, typed 'Set' call. Identical to SetGet2::set.
 		 */
 		static bool set( const ObjId& dest, const string& field, 
 			L index, A arg )
@@ -448,7 +497,6 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 
 		/**
 		 * Blocking call using typed values
-		 */
 		static A get( const ObjId& dest, const string& field, L index )
 		{ 
 			SetGet1< A > sg( dest );
@@ -463,6 +511,37 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 			assert( numRetEntries == 1 );
 			Conv< A > conv( ret[0] );
 			return *conv;
+		}
+		 */
+
+		/**
+		 * Another variant
+		 */
+		static A get( const ObjId& dest, const string& field, L index)
+		{ 
+			Field< A > sg( dest );
+			ObjId tgt( dest );
+			FuncId fid;
+
+			string fullFieldName = "get_" + field;
+			if ( sg->checkSet( fullFieldName, tgt, fid ) ) {
+				FuncId retFuncId = receiveGet()->getFid();
+				Conv< FuncId > conv1( retFuncId );
+				Conv< L > conv2 ( index );
+				char* temp = new char[ conv1.size() + conv2.size() ];
+				conv1.val2buf( temp );
+				conv2.val2buf( temp + conv1.size() );
+
+				const vector< char* >& ret = 
+					dispatchGet( dest, fid, 
+					temp, conv1.size() + conv2.size() );
+
+				if ( ret.size() == 1 ) {
+					Conv< A > conv( ret[0] );
+					return *conv;
+				}
+			}
+			return A();
 		}
 
 		/**

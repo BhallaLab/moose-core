@@ -372,6 +372,11 @@ class Shell
 		void innerDispatchSet( Eref& sheller, const ObjId& oid, 
 			FuncId fid, const PrepackedBuffer& arg );
 
+		const vector< char* >& dispatchGet( 
+			const Eref& sheller,
+			const ObjId& tgt, FuncId fid,
+			const PrepackedBuffer& buf );
+		/*
 		static const vector< char* >& dispatchGet( 
 			const ObjId& tgt, const string& field, const SetGet* sg,
 			unsigned int& numGetEntries );
@@ -379,6 +384,7 @@ class Shell
 		const vector< char* >& innerDispatchGet( 
 			const Eref& sheller, const ObjId& tgt, FuncId tgtFid,
 			unsigned int numGetEntries );
+			*/
 
 		void handleGet( const Eref& e, const Qinfo*q,
 			Id id, DataId index, FuncId fid, unsigned int numTgt );
