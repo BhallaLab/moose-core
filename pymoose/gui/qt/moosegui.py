@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Feb 25 11:24:19 2011 (+0530)
+# Last-Updated: Wed Mar 16 15:33:45 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2635
+#     Update #: 2636
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -633,8 +633,8 @@ class MainWindow(QtGui.QMainWindow):
 	self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.mooseTreePanel)
 	self.modelTreeWidget = MooseTreeWidget(self.mooseTreePanel)
         self.modelTreeWidget.setMooseHandler(self.mooseHandler)
-        self.modelTreeWidget.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.connect(self.modelTreeWidget, QtCore.SIGNAL('customContextMenuRequested ( const QPoint&)'), self.createConnectionMenu)
+        # self.modelTreeWidget.setContextMenuPolicy(Qt.CustomContextMenu)
+        # self.connect(self.modelTreeWidget, QtCore.SIGNAL('customContextMenuRequested ( const QPoint&)'), self.createConnectionMenu)
 	self.mooseTreePanel.setWidget(self.modelTreeWidget)
         config.LOGGER.debug('createMooseTreePanel - end')
         
