@@ -33,6 +33,7 @@ class Arith
 		void setOutput( double v );
 		double getOutput() const;
 
+		void setIdentifiedArg( unsigned int i, double val );
 		double getIdentifiedArg( unsigned int i ) const;
 
 		////////////////////////////////////////////////////////////////

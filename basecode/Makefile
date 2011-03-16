@@ -82,6 +82,7 @@ HEADERS = \
 	Qvec.h \
 	SrcFinfo.h \
 	ValueFinfo.h \
+	LookupValueFinfo.h \
 	SharedFinfo.h \
 	FieldElementFinfo.h \
 	MsgFuncBinding.h \

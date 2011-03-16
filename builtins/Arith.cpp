@@ -38,6 +38,14 @@ const Cinfo* Arith::initCinfo()
 			"Value of arg1 as computed last timestep.",
 			&Arith::getArg1
 		);
+
+		static LookupValueFinfo< Arith, unsigned int, double > anyValue(
+			"anyValue",
+			"Value of any of the internal fields, output, arg1, arg2, arg3,"
+			"as specified by the index argument from 0 to 3.",
+			&Arith::setIdentifiedArg,
+			&Arith::getIdentifiedArg
+		);
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -79,6 +87,7 @@ const Cinfo* Arith::initCinfo()
 		&function,	// Value
 		&outputValue,	// Value
 		&arg1Value,	// ReadOnly value
+		&anyValue,	// LookupValue
 		&arg1,		// DestFinfo
 		&arg2,		// DestFinfo
 		&arg3,		// DestFinfo
@@ -189,4 +198,16 @@ double Arith::getIdentifiedArg( unsigned int i ) const
 	if ( i == 3 )
 		return arg3_;
 	return 0;
+}
+
+void Arith::setIdentifiedArg( unsigned int i, double val )
+{
+	if ( i == 0 )
+		output_ = val;
+	if ( i == 1 )
+		arg1_ = val;
+	if ( i == 2 )
+		arg2_ = val;
+	if ( i == 3 )
+		arg3_ = val;
 }

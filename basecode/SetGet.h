@@ -434,6 +434,25 @@ template< class A1, class A2 > class SetGet2: public SetGet
 		}
 
 		/**
+		 * This setVec takes a specific object entry, presumably one with
+		 * an array of values within it. The it goes through each specified
+		 * index and assigns the corresponding argument.
+		 * This is a brute-force assignment.
+		 */
+		static bool setVec( ObjId dest, const string& field, 
+			const vector< A1 >& arg1, const vector< A2 >& arg2 )
+		{
+			unsigned int max = arg1.size();
+			if ( max > arg2.size() ) 
+				max = arg2.size();
+			bool ret = 1;
+			for ( unsigned int i = 0; i < max; ++i )
+				ret &= 
+					SetGet2< A1, A2 >::set( dest, field, arg1[i], arg2[i] );
+			return ret;
+		}
+
+		/**
 		 * Blocking call using string conversion.
 		 */
 		static bool innerStrSet( const ObjId& dest, const string& field, 
@@ -472,7 +491,7 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 {
 	public:
 		LookupField( const ObjId& dest )
-			: LookupField< L, A >( dest )
+			: SetGet2< L, A >( dest )
 		{;}
 
 		/**
@@ -485,24 +504,28 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 			return SetGet2< L, A >::set( dest, temp, index, arg );
 		}
 
-		/**
-		 * We're faking setVec. There isn't really a good matching
-		 * operation, nor do I feel it is likely to be needed often,
-		 * so it is done by marching through all the
-		 * individual assignments.
+		/** 
+		 * This setVec assigns goes through each object entry in the
+		 * destId, and assigns the corresponding index and argument to it.
 		 */
 		static bool setVec( Id destId, const string& field, 
 			const vector< L >& index, const vector< A >& arg )
 		{
 			string temp = "set_" + field;
-			unsigned int max = index.size();
-			if ( max > arg.size() ) 
-				max = arg.size();
-			bool ret = 1;
-			for ( unsigned int i = 0; i < max; ++i )
-				ret &= 
-					SetGet2< L, A >::set( destId, temp, index[i], arg[i] );
-			return ret;
+			return SetGet2< L, A >::setVec( destId, temp, index, arg );
+		}
+
+		/**
+		 * This setVec takes a specific object entry, presumably one with
+		 * an array of values within it. The it goes through each specified
+		 * index and assigns the corresponding argument.
+		 * This is a brute-force assignment.
+		 */
+		static bool setVec( ObjId dest, const string& field, 
+			const vector< L >& index, const vector< A >& arg )
+		{
+			string temp = "set_" + field;
+			return SetGet2< L, A >::setVec( dest, temp, index, arg );
 		}
 
 		/**
@@ -534,35 +557,17 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 	//////////////////////////////////////////////////////////////////
 
 		/**
-		 * Blocking call using typed values
-		static A get( const ObjId& dest, const string& field, L index )
-		{ 
-			SetGet1< A > sg( dest );
-			Conv< L > convL( index );
-			char *indexBuf = new char[ convL.size() ];
-			convL.val2buf( indexBuf );
-
-			string temp = "get_" + field;
-			unsigned int numRetEntries = 0;
-			const vector< char* >& ret = 
-				dispatchLookupGet( dest, temp, indexBuf, &sg, numRetEntries );
-			assert( numRetEntries == 1 );
-			Conv< A > conv( ret[0] );
-			return *conv;
-		}
-		 */
-
-		/**
-		 * Another variant
+		 * Gets a value on a specific object, looking it up using the
+		 * provided index.
 		 */
 		static A get( const ObjId& dest, const string& field, L index)
 		{ 
-			Field< A > sg( dest );
+			LookupField< L, A > sg( dest );
 			ObjId tgt( dest );
 			FuncId fid;
 
 			string fullFieldName = "get_" + field;
-			if ( sg->checkSet( fullFieldName, tgt, fid ) ) {
+			if ( sg.checkSet( fullFieldName, tgt, fid ) ) {
 				FuncId retFuncId = receiveGet()->getFid();
 				Conv< FuncId > conv1( retFuncId );
 				Conv< L > conv2 ( index );
@@ -570,9 +575,11 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 				conv1.val2buf( temp );
 				conv2.val2buf( temp + conv1.size() );
 
+				PrepackedBuffer pb( temp, conv1.size() + conv2.size() );
+				delete[] temp;
+
 				const vector< char* >& ret = 
-					dispatchGet( dest, fid, 
-					temp, conv1.size() + conv2.size() );
+					SetGet::dispatchGet( dest, fid, pb );
 
 				if ( ret.size() == 1 ) {
 					Conv< A > conv( ret[0] );
@@ -583,27 +590,44 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 		}
 
 		/**
-		 * Blocking call that returns a vector of values
+		 * Blocking call that returns a vector of values in vec.
+		 * This variant goes through each target object entry on dest,
+		 * and passes in a separate lookup index to each one. The results
+		 * are put together in the vector vec.
 		 */
 		static void getVec( Id dest, const string& field, 
 			vector< L >& index, vector< A >& vec )
 		{
-			SetGet1< A > sg( ObjId( dest, 0 ) );
-			Conv< vector< L > > convL( index );
-			char *indexBuf = new char[ convL.size() ];
-			convL.val2buf( indexBuf );
+			LookupField< L, A > sg( ObjId( dest, 0 ) );
+			ObjId tgt( dest );
+			FuncId fid;
+			string fullFieldName = "get_" + field;
+			unsigned int numRetEntries = 
+				sg.checkSet( fullFieldName, tgt, fid );
+			if ( numRetEntries > 0 ) {
+				FuncId retFuncId = receiveGet()->getFid();
+				unsigned int totalArgSize = 
+					index.size() * ( sizeof( FuncId ) + sizeof( L ) );
+				char* data = new char[ totalArgSize ];
+				char* temp = data;
+				for ( unsigned int i = 0; i < index.size(); ++i ) {
+					memcpy( temp, &retFuncId, sizeof( FuncId ) );
+					temp += sizeof( FuncId );
+					memcpy( temp, &index[i], sizeof( L ) );
+					temp += sizeof( L );
+				}
+				PrepackedBuffer pb( data, totalArgSize, index.size() );
+				delete[] data;
 
-			string temp = "get_" + field;
-			unsigned int numRetEntries;
-			const vector< char* >& ret = 
-				dispatchLookupGet( ObjId( dest, DataId::any() ), 
-					temp, indexBuf, 
-					&sg, numRetEntries );
+				const vector< char* >& ret = 
+					SetGet::dispatchGet( dest, fid, pb );
 
-			vec.resize( numRetEntries );
-			for ( unsigned int i = 0; i < numRetEntries; ++i ) {
-				Conv< A > conv( ret[i] );
-				vec[i] = *conv;
+				assert( ret.size() == numRetEntries );
+				vec.resize( numRetEntries );
+				for ( unsigned int i = 0; i < numRetEntries; ++i ) {
+					Conv< A > conv( ret[i] );
+					vec[i] = *conv;
+				}
 			}
 		}
 
@@ -614,20 +638,11 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 		static bool innerStrGet( const ObjId& dest, const string& field, 
 			const string& indexStr, string& str )
 		{
-			SetGet1< A > sg( dest );
 			L index;
 			Conv< L >::str2val( index, indexStr );
-			Conv< L > convL( index );
-			char *indexBuf = new char[ convL.size() ];
-			convL.val2buf( indexBuf );
 
-			string temp = "get_" + field;
-			unsigned int numRetEntries = 0;
-			const vector< char* > & ret = 
-				dispatchLookupGet( dest, temp, indexBuf, &sg, numRetEntries );
-			assert( numRetEntries == 1 );
-			Conv< A > conv( ret[0] );
-			Conv<A>::val2str( str, *conv );
+			A ret = get( dest, field, index );
+			Conv<A>::val2str( str, ret );
 			return 1;
 		}
 };
