@@ -11759,6 +11759,25 @@ into the PrepackedBuffer.
 Could also ask the Prepacked buffer to provide an allocated char* buffer to put
 stuff into so I don't have to do an extra memcpy and memory allocation.
 
+Implemented SetGet2::setVec and its unit test. OK. Checkin 2530.
 
-Implemented SetGet2::setVec and its unit test. OK.
+Next: Work on LookupField, a field which has an index for every entry.
+This is proceeding, but it shows up a problem with the semantics of setting or
+getting a vector when there are 2 args: Do we treat the operation as applying
+to an array of objects, each of which gets unique arguments, or do we treat
+it as a single object entry, which has the function applied repeatedly.
+The latter case might be an array of fields on the object which get all set
+or looked up at the same time.
+
+For now I've implemented the 'set' for both options. Option 2 is done in a 
+slow, brute force manner. 'get' currently only implemented for the first option,
+scanning through an array of objects.
+
+Need to now put in unit tests for all these cases.
+Implemented the LookupValueFinfo and put it in the Arith to test in due course.
+Now compiles.
+
+
+Next: Fix the string handling of PrepackedBuffer.
+
 ============================================================================

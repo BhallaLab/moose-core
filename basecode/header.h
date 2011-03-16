@@ -91,6 +91,7 @@ extern DestFinfo* receiveGet();
 #include "UpFunc.h"
 #include "ProcOpFunc.h"
 #include "ValueFinfo.h"
+#include "LookupValueFinfo.h"
 #include "SharedFinfo.h"
 #include "FieldElementFinfo.h"
 #include "../shell/Neutral.h"

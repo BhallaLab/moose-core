@@ -446,7 +446,7 @@ template< class T, class A > class GetOpFunc: public GetOpFuncBase< A >
  * A is the return type
  * L is the lookup index.
  */
-template< class T, class A, class L > class GetOpFunc1: public GetOpFuncBase< A >
+template< class T, class L, class A > class GetOpFunc1: public GetOpFuncBase< A >
 {
 	public:
 		GetOpFunc1( A ( T::*func )( L ) const )
@@ -500,8 +500,10 @@ template< class T, class A, class L > class GetOpFunc1: public GetOpFuncBase< A 
 
 		/// ReduceOp is not really permissible for this class.
 		A reduceOp( const Eref& e ) const {
-			L dummy;
-			return ( reinterpret_cast< T* >( e.data() )->*func_)( dummy );
+			static A ret;
+			return ret;
+			// L dummy;
+			// return ( reinterpret_cast< T* >( e.data() )->*func_)( dummy );
 		}
 
 	private:
