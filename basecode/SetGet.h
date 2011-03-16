@@ -396,6 +396,44 @@ template< class A1, class A2 > class SetGet2: public SetGet
 		}
 
 		/**
+		 * Assign a vector of targets, using matching vectors of arguments
+		 * arg1 and arg2. Specifically, index i on the target receives
+		 * arguments arg1[i], arg2[i].
+		 * Note that there is no requirement for the size of the 
+		 * argument vectors to be equal to the size of the target array
+		 * of objects. If there are fewer arguments then the index cycles
+		 * back, so as to tile the target array with as many arguments as
+		 * we have.
+		 * Need to clean up to handle string arguments later.
+		 */
+		static bool setVec( Id destId, const string& field, 
+			const vector< A1 >& arg1, const vector< A2 >& arg2 )
+		{
+			ObjId tgt( destId, 0 );
+			SetGet2< A1, A2 > sg( tgt );
+			FuncId fid;
+			if ( arg1.size() == 0 || arg1.size() != arg2.size() )
+				return 0;
+			unsigned int totalSize = 
+				arg1.size() * ( sizeof( A1 ) + sizeof( A2 ) );
+			if ( sg.checkSet( field, tgt, fid ) ) {
+				char* data = new char[ totalSize ];
+				char* temp = data;
+				for ( unsigned int i = 0; i < arg1.size(); ++i ) {
+					memcpy( temp, &arg1[i], sizeof( A1 ) );
+					temp += sizeof( A1 );
+					memcpy( temp, &arg2[i], sizeof( A2 ) );
+					temp += sizeof( A2 );
+				}
+				PrepackedBuffer pb( data, totalSize, arg1.size() );
+				dispatchSetVec( tgt, fid, pb );
+				delete[] data;
+				return 1;
+			}
+			return 0;
+		}
+
+		/**
 		 * Blocking call using string conversion.
 		 */
 		static bool innerStrSet( const ObjId& dest, const string& field, 
