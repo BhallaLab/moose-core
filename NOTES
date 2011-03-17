@@ -11780,7 +11780,14 @@ Now compiles. Checkin 2531.
 Implemented unit test, clears it. Added a couple of lines to the API.txt 
 Doc file. Checkin 2532.
 
-Next: Fix the string handling of PrepackedBuffer.
+Next: Fix the string handling of PrepackedBuffer. Done. Checkin 2535.
+
 Then: Set up fields in Neutral for accessing messages and child Elements.
 
+Working on it, the compile fails in a typically obscure way on the
+new code.
+
 ============================================================================
+17 March.
+Fixed up and added unit tests for Neutral fields "msgSrc" and "msgDest"
+for getting vector of Ids of src and targets Elements of msgs to given field.
