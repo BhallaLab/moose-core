@@ -9,7 +9,22 @@
 #ifndef _VALUE_FINFO_H
 #define _VALUE_FINFO_H
 
-template < class T, class F > class ValueFinfo: public Finfo
+/**
+ * This is the base class for all ValueFinfo classes. Used for doing 
+ * inspection using dynamic casts.
+ */
+class ValueFinfoBase: public Finfo
+{
+	public:
+		~ValueFinfoBase()
+		{;}
+
+		ValueFinfoBase( const string& name, const string& doc )
+			: Finfo( name, doc )
+		{;}
+};
+
+template < class T, class F > class ValueFinfo: public ValueFinfoBase
 {
 	public:
 		~ValueFinfo() {
@@ -20,7 +35,7 @@ template < class T, class F > class ValueFinfo: public Finfo
 		ValueFinfo( const string& name, const string& doc, 
 			void ( T::*setFunc )( F ),
 			F ( T::*getFunc )() const )
-			: Finfo( name, doc )
+			: ValueFinfoBase( name, doc )
 		{
 				string setname = "set_" + name;
 				set_ = new DestFinfo(
@@ -62,7 +77,7 @@ template < class T, class F > class ValueFinfo: public Finfo
 	//	GetOpFunc< T, F >* getOpFunc_;
 };
 
-template < class T, class F > class ReadOnlyValueFinfo: public Finfo
+template < class T, class F > class ReadOnlyValueFinfo: public ValueFinfoBase
 {
 	public:
 		~ReadOnlyValueFinfo() {
@@ -71,7 +86,7 @@ template < class T, class F > class ReadOnlyValueFinfo: public Finfo
 
 		ReadOnlyValueFinfo( const string& name, const string& doc, 
 			F ( T::*getFunc )() const )
-			: Finfo( name, doc )
+			: ValueFinfoBase( name, doc )
 		{
 				string getname = "get_" + name;
 				get_ = new DestFinfo(
@@ -108,7 +123,7 @@ template < class T, class F > class ReadOnlyValueFinfo: public Finfo
  * should also update some information in the parent class T.
  * The function thus does not refer to the class of the array field.
  */
-template < class T, class F > class UpValueFinfo: public Finfo
+template < class T, class F > class UpValueFinfo: public ValueFinfoBase
 {
 	public:
 		~UpValueFinfo() {
@@ -119,7 +134,7 @@ template < class T, class F > class UpValueFinfo: public Finfo
 		UpValueFinfo( const string& name, const string& doc, 
 			void ( T::*setFunc )( DataId, F ),
 			F ( T::*getFunc )( DataId ) const )
-			: Finfo( name, doc )
+			: ValueFinfoBase( name, doc )
 		{
 				string setname = "set_" + name;
 				set_ = new DestFinfo(

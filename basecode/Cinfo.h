@@ -38,6 +38,16 @@ class Cinfo
 					unsigned int nSched = 0
 			);
 
+			/**
+			 * This initializer is used only as a dummy, to keep Dinfo happy
+			 */
+			Cinfo();
+
+			/**
+			 * This is also a dummy initializer for Dinfo.
+			 */
+			Cinfo( const Cinfo& other );
+
 			~Cinfo();
 //////////////////////////////////////////////////////////////////////////
 			/**
@@ -132,8 +142,81 @@ class Cinfo
 			 */
 			void reportFids() const;
 
+		/////////////////////////////////////////////////////////////////
+		// Functions here for the MOOSE Cinfo inspection class
+		/////////////////////////////////////////////////////////////////
+			
+			/**
+			 * Return the documentation string
+			 */
+			string getDocs() const;
+
+			/**
+			 * Return the name of the base class
+			 */
+			string getBaseClass() const;
+
+
+			/**
+			 * Return the specified SrcFinfo
+			 */
+			Finfo* getSrcFinfo( unsigned int i );
+
+			/**
+			 * Return number of SrcFinfos
+			 */
+			unsigned int getNumSrcFinfo() const;
+
+			/**
+			 * Return the specified DestFinfo
+			 */
+			Finfo* getDestFinfo( unsigned int i );
+
+			/**
+			 * Return number of DestFinfo
+			 */
+			unsigned int getNumDestFinfo() const;
+
+			/**
+			 * Return the specified ValueFinfo
+			 */
+			Finfo* getValueFinfo( unsigned int i );
+
+			/**
+			 * Return number of ValueFinfo
+			 */
+			unsigned int getNumValueFinfo() const;
+
+			/**
+			 * Return the specified LookupFinfo
+			 */
+			Finfo* getLookupFinfo( unsigned int i );
+			/**
+			 * Return number of LookupFinfo
+			 */
+			unsigned int getNumLookupFinfo() const;
+
+			/**
+			 * Return the specified SharedFinfo
+			 */
+			Finfo* getSharedFinfo( unsigned int i );
+
+			/**
+			 * Return number of SharedFinfos
+			 */
+			unsigned int getNumSharedFinfo() const;
+
+			/**
+			 * Dummy function. We never allow this assignment.
+			 */
+			void setNumFinfo( unsigned int v );
+	
+
+
+			static const Cinfo* initCinfo();
+
 		private:
-			const string name_;
+			string name_;
 
 			std::map< std::string, std::string > doc_;
 			// const std::string author_;
@@ -143,7 +226,25 @@ class Cinfo
 
 			BindIndex numBindIndex_;
 
+			/**
+			 * This looks up Finfos by name.
+			 */
 			map< string, Finfo* > finfoMap_;
+
+			/// Keep track of all SrcFinfos
+			vector< Finfo* > srcFinfos_;
+
+			/// Keep track of all DestFinfos
+			vector< Finfo* > destFinfos_;
+
+			/// Keep track of all ValueFinfos
+			vector< Finfo* > valueFinfos_;
+
+			/// Keep track of all LookupFinfos
+			vector< Finfo* > lookupFinfos_;
+
+			/// Keep track of all SharedFinfos
+			vector< Finfo* > sharedFinfos_;
 
 			/**
 			 * These are special Finfos which have to be invoked

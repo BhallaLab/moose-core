@@ -128,3 +128,16 @@ This has the following fields of note:
 	- Id cwe: Regular value. 
 
 5.2 Neutral. These fields are shared by all objects.
+	string name
+	Id parent			// Parent Id.
+	vector< Id > children		// All child elements.
+	string path			// Full path
+	string className		
+	unsigned int linearSize		// Product of all dimensions
+	vector< unsigned int> Dimensions
+	unsigned int fieldDimension	// Size of field dimension.
+	vector< ObjId > msgOut 		// MsgManagers of all outgoing msgs
+	vector< ObjId > msgIn		// MsgManagers of all incoming msgs
+	vector< Id > msgSrc( string field )	// Ids of source msgs into field
+	vector< Id > msgDest( string field )	// Ids of dest msgs into field
+

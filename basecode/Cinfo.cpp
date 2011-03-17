@@ -28,6 +28,16 @@ Cinfo::Cinfo( const string& name,
 	cinfoMap()[ name ] = this;
 }
 
+Cinfo::Cinfo()
+		: name_( "dummy" ), baseCinfo_( 0 ), dinfo_( 0 ),
+			numBindIndex_( 0 )
+{;}
+
+Cinfo::Cinfo( const Cinfo& other )
+		: name_( "dummy" ), baseCinfo_( 0 ), dinfo_( 0 ),
+			numBindIndex_( 0 )
+{;}
+
 Cinfo::~Cinfo()
 {
 	/*
@@ -77,6 +87,21 @@ void Cinfo::registerFinfo( Finfo* f )
 {
 		finfoMap_[ f->name() ] = f;
 		f->registerFinfo( this );
+		if ( dynamic_cast< DestFinfo* >( f ) ) {
+			destFinfos_.push_back( f );
+		}
+		else if ( dynamic_cast< SrcFinfo* >( f ) ) {
+			srcFinfos_.push_back( f );
+		}
+		else if ( dynamic_cast< ValueFinfoBase* >( f ) ) {
+			valueFinfos_.push_back( f );
+		}
+		else if ( dynamic_cast< LookupValueFinfoBase* >( f ) ) {
+			lookupFinfos_.push_back( f );
+		}
+		else if ( dynamic_cast< SharedFinfo* >( f ) ) {
+			sharedFinfos_.push_back( f );
+		}
 }
 
 void Cinfo::registerPostCreationFinfo( const Finfo* f )
@@ -201,3 +226,177 @@ map< OpFunc, FuncId >& Cinfo::funcMap()
 }
 */
 
+////////////////////////////////////////////////////////////////////////
+// MOOSE class functions.
+////////////////////////////////////////////////////////////////////////
+
+const Cinfo* Cinfo::initCinfo()
+{
+		//////////////////////////////////////////////////////////////
+		// Field Definitions
+		//////////////////////////////////////////////////////////////
+		static ReadOnlyValueFinfo< Cinfo, string > docs(
+			"docs",
+			"Documentation",
+			&Cinfo::getDocs
+		);
+
+		static ReadOnlyValueFinfo< Cinfo, string > baseClass(
+			"baseClass",
+			"Name of base class",
+			&Cinfo::getBaseClass
+		);
+
+		//////////////////////////////////////////////////////////////
+		// FieldElementFinfo definitions for different kinds of Finfos
+		//////////////////////////////////////////////////////////////
+		static FieldElementFinfo< Cinfo, Finfo > srcFinfo( "srcFinfo",
+			"SrcFinfos in this Class",
+			Finfo::initCinfo(),
+			&Cinfo::getSrcFinfo,
+			&Cinfo::setNumFinfo, // Dummy
+			&Cinfo::getNumSrcFinfo
+		);
+		static FieldElementFinfo< Cinfo, Finfo > destFinfo( "destFinfo",
+			"DestFinfos in this Class",
+			Finfo::initCinfo(),
+			&Cinfo::getDestFinfo,
+			&Cinfo::setNumFinfo, // Dummy
+			&Cinfo::getNumDestFinfo
+		);
+		static FieldElementFinfo< Cinfo, Finfo > valueFinfo( "valueFinfo",
+			"ValueFinfos in this Class",
+			Finfo::initCinfo(),
+			&Cinfo::getValueFinfo,
+			&Cinfo::setNumFinfo, // Dummy
+			&Cinfo::getNumValueFinfo
+		);
+		static FieldElementFinfo< Cinfo, Finfo > lookupFinfo( "lookupFinfo",
+			"LookupFinfos in this Class",
+			Finfo::initCinfo(),
+			&Cinfo::getLookupFinfo,
+			&Cinfo::setNumFinfo, // Dummy
+			&Cinfo::getNumLookupFinfo
+		);
+		static FieldElementFinfo< Cinfo, Finfo > sharedFinfo( "sharedFinfo",
+			"SharedFinfos in this Class",
+			Finfo::initCinfo(),
+			&Cinfo::getSharedFinfo,
+			&Cinfo::setNumFinfo, // Dummy
+			&Cinfo::getNumSharedFinfo
+		);
+
+	static Finfo* cinfoFinfos[] = {
+		&docs,				// ReadOnlyValue
+		&baseClass,		// ReadOnlyValue
+		&srcFinfo,			// FieldElementFinfo
+		&destFinfo,			// FieldElementFinfo
+		&valueFinfo,			// FieldElementFinfo
+		&lookupFinfo,		// FieldElementFinfo
+		&sharedFinfo,		// FieldElementFinfo
+	};
+
+	static Cinfo cinfoCinfo (
+		"Cinfo",
+		Neutral::initCinfo(),
+		cinfoFinfos,
+		sizeof( cinfoFinfos ) / sizeof ( Finfo* ),
+		new Dinfo< Cinfo >()
+	);
+
+	return &cinfoCinfo;
+}
+
+static const Cinfo* cinfoCinfo = Cinfo::initCinfo();
+
+
+///////////////////////////////////////////////////////////////////
+// Field functions
+///////////////////////////////////////////////////////////////////
+string Cinfo::getDocs() const
+{
+	return "";
+}
+
+
+static DestFinfo dummy( 
+		"dummy", 
+		"This Finfo is a dummy. If you are reading this you have used an invalid index", 
+0 );
+
+string Cinfo::getBaseClass() const 
+{
+	return baseCinfo_->name();
+}
+
+////////////////////////////////////////////////////////////////////
+Finfo* Cinfo::getSrcFinfo( unsigned int i )
+{
+	if ( i < srcFinfos_.size() )
+		return srcFinfos_[i];
+	return &dummy; // Return a safe dummy on failure
+}
+
+unsigned int Cinfo::getNumSrcFinfo() const
+{
+	return srcFinfos_.size();
+}
+
+////////////////////////////////////////////////////////////////////
+Finfo* Cinfo::getDestFinfo( unsigned int i )
+{
+	if ( i < destFinfos_.size() )
+		return destFinfos_[i];
+	return &dummy; // Return a safe dummy on failure
+}
+
+unsigned int Cinfo::getNumDestFinfo() const
+{
+	return destFinfos_.size();
+}
+
+////////////////////////////////////////////////////////////////////
+Finfo* Cinfo::getValueFinfo( unsigned int i )
+{
+	if ( i < valueFinfos_.size() )
+		return valueFinfos_[i];
+	return &dummy; // Return a safe dummy on failure
+}
+
+unsigned int Cinfo::getNumValueFinfo() const
+{
+	return valueFinfos_.size();
+}
+
+
+////////////////////////////////////////////////////////////////////
+Finfo* Cinfo::getLookupFinfo( unsigned int i )
+{
+	if ( i < lookupFinfos_.size() )
+		return lookupFinfos_[i];
+	return &dummy; // Return a safe dummy on failure
+}
+
+unsigned int Cinfo::getNumLookupFinfo() const
+{
+	return lookupFinfos_.size();
+}
+
+////////////////////////////////////////////////////////////////////
+Finfo* Cinfo::getSharedFinfo( unsigned int i )
+{
+	if ( i < sharedFinfos_.size() )
+		return sharedFinfos_[i];
+	return &dummy; // Return a safe dummy on failure
+}
+
+unsigned int Cinfo::getNumSharedFinfo() const
+{
+	return sharedFinfos_.size();
+}
+
+////////////////////////////////////////////////////////////////////
+void Cinfo::setNumFinfo( unsigned int val ) // Dummy function
+{
+	;
+}
