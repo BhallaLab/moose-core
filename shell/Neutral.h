@@ -72,7 +72,7 @@ class Neutral
 		 * Returns an empty vector if it fails.
 		 */
 		vector< Id > getMsgTargetIds( 
-			const Eref& e, const Qinfo* q, const string& field ) const;
+			const Eref& e, const Qinfo* q, string field ) const;
 
 		/**
 		 * Readonly field access function for getting destination Ids
@@ -81,7 +81,7 @@ class Neutral
 		 * Returns an empty vector if it fails.
 		 */
 		vector< Id > getMsgSourceIds(
-			const Eref& e, const Qinfo* q, const string& field ) const;
+			const Eref& e, const Qinfo* q, string field ) const;
 
 
 		/**

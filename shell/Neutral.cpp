@@ -10,6 +10,7 @@
 #include "header.h"
 #include "Dinfo.h"
 #include "ElementValueFinfo.h"
+#include "LookupElementValueFinfo.h"
 
 
 const Cinfo* Neutral::initCinfo()
@@ -80,17 +81,15 @@ const Cinfo* Neutral::initCinfo()
 		"Messages coming in to this Element", 
 			&Neutral::getIncomingMsgs );
 
-	/*
-	static ReadOnlyElementValueFinfo1< Neutral, vector< Id >, string > msgSrc( 
+	static ReadOnlyLookupElementValueFinfo< Neutral, string, vector< Id > > msgSrc( 
 		"msgSrc",
 		"Source Ids of Messages coming into this Element on specified field", 
 			&Neutral::getMsgSourceIds );
 
-	static ReadOnlyElementValueFinfo1< Neutral, vector< Id >, string > msgDest( 
+	static ReadOnlyLookupElementValueFinfo< Neutral, string, vector< Id > > msgDest( 
 		"msgDest",
 		"Destination Ids of Messages from this Element on specified field", 
 			&Neutral::getMsgTargetIds );
-*/
 
 	/////////////////////////////////////////////////////////////////
 	// Value Finfos
@@ -130,7 +129,8 @@ const Cinfo* Neutral::initCinfo()
 		&fieldDimension,
 		&msgOut,
 		&msgIn,
-
+		&msgSrc,
+		&msgDest,
 	};
 
 	/////////////////////////////////////////////////////////////////
@@ -331,7 +331,8 @@ vector< ObjId > Neutral::getIncomingMsgs(
 	return ret;
 }
 
-vector< Id > Neutral::getMsgTargetIds( const Eref& e, const Qinfo* q, const string& field ) const
+vector< Id > Neutral::getMsgTargetIds( 
+	const Eref& e, const Qinfo* q, string field ) const
 {
 	vector< Id > ret;
 	const Finfo* f = e.element()->cinfo()->findFinfo( field );
@@ -343,7 +344,8 @@ vector< Id > Neutral::getMsgTargetIds( const Eref& e, const Qinfo* q, const stri
 }
 
 
-vector< Id > Neutral::getMsgSourceIds( const Eref& e, const Qinfo* q, const string& field ) const
+vector< Id > Neutral::getMsgSourceIds( 
+	const Eref& e, const Qinfo* q, string field ) const
 {
 	vector< Id > ret;
 	const Finfo* f = e.element()->cinfo()->findFinfo( field );

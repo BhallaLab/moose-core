@@ -1166,6 +1166,14 @@ void testSyncSynapseSize()
 	cout << "." << flush;
 }
 
+/**
+ * Tests message inspection fields on Neutral.
+ * These include 
+ *  msgOut: all outgoing Msgs, reported as ObjId of their managers
+ *  msgIn: all incoming Msgs, reported as ObjId of their managers
+ *  msgSrc: All source Ids of messages coming into specified field
+ *  msgDest: All dest Ids of messages going out of specified field
+ */
 void testGetMsgs()
 {
 	Eref sheller = Id().eref();
@@ -1241,6 +1249,7 @@ void testGetMsgs()
 	assert( Field< Id >::get( msgMgrs[2], "e2" ) == c2 );
 	assert( Field< Id >::get( msgMgrs[3], "e2" ) == d2 );
 	assert( Field< Id >::get( msgMgrs[4], "e2" ) == e2 );
+	cout << "." << flush;
 
 	////////////////////////////////////////////////////////////////
 	// Check that the incoming Msgs are OK.
@@ -1286,6 +1295,55 @@ void testGetMsgs()
 	assert( Field< Id >::get( msgMgrs[0], "e2" ) == e2 );
 	assert( Field< Id >::get( msgMgrs[1], "e1" ) == a1 );
 	assert( Field< Id >::get( msgMgrs[1], "e2" ) == e2 );
+	cout << "." << flush;
+
+	////////////////////////////////////////////////////////////////
+	// Check that the MsgSrcs are OK. 
+	////////////////////////////////////////////////////////////////
+	vector< Id > srcIds;
+	srcIds = LookupField< string, vector< Id > >::get( a2, "msgSrc", "arg3" );
+	assert( srcIds.size() == 1 );
+	assert( srcIds[0] == a1 );
+	srcIds.resize( 0 );
+	srcIds = LookupField< string, vector< Id > >::get( b2, "msgSrc", "arg3" );
+	assert( srcIds.size() == 1 );
+	assert( srcIds[0] == a1 );
+	srcIds.resize( 0 );
+	srcIds = LookupField< string, vector< Id > >::get( c2, "msgSrc", "arg3" );
+	assert( srcIds.size() == 1 );
+	assert( srcIds[0] == a1 );
+
+	MsgId m6 = shell->doAddMsg( "Single", 
+		ObjId( b1, 3 ), "output", ObjId( b2, 1 ), "arg3" );
+	assert( m6 != Msg::badMsg );
+	srcIds.resize( 0 );
+	srcIds = LookupField< string, vector< Id > >::get( b2, "msgSrc", "arg3" );
+	assert( srcIds.size() == 2 );
+	assert( srcIds[0] == a1 );
+	assert( srcIds[1] == b1 );
+	cout << "." << flush;
+
+	////////////////////////////////////////////////////////////////
+	// Check that the MsgDests are OK. 
+	////////////////////////////////////////////////////////////////
+	vector< Id > destIds;
+	destIds = LookupField< string, vector< Id > >::get( a1, "msgDest", "output" );
+	assert( destIds.size() == 5 );
+	assert( destIds[0] == a2 );
+	assert( destIds[1] == b2 );
+	assert( destIds[2] == c2 );
+	assert( destIds[3] == d2 );
+	assert( destIds[4] == e2 );
+	destIds.resize( 0 );
+	destIds = LookupField< string, vector< Id > >::get( b1, "msgDest", "output" );
+	assert( destIds.size() == 1 );
+	assert( destIds[0] == b2 );
+	cout << "." << flush;
+
+	////////////////////////////////////////////////////////////////
+	// Clean up.
+	////////////////////////////////////////////////////////////////
+
 
 	shell->doDelete( a1 );
 	shell->doDelete( a2 );
@@ -1297,7 +1355,6 @@ void testGetMsgs()
 	shell->doDelete( d2 );
 	shell->doDelete( e1 );
 	shell->doDelete( e2 );
-	cout << "." << flush;
 }
 
 void testGetMsgSrcAndTarget()
