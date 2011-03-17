@@ -11791,3 +11791,11 @@ new code.
 17 March.
 Fixed up and added unit tests for Neutral fields "msgSrc" and "msgDest"
 for getting vector of Ids of src and targets Elements of msgs to given field.
+Checkin 2536.
+
+Implemented additional Neutral inspection fields for linearSize and dimensions.
+Implemented unit tests for these within the existing 
+testShell.cpp:testSyncSynapseSize() function. Works.
+
+
+============================================================================

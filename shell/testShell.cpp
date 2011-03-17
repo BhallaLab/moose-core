@@ -1161,6 +1161,19 @@ void testSyncSynapseSize()
 	shell->doSyncDataHandler( neuronId, "get_numSynapses", synId );
 
 	assert( syn->dataHandler()->totalEntries() == size * (size - 1 ) );
+
+	assert( Field< unsigned int >::get( neuronId, "linearSize" ) == size );
+	assert( Field< unsigned int >::get( synId, "linearSize" ) == size * (size - 1 ) );
+
+	dims = 
+		Field< vector< unsigned int > >::get( neuronId, "dimensions" );
+	assert( dims.size() == 1 );
+	assert( dims[0] == size );
+	dims = Field< vector< unsigned int > >::get( synId, "dimensions" );
+	assert( dims.size() == 2 );
+	assert( dims[0] == size - 1 ); // Note that the order is reversed.
+	assert( dims[1] == size );
+
 	// cout << "NumSyn = " << syn.totalEntries() << endl;
 	shell->doDelete( neuronId );
 	cout << "." << flush;

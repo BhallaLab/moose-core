@@ -116,6 +116,22 @@ class Neutral
 		string getClass( const Eref& e, const Qinfo* q ) const;
 
 		/**
+		 * linearSize is the # of entries on Element. Its value is
+		 * the product of all dimensions.
+		 * Note that on a FieldElement this includes field entries.
+		 * If field entries form a ragged array, then the linearSize may be
+		 * greater than the actual number of allocated entries, since the
+		 * fieldDimension is at least as big as the largest ragged array.
+		 */
+		unsigned int getLinearSize( const Eref& e, const Qinfo* q ) const;
+
+		/**
+		 * Dimensions of data on the Element.
+		 * This includes the fieldDimension if present.
+		 */
+		vector< unsigned int > getDimensions( const Eref& e, const Qinfo* q ) const;
+
+		/**
 		 * Access function for the fieldDimension of the data handler
 		 * for the Element. Ignored for objects that are not Fields.
 		 */
