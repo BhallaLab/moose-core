@@ -60,6 +60,21 @@ const Cinfo* Neutral::initCinfo()
 		"Class Name of object", 
 			&Neutral::getClass );
 
+	static ReadOnlyElementValueFinfo< Neutral, unsigned int > linearSize( 
+		"linearSize",
+		"# of entries on Element: product of all dimensions."
+		"Note that on a FieldElement this includes field entries."
+		"If field entries form a ragged array, then the linearSize may be"
+		"greater than the actual number of allocated entries, since the"
+		"fieldDimension is at least as big as the largest ragged array.",
+			&Neutral::getLinearSize );
+
+	static ReadOnlyElementValueFinfo< Neutral, vector< unsigned int > > dimensions( 
+		"dimensions",
+		"Dimensions of data on the Element." 
+		"This includes the fieldDimension if present.",
+			&Neutral::getDimensions );
+
 	static ElementValueFinfo< Neutral, unsigned int > fieldDimension( 
 		"fieldDimension",
 		"Max size of the dimension of the array of fields."
@@ -126,6 +141,8 @@ const Cinfo* Neutral::initCinfo()
 		&children,
 		&path,
 		&className,
+		&linearSize,
+		&dimensions,
 		&fieldDimension,
 		&msgOut,
 		&msgIn,
@@ -282,6 +299,16 @@ string Neutral::getClass( const Eref& e, const Qinfo* q ) const
 	return e.element()->cinfo()->name();
 }
 
+unsigned int Neutral::getLinearSize( const Eref& e, const Qinfo* q ) const
+{
+	return e.element()->dataHandler()->totalEntries();
+}
+
+vector< unsigned int > Neutral::getDimensions( 
+	const Eref& e, const Qinfo* q ) const
+{
+	return e.element()->dataHandler()->dims();
+}
 
 void Neutral::setFieldDimension( const Eref& e, const Qinfo* q, 
 	unsigned int size )
