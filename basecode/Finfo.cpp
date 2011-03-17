@@ -19,3 +19,8 @@ const string& Finfo::name( ) const
 {
 	return name_;
 }
+
+const Cinfo* Finfo::initCinfo()
+{
+	return 0;
+}

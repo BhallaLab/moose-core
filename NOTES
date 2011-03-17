@@ -11795,7 +11795,40 @@ Checkin 2536.
 
 Implemented additional Neutral inspection fields for linearSize and dimensions.
 Implemented unit tests for these within the existing 
-testShell.cpp:testSyncSynapseSize() function. Works.
+testShell.cpp:testSyncSynapseSize() function. Works. Checkin 2537.
 
+Updated the API document with the key Neutral fields.
 
+Next is the access to class and field info.
+Each Finfo should know
+	name
+	docs
+	Type
+	Num args ?
+	Type of each arg ?
+	
+	ValueFinfos have to identify set and get Finfos
+	SharedFinfos have to identify src and destFinfos.
+
+Clearly, Finfos will need to be individual child Elements, much like the
+	Synapse.
+
+Each Cinfo should know
+	name
+	docs
+	parent class
+	SrcFinfos
+	DestFinfos
+	ValueFinfos
+	LookupFinfos
+	SharedFinfos
+	# instances?
+
+Cinfos should be implemented as individual children of a neutral, 'classes'.
+Indexed entries would be messy.
+
+Seems I haven't put the doc string into the Cinfo. Must do.
+
+For now: Implemented the Cinfo MOOSE field stuff. Compiles, not
+yet hooked up.
 ============================================================================
