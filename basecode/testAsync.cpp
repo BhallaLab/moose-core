@@ -2170,6 +2170,24 @@ void testCinfoFields()
 	Cinfo *cinfo = const_cast< Cinfo* >( IntFire::initCinfo() );
 	assert( cinfo->getSrcFinfo( 0 ) == cinfo->findFinfo( "spike" ) );
 	assert( cinfo->getDestFinfo( 0 ) == cinfo->findFinfo( "set_Vm" ) );
+	assert( cinfo->getDestFinfo( 1 ) == cinfo->findFinfo( "get_Vm" ) );
+	assert( cinfo->getDestFinfo( 2 ) == cinfo->findFinfo( "set_tau" ) );
+	assert( cinfo->getDestFinfo( 3 ) == cinfo->findFinfo( "get_tau" ) );
+
+	assert( cinfo->getDestFinfo( 4 ) == cinfo->findFinfo( "set_thresh" ) );
+	assert( cinfo->getDestFinfo( 5 ) == cinfo->findFinfo( "get_thresh" ) );
+	assert( cinfo->getDestFinfo( 6 ) == cinfo->findFinfo( "set_refractoryPeriod" ) );
+	assert( cinfo->getDestFinfo( 7 ) == cinfo->findFinfo( "get_refractoryPeriod" ) );
+	assert( cinfo->getDestFinfo( 8 ) == cinfo->findFinfo( "set_numSynapses" ) );
+	assert( cinfo->getDestFinfo( 9 ) == cinfo->findFinfo( "get_numSynapses" ) );
+	assert( cinfo->getDestFinfo( 10 ) == cinfo->findFinfo( "process" ) );
+	assert( cinfo->getDestFinfo( 11 ) == cinfo->findFinfo( "reinit" ) );
+
+	assert( cinfo->getDestFinfo( 12 ) == cinfo->findFinfo( "set_num_synapse" ) );
+	assert( cinfo->getDestFinfo( 13 ) == cinfo->findFinfo( "get_num_synapse" ) );
+
+	assert( cinfo->getDestFinfo( 14 )->name() == "dummy" );
+
 	assert( cinfo->getValueFinfo( 0 ) == cinfo->findFinfo( "Vm" ) );
 	assert( cinfo->getLookupFinfo( 0 )->name() == "dummy");
 	assert( cinfo->getSharedFinfo( 0 ) == cinfo->findFinfo( "proc" ) );
