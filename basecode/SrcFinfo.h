@@ -23,6 +23,8 @@ class SrcFinfo: public Finfo
 
 		void registerFinfo( Cinfo* c );
 
+		///////////////////////////////////////////////////////////////
+
 		bool strSet( const Eref& tgt, const string& field, 
 			const string& arg ) const {
 			return 0; // always fails
@@ -46,6 +48,7 @@ class SrcFinfo: public Finfo
 		 * First checks that the target will work, then adds the Msg.
 		 */
 		bool addMsg( const Finfo* target, MsgId mid, Element* src ) const;
+
 
 	private:
 		/**
@@ -107,7 +110,6 @@ template < class T > class SrcFinfo1: public SrcFinfo
 			e.element()->tsend( q, getBindIndex(), p, temp, target );
 			delete[] temp;
 		}
-
 	private:
 };
 

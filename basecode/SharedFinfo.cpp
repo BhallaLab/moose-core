@@ -136,3 +136,22 @@ const vector< Finfo* >& SharedFinfo::dest() const
 }
 
 /////////////////////////////////////////////////////////////////////
+// overridden default virtual funcs for internal set/get names
+/////////////////////////////////////////////////////////////////////
+vector< string > SharedFinfo::innerSrc() const
+{
+	vector< string > ret;
+	for ( vector< SrcFinfo* >::const_iterator i = src_.begin(); 
+		i != src_.end(); ++i )
+		ret.push_back( (*i)->name() );
+	return ret;
+}
+
+vector< string > SharedFinfo::innerDest() const
+{
+	vector< string > ret;
+	for ( vector< Finfo* >::const_iterator i = dest_.begin(); 
+		i != dest_.end(); ++i )
+		ret.push_back( (*i)->name() );
+	return ret;
+}

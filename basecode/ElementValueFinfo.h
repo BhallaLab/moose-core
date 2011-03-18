@@ -14,7 +14,7 @@
  * values of fields that require information about the managing
  * Element and possibly the Qinfo as well.
  */
-template < class T, class F > class ElementValueFinfo: public Finfo
+template < class T, class F > class ElementValueFinfo: public ValueFinfoBase
 {
 	public:
 		~ElementValueFinfo() {
@@ -25,7 +25,7 @@ template < class T, class F > class ElementValueFinfo: public Finfo
 		ElementValueFinfo( const string& name, const string& doc, 
 			void ( T::*setFunc )( const Eref&, const Qinfo*, F ),
 			F ( T::*getFunc )( const Eref&, const Qinfo* ) const )
-			: Finfo( name, doc )
+			: ValueFinfoBase( name, doc )
 		{
 				string setname = "set_" + name;
 				set_ = new DestFinfo(
@@ -61,11 +61,9 @@ template < class T, class F > class ElementValueFinfo: public Finfo
 		}
 
 	private:
-		DestFinfo* set_;
-		DestFinfo* get_;
 };
 
-template < class T, class F > class ReadOnlyElementValueFinfo: public Finfo
+template < class T, class F > class ReadOnlyElementValueFinfo: public ValueFinfoBase
 {
 	public:
 		~ReadOnlyElementValueFinfo() {
@@ -74,7 +72,7 @@ template < class T, class F > class ReadOnlyElementValueFinfo: public Finfo
 
 		ReadOnlyElementValueFinfo( const string& name, const string& doc, 
 			F ( T::*getFunc )( const Eref& e, const Qinfo* q ) const )
-			: Finfo( name, doc )
+			: ValueFinfoBase( name, doc )
 		{
 				string getname = "get_" + name;
 				get_ = new DestFinfo(
@@ -101,7 +99,6 @@ template < class T, class F > class ReadOnlyElementValueFinfo: public Finfo
 		}
 
 	private:
-		DestFinfo* get_;
 };
 
 #endif // _ELEMENT_VALUE_FINFO_H
