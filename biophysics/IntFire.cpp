@@ -93,8 +93,8 @@ const Cinfo* IntFire::initCinfo()
 		&thresh,				// Value
 		&refractoryPeriod,		// Value
 		&numSynapses,			// Value
-		&process,				// DestFinfo
-		&spike, // MsgSrc
+		&proc,					// SharedFinfo
+		&spike, 		// MsgSrc
 		&synFinfo		// FieldElementFinfo for synapses.
 	};
 
