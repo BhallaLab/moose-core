@@ -11843,3 +11843,23 @@ Checkin 2544.
 
 Added unit tests for the low-level functions for Finfo and Cinfo fields. After
 some juggling, this works. Checkin 2550.
+
+Added some more test in the Unit tests for Cinfo fields. Checkin 2551
+
+Finally got the Class inspection classes to work. They reside in
+/classes/<classname>
+and each has five child FieldElements named
+srcFinfo
+destFinfo
+valueFinfo
+lookupFinfo
+sharedFinfo
+
+Each of these is an array, indexed as DataId( 0, <index> ) 
+since they are FieldElements.
+
+There is a nasty pending hole in the code, which is that the field 
+Neutral::linearIndex
+is currently ill-defined. It should resize as soon as the fieldElements or
+any other dimension is set, but does not do so now.
+============================================================================

@@ -212,7 +212,15 @@ class Cinfo
 			void setNumFinfo( unsigned int v );
 	
 
+			/**
+			 * Utility function used at init to create the inspection 
+			 * Elements for each of the Cinfos.
+			 */
+			static void makeCinfoElements( Id parent );
 
+			/**
+			 * Initializer for the MOOSE fields for Cinfo
+			 */
 			static const Cinfo* initCinfo();
 
 		private:

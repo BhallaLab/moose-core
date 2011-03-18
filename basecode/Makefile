@@ -99,6 +99,7 @@ SparseMsg.o:	SparseMatrix.h
 SetGet.o:	SetGet.h ../shell/Neutral.h
 DataHandlerWrapper.o: DataHandlerWrapper.h
 FuncBarrier.o:	FuncBarrier.h
+Cinfo.o: ../shell/Shell.h
 #TestBasecode.o:	Shell.h ShellWrapper.h
 
 .cpp.o:

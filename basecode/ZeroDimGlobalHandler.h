@@ -20,6 +20,9 @@ class ZeroDimGlobalHandler: public DataHandler
 	public:
 		ZeroDimGlobalHandler( const DinfoBase* dinfo );
 
+		/// Special constructor used in Cinfo::makeCinfoElements
+		ZeroDimGlobalHandler( const DinfoBase* dinfo, char* data );
+
 		ZeroDimGlobalHandler( const ZeroDimGlobalHandler* other );
 
 		~ZeroDimGlobalHandler();
