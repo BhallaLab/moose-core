@@ -11830,5 +11830,13 @@ Indexed entries would be messy.
 Seems I haven't put the doc string into the Cinfo. Must do.
 
 For now: Implemented the Cinfo MOOSE field stuff. Compiles, not
-yet hooked up.
+yet hooked up. Checkin 2538.
+
+Seems I left out a couple of files from the checkin. Checkin 2543.
+
+Now to do the implement MOOSE classes for the Finfos.
+Then set up the classes Elements.
 ============================================================================
+18 March
+Compiled masses of changes for the Finfos to get them set up as MOOSE classes.
+

@@ -46,6 +46,12 @@ class SharedFinfo: public Finfo
 
 		const vector< Finfo* >& dest() const;
 
+		///////////////////////////////////////////////////////////////////
+		// Override the default virtual function for the set/get destfinfos
+		///////////////////////////////////////////////////////////////////
+		vector< string > innerSrc() const;	
+		vector< string > innerDest() const;	
+
 	private:
 		vector< SrcFinfo* > src_;
 		vector< Finfo* > dest_;

@@ -7,6 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#include <typeinfo>
 #include "header.h"
 
 DestFinfo::~DestFinfo() {
@@ -46,4 +47,9 @@ bool DestFinfo::strGet(
 	const Eref& tgt, const string& field, string& returnValue ) const 
 {
 	return 0;
+}
+
+string DestFinfo::rttiType() const
+{
+	return typeid( *func_ ).name();
 }

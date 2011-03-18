@@ -19,9 +19,16 @@ class ValueFinfoBase: public Finfo
 		~ValueFinfoBase()
 		{;}
 
-		ValueFinfoBase( const string& name, const string& doc )
-			: Finfo( name, doc )
-		{;}
+		ValueFinfoBase( const string& name, const string& doc );
+
+		///////////////////////////////////////////////////////////////
+		// Override the default virtual function for the set/get destfinfos
+		///////////////////////////////////////////////////////////////
+
+		vector< string > innerDest() const;
+	protected:
+		DestFinfo* set_;
+		DestFinfo* get_;
 };
 
 template < class T, class F > class ValueFinfo: public ValueFinfoBase
@@ -68,13 +75,7 @@ template < class T, class F > class ValueFinfo: public ValueFinfoBase
 			Field< F > sg( tgt.objId() );
 			return sg.innerStrGet( tgt.objId(), field, returnValue );
 		}
-
 	private:
-		DestFinfo* set_;
-		DestFinfo* get_;
-		
-	//	OpFunc1< T, F >* setOpFunc_;
-	//	GetOpFunc< T, F >* getOpFunc_;
 };
 
 template < class T, class F > class ReadOnlyValueFinfo: public ValueFinfoBase
@@ -113,7 +114,6 @@ template < class T, class F > class ReadOnlyValueFinfo: public ValueFinfoBase
 		}
 
 	private:
-		DestFinfo* get_;
 };
 
 
@@ -171,11 +171,6 @@ template < class T, class F > class UpValueFinfo: public ValueFinfoBase
 		}
 
 	private:
-		DestFinfo* set_;
-		DestFinfo* get_;
-		
-	//	OpFunc1< T, F >* setOpFunc_;
-	//	GetOpFunc< T, F >* getOpFunc_;
 };
 
 #endif // _VALUE_FINFO_H

@@ -17,12 +17,11 @@ class Finfo
 		Finfo( const string& name, const string& doc );
 		virtual ~Finfo() {;}
 
-		const string& name() const;
-
 		/**
-		 * Make an identical copy of self. Used for derivation of classes.
-		virtual Finfo* clone() const = 0;
+		 * Returns the Finfo name
 		 */
+		string name() const;
+
 
 		/**
 		 * Assign function Ids, bindIndex and so on.
@@ -87,6 +86,50 @@ class Finfo
 		////////////////////////////////////////////////////////////////
 		// Functions for handling MOOSE Element inspection
 		////////////////////////////////////////////////////////////////
+		/**
+		 * Returns the documentation string for the Finfo
+		 */
+		string docs() const;
+
+		/**
+		 * Returns the RTTI type string for the finfo by referring
+		 * to an internal virtual function.
+		 */
+		string type() const;
+
+		/**
+		 * Returns the list of subsidiary SrcFinfos.
+		 * Used in Shared Finfos, empty otherwise. Goes via 
+		 * internal virtual function.
+		 */
+
+		vector< string > src() const;
+
+		/**
+		 * Returns the list of subsidiary destFinfos.
+		 * Used in SharedFinfos and ValueFinfos, empty otherwise. Goes via 
+		 * internal virtual function.
+		 */
+		vector< string > dest() const;
+
+		/**
+		 * Returns an RTTI type string for this Finfo.
+		 */
+		virtual string rttiType() const;
+
+		/**
+		 * Returns subsidiary SrcFinfos
+		 */
+		virtual vector< string > innerSrc() const;
+
+		/**
+		 * Returns subsidiary DestFinfos
+		 */
+		virtual vector< string > innerDest() const;
+
+		/**
+		 * Returns the Class Info for this Finfo
+		 */
 		static const Cinfo* initCinfo();
 
 	private:

@@ -29,6 +29,12 @@ class DestFinfo: public Finfo
 		const OpFunc* getOpFunc() const;
 		FuncId getFid() const;
 
+		///////////////////////////////////////////////////////////////
+		// Override the default virtual function for the rtti info
+		///////////////////////////////////////////////////////////////
+
+		string rttiType() const;
+
 	private:
 		OpFunc* func_;
 		FuncId fid_;
