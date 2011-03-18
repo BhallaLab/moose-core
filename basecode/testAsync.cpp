@@ -2110,6 +2110,73 @@ void testFieldDataHandler()
 	cout << "." << flush;
 }
 
+void testFinfoFields()
+{
+	const Finfo* vmFinfo = IntFire::initCinfo()->findFinfo( "Vm" );
+	const Finfo* synFinfo = IntFire::initCinfo()->findFinfo( "synapse" );
+	const Finfo* procFinfo = IntFire::initCinfo()->findFinfo( "proc" );
+	const Finfo* reinitFinfo = IntFire::initCinfo()->findFinfo( "reinit" );
+	const Finfo* spikeFinfo = IntFire::initCinfo()->findFinfo( "spike" );
+
+	assert( vmFinfo->name() == "Vm" );
+	assert( vmFinfo->docs() == "Membrane potential" );
+	assert( vmFinfo->src().size() == 0 );
+	assert( vmFinfo->dest().size() == 2 );
+	assert( vmFinfo->dest()[0] == "set_Vm" );
+	assert( vmFinfo->dest()[1] == "get_Vm" );
+	assert( vmFinfo->type() == "10ValueFinfoI7IntFiredE" );
+
+	assert( synFinfo->name() == "synapse" );
+	assert( synFinfo->docs() == "Sets up field Elements for synapse" );
+	assert( synFinfo->src().size() == 0 );
+	assert( synFinfo->dest().size() == 0 );
+	// cout <<  synFinfo->type() << endl;
+	assert( synFinfo->type() == "17FieldElementFinfoI7IntFire7SynapseE" );
+
+	assert( procFinfo->name() == "proc" );
+	assert( procFinfo->docs() == "Shared message for process and reinit" );
+	assert( procFinfo->src().size() == 0 );
+	assert( procFinfo->dest().size() == 2 );
+	assert( procFinfo->dest()[0] == "process" );
+	assert( procFinfo->dest()[1] == "reinit" );
+	// cout << procFinfo->type() << endl;
+	assert( procFinfo->type() == "11SharedFinfo" );
+
+	assert( reinitFinfo->name() == "reinit" );
+	assert( reinitFinfo->docs() == "Handles reinit call" );
+	assert( reinitFinfo->src().size() == 0 );
+	assert( reinitFinfo->dest().size() == 0 );
+	// cout << reinitFinfo->type() << endl;
+	assert( reinitFinfo->type() == "10ProcOpFuncI7IntFireE" );
+
+	assert( spikeFinfo->name() == "spike" );
+	assert( spikeFinfo->docs() == "Sends out spike events" );
+	assert( spikeFinfo->src().size() == 0 );
+	assert( spikeFinfo->dest().size() == 0 );
+	// cout << spikeFinfo->type() << endl;
+	assert( spikeFinfo->type() == "9SrcFinfo1IdE" );
+
+	cout << "." << flush;
+}
+
+void testCinfoFields()
+{
+	assert( IntFire::initCinfo()->getDocs() == "" );
+	assert( IntFire::initCinfo()->getBaseClass() == "Neutral" );
+
+	// We have a little bit of a hack here to cast away
+	// constness, due to the way the FieldElementFinfos
+	// are set up.
+	Cinfo *cinfo = const_cast< Cinfo* >( IntFire::initCinfo() );
+	assert( cinfo->getSrcFinfo( 0 ) == cinfo->findFinfo( "spike" ) );
+	assert( cinfo->getDestFinfo( 0 ) == cinfo->findFinfo( "set_Vm" ) );
+	assert( cinfo->getValueFinfo( 0 ) == cinfo->findFinfo( "Vm" ) );
+	assert( cinfo->getLookupFinfo( 0 )->name() == "dummy");
+	assert( cinfo->getSharedFinfo( 0 ) == cinfo->findFinfo( "proc" ) );
+
+	cout << "." << flush;
+}
+
 void testAsync( )
 {
 	showFields();
@@ -2145,4 +2212,6 @@ void testAsync( )
 	testDataCopyAny();
 	testOneDimHandler();
 	testFieldDataHandler();
+	testFinfoFields();
+	testCinfoFields();
 }

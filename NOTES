@@ -11839,4 +11839,7 @@ Then set up the classes Elements.
 ============================================================================
 18 March
 Compiled masses of changes for the Finfos to get them set up as MOOSE classes.
+Checkin 2544.
 
+Added unit tests for the low-level functions for Finfo and Cinfo fields. After
+some juggling, this works.
