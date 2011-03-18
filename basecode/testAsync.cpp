@@ -2168,7 +2168,10 @@ void testCinfoFields()
 	// constness, due to the way the FieldElementFinfos
 	// are set up.
 	Cinfo *cinfo = const_cast< Cinfo* >( IntFire::initCinfo() );
+	assert( cinfo->getNumSrcFinfo() == 1 );
 	assert( cinfo->getSrcFinfo( 0 ) == cinfo->findFinfo( "spike" ) );
+
+	assert( cinfo->getNumDestFinfo() == 14 );
 	assert( cinfo->getDestFinfo( 0 ) == cinfo->findFinfo( "set_Vm" ) );
 	assert( cinfo->getDestFinfo( 1 ) == cinfo->findFinfo( "get_Vm" ) );
 	assert( cinfo->getDestFinfo( 2 ) == cinfo->findFinfo( "set_tau" ) );
@@ -2188,11 +2191,47 @@ void testCinfoFields()
 
 	assert( cinfo->getDestFinfo( 14 )->name() == "dummy" );
 
+	assert( cinfo->getNumValueFinfo() == 5 );
 	assert( cinfo->getValueFinfo( 0 ) == cinfo->findFinfo( "Vm" ) );
+
+	assert( cinfo->getNumLookupFinfo() == 0 );
 	assert( cinfo->getLookupFinfo( 0 )->name() == "dummy");
+	assert( cinfo->getNumSharedFinfo() == 1 );
 	assert( cinfo->getSharedFinfo( 0 ) == cinfo->findFinfo( "proc" ) );
 
 	cout << "." << flush;
+}
+
+void testCinfoElements()
+{
+	Id intFireCinfoId( "/classes/IntFire" );
+	assert( intFireCinfoId != Id() );
+	assert( Field< string >::get( intFireCinfoId, "name" ) == "IntFire" );
+	assert( Field< string >::get( intFireCinfoId, "baseClass" ) == "Neutral" );
+	assert( Field< unsigned int >::get( 
+		intFireCinfoId, "num_valueFinfo" ) == 5 );
+	assert( Field< unsigned int >::get( 
+		intFireCinfoId, "num_srcFinfo" ) == 1 );
+	assert( Field< unsigned int >::get( 
+		intFireCinfoId, "num_destFinfo" ) == 14 );
+	
+	Id intFireSrcFinfoId( "/classes/IntFire/srcFinfo" );
+	assert( intFireSrcFinfoId != Id() );
+	assert( Field< string >::get( intFireSrcFinfoId, "name" ) == "spike" );
+	assert( Field< string >::get( intFireSrcFinfoId, "type" ) == "9SrcFinfo1IdE" );
+
+	Id intFireDestFinfoId( "/classes/IntFire/destFinfo" );
+	assert( intFireDestFinfoId != Id() );
+	/*
+	unsigned int ret = Field< unsigned int >::get( intFireDestFinfoId, "linearSize" );
+	assert( Field< unsigned int >::get( intFireDestFinfoId, "linearSize" ) == 14 );
+	*/
+
+	ObjId temp( intFireDestFinfoId, DataId( 0, 7 ) );
+	assert( Field< string >::get( temp, "name" ) == "get_refractoryPeriod");
+	temp = ObjId( intFireDestFinfoId, DataId( 0, 11 ) );
+	// temp.dataId.fieldu= 11;
+	assert( Field< string >::get( temp, "name" ) == "reinit" );
 }
 
 void testAsync( )
@@ -2232,4 +2271,5 @@ void testAsync( )
 	testFieldDataHandler();
 	testFinfoFields();
 	testCinfoFields();
+	testCinfoElements();
 }

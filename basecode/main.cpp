@@ -182,9 +182,14 @@ Id init( int argc, char** argv )
 	assert( tickId.value() == 2 );
 	assert( tickId()->getName() == "tick" ) ;
 
+	Id classMasterId( 3 );
+	new Element( classMasterId, Neutral::initCinfo(), "classes", dims, 1 );
+
 	assert ( shellId == Id() );
 	assert( clockId == Id( 1 ) );
 	assert( tickId == Id( 2 ) );
+	assert( classMasterId == Id( 3 ) );
+
 
 	/// Sets up the Elements that represent each class of Msg.
 	Msg::initMsgManagers();
@@ -192,6 +197,9 @@ Id init( int argc, char** argv )
 	s->connectMasterMsg();
 
 	Shell::adopt( shellId, clockId );
+	Shell::adopt( shellId, classMasterId );
+
+	Cinfo::makeCinfoElements( classMasterId );
 
 	// This will be initialized within the Process loop, and better there
 	// as it flags attempts to call the Reduce operations before ProcessLoop

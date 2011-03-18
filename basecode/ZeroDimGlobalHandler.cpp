@@ -13,6 +13,12 @@ ZeroDimGlobalHandler::ZeroDimGlobalHandler( const DinfoBase* dinfo )
 	: DataHandler( dinfo ), data_( 0 )
 {;}
 
+// Special constructor for use by Cinfo Elements.
+ZeroDimGlobalHandler::ZeroDimGlobalHandler( const DinfoBase* dinfo, 
+	char* data )
+	: DataHandler( dinfo ), data_( data )
+{;}
+
 ZeroDimGlobalHandler::ZeroDimGlobalHandler( const ZeroDimGlobalHandler* other )
 	: DataHandler( other->dinfo() ),
 		data_( other->dinfo()->copyData( other->data_, 1, 1 ) )

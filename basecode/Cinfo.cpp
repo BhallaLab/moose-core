@@ -8,6 +8,9 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 #include "header.h"
+#include "ReduceBase.h"
+#include "ReduceMax.h"
+#include "../shell/Shell.h"
 #include "Dinfo.h"
 
 Cinfo::Cinfo( const string& name,
@@ -115,6 +118,23 @@ void Cinfo::postCreationFunc( Id newId, Element* newElm ) const
 		postCreationFinfos_.begin();
 		i != postCreationFinfos_.end(); ++i )
 		(*i)->postCreationFunc( newId, newElm );
+}
+
+// Static function called by init()
+void Cinfo::makeCinfoElements( Id parent )
+{
+	static Dinfo< Cinfo > dummy;
+	vector< unsigned int > dims( 1, 0 );
+
+	for ( map< string, Cinfo* >::iterator i = cinfoMap().begin(); 
+		i != cinfoMap().end(); ++i ) {
+		Id id = Id::nextId();
+		char* data = reinterpret_cast< char* >( i->second );
+		DataHandler* dh = new ZeroDimGlobalHandler( &dummy, data );
+		new Element( id, Cinfo::initCinfo(), i->first, dh );
+		Shell::adopt( parent, id );
+		// cout << "Cinfo::makeCinfoElements: parent= " << parent << ", Id = " << id << ", name = " << i->first << endl;
+	}
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -326,7 +346,10 @@ static DestFinfo dummy(
 
 string Cinfo::getBaseClass() const 
 {
-	return baseCinfo_->name();
+	if ( baseCinfo_ )
+		return baseCinfo_->name();
+	else
+		return "none";
 }
 
 ////////////////////////////////////////////////////////////////////
