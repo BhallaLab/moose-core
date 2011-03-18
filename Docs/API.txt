@@ -134,10 +134,41 @@ This has the following fields of note:
 	string path			// Full path
 	string className		
 	unsigned int linearSize		// Product of all dimensions
+					// Currently not working.
 	vector< unsigned int> Dimensions
 	unsigned int fieldDimension	// Size of field dimension.
 	vector< ObjId > msgOut 		// MsgManagers of all outgoing msgs
 	vector< ObjId > msgIn		// MsgManagers of all incoming msgs
 	vector< Id > msgSrc( string field )	// Ids of source msgs into field
 	vector< Id > msgDest( string field )	// Ids of dest msgs into field
+
+5.3 Class Info objects. These are located in /classes/<classname>
+	string docs			// currently not implemented
+	string baseClass		// Name of base class
+
+5.4 Field Info objects. These are children of the respective ClassInfo and
+	are located in /classes/<classname>/<Field category>
+	There are 5 field categories:
+	srcFinfo
+	destFinfo
+	valueFinfo
+	lookupFinfo
+	sharedFinfo
+	Each of these is an array, indexed as DataId( 0, <index> )
+	since they are FieldElements.
+	You can query the # of entries in each category using
+		Id classId( "/classes/<classname>" );
+		numValueFinfos = 
+			Field< unsigned int >::get( classId, "num_valueFinfo" );
+	
+	Finally each of the field categories has the following fields:
+	string name
+	string docs		// This is implemented
+	string type		// RTTI type info for this field
+	vector< string > src	// vector of subsidiary srcFinfos, which 
+				// happens in SharedFinfos.
+	vector< string > dest	// vector of subsidiary destFinfos, which 
+				// happens in SharedFinfos and ValueFinfos.
+
+
 
