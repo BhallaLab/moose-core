@@ -164,7 +164,10 @@ This has the following fields of note:
 	Finally each of the field categories has the following fields:
 	string name
 	string docs		// This is implemented
-	string type		// RTTI type info for this field
+	string type		// String with argument types separated by
+				// commas. Can handle basic types, Ids,
+				// ObjIds, DataIds, strings, and vectors of
+				// any of the above.
 	vector< string > src	// vector of subsidiary srcFinfos, which 
 				// happens in SharedFinfos.
 	vector< string > dest	// vector of subsidiary destFinfos, which 
