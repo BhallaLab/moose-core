@@ -227,6 +227,37 @@ class ZeroOrder: public RateTerm
 		double k_;
 };
 
+/**
+ * This rather odd reaction is used when we have an amount y of a molecule
+ * and we want it to proceed to zero at a fixed rate k. k would usually
+ * be 1/dt. Following dt seconds, we need to update y as it has nominally
+ * all been used up.
+ */
+class Flux: public ZeroOrder
+{
+	public:
+		Flux( double k, unsigned int y )
+			: ZeroOrder( k ), y_( y )
+		{;}
+
+		double operator() ( const double* S ) const {
+			assert( !isnan( S[ y_ ] ) );
+			return k_ * S[ y_ ];
+		}
+
+		unsigned int getReactants( vector< unsigned int >& molIndex ) const{
+			molIndex.resize( 0 );
+			return 0;
+		}
+
+		void rescaleVolume( double ratio ) {
+			return; // Nothing needs to be scaled.
+		}
+
+	private:
+		unsigned int y_;
+};
+
 class FirstOrder: public ZeroOrder
 {
 	public:

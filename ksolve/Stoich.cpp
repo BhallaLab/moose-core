@@ -41,6 +41,11 @@ static SrcFinfo1< Id > plugin(
 		"Sends out Stoich Id so that plugins can directly access fields and functions"
 	);
 
+static SrcFinfo1< vector< double > > port(
+		"port",
+		"Port for coupling solvers together"
+	);
+
 const Cinfo* Stoich::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
@@ -115,6 +120,7 @@ static const Cinfo* stoichCinfo = Stoich::initCinfo();
 
 Stoich::Stoich()
 	: 
+		totPortSize_( 0 ),
 		objMapStart_( 0 ),
 		numVarMols_( 0 ),
 		numVarMolsBytes_( 0 ),
@@ -145,6 +151,18 @@ void Stoich::reinit( const Eref& e, ProcPtr p )
 {
 	y_.assign( Sinit_.begin(), Sinit_.begin() + numVarMols_ );
 	S_ = Sinit_;
+}
+
+/**
+ * Handles incoming messages representing influx of molecules
+ */
+void Stoich::port( const Eref& e, ProcPtr p, vector< double > mol )
+{
+	assert( mol.size() == inPortEnd_ - inPortStart_ );
+	unsigned int j = 0;
+	for ( unsigned int i = inPortStart_; i < inPortEnd_; ++i ) {
+		S_[i] += mol[j++];
+	}
 }
 
 //////////////////////////////////////////////////////////////
@@ -253,6 +271,7 @@ void Stoich::allocateModel( const vector< Id >& elist )
 			++numFunc;
 		}
 	}
+	// numVarMols_ += numEfflux_;
 
 	numBufMols_ = 0;
 	for ( vector< Id >::const_iterator i = bufMols.begin(); i != bufMols.end(); ++i ){
