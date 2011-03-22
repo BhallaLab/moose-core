@@ -33,6 +33,7 @@ class Stoich
 
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref& e, ProcPtr p );
+		void port( const Eref& e, ProcPtr p, vector< double > mol );
 
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions
@@ -85,6 +86,10 @@ class Stoich
 		/**
 		 * This is the array of molecules. Of these, the first numVarMols_
 		 * are variables and are integrated using the ODE solver. 
+		 * The last numEfflux_ molecules within numVarMols are those that
+		 * go out to another solver. They are also integrated by the ODE
+		 * solver, so that at the end of dt each has exactly as many
+		 * molecules as diffused away.
 		 * The next numBufMols_ are fixed but can be changed by the script.
 		 * The next numFuncMols_ are computed using arbitrary functions of
 		 * any of the molecule levels, and the time.
@@ -130,6 +135,31 @@ class Stoich
 		 * Should be possible to replace with S.
 		 */
 		vector< double > y_;
+
+		/**
+		 * These port are the communication channel between solvers. They
+		 * are used to exchange molecules going each way through the port.
+		 * The outPortStart vector identifies starting index in the 
+		 * S_ vector, for the molecules leaving this solver. There is 
+		 * a separate block for each outgoing port because there will 
+		 * typically be differences in numbers going out on each port.
+		 */
+		vector< unsigned int > outPortStart_;
+
+		/**
+		 * This is the shared port for all incoming molecules. Each 
+		 * molecule is assigned an index within this port. Multiple
+		 * ports can share corresponding molecules because once they are
+		 * in, the incorporation into internal reactions is identical.
+		 * So the incoming molecule numbers just add up.
+		 */
+		 unsigned int inPortStart_;
+		 unsigned int inPortEnd_;
+
+		/**
+		 * totPortSize_: The sum of all port entries
+		 */
+		unsigned int totPortSize_;
 
 		/**
 		 * Maps Ids to objects in the S_, RateTerm, and FuncTerm vectors.

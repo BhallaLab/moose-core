@@ -11864,5 +11864,121 @@ is currently ill-defined. It should resize as soon as the fieldElements or
 any other dimension is set, but does not do so now.
 Checkin 2554.
 
-Added some documentation to explain these new features.
+Added some documentation to explain these new features. Checkin 2555.
+============================================================================
+21 March
+Next: work on ksolver:
+- Multiple instances/compartments
+- flux through a barrier
+- stochastic engine
+
+Also space:
+- Implement basic shapes.
+- Automatic geometry generation from neuronal morphology
+- Port over readcell and readNeuroML morphology
+
+Also chem model fix ups
+- Groups and spatial organization revisited
+- SBML import
+- mathobject.
+- volume handling
+
+
+For starters, went through and wrote a bit of documentation on the 
+ksolver system.
+
+Some issues with the ksolver design:
+- Doesn't deal well with object indices. Should explicitly state what it 
+	expects: element-to-element messages
+- Doesn't have the concept of expanding into arrays just yet.
+- Not tested multinode.
+- Not set up for multithread.
+
+None should matter for starters. I need an interface plane or port for
+communicating with other solvers. This could just be another ksolve system.
+
+- Have to have a way to deal with all molecules scalably.
+	- Use a portion of the v vector?
+	- Use a set of dummy molecules that build up?
+- Has to have outgoing flux and incoming flux terms.
+	- Separate sections of the v vector for each.
+
+============================================================================
+22 March
+
+Designing ports for interfaces between solvers.
+
+Option 1:
+	- Each port represents two sections of the S_ vector for molecules.
+		- Section 1 is for incoming
+		- section 2 is for outgoing
+	- Start of each section encoded in Stoich::portStart_;
+	- Same # molecules in each section of a given port, in same order.
+	- Incoming molecules are treated as flux per timestep, and handled
+		in the calculations by a flux RateTerm, which linearly removes
+		molecules till the end of the timestep.
+	- Outgoing molecules are integrated during the timestep.
+	- During molecule exchange at port
+		- incoming section is replaced with incoming vector values
+		- outgoing section is sent as is for 'double' outgoing
+		- outgoing section is 'floored' for 'int' outgoing. 
+			The remainder stays put for the next cycle.
+	- During setup
+		- Incoming section is tied to a set of 'flux' rate terms.
+			- These do not need parameterization, just the dt to
+			guarantee complete removal by the end of each dt.
+		- Outgoing section is tied to a set of unidirectional
+			1st order rate terms to represent diffusion rates.
+
+Option 2:
+	- Each port represents one section of the S_ vector for efflux, and one
+		vector of integers to look up molecules undergoing influx.
+	- Use Stoich::portStart_ to look up the respective vectors.
+	- Incoming molecules just added right into their S_ terms.
+	- Outgoing molecules integrated during the timestep.
+	- During molecule exchange at port
+		- Incoming molecules added into their S_ terms
+		- outgoing section is sent as is for 'double' outgoing
+		- outgoing section is 'floored' for 'int' outgoing. 
+			The remainder stays put for the next cycle.
+	- During setup
+		- Incoming mol indices filled into port vector
+		- Outgoing section is tied to a set of unidirectional
+			1st order rate terms to represent diffusion rates.
+
+
+Evaluation:
+Accuracy: Option 1 is 2nd order, option 2 is an ugly Euler. But option 1
+	may have roundoff/integration error, whereas there will be absolutely
+	no molecule loss in option 2.
+Data transfer: Identical
+Setup: Both need creation of assorted rate terms. More rate terms in option 1,
+	option 2 needs a separate table to be created.
+Speed: Stoich matrix is a bit bigger for option 1. More molecules and 
+	more reacs.
+Overlaying data transfer targets: Possible for both. 
+	Option 1: This would amount to a shared influx set of molecules for
+	all ports, assuming that the molecule set is identical or overlapping.
+	Handy for many spines on a dendrite.
+	Option 2: This happens effortlessly: influx goes right to target mols.
+Compatibility with Gillespie calculations: 
+	Both OK. Option 1 is clean, Option 2 will need extra step to flag
+	affected reactions for updating transition probabilities.
+Compatibility with something with a much finer timestep:
+	In both cases, the other solver will need to implement something like
+	the flux terms to smoothen influx. Efflux no problem.
+Compatibility with something with a much longer timestep: Option 1 is better.
+
+Overall, go with option 1. Higher order accuracy but slightly slower.
+
+Now, setup issues. Ideally we should just introduce two solvers to each other
+and let them figure out what to do.
+	- Solver A sends B a vector of all molecular species.
+	- Solver B sends back a vector with the matching subset.
+	- Each uses this subset to build its arrays and reacs
+	- Separately, provide each side of each port with a scaling factor for 
+		diffusion rates, related to area of port and other factors.
+All this to-and-fro stuff, as well as the runtime data, should go via a
+shared msg.
+
 ============================================================================
