@@ -11986,4 +11986,6 @@ Started some coding, still feeling way into implementation. Checkin 2559.
 Subha has asked for recoding of rttiType function to return instead a list of
 types of arguments to functions in a compiler-independent way. Many files
 to change as a result. Compiles, added new unit test for a nasty case, works.
+Checkin 2560.
+Updated API.txt to reflect changes.
 ============================================================================
