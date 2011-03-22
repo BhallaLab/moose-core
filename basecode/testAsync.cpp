@@ -2117,6 +2117,7 @@ void testFinfoFields()
 	const Finfo* procFinfo = IntFire::initCinfo()->findFinfo( "proc" );
 	const Finfo* reinitFinfo = IntFire::initCinfo()->findFinfo( "reinit" );
 	const Finfo* spikeFinfo = IntFire::initCinfo()->findFinfo( "spike" );
+	const Finfo* createFinfo = Shell::initCinfo()->findFinfo( "requestCreate" );
 
 	assert( vmFinfo->name() == "Vm" );
 	assert( vmFinfo->docs() == "Membrane potential" );
@@ -2124,14 +2125,14 @@ void testFinfoFields()
 	assert( vmFinfo->dest().size() == 2 );
 	assert( vmFinfo->dest()[0] == "set_Vm" );
 	assert( vmFinfo->dest()[1] == "get_Vm" );
-	assert( vmFinfo->type() == "10ValueFinfoI7IntFiredE" );
+	assert( vmFinfo->type() == "double" );
 
 	assert( synFinfo->name() == "synapse" );
 	assert( synFinfo->docs() == "Sets up field Elements for synapse" );
 	assert( synFinfo->src().size() == 0 );
 	assert( synFinfo->dest().size() == 0 );
 	// cout <<  synFinfo->type() << endl;
-	assert( synFinfo->type() == "17FieldElementFinfoI7IntFire7SynapseE" );
+	assert( synFinfo->type() == "bad" );
 
 	assert( procFinfo->name() == "proc" );
 	assert( procFinfo->docs() == "Shared message for process and reinit" );
@@ -2140,21 +2141,25 @@ void testFinfoFields()
 	assert( procFinfo->dest()[0] == "process" );
 	assert( procFinfo->dest()[1] == "reinit" );
 	// cout << procFinfo->type() << endl;
-	assert( procFinfo->type() == "11SharedFinfo" );
+	assert( procFinfo->type() == "void" );
 
 	assert( reinitFinfo->name() == "reinit" );
 	assert( reinitFinfo->docs() == "Handles reinit call" );
 	assert( reinitFinfo->src().size() == 0 );
 	assert( reinitFinfo->dest().size() == 0 );
 	// cout << reinitFinfo->type() << endl;
-	assert( reinitFinfo->type() == "10ProcOpFuncI7IntFireE" );
+	assert( reinitFinfo->type() == "void" );
 
 	assert( spikeFinfo->name() == "spike" );
 	assert( spikeFinfo->docs() == "Sends out spike events" );
 	assert( spikeFinfo->src().size() == 0 );
 	assert( spikeFinfo->dest().size() == 0 );
 	// cout << spikeFinfo->type() << endl;
-	assert( spikeFinfo->type() == "9SrcFinfo1IdE" );
+	assert( spikeFinfo->type() == "double" );
+
+	assert( createFinfo );
+	assert( createFinfo->name() == "requestCreate" );
+	assert( createFinfo->type() == "string,Id,Id,string,vector<unsigned int>" );
 
 	cout << "." << flush;
 }
@@ -2218,7 +2223,7 @@ void testCinfoElements()
 	Id intFireSrcFinfoId( "/classes/IntFire/srcFinfo" );
 	assert( intFireSrcFinfoId != Id() );
 	assert( Field< string >::get( intFireSrcFinfoId, "name" ) == "spike" );
-	assert( Field< string >::get( intFireSrcFinfoId, "type" ) == "9SrcFinfo1IdE" );
+	assert( Field< string >::get( intFireSrcFinfoId, "type" ) == "double" );
 
 	Id intFireDestFinfoId( "/classes/IntFire/destFinfo" );
 	assert( intFireDestFinfoId != Id() );

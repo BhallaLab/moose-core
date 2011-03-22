@@ -52,6 +52,9 @@ class SharedFinfo: public Finfo
 		vector< string > innerSrc() const;	
 		vector< string > innerDest() const;	
 
+		/// This always returns void. We need to check the subsidiary Finfos
+		string rttiType() const;
+
 	private:
 		vector< SrcFinfo* > src_;
 		vector< Finfo* > dest_;

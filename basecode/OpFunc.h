@@ -32,13 +32,21 @@ class OpFunc
 		virtual void op( const Eref& e, const char* buf ) const = 0;
 
 		virtual void op( const Eref& e, const Qinfo* q, const char* buf ) const = 0;
+
+		virtual string rttiType() const = 0;
 };
 
+/**
+ * This is the base class for all Get OpFuncs. 
+ */
 template< class A > class GetOpFuncBase: public OpFunc
 {
 	public: 
 		virtual A reduceOp( const Eref& e ) const = 0;
-		
+
+		string rttiType() const {
+			return Conv< A >::rttiType();
+		}
 };
 
 // Should I template these off an integer for generating a family?
@@ -54,6 +62,7 @@ class OpFuncDummy: public OpFunc
 
 		void op( const Eref& e, const char* buf ) const;
 		void op( const Eref& e, const Qinfo* q, const char* buf ) const;
+		string rttiType() const;
 };
 
 template< class T > class OpFunc0: public OpFunc
@@ -88,6 +97,10 @@ template< class T > class OpFunc0: public OpFunc
 			(reinterpret_cast< T* >( e.data() )->*func_)();
 		}
 
+		string rttiType() const {
+			return "void";
+		}
+
 	private:
 		void ( T::*func_ )( ); 
 };
@@ -120,6 +133,10 @@ template< class T, class A > class OpFunc1: public OpFunc
 		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
 			Conv< A > arg1( buf );
 			(reinterpret_cast< T* >( e.data() )->*func_)( *arg1 );
+		}
+
+		string rttiType() const {
+			return Conv< A >::rttiType();
 		}
 
 	private:
@@ -157,6 +174,10 @@ template< class T, class A1, class A2 > class OpFunc2: public OpFunc
 			Conv< A1 > arg1( buf );
 			Conv< A2 > arg2( buf + arg1.size() );
 			(reinterpret_cast< T* >( e.data() )->*func_)( *arg1, *arg2 );
+		}
+
+		string rttiType() const {
+			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType(); 
 		}
 
 	private:
@@ -203,6 +224,11 @@ template< class T, class A1, class A2, class A3 > class OpFunc3:
 			Conv< A3 > arg3( buf );
 			(reinterpret_cast< T* >( e.data() )->*func_)( 
 				*arg1, *arg2, *arg3 );
+		}
+
+		string rttiType() const {
+			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType() +
+				"," + Conv< A3 >::rttiType();
 		}
 
 	private:
@@ -253,6 +279,11 @@ template< class T, class A1, class A2, class A3, class A4 > class OpFunc4:
 			Conv< A4 > arg4( buf );
 			(reinterpret_cast< T* >( e.data() )->*func_)( 
 				*arg1, *arg2, *arg3, *arg4 );
+		}
+
+		string rttiType() const {
+			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType() +
+				"," + Conv<A3>::rttiType() + "," + Conv<A4>::rttiType();
 		}
 
 	private:
@@ -307,6 +338,12 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class OpFu
 			Conv< A5 > arg5( buf );
 			(reinterpret_cast< T* >( e.data() )->*func_)( 
 				*arg1, *arg2, *arg3, *arg4, *arg5 );
+		}
+
+		string rttiType() const {
+			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType() +
+				"," + Conv<A3>::rttiType() + "," + Conv<A4>::rttiType() +
+				"," + Conv<A5>::rttiType();
 		}
 
 	private:
@@ -365,6 +402,12 @@ template< class T, class A1, class A2, class A3, class A4, class A5, class A6 > 
 			Conv< A6 > arg6( buf );
 			(reinterpret_cast< T* >( e.data() )->*func_)( 
 				*arg1, *arg2, *arg3, *arg4, *arg5, *arg6 );
+		}
+
+		string rttiType() const {
+			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType() +
+				"," + Conv<A3>::rttiType() + "," + Conv<A4>::rttiType() +
+				"," + Conv<A5>::rttiType() + "," + Conv<A6>::rttiType();
 		}
 
 	private:

@@ -66,6 +66,10 @@ template < class T, class L, class F > class LookupElementValueFinfo: public Fin
 				indexPart, returnValue );
 		}
 
+		string rttiType() const {
+			return Conv<F>::rttiType();
+		}
+
 	private:
 		DestFinfo* set_;
 		DestFinfo* get_;
@@ -109,6 +113,10 @@ template < class T, class L, class F >
 			LookupField< L, F > sg( tgt.objId() );
 			return sg.innerStrGet( tgt.objId(), fieldPart, 
 				indexPart, returnValue );
+		}
+
+		string rttiType() const {
+			return Conv<F>::rttiType();
 		}
 
 	private:

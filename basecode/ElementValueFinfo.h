@@ -60,6 +60,10 @@ template < class T, class F > class ElementValueFinfo: public ValueFinfoBase
 			return sg.innerStrGet( tgt.objId(), field, returnValue );
 		}
 
+		string rttiType() const {
+			return Conv<F>::rttiType();
+		}
+
 	private:
 };
 
@@ -96,6 +100,10 @@ template < class T, class F > class ReadOnlyElementValueFinfo: public ValueFinfo
 			string& returnValue ) const {
 			Field< F > sg( tgt.objId() );
 			return sg.innerStrGet( tgt.objId(), field, returnValue );
+		}
+
+		string rttiType() const {
+			return Conv<F>::rttiType();
 		}
 
 	private:

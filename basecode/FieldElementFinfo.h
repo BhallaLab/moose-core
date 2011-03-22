@@ -104,6 +104,10 @@ template < class T, class F > class FieldElementFinfo: public Finfo
 			return 0; // always fails
 		}
 
+		string rttiType() const {
+			return Conv<F>::rttiType();
+		}
+
 	private:
 		DestFinfo* setNum_;
 		DestFinfo* getNum_;

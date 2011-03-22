@@ -50,6 +50,10 @@ template< class T > class UpFunc0: public OpFunc
 		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
 			(reinterpret_cast< T* >( e.parentData() )->*func_)( e.index() );
 		}
+
+		string rttiType() const {
+			return "void";
+		}
 	private:
 		void ( T::*func_ )( DataId index ); 
 };
@@ -87,6 +91,10 @@ template< class T, class A > class UpFunc1: public OpFunc
 			Conv< A > arg1( buf );
 			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
 				e.index(), *arg1 );
+		}
+
+		string rttiType() const {
+			return Conv< A >::rttiType();
 		}
 
 	private:
@@ -128,6 +136,10 @@ template< class T, class A1, class A2 > class UpFunc2: public OpFunc
 			Conv< A2 > arg2( buf );
 			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
 				e.index(), *arg1, *arg2 );
+		}
+
+		string rttiType() const {
+			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType(); 
 		}
 
 	private:
@@ -174,6 +186,11 @@ template< class T, class A1, class A2, class A3 > class UpFunc3:
 			Conv< A3 > arg3( buf );
 			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
 				e.index(), *arg1, *arg2, *arg3 );
+		}
+
+		string rttiType() const {
+			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType() +
+				"," + Conv< A3 >::rttiType();
 		}
 
 	private:
@@ -224,6 +241,11 @@ template< class T, class A1, class A2, class A3, class A4 > class UpFunc4:
 			Conv< A4 > arg4( buf );
 			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
 				e.index(), *arg1, *arg2, *arg3, *arg4 );
+		}
+
+		string rttiType() const {
+			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType() +
+				"," + Conv<A3>::rttiType() + "," + Conv<A4>::rttiType();
 		}
 
 	private:
@@ -280,6 +302,12 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class UpFu
 				e.index(), *arg1, *arg2, *arg3, *arg4, *arg5 );
 		}
 
+		string rttiType() const {
+			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType() +
+				"," + Conv<A3>::rttiType() + "," + Conv<A4>::rttiType() +
+				"," + Conv<A5>::rttiType();
+		}
+
 	private:
 		void ( T::*func_ )( DataId, A1, A2, A3, A4, A5 ); 
 };
@@ -291,7 +319,7 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class UpFu
  * FuncId of the function on the object that requested the
  * value. The UpFunc then sends back a message with the info.
  */
-template< class T, class A > class GetUpFunc: public OpFunc
+template< class T, class A > class GetUpFunc: public GetOpFuncBase< A >
 {
 	public:
 		GetUpFunc( A ( T::*func )( DataId ) const )

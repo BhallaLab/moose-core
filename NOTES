@@ -11981,4 +11981,9 @@ and let them figure out what to do.
 All this to-and-fro stuff, as well as the runtime data, should go via a
 shared msg.
 
+Started some coding, still feeling way into implementation. Checkin 2559.
+
+Subha has asked for recoding of rttiType function to return instead a list of
+types of arguments to functions in a compiler-independent way. Many files
+to change as a result. Compiles, added new unit test for a nasty case, works.
 ============================================================================

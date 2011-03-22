@@ -51,5 +51,5 @@ bool DestFinfo::strGet(
 
 string DestFinfo::rttiType() const
 {
-	return typeid( *func_ ).name();
+	return func_->rttiType();
 }
