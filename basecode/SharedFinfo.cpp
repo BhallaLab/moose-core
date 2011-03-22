@@ -155,3 +155,8 @@ vector< string > SharedFinfo::innerDest() const
 		ret.push_back( (*i)->name() );
 	return ret;
 }
+
+string SharedFinfo::rttiType() const
+{
+	return "void";
+}

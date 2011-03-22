@@ -74,3 +74,8 @@ void OpFuncDummy::op( const Eref& e, const Qinfo* q,
 	const char* buf ) const {
 	;
 }
+
+string OpFuncDummy::rttiType() const
+{
+	return "void";
+}

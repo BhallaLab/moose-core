@@ -43,6 +43,10 @@ template< class T > class EpFunc0: public OpFunc
 			(reinterpret_cast< T* >( e.data() )->*func_)( e, q ); 
 		}
 
+		string rttiType() const {
+			return "void";
+		}
+
 	private:
 		void ( T::*func_ )( const Eref& e, const Qinfo* q ); 
 };
@@ -78,6 +82,10 @@ template< class T, class A > class EpFunc1: public OpFunc
 		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
 			Conv< A > arg1( buf );
 			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1 ) ;
+		}
+
+		string rttiType() const {
+			return Conv< A >::rttiType();
 		}
 
 	private:
@@ -118,6 +126,10 @@ template< class T, class A1, class A2 > class EpFunc2: public OpFunc
 			Conv< A1 > arg1( buf );
 			Conv< A2 > arg2( buf + arg1.size() );
 			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2 ) ;
+		}
+
+		string rttiType() const {
+			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType(); 
 		}
 
 	private:
@@ -165,6 +177,11 @@ template< class T, class A1, class A2, class A3 > class EpFunc3:
 				*arg1, *arg2, *arg3 ) ;
 		}
 
+		string rttiType() const {
+			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType() +
+				"," + Conv< A3 >::rttiType();
+		}
+
 	private:
 		void ( T::*func_ )( const Eref& e, const Qinfo* q, A1, A2, A3 ); 
 };
@@ -210,6 +227,11 @@ template< class T, class A1, class A2, class A3, class A4 > class EpFunc4:
 			Conv< A4 > arg4( buf + arg1.size() + arg2.size() + arg3.size());
 			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, 
 				*arg1, *arg2, *arg3, *arg4 ) ;
+		}
+
+		string rttiType() const {
+			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType() +
+				"," + Conv<A3>::rttiType() + "," + Conv<A4>::rttiType();
 		}
 
 	private:
@@ -267,6 +289,12 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class EpFu
 			Conv< A5 > arg5( buf );
 			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, 
 				*arg1, *arg2, *arg3, *arg4, *arg5 ) ;
+		}
+
+		string rttiType() const {
+			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType() +
+				"," + Conv<A3>::rttiType() + "," + Conv<A4>::rttiType() +
+				"," + Conv<A5>::rttiType();
 		}
 
 	private:
@@ -330,6 +358,12 @@ template< class T, class A1, class A2, class A3, class A4, class A5, class A6 > 
 				*arg1, *arg2, *arg3, *arg4, *arg5, *arg6 ) ;
 		}
 
+		string rttiType() const {
+			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType() +
+				"," + Conv<A3>::rttiType() + "," + Conv<A4>::rttiType() +
+				"," + Conv<A5>::rttiType() + "," + Conv<A6>::rttiType();
+		}
+
 	private:
 		void ( T::*func_ )( const Eref& e, const Qinfo* q, 
 			A1, A2, A3, A4, A5, A6 ); 
@@ -343,7 +377,7 @@ template< class T, class A1, class A2, class A3, class A4, class A5, class A6 > 
  * FuncId of the function on the object that requested the
  * value. The EpFunc then sends back a message with the info.
  */
-template< class T, class A > class GetEpFunc: public OpFunc
+template< class T, class A > class GetEpFunc: public GetOpFuncBase< A >
 {
 	public:
 		GetEpFunc( A ( T::*func )( const Eref& e, const Qinfo* q ) const )

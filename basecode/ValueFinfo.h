@@ -75,6 +75,10 @@ template < class T, class F > class ValueFinfo: public ValueFinfoBase
 			Field< F > sg( tgt.objId() );
 			return sg.innerStrGet( tgt.objId(), field, returnValue );
 		}
+
+		string rttiType() const {
+			return Conv<F>::rttiType();
+		}
 	private:
 };
 
@@ -111,6 +115,10 @@ template < class T, class F > class ReadOnlyValueFinfo: public ValueFinfoBase
 			string& returnValue ) const {
 			Field< F > sg( tgt.objId() );
 			return sg.innerStrGet( tgt.objId(), field, returnValue );
+		}
+
+		string rttiType() const {
+			return Conv<F>::rttiType();
 		}
 
 	private:
@@ -168,6 +176,10 @@ template < class T, class F > class UpValueFinfo: public ValueFinfoBase
 			string& returnValue ) const {
 			Field< F > sg( tgt.objId() );
 			return sg.innerStrGet( tgt.objId(), field, returnValue );
+		}
+
+		string rttiType() const {
+			return Conv<F>::rttiType();
 		}
 
 	private:

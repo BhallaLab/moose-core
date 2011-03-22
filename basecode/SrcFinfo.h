@@ -70,6 +70,10 @@ class SrcFinfo0: public SrcFinfo
 		// Will need to specialize for strings etc.
 		void send( const Eref& e, const ProcInfo* p ) const;
 		void sendTo( const Eref& e, const ProcInfo* p, const ObjId& target) const;
+		/// Returns compiler-independent string with type info
+		string rttiType() const {
+			return "void";
+		}
 
 	private:
 };
@@ -110,6 +114,10 @@ template < class T > class SrcFinfo1: public SrcFinfo
 			e.element()->tsend( q, getBindIndex(), p, temp, target );
 			delete[] temp;
 		}
+
+		string rttiType() const {
+			return Conv<T>::rttiType();
+		}
 	private:
 };
 
@@ -136,6 +144,10 @@ template <> class SrcFinfo1< double >: public SrcFinfo
 			Qinfo q( e.index(), sizeof( double ), 1 );
 			e.element()->tsend( q, getBindIndex(), p, 
 				reinterpret_cast< const char* >( &arg ), target  );
+		}
+
+		string rttiType() const {
+			return Conv< double >::rttiType();
 		}
 
 	private:
@@ -166,6 +178,10 @@ template <> class SrcFinfo1< unsigned int >: public SrcFinfo
 				reinterpret_cast< const char* >( &arg ), target  );
 		}
 
+		string rttiType() const {
+			return Conv< unsigned int >::rttiType();
+		}
+
 	private:
 };
 
@@ -192,6 +208,10 @@ template <> class SrcFinfo1< int >: public SrcFinfo
 			Qinfo q( e.index(), sizeof( int ), 1 );
 			e.element()->tsend( q, getBindIndex(), p, 
 				reinterpret_cast< const char* >( &arg ), target  );
+		}
+
+		string rttiType() const {
+			return Conv< int >::rttiType();
 		}
 
 	private:
@@ -230,6 +250,10 @@ template <> class SrcFinfo1< string >: public SrcFinfo
 
 			e.element()->tsend( q, getBindIndex(), p, buf, target );
 			delete[] buf;
+		}
+
+		string rttiType() const {
+			return Conv< string >::rttiType();
 		}
 
 	private:
@@ -273,6 +297,10 @@ template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 			delete[] temp;
 		}
 
+		string rttiType() const {
+			return Conv<T1>::rttiType() + "," + Conv< T2 >::rttiType();
+		}
+
 	private:
 };
 
@@ -310,6 +338,10 @@ template <> class SrcFinfo2< double, double >: public SrcFinfo
 			temp[1] = arg2;
 			e.element()->tsend( q, getBindIndex(), p,
 				reinterpret_cast< const char* >( temp ), target );
+		}
+
+		string rttiType() const {
+			return Conv< double >::rttiType() + "," + Conv<  double  >::rttiType();
 		}
 
 	private:
@@ -354,6 +386,11 @@ template < class T1, class T2, class T3 > class SrcFinfo3: public SrcFinfo
 			a3.val2buf( temp + a1.size() + a2.size() );
 			e.element()->tsend( q, getBindIndex(), p, temp, target );
 			delete[] temp;
+		}
+
+		string rttiType() const {
+			return Conv<T1>::rttiType() + "," + Conv< T2 >::rttiType() +
+				"," + Conv<T3>::rttiType();
 		}
 
 	private:
@@ -405,6 +442,11 @@ template < class T1, class T2, class T3, class T4 > class SrcFinfo4: public SrcF
 			a4.val2buf( temp + a1.size() + a2.size() + a3.size() );
 			e.element()->tsend( q, getBindIndex(), p, temp, target );
 			delete[] temp;
+		}
+
+		string rttiType() const {
+			return Conv<T1>::rttiType() + "," + Conv< T2 >::rttiType() +
+				"," + Conv<T3>::rttiType() + "," + Conv< T4 >::rttiType();
 		}
 
 	private:
@@ -463,6 +505,12 @@ template < class T1, class T2, class T3, class T4, class T5 > class SrcFinfo5: p
 			a5.val2buf( temp + a1.size() + a2.size() + a3.size() + a4.size() );
 			e.element()->tsend( q, getBindIndex(), p, temp, target );
 			delete[] temp;
+		}
+
+		string rttiType() const {
+			return Conv<T1>::rttiType() + "," + Conv< T2 >::rttiType() +
+				"," + Conv<T3>::rttiType() + "," + Conv< T4 >::rttiType() +
+				"," + Conv<T5>::rttiType();
 		}
 
 	private:
@@ -527,6 +575,12 @@ template < class T1, class T2, class T3, class T4, class T5, class T6 > class Sr
 			a6.val2buf( temp + a1.size() + a2.size() + a3.size() + a4.size() + a5.size() );
 			e.element()->tsend( q, getBindIndex(), p, temp, target );
 			delete[] temp;
+		}
+
+		string rttiType() const {
+			return Conv<T1>::rttiType() + "," + Conv< T2 >::rttiType() +
+				"," + Conv<T3>::rttiType() + "," + Conv< T4 >::rttiType() +
+				"," + Conv<T5>::rttiType() + "," + Conv< T6 >::rttiType();
 		}
 
 	private:

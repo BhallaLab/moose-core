@@ -98,6 +98,31 @@ template< class T > class Conv
 			// ostringstream os( s );
 			// os << val;
 		}
+
+		static string rttiType() {
+			if ( typeid( T ) == typeid( int ) )
+				return "int";
+			if ( typeid( T ) == typeid( short ) )
+				return "short";
+			if ( typeid( T ) == typeid( long ) )
+				return "long";
+			if ( typeid( T ) == typeid( unsigned int ) )
+				return "unsigned int";
+			if ( typeid( T ) == typeid( unsigned long ) )
+				return "unsigned long";
+			if ( typeid( T ) == typeid( float ) )
+				return "float";
+			if ( typeid( T ) == typeid( double ) )
+				return "double";
+			if ( typeid( T ) == typeid( Id ) )
+				return "Id";
+			if ( typeid( T ) == typeid( ObjId ) )
+				return "ObjId";
+			if ( typeid( T ) == typeid( DataId ) )
+				return "DataId";
+			return "bad";
+		}
+
 	private:
 		const char* val_;
 };
@@ -144,6 +169,10 @@ template<> class Conv< string >
 
 		static void val2str( string& s, const string& val ) {
 			s = val;
+		}
+
+		static string rttiType() {
+			return "string";
 		}
 	private:
 		string val_;
@@ -198,6 +227,10 @@ template<> class Conv< bool >
 			else
 				s = "0";
 		}
+
+		static string rttiType() {
+			return "bool";
+		}
 	private:
 		int val_;
 };
@@ -242,6 +275,10 @@ template<> class Conv< PrepackedBuffer >
 
 		static void val2str( string& s, const PrepackedBuffer& val ) {
 			; // Doesn't work.
+		}
+
+		static string rttiType() {
+			return "bad";
 		}
 	private:
 		PrepackedBuffer val_;
@@ -311,6 +348,10 @@ template< class T > class Conv< vector< T > >
 
 		static void val2str( string& s, const vector< T >& val ) {
 			cout << "Specialized Conv< vector< T > >::val2str not done\n";
+		}
+		static string rttiType() {
+			string ret = "vector<" + Conv< T >::rttiType() + ">";
+			return ret;
 		}
 	private:
 		unsigned int size_;

@@ -18,6 +18,7 @@
 #include <map>
 #include <iostream>
 #include <sstream>
+#include <typeinfo> // used in Conv.h to extract compiler independent typeid
 #include <climits> // Required for g++ 4.3.2
 #include <cstring> // Required for g++ 4.3.2
 #include <cstdlib> // Required for g++ 4.3.2

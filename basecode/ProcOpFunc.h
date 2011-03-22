@@ -71,6 +71,10 @@ template< class T > class ProcOpFunc: public ProcOpFuncBase
 			( reinterpret_cast< T* >( obj )->*func_)( e, p );
 		}
 
+		string rttiType() const {
+			return "void";
+		}
+
 	private:
 		void ( T::*func_ )( const Eref& e, ProcPtr ); 
 };
