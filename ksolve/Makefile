@@ -10,6 +10,7 @@
 TARGET = ksolve.o
 
 OBJ = \
+	Port.o	\
 	Stoich.o	\
 	KinSparseMatrix.o	\
 	ZombieMol.o \
@@ -31,6 +32,7 @@ HEADERS = \
 	../basecode/header.h \
 	../basecode/SparseMatrix.h \
 	../basecode/ElementValueFinfo.h \
+	Port.h \
 	Stoich.h \
 	RateTerm.h \
 	FuncTerm.h \

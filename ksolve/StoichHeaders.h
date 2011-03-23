@@ -15,4 +15,7 @@
 #include "FuncTerm.h"
 #include "SparseMatrix.h"
 #include "KinSparseMatrix.h"
+
+class Stoich;
+#include "Port.h"
 #include "Stoich.h"
