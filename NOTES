@@ -11987,5 +11987,27 @@ Subha has asked for recoding of rttiType function to return instead a list of
 types of arguments to functions in a compiler-independent way. Many files
 to change as a result. Compiles, added new unit test for a nasty case, works.
 Checkin 2560.
-Updated API.txt to reflect changes.
+Updated API.txt to reflect changes. Checkin 2561.
+
+
+The actual picture for ports is more complicated. We may have different
+spatial compts handled by a stoich that does diffusion. We may have
+different reaction subsets handled by the same stoich, for example parts
+doing membranes and other parts doing cytosol. So the port has to be pretty
+flexible in accessing any of these.
+
+Options for ports:
+1. They are a FieldElement. Each port has the following things:
+	assorted msgs
+	scaling factor for outgoing rates.
+	Info about which part of the Stoich data structures they access
+	Possibly some spatial info, or a way to specify associated geom.
+
+
+Setting up Port class for use in FieldElement.
+
+============================================================================
+23 March 2011
+
+Skeleton Port class implemented and compiled.
 ============================================================================

@@ -33,7 +33,24 @@ class Stoich
 
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref& e, ProcPtr p );
-		void port( const Eref& e, ProcPtr p, vector< double > mol );
+
+		/**
+		 * Handles incoming messages representing influx of molecules
+ 		 */
+		void influx( DataId port, vector< double > mol );
+
+		/**
+		 * Scans through incoming and self molecule list, matching up Ids
+		 * to use in the port. Sets up the data structures to do so.
+		 * Sends out a message indicated the selected subset.
+		 */
+		void handleAvailableMols( DataId port, vector< Id > mols );
+
+		/**
+		 * Scans through incoming and self molecule list, checking that
+		 * all match. Sets up the data structures for the port.
+		 */
+		void handleMatchedMols( DataId port, vector< Id > mols );
 
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions
@@ -137,26 +154,6 @@ class Stoich
 		vector< double > y_;
 
 		/**
-		 * These port are the communication channel between solvers. They
-		 * are used to exchange molecules going each way through the port.
-		 * The outPortStart vector identifies starting index in the 
-		 * S_ vector, for the molecules leaving this solver. There is 
-		 * a separate block for each outgoing port because there will 
-		 * typically be differences in numbers going out on each port.
-		 */
-		vector< unsigned int > outPortStart_;
-
-		/**
-		 * This is the shared port for all incoming molecules. Each 
-		 * molecule is assigned an index within this port. Multiple
-		 * ports can share corresponding molecules because once they are
-		 * in, the incorporation into internal reactions is identical.
-		 * So the incoming molecule numbers just add up.
-		 */
-		 unsigned int inPortStart_;
-		 unsigned int inPortEnd_;
-
-		/**
 		 * totPortSize_: The sum of all port entries
 		 */
 		unsigned int totPortSize_;
@@ -201,6 +198,16 @@ class Stoich
 		 * The enzyme reactions count as two reaction steps.
 		 */
 		unsigned int numReac_;
+
+		/**
+		 * The Ports are interfaces to other solvers by way of a spatial
+		 * junction between the solver domains. They manage 
+		 * the info about which molecules exchange, 
+		 * They are also the connection point for the messages that 
+		 * handle the port data transfer.
+		 * Each Port connects to exactly one other solver.
+		 */
+		vector< Port > ports_;
 };
 
 #endif	// _STOICH_H
