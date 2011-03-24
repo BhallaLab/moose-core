@@ -9,20 +9,29 @@
 
 #include "StoichHeaders.h"
 
-static SrcFinfo1< vector< Id > > availableMols(
-	"availableMols",
-	"Sends out the full set of molecule Ids that are available for data transfer"
-);
+static Finfo* availableMols() {
+	static SrcFinfo1< vector< Id > > ret(
+		"availableMols",
+		"Sends out the full set of molecule Ids that are available for data transfer"
+	);
+	return &ret;
+}
 
-static SrcFinfo1< vector< Id > > matchedMols(
-	"matchedMols",
-	"Sends out the set of molecule Ids that match between both ports"
-);
+static Finfo* matchedMols() {
+	static SrcFinfo1< vector< Id > > ret(
+		"matchedMols",
+		"Sends out the set of molecule Ids that match between both ports"
+	);
+	return &ret;
+}
 
-static SrcFinfo1< vector< double > > efflux(
-	"efflux",
-	"Molecule #s going out"
-);
+static Finfo* efflux() {
+	static SrcFinfo1< vector< double > > ret(
+		"efflux",
+		"Molecule #s going out"
+	);
+	return &ret;
+}
 
 
 const Cinfo* Port::initCinfo()
@@ -86,7 +95,7 @@ const Cinfo* Port::initCinfo()
 		*/
 
 		static Finfo* port1array[] = {
-			&availableMols, &handleMatchedMols, &efflux, &influx
+			availableMols(), &handleMatchedMols, efflux(), &influx
 		};
 
 		static SharedFinfo port1( "port1",
@@ -97,7 +106,7 @@ const Cinfo* Port::initCinfo()
 		);
 
 		static Finfo* port2array[] = {
-			&handleAvailableMols, &matchedMols, &influx, &efflux, 
+			&handleAvailableMols, matchedMols(), &influx, efflux(), 
 		};
 
 		static SharedFinfo port2( "port2",

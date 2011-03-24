@@ -27,6 +27,10 @@ class Stoich
 		void setPath( const Eref& e, const Qinfo* q, string v );
 		string getPath( const Eref& e, const Qinfo* q ) const;
 
+		Port* getPort( unsigned int i );
+		unsigned int getNumPorts() const;
+		void setNumPorts( unsigned int num );
+
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////

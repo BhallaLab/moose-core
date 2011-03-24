@@ -19,7 +19,9 @@ SharedFinfo::SharedFinfo( const string& name, const string& doc,
 { 
 	for ( unsigned int i = 0; i < numEntries; ++i )
 	{
-		SrcFinfo* s = dynamic_cast< SrcFinfo* >( entries[i] );
+		Finfo* foo = entries[i];
+		SrcFinfo* s = dynamic_cast< SrcFinfo* >( foo );
+		// SrcFinfo* s = dynamic_cast< SrcFinfo* >( entries[i] );
 		if ( s != 0 )
 			src_.push_back( s );
 		else
