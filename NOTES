@@ -12009,5 +12009,12 @@ Setting up Port class for use in FieldElement.
 ============================================================================
 23 March 2011
 
-Skeleton Port class implemented and compiled.
+Skeleton Port class implemented and compiled. Checkin 2564.
+Added in FieldElementHandler for Port within Stoich, and it compiles,
+but segvs as soon as I try to run it.
+
 ============================================================================
+24 March 2011
+Tracked down Segv. Was nasty: due to calling of static initializer for PortCinfo
+which depended on other static initializers which had not yet been called.
+Organized into static funcs instead, and now it is OK.
