@@ -64,6 +64,13 @@ const Cinfo* Mol::initCinfo()
 			&Mol::getSize
 		);
 
+		static ValueFinfo< Mol, unsigned int > species(
+			"species",
+			"Species identifier for this mol pool. Eventually link to ontology.",
+			&Mol::setSpecies,
+			&Mol::getSpecies
+		);
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -117,12 +124,13 @@ const Cinfo* Mol::initCinfo()
 		);
 
 	static Finfo* molFinfos[] = {
-		&n,	// Value
-		&nInit,	// Value
+		&n,			// Value
+		&nInit,		// Value
 		&diffConst,	// Value
-		&conc,	// Value
+		&conc,		// Value
 		&concInit,	// Value
-		&size,	// Readonly Value
+		&size,		// Readonly Value
+		&species,	// Value
 		&group,			// DestFinfo
 		&setSize,			// DestFinfo
 		&reac,				// SharedFinfo
@@ -151,12 +159,12 @@ const SrcFinfo1< double >& nOut =
 
 Mol::Mol()
 	: n_( 0.0 ), nInit_( 0.0 ), size_( 1.0 ), diffConst_( 0.0 ),
-		A_( 0.0 ), B_( 0.0 )
+		A_( 0.0 ), B_( 0.0 ), species_( 0 )
 {;}
 
 Mol::Mol( double nInit)
 	: n_( 0.0 ), nInit_( nInit ), size_( 1.0 ), diffConst_( 0.0 ),
-		A_( 0.0 ), B_( 0.0 )
+		A_( 0.0 ), B_( 0.0 ), species_( 0 )
 {;}
 
 //////////////////////////////////////////////////////////////
@@ -257,4 +265,14 @@ void Mol::setSize( double v )
 double Mol::getSize() const
 {
 	return size_;
+}
+
+void Mol::setSpecies( unsigned int v )
+{
+	species_ = v;
+}
+
+unsigned int Mol::getSpecies() const
+{
+	return species_;
 }
