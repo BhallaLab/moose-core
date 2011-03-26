@@ -37,6 +37,8 @@ HEADERS = \
 	RateTerm.h \
 	FuncTerm.h \
 	KinSparseMatrix.h \
+	../kinetics/Mol.h \
+
 
 # The GSL library (GNU Scientific Library) provides a range of
 # numerical functions, which allow us to use various advanced integration

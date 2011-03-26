@@ -10,6 +10,19 @@
 #ifndef _MOL_H
 #define _MOL_H
 
+/**
+ * Identifies molecular species. This is a unique identifier for any
+ * given molecular species, regardless of which compartment or solver
+ * is handling it. 
+ */
+typedef unsigned int SpeciesId;
+
+/**
+ * The Mol class is a molecular pool. This is a set of molecules of a 
+ * given species, in a uniform chemical context. Note that the same
+ * species might be present in other compartments, or be handled by
+ * other solvers.
+ */
 class Mol
 {
 	friend void testSyncArray( unsigned int size, unsigned int numThreads,
@@ -45,8 +58,8 @@ class Mol
 		void setSize( double v );
 		double getSize() const;
 
-		void setSpecies( unsigned int v );
-		unsigned int getSpecies() const;
+		void setSpecies( SpeciesId v );
+		SpeciesId getSpecies() const;
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs

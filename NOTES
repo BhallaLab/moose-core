@@ -12116,4 +12116,9 @@ Issues with this:
 
 
 Implemented the 'species' field for molecules, and ZombieMol. It is stored as
-a vector of unsigned ints in the Stoich.
+a vector of unsigned ints in the Stoich. Checkin 2582.
+
+Now to put the bits together. 
+
+Created a SpeciesId class, currently just typedefed to unsigned int.
+This is needed for the setup of ports.
