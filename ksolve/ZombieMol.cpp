@@ -67,6 +67,13 @@ const Cinfo* ZombieMol::initCinfo()
 			&ZombieMol::getSize
 		);
 
+		static ElementValueFinfo< ZombieMol, unsigned int > species(
+			"species",
+			"Species identifer for this mol pool",
+			&ZombieMol::setSpecies,
+			&ZombieMol::getSpecies
+		);
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -121,12 +128,13 @@ const Cinfo* ZombieMol::initCinfo()
 		);
 
 	static Finfo* zombieMolFinfos[] = {
-		&n,	// Value
-		&nInit,	// Value
-		&diffConst,	// Value
-		&conc,	// Value
-		&concInit,	// Value
-		&size,		// Value
+		&n,				// Value
+		&nInit,			// Value
+		&diffConst,		// Value
+		&conc,			// Value
+		&concInit,		// Value
+		&size,			// Value
+		&species,		// Value
 		&group,			// DestFinfo
 		&setSize,			// DestFinfo
 		&reac,				// SharedFinfo
@@ -252,6 +260,16 @@ double ZombieMol::getSize( const Eref& e, const Qinfo* q ) const
 	return compartmentSize_[ index ];
 }
 
+void ZombieMol::setSpecies( const Eref& e, const Qinfo* q, unsigned int v )
+{
+	species_[ convertIdToMolIndex( e.id() ) ] = v;
+}
+
+unsigned int ZombieMol::getSpecies( const Eref& e, const Qinfo* q ) const
+{
+	return species_[ convertIdToMolIndex( e.id() ) ];
+}
+
 //////////////////////////////////////////////////////////////
 // Zombie conversion functions.
 //////////////////////////////////////////////////////////////
@@ -268,6 +286,7 @@ void ZombieMol::zombify( Element* solver, Element* orig )
 
 	z->setN( zer, 0, m->getN() );
 	z->setNinit( zer, 0, m->getNinit() );
+	z->setSpecies( zer, 0, m->getSpecies() );
 	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
 	orig->zombieSwap( zombieMolCinfo, dh );
 }
@@ -291,4 +310,5 @@ void ZombieMol::unzombify( Element* zombie )
 
 	m->setN( z->getN( zer, 0 ) );
 	m->setNinit( z->getNinit( zer, 0 ) );
+	m->setSpecies( z->getSpecies( zer, 0 ) );
 }
