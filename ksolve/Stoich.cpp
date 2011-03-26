@@ -327,6 +327,7 @@ void Stoich::allocateModel( const vector< Id >& elist )
 	S_.resize( numVarMols_ + numBufMols_ + numFuncMols_, 0.0 );
 	Sinit_.resize( numVarMols_ + numBufMols_ + numFuncMols_, 0.0 );
 	compartment_.resize( numVarMols_ + numBufMols_ + numFuncMols_, 0.0 );
+	species_.resize( numVarMols_ + numBufMols_ + numFuncMols_, 0 );
 	y_.resize( numVarMols_ );
 	rates_.resize( numReac_ );
 	v_.resize( numReac_, 0.0 );

@@ -12017,4 +12017,103 @@ but segvs as soon as I try to run it.
 24 March 2011
 Tracked down Segv. Was nasty: due to calling of static initializer for PortCinfo
 which depended on other static initializers which had not yet been called.
-Organized into static funcs instead, and now it is OK.
+Organized into static funcs instead, and now it is OK. Checkin 2572.
+
+Discussion with Steve Andrews about how Smoldyn handles ports. Seems like it
+expects everything to be defined at the model definition stage, rather than
+what I've been working on, which defines the molecule species list for the 
+port at the model setup stage and does so implicitly. The MOOSE approach says
+that molecule species which is defined as diffusible and is present at the
+port, will go through if it is also present on the other side.
+
+The MOOSE approach is compatible with loading of different models into
+a neuronal morphology and letting them mix up with each other. The models
+don't need to know anything about each other.
+The Smoldyn approach is designed for complete specification.
+
+There won't be any real difficulty with this for MOOSE provided the molecular
+species it supplies at the port are a superset of those coming from Smoldyn.
+For unknown species I guess the best thing is to turn them right around.
+
+A key pending issue is to define a map between molecular species Ids run by
+different solvers. Some issues:
+- merged species. Suppose model A does not care about MAPK*tyr vs MAPK*thr. 
+It represents them by a single species. Model B, however, does care.
+Cannot just assume equal proportions, as the ratios may even change during a
+simulation.
+- Same species, different locations within solver. Consider cytosolic vs
+membrane-bound CaMKII. However, MOOSE also treats them as different Elements
+in order to do the calculations. Pools rather than species is the better name.
+- Isoforms. One model worries about them, the other lumps them all. Here they
+	can be combined by ratio which will remain fixed during simulation.
+
+So we need to have a species map between and within solvers 
+Global:
+	- can handle all configs of ports
+Pairwise:
+	- Easier for a few
+	- This is what any individual port would want
+	- Combinatorial explosion.
+
+============================================================================
+25 March 2011.
+
+Some definitions:
+species: A unique chemical species.
+pool: A set of molecules of the same species, undergoing identical reaction
+	conditions.
+Mol, as used by MOOSE: All the pools within a given cellular compartment.
+	These could undergo diffusion and could be subdivided by spatial
+	compartments. So their chemical environment (local concentratoins) 
+	may change but the interactions that they see (reactions) will not.
+
+How to set it up? 
+	- Explicit table of species and the pools that represent it.
+	- Use unique species identifier for each species, guarantee consistency
+		across source models. Basically add a field to each Mol.
+		This would require extra input into any kkit-based model.
+		SBML uses the term 'Species' to refer to a pool, and SBML 2
+		used 'SpeciesType' to refer to a chemical species. SBML 3
+		is going to do something still more precise and complicated.
+		But I still need to map between species specified in
+		different models. If there is an ontology-based spec, fine,
+		otherwise explicit mapping.
+Decision: 
+	- Add a 'species' identifier to molecule. It is set, by default, to
+		an index of unique pools.
+	- If needed in any simulation, explicitly assign values to this 
+		identifier.
+	- Later: Find a way to couple this identifier to a global array of
+		URIs or other ways to uniquely link species to some ontology.
+	- Later: Figure out how to handle combination species as listed above.
+
+============================================================================
+26 March 2011.
+
+Another approach: Implement port as a standalone entity, one that could
+	even communicate with regular non-solved reactions.
+	- Port creates a set of regular molecules to represent the 
+		incoming and outgoing pools.
+		- Use a 'set' message to assign mol concs on incoming mols
+			once every Port dt.
+		- Port uses a 'get' to get 'n' molecules from outgoing mols 
+			every Port dt.
+		- Port sends a 'set' message to zero out mol concs on
+			outgoing mols after they have been sampled.
+	- Port creates a set of reactions into and out of these pools.
+		- Incoming reacs are the special Flux variant of RateTerm
+		connecting the incoming pool to the diffusing molecule in MOOSE.
+		- Outgoing reacs are just unidirectional FirstOrder reacs
+		connecting the diffusing mol to the outgoing pool.
+
+	The Stoich digests these entities in the usual way, with special 
+	checks for Port objects. The Solved port has a zombie variant that
+	controls the special pools involved in the port.
+
+Issues with this:
+	- Doable but adds a lot of work for little benefit
+	- Do we want to treat Ports as Elements, or as FieldElements?
+
+
+Implemented the 'species' field for molecules, and ZombieMol. It is stored as
+a vector of unsigned ints in the Stoich.

@@ -127,6 +127,12 @@ class Stoich
 		vector< short > compartment_;
 
 		/**
+		 * Lookup from each molecule to its Species identifer
+		 * This will eventually be tied into an ontology reference.
+		 */
+		vector< unsigned int > species_;
+
+		/**
 		 * Size of each compartment
 		 */
 		vector< double > compartmentSize_;
@@ -136,8 +142,6 @@ class Stoich
 		 * dimensions.
 		 */
 		vector< short > compartmentVoxels_;
-
-
 
 		/// v_ holds the rates of each reaction
 		vector< double > v_;

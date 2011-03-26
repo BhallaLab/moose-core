@@ -45,6 +45,9 @@ class Mol
 		void setSize( double v );
 		double getSize() const;
 
+		void setSpecies( unsigned int v );
+		unsigned int getSpecies() const;
+
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
@@ -55,12 +58,19 @@ class Mol
 
 		static const Cinfo* initCinfo();
 	private:
-		double n_;
-		double nInit_;
-		double size_;
-		double diffConst_;
-		double A_; // Internal state variables
+		double n_; /// Number of molecules in pool
+		double nInit_; /// initial condition 
+		double size_;	/// volume/areal density of molecule.
+		double diffConst_;	/// Diffusion constant
+		double A_; /// Internal state variables, used only in explict mode
 		double B_;
+
+		/**
+		 * System wide identifier for all mol pools that are chemically
+		 * the same species.
+		 */
+		unsigned int species_; 
+		
 };
 
 #endif	// _MOL_H
