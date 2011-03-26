@@ -70,12 +70,12 @@ const Cinfo* Port::initCinfo()
 		);
 
 		static DestFinfo handleAvailableMols( "handleAvailableMols",
-			"Handles list of all molecules that the other port cares about",
-			new UpFunc1< Stoich, vector< Id > >( &Stoich::handleAvailableMols ) );
+			"Handles list of all species that the other port cares about",
+			new UpFunc1< Stoich, vector< SpeciesId > >( &Stoich::handleAvailableMols ) );
 
 		static DestFinfo handleMatchedMols( "handleMatchedMols",
 			"Handles list of matched molecules worked out by the other port",
-			new UpFunc1< Stoich, vector< Id > >( &Stoich::handleMatchedMols ) );
+			new UpFunc1< Stoich, vector< SpeciesId > >( &Stoich::handleMatchedMols ) );
 
 		static DestFinfo influx( "influx",
 			"Molecule #s coming back in",

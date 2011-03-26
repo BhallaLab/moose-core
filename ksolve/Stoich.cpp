@@ -174,12 +174,12 @@ void Stoich::influx( DataId port, vector< double > mol )
 	*/
 }
 
-void Stoich::handleAvailableMols( DataId port, vector< Id > mols )
+void Stoich::handleAvailableMols( DataId port, vector< SpeciesId > mols )
 {
 	;
 }
 
-void Stoich::handleMatchedMols( DataId port, vector< Id > mols )
+void Stoich::handleMatchedMols( DataId port, vector< SpeciesId > mols )
 {
 	;
 }
