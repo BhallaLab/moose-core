@@ -48,13 +48,13 @@ class Stoich
 		 * to use in the port. Sets up the data structures to do so.
 		 * Sends out a message indicated the selected subset.
 		 */
-		void handleAvailableMols( DataId port, vector< Id > mols );
+		void handleAvailableMols( DataId port, vector< SpeciesId > mols );
 
 		/**
 		 * Scans through incoming and self molecule list, checking that
 		 * all match. Sets up the data structures for the port.
 		 */
-		void handleMatchedMols( DataId port, vector< Id > mols );
+		void handleMatchedMols( DataId port, vector< SpeciesId > mols );
 
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions
