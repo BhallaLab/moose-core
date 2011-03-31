@@ -40,7 +40,7 @@ import OpenGL
 OpenGL.ERROR_CHECKING = True
 from OpenGL.GL import *
 from OpenGL.GLU import *
-
+from OpenGL.GLUT import *
 from oglfunc.group import *
 
 class PyGLWidget(QtOpenGL.QGLWidget):
@@ -54,7 +54,8 @@ class PyGLWidget(QtOpenGL.QGLWidget):
         format = QtOpenGL.QGLFormat()
         format.setSampleBuffers(True)
         QtOpenGL.QGLWidget.__init__(self, format, parent)
-        self.setCursor(QtCore.Qt.OpenHandCursor)
+        
+        
         self.setMouseTracking(True)
 
         self.modelview_matrix_  = []
@@ -71,13 +72,13 @@ class PyGLWidget(QtOpenGL.QGLWidget):
         self.isInRotation_  = False
 	
 	self.z_d = 0.0			#normalization for zoom the figures
-        self.l_coords =	[] 		#coordinates of the cell figure.	
-	self.toolsel = 0		#tool selected.	
+	self.lights = 0			#lights	
 	self.ctrlPressed = False 	#default no control pressed
 	self.selectedObjects =Group(self)		#each line is a scene object.
-	self.sceneObjects = []
-        
-
+	self.sceneObjects = []		#scene objects, abstraction depends on the selection mode.
+	self.sceneObjectNames = []	#names of the scene objects being drawn
+	self.selectionMode = 0 		#select compartments by default =1 selects cells.
+	
 	# connections
         #self.signalGLMatrixChanged.connect(self.printModelViewMatrix)
 
@@ -156,6 +157,7 @@ class PyGLWidget(QtOpenGL.QGLWidget):
         self.signalGLMatrixChanged.emit()
 
     def rotate(self, _axis, _angle):
+    	#self.modelview_matrix_ = glGetDoublev(GL_MODELVIEW_MATRIX)
         t = [self.modelview_matrix_[0][0] * self.center_[0] +
              self.modelview_matrix_[1][0] * self.center_[1] +
              self.modelview_matrix_[2][0] * self.center_[2] +
@@ -168,7 +170,7 @@ class PyGLWidget(QtOpenGL.QGLWidget):
              self.modelview_matrix_[1][2] * self.center_[1] +
              self.modelview_matrix_[2][2] * self.center_[2] +
              self.modelview_matrix_[3][2]]
-
+	
         self.makeCurrent()
         glLoadIdentity()
         glTranslatef(t[0], t[1], t[2])
@@ -231,8 +233,7 @@ class PyGLWidget(QtOpenGL.QGLWidget):
         self.last_point_ok_, self.last_point_3D_ = self.map_to_sphere(self.last_point_2D_)
 	if (_event.button()==1):
 	    self.pressEventPicking()
-	
-
+	    
     def mouseMoveEvent(self, _event):
         newPoint2D = _event.pos()
 
@@ -272,6 +273,7 @@ class PyGLWidget(QtOpenGL.QGLWidget):
                                                     self.modelview_matrix_[2][3] * self.center_[2] +
                                                     self.modelview_matrix_[3][3])
 
+	    
             fovy   = 45.0
             aspect = w / h
             n      = 0.01 * self.radius_
@@ -299,7 +301,7 @@ class PyGLWidget(QtOpenGL.QGLWidget):
                     angle = math.acos(cos_angle) * 180.0 / math.pi
                     angle *= 2.0
                 self.rotate(axis, angle)
-
+	
         # remember this point
         self.last_point_2D_ = newPoint2D
         self.last_point_3D_ = newPoint3D
@@ -312,136 +314,151 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 #additions by chaitanya from glwidget.py
 
     def enterEvent(self, ev):
-		"""
-		Event called when the mouse enters the widget area.
-		"""
-		
-		self.grabKeyboard()
+	"""
+	Event called when the mouse enters the widget area.
+	"""
+	self.grabKeyboard()
 
     def leaveEvent(self, ev):
-		"""
-		Event called when the mouse leaves the widget area.
-		"""
-		
-		self.releaseKeyboard()
+	"""
+	Event called when the mouse leaves the widget area.
+	"""
+	self.releaseKeyboard()
 
     def keyPressEvent(self, ev):
-		"""
-		Key press callback.
-		"""
+	"""
+	Key press callback.
+	"""
+	key = str(ev.text()).upper()
 		
-		key = str(ev.text()).upper()
-		
-		if (ev.modifiers() & QtCore.Qt.ControlModifier):
-			self.ctrlPressed = True	
+	if (ev.modifiers() & QtCore.Qt.ControlModifier):
+	    self.ctrlPressed = True	
 
     def keyReleaseEvent(self, ev):
-		"""
-		Key release callback.
-		"""
-		
-		if (ev.key() == QtCore.Qt.Key_Control):
-			self.ctrlPressed = False
+	"""
+	Key release callback.
+	"""
+	if (ev.key() == QtCore.Qt.Key_Control):
+	    self.ctrlPressed = False
 
 
     def pressEventPicking(self):
-		"""
-		Picking event called when mousePressEvent() is called.
-		Note that this event will be called before translationMoveEvent(),
-		and so, it does not consider the translation event.
-		"""
+	"""
+	Picking event called when mousePressEvent() is called.
+	Note that this event will be called before translationMoveEvent(),
+	and so, it does not consider the translation event.
+	"""
 		
-		pickedObject = self.tryPick()
-		if pickedObject != None:
-			# An object was picked.
-			if not(self.ctrlPressed):
-				# CTRL is not pressed.
+	pickedObject = self.tryPick()
+	if pickedObject != None:
+		# An object was picked.
+	    if not(self.ctrlPressed):
+			# CTRL is not pressed.
 				
-				if pickedObject in self.selectedObjects:
-					# The picked object is already selected.
-					# releaseEventPicking
-					pass
+		if pickedObject in self.selectedObjects:
+		# The picked object is already selected.
+		# releaseEventPicking
+		    pass
 				
-				else:
-					# The picked object was not previously selected.
-					
-					# Deselect all previously selected objects.
-					self.selectedObjects.removeAll()
-					
-					# Select the picked object.
-					self.selectedObjects.add(pickedObject)
-				
-					self.preSelectedObject = pickedObject
-			else:
-				# CTRL is pressed.
-				
-				if pickedObject.selected:
-					pass
-				else:
-					self.selectedObjects.add(pickedObject)
-					self.preSelectedObject = pickedObject
-			
 		else:
-			# No objects were picked.
-			self.selectedObjects.removeAll()
-	
-		#if selectedName: 	#prints the name of the selection if any
-		#    print selectedName[0]
-		#print self.selectedObjects	
+		# The picked object was not previously selected.
+					
+		# Deselect all previously selected objects.
+	 	    self.selectedObjects.removeAll()
+					
+		# Select the picked object.
+		    self.selectedObjects.add(pickedObject)
+			
+		    self.preSelectedObject = pickedObject
+	    else:
+		# CTRL is pressed.
+			
+		if pickedObject.selected:
+		    pass
+		else:
+		    self.selectedObjects.add(pickedObject)
+		    self.preSelectedObject = pickedObject
+			
+	else:
+		# No objects were picked.
+            self.selectedObjects.removeAll()
 
-		self.updateGL()
+	#if selectedName: 	#prints the name of the selection if any
+	#    print selectedName[0]
+	#print self.selectedObjects	
+
+	self.updateGL()
 
     def tryPick(self):
-		"""
-		Handles object picking, returning the object under the current mouse position.
-		Returns None if there is none.
-		"""
+	"""
+	Handles object picking, returning the object under the current mouse position.
+	Returns None if there is none.
+	"""
+	if len(self.sceneObjects) == 0:
+	    return None	#there are no objects on the glcanvas
+	
+	buffer = glSelectBuffer(len(self.sceneObjects)*4)
+	projection = glGetDouble(GL_PROJECTION_MATRIX)
+	#projection = glGetDouble(GL_MODELVIEW_MATRIX)
+	viewport = glGetInteger(GL_VIEWPORT)
 		
-		if len(self.sceneObjects) == 0:
-			return None
+	glRenderMode(GL_SELECT)
+	glMatrixMode(GL_PROJECTION)
+	#glMatrixMode(GL_MODELVIEW)
+	glPushMatrix()
+	glLoadIdentity()
+	
+	gluPickMatrix(self.last_point_2D_.x(),viewport[3]-self.last_point_2D_.y(),10,10,viewport)
+	
+	glMultMatrixf(projection)
+	glInitNames()
+	glPushName(0)
 		
-		buffer = glSelectBuffer(len(self.sceneObjects)*4)
-		projection = glGetDouble(GL_PROJECTION_MATRIX)
-		viewport = glGetInteger(GL_VIEWPORT)
-		
-		glRenderMode(GL_SELECT)
-		glMatrixMode(GL_PROJECTION)
-		glPushMatrix()
-		glLoadIdentity()
-
-		gluPickMatrix(self.last_point_2D_.x(),viewport[3]-self.last_point_2D_.y(),10,10,viewport)
-		glMultMatrixf(projection)
-		
-		glInitNames()
-		glPushName(0)
-		
-		for i in range(len(self.sceneObjects)):
-			glLoadName(i)
-			self.sceneObjects[i].render()
+	
+	for i in range(len(self.sceneObjects)):
+	    glLoadName(i)
+	    self.sceneObjects[i].render()
 				
-		glMatrixMode(GL_PROJECTION)
-		glPopMatrix()
-		glMatrixMode(GL_MODELVIEW)
-		glFlush()
-		glPopName()
+	glMatrixMode(GL_PROJECTION)
+	glPopMatrix()
+	glMatrixMode(GL_MODELVIEW)
+	glFlush()
+	glPopName()
 			
-		hits = glRenderMode(GL_RENDER)
+	hits = glRenderMode(GL_RENDER)
+	names =[]		
+	nearestHit = None
+	for hit in hits:
+	    near, far, names = hit
+	    if (nearestHit == None) or (near < nearestHit[0]):
+		nearestHit = [near, names[0]]
+	if names:	
+	    print self.sceneObjectNames[names[0]]	#printing the cell path
 		
-		names =[]		
-		nearestHit = None
-		for hit in hits:
-			near, far, names = hit
-			if (nearestHit == None) or (near < nearestHit[0]):
-				nearestHit = [near, names[0]]
-		if names:	
-		    print self.l_coords[names[0]][6]	#printing the cell path
+	if nearestHit != None:
+	    return self.sceneObjects[nearestHit[1]]
 
-		if nearestHit != None:
-			return self.sceneObjects[nearestHit[1]]
+	return nearestHit
 
-		
-				
-		return nearestHit
+
+    def renderAxis(self):
+	"""
+	Creates the XYZ axis in the 0 coordinate, just for reference.
+	"""
+	# XYZ axis
+	glLineWidth(2)
+	glBegin(GL_LINES)
+	glColor(1, 0, 0)
+	glVertex3f(0, 0, 0)
+	glVertex3f(1, 0, 0)
+	glColor(0, 1, 0)
+	glVertex3f(0, 0, 0)
+	glVertex3f(0, 1, 0)
+	glColor(0, 0, 1)
+	glVertex3f(0, 0, 0)
+	glVertex3f(0, 0, 1)
+	glEnd()
+	glLineWidth(1)	
 
     
 
