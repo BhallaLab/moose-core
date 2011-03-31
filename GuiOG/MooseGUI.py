@@ -34,40 +34,31 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
 
 	QtCore.QObject.connect(self.toolButton, QtCore.SIGNAL("clicked()"), self.update_graph) 
-	QtCore.QObject.connect(self.toolButton_3, QtCore.SIGNAL("clicked()"), self.select_compartment)
 	QtCore.QObject.connect(self.mtree,QtCore.SIGNAL('itemDoubleClicked(QTreeWidgetItem *, int)'),self.makeObjEditorFromTreeItem)
 
     def update_graph(self):
 
-	cell_name='/cell'
-	mc.readCell('mit.p',cell_name)
-	self.an=moose.Neutral(cell_name)
-	all_ch=self.an.childList 				#all children
-	ch = self.get_childrenOfField(all_ch,'Compartment')	#compartments only
-	self.coords=[]	
+	#mc.loadG('Mitral.g')
+	mc.readCell('/mit.p','/cell')
 	
-	for i in range(0,len(ch),1):
-    	    x=float(mc.getField(ch[i],'x'))*(1e+04)
-    	    y=float(mc.getField(ch[i],'y'))*(1e+04)
-    	    z=float(mc.getField(ch[i],'z'))*(1e+04)
-    	    x0=float(mc.getField(ch[i],'x0'))*(1e+04)
-    	    y0=float(mc.getField(ch[i],'y0'))*(1e+04)
-    	    z0=float(mc.getField(ch[i],'z0'))*(1e+04)
-    	    self.coords.append((x0,y0,z0,x,y,z,ch[i].path()))
+	#self.qgl.drawNewCell('/cell',1)			#updates the canvas with just the single cell, ip1 cellname, ip2 style (1=skeletal, 2=readDimension)
 	
-	self.qgl.repaintGL(self.coords)		#checkin all cell compartment diagram entries, sending only the position values
-	self.qgl.updateGL()
-	self.update_mtree()
-    
-    def get_childrenOfField(self,all_ch,field):	#'all_ch' is a tuple of moose.id, 'field' is the field to sort with; returns a tuple with valid moose.id's
-        ch=[]
-        for i in range(0,len(all_ch)):	
-	    if(mc.className(all_ch[i])==field):
-	        ch.append(all_ch[i])
-        return tuple(ch)   
+	cellNames=[]						#from moosetree, pick the 'Cell' types
+	an=moose.Neutral('/')
+	all_ch=an.childList 					#all children
+	ch = self.qgl.get_childrenOfField(all_ch,'Cell')
 
-    def update_mtree(self):			#calls the moosetree upper right corner from MooseTree.py the moosetreewidget
-	self.mtree.setupTree(self.an,'/',[])
+	for i in range(0,len(ch),1):				#draws all cells under root.
+	    cellNames.append(moose.Cell(ch[i]).name)
+	    self.qgl.drawNewCell(cellNames[i],2)		
+
+	self.qgl.updateGL()
+	#self.update_mtree('/cell')
+	
+
+    def update_mtree(self,cellName):		#calls the moosetree upper right corner from MooseTree.py the moosetreewidget
+	an=moose.Neutral(cellName)	
+	self.mtree.setupTree(an,'/',[])
 	self.mtree.recreateTree()
 
     def cmp_position(self,line_label): 		#used with onpickplaceline, returns the absolute value of the end of compartment position
@@ -77,8 +68,6 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         z= float(mc.getField(a_id,'z'))	
         return x,y,z
 
-    def select_compartment(self):	
-	self.qgl.seltool()
 
     def makeObjEditorFromTreeItem(self, item, column):
         """Wraps makeObjectFieldEditor for use via a tree item"""
