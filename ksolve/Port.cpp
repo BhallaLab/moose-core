@@ -9,17 +9,17 @@
 
 #include "StoichHeaders.h"
 
-static Finfo* availableMols() {
+static Finfo* availableMolsAtPort() {
 	static SrcFinfo1< vector< Id > > ret(
-		"availableMols",
+		"availableMolsAtPort",
 		"Sends out the full set of molecule Ids that are available for data transfer"
 	);
 	return &ret;
 }
 
-static Finfo* matchedMols() {
+static Finfo* matchedMolsAtPort() {
 	static SrcFinfo1< vector< Id > > ret(
-		"matchedMols",
+		"matchedMolsAtPort",
 		"Sends out the set of molecule Ids that match between both ports"
 	);
 	return &ret;
@@ -69,13 +69,13 @@ const Cinfo* Port::initCinfo()
 			&Port::getOutEnd
 		);
 
-		static DestFinfo handleAvailableMols( "handleAvailableMols",
+		static DestFinfo handleAvailableMolsAtPort( "handleAvailableMolsAtPort",
 			"Handles list of all species that the other port cares about",
-			new UpFunc1< Stoich, vector< SpeciesId > >( &Stoich::handleAvailableMols ) );
+			new UpFunc1< Stoich, vector< SpeciesId > >( &Stoich::handleAvailableMolsAtPort ) );
 
-		static DestFinfo handleMatchedMols( "handleMatchedMols",
+		static DestFinfo handleMatchedMolsAtPort( "handleMatchedMolsAtPort",
 			"Handles list of matched molecules worked out by the other port",
-			new UpFunc1< Stoich, vector< SpeciesId > >( &Stoich::handleMatchedMols ) );
+			new UpFunc1< Stoich, vector< SpeciesId > >( &Stoich::handleMatchedMolsAtPort ) );
 
 		static DestFinfo influx( "influx",
 			"Molecule #s coming back in",
@@ -95,7 +95,7 @@ const Cinfo* Port::initCinfo()
 		*/
 
 		static Finfo* port1array[] = {
-			availableMols(), &handleMatchedMols, efflux(), &influx
+			availableMolsAtPort(), &handleMatchedMolsAtPort, efflux(), &influx
 		};
 
 		static SharedFinfo port1( "port1",
@@ -106,7 +106,7 @@ const Cinfo* Port::initCinfo()
 		);
 
 		static Finfo* port2array[] = {
-			&handleAvailableMols, matchedMols(), &influx, efflux(), 
+			&handleAvailableMolsAtPort, matchedMolsAtPort(), &influx, efflux(), 
 		};
 
 		static SharedFinfo port2( "port2",
@@ -187,3 +187,37 @@ unsigned int Port::getOutEnd() const
 	return outEnd_;
 }
 
+
+/////////////////////////////////////////////////////////////
+// inner functions for DestFinfos
+/////////////////////////////////////////////////////////////
+
+/**
+ * This specifies the list of molecules that the port is interested in.
+ * This would typically be the whole list of molecules in this cellular
+ * compartment.
+ * The port scans this list and discards those that have not had a specific
+ * (i.e., non-default) SpeciesId assigned, and those with a zero diffusion
+ * constant.
+ */
+void Port::assignMols( const vector< Id >& mols )
+{
+	
+}
+
+void Port::findMatchingMolSpecies( const vector< SpeciesId >& other, 
+	vector< SpeciesId >& ret )
+{
+	ret.resize( 0 );
+	/*
+	for ( vector< SpeciesId >::iterator i = other.begin(); 
+		i != other.end(); ++i ) {
+		if ( *i != DefaultSpeciesId ) {
+			if ( speciesMap_.find( *i ) != speciesMap_.end() ) {
+				ret.push_back( *i );
+				usedMols_.push_back( i->second );
+			}
+		}
+	}
+	*/
+}

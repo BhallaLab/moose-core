@@ -12121,4 +12121,99 @@ a vector of unsigned ints in the Stoich. Checkin 2582.
 Now to put the bits together. 
 
 Created a SpeciesId class, currently just typedefed to unsigned int.
-This is needed for the setup of ports.
+This is needed for the setup of ports. Checkin 2583.
+
+Next: 
+- Use SpeciesId to scan through possible molecules to build up port
+- Test port
+- Get Python wrapper running.
+- Set up geometry things for Smoldyn.
+- Look at compiling in Smoldyn
+============================================================================
+29 March 2011.
+
+Working on Port implementation. Should perhaps have Ports associated with
+KinCompartments, since one way of specifying the list of molecules available 
+for porting is to take the list of diffusible mols which have a defined 
+SpeciesId in the compartment.
+
+============================================================================
+31 March. 
+Worked on the options, also referred back to earlier design ideas for
+compartments.
+
+To reiterate definitions:
+
+Chemical compartment: Domain in which a consistent set of chemical reactions 
+apply, but the concentrations need not be spatially uniform or even contiguous.
+Equivalent to the term cellular compartment as used in biology.
+Examples might be all the apical dendrites, or the dendritic spine heads,
+or all early endosomes.
+
+Chemical compartments have an 'inside' relationship to a single surrounding 
+compartment. 
+
+Numerical compartment or voxel: Domain within which we assume that the 
+chemistry is spatially as well as chemically uniform.
+
+Geometry: an attribute of a chemical compartment, derived from 
+the ChemCompt. Equivalent to Smoldyn surfacesuperstruct. Manages set of
+child surfaces. 
+
+When drawing or using a self-meshing program like Smoldyn, the Geometry is
+sufficient to define the entire 3-D extent of the compartment.
+
+Problem: multiple Compartments can and should share the same Geometry. 
+	If they don't then things could get messy with alignment.
+Problem: Different things may happen on different parts of the surface of
+any given Compartment. Consider ports for spines, membrane vs junction with
+soma for dendrite; membrane vs PSD for spine head.
+
+Need to have different Geometries to specify different parts of the
+compartment. For example, dendrite length, ports to other solvers, Region
+
+Consider the 
+
+
+Mesh: child of Geometry, in principle Geometry can have more than one Mesh,
+say one for Ca calculations and another for other mols. Manages spatial 
+discretization of the Geometry.kkkk
+
+Crucially, the Geometry knows how to spatially decompose the 
+compartment into numerical compartments . Given the # of subdivisions and an index it can provide:
+	- volume of the voxel
+	
+
+Separate trees under Cell for ChemCompts, Geom, and solvers.
+ChemCompts: Holds mols, reacs and mesh. Each of these has one-to-one aligned 
+	vector expansion for spatial reac-diff models. Each mol or reac looks
+	up its aligned mesh element for local volume, used for conc.
+	Can be point, line, surface or volume.
+	Mols: regular Element array, one per mesh element
+	Reacs: regular Element array, one per mesh element
+	Mesh: regular Element array.
+Geom: Holds many child surfaces in the Smoldyn sense. Provides an API
+	for finding out sub-sections as needed
+	Surfaces: Manage multiple panels
+	Panels: TriPanel, RectPanel, HemispherePanel, DiskPanel, CylPanel etc.
+Solvers: These can span ChemCompts, but must occupy at least one full one.
+Ports: 
+
+Mapping between these:
+Used for:
+	Chem compts look up geoms to define vol etc
+	Chem compts look up geoms to set up meshing.
+	Solvers look up mols on chem compts to figure out what to solve
+		Solvers are typically assigned one or more entire ChemCompts 
+		as their domain. I don't really see why one would want a subset
+		of mols in a chem compt being handled by a solver.
+	Solvers look up meshing on chem compts to figure out volume conversions?
+		Perhaps this can be done invisibly by the reaction scaling terms
+	Ports: Specify a single panel? or a surface? as child or msg.
+		Specify ported molecules and porting rates
+		Ported molecules are created as copies on port
+		Porting rates are set up as reactions on port
+		Ports might be able to interact with multiple voxels, but
+			this loses info. May need concept of meshed port for
+			Smoldyn to deal with it.
+

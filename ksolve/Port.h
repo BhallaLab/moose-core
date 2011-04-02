@@ -51,6 +51,11 @@ class Port
 		 */
 		double getScaleOutRate() const;
 
+		void assignMols( const vector< Id >& mols );
+
+		void findMatchingMolSpecies( const vector< SpeciesId >& other, 
+			vector< SpeciesId >& ret );
+
 
 		static const Cinfo* initCinfo();
 	private:
@@ -84,6 +89,15 @@ class Port
 		 * port.
 		 */
 		double scaleOutRate_;
+
+		/**
+		 * This specifies molecules available at this port. 
+		 * We assume that only one molecule belonging to any given species
+		 * is present here. This is a
+		 * superset of the mols that will actually be used.
+		 */
+		map< SpeciesId, Id > availableMols_;
+
 
 		// Later: Geometry info
 

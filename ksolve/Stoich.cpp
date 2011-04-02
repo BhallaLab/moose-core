@@ -174,12 +174,29 @@ void Stoich::influx( DataId port, vector< double > mol )
 	*/
 }
 
-void Stoich::handleAvailableMols( DataId port, vector< SpeciesId > mols )
+/**
+ * Should really do this using a map indexed by SpeciesId.
+ */
+void Stoich::handleAvailableMolsAtPort( DataId port, vector< SpeciesId > mols )
 {
-	;
+	/*
+	vector< SpeciesId > ret;
+	assert( port.field() < ports_.size() );
+	ports_[port.field()]->findMatchingMolSpecies( molSpecies, ret );
+	Port& p = ports_[ port.field() ];
+	for ( vector< SpeciesId >::iterator i = species_.begin(); 
+		i != species_.end(); ++i ) {
+		if ( *i != DefaultSpeciesId ) {
+			if ( p.availableMols_.find( *i ) != p.availableMols_.end() ) {
+				ret.push_back( *i );
+				p->usedMols_.push_back( i->second );
+			}
+		}
+	}
+	*/
 }
 
-void Stoich::handleMatchedMols( DataId port, vector< SpeciesId > mols )
+void Stoich::handleMatchedMolsAtPort( DataId port, vector< SpeciesId > mols )
 {
 	;
 }
