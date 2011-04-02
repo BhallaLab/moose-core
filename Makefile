@@ -190,7 +190,7 @@ endif
 
 # To use Smoldyn, pass USE_SMOLDYN=true ( anything on the right will do) in make command line
 ifdef USE_SMOLDYN
-LIBS+= -L/usr/lib -lsmoldyn
+#LIBS+= -L/usr/local/lib -lsmoldyn
 CXXFLAGS+= -DUSE_SMOLDYN
 SMOLDYN_DIR = smol
 SMOLDYN_LIB = smol/smol.o
@@ -264,6 +264,7 @@ OBJLIBS =	\
 	regressionTests/rt.o \
 	utility/utility.o \
 	$(SMOLDYN_LIB) \
+	/usr/local/lib/libsmoldyn.a \
 
 export CXX
 export CXXFLAGS
