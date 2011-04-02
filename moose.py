@@ -1,6 +1,3 @@
-__version__ = "$Revision: 2599 $"
-# $Source$
-
 # moose.py --- 
 # 
 # Filename: moose.py
@@ -10,9 +7,9 @@ __version__ = "$Revision: 2599 $"
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Sat Apr  2 13:41:52 2011 (+0530)
+# Last-Updated: Sat Apr  2 15:08:23 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 236
+#     Update #: 279
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -32,6 +29,164 @@ __version__ = "$Revision: 2599 $"
 
 # Code:
 
+"""
+MOOSE = Multiscale Object Oriented Simulation Environment.
+
+Classes:
+
+Id:
+
+this is the unique identifier of a MOOSE object. Note that you
+can create multiple references to the same MOOSE object in Python, but
+as long as they have the same Id, they all point to the same entity in
+MOOSE.
+
+Methods:
+
+getFieldType(field) -- data type of field as a human readable string.
+
+getField(field) -- value of field
+
+setField(field, value) -- assign value to field
+
+getId() -- unsigned integer representation of id
+
+getPath() -- string representing the path corresponding this id
+
+getShape -- tuple containing the dimensions of this id
+
+Id implements part of the sequence protocol:
+
+len(id) -- the first dimension of id.
+
+id[n] -- the n-th ObjId in id.
+
+id[n1:n2] -- a tuple containing n1 to n2-th (exclusive) ObjId in id.
+
+objid in id -- True if objid is contained in id.
+
+
+
+ObjId:
+
+Unique identifier of an element in a MOOSE object. It has three components:
+
+Id id - the Id containing this element
+
+unsigned integer dataIndex - index of this element in the container
+
+unsigned integer fieldIndex - if this is a tertiary object, i.e. acts
+as a field in another element (like synapse[0] in IntFire[1]), then
+the index of this field in the containing element.
+
+Methods:
+
+getFieldType(field) -- human readable datatype information of field
+
+getField(field) -- get value of field
+
+setField(field, value) -- assign value to field
+
+getId -- Id object containing this ObjId.
+
+getFieldNames(fieldType) -- tuple containing names of all the fields
+of type fieldType. fieldType can be valueFinfo, lookupFinfo, srcFinfo,
+destFinfo and sharedFinfo. If nothing is passed, a union of all of the
+above is used and all the fields are returned.
+
+connect(srcField, destObj, destField, msgType) -- connect srcField of
+this element to destField of destObj.
+
+getDataIndex() -- unsigned integer representing the index of this
+element in containing MOOSE object.
+
+getFieldIndex() -- unsigned integer representing the index of this
+element as a field in the containing Element.
+
+
+Neutral:
+
+The base class. Each Neutral object has an unique Id (field _id) and
+that is the only data directly visible under Python. All operation are
+done on the objects by calling function on the Id.
+
+A Neutral object is actually an array. The individual elements in a
+Neutral are of class NeutralElement. To access these individual
+elements, you can index the Neutral object.
+
+A Neutral object can be constructed in many ways. The most basic one
+being:
+
+neutral = moose.Neutral('my_neutral_object', [3])
+
+This will create a Neutral object with name 'my_neutral_object'
+containing 3 elements. The object will be created as a child of the
+current working entity. Any class derived from Neutral can also be
+created using the same constructor. Actually it takes keyword
+parameters to do that:
+
+intfire = moose.Neutral(path='/my_neutral_object', dims=[3], type='IntFire')
+
+will create an IntFire object of size 3 as a child of the root entity.
+
+If the above code is already executed,
+
+duplicate = moose.Neutral(intfire)
+
+will create a duplicate reference to the existing intfire object. They
+will share the same Id and any changes made via the MOOSE API to one
+will be effective on the other.
+
+NeutralElement -- The base class for all elements in object of class
+Neutral or derivatives of Neutral. A NeutralElement will always point
+to an index in an existing entity. The underlying data is ObjId (field
+_oid) - a triplet of id, dataIndex and fieldIndex. Here id is the Id
+of the Neutral object containing this element. dataIndex is the index
+of this element in the container. FieldIndex is a tertiary index and
+used only when this element acts as a field of another
+element. Otherwise fieldIndex is 0.
+
+Indexing a Neutral object returns a NeutralElement.
+
+i_f = intfire[0] will return a reference to the first element in the
+IntFire object we created earlier. All field-wise operations are done
+on NeutralElements.
+
+Methods:
+
+
+module functions:
+
+copy(src=<src>, dest=<dest>, name=<name_of_the_copy>, n=<num_copies>, copyMsg=<whether_to_copy_messages) -- make a copy of source object as a child of the destination object.
+
+
+move(src, dest) -- move src object under dest object.
+
+useClock(tick, path, field) -- schedule <field> of every object that
+matches <path> on clock no. <tick>.
+
+setClock(tick, dt) -- set dt of clock no <tick>.
+
+start(runtime) -- start simulation of <runtime> time.
+
+reinit() -- reinitialize simulation.
+
+stop() -- stop simulation
+
+isRunning() -- true if simulation is in progress, false otherwise.
+
+loadModel(filepath, modelpath) -- load file in <filepath> into node
+<modelpath> of the moose model-tree.
+
+setCwe(obj) -- set the current working element to <obj> - which can be either a string representing the path of the object in the moose model-tree, or an Id.
+
+getCwe() -- returns Id of the current working element.
+
+
+"""
+
+__version__ = "$Revision: 2599 $"
+# $Source$
 
 
 import _moose
