@@ -228,6 +228,7 @@ SUBDIR = \
 	kinetics \
 	ksolve \
 	regressionTests \
+	utility \
 
 # Used for 'make clean'
 CLEANSUBDIR = $(SUBDIR) $(PARALLEL_DIR)
@@ -243,7 +244,7 @@ OBJLIBS =	\
 	kinetics/kinetics.o \
 	ksolve/ksolve.o \
 	regressionTests/rt.o \
-
+	utility/utility.o \
 
 export CXX
 export CXXFLAGS
@@ -259,10 +260,16 @@ libmoose.so: libs
 	$(CXX) -G $(LIBS) -o libmoose.so
 	@echo "Created dynamic library"
 
-pymoose: CXXFLAGS += -fPIC 
+# There are some unix/gcc specific paths here. Should be cleaned up later.
+pymoose: CXXFLAGS += -DPYMOOSE -fPIC -fno-strict-aliasing -I/usr/include/python2.6 # Should be updated according to platform
 pymoose: SUBDIR += pymoose
+pymoose: OBJLIBS += pymoose/pymoose.o
+pymoose: LIBS += -lpython2.6 # Needs to be modified according to Python version
 pymoose: libs $(OBJLIBS) 
 	$(MAKE) -C $@
+pymoose: _moose.so
+_moose.so: libs $(OBJLIBS)
+	$(CXX) -shared $(LDFLAGS) $(CXXFLAGS) -o $@ $(OBJLIBS) $(LIBS)
 
 libs:
 	@(for i in $(SUBDIR) $(PARALLEL_DIR); do $(MAKE) -C $$i; done)
@@ -275,4 +282,4 @@ default: moose mpp
 
 clean:
 	@(for i in $(CLEANSUBDIR) ; do $(MAKE) -C $$i clean;  done)
-	-rm -rf moose mpp core.* DOCS/html *.so *.py *.pyc
+	-rm -rf moose mpp core.* DOCS/html *.so *.pyc
