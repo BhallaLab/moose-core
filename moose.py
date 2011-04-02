@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Sat Apr  2 15:08:23 2011 (+0530)
+# Last-Updated: Sat Apr  2 15:52:33 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 279
+#     Update #: 282
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -185,9 +185,8 @@ getCwe() -- returns Id of the current working element.
 
 """
 
-__version__ = "$Revision: 2599 $"
+__version__ = "$Revision$"
 # $Source$
-
 
 import _moose
 from _moose import useClock, setClock, start, reinit, stop, isRunning, loadModel
