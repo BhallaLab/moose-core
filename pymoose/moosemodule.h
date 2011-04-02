@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Sat Apr  2 12:23:17 2011 (+0530)
+// Last-Updated: Sat Apr  2 19:57:00 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 240
+//     Update #: 242
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -69,7 +69,7 @@ extern "C" {
     static PyObject * _pymoose_Id_repr(_Id * self);
     static PyObject * _pymoose_Id_str(_Id * self);
     static PyObject * _pymoose_Id_destroy(_Id * self, PyObject * args);
-    static PyObject * _pymoose_Id_getId(_Id * self, PyObject * args);
+    static PyObject * _pymoose_Id_getValue(_Id * self, PyObject * args);
     static PyObject * _pymoose_Id_getPath(_Id * self, PyObject * args);
     static PyObject * _pymoose_Id_syncDataHandler(_Id * self, PyObject * args);
     /* Id functions to allow part of sequence protocol */
@@ -113,8 +113,12 @@ extern "C" {
     static PyObject * _pymoose_getCwe(PyObject * dummy, PyObject * args);
     static PyObject * _pymoose_copy(PyObject * dummy, PyObject * args, PyObject * kwargs);
     static PyObject * _pymoose_move(PyObject * dummy, PyObject * args);
-
+    static PyObject * _pymoose_getFieldDict(PyObject * dummy, PyObject * args);    
     PyMODINIT_FUNC init_moose();
+
+
+    void inner_getFieldDict(Id classId, string finfoType, vector<string>& fields, vector<string>& types); 
+
 } //!extern "C"
 
 
