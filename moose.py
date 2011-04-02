@@ -1,3 +1,6 @@
+__version__ = "$Revision: 2599 $"
+# $Source$
+
 # moose.py --- 
 # 
 # Filename: moose.py
@@ -7,9 +10,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Sat Apr  2 13:35:38 2011 (+0530)
+# Last-Updated: Sat Apr  2 13:41:52 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 234
+#     Update #: 236
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -29,8 +32,6 @@
 
 # Code:
 
-__version__ = "$Revision: 2597 $"
-# $Source$
 
 
 import _moose
