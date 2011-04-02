@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Sat Apr  2 12:33:21 2011 (+0530)
+// Last-Updated: Sat Apr  2 17:13:20 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 3609
+//     Update #: 3619
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -714,14 +714,14 @@ extern "C" {
             case 'x':
                 {                    
                     Id value = Field<Id>::get(self->_oid, string(field));
-                    PyObject * ret = (PyObject*)PyObject_New(_Id, &IdType);
+                    ret = (PyObject*)PyObject_New(_Id, &IdType);
                     ((_Id*)ret)->_id = value;
                     break;
                 }
             case 'y':
                 {
                     ObjId value = Field<ObjId>::get(self->_oid, string(field));
-                    PyObject * ret = (PyObject*)PyObject_New(_ObjId, &ObjIdType);
+                    ret = (PyObject*)PyObject_New(_ObjId, &ObjIdType);
                     ((_ObjId*)ret)->_oid = value;
                     break;
                 }
@@ -753,7 +753,7 @@ extern "C" {
             case 'X': // vector<Id>
                 {
                     vector<Id> value = Field< vector <Id> >::get(self->_oid, string(field));
-                    PyObject * ret = PyTuple_New((Py_ssize_t)value.size());
+                    ret = PyTuple_New((Py_ssize_t)value.size());
                     for (unsigned int ii = 0; ii < value.size(); ++ii){
                         _Id * entry = PyObject_New(_Id, &IdType);
                         if (!entry){
@@ -765,14 +765,14 @@ extern "C" {
                             Py_XDECREF(ret);
                             return NULL;
                         }
-                        cout << "Id: " << entry->_id << endl;
+                        cout << "Id: " << entry->_id << " - path " << value[ii].path() << endl;
                     }
                     break;
                 }
             case 'Y': // vector<ObjId>
                 {
                     vector<ObjId> value = Field< vector <ObjId> >::get(self->_oid, string(field));
-                    PyObject * ret = PyTuple_New(value.size());
+                    ret = PyTuple_New(value.size());
                     for (unsigned int ii = 0; ii < value.size(); ++ii){
                         _ObjId * entry = PyObject_New(_ObjId, &ObjIdType);                       
                         if (!entry){
@@ -794,7 +794,9 @@ extern "C" {
                 ret = NULL;            
         }
 #undef GET_FIELD    
-#undef GET_VECFIELD        
+#undef GET_VECFIELD
+        if (PyTuple_Check(ret))
+            cout << "Returning tuple of len " << PyTuple_Size(ret) << endl;
         return ret;        
     }
     /**
@@ -1154,10 +1156,6 @@ extern "C" {
         PyObject * ret = (PyObject*)cwe;
         return ret;
     }
-
-    
-    
-    
 } // end extern "C"
 
 
