@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Sat Apr  2 15:52:33 2011 (+0530)
+# Last-Updated: Sat Apr  2 17:11:44 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 282
+#     Update #: 301
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -192,12 +192,34 @@ import _moose
 from _moose import useClock, setClock, start, reinit, stop, isRunning, loadModel
 
 
-class MooseMeta(type):
-    def __init__(cls, name, bases, classdict):
+class _MooseDescriptor(object):
+    """Descriptor to give access to MOOSE class' ValueFinfo attributes"""
+    def __init__(self, name):
+        self.name = name
+
+    def __get__(self, obj, objtype=None):
+        self.check_dict(obj)
+        return obj._valuefinfo_dict[self.name]
+
+    def __set__(self, obj, value):
+        self.check_dict(obj)
+        if self.name in obj._valuefinfo_dict:
+            self._valuefinfo_dict[self.name] = value
+
+    def __delete__(self, obj):
+        raise AttributeError('ValueFinfos cannot be deleted.')
+
+    def check_dict(self, obj):
+        if (getattr(obj, '_valuefinfo_dict', None) is None):
+            raise AttributeError('ValueFinfo dictionary missing. Class %s probably does not call ValueFinfo.__init__' % (obj.__class__))
+
+    
+    
+class _MooseMeta(type):
+    def __init__(cls, name, bases, classdict):        
         print "Creating class %s using NeutralMeta" % (name)
-        id = _moose.Id('/classes/' + name, [1], 'Neutral')
-        fields = id.getFieldNames('valueFinfo')
-        super(MooseMeta, cls).__init__(name, bases)
+        super(_MooseMeta, cls).__init__(name, bases, classdict)
+        
 
 
 
@@ -248,7 +270,10 @@ class IntFire(Neutral):
 class NeutralElement(object):
     def __init__(self, *args, **kwargs):
         self._oid = _moose.ObjId(*args, **kwargs)
-        
+
+    def getField(self, field):
+        return self._oid.getField(field)
+    
     className = property(lambda self: self._oid.getField('class'))
     fieldNames = property(lambda self: self._oid.getFieldNames())
     name = property(lambda self: self._oid.getField('name'))
