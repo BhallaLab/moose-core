@@ -12217,3 +12217,9 @@ Used for:
 			this loses info. May need concept of meshed port for
 			Smoldyn to deal with it.
 
+============================================================================
+2 April 2011
+Skeleton placeholders added for Ports. Checkin 2603
+
+Added smol directory for the Smoldyn interface.
+============================================================================
