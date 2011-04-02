@@ -65,7 +65,7 @@ class FuncBarrier;
 #include "ProcInfo.h"
 #include "Cinfo.h"
 #include "MsgFuncBinding.h"
-#include "Msg.h"
+#include "../msg/Msg.h"
 #include "Qvec.h"
 #include "Qinfo.h"
 #include "Dinfo.h"
