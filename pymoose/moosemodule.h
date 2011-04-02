@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Mar 30 15:49:11 2011 (+0530)
+// Last-Updated: Sat Apr  2 12:23:17 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 239
+//     Update #: 240
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -57,7 +57,7 @@ extern "C" {
     */
     typedef struct {
         PyObject_HEAD
-        ObjId _id;
+        ObjId _oid;
     } _ObjId;
 
     static PyObject * MooseError;

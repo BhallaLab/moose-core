@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Mar 31 15:30:20 2011 (+0530)
+// Last-Updated: Sat Apr  2 12:33:21 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 3577
+//     Update #: 3609
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -68,8 +68,8 @@ extern const map<string, string>& getArgMap();
 extern Shell& getShell();
 extern void finalize();
 extern void setup_runtime_env(bool verbose);
-extern string getFieldType(ObjId id, string fieldName);
-extern vector<string> getFieldNames(ObjId id, string fieldType);
+extern string getFieldType(ObjId oid, string fieldName);
+extern vector<string> getFieldNames(ObjId oid, string fieldType);
 
 
 extern int isSingleThreaded;
@@ -317,14 +317,15 @@ extern "C" {
     
     static int _pymoose_Id_init(_Id * self, PyObject * args, PyObject * kwds)
     {
-        static char * kwlist[] = {"path", "dims", "type", NULL};
-        char * path, * type = "Neutral";
+        static const char * kwlist[] = {"path", "dims", "type", NULL};
+        char * path;
+        const char * type = "Neutral";
         PyObject * dims = NULL;
         PyObject * src = NULL;
         // if (PyDict_Type.tp_init((PyObject *)self, args, kwds) < 0)
         //     return -1;
         
-        if (!PyArg_ParseTupleAndKeywords(args, kwds, "s|Os", kwlist, &path, &dims, &type)){
+        if (!PyArg_ParseTupleAndKeywords(args, kwds, "s|Os", const_cast<char**>(kwlist), &path, &dims, &type)){
             if (!PyArg_ParseTuple(args, "O", &src)){
                 return -1;
             }
@@ -418,7 +419,7 @@ extern "C" {
     }
     static PyObject * _pymoose_Id_repr(_Id * self)
     {
-        return PyString_FromFormat("<Id: Id=%u>", self->_id.value());
+        return PyString_FromFormat("<Id: id=%u>", self->_id.value());
     } // !  _pymoose_Id_repr
     static PyObject * _pymoose_Id_str(_Id * self)
     {
@@ -503,7 +504,7 @@ extern "C" {
             return NULL;
         }
         _ObjId * ret = PyObject_New(_ObjId, &ObjIdType);
-        ret->_id = ObjId(self->_id, index);
+        ret->_oid = ObjId(self->_id, index);
         return (PyObject*)ret;
     }
     static PyObject * _pymoose_Id_getSlice(_Id * self, PyObject * args)
@@ -527,7 +528,7 @@ extern "C" {
         Py_XINCREF(ret);        
         for (unsigned int ii = start; ii < end; ++ii){
             _ObjId * value = PyObject_New(_ObjId, &ObjIdType);
-            value->_id = ObjId(self->_id, ii);
+            value->_oid = ObjId(self->_id, ii);
             if (PyTuple_SetItem(ret, (Py_ssize_t)ii, (PyObject*)value)){
                 Py_XDECREF(ret);
                 return NULL;
@@ -562,13 +563,13 @@ extern "C" {
     static int _pymoose_Id_contains(_Id * self, PyObject * args)
     {
         PyObject * obj = NULL;
-        if (!PyArg_ParseTuple(args, "O:asSequence", &obj)){
+        if (!PyArg_ParseTuple(args, "O:contains", &obj)){
             return 0;
         }
         if (!ObjId_Check(obj)){
             return 0;
         }
-        return (((_ObjId*)obj)->_id.id == self->_id);
+        return (((_ObjId*)obj)->_oid.id == self->_id);
     }
     /////////////////////////////////////////////////////
     // ObjId functions.
@@ -577,18 +578,22 @@ extern "C" {
     static int _pymoose_ObjId_init(_ObjId * self, PyObject * args, PyObject * kwargs)
     {
         unsigned int id = 0, data = 0, field = 0;
-        PyObject * neutral;
-        static char * kwlist[] = {"id", "dataIndex", "fieldIndex", NULL};
-        if (PyArg_ParseTupleAndKeywords(args, kwargs, "I|II", kwlist, &id, &data, &field)){
-            self->_id = ObjId(Id(id), DataId(data, field));
+        PyObject * obj;
+        static const char * kwlist[] = {"id", "dataIndex", "fieldIndex", NULL};
+        if (PyArg_ParseTupleAndKeywords(args, kwargs, "I|II", const_cast<char**>(kwlist), &id, &data, &field)){
+            self->_oid = ObjId(Id(id), DataId(data, field));
             return 0;
-        } else if (PyArg_ParseTupleAndKeywords(args, kwargs, "O|II", kwlist, &neutral, &data, &field)){
-            if (!Id_Check(neutral)){
-                PyErr_SetString(PyExc_TypeError, "ObjId.__init__(self, id, dataindex, fieldindex=0) or ObjId.__init__(self, Id, dataIndex, fieldIndex=0)");
+        } else if (PyArg_ParseTupleAndKeywords(args, kwargs, "O|II", const_cast<char**>(kwlist), &obj, &data, &field)){
+            if (Id_Check(obj)){
+                self->_oid = ObjId(((_Id*)obj)->_id, DataId(data, field));
+                return 0;
+            } else if (ObjId_Check(obj)){
+                self->_oid = ((_ObjId*)obj)->_oid;
+                return 0;
+            } else {
+                PyErr_SetString(PyExc_TypeError, "ObjId.__init__(self, id, dataindex, fieldindex=0) or ObjId.__init__(self, Id, dataIndex, fieldIndex=0) or ObjId.__init__(self, ObjId)");
                 return -1;
             }
-            self->_id = ObjId(((_Id*)neutral)->_id, DataId(data, field));
-            return 0;
         } else {
             return -1;
         }        
@@ -596,12 +601,12 @@ extern "C" {
     
     static PyObject * _pymoose_ObjId_repr(_ObjId * self)
     {
-        return PyString_FromFormat("<Id: Id=%u, Data=%u, Field=%u>", self->_id.id.value(), self->_id.dataId.data(), self->_id.dataId.field());
+        return PyString_FromFormat("<ObjId: id=%u, dataIndex=%u, fieldIndex=%u>", self->_oid.id.value(), self->_oid.dataId.data(), self->_oid.dataId.field());
     } // !  _pymoose_ObjId_repr
     static PyObject * _pymoose_ObjId_str(_ObjId * self)
     {
         assert(self);
-        return PyString_FromFormat("<Id: Id=%u, Data=%u, Field=%u>", self->_id.id.value(), self->_id.dataId.data(), self->_id.dataId.field());
+        return PyString_FromFormat("<ObjId: id=%u, dataIndex=%u, fieldIndex=%u>", self->_oid.id.value(), self->_oid.dataId.data(), self->_oid.dataId.field());
     } // !  _pymoose_ObjId_str
     
     static void _pymoose_ObjId_dealloc(_ObjId * self)
@@ -614,9 +619,9 @@ extern "C" {
         if (!PyArg_ParseTuple(args, ":ObjId.getId")){
             return NULL;
         }
-        unsigned int id = self->_id.id.value();
-        PyObject * ret = Py_BuildValue("(I)", id);
-        return ret;
+        _Id * ret = PyObject_New(_Id, &IdType);
+        ret->_id = self->_oid.id;
+        return (PyObject*)ret;
     }
 
 
@@ -626,7 +631,7 @@ extern "C" {
         if (!PyArg_ParseTuple(args, "s", &fieldName)){
             return NULL;
         }
-        string typeStr = getFieldType(self->_id, string(fieldName));
+        string typeStr = getFieldType(self->_oid, string(fieldName));
         if (typeStr.length() <= 0){
             PyErr_SetString(PyExc_ValueError, "Empty string for field type. Field name may be incorrect.");
             return NULL;
@@ -657,14 +662,14 @@ extern "C" {
         // TYPE is the full type string for the field. TYPEC is the corresponding Python Py_BuildValue format character.
 #define GET_FIELD(TYPE, TYPEC)                                          \
         { \
-            TYPE value = Field<TYPE>::get(self->_id, string(field));    \
+            TYPE value = Field<TYPE>::get(self->_oid, string(field));    \
             ret = Py_BuildValue(#TYPEC, value);                         \
             break;                                                      \
         }                                                               \
         
 #define GET_VECFIELD(TYPE, TYPEC) \
         {                                                               \
-                vector<TYPE> val = Field< vector<TYPE> >::get(self->_id, string(field)); \
+                vector<TYPE> val = Field< vector<TYPE> >::get(self->_oid, string(field)); \
                 ret = PyTuple_New((Py_ssize_t)val.size());              \
                 for (unsigned int ii = 0; ii < val.size(); ++ ii ){     \
                         PyObject * entry = Py_BuildValue(#TYPEC, val[ii]); \
@@ -677,10 +682,10 @@ extern "C" {
                 break;                                                  \
         }                                                               \
         
-        string type = getFieldType(self->_id, string(field));
+        string type = getFieldType(self->_oid, string(field));
         if (type.empty()){
             string msg = "No such field on object ";
-            msg += self->_id.id.path() + ": ";
+            msg += self->_oid.id.path() + ": ";
             msg += field;
             PyErr_SetString(PyExc_AttributeError, msg.c_str());
             return NULL;
@@ -702,22 +707,22 @@ extern "C" {
             case 'f': GET_FIELD(float, f)
             case 'd': GET_FIELD(double, d)
             case 's': {
-                string _s = Field<string>::get(self->_id, string(field));
+                string _s = Field<string>::get(self->_oid, string(field));
                 ret = Py_BuildValue("s", _s.c_str());
                 break;
             }
             case 'x':
                 {                    
-                    Id value = Field<Id>::get(self->_id, string(field));
+                    Id value = Field<Id>::get(self->_oid, string(field));
                     PyObject * ret = (PyObject*)PyObject_New(_Id, &IdType);
                     ((_Id*)ret)->_id = value;
                     break;
                 }
             case 'y':
                 {
-                    ObjId value = Field<ObjId>::get(self->_id, string(field));
+                    ObjId value = Field<ObjId>::get(self->_oid, string(field));
                     PyObject * ret = (PyObject*)PyObject_New(_ObjId, &ObjIdType);
-                    ((_ObjId*)ret)->_id = value;
+                    ((_ObjId*)ret)->_oid = value;
                     break;
                 }
             case 'z':
@@ -733,7 +738,7 @@ extern "C" {
             case 'F': GET_VECFIELD(float, f)        
             case 'D': GET_VECFIELD(double, d)        
             case 'S': {                                                 
-                vector<string> val = Field< vector<string> >::get(self->_id, string(field)); 
+                vector<string> val = Field< vector<string> >::get(self->_oid, string(field)); 
                 ret = PyTuple_New((Py_ssize_t)val.size());
                 for (unsigned int ii = 0; ii < val.size(); ++ ii ){     
                     PyObject * entry = Py_BuildValue("s", val[ii].c_str()); 
@@ -747,7 +752,7 @@ extern "C" {
             }
             case 'X': // vector<Id>
                 {
-                    vector<Id> value = Field< vector <Id> >::get(self->_id, string(field));
+                    vector<Id> value = Field< vector <Id> >::get(self->_oid, string(field));
                     PyObject * ret = PyTuple_New((Py_ssize_t)value.size());
                     for (unsigned int ii = 0; ii < value.size(); ++ii){
                         _Id * entry = PyObject_New(_Id, &IdType);
@@ -766,7 +771,7 @@ extern "C" {
                 }
             case 'Y': // vector<ObjId>
                 {
-                    vector<ObjId> value = Field< vector <ObjId> >::get(self->_id, string(field));
+                    vector<ObjId> value = Field< vector <ObjId> >::get(self->_oid, string(field));
                     PyObject * ret = PyTuple_New(value.size());
                     for (unsigned int ii = 0; ii < value.size(); ++ii){
                         _ObjId * entry = PyObject_New(_ObjId, &ObjIdType);                       
@@ -774,7 +779,7 @@ extern "C" {
                             Py_XDECREF(ret);
                             return NULL;
                         }
-                        entry->_id = value[ii];
+                        entry->_oid = value[ii];
                         if (PyTuple_SetItem(ret, (Py_ssize_t)ii, (PyObject*)entry)){
                             Py_XDECREF(ret);
                             return NULL;
@@ -804,7 +809,7 @@ extern "C" {
             if (!PyArg_ParseTuple(value, #TYPEC, &_value)){     \
                 return NULL;                                    \
             }                                                           \
-            ret = Field<TYPE>::set(self->_id, string(field), _value);   \
+            ret = Field<TYPE>::set(self->_oid, string(field), _value);   \
             break;                                                      \
         } //! SET_FIELD
 
@@ -828,7 +833,7 @@ extern "C" {
                 }                                                       \
                 _value.push_back(entry);                                \
             }                                                           \
-            ret = Field< vector <TYPE> >::set(self->_id, string(field), _value); \
+            ret = Field< vector <TYPE> >::set(self->_oid, string(field), _value); \
             break;                                                          \
         }
         PyObject * value;
@@ -838,7 +843,7 @@ extern "C" {
             cout << "Here" << endl;
             return NULL;
         }
-        char ftype = shortType(getFieldType(self->_id, string(field)));
+        char ftype = shortType(getFieldType(self->_oid, string(field)));
         
         if (!ftype){
             PyErr_SetString(PyExc_AttributeError, "Field not valid.");
@@ -857,7 +862,7 @@ extern "C" {
                 {
                     char * _value = PyString_AsString(value);
                     if (_value){
-                        ret = Field<string>::set(self->_id, string(field), string(_value));
+                        ret = Field<string>::set(self->_oid, string(field), string(_value));
                     } else {
                         return NULL;
                     }
@@ -866,7 +871,7 @@ extern "C" {
             case 'x': // Id
                 {
                     if (value){
-                        ret = Field<Id>::set(self->_id, string(field), ((_Id*)value)->_id);
+                        ret = Field<Id>::set(self->_oid, string(field), ((_Id*)value)->_id);
                     } else {
                         PyErr_SetString(PyExc_ValueError, "Null pointer passed as Id value.");
                         return NULL;
@@ -876,7 +881,7 @@ extern "C" {
             case 'y': // ObjId
                 {
                     if (value){
-                        ret = Field<ObjId>::set(self->_id, string(field), ((_ObjId*)value)->_id);
+                        ret = Field<ObjId>::set(self->_oid, string(field), ((_ObjId*)value)->_oid);
                     } else {
                         PyErr_SetString(PyExc_ValueError, "Null pointer passed as Id value.");
                         return NULL;
@@ -907,7 +912,7 @@ extern "C" {
                         char * v = PyString_AsString(PySequence_GetItem(value, ii));
                         _value.push_back(string(v));
                     }
-                    ret = Field< vector < string > >::set(self->_id, string(field), _value);
+                    ret = Field< vector < string > >::set(self->_oid, string(field), _value);
                     break;
                 }
                 
@@ -939,14 +944,14 @@ extern "C" {
         string ftype_str = (ftype != NULL)? string(ftype): "";
         vector<string> ret;
         if (ftype_str == ""){
-            static char * fieldTypes[] = {"valueFinfo", "srcFinfo", "destFinfo", "lookupFinfo", "sharedFinfo", 0};
-            char ** a;
+            static const char * fieldTypes[] = {"valueFinfo", "srcFinfo", "destFinfo", "lookupFinfo", "sharedFinfo", 0};
+            const char ** a;
             for (a = &fieldTypes[0]; *a; ++a){
-                vector<string> fields = getFieldNames(self->_id, string(*a));
+                vector<string> fields = getFieldNames(self->_oid, string(*a));
                 ret.insert(ret.end(), fields.begin(), fields.end());
             }            
         } else {
-            ret = getFieldNames(self->_id, ftype_str);
+            ret = getFieldNames(self->_oid, ftype_str);
         }
         cout << "getFieldNames: ret.size() = " << ret.size() << endl;
         
@@ -981,7 +986,7 @@ extern "C" {
             return NULL;
         }
         _ObjId * dest = reinterpret_cast<_ObjId*>(destPtr);
-        bool ret = (getShell().doAddMsg(msgType, self->_id, string(srcField), dest->_id, string(destField)) != Msg::badMsg);
+        bool ret = (getShell().doAddMsg(msgType, self->_oid, string(srcField), dest->_oid, string(destField)) != Msg::badMsg);
         if (!ret){
             PyErr_SetString(PyExc_NameError, "connect failed: check field names and type compatibility.");
             return NULL;
@@ -992,9 +997,9 @@ extern "C" {
     static int _pymoose_ObjId_richCompare(_ObjId * self, PyObject * other, int op)
     {
         if (op == Py_EQ){
-            return (self->_id == ((_ObjId*)other)->_id);
+            return (self->_oid == ((_ObjId*)other)->_oid);
         } else if (op == Py_NE){
-            return !(self->_id == ((_ObjId*)other)->_id);
+            return !(self->_oid == ((_ObjId*)other)->_oid);
         } else {
             return 0;
         }
@@ -1005,7 +1010,7 @@ extern "C" {
         if (!PyArg_ParseTuple(args, ":getDataIndex")){
             return NULL;
         }
-        PyObject * ret = Py_BuildValue("I", self->_id.dataId.data());
+        PyObject * ret = Py_BuildValue("I", self->_oid.dataId.data());
         return ret;
     }
     static PyObject * _pymoose_ObjId_getFieldIndex(_ObjId * self, PyObject * args)
@@ -1013,7 +1018,7 @@ extern "C" {
         if (!PyArg_ParseTuple(args, ":getFieldIndex")){
             return NULL;
         }
-        PyObject * ret = Py_BuildValue("I", self->_id.dataId.field());
+        PyObject * ret = Py_BuildValue("I", self->_oid.dataId.field());
         return ret;
     } 
     ////////////////////////////////////////////
@@ -1025,9 +1030,9 @@ extern "C" {
     {
         PyObject * src, *dest;
         char * newName;
-        char * kwlist[] = {"src", "dest", "name", "n", "copyMsg", NULL};
+        static const char * kwlist[] = {"src", "dest", "name", "n", "copyMsg", NULL};
         unsigned int num=1, copyExtMsgs=1;
-        if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOs|II", kwlist, &src, &dest, &newName, &num, &copyExtMsgs)){
+        if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOs|II", const_cast<char**>(kwlist), &src, &dest, &newName, &num, &copyExtMsgs)){
             return NULL;
         }
         if (!Id_SubtypeCheck(src)){
@@ -1126,9 +1131,9 @@ extern "C" {
     static PyObject * _pymoose_setCwe(PyObject * dummy, PyObject * args)
     {
         PyObject * element = NULL;
-        char * path = "/";
+        const char * path = "/";
         Id id;
-        if(PyArg_ParseTuple(args, "s", &path)){
+        if(PyArg_ParseTuple(args, "s", const_cast<char**>(&path))){
             id = Id(string(path));
         } else if (PyArg_ParseTuple(args, "O", &element)){
             id = (reinterpret_cast<_Id*>(element))->_id;
