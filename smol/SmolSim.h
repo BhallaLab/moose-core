@@ -12,6 +12,7 @@
 
 class SmolSim
 {
+	friend void testCreateSmolSim();
 	public: 
 		SmolSim();
 		~SmolSim();
@@ -95,7 +96,7 @@ class SmolSim
 		/**
 		 * sim points to the instance of Smoldyn running here.
 		 */
-		struct simstruct* sim;
+		struct simstruct* sim_;
 
 
 		/**

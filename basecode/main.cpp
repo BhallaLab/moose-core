@@ -52,6 +52,10 @@ extern void speedTestMultiNodeIntFireNetwork(
 #ifdef DO_UNIT_TESTS
 void regressionTests();
 #endif
+
+#ifdef USE_SMOLDYN
+	extern void testSmoldyn();
+#endif
 bool benchmarkTests( int argc, char** argv );
 
 //////////////////////////////////////////////////////////////////
@@ -238,6 +242,9 @@ void nonMpiTests( Shell* s )
 		testScheduling();
 		testBuiltins();
 		testKinetics();
+#ifdef USE_SMOLDYN
+		testSmoldyn();
+#endif
 		s->setHardware( isSingleThreaded, numCores, numNodes, 0 );
 	}
 #endif

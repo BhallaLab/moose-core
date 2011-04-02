@@ -12221,5 +12221,8 @@ Used for:
 2 April 2011
 Skeleton placeholders added for Ports. Checkin 2603
 
-Added smol directory for the Smoldyn interface.
+Added smol directory for the Smoldyn interface. Checkin 2606.
+
+Able to get it to compile, and to instantiate a SmolSim object. Also able to
+instantiate a couple of Mols (which should be Pools).
 ============================================================================

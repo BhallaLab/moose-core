@@ -7,8 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
-#include "SmolSim.h"
+#include "SmolHeader.h"
 #include "SmolPool.h"
 #include "Mol.h"
 #include "ElementValueFinfo.h"
@@ -290,7 +289,6 @@ unsigned int SmolPool::getSpecies( const Eref& e, const Qinfo* q ) const
 // static func
 void SmolPool::zombify( Element* solver, Element* orig )
 {
-	/*
 	Element temp( orig->id(), smolPoolCinfo, solver->dataHandler() );
 	Eref zer( &temp, 0 );
 	Eref oer( orig, 0 );
@@ -298,12 +296,20 @@ void SmolPool::zombify( Element* solver, Element* orig )
 	SmolPool* z = reinterpret_cast< SmolPool* >( zer.data() );
 	Mol* m = reinterpret_cast< Mol* >( oer.data() );
 
+	/*
 	z->setN( zer, 0, m->getN() );
 	z->setNinit( zer, 0, m->getNinit() );
 	z->setSpecies( zer, 0, m->getSpecies() );
+	*/
 	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
 	orig->zombieSwap( smolPoolCinfo, dh );
-	*/
+
+	char* tempStr = new char[orig->getName().length() + 1 ];
+	strcpy( tempStr, orig->getName().c_str() );
+
+	ErrorCode ret = smolAddSpecies( z->sim_, tempStr, 0 );
+	assert( ret == ECok );
+	cout << "added species " << orig->getName() << endl;
 }
 
 // Static func

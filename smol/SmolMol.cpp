@@ -7,9 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include <smoldyn/libsmoldyn.h>
-#include "header.h"
-#include "SmolSim.h"
+#include "SmolHeader.h"
 #include "SmolMol.h"
 #include "Mol.h"
 #include "ElementValueFinfo.h"
