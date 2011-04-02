@@ -115,6 +115,14 @@ ifeq ($(BUILD),odebug)
 CXXFLAGS = -O3 -pthread -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
 USE_GSL = 1
 endif
+
+# including SMOLDYN
+ifeq ($(BUILD),smoldyn)
+CXXFLAGS = -g -pthread -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
+USE_GSL = 1
+USE_SMOLDYN = 1
+endif
+
 ##########################################################################
 #
 # MAC OS X compilation, Debug mode:
@@ -180,6 +188,14 @@ LIBS+= -L/usr/lib -lgsl -lgslcblas
 CXXFLAGS+= -DUSE_GSL
 endif
 
+# To use Smoldyn, pass USE_SMOLDYN=true ( anything on the right will do) in make command line
+ifdef USE_SMOLDYN
+LIBS+= -L/usr/lib -lsmoldyn
+CXXFLAGS+= -DUSE_SMOLDYN
+SMOLDYN_DIR = smol
+SMOLDYN_LIB = smol/smol.o
+endif
+
 # To compile with readline support pass USE_READLINE=true in make command line
 ifdef USE_READLINE
 LIBS+= -lreadline
@@ -229,6 +245,8 @@ SUBDIR = \
 	ksolve \
 	regressionTests \
 	utility \
+	$(SMOLDYN_DIR) \
+
 
 # Used for 'make clean'
 CLEANSUBDIR = $(SUBDIR) $(PARALLEL_DIR)
@@ -245,6 +263,7 @@ OBJLIBS =	\
 	ksolve/ksolve.o \
 	regressionTests/rt.o \
 	utility/utility.o \
+	$(SMOLDYN_LIB) \
 
 export CXX
 export CXXFLAGS
