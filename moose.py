@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Sat Apr  2 12:39:00 2011 (+0530)
+# Last-Updated: Sat Apr  2 13:35:38 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 233
+#     Update #: 234
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -29,11 +29,13 @@
 
 # Code:
 
+__version__ = "$Revision: 2597 $"
+# $Source$
+
+
 import _moose
 from _moose import useClock, setClock, start, reinit, stop, isRunning, loadModel
 
-__version__ = "$Revision: 2597 $"
-# $Source$
 
 class MooseMeta(type):
     def __init__(cls, name, bases, classdict):
