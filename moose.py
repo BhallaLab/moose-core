@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Thu Mar 31 12:20:13 2011 (+0530)
+# Last-Updated: Sat Apr  2 12:39:00 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 227
+#     Update #: 233
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -32,6 +32,8 @@
 import _moose
 from _moose import useClock, setClock, start, reinit, stop, isRunning, loadModel
 
+__version__ = "$Revision: 2597 $"
+# $Source$
 
 class MooseMeta(type):
     def __init__(cls, name, bases, classdict):
@@ -57,9 +59,9 @@ class Neutral(object):
         return self._id[0].getFieldType(field)
 
     def __getitem__(self, index):
-        objid = self._id.getItem(index)
+        objid = self._id[index]
         ret = NeutralElement(0, 0, 0)
-        ret._objid = objid
+        ret._oid = objid
         return ret
 
     def __len__(self):
@@ -84,23 +86,23 @@ class IntFire(Neutral):
     def __getitem__(self, index):
         objid = self._id[index]
 	ret = IntFireElement(0,0,0)
-	ret._objid = objid
+	ret._oid = objid
         
 class NeutralElement(object):
     def __init__(self, *args, **kwargs):
-        self._objid = _moose.ObjId(*args, **kwargs)
+        self._oid = _moose.ObjId(*args, **kwargs)
         
-    className = property(lambda self: self._objid.getField('class'))
-    fieldNames = property(lambda self: self._objid.getFieldNames())
-    name = property(lambda self: self._objid.getField('name'))
-    path = property(lambda self: self._objid.getField('path'))
+    className = property(lambda self: self._oid.getField('class'))
+    fieldNames = property(lambda self: self._oid.getFieldNames())
+    name = property(lambda self: self._oid.getField('name'))
+    path = property(lambda self: self._oid.getField('path'))
     
 class IntFireElement(NeutralElement):
     def __init__(self, *args, **kwargs):
 	NeutralElement.__init__(self, *args, **kwargs)
  
-    Vm = property(lambda self: self._id.getField('Vm'),
-		  lambda self, value: self._id.setField('Vm', value))
+    Vm = property(lambda self: self._oid.getField('Vm'),
+		  lambda self, value: self._oid.setField('Vm', value))
 
 def copy(src, dest, name, n=1, copyMsg=True):
     if isinstance(src, Neutral):
@@ -108,8 +110,7 @@ def copy(src, dest, name, n=1, copyMsg=True):
     if isinstance(dest, Neutral):
         dest = dest._id
     new_id = _moose.copy(src=src, dest=dest, name=name, n=n, copyMsg=copyMsg)
-    ret = Neutral('/')
-    ret._id = new_id
+    ret = Neutral(new_id)
     return ret
 
 def move(src, dest):
@@ -129,8 +130,7 @@ def setCwe(element):
 
 def getCwe():
     _id = _moose.getCwe()
-    obj = Neutral('/')
-    obj._id = _id
+    obj = Neutral(_id)
     return obj
 
 # 
