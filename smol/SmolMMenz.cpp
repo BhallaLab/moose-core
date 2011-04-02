@@ -7,8 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
-#include "SmolSim.h"
+#include "SmolHeader.h"
 #include "ElementValueFinfo.h"
 #include "SmolMMenz.h"
 #include "MMenz.h"

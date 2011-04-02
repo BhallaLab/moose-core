@@ -25,6 +25,7 @@ OBJ = \
 HEADERS = \
 	../basecode/header.h \
 	../basecode/ElementValueFinfo.h \
+	SmolHeader.h \
 	SmolSim.h \
 	../kinetics/Mol.h \
 
@@ -33,6 +34,10 @@ HEADERS = \
 # use it. Should be fine for academic use.
 
 default: $(TARGET)
+
+#SMOLDYN_LIB_PATH = -L/usr/local/lib
+#SMOLDYN_LIBS = -lsmoldyn
+#SMOLDYN_LIBS = /usr/local/lib/libsmoldyn.a
 
 $(OBJ)	: $(HEADERS)
 SmolSim.o:	SmolMol.h SmolReac.h SmolEnz.h SmolMMenz.h ../kinetics/Mol.h ../kinetics/Reac.h ../kinetics/Enz.h ../kinetics/MMenz.h ../kinetics/Boundary.h ../kinetics/ChemCompt.h

@@ -7,9 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include <smoldyn/libsmoldyn.h>
-#include "header.h"
-#include "SmolSim.h"
+#include "SmolHeader.h"
 #include "ElementValueFinfo.h"
 #include "Mol.h"
 #include "Reac.h"
@@ -20,6 +18,9 @@
 #include "SmolReac.h"
 #include "SmolEnz.h"
 #include "SmolMMenz.h"
+#include "ReduceBase.h"
+#include "ReduceMax.h"
+#include "../shell/Shell.h"
 
 static SrcFinfo1< Id > plugin( 
 		"plugin", 
@@ -96,11 +97,14 @@ const Cinfo* SmolSim::initCinfo()
 static const Cinfo* smolSimCinfo = SmolSim::initCinfo();
 
 SmolSim::SmolSim()
-{;}
+	: sim_( 0 )
+{
+}
 
 SmolSim::~SmolSim()
 {
-	;
+	if ( sim_ )
+		smolFreeSim( sim_ );
 }
 
 //////////////////////////////////////////////////////////////
@@ -125,24 +129,28 @@ void SmolSim::reinit( const Eref& e, ProcPtr p )
 void SmolSim::setPath( const Eref& e, const Qinfo* q, string v )
 {
 	if ( path_ != "" && path_ != v ) {
-		// unzombify( path_ );
 		cout << "SmolSim::setPath: need to clear old path.\n";
 		return;
 	}
 	path_ = v;
-	/*
 	vector< Id > elist;
 	Shell::wildcard( path_, elist );
 
-	allocateObjMap( elist );
-	allocateModel( elist );
+	int dim = 3;
+	double lowbounds[3];
+	double highbounds[3];
+	lowbounds[0] = lowbounds[1] = lowbounds[2] = -1;
+	highbounds[0] = highbounds[1] = highbounds[2] = 1;
+	if ( sim_ )
+		smolFreeSim( sim_ );
+	sim_ = smolNewSim( dim, lowbounds, highbounds );
+	// allocateObjMap( elist );
+	// allocateModel( elist );
 	zombifyModel( e, elist );
-	y_.assign( Sinit_.begin(), Sinit_.begin() + numVarMols_ );
-
+	/*
 	cout << "Zombified " << numVarMols_ << " Molecules, " <<
 		numReac_ << " reactions\n";
-	N_.print();
-	*/
+		*/
 }
 
 string SmolSim::getPath( const Eref& e, const Qinfo* q ) const
