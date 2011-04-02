@@ -14,6 +14,8 @@
 
 static const double NA = 6.023e23;
 
+const SpeciesId DefaultSpeciesId = 0;
+
 const Cinfo* Mol::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
