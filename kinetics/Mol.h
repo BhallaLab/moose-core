@@ -16,6 +16,7 @@
  * is handling it. 
  */
 typedef unsigned int SpeciesId;
+extern const SpeciesId DefaultSpeciesId;
 
 /**
  * The Mol class is a molecular pool. This is a set of molecules of a 
