@@ -8,7 +8,7 @@ except ImportError:
     print 'Please include the directory containing moose.py and _moose.so in your PYTHONPATH environmental variable.'
     sys.exit(1)
 
-class TestNeutral(unittest.TestCase):
+class TestNeutralArray(unittest.TestCase):
     def __init__(self, *args):
         unittest.TestCase.__init__(self, *args)
         self.valueFinfos = ['name',                            
@@ -46,7 +46,7 @@ class TestNeutral(unittest.TestCase):
         self.sharedFinfos = []
     
     def setUp(self):
-        self.testObj = moose.Neutral('neutral%d' % (uuid.uuid4().int))
+        self.testObj = moose.NeutralArray('neutral%d' % (uuid.uuid4().int))
         self.valueFinfos.sort()
         self.lookupFinfos.sort()
         self.srcFinfos.sort()
@@ -85,22 +85,22 @@ class TestNeutral(unittest.TestCase):
         b_path = a_path + '/b'
         c_path = '/neutral%d' % (uuid.uuid4().int)
         d_path = c_path + '/d'
-        a = moose.Neutral(a_path)
-        b = moose.Neutral(b_path)
-        c = moose.Neutral(c_path)
-        d = moose.Neutral(d_path)
+        a = moose.NeutralArray(a_path)
+        b = moose.NeutralArray(b_path)
+        c = moose.NeutralArray(c_path)
+        d = moose.NeutralArray(d_path)
         self.assertEqual(a.path, '/' + a_path)
         self.assertEqual(b.path, '/' + b_path)
         self.assertEqual(c.path, c_path)
         self.assertEqual(d.path, d_path)
         self.assertEqual(b.name, 'b')
         self.assertEqual(d.name, 'd')
-        self.assertRaises(ValueError, moose.Neutral, 'test/')
+        self.assertRaises(ValueError, moose.NeutralArray, 'test/')
         
 class TestPyMooseGlobals(unittest.TestCase):
     def setUp(self):
-        self.src1 = moose.Neutral('/neutral%d' % (uuid.uuid4().int))
-        self.dest1 = moose.Neutral('/neutral%d' % (uuid.uuid4().int))
+        self.src1 = moose.NeutralArray('/neutral%d' % (uuid.uuid4().int))
+        self.dest1 = moose.NeutralArray('/neutral%d' % (uuid.uuid4().int))
 
     def testCopy(self):
         newname = 'neutral%d' % (uuid.uuid4().int)
