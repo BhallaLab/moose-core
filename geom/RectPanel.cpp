@@ -25,6 +25,9 @@ const Cinfo* RectPanel::initCinfo()
 		"Author", "Upinder S. Bhalla, 2007, NCBS",
 		"Description", "RectPanel: Rectangular panel shape for portion of compartmental surface.",
 	};
+
+	/// Value Finfo here for axis info: 
+	/// +x, -x, +y, -y, +z, -z
 	
 	static Cinfo rectPanelCinfo(
 		"RectPanel",

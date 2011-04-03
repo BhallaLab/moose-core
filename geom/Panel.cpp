@@ -190,10 +190,10 @@ unsigned int Panel::getNumNeighbors( const Eref& e, const Qinfo* q ) const
 
 void Panel::setCoords( vector< double > v )
 {
-	if ( v.size() == coords_.size() )
+	if ( v.size() == nDims_ * this->localNpts() )
 		coords_ = v;
 	else
-		cout << "Error: Panel::setCoord: argument vector dimension should be " << v.size() << ", was " << v.size() << endl;
+		cout << "Error: Panel::setCoord: argument vector dimension should be " << nDims_ * this->localNpts() << ", was " << v.size() << endl;
 }
 
 vector< double > Panel::getCoords() const

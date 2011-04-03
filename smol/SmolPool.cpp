@@ -309,7 +309,40 @@ void SmolPool::zombify( Element* solver, Element* orig )
 
 	ErrorCode ret = smolAddSpecies( z->sim_, tempStr, 0 );
 	assert( ret == ECok );
+
+	// Here instead of MSsoln I would put in something depending on where
+	// the molecule resides. 
+	// Likely options are MSfront, MSback, MSup, MSdown
+	ret = smolSetSpeciesMobility( z->sim_, tempStr, MSsoln, m->getDiffConst(), 
+		0, 0 ); // I'm ignoring drift and difmatrix.
+	assert( ret == ECok );
+
 	cout << "added species " << orig->getName() << endl;
+
+	// smolAddSurface
+	// smolSetSurfaceRate or smolSetSurfaceAction
+	// smolAddPanel
+	// Later: SmolAddCompartment then SmolAddCompartmentSurface and smolAddCompartmentPoint
+
+	// smolAddSolutionMolecules/smolAddCompartmentMolecules and 
+	// smolAddSurfaceMolecules.
+
+
+	// Later: smolSetPanelJump
+	// Later: smolSetPanelNeighbor: used only for surface diffusion
+	// smolAddReaction
+	// 		Later: to update a reaction, I call smolAddReaction again 
+	//		with same args except rate
+
+
+	// To set it off:
+	// smolSetSimTimes
+	// to run 1 timestep: smolRunTimeStep
+	// to run till end: smolRunSim
+	// to run till specified time: smolRunSimUntil
+
+
+	// k
 }
 
 // Static func
