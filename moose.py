@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Sun Apr  3 17:13:49 2011 (+0530)
+# Last-Updated: Sun Apr  3 23:33:17 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 485
+#     Update #: 534
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -195,15 +195,12 @@ from _moose import useClock, setClock, start, reinit, stop, isRunning, loadModel
 class _MooseDescriptor(object):
     """Descriptor to give access to MOOSE class' ValueFinfo attributes"""
     def __init__(self, name):
-        print 'Creating attribute', name
         self.name = name
 
     def __get__(self, obj, objtype=None):
-        print 'Getting field', self.name
         return obj._oid.getField(self.name)
 
     def __set__(self, obj, value):
-        print 'Setting field', self.name
         obj._oid.setField(self.name, value)
 
     def __delete__(self, obj):
@@ -214,7 +211,7 @@ class _MooseDescriptor(object):
     
 class _MooseMeta(type):
     def __init__(cls, name, bases, classdict):        
-        print "Creating class %s using NeutralMeta" % (name)
+        print "Creating class %s using NeutralMeta" % (name)        
         super(_MooseMeta, cls).__init__(name, bases, classdict)
         field_dict = getFieldDict('/classes/%s' % (name), 'valueFinfo')
         for field in field_dict.keys():
@@ -225,15 +222,14 @@ class NeutralArray(object):
     def __init__(self, *args, **kwargs):
         path ='/'
         dims = [1]
-        print 'NeutralArray init: className', self.className
         self._id = None
         try:
             className = kwargs['type']
             self.className = className
         except KeyError:
             # This code is messy and depends on the class name. I could not find a way to pass the element data type to the class definition dynamically
-            print 'NeutralArray init: setting element className', self.className
-            kwargs['type'] = self.className
+            if not hasattr(self, 'className'):
+                self.className = 'Neutral'
         try:
             dims = kwargs['dims']
         except KeyError:
@@ -252,7 +248,7 @@ class NeutralArray(object):
         if len(args) > 1:
             dims = args[1]
         if len(args) > 2:
-            className = args[2]
+            self.className = args[2]
         if self._id is None:
             self._id = _moose.Id(path=path, dims=dims, type=self.className)
 
@@ -373,16 +369,31 @@ def getCwe():
 classes_Id = Id('/classes')
 class_obj_list = classes_Id[0].getField('children')
 
+def define_class(classId):
+    class_name = classId[0].getField('name')
+    if class_name in globals().keys():
+        return
+    base = classId[0].getField('baseClass')
+    if base != 'none':
+        try:
+            base_class = globals()[base]
+        except KeyError:
+            define_class(Id('/classes/'+base))
+            base_class = globals()[base]
+    else:
+        base_class = object
+    class_obj = type(class_name, (base_class,), {'className': class_name})
+    globals()[class_name] = class_obj
+    array_class_name = class_name + 'Array'
+    if base != 'none':
+        base_class = globals()[base + 'Array']
+    else:
+        base_class = object
+    class_obj = type(array_class_name, (base_class,), {'className':class_name})
+    globals()[array_class_name] = class_obj
+    
 for child in class_obj_list:
-    class_name = child[0].getField('name')
-    if class_name != 'Neutral':
-        class_obj = type(class_name, (Neutral,), {})
-        globals()[class_name] = class_obj
-        array_class_name = class_name + 'Array'
-        class_obj = type(array_class_name, (NeutralArray,), {'className':class_name})
-        print 'creating', array_class_name
-        globals()[array_class_name] = class_obj
-        
+    define_class(child)
 
 
 # 
