@@ -12236,3 +12236,4 @@ Implemented inherited fields for Cinfos. Some fix up needed in testAsync as
 the indexing has now changed. Checkin 2611.
 
 Implemented Geom classes in new 'geom' subdirectory. Checkin 2613
+Added SpherePanel class. Checkin 2614

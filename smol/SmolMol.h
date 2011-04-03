@@ -48,10 +48,8 @@ class SmolMol: public SmolSim
 		//////////////////////////////////////////////////////////////////
 		// utility funcs
 		//////////////////////////////////////////////////////////////////
-		/*
 		static void zombify( Element* solver, Element* orig );
 		static void unzombify( Element* zombie );
-		*/
 
 		static const Cinfo* initCinfo();
 	private:
