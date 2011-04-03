@@ -36,6 +36,32 @@ class Surface
 		 * child panels and figure out from that. Non-trivial.
 		 */
 		double volume_; 
+
+		//// Really have to do the following parameters for each combination of molecule and surface.
+		/**
+		 * reflect, adsorb, etc. This is an alternate to the rates below
+		SrfAction action_;
+		 */
+
+		/**
+		 * Rate of sticking 
+		double adsorbRate_;
+		 */
+
+		/**
+		 * Rate of transmission
+		double transmitRate_;
+		 */
+
+		/**
+		 * Rate of desorbtion
+		double desorbRate_;
+		 */
+
+		/**
+		 * Rate of flipping fromone surface to another.
+		double flipRate_;
+		 */
 };
 
 // Used by the Smoldyn solver

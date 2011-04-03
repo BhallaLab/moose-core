@@ -33,10 +33,20 @@ void testCreateSmolSim()
 	Id mol2Id = shell->doCreate("Mol", paId, "mol2", dims );
 	Id reacId = shell->doCreate("Reac", paId, "reac", dims );
 
-	Id geomId = shell->doCreate( "Geometry", paId, "geom", dims );
-	Id surfaceId = shell->doCreate( "Surface", paId, "surf", dims );
-	Id sphereId = shell->doCreate( "Sphere", paId, "sphere", dims );
+	Field< double >::set( mol1Id, "nInit", 100 );
+	Field< double >::set( mol2Id, "nInit", 0 );
+	Field< double >::set( reacId, "kf", 2.0 );
+	Field< double >::set( reacId, "kb", 1.0 );
+	shell->doAddMsg( "Single", mol1Id, "reac", reacId, "sub" );
+	shell->doAddMsg( "Single", mol2Id, "reac", reacId, "prd" );
 
+	Id geomId = shell->doCreate( "Geometry", paId, "geom", dims );
+	Id surfaceId = shell->doCreate( "Surface", geomId, "surf", dims );
+	Id sphereId = shell->doCreate( "SpherePanel", surfaceId, "sphere", dims );
+	vector< double > sphereCoords( 6, 0 );
+	// coords 0 to 2 are the centre, let it be zero.
+	sphereCoords[3] = 1; // radius.
+	Field< vector< double> >::set( sphereId, "coords", sphereCoords );
 
 	SmolSim* ss = reinterpret_cast< SmolSim* >( smolId.eref().data() );
 	assert( ss );
