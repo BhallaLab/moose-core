@@ -193,7 +193,7 @@ ifdef USE_SMOLDYN
 #LIBS+= -L/usr/local/lib -lsmoldyn
 CXXFLAGS+= -DUSE_SMOLDYN
 SMOLDYN_DIR = smol
-SMOLDYN_LIB = smol/smol.o
+SMOLDYN_LIB = smol/smol.o /usr/local/lib/libsmoldyn.a
 LIBS += -lsmoldyn
 endif
 

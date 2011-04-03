@@ -70,18 +70,15 @@ template < class T, class F > class FieldElementFinfo: public Finfo
 		}
 
 		/**
-		 * Virtual function. Later will need to add stuff to tie the
-		 * child element to the parent.
+		 * Virtual function. 
 		 */
 		void postCreationFunc( Id parent, Element* parentElm ) const
 		{
-			// static Dinfo< F > fieldDinfo;
 			Id kid = Id::nextId();
 			new Element(
 				kid, fieldCinfo_, name(), 
 				new FieldDataHandler< T, F >(
 					fieldCinfo_->dinfo(),
-					// &fieldDinfo,
 					parentElm->dataHandler(),
 					lookupField_, getNumField_, setNumField_ )
 			);
