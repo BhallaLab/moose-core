@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Sun Apr  3 17:57:12 2011 (+0530)
+// Last-Updated: Sun Apr  3 23:05:36 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 3846
+//     Update #: 3859
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -195,7 +195,7 @@ extern "C" {
         0,                                  /* tp_as_number */
         &IdSequenceMethods,             /* tp_as_sequence */
         0,                                  /* tp_as_mapping */
-        0,                                  /* tp_hash */
+        (hashfunc)_pymoose_Id_hash,                                  /* tp_hash */
         0,                                  /* tp_call */
         (reprfunc)_pymoose_Id_str,               /* tp_str */
         PyObject_GenericGetAttr,            /* tp_getattro */
@@ -244,7 +244,7 @@ extern "C" {
         0,                                  /* tp_as_number */
         0,                                  /* tp_as_sequence */
         0,                                  /* tp_as_mapping */
-        0,                                  /* tp_hash */
+        (hashfunc)_pymoose_ObjId_hash,         /* tp_hash */
         0,                                  /* tp_call */
         (reprfunc)_pymoose_ObjId_str,               /* tp_str */
         PyObject_GenericGetAttr,            /* tp_getattro */
@@ -404,6 +404,11 @@ extern "C" {
         } 
         return 0;            
     }// ! _pymoose_Id_init
+
+    static long _pymoose_Id_hash(_Id * self, PyObject * args)
+    {
+        return self->_id.value(); // hash is the same as the Id value
+    }
 
     static void _pymoose_Id_dealloc(_Id * self)
     {
@@ -609,6 +614,14 @@ extern "C" {
             cout << "Unrecognized parameters." << endl;
             return -1;
         }        
+    }
+
+    static long _pymoose_ObjId_hash(_ObjId * self, PyObject * args)
+    {
+        long id = self->_oid.id.value();
+        long dindex = self->_oid.dataId.data();
+        long findex = self->_oid.dataId.field();
+        return ((id << 32) | (dindex << 16) | findex); // This is a naive hash function                
     }
     
     static PyObject * _pymoose_ObjId_repr(_ObjId * self)

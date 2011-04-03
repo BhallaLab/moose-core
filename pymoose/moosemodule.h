@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Sat Apr  2 19:57:00 2011 (+0530)
+// Last-Updated: Sun Apr  3 23:04:28 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 242
+//     Update #: 244
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -65,6 +65,8 @@ extern "C" {
     // Methods for Id class
     //////////////////////////////////////////
     static int _pymoose_Id_init(_Id * self, PyObject * args, PyObject * kwargs);
+    static long _pymoose_Id_hash(_Id * self, PyObject * args);
+    
     static void _pymoose_Id_dealloc(_Id * self);
     static PyObject * _pymoose_Id_repr(_Id * self);
     static PyObject * _pymoose_Id_str(_Id * self);
@@ -83,6 +85,7 @@ extern "C" {
     // Methods for ObjId class
     ///////////////////////////////////////////
     static int _pymoose_ObjId_init(_ObjId * self, PyObject * args, PyObject * kwargs);
+    static long _pymoose_ObjId_hash(_ObjId * self, PyObject * args);
     static void _pymoose_ObjId_dealloc(_ObjId * self);
     static PyObject * _pymoose_ObjId_repr(_ObjId * self);
     static PyObject * _pymoose_ObjId_str(_ObjId * self);
