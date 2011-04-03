@@ -44,6 +44,7 @@ extern void testMpiShell();
 extern void testMsg();
 extern void testMpiMsg();
 extern void testKinetics();
+extern void testGeom();
 
 extern void initMsgManagers();
 extern void destroyMsgManagers();
@@ -242,6 +243,7 @@ void nonMpiTests( Shell* s )
 		testScheduling();
 		testBuiltins();
 		testKinetics();
+		testGeom();
 #ifdef USE_SMOLDYN
 		testSmoldyn();
 #endif

@@ -246,6 +246,7 @@ SUBDIR = \
 	ksolve \
 	regressionTests \
 	utility \
+	geom \
 	$(SMOLDYN_DIR) \
 
 
@@ -264,6 +265,7 @@ OBJLIBS =	\
 	ksolve/ksolve.o \
 	regressionTests/rt.o \
 	utility/utility.o \
+	geom/geom.o \
 	$(SMOLDYN_LIB) \
 
 export CXX
