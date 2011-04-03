@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Sat Apr  2 21:59:43 2011 (+0530)
+# Last-Updated: Sun Apr  3 14:05:20 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 406
+#     Update #: 407
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -291,7 +291,7 @@ class IntFireArray(NeutralArray):
 class Neutral(object):
     __metaclass__ = _MooseMeta
     def __init__(self, *args, **kwargs):
-        _id = 0
+        id_ = 0
         dindex = 0
         findex = 0
         if len(args) >= 1:

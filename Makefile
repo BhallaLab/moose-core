@@ -143,7 +143,7 @@ endif
 
 # Libraries are defined below. For now we do not use threads.
 SUBLIBS = 
-LIBS =	-lm -lpthread
+LIBS =	-lm -lpthread -L/usr/lib -L/usr/local/lib
 #LIBS = 	-lm
 #ifeq ($(BUILD),thread)
 #LIBS += -lpthread
@@ -194,6 +194,7 @@ ifdef USE_SMOLDYN
 CXXFLAGS+= -DUSE_SMOLDYN
 SMOLDYN_DIR = smol
 SMOLDYN_LIB = smol/smol.o
+LIBS += -lsmoldyn
 endif
 
 # To compile with readline support pass USE_READLINE=true in make command line
@@ -264,7 +265,6 @@ OBJLIBS =	\
 	regressionTests/rt.o \
 	utility/utility.o \
 	$(SMOLDYN_LIB) \
-	/usr/local/lib/libsmoldyn.a \
 
 export CXX
 export CXXFLAGS
