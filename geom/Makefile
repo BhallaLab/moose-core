@@ -14,6 +14,7 @@ OBJ = \
 	Surface.o	\
 	Panel.o \
 	CylPanel.o	\
+	SpherePanel.o	\
 	HemispherePanel.o	\
 	DiskPanel.o	\
 	RectPanel.o	\
@@ -31,6 +32,7 @@ $(OBJ)	: $(HEADERS)
 Geometry.o:	Geometry.h
 Surface.o:	Surface.h
 CylPanel.o:	CylPanel.h
+SpherePanel.o:	SpherePanel.h
 HemispherePanel.o:	HemispherePanel.h
 DiskPanel.o:	DiskPanel.h
 RectPanel.o:	RectPanel.h 
