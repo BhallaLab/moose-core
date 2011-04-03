@@ -104,7 +104,6 @@ class TestPyMooseGlobals(unittest.TestCase):
 
     def testCopy(self):
         newname = 'neutral%d' % (uuid.uuid4().int)
-        print self.src1, self.src1.className, self.dest1, self.dest1.className
         newobj = moose.copy(self.src1, self.dest1, newname, 3, True)
         self.assertEqual(newobj.path, self.dest1.path + "/" + newname)
         self.assertEqual(len(newobj), 3)
