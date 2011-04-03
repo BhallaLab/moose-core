@@ -2172,37 +2172,51 @@ void testCinfoFields()
 	// We have a little bit of a hack here to cast away
 	// constness, due to the way the FieldElementFinfos
 	// are set up.
+	Cinfo *neutralCinfo = const_cast< Cinfo* >( Neutral::initCinfo() );
+	assert( neutralCinfo->getNumSrcFinfo() == 1 );
+
 	Cinfo *cinfo = const_cast< Cinfo* >( IntFire::initCinfo() );
-	assert( cinfo->getNumSrcFinfo() == 1 );
-	assert( cinfo->getSrcFinfo( 0 ) == cinfo->findFinfo( "spike" ) );
+	unsigned int nsf = neutralCinfo->getNumSrcFinfo();
+	assert( nsf == 1 );
+	assert( cinfo->getNumSrcFinfo() == 1 + nsf );
+	assert( cinfo->getSrcFinfo( 0 + nsf ) == cinfo->findFinfo( "spike" ) );
 
-	assert( cinfo->getNumDestFinfo() == 14 );
-	assert( cinfo->getDestFinfo( 0 ) == cinfo->findFinfo( "set_Vm" ) );
-	assert( cinfo->getDestFinfo( 1 ) == cinfo->findFinfo( "get_Vm" ) );
-	assert( cinfo->getDestFinfo( 2 ) == cinfo->findFinfo( "set_tau" ) );
-	assert( cinfo->getDestFinfo( 3 ) == cinfo->findFinfo( "get_tau" ) );
+	unsigned int ndf = neutralCinfo->getNumDestFinfo();
+	assert( ndf == 18 );
+	assert( cinfo->getNumDestFinfo() == 14 + ndf );
+	assert( cinfo->getDestFinfo( 0+ndf ) == cinfo->findFinfo( "set_Vm" ) );
+	assert( cinfo->getDestFinfo( 1+ndf ) == cinfo->findFinfo( "get_Vm" ) );
+	assert( cinfo->getDestFinfo( 2+ndf ) == cinfo->findFinfo( "set_tau" ) );
+	assert( cinfo->getDestFinfo( 3+ndf ) == cinfo->findFinfo( "get_tau" ) );
 
-	assert( cinfo->getDestFinfo( 4 ) == cinfo->findFinfo( "set_thresh" ) );
-	assert( cinfo->getDestFinfo( 5 ) == cinfo->findFinfo( "get_thresh" ) );
-	assert( cinfo->getDestFinfo( 6 ) == cinfo->findFinfo( "set_refractoryPeriod" ) );
-	assert( cinfo->getDestFinfo( 7 ) == cinfo->findFinfo( "get_refractoryPeriod" ) );
-	assert( cinfo->getDestFinfo( 8 ) == cinfo->findFinfo( "set_numSynapses" ) );
-	assert( cinfo->getDestFinfo( 9 ) == cinfo->findFinfo( "get_numSynapses" ) );
-	assert( cinfo->getDestFinfo( 10 ) == cinfo->findFinfo( "process" ) );
-	assert( cinfo->getDestFinfo( 11 ) == cinfo->findFinfo( "reinit" ) );
+	assert( cinfo->getDestFinfo( 4+ndf ) == cinfo->findFinfo( "set_thresh" ) );
+	assert( cinfo->getDestFinfo( 5+ndf ) == cinfo->findFinfo( "get_thresh" ) );
+	assert( cinfo->getDestFinfo( 6+ndf ) == cinfo->findFinfo( "set_refractoryPeriod" ) );
+	assert( cinfo->getDestFinfo( 7+ndf ) == cinfo->findFinfo( "get_refractoryPeriod" ) );
+	assert( cinfo->getDestFinfo( 8+ndf ) == cinfo->findFinfo( "set_numSynapses" ) );
+	assert( cinfo->getDestFinfo( 9+ndf ) == cinfo->findFinfo( "get_numSynapses" ) );
+	assert( cinfo->getDestFinfo( 10+ndf ) == cinfo->findFinfo( "process" ) );
+	assert( cinfo->getDestFinfo( 11+ndf ) == cinfo->findFinfo( "reinit" ) );
 
-	assert( cinfo->getDestFinfo( 12 ) == cinfo->findFinfo( "set_num_synapse" ) );
-	assert( cinfo->getDestFinfo( 13 ) == cinfo->findFinfo( "get_num_synapse" ) );
+	assert( cinfo->getDestFinfo( 12+ndf ) == cinfo->findFinfo( "set_num_synapse" ) );
+	assert( cinfo->getDestFinfo( 13+ndf ) == cinfo->findFinfo( "get_num_synapse" ) );
 
-	assert( cinfo->getDestFinfo( 14 )->name() == "dummy" );
+	assert( cinfo->getDestFinfo( 14+ndf )->name() == "dummy" );
 
-	assert( cinfo->getNumValueFinfo() == 5 );
-	assert( cinfo->getValueFinfo( 0 ) == cinfo->findFinfo( "Vm" ) );
+	unsigned int nvf = neutralCinfo->getNumValueFinfo();
+	assert( nvf == 12 );
+	assert( cinfo->getNumValueFinfo() == 5 + nvf );
+	assert( cinfo->getValueFinfo( 0 + nvf ) == cinfo->findFinfo( "Vm" ) );
 
-	assert( cinfo->getNumLookupFinfo() == 0 );
-	assert( cinfo->getLookupFinfo( 0 )->name() == "dummy");
-	assert( cinfo->getNumSharedFinfo() == 1 );
-	assert( cinfo->getSharedFinfo( 0 ) == cinfo->findFinfo( "proc" ) );
+	unsigned int nlf = neutralCinfo->getNumLookupFinfo();
+	assert( nlf == 0 );
+	assert( cinfo->getNumLookupFinfo() == 0 + nlf );
+	assert( cinfo->getLookupFinfo( 0 + nlf )->name() == "dummy");
+
+	unsigned int nshf = neutralCinfo->getNumSharedFinfo();
+	assert( nshf == 0 );
+	assert( cinfo->getNumSharedFinfo() == 1 + nshf );
+	assert( cinfo->getSharedFinfo( 0 + nshf ) == cinfo->findFinfo( "proc" ) );
 
 	cout << "." << flush;
 }
@@ -2210,20 +2224,26 @@ void testCinfoFields()
 void testCinfoElements()
 {
 	Id intFireCinfoId( "/classes/IntFire" );
+	const Cinfo *neutralCinfo = Neutral::initCinfo();
+	unsigned int nvf = neutralCinfo->getNumValueFinfo();
+	unsigned int nsf = neutralCinfo->getNumSrcFinfo();
+	unsigned int ndf = neutralCinfo->getNumDestFinfo();
+
 	assert( intFireCinfoId != Id() );
 	assert( Field< string >::get( intFireCinfoId, "name" ) == "IntFire" );
 	assert( Field< string >::get( intFireCinfoId, "baseClass" ) == "Neutral" );
 	assert( Field< unsigned int >::get( 
-		intFireCinfoId, "num_valueFinfo" ) == 5 );
+		intFireCinfoId, "num_valueFinfo" ) == 5 + nvf );
 	assert( Field< unsigned int >::get( 
-		intFireCinfoId, "num_srcFinfo" ) == 1 );
+		intFireCinfoId, "num_srcFinfo" ) == 1 + nsf );
 	assert( Field< unsigned int >::get( 
-		intFireCinfoId, "num_destFinfo" ) == 14 );
+		intFireCinfoId, "num_destFinfo" ) == 14 + ndf );
 	
 	Id intFireSrcFinfoId( "/classes/IntFire/srcFinfo" );
 	assert( intFireSrcFinfoId != Id() );
-	assert( Field< string >::get( intFireSrcFinfoId, "name" ) == "spike" );
-	assert( Field< string >::get( intFireSrcFinfoId, "type" ) == "double" );
+	ObjId temp( intFireSrcFinfoId, DataId( 0, nsf ) );
+	assert( Field< string >::get( temp, "name" ) == "spike" );
+	assert( Field< string >::get( temp, "type" ) == "double" );
 
 	Id intFireDestFinfoId( "/classes/IntFire/destFinfo" );
 	assert( intFireDestFinfoId != Id() );
@@ -2232,9 +2252,9 @@ void testCinfoElements()
 	assert( Field< unsigned int >::get( intFireDestFinfoId, "linearSize" ) == 14 );
 	*/
 
-	ObjId temp( intFireDestFinfoId, DataId( 0, 7 ) );
+	temp = ObjId( intFireDestFinfoId, DataId( 0, 7 + ndf ) );
 	assert( Field< string >::get( temp, "name" ) == "get_refractoryPeriod");
-	temp = ObjId( intFireDestFinfoId, DataId( 0, 11 ) );
+	temp = ObjId( intFireDestFinfoId, DataId( 0, 11 + ndf ) );
 	// temp.dataId.fieldu= 11;
 	assert( Field< string >::get( temp, "name" ) == "reinit" );
 }

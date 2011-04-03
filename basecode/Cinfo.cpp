@@ -353,69 +353,125 @@ string Cinfo::getBaseClass() const
 }
 
 ////////////////////////////////////////////////////////////////////
+// Below we have a set of functions for getting various categories of
+// Finfos. These also return the base class finfos. The baseclass finfos 
+// come first, then the new finfos. This is a bit messy because it changes
+// the indices of the new finfos, but I shouldn't be looking them up 
+// by index anyway.
+////////////////////////////////////////////////////////////////////
 Finfo* Cinfo::getSrcFinfo( unsigned int i )
 {
-	if ( i < srcFinfos_.size() )
-		return srcFinfos_[i];
-	return &dummy; // Return a safe dummy on failure
+	if ( i >= getNumSrcFinfo() )
+		return &dummy;
+	if ( baseCinfo_ ) {
+		if ( i >= baseCinfo_->getNumSrcFinfo() )
+			return srcFinfos_[ i - baseCinfo_->getNumSrcFinfo() ];
+		else
+			return const_cast< Cinfo* >( baseCinfo_ )->getSrcFinfo( i );
+	}
+
+	return srcFinfos_[i];
 }
 
 unsigned int Cinfo::getNumSrcFinfo() const
 {
-	return srcFinfos_.size();
+	if ( baseCinfo_ )
+		return srcFinfos_.size() + baseCinfo_->getNumSrcFinfo();
+	else 
+		return srcFinfos_.size();
 }
 
 ////////////////////////////////////////////////////////////////////
 Finfo* Cinfo::getDestFinfo( unsigned int i )
 {
-	if ( i < destFinfos_.size() )
-		return destFinfos_[i];
-	return &dummy; // Return a safe dummy on failure
+	if ( i >= getNumDestFinfo() )
+		return &dummy;
+	if ( baseCinfo_ ) {
+		if ( i >= baseCinfo_->getNumDestFinfo() )
+			return destFinfos_[ i - baseCinfo_->getNumDestFinfo() ];
+		else
+			return const_cast< Cinfo* >( baseCinfo_ )->getDestFinfo( i );
+	}
+
+	return destFinfos_[i];
 }
 
 unsigned int Cinfo::getNumDestFinfo() const
 {
-	return destFinfos_.size();
+	if ( baseCinfo_ )
+		return destFinfos_.size() + baseCinfo_->getNumDestFinfo();
+	else 
+		return destFinfos_.size();
 }
 
 ////////////////////////////////////////////////////////////////////
 Finfo* Cinfo::getValueFinfo( unsigned int i )
 {
-	if ( i < valueFinfos_.size() )
-		return valueFinfos_[i];
-	return &dummy; // Return a safe dummy on failure
+	if ( i >= getNumValueFinfo() )
+		return &dummy;
+	if ( baseCinfo_ ) {
+		if ( i >= baseCinfo_->getNumValueFinfo() )
+			return valueFinfos_[ i - baseCinfo_->getNumValueFinfo() ];
+		else
+			return const_cast< Cinfo* >(baseCinfo_)->getValueFinfo( i );
+	}
+
+	return valueFinfos_[i];
 }
 
 unsigned int Cinfo::getNumValueFinfo() const
 {
-	return valueFinfos_.size();
+	if ( baseCinfo_ )
+		return valueFinfos_.size() + baseCinfo_->getNumValueFinfo();
+	else 
+		return valueFinfos_.size();
 }
 
 
 ////////////////////////////////////////////////////////////////////
 Finfo* Cinfo::getLookupFinfo( unsigned int i )
 {
-	if ( i < lookupFinfos_.size() )
-		return lookupFinfos_[i];
-	return &dummy; // Return a safe dummy on failure
+	if ( i >= getNumLookupFinfo() )
+		return &dummy;
+	if ( baseCinfo_ ) {
+		if ( i >= baseCinfo_->getNumLookupFinfo() )
+			return lookupFinfos_[ i - baseCinfo_->getNumLookupFinfo() ];
+		else
+			return const_cast< Cinfo* >(baseCinfo_)->getLookupFinfo( i );
+	}
+
+	return lookupFinfos_[i];
 }
 
 unsigned int Cinfo::getNumLookupFinfo() const
 {
-	return lookupFinfos_.size();
+	if ( baseCinfo_ )
+		return lookupFinfos_.size() + baseCinfo_->getNumLookupFinfo();
+	else 
+		return lookupFinfos_.size();
 }
 
 ////////////////////////////////////////////////////////////////////
 Finfo* Cinfo::getSharedFinfo( unsigned int i )
 {
-	if ( i < sharedFinfos_.size() )
-		return sharedFinfos_[i];
-	return &dummy; // Return a safe dummy on failure
+	if ( i >= getNumSharedFinfo() )
+		return &dummy;
+	if ( baseCinfo_ ) {
+		if ( i >= baseCinfo_->getNumSharedFinfo() )
+			return sharedFinfos_[ i - baseCinfo_->getNumSharedFinfo() ];
+		else
+			return const_cast< Cinfo* >( baseCinfo_ )->getSharedFinfo( i );
+	}
+
+	return sharedFinfos_[i];
 }
 
 unsigned int Cinfo::getNumSharedFinfo() const
 {
-	return sharedFinfos_.size();
+	if ( baseCinfo_ )
+		return sharedFinfos_.size() + baseCinfo_->getNumSharedFinfo();
+	else 
+		return sharedFinfos_.size();
 }
 
 ////////////////////////////////////////////////////////////////////
