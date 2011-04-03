@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Sun Apr  3 14:05:20 2011 (+0530)
+# Last-Updated: Sun Apr  3 17:13:49 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 407
+#     Update #: 485
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -215,24 +215,25 @@ class _MooseDescriptor(object):
 class _MooseMeta(type):
     def __init__(cls, name, bases, classdict):        
         print "Creating class %s using NeutralMeta" % (name)
-        super(_MooseMeta, cls).__init__(name, bases, classdict)        
+        super(_MooseMeta, cls).__init__(name, bases, classdict)
         field_dict = getFieldDict('/classes/%s' % (name), 'valueFinfo')
         for field in field_dict.keys():
             setattr(cls, field, _MooseDescriptor(field))
         
 
-
-
 class NeutralArray(object):
     def __init__(self, *args, **kwargs):
         path ='/'
         dims = [1]
-        className = 'Neutral'
+        print 'NeutralArray init: className', self.className
         self._id = None
         try:
             className = kwargs['type']
+            self.className = className
         except KeyError:
-            kwargs['type'] = 'Neutral'
+            # This code is messy and depends on the class name. I could not find a way to pass the element data type to the class definition dynamically
+            print 'NeutralArray init: setting element className', self.className
+            kwargs['type'] = self.className
         try:
             dims = kwargs['dims']
         except KeyError:
@@ -253,8 +254,7 @@ class NeutralArray(object):
         if len(args) > 2:
             className = args[2]
         if self._id is None:
-            print path, dims, className
-            self._id = _moose.Id(path=path, dims=dims, type=className)
+            self._id = _moose.Id(path=path, dims=dims, type=self.className)
 
     def getFieldNames(self, ftype=''):
         return self._id[0].getFieldNames(ftype)
@@ -274,18 +274,18 @@ class NeutralArray(object):
     path = property(lambda self: self._id.getPath())
     id = property(lambda self: self._id)
     fieldNames = property(lambda self: self._id[0].getFieldNames('valueFinfo'))
-    className = property(lambda self: self._id[0].getField('class'))
+    # className = property(lambda self: self._id[0].getField('class'))
     name = property(lambda self: self._id[0].getField('name'))
     shape = property(lambda self: self._id.getShape())
     
 
-class IntFireArray(NeutralArray):
-    def __init__(self, *args, **kwargs):
-        try:
-            className = kwargs['type']
-        except KeyError:
-            kwargs['type'] = 'IntFire'
-        NeutralArray.__init__(self, *args, **kwargs)
+# class IntFireArray(NeutralArray):
+#     def __init__(self, *args, **kwargs):
+#         try:
+#             className = kwargs['type']
+#         except KeyError:
+#             kwargs['type'] = 'IntFire'
+#         NeutralArray.__init__(self, *args, **kwargs)
 
         
 class Neutral(object):
@@ -299,6 +299,12 @@ class Neutral(object):
                 (id_, dindex, findex) = (args[0].getId().getValue(), args[0].getDataIndex(), args[0].getFieldIndex())
             elif isinstance(args[0], Id):
                 id_ = args[0].getValue()
+            elif isinstance(args[0], Neutral):
+                (id_, dindex, findex) = (args[0]._oid.getId().getValue(),args[0]._oid.getDataIndex(), args[0]._oid.getFieldIndex())
+            elif isinstance(args[0], NeutralArray):
+                id_ = args[0]._id
+            else:
+                raise TypeError('First non-keyword argument must be a number or an existing Id/ObjId/Neutral/NeutralArray object.')
         if len(args) >= 2:
             dindex = args[1]
         if len(args) >= 3:
@@ -316,7 +322,7 @@ class Neutral(object):
                 findex = kwargs['fieldIndex']
             except KeyError:
                 pass
-        print id_, dindex, findex
+        print 'Id:', id_, 'dindex:', dindex, 'findex:', findex
         self._oid = _moose.ObjId(id_, dindex, findex)
 
     def getField(self, field):
@@ -327,9 +333,9 @@ class Neutral(object):
     name = property(lambda self: self._oid.getField('name'))
     path = property(lambda self: self._oid.getField('path'))
     
-class IntFire(Neutral):
-    def __init__(self, *args, **kwargs):
-	Neutral.__init__(self, *args, **kwargs)
+# class IntFire(Neutral):
+#     def __init__(self, *args, **kwargs):
+# 	Neutral.__init__(self, *args, **kwargs)
  
 
 def copy(src, dest, name, n=1, copyMsg=True):
@@ -360,6 +366,24 @@ def getCwe():
     _id = _moose.getCwe()
     obj = NeutralArray(_id)
     return obj
+
+#######################################################
+# This is to generate class definitions automatically
+#######################################################
+classes_Id = Id('/classes')
+class_obj_list = classes_Id[0].getField('children')
+
+for child in class_obj_list:
+    class_name = child[0].getField('name')
+    if class_name != 'Neutral':
+        class_obj = type(class_name, (Neutral,), {})
+        globals()[class_name] = class_obj
+        array_class_name = class_name + 'Array'
+        class_obj = type(array_class_name, (NeutralArray,), {'className':class_name})
+        print 'creating', array_class_name
+        globals()[array_class_name] = class_obj
+        
+
 
 # 
 # moose.py ends here
