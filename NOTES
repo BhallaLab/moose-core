@@ -12224,5 +12224,13 @@ Skeleton placeholders added for Ports. Checkin 2603
 Added smol directory for the Smoldyn interface. Checkin 2606.
 
 Able to get it to compile, and to instantiate a SmolSim object. Also able to
-instantiate a couple of Mols (which should be Pools).
+instantiate a couple of Mols (which should be Pools). Checkin 2608.
+
+Starting work on geom directory, used to set up the Geometry classes.
+
+Subha reports that Pymoose does not see inherited fields.
+
 ============================================================================
+3 April 2011
+Implemented inherited fields for Cinfos. Some fix up needed in testAsync as
+the indexing has now changed.
