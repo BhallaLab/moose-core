@@ -12248,3 +12248,11 @@ to do computations with it.
 There is a bug in the inspection routine causing a segv, probably because 
 I havent defined something. Will figure it out.
 ============================================================================
+4 April 2011
+Finally able to checkin code as revision 2617, after many attempts.
+
+Added in steps for setting the reaction rates, also made both
+forward and backward reactions.
+Still dies in the inspection routine.
+
+============================================================================

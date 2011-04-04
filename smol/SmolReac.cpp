@@ -172,6 +172,50 @@ double SmolReac::getKb( const Eref& e, const Qinfo* q ) const
 // Utility function
 //////////////////////////////////////////////////////////////
 
+void buildHalfReac( simptr sim, const char* name,
+	const vector< Id >& subs, const vector< Id >& prds,
+	double rate )
+{
+	static const double EPSILON = 1e-9;
+
+	if ( rate < EPSILON ) return;
+	
+	if ( subs.size() > 2 ) {
+		cout << "Error: SmolReac::zombify: attempt to put > 2 substrates onto :" << name << endl;
+		return;
+	}
+	const char* sub0Name = 0;
+	if ( subs.size() > 0 )
+		sub0Name = subs[0]()->getName().c_str();
+	const char* sub1Name = 0;
+	if ( subs.size() > 1 )
+		sub1Name = subs[1]()->getName().c_str();
+
+	const char** prdNames = new const char*[prds.size()];
+	MolecState* prdStates = new MolecState[prds.size()];
+	for ( unsigned int i = 0; i < prds.size(); ++i ) { 
+		prdNames[i] = prds[i]()->getName().c_str();
+		// Here I should check the state of the products. For now, solution.
+		prdStates[i] = MSsoln;
+	}
+
+	ErrorCode ret = smolAddReaction( sim, name,
+		sub0Name, MSsoln, sub1Name, MSsoln, 
+		prds.size(), prdNames, prdStates );
+	assert( ret == ECok );
+
+	// Now to set the rates
+	// I assume that the 'order' term specifies # of substrates.
+	// I don't know what to do about the last arg, isinternal, even
+	// after checking docs.
+	ret = smolSetReactionRate( sim, subs.size(), name, rate, 0 );
+	assert( ret == ECok );
+
+	delete[] prdNames;
+	delete[] prdStates;
+
+}
+
 // static func
 void SmolReac::zombify( Element* solver, Element* orig )
 {
@@ -192,37 +236,12 @@ void SmolReac::zombify( Element* solver, Element* orig )
 
 	orig->getOutputs( subs, dynamic_cast< const SrcFinfo* >( toSub ) );
 	orig->getOutputs( prds, dynamic_cast< const SrcFinfo* >( toPrd ) );
-	
-	if ( subs.size() > 2 ) {
-		cout << "Error: SmolReac::zombify: attempt to put > 2 substrates onto :" << orig->getName() << endl;
-		return;
-	}
-	const char* sub0Name = 0;
-	if ( subs.size() > 0 )
-		sub0Name = subs[0]()->getName().c_str();
-	const char* sub1Name = 0;
-	if ( subs.size() > 1 )
-		sub1Name = subs[1]()->getName().c_str();
 
-	const char** prdNames = new const char*[prds.size()];
-	MolecState* prdStates = new MolecState[prds.size()];
-	for ( unsigned int i = 0; i < prds.size(); ++i ) { 
-		prdNames[i] = prds[i]()->getName().c_str();
-		// Here I should check the state of the products. For now, solution.
-		prdStates[i] = MSsoln;
-	}
+	string halfName = orig->getName() + "_f";
+	buildHalfReac( z->sim_, halfName.c_str(), subs, prds, r->getKf() );
 
-	ErrorCode ret = smolAddReaction( z->sim_, orig->getName().c_str(),
-		sub0Name, MSsoln, sub1Name, MSsoln, 
-		prds.size(), prdNames, prdStates );
-		
-	cout << "Added reaction " << orig->getName() << endl;
-	assert( ret == ECok );
-
-	// Now to set the rates
-
-	delete[] prdNames;
-	delete[] prdStates;
+	halfName = orig->getName() + "_b";
+	buildHalfReac( z->sim_, halfName.c_str(), prds, subs, r->getKb() );
 
 	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
 	orig->zombieSwap( smolReacCinfo, dh );
