@@ -175,44 +175,57 @@ double SmolReac::getKb( const Eref& e, const Qinfo* q ) const
 // static func
 void SmolReac::zombify( Element* solver, Element* orig )
 {
-	/*
-	static const SrcFinfo* sub = dynamic_cast< const SrcFinfo* >(
-		Reac::initCinfo()->findFinfo( "toSub" ) );
-	static const SrcFinfo* prd = dynamic_cast< const SrcFinfo* >(
-		Reac::initCinfo()->findFinfo( "toPrd" ) );
-	
-	assert( sub );
-	assert( prd );
+	static const Finfo* toSub = orig->cinfo()->findFinfo( "toSub" );
+	static const Finfo* toPrd = orig->cinfo()->findFinfo( "toPrd" );
+	assert( toSub );
+	assert( toPrd );
 
 	Element temp( orig->id(), smolReacCinfo, solver->dataHandler() );
 	Eref zer( &temp, 0 );
 	Eref oer( orig, 0 );
 
 	SmolReac* z = reinterpret_cast< SmolReac* >( zer.data() );
-	Reac* reac = reinterpret_cast< Reac* >( oer.data() );
+	Reac* r = reinterpret_cast< Reac* >( oer.data() );
 
-	ZeroOrder* forward = z->makeHalfReaction( orig, reac->getKf(), sub );
-	ZeroOrder* reverse = z->makeHalfReaction( orig, reac->getKb(), prd );
+	vector< Id > subs;
+	vector< Id > prds;
 
-	unsigned int rateIndex = z->convertIdToReacIndex( orig->id() );
-	z->rates_[ rateIndex ] = new BidirectionalReaction( forward, reverse );
+	orig->getOutputs( subs, dynamic_cast< const SrcFinfo* >( toSub ) );
+	orig->getOutputs( prds, dynamic_cast< const SrcFinfo* >( toPrd ) );
+	
+	if ( subs.size() > 2 ) {
+		cout << "Error: SmolReac::zombify: attempt to put > 2 substrates onto :" << orig->getName() << endl;
+		return;
+	}
+	const char* sub0Name = 0;
+	if ( subs.size() > 0 )
+		sub0Name = subs[0]()->getName().c_str();
+	const char* sub1Name = 0;
+	if ( subs.size() > 1 )
+		sub1Name = subs[1]()->getName().c_str();
 
-	vector< unsigned int > molIndex;
-	unsigned int numReactants = forward->getReactants( molIndex );
-	for ( unsigned int i = 0; i < numReactants; ++i ) {
-		int temp = z->N_.get( molIndex[i], rateIndex );
-		z->N_.set( molIndex[i], rateIndex, temp - 1 );
+	const char** prdNames = new const char*[prds.size()];
+	MolecState* prdStates = new MolecState[prds.size()];
+	for ( unsigned int i = 0; i < prds.size(); ++i ) { 
+		prdNames[i] = prds[i]()->getName().c_str();
+		// Here I should check the state of the products. For now, solution.
+		prdStates[i] = MSsoln;
 	}
 
-	numReactants = reverse->getReactants( molIndex );
-	for ( unsigned int i = 0; i < numReactants; ++i ) {
-		int temp = z->N_.get( molIndex[i], rateIndex );
-		z->N_.set( molIndex[i], rateIndex, temp + 1 );
-	}
+	ErrorCode ret = smolAddReaction( z->sim_, orig->getName().c_str(),
+		sub0Name, MSsoln, sub1Name, MSsoln, 
+		prds.size(), prdNames, prdStates );
+		
+	cout << "Added reaction " << orig->getName() << endl;
+	assert( ret == ECok );
+
+	// Now to set the rates
+
+	delete[] prdNames;
+	delete[] prdStates;
 
 	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
 	orig->zombieSwap( smolReacCinfo, dh );
-	*/
 }
 
 // Static func

@@ -151,10 +151,8 @@ class Neutral
 		static Id child( const Eref& e, const string& name );
 
 		/**
-		 * Looks up all the Element children of the current Element
+		 * Returns parent object
 		 */
-		static vector< Id > children( const Eref& e );
-
 		static ObjId parent( const Eref& e );
 
 		/**

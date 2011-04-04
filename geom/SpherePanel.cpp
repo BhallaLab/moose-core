@@ -14,7 +14,7 @@
 #include "SpherePanel.h"
 
 /**
- * HemispherePanel is derived from Panel, and almost everything in this class
+ * SpherePanel is derived from Panel, and almost everything in this class
  * is handled by the base class and a few virtual functions.
  */
 const Cinfo* SpherePanel::initCinfo()
@@ -25,6 +25,7 @@ const Cinfo* SpherePanel::initCinfo()
 		"Author", "Upinder S. Bhalla, 2007, NCBS",
 		"Description", "SpherePanel: Spherical panel shape for portion of compartmental surface.",
 	};	
+	// Need to add in some MOOSE fields for radius and centre.
 	static Cinfo spherePanelCinfo(
 		"SpherePanel",
 		Panel::initCinfo(),
@@ -49,7 +50,9 @@ static const Cinfo* spherePanelCinfo = SpherePanel::initCinfo();
 SpherePanel::SpherePanel( unsigned int nDims )
 	: Panel( nDims, 2 )
 {
-		;
+	assert( coords_.size() >= 6 );
+	coords_[4] = 1;
+	coords_[5] = 1;
 }
 
 void SpherePanel::localFiniteElementVertices( 
