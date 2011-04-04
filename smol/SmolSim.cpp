@@ -240,11 +240,13 @@ void SmolSim::zombifyModel( const Eref& e, const vector< Id >& elist )
 	for ( vector< Id >::iterator i = pools.begin(); i != pools.end(); ++i )
 		SmolPool::zombify( e.element(), (*i)() );
 
-	smolDisplaySim( sim_ );
 
 	/// Test stuff here to see if my model was set up properly.
 	ErrorCode ret = smolSetSimTimes( sim_ , 0.0, 1.0 , 50e-6 );
 	assert( ret == ECok );
+
+	smolDisplaySim( sim_ );
+
 	ret = smolRunSim( sim_ );
 	assert( ret == ECok );
 }
