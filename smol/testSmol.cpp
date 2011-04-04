@@ -46,6 +46,8 @@ void testCreateSmolSim()
 	vector< double > sphereCoords( 6, 0 );
 	// coords 0 to 2 are the centre, let it be zero.
 	sphereCoords[3] = 1; // radius.
+	sphereCoords[4] = 1; // slice
+	sphereCoords[5] = 1; // something
 	Field< vector< double> >::set( sphereId, "coords", sphereCoords );
 
 	SmolSim* ss = reinterpret_cast< SmolSim* >( smolId.eref().data() );

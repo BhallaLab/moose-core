@@ -77,6 +77,10 @@ class SmolSim
 		double* getY();
 		*/
 
+		void parseSurface( Element* solver, Element* surface );
+		void parseSurfaceAction( Element* solver, Element* pool, Element* surface );
+
+
 		//////////////////////////////////////////////////////////////////
 		// Compute functions
 		//////////////////////////////////////////////////////////////////

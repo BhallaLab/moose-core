@@ -50,6 +50,23 @@ class SmolPool: public SmolSim
 		// utility funcs
 		//////////////////////////////////////////////////////////////////
 		static void zombify( Element* solver, Element* orig );
+
+		/**
+		 * Initializes molecular species into Smoldyn
+		 */
+		static void smolSpeciesInit( Element* solver, Element* orig );
+
+		/**
+		 * Adds up nInit for each species so we can set the max # of 
+		 * molecules in the simulation.
+		 */
+		static void smolMaxNumMolecules( simptr sim, const vector< Id >& pools );
+
+		/**
+		 * Initializes initial # of molecules of specified species
+		 */
+		static void smolNinit( Element* solver, Element* orig );
+
 		static void unzombify( Element* zombie );
 
 		static const Cinfo* initCinfo();
