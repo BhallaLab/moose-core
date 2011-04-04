@@ -99,6 +99,12 @@ class Panel
 		///////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 
+	protected:
+		/**
+		 * Vector of coords. coords_[number][dimension]
+		 */
+		vector< double > coords_;
+
 	private:
 
 		/**
@@ -115,10 +121,6 @@ class Panel
 		 */
 		unsigned int nDims_;
 
-		/**
-		 * Vector of coords. coords_[number][dimension]
-		 */
-		vector< double > coords_;
 
 };
 

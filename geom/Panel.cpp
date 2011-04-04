@@ -144,7 +144,9 @@ static const Cinfo* panelCinfo = Panel::initCinfo();
  * direction.
  */
 Panel::Panel( unsigned int nDims, unsigned int nPts )
-	: nDims_( nDims ), coords_( ( nPts + 1 ) * nDims, 0.0 )
+	: 
+		coords_( ( nPts + 1 ) * nDims, 0.0 ),
+		nDims_( nDims )
 {
 		;
 }

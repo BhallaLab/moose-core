@@ -289,6 +289,13 @@ unsigned int SmolPool::getSpecies( const Eref& e, const Qinfo* q ) const
 // static func
 void SmolPool::zombify( Element* solver, Element* orig )
 {
+	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
+	orig->zombieSwap( smolPoolCinfo, dh );
+}
+
+/// Static func.
+void SmolPool::smolSpeciesInit( Element* solver, Element* orig )
+{
 	Element temp( orig->id(), smolPoolCinfo, solver->dataHandler() );
 	Eref zer( &temp, 0 );
 	Eref oer( orig, 0 );
@@ -296,53 +303,61 @@ void SmolPool::zombify( Element* solver, Element* orig )
 	SmolPool* z = reinterpret_cast< SmolPool* >( zer.data() );
 	Mol* m = reinterpret_cast< Mol* >( oer.data() );
 
-	/*
-	z->setN( zer, 0, m->getN() );
-	z->setNinit( zer, 0, m->getNinit() );
-	z->setSpecies( zer, 0, m->getSpecies() );
-	*/
-	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
-	orig->zombieSwap( smolPoolCinfo, dh );
-
 	char* tempStr = new char[orig->getName().length() + 1 ];
 	strcpy( tempStr, orig->getName().c_str() );
 
 	ErrorCode ret = smolAddSpecies( z->sim_, tempStr, 0 );
 	assert( ret == ECok );
 
+
 	// Here instead of MSsoln I would put in something depending on where
 	// the molecule resides. 
 	// Likely options are MSfront, MSback, MSup, MSdown
 	ret = smolSetSpeciesMobility( z->sim_, tempStr, MSsoln, m->getDiffConst(), 
 		0, 0 ); // I'm ignoring drift and difmatrix.
+
 	assert( ret == ECok );
+	delete[] tempStr;
 
 	cout << "added species " << orig->getName() << endl;
+}
 
-	// smolAddSurface
-	// smolSetSurfaceRate or smolSetSurfaceAction
-	// smolAddPanel
-	// Later: SmolAddCompartment then SmolAddCompartmentSurface and smolAddCompartmentPoint
+// static func
+void SmolPool::smolMaxNumMolecules( simptr sim, const vector< Id >& pools )
+{
+	double totNum = 0.0;
+	for ( vector< Id >::const_iterator i = pools.begin(); i != pools.end(); ++i )
+		totNum += reinterpret_cast< const Mol *>( i->eref().data() )->getNinit();
+	
+	ErrorCode ret = smolSetMaxMolecules( sim, totNum * 2 );
+	assert( ret == ECok );
+}
 
-	// smolAddSolutionMolecules/smolAddCompartmentMolecules and 
-	// smolAddSurfaceMolecules.
+// static func
+void SmolPool::smolNinit( Element* solver, Element* orig )
+{
+	Element temp( orig->id(), smolPoolCinfo, solver->dataHandler() );
+	Eref zer( &temp, 0 );
+	Eref oer( orig, 0 );
 
+	SmolPool* z = reinterpret_cast< SmolPool* >( zer.data() );
+	Mol* m = reinterpret_cast< Mol* >( oer.data() );
 
-	// Later: smolSetPanelJump
-	// Later: smolSetPanelNeighbor: used only for surface diffusion
-	// smolAddReaction
-	// 		Later: to update a reaction, I call smolAddReaction again 
-	//		with same args except rate
+	char* poolName = new char[orig->getName().length() + 1 ];
+	strcpy( poolName, orig->getName().c_str() );
 
+	// Here I should really use smolAddCompartmentMolecules.
+	vector< double > lowposition( 3, -0.2 );
+	vector< double > highposition( 3, 0.2 );
+	ErrorCode ret = smolAddSolutionMolecules( z->sim_, 
+		poolName,
+		static_cast< int >( m->getNinit() ),
+		&lowposition[0],
+		&highposition[0] );
 
-	// To set it off:
-	// smolSetSimTimes
-	// to run 1 timestep: smolRunTimeStep
-	// to run till end: smolRunSim
-	// to run till specified time: smolRunSimUntil
+	assert( ret == ECok );
 
-
-	// k
+	delete[] poolName;
 }
 
 // Static func

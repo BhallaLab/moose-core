@@ -12237,3 +12237,14 @@ the indexing has now changed. Checkin 2611.
 
 Implemented Geom classes in new 'geom' subdirectory. Checkin 2613
 Added SpherePanel class. Checkin 2614
+
+Put in outline of steps needed. Incrementally going through steps.
+Checkin 2615.
+
+Added in steps to handle the addition of molecules (nInit) to the system.
+Added in steps to add the reaction to the system. Now it should be ready
+to do computations with it.
+
+There is a bug in the inspection routine causing a segv, probably because 
+I havent defined something. Will figure it out.
+============================================================================
