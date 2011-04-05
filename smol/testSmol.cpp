@@ -58,7 +58,22 @@ void testCreateSmolSim()
 
 	ss->setPath( smolId.eref(), 0, "/pa/##" );
 
-	delete smolId();
+	sim = ss->sim_;
+	assert( sim != 0 );
+
+/// Test stuff here to see if my model was set up properly.
+	ErrorCode ret = smolSetSimTimes( sim , 0.0, 1.0 , 50e-6 );
+	assert( ret == ECok );
+	smolUpdateSim( sim );
+	smolDisplaySim( sim );
+
+	ret = smolRunSim( sim );
+	assert( ret == ECok || ret == ECwarning );
+
+
+	// Bug here still to sort out, crashes when I delete it.
+	// Not due to smoldyn, but internal issue with MOOSE.
+	// delete smolId();
 	delete paId();
 	cout << "#" << flush;
 }
