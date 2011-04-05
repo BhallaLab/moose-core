@@ -117,10 +117,9 @@ USE_GSL = 1
 endif
 
 # including SMOLDYN
-ifeq ($(BUILD),smoldyn)
+ifdef USE_SMOLDYN
 CXXFLAGS = -g -pthread -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
 USE_GSL = 1
-USE_SMOLDYN = 1
 endif
 
 ##########################################################################
@@ -251,7 +250,7 @@ SUBDIR = \
 
 
 # Used for 'make clean'
-CLEANSUBDIR = $(SUBDIR) $(PARALLEL_DIR)
+CLEANSUBDIR = $(SUBDIR) $(PARALLEL_DIR) pymoose
 
 OBJLIBS =	\
 	basecode/basecode.o \

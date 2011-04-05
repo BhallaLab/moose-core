@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Sun Apr  3 23:33:17 2011 (+0530)
+# Last-Updated: Tue Apr  5 18:25:15 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 534
+#     Update #: 575
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -211,7 +211,6 @@ class _MooseDescriptor(object):
     
 class _MooseMeta(type):
     def __init__(cls, name, bases, classdict):        
-        print "Creating class %s using NeutralMeta" % (name)        
         super(_MooseMeta, cls).__init__(name, bases, classdict)
         field_dict = getFieldDict('/classes/%s' % (name), 'valueFinfo')
         for field in field_dict.keys():
@@ -250,6 +249,7 @@ class NeutralArray(object):
         if len(args) > 2:
             self.className = args[2]
         if self._id is None:
+            print 'Here'
             self._id = _moose.Id(path=path, dims=dims, type=self.className)
 
     def getFieldNames(self, ftype=''):
@@ -270,7 +270,6 @@ class NeutralArray(object):
     path = property(lambda self: self._id.getPath())
     id = property(lambda self: self._id)
     fieldNames = property(lambda self: self._id[0].getFieldNames('valueFinfo'))
-    # className = property(lambda self: self._id[0].getField('class'))
     name = property(lambda self: self._id[0].getField('name'))
     shape = property(lambda self: self._id.getShape())
     
@@ -318,7 +317,6 @@ class Neutral(object):
                 findex = kwargs['fieldIndex']
             except KeyError:
                 pass
-        print 'Id:', id_, 'dindex:', dindex, 'findex:', findex
         self._oid = _moose.ObjId(id_, dindex, findex)
 
     def getField(self, field):
@@ -366,9 +364,6 @@ def getCwe():
 #######################################################
 # This is to generate class definitions automatically
 #######################################################
-classes_Id = Id('/classes')
-class_obj_list = classes_Id[0].getField('children')
-
 def define_class(classId):
     class_name = classId[0].getField('name')
     if class_name in globals().keys():
@@ -383,6 +378,10 @@ def define_class(classId):
     else:
         base_class = object
     class_obj = type(class_name, (base_class,), {'className': class_name})
+    field_dict = getFieldDict('/classes/%s' % (class_name), 'valueFinfo')
+    for field in field_dict.keys():
+        setattr(class_obj, field, _MooseDescriptor(field))
+    
     globals()[class_name] = class_obj
     array_class_name = class_name + 'Array'
     if base != 'none':
@@ -391,7 +390,9 @@ def define_class(classId):
         base_class = object
     class_obj = type(array_class_name, (base_class,), {'className':class_name})
     globals()[array_class_name] = class_obj
-    
+
+classes_Id = Id('/classes')
+class_obj_list = classes_Id[0].getField('children')    
 for child in class_obj_list:
     define_class(child)
 
