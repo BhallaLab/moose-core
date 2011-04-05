@@ -185,19 +185,19 @@ void SmolPool::setN( const Eref& e, const Qinfo* q, double v )
 
 double SmolPool::getN( const Eref& e, const Qinfo* q ) const
 {
-	// return S_[ convertIdToMolIndex( e.id() ) ];
-	return 0;
+	return smolGetMoleculeCount( sim_, e.element()->getName().c_str(), 
+		MSsoln );
 }
 
 void SmolPool::setNinit( const Eref& e, const Qinfo* q, double v )
 {
-	// Sinit_[ convertIdToMolIndex( e.id() ) ] = v;
+	nInit_ = v;
 }
 
 double SmolPool::getNinit( const Eref& e, const Qinfo* q ) const
 {
 	// return Sinit_[ convertIdToMolIndex( e.id() ) ];
-	return 0;
+	return nInit_;
 }
 
 void SmolPool::setConc( const Eref& e, const Qinfo* q, double conc )
@@ -246,13 +246,20 @@ double SmolPool::getConcInit( const Eref& e, const Qinfo* q ) const
 
 void SmolPool::setDiffConst( const Eref& e, const Qinfo* q, double v )
 {
-	// diffConst_ = v;
+	diffConst_ = v;
+	// Here instead of MSsoln I would put in something depending on where
+	// the molecule resides. 
+	// Likely options are MSfront, MSback, MSup, MSdown
+	ErrorCode ret = smolSetSpeciesMobility( sim_, 
+		e.element()->getName().c_str(), 
+		MSsoln, v,
+		0, 0 ); // I'm ignoring drift and difmatrix.
+	assert( ret == ECok );
 }
 
 double SmolPool::getDiffConst( const Eref& e, const Qinfo* q ) const
 {
-	// return diffConst_;
-	return 0;
+	return diffConst_;
 }
 
 void SmolPool::setSize( const Eref& e, const Qinfo* q, double v )
@@ -303,22 +310,19 @@ void SmolPool::smolSpeciesInit( Element* solver, Element* orig )
 	SmolPool* z = reinterpret_cast< SmolPool* >( zer.data() );
 	Mol* m = reinterpret_cast< Mol* >( oer.data() );
 
-	char* tempStr = new char[orig->getName().length() + 1 ];
-	strcpy( tempStr, orig->getName().c_str() );
-
-	ErrorCode ret = smolAddSpecies( z->sim_, tempStr, 0 );
+	ErrorCode ret = smolAddSpecies( z->sim_, orig->getName().c_str(), 0 );
 	assert( ret == ECok );
 
 
 	// Here instead of MSsoln I would put in something depending on where
 	// the molecule resides. 
 	// Likely options are MSfront, MSback, MSup, MSdown
-	ret = smolSetSpeciesMobility( z->sim_, tempStr, MSsoln, m->getDiffConst(), 
+	ret = smolSetSpeciesMobility( z->sim_, orig->getName().c_str(), 
+		MSsoln, m->getDiffConst(), 
 		0, 0 ); // I'm ignoring drift and difmatrix.
+	z->diffConst_ = m->getDiffConst();
 
 	assert( ret == ECok );
-	delete[] tempStr;
-
 	cout << "added species " << orig->getName() << endl;
 }
 
@@ -343,21 +347,18 @@ void SmolPool::smolNinit( Element* solver, Element* orig )
 	SmolPool* z = reinterpret_cast< SmolPool* >( zer.data() );
 	Mol* m = reinterpret_cast< Mol* >( oer.data() );
 
-	char* poolName = new char[orig->getName().length() + 1 ];
-	strcpy( poolName, orig->getName().c_str() );
-
 	// Here I should really use smolAddCompartmentMolecules.
 	vector< double > lowposition( 3, -0.2 );
 	vector< double > highposition( 3, 0.2 );
 	ErrorCode ret = smolAddSolutionMolecules( z->sim_, 
-		poolName,
+		orig->getName().c_str(),
 		static_cast< int >( m->getNinit() ),
 		&lowposition[0],
 		&highposition[0] );
 
 	assert( ret == ECok );
 
-	delete[] poolName;
+	z->nInit_ = m->getNinit();
 }
 
 // Static func
