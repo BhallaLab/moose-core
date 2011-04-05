@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Sun Apr  3 23:05:36 2011 (+0530)
+// Last-Updated: Tue Apr  5 18:26:00 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 3859
+//     Update #: 3870
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -500,7 +500,6 @@ extern "C" {
         }
         PyObject * ret = PyTuple_New((Py_ssize_t)dims.size());
         for (unsigned int ii = 0; ii < dims.size(); ++ii){
-            cout << "Dimension: " << dims[ii] << endl;
             if (PyTuple_SetItem(ret, (Py_ssize_t)ii, Py_BuildValue("I", dims[ii]))){
                 Py_XDECREF(ret);
                 return NULL;
@@ -551,10 +550,12 @@ extern "C" {
         return ret;
     }
     
-    static int _pymoose_Id_richCompare(_Id * self, PyObject * args, int op)
+    static int _pymoose_Id_richCompare(_Id * self, PyObject * other, int op)
     {
-        PyObject * other;
-        if (!PyArg_ParseTuple(args, "O:_pymoose_Id_richCompare", &other)){
+        if (!self || !other){
+            return 0;
+        }
+        if (!Id_SubtypeCheck(other)){
             return 0;
         }
         if (op == Py_EQ){
@@ -604,14 +605,13 @@ extern "C" {
                 return 0;
             } else if (ObjId_Check(obj)){
                 self->_oid = ((_ObjId*)obj)->_oid;
-                cout << "Got an ObjId " << self->_oid << endl;
                 return 0;
             } else {
                 PyErr_SetString(PyExc_TypeError, "ObjId.__init__(self, id, dataindex, fieldindex=0) or ObjId.__init__(self, Id, dataIndex, fieldIndex=0) or ObjId.__init__(self, ObjId)");
                 return -1;
             }            
         } else {
-            cout << "Unrecognized parameters." << endl;
+            PyErr_SetString(PyExc_TypeError, "Unrecognized parameters.");
             return -1;
         }        
     }
@@ -790,7 +790,6 @@ extern "C" {
                             Py_XDECREF(ret);
                             return NULL;
                         }
-                        cout << "Id: " << entry->_id << " - path " << value[ii].path() << endl;
                     }
                     break;
                 }
@@ -814,14 +813,11 @@ extern "C" {
                 }
                 
             default:
-                cout << type << " " << ftype << endl;
                 PyErr_SetString(PyExc_TypeError, "Unrecognized field type.");
                 ret = NULL;            
         }
 #undef GET_FIELD    
 #undef GET_VECFIELD
-        if (PyTuple_Check(ret))
-            cout << "Returning tuple of len " << PyTuple_Size(ret) << endl;
         return ret;        
     }
     /**
@@ -1100,7 +1096,6 @@ extern "C" {
         } else {
             ret = getFieldNames(self->_oid, ftype_str);
         }
-        cout << "getFieldNames: ret.size() = " << ret.size() << endl;
         
         PyObject * pyret = PyTuple_New((Py_ssize_t)ret.size());
         for (unsigned int ii = 0; ii < ret.size(); ++ ii ){
@@ -1143,6 +1138,12 @@ extern "C" {
 
     static int _pymoose_ObjId_richCompare(_ObjId * self, PyObject * other, int op)
     {
+        if (!self || !other){
+            return 0;
+        }
+        if (!ObjId_SubtypeCheck(other)){
+            return 0;
+        }
         if (op == Py_EQ){
             return (self->_oid == ((_ObjId*)other)->_oid);
         } else if (op == Py_NE){
