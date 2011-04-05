@@ -12253,6 +12253,29 @@ Finally able to checkin code as revision 2617, after many attempts.
 
 Added in steps for setting the reaction rates, also made both
 forward and backward reactions.
-Still dies in the inspection routine.
+Still dies in the inspection routine. Checkin 2618.
+
+Added in some more access functions for SmolPool to look up the current
+molecule N.
+
+Things to do:
+	Steve:
+		Figure out why it crashes
+		Put in way to get vector of all molecule coords
+	Me:
+		Proper structure for volumes and compts.
+		Compartments
+		Buffering through scaling of reac rates
+		Updating reac rates
+		Clean up nomenclature throughout between Pool, species
+		and Mol.
 
 ============================================================================
+5 April 2011
+Following Steve's advice, added a line "smolUpdateSim" and that lets it 
+clear the display and subsequently to run it.
+
+There is a pending bug with MOOSE, deleting the SmolSim object. Does not seem
+to do with Smoldyn.
+
+

@@ -71,6 +71,8 @@ class SmolPool: public SmolSim
 
 		static const Cinfo* initCinfo();
 	private:
+		double nInit_;
+		double diffConst_;
 };
 
 #endif	// _SMOL_POOL_H
