@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Tue Apr  5 18:25:15 2011 (+0530)
+# Last-Updated: Tue Apr  5 22:48:05 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 575
+#     Update #: 576
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -249,7 +249,6 @@ class NeutralArray(object):
         if len(args) > 2:
             self.className = args[2]
         if self._id is None:
-            print 'Here'
             self._id = _moose.Id(path=path, dims=dims, type=self.className)
 
     def getFieldNames(self, ftype=''):
