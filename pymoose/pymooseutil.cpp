@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Mar 26 22:41:37 2011 (+0530)
 // Version: 
-// Last-Updated: Sat Apr  2 18:34:30 2011 (+0530)
+// Last-Updated: Tue Apr  5 22:45:32 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 65
+//     Update #: 68
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -119,11 +119,11 @@ Shell& getShell()
     {
      
         // Set up the system parameters
-        long isSingleThreaded = 0;
-        long numCores = 1;
-        long numNodes = 1;
-        long isInfinite = 0;
-        long myNode = 0;
+        int isSingleThreaded = 0;
+        int numCores = 1;
+        int numNodes = 1;
+        int isInfinite = 0;
+        int myNode = 0;
         string arg;
 
         map<string, string>::const_iterator it = getArgMap().find("SINGLETHREADED");    
@@ -147,6 +147,7 @@ Shell& getShell()
         // Not yet sure what should be passed on in argv
 #ifdef USE_MPI
         int argc = 0;
+        int provided;
         char ** argv = NULL;
         MPI_Init_thread( &argc, &argv, MPI_THREAD_SERIALIZED, &provided );
         MPI_Comm_size( MPI_COMM_WORLD, &numNodes );
