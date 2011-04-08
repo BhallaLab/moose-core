@@ -23,7 +23,7 @@ class BaseObject(object):
 		
 		# Initial color of the object.
 		self.r, self.g, self.b = 1.0, 0.0, 0.0
-		
+		self.oldColor = self.r, self.g, self.b  
 		# Reference to the GLWidget object that contains this object.
 		self.parent = parent
 		self.daddy = []
@@ -53,9 +53,10 @@ class BaseObject(object):
 		
 		self.selected = newStatus
 		if self.selected:
+			self.oldColor = [self.r,self.g,self.b]
 			self.r, self.g, self.b = 0, 1, 0
 		else:
-			self.r, self.g, self.b = 1, 0, 0
+			self.r, self.g, self.b = self.oldColor
 		
 class cLine(BaseObject):
 	"""
@@ -86,12 +87,13 @@ class cLine(BaseObject):
 		glColor(self.r, self.g, self.b)
 		glRotate(*self.rotation[:4])
 		glTranslate(*self._centralPos[:3])
-		#glMultMatrixf(self.rotation)
 		glLineWidth(2)
+		glDisable(GL_LIGHTING)
 		glBegin(GL_LINES)
   	    	glVertex3f(self.l_coords[0],self.l_coords[1],self.l_coords[2])
 	    	glVertex3f(self.l_coords[3],self.l_coords[4],self.l_coords[5])
 	    	glEnd()		
+	    	glEnable(GL_LIGHTING)
 		#glTranslate(*[i*-1 for i in self._centralPos[:3]])
 		#glRotate(*[i*-1 for i in self.rotation[:4]])
 		glPopMatrix()	
@@ -134,11 +136,9 @@ class cellStruct(BaseObject):
 
 		if self.kids:
 			glPushMatrix()
-			glColor(self.r, self.g, self.b)
+			#glColor(self.r, self.g, self.b)
 			glRotate(*self.rotation[:4])
 			glTranslate(*self._centralPos[:3])
-			#glMultMatrixf(self.rotation)
-			
 			for obj in self.kids:
 				obj.setCellParentProps(self._centralPos,self.rotation,self.r, self.g, self.b)
 				obj.render()
@@ -178,8 +178,8 @@ class somaSphere(BaseObject):
 		glColor(self.r, self.g, self.b)
 		glRotate(*self.rotation[:4])
 		glTranslate(*self._centralPos[:3])
-		#glMultMatrixf(self.rotation)
-		glTranslate(*self.centre[:3])
+		
+		glTranslate(*self.centre[:3])		#mid point of the compartment line
 		gluSphere(gluNewQuadric(),self.radius, 20, 20)
 		#glTranslate(*[i*-1 for i in self.centre[:3]])
 		#glTranslate(*[i*-1 for i in self._centralPos[:3]])
@@ -231,6 +231,9 @@ class cCylinder(BaseObject):
 		ry = vx*vz
   		glPushMatrix()
 		glColor(self.r, self.g, self.b)
+		glRotate(*self.rotation[:4])
+		glTranslate(*self._centralPos[:3])
+		
   		glTranslatef( x1,y1,z1 )
   		glRotatef(ax, rx, ry, 0.0)
   		
@@ -241,10 +244,11 @@ class cCylinder(BaseObject):
   		gluCylinder(quadric, radius, radius, v, subdivisions, 1)
   		
   		gluQuadricOrientation(quadric,GLU_INSIDE)
-  		gluDisk( quadric, 0.0, radius, subdivisions, 1)
-  		
+  		#gluDisk( quadric, 0.0, radius, subdivisions, 1)
+  		gluSphere(gluNewQuadric(),radius, 10, 10)
   		glTranslatef( 0,0,v )
   		
   		gluQuadricOrientation(quadric,GLU_OUTSIDE)
-  		gluDisk( quadric, 0.0, radius, subdivisions, 1)
+  		#gluDisk( quadric, 0.0, radius, subdivisions, 1)
+  		gluSphere(gluNewQuadric(),radius, 20, 20)
   		glPopMatrix()	

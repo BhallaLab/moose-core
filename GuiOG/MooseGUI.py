@@ -19,7 +19,6 @@ from MooseLayout import Ui_MainWindow
 from PyQt4.QtOpenGL import QGLWidget
 from OpenGL.GL import *
 from updatepaintGL import updatepaintGL
-
 mc=moose.context
 
 class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
@@ -32,30 +31,34 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
 	self.objFieldEditorMap = {}
 
-
 	QtCore.QObject.connect(self.toolButton, QtCore.SIGNAL("clicked()"), self.update_graph) 
 	QtCore.QObject.connect(self.mtree,QtCore.SIGNAL('itemDoubleClicked(QTreeWidgetItem *, int)'),self.makeObjEditorFromTreeItem)
+	QtCore.QObject.connect(self.qgl,QtCore.SIGNAL("compartmentSelected(QString)"),self.pickCompartment)
+	
 
+    def pickCompartment(self,path):				#path is a QString type moosepath
+        SelectedChild = self.mtree.pathToTreeChild(path)
+    	self.mtree.setCurrentItem(SelectedChild)		#select the corresponding moosetree
+	self.makeObjectFieldEditor(SelectedChild.getMooseObject())		#update the corresponding property
+    		
     def update_graph(self):
 
 	#mc.loadG('Mitral.g')
 	mc.readCell('/mit.p','/cell')
+	self.update_mtree('/cell')
 	
-	#self.qgl.drawNewCell('/cell',1)			#updates the canvas with just the single cell, ip1 cellname, ip2 style (1=skeletal, 2=readDimension)
+	self.qgl.selectionMode=0
+	self.qgl.viz=1						#turn on visualization
+	self.qgl.setColorMap(120*1e+06,45000*1e+06,30)		#set the color map for visualization
+
+	#self.qgl.drawAllCells(2)				#draws all cells in the moose root, in the specified style
+	self.qgl.drawNewCell('/cell',2)			#updates the canvas with just the single cell, ip1 cellname, ip2 style (1=skeletal, 2=readDimension)
+
+	self.qgl.updateViz()					#update the visualization, call once every t frames
 	
-	cellNames=[]						#from moosetree, pick the 'Cell' types
-	an=moose.Neutral('/')
-	all_ch=an.childList 					#all children
-	ch = self.qgl.get_childrenOfField(all_ch,'Cell')
+	self.qgl.updateGL()	
 
-	for i in range(0,len(ch),1):				#draws all cells under root.
-	    cellNames.append(moose.Cell(ch[i]).name)
-	    self.qgl.drawNewCell(cellNames[i],2)		
-
-	self.qgl.updateGL()
-	#self.update_mtree('/cell')
 	
-
     def update_mtree(self,cellName):		#calls the moosetree upper right corner from MooseTree.py the moosetreewidget
 	an=moose.Neutral(cellName)	
 	self.mtree.setupTree(an,'/',[])
@@ -73,6 +76,13 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         """Wraps makeObjectFieldEditor for use via a tree item"""
         obj = item.getMooseObject()
         self.makeObjectFieldEditor(obj)	
+        if item.mooseObj_.className == 'Compartment':
+        	self.qgl.selectedObjects.removeAll()
+        	iv = self.qgl.sceneObjectNames.index(obj.path)
+        	self.qgl.selectedObjects.add(self.qgl.sceneObjects[iv])
+        	
+		#self.qgl.sceneObjects[iv].select(True)
+		self.qgl.updateGL()
 
     def makeObjectFieldEditor(self, obj):
         """Creates a table-editor for a selected object."""

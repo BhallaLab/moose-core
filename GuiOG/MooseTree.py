@@ -31,7 +31,7 @@ class MooseTreeWidget(QtGui.QTreeWidget):
 	self.rootObject = moose.Neutral('/')
 	self.itemList = []
 	self.setupTree(self.rootObject, self, self.itemList)
-        self.setCurrentItem(self.itemList[0]) # Make root the default item
+        self.setCurrentItem(self.itemList[0]) 					# Make root the default item
 	self.setColumnCount(2)	
 	self.setHeaderLabels(['Moose Object                    ','Class']) 	#space as a hack to set a minimum 1st column width
 	self.header().setResizeMode(QtGui.QHeaderView.ResizeToContents)
@@ -49,7 +49,7 @@ class MooseTreeWidget(QtGui.QTreeWidget):
     
     def mooseTreeItemClick(self, item, column):
 	obj = item.getMooseObject()
-	print item, obj.path	
+	#print item, obj.path	
 
     def recreateTree(self):
         self.clear()
@@ -80,6 +80,21 @@ class MooseTreeWidget(QtGui.QTreeWidget):
         for changedItem in (item for item in self.itemList if mooseObject.id == item.mooseObj_.id):
             break
         changedItem.updateSlot()
+        
+    def pathToTreeChild(self,moosePath):
+    	#b = str(moosePath).split('/')#p = self.itemList[0]
+    	j=1
+    	return self.getmtreechild(str(moosePath).split('/'),j,self.itemList[0])
+    	
+    def getmtreechild(self,b,j,p):	
+    	for i in range(0,p.childCount()):
+		if b[j]==p.child(i).mooseObj_.name:
+    			p=p.child(i)
+    			if j==len(b)-1:
+				return p
+			else:
+				j+=1
+				return self.getmtreechild(b,j,p)
 
     
 if __name__ == '__main__':
