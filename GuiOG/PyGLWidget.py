@@ -49,6 +49,8 @@ class PyGLWidget(QtOpenGL.QGLWidget):
     signalGLMatrixChanged = QtCore.pyqtSignal()
     rotationBeginEvent = QtCore.pyqtSignal()
     rotationEndEvent = QtCore.pyqtSignal()
+	
+    compartmentSelected = QtCore.pyqtSignal( QtCore.QString)
 
     def __init__(self, parent = None):
         format = QtOpenGL.QGLFormat()
@@ -62,7 +64,7 @@ class PyGLWidget(QtOpenGL.QGLWidget):
         self.translate_vector_  = [0.0, 0.0, 0.0]
         self.viewport_matrix_   = []
         self.projection_matrix_ = []
-        self.near_   = 1.0#0.1
+        self.near_   = 1.0		#0.1
         self.far_    = 500.0
         self.fovy_   = 4.0
         self.radius_ = 10.0
@@ -71,17 +73,21 @@ class PyGLWidget(QtOpenGL.QGLWidget):
         self.last_point_3D_ = [1.0, 0.0, 0.0]
         self.isInRotation_  = False
 	
-	self.z_d = 0.0			#normalization for zoom the figures
-	self.lights = 0			#lights	
+	self.lights = 1			#lights	
 	self.ctrlPressed = False 	#default no control pressed
 	self.selectedObjects =Group(self)		#each line is a scene object.
 	self.sceneObjects = []		#scene objects, abstraction depends on the selection mode.
 	self.sceneObjectNames = []	#names of the scene objects being drawn
-	self.selectionMode = 0 		#select compartments by default =1 selects cells.
+	self.selectionMode = 1 		#select compartments by default =1 selects cells.
 	
-	# connections
-        #self.signalGLMatrixChanged.connect(self.printModelViewMatrix)
-
+	#viz parameters
+	self.viz=0
+	self.vizObjectNames=[]
+	self.vizObjects=[]
+	#self.vizColorMapIndex=[]
+	self.colorMap=[]
+    	self.stepVals=[]
+	
     @QtCore.pyqtSlot()
     def printModelViewMatrix(self):
         print self.modelview_matrix_
@@ -222,7 +228,6 @@ class PyGLWidget(QtOpenGL.QGLWidget):
     def wheelEvent(self, _event):
         # Use the mouse wheel to zoom in/out
         d = - float(_event.delta()) / 200.0 * self.radius_
-	self.z_d = self.z_d +d	        
 	self.translate([0.0, 0.0, d])
         self.updateGL()
         _event.accept()
@@ -420,6 +425,7 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 	    self.sceneObjects[i].render()
 				
 	glMatrixMode(GL_PROJECTION)
+	#glMatrixMode(GL_MODELVIEW)
 	glPopMatrix()
 	glMatrixMode(GL_MODELVIEW)
 	glFlush()
@@ -433,7 +439,8 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 	    if (nearestHit == None) or (near < nearestHit[0]):
 		nearestHit = [near, names[0]]
 	if names:	
-	    print self.sceneObjectNames[names[0]]	#printing the cell path
+	    #print self.sceneObjectNames[names[0]]
+	    self.compartmentSelected.emit(str(self.sceneObjectNames[names[0]]))	#printing the cell path
 		
 	if nearestHit != None:
 	    return self.sceneObjects[nearestHit[1]]
@@ -447,6 +454,7 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 	"""
 	# XYZ axis
 	glLineWidth(2)
+	glDisable(GL_LIGHTING)
 	glBegin(GL_LINES)
 	glColor(1, 0, 0)
 	glVertex3f(0, 0, 0)
@@ -458,6 +466,7 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 	glVertex3f(0, 0, 0)
 	glVertex3f(0, 0, 1)
 	glEnd()
+	glEnable(GL_LIGHTING)
 	glLineWidth(1)	
 
     
