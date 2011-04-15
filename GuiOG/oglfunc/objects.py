@@ -112,13 +112,18 @@ class cellStruct(BaseObject):
 		
 		for i in range(0,len(l_coords),1):	
 			if (mcc(l_coords[i][7]).name=='soma'):	#moose.Compartment =mcc
-				compartmentLine = somaSphere(self,l_coords[i],cellName)
+				if style==0:
+					compartmentLine = somaDisk(self,l_coords[i],cellName)
+					self.kids.append(compartmentLine)
+				else:
+					compartmentLine = somaSphere(self,l_coords[i],cellName)
 			else:
 	    			if style==1:
 	    				compartmentLine = cLine(self,l_coords[i],cellName)
-				else: #style==2
+				elif style==2:
 					compartmentLine = cCylinder(self,l_coords[i],cellName)
-			self.kids.append(compartmentLine)	
+			if self.style!=0:
+				self.kids.append(compartmentLine)	
 
     	
 	def setCropParentProps(self,centralPos,rotation,r,g,b):
@@ -182,6 +187,43 @@ class somaSphere(BaseObject):
 		glTranslate(*self.centre[:3])		#mid point of the compartment line
 		gluSphere(gluNewQuadric(),self.radius, 20, 20)
 		#glTranslate(*[i*-1 for i in self.centre[:3]])
+		#glTranslate(*[i*-1 for i in self._centralPos[:3]])
+		#glRotate(*[i*-1 for i in self.rotation[:4]])
+		glPopMatrix()
+		
+		
+class somaDisk(BaseObject):
+	"""
+	Class that defines a sphere.
+	"""
+	
+	def __init__(self, parent,l_coords,cellName=[]):
+		"""
+		Constructor.
+		"""
+		super(somaDisk, self).__init__(parent)
+		self.radius = (sqrt((l_coords[0]-l_coords[3])**2+(l_coords[1]-l_coords[4])**2+(l_coords[2]-l_coords[5])**2))/2
+		self.daddy  = cellName
+
+	def setCellParentProps(self,centralPos,rotation,r,g,b):
+		self._centralPos = centralPos	
+		self.rotation = rotation	
+		self.r = r
+		self.g = g
+		self.b = b
+		
+			
+	def render(self):
+		"""
+		Renders the soma as a disk.
+		"""
+		glutInit(1,1)
+		glPushMatrix()
+		glColor(self.r, self.g, self.b)
+		glRotate(*self.rotation[:4])
+		glTranslate(*self._centralPos[:3])
+		quadric = gluNewQuadric()
+		gluDisk( quadric, 0.0, self.radius, 30, 1)
 		#glTranslate(*[i*-1 for i in self._centralPos[:3]])
 		#glRotate(*[i*-1 for i in self.rotation[:4]])
 		glPopMatrix()
