@@ -80,16 +80,17 @@ class updatepaintGL(PyGLWidget):
 	   	d=float(mc.getField(ch[i],'diameter'))*(1e+04)
     	    	l_coords.append((x0,y0,z0,x,y,z,d,ch[i].path()))
     	    	
-    	if self.viz==1:	#fix
+    	if self.viz==1:				#fix
     		self.selectionMode=0
+    		
 
-	if (self.selectionMode):		#self.selectionMode=1,cells are pickable
+	if (self.selectionMode):		#self.selectionMode = 1,cells are pickable
 		newCell = cellStruct(self,l_coords,cellName,style)
 		newCell._centralPos = cellCentre
 		newCell.rotation = cellAngle
 		self.sceneObjectNames.append(cellName)
 		self.sceneObjects.append(newCell)	
-		if self.viz==1:#fix
+		if self.viz==1:			#fix
 			self.vizObjects.append(newCell)
 			self.vizObjectNames.append(cellName)
 			#self.vizColorMapIndex.append(colormap.index)
@@ -97,22 +98,35 @@ class updatepaintGL(PyGLWidget):
 	else:					#self.selectionMode=0,comapartments are pickable
 		for i in range(0,len(l_coords),1):
 			if (moose.Compartment(ch[i]).name=='soma'):
-				compartmentLine = somaSphere(self,l_coords[i],cellName)
+				if style==0:
+					compartmentLine=somaDisk(self,l_coords[i],cellName)
+					compartmentLine._centralPos = cellCentre
+					compartmentLine.rotation = cellAngle
+					self.sceneObjectNames.append(l_coords[i][7])
+	    				self.sceneObjects.append(compartmentLine)
+	    		
+	    				if self.viz==1:
+						self.vizObjects.append(compartmentLine)
+						self.vizObjectNames.append(l_coords[i][7])
+				else:
+					compartmentLine = somaSphere(self,l_coords[i],cellName) 
 			else:
 				if style==1:
 					compartmentLine=cLine(self,l_coords[i],cellName)
-				else: 	#style==2
+				elif style==2:
 					compartmentLine=cCylinder(self,l_coords[i],cellName)
+					
+			if style !=0:
 								
-			compartmentLine._centralPos = cellCentre
-			compartmentLine.rotation = cellAngle
-			self.sceneObjectNames.append(l_coords[i][7])
-	    		self.sceneObjects.append(compartmentLine)
+				compartmentLine._centralPos = cellCentre
+				compartmentLine.rotation = cellAngle
+				self.sceneObjectNames.append(l_coords[i][7])
+	    			self.sceneObjects.append(compartmentLine)
 	    		
-	    		if self.viz==1:
-				self.vizObjects.append(compartmentLine)
-				self.vizObjectNames.append(l_coords[i][7])
-				#self.vizColorMapIndex.append(colormap.index)
+	    			if self.viz==1:
+					self.vizObjects.append(compartmentLine)
+					self.vizObjectNames.append(l_coords[i][7])
+					#self.vizColorMapIndex.append(colormap.index)
 	    		
 
     def drawAllCells(self, style = 2, cellCentre=[0.0,0.0,0.0], cellAngle=[0.0,0.0,0.0,0.0]):
