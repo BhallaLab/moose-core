@@ -171,7 +171,7 @@ void SpikeGen::innerProcessFunc( const Conn* c, ProcInfo p )
 {
 	double t = p->currTime_;
 	if ( V_ > threshold_ ) {
-            if ((t + p->dt_/2.0) >= (lastEvent_ + refractT_))
+            if ((t + p->dt_/2.0) >= (lastEvent_ + refractT_)){
                 if (!edgeTriggered_ || (edgeTriggered_ && !fired_)) {
                     send1< double >( c->target(), eventSlot, t );
                     lastEvent_ = t;
@@ -180,6 +180,7 @@ void SpikeGen::innerProcessFunc( const Conn* c, ProcInfo p )
                 } else {
                     state_ = 0.0;                
                 }
+            }
 	} else {
             state_ = 0.0;
             fired_ = false;
