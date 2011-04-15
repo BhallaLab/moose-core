@@ -56,6 +56,21 @@ class PyGLWidget(QtOpenGL.QGLWidget):
         format = QtOpenGL.QGLFormat()
         format.setSampleBuffers(True)
         QtOpenGL.QGLWidget.__init__(self, format, parent)
+       
+        #self.toolbar=QtGui.QToolBar(self)
+        #self.toolbar.setGeometry(10,20,200,40)
+        #self.toolbar.setFloatable(False)
+        #self.toolbar.setMovable(True)
+        #self.toolbar.addSeparator()
+        #self.toolbar.show()
+	#self.toolbar.raise_()
+        #self.catbutt = QtGui.QToolButton(self.toolbar)
+        #self.catbutt.setGeometry(10,0,40,40)
+        #self.catbutt.setIcon(QtGui.QIcon("Search.png"))
+        #self.catbutt2 = QtGui.QToolButton(self.toolbar)
+        #self.catbutt2.setGeometry(50,0,40,40)
+        #self.catbutt2.setIcon(QtGui.QIcon("resize.png"))
+        #self.toolbar.allowedAreas(Qt.BottomToolBarArea)
         
         
         self.setMouseTracking(True)
@@ -72,6 +87,8 @@ class PyGLWidget(QtOpenGL.QGLWidget):
         self.last_point_ok_ = False
         self.last_point_3D_ = [1.0, 0.0, 0.0]
         self.isInRotation_  = False
+	
+	#additions by chaitanya
 	
 	self.lights = 1			#lights	
 	self.ctrlPressed = False 	#default no control pressed
@@ -105,6 +122,7 @@ class PyGLWidget(QtOpenGL.QGLWidget):
         self.updateGL()
 
     def paintGL(self):
+         
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         glMatrixMode(GL_MODELVIEW)
