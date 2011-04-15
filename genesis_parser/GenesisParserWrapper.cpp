@@ -588,7 +588,10 @@ map< string, string >& sliSrcLookup()
 	src[ "useY.MULTGATE" ] = "gate";
 	src[ "useZ.MULTGATE" ] = "gate";
 	src[ "CONCEN Ca" ] = "concSrc";
-
+        // Messages for Nernst object
+        src[ "CIN Ca" ] = "concSrc";
+        src[ "COUT Ca" ] = "concSrc";
+        src[ "EK E" ] = "ESrc";
 	// Message for synchan
 	src[ "SpikeGen.SPIKE" ] = "event";
 	// Message for CaConcen
@@ -600,7 +603,7 @@ map< string, string >& sliSrcLookup()
 	// is used to set the reset value of Vm in the gates, which is 
 	// done already through the existing messaging.
 	src[ "EREST Vm" ] = "";
-
+        
 	// Messages for PulseGen
 	src[ "PulseGen.INPUT output" ] = "outputSrc";
         src[ "PulseGen.INPUT Vm" ] = "outputSrc";
@@ -763,7 +766,11 @@ map< string, string >& sliDestLookup()
 	dest[ "CONCEN Ca" ] = "concen";
 	// for CaConc object
 	dest[ "I_Ca Ik" ] = "current";
-	
+
+        // Messages for Nernst object
+        dest[ "CIN Ca" ] = "CinMsg";
+        dest[ "COUT Ca" ] = "CoutMsg";
+        dest[ "EK E" ] = "EkDest"; // from Nernst to HHChannel
 	// Some messages for gates, used in the squid demo. This 
 	// is used to set the reset value of Vm in the gates, which is 
 	// done already through the existing messaging.
@@ -880,6 +887,7 @@ map< string, string >& sliClassNameConvert()
 	classnames[ "symcompartment" ] = "SymCompartment";
 	classnames[ "leakage" ] = "Leakage";
 	classnames[ "hh_channel" ] = "HHChannel";
+        classnames[ "nernst" ] = "Nernst";
 	classnames[ "tabchannel" ] = "HHChannel";
 	classnames[ "tab2Dchannel" ] = "HHChannel2D";
 	classnames[ "vdep_channel" ] = "HHChannel";
@@ -935,6 +943,8 @@ map< string, string >& sliFieldNameConvert()
 	fieldnames["SynChan.gmax"] = "Gbar";
 	fieldnames["HHChannel.gbar"] = "Gbar";
 	fieldnames["HHChannel.Z_conc"] = "useConcentration";
+        fieldnames["Nernst.valency"] = "valence";
+        fieldnames["Nernst.T"] = "Temperature";
 	fieldnames["PulseGen.level1"] = "firstLevel";
 	fieldnames["PulseGen.width1"] = "firstWidth";
 	fieldnames["PulseGen.delay1"] = "firstDelay";	

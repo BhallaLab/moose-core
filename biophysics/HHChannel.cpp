@@ -169,6 +169,9 @@ const Cinfo* initHHChannelCinfo()
 			Ftype2< string, IdGenerator >::global(),
 			RFCAST( &HHChannel::createGateFunc ),
 			"" ),
+                new DestFinfo( "EkDest", Ftype1< double >::global(),
+                               RFCAST(&HHChannel::setEk),
+                               "Update equilibrium potential Ek of channel."),
 	};
 
 	// We want the channel updates after the compartments are done.
