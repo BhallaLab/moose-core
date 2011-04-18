@@ -7,6 +7,9 @@ namespace pymoose{
     class SpikeGen : public Neutral
     {      public:
         static const std::string className_;
+        SpikeGen(string className, string objectName, Id parentId);
+        SpikeGen(string className, string path);
+        SpikeGen(std::string className, std::string objectName, PyMooseBase& parent);
         SpikeGen(Id id);
         SpikeGen(std::string path);
         SpikeGen(std::string name, Id parentId);
