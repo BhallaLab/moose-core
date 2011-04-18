@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Mar 16 15:33:45 2011 (+0530)
+# Last-Updated: Mon Apr 18 15:05:30 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2636
+#     Update #: 2653
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -125,6 +125,7 @@ class MainWindow(QtGui.QMainWindow):
         self.resize(800, 600)
         self.setDockOptions(self.AllowNestedDocks | self.AllowTabbedDocks | self.ForceTabbedDocks | self.AnimatedDocks)        
         self.setDockNestingEnabled(True)
+        self.centralPanel = QtGui.QMdiArea(self)
         # The following are for holding transient selections from
         # connection dialog
         self._srcElement = None
@@ -158,7 +159,6 @@ class MainWindow(QtGui.QMainWindow):
 	
         # By default, we show information about MOOSE in the central widget
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
-        self.centralPanel = QtGui.QMdiArea(self)
         # plots is a list of available MoosePlot widgets.
         self.plots = []
         self.plotWindows = []
@@ -367,6 +367,11 @@ class MainWindow(QtGui.QMainWindow):
 	self.connect(self.showRightBottomDocksAction, QtCore.SIGNAL('triggered(bool)'), self.showRightBottomDocks)
         self.showRightBottomDocksAction.setChecked(False)
 
+        self.tabbedViewAction = QtGui.QAction(self.tr('Tabbed view'), self)
+        self.tabbedViewAction.setCheckable(True)
+        self.tabbedViewAction.setChecked(False)
+        self.connect(self.tabbedViewAction, QtCore.SIGNAL('triggered(bool)'), self.switchTabbedView)
+
         self.tilePlotWindowsAction = QtGui.QAction(self.tr('Tile Plots'), self)
 	self.tilePlotWindowsAction.setCheckable(True)
 	self.connect(self.tilePlotWindowsAction, QtCore.SIGNAL('triggered(bool)'), self.centralPanel.tileSubWindows)
@@ -516,6 +521,7 @@ class MainWindow(QtGui.QMainWindow):
         self.viewMenu.addAction(self.autoHideAction)
         self.viewMenu.addAction(self.showRightBottomDocksAction)
         self.viewMenu.addSeparator().setText(self.tr('Layout Plot Windows'))
+        self.viewMenu.addAction(self.tabbedViewAction)
         self.viewMenu.addAction(self.tilePlotWindowsAction)
         self.viewMenu.addAction(self.cascadePlotWindowsAction)
         self.viewMenu.addAction(self.togglePlotWindowsAction)
@@ -728,6 +734,14 @@ class MainWindow(QtGui.QMainWindow):
             print 'Closing all subwindows'
             self.centralPanel.closeAllSubWindows()
             self._visiblePlotWindowCount = 0
+
+    def switchTabbedView(self, checked):
+        if checked:
+            self.centralPanel.setViewMode(self.centralPanel.TabbedView)
+        else:
+            self.centralPanel.setViewMode(self.centralPanel.SubWindowView)
+            
+        
 
     def addLayoutWindow(self):
         self.sceneLayout = layout.LayoutWidget()
