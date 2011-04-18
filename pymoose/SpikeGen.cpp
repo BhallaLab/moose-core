@@ -3,6 +3,9 @@
 #include "SpikeGen.h"
 using namespace pymoose;
 const std::string SpikeGen::className_ = "SpikeGen";
+SpikeGen::SpikeGen(std::string className, std::string objectName, Id parentId):Neutral(className, objectName, parentId){}
+SpikeGen::SpikeGen(std::string className, std::string path):Neutral(className, path){}
+SpikeGen::SpikeGen(std::string className, std::string objectName, PyMooseBase& parent):Neutral(className, objectName, parent){}
 SpikeGen::SpikeGen(Id id):Neutral(id){}
 SpikeGen::SpikeGen(std::string path):Neutral(className_, path){}
 SpikeGen::SpikeGen(std::string name, Id parentId):Neutral(className_, name, parentId){}
