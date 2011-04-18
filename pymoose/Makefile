@@ -66,6 +66,7 @@ OBJ = PyMooseBase.o \
 	Interpol2D.o \
 	CaConc.o \
 	SpikeGen.o \
+	StochSpikeGen.o \
 	PulseGen.o	\
 	RandomSpike.o	\
 	SynChan.o \
@@ -141,6 +142,7 @@ HEADERS=PyMooseUtil.h \
 	Interpol2D.h \
 	CaConc.h \
 	SpikeGen.h \
+	StochSpikeGen.h \
 	RandomSpike.h	\
 	PulseGen.h	\
 	SynChan.h \

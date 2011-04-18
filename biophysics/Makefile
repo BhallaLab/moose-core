@@ -37,6 +37,8 @@ OBJ = \
 	IzhikevichNrn.o \
 	Leakage.o	\
 	KinSynChan.o	\
+	StochSpikeGen.o \
+
 
 
 HEADERS = \
@@ -71,6 +73,8 @@ IntFire.o: IntFire.h
 IzhikevichNrn.o: IzhikevichNrn.h
 Leakage.o: Leakage.h
 KinSynChan.o: KinSynChan.h SynChan.h SynInfo.h
+StochSpikeGen.o: SpikeGen.h StochSpikeGen.h ../randnum/mt19937ar.cpp
+
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -I../basecode -I../randnum -I.. $< -c
 
