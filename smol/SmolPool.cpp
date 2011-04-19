@@ -304,6 +304,8 @@ void SmolPool::zombify( Element* solver, Element* orig )
 
 	Mol* m = reinterpret_cast< Mol* >( 
 		orig->dataHandler()->data( DataId( 0, 0 ) ) );
+	double diffConst = m->getDiffConst();
+	double nInit = m->getNinit();
 	orig->zombieSwap( SmolPool::initCinfo(), dh );
 	// This gets interesting for multidimensional Smoldyn Elements.
 	// Don't worry about it yet.
@@ -321,10 +323,10 @@ void SmolPool::zombify( Element* solver, Element* orig )
 	// the molecule resides. 
 	// Likely options are MSfront, MSback, MSup, MSdown
 	ret = smolSetSpeciesMobility( sp->sim_, orig->getName().c_str(), 
-		MSsoln, m->getDiffConst(), 
+		MSsoln, diffConst, 
 		0, 0 ); // I'm ignoring drift and difmatrix.
-	sp->diffConst_ = m->getDiffConst();
-	sp->nInit_ = m->getNinit();
+	sp->diffConst_ = diffConst;
+	sp->nInit_ = nInit;
 
 	assert( ret == ECok );
 	cout << "added species " << orig->getName() << endl;
