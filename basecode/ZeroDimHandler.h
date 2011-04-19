@@ -42,6 +42,11 @@ class ZeroDimHandler: public ZeroDimGlobalHandler
 		DataHandler* copy() const;
 
 		/**
+		 * Make a single copy with same dimensions, using a different Dinfo
+		 */
+		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo ) const;
+
+		/**
 		 * Version 2: Copy same dimensions but different # of entries.
 		 * The copySize is the total number of targets, 
 		 * here we need to figure out

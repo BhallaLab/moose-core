@@ -59,6 +59,14 @@ class SmolSim
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions
 		//////////////////////////////////////////////////////////////////
+		/**
+		 * This returns the sim_ data structure which is the manager of the
+		 * Smoldyn data. This is to be used only for passing to zombie
+		 * objects for their setup, as it is a bad idea to manipulate
+		 * this directly.
+		 */
+		struct simstruct* sim();
+
 		void zombifyModel( const Eref& e, const vector< Id >& elist );
 		/*
 		void allocateObjMap( const vector< Id >& elist );

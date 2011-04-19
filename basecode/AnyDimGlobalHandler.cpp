@@ -14,15 +14,15 @@
 
 AnyDimGlobalHandler::AnyDimGlobalHandler( const DinfoBase* dinfo )
 	: DataHandler( dinfo ),
-		data_( 0 ), size_( 0 )
+		data_( 0 ), numData_( 0 )
 {
 	;
 }
 
 AnyDimGlobalHandler::AnyDimGlobalHandler( const AnyDimGlobalHandler* other )
 	: DataHandler( other->dinfo() ),
-		data_( other->dinfo()->copyData( other->data_, other->size_, other->size_ ) ),
-		size_( other->size_ ),
+		data_( other->dinfo()->copyData( other->data_, other->numData_, other->numData_ ) ),
+		numData_( other->numData_ ),
 		dims_( other->dims_ )
 {
 	;
@@ -41,9 +41,9 @@ DataHandler* AnyDimGlobalHandler::globalize() const
 DataHandler* AnyDimGlobalHandler::unGlobalize() const
 {
 	AnyDimHandler* ret = new AnyDimHandler( dinfo() );
-	// ret->nodeBalance( size_ );
+	// ret->nodeBalance( numData_ );
 	ret->resize( dims_ );
-	ret->setDataBlock( data_, size_, 0 );
+	ret->setDataBlock( data_, numData_, 0 );
 	/*
 	unsigned int numLocal = ret->end_ - ret->start_;
 	char* newData = dinfo()->copyData( 
@@ -59,12 +59,12 @@ DataHandler* AnyDimGlobalHandler::unGlobalize() const
  * Determines how to decompose data among nodes for specified size
  * Returns true if there is a change from the current configuration
  */
-bool AnyDimGlobalHandler::innerNodeBalance( unsigned int size,
+bool AnyDimGlobalHandler::innerNodeBalance( unsigned int numData,
 	unsigned int myNode, unsigned int numNodes )
 {
-	unsigned int oldsize = size_;
-	size_ = size;
-	return ( size != oldsize );
+	unsigned int oldNumData = numData_;
+	numData_ = numData;
+	return ( numData != oldNumData );
 }
 
 /**
@@ -76,6 +76,17 @@ DataHandler* AnyDimGlobalHandler::copy() const
 {
 	return new AnyDimGlobalHandler( this );
 }
+
+DataHandler* AnyDimGlobalHandler::copyUsingNewDinfo( 
+	const DinfoBase* dinfo) const
+{
+	AnyDimGlobalHandler* ret = new AnyDimGlobalHandler( dinfo );
+	ret->data_ = dinfo->allocData( numData_ );
+	ret->numData_ = numData_;
+	ret->dims_ = dims_;
+	return ret;
+}
+
 
 
 /**
@@ -90,7 +101,7 @@ DataHandler* AnyDimGlobalHandler::copyExpand( unsigned int copySize ) const
 {
 	unsigned int quantum = 1;
 	if ( dims_.size() > 1 ) {
-		quantum = size_ / dims_[0];
+		quantum = numData_ / dims_[0];
 		if ( ( copySize % quantum ) != 0 )
 			return 0;
 	}
@@ -159,8 +170,8 @@ DataHandler* AnyDimGlobalHandler::copyToNewDim( unsigned int newDimSize ) const
 	vector< unsigned int > newdims = dims_;
 	newdims.push_back( newDimSize );
 	ret->resize( newdims );
-	// ret->nodeBalance( size_ * newDimSize );
-	unsigned int temp = size_ * dinfo()->size();
+	// ret->nodeBalance( numData_ * newDimSize );
+	unsigned int temp = numData_ * dinfo()->size();
 	for ( unsigned int i = 0; i < newDimSize; ++i ) {
 		memcpy( ret->data_ + i * temp, data_, temp );
 	}
@@ -185,11 +196,11 @@ void AnyDimGlobalHandler::process( const ProcInfo* p, Element* e, FuncId fid )
 	 * This is the variant with threads in a block.
 	 */
 	unsigned int startIndex = 
-		( ( size_ ) * p->threadIndexInGroup + 
+		( ( numData_ ) * p->threadIndexInGroup + 
 		p->numThreadsInGroup - 1 ) /
 			p->numThreadsInGroup;
 	unsigned int endIndex = 
-		( ( size_ ) * ( 1 + p->threadIndexInGroup ) +
+		( ( numData_ ) * ( 1 + p->threadIndexInGroup ) +
 		p->numThreadsInGroup - 1 ) /
 			p->numThreadsInGroup;
 	
@@ -219,12 +230,12 @@ char* AnyDimGlobalHandler::data( DataId index ) const
 
 unsigned int AnyDimGlobalHandler::totalEntries() const
 {
-	return size_;
+	return numData_;
 }
 
 unsigned int AnyDimGlobalHandler::localEntries() const
 {
-	return size_;
+	return numData_;
 }
 
 unsigned int AnyDimGlobalHandler::numDimensions() const
@@ -241,16 +252,16 @@ unsigned int AnyDimGlobalHandler::sizeOfDim( unsigned int dim ) const
 
 bool AnyDimGlobalHandler::resize( vector< unsigned int > dims )
 {
-	unsigned int size = 1;
+	unsigned int numData = 1;
 	for ( vector< unsigned int >::iterator i = dims.begin();
 		i != dims.end(); ++i ) {
-		size *= *i;
+		numData *= *i;
 	}
-	if ( nodeBalance( size ) ) { // It changed, reallocate
+	if ( nodeBalance( numData ) ) { // It changed, reallocate
 		if ( data_ )
 			dinfo()->destroyData( data_ );
 
-		data_ = reinterpret_cast< char* >( dinfo()->allocData( size_ ) );
+		data_ = reinterpret_cast< char* >( dinfo()->allocData( numData_ ) );
 	}
 	dims_ = dims;
 	return ( data_ != 0 );
@@ -262,7 +273,7 @@ vector< unsigned int > AnyDimGlobalHandler::dims() const
 }
 
 bool AnyDimGlobalHandler::isDataHere( DataId index ) const {
-	return ( index.data() >= 0 && index.data() < size_ );
+	return ( index.data() >= 0 && index.data() < numData_ );
 }
 
 bool AnyDimGlobalHandler::isAllocated() const
@@ -272,7 +283,7 @@ bool AnyDimGlobalHandler::isAllocated() const
 
 bool AnyDimGlobalHandler::isGlobal() const
 {
-	// return ( Shell::numNodes() <= 1 || ( start_ == 0 && end_ == size_ ) );
+	// return ( Shell::numNodes() <= 1 || ( start_ == 0 && end_ == numData_ ) );
 	return 0;
 }
 
@@ -283,7 +294,7 @@ AnyDimGlobalHandler::iterator AnyDimGlobalHandler::begin() const
 
 AnyDimGlobalHandler::iterator AnyDimGlobalHandler::end() const
 {
-	return iterator( this, size_, size_ );
+	return iterator( this, numData_, numData_ );
 }
 
 /**
@@ -327,7 +338,7 @@ bool AnyDimGlobalHandler::setDataBlock(
 	const char* data, unsigned int numData,
 	DataId startIndex ) const
 {
-	if ( startIndex.data() + numData > size_ )
+	if ( startIndex.data() + numData > numData_ )
 		return 0;
 	memcpy( data_ + startIndex.data() * dinfo()->size(), data, 
 		numData * dinfo()->size() );
@@ -358,7 +369,7 @@ bool AnyDimGlobalHandler::setDataBlock( const char* data,
 		return 0;
 	assert( numData == sliceSize );
 
-	if ( slice.size() == 0 && numData <= size_ ) {
+	if ( slice.size() == 0 && numData <= numData_ ) {
 		memcpy( data_ + begin * dinfo()->size(), data, 
 			(end - begin ) * dinfo()->size() );
 		return 1;
@@ -370,7 +381,7 @@ bool AnyDimGlobalHandler::setDataBlock( const char* data,
 	if ( dims_[ dims.size() -1 ] <= slice[0] ) // bad index on slice.
 		return 0;
 
-	unsigned int num = size_ / dims_[ dims.size() - 1 ];
+	unsigned int num = numData_ / dims_[ dims.size() - 1 ];
 	if ( slice.size() == 1 && numData <= num ) {
 		memcpy( data_ + ( begin + num * slice_[0] ) * dinfo()->size(), 
 			data, numData * dinfo()->size() );
@@ -379,9 +390,9 @@ bool AnyDimGlobalHandler::setDataBlock( const char* data,
 
 	// some checks here.
 
-	num = size_ / dims_[ dims.size() - 1 ];
+	num = numData_ / dims_[ dims.size() - 1 ];
 	if ( slice.size() == 2 && numData <= num ) {
-		unsigned int num = size_ / dims_[ dims.size() - 1 ];
+		unsigned int num = numData_ / dims_[ dims.size() - 1 ];
 		memcpy( data_ + ( begin + num * slice_[0] ) * dinfo()->size(), 
 			data, numData * dinfo()->size() );
 		return 1;
@@ -390,9 +401,9 @@ bool AnyDimGlobalHandler::setDataBlock( const char* data,
 
 	
 
-	assert( size_ != 0 );
+	assert( numData_ != 0 );
 	assert( isAllocated() );
-	assert( end <= size_ );
+	assert( end <= numData_ );
 	assert( dimNum == 0 || dimNum < dims_.size() );
 	unsigned int dimSize = 1;
 	for ( unsigned int i = 0; i < dims_.size() && i < dimNum; ++i ) {

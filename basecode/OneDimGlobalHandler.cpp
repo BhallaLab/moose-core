@@ -13,14 +13,14 @@
 
 OneDimGlobalHandler::OneDimGlobalHandler( const DinfoBase* dinfo )
 		: DataHandler( dinfo ), 
-			data_( 0 ), size_( 0 )
+			data_( 0 ), numData_( 0 )
 {;}
 
 OneDimGlobalHandler::OneDimGlobalHandler( const OneDimGlobalHandler* other )
 		: DataHandler( other->dinfo() ), 
-			size_( other->size_ )
+			numData_( other->numData_ )
 {
-	data_ = dinfo()->copyData( other->data_, size_, size_ );
+	data_ = dinfo()->copyData( other->data_, numData_, numData_ );
 }
 
 OneDimGlobalHandler::~OneDimGlobalHandler() {
@@ -36,9 +36,9 @@ DataHandler* OneDimGlobalHandler::globalize() const
 DataHandler* OneDimGlobalHandler::unGlobalize() const
 {
 	OneDimHandler* ret = new OneDimHandler( dinfo() );
-	vector< unsigned int > dims( 1, size_ );
+	vector< unsigned int > dims( 1, numData_ );
 	ret->resize( dims );
-	ret->setDataBlock( data_, size_, 0 );
+	ret->setDataBlock( data_, numData_, 0 );
 	return ret;
 }
 
@@ -47,13 +47,23 @@ DataHandler* OneDimGlobalHandler::copy() const
 	return ( new OneDimGlobalHandler( this ) );
 }
 
+DataHandler* OneDimGlobalHandler::copyUsingNewDinfo( 
+	const DinfoBase* dinfo ) const
+{
+	OneDimGlobalHandler* ret = new OneDimGlobalHandler( dinfo );
+	ret->numData_ = numData_;
+	ret->data_ = dinfo->allocData( numData_ );
+	return ret;
+}
+
+
 DataHandler* OneDimGlobalHandler::copyExpand( unsigned int copySize ) const
 {
 	OneDimGlobalHandler* ret = new OneDimGlobalHandler( dinfo() );
 	vector< unsigned int > dims( 1, copySize );
 	ret->resize( dims );
-	unsigned int s = size_;
-	for ( unsigned int offset = 0; offset < copySize; offset += size_ ) {
+	unsigned int s = numData_;
+	for ( unsigned int offset = 0; offset < copySize; offset += numData_ ) {
 		if ( s > ( copySize - offset ) )
 			s = copySize - offset;
 		memcpy( ret->data_ + offset * dinfo()->size(), data_, 
@@ -71,12 +81,12 @@ DataHandler* OneDimGlobalHandler::copyToNewDim( unsigned int newDimSize )
 	AnyDimGlobalHandler* ret = new AnyDimGlobalHandler( dinfo() );
 	vector< unsigned int > dims( 2 );
 	dims[1] = newDimSize;
-	dims[0] = size_;
+	dims[0] = numData_;
 	ret->resize( dims );
 
 	for ( unsigned int i = 0; i < newDimSize; ++i ) {
 		// setDataBlock( const char* data, unsigned int dataSize, unsigned int dimNum, unsigned int dimIndex )
-		ret->setDataBlock( data_, size_, i * size_ );
+		ret->setDataBlock( data_, numData_, i * numData_ );
 	}
 	return ret;
 }
@@ -96,7 +106,7 @@ void OneDimGlobalHandler::process( const ProcInfo* p, Element* e,
 	const ProcOpFuncBase* pf = dynamic_cast< const ProcOpFuncBase* >( f );
 	assert( pf );
 
-	for ( unsigned int i = p->threadIndexInGroup; i < size_; 
+	for ( unsigned int i = p->threadIndexInGroup; i < numData_; 
 		i+= p->numThreadsInGroup )
 	{
 		// reinterpret_cast< Data* >( temp )->process( p, Eref( e, i ) );
@@ -106,18 +116,18 @@ void OneDimGlobalHandler::process( const ProcInfo* p, Element* e,
 }
 
 unsigned int OneDimGlobalHandler::totalEntries() const {
-	return size_;
+	return numData_;
 }
 
 unsigned int OneDimGlobalHandler::localEntries() const {
-	return size_;
+	return numData_;
 }
 
 
 unsigned int OneDimGlobalHandler::sizeOfDim( unsigned int dim ) const
 {
 	if ( dim == 0 )
-		return size_;
+		return numData_;
 	return 0;
 }
 
@@ -126,13 +136,13 @@ char* OneDimGlobalHandler::data( DataId index ) const
 	return data_ + index.data() * dinfo()->size();
 }
 
-bool OneDimGlobalHandler::innerNodeBalance( unsigned int size,
+bool OneDimGlobalHandler::innerNodeBalance( unsigned int numData,
 	unsigned int myNode, unsigned int numNodes )
 {
-	if ( size == size_ )
+	if ( numData == numData_ )
 		return 0;
 	else
-		size_ = size;
+		numData_ = numData;
 	return 1;
 }
 
@@ -142,19 +152,19 @@ bool OneDimGlobalHandler::resize( vector< unsigned int > dims )
 		cout << "OneDimGlobalHandler::Resize: Warning: Attempt to resize wrong # of dims " << dims.size() << "\n";
 		return 0;
 	}
-	if ( !data_ || size_ == 0 ) {
-		size_ = dims[0];
-		data_ = dinfo()->allocData( size_ );
+	if ( !data_ || numData_ == 0 ) {
+		numData_ = dims[0];
+		data_ = dinfo()->allocData( numData_ );
 		return 1;
 	}
 
-	unsigned int oldsize = size_;
+	unsigned int oldNumData = numData_;
 	if ( nodeBalance( dims[0] ) ) {
-		char* newdata = dinfo()->allocData( size_ );
-		if ( size_ > oldsize )
-			memcpy( newdata, data_, oldsize * dinfo()->size() );
+		char* newdata = dinfo()->allocData( numData_ );
+		if ( numData_ > oldNumData )
+			memcpy( newdata, data_, oldNumData * dinfo()->size() );
 		else
-			memcpy( newdata, data_, size_ * dinfo()->size() );
+			memcpy( newdata, data_, numData_ * dinfo()->size() );
 		dinfo()->destroyData( data_ );
 		data_ = newdata;
 	}
@@ -163,7 +173,7 @@ bool OneDimGlobalHandler::resize( vector< unsigned int > dims )
 
 vector< unsigned int > OneDimGlobalHandler::dims() const
 {
-	vector< unsigned int > ret( 1, size_ );
+	vector< unsigned int > ret( 1, numData_ );
 	return ret;
 }
 
@@ -200,7 +210,7 @@ bool OneDimGlobalHandler::setDataBlock(
 	DataId startIndex ) const
 {
 	if ( !isAllocated() ) return 0;
-	if ( startIndex.data() + numData > size_ ) return 0;
+	if ( startIndex.data() + numData > numData_ ) return 0;
 	memcpy( data_ + startIndex.data() * dinfo()->size(), 
 		data, numData* dinfo()->size() );
 	return 1;

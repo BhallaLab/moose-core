@@ -21,7 +21,7 @@ OneDimHandler::OneDimHandler( const OneDimHandler* other )
 	  start_( other->start_ ),
 	  end_( other->end_ )
 {
-    size_ = other->size_;
+    numData_ = other->numData_;
 	unsigned int num = end_ - start_;
 	data_ = dinfo()->copyData( other->data_, num, num );
 }
@@ -49,6 +49,15 @@ DataHandler* OneDimHandler::copy() const
 	return ( new OneDimHandler( this ) );
 }
 
+DataHandler* OneDimHandler::copyUsingNewDinfo( const DinfoBase* dinfo) const
+{
+	OneDimHandler* ret = new OneDimHandler( dinfo );
+	ret->start_ = start_;
+	ret->end_ = end_;
+	ret->data_ = dinfo->allocData( end_ - start_ );
+	return ret;
+}
+
 DataHandler* OneDimHandler::copyExpand( unsigned int copySize ) const
 {
 	OneDimHandler* ret = new OneDimHandler( dinfo() );
@@ -66,12 +75,12 @@ DataHandler* OneDimHandler::copyToNewDim( unsigned int newDimSize ) const
 	AnyDimHandler* ret = new AnyDimHandler( dinfo() );
 	vector< unsigned int > dims( 2 );
 	dims[1] = newDimSize;
-	dims[0] = size_;
+	dims[0] = numData_;
 	ret->resize( dims );
 
 	for ( unsigned int i = 0; i < newDimSize; ++i ) {
 		// setDataBlock( const char* data, unsigned int dataSize, unsigned int dimNum, unsigned int dimIndex )
-		ret->setDataBlock( data_, size_, i * size_ );
+		ret->setDataBlock( data_, numData_, i * numData_ );
 	}
 	return ret;
 }
@@ -138,29 +147,29 @@ char* OneDimHandler::data( DataId index ) const
 bool OneDimHandler::nodeBalance( unsigned int size )
 {
 	return nodeBalance( size, Shell::myNode(), Shell::numNodes() );
-	unsigned int oldsize = size_;
+	unsigned int oldNumData = numData_;
 	unsigned int oldstart = start_;
 	unsigned int oldend = end_;
-	size_ = size;
+	numData_ = size;
 	start_ = ( size * Shell::myNode() ) / Shell::numNodes();
 	end_ = ( size * ( 1 + Shell::myNode() ) ) / Shell::numNodes();
-	return ( size != oldsize || oldstart != start_ || oldend != end_ );
+	return ( size != oldNumData || oldstart != start_ || oldend != end_ );
 }
 	*/
 
-bool OneDimHandler::innerNodeBalance( unsigned int size,
+bool OneDimHandler::innerNodeBalance( unsigned int numData,
 	unsigned int myNode, unsigned int numNodes )
 {
-	unsigned int oldsize = size_;
+	unsigned int oldNumData = numData_;
 	unsigned int oldstart = start_;
 	unsigned int oldend = end_;
-	size_ = size;
-	start_ = ( size * myNode ) / numNodes;
-	end_ = ( size * ( 1 + myNode ) ) / numNodes;
+	numData_ = numData;
+	start_ = ( numData * myNode ) / numNodes;
+	end_ = ( numData * ( 1 + myNode ) ) / numNodes;
 
-	// cout << "OneDimHandler::innerNodeBalance( " << size_ << ", " << start_ << ", " << end_ << "), fieldDimension = " << getFieldDimension() << "\n";
+	// cout << "OneDimHandler::innerNodeBalance( " << numData_ << ", " << start_ << ", " << end_ << "), fieldDimension = " << getFieldDimension() << "\n";
 
-	return ( size != oldsize || oldstart != start_ || oldend != end_ );
+	return ( numData != oldNumData || oldstart != start_ || oldend != end_ );
 }
 
 
@@ -173,7 +182,7 @@ bool OneDimHandler::resize( vector< unsigned int > dims )
 		cout << "OneDimHandler::Resize: Warning: Attempt to resize wrong # of dims " << dims.size() << "\n";
 		return 0;
 	}
-	if ( !data_ || size_ == 0 ) {
+	if ( !data_ || numData_ == 0 ) {
 		nodeBalance( dims[0] );
 		if ( start_ < end_ )
 		data_ = dinfo()->allocData( end_ - start_ );
@@ -220,7 +229,7 @@ bool OneDimHandler::setDataBlock( const char* data, unsigned int numData,
 	if ( !isAllocated() ) return 0;
 
 	// Check if the data block requested goes out of range.
-	if ( startIndex.data() + numData > size_ ) return 0;
+	if ( startIndex.data() + numData > numData_ ) return 0;
 
 	unsigned int actualStart = start_;
 	if ( start_ < startIndex.data() ) 
