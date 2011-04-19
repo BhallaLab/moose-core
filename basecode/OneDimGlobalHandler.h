@@ -31,6 +31,11 @@ class OneDimGlobalHandler: public DataHandler
 
 		DataHandler* copy() const;
 
+		/**
+		 * Make a single copy with same dimensions, using a different Dinfo
+		 */
+		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo ) const;
+
 		DataHandler* copyExpand( unsigned int copySize ) const;
 
 		DataHandler* copyToNewDim( unsigned int newDimSize ) const;
@@ -87,7 +92,7 @@ class OneDimGlobalHandler: public DataHandler
 		}
 
 		iterator end() const {
-			return iterator( this, size_, size_ );
+			return iterator( this, numData_, numData_ );
 		}
 
 		/**
@@ -103,7 +108,7 @@ class OneDimGlobalHandler: public DataHandler
 
 	protected:
 		char* data_;
-		unsigned int size_;	// Number of data entries in the whole array
+		unsigned int numData_;	// Number of data entries in the whole array
 };
 
 #endif	// _ONE_DIM_GLOBAL_HANDLER_H

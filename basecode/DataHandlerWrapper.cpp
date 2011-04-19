@@ -40,6 +40,12 @@ DataHandler* DataHandlerWrapper::copy() const
 	return parent_->copy();
 }
 
+DataHandler* DataHandlerWrapper::copyUsingNewDinfo(
+	const DinfoBase* dinfo ) const
+{
+	return parent_->copyUsingNewDinfo( dinfo );
+}
+
 DataHandler* DataHandlerWrapper::copyExpand( unsigned int copySize ) const
 {
 	return parent_->copyExpand( copySize );

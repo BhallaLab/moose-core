@@ -33,6 +33,8 @@ class DataHandlerWrapper: public DataHandler
 		 */
 		DataHandler* copy() const;
 
+		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo) const;
+
 		DataHandler* copyExpand( unsigned int copySize ) const;
 
 		DataHandler* copyToNewDim( unsigned int newDimSize ) const;

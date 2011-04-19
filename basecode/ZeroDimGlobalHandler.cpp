@@ -50,6 +50,14 @@ DataHandler* ZeroDimGlobalHandler::copy() const
 	return ( new ZeroDimGlobalHandler( this ) );
 }
 
+DataHandler* ZeroDimGlobalHandler::copyUsingNewDinfo( 
+	const DinfoBase* dinfo) const
+{
+	ZeroDimGlobalHandler* ret = new ZeroDimGlobalHandler( dinfo );
+	ret->data_ = dinfo->allocData( 1 );
+	return ret;
+}
+
 DataHandler* ZeroDimGlobalHandler::copyExpand( unsigned int copySize ) const
 {
 	OneDimGlobalHandler* ret = new OneDimGlobalHandler( dinfo() );

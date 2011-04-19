@@ -76,6 +76,12 @@ class DataHandler
 		virtual DataHandler* copy() const = 0;
 
 		/**
+		 * Copies DataHandler dimensions but uses new Dinfo to allocate
+		 * contents and handle new data. Useful when making zombie copies.
+		 */
+		virtual DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo ) const = 0;
+
+		/**
 		 * Version 2: Copy same dimensions but different # of entries.
 		 * The copySize is the total number of targets, 
 		 * here we need to figure out

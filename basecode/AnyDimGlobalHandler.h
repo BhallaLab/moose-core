@@ -51,6 +51,8 @@ class AnyDimGlobalHandler: public DataHandler
 		 */
 		DataHandler* copy() const;
 
+		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo ) const;
+
 		/**
 		 * Version 2: Copy same dimensions but different # of entries.
 		 * The copySize is the total number of targets, 
@@ -145,7 +147,7 @@ class AnyDimGlobalHandler: public DataHandler
 		void nextIndex( DataId& index, unsigned int& linearIndex ) const;
 	protected:
 		char* data_;
-		unsigned int size_;	// Number of data entries in the whole array
+		unsigned int numData_;	// Number of data entries in the whole array
 		vector< unsigned int > dims_;
 	private:
 };

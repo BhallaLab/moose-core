@@ -10,7 +10,7 @@
 #ifndef _SMOL_POOL_H
 #define _SMOL_POOL_H
 
-class SmolPool: public SmolSim
+class SmolPool
 {
 	public: 
 		SmolPool();
@@ -71,6 +71,8 @@ class SmolPool: public SmolSim
 
 		static const Cinfo* initCinfo();
 	private:
+		struct simstruct* sim_; 
+		// The sim_ struct is always on the local node, so a ptr is OK.
 		double nInit_;
 		double diffConst_;
 };

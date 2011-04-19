@@ -12276,6 +12276,30 @@ Following Steve's advice, added a line "smolUpdateSim" and that lets it
 clear the display and subsequently to run it.
 
 There is a pending bug with MOOSE, deleting the SmolSim object. Does not seem
-to do with Smoldyn.
+to do with Smoldyn. Checkin 2619.
 
+============================================================================
+18 April 2011
+Trying to track down deleting bug. It only crops up after we have set the path.
+in testSmol.cpp.
 
+OK, tracked it down. SmolPool::smolSpeciesInit tries to assign the local field
+diffConst_ to the original diffConst field. But the SmolPool data ptr 
+itself is just a cast version of the SmolSim, so this local field doesn't
+exist in memory.
+Tried to see if the sim knows about the diffConst field. Somewhere in
+the libsmoldyn.h library there is a way to assign it (smolSetSpeciesMobility),
+but I don't see a corresponding way to get the diffConst from the New
+Lab complex.
+Options:
+	- Have the SimPool be a small wrapper of the Stoich and also include
+	a ptr to the sim_.
+	- Have the SmolSim maintain another vector of doubles for the
+	diffusion constants
+
+============================================================================
+19 April 2011
+Fixed problem with the SmolPool. I changed it to an independent class with its
+own pointer to sim_. This required a new function in DataHandler and all its
+subclasses, to copy over a DataHandler but using a new Dinfo for the new
+data type.

@@ -51,6 +51,8 @@ class AnyDimHandler: public AnyDimGlobalHandler
 		 */
 		DataHandler* copy() const;
 
+		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo ) const;
+
 		/**
 		 * Version 2: Copy same dimensions but different # of entries.
 		 * The copySize is the total number of targets, 
