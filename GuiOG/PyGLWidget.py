@@ -356,6 +356,42 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 		
 	if (ev.modifiers() & QtCore.Qt.ControlModifier):
 	    self.ctrlPressed = True	
+	elif (ev.key() == QtCore.Qt.Key_Up):
+		self.translate([0.0, 0.25, 0.0])
+		self.updateGL()
+	elif (ev.key() == QtCore.Qt.Key_Down):
+		self.translate([0.0, -0.25, 0.0])
+		self.updateGL()
+	elif (ev.key() == QtCore.Qt.Key_Left):
+		self.translate([-0.25, 0.0, 0.0])
+		self.updateGL()
+	elif (ev.key() == QtCore.Qt.Key_Right):
+		self.translate([0.25, 0.0, 0.0])
+		self.updateGL()
+	elif (ev.key() == QtCore.Qt.Key_Plus)or(ev.key() == QtCore.Qt.Key_PageUp):
+		self.translate([0.0, 0.0, 0.75])
+		self.updateGL()
+	elif (ev.key() == QtCore.Qt.Key_Minus)or(ev.key() == QtCore.Qt.Key_PageDown):
+		self.translate([0.0, 0.0, -0.75])
+		self.updateGL()
+	elif (ev.key() == QtCore.Qt.Key_X):
+		self.rotate([1.0, 0.0, 0.0],2.0)
+		self.updateGL()
+	elif (ev.key() == QtCore.Qt.Key_C):
+		self.rotate([1.0, 0.0, 0.0],-2.0)
+		self.updateGL()
+	elif (ev.key() == QtCore.Qt.Key_Y):
+		self.rotate([0.0, 1.0, 0.0],2.0)
+		self.updateGL()
+	elif (ev.key() == QtCore.Qt.Key_U):
+		self.rotate([0.0, 1.0, 0.0],-2.0)
+		self.updateGL()
+	elif (ev.key() == QtCore.Qt.Key_Z):
+		self.rotate([0.0, 0.0, 1.0],2.0)
+		self.updateGL()
+	elif (ev.key() == QtCore.Qt.Key_A):
+		self.rotate([0.0, 0.0, 1.0],-2.0)
+		self.updateGL()
 
     def keyReleaseEvent(self, ev):
 	"""
@@ -422,12 +458,10 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 	
 	buffer = glSelectBuffer(len(self.sceneObjects)*4)
 	projection = glGetDouble(GL_PROJECTION_MATRIX)
-	#projection = glGetDouble(GL_MODELVIEW_MATRIX)
 	viewport = glGetInteger(GL_VIEWPORT)
 		
 	glRenderMode(GL_SELECT)
 	glMatrixMode(GL_PROJECTION)
-	#glMatrixMode(GL_MODELVIEW)
 	glPushMatrix()
 	glLoadIdentity()
 	
@@ -437,13 +471,12 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 	glInitNames()
 	glPushName(0)
 		
-	
+	glMatrixMode(GL_MODELVIEW)
 	for i in range(len(self.sceneObjects)):
 	    glLoadName(i)
 	    self.sceneObjects[i].render()
 				
 	glMatrixMode(GL_PROJECTION)
-	#glMatrixMode(GL_MODELVIEW)
 	glPopMatrix()
 	glMatrixMode(GL_MODELVIEW)
 	glFlush()
@@ -459,7 +492,7 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 	if names:	
 	    #print self.sceneObjectNames[names[0]]
 	    self.compartmentSelected.emit(str(self.sceneObjectNames[names[0]]))	#printing the cell path
-		
+	    #self.compartmentSelected.emit(QtCore.SIGNAL('PyQt_PyObject'),self.sceneObjectNames[names[0]])
 	if nearestHit != None:
 	    return self.sceneObjects[nearestHit[1]]
 
@@ -471,16 +504,16 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 	Creates the XYZ axis in the 0 coordinate, just for reference.
 	"""
 	# XYZ axis
-	glLineWidth(2)
+	glLineWidth(1)
 	glDisable(GL_LIGHTING)
 	glBegin(GL_LINES)
-	glColor(1, 0, 0)
+	glColor(1, 0, 0)	#Xaxis, Red color
 	glVertex3f(0, 0, 0)
 	glVertex3f(1, 0, 0)
-	glColor(0, 1, 0)
+	glColor(0, 1, 0)	#Yaxis, Green color
 	glVertex3f(0, 0, 0)
 	glVertex3f(0, 1, 0)
-	glColor(0, 0, 1)
+	glColor(0, 0, 1)	#Zaxis, Blue color
 	glVertex3f(0, 0, 0)
 	glVertex3f(0, 0, 1)
 	glEnd()
