@@ -47,23 +47,23 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 	qgl2.show()
 	qgl2.raise_()
 
-    def pickCompartment(self,path):				#path is a QString type moosepath
+    def pickCompartment(self,path):						#path is a QString type moosepath
         SelectedChild = self.mtree.pathToTreeChild(path)
-    	self.mtree.setCurrentItem(SelectedChild)		#select the corresponding moosetree
+    	self.mtree.setCurrentItem(SelectedChild)				#select the corresponding moosetree
 	self.makeObjectFieldEditor(SelectedChild.getMooseObject())		#update the corresponding property
     		
     def update_graph(self):
 
 	#mc.loadG('Mitral.g')
-	mc.readCell('/mit.p','/cell')
-	self.update_mtree('/cell')
+	mc.readCell('/mit.p','cell')
+	self.update_mtree('cell')
 	
 	self.qgl.selectionMode=0
-	self.qgl.viz=1						#turn on visualization
-	self.qgl.setColorMap(120*1e+06,45000*1e+06,30,cMap='jet')		#set the color map for visualization
+	#self.qgl.viz=1						#turn on visualization
+	#self.qgl.setColorMap(120*1e+06,45000*1e+06,30,cMap='jet')		#set the color map for visualization
 
 	#self.qgl.drawAllCells(2)				#draws all cells in the moose root, in the specified style
-	self.qgl.drawNewCell('/cell',0)			#updates the canvas with just the single cell, ip1 cellname, ip2 style (1=skeletal, 2=readDimension)
+	self.qgl.drawNewCell('cell',style=2,cellCentre=[1,1,1])			#updates the canvas with just the single cell, ip1 cellname, ip2 style (1=skeletal, 2=readDimension)
 	
 	
 
@@ -93,9 +93,15 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         	self.qgl.selectedObjects.removeAll()
         	iv = self.qgl.sceneObjectNames.index(obj.path)
         	self.qgl.selectedObjects.add(self.qgl.sceneObjects[iv])
-        	
-		#self.qgl.sceneObjects[iv].select(True)
 		self.qgl.updateGL()
+		
+	elif item.mooseObj_.className=='Cell':
+		self.qgl.selectedObjects.removeAll()
+		for cmpt in self.qgl.sceneObjects:
+			if cmpt.daddy==item.mooseObj_.name:
+        			self.qgl.selectedObjects.add(cmpt)
+        	self.qgl.updateGL()
+				
 
     def makeObjectFieldEditor(self, obj):
         """Creates a table-editor for a selected object."""
