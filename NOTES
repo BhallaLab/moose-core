@@ -12302,4 +12302,9 @@ Options:
 Fixed problem with the SmolPool. I changed it to an independent class with its
 own pointer to sim_. This required a new function in DataHandler and all its
 subclasses, to copy over a DataHandler but using a new Dinfo for the new
-data type.
+data type.  
+Checkin 2628.
+
+Valgrind reported another memory access error, which turned out to be due to
+accessing the no-longer extant original molecule object during zombification.
+Fixed.
