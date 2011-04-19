@@ -12307,4 +12307,22 @@ Checkin 2628.
 
 Valgrind reported another memory access error, which turned out to be due to
 accessing the no-longer extant original molecule object during zombification.
-Fixed.
+Fixed. Many memory leaks persist, though. Checkin 2629.
+
+Working through leaks. Eliminated many from setVec. Huge
+chunk remain from makeCinfoElements:
+
+==3976== 83,316 (11,800 direct, 71,516 indirect) bytes in 295 blocks are definitely lost in loss record 116 of 116
+==3976==    at 0x4C27CC1: operator new(unsigned long) (vg_replace_malloc.c:261)
+==3976==    by 0x484EBF: Shell::adopt(Id, Id) (Shell.cpp:794)
+==3976==    by 0x415D87: adopt(Id, Id) (FieldElementFinfo.cpp:18)
+==3976==    by 0x448A07: FieldElementFinfo<Cinfo, Finfo>::postCreationFunc(Id, Element*) const (FieldElementFinfo.h:85)
+==3976==    by 0x412ED2: Cinfo::postCreationFunc(Id, Element*) const (Cinfo.cpp:120)
+==3976==    by 0x406729: Element::Element(Id, Cinfo const*, std::string const&, DataHandler*) (Element.cpp:77)
+==3976==    by 0x4130CF: Cinfo::makeCinfoElements(Id) (Cinfo.cpp:134)
+==3976==    by 0x41C7A0: init(int, char**) (main.cpp:207)
+==3976==    by 0x41CA6F: main (main.cpp:285)
+
+There are also lots lost from the Smoldyn test.
+
+

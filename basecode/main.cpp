@@ -314,6 +314,7 @@ int main( int argc, char** argv )
 	shellId.destroy();
 	Id(1).destroy();
 	Id(2).destroy();
+	Id(3).destroy();
 	destroyMsgManagers();
 #ifdef USE_MPI
 	MPI_Finalize();
