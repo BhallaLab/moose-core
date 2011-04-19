@@ -211,6 +211,7 @@ template< class A > class SetGet1: public SetGet
 
 				PrepackedBuffer pb( data, totalArgSize, arg.size() ) ;
 				dispatchSetVec( tgt, fid, pb );
+				delete[] data;
 				return 1;
 			}
 			return 0;
