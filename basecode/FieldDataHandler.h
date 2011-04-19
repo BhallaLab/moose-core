@@ -58,6 +58,24 @@ template< class Parent, class Field > class FieldDataHandler: public FieldDataHa
 		}
 
 		/**
+		 * I'm dubious about this one too, because I don't see how the
+		 * original lookup and set/get functions could work on a different
+		 * dinfo
+		 */
+		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo ) const
+		{
+			FieldDataHandler< Parent, Field >* ret =
+				new FieldDataHandler< Parent, Field >(
+					dinfo,
+					parentDataHandler(),
+					lookupField_,
+					getNumField_,
+					setNumField_
+				);
+			return ret;
+		}
+
+		/**
 		 * Returns the pointer to the field entry at fieldIndex, on the
 		 * parent data entry at data.
 		 */

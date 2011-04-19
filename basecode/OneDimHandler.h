@@ -33,6 +33,11 @@ class OneDimHandler: public OneDimGlobalHandler
 
 		DataHandler* copy() const;
 
+		/**
+		 * Make a single copy with same dimensions, using a different Dinfo
+		 */
+		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo ) const;
+
 		DataHandler* copyExpand( unsigned int copySize ) const;
 
 		DataHandler* copyToNewDim( unsigned int newDimSize ) const;

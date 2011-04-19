@@ -23,7 +23,8 @@ AnyDimHandler::AnyDimHandler( const AnyDimHandler* other )
 	: AnyDimGlobalHandler( other->dinfo() ),
 		start_( other->start_ ), end_( other->end_ )
 {
-	;
+	unsigned int num = end_ - start_;
+	data_ = dinfo()->copyData( data_, num, num );
 }
 
 AnyDimHandler::~AnyDimHandler()
@@ -55,7 +56,7 @@ DataHandler* AnyDimHandler::unGlobalize() const
 {
 	return copy(); // It is already unglobal. Do you want a copy?
 	/*
-	nodeBalance( size_ );
+	nodeBalance( numData_ );
 	char* newData = dinfo()->copyData( 
 		data_ + start_ * dinfo->size(), end_ - start_, end_ - start_ );
 	dinfo()->destroyData( data_ );
@@ -69,16 +70,16 @@ DataHandler* AnyDimHandler::unGlobalize() const
  * Determines how to decompose data among nodes for specified size
  * Returns true if there is a change from the current configuration
  */
-bool AnyDimHandler::innerNodeBalance( unsigned int size,
+bool AnyDimHandler::innerNodeBalance( unsigned int numData,
 	unsigned int myNode, unsigned int numNodes )
 {
-	unsigned int oldsize = size_;
-	size_ = size;
+	unsigned int oldNumData = numData_;
+	numData_ = numData;
 	unsigned int start =
-		( size * myNode ) / numNodes;
+		( numData * myNode ) / numNodes;
 	unsigned int end = 
-		( size * ( 1 + myNode ) ) / numNodes;
-	return ( size != oldsize || start != start_ || end != end_ );
+		( numData * ( 1 + myNode ) ) / numNodes;
+	return ( numData != oldNumData || start != start_ || end != end_ );
 }
 
 /**
@@ -89,8 +90,15 @@ bool AnyDimHandler::innerNodeBalance( unsigned int size,
 DataHandler* AnyDimHandler::copy() const
 {
 	AnyDimHandler* ret = new AnyDimHandler( this );
-	unsigned int num = end_ - start_;
-	ret->data_ = dinfo()->copyData( data_, num, num );
+	return ret;
+}
+
+DataHandler* AnyDimHandler::copyUsingNewDinfo( const DinfoBase* dinfo) const
+{
+	AnyDimHandler* ret = new AnyDimHandler( dinfo );
+	ret->start_ = start_;
+	ret->end_ = end_;
+	ret->data_ = dinfo->allocData( end_ - start_ );
 	return ret;
 }
 
@@ -111,7 +119,7 @@ DataHandler* AnyDimHandler::copyToNewDim( unsigned int newDimSize ) const
 {
 	AnyDimHandler* ret = new AnyDimHandler( this );
 
-	ret->nodeBalance( size_ * newDimSize );
+	ret->nodeBalance( numData_ * newDimSize );
 	ret->dims_.push_back( newDimSize );
 	ret->data_ = dinfo()->copyData( data_, end_ - start_, 
 		ret->end_ - ret->start_ );
@@ -175,12 +183,12 @@ char* AnyDimHandler::data( DataId index ) const
 
 bool AnyDimHandler::resize( vector< unsigned int > dims )
 {
-	size_ = 1;
+	numData_ = 1;
 	for ( vector< unsigned int >::iterator i = dims.begin();
 		i != dims.end(); ++i ) {
-		size_ *= *i;
+		numData_ *= *i;
 	}
-	if ( nodeBalance( size_ ) ) { // It changed, reallocate
+	if ( nodeBalance( numData_ ) ) { // It changed, reallocate
 		if ( data_ )
 			dinfo()->destroyData( data_ );
 			data_ = reinterpret_cast< char* >( 

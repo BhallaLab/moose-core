@@ -73,7 +73,7 @@ void testCreateSmolSim()
 
 	// Bug here still to sort out, crashes when I delete it.
 	// Not due to smoldyn, but internal issue with MOOSE.
-	// delete smolId();
+	delete smolId();
 	delete paId();
 	cout << "#" << flush;
 }

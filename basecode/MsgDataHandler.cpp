@@ -39,6 +39,13 @@ DataHandler* MsgDataHandler::copy() const
 	return ( new MsgDataHandler( this ) );
 }
 
+/// copyUsingNewDinfo is illegal for MsgDataHandlers.
+DataHandler* MsgDataHandler::copyUsingNewDinfo( const DinfoBase* d) const
+{
+	assert( 0 ); 
+	return 0;
+}
+
 DataHandler* MsgDataHandler::copyExpand( unsigned int copySize ) const
 {
 	return 0; // Illegal.

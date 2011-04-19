@@ -109,6 +109,7 @@ SmolSim::~SmolSim()
 	if ( sim_ ) {
 		ErrorCode ret = smolFreeSim( sim_ );
 		assert( ret == ECok );
+		sim_ = 0;
 	}
 }
 
@@ -167,6 +168,10 @@ string SmolSim::getPath( const Eref& e, const Qinfo* q ) const
 //////////////////////////////////////////////////////////////
 // Model zombification functions
 //////////////////////////////////////////////////////////////
+struct simstruct* SmolSim::sim()
+{
+	return sim_;
+}
 
 void SmolSim::zombifyModel( const Eref& e, const vector< Id >& elist )
 {
@@ -207,10 +212,13 @@ void SmolSim::zombifyModel( const Eref& e, const vector< Id >& elist )
 
 	/// Stage 1: Define the species in the model and set diff const.
 	for ( vector< Id >::iterator i = pools.begin(); i != pools.end(); ++i )
-		SmolPool::smolSpeciesInit( e.element(), (*i)() );
+	{
+		SmolPool::zombify( e.element(), (*i)() );
+		// SmolPool::smolSpeciesInit( e.element(), (*i)() );
+	}
 
 	/// Stage 2: Set the max # of molecules likely to occur
-		SmolPool::smolMaxNumMolecules( sim_, pools );
+	SmolPool::smolMaxNumMolecules( sim_, pools );
 
 	/// Stage 3: Add the surfaces and panels.
 	for ( vector< Id >::iterator i = surfaces.begin(); i != surfaces.end(); ++i )
@@ -239,8 +247,10 @@ void SmolSim::zombifyModel( const Eref& e, const vector< Id >& elist )
 	/// To run till specified time: smolRunSimUntil
 
 	/// Wrap up: Zombify the pools
+	/*
 	for ( vector< Id >::iterator i = pools.begin(); i != pools.end(); ++i )
 		SmolPool::zombify( e.element(), (*i)() );
+		*/
 }
 
 PanelShape panelShapeFromInt( unsigned int i )
