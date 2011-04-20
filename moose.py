@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Tue Apr  5 22:48:05 2011 (+0530)
+# Last-Updated: Wed Apr 20 18:30:53 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 576
+#     Update #: 598
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -267,7 +267,7 @@ class NeutralArray(object):
         return len(self._id)    
     
     path = property(lambda self: self._id.getPath())
-    id = property(lambda self: self._id)
+    id_ = property(lambda self: self._id)
     fieldNames = property(lambda self: self._id[0].getFieldNames('valueFinfo'))
     name = property(lambda self: self._id[0].getField('name'))
     shape = property(lambda self: self._id.getShape())
@@ -320,11 +320,31 @@ class Neutral(object):
 
     def getField(self, field):
         return self._oid.getField(field)
+
+    def getFieldType(self, field):
+        return self._oid.getFieldType(field)
+
+    def getFieldNames(self, fieldType=None):
+        if fieldType is None:
+            return self._oid.getFieldNames()
+        else:
+            return self._oid.getFieldNames(fieldType)
+
+    def getMsgSrc(self, fieldName):
+        return self._oid.getMsgSrc(fieldName)
+    
+    def getMsgDest(self, fieldName):
+        return self._oid.getMsgDest(fieldName)
     
     className = property(lambda self: self._oid.getField('class'))
     fieldNames = property(lambda self: self._oid.getFieldNames())
     name = property(lambda self: self._oid.getField('name'))
     path = property(lambda self: self._oid.getField('path'))
+    id_ = property(lambda self: self._oid.getId())
+    fieldIndex = property(lambda self: self._oid.getFieldIndex())
+    dataIndex = property(lambda self: self._oid.getDataIndex())
+    
+    
     
 # class IntFire(Neutral):
 #     def __init__(self, *args, **kwargs):
@@ -359,6 +379,11 @@ def getCwe():
     _id = _moose.getCwe()
     obj = NeutralArray(_id)
     return obj
+
+def connect(self, srcMsg, target, destMsg):
+    """Connect this object's source field specified by srcMsg to
+    destMsg field of target object."""
+    return self._oid.connect(srcMsg, dest._oid, destMsg)
 
 #######################################################
 # This is to generate class definitions automatically

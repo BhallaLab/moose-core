@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Apr  5 18:26:00 2011 (+0530)
+// Last-Updated: Wed Apr 20 18:25:30 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 3870
+//     Update #: 3916
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -150,6 +150,10 @@ extern "C" {
          "If one of 'valueFinfo', 'lookupFinfo', 'srcFinfo', 'destFinfo' or"
          "'sharedFinfo' is specified, then only fields of that type are"
          "returned. If no argument is passed, all fields are returned."},
+        {"getMsgSrc", (PyCFunction)_pymoose_ObjId_getMsgSrc, METH_VARARGS,
+         "Retrieve a list of ObjIds sending messages to this field."},
+        {"getMsgDest", (PyCFunction)_pymoose_ObjId_getMsgDest, METH_VARARGS,
+         "Retrieve a list of Ids receiving messages from this field."},
         {"connect", (PyCFunction)_pymoose_ObjId_connect, METH_VARARGS,
          "Connect another object via a message."},
         {"getDataIndex", (PyCFunction)_pymoose_ObjId_getDataIndex, METH_VARARGS,
@@ -171,6 +175,7 @@ extern "C" {
         {"stop", (PyCFunction)_pymoose_stop, METH_VARARGS, "Stop simulation"},
         {"isRunning", (PyCFunction)_pymoose_isRunning, METH_VARARGS, "True if the simulation is currently running."},
         {"loadModel", (PyCFunction)_pymoose_loadModel, METH_VARARGS, "Load model from a file to a specified path."},
+        {"connect", (PyCFunction)_pymoose_connect, METH_VARARGS, "Create a message between srcField on src element to destField on target element."},        
         {"getCwe", (PyCFunction)_pymoose_getCwe, METH_VARARGS, "Get the current working element."},
         {"setCwe", (PyCFunction)_pymoose_setCwe, METH_VARARGS, "Set the current working element."},
         {"getFieldDict", (PyCFunction)_pymoose_getFieldDict, METH_VARARGS, "Get dictionary of field names and types for specified class"},
@@ -362,23 +367,24 @@ extern "C" {
             return -1;
         }
         vector <unsigned int> vec_dims;
-        Py_ssize_t len;
-        if (dims == NULL){
-            len = 1;
-        } else if (PySequence_Check(dims)){
-            len = PySequence_Length(dims);
-            for (Py_ssize_t ii = 0; ii < len; ++ ii){
-                PyObject* dim = PySequence_GetItem(dims, ii);
-                long dim_value = PyInt_AsLong(dim);
-                if (dim_value == -1 && PyErr_Occurred()){
-                    return -1;
+        Py_ssize_t len = 1;
+        if (dims){
+            if (PySequence_Check(dims)){
+                len = PySequence_Length(dims);
+                for (Py_ssize_t ii = 0; ii < len; ++ ii){
+                    PyObject* dim = PySequence_GetItem(dims, ii);
+                    long dim_value = PyInt_AsLong(dim);
+                    if ((dim_value == -1) && PyErr_Occurred()){
+                        return -1;
+                    }
+                    vec_dims.push_back((unsigned int)dim_value);
                 }
-                vec_dims.push_back((unsigned int)dim_value);
+            } else if (PyInt_Check(dims)){
+                len = PyInt_AsLong(dims);
+                if (len <= 0){
+                    len = 1;
+                }
             }
-        } else if (PyInt_Check(dims)){
-            len = PyInt_AsLong(dims);
-            if (len <= 0)
-                len = 1;
         }
         
         if (vec_dims.empty()){
@@ -712,6 +718,8 @@ extern "C" {
             string msg = "No such field on object ";
             msg += self->_oid.id.path() + ": ";
             msg += field;
+            msg += " of type";
+            msg += type;
             PyErr_SetString(PyExc_AttributeError, msg.c_str());
             return NULL;
         }
@@ -1113,7 +1121,49 @@ extern "C" {
         }
         return pyret;             
     }
+
+    static PyObject * _pymoose_ObjId_getMsgSrc(_ObjId * self, PyObject * args)
+    {
+        char * field = NULL;
+        if (!PyArg_ParseTuple(args, "s:_pymoose_ObjId_getMsgSrc", &field)){
+            return NULL;
+        }
+        vector< Id > val = LookupField< string, vector< Id > >::get(self->_oid, "msgSrc", string(field));
     
+        PyObject * ret = PyTuple_New((Py_ssize_t)val.size());
+        for (unsigned int ii = 0; ii < val.size(); ++ ii ){            
+            _Id * entry = PyObject_New(_Id, &IdType);
+            if (!entry || PyTuple_SetItem(ret, (Py_ssize_t)ii, (PyObject*)entry)){ 
+                Py_XDECREF(ret);                                  
+                ret = NULL;                                 
+                break;                                      
+            }
+            entry->_id = val[ii];
+        }
+        return ret;
+    }
+
+    static PyObject * _pymoose_ObjId_getMsgDest(_ObjId * self, PyObject * args)
+    {
+        char * field = NULL;
+        if (!PyArg_ParseTuple(args, "s:_pymoose_ObjId_getMsgDest", &field)){
+            return NULL;
+        }
+        vector< Id > val = LookupField< string, vector< Id > >::get(self->_oid, "msgDest", string(field));
+    
+        PyObject * ret = PyTuple_New((Py_ssize_t)val.size());
+        for (unsigned int ii = 0; ii < val.size(); ++ ii ){            
+            _Id * entry = PyObject_New(_Id, &IdType);
+            if (!entry || PyTuple_SetItem(ret, (Py_ssize_t)ii, (PyObject*)entry)){ 
+                Py_XDECREF(ret);                                  
+                ret = NULL;                                 
+                break;                                      
+            }
+            entry->_id = val[ii];
+        }
+        return ret;
+        
+    }
     // 2011-03-28 10:10:19 (+0530)
     // 2011-03-23 15:13:29 (+0530)
     // getChildren is not required as it can be accessed as getField("children")
@@ -1302,6 +1352,24 @@ extern "C" {
         cwe->_id = getShell().getCwe();        
         PyObject * ret = (PyObject*)cwe;
         return ret;
+    }
+
+    static PyObject * _pymoose_connect(PyObject * dummy, PyObject * args)
+    {
+        PyObject * srcPtr = NULL, * destPtr = NULL;
+        char * srcField = NULL, * destField = NULL, * msgType = NULL;
+        if(!PyArg_ParseTuple(args, "OsOss:_pymoose_connect", &srcPtr, &srcField, &destPtr, &destField, &msgType)){
+            return NULL;
+        }
+        _ObjId * dest = reinterpret_cast<_ObjId*>(destPtr);
+        _ObjId * src = reinterpret_cast<_ObjId*>(srcPtr);
+        bool ret = (getShell().doAddMsg(msgType, src->_oid, string(srcField), dest->_oid, string(destField)) != Msg::badMsg);
+        if (!ret){
+            PyErr_SetString(PyExc_NameError, "connect failed: check field names and type compatibility.");
+            return NULL;
+        }
+        return Py_BuildValue("i", ret);
+        
     }
 
     static PyObject * _pymoose_getFieldDict(PyObject * dummy, PyObject * args)
