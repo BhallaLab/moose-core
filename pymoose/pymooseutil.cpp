@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Mar 26 22:41:37 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Apr  5 22:45:32 2011 (+0530)
+// Last-Updated: Tue Apr  5 22:52:51 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 68
+//     Update #: 70
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -105,10 +105,12 @@ void setup_runtime_env(bool verbose=true){
     }
     if (verbose){
         cout << "ENVIRONMENT: " << endl
+             << "----------------------------------------" << endl
              << "   SINGLETHREADED = " << isSingleThreaded << endl
              << "   INFINITE = " << isInfinite << endl
              << "   NUMCORES = " << numCores << endl
-             << "   NUMNODES = " << numNodes << endl;
+             << "   NUMNODES = " << numNodes << endl
+             << "========================================" << endl;
     }
 }
 
