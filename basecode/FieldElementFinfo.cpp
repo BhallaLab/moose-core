@@ -15,5 +15,6 @@
 
 bool adopt( Id parent, Id child )
 {
+	// cout << "PostCreationFunc has called adopt( " << parent()->getName() << ", " << child()->getName() << ")\n";
 	return Shell::adopt( parent, child );
 }

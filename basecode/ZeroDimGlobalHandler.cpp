@@ -26,7 +26,12 @@ ZeroDimGlobalHandler::ZeroDimGlobalHandler( const ZeroDimGlobalHandler* other )
 
 ZeroDimGlobalHandler::~ZeroDimGlobalHandler()
 {
-	dinfo()->destroyData( data_ );
+	static Dinfo< Cinfo > ref;
+	assert( data_ != 0 );
+	if ( !dinfo()->isA( &ref ) ) {
+		dinfo()->destroyData( data_ );
+	}
+	data_ = 0;
 }
 
 DataHandler* ZeroDimGlobalHandler::globalize() const

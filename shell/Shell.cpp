@@ -147,7 +147,7 @@ static DestFinfo handleCreate( "create",
 			"create( class, parent, newElm, name, dimensions )",
 			new EpFunc5< Shell, string, Id, Id, string, vector< unsigned int > >( &Shell::handleCreate ) );
 
-static DestFinfo del( "delete", 
+static DestFinfo handleDelete( "delete", 
 			"Destroys Element, all its messages, and all its children. Args: Id",
 			new EpFunc1< Shell, Id >( & Shell::destroy ) );
 
@@ -261,7 +261,7 @@ static Finfo* shellMaster[] = {
 	&requestSync,
 	handleAck() };
 static Finfo* shellWorker[] = {
-	&handleCreate, &del,
+	&handleCreate, &handleDelete,
 		&handleAddMsg, &handleSet, &handleGet,
 		&handleMove, &handleCopy, &handleUseClock,
 		&handleSync,

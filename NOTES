@@ -12324,5 +12324,31 @@ chunk remain from makeCinfoElements:
 ==3976==    by 0x41CA6F: main (main.cpp:285)
 
 There are also lots lost from the Smoldyn test.
+Checkin now at 2630.
 
+Seems clear that many of the messages to child Elements are not being destroyed.
+Also doesn't seem that the FieldElements are being destroyed either.
 
+Turned out that there is a toxic function out there somewhere in the unit
+tests, which deletes the root or deletes everything attached to it. I suspect
+the syncDataHandler operation. 
+
+Once this is commented out of all unit tests, the whole mess just crashes
+when it is time to quit.
+
+Confirmed that this happens without Smoldyn compilation too.
+============================================================================
+20 April 2011
+Still struggling with it. 
+Confirmed that it is NOT dual deletion.
+Actually I should not delete the Cinfos at all. They are all statically
+defined.
+Finally put in a check in the destructor for ZeroDimGlobalHandler, to
+avoid deleting Cinfos.
+That fixed it.
+
+Now need to
+- valgrind it
+- re-enable calls to test that were causing crash.
+
+============================================================================
