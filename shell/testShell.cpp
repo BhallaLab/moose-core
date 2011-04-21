@@ -1400,7 +1400,7 @@ void testMpiShell( )
 	testShellAddMsg();
 	testCopyMsgOps();
 	testWildcard();
-	testSyncSynapseSize();
+//	testSyncSynapseSize();
 
 	// Stuff for doLoadModel
 	testFindModelParent();

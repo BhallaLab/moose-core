@@ -95,6 +95,7 @@ Element::Element( Id id, const Element* orig, unsigned int n )
 
 Element::~Element()
 {
+	// cout << "deleting element " << getName() << endl;
 	delete dataHandler_;
 	cinfo_ = 0; // A flag that the Element is doomed, used to avoid lookups when deleting Msgs.
 	for ( vector< vector< MsgFuncBinding > >::iterator i = msgBinding_.begin(); i != msgBinding_.end(); ++i ) {

@@ -22,6 +22,10 @@ OneToAllMsg::OneToAllMsg( MsgId mid, Eref e1, Element* e2 )
 
 OneToAllMsg::~OneToAllMsg()
 {
+	/*
+	cout << "Deleting OneToAllMsg from " << e1_->getName() << " to " <<
+		e2_->getName() << endl;
+		*/
 	;
 }
 

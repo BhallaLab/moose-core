@@ -122,7 +122,6 @@ void Id::bindIdToElement( Element* e )
 	if ( elements()[ id_ ] != 0 )
 		cout << "Warning: assigning Element to existing id " << id_ << "\n";
 		*/
-		// kick, scream, and shout.
 	elements()[ id_ ] = e;
 	// cout << "Id::bindIdToElement '" << e->getName() << "' = " << id_ << endl;
 }

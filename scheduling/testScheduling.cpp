@@ -829,10 +829,10 @@ void testSchedulingProcess()
 {
 	testThreads();
 	testThreadIntFireNetwork();
-	testMultiNodeIntFireNetwork();
+//	testMultiNodeIntFireNetwork();
 }
 
 void testMpiScheduling()
 {
-	testMultiNodeIntFireNetwork();
+//	testMultiNodeIntFireNetwork();
 }

@@ -104,6 +104,18 @@ unsigned int getNumCores()
 bool quitFlag = 0;
 //////////////////////////////////////////////////////////////////
 
+void checkChildren( Id parent, const string& info )
+{
+	vector< Id > ret;
+	Neutral::children( parent.eref(), ret );
+	cout << info << " checkChildren of " << parent()->getName() << ": " <<
+		ret.size() << " children\n";
+	for ( vector< Id >::iterator i = ret.begin(); i != ret.end(); ++i )
+	{
+		cout << (*i)()->getName() << endl;
+	}
+}
+
 Id init( int argc, char** argv )
 {
 	int numCores = getNumCores();
@@ -206,6 +218,9 @@ Id init( int argc, char** argv )
 
 	Cinfo::makeCinfoElements( classMasterId );
 
+	// checkChildren( shellId, "shellId, in init" );
+	// checkChildren( classMasterId, "classMasterId, in init" );
+
 	// This will be initialized within the Process loop, and better there
 	// as it flags attempts to call the Reduce operations before ProcessLoop
 	// Qinfo::clearReduceQ( numCores ); // Initialize the ReduceQ entry.
@@ -270,12 +285,16 @@ void mpiTests()
 {
 #ifdef DO_UNIT_TESTS
 		testMpiMsg();
+	checkChildren( Id(), "after testMpiMsg" );
 		cout << "+" << flush;
 		testMpiShell();
+	checkChildren( Id(), "after testMpiShell" );
 		cout << "+" << flush;
 		testMpiBuiltins();
+	checkChildren( Id(), "after testMpiBuiltins" );
 		cout << "+" << flush;
 		testMpiScheduling();
+	checkChildren( Id(), "after testMpiScheduling" );
 		cout << "+" << flush;
 #endif
 }
@@ -283,19 +302,24 @@ void mpiTests()
 int main( int argc, char** argv )
 {
 	Id shellId = init( argc, argv );
+	checkChildren( shellId, "shellid from now on. Just after init returns" );
 	// Note that the main loop remains the parser loop, though it may
 	// spawn a lot of other stuff.
 	Element* shelle = shellId();
 	Shell* s = reinterpret_cast< Shell* >( shelle->dataHandler()->data( 0 ) );
 	nonMpiTests( s ); // These tests do not need the process loop.
+	checkChildren( shellId, "after nonMpiTests" );
 
 	if ( !s->isSingleThreaded() )
 		s->launchThreads(); // Here we set off the thread/MPI process loop.
 	if ( s->myNode() == 0 ) {
 #ifdef DO_UNIT_TESTS
 		mpiTests();
+	checkChildren( shellId, "after mpiTests" );
 		processTests( s );
+	checkChildren( shellId, "after processTests" );
 		regressionTests();
+	checkChildren( shellId, "after regressionTests" );
 #endif
 		// These are outside unit tests because they happen in optimized
 		// mode, using a command-line argument. As soon as they are done
@@ -305,17 +329,23 @@ int main( int argc, char** argv )
 		else 
 			s->launchParser(); // Here we set off a little event loop to poll user input. It deals with the doQuit call too.
 	}
+	checkChildren( shellId, "after quit" );
 	
 	// Somehow we need to return control to our parser. Then we clean up
 	if ( !s->isSingleThreaded() )
 		s->joinThreads();
 
 
+	/*
 	shellId.destroy();
 	Id(1).destroy();
 	Id(2).destroy();
 	Id(3).destroy();
 	destroyMsgManagers();
+	*/
+	checkChildren( shellId, "after joinThreads" );
+	Neutral* ns = reinterpret_cast< Neutral* >( shelle->dataHandler()->data( 0 ) );
+	ns->destroy( shellId.eref(), 0, 0 );
 #ifdef USE_MPI
 	MPI_Finalize();
 #endif
