@@ -76,13 +76,6 @@ template < class T, class F, class R > class ReduceFinfo: public ReduceFinfoBase
 			(obj->*digestFunc_)( er, reduce );
 		}
 
-		void registerFinfo( Cinfo* c ) {
-			;
-			// c->registerFinfo( trig_ );
-		}
-
-		// bool addMsg( const Finfo* target, MsgId mid, Element* src ) const;
-
 	private:
 		// SrcFinfo* trig_;
 		void ( T::*digestFunc_ )( const Eref& er, const R* arg );

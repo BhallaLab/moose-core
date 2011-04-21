@@ -12352,3 +12352,20 @@ Now need to
 - re-enable calls to test that were causing crash.
 
 ============================================================================
+21 April 2011
+Checkin 2636.
+Ran valgrind. Now there are no outright errors, and a leak of only 848 bytes.
+But before we go too far with this, I should see if the putative 
+Shell::doSyncDataHandler operation is still causing problems. This was called
+by testMultiNodeIntFireNetwork.
+
+Reinstated the call.
+Now, there are no crashes, but the sync function is still apparently removing
+the children of the Root element.
+
+Tracked it down, it was somewhat subtle. The ReduceFinfo has to call 
+Element::clearBinding on the shell Element, to get rid of temporary messages
+it sets up. But the ReduceFinfo was not properly initializing its 
+bindIndex and so it used the default of 0, which represents the child msgs.
+Hence all the children of the root element were lost.
+
