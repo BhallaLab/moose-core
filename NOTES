@@ -12377,6 +12377,12 @@ I delete the Shell Element during wrap-up.
 The latter should not be deleted any more because
 the ZeroDimGlobalHandler doesn't destroy its data. Rerunning valgrind:
 The second seems to have been fixed, but not the first. 
+Checkin 2638.
 
+This also works when compiled with the Smoldyn flags.
+
+Next: Subha needs for the message Elements to provide information about src and
+dest fields. Since any given message may have multiple src/dest pairs, I'll
+list them all.
 
 

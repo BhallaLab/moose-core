@@ -25,7 +25,7 @@ const Cinfo* Finfo::initCinfo()
 	static ReadOnlyValueFinfo< Finfo, string > name(
 		"name",
 		"Name of Finfo",
-		&Finfo::name
+		&Finfo::getName
 	);
 
 	static ReadOnlyValueFinfo< Finfo, string > docs(
@@ -75,7 +75,14 @@ static const Cinfo* finfoCinfo = Finfo::initCinfo();
 
 ////////////////////////////////////////////////////////////////
 
-string Finfo::name( ) const
+const string& Finfo::name( ) const
+{
+	return name_;
+}
+
+// Silly variation needed to handle template expectations for
+// name field.
+string Finfo::getName( ) const
 {
 	return name_;
 }

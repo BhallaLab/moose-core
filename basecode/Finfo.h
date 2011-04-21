@@ -20,8 +20,13 @@ class Finfo
 		/**
 		 * Returns the Finfo name
 		 */
-		string name() const;
+		const string& name() const;
 
+		/**
+		 * Returns string-ified form to handle template expectations
+		 * for name field
+		 */
+		string getName() const;
 
 		/**
 		 * Assign function Ids, bindIndex and so on.

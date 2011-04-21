@@ -101,6 +101,26 @@ class Msg
 		 */
 		 Id getE2() const;
 
+		 /**
+		  * Return names of SrcFinfos for messages going from e1 to e2.
+		  */
+		 vector< string > getSrcFieldsOnE1() const;
+
+		 /**
+		  * Return names of DestFinfos for messages going from e1 to e2.
+		  */
+		 vector< string > getDestFieldsOnE2() const;
+
+		 /**
+		  * Return names of SrcFinfos for messages going from e2 to e1.
+		  */
+		 vector< string > getSrcFieldsOnE2() const;
+
+		 /**
+		  * Return names of DestFinfos for messages going from e2 to e1.
+		  */
+		 vector< string > getDestFieldsOnE1() const;
+
 		/**
 		 * return the Msg Id.
 		 */
