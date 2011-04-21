@@ -43,14 +43,6 @@ Cinfo::Cinfo( const Cinfo& other )
 
 Cinfo::~Cinfo()
 {
-	/*
-	 * We no longer have to delete the Finfos, as they are all statically
-	 * defined.
-	// This assumes we don't give the same Finfo two different names.
-	for ( map< string, Finfo*>::iterator i = finfoMap_.begin();
-		i != finfoMap_.end(); ++i )
-		delete i->second;
-	*/
 	delete dinfo_;
 }
 
@@ -130,7 +122,9 @@ void Cinfo::makeCinfoElements( Id parent )
 		i != cinfoMap().end(); ++i ) {
 		Id id = Id::nextId();
 		char* data = reinterpret_cast< char* >( i->second );
-		DataHandler* dh = new ZeroDimGlobalHandler( &dummy, data );
+		DataHandler* dh = new ZeroDimGlobalHandler( 
+			new Dinfo< Cinfo >(), data );
+			// ( &dummy, data );
 		new Element( id, Cinfo::initCinfo(), i->first, dh );
 		Shell::adopt( parent, id );
 		// cout << "Cinfo::makeCinfoElements: parent= " << parent << ", Id = " << id << ", name = " << i->first << endl;
