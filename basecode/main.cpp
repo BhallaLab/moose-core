@@ -218,8 +218,6 @@ Id init( int argc, char** argv )
 
 	Cinfo::makeCinfoElements( classMasterId );
 
-	// checkChildren( shellId, "shellId, in init" );
-	// checkChildren( classMasterId, "classMasterId, in init" );
 
 	// This will be initialized within the Process loop, and better there
 	// as it flags attempts to call the Reduce operations before ProcessLoop
@@ -285,16 +283,12 @@ void mpiTests()
 {
 #ifdef DO_UNIT_TESTS
 		testMpiMsg();
-	checkChildren( Id(), "after testMpiMsg" );
 		cout << "+" << flush;
 		testMpiShell();
-	checkChildren( Id(), "after testMpiShell" );
 		cout << "+" << flush;
 		testMpiBuiltins();
-	checkChildren( Id(), "after testMpiBuiltins" );
 		cout << "+" << flush;
 		testMpiScheduling();
-	checkChildren( Id(), "after testMpiScheduling" );
 		cout << "+" << flush;
 #endif
 }
@@ -302,7 +296,6 @@ void mpiTests()
 int main( int argc, char** argv )
 {
 	Id shellId = init( argc, argv );
-	checkChildren( shellId, "shellid from now on. Just after init returns" );
 	// Note that the main loop remains the parser loop, though it may
 	// spawn a lot of other stuff.
 	Element* shelle = shellId();
@@ -314,11 +307,8 @@ int main( int argc, char** argv )
 	if ( s->myNode() == 0 ) {
 #ifdef DO_UNIT_TESTS
 		mpiTests();
-	checkChildren( shellId, "after mpiTests" );
 		processTests( s );
-	checkChildren( shellId, "after processTests" );
 		regressionTests();
-	checkChildren( shellId, "after regressionTests" );
 #endif
 		// These are outside unit tests because they happen in optimized
 		// mode, using a command-line argument. As soon as they are done
@@ -328,21 +318,11 @@ int main( int argc, char** argv )
 		else 
 			s->launchParser(); // Here we set off a little event loop to poll user input. It deals with the doQuit call too.
 	}
-	checkChildren( shellId, "after quit" );
 	
 	// Somehow we need to return control to our parser. Then we clean up
 	if ( !s->isSingleThreaded() )
 		s->joinThreads();
 
-
-	/*
-	shellId.destroy();
-	Id(1).destroy();
-	Id(2).destroy();
-	Id(3).destroy();
-	destroyMsgManagers();
-	*/
-	checkChildren( shellId, "after joinThreads" );
 	Neutral* ns = reinterpret_cast< Neutral* >( shelle->dataHandler()->data( 0 ) );
 	ns->destroy( shellId.eref(), 0, 0 );
 #ifdef USE_MPI
