@@ -159,6 +159,83 @@ Id Msg::getE2() const
 	return e2_->id();
 }
 
+vector< string > Msg::getSrcFieldsOnE1() const
+{
+	vector< pair< BindIndex, FuncId > > ids;
+	vector< string > ret;
+
+	e1_->getFieldsOfOutgoingMsg( mid_, ids );
+
+	for ( unsigned int i = 0; i < ids.size(); ++i ) {
+		string name = e1_->cinfo()->srcFinfoName( ids[i].first );
+		if ( name == "" ) {
+			cout << "Error: Msg::getSrcFieldsOnE1: Failed to find field on msg " <<
+			e1_->getName() << "-->" << e2_->getName() << endl;
+		} else {
+			ret.push_back( name );
+		}
+	}
+	return ret;
+}
+
+vector< string > Msg::getDestFieldsOnE2() const
+{
+	vector< pair< BindIndex, FuncId > > ids;
+	vector< string > ret;
+
+	e1_->getFieldsOfOutgoingMsg( mid_, ids );
+
+	for ( unsigned int i = 0; i < ids.size(); ++i ) {
+		string name = e2_->cinfo()->destFinfoName( ids[i].second );
+		if ( name == "" ) {
+			cout << "Error: Msg::getDestFieldsOnE2: Failed to find field on msg " <<
+			e1_->getName() << "-->" << e2_->getName() << endl;
+		} else {
+			ret.push_back( name );
+		}
+	}
+	return ret;
+}
+
+vector< string > Msg::getSrcFieldsOnE2() const
+{
+	vector< pair< BindIndex, FuncId > > ids;
+	vector< string > ret;
+
+	e2_->getFieldsOfOutgoingMsg( mid_, ids );
+
+	for ( unsigned int i = 0; i < ids.size(); ++i ) {
+		string name = e2_->cinfo()->srcFinfoName( ids[i].first );
+		if ( name == "" ) {
+			cout << "Error: Msg::getSrcFieldsOnE2: Failed to find field on msg " <<
+			e1_->getName() << "-->" << e2_->getName() << endl;
+		} else {
+			ret.push_back( name );
+		}
+	}
+	return ret;
+}
+
+vector< string > Msg::getDestFieldsOnE1() const
+{
+	vector< pair< BindIndex, FuncId > > ids;
+	vector< string > ret;
+
+	e2_->getFieldsOfOutgoingMsg( mid_, ids );
+
+	for ( unsigned int i = 0; i < ids.size(); ++i ) {
+		string name = e1_->cinfo()->destFinfoName( ids[i].second );
+		if ( name == "" ) {
+			cout << "Error: Msg::getDestFieldsOnE1: Failed to find field on msg " <<
+			e1_->getName() << "-->" << e2_->getName() << endl;
+		} else {
+			ret.push_back( name );
+		}
+	}
+	return ret;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////
 // Here we set up the Element related stuff for Msgs.
 ///////////////////////////////////////////////////////////////////////////
@@ -179,9 +256,38 @@ const Cinfo* Msg::initCinfo()
 		&Msg::getE2
 	);
 
+	static ReadOnlyValueFinfo< Msg, vector< string > > srcFieldsOnE1(
+		"srcFieldsOnE1",
+		"Names of SrcFinfos for messages going from e1 to e2. There are"
+		"matching entries in the destFieldsOnE2 vector",
+		&Msg::getSrcFieldsOnE1
+	);
+	static ReadOnlyValueFinfo< Msg, vector< string > > destFieldsOnE2(
+		"destFieldsOnE2",
+		"Names of DestFinfos for messages going from e1 to e2. There are"
+		"matching entries in the srcFieldsOnE1 vector",
+		&Msg::getDestFieldsOnE2
+	);
+	static ReadOnlyValueFinfo< Msg, vector< string > > srcFieldsOnE2(
+		"srcFieldsOnE2",
+		"Names of SrcFinfos for messages going from e2 to e1. There are"
+		"matching entries in the destFieldsOnE1 vector",
+		&Msg::getSrcFieldsOnE2
+	);
+	static ReadOnlyValueFinfo< Msg, vector< string > > destFieldsOnE1(
+		"destFieldsOnE1",
+		"Names of destFinfos for messages going from e2 to e1. There are"
+		"matching entries in the srcFieldsOnE2 vector",
+		&Msg::getDestFieldsOnE1
+	);
+
 	static Finfo* msgFinfos[] = {
 		&e1,		// readonly value
 		&e2,		// readonly value
+		&srcFieldsOnE1,	// readonly value
+		&destFieldsOnE2,	// readonly value
+		&srcFieldsOnE2,	// readonly value
+		&destFieldsOnE1,	// readonly value
 	};
 
 	static Cinfo msgCinfo (
