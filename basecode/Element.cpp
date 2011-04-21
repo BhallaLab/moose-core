@@ -477,3 +477,20 @@ unsigned int Element::getInputMsgs( vector< MsgId >& caller, FuncId fid)
 	}
 	return caller.size();
 }
+
+unsigned int Element::getFieldsOfOutgoingMsg( MsgId mid,
+	vector< pair< BindIndex, FuncId > >& ret ) const
+{
+	ret.resize( 0 );
+	for ( unsigned int i = 0; i < msgBinding_.size(); ++i )
+	{
+		const vector< MsgFuncBinding >& mb = msgBinding_[i];
+		for ( vector< MsgFuncBinding >::const_iterator j = mb.begin();
+			j != mb.end(); ++j ) {
+			if ( j->mid == mid ) {
+				ret.push_back( pair< BindIndex, FuncId >( i, j->fid ));
+			}
+		}
+	}
+	return ret.size();
+}

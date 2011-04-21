@@ -472,3 +472,35 @@ void Cinfo::setNumFinfo( unsigned int val ) // Dummy function
 {
 	;
 }
+
+////////////////////////////////////////////////////////////////////
+const string& Cinfo::srcFinfoName( BindIndex bid ) const
+{
+	static const string err = "";
+	for ( vector< Finfo* >::const_iterator i = srcFinfos_.begin(); 
+		i != srcFinfos_.end(); ++i ) {
+		const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >( *i );
+		assert( sf );
+		if ( sf->getBindIndex() == bid ) {
+			return sf->name();
+		}
+	}
+	cout << "Error: Cinfo::srcFinfoName( " << bid << " ): not found\n";
+	return err;
+}
+
+const string& Cinfo::destFinfoName( FuncId fid ) const
+{
+	static const string err = "";
+	for ( vector< Finfo* >::const_iterator i = destFinfos_.begin(); 
+		i != destFinfos_.end(); ++i ) {
+		const DestFinfo* df = dynamic_cast< const DestFinfo* >( *i );
+		assert( df );
+		if ( df->getFid() == fid ) {
+			return df->name();
+		}
+	}
+	cout << "Error: Cinfo::destFinfoName( " << fid << " ): not found\n";
+	return err;
+}
+

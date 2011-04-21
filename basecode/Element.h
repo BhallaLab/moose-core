@@ -199,7 +199,15 @@ class Element
 		unsigned int getInputs( vector< Id >& ret, const DestFinfo* finfo )
 			const;
 
-	/////////////////////////////////////////////////////////////////////
+		/**
+		 * Fills in vector, each entry of which identifies the src and 
+		 * dest fields respectively. 
+		 * Src field is local and identified by BindIndex
+		 * Dest field is a FuncId on the remote Element.
+		 */
+		unsigned int getFieldsOfOutgoingMsg( 
+			MsgId mid, vector< pair< BindIndex, FuncId > >& ret ) const;
+
 		/**
 		 * zombieSwap: replaces the Cinfo and DataHandler of the zombie.
 		 * Deletes old DataHandler first.
@@ -225,20 +233,24 @@ class Element
 		 * Identifies which closely-connected group the Element is in.
 		 * Each Group is assumed to have dense message traffic internally,
 		 * and uses MPI_Allgather to exchange data.
+		 * Not yet in use.
 		 */
 		 unsigned int group_;
 
 		/**
 		 * Message vector. This is the low-level messaging information.
-		 * Contains info about incoming msgs? But this lacks binding info.
+		 * Contains info about incoming as well as outgoing Msgs.
 		 */
 		vector< MsgId > m_;
 
 		/**
 		 * Binds an outgoing message to its function.
+		 * Each index (BindIndex) gives a vector of MsgFuncBindings,
+		 * which are just pairs of MsgId, FuncId.
 		 * SrcFinfo keeps track of the BindIndex to look things up.
 		 * Note that a single BindIndex may refer to multiple Msg/Func
-		 * pairs.
+		 * pairs. This means that a single MsgSrc may dispatch data 
+		 * through multiple msgs using a single 'send' call.
 		 */
 		vector< vector < MsgFuncBinding > > msgBinding_;
 };

@@ -210,6 +210,21 @@ class Cinfo
 			 * Dummy function. We never allow this assignment.
 			 */
 			void setNumFinfo( unsigned int v );
+
+			/**
+			 * Returns the name of the SrcFinfo having the specified 
+			 * BindIndex, on this Cinfo.
+			 * Returns "" on failure.
+			 */
+			 const string& srcFinfoName( BindIndex bid ) const;
+
+			/**
+			 * Returns the name of the DestFinfo having the specified 
+			 * FuncId, on this Cinfo.
+			 * Returns "" on failure.
+			 */
+			 const string& destFinfoName( FuncId fid ) const;
+
 	
 
 			/**
