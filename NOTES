@@ -12368,4 +12368,15 @@ Element::clearBinding on the shell Element, to get rid of temporary messages
 it sets up. But the ReduceFinfo was not properly initializing its 
 bindIndex and so it used the default of 0, which represents the child msgs.
 Hence all the children of the root element were lost.
+Checkin 2637.
+
+Now running valgrind again to see what is leaking memory.
+Two things: the messages from Shell during set/get, and the Dinfo<Cinfo>
+used by makeCinfoElements. The first should really be taken care of when
+I delete the Shell Element during wrap-up.
+The latter should not be deleted any more because
+the ZeroDimGlobalHandler doesn't destroy its data. Rerunning valgrind:
+The second seems to have been fixed, but not the first. 
+
+
 
