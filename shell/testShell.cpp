@@ -1135,6 +1135,7 @@ void testSyncSynapseSize()
 	unsigned int size = 1000;
 	vector< unsigned int > dims( 1, size );
 	Id neuronId = shell->doCreate( "IntFire", Id(), "neurons", dims );
+	assert( neuronId != Id() );
 	Id synId( neuronId.value() + 1 );
 	Element* syn = synId();
 
@@ -1400,7 +1401,7 @@ void testMpiShell( )
 	testShellAddMsg();
 	testCopyMsgOps();
 	testWildcard();
-//	testSyncSynapseSize();
+	testSyncSynapseSize();
 
 	// Stuff for doLoadModel
 	testFindModelParent();

@@ -308,7 +308,6 @@ int main( int argc, char** argv )
 	Element* shelle = shellId();
 	Shell* s = reinterpret_cast< Shell* >( shelle->dataHandler()->data( 0 ) );
 	nonMpiTests( s ); // These tests do not need the process loop.
-	checkChildren( shellId, "after nonMpiTests" );
 
 	if ( !s->isSingleThreaded() )
 		s->launchThreads(); // Here we set off the thread/MPI process loop.
