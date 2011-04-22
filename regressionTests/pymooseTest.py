@@ -107,7 +107,40 @@ class TestPyMooseGlobals(unittest.TestCase):
         newobj = moose.copy(self.src1, self.dest1, newname, 3, True)
         self.assertEqual(newobj.path, self.dest1.path + "/" + newname)
         self.assertEqual(len(newobj), 3)
-        
+
+class TestMessages(unittest.TestCase):
+    def setUp(self):
+        self.src1 = moose.MolArray('/molecule%d' % (uuid.uuid4().int))
+        self.dest1 = moose.ReacArray('/reaction%d' % (uuid.uuid4().int))
+
+    def testConnect(self):
+        self.src1[0].connect('reac', self.dest1[0], 'sub')
+        print 1
+        outmsgs_src = self.src1[0].msgOut
+        print 2
+        outmsgs_dest = self.dest1[0].msgOut
+        print 3
+        self.assertEqual(len(outmsgs_dest), len(outmsgs_src))
+        print 4
+        for ii in range(len(outmsgs_src)):
+            self.assertEqual(outmsgs_src[ii], outmsgs_dest[ii])
+            srcFieldsOnE1 = outmsgs_src[ii].getField('srcFieldsOnE1')
+            self.assertEqual(srcFieldsOnE1[0], 'nOut')
+            destFieldsOnE2 = outmsgs_src[ii].getField('destFieldsOnE2')
+            self.assertEqual(destFieldsOnE2[0], 'subDest')
+        # inmsg_list = self.dest1[0].msgIn
+        # outmsg_list = self.src1[0].msgOut
+        # print inmsg_list, outmsg_list
+        # self.assertEqual(len(inmsg_list), 2)
+        # self.assertEqual(len(outmsg_list), 1)
+        # srcfield1 = inmsg_list[0].getField('srcFieldsOnE2')
+        # destfield1 = inmsg_list[0].getField('destFieldsOnE1')
+        # srcField2 = inmsg_list[0].getField('srcFieldsOnE1')
+        # destField2 = inmsg_list[0].getField('destFieldsOnE2')
+        # self.assertEqual(destfield1, 'reacDest')
+        # self.assertEqual(srcfield1, 'nOut')
+        # self.assertEqual(destField2, 'subDest')
+        # self.assertEqual(srcField2, 'toSub')
         
 if __name__ == '__main__':
     unittest.main()

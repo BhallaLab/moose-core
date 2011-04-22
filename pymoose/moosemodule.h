@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Apr 20 17:59:29 2011 (+0530)
+// Last-Updated: Fri Apr 22 14:10:18 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 246
+//     Update #: 247
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -79,7 +79,7 @@ extern "C" {
     static PyObject * _pymoose_Id_getItem(_Id * self, Py_ssize_t index);
     static PyObject * _pymoose_Id_getSlice(_Id * self, PyObject * args);    
     static PyObject * _pymoose_Id_getShape(_Id * self, PyObject * args);    
-    static int _pymoose_Id_richCompare(_Id * self, PyObject * args, int op);
+    static PyObject * _pymoose_Id_richCompare(_Id * self, PyObject * args, int op);
     static int _pymoose_Id_contains(_Id * self, PyObject * args);
     ///////////////////////////////////////////
     // Methods for ObjId class
@@ -99,7 +99,7 @@ extern "C" {
     static PyObject * _pymoose_ObjId_getMsgDest(_ObjId * self, PyObject * args);
     static PyObject * _pymoose_ObjId_getId(_ObjId * self, PyObject * args);
     static PyObject * _pymoose_ObjId_connect(_ObjId * self, PyObject * args);
-    static int _pymoose_ObjId_richCompare(_ObjId * self, PyObject * args, int op);
+    static PyObject * _pymoose_ObjId_richCompare(_ObjId * self, PyObject * args, int op);
     
     ////////////////////////////////////////////////
     // static functions to be accessed from Python

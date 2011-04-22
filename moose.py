@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Wed Apr 20 18:30:53 2011 (+0530)
+# Last-Updated: Fri Apr 22 14:33:54 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 598
+#     Update #: 630
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -264,7 +264,15 @@ class NeutralArray(object):
         return ret
 
     def __len__(self):
-        return len(self._id)    
+        return len(self._id)
+
+    def __contains__(self, other):
+        if isinstance(other, Neutral):
+            return other._oid in self._id
+        elif isinstance(other, ObjId):
+            return other in self._id
+        else:
+            return False
     
     path = property(lambda self: self._id.getPath())
     id_ = property(lambda self: self._id)
@@ -272,14 +280,6 @@ class NeutralArray(object):
     name = property(lambda self: self._id[0].getField('name'))
     shape = property(lambda self: self._id.getShape())
     
-
-# class IntFireArray(NeutralArray):
-#     def __init__(self, *args, **kwargs):
-#         try:
-#             className = kwargs['type']
-#         except KeyError:
-#             kwargs['type'] = 'IntFire'
-#         NeutralArray.__init__(self, *args, **kwargs)
 
         
 class Neutral(object):
@@ -335,6 +335,31 @@ class Neutral(object):
     
     def getMsgDest(self, fieldName):
         return self._oid.getMsgDest(fieldName)
+
+    def connect(self, srcField, dest, destField, msgType='Single'):
+        return self._oid.connect(srcField, dest._oid, destField, msgType)
+
+    
+    def inMessages(self):
+        msg_list = []
+        for msg in self.msgIn:
+            e1 = msg.getField('e1')
+            e2 = msg.getField('e2')
+            for (f1, f2) in zip(msg.getField('srcFieldsOnE2'), msg.getField('destFieldsOnE1')):
+                msg_str = '[%s].%s <- [%s].%s' % (e1.getPath(), f1, e2.getPath(), f2)
+                msg_list.append(msg_str)
+        return msg_list
+
+    def outMessages(self):
+        msg_list = []
+        for msg in self.msgOut:
+            e1 = msg.getField('e1')
+            e2 = msg.getField('e2')
+            for (f1, f2) in zip(msg.getField('srcFieldsOnE1'), msg.getField('destFieldsOnE2')):
+                msg_str = '[%s].%s -> [%s].%s' % (e1.getPath(), f1, e2.getPath(), f2)
+                msg_list.append(msg_str)
+        return msg_list
+    
     
     className = property(lambda self: self._oid.getField('class'))
     fieldNames = property(lambda self: self._oid.getFieldNames())
@@ -343,13 +368,11 @@ class Neutral(object):
     id_ = property(lambda self: self._oid.getId())
     fieldIndex = property(lambda self: self._oid.getFieldIndex())
     dataIndex = property(lambda self: self._oid.getDataIndex())
-    
-    
-    
-# class IntFire(Neutral):
-#     def __init__(self, *args, **kwargs):
-# 	Neutral.__init__(self, *args, **kwargs)
- 
+
+
+################################################################
+# Wrappers for global functions
+################################################################ 
 
 def copy(src, dest, name, n=1, copyMsg=True):
     if isinstance(src, NeutralArray):
@@ -380,10 +403,14 @@ def getCwe():
     obj = NeutralArray(_id)
     return obj
 
-def connect(self, srcMsg, target, destMsg):
-    """Connect this object's source field specified by srcMsg to
+def connect(src, srcMsg, dest, destMsg, msgType='Single'):
+    """Connect src object's source field specified by srcMsg to
     destMsg field of target object."""
-    return self._oid.connect(srcMsg, dest._oid, destMsg)
+    if isinstance(src, Neutral):
+        src = src._oid
+    if isinstance(dest, Neutral):
+        dest = dest._oid
+    return src.connect(srcMsg, dest, destMsg, msgType)
 
 #######################################################
 # This is to generate class definitions automatically
