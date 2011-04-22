@@ -12385,4 +12385,14 @@ Next: Subha needs for the message Elements to provide information about src and
 dest fields. Since any given message may have multiple src/dest pairs, I'll
 list them all.
 
+Implemented, compiles, clears old tests but no new ones yet for this. 
+Checkin 2639.
+
+Working through unit tests. Many done but there is a problem with
+the # of entries retured on Element::getFieldsOfOutgoingmsg
+for the reverse msg.
+============================================================================
+22 April
+Turned out that my understanding of the shared message semantics was wrong, not
+what the program does. Now clears unit tests.
 
