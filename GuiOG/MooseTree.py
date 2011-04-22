@@ -81,20 +81,11 @@ class MooseTreeWidget(QtGui.QTreeWidget):
             break
         changedItem.updateSlot()
         
-    def pathToTreeChild(self,moosePath):#traverses the tree
-    	#b = str(moosePath).split('/')#p = self.itemList[0]
-    	j=1
-    	return self.getmtreechild(str(moosePath).split('/'),j,self.itemList[0])
-    	
-    def getmtreechild(self,b,j,p):	#traverses the tree
-    	for i in range(0,p.childCount()):
-		if b[j]==p.child(i).mooseObj_.name:
-    			p=p.child(i)
-    			if j==len(b)-1:
-				return p
-			else:
-				j+=1
-				return self.getmtreechild(b,j,p)
+    def pathToTreeChild(self,moosePath):	#traverses the tree, itemlist already in a sorted way 
+    	path = str(moosePath)
+    	for item in self.itemList:
+    		if path==item.mooseObj_.path:
+    			return item
 
     
 if __name__ == '__main__':

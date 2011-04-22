@@ -26,7 +26,7 @@ class BaseObject(object):
 		self.oldColor = self.r, self.g, self.b  
 		# Reference to the GLWidget object that contains this object.
 		self.parent = parent
-		self.daddy = []
+		self.daddy = ''	#can have only one daddy obviously.
 		self.kids = []
 
 	@property

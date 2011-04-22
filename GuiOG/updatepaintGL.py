@@ -29,7 +29,7 @@ class updatepaintGL(PyGLWidget):
 		glEnable(GL_LIGHTING)
 		glEnable(GL_LIGHT0)
 		glEnable(GL_COLOR_MATERIAL)
-		
+
 		light0_pos = 200.0, 200.0, 300.0, 0
 		diffuse0 = 1.0, 1.0, 1.0, 1.0
 		specular0 = 1.0, 1.0, 1.0, 1.0
@@ -51,21 +51,20 @@ class updatepaintGL(PyGLWidget):
 	self.selectedObjects.render()	
 	
     def updateViz(self):
-    	if self.viz==1:
-    		vals=[]
-		for name in self.vizObjectNames:
-			r=mc.pathToId(name+self.moosepath)
-			d=float(mc.getField(r,self.variable))
-			vals.append(d)
-		inds = digitize(vals,self.stepVals)
-		
-		for i in range(0,len(self.vizObjects)):
-			self.vizObjects[i].r,self.vizObjects[i].g,self.vizObjects[i].b=self.colorMap[inds[i]-1]
+	vals=[]
+	for name in self.vizObjectNames:
+		r=mc.pathToId(name+self.moosepath)
+		d=float(mc.getField(r,self.variable))
+		vals.append(d)
+	inds = digitize(vals,self.stepVals)
 
-		self.updateGL()
+	for i in range(0,len(self.vizObjects)):
+		self.vizObjects[i].r,self.vizObjects[i].g,self.vizObjects[i].b=self.colorMap[inds[i]-1]
+
+	self.updateGL()
 			
-    def drawNewCell(self, cellName, style = 2,cellCentre=[0.0,0.0,0.0],cellAngle=[0.0,0.0,0.0,0.0]):		#cellName = moosepath
-    	
+    def drawNewCell(self, cellName, style = 2,cellCentre=[0.0,0.0,0.0],cellAngle=[0.0,0.0,0.0,0.0]):	
+    	#***cellName = moosepath in the canvas***
 	an=moose.Neutral(cellName)
 	all_ch=an.childList 					#all children
 	ch = self.get_childrenOfField(all_ch,'Compartment')	#compartments only
@@ -130,11 +129,32 @@ class updatepaintGL(PyGLWidget):
 	    		
 
     def drawAllCells(self, style = 2, cellCentre=[0.0,0.0,0.0], cellAngle=[0.0,0.0,0.0,0.0]):
-        an=moose.Neutral('/')					#moose root children
-	all_ch=an.childList 					#all children
+        an=moose.Neutral('/')						#moose root children
+	all_ch=an.childList 	
+						#all children under root, of cell type
 	ch = self.get_childrenOfField(all_ch,'Cell')
 	for i in range(0,len(ch),1):
-	    self.drawNewCell(moose.Cell(ch[i]).name,style,cellCentre,cellAngle)
+	    self.drawNewCell(moose.Cell(ch[i]).path,style,cellCentre,cellAngle)
+	    
+	nh = self.get_childrenOfField(all_ch,'Neutral')			#all cells under all other neutral elements.	
+	for j in range(0,len(nh),1):
+	    an=moose.Neutral(nh[j])					#this neutral element
+	    all_ch=an.childList 					#all children under this neutral element
+	    ch = self.get_childrenOfField(all_ch,'Cell')
+	    for i in range(0,len(ch),1):
+	    	self.drawNewCell(moose.Cell(ch[i]).path,style,cellCentre,cellAngle)
+	    	
+	
+    def drawAllCellsUnder(self, path, style = 2, cellCentre=[0.0,0.0,0.0], cellAngle=[0.0,0.0,0.0,0.0]):
+	    pathID = mc.pathToId(path)
+	    if mc.className(pathID) =='Neutral':
+		an=moose.Neutral(pathID)					#this neutral element
+	    	all_ch=an.childList 					#all children under this neutral element
+	    	ch = self.get_childrenOfField(all_ch,'Cell')
+	    	for i in range(0,len(ch),1):
+	    		self.drawNewCell(moose.Cell(ch[i]).path,style,cellCentre,cellAngle)	 
+	    else: 	
+	    	print 'Select a Neutral element path'   	
 	    
 
     def get_childrenOfField(self,all_ch,field):	#'all_ch' is a tuple of moose.id, 'field' is the field to sort with; returns a tuple with valid moose.id's
