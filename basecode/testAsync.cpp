@@ -2257,6 +2257,118 @@ void testCinfoElements()
 	temp = ObjId( intFireDestFinfoId, DataId( 0, 11 + ndf ) );
 	// temp.dataId.fieldu= 11;
 	assert( Field< string >::get( temp, "name" ) == "reinit" );
+	cout << "." << flush;
+}
+
+void testMsgSrcDestFields()
+{
+	//////////////////////////////////////////////////////////////
+	// Setup
+	//////////////////////////////////////////////////////////////
+	/* This is initialized in testSharedMsg()
+	static SrcFinfo1< string > s1( "s1", "" );
+	static SrcFinfo2< int, int > s2( "s2", "" );
+	static DestFinfo d0( "d0", "",
+		new OpFunc0< Test >( & Test::handleS0 ) );
+	static DestFinfo d1( "d1", "", 
+		new EpFunc1< Test, string >( &Test::handleS1 ) );
+	static DestFinfo d2( "d2", "", 
+		new EpFunc2< Test, int, int >( &Test::handleS2 ) );
+
+	Test::sharedVec[0] = &s0;
+	Test::sharedVec[1] = &d0;
+	Test::sharedVec[2] = &s1;
+	Test::sharedVec[3] = &d1;
+	Test::sharedVec[4] = &s2;
+	Test::sharedVec[5] = &d2;
+	*/
+	
+	Id t1 = Id::nextId();
+	Id t2 = Id::nextId();
+	// bool ret = Test::initCinfo()->create( t1, "test1", 1 );
+	vector< unsigned int > dims( 1, 1 );
+	Element* e1 = new Element( t1, Test::initCinfo(), "test1", dims, 1 );
+	assert( e1 );
+	assert( e1 == t1() );
+	Element* e2 = new Element( t2, Test::initCinfo(), "test2", dims, 1 );
+	// ret = Test::initCinfo()->create( t2, "test2", 1 );
+	assert( e2 );
+	assert( e2 == t2() );
+
+	// Set up message. The actual routine is in Shell.cpp, but here we
+	// do it independently.
+	const Finfo* shareFinfo = Test::initCinfo()->findFinfo( "shared" );
+	assert( shareFinfo != 0 );
+	Msg* m = new OneToOneMsg( Msg::nextMsgId(), t1(), t2() );
+	assert( m != 0 );
+	bool ret = shareFinfo->addMsg( shareFinfo, m->mid(), t1() );
+	assert( ret );
+
+	//////////////////////////////////////////////////////////////
+	// Test Element::getFieldsOfOutgoingMsg
+	//////////////////////////////////////////////////////////////
+	vector< pair< BindIndex, FuncId > > pairs;
+	e1->getFieldsOfOutgoingMsg( m->mid(), pairs );
+	assert( pairs.size() == 3 );
+	assert( pairs[0].first == dynamic_cast< SrcFinfo* >(Test::sharedVec[0])->getBindIndex() );
+	assert( pairs[0].second == dynamic_cast< DestFinfo* >(Test::sharedVec[1])->getFid() );
+
+	assert( pairs[1].first == dynamic_cast< SrcFinfo* >(Test::sharedVec[2])->getBindIndex() );
+	assert( pairs[1].second == dynamic_cast< DestFinfo* >(Test::sharedVec[3])->getFid() );
+
+	assert( pairs[2].first == dynamic_cast< SrcFinfo* >(Test::sharedVec[4])->getBindIndex() );
+	assert( pairs[2].second == dynamic_cast< DestFinfo* >(Test::sharedVec[5])->getFid() );
+
+	e2->getFieldsOfOutgoingMsg( m->mid(), pairs );
+	assert( pairs.size() == 3 );
+
+	//////////////////////////////////////////////////////////////
+	// Test Cinfo::srcFinfoName
+	//////////////////////////////////////////////////////////////
+	assert( Test::initCinfo()->srcFinfoName( pairs[0].first ) == "s0" );
+	assert( Test::initCinfo()->srcFinfoName( pairs[1].first ) == "s1" );
+	assert( Test::initCinfo()->srcFinfoName( pairs[2].first ) == "s2" );
+
+	//////////////////////////////////////////////////////////////
+	// Test Cinfo::destFinfoName
+	//////////////////////////////////////////////////////////////
+	assert( Test::initCinfo()->destFinfoName( pairs[0].second ) == "d0" );
+	assert( Test::initCinfo()->destFinfoName( pairs[1].second ) == "d1" );
+	assert( Test::initCinfo()->destFinfoName( pairs[2].second ) == "d2" );
+	//////////////////////////////////////////////////////////////
+	// Test Msg::getSrcFieldsOnE1 and family
+	//////////////////////////////////////////////////////////////
+	vector< string > fieldNames;
+	fieldNames = m->getSrcFieldsOnE1();
+	assert( fieldNames.size() == 3 );
+	assert( fieldNames[0] == "s0" );
+	assert( fieldNames[1] == "s1" );
+	assert( fieldNames[2] == "s2" );
+
+	fieldNames = m->getDestFieldsOnE2();
+	assert( fieldNames.size() == 3 );
+	assert( fieldNames[0] == "d0" );
+	assert( fieldNames[1] == "d1" );
+	assert( fieldNames[2] == "d2" );
+
+	fieldNames = m->getSrcFieldsOnE2();
+	assert( fieldNames.size() == 3 );
+	assert( fieldNames[0] == "s0" );
+	assert( fieldNames[1] == "s1" );
+	assert( fieldNames[2] == "s2" );
+
+	fieldNames = m->getDestFieldsOnE1();
+	assert( fieldNames.size() == 3 );
+	assert( fieldNames[0] == "d0" );
+	assert( fieldNames[1] == "d1" );
+	assert( fieldNames[2] == "d2" );
+
+	//////////////////////////////////////////////////////////////
+	// Clean up.
+	//////////////////////////////////////////////////////////////
+	t1.destroy();
+	t2.destroy();
+	cout << "." << flush;
 }
 
 void testAsync( )
@@ -2297,4 +2409,5 @@ void testAsync( )
 	testFinfoFields();
 	testCinfoFields();
 	testCinfoElements();
+	testMsgSrcDestFields();
 }
