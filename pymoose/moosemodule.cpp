@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Apr 20 18:25:30 2011 (+0530)
+// Last-Updated: Fri Apr 22 15:03:30 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 3916
+//     Update #: 3933
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -556,41 +556,38 @@ extern "C" {
         return ret;
     }
     
-    static int _pymoose_Id_richCompare(_Id * self, PyObject * other, int op)
+    static PyObject * _pymoose_Id_richCompare(_Id * self, PyObject * other, int op)
     {
+        int ret = 0;
         if (!self || !other){
-            return 0;
-        }
-        if (!Id_SubtypeCheck(other)){
-            return 0;
-        }
-        if (op == Py_EQ){
-            return (self->_id == ((_Id*)other)->_id);
+            ret = 0;
+        } else if (!Id_SubtypeCheck(other)){
+            ret = 0;
+        } else if (op == Py_EQ){
+            ret = (self->_id == ((_Id*)other)->_id);
         } else if (op == Py_NE) {
-            return (self->_id != ((_Id*)other)->_id);
+            ret = (self->_id != ((_Id*)other)->_id);
         } else if (op == Py_LT){
-            return (self->_id < ((_Id*)other)->_id);
+            ret = (self->_id < ((_Id*)other)->_id);
         } else if (op == Py_GT) {
-            return (((_Id*)other)->_id < self->_id);
+            ret = (((_Id*)other)->_id < self->_id);
         } else if (op == Py_LE){
-            return ((self->_id < ((_Id*)other)->_id) || (self->_id == ((_Id*)other)->_id));
+            ret = ((self->_id < ((_Id*)other)->_id) || (self->_id == ((_Id*)other)->_id));
         } else if (op == Py_GE){
-            return ((((_Id*)other)->_id < self->_id) || (self->_id == ((_Id*)other)->_id));
+            ret = ((((_Id*)other)->_id < self->_id) || (self->_id == ((_Id*)other)->_id));
         } else {
-            return 0;
+            ret = 0;
         }
+        return Py_BuildValue("i", ret);
     }
     
-    static int _pymoose_Id_contains(_Id * self, PyObject * args)
+    static int _pymoose_Id_contains(_Id * self, PyObject * obj)
     {
-        PyObject * obj = NULL;
-        if (!PyArg_ParseTuple(args, "O:_pymoose_Id_contains", &obj)){
-            return 0;
+        int ret = 0;
+        if (ObjId_Check(obj)){
+            ret = (((_ObjId*)obj)->_oid.id == self->_id);
         }
-        if (!ObjId_Check(obj)){
-            return 0;
-        }
-        return (((_ObjId*)obj)->_oid.id == self->_id);
+        return ret;
     }
     /////////////////////////////////////////////////////
     // ObjId functions.
@@ -1186,21 +1183,21 @@ extern "C" {
         return Py_BuildValue("i", ret);
     }
 
-    static int _pymoose_ObjId_richCompare(_ObjId * self, PyObject * other, int op)
+    static PyObject * _pymoose_ObjId_richCompare(_ObjId * self, PyObject * other, int op)
     {
+        int ret;
         if (!self || !other){
-            return 0;
-        }
-        if (!ObjId_SubtypeCheck(other)){
-            return 0;
-        }
-        if (op == Py_EQ){
-            return (self->_oid == ((_ObjId*)other)->_oid);
+            ret = 0;
+        } else if (!ObjId_SubtypeCheck(other)){
+            ret = 0;
+        } else if (op == Py_EQ){
+            ret = (self->_oid == ((_ObjId*)other)->_oid);
         } else if (op == Py_NE){
-            return !(self->_oid == ((_ObjId*)other)->_oid);
+            ret = !(self->_oid == ((_ObjId*)other)->_oid);
         } else {
-            return 0;
+            ret = 0;
         }
+        return Py_BuildValue("i", ret);
     }
 
     static PyObject * _pymoose_ObjId_getDataIndex(_ObjId * self, PyObject * args)
@@ -1368,8 +1365,7 @@ extern "C" {
             PyErr_SetString(PyExc_NameError, "connect failed: check field names and type compatibility.");
             return NULL;
         }
-        return Py_BuildValue("i", ret);
-        
+        return Py_BuildValue("i", ret);        
     }
 
     static PyObject * _pymoose_getFieldDict(PyObject * dummy, PyObject * args)
