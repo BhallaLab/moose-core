@@ -175,7 +175,7 @@ ZeroOrder* ZombieReac::makeHalfReaction(
 {
 	vector< Id > mols;
 	unsigned int numReactants = orig->getOutputs( mols, finfo ); 
-	ZeroOrder* rateTerm;
+	ZeroOrder* rateTerm = 0;
 	if ( numReactants == 1 ) {
 		rateTerm = 
 			new FirstOrder( rate, convertIdToMolIndex( mols[0] ) );
