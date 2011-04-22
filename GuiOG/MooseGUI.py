@@ -47,7 +47,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 	qgl2.show()
 	qgl2.raise_()
 
-    def pickCompartment(self,path):						#path is a QString type moosepath
+    def pickCompartment(self,path):	#path is a QString type moosepath
         SelectedChild = self.mtree.pathToTreeChild(path)
     	self.mtree.setCurrentItem(SelectedChild)				#select the corresponding moosetree
 	self.makeObjectFieldEditor(SelectedChild.getMooseObject())		#update the corresponding property
@@ -56,27 +56,31 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
 	#mc.loadG('Mitral.g')
 	mc.readCell('/mit.p','cell')
-	self.update_mtree('cell')
-	
-	self.qgl.selectionMode=0
-	#self.qgl.viz=1						#turn on visualization
-	#self.qgl.setColorMap(120*1e+06,45000*1e+06,30,cMap='jet')		#set the color map for visualization
+	mc.readCell('/mit.p','cell2')
+	self.mtree.recreateTree()			#refreshes the widget with the new elements.
 
-	#self.qgl.drawAllCells(2)				#draws all cells in the moose root, in the specified style
-	self.qgl.drawNewCell('cell',style=2,cellCentre=[1,1,1])			#updates the canvas with just the single cell, ip1 cellname, ip2 style (1=skeletal, 2=readDimension)
+	self.qgl.selectionMode=0			#selection mode, select cells or select compartments. 
 	
+	self.qgl.viz=1								#turn on visualization, use with self.qgl.updateViz()	
+	self.qgl.setColorMap(120*1e+06,45000*1e+06,30,cMap='jet')		#set the color map for visualization
 	
-
-	#self.qgl.updateViz()					#update the visualization, call once every t frames
+	#self.qgl.drawAllCells(2)					#draws all cells in the moose root, in the specified style
+	
+	#self.qgl.drawAllCellsUnder('/shell',2)				#draws cells in the given path, path must be a neutral element
+	
+	self.qgl.drawNewCell('/cell',style=2,cellCentre=[0,0,0])	#draws the canvas with just the given cellpath
+	
+	#self.qgl.updateViz()						#update the visualization, call once every t frames
+	
+	#self.qgl.viz=0
+	
+	self.qgl.drawNewCell('/cell2',style=1,cellCentre=[1,1,1])
+	
+	self.qgl.updateViz()	
 	
 	self.qgl.updateGL()	
 
 	
-    def update_mtree(self,cellName):		#calls the moosetree upper right corner from MooseTree.py the moosetreewidget
-	an=moose.Neutral(cellName)	
-	self.mtree.setupTree(an,'/',[])
-	self.mtree.recreateTree()
-
     def cmp_position(self,line_label): 		#used with onpickplaceline, returns the absolute value of the end of compartment position
         a_id=mc.pathToId(line_label)
         x= float(mc.getField(a_id,'x'))
@@ -98,7 +102,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 	elif item.mooseObj_.className=='Cell':
 		self.qgl.selectedObjects.removeAll()
 		for cmpt in self.qgl.sceneObjects:
-			if cmpt.daddy==item.mooseObj_.name:
+			if cmpt.daddy==item.mooseObj_.path:
         			self.qgl.selectedObjects.add(cmpt)
         	self.qgl.updateGL()
 				
