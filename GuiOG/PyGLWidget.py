@@ -95,7 +95,7 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 	self.selectedObjects =Group(self)		#each line is a scene object.
 	self.sceneObjects = []		#scene objects, abstraction depends on the selection mode.
 	self.sceneObjectNames = []	#names of the scene objects being drawn
-	self.selectionMode = 1 		#select compartments by default =1 selects cells.
+	self.selectionMode = 0 		#select compartments by default =1 selects compartments.
 	
 	#viz parameters
 	self.viz=0
