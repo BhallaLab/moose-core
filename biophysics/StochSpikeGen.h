@@ -6,9 +6,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Mon Dec 13 15:54:16 2010 (+0530)
 // Version: 
-// Last-Updated: Fri Apr 15 16:12:36 2011 (+0530)
+// Last-Updated: Fri Apr 29 12:16:06 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 45
+//     Update #: 47
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -52,14 +52,14 @@ class StochSpikeGen: SpikeGen
 {
   public:
     StochSpikeGen(){
-        failureP_ = 0.05;
+        Pr_ = 0.05;
     }
-    static void setFailureP(const Conn* conn, double value);
-    static double getFailureP(Eref e);
+    static void setPr(const Conn* conn, double value);
+    static double getPr(Eref e);
 
     void innerProcessFunc(const Conn *c, ProcInfo p);
   protected:
-    double failureP_;
+    double Pr_;
 };
 
 #endif 	    /* !STOCHSPIKEGEN_H_ */
