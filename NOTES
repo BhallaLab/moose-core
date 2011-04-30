@@ -12395,4 +12395,23 @@ for the reverse msg.
 22 April
 Turned out that my understanding of the shared message semantics was wrong, not
 what the program does. Now clears unit tests.
+Checkin 2640.
 
+============================================================================
+24 April 2011
+Back to Smoldyn. Added a few lines to the testSmoldyn unit test to
+advance stepwise through the simulation and use the Molecule
+access functions to find how many mols are present. Works.
+
+Now would like to get some spatial info about where the molecules
+live. This will need another library func, don't have a ready
+API for getting the whole lot.
+
+Another useful API function would be to get molecules within a certain
+subvolume, or alternatively fill up a vector of Pools with their
+individual counts based on coords, as digested by the Pool. The latter
+would be more efficient.
+
+Now need to work on the geometry and subdivisions.
+
+============================================================================

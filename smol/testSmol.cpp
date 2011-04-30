@@ -61,15 +61,30 @@ void testCreateSmolSim()
 	sim = ss->sim_;
 	assert( sim != 0 );
 
+	double runtime = 1.0;
+	double monitorTime = 0.1;
 /// Test stuff here to see if my model was set up properly.
+	
 	ErrorCode ret = smolSetSimTimes( sim , 0.0, 1.0 , 50e-6 );
+	assert( ret == ECok );
+	ret = smolSetTimeStep( sim , monitorTime );
 	assert( ret == ECok );
 	smolUpdateSim( sim );
 	smolDisplaySim( sim );
 
-	ret = smolRunSim( sim );
-	assert( ret == ECok || ret == ECwarning );
+	// ret = smolRunSim( sim );
+	// assert( ret == ECok || ret == ECwarning );
 
+
+	cout << endl;
+	for ( double t = 0; t < runtime; t += monitorTime ) {
+		ret = smolRunTimeStep( sim );
+		assert( ret == ECok || ret == ECwarning );
+		double n1 = Field< double >::get( mol1Id, "n" );
+		double n2 = Field< double >::get( mol2Id, "n" );
+		cout << "at t = " << t << ", n1 = " << n1 << ", n2 = " << 
+			n2 << endl;
+	}
 
 	// Bug here still to sort out, crashes when I delete it.
 	// Not due to smoldyn, but internal issue with MOOSE.
