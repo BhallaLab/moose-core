@@ -6,9 +6,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Mon Dec 13 15:54:16 2010 (+0530)
 // Version: 
-// Last-Updated: Fri Apr 29 12:16:06 2011 (+0530)
+// Last-Updated: Mon May  2 11:35:27 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 47
+//     Update #: 48
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -52,7 +52,7 @@ class StochSpikeGen: SpikeGen
 {
   public:
     StochSpikeGen(){
-        Pr_ = 0.05;
+        Pr_ = 1.0;
     }
     static void setPr(const Conn* conn, double value);
     static double getPr(Eref e);
