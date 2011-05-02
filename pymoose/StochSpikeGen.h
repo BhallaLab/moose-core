@@ -22,8 +22,8 @@ namespace pymoose{
         StochSpikeGen( const Id& src, std::string path);
         ~StochSpikeGen();
         const std::string& getType();
-            double __get_failureP() const;
-            void __set_failureP(double failureP);
+            double __get_pr() const;
+            void __set_pr(double pr);
     };
 
 }
