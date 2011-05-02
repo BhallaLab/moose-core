@@ -17,14 +17,14 @@ StochSpikeGen::StochSpikeGen(const Id& src, std::string name, Id& parent):SpikeG
 StochSpikeGen::StochSpikeGen(const Id& src, std::string path):SpikeGen(src, path){}
 StochSpikeGen::~StochSpikeGen(){}
 const std::string& StochSpikeGen::getType(){ return className_; }
-double StochSpikeGen::__get_failureP() const
+double StochSpikeGen::__get_pr() const
 {
-    double failureP;
-    get < double > (id_(), "failureP",failureP);
-    return failureP;
+    double pr;
+    get < double > (id_(), "pr",pr);
+    return pr;
 }
-void StochSpikeGen::__set_failureP( double failureP )
+void StochSpikeGen::__set_pr( double pr )
 {
-    set < double > (id_(), "failureP", failureP);
+    set < double > (id_(), "pr", pr);
 }
 #endif
