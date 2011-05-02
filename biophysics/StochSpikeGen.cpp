@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Apr 14 17:48:14 2011 (+0530)
 // Version: 
-// Last-Updated: Fri Apr 29 12:17:23 2011 (+0530)
+// Last-Updated: Mon May  2 11:31:33 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 87
+//     Update #: 88
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -39,7 +39,7 @@ const Cinfo* initStochSpikeGenCinfo()
 {
     static Finfo* stochSpikeGenFinfos[] = 
             {
-                new ValueFinfo( "Pr", ValueFtype1< double >::global(),
+                new ValueFinfo( "pr", ValueFtype1< double >::global(),
                                 GFCAST( &StochSpikeGen::getPr ),
                                 RFCAST( &StochSpikeGen::setPr ),
                                 "Release probability."
