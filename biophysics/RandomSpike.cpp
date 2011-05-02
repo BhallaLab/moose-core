@@ -90,7 +90,14 @@ can be connected to this and used as the interspike interval."),
 	{
 		"Name", "RandomSpike",
 		"Author", "Subhasis Ray, 2008, NCBS",
-		"Description", "RandomSpike: generates random events",
+		"Description", "RandomSpike: generates random events. It generates a random spike with "
+                "probability p = (rate * dt), where dt is the integration timestep for "
+                "the clock assigned to this object. Thus, it simulates a Poisson "
+                "process with rate {rate}. It is also possible to set the "
+                "inter-spike-interval dynamically, for example using a random number "
+                "generator object. The rate can also be changed dynamically via "
+                "rateDest message to simulate a non-homogeneous Poisson process."
+                ,
 	};
     static Cinfo randomSpikeCinfo(
                                doc,
