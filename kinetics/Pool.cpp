@@ -66,8 +66,8 @@ const Cinfo* Pool::initCinfo()
 			&Pool::getSize
 		);
 
-		static ValueFinfo< Pool, unsigned int > species(
-			"species",
+		static ValueFinfo< Pool, unsigned int > speciesId(
+			"speciesId",
 			"Species identifier for this mol pool. Eventually link to ontology.",
 			&Pool::setSpecies,
 			&Pool::getSpecies
@@ -98,6 +98,12 @@ const Cinfo* Pool::initCinfo()
 			new OpFunc1< Pool, double >( &Pool::setSize )
 		);
 
+		static DestFinfo handleMolWt( "handleMolWt",
+			"Separate finfo to assign molWt, and consequently diffusion const."
+			"Should only be used in SharedMsg with species.",
+			new OpFunc1< Pool, double >( &Pool::handleMolWt )
+		);
+
 		//////////////////////////////////////////////////////////////
 		// SrcFinfo Definitions
 		//////////////////////////////////////////////////////////////
@@ -105,6 +111,11 @@ const Cinfo* Pool::initCinfo()
 		static SrcFinfo1< double > nOut( 
 				"nOut", 
 				"Sends out # of molecules in pool on each timestep"
+		);
+
+		static SrcFinfo0 requestMolWt( 
+				"requestMolWt", 
+				"Requests Species object for mol wt"
 		);
 
 		//////////////////////////////////////////////////////////////
@@ -125,6 +136,15 @@ const Cinfo* Pool::initCinfo()
 			procShared, sizeof( procShared ) / sizeof( const Finfo* )
 		);
 
+		static Finfo* speciesShared[] = {
+			&requestMolWt, &handleMolWt
+		};
+
+		static SharedFinfo species( "species",
+			"Shared message for connecting to species objects",
+			speciesShared, sizeof( speciesShared ) / sizeof ( const Finfo* )
+		);
+
 	static Finfo* poolFinfos[] = {
 		&n,			// Value
 		&nInit,		// Value
@@ -132,11 +152,12 @@ const Cinfo* Pool::initCinfo()
 		&conc,		// Value
 		&concInit,	// Value
 		&size,		// Readonly Value
-		&species,	// Value
+		&speciesId,	// Value
 		&group,			// DestFinfo
 		&setSize,			// DestFinfo
 		&reac,				// SharedFinfo
 		&proc,				// SharedFinfo
+		&species,			// SharedFinfo
 	};
 
 	static Cinfo poolCinfo (
@@ -277,4 +298,9 @@ void Pool::setSpecies( unsigned int v )
 unsigned int Pool::getSpecies() const
 {
 	return species_;
+}
+
+void Pool::handleMolWt( double v )
+{
+	; // Here I should update DiffConst too.
 }

@@ -12429,6 +12429,7 @@ Mesh handling in geometry: voxel data structs		Compartment handling
 Replicating regular ksolver in array calculations	Array-ifying
 Gillepsie solver					-
 Setting up systematic Species info			-
+Duplicating a species (as a tracer)			Species info
 Parallelize rate updates for Ksolver and Gillespie.	array, replic, Gillesp
 Parallelize/multithread regular Ksolver			par rate updates
 Clean up math handler memory leaks			-
@@ -12487,6 +12488,8 @@ Options:
 	- Separate mesh classes, children of chem compt
 	- separate mesh classes, children of geometry
 	- Attributes of geom classes.
+	- Separate tree with its own links to the geom and compt.
+		- Would we ever need multiple meshes on a single compt?
 
 How to represent a complex mesh vol, like a cylinder with a hole in it for a 
 vesicle or a nucleus?
@@ -12494,4 +12497,20 @@ vesicle or a nucleus?
 
 Meshing aside for now. Marching through many many files to convert 'Mol' to
 'Pool'. Done. Clears unit tests.
+============================================================================
+3 May 2011
+Checkin 2649.
+
+Think about Species. This needs to be a separate object, with things like
+mol wt, diffusion const, membrane localization info, a database # and so on. 
+Would like to have a link to it - a msg - from each pool that is of that 
+species. Useful for duplicating like a GFP-tag, or a radioisotope for tracers.
+Also useful for automatically setting up interfaces at ports between solvers.
+Tricky when I want to assign explicit separate diffusion constants.
+Tricky in setting up from SBML which might not have the species info.
+SBML calls it species-type. It is not a required field.
+
+Setting up a bare-bones Species class. Connects to Pools with the mol wt info,
+which the pool can use if desired, for estimating diffusion const.
+
 ============================================================================

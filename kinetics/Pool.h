@@ -66,6 +66,7 @@ class Pool
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
 
+		void handleMolWt( double v );
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref& e, ProcPtr p );
 		void reac( double A, double B );
