@@ -68,6 +68,7 @@ const Cinfo* initRandomSpikeCinfo()
             // MsgSrc definitions
             ///////////////////////////////////////////////////////
             new SrcFinfo("event", Ftype1<double>::global()),
+            new SrcFinfo("outputSrc"Ftype1<double>::global()), 
             
             //////////////////////////////////////////////////////////////////
             // MessageDestinations
@@ -113,6 +114,7 @@ can be connected to this and used as the interspike interval."),
 static const Cinfo* randomSpikeCinfo = initRandomSpikeCinfo();
 
 static const Slot eventSlot = initRandomSpikeCinfo()->getSlot( "event");
+static const Slot outputSlot = initRandomSpikeCinfo()->getSlot( "outputSrc");
 
 
 RandomSpike::RandomSpike()
@@ -292,6 +294,7 @@ void RandomSpike::innerProcessFunc(const Conn* c, ProcInfo p)
             state_ = minAmp_;
         }        
 	send1 <double> ( c->target(), eventSlot, t);    
+	send1 <double> ( c->target(), outputSlot, state_);    
     }
 }
 
