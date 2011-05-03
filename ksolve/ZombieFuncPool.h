@@ -7,13 +7,15 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _ZOMBIE_BUF_MOL_H
-#define _ZOMBIE_BUF_MOL_H
+#ifndef _ZOMBIE_FUNC_POOL_H
+#define _ZOMBIE_FUNC_POOL_H
 
-class ZombieBufMol: public ZombieMol
+class ZombieFuncPool: public ZombiePool
 {
 	public: 
-		ZombieBufMol();
+		ZombieFuncPool();
+
+		void input( double v );
 
 		static void zombify( Element* solver, Element* orig );
 		static void unzombify( Element* zombie );
@@ -22,4 +24,4 @@ class ZombieBufMol: public ZombieMol
 	private:
 };
 
-#endif	// _ZOMBIE_BUF_MOL_H
+#endif	// _ZOMBIE_FUNC_POOL_H

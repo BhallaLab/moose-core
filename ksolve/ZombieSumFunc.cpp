@@ -104,7 +104,7 @@ void ZombieSumFunc::input( double v )
 
 double ZombieSumFunc::getResult( const Eref& e, const Qinfo* q ) const
 {
-	return S_[ convertIdToFuncIndex( e.id() ) + numVarMols_ + numBufMols_ ];
+	return S_[ convertIdToFuncIndex( e.id() ) + numVarPools_ + numBufPools_ ];
 }
 
 //////////////////////////////////////////////////////////////
@@ -124,13 +124,13 @@ void ZombieSumFunc::zombify( Element* solver, Element* orig, Id molId )
 
 	ZombieSumFunc* z = reinterpret_cast< ZombieSumFunc* >( zer.data() );
 
-	vector< Id > srcMols;
+	vector< Id > srcPools;
 	unsigned int funcIndex = z->convertIdToFuncIndex( orig->id() );
-	unsigned int numSrc = orig->getInputs( srcMols, finfo );
+	unsigned int numSrc = orig->getInputs( srcPools, finfo );
 	assert( numSrc > 0 );
 	vector< const double* > molPtrs( numSrc );
 	for ( unsigned int i = 0; i < numSrc; ++i )
-		molPtrs[i] = &z->S_[ z->convertIdToMolIndex( srcMols[i] ) ];
+		molPtrs[i] = &z->S_[ z->convertIdToPoolIndex( srcPools[i] ) ];
 	z->funcs_[ funcIndex ] = new SumTotal( molPtrs );
 
 	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );

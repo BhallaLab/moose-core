@@ -75,7 +75,7 @@ class SmolSim
 
 		*/
 		unsigned int convertIdToReacIndex( Id id ) const;
-		unsigned int convertIdToMolIndex( Id id ) const;
+		unsigned int convertIdToPoolIndex( Id id ) const;
 		/*
 		unsigned int convertIdToFuncIndex( Id id ) const;
 

@@ -9,7 +9,7 @@
 
 #include "SmolHeader.h"
 #include "SmolPool.h"
-#include "Mol.h"
+#include "Pool.h"
 #include "ElementValueFinfo.h"
 #include "DataHandlerWrapper.h"
 
@@ -182,7 +182,7 @@ void SmolPool::reac( double A, double B )
 
 void SmolPool::setN( const Eref& e, const Qinfo* q, double v )
 {
-	// S_[ convertIdToMolIndex( e.id() ) ] = v;
+	// S_[ convertIdToPoolIndex( e.id() ) ] = v;
 }
 
 double SmolPool::getN( const Eref& e, const Qinfo* q ) const
@@ -302,7 +302,7 @@ void SmolPool::zombify( Element* solver, Element* orig )
 	DataHandler* dh = solver->dataHandler()->copyUsingNewDinfo(
 		SmolPool::initCinfo()->dinfo() );
 
-	Mol* m = reinterpret_cast< Mol* >( 
+	Pool* m = reinterpret_cast< Pool* >( 
 		orig->dataHandler()->data( DataId( 0, 0 ) ) );
 	double diffConst = m->getDiffConst();
 	double nInit = m->getNinit();
@@ -342,7 +342,7 @@ void SmolPool::smolSpeciesInit( Element* solver, Element* orig )
 	Eref oer( orig, 0 );
 
 	SmolPool* z = reinterpret_cast< SmolPool* >( zer.data() );
-	Mol* m = reinterpret_cast< Mol* >( oer.data() );
+	Pool* m = reinterpret_cast< Pool* >( oer.data() );
 
 	ErrorCode ret = smolAddSpecies( z->sim_, orig->getName().c_str(), 0 );
 	assert( ret == ECok );

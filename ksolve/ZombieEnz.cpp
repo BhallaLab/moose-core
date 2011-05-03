@@ -109,19 +109,19 @@ const Cinfo* ZombieEnz::initCinfo()
 		// Shared Msg Definitions
 		//////////////////////////////////////////////////////////////
 		static SharedFinfo sub( "sub",
-			"Connects to substrate molecule",
+			"Connects to substrate pool",
 			subShared, sizeof( subShared ) / sizeof( const Finfo* )
 		);
 		static SharedFinfo prd( "prd",
-			"Connects to product molecule",
+			"Connects to product pool",
 			prdShared, sizeof( prdShared ) / sizeof( const Finfo* )
 		);
 		static SharedFinfo enz( "enz",
-			"Connects to enzyme molecule",
+			"Connects to enzyme pool",
 			enzShared, sizeof( enzShared ) / sizeof( const Finfo* )
 		);
 		static SharedFinfo cplx( "cplx",
-			"Connects to enz-sub complex molecule",
+			"Connects to enz-sub complex pool",
 			cplxShared, sizeof( cplxShared ) / sizeof( const Finfo* )
 		);
 		static Finfo* procShared[] = {
@@ -217,24 +217,24 @@ double ZombieEnz::getK3( const Eref& e, const Qinfo* q ) const
 ZeroOrder* ZombieEnz::makeHalfReaction( 
 	Element* orig, double rate, const SrcFinfo* finfo, Id enz ) const
 {
-	vector< Id > mols;
-	unsigned int numReactants = orig->getOutputs( mols, finfo ); 
+	vector< Id > pools;
+	unsigned int numReactants = orig->getOutputs( pools, finfo ); 
 	if ( enz != Id() ) // Used to add the enz to the reactants.
-		mols.push_back( enz );
-	numReactants = mols.size();
+		pools.push_back( enz );
+	numReactants = pools.size();
 
 	ZeroOrder* rateTerm = 0;
 	if ( numReactants == 1 ) {
 		rateTerm = 
-			new FirstOrder( rate, convertIdToMolIndex( mols[0] ) );
+			new FirstOrder( rate, convertIdToPoolIndex( pools[0] ) );
 	} else if ( numReactants == 2 ) {
 		rateTerm = new SecondOrder( rate,
-				convertIdToMolIndex( mols[0] ), 
-				convertIdToMolIndex( mols[1] ) );
+				convertIdToPoolIndex( pools[0] ), 
+				convertIdToPoolIndex( pools[1] ) );
 	} else if ( numReactants > 2 ) {
 		vector< unsigned int > v;
 		for ( unsigned int i = 0; i < numReactants; ++i ) {
-			v.push_back( convertIdToMolIndex( mols[i] ) );
+			v.push_back( convertIdToPoolIndex( pools[i] ) );
 		}
 		rateTerm = new NOrder( rate, v );
 	} else {
@@ -262,10 +262,10 @@ void ZombieEnz::zombify( Element* solver, Element* orig )
 	ZombieEnz* z = reinterpret_cast< ZombieEnz* >( zer.data() );
 	Enz* enz = reinterpret_cast< Enz* >( oer.data() );
 
-	vector< Id > mols;
-	unsigned int numReactants = orig->getOutputs( mols, enzFinfo ); 
+	vector< Id > pools;
+	unsigned int numReactants = orig->getOutputs( pools, enzFinfo ); 
 	assert( numReactants == 1 );
-	Id enzId = mols[0];
+	Id enzId = pools[0];
 
 	ZeroOrder* r1 = z->makeHalfReaction( orig, enz->getK1(), sub, enzId );
 	ZeroOrder* r2 = z->makeHalfReaction( orig, enz->getK2(), cplx, Id() );
@@ -275,29 +275,29 @@ void ZombieEnz::zombify( Element* solver, Element* orig )
 	z->rates_[ rateIndex ] = new BidirectionalReaction( r1, r2 );
 	z->rates_[ rateIndex + 1 ] = r3;
 
-	vector< unsigned int > molIndex;
-	numReactants = r1->getReactants( molIndex ); // Substrates
+	vector< unsigned int > poolIndex;
+	numReactants = r1->getReactants( poolIndex ); // Substrates
 	for ( unsigned int i = 0; i < numReactants; ++i ) {
-		int temp = z->N_.get( molIndex[i], rateIndex );
-		z->N_.set( molIndex[i], rateIndex, temp - 1 );
+		int temp = z->N_.get( poolIndex[i], rateIndex );
+		z->N_.set( poolIndex[i], rateIndex, temp - 1 );
 	}
-	numReactants = r2->getReactants( molIndex );
+	numReactants = r2->getReactants( poolIndex );
 	assert( numReactants == 1 ); // Should only be cplx as the only product
-	unsigned int cplxMol = molIndex[0];
-	z->N_.set( cplxMol, rateIndex, 1 );
+	unsigned int cplxPool = poolIndex[0];
+	z->N_.set( cplxPool, rateIndex, 1 );
 
 	// Now assign reaction 3. The complex is the only substrate here.
-	z->N_.set( cplxMol, rateIndex + 1, -1 );
+	z->N_.set( cplxPool, rateIndex + 1, -1 );
 	// For the products, we go to the prd list directly.
-	numReactants = orig->getOutputs( mols, prd ); 
+	numReactants = orig->getOutputs( pools, prd ); 
 	for ( unsigned int i = 0; i < numReactants; ++i ) {
-		unsigned int j = z->convertIdToMolIndex( mols[i] );
+		unsigned int j = z->convertIdToPoolIndex( pools[i] );
 		int temp = z->N_.get( j, rateIndex + 1 );
 		z->N_.set( j, rateIndex + 1, temp + 1 );
 	}
 	// Enz is also a product here.
-	unsigned int enzMol = z->convertIdToMolIndex( enzId );
-	z->N_.set( enzMol, rateIndex + 1, 1 );
+	unsigned int enzPool = z->convertIdToPoolIndex( enzId );
+	z->N_.set( enzPool, rateIndex + 1, 1 );
 
 	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
 	orig->zombieSwap( zombieEnzCinfo, dh );

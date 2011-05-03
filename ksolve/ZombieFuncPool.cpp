@@ -10,43 +10,43 @@
 #include "ElementValueFinfo.h"
 #include "DataHandlerWrapper.h"
 
-#include "Mol.h"
-#include "FuncMol.h"
-#include "ZombieMol.h"
-#include "ZombieFuncMol.h"
+#include "Pool.h"
+#include "FuncPool.h"
+#include "ZombiePool.h"
+#include "ZombieFuncPool.h"
 #include "ZombieSumFunc.h"
 
-// Derived from ZombieMol.
-const Cinfo* ZombieFuncMol::initCinfo()
+// Derived from ZombiePool.
+const Cinfo* ZombieFuncPool::initCinfo()
 {
 	static DestFinfo input( "input",
 		"Handles input to control value of n_",
-		new OpFunc1< ZombieFuncMol, double >( &ZombieFuncMol::input ) );
+		new OpFunc1< ZombieFuncPool, double >( &ZombieFuncPool::input ) );
 	
-	static Finfo* zombieFuncMolFinfos[] = {
+	static Finfo* zombieFuncPoolFinfos[] = {
 		&input,             // DestFinfo
 	};
 
-	static Cinfo zombieFuncMolCinfo (
-		"ZombieFuncMol",
-		ZombieMol::initCinfo(),
-		zombieFuncMolFinfos,
-		sizeof( zombieFuncMolFinfos ) / sizeof( const Finfo* ),
-		new Dinfo< ZombieFuncMol >()
+	static Cinfo zombieFuncPoolCinfo (
+		"ZombieFuncPool",
+		ZombiePool::initCinfo(),
+		zombieFuncPoolFinfos,
+		sizeof( zombieFuncPoolFinfos ) / sizeof( const Finfo* ),
+		new Dinfo< ZombieFuncPool >()
 	);
 
-	return &zombieFuncMolCinfo;
+	return &zombieFuncPoolCinfo;
 }
 
 //////////////////////////////////////////////////////////////
 // Class definitions
 //////////////////////////////////////////////////////////////
-static const Cinfo* zombieFuncMolCinfo = ZombieFuncMol::initCinfo();
+static const Cinfo* zombieFuncPoolCinfo = ZombieFuncPool::initCinfo();
 
-ZombieFuncMol::ZombieFuncMol()
+ZombieFuncPool::ZombieFuncPool()
 {;}
 
-void ZombieFuncMol::input( double v )
+void ZombieFuncPool::input( double v )
 {;}
 
 //////////////////////////////////////////////////////////////
@@ -55,19 +55,19 @@ void ZombieFuncMol::input( double v )
 
 // static func
 // This is more involved as it also has to zombify the Func.
-void ZombieFuncMol::zombify( Element* solver, Element* orig )
+void ZombieFuncPool::zombify( Element* solver, Element* orig )
 {
-	Element temp( orig->id(), zombieFuncMolCinfo, solver->dataHandler() );
+	Element temp( orig->id(), zombieFuncPoolCinfo, solver->dataHandler() );
 	Eref zer( &temp, 0 );
 	Eref oer( orig, 0 );
 
-	ZombieFuncMol* z = reinterpret_cast< ZombieFuncMol* >( zer.data() );
-	FuncMol* m = reinterpret_cast< FuncMol* >( oer.data() );
+	ZombieFuncPool* z = reinterpret_cast< ZombieFuncPool* >( zer.data() );
+	FuncPool* m = reinterpret_cast< FuncPool* >( oer.data() );
 
 	z->setN( zer, 0, m->getN() );
 	z->setNinit( zer, 0, m->getNinit() );
 	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
-	orig->zombieSwap( zombieFuncMolCinfo, dh );
+	orig->zombieSwap( zombieFuncPoolCinfo, dh );
 
 	// Later change name just to 'func'
 	Id funcId = Neutral::child( oer, "sumFunc" );
@@ -86,21 +86,21 @@ void ZombieFuncMol::zombify( Element* solver, Element* orig )
 }
 
 // Static func
-void ZombieFuncMol::unzombify( Element* zombie )
+void ZombieFuncPool::unzombify( Element* zombie )
 {
 	Element temp( zombie->id(), zombie->cinfo(), zombie->dataHandler() );
 	Eref zer( &temp, 0 );
 	Eref oer( zombie, 0 );
 
-	ZombieFuncMol* z = reinterpret_cast< ZombieFuncMol* >( zer.data() );
+	ZombieFuncPool* z = reinterpret_cast< ZombieFuncPool* >( zer.data() );
 
 	// Here I am unsure how to recreate the correct kind of data handler
 	// for the original. Do later.
 	DataHandler* dh = 0;
 
-	zombie->zombieSwap( FuncMol::initCinfo(), dh );
+	zombie->zombieSwap( FuncPool::initCinfo(), dh );
 
-	FuncMol* m = reinterpret_cast< FuncMol* >( oer.data() );
+	FuncPool* m = reinterpret_cast< FuncPool* >( oer.data() );
 
 	m->setN( z->getN( zer, 0 ) );
 	m->setNinit( z->getNinit( zer, 0 ) );

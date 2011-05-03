@@ -7,33 +7,33 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _MOL_H
-#define _MOL_H
+#ifndef _POOL_H
+#define _POOL_H
 
 /**
- * Identifies molecular species. This is a unique identifier for any
- * given molecular species, regardless of which compartment or solver
+ * SpeciesId identifies molecular species. This is a unique identifier for
+ * any given molecular species, regardless of which compartment or solver
  * is handling it. 
  */
 typedef unsigned int SpeciesId;
 extern const SpeciesId DefaultSpeciesId;
 
 /**
- * The Mol class is a molecular pool. This is a set of molecules of a 
+ * The Pool class is a molecular pool. This is a set of molecules of a 
  * given species, in a uniform chemical context. Note that the same
  * species might be present in other compartments, or be handled by
  * other solvers.
  */
-class Mol
+class Pool
 {
 	friend void testSyncArray( unsigned int size, unsigned int numThreads,
 		unsigned int method );
-	friend void checkVal( double time, const Mol* m, unsigned int size );
+	friend void checkVal( double time, const Pool* m, unsigned int size );
 	friend void forceCheckVal( double time, Element* e, unsigned int size );
 
 	public: 
-		Mol();
-		Mol( double nInit );
+		Pool();
+		Pool( double nInit );
 
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
@@ -87,4 +87,4 @@ class Mol
 		
 };
 
-#endif	// _MOL_H
+#endif	// _POOL_H

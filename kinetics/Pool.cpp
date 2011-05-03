@@ -8,7 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
-#include "Mol.h"
+#include "Pool.h"
 
 #define EPSILON 1e-15
 
@@ -16,61 +16,61 @@ static const double NA = 6.023e23;
 
 const SpeciesId DefaultSpeciesId = 0;
 
-const Cinfo* Mol::initCinfo()
+const Cinfo* Pool::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
 		// Field Definitions
 		//////////////////////////////////////////////////////////////
-		static ValueFinfo< Mol, double > n(
+		static ValueFinfo< Pool, double > n(
 			"n",
-			"Number of molecules",
-			&Mol::setN,
-			&Mol::getN
+			"Number of molecules in pool",
+			&Pool::setN,
+			&Pool::getN
 		);
 
-		static ValueFinfo< Mol, double > nInit(
+		static ValueFinfo< Pool, double > nInit(
 			"nInit",
-			"Initial value of number of molecules",
-			&Mol::setNinit,
-			&Mol::getNinit
+			"Initial value of number of molecules in pool",
+			&Pool::setNinit,
+			&Pool::getNinit
 		);
 
-		static ValueFinfo< Mol, double > diffConst(
+		static ValueFinfo< Pool, double > diffConst(
 			"diffConst",
 			"Diffusion constant of molecule",
-			&Mol::setDiffConst,
-			&Mol::getDiffConst
+			&Pool::setDiffConst,
+			&Pool::getDiffConst
 		);
 
-		static ValueFinfo< Mol, double > conc(
+		static ValueFinfo< Pool, double > conc(
 			"conc",
-			"Concentration of molecules",
-			&Mol::setConc,
-			&Mol::getConc
+			"Concentration of molecules in this pool",
+			&Pool::setConc,
+			&Pool::getConc
 		);
 
-		static ValueFinfo< Mol, double > concInit(
+		static ValueFinfo< Pool, double > concInit(
 			"concInit",
-			"Initial value of molecular concentration",
-			&Mol::setConcInit,
-			&Mol::getConcInit
+			"Initial value of molecular concentration in pool",
+			&Pool::setConcInit,
+			&Pool::getConcInit
 		);
 
-		static ReadOnlyValueFinfo< Mol, double > size(
+		static ReadOnlyValueFinfo< Pool, double > size(
 			"size",
 			"Size of compartment. Units are SI. "
 			"Utility field, the master size info is "
 			"stored on the compartment itself. For voxel-based spatial"
-			"models, the 'size' of the molecule at a given index is the"
+			"models, the 'size' of the pool at a given index is the"
 			"size of that voxel.",
-			&Mol::getSize
+			&Pool::getSize
 		);
 
-		static ValueFinfo< Mol, unsigned int > species(
+		static ValueFinfo< Pool, unsigned int > species(
 			"species",
 			"Species identifier for this mol pool. Eventually link to ontology.",
-			&Mol::setSpecies,
-			&Mol::getSpecies
+			&Pool::setSpecies,
+			&Pool::getSpecies
 		);
 
 		//////////////////////////////////////////////////////////////
@@ -78,10 +78,10 @@ const Cinfo* Mol::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static DestFinfo process( "process",
 			"Handles process call",
-			new ProcOpFunc< Mol >( &Mol::process ) );
+			new ProcOpFunc< Pool >( &Pool::process ) );
 		static DestFinfo reinit( "reinit",
 			"Handles reinit call",
-			new ProcOpFunc< Mol >( &Mol::reinit ) );
+			new ProcOpFunc< Pool >( &Pool::reinit ) );
 
 		static DestFinfo group( "group",
 			"Handle for grouping. Doesn't do anything.",
@@ -89,13 +89,13 @@ const Cinfo* Mol::initCinfo()
 
 		static DestFinfo reacDest( "reacDest",
 			"Handles reaction input",
-			new OpFunc2< Mol, double, double >( &Mol::reac )
+			new OpFunc2< Pool, double, double >( &Pool::reac )
 		);
 
 		static DestFinfo setSize( "setSize",
 			"Separate finfo to assign size, should only be used by compartment."
 			"Defaults to SI units of volume: m^3",
-			new OpFunc1< Mol, double >( &Mol::setSize )
+			new OpFunc1< Pool, double >( &Pool::setSize )
 		);
 
 		//////////////////////////////////////////////////////////////
@@ -104,7 +104,7 @@ const Cinfo* Mol::initCinfo()
 
 		static SrcFinfo1< double > nOut( 
 				"nOut", 
-				"Sends out # of molecules on each timestep"
+				"Sends out # of molecules in pool on each timestep"
 		);
 
 		//////////////////////////////////////////////////////////////
@@ -125,7 +125,7 @@ const Cinfo* Mol::initCinfo()
 			procShared, sizeof( procShared ) / sizeof( const Finfo* )
 		);
 
-	static Finfo* molFinfos[] = {
+	static Finfo* poolFinfos[] = {
 		&n,			// Value
 		&nInit,		// Value
 		&diffConst,	// Value
@@ -139,32 +139,32 @@ const Cinfo* Mol::initCinfo()
 		&proc,				// SharedFinfo
 	};
 
-	static Cinfo molCinfo (
-		"Mol",
+	static Cinfo poolCinfo (
+		"Pool",
 		Neutral::initCinfo(),
-		molFinfos,
-		sizeof( molFinfos ) / sizeof ( Finfo* ),
-		new Dinfo< Mol >()
+		poolFinfos,
+		sizeof( poolFinfos ) / sizeof ( Finfo* ),
+		new Dinfo< Pool >()
 	);
 
-	return &molCinfo;
+	return &poolCinfo;
 }
 
 //////////////////////////////////////////////////////////////
 // Class definitions
 //////////////////////////////////////////////////////////////
-static const Cinfo* molCinfo = Mol::initCinfo();
+static const Cinfo* poolCinfo = Pool::initCinfo();
 const SrcFinfo1< double >& nOut = 
 	*dynamic_cast< const SrcFinfo1< double >* >( 
-	molCinfo->findFinfo( "nOut" ) );
+	poolCinfo->findFinfo( "nOut" ) );
 
 
-Mol::Mol()
+Pool::Pool()
 	: n_( 0.0 ), nInit_( 0.0 ), size_( 1.0 ), diffConst_( 0.0 ),
 		A_( 0.0 ), B_( 0.0 ), species_( 0 )
 {;}
 
-Mol::Mol( double nInit)
+Pool::Pool( double nInit)
 	: n_( 0.0 ), nInit_( nInit ), size_( 1.0 ), diffConst_( 0.0 ),
 		A_( 0.0 ), B_( 0.0 ), species_( 0 )
 {;}
@@ -173,7 +173,7 @@ Mol::Mol( double nInit)
 // MsgDest Definitions
 //////////////////////////////////////////////////////////////
 
-void Mol::process( const Eref& e, ProcPtr p )
+void Pool::process( const Eref& e, ProcPtr p )
 {
 	// double A = e.sumBuf( aSlot );
 	// double B = e.sumBuf( bSlot );
@@ -191,7 +191,7 @@ void Mol::process( const Eref& e, ProcPtr p )
 	nOut.send( e, p, n_ );
 }
 
-void Mol::reinit( const Eref& e, ProcPtr p )
+void Pool::reinit( const Eref& e, ProcPtr p )
 {
 	A_ = B_ = 0.0;
 	n_ = nInit_;
@@ -199,7 +199,7 @@ void Mol::reinit( const Eref& e, ProcPtr p )
 	nOut.send( e, p, n_ );
 }
 
-void Mol::reac( double A, double B )
+void Pool::reac( double A, double B )
 {
 	A_ += A;
 	B_ += B;
@@ -209,72 +209,72 @@ void Mol::reac( double A, double B )
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
-void Mol::setN( double v )
+void Pool::setN( double v )
 {
 	n_ = v;
 }
 
-double Mol::getN() const
+double Pool::getN() const
 {
 	return n_;
 }
 
-void Mol::setNinit( double v )
+void Pool::setNinit( double v )
 {
 	n_ = nInit_ = v;
 }
 
-double Mol::getNinit() const
+double Pool::getNinit() const
 {
 	return nInit_;
 }
 
-void Mol::setConc( double c ) // Conc is given micromolar. Size is in m^3
+void Pool::setConc( double c ) // Conc is given micromolar. Size is in m^3
 {
 	n_ = 1e-3 * NA * c * size_;
 }
 
-double Mol::getConc() const // Returns conc in micromolar.
+double Pool::getConc() const // Returns conc in micromolar.
 {
 	return 1e3 * (n_ / NA) / size_;
 }
 
-void Mol::setConcInit( double c )
+void Pool::setConcInit( double c )
 {
 	nInit_ = 1e-3 * NA * c * size_;
 }
 
-double Mol::getConcInit() const
+double Pool::getConcInit() const
 {
 	return 1e3 * ( nInit_ / NA ) / size_;
 }
 
-void Mol::setDiffConst( double v )
+void Pool::setDiffConst( double v )
 {
 	diffConst_ = v;
 }
 
-double Mol::getDiffConst() const
+double Pool::getDiffConst() const
 {
 	return diffConst_;
 }
 
-void Mol::setSize( double v )
+void Pool::setSize( double v )
 {
 	size_ = v;
 }
 
-double Mol::getSize() const
+double Pool::getSize() const
 {
 	return size_;
 }
 
-void Mol::setSpecies( unsigned int v )
+void Pool::setSpecies( unsigned int v )
 {
 	species_ = v;
 }
 
-unsigned int Mol::getSpecies() const
+unsigned int Pool::getSpecies() const
 {
 	return species_;
 }

@@ -7,14 +7,14 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _ZOMBIE_MOL_H
-#define _ZOMBIE_MOL_H
+#ifndef _ZOMBIE_POOL_H
+#define _ZOMBIE_POOL_H
 
-class ZombieMol: public Stoich
+class ZombiePool: public Stoich
 {
 	public: 
-		ZombieMol();
-		~ZombieMol();
+		ZombiePool();
+		~ZombiePool();
 
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
@@ -56,4 +56,4 @@ class ZombieMol: public Stoich
 	private:
 };
 
-#endif	// _ZOMBIE_MOL_H
+#endif	// _ZOMBIE_POOL_H

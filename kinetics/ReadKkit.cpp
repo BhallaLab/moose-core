@@ -11,8 +11,8 @@
 #include <iomanip>
 #include <fstream>
 #include "header.h"
-#include "Mol.h"
-#include "FuncMol.h"
+#include "Pool.h"
+#include "FuncPool.h"
 
 #include "ReduceBase.h"
 #include "ReduceMax.h"
@@ -59,7 +59,7 @@ ReadKkit::ReadKkit()
 	version_( 11 ),
 	initdumpVersion_( 3 ),
 	numCompartments_( 0 ),
-	numMols_( 0 ),
+	numPools_( 0 ),
 	numReacs_( 0 ),
 	numEnz_( 0 ),
 	numMMenz_( 0 ),
@@ -137,12 +137,12 @@ void ReadKkit::run()
 	shell_->doSetClock( 0, simdt_ );
 	shell_->doSetClock( 1, simdt_ );
 	shell_->doSetClock( 2, plotdt_ );
-	string molpath = basePath_ + "/kinetics/##[ISA=Mol]";
-	string reacpath = basePath_ + "/kinetics/##[ISA!=Mol]";
+	string poolpath = basePath_ + "/kinetics/##[ISA=Pool]";
+	string reacpath = basePath_ + "/kinetics/##[ISA!=Pool]";
 	string plotpath = basePath_ + "/graphs/##[TYPE=Table]," + 
 		basePath_ + "/moregraphs/##[TYPE=Table]";
 	shell_->doUseClock( reacpath, "process", 0 );
-	shell_->doUseClock( molpath, "process", 1 );
+	shell_->doUseClock( poolpath, "process", 1 );
 	shell_->doUseClock( plotpath, "process", 2 );
 	shell_->doReinit();
 	if ( useVariableDt_ ) {
@@ -237,7 +237,7 @@ void ReadKkit::innerRead( ifstream& fin )
 	cout << " innerRead: " <<
 			lineNum_ << " lines read, " << 
 			numCompartments_ << " compartments, " << 
-			numMols_ << " molecules, " << 
+			numPools_ << " molecules, " << 
 			numReacs_ << " reacs, " << 
 			numEnz_ << " enzs, " << 
 			numMMenz_ << " MM enzs, " << 
@@ -393,7 +393,7 @@ void assignArgs( map< string, int >& argConv, const vector< string >& args )
 void ReadKkit::objdump( const vector< string >& args)
 {
 	if ( args[1] == "kpool" )
-		assignArgs( molMap_, args );
+		assignArgs( poolMap_, args );
 	else if ( args[1] == "kreac" )
 		assignArgs( reacMap_, args );
 	else if ( args[1] == "kenz" )
@@ -419,7 +419,7 @@ void ReadKkit::loadtab( const vector< string >& args)
 void ReadKkit::undump( const vector< string >& args)
 {
 	if ( args[1] == "kpool" )
-		buildMol( args );
+		buildPool( args );
 	else if ( args[1] == "kreac" )
 		buildReac( args );
 	else if ( args[1] == "kenz" )
@@ -476,23 +476,23 @@ Id ReadKkit::buildReac( const vector< string >& args )
 	return reac;
 }
 
-void ReadKkit::separateVols( Id mol, double vol )
+void ReadKkit::separateVols( Id pool, double vol )
 {
 	static const double TINY = 1e-3;
 	/*
-	cout << mol << " vol = " << 
-		( reinterpret_cast< const Mol* >( mol.eref().data() ) )->getSize() <<
+	cout << pool << " vol = " << 
+		( reinterpret_cast< const Pool* >( pool.eref().data() ) )->getSize() <<
 		", v2 = " << vol << endl;
 		*/
 
 	for ( unsigned int i = 0 ; i < vols_.size(); ++i ) {
 		if ( fabs( vols_[i] - vol ) / ( vols_[i] + vol ) < TINY ) {
-			volCategories_[i].push_back( mol );
+			volCategories_[i].push_back( pool );
 			return;
 		}
 	}
 	vols_.push_back( vol );
-	vector< Id > temp( 1, mol );
+	vector< Id > temp( 1, pool );
 	volCategories_.push_back( temp );
 }
 
@@ -579,9 +579,9 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 
 		string cplxName = tail + "_cplx";
 		string cplxPath = enzPath + "/" + cplxName;
-		Id cplx = shell_->doCreate( "Mol", enz, cplxName, dim );
+		Id cplx = shell_->doCreate( "Pool", enz, cplxName, dim );
 		assert( cplx != Id () );
-		molIds_[ cplxPath ] = enz; 
+		poolIds_[ cplxPath ] = enz; 
 		Field< double >::set( cplx, "nInit", nComplexInit );
 		SetGet1< double >::set( cplx, "setSize", parentVol );
 
@@ -646,7 +646,7 @@ Id ReadKkit::buildGroup( const vector< string >& args )
 	return group;
 }
 
-Id ReadKkit::buildMol( const vector< string >& args )
+Id ReadKkit::buildPool( const vector< string >& args )
 {
 	static vector< unsigned int > dim( 1, 1 );
 	const double NA = 6.0e23; // Kkit uses 6e23 for NA.
@@ -656,8 +656,8 @@ Id ReadKkit::buildMol( const vector< string >& args )
 	Id pa = shell_->doFind( head );
 	assert( pa != Id() );
 
-	double nInit = atof( args[ molMap_[ "nInit" ] ].c_str() );
-	double vsf = atof( args[ molMap_[ "vol" ] ].c_str() ); 
+	double nInit = atof( args[ poolMap_[ "nInit" ] ].c_str() );
+	double vsf = atof( args[ poolMap_[ "vol" ] ].c_str() ); 
 	/**
 	 * vsf is vol scale factor, which is what GENESIS stores in 'vol' field
 	 * n = vsf * conc( uM )
@@ -665,32 +665,32 @@ Id ReadKkit::buildMol( const vector< string >& args )
 	 * so, vol = 1e6 * vsf / NA
 	 */
 	double vol = 1.0e3 * vsf / NA; // Converts volscale to actual vol in m^3
-	int slaveEnable = atoi( args[ molMap_[ "slave_enable" ] ].c_str() );
-	double diffConst = atof( args[ molMap_[ "DiffConst" ] ].c_str() );
+	int slaveEnable = atoi( args[ poolMap_[ "slave_enable" ] ].c_str() );
+	double diffConst = atof( args[ poolMap_[ "DiffConst" ] ].c_str() );
 
-	Id mol;
+	Id pool;
 	if ( slaveEnable == 0 ) {
-		mol = shell_->doCreate( "Mol", pa, tail, dim );
+		pool = shell_->doCreate( "Pool", pa, tail, dim );
 	} else if ( slaveEnable & 4 ) {
-		mol = shell_->doCreate( "BufMol", pa, tail, dim );
+		pool = shell_->doCreate( "BufPool", pa, tail, dim );
 	} else {
-		mol = shell_->doCreate( "Mol", pa, tail, dim );
+		pool = shell_->doCreate( "Pool", pa, tail, dim );
 		/*
-		cout << "ReadKkit::buildMol: Unknown slave_enable flag '" << 
+		cout << "ReadKkit::buildPool: Unknown slave_enable flag '" << 
 			slaveEnable << "' on " << args[2] << "\n";
 			*/
 	}
-	assert( mol != Id() );
+	assert( pool != Id() );
 	// skip the 10 chars of "/kinetics/"
-	molIds_[ args[2].substr( 10 ) ] = mol; 
+	poolIds_[ args[2].substr( 10 ) ] = pool; 
 
-	Field< double >::set( mol, "nInit", nInit );
-	Field< double >::set( mol, "diffConst", diffConst );
-	SetGet1< double >::set( mol, "setSize", vol );
+	Field< double >::set( pool, "nInit", nInit );
+	Field< double >::set( pool, "diffConst", diffConst );
+	SetGet1< double >::set( pool, "setSize", vol );
 
-	separateVols( mol, vol );
+	separateVols( pool, vol );
 
-	Id info = buildInfo( mol, molMap_, args );
+	Id info = buildInfo( pool, poolMap_, args );
 
 	/*
 	cout << setw( 20 ) << head << setw( 15 ) << tail << "	" << 
@@ -698,30 +698,30 @@ Id ReadKkit::buildMol( const vector< string >& args )
 		vol << "	" << diffConst << "	" <<
 		slaveEnable << endl;
 		*/
-	numMols_++;
-	return mol;
+	numPools_++;
+	return pool;
 }
 
 void ReadKkit::buildSumTotal( const string& src, const string& dest )
 {
-	map< string, Id >::iterator i = molIds_.find( dest );
-	assert( i != molIds_.end() );
+	map< string, Id >::iterator i = poolIds_.find( dest );
+	assert( i != poolIds_.end() );
 	Id destId = i->second;
 	
-	// Don't bother on buffered mol.
-	if ( destId()->cinfo()->isA( "BufMol" ) ) 
+	// Don't bother on buffered pool.
+	if ( destId()->cinfo()->isA( "BufPool" ) ) 
 		return;
 
 	Id sumId;
-	// Check if the mol has not yet been converted to handle SumTots.
-	if ( destId()->cinfo()->name() == "Mol" ) {
+	// Check if the pool has not yet been converted to handle SumTots.
+	if ( destId()->cinfo()->name() == "Pool" ) {
 		vector< unsigned int > dim( 1, 1 );
 		sumId = shell_->doCreate( "SumFunc", destId, "sumFunc", dim );
 		const DataHandler* orig = destId()->dataHandler();
 		DataHandler* dup = orig->copy();
 	
-		// Turn dest into a FuncMol.
-		destId()->zombieSwap( FuncMol::initCinfo(), dup );
+		// Turn dest into a FuncPool.
+		destId()->zombieSwap( FuncPool::initCinfo(), dup );
 	} else {
 		sumId = Neutral::child( destId.eref(), "sumFunc" );
 	}
@@ -733,8 +733,8 @@ void ReadKkit::buildSumTotal( const string& src, const string& dest )
 	}
 	
 	// Connect up messages
-	i = molIds_.find( src );
-	assert( i != molIds_.end() );
+	i = poolIds_.find( src );
+	assert( i != poolIds_.end() );
 	Id srcId = i->second;
 
 	bool ret = shell_->doAddMsg( "single", 
@@ -817,7 +817,7 @@ void ReadKkit::innerAddMsg(
 	assert( i != m2.end() );
 	Id destId = i->second;
 
-	// dest mol is substrate of src reac
+	// dest pool is substrate of src reac
 	bool ret = shell_->doAddMsg( "single", 
 		ObjId( srcId, 0 ), srcMsg,
 		ObjId( destId, 0 ), destMsg ); 
@@ -832,43 +832,43 @@ void ReadKkit::addmsg( const vector< string >& args)
 	
 	if ( args[3] == "REAC" ) {
 		if ( args[4] == "A" && args[5] == "B" ) {
-			innerAddMsg( src, reacIds_, "sub", dest, molIds_, "reac" );
+			innerAddMsg( src, reacIds_, "sub", dest, poolIds_, "reac" );
 		} 
 		else if ( args[4] == "B" && args[5] == "A" ) {
-			// dest mol is product of src reac
-			innerAddMsg( src, reacIds_, "prd", dest, molIds_, "reac" );
+			// dest pool is product of src reac
+			innerAddMsg( src, reacIds_, "prd", dest, poolIds_, "reac" );
 		}
 		else if ( args[4] == "sA" && args[5] == "B" ) {
 			// Msg from enzyme to substrate.
 			if ( mmEnzIds_.find( src ) == mmEnzIds_.end() )
-				innerAddMsg( src, enzIds_, "sub", dest, molIds_, "reac" );
+				innerAddMsg( src, enzIds_, "sub", dest, poolIds_, "reac" );
 			else
-				innerAddMsg( src, mmEnzIds_, "sub", dest, molIds_, "reac" );
+				innerAddMsg( src, mmEnzIds_, "sub", dest, poolIds_, "reac" );
 		}
 	}
-	else if ( args[3] == "ENZYME" ) { // Msg from enz mol to enz site
+	else if ( args[3] == "ENZYME" ) { // Msg from enz pool to enz site
 		if ( mmEnzIds_.find( dest ) == mmEnzIds_.end() )
-			innerAddMsg( src, molIds_, "reac", dest, enzIds_, "enz" );
+			innerAddMsg( src, poolIds_, "reac", dest, enzIds_, "enz" );
 		else
-			innerAddMsg( src, molIds_, "nOut", dest, mmEnzIds_, "enz" );
+			innerAddMsg( src, poolIds_, "nOut", dest, mmEnzIds_, "enz" );
 	}
-	else if ( args[3] == "MM_PRD" ) { // Msg from enz to Prd mol
+	else if ( args[3] == "MM_PRD" ) { // Msg from enz to Prd pool
 		if ( mmEnzIds_.find( src ) == mmEnzIds_.end() )
-			innerAddMsg( src, enzIds_, "prd", dest, molIds_, "reac" );
+			innerAddMsg( src, enzIds_, "prd", dest, poolIds_, "reac" );
 		else
-			innerAddMsg( src, mmEnzIds_, "prd", dest, molIds_, "reac" );
+			innerAddMsg( src, mmEnzIds_, "prd", dest, poolIds_, "reac" );
 	}
-	else if ( args[3] == "PLOT" ) { // Time-course output for molecule
+	else if ( args[3] == "PLOT" ) { // Time-course output for pool
 		string head;
 		string temp;
 		dest = pathTail( args[2], head );
 		string graph = pathTail( head, temp );
 		temp = graph + "/" + dest;
 		if ( args[4] == "Co" )
-			innerAddMsg( temp, plotIds_, "requestData", src, molIds_, "get_conc" );
+			innerAddMsg( temp, plotIds_, "requestData", src, poolIds_, "get_conc" );
 		else if ( args[4] == "n" )
-		// innerAddMsg( src, molIds_, "nOut", dest, plotIds_, "input" );
-			innerAddMsg( temp, plotIds_, "requestData", src, molIds_, "get_n" );
+		// innerAddMsg( src, poolIds_, "nOut", dest, plotIds_, "input" );
+			innerAddMsg( temp, plotIds_, "requestData", src, poolIds_, "get_n" );
 		else
 			cout << "Unknown PLOT msg field '" << args[4] << "'\n";
 	}

@@ -107,19 +107,19 @@ const Cinfo* Enz::initCinfo()
 		// Shared Msg Definitions
 		//////////////////////////////////////////////////////////////
 		static SharedFinfo sub( "sub",
-			"Connects to substrate molecule",
+			"Connects to substrate pool",
 			subShared, sizeof( subShared ) / sizeof( const Finfo* )
 		);
 		static SharedFinfo prd( "prd",
-			"Connects to product molecule",
+			"Connects to product pool",
 			prdShared, sizeof( prdShared ) / sizeof( const Finfo* )
 		);
 		static SharedFinfo enz( "enz",
-			"Connects to enzyme molecule",
+			"Connects to enzyme pool",
 			enzShared, sizeof( enzShared ) / sizeof( const Finfo* )
 		);
 		static SharedFinfo cplx( "cplx",
-			"Connects to enz-sub complex molecule",
+			"Connects to enz-sub complex pool",
 			cplxShared, sizeof( cplxShared ) / sizeof( const Finfo* )
 		);
 		static Finfo* procShared[] = {

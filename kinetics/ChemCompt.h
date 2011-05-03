@@ -10,6 +10,14 @@
 #ifndef _CHEM_COMPT_H
 #define _CHEM_COMPT_H
 
+/**
+ * The ChemCompt represents a chemically identified compartment.
+ * This may be spatially extended, and may even be discontinuous.
+ * The same set of reactions and molecules populates any given compartment.
+ * Examples of compartments might be: nucleus, cell membrane, 
+ * early endosomes, spine heads.
+ * Connects to one or more 'Geometry' elements to define its boundaries.
+ */
 class ChemCompt
 {
 	public: 
@@ -42,6 +50,11 @@ class ChemCompt
 	private:
 		double size_;
 		unsigned int dimensions_;
+
+		/*
+		mesh dimension:
+		mesh type (one for each dim): none, axial, radial, 
+		*/
 
 		/**
 		 * The Boundaries are Element Fields. They appear as distinct
