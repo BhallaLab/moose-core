@@ -10,9 +10,9 @@
 TARGET = kinetics.o
 
 OBJ = \
-	Mol.o	\
-	BufMol.o	\
-	FuncMol.o	\
+	Pool.o	\
+	BufPool.o	\
+	FuncPool.o	\
 	Reac.o	\
 	Enz.o	\
 	MMenz.o	\
@@ -30,15 +30,15 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-Mol.o:	Mol.h
-BufMol.o:	Mol.h BufMol.h
-FuncMol.o:	Mol.h FuncMol.h
+Mol.o:	Pool.h
+BufMol.o:	Pool.h BufPool.h
+FuncMol.o:	Pool.h FuncPool.h
 Reac.o:	Reac.h
 Enz.o:	Enz.h
 MMenz.o:	MMenz.h 
 Boundary.o:	Boundary.h
 ChemCompt.o:	ChemCompt.h
-ReadKkit.o:	ReadKkit.h Mol.h FuncMol.h
+ReadKkit.o:	ReadKkit.h Pool.h FuncPool.h
 MathFunc.o:	MathFunc.h
 SumFunc.o:	SumFunc.h
 testKinetics.o:	ReadKkit.h

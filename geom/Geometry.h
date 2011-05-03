@@ -40,6 +40,8 @@ class Geometry
 		void setNeighDist( double value );
 		double getNeighDist() const;
 
+		void handleSizeRequest( const Eref& e, const Qinfo* q );
+
 		static const Cinfo* initCinfo();
 	private:
 

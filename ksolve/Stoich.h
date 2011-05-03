@@ -22,7 +22,7 @@ class Stoich
 
 		void setOneWay( bool v );
 		bool getOneWay() const;
-		unsigned int getNumVarMols() const;
+		unsigned int getNumVarPools() const;
 
 		void setPath( const Eref& e, const Qinfo* q, string v );
 		string getPath( const Eref& e, const Qinfo* q ) const;
@@ -65,7 +65,7 @@ class Stoich
 		void zombifyChemCompt( Id compt );
 
 		unsigned int convertIdToReacIndex( Id id ) const;
-		unsigned int convertIdToMolIndex( Id id ) const;
+		unsigned int convertIdToPoolIndex( Id id ) const;
 		unsigned int convertIdToFuncIndex( Id id ) const;
 
 		const double* S() const;
@@ -105,14 +105,14 @@ class Stoich
 		string path_;
 
 		/**
-		 * This is the array of molecules. Of these, the first numVarMols_
+		 * This is the array of molecules. Of these, the first numVarPools_
 		 * are variables and are integrated using the ODE solver. 
-		 * The last numEfflux_ molecules within numVarMols are those that
+		 * The last numEfflux_ molecules within numVarPools are those that
 		 * go out to another solver. They are also integrated by the ODE
 		 * solver, so that at the end of dt each has exactly as many
 		 * molecules as diffused away.
-		 * The next numBufMols_ are fixed but can be changed by the script.
-		 * The next numFuncMols_ are computed using arbitrary functions of
+		 * The next numBufPools_ are fixed but can be changed by the script.
+		 * The next numFuncPools_ are computed using arbitrary functions of
 		 * any of the molecule levels, and the time.
 		 * The functions evaluate _before_ the ODE. 
 		 * The functions should not cascade as there is no guarantee of
@@ -172,7 +172,7 @@ class Stoich
 		 * The calling Id must know what it wants to find: all it
 		 * gets back is an integer.
 		 * The alternative is to have multiple maps, but that is slower.
-		 * Assume no arrays. Each Mol/reac etc must be a unique
+		 * Assume no arrays. Each Pool/reac etc must be a unique
 		 * Element. Later we'll deal with diffusion.
 		 */
 		vector< unsigned int > objMap_;
@@ -187,16 +187,16 @@ class Stoich
 		 * Number of variable molecules that the solver deals with.
 		 *
 		 */
-		unsigned int numVarMols_;
-		unsigned int numVarMolsBytes_;
+		unsigned int numVarPools_;
+		unsigned int numVarPoolsBytes_;
 		/**
 		 * Number of buffered molecules
 		 */
-		unsigned int numBufMols_;
+		unsigned int numBufPools_;
 		/**
 		 * Number of molecules whose values are computed by functions
 		 */
-		unsigned int numFuncMols_;
+		unsigned int numFuncPools_;
 
 		/**
 		 * Number of reactions in the solver model. This includes 

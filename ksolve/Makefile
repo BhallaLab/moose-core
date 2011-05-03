@@ -13,9 +13,9 @@ OBJ = \
 	Port.o	\
 	Stoich.o	\
 	KinSparseMatrix.o	\
-	ZombieMol.o \
-	ZombieBufMol.o \
-	ZombieFuncMol.o \
+	ZombiePool.o \
+	ZombieBufPool.o \
+	ZombieFuncPool.o \
 	ZombieReac.o \
 	ZombieEnz.o \
 	ZombieMMenz.o \
@@ -37,7 +37,7 @@ HEADERS = \
 	RateTerm.h \
 	FuncTerm.h \
 	KinSparseMatrix.h \
-	../kinetics/Mol.h \
+	../kinetics/Pool.h \
 
 
 # The GSL library (GNU Scientific Library) provides a range of
@@ -57,11 +57,11 @@ endif
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-Stoich.o:	ZombieMol.h ZombieReac.h ZombieBufMol.h ZombieEnz.h ZombieMMenz.h ../kinetics/Mol.h ../kinetics/Reac.h ../kinetics/BufMol.h ../kinetics/FuncMol.h ../kinetics/Enz.h ../kinetics/MMenz.h ../kinetics/Boundary.h ../kinetics/ChemCompt.h
+Stoich.o:	ZombiePool.h ZombieReac.h ZombieBufPool.h ZombieEnz.h ZombieMMenz.h ../kinetics/Pool.h ../kinetics/Reac.h ../kinetics/BufPool.h ../kinetics/FuncPool.h ../kinetics/Enz.h ../kinetics/MMenz.h ../kinetics/Boundary.h ../kinetics/ChemCompt.h
 KinSparseMatrix.o:	KinSparseMatrix.h ../basecode/SparseMatrix.h
-ZombieMol.o:	ZombieMol.h
-ZombieBufMol.o:	ZombieMol.h ZombieBufMol.h
-ZombieFuncMol.o:	ZombieMol.h ZombieFuncMol.h ZombieSumFunc.h
+ZombiePool.o:	ZombiePool.h
+ZombieBufPool.o:	ZombiePool.h ZombieBufPool.h
+ZombieFuncPool.o:	ZombiePool.h ZombieFuncPool.h ZombieSumFunc.h
 ZombieReac.o:	../kinetics/Reac.h ZombieReac.h
 ZombieEnz.o:	ZombieEnz.h
 ZombieMMenz.o:	ZombieMMenz.h

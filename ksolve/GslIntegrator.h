@@ -45,7 +45,7 @@ class GslIntegrator
 		double relAccuracy_;
 		double internalStepSize_;
 		double* y_;
-		unsigned int nVarMols_;
+		unsigned int nVarPools_;
 		void* stoich_;
 //		const vector< unsigned int >* dynamicBuffers_;
 

@@ -193,14 +193,14 @@ unsigned int Port::getOutEnd() const
 /////////////////////////////////////////////////////////////
 
 /**
- * This specifies the list of molecules that the port is interested in.
- * This would typically be the whole list of molecules in this cellular
+ * This specifies the list of pools that the port is interested in.
+ * This would typically be the whole list of pools in this cellular
  * compartment.
  * The port scans this list and discards those that have not had a specific
  * (i.e., non-default) SpeciesId assigned, and those with a zero diffusion
  * constant.
  */
-void Port::assignMols( const vector< Id >& mols )
+void Port::assignPools( const vector< Id >& pools )
 {
 	
 }

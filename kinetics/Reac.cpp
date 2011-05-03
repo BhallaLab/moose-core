@@ -74,11 +74,11 @@ const Cinfo* Reac::initCinfo()
 		// Shared Msg Definitions
 		//////////////////////////////////////////////////////////////
 		static SharedFinfo sub( "sub",
-			"Connects to substrate molecule",
+			"Connects to substrate pool",
 			subShared, sizeof( subShared ) / sizeof( const Finfo* )
 		);
 		static SharedFinfo prd( "prd",
-			"Connects to substrate molecule",
+			"Connects to substrate pool",
 			prdShared, sizeof( prdShared ) / sizeof( const Finfo* )
 		);
 		static Finfo* procShared[] = {

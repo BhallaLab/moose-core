@@ -8,10 +8,12 @@
 **********************************************************************/
 
 #include "header.h"
-#include "Mol.h"
-#include "FuncMol.h"
+#include "Pool.h"
+#include "BufPool.h"
 
-const Cinfo* FuncMol::initCinfo()
+#define EPSILON 1e-15
+
+const Cinfo* BufPool::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
 		// Field Definitions
@@ -22,13 +24,10 @@ const Cinfo* FuncMol::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static DestFinfo process( "process",
 			"Handles process call",
-			new ProcOpFunc< FuncMol >( &FuncMol::process ) );
+			new ProcOpFunc< BufPool >( &BufPool::process ) );
 		static DestFinfo reinit( "reinit",
 			"Handles reinit call",
-			new ProcOpFunc< FuncMol >( &FuncMol::reinit ) );
-		static DestFinfo input( "input",
-			"Handles input to control value of n_",
-			new OpFunc1< FuncMol, double >( &FuncMol::input ) );
+			new ProcOpFunc< BufPool >( &BufPool::reinit ) );
 
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
@@ -41,50 +40,49 @@ const Cinfo* FuncMol::initCinfo()
 			procShared, sizeof( procShared ) / sizeof( const Finfo* )
 		);
 
-	static Finfo* funcMolFinfos[] = {
-		&input,				// DestFinfo
+	static Finfo* bufPoolFinfos[] = {
 		&proc,				// SharedFinfo
 	};
 
-	static Cinfo funcMolCinfo (
-		"FuncMol",
-		Mol::initCinfo(),
-		funcMolFinfos,
-		sizeof( funcMolFinfos ) / sizeof ( Finfo* ),
-		new Dinfo< FuncMol >()
+	static Cinfo bufPoolCinfo (
+		"BufPool",
+		Pool::initCinfo(),
+		bufPoolFinfos,
+		sizeof( bufPoolFinfos ) / sizeof ( Finfo* ),
+		new Dinfo< BufPool >()
 	);
 
-	return &funcMolCinfo;
+	return &bufPoolCinfo;
 }
 
 //////////////////////////////////////////////////////////////
 // Class definitions
 //////////////////////////////////////////////////////////////
-static const Cinfo* funcMolCinfo = FuncMol::initCinfo();
+static const Cinfo* bufPoolCinfo = BufPool::initCinfo();
 
-FuncMol::FuncMol()
+BufPool::BufPool()
+{;}
+
+BufPool::BufPool( double nInit)
+	: Pool( nInit )
 {;}
 
 //////////////////////////////////////////////////////////////
 // MsgDest Definitions
 //////////////////////////////////////////////////////////////
 
-void FuncMol::process( const Eref& e, ProcPtr p )
+void BufPool::process( const Eref& e, ProcPtr p )
 {
-	Mol::reinit( e, p );
+	Pool::reinit( e, p );
 }
 
-void FuncMol::reinit( const Eref& e, ProcPtr p )
+void BufPool::reinit( const Eref& e, ProcPtr p )
 {
-	Mol::reinit( e, p );
+	Pool::reinit( e, p );
 }
 
-void FuncMol::input( double v )
-{
-	setNinit( v );
-}
 
 //////////////////////////////////////////////////////////////
-// Field Definitions are all inherited
+// Field Definitions
 //////////////////////////////////////////////////////////////
 

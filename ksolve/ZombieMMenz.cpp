@@ -81,11 +81,11 @@ const Cinfo* ZombieMMenz::initCinfo()
 		// Shared Msg Definitions
 		//////////////////////////////////////////////////////////////
 		static SharedFinfo sub( "sub",
-			"Connects to substrate molecule",
+			"Connects to substrate pool",
 			subShared, sizeof( subShared ) / sizeof( const Finfo* )
 		);
 		static SharedFinfo prd( "prd",
-			"Connects to product molecule",
+			"Connects to product pool",
 			prdShared, sizeof( prdShared ) / sizeof( const Finfo* )
 		);
 		static Finfo* procShared[] = {
@@ -145,22 +145,22 @@ void ZombieMMenz::reinit( const Eref& e, ProcPtr p )
 
 void ZombieMMenz::setKm( const Eref& e, const Qinfo* q, double v )
 {
-	rates_[ convertIdToMolIndex( e.id() ) ]->setR1( v ); // First rate is Km
+	rates_[ convertIdToPoolIndex( e.id() ) ]->setR1( v ); // First rate is Km
 }
 
 double ZombieMMenz::getKm( const Eref& e, const Qinfo* q ) const
 {
-	return rates_[ convertIdToMolIndex( e.id() ) ]->getR1(); // First rate is Km
+	return rates_[ convertIdToPoolIndex( e.id() ) ]->getR1(); // First rate is Km
 }
 
 void ZombieMMenz::setKcat( const Eref& e, const Qinfo* q, double v )
 {
-	rates_[ convertIdToMolIndex( e.id() ) ]->setR2( v ); // Second rate is kcat
+	rates_[ convertIdToPoolIndex( e.id() ) ]->setR2( v ); // Second rate is kcat
 }
 
 double ZombieMMenz::getKcat( const Eref& e, const Qinfo* q ) const
 {
-	return rates_[ convertIdToMolIndex( e.id() ) ]->getR2(); // Second rate is kcat
+	return rates_[ convertIdToPoolIndex( e.id() ) ]->getR2(); // Second rate is kcat
 }
 
 //////////////////////////////////////////////////////////////
@@ -179,7 +179,7 @@ void ZombieMMenz::zombify( Element* solver, Element* orig )
 	assert( enz );
 	assert( sub );
 	assert( prd );
-	vector< Id > mols;
+	vector< Id > pools;
 
 	Element temp( orig->id(), zombieMMenzCinfo, solver->dataHandler() );
 	Eref zer( &temp, 0 );
@@ -189,12 +189,12 @@ void ZombieMMenz::zombify( Element* solver, Element* orig )
 	MMenz* mmEnz = reinterpret_cast< MMenz* >( oer.data() );
 
 	unsigned int rateIndex = z->convertIdToReacIndex( orig->id() );
-	unsigned int num = orig->getInputs( mols, enz );
-	unsigned int enzIndex = z->convertIdToMolIndex( mols[0] );
+	unsigned int num = orig->getInputs( pools, enz );
+	unsigned int enzIndex = z->convertIdToPoolIndex( pools[0] );
 
-	num = orig->getOutputs( mols, sub );
+	num = orig->getOutputs( pools, sub );
 	if ( num == 1 ) {
-		unsigned int subIndex = z->convertIdToMolIndex( mols[0] );
+		unsigned int subIndex = z->convertIdToPoolIndex( pools[0] );
 		assert( num == 1 );
 		z->rates_[ rateIndex ] = new MMEnzyme1( 
 			mmEnz->getKm(), mmEnz->getKcat(),
@@ -202,7 +202,7 @@ void ZombieMMenz::zombify( Element* solver, Element* orig )
 	} else if ( num > 1 ) {
 		vector< unsigned int > v;
 		for ( unsigned int i = 0; i < num; ++i )
-			v.push_back( z->convertIdToMolIndex( mols[i] ) );
+			v.push_back( z->convertIdToPoolIndex( pools[i] ) );
 		ZeroOrder* rateTerm = new NOrder( 1.0, v );
 		z->rates_[ rateIndex ] = new MMEnzyme( 
 			mmEnz->getKm(), mmEnz->getKcat(),
@@ -213,15 +213,15 @@ void ZombieMMenz::zombify( Element* solver, Element* orig )
 	}
 
 	for ( unsigned int i = 0; i < num; ++i ) {
-		unsigned int molIndex = z->convertIdToMolIndex( mols[i] );
-		int temp = z->N_.get( molIndex, rateIndex );
-		z->N_.set( molIndex, rateIndex, temp - 1 );
+		unsigned int poolIndex = z->convertIdToPoolIndex( pools[i] );
+		int temp = z->N_.get( poolIndex, rateIndex );
+		z->N_.set( poolIndex, rateIndex, temp - 1 );
 	}
-	num = orig->getOutputs( mols, prd );
+	num = orig->getOutputs( pools, prd );
 	for ( unsigned int i = 0; i < num; ++i ) {
-		unsigned int molIndex = z->convertIdToMolIndex( mols[i] );
-		int temp = z->N_.get( molIndex, rateIndex );
-		z->N_.set( molIndex, rateIndex, temp + 1 );
+		unsigned int poolIndex = z->convertIdToPoolIndex( pools[i] );
+		int temp = z->N_.get( poolIndex, rateIndex );
+		z->N_.set( poolIndex, rateIndex, temp + 1 );
 	}
 
 	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );

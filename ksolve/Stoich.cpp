@@ -9,18 +9,18 @@
 
 #include "StoichHeaders.h"
 #include "ElementValueFinfo.h"
-#include "Mol.h"
-#include "BufMol.h"
-#include "FuncMol.h"
+#include "Pool.h"
+#include "BufPool.h"
+#include "FuncPool.h"
 #include "Reac.h"
 #include "Enz.h"
 #include "MMenz.h"
 #include "SumFunc.h"
 #include "Boundary.h"
 #include "ChemCompt.h"
-#include "ZombieMol.h"
-#include "ZombieBufMol.h"
-#include "ZombieFuncMol.h"
+#include "ZombiePool.h"
+#include "ZombieBufPool.h"
+#include "ZombieFuncPool.h"
 #include "ZombieReac.h"
 #include "ZombieEnz.h"
 #include "ZombieMMenz.h"
@@ -55,10 +55,10 @@ const Cinfo* Stoich::initCinfo()
 			&Stoich::getOneWay
 		);
 
-		static ReadOnlyValueFinfo< Stoich, unsigned int > nVarMols(
-			"nVarMols",
-			"Number of variable molecules in the reac system",
-			&Stoich::getNumVarMols
+		static ReadOnlyValueFinfo< Stoich, unsigned int > nVarPools(
+			"nVarPools",
+			"Number of variable molecule pools in the reac system",
+			&Stoich::getNumVarPools
 		);
 
 		static ElementValueFinfo< Stoich, string > path(
@@ -102,7 +102,7 @@ const Cinfo* Stoich::initCinfo()
 
 	static Finfo* stoichFinfos[] = {
 		&useOneWay,		// Value
-		&nVarMols,		// Value
+		&nVarPools,		// Value
 		&path,			// Value
 		&plugin,		// SrcFinfo
 		&portFinfo,		// FieldElementFinfo
@@ -129,8 +129,8 @@ Stoich::Stoich()
 	: 
 		totPortSize_( 0 ),
 		objMapStart_( 0 ),
-		numVarMols_( 0 ),
-		numVarMolsBytes_( 0 ),
+		numVarPools_( 0 ),
+		numVarPoolsBytes_( 0 ),
 		numReac_( 0 )
 {;}
 
@@ -156,20 +156,20 @@ void Stoich::process( const Eref& e, ProcPtr p )
 
 void Stoich::reinit( const Eref& e, ProcPtr p )
 {
-	y_.assign( Sinit_.begin(), Sinit_.begin() + numVarMols_ );
+	y_.assign( Sinit_.begin(), Sinit_.begin() + numVarPools_ );
 	S_ = Sinit_;
 }
 
 /**
  * Handles incoming messages representing influx of molecules
  */
-void Stoich::influx( DataId port, vector< double > mol )
+void Stoich::influx( DataId port, vector< double > pool )
 {
 	/*
-	assert( mol.size() == inPortEnd_ - inPortStart_ );
+	assert( pool.size() == inPortEnd_ - inPortStart_ );
 	unsigned int j = 0;
 	for ( unsigned int i = inPortStart_; i < inPortEnd_; ++i ) {
-		S_[i] += mol[j++];
+		S_[i] += pool[j++];
 	}
 	*/
 }
@@ -229,10 +229,10 @@ void Stoich::setPath( const Eref& e, const Qinfo* q, string v )
 	allocateObjMap( elist );
 	allocateModel( elist );
 	zombifyModel( e, elist );
-	y_.assign( Sinit_.begin(), Sinit_.begin() + numVarMols_ );
+	y_.assign( Sinit_.begin(), Sinit_.begin() + numVarPools_ );
 
 	/*
-	cout << "Zombified " << numVarMols_ << " Molecules, " <<
+	cout << "Zombified " << numVarPools_ << " Molecules, " <<
 		numReac_ << " reactions\n";
 	N_.print();
 	*/
@@ -243,9 +243,9 @@ string Stoich::getPath( const Eref& e, const Qinfo* q ) const
 	return path_;
 }
 
-unsigned int Stoich::getNumVarMols() const
+unsigned int Stoich::getNumVarPools() const
 {
-	return numVarMols_;
+	return numVarPools_;
 }
 
 Port* Stoich::getPort( unsigned int i )
@@ -292,27 +292,27 @@ void Stoich::allocateObjMap( const vector< Id >& elist )
 
 void Stoich::allocateModel( const vector< Id >& elist )
 {
-	static const Cinfo* molCinfo = Mol::initCinfo();
-	static const Cinfo* bufMolCinfo = BufMol::initCinfo();
-	static const Cinfo* funcMolCinfo = FuncMol::initCinfo();
+	static const Cinfo* poolCinfo = Pool::initCinfo();
+	static const Cinfo* bufPoolCinfo = BufPool::initCinfo();
+	static const Cinfo* funcPoolCinfo = FuncPool::initCinfo();
 	static const Cinfo* reacCinfo = Reac::initCinfo();
 	static const Cinfo* enzCinfo = Enz::initCinfo();
 	static const Cinfo* mmEnzCinfo = MMenz::initCinfo();
 	static const Cinfo* sumFuncCinfo = SumFunc::initCinfo();
-	numVarMols_ = 0;
+	numVarPools_ = 0;
 	numReac_ = 0;
-	vector< Id > bufMols;
-	vector< Id > funcMols;
+	vector< Id > bufPools;
+	vector< Id > funcPools;
 	unsigned int numFunc = 0;
 	for ( vector< Id >::const_iterator i = elist.begin(); i != elist.end(); ++i ){
 		Element* ei = (*i)();
-		if ( ei->cinfo() == molCinfo ) {
-			objMap_[ i->value() - objMapStart_ ] = numVarMols_;
-			++numVarMols_;
-		} else if ( ei->cinfo() == bufMolCinfo ) {
-			bufMols.push_back( *i );
-		} else if ( ei->cinfo() == funcMolCinfo ) {
-			funcMols.push_back( *i );
+		if ( ei->cinfo() == poolCinfo ) {
+			objMap_[ i->value() - objMapStart_ ] = numVarPools_;
+			++numVarPools_;
+		} else if ( ei->cinfo() == bufPoolCinfo ) {
+			bufPools.push_back( *i );
+		} else if ( ei->cinfo() == funcPoolCinfo ) {
+			funcPools.push_back( *i );
 		} else if ( ei->cinfo() == reacCinfo || ei->cinfo() == mmEnzCinfo ){
 			objMap_[ i->value() - objMapStart_ ] = numReac_;
 			++numReac_;
@@ -324,56 +324,56 @@ void Stoich::allocateModel( const vector< Id >& elist )
 			++numFunc;
 		}
 	}
-	// numVarMols_ += numEfflux_;
+	// numVarPools_ += numEfflux_;
 
-	numBufMols_ = 0;
-	for ( vector< Id >::const_iterator i = bufMols.begin(); i != bufMols.end(); ++i ){
-		objMap_[ i->value() - objMapStart_ ] = numVarMols_ + numBufMols_;
-		++numBufMols_;
+	numBufPools_ = 0;
+	for ( vector< Id >::const_iterator i = bufPools.begin(); i != bufPools.end(); ++i ){
+		objMap_[ i->value() - objMapStart_ ] = numVarPools_ + numBufPools_;
+		++numBufPools_;
 	}
 
-	numFuncMols_ = numVarMols_ + numBufMols_;
-	for ( vector< Id >::const_iterator i = funcMols.begin(); 
-		i != funcMols.end(); ++i ) {
-		objMap_[ i->value() - objMapStart_ ] = numFuncMols_++;
+	numFuncPools_ = numVarPools_ + numBufPools_;
+	for ( vector< Id >::const_iterator i = funcPools.begin(); 
+		i != funcPools.end(); ++i ) {
+		objMap_[ i->value() - objMapStart_ ] = numFuncPools_++;
 	}
-	numFuncMols_ -= numVarMols_ + numBufMols_;
-	assert( numFunc == numFuncMols_ );
+	numFuncPools_ -= numVarPools_ + numBufPools_;
+	assert( numFunc == numFuncPools_ );
 
-	numVarMolsBytes_ = numVarMols_ * sizeof( double );
-	S_.resize( numVarMols_ + numBufMols_ + numFuncMols_, 0.0 );
-	Sinit_.resize( numVarMols_ + numBufMols_ + numFuncMols_, 0.0 );
-	compartment_.resize( numVarMols_ + numBufMols_ + numFuncMols_, 0.0 );
-	species_.resize( numVarMols_ + numBufMols_ + numFuncMols_, 0 );
-	y_.resize( numVarMols_ );
+	numVarPoolsBytes_ = numVarPools_ * sizeof( double );
+	S_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
+	Sinit_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
+	compartment_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
+	species_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0 );
+	y_.resize( numVarPools_ );
 	rates_.resize( numReac_ );
 	v_.resize( numReac_, 0.0 );
-	funcs_.resize( numFuncMols_ );
-	N_.setSize( numVarMols_ + numBufMols_ + numFuncMols_, numReac_ );
+	funcs_.resize( numFuncPools_ );
+	N_.setSize( numVarPools_ + numBufPools_ + numFuncPools_, numReac_ );
 }
 
 void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 {
-	static const Cinfo* molCinfo = Mol::initCinfo();
-	static const Cinfo* bufMolCinfo = BufMol::initCinfo();
-	static const Cinfo* funcMolCinfo = FuncMol::initCinfo();
+	static const Cinfo* poolCinfo = Pool::initCinfo();
+	static const Cinfo* bufPoolCinfo = BufPool::initCinfo();
+	static const Cinfo* funcPoolCinfo = FuncPool::initCinfo();
 	static const Cinfo* reacCinfo = Reac::initCinfo();
 	static const Cinfo* enzCinfo = Enz::initCinfo();
 	static const Cinfo* mmEnzCinfo = MMenz::initCinfo();
 	static const Cinfo* chemComptCinfo = ChemCompt::initCinfo();
 	// static const Cinfo* sumFuncCinfo = SumFunc::initCinfo();
-	// The FuncMol handles zombification of stuff coming in to it.
+	// The FuncPool handles zombification of stuff coming in to it.
 
 	for ( vector< Id >::const_iterator i = elist.begin(); i != elist.end(); ++i ){
 		Element* ei = (*i)();
-		if ( ei->cinfo() == molCinfo ) {
-			ZombieMol::zombify( e.element(), (*i)() );
+		if ( ei->cinfo() == poolCinfo ) {
+			ZombiePool::zombify( e.element(), (*i)() );
 		}
-		else if ( ei->cinfo() == bufMolCinfo ) {
-			ZombieBufMol::zombify( e.element(), (*i)() );
+		else if ( ei->cinfo() == bufPoolCinfo ) {
+			ZombieBufPool::zombify( e.element(), (*i)() );
 		}
-		else if ( ei->cinfo() == funcMolCinfo ) {
-			ZombieFuncMol::zombify( e.element(), (*i)() );
+		else if ( ei->cinfo() == funcPoolCinfo ) {
+			ZombieFuncPool::zombify( e.element(), (*i)() );
 		}
 		else if ( ei->cinfo() == reacCinfo ) {
 			ZombieReac::zombify( e.element(), (*i)() );
@@ -398,13 +398,13 @@ void Stoich::zombifyChemCompt( Id compt )
 	ChemCompt* c = reinterpret_cast< ChemCompt* >( compt.eref().data() );
 
 	Element* e = compt();
-	vector< Id > mols;
+	vector< Id > pools;
 	const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >( finfo );
 	assert( sf );
-	unsigned int numTgts = e->getOutputs( mols, sf );
+	unsigned int numTgts = e->getOutputs( pools, sf );
 
-	for ( vector< Id >::iterator i = mols.begin(); i != mols.end(); ++i ) {
-		unsigned int m = convertIdToMolIndex( *i );
+	for ( vector< Id >::iterator i = pools.begin(); i != pools.end(); ++i ) {
+		unsigned int m = convertIdToPoolIndex( *i );
 		compartment_[ m ] = compartmentSize_.size();
 	}
 
@@ -413,7 +413,7 @@ void Stoich::zombifyChemCompt( Id compt )
 	compartmentSize_.push_back( c->getSize() );
 }
 
-unsigned int Stoich::convertIdToMolIndex( Id id ) const
+unsigned int Stoich::convertIdToPoolIndex( Id id ) const
 {
 	unsigned int i = id.value() - objMapStart_;
 	assert( i < objMap_.size() );
@@ -477,8 +477,8 @@ void Stoich::updateRates( vector< double>* yprime, double dt  )
 
 	// Much scope for optimization here.
 	vector< double >::iterator j = yprime->begin();
-	assert( yprime->size() >= numVarMols_ );
-	for (unsigned int i = 0; i < numVarMols_; i++) {
+	assert( yprime->size() >= numVarPools_ );
+	for (unsigned int i = 0; i < numVarPools_; i++) {
 		*j++ = dt * N_.computeRowRate( i , v_ );
 	}
 }
@@ -490,7 +490,7 @@ void Stoich::updateRates( vector< double>* yprime, double dt  )
 void Stoich::updateFuncs( double t )
 {
 	vector< FuncTerm* >::const_iterator i;
-	vector< double >::iterator j = S_.begin() + numVarMols_ + numBufMols_;
+	vector< double >::iterator j = S_.begin() + numVarPools_ + numBufPools_;
 
 	for ( i = funcs_.begin(); i != funcs_.end(); i++)
 	{
@@ -570,7 +570,7 @@ int Stoich::innerGslFunc( double t, const double* y, double* yprime )
 	//nCall_++;
 //	if ( lasty_ != y ) { // should count to see how often this copy happens
 		// Copy the y array into the y_ vector.
-		memcpy( &S_[0], y, numVarMolsBytes_ );
+		memcpy( &S_[0], y, numVarPoolsBytes_ );
 		// lasty_ = y;
 	//	nCopy_++;
 //	}
@@ -581,7 +581,7 @@ int Stoich::innerGslFunc( double t, const double* y, double* yprime )
 	updateV();
 
 	// Much scope for optimization here.
-	for (unsigned int i = 0; i < numVarMols_; i++) {
+	for (unsigned int i = 0; i < numVarPools_; i++) {
 		*yprime++ = N_.computeRowRate( i , v_ );
 	}
 	// cout << t << ": " << y[0] << ", " << y[1] << endl;

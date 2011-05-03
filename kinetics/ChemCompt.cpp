@@ -48,9 +48,22 @@ const Cinfo* ChemCompt::initCinfo()
 			"Handle for grouping. Doesn't do anything.",
 			new OpFuncDummy() );
 
+		static DestFinfo handleSize( "handleSize",
+			"Handle for size, part of SharedFinfo to connect to geometry.",
+			new OpFunc1< ChemCompt, double >( &ChemCompt::setSize )
+			);
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
 		//////////////////////////////////////////////////////////////
+
+		static Finfo* geomShared[] = {
+			&requestSize, &handleSize
+		};
+
+		static SharedFinfo geom( "geom",
+			"Connects to Geometry tree(s) defining compt",
+			geomShared, sizeof( geomShared ) / sizeof( const Finfo* )
+		);
 
 		//////////////////////////////////////////////////////////////
 		// Field Element for the boundaries
@@ -70,6 +83,7 @@ const Cinfo* ChemCompt::initCinfo()
 		&requestSize,	// SrcFinfo
 		&compartment,	// SrcFinfo
 		&group,			// DestFinfo
+		&geom,			// SharedFinfo
 		&boundaryFinfo,	// FieldElementFinfo
 	};
 
