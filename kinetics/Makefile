@@ -18,6 +18,7 @@ OBJ = \
 	MMenz.o	\
 	Boundary.o	\
 	ChemCompt.o	\
+	Species.o	\
 	ReadKkit.o	\
 	MathFunc.o	\
 	SumFunc.o	\
@@ -38,6 +39,7 @@ Enz.o:	Enz.h
 MMenz.o:	MMenz.h 
 Boundary.o:	Boundary.h
 ChemCompt.o:	ChemCompt.h
+Species.o:	Species.h
 ReadKkit.o:	ReadKkit.h Pool.h FuncPool.h
 MathFunc.o:	MathFunc.h
 SumFunc.o:	SumFunc.h
