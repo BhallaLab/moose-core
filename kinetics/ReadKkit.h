@@ -48,7 +48,7 @@ class ReadKkit
 		// Building up the model
 		//////////////////////////////////////////////////////////////////
 		Id buildCompartment( const vector< string >& args );
-		Id buildMol( const vector< string >& args );
+		Id buildPool( const vector< string >& args );
 		Id buildReac( const vector< string >& args );
 		Id buildEnz( const vector< string >& args );
 		Id buildPlot( const vector< string >& args );
@@ -75,7 +75,7 @@ class ReadKkit
 		void objdump( const vector< string >& args );
 		void textload( const vector< string >& args );
 		void loadtab( const vector< string >& args );
-		void separateVols( Id mol, double vol );
+		void separateVols( Id pool, double vol );
 		void assignCompartments();
 
 		//////////////////////////////////////////////////////////////////
@@ -110,7 +110,7 @@ class ReadKkit
 		unsigned int initdumpVersion_;	/// Initdump too has a version.
 
 		unsigned int numCompartments_;
-		unsigned int numMols_;
+		unsigned int numPools_;
 		unsigned int numReacs_;
 		unsigned int numEnz_;
 		unsigned int numMMenz_;
@@ -119,12 +119,12 @@ class ReadKkit
 
 		unsigned int lineNum_;
 
-		map< string, int > molMap_;
+		map< string, int > poolMap_;
 		map< string, int > reacMap_;
 		map< string, int > enzMap_;
 		map< string, int > groupMap_;
 		map< string, int > tableMap_;
-		map< string, Id > molIds_;
+		map< string, Id > poolIds_;
 		map< string, Id > reacIds_;
 		map< string, Id > enzIds_;
 		map< string, Id > mmEnzIds_;

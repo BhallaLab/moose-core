@@ -27,7 +27,7 @@ HEADERS = \
 	../basecode/ElementValueFinfo.h \
 	SmolHeader.h \
 	SmolSim.h \
-	../kinetics/Mol.h \
+	../kinetics/Pool.h \
 
 
 # Smoldyn is GPL so only GPL-compliant uses of MOOSE will be able to
@@ -40,7 +40,7 @@ default: $(TARGET)
 #SMOLDYN_LIBS = /usr/local/lib/libsmoldyn.a
 
 $(OBJ)	: $(HEADERS)
-SmolSim.o:	SmolMol.h SmolReac.h SmolEnz.h SmolMMenz.h ../kinetics/Mol.h ../kinetics/Reac.h ../kinetics/Enz.h ../kinetics/MMenz.h ../kinetics/Boundary.h ../kinetics/ChemCompt.h
+SmolSim.o:	SmolMol.h SmolReac.h SmolEnz.h SmolMMenz.h ../kinetics/Pool.h ../kinetics/Reac.h ../kinetics/Enz.h ../kinetics/MMenz.h ../kinetics/Boundary.h ../kinetics/ChemCompt.h
 SmolPool.o:	SmolPool.h
 SmolMol.o:	SmolMol.h
 SmolReac.o:	../kinetics/Reac.h SmolReac.h

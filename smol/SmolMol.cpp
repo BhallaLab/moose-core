@@ -9,7 +9,7 @@
 
 #include "SmolHeader.h"
 #include "SmolMol.h"
-#include "Mol.h"
+#include "Pool.h"
 #include "ElementValueFinfo.h"
 #include "DataHandlerWrapper.h"
 

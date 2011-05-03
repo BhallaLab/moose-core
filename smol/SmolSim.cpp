@@ -9,7 +9,7 @@
 
 #include "SmolHeader.h"
 #include "ElementValueFinfo.h"
-#include "Mol.h"
+#include "Pool.h"
 #include "Reac.h"
 #include "Enz.h"
 #include "MMenz.h"
@@ -175,15 +175,15 @@ struct simstruct* SmolSim::sim()
 
 void SmolSim::zombifyModel( const Eref& e, const vector< Id >& elist )
 {
-	static const Cinfo* molCinfo = Mol::initCinfo();
-//	static const Cinfo* bufMolCinfo = BufMol::initCinfo();
-//	static const Cinfo* funcMolCinfo = FuncMol::initCinfo();
+	static const Cinfo* molCinfo = Pool::initCinfo();
+//	static const Cinfo* bufPoolCinfo = BufPool::initCinfo();
+//	static const Cinfo* funcPoolCinfo = FuncPool::initCinfo();
 	static const Cinfo* reacCinfo = Reac::initCinfo();
 	static const Cinfo* enzCinfo = Enz::initCinfo();
 	static const Cinfo* mmEnzCinfo = MMenz::initCinfo();
 //	static const Cinfo* chemComptCinfo = ChemCompt::initCinfo();
 	// static const Cinfo* sumFuncCinfo = SumFunc::initCinfo();
-	// The FuncMol handles zombification of stuff coming in to it.
+	// The FuncPool handles zombification of stuff coming in to it.
 	static const Cinfo* surfaceCinfo = Surface::initCinfo();
 	static const Cinfo* panelCinfo = Panel::initCinfo();
 
@@ -328,7 +328,7 @@ void SmolSim::parseSurfaceAction( Element* solver, Element* pool,
 	
 }
 
-unsigned int SmolSim::convertIdToMolIndex( Id id ) const
+unsigned int SmolSim::convertIdToPoolIndex( Id id ) const
 {
 	/*
 	unsigned int i = id.value() - objMapStart_;

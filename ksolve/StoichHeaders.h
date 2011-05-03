@@ -17,6 +17,6 @@
 #include "KinSparseMatrix.h"
 
 class Stoich;
-#include "../kinetics/Mol.h"
+#include "../kinetics/Pool.h"
 #include "Port.h"
 #include "Stoich.h"

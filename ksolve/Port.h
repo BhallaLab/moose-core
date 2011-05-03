@@ -14,25 +14,25 @@ class Port
 		~Port();
 
 		/**
-		 * Index to S_ vector (beyond VarMols) into which incoming
+		 * Index to S_ vector (beyond VarPools) into which incoming
 		 * molecules should add. inStart is the first entry.
 		 */
 		unsigned int getInStart() const;
 
 		/**
-		 * Index to S_ vector (beyond VarMols) into which incoming
+		 * Index to S_ vector (beyond VarPools) into which incoming
 		 * molecules should add. inEnd is the last entry plus one.
 		 */
 		unsigned int getInEnd() const;
 
 		/**
-		 * Index to location in S_ vector (within VarMols) from where 
+		 * Index to location in S_ vector (within VarPools) from where 
 		 * outgoing molecules begin. 
 		 */
 		unsigned int getOutStart() const;
 
 		/**
-		 * Index to location in S_ vector (within VarMols) one past the
+		 * Index to location in S_ vector (within VarPools) one past the
 		 * last of the outgoing molecules for this port.
 		 */
 		unsigned int getOutEnd() const;
@@ -51,7 +51,7 @@ class Port
 		 */
 		double getScaleOutRate() const;
 
-		void assignMols( const vector< Id >& mols );
+		void assignPools( const vector< Id >& pools );
 
 		void findMatchingMolSpecies( const vector< SpeciesId >& other, 
 			vector< SpeciesId >& ret );
@@ -60,25 +60,25 @@ class Port
 		static const Cinfo* initCinfo();
 	private:
 		/**
-		 * Index to S_ vector (beyond VarMols) into which incoming
+		 * Index to S_ vector (beyond VarPools) into which incoming
 		 * molecules should add. inStart_ is the first entry.
 		 */
 		unsigned int inStart_;
 
 		/**
-		 * Index to S_ vector (beyond VarMols) into which incoming
+		 * Index to S_ vector (beyond VarPools) into which incoming
 		 * molecules should add. inEnd_ is the last entry plus one.
 		 */
 		unsigned int inEnd_;
 
 		/**
-		 * Index to location in S_ vector (within VarMols) from where 
+		 * Index to location in S_ vector (within VarPools) from where 
 		 * outgoing molecules begin. 
 		 */
 		unsigned int outStart_;
 
 		/**
-		 * Index to location in S_ vector (within VarMols) one past the
+		 * Index to location in S_ vector (within VarPools) one past the
 		 * last of the outgoing molecules for this port.
 		 */
 		unsigned int outEnd_;

@@ -12415,3 +12415,83 @@ would be more efficient.
 Now need to work on the geometry and subdivisions.
 
 ============================================================================
+30 April 2011.
+Checkin 2645.
+============================================================================
+1 May 2011
+Matrix of many pending things in MOOSE, and their dependencies:
+
+Item							Dependency
+*Renaming Mols to Pools					-
+Array-ifying reaction system.				Shell funcs
++Compartment handling					-
+Mesh handling in geometry: voxel data structs		Compartment handling
+Replicating regular ksolver in array calculations	Array-ifying
+Gillepsie solver					-
+Setting up systematic Species info			-
+Parallelize rate updates for Ksolver and Gillespie.	array, replic, Gillesp
+Parallelize/multithread regular Ksolver			par rate updates
+Clean up math handler memory leaks			-
+Incorporate math handler into ksolver			-
+ReacDiff solver (4th order version)			arrayifying
+Geometry extraction from neuronal model: rule sets.	-
+GUI							-
+Merging tool						species
+SBML reader port and expansion				species, math, compt
+Molecule mapper at interfaces.				species, compt
+Voxelization of geometry				arrayifying
+Volume handling for concs and reaction rate scaling	array, compt
+Volume handling for cross-voxel reactions		array, compt
+Directions and other details for molecules in Smoldyn	geom, compt
+Automatic est of D from molecule size			-
+Mechanics						geom, compt
+Boundary changes					geom
+steady-state solver and classifier.			-
+dose-response builder					ss solver
+scanner for all steady-states.				ss solver
+hsolver							-
+markov channels						hsolver
+NeuroML reader						markov
+Port over signeur					most of the above.
+
+
+Starting off with compartment handling: See 31 March notes. 
+Setting up shared msg from compt to geom(s). Message made, compiles.
+
+For mesh elements: We want: size, centroid, vec of xA to neighbours, vec of
+neighbours, shape [linear, cyl shell, sphere shell, hemi shell, tetra, cuboid]
+etc. The mesh should be a child Field Element of the Compartment, indexed
+to make a virtual array.
+Each mesh entry should point to a location in space, referred to a geom?
+What to call it? I've called it voxel so far, but mesh would be more apt.
+
+Some mesh forms:
+				Dimensions
+- linear			1 (might subdivide a 3-D space though)
+- rectangular			2
+- cuboid			3
+- Triangular			2
+- Tetrahedral			3
+- cylindrical radial		1
+- cylindrical radial-axial	2 Concentric axial compartments.
+- cylindrical segmented		3 radial-axial-segments
+- spherical radial		1
+- spherical radial segmented	3 Possibly could have a symmetry to make it 2D
+
+Looks like the way to go is each shape knows how to handle some of these 
+meshings. Problem is with composite shapes like a neuron. The neuron as a whole
+might know how to do the meshing, but individual cylinders with hemisphere
+caps would be in trouble.
+Options:
+	- Subclasses of ChemCompts that know what is expected
+	- Separate mesh classes, children of chem compt
+	- separate mesh classes, children of geometry
+	- Attributes of geom classes.
+
+How to represent a complex mesh vol, like a cylinder with a hole in it for a 
+vesicle or a nucleus?
+
+
+Meshing aside for now. Marching through many many files to convert 'Mol' to
+'Pool'. Done. Clears unit tests.
+============================================================================

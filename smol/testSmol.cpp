@@ -29,16 +29,16 @@ void testCreateSmolSim()
 	vector< unsigned int > dims( 1, size );
 	Id smolId = shell->doCreate("SmolSim", Id(), "smol", dims );
 	Id paId = shell->doCreate("Neutral", Id(), "pa", dims );
-	Id mol1Id = shell->doCreate("Mol", paId, "mol1", dims );
-	Id mol2Id = shell->doCreate("Mol", paId, "mol2", dims );
+	Id pool1Id = shell->doCreate("Pool", paId, "pool1", dims );
+	Id pool2Id = shell->doCreate("Pool", paId, "pool2", dims );
 	Id reacId = shell->doCreate("Reac", paId, "reac", dims );
 
-	Field< double >::set( mol1Id, "nInit", 100 );
-	Field< double >::set( mol2Id, "nInit", 0 );
+	Field< double >::set( pool1Id, "nInit", 100 );
+	Field< double >::set( pool2Id, "nInit", 0 );
 	Field< double >::set( reacId, "kf", 2.0 );
 	Field< double >::set( reacId, "kb", 1.0 );
-	shell->doAddMsg( "Single", mol1Id, "reac", reacId, "sub" );
-	shell->doAddMsg( "Single", mol2Id, "reac", reacId, "prd" );
+	shell->doAddMsg( "Single", pool1Id, "reac", reacId, "sub" );
+	shell->doAddMsg( "Single", pool2Id, "reac", reacId, "prd" );
 
 	Id geomId = shell->doCreate( "Geometry", paId, "geom", dims );
 	Id surfaceId = shell->doCreate( "Surface", geomId, "surf", dims );
@@ -80,8 +80,8 @@ void testCreateSmolSim()
 	for ( double t = 0; t < runtime; t += monitorTime ) {
 		ret = smolRunTimeStep( sim );
 		assert( ret == ECok || ret == ECwarning );
-		double n1 = Field< double >::get( mol1Id, "n" );
-		double n2 = Field< double >::get( mol2Id, "n" );
+		double n1 = Field< double >::get( pool1Id, "n" );
+		double n2 = Field< double >::get( pool2Id, "n" );
 		cout << "at t = " << t << ", n1 = " << n1 << ", n2 = " << 
 			n2 << endl;
 	}

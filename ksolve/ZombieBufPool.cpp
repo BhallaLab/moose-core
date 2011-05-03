@@ -10,31 +10,31 @@
 #include "ElementValueFinfo.h"
 #include "DataHandlerWrapper.h"
 
-#include "Mol.h"
-#include "BufMol.h"
-#include "ZombieMol.h"
-#include "ZombieBufMol.h"
+#include "Pool.h"
+#include "BufPool.h"
+#include "ZombiePool.h"
+#include "ZombieBufPool.h"
 
-// Entirely derived from ZombieMol. Only the zombification routines differ.
-const Cinfo* ZombieBufMol::initCinfo()
+// Entirely derived from ZombiePool. Only the zombification routines differ.
+const Cinfo* ZombieBufPool::initCinfo()
 {
-	static Cinfo zombieBufMolCinfo (
-		"ZombieBufMol",
-		ZombieMol::initCinfo(),
+	static Cinfo zombieBufPoolCinfo (
+		"ZombieBufPool",
+		ZombiePool::initCinfo(),
 		0,
 		0,
-		new Dinfo< ZombieBufMol >()
+		new Dinfo< ZombieBufPool >()
 	);
 
-	return &zombieBufMolCinfo;
+	return &zombieBufPoolCinfo;
 }
 
 //////////////////////////////////////////////////////////////
 // Class definitions
 //////////////////////////////////////////////////////////////
-static const Cinfo* zombieBufMolCinfo = ZombieBufMol::initCinfo();
+static const Cinfo* zombieBufPoolCinfo = ZombieBufPool::initCinfo();
 
-ZombieBufMol::ZombieBufMol()
+ZombieBufPool::ZombieBufPool()
 {;}
 
 
@@ -43,37 +43,37 @@ ZombieBufMol::ZombieBufMol()
 //////////////////////////////////////////////////////////////
 
 // static func
-void ZombieBufMol::zombify( Element* solver, Element* orig )
+void ZombieBufPool::zombify( Element* solver, Element* orig )
 {
-	Element temp( orig->id(), zombieBufMolCinfo, solver->dataHandler() );
+	Element temp( orig->id(), zombieBufPoolCinfo, solver->dataHandler() );
 	Eref zer( &temp, 0 );
 	Eref oer( orig, 0 );
 
-	ZombieBufMol* z = reinterpret_cast< ZombieBufMol* >( zer.data() );
-	BufMol* m = reinterpret_cast< BufMol* >( oer.data() );
+	ZombieBufPool* z = reinterpret_cast< ZombieBufPool* >( zer.data() );
+	BufPool* m = reinterpret_cast< BufPool* >( oer.data() );
 
 	z->setN( zer, 0, m->getN() );
 	z->setNinit( zer, 0, m->getNinit() );
 	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
-	orig->zombieSwap( zombieBufMolCinfo, dh );
+	orig->zombieSwap( zombieBufPoolCinfo, dh );
 }
 
 // Static func
-void ZombieBufMol::unzombify( Element* zombie )
+void ZombieBufPool::unzombify( Element* zombie )
 {
 	Element temp( zombie->id(), zombie->cinfo(), zombie->dataHandler() );
 	Eref zer( &temp, 0 );
 	Eref oer( zombie, 0 );
 
-	ZombieBufMol* z = reinterpret_cast< ZombieBufMol* >( zer.data() );
+	ZombieBufPool* z = reinterpret_cast< ZombieBufPool* >( zer.data() );
 
 	// Here I am unsure how to recreate the correct kind of data handler
 	// for the original. Do later.
 	DataHandler* dh = 0;
 
-	zombie->zombieSwap( BufMol::initCinfo(), dh );
+	zombie->zombieSwap( BufPool::initCinfo(), dh );
 
-	BufMol* m = reinterpret_cast< BufMol* >( oer.data() );
+	BufPool* m = reinterpret_cast< BufPool* >( oer.data() );
 
 	m->setN( z->getN( zer, 0 ) );
 	m->setNinit( z->getNinit( zer, 0 ) );

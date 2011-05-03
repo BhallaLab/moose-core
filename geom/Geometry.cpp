@@ -19,6 +19,13 @@
  * parameters for tolerances, and messages to send these on to the
  * solver when updated.
  */
+///////////////////////////////////////////////////////
+// MsgSrc definitions
+///////////////////////////////////////////////////////
+static SrcFinfo1< double > returnSize(
+	"returnSize",
+	"Return size of compartment"
+);
 const Cinfo* Geometry::initCinfo()
 {
 	///////////////////////////////////////////////////////
@@ -42,22 +49,35 @@ const Cinfo* Geometry::initCinfo()
 		&Geometry::getNeighDist
 	);
 	///////////////////////////////////////////////////////
-	// MsgSrc definitions
-	///////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////
 	// MsgDest definitions
 	///////////////////////////////////////////////////////
+	static DestFinfo handleSizeRequest( 
+		"handleSizeRequest",
+		"Handles a request for size. Part of SharedMsg to ChemCompt.",
+		new EpFunc0< Geometry >( &Geometry::handleSizeRequest )
+	);
 	///////////////////////////////////////////////////////
 	// Synapse definitions
 	///////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
+	static Finfo* comptShared[] = {
+		&handleSizeRequest,
+		&returnSize
+	};
+	
+	static SharedFinfo compt( "compt",
+		"Connects to compartment(s) to specify geometry.",
+		comptShared, sizeof( comptShared ) / sizeof( const Finfo* ) 
+	);
 
+	///////////////////////////////////////////////////////
 	static Finfo* geometryFinfos[] =
 	{
 		&epsilon,	// value
-		&neighdist // value
+		&neighdist, // value
+		&compt		// SharedFinfo
 	};
 	static string doc[] =
 	{
@@ -112,5 +132,14 @@ void Geometry::setNeighDist( double value )
 double Geometry::getNeighDist() const
 {
 	return neighDist_;
+}
+
+///////////////////////////////////////////////////
+// Dest function.
+///////////////////////////////////////////////////
+
+void Geometry::handleSizeRequest( const Eref& e, const Qinfo* q )
+{
+	returnSize.send( e, q->getProcInfo(), 0.0 );
 }
 

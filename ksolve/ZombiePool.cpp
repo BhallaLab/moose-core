@@ -8,8 +8,8 @@
 **********************************************************************/
 
 #include "StoichHeaders.h"
-#include "ZombieMol.h"
-#include "Mol.h"
+#include "ZombiePool.h"
+#include "Pool.h"
 #include "ElementValueFinfo.h"
 #include "DataHandlerWrapper.h"
 
@@ -17,61 +17,61 @@
 
 static const double NA = 6.023e23;
 
-const Cinfo* ZombieMol::initCinfo()
+const Cinfo* ZombiePool::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
 		// Field Definitions
 		//////////////////////////////////////////////////////////////
-		static ElementValueFinfo< ZombieMol, double > n(
+		static ElementValueFinfo< ZombiePool, double > n(
 			"n",
-			"Number of molecules",
-			&ZombieMol::setN,
-			&ZombieMol::getN
+			"Number of molecules in pool",
+			&ZombiePool::setN,
+			&ZombiePool::getN
 		);
 
-		static ElementValueFinfo< ZombieMol, double > nInit(
+		static ElementValueFinfo< ZombiePool, double > nInit(
 			"nInit",
-			"Initial value of number of molecules",
-			&ZombieMol::setNinit,
-			&ZombieMol::getNinit
+			"Initial value of number of molecules in pool",
+			&ZombiePool::setNinit,
+			&ZombiePool::getNinit
 		);
 
-		static ElementValueFinfo< ZombieMol, double > diffConst(
+		static ElementValueFinfo< ZombiePool, double > diffConst(
 			"diffConst",
 			"Diffusion constant of molecule",
-			&ZombieMol::setDiffConst,
-			&ZombieMol::getDiffConst
+			&ZombiePool::setDiffConst,
+			&ZombiePool::getDiffConst
 		);
 
-		static ElementValueFinfo< ZombieMol, double > conc(
+		static ElementValueFinfo< ZombiePool, double > conc(
 			"conc",
-			"Concentration of molecules",
-			&ZombieMol::setConc,
-			&ZombieMol::getConc
+			"Concentration of molecules in pool",
+			&ZombiePool::setConc,
+			&ZombiePool::getConc
 		);
 
-		static ElementValueFinfo< ZombieMol, double > concInit(
+		static ElementValueFinfo< ZombiePool, double > concInit(
 			"concInit",
-			"Initial value of molecular concentration",
-			&ZombieMol::setConcInit,
-			&ZombieMol::getConcInit
+			"Initial value of molecular concentration in pool",
+			&ZombiePool::setConcInit,
+			&ZombiePool::getConcInit
 		);
 
-		static ReadOnlyElementValueFinfo< ZombieMol, double > size(
+		static ReadOnlyElementValueFinfo< ZombiePool, double > size(
 			"size",
 			"Size of compartment. Units are SI. "
 			"Utility field, the master size info is "
 			"stored on the compartment itself. For voxel-based spatial"
-			"models, the 'size' of the molecule at a given index is the"
+			"models, the 'size' of the pool at a given index is the"
 			"size of that voxel.",
-			&ZombieMol::getSize
+			&ZombiePool::getSize
 		);
 
-		static ElementValueFinfo< ZombieMol, unsigned int > species(
+		static ElementValueFinfo< ZombiePool, unsigned int > species(
 			"species",
 			"Species identifer for this mol pool",
-			&ZombieMol::setSpecies,
-			&ZombieMol::getSpecies
+			&ZombiePool::setSpecies,
+			&ZombiePool::getSpecies
 		);
 
 		//////////////////////////////////////////////////////////////
@@ -79,11 +79,11 @@ const Cinfo* ZombieMol::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static DestFinfo process( "process",
 			"Handles process call",
-			new ProcOpFunc< ZombieMol >( &ZombieMol::process ) );
+			new ProcOpFunc< ZombiePool >( &ZombiePool::process ) );
 
 		static DestFinfo reinit( "reinit",
 			"Handles reinit call",
-			new ProcOpFunc< ZombieMol >( &ZombieMol::reinit ) );
+			new ProcOpFunc< ZombiePool >( &ZombiePool::reinit ) );
 
 		static DestFinfo group( "group",
 			"Handle for grouping. Doesn't do anything.",
@@ -91,13 +91,13 @@ const Cinfo* ZombieMol::initCinfo()
 
 		static DestFinfo reacDest( "reacDest",
 			"Handles reaction input",
-			new OpFunc2< ZombieMol, double, double >( &ZombieMol::reac )
+			new OpFunc2< ZombiePool, double, double >( &ZombiePool::reac )
 		);
 
 		static DestFinfo setSize( "setSize",
 			"Separate finfo to assign size, should only be used by compartment."
 			"Defaults to SI units of volume: m^3",
-			new EpFunc1< ZombieMol, double >( &ZombieMol::setSize )
+			new EpFunc1< ZombiePool, double >( &ZombiePool::setSize )
 		);
 
 		//////////////////////////////////////////////////////////////
@@ -105,7 +105,7 @@ const Cinfo* ZombieMol::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static SrcFinfo1< double > nOut( 
 				"nOut", 
-				"Sends out # of molecules on each timestep"
+				"Sends out # of molecules in pool on each timestep"
 		);
 
 		//////////////////////////////////////////////////////////////
@@ -127,7 +127,7 @@ const Cinfo* ZombieMol::initCinfo()
 			procShared, sizeof( procShared ) / sizeof( const Finfo* )
 		);
 
-	static Finfo* zombieMolFinfos[] = {
+	static Finfo* zombiePoolFinfos[] = {
 		&n,				// Value
 		&nInit,			// Value
 		&diffConst,		// Value
@@ -141,26 +141,26 @@ const Cinfo* ZombieMol::initCinfo()
 		&proc,				// SharedFinfo
 	};
 
-	static Cinfo zombieMolCinfo (
-		"ZombieMol",
+	static Cinfo zombiePoolCinfo (
+		"ZombiePool",
 		Neutral::initCinfo(),
-		zombieMolFinfos,
-		sizeof( zombieMolFinfos ) / sizeof ( Finfo* ),
-		new Dinfo< ZombieMol >()
+		zombiePoolFinfos,
+		sizeof( zombiePoolFinfos ) / sizeof ( Finfo* ),
+		new Dinfo< ZombiePool >()
 	);
 
-	return &zombieMolCinfo;
+	return &zombiePoolCinfo;
 }
 
 //////////////////////////////////////////////////////////////
 // Class definitions
 //////////////////////////////////////////////////////////////
-static const Cinfo* zombieMolCinfo = ZombieMol::initCinfo();
+static const Cinfo* zombiePoolCinfo = ZombiePool::initCinfo();
 
-ZombieMol::ZombieMol()
+ZombiePool::ZombiePool()
 {;}
 
-ZombieMol::~ZombieMol()
+ZombiePool::~ZombiePool()
 {;}
 
 
@@ -169,105 +169,105 @@ ZombieMol::~ZombieMol()
 //////////////////////////////////////////////////////////////
 
 // Doesn't do anything on its own.
-void ZombieMol::process( const Eref& e, ProcPtr p )
+void ZombiePool::process( const Eref& e, ProcPtr p )
 {;}
 
-void ZombieMol::reinit( const Eref& e, ProcPtr p )
+void ZombiePool::reinit( const Eref& e, ProcPtr p )
 {;}
 
-void ZombieMol::reac( double A, double B )
+void ZombiePool::reac( double A, double B )
 {;}
 
 //////////////////////////////////////////////////////////////
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
-void ZombieMol::setN( const Eref& e, const Qinfo* q, double v )
+void ZombiePool::setN( const Eref& e, const Qinfo* q, double v )
 {
-	S_[ convertIdToMolIndex( e.id() ) ] = v;
+	S_[ convertIdToPoolIndex( e.id() ) ] = v;
 }
 
-double ZombieMol::getN( const Eref& e, const Qinfo* q ) const
+double ZombiePool::getN( const Eref& e, const Qinfo* q ) const
 {
-	return S_[ convertIdToMolIndex( e.id() ) ];
+	return S_[ convertIdToPoolIndex( e.id() ) ];
 }
 
-void ZombieMol::setNinit( const Eref& e, const Qinfo* q, double v )
+void ZombiePool::setNinit( const Eref& e, const Qinfo* q, double v )
 {
-	Sinit_[ convertIdToMolIndex( e.id() ) ] = v;
+	Sinit_[ convertIdToPoolIndex( e.id() ) ] = v;
 }
 
-double ZombieMol::getNinit( const Eref& e, const Qinfo* q ) const
+double ZombiePool::getNinit( const Eref& e, const Qinfo* q ) const
 {
-	return Sinit_[ convertIdToMolIndex( e.id() ) ];
+	return Sinit_[ convertIdToPoolIndex( e.id() ) ];
 }
 
-void ZombieMol::setConc( const Eref& e, const Qinfo* q, double conc )
+void ZombiePool::setConc( const Eref& e, const Qinfo* q, double conc )
 {
-	unsigned int mol = convertIdToMolIndex( e.id() );
-	unsigned int index = compartment_[ mol ];
+	unsigned int pool = convertIdToPoolIndex( e.id() );
+	unsigned int index = compartment_[ pool ];
 	assert( index < compartmentSize_.size() );
-	S_[ mol ] = 1e-3 * NA * conc * compartmentSize_[ index ];
+	S_[ pool ] = 1e-3 * NA * conc * compartmentSize_[ index ];
 }
 
-double ZombieMol::getConc( const Eref& e, const Qinfo* q ) const
+double ZombiePool::getConc( const Eref& e, const Qinfo* q ) const
 {
-	unsigned int mol = convertIdToMolIndex( e.id() );
-	unsigned int index = compartment_[ mol ];
-	assert( index < compartmentSize_.size() );
-	assert( compartmentSize_[ index ] > 0.0 );
-	return 1e3 * S_[ mol ] / ( NA * compartmentSize_[ index ] );
-}
-
-void ZombieMol::setConcInit( const Eref& e, const Qinfo* q, double conc )
-{
-	unsigned int mol = convertIdToMolIndex( e.id() );
-	unsigned int index = compartment_[ mol ];
-	assert( index < compartmentSize_.size() );
-	Sinit_[ mol ] = 1e-3 * NA * conc * compartmentSize_[ index ];
-}
-
-double ZombieMol::getConcInit( const Eref& e, const Qinfo* q ) const
-{
-	unsigned int mol = convertIdToMolIndex( e.id() );
-	unsigned int index = compartment_[ mol ];
+	unsigned int pool = convertIdToPoolIndex( e.id() );
+	unsigned int index = compartment_[ pool ];
 	assert( index < compartmentSize_.size() );
 	assert( compartmentSize_[ index ] > 0.0 );
-	return 1e3 * Sinit_[ mol ] / ( NA * compartmentSize_[ index ] );
+	return 1e3 * S_[ pool ] / ( NA * compartmentSize_[ index ] );
 }
 
-void ZombieMol::setDiffConst( const Eref& e, const Qinfo* q, double v )
+void ZombiePool::setConcInit( const Eref& e, const Qinfo* q, double conc )
+{
+	unsigned int pool = convertIdToPoolIndex( e.id() );
+	unsigned int index = compartment_[ pool ];
+	assert( index < compartmentSize_.size() );
+	Sinit_[ pool ] = 1e-3 * NA * conc * compartmentSize_[ index ];
+}
+
+double ZombiePool::getConcInit( const Eref& e, const Qinfo* q ) const
+{
+	unsigned int pool = convertIdToPoolIndex( e.id() );
+	unsigned int index = compartment_[ pool ];
+	assert( index < compartmentSize_.size() );
+	assert( compartmentSize_[ index ] > 0.0 );
+	return 1e3 * Sinit_[ pool ] / ( NA * compartmentSize_[ index ] );
+}
+
+void ZombiePool::setDiffConst( const Eref& e, const Qinfo* q, double v )
 {
 	// diffConst_ = v;
 }
 
-double ZombieMol::getDiffConst( const Eref& e, const Qinfo* q ) const
+double ZombiePool::getDiffConst( const Eref& e, const Qinfo* q ) const
 {
 	// return diffConst_;
 	return 0;
 }
 
-void ZombieMol::setSize( const Eref& e, const Qinfo* q, double v )
+void ZombiePool::setSize( const Eref& e, const Qinfo* q, double v )
 {
 	// Illegal operation.
 }
 
-double ZombieMol::getSize( const Eref& e, const Qinfo* q ) const
+double ZombiePool::getSize( const Eref& e, const Qinfo* q ) const
 {
-	unsigned int mol = convertIdToMolIndex( e.id() );
-	unsigned int index = compartment_[ mol ];
+	unsigned int pool = convertIdToPoolIndex( e.id() );
+	unsigned int index = compartment_[ pool ];
 	assert( index < compartmentSize_.size() );
 	return compartmentSize_[ index ];
 }
 
-void ZombieMol::setSpecies( const Eref& e, const Qinfo* q, unsigned int v )
+void ZombiePool::setSpecies( const Eref& e, const Qinfo* q, unsigned int v )
 {
-	species_[ convertIdToMolIndex( e.id() ) ] = v;
+	species_[ convertIdToPoolIndex( e.id() ) ] = v;
 }
 
-unsigned int ZombieMol::getSpecies( const Eref& e, const Qinfo* q ) const
+unsigned int ZombiePool::getSpecies( const Eref& e, const Qinfo* q ) const
 {
-	return species_[ convertIdToMolIndex( e.id() ) ];
+	return species_[ convertIdToPoolIndex( e.id() ) ];
 }
 
 //////////////////////////////////////////////////////////////
@@ -275,38 +275,38 @@ unsigned int ZombieMol::getSpecies( const Eref& e, const Qinfo* q ) const
 //////////////////////////////////////////////////////////////
 
 // static func
-void ZombieMol::zombify( Element* solver, Element* orig )
+void ZombiePool::zombify( Element* solver, Element* orig )
 {
-	Element temp( orig->id(), zombieMolCinfo, solver->dataHandler() );
+	Element temp( orig->id(), zombiePoolCinfo, solver->dataHandler() );
 	Eref zer( &temp, 0 );
 	Eref oer( orig, 0 );
 
-	ZombieMol* z = reinterpret_cast< ZombieMol* >( zer.data() );
-	Mol* m = reinterpret_cast< Mol* >( oer.data() );
+	ZombiePool* z = reinterpret_cast< ZombiePool* >( zer.data() );
+	Pool* m = reinterpret_cast< Pool* >( oer.data() );
 
 	z->setN( zer, 0, m->getN() );
 	z->setNinit( zer, 0, m->getNinit() );
 	z->setSpecies( zer, 0, m->getSpecies() );
 	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
-	orig->zombieSwap( zombieMolCinfo, dh );
+	orig->zombieSwap( zombiePoolCinfo, dh );
 }
 
 // Static func
-void ZombieMol::unzombify( Element* zombie )
+void ZombiePool::unzombify( Element* zombie )
 {
 	Element temp( zombie->id(), zombie->cinfo(), zombie->dataHandler() );
 	Eref zer( &temp, 0 );
 	Eref oer( zombie, 0 );
 
-	ZombieMol* z = reinterpret_cast< ZombieMol* >( zer.data() );
+	ZombiePool* z = reinterpret_cast< ZombiePool* >( zer.data() );
 
 	// Here I am unsure how to recreate the correct kind of data handler
 	// for the original. Do later.
 	DataHandler* dh = 0;
 
-	zombie->zombieSwap( Mol::initCinfo(), dh );
+	zombie->zombieSwap( Pool::initCinfo(), dh );
 
-	Mol* m = reinterpret_cast< Mol* >( oer.data() );
+	Pool* m = reinterpret_cast< Pool* >( oer.data() );
 
 	m->setN( z->getN( zer, 0 ) );
 	m->setNinit( z->getNinit( zer, 0 ) );

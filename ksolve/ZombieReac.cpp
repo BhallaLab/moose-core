@@ -178,15 +178,15 @@ ZeroOrder* ZombieReac::makeHalfReaction(
 	ZeroOrder* rateTerm = 0;
 	if ( numReactants == 1 ) {
 		rateTerm = 
-			new FirstOrder( rate, convertIdToMolIndex( mols[0] ) );
+			new FirstOrder( rate, convertIdToPoolIndex( mols[0] ) );
 	} else if ( numReactants == 2 ) {
 		rateTerm = new SecondOrder( rate,
-				convertIdToMolIndex( mols[0] ), 
-				convertIdToMolIndex( mols[1] ) );
+				convertIdToPoolIndex( mols[0] ), 
+				convertIdToPoolIndex( mols[1] ) );
 	} else if ( numReactants > 2 ) {
 		vector< unsigned int > v;
 		for ( unsigned int i = 0; i < numReactants; ++i ) {
-			v.push_back( convertIdToMolIndex( mols[i] ) );
+			v.push_back( convertIdToPoolIndex( mols[i] ) );
 		}
 		rateTerm = new NOrder( rate, v );
 	} else {
