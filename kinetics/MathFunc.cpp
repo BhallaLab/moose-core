@@ -262,41 +262,26 @@ void MathFunc::argFunc( double d )
 
 void MathFunc::arg1Func( double d )
 {
-	double *d1 = new double;
-	*d1 = d;
-	v.resize( 1 );
-	/*
-	while ( v.size() != 2)  // surely this should be 1?
-		v.push_back( &d ); // Upi Sez: I'm dubious about this.
-	*/
-	v[0] = d1;
+	while ( v.size() != 1)  // surely this should be 1?
+		v.push_back( d ); // Upi Sez: I'm dubious about this.
 }
 
 void MathFunc::arg2Func( double d )
 {
-	double *d2 = new double;  
-	*d2 = d;
   	while (v.size() != 2) 
-		v.push_back(&d);
-  	v[1] = d2;
+		v.push_back(d);
 }
 
 void MathFunc::arg3Func( double d )
 {
-	double *d3 = new double;
-	*d3 = d;
 	while ( v.size() != 3) 
-		v.push_back( &d );
-	v[2] = d3;
+		v.push_back( d );
 }
 
 void MathFunc::arg4Func( double d )
 {
-	double *d4 = new double;
-	*d4 = d;
 	while ( v.size() != 4) 
-		v.push_back( &d );
-	v[3] = d4;
+		v.push_back( d );
 }
 
 //////////////////////////////////////////////////////////////////
@@ -698,9 +683,9 @@ void MathFunc::executeFunction(){ //now this filename is the whole file string..
 double MathFunc::getResult(){
   if (status_ == ERROR || status_ == BLANK){error("function not initialized properly"); return 0; } 
   for (size_t k = 0; k < v_.size(); k++)
-    *v_[k] = *v[k];
+    *v_[k] = v[k];
   for (size_t k = v_.size(); k < v.size(); k++)
-    v_.push_back(v[k]);
+    v_.push_back(&v[k]);
   for (size_t k = 0; k < stack_.size(); k++)
     if(function_[k] == 2){
        string str = vname_[(int)stack_[k]];
