@@ -12427,32 +12427,35 @@ Array-ifying reaction system.				Shell funcs
 +Compartment handling					-
 Mesh handling in geometry: voxel data structs		Compartment handling
 Replicating regular ksolver in array calculations	Array-ifying
-Gillepsie solver					-
-Setting up systematic Species info			-
+Gillespie solver					-
+*Setting up systematic Species info			-
 Duplicating a species (as a tracer)			Species info
 Parallelize rate updates for Ksolver and Gillespie.	array, replic, Gillesp
 Parallelize/multithread regular Ksolver			par rate updates
 Clean up math handler memory leaks			-
 Incorporate math handler into ksolver			-
 ReacDiff solver (4th order version)			arrayifying
-Geometry extraction from neuronal model: rule sets.	-
+Geometry extraction from neuronal model: rule sets.	NeuroML/readcell
 GUI							-
 Merging tool						species
+Update kkit reader to deal with species etc		species
 SBML reader port and expansion				species, math, compt
 Molecule mapper at interfaces.				species, compt
 Voxelization of geometry				arrayifying
 Volume handling for concs and reaction rate scaling	array, compt
 Volume handling for cross-voxel reactions		array, compt
 Directions and other details for molecules in Smoldyn	geom, compt
-Automatic est of D from molecule size			-
+Automatic est of D from molecule wt			Species
 Mechanics						geom, compt
 Boundary changes					geom
 steady-state solver and classifier.			-
 dose-response builder					ss solver
 scanner for all steady-states.				ss solver
-hsolver							-
-markov channels						hsolver
-NeuroML reader						markov
+Regular channel/compt definitions			-
+ReadCell reader						-
+NeuroML reader						-
+hsolver							channels, compts
+markov channels						hsolver, channels
 Port over signeur					most of the above.
 
 
@@ -12512,5 +12515,10 @@ SBML calls it species-type. It is not a required field.
 
 Setting up a bare-bones Species class. Connects to Pools with the mol wt info,
 which the pool can use if desired, for estimating diffusion const.
+Checkin 2650.
 
 ============================================================================
+4 May 2011
+Working on cleaning up MathFunc class which has lots of memory leaks.
+Fixed one set, much more to go. 
+

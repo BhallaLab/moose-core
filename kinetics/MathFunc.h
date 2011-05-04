@@ -79,7 +79,7 @@ class MathFunc {
     vector <string> vname_;
     vector <double *> v_;
     string vector_name_;
-    vector <double *> v;
+    vector <double> v;
     double result_;
     map <int, int> precedence_;
     int status_; //MMLSTRING, FNSTRING, ERROR, BLANK
