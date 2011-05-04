@@ -122,6 +122,7 @@ void testMathFunc()
 		isClose( d, 0.5*(0.1*1 + (0.2*(2/0.3)*(2/0.3))/(1 + (2/0.3)*(2/0.3))), tolerance )
 	);
 	
+	mid.destroy();
 	nid.destroy();
 	cout << "." << flush;
 }
