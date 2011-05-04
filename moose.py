@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Fri Apr 22 14:33:54 2011 (+0530)
+# Last-Updated: Wed May  4 11:18:40 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 630
+#     Update #: 648
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -250,6 +250,12 @@ class NeutralArray(object):
             self.className = args[2]
         if self._id is None:
             self._id = _moose.Id(path=path, dims=dims, type=self.className)
+        orig_classname = self._id[0].getField('class')
+        if self.__class__.__name__ != orig_classname+'Array':
+            orig_class = eval('%sArray' % (orig_classname))
+            if self.__class__ not in orig_class.mro():        
+                self._id = None
+                raise TypeError('Cannot convert %s to %s' % (orig_class, self.__class__))
 
     def getFieldNames(self, ftype=''):
         return self._id[0].getFieldNames(ftype)
@@ -317,6 +323,12 @@ class Neutral(object):
             except KeyError:
                 pass
         self._oid = _moose.ObjId(id_, dindex, findex)
+        orig_classname = self._oid.getField('class')
+        if self.__class__.__name__ != orig_classname:
+            orig_class = eval(orig_classname)
+            if self.__class__ not in orig_class.mro():
+                self._oid = None
+                raise TypeError('Cannot convert %s to %s' % (orig_class, self.__class__))
 
     def getField(self, field):
         return self._oid.getField(field)
