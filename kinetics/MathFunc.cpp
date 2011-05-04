@@ -629,16 +629,12 @@ void MathFunc::executeFunction(){ //now this filename is the whole file string..
           function_.push_back(2);
           break;
         }
-        map<string,double *>::iterator iter = symtable_.find(token);
+        map<string,double>::iterator iter = symtable_.find(token);
         if( iter == symtable_.end() ) { 
-          //if (v.size() == 0) {error (lineno, string("number of arguments not matching with that in the source code!")) ; break;}
-          double *a;
-          a  = new double; 
-          v_.push_back(a);
-          //cout << v_.back()<< endl;//work out this one....
-          symtable_[token] = a; 
+		  symtable_[token] = 0.0;
+		  iter = symtable_.find( token );
+		  v_.push_back( &( iter->second ) );
           vname_.push_back(token);
-          //v.erase(v.begin());
           break;
         }
         else {
@@ -689,7 +685,7 @@ double MathFunc::getResult(){
   for (size_t k = 0; k < stack_.size(); k++)
     if(function_[k] == 2){
        string str = vname_[(int)stack_[k]];
-       stack_[k] = (*symtable_[str]);
+       stack_[k] = symtable_[str];
        function_[k] = 0;
      }
   assert(v.size()==v_.size());
@@ -934,11 +930,11 @@ bool MathFunc::storeArgNames(string args){
     }
     
     /*not a vector therefore variable*/
-    map<string,double *>::iterator iter = symtable_.find(variable);
+    map<string,double>::iterator iter = symtable_.find(variable);
     if (iter == symtable_.end()){
-      double *d = new double;
-      symtable_[variable] = d;
-      v_.push_back(d);
+		symtable_[variable] = 0.0;
+		iter = symtable_.find( variable );
+		v_.push_back( &( iter->second ) );
     }
     vname_.push_back(variable);
   }
@@ -947,7 +943,7 @@ bool MathFunc::storeArgNames(string args){
 
 bool MathFunc::testStoreArgNames(){
   string args = "x, y, z, k, helloWorld123";
-  map<string,double *>::iterator iter;
+  map<string,double>::iterator iter;
   vector <string> vname_temp = vname_;
   vname_.clear();
   storeArgNames(args);

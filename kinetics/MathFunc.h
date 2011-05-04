@@ -73,7 +73,7 @@ class MathFunc {
     string mmlstring_;
     string fn_;
     vector <double> stack_;
-    map <string, double *> symtable_;
+    map <string, double> symtable_;
     int expect_;
     vector <int> function_;
     vector <string> vname_;
