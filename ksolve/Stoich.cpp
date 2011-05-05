@@ -16,6 +16,7 @@
 #include "Enz.h"
 #include "MMenz.h"
 #include "SumFunc.h"
+#include "MathFunc.h"
 #include "Boundary.h"
 #include "ChemCompt.h"
 #include "ZombiePool.h"
@@ -485,8 +486,8 @@ void Stoich::updateRates( vector< double>* yprime, double dt  )
 
 // Update the function-computed molecule terms. These are not integrated,
 // but their values may be used by molecules that are.
-// The molecule vector S_ has a section for mathTerms. In this section
-// there is a one-to-one match between entries in S_ and MathTerm entries.
+// The molecule vector S_ has a section for FuncTerms. In this section
+// there is a one-to-one match between entries in S_ and FuncTerm entries.
 void Stoich::updateFuncs( double t )
 {
 	vector< FuncTerm* >::const_iterator i;
@@ -494,7 +495,7 @@ void Stoich::updateFuncs( double t )
 
 	for ( i = funcs_.begin(); i != funcs_.end(); i++)
 	{
-		*j++ = (**i)( t );
+		*j++ = (**i)( &( S_[0] ), t );
 		assert( !isnan( *( j-1 ) ) );
 	}
 }

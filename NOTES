@@ -12432,8 +12432,8 @@ Gillespie solver					-
 Duplicating a species (as a tracer)			Species info
 Parallelize rate updates for Ksolver and Gillespie.	array, replic, Gillesp
 Parallelize/multithread regular Ksolver			par rate updates
-Clean up math handler memory leaks			-
-Incorporate math handler into ksolver			-
+*Clean up math handler memory leaks			-
+Incorporate math handler into ksolver			MathFunc leaks
 ReacDiff solver (4th order version)			arrayifying
 Geometry extraction from neuronal model: rule sets.	NeuroML/readcell
 GUI							-
@@ -12525,5 +12525,11 @@ More cleanup later, now valgrind only reports the earlier missing 120 bytes
 that I still haven't been able to track down. I do hope that the MathFunc
 really is OK after the changes I've made in it. Don't know why Raamesh did
 it this way at all if it was so straightforward to change.
+Checkin 2654
+
+============================================================================
+5 May 2011
+Got the MathFunc stuff incorporated but not yet tested, in the
+ksolver code as a MathTerm.
 
 ============================================================================
