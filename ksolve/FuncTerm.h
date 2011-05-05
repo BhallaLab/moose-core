@@ -12,12 +12,12 @@ class FuncTerm
 {
 	public:
 		FuncTerm() {;}
-		virtual ~FuncTerm() {;}
+		virtual ~FuncTerm();
 		/**
-		 * This computes the value. The time t is an argument because time
-		 * might be an argument.
+		 * This computes the value. The time t is an argument needed by
+		 * some peculiar functions.
 		 */
-		virtual double operator() ( double t ) const = 0;
+		virtual double operator() ( const double* S, double t ) const = 0;
 
 		/**
 		 * This function finds the reactant indices in the vector
@@ -25,23 +25,80 @@ class FuncTerm
 		 * entries in molIndex.
 		 */
 		virtual unsigned int  getReactants( 
-			vector< unsigned int >& molIndex,
-			const vector< double >& S ) const = 0;
+			vector< unsigned int >& molIndex ) const = 0;
 		virtual const string& function() const = 0;
 };
 
+/**
+ * This is a special FuncTerm that returns the sum of the molecular concs.
+ * Does the calculation directly, so it is fast.
+ */
 class SumTotal: public FuncTerm
 {
 	public:
-		SumTotal( const vector< const double* >& mol )
+		SumTotal( const vector< unsigned int >& mol )
 			: mol_( mol )
 		{;}
 
-		double operator() ( double t ) const;
-		unsigned int  getReactants( vector< unsigned int >& molIndex,
-			const vector< double >& S ) const;
+		~SumTotal() {;}
+
+		double operator() ( const double* S, double t ) const;
+		unsigned int  getReactants( vector< unsigned int >& molIndex) const;
 		const string& function() const;
 
 	private:
-		vector< const double* > mol_;
+		vector< unsigned int > mol_;
 };
+
+/**
+ * This is a general FuncTerm for any function of the molecular concs.
+ * It uses MathFunc to do the evaluation.
+ */
+class MathTerm: public FuncTerm
+{
+	public:
+		MathTerm( const vector< unsigned int >& args, MathFunc* func )
+			: args_( args ), func_( func )
+		{;}
+
+		~MathTerm() {;}
+
+		double operator() ( const double* S, double t ) const;
+		unsigned int  getReactants( vector< unsigned int >& molIndex ) const;
+		const string& function() const;
+
+	private:
+		vector< unsigned int > args_;
+		MathFunc* func_;
+};
+
+/**
+ * This is a general FuncTerm for any function of time and the 
+ * molecular concs. It assumes that the first argument of the function is
+ * the simulation time. It uses MathFunc to do the evaluation.
+ */
+class MathTimeTerm: public FuncTerm
+{
+	public:
+		MathTimeTerm( const vector< unsigned int >& args, 
+			MathFunc* func )
+			: args_( args ), func_( func )
+		{;}
+
+		~MathTimeTerm() {;}
+
+		double operator() ( const double* S, double t ) const;
+		unsigned int  getReactants( vector< unsigned int >& molIndex ) const;
+		const string& function() const;
+
+	private:
+		vector< unsigned int > args_;
+		MathFunc* func_;
+};
+
+/**
+ * This is a general FuncTerm for any function of time and a delay
+ * term for each of the molecular args. If the delay is zero, it uses
+ * the mol conc directly, otherwise utilizes a ring buffer with the 
+ * specified time resolution. Nasty stuff.
+ */
