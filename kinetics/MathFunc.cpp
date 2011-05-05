@@ -241,6 +241,38 @@ void MathFunc::processFunc( const Eref& e, ProcPtr info)
   v.clear();
 }
 
+double MathFunc::op( const vector< double >& args )
+{
+	v = args;
+  if (status_ == BLANK || status_ == ERROR) 
+    return 0.0;
+  
+  if (status_ == MMLSTRING)
+    executeFunction();
+  else if (status_ == FNSTRING)
+    infixToPrefix();
+  else 
+    assert(0);/*control should never reach here.*/
+  
+  
+  /*If the execute function or the infix to prefix has not worked properly then ERROR is set in status_*/
+  if (status_ == ERROR){
+    cout << "Error!" << endl;
+    return 0.0;
+  }
+  
+  /* if the argument is the vector or there are enough arguments to satify the function then continue else return*/
+  if (!(vector_name_ != "" || v_.size () <= v.size()))
+    return 0.0;
+  result_ = getResult();
+  if (status_ == ERROR){
+    result_ = 0;
+    cout << "Error!" << endl;
+    return 0.0;
+  }
+  return result_;
+}
+
 void MathFunc::reinitFunc( const Eref& e, ProcPtr info ) 
 {
   // cout << "reiniting..." << endl;

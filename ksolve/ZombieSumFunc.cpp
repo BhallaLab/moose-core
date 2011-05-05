@@ -128,10 +128,10 @@ void ZombieSumFunc::zombify( Element* solver, Element* orig, Id molId )
 	unsigned int funcIndex = z->convertIdToFuncIndex( orig->id() );
 	unsigned int numSrc = orig->getInputs( srcPools, finfo );
 	assert( numSrc > 0 );
-	vector< const double* > molPtrs( numSrc );
+	vector< unsigned int > poolIndex( numSrc );
 	for ( unsigned int i = 0; i < numSrc; ++i )
-		molPtrs[i] = &z->S_[ z->convertIdToPoolIndex( srcPools[i] ) ];
-	z->funcs_[ funcIndex ] = new SumTotal( molPtrs );
+		poolIndex[i] = z->convertIdToPoolIndex( srcPools[i] );
+	z->funcs_[ funcIndex ] = new SumTotal( poolIndex );
 
 	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
 	orig->zombieSwap( zombieSumFuncCinfo, dh );

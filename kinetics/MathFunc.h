@@ -39,6 +39,7 @@ class MathFunc {
 
     MathFunc();
     void executeFunction();
+	double op( const vector< double >& args );
     double getResult();
     void processFunc ( const Eref& e, ProcPtr info);
     void reinitFunc( const Eref& e, ProcPtr info );

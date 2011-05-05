@@ -12,6 +12,7 @@
 
 #include "header.h"
 #include "RateTerm.h"
+class MathFunc;
 #include "FuncTerm.h"
 #include "SparseMatrix.h"
 #include "KinSparseMatrix.h"
