@@ -91,7 +91,18 @@ void testMathFunc()
 	assert (
 		isClose( d, 1/(1+0.02*(2.33*(2 + 3)+1.2E1*4)), tolerance )
 	);
-	
+
+	//////////////////////////////////////////////////////////////////
+	// Test 'op' form of MathFunc
+	//////////////////////////////////////////////////////////////////
+	for ( double x = 0; x < 10; x += 2.0 ) {
+		vector< double > args(4);
+		for ( unsigned int i = 0; i < 4; ++i )
+			args[i] = i + x;
+		double ret = math->op( args );
+		assert( doubleEq( ret, 
+			args[0]/(1+0.02*(2.33*(args[1] + args[2])+1.2E1* args[3]) ) ) );
+	}
 	Field< string >::set( mid, "function", 
 		"f(ERG, DRG) = 0.5*(0.1*ERG + ((0.2*(DRG/0.3)^2)/(1 + (DRG/0.3)^2)))");
 	SetGet1< double >::set( mid, "arg1", 1);

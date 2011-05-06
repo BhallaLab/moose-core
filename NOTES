@@ -12530,6 +12530,17 @@ Checkin 2654
 ============================================================================
 5 May 2011
 Got the MathFunc stuff incorporated but not yet tested, in the
-ksolver code as a MathTerm.
+ksolver code as a MathTerm. Checkin 2655.
+The current version is not thread-safe, will probably have to ask Subha
+to rewrite the whole thing.
 
 ============================================================================
+6 May 2011
+Figure out how to test the MathFunc and its implementation in ksolve. 
+- Implement variant on Kholodenko model, replacing MMEnz with MathFuncs.
+- Implement rat tracking model.
+
+As a first pass, tested the new MathFunc::op() in unit tests. Revealed that
+the system did not deal properly with repeat evaluation requests. Fixed.
+Since this was in a loop, also ran this through valgrind. Continues happy.
+
