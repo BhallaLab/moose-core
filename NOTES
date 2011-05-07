@@ -12537,10 +12537,47 @@ to rewrite the whole thing.
 ============================================================================
 6 May 2011
 Figure out how to test the MathFunc and its implementation in ksolve. 
+- Implement a model with nothing but some interesting funcs, like sin(A+B)
 - Implement variant on Kholodenko model, replacing MMEnz with MathFuncs.
 - Implement rat tracking model.
 
 As a first pass, tested the new MathFunc::op() in unit tests. Revealed that
 the system did not deal properly with repeat evaluation requests. Fixed.
 Since this was in a loop, also ran this through valgrind. Continues happy.
+Checkin 2656.
 
+Trying now to set up a little MM-enz equation using MathFunc and the default
+(EE) integrator.
+This hangs. GDB says:
+
+167             shell->doStart( 100 );
+(gdb) n
+^C
+Program received signal SIGINT, Interrupt.
+pthread_cond_wait@@GLIBC_2.3.2 ()
+    at ../nptl/sysdeps/unix/sysv/linux/x86_64/pthread_cond_wait.S:162
+162     ../nptl/sysdeps/unix/sysv/linux/x86_64/pthread_cond_wait.S: No such file or directory.
+        in ../nptl/sysdeps/unix/sysv/linux/x86_64/pthread_cond_wait.S
+(gdb) where
+#0  pthread_cond_wait@@GLIBC_2.3.2 ()
+    at ../nptl/sysdeps/unix/sysv/linux/x86_64/pthread_cond_wait.S:162
+#1  0x000000000048e05f in Shell::waitForAck (this=0x8ec818)
+    at ShellThreads.cpp:74
+#2  0x0000000000486f96 in Shell::doStart (this=0x8ec818, runtime=100)
+    at Shell.cpp:520
+#3  0x00000000005459a9 in testMathFuncProcess () at testKinetics.cpp:167
+#4  0x0000000000545d62 in testKineticsProcess () at testKinetics.cpp:186
+#5  0x000000000041c174 in processTests (s=0x8ec818) at main.cpp:277
+#6  0x000000000041c2bc in main (argc=1, argv=0x7fffffffe738) at main.cpp:312
+============================================================================
+7 May 2011
+
+After considerable messing around, completed the unit test with the MathFunc.
+Built in a matching reaction using the regular mmEnz.
+Made assorted extensions to Table to do the comparison of the outputs.
+Fixed various issues with the MathFunc so as to do the simulation.
+Clears the test. But I think the MathFunc is appallingly slow, needs to be 
+redone.
+Need to valgrind.
+
+============================================================================
