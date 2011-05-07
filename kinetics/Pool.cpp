@@ -92,6 +92,16 @@ const Cinfo* Pool::initCinfo()
 			new OpFunc2< Pool, double, double >( &Pool::reac )
 		);
 
+		static DestFinfo increment( "increment",
+			"Increments mol numbers by specified amount. Can be +ve or -ve",
+			new OpFunc1< Pool, double >( &Pool::increment )
+		);
+
+		static DestFinfo decrement( "decrement",
+			"Decrements mol numbers by specified amount. Can be +ve or -ve",
+			new OpFunc1< Pool, double >( &Pool::decrement )
+		);
+
 		static DestFinfo setSize( "setSize",
 			"Separate finfo to assign size, should only be used by compartment."
 			"Defaults to SI units of volume: m^3",
@@ -155,6 +165,8 @@ const Cinfo* Pool::initCinfo()
 		&speciesId,	// Value
 		&group,			// DestFinfo
 		&setSize,			// DestFinfo
+		&increment,			// DestFinfo
+		&decrement,			// DestFinfo
 		&reac,				// SharedFinfo
 		&proc,				// SharedFinfo
 		&species,			// SharedFinfo
@@ -224,6 +236,22 @@ void Pool::reac( double A, double B )
 {
 	A_ += A;
 	B_ += B;
+}
+
+void Pool::increment( double val )
+{
+	if ( val > 0 )
+		A_ += val;
+	else
+		B_ -= val;
+}
+
+void Pool::decrement( double val )
+{
+	if ( val < 0 )
+		A_ -= val;
+	else
+		B_ += val;
 }
 
 //////////////////////////////////////////////////////////////

@@ -29,7 +29,12 @@ class Table
 
 		void setThreshold( double v );
 		double getThreshold() const;
+
+		vector< double > getVec() const;
+		void setVec( vector< double > val );
+
 		double getOutputValue() const;
+
 		unsigned int getOutputIndex() const;
 
 		//////////////////////////////////////////////////////////////////
@@ -47,6 +52,7 @@ class Table
 		void loadCSV( 
 			string fname, int startLine, int colNum, char separator );
 		void compareXplot( string fname, string plotname, string op );
+		void compareVec( vector< double > other, string op );
 
 		//////////////////////////////////////////////////////////////////
 		// Lookup funcs for table

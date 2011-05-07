@@ -295,9 +295,7 @@ template< class T > class Conv< vector< T > >
 	public:
 		Conv( const char* buf )
 		{
-			// I choose this value because of the internode BUFSIZE,
-			// which is 65536.
-			static const unsigned int UnreasonablyLargeArray = 8192;
+			static const unsigned int UnreasonablyLargeArray = 1000000;
 			unsigned int numEntries = 
 				*reinterpret_cast< const unsigned int* >( buf );
 			buf += sizeof( unsigned int );
