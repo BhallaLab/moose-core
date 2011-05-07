@@ -44,6 +44,7 @@ extern void testMpiShell();
 extern void testMsg();
 extern void testMpiMsg();
 extern void testKinetics();
+extern void testKineticsProcess();
 extern void testGeom();
 
 extern void initMsgManagers();
@@ -273,6 +274,7 @@ void processTests( Shell* s )
 {
 	testSchedulingProcess();
 	testBuiltinsProcess();
+	testKineticsProcess();
 }
 
 /**

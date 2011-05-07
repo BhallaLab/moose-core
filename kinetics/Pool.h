@@ -70,6 +70,8 @@ class Pool
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref& e, ProcPtr p );
 		void reac( double A, double B );
+		void increment( double val );
+		void decrement( double val );
 
 		static const Cinfo* initCinfo();
 	private:

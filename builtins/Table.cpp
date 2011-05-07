@@ -44,6 +44,13 @@ const Cinfo* Table::initCinfo()
 			&Table::getThreshold
 		);
 
+		static ValueFinfo< Table, vector< double > > vec(
+			"vec",
+			"vector with all table entries",
+			&Table::setVec,
+			&Table::getVec
+		);
+
 		static ReadOnlyValueFinfo< Table, double > outputValue(
 			"outputValue",
 			"Output value holding current table entry or output of a calculation",
@@ -107,6 +114,17 @@ const Cinfo* Table::initCinfo()
 			new OpFunc3< Table, string, string, string >( 
 				&Table::compareXplot ) );
 
+		static DestFinfo compareVec( "compareVec",
+			"Compares contents of Table with a vector of doubles."
+			"Result is put in 'output' field of table."
+			"If the comparison fails (e.g., due to zero entries), the "
+			"return value is -1."
+			"Arguments: Other vector, comparison_operation"
+			"Operations: rmsd (for RMSDifference), rmsr (RMSratio ), "
+			"dotp (Dot product, not yet implemented).",
+			new OpFunc2< Table, vector< double >, string >(
+				&Table::compareVec ) );
+
 		static DestFinfo process( "process",
 			"Handles process call, updates internal time stamp.",
 			new ProcOpFunc< Table >( &Table::process ) );
@@ -138,9 +156,10 @@ const Cinfo* Table::initCinfo()
 
 	static Finfo* tableFinfos[] = {
 		&threshold,		// Value
+		&vec,			// Value
 		&outputValue,	// ReadOnlyValue
 		&outputIndex,	// ReadOnlyValue
-		&size,		// ReadOnlyValue
+		&size,			// ReadOnlyValue
 		&group,			// DestFinfo
 		&input,			// DestFinfo
 		&spike,			// DestFinfo
@@ -148,6 +167,7 @@ const Cinfo* Table::initCinfo()
 		&loadCSV,			// DestFinfo
 		&loadXplot,			// DestFinfo
 		&compareXplot,		// DestFinfo
+		&compareVec,		// DestFinfo
 		&recvDataBuf,	// DestFinfo
 		&output,		// SrcFinfo
 		&outputLoop,		// SrcFinfo
@@ -420,6 +440,25 @@ void Table::compareXplot( string fname, string plotname, string op )
 		cout << "Table::compareXplot: DotProduct not yet done\n";
 }
 
+void Table::compareVec( vector< double > temp, string op )
+{
+	// Note that this line below is illegal: it causes a race condition
+	// vector< double > temp = Field< vector< double > >::get( other, "vec" );
+
+	string hop = headop( op );
+
+	if ( hop == "rmsd" ) { // RMSDifference
+		output_ = getRMSDiff( vec_, temp );
+	}
+
+	if ( hop == "rmsr" ) { // RMS ratio
+		output_ = getRMSRatio( vec_, temp );
+	}
+
+	if ( hop == "dotp" )
+		cout << "Table::compareVec: DotProduct not yet done\n";
+}
+
 //////////////////////////////////////////////////////////////
 // Field Definitions
 //////////////////////////////////////////////////////////////
@@ -466,6 +505,16 @@ void Table::setVecSize( unsigned int num )
 unsigned int Table::getVecSize() const
 {
 	return vec_.size();
+}
+
+vector< double > Table::getVec() const
+{
+	return vec_;
+}
+
+void Table::setVec( vector< double >  val )
+{
+	vec_ = val;
 }
 
 //////////////////////////////////////////////////////////////

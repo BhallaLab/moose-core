@@ -138,15 +138,83 @@ void testMathFunc()
 	cout << "." << flush;
 }
 
+void testMathFuncProcess()
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< unsigned int > dims( 1, 1 );
+	//////////////////////////////////////////////////////////////////////
+	// This set is the test kinetic calculation using MathFunc
+	//////////////////////////////////////////////////////////////////////
+	Id nid = shell->doCreate( "Neutral", Id(), "n", dims );
+	Id mid = shell->doCreate( "MathFunc", nid, "m", dims );
+	Id aid = shell->doCreate( "Pool", nid, "a", dims ); // substrate
+	Id bid = shell->doCreate( "Pool", nid, "b", dims );	// enz
+	Id cid = shell->doCreate( "Pool", nid, "c", dims ); // product
+	Id tabid = shell->doCreate( "Table", nid, "tab", dims ); // output plot
+
+	Field< string >::set( mid, "function", "f(s, e) = (1 * e * s ) / (1 + s)" );
+	Field< double >::set( aid, "nInit", 1.0 );
+	Field< double >::set( bid, "nInit", 1.0 );
+	Field< double >::set( cid, "nInit", 0.0 );
+
+	shell->doAddMsg( "Single", ObjId( aid ), "nOut", ObjId( mid ), "arg1" );
+	shell->doAddMsg( "Single", ObjId( bid ), "nOut", ObjId( mid ), "arg2" );
+	shell->doAddMsg( "Single", ObjId( mid ), "output", ObjId( cid ), "increment" );
+	shell->doAddMsg( "Single", ObjId( mid ), "output", ObjId( aid ), "decrement" );
+	shell->doAddMsg( "Single", ObjId( cid ), "nOut", ObjId( tabid ), "input" );
+
+	//////////////////////////////////////////////////////////////////////
+	// This set is the reference kinetic calculation using MMEnz
+	//////////////////////////////////////////////////////////////////////
+	Id pid = shell->doCreate( "Pool", nid, "p", dims ); // substrate
+	Id qid = shell->doCreate( "Pool", nid, "q", dims );	// enz
+	Id rid = shell->doCreate( "Pool", nid, "r", dims ); // product
+	Id mmid = shell->doCreate( "MMenz", nid, "mm", dims ); // product
+
+	Id tabid2 = shell->doCreate( "Table", nid, "tab2", dims ); //output plot
+
+	Field< double >::set( mmid, "Km", 1.0 );
+	Field< double >::set( mmid, "kcat", 1.0 );
+	Field< double >::set( pid, "nInit", 1.0 );
+	Field< double >::set( qid, "nInit", 1.0 );
+	Field< double >::set( rid, "nInit", 0.0 );
+
+	shell->doAddMsg( "Single", ObjId( mmid ), "sub", ObjId( pid ), "reac" );
+	shell->doAddMsg( "Single", ObjId( mmid ), "prd", ObjId( rid ), "reac" );
+	shell->doAddMsg( "Single", ObjId( qid ), "nOut", ObjId( mmid ), "enz" );
+	shell->doAddMsg( "Single", ObjId( rid ), "nOut", ObjId( tabid2 ), "input" );
+	shell->doSetClock( 0, 0.01 );
+	shell->doUseClock( "/n/##", "process", 0 );
+
+	//////////////////////////////////////////////////////////////////////
+	// Now run models and compare outputs
+	//////////////////////////////////////////////////////////////////////
+
+	shell->doReinit();
+	shell->doStart( 10 );
+
+	// SetGet2< string, string >::set( tabid, "xplot", "m.out", "mathFunc" );
+	// SetGet2< string, string >::set( tabid2, "xplot", "m.out", "mmenz" );
+	vector< double > temp = Field< vector< double > >::get( tabid2, "vec" );
+	SetGet2< vector< double >, string >::set( 
+		tabid, "compareVec", temp, "rmsr" );
+	double val = Field< double >::get( tabid, "outputValue" );
+	assert( val < 1e-6 );
+
+	shell->doDelete( nid );
+	cout << "." << flush;
+}
 
 void testKinetics()
 {
-	// testReadKkit(); // To go into regression tests.
 	testMathFunc();
 }
 
 void testMpiKinetics( )
 {
-	//Need to update
-// 	testMpiFibonacci();
+}
+
+void testKineticsProcess( )
+{
+	testMathFuncProcess();
 }

@@ -146,6 +146,8 @@ static const Cinfo* mathFuncCinfo = MathFunc::initCinfo();
 MathFunc::MathFunc()
 {
   expect_ = EXPRESSION;
+  fn_ = "";
+  mmlstring_ = "";
   
   status_ = BLANK;
   
@@ -282,44 +284,45 @@ double MathFunc::op( const vector< double >& args )
 void MathFunc::reinitFunc( const Eref& e, ProcPtr info ) 
 {
   // cout << "reiniting..." << endl;
-  v.clear();
-  status_ = BLANK;
+  	v.clear();
+  	status_ = BLANK;
+  	if ( mmlstring_ != "" )
+  		status_ = MMLSTRING;
+  	else if ( fn_ != "" )
+  		status_ = FNSTRING;
 }
 
 //////////////////////////////////////////////////////////////////
 // Other DestFinfo definitions
 //////////////////////////////////////////////////////////////////
 
-/*
-void MathFunc::argFunc( double d )
-{
-  // v.push_back(&d); // Ugh. There is vector < double* > v_, and v both.
-  	// Ugh. Why is he storing a pointer to a temporary?
-}
-*/
 
 void MathFunc::arg1Func( double d )
 {
-	while ( v.size() != 1)  // surely this should be 1?
-		v.push_back( d ); // Upi Sez: I'm dubious about this.
+	if ( v.size() < 1 ) 
+		v.resize( 1 );
+	v[0] = d;
 }
 
 void MathFunc::arg2Func( double d )
 {
-  	while (v.size() != 2) 
-		v.push_back(d);
+	if ( v.size() < 2 ) 
+		v.resize( 2 );
+	v[1] = d;
 }
 
 void MathFunc::arg3Func( double d )
 {
-	while ( v.size() != 3) 
-		v.push_back( d );
+	if ( v.size() < 3 ) 
+		v.resize( 3 );
+	v[2] = d;
 }
 
 void MathFunc::arg4Func( double d )
 {
-	while ( v.size() != 4) 
-		v.push_back( d );
+	if ( v.size() < 4 ) 
+		v.resize( 4 );
+	v[3] = d;
 }
 
 //////////////////////////////////////////////////////////////////
@@ -608,8 +611,8 @@ void MathFunc::evaluate(int pos, int arity){
   function_.insert(function_.begin() + pos, 1, 0);
 }
 
-void MathFunc::executeFunction(){ //now this filename is the whole file string...hoho
-  //ifstream mmlfile (filename.c_str());
+void MathFunc::executeFunction()
+{
   clear();
   string mmlfile = mmlstring_;
   status_ = MMLSTRING;
