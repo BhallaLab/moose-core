@@ -12577,7 +12577,50 @@ Built in a matching reaction using the regular mmEnz.
 Made assorted extensions to Table to do the comparison of the outputs.
 Fixed various issues with the MathFunc so as to do the simulation.
 Clears the test. But I think the MathFunc is appallingly slow, needs to be 
-redone.
+redone. Checkin 2657.
 Need to valgrind.
+This looks OK. The same 120 bytes are lost as earlier, unrelated to MathFunc.
+
+Next: Get MathFunc working with solver
+
+
+Discussion with lab on priorities and efforts:
+
+
+Item							By
+Port over of Biophysics					Upi
+Port Hsolve						Niraj
+New: Markov channels					Vishaka
+Spatial kinetics					Upi
+
+SBML:							Siji, Upi
+NeuroML via python:					Aditya, Subha
+NineML via python:					defer
+Pynn core functions:					Upi, Subha
+
+
+GUI: core structure redoing				Subha
+GUI: kkit: first finish up current dev work		Harsha
+GUI: nkit: first finish up current dev work		Chaitanya
+GUI: threading						later
+
+Parallel stuff						As the problems arise.
+
+
+
+Working on port for Compartment. Way more tedious than expected, still not
+done.
+============================================================================
+8 May 2011.
+Had it working except for the unit tests for spatial spread of current.
+After a lot of messing around with debugging, turns out to be a nasty bug
+with messaging: How does one decide if a message is going forward or back?
+Current approach is to ask if originating Element == e1 on the Msg. But
+in this case e1 == e2 on the Msg (both are the Compt) so this logic does not
+work. Issue comes up only for SharedFinfos where data transfer is
+bidirectional, so I'll put in a check for this and ask the user to split up
+the contents of the Shared msg.
+Implemented this in the Compartment unit test, and it now clears it.
+Ran through valgrind, OK.
 
 ============================================================================

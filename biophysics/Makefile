@@ -12,6 +12,8 @@ TARGET = biophysics.o
 OBJ = \
 	IntFire.o	\
 	Synapse.o	\
+	Compartment.o	\
+	testBiophysics.o	\
 
 HEADERS = \
 	../basecode/header.h \
@@ -22,6 +24,8 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 IntFire.o:	IntFire.h Synapse.h 
 Synapse.o:	IntFire.h Synapse.h
+Compartment.o: Compartment.h
+testBiophysics.o: IntFire.h Synapse.h Compartment.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg $< -c

@@ -98,6 +98,27 @@ bool SharedFinfo::addMsg( const Finfo* target, MsgId mid,
 	if ( !checkTarget( target ) )
 		return 0;
 	const SharedFinfo* tgt = dynamic_cast< const SharedFinfo* >( target );
+
+	// We have a problem if the src and dest elms (e1 and e2) are the
+	// same, because this messes up the logic to assign the isForward flag.
+	// This is an issue only if the target Finfo wants to send data back.
+	// In other words, there are dest_ finfos on this SharedFinfo.
+	// Report this problem.
+	const Msg* m = Msg::getMsg( mid );
+	assert( m->e1() == srcElm );
+	Element* destElm = m->e2();
+	if ( srcElm == destElm && srcElm->id() != Id() ) {
+		if ( dest_.size() > 0 ) {
+			cout << "Error: SharedFinfo::addMsg: MsgId " << mid << endl <<
+			"Source Element == DestElement == " << srcElm->getName() <<
+			endl << "Recommend that you individually set up messages for" <<
+			" the components of the SharedFinfo, to ensure that the " <<
+			"direction of messaging is consistent.\n";
+			return 0;
+		}
+	}
+
+
 	for ( unsigned int i = 0; i < src_.size(); ++i ) {
 		if ( !src_[i]->addMsg( tgt->dest_[i], mid, srcElm ) ) {
 			// Should never happen. The checkTarget should preclude this.
@@ -107,13 +128,6 @@ bool SharedFinfo::addMsg( const Finfo* target, MsgId mid,
 		}
 	}
 
-	// For the reverse msgs we have a problem for the 'send' command,
-	// to assign the isForward flag. Logic goes to the user function,
-	// not good.
-	const Msg* m = Msg::getMsg( mid );
-	Element* destElm = m->e2();
-	if ( srcElm == destElm )
-		destElm = m->e1();
 	
 	for ( unsigned int i = 0; i < tgt->src_.size(); ++i ) {
 		if ( !tgt->src_[i]->addMsg( dest_[i], mid, destElm ) ) {
