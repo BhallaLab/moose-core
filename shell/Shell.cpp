@@ -962,9 +962,15 @@ void Shell::handleUseClock( const Eref& e, const Qinfo* q,
 		return;
 	vector< Id > list;
 	wildcard( path, list ); // By default scans only Elements.
+	string tickField = "proc";
+	// Hack to get around a common error.
+	if ( field.substr( 0, 4 ) == "proc" || field.substr( 0, 4 ) == "Proc" )
+		field = "proc"; 
+	/*
 	string tickField = "process";
 	if ( field.substr( 0, 4 ) == "proc" || field.substr( 0, 4 ) == "Proc" )
 		field = tickField = "proc"; // Use the shared Msg with process and reinit.
+		*/
 	for ( vector< Id >::iterator i = list.begin(); i != list.end(); ++i ) {
 		stringstream ss;
 		ObjId tickId( Id( 2 ), DataId( 0, tick ) );
