@@ -14,19 +14,30 @@
 using namespace moose;
 const double Compartment::EPSILON = 1.0e-15;
 
-static SrcFinfo1< double > VmOut( "VmOut", 
-	"Sends out Vm value of compartment on each timestep" );
+static SrcFinfo1< double >* VmOut() {
+	static SrcFinfo1< double > VmOut( "VmOut", 
+		"Sends out Vm value of compartment on each timestep" );
+	return &VmOut;
+}
 
 // Here we send out Vm, but to a different subset of targets. So we
 // have to define a new SrcFinfo even though the contents of the msg
 // are still only Vm.
-static SrcFinfo1< double > axialOut( "axialOut", 
+
+static SrcFinfo1< double >* axialOut() {
+	static SrcFinfo1< double > axialOut( "axialOut", 
 		"Sends out Vm value of compartment to adjacent compartments,"
 		"on each timestep" );
+	return &axialOut;
+}
 
-static SrcFinfo2< double, double > raxialOut( "raxialOut", 
-	"Sends out Raxial information on each timestep, "
-	"fields are Ra and Vm" );
+static SrcFinfo2< double, double >* raxialOut()
+{
+	static SrcFinfo2< double, double > raxialOut( "raxialOut", 
+		"Sends out Raxial information on each timestep, "
+		"fields are Ra and Vm" );
+	return &raxialOut;
+}
 
 /**
  * The initCinfo() function sets up the Compartment class.
@@ -56,7 +67,9 @@ const Cinfo* Compartment::initCinfo()
 
 	static SharedFinfo proc( "proc",
 		"This is a shared message to receive Process messages "
-		"from the scheduler objects. The first entry is a MsgDest "
+		"from the scheduler objects. The Process should be called "
+		"_second_ in each clock tick, after the Init message."
+		"The first entry in the shared msg is a MsgDest "
 		"for the Process operation. It has a single argument, "
 		"ProcInfo, which holds lots of information about current "
 		"time, thread, dt and so on. The second entry is a MsgDest "
@@ -68,7 +81,7 @@ const Cinfo* Compartment::initCinfo()
 	static DestFinfo initProc( "initProc", 
 		"Handles Process call for the 'init' phase of the Compartment "
 		"calculations. These occur as a separate Tick cycle from the "
-		"regular proc cycle.",
+		"regular proc cycle, and should be called before the proc msg.",
 		new ProcOpFunc< Compartment >( &Compartment::initProc ) );
 	static DestFinfo initReinit( "initReinit", 
 		"Handles Reinit call for the 'init' phase of the Compartment "
@@ -103,7 +116,7 @@ const Cinfo* Compartment::initCinfo()
 
 	static Finfo* channelShared[] =
 	{
-		&handleChannel, &VmOut
+		&handleChannel, VmOut()
 	};
 	static SharedFinfo channel( "channel", 
 			"This is a shared message from a compartment to channels. "
@@ -122,7 +135,7 @@ const Cinfo* Compartment::initCinfo()
 
 	static Finfo* axialShared[] =
 	{
-		&axialOut, &handleRaxial
+		axialOut(), &handleRaxial
 	};
 	static SharedFinfo axial( "axial", 
 			"This is a shared message between asymmetric compartments. "
@@ -149,7 +162,7 @@ const Cinfo* Compartment::initCinfo()
 	// rxialOut declared above as it is needed in file scope
 	static Finfo* raxialShared[] =
 	{
-		&handleAxial, &raxialOut
+		&handleAxial, raxialOut()
 	};
 	static SharedFinfo raxial( "raxial", 
 			"This is a raxial shared message between asymmetric "
@@ -544,12 +557,17 @@ void Compartment::process( const Eref& e, ProcPtr p )
 	Im_ = 0.0;
 	sumInject_ = 0.0;
 	// Send out Vm to channels, SpikeGens, etc.
-	VmOut.send( e, p, Vm_ );
+	VmOut()->send( e, p, Vm_ );
 
 	// The axial/raxial messages go out in the 'init' phase.
 }
 
 void Compartment::reinit(  const Eref& e, ProcPtr p )
+{
+	this->innerReinit( e, p );
+}
+
+void Compartment::innerReinit(  const Eref& e, ProcPtr p )
 {
 	Vm_ = initVm_;
 	A_ = 0.0;
@@ -558,19 +576,30 @@ void Compartment::reinit(  const Eref& e, ProcPtr p )
 	sumInject_ = 0.0;
 	
 	// Send out the resting Vm to channels, SpikeGens, etc.
-	VmOut.send( e, p, Vm_ );
+	VmOut()->send( e, p, Vm_ );
 }
 
 void Compartment::initProc( const Eref& e, ProcPtr p )
 {
+	// Separate variants for regular and SymCompartment
+	this->innerInitProc( e, p ); 
+}
+
+void Compartment::innerInitProc( const Eref& e, ProcPtr p )
+{
 	// Send out the axial messages
-	axialOut.send( e, p, Vm_ );
+	axialOut()->send( e, p, Vm_ );
 
 	// Send out the raxial messages
-	raxialOut.send( e, p, Ra_, Vm_ );
+	raxialOut()->send( e, p, Ra_, Vm_ );
 }
 
 void Compartment::initReinit( const Eref& e, ProcPtr p )
+{
+	this->innerInitReinit( e, p );
+}
+
+void Compartment::innerInitReinit( const Eref& e, ProcPtr p )
 {
 	; // Nothing happens here
 }
@@ -718,8 +747,8 @@ void testCompartmentProcess()
 #ifdef DO_SPATIAL_TESTS
 	shell->doSetClock( 0, dt );
 	shell->doSetClock( 1, dt );
-	shell->doUseClock( "/compt", "process", 0 );
-	shell->doUseClock( "/compt", "init", 1 );
+	shell->doUseClock( "/compt", "init", 0 );
+	shell->doUseClock( "/compt", "process", 1 );
 
 	shell->doReinit();
 	shell->doStart( runtime );
@@ -733,7 +762,7 @@ void testCompartmentProcess()
 		double Vm = Field< double >::get( ObjId( cid, i ), "Vm" );
 		double x = Vmax * exp( - static_cast< double >( i ) / lambda );
 		delta += ( Vm - x ) * ( Vm - x );
-	// 	cout << i << " (x, Vm) = ( " << x << ", " << Vm << " )\n";
+	 	// cout << i << " (x, Vm) = ( " << x << ", " << Vm << " )\n";
 	}
 	assert( delta < 1.0e-5 );
 #endif // DO_SPATIAL_TESTS

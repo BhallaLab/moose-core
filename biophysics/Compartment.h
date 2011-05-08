@@ -137,6 +137,22 @@ class Compartment
 			 * Initializes the class info.
 			 */
 			static const Cinfo* initCinfo();
+
+			/**
+			 * Virtual function to handle Reinit.
+			 */
+			virtual void innerReinit( const Eref& e, ProcPtr p );
+
+			/**
+			 * Virtual function to handle the Proc part of the Init cycle.
+			 */
+			virtual void innerInitProc( const Eref& e, ProcPtr p );
+
+			/**
+			 * Virtual function to handle the Reinit part of the Init cycle.
+			 * This does nothing here, but is needed in SymCompartment.
+			 */
+			virtual void innerInitReinit( const Eref& e, ProcPtr p );
 	protected:
 			double Ra_;
 			double Vm_;

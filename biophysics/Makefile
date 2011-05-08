@@ -13,6 +13,7 @@ OBJ = \
 	IntFire.o	\
 	Synapse.o	\
 	Compartment.o	\
+	SymCompartment.o	\
 	testBiophysics.o	\
 
 HEADERS = \
@@ -25,6 +26,7 @@ $(OBJ)	: $(HEADERS)
 IntFire.o:	IntFire.h Synapse.h 
 Synapse.o:	IntFire.h Synapse.h
 Compartment.o: Compartment.h
+SymCompartment.o: Compartment.h SymCompartment.h
 testBiophysics.o: IntFire.h Synapse.h Compartment.h
 
 .cpp.o:
