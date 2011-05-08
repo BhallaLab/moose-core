@@ -12622,5 +12622,10 @@ bidirectional, so I'll put in a check for this and ask the user to split up
 the contents of the Shared msg.
 Implemented this in the Compartment unit test, and it now clears it.
 Ran through valgrind, OK.
+Checkin 2658.
+
+Ground through the implementation of SymCompartment. Had to go back to
+Compartment to set up necessary virtual functions too. Have not yet
+made SymCompartment-specific tests.
 
 ============================================================================
