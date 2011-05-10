@@ -12627,5 +12627,59 @@ Checkin 2658.
 Ground through the implementation of SymCompartment. Had to go back to
 Compartment to set up necessary virtual functions too. Have not yet
 made SymCompartment-specific tests.
+Checkin 2659.
+
+On now to channels. Need to figure out how to deal with Gates. Possibly
+simplest to put them on each channel as a FieldElement, but with the
+caveat that a single (dim = 1,1) one of these Gates serves an entire 
+array of channels.
+
+Problem is with typical builds of the cells. If each dendritic compartment is
+its own Element, then there will be lots of duplicated instances of the HHGate,
+something to avoid.
+
+In the current design, the Gate receives a return message but is shared
+by many channels. Looks like the Gate is created as a child of the HHChannel.
+Avoidance of duplication happens because the Copy function does something
+special. This approach works well if there is a library of prototype channels,
+and the library would be the location of the one instance of the Gate.
+
+Danger here for pointer access to the Gate: one could delete the original 
+entry. Could put in a counter for number of users of the gate. Or a 
+message, for reference but not actual data traffic.
+
+============================================================================
+9 May 2011
+Begun converting HHChannel to new MOOSE form. Need to sort out Gate options.
+
+Option 1: Store readonly pointer. Message to a reference Gate somewhere.
+	Load pointer on reinit.
+		- More economical. Need a single reference Gate for all copies,
+			even if they are on different Elements.
+		- Concept is reasonably clean
+		- Implementation messy. What to do if reference Gate is deleted?
+		- User interface a bit messy, will need to traverse Msg to find Gate.
+Option 2: Store readonly pointer. Have child FieldElement with gate.
+	Unclear what to do with copies, probably just duplicate the gate 
+	otherwise pointer management will be unpleasant.
+		- Costly, a separate Gate Element for every Channel Element.
+			Many duplications if we have the same channel on many 
+			dendritic compartments.
+		- Concept is clean: Gate is right there on Channel.
+		- Implementation is clean.
+		- User interface is clean, it is just a child FieldElement.
+Option 3: Store readonly pointer, and the Id of the reference Gate whenever
+	copying or copy[] from the reference is done. Reload pointer on reinit.
+	Provide a FieldElement to wrap the Gate on each Channel.
+		- Almost as economical as option 1
+		- Concept is nasty: non-msg link to library element.
+		- Implementation is easy, may need a new kind of FieldElement.
+		- User interface is clean, it is just a child FieldElement.
+
+Go with option 3 for now.
+
+============================================================================
+10 May 2011
+Managed to get skeleton code for HHChannel to compile. 
 
 ============================================================================
