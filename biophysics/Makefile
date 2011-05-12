@@ -15,6 +15,7 @@ OBJ = \
 	Compartment.o	\
 	SymCompartment.o	\
 	HHChannel.o	\
+	HHGate.o	\
 	testBiophysics.o	\
 
 HEADERS = \
@@ -29,6 +30,7 @@ Synapse.o:	IntFire.h Synapse.h
 Compartment.o: Compartment.h
 SymCompartment.o: Compartment.h SymCompartment.h
 HHChannel.o: HHChannel.h
+HHGate.o: HHGate.h
 testBiophysics.o: IntFire.h Synapse.h Compartment.h
 
 .cpp.o:

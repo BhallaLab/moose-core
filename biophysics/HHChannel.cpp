@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "HHGate.h"
 #include "HHChannel.h"
 
 const double HHChannel::EPSILON = 1.0e-10;
@@ -569,46 +570,48 @@ int HHChannel::getUseConcentration() const
  * Returns the state variable for the new timestep based on
  * the internal variables A_ and B_ which were passed in from the gate.
  */
-double HHChannel::integrate( double state, double dt )
+double HHChannel::integrate( double state, double dt, double A, double B )
 {
 	if ( B_ > EPSILON ) {
-		double x = exp( -B_ * dt );
-		return state * x + ( A_ / B_ ) * ( 1 - x );
+		double x = exp( -B * dt );
+		return state * x + ( A / B ) * ( 1 - x );
 	}
-	return state + A_ * dt ;
+	return state + A * dt ;
 }
 
 void HHChannel::process( const Eref& e, ProcPtr info )
 {
 	g_ += Gbar_;
+	double A = 0;
+	double B = 0;
 	if ( Xpower_ > 0 ) {
-		// The looked up table values A_ and B_ come back from the gate
-		// right away after 'send' calls (made from lookup#rates() functions).
-		lookupXrates();
+		xGate_->lookupBoth( Vm_, &A, &B );
 		if ( instant_ & INSTANT_X )
-			X_ = A_/B_;
+			X_ = A/B;
 		else 
-			X_ = integrate( X_, info->dt );
+			X_ = integrate( X_, info->dt, A, B );
 		g_ *= takeXpower_( X_, Xpower_ );
 	}
 
 	if ( Ypower_ > 0 ) {
-		lookupYrates();
+		yGate_->lookupBoth( Vm_, &A, &B );
 		if ( instant_ & INSTANT_Y )
-			Y_ = A_/B_;
+			Y_ = A/B;
 		else 
-			Y_ = integrate( Y_, info->dt );
+			Y_ = integrate( Y_, info->dt, A, B );
 
 		g_ *= takeYpower_( Y_, Ypower_ );
 	}
 
 	if ( Zpower_ > 0 ) {
-		lookupZrates();
-
+		if ( useConcentration_ )
+			zGate_->lookupBoth( conc_, &A, &B );
+		else
+			zGate_->lookupBoth( Vm_, &A, &B );
 		if ( instant_ & INSTANT_Z )
-			Z_ = A_/B_;
+			Z_ = A/B;
 		else 
-			Z_ = integrate( Z_, info->dt );
+			Z_ = integrate( Z_, info->dt, A, B );
 
 		g_ *= takeZpower_( Z_, Zpower_ );
 	}
@@ -636,41 +639,44 @@ void HHChannel::reinit( const Eref& er, ProcPtr info )
 	g_ = Gbar_;
 	Element* e = er.element();
 
+	double A = 0.0;
+	double B = 0.0;
 	if ( Xpower_ > 0 ) {
-		// The looked up table values A_ and B_ come back from the gate
-		// right away after 'send' calls (made from lookup#rates() functions).
-		lookupXrates();
-		if ( B_ < EPSILON ) {
+		xGate_->lookupBoth( Vm_, &A, &B );
+		if ( B < EPSILON ) {
 			cout << "Warning: B_ value for " << e->getName() <<
 					" is ~0. Check X table\n";
 			return;
 		}
                 if (!xInited_)
-                    X_ = A_/B_;
+                    X_ = A/B;
 		g_ *= takeXpower_( X_, Xpower_ );
 	}
 
 	if ( Ypower_ > 0 ) {
-		lookupYrates();
-		if ( B_ < EPSILON ) {
-			cout << "Warning: B_ value for " << e->getName() <<
+		yGate_->lookupBoth( Vm_, &A, &B );
+		if ( B < EPSILON ) {
+			cout << "Warning: B value for " << e->getName() <<
 					" is ~0. Check Y table\n";
 			return;
 		}
                 if (!yInited_)
-                    Y_ = A_/B_;
+                    Y_ = A/B;
 		g_ *= takeYpower_( Y_, Ypower_ );
 	}
 
 	if ( Zpower_ > 0 ) {
-		lookupZrates();
-		if ( B_ < EPSILON ) {
-			cout << "Warning: B_ value for " << e->getName() <<
+		if ( useConcentration_ )
+			zGate_->lookupBoth( conc_, &A, &B );
+		else
+			zGate_->lookupBoth( Vm_, &A, &B );
+		if ( B < EPSILON ) {
+			cout << "Warning: B value for " << e->getName() <<
 					" is ~0. Check Z table\n";
 			return;
 		}
                 if (!zInited_)
-                    Z_ = A_/B_;
+                    Z_ = A/B;
 		g_ *= takeZpower_( Z_, Zpower_ );
 	}
 
