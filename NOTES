@@ -12681,5 +12681,49 @@ Go with option 3 for now.
 ============================================================================
 10 May 2011
 Managed to get skeleton code for HHChannel to compile. 
+Checkin 2661.
 
+Next need to get the HHGates in there, and then the unit tests.
+
+============================================================================
+11 May 2011
+HHGates use Interpols. Deciding whether to use Interpols or go with vectors.
+Using Interpols:
+	- Backward compat
+	- Don't need to munge code so much
+	- Field access goes through another indirection: can FieldElement
+		do it? Not really. The FieldElement assumes a specific level of
+		array indexing (which isn't needed here). 
+	- Either that or I explicitly create a child Element for
+		each HHGate, but there I lose the framework for direct pointer access.
+Using vectors:
+	- Lose BC
+	- Code munging, mostly by way of vector access
+	- Need to write local code for interpolation
+		- Could convert this into subclasses for functional lookup
+	- FieldElement access for Gates is simpler.
+	- Would have to treat the vector as a unitary field. Can't index entries
+		directly, except through the LookupValueFinfo.
+		- But Python is quite happy to handle vectors directly.
+
+Comes down to having to revisit FieldElement access to deal with nesting, and
+having yet another layer of Elements on the channel. So go with vectors.
+
+Doing implementation. Added in originalParent_ field into HHGate. Will use
+EpFuncs to do field access (and ElementValueFinfos), so that I can 
+check so that only the original parent element is allowed to write values.
+All others can read it.
+This will need a little refinement of the FieldElement creation code
+so as to keep track of the original pointer and to ensure that only the
+original parent is allowed to delete the pointer.
+I've redone the interface for the channels so it looks to the world more like
+the alpha/beta/tau/minf form than the raw values. But I need to have the
+raw values accessible too, for the purposes of direct table entry.
+
+============================================================================
+12 May 2011
+Most parts of the HHGate are done, but still need to get the cross-updating
+of alpha/beta and tau/minf forms. This will need some algebra.
+
+For now: compiled HHGate. Still no tests.
 ============================================================================

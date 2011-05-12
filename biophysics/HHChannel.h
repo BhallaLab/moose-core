@@ -211,7 +211,11 @@ class HHChannel
 		// Internal variables for return values
 		double A_;
 		double B_;
-		virtual double integrate( double state, double dt );
+		virtual double integrate( double state, double dt, double A, double B );
+
+		const HHGate* xGate_;
+		const HHGate* yGate_;
+		const HHGate* zGate_;
 
 		static const double EPSILON;
 		static const int INSTANT_X;
