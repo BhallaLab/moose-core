@@ -349,7 +349,7 @@ void Table::innerProcess( Eref e, ProcInfo p )
 			 */
 			index = expandTable( e, output_ );
 			if ( input_ > stepSize_ ) {
-				if ( lastSpike_ < stepSize_ ) { // Check for new spike
+				if ( lastSpike_ <= stepSize_ ) { // Check for new spike
 					table_[ index ] = p->currTime_;
 					output_ += 1.0;
 					xmax_ = output_;
