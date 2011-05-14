@@ -12725,5 +12725,44 @@ raw values accessible too, for the purposes of direct table entry.
 Most parts of the HHGate are done, but still need to get the cross-updating
 of alpha/beta and tau/minf forms. This will need some algebra.
 
-For now: compiled HHGate. Still no tests.
+For now: compiled HHGate. Still no tests. Checkin 2662
+============================================================================
+13 May
+Creation of HHChannels with HHGates as FieldElements is tricky if I don't
+	want dummy (empty) child HHGates.
+	- Derive a FieldElementFinfo or add a flag about post-creation func.
+It is also tricky to have doCreate (for the child HHGates) called from 
+	within a DestFinfo function. Race conditions.
+	- Allow DestFinfos to register a event in the structuralEvent Q.
+
+Copying of elements with FieldElementFinfos looks like it won't work: will
+produce duplicate copies of the FieldElement. Need to test and fix. 
+	- The regular Element copy should avoid making the FieldElements,
+	as the postCreationFunc will want to create them. But see issue
+	with only creating subset of the possible HHGates.
+		- I can pass a flag in to the overloaded Element constructor
+		that is used during copies, to make it clear that it is a
+		copy. This can also go down to the Postcreation func
+	- We want to use the regular copy to make the Elements, because we
+	know how many children need to be created.
+
+Copying of the HHGate has another issue: HHGates are FieldElements that are
+created only when needed. Unless we want to always have the dummy gate present?
+If created on need, then the default postCreationFunc will not work.
+If created on need, then the access to the field info is OK as is since we
+	will have the correct pointer accessed by the HHGates.
+
+
+Steps:
+0. Test what happens with copies of FieldElements. Do they end up with 2 copies?
+1. Set up FieldElements for the HHGates
+2. Create and test function
+3. Test copies
+============================================================================
+14 May 2011
+Begain unit test 0.: Copies of FieldElements.
+First was to check if data part is copied over correctly.
+This is done in basecode/testAsync.cpp:testCopyFieldElement()
+This now clears this new unit test.
+
 ============================================================================

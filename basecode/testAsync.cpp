@@ -2110,6 +2110,108 @@ void testFieldDataHandler()
 	cout << "." << flush;
 }
 
+/**
+ * Tests that a single copy of the FieldElement is made with all the
+ * internal fields also copied over.
+ */
+void testCopyFieldElement()
+{
+	const Cinfo* ic = IntFire::initCinfo();
+	unsigned int size = 10;
+	vector< unsigned int > dims( 1, size );
+	string arg;
+	Id i2 = Id::nextId();
+	Element* origElm = new Element( i2, ic, "test2", dims, 1 );
+	assert( origElm );
+
+	Id synId( i2.value() + 1 );
+	Element* syn = synId();
+
+	// Element should exist even if data doesn't
+	assert ( syn != 0 );
+	assert ( syn->getName() == "synapse" ); 
+
+	assert( syn->dataHandler()->data( 0 ) == 0 );
+
+	assert( syn->dataHandler()->totalEntries() == size );
+	assert( syn->dataHandler()->localEntries() == 0 );
+	// could/should use SetVec here.
+	for ( unsigned int i = 0; i < size; ++i ) {
+		// Eref e2( i2(), i );
+		ObjId oid( i2, i );
+		bool ret = Field< unsigned int >::set( oid, "numSynapses", i );
+		assert( ret );
+	}
+	assert( syn->dataHandler()->localEntries() == ( size * (size - 1) ) / 2 );
+
+	FieldDataHandlerBase * fdh =
+		static_cast< FieldDataHandlerBase *>( syn->dataHandler() );
+	fdh->setFieldDimension( fdh->biggestFieldArraySize() );
+	assert( syn->dataHandler()->totalEntries() == ( size - 1 ) * size );
+	
+	for ( unsigned int i = 0; i < size; ++i ) {
+		for ( unsigned int j = 0; j < i; ++j ) {
+			DataId di( i, j );
+			ObjId synoid( synId, di );
+			double temp = i * 1000 + j ;
+			bool ret = Field< double >::set( synoid, "delay", temp );
+			assert( ret );
+			assert( 
+			doubleEq( reinterpret_cast< Synapse* >(synoid.data())->getDelay() , temp ) );
+		}
+	}
+
+	///////////////////////////////////////////////////////////////////
+	// All that was the setup. Here we do the copy.
+	///////////////////////////////////////////////////////////////////
+	Id copyId = Id::nextId();
+	Element* copyElm = new Element( copyId, origElm, 1 );
+	Eref origEr( origElm, 0 );
+	Eref copyEr( copyElm, 0 );
+	assert( origElm->dataHandler() != copyElm->dataHandler() );
+	vector< Id > origChildren;
+	vector< Id > copyChildren;
+	Neutral::children( origEr, origChildren );
+	Neutral::children( copyEr, copyChildren );
+	assert( origChildren.size() == copyChildren.size() );
+	assert( origChildren.size() == 1 );
+	assert( origChildren[0] == synId );
+	Id copySynId = copyChildren[0];
+
+	Element* copySynElm = copySynId();
+
+	// Element should exist even if data doesn't
+	assert ( copySynElm != 0 );
+	assert ( copySynElm->getName() == "synapse" ); 
+	assert( syn->dataHandler()->data( 0 ) == 0 );
+	assert( copySynElm->dataHandler()->data( 0 ) == 0 );
+	assert( copySynElm->dataHandler()->localEntries() == 
+		(size * (size - 1)) /2 );
+	assert( copySynElm->dataHandler()->totalEntries() == size );
+	fdh =
+		static_cast< FieldDataHandlerBase *>( copySynElm->dataHandler() );
+	fdh->setFieldDimension( fdh->biggestFieldArraySize() );
+	assert( copySynElm->dataHandler()->totalEntries() == 
+		(size * (size - 1) ) );
+	
+	for ( unsigned int i = 0; i < size; ++i ) {
+		for ( unsigned int j = 0; j < i; ++j ) {
+			DataId di( i, j );
+			ObjId synoid( synId, di );
+			double temp = i * 1000 + j ;
+			assert( 
+			doubleEq( reinterpret_cast< Synapse* >(synoid.data())->getDelay() , temp ) );
+		}
+	}
+
+	delete synId();
+	delete i2();
+	delete copySynId();
+	delete copyId();
+
+	cout << "." << flush;
+}
+
 void testFinfoFields()
 {
 	const Finfo* vmFinfo = IntFire::initCinfo()->findFinfo( "Vm" );
@@ -2406,6 +2508,7 @@ void testAsync( )
 	testDataCopyAny();
 	testOneDimHandler();
 	testFieldDataHandler();
+	testCopyFieldElement();
 	testFinfoFields();
 	testCinfoFields();
 	testCinfoElements();
