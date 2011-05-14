@@ -2112,9 +2112,10 @@ void testFieldDataHandler()
 
 /**
  * Tests that a single copy of the FieldElement is made with all the
- * internal fields also copied over.
+ * internal fields also copied over. This function examines the data
+ * part of the copy.
  */
-void testCopyFieldElement()
+void testCopyFieldElementData()
 {
 	const Cinfo* ic = IntFire::initCinfo();
 	unsigned int size = 10;
@@ -2163,9 +2164,14 @@ void testCopyFieldElement()
 
 	///////////////////////////////////////////////////////////////////
 	// All that was the setup. Here we do the copy.
+	// Note that the FieldElements have to be explicitly copied.
 	///////////////////////////////////////////////////////////////////
 	Id copyId = Id::nextId();
 	Element* copyElm = new Element( copyId, origElm, 1 );
+	Id tempId = Id::nextId();
+	Element* temp = new Element( tempId, syn, 1 );
+	Shell::adopt( copyId, tempId );
+	///////////////////////////////////////////////////////////////////
 	Eref origEr( origElm, 0 );
 	Eref copyEr( copyElm, 0 );
 	assert( origElm->dataHandler() != copyElm->dataHandler() );
@@ -2187,7 +2193,9 @@ void testCopyFieldElement()
 	assert( copySynElm->dataHandler()->data( 0 ) == 0 );
 	assert( copySynElm->dataHandler()->localEntries() == 
 		(size * (size - 1)) /2 );
-	assert( copySynElm->dataHandler()->totalEntries() == size );
+	assert( copySynElm->dataHandler()->totalEntries() == 
+		( size * (size - 1) ) );
+
 	fdh =
 		static_cast< FieldDataHandlerBase *>( copySynElm->dataHandler() );
 	fdh->setFieldDimension( fdh->biggestFieldArraySize() );
@@ -2508,7 +2516,7 @@ void testAsync( )
 	testDataCopyAny();
 	testOneDimHandler();
 	testFieldDataHandler();
-	testCopyFieldElement();
+	testCopyFieldElementData();
 	testFinfoFields();
 	testCinfoFields();
 	testCinfoElements();

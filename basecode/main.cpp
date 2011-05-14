@@ -289,13 +289,13 @@ void mpiTests()
 {
 #ifdef DO_UNIT_TESTS
 		testMpiMsg();
-		cout << "+" << flush;
+		cout << "." << flush;
 		testMpiShell();
-		cout << "+" << flush;
+		cout << "." << flush;
 		testMpiBuiltins();
-		cout << "+" << flush;
+		cout << "." << flush;
 		testMpiScheduling();
-		cout << "+" << flush;
+		cout << "." << flush;
 #endif
 }
 #ifndef PYMOOSE
