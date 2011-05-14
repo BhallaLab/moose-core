@@ -381,6 +381,85 @@ void testCopy()
 	cout << "." << flush;
 }
 
+void testCopyFieldElement()
+{
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+	unsigned int size = 10;
+	vector< unsigned int > dims( 1, size );
+	Id origId = shell->doCreate( "IntFire", Id(), "f1", dims );
+	Id origSynId( origId.value() + 1 );
+	
+	Element* syn = origSynId();
+	assert( syn != 0 );
+	assert( syn->getName() == "synapse" );
+	assert( syn->dataHandler()->data( 0 ) == 0 );
+	assert( syn->dataHandler()->totalEntries() == size );
+	assert( syn->dataHandler()->localEntries() == 0 );
+	vector< unsigned int > vec(size);
+	for ( unsigned int i = 0; i < size; ++i )
+		vec[i] = i;
+	bool ret = Field< unsigned int >::setVec( origId, "numSynapses", vec );
+	assert( ret );
+
+	assert( syn->dataHandler()->localEntries() == 
+		( size * (size - 1) ) / 2);
+
+	FieldDataHandlerBase * fdh =
+		static_cast< FieldDataHandlerBase *>( syn->dataHandler() );
+	fdh->setFieldDimension( fdh->biggestFieldArraySize() );
+	assert( syn->dataHandler()->totalEntries() == ( size - 1 ) * size );
+
+	vector< double > delay( size * (size - 1 ), 0 );
+	for ( unsigned int i = 0; i < size; ++i ) {
+		for ( unsigned int j = 0; j < i; ++j ) {
+			delay[ i * (size - 1 ) + j ] = 3.14 * j + i * i;
+		}
+	}
+	ret = Field< double >::setVec( origSynId, "delay", delay );
+	assert( ret );
+
+	//////////////////////////////////////////////////////////////////
+	Id copyId = shell->doCopy( origId, Id(), "dup", 1, 0 );
+	//////////////////////////////////////////////////////////////////
+
+	Eref origEr( origId(), 0 );
+	Eref copyEr( copyId(), 0 );
+	assert( origId()->dataHandler() != copyId()->dataHandler() );
+	vector< Id > origChildren;
+	vector< Id > copyChildren;
+	Neutral::children( origEr, origChildren );
+	Neutral::children( copyEr, copyChildren );
+	assert( origChildren.size() == 1 );
+	assert( origChildren[0] == origSynId );
+	assert( origChildren.size() == copyChildren.size() );
+	Id copySynId = copyChildren[0];
+
+	Element* copySynElm = copySynId();
+	
+	// Element should exist even if data doesn't
+	assert ( copySynElm != 0 );
+	assert ( copySynElm->getName() == "synapse" );
+	assert( syn->dataHandler()->data( 0 ) == 0 );
+	assert( copySynElm->dataHandler()->data( 0 ) == 0 );
+	assert( copySynElm->dataHandler()->localEntries() ==
+		(size * (size - 1)) /2 );
+	assert( copySynElm->dataHandler()->totalEntries() ==
+		( size * (size - 1) ) );
+	
+	vector< double > del;
+	Field< double >::getVec( origSynId, "delay", del );
+	assert( del.size() == size * (size - 1 ) );
+	assert( del.size() == delay.size() );
+
+	for ( unsigned int i = 0; i < del.size(); ++i )
+		assert( doubleEq( del[i], delay[i] ) );
+	
+	shell->doDelete( origId );
+	shell->doDelete( copyId );
+	cout << "." << flush;
+}
+
 
 // Here we create the element independently on each node, and connect
 // it up independently. Using the doAddMsg we will be able to do this
@@ -1396,6 +1475,7 @@ void testMpiShell( )
 	testDescendant();
 	testMove();
 	testCopy();
+	testCopyFieldElement();
 	testShellSetGet();
 	testInterNodeOps();
 	testShellAddMsg();

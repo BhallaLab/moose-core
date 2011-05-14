@@ -12758,11 +12758,19 @@ Steps:
 1. Set up FieldElements for the HHGates
 2. Create and test function
 3. Test copies
+4. Test copies into new dims
 ============================================================================
 14 May 2011
 Begain unit test 0.: Copies of FieldElements.
 First was to check if data part is copied over correctly.
 This is done in basecode/testAsync.cpp:testCopyFieldElement()
-This now clears this new unit test.
+This now clears this new unit test. Checkin 2664.
 
+Next was to check if I do get 2 copies of FieldElements. Yes, I do. Now
+to fix it by putting in a flag to tell the Cinfo::postCreationFunc that it is 
+doing a copy.
+
+Getting close to completing the copy in testShell.cpp.
 ============================================================================
+15 May 2011
+Done the test of simple copies.
