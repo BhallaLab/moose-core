@@ -36,13 +36,15 @@ template < class T, class F > class FieldElementFinfo: public Finfo
 			const Cinfo* fieldCinfo,
 			F* ( T::*lookupField )( unsigned int ),
 			void( T::*setNumField )( unsigned int num ),
-			unsigned int ( T::*getNumField )() const
+			unsigned int ( T::*getNumField )() const,
+			bool deferCreate = 0
 		)
 			: 	Finfo( name, doc), 
 				fieldCinfo_( fieldCinfo ),
 				lookupField_( lookupField ),
 				setNumField_( setNumField ),
-				getNumField_( getNumField )
+				getNumField_( getNumField ),
+				deferCreate_( deferCreate )
 		{
 				string setname = "set_num_" + name;
 				// setNumField is a tricky operation, because it may require
@@ -74,6 +76,8 @@ template < class T, class F > class FieldElementFinfo: public Finfo
 		 */
 		void postCreationFunc( Id parent, Element* parentElm ) const
 		{
+			if ( deferCreate_ )
+				return;
 			Id kid = Id::nextId();
 			new Element(
 				kid, fieldCinfo_, name(), 
@@ -112,6 +116,7 @@ template < class T, class F > class FieldElementFinfo: public Finfo
 		F* ( T::*lookupField_ )( unsigned int );
 		void( T::*setNumField_ )( unsigned int num );
 		unsigned int ( T::*getNumField_ )() const;
+		bool deferCreate_;
 		
 	//	OpFunc1< T, F >* setOpFunc_;
 	//	GetOpFunc< T, F >* getOpFunc_;
