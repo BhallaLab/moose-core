@@ -66,45 +66,6 @@ const Cinfo* HHChannel::initCinfo()
 		channelShared, sizeof( channelShared ) / sizeof( Finfo* )
 	);
 
-	/////////////////////////////////////////////////////////////////////
-	/*
-	* All the Gate messages are now eliminated. Will use FieldElements
-	* directly, instead.
-	static Finfo* xGateShared[] =
-	{
-		new SrcFinfo( "Vm", Ftype1< double >::global() ),
-		new DestFinfo( "gate", Ftype2< double, double >::global(),
-				RFCAST( &HHChannel::xGateFunc ) ),
-	};
-
-	static Finfo* yGateShared[] =
-	{
-		new SrcFinfo( "Vm", Ftype1< double >::global() ),
-		new DestFinfo( "gate", Ftype2< double, double >::global(),
-				RFCAST( &HHChannel::yGateFunc ) ),
-	};
-
-	static Finfo* zGateShared[] =
-	{
-		new SrcFinfo( "Vm", Ftype1< double >::global() ),
-		new DestFinfo( "gate", Ftype2< double, double >::global(),
-			RFCAST( &HHChannel::zGateFunc ) ),
-	};
-		new SharedFinfo( "xGate", xGateShared,
-			sizeof( xGateShared ) / sizeof( Finfo* ),
-			"This is a shared message to communicate with the X gate. "
-			"Sends out Vm. "
-			"Receives lookedup up values A and B for the Vm. "
-			"The A term is the alpha term from HH equations. "
-			"The B term is actually alpha + beta, precalculated. " ),
-		new SharedFinfo( "yGate", yGateShared,
-			sizeof( yGateShared ) / sizeof( Finfo* ),
-			"Shared message for Y gate. Fields as in X gate."),
-		new SharedFinfo( "zGate", zGateShared,
-			sizeof( zGateShared ) / sizeof( Finfo* ),
-			"Shared message for Z gate. Fields as in X gate."),
-		*/
-
 	///////////////////////////////////////////////////////
 	// Here we reuse the Vm DestFinfo declared above.
 
@@ -204,6 +165,37 @@ const Cinfo* HHChannel::initCinfo()
 			"Argument: Gate type [X Y Z]",
 			new OpFunc1< HHChannel, string >( &HHChannel::createGateFunc )
 		);
+///////////////////////////////////////////////////////
+// FieldElementFinfo definition for HHGates. Note that these are made
+// with the deferCreate flag on, so that the HHGates are not created 
+// right away.
+///////////////////////////////////////////////////////
+		static FieldElementFinfo< HHChannel, HHGate > gateX( "gateX",
+			"Sets up HHGate X for channel",
+			HHGate::initCinfo(),
+			&HHChannel::getXgate,
+			&HHChannel::setNumGates,
+			&HHChannel::getNumGates,
+			1 // Note that the deferCreate flag is set here.
+		);
+		static FieldElementFinfo< HHChannel, HHGate > gateY( "gateY",
+			"Sets up HHGate Y for channel",
+			HHGate::initCinfo(),
+			&HHChannel::getYgate,
+			&HHChannel::setNumGates,
+			&HHChannel::getNumGates,
+			1 // Note that the deferCreate flag is set here.
+		);
+		static FieldElementFinfo< HHChannel, HHGate > gateZ( "gateZ",
+			"Sets up HHGate Z for channel",
+			HHGate::initCinfo(),
+			&HHChannel::getZgate,
+			&HHChannel::setNumGates,
+			&HHChannel::getNumGates,
+			1 // Note that the deferCreate flag is set here.
+		);
+	
+///////////////////////////////////////////////////////
 	static Finfo* HHChannelFinfos[] =
 	{
 		&proc,				// Shared
@@ -702,24 +694,34 @@ void HHChannel::handleConc( double conc )
 	conc_ = conc;
 }
 
-void HHChannel::xGateFunc( double A, double B )
+
+///////////////////////////////////////////////////
+// HHGate functions
+///////////////////////////////////////////////////
+
+
+HHGate* HHChannel::getXgate( unsigned int i )
 {
-	A_ = A;
-	B_ = B;
+	return xGate_;
 }
 
-void HHChannel::yGateFunc( double A, double B )
+HHGate* HHChannel::getYgate( unsigned int i )
 {
-	A_ = A;
-	B_ = B;
+	return yGate_;
 }
 
-void HHChannel::zGateFunc( double A, double B )
+HHGate* HHChannel::getZgate( unsigned int i )
 {
-	A_ = A;
-	B_ = B;
+	return zGate_;
 }
 
+void HHChannel::setNumGates( unsigned int num ) 
+{ ; }
+
+unsigned int  HHChannel::getNumGates() const
+{
+	return 1;
+}
 ///////////////////////////////////////////////////
 // Utility function
 ///////////////////////////////////////////////////
