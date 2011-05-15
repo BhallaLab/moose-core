@@ -131,19 +131,21 @@ class HHChannel
 		 */
 		void handleConc( double conc );
 
-		/**
-		 * These three functions receive the return values for
-		 * gate state variable X,Y,Z and the conductance, as evaluated
-		 * by the specified gate.
-		 */
-		void xGateFunc( double X, double g );
-		void yGateFunc( double Y, double g );
-		void zGateFunc( double Z, double g );
+		/////////////////////////////////////////////////////////////
+		// Gate handling functions
+		/////////////////////////////////////////////////////////////
+		HHGate* getXgate( unsigned int i );
+		HHGate* getYgate( unsigned int i );
+		HHGate* getZgate( unsigned int i );
+
+		void setNumGates( unsigned int num );
+		unsigned int getNumGates() const;
 
 		void createGateFunc( string gateType );
 		// Utility function for destroying gate
 		void destroyGate( string gateType );
 
+		/////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 
 	protected:
@@ -213,9 +215,9 @@ class HHChannel
 		double B_;
 		virtual double integrate( double state, double dt, double A, double B );
 
-		const HHGate* xGate_;
-		const HHGate* yGate_;
-		const HHGate* zGate_;
+		HHGate* xGate_;
+		HHGate* yGate_;
+		HHGate* zGate_;
 
 		static const double EPSILON;
 		static const int INSTANT_X;

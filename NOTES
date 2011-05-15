@@ -12773,4 +12773,7 @@ doing a copy.
 Getting close to completing the copy in testShell.cpp.
 ============================================================================
 15 May 2011
-Done the test of simple copies.
+Done the test of simple copies. Checkin 2665.
+
+Now to get back to the HHGate and channel.
+============================================================================
