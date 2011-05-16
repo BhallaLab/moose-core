@@ -25,23 +25,33 @@ class Element
 	friend void testSparseMsg();
 	public:
 		/**
-		 * This constructor is used when making zombies. We want to have a
+		 * This constructor is used when making zombies. It is used when
+		 * we want to have a
 		 * temporary Element for field access but nothing else, and it
 		 * should not mess with messages.
 		 */
 		Element( Id id, const Cinfo* c, DataHandler* d );
 
-		/// Regular constructor
+		/**
+		 * This is the main constructor, used by Shell::innerCreate
+		 * which makes most Elements. Also used to create base
+		 * Elements to init the simulator in main.cpp.
+		 */
 		Element( Id id, const Cinfo* c, const string& name,
 			const vector< unsigned int >& dimensions, 
 			bool isGlobal = 0 );
 
-		/// Regular constructor
+		/**
+		 * This constructor is used when making FieldElements.
+		 * It allows the user to explicitly specify the DataHandler
+		 * to be used.
+		 */
 		Element( Id id, const Cinfo* c, const string& name,
 			DataHandler* dataHandler );
 
 		/**
-		 * This constructor copies over the original n times.
+		 * This constructor copies over the original n times. It is
+		 * used for doing all copies, in Shell::innerCopyElements.
 		 */
 		Element( Id id, const Element* orig, unsigned int n );
 

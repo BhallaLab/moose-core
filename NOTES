@@ -12775,5 +12775,47 @@ Getting close to completing the copy in testShell.cpp.
 15 May 2011
 Done the test of simple copies. Checkin 2665.
 
-Now to get back to the HHGate and channel.
+Now to get back to the HHGate and channel. 
+Did the skeleton of the FieldElementFinfos. Checkin 2666.
+
+To create stuff safely:
+0. Figure out how to assign originalId. Trivial if creating data locally.
+1. Check isOriginalId.
+2. Figure out how to create FieldIds safely.
+	- Could build using elementary commands. 
+		- Thread safety issues here because this is a structural call.
+		- Not thread safe: Id::nextId, Shell::adopt.
+	- Could send this up to the Shell. One option is to 
+	find out how to call Shell::requestCreate.send directly, to avoid
+	hitting the initAck/waitForAck barriers which cause a race condition.
+	Options: 
+	a. HHGate to be created by Dinfo so it can be done using regular cmd
+		- But Dinfo::create doesn't take any args, we need to assign
+		the originalId to this new HHGate.
+			See below.
+		- But we need the HHGate pointer right away to complete the
+		command and put the ptr into the HHChannel::xGate_ field.
+		A StructuralQ command will not do this right away.
+			- StructuralQ could also have a subsequent assignment op
+			to set the gate. Just a destFunc on the HHChannel to 
+			inspect kids and extract their ptrs. This func could
+			also assign originalId.
+	b. HHGate ptr to be created by the HHChannel, so we can deal with all
+		setup value assignments.
+		- Easy to assign originalId, just make the destFunc and EpFunc.
+		- How do we assign the HHGate pointer into the the DataHandler
+		of the ElementField objects? Unsigned long?
+	c. Protect the HHChannel::createGateFunc with Qinfo::addToStructuralQ.
+		This guarantees it only executes on a single thread. Then it
+		can happily do Element creation and Shell::adopt using 
+		elementary calls.
+
+Summary: 
+	Option c is simplest and also most general.
+
+In process of compiling. Then to do tests.
+
+============================================================================
+16 May: Compiled. Clears unit tests but the real tests yet to come.
+
 ============================================================================

@@ -141,7 +141,14 @@ class HHChannel
 		void setNumGates( unsigned int num );
 		unsigned int getNumGates() const;
 
-		void createGateFunc( string gateType );
+		void createGate( const Eref& e, const Qinfo* q, string gateType );
+
+		void innerCreateGate( 
+			 const string& gateName,
+			HHGate** gatePtr, Id chanId,
+			HHGate* ( HHChannel::*getGate )( unsigned int ) );
+		bool checkOriginal( Id chanId ) const;
+
 		// Utility function for destroying gate
 		void destroyGate( string gateType );
 
