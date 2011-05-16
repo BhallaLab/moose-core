@@ -163,7 +163,7 @@ const Cinfo* HHChannel::initCinfo()
 		static DestFinfo createGate( "createGate",
 			"Function to create specified gate."
 			"Argument: Gate type [X Y Z]",
-			new OpFunc1< HHChannel, string >( &HHChannel::createGateFunc )
+			new EpFunc1< HHChannel, string >( &HHChannel::createGate )
 		);
 ///////////////////////////////////////////////////////
 // FieldElementFinfo definition for HHGates. Note that these are made
@@ -348,71 +348,64 @@ void HHChannel::setZpower( double Zpower )
  */
 // Assuming that the elements are simple elements. Use Eref for 
 // general case
-void HHChannel::createGateFunc( string gateType )
+
+bool HHChannel::checkOriginal( Id chanId ) const
 {
+	bool isOriginal = 1;
+	if ( xGate_ ) {
+		isOriginal = xGate_->isOriginal( chanId );
+	} else if ( yGate_ ) {
+		isOriginal = yGate_->isOriginal( chanId );
+	} else if ( zGate_ ) {
+		isOriginal = zGate_->isOriginal( chanId );
+	}
+	return isOriginal;
+}
+
+void HHChannel::innerCreateGate( const string& gateName, 
+	HHGate** gatePtr, Id chanId,
+	HHGate* ( HHChannel::*getGate )( unsigned int ) )
+{
+	if ( *gatePtr ) {
+		cout << "Warning: HHChannel::createGate: '" << gateName <<
+			"' on Element '" << chanId.path() << "' already present\n";
+		return;
+	}
+	*gatePtr = new HHGate( chanId );
+	Id kid = Id::nextId();
+	new Element(
+		kid, HHGate::initCinfo(), gateName,
+		new FieldDataHandler< HHChannel, HHGate >(
+			HHGate::initCinfo()->dinfo(),
+			chanId()->dataHandler(),
+			getGate,
+			&HHChannel::getNumGates,
+			&HHChannel::setNumGates )
+		);
+	adopt( chanId, kid );
+}
+
+void HHChannel::createGate( const Eref& e, const Qinfo* q, 
+	string gateType )
+{
+	if ( q->addToStructuralQ() )
+		return;
+
+	if ( !checkOriginal( e.id() ) ) {
+		cout << "Warning: HHChannel::createGateFunc: Not allowed from copied channel:\n" << e.id().path() << "\n";
+		return;
+	}
+
 	string name;
 	if ( gateType == "X" )
-		name = "xGate";
+		innerCreateGate( "xGate", &xGate_, e.id(), &HHChannel::getXgate );
 	else if ( gateType == "Y" )
-		name = "yGate";
+		innerCreateGate( "yGate", &yGate_, e.id(), &HHChannel::getYgate );
 	else if ( gateType == "Z" )
-		name = "zGate";
+		innerCreateGate( "zGate", &zGate_, e.id(), &HHChannel::getZgate );
 	else
-		assert( 0 );
-	
-	/*
-	 * Calling a few virtual functions.
-	 * 
-	 * chanFinfo: The finfo on HHChannel that connects to a gate
-	 * gateFinfo: The finfo on HHGate that connects to a channel
-	 * gateClass: "HHGate" or "HHGate2D"
-	string chanFinfo = chanFinfo( gateType );
-	string gateFinfo = gateFinfo( gateType );
-	string gateClass = gateClass( gateType );
-	
-	Element* gate = 0;
-	Eref e = c->target();
-	const Finfo* f = e->findFinfo( chanFinfo );
-	unsigned int numGates = e->msg( f->msg() )->numTargets( e.e );
-	assert( numGates <= 1 );
-	
-	if ( numGates == 1 ) {
-		Conn* gateConn = e->targets( f->msg(), 0 ); // zero index for SE
-		Element* existingGate = gateConn->target().e;
-		delete gateConn;
-		unsigned int numChans =
-			existingGate->msg( existingGate->findFinfo( gateFinfo )->msg() )->size();
-		
-		assert( numChans > 0 );
-		if ( numChans > 1 ) {
-			// Here we have multiple channels using this gate. So
-			// we don't mess with the original.
-			// make a new gate which we can change.
-			gate = Neutral::create( gateClass, name, e->id(), idGen.next() );
-			gate->addFinfo( GlobalMarkerFinfo::global() );
-                        Eref(e).dropAll(chanFinfo);
-			bool ret = Eref( e ).add( chanFinfo, gate, gateFinfo );
-			assert( ret );
-		}
-	} else { // No gate, make a new one.
-		gate = Neutral::create( gateClass, name, e->id(), idGen.next() );
-		// Make it a global so that duplicates do not happen unless
-		// the table values change.
-		gate->addFinfo( GlobalMarkerFinfo::global() );
-		bool ret = Eref( e ).add( chanFinfo, gate, gateFinfo );
-		assert( ret );
-	}
-	
-	// If a gate was created in this function, then create interpols inside it.
-	if ( gate != 0 ) {
-		string path = e->id().path() + "/" + name;
-		assert( Id( path ).good() );
-		
-		set< IdGenerator >( gate, "createInterpols", idGen );
-		assert( Id( path + "/A" ).good() );
-		assert( Id( path + "/B" ).good() );
-	}
-	 */
+		cout << "Warning: HHChannel::createGate: Unknown gate type '" <<
+			gateType << "'. Ignored\n";
 }
 
 void HHChannel::destroyGate( string gateType )

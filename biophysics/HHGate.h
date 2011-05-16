@@ -31,8 +31,18 @@
 class HHGate
 {
 	public:
-		HHGate()
-		{ ; }
+		/**
+		 * Dummy constructor, to keep Dinfo happy. Should never be used
+		 */
+		HHGate();
+
+		/**
+		 * This constructor is the one meant to be used. It takes the
+		 * originalId of the parent HHChannel as a required argument,
+		 * so that any subsequent 'write' functions can be checked to 
+		 * see if they are legal.
+		 */
+		HHGate( Id originalId );
 
 		//////////////////////////////////////////////////////////
 		// LookupValueFinfos
@@ -109,6 +119,12 @@ class HHGate
 		 * field.
 		 */
 		bool checkOriginal( Id id, const string& field ) const;
+
+		/**
+		 * isOriginal returns true if the provided Id is the one that the 
+		 * HHGate was created on. 
+		 */
+		bool isOriginal( Id id ) const;
 		
 		/**
 		 * tabFill does interpolation and range resizing for
@@ -169,16 +185,16 @@ class HHGate
 		double invDx_;
 
 		/**
-		 * Flag: Use linear interpolation for lookup if true, use direct 
-		 * table lookup if false.
-		 */
-		bool lookupByInterpolation_;
-
-		/**
 		 * Id of original, the one which has actually allocated it,
 		 * All other Elements have to treat the values as readonly.
 		 */
 		Id originalId_;
+
+		/**
+		 * Flag: Use linear interpolation for lookup if true, use direct 
+		 * table lookup if false.
+		 */
+		bool lookupByInterpolation_;
 
 		/**
 		 * Flag to indicate if table entries have been assigned directly

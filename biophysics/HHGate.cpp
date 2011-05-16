@@ -176,6 +176,22 @@ const Cinfo* HHGate::initCinfo()
 }
 
 static const Cinfo* hhGateCinfo = HHGate::initCinfo();
+///////////////////////////////////////////////////
+// Core class functions
+///////////////////////////////////////////////////
+HHGate::HHGate()
+	: xmin_(0), xmax_(1), invDx_(1), 
+		originalId_(0),
+		lookupByInterpolation_(0),
+		isDirectTable_(0)
+{;}
+
+HHGate::HHGate( Id OriginalId )
+	: xmin_(0), xmax_(1), invDx_(1), 
+		originalId_( OriginalId ),
+		lookupByInterpolation_(0),
+		isDirectTable_(0)
+{;}
 
 ///////////////////////////////////////////////////
 // Field function definitions
@@ -631,6 +647,11 @@ bool HHGate::checkOriginal( Id id, const string& field ) const
 	cout << "Warning: HHGate: attempt to set field '" << field << "' on " <<
 		id.path() << "\nwhich is not the original Gate element. Ignored.\n";
 	return 0;
+}
+
+bool HHGate::isOriginal( Id id ) const
+{
+	return ( id == originalId_ );
 }
 
 
