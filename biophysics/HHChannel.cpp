@@ -8,8 +8,12 @@
 **********************************************************************/
 
 #include "header.h"
+#include "ElementValueFinfo.h"
 #include "HHGate.h"
 #include "HHChannel.h"
+#include "ReduceBase.h"
+#include "ReduceMax.h"
+#include "../shell/Shell.h"
 
 const double HHChannel::EPSILON = 1.0e-10;
 const int HHChannel::INSTANT_X = 1;
@@ -92,17 +96,17 @@ const Cinfo* HHChannel::initCinfo()
 			&HHChannel::setEk,
 			&HHChannel::getEk
 		);
-		static ValueFinfo< HHChannel, double > Xpower( "Xpower",
+		static ElementValueFinfo< HHChannel, double > Xpower( "Xpower",
 			"Power for X gate",
 			&HHChannel::setXpower,
 			&HHChannel::getXpower
 		);
-		static ValueFinfo< HHChannel, double > Ypower( "Ypower",
+		static ElementValueFinfo< HHChannel, double > Ypower( "Ypower",
 			"Power for Y gate",
 			&HHChannel::setYpower,
 			&HHChannel::getYpower
 		);
-		static ValueFinfo< HHChannel, double > Zpower( "Zpower",
+		static ElementValueFinfo< HHChannel, double > Zpower( "Zpower",
 			"Power for Z gate",
 			&HHChannel::setZpower,
 			&HHChannel::getZpower
@@ -254,33 +258,35 @@ HHChannel::HHChannel()
 			X_( 0.0 ), Y_( 0.0 ), Z_( 0.0 ),
             xInited_( false ), yInited_( false ), zInited_( false ),
 			g_( 0.0 ),
-			useConcentration_( 0 )
+			useConcentration_( 0 ),
+			xGate_( 0 ),
+			yGate_( 0 ),
+			zGate_( 0 )
 {
 	;
 }
 
-///////////////////////////////////////////////////
-// Virtual function definitions
-///////////////////////////////////////////////////
-/*
-void HHChannel::lookupXrates( Eref e )
+bool HHChannel::setGatePower( const Eref& e, const Qinfo* q, double power,
+	double *assignee, const string& gateType )
 {
-	send1< double >( e, xGateSlot, Vm_ );
-}
+	if ( power < 0 ) {
+		cout << "Error: HHChannel::set" << gateType << 
+			"power: Cannot use negative power: " << power << endl;
+		return 0;
+	}
 
-void HHChannel::lookupYrates( Eref e )
-{
-	send1< double >( e, yGateSlot, Vm_ );
-}
+	if ( doubleEq( power, *assignee ) )
+		return 0;
 
-void HHChannel::lookupZrates( Eref e )
-{
-	if ( useConcentration_ )
-		send1< double >( e, zGateSlot, conc_ );
-	else
-		send1< double >( e, zGateSlot, Vm_ );
+	if ( doubleEq( *assignee, 0.0 ) && power > 0 ) {
+		createGate( e, q, gateType );
+	} else if ( doubleEq( power, 0.0 ) ) {
+		destroyGate( e, q, gateType );
+	}
+	
+	*assignee = power;
+	return 1;
 }
-*/
 
 /**
  * Assigns the Xpower for this gate. If the gate exists and has
@@ -288,46 +294,23 @@ void HHChannel::lookupZrates( Eref e )
  * If the gate exists and has multiple parents, then make a new gate.
  * If the gate does not exist, make a new gate
  */
-void HHChannel::setXpower( double Xpower )
+void HHChannel::setXpower( const Eref& e, const Qinfo* q, double Xpower )
 {
-	if ( Xpower == Xpower_ )
-		return;
-	
-	Xpower_ = Xpower;
-	takeXpower_ = selectPower( Xpower );
-	
-	if ( Xpower == 0.0 ) {
-		destroyGate( "X" );
-		return;
-	}
+	if ( setGatePower( e, q, Xpower, &Xpower_, "X" ) )
+		takeXpower_ = selectPower( Xpower );
 }
 
-void HHChannel::setYpower( double Ypower )
+void HHChannel::setYpower( const Eref& e, const Qinfo* q, double Ypower )
 {
-	if ( Ypower == Ypower_ )
-		return;
-	
-	Ypower_ = Ypower;
-	takeYpower_ = selectPower( Ypower );
-	
-	if ( Ypower == 0.0 ) {
-		destroyGate( "Y" );
-		return;
-	}
+	if ( setGatePower( e, q, Ypower, &Ypower_, "Y" ) )
+		takeYpower_ = selectPower( Ypower );
 }
 
-void HHChannel::setZpower( double Zpower )
+void HHChannel::setZpower( const Eref& e, const Qinfo* q, double Zpower )
 {
-	if ( Zpower == Zpower_ )
-		return;
-	
-	Zpower_ = Zpower;
-	takeZpower_ = selectPower( Zpower );
-	useConcentration_ = 1;
-	
-	if ( Zpower == 0.0 ) {
-		destroyGate("Z" );
-		return;
+	if ( setGatePower( e, q, Zpower, &Zpower_, "Z" ) ) {
+		takeZpower_ = selectPower( Zpower );
+		useConcentration_ = 1; // Not sure about this.
 	}
 }
 
@@ -366,13 +349,14 @@ void HHChannel::innerCreateGate( const string& gateName,
 	HHGate** gatePtr, Id chanId,
 	HHGate* ( HHChannel::*getGate )( unsigned int ) )
 {
+	//Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
 	if ( *gatePtr ) {
 		cout << "Warning: HHChannel::createGate: '" << gateName <<
 			"' on Element '" << chanId.path() << "' already present\n";
 		return;
 	}
-	*gatePtr = new HHGate( chanId );
-	Id kid = Id::nextId();
+	Id kid = Id::nextId(); // This is now modified to be thread-safe
+	*gatePtr = new HHGate( chanId, kid );
 	new Element(
 		kid, HHGate::initCinfo(), gateName,
 		new FieldDataHandler< HHChannel, HHGate >(
@@ -382,21 +366,17 @@ void HHChannel::innerCreateGate( const string& gateName,
 			&HHChannel::getNumGates,
 			&HHChannel::setNumGates )
 		);
-	adopt( chanId, kid );
+	// deferredAdopt( chanId, kid );
 }
 
 void HHChannel::createGate( const Eref& e, const Qinfo* q, 
 	string gateType )
 {
-	if ( q->addToStructuralQ() )
-		return;
-
 	if ( !checkOriginal( e.id() ) ) {
-		cout << "Warning: HHChannel::createGateFunc: Not allowed from copied channel:\n" << e.id().path() << "\n";
+		cout << "Warning: HHChannel::createGate: Not allowed from copied channel:\n" << e.id().path() << "\n";
 		return;
 	}
 
-	string name;
 	if ( gateType == "X" )
 		innerCreateGate( "xGate", &xGate_, e.id(), &HHChannel::getXgate );
 	else if ( gateType == "Y" )
@@ -408,36 +388,40 @@ void HHChannel::createGate( const Eref& e, const Qinfo* q,
 			gateType << "'. Ignored\n";
 }
 
-void HHChannel::destroyGate( string gateType )
+void HHChannel::innerDestroyGate( const string& gateName, 
+	HHGate** gatePtr, Id chanId )
 {
-	/*
-	HHChannel* ch = static_cast< HHChannel* >( e.data() );
-	string chanFinfo = ch->chanFinfo( gateType );
-	string gateFinfo = ch->gateFinfo( gateType );
-	
-	Element* gate = 0;
-	const Finfo* f = e->findFinfo( chanFinfo );
-	Conn* gateConn = e->targets( f->msg(), 0 ); // zero index for SE
-	unsigned int numGates = e->msg( f->msg() )->numTargets( e.e );
-	assert( numGates <= 1 );
-	
-	// If gate exists, remove it.
-	if ( numGates == 1 ) {
-		gate = gateConn->target().e;
-		unsigned int numChans =
-			gate->msg( gate->findFinfo( gateFinfo )->msg() )->size();
-		assert( numChans > 0 );
-		if ( numChans > 1 ) {
-			// Here we have multiple channels using this gate. So
-			// we don't mess with the original.
-			// Get rid of local connection to gate, but don't delete
-			Eref( e ).dropAll( f->msg() );
-		} else { // Delete the single gate.
-			bool ret = set( gate, "destroy" );
-			assert( ret );
-		}
+	if ( *gatePtr == 0 ) {
+		cout << "Warning: HHChannel::destroyGate: '" << gateName <<
+			"' on Element '" << chanId.path() << "' not present\n";
+		return;
 	}
-	*/
+	Id kid = ( *gatePtr )->originalGateId();
+	assert( kid() != 0 );
+	assert( reinterpret_cast< HHGate* >( kid.eref().data() ) == *gatePtr );
+	// Send off a request to the Shell to destroy the child
+	kid.destroy();
+	delete (*gatePtr);
+	*gatePtr = 0;
+}
+
+void HHChannel::destroyGate( const Eref& e, const Qinfo* q,
+	string gateType )
+{
+	if ( !checkOriginal( e.id() ) ) {
+		cout << "Warning: HHChannel::destroyGate: Not allowed from copied channel:\n" << e.id().path() << "\n";
+		return;
+	}
+	
+	if ( gateType == "X" )
+		innerDestroyGate( "xGate", &xGate_, e.id() );
+	else if ( gateType == "Y" )
+		innerDestroyGate( "yGate", &yGate_, e.id() );
+	else if ( gateType == "Z" )
+		innerDestroyGate( "zGate", &zGate_, e.id() );
+	else
+		cout << "Warning: HHChannel::destroyGate: Unknown gate type '" <<
+			gateType << "'. Ignored\n";
 }
 
 ///////////////////////////////////////////////////
@@ -469,17 +453,17 @@ double HHChannel::getEk() const
  * If the gate does not exist, make a new gate
  */
 
-double HHChannel::getXpower() const
+double HHChannel::getXpower( const Eref& e, const Qinfo* q ) const
 {
 	return Xpower_;
 }
 
-double HHChannel::getYpower() const
+double HHChannel::getYpower( const Eref& e, const Qinfo* q ) const
 {
 	return Ypower_;
 }
 
-double HHChannel::getZpower() const
+double HHChannel::getZpower( const Eref& e, const Qinfo* q ) const
 {
 	return Zpower_;
 }
@@ -557,7 +541,7 @@ int HHChannel::getUseConcentration() const
  */
 double HHChannel::integrate( double state, double dt, double A, double B )
 {
-	if ( B_ > EPSILON ) {
+	if ( B > EPSILON ) {
 		double x = exp( -B * dt );
 		return state * x + ( A / B ) * ( 1 - x );
 	}
@@ -816,47 +800,7 @@ double K_n_B( double v )
 
 void testHHChannel()
 {
-	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
-	cout << "\nTesting HHChannel";
-	vector< unsigned int > dims( 1, 1 );
-	Id nid = shell->doCreate( "Neutral", Id(), "n", dims );
-	Id comptId = shell->doCreate( "Compartment", nid, "compt", dims );
-	Id chanId = shell->doCreate( "HHChannel", nid, "Na", dims );
-	MsgId mid = shell->doAddMsg( "Single", ObjId( comptId ), "channel", 
-		ObjId( chanId ), "channel" );
-	assert( mid != Msg::badMsg );
-	
-	// Check gate construction and removal when powers are assigned
 	/*
-	Slot childSlot = initHHChannelCinfo()->getSlot( "childSrc" );
-
-	ASSERT( ret, "Setting up channel" );
-
-	// ASSERT( compt->findFinfo( "channel" )->add( compt, chan, chan->findFinfo( "channel" ) ), "Setting up channel" );
-
-	
-	ASSERT( chan->msg( childSlot.msg() )->size() == 0, "Creating xGate");
-	set< double >( chan, "Xpower", 2.0 );
-	ASSERT( chan->msg( xGateSlot.msg() )->size() == 1, "Creating xGate");
-	ASSERT( chan->msg( childSlot.msg() )->size() == 1, "Creating xGate");
-
-	set< double >( chan, "Xpower", 0.0 );
-	ASSERT( chan->msg( childSlot.msg() )->size() == 0, "Removing xGate");
-	ASSERT( chan->msg( xGateSlot.msg() )->size() == 0, "Removing xGate");
-	set< double >( chan, "Xpower", 3.0 );
-	ASSERT( chan->msg( xGateSlot.msg() )->size() == 1, "Creating xGate again");
-
-	Id xGateId;
-	ret = lookupGet< Id, string >(
-		chan, "lookupChild", xGateId, "xGate" );
-	ASSERT( ret, "Look up xGate");
-	ASSERT( !xGateId.zero() && !xGateId.bad(), "Lookup xGate" );
-
-	Element* xGate = xGateId();
-
-	set< double >( chan, "Ypower", 1.0 );
-	ASSERT( chan->msg( yGateSlot.msg() )->size() == 1, "Creating yGate");
-	
 	// Check steady-state calculation for channel cond on reinit
 	// Here we start with Gbar = 1, Vm set ahead of time to 0,
 	// xGate giving an X_ state of 2 and yGate of 10 for Vm == 0.
@@ -1049,8 +993,8 @@ void testHHChannel()
 	////////////////////////////////////////////////////////////////
 	// Clear it all up
 	////////////////////////////////////////////////////////////////
-	*/
 	shell->doDelete( nid );
 	cout << "." << flush;
+	*/
 }
 #endif 

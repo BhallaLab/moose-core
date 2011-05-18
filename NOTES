@@ -12817,5 +12817,39 @@ In process of compiling. Then to do tests.
 
 ============================================================================
 16 May: Compiled. Clears unit tests but the real tests yet to come.
+Checkin 2667.
+
+Working on actual tests. The test config was simple enough but I've
+run into unexpected queue problems. The argument for the assigned Xpower,
+after going into the structuralQ, seems to be messed up. Also the size
+of the argument seems wrong at 16 bytes. I suspect that a prepacked
+buffer has gotten mixed up with a double.
+Confirmed. The difference is that in the regular Assignment operation,
+the AssignmentMsg deals with the conversion from the Prepacked buffer.
+We've been using the Prepacked buffer for field assignments because we
+may have unknown numbers of array entries in there.
+One ugly way out might be to put the data portion in the beginning of
+the prepacked buffer rather than at the end. This won't work because
+the Prepacked buffer needs the size info at the beginning to work out its
+own data size.
+Further hacks are precluded by the realization that in real runs, the
+AssignmentMsg is likely to be shifted somewhere else by the time the
+structuralQ comes around. So I need to go back to options above.
 
 ============================================================================
+17 May
+Approach: Make the thread-safe ops more atomic. Specifically, get rid of the
+structuralQ requests and instead make Id::nextId thread-safe (not expensive
+as we are not going to make too many Ids in any given run). The other
+structural ops are adopt, which can be turned into a regular Shell command 
+to be passed to the Shell and forgotten, and the operation to delete the
+child Element, which needs some thought. Rest can be done on any individual
+thread.
+
+============================================================================
+18 May
+Even the atomic approach doesn't work well, because of node sync. Here is an
+old idea revisited: Create all three gates as regular FieldElements.
+Just ignore the zero power gates. Do the HHGate data object allocation as
+needed.
+

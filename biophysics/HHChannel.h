@@ -51,6 +51,7 @@ class HHChannel
 {
 #ifdef DO_UNIT_TESTS
 	friend void testHHChannel();
+	friend void testHHGateCreation();
 #endif // DO_UNIT_TESTS
 	public:
 		HHChannel();
@@ -64,13 +65,13 @@ class HHChannel
 		double getGbar() const;
 		void setEk( double Ek );
 		double getEk() const;
-		void setXpower( double Xpower );
-		double getXpower() const;
-		void setYpower( double Ypower );
-		double getYpower() const;
-		void setZpower( double Zpower );
-		double getZpower() const;
-		void setSurface( double Surface );
+		void setXpower( const Eref& e, const Qinfo* q, double Xpower );
+		double getXpower( const Eref& e, const Qinfo* q ) const;
+		void setYpower( const Eref& e, const Qinfo* q, double Ypower );
+		double getYpower( const Eref& e, const Qinfo* q ) const;
+		void setZpower( const Eref& e, const Qinfo* q, double Zpower );
+		double getZpower( const Eref& e, const Qinfo* q ) const;
+		void setSurface( const Eref& e, const Qinfo* q, double Surface );
 		double getSurface() const;
 		void setInstant( int Instant );
 		int getInstant() const;
@@ -134,23 +135,68 @@ class HHChannel
 		/////////////////////////////////////////////////////////////
 		// Gate handling functions
 		/////////////////////////////////////////////////////////////
+		/**
+		 * Access function used for the X gate. The index is ignored.
+		 */
 		HHGate* getXgate( unsigned int i );
+
+		/**
+		 * Access function used for the Y gate. The index is ignored.
+		 */
 		HHGate* getYgate( unsigned int i );
+
+		/**
+		 * Access function used for the Z gate. The index is ignored.
+		 */
 		HHGate* getZgate( unsigned int i );
 
+		/**
+		 * Dummy assignment function for the number of gates.
+		 */
 		void setNumGates( unsigned int num );
+
+		/**
+		 * Dummy access function for the number of gates. Always gives 1.
+		 */
 		unsigned int getNumGates() const;
 
+		/**
+		 * Function for safely creating each gate, identified by strings
+		 * as X, Y and Z. Will only work on a new channel, not on a
+		 * copy. The idea is that the gates are always referred to the
+		 * original 'library' channel, and their contents cannot be touched
+		 * except by the original.
+		 */
 		void createGate( const Eref& e, const Qinfo* q, string gateType );
 
-		void innerCreateGate( 
+		/// Inner utility function for creating the gate.
+		void innerCreateGate(
 			 const string& gateName,
 			HHGate** gatePtr, Id chanId,
 			HHGate* ( HHChannel::*getGate )( unsigned int ) );
+
+		/// Returns true if channel is original, false if copy.
 		bool checkOriginal( Id chanId ) const;
 
-		// Utility function for destroying gate
-		void destroyGate( string gateType );
+		/**
+		 * Utility function for destroying gate. Works only on original
+		 * HHChannel. Somewhat dangerous, should never be used after a 
+		 * copy has been made as the pointer of the gate will be in use
+		 * elsewhere.
+		 */
+		void destroyGate( const Eref& e, const Qinfo* q, string gateType );
+
+		/**
+		 * Inner utility for destroying the gate
+		 */
+		void innerDestroyGate( const string& gateName,
+			HHGate** gatePtr, Id chanId );
+
+		/**
+		 * Utility for altering gate powers
+		 */
+		bool setGatePower( const Eref& e, const Qinfo* q, double power,
+			double* assignee, const string& gateType );
 
 		/////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
@@ -167,11 +213,6 @@ class HHChannel
 		virtual string gateFinfo( string gateType ) const { return "gate"; }
 
 		virtual string gateClass( string gateType ) const { return "HHGate"; }
-
-		virtual void lookupXrates() {;}
-		virtual void lookupYrates() {;}
-		virtual void lookupZrates() {;}
-
 
 		static PFDD selectPower( double power);
 
@@ -217,9 +258,9 @@ class HHChannel
 		/// Flag for use of conc for input to Z gate calculations.
 		bool useConcentration_;	
 
-		// Internal variables for return values
-		double A_;
-		double B_;
+		// Internal variables for return values.. deprecated
+//		double A_;
+//		double B_;
 		virtual double integrate( double state, double dt, double A, double B );
 
 		HHGate* xGate_;

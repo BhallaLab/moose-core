@@ -181,14 +181,16 @@ static const Cinfo* hhGateCinfo = HHGate::initCinfo();
 ///////////////////////////////////////////////////
 HHGate::HHGate()
 	: xmin_(0), xmax_(1), invDx_(1), 
-		originalId_(0),
+		originalChanId_(0),
+		originalGateId_(0),
 		lookupByInterpolation_(0),
 		isDirectTable_(0)
 {;}
 
-HHGate::HHGate( Id OriginalId )
+HHGate::HHGate( Id originalChanId, Id originalGateId )
 	: xmin_(0), xmax_(1), invDx_(1), 
-		originalId_( OriginalId ),
+		originalChanId_( originalChanId ),
+		originalGateId_( originalGateId ),
 		lookupByInterpolation_(0),
 		isDirectTable_(0)
 {;}
@@ -641,7 +643,7 @@ void HHGate::tabFill( vector< double >& table,
 
 bool HHGate::checkOriginal( Id id, const string& field ) const
 {
-	if ( id == originalId_ )
+	if ( id == originalChanId_ )
 		return 1;
 
 	cout << "Warning: HHGate: attempt to set field '" << field << "' on " <<
@@ -651,7 +653,7 @@ bool HHGate::checkOriginal( Id id, const string& field ) const
 
 bool HHGate::isOriginal( Id id ) const
 {
-	return ( id == originalId_ );
+	return ( id == originalChanId_ );
 }
 
 
@@ -672,4 +674,9 @@ void HHGate::updateTables()
 	parms.push_back( xmax_ );
 
 	setupTables( parms, 0 );
+}
+
+Id HHGate::originalGateId() const
+{
+	return originalGateId_;
 }
