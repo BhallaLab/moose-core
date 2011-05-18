@@ -40,9 +40,9 @@ class HHGate
 		 * This constructor is the one meant to be used. It takes the
 		 * originalId of the parent HHChannel as a required argument,
 		 * so that any subsequent 'write' functions can be checked to 
-		 * see if they are legal.
+		 * see if they are legal. Also tracks its own Id.
 		 */
-		HHGate( Id originalId );
+		HHGate( Id originalChanId, Id originalGateId );
 
 		//////////////////////////////////////////////////////////
 		// LookupValueFinfos
@@ -154,6 +154,11 @@ class HHGate
 		 * and rebuild the tables.
 		 */
 		void updateTables();
+
+		/**
+		 * Return originalGateId.
+		 */
+		Id originalGateId() const;
 		
 		static const Cinfo* initCinfo();
 	private:
@@ -185,10 +190,17 @@ class HHGate
 		double invDx_;
 
 		/**
-		 * Id of original, the one which has actually allocated it,
+		 * Id of original channel, the one which has actually allocated it,
 		 * All other Elements have to treat the values as readonly.
 		 */
-		Id originalId_;
+		Id originalChanId_;
+		
+		/**
+		 * Id of original HHGate, self.
+		 */
+		Id originalGateId_;
+
+
 
 		/**
 		 * Flag: Use linear interpolation for lookup if true, use direct 
