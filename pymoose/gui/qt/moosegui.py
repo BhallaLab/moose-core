@@ -95,6 +95,7 @@ import layout
 from updatepaintGL import *
 from vizParasDialogue import *
 
+
 def makeClassList(parent=None, mode=MooseGlobals.MODE_ADVANCED):
     """Make a list of classes that can be used in current mode
     mode can be all, kinetikit, neurokit.
@@ -762,6 +763,14 @@ class MainWindow(QtGui.QMainWindow):
     	elif a==0:
     		self.vizDialogue.specificCompartmentName.setEnabled(True)
     		self.vizDialogue.label_7.setEnabled(True)
+    		self.vizDialogue.label_11.setEnabled(False)
+    		self.vizDialogue.label_12.setEnabled(False)
+    		self.vizDialogue.label_13.setEnabled(False)
+    		self.vizDialogue.label_14.setEnabled(False)
+    		self.vizDialogue.variable_2.setEnabled(False)
+    		self.vizDialogue.moosepath_2.setEnabled(False)
+    		self.vizDialogue.vizMaxVal_2.setEnabled(False)
+    		self.vizDialogue.vizMinVal_2.setEnabled(False)
     	else:
     		self.vizDialogue.specificCompartmentName.setEnabled(False)
         	self.vizDialogue.label_7.setEnabled(False)
@@ -862,7 +871,7 @@ class MainWindow(QtGui.QMainWindow):
     		for index in xrange(self.vizDialogue.vizCells.count()):				#non-grid view case
         		viz.drawNewCell(cellName=str(self.vizDialogue.vizCells.item(index).text()),style = vizStyle)
         
-        currentVizSetting = [float(str(self.vizDialogue.vizMinVal.text())),float(str(self.vizDialogue.vizMaxVal.text())),str(self.vizDialogue.moosepath.text()),str(self.vizDialogue.variable.text()),str(self.settings.value(config.KEY_GL_COLORMAP).toString())+str(self.vizDialogue.colorMapComboBox.itemText(self.vizDialogue.colorMapComboBox.currentIndex()))]						#color map inputs from user
+        currentVizSetting = [float(str(self.vizDialogue.vizMinVal.text())),float(str(self.vizDialogue.vizMaxVal.text())),str(self.vizDialogue.moosepath.text()),str(self.vizDialogue.variable.text()),os.path.join(str(self.settings.value(config.KEY_GL_COLORMAP).toString()),str(self.vizDialogue.colorMapComboBox.itemText(self.vizDialogue.colorMapComboBox.currentIndex())))]						#color map inputs from user
     	#print currentVizSetting
         
         viz.setColorMap(*currentVizSetting[:5])							#assign regular colormap
@@ -876,8 +885,9 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(vizWindow, QtCore.SIGNAL('subWindowClosed()'), self.decrementSubWindowCount)
         self.centralPanel.setActiveSubWindow(vizWindow)
         vizWindow.show()
+        vizWindow.showMaximized()
         self._visiblePlotWindowCount += 1
-        
+        self.currentPlotWindow = vizWindow
         return vizWindow
    
     def pickCompartment(self,path):	#path is a QString type moosepath
