@@ -149,6 +149,12 @@ class MooseTreeWidget(QtGui.QTreeWidget):
         for changedItem in (item for item in self.itemList if mooseObject.id == item.mooseObj_.id):
             break
         changedItem.updateSlot()
+        
+    def pathToTreeChild(self,moosePath):	#traverses the tree, itemlist already in a sorted way 
+    	path = str(moosePath)
+    	for item in self.itemList:
+    		if path==item.mooseObj_.path:
+    			return item
 
 if __name__ == '__main__':
     c = moose.Compartment("c")
