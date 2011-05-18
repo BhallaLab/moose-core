@@ -92,6 +92,8 @@ from glwizard import MooseGLWizard
 from firsttime import FirstTimeWizard
 #from layout import Screen
 import layout
+from updatepaintGL import *
+from vizParasDialogue import *
 
 def makeClassList(parent=None, mode=MooseGlobals.MODE_ADVANCED):
     """Make a list of classes that can be used in current mode
@@ -162,6 +164,10 @@ class MainWindow(QtGui.QMainWindow):
         # plots is a list of available MoosePlot widgets.
         self.plots = []
         self.plotWindows = []
+        
+        self.vizs = []		#add_chait
+        self.vizWindows = []	#add_chait
+        
         # tablePlotMap is a maps all currently available tables to the
         # plot widgets they belong to.
         self.tablePlotMap = {}
@@ -409,6 +415,9 @@ class MainWindow(QtGui.QMainWindow):
         self.loadModelAction.setShortcut(QtGui.QKeySequence(self.tr('Ctrl+L')))
         self.connect(self.loadModelAction, QtCore.SIGNAL('triggered()'), self.popupLoadModelDialog)
         
+        self.newGLWindowAction = QtGui.QAction(self.tr('New GL Window'), self) #add_chait
+        self.connect(self.newGLWindowAction, QtCore.SIGNAL('triggered(bool)'), self.addGLWindow)
+        
         self.newPlotWindowAction = QtGui.QAction(self.tr('New Plot Window'), self)
         self.connect(self.newPlotWindowAction, QtCore.SIGNAL('triggered(bool)'), self.addPlotWindow)
         self.firstTimeWizardAction = QtGui.QAction(self.tr('FirstTime Configuration Wizard'), self)
@@ -504,6 +513,7 @@ class MainWindow(QtGui.QMainWindow):
     def makeMenu(self):
         self.fileMenu = QtGui.QMenu(self.tr('&File'), self)
         self.fileMenu.addAction(self.newPlotWindowAction)
+        self.fileMenu.addAction(self.newGLWindowAction)	#add_chait
         self.fileMenu.addAction(self.loadModelAction)
         self.shellModeMenu = self.fileMenu.addMenu(self.tr('Moose Shell mode'))
         self.shellModeMenu.addActions(self.shellModeActionGroup.actions())
@@ -721,6 +731,165 @@ class MainWindow(QtGui.QMainWindow):
         #     self.centralPanel.tileSubWindows()
         self.currentPlotWindow = plotWindow
         return plotWindow
+        
+    def addGLWindow(self):   #add_chait
+       
+        self.newDia = QtGui.QDialog(self)	
+        self.vizDialogue = Ui_Dialog()
+        self.vizDialogue.setupUi(self.newDia)
+        self.newDia.show()
+        
+        self.connect(self.vizDialogue.resetButton, QtCore.SIGNAL('clicked()'), self.resetVizDialogSettings)
+        self.connect(self.vizDialogue.acceptButton, QtCore.SIGNAL('clicked()'),  self.vizSettings)
+        self.connect(self.vizDialogue.mtree, QtCore.SIGNAL('itemDoubleClicked(QTreeWidgetItem *, int)'),self.updateVizCellList)
+        self.connect(self.vizDialogue.addCellButton, QtCore.SIGNAL('clicked()'),self.addCellToVizList)
+        self.connect(self.vizDialogue.removeCellButton, QtCore.SIGNAL('clicked()'),self.removeCellFromVizList)
+        self.connect(self.vizDialogue.allCellsButton, QtCore.SIGNAL('clicked()'),self.addAllCellsToVizList)
+        self.connect(self.vizDialogue.styleComboBox,QtCore.SIGNAL('currentIndexChanged(int)'),self.styleComboChange)
+    
+    def styleComboChange(self,a):	#add_chait
+    	if a==3:
+    		self.vizDialogue.specificCompartmentName.setEnabled(True)
+    		self.vizDialogue.label_7.setEnabled(True)
+    		self.vizDialogue.label_11.setEnabled(True)
+    		self.vizDialogue.label_12.setEnabled(True)
+    		self.vizDialogue.label_13.setEnabled(True)
+    		self.vizDialogue.label_14.setEnabled(True)
+    		self.vizDialogue.variable_2.setEnabled(True)
+    		self.vizDialogue.moosepath_2.setEnabled(True)
+    		self.vizDialogue.vizMaxVal_2.setEnabled(True)
+    		self.vizDialogue.vizMinVal_2.setEnabled(True)
+    	elif a==0:
+    		self.vizDialogue.specificCompartmentName.setEnabled(True)
+    		self.vizDialogue.label_7.setEnabled(True)
+    	else:
+    		self.vizDialogue.specificCompartmentName.setEnabled(False)
+        	self.vizDialogue.label_7.setEnabled(False)
+        	self.vizDialogue.label_11.setEnabled(False)
+    		self.vizDialogue.label_12.setEnabled(False)
+    		self.vizDialogue.label_13.setEnabled(False)
+    		self.vizDialogue.label_14.setEnabled(False)
+    		self.vizDialogue.variable_2.setEnabled(False)
+    		self.vizDialogue.moosepath_2.setEnabled(False)
+    		self.vizDialogue.vizMaxVal_2.setEnabled(False)
+    		self.vizDialogue.vizMinVal_2.setEnabled(False)
+        	
+    def addAllCellsToVizList(self):		#add_chait
+        an=moose.Neutral('/')						#moose root children
+	all_ch=an.childList 	
+						#all children under root, of cell type
+	ch = self.get_childrenOfField(all_ch,'Cell')
+	for i in range(0,len(ch),1):
+	    self.vizDialogue.vizCells.addItem(moose.Cell(ch[i]).path)
+	    
+	nh = self.get_childrenOfField(all_ch,'Neutral')			#all cells under all other neutral elements.	
+	for j in range(0,len(nh),1):
+	    an=moose.Neutral(nh[j])					#this neutral element
+	    all_ch=an.childList 					#all children under this neutral element
+	    ch = self.get_childrenOfField(all_ch,'Cell')
+	    for i in range(0,len(ch),1):
+	    	self.vizDialogue.vizCells.addItem(moose.Cell(ch[i]).path)
+	    	
+    def get_childrenOfField(self,all_ch,field):	##add_chait
+        ch=[]
+        for i in range(0,len(all_ch)):	
+	    if(mc.className(all_ch[i])==field):
+	        ch.append(all_ch[i])
+        return tuple(ch)  
+        
+    def removeCellFromVizList(self):		#add_chait
+    	self.vizDialogue.vizCells.takeItem(self.vizDialogue.vizCells.currentRow())
+        
+    def addCellToVizList(self):			#add_chait
+    	self.updateVizCellList(self.vizDialogue.mtree.currentItem(),1)
+
+    def updateVizCellList(self, item, column):	#add_chait
+        if item.mooseObj_.className == 'Cell':
+        	if self.vizDialogue.vizCells.count() == 0:
+        		self.vizDialogue.vizCells.addItem(item.mooseObj_.path)
+        	else:
+        		for index in xrange(self.vizDialogue.vizCells.count()):
+     				if str(self.vizDialogue.vizCells.item(index).text())!= item.mooseObj_.path:
+        				self.vizDialogue.vizCells.addItem(item.mooseObj_.path)
+		
+    
+    def resetVizDialogSettings(self):	#add_chait
+	self.vizDialogue.variable.setText("Vm")
+	self.vizDialogue.moosepath.setText("")
+        self.vizDialogue.vizMinVal.setText("-0.1")
+        self.vizDialogue.vizMaxVal.setText("0.07")
+        self.vizDialogue.variable_2.setText("")
+	self.vizDialogue.moosepath_2.setText("")
+        self.vizDialogue.vizMinVal_2.setText("")
+        self.vizDialogue.vizMaxVal_2.setText("")
+        self.vizDialogue.colorMapComboBox.setCurrentIndex(0)
+        self.vizDialogue.styleComboBox.setCurrentIndex(2)
+    
+    def vizSettings(self):   #add_chait
+    	
+    	title = self.tr('GL %d' % (len(self.vizs)))
+        vizWindow = newGLSubWindow()
+        vizWindow.setWindowTitle(title)
+        vizWindow.setObjectName(title)
+        self.centralPanel.addSubWindow(vizWindow)
+        viz = updatepaintGL(parent=vizWindow)
+        viz.setObjectName(title)
+        vizWindow.setWidget(viz)
+        
+        viz.viz=1	#turn on visualization mode
+	vizStyle = self.vizDialogue.styleComboBox.currentIndex()
+	
+	if self.vizDialogue.specificCompartmentName.text()!='':					#if no compartment name selected, default is soma
+       		viz.specificCompartmentName = str(self.vizDialogue.specificCompartmentName.text())	#else pick name from user ip text box
+	
+	if vizStyle==3:    									#grid view case
+		numberOfCellsDrawn = 0								#as yet drawn = 0, used as a counter
+		sideSquare = self.nearestSquare(self.vizDialogue.vizCells.count())		#get the side of the square
+		for yAxis in range(sideSquare):							#Yaxis - columns
+			for xAxis in range(sideSquare):						#Xaxis - fill rows first
+				if numberOfCellsDrawn < self.vizDialogue.vizCells.count(): 	#finished drawing all cells?
+					viz.drawNewCell(cellName=str(self.vizDialogue.vizCells.item(numberOfCellsDrawn).text()),cellCentre=[xAxis*0.5,yAxis*0.5,0.0],style = vizStyle)
+					numberOfCellsDrawn += 1					#increase number of cells drawn
+			
+       		if self.vizDialogue.variable_2.text()!='':					#field2 to represented as radius of the compartment
+       			currentVizSetting_2 = [float(str(self.vizDialogue.vizMinVal_2.text())),float(str(self.vizDialogue.vizMaxVal_2.text())),str(self.vizDialogue.moosepath_2.text()),str(self.vizDialogue.variable_2.text())]
+       			viz.setColorMap_2(*currentVizSetting_2[:4])				#set the colormap equivalent of radius
+			viz.gridRadiusViz=1							#viz using both radius and color - 2 fields
+		else:										
+			viz.gridRadiusViz=0							#no 2nd field selected, just viz using colors - not radius
+
+	else:
+    		for index in xrange(self.vizDialogue.vizCells.count()):				#non-grid view case
+        		viz.drawNewCell(cellName=str(self.vizDialogue.vizCells.item(index).text()),style = vizStyle)
+        
+        currentVizSetting = [float(str(self.vizDialogue.vizMinVal.text())),float(str(self.vizDialogue.vizMaxVal.text())),str(self.vizDialogue.moosepath.text()),str(self.vizDialogue.variable.text()),str(self.settings.value(config.KEY_GL_COLORMAP).toString())+str(self.vizDialogue.colorMapComboBox.itemText(self.vizDialogue.colorMapComboBox.currentIndex()))]						#color map inputs from user
+    	#print currentVizSetting
+        
+        viz.setColorMap(*currentVizSetting[:5])							#assign regular colormap
+        
+        QtCore.QObject.connect(viz,QtCore.SIGNAL("compartmentSelected(QString)"),self.pickCompartment)
+        #viz.translate([0.0,0.0,-6.0])
+        self.vizs.append(viz)
+        
+        self.newDia.hide() 	#pressed OK button, so close the dialog
+        
+        self.connect(vizWindow, QtCore.SIGNAL('subWindowClosed()'), self.decrementSubWindowCount)
+        self.centralPanel.setActiveSubWindow(vizWindow)
+        vizWindow.show()
+        self._visiblePlotWindowCount += 1
+        
+        return vizWindow
+   
+    def pickCompartment(self,path):	#path is a QString type moosepath
+        SelectedChild = self.modelTreeWidget.pathToTreeChild(path)
+    	self.modelTreeWidget.setCurrentItem(SelectedChild)				#select the corresponding moosetree
+	#self.makeObjectFieldEditor(SelectedChild.getMooseObject())		#update the corresponding property
+
+    def nearestSquare(self, n):	#add_chait
+    	i = 1
+	while i * i < n:
+		i += 1
+	return i
 
     def setPlotWindowsVisible(self, on=True):
         """Toggle visibility of plot windows.
@@ -896,6 +1065,11 @@ class MainWindow(QtGui.QMainWindow):
     def updatePlots(self, currentTime):
         for plot in self.plots:
             plot.updatePlot(currentTime)
+        self.updateVizs()	#added by chaitanya  
+        
+    def updateVizs(self):	#added by chaitanya
+    	for viz in self.vizs:
+       		viz.updateViz()
 
     def changeShellMode(self, action):
         if action == self.pythonModeAction:
