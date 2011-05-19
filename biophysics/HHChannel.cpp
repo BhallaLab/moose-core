@@ -171,32 +171,29 @@ const Cinfo* HHChannel::initCinfo()
 		);
 ///////////////////////////////////////////////////////
 // FieldElementFinfo definition for HHGates. Note that these are made
-// with the deferCreate flag on, so that the HHGates are not created 
-// right away.
+// with the deferCreate flag off, so that the HHGates are created 
+// right away even if they are empty.
 ///////////////////////////////////////////////////////
 		static FieldElementFinfo< HHChannel, HHGate > gateX( "gateX",
 			"Sets up HHGate X for channel",
 			HHGate::initCinfo(),
 			&HHChannel::getXgate,
 			&HHChannel::setNumGates,
-			&HHChannel::getNumGates,
-			1 // Note that the deferCreate flag is set here.
+			&HHChannel::getNumXgates
 		);
 		static FieldElementFinfo< HHChannel, HHGate > gateY( "gateY",
 			"Sets up HHGate Y for channel",
 			HHGate::initCinfo(),
 			&HHChannel::getYgate,
 			&HHChannel::setNumGates,
-			&HHChannel::getNumGates,
-			1 // Note that the deferCreate flag is set here.
+			&HHChannel::getNumYgates
 		);
 		static FieldElementFinfo< HHChannel, HHGate > gateZ( "gateZ",
 			"Sets up HHGate Z for channel",
 			HHGate::initCinfo(),
 			&HHChannel::getZgate,
 			&HHChannel::setNumGates,
-			&HHChannel::getNumGates,
-			1 // Note that the deferCreate flag is set here.
+			&HHChannel::getNumZgates
 		);
 	
 ///////////////////////////////////////////////////////
@@ -220,6 +217,9 @@ const Cinfo* HHChannel::initCinfo()
 		&IkOut,				// Src
 		&concen,			// Dest
 		&createGate,		// Dest
+		&gateX,				// FieldElement
+		&gateY,				// FieldElement
+		&gateZ				// FieldElement
 	};
 	
 	static string doc[] =
@@ -346,8 +346,7 @@ bool HHChannel::checkOriginal( Id chanId ) const
 }
 
 void HHChannel::innerCreateGate( const string& gateName, 
-	HHGate** gatePtr, Id chanId,
-	HHGate* ( HHChannel::*getGate )( unsigned int ) )
+	HHGate** gatePtr, Id chanId )
 {
 	//Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
 	if ( *gatePtr ) {
@@ -355,18 +354,7 @@ void HHChannel::innerCreateGate( const string& gateName,
 			"' on Element '" << chanId.path() << "' already present\n";
 		return;
 	}
-	Id kid = Id::nextId(); // This is now modified to be thread-safe
-	*gatePtr = new HHGate( chanId, kid );
-	new Element(
-		kid, HHGate::initCinfo(), gateName,
-		new FieldDataHandler< HHChannel, HHGate >(
-			HHGate::initCinfo()->dinfo(),
-			chanId()->dataHandler(),
-			getGate,
-			&HHChannel::getNumGates,
-			&HHChannel::setNumGates )
-		);
-	// deferredAdopt( chanId, kid );
+	*gatePtr = new HHGate( chanId );
 }
 
 void HHChannel::createGate( const Eref& e, const Qinfo* q, 
@@ -378,11 +366,11 @@ void HHChannel::createGate( const Eref& e, const Qinfo* q,
 	}
 
 	if ( gateType == "X" )
-		innerCreateGate( "xGate", &xGate_, e.id(), &HHChannel::getXgate );
+		innerCreateGate( "xGate", &xGate_, e.id() );
 	else if ( gateType == "Y" )
-		innerCreateGate( "yGate", &yGate_, e.id(), &HHChannel::getYgate );
+		innerCreateGate( "yGate", &yGate_, e.id() );
 	else if ( gateType == "Z" )
-		innerCreateGate( "zGate", &zGate_, e.id(), &HHChannel::getZgate );
+		innerCreateGate( "zGate", &zGate_, e.id() );
 	else
 		cout << "Warning: HHChannel::createGate: Unknown gate type '" <<
 			gateType << "'. Ignored\n";
@@ -396,11 +384,6 @@ void HHChannel::innerDestroyGate( const string& gateName,
 			"' on Element '" << chanId.path() << "' not present\n";
 		return;
 	}
-	Id kid = ( *gatePtr )->originalGateId();
-	assert( kid() != 0 );
-	assert( reinterpret_cast< HHGate* >( kid.eref().data() ) == *gatePtr );
-	// Send off a request to the Shell to destroy the child
-	kid.destroy();
 	delete (*gatePtr);
 	*gatePtr = 0;
 }
@@ -695,9 +678,19 @@ HHGate* HHChannel::getZgate( unsigned int i )
 void HHChannel::setNumGates( unsigned int num ) 
 { ; }
 
-unsigned int  HHChannel::getNumGates() const
+unsigned int  HHChannel::getNumXgates() const
 {
-	return 1;
+	return ( xGate_ != 0 );
+}
+
+unsigned int  HHChannel::getNumYgates() const
+{
+	return ( yGate_ != 0 );
+}
+
+unsigned int  HHChannel::getNumZgates() const
+{
+	return ( zGate_ != 0 );
 }
 ///////////////////////////////////////////////////
 // Utility function
