@@ -30,6 +30,7 @@
  */
 class HHGate
 {
+	friend void testHHGateLookup();
 	public:
 		/**
 		 * Dummy constructor, to keep Dinfo happy. Should never be used
@@ -83,6 +84,14 @@ class HHGate
 		void setDivs( const Eref& e, const Qinfo* q, unsigned int val );
 		unsigned int getDivs( const Eref& e, const Qinfo* q ) const;
 
+		void setTableA( const Eref& e, const Qinfo* q, vector< double > v);
+		vector< double > getTableA( const Eref& e, const Qinfo* q ) const;
+
+		void setTableB( const Eref& e, const Qinfo* q, vector< double > v);
+		vector< double > getTableB( const Eref& e, const Qinfo* q ) const;
+
+		void setUseInterpolation( const Eref& e, const Qinfo* q, bool val );
+		bool getUseInterpolation( const Eref& e, const Qinfo* q ) const;
 
 
 		//////////////////////////////////////////////////////////

@@ -31,7 +31,7 @@ Compartment.o: Compartment.h
 SymCompartment.o: Compartment.h SymCompartment.h
 HHChannel.o: HHChannel.h HHGate.h
 HHGate.o: HHGate.h
-testBiophysics.o: IntFire.h Synapse.h Compartment.h
+testBiophysics.o: IntFire.h Synapse.h Compartment.h HHChannel.h HHGate.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg $< -c

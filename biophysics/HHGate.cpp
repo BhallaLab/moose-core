@@ -28,7 +28,7 @@ const Cinfo* HHGate::initCinfo()
 			"the xmin, xmax, and dV fields.",
 			&HHGate::lookupA );
 		static ReadOnlyLookupValueFinfo< HHGate, double, double > B( "B",
-			"Vector of entries for 'B' gate, indexed by voltage (or conc)"
+			"lookupB: Look up the B gate value from a double."
 			"Note that this looks up the raw tables, which are transformed"
 			"from the reference parameters.",
 			&HHGate::lookupB );
@@ -87,6 +87,26 @@ const Cinfo* HHGate::initCinfo()
 			&HHGate::getDivs
 		);
 
+		static ElementValueFinfo< HHGate, vector< double > > tableA( 
+			"tableA",
+			"Table of A entries",
+			&HHGate::setTableA,
+			&HHGate::getTableA
+		);
+
+		static ElementValueFinfo< HHGate, vector< double > > tableB( 
+			"tableB",
+			"Table of alpha + beta entries",
+			&HHGate::setTableB,
+			&HHGate::getTableB
+		);
+
+		static ElementValueFinfo< HHGate, bool > useInterpolation( 
+			"useInterpolation",
+			"Flag: use linear interpolation if true, else direct lookup",
+			&HHGate::setUseInterpolation,
+			&HHGate::getUseInterpolation
+		);
 	///////////////////////////////////////////////////////
 	// DestFinfos
 	///////////////////////////////////////////////////////
@@ -147,6 +167,9 @@ const Cinfo* HHGate::initCinfo()
 		&min,		// ElementValue
 		&max,		// ElementValue
 		&divs,		// ElementValue
+		&tableA,	// ElementValue
+		&tableB,	// ElementValue
+		&useInterpolation,	// ElementValue
 		&setupAlpha,	// Dest
 		&setupTau,	// Dest
 		&tweakAlpha,	// Dest
@@ -204,7 +227,7 @@ double HHGate::lookupTable( const vector< double >& tab, double v ) const
 	if ( lookupByInterpolation_ ) {
 		unsigned int index = ( v - xmin_ ) * invDx_;
 		double frac = ( v - xmin_ - index / invDx_ ) * invDx_;
-		return tab[ index ] * frac + tab[ index + 1 ] * ( 1 - frac );
+		return tab[ index ] * ( 1 - frac ) + tab[ index + 1 ] * frac;
 	} else {
 		return tab[ static_cast< unsigned int >( (v - xmin_) * invDx_ ) ];
 	}
@@ -232,8 +255,8 @@ void HHGate::lookupBoth( double v, double* A, double* B ) const
 		unsigned int index = ( v - xmin_ ) * invDx_;
 		if ( lookupByInterpolation_ ) {
 			double frac = ( v - xmin_ - index / invDx_ ) * invDx_;
-			*A = A_[ index ] * frac + A_[ index + 1 ] * ( 1 - frac );
-			*B = B_[ index ] * frac + B_[ index + 1 ] * ( 1 - frac );
+			*A = A_[ index ] * ( 1 - frac ) + A_[ index + 1 ] * frac;
+			*B = B_[ index ] * ( 1 - frac ) + B_[ index + 1 ] * frac;
 		} else {
 			*A = A_[ index ];
 			*B = B_[ index ];
@@ -329,15 +352,14 @@ double HHGate::getMin( const Eref& e, const Qinfo* q ) const
 void HHGate::setMin( const Eref& e, const Qinfo* q, double val )
 {
 	if ( checkOriginal( e.id(), "min" ) ) {
-		if ( isDirectTable_ ) {
+		xmin_ = val;
+		unsigned int xdivs = A_.size() - 1;
+		if ( isDirectTable_ && xdivs > 0 ) {
 			// Stuff here to stretch out table using interpolation.
-			unsigned int xdivs = A_.size() - 1;
 			tabFill( A_, xdivs, val, xmax_ );
 			tabFill( B_, xdivs, val, xmax_ );
-			invDx_ = ( xmax_ - val ) / xdivs;
-			xmin_ = val;
+			invDx_ = static_cast< double >( xdivs ) / ( xmax_ - val );
 		} else {
-			xmin_ = val;
 			updateTables();
 		}
 	}
@@ -351,16 +373,15 @@ double HHGate::getMax( const Eref& e, const Qinfo* q ) const
 void HHGate::setMax( const Eref& e, const Qinfo* q, double val )
 {
 	if ( checkOriginal( e.id(), "max" ) ) {
-		if ( isDirectTable_ ) {
+		xmax_ = val;
+		unsigned int xdivs = A_.size() - 1;
+		if ( isDirectTable_ && xdivs > 0 ) {
 			// Set up using direct assignment of table values.
-			unsigned int xdivs = A_.size() - 1;
 			tabFill( A_, xdivs, xmin_, val );
 			tabFill( B_, xdivs, xmin_, val );
-			invDx_ = ( val - xmin_ ) / xdivs;
-			xmax_ = val;
+			invDx_ = static_cast< double >( xdivs ) / ( val - xmin_ );
 		} else {
 			// Set up using functional form. here we just recalculate.
-			xmax_ = val;
 			updateTables();
 		}
 	}
@@ -377,15 +398,63 @@ void HHGate::setDivs( const Eref& e, const Qinfo* q, unsigned int val )
 		if ( isDirectTable_ ) {
 			tabFill( A_, val, xmin_, xmax_ );
 			tabFill( B_, val, xmin_, xmax_ );
-			invDx_ = ( xmax_ - xmin_ ) / val;
+			invDx_ = static_cast< double >( val ) / ( xmax_ - xmin_ );
 		} else {
 			/// Stuff here to redo sizes.
 			A_.resize( val + 1 );
 			B_.resize( val + 1 );
-			invDx_ = ( xmax_ - xmin_ ) / val;
+			invDx_ = static_cast< double >( val ) / ( xmax_ - xmin_ );
 			updateTables();
 		}
 	}
+}
+
+vector< double > HHGate::getTableA( const Eref& e, const Qinfo* q ) const 
+{
+	return A_;
+}
+
+void HHGate::setTableA( const Eref& e, const Qinfo* q, vector< double > v )
+{
+	if ( v.size() < 2 ) {
+		cout << "Warning: HHGate::setTableA: size must be >= 2 entries on "
+			<< e.id().path() << endl;
+			return;
+	}
+	if ( checkOriginal( e.id(), "tableA" ) ) {
+		isDirectTable_ = 1;
+		A_ = v;
+		unsigned int xdivs = A_.size() - 1;
+		invDx_ = static_cast< double >( xdivs ) / ( xmax_ - xmin_ );
+	}
+}
+
+vector< double > HHGate::getTableB( const Eref& e, const Qinfo* q ) const 
+{
+	return B_;
+}
+
+void HHGate::setTableB( const Eref& e, const Qinfo* q, vector< double > v )
+{
+	if ( checkOriginal( e.id(), "tableB" ) ) {
+		isDirectTable_ = 1;
+		if ( A_.size() != v.size() ) {
+			cout << "Warning: HHGate::setTableB: size should be same as table A: " << v.size() << " != " << A_.size() << ". Ignoring.\n";
+			return;
+		}
+		B_ = v;
+	}
+}
+
+bool HHGate::getUseInterpolation( const Eref& e, const Qinfo* q ) const 
+{
+	return lookupByInterpolation_;
+}
+
+void HHGate::setUseInterpolation( const Eref& e, const Qinfo* q, bool val )
+{
+	if ( checkOriginal( e.id(), "useInterpolation" ) )
+		lookupByInterpolation_ = val;
 }
 
 ///////////////////////////////////////////////////
@@ -554,7 +623,11 @@ void HHGate::setupGate( const Eref& e, const Qinfo* q,
 	if ( !checkOriginal( e.id(), "setupGate" ) )
 		return;
 
-	assert( parms.size() == 9 );
+	if ( parms.size() != 9 ) {
+		cout << "HHGate::setupGate: Error: parms.size() != 9\n";
+		return;
+	}
+
 	double A = parms[0];
 	double B = parms[1];
 	double C = parms[2];
@@ -665,6 +738,8 @@ void HHGate::updateTauMinf()
 
 void HHGate::updateTables()
 {
+	if ( alpha_.size() == 0 || beta_.size() == 0 )
+		return;
 	vector< double > parms = alpha_;
 	parms.insert( parms.end(), beta_.begin(), beta_.end() );
 	parms.push_back( A_.size() );
