@@ -44,7 +44,7 @@ class HHGate
 		 * so that any subsequent 'write' functions can be checked to 
 		 * see if they are legal. Also tracks its own Id.
 		 */
-		HHGate( Id originalChanId );
+		HHGate( Id originalChanId, Id originalGateId );
 
 		//////////////////////////////////////////////////////////
 		// LookupValueFinfos
@@ -131,10 +131,16 @@ class HHGate
 		bool checkOriginal( Id id, const string& field ) const;
 
 		/**
-		 * isOriginal returns true if the provided Id is the one that the 
-		 * HHGate was created on. 
+		 * isOriginalChannel returns true if the provided Id is the Id of
+		 * the channel on which the HHGate was created.
 		 */
-		bool isOriginal( Id id ) const;
+		bool isOriginalChannel( Id id ) const;
+
+		/**
+		 * isOriginalChannel returns true if the provided Id is the Id of
+		 * the Gate created at the same time as the original channel.
+		 */
+		bool isOriginalGate( Id id ) const;
 		
 		/**
 		 * tabFill does interpolation and range resizing for
@@ -199,6 +205,13 @@ class HHGate
 		 * All other Elements have to treat the values as readonly.
 		 */
 		Id originalChanId_;
+
+		/**
+		 * Id of original Gate, the one which was created with the original
+		 * channel.
+		 * All other Elements have to treat the values as readonly.
+		 */
+		Id originalGateId_;
 
 		/**
 		 * Flag: Use linear interpolation for lookup if true, use direct 

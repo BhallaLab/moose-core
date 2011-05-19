@@ -177,7 +177,7 @@ class HHChannel
 		/// Inner utility function for creating the gate.
 		void innerCreateGate(
 			 const string& gateName,
-			HHGate** gatePtr, Id chanId );
+			HHGate** gatePtr, Id chanId, Id gateId );
 
 		/// Returns true if channel is original, false if copy.
 		bool checkOriginal( Id chanId ) const;
