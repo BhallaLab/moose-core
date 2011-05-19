@@ -42,7 +42,7 @@ class HHGate
 		 * so that any subsequent 'write' functions can be checked to 
 		 * see if they are legal. Also tracks its own Id.
 		 */
-		HHGate( Id originalChanId, Id originalGateId );
+		HHGate( Id originalChanId );
 
 		//////////////////////////////////////////////////////////
 		// LookupValueFinfos
@@ -154,11 +154,6 @@ class HHGate
 		 * and rebuild the tables.
 		 */
 		void updateTables();
-
-		/**
-		 * Return originalGateId.
-		 */
-		Id originalGateId() const;
 		
 		static const Cinfo* initCinfo();
 	private:
@@ -194,13 +189,6 @@ class HHGate
 		 * All other Elements have to treat the values as readonly.
 		 */
 		Id originalChanId_;
-		
-		/**
-		 * Id of original HHGate, self.
-		 */
-		Id originalGateId_;
-
-
 
 		/**
 		 * Flag: Use linear interpolation for lookup if true, use direct 

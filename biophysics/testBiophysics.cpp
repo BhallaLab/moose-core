@@ -31,7 +31,7 @@ extern void testBioScan(); // Defined in BioScan.cpp
 void testHHGateCreation()
 {
 	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
-	cout << "\nTesting HHChannel";
+	// cout << "\nTesting HHChannel";
 	vector< unsigned int > dims( 1, 1 );
 	Id nid = shell->doCreate( "Neutral", Id(), "n", dims );
 	Id comptId = shell->doCreate( "Compartment", nid, "compt", dims );
@@ -47,50 +47,66 @@ void testHHGateCreation()
 	assert( chan->yGate_ == 0 );
 	assert( chan->zGate_ == 0 );
 	kids = Field< vector< Id > >::get( chanId, "children" );
-	assert( kids.size() == 0 );
+	assert( kids.size() == 3 );
+	assert( kids[0] == Id( chanId.value() + 1 ) );
+	assert( kids[1] == Id( chanId.value() + 2 ) );
+	assert( kids[2] == Id( chanId.value() + 3 ) );
+	assert( kids[0]()->dataHandler()->localEntries() == 0 );
+	assert( kids[1]()->dataHandler()->localEntries() == 0 );
+	assert( kids[2]()->dataHandler()->localEntries() == 0 );
 
 	Field< double >::set( chanId, "Xpower", 1 );
 	assert( chan->xGate_ != 0 );
 	assert( chan->yGate_ == 0 );
 	assert( chan->zGate_ == 0 );
 	kids = Field< vector< Id > >::get( chanId, "children" );
-	assert( kids.size() == 1 );
-	assert( kids[0] == chan->xGate_->originalGateId() );
+	assert( kids.size() == 3 );
+	assert( kids[0]()->dataHandler()->localEntries() == 1 );
+	assert( kids[1]()->dataHandler()->localEntries() == 0 );
+	assert( kids[2]()->dataHandler()->localEntries() == 0 );
+	// Read the size of the gateIds.
 
 	Field< double >::set( chanId, "Xpower", 2 );
 	assert( chan->xGate_ != 0 );
 	assert( chan->yGate_ == 0 );
 	assert( chan->zGate_ == 0 );
-	Id origGateId = chan->xGate_->originalGateId();
-	kids = Field< vector< Id > >::get( chanId, "children" );
-	assert( kids.size() == 1 );
-	assert( kids[0] == chan->xGate_->originalGateId() );
-	assert( kids[0] == origGateId );
+	assert( kids[0]()->dataHandler()->localEntries() == 1 );
+	assert( kids[1]()->dataHandler()->localEntries() == 0 );
+	assert( kids[2]()->dataHandler()->localEntries() == 0 );
 
 	Field< double >::set( chanId, "Xpower", 0 );
 	assert( chan->xGate_ == 0 );
 	assert( chan->yGate_ == 0 );
 	assert( chan->zGate_ == 0 );
 	kids = Field< vector< Id > >::get( chanId, "children" );
-	assert( kids.size() == 0 );
+	assert( kids.size() == 3 );
+	// Even though gate was deleted, its Id is intact.
+	assert( kids[0] == Id( chanId.value() + 1 ) );
+	assert( kids[0]()->dataHandler()->localEntries() == 0 );
+	assert( kids[1]()->dataHandler()->localEntries() == 0 );
+	assert( kids[2]()->dataHandler()->localEntries() == 0 );
 
 	Field< double >::set( chanId, "Xpower", 2 );
 	assert( chan->xGate_ != 0 );
 	assert( chan->yGate_ == 0 );
 	assert( chan->zGate_ == 0 );
 	kids = Field< vector< Id > >::get( chanId, "children" );
-	assert( kids.size() == 1 );
-	assert( kids[0] != origGateId ); // New gate was created
-	assert( kids[0] == chan->xGate_->originalGateId() );
+	assert( kids.size() == 3 );
+	// New gate was created but has orig Id
+	assert( kids[0] == Id( chanId.value() + 1 ) );
+	assert( kids[0]()->dataHandler()->localEntries() == 1 );
+	assert( kids[1]()->dataHandler()->localEntries() == 0 );
+	assert( kids[2]()->dataHandler()->localEntries() == 0 );
 
 	Field< double >::set( chanId, "Ypower", 3 );
 	assert( chan->xGate_ != 0 );
 	assert( chan->yGate_ != 0 );
 	assert( chan->zGate_ == 0 );
 	kids = Field< vector< Id > >::get( chanId, "children" );
-	assert( kids.size() == 2 );
-	assert( kids[0] == chan->xGate_->originalGateId() );
-	assert( kids[1] == chan->yGate_->originalGateId() );
+	assert( kids.size() == 3 );
+	assert( kids[0]()->dataHandler()->localEntries() == 1 );
+	assert( kids[1]()->dataHandler()->localEntries() == 1 );
+	assert( kids[2]()->dataHandler()->localEntries() == 0 );
 
 	Field< double >::set( chanId, "Zpower", 1 );
 	assert( chan->xGate_ != 0 );
@@ -98,9 +114,12 @@ void testHHGateCreation()
 	assert( chan->zGate_ != 0 );
 	kids = Field< vector< Id > >::get( chanId, "children" );
 	assert( kids.size() == 3 );
-	assert( kids[0] == chan->xGate_->originalGateId() );
-	assert( kids[1] == chan->yGate_->originalGateId() );
-	assert( kids[3] == chan->zGate_->originalGateId() );
+	assert( kids[0] == Id( chanId.value() + 1 ) );
+	assert( kids[1] == Id( chanId.value() + 2 ) );
+	assert( kids[2] == Id( chanId.value() + 3 ) );
+	assert( kids[0]()->dataHandler()->localEntries() == 1 );
+	assert( kids[1]()->dataHandler()->localEntries() == 1 );
+	assert( kids[2]()->dataHandler()->localEntries() == 1 );
 
 	shell->doDelete( nid );
 	cout << "." << flush;

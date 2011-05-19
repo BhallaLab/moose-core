@@ -182,15 +182,13 @@ static const Cinfo* hhGateCinfo = HHGate::initCinfo();
 HHGate::HHGate()
 	: xmin_(0), xmax_(1), invDx_(1), 
 		originalChanId_(0),
-		originalGateId_(0),
 		lookupByInterpolation_(0),
 		isDirectTable_(0)
 {;}
 
-HHGate::HHGate( Id originalChanId, Id originalGateId )
+HHGate::HHGate( Id originalChanId )
 	: xmin_(0), xmax_(1), invDx_(1), 
 		originalChanId_( originalChanId ),
-		originalGateId_( originalGateId ),
 		lookupByInterpolation_(0),
 		isDirectTable_(0)
 {;}
@@ -674,9 +672,4 @@ void HHGate::updateTables()
 	parms.push_back( xmax_ );
 
 	setupTables( parms, 0 );
-}
-
-Id HHGate::originalGateId() const
-{
-	return originalGateId_;
 }
