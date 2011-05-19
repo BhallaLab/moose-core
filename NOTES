@@ -12851,5 +12851,10 @@ thread.
 Even the atomic approach doesn't work well, because of node sync. Here is an
 old idea revisited: Create all three gates as regular FieldElements.
 Just ignore the zero power gates. Do the HHGate data object allocation as
-needed.
+needed. Key thing is to assign the Original Id for the parent when we first
+make the gate.
 
+============================================================================
+19 May
+Fixed up FieldElement creation of HHGates, and ran first pass unit test.
+============================================================================

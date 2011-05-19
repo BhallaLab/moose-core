@@ -156,9 +156,14 @@ class HHChannel
 		void setNumGates( unsigned int num );
 
 		/**
-		 * Dummy access function for the number of gates. Always gives 1.
+		 * Access function for the number of Xgates. Gives 1 if present,
+		 * otherwise 0.
 		 */
-		unsigned int getNumGates() const;
+		unsigned int getNumXgates() const;
+		/// Returns 1 if Y gate present, otherwise 0
+		unsigned int getNumYgates() const;
+		/// Returns 1 if Z gate present, otherwise 0
+		unsigned int getNumZgates() const;
 
 		/**
 		 * Function for safely creating each gate, identified by strings
@@ -172,8 +177,7 @@ class HHChannel
 		/// Inner utility function for creating the gate.
 		void innerCreateGate(
 			 const string& gateName,
-			HHGate** gatePtr, Id chanId,
-			HHGate* ( HHChannel::*getGate )( unsigned int ) );
+			HHGate** gatePtr, Id chanId );
 
 		/// Returns true if channel is original, false if copy.
 		bool checkOriginal( Id chanId ) const;
