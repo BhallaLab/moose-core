@@ -12859,5 +12859,6 @@ make the gate.
 Fixed up FieldElement creation of HHGates, and ran first pass unit test.
 Checkin 2673.
 
-Added in tests for lookup using HHGates. Passes.
+Added in tests for lookup using HHGates. Passes. Checkin 2674.
+Added in test for setupAlpha using HHGates. Passes.
 ============================================================================
