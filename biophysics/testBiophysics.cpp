@@ -148,11 +148,9 @@ static double actionPotl[] = { 0,
 -1.12439, -0.894457, -0.665128, -0.436511, -0.208708, 0.0181928,
 };
 
-void lset( 
-	Element* gate, const Finfo* table, double val, unsigned int i )
-{
-	// lookupSet< double, unsigned int >( gate, table, val, i );
-}
+// y(x) = (A + B * x) / (C + exp((x + D) / F))
+// So: A = 0.1e6*(EREST+0.025), B = -0.1e6, C = -1.0, D = -(EREST+0.025)
+// F = -0.01
 
 double Na_m_A( double v )
 {
@@ -161,21 +159,25 @@ double Na_m_A( double v )
 	return  0.1e6 * ( EREST + 0.025 - v ) / ( exp ( ( EREST + 0.025 - v )/ 0.01 ) - 1.0 );
 }
 
+// A = 4.0e3, B = 0, C = 0.0, D = -EREST, F = 0.018
 double Na_m_B( double v )
 {
 	return 4.0e3 * exp ( ( EREST - v ) / 0.018 );
 }
 
+// A = 70, B = 0, C = 0, D = -EREST, F = 0.02
 double Na_h_A( double v )
 {
 	return 70.0 * exp ( ( EREST - v ) / 0.020 );
 }
 
+// A = 1e3, B = 0, C = 1.0, D = -(EREST + 0.03 ), F = -0.01
 double Na_h_B( double v )
 {
 	return 1.0e3 / ( exp ( ( 0.030 + EREST - v )/ 0.01 )  + 1.0 );
 }
 
+// A = 1e4 * (0.01 + EREST), B = -1e4, C = -1.0, D = -(EREST + 0.01 ), F = -0.01
 double K_n_A( double v )
 {
 	if ( fabs( EREST + 0.025 - v ) < 1e-6 )
@@ -184,6 +186,7 @@ double K_n_A( double v )
 	return ( 1.0e4 * ( 0.01 + EREST - v ) ) / ( exp ( ( 0.01 + EREST         - v ) / 0.01 ) - 1.0 );
 }
 
+// A = 0.125e3, B = 0, C = 0, D = -EREST ), F = -0.08
 double K_n_B( double v )
 {
 	return 0.125e3 * exp ( (EREST - v ) / 0.08 );
@@ -247,6 +250,57 @@ void testHHGateLookup()
 	gate.lookupBoth( 100000, &x, &y );
 	assert( doubleEq( x, 4 ) );
 	assert( doubleEq( y, 1 ) );
+
+	cout << "." << flush;
+}
+
+void testHHGateSetup()
+{
+	Id shellId = Id();
+	HHGate gate( shellId );
+	Eref er = shellId.eref();
+	Qinfo q;
+
+	vector< double > parms;
+	// Try out m-gate of NA.
+// For the alpha:
+// A = 0.1e6*(EREST*0.025), B = -0.1e6, C= -1, D= -(EREST+0.025), F = -0.01
+// beta: A = 4.0e3, B = 0, C = 0.0, D = -EREST, F = 0.018
+// xdivs = 100, xmin = -0.1, xmax = 0.05
+	unsigned int xdivs = 100;
+	double xmin = -0.1;
+	double xmax = 0.05;
+	parms.push_back( 0.1e6 * ( EREST + 0.025 ) );	// A alpha
+	parms.push_back( -0.1e6 );				// B alpha
+	parms.push_back( -1 );					// C alpha
+	parms.push_back( -(EREST + 0.025 ) );	// D alpha
+	parms.push_back( -0.01 );				// F alpha
+
+	parms.push_back( 4e3 );		// A beta
+	parms.push_back( 0 );		// B beta
+	parms.push_back( 0 );		// C beta
+	parms.push_back( -EREST );	// D beta
+	parms.push_back( 0.018 );	// F beta
+
+	parms.push_back( xdivs );
+	parms.push_back( xmin );
+	parms.push_back( xmax );
+
+	gate.setupAlpha( er, &q, parms );
+	assert( gate.A_.size() == xdivs + 1 );
+	assert( gate.B_.size() == xdivs + 1 );
+
+	double x = xmin;
+	double dx = (xmax - xmin) / xdivs;
+	for ( unsigned int i = 0; i <= xdivs; ++i ) {
+		double ma = Na_m_A( x );
+		double mb = Na_m_B( x );
+		assert( doubleEq( gate.A_[i], ma ) );
+		assert( doubleEq( gate.B_[i], ma + mb ) );
+		x += dx;
+	}
+
+	cout << "." << flush;
 }
 
 void testHHChannel()
@@ -396,6 +450,7 @@ void testBiophysics()
 	testCompartment();
 	testHHGateCreation();
 	testHHGateLookup();
+	testHHGateSetup();
 	/*
 	testCaConc();
 	testNernst();

@@ -31,6 +31,7 @@
 class HHGate
 {
 	friend void testHHGateLookup();
+	friend void testHHGateSetup();
 	public:
 		/**
 		 * Dummy constructor, to keep Dinfo happy. Should never be used
