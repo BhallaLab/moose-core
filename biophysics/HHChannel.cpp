@@ -336,17 +336,17 @@ bool HHChannel::checkOriginal( Id chanId ) const
 {
 	bool isOriginal = 1;
 	if ( xGate_ ) {
-		isOriginal = xGate_->isOriginal( chanId );
+		isOriginal = xGate_->isOriginalChannel( chanId );
 	} else if ( yGate_ ) {
-		isOriginal = yGate_->isOriginal( chanId );
+		isOriginal = yGate_->isOriginalChannel( chanId );
 	} else if ( zGate_ ) {
-		isOriginal = zGate_->isOriginal( chanId );
+		isOriginal = zGate_->isOriginalChannel( chanId );
 	}
 	return isOriginal;
 }
 
 void HHChannel::innerCreateGate( const string& gateName, 
-	HHGate** gatePtr, Id chanId )
+	HHGate** gatePtr, Id chanId, Id gateId )
 {
 	//Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
 	if ( *gatePtr ) {
@@ -354,7 +354,7 @@ void HHChannel::innerCreateGate( const string& gateName,
 			"' on Element '" << chanId.path() << "' already present\n";
 		return;
 	}
-	*gatePtr = new HHGate( chanId );
+	*gatePtr = new HHGate( chanId, gateId );
 }
 
 void HHChannel::createGate( const Eref& e, const Qinfo* q, 
@@ -366,11 +366,11 @@ void HHChannel::createGate( const Eref& e, const Qinfo* q,
 	}
 
 	if ( gateType == "X" )
-		innerCreateGate( "xGate", &xGate_, e.id() );
+		innerCreateGate( "xGate", &xGate_, e.id(), Id(e.id().value() + 1) );
 	else if ( gateType == "Y" )
-		innerCreateGate( "yGate", &yGate_, e.id() );
+		innerCreateGate( "yGate", &yGate_, e.id(), Id(e.id().value() + 2) );
 	else if ( gateType == "Z" )
-		innerCreateGate( "zGate", &zGate_, e.id() );
+		innerCreateGate( "zGate", &zGate_, e.id(), Id(e.id().value() + 3) );
 	else
 		cout << "Warning: HHChannel::createGate: Unknown gate type '" <<
 			gateType << "'. Ignored\n";

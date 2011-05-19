@@ -205,13 +205,15 @@ static const Cinfo* hhGateCinfo = HHGate::initCinfo();
 HHGate::HHGate()
 	: xmin_(0), xmax_(1), invDx_(1), 
 		originalChanId_(0),
+		originalGateId_(0),
 		lookupByInterpolation_(0),
 		isDirectTable_(0)
 {;}
 
-HHGate::HHGate( Id originalChanId )
+HHGate::HHGate( Id originalChanId, Id originalGateId )
 	: xmin_(0), xmax_(1), invDx_(1), 
 		originalChanId_( originalChanId ),
+		originalGateId_( originalGateId ),
 		lookupByInterpolation_(0),
 		isDirectTable_(0)
 {;}
@@ -533,7 +535,16 @@ void HHGate::setupTables( const vector< double >& parms, bool doTau )
 		} else {
 			temp2 = parms[2] + exp( ( x + parms[3] ) / parms[4] );
 			if ( fabs( temp2 ) < SINGULARITY ) {
-				temp = prevAentry;
+				temp2 = parms[2] + exp( ( x + dx/10.0 + parms[3] ) / parms[4] );
+				temp = ( parms[0] + parms[1] * (x + dx/10 ) ) / temp2;
+
+				temp2 = parms[2] + exp( ( x - dx/10.0 + parms[3] ) / parms[4] );
+				temp += ( parms[0] + parms[1] * (x - dx/10 ) ) / temp2;
+				temp /= 2.0;
+				cout << "interpolated temp = " << temp << 
+					", prev = " << prevAentry << endl;
+
+				// temp = prevAentry;
 				A_[i] = temp;
 			} else {
 				temp = ( parms[0] + parms[1] * x) / temp2;
@@ -544,11 +555,18 @@ void HHGate::setupTables( const vector< double >& parms, bool doTau )
 			B_[i] = 0.0;
 		} else {
 			temp2 = parms[7] + exp( ( x + parms[8] ) / parms[9] );
-			if ( fabs( temp2 ) < SINGULARITY )
-				B_[i] = prevBentry;
-			else
+			if ( fabs( temp2 ) < SINGULARITY ) {
+				temp2 = parms[7] + exp( ( x + dx/10.0 + parms[8] ) / parms[9] );
+				temp = (parms[5] + parms[6] * (x + dx/10) ) / temp2;
+				temp2 = parms[7] + exp( ( x - dx/10.0 + parms[8] ) / parms[9] );
+				temp += (parms[5] + parms[6] * (x - dx/10) ) / temp2;
+				temp /= 2.0;
+				B_[i] = temp;
+				// B_[i] = prevBentry;
+			} else {
 				B_[i] = (parms[5] + parms[6] * x ) / temp2;
 				// B_.table_[i] = ( parms[5] + parms[6] * x ) / temp2;
+			}
 		}
 		// There are cleaner ways to do this, but this keeps
 		// the relation to the GENESIS version clearer.
@@ -714,7 +732,7 @@ void HHGate::tabFill( vector< double >& table,
 
 bool HHGate::checkOriginal( Id id, const string& field ) const
 {
-	if ( id == originalChanId_ )
+	if ( id == originalGateId_ )
 		return 1;
 
 	cout << "Warning: HHGate: attempt to set field '" << field << "' on " <<
@@ -722,9 +740,14 @@ bool HHGate::checkOriginal( Id id, const string& field ) const
 	return 0;
 }
 
-bool HHGate::isOriginal( Id id ) const
+bool HHGate::isOriginalChannel( Id id ) const
 {
 	return ( id == originalChanId_ );
+}
+
+bool HHGate::isOriginalGate( Id id ) const
+{
+	return ( id == originalGateId_ );
 }
 
 

@@ -12860,5 +12860,10 @@ Fixed up FieldElement creation of HHGates, and ran first pass unit test.
 Checkin 2673.
 
 Added in tests for lookup using HHGates. Passes. Checkin 2674.
-Added in test for setupAlpha using HHGates. Passes.
+Added in test for setupAlpha using HHGates. Passes. Checkin 2675.
+
+Found issue with singularity handling in HHGates::setupAlpha. Fixed.
+Struggling with test for full HH-squid simulation. Currently commented out
+for checkin.
+
 ============================================================================
