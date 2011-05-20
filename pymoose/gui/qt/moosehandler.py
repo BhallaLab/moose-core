@@ -101,7 +101,7 @@ class MooseHandler(QtCore.QObject):
         }
     DEFAULT_SIMDT = 2.5e-4
     DEFAULT_PLOTDT = 2e-3
-    DEFAULT_GLDT = 50e-3
+    #DEFAULT_GLDT = 50e-3
     DEFAULT_RUNTIME = 1.0
     DEFAULT_PLOTUPDATE_DT = 1e-1
 
@@ -113,7 +113,7 @@ class MooseHandler(QtCore.QObject):
     
     simdt = DEFAULT_SIMDT
     plotdt = DEFAULT_PLOTDT
-    gldt = DEFAULT_GLDT
+    #gldt = DEFAULT_GLDT
     runtime = DEFAULT_RUNTIME
     plotupdate_dt = DEFAULT_PLOTUPDATE_DT
     def __init__(self):
@@ -273,7 +273,8 @@ class MooseHandler(QtCore.QObject):
             self._tableIndex += 1
         return table
 
-    def doReset(self, simdt, plotdt, gldt, plotupdate_dt):
+    #def doReset(self, simdt, plotdt, gldt, plotupdate_dt):
+    def doReset(self, simdt, plotdt,  plotupdate_dt):
         """Reset moose.
 
         simdt -- dt for simulation (step size for numerical
@@ -291,13 +292,13 @@ class MooseHandler(QtCore.QObject):
         self._context.setClock(1, simdt)
         self._context.setClock(2, simdt)
         self._context.setClock(3, plotdt)
-        self._context.setClock(4, gldt)
+        #self._context.setClock(4, gldt)
         self._context.useClock(3, self._data.path + '/##[TYPE=Table]')
-        self._context.useClock(4, self._gl.path + '/##[TYPE=GLcell]')
-        self._context.useClock(4, self._gl.path + '/##[TYPE=GLview]')
+        #self._context.useClock(4, self._gl.path + '/##[TYPE=GLcell]')
+        #self._context.useClock(4, self._gl.path + '/##[TYPE=GLview]')
         MooseHandler.simdt = simdt
         MooseHandler.plotdt = plotdt
-        MooseHandler.gldt = gldt
+        #MooseHandler.gldt = gldt
         MooseHandler.plotupdate_dt = plotupdate_dt
         self._context.reset()
 
@@ -320,7 +321,8 @@ class MooseHandler(QtCore.QObject):
         self._context.step(time_left)
         self.emit(QtCore.SIGNAL('updatePlots(float)'), self._context.getCurrentTime())
 
-    def doResetAndRun(self, runtime, simdt=None, plotdt=None, gldt=None, plotupdate_dt=None):
+    #def doResetAndRun(self, runtime, simdt=None, plotdt=None, gldt=None, plotupdate_dt=None):
+    def doResetAndRun(self, runtime, simdt=None, plotdt=None, plotupdate_dt=None):
         """Reset and run the simulation.
 
         This is to replace separate reset and run methods as two
@@ -332,8 +334,8 @@ class MooseHandler(QtCore.QObject):
             MooseHandler.simdt = simdt
         if plotdt is not None and isinstance(plotdt, float):
             MooseHandler.plotdt_err = plotdt
-        if gldt is not None and isinstance(gldt, float):
-            MooseHandler.gldt = gldt
+        #if gldt is not None and isinstance(gldt, float):
+        #    MooseHandler.gldt = gldt
         if plotupdate_dt is not None and isinstance(plotupdate_dt, float):
             MooseHandler.plotupdate_dt = plotupdate_dt
         if runtime is not None and isinstance(runtime, float):
@@ -343,14 +345,14 @@ class MooseHandler(QtCore.QObject):
         self._context.setClock(1, MooseHandler.simdt)
         self._context.setClock(2, MooseHandler.simdt)
         self._context.setClock(3, MooseHandler.plotdt)
-        self._context.setClock(4, MooseHandler.gldt)
+        #self._context.setClock(4, MooseHandler.gldt)
         self._context.useClock(3, self._data.path + '/##[TYPE=Table]')
         if self._context.exists('/graphs'):
             self._context.useClock(3, '/graphs/##[TYPE=Table]')
         if self._context.exists('/moregraphs'):
             self._context.useClock(3, '/moregraphs/##[TYPE=Table]')            
-        self._context.useClock(4, self._gl.path + '/##[TYPE=GLcell]')
-        self._context.useClock(4, self._gl.path + '/##[TYPE=GLview]')
+        #self._context.useClock(4, self._gl.path + '/##[TYPE=GLcell]')
+        #self._context.useClock(4, self._gl.path + '/##[TYPE=GLview]')
         self._context.reset()
         MooseHandler.runtime = runtime      
         next_stop = MooseHandler.plotupdate_dt
