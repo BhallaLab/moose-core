@@ -457,11 +457,11 @@ class MainWindow(QtGui.QMainWindow):
         # self.contextHelpAction = QtGui.QAction(self.tr('Context Help'), self)
         
         # Run menu action
-        self.runAction = QtGui.QAction(self.tr('Run Simulation'), self)        
+        self.runAction = QtGui.QAction(self.tr('Run'), self)        
 	self.connect(self.runAction, QtCore.SIGNAL('triggered(bool)'), self.resetAndRunSlot)
         # self.resetAction = QtGui.QAction(self.tr('Reset Simulation'), self)
 	# self.connect(self.resetAction, QtCore.SIGNAL('triggered()'), self.resetSlot)
-        self.continueRunAction = QtGui.QAction(self.tr('Continue simulation'), self)
+        self.continueRunAction = QtGui.QAction(self.tr('Continue'), self)
         self.connect(self.continueRunAction, QtCore.SIGNAL('triggered()'), self._runSlot)
 
     
@@ -549,9 +549,9 @@ class MainWindow(QtGui.QMainWindow):
         self.plotMenu.addAction(self.configurePlotAction)
         self.plotMenu.addAction(self.togglePlotVisibilityAction)
         self.plotMenu.addAction(self.showAllPlotsAction)
-        self.glMenu = QtGui.QMenu(self.tr('Open&GL'), self)
-        self.glMenu.addAction(self.startGLWizardAction)
-        self.glMenu.addAction(self.stopGLAction)
+        #self.glMenu = QtGui.QMenu(self.tr('Open&GL'), self)
+        #self.glMenu.addAction(self.startGLWizardAction)
+        #self.glMenu.addAction(self.stopGLAction)
                                   
         self.helpMenu = QtGui.QMenu('&Help', self)
         self.helpMenu.addAction(self.showDocAction)
@@ -565,7 +565,7 @@ class MainWindow(QtGui.QMainWindow):
         self.menuBar().addMenu(self.editModelMenu)
         self.menuBar().addMenu(self.runMenu)
         self.menuBar().addMenu(self.plotMenu)
-        self.menuBar().addMenu(self.glMenu)
+        #self.menuBar().addMenu(self.glMenu)
         self.menuBar().addMenu(self.helpMenu)
 
     def createConnectionMenu(self, clickpoint):
@@ -654,6 +654,7 @@ class MainWindow(QtGui.QMainWindow):
         # self.connect(self.modelTreeWidget, QtCore.SIGNAL('customContextMenuRequested ( const QPoint&)'), self.createConnectionMenu)
 	self.mooseTreePanel.setWidget(self.modelTreeWidget)
         config.LOGGER.debug('createMooseTreePanel - end')
+        self.ForceTabbedDocks
         
     def createGLClientDock(self):
         config.LOGGER.debug('createGLClientDock - start')
@@ -677,18 +678,22 @@ class MainWindow(QtGui.QMainWindow):
         self.controlPanel.setFrameStyle(QtGui.QFrame.StyledPanel | QtGui.QFrame.Plain)
         layout = QtGui.QGridLayout()
         self.runtimeLabel = QtGui.QLabel(self.tr('Simulation Run Time (second):'), self.controlPanel)
+        self.runtimeLabel.setWordWrap(True)
         self.runtimeText = QtGui.QLineEdit('%1.3e' % (MooseHandler.runtime), self.controlPanel)
-        self.updateTimeLabel = QtGui.QLabel(self.tr('Update interval for plots (second):'), self.controlPanel)
+        self.updateTimeLabel = QtGui.QLabel(self.tr('Update interval for plots & viz (second):'), self.controlPanel)
+        self.updateTimeLabel.setWordWrap(True)
         self.updateTimeText = QtGui.QLineEdit('%1.3e' % (MooseHandler.plotupdate_dt), self.controlPanel)
         # self.resetButton = QtGui.QPushButton(self.tr('Reset'), self.controlPanel)
-        self.runButton = QtGui.QPushButton(self.tr('Run simulation'), self.controlPanel)
-        self.continueButton = QtGui.QPushButton(self.tr('Continue simulation'), self.controlPanel)
+        self.runButton = QtGui.QPushButton(self.tr('Run'), self.controlPanel)
+        self.continueButton = QtGui.QPushButton(self.tr('Continue'), self.controlPanel)
         self.simdtLabel = QtGui.QLabel(self.tr('Simulation timestep (second):'), self.controlPanel)
+        self.simdtLabel.setWordWrap(True)
         self.plotdtLabel = QtGui.QLabel(self.tr('Plotting timestep (second):'), self.controlPanel)
-        self.gldtLabel = QtGui.QLabel(self.tr('3D visualization timestep (second):'), self.controlPanel)
+        self.plotdtLabel.setWordWrap(True)
+        #self.gldtLabel = QtGui.QLabel(self.tr('3D visualization timestep (second):'), self.controlPanel)
         self.simdtText = QtGui.QLineEdit('%1.3e' % (MooseHandler.simdt), self.controlPanel)
         self.plotdtText = QtGui.QLineEdit('%1.3e' % (MooseHandler.plotdt), self)
-        self.gldtText = QtGui.QLineEdit('%1.3e' % (MooseHandler.gldt), self.controlPanel)
+        #self.gldtText = QtGui.QLineEdit('%1.3e' % (MooseHandler.gldt), self.controlPanel)
         # self.overlayCheckBox = QtGui.QCheckBox(self.tr('Overlay plots'), self.controlPanel)
         
         self.connect(self.runButton, QtCore.SIGNAL('clicked()'), self.resetAndRunSlot)
@@ -697,8 +702,8 @@ class MainWindow(QtGui.QMainWindow):
         layout.addWidget(self.simdtText, 0, 1)
         layout.addWidget(self.plotdtLabel, 1, 0)
         layout.addWidget(self.plotdtText, 1, 1)
-        layout.addWidget(self.gldtLabel, 2, 0)
-        layout.addWidget(self.gldtText, 2, 1)
+        #layout.addWidget(self.gldtLabel, 2, 0)
+        #layout.addWidget(self.gldtText, 2, 1)
         # layout.addWidget(self.overlayCheckBox, 3, 0)
         layout.addWidget(self.runtimeLabel, 4, 0)
         layout.addWidget(self.runtimeText, 4, 1)
@@ -885,6 +890,9 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(vizWindow, QtCore.SIGNAL('subWindowClosed()'), self.decrementSubWindowCount)
         self.centralPanel.setActiveSubWindow(vizWindow)
         vizWindow.show()
+        #print vizWindow.width()
+        #print vizWindow.height()
+        #vizWindow.setFixed
         vizWindow.showMaximized()
         self._visiblePlotWindowCount += 1
         self.currentPlotWindow = vizWindow
@@ -1009,12 +1017,12 @@ class MainWindow(QtGui.QMainWindow):
             print 'Error setting Plotting timestep:', plotdt_err
             plotdt = MooseHandler.plotdt
             self.plotdtText.setText('%1.3e' % (MooseHandler.plotdt))
-        try:            
-            gldt = float(str(self.gldtText.text()))
-        except ValueError, gldt_err:
-            print 'Error setting 3D visualization time step:', gldt_err
-            gldt = MooseHandler.gldt
-            self.gldtText.setText('%1.3e' % (MooseHandler.gldt))
+        #try:            
+        #    gldt = float(str(self.gldtText.text()))
+        #except ValueError, gldt_err:
+        #    print 'Error setting 3D visualization time step:', gldt_err
+        #    gldt = MooseHandler.gldt
+        #    self.gldtText.setText('%1.3e' % (MooseHandler.gldt))
         try:
             updateInterval = float(str(self.updateTimeText.text()))
             if updateInterval < 0.0:
@@ -1022,7 +1030,8 @@ class MainWindow(QtGui.QMainWindow):
         except ValueError:
             updateInterval = MooseHandler.plotupdate_dt
             self.updateTimeText.setText(str(updateInterval))
-        self.mooseHandler.doReset(simdt, plotdt, gldt, updateInterval)
+        #self.mooseHandler.doReset(simdt, plotdt, gldt,updateInterval)
+        self.mooseHandler.doReset(simdt, plotdt, updateInterval)
         for table, plot in self.tablePlotMap.items():
             print 'Clearing plot', table.name
             table.clear()
@@ -1218,7 +1227,7 @@ class MainWindow(QtGui.QMainWindow):
         if (modeltype == MooseHandler.type_kkit) or (modeltype == MooseHandler.type_sbml):
             self.simdtText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_SIMDT_KKIT)))
             self.plotdtText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_PLOTDT_KKIT)))
-            self.gldtText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_GLDT_KKIT)))
+            #self.gldtText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_GLDT_KKIT)))
             self.runtimeText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_RUNTIME_KKIT)))
             self.updateTimeText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_PLOTUPDATE_DT_KKIT)))
 
