@@ -141,6 +141,11 @@ class HHGate
 		 * the Gate created at the same time as the original channel.
 		 */
 		bool isOriginalGate( Id id ) const;
+
+		/**
+		 * Returns the Id of the original Channel.
+		 */
+		Id originalChannelId() const;
 		
 		/**
 		 * tabFill does interpolation and range resizing for

@@ -541,8 +541,7 @@ void HHGate::setupTables( const vector< double >& parms, bool doTau )
 				temp2 = parms[2] + exp( ( x - dx/10.0 + parms[3] ) / parms[4] );
 				temp += ( parms[0] + parms[1] * (x - dx/10 ) ) / temp2;
 				temp /= 2.0;
-				cout << "interpolated temp = " << temp << 
-					", prev = " << prevAentry << endl;
+				// cout << "interpolated temp = " << temp << ", prev = " << prevAentry << endl;
 
 				// temp = prevAentry;
 				A_[i] = temp;
@@ -750,6 +749,10 @@ bool HHGate::isOriginalGate( Id id ) const
 	return ( id == originalGateId_ );
 }
 
+Id HHGate::originalChannelId() const
+{
+	return originalChanId_;
+}
 
 void HHGate::updateAlphaBeta()
 {
