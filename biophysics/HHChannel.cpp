@@ -261,9 +261,23 @@ HHChannel::HHChannel()
 			useConcentration_( 0 ),
 			xGate_( 0 ),
 			yGate_( 0 ),
-			zGate_( 0 )
+			zGate_( 0 ),
+			myId_()
 {
 	;
+}
+
+HHChannel::~HHChannel()
+{
+	if ( xGate_ && reinterpret_cast< char* >( this ) == 
+		ObjId( xGate_->originalChannelId(), 0 ).data() )
+		delete xGate_;
+	if ( yGate_ && reinterpret_cast< char* >( this ) == 
+		ObjId( yGate_->originalChannelId(), 0 ).data() )
+		delete yGate_;
+	if ( zGate_ && reinterpret_cast< char* >( this ) == 
+		ObjId( zGate_->originalChannelId(), 0 ).data() )
+		delete zGate_;
 }
 
 bool HHChannel::setGatePower( const Eref& e, const Qinfo* q, double power,

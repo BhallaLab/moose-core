@@ -1,4 +1,4 @@
-7 Jan 2009
+
 
 I have been playing around with a new messaging system, one that uses an
 intermediate buffer. The big advantage of this sytem is that it should
@@ -12864,6 +12864,27 @@ Added in test for setupAlpha using HHGates. Passes. Checkin 2675.
 
 Found issue with singularity handling in HHGates::setupAlpha. Fixed.
 Struggling with test for full HH-squid simulation. Currently commented out
-for checkin.
+for checkin. Checkin 2676.
+
+Now I've run into a sheduling problem. The initVm_ value is not being
+received by channels till after all reinits are done.
+
+============================================================================
+20 May 2011
+Figured out why the initVm sequencing was off: The reinit does not follow
+the same sequencing as the Process, so the assumptions about update order are
+flawed. Specifically, in Process we take tick0 and go through the
+phase1/barrier1/phase2/barrier2/phase3/barrier3  sequence. Then we do the
+same for tick1, and so on. In Reinit, we go through all the ticks in one
+go, and then pass around the resulting messages. Will need to fix.
+Nevertheless, two Reinits should do the trick. Turns out they do, but the
+criterion for value matching is too tight. Changed, now clears unit tests.
+Running valgrind. This reveals something that should have been obvious, that
+the HHGates need to be deleted. Easy to do, just put it in the HHChannel
+destructor.
+Perhaps not so easy. Need to have a unique way for the internal channel
+destructor to know when it is the base of the HHGates. 
+Sorted it out. Valgrind now happy, at least it hasn't added to the existing
+leaks that still need sorting.
 
 ============================================================================

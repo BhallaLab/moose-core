@@ -55,7 +55,7 @@ class HHChannel
 #endif // DO_UNIT_TESTS
 	public:
 		HHChannel();
-		virtual ~HHChannel() { ; }
+		~HHChannel();
 
 		/////////////////////////////////////////////////////////////
 		// Value field access function definitions
@@ -206,18 +206,6 @@ class HHChannel
 		static const Cinfo* initCinfo();
 
 	protected:
-		virtual string chanFinfo( string gateType ) const
-		{
-			if ( gateType == "X" ) return "xGate";
-			else if ( gateType == "Y" ) return "yGate";
-			else if ( gateType == "Z" ) return "zGate";
-			else assert( 0 );
-		}
-
-		virtual string gateFinfo( string gateType ) const { return "gate"; }
-
-		virtual string gateClass( string gateType ) const { return "HHGate"; }
-
 		static PFDD selectPower( double power);
 
 		/// Exponent for X gate
@@ -265,11 +253,22 @@ class HHChannel
 		// Internal variables for return values.. deprecated
 //		double A_;
 //		double B_;
-		virtual double integrate( double state, double dt, double A, double B );
+		double integrate( double state, double dt, double A, double B );
 
+		/**
+		 * HHGate data structure for the xGate. This is writable only
+		 * on the HHChannel that originally created the HHGate, for others
+		 * it must be treated as readonly.
+		 */
 		HHGate* xGate_;
+
+		/// HHGate data structure for the yGate. 
 		HHGate* yGate_;
+
+		/// HHGate data structure for the yGate. 
 		HHGate* zGate_;
+
+		Id myId_;
 
 		static const double EPSILON;
 		static const int INSTANT_X;
