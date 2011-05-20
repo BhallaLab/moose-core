@@ -117,6 +117,7 @@ class MooseTreeWidget(QtGui.QTreeWidget):
         self.setupTree(moose.Neutral('/'), self, self.itemList)
         if self.mooseHandler:
             self.setCurrentItem(self.mooseHandler.getCurrentElement())
+        self.expandToDepth(0)
 
     def insertMooseObjectSlot(self, class_name):
         """Creates an instance of the class class_name and inserts it
