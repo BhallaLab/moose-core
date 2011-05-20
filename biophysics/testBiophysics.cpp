@@ -471,12 +471,16 @@ void testHHChannel()
 
 	shell->doSetClock( 0, 1.0e-5 );
 	shell->doSetClock( 1, 1.0e-5 );
-	shell->doSetClock( 2, 1.0e-4 );
+	shell->doSetClock( 2, 1.0e-5 );
+	shell->doSetClock( 3, 1.0e-4 );
 
-	shell->doUseClock( "/n/compt,/n/compt/##", "init", 0 );
-	shell->doUseClock( "/n/compt,/n/compt/##", "process", 1 );
-	shell->doUseClock( "/n/tab", "process", 2 );
+	shell->doUseClock( "/n/compt", "init", 0 );
+	shell->doUseClock( "/n/compt", "process", 1 );
+	// shell->doUseClock( "/n/compt/##", "process", 2 );
+	shell->doUseClock( "/n/compt/Na,/n/compt/K", "process", 2 );
+	shell->doUseClock( "/n/tab", "process", 3 );
 
+	shell->doReinit();
 	shell->doReinit();
 	shell->doStart( 0.01 );
 
@@ -485,8 +489,12 @@ void testHHChannel()
 	//////////////////////////////////////////////////////////////////////
 	vector< double > vec = Field< vector< double > >::get( tabId, "vec" );
 	assert( vec.size() == 101 );
-	for ( unsigned int i = 0; i < 100; ++i )
-		assert( doubleEq( vec[i], EREST + actionPotl[i] * 0.001 ) );
+	double delta = 0;
+	for ( unsigned int i = 0; i < 100; ++i ) {
+		double ref = EREST + actionPotl[i] * 0.001;
+		delta += (vec[i] - ref) * (vec[i] - ref);
+	}
+	assert( sqrt( delta/100 ) < 0.001 );
 	
 	////////////////////////////////////////////////////////////////
 	// Clear it all up
@@ -515,7 +523,7 @@ void testBiophysics()
 void testBiophysicsProcess()
 {
 	testCompartmentProcess();
-	// testHHChannel();
+	testHHChannel();
 }
 
 #endif
