@@ -75,7 +75,8 @@ class MooseTreeItem(QtGui.QTreeWidgetItem):
 	else:
 	    raise Error
 	self.setText(0, QtCore.QString(self.mooseObj_.name))
-	self.setToolTip(0, QtCore.QString('class:' + self.mooseObj_.className))
+	self.setText(1, QtCore.QString(self.mooseObj_.className))
+	#self.setToolTip(0, QtCore.QString('class:' + self.mooseObj_.className))
 
     def getMooseObject(self):
 	return self.mooseObj_
@@ -91,6 +92,10 @@ class MooseTreeWidget(QtGui.QTreeWidget):
 	self.itemList = []
 	self.setupTree(self.rootObject, self, self.itemList)
         self.setCurrentItem(self.itemList[0]) # Make root the default item
+        self.setColumnCount(2)	
+	self.setHeaderLabels(['Moose Object                    ','Class']) 	#space as a hack to set a minimum 1st column width
+	self.header().setResizeMode(QtGui.QHeaderView.ResizeToContents)
+	self.expandToDepth(0)
         self.mooseHandler = None
 
     def setMooseHandler(self, handler):
