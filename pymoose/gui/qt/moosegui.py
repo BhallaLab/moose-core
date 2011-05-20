@@ -794,7 +794,12 @@ class MainWindow(QtGui.QMainWindow):
 						#all children under root, of cell type
 	ch = self.get_childrenOfField(all_ch,'Cell')
 	for i in range(0,len(ch),1):
-	    self.vizDialogue.vizCells.addItem(moose.Cell(ch[i]).path)
+		if self.vizDialogue.vizCells.count() == 0:
+        		self.vizDialogue.vizCells.addItem(moose.Cell(ch[i]).path)
+        	else:
+	    		for index in xrange(self.vizDialogue.vizCells.count()):
+	    			if str(self.vizDialogue.vizCells.item(index).text())!= moose.Cell(ch[i]).path:
+	    				self.vizDialogue.vizCells.addItem(moose.Cell(ch[i]).path)
 	    
 	nh = self.get_childrenOfField(all_ch,'Neutral')			#all cells under all other neutral elements.	
 	for j in range(0,len(nh),1):
@@ -802,7 +807,12 @@ class MainWindow(QtGui.QMainWindow):
 	    all_ch=an.childList 					#all children under this neutral element
 	    ch = self.get_childrenOfField(all_ch,'Cell')
 	    for i in range(0,len(ch),1):
-	    	self.vizDialogue.vizCells.addItem(moose.Cell(ch[i]).path)
+	    	if self.vizDialogue.vizCells.count() == 0:
+        		self.vizDialogue.vizCells.addItem(moose.Cell(ch[i]).path)
+        	else:
+	    		for index in xrange(self.vizDialogue.vizCells.count()):
+	    			if str(self.vizDialogue.vizCells.item(index).text())!= moose.Cell(ch[i]).path:
+	    				self.vizDialogue.vizCells.addItem(moose.Cell(ch[i]).path)
 	    	
     def get_childrenOfField(self,all_ch,field):	##add_chait
         ch=[]
