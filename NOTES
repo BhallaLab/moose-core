@@ -12893,5 +12893,7 @@ Now starting on SynChan.
 
 SynChan implemented, yet to test.  Checkin 2680.
 I want to get in SpikeGen to do the unit tests. Working on it. 
-SpikeGen now also compiles, without any unit tests so far.
+SpikeGen now also compiles, without any unit tests so far. Checkin 2681.
+Put in unit tests for SpikeGen. Clears.
+
 ============================================================================
