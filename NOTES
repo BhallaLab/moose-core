@@ -12891,6 +12891,7 @@ Now starting on SynChan.
 ============================================================================
 21 May 2011.
 
-SynChan implemented, yet to test. 
-I want to get in SpikeGen to do the unit tests. Working on it.
+SynChan implemented, yet to test.  Checkin 2680.
+I want to get in SpikeGen to do the unit tests. Working on it. 
+SpikeGen now also compiles, without any unit tests so far.
 ============================================================================
