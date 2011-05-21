@@ -161,6 +161,11 @@ double SpikeGen::getState() const
 }
 */
 
+bool SpikeGen::getFired() const
+{
+	return fired_;
+}
+
 void SpikeGen::setEdgeTriggered( bool yes )
 {
 	edgeTriggered_ = yes;
@@ -204,58 +209,55 @@ void SpikeGen::handleVm( double val )
 /////////////////////////////////////////////////////////////////////
 
 #ifdef DO_UNIT_TESTS
-/*
-#include "../element/Neutral.h"
+#include "ReduceBase.h"
+#include "ReduceMax.h"
+#include "../shell/Shell.h"
 
 void testSpikeGen()
 {
-	cout << "\nTesting SpikeGen" << flush;
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< unsigned int > dims( 1, 1 );
+	Id sid = shell->doCreate( "SpikeGen", Id(), "spike", dims );
+	SpikeGen& sg = *( reinterpret_cast< SpikeGen* >( sid.eref().data() ) );
 
-	Element* n = Neutral::create( "Neutral", "n", Element::root()->id(), 
-		Id::scratchId() );
-	Element* sg = Neutral::create( "SpikeGen", "c0", n->id(), 
-		Id::scratchId() );
-	ASSERT( sg != 0, "creating compartment" );
-	ProcInfoBase p;
-	SetConn c( sg, 0 );
-	p.dt_ = 0.001;
-	p.currTime_ = 0.0;
-	SpikeGen::setThreshold( &c, 1.0 );
-	SpikeGen::setAmplitude( &c, 1.0 );
-	SpikeGen::setRefractT( &c, 0.005 );
-	SpikeGen::reinitFunc( &c, &p );
+	Eref er( sid.eref() );
+	ProcInfo p;
+	p.dt = 0.001;
+	p.currTime = 0.0;
+	sg.setThreshold( 1.0 );
+	sg.setRefractT( 0.005 );
 
-	SpikeGen::VmFunc( &c, 0.5 );
-	SpikeGen::processFunc( &c, &p );
-	ASSERT( SpikeGen::getState( sg ) == 0.0, "SpikeGen" );
-	p.currTime_ += p.dt_;
+	sg.reinit( er, &p );
+	sg.handleVm( 0.5 );
+	sg.process( er, &p );
+	assert( !sg.getFired() );
+	p.currTime += p.dt;
 
-	SpikeGen::VmFunc( &c, 0.999 );
-	SpikeGen::processFunc( &c, &p );
-	ASSERT( SpikeGen::getState( sg ) == 0.0, "SpikeGen" );
-	p.currTime_ += p.dt_;
+	sg.handleVm( 0.999 );
+	sg.process( er, &p );
+	assert( !sg.getFired() );
+	p.currTime += p.dt;
 
-	SpikeGen::VmFunc( &c, 1.01 ); // First spike
-	SpikeGen::processFunc( &c, &p );
-	ASSERT( SpikeGen::getState( sg ) == 1.0, "SpikeGen" );
-	p.currTime_ += p.dt_;
+	sg.handleVm( 1.001 );
+	sg.process( er, &p );
+	assert( sg.getFired() );
+	p.currTime += p.dt;
 
-	SpikeGen::VmFunc( &c, 0.999 );
-	SpikeGen::processFunc( &c, &p );
-	ASSERT( SpikeGen::getState( sg ) == 0.0, "SpikeGen" );
-	p.currTime_ += p.dt_;
+	sg.handleVm( 0.999 );
+	sg.process( er, &p );
+	assert( !sg.getFired() );
+	p.currTime += p.dt;
 
-	SpikeGen::VmFunc( &c, 2.0 ); // Too soon, refractory.
-	SpikeGen::processFunc( &c, &p );
-	ASSERT( SpikeGen::getState( sg ) == 0.0, "SpikeGen" );
+	sg.handleVm( 2.0 ); // Too soon, refractory
+	sg.process( er, &p );
+	assert( !sg.getFired() );
 
-	p.currTime_ = 0.010;
-	SpikeGen::VmFunc( &c, 2.0 ); // Now not refractory.
-	SpikeGen::processFunc( &c, &p );
-	ASSERT( SpikeGen::getState( sg ) == 1.0, "SpikeGen" );
+	p.currTime += 0.005; // Now post-refractory
+	sg.handleVm( 2.0 ); // Now not refractory
+	sg.process( er, &p );
+	assert( sg.getFired() );
 
-	// Get rid of all the test objects
-	set( n, "destroy" );
+	sid.destroy();
+	cout << "." << flush;
 }
-*/
 #endif
