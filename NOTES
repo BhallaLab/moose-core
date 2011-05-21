@@ -12887,4 +12887,10 @@ destructor to know when it is the base of the HHGates.
 Sorted it out. Valgrind now happy, at least it hasn't added to the existing
 leaks that still need sorting.
 
+Now starting on SynChan.
+============================================================================
+21 May 2011.
+
+SynChan implemented, yet to test. 
+I want to get in SpikeGen to do the unit tests. Working on it.
 ============================================================================
