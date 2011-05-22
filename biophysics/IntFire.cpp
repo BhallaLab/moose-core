@@ -10,6 +10,7 @@
 #include <queue>
 #include "header.h"
 #include "Synapse.h"
+#include "SynHandler.h"
 #include "IntFire.h"
 
 static SrcFinfo1< double > spike( 
@@ -50,12 +51,14 @@ const Cinfo* IntFire::initCinfo()
 			&IntFire::getRefractoryPeriod
 		);
 
+		/*
 		static ValueFinfo< IntFire, unsigned int > numSynapses(
 			"numSynapses",
 			"Number of synapses on IntFire",
 			&IntFire::setNumSynapses,
 			&IntFire::getNumSynapses
 		);
+		*/
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -66,6 +69,7 @@ const Cinfo* IntFire::initCinfo()
 			"Handles reinit call",
 			new ProcOpFunc< IntFire >( &IntFire::reinit ) );
 
+		/*
 		//////////////////////////////////////////////////////////////
 		// FieldElementFinfo definition for Synapses
 		//////////////////////////////////////////////////////////////
@@ -76,6 +80,7 @@ const Cinfo* IntFire::initCinfo()
 			&IntFire::setNumSynapses,
 			&IntFire::getNumSynapses
 		);
+		*/
 		//////////////////////////////////////////////////////////////
 		// SharedFinfo Definitions
 		//////////////////////////////////////////////////////////////
@@ -92,15 +97,15 @@ const Cinfo* IntFire::initCinfo()
 		&tau,	// Value
 		&thresh,				// Value
 		&refractoryPeriod,		// Value
-		&numSynapses,			// Value
+		// &numSynapses,			// Value
 		&proc,					// SharedFinfo
 		&spike, 		// MsgSrc
-		&synFinfo		// FieldElementFinfo for synapses.
+		// &synFinfo		// FieldElementFinfo for synapses.
 	};
 
 	static Cinfo intFireCinfo (
 		"IntFire",
-		Neutral::initCinfo(),
+		SynHandler::initCinfo(),
 		intFireFinfos,
 		sizeof( intFireFinfos ) / sizeof ( Finfo* ),
 		new Dinfo< IntFire >()
@@ -197,10 +202,10 @@ void IntFire::process( const Eref &e, ProcPtr p )
  * and gets redirected to the IntFire.
  * This is called by UpFunc1< double >
  */
-void IntFire::addSpike( DataId index, const double time )
+void IntFire::innerAddSpike( DataId index, const double time )
 {
-	assert( index.field() < synapses_.size() );
-	Synapse s( synapses_[ index.field() ], time );
+	assert( index.field() < getNumSynapses() );
+	Synapse s( *getSynapse( index.field() ), time );
 	// cout << index << "	";
 	pendingEvents_.push( s );
 }
@@ -234,44 +239,6 @@ void IntFire::setRefractoryPeriod( const double v )
 	lastSpike_ = -v;
 }
 
-void IntFire::setNumSynapses( const unsigned int v )
-{
-	assert( v < 10000000 );
-	synapses_.resize( v );
-	// threadReduce< unsigned int >( er, getMaxNumSynapses, v );
-}
-
-/*
-void IntFire::getMaxNumSynapses( const Eref& er, unsigned int v, 
-	bool isLast )
-{
-	static int max;
-
-	if ( v > max ) max = v;
-
-	if ( isLast ) {
-		nodeReduce< unsigned int >( er, setSynapseDimension, max );
-		max = 0;
-	}
-}
-
-void IntFire::setSynapseDimension( const Eref& er, unsigned int v,
-	bool isLast )
-{
-	static int max;
-
-	if ( v > max ) max = v;
-
-	if ( isLast ) {
-		FieldDataHandlerBase* fd = dynamic_cast< FieldDataHandlerBase* >(
-			er.element()->dataHandler() );
-		fd->setFieldDimension( max );
-		max = 0;
-	}
-}
-*/
-
-
 double IntFire::getVm() const
 {
 	return Vm_;
@@ -290,14 +257,4 @@ double IntFire::getThresh() const
 double IntFire::getRefractoryPeriod() const
 {
 	return refractoryPeriod_;
-}
-
-unsigned int IntFire::getNumSynapses() const
-{
-	return synapses_.size();
-}
-
-Synapse* IntFire::getSynapse( unsigned int i )
-{
-	return &synapses_[i];
 }

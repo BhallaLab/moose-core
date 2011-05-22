@@ -153,13 +153,15 @@ vector< unsigned int > FieldDataHandlerBase::dims() const
  * Assigns the size of the field array on the specified object.
  */
 void FieldDataHandlerBase::setFieldArraySize( 
-	unsigned int objectIndex, unsigned int size ) const
+	unsigned int objectIndex, unsigned int size )
 {
 	assert( objectIndex < parentDataHandler_->totalEntries() );
 
 	if ( parentDataHandler_->isDataHere( objectIndex ) ) {
 		char* pa = parentDataHandler_->data( objectIndex );
 		setNumField( pa, size );
+		if ( size > fieldDimension_ )
+			fieldDimension_ = size;
 	}
 }
 

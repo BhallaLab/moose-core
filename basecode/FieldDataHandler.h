@@ -92,11 +92,13 @@ template< class Parent, class Field > class FieldDataHandler: public FieldDataHa
 		/**
 		 * Assigns the number of field entries on parent data entry.
 		 */
-		void setNumField( char* data, unsigned int size ) const
+		void setNumField( char* data, unsigned int size )
 		{
 			if ( data ) {
 				Parent* pa = reinterpret_cast< Parent* >( data );
 				( pa->*setNumField_ )( size );
+				if ( size > getFieldDimension() )
+					setFieldDimension( size );
 			}
 		}
 
