@@ -25,7 +25,7 @@ const DataHandler* DataHandler::parentDataHandler() const
 }
 
 void DataHandler::setFieldArraySize( 
-	unsigned int objectIndex, unsigned int size ) const
+	unsigned int objectIndex, unsigned int size )
 {
 	; // Default operation does nothing. Used only in FieldDataHandlers.
 }

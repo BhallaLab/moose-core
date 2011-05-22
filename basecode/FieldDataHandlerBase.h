@@ -55,7 +55,7 @@ class FieldDataHandlerBase: public DataHandler
 		 * Set number of fields on Parent object located at
 		 * the specified data location
 		 */
-		virtual void setNumField( char* pa, unsigned int num ) const = 0;
+		virtual void setNumField( char* pa, unsigned int num ) = 0;
 
 		/**
 		 * Looks up field entry on specified parent data object, 
@@ -120,7 +120,7 @@ class FieldDataHandlerBase: public DataHandler
 		 * 
 		 */
 		void setFieldArraySize( 
-			unsigned int objectIndex, unsigned int size ) const;
+			unsigned int objectIndex, unsigned int size );
 
 		/**
 		 * Looks up the size of the field array on the specified object

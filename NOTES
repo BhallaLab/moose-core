@@ -12895,5 +12895,32 @@ SynChan implemented, yet to test.  Checkin 2680.
 I want to get in SpikeGen to do the unit tests. Working on it. 
 SpikeGen now also compiles, without any unit tests so far. Checkin 2681.
 Put in unit tests for SpikeGen. Clears.
+Setting up more complete unit test for SpikeGens->Synapses(SynChan).
+
+Running into persistent segv when I try to run this test.
+Turns out that the Synapse is hard-coded to use the IntFire::addSpike
+function when a spike comes in. Would like something more general.
+
+One option is to have a common baseclass that deals with synapses.
+Doesn't even have to be a MOOSE class. 
+This could pass the 'addSpike' request down to a suitable virtual func.
+
+Another option is to have a base Synapse class, and then each subclass
+be specialized for different parent classes.
+	There may be a lot of these:
+		- IntFire
+		- SynChan
+		- NMDAChan
+		- MarkovChan
+
+Let's do the SynHandler base class.
 
 ============================================================================
+22 May 2011
+
+The SynHandler base class is done, but I cannot get the thing to clear unit
+tests. I've tried setting the dimensions of the Synapse explicitly but this
+does not percolate into the FieldDataHandler. Then I tried making a variant
+of the OpFunc that handles setNumField. This won't work in its current form
+as the calling Element is the parent, not the Synapse. No way to find which
+FieldDataHandler to fix. Defer for now, get back to clearing the unit test.

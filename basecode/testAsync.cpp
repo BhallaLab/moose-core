@@ -16,6 +16,7 @@
 #include "Dinfo.h"
 #include <queue>
 #include "../biophysics/Synapse.h"
+#include "../biophysics/SynHandler.h"
 #include "../biophysics/IntFire.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
@@ -606,7 +607,7 @@ void testSetGetSynapse()
 	assert ( syn != 0 );
 	assert ( syn->getName() == "synapse" ); 
 
-	assert( syn->dataHandler()->data( 0 ) == 0 );
+	assert( syn->dataHandler()->data( 0 ) != 0 ); // Should give warning
 
 	assert( syn->dataHandler()->totalEntries() == 100 );
 	assert( syn->dataHandler()->localEntries() == 0 );
@@ -2132,7 +2133,7 @@ void testCopyFieldElementData()
 	assert ( syn != 0 );
 	assert ( syn->getName() == "synapse" ); 
 
-	assert( syn->dataHandler()->data( 0 ) == 0 );
+	assert( syn->dataHandler()->data( 0 ) != 0 ); // Should generate warning
 
 	assert( syn->dataHandler()->totalEntries() == size );
 	assert( syn->dataHandler()->localEntries() == 0 );
@@ -2170,6 +2171,7 @@ void testCopyFieldElementData()
 	Element* copyElm = new Element( copyId, origElm, 1 );
 	Id tempId = Id::nextId();
 	Element* temp = new Element( tempId, syn, 1 );
+	assert( temp != 0 );
 	Shell::adopt( copyId, tempId );
 	///////////////////////////////////////////////////////////////////
 	Eref origEr( origElm, 0 );
@@ -2189,8 +2191,8 @@ void testCopyFieldElementData()
 	// Element should exist even if data doesn't
 	assert ( copySynElm != 0 );
 	assert ( copySynElm->getName() == "synapse" ); 
-	assert( syn->dataHandler()->data( 0 ) == 0 );
-	assert( copySynElm->dataHandler()->data( 0 ) == 0 );
+	assert( syn->dataHandler()->data( 0 ) != 0 ); // Should generate warning
+	assert( copySynElm->dataHandler()->data( 0 ) != 0 );
 	assert( copySynElm->dataHandler()->localEntries() == 
 		(size * (size - 1)) /2 );
 	assert( copySynElm->dataHandler()->totalEntries() == 
@@ -2277,7 +2279,7 @@ void testFinfoFields()
 void testCinfoFields()
 {
 	assert( IntFire::initCinfo()->getDocs() == "" );
-	assert( IntFire::initCinfo()->getBaseClass() == "Neutral" );
+	assert( IntFire::initCinfo()->getBaseClass() == "SynHandler" );
 
 	// We have a little bit of a hack here to cast away
 	// constness, due to the way the FieldElementFinfos
@@ -2293,30 +2295,29 @@ void testCinfoFields()
 
 	unsigned int ndf = neutralCinfo->getNumDestFinfo();
 	assert( ndf == 18 );
-	assert( cinfo->getNumDestFinfo() == 14 + ndf );
-	assert( cinfo->getDestFinfo( 0+ndf ) == cinfo->findFinfo( "set_Vm" ) );
-	assert( cinfo->getDestFinfo( 1+ndf ) == cinfo->findFinfo( "get_Vm" ) );
-	assert( cinfo->getDestFinfo( 2+ndf ) == cinfo->findFinfo( "set_tau" ) );
-	assert( cinfo->getDestFinfo( 3+ndf ) == cinfo->findFinfo( "get_tau" ) );
+	unsigned int sdf = SynHandler::initCinfo()->getNumDestFinfo();
+	assert( sdf == 22 );
+	assert( cinfo->getNumDestFinfo() == 10 + sdf );
+	assert( cinfo->getDestFinfo( 0+sdf ) == cinfo->findFinfo( "set_Vm" ) );
+	assert( cinfo->getDestFinfo( 1+sdf ) == cinfo->findFinfo( "get_Vm" ) );
+	assert( cinfo->getDestFinfo( 2+sdf ) == cinfo->findFinfo( "set_tau" ) );
+	assert( cinfo->getDestFinfo( 3+sdf ) == cinfo->findFinfo( "get_tau" ) );
 
-	assert( cinfo->getDestFinfo( 4+ndf ) == cinfo->findFinfo( "set_thresh" ) );
-	assert( cinfo->getDestFinfo( 5+ndf ) == cinfo->findFinfo( "get_thresh" ) );
-	assert( cinfo->getDestFinfo( 6+ndf ) == cinfo->findFinfo( "set_refractoryPeriod" ) );
-	assert( cinfo->getDestFinfo( 7+ndf ) == cinfo->findFinfo( "get_refractoryPeriod" ) );
-	assert( cinfo->getDestFinfo( 8+ndf ) == cinfo->findFinfo( "set_numSynapses" ) );
-	assert( cinfo->getDestFinfo( 9+ndf ) == cinfo->findFinfo( "get_numSynapses" ) );
-	assert( cinfo->getDestFinfo( 10+ndf ) == cinfo->findFinfo( "process" ) );
-	assert( cinfo->getDestFinfo( 11+ndf ) == cinfo->findFinfo( "reinit" ) );
+	assert( cinfo->getDestFinfo( 4+sdf ) == cinfo->findFinfo( "set_thresh" ) );
+	assert( cinfo->getDestFinfo( 5+sdf ) == cinfo->findFinfo( "get_thresh" ) );
+	assert( cinfo->getDestFinfo( 6+sdf ) == cinfo->findFinfo( "set_refractoryPeriod" ) );
+	assert( cinfo->getDestFinfo( 7+sdf ) == cinfo->findFinfo( "get_refractoryPeriod" ) );
+	assert( cinfo->getDestFinfo( 8+sdf ) == cinfo->findFinfo( "process" ) );
+	assert( cinfo->getDestFinfo( 9+sdf ) == cinfo->findFinfo( "reinit" ) );
 
-	assert( cinfo->getDestFinfo( 12+ndf ) == cinfo->findFinfo( "set_num_synapse" ) );
-	assert( cinfo->getDestFinfo( 13+ndf ) == cinfo->findFinfo( "get_num_synapse" ) );
-
-	assert( cinfo->getDestFinfo( 14+ndf )->name() == "dummy" );
+	assert( cinfo->getDestFinfo( 10+sdf )->name() == "dummy" );
 
 	unsigned int nvf = neutralCinfo->getNumValueFinfo();
 	assert( nvf == 12 );
 	assert( cinfo->getNumValueFinfo() == 5 + nvf );
-	assert( cinfo->getValueFinfo( 0 + nvf ) == cinfo->findFinfo( "Vm" ) );
+	assert( cinfo->getValueFinfo( 0 + nvf ) == cinfo->findFinfo( "numSynapses" ) );
+	assert( cinfo->getValueFinfo( 1 + nvf ) == cinfo->findFinfo( "Vm" ) );
+	assert( cinfo->getValueFinfo( 2 + nvf ) == cinfo->findFinfo( "tau" ) );
 
 	unsigned int nlf = neutralCinfo->getNumLookupFinfo();
 	assert( nlf == 0 );
@@ -2338,10 +2339,11 @@ void testCinfoElements()
 	unsigned int nvf = neutralCinfo->getNumValueFinfo();
 	unsigned int nsf = neutralCinfo->getNumSrcFinfo();
 	unsigned int ndf = neutralCinfo->getNumDestFinfo();
+	unsigned int sdf = SynHandler::initCinfo()->getNumDestFinfo();
 
 	assert( intFireCinfoId != Id() );
 	assert( Field< string >::get( intFireCinfoId, "name" ) == "IntFire" );
-	assert( Field< string >::get( intFireCinfoId, "baseClass" ) == "Neutral" );
+	assert( Field< string >::get( intFireCinfoId, "baseClass" ) == "SynHandler" );
 	assert( Field< unsigned int >::get( 
 		intFireCinfoId, "num_valueFinfo" ) == 5 + nvf );
 	assert( Field< unsigned int >::get( 
@@ -2362,11 +2364,13 @@ void testCinfoElements()
 	assert( Field< unsigned int >::get( intFireDestFinfoId, "linearSize" ) == 14 );
 	*/
 
-	temp = ObjId( intFireDestFinfoId, DataId( 0, 7 + ndf ) );
-	assert( Field< string >::get( temp, "name" ) == "get_refractoryPeriod");
-	temp = ObjId( intFireDestFinfoId, DataId( 0, 11 + ndf ) );
+	temp = ObjId( intFireDestFinfoId, DataId( 0, 7 + sdf ) );
+	string str = Field< string >::get( temp, "name" );
+	assert( str == "get_refractoryPeriod");
+	temp = ObjId( intFireDestFinfoId, DataId( 0, 9 + sdf ) );
 	// temp.dataId.fieldu= 11;
-	assert( Field< string >::get( temp, "name" ) == "reinit" );
+	str = Field< string >::get( temp, "name" );
+	assert( str == "reinit" );
 	cout << "." << flush;
 }
 

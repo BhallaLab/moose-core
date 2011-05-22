@@ -119,7 +119,7 @@ unsigned int SetGet::checkSet(
 		Id child = Neutral::child( oid_.eref(), f2 );
 		if ( child == Id() ) {
 			cout << "Error: SetGet:checkSet:: No field or child named '" <<
-				field << "' was found\n";
+				field << "' was found on\n" << tgt.id.path() << endl;
 		} else {
 			if ( field.substr( 0, 4 ) == "set_" )
 				f = child()->cinfo()->findFinfo( "set_this" );
