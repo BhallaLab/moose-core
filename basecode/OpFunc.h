@@ -553,4 +553,61 @@ template< class T, class L, class A > class GetOpFunc1: public GetOpFuncBase< A 
 		A ( T::*func_ )( L ) const;
 };
 
+/**
+ * This is a specialized OpFunc designed to deal with setFieldNum
+ * on FieldElements. In these cases we need to update both the DataHandler
+ * and the parent object, so the generic OpFunc1 won't work.
+ */
+template< class T, class A > class FieldNumOpFunc: public OpFunc1< T, A >
+{
+	public:
+		FieldNumOpFunc( void ( T::*func )( const A ) )
+			: OpFunc1< T, A >( func )
+			{;}
+		
+		/*
+		bool strSet( const Eref& tgt, 
+			const string& field, const string& arg ) const {
+			return SetGet1< A >::innerStrSet( tgt.objId(), field, arg );
+		}
+		*/
+
+		void op( const Eref& e, const char* buf ) const {
+			Conv< A > arg1( buf + sizeof( Qinfo ) );
+			// (reinterpret_cast< T* >( e.data() )->*func_)( *arg1 );
+			FieldDataHandlerBase* fdh = 
+				dynamic_cast< FieldDataHandlerBase* >( 
+				e.element()->dataHandler() );
+			assert( fdh );
+
+			// This function internally calls the setNumField
+			// on the parent Object.
+			fdh->setNumField( fdh->parentDataHandler()->data( e.index() ),
+				*arg1 );
+		}
+
+		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+			Conv< A > arg1( buf );
+			// (reinterpret_cast< T* >( e.data() )->*func_)( *arg1 );
+			FieldDataHandlerBase* fdh = 
+				dynamic_cast< FieldDataHandlerBase* >( 
+				e.element()->dataHandler() );
+			assert( fdh );
+
+			// This function internally calls the setNumField
+			// on the parent Object.
+			fdh->setNumField( fdh->parentDataHandler()->data( e.index() ),
+				*arg1 );
+		}
+
+		/*
+		string rttiType() const {
+			return Conv< A >::rttiType();
+		}
+		*/
+
+	private:
+		void ( T::*func_ )( A ); 
+};
+
 #endif // _OPFUNC_H

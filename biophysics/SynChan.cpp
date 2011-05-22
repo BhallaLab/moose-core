@@ -11,6 +11,7 @@
 #include "header.h"
 // #include "SynInfo.h"
 #include "Synapse.h"
+#include "SynHandler.h"
 #include "SynChan.h"
 
 static const double SynE = exp(1.0);
@@ -119,6 +120,7 @@ const Cinfo* SynChan::initCinfo()
 	////////////////////////////////////////////////////////////////////
 	// FieldElementFinfo definition for Synapses
 	////////////////////////////////////////////////////////////////////
+	/*
 	static FieldElementFinfo< SynChan, Synapse > synapse( "synapse",
 		"Sets up field Elements for synapse",
 		Synapse::initCinfo(),
@@ -126,6 +128,7 @@ const Cinfo* SynChan::initCinfo()
 		&SynChan::setNumSynapses,
 		&SynChan::getNumSynapses
 	);
+	*/
 
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
@@ -153,7 +156,7 @@ const Cinfo* SynChan::initCinfo()
 		&Ik,			// ReadOnlyValue
 		&activation,	// Dest
 		&modulator,	// Dest
-		&synapse		// FieldElement
+//		&synapse		// FieldElement
 	};
 
 	static string doc[] =
@@ -167,7 +170,7 @@ const Cinfo* SynChan::initCinfo()
 
 	static Cinfo SynChanCinfo(
 		"SynChan",
-		Neutral::initCinfo(),
+		SynHandler::initCinfo(),
 		SynChanFinfos,
 		sizeof( SynChanFinfos )/sizeof(Finfo *),
 		new Dinfo< SynChan >()
@@ -253,6 +256,7 @@ double SynChan::getIk() const
 	return Ik_;
 }
 
+/*
 unsigned int SynChan::getNumSynapses() const
 {
 	return synapses_.size();
@@ -260,7 +264,7 @@ unsigned int SynChan::getNumSynapses() const
 
 void SynChan::setNumSynapses( unsigned int i )
 {
-	; // Illegal operation
+	synapses_.resize( i );
 }
 
 Synapse* SynChan::getSynapse( unsigned int i )
@@ -268,8 +272,10 @@ Synapse* SynChan::getSynapse( unsigned int i )
 	static Synapse dummy;
 	if ( i < synapses_.size() )
 		return &( synapses_[i] );
+	cout << "Warning: SynChan::getSynapse: index out of range\n";
 	return &dummy;
 }
+*/
 
 ///////////////////////////////////////////////////
 // Dest function definitions
@@ -327,8 +333,8 @@ void SynChan::reinit( const Eref& e, ProcPtr info )
         }
         
 	// updateNumSynapse( e );
-	if ( normalizeWeights_ && synapses_.size() > 0 )
-		norm_ /= static_cast< double >( synapses_.size() );
+	if ( normalizeWeights_ && getNumSynapses() > 0 )
+		norm_ /= static_cast< double >( getNumSynapses() );
 	while ( !pendingEvents_.empty() )
 		pendingEvents_.pop();
 }
@@ -349,148 +355,24 @@ void SynChan::modulator( double val )
 }
 
 ///////////////////////////////////////////////////
-// Unit tests
+// Utility function
 ///////////////////////////////////////////////////
-
-#ifdef DO_UNIT_TESTS
-// #include "SpikeGen.h"
-
-/**
- * Here we set up a SynChan recieving spike inputs from two
- * SpikeGens. The first has a delay of 1 msec, the second of 10.
- * The tau of the SynChan is 1 msec.
- * We test for generation of peak responses at the right time, that
- * is 2 and 11 msec.
- */
- /*
-void testSynChan()
+/*
+* Turns out to be rather hard.
+unsigned int SynChan::countNumSynapses( const Eref& er )
 {
-	cout << "\nTesting SynChan" << flush;
-
-	Element* n = Neutral::create( "Neutral", "n", Element::root()->id(), 
-		Id::scratchId() );
-	Element* syn = Neutral::create( "SynChan", "syn", n->id(), 
-		Id::scratchId() );
-	Element* sg1 = Neutral::create( "SpikeGen", "sg1", n->id(), 
-		Id::scratchId() );
-	Element* sg2 = Neutral::create( "SpikeGen", "sg2", n->id(), 
-		Id::scratchId() );
-	ASSERT( syn != 0, "creating Synapse" );
-	ASSERT( sg1 != 0, "testing Synapse" );
-	ASSERT( sg2 != 0, "testing Synapse" );
-	ProcInfoBase p;
-	p.dt_ = 1.0e-4;
-	p.currTime_ = 0;
-	SetConn c( syn, 0 );
-	SetConn csg1( sg1, 0 );
-	SetConn csg2( sg2, 0 );
-	bool ret;
-	ret = set< double >( syn, "tau1", 1.0e-3 );
-	ASSERT( ret, "setup SynChan" );
-	ret = set< double >( syn, "tau2", 1.0e-3 );
-	ASSERT( ret, "setup SynChan" );
-	ret = set< double >( syn, "Gbar", 1.0 );
-	ASSERT( ret, "setup SynChan" );
-
-	ret = Eref( sg1 ).add( "event", syn, "synapse" );
-	ASSERT( ret, "setup SynChan" );
-	ret = Eref( sg2 ).add( "event", syn, "synapse" );
-
-	ASSERT( ret, "setup SynChan" );
-	SynChan::reinitFunc( &c, &p );
-	
-	ret = set< double >( sg1, "threshold", 0.0 );
-	ret = set< double >( sg1, "refractT", 1.0 );
-	ret = set< double >( sg1, "amplitude", 1.0 );
-	ret = set< int >( sg1, "edgeTriggered", 0 );
-	ret = set< double >( sg2, "threshold", 0.0 );
-	ret = set< double >( sg2, "refractT", 1.0 );
-	ret = set< double >( sg2, "amplitude", 1.0 );
-	ret = set< int >( sg2, "edgeTriggered", 0 );
-	SpikeGen::reinitFunc( &csg1, &p );
-	SpikeGen::reinitFunc( &csg2, &p );
-
-	unsigned int temp;
-	ret = get< unsigned int >( syn, "numSynapses", temp );
-	ASSERT( ret, "setup SynChan" );
-	ASSERT( temp == 2, "setup SynChan" );
-	ret = lookupSet< double, unsigned int >( syn, "weight", 1.0, 0 );
-	ASSERT( ret, "setup SynChan" );
-	ret = lookupSet< double, unsigned int >( syn, "delay", 0.001, 0 );
-	ASSERT( ret, "setup SynChan" );
-	ret = lookupSet< double, unsigned int >( syn, "weight", 1.0, 1 );
-	ASSERT( ret, "setup SynChan" );
-	ret = lookupSet< double, unsigned int >( syn, "delay", 0.01, 1 );
-	ASSERT( ret, "setup SynChan" );
-
-	double dret;
-	ret = lookupGet< double, unsigned int >( syn, "weight", dret, 0 );
-	ASSERT( dret == 1.0, "setup SynChan" );
-	ret = lookupGet< double, unsigned int >( syn, "delay", dret, 0 );
-	ASSERT( dret == 0.001, "setup SynChan" );
-	ret = lookupGet< double, unsigned int >( syn, "weight", dret, 1 );
-	ASSERT( dret == 1.0, "setup SynChan" );
-	ret = lookupGet< double, unsigned int >( syn, "delay", dret, 1 );
-	ASSERT( dret == 0.01, "setup SynChan" );
-
-	ret = set< double >( sg1, "Vm", 2.0 );
-	ret = set< double >( sg2, "Vm", 2.0 );
-	ASSERT( ret, "setup SynChan" );
-	ret = get< double >( syn, "Gk", dret );
-	ASSERT( ret, "setup SynChan" );
-	// cout << "dret = " << dret << endl;
-	ASSERT( dret == 0.0, "setup SynChan" );
-	// Set off the two action potls. They should arrive at 1 and 10 msec
-	// respectively
-	SpikeGen::processFunc( &csg1, &p );
-	SpikeGen::processFunc( &csg2, &p );
-
-	// First 1 msec is the delay, so response should be zero.
-	for ( p.currTime_ = 0.0; p.currTime_ < 0.001; p.currTime_ += p.dt_ )
-		SynChan::processFunc( &c, &p );
-	ret = get< double >( syn, "Gk", dret );
-	// cout << "t = " << p.currTime_ << " dret = " << dret << endl;
-	ASSERT( dret == 0.0, "Testing SynChan response" );
-
-	// At 0.5 msec after delay, that is, 1.5 msec, it is at half-tau.
-	for ( ; p.currTime_ < 0.0015; p.currTime_ += p.dt_ )
-		SynChan::processFunc( &c, &p );
-	ret = get< double >( syn, "Gk", dret );
-	// cout << "t = " << p.currTime_ << " dret = " << dret << endl;
-	ASSERT( fabs( dret - 0.825  ) < 1e-3 , "Testing SynChan response " );
-
-	// At 1 msec it should be at the peak, almost exactly 1.
-	for ( ; p.currTime_ < 0.002; p.currTime_ += p.dt_ )
-		SynChan::processFunc( &c, &p );
-	ret = get< double >( syn, "Gk", dret );
-	// cout << "t = " << p.currTime_ << " dret = " << dret << endl;
-	ASSERT( fabs( dret - 1.0  ) < 2e-3 , "Testing SynChan response" );
-
-	// At 2 msec it is down to 70% of peak.
-	for ( ; p.currTime_ < 0.003; p.currTime_ += p.dt_ )
-		SynChan::processFunc( &c, &p );
-	ret = get< double >( syn, "Gk", dret );
-	// cout << "t = " << p.currTime_ << " dret = " << dret << endl;
-	ASSERT( fabs( dret - 0.7  ) < 1e-3 , "Testing SynChan response" );
-
-	// At 3 msec it is down to 38% of peak.
-	for ( ; p.currTime_ < 0.004; p.currTime_ += p.dt_ )
-		SynChan::processFunc( &c, &p );
-	ret = get< double >( syn, "Gk", dret );
-	// cout << "t = " << p.currTime_ << " dret = " << dret << endl;
-	ASSERT( fabs( dret - 0.38  ) < 1e-3 , "Testing SynChan response" );
-
-	// Go on to next peak.
-	for ( ; p.currTime_ < 0.011; p.currTime_ += p.dt_ )
-		SynChan::processFunc( &c, &p );
-	ret = get< double >( syn, "Gk", dret );
-	// cout << "t = " << p.currTime_ << ", dret = " << dret << endl;
-	ASSERT( fabs( dret - 1.0  ) < 2e-3 , "Testing SynChan response 2" );
-
-	////////////////////////////////////////////////////////////////
-	// Clear it all up
-	////////////////////////////////////////////////////////////////
-	set( n, "destroy" );
+	static const DestFinfo* spikeFinfo = 
+		dynamic_cast< const DestFinfo* >(
+			Synapse::initCinfo()->findFinfo("addSpike") );
+	assert( spikeFinfo != 0 );
+	assert( reinterpret_cast< char* >(this) == er.data() );
+	Id synId( er.id().value() + 1 );
 }
 */
-#endif 
+
+void SynChan::innerAddSpike( DataId synIndex, const double time )
+{
+	assert( synIndex.field() < getNumSynapses() );
+	Synapse s( *getSynapse( synIndex.field() ), time );
+	pendingEvents_.push( s );
+}

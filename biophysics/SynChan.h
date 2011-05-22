@@ -10,7 +10,7 @@
 #ifndef _SynChan_h
 #define _SynChan_h
 
-class SynChan
+class SynChan: public SynHandler
 {
 	public:
 		SynChan();
@@ -44,9 +44,11 @@ class SynChan
 		/////////////////////////////////////////////////////////////////
 		// ElementFinfo access function definitions
 		/////////////////////////////////////////////////////////////////
+		/*
 		unsigned int getNumSynapses() const;
 		void setNumSynapses( unsigned int i );
 		Synapse* getSynapse( unsigned int i );
+		*/
 
 ///////////////////////////////////////////////////
 // Dest function definitions
@@ -59,6 +61,11 @@ class SynChan
 
 		void activation( double val );
 		void modulator( double val );
+///////////////////////////////////////////////////
+		/**
+		 * Override base class function for spike handling
+		 */
+		void innerAddSpike( DataId synIndex, const double time );
 
 		static const Cinfo* initCinfo();
 	private:
@@ -85,7 +92,6 @@ class SynChan
 		double X_;	
 		double Y_;	
 		double Vm_;
-		vector< Synapse > synapses_;
 		priority_queue< Synapse > pendingEvents_;
 };
 

@@ -10,6 +10,7 @@
 TARGET = biophysics.o
 
 OBJ = \
+	SynHandler.o	\
 	IntFire.o	\
 	Synapse.o	\
 	Compartment.o	\
@@ -27,15 +28,16 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-IntFire.o:	IntFire.h Synapse.h 
-Synapse.o:	IntFire.h Synapse.h
+SynHandler.o:	SynHandler.h Synapse.h 
+IntFire.o:	IntFire.h SynHandler.h Synapse.h 
+Synapse.o:	SynHandler.h Synapse.h
 Compartment.o: Compartment.h
 SymCompartment.o: Compartment.h SymCompartment.h
 HHChannel.o: HHChannel.h HHGate.h
 HHGate.o: HHGate.h
-SynChan.o: Synapse.h SynChan.h
+SynChan.o: SynHandler.h Synapse.h SynChan.h
 SpikeGen.o: SpikeGen.h
-testBiophysics.o: IntFire.h Synapse.h Compartment.h HHChannel.h HHGate.h
+testBiophysics.o: SynHandler.h IntFire.h Synapse.h Compartment.h HHChannel.h HHGate.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg $< -c

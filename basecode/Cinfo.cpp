@@ -60,6 +60,7 @@ void Cinfo::init( Finfo** finfoArray, unsigned int nFinfos )
 		numBindIndex_ = baseCinfo_->numBindIndex_;
 		finfoMap_ = baseCinfo_->finfoMap_;
 		funcs_ = baseCinfo_->funcs_;
+		postCreationFinfos_ = baseCinfo_->postCreationFinfos_;
 	} 
 	for ( unsigned int i = 0; i < nFinfos; i++ ) {
 		registerFinfo( finfoArray[i] );

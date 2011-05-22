@@ -173,7 +173,7 @@ class DataHandler
 		 * FieldDataHandler.
 		 */
 		virtual void setFieldArraySize(
-			unsigned int objectIndex, unsigned int size ) const;
+			unsigned int objectIndex, unsigned int size );
 
 		/**
 		 * Looks up size of field data. Most objects don't have applicable

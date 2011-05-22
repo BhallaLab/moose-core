@@ -11,7 +11,7 @@
 #define _INT_FIRE_H
 
 
-class IntFire
+class IntFire: public SynHandler
 {
 	friend void testStandaloneIntFire();
 	friend void testSynapse();
@@ -20,9 +20,10 @@ class IntFire
 		IntFire( double thresh, double tau );
 
 		/**
+		 * Overrides base class function.
  		 * Inserts an event into the pendingEvents queue for spikes.
  		 */
-		void addSpike( DataId synIndex, const double time );
+		void innerAddSpike( DataId synIndex, const double time );
 		
 		////////////////////////////////////////////////////////////////
 		// Field assignment stuff.
@@ -36,10 +37,6 @@ class IntFire
 		double getThresh() const;
 		void setRefractoryPeriod( double v );
 		double getRefractoryPeriod() const;
-		void setNumSynapses( unsigned int v );
-		unsigned int getNumSynapses() const;
-
-		Synapse* getSynapse( unsigned int i );
 
 		////////////////////////////////////////////////////////////////
 		// Dest Func
@@ -54,7 +51,6 @@ class IntFire
 		double tau_; // Time course of membrane settling.
 		double refractoryPeriod_; // Minimum time between successive spikes
 		double lastSpike_; // Time of last action potential.
-		vector< Synapse > synapses_;
 		priority_queue< Synapse > pendingEvents_;
 };
 

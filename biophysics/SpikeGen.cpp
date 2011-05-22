@@ -81,7 +81,15 @@ const Cinfo* SpikeGen::initCinfo()
 
 	static Finfo* spikeGenFinfos[] = 
 	{
-		&process,
+		&event,		// SrcFinfo
+		&proc,		// Shared
+		&Vm,		// Dest
+		&threshold,	// Value
+		&refractT,	// Value
+		&absRefract,	// Value
+		&hasFired,	// ReadOnlyValue
+		&edgeTriggered,	// Value
+
 	};
 
 	static string doc[] =

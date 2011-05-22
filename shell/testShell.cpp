@@ -393,7 +393,7 @@ void testCopyFieldElement()
 	Element* syn = origSynId();
 	assert( syn != 0 );
 	assert( syn->getName() == "synapse" );
-	assert( syn->dataHandler()->data( 0 ) == 0 );
+	assert( syn->dataHandler()->data( 0 ) != 0 ); // Should give warning
 	assert( syn->dataHandler()->totalEntries() == size );
 	assert( syn->dataHandler()->localEntries() == 0 );
 	vector< unsigned int > vec(size);
@@ -440,8 +440,8 @@ void testCopyFieldElement()
 	// Element should exist even if data doesn't
 	assert ( copySynElm != 0 );
 	assert ( copySynElm->getName() == "synapse" );
-	assert( syn->dataHandler()->data( 0 ) == 0 );
-	assert( copySynElm->dataHandler()->data( 0 ) == 0 );
+	assert( syn->dataHandler()->data( 0 ) != 0 ); // Should warn
+	assert( copySynElm->dataHandler()->data( 0 ) != 0 ); // Should warn
 	assert( copySynElm->dataHandler()->localEntries() ==
 		(size * (size - 1)) /2 );
 	assert( copySynElm->dataHandler()->totalEntries() ==
@@ -1222,7 +1222,7 @@ void testSyncSynapseSize()
 	assert ( syn != 0 );
 	assert ( syn->getName() == "synapse" ); 
 
-	assert( syn->dataHandler()->data( 0 ) == 0 );
+	assert( syn->dataHandler()->data( 0 ) != 0 ); // Should warn
 
 	assert( syn->dataHandler()->totalEntries() == size );
 	assert( syn->dataHandler()->localEntries() == 0 );
