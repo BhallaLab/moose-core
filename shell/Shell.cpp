@@ -813,6 +813,7 @@ bool Shell::adopt( Id parent, Id child ) {
 void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 	const vector< unsigned int >& dimensions )
 {
+	// cout << "in Shell::innerCreate for " << parent.path() << "/" << name << endl << flush;
 	const Cinfo* c = Cinfo::find( type );
 	if ( c ) {
 		Element* pa = parent();
@@ -962,6 +963,7 @@ void Shell::handleUseClock( const Eref& e, const Qinfo* q,
 {
 	if ( q->addToStructuralQ() )
 		return;
+	// cout << q->getProcInfo()->threadIndexInGroup << ": in Shell::handleUseClock with path " << path << endl << flush;
 	vector< Id > list;
 	wildcard( path, list ); // By default scans only Elements.
 	string tickField = "proc";

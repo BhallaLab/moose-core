@@ -13,13 +13,29 @@
  * a type-safe send operation, and to provide typechecking for it.
  */
 
+const BindIndex SrcFinfo::BadBindIndex = 65535;
+
 SrcFinfo::SrcFinfo( const string& name, const string& doc )
-	: Finfo( name, doc ), bindIndex_( 0 )
+	: Finfo( name, doc ), bindIndex_( BadBindIndex )
 { ; }
 
 void SrcFinfo::registerFinfo( Cinfo* c )
 {
 	bindIndex_ = c->registerBindIndex();
+}
+
+
+BindIndex SrcFinfo::getBindIndex() const 
+{
+	// Treat this assertion as a warning that the SrcFinfo is being used
+	// without initialization.
+	assert( bindIndex_ != BadBindIndex );
+	return bindIndex_;
+}
+
+void SrcFinfo::setBindIndex( BindIndex b )
+{
+	bindIndex_ = b;
 }
 
 bool SrcFinfo::checkTarget( const Finfo* target ) const
@@ -42,7 +58,6 @@ bool SrcFinfo::addMsg( const Finfo* target, MsgId mid, Element* src ) const
 	}
 	return 0;
 }
-
 /////////////////////////////////////////////////////////////////////
 /**
  * SrcFinfo0 sets up calls without any arguments.
