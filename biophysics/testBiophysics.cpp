@@ -519,10 +519,11 @@ void testHHChannel()
 void testSynChan()
 {
 	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
+
 	vector< unsigned int > dims( 1, 1 );
 	Id nid = shell->doCreate( "Neutral", Id(), "n", dims );
 
-	Id synChanId = shell->doCreate( "SynChan", nid, "syn", dims );
+	Id synChanId = shell->doCreate( "SynChan", nid, "synChan", dims );
 	Id synId( synChanId.value() + 1 );
 	Id sgId1 = shell->doCreate( "SpikeGen", nid, "sg1", dims );
 	Id sgId2 = shell->doCreate( "SpikeGen", nid, "sg2", dims );
@@ -599,34 +600,35 @@ void testSynChan()
 	/////////////////////////////////////////////////////////////////////
 
 	shell->doSetClock( 0, 1e-4 );
-	shell->doUseClock( "/n/##", "process", 0 );
+	// shell->doUseClock( "/n/##", "process", 0 );
+	shell->doUseClock( "/n/synChan,/n/sg1,/n/sg2", "process", 0 );
+	// shell->doStart( 0.001 );
+	shell->doReinit();
 	shell->doReinit();
 
-	/*
 	shell->doStart( 0.001 );
 	dret = Field< double >::get( synChanId, "Gk" );
-	assert( doubleEq( dret, 0.0 ) );
+	assert( doubleApprox( dret, 0.0 ) );
 
 	shell->doStart( 0.0005 );
 	dret = Field< double >::get( synChanId, "Gk" );
-	assert( doubleEq( dret, 0.825 ) );
+	assert( doubleApprox( dret, 0.825 ) );
 
 	shell->doStart( 0.0005 );
 	dret = Field< double >::get( synChanId, "Gk" );
-	assert( doubleEq( dret, 0.998 ) );
+	assert( doubleApprox( dret, 1.0 ) );
 
 	shell->doStart( 0.001 );
 	dret = Field< double >::get( synChanId, "Gk" );
-	assert( doubleEq( dret, 0.7 ) );
+	assert( doubleApprox( dret, 0.736 ) );
 
 	shell->doStart( 0.001 );
 	dret = Field< double >::get( synChanId, "Gk" );
-	assert( doubleEq( dret, 0.38 ) );
+	assert( doubleApprox( dret, 0.406 ) );
 
 	shell->doStart( 0.007 );
 	dret = Field< double >::get( synChanId, "Gk" );
-	assert( doubleEq( dret, 0.998 ) );
-	*/
+	assert( doubleApprox( dret, 0.997 ) );
 
 	shell->doDelete( nid );
 	cout << "." << flush;

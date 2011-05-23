@@ -8,3 +8,4 @@
 **********************************************************************/
 
 bool doubleEq( double x, double y );
+bool doubleApprox( double x, double y );

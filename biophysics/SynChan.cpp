@@ -20,8 +20,9 @@ static const double SynE = exp(1.0);
 // MsgSrc definitions
 ///////////////////////////////////////////////////////
 static SrcFinfo1< double > IkOut( "IkOut", 
-	"Channel current. This message typically goes to concen"
-	"objects that keep track of ion concentration." );
+		"Channel current. This message typically goes to concen"
+		"objects that keep track of ion concentration." );
+
 static SrcFinfo1< double > permeability( "permeability",
 	"Conductance term. Typically goes to GHK object" );
 static SrcFinfo2< double, double > channelOut( "channelOut",
@@ -156,6 +157,7 @@ const Cinfo* SynChan::initCinfo()
 		&Ik,			// ReadOnlyValue
 		&activation,	// Dest
 		&modulator,	// Dest
+		&IkOut,			// Src
 //		&synapse		// FieldElement
 	};
 
