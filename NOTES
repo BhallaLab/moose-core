@@ -12975,5 +12975,6 @@ Checkin 2684.
 I wanted to make a channel base class too. Only issue is that with SynChan
 we'd have to deal with double inheritance.
 
-Added CaConc. Implemented its unit test. Clears.
+Added CaConc. Implemented its unit test. Clears. Checkin 2685.
+Added Nernst. Implemented its unit test. Clears.
 ============================================================================
