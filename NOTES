@@ -12924,3 +12924,51 @@ does not percolate into the FieldDataHandler. Then I tried making a variant
 of the OpFunc that handles setNumField. This won't work in its current form
 as the calling Element is the parent, not the Synapse. No way to find which
 FieldDataHandler to fix. Defer for now, get back to clearing the unit test.
+Checkin 2683.
+
+Still not able to clear the Shell::doStart function for the unit test for
+SynChans. Segv. Valgrind does not help pin down where the problem came from
+because the queue does not retain info about the calling function.
+Unable to run it in non-threaded mode.
+
+==7096== Invalid read of size 8
+==7096==    at 0x43FE1D: DataHandler::iterator::operator++() (DataHandler.h:260)
+==7096==    by 0x46C607: OneToAllMsg::exec(char const*, ProcInfo const*) const (OneToAllMsg.cpp:41)
+==7096==    by 0x416892: readBuf(Qvec const&, ProcInfo const*) (Qinfo.cpp:232)
+==7096==    by 0x4169DB: Qinfo::readQ(ProcInfo const*) (Qinfo.cpp:264)
+==7096==    by 0x48F9CB: eventLoopForBcast(void*) (ProcessLoop.cpp:53)
+==7096==    by 0x4E339C9: start_thread (pthread_create.c:300)
+==7096==    by 0x5F1F70C: clone (clone.S:112)
+==7096==  Address 0x6638bb0 is 0 bytes inside a block of size 80 free'd
+==7096==    at 0x4C26DCF: operator delete(void*) (vg_replace_malloc.c:387)
+==7096==    by 0x50A4B3: FieldDataHandler<SynHandler, Synapse>::~FieldDataHandler() (FieldDataHandler.h:37)
+==7096==    by 0x4060E6: Element::~Element() (Element.cpp:103)
+==7096==    by 0x415D1D: Id::destroy() const (Id.cpp:142)
+==7096==    by 0x40779F: Element::destroyElementTree(std::vector<Id, std::allocator<Id> > const&) (Element.cpp:414)
+==7096==    by 0x493F88: Neutral::destroy(Eref const&, Qinfo const*, int) (Neutral.cpp:413)
+==7096==    by 0x4D9E65: EpFunc1<Neutral, int>::op(Eref const&, char const*) const (EpFunc.h:79)
+==7096==    by 0x46C5EE: OneToAllMsg::exec(char const*, ProcInfo const*) const (OneToAllMsg.cpp:45)
+==7096==    by 0x416892: readBuf(Qvec const&, ProcInfo const*) (Qinfo.cpp:232)
+==7096==    by 0x4169DB: Qinfo::readQ(ProcInfo const*) (Qinfo.cpp:264)
+==7096==    by 0x48F9CB: eventLoopForBcast(void*) (ProcessLoop.cpp:53)
+==7096==    by 0x4E339C9: start_thread (pthread_create.c:300)
+==7096== 
+pure virtual method called
+terminate called without an active exception
+
+============================================================================
+23 May 2011
+Moved the doStart function around in the file. It works fine until after the
+command, Shell::doUseClock(). Put printf debugging in Shell::handleUseClock to
+see if the valgrind error is within it. It is not.
+
+Turned out to be a very subtle bug. One of the SrcFinfos defined for SynChan
+was being called in process, but this SrcFinfo had been left out of the
+list of Finfos for the class. As a result, its 'send' calls went to the default
+Fid which is to destroy the target... I need to make it impossible to call a
+SrcFinfo till it has been initialized. Done.
+
+Now I'm in to the numerical tests for SynChan. Implemented doubleApprox
+test to be somewhat more forgiving than doubleEq.
+
+

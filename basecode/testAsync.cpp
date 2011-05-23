@@ -189,8 +189,8 @@ void testSendMsg()
 	
 	ProcInfo p;
 	
-	// Defaults to BindIndex of 0.
 	SrcFinfo1<double> s( "test", "" );
+	s.setBindIndex( 0 );
 	e1.element()->addMsgAndFunc( m->mid(), fid, s.getBindIndex() );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -1520,6 +1520,7 @@ void testMsgField()
 	assert( sm->getI2() == DataId( 3 ) );
 	
 	SrcFinfo1<double> s( "test", "" );
+	s.setBindIndex( 0 );
 	e1.element()->addMsgAndFunc( m->mid(), fid, s.getBindIndex() );
 
 	for ( unsigned int i = 0; i < size; ++i ) {

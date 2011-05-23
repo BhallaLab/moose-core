@@ -35,9 +35,8 @@ class SrcFinfo: public Finfo
 			return 0; // always fails
 		}
 
-		BindIndex getBindIndex() const {
-			return bindIndex_;
-		}
+		BindIndex getBindIndex() const;
+		void setBindIndex( BindIndex b );
 
 		/**
 		 * Checks that the target will work for this Msg.
@@ -50,6 +49,8 @@ class SrcFinfo: public Finfo
 		bool addMsg( const Finfo* target, MsgId mid, Element* src ) const;
 
 
+
+		static const BindIndex BadBindIndex;
 	private:
 		/**
 		 * Index into the msgBinding_ vector.
