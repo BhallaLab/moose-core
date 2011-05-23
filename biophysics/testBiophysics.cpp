@@ -20,9 +20,9 @@
 extern void testCompartment(); // Defined in Compartment.cpp
 extern void testCompartmentProcess(); // Defined in Compartment.cpp
 extern void testSpikeGen(); // Defined in SpikeGen.cpp
+extern void testCaConc(); // Defined in CaConc.cpp
 /*
 extern void testHHChannel(); // Defined in HHChannel.cpp
-extern void testCaConc(); // Defined in CaConc.cpp
 extern void testNernst(); // Defined in Nernst.cpp
 extern void testSynChan(); // Defined in SynChan.cpp
 extern void testBioScan(); // Defined in BioScan.cpp
@@ -642,8 +642,8 @@ void testBiophysics()
 	testHHGateLookup();
 	testHHGateSetup();
 	testSpikeGen();
-	/*
 	testCaConc();
+	/*
 	testNernst();
 	testBioScan();
 	*/
