@@ -19,6 +19,7 @@ OBJ = \
 	HHGate.o	\
 	SynChan.o	\
 	SpikeGen.o	\
+	CaConc.o	\
 	testBiophysics.o	\
 
 HEADERS = \
@@ -37,6 +38,7 @@ HHChannel.o: HHChannel.h HHGate.h
 HHGate.o: HHGate.h
 SynChan.o: SynHandler.h Synapse.h SynChan.h
 SpikeGen.o: SpikeGen.h
+CaConc.o:	CaConc.h
 testBiophysics.o: SynHandler.h IntFire.h Synapse.h Compartment.h HHChannel.h HHGate.h
 
 .cpp.o:
