@@ -10,7 +10,7 @@
 #include <queue>
 #include "header.h"
 #include "Synapse.h"
-#include "SynHandler.h"
+#include "SynBase.h"
 #include "Dinfo.h"
 #include "UpFunc.h"
 
@@ -32,8 +32,8 @@ const Cinfo* Synapse::initCinfo()
 
 		static DestFinfo addSpike( "addSpike",
 			"Handles arriving spike messages, by redirecting up to parent "
-			"SynHandler object",
-			new UpFunc1< SynHandler, double >( &SynHandler::addSpike ) );
+			"SynBase object",
+			new UpFunc1< SynBase, double >( &SynBase::addSpike ) );
 
 	static Finfo* synapseFinfos[] = {
 		// Fields

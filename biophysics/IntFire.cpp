@@ -10,7 +10,7 @@
 #include <queue>
 #include "header.h"
 #include "Synapse.h"
-#include "SynHandler.h"
+#include "SynBase.h"
 #include "IntFire.h"
 
 static SrcFinfo1< double > spike( 
@@ -105,7 +105,7 @@ const Cinfo* IntFire::initCinfo()
 
 	static Cinfo intFireCinfo (
 		"IntFire",
-		SynHandler::initCinfo(),
+		SynBase::initCinfo(),
 		intFireFinfos,
 		sizeof( intFireFinfos ) / sizeof ( Finfo* ),
 		new Dinfo< IntFire >()

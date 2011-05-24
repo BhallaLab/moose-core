@@ -10,90 +10,90 @@
 #include <queue>
 #include "header.h"
 #include "Synapse.h"
-#include "SynHandler.h"
+#include "SynBase.h"
 
 /// This is bigger than # synapses for any neuron I know of: should suffice.
-const unsigned int SynHandler::MAX_SYNAPSES = 1000000;
+const unsigned int SynBase::MAX_SYNAPSES = 1000000;
 
-const Cinfo* SynHandler::initCinfo()
+const Cinfo* SynBase::initCinfo()
 {
-		static ValueFinfo< SynHandler, unsigned int > numSynapses(
+		static ValueFinfo< SynBase, unsigned int > numSynapses(
 			"numSynapses",
-			"Number of synapses on SynHandler",
-			&SynHandler::setNumSynapses,
-			&SynHandler::getNumSynapses
+			"Number of synapses on SynBase",
+			&SynBase::setNumSynapses,
+			&SynBase::getNumSynapses
 		);
 
 		//////////////////////////////////////////////////////////////
 		// FieldElementFinfo definition for Synapses
 		//////////////////////////////////////////////////////////////
-		static FieldElementFinfo< SynHandler, Synapse > synFinfo( "synapse",
+		static FieldElementFinfo< SynBase, Synapse > synFinfo( "synapse",
 			"Sets up field Elements for synapse",
 			Synapse::initCinfo(),
-			&SynHandler::getSynapse,
-			&SynHandler::setNumSynapses,
-			&SynHandler::getNumSynapses
+			&SynBase::getSynapse,
+			&SynBase::setNumSynapses,
+			&SynBase::getNumSynapses
 		);
 
-	static Finfo* synHandlerFinfos[] = {
+	static Finfo* synBaseFinfos[] = {
 		&numSynapses,	// Value
 		&synFinfo		// FieldElementFinfo for synapses.
 	};
 
-	static Cinfo synHandlerCinfo (
-		"SynHandler",
+	static Cinfo synBaseCinfo (
+		"SynBase",
 		Neutral::initCinfo(),
-		synHandlerFinfos,
-		sizeof( synHandlerFinfos ) / sizeof ( Finfo* ),
-		new Dinfo< SynHandler >()
+		synBaseFinfos,
+		sizeof( synBaseFinfos ) / sizeof ( Finfo* ),
+		new Dinfo< SynBase >()
 	);
 
-	return &synHandlerCinfo;
+	return &synBaseCinfo;
 }
 
-static const Cinfo* synHandlerCinfo = SynHandler::initCinfo();
+static const Cinfo* synBaseCinfo = SynBase::initCinfo();
 
-SynHandler::SynHandler()
+SynBase::SynBase()
 { ; }
 
-SynHandler::~SynHandler()
+SynBase::~SynBase()
 { ; }
 
 /**
  * Inserts an event into the pendingEvents queue for spikes.
  * Note that this function lives on the Element managing the Synapses,
- * and gets redirected to the SynHandler.
+ * and gets redirected to the SynBase.
  * This is called by UpFunc1< double >
  */
-void SynHandler::addSpike( DataId index, const double time )
+void SynBase::addSpike( DataId index, const double time )
 {
 	this->innerAddSpike( index, time );
 }
 
-void SynHandler::innerAddSpike( DataId index, const double time )
+void SynBase::innerAddSpike( DataId index, const double time )
 {
-	cout << "Warning: SynHandler::innerAddSpike: Should not get here\n";
+	cout << "Warning: SynBase::innerAddSpike: Should not get here\n";
 }
 
 
-void SynHandler::setNumSynapses( const unsigned int v )
+void SynBase::setNumSynapses( const unsigned int v )
 {
 	assert( v < MAX_SYNAPSES );
 	synapses_.resize( v );
 	// threadReduce< unsigned int >( er, getMaxNumSynapses, v );
 }
 
-unsigned int SynHandler::getNumSynapses() const
+unsigned int SynBase::getNumSynapses() const
 {
 	return synapses_.size();
 }
 
-Synapse* SynHandler::getSynapse( unsigned int i )
+Synapse* SynBase::getSynapse( unsigned int i )
 {
 	static Synapse dummy;
 	if ( i < synapses_.size() )
 		return &synapses_[i];
-	cout << "Warning: SynHandler::getSynapse: index: " << i <<
+	cout << "Warning: SynBase::getSynapse: index: " << i <<
 		" is out of range: " << synapses_.size() << endl;
 	return &dummy;
 }

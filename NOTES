@@ -12976,5 +12976,18 @@ I wanted to make a channel base class too. Only issue is that with SynChan
 we'd have to deal with double inheritance.
 
 Added CaConc. Implemented its unit test. Clears. Checkin 2685.
-Added Nernst. Implemented its unit test. Clears.
+Added Nernst. Implemented its unit test. Clears. Checkin 2686.
+
 ============================================================================
+24 May 2011.
+
+Working on channel base class. Will have to figure out what to do about the
+SynHandler base class for various things dealing with synapses. 
+- use a base class that is not a MOOSE class? 
+- Have a 2nd stage of base class, one that is both a SynHandler and a channel?
+	- We will then have 3 base classe
+		SynBase
+		ChanBase
+		SynChanBase
+This should work.
+
