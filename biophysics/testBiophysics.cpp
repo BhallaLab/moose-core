@@ -12,6 +12,7 @@
 #include "header.h"
 #include "Compartment.h"
 #include "HHGate.h"
+#include "ChanBase.h"
 #include "HHChannel.h"
 #include "ReduceBase.h"
 #include "ReduceMax.h"

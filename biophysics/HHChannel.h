@@ -47,7 +47,7 @@
 
 typedef double ( *PFDD )( double, double );
 
-class HHChannel
+class HHChannel: public ChanBase
 {
 #ifdef DO_UNIT_TESTS
 	friend void testHHChannel();
@@ -119,8 +119,8 @@ class HHChannel
 
 		/**
 		 * Assign the local Vm_ to the incoming Vm from the compartment
-		 */
 		void handleVm( double Vm );
+		 */
 
 		/**
 		 * Assign the local conc_ to the incoming conc from the
@@ -212,8 +212,6 @@ class HHChannel
 		double Ypower_;
 		/// Exponent for Z gate
 		double Zpower_;
-		/// Vm_ is input variable from compartment, used for most rates
-		double Vm_;
 		/// Conc_ is input variable for Ca-dependent channels.
 		double conc_;
 
@@ -222,18 +220,9 @@ class HHChannel
 		double ( *takeZpower_ )( double, double );
 
 	private:
-		/// Channel maximal conductance
-		double Gbar_;
-		/// Reversal potential of channel
-		double Ek_;
-
 		/// bitmapped flag for X, Y, Z, to do equil calculation for gate
 		int instant_;
 		/// Channel actual conductance depending on opening of gates.
-		double Gk_;
-		/// Channel current
-		double Ik_;
-
 		/// State variable for X gate
 		double X_;
 		/// State variable for Y gate

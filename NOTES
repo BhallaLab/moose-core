@@ -12992,3 +12992,10 @@ SynHandler base class for various things dealing with synapses.
 This should work.
 
 Renamed SynHandler to SynBase. Checkin 2689.
+Implemented ChanBase. Checkin 2690.
+
+Checking it out. Nagging bug in the HH calculations, comes out different
+on different runs, but takes only a few possible values. Thought it was
+failure to init a field, but that wasn't it. Valgrind might find it.
+Found it. I had defined Vm both in HHChannel as well as in the ChanBase.
+Now clears unit tests.
