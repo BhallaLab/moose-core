@@ -1,56 +1,69 @@
+# LayoutWidget for Loading Genesis files
+
 import sys
 import os
 from PyQt4 import QtGui,QtCore,Qt
 from operator import itemgetter, attrgetter
-import config
 import math
-
+import config
 import moose
 
 '''
-#import config
-
-print os.getcwd()
-os.chdir('/home/lab13/trunk/pymoose/gui')
-sys.path.append('/home/lab13/trunk/pymoose/')
-
-import moose
-dir(moose)
-
 c = moose.PyMooseBase.getContext()
-
 c.loadG('/home/lab13/Genesis_file/gfile/acc25.g')
-#c.loadG('/home/lab13/trunk/DEMOS/kholodenko/Kholodenko.g')
-
 app = QtGui.QApplication(sys.argv)
-
 '''
-class Textitem(QtGui.QGraphicsTextItem):
-	def __init__(self,layoutwidget,path):
+class Textitem(QtGui.QGraphicsTextItem): 
+	positionChange = QtCore.pyqtSignal(QtGui.QGraphicsItem)
+	def __init__(self,parent,path):
+		self.mooseObj_ = moose.Neutral(path)
+		if isinstance (parent, LayoutWidget):
+			QtGui.QGraphicsTextItem.__init__(self,self.mooseObj_.name)
+		elif isinstance (parent,Rect_Compt):
+			QtGui.QGraphicsTextItem.__init__(self,parent)
+			
+		self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
+		self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
+		self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges, 1) 
+		if config.QT_MINOR_VERSION >= 6:
+		 	self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges, 1) 
+	
+	def itemChange(self, change, value):
+		if change == QtGui.QGraphicsItem.ItemPositionChange:
+			self.positionChange.emit(self)
+       		return QtGui.QGraphicsItem.itemChange(self, change, value)
+	
+	def mouseDoubleClickEvent(self, event):
+		self.emit(QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.mooseObj_)
+	
+	def updateSlot(self):
+		if(self.mooseObj_.className == 'Enzyme'):
+			textColor = "<html><body bgcolor='black'>"+self.mooseObj_.name+"</body></html>"
+			self.setHtml(textColor)
+		else:
+			textColor = self.mooseObj_.getField('xtree_fg_req')
+			self.layoutWidgetpt.colorCheck(self,self.mooseObj_,textColor,"background")
+
+class Rect_Compt(QtGui.QGraphicsRectItem):
+	def __init__(self,layoutwidget,x,y,w,h,path):
 		self.mooseObj_ = moose.Neutral(path)
 		self.layoutWidgetpt = layoutwidget
-		QtGui.QGraphicsTextItem.__init__(self,self.mooseObj_.name)
+		self.Rectemitter = QtCore.QObject()
+		QtGui.QGraphicsRectItem.__init__(self,x,y,w,h)
 		self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
+		self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
+		
+		self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges, 1) 
 		if config.QT_MINOR_VERSION >= 6:
 		 	self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges, 1) 
 		 	
 	def mouseDoubleClickEvent(self, event):
-		self.emit(QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.mooseObj_)
+		self.Rectemitter.emit(QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.mooseObj_)
 	
-	def mousePressEvent(self, event):
-		QtGui.QGraphicsTextItem.mousePressEvent(self, event)
-		if event.button() == QtCore.Qt.LeftButton:
-			self.startingPos = event.scenePos()
-		
-	def mouseMoveEvent(self,event):
-		QtGui.QGraphicsTextItem.mouseMoveEvent(self, event)
-		if event.buttons() == QtCore.Qt.LeftButton:
-			self.endingPos = event.scenePos()
-			if ((self.endingPos.x()-self.startingPos.x() != 0) |(self.endingPos.y()-self.startingPos.y() != 0)):
-				self.emit(QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.mooseObj_)
-
-	def mouseReleaseEvent(self, event):
-		QtGui.QGraphicsTextItem.mouseReleaseEvent(self, event)
+	def itemChange(self, change, value):
+		if change == QtGui.QGraphicsItem.ItemPositionChange:
+			self.Rectemitter.emit(QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.mooseObj_)
+       		return QtGui.QGraphicsItem.itemChange(self, change, value)
 	
 	def updateSlot(self):
 		if(self.mooseObj_.className == 'Enzyme'):
@@ -61,64 +74,130 @@ class Textitem(QtGui.QGraphicsTextItem):
 			self.layoutWidgetpt.colorCheck(self,self.mooseObj_,textColor,"background")
 			
 class Graphicalview(QtGui.QGraphicsView):
-	def __init__(self,scenewidget):
-		self.sceneWidgetpt = scenewidget
-		QtGui.QGraphicsView.__init__(self,self.sceneWidgetpt)
+	def __init__(self,scenecontainer,border):
+		self.sceneContainerPt = scenecontainer
+		self.border = border
+		QtGui.QGraphicsView.__init__(self,self.sceneContainerPt)
 		self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
-		self.setScene(self.sceneWidgetpt)
+		self.setScene(self.sceneContainerPt)
 		self.rubberBandactive = False
-
+		self.rubberBand=0
 		
 	def mousePressEvent(self, event):
-		QtGui.QGraphicsView.mousePressEvent(self, event)
 		if event.buttons() == QtCore.Qt.LeftButton:
-			self.startingPos = QtCore.QPointF()
 			self.startingPos = event.pos()
 			self.startScenepos = self.mapToScene(self.startingPos)
 			
-			deviceTransform = self.viewportTransform()
+			self.deviceTransform = self.viewportTransform()
 			if config.QT_MINOR_VERSION >= 6:
 				''' deviceTransform needs to be provided if the scene contains items that ignore transformations,
 					which was introduced in 4.6
 				'''
-				if ( self.sceneWidgetpt.itemAt(self.startScenepos,deviceTransform) == None):
-					self.rubberBandactive = True
+				sceneitems = self.sceneContainerPt.itemAt(self.startScenepos,self.deviceTransform)
 			else:
 				''' for below  Qt4.6 there is no view transform for itemAt 
 				     and if view is zoom out below 50%  and if textitem object is moved, 
 				     along moving the item, zooming also happens.
 				'''
-				if ( self.sceneWidgetpt.itemAt(self.startScenepos) == None):
-					self.rubberBandactive = True
-	
+				sceneitems = self.sceneContainerPt.itemAt(self.startScenepos)
+					
 			
+			
+			#checking if rubberband selection start on any item (in my case textitem or rectcompartment) if none, start the rubber effect 
+			if ( sceneitems == None):
+				QtGui.QGraphicsView.mousePressEvent(self, event)
+				self.rubberBandactive = True
+				
+			#Since qgraphicsrectitem is a item in qt, if I select inside the rectangle it would select the entire rectangle
+			# and would not allow me to select the items inside the rectangle so breaking the code by not calling parent class to inherit functionality
+			#rather writing custom code for rubberband effect here
+			elif( sceneitems != None):
+				
+				if(isinstance(sceneitems, Textitem)):
+					QtGui.QGraphicsView.mousePressEvent(self, event)
+					
+				elif(isinstance(sceneitems, Rect_Compt)):
+					for previousSelection in self.sceneContainerPt.selectedItems():
+						if previousSelection.isSelected() == True:
+								previousSelection.setSelected(0)
+					
+					#Checking if its on the border or inside
+					xs = sceneitems.mapToScene(sceneitems.boundingRect().topLeft()).x()+self.border/2
+					ys = sceneitems.mapToScene(sceneitems.boundingRect().topLeft()).y()+self.border/2
+					xe = sceneitems.mapToScene(sceneitems.boundingRect().bottomRight()).x()-self.border/2
+					ye = sceneitems.mapToScene(sceneitems.boundingRect().bottomRight()).y()-self.border/2
+					xp = self.startScenepos.x()
+					yp = self.startScenepos.y()
+
+					#if on border rubberband is not started, but called parent class for default implementation
+					if(((xp > xs-self.border/2) and (xp < xs+self.border/2) and (yp > ys-self.border/2) and (yp < ye+self.border/2) )or 
+					   ((xp > xs+self.border/2) and (xp < xe-self.border/2) and (yp > ye-self.border/2) and (yp < ye+self.border/2) ) or 
+					   ((xp > xs+self.border/2) and (xp < xe-self.border/2) and (yp > ys-self.border/2) and (yp < ys+self.border/2) ) or
+					   ((xp > xe-self.border/2) and (xp < xe+self.border/2) and (yp > ys-self.border/2) and (yp < ye+self.border/2) ) ):
+					   	if sceneitems.isSelected() == False:
+					   		sceneitems.setSelected(1)
+						QtGui.QGraphicsView.mousePressEvent(self, event)
+
+					else:
+						#if its inside the qgraphicsrectitem then custom code for starting rubberband selection	
+						self.rubberBandactive = True
+						self.rubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle,self)
+						self.rubberBand.setGeometry(QtCore.QRect(self.startingPos,QtCore.QSize()))
+						self.rubberBand.show()
+				else:
+					print "Report this functionality may not be implimentated"
+					
 	def mouseMoveEvent(self,event):
 		QtGui.QGraphicsView.mouseMoveEvent(self, event)
-
+		
+		if(( event.buttons() == QtCore.Qt.LeftButton) and (self.rubberBandactive == False)):
+			for selecteditem in self.sceneContainerPt.selectedItems():
+				self.emit(QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),selecteditem.mooseObj_)
 							
+		if( (self.rubberBand) and (event.buttons() == QtCore.Qt.LeftButton)):
+				self.endingPos = event.pos()
+				self.endingScenepos = self.mapToScene(self.endingPos)
+				w = self.endingScenepos.x()-self.startScenepos.x()
+				h = self.endingScenepos.y()-self.startScenepos.y()
+				
+				self.rubberBand.setGeometry(QtCore.QRect(self.startingPos, event.pos()).normalized())
+								
+				#unselecting any previosly selected item in scene
+				for preSelectItem in self.sceneContainerPt.selectedItems():
+					preSelectItem.setSelected(0)
+					
+				for items in self.sceneContainerPt.items(self.startScenepos.x(),self.startScenepos.y(),w,h,Qt.Qt.IntersectsItemShape):
+					if(isinstance(items,Textitem)):
+						if items.isSelected() == False:
+							items.setSelected(1)
+						
 	def mouseReleaseEvent(self, event):
+						
 		QtGui.QGraphicsView.mouseReleaseEvent(self, event)
-
+		if(self.rubberBand):
+			self.rubberBand.hide()
+			self.rubberBand = 0
+		
 		if((event.button() == QtCore.Qt.LeftButton) and (self.rubberBandactive == True)):
-			self.endingPos = QtCore.QPoint(0,0)
 			self.endingPos = event.pos()
 			self.endScenepos = self.mapToScene(self.endingPos)
 			w = (self.endScenepos.x()-self.startScenepos.x())
 			h = (self.endScenepos.y()-self.startScenepos.y())
 			vTransform = self.viewportTransform()
+		
 			if( w > 0  and h >0):
-				self.rubberbandlist = self.sceneWidgetpt.items(self.startScenepos.x(),self.startScenepos.y(),w,h, Qt.Qt.IntersectsItemShape)
-				if (len(self.rubberbandlist) > 0):
+				self.rubberbandlist = self.sceneContainerPt.items(self.startScenepos.x(),self.startScenepos.y(),w,h, Qt.Qt.IntersectsItemShape)
+				for items in (qgraphicsitem for qgraphicsitem in self.rubberbandlist if isinstance(qgraphicsitem,Textitem)):
 					self.fitInView(self.startScenepos.x(),self.startScenepos.y(),w,h,Qt.Qt.KeepAspectRatio)
 					if((self.matrix().m11()>=1.0)and(self.matrix().m22() >=1.0)):
-						for item in ( Txtitem for Txtitem in self.sceneWidgetpt.items() if isinstance (Txtitem, Textitem)):
+						for item in ( Txtitem for Txtitem in self.sceneContainerPt.items() if isinstance (Txtitem, Textitem)):
 							item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, False)
 			else:
-				self.rubberbandlist = self.sceneWidgetpt.items(self.endScenepos.x(),self.endScenepos.y(),abs(w),abs(h), Qt.Qt.IntersectsItemShape)
-				if (len(self.rubberbandlist) > 0):	
+				self.rubberbandlist = self.sceneContainerPt.items(self.endScenepos.x(),self.endScenepos.y(),abs(w),abs(h), Qt.Qt.IntersectsItemShape)
+				for items in (qgraphicsitem for qgraphicsitem in self.rubberbandlist if isinstance(qgraphicsitem,Textitem)):
 					self.fitInView(self.endScenepos.x(),self.endScenepos.y(),abs(w),abs(h),Qt.Qt.KeepAspectRatio)
 					if((self.matrix().m11()>=1.0)and(self.matrix().m22() >=1.0)):
-						for item in ( Txtitem for Txtitem in self.sceneWidgetpt.items() if isinstance (Txtitem, Textitem)):
+						for item in ( Txtitem for Txtitem in self.sceneContainerPt.items() if isinstance (Txtitem, Textitem)):
 							item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, False)		
 							
 		self.rubberBandactive = False
@@ -130,18 +209,21 @@ class LayoutWidget(QtGui.QWidget):
 		QtGui.QWidget.__init__(self,parent)
 		grid = QtGui.QGridLayout()
 		self.setLayout(grid)
-		self.screen = QtGui.QGraphicsScene(self)
-		self.screen.setBackgroundBrush(QtGui.QColor(230,230,219,120))
-		self.screen.setSceneRect(self.screen.itemsBoundingRect())
+		
+		self.sceneContainer = QtGui.QGraphicsScene(self)
+		self.sceneContainer.setBackgroundBrush(QtGui.QColor(230,230,219,120))
+		#~ self.sceneContainer.setSceneRect(self.sceneContainer.itemsBoundingRect())
 	
 		self.rootObject = moose.Neutral('/kinetics')
 		self.itemList = []
 		self.setupItem(self.rootObject,self.itemList)
 		self.moosetext_dict = {}
-		
+		self.Compt_dict = {}
+		self.border = 10
 		#colorMap of kinetic kit
 		self.colorMap = ((248,0,255),(240,0,255),(232,0,255),(224,0,255),(216,0,255),(208,0,255),(200,0,255),(192,0,255),(184,0,255),(176,0,255),(168,0,255),(160,0,255),(152,0,255),(144,0,255),(136,0,255),(128,0,255),(120,0,255),(112,0,255),(104,0,255),(96,0,255),(88,0,255),(80,0,255),(72,0,255),(64,0,255),(56,0,255),(48,0,255),(40,0,255),(32,0,255),(24,0,255),(16,0,255),(8,0,255),(0,0,255),(0,8,248),(0,16,240),(0,24,232),(0,32,224),(0,40,216),(0,48,208),(0,56,200),(0,64,192),(0,72,184),(0,80,176),(0,88,168),(0,96,160),(0,104,152),(0,112,144),(0,120,136),(0,128,128),(0,136,120),(0,144,112),(0,152,104),(0,160,96),(0,168,88),(0,176,80),(0,184,72),(0,192,64),(0,200,56),(0,208,48),(0,216,40),(0,224,32),(0,232,24),(0,240,16),(0,248,8),(0,255,0),(8,255,0),(16,255,0),(24,255,0),(32,255,0),(40,255,0),(48,255,0),(56,255,0),(64,255,0),(72,255,0),(80,255,0),(88,255,0),(96,255,0),(104,255,0),(112,255,0),(120,255,0),(128,255,0),(136,255,0),(144,255,0),(152,255,0),(160,255,0),(168,255,0),(176,255,0),(184,255,0),(192,255,0),(200,255,0),(208,255,0),(216,255,0),(224,255,0),(232,255,0),(240,255,0),(248,255,0),(255,255,0),(255,248,0),(255,240,0),(255,232,0),(255,224,0),(255,216,0),(255,208,0),(255,200,0),(255,192,0),(255,184,0),(255,176,0),(255,168,0),(255,160,0),(255,152,0),(255,144,0),(255,136,0),(255,128,0),(255,120,0),(255,112,0),(255,104,0),(255,96,0),(255,88,0),(255,80,0),(255,72,0),(255,64,0),(255,56,0),(255,48,0),(255,40,0),(255,32,0),(255,24,0),(255,16,0),(255,8,0),(255,0,0))
-
+		
+		#This is check which version of kkit, b'cos anything below kkit8 didn't had xyz co-ordinates
 		allZero = "True"
 		for item in self.itemList:
 			x = float( item.getField( 'x' ) )
@@ -152,7 +234,6 @@ class LayoutWidget(QtGui.QWidget):
 				break
 		
 		if allZero:
-			#This is check which version of kkit, b'cos anything below kkit8 didn't had xyz co-ordinates
 			msgBox = QtGui.QMessageBox()
 			msgBox.setText("The Layout module works for kkit version 8 or higher.")
 			msgBox.setStandardButtons(QtGui.QMessageBox.Ok)
@@ -160,8 +241,13 @@ class LayoutWidget(QtGui.QWidget):
 			raise Widgetvisibility()
 	
 		else:		
-			#Adding moose Object to scene to get scene bounding reaction for spacing the coordinates
 			for item in self.itemList:
+			
+				#Creating all the compartments for the model and adding to the scene
+				self.key = moose.Neutral(item.parent)
+				self.create_Compt(item,self.key)
+				
+				#Adding moose Object to scene to get scene bounding reaction for spacing the coordinates	
 				pItem = Textitem(self,item.path)
 				x = float(item.getField('x'))
 				y = float(item.getField('y'))
@@ -169,118 +255,208 @@ class LayoutWidget(QtGui.QWidget):
 				itemid = item.id
 				
 				#moosetext_dict[] is created to get the text's sceneBoundingRect
-				self.moosetext_dict[itemid] = pItem 	
-
-			scale_Cord = int(self.cordTransform(self.itemList,self.moosetext_dict))
-
-			#Adding moose Object to scene and then adding to scene to view
-			for item in self.itemList:
-				pItem = Textitem(self,item.path)
+				self.moosetext_dict[itemid] = pItem 
+					
+		#Calculate the scaling factor for cordinates		
+		self.scale_Cord = int(self.cordTransform(self.itemList,self.moosetext_dict))		
+		
+		#Adding moose Object to scene and then adding to scene to view
+		for item in self.itemList:
 				textColor = ""
 				textBgcolor=""
 				textColor = item.getField('xtree_textfg_req')
 				textBgcolor = item.getField('xtree_fg_req')
-				x = float(item.getField('x'))*(scale_Cord)
-				y = float(item.getField('y'))*-(scale_Cord)
-				pItem.setPos(x,y)
+				x = float(item.getField('x'))*(self.scale_Cord)
+				y = float(item.getField('y'))*-(self.scale_Cord)
 				
-				self.connect(pItem, QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
+				self.key = moose.Neutral(item.parent)
+				if self.key.className == 'KinCompt':
+					value = self.Compt_dict[self.key.name]
+					pItem = Textitem(value,item.path)
+					pItem.setPos(x,y)
+				elif self.key.className == 'KineticManager':	
+					pItem = Textitem(self,item.path)
+					pItem.setPos(x,y)
+					self.sceneContainer.addItem(pItem)
+				else:
+					tobfoundkey = self.key.parent
+					found = 1
+					number=0
+					while found == 1 and number < 3:
+						self.key = moose.Neutral(tobfoundkey)
+						number = number+1
+						if self.key.className == 'KinCompt':
+							value = self.Compt_dict[self.key.name]
+							pItem = Textitem(value,item.path)
+							pItem.setPos(x,y)	
+							found = 0
+						elif self.key.className == 'KineticManager':
+							pItem = Textitem(self,item.path)
+							pItem.setPos(x,y)	
+							self.sceneContainer.addItem(pItem)
+							found = 0	
+						else:
+							tobfoundkey= self.key.parent
 				self.connect(pItem, QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"), self.emitItemtoEditor)
+				pItem.positionChange.connect(self.positionChange)
+								
 				itemid = item.id
 				self.moosetext_dict[itemid] = pItem 	
-
+						
 				if(item.className =='Enzyme'):	
 					parent = moose.Neutral(item.parent)
 					textParcolor = moose.Neutral(parent.path).getField('xtree_fg_req')
 					self.colorCheck(pItem,item,textParcolor,"foreground")
 					textbgcolor = "<html><body bgcolor='black'>"+item.name+"</body></html>"
 					pItem.setHtml(QtCore.QString(textbgcolor))	
+				
 				else:
 					if(textColor==textBgcolor):
 						textBgcolor="black"
 					self.colorCheck(pItem,item,textColor,"foreground")
 					self.colorCheck(pItem,item,textBgcolor,"background")
-				
-				self.screen.addItem(pItem)
-				
-			#connecting substrate,product to reaction and Enzyme
-			self.lineItem_dict = {}
-			self.object2line = {}
 			
-			for item in self.itemList:
-				src = ""
-				des = ""
-				if(item.className != "Molecule"):
-					for sobject in moose.Neutral(item.path).neighbours('sub', 0):
-						src = self.moosetext_dict[item.id]
-						des = self.moosetext_dict[sobject]
-						src_id = item.id
-						des_id = sobject
-						self.lineCord(src,des,self.screen,item,self.object2line,self.lineItem_dict)
-			
-					for pobject in moose.Neutral(item.path).neighbours('prd', 0):
-						src = self.moosetext_dict[pobject]
-						des = self.moosetext_dict[item.id]
-						src_id = pobject
-						des_id = item.id
-						self.lineCord(src,des,self.screen,item,self.object2line,self.lineItem_dict)
-	
-				#Added to substrate and product for reaction, we need to take enz also for the enzymetic Reaction	
-				if(item.className == "Enzyme"):
-					for pobject in moose.Neutral(item.path).neighbours('enz',0): 
-						src = self.moosetext_dict[pobject]
-						des = self.moosetext_dict[item.id]
-						src_id = pobject
-						des_id = item.id
-						self.lineCord(src,des,self.screen,item,self.object2line,self.lineItem_dict)
-			
-			self.view = Graphicalview(self.screen)
-			self.view.setScene(self.screen)
-			self.view.centerOn(self.screen.sceneRect().center())
-			grid.addWidget(self.view,0,0)
-			
-	def updateItemSlot(self, mooseObject):
-			#In this case if the name is updated from the keyboard both in mooseobj and gui gets updation
-	        for changedItem in (item for item in self.screen.items() if isinstance(item, Textitem) and mooseObject.id == item.mooseObj_.id):
-	            break
-	        changedItem.updateSlot()
+		 #RectCompartment which is kincompartment is added to the screne
+		for k, v in self.Compt_dict.items():
+				rectcompt = v.childrenBoundingRect()
+				#~ print "rectcompartment size",k,rectcompt,rectcompt.right(),rectcompt.left(),rectcompt.top(),rectcompt.bottom()
+				v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
+				v.setPen( QtGui.QPen( Qt.QColor(66,66,66,100), self.border, QtCore.Qt.SolidLine,QtCore.Qt.RoundCap,QtCore.Qt.RoundJoin ) )
+				v.Rectemitter.connect(v.Rectemitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
+				v.Rectemitter.connect(v.Rectemitter,QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.emitItemtoEditor)
 
-	def keyPressEvent(self,event):
-		#For Zooming
+		#connecting substrate,product to reaction and Enzyme
+		self.lineItem_dict = {}
+		self.object2line = {}
 		
-		for item in self.screen.items():
-			if isinstance (item, Textitem):
-				if((self.view.matrix().m11()<=1.0)and(self.view.matrix().m22() <=1.0)):
-					item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, True)
-				else:
-					item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, False)
+		for item in self.itemList:
+			src = ""
+			des = ""
+			if(item.className != "Molecule"):
+				for sobject in moose.Neutral(item.path).neighbours('sub', 0):
+					src = self.moosetext_dict[item.id]
+					des = self.moosetext_dict[sobject]
+					self.lineCord(src,des,item)
+				for pobject in moose.Neutral(item.path).neighbours('prd', 0):
+					src = self.moosetext_dict[pobject]
+					des = self.moosetext_dict[item.id]
+					self.lineCord(src,des,item)	
+				
+			#Added to substrate and product for reaction, we need to take enz also for the enzymetic Reaction	
+			if(item.className == "Enzyme"):
+				for pobject in moose.Neutral(item.path).neighbours('enz',0): 
+					src = self.moosetext_dict[pobject]
+					des = self.moosetext_dict[item.id]
+					self.lineCord(src,des,item)
+		
+		sceneBoundRect = self.sceneContainer.itemsBoundingRect()
+		self.view = Graphicalview(self.sceneContainer,self.border)
+		self.view.setScene(self.sceneContainer)
+		self.view.centerOn(self.sceneContainer.sceneRect().center())
+		grid.addWidget(self.view,0,0)
+	
+	# setting up moose item	
+	def setupItem(self,mooseObject,itemlist):
+		for child in mooseObject.children():
+			childObj = moose.Neutral(child)
+			if( (childObj.className == 'Molecule') | (childObj.className == 'Reaction') |(childObj.className == 'Enzyme') ):
+				''' This is for eliminating enzyme complex'''
+				if((moose.Neutral(childObj.parent).className) != 'Enzyme'):
+					itemlist.append(childObj)
+			self.setupItem(childObj,itemlist)
+	
+	#Checking and creating compartment
+	def create_Compt(self,item,key):
+		rectitem = ""
+		 
+		if (key.className == 'KinCompt'):
+			if self.Compt_dict.has_key(key.name):
+				rectitem = self.Compt_dict[key.name]
+			else:
+				self.new_Compt = Rect_Compt(self,0,0,0,0,key.path)
+				self.Compt_dict[key.name] = self.new_Compt
+				self.new_Compt.setRect(10,10,10,10)
+				self.sceneContainer.addItem(self.new_Compt)
+		elif (key.className == 'KineticManager'):
+			rectitem = 'kinetics'
+		else:
+			parent_key = moose.Neutral(key.parent)
+			rectitem = self.create_Compt(item,parent_key)
+			
+	def cordTransform(self,itemslist,mooseItemdict):
+		#here alpha is calculated to multipy the coordinates with, so that the each items spreads out
+		alpha = 0
+		alpha1 = 0
+		for t in range(len(itemslist)):
+			src = itemslist[t]
+			self.pitemsrc = mooseItemdict[src.id]
+			src_Scenebounding = self.pitemsrc.sceneBoundingRect()
+			srcX = src_Scenebounding.x()
+			srcY = src_Scenebounding.y()
+			#print "item bounding",srcX,srcY,src.name,srcX+srcW,srcY+srcH
+		for m in range(len(itemslist)):
+			for n in range(len(itemslist)):
+				if(m != n):
+					src = itemslist[m]
+					self.pitemsrc = mooseItemdict[src.id]
+					src_Scenebounding = self.pitemsrc.sceneBoundingRect()
+					srcX = src_Scenebounding.x()
+					srcY = src_Scenebounding.y()
+					srcW = src_Scenebounding.right()-src_Scenebounding.left()
+					srcH = src_Scenebounding.bottom()-src_Scenebounding.top()
+
+					des = itemslist[n]
+					self.pitemdes = mooseItemdict[des.id]
+					des_Scenebounding = self.pitemdes.sceneBoundingRect()
+					desX = des_Scenebounding.x()
+					desY = des_Scenebounding.y()
+					desW = des_Scenebounding.right()-des_Scenebounding.left()
+					desH = des_Scenebounding.bottom()-des_Scenebounding.top()
 					
-		key = event.key()
-		
-		if key == QtCore.Qt.Key_A:
-			self.view.resetMatrix()
-	
-		elif key == QtCore.Qt.Key_Plus:
-			self.view.scale(1.1,1.1)
-			
-		elif key == QtCore.Qt.Key_Minus:
-			self.view.scale(1/1.1,1/1.1)		
-			
-	def emitItemtoEditor(self,mooseObject):
-		self.emit(QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"), mooseObject)		
-
-	def positionChange(self,mooseObject):
-		#If the item position changes, the corresponding arrow also changes here
-		listItem = []
-		for listItem in (v for k,v in self.object2line.items() if k.mooseObj_.id == mooseObject.id ):
-			if len(listItem):
-				for ql,va in listItem:
-					srcdes = self.lineItem_dict[ql]
-					arrow = self.calArrow(srcdes[0],srcdes[1])
-					ql.setPolygon(arrow)
-			break
-
-	def lineCord(self,src,des,screen,source,object2line,lineItem_dict):
+					t = src_Scenebounding.intersects(des_Scenebounding)
+					if t:
+						sfx = 0
+						sfy = 0
+						if((desX - srcX)!= 0):	sfx = ( float(srcW)/abs(desX-srcX))
+						if((desY - srcY)!= 0):	sfy = ( float(srcH)/abs(desY-srcY))
+						if((sfx != 0) and (sfy != 0)):
+							if( sfx < sfy):		alpha = sfx
+							elif (sfy < sfx):	alpha = sfy
+							else:			alpha = 0
+						elif (sfx == 0): alpha = sfy
+						elif (sfy == 0): alpha = sfx
+						else:		 alpha =0
+					else:
+						pass
+					
+					if(alpha1 < alpha): alpha1 = alpha
+					
+				else: 
+					pass
+		alpha1=alpha1+1
+		return(alpha1)
+	#color map for kinetic kit
+	def colorCheck(self,pItem,item,textColor,fgbg_color):
+		if(textColor == "<blank-string>"): textColor = "green"		
+		if textColor.isdigit():
+			tc = int(textColor)
+			tc = (tc * 2 )
+			r,g,b = self.colorMap[tc]
+			if(fgbg_color == 'foreground'):
+				pItem.setDefaultTextColor(QtGui.QColor(r,g,b))
+			elif(fgbg_color == 'background'):
+				hexchars = "0123456789ABCDEF"
+				hexno = "#" + hexchars[r / 16] + hexchars[r % 16] + hexchars[g / 16] + hexchars[g % 16] + hexchars[b / 16] + hexchars[b % 16]	
+				textbgcolor = "<html><body bgcolor="+hexno+">"+item.name+"</body></html>"
+				pItem.setHtml(QtCore.QString(textbgcolor))
+		else:	
+			if(fgbg_color == 'foreground'):
+				pItem.setDefaultTextColor(QtGui.QColor(textColor))
+			elif(fgbg_color == 'background'):
+				textbgcolor = "<html><body bgcolor='"+textColor+"'>"+item.name+"</body></html>"
+				pItem.setHtml(QtCore.QString(textbgcolor))
+	# Calculating line distance
+	def lineCord(self,src,des,source):
 		if( (src == "") & (des == "") ):
 			print "Source or destination is missing or incorrect"
 		
@@ -289,26 +465,25 @@ class LayoutWidget(QtGui.QWidget):
 			arrow = self.calArrow(src,des)
 		
 			if(source.className == "Reaction"):
-				qgLineitem = self.screen.addPolygon(arrow,QtGui.QPen(QtCore.Qt.green, 1, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
+				qgLineitem = self.sceneContainer.addPolygon(arrow,QtGui.QPen(QtCore.Qt.green, 1, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
 
 			elif(source.className == "Enzyme"):
-				qgLineitem = self.screen.addPolygon(arrow,QtGui.QPen(QtCore.Qt.red, 1, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
+				qgLineitem = self.sceneContainer.addPolygon(arrow,QtGui.QPen(QtCore.Qt.red, 1, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
 			
-			lineItem_dict[qgLineitem] = srcdes_list
-			if src in object2line:
-				object2line[ src ].append( ( qgLineitem, des) )
+			self.lineItem_dict[qgLineitem] = srcdes_list
+			if src in self.object2line:
+				self.object2line[ src ].append( ( qgLineitem, des) )
 			else:
-				 object2line[ src ] = []
-				 object2line[ src ].append( ( qgLineitem, des) )
+				 self.object2line[ src ] = []
+				 self.object2line[ src ].append( ( qgLineitem, des) )
 			
-			if des in object2line:
-				object2line[ des ].append( ( qgLineitem, src ) )
+			if des in self.object2line:
+				self.object2line[ des ].append( ( qgLineitem, src ) )
 			else:
-				object2line[ des ] = []
-				object2line[ des ].append( ( qgLineitem, src) )
+				self.object2line[ des ] = []
+				self.object2line[ des ].append( ( qgLineitem, src) )
 									
 	def calArrow(self,src,des):
-			
 		sX = src.sceneBoundingRect().x()
 		sY = src.sceneBoundingRect().y()			
 		sw = src.sceneBoundingRect().right() -src.sceneBoundingRect().left()
@@ -363,17 +538,8 @@ class LayoutWidget(QtGui.QWidget):
 			arrow.append(QtCore.QPointF(0,0))
 			arrow.append(QtCore.QPointF(0,0))
 			return (arrow)
-						
-	def arrowHead(self,srcAngle,degree,lineSpoint):
-		#arrowhead is calculated
-		r = 8
-		delta = math.radians(srcAngle) + math.radians(degree)
-		width = math.sin(delta)*r
-		height = math.cos(delta)*r
-		srcXArr = lineSpoint.x() + width
-		srcYArr = lineSpoint.y() + height
-		return srcXArr,srcYArr
-		
+			
+	#checking which side of rectangle intersect with other		
 	def calPoAng(self,X,Y,w,h,centerLine,linePoint):
 		#Here the 1. a. intersect point between center and 4 sides of src and 
 		#            b. intersect point between center and 4 sides of des and to draw a line connecting for src & des
@@ -405,93 +571,70 @@ class LayoutWidget(QtGui.QWidget):
 					else:
 						linePoint = QtCore.QPointF(0,0)
 						return 0
-
-	def colorCheck(self,pItem,item,textColor,fgbg_color):
-		if(textColor == "<blank-string>"): textColor = "green"		
-		if textColor.isdigit():
-			tc = int(textColor)
-			tc = (tc * 2 )
-			r,g,b = self.colorMap[tc]
-			if(fgbg_color == 'foreground'):
-				pItem.setDefaultTextColor(QtGui.QColor(r,g,b))
-			elif(fgbg_color == 'background'):
-				hexchars = "0123456789ABCDEF"
-				hexno = "#" + hexchars[r / 16] + hexchars[r % 16] + hexchars[g / 16] + hexchars[g % 16] + hexchars[b / 16] + hexchars[b % 16]	
-				textbgcolor = "<html><body bgcolor="+hexno+">"+item.name+"</body></html>"
-				pItem.setHtml(QtCore.QString(textbgcolor))
-		else:	
-			if(fgbg_color == 'foreground'):
-				pItem.setDefaultTextColor(QtGui.QColor(textColor))
-			elif(fgbg_color == 'background'):
-				textbgcolor = "<html><body bgcolor='"+textColor+"'>"+item.name+"</body></html>"
-				pItem.setHtml(QtCore.QString(textbgcolor))
-
-	def setupItem(self,mooseObject,itemlist):
-		for child in mooseObject.children():
-			childObj = moose.Neutral(child)
-			if( (childObj.className == 'Molecule') | (childObj.className == 'Reaction') |(childObj.className == 'Enzyme') ):
-				''' This is for eliminating enzyme complex'''
-				if((moose.Neutral(childObj.parent).className) != 'Enzyme'):
-					itemlist.append(childObj)
-			self.setupItem(childObj,itemlist)
-
-	def cordTransform(self,itemslist,mooseItemdict):
-		#here alpha is calculated to multipy the coordinates with, so that the each items spreads out
-		alpha = 0
-		alpha1 = 0
-		for t in range(len(itemslist)):
-			src = itemslist[t]
-			self.pitemsrc = mooseItemdict[src.id]
-			src_Scenebounding = self.pitemsrc.sceneBoundingRect()
-			srcX = src_Scenebounding.x()
-			srcY = src_Scenebounding.y()
-			#print "item bounding",srcX,srcY,src.name,srcX+srcW,srcY+srcH
-		for m in range(len(itemslist)):
-			for n in range(len(itemslist)):
-				if(m != n):
-					src = itemslist[m]
-					self.pitemsrc = mooseItemdict[src.id]
-					src_Scenebounding = self.pitemsrc.sceneBoundingRect()
-					srcX = src_Scenebounding.x()
-					srcY = src_Scenebounding.y()
-					srcW = src_Scenebounding.right()-src_Scenebounding.left()
-					srcH = src_Scenebounding.bottom()-src_Scenebounding.top()
-
-					des = itemslist[n]
-					self.pitemdes = mooseItemdict[des.id]
-					des_Scenebounding = self.pitemdes.sceneBoundingRect()
-					desX = des_Scenebounding.x()
-					desY = des_Scenebounding.y()
-					desW = des_Scenebounding.right()-des_Scenebounding.left()
-					desH = des_Scenebounding.bottom()-des_Scenebounding.top()
+	
+	#arrow head is calculated					
+	def arrowHead(self,srcAngle,degree,lineSpoint):
+		r = 8
+		delta = math.radians(srcAngle) + math.radians(degree)
+		width = math.sin(delta)*r
+		height = math.cos(delta)*r
+		srcXArr = lineSpoint.x() + width
+		srcYArr = lineSpoint.y() + height
+		return srcXArr,srcYArr
+	
+	def positionChange(self,mooseObject):
+		#If the item position changes, the corresponding arrow's are claculated
+		
+		if(isinstance(mooseObject, Textitem)):
+				self.updatearrow(mooseObject)
+		else:
+			for k, v in self.Compt_dict.items():
+					for rectChilditem in v.childItems():
+						self.updatearrow(rectChilditem)
+							
+	def emitItemtoEditor(self,mooseObject):
+		self.emit(QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"), mooseObject)
+	
+	def updatearrow(self,mooseObject):
+		listItem = []
+		for listItem in (v for k,v in self.object2line.items() if k.mooseObj_.id == mooseObject.mooseObj_.id ):
+			if len(listItem):
+				for ql,va in listItem:
+					srcdes = self.lineItem_dict[ql]
+					arrow = self.calArrow(srcdes[0],srcdes[1])
+					ql.setPolygon(arrow)
+			break
+	
+	def updateItemSlot(self, mooseObject):
+			#In this case if the name is updated from the keyboard both in mooseobj and gui gets updation
+	        for changedItem in (item for item in self.sceneContainer.items() if isinstance(item, Textitem) and mooseObject.id == item.mooseObj_.id):
+	            break
+	        changedItem.updateSlot()
+	        self.positionChange(changedItem.mooseObj_)
+	        
+	def keyPressEvent(self,event):
+		#For Zooming
+		for item in self.sceneContainer.items():
+			if isinstance (item, Textitem):
+				if((self.view.matrix().m11()<=1.0)and(self.view.matrix().m22() <=1.0)):
+					item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, True)
+				else:
+					item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, False)
 					
-					t = src_Scenebounding.intersects(des_Scenebounding)
-					if t:
-						sfx = 0
-						sfy = 0
-						if((desX - srcX)!= 0):	sfx = ( float(srcW)/abs(desX-srcX))
-						if((desY - srcY)!= 0):	sfy = ( float(srcH)/abs(desY-srcY))
-						if((sfx != 0) and (sfy != 0)):
-							if( sfx < sfy):		alpha = sfx
-							elif (sfy < sfx):	alpha = sfy
-							else:			alpha = 0
-						elif (sfx == 0): alpha = sfy
-						elif (sfy == 0): alpha = sfx
-						else:		 alpha =0
-					else:
-						pass
-					
-					if(alpha1 < alpha): alpha1 = alpha
-					
-				else: 
-					pass
-		alpha1=alpha1+1
-		return(alpha1)
-
+		key = event.key()
+		
+		if key == QtCore.Qt.Key_A:
+			self.view.resetMatrix()
+	
+		elif (key == 46 or key == 62):
+			self.view.scale(1.1,1.1)
+			
+		elif (key == 44 or key == 60):	
+			self.view.scale(1/1.1,1/1.1)				
+			
 if __name__ == "__main__":
 	#app = QtGui.QApplication(sys.argv)
 	dt = LayoutWidget()
 	dt.show()
 	sys.exit(app.exec_())
-
-
+		
