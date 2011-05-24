@@ -19,13 +19,13 @@
  * events.
  * It does not assume anything about how to manage synaptic events.
  */
-class SynHandler
+class SynBase
 {
 	public: 
-		SynHandler();
-		virtual ~SynHandler();
+		SynBase();
+		virtual ~SynBase();
 
-		SynHandler( double thresh, double tau );
+		SynBase( double thresh, double tau );
 
 		/**
  		 * Inserts an event into the pendingEvents queue for spikes.

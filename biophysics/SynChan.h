@@ -10,7 +10,7 @@
 #ifndef _SynChan_h
 #define _SynChan_h
 
-class SynChan: public SynHandler
+class SynChan: public SynBase
 {
 	public:
 		SynChan();

@@ -11,7 +11,7 @@
 #include "header.h"
 // #include "SynInfo.h"
 #include "Synapse.h"
-#include "SynHandler.h"
+#include "SynBase.h"
 #include "SynChan.h"
 
 static const double SynE = exp(1.0);
@@ -172,7 +172,7 @@ const Cinfo* SynChan::initCinfo()
 
 	static Cinfo SynChanCinfo(
 		"SynChan",
-		SynHandler::initCinfo(),
+		SynBase::initCinfo(),
 		SynChanFinfos,
 		sizeof( SynChanFinfos )/sizeof(Finfo *),
 		new Dinfo< SynChan >()

@@ -16,7 +16,7 @@
 #include "Dinfo.h"
 #include <queue>
 #include "../biophysics/Synapse.h"
-#include "../biophysics/SynHandler.h"
+#include "../biophysics/SynBase.h"
 #include "../biophysics/IntFire.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
@@ -2280,7 +2280,7 @@ void testFinfoFields()
 void testCinfoFields()
 {
 	assert( IntFire::initCinfo()->getDocs() == "" );
-	assert( IntFire::initCinfo()->getBaseClass() == "SynHandler" );
+	assert( IntFire::initCinfo()->getBaseClass() == "SynBase" );
 
 	// We have a little bit of a hack here to cast away
 	// constness, due to the way the FieldElementFinfos
@@ -2296,7 +2296,7 @@ void testCinfoFields()
 
 	unsigned int ndf = neutralCinfo->getNumDestFinfo();
 	assert( ndf == 18 );
-	unsigned int sdf = SynHandler::initCinfo()->getNumDestFinfo();
+	unsigned int sdf = SynBase::initCinfo()->getNumDestFinfo();
 	assert( sdf == 22 );
 	assert( cinfo->getNumDestFinfo() == 10 + sdf );
 	assert( cinfo->getDestFinfo( 0+sdf ) == cinfo->findFinfo( "set_Vm" ) );
@@ -2340,11 +2340,11 @@ void testCinfoElements()
 	unsigned int nvf = neutralCinfo->getNumValueFinfo();
 	unsigned int nsf = neutralCinfo->getNumSrcFinfo();
 	unsigned int ndf = neutralCinfo->getNumDestFinfo();
-	unsigned int sdf = SynHandler::initCinfo()->getNumDestFinfo();
+	unsigned int sdf = SynBase::initCinfo()->getNumDestFinfo();
 
 	assert( intFireCinfoId != Id() );
 	assert( Field< string >::get( intFireCinfoId, "name" ) == "IntFire" );
-	assert( Field< string >::get( intFireCinfoId, "baseClass" ) == "SynHandler" );
+	assert( Field< string >::get( intFireCinfoId, "baseClass" ) == "SynBase" );
 	assert( Field< unsigned int >::get( 
 		intFireCinfoId, "num_valueFinfo" ) == 5 + nvf );
 	assert( Field< unsigned int >::get( 

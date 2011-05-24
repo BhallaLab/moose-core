@@ -11,7 +11,7 @@
 #define _INT_FIRE_H
 
 
-class IntFire: public SynHandler
+class IntFire: public SynBase
 {
 	friend void testStandaloneIntFire();
 	friend void testSynapse();
