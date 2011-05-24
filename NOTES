@@ -12991,3 +12991,4 @@ SynHandler base class for various things dealing with synapses.
 		SynChanBase
 This should work.
 
+Renamed SynHandler to SynBase. Checkin 2689.

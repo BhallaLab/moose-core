@@ -71,8 +71,6 @@ class HHChannel
 		double getYpower( const Eref& e, const Qinfo* q ) const;
 		void setZpower( const Eref& e, const Qinfo* q, double Zpower );
 		double getZpower( const Eref& e, const Qinfo* q ) const;
-		void setSurface( const Eref& e, const Qinfo* q, double Surface );
-		double getSurface() const;
 		void setInstant( int Instant );
 		int getInstant() const;
 		void setGk( double Gk );
