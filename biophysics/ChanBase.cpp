@@ -10,13 +10,27 @@
 #include "header.h"
 #include "ChanBase.h"
 
-static SrcFinfo1< double > permeability( "permeability", 
-	"Conductance term going out to GHK object" );
-static SrcFinfo2< double, double > channelOut( "channelOut", 
-	"Sends channel variables Gk and Ek to compartment" );
-static SrcFinfo1< double > IkOut( "IkOut", 
-	"Channel current. This message typically goes to concen"
-	"objects that keep track of ion concentration." );
+static SrcFinfo1< double >* permeability()
+{
+	static SrcFinfo1< double > permeability( "permeability", 
+		"Conductance term going out to GHK object" );
+	return &permeability;
+}
+
+static SrcFinfo2< double, double >* channelOut()
+{
+	static SrcFinfo2< double, double > channelOut( "channelOut", 
+		"Sends channel variables Gk and Ek to compartment" );
+	return &channelOut;
+}
+
+static SrcFinfo1< double >* IkOut()
+{
+	static SrcFinfo1< double > IkOut( "IkOut", 
+		"Channel current. This message typically goes to concen"
+		"objects that keep track of ion concentration." );
+	return &IkOut;
+}
 
 const Cinfo* ChanBase::initCinfo()
 {
@@ -32,7 +46,7 @@ const Cinfo* ChanBase::initCinfo()
 
 	static Finfo* channelShared[] =
 	{
-		&channelOut, &Vm
+		channelOut(), &Vm
 	};
 	static SharedFinfo channel( "channel", 
 		"This is a shared message to couple channel to compartment. "
@@ -47,7 +61,7 @@ const Cinfo* ChanBase::initCinfo()
 	/// Permability SrcFinfo defined above.
 	static Finfo* ghkShared[] =
 	{
-		&Vm, &permeability
+		&Vm, permeability()
 	};
 	static SharedFinfo ghk( "ghk", 
 		"Message to Goldman-Hodgkin-Katz object",
@@ -95,7 +109,7 @@ const Cinfo* ChanBase::initCinfo()
 		&Ek,				// Value
 		&Gk,				// Value
 		&Ik,				// ReadOnlyValue
-		&IkOut,				// Src
+		IkOut(),				// Src
 	};
 	
 	static string doc[] =
@@ -128,8 +142,7 @@ ChanBase::ChanBase()
 			:
 			Vm_( 0.0 ),
 			Gbar_( 0.0 ), Ek_( 0.0 ),
-			Gk_( 0.0 ), Ik_( 0.0 ),
-			g_( 0.0 )
+			Gk_( 0.0 ), Ik_( 0.0 )
 {
 	;
 }
@@ -168,6 +181,10 @@ double ChanBase::getGk() const
 	return Gk_;
 }
 
+void ChanBase::setIk( double Ik )
+{
+	Ik_ = Ik;
+}
 double ChanBase::getIk() const
 {
 	return Ik_;
@@ -181,3 +198,27 @@ void ChanBase::handleVm( double Vm )
 {
 	Vm_ = Vm;
 }
+
+///////////////////////////////////////////////////
+// Looks like a dest function, but it is only called
+// from the child class. Sends out various messages.
+///////////////////////////////////////////////////
+
+void ChanBase::process(  const Eref& e, const ProcPtr info )
+{
+	channelOut()->send( e, info, Gk_, Ek_ );
+	// This is used if the channel connects up to a conc pool and
+	// handles influx of ions giving rise to a concentration change.
+	IkOut()->send( e, info, Ik_ );
+	// Needed by GHK-type objects
+	permeability()->send( e, info, Gk_ );
+}
+
+
+void ChanBase::reinit(  const Eref& e, const ProcPtr info )
+{
+	channelOut()->send( e, info, Gk_, Ek_ );
+	// Needed by GHK-type objects
+	permeability()->send( e, info, Gk_ );
+}
+
