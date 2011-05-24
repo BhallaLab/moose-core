@@ -10,6 +10,7 @@
 #include "header.h"
 #include "ElementValueFinfo.h"
 #include "HHGate.h"
+#include "ChanBase.h"
 #include "HHChannel.h"
 #include "ReduceBase.h"
 #include "ReduceMax.h"
@@ -19,14 +20,6 @@ const double HHChannel::EPSILON = 1.0e-10;
 const int HHChannel::INSTANT_X = 1;
 const int HHChannel::INSTANT_Y = 2;
 const int HHChannel::INSTANT_Z = 4;
-
-static SrcFinfo1< double > permeability( "permeability", 
-	"Conductance term going out to GHK object" );
-static SrcFinfo2< double, double > channelOut( "channelOut", 
-	"Sends channel variables Gk and Ek to compartment" );
-static SrcFinfo1< double > IkOut( "IkOut", 
-	"Channel current. This message typically goes to concen"
-	"objects that keep track of ion concentration." );
 
 const Cinfo* HHChannel::initCinfo()
 {
@@ -54,48 +47,10 @@ const Cinfo* HHChannel::initCinfo()
 	);
 
 	/////////////////////////////////////////////////////////////////////
-	/// ChannelOut SrcFinfo defined above.
-	static DestFinfo Vm( "Vm", 
-		"Handles Vm message coming in from compartment",
-		new OpFunc1< HHChannel, double >( &HHChannel::handleVm ) );
-
-	static Finfo* channelShared[] =
-	{
-		&channelOut, &Vm
-	};
-	static SharedFinfo channel( "channel", 
-		"This is a shared message to couple channel to compartment. "
-		"The first entry is a MsgSrc to send Gk and Ek to the compartment "
-		"The second entry is a MsgDest for Vm from the compartment.",
-		channelShared, sizeof( channelShared ) / sizeof( Finfo* )
-	);
-
-	///////////////////////////////////////////////////////
-	// Here we reuse the Vm DestFinfo declared above.
-
-	/// Permability SrcFinfo defined above.
-	static Finfo* ghkShared[] =
-	{
-		&Vm, &permeability
-	};
-	static SharedFinfo ghk( "ghk", 
-		"Message to Goldman-Hodgkin-Katz object",
-		ghkShared, sizeof( ghkShared ) / sizeof( Finfo* ) );
 
 ///////////////////////////////////////////////////////
 // Field definitions
 ///////////////////////////////////////////////////////
-
-		static ValueFinfo< HHChannel, double > Gbar( "Gbar",
-			"Maximal channel conductance",
-			&HHChannel::setGbar,
-			&HHChannel::getGbar
-		);
-		static ValueFinfo< HHChannel, double > Ek( "Ek", 
-			"Reversal potential of channel",
-			&HHChannel::setEk,
-			&HHChannel::getEk
-		);
 		static ElementValueFinfo< HHChannel, double > Xpower( "Xpower",
 			"Power for X gate",
 			&HHChannel::setXpower,
@@ -118,15 +73,6 @@ const Cinfo* HHChannel::initCinfo()
 			"as a rate term for numerical integration for the state",
 			&HHChannel::setInstant,
 			&HHChannel::getInstant
-		);
-		static ValueFinfo< HHChannel, double > Gk( "Gk",
-			"Channel conductance variable",
-			&HHChannel::setGk,
-			&HHChannel::getGk
-		);
-		static ReadOnlyValueFinfo< HHChannel, double > Ik( "Ik",
-			"Channel current variable",
-			&HHChannel::getIk
 		);
 		static ValueFinfo< HHChannel, double > X( "X", 
 			"State variable for X gate",
@@ -200,21 +146,14 @@ const Cinfo* HHChannel::initCinfo()
 	static Finfo* HHChannelFinfos[] =
 	{
 		&proc,				// Shared
-		&channel,			// Shared
-		&ghk,				// Shared
-		&Gbar,				// Value
-		&Ek,				// Value
 		&Xpower,			// Value
 		&Ypower,			// Value
 		&Zpower,			// Value
 		&instant,			// Value
-		&Gk,				// Value
-		&Ik,				// ReadOnlyValue
 		&X,					// Value
 		&Y,					// Value
 		&Z,					// Value
 		&useConcentration,	// Value
-		&IkOut,				// Src
 		&concen,			// Dest
 		&createGate,		// Dest
 		&gateX,				// FieldElement
@@ -233,7 +172,7 @@ const Cinfo* HHChannel::initCinfo()
 
 	static Cinfo HHChannelCinfo(
 		"HHChannel",
-		Neutral::initCinfo(),
+		ChanBase::initCinfo(),
 		HHChannelFinfos,
 		sizeof( HHChannelFinfos )/sizeof(Finfo *),
 		new Dinfo< HHChannel >()
@@ -251,10 +190,8 @@ static const Cinfo* hhChannelCinfo = HHChannel::initCinfo();
 ///////////////////////////////////////////////////
 HHChannel::HHChannel()
 			: Xpower_( 0.0 ), Ypower_( 0.0 ), Zpower_( 0.0 ),
-			Vm_( 0.0 ), conc_( 0.0 ),
-			Gbar_( 0.0 ), Ek_( 0.0 ),
+			conc_( 0.0 ),
 			instant_( 0 ),
-			Gk_( 0.0 ), Ik_( 0.0 ),
 			X_( 0.0 ), Y_( 0.0 ), Z_( 0.0 ),
             xInited_( false ), yInited_( false ), zInited_( false ),
 			g_( 0.0 ),
@@ -424,25 +361,6 @@ void HHChannel::destroyGate( const Eref& e, const Qinfo* q,
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
-
-void HHChannel::setGbar( double Gbar )
-{
-	Gbar_ = Gbar;
-}
-double HHChannel::getGbar() const
-{
-	return Gbar_;
-}
-
-void HHChannel::setEk( double Ek )
-{
-	Ek_ = Ek;
-}
-double HHChannel::getEk() const
-{
-	return Ek_;
-}
-
 /**
  * Assigns the Xpower for this gate. If the gate exists and has
  * only this element for input, then change the gate value.
@@ -472,20 +390,6 @@ void HHChannel::setInstant( int instant )
 int HHChannel::getInstant() const
 {
 	return instant_;
-}
-
-void HHChannel::setGk( double Gk )
-{
-	Gk_ = Gk;
-}
-double HHChannel::getGk() const
-{
-	return Gk_;
-}
-
-double HHChannel::getIk() const
-{
-	return Ik_;
 }
 
 void HHChannel::setX( double X )
@@ -547,7 +451,7 @@ double HHChannel::integrate( double state, double dt, double A, double B )
 
 void HHChannel::process( const Eref& e, ProcPtr info )
 {
-	g_ += Gbar_;
+	g_ += ChanBase::getGbar();
 	double A = 0;
 	double B = 0;
 	if ( Xpower_ > 0 ) {
@@ -582,9 +486,15 @@ void HHChannel::process( const Eref& e, ProcPtr info )
 		g_ *= takeZpower_( Z_, Zpower_ );
 	}
 
-	Gk_ = g_;
+	ChanBase::setGk( g_ );
+	ChanBase::setIk( (ChanBase::getEk() - Vm_ ) * g_ );
+	// Gk_ = g_;
+	// Ik_ = ( Ek_ - Vm_ ) * g_;
+
+	// Send out the relevant channel messages.
+	ChanBase::process( e, info );
+	/*
 	channelOut.send( e, info, Gk_, Ek_ );
-	Ik_ = ( Ek_ - Vm_ ) * g_;
 	
 	// This is used if the channel connects up to a conc pool and
 	// handles influx of ions giving rise to a concentration change.
@@ -592,6 +502,7 @@ void HHChannel::process( const Eref& e, ProcPtr info )
 	
 	// Needed by GHK-type objects
 	permeability.send( e, info, Gk_ );
+	*/
 	
 	g_ = 0.0;
 }
@@ -602,7 +513,7 @@ void HHChannel::process( const Eref& e, ProcPtr info )
  */
 void HHChannel::reinit( const Eref& er, ProcPtr info )
 {
-	g_ = Gbar_;
+	g_ = ChanBase::getGbar();
 	Element* e = er.element();
 
 	double A = 0.0;
@@ -646,21 +557,22 @@ void HHChannel::reinit( const Eref& er, ProcPtr info )
 		g_ *= takeZpower_( Z_, Zpower_ );
 	}
 
-	Gk_ = g_;
+	ChanBase::setGk( g_ );
+	ChanBase::setIk( ( ChanBase::getEk() - Vm_ ) * g_ );
+	// Gk_ = g_;
+	// Ik_ = ( Ek_ - Vm_ ) * g_;
 
+	// Send out the relevant channel messages.
+	// Same for reinit as for process.
+	ChanBase::reinit( er, info );
+
+	/*
 	channelOut.send( er, info, Gk_, Ek_ );
-	// channelSrc_.send( Gk_, Ek_ );
-	Ik_ = ( Ek_ - Vm_ ) * g_;
-	
 	// Needed by GHK-type objects
 	permeability.send( er, info, Gk_ );
+	*/
 	
 	g_ = 0.0;
-}
-
-void HHChannel::handleVm( double Vm )
-{
-	Vm_ = Vm;
 }
 
 void HHChannel::handleConc( double conc )

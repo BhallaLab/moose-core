@@ -34,7 +34,9 @@ class ChanBase
 		int getInstant() const;
 		void setGk( double Gk );
 		double getGk() const;
-		// Ik is read-only
+		/// Ik is read-only for MOOSE, but we provide the set 
+		/// func for derived classes to update it.
+		void setIk( double Ic );
 		double getIk() const;
 
 		/////////////////////////////////////////////////////////////
@@ -47,6 +49,13 @@ class ChanBase
 		void handleVm( double Vm );
 
 		/////////////////////////////////////////////////////////////
+		/**
+		 * This function sends out the messages expected of a channel,
+		 * after process or reinit. It is NOT used by the ChanBase
+		 * itself for a DestFinfo.
+		 */
+		void process( const Eref& e, const ProcPtr info );
+		void reinit( const Eref& e, const ProcPtr info );
 		static const Cinfo* initCinfo();
 
 	protected:
@@ -63,9 +72,6 @@ class ChanBase
 		double Gk_;
 		/// Channel current
 		double Ik_;
-
-		/// Internal variable used to calculate conductance
-		double g_;	
 };
 
 
