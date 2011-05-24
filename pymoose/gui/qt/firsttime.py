@@ -124,8 +124,8 @@ class FirstTimeWizard(QtGui.QWizard):
 
     def _createColormapPage(self):
         page = QtGui.QWizardPage(self)
-        page.setTitle('Select the colormap file to use for 3D visualization.')
-        page.setSubTitle('The colormap file is %s\nBut if you have it somewhere else, please select it below.' % (self._colormapPath))
+        page.setTitle('Select the colormaps folder to use for 3D visualization.')
+        page.setSubTitle('The colormap folder is %s\nBut if you have it somewhere else, please select it below.' % (self._colormapPath))
         label = QtGui.QLabel('Colormap file', page)
         line = QtGui.QLineEdit(self._colormapPath, page)
         button = QtGui.QPushButton(self.tr('Browse'), page)
@@ -148,7 +148,8 @@ class FirstTimeWizard(QtGui.QWizard):
         self._glclientLine.setText(self._glclientPath)
 
     def _locateColormapFile(self):
-        self._colormapPath = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Colormap file'))
+#        self._colormapPath = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Colormap file'))
+        self._colormapPath = unicode(QtGui.QFileDialog.getExistingDirectory(self, 'Colormap file'))
         self._colormapLine.setText(self._colormapPath)
 
     def _finished(self):
