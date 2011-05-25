@@ -7,7 +7,6 @@ from operator import itemgetter, attrgetter
 import math
 import config
 import moose
-
 '''
 c = moose.PyMooseBase.getContext()
 c.loadG('/home/lab13/Genesis_file/gfile/acc25.g')
@@ -81,9 +80,25 @@ class Graphicalview(QtGui.QGraphicsView):
 		self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
 		self.setScene(self.sceneContainerPt)
 		self.rubberBandactive = False
-		self.rubberBand=0
-		
+		self.itemSelected = False
+		self.customrubberBand=0
+		self.rubberbandWidth = 0
+		self.rubberbandHeight = 0
+			
 	def mousePressEvent(self, event):
+		
+		if event.buttons() == QtCore.Qt.RightButton and self.rubberBandactive == True:
+			popupmenu = QtGui.QMenu('PopupMenu', self)
+			self.delete = QtGui.QAction(self.tr('delete'), self)
+			self.connect(self.delete, QtCore.SIGNAL('triggered()'), self.deleteItem)
+			
+			self.zoom = QtGui.QAction(self.tr('zoom'), self)
+			self.connect(self.zoom, QtCore.SIGNAL('triggered()'), self.zoomItem)
+			
+			popupmenu.addAction(self.delete)
+			popupmenu.addAction(self.zoom)
+			popupmenu.exec_(event.globalPos())
+
 		if event.buttons() == QtCore.Qt.LeftButton:
 			self.startingPos = event.pos()
 			self.startScenepos = self.mapToScene(self.startingPos)
@@ -106,7 +121,7 @@ class Graphicalview(QtGui.QGraphicsView):
 			#checking if rubberband selection start on any item (in my case textitem or rectcompartment) if none, start the rubber effect 
 			if ( sceneitems == None):
 				QtGui.QGraphicsView.mousePressEvent(self, event)
-				self.rubberBandactive = True
+				self.itemSelected = False
 				
 			#Since qgraphicsrectitem is a item in qt, if I select inside the rectangle it would select the entire rectangle
 			# and would not allow me to select the items inside the rectangle so breaking the code by not calling parent class to inherit functionality
@@ -115,7 +130,7 @@ class Graphicalview(QtGui.QGraphicsView):
 				
 				if(isinstance(sceneitems, Textitem)):
 					QtGui.QGraphicsView.mousePressEvent(self, event)
-					
+					self.itemSelected = True
 				elif(isinstance(sceneitems, Rect_Compt)):
 					for previousSelection in self.sceneContainerPt.selectedItems():
 						if previousSelection.isSelected() == True:
@@ -136,37 +151,44 @@ class Graphicalview(QtGui.QGraphicsView):
 					   ((xp > xe-self.border/2) and (xp < xe+self.border/2) and (yp > ys-self.border/2) and (yp < ye+self.border/2) ) ):
 					   	if sceneitems.isSelected() == False:
 					   		sceneitems.setSelected(1)
+					   		self.itemSelected = True
 						QtGui.QGraphicsView.mousePressEvent(self, event)
 
 					else:
 						#if its inside the qgraphicsrectitem then custom code for starting rubberband selection	
 						self.rubberBandactive = True
-						self.rubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle,self)
-						self.rubberBand.setGeometry(QtCore.QRect(self.startingPos,QtCore.QSize()))
-						self.rubberBand.show()
+						self.itemSelected = False
+						self.customrubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle,self)
+						self.customrubberBand.setGeometry(QtCore.QRect(self.startingPos,QtCore.QSize()))
+						self.customrubberBand.show()
 				else:
 					print "Report this functionality may not be implimentated"
 					
 	def mouseMoveEvent(self,event):
 		QtGui.QGraphicsView.mouseMoveEvent(self, event)
-		
-		if(( event.buttons() == QtCore.Qt.LeftButton) and (self.rubberBandactive == False)):
+
+		if self.customrubberBand == 0 and event.buttons() == QtCore.Qt.LeftButton and self.itemSelected == False :
+			self.rubberBandactive = True
+
+		elif event.buttons() == QtCore.Qt.LeftButton and self.itemSelected == True :
 			for selecteditem in self.sceneContainerPt.selectedItems():
 				self.emit(QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),selecteditem.mooseObj_)
+				self.rubberBandactive = False
 							
-		if( (self.rubberBand) and (event.buttons() == QtCore.Qt.LeftButton)):
+		if( (self.customrubberBand) and (event.buttons() == QtCore.Qt.LeftButton)):
 				self.endingPos = event.pos()
 				self.endingScenepos = self.mapToScene(self.endingPos)
-				w = self.endingScenepos.x()-self.startScenepos.x()
-				h = self.endingScenepos.y()-self.startScenepos.y()
+				self.rubberbandWidth = self.endingScenepos.x()-self.startScenepos.x()
+				self.rubberbandHeight = self.endingScenepos.y()-self.startScenepos.y()
+
 				
-				self.rubberBand.setGeometry(QtCore.QRect(self.startingPos, event.pos()).normalized())
+				self.customrubberBand.setGeometry(QtCore.QRect(self.startingPos, event.pos()).normalized())
 								
 				#unselecting any previosly selected item in scene
 				for preSelectItem in self.sceneContainerPt.selectedItems():
 					preSelectItem.setSelected(0)
 					
-				for items in self.sceneContainerPt.items(self.startScenepos.x(),self.startScenepos.y(),w,h,Qt.Qt.IntersectsItemShape):
+				for items in self.sceneContainerPt.items(self.startScenepos.x(),self.startScenepos.y(),self.rubberbandWidth,self.rubberbandHeight,Qt.Qt.IntersectsItemShape):
 					if(isinstance(items,Textitem)):
 						if items.isSelected() == False:
 							items.setSelected(1)
@@ -174,34 +196,48 @@ class Graphicalview(QtGui.QGraphicsView):
 	def mouseReleaseEvent(self, event):
 						
 		QtGui.QGraphicsView.mouseReleaseEvent(self, event)
-		if(self.rubberBand):
-			self.rubberBand.hide()
-			self.rubberBand = 0
+		if(self.customrubberBand):
+			self.customrubberBand.hide()
+			self.customrubberBand = 0
 		
 		if((event.button() == QtCore.Qt.LeftButton) and (self.rubberBandactive == True)):
 			self.endingPos = event.pos()
 			self.endScenepos = self.mapToScene(self.endingPos)
-			w = (self.endScenepos.x()-self.startScenepos.x())
-			h = (self.endScenepos.y()-self.startScenepos.y())
-			vTransform = self.viewportTransform()
-		
-			if( w > 0  and h >0):
-				self.rubberbandlist = self.sceneContainerPt.items(self.startScenepos.x(),self.startScenepos.y(),w,h, Qt.Qt.IntersectsItemShape)
-				for items in (qgraphicsitem for qgraphicsitem in self.rubberbandlist if isinstance(qgraphicsitem,Textitem)):
-					self.fitInView(self.startScenepos.x(),self.startScenepos.y(),w,h,Qt.Qt.KeepAspectRatio)
-					if((self.matrix().m11()>=1.0)and(self.matrix().m22() >=1.0)):
-						for item in ( Txtitem for Txtitem in self.sceneContainerPt.items() if isinstance (Txtitem, Textitem)):
-							item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, False)
-			else:
-				self.rubberbandlist = self.sceneContainerPt.items(self.endScenepos.x(),self.endScenepos.y(),abs(w),abs(h), Qt.Qt.IntersectsItemShape)
-				for items in (qgraphicsitem for qgraphicsitem in self.rubberbandlist if isinstance(qgraphicsitem,Textitem)):
-					self.fitInView(self.endScenepos.x(),self.endScenepos.y(),abs(w),abs(h),Qt.Qt.KeepAspectRatio)
-					if((self.matrix().m11()>=1.0)and(self.matrix().m22() >=1.0)):
-						for item in ( Txtitem for Txtitem in self.sceneContainerPt.items() if isinstance (Txtitem, Textitem)):
-							item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, False)		
-							
+			self.rubberbandWidth = (self.endScenepos.x()-self.startScenepos.x())
+			self.rubberbandHeight = (self.endScenepos.y()-self.startScenepos.y())
+	
+	def deleteItem(self):
 		self.rubberBandactive = False
+		for items in self.sceneContainerPt.selectedItems():
+			print "items to be deleted",items.mooseObj_.name
+	
+	def zoomItem(self):
 		
+		vTransform = self.viewportTransform()
+		if( self.rubberbandWidth > 0  and self.rubberbandHeight >0):
+			self.rubberbandlist = self.sceneContainerPt.items(self.startScenepos.x(),self.startScenepos.y(),self.rubberbandWidth,self.rubberbandHeight, Qt.Qt.IntersectsItemShape)
+			for unselectitem in self.rubberbandlist:
+				if unselectitem.isSelected() == True:
+					unselectitem.setSelected(0)
+	
+			for items in (qgraphicsitem for qgraphicsitem in self.rubberbandlist if isinstance(qgraphicsitem,Textitem)):
+				self.fitInView(self.startScenepos.x(),self.startScenepos.y(),self.rubberbandWidth,self.rubberbandHeight,Qt.Qt.KeepAspectRatio)
+				if((self.matrix().m11()>=1.0)and(self.matrix().m22() >=1.0)):
+					for item in ( Txtitem for Txtitem in self.sceneContainerPt.items() if isinstance (Txtitem, Textitem)):
+						item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, False)
+		else:
+			self.rubberbandlist = self.sceneContainerPt.items(self.endScenepos.x(),self.endScenepos.y(),abs(self.rubberbandWidth),abs(self.rubberbandHeight), Qt.Qt.IntersectsItemShape)
+			for unselectitem in self.rubberbandlist:
+				if unselectitem.isSelected() == True:
+					unselectitem.setSelected(0)
+	
+			for items in (qgraphicsitem for qgraphicsitem in self.rubberbandlist if isinstance(qgraphicsitem,Textitem)):
+				self.fitInView(self.endScenepos.x(),self.endScenepos.y(),abs(self.rubberbandWidth),abs(self.rubberbandHeight),Qt.Qt.KeepAspectRatio)
+				if((self.matrix().m11()>=1.0)and(self.matrix().m22() >=1.0)):
+					for item in ( Txtitem for Txtitem in self.sceneContainerPt.items() if isinstance (Txtitem, Textitem)):
+						item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, False)		
+		self.rubberBandactive = False
+	
 class Widgetvisibility(Exception):pass
 
 class LayoutWidget(QtGui.QWidget):
@@ -209,7 +245,7 @@ class LayoutWidget(QtGui.QWidget):
 		QtGui.QWidget.__init__(self,parent)
 		grid = QtGui.QGridLayout()
 		self.setLayout(grid)
-		
+		self.setWindowTitle('Layout')		
 		self.sceneContainer = QtGui.QGraphicsScene(self)
 		self.sceneContainer.setBackgroundBrush(QtGui.QColor(230,230,219,120))
 		#~ self.sceneContainer.setSceneRect(self.sceneContainer.itemsBoundingRect())
@@ -319,7 +355,7 @@ class LayoutWidget(QtGui.QWidget):
 		 #RectCompartment which is kincompartment is added to the screne
 		for k, v in self.Compt_dict.items():
 				rectcompt = v.childrenBoundingRect()
-				#~ print "rectcompartment size",k,rectcompt,rectcompt.right(),rectcompt.left(),rectcompt.top(),rectcompt.bottom()
+	
 				v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
 				v.setPen( QtGui.QPen( Qt.QColor(66,66,66,100), self.border, QtCore.Qt.SolidLine,QtCore.Qt.RoundCap,QtCore.Qt.RoundJoin ) )
 				v.Rectemitter.connect(v.Rectemitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
@@ -615,21 +651,27 @@ class LayoutWidget(QtGui.QWidget):
 	def keyPressEvent(self,event):
 		#For Zooming
 		for item in self.sceneContainer.items():
+			
+			
 			if isinstance (item, Textitem):
 				if((self.view.matrix().m11()<=1.0)and(self.view.matrix().m22() <=1.0)):
 					item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, True)
 				else:
 					item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, False)
-					
+			elif isinstance(item,Rect_Compt):
+					pass
+					#~ print "rect item",item.childrenBoundingRect()	
 		key = event.key()
 		
 		if key == QtCore.Qt.Key_A:
 			self.view.resetMatrix()
 	
 		elif (key == 46 or key == 62):
+			print "here in sceneContainer",self.sceneContainer.sceneRect()
 			self.view.scale(1.1,1.1)
 			
 		elif (key == 44 or key == 60):	
+			print "here in sceneContainer",self.sceneContainer.sceneRect()
 			self.view.scale(1/1.1,1/1.1)				
 			
 if __name__ == "__main__":
