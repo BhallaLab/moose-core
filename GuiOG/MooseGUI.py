@@ -18,7 +18,7 @@ from MooseLayout import Ui_MainWindow
 #opengl imports
 from PyQt4.QtOpenGL import QGLWidget
 from OpenGL.GL import *
-from updatepaintGL import *
+from updatepaintGL import newGLSubWindow,updatepaintGL
 mc=moose.context
 
 class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
@@ -62,13 +62,16 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 	self.qgl.selectionMode=0			#selection mode, select cells or select compartments. 
 	
 	self.qgl.viz=1								#turn on visualization, use with self.qgl.updateViz()	
-	self.qgl.setColorMap(120*1e+06,45000*1e+06,30,cMap='jet')		#set the color map for visualization
+	self.qgl.setColorMap(vizMinVal=120*1e+06,vizMaxVal=45000*1e+06,cMap='jet')		#set the color map for visualization
 	
 	#self.qgl.drawAllCells(2)					#draws all cells in the moose root, in the specified style
 	
 	#self.qgl.drawAllCellsUnder('/shell',2)				#draws cells in the given path, path must be a neutral element
 	
-	self.qgl.drawNewCell('/cell',style=2,cellCentre=[0,0,0])	#draws the canvas with just the given cellpath
+	self.qgl.gridCompartmentName ='axon'
+	self.qgl.drawNewCell('/cell',style=3,cellCentre=[0,0,0])	
+	
+	#self.qgl.drawNewCell('/cell',style=2,cellCentre=[0,0,0])	#draws the canvas with just the given cellpath
 	
 	#self.qgl.updateViz()						#update the visualization, call once every t frames
 	

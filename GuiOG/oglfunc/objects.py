@@ -105,8 +105,7 @@ class cellStruct(BaseObject):
 	"""
 	Class that defines a cellstructure.
 	"""
-	
-	def __init__(self, parent,l_coords,cellName,style,cropName=[]):
+	def __init__(self, parent,l_coords,cellName,style,gridCompartmentName,cropName=[]):
 		"""
 		Constructor.
 		"""
@@ -118,14 +117,19 @@ class cellStruct(BaseObject):
 				if style==0:	#simple disk model
 					compartmentLine = somaDisk(self,l_coords[i],cellName)
 					self.kids.append(compartmentLine)
-				else:
+				elif (style==1)or(style==2):
 					compartmentLine = somaSphere(self,l_coords[i],cellName)
 			else:
 	    			if style==1:	#ball and stick model
 	    				compartmentLine = cLine(self,l_coords[i],cellName)
 				elif style==2:	#realistic model
 					compartmentLine = cCylinder(self,l_coords[i],cellName)
-			if style!=0:
+			if (mcc(l_coords[i][7]).name==gridCompartmentName):	#grid View
+				if style==3:
+					compartmentLine = somaDisk(self,[0,0,0,0,0,0,l_coords[i][7]],cellName)
+					compartmentLine.radius = 0.25
+					self.kids.append(compartmentLine)
+			if (style==1)or(style==2):
 				self.kids.append(compartmentLine)	
 
     	
