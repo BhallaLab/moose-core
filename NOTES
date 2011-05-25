@@ -12998,4 +12998,7 @@ Checking it out. Nagging bug in the HH calculations, comes out different
 on different runs, but takes only a few possible values. Thought it was
 failure to init a field, but that wasn't it. Valgrind might find it.
 Found it. I had defined Vm both in HHChannel as well as in the ChanBase.
-Now clears unit tests.
+Now clears unit tests. Checkin 2691.
+============================================================================
+25 May 2011.
+

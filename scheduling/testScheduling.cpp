@@ -16,7 +16,7 @@
 
 #include <queue>
 #include "../biophysics/Synapse.h"
-#include "../biophysics/SynHandler.h"
+#include "../biophysics/SynBase.h"
 #include "../biophysics/IntFire.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"

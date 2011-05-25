@@ -17,7 +17,7 @@
 #include "Arith.h"
 #include "Table.h"
 #include "../biophysics/Synapse.h"
-#include "../biophysics/SynHandler.h"
+#include "../biophysics/SynBase.h"
 #include <queue>
 #include "../biophysics/IntFire.h"
 
