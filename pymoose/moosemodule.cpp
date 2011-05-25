@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Fri Apr 22 15:03:30 2011 (+0530)
+// Last-Updated: Wed May 25 12:23:58 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 3933
+//     Update #: 3938
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -174,6 +174,7 @@ extern "C" {
         {"reinit", (PyCFunction)_pymoose_reinit, METH_VARARGS, "Reinitialize simulation"},
         {"stop", (PyCFunction)_pymoose_stop, METH_VARARGS, "Stop simulation"},
         {"isRunning", (PyCFunction)_pymoose_isRunning, METH_VARARGS, "True if the simulation is currently running."},
+        {"exists", (PyCFunction)_pymoose_exists, METH_VARARGS, "True if there is an object with specified path."},
         {"loadModel", (PyCFunction)_pymoose_loadModel, METH_VARARGS, "Load model from a file to a specified path."},
         {"connect", (PyCFunction)_pymoose_connect, METH_VARARGS, "Create a message between srcField on src element to destField on target element."},        
         {"getCwe", (PyCFunction)_pymoose_getCwe, METH_VARARGS, "Get the current working element."},
@@ -1308,6 +1309,15 @@ extern "C" {
     static PyObject * _pymoose_isRunning(PyObject * dummy, PyObject * args)
     {
         return Py_BuildValue("i", getShell().isRunning());
+    }
+
+    static PyObject * _pymoose_exists(PyObject * dummy, PyObject * args)
+    {
+        char * path;
+        if (!PyArg_ParseTuple(args, "s", &path)){
+            return NULL;
+        }
+        return Py_BuildValue("i", Id(path) != Id());
     }
     
     static PyObject * _pymoose_loadModel(PyObject * dummy, PyObject * args)

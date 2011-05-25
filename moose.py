@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Wed May  4 11:18:40 2011 (+0530)
+# Last-Updated: Wed May 25 12:24:39 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 648
+#     Update #: 698
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -189,7 +189,7 @@ __version__ = "$Revision$"
 # $Source$
 
 import _moose
-from _moose import useClock, setClock, start, reinit, stop, isRunning, loadModel, getFieldDict, Id, ObjId
+from _moose import useClock, setClock, start, reinit, stop, isRunning, loadModel, getFieldDict, Id, ObjId, exists
 
 
 class _MooseDescriptor(object):
@@ -303,6 +303,34 @@ class Neutral(object):
                 (id_, dindex, findex) = (args[0]._oid.getId().getValue(),args[0]._oid.getDataIndex(), args[0]._oid.getFieldIndex())
             elif isinstance(args[0], NeutralArray):
                 id_ = args[0]._id
+            elif isinstance(args[0], str):
+                path = args[0].replace('[', ' ').replace(']', ' ')
+                components = args[0].split('/')
+                current_path = ''
+                for component in components:
+                    if not component:
+                        continue
+                    tokens = component.split()
+                    current_path = current_path + '/' + tokens[0]
+                    if not _moose.exists(current_path):
+                        if component == components[-1]: # this is the last entry and does not exist, so create a new one
+                            class_obj = eval(self.__class__.__name__ + 'Array')
+                            array_obj = class_obj(current_path)
+                            id_ = array_obj.id_
+                        else:
+                            raise NameError('%s does not exist.' % (current_path))
+                    else:
+                        array_obj = Id(current_path)
+                        for index in tokens[1:]:
+                            array_obj = array_obj[int(index)]
+                        if isinstance(array_obj, Id):
+                            id_ = array_obj
+                        elif isinstance(array_obj, ObjId):
+                            id_ = array_obj.id_
+                            dindex = array_obj.getDataIndex()
+                            findex = array_obj.getFieldIndex()
+                        
+                    
             else:
                 raise TypeError('First non-keyword argument must be a number or an existing Id/ObjId/Neutral/NeutralArray object.')
         if len(args) >= 2:
