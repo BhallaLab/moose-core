@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Wed May 25 12:24:39 2011 (+0530)
+# Last-Updated: Wed May 25 12:51:28 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 698
+#     Update #: 708
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -152,6 +152,14 @@ i_f = intfire[0] will return a reference to the first element in the
 IntFire object we created earlier. All field-wise operations are done
 on Neutrals.
 
+A neutral object (and its derivatives) can also be created in the older way by specifying a path to the constructor. This path may contain an index. If there is a pre-existing NeutralArray object with the given path, then the index-th item of that array is returned. If the target object does not exist, but all the objects above it exist, then a new Array object is created and its first element is returned. If an index > 0 is specified in this case, that results in an IndexOutOfBounds exception. If any of the objects higher in the hierarchy do not exist (thus the path up to the parent is invalid), a NameError is raised.
+
+a = Neutral('a') # creates /a
+b = IntFire(a/b') # Creates /a/b
+c = IntFire(c/b') # Raises NameError.
+d = NeutralArray('c', 10)
+e = Neutral('c[9]') # Last element in d
+
 Methods:
 
 
@@ -174,6 +182,8 @@ reinit() -- reinitialize simulation.
 stop() -- stop simulation
 
 isRunning() -- true if simulation is in progress, false otherwise.
+
+exists(path) -- true if there is a pre-existing object with the specified path.
 
 loadModel(filepath, modelpath) -- load file in <filepath> into node
 <modelpath> of the moose model-tree.
@@ -305,13 +315,17 @@ class Neutral(object):
                 id_ = args[0]._id
             elif isinstance(args[0], str):
                 path = args[0].replace('[', ' ').replace(']', ' ')
-                components = args[0].split('/')
+                print 'Path: ', path
+                components = path.split('/')
+                print components
                 current_path = ''
                 for component in components:
                     if not component:
                         continue
                     tokens = component.split()
+                    print 't', tokens
                     current_path = current_path + '/' + tokens[0]
+                    print current_path
                     if not _moose.exists(current_path):
                         if component == components[-1]: # this is the last entry and does not exist, so create a new one
                             class_obj = eval(self.__class__.__name__ + 'Array')
@@ -326,7 +340,7 @@ class Neutral(object):
                         if isinstance(array_obj, Id):
                             id_ = array_obj
                         elif isinstance(array_obj, ObjId):
-                            id_ = array_obj.id_
+                            id_ = array_obj.getId()
                             dindex = array_obj.getDataIndex()
                             findex = array_obj.getFieldIndex()
                         
