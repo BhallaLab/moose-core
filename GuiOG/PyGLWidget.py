@@ -104,6 +104,7 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 	#self.vizColorMapIndex=[]
 	self.colorMap=[]
     	self.stepVals=[]
+    	self.gridCompartmentName = 'soma'
 	
     @QtCore.pyqtSlot()
     def printModelViewMatrix(self):
@@ -135,7 +136,7 @@ class PyGLWidget(QtOpenGL.QGLWidget):
         self.makeCurrent()
         glMatrixMode( GL_PROJECTION )
         glLoadIdentity()
-        gluPerspective( self.fovy_, float(self.width()) / float(self.height()),
+        gluPerspective( self.fovy_, float(self.width()) / max(1.0,float(self.height())),
                         self.near_, self.far_ )
         self.updateGL()
 
@@ -374,22 +375,22 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 	elif (ev.key() == QtCore.Qt.Key_Minus)or(ev.key() == QtCore.Qt.Key_PageDown):
 		self.translate([0.0, 0.0, -0.75])
 		self.updateGL()
-	elif (ev.key() == QtCore.Qt.Key_X):
+	elif (ev.key() == QtCore.Qt.Key_A):
 		self.rotate([1.0, 0.0, 0.0],2.0)
 		self.updateGL()
-	elif (ev.key() == QtCore.Qt.Key_C):
+	elif (ev.key() == QtCore.Qt.Key_Q):
 		self.rotate([1.0, 0.0, 0.0],-2.0)
 		self.updateGL()
-	elif (ev.key() == QtCore.Qt.Key_Y):
+	elif (ev.key() == QtCore.Qt.Key_U):
 		self.rotate([0.0, 1.0, 0.0],2.0)
 		self.updateGL()
-	elif (ev.key() == QtCore.Qt.Key_U):
+	elif (ev.key() == QtCore.Qt.Key_Y):
 		self.rotate([0.0, 1.0, 0.0],-2.0)
 		self.updateGL()
 	elif (ev.key() == QtCore.Qt.Key_Z):
 		self.rotate([0.0, 0.0, 1.0],2.0)
 		self.updateGL()
-	elif (ev.key() == QtCore.Qt.Key_A):
+	elif (ev.key() == QtCore.Qt.Key_X):
 		self.rotate([0.0, 0.0, 1.0],-2.0)
 		self.updateGL()
 
