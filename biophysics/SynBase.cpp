@@ -15,6 +15,11 @@
 /// This is bigger than # synapses for any neuron I know of: should suffice.
 const unsigned int SynBase::MAX_SYNAPSES = 1000000;
 
+/**
+ * These are the base set of fields for any object managing synapses.
+ * Note that these are duplicated in SynChanBase: if you change anything
+ * here it must also be reflected there.
+ */
 const Cinfo* SynBase::initCinfo()
 {
 		static ValueFinfo< SynBase, unsigned int > numSynapses(
