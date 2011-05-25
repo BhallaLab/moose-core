@@ -13001,4 +13001,10 @@ Found it. I had defined Vm both in HHChannel as well as in the ChanBase.
 Now clears unit tests. Checkin 2691.
 ============================================================================
 25 May 2011.
+Missed out updating some of the test files in other directories with the
+conversion from SynHandler to SynBase. Checked in 2693.
 
+Implemented skeleton SynChanBase. This uses dual inheritance at the
+C++ level, but as MOOSE doesn't know how to do dual inheritance it replicates
+the SynBase fields in its code. Will be a maintenance issue to keep the two
+sets of fields identical.

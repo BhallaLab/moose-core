@@ -16,6 +16,7 @@ OBJ = \
 	Compartment.o	\
 	SymCompartment.o	\
 	ChanBase.o	\
+	SynChanBase.o	\
 	HHChannel.o	\
 	HHGate.o	\
 	SynChan.o	\
@@ -39,6 +40,7 @@ SymCompartment.o: Compartment.h SymCompartment.h
 ChanBase.o: ChanBase.h
 HHChannel.o: ChanBase.h HHChannel.h HHGate.h
 HHGate.o: HHGate.h
+SynChanBase.o: Synapse.h SynBase.h ChanBase.h
 SynChan.o: SynBase.h ChanBase.h Synapse.h SynChan.h
 SpikeGen.o: SpikeGen.h
 CaConc.o:	CaConc.h
