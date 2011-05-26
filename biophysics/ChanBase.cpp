@@ -226,3 +226,8 @@ void ChanBase::updateIk()
 {
 	Ik_ = ( Ek_ - Vm_ ) * Gk_;
 }
+
+double ChanBase::getVm() const
+{
+	return Vm_;
+}

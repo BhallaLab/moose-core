@@ -229,9 +229,12 @@ void SynChanBase::reinit(  const Eref& e, const ProcPtr info )
 	permeability()->send( e, info, cb.getGk() );
 }
 
-/*
 void SynChanBase::updateIk()
 {
 	cb.updateIk();
 }
-*/
+
+double SynChanBase::getVm() const
+{
+	return cb.getVm();
+}
