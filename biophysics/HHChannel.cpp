@@ -487,7 +487,7 @@ void HHChannel::process( const Eref& e, ProcPtr info )
 	}
 
 	ChanBase::setGk( g_ );
-	ChanBase::setIk( (ChanBase::getEk() - Vm_ ) * g_ );
+	ChanBase::updateIk();
 	// Gk_ = g_;
 	// Ik_ = ( Ek_ - Vm_ ) * g_;
 
@@ -558,7 +558,7 @@ void HHChannel::reinit( const Eref& er, ProcPtr info )
 	}
 
 	ChanBase::setGk( g_ );
-	ChanBase::setIk( ( ChanBase::getEk() - Vm_ ) * g_ );
+	ChanBase::updateIk();
 	// Gk_ = g_;
 	// Ik_ = ( Ek_ - Vm_ ) * g_;
 

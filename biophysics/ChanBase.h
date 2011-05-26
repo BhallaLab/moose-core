@@ -56,6 +56,13 @@ class ChanBase
 		 */
 		void process( const Eref& e, const ProcPtr info );
 		void reinit( const Eref& e, const ProcPtr info );
+
+		/**
+		 * Utility function for a common computation using local variables
+		 */
+		void updateIk();
+
+		/// Specify the Class Info static variable for initialization.
 		static const Cinfo* initCinfo();
 
 	protected:
@@ -73,6 +80,8 @@ class ChanBase
 		/// Channel current
 		double Ik_;
 };
+
+
 
 
 #endif // _ChanBase_h

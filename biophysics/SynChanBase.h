@@ -24,11 +24,54 @@
  * will be a maintenance issue to keep on top of.
  */
 
-class SynChanBase: public SynBase, public ChanBase
+class SynChanBase: public SynBase
 {
 	public:
 		SynChanBase();
 		~SynChanBase();
+		/////////////////////////////////////////////////////////////
+		// Value field access function definitions
+		/////////////////////////////////////////////////////////////
+
+		void setGbar( double Gbar );
+		double getGbar() const;
+		void setEk( double Ek );
+		double getEk() const;
+		void setInstant( int Instant );
+		int getInstant() const;
+		void setGk( double Gk );
+		double getGk() const;
+		/// Ik is read-only for MOOSE, but we provide the set 
+		/// func for derived classes to update it.
+		void setIk( double Ic );
+		double getIk() const;
+
+		/////////////////////////////////////////////////////////////
+		// Dest function definitions
+		/////////////////////////////////////////////////////////////
+
+		/**
+		 * Assign the local Vm_ to the incoming Vm from the compartment
+		 */
+		void handleVm( double Vm );
+
+		/////////////////////////////////////////////////////////////
+		/**
+		 * This function sends out the messages expected of a channel,
+		 * after process or reinit. It is NOT used by the ChanBase
+		 * itself for a DestFinfo.
+		 */
+		void process( const Eref& e, const ProcPtr info );
+		void reinit( const Eref& e, const ProcPtr info );
+
+		/**
+		 * Another utility function
+		 */
+// 		void updateIk(); // Uses only internal variables
+
+		/////////////////////////////////////////////////////////////
+		// Here is the ChanBase data. Can't use Multiple ineritance here
+		ChanBase cb;
 
 	static const Cinfo* initCinfo();
 };
