@@ -12,21 +12,11 @@
 // #include "SynInfo.h"
 #include "Synapse.h"
 #include "SynBase.h"
+#include "ChanBase.h"
+#include "SynChanBase.h"
 #include "SynChan.h"
 
 static const double SynE = exp(1.0);
-
-///////////////////////////////////////////////////////
-// MsgSrc definitions
-///////////////////////////////////////////////////////
-static SrcFinfo1< double > IkOut( "IkOut", 
-		"Channel current. This message typically goes to concen"
-		"objects that keep track of ion concentration." );
-
-static SrcFinfo1< double > permeability( "permeability",
-	"Conductance term. Typically goes to GHK object" );
-static SrcFinfo2< double, double > channelOut( "channelOut",
-	"Sends channel variables Gk and Ek to compartment" );
 
 const Cinfo* SynChan::initCinfo()
 {
@@ -49,48 +39,9 @@ const Cinfo* SynChan::initCinfo()
 		"Shared message to receive Process message from scheduler",
 		processShared, sizeof( processShared ) / sizeof( Finfo* ) );
 		
-	/////////////////////////////
-
-	static DestFinfo Vm( "Vm",
-			"Handles Vm message coming in from compartment",
-			new OpFunc1< SynChan, double >( &SynChan::handleVm ) );
-
-	static Finfo* channelShared[] =
-	{
-		&channelOut, &Vm
-	};
-
-	static  SharedFinfo channel( "channel", 
-		"This is a shared message to couple channel to compartment. "
-		"The first entry is a MsgSrc to send Gk and Ek to the compartment "
-		"The second entry is a MsgDest for Vm from the compartment.",
-		channelShared, sizeof( channelShared ) / sizeof( Finfo* )
-	);
-
-	static Finfo* ghkShared[] =
-	{
-		&Vm, &permeability
-	};
-
-	static SharedFinfo ghk( "ghk",
-		"Message to Goldman-Hodgkin-Katz object",
-		ghkShared, sizeof( ghkShared ) / sizeof( Finfo* ) );
-
 ///////////////////////////////////////////////////////
 // Field definitions
 ///////////////////////////////////////////////////////
-
-	static ValueFinfo< SynChan, double > Gbar( "Gbar",
-		"Peak channel conductance.",
-        &SynChan::setGbar,
-		&SynChan::getGbar
-	);
-
-	static ValueFinfo< SynChan, double > Ek( "Ek", 
-		"Reversal potential for the synaptic channel.",
-        &SynChan::setEk,
-		&SynChan::getEk
-	);
 	static ValueFinfo< SynChan, double > tau1( "tau1", 
 		"Decay time constant for the synaptic conductance, tau1 >= tau2.",
         &SynChan::setTau1,
@@ -108,28 +59,6 @@ const Cinfo* SynChan::initCinfo()
         &SynChan::setNormalizeWeights,
 		&SynChan::getNormalizeWeights
 	);
-	static ValueFinfo< SynChan, double > Gk( "Gk", 
-		"Conductance of the synaptic channel",
-		&SynChan::setGk,
-		&SynChan::getGk
-	);
-	static ReadOnlyValueFinfo< SynChan, double > Ik( "Ik", 
-		"Channel current.",
-		&SynChan::getIk
-	);
-
-	////////////////////////////////////////////////////////////////////
-	// FieldElementFinfo definition for Synapses
-	////////////////////////////////////////////////////////////////////
-	/*
-	static FieldElementFinfo< SynChan, Synapse > synapse( "synapse",
-		"Sets up field Elements for synapse",
-		Synapse::initCinfo(),
-		&SynChan::getSynapse,
-		&SynChan::setNumSynapses,
-		&SynChan::getNumSynapses
-	);
-	*/
 
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
@@ -146,19 +75,11 @@ const Cinfo* SynChan::initCinfo()
 	static Finfo* SynChanFinfos[] =
 	{
 		&proc,			// Shared
-		&channel,		// Shared
-		&ghk,			// Shared
-		&Gbar,			// Value
-		&Ek,			// Value
 		&tau1,			// Value
 		&tau2,			// Value
 		&normalizeWeights,	// Value
-		&Gk,			// Value
-		&Ik,			// ReadOnlyValue
 		&activation,	// Dest
 		&modulator,	// Dest
-		&IkOut,			// Src
-//		&synapse		// FieldElement
 	};
 
 	static string doc[] =
@@ -172,7 +93,7 @@ const Cinfo* SynChan::initCinfo()
 
 	static Cinfo SynChanCinfo(
 		"SynChan",
-		SynBase::initCinfo(),
+		SynChanBase::initCinfo(),
 		SynChanFinfos,
 		sizeof( SynChanFinfos )/sizeof(Finfo *),
 		new Dinfo< SynChan >()
@@ -184,7 +105,7 @@ const Cinfo* SynChan::initCinfo()
 static const Cinfo* synChanCinfo = SynChan::initCinfo();
 
 SynChan::SynChan()
-	: Ek_( 0.0 ), Gk_( 0.0 ), Ik_( 0.0 ), Gbar_( 0.0 ), 
+	: 
 	tau1_( 1.0e-3 ), tau2_( 1.0e-3 ),
 	normalizeWeights_( 0 )
 { ; }
@@ -195,24 +116,6 @@ SynChan::~SynChan()
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
-
-void SynChan::setGbar( double Gbar )
-{
-	Gbar_ = Gbar;
-}
-double SynChan::getGbar() const
-{
-	return Gbar_;
-}
-
-void SynChan::setEk( double Ek )
-{
-	Ek_ = Ek;
-}
-double SynChan::getEk() const
-{
-	return Ek_;
-}
 
 void SynChan::setTau1( double tau1 )
 {
@@ -244,41 +147,6 @@ bool SynChan::getNormalizeWeights() const
 	return normalizeWeights_;
 }
 
-void SynChan::setGk( double Gk )
-{
-	Gk_ = Gk;
-}
-double SynChan::getGk() const
-{
-	return Gk_;
-}
-
-double SynChan::getIk() const
-{
-	return Ik_;
-}
-
-/*
-unsigned int SynChan::getNumSynapses() const
-{
-	return synapses_.size();
-}
-
-void SynChan::setNumSynapses( unsigned int i )
-{
-	synapses_.resize( i );
-}
-
-Synapse* SynChan::getSynapse( unsigned int i )
-{
-	static Synapse dummy;
-	if ( i < synapses_.size() )
-		return &( synapses_[i] );
-	cout << "Warning: SynChan::getSynapse: index out of range\n";
-	return &dummy;
-}
-*/
-
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
@@ -292,13 +160,12 @@ void SynChan::process( const Eref& e, ProcPtr info )
 	}
 	X_ = modulation_ * activation_ * xconst1_ + X_ * xconst2_;
 	Y_ = X_ * yconst1_ + Y_ * yconst2_;
-	Gk_ = Y_ * norm_;
-	Ik_ = ( Ek_ - Vm_ ) * Gk_;
+	double Gk = Y_ * norm_;
+	setGk( Gk );
+	cb.updateIk();
 	activation_ = 0.0;
 	modulation_ = 1.0;
-	channelOut.send( e, info, Gk_, Ek_ );
-	IkOut.send( e, info, Ik_ );
-	permeability.send( e, info, Gk_ );
+	SynChanBase::process( e, info ); // Sends out messages for channel.
 }
 
 /*
@@ -309,8 +176,8 @@ void SynChan::reinit( const Eref& e, ProcPtr info )
 	double dt = info->dt;
 	activation_ = 0.0;
 	modulation_ = 1.0;
-	Gk_ = 0.0;
-	Ik_ = 0.0;
+	SynChanBase::setGk( 0.0 );
+	SynChanBase::setIk( 0.0 );
 	X_ = 0.0;
 	Y_ = 0.0;
 	xconst1_ = tau1_ * ( 1.0 - exp( -dt / tau1_ ) );
@@ -323,13 +190,13 @@ void SynChan::reinit( const Eref& e, ProcPtr info )
                 yconst1_ = tau2_ * ( 1.0 - exp( -dt / tau2_ ) );
                 yconst2_ = exp( -dt / tau2_ );
                 if ( tau1_ == tau2_ ) {
-                    norm_ = Gbar_ * SynE / tau1_;
+                    norm_ = SynChanBase::getGbar() * SynE / tau1_;
                 } else {
                     double tpeak = tau1_ * tau2_ * log( tau1_ / tau2_ ) / 
                             ( tau1_ - tau2_ );
-                    norm_ = Gbar_ * ( tau1_ - tau2_ ) / 
+                    norm_ = SynChanBase::getGbar() * ( tau1_ - tau2_ ) / 
                             ( tau1_ * tau2_ * ( 
-                                    exp( -tpeak / tau1_ ) - exp( -tpeak / tau2_ )
+                            exp( -tpeak / tau1_ ) - exp( -tpeak / tau2_ )
                                                 ));
                 }
         }
@@ -339,11 +206,6 @@ void SynChan::reinit( const Eref& e, ProcPtr info )
 		norm_ /= static_cast< double >( getNumSynapses() );
 	while ( !pendingEvents_.empty() )
 		pendingEvents_.pop();
-}
-
-void SynChan::handleVm( double Vm )
-{
-	Vm_ = Vm;
 }
 
 void SynChan::activation( double val )

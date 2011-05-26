@@ -13007,4 +13007,16 @@ conversion from SynHandler to SynBase. Checked in 2693.
 Implemented skeleton SynChanBase. This uses dual inheritance at the
 C++ level, but as MOOSE doesn't know how to do dual inheritance it replicates
 the SynBase fields in its code. Will be a maintenance issue to keep the two
-sets of fields identical.
+sets of fields identical. Checkin 2695.
+
+Running tests. Fails. The object returned by looking up the dataId of
+the SynChan object is not correct.
+
+Tried makeover of SynChanBase, where it inherits from SynBase, and simply
+maintains its own entry for ChanBase. Had to reimplement all the ChanBase
+calls to point to this internal entry. Still crashes.
+============================================================================
+26 May 2011.
+Some minor cleanups, now it clears unit tests. Valgrind also OK.
+
+============================================================================
