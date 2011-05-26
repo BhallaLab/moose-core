@@ -67,7 +67,9 @@ class SynChanBase: public SynBase
 		/**
 		 * Another utility function
 		 */
-// 		void updateIk(); // Uses only internal variables
+ 		void updateIk(); // Uses only internal variables
+
+		double getVm() const; // Returns Vm from the ChanBase cb.
 
 		/////////////////////////////////////////////////////////////
 		// Here is the ChanBase data. Can't use Multiple ineritance here

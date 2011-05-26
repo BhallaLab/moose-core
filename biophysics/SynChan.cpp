@@ -162,7 +162,7 @@ void SynChan::process( const Eref& e, ProcPtr info )
 	Y_ = X_ * yconst1_ + Y_ * yconst2_;
 	double Gk = Y_ * norm_;
 	setGk( Gk );
-	cb.updateIk();
+	updateIk();
 	activation_ = 0.0;
 	modulation_ = 1.0;
 	SynChanBase::process( e, info ); // Sends out messages for channel.
