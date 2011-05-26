@@ -13020,5 +13020,7 @@ calls to point to this internal entry. Still crashes.
 Some minor cleanups, now it clears unit tests. Valgrind also OK.
 Checkin 2698.
 
-Added GHK class. No tests yet.
+Added GHK class. No tests yet. Checkin 2699.
+Added NMDAChan class. No tests yet.
+
 ============================================================================

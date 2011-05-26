@@ -54,7 +54,7 @@ class SynChan: public SynChanBase
 		void innerAddSpike( DataId synIndex, const double time );
 
 		static const Cinfo* initCinfo();
-	private:
+	protected: // Used by NMDAChan
     
 ///////////////////////////////////////////////////
 // Utility function

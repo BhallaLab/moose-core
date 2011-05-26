@@ -62,6 +62,9 @@ class ChanBase
 		 */
 		void updateIk();
 
+		/// Utility function to access Vm
+		double getVm() const;
+
 		/// Specify the Class Info static variable for initialization.
 		static const Cinfo* initCinfo();
 

@@ -24,6 +24,7 @@ OBJ = \
 	CaConc.o	\
 	Nernst.o	\
 	GHK.o		\
+	NMDAChan.o	\
 	testBiophysics.o	\
 
 HEADERS = \
@@ -43,6 +44,7 @@ HHChannel.o: ChanBase.h HHChannel.h HHGate.h
 HHGate.o: HHGate.h
 SynChanBase.o: Synapse.h SynBase.h ChanBase.h
 SynChan.o: SynBase.h ChanBase.h Synapse.h SynChan.h
+NMDAChan.o: NMDAChan.h SynBase.h ChanBase.h Synapse.h SynChan.h
 SpikeGen.o: SpikeGen.h
 CaConc.o:	CaConc.h
 Nernst.o:	Nernst.h
