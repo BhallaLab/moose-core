@@ -13018,5 +13018,7 @@ calls to point to this internal entry. Still crashes.
 ============================================================================
 26 May 2011.
 Some minor cleanups, now it clears unit tests. Valgrind also OK.
+Checkin 2698.
 
+Added GHK class. No tests yet.
 ============================================================================
