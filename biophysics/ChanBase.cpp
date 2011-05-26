@@ -222,3 +222,7 @@ void ChanBase::reinit(  const Eref& e, const ProcPtr info )
 	permeability()->send( e, info, Gk_ );
 }
 
+void ChanBase::updateIk()
+{
+	Ik_ = ( Ek_ - Vm_ ) * Gk_;
+}

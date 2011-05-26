@@ -10,7 +10,7 @@
 #ifndef _SynChan_h
 #define _SynChan_h
 
-class SynChan: public SynBase
+class SynChan: public SynChanBase
 {
 	public:
 		SynChan();
@@ -20,12 +20,6 @@ class SynChan: public SynBase
 		// Value field access function definitions
 		/////////////////////////////////////////////////////////////////
 
-		void setGbar( double Gbar );
-		double getGbar() const;
-
-		void setEk( double Ek );
-		double getEk() const;
-
 		void setTau1( double tau1 );
 		double getTau1() const;
 
@@ -34,12 +28,6 @@ class SynChan: public SynBase
 
 		void setNormalizeWeights( bool value );
 		bool getNormalizeWeights() const;
-
-		void setGk( double Gk );
-		double getGk() const;
-
-		// Ik is read-only
-		double getIk() const;
 
 		/////////////////////////////////////////////////////////////////
 		// ElementFinfo access function definitions
@@ -53,8 +41,6 @@ class SynChan: public SynBase
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
-
-		void handleVm( double Vm );
 
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref& e, ProcPtr p );
@@ -75,10 +61,6 @@ class SynChan: public SynBase
 ///////////////////////////////////////////////////
     // virtual unsigned int updateNumSynapse( Eref e );
 		
-		double Ek_;
-		double Gk_;
-		double Ik_;
-		double Gbar_;
 		double tau1_;
 		double tau2_;
 		int normalizeWeights_;
@@ -91,7 +73,6 @@ class SynChan: public SynBase
 		double modulation_;
 		double X_;	
 		double Y_;	
-		double Vm_;
 		priority_queue< Synapse > pendingEvents_;
 };
 
