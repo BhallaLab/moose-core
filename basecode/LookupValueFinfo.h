@@ -82,7 +82,7 @@ template < class T, class L, class F > class LookupValueFinfo: public LookupValu
 		}
 
 		string rttiType() const {
-			return Conv<F>::rttiType();
+			return Conv<L>::rttiType() + "," + Conv<F>::rttiType();
 		}
 
 	private:
@@ -129,7 +129,7 @@ template < class T, class L, class F > class ReadOnlyLookupValueFinfo: public Lo
 		}
 
 		string rttiType() const {
-			return Conv<F>::rttiType();
+			return Conv<L>::rttiType() + "," + Conv<F>::rttiType();
 		}
 
 	private:
