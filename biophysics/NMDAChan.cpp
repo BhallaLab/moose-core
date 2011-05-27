@@ -25,9 +25,9 @@
 // Maintainer: 
 // Created: Sun Feb 28 18:17:56 2010 (+0530)
 // Version: 
-// Last-Updated: Fri Oct  8 16:05:10 2010 (+0530)
+// Last-Updated: Fri May 27 16:12:04 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 509
+//     Update #: 520
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -72,15 +72,15 @@ static SrcFinfo1< double > unblocked( "unblockedOut",
 	"Sends fraction of unblocked channels"
 );
 
-const Cinfo* initNMDAChanCinfo()
+const Cinfo* NMDAChan::initCinfo()
 {
     ///////////////////////////////////////////////////////
     // Field definitions
     ///////////////////////////////////////////////////////
     
- 	static LookupValueFinfo< NMDAChan, unsigned int, double >
+    static LookupValueFinfo< NMDAChan, unsigned int, double >
 		transitionParam(
-		"transitionParam", 
+		"c", 
 		"Transition parameters c0 to c10 in the Mg2+ dependent"
 		"state transitions.",
 		&NMDAChan::setTransitionParam,
@@ -97,11 +97,11 @@ const Cinfo* initNMDAChanCinfo()
 		"This is an intermediate variable which corresponds to "
 		"g(V, [Mg2+]o) "
 		" in the equation for conductance:"
-		" c * g(V, [Mg2+]o) * S(t) ",
+		" k * g(V, [Mg2+]o) * S(t) where k is a constant.",
 		&NMDAChan::getUnblocked
 	);
 	static ValueFinfo< NMDAChan, double > saturation("saturation",
-		"An upper limit on the NMDA conductance.",
+		"Upper limit on the NMDA conductance.",
 		&NMDAChan::setSaturation,
 		&NMDAChan::getSaturation
 	);
@@ -132,8 +132,8 @@ const Cinfo* initNMDAChanCinfo()
                 "This channel has four states as described by Jahr and Stevens (J. Neurosci. 1990, 10(9)) "
                 "This implementation is based on equation 4(a) in that article. "
                 "The channel conductance is defined as :"
-                " c * g(V, [Mg2+]o) * S(t) "
-                "where c is a scaling constant. "
+                " k * g(V, [Mg2+]o) * S(t) "
+                "where k is a scaling constant. "
                 "S(t) is the legand gated component of the conductance. It rises "
                 "linearly for t = tau2. Then decays exponentially with time constant "
                 "t = tau1. "

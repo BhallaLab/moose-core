@@ -24,9 +24,9 @@
 // Maintainer: 
 // Created: Mon Mar  8 15:13:02 2010 (+0530)
 // Version: 
-// Last-Updated: Mon Apr 26 21:42:14 2010 (+0530)
+// Last-Updated: Fri May 27 11:45:33 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 80
+//     Update #: 81
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -65,6 +65,9 @@ class NMDAChan: public SynChan
     void setMgConc( double conc );
     double getMgConc() const;
     unsigned int updateNumSynapse() const;
+    /////////////////////////////////////////////////////////////
+    static const Cinfo* initCinfo();
+    
   protected:
     double c0_;
     double c1_;
