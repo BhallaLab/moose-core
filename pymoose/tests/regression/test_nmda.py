@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Mar 22 16:58:57 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Mar 24 17:50:41 2010 (+0530)
+# Last-Updated: Fri May 27 11:09:34 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 146
+#     Update #: 163
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -48,7 +48,7 @@
 
 import moose
 
-def testNMDAChan(simtime=50e-3, simdt=1e-6, plotdt=1e-5):
+def testNMDAChan(simtime=50e-3, simdt=1e-4):
     context = moose.PyMooseBase.getContext()
     container = moose.Neutral('test_NMDA')
     soma_a = moose.Compartment('A', container)
@@ -68,8 +68,8 @@ def testNMDAChan(simtime=50e-3, simdt=1e-6, plotdt=1e-5):
     nmda = moose.NMDAChan('nmda', container)
     nmda.Gbar = 1.0 # Default
     nmda.Mg = 1.5 # mM = Mol/m^3  - SI :) 
-    nmda.tau1 = 5e-3 
-    nmda.tau2 = 130.5e-3 
+    nmda.tau1 = 130.5e-3 
+    nmda.tau2 = 5e-3 
     nmda.connect('channel', soma_b, 'channel')
     
     spikegen = moose.SpikeGen('spike', container)
@@ -104,13 +104,18 @@ def testNMDAChan(simtime=50e-3, simdt=1e-6, plotdt=1e-5):
 
     context.setClock(0, simdt)
     context.setClock(1, simdt)
+    context.setClock(2, simdt)
+    context.setClock(3, simdt)
     context.reset()
 
     context.step(simtime)
-    # gNMDA.dumpFile('gNMDA.dat')
-    # vmA.dumpFile('Va.dat')
-    vmB.dumpFile('nmda_moose.dat')
-
+    outfile = open('nmda_moose.plot', 'w')
+    ms = 1e-3
+    mV = 1e-3
+    uS = 1e-6
+    for ii in range(len(gNMDA)):
+        outfile.write('%g\t%g\t%g\t%g\n' % (ii*simdt/ms, vmA[ii]/mV, vmB[ii]/mV, gNMDA[ii]/uS))
+    outfile.close()
 if __name__ == '__main__':
     testNMDAChan()
 
