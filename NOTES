@@ -13021,6 +13021,15 @@ Some minor cleanups, now it clears unit tests. Valgrind also OK.
 Checkin 2698.
 
 Added GHK class. No tests yet. Checkin 2699.
-Added NMDAChan class. No tests yet.
+Added NMDAChan class. No tests yet. Checkin 2700.
 
+Looking at HHChannel2D and HHGate2D. They are derived from their 1-D 
+counterparts in the old MOOSE, but I think instead that HHChannel2D should 
+be derived from ChanBase, and HHGate2D should be de novo.
+
+Inching along implementation. Will use Interpol2D for the
+lookup.
 ============================================================================
+27 May 2011
+Subha needs proper arguments for LookupValueFinfos... Need to add the
+lookup argument in its rttiType function. Done.
