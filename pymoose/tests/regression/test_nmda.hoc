@@ -65,14 +65,14 @@ soma_a netcon = new NetCon(&v(1), syn, 0.0, 0.05, 0.25e-3)
 // netcon.threshold = 0.0
 
 tstop = 50
-// vecV_a.record(&soma_a.v(0.5))
-// vecG_b.record(&syn.g)
+vecV_a.record(&soma_a.v(0.5))
+vecG_b.record(&syn.g)
 vecV_b.record(&soma_b.v(0.5))
 vecT.record(&t)
 run()
 outfile.wopen("nmda_neuron.plot")
 for ii = 0, vecV_a.size() - 1 {
-	outfile.printf("%g %g\n", vecT.x(ii), vecV_b.x(ii))
+	outfile.printf("%g\t%g\t%g\t%g\n", vecT.x(ii), vecV_a.x(ii), vecV_b.x(ii), vecG_b.x(ii))
 }
 outfile.close()
 
