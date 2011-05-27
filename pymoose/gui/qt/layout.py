@@ -208,8 +208,9 @@ class Graphicalview(QtGui.QGraphicsView):
 	
 	def deleteItem(self):
 		self.rubberBandactive = False
-		for items in self.sceneContainerPt.selectedItems():
-			print "items to be deleted",items.mooseObj_.name
+		for selecteditem in self.sceneContainerPt.selectedItems():
+			self.sceneContainerPt.removeItem(selecteditem)
+			self.emit(QtCore.SIGNAL("deleteitem(PyQt_PyObject)"),selecteditem)
 	
 	def zoomItem(self):
 		
@@ -254,6 +255,7 @@ class LayoutWidget(QtGui.QWidget):
 		self.itemList = []
 		self.setupItem(self.rootObject,self.itemList)
 		self.moosetext_dict = {}
+		self.deletedItem_dict = {}
 		self.Compt_dict = {}
 		self.border = 10
 		#colorMap of kinetic kit
@@ -348,7 +350,7 @@ class LayoutWidget(QtGui.QWidget):
 				
 				else:
 					if(textColor==textBgcolor):
-						textBgcolor="black"
+						textBgcolor="white"
 					self.colorCheck(pItem,item,textColor,"foreground")
 					self.colorCheck(pItem,item,textBgcolor,"background")
 			
@@ -387,6 +389,7 @@ class LayoutWidget(QtGui.QWidget):
 		
 		sceneBoundRect = self.sceneContainer.itemsBoundingRect()
 		self.view = Graphicalview(self.sceneContainer,self.border)
+		self.view.connect(self.view,QtCore.SIGNAL("deleteitem(PyQt_PyObject)"),self.deleteArrow)
 		self.view.setScene(self.sceneContainer)
 		self.view.centerOn(self.sceneContainer.sceneRect().center())
 		grid.addWidget(self.view,0,0)
@@ -673,6 +676,16 @@ class LayoutWidget(QtGui.QWidget):
 		elif (key == 44 or key == 60):	
 			print "here in sceneContainer",self.sceneContainer.sceneRect()
 			self.view.scale(1/1.1,1/1.1)				
+			
+	def deleteArrow(self,mooseObject):
+		deleteline = []
+		for deleteline in (v for k,v in self.object2line.items() if k.mooseObj_.id == mooseObject.mooseObj_.id ):
+			if len(deleteline):
+				for line,va in deleteline:
+					if self.deletedItem_dict.has_key(line) == False:
+						self.sceneContainer.removeItem(line)
+						self.deletedItem_dict[line] = self.lineItem_dict[line]
+			break
 			
 if __name__ == "__main__":
 	#app = QtGui.QApplication(sys.argv)
