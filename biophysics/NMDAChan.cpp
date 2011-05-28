@@ -25,9 +25,9 @@
 // Maintainer: 
 // Created: Sun Feb 28 18:17:56 2010 (+0530)
 // Version: 
-// Last-Updated: Fri May 27 16:12:04 2011 (+0530)
+// Last-Updated: Sat May 28 14:40:47 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 520
+//     Update #: 526
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -171,28 +171,29 @@ static const Cinfo* NMDAChanCinfo = NMDAChan::initCinfo();
    for [Mg2+] dependent component of the channel conductance according
    to Jahr and Stevens (Sept. 1990) equation 4(a) for details.
 */
-NMDAChan::NMDAChan(): c0_(16.0),
-                      c1_(2.91),
-                      c2_(45.0),
-                      c3_(6.97),
-                      c4_(9.0),
-                      c5_(1.22),
-                      c6_(17.0),
-                      c7_(0.96),
-                      c8_(2.847),
-                      c9_(0.693),
-                      c10_(3.101),
-                      x_(0.0),
+NMDAChan::NMDAChan(): x_(0.0),
                       y_(0.0),
                       Mg_(1.5), // mM (value from Traub et al 2005)
                       unblocked_(0.0),
                       saturation_(DBL_MAX)
 {
+    c_.resize(10, 0.);
+    c_[0] = 16.0;
+    c_[1] = 2.91;
+    c_[2] = 45.0;
+    c_[3] = 6.97;
+    c_[4] = 9.0;
+    c_[5] = 1.22;
+    c_[6] = 17.0;
+    c_[7] = 0.96;
+    c_[8] = 2.847;
+    c_[9] = 0.693;
+    c_[10] = 3.101;
     tau2_ = 0.005;
     tau1_ = 0.130;
-    A_ = exp(-c8_);
-    B1_ = exp(-c9_);
-    B2_ = exp(-c10_);
+    A_ = exp(-c_[8]);
+    B1_ = exp(-c_[9]);
+    B2_ = exp(-c_[10]);
 }
 
 
@@ -202,19 +203,10 @@ NMDAChan::NMDAChan(): c0_(16.0),
 */
 void NMDAChan::setTransitionParam(unsigned int index, double value)
 {
-    switch (index) {
-        case 0: c0_ = value; break;
-        case 1: c1_ = value; break;
-        case 2: c2_ = value; break;
-        case 3: c3_ = value; break;
-        case 4: c4_ = value; break;
-        case 5: c5_ = value; break;
-        case 6: c6_ = value; break;
-        case 7: c7_ = value; break;
-        case 8: c8_ = value; A_ = 1e3 * exp(-c8_); break;
-        case 9: c9_ = value; B1_ = 1e3 * exp(-c9_); break;
-        case 10: c10_ = value; B2_ = 1e3 * exp(-c10_); break;
-        default: cout << "Error: The index must be between 0 and 10 (inclusive)." << endl;
+    if (index < c_.size()){
+        c_[index] = value;
+    } else {
+        cout << "Error: The index must be between 0 and 10 (inclusive)." << endl;
     }
 }
 
@@ -224,19 +216,10 @@ void NMDAChan::setTransitionParam(unsigned int index, double value)
 */
 double NMDAChan::getTransitionParam( unsigned int index ) const
 {
-    switch (index) {
-        case 0: return c0_;
-        case 1: return c1_;
-        case 2: return c2_;
-        case 3: return c3_;
-        case 4: return c4_;
-        case 5: return c5_;
-        case 6: return c6_;
-        case 7: return c7_;
-        case 8: return c8_;
-        case 9: return c9_;
-        case 10: return c10_;
-        default: cout << "Error: The index must be between 0 and 10 (inclusive)." << endl;
+    if (index < c_.size()){
+        return c_[index];
+    } else {
+        cout << "Error: The index must be between 0 and 10 (inclusive)." << endl;
     }
     return 0.0;
 }
@@ -307,10 +290,10 @@ void NMDAChan::process( const Eref& e, ProcPtr info )
     // TODO: May need to optimize these exponentiations
 	double Vm = getVm();
 
-    double a1_ = exp(-c0_ * Vm - c1_);
-    double a2_ = 1000.0 * Mg_ * exp(-c2_ * Vm - c3_);
-    double b1_ = exp(c4_ * Vm + c5_ );
-    double b2_ = exp(c6_ * Vm + c7_);
+    double a1_ = exp(-c_[0] * Vm - c_[1]);
+    double a2_ = 1000.0 * Mg_ * exp(-c_[2] * Vm - c_[3]);
+    double b1_ = exp(c_[4] * Vm + c_[5] );
+    double b2_ = exp(c_[6] * Vm + c_[7] );
     // The following two lines calculate next values of x_ and y_
     // according to Forward Euler method:
     // x' = activation

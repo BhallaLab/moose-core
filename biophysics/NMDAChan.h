@@ -24,9 +24,9 @@
 // Maintainer: 
 // Created: Mon Mar  8 15:13:02 2010 (+0530)
 // Version: 
-// Last-Updated: Fri May 27 11:45:33 2011 (+0530)
+// Last-Updated: Sat May 28 12:06:46 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 81
+//     Update #: 83
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -69,17 +69,7 @@ class NMDAChan: public SynChan
     static const Cinfo* initCinfo();
     
   protected:
-    double c0_;
-    double c1_;
-    double c2_;
-    double c3_;
-    double c4_;
-    double c5_;
-    double c6_;
-    double c7_;
-    double c8_;
-    double c9_;
-    double c10_;
+    vector< double > c_;
     double A_;
     double B1_;
     double B2_;
