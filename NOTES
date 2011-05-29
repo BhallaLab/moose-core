@@ -13036,4 +13036,5 @@ lookup argument in its rttiType function. Done. Checkin 2704.
 
 ============================================================================
 29 May 2011
-Implemented Interpol2D prior to doing HHGate2D etc.
+Implemented Interpol2D prior to doing HHGate2D etc.  Checkin 2707.
+Implemented HHGate2D prior to doing HHChannel2D.
