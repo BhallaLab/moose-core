@@ -1,5 +1,5 @@
-#ifndef _HHChannel_h
-#define _HHChannel_h
+#ifndef _HHChannel2D_h
+#define _HHChannel2D_h
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment,
@@ -31,35 +31,47 @@
  * ratio of alpha to beta rather than solving the above conversion
  * process.
  * The actual functions alpha and beta are provided by an auxiliary
- * class, the HHGate. The idea is that all copies of a channel share the
+ * class, the HHGate, which communicates with the channel using 
+ * messages. The idea is that all copies of a channel share the
  * same gate, thus saving a great deal of space. It also makes it 
  * possible to cleanly change the parameters of all the channels of
  * a give class, all at once. Should one want to mutate a subset
  * of channels, they just need to set up separate gates.
  *
- * HHGates are implemented as a special category of FieldElement, so that
- * they can be accessed as readonly pointers available to the HHChannel. 
- * The FieldElement containing the HHGate appears as a child Element of
- * the HHChannel. The HHChannel Element can be an array; the associated
- * HHGate is a singleton. So there has to be a local copy of the HHGate
- * on each node.
+ * In this version, the Channel contains the gates and refers to them
+ * through pointers. When a copy of the Channel is made, then the original
+ * pointer is used. Only the original Channel can modify the Gate.
+ * If the original Channel is deleted before the copies are, Bad Things
+ * will occur.
+ * There must be an instance of the original Channel and its Gates on
+ * every node.
+ *
+ * In HHChannel2D, there are three possible arguments to each gate:
+ * The Vm, a conc and a conc2. Two are used at a time to look up a
+ * 2-D array.
  */
 
 typedef double ( *PFDD )( double, double );
-
-class HHChannel: public ChanBase
+class HHChannel2D: public ChanBase
 {
 #ifdef DO_UNIT_TESTS
-	friend void testHHChannel();
-	friend void testHHGateCreation();
+	friend void testHHChannel2D();
 #endif // DO_UNIT_TESTS
+
 	public:
-		HHChannel();
-		~HHChannel();
+		HHChannel2D();
 
 		/////////////////////////////////////////////////////////////
 		// Value field access function definitions
 		/////////////////////////////////////////////////////////////
+		void setUseConcentration( int value );
+		int getUseConcentration( );
+		void setXindex( string index );
+		string getXindex() const;
+		void setYindex( string index );
+		string getYindex() const;
+		void setZindex( string index );
+		string getZindex() const;
 
 		void setXpower( const Eref& e, const Qinfo* q, double Xpower );
 		double getXpower( const Eref& e, const Qinfo* q ) const;
@@ -75,17 +87,29 @@ class HHChannel: public ChanBase
 		double getY() const;
 		void setZ( double Z );
 		double getZ() const;
-		void setUseConcentration( int value );
-		int getUseConcentration() const;
 
-		void innerSetXpower( double Xpower );
-		void innerSetYpower( double Ypower );
-		void innerSetZpower( double Zpower );
+		/// Access function used for the X gate. The index is ignored.
+		HHGate2D* getXgate( unsigned int i );
+		/// Access function used for the Y gate. The index is ignored.
+		HHGate2D* getYgate( unsigned int i );
+		/// Access function used for the Z gate. The index is ignored.
+		HHGate2D* getZgate( unsigned int i );
+		/// Dummy assignment function for the number of gates.
+		void setNumGates( unsigned int num );
+
+		/**
+		 * Access function for the number of Xgates. Gives 1 if present,
+		 * otherwise 0.
+		 */
+		unsigned int getNumXgates() const;
+		/// Returns 1 if Y gate present, otherwise 0
+		unsigned int getNumYgates() const;
+		/// Returns 1 if Z gate present, otherwise 0
+		unsigned int getNumZgates() const;
 
 		/////////////////////////////////////////////////////////////
 		// Dest function definitions
 		/////////////////////////////////////////////////////////////
-
 		/**
 		 * processFunc handles the update and calculations every
 		 * clock tick. It first sends the request for evaluation of
@@ -108,52 +132,18 @@ class HHChannel: public ChanBase
 		 * updates to the parent compartment as for the processFunc.
 		 */
 		void reinit( const Eref& e, ProcPtr p );
-
-		/**
-		 * Assign the local Vm_ to the incoming Vm from the compartment
-		void handleVm( double Vm );
-		 */
-
 		/**
 		 * Assign the local conc_ to the incoming conc from the
 		 * concentration calculations for the compartment. Typically
 		 * the message source will be a CaConc object, but there
 		 * are other options for computing the conc.
 		 */
-		void handleConc( double conc );
+		void conc( double conc );
+		void conc2( double conc );
 
-		/////////////////////////////////////////////////////////////
-		// Gate handling functions
-		/////////////////////////////////////////////////////////////
-		/**
-		 * Access function used for the X gate. The index is ignored.
-		 */
-		HHGate* getXgate( unsigned int i );
-
-		/**
-		 * Access function used for the Y gate. The index is ignored.
-		 */
-		HHGate* getYgate( unsigned int i );
-
-		/**
-		 * Access function used for the Z gate. The index is ignored.
-		 */
-		HHGate* getZgate( unsigned int i );
-
-		/**
-		 * Dummy assignment function for the number of gates.
-		 */
-		void setNumGates( unsigned int num );
-
-		/**
-		 * Access function for the number of Xgates. Gives 1 if present,
-		 * otherwise 0.
-		 */
-		unsigned int getNumXgates() const;
-		/// Returns 1 if Y gate present, otherwise 0
-		unsigned int getNumYgates() const;
-		/// Returns 1 if Z gate present, otherwise 0
-		unsigned int getNumZgates() const;
+		double ( *takeXpower_ )( double, double );
+		double ( *takeYpower_ )( double, double );
+		double ( *takeZpower_ )( double, double );
 
 		/**
 		 * Function for safely creating each gate, identified by strings
@@ -167,7 +157,7 @@ class HHChannel: public ChanBase
 		/// Inner utility function for creating the gate.
 		void innerCreateGate(
 			 const string& gateName,
-			HHGate** gatePtr, Id chanId, Id gateId );
+			HHGate2D** gatePtr, Id chanId, Id gateId );
 
 		/// Returns true if channel is original, false if copy.
 		bool checkOriginal( Id chanId ) const;
@@ -184,7 +174,7 @@ class HHChannel: public ChanBase
 		 * Inner utility for destroying the gate
 		 */
 		void innerDestroyGate( const string& gateName,
-			HHGate** gatePtr, Id chanId );
+			HHGate2D** gatePtr, Id chanId );
 
 		/**
 		 * Utility for altering gate powers
@@ -192,62 +182,62 @@ class HHChannel: public ChanBase
 		bool setGatePower( const Eref& e, const Qinfo* q, double power,
 			double* assignee, const string& gateType );
 
-		/////////////////////////////////////////////////////////////
-		static const Cinfo* initCinfo();
-
-	protected:
 		static PFDD selectPower( double power);
 
-		/// Exponent for X gate
-		double Xpower_;
-		/// Exponent for Y gate
-		double Ypower_;
-		/// Exponent for Z gate
-		double Zpower_;
-		/// Conc_ is input variable for Ca-dependent channels.
-		double conc_;
-
-		double ( *takeXpower_ )( double, double );
-		double ( *takeYpower_ )( double, double );
-		double ( *takeZpower_ )( double, double );
-
+		static const Cinfo* initCinfo();
+		
 	private:
-		/// bitmapped flag for X, Y, Z, to do equil calculation for gate
-		int instant_;
-		/// Channel actual conductance depending on opening of gates.
-		/// State variable for X gate
-		double X_;
-		/// State variable for Y gate
-		double Y_;
-		/// State variable for Z gate
-		double Z_;
-
-        bool xInited_, yInited_, zInited_; // true when a state variable
-        	// has been initialized
-		double g_;	/// Internal variable used to calculate conductance
-
-		/// Flag for use of conc for input to Z gate calculations.
-		bool useConcentration_;	
-
-		// Internal variables for return values.. deprecated
-//		double A_;
-//		double B_;
+		const double* dependency( string index, unsigned int dim );
 		double integrate( double state, double dt, double A, double B );
 
+		double Xpower_; /// Exponent for X gate
+		double Ypower_; /// Exponent for Y gate
+		double Zpower_; /// Exponent for Z gate
+
+		/// bitmapped flag for X, Y, Z, to do equil calculation for gate
+		int instant_;	
+		double X_;	 /// State variable for X gate
+		double Y_;	 /// State variable for Y gate
+		double Z_;	 /// State variable for Z gate
+
 		/**
-		 * HHGate data structure for the xGate. This is writable only
+		 * true when the matching state variable has been initialized
+		 */
+        bool xInited_, yInited_, zInited_; 
+
+		double g_;	/// Internal variable used to calculate conductance
+		
+		double conc_;
+		double conc2_;
+		
+		string Xindex_;
+		string Yindex_;
+		string Zindex_;
+
+		const double* Xdep0_;
+		const double* Xdep1_;
+		const double* Ydep0_;
+		const double* Ydep1_;
+		const double* Zdep0_;
+		const double* Zdep1_;
+		
+		/*
+		int Xdep0_;
+		int Xdep1_;
+		int Ydep0_;
+		int Ydep1_;
+		int Zdep0_;
+		int Zdep1_;
+		*/
+
+		/**
+		 * HHGate2D data structure for the xGate. This is writable only
 		 * on the HHChannel that originally created the HHGate, for others
 		 * it must be treated as readonly.
 		 */
-		HHGate* xGate_;
-
-		/// HHGate data structure for the yGate. 
-		HHGate* yGate_;
-
-		/// HHGate data structure for the yGate. 
-		HHGate* zGate_;
-
-		Id myId_;
+		HHGate2D* xGate_;
+		HHGate2D* yGate_; /// HHGate2D for the yGate
+		HHGate2D* zGate_; /// HHGate2D for the zGate
 
 		static const double EPSILON;
 		static const int INSTANT_X;
@@ -270,4 +260,4 @@ class HHChannel: public ChanBase
 };
 
 
-#endif // _HHChannel_h
+#endif // _HHChannel2D_h
