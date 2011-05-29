@@ -129,6 +129,13 @@ double HHGate2D::lookupB( vector< double > v ) const
 	return B_.innerLookup( v[ 0 ], v[ 1 ] );
 }
 
+void HHGate2D::lookupBoth( double v, double c, double* A, double* B ) const
+{
+	*A = A_.innerLookup( v, c );
+	*B = B_.innerLookup( v, c );
+}
+
+
 ///////////////////////////////////////////////////
 // Access functions for Interpols
 ///////////////////////////////////////////////////
@@ -153,6 +160,24 @@ void HHGate2D::setNumTable( unsigned int i)
 	;
 }
 
+
+///////////////////////////////////////////////////
+// Functions to check if this is original or copy
+///////////////////////////////////////////////////
+bool HHGate2D::isOriginalChannel( Id id ) const
+{
+	return ( id == originalChanId_ );
+}
+
+bool HHGate2D::isOriginalGate( Id id ) const
+{
+	return ( id == originalGateId_ );
+}
+
+Id HHGate2D::originalChannelId() const
+{
+	return originalChanId_;
+}
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////

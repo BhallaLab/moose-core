@@ -26,6 +26,7 @@ OBJ = \
 	GHK.o		\
 	NMDAChan.o	\
 	HHGate2D.o	\
+	HHChannel2D.o	\
 	testBiophysics.o	\
 
 HEADERS = \
@@ -51,6 +52,7 @@ CaConc.o:	CaConc.h
 Nernst.o:	Nernst.h
 GHK.o:	GHK.h
 HHGate2D.o:	../builtins/Interpol2D.h HHGate2D.h
+HHChannel2D.o: ChanBase.h HHChannel2D.h HHGate2D.h
 testBiophysics.o: SynBase.h IntFire.h Synapse.h Compartment.h HHChannel.h HHGate.h
 
 .cpp.o:
