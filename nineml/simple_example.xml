@@ -1,0 +1,244 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<nineml xmlns="http://nineml.org/9ML/0.1" name="Simple 9ML example model">
+  <node name="Inhibitory post-synaptic response">
+    <definition>
+      <url>http://svn.incf.org/svn/nineml/trunk/catalog/postsynapticresponses/exp_g.xml</url>
+    </definition>
+    <properties>
+      <decayTimeConstant>
+        <value>5.0</value>
+        <unit>ms</unit>
+      </decayTimeConstant>
+      <reversalPotential>
+        <value>-70.0</value>
+        <unit>mV</unit>
+      </reversalPotential>
+    </properties>
+  </node>
+  <node name="uniform(-70.0,-60.0)">
+    <definition>
+      <url>http://svn.incf.org/svn/nineml/trunk/catalog/randomdistributions/uniform_distribution.xml</url>
+    </definition>
+    <properties>
+      <lowerBound>
+        <value>-70.0</value>
+        <unit>dimensionless</unit>
+      </lowerBound>
+      <upperBound>
+        <value>-60.0</value>
+        <unit>dimensionless</unit>
+      </upperBound>
+    </properties>
+  </node>
+  <node name="Excitatory post-synaptic response">
+    <definition>
+      <url>http://svn.incf.org/svn/nineml/trunk/catalog/postsynapticresponses/exp_g.xml</url>
+    </definition>
+    <properties>
+      <decayTimeConstant>
+        <value>5.0</value>
+        <unit>ms</unit>
+      </decayTimeConstant>
+      <reversalPotential>
+        <value>0.0</value>
+        <unit>mV</unit>
+      </reversalPotential>
+    </properties>
+  </node>
+  <node name="Inhibitory neuron type">
+    <definition>
+      <url>http://svn.incf.org/svn/nineml/trunk/catalog/neurons/IaF_tau.xml</url>
+    </definition>
+    <properties>
+      <membraneCapacitance>
+        <value>1.0</value>
+        <unit>nF</unit>
+      </membraneCapacitance>
+      <membraneTimeConstant>
+        <value>20.0</value>
+        <unit>ms</unit>
+      </membraneTimeConstant>
+      <refractoryTime>
+        <value>5.0</value>
+        <unit>ms</unit>
+      </refractoryTime>
+      <threshold>
+        <value>-50.0</value>
+        <unit>mV</unit>
+      </threshold>
+      <restingPotential>
+        <value>-65.0</value>
+        <unit>mV</unit>
+      </restingPotential>
+      <resetPotential>
+        <value>-60.0</value>
+        <unit>mV</unit>
+      </resetPotential>
+    </properties>
+  </node>
+  <node name="normal(20.0,3.0)">
+    <definition>
+      <url>http://svn.incf.org/svn/nineml/trunk/catalog/randomdistributions/normal_distribution.xml</url>
+    </definition>
+    <properties>
+      <standardDeviation>
+        <value>3.0</value>
+        <unit>dimensionless</unit>
+      </standardDeviation>
+      <mean>
+        <value>20.0</value>
+        <unit>dimensionless</unit>
+      </mean>
+    </properties>
+  </node>
+  <node name="Static inhibitory connections">
+    <definition>
+      <url>http://svn.incf.org/svn/nineml/trunk/catalog/connectiontypes/static_connection.xml</url>
+    </definition>
+    <properties>
+      <delay>
+        <value>0.3</value>
+        <unit>ms</unit>
+      </delay>
+      <weight>
+        <value>0.2</value>
+        <unit>nS</unit>
+      </weight>
+    </properties>
+  </node>
+  <node name="Excitatory neuron type">
+    <definition>
+      <url>http://svn.incf.org/svn/nineml/trunk/catalog/neurons/IaF_tau.xml</url>
+    </definition>
+    <properties>
+      <membraneCapacitance>
+        <value>1.0</value>
+        <unit>nF</unit>
+      </membraneCapacitance>
+      <membraneTimeConstant>
+        <value>
+          <reference>normal(20.0,3.0)</reference>
+        </value>
+        <unit>ms</unit>
+      </membraneTimeConstant>
+      <refractoryTime>
+        <value>5.0</value>
+        <unit>ms</unit>
+      </refractoryTime>
+      <threshold>
+        <value>-50.0</value>
+        <unit>mV</unit>
+      </threshold>
+      <restingPotential>
+        <value>-65.0</value>
+        <unit>mV</unit>
+      </restingPotential>
+      <resetPotential>
+        <value>
+          <reference>uniform(-70.0,-60.0)</reference>
+        </value>
+        <unit>mV</unit>
+      </resetPotential>
+    </properties>
+  </node>
+  <node name="random connections">
+    <definition>
+      <url>http://svn.incf.org/svn/nineml/trunk/catalog/connectionrules/fixed_probability.xml</url>
+    </definition>
+    <properties>
+      <p_connect>
+        <value>0.1</value>
+        <unit>dimensionless</unit>
+      </p_connect>
+    </properties>
+  </node>
+  <node name="2D grid">
+    <definition>
+      <url>http://svn.incf.org/svn/nineml/trunk/catalog/networkstructures/2Dgrid.xml</url>
+    </definition>
+    <properties>
+      <fillOrder>
+        <value>sequential</value>
+      </fillOrder>
+      <aspectRatioXY>
+        <value>1.0</value>
+        <unit>dimensionless</unit>
+      </aspectRatioXY>
+      <dx>
+        <value>1.0</value>
+        <unit>µm</unit>
+      </dx>
+      <dy>
+        <value>1.0</value>
+        <unit>µm</unit>
+      </dy>
+      <y0>
+        <value>0.0</value>
+        <unit>µm</unit>
+      </y0>
+      <x0>
+        <value>0.0</value>
+        <unit>µm</unit>
+      </x0>
+    </properties>
+  </node>
+  <node name="Static excitatory connections">
+    <definition>
+      <url>http://svn.incf.org/svn/nineml/trunk/catalog/connectiontypes/static_connection.xml</url>
+    </definition>
+    <properties>
+      <delay>
+        <value>0.3</value>
+        <unit>ms</unit>
+      </delay>
+      <weight>
+        <value>0.1</value>
+        <unit>nS</unit>
+      </weight>
+    </properties>
+  </node>
+  <group name="Network">
+    <population name="Inhibitory cells">
+      <number>25</number>
+      <prototype>Inhibitory neuron type</prototype>
+      <positions>
+        <structure>2D grid</structure>
+      </positions>
+    </population>
+    <population name="Excitatory cells">
+      <number>100</number>
+      <prototype>Excitatory neuron type</prototype>
+      <positions>
+        <structure>2D grid</structure>
+      </positions>
+    </population>
+    <set name="All cells">
+      <select>
+        <any>
+          <equal>
+            <value>population[@name]</value>
+            <value>Excitatory cells</value>
+          </equal>
+          <equal>
+            <value>population[@name]</value>
+            <value>Inhibitory cells</value>
+          </equal>
+        </any>
+      </select>
+    </set>
+    <projection name="Excitatory cells-Excitatory cells">
+      <source>Excitatory cells</source>
+      <target>Excitatory cells</target>
+      <rule>random connections</rule>
+      <response>Excitatory post-synaptic response</response>
+      <synapse>Static excitatory connections</synapse>
+    </projection>
+    <projection name="Inhibitory connections">
+      <source>Inhibitory cells</source>
+      <target>All cells</target>
+      <rule>random connections</rule>
+      <response>Inhibitory post-synaptic response</response>
+      <synapse>Static inhibitory connections</synapse>
+    </projection>
+  </group>
+</nineml>
