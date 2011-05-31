@@ -307,11 +307,19 @@ void Element::showMsg() const
 					cout << sf->name() << " bindId=" << sf->getBindIndex() << ": ";
 					cout << j << ": MsgId=" << mb[j].mid << 
 					", FuncId=" << mb[j].fid << 
-					", " << Msg::getMsg( mb[j].mid )->e1() << " -> " <<
-					Msg::getMsg( mb[j].mid )->e2() << endl;
+					", " << Msg::getMsg( mb[j].mid )->e1()->getName() << 
+					" -> " <<
+					Msg::getMsg( mb[j].mid )->e2()->getName() << endl;
 				}
 			}
 		}
+	}
+	cout << "Dest and Src: \n";
+	for ( unsigned int i = 0; i < m_.size(); ++i ) {
+		const Msg* m = Msg::getMsg( m_[i] );
+		cout << i << ": MsgId= " << m_[i] << 
+			", e1= " << m->e1()->name_ <<
+			", e2= " << m->e2()->name_ << endl;
 	}
 }
 

@@ -549,6 +549,7 @@ void Shell::doStop()
 void Shell::doSetClock( unsigned int tickNum, double dt )
 {
 	/*
+	// if ( q->addToStructuralQ() ) return;
 	Eref ce = Id( 1 ).eref();
 	assert( ce.element() );
 	// We do NOT go through the message queuing here, as the clock is
@@ -556,10 +557,13 @@ void Shell::doSetClock( unsigned int tickNum, double dt )
 	Clock* clock = reinterpret_cast< Clock* >( ce.data() );
 	clock->setupTick( tickNum, dt );
 	*/
+	/*
 	Eref sheller( shelle_, 0 );
-//	initAck();
+	initAck(); // This causes a race condition in testShellAddMsg:771
 		requestSetupTick.send( sheller, &p_, tickNum, dt );
-	// waitForAck();
+	waitForAck();
+	*/
+	SetGet2< unsigned int, double >::set( ObjId( 1 ), "setupTick", tickNum, dt );
 }
 
 void Shell::doUseClock( string path, string field, unsigned int tick )

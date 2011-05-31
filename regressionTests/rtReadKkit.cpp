@@ -43,7 +43,7 @@ void rtReadKkit()
 	Id kineticId = shell->doLoadModel( "Kholodenko.g", "/rkktest" );
 	assert( kineticId != Id() );
 	unsigned int numVarMols = Field< unsigned int >::get( 
-		kineticId, "nVarMols" );
+		kineticId, "nVarPools" );
 	assert ( numVarMols == 15 );
 
 	Id gsl = shell->doCreate( "GslIntegrator", kineticId, "gsl", dims );
@@ -55,6 +55,9 @@ void rtReadKkit()
 	shell->doSetClock( 0, 10 );
 	shell->doSetClock( 1, 10 );
 	shell->doSetClock( 2, 10 );
+	shell->doSetClock( 3, 0 );
+	shell->doSetClock( 4, 0 );
+	shell->doSetClock( 5, 0 );
 	shell->doUseClock( "/rkktest/gsl", "process", 0 );
 	shell->doUseClock( "/rkktest/graphs/##[TYPE=Table],/rkktest/moregraphs/##[TYPE=Table]", "process", 2 );
 
