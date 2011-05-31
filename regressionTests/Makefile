@@ -13,6 +13,7 @@ OBJ = \
 	regressionTest.o	\
 	rtTable.o	\
 	rtReadKkit.o	\
+	rtHHnetwork.o	\
 	benchmarkTests.o	\
 
 HEADERS = \
