@@ -13039,6 +13039,51 @@ lookup argument in its rttiType function. Done. Checkin 2704.
 Implemented Interpol2D prior to doing HHGate2D etc.  Checkin 2707.
 Implemented HHGate2D prior to doing HHChannel2D. Checkin 2708.
 Implemented HHChannel2D. Checkin 2709.
-Implemented MgBlock.
+Implemented MgBlock. Checking 2711.
+
+With this I have the basic biophysics directory under control.
+Next is to work with Aditya and Subha to run models which stress-test
+this, even if it is only using the default Exp Euler method.
+	- NeuroML spec of network
+	- Connectivity functions, higher-order Message calls.
+	- Parallel tests and benchmarks.
+
+Then, or in parallel, back to spatial specification of reac-diff models.
+
+============================================================================
+30 May 2011
+Going on to make a regression test for a network of copied HH neurons. Right
+away ran into issues with Shell::doSetClock. The setup of the timesteps
+needs to be assured before we go on, but this causes a race condition in 
+testShellAddMsg in earlier unit tests. This function and several others should
+really be handled as structural operations.
+
+Use regular Set/Get operations to set up the timesteps
+Use special procState operations to complete the 'rebuild' call.
+doUseClock is done properly as a structuralQ protected function doing
+messaging. But see below.
+I need a function for clearing the schedule.
+I would like a schedule chart on the Clock: basically a lookup table of
+	each tick against its target path. May as well be a field of the Tick.
+	Shell::handleUseClock would be modified to only append things to this
+	path after checking for overlap.
+The new messages are put in at the 'rebuild' call. Or maybe I need a separate
+call to reschedule and to add things to the schedule, which involves messaging.
+
+Did the simple thing: put in a SetGet::set call to call the Clock func
+for setupTick.
+
+Implemented test for building and running an array of HH-type single-compt
+cells. Confirmed that the array itself gets built well.
+Now getting segv in reinit, when message goes from compt to HHChannel (Na).
+It is because the FuncId is 57 whereas there are only 53 funcs known.
+
+============================================================================
+31 May.
+Tracked down the problem with the crashing copies to an issue with 
+OneToOneMsg::copy. Fixed. Also found a new way to crash things: by deleting
+the prototype of HHGates before the copies. Should figure out how to avoid this.
+Now it clears a major regression test: to set up and run an array copy of
+a spiking HH compartment.
 
 ============================================================================
