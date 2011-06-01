@@ -50,9 +50,8 @@ static double actionPotl[] = { 0,
 	////////////////////////////////////////////////////////////////
 	// Check construction and result of HH squid simulation
 	////////////////////////////////////////////////////////////////
-void rtHHnetwork()
+void rtHHnetwork( unsigned int numCopies )
 {
-	const unsigned int numCopies = 100;
 	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
 	vector< unsigned int > dims( 1, 1 );
 	Id nid = shell->doCreate( "Neutral", Id(), "n", dims );
