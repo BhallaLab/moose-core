@@ -13104,6 +13104,11 @@ Need to scan all Msgs to ensure that they do the right thing when copied.
 ============================================================================
 1 June
 Some minor checks to confirm that synaptic messages are indeed going around.
-Looks good. 
+Looks good. Checkin 2715.
 
+Next: 
+- Scan all Msgs regarding copy
+- Try out network regression test on multicore and multinode configs.
+
+Trying on ghevar. Compilation error when compiled without unit tests.
 ============================================================================
