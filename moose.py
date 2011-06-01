@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Wed May 25 12:51:28 2011 (+0530)
+# Last-Updated: Wed Jun  1 17:43:10 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 708
+#     Update #: 711
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -447,10 +447,10 @@ def move(src, dest):
 def setCwe(element):
     if isinstance(element, NeutralArray):
         _moose.setCwe(element._id)
-    elif isinstance(element, str):
-        _moose.setCwe(element)
+    elif isinstance(element, Neutral):
+        _moose.setCwe(element._oid)
     else:
-        raise TypeError('Argument must be an element or the path of a valid element.')
+        _moose.setCwe(element)
 
 def getCwe():
     _id = _moose.getCwe()
