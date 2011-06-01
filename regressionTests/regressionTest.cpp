@@ -28,12 +28,8 @@ void regressionTests()
 	}
 	cout << "\nRegression Tests:";
 	rtTable();
-	cout << "done Table\n";
 	rtFindModelType();
-	cout << "done findModelType\n";
 	rtReadKkit();
-	cout << "done readKkit\n";
 	rtHHnetwork();
-	cout << "done hhNetwork\n";
 	cout << endl;
 }

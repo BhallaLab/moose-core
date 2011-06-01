@@ -14,9 +14,7 @@
  * This class manages access to array fields X in an array of objects Y.
  * Examples are synapses and clock ticks.
  * Replaces FieldElement.h
- * It is templated by the field type, the parent type and a lookup function
- * that extracts the field from the parent.
- */
+ * It is templated by the field type, the parent type and a lookup function * that extracts the field from the parent.  */
 
 template< class Parent, class Field > class FieldDataHandler: public FieldDataHandlerBase
 {
@@ -38,19 +36,26 @@ template< class Parent, class Field > class FieldDataHandler: public FieldDataHa
 
 
 		/**
-		 * This really won't work, as it is just a hook to the parent
-		 * Data Handler. Need the duplicated Parent for this.
-		 *
-		 * If n is 1, just duplicates everything. No problem.
-		 * if n > 1, then operation is nasty.
-		 * Scales up the data dimension from 0 to 1 if original had 1 entry,
-		 * and assigns n to the new dimension. This is a problem on multi
-		 * nodes as the original would have been sitting on node 0.
-		 * Scales up data dimension from 1 to 2 if original had an array.
-		 * 2nd dimension is now n. For multinodes does a hack by scaling
-		 * up all entries by n, rather than doing a clean repartitioning.
+		 * Makes a copy of the FieldDataHandler. Doesn't care what the
+		 * parent dimesion was, as it just refers everything to the parent
+		 * anyway.
+		 * Needs post-processing to substitute in the new parent.
 		 */
 		DataHandler* copy() const
+		{
+			FieldDataHandler< Parent, Field >* ret =
+				new FieldDataHandler< Parent, Field >( *this );
+			return ret;
+		}
+
+		/**
+		 * The FieldDataHandler doesn't care what the parent dim was, as
+		 * it always refers back to the parent for the actual data access
+		 * functions. So expanding dimensions doesn't need anything other
+		 * than a copy of the original FieldDataHandler.
+		 * Needs post-processing to substitute in the new parent.
+		 */
+		DataHandler* copyToNewDim( unsigned int newDim ) const
 		{
 			FieldDataHandler< Parent, Field >* ret =
 				new FieldDataHandler< Parent, Field >( *this );

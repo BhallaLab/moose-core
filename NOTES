@@ -13084,6 +13084,26 @@ Tracked down the problem with the crashing copies to an issue with
 OneToOneMsg::copy. Fixed. Also found a new way to crash things: by deleting
 the prototype of HHGates before the copies. Should figure out how to avoid this.
 Now it clears a major regression test: to set up and run an array copy of
-a spiking HH compartment.
+a spiking HH compartment. Checkin 2714.
+Next, connect up the compartments.
+Doing so. Turns out that the Synapses don't have any allocated DataHandler.
+Why? The HHGates were OK. Closer analysis: Not OK. I was not trying ever to
+access them, when I did so it turns out that their DataHandler is not allocated
+either. Easy to fix: FieldDataHandler::copyToNewDim needs to do something
+sensible. In addition, I had to create a post-copy operation to fill in the
+new parent of the FieldDataHandler.
+
+Next, went on to making the network. Numerous problems, most seriously
+that the FieldDataHandlers were not copied properly. Fixed.
+Currently a little stuck on how to check that the connections have been done
+and how.
+
+
+Need to scan all Msgs to ensure that they do the right thing when copied.
+
+============================================================================
+1 June
+Some minor checks to confirm that synaptic messages are indeed going around.
+Looks good. 
 
 ============================================================================
