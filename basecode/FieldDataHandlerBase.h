@@ -32,7 +32,7 @@ class FieldDataHandlerBase: public DataHandler
 
 		// These copy functions both return 0. Don't apply to Fields.
 		DataHandler* copyExpand( unsigned int copySize ) const;
-		DataHandler* copyToNewDim( unsigned int copySize ) const;
+		// DataHandler* copyToNewDim( unsigned int copySize ) const;
 
 		// Process doesn't do anything, left to the parent DataHandler.
 		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
@@ -188,6 +188,12 @@ class FieldDataHandlerBase: public DataHandler
 		 * Field array.
 		 */
 		const DataHandler* parentDataHandler() const;
+
+		/**
+		 * Assign parent data handler. Used only by 
+		 * Shell::innerCopyElements().
+		 */
+		void assignParentDataHandler( const DataHandler* parent );
 
 		/**
 		 * Assigns a data block.

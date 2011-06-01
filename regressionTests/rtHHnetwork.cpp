@@ -21,6 +21,7 @@
 #include "ReduceBase.h"
 #include "ReduceMax.h"
 #include "../shell/Shell.h"
+#include "../randnum/randnum.h"
 
 
 static const double EREST = -0.07;
@@ -51,6 +52,7 @@ static double actionPotl[] = { 0,
 	////////////////////////////////////////////////////////////////
 void rtHHnetwork()
 {
+	const unsigned int numCopies = 100;
 	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
 	vector< unsigned int > dims( 1, 1 );
 	Id nid = shell->doCreate( "Neutral", Id(), "n", dims );
@@ -190,6 +192,8 @@ void rtHHnetwork()
 	assert( ret );
 	ret = Field< double >::set( synChanId, "Gbar", 0.01 );
 	assert( ret );
+	ret = Field< double >::set( synChanId, "Ek", 0.0 );
+	assert( ret );
 
 	mid = shell->doAddMsg( "OneToOne", 
 		ObjId( comptId, DataId( 0, 0 ) ), "VmOut",
@@ -229,7 +233,6 @@ void rtHHnetwork()
 	// Make a copy with lots of duplicates
 	//////////////////////////////////////////////////////////////////////
 	Id copyParentId = shell->doCreate( "Neutral", Id(), "copy", dims );
-	unsigned int numCopies = 10;
 	Id copyId = shell->doCopy( comptId, copyParentId, 
 		"comptCopies", numCopies, 0 );
 	assert( copyId()->dataHandler()->localEntries() == numCopies );
@@ -246,6 +249,22 @@ void rtHHnetwork()
 	assert( kids[2]()->dataHandler()->localEntries() == numCopies );
 	assert( kids[3]()->dataHandler()->localEntries() == numCopies );
 
+	////////////////////////////////////////////////////////
+	// Check that the HHGate data is accessible in copies.
+	////////////////////////////////////////////////////////
+	vector< Id > gateKids = Field< vector< Id > >::get( kids[1], "children" );
+	assert ( gateKids.size() == 3 );
+	assert ( gateKids[0]()->dataHandler() != 0 );
+	vector< double > kparms = Field< vector< double > >::get( 
+		gateKids[0], "alpha" );
+	assert( kparms.size() == 5 );
+	for ( unsigned int i = 0; i < 5; ++i ) {
+		assert( doubleEq( kparms[i], parms[i] ) );
+	}
+	////////////////////////////////////////////////////////
+	// Check that regular fields are the same in copies.
+	////////////////////////////////////////////////////////
+
 	double chanEk = Field< double >::get( 
 		ObjId( kids[0], (numCopies * 234)/1000  ), 
 		"Ek" ); 
@@ -258,6 +277,10 @@ void rtHHnetwork()
 		ObjId( kids[2], (numCopies * 890)/1000 ), 
 		"tau1" ); 
 	assert( doubleEq( tau1, 0.001 ) );
+
+	//////////////////////////////////////////////////////////////////////
+	// Make table to monitor one of the compartments.
+	//////////////////////////////////////////////////////////////////////
 
 	Id tabId = shell->doCreate( "Table", copyParentId, "tab", dims );
 	mid = shell->doAddMsg( "single", ObjId( tabId, 0 ), "requestData",
@@ -293,6 +316,55 @@ void rtHHnetwork()
 		delta += (vec[i] - ref) * (vec[i] - ref);
 	}
 	assert( sqrt( delta/100 ) < 0.001 );
+
+	////////////////////////////////////////////////////////////////
+	// Connect up the network.
+	////////////////////////////////////////////////////////////////
+	double connectionProbability = 1.5 / sqrt( numCopies );
+	Id synCopyId( kids[2].value() + 1 );
+
+	mid = shell->doAddMsg( "Sparse", kids[3], "event", 
+		synCopyId, "addSpike" );
+	assert( mid != Msg::badMsg );
+	Eref manager = Msg::getMsg( mid )->manager();
+	SetGet2< double, long >::set( manager.objId(), "setRandomConnectivity",
+		connectionProbability, 1234UL );
+	
+	shell->doSyncDataHandler( kids[2], "get_numSynapses", synCopyId );
+
+	// Make it twice as big as expected probability, for safety.
+	unsigned int numConnections = 2 * numCopies * sqrt( numCopies );
+	mtseed( 1000UL );
+	vector< double > weight( numConnections );
+	vector< double > delay( numConnections );
+	double delayRange = 10e-3;
+	double delayMin = 5e-3;
+	double weightMax = 0.1;
+	for ( unsigned int i = 0; i < numConnections; ++i ) {
+		weight[i] = mtrand() * weightMax;
+		delay[i] = mtrand() * delayRange + delayMin;
+	}
+	ret = Field< double >::setVec( synCopyId, "weight", weight );
+	assert( ret );
+	ret = Field< double >::setVec( synCopyId, "delay", delay );
+	assert( ret );
+
+	const double injectRange = 0.1e-6;
+	vector< double > inject( numCopies, 0 );
+	for ( unsigned int i = 0; i < numCopies; ++i )
+		inject[i] = mtrand() * injectRange;
+	ret = Field< double >::setVec( copyId, "inject", inject );
+	assert( ret );
+
+	//////////////////////////////////////////////////////////////////////
+	// Reset, and run again. This time long enough to have lots of 
+	// synaptic activity
+	//////////////////////////////////////////////////////////////////////
+	shell->doReinit();
+	shell->doReinit();
+	shell->doStart( 0.1 );
+	SetGet2< string, string >::set( ObjId( tabId ), 
+		"xplot", "hhnet.plot", "hhnet" );
 	
 	////////////////////////////////////////////////////////////////
 	// Clear it all up
