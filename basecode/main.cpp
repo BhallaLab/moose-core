@@ -28,6 +28,7 @@
 #include "ReduceMax.h"
 #include "../shell/Shell.h"
 
+#ifdef DO_UNIT_TESTS
 extern void testSync();
 extern void testAsync();
 extern void testSyncArray( unsigned int size, unsigned int numThreads,
@@ -51,11 +52,10 @@ extern void testGeom();
 
 extern void initMsgManagers();
 extern void destroyMsgManagers();
-extern void speedTestMultiNodeIntFireNetwork( 
-	unsigned int size, unsigned int runsteps );
-#ifdef DO_UNIT_TESTS
 void regressionTests();
 #endif
+extern void speedTestMultiNodeIntFireNetwork( 
+	unsigned int size, unsigned int runsteps );
 
 #ifdef USE_SMOLDYN
 	extern void testSmoldyn();
