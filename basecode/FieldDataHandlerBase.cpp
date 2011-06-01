@@ -44,11 +44,13 @@ DataHandler* FieldDataHandlerBase::copyExpand( unsigned int copySize ) const
 	return 0;
 }
 
+/*
 DataHandler* FieldDataHandlerBase::copyToNewDim( unsigned int newDimSize )
 	const
 {
 	return 0;
 }
+*/
 
 void FieldDataHandlerBase::process( const ProcInfo* p, Element* e, FuncId fid ) const 
 {
@@ -311,6 +313,12 @@ void FieldDataHandlerBase::nextIndex( DataId& index, unsigned int& linearIndex )
 const DataHandler* FieldDataHandlerBase::parentDataHandler() const
 {
 	return parentDataHandler_;
+}
+
+void FieldDataHandlerBase::assignParentDataHandler( 
+	const DataHandler* parent )
+{
+	parentDataHandler_ = parent;
 }
 
 /////////////////////////////////////////////////////////////////

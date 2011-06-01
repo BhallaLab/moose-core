@@ -473,6 +473,12 @@ void HHGate::setupAlpha( const Eref& e, const Qinfo* q,
 			return;
 		}
 		setupTables( parms, 0 );
+		alpha_.resize( 5, 0 );
+		beta_.resize( 5, 0 );
+		for ( unsigned int i = 0; i < 5; ++i )
+			alpha_[i] = parms[i];
+		for ( unsigned int i = 5; i < 10; ++i )
+			beta_[i - 5] = parms[i];
 	}
 }
 

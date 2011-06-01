@@ -51,6 +51,16 @@ Element* innerCopyElements( Id orig, Id newParent, Id newElm,
 	Element* e = new Element( newElm, orig(), n );
 	assert( e );
 	Shell::adopt( newParent, newElm );
+
+	// Nasty post-creation fix for FieldElements, which need to assign
+	// parent DataHandlers.
+	FieldDataHandlerBase* fdh =
+		dynamic_cast< FieldDataHandlerBase* >( e->dataHandler() );
+	if ( fdh ) {
+		fdh->assignParentDataHandler( newParent()->dataHandler() );
+	}
+
+
 	// cout << Shell::myNode() << ": Copy: orig= " << orig << ", newParent = " << newParent << ", newElm = " << newElm << endl;
 	tree[ orig ] = e->id();
 
