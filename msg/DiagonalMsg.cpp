@@ -97,15 +97,17 @@ Msg* DiagonalMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 {
 	const Element* orig = origSrc();
 	if ( n <= 1 ) {
-		DiagonalMsg* ret;
-		if ( orig == e1() )
+		DiagonalMsg* ret = 0;
+		if ( orig == e1() ) {
 			ret = new DiagonalMsg( Msg::nextMsgId(), newSrc(), newTgt() );
-		else if ( orig == e2() )
+			ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
+		} else if ( orig == e2() ) {
 			ret = new DiagonalMsg( Msg::nextMsgId(), newTgt(), newSrc() );
-		else
+			ret->e2()->addMsgAndFunc( ret->mid(), fid, b );
+		} else {
 			assert( 0 );
+		}
 		ret->setStride( stride_ );
-		ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
 		return ret;
 	} else {
 		// Here we need a SliceMsg which goes from one 2-d array to another.

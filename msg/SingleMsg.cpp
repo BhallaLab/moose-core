@@ -101,14 +101,16 @@ Msg* SingleMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 {
 	const Element* orig = origSrc();
 	if ( n <= 1 ) {
-		SingleMsg* ret;
-		if ( orig == e1() )
+		SingleMsg* ret = 0;
+		if ( orig == e1() ) {
 			ret = new SingleMsg( Msg::nextMsgId(), Eref( newSrc(), i1_ ), Eref( newTgt(), i2_ ) );
-		else if ( orig == e2() )
+			ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
+		} else if ( orig == e2() ) {
 			ret = new SingleMsg( Msg::nextMsgId(), Eref( newTgt(), i1_ ), Eref( newSrc(), i2_ ) );
-		else
+			ret->e2()->addMsgAndFunc( ret->mid(), fid, b );
+		} else {
 			assert( 0 );
-		ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
+		}
 		return ret;
 	} else {
 		// Here we need a SliceMsg which goes from one 2-d array to another.

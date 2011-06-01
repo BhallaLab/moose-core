@@ -24,6 +24,7 @@
  * before using the Conv.
  */
 
+static const unsigned int UnreasonablyLargeArray = 1000000;
 template< class T > class Conv
 {
 	public:
@@ -295,7 +296,6 @@ template< class T > class Conv< vector< T > >
 	public:
 		Conv( const char* buf )
 		{
-			static const unsigned int UnreasonablyLargeArray = 1000000;
 			unsigned int numEntries = 
 				*reinterpret_cast< const unsigned int* >( buf );
 			buf += sizeof( unsigned int );

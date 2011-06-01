@@ -75,7 +75,7 @@ Msg* OneToOneMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 {
 	const Element* orig = origSrc();
 	// This works both for 1-copy and for n-copies
-	OneToOneMsg* ret;
+	OneToOneMsg* ret = 0;
 	if ( orig == e1() ) {
 		ret = new OneToOneMsg( Msg::nextMsgId(), newSrc(), newTgt() );
 		ret->e1()->addMsgAndFunc( ret->mid(), fid, b );

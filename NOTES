@@ -13114,5 +13114,23 @@ Trying on ghevar. Compilation error when compiled without unit tests.
 
 Some more compilation fixes, also added the hhNetwork regression test as
 a benchmark named hhNet. It tests an array of 1000 of these 'cells'.
+Checkin 2718.
 
+Tried running this on ghevar with optimization. It gives a segv. However,
+on mishti it is OK without optimization.
+
+Machine		Compilation mode	# threads	Result	time
+Mishti		default (non optimized)	2		works
+Mishti		optimized		1		works	25.5
+Mishti		optimized		2		works	18.2
+Mishti		optimized		4		works	25.8
+Ghevar		default					Fails
+Ghevar		optimized				Fails.
+
+
+Debugging Ghevar, it fails in innerAddSpike when pushing in the new spike.
+One option is to valgrind it on mishti. Did so. No signs of any problem.
+
+Went through Msgs, fixing the problem with copies. Doesn't affect any
+of the current unit tests.
 ============================================================================
