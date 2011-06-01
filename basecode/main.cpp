@@ -275,10 +275,12 @@ void nonMpiTests( Shell* s )
  */
 void processTests( Shell* s )
 {
+#ifdef DO_UNIT_TESTS
 	testSchedulingProcess();
 	testBuiltinsProcess();
 	testKineticsProcess();
 	testBiophysicsProcess();
+#endif
 }
 
 /**
