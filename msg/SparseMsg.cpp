@@ -390,17 +390,19 @@ Msg* SparseMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 {
 	const Element* orig = origSrc();
 	if ( n <= 1 ) {
-		SparseMsg* ret;
-		if ( orig == e1() )
+		SparseMsg* ret = 0;
+		if ( orig == e1() ) {
 			ret = new SparseMsg( Msg::nextMsgId(), newSrc(), newTgt() );
-		else if ( orig == e2() )
+			ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
+		} else if ( orig == e2() ) {
 			ret = new SparseMsg( Msg::nextMsgId(), newTgt(), newSrc() );
-		else
+			ret->e2()->addMsgAndFunc( ret->mid(), fid, b );
+		} else {
 			assert( 0 );
+		}
 		ret->setMatrix( matrix_ );
 		ret->numThreads_ = numThreads_;
 		ret->nrows_ = nrows_;
-		ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
 		return ret;
 	} else {
 		// Here we need a SliceMsg which goes from one 2-d array to another.
