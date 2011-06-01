@@ -13111,4 +13111,8 @@ Next:
 - Try out network regression test on multicore and multinode configs.
 
 Trying on ghevar. Compilation error when compiled without unit tests.
+
+Some more compilation fixes, also added the hhNetwork regression test as
+a benchmark named hhNet. It tests an array of 1000 of these 'cells'.
+
 ============================================================================
