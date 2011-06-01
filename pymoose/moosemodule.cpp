@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Wed May 25 12:23:58 2011 (+0530)
+// Last-Updated: Wed Jun  1 17:55:04 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 3938
+//     Update #: 3965
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -71,6 +71,10 @@ extern void setup_runtime_env(bool verbose);
 extern string getFieldType(ObjId oid, string fieldName);
 extern vector<string> getFieldNames(ObjId oid, string fieldType);
 
+extern void nonMpiTests(Shell *);
+extern void mpiTests();
+extern void processTests(Shell *);
+extern void regressionTests();
 
 extern int isSingleThreaded;
 extern int isInfinite;
@@ -308,7 +312,18 @@ extern "C" {
         PyModule_AddObject(moose_module, "ObjId", (PyObject*)&ObjIdType);
         
         setup_runtime_env(true);
+        // Comment out the unit tests to avoid segmentation fault on import.
+#ifdef DO_UNIT_TESTS        
+        nonMpiTests( &getShell() ); // These tests do not need the process loop.
+#endif
         getShell();
+        if (getShell().myNode() == 0) {
+#ifdef DO_UNIT_TESTS
+            mpiTests();
+            processTests(&getShell());
+            regressionTests();
+#endif // ifdef DO_UNIT_TESTS
+        }    
         assert (Py_AtExit(&finalize) == 0);                
         PyModule_AddIntConstant(moose_module, "SINGLETHREADED", isSingleThreaded);
         PyModule_AddIntConstant(moose_module, "NUMCORES", numCores);
@@ -1341,8 +1356,15 @@ extern "C" {
         if(PyArg_ParseTuple(args, "s:_pymoose_setCwe", const_cast<char**>(&path))){
             id = Id(string(path));
         } else if (PyArg_ParseTuple(args, "O:_pymoose_setCwe", &element)){
-            PyErr_Clear();            
-            id = (reinterpret_cast<_Id*>(element))->_id;
+            PyErr_Clear();
+            if (Id_SubtypeCheck(element)){
+                id = (reinterpret_cast<_Id*>(element))->_id;
+            } else if (ObjId_SubtypeCheck(element)){
+                    id = (reinterpret_cast<_ObjId*>(element))->_oid.id;                    
+            } else {
+                PyErr_SetString(PyExc_NameError, "setCwe: Argument must be an Id or ObjId");
+                return NULL;
+            }
         } else {
             return NULL;
         }
