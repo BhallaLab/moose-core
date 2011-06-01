@@ -169,7 +169,7 @@ Id init( int argc, char** argv )
 				break;
 			case 'h': // help
 			default:
-				cout << "Usage: moose -singleThreaded -help -infiniteLoop -quit -c numCores -n numNodes -benchmark [ksolve intFire]\n";
+				cout << "Usage: moose -singleThreaded -help -infiniteLoop -quit -c numCores -n numNodes -benchmark [ksolve intFire hhNet]\n";
 				exit( 1 );
 		}
 	}

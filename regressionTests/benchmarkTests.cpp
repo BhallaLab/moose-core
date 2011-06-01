@@ -15,6 +15,8 @@ extern double testGslIntegrator( string modelName, string plotName,
 extern void speedTestMultiNodeIntFireNetwork( 
 	unsigned int size, unsigned int runsteps );
 
+extern void rtHHnetwork( unsigned int numCopies );
+
 void testKsolve()
 {
 	double ktime1 = testGslIntegrator( "Kholodenko", "conc1/MAPK-PP.Co",
@@ -36,8 +38,10 @@ void innerBenchmarks( const string& optarg )
 	cout << "\nBenchmark Tests:";
 	if ( string( "ksolve" ) == optarg  )
 		testKsolve();
-	if ( string( "intFire" ) == optarg  )
+	else if ( string( "intFire" ) == optarg  )
 		speedTestMultiNodeIntFireNetwork( 2048, 2000 );
+	else if ( string( "hhNet" ) == optarg  )
+		rtHHnetwork( 1000 );
 
 	cout << "Completed benchmark\n";
 }

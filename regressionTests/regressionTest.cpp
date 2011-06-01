@@ -14,7 +14,7 @@
 void rtTable();
 void rtFindModelType();
 void rtReadKkit();
-void rtHHnetwork();
+void rtHHnetwork( unsigned int numCopies );
 
 void regressionTests()
 {
@@ -30,6 +30,6 @@ void regressionTests()
 	rtTable();
 	rtFindModelType();
 	rtReadKkit();
-	rtHHnetwork();
+	rtHHnetwork( 10 );
 	cout << endl;
 }
