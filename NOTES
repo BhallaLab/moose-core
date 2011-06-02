@@ -13132,5 +13132,15 @@ Debugging Ghevar, it fails in innerAddSpike when pushing in the new spike.
 One option is to valgrind it on mishti. Did so. No signs of any problem.
 
 Went through Msgs, fixing the problem with copies. Doesn't affect any
-of the current unit tests.
+of the current unit tests. Checkin 2720.
+============================================================================
+2 June.
+Subha says: The compile command was:
+
+make pymoose BUILD=debug USE_MPI=1
+
+Will test to see where things fail. Tried. Need help with applying gdb.
+
+Fixed Shell:doCreate so it now takes an optional isGlobal argument.
+
 ============================================================================
