@@ -61,7 +61,7 @@ class Shell
 		 * dimensions: Size of array in any # of dimensions.
 		 */
 		Id doCreate( string type, Id parent, string name, 
-			vector< unsigned int > dimensions );
+			vector< unsigned int > dimensions, bool isGlobal = 0 );
 
 		/**
 		 * Delete specified Element and all its children and all 
