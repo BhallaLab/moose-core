@@ -407,11 +407,13 @@ void Shell::setShellElement( Element* shelle )
  * Idea is that the model should be fully defined before load balancing.
  *
  */
-Id Shell::doCreate( string type, Id parent, string name, vector< unsigned int > dimensions )
+Id Shell::doCreate( string type, Id parent, string name, vector< unsigned int > dimensions, bool isGlobal )
 {
 	Id ret = Id::nextId();
+	vector< unsigned int > dims( dimensions );
+	dims.push_back( isGlobal );
 	initAck(); // Nasty thread stuff happens here for multithread mode.
-		requestCreate.send( Id().eref(), &p_, type, parent, ret, name, dimensions );
+		requestCreate.send( Id().eref(), &p_, type, parent, ret, name, dims );
 	waitForAck();
 	return ret;
 }
@@ -817,6 +819,7 @@ bool Shell::adopt( Id parent, Id child ) {
 void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 	const vector< unsigned int >& dimensions )
 {
+	assert( dimensions.size() >= 1 );
 	// cout << "in Shell::innerCreate for " << parent.path() << "/" << name << endl << flush;
 	const Cinfo* c = Cinfo::find( type );
 	if ( c ) {
@@ -827,7 +830,10 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 			warning( ss.str() );
 			return;
 		}
-		Element* ret = new Element( newElm, c, name, dimensions );
+		vector< unsigned int > dims( dimensions );
+		bool isGlobal = dims.back();
+		dims.pop_back();
+		Element* ret = new Element( newElm, c, name, dims, isGlobal);
 		assert( ret );
 		adopt( parent, newElm );
 
