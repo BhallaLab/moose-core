@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Jun  1 17:55:04 2011 (+0530)
+// Last-Updated: Thu Jun  2 14:36:51 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 3965
+//     Update #: 3966
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -312,17 +312,8 @@ extern "C" {
         PyModule_AddObject(moose_module, "ObjId", (PyObject*)&ObjIdType);
         
         setup_runtime_env(true);
-        // Comment out the unit tests to avoid segmentation fault on import.
-#ifdef DO_UNIT_TESTS        
-        nonMpiTests( &getShell() ); // These tests do not need the process loop.
-#endif
         getShell();
         if (getShell().myNode() == 0) {
-#ifdef DO_UNIT_TESTS
-            mpiTests();
-            processTests(&getShell());
-            regressionTests();
-#endif // ifdef DO_UNIT_TESTS
         }    
         assert (Py_AtExit(&finalize) == 0);                
         PyModule_AddIntConstant(moose_module, "SINGLETHREADED", isSingleThreaded);

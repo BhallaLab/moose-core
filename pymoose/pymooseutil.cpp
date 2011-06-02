@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Mar 26 22:41:37 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Apr  5 22:52:51 2011 (+0530)
+// Last-Updated: Thu Jun  2 14:36:28 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 70
+//     Update #: 72
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -201,15 +201,16 @@ Shell& getShell()
         while ( isInfinite ) // busy loop for debugging under gdb and MPI.
             ;
         // The following are copied from main.cpp: main()
-        // nonMpiTests( shell_ ); // These tests do not need the process loop.
-    
+#ifdef DO_UNIT_TESTS        
+        nonMpiTests( shell_ ); // These tests do not need the process loop.
+#endif    
         if (!shell_->isSingleThreaded())
             shell_->launchThreads();
         if ( shell_->myNode() == 0 ) {
 #ifdef DO_UNIT_TESTS
-            // mpiTests();
-            // processTests( shell_ );
-            // regressionTests();
+            mpiTests();
+            processTests( shell_ );
+            regressionTests();
 #endif
             // The following commented out for pymoose
             //--------------------------------------------------
