@@ -128,7 +128,20 @@ class MainWindow(QtGui.QMainWindow):
         self.resize(800, 600)
         self.setDockOptions(self.AllowNestedDocks | self.AllowTabbedDocks | self.ForceTabbedDocks | self.AnimatedDocks)        
         self.setDockNestingEnabled(True)
+        
+        #add_chait
+        self.mainCentralWidget = QtGui.QWidget(self)
+        self.horizontalLayout = QtGui.QHBoxLayout(self.mainCentralWidget)
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        
+        #add_chait
+        self.centralVizPanel = QtGui.QMdiArea(self)
+        self.horizontalLayout.addWidget(self.centralVizPanel)
+        self.centralVizPanel.setViewMode(self.centralVizPanel.TabbedView)
+
         self.centralPanel = QtGui.QMdiArea(self)
+        self.horizontalLayout.addWidget(self.centralPanel)
+        
         # The following are for holding transient selections from
         # connection dialog
         self._srcElement = None
@@ -140,7 +153,9 @@ class MainWindow(QtGui.QMainWindow):
         # List of classes - one can double click on any class to
         # create an instance under the currently selected element in
         # mooseTreePanel
+        
         self.createMooseClassesPanel()
+
         # Create a widget to configure the glclient
         # self.createGLClientDock()
         self.createControlDock()
@@ -179,7 +194,10 @@ class MainWindow(QtGui.QMainWindow):
             self.addPlotWindow()
         self.plotConfig = PlotConfig(self)
         self.plotConfig.setVisible(False)        
-        self.setCentralWidget(self.centralPanel)
+        #add_chait
+        #self.setCentralWidget(self.centralPanel)
+        self.setCentralWidget(self.mainCentralWidget)
+        
         self.centralPanel.tileSubWindows()
         self.connect(self.centralPanel, QtCore.SIGNAL('subWindowActivated(QMdiSubWindow *)'), self.setCurrentPlotWindow)
 
@@ -193,8 +211,53 @@ class MainWindow(QtGui.QMainWindow):
         self.makeMenu()
         # Loading of layout should happen only after all dockwidgets
         # have been created
+        #add_chait
+#        self.createSimulationToolbar()
         self.loadLayout()
 
+    def createSimulationToolbar(self):
+        self.simToolbar = QtGui.QToolBar(self)
+        self.simToolbar.setObjectName('simToolbar')
+        self.simToolbar.setFloatable(False)
+        self.simToolbar.setMovable(False)
+
+        
+        self.runTimeLabelToolbar = QtGui.QLabel(self.simToolbar)
+        self.runTimeLabelToolbar.setText('Run Time(secs):')
+        self.runTimeLabelToolbar.setGeometry(10,0,120,30)
+
+        self.runTimeEditToolbar = QtGui.QLineEdit(self.simToolbar)
+        self.runTimeEditToolbar.setText('%1.3e' % (MooseHandler.runtime))
+        self.runTimeEditToolbar.setGeometry(130,0,100,30)
+
+        self.currentTimeLabelToolbar = QtGui.QLabel(self.simToolbar)
+        self.currentTimeLabelToolbar.setText(' Current Time :')
+        self.currentTimeLabelToolbar.setGeometry(230,0,120,30)
+        
+        self.currentTimeEditToolbar = QtGui.QLabel(self.simToolbar)
+        self.currentTimeEditToolbar.setText('0')
+        self.currentTimeEditToolbar.setGeometry(350,0,120,30)
+        
+        self.runButtonToolbar = QtGui.QToolButton(self.simToolbar)
+        self.runButtonToolbar.setText('Run')
+        self.runButtonToolbar.setGeometry(470,0,100,30)
+#        print self.runButton.size()
+        self.simToolbar.addSeparator()
+
+        self.continueButtonToolbar = QtGui.QToolButton(self.simToolbar)
+        self.continueButtonToolbar.setText('Continue')
+        self.continueButtonToolbar.setGeometry(580,0,100,30)
+
+
+        self.connect(self.runButtonToolbar, QtCore.SIGNAL('clicked()'), self.resetAndRunSlot)
+        self.connect(self.continueButtonToolbar, QtCore.SIGNAL('clicked()'), self._runSlot)
+
+        self.simToolbar.show()
+        self.simToolbar.setMinimumHeight(30)
+#        print self.simToolbar.size()
+        self.addToolBar(Qt.TopToolBarArea,self.simToolbar)
+
+    
     def makeConnectionPopup(self):
         """Create a dialog to connect moose objects via messages."""
         self.connectionDialog = QtGui.QDialog(self)
@@ -357,7 +420,7 @@ class MainWindow(QtGui.QMainWindow):
         # self.glClientAction.setChecked(False)
         self.mooseTreeAction = self.mooseTreePanel.toggleViewAction()
         self.refreshMooseTreeAction = QtGui.QAction(self.tr('Refresh model tree'), self)
-	self.connect(self.refreshMooseTreeAction, QtCore.SIGNAL('triggered(bool)'), self.modelTreeWidget.recreateTree)
+   	self.connect(self.refreshMooseTreeAction, QtCore.SIGNAL('triggered(bool)'), self.modelTreeWidget.recreateTree)
         self.mooseClassesAction = self.mooseClassesPanel.toggleViewAction()
         self.mooseShellAction = self.commandLineDock.toggleViewAction()
         self.mooseShellAction.setChecked(False)
@@ -618,6 +681,7 @@ class MainWindow(QtGui.QMainWindow):
             self.mooseTreeAction.setChecked(False)
         else:
             self.mooseTreeAction.setChecked(True)
+
         # if self.glClientDock.isHidden():
         #     # print 'Glclient is hidden'
         #     self.glClientAction.setChecked(False)
@@ -638,7 +702,8 @@ class MainWindow(QtGui.QMainWindow):
         config.LOGGER.debug('createMooseClassesPanel - start')
         self.mooseClassesPanel = QtGui.QDockWidget(self.tr('Classes'), self)
         self.mooseClassesPanel.setObjectName(self.tr('MooseClassPanel'))
-	self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.mooseClassesPanel)
+	self.mooseClassesPanel.hide()#add_chait
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.mooseClassesPanel)
 	self.mooseClassesWidget = makeClassList(self.mooseClassesPanel)
 	self.mooseClassesPanel.setWidget(self.mooseClassesWidget)
         config.LOGGER.debug('createMooseClassesPanel - end')
@@ -648,6 +713,7 @@ class MainWindow(QtGui.QMainWindow):
 	self.mooseTreePanel = QtGui.QDockWidget(self.tr('Element Tree'), self)
         self.mooseTreePanel.setObjectName(self.tr('MooseClassPanel'))
 	self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.mooseTreePanel)
+        self.mooseTreePanel.hide()#add_chait
 	self.modelTreeWidget = MooseTreeWidget(self.mooseTreePanel)
         self.modelTreeWidget.setMooseHandler(self.mooseHandler)
         # self.modelTreeWidget.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -673,6 +739,7 @@ class MainWindow(QtGui.QMainWindow):
         config.LOGGER.debug('Making control panel')
         self.controlDock = QtGui.QDockWidget(self.tr('Simulation Control'), self)
         self.controlDock.setObjectName(self.tr('Control Dock'))
+        self.controlDock.hide()#add_chait
         self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.controlDock)
         self.controlPanel = QtGui.QFrame(self)
         self.controlPanel.setFrameStyle(QtGui.QFrame.StyledPanel | QtGui.QFrame.Plain)
@@ -713,6 +780,7 @@ class MainWindow(QtGui.QMainWindow):
         layout.addWidget(self.continueButton, 6, 1)
         self.controlPanel.setLayout(layout)
         self.controlDock.setWidget(self.controlPanel)
+    
 
     def addPlotWindow(self):
         title = self.tr('Plot %d' % (len(self.plots)))
@@ -855,7 +923,7 @@ class MainWindow(QtGui.QMainWindow):
         vizWindow = newGLSubWindow()
         vizWindow.setWindowTitle(title)
         vizWindow.setObjectName(title)
-        self.centralPanel.addSubWindow(vizWindow)
+        self.centralVizPanel.addSubWindow(vizWindow)
         viz = updatepaintGL(parent=vizWindow)
         viz.setObjectName(title)
         vizWindow.setWidget(viz)
@@ -898,7 +966,7 @@ class MainWindow(QtGui.QMainWindow):
         self.newDia.hide() 	#pressed OK button, so close the dialog
         
         self.connect(vizWindow, QtCore.SIGNAL('subWindowClosed()'), self.decrementSubWindowCount)
-        self.centralPanel.setActiveSubWindow(vizWindow)
+        self.centralVizPanel.setActiveSubWindow(vizWindow)
         vizWindow.show()
         #print vizWindow.width()
         #print vizWindow.height()
@@ -943,8 +1011,8 @@ class MainWindow(QtGui.QMainWindow):
     def addLayoutWindow(self):
         self.sceneLayout = layout.LayoutWidget()
 	self.connect(self.sceneLayout, QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"), self.makeObjectFieldEditor)
-        self.centralPanel.addSubWindow(self.sceneLayout)
-	self.centralPanel.tileSubWindows()
+        self.centralVizPanel.addSubWindow(self.sceneLayout)
+	self.centralVizPanel.tileSubWindows()
         self.sceneLayout.show()
     
 
@@ -1070,6 +1138,8 @@ class MainWindow(QtGui.QMainWindow):
             self.runtimeText.setText(str(runtime))
         self.updatePlots(runtime)
         self.mooseHandler.doRun(runtime)
+
+        
 
     def resetAndRunSlot(self):
         self._resetSlot()
