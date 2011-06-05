@@ -19,7 +19,7 @@ class AnyDimHandler: public AnyDimGlobalHandler
 	public:
 		AnyDimHandler( const DinfoBase* dinfo );
 		AnyDimHandler( const AnyDimHandler* other );
-		~AnyDimHandler();
+		// ~AnyDimHandler(); Inherited.
 
 		/**
 		 * Converts handler to its global version, where the same data is

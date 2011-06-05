@@ -24,7 +24,8 @@ OneDimGlobalHandler::OneDimGlobalHandler( const OneDimGlobalHandler* other )
 }
 
 OneDimGlobalHandler::~OneDimGlobalHandler() {
-	dinfo()->destroyData( data_ );
+	if ( data_ )
+		dinfo()->destroyData( data_ );
 }
 
 DataHandler* OneDimGlobalHandler::globalize() const

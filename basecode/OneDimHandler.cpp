@@ -26,13 +26,6 @@ OneDimHandler::OneDimHandler( const OneDimHandler* other )
 	data_ = dinfo()->copyData( other->data_, num, num );
 }
 
-/*
-OneDimHandler::~OneDimHandler()
-{
-	; // The parent class destroys the data.
-}
-*/
-
 DataHandler* OneDimHandler::globalize() const
 {
 	return 0; // Don't know yet how to do this.

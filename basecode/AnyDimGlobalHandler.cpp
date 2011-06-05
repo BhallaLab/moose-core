@@ -30,7 +30,8 @@ AnyDimGlobalHandler::AnyDimGlobalHandler( const AnyDimGlobalHandler* other )
 
 AnyDimGlobalHandler::~AnyDimGlobalHandler()
 {
-	dinfo()->destroyData( data_ );
+	if ( data_ )
+		dinfo()->destroyData( data_ );
 }
 
 DataHandler* AnyDimGlobalHandler::globalize() const

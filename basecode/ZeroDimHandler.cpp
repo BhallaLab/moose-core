@@ -28,7 +28,7 @@ ZeroDimHandler::ZeroDimHandler( const ZeroDimHandler* other )
 
 ZeroDimHandler::~ZeroDimHandler()
 {
-	// dinfo()->destroyData( data_ );
+	// The base class ZeroDimGlobalHandler does the destruction.
 }
 
 DataHandler* ZeroDimHandler::globalize() const
