@@ -26,9 +26,14 @@ ZeroDimGlobalHandler::ZeroDimGlobalHandler( const ZeroDimGlobalHandler* other )
 
 ZeroDimGlobalHandler::~ZeroDimGlobalHandler()
 {
+	// This is a hack to avoid deleting the data for the Cinfo 
+	// elements, which are statically allocated.
 	static Dinfo< Cinfo > ref;
-	assert( data_ != 0 );
-	if ( !dinfo()->isA( &ref ) ) {
+	// assert( data_ != 0 );
+	// Cannot use this assertion, because derived classes may or may
+	// not have any allocated data depending on node decomposition.
+	// Instead just check for availability of data ptr to delete.
+	if ( data_ && !dinfo()->isA( &ref ) ) {
 		dinfo()->destroyData( data_ );
 	}
 	data_ = 0;

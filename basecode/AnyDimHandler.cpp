@@ -27,11 +27,6 @@ AnyDimHandler::AnyDimHandler( const AnyDimHandler* other )
 	data_ = dinfo()->copyData( data_, num, num );
 }
 
-AnyDimHandler::~AnyDimHandler()
-{
-	dinfo()->destroyData( data_ );
-}
-
 // Sequence: The Shell tells all nodes to globalize. The local node
 // immediately creates the data handler and assigns its size, and
 // then sends out its contents to all other nodes. There needs to be

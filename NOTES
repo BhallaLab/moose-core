@@ -13142,5 +13142,22 @@ make pymoose BUILD=debug USE_MPI=1
 Will test to see where things fail. Tried. Need help with applying gdb.
 
 Fixed Shell:doCreate so it now takes an optional isGlobal argument.
+Checkin 2723.
+
+============================================================================
+5 Jun 2011
+Compiled for pymoose, now the basic pymoose runs OK. The MPI version dies but
+it looks like it is in the openmpi libraries.
+
+Several MPI functions will now be stress-tested because of the change above
+to default the isGlobal argument to zero.
+Did a non-pymoose MPI version. This also dies for more  than one node. This
+is because of an error in handling data deletion and inheritance of these
+deletion functions.
+
+Carrying on with the unit tests on multiple nodes, other problems:
+- Fails on assertion in testCopyFieldElement in testShell.cpp.
+This comes down to fixing the synchronization of dataHandlers across nodes.
+For now, several important fixes done.
 
 ============================================================================
