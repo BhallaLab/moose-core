@@ -402,12 +402,26 @@ void testCopyFieldElement()
 	bool ret = Field< unsigned int >::setVec( origId, "numSynapses", vec );
 	assert( ret );
 
-	assert( syn->dataHandler()->localEntries() == 
-		( size * (size - 1) ) / 2);
+	unsigned int numHere = 0;
+	if ( shell->numNodes() == 1 ) {
+		numHere = size * (size - 1) / 2;
+	} else {
+		for ( unsigned int i = 0; i < size; ++i ) {
+			if ( origId()->dataHandler()->isDataHere( i ) ) {
+				numHere += i;
+			}
+		}
+	}
+	assert( syn->dataHandler()->localEntries() == numHere );
 
 	FieldDataHandlerBase * fdh =
 		static_cast< FieldDataHandlerBase *>( syn->dataHandler() );
+	shell->doSyncDataHandler( origId, "get_numSynapses", origSynId );
 	fdh->setFieldDimension( fdh->biggestFieldArraySize() );
+	cout << shell->myNode() << ":"  << " bfa = " << fdh->biggestFieldArraySize() << ", expected size="
+		<< (size - 1) * size << ", actual = " << 
+		syn->dataHandler()->totalEntries() << 
+		", numHere = " << numHere << endl;
 	assert( syn->dataHandler()->totalEntries() == ( size - 1 ) * size );
 
 	vector< double > delay( size * (size - 1 ), 0 );
@@ -442,8 +456,7 @@ void testCopyFieldElement()
 	assert ( copySynElm->getName() == "synapse" );
 	assert( syn->dataHandler()->data( 0 ) != 0 ); // Should warn
 	assert( copySynElm->dataHandler()->data( 0 ) != 0 ); // Should warn
-	assert( copySynElm->dataHandler()->localEntries() ==
-		(size * (size - 1)) /2 );
+	assert( copySynElm->dataHandler()->localEntries() == numHere );
 	assert( copySynElm->dataHandler()->totalEntries() ==
 		( size * (size - 1) ) );
 	
