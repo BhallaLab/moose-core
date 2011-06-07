@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 30 11:18:34 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Nov  2 09:16:47 2010 (+0530)
+# Last-Updated: Tue Jun  7 14:33:48 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 483
+#     Update #: 501
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -175,12 +175,13 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
             self.mooseObject.setField(field, value)
             if field == 'name':
                 self.emit(QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'), self.mooseObject)
-        elif index.column() == 2 and role == Qt.EditRole: 
-            try:
-                self.fieldPlotNameMap[self.fields[index.row()]] = str(value)                
-                self.emit(QtCore.SIGNAL('plotWindowChanged(const QString&, const QString&)'), QtCore.QString(self.mooseObject.path + '/' + field), QtCore.QString(value))
-            except KeyError:
-                ret = False
+        elif index.column() == 2:
+            if role == Qt.EditRole: 
+                try:
+                    self.fieldPlotNameMap[self.fields[index.row()]] = str(value)                
+                    self.emit(QtCore.SIGNAL('plotWindowChanged(const QString&, const QString&)'), QtCore.QString(self.mooseObject.path + '/' + field), QtCore.QString(value))
+                except KeyError:
+                    ret = False
         if ret:
             self.emit(QtCore.SIGNAL('dataChanged(const QModelIndex&, const QModelIndex&)'), index, index)
         return ret
@@ -281,10 +282,16 @@ class ObjectEditDelegate(QtGui.QItemDelegate):
             combobox = QtGui.QComboBox(parent)        
             combobox.addItems(index.model().plotNames)
             combobox.setEditable(False)
+            self.connect(combobox, QtCore.SIGNAL('currentIndexChanged( int )'), self.emitComboSelectionCommit)
             # print 'create Combobox'
             return combobox
         return QtGui.QItemDelegate.createEditor(self, parent, option, index)
 
+    def emitComboSelectionCommit(self, index):
+        if not isinstance(self.sender(), QtGui.QComboBox):
+            raise TypeError('This should have never been reached. Only the plot selection ComboBox should be connected to this signal. But got: %s' % (self.sender()))
+        self.emit(QtCore.SIGNAL('commitData(QWidget *)'), self.sender())
+        
     def setEditorData(self, editor, index):
         text = index.model().data(index, Qt.DisplayRole).toString()
         if index.column == 2:
