@@ -249,8 +249,8 @@ class MainWindow(QtGui.QMainWindow):
         self.continueButtonToolbar.setGeometry(580,0,100,30)
 
 
-        self.connect(self.runButtonToolbar, QtCore.SIGNAL('clicked()'), self.resetAndRunSlot)
-        self.connect(self.continueButtonToolbar, QtCore.SIGNAL('clicked()'), self._runSlot)
+        self.connect(self.runButtonToolbar, QtCore.SIGNAL('clicked()'), self.resetAndRunSlot1)
+        self.connect(self.continueButtonToolbar, QtCore.SIGNAL('clicked()'), self._runSlot1)
 
         self.simToolbar.show()
         self.simToolbar.setMinimumHeight(30)
@@ -343,7 +343,10 @@ class MainWindow(QtGui.QMainWindow):
         self.commandLineDock.setWidget(self.shellWidget)
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.commandLineDock)
         self.commandLineDock.setObjectName('MooseCommandLine')
+        #add_chait
+        self.commandLineDock.setMaximumHeight(180)
         return self.commandLineDock
+
 
     def makeObjEditorFromTreeItem(self, item, column):
         """Wraps makeObjectFieldEditor for use via a tree item"""
@@ -401,6 +404,8 @@ class MainWindow(QtGui.QMainWindow):
         self.objFieldEditPanel.setWindowTitle(self.tr(obj.name))
         self.objFieldEditPanel.raise_()
 	self.objFieldEditPanel.show()
+        #add_chait
+        self.objFieldEditPanel.setMinimumWidth(300)
 
    
     def createGLCellWidget(self):
@@ -967,7 +972,6 @@ class MainWindow(QtGui.QMainWindow):
         self.vizs.append(viz)
         
         self.newDia.hide() 	#pressed OK button, so close the dialog
-        
         self.connect(vizWindow, QtCore.SIGNAL('subWindowClosed()'), self.decrementSubWindowCount)
         self.centralVizPanel.setActiveSubWindow(vizWindow)
         vizWindow.show()
@@ -982,7 +986,7 @@ class MainWindow(QtGui.QMainWindow):
     def pickCompartment(self,path):	#path is a QString type moosepath
         SelectedChild = self.modelTreeWidget.pathToTreeChild(path)
     	self.modelTreeWidget.setCurrentItem(SelectedChild)				#select the corresponding moosetree
-	#self.makeObjectFieldEditor(SelectedChild.getMooseObject())		#update the corresponding property
+	self.makeObjectFieldEditor(SelectedChild.getMooseObject())		#update the corresponding property
 
     def nearestSquare(self, n):	#add_chait
     	i = 1
@@ -1069,7 +1073,38 @@ class MainWindow(QtGui.QMainWindow):
             self.populateDataPlots()
             self.updateDefaultTimes(modeltype)
             self.modelTreeWidget.recreateTree()
-
+        
+        self.checkModelType()
+        
+    #add_chait
+    def checkModelType(self):
+        an=moose.Neutral('/')						#moose root children
+	all_ch=an.childList 	
+        ch = self.get_childrenOfField(all_ch,'Cell')
+        if ch :#if has cell type child elements.
+            #loaded model is a cell model, plot the cells in the 
+            if len(ch)==1:
+                #only the single cell models to be visualized
+                title = self.tr('GL %d' % (len(self.vizs)))
+                vizWindow = newGLSubWindow()
+                vizWindow.setWindowTitle(title)
+                vizWindow.setObjectName(title)
+                self.centralVizPanel.addSubWindow(vizWindow)
+                viz = updatepaintGL(parent=vizWindow)
+                viz.setObjectName(title)
+                vizWindow.setWidget(viz)
+        
+                viz.viz=1	#turn on visualization mode
+                viz.drawNewCell(cellName=moose.Cell(ch[0]).path,style = 2)
+                viz.setColorMap(cMap=os.path.join(str(self.settings.value(config.KEY_GL_COLORMAP).toString()),'jet'))
+                QtCore.QObject.connect(viz,QtCore.SIGNAL("compartmentSelected(QString)"),self.pickCompartment)
+                self.vizs.append(viz)
+                vizWindow.show()
+                vizWindow.showMaximized()
+                self._visiblePlotWindowCount += 1
+                self.currentPlotWindow = vizWindow
+                return vizWindow
+   
 
     def resetSettings(self):
         self.settingsReset = True
@@ -1080,8 +1115,6 @@ class MainWindow(QtGui.QMainWindow):
         current_element = item.getMooseObject()
         self.mooseHandler._current_element = current_element
         
-
-
     def _resetSlot(self):
         """Get the dt-s from the UI and call the reset method in
         MooseHandler
@@ -1142,8 +1175,35 @@ class MainWindow(QtGui.QMainWindow):
         self.updatePlots(runtime)
         self.mooseHandler.doRun(runtime)
 
-        
+    #add_chait
+    def resetAndRunSlot1(self): #horrible way of doing it. because of simulation toolbar.
+        self._resetSlot()
+        self._runSlot1()
 
+    #add_chait    
+    def _runSlot1(self):#bad way of doing it. but works just fine. (this is because of the simulation toolbar)
+        """Run the simulation.
+
+        """
+        if self.autoHideAction.isChecked():
+            if self.commandLineDock.isVisible():
+                self.commandLineDock.setVisible(False)
+            if self.mooseClassesPanel.isVisible():
+                self.mooseClassesPanel.setVisible(False)
+            # if self.glClientDock.isVisible():
+            #     self.glClientDock.setVisible(False)
+            if hasattr(self, 'objFieldEditPanel') and self.objFieldEditPanel.isVisible():
+                self.objFieldEditPanel.setVisible(False)
+            self.showRightBottomDocksAction.setChecked(False)
+        try:
+            runtime = float(str(self.runTimeEditToolbar.text()))
+        except ValueError:
+            runtime = MooseHandler.runtime
+            self.runtimeText.setText(str(runtime))
+        self.updatePlots(runtime)
+        self.mooseHandler.doRun(runtime)
+
+              
     def resetAndRunSlot(self):
         self._resetSlot()
         self._runSlot()
