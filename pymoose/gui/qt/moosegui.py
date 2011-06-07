@@ -212,7 +212,7 @@ class MainWindow(QtGui.QMainWindow):
         # Loading of layout should happen only after all dockwidgets
         # have been created
         #add_chait
-#        self.createSimulationToolbar()
+        self.createSimulationToolbar()
         self.loadLayout()
 
     def createSimulationToolbar(self):
@@ -229,7 +229,7 @@ class MainWindow(QtGui.QMainWindow):
         self.runTimeEditToolbar = QtGui.QLineEdit(self.simToolbar)
         self.runTimeEditToolbar.setText('%1.3e' % (MooseHandler.runtime))
         self.runTimeEditToolbar.setGeometry(130,0,100,30)
-
+        
         self.currentTimeLabelToolbar = QtGui.QLabel(self.simToolbar)
         self.currentTimeLabelToolbar.setText(' Current Time :')
         self.currentTimeLabelToolbar.setGeometry(230,0,120,30)
@@ -242,7 +242,7 @@ class MainWindow(QtGui.QMainWindow):
         self.runButtonToolbar.setText('Run')
         self.runButtonToolbar.setGeometry(470,0,100,30)
 #        print self.runButton.size()
-        self.simToolbar.addSeparator()
+#        self.simToolbar.addSeparator()
 
         self.continueButtonToolbar = QtGui.QToolButton(self.simToolbar)
         self.continueButtonToolbar.setText('Continue')
@@ -366,10 +366,12 @@ class MainWindow(QtGui.QMainWindow):
             if  not hasattr(self, 'objFieldEditPanel'):
                 self.objFieldEditPanel = QtGui.QDockWidget(self.tr(obj.name), self)
                 self.objFieldEditPanel.setObjectName(self.tr('MooseObjectFieldEdit'))
-                if (config.QT_MAJOR_VERSION > 4) or ((config.QT_MAJOR_VERSION == 4) and (config.QT_MINOR_VERSION >= 5)):
-                    self.tabifyDockWidget(self.mooseClassesPanel, self.objFieldEditPanel)
-                else:
-                    self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.objFieldEditPanel)
+                #if (config.QT_MAJOR_VERSION > 4) or ((config.QT_MAJOR_VERSION == 4) and (config.QT_MINOR_VERSION >= 5)):
+                #    self.tabifyDockWidget(self.mooseClassesPanel, self.objFieldEditPanel)
+                #else:
+                #    self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.objFieldEditPanel)
+                #add_chait
+                self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.objFieldEditPanel)
                 self.restoreDockWidget(self.objFieldEditPanel)
             self.connect(self.objFieldEditModel, QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'), self.renameObjFieldEditPanel)
             
@@ -400,6 +402,7 @@ class MainWindow(QtGui.QMainWindow):
         self.objFieldEditPanel.raise_()
 	self.objFieldEditPanel.show()
 
+   
     def createGLCellWidget(self):
     	"""Create a GLCell object to show the currently selected cell"""
         raise DeprecationWarning('This function is not implemented properly and is deprecated.')
@@ -739,7 +742,7 @@ class MainWindow(QtGui.QMainWindow):
         config.LOGGER.debug('Making control panel')
         self.controlDock = QtGui.QDockWidget(self.tr('Simulation Control'), self)
         self.controlDock.setObjectName(self.tr('Control Dock'))
-        self.controlDock.hide()#add_chait
+
         self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.controlDock)
         self.controlPanel = QtGui.QFrame(self)
         self.controlPanel.setFrameStyle(QtGui.QFrame.StyledPanel | QtGui.QFrame.Plain)
@@ -780,7 +783,7 @@ class MainWindow(QtGui.QMainWindow):
         layout.addWidget(self.continueButton, 6, 1)
         self.controlPanel.setLayout(layout)
         self.controlDock.setWidget(self.controlPanel)
-    
+        self.controlDock.hide()#add_chait
 
     def addPlotWindow(self):
         title = self.tr('Plot %d' % (len(self.plots)))
@@ -1160,13 +1163,18 @@ class MainWindow(QtGui.QMainWindow):
                     pass
                 self.tablePlotMap[table] = plot
                 plot.replot()
+                
 
     def updatePlots(self, currentTime):
         for plot in self.plots:
             plot.updatePlot(currentTime)
-        self.updateVizs()	#added by chaitanya  
-        
-    def updateVizs(self):	#added by chaitanya
+        self.updateVizs()	#add_chait  
+        self.updateCurrentTime(currentTime)
+
+    def updateCurrentTime(self,currentTime): #add_chait
+        self.currentTimeEditToolbar.setText(str(currentTime))
+
+    def updateVizs(self):	#add_chait
     	for viz in self.vizs:
        		viz.updateViz()
 
