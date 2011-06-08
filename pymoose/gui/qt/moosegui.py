@@ -615,7 +615,8 @@ class MainWindow(QtGui.QMainWindow):
 
         self.editModelMenu = QtGui.QMenu(self.tr('&Edit Model'), self)
         self.editModelMenu.addAction(self.connectionDialogAction)
-
+        
+		
         self.plotMenu = QtGui.QMenu(self.tr('&Plot Settings'), self)
         self.plotMenu.addAction(self.configurePlotAction)
         self.plotMenu.addAction(self.togglePlotVisibilityAction)
@@ -720,7 +721,7 @@ class MainWindow(QtGui.QMainWindow):
         config.LOGGER.debug('createMooseTreePanel - start')
 	self.mooseTreePanel = QtGui.QDockWidget(self.tr('Element Tree'), self)
         self.mooseTreePanel.setObjectName(self.tr('MooseClassPanel'))
-	self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.mooseTreePanel)
+	#~ self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.mooseTreePanel)
         self.mooseTreePanel.hide()#add_chait
 	self.modelTreeWidget = MooseTreeWidget(self.mooseTreePanel)
         self.modelTreeWidget.setMooseHandler(self.mooseHandler)
@@ -931,6 +932,7 @@ class MainWindow(QtGui.QMainWindow):
         vizWindow = newGLSubWindow()
         vizWindow.setWindowTitle(title)
         vizWindow.setObjectName(title)
+        
         self.centralVizPanel.addSubWindow(vizWindow)
         viz = updatepaintGL(parent=vizWindow)
         viz.setObjectName(title)
@@ -1016,7 +1018,8 @@ class MainWindow(QtGui.QMainWindow):
         
 
     def addLayoutWindow(self):
-        self.sceneLayout = layout.LayoutWidget()
+    	centralWindowsize =  self.centralVizPanel.size()
+        self.sceneLayout = layout.LayoutWidget(centralWindowsize)
 	self.connect(self.sceneLayout, QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"), self.makeObjectFieldEditor)
         self.centralVizPanel.addSubWindow(self.sceneLayout)
 	self.centralVizPanel.tileSubWindows()
