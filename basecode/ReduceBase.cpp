@@ -19,11 +19,11 @@
 #endif
 
 ReduceBase::ReduceBase() // To keep vectors happy
-	: er_( Id().eref() ), rfb_( 0 )
+	: srcId_( Id() ), rfb_( 0 )
 {;}
 
-ReduceBase::ReduceBase( const Eref& er, const ReduceFinfoBase* rfb )
-	: er_( er ), rfb_( rfb )
+ReduceBase::ReduceBase( ObjId srcId, const ReduceFinfoBase* rfb )
+	: srcId_( srcId ), rfb_( rfb )
 {;}
 
 ReduceBase::~ReduceBase()
@@ -31,8 +31,7 @@ ReduceBase::~ReduceBase()
 
 bool ReduceBase::sameEref( const ReduceBase* other ) const
 {
-	return ( rfb_ == other->rfb_ && 
-		er_.element() == other->er_.element() && er_.index() == other->er_.index()  );
+	return ( rfb_ == other->rfb_ && srcId_ == other->srcId_ );
 }
 
 bool ReduceBase::reduceNodes()
@@ -50,21 +49,21 @@ bool ReduceBase::reduceNodes()
 	delete[] recvBuf;
 #endif
 	
-	return er_.isDataHere(); // Do we need to assign the result here?
+	return srcId_.isDataHere(); // Do we need to assign the result here?
 }
 
 void ReduceBase::assignResult() const
 {
-	rfb_->digestReduce( er_, this );
+	rfb_->digestReduce( srcId_.eref(), this );
 }
 
 /////////////////////////////////////////////////////////////////////////
 
 // The function is set up by a suitable SetGet templated wrapper.
-ReduceStats::ReduceStats( const Eref& er, const ReduceFinfoBase* rfb, 
+ReduceStats::ReduceStats( ObjId srcId, const ReduceFinfoBase* rfb, 
 	const GetOpFuncBase< double >* gof )
 	: 
-		ReduceBase( er, rfb ),
+		ReduceBase( srcId, rfb ),
 		gof_( gof )
 {
 	data_.sum_ = 0.0;
@@ -85,9 +84,9 @@ unsigned int ReduceStats::dataSize() const
 	return sizeof( ReduceDataType );
 }
 
-void ReduceStats::primaryReduce( const Eref& e )
+void ReduceStats::primaryReduce( ObjId tgtId )
 {
-	double x = gof_->reduceOp( e );
+	double x = gof_->reduceOp( tgtId.eref() );
 	data_.sum_ += x;
 	data_.sumsq_ += x * x;
 	data_.count_++;
@@ -126,4 +125,67 @@ double ReduceStats::sumsq() const
 unsigned int ReduceStats::count() const
 {
 	return data_.count_;
+}
+
+/////////////////////////////////////////////////////////////////////////
+
+// The function is set up by a suitable SetGet templated wrapper.
+ReduceFieldDimension::ReduceFieldDimension( ObjId srcId, const ReduceFinfoBase* rfb, 
+	const GetOpFuncBase< unsigned int >* gof )
+	: 
+		ReduceBase( srcId, rfb ),
+		maxIndex_( 0 ),
+		gof_( gof )
+{;}
+
+ReduceFieldDimension::~ReduceFieldDimension()
+{;}
+
+const char* ReduceFieldDimension::data() const
+{
+	return reinterpret_cast< const char* >( &maxIndex_ );
+}
+
+unsigned int ReduceFieldDimension::dataSize() const
+{
+	return sizeof( unsigned int );
+}
+
+void ReduceFieldDimension::primaryReduce( ObjId tgtId )
+{
+	unsigned int i = gof_->reduceOp( tgtId.eref() );
+	tgtId_ = tgtId;
+	if ( i > maxIndex_ )
+		maxIndex_ = i;
+}
+
+// Must not use other::func_
+void ReduceFieldDimension::secondaryReduce( const ReduceBase* other )
+{
+	const ReduceFieldDimension* r = 
+		dynamic_cast< const ReduceFieldDimension* >( other );
+	assert( r );
+	if ( r->maxIndex_ > maxIndex_ )
+		maxIndex_ = r->maxIndex_;
+}
+
+// Must not use other::func_
+void ReduceFieldDimension::tertiaryReduce( const char* other )
+{
+	const unsigned int m = *reinterpret_cast< const unsigned int* >( other);
+	if ( m > maxIndex_ )
+		maxIndex_ = m;
+}
+
+unsigned int ReduceFieldDimension::maxIndex() const
+{
+	return maxIndex_;
+}
+
+bool ReduceFieldDimension::reduceNodes()
+{
+	bool ret = ReduceBase::reduceNodes();
+	
+	tgtId_.element()->dataHandler()->setFieldDimension( maxIndex_ );
+	return ret;
 }

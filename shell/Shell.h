@@ -163,16 +163,12 @@ class Shell
 		 Id doLoadModel( const string& fname, const string& modelpath );
 
 		/**
- 		 * This function synchronizes values on the DataHandler across 
- 		 * nodes. Used following functions that might lead to mismatches.
- 		 * 
- 		 * For starters it works on the FieldArray size, which affects
- 		 * total entries as well as indexing. This field is altered
- 		 * following synaptic setup, for example.
-		 * The elm and fid specify the field containing the array size. The
-		 * tgt specifies the Element which has to be modified.
+ 		 * This function synchronizes fieldDimension on the DataHandler 
+		 * across nodes. Used after function calls that might alter the
+		 * number of Field entries in the table..
+ 		 * The tgt is the FieldElement whose fieldDimension needs updating.
  		 */
-		void doSyncDataHandler( Id elm, const string& sizeField, Id tgt );
+		void doSyncDataHandler( Id tgt );
 
 		/**
 		 * Works through internal queue of operations that modify the
@@ -424,8 +420,8 @@ class Shell
 		const ProcInfo* getProcInfo( unsigned int index ) const;
 
 		/// Digests outcome of calculation for max index of ragged array
-		void digestReduceMax( 
-			const Eref& er, const ReduceMax< unsigned int >* arg );
+		void digestReduceFieldDimension( 
+			const Eref& er, const ReduceFieldDimension* arg );
 
 		/**
  		 * static func.

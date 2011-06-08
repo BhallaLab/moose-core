@@ -13158,6 +13158,31 @@ deletion functions.
 Carrying on with the unit tests on multiple nodes, other problems:
 - Fails on assertion in testCopyFieldElement in testShell.cpp.
 This comes down to fixing the synchronization of dataHandlers across nodes.
-For now, several important fixes done.
+For now, several important fixes done to the delete operations of 
+global DataHandlers, because they get called as base classes of the node-
+local DataHandlers. Checkin 2725.
 
+Need to figure out how to have ElementFields be assigned/accessed on
+all nodes, even when the DataHandler is node-local.
+
+Working on a Doc for ReduceOperations. About halfway through writing.
+
+============================================================================
+6
+Done doc. Working on fixing things. Key thing is to enable direct assignment
+of FieldElement sizes. This means that the set/get calls for fieldElement
+arrays need to be accessible from the FieldElement itself. 
+
+Making a new ReduceFieldElement class as part of this,
+
+Replacing Eref on ReduceBase with Id. Perhaps should be ObjId.
+
+============================================================================
+7 June 2011
+These changes trickled down to lots of things. Now it compiles but doesn't
+clear unit tests.
+
+Some more fixes, now it clears regression tests.
+
+However it doesn't work with computing #fieldEntries in mpi.
 ============================================================================
