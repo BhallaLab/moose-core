@@ -8,12 +8,9 @@
 **********************************************************************/
 
 #include "header.h"
-#include "ReduceBase.h"
 #include "ReduceFinfo.h"
 #ifdef USE_MPI
 #include <mpi.h>
-#include "ReduceMax.h"
-#include "ReduceBase.h"
 #include "ReduceMsg.h"
 #include "../shell/Shell.h"
 #endif

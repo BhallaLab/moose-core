@@ -14,8 +14,6 @@
 #include "Pool.h"
 #include "FuncPool.h"
 
-#include "ReduceBase.h"
-#include "ReduceMax.h"
 #include "../shell/Shell.h"
 
 #include "ReadKkit.h"

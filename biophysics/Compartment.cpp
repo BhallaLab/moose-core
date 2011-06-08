@@ -697,8 +697,6 @@ void testCompartment()
  * the values per unit length.
  * So here lambda = 20, so that each compt is lambda/20
  */
-#include "ReduceBase.h"
-#include "ReduceMax.h"
 #include "../shell/Shell.h"
 void testCompartmentProcess()
 {

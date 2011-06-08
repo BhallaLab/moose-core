@@ -10,8 +10,6 @@
 #include "header.h"
 #include <stdio.h>
 #include "Neutral.h"
-#include "ReduceBase.h"
-#include "ReduceMax.h"
 #include "Shell.h"
 #include "Wildcard.h"
 // #define NOINDEX (UINT_MAX - 2)

@@ -21,8 +21,6 @@
 #include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
 
-#include "ReduceBase.h"
-#include "ReduceMax.h"
 #include "Shell.h"
 
 static const unsigned int BLOCKSIZE = 20000; // duplicate defn, other in Qinfo.cpp

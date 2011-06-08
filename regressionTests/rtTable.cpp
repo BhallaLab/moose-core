@@ -8,8 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "ReduceBase.h"
-#include "ReduceMax.h"
 #include "Shell.h"
 
 void rtTable()

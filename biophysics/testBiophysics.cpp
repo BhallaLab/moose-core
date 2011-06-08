@@ -14,8 +14,6 @@
 #include "HHGate.h"
 #include "ChanBase.h"
 #include "HHChannel.h"
-#include "ReduceBase.h"
-#include "ReduceMax.h"
 #include "../shell/Shell.h"
 
 extern void testCompartment(); // Defined in Compartment.cpp

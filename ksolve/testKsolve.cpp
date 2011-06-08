@@ -14,8 +14,6 @@
 #include <gsl/gsl_odeiv.h>
 #include "ElementValueFinfo.h"
 #include "GslIntegrator.h"
-#include "ReduceBase.h"
-#include "ReduceMax.h"
 #include "../shell/Shell.h"
 #include "ReadKkit.h"
 
