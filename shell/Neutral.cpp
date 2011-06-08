@@ -86,6 +86,13 @@ const Cinfo* Neutral::initCinfo()
 			&Neutral::getFieldDimension
 		);
 
+	static ReadOnlyElementValueFinfo< Neutral, unsigned int > 
+		localNumField( 
+		"localNumField",
+		"For a FieldElement: number of entries of self on current node"
+		"For a regular Element: zero.",
+			&Neutral::getLocalNumField );
+
 	static ReadOnlyElementValueFinfo< Neutral, vector< ObjId > > msgOut( 
 		"msgOut",
 		"Messages going out from this Element", 
@@ -144,6 +151,7 @@ const Cinfo* Neutral::initCinfo()
 		&linearSize,
 		&dimensions,
 		&fieldDimension,
+		&localNumField,
 		&msgOut,
 		&msgIn,
 		&msgSrc,
@@ -320,6 +328,12 @@ unsigned int Neutral::getFieldDimension(
 	const Eref& e, const Qinfo* q ) const
 {
 	return e.element()->dataHandler()->getFieldDimension();
+}
+
+unsigned int Neutral::getLocalNumField( 
+	const Eref& e, const Qinfo* q ) const
+{
+	return e.element()->dataHandler()->getFieldArraySize( e.index().data());
 }
 
 vector< ObjId > Neutral::getOutgoingMsgs( 

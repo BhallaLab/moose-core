@@ -16,7 +16,7 @@ class ReduceBase
 {
 	public:
 		ReduceBase();
-		ReduceBase( const Eref& er, const ReduceFinfoBase* rfb );
+		ReduceBase( ObjId srcId, const ReduceFinfoBase* rfb );
 		virtual ~ReduceBase();
 
 		/**
@@ -24,7 +24,7 @@ class ReduceBase
 		 * in a general way it just looks up the object in this
 		 * interface function.
 		 */
-		virtual void primaryReduce( const Eref& e ) = 0;
+		virtual void primaryReduce( ObjId id ) = 0;
 
 		/**
 		 * Reduces contents of other (identical) Reduce subclasses.
@@ -59,8 +59,10 @@ class ReduceBase
 		 * Returns true if the object is global, or if the object was on
 		 * current node. In this situation we would expect to do the 
 		 * assignResult step too.
+		 * There is a problem with this: It doesn't know what to do about
+		 * global fields, that is ElementFields.
 		 */
-		bool reduceNodes();
+		virtual bool reduceNodes();
 
 		/**
 		 * Assigns the completed calculation to the object that requested 
@@ -68,7 +70,13 @@ class ReduceBase
 		 */
 		void assignResult() const;
 	private:
-		Eref er_;
+		/// This is the Object calling the Reduce operation.
+		ObjId srcId_;
+
+		/**
+		 * This is the Finfo handling the Reduce operation. 
+		 * Contains the digest call.
+		 */
 		const ReduceFinfoBase* rfb_;
 };
 
@@ -79,11 +87,11 @@ class ReduceStats: public ReduceBase
 {
 	public:
 		// The function is set up by a suitable SetGet templated wrapper.
-		ReduceStats( const Eref& er, const ReduceFinfoBase* rfb,
+		ReduceStats( ObjId srcId, const ReduceFinfoBase* rfb,
 			const GetOpFuncBase< double >* gof );
 		~ReduceStats();
 
-		void primaryReduce( const Eref& e );
+		void primaryReduce( ObjId id );
 		
 		// Must not use other::func_
 		void secondaryReduce( const ReduceBase* other );
@@ -118,6 +126,42 @@ class ReduceStats: public ReduceBase
 
 		/// OpFunc that contains function to extract data value from eref.
 		const GetOpFuncBase< double >* gof_;
+};
+
+/**
+ * Special Reduce class to handle fieldDimension reductions.
+ * It finds the max, but also grabs the dest object during primaryReduce
+ * so it can later be used to assign the fieldDimension.
+ */
+class ReduceFieldDimension: public ReduceBase
+{
+	public:
+		// The function is set up by a suitable SetGet templated wrapper.
+		ReduceFieldDimension( ObjId srcId, const ReduceFinfoBase* rfb,
+			const GetOpFuncBase< unsigned int >* gof );
+		~ReduceFieldDimension();
+
+		void primaryReduce( ObjId id );
+		
+		// Must not use other::func_
+		void secondaryReduce( const ReduceBase* other );
+
+		void tertiaryReduce( const char* data );
+
+		const char* data() const;
+
+		unsigned int dataSize() const;
+
+		unsigned int maxIndex() const;
+
+		bool reduceNodes();
+
+	private:
+		unsigned int maxIndex_;
+		ObjId tgtId_;
+
+		/// OpFunc that contains function to extract data value from eref.
+		const GetOpFuncBase< unsigned int >* gof_;
 };
 
 #endif // REDUCE_BASE_H

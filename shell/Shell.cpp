@@ -275,14 +275,14 @@ static Finfo* clockControlFinfos[] =
 
 ReduceFinfoBase* reduceArraySizeFinfo()
 {
-	static ReduceFinfo< Shell, unsigned int, ReduceMax< unsigned int > > 
+	static ReduceFinfo< Shell, unsigned int, ReduceFieldDimension >
 		reduceArraySize(
 		"reduceArraySize",
 		"Look up maximum value of an index, here ragged array size,"
 		"across many nodes, and assign uniformly to all nodes. Normally"
 		"followed by an operation to assign the size to the object that"
 		"was resized.",
-		&Shell::digestReduceMax
+		&Shell::digestReduceFieldDimension
 	);
 	return &reduceArraySize;
 }
@@ -677,31 +677,17 @@ void Shell::clearRestructuringQ()
 }
 
 /**
- * This function synchronizes values on the DataHandler across 
- * nodes. Used following functions that might lead to mismatches.
- * 
- * For starters it works on the FieldArray size, which affects
- * total entries as well as indexing. This field is altered
- * following synaptic setup, for example.
- * The elm is the Element to synchronize
- * the FuncId is the 'get' function on the array size field.
- * The tgt is the FieldElement to synchronize. Need to specify this because
- * in principle a given elm could have multiple FieldElements.
+ * This function synchronizes fieldDimension on the DataHandler across 
+ * nodes. Used after function calls that might alter the number of
+ * Field entries in the table.
+ * The tgt is the FieldElement whose fieldDimension needs updating.
  */
-void Shell::doSyncDataHandler( Id elm, const string& sizeField, Id tgt )
+void Shell::doSyncDataHandler( Id tgt )
 {
-	const Finfo* f = elm()->cinfo()->findFinfo( sizeField );
-	if ( !f ) {
-		cout << myNode() << ": Shell::doSyncDataHandler: Error, field '" <<
-			sizeField << "' not found on " << elm.path() << "\n";
-		return;
-	}
+	const Finfo* f = tgt()->cinfo()->findFinfo( "get_localNumField" );
+	assert( f );
 	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
-	if ( !df ) {
-		cout << myNode() << ": Shell::doSyncDataHandler: Error, field '" <<
-			sizeField << "' not a DestFinfo on " << elm.path() << "\n";
-		return;
-	}
+	assert( df );
 	FuncId sizeFid = df->getFid();
 
 	FieldDataHandlerBase* fb = 
@@ -713,10 +699,16 @@ void Shell::doSyncDataHandler( Id elm, const string& sizeField, Id tgt )
 	}
 	Eref sheller( shelle_, 0 );
 	initAck();
-		requestSync.send( sheller, &p_, elm, sizeFid );
+		requestSync.send( sheller, &p_, tgt, sizeFid );
 	waitForAck();
 	// Now the data is back, assign the field.
-	Field< unsigned int >::set( ObjId( tgt, 0 ), "fieldDimension", maxIndex_ );
+	// Check: will this function work on all nodes? No, only on master.
+	// So we have to do the ugly but reliable 'set' function.
+	// fv->setFieldDimension( maxIndex_ );
+	/*
+	Field< unsigned int >::set( ObjId( tgt, 0 ), 
+		"fieldDimension", maxIndex_ );
+	*/
 }
 
 ////////////////////////////////////////////////////////////////
@@ -1043,10 +1035,10 @@ const ProcInfo* Shell::procInfo()
 	return &p_;
 }
 
-void Shell::digestReduceMax( 
-	const Eref& er, const ReduceMax< unsigned int >* arg )
+void Shell::digestReduceFieldDimension( 
+	const Eref& er, const ReduceFieldDimension* arg )
 {
-	maxIndex_ = arg->max();
+	maxIndex_ = arg->maxIndex();
 	// ack()->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
 	ack()->send( er, &p_, Shell::myNode(), OkStatus );
 }

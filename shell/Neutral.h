@@ -137,6 +137,11 @@ class Neutral
 		 */
 		void setFieldDimension( const Eref& e, const Qinfo* q, unsigned int val );
 		unsigned int getFieldDimension( const Eref& e, const Qinfo* q ) const;
+		/**
+		 * Gets the number of entries of a FieldElement on current node.
+		 * If it is a regular Element, returns zero.
+		 */
+		unsigned int getLocalNumField( const Eref& e, const Qinfo* q) const;
 
 		/**
 		 * Destroys Element and all children

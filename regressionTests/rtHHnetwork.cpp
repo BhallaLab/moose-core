@@ -329,7 +329,8 @@ void rtHHnetwork( unsigned int numCopies )
 	SetGet2< double, long >::set( manager.objId(), "setRandomConnectivity",
 		connectionProbability, 1234UL );
 	
-	shell->doSyncDataHandler( kids[2], "get_numSynapses", synCopyId );
+	// shell->doSyncDataHandler( kids[2], "get_numSynapses", synCopyId );
+	shell->doSyncDataHandler( synCopyId );
 
 	// Make it twice as big as expected probability, for safety.
 	unsigned int numConnections = 2 * numCopies * sqrt( numCopies );
