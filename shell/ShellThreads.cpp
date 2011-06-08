@@ -16,8 +16,6 @@
 #include <mpi.h>
 #endif
 #include "header.h"
-#include "ReduceBase.h"
-#include "ReduceMax.h"
 #include "ReduceFinfo.h"
 #include "ReduceMsg.h"
 #include "Shell.h"

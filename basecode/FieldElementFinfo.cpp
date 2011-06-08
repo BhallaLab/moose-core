@@ -9,8 +9,6 @@
 
 #include "header.h"
 
-#include "ReduceBase.h"
-#include "ReduceMax.h"
 #include "../shell/Shell.h"
 
 bool adopt( Id parent, Id child )

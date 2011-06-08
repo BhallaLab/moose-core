@@ -21,8 +21,6 @@
 #include <queue>
 #include "../biophysics/IntFire.h"
 
-#include "ReduceBase.h"
-#include "ReduceMax.h"
 #include "../shell/Shell.h"
 
 void testArith()

@@ -9,8 +9,6 @@
 
 #include <fstream>
 #include "header.h"
-#include "ReduceBase.h"
-#include "ReduceMax.h"
 #include "Shell.h"
 #include "LoadModels.h" // For the ModelType enum.
 #include "../kinetics/ReadKkit.h"

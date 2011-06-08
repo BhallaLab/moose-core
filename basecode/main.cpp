@@ -24,8 +24,6 @@
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
-#include "ReduceBase.h"
-#include "ReduceMax.h"
 #include "../shell/Shell.h"
 
 #ifdef DO_UNIT_TESTS

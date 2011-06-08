@@ -9,8 +9,6 @@
 
 #include "header.h"
 #include "OneToAllMsg.h"
-#include "ReduceBase.h"
-#include "ReduceMax.h"
 #include "Shell.h"
 
 /// Returns the Id of the root of the copied tree.

@@ -95,6 +95,7 @@ extern DestFinfo* receiveGet();
 #include "LookupValueFinfo.h"
 #include "SharedFinfo.h"
 #include "FieldElementFinfo.h"
+#include "ReduceBase.h"
 #include "../shell/Neutral.h"
 
 #endif // _HEADER_H

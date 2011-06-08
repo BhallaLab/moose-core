@@ -18,8 +18,6 @@
 #include "SmolReac.h"
 #include "SmolEnz.h"
 #include "SmolMMenz.h"
-#include "ReduceBase.h"
-#include "ReduceMax.h"
 #include "../shell/Shell.h"
 #include "../shell/Neutral.h"
 #include "../geom/Surface.h"

@@ -10,8 +10,6 @@
 #include "header.h"
 #include "AssignmentMsg.h"
 
-#include "ReduceBase.h"
-#include "ReduceMax.h"
 #include "../shell/Shell.h"
 
 Id AssignmentMsg::managerId_;

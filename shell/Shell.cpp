@@ -18,8 +18,6 @@
 #include "SparseMsg.h"
 #include "ReduceMsg.h"
 #include "ReduceFinfo.h"
-#include "ReduceBase.h"
-#include "ReduceMax.h"
 #include "Shell.h"
 #include "Dinfo.h"
 #include "Wildcard.h"

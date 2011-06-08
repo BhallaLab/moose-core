@@ -12,8 +12,6 @@
 #include "HHGate.h"
 #include "ChanBase.h"
 #include "HHChannel.h"
-#include "ReduceBase.h"
-#include "ReduceMax.h"
 #include "../shell/Shell.h"
 
 const double HHChannel::EPSILON = 1.0e-10;

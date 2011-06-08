@@ -41,8 +41,6 @@
 #include <mpi.h>
 #endif
 
-#include "../basecode/ReduceBase.h"
-#include "../basecode/ReduceMax.h"
 #include "Shell.h"
 #include "../utility/utility.h"
 #include "../scheduling/Tick.h"
