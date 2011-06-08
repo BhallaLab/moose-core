@@ -19,10 +19,10 @@ template< class T > class ReduceMax: public ReduceBase
 {
 	public:
 		// The function is set up by a suitable SetGet templated wrapper.
-		ReduceMax( const Eref& er, const ReduceFinfoBase* rfb,
+		ReduceMax( Id srcId, const ReduceFinfoBase* rfb,
 			const GetOpFuncBase< T >* gof )
 			:
-				ReduceBase( er, rfb ),
+				ReduceBase( srcId, rfb ),
 				max_( 0 ),
 				gof_( gof )
 		{;}
@@ -30,9 +30,9 @@ template< class T > class ReduceMax: public ReduceBase
 		~ReduceMax()
 		{;}
 
-		void primaryReduce( const Eref& e )
+		void primaryReduce( Id tgtId )
 		{
-			T x = gof_->reduceOp( e );
+			T x = gof_->reduceOp( tgtId.eref() );
 			if ( max_ < x ) 
 				max_ = x;
 		}

@@ -15,13 +15,15 @@
  * target Element.
  * Inspects each entry, and uses the 'stride_' field to determine
  * which should be its target.
+ * \verbatim
  * Suppose we have a stride of +1. Then
- * Src:	1	2	3	4	n
- * Dest:2	3	4	5	n+1
+ * Src:		1	2	3	4	n
+ * Dest:	2	3	4	5	n+1
  *
  * Suppose we have a stride of -2. Then
- * Src:	1	2	3	4	n
- * Dest:-	-	1	2	n-2
+ * Src:		1	2	3	4	n
+ * Dest:	-	-	1	2	n-2
+ * \endverbatim
  *
  */
 class DiagonalMsg: public Msg

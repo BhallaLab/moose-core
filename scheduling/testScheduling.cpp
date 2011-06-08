@@ -595,7 +595,8 @@ void testMultiNodeIntFireNetwork()
 	ret = Field< double >::setVec( i2, "refractoryPeriod", temp );
 	assert( ret );
 
-	shell->doSyncDataHandler( e2.id(), "get_numSynapses", synId );
+	shell->doSyncDataHandler( synId );
+	// shell->doSyncDataHandler( e2.id(), "get_numSynapses", synId );
 
 	unsigned int fieldSize = 
 		Field< unsigned int >::get( synId, "fieldDimension" );

@@ -40,7 +40,7 @@ void ReduceMsg::exec( const char* arg, const ProcInfo *p ) const
 		or
 		*/
 		const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
-		ReduceBase* r = rfb_->makeReduce( e1_, i1_, f );
+		ReduceBase* r = rfb_->makeReduce( ObjId( e1_->id(), i1_ ), f );
 		// Qinfo::addToReduceQ( Eref( e1_, i1_ ), rfb_, r, p->threadIndexInGroup() );
 		Qinfo::addToReduceQ( r, p->threadIndexInGroup );
 		DataHandler* d2 = e2_->dataHandler();
@@ -48,7 +48,7 @@ void ReduceMsg::exec( const char* arg, const ProcInfo *p ) const
 		{
 			if ( p->execThread( e2_->id(),i.index().data() ) ) {
 				// This fills up the first pass of reduce operations.
-				r->primaryReduce( Eref( e2_, i.index() ) );
+				r->primaryReduce( ObjId( e2_->id(), i.index() ) );
 			}
 		}
 	}
