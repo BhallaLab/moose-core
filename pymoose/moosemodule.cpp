@@ -56,8 +56,6 @@
 #include "../basecode/DataId.h"
 #include "../utility/strutil.h"
 #include "../utility/utility.h"
-#include "../basecode/ReduceBase.h"
-#include "../basecode/ReduceMax.h"
 #include "../shell/Shell.h"
 
 #include "moosemodule.h"

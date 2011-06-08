@@ -8,8 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "ReduceBase.h"
-#include "ReduceMax.h"
 #include "Shell.h"
 #ifdef USE_MPI
 #include <mpi.h>

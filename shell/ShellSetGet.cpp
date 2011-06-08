@@ -21,8 +21,6 @@
 */
 #include "AssignmentMsg.h"
 #include "AssignVecMsg.h"
-#include "ReduceBase.h"
-#include "ReduceMax.h"
 #include "Shell.h"
 // #include "Dinfo.h"
 

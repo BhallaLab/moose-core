@@ -19,8 +19,6 @@
 #include "ReduceMsg.h"
 #include "MsgDataHandler.h"
 
-#include "ReduceBase.h"
-#include "ReduceMax.h"
 #include "../shell/Shell.h"
 
 ///////////////////////////////////////////////////////////////////////////

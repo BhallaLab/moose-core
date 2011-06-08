@@ -9,8 +9,6 @@
 
 #include "SmolHeader.h"
 #include "ElementValueFinfo.h"
-#include "ReduceBase.h"
-#include "ReduceMax.h"
 #include "../shell/Shell.h"
 
 

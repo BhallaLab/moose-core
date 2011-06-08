@@ -38,8 +38,6 @@
 
 #include "../basecode/header.h"
 #include "../basecode/Id.h"
-#include "../basecode/ReduceBase.h"
-#include "../basecode/ReduceMax.h"
 #include "../shell/Shell.h"
 #include "../utility/utility.h"
 #include "../scheduling/Tick.h"

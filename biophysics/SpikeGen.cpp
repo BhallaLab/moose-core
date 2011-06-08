@@ -217,8 +217,6 @@ void SpikeGen::handleVm( double val )
 /////////////////////////////////////////////////////////////////////
 
 #ifdef DO_UNIT_TESTS
-#include "ReduceBase.h"
-#include "ReduceMax.h"
 #include "../shell/Shell.h"
 
 void testSpikeGen()

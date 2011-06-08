@@ -13186,3 +13186,8 @@ Some more fixes, now it clears regression tests.
 
 However it doesn't work with computing #fieldEntries in mpi.
 ============================================================================
+8 June 2011
+Checkin 2730.
+
+Minor cleanup: I put ReduceBase.h in the header.h file, and went through all
+relevant .cpps where I had included ReduceBase and ReduceMax ahead of Shell.h.
