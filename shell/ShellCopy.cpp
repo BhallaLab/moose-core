@@ -64,9 +64,13 @@ Element* innerCopyElements( Id orig, Id newParent, Id newElm,
 
 	// cout << Shell::myNode() << ": ice, pa = " << newParent << ", pair= (" << orig << "," << e->id() << ")\n";
 
+	/*
 	const Neutral* origData = reinterpret_cast< const Neutral* >(
 		orig.eref().data() );
 	vector< Id > kids = origData->getChildren( orig.eref(), 0 );
+	*/
+	vector< Id > kids;
+	Neutral::children( orig.eref(), kids );
 
 	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i ) {
 		innerCopyElements( *i, e->id(), Id::nextId(), n, tree );

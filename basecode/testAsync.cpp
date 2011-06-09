@@ -605,7 +605,7 @@ void testSetGetSynapse()
 	assert ( syn != 0 );
 	assert ( syn->getName() == "synapse" ); 
 
-	assert( syn->dataHandler()->data( 0 ) != 0 ); // Should give warning
+//	assert( syn->dataHandler()->data( 0 ) != 0 ); // Should give warning
 
 	assert( syn->dataHandler()->totalEntries() == 100 );
 	assert( syn->dataHandler()->localEntries() == 0 );
@@ -2132,7 +2132,7 @@ void testCopyFieldElementData()
 	assert ( syn != 0 );
 	assert ( syn->getName() == "synapse" ); 
 
-	assert( syn->dataHandler()->data( 0 ) != 0 ); // Should generate warning
+	// assert( syn->dataHandler()->data( 0 ) != 0 ); // Should generate warning
 
 	assert( syn->dataHandler()->totalEntries() == size );
 	assert( syn->dataHandler()->localEntries() == 0 );
@@ -2190,8 +2190,8 @@ void testCopyFieldElementData()
 	// Element should exist even if data doesn't
 	assert ( copySynElm != 0 );
 	assert ( copySynElm->getName() == "synapse" ); 
-	assert( syn->dataHandler()->data( 0 ) != 0 ); // Should generate warning
-	assert( copySynElm->dataHandler()->data( 0 ) != 0 );
+	// assert( syn->dataHandler()->data( 0 ) != 0 ); // Should generate warning
+	// assert( copySynElm->dataHandler()->data( 0 ) != 0 );
 	assert( copySynElm->dataHandler()->localEntries() == 
 		(size * (size - 1)) /2 );
 	assert( copySynElm->dataHandler()->totalEntries() == 

@@ -13234,3 +13234,13 @@ affected fields with DataId::any; and corresponding code into the DataHandlers
 to deal with it. Still a possibility for multiple assignments from different
 threads, not sure how likely this is.
 
+Checkin 2733.
+
+Cleaning up lots of printfs. Remaining 3 warnings on access to zero-sized
+synapse arrays are all from Get and Set calls to Element fields:
+linearSize
+dimensions
+fieldDimension.
+Still trying to figure out why these calls trigger a call to getSynapse.
+
+============================================================================
