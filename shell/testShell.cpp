@@ -416,8 +416,8 @@ void testCopyFieldElement()
 		static_cast< FieldDataHandlerBase *>( syn->dataHandler() );
 	// shell->doSyncDataHandler( origId, "get_numSynapses", origSynId );
 	shell->doSyncDataHandler( origSynId );
-	fdh->setFieldDimension( fdh->biggestFieldArraySize() );
-	cout << shell->myNode() << ":"  << " bfa = " << fdh->biggestFieldArraySize() << ", expected size="
+	// fdh->setFieldDimension( fdh->biggestFieldArraySize() );
+	cout << shell->myNode() << ":"  << " bfa = " << fdh->biggestFieldArraySize() << ", expected totalEntries="
 		<< (size - 1) * size << ", actual = " << 
 		syn->dataHandler()->totalEntries() << 
 		", numHere = " << numHere << endl;

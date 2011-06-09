@@ -36,15 +36,42 @@ bool ReduceBase::reduceNodes()
 #ifdef USE_MPI
 	char* recvBuf = new char[ Shell::numNodes() * this->dataSize() ];
 	char* sendBuf = new char[ this->dataSize() ];
+	/*
+	 * Printf debugging
+	 */
+	if ( this->dataSize() == ( 24 )){ // Checked, this is size of ReduceDataType
+		const char* temp = this->data();
+		const double *x = reinterpret_cast< const double *>( temp );
+		const unsigned int* j = reinterpret_cast< const unsigned int*>( temp + 2 * sizeof( double ));
+		cout << Shell::myNode() << ": local data entry =( " << 
+				*x << ", " << *j << " )\n";
+	}
+
 	memcpy( sendBuf, this->data(), this->dataSize() );
 	MPI_Allgather( sendBuf, this->dataSize(), MPI_CHAR, 
 		recvBuf, this->dataSize(), MPI_CHAR, 
 		MPI_COMM_WORLD );
-	for ( unsigned int i = 1; i < Shell::numNodes(); ++i ) {
-		this->tertiaryReduce( recvBuf + i * this->dataSize() );
+	for ( unsigned int i = 0; i < Shell::numNodes(); ++i ) {
+		if ( i != Shell::myNode() )
+			this->tertiaryReduce( recvBuf + i * this->dataSize() );
+	}
+	/*
+	* Printf debugging
+	*/
+	if ( this->dataSize() == ( 24 )){ // Checked, this is size of ReduceDataType
+		const char* temp = recvBuf;
+		for ( unsigned int i = 0; i < Shell::numNodes(); ++i ) {
+			const double *x = reinterpret_cast< const double *>( temp );
+			const unsigned int* j = reinterpret_cast< const unsigned int*>( temp + 2 * sizeof( double ));
+			cout << Shell::myNode() << ": recvBuf entry " << i << "=( " << 
+				*x << ", " << *j << " )\n";
+			temp += this->dataSize();
+		}
 	}
 	delete[] recvBuf;
 #endif
+	cout << Shell::myNode() << ": ReduceBase::reduceNodes: src = " <<
+		srcId_ << endl;
 	
 	return srcId_.isDataHere(); // Do we need to assign the result here?
 }
@@ -52,6 +79,8 @@ bool ReduceBase::reduceNodes()
 void ReduceBase::assignResult() const
 {
 	rfb_->digestReduce( srcId_.eref(), this );
+	cout << Shell::myNode() << ": ReduceBase::assignResult: src = " <<
+		srcId_ << endl;
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -104,9 +133,16 @@ void ReduceStats::tertiaryReduce( const char* other )
 {
 	const ReduceDataType* d = reinterpret_cast< const ReduceDataType* >( other );
 	assert( d );
+
+	cout << Shell::myNode() << ": ReduceStats::tertiaryReduce: stats = " <<
+		data_.sum_ << ", " << data_.sumsq_ << ", " << data_.count_ << endl;
+
 	data_.sum_ += d->sum_;
 	data_.sumsq_ += d->sumsq_;
 	data_.count_ += d->count_;
+
+	cout << Shell::myNode() << ": ReduceStats::tertiaryReduce: stats = " <<
+		data_.sum_ << ", " << data_.sumsq_ << ", " << data_.count_ << endl;
 }
 
 double ReduceStats::sum() const
@@ -182,6 +218,7 @@ unsigned int ReduceFieldDimension::maxIndex() const
 bool ReduceFieldDimension::reduceNodes()
 {
 	bool ret = ReduceBase::reduceNodes();
+	cout << Shell::myNode() << ": ReduceFieldDimension::reduceNodes: maxindex= " << maxIndex_ << ", tgt=" << tgtId_ << endl;
 	
 	tgtId_.element()->dataHandler()->setFieldDimension( maxIndex_ );
 	return ret;

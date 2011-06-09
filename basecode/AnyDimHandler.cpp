@@ -171,6 +171,9 @@ unsigned int AnyDimHandler::localEntries() const
 
 char* AnyDimHandler::data( DataId index ) const
 {
+	// Typically data will not be touched when index == any.
+	if ( index == DataId::any() )
+		return data_; 
 	if ( isDataHere( index ) )
 		return data_ + ( index.data() - start_ ) * dinfo()->size();
 	return 0;
@@ -194,7 +197,10 @@ bool AnyDimHandler::resize( vector< unsigned int > dims )
 }
 
 bool AnyDimHandler::isDataHere( DataId index ) const {
-	return ( index.data() >= start_ && index.data() < end_ );
+	return ( 
+		index == DataId::any() ||
+		( index.data() >= start_ && index.data() < end_ )
+	);
 }
 
 bool AnyDimHandler::isAllocated() const

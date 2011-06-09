@@ -109,10 +109,10 @@ char* ZeroDimHandler::data( DataId index ) const {
 
 /**
  * Returns true if the node decomposition has the data on the
- * current node
+ * current node, or if the index explicitly states it is on any node.
  */
 bool ZeroDimHandler::isDataHere( DataId index ) const {
-	return ( Shell::myNode() == 0 );
+	return ( Shell::myNode() == 0 || index == DataId::any() );
 }
 
 bool ZeroDimHandler::isAllocated() const {
