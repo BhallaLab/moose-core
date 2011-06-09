@@ -149,6 +149,8 @@ class Neutral
 		void destroy( const Eref& e, const Qinfo* q, int stage );
 		
 		////////////////////////////////////////////////////////////
+		// Static utility functions
+		////////////////////////////////////////////////////////////
 
 		/**
 		 * Finds specific named child
@@ -180,6 +182,13 @@ class Neutral
 		 * Finds the path of element e
 		 */
 		static string path( const Eref& e );
+
+		/**
+		 * Checks if specified field is a global, typically because it is
+		 * present on the Element and therefore should be assigned uniformly
+		 * on all nodes
+		 */
+		static bool isGlobalField( const string& field );
 
 	private:
 		// string name_;

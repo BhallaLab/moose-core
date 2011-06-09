@@ -12,7 +12,6 @@
 #include "ElementValueFinfo.h"
 #include "LookupElementValueFinfo.h"
 
-
 const Cinfo* Neutral::initCinfo()
 {
 	/////////////////////////////////////////////////////////////////
@@ -531,3 +530,29 @@ ostream& operator <<( ostream& s, const Neutral& d )
 {
 	return s;
 }
+
+bool Neutral::isGlobalField( const string& field )
+{
+	/*
+	* This is over the top: only 3 cases to worry about.
+	static set< string > fieldnames;
+
+	if ( fieldnames.size() == 0 ) {
+		fieldnames.insert( "set_name" );
+		fieldnames.insert( "set_group" );
+		fieldnames.insert( "set_fieldDimension" );
+	}
+	*/
+	if ( field.length() < 8 )
+		return 0;
+	if ( field.substr( 0, 4 ) == "set_" ) {
+		if ( field == "set_name" )
+			return 1;
+		if ( field == "set_group" )
+			return 1;
+		if ( field == "set_fieldDimension" ) // This is the critical one!
+			return 1;
+	}
+	return 0;
+}
+

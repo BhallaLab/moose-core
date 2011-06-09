@@ -13191,3 +13191,46 @@ Checkin 2730.
 
 Minor cleanup: I put ReduceBase.h in the header.h file, and went through all
 relevant .cpps where I had included ReduceBase and ReduceMax ahead of Shell.h.
+Checkin 2731.
+
+Fundamental issue: Why does the testBuiltins::testMpiStatsReduce report 
+different totals on different nodes? Can I examine the transfer buffer after the
+transfer?
+
+Further tests. Two problems:
+- How to deal with ElementFinfos, ones that refer to a field on the parent
+	Element. Two issues for this
+	- isDataHere should be true even if there is no data on current node.
+	- Should only do a single assignment per node.
+	- However, some ElementFinfos associated with FieldElements do
+		need to be object and node specific.
+		- some ElementValueFinfos are used just because we want
+		to have the element handy to send on a msg or similar ops
+		involving the Element.
+		- Zombies use ElementValueFinfos in order to extract their own 
+		Id, which looks up the solver tables.
+		
+- The Reduce code gets confused with globals. It adds everything up. 
+
+Lots of printf debugging put in. Something funny is hapening with 
+contents of RecvBuf.
+
+============================================================================
+9 June
+Starting to make sense after lots of printf debugging:
+- RecvBuf entries are identical on all nodes. The earlier code assumed that the
+	local node entry was on node zero, and is therefore wrong.
+- Entries match regarless of number of threads activated per node. Good.
+
+Fixed the RecvBuf reducing code, using tertiaryReduce. Now all nodes end up
+with the same values after reduction. Problem is that this value is wrong.
+It also differs depending on how many nodes are used.
+
+Fixed the problem with the ReduceStats test in testBuiltins::testMpiStatsReduce.
+It turned out to be that the ElementFinfo assigning fieldDimension was only
+going to node 0. In other words it was one of the problems listed above. My
+solution was to put code into checkSet to change the DataIds of
+affected fields with DataId::any; and corresponding code into the DataHandlers
+to deal with it. Still a possibility for multiple assignments from different
+threads, not sure how likely this is.
+
