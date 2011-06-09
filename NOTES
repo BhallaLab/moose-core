@@ -13243,4 +13243,11 @@ dimensions
 fieldDimension.
 Still trying to figure out why these calls trigger a call to getSynapse.
 
+For now, checkin 2734.
+
+More clean up of printf debugging. This also meant a cleanup of a number
+of calls to getSynapse where there was no data available, as the call
+was really to work on Element fields. Some rather nasty template stuff 
+followed, by trial and error, till I got something that compiled.
+
 ============================================================================
