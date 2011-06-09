@@ -52,13 +52,13 @@ void rtHHnetwork( unsigned int numCopies )
 {
 	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
 	vector< unsigned int > dims( 1, 1 );
-	Id nid = shell->doCreate( "Neutral", Id(), "n", dims );
-	Id comptId = shell->doCreate( "Compartment", nid, "compt", dims );
-	Id naId = shell->doCreate( "HHChannel", comptId, "Na", dims );
+	Id nid = shell->doCreate( "Neutral", Id(), "n", dims, 1 );
+	Id comptId = shell->doCreate( "Compartment", nid, "compt", dims, 1 );
+	Id naId = shell->doCreate( "HHChannel", comptId, "Na", dims, 1 );
 	MsgId mid = shell->doAddMsg( "OneToOne", ObjId( comptId ), "channel", 
 		ObjId( naId ), "channel" );
 	assert( mid != Msg::badMsg );
-	Id kId = shell->doCreate( "HHChannel", comptId, "K", dims );
+	Id kId = shell->doCreate( "HHChannel", comptId, "K", dims, 1 );
 	mid = shell->doAddMsg( "OneToOne", ObjId( comptId ), "channel", 
 		ObjId( kId ), "channel" );
 	assert( mid != Msg::badMsg );
@@ -178,9 +178,9 @@ void rtHHnetwork( unsigned int numCopies )
 	//////////////////////////////////////////////////////////////////////
 	// Set up SpikeGen and SynChan
 	//////////////////////////////////////////////////////////////////////
-	Id synChanId = shell->doCreate( "SynChan", comptId, "synChan", dims );
+	Id synChanId = shell->doCreate( "SynChan", comptId, "synChan", dims, 1);
 	Id synId( synChanId.value() + 1 );
-	Id axonId = shell->doCreate( "SpikeGen", comptId, "axon", dims );
+	Id axonId = shell->doCreate( "SpikeGen", comptId, "axon", dims, 1 );
 	bool ret;
 	assert( synId()->getName() == "synapse" );
 	ret = Field< double >::set( synChanId, "tau1", 1.0e-3 );

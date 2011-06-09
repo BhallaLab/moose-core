@@ -13249,5 +13249,19 @@ More clean up of printf debugging. This also meant a cleanup of a number
 of calls to getSynapse where there was no data available, as the call
 was really to work on Element fields. Some rather nasty template stuff 
 followed, by trial and error, till I got something that compiled.
+Checkin 2735.
 
+Now after all this, went back to the regression tests with MPI. Fails in
+ZeroDimHandler::copyExpand. 
+This turned out to be because the source objects were not global. Works when
+they are converted to global, but I need a general fix for this.
+
+Now it crashes in the results of the network in rtHHnetwork.cpp. 
+There is a problem in copyExpand, it doesn't seem to keep track of 
+the node decomposition.
+ZeroDimHandler::copyToNewDim and copyExpand both need to do something better
+here.
+
+Put in some tests to avoid the problem of making array copies of local data 
+onto multiple nodes.
 ============================================================================
