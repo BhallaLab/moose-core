@@ -86,6 +86,7 @@ class FuncBarrier;
 #include "FieldDataHandler.h"
 
 extern DestFinfo* receiveGet();
+class Neutral;
 #include "SetGet.h"
 #include "OpFunc.h"
 #include "EpFunc.h"

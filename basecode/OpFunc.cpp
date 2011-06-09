@@ -77,3 +77,18 @@ string OpFuncDummy::rttiType() const
 {
 	return "void";
 }
+
+//////////////////////////////////////////////////////////////////
+
+/*
+Neutral* dummyNeutral()
+{
+	static Neutral dummy;
+	return &dummy;
+}
+*/
+template<> Neutral* getEpFuncData< Neutral >( const Eref& e )
+{
+	static Neutral dummy;
+	return &dummy;
+}

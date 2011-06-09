@@ -9,6 +9,37 @@
 
 #ifndef _EPFUNC_H
 #define _EPFUNC_H
+
+/**
+ * Utility function to return a pointer of the desired type from the 
+ * Eref data. Mainly here because it lets us specialize for Neutrals,
+ * below.
+ */
+template< class T > T* getEpFuncData( const Eref& e )
+{
+	return reinterpret_cast< T* >( e.data() ) ;
+}
+
+/**
+ * This is a template specialization for GetEpFunc applied to Neutrals.
+ * This is necessary in order to access Element fields of objects that 
+ * may not have been allocated (such as synapses), even though their Element
+ * has been created and needs to be manipulated.
+ * Apparently regular functions with same args will be preferred
+ * over templates, let's see if this works. Nope, it doesn't. Good try.
+	extern Neutral* getEpFuncData( const Eref& e );
+ * Try this form: it doesn't work either.
+extern Neutral* dummyNeutral();
+template<> Neutral* getEpFuncData< Neutral >( const Eref& e )
+{
+	return dummyNeutral();
+}
+ * Try externing the template itself.
+ */
+template<> Neutral* getEpFuncData< Neutral >( const Eref& e );
+
+
+
 /**
  * This set of classes is derived from OpFunc, and take extra args
  * for the qinfo and Eref.
@@ -36,11 +67,13 @@ template< class T > class EpFunc0: public OpFunc
 
 		void op( const Eref& e, const char* buf ) const {
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
-			(reinterpret_cast< T* >( e.data() )->*func_)( e, q ); 
+			( getEpFuncData< T >( e )->*func_ )( e, q );
+			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q ); 
 		}
 
 		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
-			(reinterpret_cast< T* >( e.data() )->*func_)( e, q ); 
+			( getEpFuncData< T >( e )->*func_ )( e, q );
+			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q ); 
 		}
 
 		string rttiType() const {
@@ -76,12 +109,14 @@ template< class T, class A > class EpFunc1: public OpFunc
 		void op( const Eref& e, const char* buf ) const {
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
 			Conv< A > arg1( buf + sizeof( Qinfo ) );
-			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1 ) ;
+			( getEpFuncData< T >( e )->*func_ )( e, q, *arg1 );
+			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1 ) ;
 		}
 
 		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
 			Conv< A > arg1( buf );
-			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1 ) ;
+			( getEpFuncData< T >( e )->*func_ )( e, q, *arg1 );
+			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1 ) ;
 		}
 
 		string rttiType() const {
@@ -119,13 +154,15 @@ template< class T, class A1, class A2 > class EpFunc2: public OpFunc
 			buf += sizeof( Qinfo );
 			Conv< A1 > arg1( buf );
 			Conv< A2 > arg2( buf + arg1.size() );
-			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2 ) ;
+			( getEpFuncData< T >( e )->*func_ )( e, q, *arg1, *arg2 );
+			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2 ) ;
 		}
 
 		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
 			Conv< A1 > arg1( buf );
 			Conv< A2 > arg2( buf + arg1.size() );
-			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2 ) ;
+			( getEpFuncData< T >( e )->*func_ )( e, q, *arg1, *arg2 );
+		// 	(reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2 ) ;
 		}
 
 		string rttiType() const {
@@ -165,16 +202,16 @@ template< class T, class A1, class A2, class A3 > class EpFunc3:
 			Conv< A1 > arg1( buf );
 			Conv< A2 > arg2( buf + arg1.size() );
 			Conv< A3 > arg3( buf + arg1.size() + arg2.size() );
-			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, 
-				*arg1, *arg2, *arg3 ) ;
+			( getEpFuncData< T >( e )->*func_ )( e, q, *arg1, *arg2, *arg3);
+			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2, *arg3 ) ;
 		}
 
 		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
 			Conv< A1 > arg1( buf );
 			Conv< A2 > arg2( buf + arg1.size() );
 			Conv< A3 > arg3( buf + arg1.size() + arg2.size() );
-			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, 
-				*arg1, *arg2, *arg3 ) ;
+			( getEpFuncData< T >( e )->*func_ )( e, q, *arg1, *arg2, *arg3);
+			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2, *arg3 ) ;
 		}
 
 		string rttiType() const {
@@ -216,8 +253,9 @@ template< class T, class A1, class A2, class A3, class A4 > class EpFunc4:
 			Conv< A2 > arg2( buf + arg1.size() );
 			Conv< A3 > arg3( buf + arg1.size() + arg2.size() );
 			Conv< A4 > arg4( buf + arg1.size() + arg2.size() + arg3.size());
-			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, 
-				*arg1, *arg2, *arg3, *arg4 ) ;
+			( getEpFuncData< T >( e )->*func_ )( e, q, 
+				*arg1, *arg2, *arg3, *arg4);
+			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2, *arg3, *arg4 ) ;
 		}
 
 		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
@@ -225,8 +263,9 @@ template< class T, class A1, class A2, class A3, class A4 > class EpFunc4:
 			Conv< A2 > arg2( buf + arg1.size() );
 			Conv< A3 > arg3( buf + arg1.size() + arg2.size() );
 			Conv< A4 > arg4( buf + arg1.size() + arg2.size() + arg3.size());
-			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, 
-				*arg1, *arg2, *arg3, *arg4 ) ;
+			( getEpFuncData< T >( e )->*func_ )( e, q, 
+				*arg1, *arg2, *arg3, *arg4);
+			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2, *arg3, *arg4 ) ;
 		}
 
 		string rttiType() const {
@@ -273,8 +312,9 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class EpFu
 			Conv< A4 > arg4( buf );
 			buf += arg4.size();
 			Conv< A5 > arg5( buf );
-			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, 
-				*arg1, *arg2, *arg3, *arg4, *arg5 ) ;
+			( getEpFuncData< T >( e )->*func_ )( e, q, 
+				*arg1, *arg2, *arg3, *arg4, *arg5 );
+			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2, *arg3, *arg4, *arg5 ) ;
 		}
 
 		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
@@ -287,8 +327,9 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class EpFu
 			Conv< A4 > arg4( buf );
 			buf += arg4.size();
 			Conv< A5 > arg5( buf );
-			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, 
-				*arg1, *arg2, *arg3, *arg4, *arg5 ) ;
+			( getEpFuncData< T >( e )->*func_ )( e, q, 
+				*arg1, *arg2, *arg3, *arg4, *arg5 );
+			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2, *arg3, *arg4, *arg5 ) ;
 		}
 
 		string rttiType() const {
@@ -338,8 +379,9 @@ template< class T, class A1, class A2, class A3, class A4, class A5, class A6 > 
 			Conv< A5 > arg5( buf );
 			buf += arg5.size();
 			Conv< A6 > arg6( buf );
-			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, 
-				*arg1, *arg2, *arg3, *arg4, *arg5, *arg6 ) ;
+			( getEpFuncData< T >( e )->*func_ )( e, q, 
+				*arg1, *arg2, *arg3, *arg4, *arg5, *arg6 );
+			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2, *arg3, *arg4, *arg5, *arg6 ) ;
 		}
 
 		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
@@ -354,8 +396,9 @@ template< class T, class A1, class A2, class A3, class A4, class A5, class A6 > 
 			Conv< A5 > arg5( buf );
 			buf += arg5.size();
 			Conv< A6 > arg6( buf );
-			(reinterpret_cast< T* >( e.data() )->*func_)( e, q, 
-				*arg1, *arg2, *arg3, *arg4, *arg5, *arg6 ) ;
+			( getEpFuncData< T >( e )->*func_ )( e, q, 
+				*arg1, *arg2, *arg3, *arg4, *arg5, *arg6 );
+			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2, *arg3, *arg4, *arg5, *arg6 ) ;
 		}
 
 		string rttiType() const {
@@ -417,8 +460,8 @@ template< class T, class A > class GetEpFunc: public GetOpFuncBase< A >
 		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
 			if ( skipWorkerNodeGlobal( e ) )
 				return;
-			const A& ret = 
-				(( reinterpret_cast< T* >( e.data() ) )->*func_)( e, q );
+			const A& ret = ( getEpFuncData< T >( e )->*func_ )( e, q );
+				// (( reinterpret_cast< T* >( e.data() ) )->*func_)( e, q );
 			Conv<A> conv0( ret );
 			char* temp0 = new char[ conv0.size() ];
 			conv0.val2buf( temp0 );
@@ -428,12 +471,14 @@ template< class T, class A > class GetEpFunc: public GetOpFuncBase< A >
 
 		A reduceOp( const Eref& e ) const {
 			Qinfo q; // Dummy.
-			return ( reinterpret_cast< T* >( e.data() )->*func_)( e, &q );
+			return ( getEpFuncData< T >( e )->*func_ )( e, &q );
+			// return ( reinterpret_cast< T* >( e.data() )->*func_)( e, &q );
 		}
 
 	private:
 		A ( T::*func_ )( const Eref& e, const Qinfo* q ) const;
 };
+
 
 /**
  * This specialized EpFunc is for returning a single field value,
@@ -476,7 +521,9 @@ template< class T, class L, class A > class GetEpFunc1: public GetOpFuncBase< A 
 			Conv< L > conv1( buf + sizeof( FuncId ) );
 
 			const A& ret = 
-				(( reinterpret_cast< T* >( e.data() ) )->*func_)( e, q, *conv1 );
+				( getEpFuncData< T >( e )->*func_ )( e, q, *conv1 );
+
+			// const A& ret = (( reinterpret_cast< T* >( e.data() ) )->*func_)( e, q, *conv1 );
 			Conv<A> conv0( ret );
 			char* temp0 = new char[ conv0.size() ];
 			conv0.val2buf( temp0 );
@@ -493,5 +540,6 @@ template< class T, class L, class A > class GetEpFunc1: public GetOpFuncBase< A 
 	private:
 		A ( T::*func_ )( const Eref& e, const Qinfo* q, L ) const;
 };
+
 
 #endif //_EPFUNC_H
