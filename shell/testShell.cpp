@@ -391,7 +391,7 @@ void testCopyFieldElement()
 	Element* syn = origSynId();
 	assert( syn != 0 );
 	assert( syn->getName() == "synapse" );
-	assert( syn->dataHandler()->data( 0 ) != 0 ); // Should give warning
+	// assert( syn->dataHandler()->data( 0 ) != 0 ); // Should give warning
 	assert( syn->dataHandler()->totalEntries() == size );
 	assert( syn->dataHandler()->localEntries() == 0 );
 	vector< unsigned int > vec(size);
@@ -412,15 +412,11 @@ void testCopyFieldElement()
 	}
 	assert( syn->dataHandler()->localEntries() == numHere );
 
-	FieldDataHandlerBase * fdh =
-		static_cast< FieldDataHandlerBase *>( syn->dataHandler() );
+	// FieldDataHandlerBase * fdh = static_cast< FieldDataHandlerBase *>( syn->dataHandler() );
 	// shell->doSyncDataHandler( origId, "get_numSynapses", origSynId );
 	shell->doSyncDataHandler( origSynId );
 	// fdh->setFieldDimension( fdh->biggestFieldArraySize() );
-	cout << shell->myNode() << ":"  << " bfa = " << fdh->biggestFieldArraySize() << ", expected totalEntries="
-		<< (size - 1) * size << ", actual = " << 
-		syn->dataHandler()->totalEntries() << 
-		", numHere = " << numHere << endl;
+	// cout << shell->myNode() << ":"  << " bfa = " << fdh->biggestFieldArraySize() << ", expected totalEntries=" << (size - 1) * size << ", actual = " << syn->dataHandler()->totalEntries() << ", numHere = " << numHere << endl;
 	assert( syn->dataHandler()->totalEntries() == ( size - 1 ) * size );
 
 	vector< double > delay( size * (size - 1 ), 0 );
@@ -453,8 +449,8 @@ void testCopyFieldElement()
 	// Element should exist even if data doesn't
 	assert ( copySynElm != 0 );
 	assert ( copySynElm->getName() == "synapse" );
-	assert( syn->dataHandler()->data( 0 ) != 0 ); // Should warn
-	assert( copySynElm->dataHandler()->data( 0 ) != 0 ); // Should warn
+	// assert( syn->dataHandler()->data( 0 ) != 0 ); // Should warn
+	// assert( copySynElm->dataHandler()->data( 0 ) != 0 ); // Should warn
 	assert( copySynElm->dataHandler()->localEntries() == numHere );
 	assert( copySynElm->dataHandler()->totalEntries() ==
 		( size * (size - 1) ) );
@@ -1234,7 +1230,7 @@ void testSyncSynapseSize()
 	assert ( syn != 0 );
 	assert ( syn->getName() == "synapse" ); 
 
-	assert( syn->dataHandler()->data( 0 ) != 0 ); // Should warn
+	// assert( syn->dataHandler()->data( 0 ) != 0 ); // Should warn
 
 	assert( syn->dataHandler()->totalEntries() == size );
 	assert( syn->dataHandler()->localEntries() == 0 );
