@@ -10,6 +10,7 @@
 #include "header.h"
 #include "SetGet.h"
 #include "../shell/Shell.h"
+#include "../shell/Neutral.h"
 
 /*
 Eref SetGet::shelle_( 0, 0 );
@@ -141,6 +142,11 @@ unsigned int SetGet::checkSet(
 	} else {
 		tgt = oid_;
 	}
+
+	if ( Neutral::isGlobalField( field ) ) {
+		tgt.dataId = DataId::any();
+	}
+
 	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
 	if ( !df )
 		return 0;

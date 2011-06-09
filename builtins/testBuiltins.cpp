@@ -427,7 +427,7 @@ void testMpiStatsReduce()
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	unsigned int size = 100;
 	vector< unsigned int > dims( 1, size );
-	Id i2 = shell->doCreate( "IntFire", Id(), "test2", dims );
+	Id i2 = shell->doCreate( "IntFire", Id(), "test2", dims, 0 );
 	Id synId( i2.value() + 1 );
 	// bool ret = ic->create( i2, "test2", size );
 	Element* syn = synId();
@@ -453,7 +453,7 @@ void testMpiStatsReduce()
 
 	// This calculation only works for node 0, with the present (implicit)
 	// decomposition scheme.
-	assert( fd->biggestFieldArraySize() == size/Shell::numNodes() - 1 );
+	// assert( fd->biggestFieldArraySize() == size/Shell::numNodes() - 1 );
 	Field< unsigned int >::set( synId, "fieldDimension", size );
 	assert ( fd->totalEntries() == size * size );
 	// Here we test setting a 2-D array with different dims on each axis.
@@ -484,6 +484,7 @@ void testMpiStatsReduce()
 	assert( mid != Msg::badMsg );
 	SetGet0::set( statsid, "trig" );
 	double x = Field< double >::get( statsid, "sum" );
+	cout << Shell::myNode() << ": x = " << x << ", sum = " << sum << endl;
 	assert( doubleEq( x, sum ) );
 	unsigned int i = Field< unsigned int >::get( statsid, "num" );
 	assert( i == num );
