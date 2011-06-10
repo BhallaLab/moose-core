@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Apr 18 15:05:30 2011 (+0530)
+# Last-Updated: Fri Jun 10 11:14:40 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2653
+#     Update #: 2655
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -1224,14 +1224,14 @@ class MainWindow(QtGui.QMainWindow):
         for plot in self.plots:
             if plotname == plot.objectName():
                 table = self.mooseHandler.addFieldTable(fieldpath)
-                plot.addTable(table)
                 try:
                     oldplot = self.tablePlotMap[table]
                     oldplot.removeTable(table)
                 except KeyError:
                     pass
-                self.tablePlotMap[table] = plot
+                plot.addTable(table)
                 plot.replot()
+                self.tablePlotMap[table] = plot
                 
 
     def updatePlots(self, currentTime):
