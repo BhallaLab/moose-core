@@ -226,34 +226,45 @@ class MainWindow(QtGui.QMainWindow):
 
         
         self.runTimeLabelToolbar = QtGui.QLabel(self.simToolbar)
-        self.runTimeLabelToolbar.setText('Run Time(secs):')
-        self.runTimeLabelToolbar.setGeometry(10,0,120,30)
+        self.runTimeLabelToolbar.setText('Run Time:')
+        self.runTimeLabelToolbar.setGeometry(10,0,80,30)
 
         self.runTimeEditToolbar = QtGui.QLineEdit(self.simToolbar)
         self.runTimeEditToolbar.setText('%1.3e' % (MooseHandler.runtime))
-        self.runTimeEditToolbar.setGeometry(130,0,100,30)
+        self.runTimeEditToolbar.setGeometry(100,0,80,30)
         
         self.currentTimeLabelToolbar = QtGui.QLabel(self.simToolbar)
         self.currentTimeLabelToolbar.setText(' Current Time :')
-        self.currentTimeLabelToolbar.setGeometry(230,0,120,30)
+        self.currentTimeLabelToolbar.setGeometry(190,0,100,30)
 
         self.currentTimeEditToolbar = QtGui.QLabel(self.simToolbar)
         self.currentTimeEditToolbar.setText('0')
-        self.currentTimeEditToolbar.setGeometry(350,0,120,30)
+        self.currentTimeEditToolbar.setGeometry(300,0,50,30)
         
         self.runButtonToolbar = QtGui.QToolButton(self.simToolbar)
         self.runButtonToolbar.setText('Run')
-        self.runButtonToolbar.setGeometry(470,0,100,30)
+        #self.runButtonToolbar.setIcon(QtGui.QIcon("run1.png"))
+        self.runButtonToolbar.setGeometry(360,0,80,30)
 #        print self.runButton.size()
-#        self.simToolbar.addSeparator()
+       # self.simToolbar.addSeparator()
 
         self.continueButtonToolbar = QtGui.QToolButton(self.simToolbar)
         self.continueButtonToolbar.setText('Continue')
-        self.continueButtonToolbar.setGeometry(580,0,100,30)
+        #self.continueButtonToolbar.setIcon(QtGui.QIcon("continue.png"))
+        self.continueButtonToolbar.setGeometry(450,0,80,30)
 
+        self.resetButtonToolbar = QtGui.QToolButton(self.simToolbar)
+        self.resetButtonToolbar.setText('Reset')
+        self.resetButtonToolbar.setGeometry(540,0,80,30)
+
+        self.stopButtonToolbar = QtGui.QToolButton(self.simToolbar)
+        self.stopButtonToolbar.setText('Stop')
+        self.stopButtonToolbar.setGeometry(630,0,80,30)
+        self.stopButtonToolbar.setEnabled(False)
 
         self.connect(self.runButtonToolbar, QtCore.SIGNAL('clicked()'), self.resetAndRunSlot1)
         self.connect(self.continueButtonToolbar, QtCore.SIGNAL('clicked()'), self._runSlot1)
+        self.connect(self.resetButtonToolbar,QtCore.SIGNAL('clicked()'),self._resetSlot)
 
         self.simToolbar.show()
         self.simToolbar.setMinimumHeight(30)
