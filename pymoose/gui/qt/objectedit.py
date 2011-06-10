@@ -175,8 +175,8 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
             self.mooseObject.setField(field, value)
             if field == 'name':
                 self.emit(QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'), self.mooseObject)
-        elif index.column() == 2:
-            if role == Qt.EditRole: 
+        elif index.column() == 2 and role ==Qt.EditRole:
+           # if role == Qt.EditRole: 
                 try:
                     self.fieldPlotNameMap[self.fields[index.row()]] = str(value)                
                     self.emit(QtCore.SIGNAL('plotWindowChanged(const QString&, const QString&)'), QtCore.QString(self.mooseObject.path + '/' + field), QtCore.QString(value))
@@ -278,11 +278,14 @@ class ObjectEditDelegate(QtGui.QItemDelegate):
         """Override createEditor from parent class to show custom
         combo box for the plot column."""
         # print 'Creating editor'
+        
         if index.column() == 2:
             combobox = QtGui.QComboBox(parent)        
             combobox.addItems(index.model().plotNames)
             combobox.setEditable(False)
+            self.index = index
             self.connect(combobox, QtCore.SIGNAL('currentIndexChanged( int )'), self.emitComboSelectionCommit)
+        
             # print 'create Combobox'
             return combobox
         return QtGui.QItemDelegate.createEditor(self, parent, option, index)
@@ -290,8 +293,10 @@ class ObjectEditDelegate(QtGui.QItemDelegate):
     def emitComboSelectionCommit(self, index):
         if not isinstance(self.sender(), QtGui.QComboBox):
             raise TypeError('This should have never been reached. Only the plot selection ComboBox should be connected to this signal. But got: %s' % (self.sender()))
-        self.emit(QtCore.SIGNAL('commitData(QWidget *)'), self.sender())
-        
+#        self.emit(QtCore.SIGNAL('commitData(QWidget *)'), self.sender())
+#        self.emit(QtCore.SIGNAL('plotValueChanged(int,QModelIndex * )'),index,self.index)
+#        self.emit(QtCore.SIGNAL('plotWindowChanged(const QString&, const QString&)'), QtCore.QString(self.mooseObject.path + '/' + field), QtCore.QString(value))
+
     def setEditorData(self, editor, index):
         text = index.model().data(index, Qt.DisplayRole).toString()
         if index.column == 2:
