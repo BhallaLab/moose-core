@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 30 11:18:34 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Jun  7 14:33:48 2011 (+0530)
+# Last-Updated: Fri Jun 10 11:24:14 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 501
+#     Update #: 511
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -176,12 +176,11 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
             if field == 'name':
                 self.emit(QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'), self.mooseObject)
         elif index.column() == 2 and role ==Qt.EditRole:
-           # if role == Qt.EditRole: 
-                try:
-                    self.fieldPlotNameMap[self.fields[index.row()]] = str(value)                
-                    self.emit(QtCore.SIGNAL('plotWindowChanged(const QString&, const QString&)'), QtCore.QString(self.mooseObject.path + '/' + field), QtCore.QString(value))
-                except KeyError:
-                    ret = False
+            try:
+                self.fieldPlotNameMap[self.fields[index.row()]] = str(value)
+                self.emit(QtCore.SIGNAL('plotWindowChanged(const QString&, const QString&)'), QtCore.QString(self.mooseObject.path + '/' + field), QtCore.QString(value))
+            except KeyError:
+                ret = False
         if ret:
             self.emit(QtCore.SIGNAL('dataChanged(const QModelIndex&, const QModelIndex&)'), index, index)
         return ret
