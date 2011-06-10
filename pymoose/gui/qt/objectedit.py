@@ -292,9 +292,8 @@ class ObjectEditDelegate(QtGui.QItemDelegate):
     def emitComboSelectionCommit(self, index):
         if not isinstance(self.sender(), QtGui.QComboBox):
             raise TypeError('This should have never been reached. Only the plot selection ComboBox should be connected to this signal. But got: %s' % (self.sender()))
-#        self.emit(QtCore.SIGNAL('commitData(QWidget *)'), self.sender())
-#        self.emit(QtCore.SIGNAL('plotValueChanged(int,QModelIndex * )'),index,self.index)
-#        self.emit(QtCore.SIGNAL('plotWindowChanged(const QString&, const QString&)'), QtCore.QString(self.mooseObject.path + '/' + field), QtCore.QString(value))
+        self.emit(QtCore.SIGNAL('commitData(QWidget *)'), self.sender())
+
 
     def setEditorData(self, editor, index):
         text = index.model().data(index, Qt.DisplayRole).toString()
