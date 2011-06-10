@@ -137,7 +137,7 @@ class updatepaintGL(PyGLWidget):
 					compartmentLine = somaSphere(self,l_coords[i],cellName) 	#$
 					
 				elif style==3:						#grid view, any choice to compartment as a disk
-					compartmentLine=somaDisk(self,[0,0,0,0,0,0,l_coords[i][7]],cellName)
+					compartmentLine=somaDisk(self,[0,0,0,0,0,0,0,l_coords[i][7]],cellName)
 					compartmentLine.radius = 0.20
 					compartmentLine._centralPos = cellCentre
 					compartmentLine.rotation = cellAngle
