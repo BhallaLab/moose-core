@@ -167,7 +167,8 @@ class somaSphere(BaseObject):
 		Constructor.
 		"""
 		super(somaSphere, self).__init__(parent)
-		self.radius = (sqrt((l_coords[0]-l_coords[3])**2+(l_coords[1]-l_coords[4])**2+(l_coords[2]-l_coords[5])**2))/2
+		#self.radius = (sqrt((l_coords[0]-l_coords[3])**2+(l_coords[1]-l_coords[4])**2+(l_coords[2]-l_coords[5])**2))/2
+		self.radius = l_coords[6]/2
 		self.centre = [(l_coords[0]+l_coords[3])/2,(l_coords[1]+l_coords[4])/2,(l_coords[2]+l_coords[5])/2]
 		self.daddy  = cellName
 
@@ -210,7 +211,8 @@ class somaDisk(BaseObject):
 		Constructor.
 		"""
 		super(somaDisk, self).__init__(parent)
-		self.radius = (sqrt((l_coords[0]-l_coords[3])**2+(l_coords[1]-l_coords[4])**2+(l_coords[2]-l_coords[5])**2))/2
+		#self.radius = (sqrt((l_coords[0]-l_coords[3])**2+(l_coords[1]-l_coords[4])**2+(l_coords[2]-l_coords[5])**2))/2
+		self.radius = l_coords[6]/2
 		self.centre = [(l_coords[0]+l_coords[3])/2,(l_coords[1]+l_coords[4])/2,(l_coords[2]+l_coords[5])/2]
 		self.daddy  = cellName
 

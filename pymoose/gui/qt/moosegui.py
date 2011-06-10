@@ -148,6 +148,17 @@ class MainWindow(QtGui.QMainWindow):
         self._destElement = None
         self._srcField = None
         self._destField = None
+        
+        # plots is a list of available MoosePlot widgets.
+        self.plots = []
+        self.plotWindows = []
+        
+        self.vizs = []		#add_chait
+        self.vizWindows = []	#add_chait
+        
+        # We use the objFieldEditorMap to store reference to cache the
+        # model objects for moose objects.
+        self.objFieldEditorMap = {}
         # This is the element tree of MOOSE
         self.createMooseTreePanel()
         # List of classes - one can double click on any class to
@@ -170,19 +181,11 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.modelTreeWidget, 
                      QtCore.SIGNAL('itemClicked(QTreeWidgetItem *, int)'),
                      self.setCurrentElement)
-        # We use the objFieldEditorMap to store reference to cache the
-        # model objects for moose objects.
-        self.objFieldEditorMap = {}
+        
         self.makeShellDock(interpreter)
 	
         # By default, we show information about MOOSE in the central widget
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
-        # plots is a list of available MoosePlot widgets.
-        self.plots = []
-        self.plotWindows = []
-        
-        self.vizs = []		#add_chait
-        self.vizWindows = []	#add_chait
         
         # tablePlotMap is a maps all currently available tables to the
         # plot widgets they belong to.
@@ -233,7 +236,7 @@ class MainWindow(QtGui.QMainWindow):
         self.currentTimeLabelToolbar = QtGui.QLabel(self.simToolbar)
         self.currentTimeLabelToolbar.setText(' Current Time :')
         self.currentTimeLabelToolbar.setGeometry(230,0,120,30)
-        
+
         self.currentTimeEditToolbar = QtGui.QLabel(self.simToolbar)
         self.currentTimeEditToolbar.setText('0')
         self.currentTimeEditToolbar.setGeometry(350,0,120,30)
@@ -366,6 +369,7 @@ class MainWindow(QtGui.QMainWindow):
             self.objFieldEditModel = ObjectFieldsModel(obj)
             self.objFieldEditorMap[obj.id] = self.objFieldEditModel
             self.connect(self.objFieldEditModel, QtCore.SIGNAL('plotWindowChanged(const QString&, const QString&)'), self.changeFieldPlotWidget)
+            
             if  not hasattr(self, 'objFieldEditPanel'):
                 self.objFieldEditPanel = QtGui.QDockWidget(self.tr(obj.name), self)
                 self.objFieldEditPanel.setObjectName(self.tr('MooseObjectFieldEdit'))
@@ -395,7 +399,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.objFieldEditModel, 
                      QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'),
                      self.modelTreeWidget.updateItemSlot)
-	if hasattr(self, 'sceneLayout'):
+        if hasattr(self, 'sceneLayout'):
 	        self.connect(self.objFieldEditModel, 
         	             QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'),
         	             self.sceneLayout.updateItemSlot)
@@ -407,7 +411,6 @@ class MainWindow(QtGui.QMainWindow):
         #add_chait
         self.objFieldEditPanel.setMinimumWidth(300)
 
-   
     def createGLCellWidget(self):
     	"""Create a GLCell object to show the currently selected cell"""
         raise DeprecationWarning('This function is not implemented properly and is deprecated.')
@@ -730,6 +733,7 @@ class MainWindow(QtGui.QMainWindow):
 	self.mooseTreePanel.setWidget(self.modelTreeWidget)
         config.LOGGER.debug('createMooseTreePanel - end')
         self.ForceTabbedDocks
+        self.makeObjectFieldEditor(self.modelTreeWidget.currentItem().getMooseObject())
         
     def createGLClientDock(self):
         config.LOGGER.debug('createGLClientDock - start')
@@ -801,6 +805,8 @@ class MainWindow(QtGui.QMainWindow):
         plot.setObjectName(title)
         plotWindow.setWidget(plot)
         self.plots.append(plot)
+        if len(self.plots)>1:
+            self.objFieldEditModel.plotNames.append(plot.objectName())
         self.centralPanel.addSubWindow(plotWindow)
         plotWindow.setAcceptDrops(True)
         self.connect(plotWindow, QtCore.SIGNAL('subWindowClosed()'), self.decrementSubWindowCount)
