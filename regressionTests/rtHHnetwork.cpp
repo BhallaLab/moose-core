@@ -232,7 +232,9 @@ void rtHHnetwork( unsigned int numCopies )
 	Id copyParentId = shell->doCreate( "Neutral", Id(), "copy", dims );
 	Id copyId = shell->doCopy( comptId, copyParentId, 
 		"comptCopies", numCopies, false, false );
-	assert( copyId()->dataHandler()->localEntries() == numCopies );
+	// cout << "localEntries = " << copyId()->dataHandler()->localEntries() << "numCopies = " << numCopies << endl;
+	unsigned int numLocal = numCopies / Shell::numNodes();
+	assert( copyId()->dataHandler()->localEntries() == numLocal );
 	assert( copyId()->dataHandler()->numDimensions() == 1 );
 	kids = Field< vector< Id > >::get( copyId, "children" );
 	assert( kids.size() == 4 );
@@ -241,10 +243,10 @@ void rtHHnetwork( unsigned int numCopies )
 	assert( kids[2]()->getName() == "synChan" );
 	assert( kids[3]()->getName() == "axon" );
 
-	assert( kids[0]()->dataHandler()->localEntries() == numCopies );
-	assert( kids[1]()->dataHandler()->localEntries() == numCopies );
-	assert( kids[2]()->dataHandler()->localEntries() == numCopies );
-	assert( kids[3]()->dataHandler()->localEntries() == numCopies );
+	assert( kids[0]()->dataHandler()->localEntries() == numLocal );
+	assert( kids[1]()->dataHandler()->localEntries() == numLocal );
+	assert( kids[2]()->dataHandler()->localEntries() == numLocal );
+	assert( kids[3]()->dataHandler()->localEntries() == numLocal );
 
 	////////////////////////////////////////////////////////
 	// Check that the HHGate data is accessible in copies.
