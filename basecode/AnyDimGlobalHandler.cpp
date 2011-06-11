@@ -36,7 +36,7 @@ AnyDimGlobalHandler::~AnyDimGlobalHandler()
 
 DataHandler* AnyDimGlobalHandler::globalize() const
 {
-	return copy();  // It is already global.
+	return copy( 1 );  // It is already global.
 }
 
 DataHandler* AnyDimGlobalHandler::unGlobalize() const
@@ -73,8 +73,9 @@ bool AnyDimGlobalHandler::innerNodeBalance( unsigned int numData,
  * Instead define function: globalize, which converts local data to global.
  * Version 1: Just copy as original
  */
-DataHandler* AnyDimGlobalHandler::copy() const
+DataHandler* AnyDimGlobalHandler::copy( bool toGlobal ) const
 {
+	assert( toGlobal ); // Need to put in option for copy to non-global.
 	return new AnyDimGlobalHandler( this );
 }
 
@@ -98,8 +99,10 @@ DataHandler* AnyDimGlobalHandler::copyUsingNewDinfo(
  * the last (zeroth) one.
  * The system returns zero if this constraint fails.
  */
-DataHandler* AnyDimGlobalHandler::copyExpand( unsigned int copySize ) const
+DataHandler* AnyDimGlobalHandler::copyExpand( 
+	unsigned int copySize, bool toGlobal ) const
 {
+	assert( toGlobal ); // For now can only copy to globals.
 	unsigned int quantum = 1;
 	if ( dims_.size() > 1 ) {
 		quantum = numData_ / dims_[0];
@@ -165,8 +168,10 @@ DataHandler* AnyDimGlobalHandler::copyExpand( unsigned int copySize ) const
 	return ret;
 }
 
-DataHandler* AnyDimGlobalHandler::copyToNewDim( unsigned int newDimSize ) const
+DataHandler* AnyDimGlobalHandler::copyToNewDim( 
+	unsigned int newDimSize, bool toGlobal ) const
 {
+	assert( toGlobal ); // For now can only copy to globals.
 	AnyDimGlobalHandler* ret = new AnyDimGlobalHandler( this );
 	vector< unsigned int > newdims = dims_;
 	newdims.push_back( newDimSize );

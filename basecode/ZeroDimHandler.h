@@ -39,7 +39,7 @@ class ZeroDimHandler: public ZeroDimGlobalHandler
 		 * Instead define function: globalize above.
 		 * Version 1: Just copy as original
 		 */
-		DataHandler* copy() const;
+		DataHandler* copy( bool toGlobal ) const;
 
 		/**
 		 * Make a single copy with same dimensions, using a different Dinfo
@@ -52,13 +52,13 @@ class ZeroDimHandler: public ZeroDimGlobalHandler
 		 * here we need to figure out
 		 * what belongs on the current node.
 		 */
-		DataHandler* copyExpand( unsigned int copySize ) const;
+		DataHandler* copyExpand( unsigned int copySize, bool toGlobal ) const;
 
 		/**
 		 * Version 3: Add another dimension when doing the copy.
 		 * Here too we figure out what is to be on current node for copy.
 		 */
-		DataHandler* copyToNewDim( unsigned int newDimSize ) const;
+		DataHandler* copyToNewDim( unsigned int newDimSize, bool toGlobal ) const;
 
 
 		/**

@@ -1740,20 +1740,20 @@ void testDataCopyZero()
 	ok = zd.setDataBlock( cx, 1, dim );
 	assert( doubleEq( *dptr( &zd, 0 ), x ) );
 
-	DataHandler* czd = zd.copy();
+	DataHandler* czd = zd.copy( 1 );
 	assert( dynamic_cast< ZeroDimGlobalHandler* >( czd ) != 0 );
 	assert ( czd->isAllocated() == 1 );
 	assert( czd->totalEntries() == 1 );
 	assert( doubleEq( *dptr( czd, 0 ), x ) );
 
-	DataHandler* czd1 = zd.copyExpand( 10 );
+	DataHandler* czd1 = zd.copyExpand( 10, 1 );
 	assert( dynamic_cast< OneDimGlobalHandler* >( czd1 ) != 0 );
 	assert ( czd1->isAllocated() == 1 );
 	assert( czd1->totalEntries() == 10 );
 	for ( unsigned int i = 0; i < 10; ++i )
 		assert( doubleEq( *dptr( czd1, i ), x ) );
 
-	DataHandler* czd2 = zd.copyToNewDim( 20 );
+	DataHandler* czd2 = zd.copyToNewDim( 20, 1 );
 	assert( dynamic_cast< OneDimGlobalHandler* >( czd2 ) != 0 );
 	assert ( czd2->isAllocated() == 1 );
 	assert( czd2->totalEntries() == 20 );
@@ -1798,14 +1798,14 @@ void testDataCopyOne()
 	for ( unsigned int i = 0; i < 10; ++i )
 		assert( doubleEq( *dptr( &od, i ), x * i ) );
 
-	DataHandler* cod = od.copy();
+	DataHandler* cod = od.copy( true );
 	assert( dynamic_cast< OneDimGlobalHandler* >( cod ) != 0 );
 	assert ( cod->isAllocated() == 1 );
 	assert( cod->totalEntries() == 10 );
 	for ( unsigned int i = 0; i < 10; ++i )
 		assert( doubleEq( *dptr( &od, i ), x * i ) );
 
-	DataHandler* cod1 = od.copyExpand( 27 );
+	DataHandler* cod1 = od.copyExpand( 27, true );
 	assert( dynamic_cast< OneDimGlobalHandler* >( cod1 ) != 0 );
 	assert ( cod1->isAllocated() == 1 );
 	assert( cod1->totalEntries() == 27 );
@@ -1818,7 +1818,7 @@ void testDataCopyOne()
 	for ( unsigned int i = 0; i < 27; ++i )
 		assert( doubleEq( *dptr( cod1, i ), x * ( i % 10 ) ) );
 
-	DataHandler* cod2 = od.copyToNewDim( 9 );
+	DataHandler* cod2 = od.copyToNewDim( 9, true );
 	assert( dynamic_cast< AnyDimGlobalHandler* >( cod2 ) != 0 );
 	assert ( cod2->isAllocated() == 1 );
 	assert( cod2->totalEntries() == 90 );
@@ -1885,7 +1885,7 @@ void testDataCopyAny()
 		for ( unsigned int j = 0; j < n0; ++j )
 			assert( doubleEq( *dptr( &ad, i * n0 + j ), i * n0 + j ) );
 
-	DataHandler* cad = ad.copy();
+	DataHandler* cad = ad.copy( true );
 	assert( dynamic_cast< AnyDimGlobalHandler* >( cad ) != 0 );
 	assert ( cad->isAllocated() == 1 );
 	assert( cad->totalEntries() == n0 * n1 );
@@ -1906,9 +1906,9 @@ void testDataCopyAny()
 	21	22	23	24	25	26	27
 	*/
 
-	DataHandler* cad1 = ad.copyExpand( 27 );
+	DataHandler* cad1 = ad.copyExpand( 27, true );
 	assert( cad1 == 0 ); // Do not permit non-multiple expansions.
-	cad1 = ad.copyExpand( 28 ); // A multiple of dim1 == n1 == 4
+	cad1 = ad.copyExpand( 28, true ); // A multiple of dim1 == n1 == 4
 		// Now dim0 becomes 7.
 	assert( dynamic_cast< AnyDimGlobalHandler* >( cad1 ) != 0 );
 	assert ( cad1->isAllocated() == 1 );
@@ -1928,7 +1928,7 @@ void testDataCopyAny()
 		}
 	}
 
-	DataHandler* cad2 = ad.copyToNewDim( n2 );
+	DataHandler* cad2 = ad.copyToNewDim( n2, true );
 	assert( dynamic_cast< AnyDimGlobalHandler* >( cad2 ) != 0 );
 	assert ( cad2->isAllocated() == 1 );
 	assert( cad2->totalEntries() == n0 * n1 * n2 );
@@ -2122,7 +2122,7 @@ void testCopyFieldElementData()
 	vector< unsigned int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
-	Element* origElm = new Element( i2, ic, "test2", dims, 1 );
+	Element* origElm = new Element( i2, ic, "test2", dims, true );
 	assert( origElm );
 
 	Id synId( i2.value() + 1 );
@@ -2167,9 +2167,9 @@ void testCopyFieldElementData()
 	// Note that the FieldElements have to be explicitly copied.
 	///////////////////////////////////////////////////////////////////
 	Id copyId = Id::nextId();
-	Element* copyElm = new Element( copyId, origElm, 1 );
+	Element* copyElm = new Element( copyId, origElm, 1, true );
 	Id tempId = Id::nextId();
-	Element* temp = new Element( tempId, syn, 1 );
+	Element* temp = new Element( tempId, syn, 1, true );
 	assert( temp != 0 );
 	Shell::adopt( copyId, tempId );
 	///////////////////////////////////////////////////////////////////

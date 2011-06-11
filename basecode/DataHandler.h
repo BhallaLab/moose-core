@@ -38,14 +38,14 @@ class DataHandler
 		/**
 		 * Converts handler to its global version, where the same data is
 		 * present on all nodes. Ignored if already global.
-		 * returns true on success.
+		 * Returns a newly allocated DataHandler, the old one remains.
 		 */
 		virtual DataHandler* globalize() const = 0;
 
 		/**
 		 * Converts handler to its local version, where the data is 
 		 * partitioned between nodes based on the load balancing policy.
-		 * Returns true on success.
+		 * Returns a newly allocated DataHandler, the old one remains.
 		 */
 		virtual DataHandler* unGlobalize() const = 0;
 
@@ -69,17 +69,21 @@ class DataHandler
 			unsigned int myNode, unsigned int numNodes ) = 0;
 
 		/**
-		 * For copy we won't worry about global status. 
-		 * Instead define function: globalize above.
-		 * Version 1: Just copy as original
+		 * Copies to another DataHandler. If the source is global and
+		 * the dest is non-global, it does a selective copy of data
+		 * contents only for the entries on current node.
+		 * Otherwise it copies everthing over.
 		 */
-		virtual DataHandler* copy() const = 0;
+		virtual DataHandler* copy( bool toGlobal) const = 0;
 
 		/**
 		 * Copies DataHandler dimensions but uses new Dinfo to allocate
 		 * contents and handle new data. Useful when making zombie copies.
+		 * This does not need the toGlobal flag as the zombies are always
+		 * located identically to the original.
 		 */
-		virtual DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo ) const = 0;
+		virtual DataHandler* copyUsingNewDinfo( 
+			const DinfoBase* dinfo ) const = 0;
 
 		/**
 		 * Version 2: Copy same dimensions but different # of entries.
@@ -87,13 +91,15 @@ class DataHandler
 		 * here we need to figure out
 		 * what belongs on the current node.
 		 */
-		virtual DataHandler* copyExpand( unsigned int copySize ) const = 0;
+		virtual DataHandler* copyExpand( 
+			unsigned int copySize, bool toGlobal ) const = 0;
 
 		/**
 		 * Version 3: Add another dimension when doing the copy.
 		 * Here too we figure out what is to be on current node for copy.
 		 */
-		virtual DataHandler* copyToNewDim( unsigned int newDimSize ) const = 0;
+		virtual DataHandler* copyToNewDim( 
+			unsigned int newDimSize, bool toGlobal ) const = 0;
 
 		/**
 		 * Returns the data on the specified index.
@@ -318,8 +324,8 @@ class DataHandler
 		/**
 		 * Assigns block of data, which is a slice of 0 to n dimensions,
 		 * in a data handler of n dimensions. The block of data is a 
-		 * contiguous block in memory, and contains objects in the
-		 * range starting at 'startIndex'.
+		 * contiguous block in memory, and contains 'numData' objects in
+		 * the range starting at 'startIndex'.
 		 * The vector form of the function first converts the index
 		 * into the linear form.
 		 * Returns true if the assignment succeeds. In other words,

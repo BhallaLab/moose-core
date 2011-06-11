@@ -35,9 +35,9 @@ bool DataHandlerWrapper::innerNodeBalance( unsigned int size,
 	return 0;
 }
 
-DataHandler* DataHandlerWrapper::copy() const
+DataHandler* DataHandlerWrapper::copy( bool toGlobal ) const
 {
-	return parent_->copy();
+	return parent_->copy( toGlobal );
 }
 
 DataHandler* DataHandlerWrapper::copyUsingNewDinfo(
@@ -46,14 +46,16 @@ DataHandler* DataHandlerWrapper::copyUsingNewDinfo(
 	return parent_->copyUsingNewDinfo( dinfo );
 }
 
-DataHandler* DataHandlerWrapper::copyExpand( unsigned int copySize ) const
+DataHandler* DataHandlerWrapper::copyExpand( 
+	unsigned int copySize, bool toGlobal ) const
 {
-	return parent_->copyExpand( copySize );
+	return parent_->copyExpand( copySize, toGlobal );
 }
 
-DataHandler* DataHandlerWrapper::copyToNewDim( unsigned int newDimSize ) const
+DataHandler* DataHandlerWrapper::copyToNewDim( 
+	unsigned int newDimSize, bool toGlobal ) const
 {
-	return parent_->copyToNewDim( newDimSize );
+	return parent_->copyToNewDim( newDimSize, toGlobal );
 }
 
 char* DataHandlerWrapper::data( DataId index ) const

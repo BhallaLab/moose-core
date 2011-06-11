@@ -33,12 +33,13 @@ DataHandler* OneDimHandler::globalize() const
 
 DataHandler* OneDimHandler::unGlobalize() const
 {
-	return copy();
+	return copy( 0 );
 }
 
 
-DataHandler* OneDimHandler::copy() const
+DataHandler* OneDimHandler::copy( bool toGlobal ) const
 {
+	assert( !toGlobal ); // Can't yet handle copies to globals.
 	return ( new OneDimHandler( this ) );
 }
 
@@ -51,8 +52,10 @@ DataHandler* OneDimHandler::copyUsingNewDinfo( const DinfoBase* dinfo) const
 	return ret;
 }
 
-DataHandler* OneDimHandler::copyExpand( unsigned int copySize ) const
+DataHandler* OneDimHandler::copyExpand( 
+	unsigned int copySize, bool toGlobal ) const
 {
+	assert( !toGlobal ); // Can't yet handle copies to globals.
 	OneDimHandler* ret = new OneDimHandler( dinfo() );
 	vector< unsigned int > dims( 1, copySize );
 	ret->resize( dims );
@@ -63,8 +66,10 @@ DataHandler* OneDimHandler::copyExpand( unsigned int copySize ) const
 	return ret;
 }
 
-DataHandler* OneDimHandler::copyToNewDim( unsigned int newDimSize ) const
+DataHandler* OneDimHandler::copyToNewDim( 
+	unsigned int newDimSize, bool toGlobal ) const
 {
+	assert( !toGlobal ); // Can't yet handle copies to globals.
 	AnyDimHandler* ret = new AnyDimHandler( dinfo() );
 	vector< unsigned int > dims( 2 );
 	dims[1] = newDimSize;
