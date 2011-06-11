@@ -13307,4 +13307,12 @@ the toGlobal flag. Done ZeroDim.
 11 June 2011
 Still working through them. AnyDim has not been done but the hooks are put in.
 
+checkin 2471.
+At this point clears regular tests, but breaks in the regression tests 
+for rtHHnetwork.
+
+Some minor fixes later, and now we have it working correctly and giving
+identical output on 1 to 4 nodes.  This is a major milestone. Need to
+confirm it works properly on ghevar and on gj.
+
 ============================================================================
