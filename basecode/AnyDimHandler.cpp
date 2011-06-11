@@ -49,7 +49,7 @@ DataHandler* AnyDimHandler::globalize() const
 
 DataHandler* AnyDimHandler::unGlobalize() const
 {
-	return copy(); // It is already unglobal. Do you want a copy?
+	return copy( 0 ); // It is already unglobal. Do you want a copy?
 	/*
 	nodeBalance( numData_ );
 	char* newData = dinfo()->copyData( 
@@ -82,8 +82,9 @@ bool AnyDimHandler::innerNodeBalance( unsigned int numData,
  * Instead define function: globalize, which converts local data to global.
  * Version 1: Just copy as original
  */
-DataHandler* AnyDimHandler::copy() const
+DataHandler* AnyDimHandler::copy( bool toGlobal ) const
 {
+	assert( !toGlobal ); // Cannot yet handle globalization
 	AnyDimHandler* ret = new AnyDimHandler( this );
 	return ret;
 }
@@ -101,8 +102,10 @@ DataHandler* AnyDimHandler::copyUsingNewDinfo( const DinfoBase* dinfo) const
 // Version 2: Copy same dimensions but different # of entries.
 // The copySize is the total number of targets, here we need to figure out
 // what belongs on the current node.
-DataHandler* AnyDimHandler::copyExpand( unsigned int copySize ) const
+DataHandler* AnyDimHandler::copyExpand( 
+	unsigned int copySize, bool toGlobal ) const
 {
+	assert( !toGlobal ); // Cannot yet handle copies to globals.
 	AnyDimHandler* ret = new AnyDimHandler( this );
 	ret->nodeBalance( copySize );
 	ret->data_ = dinfo()->copyData( data_, end_ - start_, 
@@ -110,8 +113,10 @@ DataHandler* AnyDimHandler::copyExpand( unsigned int copySize ) const
 	return ret;
 }
 
-DataHandler* AnyDimHandler::copyToNewDim( unsigned int newDimSize ) const
+DataHandler* AnyDimHandler::copyToNewDim(
+	unsigned int newDimSize, bool toGlobal ) const
 {
+	assert( !toGlobal ); // Cannot yet handle copies to globals.
 	AnyDimHandler* ret = new AnyDimHandler( this );
 
 	ret->nodeBalance( numData_ * newDimSize );

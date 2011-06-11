@@ -49,7 +49,7 @@ class AnyDimGlobalHandler: public DataHandler
 		 * Instead define function: globalize above.
 		 * Version 1: Just copy as original
 		 */
-		DataHandler* copy() const;
+		DataHandler* copy( bool toGlobal ) const;
 
 		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo ) const;
 
@@ -59,13 +59,13 @@ class AnyDimGlobalHandler: public DataHandler
 		 * here we need to figure out
 		 * what belongs on the current node.
 		 */
-		DataHandler* copyExpand( unsigned int copySize ) const;
+		DataHandler* copyExpand( unsigned int copySize, bool toGlobal ) const;
 
 		/**
 		 * Version 3: Add another dimension when doing the copy.
 		 * Here too we figure out what is to be on current node for copy.
 		 */
-		DataHandler* copyToNewDim( unsigned int newDimSize ) const;
+		DataHandler* copyToNewDim( unsigned int newDimSize, bool toGlobal ) const;
 
 
 		/**

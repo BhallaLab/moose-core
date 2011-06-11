@@ -77,11 +77,13 @@ Element::Element( Id id, const Cinfo* c, const string& name,
 	c->postCreationFunc( id, this );
 }
 
-/// Used for copies. Note that it does NOT call the postCreation Func,
-/// so FieldElements are copied rather than created by the Cinfo when
-/// the parent element is created. This allows the copied FieldElements to
-/// retain info from the originals.
-Element::Element( Id id, const Element* orig, unsigned int n )
+/*
+ * Used for copies. Note that it does NOT call the postCreation Func,
+ * so FieldElements are copied rather than created by the Cinfo when
+ * the parent element is created. This allows the copied FieldElements to
+ * retain info from the originals.
+ */
+Element::Element( Id id, const Element* orig, unsigned int n, bool toGlobal)
 	:	name_( orig->getName() ),
 		id_( id ),
 		cinfo_( orig->cinfo_ ), 
@@ -89,9 +91,9 @@ Element::Element( Id id, const Element* orig, unsigned int n )
 		msgBinding_( orig->cinfo_->numBindIndex() )
 {
 	if ( n <= 1 ) {
-		dataHandler_ = orig->dataHandler_->copy();
+		dataHandler_ = orig->dataHandler_->copy( toGlobal );
 	} else {
-		dataHandler_ = orig->dataHandler_->copyToNewDim( n );
+		dataHandler_ = orig->dataHandler_->copyToNewDim( n, toGlobal  );
 	}
 	id.bindIdToElement( this );
 	// cinfo_->postCreationFunc( id, this );

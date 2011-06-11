@@ -30,7 +30,7 @@ OneDimGlobalHandler::~OneDimGlobalHandler() {
 
 DataHandler* OneDimGlobalHandler::globalize() const
 {
-	return copy();
+	return copy( 1 );
 }
 
 
@@ -43,9 +43,13 @@ DataHandler* OneDimGlobalHandler::unGlobalize() const
 	return ret;
 }
 
-DataHandler* OneDimGlobalHandler::copy() const
+DataHandler* OneDimGlobalHandler::copy( bool toGlobal ) const
 {
-	return ( new OneDimGlobalHandler( this ) );
+	if ( toGlobal ) {
+		return ( new OneDimGlobalHandler( this ) );
+	} else {
+		return unGlobalize();
+	}
 }
 
 DataHandler* OneDimGlobalHandler::copyUsingNewDinfo( 
@@ -58,27 +62,52 @@ DataHandler* OneDimGlobalHandler::copyUsingNewDinfo(
 }
 
 
-DataHandler* OneDimGlobalHandler::copyExpand( unsigned int copySize ) const
+DataHandler* OneDimGlobalHandler::copyExpand( unsigned int copySize,
+	bool toGlobal ) const
 {
-	OneDimGlobalHandler* ret = new OneDimGlobalHandler( dinfo() );
-	vector< unsigned int > dims( 1, copySize );
-	ret->resize( dims );
-	unsigned int s = numData_;
-	for ( unsigned int offset = 0; offset < copySize; offset += numData_ ) {
-		if ( s > ( copySize - offset ) )
-			s = copySize - offset;
-		memcpy( ret->data_ + offset * dinfo()->size(), data_, 
+	if ( toGlobal ) {
+		OneDimGlobalHandler* ret = new OneDimGlobalHandler( dinfo() );
+		vector< unsigned int > dims( 1, copySize );
+		ret->resize( dims );
+		unsigned int s = numData_;
+		for ( unsigned int offset = 0; offset < copySize; 
+			offset += numData_ )
+		{
+			if ( s > ( copySize - offset ) )
+				s = copySize - offset;
+			memcpy( ret->data_ + offset * dinfo()->size(), data_, 
 			s * dinfo()->size() );
+		}
+		return ret;
+	} else {
+		OneDimHandler* ret = new OneDimHandler( dinfo() );
+		vector< unsigned int > dims( 1, copySize );
+		ret->resize( dims );
+		// For now do a brute force temporary buffer and use only
+		// the part we need. Later could copy more precisely.
+		char* temp = new char[ copySize * dinfo()->size() ];
+		unsigned int s = numData_;
+		for ( unsigned int i = 0; i < copySize; i += numData_ )
+		{
+			if ( s > ( copySize - i ) )
+				s = copySize - i;
+			memcpy( temp, data_, s * dinfo()->size() );
+		}
+		ret->setDataBlock( temp, copySize, 0 );
+		delete[] temp;
+		return ret;
 	}
-	return ret;
 }
 
 /**
  * Expand it into a 2-dimensional version of AnyDimGlobalHandler.
+ * Doesn't yet handle copies to non-global handler.
  */
-DataHandler* OneDimGlobalHandler::copyToNewDim( unsigned int newDimSize ) 
-	const
+DataHandler* OneDimGlobalHandler::copyToNewDim( unsigned int newDimSize,
+	bool toGlobal ) const
 {
+	assert( toGlobal );
+
 	AnyDimGlobalHandler* ret = new AnyDimGlobalHandler( dinfo() );
 	vector< unsigned int > dims( 2 );
 	dims[1] = newDimSize;

@@ -31,16 +31,16 @@ class MsgDataHandler: public DataHandler
 		/**
 		 * Make a single copy
 		 */
-		DataHandler* copy() const;
+		DataHandler* copy( bool toGlobal ) const;
 
 		/**
 		 * Make a single copy with same dimensions, using a different Dinfo
 		 */
 		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo ) const;
 
-		DataHandler* copyExpand( unsigned int copySize ) const;
+		DataHandler* copyExpand( unsigned int copySize, bool toGlobal ) const;
 
-		DataHandler* copyToNewDim( unsigned int newDimSize ) const;
+		DataHandler* copyToNewDim( unsigned int newDimSize, bool toGlobal ) const;
 
 		/**
 		 * Returns the data on the specified index.

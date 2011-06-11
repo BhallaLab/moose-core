@@ -13263,5 +13263,48 @@ ZeroDimHandler::copyToNewDim and copyExpand both need to do something better
 here.
 
 Put in some tests to avoid the problem of making array copies of local data 
-onto multiple nodes.
+onto multiple nodes.  Checkin 2736.
+
+More work on copyExpand. There is a problem copying from globals to locals.
+Need a way to pass on the node mode from the Element creation function to
+the DataHandler copy function. Could simply propagate a flag through.
+============================================================================
+10 June 2011
+
+Can I establish rules for copies in all four cases:
+local->local
+local->global
+global->local
+global->global
+
+In all cases the sensible outcome is that the entire contents of the Element
+are copied over and the array index partitioning is done according to the 
+usual rules. In the case of single copies there is no problem, everthing 
+copies over just as is, and possibly globalizes if it is a single copy of a
+local to a global. In the case of array copies we have the following cases:
+
+local->local
+	Trickiest. Start with some partitioning, and end with a different one.
+	Will need to copy things from node A onto node B.
+	Will need to globalize the original version to accomplish this,
+	then unglobalize it.
+
+local->global
+	While no funny partitioning is needed at the output, still need to
+	do the globalization/unglobalization of the original version.
+
+global->local
+	Straightforward. Copy whatever subset is needed for local node.
+
+global->global
+	Simplest of all. Copy everything.
+
+
+Working through DataHandlers to implement the change in copy calls to include
+the toGlobal flag. Done ZeroDim.
+
+============================================================================
+11 June 2011
+Still working through them. AnyDim has not been done but the hooks are put in.
+
 ============================================================================

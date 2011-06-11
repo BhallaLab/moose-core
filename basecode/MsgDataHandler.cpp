@@ -25,16 +25,16 @@ MsgDataHandler::~MsgDataHandler()
 
 DataHandler* MsgDataHandler::globalize() const
 {
-	return copy();
+	return copy( 1 );
 }
 
 
 DataHandler* MsgDataHandler::unGlobalize() const
 {
-	return copy();
+	return copy( 0 );
 }
 
-DataHandler* MsgDataHandler::copy() const
+DataHandler* MsgDataHandler::copy( bool toGlobal ) const
 {
 	return ( new MsgDataHandler( this ) );
 }
@@ -46,7 +46,7 @@ DataHandler* MsgDataHandler::copyUsingNewDinfo( const DinfoBase* d) const
 	return 0;
 }
 
-DataHandler* MsgDataHandler::copyExpand( unsigned int copySize ) const
+DataHandler* MsgDataHandler::copyExpand( unsigned int copySize, bool toGlobal ) const
 {
 	return 0; // Illegal.
 }
@@ -54,7 +54,7 @@ DataHandler* MsgDataHandler::copyExpand( unsigned int copySize ) const
 /**
  * Expand it into a 2-dimensional version of AnyDimGlobalHandler.
  */
-DataHandler* MsgDataHandler::copyToNewDim( unsigned int newDimSize ) 
+DataHandler* MsgDataHandler::copyToNewDim( unsigned int newDimSize, bool toGlobal ) 
 	const
 {
 	return 0;

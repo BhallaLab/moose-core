@@ -37,7 +37,8 @@ bool FieldDataHandlerBase::innerNodeBalance( unsigned int size,
 	return 0;
 }
 
-DataHandler* FieldDataHandlerBase::copyExpand( unsigned int copySize ) const
+DataHandler* FieldDataHandlerBase::copyExpand( 
+	unsigned int copySize, bool toGlobal ) const
 {
 	return 0;
 }

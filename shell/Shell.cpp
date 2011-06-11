@@ -121,9 +121,9 @@ static SrcFinfo2< Id, Id > requestMove(
 			"move( origId, newParent);"
 			"Moves origId to become a child of newParent"
 			);
-static SrcFinfo4< vector< Id >, string, unsigned int, bool > requestCopy(
+static SrcFinfo5< vector< Id >, string, unsigned int, bool, bool > requestCopy(
 			"copy",
-			"copy( origId, newParent, numRepeats, copyExtMsg );"
+			"copy( origId, newParent, numRepeats, toGlobal, copyExtMsg );"
 			"Copies origId to become a child of newParent"
 			);
 static SrcFinfo3< string, string, unsigned int > requestUseClock(
@@ -227,13 +227,13 @@ static DestFinfo handleMove( "move",
 	new EpFunc2< Shell, Id, Id >( & Shell::handleMove ) );
 
 static DestFinfo handleCopy( "handleCopy", 
-		"handleCopy( vector< Id > args, string newName, unsigned int nCopies, bool copyExtMsgs ): "
+		"handleCopy( vector< Id > args, string newName, unsigned int nCopies, bool toGlobal, bool copyExtMsgs ): "
 		" The vector< Id > has Id orig, Id newParent, Id newElm. " 
 		"This function copies an Element and all its children to a new parent."
 		" May also expand out the original into nCopies copies."
 		" Normally all messages within the copy tree are also copied. "
 		" If the flag copyExtMsgs is true, then all msgs going out are also copied.",
-			new EpFunc4< Shell, vector< Id >, string, unsigned int, bool >( 
+			new EpFunc5< Shell, vector< Id >, string, unsigned int, bool, bool >( 
 				& Shell::handleCopy ) );
 
 static SrcFinfo2< Id, FuncId > requestSync(

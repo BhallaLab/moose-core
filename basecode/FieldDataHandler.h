@@ -41,7 +41,7 @@ template< class Parent, class Field > class FieldDataHandler: public FieldDataHa
 		 * anyway.
 		 * Needs post-processing to substitute in the new parent.
 		 */
-		DataHandler* copy() const
+		DataHandler* copy( bool toGlobal ) const
 		{
 			FieldDataHandler< Parent, Field >* ret =
 				new FieldDataHandler< Parent, Field >( *this );
@@ -55,7 +55,7 @@ template< class Parent, class Field > class FieldDataHandler: public FieldDataHa
 		 * than a copy of the original FieldDataHandler.
 		 * Needs post-processing to substitute in the new parent.
 		 */
-		DataHandler* copyToNewDim( unsigned int newDim ) const
+		DataHandler* copyToNewDim( unsigned int newDim, bool toGlobal ) const
 		{
 			FieldDataHandler< Parent, Field >* ret =
 				new FieldDataHandler< Parent, Field >( *this );

@@ -31,13 +31,13 @@ class DataHandlerWrapper: public DataHandler
 		 * Make a single identity copy, doing appropriate node 
 		 * partitioning if toGlobal is false.
 		 */
-		DataHandler* copy() const;
+		DataHandler* copy( bool toGlobal ) const;
 
 		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo) const;
 
-		DataHandler* copyExpand( unsigned int copySize ) const;
+		DataHandler* copyExpand( unsigned int copySize, bool toGlobal ) const;
 
-		DataHandler* copyToNewDim( unsigned int newDimSize ) const;
+		DataHandler* copyToNewDim( unsigned int newDimSize, bool toGlobal ) const;
 
 		char* data( DataId index ) const;
 

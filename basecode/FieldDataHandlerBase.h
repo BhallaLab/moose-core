@@ -31,7 +31,7 @@ class FieldDataHandlerBase: public DataHandler
 		// DataHandler* copy() const
 
 		// These copy functions both return 0. Don't apply to Fields.
-		DataHandler* copyExpand( unsigned int copySize ) const;
+		DataHandler* copyExpand( unsigned int copySize, bool toGlobal ) const;
 		// DataHandler* copyToNewDim( unsigned int copySize ) const;
 
 		// Process doesn't do anything, left to the parent DataHandler.

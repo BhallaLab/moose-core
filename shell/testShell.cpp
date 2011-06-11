@@ -349,7 +349,7 @@ void testCopy()
 	assert( path == "/f1/f2a/f3" );
 
 	//////////////////////////////////////////////////////////////////
-	Id dupf2a = shell->doCopy( f2a, Id(), "TheElephantsAreLoose", 1, 0 );
+	Id dupf2a = shell->doCopy( f2a, Id(), "TheElephantsAreLoose", 1, false, false );
 	//////////////////////////////////////////////////////////////////
 
 	verifyKids( f1, f2a, f2b, f3, f4a, f4b );
@@ -429,7 +429,7 @@ void testCopyFieldElement()
 	assert( ret );
 
 	//////////////////////////////////////////////////////////////////
-	Id copyId = shell->doCopy( origId, Id(), "dup", 1, 0 );
+	Id copyId = shell->doCopy( origId, Id(), "dup", 1, false, false );
 	//////////////////////////////////////////////////////////////////
 
 	Eref origEr( origId(), 0 );
@@ -1017,7 +1017,7 @@ void testCopyMsgOps()
 	// Copy it
 	///////////////////////////////////////////////////////////
 
-	Id pa2 = shell->doCopy( pa, Id(), "pa2", 1, 0 );
+	Id pa2 = shell->doCopy( pa, Id(), "pa2", 1, false, false );
 
 	///////////////////////////////////////////////////////////
 	// Pull out the child Ids.

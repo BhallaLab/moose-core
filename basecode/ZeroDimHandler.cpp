@@ -45,8 +45,11 @@ bool ZeroDimHandler::innerNodeBalance( unsigned int size,
 	return 0;
 }
 
-DataHandler* ZeroDimHandler::copy() const
+DataHandler* ZeroDimHandler::copy( bool toGlobal ) const
 {
+	// If we want to copy to a global, the DataHandler should first
+	// itself become a global, then make the copy.
+	assert( !toGlobal ); 
 	return ( new ZeroDimHandler( this ) );
 }
 
@@ -59,11 +62,19 @@ DataHandler* ZeroDimHandler::copyUsingNewDinfo(
 	return ret;
 }
 
-DataHandler* ZeroDimHandler::copyExpand( unsigned int copySize ) const
+DataHandler* ZeroDimHandler::copyExpand( unsigned int copySize, 
+	bool toGlobal ) const
 {
+	// If we want to copy to a global, the DataHandler should first
+	// itself become a global, then make the copy.
+	assert( !toGlobal ); 
+
 	OneDimHandler* ret = new OneDimHandler( dinfo() );
 	vector< unsigned int > dims( 1, copySize );
 	ret->resize( dims );
+	cout << Shell::myNode() << ": CopyExpand gives " << 
+		ret->localEntries() << " from " <<
+		ret->begin().index() << " to " << ret->end().index() << endl;
 	for ( iterator i = ret->begin(); i != ret->end(); ++i ) {
 		char* temp = *i;
 		memcpy( temp, data_, dinfo()->size() );
@@ -71,9 +82,10 @@ DataHandler* ZeroDimHandler::copyExpand( unsigned int copySize ) const
 	return ret;
 }
 
-DataHandler* ZeroDimHandler::copyToNewDim( unsigned int newDimSize ) const
+DataHandler* ZeroDimHandler::copyToNewDim( unsigned int newDimSize,
+	bool toGlobal ) const
 {
-	return copyExpand( newDimSize );
+	return copyExpand( newDimSize, toGlobal );
 }
 
 
