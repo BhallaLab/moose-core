@@ -12,12 +12,12 @@
 #include "Shell.h"
 
 /// Returns the Id of the root of the copied tree.
-Id Shell::doCopy( Id orig, Id newParent, string newName, unsigned int n, bool copyExtMsg )
+Id Shell::doCopy( Id orig, Id newParent, string newName, unsigned int n, bool toGlobal, bool copyExtMsg )
 {
 	static const Finfo* reqf = 
 		Shell::initCinfo()->findFinfo( "copy" );
-	static const SrcFinfo4< vector< Id >, string, unsigned int, bool >* 
-		requestCopy = dynamic_cast< const SrcFinfo4< vector< Id >, string, unsigned int, bool >* >( reqf );
+	static const SrcFinfo5< vector< Id >, string, unsigned int, bool, bool >* 
+		requestCopy = dynamic_cast< const SrcFinfo5< vector< Id >, string, unsigned int, bool, bool >* >( reqf );
 	assert( reqf );
 	assert( requestCopy );
 
@@ -40,7 +40,7 @@ Id Shell::doCopy( Id orig, Id newParent, string newName, unsigned int n, bool co
 	args.push_back( newParent );
 	args.push_back( newElm );
 	initAck();
-		requestCopy->send( sheller, &p_, args, newName , n, copyExtMsg);
+		requestCopy->send( sheller, &p_, args, newName , n, toGlobal, copyExtMsg);
 	waitForAck();
 
 	return newElm;
@@ -48,12 +48,12 @@ Id Shell::doCopy( Id orig, Id newParent, string newName, unsigned int n, bool co
 
 /// Runs in parallel on all nodes.
 Element* innerCopyElements( Id orig, Id newParent, Id newElm, 
-	unsigned int n, map< Id, Id >& tree )
+	unsigned int n, bool toGlobal, map< Id, Id >& tree )
 {
 	// static const Finfo* pf = Neutral::initCinfo()->findFinfo( "parentMsg" );
 	// static const Finfo* cf = Neutral::initCinfo()->findFinfo( "childMsg" );
 
-	Element* e = new Element( newElm, orig(), n );
+	Element* e = new Element( newElm, orig(), n, toGlobal );
 	assert( e );
 	Shell::adopt( newParent, newElm );
 
@@ -80,7 +80,7 @@ Element* innerCopyElements( Id orig, Id newParent, Id newElm,
 	Neutral::children( orig.eref(), kids );
 
 	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i ) {
-		innerCopyElements( *i, e->id(), Id::nextId(), n, tree );
+		innerCopyElements( *i, e->id(), Id::nextId(), n, toGlobal, tree );
 	}
 	return e;
 }
@@ -143,7 +143,7 @@ void innerCopyMsgs( map< Id, Id >& tree, unsigned int n, bool copyExtMsgs )
 
 void Shell::handleCopy( const Eref& er, const Qinfo* q,
 	vector< Id > args, string newName,
-	unsigned int n, bool copyExtMsgs )
+	unsigned int n, bool toGlobal, bool copyExtMsgs )
 {
 	static const Finfo* ackf = 
 		Shell::initCinfo()->findFinfo( "ack" );
@@ -173,7 +173,7 @@ void Shell::handleCopy( const Eref& er, const Qinfo* q,
 	map< Id, Id > tree;
 	// args are orig, newParent, newElm.
 	assert( args.size() == 3 );
-	Element* e = innerCopyElements( args[0], args[1], args[2], n, tree );
+	Element* e = innerCopyElements( args[0], args[1], args[2], n, toGlobal, tree );
 	if ( !e ) {
 		ack->send( 
 			Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus );

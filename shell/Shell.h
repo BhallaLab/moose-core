@@ -135,7 +135,7 @@ class Shell
 		 * to objects outside the copy tree. Usually we don't do this.
 		 */
 		Id doCopy( Id orig, Id newParent, string newName,
-			unsigned int n, bool copyExtMsgs);
+			unsigned int n, bool toGlobal, bool copyExtMsgs);
 
 		/**
 		 * Looks up the Id specified by the given path. May include
@@ -270,7 +270,7 @@ class Shell
 		 */
 		void handleCopy( const Eref& e, const Qinfo* q,
 			vector< Id > args, string newName, unsigned int n, 
-			bool copyExtMsgs );
+			bool toGlobal, bool copyExtMsgs );
 
 		/**
 		 * Sets up scheduling for elements on the path.

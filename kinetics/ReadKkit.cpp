@@ -716,7 +716,7 @@ void ReadKkit::buildSumTotal( const string& src, const string& dest )
 		vector< unsigned int > dim( 1, 1 );
 		sumId = shell_->doCreate( "SumFunc", destId, "sumFunc", dim );
 		const DataHandler* orig = destId()->dataHandler();
-		DataHandler* dup = orig->copy();
+		DataHandler* dup = orig->copy( false );
 	
 		// Turn dest into a FuncPool.
 		destId()->zombieSwap( FuncPool::initCinfo(), dup );

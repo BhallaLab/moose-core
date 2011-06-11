@@ -231,7 +231,7 @@ void rtHHnetwork( unsigned int numCopies )
 	//////////////////////////////////////////////////////////////////////
 	Id copyParentId = shell->doCreate( "Neutral", Id(), "copy", dims );
 	Id copyId = shell->doCopy( comptId, copyParentId, 
-		"comptCopies", numCopies, 0 );
+		"comptCopies", numCopies, false, false );
 	assert( copyId()->dataHandler()->localEntries() == numCopies );
 	assert( copyId()->dataHandler()->numDimensions() == 1 );
 	kids = Field< vector< Id > >::get( copyId, "children" );

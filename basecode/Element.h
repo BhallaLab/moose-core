@@ -53,7 +53,7 @@ class Element
 		 * This constructor copies over the original n times. It is
 		 * used for doing all copies, in Shell::innerCopyElements.
 		 */
-		Element( Id id, const Element* orig, unsigned int n );
+		Element( Id id, const Element* orig, unsigned int n, bool toGlobal);
 
 		/**
 		 * Destructor

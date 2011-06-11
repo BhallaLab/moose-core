@@ -46,7 +46,11 @@ DataHandler* ZeroDimGlobalHandler::globalize() const
 
 DataHandler* ZeroDimGlobalHandler::unGlobalize() const
 {
-	return 0;
+	DataHandler* ret = new ZeroDimHandler( dinfo() );
+	vector< unsigned int > dims(1,1);
+	ret->resize( dims );
+	ret->setDataBlock( data_, 1, 0 );
+	return ret;
 }
 
 bool ZeroDimGlobalHandler::innerNodeBalance( unsigned int size,
@@ -55,9 +59,13 @@ bool ZeroDimGlobalHandler::innerNodeBalance( unsigned int size,
 	return 0;
 }
 
-DataHandler* ZeroDimGlobalHandler::copy() const
+DataHandler* ZeroDimGlobalHandler::copy( bool toGlobal ) const
 {
-	return ( new ZeroDimGlobalHandler( this ) );
+	if ( toGlobal ) {
+		return ( new ZeroDimGlobalHandler( this ) );
+	} else {
+		return unGlobalize();
+	}
 }
 
 DataHandler* ZeroDimGlobalHandler::copyUsingNewDinfo( 
@@ -68,11 +76,20 @@ DataHandler* ZeroDimGlobalHandler::copyUsingNewDinfo(
 	return ret;
 }
 
-DataHandler* ZeroDimGlobalHandler::copyExpand( unsigned int copySize ) const
+DataHandler* ZeroDimGlobalHandler::copyExpand( unsigned int copySize,
+	bool toGlobal ) const
 {
-	OneDimGlobalHandler* ret = new OneDimGlobalHandler( dinfo() );
 	vector< unsigned int > dims( 1, copySize );
-	ret->resize( dims );
+	DataHandler* ret;
+	if ( toGlobal ) {
+		OneDimGlobalHandler* temp = new OneDimGlobalHandler( dinfo() );
+		temp->resize( dims );
+		ret = temp;
+	} else {
+		OneDimHandler* temp = new OneDimHandler( dinfo() );
+		temp->resize( dims );
+		ret = temp;
+	}
 	for ( iterator i = ret->begin(); i != ret->end(); ++i ) {
 		char* temp = *i;
 		memcpy( temp, data_, dinfo()->size() );
@@ -80,9 +97,10 @@ DataHandler* ZeroDimGlobalHandler::copyExpand( unsigned int copySize ) const
 	return ret;
 }
 
-DataHandler* ZeroDimGlobalHandler::copyToNewDim( unsigned int newDimSize ) const
+DataHandler* ZeroDimGlobalHandler::copyToNewDim( unsigned int newDimSize,
+	bool toGlobal ) const
 {
-	return copyExpand( newDimSize );
+	return copyExpand( newDimSize, toGlobal );
 }
 
 
