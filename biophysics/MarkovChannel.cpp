@@ -114,7 +114,11 @@ const Cinfo* MarkovChannel::initCinfo()
 		&state,
 		&initialstate,
 		&labels,
-		&gbar
+		&gbar,
+		&ligandconc,
+		&setoneparam,
+		&settwoparam,
+		&setuptables
 	};
 
 	static string doc[] = 
