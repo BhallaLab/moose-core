@@ -84,9 +84,9 @@ class SynChan
 				Eref e, double val, unsigned int i );
 		double innerGetDelay(
 				Eref e, unsigned int i );
-		void innerSynapseFunc( const Conn* c, double time );
-		virtual void innerProcessFunc( Eref e, ProcInfo p );
-		virtual void innerReinitFunc( Eref e,  ProcInfo p );
+    virtual void innerSynapseFunc( const Conn* c, double time );
+    virtual void innerProcessFunc( Eref e, ProcInfo p );
+    virtual void innerReinitFunc( Eref e,  ProcInfo p );
     virtual void innerSetTau2(double value);
     virtual double innerGetTau2();
     
