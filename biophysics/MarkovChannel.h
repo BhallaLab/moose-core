@@ -62,6 +62,10 @@ class MarkovChannel : public ChanBase {
 	//Updating the rates of transiton at each time step.
 	void updateRates();
 
+	//Sets those rates of transition which are constant throughout the time
+	//interval.
+	void initConstantRates();
+
 /*	//Function to return status of initialization of channel. Returns true if all
 	//the parameters of the channel i.e. number of states, number of open states,
 	//conductances, rate tables have all been initialized. This is to prevent
@@ -73,10 +77,9 @@ class MarkovChannel : public ChanBase {
 	int innerEvalGslSystem( double t, const double* y, double* yprime );
 
 	//DestFinfo functions.
-	void setupOneParamRateTable( unsigned int );
+	void setupRateTables( unsigned int );
 	void setOneParamRateTable( vector< unsigned int >, vector< double >,  vector< double >, bool ligandFlag );
 	void setTwoParamRateTable( vector< unsigned int >, vector< double >, vector< vector< double > >);
-	void setupTwoParamRateTable( unsigned int );
 	void process( const Eref&, const ProcPtr);
 	void reinit( const Eref&, const ProcPtr);
 	void handleLigandConc( double );
@@ -87,18 +90,16 @@ class MarkovChannel : public ChanBase {
 	unsigned int numStates_;					//Total number of states.
 	unsigned int numOpenStates_;			//Number of open (conducting) states.
 	vector< vector< double > > A_;		//Instantaneous rate matrix.
-	vector< string > stateLabels_;
-	vector< vector< bool > > isLigandGated_;
 
+	vector< string > stateLabels_;
 	vector< double > state_;					//Probabilities of occupancy of each state.
 	vector< double > initialState_;
-//	bool isInitialized_;
-	double* stateForGsl_;
 	vector< double > Gbars_;		//Conductance associated with each open state.
+//	bool isInitialized_;
 
-	TableOfVectors* oneParamRates_;			//Rates that vary with only one parameter.
-	TableOfInterpol2D* twoParamRates_;	//Rates that vary with two parameters.
+	MarkovRateTable* rateTables_;
 
+	double* stateForGsl_;
 	MarkovGsl* solver_;
 };
 
