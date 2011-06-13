@@ -10,8 +10,7 @@
 #include "header.h"
 #include "VectorTable.h"
 #include "../builtins/Interpol2D.h"
-#include "TableOfVectors.h"
-#include "TableOfInterpol2D.h"
+#include "MarkovRateTable.h"
 #include <gsl/gsl_odeiv.h>
 #include <gsl/gsl_errno.h>
 #include "MarkovGsl.h"
@@ -68,7 +67,7 @@ const Cinfo* MarkovChannel::initCinfo()
 			&MarkovChannel::getState
 			);
 
-	static ValueFinfo< MarkovChannel, vector< double > > initialstate( "state",
+	static ValueFinfo< MarkovChannel, vector< double > > initialstate( "initialstate",
 			"This is a row vector that contains the probabilities of finding the channel in each state at t = 0. The state of the channel is reset to this value during a call to reinit()",
 			&MarkovChannel::setInitialState,
 			&MarkovChannel::getInitialState
@@ -103,13 +102,10 @@ const Cinfo* MarkovChannel::initCinfo()
 		" the channel is ligand gated and voltage gated.",
 		new OpFunc3< MarkovChannel, vector< unsigned int >, vector< double >, vector< vector< double > > >(&MarkovChannel::setTwoParamRateTable));
 
-	static DestFinfo setuponeparam("setuponeparam",
-		"Initializes a table of 1D lookup tables.",
-		new OpFunc1< MarkovChannel, unsigned int >(&MarkovChannel::setupOneParamRateTable) );
+	static DestFinfo setuptables("setuptables",
+		"Initializes all rate tables.",
+		new OpFunc1< MarkovChannel, unsigned int >(&MarkovChannel::setupRateTables) );
 
-	static DestFinfo setuptwoparam("setuponeparam",
-		"Initializes a table of 2D lookup tables.",
-		new OpFunc1< MarkovChannel, unsigned int >(&MarkovChannel::setupTwoParamRateTable) );
 	///////////////////////////////////////////
 	static Finfo* MarkovChannelFinfos[] = 
 	{
@@ -154,34 +150,26 @@ MarkovChannel::MarkovChannel() :
 	ligandConc_(0), 
 	numStates_(0),
 	numOpenStates_(0),
-	oneParamRates_(0),
-	twoParamRates_(0)
+	rateTables_(0),
+	stateForGsl_(0)
 //	isInitialized_(false)
 {;}
 
-MarkovChannel::MarkovChannel(unsigned int numStates, unsigned int numOpenStates) 
+MarkovChannel::MarkovChannel(unsigned int numStates, unsigned int numOpenStates) :
+	g_(0), ligandConc_(0), numStates_(numStates), numOpenStates_(numOpenStates)
 {
-	g_ = 0;
+	A_.resize( numStates );
+	for ( unsigned int i = 0; i < numStates; ++i )
+		A_[i].resize( numStates, 0.0 );
 
-	numStates_ = numStates;
-	numOpenStates_ = numOpenStates;
-
-	A_.resize( numStates_ );
-	for ( unsigned int i = 0; i < numStates_; ++i )
-		A_[i].resize( numStates_, 0.0 );
-
-	isLigandGated_.resize( numStates_ );
-	for ( unsigned int i = 0; i < numStates_; ++i )
-		isLigandGated_[i].resize ( numStates_, false );
-
-	state_.resize( numStates_ );
-	initialState_.resize( numStates_ );
+	stateLabels_.resize( numStates );
+	state_.resize( numStates );
+	initialState_.resize( numStates );
+	Gbars_.resize( numOpenStates ) ;
 //	isInitialized_ = true;
-	stateForGsl_ = new double[numStates_];
-	Gbars_.resize( numOpenStates_ ) ;
+	stateForGsl_ = new double[numStates];
 
-	oneParamRates_ = new TableOfVectors( numStates_ );
-	twoParamRates_ = new TableOfInterpol2D( numStates_ );
+	rateTables_ = new MarkovRateTable( numStates );
 
 	solver_ = new MarkovGsl();
 }
@@ -227,6 +215,10 @@ vector< double > MarkovChannel::getState ( ) const
 void MarkovChannel::setState( vector< double > state ) 
 {
 	double sumOfProbabilities = 0;
+
+	if ( stateForGsl_ == 0 )
+		stateForGsl_ = new double[ state.size() ];
+
 	for ( unsigned int i = 0; i < state.size(); i++)
 	{
 		stateForGsl_[i] = state[i];
@@ -265,45 +257,32 @@ void MarkovChannel::setGbars( vector< double > Gbars )
 
 vector< double > MarkovChannel::getOneParamRateTable( unsigned int i, unsigned int j )
 { 
-	vector< double > emptyVec;
-	VectorTable* ptr = oneParamRates_->getChildTable( i, j );
-
-	if ( ptr != 0 )
-		return ptr->getTable();
-
-	return emptyVec;
+	return rateTables_->getVtChildTable( i, j );
 }
 
+void MarkovChannel::setOneParamRateTable( vector< unsigned int > intParams, vector <double > doubleParams, vector< double > table, bool ligandFlag )
+{
+	rateTables_->setVtChildTable( intParams, doubleParams, table, ligandFlag );
+}
 
 vector< vector< double > > MarkovChannel::getTwoParamRateTable( unsigned int i, unsigned int j )
 { 
-	vector< vector< double > > emptyVec;
-	Interpol2D* ptr = twoParamRates_->getChildTable( i, j );
+	return rateTables_->getInt2dChildTable( i, j );
+}
 
-	if ( ptr != 0 )
-		return ptr->getTableVector();
-
-	return emptyVec;
+void MarkovChannel::setTwoParamRateTable( vector< unsigned int > intParams, vector< double > doubleParams, vector< vector< double > > table )
+{
+	rateTables_->setInt2dChildTable( intParams, doubleParams, table );	
 }
 
 double MarkovChannel::lookupRate( unsigned int i , unsigned int j , vector<double> args )
 {
-	if ( i > numStates_ || j > numStates_ )
-	{
-		cerr << "Error : Requested rate is out of bounds\n";
-		return 0;
-	}
-
-	if ( args.size() > 2 || args.size() == 0 )
-	{
-		cerr << "Error : Either 1 or 2 lookup arguments may be specified\n";
-		return 0;
-	}
-	else if ( args.size() == 2 )
-		return twoParamRates_->lookupChildTable( i, j, args[0], args[1] );
-	else if ( args.size() == 1 )
-		return oneParamRates_->lookupChildTable( i, j, args[0] );
-
+	if ( args.size() == 1 )
+		return rateTables_->lookup1D( i, j, args[0] );
+	if ( args.size() == 2 )
+		return rateTables_->lookup2D( i, j, args[0], args[1] );
+	
+	cerr << "Error : Either 1 or 2 lookup arguments must be supplied. Returning 0.\n";
 	return 0;
 }
 
@@ -319,19 +298,19 @@ void MarkovChannel::updateRates()
 		for ( unsigned int j = 0; j < numStates_; ++j )
 		{
 			//If rate is ligand OR voltage dependent.
-			if ( oneParamRates_->doesChildExist( i, j ) &&
-					 !twoParamRates_->doesChildExist( i, j ) )
+			if ( rateTables_->isRateOneParam( i, j ) )
 			{
 				//Use ligand concentration instead of voltage.
-				if ( isLigandGated_[i][j] )
-					A_[i][j] = oneParamRates_->lookupChildTable( i, j, ligandConc_ );
+				if ( rateTables_->isRateLigandDep( i, j ) )
+					A_[i][j] = rateTables_->lookup1D( i, j, ligandConc_ );
 				else
-					A_[i][j] = oneParamRates_->lookupChildTable( i, j, getVm() );
+					A_[i][j] = rateTables_->lookup1D( i, j, getVm() );
 			}
-			//If rate is ligand AND voltage dependent.
-			if ( !oneParamRates_->doesChildExist( i, j ) && 
-					 twoParamRates_->doesChildExist( i, j ) )
-				A_[i][j] = twoParamRates_->lookupChildTable( i, j, ligandConc_, getVm() );
+			
+			//If rate is ligand AND voltage dependent. It is assumed that ligand
+			//concentration varies along the first dimension.
+			if ( rateTables_->isRateTwoParam( i, j ) )
+				A_[i][j] = rateTables_->lookup2D( i, j, ligandConc_, getVm() );
 		}
 	}
 
@@ -349,11 +328,19 @@ void MarkovChannel::updateRates()
 	}
 }
 
-
-/*bool MarkovChannel::channelIsInitialized()
+void MarkovChannel::initConstantRates() 
 {
-	return ( numStates_ > 0 && numOpenStates_ > 0 &&  
-}*/
+	for (	unsigned int i = 0; i < numStates_; ++i )	
+	{
+		for ( unsigned int j = 0; j < numStates_; ++j )
+		{
+			if ( rateTables_->isRateConstant( i, j ) )
+				A_[i][j] = rateTables_->lookup1D( i, j, 0.0 );  
+			//Doesn't really matter which value is looked up as there is only one
+			//entry in the table.
+		}
+	}
+}	
 
 int MarkovChannel::evalGslSystem( double t, const double* state, double* f, void *s)
 {
@@ -376,36 +363,10 @@ int MarkovChannel::innerEvalGslSystem( double t, const double* state, double* f 
 	return GSL_SUCCESS;
 }
 
-void MarkovChannel::setupOneParamRateTable( unsigned int n )
+void MarkovChannel::setupRateTables( unsigned int n )
 {
-	if ( oneParamRates_ != 0 )			
-		oneParamRates_ = new TableOfVectors( n );
-	else
-		cerr << "Error : Set of one parameter lookup tables have already been initialized!\n";
-}
-
-void MarkovChannel::setOneParamRateTable( vector< unsigned int > intParams, vector <double > doubleParams, vector< double > table, bool ligandFlag )
-{
-	oneParamRates_->setChildTable( intParams, doubleParams, table );
-
-	unsigned int i = intParams[0];
-	unsigned int j = intParams[1];
-
-	if ( ligandFlag )
-		isLigandGated_[i][j] = true;
-}
-
-void MarkovChannel::setupTwoParamRateTable( unsigned int n )
-{
-	if ( twoParamRates_ != 0 )	
-		twoParamRates_ = new TableOfInterpol2D( n );
-	else
-		cerr << "Error : Set of two parameter lookup tables have already been initialized!\n";
-}
-
-void MarkovChannel::setTwoParamRateTable( vector< unsigned int > intParams, vector< double > doubleParams, vector< vector< double > > table )
-{
-	twoParamRates_->setChildTable( intParams, doubleParams, table );	
+	if ( rateTables_ == 0 )
+		rateTables_ = new MarkovRateTable( n );
 }
 
 void MarkovChannel::process( const Eref& e, const ProcPtr p ) 
@@ -440,6 +401,7 @@ void MarkovChannel::reinit( const Eref& e, const ProcPtr p )
 		stateForGsl_[i] = state_[i];
 
 	ChanBase::reinit( e, p );	
+	initConstantRates();
 }
 
 void MarkovChannel::handleLigandConc( double ligandConc )
