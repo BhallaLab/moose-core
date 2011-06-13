@@ -73,6 +73,7 @@ OBJ = PyMooseBase.o \
 	NMDAChan.o \
 	BinSynchan.o	\
 	StochSynchan.o	\
+	STPSynChan.o	\
 	KinSynChan.o \
 	Table.o \
 	Nernst.o \
@@ -149,6 +150,7 @@ HEADERS=PyMooseUtil.h \
 	NMDAChan.h \
 	BinSynchan.h	\
 	StochSynchan.h	\
+	STPSynChan.h	\
 	KinSynChan.h \
 	Table.h \
 	Nernst.h \
