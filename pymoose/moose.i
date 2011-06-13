@@ -22,6 +22,7 @@
 	#include "SynChan.h"
 	#include "BinSynchan.h"
 	#include "StochSynchan.h"
+	#include "STPSynChan.h"
         #include "NMDAChan.h"
         #include "KinSynChan.h"
 	#include "SpikeGen.h"
@@ -385,6 +386,15 @@ SynChan.delay = listproperty(SynChan.getDelay, SynChan.setDelay)
 %attribute(pymoose::StochSynchan, unsigned int, numSynapses, __get_numSynapses)
 %attribute(pymoose::StochSynchan, double, activation, __get_activation, __set_activation)
 %attribute(pymoose::StochSynchan, double, modulator, __get_modulator, __set_modulator)
+
+%include "STPSynChan.h"
+%attribute(pymoose::STPSynChan, double, tauD1, __get_tauD1, __set_tauD1)
+%attribute(pymoose::STPSynChan, double, tauD2, __get_tauD2, __set_tauD2)
+%attribute(pymoose::STPSynChan, double, tauF, __get_tauF, __set_tauF)
+%attribute(pymoose::STPSynChan, double, deltaF, __get_deltaF, __set_deltaF)
+%attribute(pymoose::STPSynChan, double, d1, __get_d1, __set_d1)
+%attribute(pymoose::STPSynChan, double, d2, __get_d2, __set_d2)
+
 
 %include "NMDAChan.h"
 %attribute(pymoose::NMDAChan, double, MgConc, __get_MgConc, __set_MgConc)
