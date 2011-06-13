@@ -138,6 +138,7 @@ class MainWindow(QtGui.QMainWindow):
         self.centralVizPanel = QtGui.QMdiArea(self)
         self.horizontalLayout.addWidget(self.centralVizPanel)
         self.centralVizPanel.setViewMode(self.centralVizPanel.TabbedView)
+        self.centralVizPanel.setBackground(QtGui.QBrush(QtGui.QImage('QMdiBackground.png')))
 
         self.centralPanel = QtGui.QMdiArea(self)
         self.horizontalLayout.addWidget(self.centralPanel)
@@ -223,7 +224,6 @@ class MainWindow(QtGui.QMainWindow):
         self.simToolbar.setObjectName('simToolbar')
         self.simToolbar.setFloatable(False)
         self.simToolbar.setMovable(False)
-
         
         self.runTimeLabelToolbar = QtGui.QLabel(self.simToolbar)
         self.runTimeLabelToolbar.setText('Run Time:')
@@ -498,12 +498,16 @@ class MainWindow(QtGui.QMainWindow):
 
         # Actions for file menu
         self.loadModelAction = QtGui.QAction(self.tr('Load Model'), self)
-        self.loadModelAction.setShortcut(QtGui.QKeySequence(self.tr('Ctrl+L')))
+        self.loadModelAction.setShortcut(QtGui.QKeySequence(self.tr('Ctrl+O')))
         self.connect(self.loadModelAction, QtCore.SIGNAL('triggered()'), self.popupLoadModelDialog)
         
         self.newGLWindowAction = QtGui.QAction(self.tr('New GL Window'), self) #add_chait
         self.connect(self.newGLWindowAction, QtCore.SIGNAL('triggered(bool)'), self.addGLWindow)
         
+        self.saveTablePlotsAction = QtGui.QAction(self.tr('Save Plots'),self) #add_chait
+        self.saveTablePlotsAction.setShortcut(QtGui.QKeySequence(self.tr('Ctrl+S')))
+        self.connect(self.saveTablePlotsAction,QtCore.SIGNAL('triggered(bool)'),self.saveTablePlots)
+
         self.newPlotWindowAction = QtGui.QAction(self.tr('New Plot Window'), self)
         self.connect(self.newPlotWindowAction, QtCore.SIGNAL('triggered(bool)'), self.addPlotWindow)
         self.firstTimeWizardAction = QtGui.QAction(self.tr('FirstTime Configuration Wizard'), self)
@@ -600,6 +604,7 @@ class MainWindow(QtGui.QMainWindow):
         self.fileMenu = QtGui.QMenu(self.tr('&File'), self)
         self.fileMenu.addAction(self.newPlotWindowAction)
         self.fileMenu.addAction(self.newGLWindowAction)	#add_chait
+        self.fileMenu.addAction(self.saveTablePlotsAction) #add_chait
         self.fileMenu.addAction(self.loadModelAction)
         self.shellModeMenu = self.fileMenu.addMenu(self.tr('Moose Shell mode'))
         self.shellModeMenu.addActions(self.shellModeActionGroup.actions())
@@ -719,7 +724,6 @@ class MainWindow(QtGui.QMainWindow):
             self.mooseShellAction.setChecked(False)
         else:
             self.mooseShellAction.setChecked(True)
-        
     
     def createMooseClassesPanel(self):
         config.LOGGER.debug('createMooseClassesPanel - start')
@@ -882,6 +886,10 @@ class MainWindow(QtGui.QMainWindow):
     		self.vizDialogue.vizMaxVal_2.setEnabled(False)
     		self.vizDialogue.vizMinVal_2.setEnabled(False)
         	
+    def saveTablePlots(self):
+        for tablePlot in self.tablePlotMap.keys():
+            tablePlot.dumpFile(tablePlot.name+'.plot')
+
     def addAllCellsToVizList(self):		#add_chait
         an=moose.Neutral('/')						#moose root children
 	all_ch=an.childList 	
