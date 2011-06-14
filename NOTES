@@ -13326,3 +13326,34 @@ See long list from 1 May 2011
 Some messing around fixing up the Markov channel compilation.
 Compiled code on Ghevar. Still doesn't work with the benchmark test for hhNet.
 Still works fine on mishti.
+Fixed some minor double-to-int conversion warnings. Checkin 2754.
+Added warning messages in Shell::doUseClock in case the provided path has
+no Elements.
+
+Dealing with a funny bug revealed on Ghevar: With 12 or more compute threads, 
+the system fails an assertion in testShell.cpp:420. Here the totalEntries
+in a synapse has not been updated following the doSyncDataHandler call.
+getFieldDimension also returns 1, should be 10 in this case.
+Oddly it works with fewer threads.
+Oddly localEntries is still OK.
+
+Check: what is the thread limit if there size = 5?
+Yes, the thread limit goes down to 5.
+Likewise, with size = 7, thread limit is 7.
+
+Note that with size = 10, thread limit is 11, not 10.
+
+GDB stepping through it. One bug that doesn't seem to have an obvious
+effect is that the iterator
+goes through every field array entry, which is what this iterator is
+designed to do. This is good for reducing Stats, but not for a field like
+maxIndex, which is common to all the array entries.
+
+I think I have found the bug. Subtle. I create a ReduceFieldDimension
+object in ReduceMsg::exec, but I rely on the exec to call the
+primaryReduce() for the object in order to correctly initialize the
+tgtId_. The default, of course, is Id(). Turns out that when final
+reduction happens in reduceNodes, it is the root Element whose 
+FieldDimension is being set.
+
+Fixed. Works. But regression tests still bomb with 16 cores.
