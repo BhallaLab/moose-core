@@ -16,7 +16,7 @@ VectorTable::VectorTable() : xDivs_(0), xMin_(0), xMax_(0), invDx_(0),
 {;}
 
 //Implementation identical to that of HHGate::lookupTable.
-double VectorTable::innerLookupTable( double x ) const
+double VectorTable::innerLookup( double x ) const
 {
 	if (x <= xMin_) 
 		return table_[0];
