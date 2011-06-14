@@ -157,6 +157,8 @@ class MainWindow(QtGui.QMainWindow):
         self.vizs = []		#add_chait
         self.vizWindows = []	#add_chait
         
+
+        self.makeShellDock(interpreter)
         # We use the objFieldEditorMap to store reference to cache the
         # model objects for moose objects.
         self.objFieldEditorMap = {}
@@ -183,7 +185,7 @@ class MainWindow(QtGui.QMainWindow):
                      QtCore.SIGNAL('itemClicked(QTreeWidgetItem *, int)'),
                      self.setCurrentElement)
         
-        self.makeShellDock(interpreter)
+        
 	
         # By default, we show information about MOOSE in the central widget
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
@@ -393,7 +395,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.restoreDockWidget(self.objFieldEditPanel)
             self.connect(self.objFieldEditModel, QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'), self.renameObjFieldEditPanel)
             
-                
+
         self.objFieldEditor = ObjectEditView(self.objFieldEditPanel)
         self.objFieldEditor.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Raised)
         self.objFieldEditor.setObjectName(str(obj.id)) # Assuming Id will not change in the lifetime of the object - something that might break in future version.
@@ -420,7 +422,7 @@ class MainWindow(QtGui.QMainWindow):
         self.objFieldEditPanel.raise_()
 	self.objFieldEditPanel.show()
         #add_chait
-        self.objFieldEditPanel.setMinimumWidth(300)
+        self.objFieldEditPanel.setMaximumWidth(320)
 
     def createGLCellWidget(self):
     	"""Create a GLCell object to show the currently selected cell"""
@@ -602,10 +604,9 @@ class MainWindow(QtGui.QMainWindow):
         
     def makeMenu(self):
         self.fileMenu = QtGui.QMenu(self.tr('&File'), self)
-        self.fileMenu.addAction(self.newPlotWindowAction)
-        self.fileMenu.addAction(self.newGLWindowAction)	#add_chait
-        self.fileMenu.addAction(self.saveTablePlotsAction) #add_chait
         self.fileMenu.addAction(self.loadModelAction)
+        self.fileMenu.addAction(self.saveTablePlotsAction) #add_chait
+
         self.shellModeMenu = self.fileMenu.addMenu(self.tr('Moose Shell mode'))
         self.shellModeMenu.addActions(self.shellModeActionGroup.actions())
         self.fileMenu.addAction(self.firstTimeWizardAction)
@@ -613,6 +614,19 @@ class MainWindow(QtGui.QMainWindow):
         self.fileMenu.addAction(self.quitAction)
 
         self.viewMenu = QtGui.QMenu('&View', self)
+        self.viewMenu.addAction(self.newPlotWindowAction)
+        self.viewMenu.addAction(self.newGLWindowAction)	#add_chait
+        self.viewMenu.addAction(self.configurePlotAction)
+        self.viewMenu.addAction(self.togglePlotVisibilityAction)
+        self.viewMenu.addAction(self.showAllPlotsAction)
+        self.viewMenu.addSeparator().setText(self.tr('Layout Plot Windows'))
+
+        self.viewMenu.addAction(self.tabbedViewAction)
+        self.viewMenu.addAction(self.tilePlotWindowsAction)
+        self.viewMenu.addAction(self.cascadePlotWindowsAction)
+        self.viewMenu.addAction(self.togglePlotWindowsAction)
+
+        self.viewMenu.addSeparator()
         self.viewMenu.addAction(self.controlDockAction)
         # self.viewMenu.addAction(self.glClientAction)
         self.viewMenu.addAction(self.mooseTreeAction)
@@ -621,25 +635,20 @@ class MainWindow(QtGui.QMainWindow):
         self.viewMenu.addAction(self.mooseShellAction)
         self.viewMenu.addAction(self.autoHideAction)
         self.viewMenu.addAction(self.showRightBottomDocksAction)
-        self.viewMenu.addSeparator().setText(self.tr('Layout Plot Windows'))
-        self.viewMenu.addAction(self.tabbedViewAction)
-        self.viewMenu.addAction(self.tilePlotWindowsAction)
-        self.viewMenu.addAction(self.cascadePlotWindowsAction)
-        self.viewMenu.addAction(self.togglePlotWindowsAction)
+
         self.runMenu = QtGui.QMenu(self.tr('&Run'), self)
         # self.runMenu.addAction(self.resetAction)
         self.runMenu.addAction(self.runAction)
         self.runMenu.addAction(self.continueRunAction)
 
+        
 
         self.editModelMenu = QtGui.QMenu(self.tr('&Edit Model'), self)
         self.editModelMenu.addAction(self.connectionDialogAction)
         
 		
-        self.plotMenu = QtGui.QMenu(self.tr('&Plot Settings'), self)
-        self.plotMenu.addAction(self.configurePlotAction)
-        self.plotMenu.addAction(self.togglePlotVisibilityAction)
-        self.plotMenu.addAction(self.showAllPlotsAction)
+        #self.plotMenu = QtGui.QMenu(self.tr('&Plot Settings'), self)
+        
         #self.glMenu = QtGui.QMenu(self.tr('Open&GL'), self)
         #self.glMenu.addAction(self.startGLWizardAction)
         #self.glMenu.addAction(self.stopGLAction)
@@ -655,7 +664,7 @@ class MainWindow(QtGui.QMainWindow):
         self.menuBar().addMenu(self.viewMenu)
         self.menuBar().addMenu(self.editModelMenu)
         self.menuBar().addMenu(self.runMenu)
-        self.menuBar().addMenu(self.plotMenu)
+        #self.menuBar().addMenu(self.plotMenu)
         #self.menuBar().addMenu(self.glMenu)
         self.menuBar().addMenu(self.helpMenu)
 
@@ -813,6 +822,7 @@ class MainWindow(QtGui.QMainWindow):
     def addPlotWindow(self):
         title = self.tr('Plot %d' % (len(self.plots)))
         plotWindow = MoosePlotWindow()
+        plotWindow.setToolTip('Drag field from editor into the plot window to plot')
         plotWindow.setWindowTitle(title)
         plotWindow.setObjectName(title)
         plot = MoosePlot(plotWindow)
