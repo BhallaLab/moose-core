@@ -13316,3 +13316,10 @@ identical output on 1 to 4 nodes.  This is a major milestone. Need to
 confirm it works properly on ghevar and on gj.
 
 ============================================================================
+13 June:
+Some things to do
+- Get code to run on Ghevar
+- Get MathFunc to work with solver.
+See long list from 1 May 2011
+============================================================================
+
