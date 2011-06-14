@@ -13322,4 +13322,7 @@ Some things to do
 - Get MathFunc to work with solver.
 See long list from 1 May 2011
 ============================================================================
-
+14 June
+Some messing around fixing up the Markov channel compilation.
+Compiled code on Ghevar. Still doesn't work with the benchmark test for hhNet.
+Still works fine on mishti.
