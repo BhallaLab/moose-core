@@ -966,6 +966,10 @@ void Shell::handleUseClock( const Eref& e, const Qinfo* q,
 	// cout << q->getProcInfo()->threadIndexInGroup << ": in Shell::handleUseClock with path " << path << endl << flush;
 	vector< Id > list;
 	wildcard( path, list ); // By default scans only Elements.
+	if ( list.size() == 0 ) {
+		cout << "Warning: no Elements found on path " << path << endl;
+		return;
+	}
 	string tickField = "proc";
 	// Hack to get around a common error.
 	if ( field.substr( 0, 4 ) == "proc" || field.substr( 0, 4 ) == "Proc" )
