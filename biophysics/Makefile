@@ -34,7 +34,7 @@ OBJ = \
 	MarkovRateTable.o \
 	MarkovChannel.o \
 
-GSL_LIBS = -L/usr/lib -lgsl
+# GSL_LIBS = -L/usr/lib -lgsl
 
 HEADERS = \
 	../basecode/header.h \
