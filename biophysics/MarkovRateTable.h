@@ -1,6 +1,17 @@
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment.
+**           Copyright (C) 2003-2011 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
+
 #ifndef _MARKOVRATETABLE_H
 #define _MARKOVRATETABLE_H
 
+// Author : Vishaka Datta S, 2011, NCBS
+//
 //Presents a unified interface to deal with transition rates that are dependent
 //on one or two parameters, or are constant.
 //For two parameter lookups, this class borrows
