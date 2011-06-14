@@ -183,7 +183,7 @@ endif
 
 # To use GSL, pass USE_GSL=true ( anything on the right will do) in make command line
 ifdef USE_GSL
-LIBS+= -L/usr/lib -lgsl -lgslcblas
+LIBS+= -L/usr/lib -L/usr/lib64 -lgsl -lgslcblas
 CXXFLAGS+= -DUSE_GSL
 endif
 
