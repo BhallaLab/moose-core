@@ -29,10 +29,10 @@ OBJ = \
 	HHChannel2D.o	\
 	MgBlock.o	\
 	testBiophysics.o	\
-#	VectorTable.o \
-#	MarkovGsl.o \
-#	MarkovRateTable.o \
-#	MarkovChannel.o \
+	VectorTable.o \
+  MarkovGsl.o \
+	MarkovRateTable.o \
+	MarkovChannel.o \
 
 GSL_LIBS = -L/usr/lib -lgsl
 
@@ -64,9 +64,7 @@ VectorTable.o : VectorTable.h
 MarkovGsl.o : MarkovGsl.h
 MarkovRateTable.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h 
 MarkovChannel.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h MarkovGsl.h ChanBase.h MarkovChannel.h 
-testBiophysics.o: SynBase.h IntFire.h Synapse.h Compartment.h HHChannel.h HHGate.h ../builtins/Interpol2D.h
-
-# testBiophysics.o: SynBase.h IntFire.h Synapse.h Compartment.h HHChannel.h HHGate.h VectorTable.h MarkovRateTable.h	../builtins/Interpol2D.h MarkovGsl.h MarkovChannel.h
+testBiophysics.o: SynBase.h IntFire.h Synapse.h Compartment.h HHChannel.h HHGate.h VectorTable.h MarkovRateTable.h	../builtins/Interpol2D.h MarkovGsl.h MarkovChannel.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg $< -c
