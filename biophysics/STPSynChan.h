@@ -79,7 +79,7 @@ class STPSynChan: SynChan
 ///////////////////////////////////////////////////
 
   protected:
-    double d1_, d2_, deltaF_, tauD1_, tauD2_, tauF_;
+    double d1_, d2_, deltaF_, tauD1_, tauD2_, tauF_, dt_tauF_, dt_tauD1_, dt_tauD2_;
     vector< double > initPr_, F_, D1_, D2_, initF_, initD1_, initD2_;
     
 };
