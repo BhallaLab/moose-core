@@ -227,7 +227,8 @@ double HHGate::lookupTable( const vector< double >& tab, double v ) const
 	if ( v <= xmin_ ) return tab[0];
 	if ( v >= xmax_ ) return tab.back(); 
 	if ( lookupByInterpolation_ ) {
-		unsigned int index = ( v - xmin_ ) * invDx_;
+		unsigned int index = 
+			static_cast< unsigned int >( ( v - xmin_ ) * invDx_ );
 		double frac = ( v - xmin_ - index / invDx_ ) * invDx_;
 		return tab[ index ] * ( 1 - frac ) + tab[ index + 1 ] * frac;
 	} else {
@@ -254,7 +255,8 @@ void HHGate::lookupBoth( double v, double* A, double* B ) const
 		*A = A_.back();
 		*B = B_.back();
 	} else {
-		unsigned int index = ( v - xmin_ ) * invDx_;
+		unsigned int index =
+			static_cast< unsigned int >( ( v - xmin_ ) * invDx_ );
 		if ( lookupByInterpolation_ ) {
 			double frac = ( v - xmin_ - index / invDx_ ) * invDx_;
 			*A = A_[ index ] * ( 1 - frac ) + A_[ index + 1 ] * frac;
