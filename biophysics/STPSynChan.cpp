@@ -180,7 +180,7 @@ static const Slot ikSlot =
 static const Slot synapseSlot =
 	initSTPSynChanCinfo()->getSlot( "synapse" );
 
-STPSynChan::STPSynChan(): d1_(1.0), d2_(1.0), deltaF_(0.0), tauD1_(1.0), tauD2_(1.0), tauF_(1.0)
+STPSynChan::STPSynChan(): d1_(1.0), d2_(1.0), deltaF_(0.0), tauD1_(1.0), tauD2_(1.0), tauF_(1.0), dt_tauF_(0.0), dt_tauD1_(0.0), dt_tauD2_(0.0)
 {
     ;
 }
@@ -449,6 +449,11 @@ void STPSynChan::innerProcessFunc( Eref e, ProcInfo info )
     Ik_ = ( Ek_ - Vm_ ) * Gk_;
     activation_ = 0.0;
     modulation_ = 1.0;
+    for (unsigned int ii = 0; ii < synapses_.size(); ++ii){
+        F_[ii] += (1 - F_[ii]) * dt_tauF_;
+        D1_[ii] += (1 - D1_[ii]) * dt_tauD1_;
+        D2_[ii] += (1 - D2_[ii]) * dt_tauD2_;
+    }
     send2< double, double >( e, channelSlot, Gk_, Ek_ );
     send2< double, double >( e, origChannelSlot, Gk_, Ek_ );
     send1< double >( e, ikSlot, Ik_ );
@@ -460,13 +465,14 @@ void STPSynChan::innerProcessFunc( Eref e, ProcInfo info )
 void STPSynChan::innerReinitFunc( Eref e, ProcInfo info )
 {
     SynChan::innerReinitFunc(e, info);
-    cout << "Inner reinit" << synapses_.size() << endl;
     for (unsigned int index = 0; index < synapses_.size(); ++index){
         F_[index] = initF_[index];
         D1_[index] = initD1_[index];
         D2_[index] = initD2_[index];
-        cout << index << "F = " << F_[index] << ", D1 = " << D1_[index] << ", D2 = " << D2_[index] << endl;
     }
+    dt_tauF_ = info->dt_ / tauF_;
+    dt_tauD1_ = info->dt_ / tauD1_;
+    dt_tauD2_ = info->dt_ / tauD2_;
 }
     
 
@@ -476,7 +482,7 @@ void STPSynChan::innerSynapseFunc( const Conn* c, double time )
     assert( index < synapses_.size() );
     F_[index] += deltaF_;
     D1_[index] *= d1_;
-    D2_[index] *= d2_;        
+    D2_[index] *= d2_;    
     if ( mtrand() < initPr_[index] * F_[index] * D1_[index] * D2_[index] )
     {
         pendingEvents_.push(synapses_[index].event( time ));
