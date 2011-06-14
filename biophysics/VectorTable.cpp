@@ -98,10 +98,10 @@ void testVectorTable()
 	assert( doubleEq(unInitedTable.getMax(), 1.0) );
 	assert( doubleEq(unInitedTable.getInvDx(), 5) );
 
-	assert( doubleEq(unInitedTable.innerLookupTable( 0.25 ), 0.475 ) );
-	assert( doubleEq(unInitedTable.innerLookupTable( 0.47 ), 0.4125 ) );
-	assert( doubleEq(unInitedTable.innerLookupTable( 1.5 ), 0.44 ) );
-	assert( doubleEq(unInitedTable.innerLookupTable( -1.8 ), 0.0 ) );
+	assert( doubleEq(unInitedTable.innerLookup( 0.25 ), 0.475 ) );
+	assert( doubleEq(unInitedTable.innerLookup( 0.47 ), 0.4125 ) );
+	assert( doubleEq(unInitedTable.innerLookup( 1.5 ), 0.44 ) );
+	assert( doubleEq(unInitedTable.innerLookup( -1.8 ), 0.0 ) );
 
 	cout << "." << flush;
 }
