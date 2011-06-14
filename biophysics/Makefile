@@ -28,11 +28,11 @@ OBJ = \
 	HHGate2D.o	\
 	HHChannel2D.o	\
 	MgBlock.o	\
-	VectorTable.o \
-	MarkovGsl.o \
-	MarkovRateTable.o \
-	MarkovChannel.o \
 	testBiophysics.o	\
+#	VectorTable.o \
+#	MarkovGsl.o \
+#	MarkovRateTable.o \
+#	MarkovChannel.o \
 
 GSL_LIBS = -L/usr/lib -lgsl
 
