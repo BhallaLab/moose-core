@@ -16,11 +16,11 @@
 #endif
 
 ReduceBase::ReduceBase() // To keep vectors happy
-	: srcId_( Id() ), rfb_( 0 )
+	: srcId_( Id() ), rfb_( 0 ), inited_( 0 )
 {;}
 
 ReduceBase::ReduceBase( ObjId srcId, const ReduceFinfoBase* rfb )
-	: srcId_( srcId ), rfb_( rfb )
+	: srcId_( srcId ), rfb_( rfb ), inited_( 0 )
 {;}
 
 ReduceBase::~ReduceBase()
@@ -77,6 +77,16 @@ bool ReduceBase::reduceNodes()
 void ReduceBase::assignResult() const
 {
 	rfb_->digestReduce( srcId_.eref(), this );
+}
+
+bool ReduceBase::getInited() const
+{
+	return inited_;
+}
+
+void ReduceBase::setInited()
+{
+	inited_ = true;
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -194,6 +204,10 @@ void ReduceFieldDimension::secondaryReduce( const ReduceBase* other )
 	assert( r );
 	if ( r->maxIndex_ > maxIndex_ )
 		maxIndex_ = r->maxIndex_;
+	if ( ( !getInited() ) && r->getInited() ) {
+		tgtId_ = r->tgtId_;
+		setInited();
+	}
 }
 
 // Must not use other::func_
@@ -211,6 +225,7 @@ unsigned int ReduceFieldDimension::maxIndex() const
 
 bool ReduceFieldDimension::reduceNodes()
 {
+	assert ( getInited() );
 	bool ret = ReduceBase::reduceNodes();
 	// cout << Shell::myNode() << ": ReduceFieldDimension::reduceNodes: maxindex= " << maxIndex_ << ", tgt=" << tgtId_ << endl;
 	

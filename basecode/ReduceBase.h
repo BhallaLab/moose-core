@@ -69,6 +69,17 @@ class ReduceBase
 		 * it, using the ReduceFinfoBase::digestReduce function.
 		 */
 		void assignResult() const;
+
+		/**
+		 * Check if the Reduce object has been inited.
+		 */
+		bool getInited() const;
+
+		/**
+		 * Set the 'inited' flag
+		 */
+		void setInited();
+		
 	private:
 		/// This is the Object calling the Reduce operation.
 		ObjId srcId_;
@@ -78,6 +89,12 @@ class ReduceBase
 		 * Contains the digest call.
 		 */
 		const ReduceFinfoBase* rfb_;
+
+		/**
+		 * Keeps track of whether this Reduce entry has been accessed
+		 * through the primaryReduce. If not, its values are useless.
+		 */
+		bool inited_;
 };
 
 /**

@@ -49,6 +49,7 @@ void ReduceMsg::exec( const char* arg, const ProcInfo *p ) const
 			if ( p->execThread( e2_->id(),i.index().data() ) ) {
 				// This fills up the first pass of reduce operations.
 				r->primaryReduce( ObjId( e2_->id(), i.index() ) );
+				r->setInited();
 			}
 		}
 	}
