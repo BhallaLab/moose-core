@@ -232,7 +232,7 @@ double STPSynChan::innerGetPr( Eref e, const unsigned int& i )
 {
     updateNumSynapse(e);
     if ( i < initPr_.size() ){
-        return initPr_[i] * F_[i] * D1_[i] * D2_[i];
+        return amp_[i] * (F_[i] + deltaF_) * d1_ * D1_[i] * d2_ * D2_[i];
     }
     cout << "Error: STPSynChan::getPr : Index " << i << 
             " out of range\n";
@@ -427,6 +427,7 @@ unsigned  int STPSynChan::updateNumSynapse( Eref e)
         F_.resize(size, 1.0);
         D1_.resize(size, 1.0);
         D2_.resize(size, 1.0);
+        amp_.resize(size, 1.0);
     }
     return size;
 }
@@ -469,6 +470,7 @@ void STPSynChan::innerReinitFunc( Eref e, ProcInfo info )
         F_[index] = initF_[index];
         D1_[index] = initD1_[index];
         D2_[index] = initD2_[index];
+        amp_[index] = initPr_[index] / ((initF_[index] + deltaF_) * initD1_[index] * d1_ * initD2_[index] * d2_);
     }
     dt_tauF_ = info->dt_ / tauF_;
     dt_tauD1_ = info->dt_ / tauD1_;
@@ -483,7 +485,7 @@ void STPSynChan::innerSynapseFunc( const Conn* c, double time )
     F_[index] += deltaF_;
     D1_[index] *= d1_;
     D2_[index] *= d2_;    
-    if ( mtrand() < initPr_[index] * F_[index] * D1_[index] * D2_[index] )
+    if ( mtrand() < amp_[index] * F_[index] * D1_[index] * D2_[index] )
     {
         pendingEvents_.push(synapses_[index].event( time ));
     }

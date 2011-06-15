@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Mon Jun 13 14:59:06 2011 (+0530)
 # Version: 
-# Last-Updated: Tue Jun 14 19:15:33 2011 (+0530)
+# Last-Updated: Wed Jun 15 11:59:41 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 299
+#     Update #: 312
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -40,16 +40,16 @@ class TestSTPSynChan(unittest.TestCase):
         unittest.TestCase.__init__(self, *args)
         self.testId = uuid.uuid4().int
         # These are the common parameters to be used in tests
-        self.tauF = 1e-3
-        self.tauD1 = 2e-3
-        self.tauD2 = 20e-3
-        self.d1 = 0.8
-        self.d2 = 0.3
-        self.deltaF = 0.01
+        self.tauF = 0.094 # From figure 3 of Varela et al (1997)
+        self.tauD1 = 0.38 # From figure 3 of Varela et al (1997)
+        self.tauD2 = 9.2  # From figure 3 of Varela et al (1997)
+        self.d1 = 0.416   # From figure 3 of Varela et al (1997)
+        self.d2 = 0.975   # From figure 3 of Varela et al (1997)
+        self.deltaF = 0.917 # From figure 3 of Varela et al (1997)
         self.initPr = [0.8, 0.3]
-        self.initF = [0.9, 0.7]
-        self.initD1 = [0.6, 0.4]
-        self.initD2 = [0.7, 0.2]
+        self.initF = [1.0, 1.0]
+        self.initD1 = [1.0, 1.0]
+        self.initD2 = [1.0, 1.0]
         self.Rm = 1e9
         self.Ra = 1e6
         self.Cm = 1e-9
@@ -117,7 +117,8 @@ class TestSTPSynChan(unittest.TestCase):
             self.assertAlmostEqual(self.synchan.getF(ii), self.initF[ii])
             self.assertAlmostEqual(self.synchan.getD1(ii), self.initD1[ii])
             self.assertAlmostEqual(self.synchan.getD2(ii), self.initD2[ii])
-        
+            self.assertAlmostEqual(self.synchan.getPr(ii), self.initPr[ii])
+            
     def testProcess(self):
         self.setupSynapses()
         self.setupStimulus()
