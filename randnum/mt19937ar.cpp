@@ -233,8 +233,10 @@ void mtseed(long seed = 0)
 	if (seed == 0) {
 		char* hostname = getenv("HOST");
 		gettimeofday(&tv, NULL);
-		for (int i = 0; *hostname; hostname++, i++)
+                if (hostname){
+                    for (int i = 0; *hostname; hostname++, i++)
 			tv.tv_usec += *hostname * i * i * 16;
+                }
 		unsigned long init[2] = {tv.tv_sec, tv.tv_usec};
 		unsigned long length = 2;
 		init_by_array(init, length);

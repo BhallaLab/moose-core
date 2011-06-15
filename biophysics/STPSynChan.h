@@ -19,7 +19,7 @@
 #define _STPSYNCHAN_H
 
 
-class STPSynChan: SynChan
+class STPSynChan: public SynChan
 {    
   public:
     // Functions duplicated from SynChan
