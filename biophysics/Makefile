@@ -25,6 +25,7 @@ OBJ = \
 	BinSynchan.o	\
 	StochSynchan.o	\
 	STPSynChan.o	\
+	STPNMDAChan.o	\
 	NMDAChan.o	\
 	RandomSpike.o \
 	Cell.o		\
@@ -63,6 +64,7 @@ SpikeGen.o:	SpikeGen.h
 script_out.o:	script_out.h
 SynChan.o:	SynChan.h SynInfo.h
 STPSynChan.o:	STPSynChan.h SynChan.h SynInfo.h
+STPNMDAChan.o: STPSynChan.h STPNMDAChan.h SynInfo.h STPSynChan.cpp
 NMDAChan.o:	NMDAChan.h SynInfo.h
 Cell.o:	Cell.h ../element/Neutral.h
 BioScan.o:		BioScan.h
