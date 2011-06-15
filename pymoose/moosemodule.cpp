@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Jun  2 14:36:51 2011 (+0530)
+// Last-Updated: Wed Jun 15 11:50:46 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 3966
+//     Update #: 3973
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -92,8 +92,8 @@ extern "C" {
          "destroy the underlying moose element"},
         {"getValue", (PyCFunction)_pymoose_Id_getValue, METH_VARARGS,
          "return integer representation of the id of the element."},
-        {"syncDataHandler", (PyCFunction)_pymoose_Id_syncDataHandler, METH_VARARGS,
-         "?"},
+        // {"syncDataHandler", (PyCFunction)_pymoose_Id_syncDataHandler, METH_VARARGS,
+        //  "?"},
         {"getPath", (PyCFunction)_pymoose_Id_getPath, METH_VARARGS,
          "The path of this Id object."},
         {"getShape", (PyCFunction)_pymoose_Id_getShape, METH_VARARGS,
@@ -474,21 +474,21 @@ extern "C" {
         PyObject * ret = Py_BuildValue("s", path.c_str());
         return ret;
     }
-    static PyObject * _pymoose_Id_syncDataHandler(_Id * self, PyObject * args)
-    {
-        char * sizeField;
-        PyObject * target;
-        if(!PyArg_ParseTuple(args, "sO:_pymoose_Id_syncDataHandler", &sizeField, &target)){
-            return NULL;
-        }
-        _Id * tgt = reinterpret_cast<_Id*>(target);
-        if (!tgt){
-            PyErr_SetString(PyExc_TypeError, "Could not cast target to Id object");
-            return NULL;
-        }
-        getShell().doSyncDataHandler(self->_id, string(sizeField), tgt->_id);
-        Py_RETURN_NONE;        
-    }
+    // static PyObject * _pymoose_Id_syncDataHandler(_Id * self, PyObject * args)
+    // {
+    //     char * sizeField;
+    //     PyObject * target;
+    //     if(!PyArg_ParseTuple(args, "sO:_pymoose_Id_syncDataHandler", &sizeField, &target)){
+    //         return NULL;
+    //     }
+    //     _Id * tgt = reinterpret_cast<_Id*>(target);
+    //     if (!tgt){
+    //         PyErr_SetString(PyExc_TypeError, "Could not cast target to Id object");
+    //         return NULL;
+    //     }
+    //     getShell().doSyncDataHandler(self->_id, string(sizeField), tgt->_id);
+    //     Py_RETURN_NONE;        
+    // }
 
     /** Subset of sequence protocol functions */
     static Py_ssize_t _pymoose_Id_getLength(_Id * self)
@@ -1230,9 +1230,9 @@ extern "C" {
     {
         PyObject * src, *dest;
         char * newName;
-        static const char * kwlist[] = {"src", "dest", "name", "n", "copyMsg", NULL};
-        unsigned int num=1, copyExtMsgs=1;
-        if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOs|II:_pymoose_copy", const_cast<char**>(kwlist), &src, &dest, &newName, &num, &copyExtMsgs)){
+        static const char * kwlist[] = {"src", "dest", "name", "n", "toGlobal", "copyMsg", NULL};
+        unsigned int num=1, toGlobal=1, copyExtMsgs=1;
+        if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOs|III:_pymoose_copy", const_cast<char**>(kwlist), &src, &dest, &newName, &num, &toGlobal, &copyExtMsgs)){
             return NULL;
         }
         if (!Id_SubtypeCheck(src)){
@@ -1245,7 +1245,7 @@ extern "C" {
         
         _Id * tgt = PyObject_New(_Id, &IdType);
         
-        tgt->_id = getShell().doCopy(((_Id*)src)->_id, ((_Id*)dest)->_id, string(newName), num, copyExtMsgs);
+        tgt->_id = getShell().doCopy(((_Id*)src)->_id, ((_Id*)dest)->_id, string(newName), num, toGlobal, copyExtMsgs);
         PyObject * ret = (PyObject*)tgt;
         return ret;            
     }
