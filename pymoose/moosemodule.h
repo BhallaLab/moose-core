@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Wed May 25 10:40:02 2011 (+0530)
+// Last-Updated: Wed Jun 15 11:51:00 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 248
+//     Update #: 249
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -73,7 +73,7 @@ extern "C" {
     static PyObject * _pymoose_Id_destroy(_Id * self, PyObject * args);
     static PyObject * _pymoose_Id_getValue(_Id * self, PyObject * args);
     static PyObject * _pymoose_Id_getPath(_Id * self, PyObject * args);
-    static PyObject * _pymoose_Id_syncDataHandler(_Id * self, PyObject * args);
+    // static PyObject * _pymoose_Id_syncDataHandler(_Id * self, PyObject * args);
     /* Id functions to allow part of sequence protocol */
     static Py_ssize_t _pymoose_Id_getLength(_Id * self);
     static PyObject * _pymoose_Id_getItem(_Id * self, Py_ssize_t index);
