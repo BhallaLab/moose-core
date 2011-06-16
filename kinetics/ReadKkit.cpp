@@ -499,7 +499,7 @@ void ReadKkit::separateVols( Id pool, double vol )
 void ReadKkit::assignCompartments()
 {
 	double max = 0.0;
-	unsigned int maxi;
+	unsigned int maxi = 0;
 	Id kinetics = Neutral::child( baseId_.eref(), "kinetics" );
 	assert( kinetics != Id() );
 	for ( unsigned int i = 0 ; i < vols_.size(); ++i ) {
