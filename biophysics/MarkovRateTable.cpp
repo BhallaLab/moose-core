@@ -18,8 +18,9 @@ MarkovRateTable::MarkovRateTable() :
 MarkovRateTable::MarkovRateTable( unsigned int size ) : 
 	size_(size)
 {
-	resize< VectorTable* >( vtTables_, size, 0 );
-	resize< Interpol2D* >( int2dTables_, size, 0 );
+	vtTables_ = resize< VectorTable* >( vtTables_, size, 0 );
+	int2dTables_ = resize< Interpol2D* >( int2dTables_, size, 0 );
+	useLigandConc_ = resize< bool >( useLigandConc_, size, false );
 }
 
 vector< double > MarkovRateTable::getVtChildTable( unsigned int i, unsigned int j ) const
@@ -162,19 +163,18 @@ bool MarkovRateTable::isRateZero( unsigned int i, unsigned int j ) const
 
 bool MarkovRateTable::isRateConstant( unsigned int i, unsigned int j ) const
 {
-	if ( !isRateOneParam( i, j ) )
+	if ( isRateTwoParam( i, j ) || isRateZero( i, j ) )
 		return false;
 
-	//No need to check if isRateTwoParam(i,j) is true as this condition is
-	//impossible i.e. in such a case, the (i,j)'th rate contains pointers to both
-	//a 1D and 2D lookup table. The setter functions for the child tables contain
-	//guards to prevent this from occurring.
 	return ( vtTables_[i][j]->getDiv() == 0 );
 }
 
 bool MarkovRateTable::isRateOneParam( unsigned int i, unsigned int j ) const
 {
-	return ( vtTables_[i][j] != 0 );
+	//Second condition is necessary because for a constant rate, the 1D lookup
+	//table class is set, but has only one entry. So a constant rate would pass
+	//off as a one-parameter rate if not for this check.
+	return ( vtTables_[i][j] != 0 && vtTables_[i][j]->getDiv() > 0);
 }
 
 bool MarkovRateTable::isRateLigandDep( unsigned int i, unsigned int j ) const
