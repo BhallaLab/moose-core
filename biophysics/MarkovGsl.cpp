@@ -13,11 +13,9 @@
 #include <gsl/gsl_odeiv.h>
 #include "MarkovGsl.h"
 
-///////////////////////////////////////////////////
-// Basic class function definitions
-///////////////////////////////////////////////////
+//Author : Vishaka Datta S, 2011, NCBS
 
-MarkovGsl::MarkovGsl()
+MarkovGsl::MarkovGsl() 
 {
 	isInitialized_ = 0;
 	method_ = "rk5";
@@ -26,10 +24,11 @@ MarkovGsl::MarkovGsl()
 	gslStep_ = 0;
 #endif // USE_GSL
 	absAccuracy_ = 1.0e-6;
-	relAccuracy_ = 1.0e-6;
+	relAccuracy_ = 0;
 	internalStepSize_ = 1.0e-4;
-	gslEvolve_ = NULL;
-	gslControl_ = NULL;
+	gslEvolve_ = 0;
+	gslControl_ = 0;
+	nVars_ = 0;
 }
 
 MarkovGsl::~MarkovGsl()
@@ -61,7 +60,6 @@ void MarkovGsl::setMethod( string method )
 #ifdef USE_GSL
 	method_ = method;
 	gslStepType_ = 0;
-	// cout << "in void MarkovGsl::innerSetMethod( string method ) \n";
 	if ( method == "rk2" ) {
 		gslStepType_ = gsl_odeiv_step_rk2;
 	} else if ( method == "rk4" ) {
@@ -119,29 +117,53 @@ void MarkovGsl::setInternalDt( double value )
 	internalStepSize_ = value;
 }
 
-double* MarkovGsl::solve( double currTime, double dt, double* state, unsigned int numStates ) 
+const gsl_odeiv_step_type* MarkovGsl::getGslStepType( ) const
+{
+	return gslStepType_;
+}
+
+void MarkovGsl::init(	gsl_odeiv_system gslSys, unsigned int nVars ) 
+{
+	gslSys_ = gslSys;
+	nVars_ = nVars;
+
+	if ( gslStep_ == 0 )
+		gslStep_ = gsl_odeiv_step_alloc( gslStepType_, nVars_ );
+
+	if ( gslEvolve_ == 0 )
+		gslEvolve_ = gsl_odeiv_evolve_alloc( nVars_ );
+	
+	if ( gslControl_ == 0 )
+		gslControl_ = gsl_odeiv_control_y_new( absAccuracy_, relAccuracy_ );
+}
+
+void MarkovGsl::solve( double currTime, double dt, double* stateGsl ) 
 {
 	double nextt = currTime + dt;
 	double t = currTime, sum = 0;
+
+	#ifdef DO_UNIT_TESTS
+	assert( gslStep_ != 0 );
+	assert( gslControl_ != 0 );
+	assert( gslEvolve_ != 0 );
+	#endif
 
 	while ( t < nextt ) {
 		int status = gsl_odeiv_evolve_apply ( 
 			gslEvolve_, gslControl_, gslStep_, &gslSys_, 
 			&t, nextt,
-			&internalStepSize_, state);
+			&internalStepSize_, stateGsl);
 
 		//Simple idea borrowed from Dieter Jaeger's implementation of a Markov
 		//channel to deal with potential round-off error.
 		sum = 0;
-		for ( unsigned int i = 0; i < numStates; i++ )
-			sum += state[i];
+		for ( unsigned int i = 0; i < nVars_; i++ )
+			sum += stateGsl[i];
 
-		for ( unsigned int i = 0; i < numStates; i++ )
-			state[i] /= sum;
+		for ( unsigned int i = 0; i < nVars_; i++ )
+			stateGsl[i] /= sum;
 
 		if ( status != GSL_SUCCESS )
 			break;
 	}
-
-	return state;
 }

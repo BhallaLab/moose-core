@@ -501,6 +501,157 @@ void testHHChannel()
 	cout << "." << flush;
 }
 
+//
+// Markov Channel unit tests.
+//
+
+void pushIntoTable( Id mChanId, double val, int i, int j, bool flag )
+{
+	vector< unsigned int > intParams;	
+	vector< double > doubleParams;
+	vector< double > vecWrapper;
+
+	vecWrapper.push_back( val );
+
+	intParams.push_back( i );
+	intParams.push_back( j );
+
+	doubleParams.push_back( val );
+	doubleParams.push_back( val );
+
+	SetGet4< vector< unsigned int >, vector< double >, vector< double >, bool >::
+		set( mChanId, "setoneparam", intParams, doubleParams, vecWrapper, flag );
+}
+
+//Sample current obtained from channel in Chapter 20, Sakmann & Neher, Pg. 603.
+//The current is sampled at intervals of 10 usec.
+static double sampleCurrent[] = 
+   {0.0000000e+00, 3.0005743e-26, 1.2004594e-25, 2.7015505e-25, 4.8036751e-25, 7.5071776e-25,
+   1.0812402e-24, 1.4719693e-24, 1.9229394e-24, 2.4341850e-24, 3.0057404e-24, 3.6376401e-24,
+   4.3299183e-24, 5.0826095e-24, 5.8957481e-24, 6.7693684e-24, 7.7035046e-24, 8.6981913e-24,
+   9.7534627e-24, 1.0869353e-23, 1.2045897e-23, 1.3283128e-23, 1.4581082e-23, 1.5939791e-23,
+   1.7359292e-23, 1.8839616e-23, 2.0380801e-23, 2.1982878e-23, 2.3645883e-23, 2.5369850e-23,
+   2.7154813e-23, 2.9000806e-23, 3.0907863e-23, 3.2876020e-23, 3.4905309e-23, 3.6995766e-23,
+   3.9147423e-23, 4.1360317e-23, 4.3634480e-23, 4.5969946e-23, 4.8366751e-23, 5.0824928e-23,
+   5.3344511e-23, 5.5925535e-23, 5.8568033e-23, 6.1272040e-23, 6.4037589e-23, 6.6864716e-23,
+   6.9753453e-23, 7.2703835e-23, 7.5715897e-23, 7.8789672e-23, 8.1925194e-23, 8.5122497e-23,
+   8.8381616e-23, 9.1702584e-23, 9.5085435e-23, 9.8530204e-23, 1.0203692e-22, 1.0560563e-22,
+   1.0923636e-22, 1.1292913e-22, 1.1668400e-22, 1.2050099e-22, 1.2438013e-22, 1.2832146e-22,
+   1.3232502e-22, 1.3639083e-22, 1.4051894e-22, 1.4470937e-22, 1.4896215e-22, 1.5327733e-22,
+   1.5765494e-22, 1.6209501e-22, 1.6659757e-22, 1.7116267e-22, 1.7579032e-22, 1.8048057e-22,
+   1.8523345e-22, 1.9004900e-22, 1.9492724e-22, 1.9986821e-22, 2.0487195e-22, 2.0993849e-22,
+   2.1506786e-22, 2.2026010e-22, 2.2551524e-22, 2.3083331e-22, 2.3621436e-22, 2.4165840e-22,
+   2.4716548e-22, 2.5273563e-22, 2.5836888e-22, 2.6406527e-22, 2.6982483e-22, 2.7564760e-22,
+   2.8153360e-22, 2.8748287e-22, 2.9349545e-22, 2.9957137e-22, 3.0571067e-22 };
+
+void testMarkovChannel()
+{
+	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
+	vector< unsigned int > dims( 1, 1 );
+
+	Id nid = shell->doCreate( "Neutral", Id(), "n", dims );
+	Id comptId = shell->doCreate( "Compartment", nid, "compt", dims );
+	Id mChanId = shell->doCreate( "MarkovChannel", comptId, "mChan", dims );
+
+	Id tabId = shell->doCreate( "Table", nid, "tab", dims );
+
+	MsgId mid = shell->doAddMsg( "Single", ObjId( comptId ), "channel", 
+			ObjId( mChanId ), "channel" );
+	assert( mid != Msg::badMsg );
+
+	mid = shell->doAddMsg( "Single", ObjId( tabId, 0 ), "requestData",
+			ObjId( mChanId, 0 ), "get_Ik" );
+
+	//////////////////////////////////////////////////////////////////////
+	// set up compartment properties
+	//////////////////////////////////////////////////////////////////////
+
+	Field< double >::set( comptId, "Cm", 0.007854e-6 );
+	Field< double >::set( comptId, "Ra", 7639.44e3 ); // does it matter?
+	Field< double >::set( comptId, "Rm", 424.4e3 );
+	Field< double >::set( comptId, "Em", 0);	
+	Field< double >::set( comptId, "inject", 0 );
+	Field< double >::set( comptId, "initVm", -0.1 );
+
+	/////////////////////////////////
+	//
+	//Setup of Markov Channel.
+	//This is a simple 5-state channel model taken from Chapter 20, "Single-Channel
+	//Recording", Sakmann & Neher.  
+	//All the transition rates are constant.
+	//
+	////////////////////////////////
+	
+	//Setting number of states, number of open states.
+	Field< unsigned int >::set( mChanId, "numstates", 5 );
+	Field< unsigned int >::set( mChanId, "numopenstates", 2 );
+
+	//Setting initial state of system.  
+	vector< double > initState;
+	
+	initState.push_back( 0.0 );
+  initState.push_back( 0.0 );
+  initState.push_back( 0.0 );
+ 	initState.push_back( 0.0 );
+ 	initState.push_back( 1.0 );
+
+	Field< vector< double > >::set( mChanId, "initialstate", initState );
+
+	vector< string > stateLabels;
+
+	stateLabels.push_back( "O1" );
+	stateLabels.push_back( "O2" );
+	stateLabels.push_back( "C1" );
+	stateLabels.push_back( "C2" );
+	stateLabels.push_back( "C3" );
+
+	Field< vector< string > >::set( mChanId, "labels", stateLabels );	
+	
+	vector< double > gBars;
+
+	gBars.push_back( 40e-12 );
+	gBars.push_back( 50e-12 );
+
+	Field< vector< double > >::set( mChanId, "gbar", gBars );
+
+	//Setting up rate tables.
+	SetGet1< unsigned int >::set( mChanId, "setuptables", 5 );
+
+	//Filling in values into one parameter rate table. Note that all rates here
+	//are constant.
+	pushIntoTable( mChanId, 0.05, 0, 1, false );
+	pushIntoTable( mChanId, 3, 0, 4, false );
+	pushIntoTable( mChanId, 0.000666667, 1, 0, false );
+	pushIntoTable( mChanId, 0.5, 1, 2, false );
+	pushIntoTable( mChanId, 15, 2, 1, false );
+	pushIntoTable( mChanId, 4, 2, 3, false );
+	pushIntoTable( mChanId, 0.015, 3, 0, false );
+	pushIntoTable( mChanId, 0.05, 3, 2, false );
+	pushIntoTable( mChanId, 2, 3, 4, false );
+	pushIntoTable( mChanId, 0.01, 4, 3, false );
+
+	shell->doSetClock( 0, 1.0e-5 );	
+	shell->doSetClock( 1, 1.0e-5 );	
+	shell->doSetClock( 2, 1.0e-5 );	
+	shell->doSetClock( 3, 1.0e-5 );	
+
+	shell->doUseClock( "/n/compt", "init", 0 );
+	shell->doUseClock( "/n/compt", "process", 1 );
+	shell->doUseClock( "/n/compt/mChan", "process", 2 );
+	shell->doUseClock( "/n/tab", "process", 3 );
+
+	shell->doReinit( );
+	shell->doReinit( );
+	shell->doStart( 1e-3 );
+
+	vector< double > vec = Field< vector< double > >::get( tabId, "vec" );
+
+	for ( unsigned i = 0; i < 101; i++ )
+		assert( doubleEq( sampleCurrent[i], vec[i] ) );
+
+	cout << "." << flush;
+}
+
 ///////////////////////////////////////////////////
 // Unit tests for SynChan
 ///////////////////////////////////////////////////
@@ -759,6 +910,7 @@ void testBiophysicsProcess()
 {
 	testCompartmentProcess();
 	testHHChannel();
+	testMarkovChannel();
 	testSynChan();
 }
 
