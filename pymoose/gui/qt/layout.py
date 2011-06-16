@@ -16,10 +16,13 @@ app = QtGui.QApplication(sys.argv)
 class Textitem(QtGui.QGraphicsTextItem): 
 	positionChange = QtCore.pyqtSignal(QtGui.QGraphicsItem)
 	def __init__(self,parent,path):
+		self.parent = parent
 		self.mooseObj_ = moose.Neutral(path)
 		if isinstance (parent, LayoutWidget):
 			QtGui.QGraphicsTextItem.__init__(self,self.mooseObj_.name)
+			self.layoutWidgetpt = parent
 		elif isinstance (parent,Rect_Compt):
+			self.layoutWidgetpt = parent.pointerLayoutpt()
 			QtGui.QGraphicsTextItem.__init__(self,parent)
 			
 		self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
@@ -43,7 +46,7 @@ class Textitem(QtGui.QGraphicsTextItem):
 		else:
 			textColor = self.mooseObj_.getField('xtree_fg_req')
 			self.layoutWidgetpt.colorCheck(self,self.mooseObj_,textColor,"background")
-
+		
 class Rect_Compt(QtGui.QGraphicsRectItem):
 	def __init__(self,layoutwidget,x,y,w,h,path):
 		self.mooseObj_ = moose.Neutral(path)
@@ -64,15 +67,9 @@ class Rect_Compt(QtGui.QGraphicsRectItem):
 		if change == QtGui.QGraphicsItem.ItemPositionChange:
 			self.Rectemitter.emit(QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.mooseObj_)
        		return QtGui.QGraphicsItem.itemChange(self, change, value)
-	
-	def updateSlot(self):
-		if(self.mooseObj_.className == 'Enzyme'):
-			textColor = "<html><body bgcolor='black'>"+self.mooseObj_.name+"</body></html>"
-			self.setHtml(textColor)
-		else:
-			textColor = self.mooseObj_.getField('xtree_fg_req')
-			self.layoutWidgetpt.colorCheck(self,self.mooseObj_,textColor,"background")
-			
+	def pointerLayoutpt(self):
+		return (self.layoutWidgetpt)
+		
 class Graphicalview(QtGui.QGraphicsView):
 	def __init__(self,scenecontainer,border):
 		self.sceneContainerPt = scenecontainer
@@ -656,14 +653,17 @@ class LayoutWidget(QtGui.QWidget):
 					arrow = self.calArrow(srcdes[0],srcdes[1])
 					ql.setPolygon(arrow)
 			break
-		#~ self.setCursor(Qt.Qt.ArrowCursor)
+
 	def updateItemSlot(self, mooseObject):
-			#In this case if the name is updated from the keyboard both in mooseobj and gui gets updation
-	        for changedItem in (item for item in self.sceneContainer.items() if isinstance(item, Textitem) and mooseObject.id == item.mooseObj_.id):
-	            break
-	        changedItem.updateSlot()
-	        self.positionChange(changedItem.mooseObj_)
-	        
+		#In this case if the name is updated from the keyboard both in mooseobj and gui gets updation
+		changedItem = ''
+		for changedItem in (item for item in self.sceneContainer.items() if isinstance(item, Textitem) and mooseObject.id == item.mooseObj_.id):
+			break
+		
+		if isinstance(changedItem,Textitem):
+			changedItem.updateSlot()
+			self.positionChange(changedItem.mooseObj_)
+		
 	def keyPressEvent(self,event):
 		#For Zooming
 		#~ for item in self.sceneContainer.items():
