@@ -8,9 +8,18 @@
 //between these states can be constant, voltage-dependent, ligand dependent 
 //(only one ligand species) or both. The current flow obtained from the channel
 //is calculated in a deterministic method by solving the system of
-//differential equations obtained from the assumptions above.*/
+//differential equations obtained from the assumptions above.
+//The implicit assumption is that there are a number of ion channels present in
+//the system. */
 
-class MarkovChannel : public ChanBase {
+//Circular dependence arising from the fact that MarkovGsl::init takes a
+//MarkovChannel object as an argument, and MarkovChannel has a MarkovGsl object
+//as a member. Rather ugly way of resolving the issue.
+class MarkovRateTable;
+class MarkovGsl;
+
+class MarkovChannel : public ChanBase
+{
 	public:
 	//Default constructor. Use is not recommended as most of the class members
 	//cannot be initialized. 
@@ -29,6 +38,8 @@ class MarkovChannel : public ChanBase {
 
 	unsigned int getNumOpenStates( ) const;
 	void setNumOpenStates( unsigned int );
+
+	vector< vector< double > > getInstRates( ) const;
 
 	vector< string > getStateLabels( ) const;
 	void setStateLabels( vector< string > );
@@ -55,9 +66,8 @@ class MarkovChannel : public ChanBase {
 	vector< double > getOneParamRateTable( unsigned int, unsigned int );
 	vector< vector< double > > getTwoParamRateTable( unsigned int, unsigned int );
 
-
 	//Type-independent lookup function for rate.
-	double lookupRate( unsigned int, unsigned int, vector<double> );
+//	void lookupRate( unsigned int, unsigned int, vector<double>, double* );
 
 	//Updating the rates of transiton at each time step.
 	void updateRates();
@@ -75,6 +85,15 @@ class MarkovChannel : public ChanBase {
 	//GSL related functions.
 	static int evalGslSystem( double t, const double* y, double* yprime, void* s );
 	int innerEvalGslSystem( double t, const double* y, double* yprime );
+
+	//Hard to divorce the GSL solver object from the channel implmentation in this
+	//case. In ksolve, the GSL object has to be initialized just once i.e. the
+	//parameters of the system stay constant throughout the evolution of the
+	//system. In this case, the parameters of the system i.e. the rate constants
+	//are time-varying. This means, the new system has to be fed into the solver
+	//object at each time step. Doing this via a process function call to the
+	//GslIntegrator object is not possible as it is a void return type.
+	void initGslSolver();
 
 	//DestFinfo functions.
 	void setupRateTables( unsigned int );
@@ -99,8 +118,8 @@ class MarkovChannel : public ChanBase {
 
 	MarkovRateTable* rateTables_;
 
-	double* stateForGsl_;
-	MarkovGsl* solver_;
+	double* stateFromGsl_;
+	MarkovGsl solver_;
 };
 
 #endif

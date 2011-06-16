@@ -30,8 +30,8 @@ OBJ = \
 	MgBlock.o	\
 	testBiophysics.o	\
 	VectorTable.o \
-  MarkovGsl.o \
 	MarkovRateTable.o \
+  MarkovGsl.o \
 	MarkovChannel.o \
 
 # GSL_LIBS = -L/usr/lib -lgsl
@@ -61,7 +61,7 @@ GHK.o:	GHK.h
 HHGate2D.o:	../builtins/Interpol2D.h HHGate2D.h
 HHChannel2D.o: ChanBase.h HHChannel2D.h HHGate2D.h
 VectorTable.o : VectorTable.h
-MarkovGsl.o : MarkovGsl.h
+MarkovGsl.o : MarkovGsl.h MarkovChannel.h
 MarkovRateTable.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h 
 MarkovChannel.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h MarkovGsl.h ChanBase.h MarkovChannel.h 
 testBiophysics.o: SynBase.h IntFire.h Synapse.h Compartment.h HHChannel.h HHGate.h VectorTable.h MarkovRateTable.h	../builtins/Interpol2D.h MarkovGsl.h MarkovChannel.h
