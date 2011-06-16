@@ -434,6 +434,12 @@ class Shell
 		static void wildcard( const string& path, vector< Id >& list );
 
 		/**
+		 * Clears out the three temporary Msgs that are used for 
+		 * assignments: Reduce, AssignVec and Assignment
+		 */
+		void clearSetMsgs();
+
+		/**
 		 * Flag: True when the waitForGetAck has requested that the 
 		 * ProcessLoop go around one more time to harvest pending queue
 		 * entries from other threads.
@@ -544,6 +550,15 @@ class Shell
 
 		/// Return value from reduceMax calculation for array sizes.
 		unsigned int maxIndex_;
+
+		/// Keeps track of allocated assignmentMsg so we can deallocate.
+		MsgId assignmentMsg_;
+
+		/// Keeps track of allocated assignVecMsg so we can deallocate.
+		MsgId assignVecMsg_;
+
+		/// Keeps track of allocated reduceMsg so we can deallocate.
+		MsgId reduceMsg_;
 };
 
 /*
