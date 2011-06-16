@@ -263,7 +263,9 @@ class MooseHandler(QtCore.QObject):
             fieldName = full_field_path[fstart+1:]
             objPath =  full_field_path[:fstart]
             # tableName = '%s_%d_%d' % (fieldName, self._tableSuffix, self._tableIndex)
-            tableName = full_field_path[1:].replace('/', '_')
+            names = full_field_path.split('/')
+            #tableName = full_field_path[1:].replace('/', '_')
+            tableName = names[len(names)-2]+'_'+names[len(names)-1]
             table = moose.Table(tableName, self._data)
             self.fieldTableMap[full_field_path] = table
             table.stepMode = 3
