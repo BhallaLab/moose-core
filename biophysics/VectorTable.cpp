@@ -41,20 +41,23 @@ vector< double > VectorTable::getTable() const
 //Function to set up the lookup table. 
 void VectorTable::setTable( vector< double > table, double xMin, double xMax )
 {
-	if (table.size() < 2)
-	{
-		cerr << "VectorTable : Error : Table must have at least two entries!\n"; 
-		return;
-	}
-
-	if (table_.size() > 2)
+	if (table_.size() > 0)
 		cout << "Warning : Current table will be erased\n";
+
+	if ( table.size() > 1 && xMin == xMax )
+	{
+		cerr << "Error : xmin and xmax cannot be the same when there are more than"
+			"two entries in the table!\n";
+	}
 
 	table_ = table;
 	xMin_ = xMin;
 	xMax_ = xMax; 
 	xDivs_ = table.size() - 1;
-	invDx_ = xDivs_ / (xMax - xMin);
+	if ( table.size() > 1 )
+		invDx_ = xDivs_ / (xMax - xMin);
+	else
+		invDx_ = 0;
 }
 
 unsigned int VectorTable::getDiv() const

@@ -10,14 +10,17 @@
 #ifndef _MARKOVGSL_H
 #define _MARKOVGSL_H
 
+//Author : Vishaka Datta S, 2011, NCBS
+
 //This is a slightly modified version of the GSL integrator from the ksolve
 //library. Minor changes have been made to adapt it to the Markov channel
 //system. Importantly, it is not a MOOSE class. This has been done because the
 //use of GSL for the Markov Channel is only a temporary affair. 
+
 class MarkovGsl
 {
 	public:
-		MarkovGsl();
+		MarkovGsl( );
 		~MarkovGsl();
 
 		bool getIsInitialized() const;
@@ -29,8 +32,10 @@ class MarkovGsl
 		void setAbsoluteAccuracy( double value );
 		double getInternalDt() const;
 		void setInternalDt( double value );
+		const gsl_odeiv_step_type* getGslStepType( ) const;
+		void init( gsl_odeiv_system, unsigned int );
 
-		double* solve( double, double, double*, unsigned int );
+		void solve( double, double, double* );
 
 	private:
 		bool isInitialized_;
@@ -38,6 +43,7 @@ class MarkovGsl
 		double absAccuracy_;
 		double relAccuracy_;
 		double internalStepSize_;
+		unsigned int nVars_;
 
 		const gsl_odeiv_step_type* gslStepType_;
 		gsl_odeiv_step* gslStep_;
