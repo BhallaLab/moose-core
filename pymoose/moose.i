@@ -23,6 +23,7 @@
 	#include "BinSynchan.h"
 	#include "StochSynchan.h"
 	#include "STPSynChan.h"
+	#include "STPNMDAChan.h"
         #include "NMDAChan.h"
         #include "KinSynChan.h"
 	#include "SpikeGen.h"
@@ -395,6 +396,10 @@ SynChan.delay = listproperty(SynChan.getDelay, SynChan.setDelay)
 %attribute(pymoose::STPSynChan, double, d1, __get_d1, __set_d1)
 %attribute(pymoose::STPSynChan, double, d2, __get_d2, __set_d2)
 
+%include "STPNMDAChan.h"
+%attribute(pymoose::STPNMDAChan, double, MgConc, __get_MgConc, __set_MgConc)
+%attribute(pymoose::STPNMDAChan, double, unblocked, __get_unblocked)
+%attribute(pymoose::STPNMDAChan, double, saturation, __get_saturation, __set_saturation)
 
 %include "NMDAChan.h"
 %attribute(pymoose::NMDAChan, double, MgConc, __get_MgConc, __set_MgConc)
