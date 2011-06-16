@@ -322,8 +322,12 @@ class MoosePlot(Qwt.QwtPlot):
             # time and skill to do "Software Engineering" will clean
             # this mishmash of dependencies.
             # -- Subha
-            table = self.mooseHandler.addFieldTable(fieldPath)
-            self.addTable(table)
+
+#            table = self.mooseHandler.addFieldTable(fieldPath)
+#            self.addTable(table)
+            
+            #add_chc
+            self.emit(QtCore.SIGNAL('draggedAField(const QString&,const QString&)'),fieldPath,self.objectName())
             # This also breaks the capability to move a plot from one
             # plot window to another.
             model.updatePlotField(index, self.objectName())
@@ -340,7 +344,8 @@ class MoosePlotWindow(QtGui.QMdiSubWindow):
     def closeEvent(self, event):
         self.emit(QtCore.SIGNAL('subWindowClosed()'))
         self.hide()
-
+        
+   
 
 import sys
 if __name__ == '__main__':

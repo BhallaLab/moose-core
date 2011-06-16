@@ -259,10 +259,10 @@ class MainWindow(QtGui.QMainWindow):
         self.resetButtonToolbar.setText('Reset')
         self.resetButtonToolbar.setGeometry(540,0,80,30)
 
-        self.stopButtonToolbar = QtGui.QToolButton(self.simToolbar)
-        self.stopButtonToolbar.setText('Stop')
-        self.stopButtonToolbar.setGeometry(630,0,80,30)
-        self.stopButtonToolbar.setEnabled(False)
+#        self.stopButtonToolbar = QtGui.QToolButton(self.simToolbar)
+#        self.stopButtonToolbar.setText('Stop')
+#        self.stopButtonToolbar.setGeometry(630,0,80,30)
+#        self.stopButtonToolbar.setEnabled(False)
 
         self.connect(self.runButtonToolbar, QtCore.SIGNAL('clicked()'), self.resetAndRunSlot1)
         self.connect(self.continueButtonToolbar, QtCore.SIGNAL('clicked()'), self._runSlot1)
@@ -361,6 +361,7 @@ class MainWindow(QtGui.QMainWindow):
         self.commandLineDock.setObjectName('MooseCommandLine')
         #add_chait
         self.commandLineDock.setMaximumHeight(180)
+        self.commandLineDock.setFeatures(QtGui.QDockWidget.DockWidgetClosable)
         return self.commandLineDock
 
 
@@ -423,6 +424,8 @@ class MainWindow(QtGui.QMainWindow):
 	self.objFieldEditPanel.show()
         #add_chait
         self.objFieldEditPanel.setMaximumWidth(320)
+        self.objFieldEditPanel.setFeatures(QtGui.QDockWidget.DockWidgetClosable)
+
 
     def createGLCellWidget(self):
     	"""Create a GLCell object to show the currently selected cell"""
@@ -489,9 +492,9 @@ class MainWindow(QtGui.QMainWindow):
         self.togglePlotVisibilityAction = QtGui.QAction(self.tr('Hide selected plots'), self)
         self.togglePlotVisibilityAction.setCheckable(True)
         self.togglePlotVisibilityAction.setChecked(False)
-        self.connect(self.togglePlotVisibilityAction, QtCore.SIGNAL('triggered(bool)'), self.togglePlotVisibility)
-        self.showAllPlotsAction = QtGui.QAction(self.tr('Show all plots'), self)
-        self.connect(self.showAllPlotsAction, QtCore.SIGNAL('triggered()'), self.showAllPlots)
+        #self.connect(self.togglePlotVisibilityAction, QtCore.SIGNAL('triggered(bool)'), self.togglePlotVisibility)
+        #self.showAllPlotsAction = QtGui.QAction(self.tr('Show all plots'), self)
+        #self.connect(self.showAllPlotsAction, QtCore.SIGNAL('triggered()'), self.showAllPlots)
         
 
         # Action to create connections
@@ -500,7 +503,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Actions for file menu
         self.loadModelAction = QtGui.QAction(self.tr('Load Model'), self)
-        self.loadModelAction.setShortcut(QtGui.QKeySequence(self.tr('Ctrl+O')))
+        self.loadModelAction.setShortcut(QtGui.QKeySequence(self.tr('Ctrl+L')))
         self.connect(self.loadModelAction, QtCore.SIGNAL('triggered()'), self.popupLoadModelDialog)
         
         self.newGLWindowAction = QtGui.QAction(self.tr('New GL Window'), self) #add_chait
@@ -617,8 +620,8 @@ class MainWindow(QtGui.QMainWindow):
         self.viewMenu.addAction(self.newPlotWindowAction)
         self.viewMenu.addAction(self.newGLWindowAction)	#add_chait
         self.viewMenu.addAction(self.configurePlotAction)
-        self.viewMenu.addAction(self.togglePlotVisibilityAction)
-        self.viewMenu.addAction(self.showAllPlotsAction)
+        #self.viewMenu.addAction(self.togglePlotVisibilityAction)
+        #self.viewMenu.addAction(self.showAllPlotsAction)
         self.viewMenu.addSeparator().setText(self.tr('Layout Plot Windows'))
 
         self.viewMenu.addAction(self.tabbedViewAction)
@@ -748,7 +751,7 @@ class MainWindow(QtGui.QMainWindow):
         config.LOGGER.debug('createMooseTreePanel - start')
 	self.mooseTreePanel = QtGui.QDockWidget(self.tr('Element Tree'), self)
         self.mooseTreePanel.setObjectName(self.tr('MooseClassPanel'))
-	#~ self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.mooseTreePanel)
+	self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.mooseTreePanel)
         self.mooseTreePanel.hide()#add_chait
 	self.modelTreeWidget = MooseTreeWidget(self.mooseTreePanel)
         self.modelTreeWidget.setMooseHandler(self.mooseHandler)
@@ -756,7 +759,7 @@ class MainWindow(QtGui.QMainWindow):
         # self.connect(self.modelTreeWidget, QtCore.SIGNAL('customContextMenuRequested ( const QPoint&)'), self.createConnectionMenu)
 	self.mooseTreePanel.setWidget(self.modelTreeWidget)
         config.LOGGER.debug('createMooseTreePanel - end')
-        self.ForceTabbedDocks
+        #self.ForceTabbedDocks
         self.makeObjectFieldEditor(self.modelTreeWidget.currentItem().getMooseObject())
         
     def createGLClientDock(self):
@@ -835,6 +838,9 @@ class MainWindow(QtGui.QMainWindow):
         self.centralPanel.addSubWindow(plotWindow)
         plotWindow.setAcceptDrops(True)
         self.connect(plotWindow, QtCore.SIGNAL('subWindowClosed()'), self.decrementSubWindowCount)
+        self.connect(plot,QtCore.SIGNAL('draggedAField(const QString&,const QString&)'),self.changeFieldPlotWidget)
+
+        
         # self.plotWindows.append(plotWindow)
         self.centralPanel.setActiveSubWindow(plotWindow)
         plotWindow.show()
@@ -845,9 +851,8 @@ class MainWindow(QtGui.QMainWindow):
         #     self.centralPanel.tileSubWindows()
         self.currentPlotWindow = plotWindow
         return plotWindow
-        
-    def addGLWindow(self):   #add_chait
        
+    def addGLWindow(self):   #add_chait
         self.newDia = QtGui.QDialog(self)	
         self.vizDialogue = Ui_Dialog()
         self.vizDialogue.setupUi(self.newDia)
