@@ -376,7 +376,10 @@ Shell::Shell()
 		barrier2_( 0 ),
 		doReinit_( 0 ),
 		runtime_( 0.0 ),
-		cwe_( Id() )
+		cwe_( Id() ),
+		assignmentMsg_( Msg::badMsg ),
+		assignVecMsg_( Msg::badMsg ),
+		reduceMsg_( Msg::badMsg )
 {
 	// cout << myNode() << ": fids\n";
 	// shellCinfo->reportFids();

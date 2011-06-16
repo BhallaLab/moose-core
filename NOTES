@@ -12451,7 +12451,7 @@ Boundary changes					geom
 steady-state solver and classifier.			-
 dose-response builder					ss solver
 scanner for all steady-states.				ss solver
-Regular channel/compt definitions			-
+*Regular channel/compt definitions			-
 ReadCell reader						-
 NeuroML reader						-
 hsolver							channels, compts
@@ -13357,3 +13357,78 @@ reduction happens in reduceNodes, it is the root Element whose
 FieldDimension is being set.
 
 Fixed. Works. But regression tests still bomb with 16 cores.
+Checkin 2758.
+
+Could do a lot of cleanup and optimization on ReduceFieldDimension. For one,
+could put in a flag to indicate that the ReduceMsg::exec need not scan all
+fields, or even threads. Later.
+
+============================================================================
+Designing a prototype spatial chem model that would deploy the components from
+31 March.
+: spiny section of dendrite.
+
+Note that the mesh, mols, reacs etc are array entries in a 1:1 mapping to each
+other. Mesh entry provides associated mols and reacs with volume and position
+info.
+
+/sigNeurModel
+	/elec
+		/hsolve
+		/compts
+		/geom
+			/extracell_surface
+				/panels
+	/chem
+		/ksolve
+		/somaCompt
+			/mesh
+				/mols...
+				/reacs...
+				/enz...
+				/groups, etc
+			/nucleusCompt
+				/mesh, etc.
+		/apicalDendCompt
+			/mesh, etc
+		/spineGroup
+			/gsolve
+			/spineNeckCompt
+				/mesh, etc
+			/spineHeadCompt
+				/mesh, etc
+		
+
+Msgs between components:
+	- mesh-> mols etc: to update stuff based on vol.
+	- mols etc-> mesh: to query vol.
+	- mesh<-->geom: to figure out 3D location, to figure out partitioning,
+		to generate a 'surface' to represent the mesh on its own.
+	- mols etc <--> ksolve: zombification
+	- ksolve <---> gsolve: ports
+	- elec compts <---> adaptors <---> chem compt components: multiscaling
+	- ksolve <--->hsolve: coordinate multiscaling.
+
+============================================================================
+16 June
+Cleaning up memory leaks using valgrind and Newtonian bisection.
+testMpiMsg is clean.
+testMpiShell is not. Bisecting testMpiShell.
+	Last half of testMpiShell loses 40 bytes.
+	Last quarter of testMpiShell loses the 40 bytes.
+	Neither of testCopyMsgOps and testWildcard lose the 40 bytes.
+	testSyncSynapseSize is the culprit. It calls doSyncDataHandler.
+
+Tried to put Shell::clearBinding of reduceArraySizeFinfo onto the 
+	Shell::handleSet. Doesn't fix it.
+
+Did a huge amount of messing around trying to fix this. I now have a version
+that doesn't segv but does make valgrind unhappy. I used statically allocated
+Msgs to avoid the memory leaks. The current problem with valgrind boils down to
+the fact that all three of the temporary messages: AssignVec, Assignment and
+Reduce, use the same MsgId, Msg::setMsg. Since this is such a mess I'm going
+to check it in as a branch. That was checkin 2764 on branch badAssignMsgs.
+
+Revisited the memory leak. I think I've fixed it, but there are now other
+leaks in the Markov code so I can't be sure.
+

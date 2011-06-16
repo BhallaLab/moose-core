@@ -28,20 +28,36 @@
 // Functions for handling field set/get and func calls
 ////////////////////////////////////////////////////////////////////////
 
+void Shell::clearSetMsgs()
+{
+	if ( assignVecMsg_ != Msg::badMsg )
+		Msg::deleteMsg( assignVecMsg_ );
+	if ( assignmentMsg_ != Msg::badMsg )
+		Msg::deleteMsg( assignmentMsg_ );
+	if ( reduceMsg_ != Msg::badMsg )
+		Msg::deleteMsg( reduceMsg_ );
+	assignVecMsg_ = Msg::badMsg;
+	assignmentMsg_ = Msg::badMsg;
+	reduceMsg_ = Msg::badMsg;
+}
+
 void Shell::handleSet( const Eref& e, const Qinfo* q, 
 	Id id, DataId d, FuncId fid, PrepackedBuffer arg )
 {
 	if ( q->addToStructuralQ() )
 		return;
 	Eref er( id(), d );
-	shelle_->clearBinding ( lowLevelSetGet()->getBindIndex() );
+	// shelle_->clearBinding ( lowLevelSetGet()->getBindIndex() );
+	clearSetMsgs();
 	Eref sheller( shelle_, 0 );
-	Msg* m;
+	Msg* m = 0;
 	
 	if ( arg.isVector() ) {
 		m = new AssignVecMsg( Msg::setMsg, sheller, er.element() );
+		assignVecMsg_ = m->mid();
 	} else {
 		m = new AssignmentMsg( Msg::setMsg, sheller, er );
+		assignmentMsg_ = m->mid();
 		// innerSet( er, fid, arg.data(), arg.dataSize() );
 	}
 	shelle_->addMsgAndFunc( m->mid(), fid, lowLevelSetGet()->getBindIndex() );
@@ -115,9 +131,11 @@ void Shell::handleGet( const Eref& e, const Qinfo* q,
 	Eref tgt( id(), index );
 	FuncId retFunc = receiveGet()->getFid();
 
-	shelle_->clearBinding( lowLevelSetGet()->getBindIndex() );
+	clearSetMsgs();
+	// shelle_->clearBinding( lowLevelSetGet()->getBindIndex() );
 	if ( numTgt > 1 ) {
 		Msg* m = new AssignVecMsg( Msg::setMsg, sheller, tgt.element() );
+		assignVecMsg_ = m->mid();
 		shelle_->addMsgAndFunc( m->mid(), fid, lowLevelSetGet()->getBindIndex() );
 		if ( myNode_ == 0 ) {
 			//Need to find numTgt
@@ -128,6 +146,7 @@ void Shell::handleGet( const Eref& e, const Qinfo* q,
 		}
 	} else {
 		Msg* m = new AssignmentMsg( Msg::setMsg, sheller, tgt );
+		assignmentMsg_ = m->mid();
 		shelle_->addMsgAndFunc( m->mid(), fid, lowLevelSetGet()->getBindIndex());
 		if ( myNode_ == 0 ) {
 			PrepackedBuffer pb( 
