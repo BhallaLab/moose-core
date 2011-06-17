@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Mar 26 22:41:37 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Jun  2 14:36:28 2011 (+0530)
+// Last-Updated: Fri Jun 17 11:31:14 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 72
+//     Update #: 87
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -81,6 +81,10 @@ int isInfinite = 0;
 int numNodes = 1;
 int numCores = 1;
 int myNode = 0;
+static Element* shellE = NULL; // This is in order to keep a handle on
+                               // the original shell element - I don't
+                               // know how to get back the Id of
+                               // stupid shell from the Shell&.
 
 void setup_runtime_env(bool verbose=true){
     const map<string, string>& argmap = getArgMap();
@@ -161,7 +165,7 @@ Shell& getShell()
         Id shellId;
         vector <unsigned int> dims;
         dims.push_back(1);
-        Element * shellE = new Element(shellId, Shell::initCinfo(), "root", dims, 1);
+        shellE = new Element(shellId, Shell::initCinfo(), "root", dims, 1);
         Id clockId = Id::nextId();
         shell_ = reinterpret_cast<Shell*>(shellId.eref().data());
         shell_->setShellElement(shellE);
@@ -231,19 +235,14 @@ void finalize()
         cout << "Joining threads." << endl;
         getShell().joinThreads();
     }
-    cout << "Destroying Id(0)." << endl;
-    Id().destroy();
-    cout << "Destroying Id(1)." << endl;
-    Id(1).destroy();
-    cout << "Destroying Id(2)." << endl;
-    Id(2).destroy();
-    cout << "Destroying msgmanagers." << endl; 
-    destroyMsgManagers();
+    getShell().clearSetMsgs();
+    Neutral* ns = reinterpret_cast<Neutral*>(shellE);
+    ns->destroy( shellE->id().eref(), 0, 0);
 #ifdef USE_MPI
     cout << "Befor MPI Finalize." << endl; 
     MPI_Finalize();
 #endif
-    cout << "Finished pymoose_finalize()" << endl;            
+    cout << "Finished pymoose_finalize()" << endl;
 
 }
 
