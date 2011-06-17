@@ -54,6 +54,7 @@ from PyQt4.Qwt5.anynumpy import *
 
 import config
 import moose
+import os
 
 class MoosePlot(Qwt.QwtPlot):
     """Handler for plots in MOOSE gui"""
