@@ -175,3 +175,40 @@ This has the following fields of note:
 
 
 
+6. Message traversal, C++ level:
+General approach: 
+	- If you just want src/dest Id, use the Neutral or Element functions
+		to find list of source or target Ids as per spec.
+		- Netural::msgSrc( string field );
+		- Netural::msgDest( string field );
+		- Element::getOutputs( vector< Id >& ret, const SrcFinfo* finfo)
+		- Element::getInputs( vector< Id >& ret, const DestFinfo* finfo)
+
+	- If you want to iterate through specific array and/or field
+		entries in src/dest Id, then you will have to look up the
+		MsgIds themselves.
+		- vector< ObjId > Neutral::msgOut(): 
+			Not very specific, just the ObjIds of the MsgManagers
+			of all outgoing Msgs.
+		- vector< ObjId > Neutral::msgIn(): 
+			All ObjIds of MsgManagers of incoming Msgs.
+		- MsgId Element::findCaller( FuncId fid ) const: 
+			Looks up the first Msg that calls the specified Fid 
+		- Element::getInputMsgs( vector< MsgId >& caller, FuncId fid)
+			Fills up vector of MsgIds that call the specified fid 
+
+	- To convert between MsgIds, Msgs, and the manager ObjId:
+		- MsgId Msg::mid(): 	returns the MsgId of the Msg.
+		- Msg::manager():	 returns the manager Eref of a Msg.
+		- Msg::manager().objId(): returns the manager ObjId of a Msg.
+		- static const Msg* Msg::getMsg( MsgId mid )
+					Returns the Msg ptr given a MsgId.
+
+	- To iterate through Msg targets:
+		unsigned int Msg::srcToDestPairs(
+			vector< DataId >& src, vector< DataId >& dest) const
+			This function gives matching vectors of src and dest
+			pairs for the Msg. This should be node-independent,
+			but the SparseMsg currently doesn't handle it right,
+			and works only on 1 node.
+

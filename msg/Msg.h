@@ -151,6 +151,13 @@ class Msg
 			FuncId fid, unsigned int b, unsigned int n ) const = 0;
 
 		/**
+		 * Builds up list of all source DataIds (on e1) paired with dest
+		 * DataIds (on e2)
+		 */
+		virtual unsigned int srcToDestPairs( 
+			vector< DataId >& src, vector< DataId >& dest) const = 0;
+
+		/**
 		 * Checks if the message is going forward.
 		 * Now merged into Msg::addToQ for most cases.
 		 */
