@@ -13430,5 +13430,24 @@ Reduce, use the same MsgId, Msg::setMsg. Since this is such a mess I'm going
 to check it in as a branch. That was checkin 2764 on branch badAssignMsgs.
 
 Revisited the memory leak. I think I've fixed it, but there are now other
-leaks in the Markov code so I can't be sure.
+leaks in the Markov code so I can't be sure. Checkin 2768.
+
+...................................................
+Back to the spatial kinetics.
+Made some initial changes to readKkit.
+Begin implementing ChemMesh class. maybe it is a generic mesh class.
+Handles volume, a reference to a geometry (probably via msgs), 
+Should have a field to specify type of mesh: axial, spherical shell.
+Need a way to talk to the pool objects, which will query it for vol 
+whenever needed.
+
+============================================================================
+17 June
+Implementing message querying stuff to get pairs of src/dest DataIds,
+needed for detailed traversal of Msgs.
+Msg::srcToDestPairs.
+Compiles but no new unit tests for it as yet. Also the SparseMsg version is
+not yet node-safe.
+
+Also commented out some half-baked changes in ReadKkit.
 

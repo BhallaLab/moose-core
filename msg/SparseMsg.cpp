@@ -410,3 +410,26 @@ Msg* SparseMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 		return 0;
 	}
 }
+
+unsigned int SparseMsg::srcToDestPairs(
+	vector< DataId >& src, vector< DataId >& dest ) const
+{
+	unsigned int nRows = matrix_.nRows(); // Sources
+	src.resize( 0 );
+	dest.resize( 0 );
+	src.reserve( matrix_.nEntries() );
+	dest.reserve( matrix_.nEntries() );
+	for ( unsigned int i = 0; i < nRows; ++i ) {
+		const unsigned int* fieldIndex;
+		const unsigned int* colIndex;
+		unsigned int n = matrix_.getRow( i, &fieldIndex, &colIndex );
+		// N is number of used column entries in this row.
+		for ( unsigned int j = 0; j < n; ++j ) {
+			src.push_back( DataId( i, 0 ) );
+			dest.push_back( DataId( colIndex[j], fieldIndex[j] ) );
+		}
+	}
+	assert( src.size() == matrix_.nEntries() );
+
+	return src.size();
+}

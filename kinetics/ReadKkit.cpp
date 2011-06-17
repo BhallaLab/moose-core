@@ -523,7 +523,12 @@ void ReadKkit::assignCompartments()
 		}
 		Id compt = shell_->doCreate( 
 			"ChemCompt", baseId_, name, dims );
+		/*
+		Id mesh = shell_->doCreate( 
+			"ChemMesh", compt, "mesh", dims );
+			*/
 		Field< double >::set( compt, "size", vols_[i] );
+		// Field< double >::set( mesh, "size", vols_[i] );
 		compartments_.push_back( compt );
 		for ( vector< Id >::iterator j = volCategories_[i].begin();
 			j != volCategories_[i].end(); ++j ) {
@@ -531,6 +536,11 @@ void ReadKkit::assignCompartments()
 			MsgId ret = shell_->doAddMsg( "single", 
 				ObjId( compt, 0 ), "compartment",
 				ObjId( *j, 0 ), "setSize" ); 
+			/*
+			MsgId ret = shell_->doAddMsg( "OneToOne", 
+				ObjId( compt, 0 ), "sizeOut",
+				ObjId( *j, 0 ), "setSize" ); 
+				*/
 			assert( ret != Msg::badMsg );
 		}
 	}

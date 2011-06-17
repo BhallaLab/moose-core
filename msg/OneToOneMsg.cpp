@@ -70,6 +70,31 @@ ObjId OneToOneMsg::findOtherEnd( ObjId f ) const
 	return ObjId::bad();
 }
 
+unsigned int OneToOneMsg::srcToDestPairs(
+	vector< DataId >& src, vector< DataId >& dest ) const
+{
+	unsigned int srcRange = e1_->dataHandler()->totalEntries();
+	unsigned int destRange = e2_->dataHandler()->totalEntries();
+	unsigned int range = ( srcRange < destRange ) ? srcRange : destRange;
+
+	src.resize( range );
+	dest.resize( range );
+	unsigned int fd1 = e2_->dataHandler()->getFieldDimension();
+	unsigned int fd2 = e2_->dataHandler()->getFieldDimension();
+	if ( fd1 != fd2 ) {
+		cout << "Warning: OneToOneMsg::srcToDestPairs: Mismatch in fieldDimension of e1 and e2:\n";
+		cout << e1_->getName() << " -> " << e2_->getName() << endl;
+	}
+	if ( fd1 == 0 ) fd1 = 1;
+	if ( fd2 == 0 ) fd2 = 1;
+	for ( unsigned int i = 0; i < range; ++i ) {
+		src[i] = DataId( i / fd1, i % fd1 );
+		dest[i] = DataId( i / fd2, i % fd2 );
+	}
+
+	return range;
+}
+
 Msg* OneToOneMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 			FuncId fid, unsigned int b, unsigned int n ) const
 {

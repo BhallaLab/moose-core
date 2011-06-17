@@ -116,6 +116,34 @@ Msg* DiagonalMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 	}
 }
 
+unsigned int DiagonalMsg::srcToDestPairs( 
+	vector< DataId >& src, vector< DataId >& dest ) const
+{
+	unsigned int srcRange = e1_->dataHandler()->totalEntries();
+	if ( e1_->dataHandler()->getFieldDimension() != 0 ) {
+		srcRange /= e1_->dataHandler()->getFieldDimension();
+		cout << "Warning: DiagonalMsg::srcToDestPairs on " << mid() << ":"
+		<< "\nDiagonalMsgs do not properly handle FieldElement arrays.\n";
+	}
+
+	unsigned int destRange = e2_->dataHandler()->totalEntries();
+	if ( e2_->dataHandler()->getFieldDimension() != 0 ) {
+		destRange /= e2_->dataHandler()->getFieldDimension();
+		cout << "Warning: DiagonalMsg::srcToDestPairs on " << mid() << ":"
+		<< "\nDiagonalMsgs do not properly handle FieldElement arrays.\n";
+	}
+	src.resize( 0 );
+	dest.resize( 0 );
+	for ( unsigned int i = 0; i < srcRange; ++i ) {
+		unsigned int j = i + stride_;
+		if ( j < destRange ) {
+			src.push_back( DataId( i ) );
+			dest.push_back( DataId( j ) );
+		}
+	}
+	return src.size();
+}
+
 ///////////////////////////////////////////////////////////////////////
 // Here we set up the MsgManager portion of the class.
 ///////////////////////////////////////////////////////////////////////

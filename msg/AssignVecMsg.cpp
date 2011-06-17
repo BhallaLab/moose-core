@@ -94,6 +94,24 @@ Msg* AssignVecMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 	return 0;
 }
 
+unsigned int AssignVecMsg::srcToDestPairs(
+	vector< DataId >& src, vector< DataId >& dest ) const
+{
+	 unsigned int destRange = e2_->dataHandler()->totalEntries();
+	src.resize( destRange, i1_ );
+	dest.resize( destRange );
+	unsigned int fd = e2_->dataHandler()->getFieldDimension();
+	if ( fd <= 1 ) {
+		for ( unsigned int i = 0; i < destRange; ++i )
+			dest[i] = DataId( i );
+	} else {
+		for ( unsigned int i = 0; i < destRange; ++i )
+			dest[i] = DataId( i / fd, i % fd );
+	}
+
+	return destRange;
+}
+
 void AssignVecMsg::addToQ( const Element* src, Qinfo& q,
 	const ProcInfo* p, MsgFuncBinding i, const char* arg ) const
 {
