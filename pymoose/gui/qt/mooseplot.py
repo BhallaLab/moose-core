@@ -325,11 +325,14 @@ class MoosePlot(Qwt.QwtPlot):
             # time and skill to do "Software Engineering" will clean
             # this mishmash of dependencies.
             # -- Subha
-            table = self.mooseHandler.addFieldTable(fieldPath)
-            tokens = fieldPath.split('/')
-            if len(tokens) < 2:
-                raise IndexError('Field path should have at least two components. Got %d' % (len(tokens)))
-            self.addTable(table, tokens[-2] + '_' + tokens[-1])
+#edit_chait
+#            table = self.mooseHandler.addFieldTable(fieldPath)
+#            tokens = fieldPath.split('/')
+#            if len(tokens) < 2:
+#                raise IndexError('Field path should have at least two components. Got %d' % (len(tokens)))
+#            self.addTable(table, tokens[-2] + '_' + tokens[-1])
+
+            self.emit(QtCore.SIGNAL('draggedAField(const QString&,const QString&)'),fieldPath,self.objectName())
             # This also breaks the capability to move a plot from one
             # plot window to another.
             model.updatePlotField(index, self.objectName())
