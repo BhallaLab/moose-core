@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul  5 21:35:09 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Sep 16 10:56:33 2010 (+0530)
+# Last-Updated: Fri Jun 17 12:39:59 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 601
+#     Update #: 615
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -230,12 +230,14 @@ class MoosePlot(Qwt.QwtPlot):
             curve.setData(xdata, ydata)
         self.clearZoomStack()
 
-    def addTable(self, table):
+    def addTable(self, table, curve_name=None):
         try:
             curve = self.tableCurveMap[table]
         except KeyError:
             print 'Adding table ', table.path
-            curve = Qwt.QwtPlotCurve(table.name)
+            if curve_name is None:
+                curve_name = table.name
+            curve = Qwt.QwtPlotCurve(curve_name)
             curve.setPen(MoosePlot.colors[self.curveIndex])
             self.curveIndex = (self.curveIndex + 1) % len(MoosePlot.colors)
             self.curveTableMap[curve] = table
@@ -322,15 +324,20 @@ class MoosePlot(Qwt.QwtPlot):
             # time and skill to do "Software Engineering" will clean
             # this mishmash of dependencies.
             # -- Subha
-
-#            table = self.mooseHandler.addFieldTable(fieldPath)
-#            self.addTable(table)
-            
-            #add_chc
-            self.emit(QtCore.SIGNAL('draggedAField(const QString&,const QString&)'),fieldPath,self.objectName())
+            table = self.mooseHandler.addFieldTable(fieldPath)
+            tokens = fieldPath.split('/')
+            if len(tokens) < 2:
+                raise IndexError('Field path should have at least two components. Got %d' % (len(tokens)))
+            self.addTable(table, tokens[-2] + '_' + tokens[-1])
             # This also breaks the capability to move a plot from one
             # plot window to another.
             model.updatePlotField(index, self.objectName())
+
+    def savePlotData(self, directory=''):
+        for table in self.tableCurveMap.keys():
+            filename = os.path.join(directory, table.name + '.plot')
+            print 'Saving', filename
+            table.dumpFile(filename)
 
 class MoosePlotWindow(QtGui.QMdiSubWindow):
     """This is to customize MDI sub window for our purpose.
