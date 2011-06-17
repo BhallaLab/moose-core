@@ -65,6 +65,10 @@ class MarkovChannel : public ChanBase
 	//Couple of dummy get functions. 
 	vector< double > getOneParamRateTable( unsigned int, unsigned int );
 	vector< vector< double > > getTwoParamRateTable( unsigned int, unsigned int );
+	void setOneParamRateTable( vector< unsigned int >, vector< double >,  vector< double >, bool ligandFlag );
+	void setTwoParamRateTable( vector< unsigned int >, vector< double >, vector< vector< double > >);
+
+//	unsigned int findByteSize();
 
 	//Type-independent lookup function for rate.
 //	void lookupRate( unsigned int, unsigned int, vector<double>, double* );
@@ -97,8 +101,6 @@ class MarkovChannel : public ChanBase
 
 	//DestFinfo functions.
 	void setupRateTables( unsigned int );
-	void setOneParamRateTable( vector< unsigned int >, vector< double >,  vector< double >, bool ligandFlag );
-	void setTwoParamRateTable( vector< unsigned int >, vector< double >, vector< vector< double > >);
 	void process( const Eref&, const ProcPtr);
 	void reinit( const Eref&, const ProcPtr);
 	void handleLigandConc( double );

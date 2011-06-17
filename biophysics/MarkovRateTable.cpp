@@ -18,9 +18,26 @@ MarkovRateTable::MarkovRateTable() :
 MarkovRateTable::MarkovRateTable( unsigned int size ) : 
 	size_(size)
 {
-	vtTables_ = resize< VectorTable* >( vtTables_, size, 0 );
-	int2dTables_ = resize< Interpol2D* >( int2dTables_, size, 0 );
-	useLigandConc_ = resize< bool >( useLigandConc_, size, false );
+	if ( vtTables_.size() == 0 )
+		vtTables_ = resize< VectorTable* >( vtTables_, size, 0 );
+	if ( int2dTables_.size() == 0 )
+		int2dTables_ = resize< Interpol2D* >( int2dTables_, size, 0 );
+	if ( useLigandConc_.size() == 0 )
+		useLigandConc_ = resize< bool >( useLigandConc_, size, false );
+}
+
+MarkovRateTable::~MarkovRateTable()
+{
+	for ( unsigned int i = 0; i < size_; ++i )	
+	{
+		for ( unsigned int j = 0; j < size_; ++j )
+		{
+			if ( isRateOneParam( i, j ) || isRateConstant( i, j ) ) 
+				delete vtTables_[i][j];
+			if ( isRateTwoParam( i, j ) ) 
+				delete int2dTables_[i][j];
+		}
+	}
 }
 
 vector< double > MarkovRateTable::getVtChildTable( unsigned int i, unsigned int j ) const
