@@ -348,8 +348,8 @@ class MainWindow(QtGui.QMainWindow):
             if ( area == QtCore.Qt.BottomDockWidgetArea) or \
                     (area == QtCore.Qt.RightDockWidgetArea):
                 child.setVisible(checked)
-
-
+                
+        
     def makeShellDock(self, interpreter=None, mode=MooseGlobals.CMD_MODE_PYMOOSE):
         """A MOOSE command line for GENESIS/Python interaction"""
         self.commandLineDock = QtGui.QDockWidget(self.tr('MOOSE Shell'), self)
@@ -361,6 +361,8 @@ class MainWindow(QtGui.QMainWindow):
         self.commandLineDock.setObjectName('MooseCommandLine')
         #add_chait
         self.commandLineDock.setMaximumHeight(180)
+        self.commandLineDock.setMinimumWidth(1000)
+        #self.commandLineDock.setSizePolicy(QtGui.QSizePolicy.MaximumExpanding, QtGui.QSizePolicy.MinimumExpanding)
         self.commandLineDock.setFeatures(QtGui.QDockWidget.DockWidgetClosable)
         return self.commandLineDock
 
@@ -413,6 +415,8 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.objFieldEditModel, 
                      QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'),
                      self.modelTreeWidget.updateItemSlot)
+        self.connect(self.objFieldEditPanel,QtCore.SIGNAL('visibilityChanged(bool)'),self.closeObjectEditorPanel)
+
         if hasattr(self, 'sceneLayout'):
 	        self.connect(self.objFieldEditModel, 
         	             QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'),
@@ -423,9 +427,11 @@ class MainWindow(QtGui.QMainWindow):
         self.objFieldEditPanel.raise_()
 	self.objFieldEditPanel.show()
         #add_chait
-        self.objFieldEditPanel.setMaximumWidth(320)
+        self.objFieldEditPanel.setMinimumWidth(320)
         self.objFieldEditPanel.setFeatures(QtGui.QDockWidget.DockWidgetClosable)
-
+        
+    def closeObjectEditorPanel(self,status):
+        self.showObjectEditorAction.setChecked(status)
 
     def createGLCellWidget(self):
     	"""Create a GLCell object to show the currently selected cell"""
@@ -449,8 +455,10 @@ class MainWindow(QtGui.QMainWindow):
         self.refreshMooseTreeAction = QtGui.QAction(self.tr('Refresh model tree'), self)
    	self.connect(self.refreshMooseTreeAction, QtCore.SIGNAL('triggered(bool)'), self.modelTreeWidget.recreateTree)
         self.mooseClassesAction = self.mooseClassesPanel.toggleViewAction()
+        
         self.mooseShellAction = self.commandLineDock.toggleViewAction()
         self.mooseShellAction.setChecked(False)
+        
         self.mooseGLCellAction = QtGui.QAction(self.tr('GLCell'), self)
         self.mooseGLCellAction.setChecked(False)
         self.connect(self.mooseGLCellAction, QtCore.SIGNAL('triggered()'), self.createGLCellWidget)
@@ -463,6 +471,11 @@ class MainWindow(QtGui.QMainWindow):
 	self.showRightBottomDocksAction.setCheckable(True)
 	self.connect(self.showRightBottomDocksAction, QtCore.SIGNAL('triggered(bool)'), self.showRightBottomDocks)
         self.showRightBottomDocksAction.setChecked(False)
+
+        self.showObjectEditorAction = QtGui.QAction(self.tr('Object Editor'),self)
+        self.showObjectEditorAction.setCheckable(True)
+        self.connect(self.showObjectEditorAction, QtCore.SIGNAL('triggered(bool)'),self.showObjectEditor)
+        self.showObjectEditorAction.setChecked(True)
 
         self.tabbedViewAction = QtGui.QAction(self.tr('Tabbed view'), self)
         self.tabbedViewAction.setCheckable(True)
@@ -639,6 +652,9 @@ class MainWindow(QtGui.QMainWindow):
         self.viewMenu.addAction(self.autoHideAction)
         self.viewMenu.addAction(self.showRightBottomDocksAction)
 
+        self.viewMenu.addAction(self.showObjectEditorAction)
+
+
         self.runMenu = QtGui.QMenu(self.tr('&Run'), self)
         # self.runMenu.addAction(self.resetAction)
         self.runMenu.addAction(self.runAction)
@@ -646,7 +662,7 @@ class MainWindow(QtGui.QMainWindow):
 
         
 
-        self.editModelMenu = QtGui.QMenu(self.tr('&Edit Model'), self)
+        self.editModelMenu = QtGui.QMenu(self.tr('&Edit'), self)
         self.editModelMenu.addAction(self.connectionDialogAction)
         
 		
@@ -1056,6 +1072,8 @@ class MainWindow(QtGui.QMainWindow):
             self.centralPanel.setViewMode(self.centralPanel.SubWindowView)
             
         
+    def showObjectEditor(self,checked):
+        self.objFieldEditPanel.setVisible(checked)
 
     def addLayoutWindow(self):
     	centralWindowsize =  self.centralVizPanel.size()

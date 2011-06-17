@@ -532,7 +532,6 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 	glEnd()
 	glEnable(GL_LIGHTING)
 	glLineWidth(1)	
-
     
 
 #===============================================================================
