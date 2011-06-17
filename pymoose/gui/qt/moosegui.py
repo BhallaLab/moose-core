@@ -918,8 +918,21 @@ class MainWindow(QtGui.QMainWindow):
     		self.vizDialogue.vizMinVal_2.setEnabled(False)
         	
     def saveTablePlots(self):
-        for plot in self.plots:
-            plot.savePlotData()
+        fileDialog2 = QtGui.QFileDialog(self)        
+        fileDialog2.setFileMode(QtGui.QFileDialog.Directory)
+        fileDialog2.setWindowTitle('Save Plots In')
+        fileDialog2.setOptions(QtGui.QFileDialog.ShowDirsOnly)
+        targetPanel = QtGui.QFrame(fileDialog2)
+        targetPanel.setLayout(QtGui.QVBoxLayout())
+        currentPath = self.mooseHandler._current_element.path
+        
+        layout = fileDialog2.layout()
+        layout.addWidget(targetPanel)
+        if fileDialog2.exec_():
+            directory = fileDialog2.directory().path() 
+            print directory
+            for plot in self.plots:
+                plot.savePlotData(str(directory))
 
     def addAllCellsToVizList(self):		#add_chait
         an=moose.Neutral('/')						#moose root children
@@ -1455,5 +1468,6 @@ if __name__ == '__main__':
 	firstTimeWizard.connect(firstTimeWizard, QtCore.SIGNAL('accepted()'), mainWin.updatePaths)
         firstTimeWizard.show()
     mainWin.show()
+    mainWin.setWindowState(Qt.WindowMaximized)
     app.exec_()
 	
