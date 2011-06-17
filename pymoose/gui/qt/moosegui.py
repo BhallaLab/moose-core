@@ -1286,6 +1286,11 @@ class MainWindow(QtGui.QMainWindow):
         """Remove the plot for the specified field from the current
         plot window and set it to the plotwindow with given name."""
         fieldpath = str(full_field_path)
+        
+        tokens = fieldpath.split('/')
+        if len(tokens) < 2:
+            raise IndexError('Field path should have at least two components. Got %d' % (len(tokens)))
+        
         for plot in self.plots:
             if plotname == plot.objectName():
                 table = self.mooseHandler.addFieldTable(fieldpath)
@@ -1294,7 +1299,8 @@ class MainWindow(QtGui.QMainWindow):
                     oldplot.removeTable(table)
                 except KeyError:
                     pass
-                plot.addTable(table)
+                #plot.addTable(table)
+                plot.addTable(table, tokens[-2] + '_' + tokens[-1])
                 plot.replot()
                 self.tablePlotMap[table] = plot
                 
