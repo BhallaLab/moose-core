@@ -49,6 +49,8 @@ class MarkovRateTable {
 
 	MarkovRateTable( unsigned int );
 
+	~MarkovRateTable();
+
 	//One parameter rate table set and get functions.
 	vector< double > getVtChildTable( unsigned int, unsigned int ) const; 
 	void setVtChildTable( vector< unsigned int >, vector< double >, vector< double >, bool );

@@ -181,7 +181,13 @@ MarkovChannel::MarkovChannel(unsigned int numStates, unsigned int numOpenStates)
 }
 
 MarkovChannel::~MarkovChannel( )
-{	; }
+{	
+	if ( stateFromGsl_ != 0 )
+		delete[] stateFromGsl_;
+
+	if ( rateTables_ != 0 )
+		delete rateTables_;
+}
 
 unsigned int MarkovChannel::getNumStates( ) const
 {
@@ -227,14 +233,8 @@ void MarkovChannel::setState( vector< double > state )
 {
 	double sumOfProbabilities = 0;
 
-	if ( stateFromGsl_ == 0 )
-		stateFromGsl_ = new double[ state.size() ];
-
 	for ( unsigned int i = 0; i < state.size(); i++)
-	{
-		stateFromGsl_[i] = state[i];
 		sumOfProbabilities += state[i];
-	}
 		
 	if ( !doubleEq( sumOfProbabilities, 1.0) ) 
 	{
@@ -285,6 +285,19 @@ void MarkovChannel::setTwoParamRateTable( vector< unsigned int > intParams, vect
 {
 	rateTables_->setInt2dChildTable( intParams, doubleParams, table );	
 }
+
+/*unsigned int MarkovChannel::findByteSize() {
+	unsigned int size = 0;
+
+	size += 2 * sizeof( double ); 			//g_ & ligandConc_
+	size += 2 * sizeof( unsigned int ); //numStates_, numOpenStates_
+	size +=	2 * numStates_ * sizeof( vector< double > );  //state_, initialState_
+	size += numOpenStates_ * sizeof( Gbars_ ); //Gbars_
+  size +=	numStates_ * numStates_ * sizeof( vector< vector< double > > );	//A_
+	size += numStates_ * sizeof(double);	//stateFromGsl_
+	size += rateTables_->findByteSize();
+
+}*/
 
 /*double MarkovChannel::lookupRate( unsigned int i , unsigned int j , vector<double> args )
 {
@@ -428,12 +441,14 @@ void MarkovChannel::reinit( const Eref& e, const ProcPtr p )
 
 	state_ = initialState_;
 
-	assert ( stateFromGsl_ != 0 );
+	if ( stateFromGsl_ == 0 )
+		stateFromGsl_ = new double[ state_.size() ];
+
 	for ( unsigned int i = 0; i < numStates_; ++i )
 		stateFromGsl_[i] = state_[i];
 
 	initGslSolver();
-	
+		
 	ChanBase::reinit( e, p );	
 	initConstantRates( );
 	updateRates( );
