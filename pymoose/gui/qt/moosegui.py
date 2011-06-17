@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Jun 10 11:14:40 2011 (+0530)
+# Last-Updated: Fri Jun 17 12:20:38 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2655
+#     Update #: 2656
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -918,8 +918,8 @@ class MainWindow(QtGui.QMainWindow):
     		self.vizDialogue.vizMinVal_2.setEnabled(False)
         	
     def saveTablePlots(self):
-        for tablePlot in self.tablePlotMap.keys():
-            tablePlot.dumpFile(tablePlot.name+'.plot')
+        for plot in self.plots:
+            plot.savePlotData()
 
     def addAllCellsToVizList(self):		#add_chait
         an=moose.Neutral('/')						#moose root children
