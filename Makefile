@@ -73,6 +73,7 @@ endif
 # and thus have the command uname for getting Unix system name
 ifneq ($(OSTYPE),win32)
 MACHINE=$(shell uname -m)
+PLATFORM := $(shell uname -s)
 endif
 
 # Debug mode:
@@ -207,8 +208,9 @@ ifdef USE_CURSES
 LIBS += -lcurses
 CXXFLAGS+= -DUSE_CURSES
 endif
+
 # For 64 bit Linux systems add paths to 64 bit libraries 
-ifeq ($(OSTYPE),linux)
+ifeq ($(PLATFORM),Linux)
 CXXFLAGS += -DLINUX
 ifeq ($(MACHINE),x86_64)
 LIBS+= -L/lib64 -L/usr/lib64
