@@ -38,6 +38,9 @@ class OneToAllMsg: public Msg
 		void addToQ( const Element* src, Qinfo& q, const ProcInfo* p,
 			MsgFuncBinding i, const char* arg ) const;
 
+		unsigned int srcToDestPairs(
+			vector< DataId >& src, vector< DataId >& dest) const;
+
 		/// Return the first DataId
 		DataId getI1() const;
 

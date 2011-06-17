@@ -47,6 +47,9 @@ class DiagonalMsg: public Msg
 		Msg* copy( Id origSrc, Id newSrc, Id newTgt,
 			FuncId fid, unsigned int b, unsigned int n ) const;
 
+		unsigned int srcToDestPairs(
+			vector< DataId >& src, vector< DataId >& dest) const;
+
 		/**
 		 * The stride is the increment to the src DataId that gives the dest
 		 * DataId. It can be positive or negative, but bounds checking

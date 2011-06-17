@@ -36,6 +36,9 @@ class SingleMsg: public Msg
 		void addToQ( const Element* src, Qinfo& q, 
 			const ProcInfo* p, MsgFuncBinding i, const char* arg ) const;
 
+		unsigned int srcToDestPairs(
+			vector< DataId >& src, vector< DataId >& dest) const;
+
 		void setI1( DataId di );
 		DataId getI1() const;
 

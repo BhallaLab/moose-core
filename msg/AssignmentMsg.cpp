@@ -100,6 +100,14 @@ Msg* AssignmentMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 	return 0;
 }
 
+unsigned int AssignmentMsg::srcToDestPairs(
+	vector< DataId >& src, vector< DataId >& dest ) const
+{
+	src.resize( 1, i1_ );
+	dest.resize( 1, i2_ );
+	return 1;
+}
+
 void AssignmentMsg::addToQ( const Element* src, Qinfo& q,
 	const ProcInfo* p, MsgFuncBinding i, const char* arg ) const
 {

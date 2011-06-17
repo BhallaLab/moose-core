@@ -119,6 +119,15 @@ Msg* SingleMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 	}
 }
 
+
+unsigned int SingleMsg::srcToDestPairs(
+	vector< DataId >& src, vector< DataId >& dest ) const
+{
+	src.resize( 1, i1_ );
+	dest.resize( 1, i2_ );
+	return 1;
+}
+
 void SingleMsg::addToQ( const Element* src, Qinfo& q,
 	const ProcInfo* p, MsgFuncBinding i, const char* arg ) const
 {
