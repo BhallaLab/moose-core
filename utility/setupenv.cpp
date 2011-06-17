@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Mar 26 22:36:10 2011 (+0530)
 // Version: 
-// Last-Updated: Mon Mar 28 15:50:58 2011 (+0530)
+// Last-Updated: Fri Jun 17 18:21:23 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 17
+//     Update #: 20
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -69,6 +69,12 @@ const map<string, string>& getArgMap()
             argmap.insert(pair<string, string>("NUMNODES", string(numNodes)));
         } else {
             argmap.insert(pair<string, string>("NUMNODES", "1"));
+        }
+        char * doQuit = getenv("QUIT");
+        if (doQuit != NULL){
+            argmap.insert(pair<string, string>("QUIT", string(doQuit)));
+        } else {
+            argmap.insert(pair<string, string>("QUIT", "0"));
         }
     }
     return argmap;

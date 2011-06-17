@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Mar 26 22:41:37 2011 (+0530)
 // Version: 
-// Last-Updated: Fri Jun 17 11:31:14 2011 (+0530)
+// Last-Updated: Fri Jun 17 18:26:56 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 87
+//     Update #: 98
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -81,6 +81,7 @@ int isInfinite = 0;
 int numNodes = 1;
 int numCores = 1;
 int myNode = 0;
+static bool quitFlag = 0;
 static Element* shellE = NULL; // This is in order to keep a handle on
                                // the original shell element - I don't
                                // know how to get back the Id of
@@ -104,6 +105,10 @@ void setup_runtime_env(bool verbose=true){
     it = argmap.find("NUMNODES");
     if (it != argmap.end()){
         istringstream(it->second) >> numNodes;
+    }
+    it = argmap.find("QUIT");
+    if (it != argmap.end()){
+        istringstream(it->second) >> quitFlag;
     }
     if (verbose){
         cout << "ENVIRONMENT: " << endl
@@ -220,9 +225,10 @@ Shell& getShell()
             // mode, using a command-line argument. As soon as they are done
             // the system quits, in order to estimate timing.
             // if ( benchmarkTests( argc, argv ) || quitFlag )
-            //     shell->doQuit();
+            if ( quitFlag )
+                shell_->doQuit();
             // else 
-            //     shell->launchParser(); // Here we set off a little event loop to poll user input. It deals with the doQuit call too.
+            //     shell_->launchParser(); // Here we set off a little event loop to poll user input. It deals with the doQuit call too.
         }
     } // ! if (shell_ == NULL)
     return *shell_;
