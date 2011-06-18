@@ -7,22 +7,28 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _MARKOVGSL_H
-#define _MARKOVGSL_H
+#ifndef _MARKOVGSLSOLVER_H
+#define _MARKOVGSLSOLVER_H
 
-//Author : Vishaka Datta S, 2011, NCBS
+// Author : Vishaka Datta S, 2011, NCBS.
+//
+// The GslIntegrator class in ksolve deals with a system whose coefficients stay
+// constant. In the case of a Markov channel, the coefficients of the system
+// vary with time. 
+//
+// This makes it necessary for the system to keep track of changes in the system
+// matrix, which is implemented by the message handler. 
+//
 
-//This is a slightly modified version of the GSL integrator from the ksolve
-//library. Minor changes have been made to adapt it to the Markov channel
-//system. Importantly, it is not a MOOSE class. This has been done because the
-//use of GSL for the Markov Channel is only a temporary affair. 
-
-class MarkovGsl
+class MarkovGslSolver
 {
 	public:
-		MarkovGsl( );
-		~MarkovGsl();
+		MarkovGslSolver();
+		~MarkovGslSolver();
 
+///////////////////////////////////////////////////
+// Field function definitions
+///////////////////////////////////////////////////
 		bool getIsInitialized() const;
 		string getMethod() const;
 		void setMethod( string method );
@@ -32,17 +38,26 @@ class MarkovGsl
 		void setAbsoluteAccuracy( double value );
 		double getInternalDt() const;
 		void setInternalDt( double value );
-		const gsl_odeiv_step_type* getGslStepType( ) const;
-		void init( gsl_odeiv_system, unsigned int );
 
-		void solve( double, double, double* );
+///////////////////////////////////////////////////
+// Dest function definitions
+///////////////////////////////////////////////////
 
+		void process( const Eref& e, ProcPtr info );
+		void reinit( const Eref& e, ProcPtr info );
+
+		void setParams( Id );
+//		void handleState( vector< double > );
+
+		static const Cinfo* initCinfo();
 	private:
 		bool isInitialized_;
 		string method_;
 		double absAccuracy_;
 		double relAccuracy_;
 		double internalStepSize_;
+		vector< double > state_;
+		double* stateGsl_;
 		unsigned int nVars_;
 
 		const gsl_odeiv_step_type* gslStepType_;
@@ -51,4 +66,4 @@ class MarkovGsl
 		gsl_odeiv_evolve* gslEvolve_;
 		gsl_odeiv_system gslSys_;
 };
-#endif // _MARKOVGSL_H
+#endif 

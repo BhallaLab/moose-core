@@ -552,6 +552,7 @@ void testMarkovChannel()
 	Id nid = shell->doCreate( "Neutral", Id(), "n", dims );
 	Id comptId = shell->doCreate( "Compartment", nid, "compt", dims );
 	Id mChanId = shell->doCreate( "MarkovChannel", comptId, "mChan", dims );
+	Id gslSolverId = shell->doCreate( "MarkovGslSolver", mChanId, "gslSolver", dims );
 
 	Id tabId = shell->doCreate( "Table", nid, "tab", dims );
 
@@ -561,6 +562,10 @@ void testMarkovChannel()
 
 	mid = shell->doAddMsg( "Single", ObjId( tabId, 0 ), "requestData",
 			ObjId( mChanId, 0 ), "get_Ik" );
+	assert( mid != Msg::badMsg );
+
+	mid = shell->doAddMsg( "Single", ObjId( gslSolverId ), "stateOut", 
+			ObjId( mChanId ), "handlestate" );
 
 	//////////////////////////////////////////////////////////////////////
 	// set up compartment properties
@@ -630,15 +635,22 @@ void testMarkovChannel()
 	pushIntoTable( mChanId, 2, 3, 4, false );
 	pushIntoTable( mChanId, 0.01, 4, 3, false );
 
+	//Setting solver parameters.
+	SetGet1< Id >::set( gslSolverId, "setparams", mChanId );
+		
 	shell->doSetClock( 0, 1.0e-5 );	
 	shell->doSetClock( 1, 1.0e-5 );	
 	shell->doSetClock( 2, 1.0e-5 );	
 	shell->doSetClock( 3, 1.0e-5 );	
+	shell->doSetClock( 4, 1.0e-5 );	
 
 	shell->doUseClock( "/n/compt", "init", 0 );
 	shell->doUseClock( "/n/compt", "process", 1 );
 	shell->doUseClock( "/n/compt/mChan", "process", 2 );
-	shell->doUseClock( "/n/tab", "process", 3 );
+	shell->doUseClock( "/n/compt/mChan/gslSolver", "process", 3 );
+	shell->doUseClock( "/n/tab", "process", 4 );
+
+	vector< double > blah = Field< vector< double > >::get( mChanId, "state" );
 
 	shell->doReinit( );
 	shell->doReinit( );

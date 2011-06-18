@@ -6,16 +6,16 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-#include <stdio.h>
+
 #include "header.h"
 #include "VectorTable.h"
 #include "../builtins/Interpol2D.h"
 #include "MarkovRateTable.h"
-#include <gsl/gsl_odeiv.h>
-#include <gsl/gsl_errno.h>
 #include "ChanBase.h"
-#include "MarkovGsl.h"
 #include "MarkovChannel.h"
+//#include <gsl/gsl_odeiv.h>
+#include <gsl/gsl_errno.h>
+//#include "MarkovGsl.h"
 
 const Cinfo* MarkovChannel::initCinfo()
 {
@@ -85,9 +85,13 @@ const Cinfo* MarkovChannel::initCinfo()
 			);
 
 	//MsgDest functions		
-	static DestFinfo ligandconc( "ligandconc", 
+	static DestFinfo handleligandconc( "handleligandconc", 
 		"Deals with incoming messages containing information of ligand concentration",
 		new OpFunc1< MarkovChannel, double >(&MarkovChannel::handleLigandConc) );
+
+	static DestFinfo handlestate("handlestate",
+		"Deals with incoming message from MarkovSolver object containing state information of the channel.\n",
+		new OpFunc1< MarkovChannel, vector< double > >(&MarkovChannel::handleState) );
 
 /*	static DestFinfo lookup("lookup",
 		"Looks up the rate table corresponding to the (i,j)'th rate i.e. transition from state i to state j.",
@@ -121,7 +125,8 @@ const Cinfo* MarkovChannel::initCinfo()
 		&initialstate,
 		&labels,
 		&gbar,
-		&ligandconc,
+		&handleligandconc,
+		&handlestate,
 		&setoneparam,
 		&settwoparam,
 		&setuptables
@@ -160,8 +165,7 @@ MarkovChannel::MarkovChannel() :
 	ligandConc_(0), 
 	numStates_(0),
 	numOpenStates_(0),
-	rateTables_(0),
-	stateFromGsl_(0)
+	rateTables_(0)
 { ; }
 	
 MarkovChannel::MarkovChannel(unsigned int numStates, unsigned int numOpenStates) :
@@ -175,16 +179,12 @@ MarkovChannel::MarkovChannel(unsigned int numStates, unsigned int numOpenStates)
 	state_.resize( numStates );
 	initialState_.resize( numStates );
 	Gbars_.resize( numOpenStates ) ;
-	stateFromGsl_ = new double[numStates];
 
 	rateTables_ = new MarkovRateTable( numStates );
 }
 
 MarkovChannel::~MarkovChannel( )
 {	
-	if ( stateFromGsl_ != 0 )
-		delete[] stateFromGsl_;
-
 	if ( rateTables_ != 0 )
 		delete rateTables_;
 }
@@ -229,22 +229,6 @@ vector< double > MarkovChannel::getState ( ) const
 	return state_;	
 }
 
-void MarkovChannel::setState( vector< double > state ) 
-{
-	double sumOfProbabilities = 0;
-
-	for ( unsigned int i = 0; i < state.size(); i++)
-		sumOfProbabilities += state[i];
-		
-	if ( !doubleEq( sumOfProbabilities, 1.0) ) 
-	{
-		cerr << "Probabilities of occupation do not sum to 1!\n";
-		return;
-	}
-
-	state_ = state;	
-}
-
 vector< double > MarkovChannel::getInitialState() const 
 {
 	return initialState_;
@@ -253,7 +237,7 @@ vector< double > MarkovChannel::getInitialState() const
 void MarkovChannel::setInitialState( vector< double > initialState ) 
 {
 	initialState_ = initialState;
-	setState( initialState );
+	state_ = initialState;
 }
 
 vector< double > MarkovChannel::getGbars() const
@@ -285,19 +269,6 @@ void MarkovChannel::setTwoParamRateTable( vector< unsigned int > intParams, vect
 {
 	rateTables_->setInt2dChildTable( intParams, doubleParams, table );	
 }
-
-/*unsigned int MarkovChannel::findByteSize() {
-	unsigned int size = 0;
-
-	size += 2 * sizeof( double ); 			//g_ & ligandConc_
-	size += 2 * sizeof( unsigned int ); //numStates_, numOpenStates_
-	size +=	2 * numStates_ * sizeof( vector< double > );  //state_, initialState_
-	size += numOpenStates_ * sizeof( Gbars_ ); //Gbars_
-  size +=	numStates_ * numStates_ * sizeof( vector< vector< double > > );	//A_
-	size += numStates_ * sizeof(double);	//stateFromGsl_
-	size += rateTables_->findByteSize();
-
-}*/
 
 /*double MarkovChannel::lookupRate( unsigned int i , unsigned int j , vector<double> args )
 {
@@ -386,18 +357,6 @@ int MarkovChannel::innerEvalGslSystem( double t, const double* state, double* f 
 	return GSL_SUCCESS;
 }
 
-void MarkovChannel::initGslSolver()
-{
-	gsl_odeiv_system gslSys;
-
-	gslSys.function = &MarkovChannel::evalGslSystem;
-	gslSys.jacobian = 0;
-	gslSys.dimension = numStates_;
-	gslSys.params = static_cast< void* >( this );
-
-	solver_.init( gslSys, numStates_ );
-}
-
 void MarkovChannel::setupRateTables( unsigned int n )
 {
 	if ( rateTables_ == 0 )
@@ -412,21 +371,14 @@ void MarkovChannel::setupRateTables( unsigned int n )
 	}
 }
 
+//DestFinfos
 void MarkovChannel::process( const Eref& e, const ProcPtr p ) 
 {
-	for( unsigned int i = 0; i < numStates_; ++i )
-		stateFromGsl_[i] = state_[i];
-
-	solver_.solve( p->currTime, p->dt, stateFromGsl_ ); 
-
-	for ( unsigned int i = 0; i < numStates_; ++i )
-		state_[i] = stateFromGsl_[i];
-
 	g_ = 0.0;
+	
 	//Cannot use the Gbar_ variable of the ChanBase class. The conductance
 	//Gk_ calculated here is the "expected conductance" of the channel due to its
 	//stochastic nature. 
-
 	for( unsigned int i = 0; i < numOpenStates_; ++i )
 		g_ += Gbars_[i] * state_[i];			
 
@@ -439,15 +391,14 @@ void MarkovChannel::reinit( const Eref& e, const ProcPtr p )
 {
 	g_ = 0.0;
 
+	if ( initialState_.empty() ) 
+	{
+		cerr << "Initial state has not been set.!\n";
+		return;
+	}
 	state_ = initialState_;
 
-	if ( stateFromGsl_ == 0 )
-		stateFromGsl_ = new double[ state_.size() ];
-
-	for ( unsigned int i = 0; i < numStates_; ++i )
-		stateFromGsl_[i] = state_[i];
-
-	initGslSolver();
+//	initGslSolver();
 		
 	ChanBase::reinit( e, p );	
 	initConstantRates( );
@@ -459,3 +410,7 @@ void MarkovChannel::handleLigandConc( double ligandConc )
 	ligandConc_ = ligandConc;	
 }
 
+void MarkovChannel::handleState( vector< double > state )
+{
+	state_ = state;
+}
