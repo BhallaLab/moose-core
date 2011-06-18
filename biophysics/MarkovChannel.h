@@ -12,12 +12,6 @@
 //The implicit assumption is that there are a number of ion channels present in
 //the system. */
 
-//Circular dependence arising from the fact that MarkovGsl::init takes a
-//MarkovChannel object as an argument, and MarkovChannel has a MarkovGsl object
-//as a member. Rather ugly way of resolving the issue.
-class MarkovRateTable;
-class MarkovGsl;
-
 class MarkovChannel : public ChanBase
 {
 	public:
@@ -90,20 +84,14 @@ class MarkovChannel : public ChanBase
 	static int evalGslSystem( double t, const double* y, double* yprime, void* s );
 	int innerEvalGslSystem( double t, const double* y, double* yprime );
 
-	//Hard to divorce the GSL solver object from the channel implmentation in this
-	//case. In ksolve, the GSL object has to be initialized just once i.e. the
-	//parameters of the system stay constant throughout the evolution of the
-	//system. In this case, the parameters of the system i.e. the rate constants
-	//are time-varying. This means, the new system has to be fed into the solver
-	//object at each time step. Doing this via a process function call to the
-	//GslIntegrator object is not possible as it is a void return type.
-	void initGslSolver();
+//	void initGslSolver();
 
 	//DestFinfo functions.
 	void setupRateTables( unsigned int );
 	void process( const Eref&, const ProcPtr);
 	void reinit( const Eref&, const ProcPtr);
 	void handleLigandConc( double );
+	void handleState( vector< double > );
 
 	private:
 	double g_;												//Expected conductance of the channel.	
@@ -116,12 +104,10 @@ class MarkovChannel : public ChanBase
 	vector< double > state_;					//Probabilities of occupancy of each state.
 	vector< double > initialState_;
 	vector< double > Gbars_;		//Conductance associated with each open state.
-//	bool isInitialized_;
 
 	MarkovRateTable* rateTables_;
 
-	double* stateFromGsl_;
-	MarkovGsl solver_;
+//	MarkovGsl solver_;
 };
 
 #endif
