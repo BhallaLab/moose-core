@@ -49,6 +49,7 @@ extern void testBiophysics();
 extern void testBiophysicsProcess();
 extern void testKineticsProcess();
 extern void testGeom();
+extern void testMesh();
 
 extern void initMsgManagers();
 extern void destroyMsgManagers();

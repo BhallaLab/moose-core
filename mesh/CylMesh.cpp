@@ -12,6 +12,124 @@
 #include "ChemMesh.h"
 #include "CylMesh.h"
 
+const Cinfo* CylMesh::initCinfo()
+{
+		//////////////////////////////////////////////////////////////
+		// Field Definitions
+		//////////////////////////////////////////////////////////////
+		static ValueFinfo< CylMesh, double > x0(
+			"x0",
+			"Radius of one end",
+			&CylMesh::setX0,
+			&CylMesh::getX0
+		);
+		static ValueFinfo< CylMesh, double > y0(
+			"y0",
+			"Radius of one end",
+			&CylMesh::setY0,
+			&CylMesh::getY0
+		);
+		static ValueFinfo< CylMesh, double > z0(
+			"z0",
+			"Radius of one end",
+			&CylMesh::setZ0,
+			&CylMesh::getZ0
+		);
+		static ValueFinfo< CylMesh, double > r0(
+			"r0",
+			"Radius of one end",
+			&CylMesh::setR0,
+			&CylMesh::getR0
+		);
+		static ValueFinfo< CylMesh, double > x1(
+			"x1",
+			"Radius of one end",
+			&CylMesh::setX1,
+			&CylMesh::getX1
+		);
+		static ValueFinfo< CylMesh, double > y1(
+			"y1",
+			"Radius of one end",
+			&CylMesh::setY1,
+			&CylMesh::getY1
+		);
+		static ValueFinfo< CylMesh, double > z1(
+			"z1",
+			"Radius of one end",
+			&CylMesh::setZ1,
+			&CylMesh::getZ1
+		);
+		static ValueFinfo< CylMesh, double > r1(
+			"r1",
+			"Radius of one end",
+			&CylMesh::setR1,
+			&CylMesh::getR1
+		);
+		static ValueFinfo< CylMesh, vector< double > > coords(
+			"coords",
+			"All the coords as a single vector: x0 y0 z0 r0 x1 y1 z1 r1",
+			&CylMesh::setCoords,
+			&CylMesh::getCoords
+		);
+
+		static ValueFinfo< CylMesh, double > lambda(
+			"lambda",
+			"Length constant to use for subdivisions"
+			"The system will attempt to subdivide using compartments of"
+			"length lambda on average. If the cylinder has different end"
+			"diameters r0 and r1, it will scale to smaller lengths"
+			"for the smaller diameter end and vice versa."
+			"Once the value is set it will recompute lambda as "
+			"totLength/numEntries",
+			&CylMesh::setLambda,
+			&CylMesh::getLambda
+		);
+
+		static ReadOnlyValueFinfo< CylMesh, double > totLength(
+			"totLength",
+			"Total length of cylinder",
+			&CylMesh::getTotLength
+		);
+
+		//////////////////////////////////////////////////////////////
+		// MsgDest Definitions
+		//////////////////////////////////////////////////////////////
+
+		//////////////////////////////////////////////////////////////
+		// Field Elements
+		//////////////////////////////////////////////////////////////
+
+	static Finfo* cylMeshFinfos[] = {
+		&x0,			// Value
+		&y0,			// Value
+		&z0,			// Value
+		&r0,			// Value
+		&x1,			// Value
+		&y1,			// Value
+		&z1,			// Value
+		&r1,			// Value
+		&lambda,			// Value
+		&coords,		// Value
+		&totLength,		// ReadOnlyValue
+	};
+
+	static Cinfo cylMeshCinfo (
+		"CylMesh",
+		Neutral::initCinfo(),
+		cylMeshFinfos,
+		sizeof( cylMeshFinfos ) / sizeof ( Finfo* ),
+		new Dinfo< short >()
+	);
+
+	return &cylMeshCinfo;
+}
+
+//////////////////////////////////////////////////////////////
+// Basic class Definitions
+//////////////////////////////////////////////////////////////
+
+static const Cinfo* cylMeshCinfo = CylMesh::initCinfo();
+
 //////////////////////////////////////////////////////////////////
 // Class stuff.
 //////////////////////////////////////////////////////////////////
@@ -20,15 +138,16 @@ CylMesh::CylMesh()
 		numEntries_( 1 ),
 		useCaps_( 0 ),
 		isToroid_( 0 ),
-		r0_( 1.0e-6 ),
+		r0_( 1.0 ),
 		x0_( 0.0 ),
 		y0_( 0.0 ),
 		z0_( 0.0 ),
-		r1_( 1.0e-6 ),
-		x1_( 10.0e-6 ),
-		y1_( 10.0e-6 ),
-		z1_( 10.0e-6 ),
-		lambda_( 5.0e-6 ),
+		r1_( 1.0 ),
+		x1_( 1.0 ),
+		y1_( 0.0 ),
+		z1_( 0.0 ),
+		lambda_( 1.0 ),
+		totLen_( 1.0 ),
 		rSlope_( 0.0 ),
 		lenSlope_( 0.0 )
 {
@@ -43,6 +162,135 @@ CylMesh::~CylMesh()
 //////////////////////////////////////////////////////////////////
 // Field assignment stuff
 //////////////////////////////////////////////////////////////////
+
+void CylMesh::setX0( double v )
+{
+	x0_ = v;
+}
+
+double CylMesh::getX0() const
+{
+	return x0_;
+}
+
+void CylMesh::setY0( double v )
+{
+	y0_ = v;
+}
+
+double CylMesh::getY0() const
+{
+	return y0_;
+}
+
+void CylMesh::setZ0( double v )
+{
+	z0_ = v;
+}
+
+double CylMesh::getZ0() const
+{
+	return z0_;
+}
+
+void CylMesh::setR0( double v )
+{
+	r0_ = v;
+}
+
+double CylMesh::getR0() const
+{
+	return r0_;
+}
+
+
+void CylMesh::setX1( double v )
+{
+	x1_ = v;
+}
+
+double CylMesh::getX1() const
+{
+	return x1_;
+}
+
+void CylMesh::setY1( double v )
+{
+	y1_ = v;
+}
+
+double CylMesh::getY1() const
+{
+	return y1_;
+}
+
+void CylMesh::setZ1( double v )
+{
+	z1_ = v;
+}
+
+double CylMesh::getZ1() const
+{
+	return z1_;
+}
+
+void CylMesh::setR1( double v )
+{
+	r1_ = v;
+}
+
+double CylMesh::getR1() const
+{
+	return r1_;
+}
+
+
+void CylMesh::setCoords( vector< double > v )
+{
+	x0_ = v[0];
+	y0_ = v[1];
+	z0_ = v[2];
+	r0_ = v[3];
+
+	x1_ = v[4];
+	y1_ = v[5];
+	z1_ = v[6];
+	r1_ = v[7];
+}
+
+vector< double > CylMesh::getCoords() const
+{
+	vector< double > ret( 8 );
+
+	ret[0] = x0_;
+	ret[1] = y0_;
+	ret[2] = z0_;
+	ret[3] = r0_;
+
+	ret[4] = x1_;
+	ret[5] = y1_;
+	ret[6] = z1_;
+	ret[7] = r1_;
+
+	return ret;
+}
+
+
+void CylMesh::setLambda( double v )
+{
+	lambda_ = v;
+}
+
+double CylMesh::getLambda() const
+{
+	return lambda_;
+}
+
+
+double CylMesh::getTotLength() const
+{
+	return totLen_;
+}
 
 unsigned int CylMesh::innerGetDimensions() const
 {
