@@ -163,9 +163,43 @@ CylMesh::~CylMesh()
 // Field assignment stuff
 //////////////////////////////////////////////////////////////////
 
+/**
+ * This assumes that lambda is the quantity to preserve, over numEntries.
+ * So when the compartment changes size, so does numEntries. Lambda will
+ * be fine-tuned to be a clean multiple.
+ */
+void CylMesh::updateCoords()
+{
+	double temp = sqrt( 
+		( x1_ - x0_ ) * ( x1_ - x0_ ) + 
+		( y1_ - y0_ ) * ( y1_ - y0_ ) + 
+		( z1_ - z0_ ) * ( z1_ - z0_ )
+	);
+
+	if ( doubleEq( temp, 0.0 ) ) {
+		cout << "Error: CylMesh::updateCoords:\n"
+		"total length of compartment = 0 with these parameters\n";
+		return;
+	}
+	totLen_ = temp;
+
+	rSlope_ = ( r1_ - r0_ ) / totLen_;
+	lenSlope_ = rSlope_ * ( r0_ + r1_ );
+
+	temp = totLen_ / lambda_;
+	if ( temp < 1.0 ) {
+		lambda_ = totLen_;
+		numEntries_ = 1;
+	} else {
+		numEntries_ = static_cast< unsigned int >( round ( temp ) );
+		lambda_ = totLen_ / numEntries_;
+	}
+}
+
 void CylMesh::setX0( double v )
 {
 	x0_ = v;
+	updateCoords();
 }
 
 double CylMesh::getX0() const
@@ -176,6 +210,7 @@ double CylMesh::getX0() const
 void CylMesh::setY0( double v )
 {
 	y0_ = v;
+	updateCoords();
 }
 
 double CylMesh::getY0() const
@@ -186,6 +221,7 @@ double CylMesh::getY0() const
 void CylMesh::setZ0( double v )
 {
 	z0_ = v;
+	updateCoords();
 }
 
 double CylMesh::getZ0() const
@@ -196,6 +232,7 @@ double CylMesh::getZ0() const
 void CylMesh::setR0( double v )
 {
 	r0_ = v;
+	updateCoords();
 }
 
 double CylMesh::getR0() const
@@ -207,6 +244,7 @@ double CylMesh::getR0() const
 void CylMesh::setX1( double v )
 {
 	x1_ = v;
+	updateCoords();
 }
 
 double CylMesh::getX1() const
@@ -217,6 +255,7 @@ double CylMesh::getX1() const
 void CylMesh::setY1( double v )
 {
 	y1_ = v;
+	updateCoords();
 }
 
 double CylMesh::getY1() const
@@ -227,6 +266,7 @@ double CylMesh::getY1() const
 void CylMesh::setZ1( double v )
 {
 	z1_ = v;
+	updateCoords();
 }
 
 double CylMesh::getZ1() const
@@ -237,6 +277,7 @@ double CylMesh::getZ1() const
 void CylMesh::setR1( double v )
 {
 	r1_ = v;
+	updateCoords();
 }
 
 double CylMesh::getR1() const
@@ -256,6 +297,8 @@ void CylMesh::setCoords( vector< double > v )
 	y1_ = v[5];
 	z1_ = v[6];
 	r1_ = v[7];
+
+	updateCoords();
 }
 
 vector< double > CylMesh::getCoords() const
@@ -279,6 +322,7 @@ vector< double > CylMesh::getCoords() const
 void CylMesh::setLambda( double v )
 {
 	lambda_ = v;
+	updateCoords();
 }
 
 double CylMesh::getLambda() const
@@ -454,7 +498,23 @@ vector< double > CylMesh::getDiffusionScaling( unsigned int fid ) const
 /**
  * Inherited virtual func. Returns number of MeshEntry in array
  */
-unsigned int CylMesh::innerNumEntries() const
+unsigned int CylMesh::innerGetNumEntries() const
 {
 	return numEntries_;
+}
+
+/**
+ * Inherited virtual func. Assigns number of MeshEntries.
+ */
+void CylMesh::innerSetNumEntries( unsigned int n )
+{
+	static const unsigned int WayTooLarge = 1000000;
+	if ( n == 0 || n > WayTooLarge ) {
+		cout << "Warning: CylMesh::innerSetNumEntries( " << n <<
+		" ): out of range\n";
+		return;
+	}
+	assert( n > 0 );
+	numEntries_ = n;
+	lambda_ = totLen_ / n;
 }

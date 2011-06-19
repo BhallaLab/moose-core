@@ -262,6 +262,7 @@ void nonMpiTests( Shell* s )
 		testKinetics();
 		testBiophysics();
 		testGeom();
+		testMesh();
 #ifdef USE_SMOLDYN
 		testSmoldyn();
 #endif

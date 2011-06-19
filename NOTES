@@ -13498,6 +13498,8 @@ ChemMesh.cpp to go into this new directory.
 19 June
 Compiled mesh directory. Checked it in. Yet to put in unit tests.
 
-Completed missing fields in CylMesh.
+Completed missing fields in CylMesh. Checkin 2779.
+
+Added first pass unit tests.
 ============================================================================
 
