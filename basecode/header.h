@@ -23,7 +23,6 @@
 #include <cstring> // Required for g++ 4.3.2
 #include <cstdlib> // Required for g++ 4.3.2
 
-
 // Used for INT_MAX and UINT_MAX, but may be done within the compiler
 // #include <limits.h>
 //
@@ -46,6 +45,8 @@ typedef unsigned int MsgId;
  * Index into Element::vector< vector< MsgFuncBinding > > msgBinding_;
  */
 typedef unsigned short BindIndex;
+
+extern const double PI;
 
 class Element;
 class Eref;
