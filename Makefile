@@ -248,6 +248,7 @@ SUBDIR = \
 	regressionTests \
 	utility \
 	geom \
+	mesh \
 	$(SMOLDYN_DIR) \
 
 
@@ -267,6 +268,7 @@ OBJLIBS =	\
 	regressionTests/rt.o \
 	utility/utility.o \
 	geom/geom.o \
+	mesh/mesh.o \
 	$(SMOLDYN_LIB) \
 
 export CXX

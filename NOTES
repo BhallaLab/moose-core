@@ -13373,12 +13373,12 @@ other. Mesh entry provides associated mols and reacs with volume and position
 info.
 
 /sigNeurModel
+	/geom
+		/extracell_surface
+			/panels
 	/elec
 		/hsolve
 		/compts
-		/geom
-			/extracell_surface
-				/panels
 	/chem
 		/ksolve
 		/somaCompt
@@ -13449,5 +13449,49 @@ Msg::srcToDestPairs.
 Compiles but no new unit tests for it as yet. Also the SparseMsg version is
 not yet node-safe.
 
-Also commented out some half-baked changes in ReadKkit.
+Also commented out some half-baked changes in ReadKkit. Checkin 2772.
 
+Ran valgrind. OK.
+
+Decide if I need to have multiple Mesh variants:
+From 1 May:
+Some mesh forms:
+				Dimensions
+- linear			1 (might subdivide a 3-D space though)
+- rectangular			2
+- cuboid			3
+- Triangular			2
+- Tetrahedral			3
+- cylindrical radial		1
+- cylindrical radial-axial	2 Concentric axial compartments.
+- cylindrical segmented		3 radial-axial-segments
+- spherical radial		1
+- spherical radial segmented	3 Possibly could have a symmetry to make it 2D
+
+Common fields:
+	- vector of adjacent mesh indices
+	- size
+	- dimensions (serves secondary purpose of defining what form of the
+		shape should be used: 3D or 2D)
+		
+
+
+Mesh needs to be able to generate surfaces corresponding to each subdivision
+Mesh needs to be able to generate subdivisions based on various rules
+Mesh needs to be of different classes each of which does the subdivision
+	according to internal rules. Initial ones are sphere, cylinder,
+	spine, dendrite.
+Mesh corresponds to neuronal/cellular functional compartments. So within a
+	mesh all reacs are the same.
+Mesh supplies diffusion rules between mesh entries, including scaling factors
+	for non-cartesian cases.
+
+The ChemMesh class is a base class for different kinds of meshes. These
+include CylMesh, SpineMesh, OnionMesh, DendriticTree, and others 
+eventually to come.
+
+============================================================================
+18 June
+Began implementation. Made a new 'mesh' directory. Started with
+ChemMesh.cpp to go into this new directory.
+============================================================================
