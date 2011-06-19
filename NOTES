@@ -13500,6 +13500,9 @@ Compiled mesh directory. Checked it in. Yet to put in unit tests.
 
 Completed missing fields in CylMesh. Checkin 2779.
 
-Added first pass unit tests.
+Added first pass unit tests. Checkin 2780.
+
+Added second pass unit tests. These were pretty tricky, lots of fiddly
+details had to be fixed in the CylMesh to do with mesh partitioning.
 ============================================================================
 

@@ -19,16 +19,21 @@
 void testCylMesh()
 {
 	CylMesh cm;
-	vector< double > coords( 8 );
-	coords[0] = 1;
-	coords[1] = 2;
-	coords[2] = 3;
-	coords[3] = 1;
+	assert( cm.getMeshType( 0 ) == CYL );
+	assert( cm.getMeshDimensions( 0 ) == 3 );
+	assert( cm.getDimensions() == 3 );
 
-	coords[4] = 3;
-	coords[5] = 5;
-	coords[6] = 7;
-	coords[7] = 2;
+	vector< double > coords( 8 );
+	coords[0] = 1; // X0
+	coords[1] = 2; // Y0
+	coords[2] = 3; // Z0
+
+	coords[3] = 3; // X1
+	coords[4] = 5; // Y1
+	coords[5] = 7; // Z1
+
+	coords[6] = 1; // R0
+	coords[7] = 2; // R1
 
 	cm.setCoords( coords );
 
@@ -57,11 +62,49 @@ void testCylMesh()
 	for ( unsigned int i = 0; i < temp.size(); ++i )
 		assert( doubleEq( temp[i], coords[i] + 1 ) );
 	
-	assert( doubleEq( cm.getTotLength() , sqrt( 29.0 ) ) );
+	double totLen = sqrt( 29.0 );
+	assert( doubleEq( cm.getTotLength() , totLen ) );
 
 	cm.setLambda( 1.0 );
 	assert( cm.getNumEntries() == 5 );
-	assert( doubleEq( cm.getLambda(), sqrt( 29.0 ) / 5 ) );
+	assert( doubleEq( cm.getLambda(), totLen / 5 ) );
+
+	///////////////////////////////////////////////////////////////
+	assert( doubleEq( cm.getMeshEntrySize( 2 ), 2.5 * 2.5 * PI * totLen / 5 ) );
+
+	///////////////////////////////////////////////////////////////
+	// LenSlope/totLen = 0.016
+	// Here are the fractional positions
+	// part0 = 1/5 - 0.032: end= 0.2 - 0.032
+	// part1 = 1/5 - 0.016: end = 0.4 - 0.048
+	// part2 = 1/5			: end = 0.6 - 0.048
+	// part3 = 1/5 + 0.016	: end = 0.8 - 0.032
+	// part4 = 1/5 + 0.032	: end = 1
+
+	coords = cm.getCoordinates( 2 );
+	assert( coords.size() == 10 );
+	assert( doubleEq( coords[0], 2 + (0.4 - 0.048) * 2 ) );
+	assert( doubleEq( coords[1], 3 + (0.4 - 0.048) * 3 ) );
+	assert( doubleEq( coords[2], 4 + (0.4 - 0.048) * 4 ) );
+
+	assert( doubleEq( coords[3], 2 + (0.6 - 0.048) * 2 ) );
+	assert( doubleEq( coords[4], 3 + (0.6 - 0.048) * 3 ) );
+	assert( doubleEq( coords[5], 4 + (0.6 - 0.048) * 4 ) );
+
+	assert( doubleEq( coords[6], 2.4 ) );
+	assert( doubleEq( coords[7], 2.6 ) );
+
+	///////////////////////////////////////////////////////////////
+	vector< unsigned int > neighbors = cm.getNeighbors( 2 );
+	assert( neighbors.size() == 2 );
+	assert( neighbors[0] == 1 );
+	assert( neighbors[1] == 3 );
+
+	///////////////////////////////////////////////////////////////
+	coords = cm.getDiffusionArea( 2 );
+	assert( coords.size() == 2 );
+	assert( doubleEq( coords[0], 2.4 * 2.4 * PI ) );
+	assert( doubleEq( coords[1], 2.6 * 2.6 * PI ) );
 
 	cout << "." << flush;
 }

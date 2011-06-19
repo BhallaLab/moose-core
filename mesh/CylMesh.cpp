@@ -67,7 +67,7 @@ const Cinfo* CylMesh::initCinfo()
 		);
 		static ValueFinfo< CylMesh, vector< double > > coords(
 			"coords",
-			"All the coords as a single vector: x0 y0 z0 r0 x1 y1 z1 r1",
+			"All the coords as a single vector: x0 y0 z0  x1 y1 z1  r0 r1",
 			&CylMesh::setCoords,
 			&CylMesh::getCoords
 		);
@@ -138,14 +138,14 @@ CylMesh::CylMesh()
 		numEntries_( 1 ),
 		useCaps_( 0 ),
 		isToroid_( 0 ),
-		r0_( 1.0 ),
 		x0_( 0.0 ),
 		y0_( 0.0 ),
 		z0_( 0.0 ),
-		r1_( 1.0 ),
 		x1_( 1.0 ),
 		y1_( 0.0 ),
 		z1_( 0.0 ),
+		r0_( 1.0 ),
+		r1_( 1.0 ),
 		lambda_( 1.0 ),
 		totLen_( 1.0 ),
 		rSlope_( 0.0 ),
@@ -183,8 +183,6 @@ void CylMesh::updateCoords()
 	}
 	totLen_ = temp;
 
-	rSlope_ = ( r1_ - r0_ ) / totLen_;
-	lenSlope_ = rSlope_ * ( r0_ + r1_ );
 
 	temp = totLen_ / lambda_;
 	if ( temp < 1.0 ) {
@@ -194,6 +192,8 @@ void CylMesh::updateCoords()
 		numEntries_ = static_cast< unsigned int >( round ( temp ) );
 		lambda_ = totLen_ / numEntries_;
 	}
+	rSlope_ = ( r1_ - r0_ ) / numEntries_;
+	lenSlope_ = lambda_ * rSlope_ * 2 / ( r0_ + r1_ );
 }
 
 void CylMesh::setX0( double v )
@@ -291,11 +291,12 @@ void CylMesh::setCoords( vector< double > v )
 	x0_ = v[0];
 	y0_ = v[1];
 	z0_ = v[2];
-	r0_ = v[3];
 
-	x1_ = v[4];
-	y1_ = v[5];
-	z1_ = v[6];
+	x1_ = v[3];
+	y1_ = v[4];
+	z1_ = v[5];
+
+	r0_ = v[6];
 	r1_ = v[7];
 
 	updateCoords();
@@ -308,11 +309,12 @@ vector< double > CylMesh::getCoords() const
 	ret[0] = x0_;
 	ret[1] = y0_;
 	ret[2] = z0_;
-	ret[3] = r0_;
 
-	ret[4] = x1_;
-	ret[5] = y1_;
-	ret[6] = z1_;
+	ret[3] = x1_;
+	ret[4] = y1_;
+	ret[5] = z1_;
+
+	ret[6] = r0_;
 	ret[7] = r1_;
 
 	return ret;
@@ -364,7 +366,7 @@ unsigned int CylMesh::getMeshDimensions( unsigned int fid ) const
  * lambda = length constant for diffusive spread
  * len = length of each mesh entry
  * totLen = total length of cylinder
- * lambda = k / r^2
+ * lambda = k * r^2
  * Each entry has the same number of lambdas, L = len/lambda.
  * Thinner entries have shorter lambda.
  * This gives a moderately nasty quadratic.
@@ -378,19 +380,38 @@ unsigned int CylMesh::getMeshDimensions( unsigned int fid ) const
  * dr/dx = (r1-r0)/len
  * ri = r0 + i * dr/dx
  * r(i+1)-ri = (r1-r0)/numEntries
- * dlen/dx = dr/dx * dlen/dr = ( (r1-r0)/len ) * 2r
- * To linearize, let 2r = r0 + r1.
- * so dlen/dx = ( (r1-r0)/len ) * ( r0 + r1 )
- * len(i) = len0 + i * dlen/dx
- * len0 = totLen/numEntries - ( numEntries/2 ) * dlen/dx 
+ * len = k * r^2
+ * we get k from integ_r0,r1( len.dr ) = totLen
+ * So k.r^3/3 | r0, r1 = totLen
+ * => k/3 * ( r1^3 - r0^3) = totLen
+ * => k = 3 * totLen / (r1^3 - r0^3);
+ * This is bad if r1 == r0, and is generally unpleasant.
+ * 
+ * Simple definition of rSlope:
+ * rSlope is measured per meshEntry, not per length:
+ * rSlope = ( r1 - r0 ) / numEntries;
+ * Let's just compute len0 from r0 and lambda.
+ * len0/lambda = 2 * r0 / (r0 + r1)
+ * so len0 = lambda * 2 * r0 / (r0 + r1)
+ * and dlen/dx = lenSlope = lambda * rSlope * 2/(r0 + r1)
+ *
+ * Drop the following calculations:
+ * // dlen/dx = dr/dx * dlen/dr = ( (r1-r0)/len ) * 2k.r
+ * // To linearize, let 2r = r0 + r1.
+ * // so dlen/dx = ( (r1-r0)/len ) * k * ( r0 + r1 )
+ * // len(i) = len0 + i * dlen/dx
+ * // len0 = totLen/numEntries - ( numEntries/2 ) * dlen/dx 
  */
 
 /// Virtual function to return volume of mesh Entry.
 double CylMesh::getMeshEntrySize( unsigned int fid ) const
 {
- 	double len0 = totLen_/numEntries_ - ( numEntries_/2 ) * lenSlope_;
+ 	double len0 = lambda_ * 2 * r0_ / ( r0_ + r1_ );
+
 	double ri = r0_ + (fid + 0.5) * rSlope_;
-	return (len0 + fid * lenSlope_) * ri * ri * PI;
+	double leni = len0 + ( fid + 0.5 ) * lenSlope_;
+
+	return leni * ri * ri * PI;
 }
 
 /// Virtual function to return coords of mesh Entry.
@@ -398,12 +419,15 @@ double CylMesh::getMeshEntrySize( unsigned int fid ) const
 vector< double > CylMesh::getCoordinates( unsigned int fid ) const
 {
 	vector< double > ret(10, 0.0);
-	double frac = static_cast< double >( numEntries_ )/2.0;
+ 	double len0 = lambda_ * 2 * r0_ / ( r0_ + r1_ );
+ 	// double len0 = lambda_ * 2 * ( r0_ + rSlope_ / 0.5) / ( r0_ + r1_ );
+	double lenStart = len0 + lenSlope_ * 0.5;
 
-	double axialStart = 
-		fid * totLen_/numEntries_ + (fid - frac ) * lenSlope_;
+	double axialStart = fid * lenStart + ( ( fid * (fid - 1 ) )/2 ) * lenSlope_;
+		// fid * totLen_/numEntries_ + (fid - frac ) * lenSlope_;
 	double axialEnd = 
-		(fid + 1) * totLen_/numEntries_ + (fid - frac + 1.0) * lenSlope_;
+		(fid + 1) * lenStart + ( ( fid * (fid + 1 ) )/2 ) * lenSlope_;
+		// (fid + 1) * totLen_/numEntries_ + (fid - frac + 1.0) * lenSlope_;
 
 	ret[0] = x0_ + (x1_ - x0_ ) * axialStart/totLen_;
 	ret[1] = y0_ + (y1_ - y0_ ) * axialStart/totLen_;
