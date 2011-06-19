@@ -103,15 +103,16 @@ class CylMesh: public ChemMesh
 		bool useCaps_; // Flag: Should the ends have hemispherical caps?
 		bool isToroid_; // Flag: Should the ends loop around mathemagically?
 
-		double r0_;	/// Radius at one end
 		double x0_; /// coords
 		double y0_; /// coords
 		double z0_; /// coords
 
-		double r1_; /// Radius at other end
 		double x1_; /// coords
 		double y1_; /// coords
 		double z1_; /// coords
+
+		double r0_;	/// Radius at one end
+		double r1_; /// Radius at other end
 
 		double lambda_;	/// Length constant for diffusion
 
