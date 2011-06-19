@@ -25,6 +25,32 @@ class CylMesh: public ChemMesh
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
 
+		void setX0( double v );
+		double getX0() const;
+		void setY0( double v );
+		double getY0() const;
+		void setZ0( double v );
+		double getZ0() const;
+		void setR0( double v );
+		double getR0() const;
+
+		void setX1( double v );
+		double getX1() const;
+		void setY1( double v );
+		double getY1() const;
+		void setZ1( double v );
+		double getZ1() const;
+		void setR1( double v );
+		double getR1() const;
+
+		void setCoords( vector< double > v );
+		vector< double > getCoords() const;
+
+		void setLambda( double v );
+		double getLambda() const;
+
+		double getTotLength() const;
+
 		unsigned int innerGetDimensions() const;
 
 		//////////////////////////////////////////////////////////////////

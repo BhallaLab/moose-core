@@ -79,28 +79,28 @@ const Cinfo* ChemMesh::initCinfo()
 			&ChemMesh::getNumEntries
 		);
 
-	static Finfo* chemComptFinfos[] = {
+	static Finfo* chemMeshFinfos[] = {
 		&size,	// ReadOnlyValue
 		&dimensions,	// ReadOnlyValue
 		&entryFinfo,	// FieldElementFinfo
 	};
 
-	static Cinfo chemComptCinfo (
+	static Cinfo chemMeshCinfo (
 		"ChemMesh",
 		Neutral::initCinfo(),
-		chemComptFinfos,
-		sizeof( chemComptFinfos ) / sizeof ( Finfo* ),
+		chemMeshFinfos,
+		sizeof( chemMeshFinfos ) / sizeof ( Finfo* ),
 		new Dinfo< short >()
 	);
 
-	return &chemComptCinfo;
+	return &chemMeshCinfo;
 }
 
 //////////////////////////////////////////////////////////////
 // Basic class Definitions
 //////////////////////////////////////////////////////////////
 
-static const Cinfo* chemComptCinfo = ChemMesh::initCinfo();
+static const Cinfo* chemMeshCinfo = ChemMesh::initCinfo();
 
 ChemMesh::ChemMesh()
 	: 
@@ -143,7 +143,8 @@ MeshEntry* ChemMesh::lookupEntry( unsigned int index )
 
 void ChemMesh::setNumEntries( unsigned int num )
 {
-	cout << "Warning: ChemMesh::setNumEntries: No effect. Use subclass-specific functions\nto build or resize mesh.\n";
+	this->innerSetNumEntries( num );
+	// cout << "Warning: ChemMesh::setNumEntries: No effect. Use subclass-specific functions\nto build or resize mesh.\n";
 }
 
 unsigned int ChemMesh::getNumEntries() const
