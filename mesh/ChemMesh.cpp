@@ -149,5 +149,5 @@ void ChemMesh::setNumEntries( unsigned int num )
 
 unsigned int ChemMesh::getNumEntries() const
 {
-	return this->innerNumEntries();
+	return this->innerGetNumEntries();
 }

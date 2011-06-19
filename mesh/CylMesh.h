@@ -22,6 +22,16 @@ class CylMesh: public ChemMesh
 		CylMesh();
 		~CylMesh();
 		//////////////////////////////////////////////////////////////////
+		//  Utility func
+		//////////////////////////////////////////////////////////////////
+		/**
+		 * Recomputes all local coordinate and meshing data following
+		 * a change in any of the coord parameters
+		 */
+
+		void updateCoords();
+
+		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
 
@@ -77,15 +87,15 @@ class CylMesh: public ChemMesh
 		/**
 		 * Inherited virtual func. Returns number of MeshEntry in array
 		 */
-		unsigned int innerNumEntries() const;
+		unsigned int innerGetNumEntries() const;
+		/// Inherited virtual func.
+		void innerSetNumEntries( unsigned int n );
 		
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
 
 		static const Cinfo* initCinfo();
-
-	protected:
 
 	private:
 		double size_; /// Total Volume

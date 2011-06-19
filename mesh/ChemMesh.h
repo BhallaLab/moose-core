@@ -39,7 +39,7 @@ class ChemMesh
 		 * Returns the number of MeshEntries on this ChemMesh
 		 */
 		unsigned int getNumEntries() const;
-		virtual unsigned int innerNumEntries() const = 0;
+		virtual unsigned int innerGetNumEntries() const = 0;
 
 		/**
 		 * Dummy function. The numEntries is only set by other functions
