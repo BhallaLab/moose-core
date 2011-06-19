@@ -46,6 +46,7 @@ class ChemMesh
 		 * that define compartment decomposition.
 		 */
 		void setNumEntries( unsigned int num );
+		virtual void innerSetNumEntries( unsigned int n ) = 0;
 
 		/**
 		 * Returns the matched lookupEntry
