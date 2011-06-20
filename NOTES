@@ -13516,5 +13516,26 @@ Next:
 ============================================================================
 20 June.
 Added more unit tests for MOOSE field access to CylMesh. Lots of bugs cleaned
-up, now clears the tests.
+up, now clears the tests. Checkin 2782.
+
+Designing Cube mesh. If it is to do more than just make big blocks, I need
+to specify a surface within which the mesh exists.
+
+- Perimeter polygon. Like contour lines in z. Each perimeter needs one 
+	extra point to define 'inside', that is, where to do the meshing.
+- Collection of surfaces, through a geom. Will need somewhat more to figure out
+	inside, and it will also be tricky to deal with each surface to build up
+	composite.
+- Could set up perimeter as either a LookupValueFinfo, or as a FieldElement
+	handling a set of geoms. Still is nasty to figure out what is inside.
+	
+Rather than deal with this, I'll set up a simple vector in which each entry
+stores the index that it would have had if it were a complete cuboid, and a 
+bitmapped flag to say which of the six directions permits diffusion. The 
+construction of this vector is another whole exercise.
+I'll need another vector from the full cuboid to the actual mesh set. May
+need to use a multi-dim sparse matrix in some cases. This obviates the need
+for the bitmapped flag: the requested entries will simply be empty.
+Iuuimplemented first pass at CubeMesh. Compiles, no tests yet.
+
 ============================================================================

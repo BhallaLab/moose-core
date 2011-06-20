@@ -19,19 +19,19 @@ const Cinfo* CylMesh::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static ValueFinfo< CylMesh, double > x0(
 			"x0",
-			"Radius of one end",
+			"x coord of one end",
 			&CylMesh::setX0,
 			&CylMesh::getX0
 		);
 		static ValueFinfo< CylMesh, double > y0(
 			"y0",
-			"Radius of one end",
+			"y coord of one end",
 			&CylMesh::setY0,
 			&CylMesh::getY0
 		);
 		static ValueFinfo< CylMesh, double > z0(
 			"z0",
-			"Radius of one end",
+			"z coord of one end",
 			&CylMesh::setZ0,
 			&CylMesh::getZ0
 		);
@@ -43,25 +43,25 @@ const Cinfo* CylMesh::initCinfo()
 		);
 		static ValueFinfo< CylMesh, double > x1(
 			"x1",
-			"Radius of one end",
+			"x coord of other end",
 			&CylMesh::setX1,
 			&CylMesh::getX1
 		);
 		static ValueFinfo< CylMesh, double > y1(
 			"y1",
-			"Radius of one end",
+			"y coord of other end",
 			&CylMesh::setY1,
 			&CylMesh::getY1
 		);
 		static ValueFinfo< CylMesh, double > z1(
 			"z1",
-			"Radius of one end",
+			"z coord of other end",
 			&CylMesh::setZ1,
 			&CylMesh::getZ1
 		);
 		static ValueFinfo< CylMesh, double > r1(
 			"r1",
-			"Radius of one end",
+			"Radius of other end",
 			&CylMesh::setR1,
 			&CylMesh::getR1
 		);
