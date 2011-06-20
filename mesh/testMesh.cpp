@@ -73,7 +73,8 @@ void testCylMesh()
 	assert( doubleEq( cm.getMeshEntrySize( 2 ), 2.5 * 2.5 * PI * totLen / 5 ) );
 
 	///////////////////////////////////////////////////////////////
-	// LenSlope/totLen = 0.016
+	// LenSlope/totLen = 0.016 = 
+	// 	1/numEntries * (r1-r0)/numEntries * 2/(r0+r1) = 1/25 * 1 * 2/5
 	// Here are the fractional positions
 	// part0 = 1/5 - 0.032: end= 0.2 - 0.032
 	// part1 = 1/5 - 0.016: end = 0.4 - 0.048
@@ -109,7 +110,67 @@ void testCylMesh()
 	cout << "." << flush;
 }
 
+
+/**
+ * mid-level tests for the CylMesh object, using MOOSE calls.
+ */
+void testMidLevelCylMesh()
+{
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< unsigned int > dims( 1, 1 );
+
+	Id cylId = s->doCreate( "CylMesh", Id(), "cyl", dims, 0 );
+	Id meshId( cylId.value() + 1 );
+
+	vector< double > coords( 8 );
+	coords[0] = 1; // X0
+	coords[1] = 2; // Y0
+	coords[2] = 3; // Z0
+
+	coords[3] = 3; // X1
+	coords[4] = 5; // Y1
+	coords[5] = 7; // Z1
+
+	coords[6] = 1; // R0
+	coords[7] = 2; // R1
+
+	bool ret = Field< vector< double > >::set( cylId, "coords", coords );
+	assert( ret );
+
+	assert( doubleEq( Field< double >::get( cylId, "x0" ), 1 ) );
+	assert( doubleEq( Field< double >::get( cylId, "y0" ), 2 ) );
+	assert( doubleEq( Field< double >::get( cylId, "z0" ), 3 ) );
+	assert( doubleEq( Field< double >::get( cylId, "x1" ), 3 ) );
+	assert( doubleEq( Field< double >::get( cylId, "y1" ), 5 ) );
+	assert( doubleEq( Field< double >::get( cylId, "z1" ), 7 ) );
+	assert( doubleEq( Field< double >::get( cylId, "r0" ), 1 ) );
+	assert( doubleEq( Field< double >::get( cylId, "r1" ), 2 ) );
+
+	ret = Field< double >::set( cylId, "lambda", 1 );
+	assert( ret );
+
+	assert( meshId()->dataHandler()->localEntries() == 5 );
+
+	unsigned int n = Field< unsigned int >::get( cylId, "num_meshEntries" );
+	assert( n == 5 );
+
+	ObjId oid( meshId, DataId( 0, 2 ) );
+
+	double totLen = sqrt( 29.0 );
+	assert( doubleEq( Field< double >::get( oid, "size" ),
+		1.5 * 1.5 * PI * totLen / 5 ) );
+
+	vector< unsigned int > neighbors = 
+		Field< vector< unsigned int > >::get( oid, "neighbors" );
+	assert( neighbors.size() == 2 );
+	assert( neighbors[0] = 1 );
+	assert( neighbors[1] = 3 );
+
+	cout << "." << flush;
+}
+
 void testMesh()
 {
 	testCylMesh();
+	testMidLevelCylMesh();
 }
