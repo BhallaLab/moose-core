@@ -13,6 +13,7 @@ OBJ = \
 	ChemMesh.o	\
 	MeshEntry.o	\
 	CylMesh.o	\
+	CubeMesh.o	\
 	testMesh.o	\
 
 HEADERS = \
@@ -25,6 +26,7 @@ $(OBJ)	: $(HEADERS)
 MeshEntry.o:	MeshEntry.h
 ChemMesh.o:	ChemMesh.h MeshEntry.h
 CylMesh.o:	ChemMesh.h CylMesh.h MeshEntry.h
+CubeMesh.o:	ChemMesh.h CubeMesh.h MeshEntry.h
 testMesh.o:	MeshEntry.h ChemMesh.h CylMesh.h
 
 .cpp.o:
