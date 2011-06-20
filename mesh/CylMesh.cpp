@@ -115,10 +115,10 @@ const Cinfo* CylMesh::initCinfo()
 
 	static Cinfo cylMeshCinfo (
 		"CylMesh",
-		Neutral::initCinfo(),
+		ChemMesh::initCinfo(),
 		cylMeshFinfos,
 		sizeof( cylMeshFinfos ) / sizeof ( Finfo* ),
-		new Dinfo< short >()
+		new Dinfo< CylMesh >()
 	);
 
 	return &cylMeshCinfo;

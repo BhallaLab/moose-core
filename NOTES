@@ -13504,5 +13504,17 @@ Added first pass unit tests. Checkin 2780.
 
 Added second pass unit tests. These were pretty tricky, lots of fiddly
 details had to be fixed in the CylMesh to do with mesh partitioning.
-============================================================================
+Checkin 2781.
 
+Next: 
+	- Add more unit tests for the MOOSE field access of the CylMesh
+	- Implement the cuboid mesh.
+	- Get them to talk to reac systems. See if there is a smart
+		way to set up messaging (other than SparseMsg).
+	- Get them to talk to the solver.
+
+============================================================================
+20 June.
+Added more unit tests for MOOSE field access to CylMesh. Lots of bugs cleaned
+up, now clears the tests.
+============================================================================
