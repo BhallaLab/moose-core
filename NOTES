@@ -13536,6 +13536,10 @@ construction of this vector is another whole exercise.
 I'll need another vector from the full cuboid to the actual mesh set. May
 need to use a multi-dim sparse matrix in some cases. This obviates the need
 for the bitmapped flag: the requested entries will simply be empty.
-Iuuimplemented first pass at CubeMesh. Compiles, no tests yet.
+
+Implemented first pass at CubeMesh. Compiles, no tests yet. Checkin 2783.
+Working on unit tests.
 
 ============================================================================
+21 June
+Added in first pass of unit tests to CubeMesh. Clears.
