@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sun Feb 28 18:17:56 2010 (+0530)
 // Version: 
-// Last-Updated: Tue Nov 16 17:49:43 2010 (+0530)
+// Last-Updated: Tue Jun 21 16:00:07 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 510
+//     Update #: 534
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -172,7 +172,7 @@ NMDAChan::NMDAChan(): c0_(16.0),
                       x_(0.0),
                       y_(0.0),
                       Mg_(1.5), // mM (value from Traub et al 2005)
-                      unblocked_(0.0),
+                      unblocked_(1.0),
                       saturation_(DBL_MAX)
 {
     tau2_ = 0.005;
@@ -314,6 +314,15 @@ unsigned int NMDAChan::updateNumSynapse( Eref e )
     return synapses_.size();
 }
 
+void NMDAChan::innerSynapseFunc( const Conn* c, double time )
+{
+    	unsigned int index = c->targetIndex();
+	assert( index < synapses_.size() );
+	pendingEvents_.push( synapses_[index].event( time ) );
+        oldEvents_.push(synapses_[index].event(time + tau2_));
+
+}
+
 void NMDAChan::processFunc(const Conn* conn, ProcInfo info)
 {
     static_cast<NMDAChan*>(conn->data())->innerProcessFunc(conn->target(), info);
@@ -334,13 +343,12 @@ void NMDAChan::innerProcessFunc(Eref e, ProcInfo info)
         SynInfo event = pendingEvents_.top();
         pendingEvents_.pop();
         activation_ += event.weight / tau2_;
-        oldEvents_.push(event.event(tau2_));
     }
     // TODO: May need to optimize these exponentiations
-    double a1_ = exp(-c0_ * Vm_ - c1_);
-    double a2_ = 1000.0 * Mg_ * exp(-c2_ * Vm_ - c3_);
-    double b1_ = exp(c4_ * Vm_ + c5_ );
-    double b2_ = exp(c6_ * Vm_ + c7_);
+    double a1_ = exp(-c0_ * Vm_ - c1_); // A1_ in traub_nmda.mod
+    double a2_ = 1000.0 * Mg_ * exp(-c2_ * Vm_ - c3_); // A2_ in traub_nmda.mod
+    double b1_ = exp(c4_ * Vm_ + c5_ ); // B1_ in traub_nmda.mod
+    double b2_ = exp(c6_ * Vm_ + c7_); // B2_ in traub_nmda.mod
     // The following two lines calculate next values of x_ and y_
     // according to Forward Euler method:
     // x' = activation
@@ -348,10 +356,11 @@ void NMDAChan::innerProcessFunc(Eref e, ProcInfo info)
     x_ += activation_ * info->dt_; 
     y_ = y_ * decayFactor_;
     unblocked_ = 1.0 / ( 1.0 + (a1_ + a2_) * (a1_ * B1_ + a2_ * B2_) / (A_ * (a1_ * (B1_ + b1_) + a2_ * (B2_ + b2_))));
-    Gk_ = Gbar_* (x_ + y_) * unblocked_;
-    if (Gk_ > saturation_){
-        Gk_ = saturation_;
+    Gk_ = x_ + y_;
+    if (Gk_ > saturation_ * Gbar_){
+        Gk_ = saturation_ * Gbar_;
     }
+    Gk_  *= unblocked_;
     Ik_ = ( Ek_ - Vm_ ) * Gk_;
     // activation_ = 0.0;
     modulation_ = 1.0;
@@ -371,10 +380,10 @@ void NMDAChan::reinitFunc(const Conn* conn, ProcInfo info)
 void NMDAChan::innerReinitFunc(Eref e, ProcInfo info)
 {
     Gk_ = 0.0;
-    x_ = 0.0;
-    y_ = 0.0;
-    unblocked_ = 0.0;
-    activation_ = 0.0;
+    x_ = 0.0; // A in traub_nmda.mod
+    y_ = 0.0; // B in traub_nmda.mod
+    unblocked_ = 1.0; // Mg_unblocked in traub_nmda.mod
+    activation_ = 0.0; // equivalent to k in traub_nmda.mod
     modulation_ = 1.0;
     decayFactor_ = exp(-info->dt_ / tau1_);
     Ik_ = 0.0;
