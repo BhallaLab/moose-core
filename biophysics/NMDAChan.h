@@ -5,9 +5,9 @@
 // Maintainer: 
 // Created: Mon Mar  8 15:13:02 2010 (+0530)
 // Version: 
-// Last-Updated: Mon Apr 26 21:42:14 2010 (+0530)
+// Last-Updated: Mon Jun 20 16:37:15 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 80
+//     Update #: 85
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -54,25 +54,28 @@ class NMDAChan: public SynChan
   public:
     NMDAChan();
     static void setTransitionParam(const Conn* c, double value, const unsigned int& index);
-    void innerSetTransitionParam(double value, const unsigned int index);
     static double getTransitionParam(Eref e, const unsigned int& index);
-    double innerGetTransitionParam(unsigned int index);
     static double getUnblocked(Eref e);
-    double innerGetUnblocked();
     static double getSaturation(Eref e);
-    double innerGetSaturation();
     static void setSaturation(const Conn * conn, double value);
-    void innerSetSaturation(double value);
     static void processFunc(const Conn* conn, ProcInfo info);
-    void innerProcessFunc(Eref e, ProcInfo info);
     static void reinitFunc(const Conn* conn, ProcInfo info);
-    void innerReinitFunc(Eref e, ProcInfo info);
     static void setMgConc(const Conn* conn, double conc);
-    void innerSetMgConc(double value);
     static double getMgConc(Eref e);
-    double innerGetMgConc();
-    unsigned int updateNumSynapse( Eref e );
+    
   protected:
+    virtual void innerSynapseFunc( const Conn* c, double time );
+    virtual unsigned int updateNumSynapse( Eref e );
+    void innerSetTransitionParam(double value, const unsigned int index);
+    double innerGetTransitionParam(unsigned int index);
+    double innerGetUnblocked();
+    double innerGetSaturation();
+    void innerSetSaturation(double value);
+    virtual void innerProcessFunc(Eref e, ProcInfo info);
+    virtual void innerReinitFunc(Eref e, ProcInfo info);
+    void innerSetMgConc(double value);
+    double innerGetMgConc();
+    
     double c0_;
     double c1_;
     double c2_;
