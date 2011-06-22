@@ -14,11 +14,9 @@
 //Extreme barebones implementation of a vector lookup table.
 //This is a minimal 1D equivalent of the Interpol2D class. Provides simple
 //functions for getting and setting up the table, along with a lookup function.
-//All the parameters of the lookup table are read-only to avoid the hassle of
-//re-initializing and refilling the table. Admittedly too restrictive, should be
-//rewritten later on.
-
-using namespace std;
+//This class is to be used while supplying lookup tables to the MarkovChannel
+//class, in cases where the transition rate varies with either membrane voltage
+//or ligand concentration. 
 
 class VectorTable 
 {
@@ -31,12 +29,21 @@ class VectorTable
 	vector< double > getTable() const;
 
 	//Setting up the lookup table. 
-	void setTable( vector< double >, double, double );
+	void setTable( vector< double > );
 
 	unsigned int getDiv() const;	
+	void setDiv( unsigned int );
 	double getMin() const;
+	void setMin( double );
 	double getMax() const;
+	void setMax( double );
 	double getInvDx() const;
+
+	bool tableIsEmpty() const;
+
+	static const Cinfo* initCinfo();
+
+	friend istream& operator>>( istream&, VectorTable& ); 
 
 	private : 
 	unsigned int xDivs_;

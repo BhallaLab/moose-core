@@ -33,7 +33,7 @@ class MarkovChannel : public ChanBase
 	unsigned int getNumOpenStates( ) const;
 	void setNumOpenStates( unsigned int );
 
-	vector< vector< double > > getInstRates( ) const;
+//	vector< vector< double > > getInstRates( ) const;
 
 	vector< string > getStateLabels( ) const;
 	void setStateLabels( vector< string > );
@@ -56,38 +56,10 @@ class MarkovChannel : public ChanBase
 	vector< double > getGbars( ) const;
 	void setGbars( vector< double > );
 
-	//Couple of dummy get functions. 
-	vector< double > getOneParamRateTable( unsigned int, unsigned int );
-	vector< vector< double > > getTwoParamRateTable( unsigned int, unsigned int );
-	void setOneParamRateTable( vector< unsigned int >, vector< double >,  vector< double >, bool ligandFlag );
-	void setTwoParamRateTable( vector< unsigned int >, vector< double >, vector< vector< double > >);
-
-//	unsigned int findByteSize();
-
-	//Type-independent lookup function for rate.
-//	void lookupRate( unsigned int, unsigned int, vector<double>, double* );
-
-	//Updating the rates of transiton at each time step.
-	void updateRates();
-
-	//Sets those rates of transition which are constant throughout the time
-	//interval.
-	void initConstantRates();
-
-/*	//Function to return status of initialization of channel. Returns true if all
-	//the parameters of the channel i.e. number of states, number of open states,
-	//conductances, rate tables have all been initialized. This is to prevent
-	//accidental changes in parameters while setting parameters.
-	bool channelIsInitialized();	*/
-
-	//GSL related functions.
-	static int evalGslSystem( double t, const double* y, double* yprime, void* s );
-	int innerEvalGslSystem( double t, const double* y, double* yprime );
-
-//	void initGslSolver();
-
-	//DestFinfo functions.
-	void setupRateTables( unsigned int );
+	//////////////////////
+	//MsgDest functions
+	/////////////////////
+	
 	void process( const Eref&, const ProcPtr);
 	void reinit( const Eref&, const ProcPtr);
 	void handleLigandConc( double );
@@ -98,16 +70,11 @@ class MarkovChannel : public ChanBase
 	double ligandConc_;								//Ligand concentration.
 	unsigned int numStates_;					//Total number of states.
 	unsigned int numOpenStates_;			//Number of open (conducting) states.
-	vector< vector< double > > A_;		//Instantaneous rate matrix.
 
 	vector< string > stateLabels_;
 	vector< double > state_;					//Probabilities of occupancy of each state.
 	vector< double > initialState_;
 	vector< double > Gbars_;		//Conductance associated with each open state.
-
-	MarkovRateTable* rateTables_;
-
-//	MarkovGsl solver_;
 };
 
 #endif
