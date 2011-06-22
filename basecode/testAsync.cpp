@@ -770,6 +770,50 @@ void test2ArgSetVec()
 	delete i2();
 }
 
+void testFastGet()
+{
+	const Cinfo* ic = IntFire::initCinfo();
+	const Finfo* gf = ic->findFinfo("spike");
+	const Finfo* vmf = ic->findFinfo("get_Vm");
+	assert( gf );
+	const SrcFinfo* sgf = dynamic_cast< const SrcFinfo* >( gf );
+	assert( sgf );
+
+	unsigned int size = 100;
+	vector< unsigned int > dims( 1, size );
+	string arg;
+	Id srcId = Id::nextId();
+	Element* src = new Element( srcId, ic, "src", dims, 1 );
+	Id tgtId = Id::nextId();
+	Element* tgt = new Element( tgtId, ic, "tgt", dims, 1 );
+
+	for ( unsigned int i = 0; i < size; ++i ) {
+		IntFire* f = reinterpret_cast< IntFire* >( tgt->dataHandler()->data( i ) );
+		f->setVm( i * i );
+	}
+
+	Msg* m = new OneToOneMsg( Msg::nextMsgId(), src, tgt );
+	assert( m );
+	assert( sgf->addMsg( vmf, m->mid(), src ) );
+
+	const vector< MsgFuncBinding >* mfb = 
+		src->getMsgAndFunc( sgf->getBindIndex() );
+	assert( mfb->size() > 0 );
+
+	FuncId fid = (*mfb)[0].fid;
+	MsgId mid = (*mfb)[0].mid;
+	assert (m->mid() == mid );
+	for ( unsigned int i = 0; i < size; ++i ) {
+		Eref srcer( src, i );
+		double v = Field< double >::fastGet( srcer, m->mid(), fid );
+		assert( doubleEq( v, i * i ) );
+	}
+
+	delete srcId();
+	delete tgtId();
+	cout << "." << flush;
+}
+
 void testSetRepeat()
 {
 	const Cinfo* ic = IntFire::initCinfo();
@@ -2499,6 +2543,7 @@ void testAsync( )
 	testSetGetSynapse();
 	testSetGetVec();
 	test2ArgSetVec();
+	testFastGet();
 	testSetRepeat();
 	testStrSet();
 	testStrGet();

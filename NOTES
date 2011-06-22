@@ -13663,4 +13663,9 @@ Q: How do objects find their size?
 Implemented last one. It has a lot of promise and should be useful in many
 cases. Ripple effects through all Msgs. Also had to comment on regression
 tests on ReadKkit due to ongoing work. fastGet not yet tested but compiles.
+
+Checkin 2787.
+
+Added unit test for fastGet. Works.
+
 ============================================================================
