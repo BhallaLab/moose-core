@@ -13666,6 +13666,8 @@ tests on ReadKkit due to ongoing work. fastGet not yet tested but compiles.
 
 Checkin 2787.
 
-Added unit test for fastGet. Works.
+Added unit test for fastGet. Works. Checkin 2789
+Need to add section to test for it to look up FieldElements.
+Added section for FieldElements. Revealed problems, fixed.
 
 ============================================================================

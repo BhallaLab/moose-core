@@ -809,8 +809,44 @@ void testFastGet()
 		assert( doubleEq( v, i * i ) );
 	}
 
+	dims[0] = 1;
+	Id tgtId2 = Id::nextId();
+	Element* tgt2 = new Element( tgtId2, ic, "tgt2", dims, 1 );
+	Id synId( tgtId2.value() + 1 );
+	Element* syn = synId();
+	assert ( syn != 0 );
+	assert ( syn->getName() == "synapse" );
+	bool ret = Field< unsigned int >::set( ObjId( tgtId2, 0 ), "numSynapses", size );
+	assert( ret );
+	assert( syn->dataHandler()->getFieldArraySize( 0 ) == size );
+
+	for ( unsigned int i = 0; i < size; ++i ) {
+		Synapse* f = reinterpret_cast< Synapse* >( syn->dataHandler()->data( DataId( 0, i ) ) );
+		f->setWeight( 5 + 10 * i - i * i );
+	}
+
+	const Cinfo* sc = Synapse::initCinfo();
+	const Finfo* wtf = sc->findFinfo("get_weight");
+	Msg* m2 = new OneToOneMsg( Msg::nextMsgId(), src, syn );
+	assert( m2 );
+	assert( sgf->addMsg( wtf, m2->mid(), src ) );
+
+	mfb = src->getMsgAndFunc( sgf->getBindIndex() );
+	assert( mfb->size() == 2 );
+
+	fid = (*mfb)[1].fid;
+	mid = (*mfb)[1].mid;
+	assert (m2->mid() == mid );
+	for ( unsigned int i = 0; i < size; ++i ) {
+		Eref srcer( src, i );
+		double v = Field< double >::fastGet( srcer, m2->mid(), fid );
+		assert( doubleEq( v, 5 + 10 * i - i * i ) );
+	}
+
+
 	delete srcId();
 	delete tgtId();
+	delete tgtId2();
 	cout << "." << flush;
 }
 
