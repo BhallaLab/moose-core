@@ -63,17 +63,23 @@ void OneToOneMsg::exec( const char* arg, const ProcInfo* p ) const
 Eref OneToOneMsg::firstTgt( const Eref& src ) const 
 {
 	if ( src.element() == e1_ ) {
-		if ( e2_->dataHandler()->isDataHere( src.index() ) )
-			return Eref( e2_, src.index() );
-		else if ( e2_->dataHandler()->getFieldArraySize( 0 ) > 
-			src.index().data() )
+		if ( e2_->dataHandler()->getFieldArraySize( 0 ) == 0 ) {
+			if ( e2_->dataHandler()->isDataHere( src.index() ) )
+				return Eref( e2_, src.index() );
+		} else {
+			if ( e2_->dataHandler()->getFieldArraySize( 0 ) > 
+				src.index().data() )
 			return Eref( e2_, DataId( 0, src.index().data() ) );
+		}
 	} else if ( src.element() == e2_ ) {
-		if ( e1_->dataHandler()->isDataHere( src.index() ) )
-			return Eref( e1_, src.index() );
-		else if ( e1_->dataHandler()->getFieldArraySize( 0 ) > 
-			src.index().data() )
-			return Eref( e1_, DataId( 0, src.index().data() ) );
+		if ( e2_->dataHandler()->getFieldArraySize( 0 ) == 0 ) {
+			if ( e1_->dataHandler()->isDataHere( src.index() ) )
+				return Eref( e1_, src.index() );
+		} else {
+			if ( e1_->dataHandler()->getFieldArraySize( 0 ) > 
+				src.index().data() )
+				return Eref( e1_, DataId( 0, src.index().data() ) );
+		}
 	}
 	return Eref( 0, 0 );
 }
