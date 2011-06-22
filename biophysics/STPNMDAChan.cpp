@@ -123,7 +123,7 @@ STPNMDAChan::STPNMDAChan()
     c_[9] = 0.693;
     c_[10] = 3.101;
     Mg_ = 1.5; // mM  = value from Traub et al 2005
-    unblocked_ = 0.0;
+    unblocked_ = 1.0;
     saturation_ = DBL_MAX;    
     tau2_ = 0.005;
     tau1_ = 0.130;
@@ -136,8 +136,9 @@ STPNMDAChan::STPNMDAChan()
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
-void STPNMDAChan::innerSetTransitionParam(double value, const unsigned int index)
+void STPNMDAChan::innerSetTransitionParam(Eref e, double value, const unsigned int index)
 {
+    updateNumSynapse(e);
     if ((index < 0) || (index >= c_.size())){
         cout << "Error: STPNMDAChan::innerSetTransitionParam - index out of range." << endl;
         return;
@@ -147,20 +148,21 @@ void STPNMDAChan::innerSetTransitionParam(double value, const unsigned int index
 
 void STPNMDAChan::setTransitionParam(const Conn* conn, double value, const unsigned int& index )
 {
-    static_cast< STPNMDAChan* >( conn->data() )->innerSetTransitionParam(value, index);
+    static_cast< STPNMDAChan* >( conn->data() )->innerSetTransitionParam(conn->target(), value, index);
 }
 
 double STPNMDAChan::getTransitionParam(Eref e, const unsigned int& index)
 {
-    return static_cast< STPNMDAChan* >(e.data())->innerGetTransitionParam(index);
+    return static_cast< STPNMDAChan* >(e.data())->innerGetTransitionParam(e, index);
 }
 
 /**
    get the transition parameter according to index. See class
    documentation for more information.
 */
-double STPNMDAChan::innerGetTransitionParam(unsigned int index)
+double STPNMDAChan::innerGetTransitionParam(Eref e, unsigned int index)
 {
+    updateNumSynapse(e);
     if ((index < 0) || (index >= c_.size())){
         cout << "Error: The index must be between 0 and 10 (inclusive)." << endl;
         return 0.0;
@@ -246,7 +248,6 @@ void STPNMDAChan::innerProcessFunc(Eref e, ProcInfo info)
         SynInfo event = pendingEvents_.top();
         pendingEvents_.pop();
         activation_ += event.weight / tau2_;
-        oldEvents_.push(event.event(tau2_));
     }
     // TODO: May need to optimize these exponentiations
     double a1_ = exp(-c_[0] * Vm_ - c_[1]);
@@ -260,10 +261,11 @@ void STPNMDAChan::innerProcessFunc(Eref e, ProcInfo info)
     X_ += activation_ * info->dt_; 
     Y_ = Y_ * decayFactor_;
     unblocked_ = 1.0 / ( 1.0 + (a1_ + a2_) * (a1_ * B1_ + a2_ * B2_) / (A_ * (a1_ * (B1_ + b1_) + a2_ * (B2_ + b2_))));
-    Gk_ = Gbar_* (X_ + Y_) * unblocked_;
-    if (Gk_ > saturation_){
-        Gk_ = saturation_;
+    Gk_ = X_ + Y_;
+    if (Gk_ > saturation_ * Gbar_){
+        Gk_ = saturation_ * Gbar_;
     }
+    Gk_ *= unblocked_;
     Ik_ = ( Ek_ - Vm_ ) * Gk_;
     modulation_ = 1.0;
     for (unsigned int ii = 0; ii < synapses_.size(); ++ii){
@@ -285,7 +287,7 @@ void STPNMDAChan::innerReinitFunc( Eref e, ProcInfo info )
     Gk_ = 0.0;
     X_ = 0.0;
     Y_ = 0.0;
-    unblocked_ = 0.0;
+    unblocked_ = 1.0;
     activation_ = 0.0;
     modulation_ = 1.0;
     decayFactor_ = exp(-info->dt_ / tau1_);
@@ -320,6 +322,7 @@ void STPNMDAChan::innerSynapseFunc( const Conn* c, double time )
     if ( mtrand() < amp_[index] * F_[index] * D1_[index] * D2_[index] )
     {
         pendingEvents_.push(synapses_[index].event( time ));
+        oldEvents_.push(synapses_[index].event(time + tau2_));
     }
 }
 

@@ -175,6 +175,8 @@ static const Slot channelSlot =
 	initSTPSynChanCinfo()->getSlot( "channel" );
 static const Slot origChannelSlot =
 	initSTPSynChanCinfo()->getSlot( "origChannel" );
+static const Slot gkSlot =
+	initSTPSynChanCinfo()->getSlot( "GkSrc" );
 static const Slot ikSlot =
 	initSTPSynChanCinfo()->getSlot( "IkSrc" );
 static const Slot synapseSlot =
@@ -458,6 +460,7 @@ void STPSynChan::innerProcessFunc( Eref e, ProcInfo info )
     send2< double, double >( e, channelSlot, Gk_, Ek_ );
     send2< double, double >( e, origChannelSlot, Gk_, Ek_ );
     send1< double >( e, ikSlot, Ik_ );
+    send1< double >( e, gkSlot, Gk_ );    
 }
 
 /*
