@@ -5,9 +5,9 @@
 // Maintainer: 
 // Created: Mon Mar  8 15:13:02 2010 (+0530)
 // Version: 
-// Last-Updated: Mon Jun 20 16:37:15 2011 (+0530)
+// Last-Updated: Wed Jun 22 10:49:16 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 85
+//     Update #: 86
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -90,8 +90,8 @@ class NMDAChan: public SynChan
     double A_;
     double B1_;
     double B2_;
-    double x_;
-    double y_;
+    // double x_;
+    // double y_;
     double Mg_;
     double unblocked_;
     double saturation_;

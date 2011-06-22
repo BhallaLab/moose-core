@@ -24,40 +24,19 @@ class STPSynChan: public SynChan
   public:
     // Functions duplicated from SynChan
     STPSynChan();
-    ///////////////////////////////////////////////////
-    // Dest function definitions
-    ///////////////////////////////////////////////////
-
-    virtual void innerSynapseFunc( const Conn* c, double time );
-    void innerProcessFunc( Eref e, ProcInfo p );
-    void innerReinitFunc( Eref e,  ProcInfo p );
-
-    ///////////////////////////////////////////////////
-    // Utility function
-    ///////////////////////////////////////////////////
-    virtual unsigned int updateNumSynapse( Eref e );
 
     ///////////////////////////////////////
     // Functions specific to STPSynChan
     ///////////////////////////////////////
     static void setInitPr(const Conn* c, double p, const unsigned int& index);
-    void innerSetInitPr(Eref e, double value, const unsigned int& index);
     static double getInitPr(Eref e, const unsigned int& index);
-    double innerGetInitPr(Eref e, const unsigned int& index);
     static double getPr(Eref e, const unsigned int& index);
-    double innerGetPr(Eref e, const unsigned int& index);
     static void setInitF(const Conn* c, double p, const unsigned int& index);
-    void innerSetInitF(Eref e, double value, const unsigned int& index);
     static double getInitF(Eref e, const unsigned int& index);
-    double innerGetInitF(Eref e, const unsigned int& index);
     static void setInitD1(const Conn* c, double p, const unsigned int& index);
-    void innerSetInitD1(Eref e, double value, const unsigned int& index);
     static double getInitD1(Eref e, const unsigned int& index);
-    double innerGetInitD1(Eref e, const unsigned int& index);
     static void setInitD2(const Conn* c, double p, const unsigned int& index);
-    void innerSetInitD2(Eref e, double value, const unsigned int& index);
     static double getInitD2(Eref e, const unsigned int& index);
-    double innerGetInitD2(Eref e, const unsigned int& index);
     static void set_d1(const Conn* c, double value);
     static double get_d1(Eref e);
     static void set_d2(const Conn* c, double value);
@@ -79,6 +58,28 @@ class STPSynChan: public SynChan
 ///////////////////////////////////////////////////
 
   protected:
+    void innerSetInitPr(Eref e, double value, const unsigned int& index);
+    double innerGetInitPr(Eref e, const unsigned int& index);
+    double innerGetPr(Eref e, const unsigned int& index);
+    void innerSetInitF(Eref e, double value, const unsigned int& index);
+    double innerGetInitF(Eref e, const unsigned int& index);
+    void innerSetInitD1(Eref e, double value, const unsigned int& index);
+    double innerGetInitD1(Eref e, const unsigned int& index);
+    void innerSetInitD2(Eref e, double value, const unsigned int& index);
+    double innerGetInitD2(Eref e, const unsigned int& index);
+    ///////////////////////////////////////////////////
+    // Dest function definitions
+    ///////////////////////////////////////////////////
+
+    virtual void innerSynapseFunc( const Conn* c, double time );
+    virtual void innerProcessFunc( Eref e, ProcInfo p );
+    virtual void innerReinitFunc( Eref e,  ProcInfo p );
+
+    ///////////////////////////////////////////////////
+    // Utility function
+    ///////////////////////////////////////////////////
+    virtual unsigned int updateNumSynapse( Eref e );
+
     double d1_, d2_, deltaF_, tauD1_, tauD2_, tauF_, dt_tauF_, dt_tauD1_, dt_tauD2_;
     vector< double > initPr_, F_, D1_, D2_, initF_, initD1_, initD2_, amp_;
     
