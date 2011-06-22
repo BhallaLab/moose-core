@@ -68,6 +68,10 @@ class Interpol2D
 		double innerLookup( double x, double y ) const;
 		bool operator==( const Interpol2D& other ) const;
 		bool operator<( const Interpol2D& other ) const;
+
+		//Overloading the >> operator to allow use in OpFunc.
+		friend istream& operator>>( istream&, Interpol2D& );
+
 		double invDy() const {
 			return invDy_;
 		}

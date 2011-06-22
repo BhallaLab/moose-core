@@ -21,6 +21,8 @@ extern void testCompartmentProcess(); // Defined in Compartment.cpp
 extern void testSpikeGen(); // Defined in SpikeGen.cpp
 extern void testCaConc(); // Defined in CaConc.cpp
 extern void testNernst(); // Defined in Nernst.cpp
+extern void testMarkovRateTable(); //Defined in MarkovRateTable.cpp
+extern void testVectorTable();	//Defined in VectorTable.cpp
 /*
 extern void testSynChan(); // Defined in SynChan.cpp
 extern void testBioScan(); // Defined in BioScan.cpp
@@ -29,7 +31,6 @@ extern void testBioScan(); // Defined in BioScan.cpp
 void testHHGateCreation()
 {
 	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
-	// cout << "\nTesting HHChannel";
 	vector< unsigned int > dims( 1, 1 );
 	Id nid = shell->doCreate( "Neutral", Id(), "n", dims );
 	Id comptId = shell->doCreate( "Compartment", nid, "compt", dims );
@@ -501,27 +502,9 @@ void testHHChannel()
 	cout << "." << flush;
 }
 
-//
+/////////////////////////////////////
 // Markov Channel unit tests.
-//
-
-void pushIntoTable( Id mChanId, double val, int i, int j, bool flag )
-{
-	vector< unsigned int > intParams;	
-	vector< double > doubleParams;
-	vector< double > vecWrapper;
-
-	vecWrapper.push_back( val );
-
-	intParams.push_back( i );
-	intParams.push_back( j );
-
-	doubleParams.push_back( val );
-	doubleParams.push_back( val );
-
-	SetGet4< vector< unsigned int >, vector< double >, vector< double >, bool >::
-		set( mChanId, "setoneparam", intParams, doubleParams, vecWrapper, flag );
-}
+////////////////////////////////////
 
 //Sample current obtained from channel in Chapter 20, Sakmann & Neher, Pg. 603.
 //The current is sampled at intervals of 10 usec.
@@ -551,8 +534,9 @@ void testMarkovChannel()
 
 	Id nid = shell->doCreate( "Neutral", Id(), "n", dims );
 	Id comptId = shell->doCreate( "Compartment", nid, "compt", dims );
+	Id rateTabId = shell->doCreate( "MarkovRateTable", comptId, "rateTab", dims ); 
 	Id mChanId = shell->doCreate( "MarkovChannel", comptId, "mChan", dims );
-	Id gslSolverId = shell->doCreate( "MarkovGslSolver", mChanId, "gslSolver", dims );
+	Id gslSolverId = shell->doCreate( "MarkovGslSolver", comptId, "gslSolver", dims );
 
 	Id tabId = shell->doCreate( "Table", nid, "tab", dims );
 
@@ -560,12 +544,20 @@ void testMarkovChannel()
 			ObjId( mChanId ), "channel" );
 	assert( mid != Msg::badMsg );
 
-	mid = shell->doAddMsg( "Single", ObjId( tabId, 0 ), "requestData",
-			ObjId( mChanId, 0 ), "get_Ik" );
+	mid = shell->doAddMsg( "Single", ObjId( comptId ), "channel",
+			ObjId( rateTabId ), "channel" );
 	assert( mid != Msg::badMsg );
 
 	mid = shell->doAddMsg( "Single", ObjId( gslSolverId ), "stateOut", 
 			ObjId( mChanId ), "handlestate" );
+	assert( mid != Msg::badMsg );
+
+	mid = shell->doAddMsg("Single", ObjId( rateTabId ), "instratesOut",
+			ObjId( gslSolverId ), "handleQ" ); 
+
+	mid = shell->doAddMsg( "Single", ObjId( tabId, 0 ), "requestData",
+			ObjId( mChanId, 0 ), "get_Ik" );
+	assert( mid != Msg::badMsg );
 
 	//////////////////////////////////////////////////////////////////////
 	// set up compartment properties
@@ -574,7 +566,7 @@ void testMarkovChannel()
 	Field< double >::set( comptId, "Cm", 0.007854e-6 );
 	Field< double >::set( comptId, "Ra", 7639.44e3 ); // does it matter?
 	Field< double >::set( comptId, "Rm", 424.4e3 );
-	Field< double >::set( comptId, "Em", 0);	
+	Field< double >::set( comptId, "Em", -0.1 );	
 	Field< double >::set( comptId, "inject", 0 );
 	Field< double >::set( comptId, "initVm", -0.1 );
 
@@ -620,37 +612,46 @@ void testMarkovChannel()
 	Field< vector< double > >::set( mChanId, "gbar", gBars );
 
 	//Setting up rate tables.
-	SetGet1< unsigned int >::set( mChanId, "setuptables", 5 );
+	SetGet1< unsigned int >::set( rateTabId, "setuptables", 5 );
 
 	//Filling in values into one parameter rate table. Note that all rates here
 	//are constant.
-	pushIntoTable( mChanId, 0.05, 0, 1, false );
-	pushIntoTable( mChanId, 3, 0, 4, false );
-	pushIntoTable( mChanId, 0.000666667, 1, 0, false );
-	pushIntoTable( mChanId, 0.5, 1, 2, false );
-	pushIntoTable( mChanId, 15, 2, 1, false );
-	pushIntoTable( mChanId, 4, 2, 3, false );
-	pushIntoTable( mChanId, 0.015, 3, 0, false );
-	pushIntoTable( mChanId, 0.05, 3, 2, false );
-	pushIntoTable( mChanId, 2, 3, 4, false );
-	pushIntoTable( mChanId, 0.01, 4, 3, false );
+	SetGet3< unsigned int, unsigned int, double >::
+		set( rateTabId, "setconst", 0, 1, 0.05 );
+	SetGet3< unsigned int, unsigned int, double >::
+		set( rateTabId, "setconst", 0, 3, 3 );
+	SetGet3< unsigned int, unsigned int, double >::
+		set( rateTabId, "setconst", 1, 0, 0.00066667 );
+	SetGet3< unsigned int, unsigned int, double >::
+		set( rateTabId, "setconst", 1, 2, 0.5 );
+	SetGet3< unsigned int, unsigned int, double >::
+		set( rateTabId, "setconst", 2, 1, 15 );
+	SetGet3< unsigned int, unsigned int, double >::
+		set( rateTabId, "setconst", 2, 3, 4 );
+	SetGet3< unsigned int, unsigned int, double >::
+		set( rateTabId, "setconst", 3, 0, 0.015 );
+	SetGet3< unsigned int, unsigned int, double >::
+		set( rateTabId, "setconst", 3, 2, 0.05 );
+	SetGet3< unsigned int, unsigned int, double >::
+		set( rateTabId, "setconst", 3, 4, 2.0 );
+	SetGet3< unsigned int, unsigned int, double >::
+		set( rateTabId, "setconst", 4, 3, 0.01 );
 
-	//Setting solver parameters.
-	SetGet1< Id >::set( gslSolverId, "setparams", mChanId );
+	//Setting initial state of the solver. Once this is set, the solver object
+	//will send out messages containing the updated state to the channel object.  
+	SetGet1< vector< double > >::set( gslSolverId, "setinitstate", initState );
 		
 	shell->doSetClock( 0, 1.0e-5 );	
 	shell->doSetClock( 1, 1.0e-5 );	
 	shell->doSetClock( 2, 1.0e-5 );	
 	shell->doSetClock( 3, 1.0e-5 );	
-	shell->doSetClock( 4, 1.0e-5 );	
 
+	//Voltage is clamped to -100 mV in the example. Hence, we skip running the
+	//process function.
 	shell->doUseClock( "/n/compt", "init", 0 );
 	shell->doUseClock( "/n/compt", "process", 1 );
-	shell->doUseClock( "/n/compt/mChan", "process", 2 );
-	shell->doUseClock( "/n/compt/mChan/gslSolver", "process", 3 );
-	shell->doUseClock( "/n/tab", "process", 4 );
-
-	vector< double > blah = Field< vector< double > >::get( mChanId, "state" );
+	shell->doUseClock( "/n/compt/gslSolver,/n/compt/rateTab", "process", 1 );
+	shell->doUseClock( "/n/compt/mChan,/n/tab", "process", 2 );
 
 	shell->doReinit( );
 	shell->doReinit( );
@@ -728,7 +729,6 @@ void testSynChan()
 	ret = Field< double >::set( sgId2, "threshold", 0.0 );
 	ret = Field< double >::set( sgId2, "refractT", 1.0 );
 	ret = Field< bool >::set( sgId2, "edgeTriggered", 0 );
-
 
 	ret = Field< double >::set( ObjId( synId, DataId( 0, 0 ) ), 
 		"weight", 1.0 );
@@ -840,7 +840,6 @@ void testNMDAChan()
 	ret = Field< double >::set( sgId1, "refractT", 1.0 );
 	ret = Field< bool >::set( sgId1, "edgeTriggered", 0 );
 
-
 	ret = Field< double >::set( ObjId( synId, DataId( 0, 0 ) ), 
 		"weight", 1.0 );
 	assert( ret);
@@ -912,6 +911,7 @@ void testBiophysics()
 	testSpikeGen();
 	testCaConc();
 	testNernst();
+	testVectorTable();
 	/*
 	testBioScan();
 	*/

@@ -138,7 +138,7 @@ const Cinfo* Interpol2D::initCinfo()
 	};
 	
 	static Cinfo interpol2DCinfo(
-		"Niraj Dudani NCBS",
+		"Interpol2D",
 		Neutral::initCinfo(),
 		interpol2DFinfos, sizeof( interpol2DFinfos ) / sizeof( Finfo * ),
 		new Dinfo< Interpol2D >()
@@ -406,7 +406,7 @@ double Interpol2D::getTableValue( vector< unsigned int > index ) const
 void Interpol2D::setTableVector( vector< vector< double > > value ) 
 {
 	table_ = value;
-	invDx_ = ( table_.size() + 1) / ( xmax_ - xmin_ );
+	invDx_ = xdivs() / ( xmax_ - xmin_ );
 	invDy_ = ydivs() / ( ymax_ - ymin_ );
 }
 
@@ -423,7 +423,6 @@ unsigned int Interpol2D::ydivs() const
 		return 0;
 	return table_[0].size() - 1;
 }
-
 
 ////////////////////////////////////////////////////////////////////
 // Here we set up Interpol2D Destination functions
@@ -468,27 +467,61 @@ double Interpol2D::interpolateWithoutCheck( double x, double y ) const
 	
 	double xv = ( x - xmin_ ) * invDx_;
 	unsigned long xInteger = static_cast< unsigned long >( xv );
+	assert( xInteger < table_.size() );
 	double xFraction = xv - xInteger;
-	assert( xInteger < table_.size() - 1 );
-	
+
 	double yv = ( y - ymin_ ) * invDy_;
 	unsigned long yInteger = static_cast< unsigned long >( yv );
+	assert( yInteger < table_[ 0 ].size() );
 	double yFraction = yv - yInteger;
-	assert( yInteger < table_[ 0 ].size() - 1 );
+
+	bool isEndOfX, isEndOfY;
+	double xFyF = xFraction * yFraction;
 	
+	//If the value being looked up is at the boundary, we dont want to read past
+	//the boundary for the x interpolation.
+	( xInteger == table_.size() - 1 ) ? isEndOfX = true : isEndOfX = false;
+	( yInteger == table_.size() - 1 ) ? isEndOfY = true : isEndOfY = false;
+
+	vector< vector< double > >::const_iterator iz0 = table_.begin() + xInteger;
+	vector< double >::const_iterator iz00 = iz0->begin() + yInteger;
+	vector< double >::const_iterator iz10;
+
 	/* The following is the same as:
 			double z00 = table_[ xInteger ][ yInteger ];
 			double z01 = table_[ xInteger ][ yInteger + 1 ];
 			double z10 = table_[ xInteger + 1 ][ yInteger ];
 			double z11 = table_[ xInteger + 1 ][ yInteger + 1 ];
 	*/
-	vector< vector< double > >::const_iterator iz0 = table_.begin() + xInteger;
-	vector< double >::const_iterator iz00 = iz0->begin() + yInteger;
-	vector< double >::const_iterator iz10 = ( iz0 + 1 )->begin() + yInteger;
+
 	double z00 = *iz00;
-	double z01 = *( iz00 + 1 );
-	double z10 = *iz10;
-	double z11 = *( iz10 + 1 );
+	double z01;
+	double z10;
+	double z11;
+
+	//Upto this point, only iz00 is known. The rest are computed only
+	//conditionally.
+	if ( isEndOfX ) 
+	{
+		z10 = 0;
+		z11 = 0;
+		( isEndOfY == true ) ? z01 = 0 : z01 = *(iz00 + 1);
+	}
+	else
+	{
+		iz10 = ( iz0 + 1 )->begin() + yInteger;
+		z10 = *iz10;
+		if ( isEndOfY )
+		{
+			z01 = 0;
+			z11 = 0;
+		}
+		else
+		{
+			z01 = *( iz00 + 1 );
+			z11 = *( iz10 + 1 );
+		}
+	}
 	
 	/* The following is the same as:
 			return (
@@ -497,7 +530,6 @@ double Interpol2D::interpolateWithoutCheck( double x, double y ) const
 				z01 * ( 1 - xFraction ) * yFraction +
 				z11 * xFraction * yFraction );
 	*/
-	double xFyF = xFraction * yFraction;
 	return (
 		z00 * ( 1 - xFraction - yFraction + xFyF ) +
 		z10 * ( xFraction - xFyF ) +
@@ -564,6 +596,29 @@ bool Interpol2D::operator<( const Interpol2D& other ) const
 	
 	return 0;
 }
+
+//Added by Vishaka Datta S, 2011, NCBS.
+//Overloading this operator was necessary to be able to pass in
+//Interpol2D arguments to the SrcFinfo templates, in order for the Conv
+//class to pull off its pointer typecasting kung fu.
+istream& operator>>( istream& in, Interpol2D& int2dTable )
+{
+	in >> int2dTable.xmin_;		
+	in >> int2dTable.xmax_;
+	in >> int2dTable.invDx_;
+	in >> int2dTable.ymin_;
+	in >> int2dTable.ymax_;
+	in >> int2dTable.invDy_;
+
+	for ( unsigned int i = 0; i < int2dTable.table_.size(); ++i )
+	{
+		for ( unsigned int j = 0; j < int2dTable.table_.size(); ++j )
+			in >> int2dTable.table_[i][j];
+	}
+
+	return in;
+}
+
 // This sets the whole thing up: values, xdivs, dx and so on. Only xmin
 // and xmax are unknown to the input vector.
 void Interpol2D::appendTableVector(
