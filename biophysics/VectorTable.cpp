@@ -9,21 +9,98 @@
 #include "header.h"
 #include "VectorTable.h"
 
+#define INIT_XMIN 0
+#define INIT_XMAX 0
+#define INIT_XDIV 0
+
 using namespace std;
 
-VectorTable::VectorTable() : xDivs_(0), xMin_(0), xMax_(0), invDx_(0),
-														table_(0) 
-{;}
+const Cinfo* VectorTable::initCinfo()
+{
+	//Field information.
+	static ValueFinfo< VectorTable, unsigned int > xdivs("xdivs",
+			"Number of divisions.",
+			&VectorTable::setDiv,
+			&VectorTable::getDiv 
+			);
+
+	static ValueFinfo< VectorTable, double > xmin("xmin",
+			"Minimum value in table.",
+			&VectorTable::setMin,
+			&VectorTable::getMin 
+			);
+
+	static ValueFinfo< VectorTable, double > xmax("xmax",
+			"Maximum value in table.",
+			&VectorTable::setMax,
+			&VectorTable::getMax
+			);
+
+	static ReadOnlyValueFinfo< VectorTable, double > invdx("invdx",
+			"Maximum value in table.",
+			&VectorTable::getInvDx
+			);
+
+	static ValueFinfo< VectorTable, vector< double > > table("table",
+			"The lookup table.",
+			&VectorTable::setTable,
+			&VectorTable::getTable
+			);
+
+	static ReadOnlyLookupValueFinfo< VectorTable, double, double > lookup("lookup",
+			"Lookup function.",
+			&VectorTable::innerLookup
+			);
+
+	static Finfo* vectorTableFinfos[] = 
+	{
+		&xdivs,
+		&xmin,
+		&xmax,
+		&invdx,
+		&table
+	};
+
+	static string doc[] =
+	{
+		"Name", "VectorTable",
+		"Author", "Vishaka Datta S, 2011, NCBS",
+		"Description", "This is a minimal 1D equivalent of the Interpol2D class. "
+		"Provides simple functions for getting and setting up the table, along "
+		"with a lookup function. This class is to be used while supplying lookup "
+		"tables to the MarkovChannel class, in cases where the transition rate "
+		"varies with either membrane voltage or ligand concentration."
+	};
+
+	static Cinfo VectorTableCinfo(
+		"VectorTable",
+		Neutral::initCinfo(),
+		vectorTableFinfos,
+		sizeof( vectorTableFinfos )/sizeof( Finfo* ),
+		new Dinfo< VectorTable >()
+		);
+
+	return &VectorTableCinfo;
+}
+
+static const Cinfo* vectorTableCinfo = VectorTable::initCinfo();
+
+VectorTable::VectorTable() : xDivs_(INIT_XDIV), xMin_(INIT_XMIN), xMax_(INIT_XMAX), 
+														 invDx_(-1), table_(0) 
+{ ; }
 
 //Implementation identical to that of HHGate::lookupTable.
 double VectorTable::innerLookup( double x ) const
 {
+	if ( table_.size() == 1 )
+		return table_[0];
+
 	if (x <= xMin_) 
 		return table_[0];
 	if (x >= xMax_)
 		return table_.back();
 
-	unsigned int index = ( x - xMin_ ) * invDx_;
+	unsigned int index = static_cast< unsigned int>( ( x - xMin_ ) * invDx_ );
 	double frac = ( x - xMin_ - index / invDx_ ) * invDx_;
 	return table_[ index ] * ( 1 - frac ) + table_[ index + 1 ] * frac;
 }
@@ -39,23 +116,30 @@ vector< double > VectorTable::getTable() const
 }
 
 //Function to set up the lookup table. 
-void VectorTable::setTable( vector< double > table, double xMin, double xMax )
+//All parameters except xMin_ and xMax_ can be set based on the table that is
+//passed in.
+void VectorTable::setTable( vector< double > table )
 {
-	if (table_.size() > 0)
-		cout << "Warning : Current table will be erased\n";
-
-	if ( table.size() > 1 && xMin == xMax )
+	if ( table.size() > 1 && xMin_ == xMax_ )
 	{
-		cerr << "Error : xmin and xmax cannot be the same when there are more than"
+		cerr << "Error : xmin and xmax cannot be the same when there are more than "
 			"two entries in the table!\n";
+		return;
+	}
+
+	if ( table.empty() )
+	{
+		cerr << "Error : Cannot set with empty table!\n";
+		return;
 	}
 
 	table_ = table;
-	xMin_ = xMin;
-	xMax_ = xMax; 
 	xDivs_ = table.size() - 1;
+
+	//This is in case the lookup table has only one entry, in which case, 
+	//the transition rate being considered is assumed to be constant.
 	if ( table.size() > 1 )
-		invDx_ = xDivs_ / (xMax - xMin);
+		invDx_ = xDivs_ / ( xMax_ - xMin_ );
 	else
 		invDx_ = 0;
 }
@@ -65,9 +149,19 @@ unsigned int VectorTable::getDiv() const
 	return xDivs_;
 }
 
+void VectorTable::setDiv( unsigned int xDivs  )
+{
+	xDivs_ = xDivs;
+}
+
 double VectorTable::getMin() const
 {
 	return xMin_;
+}
+
+void VectorTable::setMin( double xMin )
+{
+	xMin_ = xMin;
 }
 
 double VectorTable::getMax() const
@@ -75,9 +169,32 @@ double VectorTable::getMax() const
 	return xMax_;
 }
 
+void VectorTable::setMax( double xMax )
+{
+	xMax_ = xMax;
+}
+
 double VectorTable::getInvDx() const
 {
 	return invDx_;
+}
+
+bool VectorTable::tableIsEmpty() const
+{
+	return table_.empty();
+}
+
+istream& operator>>( istream& in, VectorTable& vecTable )
+{
+	in >> vecTable.xDivs_;
+	in >> vecTable.xMin_;
+	in >> vecTable.xMax_;
+	in >> vecTable.invDx_;
+
+	for ( unsigned int i = 0; i < vecTable.table_.size(); ++i )
+		in >> vecTable.table_[i];
+	
+	return in;
 }
 
 #ifdef DO_UNIT_TESTS
@@ -94,17 +211,22 @@ void testVectorTable()
 	for ( int i = 0; i < 11; i++ )	
 		data.push_back( arr[i] );
 
-	unInitedTable.setTable( data, -1.0, 1.0 ); 
+	unInitedTable.setMin( -0.5 );
+	unInitedTable.setMax( 0.5 );
+	unInitedTable.setTable( data ); 
 
-	assert( unInitedTable.getDiv() == 10 );
-	assert( doubleEq(unInitedTable.getMin(), -1.0) );
-	assert( doubleEq(unInitedTable.getMax(), 1.0) );
-	assert( doubleEq(unInitedTable.getInvDx(), 5) );
+	assert( doubleEq(unInitedTable.getInvDx(), 10 ) );
 
-	assert( doubleEq(unInitedTable.innerLookup( 0.25 ), 0.475 ) );
-	assert( doubleEq(unInitedTable.innerLookup( 0.47 ), 0.4125 ) );
-	assert( doubleEq(unInitedTable.innerLookup( 1.5 ), 0.44 ) );
-	assert( doubleEq(unInitedTable.innerLookup( -1.8 ), 0.0 ) );
+	assert( doubleEq(unInitedTable.innerLookup( 0.0 ), 0.52 ) );
+	assert( doubleEq(unInitedTable.innerLookup( 0.1 ), 0.49 ) );
+	assert( doubleEq(unInitedTable.innerLookup( 0.15 ), 0.46 ) );
+	assert( doubleEq(unInitedTable.innerLookup( 0.2 ), 0.43 ) );
+	assert( doubleEq(unInitedTable.innerLookup( 0.25 ), 0.405 ) );
+	assert( doubleEq(unInitedTable.innerLookup( 0.3 ), 0.38 ) );
+	assert( doubleEq(unInitedTable.innerLookup( 0.35 ), 0.405 ) );
+	assert( doubleEq(unInitedTable.innerLookup( 0.4 ), 0.43 ) );
+	assert( doubleEq(unInitedTable.innerLookup( 0.45 ), 0.435 ) );
+	assert( doubleEq(unInitedTable.innerLookup( 0.5 ), 0.44 ) );
 
 	cout << "." << flush;
 }

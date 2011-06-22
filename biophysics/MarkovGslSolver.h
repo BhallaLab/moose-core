@@ -46,8 +46,8 @@ class MarkovGslSolver
 		void process( const Eref& e, ProcPtr info );
 		void reinit( const Eref& e, ProcPtr info );
 
-		void setParams( Id );
-//		void handleState( vector< double > );
+		void init( vector< double > );
+		void handleQ( vector< vector< double > > );
 
 		static const Cinfo* initCinfo();
 	private:
@@ -56,14 +56,21 @@ class MarkovGslSolver
 		double absAccuracy_;
 		double relAccuracy_;
 		double internalStepSize_;
-		vector< double > state_;
 		double* stateGsl_;
+
+		//The following four variables should be members of any solver class that
+		//will be implmented.
 		unsigned int nVars_;
+		vector< double > state_;
+		vector< double > initialState_;
+		vector< vector< double > > Q_;
 
 		const gsl_odeiv_step_type* gslStepType_;
 		gsl_odeiv_step* gslStep_;
 		gsl_odeiv_control* gslControl_;
 		gsl_odeiv_evolve* gslEvolve_;
 		gsl_odeiv_system gslSys_;
+
+		static int evalSystem( double, const double*, double*, void* );
 };
 #endif 

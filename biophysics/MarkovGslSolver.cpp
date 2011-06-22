@@ -8,11 +8,11 @@
 **********************************************************************/
 
 #include "header.h"
-#include "VectorTable.h"
+/*#include "VectorTable.h"
 #include "../builtins/Interpol2D.h"
 #include "MarkovRateTable.h"
 #include "ChanBase.h"
-#include "MarkovChannel.h"
+#include "MarkovChannel.h"*/
 #include <gsl/gsl_errno.h>
 //#include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv.h>
@@ -62,14 +62,16 @@ const Cinfo* MarkovGslSolver::initCinfo()
 		///////////////////////////////////////////////////////
 		// DestFinfo definitions
 		///////////////////////////////////////////////////////
-		static DestFinfo setparams( "setparams",
+		static DestFinfo setinitstate( "setinitstate",
 			"Initialize solver parameters.",
-			new OpFunc1< MarkovGslSolver, Id >( &MarkovGslSolver::setParams )
+			new OpFunc1< MarkovGslSolver, vector< double > >
+			( &MarkovGslSolver::init )
 		);
-		
-/*		static DestFinfo handlestate( "handlestate",
-			"Handles state information from MarkovChannel object.",
-			new OpFunc1< MarkovGslSolver, vector< double > >( &MarkovGslSolver::handleState) );*/
+
+		static DestFinfo handleQ( "handleQ",
+			"Handles information regarding the instantaneous rate matrix from "
+			"the MarkovRateTable class.",
+			new OpFunc1< MarkovGslSolver, vector< vector< double > > >( &MarkovGslSolver::handleQ) );
 
 		static DestFinfo process( "process",
 			"Handles process call",
@@ -90,13 +92,14 @@ const Cinfo* MarkovGslSolver::initCinfo()
 
 	static Finfo* MarkovGslFinfos[] =
 	{
-		&isInitialized,		// Value
-		&method,			// Value
-		&relativeAccuracy,	// Value
-		&absoluteAccuracy,	// Value
-		&setparams,			// DestFinfo
-		&proc,				// SharedFinfo
-		stateOut(),  //Src
+		&isInitialized,			// ValueFinfo
+		&method,						// ValueFinfo
+		&relativeAccuracy,	// ValueFinfo
+		&absoluteAccuracy,	// ValueFinfo
+		&setinitstate,			// DestFinfo
+		&handleQ,						// DestFinfo	
+		&proc,							// SharedFinfo
+		stateOut(),  				// SrcFinfo
 	};
 	
 	static  Cinfo MarkovGslSolverCinfo(
@@ -123,9 +126,9 @@ MarkovGslSolver::MarkovGslSolver()
 	gslStepType_ = gsl_odeiv_step_rkf45;
 	gslStep_ = 0;
 	nVars_ = 0;
-	absAccuracy_ = 1.0e-6;
-	relAccuracy_ = 1.0e-6;
-	internalStepSize_ = 1.0e-4;
+	absAccuracy_ = 1.0e-8;
+	relAccuracy_ = 1.0e-8;
+	internalStepSize_ = 1.0e-6;
 	stateGsl_ = 0;
 	gslEvolve_ = NULL;
 	gslControl_ = NULL;
@@ -142,6 +145,25 @@ MarkovGslSolver::~MarkovGslSolver()
 	
 	if ( stateGsl_ )
 		delete[] stateGsl_;
+}
+
+int MarkovGslSolver::evalSystem( double t, const double* state, double* f, void *params)
+{
+	vector< vector< double > >* Q = static_cast< vector< vector< double > >* >( params );
+	unsigned int nVars = Q->size();
+
+	//Matrix being accessed along columns, which is a very bad thing in terms of
+	//cache optimality. Transposing the matrix during reinit() would be a good idea.
+	for ( unsigned int i = 0; i < nVars; ++i)
+	{
+		f[i] = 0;
+		for ( unsigned int j = 0; j < nVars; ++j)
+			f[i] += state[j] * ((*Q)[j][i]);
+//		cout << f[i] << " ";
+	}
+//	cout << endl;
+
+	return GSL_SUCCESS;
 }
 
 ///////////////////////////////////////////////////
@@ -225,15 +247,22 @@ void MarkovGslSolver::setInternalDt( double value )
 ///////////////////////////////////////////////////
 
 //Handles data from MarkovChannel class.
-void MarkovGslSolver::setParams( Id mChanId )
+void MarkovGslSolver::init( vector< double > initialState )
 {
-	MarkovChannel* chan = reinterpret_cast< MarkovChannel* >( mChanId.eref().data() );
-	nVars_ = chan->getNumStates();
+//	MarkovChannel* chan = reinterpret_cast< MarkovChannel* >( mChanId.eref().data() );
+//	nVars_ = chan->getNumStates();	
+	nVars_ = initialState.size();
 
 	if ( stateGsl_ == 0 )
 		stateGsl_ = new double[ nVars_ ];
 
-	state_ = chan->getState();
+	state_ = initialState;
+	initialState_ = initialState;
+
+	Q_.resize( nVars_ );
+
+	for ( unsigned int i = 0; i < nVars_; ++i )
+		Q_[i].resize( nVars_, 0.0 );	
 
 	isInitialized_ = 1;
 
@@ -242,7 +271,6 @@ void MarkovGslSolver::setParams( Id mChanId )
 		gsl_odeiv_step_free(gslStep_);
 
 	gslStep_ = gsl_odeiv_step_alloc( gslStepType_, nVars_ );
-
 	assert( gslStep_ != 0 );
 
 	if ( !gslEvolve_ )
@@ -259,35 +287,23 @@ void MarkovGslSolver::setParams( Id mChanId )
 
 	assert(gslControl_!= 0);
         
-	gslSys_.function = &MarkovChannel::evalGslSystem;
+	gslSys_.function = &MarkovGslSolver::evalSystem;
 	gslSys_.jacobian = 0;
 	gslSys_.dimension = nVars_;
-	gslSys_.params = static_cast< void* >( chan );
+	gslSys_.params = static_cast< void * >( &Q_ );
 }
 
-/*void MarkovGslSolver::handleState( vector< double > state )
-{
-	state_ = state;
-}*/
-
+//////////////////////////
+//MsgDest functions.
+/////////////////////////
 void MarkovGslSolver::process( const Eref& e, ProcPtr info )
 {
 	double nextt = info->currTime + info->dt;
 	double t = info->currTime;
 	double sum = 0;
 
-	assert( stateGsl_ != 0 );
-	assert( state_.size() > 0 );
-
 	for ( unsigned int i = 0; i < nVars_; ++i )
-	{
 		stateGsl_[i] = state_[i];
-//		cout << stateGsl_[i] << " ";
-	}
-
-	assert (gslEvolve_ != NULL );
-	assert (gslControl_ != NULL );
-	assert (gslStep_ != NULL );
 
 	while ( t < nextt ) {
 		int status = gsl_odeiv_evolve_apply ( 
@@ -299,19 +315,28 @@ void MarkovGslSolver::process( const Eref& e, ProcPtr info )
 		//channel to deal with potential round-off error.
 		sum = 0;
 		for ( unsigned int i = 0; i < nVars_; i++ )
-			sum += state_[i];
+			sum += stateGsl_[i];
 
 		for ( unsigned int i = 0; i < nVars_; i++ )
-			state_[i] /= sum;
+			stateGsl_[i] /= sum;
 
 		if ( status != GSL_SUCCESS )
 			break;
 	}
 
+	for ( unsigned int i = 0; i < nVars_; ++i )
+		state_[i] = stateGsl_[i];
 	stateOut()->send( e, info, state_ );
 }
 
 void MarkovGslSolver::reinit( const Eref& e, ProcPtr info )
 {
-	;
+	state_ = initialState_;
+	stateOut()->send( e, info, state_ );
+}
+
+void MarkovGslSolver::handleQ( vector< vector< double > > Q )
+{
+//	cout << "Received Q message\n";
+	Q_ = Q;
 }
