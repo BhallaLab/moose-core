@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sun Feb 28 18:17:56 2010 (+0530)
 // Version: 
-// Last-Updated: Tue Jun 21 16:00:07 2011 (+0530)
+// Last-Updated: Wed Jun 22 10:50:02 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 534
+//     Update #: 537
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -169,8 +169,6 @@ NMDAChan::NMDAChan(): c0_(16.0),
                       c8_(2.847),
                       c9_(0.693),
                       c10_(3.101),
-                      x_(0.0),
-                      y_(0.0),
                       Mg_(1.5), // mM (value from Traub et al 2005)
                       unblocked_(1.0),
                       saturation_(DBL_MAX)
@@ -335,8 +333,8 @@ void NMDAChan::innerProcessFunc(Eref e, ProcInfo info)
         SynInfo event = oldEvents_.top();
         oldEvents_.pop();
         activation_ -= event.weight / tau2_;
-        x_ -= event.weight; 
-        y_ += event.weight;
+        X_ -= event.weight; 
+        Y_ += event.weight;
     }
     while ( !pendingEvents_.empty() &&
             pendingEvents_.top().delay <= info->currTime_ ) {
@@ -349,14 +347,14 @@ void NMDAChan::innerProcessFunc(Eref e, ProcInfo info)
     double a2_ = 1000.0 * Mg_ * exp(-c2_ * Vm_ - c3_); // A2_ in traub_nmda.mod
     double b1_ = exp(c4_ * Vm_ + c5_ ); // B1_ in traub_nmda.mod
     double b2_ = exp(c6_ * Vm_ + c7_); // B2_ in traub_nmda.mod
-    // The following two lines calculate next values of x_ and y_
+    // The following two lines calculate next values of X_ and Y_
     // according to Forward Euler method:
     // x' = activation
     // y' = -y/tau2
-    x_ += activation_ * info->dt_; 
-    y_ = y_ * decayFactor_;
+    X_ += activation_ * info->dt_; 
+    Y_ = Y_ * decayFactor_;
     unblocked_ = 1.0 / ( 1.0 + (a1_ + a2_) * (a1_ * B1_ + a2_ * B2_) / (A_ * (a1_ * (B1_ + b1_) + a2_ * (B2_ + b2_))));
-    Gk_ = x_ + y_;
+    Gk_ = X_ + Y_;
     if (Gk_ > saturation_ * Gbar_){
         Gk_ = saturation_ * Gbar_;
     }
@@ -380,8 +378,8 @@ void NMDAChan::reinitFunc(const Conn* conn, ProcInfo info)
 void NMDAChan::innerReinitFunc(Eref e, ProcInfo info)
 {
     Gk_ = 0.0;
-    x_ = 0.0; // A in traub_nmda.mod
-    y_ = 0.0; // B in traub_nmda.mod
+    X_ = 0.0; // A in traub_nmda.mod
+    Y_ = 0.0; // B in traub_nmda.mod
     unblocked_ = 1.0; // Mg_unblocked in traub_nmda.mod
     activation_ = 0.0; // equivalent to k in traub_nmda.mod
     modulation_ = 1.0;
