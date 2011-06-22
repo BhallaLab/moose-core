@@ -24,6 +24,8 @@ class OneToOneMsg: public Msg
 
 		void exec( const char* arg, const ProcInfo* p) const;
 
+		Eref firstTgt( const Eref& src ) const;
+
 		Id managerId() const;
 
 		ObjId findOtherEnd( ObjId end ) const;

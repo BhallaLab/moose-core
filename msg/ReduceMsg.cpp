@@ -60,6 +60,16 @@ void ReduceMsg::exec( const char* arg, const ProcInfo *p ) const
 	}
 }
 
+Eref ReduceMsg::firstTgt( const Eref& src ) const 
+{
+	if ( src.element() == e1_ )
+		return Eref( e2_, 0 );
+	else if ( src.element() == e2_ )
+		return Eref( e1_, i1_ );
+	return Eref( 0, 0 );
+}
+
+
 /*
 // when parsing the ReduceQ:
 First go through all the ReduceBase ptrs for a given slot.

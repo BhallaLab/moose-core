@@ -115,7 +115,7 @@ Id ReadKkit::read(
 
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 	vector< unsigned int > dims( 1,1 );
-	Id base = s->doCreate( "Stoich", pa, modelname, dims );
+	Id base = s->doCreate( "Stoich", pa, modelname, dims, true );
 	assert( base != Id() );
 
 	baseId_ = base;
@@ -252,7 +252,7 @@ void ReadKkit::makeStandardElements()
 	Id kinetics = Neutral::child( baseId_.eref(), "kinetics" );
 	if ( kinetics == Id() ) {
 		kinetics = 
-		shell_->doCreate( "Neutral", baseId_, "kinetics", dims );
+		shell_->doCreate( "CubeMesh", baseId_, "kinetics", dims, true );
 	}
 	assert( kinetics != Id() );
 	assert( kinetics.eref().element()->getName() == "kinetics" );
@@ -260,35 +260,35 @@ void ReadKkit::makeStandardElements()
 	Id graphs = Neutral::child( baseId_.eref(), "graphs" );
 	if ( graphs == Id() ) {
 		graphs = 
-		shell_->doCreate( "Neutral", baseId_, "graphs", dims );
+		shell_->doCreate( "Neutral", baseId_, "graphs", dims, true );
 	}
 	assert( graphs != Id() );
 
 	Id moregraphs = Neutral::child( baseId_.eref(), "moregraphs" );
 	if ( moregraphs == Id() ) {
 		moregraphs = 
-		shell_->doCreate( "Neutral", baseId_, "moregraphs", dims );
+		shell_->doCreate( "Neutral", baseId_, "moregraphs", dims, true );
 	}
 	assert( moregraphs != Id() );
 
 	Id compartments = Neutral::child( baseId_.eref(), "compartments" );
 	if ( compartments == Id() ) {
 		compartments = 
-		shell_->doCreate( "Neutral", baseId_, "compartments", dims );
+		shell_->doCreate( "Neutral", baseId_, "compartments", dims, true );
 	}
 	assert( compartments != Id() );
 
 	Id geometry = Neutral::child( baseId_.eref(), "geometry" );
 	if ( geometry == Id() ) {
 		geometry = 
-		shell_->doCreate( "Neutral", baseId_, "geometry", dims );
+		shell_->doCreate( "Neutral", baseId_, "geometry", dims, true );
 	}
 	assert( geometry != Id() );
 
 	Id groups = Neutral::child( baseId_.eref(), "groups" );
 	if ( groups == Id() ) {
 		groups = 
-		shell_->doCreate( "Neutral", baseId_, "groups", dims );
+		shell_->doCreate( "Neutral", baseId_, "groups", dims, true );
 	}
 	assert( groups != Id() );
 }
@@ -462,7 +462,7 @@ Id ReadKkit::buildReac( const vector< string >& args )
 	double kf = atof( args[ reacMap_[ "kf" ] ].c_str() );
 	double kb = atof( args[ reacMap_[ "kb" ] ].c_str() );
 
-	Id reac = shell_->doCreate( "Reac", pa, tail, dim );
+	Id reac = shell_->doCreate( "Reac", pa, tail, dim, true );
 	reacIds_[ args[2].substr( 10 ) ] = reac; 
 
 	Field< double >::set( reac, "kf", kf );
@@ -514,28 +514,31 @@ void ReadKkit::assignCompartments()
 
 	for ( unsigned int i = 0 ; i < volCategories_.size(); ++i ) {
 		string name;
+		Id kinId = Neutral::child( baseId_.eref(), "kinetics" );
+		assert( kinId != Id() );
+		Id comptId;
 		if ( i == maxi ) {
-			name = "main_compartment";
+			comptId = kinId;
 		} else {
 			stringstream ss;
 			ss << "compartment_" << i;
 			name = ss.str();
+			comptId = shell_->doCreate( "CubeMesh", baseId_, name, dims, 
+				true );
 		}
-		Id compt = shell_->doCreate( 
-			"ChemCompt", baseId_, name, dims );
-		/*
-		Id mesh = shell_->doCreate( 
-			"ChemMesh", compt, "mesh", dims );
-			*/
-		Field< double >::set( compt, "size", vols_[i] );
-		// Field< double >::set( mesh, "size", vols_[i] );
-		compartments_.push_back( compt );
+		Id meshId = Neutral::child( comptId.eref(), "meshEntries" );
+		assert( meshId != Id() );
+		double side = pow( vols_[i], 1.0 / 3.0 );
+		vector< double > coords( 9, side );
+		// Field< double >::set( comptId, "size", vols_[i] );
+		Field< vector< double > >::set( comptId, "coords", coords );
+		// compartments_.push_back( comptId );
 		for ( vector< Id >::iterator j = volCategories_[i].begin();
 			j != volCategories_[i].end(); ++j ) {
 			// get the group Ids that have a different vol in them
-			MsgId ret = shell_->doAddMsg( "single", 
-				ObjId( compt, 0 ), "compartment",
-				ObjId( *j, 0 ), "setSize" ); 
+			MsgId ret = shell_->doAddMsg( "OneToOne", 
+				ObjId( *j, 0 ), "requestSize",
+				ObjId( meshId, 0 ), "get_size" );
 			/*
 			MsgId ret = shell_->doAddMsg( "OneToOne", 
 				ObjId( compt, 0 ), "sizeOut",
@@ -562,7 +565,7 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 	bool isMM = atoi( args[ enzMap_[ "usecomplex" ] ].c_str());
 
 	if ( isMM ) {
-		Id enz = shell_->doCreate( "MMenz", pa, tail, dim );
+		Id enz = shell_->doCreate( "MMenz", pa, tail, dim, true );
 		assert( enz != Id () );
 		string mmEnzPath = args[2].substr( 10 );
 		mmEnzIds_[ mmEnzPath ] = enz; 
@@ -575,7 +578,7 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 		numMMenz_++;
 		return enz;
 	} else {
-		Id enz = shell_->doCreate( "Enz", pa, tail, dim );
+		Id enz = shell_->doCreate( "Enz", pa, tail, dim, true );
 		double parentVol = Field< double >::get( pa, "size" );
 		assert( enz != Id () );
 		string enzPath = args[2].substr( 10 );
@@ -587,7 +590,7 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 
 		string cplxName = tail + "_cplx";
 		string cplxPath = enzPath + "/" + cplxName;
-		Id cplx = shell_->doCreate( "Pool", enz, cplxName, dim );
+		Id cplx = shell_->doCreate( "Pool", enz, cplxName, dim, true );
 		assert( cplx != Id () );
 		poolIds_[ cplxPath ] = enz; 
 		Field< double >::set( cplx, "nInit", nComplexInit );
@@ -620,7 +623,7 @@ Id ReadKkit::buildInfo( Id parent,
 	map< string, int >& m, const vector< string >& args )
 {
 	static vector< unsigned int > dim( 1, 1 );
-	Id info = shell_->doCreate( "Neutral", parent, "info", dim );
+	Id info = shell_->doCreate( "Neutral", parent, "info", dim, true );
 	assert( info != Id() );
 
 	/*
@@ -646,7 +649,7 @@ Id ReadKkit::buildGroup( const vector< string >& args )
 
 	Id pa = shell_->doFind( head );
 	assert( pa != Id() );
-	Id group = shell_->doCreate( "Neutral", pa, tail, dim );
+	Id group = shell_->doCreate( "Neutral", pa, tail, dim, true );
 	assert( group != Id() );
 	Id info = buildInfo( group, groupMap_, args );
 
@@ -678,11 +681,11 @@ Id ReadKkit::buildPool( const vector< string >& args )
 
 	Id pool;
 	if ( slaveEnable == 0 ) {
-		pool = shell_->doCreate( "Pool", pa, tail, dim );
+		pool = shell_->doCreate( "Pool", pa, tail, dim, true );
 	} else if ( slaveEnable & 4 ) {
-		pool = shell_->doCreate( "BufPool", pa, tail, dim );
+		pool = shell_->doCreate( "BufPool", pa, tail, dim, true );
 	} else {
-		pool = shell_->doCreate( "Pool", pa, tail, dim );
+		pool = shell_->doCreate( "Pool", pa, tail, dim, true );
 		/*
 		cout << "ReadKkit::buildPool: Unknown slave_enable flag '" << 
 			slaveEnable << "' on " << args[2] << "\n";
@@ -724,7 +727,7 @@ void ReadKkit::buildSumTotal( const string& src, const string& dest )
 	// Check if the pool has not yet been converted to handle SumTots.
 	if ( destId()->cinfo()->name() == "Pool" ) {
 		vector< unsigned int > dim( 1, 1 );
-		sumId = shell_->doCreate( "SumFunc", destId, "sumFunc", dim );
+		sumId = shell_->doCreate( "SumFunc", destId, "sumFunc", dim, true );
 		const DataHandler* orig = destId()->dataHandler();
 		DataHandler* dup = orig->copy( false );
 	
@@ -773,7 +776,7 @@ Id ReadKkit::buildGraph( const vector< string >& args )
 
 	Id pa = shell_->doFind( head );
 	assert( pa != Id() );
-	Id graph = shell_->doCreate( "Neutral", pa, tail, dim );
+	Id graph = shell_->doCreate( "Neutral", pa, tail, dim, true );
 	assert( graph != Id() );
 	numOthers_++;
 	return graph;

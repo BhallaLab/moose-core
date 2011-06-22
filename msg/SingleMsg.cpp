@@ -53,6 +53,17 @@ void SingleMsg::exec( const char* arg, const ProcInfo *p ) const
 	}
 }
 
+Eref SingleMsg::firstTgt( const Eref& src ) const 
+{
+	if ( src.element() == e1_ )
+		return Eref( e2_, i2_ );
+	else if ( src.element() == e2_ )
+		return Eref( e1_, i1_ );
+	return Eref( 0, 0 );
+}
+
+
+
 /*
 bool SingleMsg::isMsgHere( const Qinfo& q ) const
 {

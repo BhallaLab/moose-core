@@ -128,6 +128,11 @@ const Cinfo* Pool::initCinfo()
 				"Requests Species object for mol wt"
 		);
 
+		static SrcFinfo1< double > requestSize( 
+				"requestSize", 
+				"Requests Size of pool from matching mesh entry"
+		);
+
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
 		//////////////////////////////////////////////////////////////
@@ -167,6 +172,7 @@ const Cinfo* Pool::initCinfo()
 		&setSize,			// DestFinfo
 		&increment,			// DestFinfo
 		&decrement,			// DestFinfo
+		&requestSize,		// SrcFinfo
 		&reac,				// SharedFinfo
 		&proc,				// SharedFinfo
 		&species,			// SharedFinfo

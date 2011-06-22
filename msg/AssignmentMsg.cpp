@@ -76,6 +76,15 @@ void AssignmentMsg::exec( const char* arg, const ProcInfo *p ) const
 	}
 }
 
+Eref AssignmentMsg::firstTgt( const Eref& src ) const 
+{
+	if ( src.element() == e1_ )
+		return Eref( e2_, i2_ );
+	else if ( src.element() == e2_ )
+		return Eref( e1_, i1_ );
+	return Eref( 0, 0 );
+}
+
 Id AssignmentMsg::managerId() const
 {
 	return AssignmentMsg::managerId_;
