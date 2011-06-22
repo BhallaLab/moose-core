@@ -76,6 +76,7 @@ HEADERS = \
 	Id.h \
 	ObjId.h \
 	../msg/Msg.h \
+	OpFuncBase.h \
 	OpFunc.h \
 	EpFunc.h \
 	ProcInfo.h \

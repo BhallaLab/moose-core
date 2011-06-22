@@ -70,6 +70,15 @@ if ( i.linearIndex() > 68570 && i.linearIndex() < 68640 ) {
 	}
 }
 
+Eref AssignVecMsg::firstTgt( const Eref& src ) const 
+{
+	if ( src.element() == e1_ )
+		return Eref( e2_, 0 );
+	else if ( src.element() == e2_ )
+		return Eref( e1_, i1_ );
+	return Eref( 0, 0 );
+}
+
 Id AssignVecMsg::managerId() const
 {
 	return AssignVecMsg::managerId_;

@@ -35,6 +35,8 @@ class DiagonalMsg: public Msg
 
 		void exec( const char* arg, const ProcInfo* p ) const;
 
+		Eref firstTgt( const Eref& src ) const;
+
 		/*
 		static bool add( Element* e1, const string& srcField, 
 			Element* e2, const string& destField, int stride );

@@ -60,6 +60,13 @@ class Msg
 		virtual void exec( const char* arg, const ProcInfo* p ) const = 0;
 
 		/**
+		 * Obtain the first target Eref for the specified Src Eref
+		 * It is really meant only to work with messages with a 
+		 * single target ObjId for each given src, typically OneToOne.
+		 */
+		virtual Eref firstTgt( const Eref& src ) const = 0;
+
+		/**
 		 * Return the Id of the managing Element. Each derived Msg class
 		 * has its own manager as a static field. This is predefined at
 		 * initialization.

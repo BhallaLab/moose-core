@@ -55,6 +55,21 @@ void DiagonalMsg::exec( const char* arg, const ProcInfo *p ) const
 	}
 }
 
+Eref DiagonalMsg::firstTgt( const Eref& src ) const 
+{
+	if ( src.element() == e1_ ) {
+		unsigned int nextData = src.index().data() + stride_;
+		if ( e2_->dataHandler()->isDataHere( nextData ) )
+			return Eref( e2_, nextData );
+	}
+	else if ( src.element() == e2_ ) {
+		unsigned int nextData = src.index().data() - stride_;
+		if ( e1_->dataHandler()->isDataHere( nextData ) )
+			return Eref( e1_, nextData );
+	}
+	return Eref( 0, 0 );
+}
+
 Id DiagonalMsg::managerId() const
 {
 	return DiagonalMsg::managerId_;
