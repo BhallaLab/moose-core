@@ -29,33 +29,34 @@ class STPNMDAChan: public STPSynChan
     // Dest function definitions
     ///////////////////////////////////////////////////
 
-    virtual void innerSynapseFunc( const Conn* c, double time );
-    virtual void innerProcessFunc( Eref e, ProcInfo p );
-    virtual void innerReinitFunc( Eref e,  ProcInfo p );
 
     ///////////////////////////////////////
     // Functions specific to STPNMDAChan
     ///////////////////////////////////////
     static void setTransitionParam(const Conn* c, double value, const unsigned int& index);
-    void innerSetTransitionParam(double value, const unsigned int index);
     static double getTransitionParam(Eref e, const unsigned int& index);
-    double innerGetTransitionParam(unsigned int index);
     static double getUnblocked(Eref e);
-    double innerGetUnblocked();
     static double getSaturation(Eref e);
-    double innerGetSaturation();
     static void setSaturation(const Conn * conn, double value);
-    void innerSetSaturation(double value);
     static void setMgConc(const Conn* conn, double conc);
-    void innerSetMgConc(double value);
     static double getMgConc(Eref e);
-    double innerGetMgConc();
 
 ///////////////////////////////////////////////////
 // Protected fields.
 ///////////////////////////////////////////////////
 
   protected:
+    virtual void innerSynapseFunc( const Conn* c, double time );
+    virtual void innerProcessFunc( Eref e, ProcInfo p );
+    virtual void innerReinitFunc( Eref e,  ProcInfo p );
+    void innerSetTransitionParam(Eref e, double value, const unsigned int index);
+    double innerGetTransitionParam(Eref e, unsigned int index);
+    double innerGetUnblocked();
+    double innerGetSaturation();
+    void innerSetSaturation(double value);
+    void innerSetMgConc(double value);
+    double innerGetMgConc();
+
     double saturation_, unblocked_, Mg_, A_, B1_, B2_, decayFactor_;
     vector<double> c_;
     priority_queue<SynInfo> oldEvents_;
