@@ -13542,4 +13542,125 @@ Working on unit tests.
 
 ============================================================================
 21 June
-Added in first pass of unit tests to CubeMesh. Clears.
+Added in first pass of unit tests to CubeMesh. Clears. Checkin 2784.
+
+Now looking at the 4th-order in time and space method of Liao et al.
+
+Can be done, needs new solver system, but can probably use the Stoich to
+load up the model.
+Things to do:
+- Redo ReadKkit to properly deal with ChemCompt and Mesh. Also convert from
+	Single to OneToOne messaging.
+- Fix up volume handling stuff in reacs and in pools to use Mesh
+- Provide Mesh function to propagate changes in # of mesh subdivisions
+	down to all objects under it.
+- Test under EE integration
+- Update Stoich::convertIdToPoolIndex/ReacIndex/FuncIndex functions to take
+	the ObjId
+- Some Zombie fixes perhaps to make them aware of array entries.
+- Provide additional object or features in Stoich to manage updates of
+	all array entries. Seems like it is just a matter of extending the
+	dimensions of S_ and Sinit_.
+- Get Stoich to do its calculations in parallel on each node/thread. In other
+	words, make it easy to specify which subset of array entries will
+	be updated by any single call. Requires some work on thread safety.
+
+- Get Stoich to handle multiple compartments with distinct reaction sets.
+	Possibly do using multiple instances of the Stoich, and have a
+	coordinator for integration.
+
+- Implement code for diffusion calculations within the RK5/Stoich framework.
+- Implement new code for 4th-order reac-diff calculations using the Stoich
+	but different engine.
+
+- Get the surface generation going for the Mesh, for display of 
+	compartmentalization
+- Incorporate yet more solvers.
+
+.....................................................................
+Starting off with ReadKkit. Currently it calls assignCompartments after the
+model is loaded with the usual GENESIS object tree. The compartments are
+created on the baseId, which is a stoich whose name is passed into the 
+readKkit command. I refer to this as /model. Under this we create 
+/kinetics, /graphs and all the other stuff from the kkit file in 
+a standard call.
+Following the reading of the kkit model, we call assignCompartments. This
+builds one compartment (and only one) under /model. 
+
+I think the simplest way to do this is to convert /kinetics into a Compartment.
+
+Also we can merge the concepts of ChemCompt and ChemMesh. The ChemCompt
+only added fields for Boundaries, which should go into ChemMesh.
+
+/sigNeurModel
+	/geom
+		/extracell_surface
+			/panels
+	/elec
+		/hsolve
+		/compts
+	/chem
+		/ksolve
+		/somaCompt
+			/mesh
+				/mols...
+				/reacs...
+				/enz...
+				/groups, etc
+			/nucleusCompt
+				/mesh, etc.
+		/apicalDendCompt
+			/mesh, etc
+		/spineGroup
+			/gsolve
+			/spineNeckCompt
+				/mesh, etc
+			/spineHeadCompt
+				/mesh, etc
+		
+
+Rules for reading and converting Kkit files to this form:
+- Read in with /kinetics as a group (Neutral) and the old kkit element tree
+- Go through and parse for differing volumes, note these down as required
+	ChemCompts.
+- Make /kinetics a ChemCompt (merged with ChemMesh)
+- Move the entire tree onto the mesh of this ChemCompt. Note that we have
+	to move without the original /kinetics parent here.
+- If there are any subsidiary volumes, check for identity with a group. 
+	- If identical, replace the group with the new ChemCompt and move 
+	contents onto its mesh
+	- If differing, make a new ChemCompt anyway, and move the objects with
+	different volume into its mesh. One can easily identify mols and most
+	enzymes to move, but reactions will have to be done on the basis of 
+	the vols of what they connect to.
+
+- Extend mesh capabilities to handle these nested situations. 
+	- Consider, for a dend spine, we would have a mesh for the spine
+		neck and head, and another for the PSD. But this doesn't
+		work if we want the whole spine replicated with each mesh entry.
+- Container relationships here are assumed by nesting.
+
+
+.........................................................................
+Setting up ReadKkit parse. Instead of putting mols etc as children of mesh,
+here I make them sibling. I've assigned size. 
+Q: How do objects find their size? 
+	- Return msg for size: Simple but slow, uses queue.
+		Problem is to make the request without race conditions 
+		as the size query itself is waiting for ack.
+	- Traverse down parent msgs till we see a ChemCompt, then look for its
+		Mesh. Get the size for the matching entry.
+		-This doesn't work because even if the traversal is clean I need
+		to do a 'get' request which uses the Msg system anyway.
+		- Or do the evil thing and look up the pointer... not good.
+	- Assign 'size' from the mesh itself, store it locally in the
+		relevant Elements. Unpleasant, much duplication.
+	- Implement fastGet operation, which uses message traversal on 
+		existing msgs but only
+		on local objects, and does not use the queue. Off-node fastGet
+		must cause program exit, I don't see any way to recover from it.
+
+Implemented last one. It has a lot of promise and should be useful in many
+cases. Ripple effects through all Msgs. Also had to comment on regression
+tests on ReadKkit due to ongoing work. fastGet not yet tested but compiles.
+============================================================================

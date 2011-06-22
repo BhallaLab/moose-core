@@ -275,6 +275,23 @@ void SparseMsg::exec( const char* arg, const ProcInfo *p ) const
 	}
 }
 
+Eref SparseMsg::firstTgt( const Eref& src ) const 
+{
+	if ( matrix_.nEntries() == 0 )
+		return Eref( 0, 0 );
+
+	if ( src.element() == e1_ ) {
+		const unsigned int* fieldIndex;
+		const unsigned int* colIndex;
+		unsigned int n = matrix_.getRow( src.index().data(), 
+			&fieldIndex, &colIndex );
+		if ( n != 0 )
+			return Eref( e2_, DataId( colIndex[0], fieldIndex[0] )  );
+	} else if ( src.element() == e2_ ) {
+		return Eref( e1_, 0 );
+	}
+	return Eref( 0, 0 );
+}
 
 /**
  * Should really have a seed argument

@@ -25,6 +25,8 @@ class OneToAllMsg: public Msg
 
 		void exec( const char* arg, const ProcInfo* p ) const;
 
+		Eref firstTgt( const Eref& src ) const;
+
 
 		bool isMsgHere( const Qinfo& q ) const;
 

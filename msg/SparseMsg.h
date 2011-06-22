@@ -50,6 +50,8 @@ class SparseMsg: public Msg
 		~SparseMsg();
 
 		void exec( const char* arg, const ProcInfo* p ) const;
+
+		Eref firstTgt( const Eref& src ) const;
 		
 		unsigned int randomConnect( double probability );
 

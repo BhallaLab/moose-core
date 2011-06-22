@@ -351,6 +351,30 @@ template< class A > class Field: public SetGet1< A >
 			vec.resize( 0 );
 		}
 
+		/**
+		 * Instant-return call for a single value along an existing Msg.
+		 * Bypasses all the queueing stuff.
+		 * It is hardcoded so type safety will have to be coded in too:
+		 * the dynamic_cast will catch it only at runtime.
+		 */
+		static A fastGet( const Eref& src, MsgId mid, FuncId fid )
+		{
+			const Msg* m = Msg::getMsg( mid );
+			if ( m ) {
+				Eref tgt = m->firstTgt( src );
+				if ( tgt.element() ) {
+					GetOpFuncBase< A >* gof = 
+						dynamic_cast< GetOpFuncBase< A >* >(
+						tgt.element()->cinfo()->getOpFunc( fid ) );
+					if ( gof ) {
+						return gof->reduceOp( tgt );
+					}
+				}
+			}
+			cout << "Warning: fastGet failed for " << src.id().path() <<
+				endl;
+			return A();
+		}
 
 		/**
 		 * Blocking call for finding a value and returning in a
