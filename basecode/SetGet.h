@@ -363,8 +363,8 @@ template< class A > class Field: public SetGet1< A >
 			if ( m ) {
 				Eref tgt = m->firstTgt( src );
 				if ( tgt.element() ) {
-					GetOpFuncBase< A >* gof = 
-						dynamic_cast< GetOpFuncBase< A >* >(
+					const GetOpFuncBase< A >* gof = 
+						dynamic_cast< const GetOpFuncBase< A >* >(
 						tgt.element()->cinfo()->getOpFunc( fid ) );
 					if ( gof ) {
 						return gof->reduceOp( tgt );
