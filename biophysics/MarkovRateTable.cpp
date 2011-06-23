@@ -173,10 +173,10 @@ VectorTable* MarkovRateTable::getVtChildTable( unsigned int i, unsigned int j ) 
 }
 
 void MarkovRateTable::innerSetVtChildTable( unsigned int i, unsigned int j,
-																						VectorTable* vecTable, 
+																						VectorTable vecTable, 
 																					  unsigned int ligandFlag )	
 {
-	if ( vecTable->tableIsEmpty() )
+	if ( vecTable.tableIsEmpty() )
 	{
 		cerr << "Error : Cannot set with empty table!.\n";
 		return;
@@ -199,7 +199,7 @@ void MarkovRateTable::innerSetVtChildTable( unsigned int i, unsigned int j,
 		return;
 	}
 
-	*vtTables_[i][j] = *vecTable;
+	*vtTables_[i][j] = vecTable;
 	useLigandConc_[i][j] = ligandFlag;
 }
 
@@ -214,7 +214,7 @@ Interpol2D* MarkovRateTable::getInt2dChildTable( unsigned int i, unsigned int j 
 	}
 }
 
-void MarkovRateTable::innerSetInt2dChildTable( unsigned int i, unsigned int j, Interpol2D* int2dTable )
+void MarkovRateTable::innerSetInt2dChildTable( unsigned int i, unsigned int j, Interpol2D int2dTable )
 {
 	if ( areIndicesOutOfBounds( i, j ) ) 
 	{
@@ -234,7 +234,7 @@ void MarkovRateTable::innerSetInt2dChildTable( unsigned int i, unsigned int j, I
 		return;
 	}
 
-	*int2dTables_[i][j] = *int2dTable;
+	*int2dTables_[i][j] = int2dTable;
 }
 
 
@@ -448,7 +448,7 @@ void MarkovRateTable::setVtChildTable( unsigned int i, unsigned int j,
 	VectorTable* vecTable = reinterpret_cast< VectorTable* >
 																( vecTabId.eref().data() );	
 
-	innerSetVtChildTable( i, j, vecTable, ligandFlag );
+	innerSetVtChildTable( i, j, *vecTable, ligandFlag );
 }
 
 void MarkovRateTable::setInt2dChildTable( unsigned int i, unsigned int j,
@@ -457,7 +457,7 @@ void MarkovRateTable::setInt2dChildTable( unsigned int i, unsigned int j,
 	Interpol2D* int2dTable = reinterpret_cast< Interpol2D* >
 															( int2dTabId.eref().data() );
 
-	innerSetInt2dChildTable( i, j, int2dTable );
+	innerSetInt2dChildTable( i, j, *int2dTable );
 }
 
 //Using the default 'setTable' function from the VectorTable class is rather
@@ -466,16 +466,16 @@ void MarkovRateTable::setInt2dChildTable( unsigned int i, unsigned int j,
 //complex setTable call.
 void MarkovRateTable::setConstantRate( unsigned int i, unsigned int j, double rate )
 {
-	VectorTable *vecTable = new VectorTable;
+	VectorTable vecTable;
 
-	vecTable->setMin( rate );
-	vecTable->setMax( rate );
-	vecTable->setDiv( 1 );
+	vecTable.setMin( rate );
+	vecTable.setMax( rate );
+	vecTable.setDiv( 1 );
 
 	vector< double > rateWrap;
 	rateWrap.push_back( rate );
 
-	vecTable->setTable( rateWrap );
+	vecTable.setTable( rateWrap );
 
 	innerSetVtChildTable( i, j, vecTable, 0 ); 
 }

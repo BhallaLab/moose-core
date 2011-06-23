@@ -660,7 +660,9 @@ void testMarkovChannel()
 	vector< double > vec = Field< vector< double > >::get( tabId, "vec" );
 
 	for ( unsigned i = 0; i < 101; i++ )
-		assert( doubleEq( sampleCurrent[i], vec[i] ) );
+		assert( doubleEq( sampleCurrent[i] * 1e25, vec[i] * 1e25 ) );
+	//Currents involved here are incredibly small. Scaling them up is necessary
+	//for the doubleEq function to do its job.
 
 	cout << "." << flush;
 }
