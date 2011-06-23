@@ -46,7 +46,8 @@ typedef unsigned int MsgId;
  */
 typedef unsigned short BindIndex;
 
-extern const double PI;
+extern const double PI;	// Defined in consts.cpp
+extern const double NA; // Defined in consts.cpp
 
 class Element;
 class Eref;

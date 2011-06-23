@@ -13677,11 +13677,21 @@ Working on the Pool size handling.
 Updated Pool to use fastGet to look up mesh entry size. Checkin 2793.
 
 Added unit tests to check that Pool does the right thing using fastGet to
-look up mesh entry size, and for conc conversions.
+look up mesh entry size, and for conc conversions. Checkin 2794.
 
 I clearly need to extend the interface between Compartment, mesh and pool so
 that I can change compartment size or lambda, and automagically rescale both
 the pool dimensions, and also the number of entries in the pool (mesh
-happens anyway.)
+happens anyway.) As this is a structural change, I think it is best to
+pass the work over to the Shell. But this can come later after the
+ReadKkit is working again.
+
+I can get ReadKkit to work, but both reac and enz need to have additional
+fields for their rate constants, and I need then to fix up the scaling if
+the compartment volume changes.
+
+Somewhat premature addition of volume handling to Reac.cpp. Assorted
+fixes needed, including the implementation of a consts.cpp file for
+numbers like PI and NA.
 
 ============================================================================

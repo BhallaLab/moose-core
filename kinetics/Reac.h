@@ -25,6 +25,16 @@ class Reac
 		void setKb( double v );
 		double getKb() const;
 
+		/// set Kf in concentration units
+		void setConcKf( const Eref& e, const Qinfo* q, double v );
+		/// get Kf in concentration units
+		double getConcKf( const Eref& e, const Qinfo* q ) const;
+
+		/// set Kb in concentration units
+		void setConcKb( const Eref& e, const Qinfo* q, double v );
+		/// get Kb in concentration units
+		double getConcKb( const Eref& e, const Qinfo* q ) const;
+
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
