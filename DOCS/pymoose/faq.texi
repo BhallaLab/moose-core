@@ -83,7 +83,9 @@ to load the model defined in Ca1.xml into a Cell object '/ca1'.
 @section How do I record field 'xyz' from and object?
 The @code{Table} class serves for recording data in MOOSE. @code{Table}
 is a multipurpose class, capable of acting as an interpolation table,
-function generator as well as a data recorder.
+function generator as well as a data recorder. You have to set up a
+@code{Table} element before you reset and run the simulation (the
+@code{Table} objects are themselves part of the simulation).
 
 For recording the value of fields that represent continuous variables,
 during a simulation, you have to connect the @code{inputRequest} field
@@ -92,9 +94,31 @@ object, and set the step mode of the table object to @code{TAB_BUF}
 (=3).
 
 @example
+
+Suppose, you want to record the membrane potential of a compartment
+@code{/soma} over simulation time. Now, the membrane potential is
+represented by the value field (@code{ValueFinfo} in MOOSE API) @var{Vm}
+of @var{Compartment} class.
+
+Assuming you have a container element for data [you can create one by
+data = moose.Neutral('/data')], the following code will setup a Table
+for recording Vm at each timestep.
+
+
+@code{
+Vm_table = moose.Table('/data/Vm_table')
+Vm_table.stepMode = moose.TAB_BUF
+Vm_table.connect('inputRequest', target_object, 'Vm')
+}
+
+Generally,
+
+@code{
 xyz_table = moose.Table('/data/xyz_table')
 xyz_table.stepMode = moose.TAB_BUF
 xyz_table.connect('inputRequest', target_object, 'xyz')
+}
+
 @end example
 
 @subsection How do I record spike events?
@@ -119,6 +143,14 @@ out).
 @node Can I do XYZ available in GENESIS using PyMOOSE?
 @section Can I do XYZ available in GENESIS using PyMOOSE?
 @xref{Backward Compatibility}.
+
+@node How do I plot the simulation data?
+@section How do I plot the simulation data?
+To plot data, you must set up recording tables for fields you are
+interested in (@xref{How do I record field 'xyz' from and object?}).
+Once the simulation is finished [i.e. after you have called
+@code{moose.context.reset()} and
+@code{moose.context.step({runtime/no.-of-integration-steps})}], you 
 
 @c Local Variables: 
 @c mode: texinfo
