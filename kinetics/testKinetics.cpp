@@ -203,9 +203,59 @@ void testMathFuncProcess()
 	cout << "." << flush;
 }
 
+void testPoolVolumeScaling()
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< unsigned int > dims( 1, 1 );
+	Id comptId = shell->doCreate( "CylMesh", Id(), "cyl", dims );
+	Id meshId( comptId.value() + 1 );
+	Id poolId = shell->doCreate( "Pool", comptId, "pool", dims );
+
+	MsgId mid = shell->doAddMsg( "OneToOne", 
+		ObjId( poolId, 0 ), "requestSize",
+		ObjId( meshId, 0 ), "get_size" );
+
+	assert( mid != Msg::badMsg );
+
+	vector< double > coords( 9, 0.0 );
+	double x1 = 100e-6;
+	double r0 = 10e-6;
+	double r1 = 5e-6;
+	double lambda = x1;
+	coords[3] = x1;
+	coords[6] = r0;
+	coords[7] = r1;
+	coords[8] = lambda;
+
+	Field< vector< double > >::set( comptId, "coords", coords );
+
+	double size = Field< double >::get( poolId, "size" );
+	assert( size == PI * x1 * (r0+r1) * (r0+r1) / 4.0 );
+
+	double NA =  6.0221415e23;
+	Field< double >::set( poolId, "n", 400 );
+	double volscale = 1e3 / ( NA * size );
+	double conc = Field< double >::get( poolId, "conc" );
+	assert( doubleEq( conc, 400 * volscale ) );
+	Field< double >::set( poolId, "conc", 500 * volscale );
+	double n = Field< double >::get( poolId, "n" );
+	assert( doubleEq( n, 500 ) );
+
+	Field< double >::set( poolId, "nInit", 650 );
+	conc = Field< double >::get( poolId, "conc" );
+	assert( doubleEq( conc, 650 * volscale ) );
+	Field< double >::set( poolId, "concInit", 10 * volscale );
+	n = Field< double >::get( poolId, "nInit" );
+	assert( doubleEq( n, 10 ) );
+
+	shell->doDelete( comptId );
+	cout << "." << flush;
+}
+
 void testKinetics()
 {
 	testMathFunc();
+	testPoolVolumeScaling();
 }
 
 void testMpiKinetics( )
