@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Wed Jun  1 17:43:10 2011 (+0530)
+# Last-Updated: Thu Jun 23 14:57:06 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 711
+#     Update #: 718
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -43,19 +43,13 @@ MOOSE.
 
 Methods:
 
-getFieldType(field) -- data type of field as a human readable string.
-
-getField(field) -- value of field
-
-setField(field, value) -- assign value to field
-
 getValue() -- unsigned integer representation of id
 
 getPath() -- string representing the path corresponding this id
 
 getShape -- tuple containing the dimensions of this id
 
-Id implements part of the sequence protocol:
+Id also implements part of the sequence protocol:
 
 len(id) -- the first dimension of id.
 
@@ -81,13 +75,19 @@ the index of this field in the containing element.
 
 Methods:
 
+getId -- Id object containing this ObjId.
+
+getDataIndex() -- unsigned integer representing the index of this
+element in containing MOOSE object.
+
+getFieldIndex() -- unsigned integer representing the index of this
+element as a field in the containing Element.
+
 getFieldType(field) -- human readable datatype information of field
 
 getField(field) -- get value of field
 
 setField(field, value) -- assign value to field
-
-getId -- Id object containing this ObjId.
 
 getFieldNames(fieldType) -- tuple containing names of all the fields
 of type fieldType. fieldType can be valueFinfo, lookupFinfo, srcFinfo,
@@ -97,11 +97,12 @@ above is used and all the fields are returned.
 connect(srcField, destObj, destField, msgType) -- connect srcField of
 this element to destField of destObj.
 
-getDataIndex() -- unsigned integer representing the index of this
-element in containing MOOSE object.
+getMsgSrc(fieldName) -- return a tuple containing the ObjIds of all
+the elements from which a message is entering the field specified by
+fieldName.
 
-getFieldIndex() -- unsigned integer representing the index of this
-element as a field in the containing Element.
+getMsgDesr(fieldName) -- return a tuple containing list of ObjIds of
+elements that recieve messages from the fieldName of this element.
 
 
 NeutralArray:
