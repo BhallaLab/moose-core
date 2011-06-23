@@ -67,7 +67,7 @@ const Cinfo* CylMesh::initCinfo()
 		);
 		static ValueFinfo< CylMesh, vector< double > > coords(
 			"coords",
-			"All the coords as a single vector: x0 y0 z0  x1 y1 z1  r0 r1",
+			"All the coords as a single vector: x0 y0 z0  x1 y1 z1  r0 r1 lambda",
 			&CylMesh::setCoords,
 			&CylMesh::getCoords
 		);
@@ -299,12 +299,14 @@ void CylMesh::setCoords( vector< double > v )
 	r0_ = v[6];
 	r1_ = v[7];
 
+	lambda_ = v[8];
+
 	updateCoords();
 }
 
 vector< double > CylMesh::getCoords() const
 {
-	vector< double > ret( 8 );
+	vector< double > ret( 9 );
 
 	ret[0] = x0_;
 	ret[1] = y0_;
@@ -317,6 +319,7 @@ vector< double > CylMesh::getCoords() const
 	ret[6] = r0_;
 	ret[7] = r1_;
 
+	ret[8] = lambda_;
 	return ret;
 }
 
