@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "ElementValueFinfo.h"
 #include "Pool.h"
 
 #define EPSILON 1e-15
@@ -15,6 +16,14 @@
 static const double NA = 6.023e23;
 
 const SpeciesId DefaultSpeciesId = 0;
+
+static SrcFinfo1< double >* requestSize() {
+	static SrcFinfo1< double > requestSize( 
+		"requestSize", 
+		"Requests Size of pool from matching mesh entry"
+	);
+	return &requestSize;
+}
 
 const Cinfo* Pool::initCinfo()
 {
@@ -42,27 +51,27 @@ const Cinfo* Pool::initCinfo()
 			&Pool::getDiffConst
 		);
 
-		static ValueFinfo< Pool, double > conc(
+		static ElementValueFinfo< Pool, double > conc(
 			"conc",
 			"Concentration of molecules in this pool",
 			&Pool::setConc,
 			&Pool::getConc
 		);
 
-		static ValueFinfo< Pool, double > concInit(
+		static ElementValueFinfo< Pool, double > concInit(
 			"concInit",
 			"Initial value of molecular concentration in pool",
 			&Pool::setConcInit,
 			&Pool::getConcInit
 		);
 
-		static ReadOnlyValueFinfo< Pool, double > size(
+		static ReadOnlyElementValueFinfo< Pool, double > size(
 			"size",
 			"Size of compartment. Units are SI. "
-			"Utility field, the master size info is "
-			"stored on the compartment itself. For voxel-based spatial"
-			"models, the 'size' of the pool at a given index is the"
-			"size of that voxel.",
+			"Utility field, the actual size info is "
+			"stored on a volume mesh entry in the parent compartment."
+			"This is hooked up by a message. If the message isn't"
+			"available size is just taken as 1",
 			&Pool::getSize
 		);
 
@@ -102,12 +111,6 @@ const Cinfo* Pool::initCinfo()
 			new OpFunc1< Pool, double >( &Pool::decrement )
 		);
 
-		static DestFinfo setSize( "setSize",
-			"Separate finfo to assign size, should only be used by compartment."
-			"Defaults to SI units of volume: m^3",
-			new OpFunc1< Pool, double >( &Pool::setSize )
-		);
-
 		static DestFinfo handleMolWt( "handleMolWt",
 			"Separate finfo to assign molWt, and consequently diffusion const."
 			"Should only be used in SharedMsg with species.",
@@ -126,11 +129,6 @@ const Cinfo* Pool::initCinfo()
 		static SrcFinfo0 requestMolWt( 
 				"requestMolWt", 
 				"Requests Species object for mol wt"
-		);
-
-		static SrcFinfo1< double > requestSize( 
-				"requestSize", 
-				"Requests Size of pool from matching mesh entry"
 		);
 
 		//////////////////////////////////////////////////////////////
@@ -169,10 +167,9 @@ const Cinfo* Pool::initCinfo()
 		&size,		// Readonly Value
 		&speciesId,	// Value
 		&group,			// DestFinfo
-		&setSize,			// DestFinfo
 		&increment,			// DestFinfo
 		&decrement,			// DestFinfo
-		&requestSize,		// SrcFinfo
+		requestSize(),		// SrcFinfo
 		&reac,				// SharedFinfo
 		&proc,				// SharedFinfo
 		&species,			// SharedFinfo
@@ -199,12 +196,12 @@ const SrcFinfo1< double >& nOut =
 
 
 Pool::Pool()
-	: n_( 0.0 ), nInit_( 0.0 ), size_( 1.0 ), diffConst_( 0.0 ),
+	: n_( 0.0 ), nInit_( 0.0 ), diffConst_( 0.0 ),
 		A_( 0.0 ), B_( 0.0 ), species_( 0 )
 {;}
 
 Pool::Pool( double nInit)
-	: n_( 0.0 ), nInit_( nInit ), size_( 1.0 ), diffConst_( 0.0 ),
+	: n_( 0.0 ), nInit_( nInit ), diffConst_( 0.0 ),
 		A_( 0.0 ), B_( 0.0 ), species_( 0 )
 {;}
 
@@ -284,24 +281,43 @@ double Pool::getNinit() const
 	return nInit_;
 }
 
-void Pool::setConc( double c ) // Conc is given micromolar. Size is in m^3
+/// Utility function
+static double lookupSize( const Eref& e )
 {
-	n_ = 1e-3 * NA * c * size_;
+	const vector< MsgFuncBinding >* mfb = 
+		e.element()->getMsgAndFunc( requestSize()->getBindIndex() );
+	if ( !mfb ) return 1.0;
+	if ( mfb->size() == 0 ) return 1.0;
+
+	double size = 
+		Field< double >::fastGet( e, (*mfb)[0].mid, (*mfb)[0].fid );
+
+	if ( size <= 0 ) size = 1.0;
+
+	return size;
 }
 
-double Pool::getConc() const // Returns conc in micromolar.
+// Conc is given micromolar. Size is in m^3
+void Pool::setConc( const Eref& e, const Qinfo* q, double c ) 
 {
-	return 1e3 * (n_ / NA) / size_;
+	
+	n_ = 1e-3 * NA * c * lookupSize( e );
 }
 
-void Pool::setConcInit( double c )
+// Returns conc in micromolar.
+double Pool::getConc( const Eref& e, const Qinfo* q ) const
 {
-	nInit_ = 1e-3 * NA * c * size_;
+	return 1e3 * (n_ / NA) / lookupSize( e );
 }
 
-double Pool::getConcInit() const
+void Pool::setConcInit( const Eref& e, const Qinfo* q, double c )
 {
-	return 1e3 * ( nInit_ / NA ) / size_;
+	nInit_ = 1e-3 * NA * c * lookupSize( e );
+}
+
+double Pool::getConcInit( const Eref& e, const Qinfo* q ) const
+{
+	return 1e3 * ( nInit_ / NA ) / lookupSize( e );
 }
 
 void Pool::setDiffConst( double v )
@@ -314,14 +330,9 @@ double Pool::getDiffConst() const
 	return diffConst_;
 }
 
-void Pool::setSize( double v )
+double Pool::getSize( const Eref& e, const Qinfo* q ) const
 {
-	size_ = v;
-}
-
-double Pool::getSize() const
-{
-	return size_;
+	return lookupSize( e );
 }
 
 void Pool::setSpecies( unsigned int v )

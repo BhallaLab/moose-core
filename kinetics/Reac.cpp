@@ -21,6 +21,13 @@ static SrcFinfo2< double, double > toPrd(
 		"Sends out increment of molecules on product each timestep"
 	);
 
+static SrcFinfo1< double > requestSize( 
+		"requestSize", 
+		"Requests size (volume) in which reaction is embedded. Used for"
+		"conversion to concentration units from molecule # units,"
+		"and for calculations when resized."
+	);
+
 static DestFinfo sub( "subDest",
 		"Handles # of molecules of substrate",
 		new OpFunc1< Reac, double >( &Reac::sub ) );
@@ -93,6 +100,7 @@ const Cinfo* Reac::initCinfo()
 	static Finfo* reacFinfos[] = {
 		&kf,	// Value
 		&kb,	// Value
+		&requestSize,		// SrcFinfo
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
 		&proc,				// SharedFinfo
