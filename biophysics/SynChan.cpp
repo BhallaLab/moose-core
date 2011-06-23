@@ -105,9 +105,6 @@ const Cinfo* initSynChanCinfo()
 // Shared message definitions
 ///////////////////////////////////////////////////////
 		process,
-		new SharedFinfo( "process", processShared,
-			sizeof( processShared ) / sizeof( Finfo* ),
-			"This is a shared message to receive Process message from the scheduler." ), 
 		new SharedFinfo( "channel", channelShared,
 			sizeof( channelShared ) / sizeof( Finfo* ),
 			"This is a shared message to couple channel to compartment. "
@@ -346,6 +343,7 @@ double SynChan::innerGetDelay( Eref e, unsigned int i )
 
 unsigned int SynChan::updateNumSynapse( Eref e )
 {
+    cout << "SynChan::updateNumSynapse( Eref e )" << endl;
 	static const Finfo* synFinfo = initSynChanCinfo()->findFinfo( "synapse" );
 
 	unsigned int n = e.e->numTargets( synFinfo->msg(), e.i );
