@@ -24,7 +24,7 @@ void testCylMesh()
 	assert( cm.getMeshDimensions( 0 ) == 3 );
 	assert( cm.getDimensions() == 3 );
 
-	vector< double > coords( 8 );
+	vector< double > coords( 9 );
 	coords[0] = 1; // X0
 	coords[1] = 2; // Y0
 	coords[2] = 3; // Z0
@@ -35,6 +35,8 @@ void testCylMesh()
 
 	coords[6] = 1; // R0
 	coords[7] = 2; // R1
+
+	coords[8] = 1; // lambda
 
 	cm.setCoords( coords );
 
@@ -48,6 +50,8 @@ void testCylMesh()
 	assert( doubleEq( cm.getZ1(), 7 ) );
 	assert( doubleEq( cm.getR1(), 2 ) );
 
+	assert( doubleEq( cm.getLambda(), sqrt( 29 ) / 5.0 ) );
+
 	cm.setX0( 2 );
 	cm.setY0( 3 );
 	cm.setZ0( 4 );
@@ -58,9 +62,12 @@ void testCylMesh()
 	cm.setZ1( 8 );
 	cm.setR1( 3 );
 
+	cm.setLambda( 2.0 );
+
 	vector< double > temp = cm.getCoords();
-	assert( temp.size() == 8 );
-	for ( unsigned int i = 0; i < temp.size(); ++i )
+	assert( temp.size() == 9 );
+	// Can't check on the last coord as it is lambda, it changes.
+	for ( unsigned int i = 0; i < temp.size() - 1; ++i )
 		assert( doubleEq( temp[i], coords[i] + 1 ) );
 	
 	double totLen = sqrt( 29.0 );

@@ -13671,5 +13671,17 @@ Need to add section to test for it to look up FieldElements.
 Added section for FieldElements. Revealed problems, fixed. Checkin 2791.
 Now let's deploy this for the volume handling for pools and reacs.
 
-Working on the Pool size handling.
+Working on the Pool size handling. 
+============================================================================
+23 June 2011.
+Updated Pool to use fastGet to look up mesh entry size. Checkin 2793.
+
+Added unit tests to check that Pool does the right thing using fastGet to
+look up mesh entry size, and for conc conversions.
+
+I clearly need to extend the interface between Compartment, mesh and pool so
+that I can change compartment size or lambda, and automagically rescale both
+the pool dimensions, and also the number of entries in the pool (mesh
+happens anyway.)
+
 ============================================================================

@@ -13,7 +13,8 @@
 
 #define EPSILON 1e-15
 
-static const double NA = 6.023e23;
+// There is experimental error in the last sig fig here.
+static const double NA = 6.0221415e23; 
 
 const SpeciesId DefaultSpeciesId = 0;
 
