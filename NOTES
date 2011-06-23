@@ -13692,6 +13692,6 @@ the compartment volume changes.
 
 Somewhat premature addition of volume handling to Reac.cpp. Assorted
 fixes needed, including the implementation of a consts.cpp file for
-numbers like PI and NA.
+numbers like PI and NA. Checkin 2797.
 
 ============================================================================
