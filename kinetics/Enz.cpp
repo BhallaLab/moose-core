@@ -70,21 +70,21 @@ const Cinfo* Enz::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static ValueFinfo< Enz, double > k1(
 			"k1",
-			"Forward rate constant",
+			"Forward reaction from enz + sub to complex",
 			&Enz::setK1,
 			&Enz::getK1
 		);
 
 		static ValueFinfo< Enz, double > k2(
 			"k2",
-			"Forward rate constant",
+			"Reverse reaction from complex to enz + sub",
 			&Enz::setK2,
 			&Enz::getK2
 		);
 
 		static ValueFinfo< Enz, double > k3(
 			"k3",
-			"Forward rate constant",
+			"Forward rate constant from complex to product + enz",
 			&Enz::setK3,
 			&Enz::getK3
 		);

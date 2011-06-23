@@ -13,9 +13,6 @@
 
 #define EPSILON 1e-15
 
-// There is experimental error in the last sig fig here.
-static const double NA = 6.0221415e23; 
-
 const SpeciesId DefaultSpeciesId = 0;
 
 static SrcFinfo1< double >* requestSize() {

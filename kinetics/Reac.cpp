@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "ElementValueFinfo.h"
 #include "Reac.h"
 
 #define EPSILON 1e-15
@@ -51,16 +52,30 @@ const Cinfo* Reac::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static ValueFinfo< Reac, double > kf(
 			"kf",
-			"Forward rate constant",
+			"Forward rate constant, in # units",
 			&Reac::setKf,
 			&Reac::getKf
 		);
 
 		static ValueFinfo< Reac, double > kb(
 			"kb",
-			"Forward rate constant",
+			"Reverse rate constant, in # units",
 			&Reac::setKb,
 			&Reac::getKb
+		);
+
+		static ElementValueFinfo< Reac, double > Kf(
+			"Kf",
+			"Forward rate constant, in concentration units",
+			&Reac::setConcKf,
+			&Reac::getConcKf
+		);
+
+		static ElementValueFinfo< Reac, double > Kb(
+			"Kb",
+			"Reverse rate constant, in concentration units",
+			&Reac::setConcKb,
+			&Reac::getConcKb
 		);
 
 		//////////////////////////////////////////////////////////////
@@ -187,5 +202,60 @@ void Reac::setKb( double v )
 double Reac::getKb() const
 {
 	return kb_;
+}
+
+
+/// Utility function
+static double lookupSize( const Eref& e, const SrcFinfo* sf )
+{
+	const vector< MsgFuncBinding >* mfb = 
+		e.element()->getMsgAndFunc( sf->getBindIndex() );
+	if ( !mfb ) return 1.0;
+	if ( mfb->size() == 0 ) return 1.0;
+
+	double size = 
+		Field< double >::fastGet( e, (*mfb)[0].mid, (*mfb)[0].fid );
+
+	if ( size <= 0 ) size = 1.0;
+
+	return size;
+}
+
+static unsigned int findNumReactants( const Eref& e, const SrcFinfo* sf )
+{
+	const vector< MsgFuncBinding >* mfb = 
+		e.element()->getMsgAndFunc( sf->getBindIndex() );
+	if ( !mfb ) return 0;
+	return mfb->size();
+}
+
+static double volScale( const Eref& e, 
+	const SrcFinfo *sizeF, const SrcFinfo *numF )
+{
+	unsigned int n = findNumReactants( e, &toPrd );
+	if ( n == 0 ) return 1.0;
+	double size = lookupSize( e, &requestSize );
+	double scale = pow( 1e-3 * NA * size, n-1 );
+	return scale;
+}
+
+void Reac::setConcKf( const Eref& e, const Qinfo* q, double v )
+{
+	sub_ = kf_ = v * volScale( e, &requestSize, &toPrd );
+}
+
+double Reac::getConcKf( const Eref& e, const Qinfo* q ) const
+{
+	return kf_ / volScale( e, &requestSize, &toPrd );
+}
+
+void Reac::setConcKb( const Eref& e, const Qinfo* q, double v )
+{
+	prd_ = kf_ = v * volScale( e, &requestSize, &toSub );
+}
+
+double Reac::getConcKb( const Eref& e, const Qinfo* q ) const
+{
+	return kb_ / volScale( e, &requestSize, &toSub );
 }
 
