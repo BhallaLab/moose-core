@@ -46,18 +46,18 @@ class Pool
 		void setDiffConst( double v );
 		double getDiffConst() const;
 
-		void setConc( double v );
-		double getConc() const;
-		void setConcInit( double v );
-		double getConcInit() const;
+		void setConc( const Eref& e, const Qinfo* q, double v );
+		double getConc( const Eref& e, const Qinfo* q ) const;
+		void setConcInit( const Eref& e, const Qinfo* q, double v );
+		double getConcInit( const Eref& e, const Qinfo* q ) const;
 
 		/**
 		 * Size is usually volume, but we also permit areal density
-		 * This should be slaved to the parent compartment and is not
-		 * meant to be set through field operations.
+		 * This is obtained by looking up the corresponding spatial mesh
+		 * entry in the parent compartment. If the message isn't set then
+		 * it defaults to 1.0.
 		 */
-		void setSize( double v );
-		double getSize() const;
+		double getSize( const Eref& e, const Qinfo* q ) const;
 
 		void setSpecies( SpeciesId v );
 		SpeciesId getSpecies() const;
@@ -77,7 +77,6 @@ class Pool
 	private:
 		double n_; /// Number of molecules in pool
 		double nInit_; /// initial condition 
-		double size_;	/// volume/areal density of molecule.
 		double diffConst_;	/// Diffusion constant
 		double A_; /// Internal state variables, used only in explict mode
 		double B_;
