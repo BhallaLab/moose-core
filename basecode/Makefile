@@ -17,6 +17,7 @@ TARGET = basecode.o
 #  CXXFLAGS += -I.. -I../kinetics -I../biophysics
 
 OBJ = \
+	consts.o	\
 	Element.o	\
 	DataHandler.o \
 	AnyDimGlobalHandler.o \
