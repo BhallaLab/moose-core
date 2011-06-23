@@ -48,11 +48,11 @@ class MarkovRateTable {
 
 	//One parameter rate table set and get functions.
 	VectorTable* getVtChildTable( unsigned int, unsigned int ) const; 
-	void innerSetVtChildTable( unsigned int, unsigned int, VectorTable*, unsigned int );
+	void innerSetVtChildTable( unsigned int, unsigned int, VectorTable, unsigned int );
 
 	//Two parameter rate table set and get functions.
 	Interpol2D* getInt2dChildTable( unsigned int, unsigned int ) const;
-	void innerSetInt2dChildTable( unsigned int, unsigned int, Interpol2D* );
+	void innerSetInt2dChildTable( unsigned int, unsigned int, Interpol2D );
 	
 	//Lookup functions.
 	double lookup1d( unsigned int, unsigned int, double );
