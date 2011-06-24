@@ -130,6 +130,13 @@ class ReadKkit
 		map< string, Id > mmEnzIds_;
 		map< string, Id > plotIds_;
 
+		/*
+		vector< Id > pools_;
+		/// This keeps track of all vols, since the pools no longer do.
+		vector< double > poolVols_;
+		*/
+
+		/// This keeps track of unique volumes
 		vector< double > vols_;
 		vector< vector< Id > > volCategories_;
 		vector< Id > compartments_;

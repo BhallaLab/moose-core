@@ -9,6 +9,7 @@
 
 #include "header.h"
 #include "ElementValueFinfo.h"
+#include "lookupSizeFromMesh.h"
 #include "Pool.h"
 
 #define EPSILON 1e-15
@@ -280,6 +281,7 @@ double Pool::getNinit() const
 }
 
 /// Utility function
+/*
 static double lookupSize( const Eref& e )
 {
 	const vector< MsgFuncBinding >* mfb = 
@@ -294,28 +296,29 @@ static double lookupSize( const Eref& e )
 
 	return size;
 }
+*/
 
 // Conc is given micromolar. Size is in m^3
 void Pool::setConc( const Eref& e, const Qinfo* q, double c ) 
 {
 	
-	n_ = 1e-3 * NA * c * lookupSize( e );
+	n_ = 1e-3 * NA * c * lookupSizeFromMesh( e, requestSize() );
 }
 
 // Returns conc in micromolar.
 double Pool::getConc( const Eref& e, const Qinfo* q ) const
 {
-	return 1e3 * (n_ / NA) / lookupSize( e );
+	return 1e3 * (n_ / NA) / lookupSizeFromMesh( e, requestSize() );
 }
 
 void Pool::setConcInit( const Eref& e, const Qinfo* q, double c )
 {
-	nInit_ = 1e-3 * NA * c * lookupSize( e );
+	nInit_ = 1e-3 * NA * c * lookupSizeFromMesh( e, requestSize() );
 }
 
 double Pool::getConcInit( const Eref& e, const Qinfo* q ) const
 {
-	return 1e3 * ( nInit_ / NA ) / lookupSize( e );
+	return 1e3 * ( nInit_ / NA ) / lookupSizeFromMesh( e, requestSize() );
 }
 
 void Pool::setDiffConst( double v )
@@ -330,7 +333,7 @@ double Pool::getDiffConst() const
 
 double Pool::getSize( const Eref& e, const Qinfo* q ) const
 {
-	return lookupSize( e );
+	return lookupSizeFromMesh( e, requestSize() );
 }
 
 void Pool::setSpecies( unsigned int v )

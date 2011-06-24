@@ -125,6 +125,7 @@ const Cinfo* CubeMesh::initCinfo()
 		&dx,			// Value
 		&dy,			// Value
 		&dz,			// Value
+		&coords,		// Value
 		&meshToSpace,	// Value
 		&spaceToMesh,	// Value
 	};
