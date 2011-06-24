@@ -22,6 +22,7 @@ OBJ = \
 	ReadKkit.o	\
 	MathFunc.o	\
 	SumFunc.o	\
+	lookupSizeFromMesh.o	\
 	testKinetics.o	\
 
 HEADERS = \
@@ -31,18 +32,19 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-Mol.o:	Pool.h
-BufMol.o:	Pool.h BufPool.h
-FuncMol.o:	Pool.h FuncPool.h
-Reac.o:	Reac.h
-Enz.o:	Enz.h
-MMenz.o:	MMenz.h 
+Pool.o:	Pool.h lookupSizeFromMesh.h
+BufPool.o:	Pool.h BufPool.h lookupSizeFromMesh.h
+FuncPool.o:	Pool.h FuncPool.h lookupSizeFromMesh.h
+Reac.o:	Reac.h lookupSizeFromMesh.h
+Enz.o:	Enz.h lookupSizeFromMesh.h
+MMenz.o:	MMenz.h  lookupSizeFromMesh.h
 Boundary.o:	Boundary.h
 ChemCompt.o:	ChemCompt.h
 Species.o:	Species.h
 ReadKkit.o:	ReadKkit.h Pool.h FuncPool.h
 MathFunc.o:	MathFunc.h
 SumFunc.o:	SumFunc.h
+lookupSizeFromMesh.o: lookupSizeFromMesh.h
 testKinetics.o:	ReadKkit.h
 
 .cpp.o:

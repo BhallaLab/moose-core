@@ -29,7 +29,7 @@ void regressionTests()
 	cout << "\nRegression Tests:";
 	rtTable();
 	rtFindModelType();
-//	rtReadKkit(); // Commented out because of ongoing coding.
+	rtReadKkit(); // Commented out because of ongoing coding.
 	rtHHnetwork( 10 );
 	cout << endl;
 }

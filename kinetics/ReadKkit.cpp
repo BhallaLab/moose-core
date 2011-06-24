@@ -594,7 +594,7 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 		assert( cplx != Id () );
 		poolIds_[ cplxPath ] = enz; 
 		Field< double >::set( cplx, "nInit", nComplexInit );
-		SetGet1< double >::set( cplx, "setSize", parentVol );
+		// SetGet1< double >::set( cplx, "setSize", parentVol );
 
 		separateVols( cplx, parentVol );
 
@@ -697,11 +697,10 @@ Id ReadKkit::buildPool( const vector< string >& args )
 
 	Field< double >::set( pool, "nInit", nInit );
 	Field< double >::set( pool, "diffConst", diffConst );
-	SetGet1< double >::set( pool, "setSize", vol );
-
+	// SetGet1< double >::set( pool, "setSize", vol );
 	separateVols( pool, vol );
 
-	Id info = buildInfo( pool, poolMap_, args );
+	// Id info = buildInfo( pool, poolMap_, args );
 
 	/*
 	cout << setw( 20 ) << head << setw( 15 ) << tail << "	" << 
@@ -829,7 +828,7 @@ void ReadKkit::innerAddMsg(
 	Id destId = i->second;
 
 	// dest pool is substrate of src reac
-	bool ret = shell_->doAddMsg( "single", 
+	MsgId ret = shell_->doAddMsg( "OneToOne", 
 		ObjId( srcId, 0 ), srcMsg,
 		ObjId( destId, 0 ), destMsg ); 
 	assert( ret != Msg::badMsg );
