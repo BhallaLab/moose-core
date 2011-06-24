@@ -9,6 +9,7 @@
 
 #include "header.h"
 #include "ElementValueFinfo.h"
+#include "lookupSizeFromMesh.h"
 #include "Reac.h"
 
 #define EPSILON 1e-15
@@ -206,6 +207,7 @@ double Reac::getKb() const
 
 
 /// Utility function
+/*
 static double lookupSize( const Eref& e, const SrcFinfo* sf )
 {
 	const vector< MsgFuncBinding >* mfb = 
@@ -220,6 +222,7 @@ static double lookupSize( const Eref& e, const SrcFinfo* sf )
 
 	return size;
 }
+*/
 
 static unsigned int findNumReactants( const Eref& e, const SrcFinfo* sf )
 {
@@ -234,7 +237,7 @@ static double volScale( const Eref& e,
 {
 	unsigned int n = findNumReactants( e, &toPrd );
 	if ( n == 0 ) return 1.0;
-	double size = lookupSize( e, &requestSize );
+	double size = lookupSizeFromMesh( e, &requestSize );
 	double scale = pow( 1e-3 * NA * size, n-1 );
 	return scale;
 }

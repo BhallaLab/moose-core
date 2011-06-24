@@ -10,10 +10,20 @@
 #include "StoichHeaders.h"
 #include "ZombiePool.h"
 #include "Pool.h"
+#include "lookupSizeFromMesh.h"
 #include "ElementValueFinfo.h"
 #include "DataHandlerWrapper.h"
 
 #define EPSILON 1e-15
+
+static SrcFinfo1< double >* requestSize() {
+	static SrcFinfo1< double > requestSize(
+		"requestSize",
+		"Requests Size of pool from matching mesh entry"
+	);
+	return &requestSize;
+}
+
 
 const Cinfo* ZombiePool::initCinfo()
 {
@@ -134,7 +144,7 @@ const Cinfo* ZombiePool::initCinfo()
 		&size,			// Value
 		&species,		// Value
 		&group,			// DestFinfo
-		&setSize,			// DestFinfo
+		requestSize(),	// SrcFinfo
 		&reac,				// SharedFinfo
 		&proc,				// SharedFinfo
 	};
@@ -203,18 +213,27 @@ double ZombiePool::getNinit( const Eref& e, const Qinfo* q ) const
 void ZombiePool::setConc( const Eref& e, const Qinfo* q, double conc )
 {
 	unsigned int pool = convertIdToPoolIndex( e.id() );
+	S_[ pool ] = 1e-3 * NA * conc * lookupSizeFromMesh( e, requestSize() );
+
+	/*
 	unsigned int index = compartment_[ pool ];
 	assert( index < compartmentSize_.size() );
 	S_[ pool ] = 1e-3 * NA * conc * compartmentSize_[ index ];
+	*/
 }
 
 double ZombiePool::getConc( const Eref& e, const Qinfo* q ) const
 {
 	unsigned int pool = convertIdToPoolIndex( e.id() );
+	return 1e3 * S_[ pool ] / ( NA * lookupSizeFromMesh( e, requestSize()));
+
+
+	/*
 	unsigned int index = compartment_[ pool ];
 	assert( index < compartmentSize_.size() );
 	assert( compartmentSize_[ index ] > 0.0 );
 	return 1e3 * S_[ pool ] / ( NA * compartmentSize_[ index ] );
+	*/
 }
 
 void ZombiePool::setConcInit( const Eref& e, const Qinfo* q, double conc )

@@ -13694,4 +13694,12 @@ Somewhat premature addition of volume handling to Reac.cpp. Assorted
 fixes needed, including the implementation of a consts.cpp file for
 numbers like PI and NA. Checkin 2797.
 
+Now back to the ReadKkit.
+Lots of errors when I run it again. I need to fill the vol_ vector instead
+of trying to assign vols to the pools.
+
 ============================================================================
+24 June 2011
+Cleaned up ReadKkit. Now it clears regression test in gdb, but complains about
+odd-number sizes for queue entries. But it doesn't clear in non-debug mode.
+
