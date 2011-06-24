@@ -812,6 +812,7 @@ void testFastGet()
 	dims[0] = 1;
 	Id tgtId2 = Id::nextId();
 	Element* tgt2 = new Element( tgtId2, ic, "tgt2", dims, 1 );
+	assert( tgt2 );
 	Id synId( tgtId2.value() + 1 );
 	Element* syn = synId();
 	assert ( syn != 0 );
@@ -844,6 +845,12 @@ void testFastGet()
 	}
 
 
+	Id synId0( srcId.value() + 1 );
+	delete synId0();
+	Id synId1( tgtId.value() + 1 );
+	delete synId1();
+	Id synId2( tgtId2.value() + 1 );
+	delete synId2();
 	delete srcId();
 	delete tgtId();
 	delete tgtId2();

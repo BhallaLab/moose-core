@@ -13702,4 +13702,9 @@ of trying to assign vols to the pools.
 24 June 2011
 Cleaned up ReadKkit. Now it clears regression test in gdb, but complains about
 odd-number sizes for queue entries. But it doesn't clear in non-debug mode.
+Checkin 2799.
 
+Valgrind showed up a number of leaks and bad memory accesses. Fixed. But this
+does not fix the problem with odd number sizes for queue entries.
+
+============================================================================

@@ -296,6 +296,9 @@ double CubeMesh::getDz() const
 
 void CubeMesh::setCoords( vector< double > v )
 {
+	if ( v.size() < 9 ) {
+		cout << "CubeMesh::setCoords: Warning: size of argument vec should be >= 9, was " << v.size() << endl;
+	}
 	x0_ = v[0];
 	y0_ = v[1];
 	z0_ = v[2];
