@@ -130,7 +130,7 @@ void testMidLevelCylMesh()
 	Id cylId = s->doCreate( "CylMesh", Id(), "cyl", dims, 0 );
 	Id meshId( cylId.value() + 1 );
 
-	vector< double > coords( 8 );
+	vector< double > coords( 9 );
 	coords[0] = 1; // X0
 	coords[1] = 2; // Y0
 	coords[2] = 3; // Z0
@@ -141,6 +141,8 @@ void testMidLevelCylMesh()
 
 	coords[6] = 1; // R0
 	coords[7] = 2; // R1
+
+	coords[8] = 1; // lambda
 
 	bool ret = Field< vector< double > >::set( cylId, "coords", coords );
 	assert( ret );
