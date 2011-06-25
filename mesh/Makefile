@@ -14,6 +14,7 @@ OBJ = \
 	MeshEntry.o	\
 	CylMesh.o	\
 	CubeMesh.o	\
+	Boundary.o	\
 	testMesh.o	\
 
 HEADERS = \
@@ -24,10 +25,11 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 MeshEntry.o:	MeshEntry.h
-ChemMesh.o:	ChemMesh.h MeshEntry.h
-CylMesh.o:	ChemMesh.h CylMesh.h MeshEntry.h
-CubeMesh.o:	ChemMesh.h CubeMesh.h MeshEntry.h
-testMesh.o:	MeshEntry.h ChemMesh.h CylMesh.h
+Boundary.o:	Boundary.h
+ChemMesh.o:	ChemMesh.h MeshEntry.h Boundary.h
+CylMesh.o:	ChemMesh.h CylMesh.h MeshEntry.h Boundary.h
+CubeMesh.o:	ChemMesh.h CubeMesh.h MeshEntry.h Boundary.h
+testMesh.o:	MeshEntry.h ChemMesh.h CylMesh.h Boundary.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I.. -I../basecode $< -c
@@ -37,3 +39,4 @@ $(TARGET):		$(OBJ) $(SMOLDYN_OBJ) $(HEADERS)
 
 clean:
 	-rm -f *.o $(TARGET) core core.*
+

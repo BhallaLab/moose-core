@@ -9,6 +9,7 @@
 
 #include "header.h"
 #include "../shell/Shell.h"
+#include "Boundary.h"
 #include "MeshEntry.h"
 #include "ChemMesh.h"
 #include "CylMesh.h"

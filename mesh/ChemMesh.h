@@ -52,6 +52,14 @@ class ChemMesh
 		 * Returns the matched lookupEntry
 		 */
 		MeshEntry* lookupEntry( unsigned int index );
+
+		//////////////////////////////////////////////////////////////////
+		// Lookup funcs for Boundary
+		//////////////////////////////////////////////////////////////////
+		Boundary* lookupBoundary( unsigned int index );
+		void setNumBoundary( unsigned int num );
+		unsigned int getNumBoundary( ) const;
+
 		//////////////////////////////////////////////////////////////////
 		// FieldElement assignment stuff for MeshEntries
 		//////////////////////////////////////////////////////////////////
@@ -84,7 +92,21 @@ class ChemMesh
 	protected:
 		double size_; /// Volume or area
 	private:
-		MeshEntry entry_; // Wrapper for self ptr
+		MeshEntry entry_; /// Wrapper for self ptr
+
+		/**
+		 * The Boundaries are Element Fields. They appear as distinct
+		 * Elements, though they are controlled by the ChemCompt.
+		 * These are the interfaces between compartments, or just
+		 * the boundaries of the current one. Each Boundary can be
+		 * diffusive, reflective, or an interface where molecules in
+		 * different compartments can talk to each other.
+		 * All boundaries have a message to a Geometry. The Geometries
+		 * may be shared, which is why the boundary isn't a Geometry itself.
+		 * If it is an interface (diffusive or other) then the boundary 
+		 * also contains a message to the adjacent compartment.
+		 */
+		vector< Boundary > boundaries_;
 };
 
 #endif	// _CHEM_MESH_H
