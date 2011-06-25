@@ -226,9 +226,12 @@ class MoosePlot(Qwt.QwtPlot):
             tabLen = len(table)
             if tabLen == 0:
                 continue
-            ydata = array(table.table)                
+            ydata = array(table.table)           
             xdata = linspace(0, currentTime, tabLen)
-            curve.setData(xdata, ydata)
+            #~ harsha:for Genesis first element had some invalid number which when ploted had a different result so eliminating
+            #~ curve.setData(xdata, ydata)            
+            curve.setData(xdata[2:tabLen:1],ydata[2:tabLen:1])
+            
         self.clearZoomStack()
 
     def addTable(self, table, curve_name=None):
