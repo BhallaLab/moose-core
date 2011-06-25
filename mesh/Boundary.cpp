@@ -9,7 +9,8 @@
 
 #include "header.h"
 #include "Boundary.h"
-#include "ChemCompt.h"
+#include "MeshEntry.h"
+#include "ChemMesh.h"
 #include "UpFunc.h"
 
 const Cinfo* Boundary::initCinfo()
@@ -21,13 +22,15 @@ const Cinfo* Boundary::initCinfo()
 			&Boundary::getReflectivity
 		);
 
+		/*
 		static DestFinfo geometry( "geometry",
 			"Size message coming from geometry object for this Boundary"
 			"The three arguments are volume, area, and perimeter. The"
 			"receiving function decides which it cares about."
 			"The originating geometry may return zero on some of the"
 			"dimensions if they do not apply",
-			new UpFunc3< ChemCompt, double, double, double >( &ChemCompt::extent ) );
+			new UpFunc3< ChemMesh, double, double, double >( &ChemMesh::extent ) );
+			*/
 
 		static DestFinfo adjacent( "adjacent",
 			"Dummy message coming from adjacent compartment to current one"
@@ -50,7 +53,7 @@ const Cinfo* Boundary::initCinfo()
 
 	static Finfo* boundaryFinfos[] = {
 		&reflectivity,	// Field
-		&geometry,		// DestFinfo
+		// &geometry,		// DestFinfo
 		&adjacent,		// DestFinfo
 		&outside,		// DestFinfo
 		&toAdjacent,	// SrcFinfo

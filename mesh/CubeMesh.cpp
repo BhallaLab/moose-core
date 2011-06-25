@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "Boundary.h"
 #include "MeshEntry.h"
 #include "ChemMesh.h"
 #include "CubeMesh.h"

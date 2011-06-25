@@ -62,7 +62,7 @@ class Stoich
 		void allocateObjMap( const vector< Id >& elist );
 		void allocateModel( const vector< Id >& elist );
 		void zombifyModel( const Eref& e, const vector< Id >& elist );
-		void zombifyChemCompt( Id compt );
+		void zombifyChemMesh( Id compt );
 
 		unsigned int convertIdToReacIndex( Id id ) const;
 		unsigned int convertIdToPoolIndex( Id id ) const;

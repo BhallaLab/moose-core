@@ -76,7 +76,9 @@ class ReadKkit
 		void textload( const vector< string >& args );
 		void loadtab( const vector< string >& args );
 		void separateVols( Id pool, double vol );
-		void assignCompartments();
+		void assignPoolCompartments();
+		void assignReacCompartments();
+		void assignEnzCompartments();
 
 		//////////////////////////////////////////////////////////////////
 		// Utility functions
@@ -138,6 +140,8 @@ class ReadKkit
 
 		/// This keeps track of unique volumes
 		vector< double > vols_;
+
+		/// List of Ids in each unique volume.
 		vector< vector< Id > > volCategories_;
 		vector< Id > compartments_;
 
