@@ -13709,9 +13709,14 @@ does not fix the problem with odd number sizes for queue entries.
 Checkin 2801.
 
 - Need to complete the volume scaling: enzymes.
+	- Do unit tests for reacs and enz rate scaling.
 - Merge ChemMesh and ChemCompt, using the latter name but the former code.
 - Do a mesh expansion, perhaps using a Shell function.
 
 ============================================================================
 25 June 2011
-Vishaka caught an equality comparison between doubles. Fixed.
+Vishaka caught an equality comparison between doubles. Fixed. Checkin 2802.
+
+Implemented volume scaling for enzymes. Yet to test.
+
+============================================================================
