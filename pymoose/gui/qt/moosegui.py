@@ -453,7 +453,8 @@ class MainWindow(QtGui.QMainWindow):
         # self.glClientAction.setChecked(False)
         self.mooseTreeAction = self.mooseTreePanel.toggleViewAction()
         self.refreshMooseTreeAction = QtGui.QAction(self.tr('Refresh model tree'), self)
-   	self.connect(self.refreshMooseTreeAction, QtCore.SIGNAL('triggered(bool)'), self.modelTreeWidget.recreateTree)
+        self.connect(self.refreshMooseTreeAction, QtCore.SIGNAL('triggered(bool)'), self.modelTreeWidget.recreateTree)
+        
         self.mooseClassesAction = self.mooseClassesPanel.toggleViewAction()
         
         self.mooseShellAction = self.commandLineDock.toggleViewAction()
@@ -524,6 +525,8 @@ class MainWindow(QtGui.QMainWindow):
         
         self.saveTablePlotsAction = QtGui.QAction(self.tr('Save Plots'),self) #add_chait
         self.saveTablePlotsAction.setShortcut(QtGui.QKeySequence(self.tr('Ctrl+S')))
+        #harsha saving the plot is disbabled before loading a model
+        self.saveTablePlotsAction.setEnabled(0)
         self.connect(self.saveTablePlotsAction,QtCore.SIGNAL('triggered(bool)'),self.saveTablePlots)
 
         self.newPlotWindowAction = QtGui.QAction(self.tr('New Plot Window'), self)
@@ -855,7 +858,8 @@ class MainWindow(QtGui.QMainWindow):
         plotWindow.setAcceptDrops(True)
         self.connect(plotWindow, QtCore.SIGNAL('subWindowClosed()'), self.decrementSubWindowCount)
         self.connect(plot,QtCore.SIGNAL('draggedAField(const QString&,const QString&)'),self.changeFieldPlotWidget)
-
+        #harsha when new object added to plot, mooseTree shd be refresh
+        self.connect(plot,QtCore.SIGNAL('draggedAField(const QString&,const QString&)'),self.modelTreeWidget.recreateTree)
         
         # self.plotWindows.append(plotWindow)
         self.centralPanel.setActiveSubWindow(plotWindow)
@@ -1231,7 +1235,8 @@ class MainWindow(QtGui.QMainWindow):
         """Run the simulation.
 
         """
-        if self.autoHideAction.isChecked():
+        
+	if self.autoHideAction.isChecked():
             if self.commandLineDock.isVisible():
                 self.commandLineDock.setVisible(False)
             if self.mooseClassesPanel.isVisible():
@@ -1248,7 +1253,8 @@ class MainWindow(QtGui.QMainWindow):
             self.runtimeText.setText(str(runtime))
         self.updatePlots(runtime)
         self.mooseHandler.doRun(runtime)
-
+        #harsha: only after the model is run, saving the plot is enabled,otherwise there will be nothing to save
+        self.saveTablePlotsAction.setEnabled(1)
     #add_chait
     def resetAndRunSlot1(self): #horrible way of doing it. because of simulation toolbar.
         self._resetSlot()
@@ -1259,6 +1265,7 @@ class MainWindow(QtGui.QMainWindow):
         """Run the simulation.
 
         """
+ 
         if self.autoHideAction.isChecked():
             if self.commandLineDock.isVisible():
                 self.commandLineDock.setVisible(False)
@@ -1276,7 +1283,8 @@ class MainWindow(QtGui.QMainWindow):
             self.runtimeText.setText(str(runtime))
         self.updatePlots(runtime)
         self.mooseHandler.doRun(runtime)
-
+        #harsha: only after the model is run, saving the plot is enabled,otherwise there will be nothing to save
+        self.saveTablePlotsAction.setEnabled(1)
               
     def resetAndRunSlot(self):
         self._resetSlot()
@@ -1457,6 +1465,8 @@ class MainWindow(QtGui.QMainWindow):
             self.plotdtText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_PLOTDT_KKIT)))
             #self.gldtText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_GLDT_KKIT)))
             self.runtimeText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_RUNTIME_KKIT)))
+            #harsha run from menu takes from self.runtimeText and run for toolbar takes from self.runTimeEditToolbar
+            self.runTimeEditToolbar.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_RUNTIME_KKIT)))
             self.updateTimeText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_PLOTUPDATE_DT_KKIT)))
 
             
