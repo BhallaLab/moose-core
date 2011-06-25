@@ -26,6 +26,11 @@ class Enz
 		void setK3( double v );
 		double getK3() const;
 
+		void setKm( const Eref& e, const Qinfo* q, double v );
+		double getKm( const Eref& e, const Qinfo* q ) const;
+		void setRatio( double v );
+		double getRatio() const;
+
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
