@@ -123,7 +123,9 @@ Id ReadKkit::read(
 
 	innerRead( fin );
 
-	assignCompartments();
+	assignPoolCompartments();
+	assignReacCompartments();
+	assignEnzCompartments();
 	s->setCwe( base );
 	Field< string >::set( base, "path", "##" );
 	s->doReinit();
@@ -496,7 +498,7 @@ void ReadKkit::separateVols( Id pool, double vol )
 
 // We assume that the biggest compartment contains all the rest.
 // This is not true in synapses, where they are adjacent.
-void ReadKkit::assignCompartments()
+void ReadKkit::assignPoolCompartments()
 {
 	double max = 0.0;
 	unsigned int maxi = 0;
@@ -547,6 +549,14 @@ void ReadKkit::assignCompartments()
 			assert( ret != Msg::badMsg );
 		}
 	}
+}
+
+void ReadKkit::assignReacCompartments()
+{
+}
+
+void ReadKkit::assignEnzCompartments()
+{
 }
 
 Id ReadKkit::buildEnz( const vector< string >& args )

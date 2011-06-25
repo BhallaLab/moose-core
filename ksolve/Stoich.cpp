@@ -18,7 +18,8 @@
 #include "SumFunc.h"
 #include "MathFunc.h"
 #include "Boundary.h"
-#include "ChemCompt.h"
+#include "MeshEntry.h"
+#include "ChemMesh.h"
 #include "ZombiePool.h"
 #include "ZombieBufPool.h"
 #include "ZombieFuncPool.h"
@@ -359,7 +360,7 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 	static const Cinfo* reacCinfo = Reac::initCinfo();
 	static const Cinfo* enzCinfo = Enz::initCinfo();
 	static const Cinfo* mmEnzCinfo = MMenz::initCinfo();
-	static const Cinfo* chemComptCinfo = ChemCompt::initCinfo();
+	static const Cinfo* chemComptCinfo = ChemMesh::initCinfo();
 	// static const Cinfo* sumFuncCinfo = SumFunc::initCinfo();
 	// The FuncPool handles zombification of stuff coming in to it.
 
@@ -384,17 +385,17 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 			ZombieEnz::zombify( e.element(), (*i)() );
 		}
 		else if ( ei->cinfo() == chemComptCinfo ) {
-			zombifyChemCompt( *i ); // It retains its identity.
-			// ZombieChemCompt::zombify( e.element(), (*i)() );
+			zombifyChemMesh( *i ); // It retains its identity.
+			// ZombieChemMesh::zombify( e.element(), (*i)() );
 		}
 	}
 }
 
-void Stoich::zombifyChemCompt( Id compt )
+void Stoich::zombifyChemMesh( Id compt )
 {
-	static const Cinfo* chemComptCinfo = ChemCompt::initCinfo();
+	static const Cinfo* chemComptCinfo = ChemMesh::initCinfo();
 	static const Finfo* finfo = chemComptCinfo->findFinfo( "compartment" );
-	ChemCompt* c = reinterpret_cast< ChemCompt* >( compt.eref().data() );
+	ChemMesh* c = reinterpret_cast< ChemMesh* >( compt.eref().data() );
 
 	Element* e = compt();
 	vector< Id > pools;
@@ -409,7 +410,7 @@ void Stoich::zombifyChemCompt( Id compt )
 
 	assert( numTgts > 0 );
 
-	compartmentSize_.push_back( c->getSize() );
+	compartmentSize_.push_back( c->getEntireSize() );
 }
 
 unsigned int Stoich::convertIdToPoolIndex( Id id ) const

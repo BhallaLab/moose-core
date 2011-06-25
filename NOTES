@@ -13717,6 +13717,31 @@ Checkin 2801.
 25 June 2011
 Vishaka caught an equality comparison between doubles. Fixed. Checkin 2802.
 
-Implemented volume scaling for enzymes. Yet to test.
+Implemented volume scaling for enzymes. Yet to test. Checkin 2804.
+
+Reconsider enzyme and reac compartmentalization. Should really set up
+rate scaling based on compt volumes of each substrate. More tricky is setting
+which compartment they belong in, if they transfer stuff between two 
+compartments. The two compartments may have different mesh geometries. Assume
+these match up in an integral way, that is, the face of one or more mesh
+entries are always completely within the other face.
+- For enzyme sites, should simply be in same compartment as parent Pool.
+	- Enzyme substrates on a different mesh with smaller integral fraction
+		size of Enzyme mesh: Make duplicate enzyme sites on same parent
+		enzyme Pool, one enz site per substrate mesh entry.
+	- Enzyme substrates on a different mesh which is an integral multiple
+		of Enzyme mesh: Each enzyme entry does its own thing.
+	- Channels interact with 3 meshes: outside, inside, and membrane.
+		Assuming integral mappings, we put channel sites on proteins in
+		the membrane, and the # of sites is the same as the finer mesh.
+		Cases with 3 on one side to 2 on other are Naughty.
+  In other words, we need as many enzyme sites as the finer of the two meshes.
+- For reacs, they should be in the smaller compartment. Then we always have
+	the second case from above, where each reac entry does its own thing.
+
+
+
+For now: relatively small change but with lots of knock-on effects:
+	Merged ChemCompt into ChemMesh, moved Boundary into mesh directory.
 
 ============================================================================

@@ -16,8 +16,6 @@ OBJ = \
 	Reac.o	\
 	Enz.o	\
 	MMenz.o	\
-	Boundary.o	\
-	ChemCompt.o	\
 	Species.o	\
 	ReadKkit.o	\
 	MathFunc.o	\
@@ -28,6 +26,9 @@ OBJ = \
 HEADERS = \
 	../basecode/header.h \
 
+
+#	Boundary.o	\
+#	ChemCompt.o	\
 
 default: $(TARGET)
 

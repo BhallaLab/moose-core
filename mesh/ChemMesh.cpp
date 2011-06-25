@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "Boundary.h"
 #include "MeshEntry.h"
 #include "ChemMesh.h"
 
@@ -59,8 +60,7 @@ const Cinfo* ChemMesh::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// Field Elements
 		//////////////////////////////////////////////////////////////
-		/*
-		static FieldElementFinfo< ChemMesh, MeshEntry > boundaryFinfo( 
+		static FieldElementFinfo< ChemMesh, Boundary > boundaryFinfo( 
 			"boundary", 
 			"Field Element for Boundaries",
 			Boundary::initCinfo(),
@@ -68,7 +68,6 @@ const Cinfo* ChemMesh::initCinfo()
 			&ChemMesh::setNumBoundary,
 			&ChemMesh::getNumBoundary
 		);
-		*/
 
 		static FieldElementFinfo< ChemMesh, MeshEntry > entryFinfo( 
 			"meshEntries", 
@@ -83,6 +82,7 @@ const Cinfo* ChemMesh::initCinfo()
 		&size,	// ReadOnlyValue
 		&dimensions,	// ReadOnlyValue
 		&entryFinfo,	// FieldElementFinfo
+		&boundaryFinfo,	// Boundaries
 	};
 
 	static Cinfo chemMeshCinfo (
@@ -150,4 +150,28 @@ void ChemMesh::setNumEntries( unsigned int num )
 unsigned int ChemMesh::getNumEntries() const
 {
 	return this->innerGetNumEntries();
+}
+
+//////////////////////////////////////////////////////////////
+// Element Field Definitions for boundary
+//////////////////////////////////////////////////////////////
+
+Boundary* ChemMesh::lookupBoundary( unsigned int index )
+{
+	if ( index < boundaries_.size() )
+		return &( boundaries_[index] );
+	cout << "Error: ChemCompt::lookupBoundary: Index " << index << 
+		" >= vector size " << boundaries_.size() << endl;
+	return 0;
+}
+
+void ChemMesh::setNumBoundary( unsigned int num )
+{
+	assert( num < 1000 ); // Pretty unlikely upper limit
+	boundaries_.resize( num );
+}
+
+unsigned int ChemMesh::getNumBoundary() const
+{
+	return boundaries_.size();
 }
