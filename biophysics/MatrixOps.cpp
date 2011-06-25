@@ -37,7 +37,10 @@ void matMatMul( Matrix* A, Matrix* B, unsigned int dummy )
 {
 	unsigned int n = A->size();
 	Matrix *C = matAlloc( n );
+//	Matrix *Bt;
 	dummy = 0;			//To keep the compiler happy.
+
+//	Bt = matTrans(B);
 
 	for( unsigned int i = 0; i < n; ++i )
 	{
@@ -213,16 +216,15 @@ double doPartialPivot( Matrix* A, unsigned int row, unsigned int col,
 		return 0;										//Matrix is singular!
 }
 
-Matrix* matInv( Matrix* A )
+void matInv( Matrix* A, Matrix* P, vector< unsigned int >* swaps )
 {
-	Matrix *U, *L, *invL, *invA, *invU;		
+	Matrix *U, *L, *invL, *invU, *invA;		
 	unsigned int n = A->size(), i, j, diagPos;
-	vector < unsigned int >* swaps;
 	double pivot, rowMultiplier1, rowMultiplier2;
 
-	swaps = new vector< unsigned int >;
-	U = matAlloc( n );   
 	L = matAlloc( n );   
+	U = matAlloc( n );   
+	//The upper triangular portion is stored and inverted in invA
 
 	//Creating a copy of the input matrix, as well as initializing the 
 	//lower triangular matrix L.
@@ -344,25 +346,31 @@ Matrix* matInv( Matrix* A )
 	matMatMul( invU, invL, VERSION_2 );	
 	if ( !swaps->empty() )
 	{
-		Matrix *P;
-
-		P = matAlloc( n );
-
+		//Permutation matrix needs to be reset before anything further
+		//can be done.
 		for( unsigned int k = 0; k < n; ++k )
+		{
 			(*P)[k][k] = 1;
+			for( unsigned int l = 0; l < n; ++l )
+			{
+				if ( l != k )
+					(*P)[l][k] = 0;
+			}
+		}
 
-		for( unsigned int k = 0; k < swaps->size(); ++k )
-		{	
-			i = (*swaps)[k] % 10;
-			j = ( (*swaps)[k] / 10 ) % 10;
+		unsigned int index;
+		while ( !swaps->empty() )
+		{
+			index = swaps->back();
+			i = index % 10;
+			j = ( index / 10 ) % 10;
 
 			Matrix::iterator row1Itr = (P->begin() + i); 
 			Matrix::iterator row2Itr = (P->begin() + j); 
 			swap( *row1Itr, *row2Itr );
+			matMatMul( invU, P, VERSION_2 );
+			swaps->pop_back();
 		}
-		matMatMul( invU, P, VERSION_2 );
-
-		delete P;
 	}
 
 	////////////////////////
@@ -377,7 +385,6 @@ Matrix* matInv( Matrix* A )
 	invA = invU;
 
 	delete invL;
-	delete swaps;
 	//Cannot delete U or invU as invA points to them!
 
 	return invA;

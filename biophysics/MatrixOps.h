@@ -61,7 +61,7 @@ Matrix* matTrans( Matrix* );
 
 //Matrix inverse implemented using LU-decomposition (Doolittle algorithm)
 //Returns NULL if matrix is singular.  
-Matrix* matInv( Matrix* );
+Matrix* matInv( Matrix*, Matrix*, vector< unsigned int >* );
 
 //Carry out partial pivoting. 
 double doPartialPivot( Matrix*, unsigned int, unsigned int, vector< unsigned int >* );
