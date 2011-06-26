@@ -18,13 +18,16 @@
 #ifndef _STPSYNCHAN_H
 #define _STPSYNCHAN_H
 
+#include <queue>
+#include "SynInfo.h"
+#include "SynChan.h"
 
 class STPSynChan: public SynChan
 {    
   public:
     // Functions duplicated from SynChan
     STPSynChan();
-
+    virtual ~STPSynChan(){};
     ///////////////////////////////////////
     // Functions specific to STPSynChan
     ///////////////////////////////////////
@@ -85,4 +88,5 @@ class STPSynChan: public SynChan
     
 };
 
+extern const Cinfo * initSynChanCinfo();
 #endif

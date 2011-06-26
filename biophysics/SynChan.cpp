@@ -189,9 +189,6 @@ static const Slot gkSlot =
 	initSynChanCinfo()->getSlot( "GkSrc" );
 static const Slot ikSlot =
 	initSynChanCinfo()->getSlot( "IkSrc" );
-static const Slot synapseSlot =
-	initSynChanCinfo()->getSlot( "synapse" );
-
 
 ///////////////////////////////////////////////////
 // Field function definitions
@@ -269,8 +266,7 @@ double SynChan::getIk( Eref e )
 
 int SynChan::getNumSynapses( Eref e )
 {
-        static_cast< SynChan* >( e.data() )->updateNumSynapse( e );
-	return static_cast< SynChan* >( e.data() )->synapses_.size();
+    return static_cast< SynChan* >( e.data() )->updateNumSynapse( e );
 }
 
 void SynChan::setWeight( const Conn* c, double val, const unsigned int& i )
@@ -343,14 +339,12 @@ double SynChan::innerGetDelay( Eref e, unsigned int i )
 
 unsigned int SynChan::updateNumSynapse( Eref e )
 {
-    cout << "SynChan::updateNumSynapse( Eref e )" << endl;
-	static const Finfo* synFinfo = initSynChanCinfo()->findFinfo( "synapse" );
-
-	unsigned int n = e.e->numTargets( synFinfo->msg(), e.i );
-
-	if ( n >= synapses_.size() )
-			synapses_.resize( n );
-	return synapses_.size();
+    static const Finfo* synFinfo = initSynChanCinfo()->findFinfo( "synapse" );    
+    unsigned int n = e.e->numTargets( synFinfo->msg(), e.i );
+    if ( n >= synapses_.size() ){
+        synapses_.resize( n );
+    }
+    return synapses_.size();
 }
 
 ///////////////////////////////////////////////////
