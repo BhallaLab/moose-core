@@ -27,8 +27,6 @@
 #include "STPSynChan.h"
 
 
-static const double SynE = 2.7182818284590452354;
-
 const Cinfo* initSTPSynChanCinfo()
 {
     ///////////////////////////////////////////////////////
@@ -172,15 +170,13 @@ const Cinfo* initSTPSynChanCinfo()
 static const Cinfo* STPSynChanCinfo = initSTPSynChanCinfo();
 
 static const Slot channelSlot =
-	initSTPSynChanCinfo()->getSlot( "channel" );
+	initSTPSynChanCinfo()->getSlot( "channel.channel" );
 static const Slot origChannelSlot =
 	initSTPSynChanCinfo()->getSlot( "origChannel" );
 static const Slot gkSlot =
 	initSTPSynChanCinfo()->getSlot( "GkSrc" );
 static const Slot ikSlot =
 	initSTPSynChanCinfo()->getSlot( "IkSrc" );
-static const Slot synapseSlot =
-	initSTPSynChanCinfo()->getSlot( "synapse" );
 
 STPSynChan::STPSynChan(): d1_(1.0), d2_(1.0), deltaF_(0.0), tauD1_(1.0), tauD2_(1.0), tauF_(1.0), dt_tauF_(0.0), dt_tauD1_(0.0), dt_tauD2_(0.0)
 {
@@ -200,8 +196,8 @@ void STPSynChan::setInitPr( const Conn * conn, double val, const unsigned int& i
 
 void STPSynChan::innerSetInitPr( Eref e, double val, const unsigned int& i )
 {
-    updateNumSynapse(e);
-    if ( i < initPr_.size() ){
+    unsigned int size = updateNumSynapse(e);
+    if ( i < size ){
         initPr_[i] = val;
     } else {
         cout << "Error: STPSynChan::setInitPr : Index " << i << 
@@ -216,8 +212,8 @@ double STPSynChan::getInitPr( Eref e, const unsigned int& i)
 
 double STPSynChan::innerGetInitPr( Eref e, const unsigned int& i )
 {
-    updateNumSynapse(e);
-    if ( i < initPr_.size() ){
+    unsigned int size = updateNumSynapse(e);
+    if ( i < size ){
         return initPr_[i];
     }
     cout << "Error: STPSynChan::getInitPr : Index " << i << 
@@ -232,8 +228,8 @@ double STPSynChan::getPr( Eref e, const unsigned int& i)
 
 double STPSynChan::innerGetPr( Eref e, const unsigned int& i )
 {
-    updateNumSynapse(e);
-    if ( i < initPr_.size() ){
+    unsigned int size = updateNumSynapse(e);
+    if ( i < size ){
         return amp_[i] * (F_[i] + deltaF_) * d1_ * D1_[i] * d2_ * D2_[i];
     }
     cout << "Error: STPSynChan::getPr : Index " << i << 
@@ -248,8 +244,8 @@ void STPSynChan::setInitF( const Conn * conn, double val, const unsigned int& i 
 
 void STPSynChan::innerSetInitF( Eref e, double val, const unsigned int& i )
 {
-    updateNumSynapse(e);
-    if ( i < initF_.size() ){
+    unsigned int size = updateNumSynapse(e);
+    if ( i < size ){
         initF_[i] = val;
     } else {
         cout << "Error: STPSynChan::setInitF : Index " << i << 
@@ -264,8 +260,8 @@ double STPSynChan::getInitF( Eref e, const unsigned int& i)
 
 double STPSynChan::innerGetInitF( Eref e, const unsigned int& i )
 {
-    updateNumSynapse(e);
-    if ( i < initF_.size() ){
+    unsigned int size = updateNumSynapse(e);
+    if ( i < size ){
         return initF_[i];
     }
     cout << "Error: STPSynChan::getInitF : Index " << i << 
@@ -281,8 +277,8 @@ void STPSynChan::setInitD1( const Conn * conn, double val, const unsigned int& i
 
 void STPSynChan::innerSetInitD1( Eref e, double val, const unsigned int& i )
 {
-    updateNumSynapse(e);
-    if ( i < initD1_.size() ){
+    unsigned int size = updateNumSynapse(e);
+    if ( i < size ){
         initD1_[i] = val;
     } else {
         cout << "Error: STPSynChan::setInitD1 : Index " << i << 
@@ -297,8 +293,8 @@ double STPSynChan::getInitD1( Eref e, const unsigned int& i)
 
 double STPSynChan::innerGetInitD1( Eref e, const unsigned int& i )
 {
-    updateNumSynapse(e);
-    if ( i < initD1_.size() ){
+    unsigned int size = updateNumSynapse(e);
+    if ( i < size ){
         return initD1_[i];
     }
     cout << "Error: STPSynChan::getInitD1 : Index " << i << 
@@ -313,8 +309,8 @@ void STPSynChan::setInitD2( const Conn * conn, double val, const unsigned int& i
 
 void STPSynChan::innerSetInitD2( Eref e, double val, const unsigned int& i )
 {
-    updateNumSynapse(e);
-    if ( i < initD2_.size() ){
+    unsigned int size = updateNumSynapse(e);
+    if ( i < size ){
         initD2_[i] = val;
     } else {
         cout << "Error: STPSynChan::setInitD2 : Index " << i << 
@@ -329,8 +325,8 @@ double STPSynChan::getInitD2( Eref e, const unsigned int& i)
 
 double STPSynChan::innerGetInitD2( Eref e, const unsigned int& i )
 {
-    updateNumSynapse(e);
-    if ( i < initD2_.size() ){
+    unsigned int size = updateNumSynapse(e);
+    if ( i < size ){
         return initD2_[i];
     }
     cout << "Error: STPSynChan::getInitD2 : Index " << i << 
@@ -420,8 +416,10 @@ double STPSynChan::getF( Eref e, const unsigned int& index)
 
 unsigned  int STPSynChan::updateNumSynapse( Eref e)
 {
-    unsigned int size = SynChan::updateNumSynapse(e);
-    if (size != initPr_.size()){
+    static const Finfo * synFinfo = initSTPSynChanCinfo()->findFinfo( "synapse" );
+    unsigned int size = e.e->numTargets( synFinfo->msg(), e.i );
+    if ( size != synapses_.size() ){
+        synapses_.resize(size);
         initPr_.resize(size, 1.0);
         initF_.resize(size, 1.0);
         initD1_.resize(size, 1.0);
@@ -484,7 +482,10 @@ void STPSynChan::innerReinitFunc( Eref e, ProcInfo info )
 void STPSynChan::innerSynapseFunc( const Conn* c, double time )
 {
     unsigned int index = c->targetIndex();
-    assert( index < synapses_.size() );
+    if ( index > synapses_.size() ){
+        cout << "STPSynChan::innerSynapseFunc:: Index: " << index << ", size: " << synapses_.size() << endl;
+        return;
+    }
     F_[index] += deltaF_;
     D1_[index] *= d1_;
     D2_[index] *= d2_;    
