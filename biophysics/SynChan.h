@@ -20,7 +20,9 @@ class SynChan
 		{
 			;
 		}
-
+    virtual ~SynChan(){
+        ;
+    }
 		static void setGbar( const Conn* c, double Gbar );
 		static double getGbar( Eref e );
 
