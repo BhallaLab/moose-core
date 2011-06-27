@@ -27,8 +27,13 @@ typedef vector< double > Vector;
 Matrix* matMatMul( Matrix*, Matrix* ); 
 
 //Version 2 : Returns the result in the first matrix.
-//The third parameter is there merely to differentiate it from the first one. 
+//The third parameter determines which matrix to destroy in order to return
+//the result in it.
 void matMatMul( Matrix*, Matrix*, unsigned int );
+
+//Special matrix multiplication when the second matrix is a permutation matrix
+//i.e. the columns are to be permuted.
+void matPermMul( Matrix*, vector< unsigned int >* );
 
 //Computes sum of two square matrices.
 Matrix* matMatAdd( Matrix&, Matrix& );
@@ -61,10 +66,11 @@ Matrix* matTrans( Matrix* );
 
 //Matrix inverse implemented using LU-decomposition (Doolittle algorithm)
 //Returns NULL if matrix is singular.  
-Matrix* matInv( Matrix*, Matrix*, vector< unsigned int >* );
+void matInv( Matrix*, vector< unsigned int >*, Matrix* );
+
 
 //Carry out partial pivoting. 
-double doPartialPivot( Matrix*, unsigned int, unsigned int, vector< unsigned int >* );
+double doPartialPivot( Matrix*, unsigned int, unsigned int, vector< unsigned int >*);
 /////////
 //Memory allocation routines.
 ////////
