@@ -90,7 +90,7 @@ void Cinfo::init( const string* doc,
 	unsigned int i;
 	for ( i = 0; i < nDoc; i += 2 )
 		doc_[ doc[ i ] ] = doc[ i + 1 ];
-	
+
 	map< const Finfo*, const Finfo* > baseFinfoCopy;
 	if ( baseCinfo_ ) {
 		nMsg_ = baseCinfo_->nMsg_;
@@ -233,8 +233,7 @@ void Cinfo::init( const string* doc,
                 << "const std::string& "<< name() <<"::getType(){ return className_; }\n";
             swig << "%include \"" << name() << ".h\"\n";        
         }
-#endif
-
+#endif // GENERATE_WRAPPERS
 	for ( i = 0 ; i < nFinfos; i++ ) {
             finfoArray[i]->countMessages( nMsg_ );
 			// This sends in the new Cinfo name needed to set up the
@@ -283,7 +282,7 @@ void Cinfo::init( const string* doc,
                     swig << ")\n";                
                 }
             }
-#endif
+#endif // GENERATE_WRAPPERS
         }
 #ifdef GENERATE_WRAPPERS
         if (created)
@@ -296,7 +295,7 @@ void Cinfo::init( const string* doc,
             cpp.close();
             swig.close();        
         }
-#endif
+#endif // GENERATE_WRAPPERS
 	
 	// Now we shift the DestFinfos to the back of the set.
 	// Have to maintain ordering here
@@ -309,7 +308,6 @@ void Cinfo::init( const string* doc,
 	///\todo: here need to put in additional initialization stuff from base class
 	if ( name() != "" )
 		lookup()[ name() ] = this;
-	//cout << "Cinfo: " << name() << endl;
 }
 
 Cinfo::~Cinfo()
