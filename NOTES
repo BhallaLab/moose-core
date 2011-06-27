@@ -13743,5 +13743,12 @@ entries are always completely within the other face.
 
 For now: relatively small change but with lots of knock-on effects:
 	Merged ChemCompt into ChemMesh, moved Boundary into mesh directory.
+	Checkin 2805.
+
+============================================================================
+27 June 2011
+Put in the mesh/compartment asignment for Reacs and Enzs in ReadKkit. This
+works on 1 thread, fails frequently on 2 threads for a variety reported
+reasons. I suspect the msg queuing.
 
 ============================================================================
