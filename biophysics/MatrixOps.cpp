@@ -9,18 +9,23 @@
 #include <vector>
 #include <math.h>
 #include "doubleEq.h"
+#include <iomanip>
 #include <iostream>
 #include "MatrixOps.h" 
 
-#define FIRST 1
-#define SECOND 2
+using std::cerr; 
+using std::endl; 
+using std::cout;
 
-//Idea taken from the implementation of the DGETRF method in LAPACK. When 
-//the pivot is zero, we divide by a small number instead of simply throwing up
-//an error and not returning a result.
-#define EPSILON 1e-15
-
-using std::cerr;
+void matPrint( Matrix* A )
+{
+	for( unsigned int i = 0; i < A->size(); ++i )
+	{
+		for( unsigned int j = 0; j < A->size(); ++j )
+			printf("%.15e ", (*A)[i][j]);
+		printf("\n");
+	}
+}
 
 Matrix* matMatMul( Matrix* A, Matrix* B )
 {
@@ -41,23 +46,16 @@ Matrix* matMatMul( Matrix* A, Matrix* B )
 
 void matMatMul( Matrix* A, Matrix* B, unsigned int resIndex )
 {
-	unsigned int n = A->size();
-	Matrix *C = matAlloc( n );
-//	dummy = 0;			//To keep the compiler happy.
+	Matrix *C;
 
-	for( unsigned int i = 0; i < n; ++i )
-	{
-		for( unsigned int j = 0; j < n; ++j )
-		{
-			for( unsigned int k = 0; k < n; ++k )
-				(*C)[i][j] += (*A)[i][k] * (*B)[k][j];
-		}
-	}
+	C = matMatMul( A, B );
 
 	if ( resIndex == FIRST )
 		*A = *C;
 	else if ( resIndex == SECOND )
 		*B = *C;
+
+	delete C;
 }
 
 void matPermMul( Matrix* A, vector< unsigned int >* swaps )
@@ -73,6 +71,7 @@ void matPermMul( Matrix* A, vector< unsigned int >* swaps )
 		i = index % 10;
 		j = (index / 10 ) % 10;
 
+		//Swapping the columns.
 		for( unsigned int l = 0; l < n; ++l ) 
 		{
 			temp = (*A)[l][i];
@@ -82,46 +81,92 @@ void matPermMul( Matrix* A, vector< unsigned int >* swaps )
 	}
 }
 
-Matrix* matMatAdd( Matrix& A, Matrix& B ) 
+Matrix* matMatAdd( Matrix* A, Matrix* B, double alpha, double beta ) 
 {
-	unsigned int n = A.size();
+	unsigned int n = A->size();
 	Matrix *C = matAlloc( n );
 
 	for( unsigned int i = 0; i < n; ++i )
 	{
 		for( unsigned int j = 0; j < n; ++j )
-			(*C)[i][j] = A[i][j] + B[i][j];
+			(*C)[i][j] = alpha * (*A)[i][j] + beta * (*B)[i][j];
 	}
 
 	return C;
 }
 
-Matrix* matMatSub( Matrix& A, Matrix& B ) 
+void matMatAdd( Matrix* A, Matrix* B, double alpha, double beta, 
+								unsigned int resIndex ) 
 {
-	unsigned int n = A.size();
+	Matrix *C;
+	unsigned int n = A->size();
+
+	if ( resIndex == FIRST )
+		C = A;
+	else if ( resIndex == SECOND )
+		C = B;
+	else
+		cerr << "matMatAdd : Invalid index supplied to store result.\n";
+
+	for( unsigned int i = 0; i < n; ++i )
+	{
+		for( unsigned int j = 0; j < n; ++j )
+			(*C)[i][j] = alpha * (*A)[i][j] + beta * (*B)[i][j];
+	}
+}
+
+Matrix* matEyeAdd( Matrix* A, double k )
+{
+	unsigned int n = A->size();
+	Matrix* B = matAlloc( n );
+
+	for( unsigned int i = 0; i < n; ++i )
+	{
+		for( unsigned int j = 0; j < n; ++j )
+		{
+			if ( i == j )
+				(*B)[i][j] = (*A)[i][j] + k;
+			else
+				(*B)[i][j] = (*A)[i][j];
+		}
+	}
+
+	return B;
+}
+
+void matEyeAdd( Matrix* A, double k, unsigned int dummy )
+{
+	unsigned int n = A->size();
+	dummy = 0;
+	
+	for( unsigned int i = 0; i < n; ++i )
+		(*A)[i][i] += k;
+}
+
+Matrix* matScalShift( Matrix* A, double mul, double add )
+{
+	unsigned int n = A->size();
 	Matrix *C = matAlloc( n );
 
 	for( unsigned int i = 0; i < n; ++i )
 	{
 		for( unsigned int j = 0; j < n; ++j )
-			(*C)[i][j] = A[i][j] - B[i][j];
+			(*C)[i][j] = (*A)[i][j] * mul + add;
 	}
 
 	return C;
 }
 
-Matrix* matScalMul( Matrix& A, double k)
+void matScalShift( Matrix* A, double mul, double add, unsigned int dummy )
 {
-	unsigned int n = A.size();
-	Matrix *C = matAlloc( n );
+	unsigned int n = A->size();
+	dummy = 0;
 
 	for( unsigned int i = 0; i < n; ++i )
 	{
 		for( unsigned int j = 0; j < n; ++j )
-			(*C)[i][j] = A[i][j] * k;
+			(*A)[i][j] = (*A)[i][j] * mul + add;
 	}
-
-	return C;
 }
 
 Vector* vecMatMul( Vector& v, Matrix& A )
@@ -152,13 +197,13 @@ Vector* matVecMul( Matrix& A, Vector& v )
 	return w;
 }
 
-double matTrace( Matrix& A )
+double matTrace( Matrix* A )
 {
-	unsigned int n = A.size();
+	unsigned int n = A->size();
 	double trace = 0;
 
 	for ( unsigned int i = 0; i < n; ++i )
-		trace += A[i][i];
+		trace += (*A)[i][i];
 
 	return trace;	
 }
@@ -258,16 +303,14 @@ void matInv( Matrix* A, vector< unsigned int >* swaps, Matrix* invA )
 	j = 0;
 	while( diagPos < n - 1 )
 	{
-
-		//Carrying out the row operations in this fashion seemed like a way of 
-		//reducing round-off error, at the cost of one extra floating point
-		//operation.  
 		rowMultiplier1 = (*invA)[diagPos][j];		//Pivot element.
 		rowMultiplier2 = (*invA)[i][j];
 
-		for( unsigned int k = j; k < n; ++k )
+		(*invA)[i][j] = 0;
+		for( unsigned int k = j + 1; k < n; ++k )
 			(*invA)[i][k] = ( (*invA)[i][k] * rowMultiplier1 - 
 									   (*invA)[diagPos][k] *rowMultiplier2 ) / rowMultiplier1;
+
 
 		(*L)[i][j] = rowMultiplier2 / rowMultiplier1;
 
@@ -289,12 +332,12 @@ void matInv( Matrix* A, vector< unsigned int >* swaps, Matrix* invA )
 			i = diagPos + 1;	
 		}
 	}
-
-/*	if ( doubleEq( (*invA)[n-1][n-1], 0.0 ) ) 
-		cerr << "Warning : Matrix is singular!\n";*/
-
 	//End of computation of L and U (which is stored in invA).
 	////////////////////////////
+	printf("\nL\n");
+	matPrint(L);
+	printf("\nU\n");
+	matPrint(invA);
 
 	////////////////////////////
 	//Obtaining the inverse of invA and L, which is obtained by solving the 
@@ -323,7 +366,6 @@ void matInv( Matrix* A, vector< unsigned int >* swaps, Matrix* invA )
 				(*invA)[l][k] = -sum/(*invA)[l][l];
 		}
 	}
-
 	//Similarly as above, we find the inverse of the lower triangular matrix by
 	//forward-substitution.
 
@@ -346,6 +388,10 @@ void matInv( Matrix* A, vector< unsigned int >* swaps, Matrix* invA )
 		}
 	}
 
+	printf("\ninvL\n");
+	matPrint(invL);
+	printf("\ninvU\n");
+	matPrint(invA);
 
 	//End of computation of invL and invU. Note that they have been computed in
 	//place, which means the original copies of L and U are now gone.
