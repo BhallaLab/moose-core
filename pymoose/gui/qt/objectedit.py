@@ -156,15 +156,19 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
         """Set field value or set plot flag.
 
         If a user tries to put an invalid value then the field is
-        reset to default value. Old edit is lost.
+        reset to default value. Restored to previous edit.
         """
+        oldValue = str(index.data().toString())
         if not index.isValid() and index.row () >= len(self.fields):
             return False
         ret = True
         value = str(value.toString()) # convert Qt datastructure to
                                       # Python datastructure
-
+        #add_chait
+        if value =='':
+            value = oldValue
         field = self.fields[index.row()]
+        
         if index.column() == 0: # This is the fieldname
             ret = False
         elif index.column() == 1: # This is the value column
@@ -277,9 +281,9 @@ class ObjectEditDelegate(QtGui.QItemDelegate):
         """Override createEditor from parent class to show custom
         combo box for the plot column."""
         # print 'Creating editor'
-        
+        #QtGui.QAbstractItemView.openPersistentEditor(index)
         if index.column() == 2:
-            combobox = QtGui.QComboBox(parent)        
+            combobox = QtGui.QComboBox(parent)  
             combobox.addItems(index.model().plotNames)
             combobox.setEditable(False)
             self.index = index
