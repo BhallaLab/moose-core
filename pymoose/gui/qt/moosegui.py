@@ -406,6 +406,7 @@ class MainWindow(QtGui.QMainWindow):
         config.LOGGER.debug('Set model to: %s' % (str(self.objFieldEditModel)))
         self.objFieldEditor.setEditTriggers(QtGui.QAbstractItemView.DoubleClicked
                                  | QtGui.QAbstractItemView.SelectedClicked)
+
         self.objFieldEditor.setDragEnabled(True)
         for plot in self.plots:
             objName = plot.objectName()
