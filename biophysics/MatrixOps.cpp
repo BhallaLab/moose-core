@@ -208,16 +208,16 @@ double matTrace( Matrix* A )
 	return trace;	
 }
 
-double matColNorm( Matrix& A )
+double matColNorm( Matrix* A )
 {
 	double norm = 0, colSum = 0;
-	unsigned int n = A.size();
+	unsigned int n = A->size();
 
 	for( unsigned int i = 0; i < n; ++i )
 	{
 		colSum = 0;
 		for( unsigned int j = 0; j < n; ++j )
-			colSum += fabs( A[j][i] );	
+			colSum += fabs( (*A)[j][i] );	
 		
 		if ( colSum > norm )
 			norm = colSum;
@@ -334,11 +334,7 @@ void matInv( Matrix* A, vector< unsigned int >* swaps, Matrix* invA )
 	}
 	//End of computation of L and U (which is stored in invA).
 	////////////////////////////
-	printf("\nL\n");
-	matPrint(L);
-	printf("\nU\n");
-	matPrint(invA);
-
+	
 	////////////////////////////
 	//Obtaining the inverse of invA and L, which is obtained by solving the 
 	//simple systems Ux = I and Lx= I.
@@ -387,11 +383,6 @@ void matInv( Matrix* A, vector< unsigned int >* swaps, Matrix* invA )
 			(*invL)[l][k] = invTemp;
 		}
 	}
-
-	printf("\ninvL\n");
-	matPrint(invL);
-	printf("\ninvU\n");
-	matPrint(invA);
 
 	//End of computation of invL and invU. Note that they have been computed in
 	//place, which means the original copies of L and U are now gone.
