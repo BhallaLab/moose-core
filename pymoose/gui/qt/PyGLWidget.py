@@ -258,7 +258,7 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 
     def wheelEvent(self, _event):
         # Use the mouse wheel to zoom in/out
-        d = - float(_event.delta()) / 200.0 * self.radius_
+        d =  float(_event.delta()) / 200.0 * self.radius_
 	self.translate([0.0, 0.0, d])
         self.updateGL()
         _event.accept()
