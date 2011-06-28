@@ -31,7 +31,6 @@ import moose
 import pickle
 mc=moose.context
 
-
 class updatepaintGL(PyGLWidget):
 	
     def paintGL(self):
@@ -74,7 +73,7 @@ class updatepaintGL(PyGLWidget):
 		for name in self.vizObjectNames:
 			r=mc.pathToId(name+self.moosepath)
 			d=float(mc.getField(r,self.variable))
-			vals.append(d)
+                        vals.append(d)
 		inds = digitize(vals,self.stepVals)
 
 		for i in range(0,len(self.vizObjects)):
@@ -84,14 +83,15 @@ class updatepaintGL(PyGLWidget):
 		vals=[]
 		vals_2=[]
 		for name in self.vizObjectNames:
-			r=mc.pathToId(name+self.moosepath)
-			d=float(mc.getField(r,self.variable))
-			
-			r2=mc.pathToId(name+self.moosepath_2)
-			d2=float(mc.getField(r2,self.variable_2))
+                    r=mc.pathToId(name+self.moosepath)
+                    d=float(mc.getField(r,self.variable))
+                    
+
+                    r2=mc.pathToId(name+self.moosepath_2)
+                    d2=float(mc.getField(r2,self.variable_2))
 				
-			vals.append(d)
-			vals_2.append(d2)
+                    vals.append(d)
+                    vals_2.append(d2)
 			
 		inds = digitize(vals,self.stepVals)
 		inds_2 = digitize(vals_2,self.stepVals_2)
