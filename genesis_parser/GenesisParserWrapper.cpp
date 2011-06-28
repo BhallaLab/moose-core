@@ -1628,10 +1628,28 @@ void do_call( int argc, const char** const argv, Id s )
 int do_isa( int argc, const char** const argv, Id s )
 {
 	if ( argc == 3 ) {
-		cout << "in do_isa " << argv[1] << ", " << argv[2] << endl;
-		// return s->isaFuncLocal( argv[1], argv[2] );
+            Id eid(argv[2]);
+            if (eid.bad()){
+                cout << "Error: " << argv[2] << " : no such element." << endl;
+                return 0;
+            }
+            const Cinfo * thisCinfo = eid()->cinfo();
+            const Cinfo * otherCinfo = Cinfo::find(argv[1]);
+            if (otherCinfo){
+                return thisCinfo->isA(otherCinfo);
+            }
+            // Try translating from GENESIS name to MOOSE name
+            map<string, string>::iterator it = sliClassNameConvert().find(argv[1]);
+            if (it == sliClassNameConvert().end()){
+                cout << "Error: " << argv[2] << " : no such class." << endl;
+                return 0;
+            }
+            otherCinfo = Cinfo::find(it->second);
+            if (otherCinfo) {
+                return thisCinfo->isA(otherCinfo);
+            }
 	} else {
-		cout << "usage:: " << argv[0] << " type field\n";
+            cout << "usage:: " << argv[0] << " type field\n";
 	}
 	return 0;
 }
