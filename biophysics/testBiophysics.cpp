@@ -23,6 +23,7 @@ extern void testCaConc(); // Defined in CaConc.cpp
 extern void testNernst(); // Defined in Nernst.cpp
 extern void testMarkovRateTable(); //Defined in MarkovRateTable.cpp
 extern void testVectorTable();	//Defined in VectorTable.cpp
+extern void testMarkovSolver();		//Defined in MarkovSolver.cpp
 /*
 extern void testSynChan(); // Defined in SynChan.cpp
 extern void testBioScan(); // Defined in BioScan.cpp
@@ -655,7 +656,7 @@ void testMarkovChannel()
 
 	shell->doReinit( );
 	shell->doReinit( );
-	shell->doStart( 1e-3 );
+	shell->doStart( 1.0e-3 );
 
 	vector< double > vec = Field< vector< double > >::get( tabId, "vec" );
 
@@ -906,14 +907,15 @@ void testNMDAChan()
 // This tests stuff without using the messaging.
 void testBiophysics()
 {
-	testCompartment();
+/*	testCompartment();
 	testHHGateCreation();
 	testHHGateLookup();
 	testHHGateSetup();
 	testSpikeGen();
 	testCaConc();
 	testNernst();
-	testVectorTable();
+	testVectorTable();*/
+	testMarkovSolver();
 	/*
 	testBioScan();
 	*/

@@ -84,7 +84,7 @@ Vector* matVecMul( Matrix&, Vector& );
 double matTrace( Matrix* );
 
 //Calculate column norm of matrix.
-double matColNorm( Matrix& );
+double matColNorm( Matrix* );
 
 //Plain old matrix transpose i.e. done out-of-place.
 Matrix* matTrans( Matrix* ); 
