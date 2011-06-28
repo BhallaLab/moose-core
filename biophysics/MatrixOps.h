@@ -22,27 +22,52 @@ using std::vector;
 typedef vector< vector< double > > Matrix;
 typedef vector< double > Vector;
 
+//Idea taken from the implementation of the DGETRF method in LAPACK. When 
+//the pivot is zero, we divide by a small number instead of simply throwing up
+//an error and not returning a result.
+#define EPSILON 1e-15
+
+#define FIRST 1
+#define SECOND 2
+
+#define DUMMY 0
+
+//Just a debug function to print the matrix.
+void matPrint( Matrix* );
+
 //Computes product of two square matrices.  
 //Version 1 : Returns the result in a new matrix.
 Matrix* matMatMul( Matrix*, Matrix* ); 
 
-//Version 2 : Returns the result in the first matrix.
+//Version 2 : Returns the result in either of the matrices passed in.
 //The third parameter determines which matrix to destroy in order to return
 //the result in it.
 void matMatMul( Matrix*, Matrix*, unsigned int );
 
 //Special matrix multiplication when the second matrix is a permutation matrix
 //i.e. the columns are to be permuted.
+//This helps in avoiding a matrix multiplication.
 void matPermMul( Matrix*, vector< unsigned int >* );
 
 //Computes sum of two square matrices.
-Matrix* matMatAdd( Matrix&, Matrix& );
+Matrix* matMatAdd( Matrix*, Matrix*, double, double );
 
-//Computes difference of two square matrices.
-Matrix* matMatSub( Matrix&, Matrix& );
+//Version 2 : Returns the result in either of the matrices that are passed as
+//arguments.
+void matMatAdd( Matrix*, Matrix*, double, double, unsigned int );
 
-//Computes the result of multiplying all terms of a matrix by a scalar.
-Matrix* matScalMul( Matrix&, double );
+//Adds k*I to given matrix. Original is intact.
+Matrix* matEyeAdd( Matrix*, double );
+
+//Version 2 : Returns the matrix in first argument i.e. original is destroyed.
+void matEyeAdd( Matrix*, double, unsigned int );
+
+//Computes the result of multiplying all terms of a matrix by a scalar and then
+//adding another scalar i.e. B = a*A + b.
+//First argument is scale i.e. 'a' and second argument is shift i.e. 'b'.
+Matrix* matScalShift( Matrix*, double, double );
+
+void matScalShift( Matrix*, double, double, unsigned int );
 
 //Computes the result of multiplying a row vector with a matrix (in that order).
 Vector* vecMatMul( Vector&, Matrix& );
@@ -56,7 +81,7 @@ Vector* matVecMul( Matrix&, Vector& );
 //void vecVecScalAdd( Matrix::iterator&, Matrix::iterator&, double, double );
 
 //Trace of matrix.
-double matTrace( Matrix& );
+double matTrace( Matrix* );
 
 //Calculate column norm of matrix.
 double matColNorm( Matrix& );
@@ -68,9 +93,9 @@ Matrix* matTrans( Matrix* );
 //Returns NULL if matrix is singular.  
 void matInv( Matrix*, vector< unsigned int >*, Matrix* );
 
-
 //Carry out partial pivoting. 
 double doPartialPivot( Matrix*, unsigned int, unsigned int, vector< unsigned int >*);
+
 /////////
 //Memory allocation routines.
 ////////
