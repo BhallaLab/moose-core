@@ -44,6 +44,13 @@ Matrix* matMatMul( Matrix*, Matrix* );
 //the result in it.
 void matMatMul( Matrix*, Matrix*, unsigned int );
 
+//Special version to multiply upper and lower triangular matrices (in that
+//order). Used specially by the matInv method. The result is stored in the
+//first matrix.
+//Thanks to the structure of this multiplication, the multiplication can be
+//carried out in place.
+void triMatMul( Matrix*, Matrix* );
+
 //Special matrix multiplication when the second matrix is a permutation matrix
 //i.e. the columns are to be permuted.
 //This helps in avoiding a matrix multiplication.

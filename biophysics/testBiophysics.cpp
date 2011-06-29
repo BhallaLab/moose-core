@@ -907,14 +907,14 @@ void testNMDAChan()
 // This tests stuff without using the messaging.
 void testBiophysics()
 {
-/*	testCompartment();
+	testCompartment();
 	testHHGateCreation();
 	testHHGateLookup();
 	testHHGateSetup();
 	testSpikeGen();
 	testCaConc();
 	testNernst();
-	testVectorTable();*/
+	testVectorTable();
 	testMarkovSolver();
 	/*
 	testBioScan();
