@@ -28,6 +28,10 @@
 #include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
 
+#include "../mesh/MeshEntry.h"
+// #include "../mesh/Boundary.h"
+// #include "../mesh/ChemMesh.h"
+
 const unsigned int Shell::OkStatus = ~0;
 const unsigned int Shell::ErrorStatus = ~1;
 unsigned int Shell::numCores_;
@@ -133,6 +137,11 @@ static SrcFinfo3< string, string, unsigned int > requestUseClock(
 			"The 'field' is typically process, but some cases need to send"
 			"updates to the 'init' field."
 			"Tick # specifies which tick to be attached to the objects."
+			);
+static SrcFinfo1< Id > requestReMesh(
+			"requestReMesh",
+			"requestReMesh( meshId );"
+			"Chops up specified mesh."
 			);
 
 static DestFinfo handleUseClock( "handleUseClock", 
@@ -711,6 +720,64 @@ void Shell::doSyncDataHandler( Id tgt )
 		"fieldDimension", maxIndex_ );
 	*/
 }
+
+/**
+ * Tell all attached pools and vols to update themselves: set their
+ * array sizes and set their new volumes.
+ * Dangerous function, if called elsewhere it will cause all sorts of
+ * structuralQ issues.
+ */
+void Shell::handleReMesh( Id baseMesh )
+{
+	static const Finfo* finfo = MeshEntry::initCinfo()->findFinfo( "get_size" );
+	static const DestFinfo* df = dynamic_cast< const DestFinfo* >( finfo );
+	assert( df );
+	vector< Id > tgts;
+	unsigned int numTgts = baseMesh()->getInputs( tgts, df );
+	assert( tgts.size() == numTgts );
+	vector< unsigned int > dims( 1, baseMesh()->dataHandler()->totalEntries() );
+	for ( vector< Id >::iterator i = tgts.begin(); i != tgts.end(); ++i )
+	{
+		bool ret = i->operator()()->dataHandler()->resize( dims );
+		assert( ret );
+		// Now we need to tell each tgt to scale its n, rates etc from vol.
+	}
+}
+
+/**
+ * This function builds a reac-diffusion mesh starting at the
+ * specified ChemCompt, which houses MeshEntry FieldElements.
+ * Assumes that the dimensions of the baseCompartment have just been
+ * redefined, and we now need to go through and update the child 
+ * reaction system.
+ */
+
+void Shell::doReacDiffMesh( Id baseCompartment )
+{
+	Eref sheller( shelle_, 0 );
+	assert( baseCompartment()->dataHandler()->isGlobal() );
+	assert( baseCompartment()->cinfo()->isA( "ChemMesh" ) );
+	Id baseMesh( baseCompartment.value() + 1 );
+	doSyncDataHandler( baseMesh );
+
+	initAck();
+		requestReMesh.send( sheller, &p_, baseMesh );
+	waitForAck();
+
+	// Traverse all child compts and do their meshes.
+	vector< Id > kids;
+	Neutral::children( baseCompartment.eref(), kids );
+	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i)
+	{
+		if ( i->operator()()->cinfo()->isA( "ChemMesh" ) ) {
+			doReacDiffMesh( *i );
+		}
+	}
+
+	// Here we need to check on any non-matching Reacs and enzymes.
+	
+}
+
 
 ////////////////////////////////////////////////////////////////
 // DestFuncs

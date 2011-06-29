@@ -343,7 +343,7 @@ void Stoich::allocateModel( const vector< Id >& elist )
 	numVarPoolsBytes_ = numVarPools_ * sizeof( double );
 	S_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
 	Sinit_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
-	compartment_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
+	compartment_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0 );
 	species_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0 );
 	y_.resize( numVarPools_ );
 	rates_.resize( numReac_ );
