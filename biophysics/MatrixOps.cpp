@@ -22,7 +22,7 @@ void matPrint( Matrix* A )
 	for( unsigned int i = 0; i < A->size(); ++i )
 	{
 		for( unsigned int j = 0; j < A->size(); ++j )
-			printf("%.15e ", (*A)[i][j]);
+			printf("%f ", (*A)[i][j]);
 		printf("\n");
 	}
 }
@@ -56,6 +56,27 @@ void matMatMul( Matrix* A, Matrix* B, unsigned int resIndex )
 		*B = *C;
 
 	delete C;
+}
+
+void triMatMul( Matrix* A, Matrix* B)
+{
+	unsigned int n = A->size();
+	unsigned int k;
+	double temp;
+
+	for ( unsigned int i = 0; i < n; ++i )
+	{
+		for ( unsigned int j = 0; j < n; ++j )
+		{
+			k = j >= i ? j : i;
+			temp = (*A)[i][j];
+
+			for ( ; k < n; ++k )
+				(*A)[i][j] += (*A)[i][k] * (*B)[k][j];
+
+			(*A)[i][j] -= temp;
+		}
+	}
 }
 
 void matPermMul( Matrix* A, vector< unsigned int >* swaps )
@@ -391,24 +412,20 @@ void matInv( Matrix* A, vector< unsigned int >* swaps, Matrix* invA )
 	/////////////////////////////
 	//Constructing the inverse of the permutation matrix P. 
 	//P is calculated only if there was any pivoting carried out.
-	////////////////////////////
-
-	matMatMul( invA, invL, FIRST );	
-	if ( !swaps->empty() )
-		matPermMul( invA, swaps );
-
-	////////////////////////
-	//At this stage, L^(-1) has already been calculated. U^(-1) is just -U, and
+	//At this stage, L^(-1) has already been calculated. 
 	//P^(-1) = P^T. 
 	//Since we have computed PA = LU, 
 	//the final inverse is given by U^(-1)*L^(-1)*P^(-1).	
 	//If P was not calculated i.e. there were no exchanges, then the 
 	//inverse is just U^(-1) * L^(-1).
 	////////////////////////
+//	matMatMul( invA, invL, FIRST );	
+	triMatMul( invA, invL );
+	if ( !swaps->empty() )
+		matPermMul( invA, swaps );
 
 	delete invL;
 	delete L;
-
 }
 
 Matrix* matAlloc( unsigned int n )
