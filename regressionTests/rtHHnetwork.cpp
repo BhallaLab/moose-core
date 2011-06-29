@@ -333,7 +333,9 @@ void rtHHnetwork( unsigned int numCopies )
 	shell->doSyncDataHandler( synCopyId );
 
 	// Make it twice as big as expected probability, for safety.
-	unsigned int numConnections = 2 * numCopies * sqrt( numCopies );
+	unsigned int numConnections = 
+		2 * numCopies * static_cast< unsigned int >( 
+		sqrt( double( numCopies ) ) );
 	mtseed( 1000UL );
 	vector< double > weight( numConnections );
 	vector< double > delay( numConnections );

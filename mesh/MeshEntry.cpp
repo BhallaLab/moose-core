@@ -64,14 +64,14 @@ const Cinfo* MeshEntry::initCinfo()
 		static ReadOnlyElementValueFinfo< MeshEntry, vector< double >  >
 			diffusionArea (
 			"DiffusionArea",
-			"Diffusion area for our geometry of interface",
+			"Diffusion area for geometry of interface",
 			&MeshEntry::getDiffusionArea
 		);
 
 		static ReadOnlyElementValueFinfo< MeshEntry, vector< double >  >
 			diffusionScaling (
 			"DiffusionScaling",
-			"Diffusion scaling four geometry of interface",
+			"Diffusion scaling for geometry of interface",
 			&MeshEntry::getDiffusionScaling
 		);
 

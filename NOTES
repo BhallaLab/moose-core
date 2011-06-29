@@ -13739,8 +13739,6 @@ entries are always completely within the other face.
 - For reacs, they should be in the smaller compartment. Then we always have
 	the second case from above, where each reac entry does its own thing.
 
-
-
 For now: relatively small change but with lots of knock-on effects:
 	Merged ChemCompt into ChemMesh, moved Boundary into mesh directory.
 	Checkin 2805.
@@ -13749,6 +13747,50 @@ For now: relatively small change but with lots of knock-on effects:
 27 June 2011
 Put in the mesh/compartment asignment for Reacs and Enzs in ReadKkit. This
 works on 1 thread, fails frequently on 2 threads for a variety reported
-reasons. I suspect the msg queuing.
+reasons. I suspect the msg queuing. Checkin 2808.
+
+Ran valgrind on the entire unit+regression tests. It reports things as
+absolutely clean. 
+
+Machine	Compile	#c:n	#tests	clean	fail	oddbuf
+mishti	-g	1	10		
+ghevar	-g	1	5		5
+mishti	-g	2	10	3	4	3
+ghevar	-g	2	8		8
+ghevar	-g	16	8		8
+
+mishti	mpi -g	2:1	12	3	6	3
+mishti	mpi -g	2:2	8	8
+mishti	mpi -g	1:4	2	2
+
+This is interesting. When we have MPI comms the problems seem to go away.
+I tried to compile for MPI on ghevar, but it didn't work. Should try on gj.
+
+
+Now to implement Shell::doChemMesh. This is going to do the following:
+- Set up the mesh on all nodes: a global.
+- Traverse down the compartment hierarchy. Figure out if we have to do
+	anything between levels. Usually not.
+- Resize all the meshed Elements. Traverse the messages to know which to do.
+	- Need to do something intellegent about the # and rate scaling.
+- Identify any problem Reactions and Enzymes. Do something about them.
+- Do something sensible about ksolves for handling arrays. What about
+	reaction sets in different compts?
+- Set up the diffusion in the ksolves.
+
+
+Working on the mesh builder, Shell::doReacDiffMesh, around 725 in Shell.cpp.
+============================================================================
+29 June.
+What to do about the volumes when re-meshing. Clean thing is to get the
+average conc of each pool, and the total vol. Then re-apply this to the
+remeshed model.
+
+
+For now, trying to compile. After some effort, compiles and clears
+unit tests, but the meshing itself has not been tested.
+Also replaced a printf in MatrixOps.cpp with a cout, to get it
+to compile with the updated version.
 
 ============================================================================
+

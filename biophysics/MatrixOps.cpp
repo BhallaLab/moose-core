@@ -22,8 +22,8 @@ void matPrint( Matrix* A )
 	for( unsigned int i = 0; i < A->size(); ++i )
 	{
 		for( unsigned int j = 0; j < A->size(); ++j )
-			printf("%f ", (*A)[i][j]);
-		printf("\n");
+			cout << (*A)[i][j] << " ";
+		cout << endl;
 	}
 }
 
