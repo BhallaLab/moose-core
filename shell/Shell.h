@@ -171,6 +171,15 @@ class Shell
 		void doSyncDataHandler( Id tgt );
 
 		/**
+ 		 * This function builds a reac-diffusion mesh starting at the
+ 		 * specified ChemCompt, which houses MeshEntry FieldElements.
+ 		 * Assumes that the dimensions of the baseCompartment have just been
+ 		 * redefined, and we now need to go through and update the child 
+ 		 * reaction system.
+ 		 */
+		void doReacDiffMesh( Id baseCompartment );
+
+		/**
 		 * Works through internal queue of operations that modify the
 		 * structure of the simulation. These operations have to be 
 		 * carefully separated from any other functions or messaging,
@@ -278,6 +287,11 @@ class Shell
 		void handleUseClock( const Eref& e, const Qinfo* q,
 			string path, string field, unsigned int tick );
 
+		/**
+ 		 * Tell all attached pools and vols to update themselves: set their
+ 		 * array sizes and set their new volumes.
+ 		 */
+		void handleReMesh( Id baseMesh );
 		////////////////////////////////////////////////////////////////
 		// Thread and MPI handling functions
 		////////////////////////////////////////////////////////////////
