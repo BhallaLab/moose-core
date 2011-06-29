@@ -339,6 +339,7 @@ void testMarkovSolver()
 			3.871153286669158,
 			1.383289714485624e+06
 	};
+
 	for ( unsigned int i = 0; i < 5; ++i )
 	{
 		assignMat( solver.Q_, testMats[i] );
@@ -351,9 +352,11 @@ void testMarkovSolver()
 			for( unsigned int k = 0; k < 3; ++k )
 				assert( doubleEq( (*expQ)[j][k], correctExps[i][j][k] ) );
 		}
+
+		delete expQ;
 	}
 
-	delete expQ;
 	cout << "." << flush;
 }
+
  #endif
