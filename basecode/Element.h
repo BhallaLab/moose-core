@@ -93,6 +93,20 @@ class Element
 		DataHandler* dataHandler() const;
 
 		/**
+		 * Resizes the current data, may include changing dimensions and
+		 * hence changing the dataHandler.
+		 * Returns the dataHandler on success, and NULL on failure.
+		 * When resizing it uses the current data and puts it treadmill-
+		 * fashion into the new dimensions. This means that if we had a
+		 * 2-D array and add a z dimension while keeping x and y fixed, we
+		 * should just repeat the same plane of data for all z values.
+		 * But it will get terribly messy if we change x and y dimensions.
+		 * Note that the resizing only works on the data dimensions, it
+		 * does not touch the field dimensions.
+		 */
+		DataHandler* resize( const vector< unsigned int >& dims );
+
+		/**
 		 * Asynchronous send command. Adds Qinfo and data onto msg specified
 		 * by bindIndex, and queue specified in the ProcInfo.
 		 */

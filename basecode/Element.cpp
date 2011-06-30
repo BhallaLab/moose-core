@@ -24,6 +24,20 @@ Element::Element( Id id, const Cinfo* c, DataHandler* d )
 	dataHandler_ = new DataHandlerWrapper( d );
 }
 
+unsigned int numDimensionsActuallyUsed( 
+	const vector< unsigned int >& dimensions )
+{
+	unsigned int ret = 0;
+	for ( unsigned int i = 0; i < dimensions.size(); ++i ) {
+		if ( dimensions[i] > 1 ) {
+			++ret;
+		} else {
+			break; // Do not permit high dimensions later.
+		}
+	}
+	return ret;
+}
+
 Element::Element( Id id, const Cinfo* c, const string& name, 
 	const vector< unsigned int >& dimensions, bool isGlobal )
 	:	name_( name ),
@@ -32,15 +46,7 @@ Element::Element( Id id, const Cinfo* c, const string& name,
 		group_( 0 ),
 		msgBinding_( c->numBindIndex() )
 {
-	unsigned int numRealDimensions = 0;
-
-	for ( unsigned int i = 0; i < dimensions.size(); ++i ) {
-		if ( dimensions[i] > 1 ) {
-			++numRealDimensions;
-		} else {
-			break; // Do not permit high dimensions later.
-		}
-	}
+	unsigned int numRealDimensions = numDimensionsActuallyUsed( dimensions);
 
 	if ( numRealDimensions == 0 ) {
 		if ( isGlobal )
@@ -223,6 +229,55 @@ const Cinfo* Element::cinfo() const
 
 DataHandler* Element::dataHandler() const
 {
+	return dataHandler_;
+}
+
+/**
+* Resizes the current data, may include changing dimensions.
+* Returns the new dataHandler if needed, and NULL on failure.
+* When resizing it uses the current data and puts it treadmill-
+* fashion into the new dimensions. This means that if we had a
+* 2-D array and add a z dimension while keeping x and y fixed, we
+* should just repeat the same plane of data for all z values.
+* But it will get terribly messy if we change x and y dimensions.
+* Note that the resizing only works on the data dimensions, it
+* does not touch the field dimensions.
+*/
+DataHandler* Element::resize( const vector< unsigned int >& dims )
+{
+	unsigned int numRealDimensions = numDimensionsActuallyUsed( dims );
+	if ( numRealDimensions == dataHandler_->numDimensions() ) {
+		dataHandler_->resize( dims );
+		return dataHandler_;
+	} else {
+		DataHandler* old = dataHandler_;
+		if ( numRealDimensions == 0 ) {
+			if ( old->isGlobal() )
+				dataHandler_ = new ZeroDimGlobalHandler( old->dinfo() );
+			else
+				dataHandler_ = new ZeroDimHandler( old->dinfo() );
+		} else if ( numRealDimensions == 1 ) {
+			if ( old->isGlobal() )
+				dataHandler_ = new OneDimGlobalHandler( old->dinfo() );
+			else
+				dataHandler_ = new OneDimHandler( old->dinfo() );	
+		} else {
+			if ( old->isGlobal() )
+				dataHandler_ = new AnyDimGlobalHandler( old->dinfo() );
+			else
+				dataHandler_ = new AnyDimHandler( old->dinfo() );	
+		}
+		dataHandler_->resize( dims );
+		unsigned int oldSize = old->localEntries();
+		unsigned int newSize = dataHandler_->localEntries();
+		const char* data = *( old->begin() );
+
+		unsigned int start = dataHandler_->begin().index().data(); 
+		for( unsigned int i = 0; i < newSize; i += oldSize ) {
+			dataHandler_->setDataBlock( data, oldSize, DataId( i + start ));
+		}
+		delete old;
+	}
 	return dataHandler_;
 }
 
