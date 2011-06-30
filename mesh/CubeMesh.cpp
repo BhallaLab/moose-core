@@ -192,6 +192,17 @@ void CubeMesh::updateCoords()
 	nx_ = ceil( (x1_ - x0_) / dx_ );
 	ny_ = ceil( (y1_ - y0_) / dy_ );
 	nz_ = ceil( (z1_ - z0_) / dz_ );
+
+	if ( nx_ == 0 ) nx_ = 1;
+	if ( ny_ == 0 ) ny_ = 1;
+	if ( nz_ == 0 ) nz_ = 1;
+
+	/// Temporarily fill out the whole cube.
+	unsigned int size = nx_ * ny_ * nz_;
+	m2s_.resize( size );
+	s2m_.resize( size );
+	for ( unsigned int i = 0; i < size; ++i )
+		m2s_[i] = s2m_[i] = i;
 }
 
 void CubeMesh::setX0( double v )

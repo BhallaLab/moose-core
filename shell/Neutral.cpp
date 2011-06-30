@@ -79,7 +79,7 @@ const Cinfo* Neutral::initCinfo()
 		"Max size of the dimension of the array of fields."
 		"Applicable specially for ragged arrays of fields, "
 		"where each object may have a different number of fields. "
-		"Must be larger than the size of any of the ragger arrays."
+		"Must be larger than the size of any of the ragged arrays."
 		"Normally is only assigned from Shell::doSyncDataHandler.",
 			&Neutral::setFieldDimension,
 			&Neutral::getFieldDimension

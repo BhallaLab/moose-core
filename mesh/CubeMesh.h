@@ -137,7 +137,22 @@ class CubeMesh: public ChemMesh
 		 * Later worry about planar meshes. Those would be surfaces
 		 */
 
+		/**
+		 * Mesh to Space lookup. Indexed by linear mesh index, from 0 to
+		 * number of actual mesh entries (occupied cuboids). Returns 
+		 * spatial index, from 0 to nx * ny * nz - 1.
+		 * Needed whenever the cuboid mesh is not filling the entire volume
+		 * of the cube, that is, in most cases.
+		 */
 		vector< unsigned int > m2s_;
+
+		/**
+		 * Space to Mesh lookup. Indexed by spatial index, from
+		 * 0 to nx * ny * nz - 1. Specifically, point x y z is indexed as
+		 * ( z * ny + y ) * nx + x. Returns mesh index to look up molecules
+		 * etc in the specific volume. In case the spatial location is 
+		 * outside the included volume of the mesh, returns ~0.
+		 */
 		vector< unsigned int > s2m_;
 };
 
