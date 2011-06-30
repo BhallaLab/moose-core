@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Jun 25 15:06:46 2011 (+0530)
 // Version: 
-// Last-Updated: Sat Jun 25 15:58:56 2011 (+0530)
+// Last-Updated: Thu Jun 30 12:18:52 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 55
+//     Update #: 56
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -148,9 +148,9 @@ void STPNMDAChan::innerProcessFunc(Eref e, ProcInfo proc)
     Ik_ = ( Ek_ - Vm_ ) * Gk_;
     modulation_ = 1.0;
     for (unsigned int ii = 0; ii < synapses_.size(); ++ii){
-        F_[ii] += (1 - F_[ii]) * dt_tauF_;
-        D1_[ii] += (1 - D1_[ii]) * dt_tauD1_;
-        D2_[ii] += (1 - D2_[ii]) * dt_tauD2_;
+        F_[ii] += (1 - F_[ii]) * (1 - 0.5 * dt_tauF_) * dt_tauF_;
+        D1_[ii] += (1 - D1_[ii]) * (1 - 0.5 * dt_tauD1_) * dt_tauD1_;
+        D2_[ii] += (1 - D2_[ii]) * (1 - 0.5 * dt_tauD2_) * dt_tauD2_;
     }
 
     send2< double, double >( e, channelSlot, Gk_, Ek_ );

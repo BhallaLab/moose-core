@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: 2011-06-22 11:03:39 (+0530)
 # Version: 
-# Last-Updated: Wed Jun 22 11:20:36 2011 (+0530)
+# Last-Updated: Thu Jun 30 12:37:16 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 29
+#     Update #: 31
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -156,16 +156,16 @@ class TestSTPNMDAChan(unittest.TestCase):
             tmpF = self.initF[ii]
             # We calculate two steps because of this moose bug:
             # step(1) after reset() always does 2 steps
-            tmpF = ( 1 - tmpF ) * self.dt / self.tauF + tmpF 
-            tmpF = ( 1 - tmpF ) * self.dt / self.tauF + tmpF            
+            tmpF = (1 - 0.5 * self.dt / self.tauF) * ( 1 - tmpF ) * self.dt / self.tauF + tmpF 
+            tmpF = (1 - 0.5 * self.dt / self.tauF) * ( 1 - tmpF ) * self.dt / self.tauF + tmpF            
             self.assertAlmostEqual(self.synchan.getF(ii), tmpF)
             tmpD1 = self.initD1[ii]
-            tmpD1 = ( 1 - tmpD1 ) * self.dt / self.tauD1 + tmpD1
-            tmpD1 = ( 1 - tmpD1 ) * self.dt / self.tauD1 + tmpD1            
+            tmpD1 = (1 - 0.5 * self.dt / self.tauD1) * ( 1 - tmpD1 ) * self.dt / self.tauD1 + tmpD1
+            tmpD1 = (1 - 0.5 * self.dt / self.tauD1) * ( 1 - tmpD1 ) * self.dt / self.tauD1 + tmpD1            
             self.assertAlmostEqual(self.synchan.getD1(ii), tmpD1)
             tmpD2 = self.initD2[ii]
-            tmpD2 = ( 1 - tmpD2 ) * self.dt / self.tauD2 + tmpD2
-            tmpD2 = ( 1 - tmpD2 ) * self.dt / self.tauD2 + tmpD2            
+            tmpD2 = (1 - 0.5 * self.dt / self.tauD2) * ( 1 - tmpD2 ) * self.dt / self.tauD2 + tmpD2
+            tmpD2 = (1 - 0.5 * self.dt / self.tauD2) * ( 1 - tmpD2 ) * self.dt / self.tauD2 + tmpD2            
             self.assertAlmostEqual(self.synchan.getD2(ii), tmpD2)
             prev_F.append(self.synchan.getF(ii))
             prev_D1.append(self.synchan.getD1(ii))
@@ -173,16 +173,16 @@ class TestSTPNMDAChan(unittest.TestCase):
         moose.context.step(2)
         for ii in range(self.synchan.numSynapses):
             tmpF = self.deltaF + prev_F[ii]
-            tmpF = (1 - tmpF) * self.dt / self.tauF + tmpF
-            tmpF = (1 - tmpF) * self.dt / self.tauF + tmpF
+            tmpF = (1 - 0.5 * self.dt / self.tauF) * (1 - tmpF) * self.dt / self.tauF + tmpF
+            tmpF = (1 - 0.5 * self.dt / self.tauF) * (1 - tmpF) * self.dt / self.tauF + tmpF
             self.assertAlmostEqual(self.synchan.getF(ii), tmpF)
             tmpD1 = self.d1 * prev_D1[ii]
-            tmpD1 = (1 - tmpD1) * self.dt / self.tauD1 + tmpD1
-            tmpD1 = (1 - tmpD1) * self.dt / self.tauD1 + tmpD1
+            tmpD1 = (1 - 0.5 * self.dt / self.tauD1) * (1 - tmpD1) * self.dt / self.tauD1 + tmpD1
+            tmpD1 = (1 - 0.5 * self.dt / self.tauD1) * (1 - tmpD1) * self.dt / self.tauD1 + tmpD1
             self.assertAlmostEqual(self.synchan.getD1(ii), tmpD1)
             tmpD2 = self.d2 * prev_D2[ii]
-            tmpD2 = (1 - tmpD2) * self.dt / self.tauD2 + tmpD2
-            tmpD2 = (1 - tmpD2) * self.dt / self.tauD2 + tmpD2
+            tmpD2 = (1 - 0.5 * self.dt / self.tauD2) * (1 - tmpD2) * self.dt / self.tauD2 + tmpD2
+            tmpD2 = (1 - 0.5 * self.dt / self.tauD2) * (1 - tmpD2) * self.dt / self.tauD2 + tmpD2
             self.assertAlmostEqual(self.synchan.getD2(ii), tmpD2)
         
 if __name__ == '__main__':
