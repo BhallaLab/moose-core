@@ -395,6 +395,7 @@ SynChan.delay = listproperty(SynChan.getDelay, SynChan.setDelay)
 %attribute(pymoose::STPSynChan, double, deltaF, __get_deltaF, __set_deltaF)
 %attribute(pymoose::STPSynChan, double, d1, __get_d1, __set_d1)
 %attribute(pymoose::STPSynChan, double, d2, __get_d2, __set_d2)
+%pythoncode %{
 STPSynChan.initPr = listproperty(STPSynChan.getInitPr, SynChan.setInitPr)
 STPSynChan.initF = listproperty(STPSynChan.getInitF, SynChan.setInitF)
 STPSynChan.initD1 = listproperty(STPSynChan.getInitD1, SynChan.setInitD1)
@@ -403,7 +404,7 @@ STPSynChan.Pr = listproperty(STPSynChan.getPr)
 STPSynChan.F = listproperty(STPSynChan.getF)
 STPSynChan.D1 = listproperty(STPSynChan.getD1)
 STPSynChan.D2 = listproperty(STPSynChan.getD2)
-
+%} // end pythoncode
 %include "STPNMDAChan.h"
 %attribute(pymoose::STPNMDAChan, double, MgConc, __get_MgConc, __set_MgConc)
 %attribute(pymoose::STPNMDAChan, double, unblocked, __get_unblocked)
