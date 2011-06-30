@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Jun 25 15:06:52 2011 (+0530)
 // Version: 
-// Last-Updated: Sat Jun 25 15:46:32 2011 (+0530)
+// Last-Updated: Thu Jun 30 12:19:55 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 28
+//     Update #: 29
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -64,7 +64,7 @@ class STPNMDAChan: public STPSynChan
     /////////////////////////////////////
     // Fields
     /////////////////////////////////////
-    double saturation_, unblocked_, MgConc_, A_, B1_, B2_, decayFactor_;
+    double MgConc_, unblocked_, saturation_, A_, B1_, B2_, decayFactor_;
     vector<double> c_;
     priority_queue<SynInfo> oldEvents_;
 };
