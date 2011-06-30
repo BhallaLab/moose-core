@@ -13790,7 +13790,30 @@ remeshed model.
 For now, trying to compile. After some effort, compiles and clears
 unit tests, but the meshing itself has not been tested.
 Also replaced a printf in MatrixOps.cpp with a cout, to get it
-to compile with the updated version.
+to compile with the updated version. Checkin 2816.
 
 ============================================================================
+30 June
+Revisiting reactions and volumes and meshes. Conceptually, the reaction
+should only be a single instance defined by rate terms in concentration units.
+Likewise the enzyme. The multiplication of individual entities is something
+needed only for runtime state variables in the explicit calculation, and for
+matching up pools belonging to different mesh entries. By this reasoning,
+the pools and enzymes should store their parameters in concentration units,
+and have only one set of parameters over the entire array.
+If I do retain the explicit calculations, will need to do some nasty stuff to 
+	- Figure out which of the incoming meshes is the finest.
+	- Make arrays of the reac/enz site according to the finest.
+	- Figure out individual scaling factor for each reac/enz instance
+		OR pass in volume term along with the conc on each step.
+	- Find a way to set across-array fields for rates. Furthermore, these
+		would be globals, having to update across all nodes.
+		OR: don't turn the Reacs into arrays at all, but internally
+		manage an array for state variables. This gets ugly with 
+		messaging though.
+		The messaging is ugly anyway.
 
+
+Started out with the unit test for resizing the CubeMesh with a Pool attached.
+Various loose ends with DataHandlers and Elements had to be fixed.
+Clears the basic test, just replicating a Pool throughout the mesh.

@@ -1464,6 +1464,52 @@ void testGetMsgSrcAndTarget()
 	// cout << "." << flush;
 }
 
+void testShellMesh()
+{
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+	vector< unsigned int > dimensions(1,1);
+
+	///////////////////////////////////////////////////////////
+	// Set up the objects.
+	///////////////////////////////////////////////////////////
+	Id compt = shell->doCreate( "CubeMesh", Id(), "compt", dimensions );
+	Id mesh( compt.value() + 1 );
+	Id pool = shell->doCreate( "Pool", compt, "pool", dimensions );
+	shell->doAddMsg( "OneToOne",
+		ObjId( pool, 0 ), "requestSize",
+		ObjId( mesh, 0 ), "get_size" );
+
+	vector< double > meshCoords( 9, 0.0 );
+	meshCoords[3] = meshCoords[4] = meshCoords[5] = 10.0;
+	meshCoords[6] = meshCoords[7] = meshCoords[8] = 1.0;
+	
+	Field< vector< double > >::set( compt, "coords", meshCoords );
+	// Can't do this at this stage because the reduceQ hasn't been set up.
+	// shell->doSyncDataHandler( mesh );
+
+	double testN = 123.0;
+	Field< double >::set( pool, "n", testN );
+	
+	unsigned int size = Field< unsigned int >::get( mesh, "localNumField");
+	assert( size == 1000 );
+
+	size = Field< unsigned int >::get( pool, "linearSize" );
+	assert( size == 1 );
+	shell->handleReMesh( mesh );
+	size = Field< unsigned int >::get( pool, "linearSize" );
+	assert( size == 1000 );
+
+	vector< double > numMols;
+	Field< double >::getVec( pool, "n", numMols );
+	assert( numMols.size() == size );
+	for ( unsigned int i = 0; i < size; ++i )
+		assert( doubleEq( numMols[i] , testN ) );
+
+	shell->doDelete( compt );
+	cout << "." << flush;
+}
+
 void testShell( )
 {
 	testChopPath();
@@ -1472,6 +1518,7 @@ void testShell( )
 	// testShellParserQuit();
 	testGetMsgs();	// Tests getting Msg info from Neutral.
 	testGetMsgSrcAndTarget();
+	testShellMesh();
 }
 
 extern void testWildcard();

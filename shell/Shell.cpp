@@ -138,11 +138,6 @@ static SrcFinfo3< string, string, unsigned int > requestUseClock(
 			"updates to the 'init' field."
 			"Tick # specifies which tick to be attached to the objects."
 			);
-static SrcFinfo1< Id > requestReMesh(
-			"requestReMesh",
-			"requestReMesh( meshId );"
-			"Chops up specified mesh."
-			);
 
 static DestFinfo handleUseClock( "handleUseClock", 
 			"Deals with assignment of path to a given clock.",
@@ -261,17 +256,30 @@ static DestFinfo handleSync( "handleSync",
 		"The FuncId is the 'get' function for the synchronized field.",
 	new EpFunc2< Shell, Id, FuncId >( & Shell::handleSync ) );
 
+static SrcFinfo1< Id > requestReMesh(
+			"requestReMesh",
+			"requestReMesh( meshId );"
+			"Chops up specified mesh."
+			);
+static DestFinfo handleReMesh( "handleReMesh", 
+		"handleReMesh( Id BaseMesh): "
+		"Deals with outcome of resizing the meshing in a cellular"
+		"compartment (the ChemMesh class). The mesh change has to"
+		"propagate down to the molecules and reactions managed by this."
+		"Mesh. The ElementId is the mesh being synchronized.",
+	new OpFunc1< Shell, Id >( & Shell::handleReMesh ) );
+
 static Finfo* shellMaster[] = {
 	&requestCreate, &requestDelete,
 	&requestAddMsg, requestSet(), requestGet(),
 	&requestMove, &requestCopy, &requestUseClock,
-	&requestSync,
+	&requestSync, &requestReMesh,
 	handleAck() };
 static Finfo* shellWorker[] = {
 	&handleCreate, &handleDelete,
 		&handleAddMsg, &handleSet, &handleGet,
 		&handleMove, &handleCopy, &handleUseClock,
-		&handleSync,
+		&handleSync, &handleReMesh,
 	ack() };
 
 static Finfo* clockControlFinfos[] = 
@@ -735,10 +743,10 @@ void Shell::handleReMesh( Id baseMesh )
 	vector< Id > tgts;
 	unsigned int numTgts = baseMesh()->getInputs( tgts, df );
 	assert( tgts.size() == numTgts );
-	vector< unsigned int > dims( 1, baseMesh()->dataHandler()->totalEntries() );
+	vector< unsigned int > dims( 1, baseMesh()->dataHandler()->localEntries() );
 	for ( vector< Id >::iterator i = tgts.begin(); i != tgts.end(); ++i )
 	{
-		bool ret = i->operator()()->dataHandler()->resize( dims );
+		bool ret = i->operator()()->resize( dims );
 		assert( ret );
 		// Now we need to tell each tgt to scale its n, rates etc from vol.
 	}
