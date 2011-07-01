@@ -10,6 +10,8 @@
 #ifndef _MARKOVGSLSOLVER_H
 #define _MARKOVGSLSOLVER_H
 
+////////////////////////////////////////////////////
+// Class : MarkovGslSolver
 // Author : Vishaka Datta S, 2011, NCBS.
 //
 // The GslIntegrator class in ksolve deals with a system whose coefficients stay
@@ -18,7 +20,7 @@
 //
 // This makes it necessary for the system to keep track of changes in the system
 // matrix, which is implemented by the message handler. 
-//
+///////////////////////////////////////////////////
 
 class MarkovGslSolver
 {

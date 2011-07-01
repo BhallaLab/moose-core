@@ -10,7 +10,9 @@
 #ifndef _MARKOVRATETABLE_H
 #define _MARKOVRATETABLE_H
 
-// Author : Vishaka Datta S, 2011, NCBS
+////////////////////////////////////////////////////////
+//Class : MarkovRateTable
+//Author : Vishaka Datta S, 2011, NCBS
 //
 //Presents a unified interface to deal with transition rates that are dependent
 //on one or two parameters, or are constant.
@@ -29,6 +31,9 @@
 //
 //In case a rate is constant, it is stored in a VectorTable class whose lookup 
 //table is of size 1. 
+//
+/////////////////////////////////////////////////////
+
 template <class T> 
 vector< vector< T > > resize( vector< vector< T > >table, unsigned int n, T init )
 {
@@ -49,18 +54,23 @@ class MarkovRateTable {
 	//One parameter rate table set and get functions.
 	VectorTable* getVtChildTable( unsigned int, unsigned int ) const; 
 	void innerSetVtChildTable( unsigned int, unsigned int, VectorTable, unsigned int );
-
 	//Two parameter rate table set and get functions.
 	Interpol2D* getInt2dChildTable( unsigned int, unsigned int ) const;
 	void innerSetInt2dChildTable( unsigned int, unsigned int, Interpol2D );
 	
 	//Lookup functions.
-	double lookup1d( unsigned int, unsigned int, double );
-	double lookup2d( unsigned int, unsigned int, double, double );
+	double lookup1dValue( unsigned int, unsigned int, double );
+	double lookup1dIndex( unsigned int, unsigned int, unsigned int );
+	double lookup2dValue( unsigned int, unsigned int, double, double );
+	double lookup2dIndex( unsigned int, unsigned int, unsigned int, unsigned int );
 
 	//Rate update and initialization functions.
 	void updateRates();	
 	void initConstantRates();
+
+	vector< unsigned int > getListOf1dRates();
+	vector< unsigned int > getListOf2dRates();
+	vector< unsigned int > getListOfConstantRates();
 
 	//Overloading the >> operator. This is done so that VectorTable and 
 	//Interpol2D classes can be used to declare OpFuncs.
@@ -97,6 +107,22 @@ class MarkovRateTable {
 
 	//Returns true if a table is being accessed at an invalid address.
 	bool areIndicesOutOfBounds( unsigned int, unsigned int ) const ;
+
+	///////
+	//These functions return general information about the whole rate table
+	//itself. Useful for the MarkovSolver class.
+	//////
+
+	//Returns true if all the rates in the transition matrix are constant.
+	bool areAllRatesConstant();	
+
+	//Returns true if at least one of the rates are 1D i.e. vary with only 
+	//one parameter.
+	bool areAnyRates1d();
+
+	//Returns true if at least one of the rates are 2D i.e. vary with two
+	//parameters.
+	bool areAnyRates2d();
 
 	static const Cinfo* initCinfo();
 
@@ -136,6 +162,13 @@ class MarkovRateTable {
 	//concentration is used instead of voltage for rate lookups. 
 	vector< vector< unsigned int > > useLigandConc_; 
 
+	//Maintains a list of the indices of 1D,2D and constant rates. Makes 
+	//updating rates a whole lot easier and more elegant than blindly scanning 
+	//through the entire rate matrix each time.
+	vector< unsigned int > listOf1dRates_;
+	vector< unsigned int > listOf2dRates_;
+	vector< unsigned int > listOfConstantRates_;
+	
 	//The instantaneous rate matrix. 
 	vector< vector< double > > Q_;
 
