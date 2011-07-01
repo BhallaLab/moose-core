@@ -47,9 +47,18 @@ const Cinfo* VectorTable::initCinfo()
 			&VectorTable::getTable
 			);
 
-	static ReadOnlyLookupValueFinfo< VectorTable, double, double > lookup("lookup",
-			"Lookup function.",
-			&VectorTable::innerLookup
+	static ReadOnlyLookupValueFinfo< VectorTable, double, double > 
+			lookupvalue(
+			"lookupvalue",
+			"Lookup function that performs interpolation to return a value.",
+			&VectorTable::lookupByValue
+			);
+
+	static ReadOnlyLookupValueFinfo< VectorTable, unsigned int, double > 
+			lookupindex(
+			"lookupindex",
+			"Lookup function that returns value by index.",
+			&VectorTable::lookupByIndex
 			);
 
 	static Finfo* vectorTableFinfos[] = 
@@ -58,7 +67,9 @@ const Cinfo* VectorTable::initCinfo()
 		&xmin,
 		&xmax,
 		&invdx,
-		&table
+		&table,
+		&lookupvalue,
+		&lookupindex
 	};
 
 	static string doc[] =
@@ -90,7 +101,7 @@ VectorTable::VectorTable() : xDivs_(INIT_XDIV), xMin_(INIT_XMIN), xMax_(INIT_XMA
 { ; }
 
 //Implementation identical to that of HHGate::lookupTable.
-double VectorTable::innerLookup( double x ) const
+double VectorTable::lookupByValue( double x ) const
 {
 	if ( table_.size() == 1 )
 		return table_[0];
@@ -103,6 +114,24 @@ double VectorTable::innerLookup( double x ) const
 	unsigned int index = static_cast< unsigned int>( ( x - xMin_ ) * invDx_ );
 	double frac = ( x - xMin_ - index / invDx_ ) * invDx_;
 	return table_[ index ] * ( 1 - frac ) + table_[ index + 1 ] * frac;
+}
+
+double VectorTable::lookupByIndex( unsigned int index ) const
+{
+	if ( tableIsEmpty() )
+	{
+		cerr << "Cannot look up table by index as table is empty. Returning zero.\n";
+		return 0;
+	}
+
+	//Applying similar wrapping as is done in lookupByValue.
+	if ( index < 0 )
+		index = 0;
+
+	if ( index >= table_.size() )
+		index = table_.size() - 1;
+
+	return table_[index];
 }
 
 vector< double > VectorTable::getTable() const
@@ -217,16 +246,16 @@ void testVectorTable()
 
 	assert( doubleEq(unInitedTable.getInvDx(), 10 ) );
 
-	assert( doubleEq(unInitedTable.innerLookup( 0.0 ), 0.52 ) );
-	assert( doubleEq(unInitedTable.innerLookup( 0.1 ), 0.49 ) );
-	assert( doubleEq(unInitedTable.innerLookup( 0.15 ), 0.46 ) );
-	assert( doubleEq(unInitedTable.innerLookup( 0.2 ), 0.43 ) );
-	assert( doubleEq(unInitedTable.innerLookup( 0.25 ), 0.405 ) );
-	assert( doubleEq(unInitedTable.innerLookup( 0.3 ), 0.38 ) );
-	assert( doubleEq(unInitedTable.innerLookup( 0.35 ), 0.405 ) );
-	assert( doubleEq(unInitedTable.innerLookup( 0.4 ), 0.43 ) );
-	assert( doubleEq(unInitedTable.innerLookup( 0.45 ), 0.435 ) );
-	assert( doubleEq(unInitedTable.innerLookup( 0.5 ), 0.44 ) );
+	assert( doubleEq(unInitedTable.lookupByValue( 0.0 ), 0.52 ) );
+	assert( doubleEq(unInitedTable.lookupByValue( 0.1 ), 0.49 ) );
+	assert( doubleEq(unInitedTable.lookupByValue( 0.15 ), 0.46 ) );
+	assert( doubleEq(unInitedTable.lookupByValue( 0.2 ), 0.43 ) );
+	assert( doubleEq(unInitedTable.lookupByValue( 0.25 ), 0.405 ) );
+	assert( doubleEq(unInitedTable.lookupByValue( 0.3 ), 0.38 ) );
+	assert( doubleEq(unInitedTable.lookupByValue( 0.35 ), 0.405 ) );
+	assert( doubleEq(unInitedTable.lookupByValue( 0.4 ), 0.43 ) );
+	assert( doubleEq(unInitedTable.lookupByValue( 0.45 ), 0.435 ) );
+	assert( doubleEq(unInitedTable.lookupByValue( 0.5 ), 0.44 ) );
 
 	cout << "." << flush;
 }

@@ -224,7 +224,6 @@ void MarkovChannel::process( const Eref& e, const ProcPtr p )
 
 	ChanBase::setGk( g_ );
 	ChanBase::updateIk();
-//	printf("%.15e %.15e %.15e %.15e %.15e\n", state_[0], state_[1], Gbars_[0] * state_[0], Gbars_[1] * state_[1], g_);
 	ChanBase::process( e, p ); 
 }
 

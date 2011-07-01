@@ -77,10 +77,10 @@ Matrix* matScalShift( Matrix*, double, double );
 void matScalShift( Matrix*, double, double, unsigned int );
 
 //Computes the result of multiplying a row vector with a matrix (in that order).
-Vector* vecMatMul( Vector&, Matrix& );
+Vector* vecMatMul( Vector*, Matrix* );
 
 //Computes the result of multiplying a matrix with a column vector (in that order).
-Vector* matVecMul( Matrix&, Vector& );
+Vector* matVecMul( Matrix*, Vector* );
 
 //Computes the result of alpha*x + beta*y, where x and y are vectors. This is a 
 //helper function for the matInv function. The result is stored in the 

@@ -63,7 +63,7 @@ class Interpol2D
 		////////////////////////////////////////////////////////////
 		// Here are the internal functions
 		////////////////////////////////////////////////////////////
-		double interpolateWithoutCheck( double x, double y ) const;
+		double interpolate( double x, double y ) const;
 		double indexWithoutCheck( double x, double y ) const;
 		double innerLookup( double x, double y ) const;
 		bool operator==( const Interpol2D& other ) const;

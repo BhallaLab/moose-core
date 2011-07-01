@@ -6,6 +6,7 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+#include <iomanip>
 #include "header.h"
 #include "VectorTable.h"
 #include "../builtins/Interpol2D.h"
@@ -167,7 +168,8 @@ VectorTable* MarkovRateTable::getVtChildTable( unsigned int i, unsigned int j ) 
 		return vtTables_[i][j];
 	else	
 	{
-		cerr << "Error : No one parameter rate table set for this rate!\n";
+		cerr << "Error : No one parameter rate table set for this rate!. "
+			   << "Returing NULL.\n";
 		return 0;
 	}
 }
@@ -209,7 +211,8 @@ Interpol2D* MarkovRateTable::getInt2dChildTable( unsigned int i, unsigned int j 
 		return int2dTables_[i][j];
 	else	
 	{
-		cerr << "Error : No two parameter rate table set for this rate!\n";
+		cerr << "Error : No two parameter rate table set for this rate!. "
+			   << "Returning NULL.\n";
 		return 0;
 	}
 }
@@ -237,22 +240,85 @@ void MarkovRateTable::innerSetInt2dChildTable( unsigned int i, unsigned int j, I
 	*int2dTables_[i][j] = int2dTable;
 }
 
-
-
-double MarkovRateTable::lookup1d( unsigned int i, unsigned int j, double x )
+double MarkovRateTable::lookup1dValue( unsigned int i, unsigned int j, double x )
 {
 	if ( areIndicesOutOfBounds( i, j ) ) 
+	{
+		cerr << "Lookup requested on non-existent table at (" << i << 
+				 "," << j << "). Returning 0.\n";
 		return 0;
+	}
 
-	return vtTables_[i][j]->innerLookup( x );
+	if ( !isRate1d( i, j ) && !isRateConstant( i, j ) )
+	{
+		cerr << "No 1D or constant rate set at (" << i << "," << j << ")."
+						"Returning 0.\n";
+		return 0;
+	}
+
+	return vtTables_[i][j]->lookupByValue( x );
 }
 
-double MarkovRateTable::lookup2d( unsigned int i, unsigned int j, double x, double y )
+double MarkovRateTable::lookup1dIndex( unsigned int i, unsigned int j,
+																			 unsigned int xIndex )
 {
 	if ( areIndicesOutOfBounds( i, j ) ) 
+	{
+		cerr << "Lookup requested on non-existent table at (" << i << 
+				 "," << j << "). Returning 0.\n";
 		return 0;
+	}
+
+	if ( !isRate1d( i, j ) && !isRateConstant( i, j ) )
+	{
+		cerr << "No 1D or constant rate set at (" << i << "," << j << ")."
+						"Returning 0.\n";
+		return 0;
+	}
+
+	return vtTables_[i][j]->lookupByIndex( xIndex );
+}
+
+double MarkovRateTable::lookup2dValue( unsigned int i, unsigned int j, 
+																	double x, double y )
+{
+	if ( areIndicesOutOfBounds( i, j ) ) 
+	{
+		cerr << "Lookup requested on non-existent table at (" << i << 
+				 "," << j << "). Returning 0.\n";
+		return 0;
+	}
+
+	if ( !isRate2d( i, j ) )
+	{
+		cerr << "No 2D rate set at (" << i << "," << j << "). Returning 0.\n";
+		return 0;
+	}
 
 	return int2dTables_[i][j]->innerLookup( x, y );
+}
+
+double MarkovRateTable::lookup2dIndex( unsigned int i, unsigned int j, 
+														unsigned int xIndex, unsigned int yIndex )
+{
+	if ( areIndicesOutOfBounds( i, j ) ) 
+	{
+		cerr << "Lookup requested on non-existent table at (" << i << 
+				 "," << j << "). Returning 0.\n";
+		return 0;
+	}
+
+	if ( !isRate2d( i, j ) )
+	{
+		cerr << "No 2D rate set at (" << i << "," << j << "). Returning 0.\n";
+		return 0;
+	}
+
+	vector< unsigned int > indices;
+	indices.push_back( xIndex );
+	indices.push_back( yIndex );
+
+	return int2dTables_[i][j]->getTableValue( indices );
 }
 
 vector< vector< double > > MarkovRateTable::getQ() const
@@ -283,7 +349,6 @@ bool MarkovRateTable::isRate1d( unsigned int i, unsigned int j ) const
 	//Second condition is necessary because for a constant rate, the 1D lookup
 	//table class is set, but has only one entry. So a constant rate would pass
 	//off as a one-parameter rate transition if not for this check.
-	
 	if ( vtTables_[i][j] == 0 )
 		return false;
 	else
@@ -307,58 +372,95 @@ bool MarkovRateTable::areIndicesOutOfBounds( unsigned int i, unsigned int j ) co
 	return ( i > size_ || j > size_ );
 }
 
+bool MarkovRateTable::areAllRatesConstant()
+{
+	return listOf1dRates_.empty() && listOf2dRates_.empty() && 
+				 !listOfConstantRates_.empty();
+}
+
+//Returns true if any of the rates vary with only one parameter.
+bool MarkovRateTable::areAnyRates1d()
+{
+	return !listOf1dRates_.empty();
+}
+
+//Returns true if any of the rates vary with two parameters.
+bool MarkovRateTable::areAnyRates2d()
+{
+	return !listOf2dRates_.empty();
+}
+
 void MarkovRateTable::updateRates()
 {
 	double temp;
+	unsigned int i,j;
 
-	//Rather crude update function. Might be easier to store the variable rates in
-	//a separate list and update only those, rather than scan through the entire
-	//matrix at every single function evaluation. Profile this later. 
-	for ( unsigned int i = 0; i < size_; ++i )
+	//Update 1D rates, if any.
+	for( unsigned int k = 0; k < listOf1dRates_.size(); ++k )
 	{
-		for ( unsigned int j = 0; j < size_; ++j )
-		{
-			temp = Q_[i][j];
-			//If rate is ligand OR voltage dependent.
-//			cout << "updateRates\n";
-			if ( isRate1d( i, j ) )
-			{
-				//Use ligand concentration instead of voltage.
-				if ( isRateLigandDep( i, j ) )
-					Q_[i][j] = lookup1d( i, j, ligandConc_ );
-				else
-					Q_[i][j] = lookup1d( i, j, Vm_ );
-			}
-			
-			//If rate is ligand AND voltage dependent. It is assumed that ligand
-			//concentration varies along the first dimension.
-			if ( isRate2d( i, j ) )
-				Q_[i][j] = lookup2d( i, j, ligandConc_, Vm_ );
+		i = ( listOf1dRates_[k] % 10 ) - 1;
+		j = ( ( listOf1dRates_[k] / 10 ) % 10 ) - 1;
+		
+		temp = Q_[i][j];
 
-			//Ensures that the row sums to zero.
-			if ( temp != Q_[i][j] )
-				Q_[i][i] = Q_[i][i] - Q_[i][j] + temp;
-		}
+		if ( isRateLigandDep( i, j ) )
+			Q_[i][j] = lookup1dValue( i, j, ligandConc_ );
+		else
+			Q_[i][j] = lookup1dValue( i, j, Vm_ );
+
+		//Ensures that the row sums to zero.
+		if ( !doubleEq( temp, Q_[i][j] ) )
+			Q_[i][i] = Q_[i][i] - Q_[i][j] + temp;
+	}
+
+	//Update 2D rates, if any.
+	for( unsigned int k = 0; k < listOf2dRates_.size(); ++k )
+	{
+		i = ( listOf2dRates_[k] % 10 ) - 1;
+		j = ( ( listOf2dRates_[k] / 10 ) % 10 ) - 1;
+		
+		temp = Q_[i][j];
+
+		Q_[i][j] = lookup2dValue( i, j, Vm_, ligandConc_ );
+
+		//Ensures that the row sums to zero.
+		if ( !doubleEq( temp, Q_[i][j] ) )
+			Q_[i][i] = Q_[i][i] - Q_[i][j] + temp;
 	}
 }
 
 void MarkovRateTable::initConstantRates() 
 {
-	for (	unsigned int i = 0; i < size_; ++i )	
+	unsigned int n = listOfConstantRates_.size(), i, j;
+	for ( unsigned int k = 0; k < n; ++k )
 	{
-		Q_[i][i] = 0;
-		for ( unsigned int j = 0; j < size_; ++j )
-		{
-			if ( isRateConstant( i, j ) )
-			{
-				Q_[i][j] = lookup1d( i, j, 0.0 );  
-				//Doesn't really matter which value is looked up as there is only one
-				//entry in the table.
-				Q_[i][i] -= Q_[i][j];
-			}
-		}
+		i = ( ( listOfConstantRates_[k] / 10 ) % 10 ) - 1;
+		j = ( listOfConstantRates_[k] % 10 ) - 1;
+
+		Q_[i][i] += Q_[i][j];
+
+		//Doesn't really matter which value is looked up as there is only one
+		//entry in the table.
+		Q_[i][j] = lookup1dValue( i, j, 0.0 );  
+
+		Q_[i][i] -= Q_[i][j];
 	}
 }	
+
+vector< unsigned int > MarkovRateTable::getListOf1dRates()
+{
+	return listOf1dRates_;
+}
+
+vector< unsigned int > MarkovRateTable::getListOf2dRates()
+{
+	return listOf2dRates_;
+}
+
+vector< unsigned int > MarkovRateTable::getListOfConstantRates()
+{
+	return listOfConstantRates_;
+}
 
 istream& operator>>( istream& in, MarkovRateTable& rateTable )
 {
@@ -402,7 +504,9 @@ bool MarkovRateTable::isInitialized() const
 ////////////////////////////////////////////////
 void MarkovRateTable::process( const Eref& e, ProcPtr info )
 {
-	updateRates();
+	if ( !areAllRatesConstant() ) 
+		updateRates();
+
 	//Sending the whole matrix out seems a bit like overkill, as only a few rates
 	//may vary. Would using a sparse representation speed things up? 
 	instRatesOut()->send( e, info, Q_ );
@@ -418,6 +522,9 @@ void MarkovRateTable::reinit( const Eref& e, ProcPtr info )
 	instRatesOut()->send( e, info, Q_ );
 }
 
+////////////////////////////
+//MsgDest functions.
+///////////////////////////
 void MarkovRateTable::setupTables( unsigned int size )
 {
 	size_ = size;
@@ -448,7 +555,9 @@ void MarkovRateTable::setVtChildTable( unsigned int i, unsigned int j,
 	VectorTable* vecTable = reinterpret_cast< VectorTable* >
 																( vecTabId.eref().data() );	
 
-	innerSetVtChildTable( i, j, *vecTable, ligandFlag );
+	innerSetVtChildTable( i - 1, j - 1, *vecTable, ligandFlag );
+
+	listOf1dRates_.push_back( i * 10 + j );
 }
 
 void MarkovRateTable::setInt2dChildTable( unsigned int i, unsigned int j,
@@ -457,7 +566,9 @@ void MarkovRateTable::setInt2dChildTable( unsigned int i, unsigned int j,
 	Interpol2D* int2dTable = reinterpret_cast< Interpol2D* >
 															( int2dTabId.eref().data() );
 
-	innerSetInt2dChildTable( i, j, *int2dTable );
+	innerSetInt2dChildTable( i - 1, j - 1, *int2dTable );
+
+	listOf2dRates_.push_back( i * 10 + j );
 }
 
 //Using the default 'setTable' function from the VectorTable class is rather
@@ -477,5 +588,7 @@ void MarkovRateTable::setConstantRate( unsigned int i, unsigned int j, double ra
 
 	vecTable.setTable( rateWrap );
 
-	innerSetVtChildTable( i, j, vecTable, 0 ); 
+	innerSetVtChildTable( i - 1, j - 1, vecTable, 0 ); 
+
+	listOfConstantRates_.push_back( i * 10 + j );
 }

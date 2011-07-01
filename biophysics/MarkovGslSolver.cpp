@@ -8,13 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
-/*#include "VectorTable.h"
-#include "../builtins/Interpol2D.h"
-#include "MarkovRateTable.h"
-#include "ChanBase.h"
-#include "MarkovChannel.h"*/
 #include <gsl/gsl_errno.h>
-//#include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv.h>
 #include "MarkovGslSolver.h"
 
@@ -159,9 +153,7 @@ int MarkovGslSolver::evalSystem( double t, const double* state, double* f, void 
 		f[i] = 0;
 		for ( unsigned int j = 0; j < nVars; ++j)
 			f[i] += state[j] * ((*Q)[j][i]);
-//		cout << f[i] << " ";
 	}
-//	cout << endl;
 
 	return GSL_SUCCESS;
 }
@@ -249,8 +241,6 @@ void MarkovGslSolver::setInternalDt( double value )
 //Handles data from MarkovChannel class.
 void MarkovGslSolver::init( vector< double > initialState )
 {
-//	MarkovChannel* chan = reinterpret_cast< MarkovChannel* >( mChanId.eref().data() );
-//	nVars_ = chan->getNumStates();	
 	nVars_ = initialState.size();
 
 	if ( stateGsl_ == 0 )
@@ -337,6 +327,5 @@ void MarkovGslSolver::reinit( const Eref& e, ProcPtr info )
 
 void MarkovGslSolver::handleQ( vector< vector< double > > Q )
 {
-//	cout << "Received Q message\n";
 	Q_ = Q;
 }

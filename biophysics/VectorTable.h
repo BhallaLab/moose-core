@@ -23,7 +23,8 @@ class VectorTable
 	public : 
 	VectorTable();
 
-	double innerLookup( double ) const;
+	double lookupByValue( double ) const;
+	double lookupByIndex( unsigned int ) const;
 
 	//All members except table_ are read-only. Avoids the hassle of recomputing the table when one of the terms are changed. 
 	vector< double > getTable() const;
