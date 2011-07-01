@@ -9,7 +9,6 @@
 #include <vector>
 #include <math.h>
 #include "doubleEq.h"
-#include <iomanip>
 #include <iostream>
 #include "MatrixOps.h" 
 
@@ -190,29 +189,29 @@ void matScalShift( Matrix* A, double mul, double add, unsigned int dummy )
 	}
 }
 
-Vector* vecMatMul( Vector& v, Matrix& A )
+Vector* vecMatMul( Vector* v, Matrix* A )
 {
-	unsigned int n = A.size();
+	unsigned int n = A->size();
 	Vector* w = vecAlloc( n );
 
 	for( unsigned int i = 0; i < n; ++i )
 	{
 		for( unsigned int j = 0; j < n; ++j )
-			(*w)[i] += v[j] * A[j][i];
+			(*w)[i] += (*v)[j] * (*A)[j][i];
 	}
 
 	return w;
 }
 
-Vector* matVecMul( Matrix& A, Vector& v )
+Vector* matVecMul( Matrix* A, Vector* v )
 {
-	unsigned int n = A.size();
+	unsigned int n = A->size();
 	Vector* w = vecAlloc( n );
 
 	for( unsigned int i = 0; i < n; ++i )
 	{
 		for( unsigned int j = 0; j < n; ++j )
-			(*w)[i] += A[i][j] * v[j];
+			(*w)[i] += (*A)[i][j] * (*v)[j];
 	}
 
 	return w;

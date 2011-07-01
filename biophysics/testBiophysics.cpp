@@ -618,25 +618,25 @@ void testMarkovChannel()
 	//Filling in values into one parameter rate table. Note that all rates here
 	//are constant.
 	SetGet3< unsigned int, unsigned int, double >::
-		set( rateTabId, "setconst", 0, 1, 0.05 );
+		set( rateTabId, "setconst", 1, 2, 0.05 );
 	SetGet3< unsigned int, unsigned int, double >::
-		set( rateTabId, "setconst", 0, 3, 3 );
+		set( rateTabId, "setconst", 1, 4, 3 );
 	SetGet3< unsigned int, unsigned int, double >::
-		set( rateTabId, "setconst", 1, 0, 0.00066667 );
+		set( rateTabId, "setconst", 2, 1, 0.00066667 );
 	SetGet3< unsigned int, unsigned int, double >::
-		set( rateTabId, "setconst", 1, 2, 0.5 );
+		set( rateTabId, "setconst", 2, 3, 0.5 );
 	SetGet3< unsigned int, unsigned int, double >::
-		set( rateTabId, "setconst", 2, 1, 15 );
+		set( rateTabId, "setconst", 3, 2, 15 );
 	SetGet3< unsigned int, unsigned int, double >::
-		set( rateTabId, "setconst", 2, 3, 4 );
+		set( rateTabId, "setconst", 3, 4, 4 );
 	SetGet3< unsigned int, unsigned int, double >::
-		set( rateTabId, "setconst", 3, 0, 0.015 );
+		set( rateTabId, "setconst", 4, 1, 0.015 );
 	SetGet3< unsigned int, unsigned int, double >::
-		set( rateTabId, "setconst", 3, 2, 0.05 );
+		set( rateTabId, "setconst", 4, 3, 0.05 );
 	SetGet3< unsigned int, unsigned int, double >::
-		set( rateTabId, "setconst", 3, 4, 2.0 );
+		set( rateTabId, "setconst", 4, 5, 2.0 );
 	SetGet3< unsigned int, unsigned int, double >::
-		set( rateTabId, "setconst", 4, 3, 0.01 );
+		set( rateTabId, "setconst", 5, 4, 0.01 );
 
 	//Setting initial state of the solver. Once this is set, the solver object
 	//will send out messages containing the updated state to the channel object.  
@@ -667,6 +667,130 @@ void testMarkovChannel()
 
 	cout << "." << flush;
 }
+
+void testMarkovSolverProcess()
+{
+	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
+	vector< unsigned int > dims( 1, 1 );
+
+	Id nid = shell->doCreate( "Neutral", Id(), "n", dims );
+	Id vecTableId = shell->doCreate( "VectorTable", nid, "vecTable", dims );
+	Id int2dTableId = shell->doCreate( "Interpol2D", nid, "int2dTable", dims );
+
+	Id comptId = shell->doCreate( "Compartment", nid, "compt", dims );
+	Id rateTableId = shell->doCreate( "MarkovRateTable", comptId, "compt", dims );
+	Id solverId = shell->doCreate( "MarkovSolver", comptId, "compt", dims );
+
+	MsgId mid = shell->doAddMsg("Single", ObjId( comptId ), "channel", 
+							ObjId( solverId ), "channel" );
+	assert( mid != Msg::badMsg );
+
+	mid = shell->doAddMsg("Single", ObjId( comptId ), "channel", 
+							ObjId( rateTableId ), "channel" );
+	assert( mid != Msg::badMsg );
+
+	////////////////
+	//Initializing the rate table.
+	//I create a 3x3 rate table, which is what we would have if one initialized a 
+	//3 state Markov channel. 
+	//The rate (1,2) is set as a voltage dependent rate, (1,3) is a ligand
+	//dependent rate and (2,3) is ligand and voltage dependent. 
+	//Rates (2,1) and (3,1) are constant.
+	///////////////
+
+	SetGet1< unsigned int >::set( rateTableId, "setuptables", 3 );
+
+	/////////////
+	//Setting up rate (1,2) i.e. transition from S1->S2.
+	//(1,2) = 0.85 * exp( -0.1 * V );
+	//Vmin = -0.05 volts, Vmax = +0.10 volts, dV = 0.005 volts.
+	////////////
+	
+	vector< double > vecEntries;
+	for ( double v = -0.05; !doubleEq( v, 0.10 ); v += 0.005 )
+		vecEntries.push_back( 0.85 * exp( -0.1 * v ) );	
+
+
+	Field< double >::set( vecTableId, "xmin", -0.05 );
+	Field< double >::set( vecTableId, "xmax", 0.10 );
+	Field< vector< double > >::set( vecTableId, "table", vecEntries ); 
+
+	//We now pass in this table to the MarkovRateTable class.
+	//The last argument determines if the rate is ligand or voltage dependent.
+	//Set this argument to a non-zero value if ligand dependent, and zero if it is 
+	//voltage dependent.
+	SetGet4< unsigned int, unsigned int, Id, unsigned int >::set( 
+			rateTableId, "set1d", 1, 2, vecTableId, 0 );
+
+	///////////
+	//Setting up rate (1,3) i.e. transition from S1->S3.
+	//(1,3) = 1.29 * [L]   L -> Some ligand species
+	//Lmin = 0 nM, Lmax = 100 nM, dL = 1 nM
+	//////////
+	
+	//Cleaning out old vecEntries.
+	vecEntries.erase( vecEntries.begin(), vecEntries.end() );
+	
+	for( double l = 0; !doubleEq(l, 100e-9); l += 1e-9 )
+		vecEntries.push_back( 1.29 * l );
+
+	Field< double >::set( vecTableId, "xmin", 0 );
+	Field< double >::set( vecTableId, "xmax", 100e-9 );
+	Field< vector< double > >::set( vecTableId, "table", vecEntries );
+
+	SetGet4< unsigned int, unsigned int, Id, unsigned int>::set( 
+			rateTableId, "set1d", 1, 3, vecTableId, 1 );
+
+	//Erasing this just to be clean.
+	vecEntries.erase( vecEntries.begin(), vecEntries.end() );
+
+	/////////
+	//Setting up rate (2,3) i.e. transition S2->S3
+	//(2,3) = 1.44 * [L] / ( 1 + exp( -0.04V ) )
+	//Vmin = -0.75 volts, Vmax = 0.2 volts, dV = 0.001 volts
+	//Lmin = 4 nM, Lmax = 50 nM, dL = 2 nM
+	//
+	//Note that in the case of Interpol2D tables, the ligand concentration is
+	//assumed to vary along the y-direction while voltage is on the x-direction, 
+	//where x increases downwards and y increases to the right in the lookup tables.
+	//Violating this convention can (and will) lead to disaster.
+	///////
+
+	vector< vector< double > > int2dEntries;
+
+	Field< double >::set( int2dTableId, "xmin", -0.75 );
+	Field< double >::set( int2dTableId, "xmax", 0.2 );
+	Field< double >::set( int2dTableId, "ymin", 4e-9 );
+	Field< double >::set( int2dTableId, "ymax", 50e-9 );
+
+	unsigned int c = 0;
+	for( double v = -0.75; !doubleEq( v, 0.2 ); v += 0.001 )
+	{
+		int2dEntries.resize( int2dEntries.size() + 1 ); 
+		for( double l = 4e-9; !doubleEq( l, 50e-9 ); l += 2e-9 )
+			int2dEntries[c].push_back( 1.44 * l / ( 1 + exp( -0.04 * v ) ) );
+		++c;
+	}
+
+	Field< vector< vector< double > > >::set( int2dTableId, "tableVector2D", int2dEntries );
+
+	SetGet3< unsigned int, unsigned int, Id >::set( rateTableId, "set2d", 2, 3, int2dTableId ); 
+	////////////////////////////
+	//Rates (2,1) and (3,1) are set to 0.17 and 5.6 respectively.
+	///////////////////////////
+
+	SetGet3< unsigned int, unsigned int, double >::set( rateTableId, "setconst", 2, 1, 0.17 );
+	SetGet3< unsigned int, unsigned int, double >::set( rateTableId, "setconst", 3, 1, 5.6 );
+
+	//Setup of MarkovRateTable object complete.
+	/////////////////////////
+
+	//Initializing MarkovSolver tables.
+	SetGet1< Id >::set( solverId, "setuptable", rateTableId ); 
+
+	cout << "." << flush;
+}
+
 
 ///////////////////////////////////////////////////
 // Unit tests for SynChan
@@ -927,7 +1051,8 @@ void testBiophysicsProcess()
 	testCompartmentProcess();
 	testHHChannel();
 	testMarkovChannel();
-	testSynChan();
+//	testMarkovSolverProcess();
+//	testSynChan();
 }
 
 #endif

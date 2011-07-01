@@ -89,12 +89,6 @@ const Cinfo* Interpol2D::initCinfo()
 			&Interpol2D::setTableValue,
 			&Interpol2D::getTableValue
 		);		
-	static LookupValueFinfo< Interpol2D, vector< unsigned int >, double > 
-		table2D( "table2D",
-		"Lookup an entry on the table",
-			&Interpol2D::setTableValue,
-			&Interpol2D::getTableValue
-		);
 	static ValueFinfo< Interpol2D, vector< vector< double > > >
 		tableVector2D( "tableVector2D",
 		"Get the entire table.",
@@ -122,9 +116,7 @@ const Cinfo* Interpol2D::initCinfo()
 		&ydivs,				// Value
 		&dy,				// Value
 		&table,				// Lookup
-		&table2D,			// Lookup
 		&tableVector2D,		// Value
-
 	};
 
 	static string doc[] =
@@ -387,18 +379,32 @@ void Interpol2D::setTableValue( vector< unsigned int > index, double value )
 		cerr << "Error: Interpol2D::setTableValue: Index out of bounds!\n";
 }
 
+////////////////
+//Modified by Vishaka Datta S, 2011, NCBS.
+//When a single index is out of bounds, the first or last element along that
+//respective dimension is returned.
+//Modification was needed for the MarkovSolver base class. 
+///////////////
 double Interpol2D::getTableValue( vector< unsigned int > index ) const
 {
 	assert( index.size() == 2 );
 	unsigned int i0 = index[ 0 ];
 	unsigned int i1 = index[ 1 ];
 	
-	if ( i0 < table_.size() && i1 < table_[ 0 ].size() )
-		return table_[ i0 ][ i1 ];
-	else {
-		cerr << "Error: Interpol2D::getTableValue: Index out of bounds!\n";
-		return 0.0;
-	}
+	//Above-said modifications.
+	if ( i0 < 0 ) 
+		i0 = 0;
+
+	if ( i0 > table_.size() )
+		i0 = table_.size() - 1;
+
+	if ( i1 < 0 )
+		i1 = 0;
+
+	if ( i1 > table_[i0].size() )
+		i1 = table_[i0].size();
+
+	return table_[ i0 ][ i1 ];
 }
 
 // This sets the whole thing up: values, xdivs, dx and so on. Only xmin
@@ -459,19 +465,22 @@ double Interpol2D::indexWithoutCheck( double x, double y ) const
 }
 
 /**
- * Performs bi-linear interpolation, without bounds-checking.
+ * Performs bi-linear interpolation.
+ *
+ * Modified by Vishaka Datta S, 2011, NCBS.
+ * Interpolation now performs bounds checking. 
  */
-double Interpol2D::interpolateWithoutCheck( double x, double y ) const
+double Interpol2D::interpolate( double x, double y ) const
 {
 	assert( table_.size() > 1 );
 	
 	double xv = ( x - xmin_ ) * invDx_;
-	unsigned long xInteger = static_cast< unsigned long >( xv );
+	unsigned long xInteger = static_cast< unsigned long >( (x - xmin_) * invDx_ );
 	assert( xInteger < table_.size() );
 	double xFraction = xv - xInteger;
 
 	double yv = ( y - ymin_ ) * invDy_;
-	unsigned long yInteger = static_cast< unsigned long >( yv );
+	unsigned long yInteger = static_cast< unsigned long >( (y - ymin_) * invDy_ );
 	assert( yInteger < table_[ 0 ].size() );
 	double yFraction = yv - yInteger;
 
@@ -564,7 +573,7 @@ double Interpol2D::innerLookup( double x, double y ) const
 	if ( isOutOfBounds )
 		return indexWithoutCheck( x, y );
 	else 
-		return interpolateWithoutCheck( x, y );
+		return interpolate( x, y );
 }
 
 bool Interpol2D::operator==( const Interpol2D& other ) const
