@@ -34,6 +34,7 @@ OBJ = \
   MarkovGslSolver.o \
 	MatrixOps.o \
 	testBiophysics.o	\
+	MarkovSolverBase.o \
 	MarkovSolver.o \
 
 # GSL_LIBS = -L/usr/lib -lgsl
@@ -66,7 +67,8 @@ VectorTable.o : VectorTable.h
 MarkovGslSolver.o : MarkovGslSolver.h 
 MatrixOps.o : MatrixOps.h
 MarkovRateTable.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h 
-MarkovSolver.o : MarkovSolver.h MatrixOps.h MarkovRateTable.h
+MarkovSolverBase.o : MarkovSolver.h MatrixOps.h MarkovRateTable.h
+MarkovSolver.o : MarkovSolverBase.h MarkovSolver.h
 MarkovChannel.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h ChanBase.h MarkovChannel.h 
 testBiophysics.o: SynBase.h IntFire.h Synapse.h Compartment.h HHChannel.h HHGate.h VectorTable.h MarkovRateTable.h	../builtins/Interpol2D.h MarkovGslSolver.h MarkovChannel.h
 
