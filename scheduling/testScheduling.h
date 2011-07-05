@@ -31,6 +31,10 @@ class TestSched
 
 		void process( const Eref& e, ProcPtr p );
 
+		void zeroIndex() {
+			index_ = 0 ;
+		}
+
 		static const Cinfo* initCinfo();
 	private:
 		int index_;

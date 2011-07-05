@@ -361,6 +361,97 @@ void testThreads()
 	cout << "." << flush;
 }
 
+void testQueueAndStart()
+{
+	Element* se = Id()();
+	Shell* s = reinterpret_cast< Shell* >( se->dataHandler()->data( 0 ) );
+	s->doSetClock( 0, 5.0 );
+	s->doSetClock( 1, 2.0 );
+	s->doSetClock( 2, 2.0 );
+	s->doSetClock( 3, 1.0 );
+	s->doSetClock( 4, 3.0 );
+	s->doSetClock( 5, 5.0 );
+
+	vector< unsigned int > dims;
+	dims.push_back( 7 ); // A suitable number to test dispatch of Process calls during threading.
+	Id tsid = Id::nextId();
+	Element* tse = new Element( tsid, testSchedCinfo, "tse", dims, 1 );
+	// testThreadSchedElement tse;
+	Eref ts( tse, 0 );
+	Element* ticke = Id( 2 )();
+	Eref er0( ticke, DataId( 0, 0 ) );
+	Eref er1( ticke, DataId( 0, 1 ) );
+	Eref er2( ticke, DataId( 0, 2 ) );
+	Eref er3( ticke, DataId( 0, 3 ) );
+	Eref er4( ticke, DataId( 0, 4 ) );
+	Eref er5( ticke, DataId( 0, 5 ) );
+
+	const Finfo* proc0 = ticke->cinfo()->findFinfo( "process0" );
+	assert( proc0 );
+	const SrcFinfo* sproc0 = dynamic_cast< const SrcFinfo* >( proc0 );
+	assert( sproc0 );
+	unsigned int b0 = sproc0->getBindIndex();
+	/*
+	const Finfo* proc1 = ticke->cinfo()->findFinfo( "process1" );
+	const SrcFinfo* sproc1 = dynamic_cast< const SrcFinfo* >( proc1 );
+	const Finfo* proc2 = ticke->cinfo()->findFinfo( "process2" );
+	const SrcFinfo* sproc2 = dynamic_cast< const SrcFinfo* >( proc2 );
+	unsigned int b1 = sproc1->getBindIndex();
+	unsigned int b2 = sproc2->getBindIndex();
+	*/
+
+	FuncId f( processFinfo.getFid() );
+	SingleMsg* m0 = new SingleMsg( Msg::nextMsgId(), er0, ts );
+	er0.element()->addMsgAndFunc( m0->mid(), f, 0 + b0 );
+	SingleMsg* m1 = new SingleMsg( Msg::nextMsgId(), er1, ts );
+	er1.element()->addMsgAndFunc( m1->mid(), f, 2 + b0 );
+	SingleMsg* m2 = new SingleMsg( Msg::nextMsgId(), er2, ts );
+	er2.element()->addMsgAndFunc( m2->mid(), f, 4 + b0 );
+	SingleMsg* m3 = new SingleMsg( Msg::nextMsgId(), er3, ts );
+	er3.element()->addMsgAndFunc( m3->mid(), f, 6 + b0 );
+	SingleMsg* m4 = new SingleMsg( Msg::nextMsgId(), er4, ts );
+	er4.element()->addMsgAndFunc( m4->mid(), f, 8 + b0 );
+	SingleMsg* m5 = new SingleMsg( Msg::nextMsgId(), er5, ts );
+	er5.element()->addMsgAndFunc( m5->mid(), f, 10 + b0 );
+
+	unsigned int num = 20;
+	dims[0] = num;
+	Id pool = s->doCreate( "Pool", Id(), "pool", dims );
+	Id reac = s->doCreate( "Reac", Id(), "reac", dims );
+	bool ret = Field< double >::set( pool, "nInit", 123 );
+	assert( ret );
+	ret = Field< double >::set( pool, "n", 456 );
+	assert( ret );
+	double x= Field< double >::get( pool, "conc" );
+	assert ( doubleEq( x, 456.0/NA ) );
+	ret = Field< double >::set( reac, "kf", 111 );
+	ret = Field< double >::set( reac, "kb", 222 );
+	MsgId mid = s->doAddMsg( "OneToOne",
+		pool, "reac", reac, "sub" );
+	assert( mid != Msg::badMsg );
+	s->doUseClock( "/pool,/reac", "process", 0 );
+	s->doReinit();
+	TestSched* tsData = reinterpret_cast< TestSched* >( ts.data() );
+	tsData->zeroIndex();
+
+	for ( unsigned int i = 0; i < num; ++i ) {
+		s->doStart( 1.0 );
+		ObjId oi( pool, i );
+		// Just to stir up some stuff with the messaging.
+		ret = Field< double >::set( oi, "n", i );
+		x = Field< double >::get( oi, "n" );
+		assert( doubleEq( x, i ) );
+	}
+
+	// Qinfo::mergeQ( 0 ); // Need to clean up stuff.
+
+	// cout << "Done TestThreads" << flush;
+	tsid.destroy();
+	s->doDelete( pool );
+	s->doDelete( reac );
+	cout << "." << flush;
+}
+
 void testThreadIntFireNetwork()
 {
 	// Known value from single-thread run, at t = 1 sec.
@@ -828,6 +919,7 @@ void testScheduling()
 void testSchedulingProcess()
 {
 	testThreads();
+	testQueueAndStart();
 	testThreadIntFireNetwork();
 	testMultiNodeIntFireNetwork();
 }
