@@ -13817,3 +13817,44 @@ If I do retain the explicit calculations, will need to do some nasty stuff to
 Started out with the unit test for resizing the CubeMesh with a Pool attached.
 Various loose ends with DataHandlers and Elements had to be fixed.
 Clears the basic test, just replicating a Pool throughout the mesh.
+Pool values also replicate. Checkin 2821.
+
+Let's not have explicit Euler calculations for the Reac-diff mesh. It 
+should never be done for numerical reasons, and it is going to be a huge pain
+to set up cleanly with the Reactions and their messaging, precisely because
+they may interface between pools in different meshes. Instead, Reactions and
+Enzymes are _not_ to be replicated when meshing. Additionally, they take up
+concentration-dependent terms and the terms in 'n' are there for backward
+compatibility but not normally used. 
+
+If we take the logic further still, this exercise for pools wasn't really
+needed. We'll have the zombies set up the arrays and they can communicate
+more directly with the mesh. Anyway, it cleaned up some code.
+
+I think it is time to go right to the reac-diff solver. The design will be
+clearer once I have calculations that work.
+
+- Continue to use Stoich as a basis for setting up the system. 
+- Modularize the reac updates: 
+	- Blocks for each compartment
+	- Blocks for cross-compartment calculations, with the indexing set up.
+- Modularize the diffusion relationships
+	- Start out with a block treating flux as reacs so we can use RKF5.
+	- Work out how to fit in the 4th order method.
+
+
+I think I should do this in a new directory. I want to be able to 
+replicate most of what ksolve already does, and be able to replace the
+old ksolve with this more general version. Some aspects of multithreading
+should also be possible to set up.
+============================================================================
+4 July 2011
+Something to stress test: write a unit test for start/stop of simulations
+from the parser thread, where we do this a lot of times to be sure to catch
+threading problems with it.
+
+============================================================================
+5 July 2011
+Wrote and ran stress test for start/stop of sims. It clears the test.
+
+============================================================================
