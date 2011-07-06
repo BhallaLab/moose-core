@@ -139,7 +139,8 @@ void TestSched::process( const Eref& e, ProcPtr p )
 	static const int timings[] = { 1, 2, 2, 2, 3, 3, 4, 4, 4, 
 		5, 5, 5, 6, 6, 6, 6, 7, 8, 8, 8, 9, 9, 10, 10, 10, 10, 10,
 		11, 12, 12, 12, 12, 13, 14, 14, 14, 15, 15, 15, 15,
-		16, 16, 16, 17, 18, 18, 18, 18, 19, 20, 20, 20, 20, 20 };
+		16, 16, 16, 17, 18, 18, 18, 18, 19, 20, 20, 20, 20, 20,
+		21, 21, 22, 22, 22, 23, 24, 24, 24, 24, 25, 25, 25 };
 	// unsigned int max = sizeof( timings ) / sizeof( int );
 	// cout << Shell::myNode() << ":" << p->threadIndexInGroup << " : timing[ " << index_ << ", " << p->threadId << " ] = " << timings[ index_ ] << ", time = " << p->currTime << endl;
 	if ( static_cast< int >( p->currTime ) != timings[ index_ ] ) {
@@ -414,7 +415,7 @@ void testQueueAndStart()
 	SingleMsg* m5 = new SingleMsg( Msg::nextMsgId(), er5, ts );
 	er5.element()->addMsgAndFunc( m5->mid(), f, 10 + b0 );
 
-	unsigned int num = 20;
+	unsigned int num = 12;
 	dims[0] = num;
 	Id pool = s->doCreate( "Pool", Id(), "pool", dims );
 	Id reac = s->doCreate( "Reac", Id(), "reac", dims );
@@ -435,7 +436,7 @@ void testQueueAndStart()
 	tsData->zeroIndex();
 
 	for ( unsigned int i = 0; i < num; ++i ) {
-		s->doStart( 1.0 );
+		s->doStart( 2.0 );
 		ObjId oi( pool, i );
 		// Just to stir up some stuff with the messaging.
 		ret = Field< double >::set( oi, "n", i );
