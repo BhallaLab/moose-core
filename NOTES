@@ -13855,6 +13855,16 @@ threading problems with it.
 
 ============================================================================
 5 July 2011
-Wrote and ran stress test for start/stop of sims. It clears the test.
+Wrote and ran stress test for start/stop of sims. It clears the test,
+even for 8 cores.
+Checkin 2824.
+
+So the start/stop code isn't apparently the problem. Next steps:
+- test on ghevar
+- Put an assertion on the queue entry odd size to trap it and track it down.
 
 ============================================================================
+
+6 July 2011.
+Ghevar test is OK, even on 16 cores.
+Changed the start/stop test to do two timesteps. This too is OK.
