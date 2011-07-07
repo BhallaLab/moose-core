@@ -12,6 +12,7 @@ TARGET = biophysics.o
 OBJ = \
 	SynBase.o	\
 	IntFire.o	\
+	LeakyIaF.o	\
 	Synapse.o	\
 	Compartment.o	\
 	SymCompartment.o	\
@@ -31,11 +32,12 @@ OBJ = \
 	VectorTable.o \
 	MarkovRateTable.o \
 	MarkovChannel.o \
-  MarkovGslSolver.o \
+	MarkovGslSolver.o \
 	MatrixOps.o \
 	testBiophysics.o	\
 	MarkovSolverBase.o \
 	MarkovSolver.o \
+
 
 # GSL_LIBS = -L/usr/lib -lgsl
 
@@ -47,6 +49,7 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 SynBase.o:	SynBase.h Synapse.h 
 IntFire.o:	IntFire.h SynBase.h Synapse.h 
+LeakyIaF.o: LeakyIaF.h
 Synapse.o:	SynBase.h Synapse.h
 Compartment.o: Compartment.h
 SymCompartment.o: Compartment.h SymCompartment.h
