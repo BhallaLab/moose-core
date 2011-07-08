@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Thu Jul  7 12:16:55 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Jul  7 14:07:31 2011 (+0530)
+// Last-Updated: Fri Jul  8 15:38:26 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 95
+//     Update #: 110
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -33,21 +33,25 @@
 #include "header.h"
 #include "LeakyIaF.h"
 
-static SrcFinfo1< double > spike( 
-		"spike", 
-		"Sends out spike events"
-	);
+static SrcFinfo1< double >* spike() {
+    static SrcFinfo1< double > spike(
+            "spike", 
+            "Sends out spike events");
+    return &spike;
+}
 
-static SrcFinfo1< double > VmOut(
-		"VmOut", 
-		"Sends out Vm"
-                                 );
+static SrcFinfo1< double >* VmOut() {
+    static SrcFinfo1< double > VmOut(
+            "VmOut", 
+            "Sends out Vm");
+    return &VmOut;
+}
 
 const Cinfo* LeakyIaF::initCinfo()
 {
-		//////////////////////////////////////////////////////////////
-		// Field Definitions
-		//////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////
+    // Field Definitions
+    //////////////////////////////////////////////////////////////
 		static ValueFinfo< LeakyIaF, double > Rm(
 			"Rm",
 			"Membrane resistance, inverse of leak-conductance.",
@@ -172,10 +176,9 @@ const Cinfo* LeakyIaF::initCinfo()
             &Vthreshold,				// Value
             &refractoryPeriod,		// Value
             &tSpike,
-            // &numSynapses,			// Value
             &proc,					// SharedFinfo
-            &spike, 		// MsgSrc
-            // &synFinfo		// FieldElementFinfo for synapses.
+            spike(), 		// MsgSrc
+            VmOut()
 	};
 
 	static Cinfo leakyIaFCinfo (
@@ -315,10 +318,10 @@ void LeakyIaF::process(const Eref & eref, ProcPtr proc)
     double time = proc->currTime;
     Vm_ += ((Em_ - Vm_)/Rm_ + sumInject_)/Cm_; // Forward Euler
     sumInject_ = 0.0;
-    VmOut.send(eref, proc, Vm_);
+    VmOut()->send(eref, proc, Vm_);
     if ((Vm_ > Vthreshold_) && (time > tSpike_ + refractoryPeriod_)){
         tSpike_ = time;
-        spike.send(eref, proc, time);
+        spike()->send(eref, proc, time);
         Vm_ = Vreset_;
     }
 }
@@ -328,7 +331,7 @@ void LeakyIaF::reinit(const Eref& eref, ProcPtr proc)
     Vm_ = initVm_;
     sumInject_ = 0.0;
     tSpike_ = -DBL_MAX;
-    VmOut.send(eref, proc, Vm_);
+    VmOut()->send(eref, proc, Vm_);
 }
 
 // 
