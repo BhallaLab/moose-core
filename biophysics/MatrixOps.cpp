@@ -101,7 +101,7 @@ void matPermMul( Matrix* A, vector< unsigned int >* swaps )
 	}
 }
 
-Matrix* matMatAdd( Matrix* A, Matrix* B, double alpha, double beta ) 
+Matrix* matMatAdd( const Matrix* A, const Matrix* B, double alpha, double beta ) 
 {
 	unsigned int n = A->size();
 	Matrix *C = matAlloc( n );
@@ -135,7 +135,7 @@ void matMatAdd( Matrix* A, Matrix* B, double alpha, double beta,
 	}
 }
 
-Matrix* matEyeAdd( Matrix* A, double k )
+Matrix* matEyeAdd( const Matrix* A, double k )
 {
 	unsigned int n = A->size();
 	Matrix* B = matAlloc( n );
@@ -163,7 +163,7 @@ void matEyeAdd( Matrix* A, double k, unsigned int dummy )
 		(*A)[i][i] += k;
 }
 
-Matrix* matScalShift( Matrix* A, double mul, double add )
+Matrix* matScalShift( const Matrix* A, double mul, double add )
 {
 	unsigned int n = A->size();
 	Matrix *C = matAlloc( n );
@@ -189,7 +189,7 @@ void matScalShift( Matrix* A, double mul, double add, unsigned int dummy )
 	}
 }
 
-Vector* vecMatMul( Vector* v, Matrix* A )
+Vector* vecMatMul( const Vector* v, Matrix* A )
 {
 	unsigned int n = A->size();
 	Vector* w = vecAlloc( n );
@@ -201,6 +201,26 @@ Vector* vecMatMul( Vector* v, Matrix* A )
 	}
 
 	return w;
+}
+
+Vector* vecScalShift( const Vector* v, double scal, double shift )
+{
+	unsigned int n = v->size();
+	Vector* w = vecAlloc( n );
+
+	for ( unsigned int i = 0; i < n; ++i )
+		(*w)[i] = scal * (*v)[i] + shift;
+
+	return w;
+}
+
+void vecScalShift( Vector* v, double scal, double shift, unsigned int dummy )
+{
+	unsigned int n = v->size();
+	dummy = 0;
+
+	for ( unsigned int i = 0; i < n; ++i )
+		(*v)[i] += scal * (*v)[i] + shift;
 }
 
 Vector* matVecMul( Matrix* A, Vector* v )
@@ -215,6 +235,28 @@ Vector* matVecMul( Matrix* A, Vector* v )
 	}
 
 	return w;
+}
+
+Vector* vecVecScalAdd( const Vector* v1, const Vector* v2, 
+											 double alpha, double beta )
+{
+	unsigned int n = v1->size();
+	Vector *w = vecAlloc( n );
+
+	for ( unsigned int i = 0; i < n; ++i )
+		(*w)[i] = (*v1)[i] * alpha + (*v2)[i] * beta;
+
+	return w;
+}
+
+void vecVecScalAdd( Vector* v1, Vector* v2, double alpha, double beta, 
+	 									unsigned int dummy )
+{
+	unsigned int n = v1->size();
+	dummy = 0;
+
+	for ( unsigned int i = 0; i < n; ++i )
+		(*v1)[i] = (*v1)[i] * alpha + (*v2)[i] * beta;
 }
 
 double matTrace( Matrix* A )

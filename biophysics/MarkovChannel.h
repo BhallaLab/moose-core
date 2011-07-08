@@ -27,13 +27,17 @@ class MarkovChannel : public ChanBase
 	MarkovChannel( unsigned int, unsigned int);
 	~MarkovChannel( );
 
-	unsigned getNumStates( ) const;
+	double getVm( ) const;	
+	void setVm( double );
+	
+	double getLigandConc( ) const;
+	void setLigandConc( double );
+
+	unsigned int getNumStates( ) const;
 	void setNumStates( unsigned int );
 
 	unsigned int getNumOpenStates( ) const;
 	void setNumOpenStates( unsigned int );
-
-//	vector< vector< double > > getInstRates( ) const;
 
 	vector< string > getStateLabels( ) const;
 	void setStateLabels( vector< string > );

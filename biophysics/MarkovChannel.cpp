@@ -44,12 +44,24 @@ const Cinfo* MarkovChannel::initCinfo()
 	///////////////////////
 	//Field information.
 	///////////////////////
+	static ValueFinfo< MarkovChannel, double > ligandconc( "ligandconc",
+			"Ligand concentration.",
+			&MarkovChannel::setLigandConc,
+			&MarkovChannel::getLigandConc
+			);
+
+	static ValueFinfo< MarkovChannel, double > vm( "vm",
+			"Membrane voltage.",
+			&MarkovChannel::setVm,
+			&MarkovChannel::getVm
+			);
 
 	static ValueFinfo< MarkovChannel, unsigned int > numstates( "numstates", 
 			"The number of states that the channel can occupy.",
 			&MarkovChannel::setNumStates,
 			&MarkovChannel::getNumStates 
 			);
+
 
 	static ValueFinfo< MarkovChannel, unsigned int > numopenstates( "numopenstates", 
 			"The number of states which are open/conducting.",
@@ -93,6 +105,8 @@ const Cinfo* MarkovChannel::initCinfo()
 	static Finfo* MarkovChannelFinfos[] = 
 	{
 		&proc,
+		&ligandconc,
+		&vm,
 		&numstates,						
 		&numopenstates,
 		&state,
@@ -150,6 +164,26 @@ MarkovChannel::MarkovChannel(unsigned int numStates, unsigned int numOpenStates)
 MarkovChannel::~MarkovChannel( )
 {	
 	;
+}
+
+double MarkovChannel::getVm( ) const
+{
+	return Vm_;
+}
+
+void MarkovChannel::setVm( double Vm ) 
+{
+	Vm_ = Vm;
+}
+
+double MarkovChannel::getLigandConc( ) const
+{
+	return ligandConc_;
+}
+
+void MarkovChannel::setLigandConc( double ligandConc ) 
+{
+	ligandConc_ = ligandConc;
 }
 
 unsigned int MarkovChannel::getNumStates( ) const
@@ -219,11 +253,14 @@ void MarkovChannel::process( const Eref& e, const ProcPtr p )
 	//Cannot use the Gbar_ variable of the ChanBase class. The conductance
 	//Gk_ calculated here is the "expected conductance" of the channel due to its
 	//stochastic nature. 
+
+
 	for( unsigned int i = 0; i < numOpenStates_; ++i )
 		g_ += Gbars_[i] * state_[i];			
 
 	ChanBase::setGk( g_ );
 	ChanBase::updateIk();
+
 	ChanBase::process( e, p ); 
 }
 
@@ -233,7 +270,7 @@ void MarkovChannel::reinit( const Eref& e, const ProcPtr p )
 
 	if ( initialState_.empty() ) 
 	{
-		cerr << "Initial state has not been set.!\n";
+		cerr << "MarkovChannel::reinit : Initial state has not been set.!\n";
 		return;
 	}
 	state_ = initialState_;
