@@ -12,6 +12,7 @@ TARGET = biophysics.o
 OBJ = \
 	SynBase.o	\
 	IntFire.o	\
+	IzhikevichNrn.o	\
 	LeakyIaF.o	\
 	Synapse.o	\
 	Compartment.o	\
@@ -49,6 +50,7 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 SynBase.o:	SynBase.h Synapse.h 
 IntFire.o:	IntFire.h SynBase.h Synapse.h 
+IzhikevichNrn.o: IzhikevichNrn.h
 LeakyIaF.o: LeakyIaF.h
 Synapse.o:	SynBase.h Synapse.h
 Compartment.o: Compartment.h
