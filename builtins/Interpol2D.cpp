@@ -381,7 +381,7 @@ void Interpol2D::setTableValue( vector< unsigned int > index, double value )
 
 ////////////////
 //Modified by Vishaka Datta S, 2011, NCBS.
-//When a single index is out of bounds, the first or last element along that
+//When a single index is out of bounds, the last element along that
 //respective dimension is returned.
 //Modification was needed for the MarkovSolver base class. 
 ///////////////
@@ -392,17 +392,11 @@ double Interpol2D::getTableValue( vector< unsigned int > index ) const
 	unsigned int i1 = index[ 1 ];
 	
 	//Above-said modifications.
-	if ( i0 < 0 ) 
-		i0 = 0;
-
-	if ( i0 > table_.size() )
+	if ( i0 >= table_.size() )
 		i0 = table_.size() - 1;
 
-	if ( i1 < 0 )
-		i1 = 0;
-
-	if ( i1 > table_[i0].size() )
-		i1 = table_[i0].size();
+	if ( i1 >= table_[i0].size() )
+		i1 = table_[i0].size() - 1;
 
 	return table_[ i0 ][ i1 ];
 }

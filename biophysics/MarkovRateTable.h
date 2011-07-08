@@ -70,6 +70,8 @@ class MarkovRateTable {
 
 	vector< unsigned int > getListOf1dRates();
 	vector< unsigned int > getListOf2dRates();
+	vector< unsigned int > getListOfLigandRates();
+	vector< unsigned int > getListOfVoltageRates();
 	vector< unsigned int > getListOfConstantRates();
 
 	//Overloading the >> operator. This is done so that VectorTable and 
@@ -81,6 +83,12 @@ class MarkovRateTable {
 	////////////////////////
 	vector< vector< double > > getQ() const;	
 	unsigned int getSize() const;
+
+	double getVm( ) const;	
+	void setVm( double );
+	
+	double getLigandConc( ) const;
+	void setLigandConc( double );
 
 	//////////////////
 	//Helper functions
@@ -119,10 +127,20 @@ class MarkovRateTable {
 	//Returns true if at least one of the rates are 1D i.e. vary with only 
 	//one parameter.
 	bool areAnyRates1d();
+	bool areAllRates1d();
 
 	//Returns true if at least one of the rates are 2D i.e. vary with two
 	//parameters.
 	bool areAnyRates2d();
+	bool areAllRates2d();
+
+	//Returns true if at least one of the rates are ligand dependent.
+	bool areAnyRatesLigandDep();
+	bool areAllRatesLigandDep();
+
+	//Returns true if at least one of the rates are voltage dependent.
+	bool areAnyRatesVoltageDep();
+	bool areAllRatesVoltageDep();
 
 	static const Cinfo* initCinfo();
 
@@ -162,12 +180,15 @@ class MarkovRateTable {
 	//concentration is used instead of voltage for rate lookups. 
 	vector< vector< unsigned int > > useLigandConc_; 
 
-	//Maintains a list of the indices of 1D,2D and constant rates. Makes 
-	//updating rates a whole lot easier and more elegant than blindly scanning 
-	//through the entire rate matrix each time.
+	//Maintains a list of the indices of 1D,2D,constant rates, voltage and
+	//ligand dependent rates. Makes updating rates a whole lot easier and 
+	//more elegant than blindly scanning through the entire rate matrix 
+	//each time.
 	vector< unsigned int > listOf1dRates_;
 	vector< unsigned int > listOf2dRates_;
 	vector< unsigned int > listOfConstantRates_;
+	vector< unsigned int > listOfLigandRates_;
+	vector< unsigned int > listOfVoltageRates_;
 	
 	//The instantaneous rate matrix. 
 	vector< vector< double > > Q_;

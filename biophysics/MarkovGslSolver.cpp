@@ -56,7 +56,7 @@ const Cinfo* MarkovGslSolver::initCinfo()
 		///////////////////////////////////////////////////////
 		// DestFinfo definitions
 		///////////////////////////////////////////////////////
-		static DestFinfo setinitstate( "setinitstate",
+		static DestFinfo init( "init",
 			"Initialize solver parameters.",
 			new OpFunc1< MarkovGslSolver, vector< double > >
 			( &MarkovGslSolver::init )
@@ -90,13 +90,13 @@ const Cinfo* MarkovGslSolver::initCinfo()
 		&method,						// ValueFinfo
 		&relativeAccuracy,	// ValueFinfo
 		&absoluteAccuracy,	// ValueFinfo
-		&setinitstate,			// DestFinfo
+		&init,							// DestFinfo
 		&handleQ,						// DestFinfo	
 		&proc,							// SharedFinfo
 		stateOut(),  				// SrcFinfo
 	};
 	
-	static  Cinfo MarkovGslSolverCinfo(
+	static Cinfo MarkovGslSolverCinfo(
 		"MarkovGslSolver",
 		Neutral::initCinfo(),
 		MarkovGslFinfos,
@@ -316,12 +316,24 @@ void MarkovGslSolver::process( const Eref& e, ProcPtr info )
 
 	for ( unsigned int i = 0; i < nVars_; ++i )
 		state_[i] = stateGsl_[i];
+
+/*	cout << "\nt = " << info->currTime << endl;
+	for ( unsigned int i = 0; i < nVars_; ++i ) 
+		cout << state_[i] << " ";
+	cout << "\n";*/
 	stateOut()->send( e, info, state_ );
 }
 
 void MarkovGslSolver::reinit( const Eref& e, ProcPtr info )
 {
 	state_ = initialState_;
+	if ( initialState_.empty() )
+	{
+		cerr << "MarkovGslSolver::reinit : "
+				 "Initial state has not been set. Solver has not been initialized."
+				 "Call init() before running.\n";
+	}
+				
 	stateOut()->send( e, info, state_ );
 }
 

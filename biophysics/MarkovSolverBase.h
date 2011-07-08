@@ -80,22 +80,26 @@ class MarkovSolverBase {
 	unsigned int getYdivs() const;
 	double getInvDy() const;
 	
-	//Computes the updated state of the system. Is called from the process
-	//function.
-	void computeState();	
-
 	/////////////////////////
 	//Lookup table related stuff.
 	////////////////////////
+	
 	//Fills up lookup table of matrix exponentials.
-
-	void innerFillupTable( MarkovRateTable*, vector< unsigned int >, string, 
+	void innerFillupTable( vector< unsigned int >, string, 
 											   unsigned int, unsigned int );
-	void fillupTable( MarkovRateTable* );
+	void fillupTable();
 
 	//This returns the pointer to the exponential of the Q matrix.
 	virtual Matrix* computeMatrixExponential();
 	
+	//State space interpolation routines.
+	Vector* bilinearInterpolate() const;
+	Vector* linearInterpolate() const;
+
+	//Computes the updated state of the system. Is called from the process
+	//function.
+	void computeState();	
+
 	///////////////////////////
 	//MsgDest functions.
 	//////////////////////////
@@ -113,6 +117,13 @@ class MarkovSolverBase {
 	void setupTable( Id );
 
 	static const Cinfo* initCinfo();
+	
+	/////////////////
+	//Unit test
+	////////////////
+	#ifdef DO_UNIT_TESTS
+	friend void testMarkovSolverBase();
+	#endif
 
 	protected : 
 	//The instantaneous rate matrix.
@@ -124,8 +135,7 @@ class MarkovSolverBase {
 	/////////////
 	
 	//Sets the values of xMin, xMax, xDivs, yMin, yMax, yDivs.
-	void setLookupParams( MarkovRateTable* );
-
+	void setLookupParams();
 
 	//////////////
 	//Lookup table related stuff.
@@ -170,6 +180,10 @@ class MarkovSolverBase {
 	//Miscallenous stuff
 	///////////
 	
+	//Pointer to the MarkovRateTable object. Necessary to glean information
+	//about the properties of all the transition rates.
+	MarkovRateTable* rateTable_;
+
 	//Instantaneous state of the system.
 	Vector state_;
 

@@ -100,6 +100,18 @@ const Cinfo* MarkovRateTable::initCinfo()
 	///////////////////////////
 	//Field information.		
 	//////////////////////////
+	static ValueFinfo< MarkovRateTable, double > ligandconc( "ligandconc",
+			"Ligand concentration.",
+			&MarkovRateTable::setLigandConc,
+			&MarkovRateTable::getLigandConc
+			);
+
+	static ValueFinfo< MarkovRateTable, double > vm( "vm",
+			"Membrane voltage.",
+			&MarkovRateTable::setVm,
+			&MarkovRateTable::getVm
+			);
+
 	static ReadOnlyValueFinfo< MarkovRateTable, vector< vector< double > > >
 		Q( "Q", 
 			"Instantaneous rate matrix.",
@@ -125,6 +137,8 @@ const Cinfo* MarkovRateTable::initCinfo()
 		&set1d,							//DestFinfo
 		&set2d,							//DestFinfo
 		&setconst,					//DestFinfo
+		&vm,								//ValueFinfo
+		&ligandconc,				//ValueFinfo
 		&Q,									//ReadOnlyValueFinfo
 		&size,							//ReadOnlyValueFinfo
 	};
@@ -164,12 +178,12 @@ MarkovRateTable::~MarkovRateTable()
 
 VectorTable* MarkovRateTable::getVtChildTable( unsigned int i, unsigned int j ) const
 {
-	if ( isRate1d( i, j ) )
+	if ( isRate1d( i, j ) || isRateConstant( i, j ) )
 		return vtTables_[i][j];
 	else	
 	{
-		cerr << "Error : No one parameter rate table set for this rate!. "
-			   << "Returing NULL.\n";
+		cerr << "MarkovRateTable::getVtChildTable : Error : No one parameter rate "
+			"table set for (" << i+1 << "," << j+1 << "). Returing NULL.\n";
 		return 0;
 	}
 }
@@ -178,28 +192,31 @@ void MarkovRateTable::innerSetVtChildTable( unsigned int i, unsigned int j,
 																						VectorTable vecTable, 
 																					  unsigned int ligandFlag )	
 {
-	if ( vecTable.tableIsEmpty() )
+	if ( areIndicesOutOfBounds( i, j ) )
 	{
-		cerr << "Error : Cannot set with empty table!.\n";
+		cerr << "MarkovRateTable::innerSetVtChildTable : Error : Table requested"
+		 			"is out of bounds!.\n";
+		return; 
+	}
+
+	//Checking to see if this rate has already been set with a 2-parameter rate.
+	if ( isRate2d( i, j ) || isRateConstant( i, j ) || isRate1d( i, j ) ) 
+	{
+		cerr << "MarkovRateTable::innerSetVtChildTable : Error : "
+						"Rate (" << i+1 << "," << j+1 << ")has already been set.\n";
 		return;
 	}
 
-	if ( areIndicesOutOfBounds( i, j ) )
+	if ( i == j )
 	{
-		cerr << "Error : Table requested is out of bounds!.\n";
-		return; 
+		cerr << "MarkovRateTable::innerSetVtChildTable : Error : Cannot "
+						"set diagonal rate (" << i+1 << "," << i+1 << endl;
+		return;
 	}
 
 	//If table hasnt been allocated any memory, do so. 
 	if ( vtTables_[i][j] == 0 )
 		vtTables_[i][j] = new VectorTable();
-
-	//Checking to see if this rate has already been set with a 2-parameter rate.
-	if ( isRate2d( i, j ) ) 
-	{
-		cerr << "This rate has already been set with a 2 parameter lookup table.\n";
-		return;
-	}
 
 	*vtTables_[i][j] = vecTable;
 	useLigandConc_[i][j] = ligandFlag;
@@ -211,8 +228,8 @@ Interpol2D* MarkovRateTable::getInt2dChildTable( unsigned int i, unsigned int j 
 		return int2dTables_[i][j];
 	else	
 	{
-		cerr << "Error : No two parameter rate table set for this rate!. "
-			   << "Returning NULL.\n";
+		cerr << "MarkovRateTable::getInt2dChildTable : Error : No two parameter"
+		  " rate table set for (" << i+1 << "," << j+1 << "). Returning NULL.\n";
 		return 0;
 	}
 }
@@ -221,22 +238,31 @@ void MarkovRateTable::innerSetInt2dChildTable( unsigned int i, unsigned int j, I
 {
 	if ( areIndicesOutOfBounds( i, j ) ) 
 	{
-		cerr << "Error : Table requested is out of bounds\n";
+		cerr << "MarkovRateTable::innerSetInt2dChildTable : Error : Table requested"
+		 		"	is out of bounds\n";
 		return;
 	}
 	
+	if ( isRate1d( i, j ) || isRate2d( i, j ) || isRateConstant( i, j ) ) 
+	{
+		cerr << "MarkovRateTable::innerSetInt2dChildTable : Error : Rate (" << 
+						i+1 << "," << j+1 << ") has already been set!\n";
+		return;
+	}
+
+	if ( i == j )
+	{
+		cerr << "MarkovRateTable::innerSetInt2dChildTable : Error : Cannot "
+						"set diagonal rate (" << i+1 << "," << i+1 << endl;
+		return;
+	}
+
 	//If table isn't already initialized, do so.
 	if ( int2dTables_[i][j] == 0 )
 		int2dTables_[i][j] = new Interpol2D();
 
 	//Checking to see if this rate has already been set with a one parameter rate
 	//table.
-	if ( isRate1d( i, j) ) 
-	{
-		cerr << "Error : This rate has already been set with a one parameter rate table!\n";
-		return;
-	}
-
 	*int2dTables_[i][j] = int2dTable;
 }
 
@@ -244,15 +270,15 @@ double MarkovRateTable::lookup1dValue( unsigned int i, unsigned int j, double x 
 {
 	if ( areIndicesOutOfBounds( i, j ) ) 
 	{
-		cerr << "Lookup requested on non-existent table at (" << i << 
-				 "," << j << "). Returning 0.\n";
+		cerr << "MarkovRateTable::lookup1dValue : Lookup requested on non-existent" 
+			"table at (" << i + 1 << "," << j + 1 << "). Returning 0.\n";
 		return 0;
 	}
 
 	if ( !isRate1d( i, j ) && !isRateConstant( i, j ) )
 	{
-		cerr << "No 1D or constant rate set at (" << i << "," << j << ")."
-						"Returning 0.\n";
+		cerr << "MarkovRateTable::lookup1dValue : No 1D or constant rate set at "
+			"(" << i + 1 << "," << j + 1 << "). Returning 0.\n";
 		return 0;
 	}
 
@@ -264,15 +290,15 @@ double MarkovRateTable::lookup1dIndex( unsigned int i, unsigned int j,
 {
 	if ( areIndicesOutOfBounds( i, j ) ) 
 	{
-		cerr << "Lookup requested on non-existent table at (" << i << 
-				 "," << j << "). Returning 0.\n";
+		cerr << "MarkovRateTable::lookup1dIndex : Lookup requested on non-"
+				"existent table at (" << i << "," << j << "). Returning 0.\n";
 		return 0;
 	}
 
 	if ( !isRate1d( i, j ) && !isRateConstant( i, j ) )
 	{
-		cerr << "No 1D or constant rate set at (" << i << "," << j << ")."
-						"Returning 0.\n";
+		cerr << "MarkovRateTable::lookup1dIndex : No 1D or constant rate set at ("
+		 		<< i << "," << j << "). Returning 0.\n";
 		return 0;
 	}
 
@@ -284,14 +310,15 @@ double MarkovRateTable::lookup2dValue( unsigned int i, unsigned int j,
 {
 	if ( areIndicesOutOfBounds( i, j ) ) 
 	{
-		cerr << "Lookup requested on non-existent table at (" << i << 
-				 "," << j << "). Returning 0.\n";
+		cerr << "MarkovRateTable::lookup2dValue : Lookup requested on non-existent"
+			 " table at (" << i + 1<< "," << j+1 << "). Returning 0.\n";
 		return 0;
 	}
 
 	if ( !isRate2d( i, j ) )
 	{
-		cerr << "No 2D rate set at (" << i << "," << j << "). Returning 0.\n";
+		cerr << "MarkovRateTable::lookup2dValue : No 2D rate set at (" << i+1 << "," 
+			<< j+1 << "). Returning 0.\n";
 		return 0;
 	}
 
@@ -303,14 +330,15 @@ double MarkovRateTable::lookup2dIndex( unsigned int i, unsigned int j,
 {
 	if ( areIndicesOutOfBounds( i, j ) ) 
 	{
-		cerr << "Lookup requested on non-existent table at (" << i << 
-				 "," << j << "). Returning 0.\n";
+		cerr << "MarkovRateTable::lookup2dIndex : Lookup requested on non-existent"
+		 " table at (" << i+1 << "," << j+1 << "). Returning 0.\n";
 		return 0;
 	}
 
 	if ( !isRate2d( i, j ) )
 	{
-		cerr << "No 2D rate set at (" << i << "," << j << "). Returning 0.\n";
+		cerr << "MarkovRateTable::lookup2dIndex : No 2D rate set at (" << i+1 << ","
+		 	 	<< j+1 << "). Returning 0.\n";
 		return 0;
 	}
 
@@ -329,6 +357,26 @@ vector< vector< double > > MarkovRateTable::getQ() const
 unsigned int MarkovRateTable::getSize() const
 {
 	return size_;
+}
+
+double MarkovRateTable::getVm( ) const
+{
+	return Vm_;
+}
+
+void MarkovRateTable::setVm( double Vm ) 
+{
+	Vm_ = Vm;
+}
+
+double MarkovRateTable::getLigandConc( ) const
+{
+	return ligandConc_;
+}
+
+void MarkovRateTable::setLigandConc( double ligandConc ) 
+{
+	ligandConc_ = ligandConc;
 }
 
 bool MarkovRateTable::isRateZero( unsigned int i, unsigned int j ) const
@@ -353,8 +401,6 @@ bool MarkovRateTable::isRate1d( unsigned int i, unsigned int j ) const
 		return false;
 	else
 		return ( vtTables_[i][j]->getDiv() > 0 );
-
-//	return ( vtTables_[i][j] != 0 && vtTables_[i][j]->getDiv() > 0);
 }
 
 bool MarkovRateTable::isRateLigandDep( unsigned int i, unsigned int j ) const
@@ -384,10 +430,44 @@ bool MarkovRateTable::areAnyRates1d()
 	return !listOf1dRates_.empty();
 }
 
+bool MarkovRateTable::areAllRates1d()
+{
+	return areAnyRates1d() && !areAnyRates2d();
+}
+
 //Returns true if any of the rates vary with two parameters.
 bool MarkovRateTable::areAnyRates2d()
 {
 	return !listOf2dRates_.empty();
+}
+
+bool MarkovRateTable::areAllRates2d()
+{
+	return areAnyRates2d() && !areAnyRates1d();
+}
+
+//Returns true if at least one of the rates are ligand dependent.
+bool MarkovRateTable::areAnyRatesLigandDep()
+{
+	return !listOfLigandRates_.empty();
+}
+
+bool MarkovRateTable::areAllRatesLigandDep()
+{
+	return areAllRates1d() && !areAnyRatesVoltageDep() &&
+				 areAnyRatesLigandDep();
+}
+
+//Returns true if at least one of the rates are voltage dependent.
+bool MarkovRateTable::areAnyRatesVoltageDep()
+{
+	return !listOfVoltageRates_.empty();
+}
+
+bool MarkovRateTable::areAllRatesVoltageDep()
+{
+	return areAllRates1d() && areAnyRatesVoltageDep() &&
+				 !areAnyRatesLigandDep();
 }
 
 void MarkovRateTable::updateRates()
@@ -398,8 +478,8 @@ void MarkovRateTable::updateRates()
 	//Update 1D rates, if any.
 	for( unsigned int k = 0; k < listOf1dRates_.size(); ++k )
 	{
-		i = ( listOf1dRates_[k] % 10 ) - 1;
-		j = ( ( listOf1dRates_[k] / 10 ) % 10 ) - 1;
+		j = ( listOf1dRates_[k] % 10 ) - 1;
+		i = ( ( listOf1dRates_[k] / 10 ) % 10 ) - 1;
 		
 		temp = Q_[i][j];
 
@@ -416,8 +496,8 @@ void MarkovRateTable::updateRates()
 	//Update 2D rates, if any.
 	for( unsigned int k = 0; k < listOf2dRates_.size(); ++k )
 	{
-		i = ( listOf2dRates_[k] % 10 ) - 1;
-		j = ( ( listOf2dRates_[k] / 10 ) % 10 ) - 1;
+		j = ( listOf2dRates_[k] % 10 ) - 1;
+		i = ( ( listOf2dRates_[k] / 10 ) % 10 ) - 1;
 		
 		temp = Q_[i][j];
 
@@ -455,6 +535,16 @@ vector< unsigned int > MarkovRateTable::getListOf1dRates()
 vector< unsigned int > MarkovRateTable::getListOf2dRates()
 {
 	return listOf2dRates_;
+}
+
+vector< unsigned int > MarkovRateTable::getListOfVoltageRates()
+{
+	return listOfVoltageRates_;
+}
+
+vector< unsigned int > MarkovRateTable::getListOfLigandRates()
+{
+	return listOfLigandRates_;
 }
 
 vector< unsigned int > MarkovRateTable::getListOfConstantRates()
@@ -517,7 +607,8 @@ void MarkovRateTable::reinit( const Eref& e, ProcPtr info )
 	if ( isInitialized() )
 		initConstantRates();	
 	else
-		cerr << "MarkovRateTable class has not been initialized!.";
+		cerr << "MarkovRateTable::reinit : MarkovRateTable class has not been"
+		 		" initialized!.";
 
 	instRatesOut()->send( e, info, Q_ );
 }
@@ -558,6 +649,11 @@ void MarkovRateTable::setVtChildTable( unsigned int i, unsigned int j,
 	innerSetVtChildTable( i - 1, j - 1, *vecTable, ligandFlag );
 
 	listOf1dRates_.push_back( i * 10 + j );
+
+	if ( ligandFlag > 0 )
+		listOfLigandRates_.push_back( i * 10 + j );
+	else 
+		listOfVoltageRates_.push_back( i * 10 + j );
 }
 
 void MarkovRateTable::setInt2dChildTable( unsigned int i, unsigned int j,

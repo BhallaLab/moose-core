@@ -23,6 +23,7 @@ extern void testCaConc(); // Defined in CaConc.cpp
 extern void testNernst(); // Defined in Nernst.cpp
 extern void testMarkovRateTable(); //Defined in MarkovRateTable.cpp
 extern void testVectorTable();	//Defined in VectorTable.cpp
+extern void testMarkovSolverBase();	//Defined in MarkovSolverBase.cpp
 extern void testMarkovSolver();		//Defined in MarkovSolver.cpp
 /*
 extern void testSynChan(); // Defined in SynChan.cpp
@@ -528,7 +529,7 @@ static double sampleCurrent[] =
    2.4716548e-22, 2.5273563e-22, 2.5836888e-22, 2.6406527e-22, 2.6982483e-22, 2.7564760e-22,
    2.8153360e-22, 2.8748287e-22, 2.9349545e-22, 2.9957137e-22, 3.0571067e-22 };
 
-void testMarkovChannel()
+void testMarkovGslSolver()
 {
 	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
 	vector< unsigned int > dims( 1, 1 );
@@ -660,11 +661,311 @@ void testMarkovChannel()
 
 	vector< double > vec = Field< vector< double > >::get( tabId, "vec" );
 
-	for ( unsigned i = 0; i < 101; i++ )
+	for ( unsigned i = 0; i < 101; ++i )
 		assert( doubleEq( sampleCurrent[i] * 1e25, vec[i] * 1e25 ) );
 	//Currents involved here are incredibly small. Scaling them up is necessary
 	//for the doubleEq function to do its job.
 
+	shell->doDelete( nid );
+	cout << "." << flush;
+}
+
+////////////////
+//The testMarkovGslSolver() function includes the MarkovChannel object, but
+//is a rather trivial case, in that the rates are all constant. 
+//This test simultaneously tests the MarkovChannel, MarkovGslSolver, 
+//MarkovSolverBase and MarkovSolver classes. 
+//This test involves simulating the 4-state NMDA channel model specified 
+//in the following paper : 
+//"Voltage Dependence of NMDA-Activated Macroscopic Conductances Predicted
+//by Single-Channel Kinetics", Craig E. Jahr and Charles F. Stevens, The Journal
+//of Neuroscience, 1990, 10(9), pp. 3178-3182.
+//It is expected that the MarkovGslSolver and the MarkovSolver objects will
+//give the same answer. 
+//
+//Note that this is different from the NMDAChan test which involves synapses.
+///////////////
+void testMarkovChannel()
+{
+	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
+	vector< unsigned int > dims( 1, 1 );
+	
+	Id nid = shell->doCreate( "Neutral", Id(), "n", dims ); 
+	Id comptId = shell->doCreate( "Compartment", nid, "compt", dims );
+	Id rateTableId = shell->doCreate( "MarkovRateTable", comptId, "rateTable", dims );
+	Id mChanGslId = shell->doCreate( "MarkovChannel", comptId, "mChanGsl", dims );
+	Id mChanExptlId = shell->doCreate( "MarkovChannel", comptId, "mChanExptl", dims );
+
+	Id gslSolverId = shell->doCreate( "MarkovGslSolver", comptId, "gslSolver", dims );
+	Id exptlSolverId = shell->doCreate( "MarkovSolver", comptId, "exptlSolver", dims );
+
+	Id gslTableId = shell->doCreate( "Table", nid, "gslTable", dims );
+	Id exptlTableId = shell->doCreate( "Table", nid, "exptlTable", dims );
+	
+	Id int2dTableId = shell->doCreate( "Interpol2D", nid, "int2dTable", dims );
+	Id vecTableId = shell->doCreate( "VectorTable", nid, "vecTable", dims );
+
+	vector< double > table1d;
+	vector< vector< double > > table2d;
+
+	///////////////////////////
+	//Setting up the messaging.
+	//////////////////////////
+
+	////////
+	//Connecting up the MarkovGslSolver.
+	///////
+
+	//Connecting Compartment and MarkovChannel objects. 
+	//Compartment sends Vm to MarkovChannel object. The MarkovChannel, 
+	//via its ChanBase base class, sends back the conductance and current through
+	//it.
+	MsgId	mid = shell->doAddMsg( "Single", ObjId( comptId ), "channel", 
+			  ObjId( mChanGslId ), "channel" );
+	assert( mid != Msg::badMsg );
+
+	//Connecting Compartment and MarkovRateTable.
+	//The MarkovRateTable's job is to send out the instantaneous rate matrix,
+	//Q, to the solver object(s). 
+	//In order to do so, the MarkovRateTable object needs information on 
+	//Vm and ligand concentration to look up the rate from the table provided
+	//by the user. Hence, the need of the connection to the Compartment object.
+	//However, unlike a channel object, the MarkovRateTable object does not
+	//return anything to the Compartment directly, and communicates only with the 
+	//solvers.
+	mid = shell->doAddMsg( "Single", ObjId( comptId ), "channel",
+			ObjId( rateTableId ), "channel" );
+	assert( mid != Msg::badMsg );
+
+	//Connecting the MarkovRateTable with the MarkovGslSolver object.
+	//As mentioned earlier, the MarkovRateTable object sends out information
+	//about Q to the MarkovGslSolver. The MarkovGslSolver then churns out
+	//the state of the system for the next time step. 
+	mid = shell->doAddMsg("Single", ObjId( rateTableId ), "instratesOut",
+			ObjId( gslSolverId ), "handleQ" ); 
+
+	//Connecting MarkovGslSolver with MarkovChannel.
+	//The MarkovGslSolver object, upon computing the state of the channel, 
+	//sends this information to the MarkovChannel object. The MarkovChannel
+	//object will compute the expected conductance of the channel and send
+	//this information to the compartment. 
+	mid = shell->doAddMsg( "Single", ObjId( gslSolverId ), "stateOut", 
+			ObjId( mChanGslId ), "handlestate" );
+	assert( mid != Msg::badMsg );
+
+	//////////
+	//Connecting up the MarkovSolver class.
+	/////////
+
+	//Connecting the MarkovSolver and Compartment.
+	//The MarkovSolver derives from the MarkovSolverBase class.
+	//The base class need Vm and ligand concentration information to 
+	//perform lookup and interpolation on the matrix exponential lookup 
+	//tables.
+	mid = shell->doAddMsg( "Single", ObjId( comptId ), "channel", 
+			ObjId( exptlSolverId ), "channel" );
+	assert( mid != Msg::badMsg );						
+
+	/////////
+	//Connecting up the Table objects to cross-check values.
+	////////
+
+	//Get the current values from the GSL solver based channel.
+	mid = shell->doAddMsg( "Single", ObjId( gslTableId ), "requestData", 
+				ObjId( mChanGslId ), "get_Ik" );
+	assert( mid != Msg::badMsg );
+
+	//Get the current values from the matrix exponential solver based channel.
+	mid = shell->doAddMsg( "Single", ObjId( exptlTableId ), "requestData", 
+				ObjId( mChanExptlId ), "get_Ik" );
+	assert( mid != Msg::badMsg );
+
+	////////////////////
+	//Compartment properties. Identical to ones used in testHHChannel()
+	//barring a few modifications.
+	///////////////////
+
+	Field< double >::set( comptId, "Cm", 0.007854e-6 );
+	Field< double >::set( comptId, "Ra", 7639.44e3 ); // does it matter?
+	Field< double >::set( comptId, "Rm", 424.4e3 );
+	Field< double >::set( comptId, "Em", EREST + 0.02 );	
+	Field< double >::set( comptId, "inject", 0 );
+	Field< double >::set( comptId, "initVm", EREST );
+
+	//////////////////
+	//Setup of rate tables.
+	//Refer paper mentioned at the header of the unit test for more
+	//details.
+	/////////////////
+
+	//Number of states and open states.
+	Field< unsigned int >::set( mChanGslId, "numstates", 4 );		
+	Field< unsigned int >::set( mChanExptlId, "numstates", 4 );		
+
+	Field< unsigned int >::set( mChanGslId, "numopenstates", 1 );		
+	Field< unsigned int >::set( mChanExptlId, "numopenstates", 1 );		
+
+	vector< string > stateLabels;
+
+	//In the MarkovChannel class, the opening states are listed first.
+	//This is in line with the convention followed in Chapter 20, Sakmann & 
+	//Neher. 
+	stateLabels.push_back( "O" );		//State 1.
+	stateLabels.push_back( "B1" );	//State 2.
+	stateLabels.push_back( "B2" );	//State 3.
+	stateLabels.push_back( "C" ); 	//State 4.
+
+	Field< vector< string > >::set( mChanGslId, "labels", stateLabels );	
+	Field< vector< string > >::set( mChanExptlId, "labels", stateLabels );	
+
+	//Setting up conductance value for single open state.	Value chosen
+	//is quite arbitrary.
+	vector< double > gBar;
+
+	gBar.push_back( 5.431553e-9 );
+
+	Field< vector< double > >::set( mChanGslId, "gbar", gBar );
+	Field< vector< double > >::set( mChanExptlId, "gbar", gBar );
+
+	//Initial state of the system. This is really an arbitrary choice.
+	vector< double > initState;
+
+	initState.push_back( 0.30 ); 
+	initState.push_back( 0.05 ); 
+	initState.push_back( 0.30 ); 
+	initState.push_back( 0.35 ); 
+
+	Field< vector< double > >::set( mChanGslId, "initialstate", initState );
+	Field< vector< double > >::set( mChanExptlId, "initialstate", initState );
+
+	//This initializes the GSL solver object.
+	SetGet1< vector< double > >::set( gslSolverId, "init", initState );	
+
+	//Initializing MarkovRateTable object.
+	double v;
+	double conc;
+
+	SetGet1< unsigned int >::set( rateTableId, "setuptables", 4 );
+
+	//Setting up lookup tables for the different rates.		
+	
+	//Transition from "O" to "B1" i.e. r12.
+	Field< double >::set( vecTableId, "xmin", -0.05 );
+	Field< double >::set( vecTableId, "xmin", 0.10 );
+	Field< unsigned int >::set( vecTableId, "xdivs", 150 );
+
+	v = -0.05;
+	for ( unsigned int i = 0; i < 151; ++i )	
+	{
+		table1d.push_back( exp( -16 * v - 2.91 ) );
+		v += 0.001;
+	}
+
+	Field< vector< double > >::set( vecTableId, "table", table1d );
+
+	SetGet4< unsigned int, unsigned int, Id, unsigned int >::set( 
+			rateTableId, "set1d", 1, 2, vecTableId, 0 );
+
+	table1d.erase( table1d.begin(), table1d.end() );
+
+	//Transition from "B1" back to O i.e. r21
+	v = -0.05;	
+	for ( unsigned int i = 0; i < 151; ++i )
+	{
+		table1d.push_back( exp( 9 * v + 1.22 ) );
+		v += 0.001;
+	}
+
+	Field< vector< double > >::set( vecTableId, "table", table1d );
+	SetGet4< unsigned int, unsigned int, Id, unsigned int >::set( 
+			rateTableId, "set1d", 2, 1, vecTableId, 0 );
+
+	table1d.erase( table1d.begin(), table1d.end() );
+
+	//Transition from "O" to "B2" i.e. r13
+	//This is actually a 2D rate. But, there is no change in Mg2+ concentration
+	//that occurs. Hence, I create a 2D lookup table anyway but I manually
+	//set the concentration on the rate table object anyway.
+
+	Field< double >::set( rateTableId, "ligandconc", 24e-6 );
+
+	Field< double >::set( int2dTableId, "xmin", -0.05 );
+	Field< double >::set( int2dTableId, "xmax", 0.10 );
+	Field< double >::set( int2dTableId, "ymin", 1e-6 );
+	Field< double >::set( int2dTableId, "ymax", 30e-6 );
+	Field< unsigned int >::set( int2dTableId, "xdivs", 150 );
+	Field< unsigned int >::set( int2dTableId, "ydivs", 30 );
+
+	v = 0;
+	table2d.resize( 151 );
+	for ( unsigned int i = 0; i < 151; ++i )
+	{
+		conc = 0;
+		for ( unsigned int j = 0; j < 31; ++j )
+		{
+			table2d[i].push_back( 1e6 * conc * exp( -45 * v - 6.97 ) ); 
+			conc += 1e-6;
+		}
+		v += 1e-3;
+	}
+
+	Field< vector< vector< double > > >::set( int2dTableId, "tableVector2D", 
+																table2d );
+
+	SetGet3< unsigned int, unsigned int, Id >::set( rateTableId, 
+																			"set2d", 1, 3, int2dTableId ); 
+
+	//There is only one 2D rate, so no point manually erasing the elements.
+	
+	//Transition from "B2" to "O" i.e. r31
+	v = -0.05;	
+	for ( unsigned int i = 0; i < 151; ++i )
+	{
+		table1d.push_back( exp( 17 * v + 0.96 ) );
+		v += 0.001;
+	}
+
+	Field< vector< double > >::set( vecTableId, "table", table1d );
+	SetGet4< unsigned int, unsigned int, Id, unsigned int >::set( 
+			rateTableId, "set1d", 3, 1, vecTableId, 0 );
+
+	table1d.erase( table1d.begin(), table1d.end() );
+
+	//Transition from "O" to "C" i.e. r14 
+	SetGet3< unsigned int, unsigned int, double >::set( rateTableId,	
+									"setconst", 1, 4, exp( -2.847 ) ); 
+	
+	//Transition from "B1" to "C" i.e. r24
+	SetGet3< unsigned int, unsigned int, double >::set( rateTableId, 	
+									"setconst", 2, 4, exp( -0.693 ) );
+
+	//Transition from "B2" to "C" i.e. r34
+	SetGet3< unsigned int, unsigned int, double >::set( rateTableId, 
+									"setconst", 3, 4, exp( -3.101 ) );
+
+	//Once the rate tables have been set up, we can initialize the 
+	//tables in the MarkovSolver class.
+		
+	shell->doSetClock( 0, 1.0e-3 );	
+	shell->doSetClock( 1, 1.0e-3 );	
+	shell->doSetClock( 2, 1.0e-3 );	
+	shell->doSetClock( 3, 1.0e-3 );	
+
+	shell->doUseClock( "/n/compt", "init", 0 );
+	shell->doUseClock( "/n/compt", "process", 1 );
+	shell->doUseClock( "/n/compt/gslSolver,/n/compt/rateTable", "process", 2 );
+	shell->doUseClock( "/n/compt/mChanGsl,/n/gslTable", "process", 3 );
+
+	shell->doReinit();
+	shell->doReinit();
+	shell->doStart( 1.0 );
+
+	vector< double > vec = Field< vector< double > >::get( gslTableId, "vec" );
+
+/*	for ( unsigned int i = 0; i < 1001; ++i )
+		cout << vec[i] << endl;*/
+
+	shell->doDelete( nid );
 	cout << "." << flush;
 }
 
@@ -788,6 +1089,7 @@ void testMarkovSolverProcess()
 	//Initializing MarkovSolver tables.
 	SetGet1< Id >::set( solverId, "setuptable", rateTableId ); 
 
+	shell->doDelete( nid );
 	cout << "." << flush;
 }
 
@@ -1039,6 +1341,7 @@ void testBiophysics()
 	testCaConc();
 	testNernst();
 	testVectorTable();
+	testMarkovSolverBase();
 	testMarkovSolver();
 	/*
 	testBioScan();
@@ -1050,7 +1353,8 @@ void testBiophysicsProcess()
 {
 	testCompartmentProcess();
 	testHHChannel();
-	testMarkovChannel();
+//	testMarkovGslSolver();
+//	testMarkovChannel();
 //	testMarkovSolverProcess();
 //	testSynChan();
 }
