@@ -32,7 +32,7 @@ const Cinfo* MarkovSolverBase::initCinfo()
 	/////////////////////
 	static DestFinfo handleVm("handleVm", 
 			"Handles incoming message containing voltage information.",
-			new OpFunc1< MarkovRateTable, double >(&MarkovRateTable::handleVm)
+			new OpFunc1< MarkovSolverBase, double >(&MarkovSolverBase::handleVm)
 			);
 
 	static Finfo* channelShared[] = 
@@ -209,7 +209,7 @@ MarkovSolverBase::~MarkovSolverBase()
 		}
 	}
 
-	if ( !expMat_ )
+	if ( expMat_ != 0 )
 		delete expMat_;
 }
 
@@ -304,19 +304,119 @@ double MarkovSolverBase::getInvDy() const
 	return invDy_;		
 }
 
+Vector* MarkovSolverBase::bilinearInterpolate( ) const 
+{
+	bool isEndOfX, isEndOfY;
+
+	unsigned int xIndex = 
+		static_cast< unsigned int >( ( Vm_ - xMin_ ) * invDx_ );
+	unsigned int yIndex = 
+		static_cast< unsigned int >( ( ligandConc_ - yMin_ ) * invDy_ );
+
+	double xF = Vm_ - xIndex;
+	double yF = Vm_ - yIndex;
+	double xFyF = xF * yF;
+
+	( xIndex == xDivs_ ) ? isEndOfX = true : isEndOfX = false;
+	( yIndex == yDivs_ ) ? isEndOfY = true : isEndOfY = false;
+
+	vector< vector< Matrix* > >::const_iterator iExpQ0 = 
+																					expMats2d_.begin() + xIndex;
+	vector< Matrix* >::const_iterator iExpQ00 = iExpQ0->begin() + yIndex;
+	vector< Matrix* >::const_iterator iExpQ10;
+
+	Matrix* expQ00 = *iExpQ00;
+	Matrix* expQ01;
+	Matrix* expQ10;
+	Matrix* expQ11;
+
+	if ( isEndOfX ) 
+	{
+		if ( isEndOfY )
+			return vecMatMul( &state_, expQ00 );
+		else
+		{
+			expQ01 = *(iExpQ00 + 1);
+			return vecVecScalAdd( vecMatMul( &state_, expQ00 ), 
+														vecMatMul( &state_, expQ01 ),
+				 										(1 - yF), yF );
+		}
+	}
+	else
+	{
+		iExpQ10 = ( iExpQ0 + 1 )->begin() + yIndex;
+		expQ10 = *iExpQ10;
+		if ( isEndOfY )
+		{
+			return vecVecScalAdd( vecMatMul( &state_, expQ00 ),
+														vecMatMul( &state_, expQ10 ),
+														( 1 - xF ), xF );
+						
+		}
+		else
+		{
+			expQ01 = *( iExpQ00 + 1 );
+			expQ11 = *( iExpQ10 + 1 );
+
+			return vecVecScalAdd( 
+								vecVecScalAdd( 
+									vecMatMul( &state_, expQ00 ),  
+									vecMatMul( &state_, expQ10 ),
+									( 1 - xF - yF + xFyF ),
+									( xF - xFyF )
+								), 
+								vecVecScalAdd( 
+									vecMatMul( &state_, expQ01 ),
+									vecMatMul( &state_, expQ11 ),
+									( yF - xFyF ),
+									xFyF 
+								),
+								1.0, 1.0
+					);
+		}
+	}
+}
+
 //Computes the updated state of the system. Is called from the process function.
-void MarkovSolverBase::computeState()
+//This performs state space interpolation to calculate the state of the
+//channel. 
+//When a value of Vm_ and ligandConc_ is provided, we find the 4 matrix
+//exponentials that are closest to these values, and then calculate the 
+//states at each of these 4 points. We then interpolate between these
+//states to calculate the final one.
+//In case all rates are 1D, then, the above-mentioned interpolation is
+//only one-dimensional in nature.
+void MarkovSolverBase::computeState( )
 {
 	Vector* newState;
-	Matrix *expQ = computeMatrixExponential();
+	bool useBilinear = false, useLinear = false;
 
-	newState = vecMatMul( &state_, expQ);
+	if ( rateTable_->areAnyRates2d() || 
+			( rateTable_->areAllRates1d() && 
+ 			  rateTable_->areAnyRatesVoltageDep() && 
+			  rateTable_->areAnyRatesLigandDep() 
+			)  )
+	{
+		useBilinear = true;
+	}
+	else if ( rateTable_->areAllRatesVoltageDep() ||
+						rateTable_->areAllRatesLigandDep() )
+	{
+		useLinear = true;
+	}
+
+	//Heavily borrows from the Interpol2D::interpolate function.
+	if ( useBilinear ) 
+		newState = bilinearInterpolate();
+/*	else
+		newState = linearInterpolate();*/
+
 	state_ = *newState;
 
 	delete newState;
 }
 
-void MarkovSolverBase::innerFillupTable( MarkovRateTable *rateTable, 	
+void MarkovSolverBase::innerFillupTable(  	
 																		 vector< unsigned int > rateIndices,
 																		 string rateType, 
 																		 unsigned int xIndex, 
@@ -332,63 +432,89 @@ void MarkovSolverBase::innerFillupTable( MarkovRateTable *rateTable,
 		(*Q_)[i][i] += (*Q_)[i][j];
 		
 		if ( rateType.compare("2D") == 0 )
-			(*Q_)[i][j] = rateTable->lookup2dIndex( i, j, xIndex, yIndex );
+			(*Q_)[i][j] = rateTable_->lookup2dIndex( i, j, xIndex, yIndex );
 		else if ( rateType.compare("1D") == 0 )
-		{
-			if ( rateTable->isRateLigandDep( i, j ) )
-				(*Q_)[i][j] = rateTable->lookup1dIndex( i, j, yIndex );
-			else
-				(*Q_)[i][j] = rateTable->lookup1dIndex( i, j, xIndex );
-		}
+			(*Q_)[i][j] = rateTable_->lookup1dIndex( i, j, xIndex );
 		else if ( rateType.compare("constant") == 0 )
-			(*Q_)[i][j] = rateTable->lookup1dValue( i, j, 1.0 );
+			(*Q_)[i][j] = rateTable_->lookup1dValue( i, j, 1.0 );
 
 		(*Q_)[i][i] -= (*Q_)[i][j];
 	}
 }
 																		 
-void MarkovSolverBase::fillupTable( MarkovRateTable* rateTable )
+void MarkovSolverBase::fillupTable()
 {
 	double dx = (xMax_ - xMin_) / xDivs_;  			
 	double dy = (yMax_ - yMin_) / yDivs_;  			
 
-	vector< unsigned int > listOf1dRates = rateTable->getListOf1dRates();
-	vector< unsigned int > listOf2dRates = rateTable->getListOf2dRates();
+	vector< unsigned int > listOf1dRates = rateTable_->getListOf1dRates();
+	vector< unsigned int > listOf2dRates = rateTable_->getListOf2dRates();
 	vector< unsigned int > listOfConstantRates = 
-												 rateTable->getListOfConstantRates();
+												 rateTable_->getListOfConstantRates();
 
 	//Set constant rates in the Q matrix, if any.
-	innerFillupTable( rateTable, listOfConstantRates, "constant", 
+	innerFillupTable( listOfConstantRates, "constant", 
 										0.0, 0.0 ); 
 
-	if ( rateTable->areAllRatesConstant() ) 
+	//xIndex loops through all voltages, yIndex loops through all
+	//ligand concentrations.
+	if ( rateTable_->areAnyRates2d() || 
+			( rateTable_->areAllRates1d() && 
+ 			  rateTable_->areAnyRatesVoltageDep() && 
+			  rateTable_->areAnyRatesLigandDep() 
+			)  )
+	{
+		double voltage = xMin_, ligandConc = yMin_;
+
+		for ( unsigned int xIndex = 0; xIndex < xDivs_ + 1; ++xIndex )
+		{
+			ligandConc = yMin_;
+			for( unsigned int yIndex = 0; yIndex < yDivs_ + 1; ++yIndex ) 
+			{
+				innerFillupTable( listOf2dRates, "2D", xIndex, yIndex ); 
+
+				//This is a very klutzy way of updating 1D rates as the same
+				//lookup is done multiple times. But this all occurs at setup,
+				//and lookups arent that slow either. This way is also easier
+				//to maintain.
+				innerFillupTable( listOf1dRates, "1D", xIndex, yIndex ); 
+
+				expMats2d_[xIndex][yIndex] = computeMatrixExponential();
+				ligandConc += dy;
+			}
+			voltage += dx;
+		}
+	}
+	else if ( rateTable_->areAllRatesLigandDep() )
+	{
+		double x = xMin_;
+		vector< unsigned int > listOfLigandRates = 
+													rateTable_->getListOfLigandRates();
+
+		for ( unsigned int xIndex = 0; xIndex < xDivs_ + 1; ++xIndex )
+		{
+			innerFillupTable( listOfLigandRates, "1D", xIndex, 0 );
+			expMats1d_[xIndex] = computeMatrixExponential();
+			x += dx;
+		}
+	}
+	else if ( rateTable_->areAllRatesVoltageDep() )
+	{
+		double x = xMin_;
+		vector< unsigned int > listOfVoltageRates = 
+												 rateTable_->getListOfVoltageRates();
+
+		for ( unsigned int xIndex = 0; xIndex < xDivs_ + 1; ++xIndex )
+		{
+			innerFillupTable( listOfVoltageRates, "1D", xIndex, 0 );
+			expMats1d_[xIndex] = computeMatrixExponential();
+			x += dx;
+		}
+	}
+	else if ( rateTable_->areAllRatesConstant() ) 
 	{
 		expMat_ = computeMatrixExponential();
 		return;
-	}
-
-	//xIndex loops through all voltags, yIndex loops through all
-	//ligand concentrations.
-	double voltage = xMin_, ligandConc = yMin_;
-	for ( unsigned int xIndex = 0; xIndex < xDivs_ + 1; ++xIndex )
-	{
-		ligandConc = yMin_;
-		for( unsigned int yIndex = 0; yIndex < yDivs_ + 1; ++yIndex ) 
-		{
-			if ( rateTable->areAnyRates2d() )
-				innerFillupTable( rateTable, listOf2dRates, "2D", xIndex, yIndex ); 
-
-			//This is a very klutzy way of updating 1D rates as the same
-			//lookup is done multiple times. But this all occurs at setup,
-			//and lookups arent that slow either. This way is also easier
-			//to maintain.
-			if ( rateTable->areAnyRates1d() )
-				innerFillupTable( rateTable, listOf1dRates, "1D", xIndex, yIndex ); 
-
-			expMats2d_[xIndex][yIndex] = computeMatrixExponential();
-			ligandConc += dy;
-		}
-		voltage += dx;
 	}
 }
 
@@ -404,11 +530,15 @@ Matrix* MarkovSolverBase::computeMatrixExponential()
 void MarkovSolverBase::reinit( const Eref& e, ProcPtr p )
 {
 	state_ = initialState_;		
+
+	stateOut()->send( e, p, state_ );
 }
 
 void MarkovSolverBase::process( const Eref& e, ProcPtr p )
 {
-	;		
+	computeState();	
+
+	stateOut()->send( e, p, state_ );
 }
 
 void MarkovSolverBase::handleVm( double Vm )
@@ -429,24 +559,34 @@ void MarkovSolverBase::setupTable( Id rateTableId )
 																rateTableId.eref().data() );
 
 	size_ = rateTable->getSize();
-	setLookupParams( rateTable );
-
-	if ( rateTable->areAnyRates2d() )
+	rateTable_ = rateTable;
+	setLookupParams( );
+	
+	if ( rateTable->areAnyRates2d() || 
+			( rateTable->areAllRates1d() && 
+ 			  rateTable->areAnyRatesVoltageDep() && 
+			  rateTable->areAnyRatesLigandDep() 
+			)  )
 	{
 		expMats2d_.resize( xDivs_ + 1 );
 		for( unsigned int i = 0; i < xDivs_ + 1; ++i )
 			expMats2d_[i].resize( yDivs_ + 1);
 	}
-	else if ( rateTable->areAnyRates1d() )
+	else if ( rateTable->areAllRatesLigandDep() ||
+						rateTable->areAllRatesVoltageDep() )
+	{
 		expMats1d_.resize( xDivs_ + 1);
+	}
 	else	//All rates must be constant.
+	{
 		expMat_ = matAlloc( size_ );
+	}
 
 	//Initializing Q.
 	Q_ = matAlloc( size_ );		
 
 	//Fills up the newly setup tables with exponentials.
-	fillupTable( rateTable ); 
+	fillupTable( ); 
 }
 
 ////////////////
@@ -465,54 +605,76 @@ void MarkovSolverBase::setupTable( Id rateTableId )
 //If all the rates are constant, then all these values remain unchanged
 //from the time the MarkovSolverBase object was constructed i.e. all are zero.
 ///////////////
-void MarkovSolverBase::setLookupParams( MarkovRateTable* rateTable )
+void MarkovSolverBase::setLookupParams( )
 {
-	if ( rateTable->areAnyRates1d() )
+	if ( rateTable_->areAnyRates1d() )
 	{
-		vector< unsigned int > listOf1dRates = rateTable->getListOf1dRates();
+		vector< unsigned int > listOfLigandRates 
+														= rateTable_->getListOfLigandRates();
+		vector< unsigned int > listOfVoltageRates
+														= rateTable_->getListOfVoltageRates();
+
 		double temp;
+		double yMax = DBL_MIN, yMin = DBL_MAX;
+	 	unsigned int yDivs = 0u;
 		unsigned int divs, i, j;
 
-		for( unsigned int k = 0; k < listOf1dRates.size(); ++k )
+		for( unsigned int k = 0; k < listOfLigandRates.size(); ++k )
 		{
-			i = ( ( listOf1dRates[k] / 10 ) % 10 ) - 1;
-			j = ( listOf1dRates[k] % 10 ) - 1;
+			i = ( ( listOfLigandRates[k] / 10 ) % 10 ) - 1;
+			j = ( listOfLigandRates[k] % 10 ) - 1;
 
-			temp = rateTable->getVtChildTable( i, j )->getMin();
+			temp = rateTable_->getVtChildTable( i, j )->getMin();
+			if ( yMin > temp )
+				yMin = temp;
 
-			if ( !rateTable->isRateLigandDep( i, j ) )
-			{
-				if ( xMin_ > temp )
-					xMin_ = temp;
-			}
-			else 
-				yMin_ = temp;
+			temp = rateTable_->getVtChildTable( i, j )->getMax();
+			if ( yMax < temp )
+				yMax = temp;
 
-			temp = rateTable->getVtChildTable( i, j )->getMax();
-			if ( !rateTable->isRateLigandDep( i, j ) )
-			{
-				if ( xMax_ < temp )
-					xMax_ = temp;
-			}
-			else
-				yMax_ = temp;
-
-			divs = rateTable->getVtChildTable( i, j )->getDiv();
-			if ( !rateTable->isRateLigandDep( i, j ) )
-			{
-				if ( xDivs_ < divs )
-					xDivs_ = divs;
-			}
-			else
-				yDivs_ = divs;
+			divs = rateTable_->getVtChildTable( i, j )->getDiv();
+			if ( yDivs < divs )
+				yDivs = divs;
 		}
 
-		invDx_ = xDivs_ / ( xMax_ - xMin_ );
+		if ( ( rateTable_->areAllRatesLigandDep() && 
+					 rateTable_->areAllRates1d() ) )
+		{
+			xMin_ = yMin;
+			xMax_ = yMax;
+			xDivs_ = yDivs;
+			invDx_ = yDivs / ( yMax - yMin );
+		}
+		else
+		{
+			yMin_= yMin;
+			yMax_ = yMax;
+			yDivs_ = yDivs;
+			invDy_ = yDivs / ( yMax - yMin );
+		}
+
+		for( unsigned int k = 0; k < listOfVoltageRates.size(); ++k )
+		{
+			i = ( ( listOfVoltageRates[k] / 10 ) % 10 ) - 1;
+			j = ( listOfVoltageRates[k] % 10 ) - 1;
+
+			temp = rateTable_->getVtChildTable( i, j )->getMin();
+			if ( xMin_ > temp )
+				xMin_ = temp;
+
+			temp = rateTable_->getVtChildTable( i, j )->getMax();
+			if ( xMax_ < temp )
+				xMax_ = temp;
+
+			divs = rateTable_->getVtChildTable( i, j )->getDiv();
+			if ( xDivs_ < divs )
+				xDivs_ = divs;
+		}
 	}
 
-	if ( rateTable->areAnyRates2d() )
+	if ( rateTable_->areAnyRates2d() )
 	{
-		vector< unsigned int > listOf2dRates = rateTable->getListOf2dRates();
+		vector< unsigned int > listOf2dRates = rateTable_->getListOf2dRates();
 		double temp;
 		unsigned int divs, i, j;
 
@@ -521,27 +683,27 @@ void MarkovSolverBase::setLookupParams( MarkovRateTable* rateTable )
 			i = ( ( listOf2dRates[k] / 10 ) % 10 ) - 1;
 			j = ( listOf2dRates[k] % 10 ) - 1;
 
-			temp = rateTable->getInt2dChildTable( i, j )->getXmin();
+			temp = rateTable_->getInt2dChildTable( i, j )->getXmin();
 			if ( xMin_ > temp )
 				xMin_ = temp;
 
-			temp = rateTable->getInt2dChildTable( i, j )->getXmax();
+			temp = rateTable_->getInt2dChildTable( i, j )->getXmax();
 			if ( xMax_ < temp )
 				xMax_ = temp;
 
-			temp = rateTable->getInt2dChildTable( i, j )->getYmin();
+			temp = rateTable_->getInt2dChildTable( i, j )->getYmin();
 			if ( yMin_ > temp )
 				yMin_ = temp;
 
-			temp = rateTable->getInt2dChildTable( i, j )->getYmax();
+			temp = rateTable_->getInt2dChildTable( i, j )->getYmax();
 			if ( yMax_ < temp )
 				yMax_ = temp;
 
-			divs = rateTable->getInt2dChildTable( i, j )->getXdivs();
+			divs = rateTable_->getInt2dChildTable( i, j )->getXdivs();
 			if ( xDivs_ < divs )
 				xDivs_ = divs;
 
-			divs = rateTable->getInt2dChildTable( i, j )->getYdivs();
+			divs = rateTable_->getInt2dChildTable( i, j )->getYdivs();
 			if ( yDivs_ < divs )
 				yDivs_ = divs;
 		}
@@ -550,3 +712,213 @@ void MarkovSolverBase::setLookupParams( MarkovRateTable* rateTable )
 		invDy_ = yDivs_ / ( yMax_ - yMin_ );
 	}
 }
+
+#ifdef DO_UNIT_TESTS
+void setupInterpol2D( Interpol2D* table, unsigned int xDivs, double xMin, 
+								double xMax, unsigned int yDivs, double yMin, double yMax )
+{
+	table->setXdivs( xDivs );
+	table->setXmin( xMin );
+	table->setXmax( xMax );
+	table->setYdivs( yDivs );
+	table->setYmin( yMin );
+	table->setYmax( yMax );
+}
+
+void setupVectorTable( VectorTable* table, unsigned int xDivs, double xMin,
+												double xMax )	
+{
+	table->setDiv( xDivs );
+	table->setMin( xMin );
+	table->setMax( xMax );
+}
+
+//3-state Markov Channel.
+//Simple tests on whether the exponential lookup tables are being set
+//to the correct size and the lookup function tests.
+void testMarkovSolverBase()
+{
+
+	const Cinfo* rateTableCinfo = MarkovRateTable::initCinfo();
+	const Cinfo* interpol2dCinfo = Interpol2D::initCinfo();
+	const Cinfo* vectorTableCinfo = VectorTable::initCinfo();
+	const Cinfo* solverBaseCinfo = MarkovSolverBase::initCinfo();
+
+	Id vecTableId = Id::nextId();
+	Id int2dId = Id::nextId();
+
+	vector< Id > rateTableIds;
+	vector< Id > solverBaseIds;
+
+	vector< Element* > rateTableElements;
+	vector< Eref* > rateTableErefs;
+
+	vector< Element* > solverBaseElements;
+	vector< Eref* > solverBaseErefs;
+
+	vector< MarkovRateTable* > rateTables;
+	vector< MarkovSolverBase* > solverBases;
+
+	vector< unsigned int > single( 1, 1 );
+	string str;
+
+	unsigned int numCopies = 4;
+
+	for ( unsigned int i = 0; i < numCopies; ++i )
+	{
+		rateTableIds.push_back( Id::nextId() );
+		str = string("ratetable") + static_cast< char >( 65 + i );
+		rateTableElements.push_back( new Element( rateTableIds[i], rateTableCinfo, 
+																		str, single, 1 ) );
+		rateTableErefs.push_back( new Eref( rateTableElements[i], 0 ) );
+		rateTables.push_back( reinterpret_cast< MarkovRateTable* >(
+															rateTableErefs[i]->data() ) );
+
+		solverBaseIds.push_back( Id::nextId() );
+		str = string("solverbase") + static_cast< char >( 65 + i );
+		solverBaseElements.push_back( new Element( solverBaseIds[i], solverBaseCinfo,
+																	str, single, 1 ) );
+		solverBaseErefs.push_back( new Eref( solverBaseElements[i], 0 ) );
+		solverBases.push_back( reinterpret_cast< MarkovSolverBase* >(
+															solverBaseErefs[i]->data() ) );				
+	}
+
+	Element *eInt2d = new Element( int2dId, interpol2dCinfo, "int2d", single, 1 );
+	Element *eVecTable = new Element( vecTableId, vectorTableCinfo, "vecTable",
+																		single, 1 );
+
+	Interpol2D *int2dTable;
+	VectorTable* vecTable;
+
+	Eref int2dEref( eInt2d, 0 );
+	int2dTable = reinterpret_cast< Interpol2D* >( int2dEref.data() );
+
+	Eref vecTableEref( eVecTable, 0 );
+	vecTable = reinterpret_cast< VectorTable* >( vecTableEref.data() );
+
+	//////////////////////////////
+	//ratetables[0]		//Only 2D rates.
+	//ratetables[1]		//1D and 2D rates.
+	//ratetables[2]		//Only ligand dependent rates.
+	//ratetables[3]  	//Only voltage dependent rates.
+	//////////////////////////////
+
+	////////
+	//Case 1 :
+	//Rates (1,2) and (2,3) are ligand and voltage dependent.
+	///////
+	rateTables[0]->setupTables( 3 );
+
+	setupInterpol2D( int2dTable, 201, -0.05, 0.10, 151, 1e-9, 50e-9 );
+	rateTables[0]->setInt2dChildTable( 1, 2, int2dId );
+
+	setupInterpol2D( int2dTable, 175, -0.02, 0.19, 151, 3e-9, 75e-9 );
+	rateTables[0]->setInt2dChildTable( 2, 3, int2dId );
+
+	solverBases[0]->setupTable( rateTableIds[0] );
+	
+	assert( solverBases[0]->getXdivs() == 201 );
+	assert( doubleEq( solverBases[0]->getXmin(), -0.05 ) ); 
+	assert( doubleEq( solverBases[0]->getXmax(), 0.19 ) );
+	assert( solverBases[0]->getYdivs() == 151 );
+	
+	//1D and 2D rates.
+	rateTables[1]->setupTables( 5 );	
+
+	///////
+	//Case 2 :
+	//Rates (1,2) and (1,3) are ligand and voltage dependent.
+	//Rates (2,1) and (3,1) are voltage and ligand dependent respectively.
+	//////
+	setupInterpol2D( int2dTable, 250, -0.10, 0.75, 101, 10e-9, 25e-8 );
+	rateTables[1]->setInt2dChildTable( 1, 2, int2dId );
+
+	setupInterpol2D( int2dTable, 275, -0.05, 0.55, 141, 5e-9, 40e-7 );
+	rateTables[1]->setInt2dChildTable( 1, 3, int2dId );
+
+	//Voltage dependent.
+	setupVectorTable( vecTable, 145, -0.17, 0.73 );
+	rateTables[1]->setVtChildTable( 2, 1, vecTableId, 0 );
+
+	//Ligand dependent
+	setupVectorTable( vecTable, 375, 7e-9, 75e-7 );
+	rateTables[1]->setVtChildTable( 3, 1, vecTableId, 1 );
+
+	solverBases[1]->setupTable( rateTableIds[1] );
+
+	assert( solverBases[1]->getXdivs() == 275 ); 
+	assert( solverBases[1]->getYdivs() == 375 );
+	assert( doubleEq( solverBases[1]->getXmin(), -0.17 ) );
+	assert( doubleEq( solverBases[1]->getXmax(), 0.75 ) );
+	assert( doubleEq( solverBases[1]->getYmin(), 5e-9 ) );
+	assert( doubleEq( solverBases[1]->getYmax(), 75e-7 ) );
+
+	////////
+	//Case 3 : Only ligand dependent rates.
+	//Rates (1, 2), (3, 5), (2, 4), (4, 1).
+	///////
+
+	rateTables[2]->setupTables( 5 );
+		
+	setupVectorTable( vecTable, 155, 7e-9, 50e-9 );
+	rateTables[2]->setVtChildTable( 1, 2, vecTableId, 1 );
+
+	setupVectorTable( vecTable, 190, 4e-9, 35e-9 ); 
+	rateTables[2]->setVtChildTable( 3, 5, vecTableId, 1 );
+
+	setupVectorTable( vecTable, 120, 7e-9, 90e-9 );
+	rateTables[2]->setVtChildTable( 2, 4, vecTableId, 1 );
+
+	setupVectorTable( vecTable, 250, 10e-9, 100e-9 );
+	rateTables[2]->setVtChildTable( 4, 1, vecTableId, 1 );
+
+	solverBases[2]->setupTable( rateTableIds[2] );
+
+	assert( doubleEq( 1e-308 * solverBases[2]->getYmin(), 1e-308 * DBL_MAX ) );
+	assert( doubleEq( 1e308 * solverBases[2]->getYmax(), 1e308 * DBL_MIN ) );
+	assert( solverBases[2]->getYdivs() == 0u );
+
+	assert( doubleEq( solverBases[2]->getXmin(), 4e-9 ) );
+	assert( doubleEq( solverBases[2]->getXmax(), 100e-9 ) );
+	assert( solverBases[2]->getXdivs() == 250 );
+
+	///////
+	//Case 4 : Only voltage dependent rates.
+	//Rates (3,6), (5, 6), (1, 4). 
+	//////
+
+	rateTables[3]->setupTables( 7 );
+
+	setupVectorTable( vecTable, 100, -0.05, 0.1 );
+	rateTables[3]->setVtChildTable( 3, 6, vecTableId, 1 );
+
+	setupVectorTable( vecTable, 190, -0.15, 0.2 );
+	rateTables[3]->setVtChildTable( 5, 6, vecTableId, 1 );
+
+	setupVectorTable( vecTable, 140, -0.2, 0.1 );
+	rateTables[3]->setVtChildTable( 1, 4, vecTableId, 1 );
+
+	solverBases[3]->setupTable( rateTableIds[3] );
+
+	assert( doubleEq( 1e-308 * solverBases[3]->getYmin(), 1e-308 * DBL_MAX ) );
+	assert( doubleEq( 1e308 * solverBases[3]->getYmax(), 1e308 * DBL_MIN ) );
+	assert( solverBases[3]->getYdivs() == 0u );
+
+	assert( doubleEq( solverBases[3]->getXmin(), -0.2 ) );
+	assert( doubleEq( solverBases[3]->getXmax(), 0.2 ) );
+	assert( solverBases[3]->getXdivs() == 190 );
+
+	for ( unsigned int i = 0; i < numCopies; ++i )
+	{
+		rateTableIds[i].destroy();
+		solverBaseIds[i].destroy();
+		delete rateTableErefs[i];
+		delete solverBaseErefs[i];
+	}
+
+	int2dId.destroy();
+	vecTableId.destroy();
+
+	cout << "." << flush;
+}
+#endif

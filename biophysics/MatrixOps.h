@@ -57,14 +57,14 @@ void triMatMul( Matrix*, Matrix* );
 void matPermMul( Matrix*, vector< unsigned int >* );
 
 //Computes sum of two square matrices.
-Matrix* matMatAdd( Matrix*, Matrix*, double, double );
+Matrix* matMatAdd( const Matrix*, const Matrix*, double, double );
 
 //Version 2 : Returns the result in either of the matrices that are passed as
 //arguments.
 void matMatAdd( Matrix*, Matrix*, double, double, unsigned int );
 
 //Adds k*I to given matrix. Original is intact.
-Matrix* matEyeAdd( Matrix*, double );
+Matrix* matEyeAdd( const Matrix*, double );
 
 //Version 2 : Returns the matrix in first argument i.e. original is destroyed.
 void matEyeAdd( Matrix*, double, unsigned int );
@@ -72,20 +72,26 @@ void matEyeAdd( Matrix*, double, unsigned int );
 //Computes the result of multiplying all terms of a matrix by a scalar and then
 //adding another scalar i.e. B = a*A + b.
 //First argument is scale i.e. 'a' and second argument is shift i.e. 'b'.
-Matrix* matScalShift( Matrix*, double, double );
+Matrix* matScalShift( const Matrix*, double, double );
 
 void matScalShift( Matrix*, double, double, unsigned int );
 
 //Computes the result of multiplying a row vector with a matrix (in that order).
-Vector* vecMatMul( Vector*, Matrix* );
+Vector* vecMatMul( const Vector*, Matrix* );
+
+//Computes the result of scaling and shifting a vector.
+Vector* vecScalShift( const Vector*, double, double );
+
+void vecScalShift( Vector*, double, double, unsigned int );
 
 //Computes the result of multiplying a matrix with a column vector (in that order).
 Vector* matVecMul( Matrix*, Vector* );
 
-//Computes the result of alpha*x + beta*y, where x and y are vectors. This is a 
-//helper function for the matInv function. The result is stored in the 
-//first argument.  
-//void vecVecScalAdd( Matrix::iterator&, Matrix::iterator&, double, double );
+//Computes the sum of two vectors.
+Vector* vecVecScalAdd( const Vector*, const Vector*, double, double );
+
+//Version 2 : Returns the result in the first vector.
+void vecVecScalAdd( Vector*, Vector*, double, double, unsigned int );
 
 //Trace of matrix.
 double matTrace( Matrix* );

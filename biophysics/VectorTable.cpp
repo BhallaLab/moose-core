@@ -119,10 +119,7 @@ double VectorTable::lookupByValue( double x ) const
 double VectorTable::lookupByIndex( unsigned int index ) const
 {
 	if ( tableIsEmpty() )
-	{
-		cerr << "Cannot look up table by index as table is empty. Returning zero.\n";
 		return 0;
-	}
 
 	//Applying similar wrapping as is done in lookupByValue.
 	if ( index < 0 )
@@ -138,7 +135,7 @@ vector< double > VectorTable::getTable() const
 {
 	if ( table_.size() == 0 )
 	{
-		cerr << "Warning : Table is empty\n";
+		cerr << "VectorTable::getTable : Warning : Table is empty\n";
 	}
 
 	return table_;
@@ -151,14 +148,14 @@ void VectorTable::setTable( vector< double > table )
 {
 	if ( table.size() > 1 && xMin_ == xMax_ )
 	{
-		cerr << "Error : xmin and xmax cannot be the same when there are more than "
+		cerr << "VectorTable::setTable : Error : xmin and xmax cannot be the same when there are more than "
 			"two entries in the table!\n";
 		return;
 	}
 
 	if ( table.empty() )
 	{
-		cerr << "Error : Cannot set with empty table!\n";
+		cerr << "VectorTable::setTable : Error : Cannot set with empty table!\n";
 		return;
 	}
 
