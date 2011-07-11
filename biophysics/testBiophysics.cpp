@@ -25,6 +25,8 @@ extern void testMarkovRateTable(); //Defined in MarkovRateTable.cpp
 extern void testVectorTable();	//Defined in VectorTable.cpp
 extern void testMarkovSolverBase();	//Defined in MarkovSolverBase.cpp
 extern void testMarkovSolver();		//Defined in MarkovSolver.cpp
+extern void testLeakyIaF(); // Defined in LeakyIaF.cpp
+
 /*
 extern void testSynChan(); // Defined in SynChan.cpp
 extern void testBioScan(); // Defined in BioScan.cpp
@@ -1357,6 +1359,7 @@ void testBiophysicsProcess()
 //	testMarkovChannel();
 //	testMarkovSolverProcess();
 //	testSynChan();
+        testLeakyIaF();
 }
 
 #endif

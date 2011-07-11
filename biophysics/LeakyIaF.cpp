@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Thu Jul  7 12:16:55 2011 (+0530)
 // Version: 
-// Last-Updated: Fri Jul  8 15:38:26 2011 (+0530)
+// Last-Updated: Mon Jul 11 15:08:36 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 110
+//     Update #: 168
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -31,6 +31,8 @@
 #include <cfloat>
 
 #include "header.h"
+#include "../utility/numutil.h"
+
 #include "LeakyIaF.h"
 
 static SrcFinfo1< double >* spike() {
@@ -333,6 +335,52 @@ void LeakyIaF::reinit(const Eref& eref, ProcPtr proc)
     tSpike_ = -DBL_MAX;
     VmOut()->send(eref, proc, Vm_);
 }
+
+///////////////////////////////////////////////////////////////////////////
+
+#ifdef DO_UNIT_TESTS
+
+void testLeakyIaF()
+{
+    const Cinfo * leakyIaFCinfo = LeakyIaF::initCinfo();
+    Id leakyIaFId = Id::nextId();
+    vector<unsigned int> dims(1, 1);
+    Element * elem = new Element(leakyIaFId, leakyIaFCinfo, "LeakyIaF", dims, 1);
+    assert(elem != 0);
+    Eref eref(elem, 0);
+    LeakyIaF* instance_ptr = reinterpret_cast<LeakyIaF*>(eref.data());
+    ProcInfo proc;
+    instance_ptr->setVm(-0.70);
+    assert(almostEqual(instance_ptr->getVm(), -0.70));
+    instance_ptr->setRm(1.0);
+    assert(almostEqual(instance_ptr->getRm(), 1.0));
+    instance_ptr->setCm(1.0);
+    assert(almostEqual(instance_ptr->getCm(), 1.0));    
+    instance_ptr->setInitVm(-0.65);
+    assert(almostEqual(instance_ptr->getInitVm(), -0.65));    
+    instance_ptr->setVreset(-0.65);
+    assert(almostEqual(instance_ptr->getVreset(), -0.65));    
+    instance_ptr->setVthreshold(-0.40);
+    assert(almostEqual(instance_ptr->getVthreshold(), -0.40));    
+    instance_ptr->setEm(-0.65);
+    assert(almostEqual(instance_ptr->getEm(), -0.65));    
+    double delta = 0.0;
+    double Vm = 0.0;
+    proc.dt = 0.002;
+    instance_ptr->reinit(eref, &proc);
+    assert(almostEqual(instance_ptr->getVm(), instance_ptr->getInitVm()));
+    for (proc.currTime = 0.0; proc.currTime < 2.0; proc.currTime += proc.dt)
+    {
+        Vm = instance_ptr->getVm();
+        double x = (instance_ptr->getEm() - instance_ptr->getVm()) / instance_ptr->getRm();
+        instance_ptr->process(eref, &proc);
+        delta += instance_ptr->getVm() - Vm - x;
+    }
+    assert(almostEqual(delta, 0.0));
+    cout << "." << flush;
+}
+
+#endif //! DO_UNIT_TESTS
 
 // 
 // LeakyIaF.cpp ends here
