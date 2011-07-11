@@ -44,6 +44,8 @@ OBJ = \
 
 HEADERS = \
 	../basecode/header.h \
+	../utility/numutil.h \
+
 
 default: $(TARGET)
 
