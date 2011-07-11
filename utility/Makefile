@@ -8,10 +8,12 @@ OBJ = \
 	strutil.o	\
 	types.o 	\
 	setupenv.o	\
+	numutil.o	\
 
 
 HEADERS = \
-	strutil.h \
+	strutil.h 	\
+	numutil.h	\
 
 default: $(TARGET)
 
