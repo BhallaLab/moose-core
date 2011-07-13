@@ -394,6 +394,41 @@ Vector* MarkovSolverBase::bilinearInterpolate( ) const
 	return result;
 }
 
+Vector* MarkovSolverBase::linearInterpolate() const
+{
+	double x;
+
+	if ( rateTable_->areAllRatesVoltageDep() )
+		x = Vm_;
+	else
+		x = ligandConc_;
+
+	if ( x < xMin_ )
+		return vecMatMul( &state_, expMats1d_[0] ); 
+	else if ( x > xMax_ )
+		return vecMatMul( &state_, expMats1d_.back() );
+
+	unsigned int xIndex = static_cast< unsigned int >( ( x - xMin_) * invDx_ );
+
+	double xv = ( x - xMin_ ) * invDx_;
+	double xF = xv - xIndex;
+
+	vector< Matrix* >::const_iterator iExpQ = 
+																					expMats1d_.begin() + xIndex;
+
+	Vector *state0, *state1, *result;
+
+	state0 = vecMatMul( &state_, *iExpQ );
+	state1 = vecMatMul( &state_, *( iExpQ + 1 ) );
+
+	result = vecVecScalAdd( state0, state1, 1 - xF, xF ); 
+
+	delete state0;
+	delete state1;
+
+	return result;
+}
+
 //Computes the updated state of the system. Is called from the process function.
 //This performs state space interpolation to calculate the state of the
 //channel. 
@@ -425,8 +460,8 @@ void MarkovSolverBase::computeState( )
 	//Heavily borrows from the Interpol2D::interpolate function.
 	if ( useBilinear ) 
 		newState = bilinearInterpolate();
-/*	else
-		newState = linearInterpolate();*/
+	else
+		newState = linearInterpolate();
 
 	state_ = *newState;
 
