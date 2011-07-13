@@ -48,7 +48,9 @@ class MarkovSolver : public MarkovSolverBase {
 	/////////////
 	//Unit test
 	////////////
+	#ifdef DO_UNIT_TESTS
 	friend void testMarkovSolver();
+	#endif
 
 	private :
 };

@@ -114,7 +114,7 @@ class MarkovSolverBase {
 
 	//Takes the Id of a MarkovRateTable object to initialize the table of matrix
 	//exponentials. 
-	void setupTable( Id );
+	void init( Id );
 
 	static const Cinfo* initCinfo();
 	
@@ -128,6 +128,13 @@ class MarkovSolverBase {
 	protected : 
 	//The instantaneous rate matrix.
 	Matrix *Q_;
+
+	#ifdef DO_UNIT_TESTS
+	//Allows us to set Vm_ and ligandConc_ for the state space interpolation
+	//unit test in the MarkovSolver class.
+	void setVm( double );
+	void setLigandConc( double );
+	#endif
 
 	private :
 	//////////////
