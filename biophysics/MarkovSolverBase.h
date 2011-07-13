@@ -114,7 +114,7 @@ class MarkovSolverBase {
 
 	//Takes the Id of a MarkovRateTable object to initialize the table of matrix
 	//exponentials. 
-	void init( Id );
+	void init( Id, double );
 
 	static const Cinfo* initCinfo();
 	
@@ -205,6 +205,10 @@ class MarkovSolverBase {
 	double Vm_;
 	//Ligand concentration.
 	double ligandConc_;
+
+	//Time step in simulation. The state at t = (t0 + dt) is given by
+	//exp( A * dt ) * [state at t = t0 ].
+	double dt_;
 };
 //End of class definition.
 #endif
