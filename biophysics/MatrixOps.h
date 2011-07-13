@@ -35,6 +35,8 @@ typedef vector< double > Vector;
 //Just a debug function to print the matrix.
 void matPrint( Matrix* );
 
+void vecPrint( Vector* );
+
 //Computes product of two square matrices.  
 //Version 1 : Returns the result in a new matrix.
 Matrix* matMatMul( Matrix*, Matrix* ); 

@@ -52,7 +52,7 @@ const Cinfo* MarkovGslSolver::initCinfo()
 			&MarkovGslSolver::setInternalDt,
 			&MarkovGslSolver::getInternalDt
 		);
-
+		
 		///////////////////////////////////////////////////////
 		// DestFinfo definitions
 		///////////////////////////////////////////////////////
@@ -317,10 +317,6 @@ void MarkovGslSolver::process( const Eref& e, ProcPtr info )
 	for ( unsigned int i = 0; i < nVars_; ++i )
 		state_[i] = stateGsl_[i];
 
-/*	cout << "\nt = " << info->currTime << endl;
-	for ( unsigned int i = 0; i < nVars_; ++i ) 
-		cout << state_[i] << " ";
-	cout << "\n";*/
 	stateOut()->send( e, info, state_ );
 }
 

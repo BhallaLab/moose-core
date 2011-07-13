@@ -69,9 +69,9 @@ const Cinfo* MarkovRateTable::initCinfo()
 		processShared, sizeof( processShared ) / sizeof( Finfo* )
 	);
 
-	static DestFinfo setuptables("setuptables",
+	static DestFinfo init("init",
 			"Initialization of the class. Allocates memory for all the tables.",
-			new OpFunc1< MarkovRateTable, unsigned int >(&MarkovRateTable::setupTables) );
+			new OpFunc1< MarkovRateTable, unsigned int >(&MarkovRateTable::init) );
 
 	static DestFinfo handleLigandConc("handleLigandConc",
 			"Handles incoming message containing ligand concentration.",
@@ -132,7 +132,7 @@ const Cinfo* MarkovRateTable::initCinfo()
 		&channel,						//SharedFinfo
 		instRatesOut(),			//SrcFinfo
 		&proc,							//DestFinfo
-		&setuptables,				//DestFinfo
+		&init,							//DestFinfo
 		&handleLigandConc,	//DestFinfo
 		&set1d,							//DestFinfo
 		&set2d,							//DestFinfo
@@ -486,7 +486,9 @@ void MarkovRateTable::updateRates()
 		if ( isRateLigandDep( i, j ) )
 			Q_[i][j] = lookup1dValue( i, j, ligandConc_ );
 		else
+		{
 			Q_[i][j] = lookup1dValue( i, j, Vm_ );
+		}
 
 		//Ensures that the row sums to zero.
 		if ( !doubleEq( temp, Q_[i][j] ) )
@@ -597,8 +599,6 @@ void MarkovRateTable::process( const Eref& e, ProcPtr info )
 	if ( !areAllRatesConstant() ) 
 		updateRates();
 
-	//Sending the whole matrix out seems a bit like overkill, as only a few rates
-	//may vary. Would using a sparse representation speed things up? 
 	instRatesOut()->send( e, info, Q_ );
 }
 
@@ -616,7 +616,7 @@ void MarkovRateTable::reinit( const Eref& e, ProcPtr info )
 ////////////////////////////
 //MsgDest functions.
 ///////////////////////////
-void MarkovRateTable::setupTables( unsigned int size )
+void MarkovRateTable::init( unsigned int size )
 {
 	size_ = size;
 
