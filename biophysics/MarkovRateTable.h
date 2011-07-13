@@ -151,7 +151,7 @@ class MarkovRateTable {
 	void reinit( const Eref&, ProcPtr );	
 
 	//Initialization of object.
-	void setupTables( unsigned int );
+	void init( unsigned int );
 
 	//Handling incoming messages containing voltage and concentration information.
 	void handleVm( double );	
@@ -198,6 +198,11 @@ class MarkovRateTable {
 	//channels are the only destinations for Vm and conc. 
 	double Vm_;
 	double ligandConc_;
+
+	//Time step of simulation. The rates are specified in sec^(-1). All the rates 
+	//have to be proportionally scaled for an arbitrary time step.
+	//Is not a MOOSE field, and does not need an explicit setup call either.  
+	//It is set during the call to reinit. 
 
 	unsigned int size_;
 

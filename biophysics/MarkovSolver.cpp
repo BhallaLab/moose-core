@@ -381,7 +381,110 @@ void testMarkovSolver()
 		delete expQ;
 	}
 
+	/////////////////
+	//Testing state space interpolation.
+	////////////////
+	const Cinfo* rateTableCinfo = MarkovRateTable::initCinfo();
+	const Cinfo* interpol2dCinfo = Interpol2D::initCinfo();
+	const Cinfo* vectorTableCinfo = VectorTable::initCinfo();
+	const Cinfo* markovSolverCinfo = MarkovSolver::initCinfo();
+
+	vector< unsigned int > single( 1, 1 );
+
+	Id rateTableId = Id::nextId();
+	Id int2dId = Id::nextId();
+	Id vecTableId = Id::nextId();
+	Id solverId = Id::nextId();
+
+	Element *eRateTable = new Element( rateTableId, rateTableCinfo, "rateTable",
+																		 single, 1 );
+	Element *eInt2d = new Element( int2dId, interpol2dCinfo, "int2d", single, 1 );
+	Element *eVecTable = new Element( vecTableId, vectorTableCinfo, "vecTable", 
+																		single, 1 );
+	Element *eSolver = new Element( solverId, markovSolverCinfo, "solver", 
+		 																single, 1 );	
+																		 
+	Eref rateTableEref( eRateTable, 0 );
+	Eref int2dEref( eInt2d, 0 );
+	Eref vecTableEref( eVecTable, 0 );
+	Eref solverEref( eSolver, 0 );
+
+	vector< double > table1d;
+	vector< vector< double > > table2d;
+	double v, conc;
+
+	MarkovRateTable* rateTable = reinterpret_cast< MarkovRateTable* >
+																( rateTableEref.data() );
+	VectorTable* vecTable = reinterpret_cast< VectorTable* >
+																( vecTableEref.data() );
+	Interpol2D* int2d = reinterpret_cast< Interpol2D* >
+																( int2dEref.data() );
+	MarkovSolver* markovSolver = reinterpret_cast< MarkovSolver* >
+																( solverEref.data() );
+
+	rateTable->init( 3 );
+
+	vecTable->setMin( -0.10 );
+	vecTable->setMax( 0.10 );
+	vecTable->setDiv( 200 );
+
+	v = vecTable->getMin(); 
+	for ( unsigned int i = 0; i < 201; ++i )
+	{
+		table1d.push_back( 1e3 * exp( 9 * v - 0.45 ) );
+		v += 0.001;
+	}
+
+	vecTable->setTable( table1d );
+
+	rateTable->setVtChildTable( 1, 3, vecTableId, 0 );
+
+	int2d->setXmin( -0.10 );
+	int2d->setXmax( 0.10 );
+	int2d->setYmin( 0 );
+	int2d->setYmax( 50e-6 );
+
+	v = int2d->getXmin();
+	table2d.resize( 201 );
+	for ( unsigned int i = 0; i < 201; ++i )
+	{
+		conc = int2d->getYmin();
+		for ( unsigned int j = 0; j < 50; ++j )
+		{
+			table2d[i].push_back( 1e3 * conc * exp( -45 * v + 0.65 ) );
+			conc += 1e-6;
+		}
+		v += 0.001;
+	}
+
+	int2d->setTableVector( table2d );
+
+	rateTable->setInt2dChildTable( 2, 3, int2dId );
+
+	rateTable->setConstantRate( 3, 1, 0.652 );
+	rateTable->setConstantRate( 2, 1, 1.541 );
+
+	markovSolver->init( rateTableId );
+	
+	markovSolver->setVm( 0.0533 );
+	markovSolver->setLigandConc( 3.41e-6 );
+
+	Vector initState;
+
+	initState.push_back( 0.2 );
+	initState.push_back( 0.4 );
+	initState.push_back( 0.4 );
+
+	markovSolver->setInitialState( initState );
+	markovSolver->computeState();
+
+	Vector interpState = markovSolver->getState();
+
+	rateTableId.destroy();
+	int2dId.destroy();
+	vecTableId.destroy();
+	solverId.destroy();
+
 	cout << "." << flush;
 }
-
- #endif
+#endif

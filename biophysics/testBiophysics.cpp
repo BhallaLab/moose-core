@@ -25,8 +25,6 @@ extern void testMarkovRateTable(); //Defined in MarkovRateTable.cpp
 extern void testVectorTable();	//Defined in VectorTable.cpp
 extern void testMarkovSolverBase();	//Defined in MarkovSolverBase.cpp
 extern void testMarkovSolver();		//Defined in MarkovSolver.cpp
-extern void testLeakyIaF(); // Defined in LeakyIaF.cpp
-
 /*
 extern void testSynChan(); // Defined in SynChan.cpp
 extern void testBioScan(); // Defined in BioScan.cpp
@@ -616,7 +614,7 @@ void testMarkovGslSolver()
 	Field< vector< double > >::set( mChanId, "gbar", gBars );
 
 	//Setting up rate tables.
-	SetGet1< unsigned int >::set( rateTabId, "setuptables", 5 );
+	SetGet1< unsigned int >::set( rateTabId, "init", 5 );
 
 	//Filling in values into one parameter rate table. Note that all rates here
 	//are constant.
@@ -643,7 +641,7 @@ void testMarkovGslSolver()
 
 	//Setting initial state of the solver. Once this is set, the solver object
 	//will send out messages containing the updated state to the channel object.  
-	SetGet1< vector< double > >::set( gslSolverId, "setinitstate", initState );
+	SetGet1< vector< double > >::set( gslSolverId, "init", initState );
 		
 	shell->doSetClock( 0, 1.0e-5 );	
 	shell->doSetClock( 1, 1.0e-5 );	
@@ -790,9 +788,9 @@ void testMarkovChannel()
 	Field< double >::set( comptId, "Cm", 0.007854e-6 );
 	Field< double >::set( comptId, "Ra", 7639.44e3 ); // does it matter?
 	Field< double >::set( comptId, "Rm", 424.4e3 );
-	Field< double >::set( comptId, "Em", EREST + 0.02 );	
+	Field< double >::set( comptId, "Em", -0.04 );	
 	Field< double >::set( comptId, "inject", 0 );
-	Field< double >::set( comptId, "initVm", EREST );
+	Field< double >::set( comptId, "initVm", -0.04 );
 
 	//////////////////
 	//Setup of rate tables.
@@ -832,10 +830,10 @@ void testMarkovChannel()
 	//Initial state of the system. This is really an arbitrary choice.
 	vector< double > initState;
 
-	initState.push_back( 0.30 ); 
-	initState.push_back( 0.05 ); 
-	initState.push_back( 0.30 ); 
-	initState.push_back( 0.35 ); 
+	initState.push_back( 0.00 ); 
+	initState.push_back( 0.50 ); 
+	initState.push_back( 0.50 ); 
+	initState.push_back( 0.00 ); 
 
 	Field< vector< double > >::set( mChanGslId, "initialstate", initState );
 	Field< vector< double > >::set( mChanExptlId, "initialstate", initState );
@@ -850,16 +848,17 @@ void testMarkovChannel()
 	SetGet1< unsigned int >::set( rateTableId, "setuptables", 4 );
 
 	//Setting up lookup tables for the different rates.		
+	//Please note that the rates should be in sec^(-1).  
 	
-	//Transition from "O" to "B1" i.e. r12.
-	Field< double >::set( vecTableId, "xmin", -0.05 );
-	Field< double >::set( vecTableId, "xmin", 0.10 );
-	Field< unsigned int >::set( vecTableId, "xdivs", 150 );
+	//Transition from "O" to "B1" i.e. r12 or a1.
+	Field< double >::set( vecTableId, "xmin", -0.10 );
+	Field< double >::set( vecTableId, "xmax", 0.10 );
+	Field< unsigned int >::set( vecTableId, "xdivs", 200 );
 
-	v = -0.05;
-	for ( unsigned int i = 0; i < 151; ++i )	
+	v = Field< double >::get( vecTableId, "xmin" );
+	for ( unsigned int i = 0; i < 201; ++i )	
 	{
-		table1d.push_back( exp( -16 * v - 2.91 ) );
+		table1d.push_back( 1e3 * exp( -16 * v - 2.91 ) );
 		v += 0.001;
 	}
 
@@ -870,11 +869,11 @@ void testMarkovChannel()
 
 	table1d.erase( table1d.begin(), table1d.end() );
 
-	//Transition from "B1" back to O i.e. r21
-	v = -0.05;	
-	for ( unsigned int i = 0; i < 151; ++i )
+	//Transition from "B1" back to O i.e. r21 or b1
+	v = Field< double >::get( vecTableId, "xmin" );
+	for ( unsigned int i = 0; i < 201; ++i )
 	{
-		table1d.push_back( exp( 9 * v + 1.22 ) );
+		table1d.push_back( 1e3 * exp( 9 * v + 1.22 ) );
 		v += 0.001;
 	}
 
@@ -884,28 +883,28 @@ void testMarkovChannel()
 
 	table1d.erase( table1d.begin(), table1d.end() );
 
-	//Transition from "O" to "B2" i.e. r13
+	//Transition from "O" to "B2" i.e. r13 or a2
 	//This is actually a 2D rate. But, there is no change in Mg2+ concentration
 	//that occurs. Hence, I create a 2D lookup table anyway but I manually
 	//set the concentration on the rate table object anyway.
 
 	Field< double >::set( rateTableId, "ligandconc", 24e-6 );
 
-	Field< double >::set( int2dTableId, "xmin", -0.05 );
+	Field< double >::set( int2dTableId, "xmin", -0.10 );
 	Field< double >::set( int2dTableId, "xmax", 0.10 );
 	Field< double >::set( int2dTableId, "ymin", 1e-6 );
 	Field< double >::set( int2dTableId, "ymax", 30e-6 );
-	Field< unsigned int >::set( int2dTableId, "xdivs", 150 );
+	Field< unsigned int >::set( int2dTableId, "xdivs", 200 );
 	Field< unsigned int >::set( int2dTableId, "ydivs", 30 );
 
-	v = 0;
-	table2d.resize( 151 );
-	for ( unsigned int i = 0; i < 151; ++i )
+	table2d.resize( 201 );
+	v = Field< double >::get( int2dTableId, "xmin" );
+	for ( unsigned int i = 0; i < 201; ++i )
 	{
-		conc = 0;
+		conc = Field< double >::get( int2dTableId, "ymin" );
 		for ( unsigned int j = 0; j < 31; ++j )
 		{
-			table2d[i].push_back( 1e6 * conc * exp( -45 * v - 6.97 ) ); 
+			table2d[i].push_back( 1e3 * conc * exp( -45 * v - 6.97 ) ); 
 			conc += 1e-6;
 		}
 		v += 1e-3;
@@ -919,11 +918,11 @@ void testMarkovChannel()
 
 	//There is only one 2D rate, so no point manually erasing the elements.
 	
-	//Transition from "B2" to "O" i.e. r31
-	v = -0.05;	
-	for ( unsigned int i = 0; i < 151; ++i )
+	//Transition from "B2" to "O" i.e. r31 or b2
+	v = -0.10;	
+	for ( unsigned int i = 0; i < 201; ++i )
 	{
-		table1d.push_back( exp( 17 * v + 0.96 ) );
+		table1d.push_back( 1e3 * exp( 17 * v + 0.96 ) );
 		v += 0.001;
 	}
 
@@ -935,15 +934,15 @@ void testMarkovChannel()
 
 	//Transition from "O" to "C" i.e. r14 
 	SetGet3< unsigned int, unsigned int, double >::set( rateTableId,	
-									"setconst", 1, 4, exp( -2.847 ) ); 
+									"setconst", 1, 4, 1e3 * exp( -2.847 ) ); 
 	
 	//Transition from "B1" to "C" i.e. r24
 	SetGet3< unsigned int, unsigned int, double >::set( rateTableId, 	
-									"setconst", 2, 4, exp( -0.693 ) );
+									"setconst", 2, 4, 1e3 * exp( -0.693 ) );
 
 	//Transition from "B2" to "C" i.e. r34
 	SetGet3< unsigned int, unsigned int, double >::set( rateTableId, 
-									"setconst", 3, 4, exp( -3.101 ) );
+									"setconst", 3, 4, 1e3* exp( -3.101 ) );
 
 	//Once the rate tables have been set up, we can initialize the 
 	//tables in the MarkovSolver class.
@@ -964,7 +963,7 @@ void testMarkovChannel()
 
 	vector< double > vec = Field< vector< double > >::get( gslTableId, "vec" );
 
-/*	for ( unsigned int i = 0; i < 1001; ++i )
+/*	for ( unsigned int i = 0; i < 4001; ++i )
 		cout << vec[i] << endl;*/
 
 	shell->doDelete( nid );
@@ -1001,7 +1000,7 @@ void testMarkovSolverProcess()
 	//Rates (2,1) and (3,1) are constant.
 	///////////////
 
-	SetGet1< unsigned int >::set( rateTableId, "setuptables", 3 );
+	SetGet1< unsigned int >::set( rateTableId, "init", 3 );
 
 	/////////////
 	//Setting up rate (1,2) i.e. transition from S1->S2.
@@ -1011,7 +1010,7 @@ void testMarkovSolverProcess()
 	
 	vector< double > vecEntries;
 	for ( double v = -0.05; !doubleEq( v, 0.10 ); v += 0.005 )
-		vecEntries.push_back( 0.85 * exp( -0.1 * v ) );	
+		vecEntries.push_back( 0.85 * exp( -0.01 * v ) );	
 
 
 	Field< double >::set( vecTableId, "xmin", -0.05 );
@@ -1067,7 +1066,7 @@ void testMarkovSolverProcess()
 	Field< double >::set( int2dTableId, "ymax", 50e-9 );
 
 	unsigned int c = 0;
-	for( double v = -0.75; !doubleEq( v, 0.2 ); v += 0.001 )
+	for( double v = -0.75; !doubleEq( v, 0.2 ); v += 0.01 )
 	{
 		int2dEntries.resize( int2dEntries.size() + 1 ); 
 		for( double l = 4e-9; !doubleEq( l, 50e-9 ); l += 2e-9 )
@@ -1090,6 +1089,8 @@ void testMarkovSolverProcess()
 
 	//Initializing MarkovSolver tables.
 	SetGet1< Id >::set( solverId, "setuptable", rateTableId ); 
+
+
 
 	shell->doDelete( nid );
 	cout << "." << flush;
@@ -1355,11 +1356,10 @@ void testBiophysicsProcess()
 {
 	testCompartmentProcess();
 	testHHChannel();
-//	testMarkovGslSolver();
+	testMarkovGslSolver();
 //	testMarkovChannel();
 //	testMarkovSolverProcess();
 //	testSynChan();
-        testLeakyIaF();
 }
 
 #endif

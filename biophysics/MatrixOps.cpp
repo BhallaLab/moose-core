@@ -26,6 +26,13 @@ void matPrint( Matrix* A )
 	}
 }
 
+void vecPrint( Vector* v )
+{
+	for( unsigned int j = 0; j < v->size(); ++j )
+		cout << (*v)[j] << " ";
+	cout << endl;
+}
+
 Matrix* matMatMul( Matrix* A, Matrix* B )
 {
 	unsigned int n = A->size();
@@ -460,7 +467,6 @@ void matInv( Matrix* A, vector< unsigned int >* swaps, Matrix* invA )
 	//If P was not calculated i.e. there were no exchanges, then the 
 	//inverse is just U^(-1) * L^(-1).
 	////////////////////////
-//	matMatMul( invA, invL, FIRST );	
 	triMatMul( invA, invL );
 	if ( !swaps->empty() )
 		matPermMul( invA, swaps );
