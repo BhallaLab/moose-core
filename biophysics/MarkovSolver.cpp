@@ -250,9 +250,14 @@ Matrix* MarkovSolver::computeMatrixExponential()
 	//In case none of the candidates were satisfactory, we scale down the norm
 	//by dividing A by 2^s until ||A|| < 1. We then use a 13th degree
 	//Pade approximant.
-	unsigned int s = ceil( log( matColNorm( Q1 )/thetaM[4] ) / log( 2 ) );
-	if ( s > 0 )
+	double sf = ceil( log( matColNorm( Q1 )/thetaM[4] ) / log( 2 ) );
+	unsigned int s = 0;
+
+	if ( sf > 0 ) 
+	{
+		s = static_cast< unsigned int >( sf );
 		matScalShift( Q1, 1.0/(2 << (s - 1)), 0, DUMMY );
+	}
 	expQ = computePadeApproximant( Q1, 4 );
 	
 	//Upto this point, the matrix stored in expQ is r13, the 13th degree
@@ -464,7 +469,7 @@ void testMarkovSolver()
 	rateTable->setConstantRate( 3, 1, 0.652 );
 	rateTable->setConstantRate( 2, 1, 1.541 );
 
-	markovSolver->init( rateTableId );
+	markovSolver->init( rateTableId, 0.1 );
 	
 	markovSolver->setVm( 0.0533 );
 	markovSolver->setLigandConc( 3.41e-6 );

@@ -74,7 +74,7 @@ const Cinfo* MarkovSolverBase::initCinfo()
 		processShared, sizeof( processShared ) / sizeof( Finfo* )
 	);
 
-	static DestFinfo handleLigandConc("handleLigandConc",
+	static DestFinfo ligandConc("ligandconc",
 			"Handles incoming message containing ligand concentration.",
 			new OpFunc1< MarkovSolverBase, double >(&MarkovSolverBase::handleLigandConc) 
 			);
@@ -82,7 +82,7 @@ const Cinfo* MarkovSolverBase::initCinfo()
 	static DestFinfo init("init",
 			"Setups the table of matrix exponentials associated with the"
 			" solver object.",
-			new OpFunc1< MarkovSolverBase, Id >(&MarkovSolverBase::init) 
+			new OpFunc2< MarkovSolverBase, Id, double >(&MarkovSolverBase::init) 
 			);
 
 	//////////////////////
@@ -149,7 +149,7 @@ const Cinfo* MarkovSolverBase::initCinfo()
 		&channel,						//SharedFinfo	
 		&proc,							//SharedFinfo
 		stateOut(), 				//SrcFinfo
-		&handleLigandConc,	//DestFinfo
+		&ligandConc,				//DestFinfo
 		&init,							//DestFinfo
 		&Q,									//ReadOnlyValueFinfo
 		&state,							//ReadOnlyValueFinfo
@@ -180,7 +180,7 @@ static const Cinfo* markovSolverBaseCinfo = MarkovSolverBase::initCinfo();
 MarkovSolverBase::MarkovSolverBase() : Q_(0), expMats1d_(0), expMat_(0), 
 	expMats2d_(0), xMin_(DBL_MAX), xMax_(DBL_MIN), xDivs_(0u), 
 	yMin_(DBL_MAX), yMax_(DBL_MIN), yDivs_(0u), size_(0u), Vm_(0),
- 	ligandConc_(0)
+ 	ligandConc_(0), dt_(0)
 {
 	;
 }
@@ -233,7 +233,8 @@ Vector MarkovSolverBase::getInitialState() const
 
 void MarkovSolverBase::setInitialState( Vector state )
 {
-	state_ = state;
+	initialState_ = state;
+	state_ = initialState_;
 }
 
 void MarkovSolverBase::setXmin( double xMin )
@@ -454,6 +455,8 @@ void MarkovSolverBase::innerFillupTable(
 		else if ( rateType.compare("constant") == 0 )
 			(*Q_)[i][j] = rateTable_->lookup1dValue( i, j, 1.0 );
 
+		(*Q_)[i][j] *= dt_;
+
 		(*Q_)[i][i] -= (*Q_)[i][j];
 	}
 }
@@ -545,6 +548,12 @@ Matrix* MarkovSolverBase::computeMatrixExponential()
 
 void MarkovSolverBase::reinit( const Eref& e, ProcPtr p )
 {
+	if ( initialState_.empty() )
+	{
+		cerr << "MarkovSolverBase::reinit : Initial state has not been "
+						"set.\n";
+		return;
+	}
 	state_ = initialState_;		
 
 	stateOut()->send( e, p, state_ );
@@ -569,7 +578,7 @@ void MarkovSolverBase::handleLigandConc( double ligandConc )
 
 //Sets up the exponential lookup tables based on the rate table that is passed
 //in. Initializes the whole object.
-void MarkovSolverBase::init( Id rateTableId )
+void MarkovSolverBase::init( Id rateTableId, double dt )
 {
 	MarkovRateTable* rateTable = reinterpret_cast< MarkovRateTable* >(
 																rateTableId.eref().data() );
@@ -600,6 +609,10 @@ void MarkovSolverBase::init( Id rateTableId )
 
 	//Initializing Q.
 	Q_ = matAlloc( size_ );		
+
+	//The state at t = t0 + dt is exp( dt * Q ) * [state at t = t0].
+	//Hence, we need to scale the terms of Q by dt.
+	dt_ = dt;
 
 	//Fills up the newly setup tables with exponentials.
 	fillupTable( ); 
@@ -843,7 +856,7 @@ void testMarkovSolverBase()
 	setupInterpol2D( int2dTable, 175, -0.02, 0.19, 151, 3e-9, 75e-9 );
 	rateTables[0]->setInt2dChildTable( 2, 3, int2dId );
 
-	solverBases[0]->init( rateTableIds[0] );
+	solverBases[0]->init( rateTableIds[0], 0.1 );
 	
 	assert( solverBases[0]->getXdivs() == 201 );
 	assert( doubleEq( solverBases[0]->getXmin(), -0.05 ) ); 
@@ -872,7 +885,7 @@ void testMarkovSolverBase()
 	setupVectorTable( vecTable, 375, 7e-9, 75e-7 );
 	rateTables[1]->setVtChildTable( 3, 1, vecTableId, 1 );
 
-	solverBases[1]->init( rateTableIds[1] );
+	solverBases[1]->init( rateTableIds[1], 0.1 );
 
 	assert( solverBases[1]->getXdivs() == 275 ); 
 	assert( solverBases[1]->getYdivs() == 375 );
@@ -900,7 +913,7 @@ void testMarkovSolverBase()
 	setupVectorTable( vecTable, 250, 10e-9, 100e-9 );
 	rateTables[2]->setVtChildTable( 4, 1, vecTableId, 1 );
 
-	solverBases[2]->init( rateTableIds[2] );
+	solverBases[2]->init( rateTableIds[2], 0.1 );
 
 	assert( doubleEq( 1e-308 * solverBases[2]->getYmin(), 1e-308 * DBL_MAX ) );
 	assert( doubleEq( 1e308 * solverBases[2]->getYmax(), 1e308 * DBL_MIN ) );
@@ -926,7 +939,7 @@ void testMarkovSolverBase()
 	setupVectorTable( vecTable, 140, -0.2, 0.1 );
 	rateTables[3]->setVtChildTable( 1, 4, vecTableId, 1 );
 
-	solverBases[3]->init( rateTableIds[3] );
+	solverBases[3]->init( rateTableIds[3], 0.1 );
 
 	assert( doubleEq( 1e-308 * solverBases[3]->getYmin(), 1e-308 * DBL_MAX ) );
 	assert( doubleEq( 1e308 * solverBases[3]->getYmax(), 1e308 * DBL_MIN ) );

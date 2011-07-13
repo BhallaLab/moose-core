@@ -90,6 +90,7 @@ const Cinfo* MarkovGslSolver::initCinfo()
 		&method,						// ValueFinfo
 		&relativeAccuracy,	// ValueFinfo
 		&absoluteAccuracy,	// ValueFinfo
+		&internalDt,				// ValueFinfo
 		&init,							// DestFinfo
 		&handleQ,						// DestFinfo	
 		&proc,							// SharedFinfo
