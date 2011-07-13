@@ -106,9 +106,9 @@ double VectorTable::lookupByValue( double x ) const
 	if ( table_.size() == 1 )
 		return table_[0];
 
-	if (x <= xMin_) 
+	if ( x < xMin_ || doubleEq( x, xMin_ ) ) 
 		return table_[0];
-	if (x >= xMax_)
+	if ( x > xMax_ || doubleEq( x, xMax_ ) )
 		return table_.back();
 
 	unsigned int index = static_cast< unsigned int>( ( x - xMin_ ) * invDx_ );
