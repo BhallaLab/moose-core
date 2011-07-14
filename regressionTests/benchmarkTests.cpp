@@ -17,6 +17,8 @@ extern void speedTestMultiNodeIntFireNetwork(
 
 extern void rtHHnetwork( unsigned int numCopies );
 
+extern void perfTestMarkovSolver();			
+
 void testKsolve()
 {
 	double ktime1 = testGslIntegrator( "Kholodenko", "conc1/MAPK-PP.Co",
@@ -42,6 +44,8 @@ void innerBenchmarks( const string& optarg )
 		speedTestMultiNodeIntFireNetwork( 2048, 2000 );
 	else if ( string( "hhNet" ) == optarg  )
 		rtHHnetwork( 1000 );
+	else if ( string("markovSolver") == optarg )
+		perfTestMarkovSolver( );
 
 	cout << "Completed benchmark\n";
 }

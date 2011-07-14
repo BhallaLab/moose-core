@@ -14,6 +14,7 @@ OBJ = \
 	rtTable.o	\
 	rtReadKkit.o	\
 	rtHHnetwork.o	\
+	perfTestMarkovSolver.o \
 	benchmarkTests.o	\
 
 HEADERS = \
