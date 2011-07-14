@@ -396,38 +396,51 @@ void testMarkovSolver()
 
 	vector< unsigned int > single( 1, 1 );
 
-	Id rateTableId = Id::nextId();
+	Id rateTable2dId = Id::nextId();
+	Id rateTable1dId = Id::nextId();
 	Id int2dId = Id::nextId();
 	Id vecTableId = Id::nextId();
-	Id solverId = Id::nextId();
+	Id solver2dId = Id::nextId();
+	Id solver1dId = Id::nextId();
 
-	Element *eRateTable = new Element( rateTableId, rateTableCinfo, "rateTable",
-																		 single, 1 );
+	Element *eRateTable2d = new Element( rateTable2dId, rateTableCinfo, 
+																			"rateTable2d", single, 1 );
+	Element *eRateTable1d = new Element( rateTable1dId, rateTableCinfo, 
+																			"rateTable1d", single, 1 );
 	Element *eInt2d = new Element( int2dId, interpol2dCinfo, "int2d", single, 1 );
 	Element *eVecTable = new Element( vecTableId, vectorTableCinfo, "vecTable", 
 																		single, 1 );
-	Element *eSolver = new Element( solverId, markovSolverCinfo, "solver", 
-		 																single, 1 );	
+	Element *eSolver2d = new Element( solver2dId, markovSolverCinfo, 
+																		"solver2d", single, 1 );	
+	Element *eSolver1d = new Element( solver1dId, markovSolverCinfo, 
+																		"solver1d", single, 1 );	
 																		 
-	Eref rateTableEref( eRateTable, 0 );
+	Eref rateTable2dEref( eRateTable2d, 0 );
+	Eref rateTable1dEref( eRateTable1d, 0 );
 	Eref int2dEref( eInt2d, 0 );
 	Eref vecTableEref( eVecTable, 0 );
-	Eref solverEref( eSolver, 0 );
+	Eref solver2dEref( eSolver2d, 0 );
+	Eref solver1dEref( eSolver1d, 0 );
 
 	vector< double > table1d;
 	vector< vector< double > > table2d;
 	double v, conc;
 
-	MarkovRateTable* rateTable = reinterpret_cast< MarkovRateTable* >
-																( rateTableEref.data() );
+	MarkovRateTable* rateTable2d = reinterpret_cast< MarkovRateTable* >
+																( rateTable2dEref.data() );
+	MarkovRateTable* rateTable1d = reinterpret_cast< MarkovRateTable* >
+																( rateTable1dEref.data() );
 	VectorTable* vecTable = reinterpret_cast< VectorTable* >
 																( vecTableEref.data() );
 	Interpol2D* int2d = reinterpret_cast< Interpol2D* >
 																( int2dEref.data() );
-	MarkovSolver* markovSolver = reinterpret_cast< MarkovSolver* >
-																( solverEref.data() );
+	MarkovSolver* markovSolver2d = reinterpret_cast< MarkovSolver* >
+																( solver2dEref.data() );
+	MarkovSolver* markovSolver1d = reinterpret_cast< MarkovSolver* >
+																( solver1dEref.data() );
 
-	rateTable->init( 3 );
+	rateTable2d->init( 3 );
+	rateTable1d->init( 3 );
 
 	vecTable->setMin( -0.10 );
 	vecTable->setMax( 0.10 );
@@ -442,7 +455,8 @@ void testMarkovSolver()
 
 	vecTable->setTable( table1d );
 
-	rateTable->setVtChildTable( 1, 3, vecTableId, 0 );
+	rateTable2d->setVtChildTable( 1, 3, vecTableId, 0 );
+	rateTable1d->setVtChildTable( 1, 3, vecTableId, 0 );
 
 	int2d->setXmin( -0.10 );
 	int2d->setXmax( 0.10 );
@@ -464,15 +478,21 @@ void testMarkovSolver()
 
 	int2d->setTableVector( table2d );
 
-	rateTable->setInt2dChildTable( 2, 3, int2dId );
+	rateTable2d->setInt2dChildTable( 2, 3, int2dId );
 
-	rateTable->setConstantRate( 3, 1, 0.652 );
-	rateTable->setConstantRate( 2, 1, 1.541 );
+	rateTable2d->setConstantRate( 3, 1, 0.652 );
+	rateTable2d->setConstantRate( 2, 1, 1.541 );
 
-	markovSolver->init( rateTableId, 0.1 );
+	rateTable1d->setConstantRate( 3, 1, 0.652 );
+	rateTable1d->setConstantRate( 2, 1, 1.541 );
+
+	markovSolver2d->init( rateTable2dId, 0.1 );
+	markovSolver1d->init( rateTable1dId, 0.1 );
 	
-	markovSolver->setVm( 0.0533 );
-	markovSolver->setLigandConc( 3.41e-6 );
+	markovSolver2d->setVm( 0.0533 );
+	markovSolver2d->setLigandConc( 3.41e-6 );
+
+	markovSolver1d->setVm( 0.0533 );
 
 	Vector initState;
 
@@ -480,15 +500,17 @@ void testMarkovSolver()
 	initState.push_back( 0.4 );
 	initState.push_back( 0.4 );
 
-	markovSolver->setInitialState( initState );
-	markovSolver->computeState();
+	markovSolver2d->setInitialState( initState );
+	markovSolver2d->computeState();
 
-	Vector interpState = markovSolver->getState();
+	Vector interpState = markovSolver2d->getState();
 
-	rateTableId.destroy();
+	rateTable2dId.destroy();
+	rateTable1dId.destroy();
 	int2dId.destroy();
 	vecTableId.destroy();
-	solverId.destroy();
+	solver2dId.destroy();
+	solver1dId.destroy();
 
 	cout << "." << flush;
 }
