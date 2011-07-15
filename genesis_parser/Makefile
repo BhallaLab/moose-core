@@ -62,23 +62,17 @@ ifneq (,$(findstring -DCRL_MPI,$(CXXFLAGS)))
 ParGenesisParser.o:		GenesisParserWrapper.h ParGenesisParser.h ../shell/Shell.h
 endif
 GenesisParser.yy.o:			GenesisParser.yy.cpp
-#GenesisParser.yy.o:			GenesisParser.yy.l
-
-
-parser:
+GenesisParser.yy.cpp:			GenesisParser.yy.l
 	flex++ -+ -oGenesisParser.yy.cpp GenesisParser.yy.l
-	bison -d GenesisParser.ypp
-	sed -e "/^extern\ YYSTYPE/D" GenesisParser.tab.hpp > GenesisParser.tab.h
-#/bin/mv GenesisParser.tab.hpp GenesisParser.tab.h
-	sed -e "s/^yyparse/myFlexLexer::yyparse/" GenesisParser.tab.cpp > temp
-	sed -e "s/YYSTACK_FREE (yyss);/    ;\/\/ Deleted YYSTACK_FREE( yyss);/" temp > temp2
-	sed -e "s/^YY_DECL_VARIABLES/\/\/ Shifted YY_DECL_VARIABLES to inside myFlexLexer class/" temp2 > GenesisParser.tab.cpp 
 	sed -e "s/^    #define yyFlexLexer yyFlexLexer/\/\/ Deleted    #define yyFlexLexer yyFlexLexer/" GenesisParser.yy.cpp > temp
 	sed -e "s/^extern \"C\" int isatty (int );/\/\/ Deleted extern C int isatty/" temp > GenesisParser.yy.cpp
-
-# GenesisParser.yy.cpp: GenesisParser.yy.l
-# 	flex++ -+ -oGenesisParser.yy.cpp GenesisParser.yy.l
-
+GenesisParser.tab.o:	GenesisParser.tab.cpp
+GenesisParser.tab.cpp:	GenesisParser.ypp GenesisParser.yy.cpp
+	bison -d GenesisParser.ypp
+	sed -e "/^extern\ YYSTYPE/D" GenesisParser.tab.hpp > GenesisParser.tab.h 
+	sed -e "s/^yyparse/myFlexLexer::yyparse/" GenesisParser.tab.cpp > temp
+	sed -e "s/YYSTACK_FREE (yyss);/    ;\/\/ Deleted YYSTACK_FREE( yyss);/" temp > temp2
+	sed -e "s/^YY_DECL_VARIABLES/\/\/ Shifted YY_DECL_VARIABLES to inside myFlexLexer class/" temp2 > GenesisParser.tab.cpp
 
 GenesisParser.tab.o GenesisParser.yy.o GenesisParser.o: GenesisParser.yy.cpp GenesisParser.h GenesisParser.tab.h
 
