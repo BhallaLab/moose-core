@@ -153,7 +153,7 @@ class myFlexLexer: public yyFlexLexer
 		void listCommands();
 
 		void setElement( Id id );
-
+                static void doQuit(bool quit);
 	protected:
 		int LexerInput( char* buf, int max_size );
 
@@ -286,6 +286,7 @@ class myFlexLexer: public yyFlexLexer
 		std::map< std::string, std::string > alias_map;
 		short script_ptr;
 		Script script[MAXSCRIPTS];
+                static bool quit;
 };
 
 #endif // _GENESIS_PARSER_H

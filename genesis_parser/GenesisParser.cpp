@@ -62,12 +62,13 @@ bool Autoshell() {
 #endif
 }
 
+extern void do_quit(int argc, const char** argv, Id s);
 ///////////////////////////////////////////////////////////////////////
 //
 // Basic GenesisParser functions
 //
 ///////////////////////////////////////////////////////////////////////
-
+bool myFlexLexer::quit = false;
 
 myFlexLexer::myFlexLexer( )
 			: yyFlexLexer(), state(LOOKUP)
@@ -83,7 +84,7 @@ myFlexLexer::myFlexLexer( )
 	continuation = 0;
 	CurLocals = 0;
 	script_ptr = -1;
-
+        quit = false;
 	// AddFunc("quit", do_quit, "void");
 	// AddFunc("echo", do_echo, "void");
 	set_float_format("%g");
@@ -167,8 +168,9 @@ void myFlexLexer::Process() {
 		currstr += s + "\n";
 #endif
 		while (currstr.length() > 0) {
-			i =  yyparse();
-		//	cerr << "in FlexLexer::Proc: yyparse() = " << i << std::endl;
+                    cerr << "in FlexLexer::Proc: yyparse() = " << currstr << " # " << std::endl;                    
+			i =  yyparse();                        
+			cerr << "in FlexLexer::Proc: yyparse() = " << currstr << " # " << i << std::endl;
 		}
 		// yyparse();
 		/*
@@ -187,8 +189,8 @@ void myFlexLexer::ParseInput(const string& s) {
 		return;
 	}
 	currstr += temp + "\n";
-	while (currstr.length() > 0) {
-		 yyparse();
+	while (!quit && currstr.length() > 0 ) {            
+            yyparse();
 	}
 }
 
@@ -442,7 +444,6 @@ int SetCommandTraceLevel(int iLevel)
 Result func_entry::Execute(int argc, const char** argv, Id s)
 {
 	Result		result;
-
 	assert( s != Id() );
 	if ( type == "int") {
 	    result.r_type = IntType();
@@ -469,8 +470,12 @@ Result func_entry::Execute(int argc, const char** argv, Id s)
 	    result.r.r_str = ((PFC)func)( argc, argv, s );
 	} else {
 	    func( argc, argv, s );
-	    result.r_type = IntType();
-	    result.r.r_int = 0;
+            if (func == do_quit){
+                myFlexLexer::doQuit(true);
+            }
+            result.r_type = IntType();
+            result.r.r_int = 0;
+            
 	}
 	return(result);
 }
@@ -597,11 +602,16 @@ func_entry	*command;
 	    close(savefd);
 	    genesis_tty();
 #endif
-	} else
+	} else {
 	/*
 	** call the function
 	*/
-	return command->Execute( argc, (const char**)argv, element_ );
+            result = command->Execute( argc, (const char**)argv, element_ );
+        }
+        if (myFlexLexer::quit){
+            EndScript();
+        }
+        return result;
 
     } else 
     /*
@@ -702,3 +712,9 @@ FILE	*pfile;
 	return(0);
     }
 }
+
+void myFlexLexer::doQuit(bool quit)
+{
+    myFlexLexer::quit = quit;
+}
+    
