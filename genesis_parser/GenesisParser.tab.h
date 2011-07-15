@@ -1,24 +1,23 @@
-/* A Bison parser, made by GNU Bison 2.3.  */
+
+/* A Bison parser, made by GNU Bison 2.4.1.  */
 
 /* Skeleton interface for Bison's Yacc-like parsers in C
-
-   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   
+      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
-
-   This program is free software; you can redistribute it and/or modify
+   
+   This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+   
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+   
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301, USA.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -29,9 +28,10 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-
+   
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
+
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -59,86 +59,41 @@
      INCLUDE = 275,
      ENDSCRIPT = 276,
      BREAK = 277,
-     INT = 278,
-     FLOAT = 279,
-     STR = 280,
-     RETURN = 281,
-     WHITESPACE = 282,
-     FUNCTION = 283,
-     INTCONST = 284,
-     DOLLARARG = 285,
-     FLOATCONST = 286,
-     STRCONST = 287,
-     LITERAL = 288,
-     IDENT = 289,
-     VARREF = 290,
-     FUNCREF = 291,
-     EXTERN = 292,
-     SL = 293,
-     COMMAND = 294,
-     EXPRCALL = 295,
-     ARGUMENT = 296,
-     ARGLIST = 297,
-     LOCREF = 298,
-     ICAST = 299,
-     FCAST = 300,
-     SCAST = 301
+     QUIT = 278,
+     INT = 279,
+     FLOAT = 280,
+     STR = 281,
+     RETURN = 282,
+     WHITESPACE = 283,
+     FUNCTION = 284,
+     INTCONST = 285,
+     DOLLARARG = 286,
+     FLOATCONST = 287,
+     STRCONST = 288,
+     LITERAL = 289,
+     IDENT = 290,
+     VARREF = 291,
+     FUNCREF = 292,
+     EXTERN = 293,
+     SL = 294,
+     COMMAND = 295,
+     EXPRCALL = 296,
+     ARGUMENT = 297,
+     ARGLIST = 298,
+     LOCREF = 299,
+     ICAST = 300,
+     FCAST = 301,
+     SCAST = 302
    };
 #endif
-/* Tokens.  */
-#define AND 258
-#define OR 259
-#define NE 260
-#define EQ 261
-#define GE 262
-#define GT 263
-#define LE 264
-#define LT 265
-#define POW 266
-#define UMINUS 267
-#define WHILE 268
-#define IF 269
-#define ELSE 270
-#define ELIF 271
-#define FOR 272
-#define FOREACH 273
-#define END 274
-#define INCLUDE 275
-#define ENDSCRIPT 276
-#define BREAK 277
-#define INT 278
-#define FLOAT 279
-#define STR 280
-#define RETURN 281
-#define WHITESPACE 282
-#define FUNCTION 283
-#define INTCONST 284
-#define DOLLARARG 285
-#define FLOATCONST 286
-#define STRCONST 287
-#define LITERAL 288
-#define IDENT 289
-#define VARREF 290
-#define FUNCREF 291
-#define EXTERN 292
-#define SL 293
-#define COMMAND 294
-#define EXPRCALL 295
-#define ARGUMENT 296
-#define ARGLIST 297
-#define LOCREF 298
-#define ICAST 299
-#define FCAST 300
-#define SCAST 301
-
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
-# define YYSTYPE_IS_TRIVIAL 1
 #endif
+
 
 
