@@ -198,7 +198,6 @@ int ArgListType()
 }	/* ArgListType */
 
 
-
 int IntType()
 
 {	/* IntType --- Return INT result type */
@@ -1122,7 +1121,7 @@ void promote(Result* arg1, Result* arg2)
 	    break;
 
 	  default:
-	    sprintf(buf,"promote: Unknown argument type %s",
+	    sprintf(buf,"promote: Unknown a3623rgument type %s",
 			TokenStr(arg1->r_type));
 	    myFlexLexer::yyerror(buf);
 	    /* No Return */
@@ -1148,132 +1147,132 @@ char* myFlexLexer::do_cmd_args(ParseNode* arg, int* argc, char* argv[])
 	    return(NULL);
  
 	switch (arg->pn_val.r_type)
-	  {
+        {
 
-	  case COMMAND:
-	    r = do_cmd(arg->pn_val.r.r_str, arg->pn_left, FALSE);
-	    switch (r.r_type)
-	      {
+            case COMMAND:
+                r = do_cmd(arg->pn_val.r.r_str, arg->pn_left, FALSE);
+                switch (r.r_type)
+                {
 
-	      case INT:
-		sprintf(buf, "%d", r.r.r_int);
-		return(strsave(buf));
+                    case INT:
+                        sprintf(buf, "%d", r.r.r_int);
+                        return(strsave(buf));
 
-	      case FLOAT:
-		/* sprintf(buf, "%0.20g", r.r.r_float); */
-		sprintf(buf, float_format, r.r.r_float);
-		return(strsave(buf));
+                    case FLOAT:
+                        /* sprintf(buf, "%0.20g", r.r.r_float); */
+                        sprintf(buf, float_format, r.r.r_float);
+                        return(strsave(buf));
 
-	      case STR:
-		if (r.r.r_str == NULL)
-		    myFlexLexer::yyerror("do_cmd_args: NULL string");
-		    /* No Return */
+                    case STR:
+                        if (r.r.r_str == NULL)
+                            myFlexLexer::yyerror("do_cmd_args: NULL string");
+                        /* No Return */
 
-		return(r.r.r_str);
+                        return(r.r.r_str);
 
-	      case ARGLIST:
-		cargv = (char **) r.r.r_str;
-		if (cargv == NULL) {
-		    myFlexLexer::yyerror("do_cmd_args: NULL Arglist");
-			return( NULL );
-		}
-		while (*cargv != NULL)
-		  {
-		    if (argv == NULL)
-			free(*cargv++);
-		    else
-		      {
-			argv[*argc] = *cargv++;
-			*argc += 1;
-		      }
-		  }
-		free(r.r.r_str);
-		return(NULL);
+                    case ARGLIST:
+                        cargv = (char **) r.r.r_str;
+                        if (cargv == NULL) {
+                            myFlexLexer::yyerror("do_cmd_args: NULL Arglist");
+                            return( NULL );
+                        }
+                        while (*cargv != NULL)
+                        {
+                            if (argv == NULL)
+                                free(*cargv++);
+                            else
+                            {
+                                argv[*argc] = *cargv++;
+                                *argc += 1;
+                            }
+                        }
+                        free(r.r.r_str);
+                        return(NULL);
 
-	      }
+                }
 
-	  case ARGLIST:
-	    if (argv != NULL)
-	      {
-		do_cmd_args(arg->pn_left, argc, argv);
-		argcp = do_cmd_args(arg->pn_right, argc, argv);
-		if (argcp != NULL)
-		  {
-		    argv[*argc] = argcp;
-		    *argc += 1;
-		  }
-	      }
-	    break;
+            case ARGLIST:
+                if (argv != NULL)
+                {
+                    do_cmd_args(arg->pn_left, argc, argv);
+                    argcp = do_cmd_args(arg->pn_right, argc, argv);
+                    if (argcp != NULL)
+                    {
+                        argv[*argc] = argcp;
+                        *argc += 1;
+                    }
+                }
+                break;
 
-	  case ARGUMENT:
-	    arg1 = do_cmd_args(arg->pn_left, argc, argv);
-	    arg2 = do_cmd_args(arg->pn_right, argc, argv);
+            case ARGUMENT:
+                arg1 = do_cmd_args(arg->pn_left, argc, argv);
+                arg2 = do_cmd_args(arg->pn_right, argc, argv);
 
-	    if (arg1 == NULL) return(arg2);
-	    if (arg2 == NULL) return(arg1);
+                if (arg1 == NULL) return(arg2);
+                if (arg2 == NULL) return(arg1);
 
-	    result = (char *) malloc(strlen(arg1) + strlen(arg2) + 1);
-	    if (result == NULL)
-	      {
-		perror("do_cmd_args");
-		myFlexLexer::yyerror("Out of mem");
-		/* No Return */
-	      }
+                result = (char *) malloc(strlen(arg1) + strlen(arg2) + 1);
+                if (result == NULL)
+                {
+                    perror("do_cmd_args");
+                    myFlexLexer::yyerror("Out of mem");
+                    /* No Return */
+                }
 
-	    sprintf(result, "%s%s", arg1, arg2);
-	    free(arg1);
-	    free(arg2);
+                sprintf(result, "%s%s", arg1, arg2);
+                free(arg1);
+                free(arg2);
 
-	    return(result);
+                return(result);
 
-	  case LITERAL:
-	    return(strsave(arg->pn_val.r.r_str));
+            case LITERAL:
+                return(strsave(arg->pn_val.r.r_str));
 
-	  default:	/* expr or DOLLARARG */
-	    r = PTEval(arg);
-	    switch (r.r_type)
-	      {
+            default:	/* expr or DOLLARARG */
+                r = PTEval(arg);
+                switch (r.r_type)
+                {
 
-	      case INT:
-	        sprintf(buf, "%d", r.r.r_int);
-		return(strsave(buf));
+                    case INT:
+                        sprintf(buf, "%d", r.r.r_int);
+                        return(strsave(buf));
 
-	      case FLOAT:
-	        /* sprintf(buf, "%0.20g", r.r.r_float); */
-	    	sprintf(buf, float_format, r.r.r_float);
-		return(strsave(buf));
+                    case FLOAT:
+                        /* sprintf(buf, "%0.20g", r.r.r_float); */
+                        sprintf(buf, float_format, r.r.r_float);
+                        return(strsave(buf));
 
-	      case STR:
-		return(r.r.r_str);
+                    case STR:
+                        return(r.r.r_str);
 
-	      case ARGLIST:
-		cargv = (char **) r.r.r_str;
-		if (cargv == NULL)
-		    myFlexLexer::yyerror("do_cmd_args: NULL Arglist");
-		    /* no return */
+                    case ARGLIST:
+                        cargv = (char **) r.r.r_str;
+                        if (cargv == NULL)
+                            myFlexLexer::yyerror("do_cmd_args: NULL Arglist");
+                        /* no return */
 
-		while (*cargv != NULL)
-		  {
-		    if (argv == NULL)
-			free(*cargv++);
-		    else
-		      {
-			argv[*argc] = *cargv++;
-			*argc += 1;
-		      }
-		  }
-		free(r.r.r_str);
-		return(NULL);
+                        while (*cargv != NULL)
+                        {
+                            if (argv == NULL)
+                                free(*cargv++);
+                            else
+                            {
+                                argv[*argc] = *cargv++;
+                                *argc += 1;
+                            }
+                        }
+                        free(r.r.r_str);
+                        return(NULL);
 
-	      default:
-	        sprintf(buf, "do_cmd_args: Unknown return value type %s from PTEval", TokenStr(r.r_type));
-		myFlexLexer::yyerror(buf);
-		/* No Return */
+                    default:
+                        sprintf(buf, "do_cmd_args: Unknown return value type %s from PTEval", TokenStr(r.r_type));
+                        myFlexLexer::yyerror(buf);
+                        /* No Return */
 
-	      }
-	    break;
+                }
+                break;
 
-	  }
+        }
 
 	return(NULL);
 
@@ -1720,6 +1719,9 @@ Result myFlexLexer::PTEval(ParseNode* pn)
 	r.r_type = 0;
 	if (pn == NULL)
 	    return(r);
+        if (myFlexLexer::quit){
+            return r;
+        }
 
 	switch (pn->pn_val.r_type)
 	  {
@@ -1914,7 +1916,6 @@ Result myFlexLexer::PTEval(ParseNode* pn)
 		ReturnResult = PTEval(pn->pn_left);
 	    longjmp(ReturnBuf, 1);
 	    /* No Return */
-
 	  case COMMAND:
 	    r = do_cmd(pn->pn_val.r.r_str, pn->pn_left, TRUE);
 	    break;
@@ -1928,7 +1929,10 @@ Result myFlexLexer::PTEval(ParseNode* pn)
 	  case ENDSCRIPT:
 	    PopLocalVars();
 	    break;
-
+          case QUIT:
+            PopLocalVars();
+            myFlexLexer::doQuit(true);
+            break;
 	  case SL:
 	    PTCall(pn->pn_left);
 	    SetLine((ScriptInfo *) pn->pn_val.r.r_str);
@@ -1996,7 +2000,6 @@ void myFlexLexer::PTCall(ParseNode* pn)
 {	/* PTCall --- Evaluate parse tree and free any result returned */
 
 	Result	r;
-
 	r = PTEval(pn);
 	switch (r.r_type)
 	  {

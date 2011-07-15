@@ -42,7 +42,7 @@ extern char *TokenStr(int token);
 %left POW
 %left UMINUS
 
-%token WHILE IF ELSE ELIF FOR FOREACH END INCLUDE ENDSCRIPT BREAK
+%token WHILE IF ELSE ELIF FOR FOREACH END INCLUDE ENDSCRIPT BREAK QUIT
 %token INT FLOAT STR RETURN WHITESPACE FUNCTION
 %token <iconst> INTCONST DOLLARARG
 %token <fconst> FLOATCONST
@@ -62,6 +62,7 @@ extern char *TokenStr(int token);
 %type <pn> func_args func_arg_list func_hdr include_stmnt func_call
 %type <pn> break_stmnt decl_ident decl_list opt_arg_list endscript_marker
 %type <pn> ext_func cmd_name opt_node ac_func_cmd_expr
+%type <pn> quit_stmnt
 /*
 %type <pn> cmdname_expr
 */
@@ -131,6 +132,7 @@ statement	: while_stmnt
 		| assign_stmnt
 		| include_stmnt
 		| endscript_marker
+		| quit_stmnt
 		| cmd_stmnt
 		| func_call
 		| func_def
@@ -161,6 +163,16 @@ endscript_marker : ENDSCRIPT
 		  }
 		;
 
+quit_stmnt	: QUIT
+		  {
+		    ResultValue	v;
+		    char * argv[] = {"quit"};
+		    $$ = PTNew(QUIT, v, NULL, NULL);
+		    doQuit(true);
+		    ExecuteCommand(1, argv);
+		    YYACCEPT;	
+	          }
+		;
 while_stmnt	: WHILE '(' expr ')'
 		  {
 		    Compiling++;
