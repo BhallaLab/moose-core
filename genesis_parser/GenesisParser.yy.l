@@ -157,6 +157,8 @@ include		lextoken(INCLUDE);
 
 "*ENDSCRIPT*"	lextoken(ENDSCRIPT);
 
+quit		lextoken(QUIT);
+
 break		lextoken(BREAK);
 
 return		lextoken(RETURN);
