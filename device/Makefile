@@ -15,6 +15,7 @@ OBJ= \
 	PIDController.o \
 	RC.o	\
 	PulseGen.o	\
+	Efield.o	\
 
 
 HEADERS= \
@@ -22,6 +23,7 @@ HEADERS= \
 	PIDController.h \
 	RC.h	\
 	PulseGen.h	\
+	Efield.h	\
 
 
 default: $(TARGET)
