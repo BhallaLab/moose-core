@@ -66,7 +66,7 @@ const Cinfo* MarkovSolver::initCinfo()
 
 static const Cinfo* markovSolverCinfo = MarkovSolver::initCinfo();
 
-MarkovSolver::MarkovSolver() 
+MarkovSolver::MarkovSolver()
 {
 	;
 }
@@ -85,6 +85,7 @@ Matrix* MarkovSolver::computePadeApproximant( Matrix* Q1,
 	unsigned int n = Q1->size();
 	unsigned int degree = mCandidates[degreeIndex];
 	double *padeCoeffs; 
+
 
 	//Vector of Matrix pointers. Each entry is an even power of Q.
 	vector< Matrix* > QevenPowers;
@@ -112,6 +113,7 @@ Matrix* MarkovSolver::computePadeApproximant( Matrix* Q1,
 			padeCoeffs = b3;
 		break;
 	}
+
 
 	/////////
 	//Q2 = Q^2 is computed for all degrees.
@@ -178,7 +180,9 @@ Matrix* MarkovSolver::computePadeApproximant( Matrix* Q1,
 			temp = matScalShift( Q6, b13[13], 0.0 );
 			matMatAdd( temp, Q4, 1.0, b13[11], FIRST );
 			matMatAdd( temp, Q2, 1.0, b13[9], FIRST );
+
 			matMatMul( Q6, temp, SECOND );
+
 			matMatAdd( temp, Q6, 1.0, b13[7], FIRST ); 
 			matMatAdd( temp, Q4, 1.0, b13[5], FIRST ); 
 			matMatAdd( temp, Q2, 1.0, b13[3], FIRST ); 
@@ -210,6 +214,7 @@ Matrix* MarkovSolver::computePadeApproximant( Matrix* Q1,
 	matInv( VminusU, swaps, invVminusU );
 	expQ = matMatMul( invVminusU, VplusU );
 	
+
 	//Memory cleanup.
 	delete U;
 	delete V;
@@ -223,7 +228,7 @@ Matrix* MarkovSolver::computePadeApproximant( Matrix* Q1,
 
 Matrix* MarkovSolver::computeMatrixExponential()
 {
-	double mu;					
+	double mu, norm;					
 	unsigned int n = Q_->size();
 	Matrix *expQ, *Q1;
 
@@ -237,9 +242,10 @@ Matrix* MarkovSolver::computeMatrixExponential()
 	//We cycle through the first four candidate values of m. The moment the norm 
 	//satisfies the theta_M bound, we choose that m and compute the Pade'
 	//approximant to the exponential. We can then directly return the exponential. 
+	norm = matColNorm( Q1 );
 	for ( unsigned int i = 0; i < 4; ++i )
 	{
-		if ( matColNorm( Q1 ) < thetaM[i] )
+		if ( norm < thetaM[i] )
 		{
 			expQ = computePadeApproximant( Q1, i );
 			matScalShift( expQ, exp( mu ), 0, DUMMY );
@@ -250,7 +256,7 @@ Matrix* MarkovSolver::computeMatrixExponential()
 	//In case none of the candidates were satisfactory, we scale down the norm
 	//by dividing A by 2^s until ||A|| < 1. We then use a 13th degree
 	//Pade approximant.
-	double sf = ceil( log( matColNorm( Q1 )/thetaM[4] ) / log( 2 ) );
+	double sf = ceil( log( norm / thetaM[4] ) / log( 2 ) );
 	unsigned int s = 0;
 
 	if ( sf > 0 ) 
@@ -513,5 +519,6 @@ void testMarkovSolver()
 	solver1dId.destroy();
 
 	cout << "." << flush;
+
 }
 #endif

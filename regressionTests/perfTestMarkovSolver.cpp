@@ -161,7 +161,7 @@ void perfTestMarkovSolver( )
 		for ( unsigned int j = 0; j < 301; ++j )
 		{
 			table2d[i].push_back( 1e3 * conc * exp( -45 * v - 6.97 ) ); 
-			conc += 1e-7;
+			conc += 1e-10;
 		}
 		v += 1e-4;
 	}
@@ -175,11 +175,11 @@ void perfTestMarkovSolver( )
 	//There is only one 2D rate, so no point manually erasing the elements.
 	
 	//Transition from "B2" to "O" i.e. r31 or b2
-	v = -0.10;	
+	v = Field< double >::get( vecTableId, "xmin" );
 	for ( unsigned int i = 0; i < 2001 ; ++i )
 	{
 		table1d.push_back( 1e3 * exp( 17 * v + 0.96 ) );
-		v += 0.001;
+		v += 1e-4;
 	}
 
 	Field< vector< double > >::set( vecTableId, "table", table1d );
@@ -202,7 +202,7 @@ void perfTestMarkovSolver( )
 
 	//Once the rate tables have been set up, we can initialize the 
 	//tables in the Markovsolver class.
-	SetGet2< Id, double >::set( solverId, "init", rateTableId, 1.0e-3 );
+	SetGet2< Id, double >::set( solverId, "init", rateTableId, 1.0e-5 );
 	SetGet1< double >::set( solverId, "ligandconc", 24e-6 );
 	Field< vector< double > >::set( solverId, "initialstate", 
 																	initState );
