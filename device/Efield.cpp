@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Wed Jul 20 14:52:24 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Jul 20 17:49:10 2011 (+0530)
+// Last-Updated: Thu Jul 21 15:30:01 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 109
+//     Update #: 110
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -170,7 +170,6 @@ void Efield::innerReinitFunc(const Conn * conn, ProcInfo proc)
 
 void Efield::updateDistances(Eref eref)
 {
-    cout << "void Efield::updateDistances " << endl;
     unsigned int n = eref.e->numTargets("currentDest");
     distance_.resize(n);
     Conn * comps_it = eref.e->targets("currentDest", eref.i);
