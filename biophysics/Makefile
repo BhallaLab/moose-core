@@ -35,9 +35,9 @@ OBJ = \
 	MarkovChannel.o \
 	MarkovGslSolver.o \
 	MatrixOps.o \
-	testBiophysics.o	\
 	MarkovSolverBase.o \
 	MarkovSolver.o \
+	testBiophysics.o	\
 
 # GSL_LIBS = -L/usr/lib -lgsl
 
