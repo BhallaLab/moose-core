@@ -272,6 +272,7 @@ Compartment::Compartment()
 	invRm_ = 1.0;
 	Ra_ = 1.0;
 	Im_ = 0.0;
+        tmpIm_ = 0.0;
 	Inject_ = 0.0;
 	sumInject_ = 0.0;
 	initVm_ = -0.06;
@@ -357,7 +358,8 @@ double Compartment::getRa( Eref e )
 
 void Compartment::setIm( const Conn* c, double Im )
 {
-	static_cast< Compartment* >( c->data() )->Im_ = Im;
+    Compartment * comp = static_cast< Compartment* >( c->data() );
+    comp->tmpIm_ = comp->Im_ = Im;
 }
 
 double Compartment::getIm( Eref e )
@@ -491,8 +493,10 @@ void Compartment::innerProcessFunc( Eref e, ProcInfo p )
 	A_ = 0.0;
 	B_ = invRm_; 
 	sumInject_ = 0.0;
-        send1< double >(e, ImSlot, Im_); // for efield objects
-	Im_ = 0.0;
+	Im_ = tmpIm_;
+        tmpIm_ = 0.0;
+        // Send out for efield objects
+        send1< double >(e, ImSlot, Im_); 
 	// Send out the channel messages
 	send1< double >( e, channelSlot, Vm_ );
 	// Send out the message to any SpikeGens.
@@ -517,6 +521,7 @@ void Compartment::innerReinitFunc(  Eref e, ProcInfo p )
 	Vm_ = initVm_;
 	A_ = 0.0;
 	B_ = invRm_;
+        tmpIm_ = 0.0;
 	Im_ = 0.0;
 	sumInject_ = 0.0;
 	// Send the Vm over to the channels at reset.
@@ -568,7 +573,7 @@ void Compartment::innerRaxialFunc( double Ra, double Vm)
 {
 	A_ += Vm / Ra;
 	B_ += 1.0 / Ra;
-	Im_ += ( Vm - Vm_ ) / Ra;
+	tmpIm_ += ( Vm - Vm_ ) / Ra;
 }
 
 void Compartment::raxialFunc( const Conn* c, double Ra, double Vm)
@@ -582,7 +587,7 @@ void Compartment::innerAxialFunc( double Vm)
 {
 	A_ += Vm / Ra_;
 	B_ += 1.0 / Ra_;
-	Im_ += ( Vm - Vm_ ) / Ra_;
+	tmpIm_ += ( Vm - Vm_ ) / Ra_;
 }
 
 void Compartment::axialFunc( const Conn* c, double Vm)
@@ -596,7 +601,7 @@ void Compartment::injectMsgFunc( const Conn* c, double I)
 	Compartment* compt = static_cast< Compartment* >(
 					c->data() );
 	compt->sumInject_ += I;
-	compt->Im_ += I;
+	compt->tmpIm_ += I;
 }
 
 void Compartment::randInjectFunc( const Conn* c, double prob, double I)
