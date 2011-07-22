@@ -169,7 +169,7 @@ void Property::initialize(string fileName, int format)
    
 int Property::readProperties(string fileName, int format)
 {
-    int returnValue;
+    int returnValue = 1;
     string simpath = properties()[SIMPATH];
     
     if ( format == XML_FORMAT)
