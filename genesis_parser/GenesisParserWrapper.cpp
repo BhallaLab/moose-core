@@ -913,7 +913,7 @@ map< string, string >& sliClassNameConvert()
 	classnames[ "x1shape" ] = "Sli";
 	classnames[ "xtext" ] = "Sli";
 	classnames[ "ghk" ] = "GHK";
-        
+        classnames[ "efield" ] = "Efield";
 	return classnames;
 }
 
@@ -966,6 +966,7 @@ map< string, string >& sliFieldNameConvert()
 	fieldnames["PIDController.e"] = "error";
 	fieldnames["PIDController.e_integral"] = "integral";
 	fieldnames["PIDController.e_deriv"] = "derivative";
+        fieldnames["Efield.field"] = "potential";
 	return fieldnames;
 }
 

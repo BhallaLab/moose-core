@@ -28,6 +28,7 @@
         #include "KinSynChan.h"
 	#include "SpikeGen.h"
 	#include "StochSpikeGen.h"
+        #include "Efield.h"
 	#include "PulseGen.h"
 	#include "RandomSpike.h"
 	#include "Nernst.h"
@@ -444,6 +445,14 @@ NMDAChan.transitionParam = listproperty(NMDAChan.getTransitionParam, NMDAChan.se
 %attribute(pymoose::RandomSpike, double, absRefract, __get_absRefract, __set_absRefract)
 %attribute(pymoose::RandomSpike, double, lastEvent, __get_lastEvent)
 %attribute(pymoose::RandomSpike, int, reset, __get_reset, __set_reset)
+
+%include "Efield.h"
+%attribute(pymoose::Efield, double, x, __get_x, __set_x)
+%attribute(pymoose::Efield, double, y, __get_y, __set_y)
+%attribute(pymoose::Efield, double, z, __get_z, __set_z)
+%attribute(pymoose::Efield, double, scale, __get_scale, __set_scale)
+%attribute(pymoose::Efield, double, potential, __get_potential)
+
 
 %include "PulseGen.h"
 %attribute(pymoose::PulseGen, double, firstLevel, __get_firstLevel, __set_firstLevel)

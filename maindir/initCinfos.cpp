@@ -104,112 +104,116 @@ extern const Cinfo* initUniformRngCinfo();
 extern const Cinfo* initSteadyStateCinfo();
 extern const Cinfo* initscript_outCinfo();
 
-void initCinfos(){
-    static const Cinfo* AdaptorCinfo = initAdaptorCinfo();
-    static const Cinfo* AscFileCinfo = initAscFileCinfo();
-//    static const Cinfo* AtestCinfo = initAtestCinfo();
-//    static const Cinfo* AverageCinfo = initAverageCinfo();
-    static const Cinfo* BinSynchanCinfo = initBinSynchanCinfo();
-    static const Cinfo* BinomialRngCinfo = initBinomialRngCinfo();
-    static const Cinfo* CaConcCinfo = initCaConcCinfo();
-    static const Cinfo* CellCinfo = initCellCinfo();
-    static const Cinfo* ClassCinfo = initClassCinfo();
-    static const Cinfo* ClockJobCinfo = initClockJobCinfo();
-    static const Cinfo* CompartmentCinfo = initCompartmentCinfo();
-    static const Cinfo* CylPanelCinfo = initCylPanelCinfo();
-    static const Cinfo* DifShellCinfo = initDifShellCinfo();
-    static const Cinfo* DiffAmpCinfo = initDiffAmpCinfo();
-    static const Cinfo* DiskPanelCinfo = initDiskPanelCinfo();
-    static const Cinfo* EnzymeCinfo = initEnzymeCinfo();
-    static const Cinfo* ExponentialRngCinfo = initExponentialRngCinfo();
-    static const Cinfo* GammaRngCinfo = initGammaRngCinfo();
-    static const Cinfo* GeometryCinfo = initGeometryCinfo();
-    static const Cinfo* GHKCinfo = initGHKCinfo();
-    static const Cinfo* IntFireCinfo = initIntFireCinfo();
-    static const Cinfo* CalculatorCinfo = initCalculatorCinfo();
+const Cinfo ** initCinfos(){
+    static const Cinfo * cinfoList[] = {
+        initAdaptorCinfo(),
+        initAscFileCinfo(),
+        //     initAtestCinfo(),
+        //     initAverageCinfo(),
+        initBinSynchanCinfo(),
+        initBinomialRngCinfo(),
+        initCaConcCinfo(),
+        initCellCinfo(),
+        initClassCinfo(),
+        initClockJobCinfo(),
+        initCompartmentCinfo(),
+        initCylPanelCinfo(),
+        initDifShellCinfo(),
+        initDiffAmpCinfo(),
+        initDiskPanelCinfo(),
+        initEnzymeCinfo(),
+        initExponentialRngCinfo(),
+        initGammaRngCinfo(),
+        initGeometryCinfo(),
+        initGHKCinfo(),
+        initIntFireCinfo(),
+        initCalculatorCinfo(),
 
 #ifdef USE_GSL
-    static const Cinfo* GslIntegratorCinfo = initGslIntegratorCinfo();
-    static const Cinfo* SteadyStateCinfo = initSteadyStateCinfo();
+        initGslIntegratorCinfo(),
+        initSteadyStateCinfo(),
 #endif
-    static const Cinfo* GssaStoichCinfo = initGssaStoichCinfo();
-    static const Cinfo* InterpolCinfo = initInterpolCinfo();
-    static const Cinfo* Interpol2DCinfo = initInterpol2DCinfo();
-    static const Cinfo* HHGateCinfo = initHHGateCinfo();
-    static const Cinfo* HHGate2DCinfo = initHHGate2DCinfo();
-    static const Cinfo* HHChannelCinfo = initHHChannelCinfo();
-    static const Cinfo* HHChannel2DCinfo = initHHChannel2DCinfo();
-    static const Cinfo* LeakageCinfo = initLeakageCinfo();
-    static const Cinfo* HSolveCinfo = initHSolveCinfo();
-    static const Cinfo* HSolveHubCinfo = initHSolveHubCinfo();
-    static const Cinfo* HemispherePanelCinfo = initHemispherePanelCinfo();
+        initGssaStoichCinfo(),
+        initInterpolCinfo(),
+        initInterpol2DCinfo(),
+        initHHGateCinfo(),
+        initHHGate2DCinfo(),
+        initHHChannelCinfo(),
+        initHHChannel2DCinfo(),
+        initLeakageCinfo(),
+        initHSolveCinfo(),
+        initHSolveHubCinfo(),
+        initHemispherePanelCinfo(),
 #ifdef USE_MUSIC
-    static const Cinfo* InputEventChannelCinfo = initInputEventChannelCinfo();
-    static const Cinfo* InputEventPortCinfo = initInputEventPortCinfo();
-    static const Cinfo* MusicCinfo = initMusicCinfo();
-    static const Cinfo* OutputEventChannelCinfo = initOutputEventChannelCinfo();
-    static const Cinfo* OutputEventPortCinfo = initOutputEventPortCinfo();
+        initInputEventChannelCinfo(),
+        initInputEventPortCinfo(),
+        initMusicCinfo(),
+        initOutputEventChannelCinfo(),
+        initOutputEventPortCinfo(),
 #endif
-    static const Cinfo* InterSolverFluxCinfo = initInterSolverFluxCinfo();
-    static const Cinfo* KinComptCinfo = initKinComptCinfo();
-    static const Cinfo* KinPlaceHolderCinfo = initKinPlaceHolderCinfo();
-    static const Cinfo* KineticHubCinfo = initKineticHubCinfo();
-    static const Cinfo* KineticManagerCinfo = initKineticManagerCinfo();
-    static const Cinfo* KintegratorCinfo = initKintegratorCinfo();
-    static const Cinfo* MathFuncCinfo = initMathFuncCinfo();
-    static const Cinfo* Mg_blockCinfo = initMg_blockCinfo();
-    static const Cinfo* MoleculeCinfo = initMoleculeCinfo();
-    static const Cinfo* NernstCinfo = initNernstCinfo();
-    static const Cinfo* NeutralCinfo = initNeutralCinfo();
-	static const Cinfo* NormalRngCinfo = initNormalRngCinfo();
-    static const Cinfo* PIDControllerCinfo = initPIDControllerCinfo();
-    static const Cinfo* PanelCinfo = initPanelCinfo();
-	static const Cinfo* IzhikevichNrn = initIzhikevichNrnCinfo();
+        initInterSolverFluxCinfo(),
+        initKinComptCinfo(),
+        initKinPlaceHolderCinfo(),
+        initKineticHubCinfo(),
+        initKineticManagerCinfo(),
+        initKintegratorCinfo(),
+        initMathFuncCinfo(),
+        initMg_blockCinfo(),
+        initMoleculeCinfo(),
+        initNernstCinfo(),
+        initNeutralCinfo(),
+        initNormalRngCinfo(),
+        initPIDControllerCinfo(),
+        initPanelCinfo(),
+        initIzhikevichNrnCinfo(),
 #ifdef USE_MPI
-//    static const Cinfo* ParGenesisParserCinfo = initParGenesisParserCinfo();
-    static const Cinfo* ParTickCinfo = initParTickCinfo();
-    static const Cinfo* PostMasterCinfo = initPostMasterCinfo();
+        //     initParGenesisParserCinfo(),
+        initParTickCinfo(),
+        initPostMasterCinfo(),
 #else
-    static const Cinfo* GenesisParserCinfo = initGenesisParserCinfo();
-    static const Cinfo* TickCinfo = initTickCinfo();
+        initGenesisParserCinfo(),
+        initTickCinfo(),
 #endif
 #ifdef USE_SMOLDYN
-    static const Cinfo* SmoldynHubCinfo = initSmoldynHubCinfo();
-    static const Cinfo* ParticleCinfo = initParticleCinfo();
+        initSmoldynHubCinfo(),
+        initParticleCinfo(),
 #endif
-    static const Cinfo* PoissonRngCinfo = initPoissonRngCinfo();
-    static const Cinfo* PulseGenCinfo = initPulseGenCinfo();
-    static const Cinfo* EfieldCinfo = initEfieldCinfo();
+        initPoissonRngCinfo(),
+        initPulseGenCinfo(),
+        initEfieldCinfo(),
 #ifdef PYMOOSE
-    static const Cinfo* PyMooseContextCinfo = initPyMooseContextCinfo();
+        initPyMooseContextCinfo(),
 #endif
-    static const Cinfo* RCCinfo = initRCCinfo();
-    static const Cinfo* RandGeneratorCinfo = initRandGeneratorCinfo();
-    static const Cinfo* RandomSpikeCinfo = initRandomSpikeCinfo();
-    static const Cinfo* ReactionCinfo = initReactionCinfo();
-    static const Cinfo* RectPanelCinfo = initRectPanelCinfo();
-    static const Cinfo* ShellCinfo = initShellCinfo();
-    static const Cinfo* SigNeurCinfo = initSigNeurCinfo();
-    static const Cinfo* SpherePanelCinfo = initSpherePanelCinfo();
-    static const Cinfo* SpikeGenCinfo = initSpikeGenCinfo();
-    static const Cinfo* StochSynchanCinfo = initStochSynchanCinfo();
-    static const Cinfo* StoichCinfo = initStoichCinfo();
-    static const Cinfo* SurfaceCinfo = initSurfaceCinfo();
-    static const Cinfo* SymCompartmentCinfo = initSymCompartmentCinfo();
-    static const Cinfo* SynChanCinfo = initSynChanCinfo();
-    static const Cinfo* NMDAChanCinfo = initNMDAChanCinfo();
-    static const Cinfo* STPSynChanCinfo = initSTPSynChanCinfo();
-    static const Cinfo* STPNMDAChanCinfo = initSTPNMDAChanCinfo();
-    static const Cinfo* TableCinfo = initTableCinfo();
-    static const Cinfo* TauPumpCinfo = initTauPumpCinfo();
+        initRCCinfo(),
+        initRandGeneratorCinfo(),
+        initRandomSpikeCinfo(),
+        initReactionCinfo(),
+        initRectPanelCinfo(),
+        initShellCinfo(),
+        initSigNeurCinfo(),
+        initSpherePanelCinfo(),
+        initSpikeGenCinfo(),
+        initStochSynchanCinfo(),
+        initStoichCinfo(),
+        initSurfaceCinfo(),
+        initSymCompartmentCinfo(),
+        initSynChanCinfo(),
+        initNMDAChanCinfo(),
+        initSTPSynChanCinfo(),
+        initSTPNMDAChanCinfo(),
+        initTableCinfo(),
+        initTauPumpCinfo(),
 #ifdef USE_GL
-    static const Cinfo* GLcellCinfo = initGLcellCinfo();
-    static const Cinfo* GLviewCinfo = initGLviewCinfo();
+        initGLcellCinfo(),
+        initGLviewCinfo(),
 #endif
-    static const Cinfo* TimeTableCinfo = initTimeTableCinfo();
-    static const Cinfo* TriPanelCinfo = initTriPanelCinfo();
-    static const Cinfo* UniformRngCinfo = initUniformRngCinfo();
-    static const Cinfo* script_outCinfo = initscript_outCinfo();
+        initTimeTableCinfo(),
+        initTriPanelCinfo(),
+        initUniformRngCinfo(),
+        initscript_outCinfo(),
+    };
+
+    return cinfoList;
     
     
 }
