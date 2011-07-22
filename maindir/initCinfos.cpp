@@ -71,6 +71,7 @@ extern const Cinfo* initSmoldynHubCinfo();
 #endif
 extern const Cinfo* initPoissonRngCinfo();
 extern const Cinfo* initPulseGenCinfo();
+extern const Cinfo * initEfieldCinfo();
 #ifdef PYMOOSE
 extern const Cinfo* initPyMooseContextCinfo();
 #endif
@@ -89,6 +90,8 @@ extern const Cinfo* initSurfaceCinfo();
 extern const Cinfo* initSymCompartmentCinfo();
 extern const Cinfo* initSynChanCinfo();
 extern const Cinfo* initNMDAChanCinfo();
+extern const Cinfo* initSTPSynChanCinfo();
+extern const Cinfo* initSTPNMDAChanCinfo();
 extern const Cinfo* initTableCinfo();
 extern const Cinfo* initTauPumpCinfo();
 #ifdef USE_GL
@@ -176,6 +179,7 @@ void initCinfos(){
 #endif
     static const Cinfo* PoissonRngCinfo = initPoissonRngCinfo();
     static const Cinfo* PulseGenCinfo = initPulseGenCinfo();
+    static const Cinfo* EfieldCinfo = initEfieldCinfo();
 #ifdef PYMOOSE
     static const Cinfo* PyMooseContextCinfo = initPyMooseContextCinfo();
 #endif
@@ -194,6 +198,8 @@ void initCinfos(){
     static const Cinfo* SymCompartmentCinfo = initSymCompartmentCinfo();
     static const Cinfo* SynChanCinfo = initSynChanCinfo();
     static const Cinfo* NMDAChanCinfo = initNMDAChanCinfo();
+    static const Cinfo* STPSynChanCinfo = initSTPSynChanCinfo();
+    static const Cinfo* STPNMDAChanCinfo = initSTPNMDAChanCinfo();
     static const Cinfo* TableCinfo = initTableCinfo();
     static const Cinfo* TauPumpCinfo = initTauPumpCinfo();
 #ifdef USE_GL
