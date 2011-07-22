@@ -77,6 +77,7 @@ class Compartment
 			double Ra_;
 			double Vm_;
 			double Im_;
+                        double tmpIm_;
 			double A_;
 			double B_;
 
