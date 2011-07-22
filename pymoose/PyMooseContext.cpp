@@ -26,7 +26,7 @@ using namespace pymoose;
 
 extern unsigned int init(int& argc, char **& argv);
 extern void initSched();
-extern void initCinfos();
+extern const Cinfo ** initCinfos();
 extern const string& helpless();
 extern const string& getClassDoc(const string&, const string&);
 extern const string& getCommandDoc(const string&);
