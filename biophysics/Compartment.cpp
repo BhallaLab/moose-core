@@ -156,7 +156,7 @@ const Cinfo* initCompartmentCinfo()
 	///////////////////////////////////////////////////////
 		// Sends out the membrane potential. Used for SpikeGen.
 		new SrcFinfo( "VmSrc", Ftype1< double >::global() ),
-
+                new SrcFinfo( "ImSrc", Ftype1< double >::global() ),
 	//////////////////////////////////////////////////////////////////
 	// SharedFinfo definitions
 	//////////////////////////////////////////////////////////////////
@@ -256,6 +256,8 @@ static const Slot raxialSlot =
 	initCompartmentCinfo()->getSlot( "raxial.raxialSrc" );
 static const Slot VmSlot =
 	initCompartmentCinfo()->getSlot( "VmSrc" );
+static const Slot ImSlot =
+	initCompartmentCinfo()->getSlot( "ImSrc" );
 
 //////////////////////////////////////////////////////////////////
 // Here we put the Compartment class functions.
@@ -488,8 +490,9 @@ void Compartment::innerProcessFunc( Eref e, ProcInfo p )
 	}
 	A_ = 0.0;
 	B_ = invRm_; 
-	Im_ = 0.0;
 	sumInject_ = 0.0;
+        send1< double >(e, ImSlot, Im_); // for efield objects
+	Im_ = 0.0;
 	// Send out the channel messages
 	send1< double >( e, channelSlot, Vm_ );
 	// Send out the message to any SpikeGens.
