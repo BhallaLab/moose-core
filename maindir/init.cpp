@@ -34,7 +34,7 @@
 #include <mpi.h>
 #include "MuMPI.h"	// Provides MUSIC-compatible MPI calls
 #endif // USE_MPI
-extern void initCinfos();
+extern const Cinfo ** initCinfos();
 extern bool setupProxyMsg(
 	unsigned int srcNode, Id proxy, unsigned int srcFuncId,
 	unsigned int proxySize,
