@@ -27,6 +27,7 @@ void fieldOp( const Eref& e, const Qinfo* q, const char* buf,
 
 	MsgFuncBinding mfb( q->mid(), retFunc );
 	Qinfo retq( retFunc, e.index(), totSize, 0 );
+	retq.setProcInfo( q->getProcInfo() );
 	retq.addToQbackward( q->getProcInfo(), mfb, temp );
 	delete[] temp;
 }

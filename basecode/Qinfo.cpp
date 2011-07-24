@@ -231,10 +231,12 @@ void readBuf(const Qvec& qv, const ProcInfo* proc )
 			}
 		}
 		buf += sizeof( Qinfo ) + qi->size();
-		if ( qi->size() % 2 != 0 ) {
+		if ( qi->size() % 2 != 0 || qi->size() > 2000000 || qi->mid() == Msg::badMsg ) {
+			// Qinfo::reportQ();
 			cout << proc->nodeIndexInGroup << "." << 
 				proc->threadIndexInGroup << ": readBuf is odd sized: " <<
-				qi->size() << endl;
+				qi->size() << ", MsgId = " << qi->mid() << endl;
+			break;
 		}
 	}
 }
@@ -453,22 +455,47 @@ void Qinfo::reportQ()
 	if ( mpiRecvQ_ ) innerReportQ( *mpiRecvQ_, "mpiRecvQ" );
 }
 
+
+/*
+pthread_mutex_t* init_mutex()
+{
+	static pthread_mutex_t* mutex = new pthread_mutex_t;
+	pthread_mutex_init( mutex, NULL );
+	cout << "inititing mutex\n";
+
+	return mutex;
+}
+*/
+
 void Qinfo::addToQforward( const ProcInfo* p, MsgFuncBinding b, 
 	const char* arg )
 {
+	// static pthread_mutex_t *mutex = init_mutex(); // only called once.
 	m_ = b.mid;
 	f_ = b.fid;
+	assert( b.mid != Msg::badMsg );
 	isForward_ = 1;
-	(*outQ_)[p->groupId].push_back( p->threadIndexInGroup, this, arg );
+	// pthread_mutex_lock( mutex );
+		(*outQ_)[p->groupId].push_back( p->threadIndexInGroup, this, arg );
+	// pthread_mutex_unlock( mutex );
 }
 
 void Qinfo::addToQbackward( const ProcInfo* p, MsgFuncBinding b, 
 	const char* arg )
 {
+	// static pthread_mutex_t *mutex = init_mutex(); // only called once.
+
 	m_ = b.mid;
 	f_ = b.fid;
+	assert( b.mid != Msg::badMsg );
 	isForward_ = 0;
-	(*outQ_)[p->groupId].push_back( p->threadIndexInGroup, this, arg );
+	// if ( p->threadIndexInGroup != 0 ) cout << "#" << flush;
+	// if ( procIndex_ != p->threadIndexInGroup ) cout << "@" << flush;
+	// cout << p->groupId << ":" << p->threadIndexInGroup << " " << flush;
+
+	// pthread_mutex_lock( mutex );
+		(*outQ_)[p->groupId].push_back( p->threadIndexInGroup, this, arg );
+	// pthread_mutex_unlock( mutex );
 }
 
 /// Static func.
@@ -504,6 +531,9 @@ bool Qinfo::addToStructuralQ() const
 void Qinfo::addSpecificTargetToQ( const ProcInfo* p, MsgFuncBinding b, 
 	const char* arg, const DataId& target, bool isForward )
 {
+	// if ( !isForward )
+		cout << p->groupId << ":" << p->threadIndexInGroup << " " << 
+			b.mid << ", " << size_ << endl << flush;
 	m_ = b.mid;
 	f_ = b.fid;
 	isForward_ = isForward;

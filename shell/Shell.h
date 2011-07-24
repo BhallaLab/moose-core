@@ -448,6 +448,14 @@ class Shell
 		static void wildcard( const string& path, vector< Id >& list );
 
 		/**
+		 * Cleans up all Elements except /root itself, /clock, /classes,
+		 * and /Msgs.
+		 * In due course will also do suitable reinitialization of
+		 * tick and other values.
+		 */
+		 static void cleanSimulation();
+
+		/**
 		 * Clears out the three temporary Msgs that are used for 
 		 * assignments: Reduce, AssignVec and Assignment
 		 */

@@ -224,6 +224,10 @@ void ZombiePool::setConc( const Eref& e, const Qinfo* q, double conc )
 
 double ZombiePool::getConc( const Eref& e, const Qinfo* q ) const
 {
+	/*
+	const ProcInfo* p = q->getProcInfo();
+	cout << p->groupId << ":" << p->threadIndexInGroup << " ZombiePool getConc " << e.element()->getName() << endl << flush;
+	*/
 	unsigned int pool = convertIdToPoolIndex( e.id() );
 	return 1e3 * S_[ pool ] / ( NA * lookupSizeFromMesh( e, requestSize()));
 
