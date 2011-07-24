@@ -13867,4 +13867,226 @@ So the start/stop code isn't apparently the problem. Next steps:
 
 6 July 2011.
 Ghevar test is OK, even on 16 cores.
-Changed the start/stop test to do two timesteps. This too is OK.
+Changed the start/stop test to do two timesteps. This too is OK. Checkin 2825.
+
+The hackForSendTo has turned up in the regression test problem zone.
+
+I put in several more tests in the readBuf function in Qinfo.cpp, to
+check that the buffer entry is good. Lots of problem entries come out.
+Some observations:
+- Only happens with > 1 thread
+- Only happens in the rtReadKkit section, at doReinit or doStart.
+
+Tried setting runtime to a value not an integral multiple of dt, to ensure that
+the sequencing doesn't suffer from roundoff error. Still get assertion
+fail for # of steps, still get lots of 'odd sized' outcomes from ReadBuf.
+
+============================================================================
+9 July 2011
+Major clue: Looks like ReadKkit is not the problem, it is something that
+happens when the model is zombified or when the gsl integrator is built.
+============================================================================
+10 July
+Tracking down error:
+- Put in assertions for zero MsgIds in addToQForward and Backward. Doesn't
+pick anything, though subsequent readBufs do show zero MsgIds. Is this a
+case of Msg corruption?
+
+Tried a couple of runs using valgrind, no problem found.
+
+============================================================================
+12 July
+Possibly the setup process of the ksolver messes up the messaging. If so, 
+then it should be possible to get the same errors if I do the setup as
+before, but don't run it. Instead run another model. First run just the
+graphs.
+
+Going through the rtReadKkit steps, cutting away parts to find which causes
+errors in the clock running. Seems the problem is loading the model after all.
+============================================================================
+14 July.
+Narrowing it down. Looks like the second of the doReinit calls in 
+rtReadKkit around line 67, introduces errors into the message queue.
+
+A closer examination shows that the first doReinit does too, just not 
+every time.
+
+It begins to look like sending control requests around by messaging is somewhat
+dangerous, specially between clock and Shell. There is no test for structural
+Msgs, though of course all of these are structural.
+
+The messages received by the Clock for reinit seem OK, but should
+check what happens with the ack it sends back.
+
+Note that all these errors occur even when no model is loaded. I have called
+doSetClock six times before the first doRenit.
+
+Should go back to analyze why the earlier start/stop tests didn't have a
+problem. Is it reinit?
+
+============================================================================
+15 July.
+Checking if earlier tests caused a problem that manifests only with rtReadKkit.
+Commented out all regression tests except rtReadKkit. Still have the bug.
+Conversely, if only rtReadKkit is commented out, all runs fine (5 repetitions
+of the tests, two threads in each case).
+
+Now commented out all the doSetClock calls. This leaves the doReinit
+as the only think happening in the rtReadKkit function. All else has already
+been commented out.
+
+Now I get fewer queue entry errors (3 in 10 runs). Also it hangs in doStart
+because the clocks have not had their timesteps assigned: must fix or provide
+sensible defaults. I thought the default was 1.
+When I put back just one clock, I have more errors ( 7 in 10 runs)
+
+p-value: Null hypothesis: we have a single distribution with p as the
+probability of an error. In the first set of samples we got 3/10.
+Prob of this is p^3*(1-p)^7*(3C10)
+In the second set of samples we got 7/10.
+Prob of this is p^7*(1-p)^3*(7C10)
+
+Combined prob is the product of these.
+3C10 = 7C10 = 10 * 9 * 8 / (1 * 2 * 3 ) = 10 * 3 * 4 = 120.
+Suppose p is 0.5. Then we have 0.5^10 = 1/1024.
+So total p = (1/1024) * (1/1024) * 120 * 120 ~ 0.014. Rather unlikely.
+
+Does the doSetClock add to this likelihood?  Uncommented all six clock
+assignments.
+I see a bad queue before doReinit 0/20 times. So doReinit is bad.
+
+What happens if I have in fact loaded in the model?
+bad queue before doReinit: 0/10
+bad queue after one of the doReinits: 7/10.
+
+doReinit it is.
+
+Checked if there is a problem with the messaging during Clock::reinitPhase2
+to send the ack. Used a direct pointer call to the Shell to handle the ack,
+instead of sending the ack through messaging. Now it fails 10/10 times.
+
+============================================================================
+17 July.
+There is a Compartment called 'compt' whose reinit is being called in 
+rtReadKkit. This sends out a message. Where did this compartment come from?
+Its parent is not root, just the id ahead of it. The parent name is 'n'.
+The parent of 'n' is probably root, but gdb couldn't handle it.
+
+I need to write a function to check for and clean up cruft from the unit tests.
+First, what happens if I delete 'n' ?
+Still croaks. Possibly other cruft is present. Need to do a 
+systematic cleanup here. Working on Shell::cleanAll(), and a corresponding
+utility func doClean.
+
+Implemented. Reports and cleans more cruft, but the simulation still
+croaks.
+
+============================================================================
+22 July.
+Revisited the reinit calls. Now it goes only to the gsl and to the plot
+objects during the reinits in rtReadKkit.
+
+Followed these by putting breaks on the doReinit calls in rtReadKkit,
+on Tick::reinit, and Msg::process.
+
+This will introduce calls to requestData from the Table.
+Still need to figure out if there are any other things in the queue.
+
+Removed table from sched.
+No msg Q problems in 10/10 of the runs using gdb.
+No msg Q problems in 10/10 of the runs done directly.
+
+Looks like the get call may be a problem.
+
+============================================================================
+23 July
+
+Trying to pin down source of queue problems.
+Put in lots of printf debugging. These show that all the reinit stuff seems to
+be triggered from thread 1, but to be executed on thread 0.
+Put a mutex to protect the queue in addToQforward and addToQbackward.
+Doesn't help. This is a surprise. It would seem to rule out cases where the
+buffer is trodden on simultaneously by different threads, which had been my
+working hypothesis.
+Tried valgrind, but as before, it doesn't spot anything, and the sim runs
+this time flawlessly. Will try one more time. Again flawless. Heisenbug.
+
+Try censoring input to addToQ... Did that already. I check for bad Msgs.
+Try running with 1 core. There are still multiple threads, but only one
+process thread. Still has problems.
+
+Tried to put in a printf debug in Qinfo::addSpecificTargetToQ.
+It isn't being called. Odd. How does the get return specify its target?  
+Seems it just puts stuff in the queue without specifying unique target.
+Is the fieldOp doing something bad, such as errors with the PrepackedBuffer?
+Why should it only show up in the reinit?
+
+============================================================================
+24 July
+
+Redesign of messaging for better type-safety, efficiency etc.
+
+- The Qinfo really needs only the following:
+	Source ObjId
+	MsgBinding index
+	data ptr or reference (implicit size info here, wrt next entry)
+  This is because all nodes have the entire message and Element info, and
+  can traverse through the message Binding stuff on their own.
+
+Decisions:
+1. Contiguous Qinfo and data, or a vector of Qinfos; and data separate?
+2. Data in situ on source Object, or copied over to a buffer?
+3. Freeform Data, or doubles, or uints?
+4. Handling of reverse messages.
+5. Message grouping or just universal transfer?
+6. Handling of Shell-to-Shell communications
+7. Threads and buffers
+
+1. Contiguous Qinfo and data, or a vector of Qinfos; and data separate?
+   Separate vector of Qinfos has the following gains:
+	- Less likelihood of funny alignment problems => type safety on Qinfos.
+	- Can preallocate: faster
+	- May be able to return to the idea of synchronous messages where we
+		know the Qinfos ahead of time and don't even need to send them.
+   Separate vector of Qinfos has the following costs:
+   	- Extra send or memory shuffling step to build a send buffer.
+Decision: This is a clear case for separate vector of Qinfos.
+
+2. Data in situ on source Object, or copied over to a buffer?
+   In situ has the following gains:
+   	- One fewer copy in many cases
+   In situ has the following costs:
+   	- Hard to do multiple readonly lookup/return type calls
+	- Need to separately copy over data for send buffer
+Decision: Copy it over to a buffer. The in situ version may need copying anyway
+	for MPI send buffers.
+
+3. Freeform Data, or doubles, or uints?
+   Freeform:
+    	- Efficient use of space. Marginal at best.
+   Doubles:
+   	- Alignment
+	- No conversion for most common data type
+   UInts
+   	- Alignment
+
+Decision: Use doubles.
+
+4. Handling of reverse/return messages.
+  Extra flag in Qinfo to say it is reverse
+  	- MsgBinding info now inadequate.
+  Separate MsgBinding structure
+  	- Will we need this for every 'get' field?
+  Add return info as part of Msg content
+  	- Brings back messy recasting of message direction info.
+  Add a field in Qinfo to hold fid, the MsgBinding field now holds MsgId.
+ 
+5. Message grouping?
+	No. For now just have one group.
+
+6. Handling of Shell-to-Shell communications
+
+7. Threads and buffers
+	Use interleaved indices and a single buffer in two parts: the
+	Qinfo part, and the data part. Ah. Problem here with data part, don't
+	know its size ahead of time.

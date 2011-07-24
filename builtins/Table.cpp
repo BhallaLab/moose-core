@@ -234,6 +234,7 @@ void Table::reinit( const Eref& e, ProcPtr p )
 	vec_.resize( 0 );
 	outputIndex_ = 0;
 	lastTime_ = 0;
+	// cout << "tabReinit on :" << p->groupId << ":" << p->threadIndexInGroup << endl << flush;
 	requestData.send( e, p, recvDataBuf.getFid() );
 }
 

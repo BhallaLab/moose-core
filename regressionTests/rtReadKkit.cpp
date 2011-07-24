@@ -37,18 +37,21 @@ void rtReadKkit()
 
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	vector< unsigned int > dims( 1, 1 );
+	Shell::cleanSimulation();
 
 	Id kineticId = shell->doLoadModel( "Kholodenko.g", "/rkktest" );
 	assert( kineticId != Id() );
 	unsigned int numVarMols = Field< unsigned int >::get( 
 		kineticId, "nVarPools" );
-	assert ( numVarMols == 15 );
+	// assert ( numVarMols == 15 );
 
 	Id gsl = shell->doCreate( "GslIntegrator", kineticId, "gsl", dims );
 	bool ret = SetGet1< Id >::set( gsl, "stoich", kineticId );
 	assert( ret );
 	ret = Field< bool >::get( gsl, "isInitialized" );
 	assert( ret );
+	/*
+	*/
 
 	shell->doSetClock( 0, 10 );
 	shell->doSetClock( 1, 10 );
@@ -59,13 +62,20 @@ void rtReadKkit()
 	shell->doUseClock( "/rkktest/gsl", "process", 0 );
 	shell->doUseClock( "/rkktest/graphs/##[TYPE=Table],/rkktest/moregraphs/##[TYPE=Table]", "process", 2 );
 
+	cout << "Before Reinit\n";
+	Qinfo::reportQ();
 	shell->doReinit();
-	shell->doStart( 5000.0 );
+	cout << "Between Reinits\n";
+	Qinfo::reportQ();
+	shell->doReinit();
+	cout << "After Reinit\n";
+	Qinfo::reportQ();
+	shell->doStart( 5001.0 );
 
 	Id plotId( "/rkktest/graphs/conc1/MAPK-PP.Co" );
 	assert( plotId != Id() );
 	unsigned int size = Field< unsigned int >::get( plotId, "size" );
-	assert( size == 501 ); // Note that dt was 10.
+	assert( size == 502 ); // Note that dt was 10.
 	
 	/*
 	bool ok = SetGet::strSet( 
@@ -85,6 +95,6 @@ void rtReadKkit()
 	assert( val >= 0 && val < TOLERANCE );
 
 	/////////////////////////////////////////////////////////////////////
-	shell->doDelete( kineticId );
+	// shell->doDelete( kineticId );
 	cout << "." << flush;
 }
