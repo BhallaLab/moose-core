@@ -1123,3 +1123,20 @@ void Shell::digestReduceFieldDimension(
 	ack()->send( er, &p_, Shell::myNode(), OkStatus );
 }
 
+
+// Static func
+void Shell::cleanSimulation()
+{
+	Eref sheller = Id().eref();
+	Shell* s = reinterpret_cast< Shell* >( sheller.data() );
+	vector< Id > kids;
+	Neutral::children( sheller, kids );
+	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i )
+	{
+		if ( i->value() > 4 ) {
+			cout << "Shell::cleanSimulation: deleted cruft at " << 
+				i->value() << ": " << i->path() << endl;
+			s->doDelete( *i );
+		}
+	}
+}
