@@ -302,14 +302,20 @@ void HSolveActive::sendValues( ) {
 		initCaConcCinfo( )->getSlot( "concSrc" );
 	static const Slot compartmentChannelVmSlot =
 		initCompartmentCinfo( )->getSlot( "channel.Vm" );
-	
+    static const Slot compartmentImSrcSlot =
+        initCompartmentCinfo( )->getSlot( "ImSrc" );
+    
 	for ( unsigned int i = 0; i < compartmentId_.size( ); ++i ) {
 		send1< double > (
 			compartmentId_[ i ].eref(),
 			compartmentVmSrcSlot,
 			V_[ i ]
 		);
-		
+		send1< double > (
+                compartmentId_[ i ].eref(),
+                compartmentImSrcSlot,
+                getIm( i )
+        );
 		// An advantage of sending from the compartment here is that we can use
 		// as simple 'send' as opposed to 'sendTo'. sendTo requires the conn
 		// index for the target, and that will require extra book keeping.
