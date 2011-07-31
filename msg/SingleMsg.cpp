@@ -29,9 +29,26 @@ SingleMsg::~SingleMsg()
 	;
 }
 
-void SingleMsg::exec( const char* arg, const ProcInfo *p ) const
+void SingleMsg::exec( const Qinfo* q, const char* arg, FuncId fid,
+	const ProcInfo *p ) const
 {
-	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
+	if ( q->src().element() == e1_ ) { // forward message
+		if ( handleForward( p->threadIndexInGroup ) ) {
+			const OpFunc* f = e2_->cinfo()->getOpFunc( fid );
+			//cout << ": called\n";
+			f->op( Eref( e2_, i2_ ), arg );
+			return;
+		}
+	} else {
+		if ( handleBackward( p->threadIndexInGroup ) ) {
+			const OpFunc* f = e1_->cinfo()->getOpFunc( fid );
+			//cout << ": called\n";
+			f->op( Eref( e1_, i1_ ), arg );
+			return;
+		}
+	}
+
+	// const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
 
 	// cout <<  p->nodeIndexInGroup << "." << p->threadIndexInGroup << ": " << e2_->getName() << ", " << i2_;
 	/// This partitions the messages between threads.

@@ -18,71 +18,46 @@
 
 // Declaration of static fields
 bool Qinfo::isSafeForStructuralOps_ = 0;
-vector< Qvec > Qinfo::q1_;
-vector< Qvec > Qinfo::q2_;
-vector< Qvec >* Qinfo::inQ_ = &Qinfo::q1_;
-vector< Qvec >* Qinfo::outQ_ = &Qinfo::q2_;
+vector< double > Qinfo::q0_( 1000, 0.0 );
+vector< double > Qinfo::q1_( 1000, 0.0 );
+double* Qinfo::inQ_ = &Qinfo::q0_[0];
+double* Qinfo::outQ_ = &Qinfo::q1_[0];
 vector< vector< ReduceBase* > > Qinfo::reduceQ_;
 
-Qvec Qinfo::mpiQ1_;
-Qvec Qinfo::mpiQ2_;
-Qvec* Qinfo::mpiInQ_ = &mpiQ1_;
-Qvec* Qinfo::mpiRecvQ_ = &mpiQ2_;
+vector< double > Qinfo::mpiQ1_( 1000, 0.0 );
+vector< double > Qinfo::mpiQ2_( 1000, 0.0 );
+double* Qinfo::mpiInQ_ = &mpiQ1_[0];
+double* Qinfo::mpiRecvQ_ = &mpiQ2_[0];
 
-vector< SimGroup > Qinfo::g_;
-vector< char > Qinfo::structuralQ_;
+// vector< SimGroup > Qinfo::g_;
+vector< Qinfo > Qinfo::structuralQinfo_;
+vector< double > Qinfo::structuralQdata_;
 
-void hackForSendTo( const Qinfo* q, const char* buf );
+// void hackForSendTo( const Qinfo* q, const char* buf );
 static const unsigned int BLOCKSIZE = 20000;
 
-Qinfo::Qinfo( FuncId f, DataId srcIndex, unsigned int size, bool useSendTo )
-	:	
-		useSendTo_( useSendTo ), 
-		isForward_( 1 ), 
-		// isDummy_( 0 ), 
-		m_( 0 ), 
-		f_( f ), 
-		srcIndex_( srcIndex ),
-		size_( size ),
-		procIndex_( 0 )
-{;}
 
-Qinfo::Qinfo( DataId srcIndex, unsigned int size, bool useSendTo )
-	:	
-		useSendTo_( useSendTo ), 
-		isForward_( 1 ), 
-		// isDummy_( 0 ), 
-		m_( 0 ), 
-		f_( 0 ), 
-		srcIndex_( srcIndex ),
-		size_( size ),
-		procIndex_( 0 )
-{;}
-
+/// Default dummy Qinfo creation.
 Qinfo::Qinfo()
 	:	
-		useSendTo_( 0 ), 
-		isForward_( 1 ), 
-		// isDummy_( 0 ), 
-		m_( 0 ), 
-		f_( 0 ), 
-		srcIndex_( 0 ),
-		size_( 0 ),
-		procIndex_( 0 )
+		src_(),
+		msgBindIndex_(0),
+		threadNum_( 0 ),
+		dataIndex_( 0 )
 {;}
 
-/// Static function
-// deprecated
-/*
-Qinfo Qinfo::makeDummy( unsigned int size )
-{
-	Qinfo ret( 0, size, 0 ) ;
-	// ret.isDummy_ = 1;
-	return ret;
-}
-*/
+Qinfo::Qinfo( const ObjId& src, 
+	BindIndex bindIndex, unsigned short threadNum,
+	unsigned int dataIndex )
+	:	
+		src_( src ),
+		msgBindIndex_( bindIndex ),
+		threadNum_( threadNum ),
+		dataIndex_( dataIndex )
+{;}
 
 /**
+ * Deprecated
  * Static func: Sets up a SimGroup to keep track of thread and node
  * grouping info. This is used by the Qinfo to manage assignment of
  * threads and queues.
@@ -90,17 +65,10 @@ Qinfo Qinfo::makeDummy( unsigned int size )
  * Returns the group number of the new group.
  * have that because it will require updates to messages.
  * Returns number of new sim group.
- */
 unsigned int Qinfo::addSimGroup( unsigned short numThreads, 
 	unsigned short numNodes )
 {
 	const unsigned int DefaultMpiBufSize = 1000; // bytes.
-	/*
-	unsigned short ng = g_.size();
-	unsigned short si = 0;
-	if ( ng > 0 )
-		si = g_[ng - 1].startThread + g_[ng - 1].numThreads;
-	*/
 	// For starters, just put this group on all nodes.
 	SimGroup sg( 0, numNodes, DefaultMpiBufSize );
 	g_.push_back( sg );
@@ -112,25 +80,28 @@ unsigned int Qinfo::addSimGroup( unsigned short numThreads,
 
 	return g_.size() - 1;
 }
+ */
 
-// Static function
+/*
+// Static function, deprecated
 unsigned int Qinfo::numSimGroup()
 {
 	return g_.size();
 }
 
-// Static function
+// Static function, deprecated
 const SimGroup* Qinfo::simGroup( unsigned int index )
 {
 	assert( index < g_.size() );
 	return &( g_[index] );
 }
 
-// Static function
+// Static function, deprecated
 void Qinfo::clearSimGroups()
 {
 	g_.clear();
 }
+*/
 
 /**
  * This is called within barrier1 of the ProcessLoop. It isn't
@@ -139,9 +110,18 @@ void Qinfo::clearSimGroups()
 void Qinfo::clearStructuralQ()
 {
 	isSafeForStructuralOps_ = 1;
-	const char* begin = &( structuralQ_[0] );
-	const char* end = begin + structuralQ_.size();
-	const char* buf = begin;
+	double* buf = &structuralQdata_[0];
+	for ( unsigned int i = 0; i < structuralQinfo_.size(); ++i ) {
+		const Qinfo* qi = &structuralQinfo_[i];
+		if ( !qi->isDummy() ) {
+			const Element* e = qi->src_.element();
+			e->exec( qi, Shell::procInfo(), buf + qi->dataIndex_ );
+		}
+	}
+	/*
+	const double* begin = &( structuralQ_[0] );
+	const double* end = begin + structuralQ_.size();
+	const double* buf = begin;
 	while ( buf < end ) {
 		const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
 		const Msg *m = Msg::getMsg( q->mid() );
@@ -157,31 +137,15 @@ void Qinfo::clearStructuralQ()
 		}
 		buf += sizeof( Qinfo ) + q->size();
 	}
+	*/
 
-/*
-
-	for ( vector< const char* >::iterator i = structuralQ_.begin(); 
-		i != structuralQ_.end(); ++i ) {
-		const char* buf = *i;
-		const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
-		const Msg *m = Msg::getMsg( q->mid() );
-		if ( m ) { // may be 0 if model restructured before msg delivery.
-			Element* tgt;
-			if ( q->isForward() )
-				tgt = m->e2();
-			else 
-				tgt = m->e1();
-			assert( tgt == Id()() ); // The tgt should be the shell
-			const OpFunc* func = tgt->cinfo()->getOpFunc( q->fid() );
-			func->op( Eref( tgt, 0 ), buf );
-		}
-	}
-*/
 	isSafeForStructuralOps_ = 0;
-	structuralQ_.resize( 0 );
+	structuralQinfo_.resize( 0 );
+	structuralQdata_.resize( 0 );
 }
 
-// local func
+/*
+// local func. Deprecated.
 // Note that it does not advance the buffer.
 void hackForSendTo( const Qinfo* q, const char* buf )
 {
@@ -200,15 +164,36 @@ void hackForSendTo( const Qinfo* q, const char* buf )
 		func->op( Eref( tgt, *tgtIndex ), buf );
 	}
 }
+*/
 
-void readBuf(const Qvec& qv, const ProcInfo* proc )
+void readBuf(const double* buf, const ProcInfo* proc )
 {
+	/*
 	assert( qv.allocatedSize() >= Qvec::HeaderSize &&
 		qv.mpiArrivedDataSize() >= Qvec::HeaderSize );
 	const char* buf = qv.data();
-
-	// unsigned int bufsize = qv.dataQsize();
 	unsigned int bufsize = qv.mpiArrivedDataSize() - Qvec::HeaderSize;
+	*/
+	unsigned int bufsize = static_cast< unsigned int >( buf[0] );
+	unsigned int numQinfo = static_cast< unsigned int >( buf[1] );
+	assert( bufsize > numQinfo * 3 );
+
+	const double* qptr = buf + 2;
+
+	for ( unsigned int i = 0; i < numQinfo; ++i ) {
+		const Qinfo* qi = reinterpret_cast< const Qinfo* >( qptr );
+		qptr += 3;
+		if ( !qi->isDummy() ) {
+			const Element* e = qi->src().element();
+			e->exec( qi, proc, buf + qi->dataIndex() );
+		}
+	}
+
+	
+
+	////////////////////////////////////////////////////////////////////
+
+	/*
 	const char* end = buf + bufsize;
 	Qinfo::doMpiStats( bufsize, proc ); // Need zone info too.
 
@@ -239,6 +224,7 @@ void readBuf(const Qvec& qv, const ProcInfo* proc )
 			break;
 		}
 	}
+	*/
 }
 
 /**
@@ -253,15 +239,20 @@ void Qinfo::doMpiStats( unsigned int bufsize, const ProcInfo* proc )
 /** 
  * Static func
  * In this variant we just go through the specified queue. 
- * The job of thread safety is left to the calling function.
- * Thread safe as it is readonly in the Queue.
+ * Thread safety is fragile here. We require that all the exec functions
+ * on the Element or on the Msg, should internally guarantee that they
+ * will dispatch calls only to the ObjIds that are allowed for the
+ * running thread.
  */ 
 void Qinfo::readQ( const ProcInfo* proc )
 {
 	assert( proc );
+	readBuf( inQ_, proc );
+	/*
 	assert( proc->groupId < inQ_->size() );
 	for ( unsigned int i = 0; i < inQ_->size(); ++i )
 		readBuf( ( *inQ_ )[ i ], proc );
+		*/
 }
 
 /**
@@ -275,14 +266,16 @@ void Qinfo::readMpiQ( const ProcInfo* proc, unsigned int node )
 {
 	assert( proc );
 	// assert( proc->groupId < mpiQ_.size() );
-	if ( mpiInQ_->mpiArrivedDataSize() > Qvec::HeaderSize )
+	// if ( mpiInQ_->mpiArrivedDataSize() > Qvec::HeaderSize )
 		// cout << Shell::myNode() << ":" << proc->threadIndexInGroup << "	mpi data transf = " << mpiInQ_->mpiArrivedDataSize() << endl;
 
-	readBuf( *mpiInQ_, proc );
+	readBuf( mpiInQ_, proc );
 
+	/*
 	if ( proc->nodeIndexInGroup == 0 && mpiInQ_->isBigBlock() ) 
 		// Clock::requestBigBlock( proc->groupId, node );
 		;
+		*/
 }
 
 /**
@@ -295,18 +288,72 @@ void Qinfo::readMpiQ( const ProcInfo* proc, unsigned int node )
  */
 void Qinfo::swapQ()
 {
-	// This happens here protected by the barrier, so that operations that
-	// change the structure of the model can occur without risk of 
-	// affecting ongoing messaging.
+	/**
+	 * clearStructuralQ happens here protected by the barrier, so that 
+	 * operations that
+	 * change the structure of the model can occur without risk of 
+	 * affecting ongoing messaging.
+	 */
 	clearStructuralQ(); // static function.
 
-	if ( inQ_ == &q2_ ) {
-		inQ_ = &q1_;
-		outQ_ = &q2_;
-	} else {
-		inQ_ = &q2_;
-		outQ_ = &q1_;
+	/**
+	 * Here we just deposit all the data from the data and Q vectors into
+	 * the inQ.
+	 */
+	unsigned int bufsize = 0;
+	unsigned int datasize = 0;
+	unsigned int numQinfo = 0;
+	for ( unsigned int i = 0; i < Shell::numCores(); ++i ) {
+		numQinfo += qBuf_[i].size();
+		datasize += dBuf_[i].size();
 	}
+
+	bufsize = numQinfo * 3 + datasize + 2;
+	if ( bufsize > q0_.capacity() )
+		q0_.reserve( bufsize + bufsize / 2 );
+	q0_.resize( bufsize );
+	inQ_ = &q0_[0];
+	q0_[0] = bufsize;
+	q0_[1] = numQinfo;
+	double* qptr = &q0_[2];
+	unsigned int prevQueueDataIndex = numQinfo * 3 + 2;
+	for ( unsigned int i = 0; i < Shell::numCores(); ++i ) {
+		for ( vector< Qinfo >::iterator j = qBuf_[i].begin(); 
+			j != qBuf_[i].end(); ++j ) {
+			Qinfo* qi = reinterpret_cast< Qinfo* >( qptr );
+			*qi = *j;
+			qi->dataIndex_ += prevQueueDataIndex;
+			qptr += 3;
+		}
+		prevQueueDataIndex += dBuf_[i].size();
+	}
+	assert( prevQueueDataIndex == bufsize );
+
+	/*
+	if ( inQ_ == &q2_[0] ) {
+		inQ_ = &q1_[0];
+		outQ_ = &q2_[0];
+	} else {
+		inQ_ = &q2_[0];
+		outQ_ = &q1_[0];
+	}
+
+	// Clear outQ: set all entries to dummies, as the least-effort way.
+	unsigned int bufsize = static_cast< unsigned int >( buf[0] );
+	unsigned int numQinfo = static_cast< unsigned int >( outQ_[1] );
+	assert( bufsize > numQinfo * 3 );
+	double* qptr = outQ_ + 2;
+	for ( unsigned int i = 0; < numQinfo; ++i ) {
+		Qinfo* qi = reinterpret_cast< Qinfo* >( qptr );
+		qi->setDummy();
+		qptr += 3;
+	}
+	*/
+
+	// Here we also need to do the size adjustment, dealing with overflow,
+	// and so on.
+
+	/*
 	for ( vector< Qvec >::iterator i = inQ_->begin(); 
 		i != inQ_->end(); ++i )
 	{
@@ -317,24 +364,22 @@ void Qinfo::swapQ()
 		i != outQ_->end(); ++i ) {
 		i->clear();
 	}
+	*/
 }
 
 /**
  * Need to allocate space for incoming block
- * Still pending: need a way to decide which SimGroup is
- * coming in.
  */
 void Qinfo::swapMpiQ()
 {
-	if ( mpiInQ_ == &mpiQ2_ ) {
-		mpiInQ_ = &mpiQ1_;
-		mpiRecvQ_ = &mpiQ2_;
+	if ( mpiInQ_ == &mpiQ2_[0] ) {
+		mpiInQ_ = &mpiQ1_[0];
+		mpiRecvQ_ = &mpiQ2_[0];
 	} else {
-		mpiInQ_ = &mpiQ2_;
-		mpiRecvQ_ = &mpiQ1_;
+		mpiInQ_ = &mpiQ2_[0];
+		mpiRecvQ_ = &mpiQ1_[0];
 	}
-	// mpiRecvQ_->resizeLinearData( Qinfo::simGroup( 1 )->bufSize() );
-	mpiRecvQ_->resizeLinearData( BLOCKSIZE );
+	// mpiRecvQ_->resizeLinearData( BLOCKSIZE );
 }
 
 /**
@@ -374,6 +419,7 @@ void Qinfo::sendAllToAll( const ProcInfo* proc )
 */
 }
 
+/*
 void innerReportQ( const Qvec& qv, const string& name )
 {
 	bool isMpi = ( name.substr( 0, 3 ) == "mpi" );
@@ -432,27 +478,64 @@ void innerReportQ( const Qvec& qv, const string& name )
 		buf += q->size() + sizeof( Qinfo );
 	}
 }
+*/
+
+void innerReportQ( const double* q, const string& name )
+{
+	cout << endl << Shell::myNode() << ": Reporting " << name << endl;
+	unsigned int numQinfo = q[1];
+	const double* qptr = q + 2;
+	for ( unsigned int i = 0; i < numQinfo; ++i ) {
+		const Qinfo* qi = reinterpret_cast< const Qinfo* >( qptr );
+		cout << "src= " << qi->src() << 
+			", msgBind=" << qi->bindIndex() <<
+			", threadNum=" << qi->threadNum() <<
+			", dataIndex=" << qi->dataIndex() << endl;
+		qptr += 3;
+	}
+}
+
+void reportOutQ( const vector< vector< Qinfo > >& q, const string& name )
+{
+	cout << endl << Shell::myNode() << ": Reporting " << name << endl;
+	for ( unsigned int i = 0; i < Shell::numCores(); ++i ) {
+		for ( vector< Qinfo >::const_iterator qi = q[i].begin(); 
+			qi != q[i].end(); ++qi ) {
+			cout << i << ": src= " << qi->src() <<
+				", msgBind=" << qi->bindIndex() <<
+				", threadNum=" << qi->threadNum() <<
+				", dataIndex=" << qi->dataIndex() << endl;
+		}
+	}
+}
+
 
 /**
  * Static func. readonly, so it is thread safe
  */
 void Qinfo::reportQ()
 {
-	cout << Shell::myNode() << ":	inQ: ";
-	for ( unsigned int i = 0; i < inQ_->size(); ++i )
-		cout << "[" << i << "]=" << ( *inQ_ )[i].totalNumEntries() << "	";
-	cout << "outQ: ";
-	for ( unsigned int i = 0; i < outQ_->size(); ++i )
-		cout << "[" << i << "]=" << (*outQ_ )[i].totalNumEntries() << "	";
-	cout << "mpiQ: ";
-	cout << endl;
+	cout << Shell::myNode() << ":	inQ: size =  " << inQ_[0] << 
+		", numQinfo = " << inQ_[1] << endl;
+	cout << Shell::myNode() << ":	mpiInQ: size =  " << mpiInQ_[0] << 
+		", numQinfo = " << mpiInQ_[1] << endl;
+	cout << Shell::myNode() << ":	mpiRecvQ: size =  " << mpiRecvQ_[0] << 
+		", numQinfo = " << mpiRecvQ_[1] << endl;
 
-	if ( inQ_->size() > 0 ) innerReportQ( (*inQ_)[0], "inQ[0]" );
-	if ( inQ_->size() > 1 ) innerReportQ( (*inQ_)[1], "inQ[1]" );
-	if ( outQ_->size() > 0 ) innerReportQ( (*outQ_)[0], "outQ[0]" );
-	if ( outQ_->size() > 1 ) innerReportQ( (*outQ_)[1], "outQ[1]" );
-	if ( mpiInQ_ ) innerReportQ( *mpiInQ_, "mpiInQ" );
-	if ( mpiRecvQ_ ) innerReportQ( *mpiRecvQ_, "mpiRecvQ" );
+	unsigned int datasize = 0;
+	unsigned int numQinfo = 0;
+	for ( unsigned int i = 0; i < Shell::numCores(); ++i ) {
+		numQinfo += qBuf_[i].size();
+		datasize += dBuf_[i].size();
+	}
+	cout << Shell::myNode() << ":	outQ: numCores = " << 
+		Shell::numCores() << ", size = " << datasize + 3 * numQinfo << 
+		", numQinfo = " << numQinfo << endl;
+
+	if ( inQ_[1] > 0 ) innerReportQ(inQ_, "inQ" );
+	if ( numQinfo > 0 ) reportOutQ( qBuf_, "outQ" );
+	if ( mpiInQ_[1] > 0 ) innerReportQ( mpiInQ_, "mpiInQ" );
+	if ( mpiRecvQ_[1] > 0 ) innerReportQ( mpiRecvQ_, "mpiRecvQ" );
 }
 
 
@@ -467,6 +550,74 @@ pthread_mutex_t* init_mutex()
 }
 */
 
+/**
+ * Static function.
+ * Adds a Queue entry.
+ */
+void Qinfo::addToQ( const ObjId& oi, 
+	BindIndex bindIndex, unsigned short threadNum,
+	const double* arg, unsigned int size )
+{
+	qBuf_[ threadNum ].push_back( 
+		Qinfo( oi, bindIndex, threadNum, dBuf_.size() ) );
+	if ( size > 0 ) {
+		vector< double >& vec = dBuf_[ threadNum ];
+		vec.insert( vec.end(), arg, arg + size );
+	}
+}
+
+
+/**
+ * Static function.
+ * Adds a Queue entry. This variant allocates the space and returns
+ * the pointer into which the data can be copied. Useful when there are
+ * multiple fields to be put in.
+ */
+double* Qinfo::addToQ( const ObjId& oi, 
+	BindIndex bindIndex, unsigned short threadNum,
+	unsigned int size )
+{
+	unsigned int oldSize = dBuf_.size();
+	qBuf_[ threadNum ].push_back( 
+		Qinfo( oi, bindIndex, threadNum, oldSize ) );
+	dBuf_[ threadNum ].resize( oldSize + size );
+	return &( dBuf_[threadNum][oldSize] );
+}
+
+// Static function
+void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest, 
+	unsigned short threadNum,
+	FuncId fid, 
+	const double* arg, unsigned int size )
+{
+	static const unsigned int ObjFidSizeInDoubles = 
+		1 + ( sizeof( ObjFid ) - 1 ) / sizeof( double );
+
+	qBuf_[ threadNum ].push_back( 
+		Qinfo( src, ~0, threadNum, dBuf_.size() ) );
+	ObjFid ofid = { dest, fid };
+	const double* ptr = reinterpret_cast< const double* >( &ofid );
+	vector< double >& vec = dBuf_[ threadNum ];
+	vec.insert( vec.end(), ptr, ptr + ObjFidSizeInDoubles );
+	if ( size > 0 ) {
+		vec.insert( vec.end(), arg, arg + size );
+	}
+}
+
+/**
+ * Static function.
+ * Adds a Queue entry in the reverse direction.
+void Qinfo::addToQbackward( const ProcInfo* p, 
+	const ObjId& oi, MsgId mid, FuncId fid,
+	const double* arg, unsigned int size )
+{
+	qBuf_[ p->threadIndexInGroup ].push_back( Qinfo( oi, mid, fid, dBuf_.size() ) );
+	vector< double >& vec = dBuf_[ p->threadIndexInGroup ];
+	vec.insert( vec.end(), arg, arg + size );
+}
+ */
+
+/*
 void Qinfo::addToQforward( const ProcInfo* p, MsgFuncBinding b, 
 	const char* arg )
 {
@@ -497,6 +648,7 @@ void Qinfo::addToQbackward( const ProcInfo* p, MsgFuncBinding b,
 		(*outQ_)[p->groupId].push_back( p->threadIndexInGroup, this, arg );
 	// pthread_mutex_unlock( mutex );
 }
+*/
 
 /// Static func.
 void Qinfo::disableStructuralQ()
@@ -517,17 +669,25 @@ void Qinfo::enableStructuralQ()
  * Note that the 'isSafeForStructuralOps' flag is only ever touched in 
  * clearStructuralQ(), except in the unit tests.
  */
-bool Qinfo::addToStructuralQ() const
+bool Qinfo::addToStructuralQ( const double* data, unsigned int size ) const
 {
 	if ( isSafeForStructuralOps_ )
 		return 0;
+	structuralQinfo_.push_back( *this );
+	// unsigned int di = structuralQinfo_.back().dataIndex();
+	structuralQinfo_.back().dataIndex_ = structuralQdata_.size();
+	structuralQdata_.insert( structuralQdata_.end(), data, data + size );
+
+	/*
 	const char* begin = reinterpret_cast< const char* >( this );
 	const char* end = begin + sizeof( Qinfo ) + size_;
 	structuralQ_.insert( structuralQ_.end(), begin, end );
+	*/
 	// structuralQ_.push_back( reinterpret_cast< const char* >( this ) );
 	return 1;
 }
 
+/*
 void Qinfo::addSpecificTargetToQ( const ProcInfo* p, MsgFuncBinding b, 
 	const char* arg, const DataId& target, bool isForward )
 {
@@ -544,13 +704,24 @@ void Qinfo::addSpecificTargetToQ( const ProcInfo* p, MsgFuncBinding b,
 	(*outQ_)[p->groupId].push_back( p->threadIndexInGroup, this, temp );
 	delete[] temp;
 }
+*/
 
+/// Static func
 void Qinfo::emptyAllQs()
 {
+	inQ_[0] = 0;
+	inQ_[1] = 0;
+	for ( unsigned int i = 0; i < Shell::numCores(); ++i ) {
+		qBuf_[i].resize( 0 );
+		dBuf_[i].resize( 0 );
+	}
+
+	/*
 	for ( vector< Qvec >::iterator i = q1_.begin(); i != q1_.end(); ++i )
 		i->clear();
 	for ( vector< Qvec >::iterator i = q2_.begin(); i != q2_.end(); ++i )
 		i->clear();
+	*/
 }
 
 // Static function. Used only during single-thread tests, when the
@@ -563,6 +734,7 @@ void Qinfo::clearQ( const ProcInfo* p )
 	readQ( p );
 }
 
+/*
 // static func
 char* Qinfo::inQ( unsigned int group )
 {
@@ -588,14 +760,13 @@ void Qinfo::expandMpiRecvQbuf( unsigned int size )
 {
 	mpiRecvQ_->resizeLinearData( size );
 }
+*/
 
 // static func. Typically only called during setup in Shell::setHardware.
 void Qinfo::initMpiQs()
 {
-	mpiQ1_.resizeLinearData( BLOCKSIZE );
-	mpiQ1_.setMpiDataSize( 0 );
-	mpiQ2_.resizeLinearData( BLOCKSIZE );
-	mpiQ2_.setMpiDataSize( 0 );
+	mpiQ1_.resize( BLOCKSIZE );
+	mpiQ2_.resize( BLOCKSIZE );
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -673,6 +844,7 @@ void Qinfo::clearReduceQ( unsigned int numThreads )
 	}
 }
 
+/*
 void Qinfo::setProcInfo( const ProcInfo* p )
 {
 	procIndex_ = p->procIndex;
@@ -684,3 +856,4 @@ const ProcInfo* Qinfo::getProcInfo() const
 	const Shell* s = reinterpret_cast< const Shell* >( sheller.data() );
 	return s->getProcInfo( procIndex_ );
 }
+*/

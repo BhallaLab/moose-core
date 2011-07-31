@@ -40,7 +40,6 @@ OBJ = \
 	Id.o \
 	ObjId.o \
 	Qinfo.o \
-	Qvec.o \
 	DataId.o \
 	SetGet.o \
 	OpFunc.o \
@@ -82,7 +81,6 @@ HEADERS = \
 	EpFunc.h \
 	ProcInfo.h \
 	Qinfo.h \
-	Qvec.h \
 	SrcFinfo.h \
 	ValueFinfo.h \
 	LookupValueFinfo.h \

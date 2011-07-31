@@ -19,11 +19,16 @@ class PrepackedBuffer
 		 * Constructor. 
 		 * Here data is a pointer to the entire data block.
 		 * dataSize is the size of the entire data block to be transferred,
-		 *  dataSize = individualDataSize * numEntries.
+		 * in units of doubles. Minimum size is therefore 1, corresponding
+		 * to 8 bytes.
+		 * If we have an array, then the whole array is packed efficiently,
+		 * just that the start and end alignments are on double boundaries.
+		 *  dataSize = individualDataSize * numEntries,
+		 * with rounding up to convert to the double segment.
 		 * numEntries is the # of array entries. For non-arrays it defaults
 		 * to 0.
 		 */
-		PrepackedBuffer( const char* data, unsigned int dataSize, 
+		PrepackedBuffer( const double* data, unsigned int dataSize, 
 			unsigned int numEntries = 0 );
 
 		PrepackedBuffer( const PrepackedBuffer& other );
@@ -33,13 +38,13 @@ class PrepackedBuffer
 		 * Here the char buffer is a serialized version of the 
 		 * Prepacked buffer
 		 */
-		PrepackedBuffer( const char* buf );
+		PrepackedBuffer( const double* buf );
 
 		PrepackedBuffer();
 
 		~PrepackedBuffer();
 
-		const char* data() const {
+		const double* data() const {
 			return data_;
 		}
 
@@ -48,26 +53,27 @@ class PrepackedBuffer
 		 * beginning. Lets us tile the target with repeating sequences.
 		 * Most commonly just repeat one entry.
 		 */
-		const char* operator[]( unsigned int index ) const;
+		const double* operator[]( unsigned int index ) const;
 
 		/**
-		 * 	Returns the size of the data contents.
+		 * 	Returns the size of the data contents, in bytes.
 		 */
 		unsigned int dataSize() const {
 			return dataSize_;
 		}
 
 		/**
-		 * Returns the size of the entire PrepackedBuffer converted to char*
+		 * Returns the size of the entire PrepackedBuffer  in terms of
+		 * double*
 		 */
 		unsigned int size() const {
-			return dataSize_ + 2 * sizeof( unsigned int );
+			return dataSize_ + 2; // Note that we don't need to transfer the individualDataSize_ entry.
 		}
 
 		/**
 		 * Converts to a buffer. Buf must be preallocated.
 		 */
-		unsigned int conv2buf( char* buf ) const;
+		unsigned int conv2buf( double* buf ) const;
 
 		/**
 		 * Returns number of data entries: size of transferred array.
@@ -86,5 +92,5 @@ class PrepackedBuffer
 		unsigned int dataSize_; // Size of data.
 		unsigned int numEntries_; // Number of data entries, if array.
 		unsigned int individualDataSize_; // size of each entry.
-		char* data_; // Converted data.
+		double* data_; // Converted data.
 };

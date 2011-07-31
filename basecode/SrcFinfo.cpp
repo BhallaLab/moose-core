@@ -67,11 +67,14 @@ SrcFinfo0::SrcFinfo0( const string& name, const string& doc )
 { ; }
 
 void SrcFinfo0::send( const Eref& e, const ProcInfo* p ) const {
-	// Qinfo( eindex, size, useSendTo );
+	Qinfo::addToQ( e.objId(), getBindIndex(), p->threadIndexInGroup, 0, 0 );
+	/*
 	Qinfo q( e.index(), 0, 0 );
 	e.element()->asend( q, getBindIndex(), p, 0 ); // last arg is data
+	*/
 }
 
+/*
 void SrcFinfo0::sendTo( const Eref& e, const ProcInfo* p, 
 	const ObjId& target ) const
 {
@@ -79,3 +82,4 @@ void SrcFinfo0::sendTo( const Eref& e, const ProcInfo* p,
 	Qinfo q( e.index(), 0, 1 );
 	e.element()->tsend( q, getBindIndex(), p, 0, target );
 }
+*/
