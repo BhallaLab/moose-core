@@ -25,9 +25,9 @@ class OpFunc
 		virtual bool strSet( const Eref& tgt, 
 			const string& field, const string& arg ) const = 0;
 
-		virtual void op( const Eref& e, const char* buf ) const = 0;
+// 		virtual void op( const Eref& e, const char* buf ) const = 0;
 
-		virtual void op( const Eref& e, const Qinfo* q, const char* buf ) const = 0;
+		virtual void op( const Eref& e, const Qinfo* q, const double* buf ) const = 0;
 
 		virtual string rttiType() const = 0;
 };
@@ -56,8 +56,7 @@ class OpFuncDummy: public OpFunc
 		bool strSet( const Eref& tgt, 
 			const string& field, const string& arg ) const;
 
-		void op( const Eref& e, const char* buf ) const;
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const;
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const;
 		string rttiType() const;
 };
 #endif // _OPFUNCBASE_H

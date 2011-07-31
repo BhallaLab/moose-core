@@ -80,16 +80,18 @@ class SetGet
 	
 		/// Adapter function, just forwards to Shell::dispatchSet
 		static void dispatchSet( const ObjId& oid, FuncId fid, 
-			const char* args, unsigned int size );
+			const double* args, unsigned int size );
 
 		/// Adapter function, just forwards to Shell::dispatchSetVec
 		static void dispatchSetVec( const ObjId& oid, FuncId fid, 
 			const PrepackedBuffer& arg );
 
-		/// Adapter function, just forwards to Shell::dispatchGet
-		static const vector< char* >& dispatchGet( 
-			const ObjId& oid, FuncId fid,
-			const PrepackedBuffer& arg );
+		/// Sends out request for data, and awaits its return.
+		static const vector< double* >* dispatchGet( 
+			const ObjId& tgt, FuncId tgtFid, 
+			const double* arg, unsigned int size );
+
+		//	(const ObjId& oid, FuncId fid, const PrepackedBuffer& arg );
 
 		/*
 		static const vector< char* >& dispatchGetVec( 
@@ -127,12 +129,9 @@ class SetGet0: public SetGet
 			FuncId fid;
 			ObjId tgt( dest );
 			if ( sg.checkSet( field, tgt, fid ) ) {
-				dispatchSet( tgt, fid, "", 0 );
+				Qinfo::addDirectToQ( ObjId(), tgt, 0, fid, 0 );
 				/*
-				sg.iSetInner( fid, "", 0 );
-
-				// Ensure that clearQ is called before this return.
-				sg.completeSet();
+				dispatchSet( tgt, fid, 0, 0 );
 				*/
 				return 1;
 			}
@@ -166,10 +165,15 @@ template< class A > class SetGet1: public SetGet
 			ObjId tgt( dest );
 			if ( sg.checkSet( field, tgt, fid ) ) {
 				Conv< A > conv( arg );
+				/*
 				char *temp = new char[ conv.size() ];
 				conv.val2buf( temp );
-				dispatchSet( tgt, fid, temp, conv.size() );
+				dispatchSet( tgt, fid, conv.ptr(), conv.size() );
 				delete[] temp;
+				*/
+				double *ptr = Qinfo::addDirectToQ( 
+					ObjId(), tgt, 0, fid, conv.size() );
+				memcpy( ptr, conv.ptr(), conv.size() );
 				return 1;
 			}
 			return 0;
@@ -285,9 +289,11 @@ template< class A > class Field: public SetGet1< A >
 	//////////////////////////////////////////////////////////////////
 
 		/**
-		 * Blocking call using typed values
+		 * Blocking call using typed values to get either single values or
+		 * vectors.
 		 */
-		static A get( const ObjId& dest, const string& field)
+		static const vector< double* >* innerGet( 
+			const ObjId& dest, const string& field )
 		{ 
 			Field< A > sg( dest );
 			ObjId tgt( dest );
@@ -296,54 +302,34 @@ template< class A > class Field: public SetGet1< A >
 			string fullFieldName = "get_" + field;
 			if ( sg.checkSet( fullFieldName, tgt, fid ) ) {
 				FuncId retFuncId = receiveGet()->getFid();
-				PrepackedBuffer buf( 
-					reinterpret_cast< const char* >( &retFuncId ), 
-					sizeof( FuncId ) );
-				const vector< char* >& ret = 
-					SetGet::dispatchGet( tgt, fid, buf );
-				if ( ret.size() == 1 ) {
-					Conv< A > conv( ret[0] );
+				double temp = retFuncId;
+				return SetGet::dispatchGet( tgt, fid, &temp, 1 );
+			}
+			return 0;
+		}
+
+		static A get( const ObjId& dest, const string& field)
+		{ 
+			const vector< double* >* ret = innerGet( dest, field );
+			if ( ret ) {
+				if ( ret->size() == 1 ) {
+					Conv< A > conv( ( *ret )[0] );
 					return *conv;
 				}
 			}
 			return A();
-			/*
-			Conv< FuncId > args( retFuncId );
-			char *temp = new char[ args.size() ];
-			args.val2buf( temp );
-			const char* ret = dispatchGet( &sg, dest, fullFieldName, buf, 
-				args.size() );
-			delete[] temp;
-			*/
 		}
 
 		/**
 		 * Blocking call that returns a vector of values
 		 */
-		static void getVec( Id dest, const string& field, vector< A >& vec )
+		static void getVec( Id dest, const string& field, vector< A >& vec)
 		{
-			Field< A > sg( ObjId( dest, 0 ) );
-			ObjId tgt( dest );
-			FuncId fid;
-
-			string fullFieldName = "get_" + field;
-			unsigned int numRetEntries = 
-				sg.checkSet( fullFieldName, tgt, fid );
-			if ( numRetEntries > 0 ) {
-				FuncId retFuncId = receiveGet()->getFid();
-				vector< FuncId > fidVec( numRetEntries, retFuncId );
-
-				PrepackedBuffer pb( 
-					reinterpret_cast< const char* >( &fidVec[0] ), 
-					numRetEntries * sizeof( FuncId ), numRetEntries );
-
-				const vector< char* >& ret = SetGet::dispatchGet( 
-					dest, fid, pb );
-
-				assert( ret.size() == numRetEntries );
-				vec.resize( numRetEntries );
-				for ( unsigned int i = 0; i < numRetEntries; ++i ) {
-					Conv< A > conv( ret[i] );
+			const vector< double* >* ret = innerGet( dest, field );
+			if ( ret ) {
+				vec.resize( ret->size() );
+				for ( unsigned int i = 0; i < ret->size(); ++i ) {
+					Conv< A > conv( (*ret)[i] );
 					vec[i] = *conv;
 				}
 				return;
@@ -385,17 +371,6 @@ template< class A > class Field: public SetGet1< A >
 		{
 			Conv< A >::val2str( str, get( dest, field ) );
 			return 1;
-			/*
-			SetGet1< A > sg( dest );
-			string temp = "get_" + field;
-			unsigned int numEntries = 0;
-			const vector< char* > & ret = 
-				dispatchGet( dest, temp, &sg, numEntries );
-			assert( numEntries == 1 );
-			Conv< A > conv( ret[0] );
-			Conv<A>::val2str( str, *conv );
-			return 1;
-			*/
 		}
 };
 
@@ -421,12 +396,19 @@ template< class A1, class A2 > class SetGet2: public SetGet
 			if ( sg.checkSet( field, tgt, fid ) ) {
 				Conv< A1 > conv1( arg1 );
 				Conv< A2 > conv2( arg2 );
+				double *ptr = Qinfo::addDirectToQ( 
+					ObjId(), tgt, 0, fid, conv1.size() + conv2.size() );
+				memcpy( ptr, conv1.ptr(), conv1.size() );
+				ptr += conv1.size();
+				memcpy( ptr, conv2.ptr(), conv2.size() );
+				/*
 				char *temp = new char[ conv1.size() + conv2.size() ];
 				conv1.val2buf( temp );
 				conv2.val2buf( temp + conv1.size() );
 				dispatchSet( tgt, fid, temp, 
 					conv1.size() + conv2.size() );
 				delete[] temp;
+				*/
 				return 1;
 			}
 			return 0;
@@ -603,12 +585,8 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 		}
 
 	//////////////////////////////////////////////////////////////////
-
-		/**
-		 * Gets a value on a specific object, looking it up using the
-		 * provided index.
-		 */
-		static A get( const ObjId& dest, const string& field, L index)
+		static const vector< double* >* innerGet( 
+			const ObjId& dest, const string& field, L index )
 		{ 
 			LookupField< L, A > sg( dest );
 			ObjId tgt( dest );
@@ -619,18 +597,30 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 				FuncId retFuncId = receiveGet()->getFid();
 				Conv< FuncId > conv1( retFuncId );
 				Conv< L > conv2 ( index );
-				char* temp = new char[ conv1.size() + conv2.size() ];
+				double* temp = new double[ conv1.size() + conv2.size() ];
 				conv1.val2buf( temp );
 				conv2.val2buf( temp + conv1.size() );
-
-				PrepackedBuffer pb( temp, conv1.size() + conv2.size() );
+				const vector< double* >* ret = 
+					SetGet::dispatchGet( tgt, fid, temp, 
+						conv1.size() + conv2.size() );
 				delete[] temp;
 
-				const vector< char* >& ret = 
-					SetGet::dispatchGet( dest, fid, pb );
+				return ret;
+			}
+			return 0;
+		}
 
-				if ( ret.size() == 1 ) {
-					Conv< A > conv( ret[0] );
+		/**
+		 * Gets a value on a specific object, looking it up using the
+		 * provided index.
+		 */
+		static A get( const ObjId& dest, const string& field, L index)
+		{ 
+			const vector< double* >* ret = 
+				innerGet( dest, field, index );
+			if ( ret ) {
+				if ( ret->size() == 1 ) {
+					Conv< A > conv( (*ret)[0] );
 					return *conv;
 				}
 			}
@@ -640,45 +630,18 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 		/**
 		 * Blocking call that returns a vector of values in vec.
 		 * This variant goes through each target object entry on dest,
-		 * and passes in a separate lookup index to each one. The results
+		 * and passes in the same lookup index to each one. The results
 		 * are put together in the vector vec.
 		 */
 		static void getVec( Id dest, const string& field, 
 			vector< L >& index, vector< A >& vec )
 		{
-			LookupField< L, A > sg( ObjId( dest, 0 ) );
-			ObjId tgt( dest );
-			FuncId fid;
-			string fullFieldName = "get_" + field;
-			unsigned int numRetEntries = 
-				sg.checkSet( fullFieldName, tgt, fid );
-			if ( numRetEntries > 0 ) {
-				FuncId retFuncId = receiveGet()->getFid();
-				unsigned int totalArgSize = index.size() * sizeof( FuncId );
-				for ( unsigned int i = 0; i < index.size(); ++i ) {
-					Conv< L > conv( index[i] );
-					totalArgSize += conv.size();
-				}
-
-				char* data = new char[ totalArgSize ];
-				char* temp = data;
-				for ( unsigned int i = 0; i < index.size(); ++i ) {
-					memcpy( temp, &retFuncId, sizeof( FuncId ) );
-					temp += sizeof( FuncId );
-					Conv< L > conv( index[i] );
-					conv.val2buf( temp );
-					temp += conv.size();
-				}
-				PrepackedBuffer pb( data, totalArgSize, index.size() );
-				delete[] data;
-
-				const vector< char* >& ret = 
-					SetGet::dispatchGet( dest, fid, pb );
-
-				assert( ret.size() == numRetEntries );
-				vec.resize( numRetEntries );
-				for ( unsigned int i = 0; i < numRetEntries; ++i ) {
-					Conv< A > conv( ret[i] );
+			const vector< double* >* ret = 
+				innerGet( dest, field, index, ret );
+			if ( ret ) {
+				vec.resize( ret->size() );
+				for ( unsigned int i = 0; i < ret->size(); ++i ) {
+					Conv< A > conv( (*ret)[i] );
 					vec[i] = *conv;
 				}
 			}
@@ -723,6 +686,16 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 				Conv< A1 > conv1( arg1 );
 				Conv< A2 > conv2( arg2 );
 				Conv< A3 > conv3( arg3 );
+				double *ptr = Qinfo::addDirectToQ( 
+					ObjId(), tgt, 0, fid, 
+						conv1.size() + conv2.size() + conv3.size() );
+				memcpy( ptr, conv1.ptr(), conv1.size() );
+				ptr += conv1.size();
+				memcpy( ptr, conv2.ptr(), conv2.size() );
+				ptr += conv2.size();
+				memcpy( ptr, conv3.ptr(), conv3.size() );
+
+				/*
 				unsigned int totSize = conv1.size() + conv2.size() + conv3.size();
 				char *temp = new char[ totSize ];
 				conv1.val2buf( temp );
@@ -730,6 +703,7 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 				conv3.val2buf( temp + conv1.size() + conv2.size() );
 				dispatchSet( tgt, fid, temp, totSize );
 				delete[] temp;
+				*/
 				return 1;
 			}
 			return 0;
@@ -788,6 +762,19 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 				Conv< A2 > conv2( arg2 );
 				Conv< A3 > conv3( arg3 );
 				Conv< A4 > conv4( arg4 );
+				double *ptr = Qinfo::addDirectToQ( 
+					ObjId(), tgt, 0, fid, 
+						conv1.size() + conv2.size() + 
+						conv3.size() + conv4.size() );
+				memcpy( ptr, conv1.ptr(), conv1.size() );
+				ptr += conv1.size();
+				memcpy( ptr, conv2.ptr(), conv2.size() );
+				ptr += conv2.size();
+				memcpy( ptr, conv3.ptr(), conv3.size() );
+				ptr += conv3.size();
+				memcpy( ptr, conv4.ptr(), conv4.size() );
+
+				/*
 				unsigned int s1 = conv1.size();
 				unsigned int s1s2 = s1 + conv2.size();
 				unsigned int s1s2s3 = s1s2 + conv3.size();
@@ -799,6 +786,7 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 				conv4.val2buf( temp + s1s2s3 );
 				dispatchSet( tgt, fid, temp, totSize );
 				delete[] temp;
+				*/
 				return 1;
 			}
 			return 0;
@@ -866,6 +854,21 @@ template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
 				Conv< A3 > conv3( arg3 );
 				Conv< A4 > conv4( arg4 );
 				Conv< A5 > conv5( arg5 );
+				double *ptr = Qinfo::addDirectToQ( 
+					ObjId(), tgt, 0, fid, 
+						conv1.size() + conv2.size() + 
+						conv3.size() + conv4.size() +
+						conv5.size() );
+				memcpy( ptr, conv1.ptr(), conv1.size() );
+				ptr += conv1.size();
+				memcpy( ptr, conv2.ptr(), conv2.size() );
+				ptr += conv2.size();
+				memcpy( ptr, conv3.ptr(), conv3.size() );
+				ptr += conv3.size();
+				memcpy( ptr, conv4.ptr(), conv4.size() );
+				ptr += conv4.size();
+				memcpy( ptr, conv5.ptr(), conv5.size() );
+				/*
 				unsigned int totSize = conv1.size() + conv2.size() +
 					conv3.size() + conv4.size() + conv5.size();
 				char *temp = new char[ totSize ];
@@ -879,6 +882,7 @@ template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
 				dispatchSet( tgt, fid, temp, totSize );
 
 				delete[] temp;
+				*/
 				return 1;
 			}
 			return 0;
@@ -949,6 +953,23 @@ template< class A1, class A2, class A3, class A4, class A5, class A6 > class Set
 				Conv< A4 > conv4( arg4 );
 				Conv< A5 > conv5( arg5 );
 				Conv< A6 > conv6( arg6 );
+				double *ptr = Qinfo::addDirectToQ( 
+					ObjId(), tgt, 0, fid, 
+						conv1.size() + conv2.size() + 
+						conv3.size() + conv4.size() +
+						conv5.size() );
+				memcpy( ptr, conv1.ptr(), conv1.size() );
+				ptr += conv1.size();
+				memcpy( ptr, conv2.ptr(), conv2.size() );
+				ptr += conv2.size();
+				memcpy( ptr, conv3.ptr(), conv3.size() );
+				ptr += conv3.size();
+				memcpy( ptr, conv4.ptr(), conv4.size() );
+				ptr += conv4.size();
+				memcpy( ptr, conv5.ptr(), conv5.size() );
+				ptr += conv5.size();
+				memcpy( ptr, conv6.ptr(), conv6.size() );
+				/*
 				unsigned int totSize = conv1.size() + conv2.size() +
 					conv3.size() + conv4.size() + conv5.size() + conv6.size();
 				char *temp = new char[ totSize ];
@@ -964,6 +985,7 @@ template< class A1, class A2, class A3, class A4, class A5, class A6 > class Set
 				dispatchSet( tgt, fid, temp, totSize );
 
 				delete[] temp;
+				*/
 				return 1;
 			}
 			return 0;

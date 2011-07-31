@@ -11,8 +11,9 @@
 #include "../shell/Shell.h"
 
 /**
+ * Sends data back.
  * Used to do the serious argument juggling in GetOpFunc::op
- */
+ * Deprecated.
 void fieldOp( const Eref& e, const Qinfo* q, const char* buf, 
 	const char* data, unsigned int size )
 {
@@ -25,12 +26,11 @@ void fieldOp( const Eref& e, const Qinfo* q, const char* buf,
 	char* temp = new char[ totSize ];
 	conv.val2buf( temp );
 
-	MsgFuncBinding mfb( q->mid(), retFunc );
-	Qinfo retq( retFunc, e.index(), totSize, 0 );
-	retq.setProcInfo( q->getProcInfo() );
-	retq.addToQbackward( q->getProcInfo(), mfb, temp );
+	Qinfo::addToQbackward( p, e.objId(), mid_dunno, retFunc,
+		data, size );
 	delete[] temp;
 }
+ */
 
 /**
  * Used to check if the Eref e should be sending any data back to
@@ -65,12 +65,8 @@ bool OpFuncDummy::strSet( const Eref& tgt,
 	return 0;
 }
 
-void OpFuncDummy::op( const Eref& e, const char* buf ) const {
-	;
-}
-
 void OpFuncDummy::op( const Eref& e, const Qinfo* q, 
-	const char* buf ) const {
+	const double* buf ) const {
 	;
 }
 

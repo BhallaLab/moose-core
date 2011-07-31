@@ -11,7 +11,7 @@
 #include "PrepackedBuffer.h"
 
 PrepackedBuffer::PrepackedBuffer( 
-	const char* data, unsigned int dataSize, unsigned int numEntries )
+	const double* data, unsigned int dataSize, unsigned int numEntries )
 	: dataSize_( dataSize ), numEntries_( numEntries )
 {
 	if ( numEntries == 0 )
@@ -19,7 +19,7 @@ PrepackedBuffer::PrepackedBuffer(
 	else
 		individualDataSize_ = dataSize_ / numEntries_;
 	
-	data_ = new char[ dataSize ];
+	data_ = new double[ dataSize ];
 	memcpy( data_, data, dataSize );
 }
 
@@ -31,28 +31,28 @@ PrepackedBuffer::PrepackedBuffer( const PrepackedBuffer& other )
 		individualDataSize_ = dataSize_;
 	else
 		individualDataSize_ = dataSize_ / numEntries_;
-	data_ = new char[ dataSize_ ];
+	data_ = new double[ dataSize_ ];
 	memcpy( data_, other.data_, dataSize_ );
 }
 
-PrepackedBuffer::PrepackedBuffer( const char* buf )
-	: dataSize_( *reinterpret_cast< const unsigned int * >( buf ) ),
-		numEntries_( *reinterpret_cast< const unsigned int * >( 
-			buf + sizeof( unsigned int ) ) )
+PrepackedBuffer::PrepackedBuffer( const double* buf )
+	: 
+		dataSize_( buf[0] ),
+		numEntries_( buf[1] )
 {
 	if ( numEntries_ == 0 )
 		individualDataSize_ = dataSize_;
 	else
 		individualDataSize_ = dataSize_ / numEntries_;
-	data_ = new char[ dataSize_ ];
-	memcpy( data_, buf + 2 * sizeof( unsigned int ), dataSize_ );
+	data_ = new double[ dataSize_ ];
+	memcpy( data_, buf + 2, dataSize_ * sizeof( double ) );
 }
 
 PrepackedBuffer::PrepackedBuffer() // Used to make StrSet happy
 	: dataSize_( 0 ), numEntries_( 0 ), individualDataSize_( 0 )
 {
-	data_ = new char[1];
-	data_[0] = '\0';
+	data_ = new double[1];
+	data_[0] = 0;
 }
 
 PrepackedBuffer::~PrepackedBuffer()
@@ -60,19 +60,17 @@ PrepackedBuffer::~PrepackedBuffer()
 	delete[] data_;
 }
 
-const char* PrepackedBuffer::operator[]( unsigned int index ) const
+const double* PrepackedBuffer::operator[]( unsigned int index ) const
 {
 	if ( numEntries_ == 0 )
 		return data_ ;
 	return data_ + ( index % numEntries_ ) * individualDataSize_;
 }
 
-unsigned int PrepackedBuffer::conv2buf( char* buf ) const
+unsigned int PrepackedBuffer::conv2buf( double* buf ) const
 {
-	*reinterpret_cast< unsigned int* >( buf ) = dataSize_;
-	buf += sizeof( unsigned int );
-	*reinterpret_cast< unsigned int* >( buf ) = numEntries_;
-	buf += sizeof( unsigned int );
-	memcpy( buf, data_, dataSize_ );
-	return size();
+	buf[0] = dataSize_;
+	buf[1] = numEntries_;
+	memcpy( buf + 2, data_, dataSize_ );
+	return 2 + dataSize_;
 }

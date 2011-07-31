@@ -292,7 +292,6 @@ Id Element::id() const
  * Eref::index() and size assigned.
  * ProcInfo is used only for p->qId?
  * Qinfo needs to have funcid put in, and Msg Id.
- */
 void Element::asend( Qinfo& q, BindIndex bindIndex, 
 	const ProcInfo *p, const char* arg ) const
 {
@@ -306,6 +305,34 @@ void Element::asend( Qinfo& q, BindIndex bindIndex,
 			// whether to add to the queue at all.
 	}
 }
+ */
+
+/**
+ * Executes a queue entry from the buffer.
+ */
+void Element::exec( const Qinfo* qi, const ProcInfo* p, const double* arg )
+	const
+{
+	static const unsigned int ObjFidSizeInDoubles = 
+		1 + ( sizeof( ObjFid ) - 1 ) / sizeof( double );
+	assert( qi->bindIndex() < msgBinding_.size() );
+	if ( qi->isDirect() ) { // Direct Q entry, where the first part
+		// of Data specifies the target Element.
+		const ObjFid *ofid = reinterpret_cast< const ObjFid* >( arg );
+		const OpFunc* f = 
+			ofid->oi.element()->cinfo()->getOpFunc( ofid->fid );
+		f->op( ofid->oi.eref(), qi, arg + ObjFidSizeInDoubles );
+	} else {
+		vector< MsgFuncBinding >::const_iterator end = 
+			msgBinding_[ qi->bindIndex() ].end();
+		for ( vector< MsgFuncBinding >::const_iterator i =
+			msgBinding_[ qi->bindIndex() ].begin(); i != end; ++i ) {
+			assert( i->mid != 0 );
+			assert( Msg::getMsg( i->mid ) != 0 );
+			Msg::getMsg( i->mid )->exec( qi, arg, i->fid );
+		}
+	}
+}
 
 /*
  * Asynchronous send to specific target.
@@ -317,7 +344,6 @@ void Element::asend( Qinfo& q, BindIndex bindIndex,
  * but there is a requirement that all function calls should be able
  * to trace back their calling Element. At present that goes by the Msg.
  *
- */
 void Element::tsend( Qinfo& q, BindIndex bindIndex, 
 	const ProcInfo *p, const char* arg, const ObjId& target ) const
 {
@@ -348,6 +374,7 @@ void Element::tsend( Qinfo& q, BindIndex bindIndex,
 	cout << "Warning: Element::tsend: Failed to find specific target " <<
 		target << endl;
 }
+ */
 
 void Element::showMsg() const
 {
