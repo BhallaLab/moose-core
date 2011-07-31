@@ -42,6 +42,7 @@ void SetGet::completeSet() const
 // A group of functions to forward dispatch commands to the Shell.
 //////////////////////////////////////////////////////////////////////
 
+/*
 void SetGet::dispatchSet( const ObjId& oid, FuncId fid, 
 	const char* args, unsigned int size )
 {
@@ -53,17 +54,17 @@ void SetGet::dispatchSetVec( const ObjId& oid, FuncId fid,
 {
 	Shell::dispatchSetVec( oid, fid, arg );
 }
-
-/*
-const vector< char* >& SetGet::dispatchGet( 
-	const ObjId& oid, const string& field,
-	const SetGet* sg, unsigned int& numGetEntries )
-{
-	return Shell::dispatchGet( oid, field, sg, numGetEntries );
-}
 */
 
+const vector< double* >* SetGet::dispatchGet( 
+	const ObjId& tgt, FuncId tgtFid, const double* arg, unsigned int size )
+{
+	// 0 is presumed threadNum here, but need to figure out.
+	Qinfo::addDirectToQ( ObjId(), tgt, 0, tgtFid, arg, size );
+	return Shell::awaitGottenData();
+}
 
+/*
 const vector< char* >& SetGet::dispatchGet( 
 	const ObjId& dest, FuncId fid, const PrepackedBuffer& buf )
 {
@@ -71,6 +72,7 @@ const vector< char* >& SetGet::dispatchGet(
 	Shell* s = reinterpret_cast< Shell* >( sheller.data() );
 	return s->dispatchGet( sheller, dest, fid, buf );
 }
+*/
 
 /*
 const vector< char* >& SetGet::dispatchLookupGet( 

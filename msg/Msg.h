@@ -57,7 +57,8 @@ class Msg
 		/**
 		 * Execute func( arg ) on all relevant indices of target
 		 */
-		virtual void exec( const char* arg, const ProcInfo* p ) const = 0;
+		virtual void exec( const Qinfo* qi, const double* arg, 
+			FuncId fid ) const = 0;
 
 		/**
 		 * Obtain the first target Eref for the specified Src Eref

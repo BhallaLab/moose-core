@@ -14070,9 +14070,9 @@ Decision: Copy it over to a buffer. The in situ version may need copying anyway
    UInts
    	- Alignment
 
-Decision: Use doubles.
+Decision: Use doubles. Significant work on Conv< A > needed.
 
-4. Handling of reverse/return messages.
+4. Handling of reverse/return messages. Used in get functions.
   Extra flag in Qinfo to say it is reverse
   	- MsgBinding info now inadequate.
   Separate MsgBinding structure
@@ -14080,13 +14080,161 @@ Decision: Use doubles.
   Add return info as part of Msg content
   	- Brings back messy recasting of message direction info.
   Add a field in Qinfo to hold fid, the MsgBinding field now holds MsgId.
+  	- Assumes originating MsgId had a unique Src.
+ 
+4a. Handling of single-tgt msgs?
+  Similar hack to current version.
+  	- Horrible.
+  Interpret regular ObjId as Dest, rather than Src.
+  	- Loses convention that Src of Msg is always accessible.
+  Ban them. Their only purpose was return to sender. See above.
+  	- Hm.
+
+Decision: Add FuncId field in Qinfo, it also acts as a flag that the MsgBinding
+	field is the MsgId instead. Direction is assumed reverse.
  
 5. Message grouping?
 	No. For now just have one group.
 
 6. Handling of Shell-to-Shell communications
+  	- Special queue and special comms at a special phase in the cycle
+	- Regular queue but special Msgs that only connect off-node.
 
 7. Threads and buffers
 	Use interleaved indices and a single buffer in two parts: the
 	Qinfo part, and the data part. Ah. Problem here with data part, don't
 	know its size ahead of time.
+	- Can implement an experience-based buffer size
+	- Can put in a mutex whenever adjusting buffer boundaries.
+	- During Reinit, figure out all the sync buffer sizes and locations?
+	- Can do the multiple memcpys as at present.
+
+
+1---init alloc----2---init alloc----|
+becomes, if 1 expands:
+1---init alloc----2---init alloc----1---second alloc----|
+or if 2 expands:
+1---init alloc----2---init alloc----2---second alloc----|
+
+With only 2 threads, could expand bidirectionally from middle, and never have
+to worry about contiguity or about collisions:
+
+<----------alloc for thread one----|-----alloc for thread two------>
+
+With a good estimate of size, one could get the alloc about right (with 50%
+spare capacity) about 90% of the time. Maybe the best thing is to realloc
+as needed, and keep track. First cycle would require a lot of reallocs, but 
+later cycles fewer and it would go faster.
+	- Rather than do reallocs, set up a fallback vector for each thread
+	that is occupied whenever there is overflow. Do the reallocs only
+	at swapQ time. Also set up MPI data transfer sizes at the same time.
+Decision: Two layer system, one for normal ops, the other if the one overflows.
+	Normal ops is preallocated space for each thread, all contiguous.
+	Overflow ops is a separate buffer for each thread, expandable.
+	All these are addressed invisibly by addToQ functions.
+	At swapQ time the normal buffer is reallocated and the overflow buffer 
+	contents are inserted into it.
+	* Do NOT use interleaved indices. Instead have each thread fill in a
+	block. Interleaved will be harder to debug and will be slower.
+
+Before playing with any of this, checkin 2845.
+============================================================================
+26 July
+Setting up data structures. Need to figure out how to handle indexing and
+keep track for each thread. I'm inclined to use absolute indexing so
+each Qinfo knows exactly where its data is. This means we have to keep track
+of the offsets for each thread and do a complete sweep through to update
+all indices whenever resizing.
+
+Start out with the overflowData_ and overflowQinfo_ only to handle first tests.
+These behave a lot like the current system, with filling in during the process
+and clearing out during swap. When stable, set up stats monitoring and then
+the preallocated buffers.
+============================================================================
+28 July
+Working through Qinfo.cpp with some fallout on Element.cpp
+
+At Qinfo::innerReportQ, around Qinfo.cpp:459.
+============================================================================
+29 July 2011
+Worked through data transfer and messaging rates. Seems like the required
+size of the queues isn't really so big for expected model scales. It may be
+better to dump data into individual queues rather than a pre-linearized
+data chunk.
+
+Struggling with the compilation. In OpFunc.cpp:fieldOp, we have a problem:
+the Qinfo::addToQbackward needs a ProcInfo or at least a threadNum. 
+Now, as Qinfo doesn't carry it, I need to figure out how to make it accessible.
+Also, how do we find the relevant MsgId? The Qinfo no longer knows the Msg.
+The calling Msg never passes in itself to the Opfunc,
+============================================================================
+30 July
+Some options
+- Include ProcId or ProcInfo in Qinfo. This specifies thread too.
+	- Have a predefined set of ProcInfos, refer to by ProcId? No need.
+- Drop ProcInfo argument from Msg::exec, if it goes into Qinfo. 
+	Add Qinfo argument instead.
+- Provide Msgs with a couple of flags to specify which thread and which node
+	they are active on. Quick way to skip the Msgs.
+- Add a new kind of Q entry which is inserted, msg-free, with specified
+	target. Similar to the old one with the DataId of the tgt in the
+	data section.
+	- I would have to modify Element::exec a little to deal with the
+	cases where the Qinfo::fid is nonzero, to indicate that the 
+	Data includes an ObjId.
+	- This could be used for 'set': Avoid all that silly temporary Msg
+	stuff.
+	- In the case of 'get' also is good.
+
+I've put skeleton stuff for all this in, except the Q::proc. Here we
+need to have a header entry for the # of buf entries (doubles) needed to
+hold a Qinfo.
+Redid Qinfo.h to handle the proc, as a ProcId. I actually have enough
+space in the 24 bytes for the Qinfo, to put in a full pointer.
+
+Q: When do we assign the ProcId to put into Qinfo? 
+A: readBuf is the point at which the ProcId from the oldQinfo (whether
+	from inQ or from mpiInQ) becomes irrelevant, and the new Proc is
+	available. This calls Element::exec -> Msg::exec -> OpFunc::op.
+	So the ops lose the proc info and must therefore not try to send msgs.
+
+Q: When are Msgs sent?
+A:
+	- Msgs are normally sent in the process/reinit function, 
+	which knows ProcInfo. 
+	- Msgs may also be sent from EpFuncs, which are passed the 
+	Eref and Qinfo.
+
+Things to do tomorrow:
+- Rebuild with the new Qinfo data structs.
+- Decide whether to set up all ProcInfos with a pid, or to use  a ptr within
+	the Qinfo. the ProcInfo is, of course, useless between nodes.
+	- Use a pid. It is dumb to pass around pointers in a queue.
+	- For now, see if we can get by with just the thread index.
+
+
+============================================================================
+31 July
+
+TDL
+- OpFunc.h: 419: Replace direct casting for fid with a Conv< FuncId> call.
+- Conv.h: 404: template< class T > class Conv< vector< T > >::ptr()
+	needs to be filled out
+- Conv.h: Need to sort out a general scheme so that numbers can assign
+	directly to the doubles, rather than fill in the memory location in
+	their original format.
+- Need to sort out threading of script vs main code. I'm now not separating
+	the schedule into groups. The script threading should therefore
+	send stuff onto a separate queue, presumably thread 0. This will
+	have to merge its stuf finto inQ at swapQ time, again protected
+	by the barrier. Currently I use thread0 in SetGet.h for Qinfo::
+	addDirectToQ.
+- Check the memcpies for convs in SrcFinfo and SetGet: size in doubles.
+- Check the threadNum also in SetGet::Field::get usage of addDirectToQ.
+- Element::exec will have to deal with getVec and setVec.
+- Element::exec will have to sort out threads in the direct calls.
+- HandleGet will have to deal with getVec, probably not too different
+	from current format.
+- Figure out if the assorted SetGet::set calls are safe to run without 
+	wait for ack.
+- Figure out how for SetGet::get call to wait for ack. Implement awaitGottenData

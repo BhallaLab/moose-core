@@ -55,8 +55,8 @@ void testPrepackedBuffer()
 	Conv< unsigned int > conv3( arg3 );
 
 	unsigned int totSize = conv1.size() + conv2.size() + conv3.size();
-	char* buf = new char[ totSize ];
-	char* temp = buf;
+	double* buf = new double[ totSize ];
+	double* temp = buf;
 
 	conv1.val2buf( temp ); temp += conv1.size();
 	conv2.val2buf( temp ); temp += conv2.size();

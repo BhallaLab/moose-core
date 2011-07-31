@@ -37,12 +37,12 @@ template< class T > class OpFunc0: public OpFunc
 		/**
 		 * Call function on T located at e.data(), which is a simple 
 		 * array lookup of the data_ vector using the Eref index.
-		 */
 		void op( const Eref& e, const char* buf ) const {
 			(reinterpret_cast< T* >( e.data() )->*func_)( );
 		}
+		 */
 
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			(reinterpret_cast< T* >( e.data() )->*func_)();
 		}
 
@@ -74,12 +74,14 @@ template< class T, class A > class OpFunc1: public OpFunc
 			return SetGet1< A >::innerStrSet( tgt.objId(), field, arg );
 		}
 
+		/*
 		void op( const Eref& e, const char* buf ) const {
 			Conv< A > arg1( buf + sizeof( Qinfo ) );
 			(reinterpret_cast< T* >( e.data() )->*func_)( *arg1 );
 		}
+		*/
 
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			Conv< A > arg1( buf );
 			(reinterpret_cast< T* >( e.data() )->*func_)( *arg1 );
 		}
@@ -112,14 +114,16 @@ template< class T, class A1, class A2 > class OpFunc2: public OpFunc
 			return SetGet2< A1, A2 >::innerStrSet( tgt.objId(), field, arg );
 		}
 
+		/*
 		void op( const Eref& e, const char* buf ) const {
 			buf += sizeof( Qinfo );
 			Conv< A1 > arg1( buf );
 			Conv< A2 > arg2( buf + arg1.size() );
 			(reinterpret_cast< T* >( e.data() )->*func_)( *arg1, *arg2 );
 		}
+		*/
 
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			Conv< A1 > arg1( buf );
 			Conv< A2 > arg2( buf + arg1.size() );
 			(reinterpret_cast< T* >( e.data() )->*func_)( *arg1, *arg2 );
@@ -154,6 +158,7 @@ template< class T, class A1, class A2, class A3 > class OpFunc3:
 			return SetGet3< A1, A2, A3 >::innerStrSet( tgt.objId(), field, arg );
 		}
 
+		/*
 		void op( const Eref& e, const char* buf ) const {
 			buf += sizeof( Qinfo );
 			Conv< A1 > arg1( buf );
@@ -164,8 +169,9 @@ template< class T, class A1, class A2, class A3 > class OpFunc3:
 			(reinterpret_cast< T* >( e.data() )->*func_)( 
 				*arg1, *arg2, *arg3 );
 		}
+		*/
 
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			Conv< A1 > arg1( buf );
 			buf += arg1.size();
 			Conv< A2 > arg2( buf );
@@ -205,6 +211,7 @@ template< class T, class A1, class A2, class A3, class A4 > class OpFunc4:
 			return SetGet4< A1, A2, A3, A4 >::innerStrSet( tgt.objId(), field, arg );
 		}
 
+		/*
 		void op( const Eref& e, const char* buf ) const {
 			buf += sizeof( Qinfo );
 			Conv< A1 > arg1( buf );
@@ -217,8 +224,9 @@ template< class T, class A1, class A2, class A3, class A4 > class OpFunc4:
 			(reinterpret_cast< T* >( e.data() )->*func_)( 
 				*arg1, *arg2, *arg3, *arg4 );
 		}
+		*/
 
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			Conv< A1 > arg1( buf );
 			buf += arg1.size();
 			Conv< A2 > arg2( buf );
@@ -260,6 +268,7 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class OpFu
 			return SetGet5< A1, A2, A3, A4, A5 >::innerStrSet( tgt.objId(), field, arg );
 		}
 
+		/*
 		void op( const Eref& e, const char* buf ) const {
 			buf += sizeof( Qinfo );
 			Conv< A1 > arg1( buf );
@@ -274,8 +283,9 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class OpFu
 			(reinterpret_cast< T* >( e.data() )->*func_)( 
 				*arg1, *arg2, *arg3, *arg4, *arg5 );
 		}
+		*/
 
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			Conv< A1 > arg1( buf );
 			buf += arg1.size();
 			Conv< A2 > arg2( buf );
@@ -320,6 +330,7 @@ template< class T, class A1, class A2, class A3, class A4, class A5, class A6 > 
 			return SetGet6< A1, A2, A3, A4, A5, A6 >::innerStrSet( tgt.objId(), field, arg );
 		}
 
+		/*
 		void op( const Eref& e, const char* buf ) const {
 			buf += sizeof( Qinfo );
 			Conv< A1 > arg1( buf );
@@ -336,8 +347,9 @@ template< class T, class A1, class A2, class A3, class A4, class A5, class A6 > 
 			(reinterpret_cast< T* >( e.data() )->*func_)( 
 				*arg1, *arg2, *arg3, *arg4, *arg5, *arg6 );
 		}
+		*/
 
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			Conv< A1 > arg1( buf );
 			buf += arg1.size();
 			Conv< A2 > arg2( buf );
@@ -400,23 +412,32 @@ template< class T, class A > class GetOpFunc: public GetOpFuncBase< A >
 		 * right to the Qinfo::addToQ to send off data.
 		 * Finally, the data is copied back-and-forth about 3 times.
 		 * Wasteful, but the 'get' function is not to be heavily used.
-		 */
 		void op( const Eref& e, const char* buf ) const {
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
 			buf += sizeof( Qinfo );
 			this->op( e, q, buf );
 		}
+		 */
 
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			if ( skipWorkerNodeGlobal( e ) )
 				return;
 			const A& ret = 
 				(( reinterpret_cast< T* >( e.data() ) )->*func_)();
 			Conv<A> conv0( ret );
+
+			// Qinfo::addDirectQentry( proc, src, dest, fid, data, size )
+			// Should replace with a Conv< FuncId > conversion.
+			FuncId fid = *reinterpret_cast< const FuncId* >( buf );
+			Qinfo::addDirectToQ( e.objId(), q->src(), 
+				q->threadNum(), fid,
+				conv0.ptr(), conv0.size() );
+			/*
 			char* temp0 = new char[ conv0.size() ];
 			conv0.val2buf( temp0 );
 			fieldOp( e, q, buf, temp0, conv0.size() );
 			delete[] temp0;
+			*/
 		}
 
 		A reduceOp( const Eref& e ) const {
@@ -471,13 +492,15 @@ template< class T, class L, class A > class GetOpFunc1: public GetOpFuncBase< A 
 		 * Finally, the data is copied back-and-forth about 3 times.
 		 * Wasteful, but the 'get' function is not to be heavily used.
 		 */
+		/*
 		void op( const Eref& e, const char* buf ) const {
 			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
 			buf += sizeof( Qinfo );
 			this->op( e, q, buf );
 		}
+		*/
 
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			if ( skipWorkerNodeGlobal( e ) )
 				return;
 			Conv< L > conv1( buf + sizeof( FuncId ) );
@@ -521,6 +544,7 @@ template< class T, class A > class FieldNumOpFunc: public OpFunc1< T, A >
 		}
 		*/
 
+		/*
 		void op( const Eref& e, const char* buf ) const {
 			Conv< A > arg1( buf + sizeof( Qinfo ) );
 			// (reinterpret_cast< T* >( e.data() )->*func_)( *arg1 );
@@ -534,8 +558,9 @@ template< class T, class A > class FieldNumOpFunc: public OpFunc1< T, A >
 			fdh->setNumField( fdh->parentDataHandler()->data( e.index() ),
 				*arg1 );
 		}
+		*/
 
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			Conv< A > arg1( buf );
 			// (reinterpret_cast< T* >( e.data() )->*func_)( *arg1 );
 			FieldDataHandlerBase* fdh = 

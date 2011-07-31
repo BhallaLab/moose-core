@@ -382,10 +382,13 @@ class Shell
 		void innerDispatchSet( Eref& sheller, const ObjId& oid, 
 			FuncId fid, const PrepackedBuffer& arg );
 
-		const vector< char* >& dispatchGet( 
+		static const vector< double* >* awaitGottenData();
+		/*
+		const vector< char* >& dispatchGet(
 			const Eref& sheller,
 			const ObjId& tgt, FuncId fid,
 			const PrepackedBuffer& buf );
+			*/
 		/*
 		static const vector< char* >& dispatchGet( 
 			const ObjId& tgt, const string& field, const SetGet* sg,

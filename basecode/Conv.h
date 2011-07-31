@@ -32,7 +32,7 @@ template< class T > class Conv
 		 * Constructs a conv object from a binary buffer, which is presumed
 		 * filled by a complementary conversion at the sender.
 		 */
-		Conv( const char* buf )
+		Conv( const double* buf )
 		{
 			// By default the inner representation is just another char*
 			// pointer.
@@ -48,12 +48,22 @@ template< class T > class Conv
 		 */ 
 		Conv( const T& arg )
 		{
-			val_ = reinterpret_cast< const char* >( &arg );
+			val_ = reinterpret_cast< const double* >( &arg );
 		}
 
+		const double* ptr() const
+		{
+			return val_;
+		}
+
+		/**
+		 * Size, in units of sizeof(double). So a double would be 1,
+		 * something with 1 chars would be 1 as well, but something
+		 * with 9 chars would be 2.
+		 */
 		unsigned int size() const
 		{
-			return sizeof( T );
+			return 1 + ( sizeof( T ) - 1 ) / sizeof( double );
 		}
 
 		/**
@@ -67,12 +77,12 @@ template< class T > class Conv
 		}
 
 		/**
-		 * Converts data contents into char* buf. Buf must be allocated
+		 * Converts data contents into double* buf. Buf must be allocated
 		 * ahead of time.
 		 * Needs to be specialized for variable size and pointer-containing
 		 * types T.
 		 */
-		unsigned int val2buf( char* buf ) const {
+		unsigned int val2buf( double* buf ) const {
 			*reinterpret_cast< T* >( buf ) = 
 				*reinterpret_cast< const T* >( val_);
 			// Or I could do a memcpy. Worth trying to see speed implication
@@ -125,7 +135,7 @@ template< class T > class Conv
 		}
 
 	private:
-		const char* val_;
+		const double* val_;
 };
 
 template<> class Conv< string >
@@ -138,28 +148,42 @@ template<> class Conv< string >
 			else
 				val_ = buf;
 		}
+		Conv( const double* dbuf )
+		{
+			const char* buf = reinterpret_cast< const char* >( dbuf );
+			if ( buf == 0 )
+				val_ = "";
+			else
+				val_ = buf;
+		}
 
 		Conv( const string& arg )
 			: val_( arg )
 		{;}
 
+		const double* ptr() const
+		{
+			return reinterpret_cast< const double* >( val_.c_str() );
+		}
+
 		/**
-		 * This is the size used in the serialized form, as a char*
+		 * This is the size used in the serialized form, as a double*
 		 * Note that we do some ugly stuff to get alignment on 8-byte
 		 * boundaries.
 		 * We need to have strlen + 1 as a minimum.
 		 */
 		unsigned int size() const
 		{
-			static const unsigned int ALIGNMENT = 8;
-			return ALIGNMENT * ( 1 + ( val_.length() / ALIGNMENT ) );
+			
+			return ( 1 + ( val_.length() / sizeof( double ) ) );
 		}
 
 		const string& operator*() const {
 			return val_;
 		}
 
-		unsigned int val2buf( char* buf ) const {
+		unsigned int val2buf( double* dbuf ) const {
+			char* buf = reinterpret_cast< char* >( dbuf );
 			strcpy( buf, val_.c_str() );
 			return size();
 		}
@@ -181,19 +205,76 @@ template<> class Conv< string >
 
 /**
  * The template specialization of Conv< bool > sets up alignment on
- * word boundaries by storing the bool as an int. 
+ * word boundaries by storing the bool as a double. 
+ */
+template<> class Conv< double >
+{
+	public:
+		/// Constructor assumes that the buffer points to a double
+		Conv( const double* buf )
+		{
+			assert( buf );
+			val_ = *buf;
+		}
+
+		/// Constructor uses implicit conversion of bool to int.
+		Conv( const double& arg )
+			: val_( arg )
+		{;}
+
+		/**
+		 * This is the size used in the serialized form.
+		 */
+		unsigned int size() const
+		{
+			return 1;
+		}
+
+		const double* ptr() const
+		{
+			return &val_;
+		}
+
+		const double operator*() const {
+			return val_;
+		}
+
+		unsigned int val2buf( double* buf ) const {
+			*buf = val_;
+			return 1;
+		}
+
+		static void str2val( double& val, const string& s ) {
+			val = atof( s.c_str() );
+		}
+
+		static void val2str( string& s, const double& val ) {
+			stringstream ss;
+			ss << val;
+			s = ss.str();
+		}
+
+		static string rttiType() {
+			return "double";
+		}
+	private:
+		double val_;
+};
+
+/**
+ * The template specialization of Conv< bool > sets up alignment on
+ * word boundaries by storing the bool as a double. 
  */
 template<> class Conv< bool >
 {
 	public:
-		/// Constructor assumes that the buffer points to an int.
-		Conv( const char* buf )
+		Conv( const double* buf )
 		{
 			assert( buf );
-			val_ = *reinterpret_cast< const int* >( buf );
+			val_ = *buf;
 		}
 
-		/// Constructor uses implicit conversion of bool to int.
+		/// Constructor uses implicit conversion of bool to double.
 		Conv( const bool& arg )
 			: val_( arg )
 		{;}
@@ -203,16 +284,21 @@ template<> class Conv< bool >
 		 */
 		unsigned int size() const
 		{
-			return sizeof( int );
+			return 1;
+		}
+
+		const double* ptr() const
+		{
+			return &val_;
 		}
 
 		const bool operator*() const {
-			return val_;
+			return ( val_ > 0.5 );
 		}
 
-		unsigned int val2buf( char* buf ) const {
-			*reinterpret_cast< int* >( buf ) = val_;
-			return sizeof( int );
+		unsigned int val2buf( double* buf ) const {
+			*buf = val_;
+			return 1;
 		}
 
 		static void str2val( bool& val, const string& s ) {
@@ -223,7 +309,7 @@ template<> class Conv< bool >
 		}
 
 		static void val2str( string& s, const bool& val ) {
-			if ( val )
+			if ( val > 0.5 )
 				s = "1";
 			else
 				s = "0";
@@ -233,13 +319,13 @@ template<> class Conv< bool >
 			return "bool";
 		}
 	private:
-		int val_;
+		double val_;
 };
 
 template<> class Conv< PrepackedBuffer >
 {
 	public:
-		Conv( const char* buf )
+		Conv( const double* buf )
 			: val_( buf )
 		{;}
 
@@ -266,7 +352,7 @@ template<> class Conv< PrepackedBuffer >
 		 * types T.
 		 * returns size of newly filled buffer.
 		 */
-		unsigned int val2buf( char* buf ) const {
+		unsigned int val2buf( double* buf ) const {
 			return val_.conv2buf( buf );
 		}
 
@@ -294,7 +380,7 @@ template<> class Conv< PrepackedBuffer >
 template< class T > class Conv< vector< T > >
 {
 	public:
-		Conv( const char* buf )
+		Conv( const double* buf )
 		{
 			unsigned int numEntries = 
 				*reinterpret_cast< const unsigned int* >( buf );
@@ -321,6 +407,11 @@ template< class T > class Conv< vector< T > >
 			}
 		}
 
+		const double* ptr() const
+		{
+			return 0;
+		}
+
 		unsigned int size() const
 		{
 			return size_;
@@ -330,9 +421,9 @@ template< class T > class Conv< vector< T > >
 			return val_;
 		}
 
-		unsigned int val2buf( char* buf ) const {
+		unsigned int val2buf( double* buf ) const {
 			*( reinterpret_cast< unsigned int* >( buf ) ) = val_.size();
-			buf += sizeof( unsigned int );
+			buf += 1;
 			for ( unsigned int i = 0; i < val_.size(); ++i ) {
 				Conv< T > temp( val_[ i ] );
 				buf += temp.val2buf( buf );
