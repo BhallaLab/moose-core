@@ -11,8 +11,6 @@ TARGET = msg.o
 
 OBJ = \
 	Msg.o	\
-	AssignmentMsg.o	\
-	AssignVecMsg.o	\
 	DiagonalMsg.o	\
 	OneToAllMsg.o	\
 	OneToOneMsg.o	\
@@ -28,15 +26,13 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-AssignmentMsg.o:	AssignmentMsg.h
-AssignVecMsg.o:	AssignVecMsg.h
 DiagonalMsg.o:	DiagonalMsg.h
 OneToAll.o:	OneToAll.h
 OneToOne.o:	OneToOne.h
 SingleMsg.o:	SingleMsg.h
 SparseMsg.o:	SparseMsg.h
 ReduceMsg.o:	ReduceMsg.h
-testMsg.o: AssignmentMsg.h AssignVecMsg.h DiagonalMsg.h OneToAllMsg.h OneToOneMsg.h SingleMsg.h SparseMsg.h ReduceMsg.h ../basecode/SetGet.h
+testMsg.o: DiagonalMsg.h OneToAllMsg.h OneToOneMsg.h SingleMsg.h SparseMsg.h ReduceMsg.h ../basecode/SetGet.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode $< -c

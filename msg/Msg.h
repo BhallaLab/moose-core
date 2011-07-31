@@ -43,16 +43,6 @@ class Msg
 		 * Calls Process on e1.
 		 */
 		virtual void process( const ProcInfo *p, FuncId fid ) const;
-
-		/**
-		 * Report if the msg accepts input from the DataId specified
-		 * in the Qinfo. Note that the direction of the message is also
-		 * important to know in order to figure this out.
-		 * Usually the answer is yes, regardless of DataId.
-		virtual bool isMsgHere( const Qinfo& q ) const {
-			return 1;
-		}
-		 */
 		
 		/**
 		 * Execute func( arg ) on all relevant indices of target
@@ -178,10 +168,10 @@ class Msg
 		 * be added to the Queue at all. There is a default implementation
 		 * in which it always adds the message to the queue, but this has to
 		 * specialized for any Msg subclass which has specific inputs.
-		 */
 		virtual void addToQ( const Element* src, Qinfo& q, 
 			const ProcInfo* p, MsgFuncBinding i, const char* arg ) 
 			const;
+		 */
 
 		/**
 		 * Looks up the message on the global vector of Msgs. No checks,

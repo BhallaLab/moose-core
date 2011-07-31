@@ -27,36 +27,25 @@ ReduceMsg::~ReduceMsg()
 	;
 }
 
-void ReduceMsg::exec( const char* arg, const ProcInfo *p ) const
+void ReduceMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const
 {
-	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
-
-	if ( q->isForward() ) {
-		/*
-		FuncId fid = *reinterpret_cast< const FuncId* >( arg + sizeof( Qinfo ) );
-		// Create Reduce operator.
-		/// ReduceFinfoBase rfb_ is built into the Msg.
-		ReduceBase* r = rfb_->makeReduce( e2_, q->fid() );
-		or
-		*/
-		const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
+	if ( q->src().element() == e1_ ) {
+		const OpFunc* f = e2_->cinfo()->getOpFunc( fid );
 		ReduceBase* r = rfb_->makeReduce( ObjId( e1_->id(), i1_ ), f );
-		// Qinfo::addToReduceQ( Eref( e1_, i1_ ), rfb_, r, p->threadIndexInGroup() );
-		Qinfo::addToReduceQ( r, p->threadIndexInGroup );
+		Qinfo::addToReduceQ( r, q->threadNum() );
 		DataHandler* d2 = e2_->dataHandler();
 		for ( DataHandler::iterator i = d2->begin(); i != d2->end(); ++i )
 		{
-			if ( p->execThread( e2_->id(),i.index().data() ) ) {
+			if ( q->execThread( e2_->id(),i.index().data() ) ) {
 				// This fills up the first pass of reduce operations.
 				r->primaryReduce( ObjId( e2_->id(), i.index() ) );
 				r->setInited();
 			}
 		}
-	}
-	if ( !q->isForward() && e1_->dataHandler()->isDataHere( i1_ ) &&
-		p->execThread( e1_->id(), i1_.data() ) ) {
-		const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
-		f->op( Eref( e1_, i1_ ), arg );
+	} else if ( e1_->dataHandler()->isDataHere( i1_ ) &&
+		q->execThread( e1_->id(), i1_.data() ) ) {
+		const OpFunc* f = e1_->cinfo()->getOpFunc( fid );
+		f->op( Eref( e1_, i1_ ), q, arg );
 	}
 }
 
@@ -120,16 +109,6 @@ unsigned int ReduceMsg::srcToDestPairs(
 	}
 
 	return destRange;
-}
-
-void ReduceMsg::addToQ( const Element* src, Qinfo& q,
-	const ProcInfo* p, MsgFuncBinding i, const char* arg ) const
-{
-	if ( e1_ == src && i1_ == q.srcIndex() ) {
-		q.addToQforward( p, i, arg );
-	} else if ( e2_ == src ) { // Not sure if we should allow back_msg here.
-		q.addToQbackward( p, i, arg ); 
-	}
 }
 
 ///////////////////////////////////////////////////////////////////////
