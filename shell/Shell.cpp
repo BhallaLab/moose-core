@@ -822,7 +822,7 @@ bool Shell::isRunning() const
 	return ( reinterpret_cast< const Clock* >( clockId.eref().data() ) )->isRunning();
 }
 
-const vector< char* >& Shell::getBuf() const
+const vector< double* >& Shell::getBuf() const
 {
 	return getBuf_;
 }

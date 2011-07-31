@@ -188,34 +188,32 @@ template< class A > class SetGet1: public SetGet
 		 * operation.
 		 * This variant requires that all vector entries have the same
 		 * size. Strings won't work.
+		 *
+		 * The sequence of data in the buffer is:
+		 * first few locations: ObjFid
+		 * Remaining locations: Args.
 		 */
 		static bool setVec( Id destId, const string& field, 
 			const vector< A >& arg )
 		{
+			if ( arg.size() == 0 ) return 0;
+
 			ObjId tgt( destId, 0 );
 			SetGet1< A > sg( tgt );
 			FuncId fid;
-			if ( arg.size() == 0 )
-				return 0;
 
 			if ( sg.checkSet( field, tgt, fid ) ) {
-				unsigned int totalArgSize = 0;
-				for ( unsigned int i = 0; i < arg.size(); ++i ) {
-					Conv< A > conv( arg[i] );
-					totalArgSize += conv.size();
-				}
-				char* data = new char[ totalArgSize ];
-				char* temp = data;
+				Conv< A > conv( arg[0] );
+				unsigned int entrySize = conv.size();
+
+				double* ptr = Qinfo::addVecDirectToQ( ObjId(), tgt, 0, fid,
+					entrySize, arg.size() );
 
 				for ( unsigned int i = 0; i < arg.size(); ++i ) {
 					Conv< A > conv( arg[i] );
-					conv.val2buf( temp );
-					temp += conv.size();
+					memcpy( ptr, conv.ptr(), entrySize * sizeof( double ) );
+					ptr += entrySize;
 				}
-
-				PrepackedBuffer pb( data, totalArgSize, arg.size() ) ;
-				dispatchSetVec( tgt, fid, pb );
-				delete[] data;
 				return 1;
 			}
 			return 0;
@@ -428,36 +426,27 @@ template< class A1, class A2 > class SetGet2: public SetGet
 		static bool setVec( Id destId, const string& field, 
 			const vector< A1 >& arg1, const vector< A2 >& arg2 )
 		{
+			if ( arg1.size() != arg2.size() || arg1.size() == 0 )
+				return 0;
 			ObjId tgt( destId, 0 );
 			SetGet2< A1, A2 > sg( tgt );
 			FuncId fid;
 			if ( sg.checkSet( field, tgt, fid ) ) {
-				unsigned int size = arg1.size();
-				if ( size > arg2.size() ) 
-					size = arg2.size();
-				if ( size == 0 )
-					return 0;
-				unsigned int totalSize = 0;
-				for ( unsigned int i = 0; i < size; ++i ) {
-					Conv< A1 > a1( arg1[i] );
-					Conv< A2 > a2( arg2[i] );
-					totalSize += a1.size() + a2.size();
+				Conv< A1 > conv1( arg1[0] );
+				Conv< A2 > conv2( arg2[0] );
+				unsigned int entrySize = conv1.size() + conv2.size();
+
+				double* ptr = Qinfo::addVecDirectToQ( ObjId(), tgt, 0, fid,
+					entrySize, arg1.size() );
+
+				for ( unsigned int i = 0; i < arg1.size(); ++i ) {
+					Conv< A1 > conv1( arg1[i] );
+					Conv< A2 > conv2( arg2[i] );
+					memcpy( ptr, conv1.ptr(), conv1.size() * sizeof( double ) );
+					ptr += conv1.size();
+					memcpy( ptr, conv2.ptr(), conv2.size() * sizeof( double ) );
+					ptr += conv2.size();
 				}
-	
-				char* data = new char[ totalSize ];
-				char* temp = data;
-				for ( unsigned int i = 0; i < size; ++i ) {
-					Conv< A1 > a1( arg1[i] );
-					a1.val2buf( temp );
-					temp += a1.size();
-	
-					Conv< A2 > a2( arg2[i] );
-					a2.val2buf( temp );
-					temp += a2.size();
-				}
-				PrepackedBuffer pb( data, totalSize, size );
-				dispatchSetVec( tgt, fid, pb );
-				delete[] data;
 				return 1;
 			}
 			return 0;
