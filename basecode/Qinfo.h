@@ -17,6 +17,8 @@ class ReduceBase;
 typedef struct {
 	ObjId oi;
 	FuncId fid;
+	unsigned int entrySize;
+	unsigned int numEntries;
 } ObjFid;
 
 /**
@@ -156,18 +158,16 @@ class Qinfo
 			unsigned int size );
 
 		/**
-		 * Add data to the queue. This is non-static, since we will also
-		 * put the current Qinfo on the queue as a header.
-		 * The arg will just be memcopied onto the queue, so avoid
-		 * pointers. The Qinfo must already know its size.
-		 * This variant sets the isForward flag to True.
-		void addToQforward( const ProcInfo* p, MsgFuncBinding b, const char* arg );
+		 * Add vector data to queue without any underlying message,
+		 * allocate space for the arguments and return a pointer to this 
+		 * space. This function is used
+		 * for specific point-to-point data delivery with a vector
 		 */
+		static double* addVecDirectToQ( const ObjId& src, const ObjId& dest,
+			unsigned short threadNum,
+			FuncId fid,
+			unsigned int entrySize, unsigned int numEntries );
 
-		/**
-		 * Adds data to the queue with the isForward flag set to False.
-		void addToQbackward( const ProcInfo* p, MsgFuncBinding b, const char* arg );
-		 */
 
 		/**
 		 * Adds an existing queue entry into the structuralQ, for later

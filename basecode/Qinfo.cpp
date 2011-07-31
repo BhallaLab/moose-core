@@ -595,7 +595,7 @@ void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest,
 
 	qBuf_[ threadNum ].push_back( 
 		Qinfo( src, ~0, threadNum, dBuf_.size() ) );
-	ObjFid ofid = { dest, fid };
+	ObjFid ofid = { dest, fid, 0, 0 };
 	const double* ptr = reinterpret_cast< const double* >( &ofid );
 	vector< double >& vec = dBuf_[ threadNum ];
 	vec.insert( vec.end(), ptr, ptr + ObjFidSizeInDoubles );
@@ -603,52 +603,6 @@ void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest,
 		vec.insert( vec.end(), arg, arg + size );
 	}
 }
-
-/**
- * Static function.
- * Adds a Queue entry in the reverse direction.
-void Qinfo::addToQbackward( const ProcInfo* p, 
-	const ObjId& oi, MsgId mid, FuncId fid,
-	const double* arg, unsigned int size )
-{
-	qBuf_[ p->threadIndexInGroup ].push_back( Qinfo( oi, mid, fid, dBuf_.size() ) );
-	vector< double >& vec = dBuf_[ p->threadIndexInGroup ];
-	vec.insert( vec.end(), arg, arg + size );
-}
- */
-
-/*
-void Qinfo::addToQforward( const ProcInfo* p, MsgFuncBinding b, 
-	const char* arg )
-{
-	// static pthread_mutex_t *mutex = init_mutex(); // only called once.
-	m_ = b.mid;
-	f_ = b.fid;
-	assert( b.mid != Msg::badMsg );
-	isForward_ = 1;
-	// pthread_mutex_lock( mutex );
-		(*outQ_)[p->groupId].push_back( p->threadIndexInGroup, this, arg );
-	// pthread_mutex_unlock( mutex );
-}
-
-void Qinfo::addToQbackward( const ProcInfo* p, MsgFuncBinding b, 
-	const char* arg )
-{
-	// static pthread_mutex_t *mutex = init_mutex(); // only called once.
-
-	m_ = b.mid;
-	f_ = b.fid;
-	assert( b.mid != Msg::badMsg );
-	isForward_ = 0;
-	// if ( p->threadIndexInGroup != 0 ) cout << "#" << flush;
-	// if ( procIndex_ != p->threadIndexInGroup ) cout << "@" << flush;
-	// cout << p->groupId << ":" << p->threadIndexInGroup << " " << flush;
-
-	// pthread_mutex_lock( mutex );
-		(*outQ_)[p->groupId].push_back( p->threadIndexInGroup, this, arg );
-	// pthread_mutex_unlock( mutex );
-}
-*/
 
 /// Static func.
 void Qinfo::disableStructuralQ()

@@ -428,7 +428,7 @@ class Shell
 		// Initialization function, used only in main.cpp:init()
 		void setShellElement( Element* shelle );
 
-		const vector< char* >& getBuf() const;
+		const vector< double* >& getBuf() const;
 		void clearGetBuf();
 
 		/// Static func for returning the ProcInfo of the shell.
@@ -478,7 +478,7 @@ class Shell
 		 * Only index 0 is used for any single-value 'get' call.
 		 * If it was the 'getVec' command then the array is filled up
 		 */
-		vector< char* > getBuf_;
+		vector< double* > getBuf_;
 
 		/**
 		 * Flag, used by the 'get' subsystem which maintains a buffer for

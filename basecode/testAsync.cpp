@@ -68,7 +68,7 @@ void testPrepackedBuffer()
 
 	assert( conv4.size() == pb.dataSize() + 2 * sizeof( unsigned int ) );
 
-	temp = new char[ conv4.size() ];
+	temp = new double[ conv4.size() ];
 
 	unsigned int size = conv4.val2buf( temp );
 	assert( size == pb.dataSize() + 2 * sizeof( unsigned int ) );
@@ -79,7 +79,7 @@ void testPrepackedBuffer()
 
 	assert( pb2.dataSize() == pb.dataSize() );
 
-	const char* temp2 = pb2.data();
+	const double* temp2 = pb2.data();
 
 	Conv< string > conv6( temp2 );
 	temp2 += conv6.size();
@@ -131,9 +131,12 @@ void insertIntoQ( )
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double x = i * i;
-		char buf[200];
-
 		// This simulates a sendTo
+		Qinfo::addDirectToQ( i1, i2, 0, fid, &x, 1 );
+
+		/*
+		double buf[200];
+
 		Conv< double > conv( x );
 		unsigned int size = conv.val2buf( buf );
 		Qinfo qi( 1, i, size + sizeof( DataId ), 1 );
@@ -145,6 +148,7 @@ void insertIntoQ( )
 		// addToQ( threadIndex, Binding, argbuf )
 		// qi.assignQblock( m, &p );
 		qi.addToQforward( &p, b, buf );
+		*/
 	}
 	Qinfo::clearQ( &p );
 
@@ -279,7 +283,7 @@ void testInnerSet()
 	assert( finfo );
 	FuncId f1 = dynamic_cast< const DestFinfo* >( finfo )->getFid();
 	Conv< string > conv( "New Improved Test" );
-	char* args = new char[ conv.size() ];
+	double* args = new double[ conv.size() ];
 	conv.val2buf( args );
 	PrepackedBuffer pb( args, conv.size() );
 	Qinfo q;
@@ -297,7 +301,7 @@ void testInnerSet()
 	FuncId f2 = dynamic_cast< const DestFinfo* >( finfo )->getFid();
 
 	for ( unsigned int i = 0; i < size; ++i ) {
-		char args[100];
+		double args[100];
 		double x = sqrt( i );
 		Conv< double > conv( x );
 		Eref dest( e2.element(), i );
@@ -963,11 +967,14 @@ void testSendSpike()
 	double Vm = reinterpret_cast< IntFire* >(e2.data())->getVm();
 	assert( doubleEq( Vm, -1e-7 ) );
 	// Test that the spike message is in the queue.
-	assert( Qinfo::outQ_->size() > 0 ); // Number of groups.
-	assert( (*Qinfo::outQ_)[0].totalNumEntries() == 1 );
+	assert( Qinfo::qBuf_.size() > 0 );
+	assert( Qinfo::dBuf_.size() > 0 );
+	assert( Qinfo::qBuf_[0].size() == 1 );
+	assert( Qinfo::dBuf_[0].size() == 1 );
 
 	Qinfo::clearQ( &p );
-	assert( (*Qinfo::outQ_)[0].totalNumEntries() == 0 );
+	assert( Qinfo::qBuf_[0].size() == 0 );
+	assert( Qinfo::dBuf_[0].size() == 0 );
 
 	/*
 	// Warning: the 'get' function calls clearQ also.
@@ -1316,7 +1323,8 @@ void testSparseMsg()
 			startThread = Qinfo::simGroup( 1 )->startThread;
 		}
 		*/
-		unsigned int totOutqEntries = ( *Qinfo::outQ_ )[ 0 ].totalNumEntries();
+		unsigned int totOutqEntries = Qinfo::qBuf_[ 0 ].size();
+		// unsigned int totOutqEntries = ( *Qinfo::outQ_ )[ 0 ].totalNumEntries();
 		assert( totOutqEntries == qSize[i] );
 		// cout << i << ": " << totOutqEntries / ( sizeof( Qinfo ) + sizeof( double ) ) << endl << endl ;
 		// cout << p.currTime << "	" << ifire100->getVm() << "	" << ifire900->getVm() << endl;
@@ -1547,7 +1555,7 @@ void testConvVector()
 	for ( unsigned int i = 0; i < 5; ++i )
 		intVec.push_back( i * i );
 	
-	char buf[500];
+	double buf[500];
 
 	Conv< vector< unsigned int > > intConv( intVec );
 	assert( intConv.size() == sizeof( unsigned int ) * (intVec.size() + 1));

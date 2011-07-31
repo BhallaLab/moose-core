@@ -14238,3 +14238,16 @@ TDL
 - Figure out if the assorted SetGet::set calls are safe to run without 
 	wait for ack.
 - Figure out how for SetGet::get call to wait for ack. Implement awaitGottenData
+
+- Implement the two extra variants of Qinfo::addDirectToQ, put in the
+	ObjFid stuff for the second.
+
+
+
+
+Moved the current development to a new branch:
+https://moose.svn.sourceforge.net/svnroot/moose/moose/branches/newQ
+Checkin 2847.
+Pegged away at it. Now compiles through the basecode directory.
+
+

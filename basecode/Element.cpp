@@ -321,7 +321,13 @@ void Element::exec( const Qinfo* qi, const ProcInfo* p, const double* arg )
 		const ObjFid *ofid = reinterpret_cast< const ObjFid* >( arg );
 		const OpFunc* f = 
 			ofid->oi.element()->cinfo()->getOpFunc( ofid->fid );
-		f->op( ofid->oi.eref(), qi, arg + ObjFidSizeInDoubles );
+		if ( ofid->oi.dataId == DataId::bad() ) return;
+		if ( ofid->oi.dataId == DataId::any() ) {
+			// Here we iterate through the DataId, using the
+			// numEntries and entrySize of the ofid to set args.
+		} else {
+			f->op( ofid->oi.eref(), qi, arg + ObjFidSizeInDoubles );
+		}
 	} else {
 		vector< MsgFuncBinding >::const_iterator end = 
 			msgBinding_[ qi->bindIndex() ].end();

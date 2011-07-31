@@ -65,15 +65,8 @@ template< class T > class EpFunc0: public OpFunc
 			return SetGet0::innerStrSet( tgt.objId(), field, arg );
 		}
 
-		void op( const Eref& e, const char* buf ) const {
-			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			( getEpFuncData< T >( e )->*func_ )( e, q );
-			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q ); 
-		}
-
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
-			( getEpFuncData< T >( e )->*func_ )( e, q );
-			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q ); 
 		}
 
 		string rttiType() const {
@@ -104,19 +97,9 @@ template< class T, class A > class EpFunc1: public OpFunc
 			return SetGet1< A >::innerStrSet( tgt.objId(), field, arg );
 		}
 
-		// This could do with a whole lot of optimization to avoid
-		// copying data back and forth.
-		void op( const Eref& e, const char* buf ) const {
-			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
-			Conv< A > arg1( buf + sizeof( Qinfo ) );
-			( getEpFuncData< T >( e )->*func_ )( e, q, *arg1 );
-			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1 ) ;
-		}
-
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			Conv< A > arg1( buf );
 			( getEpFuncData< T >( e )->*func_ )( e, q, *arg1 );
-			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1 ) ;
 		}
 
 		string rttiType() const {
@@ -147,22 +130,10 @@ template< class T, class A1, class A2 > class EpFunc2: public OpFunc
 			return SetGet2< A1, A2 >::innerStrSet( tgt.objId(), field, arg );
 		}
 
-		// This could do with a whole lot of optimization to avoid
-		// copying data back and forth.
-		void op( const Eref& e, const char* buf ) const {
-			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
-			buf += sizeof( Qinfo );
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			Conv< A1 > arg1( buf );
 			Conv< A2 > arg2( buf + arg1.size() );
 			( getEpFuncData< T >( e )->*func_ )( e, q, *arg1, *arg2 );
-			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2 ) ;
-		}
-
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
-			Conv< A1 > arg1( buf );
-			Conv< A2 > arg2( buf + arg1.size() );
-			( getEpFuncData< T >( e )->*func_ )( e, q, *arg1, *arg2 );
-		// 	(reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2 ) ;
 		}
 
 		string rttiType() const {
@@ -194,24 +165,11 @@ template< class T, class A1, class A2, class A3 > class EpFunc3:
 			return SetGet3< A1, A2, A3 >::innerStrSet( tgt.objId(), field, arg );
 		}
 
-		// This could do with a whole lot of optimization to avoid
-		// copying data back and forth.
-		void op( const Eref& e, const char* buf ) const {
-			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
-			buf += sizeof( Qinfo );
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			Conv< A1 > arg1( buf );
 			Conv< A2 > arg2( buf + arg1.size() );
 			Conv< A3 > arg3( buf + arg1.size() + arg2.size() );
 			( getEpFuncData< T >( e )->*func_ )( e, q, *arg1, *arg2, *arg3);
-			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2, *arg3 ) ;
-		}
-
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
-			Conv< A1 > arg1( buf );
-			Conv< A2 > arg2( buf + arg1.size() );
-			Conv< A3 > arg3( buf + arg1.size() + arg2.size() );
-			( getEpFuncData< T >( e )->*func_ )( e, q, *arg1, *arg2, *arg3);
-			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2, *arg3 ) ;
 		}
 
 		string rttiType() const {
@@ -244,28 +202,13 @@ template< class T, class A1, class A2, class A3, class A4 > class EpFunc4:
 			return SetGet4< A1, A2, A3, A4 >::innerStrSet( tgt.objId(), field, arg );
 		}
 
-		// This could do with a whole lot of optimization to avoid
-		// copying data back and forth.
-		void op( const Eref& e, const char* buf ) const {
-			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
-			buf += sizeof( Qinfo );
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			Conv< A1 > arg1( buf );
 			Conv< A2 > arg2( buf + arg1.size() );
 			Conv< A3 > arg3( buf + arg1.size() + arg2.size() );
 			Conv< A4 > arg4( buf + arg1.size() + arg2.size() + arg3.size());
 			( getEpFuncData< T >( e )->*func_ )( e, q, 
 				*arg1, *arg2, *arg3, *arg4);
-			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2, *arg3, *arg4 ) ;
-		}
-
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
-			Conv< A1 > arg1( buf );
-			Conv< A2 > arg2( buf + arg1.size() );
-			Conv< A3 > arg3( buf + arg1.size() + arg2.size() );
-			Conv< A4 > arg4( buf + arg1.size() + arg2.size() + arg3.size());
-			( getEpFuncData< T >( e )->*func_ )( e, q, 
-				*arg1, *arg2, *arg3, *arg4);
-			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2, *arg3, *arg4 ) ;
 		}
 
 		string rttiType() const {
@@ -298,11 +241,7 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class EpFu
 			return SetGet5< A1, A2, A3, A4, A5 >::innerStrSet( tgt.objId(), field, arg );
 		}
 
-		// This could do with a whole lot of optimization to avoid
-		// copying data back and forth.
-		void op( const Eref& e, const char* buf ) const {
-			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
-			buf += sizeof( Qinfo );
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			Conv< A1 > arg1( buf );
 			buf += arg1.size();
 			Conv< A2 > arg2( buf );
@@ -314,22 +253,6 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class EpFu
 			Conv< A5 > arg5( buf );
 			( getEpFuncData< T >( e )->*func_ )( e, q, 
 				*arg1, *arg2, *arg3, *arg4, *arg5 );
-			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2, *arg3, *arg4, *arg5 ) ;
-		}
-
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
-			Conv< A1 > arg1( buf );
-			buf += arg1.size();
-			Conv< A2 > arg2( buf );
-			buf += arg2.size();
-			Conv< A3 > arg3( buf );
-			buf += arg3.size();
-			Conv< A4 > arg4( buf );
-			buf += arg4.size();
-			Conv< A5 > arg5( buf );
-			( getEpFuncData< T >( e )->*func_ )( e, q, 
-				*arg1, *arg2, *arg3, *arg4, *arg5 );
-			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2, *arg3, *arg4, *arg5 ) ;
 		}
 
 		string rttiType() const {
@@ -363,11 +286,7 @@ template< class T, class A1, class A2, class A3, class A4, class A5, class A6 > 
 			return SetGet6< A1, A2, A3, A4, A5, A6 >::innerStrSet( tgt.objId(), field, arg );
 		}
 
-		// This could do with a whole lot of optimization to avoid
-		// copying data back and forth.
-		void op( const Eref& e, const char* buf ) const {
-			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
-			buf += sizeof( Qinfo );
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			Conv< A1 > arg1( buf );
 			buf += arg1.size();
 			Conv< A2 > arg2( buf );
@@ -381,24 +300,6 @@ template< class T, class A1, class A2, class A3, class A4, class A5, class A6 > 
 			Conv< A6 > arg6( buf );
 			( getEpFuncData< T >( e )->*func_ )( e, q, 
 				*arg1, *arg2, *arg3, *arg4, *arg5, *arg6 );
-			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2, *arg3, *arg4, *arg5, *arg6 ) ;
-		}
-
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
-			Conv< A1 > arg1( buf );
-			buf += arg1.size();
-			Conv< A2 > arg2( buf );
-			buf += arg2.size();
-			Conv< A3 > arg3( buf );
-			buf += arg3.size();
-			Conv< A4 > arg4( buf );
-			buf += arg4.size();
-			Conv< A5 > arg5( buf );
-			buf += arg5.size();
-			Conv< A6 > arg6( buf );
-			( getEpFuncData< T >( e )->*func_ )( e, q, 
-				*arg1, *arg2, *arg3, *arg4, *arg5, *arg6 );
-			// (reinterpret_cast< T* >( e.data() )->*func_)( e, q, *arg1, *arg2, *arg3, *arg4, *arg5, *arg6 ) ;
 		}
 
 		string rttiType() const {
@@ -452,22 +353,23 @@ template< class T, class A > class GetEpFunc: public GetOpFuncBase< A >
 		 * Finally, the data is copied back-and-forth about 3 times.
 		 * Wasteful, but the 'get' function is not to be heavily used.
 		 */
-		void op( const Eref& e, const char* buf ) const {
-			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
-			buf += sizeof( Qinfo );
-			op( e, q, buf );
-		}
 
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			if ( skipWorkerNodeGlobal( e ) )
 				return;
 			const A& ret = ( getEpFuncData< T >( e )->*func_ )( e, q );
-				// (( reinterpret_cast< T* >( e.data() ) )->*func_)( e, q );
 			Conv<A> conv0( ret );
+			FuncId fid = *reinterpret_cast< const FuncId* >( buf );
+			Qinfo::addDirectToQ( e.objId(), q->src(),
+				q->threadNum(), fid,
+				conv0.ptr(), conv0.size() );
+
+			/*
 			char* temp0 = new char[ conv0.size() ];
 			conv0.val2buf( temp0 );
 			fieldOp( e, q, buf, temp0, conv0.size() );
 			delete[] temp0;
+			*/
 		}
 
 		A reduceOp( const Eref& e ) const {
@@ -510,26 +412,25 @@ template< class T, class L, class A > class GetEpFunc1: public GetOpFuncBase< A 
 			return SetGet1< A >::innerStrSet( tgt.objId(), field, arg );
 		}
 
-		void op( const Eref& e, const char* buf ) const {
-			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
-			buf += sizeof( Qinfo );
-			this->op( e, q, buf );
-		}
-
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			if ( skipWorkerNodeGlobal( e ) )
 				return;
+			Conv< FuncId > convFid( buf );
 			Conv< L > conv1( buf + sizeof( FuncId ) );
-
 			const A& ret = 
 				( getEpFuncData< T >( e )->*func_ )( e, q, *conv1 );
 
-			// const A& ret = (( reinterpret_cast< T* >( e.data() ) )->*func_)( e, q, *conv1 );
 			Conv<A> conv0( ret );
+			FuncId fid = *convFid;
+			Qinfo::addDirectToQ( e.objId(), q->src(),
+				q->threadNum(), fid,
+				conv0.ptr(), conv0.size() );
+			/*
 			char* temp0 = new char[ conv0.size() ];
 			conv0.val2buf( temp0 );
 			fieldOp( e, q, buf, temp0, conv0.size() );
 			delete[] temp0;
+			*/
 		}
 
 		/// ReduceOp not permissible.
