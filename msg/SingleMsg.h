@@ -18,7 +18,8 @@ class SingleMsg: public Msg
 		SingleMsg( MsgId mid, Eref e1, Eref e2 );
 		~SingleMsg();
 
-		void exec( const char* arg, const ProcInfo* p) const;
+		// void exec( const char* arg, const ProcInfo* p) const;
+		void exec( const Qinfo* qi, const double* arg, FuncId fid ) const;
 
 		Eref firstTgt( const Eref& src ) const;
 

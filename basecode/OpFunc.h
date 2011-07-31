@@ -503,14 +503,22 @@ template< class T, class L, class A > class GetOpFunc1: public GetOpFuncBase< A 
 		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			if ( skipWorkerNodeGlobal( e ) )
 				return;
-			Conv< L > conv1( buf + sizeof( FuncId ) );
+			Conv< FuncId > convFid( buf );
+			Conv< L > conv1( buf + convFid.size() );
 			const A& ret = 
 				(( reinterpret_cast< T* >( e.data() ) )->*func_)( *conv1 );
 			Conv<A> conv0( ret );
+			FuncId fid = *convFid;
+			Qinfo::addDirectToQ( e.objId(), q->src(), 
+				q->threadNum(), fid,
+				conv0.ptr(), conv0.size() );
+
+			/*
 			char* temp0 = new char[ conv0.size() ];
 			conv0.val2buf( temp0 );
 			fieldOp( e, q, buf, temp0, conv0.size() );
 			delete[] temp0;
+			*/
 		}
 
 		/// ReduceOp is not really permissible for this class.

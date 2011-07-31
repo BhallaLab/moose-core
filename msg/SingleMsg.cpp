@@ -29,18 +29,18 @@ SingleMsg::~SingleMsg()
 	;
 }
 
-void SingleMsg::exec( const Qinfo* q, const char* arg, FuncId fid,
-	const ProcInfo *p ) const
+//void SingleMsg::exec( const Qinfo* q, const char* arg, FuncId fid, const ProcInfo *p ) const
+void SingleMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const
 {
 	if ( q->src().element() == e1_ ) { // forward message
-		if ( handleForward( p->threadIndexInGroup ) ) {
+		if ( handleForward( q->threadNum ) ) {
 			const OpFunc* f = e2_->cinfo()->getOpFunc( fid );
 			//cout << ": called\n";
 			f->op( Eref( e2_, i2_ ), arg );
 			return;
 		}
 	} else {
-		if ( handleBackward( p->threadIndexInGroup ) ) {
+		if ( handleBackward( q->threadNum ) ) {
 			const OpFunc* f = e1_->cinfo()->getOpFunc( fid );
 			//cout << ": called\n";
 			f->op( Eref( e1_, i1_ ), arg );
