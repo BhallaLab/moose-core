@@ -32,25 +32,25 @@ OneToAllMsg::~OneToAllMsg()
 /**
  * Need to revisit to handle nodes
  */
-void OneToAllMsg::exec( const char* arg, const ProcInfo *p ) const
+void OneToAllMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) 
+	const
 {
-	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
-	if ( q->isForward() ) {
+	if ( q->src().element() == e1_ ) {
 		DataHandler::iterator end = e2_->dataHandler()->end();
-		const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
+		const OpFunc* f = e2_->cinfo()->getOpFunc( fid );
 		for ( DataHandler::iterator i = e2_->dataHandler()->begin();
 			i != end; ++i ) {
-			if ( p->execThread( e2_->id(), i.index().data() ) )
+			if ( q->execThread( e2_->id(), i.index().data() ) )
 			{
-					f->op( Eref( e2_, i.index() ), arg );
+					f->op( Eref( e2_, i.index() ), q, arg );
 			}
 		}
 	} else {
 		if ( e1_->dataHandler()->isDataHere( i1_ )  &&
-			p->execThread( e1_->id(), i1_.data() ) )
+			q->execThread( e1_->id(), i1_.data() ) )
 		{
-			const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
-			f->op( Eref( e1_, i1_ ), arg );
+			const OpFunc* f = e1_->cinfo()->getOpFunc( fid );
+			f->op( Eref( e1_, i1_ ), q, arg );
 		}
 	}
 }
@@ -62,13 +62,6 @@ Eref OneToAllMsg::firstTgt( const Eref& src ) const
 	else if ( src.element() == e2_ )
 		return Eref( e1_, i1_ );
 	return Eref( 0, 0 );
-}
-
-bool OneToAllMsg::isMsgHere( const Qinfo& q ) const
-{
-	if ( q.isForward() )
-		return ( i1_ == q.srcIndex() );
-	return 1; // Going the other way, any of the indices can send the msg.
 }
 
 Id OneToAllMsg::managerId() const
@@ -129,16 +122,6 @@ unsigned int OneToAllMsg::srcToDestPairs(
 	}
 
 	return destRange;
-}
-
-void OneToAllMsg::addToQ( const Element* src, Qinfo& q,
-	const ProcInfo* p, MsgFuncBinding i, const char* arg ) const
-{
-	if ( e1_ == src && i1_ == q.srcIndex() ) {
-		q.addToQforward( p, i, arg );
-	} else if ( e1_ != src ) {
-		q.addToQbackward( p, i, arg ); 
-	}
 }
 
 ///////////////////////////////////////////////////////////////////////

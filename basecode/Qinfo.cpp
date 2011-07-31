@@ -56,6 +56,11 @@ Qinfo::Qinfo( const ObjId& src,
 		dataIndex_( dataIndex )
 {;}
 
+bool Qinfo::execThread( Id id, unsigned int dataIndex ) const
+{
+	return threadNum_ == ( ( id.value() + dataIndex ) % Shell::numCores() );
+}
+
 /**
  * Deprecated
  * Static func: Sets up a SimGroup to keep track of thread and node

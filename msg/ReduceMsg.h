@@ -24,7 +24,7 @@ class ReduceMsg: public Msg
 			const ReduceFinfoBase* rfb );
 		~ReduceMsg();
 
-		void exec( const char* arg, const ProcInfo* p) const;
+		void exec( const Qinfo* q, const double* arg, FuncId fid ) const;
 
 		Eref firstTgt( const Eref& src ) const;
 
@@ -35,8 +35,10 @@ class ReduceMsg: public Msg
 		Msg* copy( Id origSrc, Id newSrc, Id newTgt,
 			FuncId fid, unsigned int b, unsigned int n ) const;
 
+		/*
 		void addToQ( const Element* src, Qinfo& q, const ProcInfo* p,
 			MsgFuncBinding i, const char* arg ) const;
+			*/
 
 		unsigned int srcToDestPairs(
 			vector< DataId >& src, vector< DataId >& dest) const;

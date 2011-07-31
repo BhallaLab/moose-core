@@ -30,26 +30,24 @@ DiagonalMsg::~DiagonalMsg()
  * no other input will hit the same target. So we can partition the
  * message exec operation among sources as we like.
  */
-void DiagonalMsg::exec( const char* arg, const ProcInfo *p ) const
+void DiagonalMsg::exec( const Qinfo* q, const double* arg, FuncId fid) const
 {
-	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
-
-	int src = q->srcIndex().data();
-	if ( q->isForward() ) {
+	int src = q->src().dataId.data();
+	if ( q->src().element() == e1_ ) {
 		int dest = src + stride_;
 		if ( dest >= 0 && e2_->dataHandler()->isDataHere( dest ) ) {
-			if ( p->execThread( e2_->id(), dest ) ) {
-				const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
-				f->op( Eref( e2_, dest ), arg );
+			if ( q->execThread( e2_->id(), dest ) ) {
+				const OpFunc* f = e2_->cinfo()->getOpFunc( fid );
+				f->op( Eref( e2_, dest ), q, arg );
 			}
 		}
 	} else {
 		// Here we are stuck a bit. I will assume srcIndex is now for e2
 		int dest = src - stride_;
 		if ( dest >= 0 && e1_->dataHandler()->isDataHere( dest ) ) {
-			if ( p->execThread( e1_->id(), dest ) ) {
-				const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
-				f->op( Eref( e1_, dest ), arg );
+			if ( q->execThread( e1_->id(), dest ) ) {
+				const OpFunc* f = e1_->cinfo()->getOpFunc( fid );
+				f->op( Eref( e1_, dest ), q, arg );
 			}
 		}
 	}

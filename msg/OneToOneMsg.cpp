@@ -23,34 +23,22 @@ OneToOneMsg::~OneToOneMsg()
 	;
 }
 
-void OneToOneMsg::exec( const char* arg, const ProcInfo* p ) const
+void OneToOneMsg::exec( const Qinfo* q, const double* arg, FuncId fid) const
 {
-	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
-	unsigned int src = q->srcIndex().data(); // will also be dest index.
-	/*
-	cout << Shell::myNode() << ":" << p->threadIndexInGroup << 
-		"	: OneToOneMsg::exec with " << q->size() << " bytes, from " <<
-		e1_->getName() << "[" << q->srcIndex() << "]" <<
-		" to " << e2_->getName() << "[" << q->srcIndex() << "]" <<
-		", here=(" <<
-		e1_->dataHandler()->isDataHere( src ) << "," <<
-		e2_->dataHandler()->isDataHere( src ) << "), execThread=(" <<
-		p->execThread( e1_->id(), src ) << "," <<
-		p->execThread( e2_->id(), src ) << "), fid = " << q->fid() << "\n";
-		*/
-	if ( q->isForward() ) {
+	unsigned int src = q->src().dataId.data(); // will also be dest index.
+	if ( q->src().element() == e1_ ) {
 		if ( e2_->dataHandler()->isDataHere( src ) &&
-			p->execThread( e2_->id(), src ) )
+			q->execThread( e2_->id(), src ) )
 		{
-			const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
-			f->op( Eref( e2_, q->srcIndex() ), arg );
+			const OpFunc* f = e2_->cinfo()->getOpFunc( fid );
+			f->op( Eref( e2_, q->src().dataId ), q, arg );
 		}
 	} else {
 		if ( e1_->dataHandler()->isDataHere( src ) &&
-			p->execThread( e1_->id(), src ) )
+			q->execThread( e1_->id(), src ) )
 		{
-			const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
-			f->op( Eref( e1_, q->srcIndex() ), arg );
+			const OpFunc* f = e1_->cinfo()->getOpFunc( fid );
+			f->op( Eref( e1_, q->src().dataId ), q, arg );
 		}
 	}
 }
