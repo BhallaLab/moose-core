@@ -359,6 +359,8 @@ class Qinfo
 		 */
 		static void enableStructuralQ();
 
+		bool execThread( Id id, unsigned int dataIndex ) const;
+
 	private:
 		ObjId src_;	/// Originating object
 

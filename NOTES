@@ -14242,12 +14242,16 @@ TDL
 - Implement the two extra variants of Qinfo::addDirectToQ, put in the
 	ObjFid stuff for the second.
 
-
+- Figure out how to decide which thread to use for each DataId of an 
+	object, in the various Msg::exec functions.
 
 
 Moved the current development to a new branch:
 https://moose.svn.sourceforge.net/svnroot/moose/moose/branches/newQ
 Checkin 2847.
 Pegged away at it. Now compiles through the basecode directory.
+Checkin 2848.
+Now compiles through the msg directory.
+
 
 

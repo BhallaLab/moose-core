@@ -29,44 +29,22 @@ SingleMsg::~SingleMsg()
 	;
 }
 
-//void SingleMsg::exec( const Qinfo* q, const char* arg, FuncId fid, const ProcInfo *p ) const
 void SingleMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const
 {
 	if ( q->src().element() == e1_ ) { // forward message
-		if ( handleForward( q->threadNum ) ) {
+		if ( e2_->dataHandler()->isDataHere( i2_ ) &&
+			q->execThread( e2_->id(), i2_.data() ) ) {
 			const OpFunc* f = e2_->cinfo()->getOpFunc( fid );
-			//cout << ": called\n";
-			f->op( Eref( e2_, i2_ ), arg );
+			f->op( Eref( e2_, i2_ ), q, arg );
 			return;
 		}
 	} else {
-		if ( handleBackward( q->threadNum ) ) {
+		if ( e1_->dataHandler()->isDataHere( i1_ ) &&
+			q->execThread( e1_->id(), i1_.data() ) ) {
 			const OpFunc* f = e1_->cinfo()->getOpFunc( fid );
-			//cout << ": called\n";
-			f->op( Eref( e1_, i1_ ), arg );
+			f->op( Eref( e1_, i1_ ), q, arg );
 			return;
 		}
-	}
-
-	// const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
-
-	// cout <<  p->nodeIndexInGroup << "." << p->threadIndexInGroup << ": " << e2_->getName() << ", " << i2_;
-	/// This partitions the messages between threads.
-	if ( q->isForward() && e2_->dataHandler()->isDataHere( i2_ ) &&
-		p->execThread( e2_->id(), i2_.data() ) )
-	{
-			const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
-			//cout << ": called\n";
-			f->op( Eref( e2_, i2_ ), arg );
-			return;
-	} 
-		// cout << ": NOT called\n";
-	
-	if ( !q->isForward() && e1_->dataHandler()->isDataHere( i1_ ) &&
-		p->execThread( e1_->id(), i1_.data() ) )
-	{
-			const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
-			f->op( Eref( e1_, i1_ ), arg );
 	}
 }
 
@@ -147,7 +125,6 @@ Msg* SingleMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 	}
 }
 
-
 unsigned int SingleMsg::srcToDestPairs(
 	vector< DataId >& src, vector< DataId >& dest ) const
 {
@@ -155,17 +132,6 @@ unsigned int SingleMsg::srcToDestPairs(
 	dest.resize( 1, i2_ );
 	return 1;
 }
-
-void SingleMsg::addToQ( const Element* src, Qinfo& q,
-	const ProcInfo* p, MsgFuncBinding i, const char* arg ) const
-{
-	if ( e1_ == src && i1_ == q.srcIndex() ) {
-		q.addToQforward( p, i, arg ); // 1 for isForward
-	} else if ( e2_ == src && i2_ == q.srcIndex() ) {
-		q.addToQbackward( p, i, arg ); 
-	}
-}
-
 
 ///////////////////////////////////////////////////////////////////////
 // Here we set up the MsgManager portion of the class.

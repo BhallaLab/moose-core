@@ -12,6 +12,7 @@
 #include "SparseMsg.h"
 #include "../randnum/randnum.h"
 #include "../biophysics/Synapse.h"
+#include "../shell/Shell.h"
 
 Id SparseMsg::managerId_;
 
@@ -224,18 +225,16 @@ unsigned int rowIndex( const Element* e, const DataId& d )
 	return 0;
 }
 
-void SparseMsg::exec( const char* arg, const ProcInfo *p ) const
+void SparseMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const
 {
-	const Qinfo *q = ( reinterpret_cast < const Qinfo * >( arg ) );
-	// arg += sizeof( Qinfo );
 	bool report = 1;
 
 	/**
 	 * The system is really optimized for data from e1 to e2.
 	 */
-	if ( q->isForward() ) {
-		const OpFunc* f = e2_->cinfo()->getOpFunc( q->fid() );
-		unsigned int row = rowIndex( e1_, q->srcIndex() );
+	if ( q->src().element() == e1_ ) {
+		const OpFunc* f = e2_->cinfo()->getOpFunc( fid );
+		unsigned int row = rowIndex( e1_, q->src().dataId.data() );
 		// unsigned int oldRow = row;
 
 		const unsigned int* fieldIndex;
@@ -245,14 +244,17 @@ void SparseMsg::exec( const char* arg, const ProcInfo *p ) const
 		// if ( e1_->getName() == "test2" )
 			report = 0;
 
-		if ( report ) cout << p->nodeIndexInGroup << "." << p->threadIndexInGroup << ": SparseMsg " << e1_->getName() << "->" << e2_->getName() << ", row= " << row << ": entries= ";
+		if ( report )
+			cout << Shell::myNode() << "." << q->threadNum() << 
+				": SparseMsg " << e1_->getName() << "->" << 
+				e2_->getName() << ", row= " << row << ": entries= ";
 		// J counts over all the column entries, i.e., all targets.
 		for ( unsigned int j = 0; j < n; ++j ) {
 			if ( report ) cout << "(" << colIndex[j] << "," << fieldIndex[j] << ")";
-			if ( p->execThread( e2_->id(), colIndex[j] ) ) {
+			if ( q->execThread( e2_->id(), colIndex[j] ) ) {
 				Eref tgt( e2_, DataId( colIndex[j], fieldIndex[j] ) );
 				if ( tgt.isDataHere() )
-					f->op( tgt, arg );
+					f->op( tgt, q, arg );
 			}
 		}
 		if ( report ) cout << "\n";
@@ -260,16 +262,16 @@ void SparseMsg::exec( const char* arg, const ProcInfo *p ) const
 		// Avoid using this back operation!
 		// Note that we do NOT use the fieldIndex going backward. It is
 		// assumed that e1 does not have fieldArrays.
-		const OpFunc* f = e1_->cinfo()->getOpFunc( q->fid() );
-		unsigned int column = rowIndex( e2_, q->srcIndex() );
+		const OpFunc* f = e1_->cinfo()->getOpFunc( fid );
+		unsigned int column = rowIndex( e2_, q->src().dataId.data() );
 		vector< unsigned int > fieldIndex;
 		vector< unsigned int > rowIndex;
 		unsigned int n = matrix_.getColumn( column, fieldIndex, rowIndex );
 		for ( unsigned int j = 0; j < n; ++j ) {
-			if ( p->execThread( e1_->id(), rowIndex[j] ) ) {
+			if ( q->execThread( e1_->id(), rowIndex[j] ) ) {
 				Eref tgt( e1_, DataId( rowIndex[j] ) );
 				if ( tgt.isDataHere() )
-					f->op( tgt, arg );
+					f->op( tgt, q, arg );
 			}
 		}
 	}
