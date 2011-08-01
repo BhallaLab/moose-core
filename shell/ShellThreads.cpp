@@ -270,43 +270,8 @@ void Shell::start( double runtime )
 // Functions using MPI
 ////////////////////////////////////////////////////////////////////////
 
-/*
-// Static function
-unsigned int Shell::reduceInt( unsigned int val )
-{
-#ifdef USE_MPI
-	unsigned int max = 0;
-	unsigned int *recvBuf = new unsigned int [ numNodes_ ];
-	MPI_Allgather( &val, 1, MPI_UNSIGNED, recvBuf, 1, MPI_UNSIGNED, 
-		MPI_COMM_WORLD );
-	for ( unsigned int i = 0; i < numNodes_; ++i ) {
-		if ( max < recvBuf[i] )
-			max = recvBuf[i];
-	}
-	delete[] recvBuf;
-	return max;
-
-#else
-	return val;
-#endif
-}
-*/
-
 void Shell::handleSync( const Eref& e, const Qinfo* q, Id elm, FuncId fid )
 {
-	/*
-	static const Finfo* ackf = ack();
-		Shell::initCinfo()->findFinfo( "ack" );
-	static const SrcFinfo2< unsigned int, unsigned int >* 
-		ack = dynamic_cast< const SrcFinfo2< unsigned int, unsigned int >* >( ackf );
-	assert( ackf );
-	assert( ack );
-	*/
-
-	/* May need to protect the function.
-	if ( q->addToStructuralQ() )
-		return;
-		*/
 
 	assert( elm != Id() && elm() != 0 );
 	/*
@@ -314,8 +279,7 @@ void Shell::handleSync( const Eref& e, const Qinfo* q, Id elm, FuncId fid )
 		elm()->dataHandler() );
 		*/
 	const ReduceFinfoBase* rfb = reduceArraySizeFinfo();
-	// shelle_->clearBinding( rfb->getBindIndex() );
-	clearSetMsgs();
+
 	if ( rfb )  {
 		Msg * m = new ReduceMsg( Msg::setMsg, e, elm(), rfb );
 		reduceMsg_ = m->mid();

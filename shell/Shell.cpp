@@ -166,11 +166,13 @@ static DestFinfo handleAddMsg( "handleAddMsg",
 			new EpFunc6< Shell, string, MsgId, ObjId, string, ObjId, string >
 				( & Shell::handleAddMsg ) );
 
+/*
 static DestFinfo handleSet( "handleSet", 
 			"Deals with request, to set specified field on any node to a value.",
 			new EpFunc4< Shell, Id, DataId, FuncId, PrepackedBuffer >( 
 				&Shell::handleSet )
 			);
+			*/
 
 
 /**
@@ -179,6 +181,7 @@ static DestFinfo handleSet( "handleSet",
  * 	receiveGet->completeGet
  */
 
+/*
 SrcFinfo4< Id, DataId, FuncId, unsigned int >* requestGet()
 {
 	static SrcFinfo4< Id, DataId, FuncId, unsigned int > temp( 
@@ -207,6 +210,7 @@ SrcFinfo1< PrepackedBuffer >* lowLevelSetGet() {
 	);
 	return &temp;
 }
+*/
 
 DestFinfo* receiveGet() {
 	static DestFinfo temp( "receiveGet", 
@@ -218,11 +222,11 @@ DestFinfo* receiveGet() {
 }
 
 /** Deprecated?
-*/
 static SrcFinfo3< unsigned int, unsigned int, PrepackedBuffer > relayGet(
 	"relayGet",
 	"relayGet( node, status, data ): Passes 'get' data back to master node"
 );
+*/
 
 static DestFinfo handleMove( "move", 
 		"handleMove( Id orig, Id newParent ): "
@@ -270,13 +274,15 @@ static DestFinfo handleReMesh( "handleReMesh",
 
 static Finfo* shellMaster[] = {
 	&requestCreate, &requestDelete,
-	&requestAddMsg, requestSet(), requestGet(),
+	&requestAddMsg, 
+	// requestSet(), requestGet(),
 	&requestMove, &requestCopy, &requestUseClock,
 	&requestSync, &requestReMesh,
 	handleAck() };
 static Finfo* shellWorker[] = {
 	&handleCreate, &handleDelete,
-		&handleAddMsg, &handleSet, &handleGet,
+		&handleAddMsg,
+		// &handleSet, &handleGet,
 		&handleMove, &handleCopy, &handleUseClock,
 		&handleSync, &handleReMesh,
 	ack() };
@@ -353,8 +359,8 @@ const Cinfo* Shell::initCinfo()
 //  Predefined Msg Src and MsgDests.
 ////////////////////////////////////////////////////////////////
 
-		requestGet(),
-		lowLevelSetGet(),
+		// requestGet(),
+		// lowLevelSetGet(),
 		reduceArraySizeFinfo(),
 ////////////////////////////////////////////////////////////////
 //  Shared msg
