@@ -14274,3 +14274,8 @@ ProcInfo argument in all 'send' calls with the threadNum.
 Now biophysics compiles. Checkin 2850.
 
 Now builtins compiles. Working on Shell. Issue with Qinfo::addToStructuralQ.
+Checkin 2851.
+
+Setting up a mutex in Qinfo to protect the structural Q. To compile
+
+Compiled through the shell directory.

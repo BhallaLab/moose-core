@@ -210,6 +210,7 @@ void Shell::loadBalance()
 	//
 	// Note that the messages have to be rebuilt after this call.
 	// Note that this function is called independently on each node.
+	/*
 	Qinfo::clearSimGroups();
 	Qinfo::addSimGroup( numCores_, numNodes_ ); // This is the shell group.
 	if ( !isSingleThreaded_ ) {
@@ -217,6 +218,7 @@ void Shell::loadBalance()
 		// More sophisticated balancing to come.
 		Qinfo::addSimGroup( numCores_, numNodes_ );
 	}
+	*/
 }
 
 unsigned int Shell::numCores()
@@ -319,7 +321,7 @@ void Shell::handleSync( const Eref& e, const Qinfo* q, Id elm, FuncId fid )
 		reduceMsg_ = m->mid();
 		shelle_->addMsgAndFunc( m->mid(), fid, rfb->getBindIndex() );
 		if ( myNode_ == 0 )
-			rfb->send( Eref( shelle_, 0 ), &p_, 0 );
+			rfb->send( Eref( shelle_, 0 ), ScriptThreadNum, 0 );
 	}
 	// We don't send an ack, instead the digest function does the update.
 	// ack()->send( e, &p_, Shell::myNode(), OkStatus );

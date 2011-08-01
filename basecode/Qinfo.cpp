@@ -114,7 +114,7 @@ void Qinfo::clearSimGroups()
  */
 void Qinfo::clearStructuralQ()
 {
-	isSafeForStructuralOps_ = 1;
+	enableStructuralOps();
 	double* buf = &structuralQdata_[0];
 	for ( unsigned int i = 0; i < structuralQinfo_.size(); ++i ) {
 		const Qinfo* qi = &structuralQinfo_[i];
@@ -144,7 +144,7 @@ void Qinfo::clearStructuralQ()
 	}
 	*/
 
-	isSafeForStructuralOps_ = 0;
+	disableStructuralOps();
 	structuralQinfo_.resize( 0 );
 	structuralQdata_.resize( 0 );
 }
@@ -610,15 +610,19 @@ void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest,
 }
 
 /// Static func.
-void Qinfo::disableStructuralQ()
+void Qinfo::disableStructuralOps()
 {
-	isSafeForStructuralOps_ = 1;
+	pthread_mutex_lock( qMutex_ );
+		isSafeForStructuralOps_ = 0;
+	pthread_mutex_unlock( qMutex_ );
 }
 
 /// static func
-void Qinfo::enableStructuralQ()
+void Qinfo::enableStructuralOps()
 {
-	isSafeForStructuralOps_ = 0;
+	pthread_mutex_lock( qMutex_ );
+		isSafeForStructuralOps_ = 1;
+	pthread_mutex_unlock( qMutex_ );
 }
 
 /**
@@ -628,42 +632,40 @@ void Qinfo::enableStructuralQ()
  * Note that the 'isSafeForStructuralOps' flag is only ever touched in 
  * clearStructuralQ(), except in the unit tests.
  */
-bool Qinfo::addToStructuralQ( const double* data, unsigned int size ) const
+bool Qinfo::addToStructuralQ() const
 {
-	if ( isSafeForStructuralOps_ )
-		return 0;
-	structuralQinfo_.push_back( *this );
-	// unsigned int di = structuralQinfo_.back().dataIndex();
-	structuralQinfo_.back().dataIndex_ = structuralQdata_.size();
-	structuralQdata_.insert( structuralQdata_.end(), data, data + size );
-
-	/*
-	const char* begin = reinterpret_cast< const char* >( this );
-	const char* end = begin + sizeof( Qinfo ) + size_;
-	structuralQ_.insert( structuralQ_.end(), begin, end );
-	*/
-	// structuralQ_.push_back( reinterpret_cast< const char* >( this ) );
-	return 1;
+	bool ret = 0;
+	pthread_mutex_lock( qMutex_ );
+		if ( !isSafeForStructuralOps_ ) {
+			structuralQinfo_.push_back( *this );
+			/// Here we assert that we are reading from the inQ_ 
+			/// and that there are no gaps in the data or Qinfo sections,
+			/// and that the last used Qinfo is terminated by a null Qinfo.
+			const double* data = &( inQ_[ dataIndex_ ] );
+			const Qinfo* nextQinfo = this + 1;
+			unsigned int size = nextQinfo->dataIndex_ - dataIndex_;
+			structuralQinfo_.back().dataIndex_ = structuralQdata_.size();
+			structuralQdata_.insert( structuralQdata_.end(), data, data + size );
+			ret = 1;
+		}
+	pthread_mutex_unlock( qMutex_ );
+	return ret;
 }
 
-/*
-void Qinfo::addSpecificTargetToQ( const ProcInfo* p, MsgFuncBinding b, 
-	const char* arg, const DataId& target, bool isForward )
+
+/// Static func
+void Qinfo::initMutex()
 {
-	// if ( !isForward )
-		cout << p->groupId << ":" << p->threadIndexInGroup << " " << 
-			b.mid << ", " << size_ << endl << flush;
-	m_ = b.mid;
-	f_ = b.fid;
-	isForward_ = isForward;
-	char* temp = new char[ size_ + sizeof( DataId ) ];
-	memcpy( temp, arg, size_ );
-	memcpy( temp + size_, &target, sizeof( DataId ) );
-	size_ += sizeof( DataId );
-	(*outQ_)[p->groupId].push_back( p->threadIndexInGroup, this, temp );
-	delete[] temp;
+	qMutex_ = new pthread_mutex_t;
+	pthread_mutex_init( qMutex_, NULL );
 }
-*/
+
+/// Static func
+void Qinfo::freeMutex()
+{
+	pthread_mutex_destroy( qMutex_ );
+	delete qMutex_;
+}
 
 /// Static func
 void Qinfo::emptyAllQs()
