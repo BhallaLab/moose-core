@@ -140,6 +140,6 @@ double Geometry::getNeighDist() const
 
 void Geometry::handleSizeRequest( const Eref& e, const Qinfo* q )
 {
-	returnSize.send( e, q->getProcInfo(), 0.0 );
+	returnSize.send( e, q->threadNum(), 0.0 );
 }
 
