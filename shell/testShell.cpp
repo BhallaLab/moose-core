@@ -23,7 +23,6 @@
 #include "SparseMsg.h"
 #include "SingleMsg.h"
 #include "OneToAllMsg.h"
-#include "AssignmentMsg.h"
 #include "Wildcard.h"
 
 

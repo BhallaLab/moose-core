@@ -172,12 +172,13 @@ class Qinfo
 		/**
 		 * Adds an existing queue entry into the structuralQ, for later
 		 * execution when it is safe to do so.
-		 * This is not thread-safe, should only be called by the Shell.
+		 * This is now thread-safe, has a mutex in it.
 		 * Returns true if it added the entry.
 		 * Returns false if it was in the Qinfo::clearStructuralQ function
 		 * and wants the calling function to actually operate on the queue.
 		 */
-		bool addToStructuralQ( const double* data, unsigned int size) const;
+		// bool addToStructuralQ( const double* data, unsigned int size) const;
+		bool addToStructuralQ() const;
 
 		/**
 		 * This adds the data to the queue and then an additional
@@ -346,18 +347,24 @@ class Qinfo
 		static void clearReduceQ( unsigned int numThreads );
 
 		/**
-		 * Sets the isSafeForStructuralOps_ flag.
-		 * Helper function used by the async unit tests.
-		 * Not to be used elsewhere.
+		 * Zeroes the isSafeForStructuralOps_ flag.
 		 */
-		static void disableStructuralQ();
+		static void disableStructuralOps();
 
 		/**
-		 * Zeroes the isSafeForStructuralOps_ flag.
-		 * Helper function used by the async unit tests.
-		 * Not to be used elsewhere.
+		 * Sets the isSafeForStructuralOps_ flag.
 		 */
-		static void enableStructuralQ();
+		static void enableStructuralOps();
+
+		/**
+		 * Initializes the qMutex
+		 */
+		static void initMutex();
+
+		/**
+		 * Cleans up the qMutex
+		 */
+		static void freeMutex();
 
 		bool execThread( Id id, unsigned int dataIndex ) const;
 
@@ -539,6 +546,11 @@ class Qinfo
 		 * After barrier3 the reduceQ_ should be empty.
 		 */
 		static vector< vector< ReduceBase* > > reduceQ_;
+
+		/**
+		 * Used to protect the structural Q
+		 */
+		static pthread_mutex_t* qMutex_;
 };
 
 #endif // QINFO_H

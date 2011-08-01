@@ -345,6 +345,11 @@ template<> class Conv< PrepackedBuffer >
 			return val_;
 		}
 
+		const double* ptr() const
+		{
+			return reinterpret_cast< const double* >( &val_ );
+		}
+
 		/**
 		 * Converts data contents into char* buf. Buf must be allocated
 		 * ahead of time.

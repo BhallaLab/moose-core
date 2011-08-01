@@ -8,26 +8,13 @@
 **********************************************************************/
 
 #include "header.h"
-/*
-#include "MsgManager.h"
-#include "SingleMsg.h"
-#include "DiagonalMsg.h"
-#include "OneToOneMsg.h"
-#include "OneToAllMsg.h"
-#include "SparseMatrix.h"
-#include "SparseMsg.h"
-#include "ReduceMsg.h"
-#include "ReduceFinfo.h"
-*/
-#include "AssignmentMsg.h"
-#include "AssignVecMsg.h"
 #include "Shell.h"
-// #include "Dinfo.h"
 
 ////////////////////////////////////////////////////////////////////////
 // Functions for handling field set/get and func calls
 ////////////////////////////////////////////////////////////////////////
 
+/*
 void Shell::clearSetMsgs()
 {
 	if ( assignVecMsg_ != Msg::badMsg )
@@ -115,12 +102,12 @@ const vector< char* >& Shell::dispatchGet(
 
 	return getBuf_;
 }
+*/
 
 
 /**
  * This operates on the worker node. It handles the Get request from
  * the master node, and dispatches if need to the local object.
- */
 void Shell::handleGet( const Eref& e, const Qinfo* q, 
 	Id id, DataId index, FuncId fid, unsigned int numTgt )
 {
@@ -156,18 +143,18 @@ void Shell::handleGet( const Eref& e, const Qinfo* q,
 		}
 	}
 }
+*/
 
 void Shell::recvGet( const Eref& e, const Qinfo* q, PrepackedBuffer pb )
 {
 	if ( myNode_ == 0 ) {
 		if ( gettingVector_ ) {
-			assert( q->mid() != Msg::badMsg );
-			Element* tgtElement = Msg::getMsg( q->mid() )->e2();
-			Eref tgt( tgtElement, q->srcIndex() );
-			assert ( tgt.linearIndex() < getBuf_.size() );
-			char*& c = getBuf_[ tgt.linearIndex() ];
-			c = new char[ pb.dataSize() ];
-			memcpy( c, pb.data(), pb.dataSize() );
+			ObjId tgt = q->src();
+			unsigned int linearIndex = q->src().eref().linearIndex();
+			assert ( linearIndex < getBuf_.size() );
+			double*& c = getBuf_[ linearIndex ];
+			c = new double[ pb.dataSize() ];
+			memcpy( c, pb.data(), pb.dataSize() * sizeof( double ) );
 /*
 if ( tgt.linearIndex() > 68570 && tgt.linearIndex() < 68640 ) {
 	cout << "linearIndex = " << tgt.linearIndex() << 
@@ -178,9 +165,9 @@ if ( tgt.linearIndex() > 68570 && tgt.linearIndex() < 68640 ) {
 			// cout << myNode_ << ": Shell::recvGet[" << tgt.linearIndex() << "]= (" << pb.dataSize() << ", " <<  *reinterpret_cast< const double* >( c ) << ")\n";
 		} else  {
 			assert ( getBuf_.size() == 1 );
-			char*& c = getBuf_[ 0 ];
-			c = new char[ pb.dataSize() ];
-			memcpy( c, pb.data(), pb.dataSize() );
+			double*& c = getBuf_[ 0 ];
+			c = new double[ pb.dataSize() ];
+			memcpy( c, pb.data(), pb.dataSize() * sizeof( double ) );
 		}
 		++numGetVecReturns_;
 	}
@@ -198,7 +185,7 @@ void Shell::lowLevelRecvGet( PrepackedBuffer pb )
 
 void Shell::clearGetBuf()
 {
-	for ( vector< char* >::iterator i = getBuf_.begin(); 
+	for ( vector< double* >::iterator i = getBuf_.begin(); 
 		i != getBuf_.end(); ++i )
 	{
 		if ( *i != 0 ) {

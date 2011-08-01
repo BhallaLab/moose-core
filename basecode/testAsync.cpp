@@ -289,7 +289,7 @@ void testInnerSet()
 	conv.val2buf( args );
 	PrepackedBuffer pb( args, conv.size() );
 	Qinfo q;
-	Qinfo::disableStructuralQ();
+	Qinfo::enableStructuralOps();
 	shell->handleSet( sheller, &q, i2, e2.index(), f1, pb );
 	// shell->innerSet( e2, f1, args, conv.size() );
 	delete[] args;
@@ -310,7 +310,7 @@ void testInnerSet()
 		// char* args = new char[ conv.size() ];
 		conv.val2buf( args );
 		PrepackedBuffer pb( args, conv.size() );
-		Qinfo::disableStructuralQ();
+		Qinfo::enableStructuralOps();
 		shell->handleSet( sheller, &q, dest.id(), dest.index(), f2, pb );
 	//	shell->innerSet( dest, f2, args, conv.size() );
 	// 	SetGet1< double >::set( dest, "set_outputValue", x );
@@ -346,7 +346,7 @@ void testInnerGet() // Actually works on Shell::handleGet.
 	assert( finfo );
 	FuncId f1 = dynamic_cast< const DestFinfo* >( finfo )->getFid();
 	Qinfo q;
-	Qinfo::disableStructuralQ();
+	Qinfo::enableStructuralOps();
 	shell->handleGet( sheller, &q, i2, DataId( 0 ), f1, 1 );
 	Qinfo::clearQ( &p ); // The request goes to the target Element
 	Qinfo::clearQ( &p ); // The response comes back to the Shell
@@ -358,7 +358,7 @@ void testInnerGet() // Actually works on Shell::handleGet.
 	// string val = Field< string >::get( e2, "name" );
 	// assert( val == "test2" );
 	ret->setName( "HupTwoThree" );
-	Qinfo::disableStructuralQ();
+	Qinfo::enableStructuralOps();
 	shell->handleGet( sheller, &q, i2, DataId( 0 ), f1, 1 );
 	Qinfo::clearQ( &p ); // The request goes to the target Element
 	Qinfo::clearQ( &p ); // The response comes back to the Shell
@@ -381,7 +381,7 @@ void testInnerGet() // Actually works on Shell::handleGet.
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref dest( e2.element(), i );
 
-		Qinfo::disableStructuralQ();
+		Qinfo::enableStructuralOps();
 		shell->handleGet( sheller, &q, i2, DataId( i ), f2, 1 );
 		Qinfo::clearQ( &p ); // The request goes to the target Element
 		Qinfo::clearQ( &p ); // The response comes back to the Shell

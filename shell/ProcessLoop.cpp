@@ -59,9 +59,7 @@ void* eventLoopForBcast( void* info )
 		// of bcast calls goes down.
 
 		if ( Shell::numNodes() > 1 ) {
-			for ( unsigned int i = 0; i < Qinfo::numSimGroup(); ++i ) {
-				for ( unsigned int j = Qinfo::simGroup( i )->startNode();
-					j < Qinfo::simGroup( i )->endNode(); ++j )
+			for ( unsigned int j = 0; j < Shell::numNodes(); ++j )
 				{
 					// cout << Shell::myNode() << ":" << p->nodeIndexInGroup << "	: eventLoop, (numSimGroup, tgtNode) = (" << i << ", " << j << ")\n";
 					p->barrier2->wait(); // This barrier swaps mpiInQ and mpiRecvQ
@@ -71,7 +69,6 @@ void* eventLoopForBcast( void* info )
 					// data transfer.
 					Qinfo::readMpiQ( p, j ); 
 				}
-			}
 		}
 		// cout << Shell::myNode() << ":" << p->threadIndexInGroup << ":	phase3 :	" << loopNum++ << "\n";
 
@@ -107,10 +104,8 @@ void* mpiEventLoopForBcast( void* info )
 		// Phase 2, 3. Now we loop around barrier 2 till all nodes have
 		// sent data and the data has been received and processed.
 		// On the process threads the inQ/mpiInQ is busy being executed.
-		for ( unsigned int i = 0; i < Qinfo::numSimGroup(); ++i ) {
-			for ( unsigned int j = Qinfo::simGroup( i )->startNode();
-				j < Qinfo::simGroup( i )->endNode(); ++j )
-			{
+		for ( unsigned int j = 0; j < Shell::numNodes(); ++j )
+		{
 #ifdef USE_MPI
 				// cout << Shell::myNode() << ":" << p->nodeIndexInGroup << "	: mpiEventLoop, (numSimGroup, tgtNode) = (" << i << ", " << j << ")\n";
 				if ( p->nodeIndexInGroup == j ) {
@@ -138,7 +133,6 @@ void* mpiEventLoopForBcast( void* info )
 
 #endif
 				p->barrier2->wait(); // This barrier swaps mpiInQ and mpiRecvQ
-			}
 		}
 
 		// Phase 3: Read and execute the arrived MPI data on all threads 
