@@ -308,8 +308,10 @@ int main( int argc, char** argv )
 	Shell* s = reinterpret_cast< Shell* >( shelle->dataHandler()->data( 0 ) );
 	nonMpiTests( s ); // These tests do not need the process loop.
 
-	if ( !s->isSingleThreaded() )
+	if ( !s->isSingleThreaded() ) {
+		Qinfo::initMutex();
 		s->launchThreads(); // Here we set off the thread/MPI process loop.
+	}
 	if ( s->myNode() == 0 ) {
 #ifdef DO_UNIT_TESTS
 		mpiTests();
@@ -326,9 +328,10 @@ int main( int argc, char** argv )
 	}
 	
 	// Somehow we need to return control to our parser. Then we clean up
-	if ( !s->isSingleThreaded() )
+	if ( !s->isSingleThreaded() ) {
 		s->joinThreads();
-
+		Qinfo::freeMutex();
+	}
 	s->clearSetMsgs();
 	Neutral* ns = reinterpret_cast< Neutral* >( shelle->dataHandler()->data( 0 ) );
 	ns->destroy( shellId.eref(), 0, 0 );

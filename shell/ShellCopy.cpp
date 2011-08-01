@@ -40,7 +40,7 @@ Id Shell::doCopy( Id orig, Id newParent, string newName, unsigned int n, bool to
 	args.push_back( newParent );
 	args.push_back( newElm );
 	initAck();
-		requestCopy->send( sheller, &p_, args, newName , n, toGlobal, copyExtMsg);
+		requestCopy->send( sheller, ScriptThreadNum, args, newName , n, toGlobal, copyExtMsg);
 	waitForAck();
 
 	return newElm;
@@ -176,12 +176,12 @@ void Shell::handleCopy( const Eref& er, const Qinfo* q,
 	Element* e = innerCopyElements( args[0], args[1], args[2], n, toGlobal, tree );
 	if ( !e ) {
 		ack->send( 
-			Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus );
+			Eref( shelle_, 0 ), ScriptThreadNum, Shell::myNode(), ErrorStatus );
 		return;
 	}
 	if ( newName != "" )
 		e->setName( newName );
 	//innerCopyData( orig, newParent );
 	innerCopyMsgs( tree, n, copyExtMsgs );
-	ack->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
+	ack->send( Eref( shelle_, 0 ), ScriptThreadNum, Shell::myNode(), OkStatus );
 }

@@ -77,37 +77,10 @@ class SetGet
 		 */
 		void completeSet() const;
 
-	
-		/// Adapter function, just forwards to Shell::dispatchSet
-		static void dispatchSet( const ObjId& oid, FuncId fid, 
-			const double* args, unsigned int size );
-
-		/// Adapter function, just forwards to Shell::dispatchSetVec
-		static void dispatchSetVec( const ObjId& oid, FuncId fid, 
-			const PrepackedBuffer& arg );
-
 		/// Sends out request for data, and awaits its return.
 		static const vector< double* >* dispatchGet( 
 			const ObjId& tgt, FuncId tgtFid, 
 			const double* arg, unsigned int size );
-
-		//	(const ObjId& oid, FuncId fid, const PrepackedBuffer& arg );
-
-		/*
-		static const vector< char* >& dispatchGetVec( 
-			const ObjId& oid, FuncId fid,
-			const char* args, unsigned int size );
-			*/
-
-		/// Adapter function, forwards to Shell::dispatchLookupGet
-		/*
-		static const vector< char* >& dispatchLookupGet( 
-			const ObjId& oid, const string& field,
-			char* indexBuf, const SetGet* sg, 
-			unsigned int& numGetEntries );
-			*/
-
-		///  char* buf();
 
 	private:
 		ObjId oid_;

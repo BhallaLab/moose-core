@@ -59,9 +59,13 @@ void SetGet::dispatchSetVec( const ObjId& oid, FuncId fid,
 const vector< double* >* SetGet::dispatchGet( 
 	const ObjId& tgt, FuncId tgtFid, const double* arg, unsigned int size )
 {
+	static Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 	// 0 is presumed threadNum here, but need to figure out.
-	Qinfo::addDirectToQ( ObjId(), tgt, 0, tgtFid, arg, size );
-	return Shell::awaitGottenData();
+	s->initAck();
+		Qinfo::addDirectToQ( ObjId(), tgt, 0, tgtFid, arg, size );
+	s->waitForGetAck();
+	return &s->getBuf();
+	// return Shell::awaitGottenData();
 }
 
 /*
