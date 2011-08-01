@@ -432,12 +432,13 @@ unsigned int Interpol2D::ydivs() const
  * lookupReturn uses its argument to do an interpolating lookup of the
  * table. It sends a return message to the
  * originating object with the looked up value.
+ * This should be avoided, instead use the fastGet function.
  */
 void Interpol2D::lookupReturn( const Eref& e, const Qinfo*q, 
 	double v1, double v2 )
 {
 	double ret = innerLookup( v1, v2 );
-	trig.send( e, q->getProcInfo(), ret );
+	trig.send( e, q->threadNum(), ret );
 }
 
 ////////////////////////////////////////////////////////////////////
