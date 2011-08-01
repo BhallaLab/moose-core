@@ -196,14 +196,14 @@ void Nernst::handleCin( const Eref& er, const Qinfo* q, double conc )
 {
 	Cin_ = conc;
 	updateE();
-	Eout.send( er, q->getProcInfo(), E_ );
+	Eout.send( er, q->threadNum(), E_ );
 }
 
 void Nernst::handleCout( const Eref& er, const Qinfo* q, double conc )
 {
 	Cout_ = conc;
 	updateE();
-	Eout.send( er, q->getProcInfo(), E_ );
+	Eout.send( er, q->threadNum(), E_ );
 }
 
 ///////////////////////////////////////////////////

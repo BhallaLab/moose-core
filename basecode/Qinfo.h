@@ -31,7 +31,7 @@ class Qinfo
 	public:
 		/// Used in addToQ and addDirectToQ
 		Qinfo( const ObjId& src, 
-			BindIndex bindIndex, unsigned short threadNum,
+			BindIndex bindIndex, ThreadId threadNum,
 			unsigned int size );
 
 		Qinfo();
@@ -79,11 +79,11 @@ class Qinfo
 		/**
 		 * Returns the thread index.
 		 */
-		unsigned short threadNum() const {
+		ThreadId threadNum() const {
 			return threadNum_;
 		}
 
-		void setThreadNum( unsigned short threadNum ) {
+		void setThreadNum( ThreadId threadNum ) {
 			threadNum_ = threadNum;
 		}
 
@@ -125,7 +125,7 @@ class Qinfo
 		 * as putting the corresponding data.
 		 */
 		static void addToQ( const ObjId& oi, 
-			BindIndex bindIndex, unsigned short threadNum,
+			BindIndex bindIndex, ThreadId threadNum,
 			const double* arg, unsigned int size );
 
 		/**
@@ -134,7 +134,7 @@ class Qinfo
 		 * Used for multiple args.
 		 */
 		static double* addToQ( const ObjId& oi, 
-			BindIndex bindIndex, unsigned short threadNum,
+			BindIndex bindIndex, ThreadId threadNum,
 			unsigned int size );
 
 		/**
@@ -142,7 +142,7 @@ class Qinfo
 		 * for specific point-to-point data delivery.
 		 */
 		static void addDirectToQ( const ObjId& src, const ObjId& dest,
-			unsigned short threadNum,
+			ThreadId threadNum,
 			FuncId fid,
 			const double* arg, unsigned int size );
 
@@ -153,7 +153,7 @@ class Qinfo
 		 * for specific point-to-point data delivery with multiple args.
 		 */
 		static double* addDirectToQ( const ObjId& src, const ObjId& dest,
-			unsigned short threadNum,
+			ThreadId threadNum,
 			FuncId fid,
 			unsigned int size );
 
@@ -164,7 +164,7 @@ class Qinfo
 		 * for specific point-to-point data delivery with a vector
 		 */
 		static double* addVecDirectToQ( const ObjId& src, const ObjId& dest,
-			unsigned short threadNum,
+			ThreadId threadNum,
 			FuncId fid,
 			unsigned int entrySize, unsigned int numEntries );
 
@@ -368,7 +368,7 @@ class Qinfo
 			/// Takes value of -1 when it is a DirectQentry.
 
 		// ProcId proc_; /// Identifier for Process handled in Q.
-		unsigned short threadNum_; /// Which thread am I on?
+		ThreadId threadNum_; /// Which thread am I on?
 
 		/**
 		 * fid_ is zero for regular forward msgs.

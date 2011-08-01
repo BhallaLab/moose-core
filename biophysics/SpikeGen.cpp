@@ -193,7 +193,7 @@ void SpikeGen::process( const Eref& e, ProcPtr p )
 	if ( V_ > threshold_ ) {
 		if ((t + p->dt/2.0) >= (lastEvent_ + refractT_)) {
 			if ( !( edgeTriggered_ && fired_ ) ) {
-				event.send( e, p, t );
+				event.send( e, p->threadIndexInGroup, t );
 				lastEvent_ = t;
 				fired_ = true;                    
 			}

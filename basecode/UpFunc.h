@@ -43,10 +43,6 @@ template< class T > class UpFunc0: public OpFunc
 		 * Calls function on first dimension of data, using index as
 		 * argument.
 		 */
-		void op( const Eref& e, const char* buf ) const {
-			(reinterpret_cast< T* >( e.parentData() )->*func_)( e.index() );
-		}
-
 		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
 			(reinterpret_cast< T* >( e.parentData() )->*func_)( e.index() );
 		}
@@ -78,16 +74,7 @@ template< class T, class A > class UpFunc1: public OpFunc
 			return SetGet1< A >::innerStrSet( tgt.objId(), field, arg );
 		}
 
-		// This could do with a whole lot of optimization to avoid
-		// copying data back and forth.
-		// buf is organized as Qinfo, args, optionally srcIndex.
-		void op( const Eref& e, const char* buf ) const {
-			Conv< A > arg1( buf + sizeof( Qinfo ) );
-			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
-				e.index(), *arg1 );
-		}
-
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			Conv< A > arg1( buf );
 			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
 				e.index(), *arg1 );
@@ -121,16 +108,7 @@ template< class T, class A1, class A2 > class UpFunc2: public OpFunc
 			return SetGet2< A1, A2 >::innerStrSet( tgt.objId(), field, arg );
 		}
 
-		void op( const Eref& e, const char* buf ) const {
-			buf += sizeof( Qinfo );
-			Conv< A1 > arg1( buf );
-			buf += arg1.size();
-			Conv< A2 > arg2( buf );
-			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
-				e.index(), *arg1, *arg2 );
-		}
-
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			Conv< A1 > arg1( buf );
 			buf += arg1.size();
 			Conv< A2 > arg2( buf );
@@ -167,18 +145,7 @@ template< class T, class A1, class A2, class A3 > class UpFunc3:
 			return SetGet3< A1, A2, A3 >::innerStrSet( tgt.objId(), field, arg );
 		}
 
-		void op( const Eref& e, const char* buf ) const {
-			buf += sizeof( Qinfo );
-			Conv< A1 > arg1( buf );
-			buf += arg1.size();
-			Conv< A2 > arg2( buf );
-			buf += arg2.size();
-			Conv< A3 > arg3( buf );
-			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
-				e.index(), *arg1, *arg2, *arg3 );
-		}
-
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			Conv< A1 > arg1( buf );
 			buf += arg1.size();
 			Conv< A2 > arg2( buf );
@@ -218,20 +185,7 @@ template< class T, class A1, class A2, class A3, class A4 > class UpFunc4:
 			return SetGet4< A1, A2, A3, A4 >::innerStrSet( tgt.objId(), field, arg );
 		}
 
-		void op( const Eref& e, const char* buf ) const {
-			buf += sizeof( Qinfo );
-			Conv< A1 > arg1( buf );
-			buf += arg1.size();
-			Conv< A2 > arg2( buf );
-			buf += arg2.size();
-			Conv< A3 > arg3( buf );
-			buf += arg3.size();
-			Conv< A4 > arg4( buf );
-			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
-				e.index(), *arg1, *arg2, *arg3, *arg4 );
-		}
-
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			Conv< A1 > arg1( buf );
 			buf += arg1.size();
 			Conv< A2 > arg2( buf );
@@ -273,22 +227,7 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class UpFu
 			return SetGet5< A1, A2, A3, A4, A5 >::innerStrSet( tgt.objId(), field, arg );
 		}
 
-		void op( const Eref& e, const char* buf ) const {
-			buf += sizeof( Qinfo );
-			Conv< A1 > arg1( buf );
-			buf += arg1.size();
-			Conv< A2 > arg2( buf );
-			buf += arg2.size();
-			Conv< A3 > arg3( buf );
-			buf += arg3.size();
-			Conv< A4 > arg4( buf );
-			buf += arg4.size();
-			Conv< A5 > arg5( buf );
-			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
-				e.index(), *arg1, *arg2, *arg3, *arg4, *arg5 );
-		}
-
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			Conv< A1 > arg1( buf );
 			buf += arg1.size();
 			Conv< A2 > arg2( buf );
@@ -348,11 +287,6 @@ template< class T, class A > class GetUpFunc: public GetOpFuncBase< A >
 		 * So we bypass the usual SrcFinfo::sendTo, and instead go
 		 * right to the Conn to send the data.
 		 */
-		void op( const Eref& e, const char* buf ) const {
-			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
-			buf += sizeof( Qinfo );
-			this->op( e, q, buf );
-		}
 
 		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
 			if ( skipWorkerNodeGlobal( e ) )
