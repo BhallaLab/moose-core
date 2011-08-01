@@ -332,7 +332,6 @@ int main( int argc, char** argv )
 		s->joinThreads();
 		Qinfo::freeMutex();
 	}
-	s->clearSetMsgs();
 	Neutral* ns = reinterpret_cast< Neutral* >( shelle->dataHandler()->data( 0 ) );
 	ns->destroy( shellId.eref(), 0, 0 );
 #ifdef USE_MPI

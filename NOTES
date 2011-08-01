@@ -14282,4 +14282,10 @@ Compiled through the shell directory. Checkin 2852.
 
 Compiled through kinetics directory. Checkin 2854.
 
-Compiled through geom directory.
+Compiled through geom directory. Checkin 2855.
+
+At this point all directories compile, and there are many pages of
+linking errors.
+
+Ground through the linking errors. Now it completes the compilation. Promptly
+fails when run.

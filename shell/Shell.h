@@ -370,7 +370,6 @@ class Shell
 		 * Local node function that orchestrates the assignment. It picks
 		 * the assignment mode to operate the appropriate innerSet 
 		 * function.
-		 */
 		void handleSet( const Eref& e, const Qinfo*q,
 			Id id, DataId d, FuncId fid, PrepackedBuffer arg );
 
@@ -384,6 +383,7 @@ class Shell
 			FuncId fid, const PrepackedBuffer& arg );
 
 		static const vector< double* >* awaitGottenData();
+		 */
 		/*
 		const vector< char* >& dispatchGet(
 			const Eref& sheller,
@@ -398,10 +398,10 @@ class Shell
 		const vector< char* >& innerDispatchGet( 
 			const Eref& sheller, const ObjId& tgt, FuncId tgtFid,
 			unsigned int numGetEntries );
-			*/
 
 		void handleGet( const Eref& e, const Qinfo*q,
 			Id id, DataId index, FuncId fid, unsigned int numTgt );
+			*/
 
 		void recvGet( const Eref& e, const Qinfo* q, PrepackedBuffer pb );
 

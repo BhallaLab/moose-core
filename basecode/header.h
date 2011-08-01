@@ -73,7 +73,6 @@ class FuncBarrier;
 #include "Cinfo.h"
 #include "MsgFuncBinding.h"
 #include "../msg/Msg.h"
-#include "Qvec.h"
 #include "Qinfo.h"
 #include "Dinfo.h"
 #include "DataHandler.h"

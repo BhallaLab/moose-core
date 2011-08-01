@@ -267,8 +267,8 @@ void testCreateMsg()
  */
 void testInnerSet()
 {
-	Eref sheller = Id().eref();
-	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+	// Eref sheller = Id().eref();
+	// Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 	const Cinfo* ac = Arith::initCinfo();
 	unsigned int size = 100;
 	vector< unsigned int > dims( 1, size );
@@ -285,14 +285,16 @@ void testInnerSet()
 	assert( finfo );
 	FuncId f1 = dynamic_cast< const DestFinfo* >( finfo )->getFid();
 	Conv< string > conv( "New Improved Test" );
-	double* args = new double[ conv.size() ];
-	conv.val2buf( args );
-	PrepackedBuffer pb( args, conv.size() );
-	Qinfo q;
+	// double* args = new double[ conv.size() ];
+	// conv.val2buf( args );
+	// PrepackedBuffer pb( args, conv.size() );
+	// Qinfo q;
 	Qinfo::enableStructuralOps();
-	shell->handleSet( sheller, &q, i2, e2.index(), f1, pb );
+	Qinfo::addDirectToQ( ObjId(), ret->id(), 0, f1,
+		conv.ptr(), conv.size() );
+	// shell->handleSet( sheller, &q, i2, e2.index(), f1, pb );
 	// shell->innerSet( e2, f1, args, conv.size() );
-	delete[] args;
+	// delete[] args;
 	Qinfo::clearQ( &p );
 	// Field< string >::set( e2, "name", "NewImprovedTest" );
 	assert( ret->getName() == "New Improved Test" );
@@ -303,15 +305,18 @@ void testInnerSet()
 	FuncId f2 = dynamic_cast< const DestFinfo* >( finfo )->getFid();
 
 	for ( unsigned int i = 0; i < size; ++i ) {
-		double args[100];
+		// double args[100];
 		double x = sqrt( i );
 		Conv< double > conv( x );
 		Eref dest( e2.element(), i );
 		// char* args = new char[ conv.size() ];
-		conv.val2buf( args );
-		PrepackedBuffer pb( args, conv.size() );
+		// conv.val2buf( args );
+		// PrepackedBuffer pb( args, conv.size() );
 		Qinfo::enableStructuralOps();
-		shell->handleSet( sheller, &q, dest.id(), dest.index(), f2, pb );
+		Qinfo::addDirectToQ( ObjId(), ret->id(), 0, f2,
+			conv.ptr(), conv.size() );
+
+	//	shell->handleSet( sheller, &q, dest.id(), dest.index(), f2, pb );
 	//	shell->innerSet( dest, f2, args, conv.size() );
 	// 	SetGet1< double >::set( dest, "set_outputValue", x );
 		Qinfo::clearQ( &p );
@@ -347,7 +352,9 @@ void testInnerGet() // Actually works on Shell::handleGet.
 	FuncId f1 = dynamic_cast< const DestFinfo* >( finfo )->getFid();
 	Qinfo q;
 	Qinfo::enableStructuralOps();
-	shell->handleGet( sheller, &q, i2, DataId( 0 ), f1, 1 );
+	double temp = receiveGet()->getFid();
+	Qinfo::addDirectToQ( ObjId(), i2, 0, f1, &temp, 1 );
+	// shell->handleGet( sheller, &q, i2, DataId( 0 ), f1, 1 );
 	Qinfo::clearQ( &p ); // The request goes to the target Element
 	Qinfo::clearQ( &p ); // The response comes back to the Shell
 	Qinfo::clearQ( &p ); // Response is relayed back to the node 0 Shell
@@ -359,7 +366,9 @@ void testInnerGet() // Actually works on Shell::handleGet.
 	// assert( val == "test2" );
 	ret->setName( "HupTwoThree" );
 	Qinfo::enableStructuralOps();
-	shell->handleGet( sheller, &q, i2, DataId( 0 ), f1, 1 );
+	Qinfo::addDirectToQ( ObjId(), i2, 0, f1, &temp, 1 );
+
+	// shell->handleGet( sheller, &q, i2, DataId( 0 ), f1, 1 );
 	Qinfo::clearQ( &p ); // The request goes to the target Element
 	Qinfo::clearQ( &p ); // The response comes back to the Shell
 	Qinfo::clearQ( &p ); // Response is relayed back to the node 0 Shell
@@ -382,12 +391,14 @@ void testInnerGet() // Actually works on Shell::handleGet.
 		Eref dest( e2.element(), i );
 
 		Qinfo::enableStructuralOps();
-		shell->handleGet( sheller, &q, i2, DataId( i ), f2, 1 );
+	//	shell->handleGet( sheller, &q, i2, DataId( i ), f2, 1 );
+		double temp = receiveGet()->getFid();
+		Qinfo::addDirectToQ( ObjId(), i2, 0, f2, &temp, 1 );
 		Qinfo::clearQ( &p ); // The request goes to the target Element
 		Qinfo::clearQ( &p ); // The response comes back to the Shell
 		Qinfo::clearQ( &p ); // Response is relayed back to the node 0 Shell
 		Conv< double > conv3( shell->getBuf()[0] );
-		double temp = i * 3;
+		temp = i * 3;
 		assert( doubleEq( *conv3 , temp ) );
 		shell->clearGetBuf();
 
@@ -2587,7 +2598,6 @@ void testAsync( )
 {
 	showFields();
 	testPrepackedBuffer();
-	Qvec::testQvec();
 	insertIntoQ();
 	testSendMsg();
 	testCreateMsg();
