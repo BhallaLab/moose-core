@@ -288,15 +288,15 @@ template< class T, class A > class GetUpFunc: public GetOpFuncBase< A >
 		 * right to the Conn to send the data.
 		 */
 
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			if ( skipWorkerNodeGlobal( e ) )
 				return;
 			const A& ret = (( reinterpret_cast< T* >( e.parentData() ) )->*func_)( e.index() );
 			Conv< A > arg( ret );
-			char* temp = new char[ arg.size() ];
-			arg.val2buf( temp );
-			fieldOp( e, q, buf, temp, arg.size() );
-			delete[] temp;
+			FuncId fid = *reinterpret_cast< const FuncId* >( buf );
+			Qinfo::addDirectToQ( e.objId(), q->src(),
+				q->threadNum(), fid,
+				arg.ptr(), arg.size() );
 		}
 
 		A reduceOp( const Eref& e ) const {
