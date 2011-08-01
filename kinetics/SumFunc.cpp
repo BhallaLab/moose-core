@@ -91,7 +91,7 @@ SumFunc::SumFunc()
 
 void SumFunc::process( const Eref& e, ProcPtr p )
 {
-	output.send( e, p, result_ );
+	output.send( e, p->threadIndexInGroup, result_ );
 	result_ = 0.0;
 }
 

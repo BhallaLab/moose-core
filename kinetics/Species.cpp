@@ -82,7 +82,7 @@ Species::Species()
 
 void Species::handleMolWtRequest( const Eref& e, const Qinfo* q )
 {
-	sendMolWt.send( e, q->getProcInfo(), molWt_ );
+	sendMolWt.send( e, q->threadNum(), molWt_ );
 }
 
 //////////////////////////////////////////////////////////////

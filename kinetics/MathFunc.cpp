@@ -239,7 +239,7 @@ void MathFunc::processFunc( const Eref& e, ProcPtr info)
   }
   //cout << result_ << endl;
   // send1< double >( e, outputSlot, result_ );
-  output.send( e, info, result_ );
+  output.send( e, info->threadIndexInGroup, result_ );
   v.clear();
 }
 

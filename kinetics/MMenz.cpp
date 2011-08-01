@@ -149,8 +149,8 @@ void MMenz::enz( double n )
 void MMenz::process( const Eref& e, ProcPtr p )
 {
 	double rate = kcat_ * enz_ * sub_ / ( Km_ + sub_ );
-	toSub.send( e, p, 0, rate );
-	toPrd.send( e, p, rate, 0 );
+	toSub.send( e, p->threadIndexInGroup, 0, rate );
+	toPrd.send( e, p->threadIndexInGroup, rate, 0 );
 	
 	sub_ = 1.0;
 }
