@@ -17,6 +17,7 @@ class FuncBarrier;
 // class pthread_attr_t;
 
 enum AssignmentType { SINGLE, VECTOR, REPEAT };
+extern const ThreadId ScriptThreadNum; // Defined in Shell.cpp
 
 extern SrcFinfo1< PrepackedBuffer >* lowLevelSetGet();
 extern SrcFinfo4< Id, DataId, FuncId, PrepackedBuffer >* requestSet();

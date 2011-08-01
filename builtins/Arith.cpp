@@ -127,7 +127,7 @@ void Arith::process( const Eref& e, ProcPtr p )
 			e.element()->getName() << ", " << e.objId() << "		" << 
 			arg3_ << "	" << &arg3_ << endl;
 	}
-	output.send( e, p, output_ );
+	output.send( e, p->threadIndexInGroup, output_ );
 	arg3_ = 0.0;
 }
 

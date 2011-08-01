@@ -14246,6 +14246,9 @@ TDL
 - Figure out how to decide which thread to use for each DataId of an 
 	object, in the various Msg::exec functions.
 
+- For all the Shell API calls, figure out which thread to use. assume 0.
+- Shell::digestReduceFieldDimension: unclear which thread to use for send.
+	Assuming ScriptThreadNum.
 
 Moved the current development to a new branch:
 https://moose.svn.sourceforge.net/svnroot/moose/moose/branches/newQ
@@ -14268,4 +14271,6 @@ identifier.
 
 Using these changes, went through the biophysics directory and replaced the
 ProcInfo argument in all 'send' calls with the threadNum. 
-Now biophysics compiles.
+Now biophysics compiles. Checkin 2850.
+
+Now builtins compiles. Working on Shell. Issue with Qinfo::addToStructuralQ.

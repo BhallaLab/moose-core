@@ -12,8 +12,6 @@
 #include "DiagonalMsg.h"
 #include "OneToOneMsg.h"
 #include "OneToAllMsg.h"
-#include "AssignmentMsg.h"
-#include "AssignVecMsg.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
 #include "ReduceMsg.h"
@@ -38,6 +36,7 @@ unsigned int Shell::numCores_;
 unsigned int Shell::numNodes_;
 unsigned int Shell::myNode_;
 ProcInfo Shell::p_;
+const ThreadId ScriptThreadNum = 0;
 
 static SrcFinfo5< string, Id, Id, string, vector< unsigned int > > requestCreate( "requestCreate",
 			"requestCreate( class, parent, newElm, name, dimensions ): "
@@ -431,7 +430,7 @@ Id Shell::doCreate( string type, Id parent, string name, vector< unsigned int > 
 	vector< unsigned int > dims( dimensions );
 	dims.push_back( isGlobal );
 	initAck(); // Nasty thread stuff happens here for multithread mode.
-		requestCreate.send( Id().eref(), &p_, type, parent, ret, name, dims );
+		requestCreate.send( Id().eref(), ScriptThreadNum, type, parent, ret, name, dims );
 	waitForAck();
 	return ret;
 }
@@ -439,7 +438,7 @@ Id Shell::doCreate( string type, Id parent, string name, vector< unsigned int > 
 bool Shell::doDelete( Id i )
 {
 	initAck();
-		requestDelete.send( Id().eref(), &p_, i );
+		requestDelete.send( Id().eref(), ScriptThreadNum, i );
 	waitForAck();
 	return 1;
 }
@@ -474,7 +473,7 @@ MsgId Shell::doAddMsg( const string& msgType,
 	}
 	initAck();
 	MsgId mid = Msg::nextMsgId();
-	requestAddMsg.send( Eref( shelle_, 0 ), &p_, 
+	requestAddMsg.send( Eref( shelle_, 0 ), ScriptThreadNum, 
 		msgType, mid, src, srcField, dest, destField );
 	//	Qinfo::clearQ( &p_ );
 	waitForAck();
@@ -526,7 +525,7 @@ void Shell::doQuit( )
 {
 	// No acks needed: the next call from parser should be to 
 	// exit parser itself.
-	requestQuit.send( Id().eref(), &p_ );
+	requestQuit.send( Id().eref(), ScriptThreadNum );
 }
 
 void Shell::doStart( double runtime )
@@ -536,7 +535,7 @@ void Shell::doStart( double runtime )
 
 	// Then actually run simulation.
 	initAck();
-		requestStart.send( sheller, &p_, runtime );
+		requestStart.send( sheller, ScriptThreadNum, runtime );
 	waitForAck();
 	// cout << Shell::myNode() << ": Shell::doStart(" << runtime << ")" << endl;
 }
@@ -546,14 +545,14 @@ void Shell::doNonBlockingStart( double runtime )
 	Eref sheller( shelle_, 0 );
 	// Check if sim not yet initialized. Do it if needed.
 
-	requestStart.send( sheller, &p_, runtime );
+	requestStart.send( sheller, ScriptThreadNum, runtime );
 }
 
 void Shell::doReinit()
 {
 	Eref sheller( shelle_, 0 );
 	initAck();
-		requestReinit.send( sheller, &p_ );
+		requestReinit.send( sheller, ScriptThreadNum );
 	waitForAck();
 }
 
@@ -561,7 +560,7 @@ void Shell::doStop()
 {
 	Eref sheller( shelle_, 0 );
 	initAck();
-		requestStop.send( sheller, &p_ );
+		requestStop.send( sheller, ScriptThreadNum );
 	waitForAck();
 }
 ////////////////////////////////////////////////////////////////////////
@@ -580,7 +579,7 @@ void Shell::doSetClock( unsigned int tickNum, double dt )
 	/*
 	Eref sheller( shelle_, 0 );
 	initAck(); // This causes a race condition in testShellAddMsg:771
-		requestSetupTick.send( sheller, &p_, tickNum, dt );
+		requestSetupTick.send( sheller, ScriptThreadNum, tickNum, dt );
 	waitForAck();
 	*/
 	SetGet2< unsigned int, double >::set( ObjId( 1 ), "setupTick", tickNum, dt );
@@ -590,7 +589,7 @@ void Shell::doUseClock( string path, string field, unsigned int tick )
 {
 	Eref sheller( shelle_, 0 );
 	initAck();
-		requestUseClock.send( sheller, &p_, path, field, tick );
+		requestUseClock.send( sheller, ScriptThreadNum, path, field, tick );
 	waitForAck();
 }
 
@@ -615,7 +614,7 @@ void Shell::doMove( Id orig, Id newParent )
 	// Put in check here that newParent is not a child of orig.
 	Eref sheller( shelle_, 0 );
 	initAck();
-		requestMove.send( sheller, &p_, orig, newParent );
+		requestMove.send( sheller, ScriptThreadNum, orig, newParent );
 	waitForAck();
 }
 
@@ -717,7 +716,7 @@ void Shell::doSyncDataHandler( Id tgt )
 	}
 	Eref sheller( shelle_, 0 );
 	initAck();
-		requestSync.send( sheller, &p_, tgt, sizeFid );
+		requestSync.send( sheller, ScriptThreadNum, tgt, sizeFid );
 	waitForAck();
 	// Now the data is back, assign the field.
 	// Check: will this function work on all nodes? No, only on master.
@@ -769,7 +768,7 @@ void Shell::doReacDiffMesh( Id baseCompartment )
 	doSyncDataHandler( baseMesh );
 
 	initAck();
-		requestReMesh.send( sheller, &p_, baseMesh );
+		requestReMesh.send( sheller, ScriptThreadNum, baseMesh );
 	waitForAck();
 
 	// Traverse all child compts and do their meshes.
@@ -846,7 +845,7 @@ void Shell::handleCreate( const Eref& e, const Qinfo* q,
 		return;
 	innerCreate( type, parent, newElm, name, dimensions );
 //	if ( myNode_ != 0 )
-	ack()->send( e, &p_, Shell::myNode(), OkStatus );
+	ack()->send( e, q->threadNum(), Shell::myNode(), OkStatus );
 	// cout << myNode_ << ": Shell::handleCreate ack sent" << endl;
 }
 
@@ -923,7 +922,7 @@ void Shell::destroy( const Eref& e, const Qinfo* q, Id eid)
 	// eid.destroy();
 	// cout << myNode_ << ": Shell::destroy done for element id " << eid << endl;
 
-	ack()->send( e, &p_, Shell::myNode(), OkStatus );
+	ack()->send( e, q->threadNum(), Shell::myNode(), OkStatus );
 }
 
 
@@ -939,9 +938,9 @@ void Shell::handleAddMsg( const Eref& e, const Qinfo* q,
 	if ( q->addToStructuralQ() )
 		return;
 	if ( innerAddMsg( msgType, mid, src, srcField, dest, destField ) )
-		ack()->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
+		ack()->send( Eref( shelle_, 0 ), q->threadNum(), Shell::myNode(), OkStatus );
 	else
-		ack()->send( Eref( shelle_, 0), &p_, Shell::myNode(), ErrorStatus );
+		ack()->send( Eref( shelle_, 0), q->threadNum(), Shell::myNode(), ErrorStatus );
 }
 
 /**
@@ -1033,7 +1032,7 @@ void Shell::handleMove( const Eref& e, const Qinfo* q,
 		return;
 	}
 	
-	ack()->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
+	ack()->send( Eref( shelle_, 0 ), q->threadNum(), Shell::myNode(), OkStatus );
 }
 
 void Shell::handleUseClock( const Eref& e, const Qinfo* q,
@@ -1075,7 +1074,7 @@ void Shell::handleUseClock( const Eref& e, const Qinfo* q,
 		}
 		*/
 	}
-	ack()->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
+	ack()->send( Eref( shelle_, 0 ), q->threadNum(), Shell::myNode(), OkStatus );
 }
 
 void Shell::warning( const string& text )
@@ -1120,7 +1119,7 @@ void Shell::digestReduceFieldDimension(
 {
 	maxIndex_ = arg->maxIndex();
 	// ack()->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
-	ack()->send( er, &p_, Shell::myNode(), OkStatus );
+	ack()->send( er, ScriptThreadNum, Shell::myNode(), OkStatus );
 }
 
 
