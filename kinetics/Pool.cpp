@@ -223,7 +223,7 @@ void Pool::process( const Eref& e, ProcPtr p )
 
 	A_ = B_ = 0.0;
 
-	nOut.send( e, p, n_ );
+	nOut.send( e, p->threadIndexInGroup, n_ );
 }
 
 void Pool::reinit( const Eref& e, ProcPtr p )
@@ -231,7 +231,7 @@ void Pool::reinit( const Eref& e, ProcPtr p )
 	A_ = B_ = 0.0;
 	n_ = nInit_;
 
-	nOut.send( e, p, n_ );
+	nOut.send( e, p->threadIndexInGroup, n_ );
 }
 
 void Pool::reac( double A, double B )

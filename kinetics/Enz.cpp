@@ -230,10 +230,10 @@ void Enz::cplx( double n ) // dummy
 
 void Enz::process( const Eref& e, ProcPtr p )
 {
-	toSub.send( e, p, r2_, r1_ );
-	toPrd.send( e, p, r3_, 0 );
-	toEnz.send( e, p, r3_ + r2_, r1_ );
-	toCplx.send( e, p, r1_, r3_ + r2_ );
+	toSub.send( e, p->threadIndexInGroup, r2_, r1_ );
+	toPrd.send( e, p->threadIndexInGroup, r3_, 0 );
+	toEnz.send( e, p->threadIndexInGroup, r3_ + r2_, r1_ );
+	toCplx.send( e, p->threadIndexInGroup, r1_, r3_ + r2_ );
 
 	// cout << "	proc: " << r1_ << ", " << r2_ << ", " << r3_ << endl;
 	
