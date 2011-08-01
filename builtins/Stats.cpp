@@ -133,7 +133,7 @@ void Stats::reinit( const Eref& e, ProcPtr p )
 void Stats::trig( const Eref& e, const Qinfo* q )
 {
 	ProcInfo p;
-	reduce.send( e, &p, 0 );
+	reduce.send( e, q->threadNum(), 0 );
 }
 ///////////////////////////////////////////////////////////////////////////
 // Reduce func
