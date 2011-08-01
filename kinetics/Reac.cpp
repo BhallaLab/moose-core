@@ -168,8 +168,8 @@ void Reac::prd( double v )
 
 void Reac::process( const Eref& e, ProcPtr p )
 {
-	toPrd.send( e, p, sub_, prd_ );
-	toSub.send( e, p, prd_, sub_ );
+	toPrd.send( e, p->threadIndexInGroup, sub_, prd_ );
+	toSub.send( e, p->threadIndexInGroup, prd_, sub_ );
 	
 	sub_ = kf_;
 	prd_ = kb_;
