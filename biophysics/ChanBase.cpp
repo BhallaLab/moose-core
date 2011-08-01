@@ -206,20 +206,20 @@ void ChanBase::handleVm( double Vm )
 
 void ChanBase::process(  const Eref& e, const ProcPtr info )
 {
-	channelOut()->send( e, info, Gk_, Ek_ );
+	channelOut()->send( e, info->threadIndexInGroup, Gk_, Ek_ );
 	// This is used if the channel connects up to a conc pool and
 	// handles influx of ions giving rise to a concentration change.
-	IkOut()->send( e, info, Ik_ );
+	IkOut()->send( e, info->threadIndexInGroup, Ik_ );
 	// Needed by GHK-type objects
-	permeability()->send( e, info, Gk_ );
+	permeability()->send( e, info->threadIndexInGroup, Gk_ );
 }
 
 
 void ChanBase::reinit(  const Eref& e, const ProcPtr info )
 {
-	channelOut()->send( e, info, Gk_, Ek_ );
+	channelOut()->send( e, info->threadIndexInGroup, Gk_, Ek_ );
 	// Needed by GHK-type objects
-	permeability()->send( e, info, Gk_ );
+	permeability()->send( e, info->threadIndexInGroup, Gk_ );
 }
 
 void ChanBase::updateIk()

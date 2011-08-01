@@ -118,8 +118,7 @@ class Compartment
 			 * the current amplitude that is random, it is the presence
 			 * or absence of the current that is probabilistic.
 			 */
-			void randInject( const Eref& e, const Qinfo* q,
-				double prob, double current);
+			void randInject( double prob, double current);
 
 			/**
 			 * Dummy function to act as recipient of 'cable' message,
@@ -180,6 +179,7 @@ class Compartment
 			double x_;
 			double y_;
 			double z_;
+			double dt_;
 			static const double EPSILON;
 };
 }

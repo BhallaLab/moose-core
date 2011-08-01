@@ -320,10 +320,10 @@ void LeakyIaF::process(const Eref & eref, ProcPtr proc)
     double time = proc->currTime;
     Vm_ += ((Em_ - Vm_)/Rm_ + sumInject_)/Cm_; // Forward Euler
     sumInject_ = 0.0;
-    VmOut()->send(eref, proc, Vm_);
+    VmOut()->send(eref, proc->threadIndexInGroup, Vm_);
     if ((Vm_ > Vthreshold_) && (time > tSpike_ + refractoryPeriod_)){
         tSpike_ = time;
-        spike()->send(eref, proc, time);
+        spike()->send(eref, proc->threadIndexInGroup, time);
         Vm_ = Vreset_;
     }
 }
@@ -333,7 +333,7 @@ void LeakyIaF::reinit(const Eref& eref, ProcPtr proc)
     Vm_ = initVm_;
     sumInject_ = 0.0;
     tSpike_ = -DBL_MAX;
-    VmOut()->send(eref, proc, Vm_);
+    VmOut()->send(eref, proc->threadIndexInGroup, Vm_);
 }
 
 ///////////////////////////////////////////////////////////////////////////

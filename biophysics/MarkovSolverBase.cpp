@@ -591,14 +591,14 @@ void MarkovSolverBase::reinit( const Eref& e, ProcPtr p )
 	}
 	state_ = initialState_;		
 
-	stateOut()->send( e, p, state_ );
+	stateOut()->send( e, p->threadIndexInGroup, state_ );
 }
 
 void MarkovSolverBase::process( const Eref& e, ProcPtr p )
 {
 	computeState();	
 
-	stateOut()->send( e, p, state_ );
+	stateOut()->send( e, p->threadIndexInGroup, state_ );
 }
 
 void MarkovSolverBase::handleVm( double Vm )

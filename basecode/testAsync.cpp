@@ -189,6 +189,7 @@ void testSendMsg()
 	Msg* m = new OneToOneMsg( Msg::nextMsgId(), e1.element(), e2.element() );
 
 	
+	ThreadId threadNum = 0;
 	ProcInfo p;
 	
 	SrcFinfo1<double> s( "test", "" );
@@ -197,7 +198,7 @@ void testSendMsg()
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double x = i + i * i;
-		s.send( Eref( e1.element(), i ), &p, x );
+		s.send( Eref( e1.element(), i ), threadNum, x );
 	}
 	Qinfo::clearQ( &p );
 
@@ -230,6 +231,7 @@ void testCreateMsg()
 	Eref e1 = i1.eref();
 	Eref e2 = i2.eref();
 	ProcInfo p;
+	ThreadId threadNum = 0;
 
 	OneToOneMsg *m = new OneToOneMsg( Msg::nextMsgId(), e1.element(), e2.element() );
 	assert( m );
@@ -245,7 +247,7 @@ void testCreateMsg()
 	for ( unsigned int i = 0; i < size; ++i ) {
 		const SrcFinfo1< double >* sf = dynamic_cast< const SrcFinfo1< double >* >( f1 );
 		assert( sf != 0 );
-		sf->send( Eref( e1.element(), i ), &p, double( i ) );
+		sf->send( Eref( e1.element(), i ), threadNum, double( i ) );
 	}
 	Qinfo::clearQ( &p );
 
@@ -1414,16 +1416,16 @@ class Test
 		}
 
 		void handleS1( const Eref& e, const Qinfo* q, string s ) {
-			ProcInfo p;
+			ThreadId threadNum = 0;
 			s_ = s + s_;
-			s0.send( e, &p );
+			s0.send( e, threadNum );
 		}
 
 		void handleS2( const Eref& e, const Qinfo* q, int i1, int i2 ) {
-			ProcInfo p;
+			ThreadId threadNum = 0;
 			i1_ += 10 * i1;
 			i2_ += 10 * i2;
-			s0.send( e, &p );
+			s0.send( e, threadNum );
 		}
 
 		static Finfo* sharedVec[ 6 ];
@@ -1510,16 +1512,17 @@ void testSharedMsg()
 
 	// Send messages
 	ProcInfo p;
+	ThreadId threadNum = 0;
 	string arg1 = " hello ";
-	s1.send( t1.eref(), &p, arg1 );
-	s2.send( t1.eref(), &p, 100, 200 );
+	s1.send( t1.eref(), threadNum, arg1 );
+	s2.send( t1.eref(), threadNum, 100, 200 );
 
 	Qinfo::clearQ( &p );
 	Qinfo::clearQ( &p );
 
 	string arg2 = " goodbye ";
-	s1.send( t2.eref(), &p, arg2 );
-	s2.send( t2.eref(), &p, 500, 600 );
+	s1.send( t2.eref(), threadNum, arg2 );
+	s2.send( t2.eref(), threadNum, 500, 600 );
 
 	Qinfo::clearQ( &p );
 	Qinfo::clearQ( &p );
@@ -1597,6 +1600,7 @@ void testMsgField()
 
 	Msg* m = new SingleMsg( Msg::nextMsgId(), Eref( i1(), 5 ), Eref( i2(), 3 ) );
 	ProcInfo p;
+	ThreadId threadNum = 0;
 
 	Id msgElmId = m->managerId();
 
@@ -1618,7 +1622,7 @@ void testMsgField()
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double x = i * 42;
-		s.send( Eref( e1.element(), i ), &p, x );
+		s.send( Eref( e1.element(), i ), threadNum, x );
 	}
 	Qinfo::clearQ( &p );
 
@@ -1635,7 +1639,7 @@ void testMsgField()
 	sm->setI2( 8 );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double x = i * 1000;
-		s.send( Eref( e1.element(), i ), &p, x );
+		s.send( Eref( e1.element(), i ), threadNum, x );
 	}
 	Qinfo::clearQ( &p );
 	val = reinterpret_cast< Arith* >( tgt3.data() )->getOutput();

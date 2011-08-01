@@ -46,6 +46,11 @@ typedef unsigned int MsgId;
  */
 typedef unsigned short BindIndex;
 
+/**
+ * Identifier for threads.
+ */
+typedef unsigned short ThreadId;
+
 extern const double PI;	// Defined in consts.cpp
 extern const double NA; // Defined in consts.cpp
 

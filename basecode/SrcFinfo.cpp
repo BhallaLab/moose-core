@@ -66,8 +66,8 @@ SrcFinfo0::SrcFinfo0( const string& name, const string& doc )
 	: SrcFinfo( name, doc )
 { ; }
 
-void SrcFinfo0::send( const Eref& e, const ProcInfo* p ) const {
-	Qinfo::addToQ( e.objId(), getBindIndex(), p->threadIndexInGroup, 0, 0 );
+void SrcFinfo0::send( const Eref& e, ThreadId threadNum ) const {
+	Qinfo::addToQ( e.objId(), getBindIndex(), threadNum, 0, 0 );
 	/*
 	Qinfo q( e.index(), 0, 0 );
 	e.element()->asend( q, getBindIndex(), p, 0 ); // last arg is data
