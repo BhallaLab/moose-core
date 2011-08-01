@@ -20,6 +20,10 @@
 bool Qinfo::isSafeForStructuralOps_ = 0;
 vector< double > Qinfo::q0_( 1000, 0.0 );
 vector< double > Qinfo::q1_( 1000, 0.0 );
+
+vector< vector< double > > Qinfo::dBuf_;
+vector< vector< Qinfo > > Qinfo::qBuf_;
+
 double* Qinfo::inQ_ = &Qinfo::q0_[0];
 double* Qinfo::outQ_ = &Qinfo::q1_[0];
 vector< vector< ReduceBase* > > Qinfo::reduceQ_;
@@ -32,6 +36,8 @@ double* Qinfo::mpiRecvQ_ = &mpiQ2_[0];
 // vector< SimGroup > Qinfo::g_;
 vector< Qinfo > Qinfo::structuralQinfo_;
 vector< double > Qinfo::structuralQdata_;
+
+pthread_mutex_t* Qinfo::qMutex_;
 
 // void hackForSendTo( const Qinfo* q, const char* buf );
 static const unsigned int BLOCKSIZE = 20000;
@@ -607,6 +613,50 @@ void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest,
 	if ( size > 0 ) {
 		vec.insert( vec.end(), arg, arg + size );
 	}
+}
+
+// Static function
+double* Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest, 
+	unsigned short threadNum,
+	FuncId fid, unsigned int size )
+{
+	static const unsigned int ObjFidSizeInDoubles = 
+		1 + ( sizeof( ObjFid ) - 1 ) / sizeof( double );
+
+
+	qBuf_[ threadNum ].push_back( 
+		Qinfo( src, ~0, threadNum, dBuf_.size() ) );
+
+	ObjFid ofid = { dest, fid, 0, 0 };
+	const double* ptr = reinterpret_cast< const double* >( &ofid );
+	vector< double >& vec = dBuf_[ threadNum ];
+	vec.insert( vec.end(), ptr, ptr + ObjFidSizeInDoubles );
+
+	unsigned int oldSize = dBuf_.size();
+	dBuf_[ threadNum ].resize( oldSize + size );
+	return &( dBuf_[threadNum][oldSize] );
+}
+
+// Static function
+double* Qinfo::addVecDirectToQ( const ObjId& src, const ObjId& dest, 
+	unsigned short threadNum,
+	FuncId fid, unsigned int entrySize, unsigned int numEntries )
+{
+	static const unsigned int ObjFidSizeInDoubles = 
+		1 + ( sizeof( ObjFid ) - 1 ) / sizeof( double );
+
+	qBuf_[ threadNum ].push_back( 
+		Qinfo( src, ~0, threadNum, dBuf_.size() ) );
+
+	ObjFid ofid = { dest, fid, entrySize, numEntries };
+	const double* ptr = reinterpret_cast< const double* >( &ofid );
+	vector< double >& vec = dBuf_[ threadNum ];
+	vec.insert( vec.end(), ptr, ptr + ObjFidSizeInDoubles );
+
+	unsigned int oldSize = dBuf_.size();
+	unsigned int newSize = entrySize * numEntries;
+	dBuf_[ threadNum ].resize( oldSize + newSize );
+	return &( dBuf_[threadNum][oldSize] );
 }
 
 /// Static func.
