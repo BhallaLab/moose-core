@@ -402,23 +402,6 @@ template< class T, class A > class GetOpFunc: public GetOpFuncBase< A >
 			return SetGet1< A >::innerStrSet( tgt.objId(), field, arg );
 		}
 
-		/**
-		 * The buf just contains the funcid on the src element that is
-		 * ready to receive the returned data.
-		 * Also we are returning the data along the Msg that brought in
-		 * the request, so we don't need to scan through all Msgs in
-		 * the Element to find the right one.
-		 * So we bypass the usual SrcFinfo::sendTo, and instead go
-		 * right to the Qinfo::addToQ to send off data.
-		 * Finally, the data is copied back-and-forth about 3 times.
-		 * Wasteful, but the 'get' function is not to be heavily used.
-		void op( const Eref& e, const char* buf ) const {
-			const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
-			buf += sizeof( Qinfo );
-			this->op( e, q, buf );
-		}
-		 */
-
 		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			if ( skipWorkerNodeGlobal( e ) )
 				return;
@@ -432,12 +415,6 @@ template< class T, class A > class GetOpFunc: public GetOpFuncBase< A >
 			Qinfo::addDirectToQ( e.objId(), q->src(), 
 				q->threadNum(), fid,
 				conv0.ptr(), conv0.size() );
-			/*
-			char* temp0 = new char[ conv0.size() ];
-			conv0.val2buf( temp0 );
-			fieldOp( e, q, buf, temp0, conv0.size() );
-			delete[] temp0;
-			*/
 		}
 
 		A reduceOp( const Eref& e ) const {

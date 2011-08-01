@@ -618,7 +618,7 @@ void Clock::advancePhase2(  ProcInfo *p )
 			Id clockId( 1 );
 			procState_ = StopOnly;
 			// isRunning_ = 0; // Should not set this flag here, it affects other threads.
-			finished.send( clockId.eref(), p );
+			finished.send( clockId.eref(), p->threadIndexInGroup );
 		//	ack()->send( clockId.eref(), p, p->nodeIndexInGroup, OkStatus );
 		Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 		s->handleAck( p->nodeIndexInGroup, OkStatus );

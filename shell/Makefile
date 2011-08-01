@@ -29,7 +29,7 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-Shell.o:	Shell.h ../msg/AssignmentMsg.h Neutral.h ../scheduling/Clock.h 
+Shell.o:	Shell.h Neutral.h ../scheduling/Clock.h 
 ShellCopy.o:	Shell.h Neutral.h
 ShellSetGet.o:	Shell.h
 ShellThreads.o:	Shell.h Neutral.h ../scheduling/Clock.h

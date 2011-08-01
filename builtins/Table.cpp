@@ -208,10 +208,10 @@ void Table::process( const Eref& e, ProcPtr p )
 	lastTime_ = p->currTime;
 	// send out a request for data. This magically comes back in the
 	// RecvDataBuf and is handled.
-	requestData.send( e, p, recvDataBuf.getFid() );
+	requestData.send( e, p->threadIndexInGroup, recvDataBuf.getFid() );
 	if ( vec_.size() == 0 ) {
-		output.send( e, p, 0.0 );
-		outputLoop.send( e, p, 0.0 );
+		output.send( e, p->threadIndexInGroup, 0.0 );
+		outputLoop.send( e, p->threadIndexInGroup, 0.0 );
 		output_ = 0;
 		return;
 	}
@@ -221,9 +221,9 @@ void Table::process( const Eref& e, ProcPtr p )
 	else
 		output_ = vec_.back();
 
-	output.send( e, p, output_ );
+	output.send( e, p->threadIndexInGroup, output_ );
 
-	outputLoop.send( e, p, vec_[ outputIndex_ % vec_.size() ] );
+	outputLoop.send( e, p->threadIndexInGroup, vec_[ outputIndex_ % vec_.size() ] );
 
 	outputIndex_++;
 }
@@ -235,7 +235,7 @@ void Table::reinit( const Eref& e, ProcPtr p )
 	outputIndex_ = 0;
 	lastTime_ = 0;
 	// cout << "tabReinit on :" << p->groupId << ":" << p->threadIndexInGroup << endl << flush;
-	requestData.send( e, p, recvDataBuf.getFid() );
+	requestData.send( e, p->threadIndexInGroup, recvDataBuf.getFid() );
 }
 
 void Table::input( double v )
