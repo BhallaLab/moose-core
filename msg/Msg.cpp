@@ -8,8 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "AssignmentMsg.h"
-#include "AssignVecMsg.h"
 #include "SingleMsg.h"
 #include "DiagonalMsg.h"
 #include "OneToOneMsg.h"
@@ -344,6 +342,7 @@ void Msg::initMsgManagers()
 	Shell::adopt( msgManagerId_, SparseMsg::managerId_ );
 	msgMgrs.push_back( SparseMsg::managerId_ );
 
+	/*
 	AssignmentMsg::managerId_ = Id::nextId();
 	new Element( AssignmentMsg::managerId_, AssignmentMsg::initCinfo(),
 		"assignmentMsg", new MsgDataHandler( &dummyDinfo ) );
@@ -355,6 +354,7 @@ void Msg::initMsgManagers()
 		"assignVecMsg", new MsgDataHandler( &dummyDinfo ) );
 	Shell::adopt( msgManagerId_, AssignVecMsg::managerId_ );
 	msgMgrs.push_back( AssignVecMsg::managerId_ );
+	*/
 
 	ReduceMsg::managerId_ = Id::nextId();
 	new Element( ReduceMsg::managerId_, ReduceMsg::initCinfo(),

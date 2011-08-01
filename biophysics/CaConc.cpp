@@ -241,7 +241,7 @@ void CaConc::reinit( const Eref& e, ProcPtr p )
 	activation_ = 0.0;
 	c_ = 0.0;
 	Ca_ = CaBasal_;
-	concOut.send( e, p, Ca_ );
+	concOut.send( e, p->threadIndexInGroup, Ca_ );
 }
 
 void CaConc::process( const Eref& e, ProcPtr p )
@@ -254,7 +254,7 @@ void CaConc::process( const Eref& e, ProcPtr p )
 		Ca_ = floor_;
 	}
 	c_ = Ca_ - CaBasal_;
-	concOut.send( e, p, Ca_ );
+	concOut.send( e, p->threadIndexInGroup, Ca_ );
 	activation_ = 0;
 }
 

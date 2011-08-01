@@ -272,7 +272,7 @@ const Cinfo* Compartment::initCinfo()
 			"Sends a random injection current to the compartment. Must be"
 			"updated each timestep."
 			"Arguments to randInject are probability and current.",
-			new EpFunc2< Compartment, double, double > (
+			new OpFunc2< Compartment, double, double > (
 				&Compartment::randInject ) );
 
 		static DestFinfo cable( "cable", 
@@ -557,7 +557,7 @@ void Compartment::process( const Eref& e, ProcPtr p )
 	Im_ = 0.0;
 	sumInject_ = 0.0;
 	// Send out Vm to channels, SpikeGens, etc.
-	VmOut()->send( e, p, Vm_ );
+	VmOut()->send( e, p->threadIndexInGroup, Vm_ );
 
 	// The axial/raxial messages go out in the 'init' phase.
 }
@@ -574,9 +574,10 @@ void Compartment::innerReinit(  const Eref& e, ProcPtr p )
 	B_ = invRm_;
 	Im_ = 0.0;
 	sumInject_ = 0.0;
+	dt_ = p->dt;
 	
 	// Send out the resting Vm to channels, SpikeGens, etc.
-	VmOut()->send( e, p, Vm_ );
+	VmOut()->send( e, p->threadIndexInGroup, Vm_ );
 }
 
 void Compartment::initProc( const Eref& e, ProcPtr p )
@@ -588,10 +589,10 @@ void Compartment::initProc( const Eref& e, ProcPtr p )
 void Compartment::innerInitProc( const Eref& e, ProcPtr p )
 {
 	// Send out the axial messages
-	axialOut()->send( e, p, Vm_ );
+	axialOut()->send( e, p->threadIndexInGroup, Vm_ );
 
 	// Send out the raxial messages
-	raxialOut()->send( e, p, Ra_, Vm_ );
+	raxialOut()->send( e, p->threadIndexInGroup, Ra_, Vm_ );
 }
 
 void Compartment::initReinit( const Eref& e, ProcPtr p )
@@ -630,10 +631,9 @@ void Compartment::injectMsg( double current)
 	Im_ += current;
 }
 
-void Compartment::randInject( const Eref& e, const Qinfo*q,
-	double prob, double current)
+void Compartment::randInject( double prob, double current)
 {
-	if ( mtrand() < prob * q->getProcInfo()->dt ) {
+	if ( mtrand() < prob * dt_ ) {
 		sumInject_ += current;
 		Im_ += current;
 	}

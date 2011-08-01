@@ -14218,6 +14218,7 @@ Things to do tomorrow:
 
 TDL
 - OpFunc.h: 419: Replace direct casting for fid with a Conv< FuncId> call.
+- UpFunc.h: Deal with GetUpFunc::op.
 - Conv.h: 404: template< class T > class Conv< vector< T > >::ptr()
 	needs to be filled out
 - Conv.h: Need to sort out a general scheme so that numbers can assign
@@ -14251,7 +14252,20 @@ https://moose.svn.sourceforge.net/svnroot/moose/moose/branches/newQ
 Checkin 2847.
 Pegged away at it. Now compiles through the basecode directory.
 Checkin 2848.
-Now compiles through the msg directory.
+Now compiles through the msg directory. Checkin 2849.
+
+Compiling through biophysics dir. May need to redo all of
+SrcFinfo::send, to use Qinfo or even just threadNum instead of ProcInfo.
+This has come up because some of the dest functions in SymCompartment.cpp
+want to call 'send'.
 
 
+============================================================================
+1 August 2011.
 
+Changed SrcFinfo::send to use threadNum argument. Also set up ThreadId as
+identifier.
+
+Using these changes, went through the biophysics directory and replaced the
+ProcInfo argument in all 'send' calls with the threadNum. 
+Now biophysics compiles.

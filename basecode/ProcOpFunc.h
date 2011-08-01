@@ -52,15 +52,7 @@ template< class T > class ProcOpFunc: public ProcOpFuncBase
 			return SetGet1< ProcPtr >::set( tgt.objId(), field, &p );
 		}
 
-		// This could do with a whole lot of optimization to avoid
-		// copying data back and forth.
-		void op( const Eref& e, const char* buf ) const {
-			// const Qinfo* q = reinterpret_cast< const Qinfo* >( buf );
-			Conv< ProcPtr > arg1( buf + sizeof( Qinfo ) );
-			(reinterpret_cast< T* >( e.data() )->*func_)( e, *arg1 ) ;
-		}
-
-		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			Conv< ProcPtr > arg1( buf );
 			(reinterpret_cast< T* >( e.data() )->*func_)( e, *arg1 ) ;
 		}

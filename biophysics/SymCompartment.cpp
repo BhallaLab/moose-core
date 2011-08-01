@@ -207,8 +207,8 @@ void SymCompartment::innerProcessFunc( Element* e, ProcInfo p )
 // Alternates with the 'process' message
 void SymCompartment::innerInitProc( const Eref& e, ProcPtr p )
 {
-	raxialOut.send( e, p, Ra_, Vm_ ); // to kids
-	raxial2Out.send( e, p, Ra_, Vm_ ); // to parent and sibs.
+	raxialOut.send( e, p->threadIndexInGroup, Ra_, Vm_ ); // to kids
+	raxial2Out.send( e, p->threadIndexInGroup, Ra_, Vm_ ); // to parent and sibs.
 }
 
 // Virtual func. Must be called after the 'init' phase.
@@ -230,18 +230,18 @@ void SymCompartment::innerReinit( const Eref& e, ProcPtr p )
 // This funciton is called during 'init' phase to send Raxial info around.
 void SymCompartment::innerInitReinit( const Eref& e, ProcPtr p )
 {
-	requestSumAxial.send( e, p );
-	requestSumAxial2.send( e, p );
+	requestSumAxial.send( e, p->threadIndexInGroup );
+	requestSumAxial2.send( e, p->threadIndexInGroup );
 }
 
 void SymCompartment::handleSumRaxialRequest( const Eref& e, const Qinfo* q )
 {
-	sumRaxialOut.send( e, q->getProcInfo(), Ra_ );
+	sumRaxialOut.send( e, q->threadNum(), Ra_ );
 }
 
 void SymCompartment::handleSumRaxial2Request( const Eref& e, const Qinfo* q)
 {
-	sumRaxial2Out.send( e, q->getProcInfo(), Ra_ );
+	sumRaxial2Out.send( e, q->threadNum(), Ra_ );
 }
 
 void SymCompartment::sumRaxial( double Ra )

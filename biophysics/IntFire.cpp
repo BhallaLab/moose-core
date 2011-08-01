@@ -157,7 +157,7 @@ void IntFire::process( const Eref &e, ProcPtr p )
 		Vm_ = 0.0;
 
 	if ( Vm_ > thresh_ ) {
-		spike.send( e, p, p->currTime );
+		spike.send( e, p->threadIndexInGroup, p->currTime );
 		// e.sendSpike( spikeSlot, p->currTime );
 		if ( e.index().data() % 100 == 0 ) {
 			// cout << "IntFire[" << e.index().data() << "]::process, zeroing Vm= " << Vm_ << ", Ptr = " << this << endl;

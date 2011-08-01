@@ -319,7 +319,7 @@ void NMDAChan::process( const Eref& e, ProcPtr info )
     // Usually needed by GHK-type objects
     send1< double >( e, gkSlot, Gk_ );
 	*/
-	unblocked.send( e, info, unblocked_ );
+	unblocked.send( e, info->threadIndexInGroup, unblocked_ );
     // send1< double >( e, unblockedSlot, unblocked_);
 }
 
