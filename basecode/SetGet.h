@@ -138,15 +138,8 @@ template< class A > class SetGet1: public SetGet
 			ObjId tgt( dest );
 			if ( sg.checkSet( field, tgt, fid ) ) {
 				Conv< A > conv( arg );
-				/*
-				char *temp = new char[ conv.size() ];
-				conv.val2buf( temp );
-				dispatchSet( tgt, fid, conv.ptr(), conv.size() );
-				delete[] temp;
-				*/
-				double *ptr = Qinfo::addDirectToQ( 
-					ObjId(), tgt, 0, fid, conv.size() );
-				memcpy( ptr, conv.ptr(), conv.size() );
+				Qinfo::addDirectToQ(
+					ObjId(), tgt, 0, fid, conv.ptr(), conv.size() );
 				return 1;
 			}
 			return 0;

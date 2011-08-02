@@ -397,12 +397,14 @@ void testSetGet()
 	Id i2 = Id::nextId();
 	Element* ret = new Element( i2, ac, "test2", dims, 1 );
 	assert( ret );
+	ProcInfo p;
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
 		ObjId oid( i2, i );
 		double x = i * 3.14;
 		bool ret = Field< double >::set( oid, "outputValue", x );
 		assert( ret );
+		Qinfo::clearQ( &p ); // The request goes to the target Element
 		double val = reinterpret_cast< Arith* >(oid.data())->getOutput();
 		assert( doubleEq( val, x ) );
 	}
@@ -555,15 +557,14 @@ void testSetGetDouble()
 	// bool ret = ic->create( i2, "test2", size );
 	Element* ret = new Element( i2, ic, "test2", dims, 1 );
 	assert( ret );
+	ProcInfo p;
 
-	// i2()->showFields();
-
-	
 	for ( unsigned int i = 0; i < size; ++i ) {
 		// Eref e2( i2(), i );
 		ObjId oid( i2, i );
 		double temp = i;
 		bool ret = Field< double >::set( oid, "Vm", temp );
+		Qinfo::clearQ( &p ); // The request goes to the target Element
 		assert( ret );
 		assert( 
 			doubleEq ( reinterpret_cast< IntFire* >(oid.data())->getVm() , temp ) );
