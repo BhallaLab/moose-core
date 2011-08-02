@@ -73,7 +73,7 @@ class Qinfo
 		*/
 
 		bool isDirect() const {
-			return msgBindIndex_ == ~0;
+			return msgBindIndex_ == DirectAdd;
 		}
 
 		/**
@@ -328,6 +328,12 @@ class Qinfo
 
 		/**
 		 * Does an initial allocation of space for data transfer in 
+		 * the qBuf and dBuf.
+		 */
+		static void initQs( unsigned int numThreads, unsigned int reserve );
+
+		/**
+		 * Does an initial allocation of space for data transfer in 
 		 * the MPIQs.
 		 */
 		static void initMpiQs();
@@ -548,9 +554,12 @@ class Qinfo
 		static vector< vector< ReduceBase* > > reduceQ_;
 
 		/**
-		 * Used to protect the structural Q
+		 * Used to protect the queues from the timing of parser calls
 		 */
 		static pthread_mutex_t* qMutex_;
+
+		/// Flag setting
+		static const BindIndex DirectAdd;
 };
 
 #endif // QINFO_H

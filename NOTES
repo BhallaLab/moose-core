@@ -14288,4 +14288,22 @@ At this point all directories compile, and there are many pages of
 linking errors.
 
 Ground through the linking errors. Now it completes the compilation. Promptly
-fails when run.
+fails when run. Checkin 2856.
+
+============================================================================
+2 August 2011.
+
+Planning for threads and interface with script. Options
+- Protect all of the addToQ functions with a mutex if it is ScriptThreadNum.
+	This mutex will lock all of swapQ to ensure that the copying of 
+	Q0 (the script queue) into the inQ is safe.
+	- Messiness ensues: The addToQ functions that return a pointer to be
+	filled in later will fail because the fillin may complete on the master
+	thread only after the worker threads have executed the call.
+- In LaunchThreads, add an extra thread to handle script calls. This 
+	extra thread is also tied into the barriers, so it is safe for swapQ.
+	All Shell API calls go through this thread protected by mutexes.
+
+
+With this pending, I'm slowly marching through the unit tests in testAsync.cpp.
+So far 5 cleared.

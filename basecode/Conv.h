@@ -262,6 +262,296 @@ template<> class Conv< double >
 };
 
 /**
+ * The template specialization of Conv< unsigned int > sets up alignment on
+ * word boundaries by storing the data as a double. 
+ */
+template<> class Conv< unsigned int >
+{
+	public:
+		/// Constructor assumes that the buffer points to a double
+		Conv( const double* buf )
+		{
+			assert( buf );
+			val_ = *buf;
+		}
+
+		/// Constructor uses implicit conversion of int to double.
+		Conv( const unsigned int& arg )
+			: val_( arg )
+		{;}
+
+		/**
+		 * This is the size used in the serialized form.
+		 */
+		unsigned int size() const
+		{
+			return 1;
+		}
+
+		const double* ptr() const
+		{
+			return &val_;
+		}
+
+		const unsigned int operator*() const {
+			return val_;
+		}
+
+		unsigned int val2buf( double* buf ) const {
+			*buf = val_;
+			return 1;
+		}
+
+		static void str2val( unsigned int& val, const string& s ) {
+			val = atoi( s.c_str() );
+		}
+
+		static void val2str( string& s, const unsigned int& val ) {
+			stringstream ss;
+			ss << val;
+			s = ss.str();
+		}
+
+		static string rttiType() {
+			return "unsigned int";
+		}
+	private:
+		double val_;
+};
+
+/**
+ * The template specialization of Conv< float > sets up alignment on
+ * word boundaries by storing the data as a double. 
+ */
+template<> class Conv< float >
+{
+	public:
+		/// Constructor assumes that the buffer points to a double
+		Conv( const double* buf )
+		{
+			assert( buf );
+			val_ = *buf;
+		}
+
+		/// Constructor uses implicit conversion of int to double.
+		Conv( const float& arg )
+			: val_( arg )
+		{;}
+
+		/**
+		 * This is the size used in the serialized form.
+		 */
+		unsigned int size() const
+		{
+			return 1;
+		}
+
+		const double* ptr() const
+		{
+			return &val_;
+		}
+
+		const float operator*() const {
+			return val_;
+		}
+
+		unsigned int val2buf( double* buf ) const {
+			*buf = val_;
+			return 1;
+		}
+
+		static void str2val( float& val, const string& s ) {
+			val = atoi( s.c_str() );
+		}
+
+		static void val2str( string& s, const float& val ) {
+			stringstream ss;
+			ss << val;
+			s = ss.str();
+		}
+
+		static string rttiType() {
+			return "float";
+		}
+	private:
+		double val_;
+};
+
+/**
+ * The template specialization of Conv< int > sets up alignment on
+ * word boundaries by storing the data as a double. 
+ */
+template<> class Conv< int >
+{
+	public:
+		/// Constructor assumes that the buffer points to a double
+		Conv( const double* buf )
+		{
+			assert( buf );
+			val_ = *buf;
+		}
+
+		/// Constructor uses implicit conversion of int to double.
+		Conv( const int& arg )
+			: val_( arg )
+		{;}
+
+		/**
+		 * This is the size used in the serialized form.
+		 */
+		unsigned int size() const
+		{
+			return 1;
+		}
+
+		const double* ptr() const
+		{
+			return &val_;
+		}
+
+		const int operator*() const {
+			return val_;
+		}
+
+		unsigned int val2buf( double* buf ) const {
+			*buf = val_;
+			return 1;
+		}
+
+		static void str2val( int& val, const string& s ) {
+			val = atoi( s.c_str() );
+		}
+
+		static void val2str( string& s, const int& val ) {
+			stringstream ss;
+			ss << val;
+			s = ss.str();
+		}
+
+		static string rttiType() {
+			return "int";
+		}
+	private:
+		double val_;
+};
+
+/**
+ * The template specialization of Conv< unsigned short > sets up alignment on
+ * word boundaries by storing the data as a double. 
+ */
+template<> class Conv< unsigned short >
+{
+	public:
+		/// Constructor assumes that the buffer points to a double
+		Conv( const double* buf )
+		{
+			assert( buf );
+			val_ = *buf;
+		}
+
+		/// Constructor uses implicit conversion of int to double.
+		Conv( const unsigned short& arg )
+			: val_( arg )
+		{;}
+
+		/**
+		 * This is the size used in the serialized form.
+		 */
+		unsigned int size() const
+		{
+			return 1;
+		}
+
+		const double* ptr() const
+		{
+			return &val_;
+		}
+
+		const unsigned short operator*() const {
+			return val_;
+		}
+
+		unsigned int val2buf( double* buf ) const {
+			*buf = val_;
+			return 1;
+		}
+
+		static void str2val( unsigned short& val, const string& s ) {
+			val = atoi( s.c_str() );
+		}
+
+		static void val2str( string& s, const unsigned short& val ) {
+			stringstream ss;
+			ss << val;
+			s = ss.str();
+		}
+
+		static string rttiType() {
+			return "unsigned short";
+		}
+	private:
+		double val_;
+};
+
+/**
+ * The template specialization of Conv< short > sets up alignment on
+ * word boundaries by storing the data as a double. 
+ */
+template<> class Conv< short >
+{
+	public:
+		/// Constructor assumes that the buffer points to a double
+		Conv( const double* buf )
+		{
+			assert( buf );
+			val_ = *buf;
+		}
+
+		/// Constructor uses implicit conversion of int to double.
+		Conv( const short& arg )
+			: val_( arg )
+		{;}
+
+		/**
+		 * This is the size used in the serialized form.
+		 */
+		unsigned int size() const
+		{
+			return 1;
+		}
+
+		const double* ptr() const
+		{
+			return &val_;
+		}
+
+		const short operator*() const {
+			return val_;
+		}
+
+		unsigned int val2buf( double* buf ) const {
+			*buf = val_;
+			return 1;
+		}
+
+		static void str2val( short& val, const string& s ) {
+			val = atoi( s.c_str() );
+		}
+
+		static void val2str( string& s, const short& val ) {
+			stringstream ss;
+			ss << val;
+			s = ss.str();
+		}
+
+		static string rttiType() {
+			return "short";
+		}
+	private:
+		double val_;
+};
+
+/**
  * The template specialization of Conv< bool > sets up alignment on
  * word boundaries by storing the bool as a double. 
  */
