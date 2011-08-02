@@ -36,28 +36,6 @@ class Qinfo
 
 		Qinfo();
 
-		/*
-		void setMsgId( MsgId m ) {
-			m_ = m;
-		}
-		*/
-
-		/**
-		 * Returns true if the data is to go to a specific one among
-		 * all the message targets. 
-		bool useSendTo() const {
-			return useSendTo_;
-		}
-		 */
-
-		/**
-		 * Returns true if the direction of the message is from
-		 * e1 to e2.
-		bool isForward() const {
-			return isForward_;
-		}
-		 */
-
 		/**
 		 * Returns true if the Qinfo is inserted just for padding, and
 		 * the data is not meant to be processed.
@@ -83,42 +61,37 @@ class Qinfo
 			return threadNum_;
 		}
 
+		/**
+		 * Assigns the thread index
+		 */
 		void setThreadNum( ThreadId threadNum ) {
 			threadNum_ = threadNum;
 		}
 
-		/*
-		void setFid( FuncId f ) {
-			f_ = f;
-		}
-		*/
-
-		/*
-		DataId srcIndex() const {
-			return srcIndex_;
-		}
-		*/
+		/**
+		 * Returns the src ObjId
+		 */
 		ObjId src() const {
 			return src_;
 		}
 
+		/**
+		 * Returns the BindIndex
+		 */
 		BindIndex bindIndex() const {
 			return msgBindIndex_;
 		}
 
+		/**
+		 * Returns the index of the data associated with this Q entry.
+		 * If it is the outQ, this refers to the location in 
+		 * dBuf_[threadNum].
+		 * If it is the inQ, this refers to the location in the array of
+		 * doubles in the inQ.
+		 */
 		unsigned int dataIndex() const {
 			return dataIndex_;
 		}
-
-		/**
-		 * size() returns the length of the data segment managed by this 
-		 * Qinfo, and immediately following it. Note that the total
-		 * length in memory of of this entire queue entry is 
-		 * sizeof( Qinfo ) + Qinfo::size()
-		unsigned int size() const {
-			return size_;
-		}
-		 */
 
 		/**
 		 * Add data to the queue. Fills up an entry in the qBuf as well
@@ -188,42 +161,9 @@ class Qinfo
 			const char* arg, const DataId& target, bool isForward );
 
 
-		/**
-		 * This assigns temporary storage in the Qinfo for thread
-		 * identifiers.
-		void setProcInfo( const ProcInfo* p );
-		 */
-
-		/**
-		 * This extracts the procinfo.
-		const ProcInfo* getProcInfo() const;
-		 */
 		//////////////////////////////////////////////////////////////
 		// From here, static funcs handling the Queues.
 		//////////////////////////////////////////////////////////////
-
-		/**
-		 * Set up a SimGroup which keeps track of grouping information, and
-		 * resulting queue information.
-		 * Returns group#
-		static unsigned int addSimGroup( unsigned short numThreads,
-			unsigned short numNodes );
-		 */
-
-		/**
-		 * 	Returns the number of SimGroups
-		static unsigned int numSimGroup();
-		 */
-
-		/**
-		 * Returns the specified SimGroup
-		static const SimGroup* simGroup( unsigned int index );
-		 */
-
-		/**
-		 * Clears out all sim groups.
-		static void clearSimGroups();
-		 */
 
 		/**
 		 * Read the inQ. Meant to run on all the sim threads.
@@ -237,12 +177,6 @@ class Qinfo
 		 * has arrived from off-node.
 		 */
 		static void readMpiQ( const ProcInfo* proc, unsigned int node );
-
-		/**
-		 * Read the MPI Q in contexts where only the message from the
-		 * root Element should be considered.
-		static void readRootQ( const ProcInfo* proc );
-		 */
 
 		/**
 		 * Exchange inQ and outQ.
@@ -267,13 +201,6 @@ class Qinfo
 		 * Send contents of specified inQ to all nodes using MPI
 		 */
 		static void sendAllToAll( const ProcInfo* proc );
-
-		/**
-		 * Handles the case where the system wants to send a msg to
-		 * a single target. Currently done through an ugly hack, 
-		 * encapsulated here.
-		static void hackForSendTo( const Qinfo* q, const char* buf );
-		 */
 
 		/**
 		 * Reporting function to tell us about queue status.
@@ -309,12 +236,6 @@ class Qinfo
 		 * Returns a pointer to the block of memory on the mpiRecvQ.
 		 */
 		static double* mpiRecvQbuf();
-
-		/**
-		 * Expands the memory allocation on mpiRecvQ to handle outsize
-		 * data packets
-		static void expandMpiRecvQbuf( unsigned int size );
-		 */
 
 		/**
 		 * Works through any requests for structural changes to the model.
@@ -384,16 +305,6 @@ class Qinfo
 		ThreadId threadNum_; /// Which thread am I on?
 
 		/**
-		 * fid_ is zero for regular forward msgs.
-		 * In reverse msgs, fid_ identifies target func. In these cases the
-		 * msgBindIndex is the MsgId.
-		 * Not needed here: if we need it we should in any case have the
-		 * extra space in the Data portion of the queue entry, where the
-		 * dest ObjId lives, to also put the FuncId.
-		FuncId fid_; 				
-		 */
-
-		/**
 		 * Index to look up data, counting from start of array of 
 		 * doubles in inQ.
 		 * Index is zero if and only if this Qinfo is a dummy. Otherwise
@@ -445,45 +356,12 @@ class Qinfo
 		 */
 		static vector< vector< Qinfo > > qBuf_;
 
-		///////////////////////////////////////////////////////////
-
-		/*
-		bool useSendTo_;	/// true if msg is to a single target DataId.
-		bool isForward_; /// True if the msg is from e1 to e2.
-
-		// Deprecated
-		// bool isDummy_; /// True if the Queue entry is a dummy and not used.
-
-		MsgId m_;		/// Unique lookup Id for Msg.
-		FuncId f_;		/// Unique lookup Id for function.
-		DataId srcIndex_; /// DataId of src.
-		unsigned int size_; /// size of argument in bytes. Zero is allowed.
-
-		unsigned short procIndex_; /// Which thread does Q entry go to?
-		///////////////////////////////////////////////////////////
-		*/
-
 		/**
 		 * Ugly flag to tell Shell functions if the simulation should
 		 * actually compute structural operations, or if it should just
 		 * stuff them into a buffer.
 		 */
 		static bool isSafeForStructuralOps_;
-
-		/**
-		 * outQ_ is the buffer in which messages get queued. The Qvec
-		 * class deals with threading issues.
-		 * There are as many entries as there are simulation groups.
-		 * In computation phase 2 the outQ swaps with the inQ, and the 
-		 * inQ is used to read the data that had accumulated in the outQ.
-		static vector< Qvec >* outQ_;
-		 */
-
-		/**
-		 * inQ_ is the buffer that holds data to be read out in order to
-		 * deliver the messages to the target.
-		static vector< Qvec >* inQ_;
-		 */
 
 		/*
 		 * This handles incoming data from MPI. It is used as a buffer
@@ -500,15 +378,6 @@ class Qinfo
 		 */
 		static double* mpiInQ_;
 
-		/**
-		 * These are the actual allocated locations of the vectors
-		 * underlying the inQ and outQ.
-		 * The number of entries in the vectors is equal to the number
-		 * of simulation groups, which have close message coupling
-		 * requiring all-to-all MPI communications.
-		static vector< Qvec > q1_;
-		static vector< Qvec > q2_;
-		 */
 
 		/**
 		 * These are the actual allocated locations of the vectors
@@ -520,8 +389,6 @@ class Qinfo
 		 * more than one group, it sends only one group at a time.
 		 * Once the data is in, it does not care about originating
 		 * node/group since all threads chew on it anyway.
-		static Qvec mpiQ1_;
-		static Qvec mpiQ2_;
 		 */
 		static vector< double > mpiQ1_;
 		static vector< double > mpiQ2_;
@@ -537,11 +404,6 @@ class Qinfo
 		// static vector< double > structuralQ_;
 		static vector< Qinfo > structuralQinfo_;
 		static vector< double > structuralQdata_;
-
-		/*
-		** Deprecated.
-		static vector< SimGroup > g_; // Information about grouping.
-		*/
 
 		/**
 		 * The reduceQ manages requests to 'reduce' data from many sources.

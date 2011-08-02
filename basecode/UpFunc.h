@@ -292,11 +292,8 @@ template< class T, class A > class GetUpFunc: public GetOpFuncBase< A >
 			if ( skipWorkerNodeGlobal( e ) )
 				return;
 			const A& ret = (( reinterpret_cast< T* >( e.parentData() ) )->*func_)( e.index() );
-			Conv< A > arg( ret );
-			FuncId fid = *reinterpret_cast< const FuncId* >( buf );
-			Qinfo::addDirectToQ( e.objId(), q->src(),
-				q->threadNum(), fid,
-				arg.ptr(), arg.size() );
+			Conv< A > conv0( ret );
+			returnFromGet( e, q, buf, conv0.ptr(), conv0.size() );
 		}
 
 		A reduceOp( const Eref& e ) const {
