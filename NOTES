@@ -14321,3 +14321,9 @@ Fixed up low-level 'get' call. Checkin 2858.
 
 Got regular Set/Get calls working in their unit tests. But the Set call
 is currently non-blocking. Need to decide if to keep it this way.
+Checkin 2861.
+
+Fixed a key step in passing the correct thread information into the Qinfo in
+readBuf, leading to Element::exec. Replaced the generic ProcInfo ptr in a number
+of Qinfo functions with the ThreadId to make this explicit. Resulted in 
+assorted fixes through the code.

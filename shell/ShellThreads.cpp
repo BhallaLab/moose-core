@@ -61,7 +61,7 @@ void Shell::waitForAck()
 {
 	if ( isSingleThreaded_ ) {
 		while ( isAckPending() ) {
-			Qinfo::clearQ( &p_ );
+			Qinfo::clearQ( p_.threadIndexInGroup );
 	// Tried this to get it to work in single-thread mode. Doesn't work.
 	// Also causes problems by setting the size of Qinfo::reduceQ in
 	// Qinfo::clearReduceQ
@@ -85,7 +85,7 @@ void Shell::waitForGetAck()
 {
 	if ( isSingleThreaded_ ) {
 		while ( isAckPending() )
-			Qinfo::clearQ( &p_ );
+			Qinfo::clearQ( p_.threadIndexInGroup );
 	} else {
 		while ( isAckPending() )
 			pthread_cond_wait( parserBlockCond_, parserMutex_ );
