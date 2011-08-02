@@ -68,48 +68,6 @@ const vector< double* >* SetGet::dispatchGet(
 	// return Shell::awaitGottenData();
 }
 
-/*
-const vector< char* >& SetGet::dispatchGet( 
-	const ObjId& dest, FuncId fid, const PrepackedBuffer& buf )
-{
-	Eref sheller = Id().eref();
-	Shell* s = reinterpret_cast< Shell* >( sheller.data() );
-	return s->dispatchGet( sheller, dest, fid, buf );
-}
-*/
-
-/*
-const vector< char* >& SetGet::dispatchLookupGet( 
-	const ObjId& oid, const string& field, char* indexBuf,
-	const SetGet* sg, unsigned int& numGetEntries )
-{
-	// return Shell::dispatchGet( oid, field, sg, numGetEntries );
-}
-*/
-
-/*
-const vector< char* >& SetGet::dispatchGetVec( 
-	const SetGet* sg, const ObjId& dest, const string& field,
-	const char* args, unsigned int size)
-{
-	static vector< char* > badRet( 0 );
-	ObjId tgt( dest );
-	FuncId fid;
-
-	unsigned int numRetEntries = sg->checkSet( field, tgt, fid );
-	if ( numRetEntries > 0 ) {
-		FuncId retFuncId = receiveGet()->getFid();
-		Conv< FuncId > conv( retFuncId );
-		char *temp = new char[ conv.size() ];
-		conv.val2buf( temp );
-		const vector< char* >& ret = 
-			Shell::dispatchGet( tgt, fid, temp, conv.size() );
-		delete[] temp;
-		return ret;
-	}
-	return badRet;
-}
-*/
 
 //////////////////////////////////////////////////////////////////////
 

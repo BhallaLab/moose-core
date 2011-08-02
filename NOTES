@@ -14300,6 +14300,15 @@ Planning for threads and interface with script. Options
 	- Messiness ensues: The addToQ functions that return a pointer to be
 	filled in later will fail because the fillin may complete on the master
 	thread only after the worker threads have executed the call.
+		Options:
+		- Eliminate addToQ funcs that return a pointer. Require that the
+		data always be passed in. This will mean allocs in SetGet,
+		not a big hardship. But also in SrcFinfo::send. This is
+		expensive. Do we use addToQ anywhere else? Seems not.
+			Could add a 2 and 3 arg variant of addToQ.
+		- Separate function for unlocking mutex.
+			Nope.
+
 - In LaunchThreads, add an extra thread to handle script calls. This 
 	extra thread is also tied into the barriers, so it is safe for swapQ.
 	All Shell API calls go through this thread protected by mutexes.
@@ -14308,5 +14317,7 @@ Planning for threads and interface with script. Options
 With this pending, I'm slowly marching through the unit tests in testAsync.cpp.
 So far 5 cleared. Checkin 2857.
 
-Fixed up low-level 'get' call.
+Fixed up low-level 'get' call. Checkin 2858.
 
+Got regular Set/Get calls working in their unit tests. But the Set call
+is currently non-blocking. Need to decide if to keep it this way.
