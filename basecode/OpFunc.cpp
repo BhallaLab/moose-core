@@ -12,25 +12,22 @@
 
 /**
  * Sends data back.
- * Used to do the serious argument juggling in GetOpFunc::op
- * Deprecated.
-void fieldOp( const Eref& e, const Qinfo* q, const char* buf, 
-	const char* data, unsigned int size )
+ * Used to do the argument juggling in GetOpFunc::op
+ */
+void returnFromGet( const Eref& e, const Qinfo* q, const double* buf, 
+	const double* data, unsigned int dataSize )
 {
+	Conv< FuncId> convFid( buf );
+	PrepackedBuffer pb( data, dataSize );
+	double* temp = new double[ pb.size() ];
+	pb.conv2buf( temp );
 
-	FuncId retFunc = *reinterpret_cast< const FuncId* >( buf );
+	 Qinfo::addDirectToQ( e.objId(), q->src(),
+	 	q->threadNum(), *convFid,
+	 	temp, pb.size() );
 
-	PrepackedBuffer pb( data, size );
-	Conv< PrepackedBuffer > conv( pb );
-	unsigned int totSize = conv.size();
-	char* temp = new char[ totSize ];
-	conv.val2buf( temp );
-
-	Qinfo::addToQbackward( p, e.objId(), mid_dunno, retFunc,
-		data, size );
 	delete[] temp;
 }
- */
 
 /**
  * Used to check if the Eref e should be sending any data back to

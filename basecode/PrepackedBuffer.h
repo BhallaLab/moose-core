@@ -56,7 +56,7 @@ class PrepackedBuffer
 		const double* operator[]( unsigned int index ) const;
 
 		/**
-		 * 	Returns the size of the data contents, in bytes.
+		 * 	Returns the size of the data contents, in doubles.
 		 */
 		unsigned int dataSize() const {
 			return dataSize_;

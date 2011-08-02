@@ -359,17 +359,7 @@ template< class T, class A > class GetEpFunc: public GetOpFuncBase< A >
 				return;
 			const A& ret = ( getEpFuncData< T >( e )->*func_ )( e, q );
 			Conv<A> conv0( ret );
-			FuncId fid = *reinterpret_cast< const FuncId* >( buf );
-			Qinfo::addDirectToQ( e.objId(), q->src(),
-				q->threadNum(), fid,
-				conv0.ptr(), conv0.size() );
-
-			/*
-			char* temp0 = new char[ conv0.size() ];
-			conv0.val2buf( temp0 );
-			fieldOp( e, q, buf, temp0, conv0.size() );
-			delete[] temp0;
-			*/
+			returnFromGet( e, q, buf, conv0.ptr(), conv0.size() );
 		}
 
 		A reduceOp( const Eref& e ) const {
@@ -416,21 +406,11 @@ template< class T, class L, class A > class GetEpFunc1: public GetOpFuncBase< A 
 			if ( skipWorkerNodeGlobal( e ) )
 				return;
 			Conv< FuncId > convFid( buf );
-			Conv< L > conv1( buf + sizeof( FuncId ) );
+			Conv< L > conv1( buf + convFid.size() );
 			const A& ret = 
 				( getEpFuncData< T >( e )->*func_ )( e, q, *conv1 );
-
 			Conv<A> conv0( ret );
-			FuncId fid = *convFid;
-			Qinfo::addDirectToQ( e.objId(), q->src(),
-				q->threadNum(), fid,
-				conv0.ptr(), conv0.size() );
-			/*
-			char* temp0 = new char[ conv0.size() ];
-			conv0.val2buf( temp0 );
-			fieldOp( e, q, buf, temp0, conv0.size() );
-			delete[] temp0;
-			*/
+			returnFromGet( e, q, buf, conv0.ptr(), conv0.size() );
 		}
 
 		/// ReduceOp not permissible.

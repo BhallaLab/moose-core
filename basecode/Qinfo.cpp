@@ -52,7 +52,7 @@ Qinfo::Qinfo()
 {;}
 
 Qinfo::Qinfo( const ObjId& src, 
-	BindIndex bindIndex, unsigned short threadNum,
+	BindIndex bindIndex, ThreadId threadNum,
 	unsigned int dataIndex )
 	:	
 		src_( src ),
@@ -371,7 +371,7 @@ void Qinfo::reportQ()
  * Adds a Queue entry.
  */
 void Qinfo::addToQ( const ObjId& oi, 
-	BindIndex bindIndex, unsigned short threadNum,
+	BindIndex bindIndex, ThreadId threadNum,
 	const double* arg, unsigned int size )
 {
 	if ( threadNum == ScriptThreadNum ) pthread_mutex_lock( qMutex_ );
@@ -392,7 +392,7 @@ void Qinfo::addToQ( const ObjId& oi,
  * multiple fields to be put in.
  */
 double* Qinfo::addToQ( const ObjId& oi, 
-	BindIndex bindIndex, unsigned short threadNum,
+	BindIndex bindIndex, ThreadId threadNum,
 	unsigned int size )
 {
 	if ( threadNum == ScriptThreadNum ) pthread_mutex_lock( qMutex_ );
@@ -407,7 +407,7 @@ double* Qinfo::addToQ( const ObjId& oi,
 
 // Static function
 void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest, 
-	unsigned short threadNum,
+	ThreadId threadNum,
 	FuncId fid, 
 	const double* arg, unsigned int size )
 {
@@ -429,7 +429,7 @@ void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest,
 
 // Static function
 double* Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest, 
-	unsigned short threadNum,
+	ThreadId threadNum,
 	FuncId fid, unsigned int size )
 {
 	static const unsigned int ObjFidSizeInDoubles = 
@@ -452,7 +452,7 @@ double* Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest,
 
 // Static function
 double* Qinfo::addVecDirectToQ( const ObjId& src, const ObjId& dest, 
-	unsigned short threadNum,
+	ThreadId threadNum,
 	FuncId fid, unsigned int entrySize, unsigned int numEntries )
 {
 	static const unsigned int ObjFidSizeInDoubles = 
