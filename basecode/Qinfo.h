@@ -36,6 +36,9 @@ class Qinfo
 
 		Qinfo();
 
+		/// Used in readBuf to create a copy of Qinfo with specified thread.
+		Qinfo( const Qinfo* other, ThreadId threadNum );
+
 		/**
 		 * Returns true if the Qinfo is inserted just for padding, and
 		 * the data is not meant to be processed.
@@ -153,14 +156,6 @@ class Qinfo
 		// bool addToStructuralQ( const double* data, unsigned int size) const;
 		bool addToStructuralQ() const;
 
-		/**
-		 * This adds the data to the queue and then an additional
-		 * sizeof( DataId ) block to specify target DataId.
-		 */
-		void addSpecificTargetToQ( const ProcInfo* p, MsgFuncBinding b, 
-			const char* arg, const DataId& target, bool isForward );
-
-
 		//////////////////////////////////////////////////////////////
 		// From here, static funcs handling the Queues.
 		//////////////////////////////////////////////////////////////
@@ -170,13 +165,13 @@ class Qinfo
 		 * The Messages internally ensure thread safety by segregating
 		 * target Objects.
 		 */
-		static void readQ( const ProcInfo* proc );
+		static void readQ( ThreadId threadNum );
 
 		/**
 		 * Read the MPI Q. Similar to readQ, except that the data source
 		 * has arrived from off-node.
 		 */
-		static void readMpiQ( const ProcInfo* proc, unsigned int node );
+		static void readMpiQ( ThreadId threadNum, unsigned int node );
 
 		/**
 		 * Exchange inQ and outQ.
@@ -212,7 +207,7 @@ class Qinfo
 		 * Used to work through the queues when the background
 		 * threads are not running.
 		 */
-		static void clearQ( const ProcInfo* p );
+		static void clearQ( ThreadId threadNum );
 
 		/**
 		 * Dummy function, in due course will monitor data transfer

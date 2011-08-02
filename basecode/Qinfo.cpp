@@ -61,6 +61,14 @@ Qinfo::Qinfo( const ObjId& src,
 		dataIndex_( dataIndex )
 {;}
 
+Qinfo::Qinfo( const Qinfo* orig, ThreadId threadNum )
+	:	
+		src_( orig->src_ ),
+		msgBindIndex_( orig->msgBindIndex_ ),
+		threadNum_( threadNum ),
+		dataIndex_( orig->dataIndex_ )
+{;}
+
 bool Qinfo::execThread( Id id, unsigned int dataIndex ) const
 {
 	return threadNum_ == ( ( id.value() + dataIndex ) % Shell::numCores() );
@@ -77,8 +85,10 @@ void Qinfo::clearStructuralQ()
 	for ( unsigned int i = 0; i < structuralQinfo_.size(); ++i ) {
 		const Qinfo* qi = &structuralQinfo_[i];
 		if ( !qi->isDummy() ) {
+			// Instead of ScriptThreadNum I use the first worker thread here
+			Qinfo newQ( qi, 1 );
 			const Element* e = qi->src_.element();
-			e->exec( qi, Shell::procInfo(), buf + qi->dataIndex_ );
+			e->exec( &newQ, buf + newQ.dataIndex_ );
 		}
 	}
 
@@ -87,7 +97,7 @@ void Qinfo::clearStructuralQ()
 	structuralQdata_.resize( 0 );
 }
 
-void readBuf(const double* buf, const ProcInfo* proc )
+void readBuf(const double* buf, ThreadId threadNum )
 {
 	unsigned int bufsize = static_cast< unsigned int >( buf[0] );
 	unsigned int numQinfo = static_cast< unsigned int >( buf[1] );
@@ -96,11 +106,12 @@ void readBuf(const double* buf, const ProcInfo* proc )
 	const double* qptr = buf + 2;
 
 	for ( unsigned int i = 0; i < numQinfo; ++i ) {
-		const Qinfo* qi = reinterpret_cast< const Qinfo* >( qptr );
+		// const Qinfo* qi = reinterpret_cast< const Qinfo* >( qptr );
+		Qinfo qi( reinterpret_cast< const Qinfo* >( qptr ), threadNum );
 		qptr += 3;
-		if ( !qi->isDummy() ) {
-			const Element* e = qi->src().element();
-			e->exec( qi, proc, buf + qi->dataIndex() );
+		if ( !qi.isDummy() ) {
+			const Element* e = qi.src().element();
+			e->exec( &qi, buf + qi.dataIndex() );
 		}
 	}
 }
@@ -122,10 +133,9 @@ void Qinfo::doMpiStats( unsigned int bufsize, const ProcInfo* proc )
  * will dispatch calls only to the ObjIds that are allowed for the
  * running thread.
  */ 
-void Qinfo::readQ( const ProcInfo* proc )
+void Qinfo::readQ( ThreadId threadNum )
 {
-	assert( proc );
-	readBuf( inQ_, proc );
+	readBuf( inQ_, threadNum );
 }
 
 /**
@@ -135,10 +145,9 @@ void Qinfo::readQ( const ProcInfo* proc )
  * Checks the data block size in case it is over the regular
  * blocksize allocated for the current node.
  */
-void Qinfo::readMpiQ( const ProcInfo* proc, unsigned int node )
+void Qinfo::readMpiQ( ThreadId threadNum, unsigned int node )
 {
-	assert( proc );
-	readBuf( mpiInQ_, proc );
+	readBuf( mpiInQ_, threadNum );
 
 	/*
 	if ( proc->nodeIndexInGroup == 0 && mpiInQ_->isBigBlock() ) 
@@ -547,10 +556,10 @@ void Qinfo::emptyAllQs()
 // main thread-handling loop is inactive.
 // Called after all the 'send' functions have been done. Typically just
 // one is pending.
-void Qinfo::clearQ( const ProcInfo* p )
+void Qinfo::clearQ( ThreadId threadNum )
 {
 	swapQ();
-	readQ( p );
+	readQ( threadNum );
 }
 
 // static func. Called during setup in Shell::setHardware.

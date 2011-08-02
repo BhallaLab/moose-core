@@ -286,31 +286,10 @@ Id Element::id() const
 	return id_;
 }
 
-/*
- * Asynchronous send
- * At this point the Qinfo has the values for 
- * Eref::index() and size assigned.
- * ProcInfo is used only for p->qId?
- * Qinfo needs to have funcid put in, and Msg Id.
-void Element::asend( Qinfo& q, BindIndex bindIndex, 
-	const ProcInfo *p, const char* arg ) const
-{
-	assert ( bindIndex < msgBinding_.size() );
-	vector< MsgFuncBinding >::const_iterator end = 
-		msgBinding_[ bindIndex ].end();
-	for ( vector< MsgFuncBinding >::const_iterator i =
-		msgBinding_[ bindIndex ].begin(); i != end; ++i ) {
-		Msg::getMsg( i->mid )->addToQ( this, q, p, *i, arg );
-			// the Msg needs to figure out direction of msg, and also
-			// whether to add to the queue at all.
-	}
-}
- */
-
 /**
  * Executes a queue entry from the buffer.
  */
-void Element::exec( const Qinfo* qi, const ProcInfo* p, const double* arg )
+void Element::exec( const Qinfo* qi, const double* arg )
 	const
 {
 	static const unsigned int ObjFidSizeInDoubles = 
@@ -339,48 +318,6 @@ void Element::exec( const Qinfo* qi, const ProcInfo* p, const double* arg )
 		}
 	}
 }
-
-/*
- * Asynchronous send to specific target.
- * Scan through potential targets, figure out direction, 
- * copy over ObjId to sit in specially assigned space on queue.
- *
- * This may seem easier to do if we don't even bother with the Msg,
- * and just plug in the queue entry.
- * but there is a requirement that all function calls should be able
- * to trace back their calling Element. At present that goes by the Msg.
- *
-void Element::tsend( Qinfo& q, BindIndex bindIndex, 
-	const ProcInfo *p, const char* arg, const ObjId& target ) const
-{
-	assert ( bindIndex < msgBinding_.size() );
-	Element *e = target.id();
-	for ( vector< MsgFuncBinding >::const_iterator i =
-		msgBinding_[ bindIndex ].begin(); 
-		i != msgBinding_[ bindIndex ].end(); ++i ) {
-		const Msg* m = Msg::getMsg( i->mid );
-		// q.setForward( m->isForward( this ) );
-		if ( q.isForward() ) {
-			if ( m->e2() == e ) {
-			// Earlier I also tested that the caller matched the Msg DataId entry: m->isMsgHere( q ). Now this is skipped.
-				q.addSpecificTargetToQ( p, *i, arg, target.dataId,
-					m->isForward( this ) );
-				return;
-			}
-		} else {
-			if ( m->e1() == e ) {
-			// Earlier I also tested that the caller matched the Msg DataId entry: m->isMsgHere( q ). Now this is skipped.
-				// q.assignQblock( m, p );
-				q.addSpecificTargetToQ( p, *i, arg, target.dataId,
-					m->isForward( this ) );
-				return;
-			}
-		}
-	}
-	cout << "Warning: Element::tsend: Failed to find specific target " <<
-		target << endl;
-}
- */
 
 void Element::showMsg() const
 {

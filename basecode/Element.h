@@ -116,8 +116,7 @@ class Element
 		/**
  		 * Executes a queue entry from the buffer.
  		 */
-		void exec( const Qinfo* qi, const ProcInfo* p, const double* arg )
-			const;
+		void exec( const Qinfo* qi, const double* arg ) const;
 
 		/**
 		 * Asynchronous send command, going to specific target Element/Data.

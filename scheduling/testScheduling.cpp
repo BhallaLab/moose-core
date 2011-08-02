@@ -49,7 +49,6 @@ void testTicks()
 
 	MsgId m1 = shell->doAddMsg( "Single", 
 		ObjId( tickId, 0 ), "proc0", ObjId( arithId, 0 ), "proc" );
-	// Qinfo::clearQ( &p );
 	assert( m1 != Msg::badMsg );
 
 	vector< Id > msgDests;
@@ -293,8 +292,8 @@ void setupTicks()
 
 	assert( doubleEq( cdata->getCurrentTime(), runtime ) );
 	// Get rid of pending events in the queues.
-	Qinfo::clearQ( &p );
-	Qinfo::clearQ( &p );
+	Qinfo::clearQ( p.threadIndexInGroup );
+	Qinfo::clearQ( p.threadIndexInGroup );
 
 	tickId.destroy();
 	clock.destroy();
