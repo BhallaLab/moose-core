@@ -66,7 +66,7 @@ class FirstTimeWizard(QtGui.QWizard):
             self._colormapPath = '/usr/share/moose1.3/colormaps/rainbow2'
         self.addPage(self._createIntroPage())
         self.addPage(self._createDemosPage())
-        self.addPage(self._createGLClientPage())
+        #self.addPage(self._createGLClientPage())
         self.addPage(self._createColormapPage())
         self.connect(self, QtCore.SIGNAL('accepted()'), self._finished)
 
