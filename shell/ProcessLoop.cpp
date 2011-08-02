@@ -247,7 +247,7 @@ void Shell::launchThreads()
 		// Note that here we put # of compute cores, not total threads.
 		p[i].numThreadsInGroup = numCores_; 
 		p[i].groupId = 1; // Later more sophisticated subdivision into grps
-		p[i].threadIndexInGroup = i;
+		p[i].threadIndexInGroup = i + 1;
 		p[i].nodeIndexInGroup = myNode_;
 		p[i].numNodesInGroup = numNodes_;
 		p[i].barrier1 = barrier1_;

@@ -188,8 +188,8 @@ void Shell::setHardware(
 	} else {
 		numCores_ = 1;
 		numNodes_ = 1;
-		// Qinfo::setNumQs( 1, 1024 );
 	}
+	Qinfo::initQs( numCores + 1, 1024 );
 	myNode_ = myNode;
 	p_.numNodesInGroup = numNodes_;
 	p_.nodeIndexInGroup = myNode;

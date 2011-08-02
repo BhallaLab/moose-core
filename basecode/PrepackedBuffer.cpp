@@ -20,7 +20,7 @@ PrepackedBuffer::PrepackedBuffer(
 		individualDataSize_ = dataSize_ / numEntries_;
 	
 	data_ = new double[ dataSize ];
-	memcpy( data_, data, dataSize );
+	memcpy( data_, data, dataSize * sizeof( double ) );
 }
 
 PrepackedBuffer::PrepackedBuffer( const PrepackedBuffer& other )
@@ -32,7 +32,7 @@ PrepackedBuffer::PrepackedBuffer( const PrepackedBuffer& other )
 	else
 		individualDataSize_ = dataSize_ / numEntries_;
 	data_ = new double[ dataSize_ ];
-	memcpy( data_, other.data_, dataSize_ );
+	memcpy( data_, other.data_, dataSize_ * sizeof( double ) );
 }
 
 PrepackedBuffer::PrepackedBuffer( const double* buf )
@@ -71,6 +71,6 @@ unsigned int PrepackedBuffer::conv2buf( double* buf ) const
 {
 	buf[0] = dataSize_;
 	buf[1] = numEntries_;
-	memcpy( buf + 2, data_, dataSize_ );
+	memcpy( buf + 2, data_, dataSize_ * sizeof( double ) );
 	return 2 + dataSize_;
 }
