@@ -131,7 +131,6 @@ void insertIntoQ( )
 	Eref e2 = i2.eref();
 
 	Msg* m = new SingleMsg( Msg::nextMsgId(), e1, e2 );
-	ProcInfo p;
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double x = i * i;
@@ -155,7 +154,7 @@ void insertIntoQ( )
 		qi.addToQforward( &p, b, buf );
 		*/
 	}
-	Qinfo::clearQ( &p );
+	Qinfo::clearQ( 0 );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double val = ( reinterpret_cast< Arith* >(e2.element()->dataHandler()->data( i )) )->getOutput();
@@ -195,7 +194,6 @@ void testSendMsg()
 
 	
 	ThreadId threadNum = 0;
-	ProcInfo p;
 	
 	SrcFinfo1<double> s( "test", "" );
 	s.setBindIndex( 0 );
@@ -205,7 +203,7 @@ void testSendMsg()
 		double x = i + i * i;
 		s.send( Eref( e1.element(), i ), threadNum, x );
 	}
-	Qinfo::clearQ( &p );
+	Qinfo::clearQ( 0 );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double temp = i + i * i;
@@ -235,7 +233,6 @@ void testCreateMsg()
 
 	Eref e1 = i1.eref();
 	Eref e2 = i2.eref();
-	ProcInfo p;
 	ThreadId threadNum = 0;
 
 	OneToOneMsg *m = new OneToOneMsg( Msg::nextMsgId(), e1.element(), e2.element() );
@@ -254,7 +251,7 @@ void testCreateMsg()
 		assert( sf != 0 );
 		sf->send( Eref( e1.element(), i ), threadNum, double( i ) );
 	}
-	Qinfo::clearQ( &p );
+	Qinfo::clearQ( 0 );
 
 	/*
 	for ( unsigned int i = 0; i < size; ++i )
@@ -293,7 +290,7 @@ void testInnerSet()
 	Qinfo::enableStructuralOps();
 	Qinfo::addDirectToQ( ObjId(), ret->id(), 0, f1,
 		conv.ptr(), conv.size() );
-	Qinfo::clearQ( &p );
+	Qinfo::clearQ( 0  );
 	// Field< string >::set( e2, "name", "NewImprovedTest" );
 	assert( ret->getName() == "New Improved Test" );
 	
@@ -311,7 +308,7 @@ void testInnerSet()
 		Qinfo::addDirectToQ( ObjId(), dest.objId(), 0, f2,
 			conv.ptr(), conv.size() );
 
-		Qinfo::clearQ( &p );
+		Qinfo::clearQ( 0 );
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -346,8 +343,8 @@ void testInnerGet() // Uses low-level ops to do a 'get'.
 	Qinfo::enableStructuralOps();
 	double temp = receiveGet()->getFid();
 	Qinfo::addDirectToQ( ObjId(), i2, 0, f1, &temp, 1 );
-	Qinfo::clearQ( &p ); // The request goes to the target Element
-	Qinfo::clearQ( &p ); // The response comes back to the Shell
+	Qinfo::clearQ( 0 ); // The request goes to the target Element
+	Qinfo::clearQ( 0 ); // The response comes back to the Shell
 	Conv< string > conv( shell->getBuf()[0] );
 	assert( *conv == "test2" );
 	shell->clearGetBuf();
@@ -356,8 +353,8 @@ void testInnerGet() // Uses low-level ops to do a 'get'.
 	Qinfo::enableStructuralOps();
 	Qinfo::addDirectToQ( ObjId(), i2, 0, f1, &temp, 1 );
 
-	Qinfo::clearQ( &p ); // The request goes to the target Element
-	Qinfo::clearQ( &p ); // The response comes back to the Shell
+	Qinfo::clearQ( 0 ); // The request goes to the target Element
+	Qinfo::clearQ( 0 ); // The response comes back to the Shell
 	Conv< string > conv2( shell->getBuf()[0] );
 	assert( *conv2 == "HupTwoThree" );
 	shell->clearGetBuf();
@@ -376,8 +373,8 @@ void testInnerGet() // Uses low-level ops to do a 'get'.
 		Qinfo::enableStructuralOps();
 		double temp = receiveGet()->getFid();
 		Qinfo::addDirectToQ( ObjId(), ObjId( i2, i ), 0, f2, &temp, 1 );
-		Qinfo::clearQ( &p ); // The request goes to the target Element
-		Qinfo::clearQ( &p ); // The response comes back to the Shell
+		Qinfo::clearQ( 0 ); // The request goes to the target Element
+		Qinfo::clearQ( 0 ); // The response comes back to the Shell
 		Conv< double > conv3( shell->getBuf()[0] );
 		temp = i * 3;
 		assert( doubleEq( *conv3 , temp ) );
@@ -404,7 +401,7 @@ void testSetGet()
 		double x = i * 3.14;
 		bool ret = Field< double >::set( oid, "outputValue", x );
 		assert( ret );
-		Qinfo::clearQ( &p ); // The request goes to the target Element
+		Qinfo::clearQ( 0 ); // The request goes to the target Element
 		double val = reinterpret_cast< Arith* >(oid.data())->getOutput();
 		assert( doubleEq( val, x ) );
 	}
@@ -564,7 +561,7 @@ void testSetGetDouble()
 		ObjId oid( i2, i );
 		double temp = i;
 		bool ret = Field< double >::set( oid, "Vm", temp );
-		Qinfo::clearQ( &p ); // The request goes to the target Element
+		Qinfo::clearQ( 0 ); // The request goes to the target Element
 		assert( ret );
 		assert( 
 			doubleEq ( reinterpret_cast< IntFire* >(oid.data())->getVm() , temp ) );
@@ -965,7 +962,7 @@ void testSendSpike()
 	assert( Qinfo::qBuf_[0].size() == 1 );
 	assert( Qinfo::dBuf_[0].size() == 1 );
 
-	Qinfo::clearQ( &p );
+	Qinfo::clearQ( 0 );
 	assert( Qinfo::qBuf_[0].size() == 0 );
 	assert( Qinfo::dBuf_[0].size() == 0 );
 
@@ -1322,7 +1319,7 @@ void testSparseMsg()
 		// cout << i << ": " << totOutqEntries / ( sizeof( Qinfo ) + sizeof( double ) ) << endl << endl ;
 		// cout << p.currTime << "	" << ifire100->getVm() << "	" << ifire900->getVm() << endl;
 		// cout << "T = " << p.currTime << ", Q size = " << Qinfo::q_[0].size() << endl;
-		Qinfo::clearQ( &p );
+		Qinfo::clearQ( 0 );
 //		i2()->process( &p );
 		// printGrid( i2(), "Vm", 0, thresh );
 		// sleep(1);
@@ -1508,15 +1505,15 @@ void testSharedMsg()
 	s1.send( t1.eref(), threadNum, arg1 );
 	s2.send( t1.eref(), threadNum, 100, 200 );
 
-	Qinfo::clearQ( &p );
-	Qinfo::clearQ( &p );
+	Qinfo::clearQ( 0 );
+	Qinfo::clearQ( 0 );
 
 	string arg2 = " goodbye ";
 	s1.send( t2.eref(), threadNum, arg2 );
 	s2.send( t2.eref(), threadNum, 500, 600 );
 
-	Qinfo::clearQ( &p );
-	Qinfo::clearQ( &p );
+	Qinfo::clearQ( 0 );
+	Qinfo::clearQ( 0 );
 
 	/*
 	cout << "data1: s=" << tdata1->s_ << 
@@ -1615,7 +1612,7 @@ void testMsgField()
 		double x = i * 42;
 		s.send( Eref( e1.element(), i ), threadNum, x );
 	}
-	Qinfo::clearQ( &p );
+	Qinfo::clearQ( 0 );
 
 	// Check that regular msgs go through.
 	Eref tgt3( i2(), 3 );
@@ -1632,7 +1629,7 @@ void testMsgField()
 		double x = i * 1000;
 		s.send( Eref( e1.element(), i ), threadNum, x );
 	}
-	Qinfo::clearQ( &p );
+	Qinfo::clearQ( 0 );
 	val = reinterpret_cast< Arith* >( tgt3.data() )->getOutput();
 	assert( doubleEq( val, 5 * 42 ) );
 	val = reinterpret_cast< Arith* >( tgt8.data() )->getOutput();

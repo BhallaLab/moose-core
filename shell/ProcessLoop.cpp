@@ -48,7 +48,7 @@ void* eventLoopForBcast( void* info )
 		// In parallel, the MPI data transfer begins by broadcasting
 		// contents of inQ on node 0.
 		clock->processPhase2( p ); // Do tick juggling for the clock.
-		Qinfo::readQ( p ); // Deliver all local node Msgs.
+		Qinfo::readQ( p->threadIndexInGroup ); //Deliver all local node Msgs
 
 		// Phase 3
 		// The allgather approach is not going to scale well: 
@@ -67,7 +67,7 @@ void* eventLoopForBcast( void* info )
 					// blocksize for this buffer. If not, it pushes up a call
 					// to the Clock to schedule another cycle to finish of the
 					// data transfer.
-					Qinfo::readMpiQ( p, j ); 
+					Qinfo::readMpiQ( p->threadIndexInGroup, j ); 
 				}
 		}
 		// cout << Shell::myNode() << ":" << p->threadIndexInGroup << ":	phase3 :	" << loopNum++ << "\n";
