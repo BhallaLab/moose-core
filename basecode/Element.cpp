@@ -315,7 +315,6 @@ void Element::exec( const Qinfo* qi, const ProcInfo* p, const double* arg )
 {
 	static const unsigned int ObjFidSizeInDoubles = 
 		1 + ( sizeof( ObjFid ) - 1 ) / sizeof( double );
-	assert( qi->bindIndex() < msgBinding_.size() );
 	if ( qi->isDirect() ) { // Direct Q entry, where the first part
 		// of Data specifies the target Element.
 		const ObjFid *ofid = reinterpret_cast< const ObjFid* >( arg );
@@ -329,6 +328,7 @@ void Element::exec( const Qinfo* qi, const ProcInfo* p, const double* arg )
 			f->op( ofid->oi.eref(), qi, arg + ObjFidSizeInDoubles );
 		}
 	} else {
+		assert( qi->bindIndex() < msgBinding_.size() );
 		vector< MsgFuncBinding >::const_iterator end = 
 			msgBinding_[ qi->bindIndex() ].end();
 		for ( vector< MsgFuncBinding >::const_iterator i =

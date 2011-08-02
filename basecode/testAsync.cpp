@@ -54,6 +54,10 @@ void testPrepackedBuffer()
 	Conv< double > conv2( arg2 );
 	Conv< unsigned int > conv3( arg3 );
 
+	assert( conv1.size() == 2 );
+	assert( conv2.size() == 1 );
+	assert( conv3.size() == 1 );
+
 	unsigned int totSize = conv1.size() + conv2.size() + conv3.size();
 	double* buf = new double[ totSize ];
 	double* temp = buf;
@@ -66,12 +70,12 @@ void testPrepackedBuffer()
 
 	Conv< PrepackedBuffer > conv4( pb );
 
-	assert( conv4.size() == pb.dataSize() + 2 * sizeof( unsigned int ) );
+	assert( conv4.size() == pb.dataSize() + 2 );
 
 	temp = new double[ conv4.size() ];
 
 	unsigned int size = conv4.val2buf( temp );
-	assert( size == pb.dataSize() + 2 * sizeof( unsigned int ) );
+	assert( size == pb.dataSize() + 2 );
 
 	Conv< PrepackedBuffer > conv5( temp );
 
@@ -132,7 +136,8 @@ void insertIntoQ( )
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double x = i * i;
 		// This simulates a sendTo
-		Qinfo::addDirectToQ( i1, i2, 0, fid, &x, 1 );
+		Qinfo::addDirectToQ( i1, ObjId( i2, i ), 
+			ScriptThreadNum, fid, &x, 1 );
 
 		/*
 		double buf[200];
