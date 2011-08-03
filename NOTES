@@ -14341,4 +14341,10 @@ to wait one cycle (two for Get) of the ProcessLoop.
 
 ============================================================================
 3 August 2011
-The SetVec is working, so check that in.
+The SetVec is working, so check that in. Checkin 2863.
+Working now on cleaning up the Qinfo::addToQ functions so that they properly
+insulate the threads using mutexes. 
+Done
+
+Next is to put in a way using the same mutexes, 
+to skip a couple of process cycles for set/get calls.

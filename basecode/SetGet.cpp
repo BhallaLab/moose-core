@@ -64,9 +64,10 @@ const vector< double* >* SetGet::dispatchGet(
 		; // Put something here to set the number of entries expected.
 	}
 	// 0 is presumed threadNum here, but need to figure out.
-	s->initAck();
+	// s->initAck();
 		Qinfo::addDirectToQ( ObjId(), tgt, 0, tgtFid, arg, size );
-	s->waitForGetAck();
+	// s->waitForGetAck();
+	// s->waitForProcessLoopCycles( 2 );
 	return &s->getBuf();
 	// return Shell::awaitGottenData();
 }

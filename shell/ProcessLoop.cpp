@@ -204,6 +204,19 @@ void* reportGraphics( void* info )
 	pthread_exit( NULL );
 }
 
+/*
+void Shell::waitForProcessLoopCycles( unsigned int numCycles )
+{
+	Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );
+	if ( isSingleThreaded_ || clock->keepLooping() == 0 ) {
+		for ( unsigned int i = 0; i < numCycles; ++i )
+			Qinfo::clearQ( ScriptThreadNum );
+	} else {
+		Qinfo::setSwapCycles( numCycles );
+	}
+}
+*/
+
 //////////////////////////////////////////////////////////////////////////
 // This function sets up the threading for the process loop.
 //////////////////////////////////////////////////////////////////////////

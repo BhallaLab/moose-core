@@ -104,14 +104,19 @@ class Qinfo
 			BindIndex bindIndex, ThreadId threadNum,
 			const double* arg, unsigned int size );
 
+		static void addToQ( const ObjId& oi, 
+			BindIndex bindIndex, ThreadId threadNum,
+			const double* arg1, unsigned int size1,
+			const double* arg2, unsigned int size2 );
+
 		/**
 		 * Add data to the queue. Fills up an entry in the qBuf, allocate
 		 * space for the arguments, and return a pointer to this space.
 		 * Used for multiple args.
-		 */
 		static double* addToQ( const ObjId& oi, 
 			BindIndex bindIndex, ThreadId threadNum,
 			unsigned int size );
+		 */
 
 		/**
 		 * Add data to queue without any underlying message. This is used
@@ -122,16 +127,22 @@ class Qinfo
 			FuncId fid,
 			const double* arg, unsigned int size );
 
+		static void addDirectToQ( const ObjId& src, const ObjId& dest,
+			ThreadId threadNum,
+			FuncId fid,
+			const double* arg1, unsigned int size1,
+			const double* arg2, unsigned int size2 );
+
 		/**
 		 * Add data to queue without any underlying message, allocate space
 		 * for the arguments and return a pointer to this space. 
 		 * This is used
 		 * for specific point-to-point data delivery with multiple args.
-		 */
 		static double* addDirectToQ( const ObjId& src, const ObjId& dest,
 			ThreadId threadNum,
 			FuncId fid,
 			unsigned int size );
+		 */
 
 		/**
 		 * Add vector data to queue without any underlying message,
@@ -139,9 +150,9 @@ class Qinfo
 		 * space. This function is used
 		 * for specific point-to-point data delivery with a vector
 		 */
-		static double* addVecDirectToQ( const ObjId& src, const ObjId& dest,
-			ThreadId threadNum,
-			FuncId fid,
+		static void addVecDirectToQ( const ObjId& src, const ObjId& dest,
+			ThreadId threadNum, FuncId fid,
+			const double* arg, 
 			unsigned int entrySize, unsigned int numEntries );
 
 
