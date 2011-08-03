@@ -10,6 +10,10 @@
 #include "header.h"
 // #include "ReduceFinfo.h"
 #include "../shell/Shell.h"
+#include "../scheduling/Tick.h"
+#include "../scheduling/TickMgr.h"
+#include "../scheduling/TickPtr.h"
+#include "../scheduling/Clock.h"
 /*
 #ifdef USE_MPI
 #include <mpi.h>
@@ -38,6 +42,10 @@ vector< Qinfo > Qinfo::structuralQinfo_;
 vector< double > Qinfo::structuralQdata_;
 
 pthread_mutex_t* Qinfo::qMutex_;
+pthread_cond_t* Qinfo::qCond_;
+
+bool Qinfo::waiting_ = 0;
+int Qinfo::numCycles_ = 0;
 
 static const unsigned int BLOCKSIZE = 20000;
 
@@ -230,8 +238,38 @@ void Qinfo::swapQ()
 			qBuf_[i].resize( 0 );
 			dBuf_[i].resize( 0 );
 		}
+
+		if ( waiting_ ) {
+			if ( numCycles_ == 0 ) {
+				waiting_ = 0;
+				pthread_cond_signal( qCond_ );
+			} else {
+				--numCycles_;
+			}
+		}
 	pthread_mutex_unlock( qMutex_ );
 }
+
+/**
+ * Waits the specified number of Process cycles before returning.
+ * Should only be called on the master thread (thread 0)
+ */
+void Qinfo::waitProcCycles( unsigned int numCycles )
+{
+	static Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );
+	if ( clock->keepLooping() ) {
+		pthread_mutex_lock( qMutex_ );
+			waiting_ = 1;
+			numCycles_ = numCycles;
+			while( waiting_ )
+				pthread_cond_wait( qCond_, qMutex_ );
+		pthread_mutex_unlock( qMutex_ );
+	} else {
+		for ( unsigned int i = 0; i < numCycles; ++i )
+			clearQ( ScriptThreadNum );
+	}
+}
+
 
 /**
  * Need to allocate space for incoming block
@@ -393,26 +431,6 @@ void Qinfo::addToQ( const ObjId& oi,
 	if ( threadNum == ScriptThreadNum ) pthread_mutex_unlock( qMutex_ );
 }
 
-/**
- * Static function.
- * Adds a Queue entry. This variant allocates the space and returns
- * the pointer into which the data can be copied. Useful when there are
- * multiple fields to be put in.
-double* Qinfo::addToQ( const ObjId& oi, 
-	BindIndex bindIndex, ThreadId threadNum,
-	unsigned int size )
-{
-	if ( threadNum == ScriptThreadNum ) pthread_mutex_lock( qMutex_ );
-		vector< double >& data = dBuf_[ threadNum ];
-		unsigned int oldSize = data.size();
-		qBuf_[ threadNum ].push_back( 
-			Qinfo( oi, bindIndex, threadNum, oldSize ) );
-		data.resize( oldSize + size );
-	if ( threadNum == ScriptThreadNum ) pthread_mutex_unlock( qMutex_ );
-		return &( data[oldSize] );
-}
- */
-
 // Static function
 void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest, 
 	ThreadId threadNum,
@@ -458,31 +476,6 @@ void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest,
 			vec.insert( vec.end(), arg2, arg2 + size2 );
 	if ( threadNum == ScriptThreadNum ) pthread_mutex_unlock( qMutex_ );
 }
-
-/*
-// Static function
-double* Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest, 
-	ThreadId threadNum,
-	FuncId fid, unsigned int size )
-{
-	static const unsigned int ObjFidSizeInDoubles = 
-		1 + ( sizeof( ObjFid ) - 1 ) / sizeof( double );
-
-	if ( threadNum == ScriptThreadNum ) pthread_mutex_lock( qMutex_ );
-		qBuf_[ threadNum ].push_back( 
-			Qinfo( src, DirectAdd, threadNum, dBuf_[threadNum].size() ) );
-	
-		ObjFid ofid = { dest, fid, size, 1 };
-		const double* ptr = reinterpret_cast< const double* >( &ofid );
-		vector< double >& vec = dBuf_[ threadNum ];
-		vec.insert( vec.end(), ptr, ptr + ObjFidSizeInDoubles );
-	
-		unsigned int oldSize = dBuf_[threadNum].size();
-		dBuf_[ threadNum ].resize( oldSize + size );
-	if ( threadNum == ScriptThreadNum ) pthread_mutex_unlock( qMutex_ );
-		return &( dBuf_[threadNum][oldSize] );
-}
-*/
 
 // Static function
 void Qinfo::addVecDirectToQ( const ObjId& src, const ObjId& dest, 
@@ -555,13 +548,18 @@ bool Qinfo::addToStructuralQ() const
 void Qinfo::initMutex()
 {
 	qMutex_ = new pthread_mutex_t;
-	pthread_mutex_init( qMutex_, NULL );
+	int ret = pthread_mutex_init( qMutex_, NULL );
+	assert( ret == 0 );
+	qCond_ = new pthread_cond_t;
+	ret = pthread_cond_init( qCond_, NULL );
+	assert( ret == 0 );
 }
 
 /// Static func
 void Qinfo::freeMutex()
 {
-	pthread_mutex_destroy( qMutex_ );
+	int ret = pthread_mutex_destroy( qMutex_ );
+	assert( ret == 0 );
 	delete qMutex_;
 }
 

@@ -290,6 +290,14 @@ class Qinfo
 		static void enableStructuralOps();
 
 		/**
+		 * Blocks for the specified number of Process cycles, if the
+		 * process loops and threads are operational. 
+		 * Otherwise goes through the specified number of ClearQs.
+		 */
+		static void waitProcCycles( unsigned int numCycles );
+	 
+
+		/**
 		 * Initializes the qMutex
 		 */
 		static void initMutex();
@@ -425,6 +433,10 @@ class Qinfo
 		 * Used to protect the queues from the timing of parser calls
 		 */
 		static pthread_mutex_t* qMutex_;
+		static pthread_cond_t* qCond_;
+
+		static bool waiting_;
+		static int numCycles_;
 
 		/// Flag setting
 		static const BindIndex DirectAdd;

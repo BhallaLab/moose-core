@@ -67,7 +67,7 @@ const vector< double* >* SetGet::dispatchGet(
 	// s->initAck();
 		Qinfo::addDirectToQ( ObjId(), tgt, 0, tgtFid, arg, size );
 	// s->waitForGetAck();
-	// s->waitForProcessLoopCycles( 2 );
+	Qinfo::waitProcCycles( 2 );
 	return &s->getBuf();
 	// return Shell::awaitGottenData();
 }
