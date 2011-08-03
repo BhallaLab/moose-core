@@ -299,10 +299,26 @@ void Element::exec( const Qinfo* qi, const double* arg )
 		const ObjFid *ofid = reinterpret_cast< const ObjFid* >( arg );
 		const OpFunc* f = 
 			ofid->oi.element()->cinfo()->getOpFunc( ofid->fid );
-		if ( ofid->oi.dataId == DataId::bad() ) return;
+		if ( ofid->oi.dataId == DataId::bad() )  {
+			return;
+		}
 		if ( ofid->oi.dataId == DataId::any() ) {
 			// Here we iterate through the DataId, using the
 			// numEntries and entrySize of the ofid to set args.
+			Element* elm = ofid->oi.element();
+			assert( ofid->numEntries > 0 );
+			DataHandler* dh = elm->dataHandler();
+			const double* data = arg + ObjFidSizeInDoubles;
+			unsigned int count = 0;
+			unsigned int offset = 0;
+			for ( DataHandler::iterator 
+				i = dh->begin(); i != dh->end(); ++i ) {
+				// if ( qi->execThread( elm->id(), i.index().data() ) ) {
+					f->op( Eref( elm, i.index() ), qi, data + offset );
+					count++;
+					offset = ( count % ofid->numEntries) * ofid->entrySize;
+				// }
+			}
 		} else {
 			f->op( ofid->oi.eref(), qi, arg + ObjFidSizeInDoubles );
 		}

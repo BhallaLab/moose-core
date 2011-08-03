@@ -60,6 +60,9 @@ const vector< double* >* SetGet::dispatchGet(
 	const ObjId& tgt, FuncId tgtFid, const double* arg, unsigned int size )
 {
 	static Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	if ( tgt.dataId == DataId::any() ) {
+		; // Put something here to set the number of entries expected.
+	}
 	// 0 is presumed threadNum here, but need to figure out.
 	s->initAck();
 		Qinfo::addDirectToQ( ObjId(), tgt, 0, tgtFid, arg, size );
