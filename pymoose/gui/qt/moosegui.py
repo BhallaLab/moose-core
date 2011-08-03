@@ -94,7 +94,8 @@ from firsttime import FirstTimeWizard
 import layout
 from updatepaintGL import *
 from vizParasDialogue import *
-
+from electrodeParasDialog import *
+from mooseelectrodes import *
 
 def makeClassList(parent=None, mode=MooseGlobals.MODE_ADVANCED):
     """Make a list of classes that can be used in current mode
@@ -516,6 +517,9 @@ class MainWindow(QtGui.QMainWindow):
         self.connectionDialogAction = QtGui.QAction(self.tr('&Connect elements'), self)
 	self.connect(self.connectionDialogAction, QtCore.SIGNAL('triggered()'), self.makeConnectionPopup)
 
+        self.addElectrodesDialogAction = QtGui.QAction(self.tr('&Insert Electode'),self)
+        self.connect(self.addElectrodesDialogAction, QtCore.SIGNAL('triggered()'),self.addElectrodesPopup)
+
         # Actions for file menu
         self.loadModelAction = QtGui.QAction(self.tr('Load Model'), self)
         self.loadModelAction.setShortcut(QtGui.QKeySequence(self.tr('Ctrl+L')))
@@ -668,7 +672,8 @@ class MainWindow(QtGui.QMainWindow):
 
         self.editModelMenu = QtGui.QMenu(self.tr('&Edit'), self)
         self.editModelMenu.addAction(self.connectionDialogAction)
-        
+        self.editModelMenu.addAction(self.addElectrodesDialogAction)
+
 		
         #self.plotMenu = QtGui.QMenu(self.tr('&Plot Settings'), self)
         
@@ -873,6 +878,40 @@ class MainWindow(QtGui.QMainWindow):
         self.currentPlotWindow = plotWindow
         return plotWindow
        
+    def addElectrodesPopup(self):
+        self.newElectodeDia = QtGui.QDialog(self)
+        self.electrodeDialog = Electrode_dialog()
+        self.electrodeDialog.setupUi(self.newElectodeDia)
+        self.newElectodeDia.show()
+        
+        self.connect(self.electrodeDialog.okayPushButton, QtCore.SIGNAL('clicked()'),self.newElectrode)
+#        self.connect(self.electrodeDialog.
+
+
+    def newElectrode(self):
+        baseLevel = float(self.electrodeDialog.baseLevelEdit.text())
+        firstLevel = float(self.electrodeDialog.firstLevelEdit.text())
+        secondLevel = float(self.electrodeDialog.secondLevelEdit.text())
+        firstDelay = float(self.electrodeDialog.firstDelayEdit.text())
+        secondDelay = float(self.electrodeDialog.secondDelayEdit.text())
+        firstWidth = float(self.electrodeDialog.firstWidthEdit.text())
+        secondWidth = float(self.electrodeDialog.secondWidthEdit.text())
+        clampOption = self.electrodeDialog.electrodeSelectionCombo.currentIndex()
+        #print baseLevel,firstLevel,secondLevel,firstDelay,secondDelay,firstWidth,secondWidth,clampOption
+        paramDict = { 'baseLevel':baseLevel,'firstLevel':firstLevel,'secondLevel':secondLevel,'firstDelay':firstDelay,'secondDelay':secondDelay,'firstWidth':firstWidth,'secondWidth':secondWidth}
+        #print paramDict.values(), clampOption
+        self.electrodeCompartment = '/mit/soma'
+        if clampOption:
+            print 'Voltage Clamp at compartment'
+            wateva = mooseElectrodes()
+            wateva.voltageClamp(paramDict,moose.Neutral(self.electrodeCompartment))
+        else:
+            print 'Current Clamp at compartment'
+            wateva = mooseElectrodes()
+            wateva.currentClamp(paramDict,moose.Neutral(self.electrodeCompartment))
+        self.newElectodeDia.hide()
+        self.modelTreeWidget.recreateTree()
+
     def addGLWindow(self):   #add_chait
         self.newDia = QtGui.QDialog(self)	
         self.vizDialogue = Ui_Dialog()
