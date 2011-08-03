@@ -14326,4 +14326,19 @@ Checkin 2861.
 Fixed a key step in passing the correct thread information into the Qinfo in
 readBuf, leading to Element::exec. Replaced the generic ProcInfo ptr in a number
 of Qinfo functions with the ThreadId to make this explicit. Resulted in 
-assorted fixes through the code.
+assorted fixes through the code.  Checkin 2862.
+
+Currently stuck in getVec in testSetGetVec().
+This is because the Shell doesn't know that it should be awaiting a vector of
+results. Looks like the rest of the calculation is actually OK.
+
+In SetGet::dispatchGet one could set the shell to expect the right # of
+entries. Except that I don't know what number to expect. This issue is also
+tied up with the problem of sending the ack, which should go only after all 
+data has come back.
+One simple option both for Set and Get is to simply require the calling function
+to wait one cycle (two for Get) of the ProcessLoop.
+
+============================================================================
+3 August 2011
+The SetVec is working, so check that in.

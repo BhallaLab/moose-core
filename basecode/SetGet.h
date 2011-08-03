@@ -171,6 +171,7 @@ template< class A > class SetGet1: public SetGet
 			if ( sg.checkSet( field, tgt, fid ) ) {
 				Conv< A > conv( arg[0] );
 				unsigned int entrySize = conv.size();
+				tgt.dataId = DataId::any();
 
 				double* ptr = Qinfo::addVecDirectToQ( ObjId(), tgt, 0, fid,
 					entrySize, arg.size() );
@@ -289,7 +290,8 @@ template< class A > class Field: public SetGet1< A >
 		 */
 		static void getVec( Id dest, const string& field, vector< A >& vec)
 		{
-			const vector< double* >* ret = innerGet( dest, field );
+			ObjId tgt( dest, DataId::any() );
+			const vector< double* >* ret = innerGet( tgt, field );
 			if ( ret ) {
 				vec.resize( ret->size() );
 				for ( unsigned int i = 0; i < ret->size(); ++i ) {
@@ -401,6 +403,7 @@ template< class A1, class A2 > class SetGet2: public SetGet
 				Conv< A1 > conv1( arg1[0] );
 				Conv< A2 > conv2( arg2[0] );
 				unsigned int entrySize = conv1.size() + conv2.size();
+				tgt.dataId = DataId::any();
 
 				double* ptr = Qinfo::addVecDirectToQ( ObjId(), tgt, 0, fid,
 					entrySize, arg1.size() );
@@ -591,8 +594,9 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 		static void getVec( Id dest, const string& field, 
 			vector< L >& index, vector< A >& vec )
 		{
+			ObjId tgt( dest, DataId::any() );
 			const vector< double* >* ret = 
-				innerGet( dest, field, index, ret );
+				innerGet( tgt, field, index, ret );
 			if ( ret ) {
 				vec.resize( ret->size() );
 				for ( unsigned int i = 0; i < ret->size(); ++i ) {
