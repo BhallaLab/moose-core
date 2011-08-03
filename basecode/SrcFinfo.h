@@ -232,11 +232,10 @@ template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 		{
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
-			double* ptr = Qinfo::addToQ( e.objId(), getBindIndex(), 
+			Qinfo::addToQ( e.objId(), getBindIndex(), 
 				threadNum,
-				a1.size() + a2.size() );
-			memcpy( ptr, a1.ptr(), a1.size() * sizeof( double ) );
-			memcpy( ptr + a1.size(), a2.ptr(), a2.size() * sizeof( double ) );
+				a1.ptr(), a1.size(),
+				a2.ptr(), a2.size() );
 		}
 
 		string rttiType() const {
@@ -261,10 +260,9 @@ template <> class SrcFinfo2< double, double >: public SrcFinfo
 		void send( const Eref& e, ThreadId threadNum,
 			double arg1, double arg2 ) const
 		{
-			double* ptr = Qinfo::addToQ( e.objId(), getBindIndex(), 
-				threadNum, 2 );
-			*ptr = arg1;
-			*( ptr + 1 ) = arg2;
+			Qinfo::addToQ( e.objId(), getBindIndex(), 
+				threadNum,
+				&arg1, 1, &arg2, 1 );
 		}
 
 		string rttiType() const {
@@ -290,15 +288,19 @@ template < class T1, class T2, class T3 > class SrcFinfo3: public SrcFinfo
 			Conv< T1 > a1( arg1 );
 			Conv< T2 > a2( arg2 );
 			Conv< T3 > a3( arg3 );
-
-			double* ptr = Qinfo::addToQ( e.objId(), getBindIndex(),
-				threadNum,
-				a1.size() + a2.size() + a3.size() );
+			unsigned int totSize = a1.size() + a2.size() + a3.size();
+			double* data = new double[ totSize ];
+			double* ptr = data;
 			memcpy( ptr, a1.ptr(), a1.size() * sizeof( double ) );
 			ptr += a1.size();
 			memcpy( ptr, a2.ptr(), a2.size() * sizeof( double ) );
 			ptr += a2.size();
 			memcpy( ptr, a3.ptr(), a3.size() * sizeof( double ) );
+			
+			Qinfo::addToQ( e.objId(), getBindIndex(),
+				threadNum, 
+				data, totSize );
+			delete[] data;
 		}
 
 		string rttiType() const {
@@ -327,10 +329,10 @@ template < class T1, class T2, class T3, class T4 > class SrcFinfo4: public SrcF
 			Conv< T2 > a2( arg2 );
 			Conv< T3 > a3( arg3 );
 			Conv< T4 > a4( arg4 );
-
-			double* ptr = Qinfo::addToQ( e.objId(), getBindIndex(), 
-				threadNum,
-				a1.size() + a2.size() + a3.size() + a4.size() );
+			unsigned int totSize = a1.size() + a2.size() + 
+				a3.size() + a4.size();
+			double* data = new double[ totSize ];
+			double* ptr = data;
 			memcpy( ptr, a1.ptr(), a1.size() * sizeof( double ) );
 			ptr += a1.size();
 			memcpy( ptr, a2.ptr(), a2.size() * sizeof( double ) );
@@ -338,6 +340,11 @@ template < class T1, class T2, class T3, class T4 > class SrcFinfo4: public SrcF
 			memcpy( ptr, a3.ptr(), a3.size() * sizeof( double ) );
 			ptr += a3.size();
 			memcpy( ptr, a4.ptr(), a4.size() * sizeof( double ) );
+			
+			Qinfo::addToQ( e.objId(), getBindIndex(),
+				threadNum, 
+				data, totSize );
+			delete[] data;
 		}
 
 		string rttiType() const {
@@ -368,9 +375,10 @@ template < class T1, class T2, class T3, class T4, class T5 > class SrcFinfo5: p
 			Conv< T4 > a4( arg4 );
 			Conv< T5 > a5( arg5 );
 
-			double* ptr = Qinfo::addToQ( e.objId(), getBindIndex(), 
-				threadNum,
-				a1.size() + a2.size() + a3.size() + a4.size() + a5.size() );
+			unsigned int totSize = a1.size() + a2.size() + 
+				a3.size() + a4.size() + a5.size();
+			double* data = new double[ totSize ];
+			double* ptr = data;
 			memcpy( ptr, a1.ptr(), a1.size() * sizeof( double ) );
 			ptr += a1.size();
 			memcpy( ptr, a2.ptr(), a2.size() * sizeof( double ) );
@@ -380,6 +388,11 @@ template < class T1, class T2, class T3, class T4, class T5 > class SrcFinfo5: p
 			memcpy( ptr, a4.ptr(), a4.size() * sizeof( double ) );
 			ptr += a4.size();
 			memcpy( ptr, a5.ptr(), a5.size() * sizeof( double ) );
+			
+			Qinfo::addToQ( e.objId(), getBindIndex(),
+				threadNum, 
+				data, totSize );
+			delete[] data;
 		}
 
 		string rttiType() const {
@@ -413,10 +426,10 @@ template < class T1, class T2, class T3, class T4, class T5, class T6 > class Sr
 			Conv< T5 > a5( arg5 );
 			Conv< T6 > a6( arg6 );
 
-			double* ptr = Qinfo::addToQ( e.objId(), getBindIndex(), 
-				threadNum,
-				a1.size() + a2.size() + a3.size() + a4.size() + 
-				a5.size() + a6.size() );
+			unsigned int totSize = a1.size() + a2.size() + 
+				a3.size() + a4.size() + a5.size() + a6.size();
+			double* data = new double[ totSize ];
+			double* ptr = data;
 			memcpy( ptr, a1.ptr(), a1.size() * sizeof( double ) );
 			ptr += a1.size();
 			memcpy( ptr, a2.ptr(), a2.size() * sizeof( double ) );
@@ -428,6 +441,11 @@ template < class T1, class T2, class T3, class T4, class T5, class T6 > class Sr
 			memcpy( ptr, a5.ptr(), a5.size() * sizeof( double ) );
 			ptr += a5.size();
 			memcpy( ptr, a6.ptr(), a6.size() * sizeof( double ) );
+			
+			Qinfo::addToQ( e.objId(), getBindIndex(),
+				threadNum, 
+				data, totSize );
+			delete[] data;
 		}
 
 		string rttiType() const {

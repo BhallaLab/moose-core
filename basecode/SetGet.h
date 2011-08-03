@@ -102,7 +102,7 @@ class SetGet0: public SetGet
 			FuncId fid;
 			ObjId tgt( dest );
 			if ( sg.checkSet( field, tgt, fid ) ) {
-				Qinfo::addDirectToQ( ObjId(), tgt, 0, fid, 0 );
+				Qinfo::addDirectToQ( ObjId(), tgt, 0, fid, 0, 0 );
 				/*
 				dispatchSet( tgt, fid, 0, 0 );
 				*/
@@ -172,15 +172,20 @@ template< class A > class SetGet1: public SetGet
 				Conv< A > conv( arg[0] );
 				unsigned int entrySize = conv.size();
 				tgt.dataId = DataId::any();
-
-				double* ptr = Qinfo::addVecDirectToQ( ObjId(), tgt, 0, fid,
-					entrySize, arg.size() );
+				double* data = new double[ entrySize * arg.size() ];
+				double* ptr = data;
 
 				for ( unsigned int i = 0; i < arg.size(); ++i ) {
 					Conv< A > conv( arg[i] );
+					assert( conv.size() == entrySize );
 					memcpy( ptr, conv.ptr(), entrySize * sizeof( double ) );
 					ptr += entrySize;
 				}
+
+				Qinfo::addVecDirectToQ( ObjId(), tgt, 0, fid, data,
+					entrySize, arg.size() );
+				delete[] data;
+
 				return 1;
 			}
 			return 0;
@@ -362,19 +367,10 @@ template< class A1, class A2 > class SetGet2: public SetGet
 			if ( sg.checkSet( field, tgt, fid ) ) {
 				Conv< A1 > conv1( arg1 );
 				Conv< A2 > conv2( arg2 );
-				double *ptr = Qinfo::addDirectToQ( 
-					ObjId(), tgt, 0, fid, conv1.size() + conv2.size() );
-				memcpy( ptr, conv1.ptr(), conv1.size() );
-				ptr += conv1.size();
-				memcpy( ptr, conv2.ptr(), conv2.size() );
-				/*
-				char *temp = new char[ conv1.size() + conv2.size() ];
-				conv1.val2buf( temp );
-				conv2.val2buf( temp + conv1.size() );
-				dispatchSet( tgt, fid, temp, 
-					conv1.size() + conv2.size() );
-				delete[] temp;
-				*/
+				Qinfo::addDirectToQ( 
+					ObjId(), tgt, 0, fid, 
+					conv1.ptr(), conv1.size(),
+					conv2.ptr(), conv2.size() );
 				return 1;
 			}
 			return 0;
@@ -404,9 +400,8 @@ template< class A1, class A2 > class SetGet2: public SetGet
 				Conv< A2 > conv2( arg2[0] );
 				unsigned int entrySize = conv1.size() + conv2.size();
 				tgt.dataId = DataId::any();
-
-				double* ptr = Qinfo::addVecDirectToQ( ObjId(), tgt, 0, fid,
-					entrySize, arg1.size() );
+				double* data = new double[ entrySize * arg1.size() ];
+				double* ptr = data;
 
 				for ( unsigned int i = 0; i < arg1.size(); ++i ) {
 					Conv< A1 > conv1( arg1[i] );
@@ -416,6 +411,10 @@ template< class A1, class A2 > class SetGet2: public SetGet
 					memcpy( ptr, conv2.ptr(), conv2.size() * sizeof( double ) );
 					ptr += conv2.size();
 				}
+
+				Qinfo::addVecDirectToQ( ObjId(), tgt, 0, fid, data,
+					entrySize, arg1.size() );
+				delete[] data;
 				return 1;
 			}
 			return 0;
@@ -645,24 +644,17 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 				Conv< A1 > conv1( arg1 );
 				Conv< A2 > conv2( arg2 );
 				Conv< A3 > conv3( arg3 );
-				double *ptr = Qinfo::addDirectToQ( 
-					ObjId(), tgt, 0, fid, 
-						conv1.size() + conv2.size() + conv3.size() );
-				memcpy( ptr, conv1.ptr(), conv1.size() );
-				ptr += conv1.size();
-				memcpy( ptr, conv2.ptr(), conv2.size() );
-				ptr += conv2.size();
-				memcpy( ptr, conv3.ptr(), conv3.size() );
-
-				/*
-				unsigned int totSize = conv1.size() + conv2.size() + conv3.size();
-				char *temp = new char[ totSize ];
+				unsigned int totSize = 
+					conv1.size() + conv2.size() + conv3.size();
+				double *temp = new double[ totSize ];
 				conv1.val2buf( temp );
 				conv2.val2buf( temp + conv1.size() );
 				conv3.val2buf( temp + conv1.size() + conv2.size() );
-				dispatchSet( tgt, fid, temp, totSize );
+
+				Qinfo::addDirectToQ( 
+					ObjId(), tgt, 0, fid, 
+					temp, totSize );
 				delete[] temp;
-				*/
 				return 1;
 			}
 			return 0;
@@ -721,31 +713,21 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 				Conv< A2 > conv2( arg2 );
 				Conv< A3 > conv3( arg3 );
 				Conv< A4 > conv4( arg4 );
-				double *ptr = Qinfo::addDirectToQ( 
-					ObjId(), tgt, 0, fid, 
-						conv1.size() + conv2.size() + 
-						conv3.size() + conv4.size() );
-				memcpy( ptr, conv1.ptr(), conv1.size() );
-				ptr += conv1.size();
-				memcpy( ptr, conv2.ptr(), conv2.size() );
-				ptr += conv2.size();
-				memcpy( ptr, conv3.ptr(), conv3.size() );
-				ptr += conv3.size();
-				memcpy( ptr, conv4.ptr(), conv4.size() );
+				unsigned int totSize = 
+					conv1.size() + conv2.size() + 
+					conv3.size() + conv4.size();
+				double* temp = new double[ totSize ];
+				double* ptr = temp;
+				conv1.val2buf( ptr ); ptr += conv1.size();
+				conv2.val2buf( ptr ); ptr += conv2.size();
+				conv3.val2buf( ptr ); ptr += conv3.size();
+				conv4.val2buf( ptr );
 
-				/*
-				unsigned int s1 = conv1.size();
-				unsigned int s1s2 = s1 + conv2.size();
-				unsigned int s1s2s3 = s1s2 + conv3.size();
-				unsigned int totSize = s1s2s3 + conv4.size();
-				char *temp = new char[ totSize ];
-				conv1.val2buf( temp );
-				conv2.val2buf( temp + s1 );
-				conv3.val2buf( temp + s1s2 );
-				conv4.val2buf( temp + s1s2s3 );
-				dispatchSet( tgt, fid, temp, totSize );
+				Qinfo::addDirectToQ( 
+					ObjId(), tgt, 0, fid, 
+					temp, totSize );
+
 				delete[] temp;
-				*/
 				return 1;
 			}
 			return 0;
@@ -813,35 +795,23 @@ template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
 				Conv< A3 > conv3( arg3 );
 				Conv< A4 > conv4( arg4 );
 				Conv< A5 > conv5( arg5 );
-				double *ptr = Qinfo::addDirectToQ( 
-					ObjId(), tgt, 0, fid, 
-						conv1.size() + conv2.size() + 
-						conv3.size() + conv4.size() +
-						conv5.size() );
-				memcpy( ptr, conv1.ptr(), conv1.size() );
-				ptr += conv1.size();
-				memcpy( ptr, conv2.ptr(), conv2.size() );
-				ptr += conv2.size();
-				memcpy( ptr, conv3.ptr(), conv3.size() );
-				ptr += conv3.size();
-				memcpy( ptr, conv4.ptr(), conv4.size() );
-				ptr += conv4.size();
-				memcpy( ptr, conv5.ptr(), conv5.size() );
-				/*
-				unsigned int totSize = conv1.size() + conv2.size() +
+
+				unsigned int totSize = 
+					conv1.size() + conv2.size() + 
 					conv3.size() + conv4.size() + conv5.size();
-				char *temp = new char[ totSize ];
-				conv1.val2buf( temp );
-				conv2.val2buf( temp + conv1.size() );
-				conv3.val2buf( temp + conv1.size() + conv2.size() );
-				conv4.val2buf( temp + conv1.size() + conv2.size() + 
-					conv3.size() );
-				conv5.val2buf( temp + conv1.size() + conv2.size() + 
-					conv3.size() + conv4.size() );
-				dispatchSet( tgt, fid, temp, totSize );
+				double* temp = new double[ totSize ];
+				double* ptr = temp;
+				conv1.val2buf( ptr ); ptr += conv1.size();
+				conv2.val2buf( ptr ); ptr += conv2.size();
+				conv3.val2buf( ptr ); ptr += conv3.size();
+				conv4.val2buf( ptr ); ptr += conv4.size();
+				conv5.val2buf( ptr );
+
+				Qinfo::addDirectToQ( 
+					ObjId(), tgt, 0, fid, 
+					temp, totSize );
 
 				delete[] temp;
-				*/
 				return 1;
 			}
 			return 0;
@@ -912,39 +882,25 @@ template< class A1, class A2, class A3, class A4, class A5, class A6 > class Set
 				Conv< A4 > conv4( arg4 );
 				Conv< A5 > conv5( arg5 );
 				Conv< A6 > conv6( arg6 );
-				double *ptr = Qinfo::addDirectToQ( 
+
+				unsigned int totSize = 
+					conv1.size() + conv2.size() + 
+					conv3.size() + conv4.size() + conv5.size();
+				double* temp = new double[ totSize ];
+				double* ptr = temp;
+				conv1.val2buf( ptr ); ptr += conv1.size();
+				conv2.val2buf( ptr ); ptr += conv2.size();
+				conv3.val2buf( ptr ); ptr += conv3.size();
+				conv4.val2buf( ptr ); ptr += conv4.size();
+				conv5.val2buf( ptr ); ptr += conv5.size();
+				conv6.val2buf( ptr );
+
+				Qinfo::addDirectToQ( 
 					ObjId(), tgt, 0, fid, 
-						conv1.size() + conv2.size() + 
-						conv3.size() + conv4.size() +
-						conv5.size() );
-				memcpy( ptr, conv1.ptr(), conv1.size() );
-				ptr += conv1.size();
-				memcpy( ptr, conv2.ptr(), conv2.size() );
-				ptr += conv2.size();
-				memcpy( ptr, conv3.ptr(), conv3.size() );
-				ptr += conv3.size();
-				memcpy( ptr, conv4.ptr(), conv4.size() );
-				ptr += conv4.size();
-				memcpy( ptr, conv5.ptr(), conv5.size() );
-				ptr += conv5.size();
-				memcpy( ptr, conv6.ptr(), conv6.size() );
-				/*
-				unsigned int totSize = conv1.size() + conv2.size() +
-					conv3.size() + conv4.size() + conv5.size() + conv6.size();
-				char *temp = new char[ totSize ];
-				conv1.val2buf( temp );
-				conv2.val2buf( temp + conv1.size() );
-				conv3.val2buf( temp + conv1.size() + conv2.size() );
-				conv4.val2buf( temp + conv1.size() + conv2.size() + 
-					conv3.size() );
-				conv5.val2buf( temp + conv1.size() + conv2.size() + 
-					conv3.size() + conv4.size() );
-				conv6.val2buf( temp + conv1.size() + conv2.size() + 
-					conv3.size() + conv4.size() + conv5.size() );
-				dispatchSet( tgt, fid, temp, totSize );
+					temp, totSize );
 
 				delete[] temp;
-				*/
+
 				return 1;
 			}
 			return 0;

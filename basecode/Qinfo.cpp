@@ -223,23 +223,6 @@ void Qinfo::swapQ()
 
 				qptr += 3;
 			}
-
-			/*
-			for ( vector< Qinfo >::iterator j = qBuf_[i].begin(); 
-				j != qEnd; ++j ) {
-				Qinfo* qi = reinterpret_cast< Qinfo* >( qptr );
-				*qi = *j;
-				qi->dataIndex_ += prevQueueDataIndex;
-
-				unsigned int size = ( j + 1 == qEnd ) ? dBuf_[i].size() : 
-					(j+1)->dataIndex();
-				size -= j->dataIndex();
-				memcpy( dptr + qi->dataIndex_, dataOrig + j->dataIndex(),
-					size * sizeof( double ) );
-
-				qptr += 3;
-			}
-			*/
 			prevQueueDataIndex += dBuf_[i].size();
 		}
 		assert( prevQueueDataIndex == bufsize );
@@ -393,13 +376,28 @@ void Qinfo::addToQ( const ObjId& oi,
 	if ( threadNum == ScriptThreadNum ) pthread_mutex_unlock( qMutex_ );
 }
 
+/// Utility variant that adds two args.
+void Qinfo::addToQ( const ObjId& oi, 
+	BindIndex bindIndex, ThreadId threadNum,
+	const double* arg1, unsigned int size1, 
+	const double* arg2, unsigned int size2 )
+{
+	if ( threadNum == ScriptThreadNum ) pthread_mutex_lock( qMutex_ );
+		vector< double >& vec = dBuf_[ threadNum ];
+		qBuf_[ threadNum ].push_back( 
+			Qinfo( oi, bindIndex, threadNum, vec.size() ) );
+		if ( size1 > 0 )
+			vec.insert( vec.end(), arg1, arg1 + size1 );
+		if ( size2 > 0 )
+			vec.insert( vec.end(), arg2, arg2 + size2 );
+	if ( threadNum == ScriptThreadNum ) pthread_mutex_unlock( qMutex_ );
+}
 
 /**
  * Static function.
  * Adds a Queue entry. This variant allocates the space and returns
  * the pointer into which the data can be copied. Useful when there are
  * multiple fields to be put in.
- */
 double* Qinfo::addToQ( const ObjId& oi, 
 	BindIndex bindIndex, ThreadId threadNum,
 	unsigned int size )
@@ -413,6 +411,7 @@ double* Qinfo::addToQ( const ObjId& oi,
 	if ( threadNum == ScriptThreadNum ) pthread_mutex_unlock( qMutex_ );
 		return &( data[oldSize] );
 }
+ */
 
 // Static function
 void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest, 
@@ -424,11 +423,11 @@ void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest,
 		1 + ( sizeof( ObjFid ) - 1 ) / sizeof( double );
 
 	if ( threadNum == ScriptThreadNum ) pthread_mutex_lock( qMutex_ );
+		vector< double >& vec = dBuf_[ threadNum ];
 		qBuf_[ threadNum ].push_back(
-			Qinfo( src, DirectAdd, threadNum, dBuf_[threadNum].size() ) );
+			Qinfo( src, DirectAdd, threadNum, vec.size() ) );
 		ObjFid ofid = { dest, fid, size, 1 };
 		const double* ptr = reinterpret_cast< const double* >( &ofid );
-		vector< double >& vec = dBuf_[ threadNum ];
 		vec.insert( vec.end(), ptr, ptr + ObjFidSizeInDoubles );
 		if ( size > 0 ) {
 			vec.insert( vec.end(), arg, arg + size );
@@ -436,6 +435,31 @@ void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest,
 	if ( threadNum == ScriptThreadNum ) pthread_mutex_unlock( qMutex_ );
 }
 
+// Static function
+void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest, 
+	ThreadId threadNum,
+	FuncId fid, 
+	const double* arg1, unsigned int size1,
+	const double* arg2, unsigned int size2 )
+{
+	static const unsigned int ObjFidSizeInDoubles = 
+		1 + ( sizeof( ObjFid ) - 1 ) / sizeof( double );
+
+	if ( threadNum == ScriptThreadNum ) pthread_mutex_lock( qMutex_ );
+		vector< double >& vec = dBuf_[ threadNum ];
+		qBuf_[ threadNum ].push_back(
+			Qinfo( src, DirectAdd, threadNum, vec.size() ) );
+		ObjFid ofid = { dest, fid, size1 + size2, 1 };
+		const double* ptr = reinterpret_cast< const double* >( &ofid );
+		vec.insert( vec.end(), ptr, ptr + ObjFidSizeInDoubles );
+		if ( size1 > 0 )
+			vec.insert( vec.end(), arg1, arg1 + size1 );
+		if ( size2 > 0 )
+			vec.insert( vec.end(), arg2, arg2 + size2 );
+	if ( threadNum == ScriptThreadNum ) pthread_mutex_unlock( qMutex_ );
+}
+
+/*
 // Static function
 double* Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest, 
 	ThreadId threadNum,
@@ -458,15 +482,19 @@ double* Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest,
 	if ( threadNum == ScriptThreadNum ) pthread_mutex_unlock( qMutex_ );
 		return &( dBuf_[threadNum][oldSize] );
 }
+*/
 
 // Static function
-double* Qinfo::addVecDirectToQ( const ObjId& src, const ObjId& dest, 
+void Qinfo::addVecDirectToQ( const ObjId& src, const ObjId& dest, 
 	ThreadId threadNum,
-	FuncId fid, unsigned int entrySize, unsigned int numEntries )
+	FuncId fid, 
+	const double* arg, unsigned int entrySize, unsigned int numEntries )
 {
 	static const unsigned int ObjFidSizeInDoubles = 
 		1 + ( sizeof( ObjFid ) - 1 ) / sizeof( double );
 
+	if ( entrySize == 0 || numEntries == 0 )
+		return;
 	if ( threadNum == ScriptThreadNum ) pthread_mutex_lock( qMutex_ );
 		qBuf_[ threadNum ].push_back( 
 			Qinfo( src, DirectAdd, threadNum, dBuf_[threadNum].size() ) );
@@ -475,12 +503,8 @@ double* Qinfo::addVecDirectToQ( const ObjId& src, const ObjId& dest,
 		const double* ptr = reinterpret_cast< const double* >( &ofid );
 		vector< double >& vec = dBuf_[ threadNum ];
 		vec.insert( vec.end(), ptr, ptr + ObjFidSizeInDoubles );
-	
-		unsigned int oldSize = dBuf_[threadNum].size();
-		unsigned int newSize = entrySize * numEntries;
-		dBuf_[ threadNum ].resize( oldSize + newSize );
+		vec.insert( vec.end(), arg, arg + entrySize * numEntries );
 	if ( threadNum == ScriptThreadNum ) pthread_mutex_unlock( qMutex_ );
-		return &( dBuf_[threadNum][oldSize] );
 }
 
 /// Static func.
