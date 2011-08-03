@@ -471,6 +471,12 @@ class Shell
 		 * entries from other threads.
 		 */
 		unsigned int anotherCycleFlag_;
+
+		/**
+		 * set the gettingVector_ flag 
+		 */
+		void expectVector( bool flag );
+		
 	private:
 		Element* shelle_; // It is useful for the Shell to have this.
 
