@@ -55,7 +55,7 @@ class updatepaintGL(PyGLWidget):
 	for name in self.vizObjectNames:
 		r=mc.pathToId(name+self.moosepath)
 		d=float(mc.getField(r,self.variable))
-		vals.append(d)
+                vals.append(d)
 	inds = digitize(vals,self.stepVals)
 
 	for i in range(0,len(self.vizObjects)):
@@ -196,7 +196,6 @@ class updatepaintGL(PyGLWidget):
 		steps = len(self.colorMap)
 		f.close()
 	self.stepVals = arange(vizMinVal,vizMaxVal,(vizMaxVal-vizMinVal)/steps)
-	
 	
 class newGLWindow(QtGui.QMainWindow):
     def __init__(self, parent = None):
