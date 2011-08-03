@@ -14,12 +14,22 @@
 // Functions for handling field set/get and func calls
 ////////////////////////////////////////////////////////////////////////
 
+void Shell::expectVector( bool flag )
+{
+	gettingVector_ = flag;
+}
+
 void Shell::recvGet( const Eref& e, const Qinfo* q, PrepackedBuffer pb )
 {
 	if ( myNode_ == 0 ) {
 		if ( gettingVector_ ) {
 			ObjId tgt = q->src();
 			unsigned int linearIndex = q->src().eref().linearIndex();
+			if ( linearIndex >= getBuf_.size() ) {
+				if ( linearIndex >= getBuf_.capacity() )
+					getBuf_.reserve( linearIndex * 2 );
+				getBuf_.resize( linearIndex + 1 );
+			}
 			assert ( linearIndex < getBuf_.size() );
 			double*& c = getBuf_[ linearIndex ];
 			c = new double[ pb.dataSize() ];
