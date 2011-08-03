@@ -610,6 +610,7 @@ void testSetGetSynapse()
 		bool ret = Field< unsigned int >::set( oid, "numSynapses", i );
 		assert( ret );
 	}
+	Qinfo::clearQ( ScriptThreadNum );
 	assert( syn->dataHandler()->localEntries() == ( size * (size - 1) ) / 2 );
 
 	/*
@@ -638,6 +639,7 @@ void testSetGetSynapse()
 			ObjId synoid( synId, di );
 			double temp = i * 1000 + j ;
 			bool ret = Field< double >::set( synoid, "delay", temp );
+			Qinfo::clearQ( ScriptThreadNum );
 			assert( ret );
 			assert( 
 			doubleEq( reinterpret_cast< Synapse* >(synoid.data())->getDelay() , temp ) );
@@ -681,7 +683,12 @@ void testSetGetVec()
 	// Here we test setting a 1-D vector
 	bool ret = Field< unsigned int >::setVec( i2, "numSynapses", numSyn );
 	assert( ret );
+	Qinfo::clearQ( ScriptThreadNum );
 
+	for ( unsigned int i = 0; i < size; ++i ) {
+		IntFire* fire = reinterpret_cast< IntFire* >( i2()->dataHandler()->data( i ) );
+		assert( fire->getNumSynapses() == i );
+	}
 
 	vector< unsigned int > getSyn;
 	Eref tempE( e2.element(), DataId::any() );

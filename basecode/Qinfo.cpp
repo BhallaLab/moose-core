@@ -426,7 +426,7 @@ void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest,
 	if ( threadNum == ScriptThreadNum ) pthread_mutex_lock( qMutex_ );
 		qBuf_[ threadNum ].push_back(
 			Qinfo( src, DirectAdd, threadNum, dBuf_[threadNum].size() ) );
-		ObjFid ofid = { dest, fid, 0, 0 };
+		ObjFid ofid = { dest, fid, size, 1 };
 		const double* ptr = reinterpret_cast< const double* >( &ofid );
 		vector< double >& vec = dBuf_[ threadNum ];
 		vec.insert( vec.end(), ptr, ptr + ObjFidSizeInDoubles );
@@ -448,7 +448,7 @@ double* Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest,
 		qBuf_[ threadNum ].push_back( 
 			Qinfo( src, DirectAdd, threadNum, dBuf_[threadNum].size() ) );
 	
-		ObjFid ofid = { dest, fid, 0, 0 };
+		ObjFid ofid = { dest, fid, size, 1 };
 		const double* ptr = reinterpret_cast< const double* >( &ofid );
 		vector< double >& vec = dBuf_[ threadNum ];
 		vec.insert( vec.end(), ptr, ptr + ObjFidSizeInDoubles );
