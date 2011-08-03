@@ -103,9 +103,7 @@ class SetGet0: public SetGet
 			ObjId tgt( dest );
 			if ( sg.checkSet( field, tgt, fid ) ) {
 				Qinfo::addDirectToQ( ObjId(), tgt, 0, fid, 0, 0 );
-				/*
-				dispatchSet( tgt, fid, 0, 0 );
-				*/
+				Qinfo::waitProcCycles( 1 );
 				return 1;
 			}
 			return 0;
@@ -140,6 +138,7 @@ template< class A > class SetGet1: public SetGet
 				Conv< A > conv( arg );
 				Qinfo::addDirectToQ(
 					ObjId(), tgt, 0, fid, conv.ptr(), conv.size() );
+				Qinfo::waitProcCycles( 1 );
 				return 1;
 			}
 			return 0;
@@ -184,6 +183,7 @@ template< class A > class SetGet1: public SetGet
 
 				Qinfo::addVecDirectToQ( ObjId(), tgt, 0, fid, data,
 					entrySize, arg.size() );
+				Qinfo::waitProcCycles( 1 );
 				delete[] data;
 
 				return 1;
@@ -371,6 +371,7 @@ template< class A1, class A2 > class SetGet2: public SetGet
 					ObjId(), tgt, 0, fid, 
 					conv1.ptr(), conv1.size(),
 					conv2.ptr(), conv2.size() );
+				Qinfo::waitProcCycles( 1 );
 				return 1;
 			}
 			return 0;
@@ -414,6 +415,7 @@ template< class A1, class A2 > class SetGet2: public SetGet
 
 				Qinfo::addVecDirectToQ( ObjId(), tgt, 0, fid, data,
 					entrySize, arg1.size() );
+				Qinfo::waitProcCycles( 1 );
 				delete[] data;
 				return 1;
 			}
@@ -654,6 +656,7 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 				Qinfo::addDirectToQ( 
 					ObjId(), tgt, 0, fid, 
 					temp, totSize );
+				Qinfo::waitProcCycles( 1 );
 				delete[] temp;
 				return 1;
 			}
@@ -726,6 +729,7 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 				Qinfo::addDirectToQ( 
 					ObjId(), tgt, 0, fid, 
 					temp, totSize );
+				Qinfo::waitProcCycles( 1 );
 
 				delete[] temp;
 				return 1;
@@ -810,6 +814,7 @@ template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
 				Qinfo::addDirectToQ( 
 					ObjId(), tgt, 0, fid, 
 					temp, totSize );
+				Qinfo::waitProcCycles( 1 );
 
 				delete[] temp;
 				return 1;
@@ -898,6 +903,7 @@ template< class A1, class A2, class A3, class A4, class A5, class A6 > class Set
 				Qinfo::addDirectToQ( 
 					ObjId(), tgt, 0, fid, 
 					temp, totSize );
+				Qinfo::waitProcCycles( 1 );
 
 				delete[] temp;
 
