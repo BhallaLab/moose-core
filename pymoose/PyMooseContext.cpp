@@ -641,6 +641,40 @@ Id PyMooseContext::getShell()
 {
     return shell_;
 }
+
+/**
+ * 'breakMain()' is defined in main/main.cpp.
+ * It is just a blank function, useful when debugging.
+ * 
+ * This is how to use it under PyMOOSE:
+ *   1) Insert following lines at start of your python script:
+ *          import os
+ *          print os.getpid()  # This will print PID to stdout.
+ *          raw_input()        # This will cause process to wait for keyboard I/P.
+ *      
+ *      If debugging some MOOSE initialization code (like Cinfo init.), then
+ *      place these lines before 'import moose'. Otherwise easier to place them
+ *      afterwards.
+ *   2) Run python script. It will print PID and wait for keyboard input. Let it
+ *      wait.
+ *   3) Attach GDB to the process using 'gdb --pid <pid>'
+ *   4) Set breakpoint at 'breakMain': 'b breakMain'. If the moose module has
+ *      not yet been imported in the python process, answer 'y' to the question
+ *      regarding setting the breakpoint in a future library load.
+ *   5) Continue process under GDB.
+ *   6) Return to python, let program begin by hitting 'Enter'.
+ *   7) Once the breakpoint hits, return to GDB to set any further breakpoints.
+ *   8) Continue process under GDB. Now you can proceed with debugging in the
+ *      usual way.
+ * 
+ * Note: Using 'breakMain' is not needed if one needs to set breakpoints at
+ * places that will not get hit in startup code: Unit tests, for example. Also,
+ * one can avoid the trouble of attaching gdb by simply loading python under
+ * gdb directly ('gdb python'), and then loading the python script using one of
+ * the available ways.
+ */
+extern void breakMain();
+
 /**
    This method should be used instead of a constructor. The constructor is kept public
    for only the moose-core's use.
@@ -684,6 +718,9 @@ PyMooseContext* PyMooseContext::createPyMooseContext(string contextName, string 
 
     // From maindir/main.cpp: parser requires to be created before the clock job
     Element * genesisSli = makeGenesisParser();
+    
+    // Call to an empty function, useful for setting breakpoints.
+    breakMain();
 
     Id shellId = Id::shellId();
     
