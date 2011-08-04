@@ -14353,6 +14353,12 @@ Implemented, but currently we're not running the process cycle. But it
 does handle the default case with clearQ OK. Checkin 2868.
 
 Implemented assignment of Shell::gettingVector_ flag, used it to handle
-getVec correctly.
+getVec correctly. Checkin 2869.
+
 Current problem is assignment (setVec) of all the synaptic delays, in 
 testAsync.cpp:718.
+============================================================================
+4 August 2011
+
+Cleaning up setVec/getVec to deal with field indices.
+Now it clears this.
