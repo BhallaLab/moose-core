@@ -1556,10 +1556,10 @@ void testConvVector()
 	double buf[500];
 
 	Conv< vector< unsigned int > > intConv( intVec );
-	assert( intConv.size() == sizeof( unsigned int ) * (intVec.size() + 1));
+	assert( intConv.size() == 2 + ( intVec.size() * sizeof( unsigned int ) - 1) / sizeof( double ) );
 	unsigned int ret = intConv.val2buf( buf );
-	assert( ret == sizeof( unsigned int ) * (intVec.size() + 1));
-	assert( *reinterpret_cast< unsigned int* >( buf ) == intVec.size() );
+	assert( ret == 4 );
+	assert( buf[0] == intVec.size() );
 
 	Conv< vector< unsigned int > > testIntConv( buf );
 	assert( intConv.size() == testIntConv.size() );
@@ -1568,6 +1568,24 @@ void testConvVector()
 	for ( unsigned int i = 0; i < intVec.size(); ++i ) {
 		assert( intVec[ i ] == testIntVec[i] );
 	}
+
+	vector< string > strVec;
+	strVec.push_back( "one" );
+	strVec.push_back( "two" );
+	strVec.push_back( "three and more and more and more" );
+	strVec.push_back( "four and yet more" );
+
+	Conv< vector< string > > strConv( strVec );
+	ret = strConv.val2buf( buf );
+	assert( ret = strConv.size() );
+	assert( buf[0] == 4 );
+	assert( buf[1] == ret );
+	Conv< vector< string > > strConvTgt( buf );
+	
+	vector< string > tgtStr = *strConvTgt;
+	assert( tgtStr.size() == 4 );
+	for ( unsigned int i = 0; i < 4; ++i )
+		assert( tgtStr[i] == strVec[i] );
 
 	cout << "." << flush;
 }
