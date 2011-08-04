@@ -58,48 +58,6 @@ class BaseObject(object):
 		else:
 			self.r, self.g, self.b = self.oldColor
 		
-class cLine(BaseObject):
-	"""
-	Class that defines a compartment line.
-	"""
-	
-	def __init__(self, parent,l_coords,cellName=[]):
-		"""
-		Constructor.
-		"""
-		super(cLine, self).__init__(parent)
-		self.l_coords = l_coords
-		self.daddy = cellName
-
-
-	def setCellParentProps(self,centralPos,rotation,r,g,b):
-		self._centralPos = centralPos	
-		self.rotation = rotation	
-		self.r = r
-		self.g = g
-		self.b = b	
-
-	def render(self):
-		"""
-		Renders the compartment line.
-		"""
-		glPushMatrix()
-		glColor(self.r, self.g, self.b)
-		glRotate(*self.rotation[:4])		#get pen to the new orientation
-		glTranslate(*self._centralPos[:3])	#get pen to the new position
-		
-		glLineWidth(2)
-		glDisable(GL_LIGHTING)
-		glBegin(GL_LINES)
-  	    	glVertex3f(self.l_coords[0],self.l_coords[1],self.l_coords[2])
-	    	glVertex3f(self.l_coords[3],self.l_coords[4],self.l_coords[5])
-	    	glEnd()		
-	    	glEnable(GL_LIGHTING)
-		
-		glTranslate(*[i*-1 for i in self._centralPos[:3]])	#get pen back to the origin
-		glRotate(*[i*-1 for i in self.rotation[:4]])		#get pen to the original orientation
-		
-		glPopMatrix()	
 
 class cellStruct(BaseObject):
 	"""
@@ -170,6 +128,7 @@ class somaSphere(BaseObject):
 		self.radius = (sqrt((l_coords[0]-l_coords[3])**2+(l_coords[1]-l_coords[4])**2+(l_coords[2]-l_coords[5])**2))/2
 		self.centre = [(l_coords[0]+l_coords[3])/2,(l_coords[1]+l_coords[4])/2,(l_coords[2]+l_coords[5])/2]
 		self.daddy  = cellName
+		self.l_coords = l_coords
 
 	def setCellParentProps(self,centralPos,rotation,r,g,b):
 		self._centralPos = centralPos	
@@ -213,6 +172,7 @@ class somaDisk(BaseObject):
 		self.radius = (sqrt((l_coords[0]-l_coords[3])**2+(l_coords[1]-l_coords[4])**2+(l_coords[2]-l_coords[5])**2))/2
 		self.centre = [(l_coords[0]+l_coords[3])/2,(l_coords[1]+l_coords[4])/2,(l_coords[2]+l_coords[5])/2]
 		self.daddy  = cellName
+		self.l_coords = l_coords
 
 	def setCellParentProps(self,centralPos,rotation,r,g,b):
 		self._centralPos = centralPos	
@@ -313,3 +273,47 @@ class cCylinder(BaseObject):
 		glRotate(*[i*-1 for i in self.rotation[:4]])		#bring back to original orientation
   		
   		glPopMatrix()	
+  		
+class cLine(BaseObject):
+	"""
+	Class that defines a compartment line.
+	"""
+	
+	def __init__(self, parent,l_coords,cellName=[]):
+		"""
+		Constructor.
+		"""
+		super(cLine, self).__init__(parent)
+		self.l_coords = l_coords
+		self.daddy = cellName
+
+
+	def setCellParentProps(self,centralPos,rotation,r,g,b):
+		self._centralPos = centralPos	
+		self.rotation = rotation	
+		self.r = r
+		self.g = g
+		self.b = b	
+
+	def render(self):
+		"""
+		Renders the compartment line.
+		"""
+		glPushMatrix()
+		glColor(self.r, self.g, self.b)
+		glRotate(*self.rotation[:4])		#get pen to the new orientation
+		glTranslate(*self._centralPos[:3])	#get pen to the new position
+		
+		glLineWidth(2)
+		glDisable(GL_LIGHTING)
+		glBegin(GL_LINES)
+  	    	glVertex3f(self.l_coords[0],self.l_coords[1],self.l_coords[2])
+	    	glVertex3f(self.l_coords[3],self.l_coords[4],self.l_coords[5])
+	    	glEnd()		
+	    	glEnable(GL_LIGHTING)
+		
+		glTranslate(*[i*-1 for i in self._centralPos[:3]])	#get pen back to the origin
+		glRotate(*[i*-1 for i in self.rotation[:4]])		#get pen to the original orientation
+		
+		glPopMatrix()	
+ 
