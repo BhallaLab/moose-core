@@ -101,6 +101,7 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 	self.viz=0
 	self.vizObjectNames=[]
 	self.vizObjects=[]
+        self.allinds=[]
 	#self.vizColorMapIndex=[]
 	self.colorMap=[]
     	self.stepVals=[]

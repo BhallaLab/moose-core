@@ -15,7 +15,7 @@ mc=moose.context
 
 
 class updatepaintGL(PyGLWidget):
-	
+
     def paintGL(self):
         PyGLWidget.paintGL(self)
 	self.render()
@@ -56,12 +56,30 @@ class updatepaintGL(PyGLWidget):
 		r=mc.pathToId(name+self.moosepath)
 		d=float(mc.getField(r,self.variable))
                 vals.append(d)
+
 	inds = digitize(vals,self.stepVals)
+        self.allinds.append(inds)
+        #f = open('filename','a')
+        #pickle.dump(inds,f)
+        #f.close()
 
 	for i in range(0,len(self.vizObjects)):
 		self.vizObjects[i].r,self.vizObjects[i].g,self.vizObjects[i].b=self.colorMap[inds[i]-1]
 
 	self.updateGL()
+
+    def saveVizAll(self, filename):
+        print 'Saving the Visualization'
+        openGLConfig = []
+        for i in range(0,len(self.vizObjects)):
+            openGLConfig.append([self.vizObjects[i].__class__.__name__,self.vizObjects[i].l_coords, self.vizObjects[i].daddy,self.vizObjects[i]._centralPos,self.vizObjects[i].rotation])
+        
+        self.allinds.append(openGLConfig)
+
+        f = open(filename,'w')
+        pickle.dump(self.allinds,f)
+        f.close()
+
     
     def setGridCompartmentName(self,name):
     	self.gridCompartmentName = name
@@ -220,8 +238,8 @@ class newGLWindow(QtGui.QMainWindow):
         sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
         MainWindow.setSizePolicy(sizePolicy)
         self.centralwidget = QtGui.QWidget(MainWindow)
-        self.horizontalLayout = QtGui.QHBoxLayout(self.centralwidget)
-        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.verticalLayout = QtGui.QVBoxLayout(self.centralwidget)
+        self.verticalLayout.setObjectName("horizontalLayout")
 	self.mgl = updatepaintGL(self.centralwidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
@@ -229,7 +247,9 @@ class newGLWindow(QtGui.QMainWindow):
         sizePolicy.setHeightForWidth(self.mgl.sizePolicy().hasHeightForWidth())
         self.mgl.setSizePolicy(sizePolicy)
         self.mgl.setObjectName("mgl")
-        self.horizontalLayout.addWidget(self.mgl)
+        self.verticalLayout.addWidget(self.mgl)
+        
+
         MainWindow.setCentralWidget(self.centralwidget)
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", self.name, None, QtGui.QApplication.UnicodeUTF8))
 
