@@ -671,18 +671,16 @@ template<> class Conv< PrepackedBuffer >
  * Trying to do a partial specialization.
  * The buffer here starts with the # of entries in the vector
  * Then it has the actual entries.
- */
 template< class T > class Conv< vector< T > >
 {
 	public:
 		Conv( const double* buf )
 		{
-			unsigned int numEntries = 
-				*reinterpret_cast< const unsigned int* >( buf );
-			buf += sizeof( unsigned int );
+			unsigned int numEntries = *buf;
+			buf += 1;
 			assert( numEntries < UnreasonablyLargeArray );
 			val_.resize( numEntries );
-			size_ = sizeof( unsigned int );
+			size_ = 1;
 			for ( unsigned int i = 0; i < numEntries; ++i ) {
 				Conv< T > arg( buf );
 				val_[ i ] = *arg;
@@ -695,7 +693,7 @@ template< class T > class Conv< vector< T > >
 		Conv( const vector< T >& arg )
 			: val_( arg )
 		{
-			size_ = sizeof( unsigned int );
+			size_ = 1;
 			for ( unsigned int i = 0; i < val_.size(); ++i ) {
 				Conv< T > temp( val_[ i ] );
 				size_ += temp.size();
@@ -740,6 +738,184 @@ template< class T > class Conv< vector< T > >
 	private:
 		unsigned int size_;
 		vector< T > val_;
+};
+ */
+
+/**
+ * Trying to do a partial specialization.
+ * This works with anything that has a uniform size.
+ * Assume strings are the only exception.
+ * The first double in the vector vec_ holds the # of data entries that
+ * follow it. This excludes the space for the size entry itself.
+ */
+template< class T > class Conv< vector< T > >
+{
+	public:
+		Conv( const double* buf )
+		{
+			unsigned int numEntries = *buf;
+			unsigned int numDoubles = 
+				1 + ( sizeof( T ) * numEntries - 1 ) / sizeof( double );
+
+			vec_.insert( vec_.end(), buf, buf + numDoubles + 1 );
+		}
+
+		Conv( const vector< T >& arg )
+		{
+			if ( arg.size() == 0 ) {
+				vec_.resize( 0 );
+				return;
+			}
+
+			unsigned int entrySize = sizeof( T );
+			unsigned int numDoubles = 
+				1 + ( entrySize * arg.size() - 1 ) / sizeof( double );
+			// One extra for the size field.
+			vec_.resize( 1 + numDoubles );
+			vec_[0] = arg.size();
+			memcpy( &vec_[1], &arg[0], arg.size() * entrySize );
+		}
+
+		/** 
+		 * Returns ptr to entire array
+		 */
+		const double* ptr() const
+		{
+			if ( vec_.size() > 0 )
+				return &vec_[0];
+			return 0;
+		}
+
+		/** 
+		 * Size of returned array in doubles.
+		 */
+		unsigned int size() const
+		{
+			return vec_.size();
+		}
+
+		const vector< T > operator*() const {
+			if ( vec_.size() > 0 ) {
+				unsigned int numEntries = vec_[0];
+				vector< T > ret( numEntries );
+				memcpy( &ret[0], &vec_[1], sizeof( T ) * numEntries );
+				return ret;
+			}
+			return vector< T >();
+		}
+
+		unsigned int val2buf( double* buf ) const {
+			if ( vec_.size() > 0 ) {
+				memcpy( buf, &vec_[0], vec_.size() * sizeof( double ) );
+				return vec_.size();
+			}
+			return 0;
+		}
+
+		static void str2val( vector< T >& val, const string& s ) {
+			cout << "Specialized Conv< vector< T > >::str2val not done\n";
+		}
+
+		static void val2str( string& s, const vector< T >& val ) {
+			cout << "Specialized Conv< vector< T > >::val2str not done\n";
+		}
+		static string rttiType() {
+			string ret = "vector<" + Conv< T >::rttiType() + ">";
+			return ret;
+		}
+	private:
+		vector< double > vec_;
+};
+
+/// Here entry 0 is the # of entries, and entry 1 is the total size of
+/// the Conv, including two places for # entry 0 and entry 1.
+template<> class Conv< vector< string > >
+{
+	public:
+		Conv( const double* buf )
+		{
+			// unsigned int numEntries = buf[0];
+			unsigned int size = buf[1];
+			vec_.resize( 0 );
+			vec_.insert( vec_.end(), buf, buf + size );
+		}
+
+		Conv( const vector< string >& arg )
+		{
+			if ( arg.size() == 0 ) {
+				vec_.resize( 0 );
+				return;
+			}
+			unsigned int totNumChars = 0;
+			for ( unsigned int i = 0; i < arg.size(); ++i ) {
+				totNumChars += arg[i].length() + 1;
+			}
+			unsigned int charsInDoubles = 
+				1 + ( totNumChars - 1 )/sizeof( double );
+
+			vec_.resize( 2 + charsInDoubles );
+			vec_[0] = arg.size();
+			vec_[1] = vec_.size();
+			char* ptr = reinterpret_cast< char*> (&vec_[ 2 ] );
+			for (unsigned int i = 0; i < arg.size(); ++i ) {
+				strcpy( ptr, arg[i].c_str() );
+				ptr += arg[i].length() + 1;
+			}
+		}
+
+		/** 
+		 * Returns ptr to entire array
+		 */
+		const double* ptr() const
+		{
+			if ( vec_.size() > 0 )
+				return &vec_[0];
+			return 0;
+		}
+
+		/** 
+		 * Size of returned array in doubles.
+		 */
+		unsigned int size() const
+		{
+			return vec_.size();
+		}
+
+		const vector< string > operator*() const {
+			if ( vec_.size() > 1 ) {
+				unsigned int numEntries = vec_[0];
+				vector< string > ret( numEntries );
+				const char* ptr = reinterpret_cast< const char* > (&vec_[ 2 ] );
+				for (unsigned int i = 0; i < numEntries; ++i ) {
+					ret[i] = ptr;
+					ptr += ret[i].length() + 1;
+				}
+				return ret;
+			}
+			return vector< string >();
+		}
+
+		unsigned int val2buf( double* buf ) const {
+			if ( vec_.size() > 0 ) {
+				memcpy( buf, &vec_[0], vec_.size() * sizeof( double ) );
+				return vec_.size();
+			}
+			return 0;
+		}
+
+		static void str2val( vector< string >& val, const string& s ) {
+			cout << "Specialized Conv< vector< T > >::str2val not done\n";
+		}
+
+		static void val2str( string& s, const vector< string >& val ) {
+			cout << "Specialized Conv< vector< T > >::val2str not done\n";
+		}
+		static string rttiType() {
+			string ret = "vector<" + Conv< string >::rttiType() + ">";
+			return ret;
+		}
+	private:
+		vector< double > vec_;
 };
 
 #endif // _CONV_H
