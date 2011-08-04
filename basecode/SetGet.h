@@ -300,8 +300,10 @@ template< class A > class Field: public SetGet1< A >
 			if ( ret ) {
 				vec.resize( ret->size() );
 				for ( unsigned int i = 0; i < ret->size(); ++i ) {
-					Conv< A > conv( (*ret)[i] );
-					vec[i] = *conv;
+					if ( ( *ret )[i] ) {
+						Conv< A > conv( (*ret)[i] );
+						vec[i] = *conv;
+					}
 				}
 				return;
 			}

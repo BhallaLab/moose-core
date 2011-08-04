@@ -314,9 +314,9 @@ void Element::exec( const Qinfo* qi, const double* arg )
 			for ( DataHandler::iterator 
 				i = dh->begin(); i != dh->end(); ++i ) {
 				// if ( qi->execThread( elm->id(), i.index().data() ) ) {
-					f->op( Eref( elm, i.index() ), qi, data + offset );
-					count++;
+					count = i.linearIndex();
 					offset = ( count % ofid->numEntries) * ofid->entrySize;
+					f->op( Eref( elm, i.index() ), qi, data + offset );
 				// }
 			}
 		} else {
