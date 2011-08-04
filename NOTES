@@ -14361,4 +14361,9 @@ testAsync.cpp:718.
 4 August 2011
 
 Cleaning up setVec/getVec to deal with field indices.
-Now it clears this.
+Now it clears this. Checkin 2872.
+
+Put in Shell::clearGetBuf() in SetGet::dispatchGet to clean up after 'Get' 
+calls. Now clears a lot more tests. 
+
+============================================================================
