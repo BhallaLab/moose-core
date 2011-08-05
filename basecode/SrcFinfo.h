@@ -225,8 +225,6 @@ template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 			: SrcFinfo( name, doc )
 			{ ; }
 
-		// This version is general but inefficient as it uses an extra
-		// memcpy in val2buf.
 		void send( const Eref& e, ThreadId threadNum,
 			const T1& arg1, const T2& arg2 ) const
 		{
@@ -255,8 +253,6 @@ template <> class SrcFinfo2< double, double >: public SrcFinfo
 			: SrcFinfo( name, doc )
 			{ ; }
 
-		// This version is general but inefficient as it uses an extra
-		// memcpy in val2buf.
 		void send( const Eref& e, ThreadId threadNum,
 			double arg1, double arg2 ) const
 		{
