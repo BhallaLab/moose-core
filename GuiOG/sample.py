@@ -20,17 +20,30 @@ def getValue(value):
     updateColor(w,q,value)
 
 def playMovie():
-    print 'playing movie'
     t = newWin.slider.tickPosition()
-    newWin.playButton.setEnabled(False)
+#    newWin.playButton.setEnabled(False)
     while t<(len(q)-1):
-#        newWin.slider.setTickPosition(t)
+        
         time.sleep(0.2)
+        newWin.slider.setValue(t)
         updateColor(w,q,t)
         t += 1
+        
+#    newWin.playButton.setEnabled(True)
 
-    newWin.playButton.setEnabled(True)
-
+def playMovie1():
+    t = newWin.slider.tickPosition()
+    while t<(len(q)-1):
+        time.sleep(0.2)
+        newWin.slider.setValue(t)
+        #w.rotate([1,0,0],50)
+        w.rotate([0,1,1],1)
+        w.translate([0,0.05,0])
+        updateColor(w,q,t)
+        pic = w.grabFrameBuffer()
+        pic.save('movie/sim_'+str(t)+'.png','PNG')
+        t += 1
+        #w.rotate([1,0,0],-50)
 
 app = QtGui.QApplication(sys.argv) 
 newWin = newGLWindow()
@@ -42,21 +55,22 @@ q = pickle.load(f)
 f.close()
 
 
-newWin.playButton =  QtGui.QToolButton(newWin)
-newWin.playButton.setText('>')
+
+newWin.playButton =  QtGui.QPushButton(newWin)
+newWin.playButton.setIcon(QtGui.QIcon('run1.png'))
 newWin.connect(newWin.playButton,QtCore.SIGNAL('clicked()'),playMovie)
 
 
 newWin.slider = QtGui.QSlider(QtCore.Qt.Horizontal,newWin.centralwidget)
-newWin.verticalLayout.addWidget(newWin.playButton)
-#newWin.horizontalLayout.addWidget(newWin.slider)
-
 newWin.verticalLayout.addWidget(newWin.slider)
+newWin.verticalLayout.addWidget(newWin.playButton)
+
+
 newWin.slider.setRange(0,len(q)-2)
 newWin.slider.setTickPosition(0)
 newWin.connect(newWin.slider, QtCore.SIGNAL('valueChanged(int)'), getValue)
 
-#newWin.setWindowState(Qt.WindowMaximized)
+newWin.setWindowState(Qt.WindowMaximized)
 w =  newWin.mgl
 cnf = q[len(q)-1]
 for i in range(len(cnf)):
@@ -64,9 +78,11 @@ for i in range(len(cnf)):
     a.setCellParentProps(cnf[i][3],cnf[i][4],1,0,0)
     w.vizObjects.append(a)
 w.setColorMap()
-w.updateGL()
 
-    
+#w.translate([0,-3,-75])
+#w.rotate([1,0,0],-50)
+
+w.updateGL()
 
          
 sys.exit(app.exec_())
