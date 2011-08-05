@@ -32,14 +32,16 @@ SingleMsg::~SingleMsg()
 void SingleMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const
 {
 	if ( q->src().element() == e1_ ) { // forward message
-		if ( e2_->dataHandler()->isDataHere( i2_ ) &&
+		if ( q->src().dataId == i1_ && 
+			e2_->dataHandler()->isDataHere( i2_ ) &&
 			q->execThread( e2_->id(), i2_.data() ) ) {
 			const OpFunc* f = e2_->cinfo()->getOpFunc( fid );
 			f->op( Eref( e2_, i2_ ), q, arg );
 			return;
 		}
 	} else {
-		if ( e1_->dataHandler()->isDataHere( i1_ ) &&
+		if ( q->src().dataId == i2_ && 
+			e1_->dataHandler()->isDataHere( i1_ ) &&
 			q->execThread( e1_->id(), i1_.data() ) ) {
 			const OpFunc* f = e1_->cinfo()->getOpFunc( fid );
 			f->op( Eref( e1_, i1_ ), q, arg );
