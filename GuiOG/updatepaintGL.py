@@ -13,9 +13,8 @@ import moose
 import pickle
 mc=moose.context
 
-
 class updatepaintGL(PyGLWidget):
-
+	
     def paintGL(self):
         PyGLWidget.paintGL(self)
 	self.render()
@@ -51,20 +50,39 @@ class updatepaintGL(PyGLWidget):
 	self.selectedObjects.render()	
 	
     def updateViz(self):
-	vals=[]
-	for name in self.vizObjectNames:
-		r=mc.pathToId(name+self.moosepath)
-		d=float(mc.getField(r,self.variable))
-                vals.append(d)
+    	if self.gridRadiusViz==0:
+		vals=[]
+		for name in self.vizObjectNames:
+			r=mc.pathToId(name+self.moosepath)
+			d=float(mc.getField(r,self.variable))
+                        vals.append(d)
+		inds = digitize(vals,self.stepVals)
 
-	inds = digitize(vals,self.stepVals)
-        self.allinds.append(inds)
-        #f = open('filename','a')
-        #pickle.dump(inds,f)
-        #f.close()
+                self.allinds.append(inds)
 
-	for i in range(0,len(self.vizObjects)):
-		self.vizObjects[i].r,self.vizObjects[i].g,self.vizObjects[i].b=self.colorMap[inds[i]-1]
+		for i in range(0,len(self.vizObjects)):
+			self.vizObjects[i].r,self.vizObjects[i].g,self.vizObjects[i].b=self.colorMap[inds[i]-1]
+
+	else:
+		vals=[]
+		vals_2=[]
+		for name in self.vizObjectNames:
+                    r=mc.pathToId(name+self.moosepath)
+                    d=float(mc.getField(r,self.variable))
+                    
+
+                    r2=mc.pathToId(name+self.moosepath_2)
+                    d2=float(mc.getField(r2,self.variable_2))
+				
+                    vals.append(d)
+                    vals_2.append(d2)
+			
+		inds = digitize(vals,self.stepVals)
+		inds_2 = digitize(vals_2,self.stepVals_2)
+
+		for i in range(0,len(self.vizObjects)):
+			self.vizObjects[i].r,self.vizObjects[i].g,self.vizObjects[i].b=self.colorMap[inds[i]-1]
+			self.vizObjects[i].radius=self.indRadius[inds_2[i]-1]
 
 	self.updateGL()
 
@@ -72,6 +90,7 @@ class updatepaintGL(PyGLWidget):
         print 'Saving the Visualization'
         openGLConfig = []
         for i in range(0,len(self.vizObjects)):
+
             openGLConfig.append([self.vizObjects[i].__class__.__name__,self.vizObjects[i].l_coords, self.vizObjects[i].daddy,self.vizObjects[i]._centralPos,self.vizObjects[i].rotation])
         
         self.allinds.append(openGLConfig)
@@ -81,11 +100,11 @@ class updatepaintGL(PyGLWidget):
         f.close()
 
     
-    def setGridCompartmentName(self,name):
-    	self.gridCompartmentName = name
+    def setSpecificCompartmentName(self,name):
+    	self.specificCompartmentName = name
 			
     def drawNewCell(self, cellName, style = 2,cellCentre=[0.0,0.0,0.0],cellAngle=[0.0,0.0,0.0,0.0]):	
-    	#***cellName = moosepath in the canvas***
+    	#***cellName = moosepath in the GL canvas***
 	an=moose.Neutral(cellName)
 	all_ch=an.childList 					#all children
 	ch = self.get_childrenOfField(all_ch,'Compartment')	#compartments only
@@ -103,9 +122,11 @@ class updatepaintGL(PyGLWidget):
     	if self.viz==1:				#fix
     		self.selectionMode=0
     		
+    	if (style==1) or (style==2):		#ensures soma is drawn as a sphere
+    		self.specificCompartmentName='soma'
 
 	if (self.selectionMode):		#self.selectionMode = 1,cells are pickable
-		newCell = cellStruct(self,l_coords,cellName,style,gridCompartmentName=self.gridCompartmentName)
+		newCell = cellStruct(self,l_coords,cellName,style,specificCompartmentName=self.specificCompartmentName)
 		newCell._centralPos = cellCentre
 		newCell.rotation = cellAngle
 		self.sceneObjectNames.append(cellName)
@@ -113,11 +134,10 @@ class updatepaintGL(PyGLWidget):
 		if self.viz==1:			#fix
 			self.vizObjects.append(newCell)
 			self.vizObjectNames.append(cellName)
-			#self.vizColorMapIndex.append(colormap.index)
 			
 	else:					#self.selectionMode=0,comapartments are pickable
 		for i in range(0,len(l_coords),1):
-			if (moose.Compartment(ch[i]).name=='soma'):			#drawing of the soma in style 0
+			if (moose.Compartment(ch[i]).name==self.specificCompartmentName):#drawing of the select compartment in style 0
 				if style==0:
 					compartmentLine=somaDisk(self,l_coords[i],cellName)
 					compartmentLine._centralPos = cellCentre
@@ -128,19 +148,13 @@ class updatepaintGL(PyGLWidget):
 	    				if self.viz==1:
 						self.vizObjects.append(compartmentLine)
 						self.vizObjectNames.append(l_coords[i][7])
+				
 				elif (style==1) or (style==2):				#drawing of the soma in style 1&2
-					compartmentLine = somaSphere(self,l_coords[i],cellName) 
-			else:								#to draw compartments other than soma
-				if style==1:
-					compartmentLine=cLine(self,l_coords[i],cellName)
+					compartmentLine = somaSphere(self,l_coords[i],cellName) 	#$
 					
-				elif style==2:
-					compartmentLine=cCylinder(self,l_coords[i],cellName)
-			
-			if (moose.Compartment(ch[i]).name==self.gridCompartmentName):	#grid view, any choice to compartment as a disk
-				if style==3:
-					compartmentLine=somaDisk(self,[0,0,0,0,0,0,l_coords[i][7]],cellName)
-					compartmentLine.radius = 0.25
+				elif style==3:						#grid view, any choice to compartment as a disk
+					compartmentLine=somaDisk(self,[0,0,0,0,0,0,0,l_coords[i][7]],cellName)
+					compartmentLine.radius = 0.20
 					compartmentLine._centralPos = cellCentre
 					compartmentLine.rotation = cellAngle
 					self.sceneObjectNames.append(l_coords[i][7])
@@ -148,9 +162,17 @@ class updatepaintGL(PyGLWidget):
 	    		
 	    				if self.viz==1:
 						self.vizObjects.append(compartmentLine)
-						self.vizObjectNames.append(l_coords[i][7])	
+						self.vizObjectNames.append(l_coords[i][7])
+				
+			else:								#to draw compartments other than soma
+				if style==1:
+					compartmentLine=cLine(self,l_coords[i],cellName)	#$
+					
+				elif style==2:
+					compartmentLine=cCylinder(self,l_coords[i],cellName)	#$
 			
-			if (style!=0)and(style!=3):					#necessary
+			
+			if (style==1)or(style==2):					#necessary, appends includ the soma as well (= include code in "$" areas)
 				compartmentLine._centralPos = cellCentre
 				compartmentLine.rotation = cellAngle
 				self.sceneObjectNames.append(l_coords[i][7])
@@ -196,7 +218,7 @@ class updatepaintGL(PyGLWidget):
 	        ch.append(all_ch[i])
         return tuple(ch)  
         
-    def setColorMap(self,vizMinVal=-0.040,vizMaxVal=-0.120,moosepath='',variable='Vm',cMap='jet'):
+    def setColorMap(self,vizMinVal=-0.1,vizMaxVal=0.07,moosepath='',variable='Vm',cMap='/home/chaitu/Desktop/GuiOG/oglfunc/colors/jet'):
     	self.colorMap=[]
     	self.stepVals=[]
     	self.moosepath=moosepath
@@ -209,11 +231,17 @@ class updatepaintGL(PyGLWidget):
 			g=min((2.0*x)/steps,(-2.0*x)/steps+2)
 			self.colorMap.append([r,g,b])
 	else:
-		f = open(('oglfunc/colors/'+cMap),'r')
+		f = open(cMap,'r')
 		self.colorMap = pickle.load(f)
 		steps = len(self.colorMap)
 		f.close()
 	self.stepVals = arange(vizMinVal,vizMaxVal,(vizMaxVal-vizMinVal)/steps)
+	
+    def setColorMap_2(self,vizMinVal_2=-0.1,vizMaxVal_2=0.07,moosepath_2='',variable_2='Vm'):	#colormap for the radius - grid view case
+    	self.moosepath_2 = moosepath_2
+    	self.variable_2 = variable_2
+    	self.stepVals_2 = arange(vizMinVal_2,vizMaxVal_2,(vizMaxVal_2-vizMinVal_2)/30)		#assigned a default of 30 steps
+    	self.indRadius = arange(0.05,0.20,0.005)						#radius equivalent colormap 
 	
 class newGLWindow(QtGui.QMainWindow):
     def __init__(self, parent = None):
@@ -240,7 +268,7 @@ class newGLWindow(QtGui.QMainWindow):
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.verticalLayout = QtGui.QVBoxLayout(self.centralwidget)
         self.verticalLayout.setObjectName("horizontalLayout")
-	self.mgl = updatepaintGL(self.centralwidget)
+        self.mgl = updatepaintGL(self.centralwidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -248,16 +276,17 @@ class newGLWindow(QtGui.QMainWindow):
         self.mgl.setSizePolicy(sizePolicy)
         self.mgl.setObjectName("mgl")
         self.verticalLayout.addWidget(self.mgl)
-        
-
+	        
         MainWindow.setCentralWidget(self.centralwidget)
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", self.name, None, QtGui.QApplication.UnicodeUTF8))
-
+	
 if __name__ == '__main__':
-	app = QtGui.QApplication(sys.argv)
-	widget = newGLWindow()
-    	widget.show()
-    	app.exec_()
+        app = QtGui.QApplication(sys.argv)
+        widget = newGLWindow()
+        widget.show()
+        app.exec_()
+
+
 
 class newGLSubWindow(QtGui.QMdiSubWindow):
     """This is to customize MDI sub window for our purpose.
