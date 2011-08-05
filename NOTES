@@ -14366,5 +14366,9 @@ Now it clears this. Checkin 2872.
 Put in Shell::clearGetBuf() in SetGet::dispatchGet to clean up after 'Get' 
 calls. Now clears a lot more tests.  Checkin 2873.
 
-Fixed up Conv< vector< T > > for T = regular fields and strings.
+Fixed up Conv< vector< T > > for T = regular fields and strings. Checkin 2874.
+
+Next failure is at a rather involved test of messaging.
 ============================================================================
+5 August 2011
+Fixed messaging bug in SingleMsg.
