@@ -289,38 +289,37 @@ class Shell
 		// Thread and MPI handling functions
 		////////////////////////////////////////////////////////////////
 
-		void process( const Eref& e, ProcPtr p );
-		
 		/**
 		 * Sets up master message that interconnects all shells on all
 		 * nodes, and other initialization of basic messages.
 		 */
-		void connectMasterMsg();
+		static void connectMasterMsg();
 		/**
 		 * Assigns the hardware availability. Assumes that each node will
 		 * have the same number of cores available.
 		 */
-		void setHardware( bool isSingleThreaded, 
+		static void setHardware( unsigned int numThreads, 
 			unsigned int numCores, unsigned int numNodes, 
 			unsigned int myNode );
 
 		static unsigned int myNode();
 		static unsigned int numNodes();
 		static unsigned int numCores();
+		static unsigned int numProcessThreads();
 
 		/**
 		 * Stub for eventual function to handle load balancing. This must
 		 * be called to set up default groups.
 		 */
-		void loadBalance();
+		static void loadBalance();
 
-		void launchParser();
+		static void launchParser();
 
 		/**
-	 	 * True when the parser is in a call which is being blocked becaus
+	 	 * True when the parser is in a call which is being blocked because
 		 * it requires the event loop to complete some actions.
 		 */
-		bool inBlockingParserCall() const;
+		static bool inBlockingParserCall();
 
 		/**
 		 * True in single-threaded mode. This is a special mode of
@@ -331,23 +330,28 @@ class Shell
 		 * possible, and even recommended, to run in multithread mode
 		 * even when the system has just one core to run it on.
 		 */
-		bool isSingleThreaded() const;
+		static bool isSingleThreaded();
+
+		/**
+		 * True as long as the main process loop is looping
+		 */
+		static bool keepLooping();
 
 		/**
 		 * This function sets up the threading for the entire system.
 		 * It creates all the worker threads and the threads for
 		 * handling MPI and handling shell requests.
 		 */
-		void launchThreads();
+		static void launchThreads();
 
 		/**
 		 * This function closes up shop with all the threads.
 		 */
-		void joinThreads();
+		static void joinThreads();
 
-		pthread_mutex_t* parserMutex() const; 
+		static pthread_mutex_t* parserMutex(); 
 
-		pthread_cond_t* parserBlockCond() const; 
+		static pthread_cond_t* parserBlockCond(); 
 
 		/**
 		 * Checks for highest 'val' on all nodes
@@ -357,43 +361,6 @@ class Shell
 		////////////////////////////////////////////////////////////////
 		// Functions for handling field Set/Get operations
 		////////////////////////////////////////////////////////////////
-
-		/**
-		 * Local node function that orchestrates the assignment. It picks
-		 * the assignment mode to operate the appropriate innerSet 
-		 * function.
-		void handleSet( const Eref& e, const Qinfo*q,
-			Id id, DataId d, FuncId fid, PrepackedBuffer arg );
-
-		static void dispatchSet( const ObjId& oid, FuncId fid, 
-			const char* args, unsigned int size );
-
-		static void dispatchSetVec( const ObjId& oid, FuncId fid, 
-			const PrepackedBuffer& arg );
-
-		void innerDispatchSet( Eref& sheller, const ObjId& oid, 
-			FuncId fid, const PrepackedBuffer& arg );
-
-		static const vector< double* >* awaitGottenData();
-		 */
-		/*
-		const vector< char* >& dispatchGet(
-			const Eref& sheller,
-			const ObjId& tgt, FuncId fid,
-			const PrepackedBuffer& buf );
-			*/
-		/*
-		static const vector< char* >& dispatchGet( 
-			const ObjId& tgt, const string& field, const SetGet* sg,
-			unsigned int& numGetEntries );
-
-		const vector< char* >& innerDispatchGet( 
-			const Eref& sheller, const ObjId& tgt, FuncId tgtFid,
-			unsigned int numGetEntries );
-
-		void handleGet( const Eref& e, const Qinfo*q,
-			Id id, DataId index, FuncId fid, unsigned int numTgt );
-			*/
 
 		void recvGet( const Eref& e, const Qinfo* q, PrepackedBuffer pb );
 
@@ -452,19 +419,6 @@ class Shell
 		 static void cleanSimulation();
 
 		/**
-		 * Clears out the three temporary Msgs that are used for 
-		 * assignments: Reduce, AssignVec and Assignment
-		 */
-		void clearSetMsgs();
-
-		/**
-		 * Flag: True when the waitForGetAck has requested that the 
-		 * ProcessLoop go around one more time to harvest pending queue
-		 * entries from other threads.
-		 */
-		unsigned int anotherCycleFlag_;
-
-		/**
 		 * set the gettingVector_ flag 
 		 */
 		void expectVector( bool flag );
@@ -494,25 +448,29 @@ class Shell
 		MsgId latestMsgId_; // Hack to communicate newly made MsgIds.
 
 		/**
-		 * Flag: True when system is operating in single threaded mode.
-		 * Used primarily for unit tests.
-		 */
-		bool isSingleThreaded_;
-
-		/**
 		 * Flag: True when the parser thread is blocked waiting for 
 		 * some system call to be handled by the threading and the 
 		 * MPI connected nodes.
 		 */
-		bool isBlockedOnParser_;
-
+		static bool isBlockedOnParser_;
 
 		/**
-		 * Number of CPU cores in system. Specifies how many working threads
-		 * will be assigned. Additional threads are created for parser
-		 * and graphics.
+		 * Flag: Tells the ProcessLoop to keep on going.
+		 * Should only be altered during a barrier.
+		 */
+		static bool keepLooping_;
+
+		/**
+		 * Number of CPU cores in system. 
 		 */
 		static unsigned int numCores_;
+
+		/**
+		 * Number of threads dedicated to the ProcessLoop.
+		 * The parser thread is the master thread.
+		 * Additional threads may be created for graphics, but not now.
+		 */
+		 static unsigned int numProcessThreads_;
 
 		/**
 		 * Number of nodes in MPI-based system. Each node may have many
@@ -532,54 +490,48 @@ class Shell
 		 */
 		static ProcInfo p_; 
 
-		vector< ProcInfo > threadProcs_;
+		static vector< ProcInfo > threadProcs_;
 
 		/**
 		 * Array of threads, initialized in launchThreads.
 		 */
-		pthread_t* threads_;
-		pthread_t* gThread_; /// graphics thread.
-		pthread_attr_t *attr_;
+		static pthread_t* threads_;
+		static pthread_t* gThread_; /// graphics thread.
+		static pthread_attr_t *attr_;
 
-		unsigned int numAcks_;
-		vector< unsigned int > acked_;
-		FuncBarrier* barrier1_;
-		FuncBarrier* barrier2_;
-		FuncBarrier* barrier3_;
+		static unsigned int numAcks_;
+		static vector< unsigned int > acked_;
+		static FuncBarrier* barrier1_;
+		static FuncBarrier* barrier2_;
+		static FuncBarrier* barrier3_;
 
 		/**
 		 * Pthreads mutex for synchronizing parser calls with underlying
 		 * thread work cycle. Void here so we can compile without pthreads.
 		 */
-		pthread_mutex_t* parserMutex_; 
+		static pthread_mutex_t* parserMutex_; 
 
 		/**
 		 * Pthreads conditional for synchronizing parser calls with 
 		 * thread work cycle. Void here so we can compile without pthreads.
 		 */
-		pthread_cond_t* parserBlockCond_; 
+		static pthread_cond_t* parserBlockCond_; 
 
 		/**
 		 * Flag to tell system to reinitialize. We use this to defer the
 		 * actual operation to the 'process' call for a clean reinit.
 		 */
-		bool doReinit_;
+		static bool doReinit_;
 		/**
 		 * Simulation run time
 		 */
-		double runtime_;
+		static double runtime_;
 
 		/// Current working Element
 		Id cwe_;
 
 		/// Return value from reduceMax calculation for array sizes.
 		unsigned int maxIndex_;
-
-		/// Keeps track of allocated assignmentMsg so we can deallocate.
-		MsgId assignmentMsg_;
-
-		/// Keeps track of allocated assignVecMsg so we can deallocate.
-		MsgId assignVecMsg_;
 
 		/// Keeps track of allocated reduceMsg so we can deallocate.
 		MsgId reduceMsg_;

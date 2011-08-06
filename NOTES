@@ -14382,10 +14382,55 @@ entry with the final dataIndex.
 Fixed up the structuralQ handling. But it still crashes.
 
 ============================================================================
-
 6 August 2011.
 I've run into issues with the distinction between single-thread and regular
 mode which does have parser plus ProcessLoop threads. Need to clarify.
 The doCreate function never returns, I suspect because of this.
 
-Meanwhile, minor fixes checked in.
+Meanwhile, minor fixes checked in as 2877.
+
+Currently I have four inputs to the number of threads and how to execute
+	Shell::numCores(), which is a static.
+	Clock::keepLooping(), which is non-static.
+	Shell::isSingleThreaded(), which is non-static.
+	Clock::isRunning: non-static.
+
+
+NumThreads and numCores are actually independent. numCores should be a hardware
+thing and numThreads should really be specified as numProcessThreads,
+which could even be zero if the entire simulator including parser are all on 
+just one thread.
+We could have multiple threads on a single core machine, and we could have
+a single thread running on a multicore machine, so numCores is irrelevant
+except for determining defaults at startup.
+
+The keepLooping flag should be a static on Shell.
+The isSingleThreaded() function should be true if numProcessThreads == 0.
+
+Possible states are:
+	keepLooping	isSingleThreaded	Notes
+	0		0			Idle, multithread
+	0		1			Idle, single thread
+	1		0			Running, multithread
+	1		1			running, single thread.
+
+The following operations are handled differently in single vs multi thread mode:
+	- addToQ and variants do not need to lock mutex in STM.
+	- on the flip side, SwapQ does not need its matching mutex in STM.
+	- Qinfo::waitProcCycles depends on STM and also on keepLooping.
+	- Qinfo::execThread(...) must always return true in STM.
+	- Msg::exec and variants, if they have precomputed thread allocations
+		for execution of subsets, must recompute depending on # of 
+		threads
+	- ProcessLoop should not set up barriers in STM.
+
+Steps:
+- Static-ize thread info flags, and put all on Shell.
+- Separate out Clock operations of running from Shell operations of looping.
+- Put in Shell the control operations for looping.
+- fix up initial thread specification
+- March through operations that depend on threading state.
+
+
+
+============================================================================
