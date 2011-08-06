@@ -42,7 +42,8 @@
  */
 void Shell::initAck()
 {
-	if ( isSingleThreaded_ ) {
+	Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );
+	if ( isSingleThreaded_ || !clock->keepLooping() ) {
 		numAcks_ = 0; 
 	} else {
 		pthread_mutex_lock( parserMutex_ );
@@ -59,7 +60,8 @@ void Shell::initAck()
  */
 void Shell::waitForAck()
 {
-	if ( isSingleThreaded_ ) {
+	Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );
+	if ( isSingleThreaded_ || !clock->keepLooping() ) {
 		while ( isAckPending() ) {
 			Qinfo::clearQ( p_.threadIndexInGroup );
 	// Tried this to get it to work in single-thread mode. Doesn't work.
@@ -72,49 +74,6 @@ void Shell::waitForAck()
 			pthread_cond_wait( parserBlockCond_, parserMutex_ );
 		isBlockedOnParser_ = 0;
 		pthread_mutex_unlock( parserMutex_ );
-	}
-}
-
-/**
- * test for completion of request, after a full cycle. Used for get and
- * getVec calls where we may have the ack come before the data on
- * the first cycle.
- * This MUST be preceded by an initAck call.
- */
-void Shell::waitForGetAck()
-{
-	if ( isSingleThreaded_ ) {
-		while ( isAckPending() )
-			Qinfo::clearQ( p_.threadIndexInGroup );
-	} else {
-		while ( isAckPending() )
-			pthread_cond_wait( parserBlockCond_, parserMutex_ );
-		isBlockedOnParser_ = 0;
-		// Now we have cleared the first cycle in the shellEventLoop.
-		// The mutex is now locked again.
-		// So we wait to go around again:
-		anotherCycleFlag_ = 2;
-		while ( anotherCycleFlag_ > 0 )
-			pthread_cond_wait( parserBlockCond_, parserMutex_ );
-		pthread_mutex_unlock( parserMutex_ );
-		/*
-		** This was here for debugging.
-		if ( numGetVecReturns_ > 1 ) {
-			cout << myNode_ << ": Shell::waitForGetAck: #= " << numGetVecReturns_ << endl << flush;
-			bool isBad = 0;
-			for ( unsigned int i = 0; i < numGetVecReturns_; ++i ) {
-				if ( getBuf_[i] == 0 )  {
-					cout << "( " << i << ", 0x0)	";
-					isBad = 1;
-				} else {
-					cout << "( " << i << ", " << *reinterpret_cast< const double* >( getBuf_[i] ) << ")	";
-				}
-			}
-			cout << endl;
-			if ( isBad ) 
-				assert( 0 );
-		}
-		*/
 	}
 }
 

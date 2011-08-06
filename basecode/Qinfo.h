@@ -97,6 +97,12 @@ class Qinfo
 		}
 
 		/**
+		 * Utility function to get the data size of the current Qinfo,
+		 * provided it resides on the InQ.
+		 */
+		unsigned int dataSizeOnInQ() const;
+
+		/**
 		 * Add data to the queue. Fills up an entry in the qBuf as well
 		 * as putting the corresponding data.
 		 */
@@ -226,6 +232,7 @@ class Qinfo
 		 * group as it goes along.
 		 */
 		static void doMpiStats( unsigned int bufsize, const ProcInfo* p );
+
 
 		/**
 		 * Returns a pointer to the data buffer in the specified inQ
@@ -409,15 +416,19 @@ class Qinfo
 
 		/**
 		 * This contains pointers to Queue entries requesting functions that
-		 * change the model structure. This includes creation, deletion,
+		 * change the model structure.
+		 * We only need to point to the original Queue entry, because it
+		 * sits safely in the InQ. Likewise, its data is unchanged sitting
+		 * in the InQ. 
+		 * Operations using the structuralQ include creation, deletion,
 		 * resizing, and movement of Elements and Msgs. These functions
 		 * must be carried out at a time when nothing else is being
 		 * computed, and no iterators are pending. Currently happens during
 		 * swapQ, and is serial and single-threaded.
 		 */
 		// static vector< double > structuralQ_;
-		static vector< Qinfo > structuralQinfo_;
-		static vector< double > structuralQdata_;
+		static vector< const Qinfo* > structuralQinfo_;
+		// static vector< double > structuralQdata_;
 
 		/**
 		 * The reduceQ manages requests to 'reduce' data from many sources.

@@ -14371,4 +14371,21 @@ Fixed up Conv< vector< T > > for T = regular fields and strings. Checkin 2874.
 Next failure is at a rather involved test of messaging.
 ============================================================================
 5 August 2011
-Fixed messaging bug in SingleMsg.
+Fixed messaging bug in SingleMsg. Checkin 2875.
+
+Here we have a problem with the structural Q copy: we don't know how
+big the data contents of Qinfo are. This was bodged together for inQ,
+but it is buggy, and I see I may need to do it also for mpiQ. Perhaps
+fall back to having it inQ independent by guaranteeing an extra Qinfo
+entry with the final dataIndex.
+
+Fixed up the structuralQ handling. But it still crashes.
+
+============================================================================
+
+6 August 2011.
+I've run into issues with the distinction between single-thread and regular
+mode which does have parser plus ProcessLoop threads. Need to clarify.
+The doCreate function never returns, I suspect because of this.
+
+Meanwhile, minor fixes checked in.
