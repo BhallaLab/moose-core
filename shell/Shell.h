@@ -223,6 +223,12 @@ class Shell
  		 */ 
 		bool isAckPending() const;
 
+		/**
+		 * Wraps up operations. Doesn't quit instantly, completes the
+		 * current process cycle first.
+		 */
+		void handleQuit();
+
 		void handleCreate( const Eref& e, const Qinfo* q, 
 			string type, Id parent, Id newElm, string name,
 			vector< unsigned int > dimensions );
