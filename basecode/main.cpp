@@ -119,6 +119,7 @@ void checkChildren( Id parent, const string& info )
 Id init( int argc, char** argv )
 {
 	int numCores = getNumCores();
+	int numThreads = numCores;
 	int numNodes = 1;
 	int myNode = 0;
 	bool isSingleThreaded = 0;
@@ -142,9 +143,9 @@ Id init( int argc, char** argv )
 	 * Here we allow the user to override the automatic identification
 	 * of processor configuration
 	 */
-	while ( ( opt = getopt( argc, argv, "shiqn:c:b:B:" ) ) != -1 ) {
+	while ( ( opt = getopt( argc, argv, "shiqn:t:b:B:" ) ) != -1 ) {
 		switch ( opt ) {
-			case 's': // Single threaded mode
+			case 's': // Single threaded mode. Overrides numThreads.
 				isSingleThreaded = 1;
 				break;
 			case 'i' : // infinite loop, used for multinode debugging, to give gdb something to attach to.
@@ -153,9 +154,9 @@ Id init( int argc, char** argv )
 			case 'n': // Multiple nodes
 				numNodes = atoi( optarg );
 				break;
-			case 'c': // Multiple cores per node
-				// Each node handles 
-				numCores = atoi( optarg );
+			case 't': // Number of process threads to use. Default is
+				// obtained from hardware NumCores.
+				numThreads = atoi( optarg );
 				break;
 			case 'b': // Benchmark: handle later.
 				break;
@@ -166,11 +167,13 @@ Id init( int argc, char** argv )
 				break;
 			case 'h': // help
 			default:
-				cout << "Usage: moose -singleThreaded -help -infiniteLoop -quit -c numCores -n numNodes -benchmark [ksolve intFire hhNet]\n";
+				cout << "Usage: moose -singleThreaded -help -infiniteLoop -quit -t numComputeThreads -n numNodes -benchmark [ksolve intFire hhNet]\n";
 				exit( 1 );
 		}
 	}
-	cout << "on node " << myNode << ", numNodes = " << numNodes << ", numCores = " << numCores << endl;
+	if ( isSingleThreaded )
+		numThreads = 0;
+	cout << "on node " << myNode << ", numNodes = " << numNodes << ", numCores = " << numCores << ", numComputeThreads = " << numThreads << endl;
 
 	Msg::initNull();
 	Id shellId;
@@ -184,7 +187,7 @@ Id init( int argc, char** argv )
 
 	Shell* s = reinterpret_cast< Shell* >( shellId.eref().data() );
 	s->setShellElement( shelle );
-	s->setHardware( isSingleThreaded, numCores, numNodes, myNode );
+	s->setHardware( numThreads, numCores, numNodes, myNode );
 	s->loadBalance();
 
 	// Element* clocke = 
@@ -246,10 +249,10 @@ void nonMpiTests( Shell* s )
 	if ( Shell::myNode() == 0 ) {
 		unsigned int numNodes = s->numNodes();
 		unsigned int numCores = s->numCores();
-		bool isSingleThreaded = s->isSingleThreaded();
+		unsigned int numThreads = s->numProcessThreads();
 		if ( numCores > 0 )
 		// s->setHardware( isSingleThreaded, numCores, numNodes, myNode );
-		s->setHardware( 1, 1, 1, 0 );
+		s->setHardware( 0, 1, 1, 0 );
 		testAsync();
 		testMsg();
 		testShell();
@@ -262,7 +265,7 @@ void nonMpiTests( Shell* s )
 #ifdef USE_SMOLDYN
 		testSmoldyn();
 #endif
-		s->setHardware( isSingleThreaded, numCores, numNodes, 0 );
+		s->setHardware( numThreads, numCores, numNodes, 0 );
 	}
 #endif
 }
@@ -306,13 +309,13 @@ int main( int argc, char** argv )
 	// spawn a lot of other stuff.
 	Element* shelle = shellId();
 	Shell* s = reinterpret_cast< Shell* >( shelle->dataHandler()->data( 0 ) );
-	Qinfo::initMutex(); // Mutex used to align Parser and MOOSE threads.
 	nonMpiTests( s ); // These tests do not need the process loop.
 
 	if ( !s->isSingleThreaded() ) {
-		s->launchThreads(); // Here we set off the thread/MPI process loop.
+		Qinfo::initMutex(); // Mutex used to align Parser and MOOSE threads.
+		Shell::launchThreads(); // Here we set off the thread/MPI process loop.
 	}
-	if ( s->myNode() == 0 ) {
+	if ( Shell::myNode() == 0 ) {
 #ifdef DO_UNIT_TESTS
 		mpiTests();
 		processTests( s );
@@ -324,14 +327,14 @@ int main( int argc, char** argv )
 		if ( benchmarkTests( argc, argv ) || quitFlag )
 			s->doQuit();
 		else 
-			s->launchParser(); // Here we set off a little event loop to poll user input. It deals with the doQuit call too.
+			Shell::launchParser(); // Here we set off a little event loop to poll user input. It deals with the doQuit call too.
 	}
 	
 	// Somehow we need to return control to our parser. Then we clean up
-	if ( !s->isSingleThreaded() ) {
-		s->joinThreads();
+	if ( !Shell::isSingleThreaded() ) {
+		Shell::joinThreads();
+		Qinfo::freeMutex();
 	}
-	Qinfo::freeMutex();
 	Neutral* ns = reinterpret_cast< Neutral* >( shelle->dataHandler()->data( 0 ) );
 	ns->destroy( shellId.eref(), 0, 0 );
 #ifdef USE_MPI

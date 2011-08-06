@@ -1007,7 +1007,6 @@ void testCopyMsgOps()
 		m5oid, "setEntry", 4, 0, 0 );
 	assert( ret );
 
-	// ret = SetGet1< unsigned int >::set( m5er, "loadBalance", Shell::numCores() );
 	assert( ret );
 
 	ObjId tick( Id( 2 ), 0 );

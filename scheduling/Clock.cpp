@@ -163,15 +163,8 @@ const Cinfo* Clock::initCinfo()
 	 		new OpFunc0< Clock >(&Clock::handleReinit )
 		);
 
-		static DestFinfo quit( "quit",
-			"Quits the main event loop, whether or not a simulation is"
-			"still running.",
-	 		new OpFunc0< Clock >(&Clock::handleQuit )
-		);
-
-
 		static Finfo* clockControlFinfos[] = {
-			&start, &step, &stop, &setupTick, &reinit, &quit, ack(),
+			&start, &step, &stop, &setupTick, &reinit, ack(),
 		};
 	///////////////////////////////////////////////////////
 	// SharedFinfo for Shell to control Clock
@@ -335,11 +328,6 @@ void Clock::stop()
 	procState_ = StopOnly;
 }
 
-void Clock::handleQuit()
-{
-	procState_ = QuitProcessLoop;
-}
-
 /**
  * This function handles any changes to dt in the ticks. This means
  * it must redo the ordering of the ticks and call a resched on them.
@@ -442,16 +430,6 @@ void Clock::rebuild()
 // Barrier 3
 ///////////////////////////////////////////////////
 
-bool Clock::keepLooping() const
-{
-	return keepLooping_;
-}
-
-void Clock::setLoopingState( bool val )
-{
-	keepLooping_ = val;
-}
-
 bool Clock::isRunning() const
 {
 	return isRunning_;
@@ -501,7 +479,7 @@ void Clock::processPhase2( ProcInfo* info )
 void Clock::checkProcState()
 {
 	/// Handle pending Reduce operations.
-	Qinfo::clearReduceQ( Shell::numCores() );
+	Qinfo::clearReduceQ( Shell::numProcessThreads() );
 
 	if ( procState_ == NoChange ) { // Most common 
 		return;
@@ -537,9 +515,6 @@ void Clock::checkProcState()
 			clock->isRunning_ = 0;
 			clock->doingReinit_ = 1;
 		//	procState_ = TurnOffReinit;
-		break;
-		case QuitProcessLoop:
-			clock->keepLooping_ = 0;
 		break;
 		case NoChange:
 		default:
@@ -693,13 +668,3 @@ void Clock::reinitPhase2( ProcInfo* info )
 	}
 }
 
-
-void Clock::printCounts() const
-{
-	cout << "Phase 1: Reinit = " << countReinit1_ <<
-		";	advance = " << countAdvance1_ <<
-		";	null = " << countNull1_ << endl;
-	cout << "Phase 2: Reinit = " << countReinit2_ <<
-		";	advance = " << countAdvance2_ <<
-		";	null = " << countNull2_ << endl;
-}

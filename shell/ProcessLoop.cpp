@@ -25,14 +25,27 @@
 
 static const unsigned int BLOCKSIZE = 20000; // duplicate defn, other in Qinfo.cpp
 
+/*
+void Shell::eventLoopSingleThreaded()
+{
+	while ( Shell::keepLooping() )
+	{
+		clock->processPhase1( &p_ ); // Call Process on all scheduled Objs.
+		Qinfo::swapQ();				// Queue swap
+		clock->processPhase2( p ); // Do tick juggling for the clock.
+		Qinfo::readQ( p->threadIndexInGroup ); //Deliver all local node Msgs
+		Clock::checkProcState();	// Decide whether to continue.
+	}
+}
+*/
+
 void* eventLoopForBcast( void* info )
 {
 	ProcInfo *p = reinterpret_cast< ProcInfo* >( info );
 	// cout << "eventLoop on " << p->nodeIndexInGroup << ":" << p->threadIndexInGroup << endl;
 	Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );
-	// unsigned int loopNum = 0;
 
-	while( clock->keepLooping() )
+	while( Shell::keepLooping() )
 	// for( unsigned int i = 0; i < NLOOP; ++i )
 	{
 		// Phase 1. Here we carry out the Process calculations
@@ -74,13 +87,7 @@ void* eventLoopForBcast( void* info )
 
 		// This barrier handles the state transitions for clock scheduling
 		// as its internal protected function.
-			Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-			if ( shell->anotherCycleFlag_ ) {
-				// cout << p->threadIndexInGroup << ":" << p->groupId << "  another Cycle in eventLoopForBcast\n";
-			}
 		p->barrier3->wait();
-		// rc = pthread_barrier_wait( p->barrier3 );
-		// assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 	}
 	pthread_exit( NULL );
 }
@@ -94,8 +101,7 @@ void* mpiEventLoopForBcast( void* info )
 	ProcInfo *p = reinterpret_cast< ProcInfo* >( info );
 	// cout << "mpiEventLoop on " << p->nodeIndexInGroup << ":" << p->threadIndexInGroup << endl;
 
-	Clock* clock = reinterpret_cast< Clock* >( Id( 1 ).eref().data() );
-	while( clock->keepLooping() )
+	while( Shell::keepLooping() )
 	{
 		// Phase 1: do nothing. But we must wait for barrier 0 to clear,
 		// because we need inQ to be settled before broadcasting it.
@@ -145,77 +151,12 @@ void* mpiEventLoopForBcast( void* info )
 	pthread_exit( NULL );
 }
 
-/*
- * Happens on the one thread doing Shell stuff.
- */
-void* shellEventLoop( void* info )
-{
-	ProcInfo *p = reinterpret_cast< ProcInfo* >( info );
-	// cout << "shellEventLoop on " << p->nodeIndexInGroup << ":" << p->threadIndexInGroup << endl;
-
-	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-	Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );
-	while( clock->keepLooping() )
-	// for( unsigned int i = 0; i < NLOOP; ++i )
-	{
-		// Phase 1: Protect the barrier (actually, the swap call)
-		// with a mutex so that the Shell doesn't insert data into outQ
-		// while things are changing. Note that this outQ is in the
-		// Shell group and thus is safe from the other threads.
-		pthread_mutex_lock( shell->parserMutex() );
-			p->barrier1->wait();
-
-			// Here we signal if the waitForGetAck has asked for another
-			// cycle, and that cycle is now complete.
-			if ( shell->anotherCycleFlag_ ) {
-				shell->anotherCycleFlag_ -= 1;
-				// cout << "\nanother Cycle in shellEventLoop\n";
-				pthread_cond_signal( shell->parserBlockCond() );
-			}
-			// We only want to signal if it is waiting, AND if
-			// we have gotten enough acks done. It is the job of the
-			// rest of the event loop to deal with the acks.
-			if ( shell->inBlockingParserCall() && !shell->isAckPending() ) {
-				pthread_cond_signal( shell->parserBlockCond() );
-			}
-		pthread_mutex_unlock( shell->parserMutex() );
-		// cout << Shell::myNode() << ":" << p->nodeIndexInGroup << "	: shellEventLoop\n";
-
-		// Phase 2. Here we simply ignore barrier 2 as it
-		// does not matter for the Shell. This takes a little
-		// care when initializing the threads, but saves time.
-
-		// Phase 3: We need to block here to ensure that the endit
-		// call is encapsulated within the current cycle.
-		p->barrier3->wait();
-		// int rc = pthread_barrier_wait( p->barrier3 );
-		// assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
-	}
-	pthread_exit( NULL );
-}
-
-
-
-
 void* reportGraphics( void* info )
 {
 	// ProcInfo *p = reinterpret_cast< ProcInfo* >( info );
 	// cout << "reportGraphics on " << p->nodeIndexInGroup << ":" << p->threadIndexInGroup << endl;
 	pthread_exit( NULL );
 }
-
-/*
-void Shell::waitForProcessLoopCycles( unsigned int numCycles )
-{
-	Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );
-	if ( isSingleThreaded_ || clock->keepLooping() == 0 ) {
-		for ( unsigned int i = 0; i < numCycles; ++i )
-			Qinfo::clearQ( ScriptThreadNum );
-	} else {
-		Qinfo::setSwapCycles( numCycles );
-	}
-}
-*/
 
 //////////////////////////////////////////////////////////////////////////
 // This function sets up the threading for the process loop.
@@ -227,15 +168,11 @@ void Shell::launchThreads()
 	pthread_attr_setdetachstate( attr_, PTHREAD_CREATE_JOINABLE );
 
 	// Add one for the MPI thread if we have multiple nodes.
-	unsigned int numThreads = numCores_ + ( numNodes_ > 1 ); 
+	unsigned int numThreads = numProcessThreads_ + ( numNodes_ > 1 ); 
 
-	// Extra thread on barrier 1 for parser control on node 0 
-	// (the main thread here).
-	unsigned int numBarrier1Threads = numThreads + ( myNode_ == 0 );
-
-	barrier1_ = new FuncBarrier( numBarrier1Threads, &Qinfo::swapQ );
+	barrier1_ = new FuncBarrier( numThreads, &Qinfo::swapQ );
 	barrier2_ = new FuncBarrier( numThreads, &Qinfo::swapMpiQ );
-	barrier3_ = new FuncBarrier( numBarrier1Threads, &Clock::checkProcState );
+	barrier3_ = new FuncBarrier( numThreads, &Clock::checkProcState );
 	int ret;
 
 	parserMutex_ = new pthread_mutex_t; // Assign the Shell variables.
@@ -247,18 +184,17 @@ void Shell::launchThreads()
 	ret = pthread_cond_init( parserBlockCond_, NULL );
 	assert( ret == 0 );
 
-	Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );
-	clock->setLoopingState( 1 );
+	keepLooping_ = 1;
 	
-	threadProcs_.resize( numBarrier1Threads );
+	threadProcs_.resize( numThreads );
 	vector< ProcInfo >& p = threadProcs_;
 	// An extra thread is used by MPI, and on node 0, yet another for Shell
-	// pthread_t* threads = new pthread_t[ numBarrier1Threads ];
-	threads_ = new pthread_t[ numBarrier1Threads ];
+	// pthread_t* threads = new pthread_t[ numThreads ];
+	threads_ = new pthread_t[ numThreads ];
 
-	for ( unsigned int i = 0; i < numBarrier1Threads; ++i ) {
+	for ( unsigned int i = 0; i < numThreads; ++i ) {
 		// Note that here we put # of compute cores, not total threads.
-		p[i].numThreadsInGroup = numCores_; 
+		p[i].numThreadsInGroup = numProcessThreads_; 
 		p[i].groupId = 1; // Later more sophisticated subdivision into grps
 		p[i].threadIndexInGroup = i + 1;
 		p[i].nodeIndexInGroup = myNode_;
@@ -269,17 +205,13 @@ void Shell::launchThreads()
 		p[i].procIndex = i;
 
 	// cout << myNode_ << "." << i << ": ptr= " << &( p[i] ) << ", Shell::procInfo = " << &p_ << " setting up procs\n";
-		if ( i < numCores_ ) { // These are the compute threads
+		if ( i < numProcessThreads_ ) { // These are the compute threads
 			int rc = pthread_create( threads_ + i, NULL, eventLoopForBcast, 
 				(void *)&p[i] );
 			assert( rc == 0 );
-		} else if ( numNodes_ > 1 && i == numCores_ ) { // mpiThread stufff.
+		} else if ( numNodes_ > 1 && i == numProcessThreads_ ) { // mpiThread stufff.
 			int rc = pthread_create( 
 				threads_ + i, NULL, mpiEventLoopForBcast, (void *)&p[i] );
-			assert( rc == 0 );
-		} else if ( i == numThreads ) { // shellThread stuff.
-			int rc = pthread_create( 
-				threads_ + i, NULL, shellEventLoop, (void *)&p[i] );
 			assert( rc == 0 );
 		}
 	}
@@ -288,11 +220,10 @@ void Shell::launchThreads()
 void Shell::joinThreads()
 {
 	// Add one for the MPI thread if needed.
-	int numThreads = numCores_ + ( numNodes_ > 1 ); 
-	int numBarrier1Threads = numThreads + ( myNode_ == 0 );
+	int numThreads = numProcessThreads_ + ( numNodes_ > 1 ); 
 	int ret;
 
-	for ( int i = 0; i < numBarrier1Threads; ++i ) {
+	for ( int i = 0; i < numThreads; ++i ) {
 		void* status;
 		ret = pthread_join( threads_[i], &status );
 		if ( ret )

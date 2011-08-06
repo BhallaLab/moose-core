@@ -21,13 +21,6 @@
 #include "Shell.h"
 #include "Dinfo.h"
 
-// Want to separate out this search path into the Makefile options
-#include "../scheduling/Tick.h"
-#include "../scheduling/TickMgr.h"
-#include "../scheduling/TickPtr.h"
-#include "../scheduling/ThreadInfo.h"
-#include "../scheduling/Clock.h"
-
 #define USE_NODES 1
 
 ///////////////////////////////////////////////////////////////////
@@ -42,11 +35,10 @@
  */
 void Shell::initAck()
 {
-	Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );
-	if ( isSingleThreaded_ || !clock->keepLooping() ) {
+	if ( isSingleThreaded() || !keepLooping() ) {
 		numAcks_ = 0; 
 	} else {
-		pthread_mutex_lock( parserMutex_ );
+		pthread_mutex_lock( parserMutex() );
 			// Note that we protect this in the mutex in the threaded mode.
 			numAcks_ = 0;
 			isBlockedOnParser_ = 1;
@@ -60,8 +52,7 @@ void Shell::initAck()
  */
 void Shell::waitForAck()
 {
-	Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );
-	if ( isSingleThreaded_ || !clock->keepLooping() ) {
+	if ( isSingleThreaded() || !keepLooping() ) {
 		while ( isAckPending() ) {
 			Qinfo::clearQ( p_.threadIndexInGroup );
 	// Tried this to get it to work in single-thread mode. Doesn't work.
@@ -71,9 +62,9 @@ void Shell::waitForAck()
 		}
 	} else {
 		while ( isAckPending() )
-			pthread_cond_wait( parserBlockCond_, parserMutex_ );
+			pthread_cond_wait( parserBlockCond(), parserMutex() );
 		isBlockedOnParser_ = 0;
-		pthread_mutex_unlock( parserMutex_ );
+		pthread_mutex_unlock( parserMutex() );
 	}
 }
 
@@ -114,6 +105,7 @@ void Shell::handleAck( unsigned int ackNode, unsigned int status )
 void Shell::launchParser()
 {
 	Id shellId;
+	Shell* s = reinterpret_cast< Shell* >( shellId.eref().data() );
 	bool quit = 0;
 	
 	cout << "moose : " << flush;
@@ -121,7 +113,7 @@ void Shell::launchParser()
 		string temp;
 		cin >> temp;
 		if ( temp == "quit" || temp == "q" ) {
-			doQuit();
+			s->doQuit();
 			quit = 1;
 		}
 	}
@@ -130,25 +122,15 @@ void Shell::launchParser()
 
 // Function to assign hardware availability
 void Shell::setHardware( 
-	bool isSingleThreaded, unsigned int numCores, unsigned int numNodes,
+	unsigned int numThreads, unsigned int numCores, unsigned int numNodes,
 	unsigned int myNode )
 {
 	if ( numNodes > 1 )
 		Qinfo::initMpiQs();
-	isSingleThreaded_ = isSingleThreaded;
-	if ( !isSingleThreaded ) {
-		// Create the parser and the gui threads.
-		numCores_ = numCores;
-		numNodes_ = numNodes;
-		/// The Zero Qvec is for parser calls into the system. Only the
-		/// shell should use this queue, and it really only kicks in on 
-		/// node 0.
-		/// The One and higher Qvecs are for compute groups.
-	} else {
-		numCores_ = 1;
-		numNodes_ = 1;
-	}
-	Qinfo::initQs( numCores + 1, 1024 );
+	numProcessThreads_ = numThreads;
+	numCores_ = numCores;
+	numNodes_ = numNodes;
+	Qinfo::initQs( numThreads + 1, 1024 );
 	myNode_ = myNode;
 	p_.numNodesInGroup = numNodes_;
 	p_.nodeIndexInGroup = myNode;
@@ -169,20 +151,16 @@ void Shell::loadBalance()
 	//
 	// Note that the messages have to be rebuilt after this call.
 	// Note that this function is called independently on each node.
-	/*
-	Qinfo::clearSimGroups();
-	Qinfo::addSimGroup( numCores_, numNodes_ ); // This is the shell group.
-	if ( !isSingleThreaded_ ) {
-		// Add the basic process group as group 1.
-		// More sophisticated balancing to come.
-		Qinfo::addSimGroup( numCores_, numNodes_ );
-	}
-	*/
 }
 
 unsigned int Shell::numCores()
 {
 	return numCores_;
+}
+
+unsigned int Shell::numProcessThreads()
+{
+	return numProcessThreads_;
 }
 
 unsigned int Shell::numNodes()
@@ -195,23 +173,28 @@ unsigned int Shell::myNode()
 	return myNode_;
 }
 
-pthread_mutex_t* Shell::parserMutex() const
+pthread_mutex_t* Shell::parserMutex()
 {
 	return parserMutex_;
 }
-pthread_cond_t* Shell::parserBlockCond() const
+pthread_cond_t* Shell::parserBlockCond()
 {
 	return parserBlockCond_;
 }
 
-bool Shell::inBlockingParserCall() const
+bool Shell::inBlockingParserCall()
 {
 	return isBlockedOnParser_;
 }
 
-bool Shell::isSingleThreaded() const
+bool Shell::isSingleThreaded()
 {
-	return isSingleThreaded_;
+	return ( numProcessThreads_ == 0 );
+}
+
+bool Shell::keepLooping()
+{
+	return keepLooping_;
 }
 
 

@@ -49,12 +49,6 @@ class Clock
 		void stop();
 
 		/**
-		 * Quit the main event loop gracefully. It will wait till all
-		 * threads and nodes are at barrier3 before going.
-		 */
-		void handleQuit();
-
-		/**
 		 * This utility function creates a tick on the assigned tickNum,
 		 * Assigns dt.
 		 * Must only be called at a thread-safe time.
@@ -125,24 +119,9 @@ class Clock
 		void setBarrier( void* barrier1, void* barrier2 );
 
 		/**
-		 * Flag: True when the Process loop is still going around
-		 */
-		bool keepLooping() const;
-		/**
-		 * Assign state for Process loop
-		 */
-		void setLoopingState( bool val );
-
-		/**
 		 * Flag: True when the simulation is still running.
 		 */
 		bool isRunning() const;
-
-		/**
-		 * Diagnostic: reports the numbe rof times around different phases
-		 * of the Process loop
-		 */
-		void printCounts() const;
 
 		/**
 		 * Static function, used to flip flags to start or end simulation. 
@@ -177,11 +156,6 @@ class Clock
 		unsigned int numPendingThreads_;
 		unsigned int numThreads_;
 		int callback_;
-
-		/**
-		 * True while main event loop continues
-		 */
-		bool keepLooping_;
 
 		/**
 		 * TickPtr contains pointers to tickMgr and is used to sort.
