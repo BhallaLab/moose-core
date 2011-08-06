@@ -14425,12 +14425,14 @@ The following operations are handled differently in single vs multi thread mode:
 	- ProcessLoop should not set up barriers in STM.
 
 Steps:
-- Static-ize thread info flags, and put all on Shell.
+* Static-ize thread info flags, and put all on Shell.
 - Separate out Clock operations of running from Shell operations of looping.
 - Put in Shell the control operations for looping.
 - fix up initial thread specification
 - March through operations that depend on threading state.
 
 
+Converted the flags to static, and separated out Clock operations. Now
+clears unit tests to the same point as earlier.
 
 ============================================================================

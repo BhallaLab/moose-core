@@ -77,7 +77,8 @@ Qinfo::Qinfo( const Qinfo* orig, ThreadId threadNum )
 
 bool Qinfo::execThread( Id id, unsigned int dataIndex ) const
 {
-	return threadNum_ == ( ( id.value() + dataIndex ) % Shell::numProcessThreads() );
+	return ( Shell::isSingleThreaded() || 
+		( threadNum_ == ( ( id.value() + dataIndex ) % Shell::numProcessThreads() ) ) );
 }
 
 /**
@@ -180,7 +181,7 @@ void Qinfo::swapQ()
 	 * operations that change the structure of the model can occur without 
 	 * risk of affecting ongoing messaging.
 	 */
-	pthread_mutex_lock( qMutex_ );
+	if ( !Shell::isSingleThreaded() ) pthread_mutex_lock( qMutex_ );
 		clearStructuralQ(); // static function.
 
 		/**
@@ -244,7 +245,7 @@ void Qinfo::swapQ()
 				--numCycles_;
 			}
 		}
-	pthread_mutex_unlock( qMutex_ );
+	if ( !Shell::isSingleThreaded() ) pthread_mutex_unlock( qMutex_ );
 }
 
 /**
@@ -253,7 +254,7 @@ void Qinfo::swapQ()
  */
 void Qinfo::waitProcCycles( unsigned int numCycles )
 {
-	if ( Shell::keepLooping() ) {
+	if ( Shell::keepLooping() && !Shell::isSingleThreaded()  ) {
 		pthread_mutex_lock( qMutex_ );
 			waiting_ = 1;
 			numCycles_ = numCycles;
@@ -400,14 +401,14 @@ void Qinfo::addToQ( const ObjId& oi,
 	BindIndex bindIndex, ThreadId threadNum,
 	const double* arg, unsigned int size )
 {
-	if ( threadNum == ScriptThreadNum ) pthread_mutex_lock( qMutex_ );
+	lockQmutex( threadNum );
 		vector< double >& vec = dBuf_[ threadNum ];
 		qBuf_[ threadNum ].push_back( 
 			Qinfo( oi, bindIndex, threadNum, vec.size() ) );
 		if ( size > 0 ) {
 			vec.insert( vec.end(), arg, arg + size );
 		}
-	if ( threadNum == ScriptThreadNum ) pthread_mutex_unlock( qMutex_ );
+	unlockQmutex( threadNum );
 }
 
 /// Utility variant that adds two args.
@@ -416,7 +417,7 @@ void Qinfo::addToQ( const ObjId& oi,
 	const double* arg1, unsigned int size1, 
 	const double* arg2, unsigned int size2 )
 {
-	if ( threadNum == ScriptThreadNum ) pthread_mutex_lock( qMutex_ );
+	lockQmutex( threadNum );
 		vector< double >& vec = dBuf_[ threadNum ];
 		qBuf_[ threadNum ].push_back( 
 			Qinfo( oi, bindIndex, threadNum, vec.size() ) );
@@ -424,7 +425,7 @@ void Qinfo::addToQ( const ObjId& oi,
 			vec.insert( vec.end(), arg1, arg1 + size1 );
 		if ( size2 > 0 )
 			vec.insert( vec.end(), arg2, arg2 + size2 );
-	if ( threadNum == ScriptThreadNum ) pthread_mutex_unlock( qMutex_ );
+	unlockQmutex( threadNum );
 }
 
 // Static function
@@ -436,7 +437,7 @@ void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest,
 	static const unsigned int ObjFidSizeInDoubles = 
 		1 + ( sizeof( ObjFid ) - 1 ) / sizeof( double );
 
-	if ( threadNum == ScriptThreadNum ) pthread_mutex_lock( qMutex_ );
+	lockQmutex( threadNum );
 		vector< double >& vec = dBuf_[ threadNum ];
 		qBuf_[ threadNum ].push_back(
 			Qinfo( src, DirectAdd, threadNum, vec.size() ) );
@@ -446,7 +447,7 @@ void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest,
 		if ( size > 0 ) {
 			vec.insert( vec.end(), arg, arg + size );
 		}
-	if ( threadNum == ScriptThreadNum ) pthread_mutex_unlock( qMutex_ );
+	unlockQmutex( threadNum );
 }
 
 // Static function
@@ -459,7 +460,7 @@ void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest,
 	static const unsigned int ObjFidSizeInDoubles = 
 		1 + ( sizeof( ObjFid ) - 1 ) / sizeof( double );
 
-	if ( threadNum == ScriptThreadNum ) pthread_mutex_lock( qMutex_ );
+	lockQmutex( threadNum );
 		vector< double >& vec = dBuf_[ threadNum ];
 		qBuf_[ threadNum ].push_back(
 			Qinfo( src, DirectAdd, threadNum, vec.size() ) );
@@ -470,7 +471,7 @@ void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest,
 			vec.insert( vec.end(), arg1, arg1 + size1 );
 		if ( size2 > 0 )
 			vec.insert( vec.end(), arg2, arg2 + size2 );
-	if ( threadNum == ScriptThreadNum ) pthread_mutex_unlock( qMutex_ );
+	unlockQmutex( threadNum );
 }
 
 // Static function
@@ -484,7 +485,7 @@ void Qinfo::addVecDirectToQ( const ObjId& src, const ObjId& dest,
 
 	if ( entrySize == 0 || numEntries == 0 )
 		return;
-	if ( threadNum == ScriptThreadNum ) pthread_mutex_lock( qMutex_ );
+	lockQmutex( threadNum );
 		qBuf_[ threadNum ].push_back( 
 			Qinfo( src, DirectAdd, threadNum, dBuf_[threadNum].size() ) );
 	
@@ -493,7 +494,7 @@ void Qinfo::addVecDirectToQ( const ObjId& src, const ObjId& dest,
 		vector< double >& vec = dBuf_[ threadNum ];
 		vec.insert( vec.end(), ptr, ptr + ObjFidSizeInDoubles );
 		vec.insert( vec.end(), arg, arg + entrySize * numEntries );
-	if ( threadNum == ScriptThreadNum ) pthread_mutex_unlock( qMutex_ );
+	unlockQmutex( threadNum );
 }
 
 /// Static func.
@@ -539,27 +540,17 @@ bool Qinfo::addToStructuralQ() const
 	return ret;
 }
 
-/// Here we assert that we are reading from the inQ_ 
-/// and that there are no gaps in the data or Qinfo sections,
-/// and that the last used Qinfo is terminated by a null Qinfo.
-/*
-unsigned int Qinfo::dataSizeOnInQ() const
+void Qinfo::lockQmutex( ThreadId threadNum )
 {
-	const Qinfo* begin = reinterpret_cast< const Qinfo* >( &inQ_[2] );
-
-	const double* qbegin = &inQ_[2];
-	const double* qptr = reinterpret_cast< const double* >( this );
-	assert( ( qptr - qbegin ) % QinfoSizeInDoubles == 0 );
-	unsigned int qIndex = ( qptr - qbegin ) / QinfoSizeInDoubles;
-	unsigned int bufSize = inQ_[0];
-	unsigned int numQinfo = inQ_[1];
-	if ( qIndex < numQinfo - 1 )
-		return ( this + 1 )->dataIndex_ - dataIndex_;
-	else
-		return bufSize - dataIndex_;
+	if ( !Shell::isSingleThreaded() && threadNum == ScriptThreadNum )
+		pthread_mutex_lock( qMutex_ );
 }
-*/
 
+void Qinfo::unlockQmutex( ThreadId threadNum )
+{
+	if ( !Shell::isSingleThreaded() && threadNum == ScriptThreadNum )
+		pthread_mutex_unlock( qMutex_ );
+}
 
 /// Static func
 void Qinfo::initMutex()
