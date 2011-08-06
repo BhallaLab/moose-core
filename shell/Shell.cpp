@@ -32,10 +32,27 @@
 
 const unsigned int Shell::OkStatus = ~0;
 const unsigned int Shell::ErrorStatus = ~1;
+
+bool Shell::isBlockedOnParser_ = 0;
+bool Shell::keepLooping_ = 0;
 unsigned int Shell::numCores_;
+unsigned int Shell::numProcessThreads_;
 unsigned int Shell::numNodes_;
 unsigned int Shell::myNode_;
 ProcInfo Shell::p_;
+vector< ProcInfo> Shell::threadProcs_(1);
+unsigned int Shell::numAcks_ = 0;
+vector< unsigned int > Shell::acked_( 1, 0 );
+pthread_t* Shell::threads_( 0 );
+pthread_mutex_t* Shell::parserMutex_( 0 );
+pthread_cond_t* Shell::parserBlockCond_( 0 );
+pthread_attr_t* Shell::attr_( 0 );
+FuncBarrier* Shell::barrier1_( 0 );
+FuncBarrier* Shell::barrier2_( 0 );
+FuncBarrier* Shell::barrier3_( 0 );
+bool Shell::doReinit_( 0 );
+double Shell::runtime_( 0.0 );
+
 const ThreadId ScriptThreadNum = 0;
 
 static SrcFinfo5< string, Id, Id, string, vector< unsigned int > > requestCreate( "requestCreate",
@@ -329,10 +346,6 @@ const Cinfo* Shell::initCinfo()
 		static DestFinfo setclock( "setclock", 
 			"Assigns clock ticks. Args: tick#, dt",
 			new OpFunc2< Shell, unsigned int, double >( & Shell::doSetClock ) );
-		static DestFinfo loadBalance( "loadBalance", 
-			"Set up load balancing",
-			new OpFunc0< Shell >( & Shell::loadBalance ) );
-
 		static SharedFinfo master( "master",
 			"Issues commands from master shell to worker shells located "
 			"on different nodes. Also handles acknowledgements from them.",
@@ -353,7 +366,6 @@ const Cinfo* Shell::initCinfo()
 	static Finfo* shellFinfos[] = {
 		receiveGet(),
 		&setclock,
-		&loadBalance,
 
 ////////////////////////////////////////////////////////////////
 //  Predefined Msg Src and MsgDests.
@@ -386,21 +398,9 @@ static const Cinfo* shellCinfo = Shell::initCinfo();
 
 Shell::Shell()
 	: 
-		anotherCycleFlag_( 0 ),
 		gettingVector_( 0 ),
 		numGetVecReturns_( 0 ),
-		isSingleThreaded_( 0 ),
-		isBlockedOnParser_( 0 ),
-		threadProcs_(1),
-		numAcks_( 0 ),
-		acked_( 1, 0 ),
-		barrier1_( 0 ),
-		barrier2_( 0 ),
-		doReinit_( 0 ),
-		runtime_( 0.0 ),
 		cwe_( Id() ),
-		assignmentMsg_( Msg::badMsg ),
-		assignVecMsg_( Msg::badMsg ),
 		reduceMsg_( Msg::badMsg )
 {
 	// cout << myNode() << ": fids\n";
@@ -493,7 +493,7 @@ MsgId Shell::doAddMsg( const string& msgType,
  */
 void Shell::connectMasterMsg()
 {
-	Id shellId;
+	Id shellId( 0 );
 	Element* shelle = shellId();
 	const Finfo* f1 = shelle->cinfo()->findFinfo( "master" );
 	if ( !f1 ) {
@@ -520,7 +520,8 @@ void Shell::connectMasterMsg()
 	// cout << Shell::myNode() << ": Shell::connectMasterMsg gave id: " << m->mid() << "\n";
 
 	Id clockId( 1 );
-	bool ret = innerAddMsg( "Single", Msg::nextMsgId(), 
+	Shell* s = reinterpret_cast< Shell* >( shellId.eref().data() );
+	bool ret = s->innerAddMsg( "Single", Msg::nextMsgId(), 
 		ObjId( shellId, 0 ), "clockControl", 
 		ObjId( clockId, 0 ), "clockControl" );
 	assert( ret );
@@ -795,18 +796,6 @@ void Shell::doReacDiffMesh( Id baseCompartment )
 ////////////////////////////////////////////////////////////////
 // DestFuncs
 ////////////////////////////////////////////////////////////////
-
-/**
- * The process call happens at a time when there are no more incoming
- * msgs to the Shell making their way through the message system.
- * However, there may be outgoing msgs queued up.
- * Deprecated. This is now replaced with the Qinfo::struturalQ_
- * which keeps track of any operations with structural implications.
- * These are executed in swapQ
- */
-void Shell::process( const Eref& e, ProcPtr p )
-{
-}
 
 
 void Shell::setCwe( Id val )

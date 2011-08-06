@@ -10,10 +10,6 @@
 #include "header.h"
 // #include "ReduceFinfo.h"
 #include "../shell/Shell.h"
-#include "../scheduling/Tick.h"
-#include "../scheduling/TickMgr.h"
-#include "../scheduling/TickPtr.h"
-#include "../scheduling/Clock.h"
 /*
 #ifdef USE_MPI
 #include <mpi.h>
@@ -81,7 +77,7 @@ Qinfo::Qinfo( const Qinfo* orig, ThreadId threadNum )
 
 bool Qinfo::execThread( Id id, unsigned int dataIndex ) const
 {
-	return threadNum_ == ( ( id.value() + dataIndex ) % Shell::numCores() );
+	return threadNum_ == ( ( id.value() + dataIndex ) % Shell::numProcessThreads() );
 }
 
 /**
@@ -195,7 +191,7 @@ void Qinfo::swapQ()
 		unsigned int datasize = 0;
 		unsigned int numQinfo = 0;
 		// Note that we have an extra queue for the parser
-		for ( unsigned int i = 0; i <= Shell::numCores(); ++i ) {
+		for ( unsigned int i = 0; i <= Shell::numProcessThreads(); ++i ) {
 			numQinfo += qBuf_[i].size();
 			datasize += dBuf_[i].size();
 		}
@@ -211,7 +207,7 @@ void Qinfo::swapQ()
 		double* dptr = &q0_[0];
 		unsigned int prevQueueDataIndex = numQinfo * QinfoSizeInDoubles + 2;
 		// Note that we have an extra queue for the parser
-		for ( unsigned int i = 0; i <= Shell::numCores(); ++i ) {
+		for ( unsigned int i = 0; i <= Shell::numProcessThreads(); ++i ) {
 			const double *dataOrig = &( dBuf_[i][0] );
 			// vector< Qinfo >::iterator qEnd = qBuf_[i].end();
 			vector< Qinfo >& qvec = qBuf_[i];
@@ -235,7 +231,7 @@ void Qinfo::swapQ()
 			prevQueueDataIndex += dBuf_[i].size();
 		}
 		assert( prevQueueDataIndex == bufsize );
-		for ( unsigned int i = 0; i <= Shell::numCores(); ++i ) {
+		for ( unsigned int i = 0; i <= Shell::numProcessThreads(); ++i ) {
 			qBuf_[i].resize( 0 );
 			dBuf_[i].resize( 0 );
 		}
@@ -257,8 +253,7 @@ void Qinfo::swapQ()
  */
 void Qinfo::waitProcCycles( unsigned int numCycles )
 {
-	static Clock* clock = reinterpret_cast< Clock* >( Id(1).eref().data() );
-	if ( clock->keepLooping() ) {
+	if ( Shell::keepLooping() ) {
 		pthread_mutex_lock( qMutex_ );
 			waiting_ = 1;
 			numCycles_ = numCycles;
@@ -350,7 +345,7 @@ void reportOutQ( const vector< vector< Qinfo > >& q,
 	const vector< vector< double > >& d, const string& name )
 {
 	cout << endl << Shell::myNode() << ": Reporting " << name << endl;
-	for ( unsigned int i = 0; i < Shell::numCores(); ++i ) {
+	for ( unsigned int i = 0; i < Shell::numProcessThreads(); ++i ) {
 		for ( vector< Qinfo >::const_iterator qi = q[i].begin(); 
 			qi != q[i].end(); ++qi ) {
 			cout << i << ": src= " << qi->src() <<
@@ -383,12 +378,12 @@ void Qinfo::reportQ()
 
 	unsigned int datasize = 0;
 	unsigned int numQinfo = 0;
-	for ( unsigned int i = 0; i < Shell::numCores(); ++i ) {
+	for ( unsigned int i = 0; i < Shell::numProcessThreads(); ++i ) {
 		numQinfo += qBuf_[i].size();
 		datasize += dBuf_[i].size();
 	}
-	cout << Shell::myNode() << ":	outQ: numCores = " << 
-		Shell::numCores() << ", size = " << datasize + QinfoSizeInDoubles * numQinfo << 
+	cout << Shell::myNode() << ":	outQ: numProcessThreads = " << 
+		Shell::numProcessThreads() << ", size = " << datasize + QinfoSizeInDoubles * numQinfo << 
 		", numQinfo = " << numQinfo << endl;
 
 	if ( inQ_[1] > 0 ) innerReportQ(inQ_, "inQ" );
@@ -582,6 +577,8 @@ void Qinfo::freeMutex()
 {
 	int ret = pthread_mutex_destroy( qMutex_ );
 	assert( ret == 0 );
+	ret = pthread_cond_destroy( qCond_ );
+	assert( ret == 0 );
 	delete qMutex_;
 }
 
@@ -590,7 +587,7 @@ void Qinfo::emptyAllQs()
 {
 	inQ_[0] = 0;
 	inQ_[1] = 0;
-	for ( unsigned int i = 0; i < Shell::numCores(); ++i ) {
+	for ( unsigned int i = 0; i <= Shell::numProcessThreads(); ++i ) {
 		qBuf_[i].resize( 0 );
 		dBuf_[i].resize( 0 );
 	}
