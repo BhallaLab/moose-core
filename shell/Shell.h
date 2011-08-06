@@ -213,14 +213,6 @@ class Shell
 		void waitForAck();
 
 		/**
-		 * test for completion of 'Get' request. In multithread mode, 
-		 * we require the system to go through another process cycle 
-		 * to ensure that all return values have arrived.
-		 * Like the waitForAck(), we MUST precede this by an initAck call.
-		 */
-		void waitForGetAck();
-
-		/**
  		 * Generic handler for ack msgs from various nodes. Keeps track of
  		 * which nodes have responded.
  		 */

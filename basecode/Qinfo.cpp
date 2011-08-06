@@ -38,8 +38,8 @@ vector< double > Qinfo::mpiQ2_( 1000, 0.0 );
 double* Qinfo::mpiInQ_ = &mpiQ1_[0];
 double* Qinfo::mpiRecvQ_ = &mpiQ2_[0];
 
-vector< Qinfo > Qinfo::structuralQinfo_;
-vector< double > Qinfo::structuralQdata_;
+vector< const Qinfo* > Qinfo::structuralQinfo_;
+// vector< double > Qinfo::structuralQdata_;
 
 pthread_mutex_t* Qinfo::qMutex_;
 pthread_cond_t* Qinfo::qCond_;
@@ -48,6 +48,8 @@ bool Qinfo::waiting_ = 0;
 int Qinfo::numCycles_ = 0;
 
 static const unsigned int BLOCKSIZE = 20000;
+static const unsigned int QinfoSizeInDoubles = 
+			1 + ( sizeof( Qinfo ) - 1 ) / sizeof( double );
 
 
 /// Default dummy Qinfo creation.
@@ -89,34 +91,33 @@ bool Qinfo::execThread( Id id, unsigned int dataIndex ) const
 void Qinfo::clearStructuralQ()
 {
 	enableStructuralOps();
-	double* buf = &structuralQdata_[0];
 	for ( unsigned int i = 0; i < structuralQinfo_.size(); ++i ) {
-		const Qinfo* qi = &structuralQinfo_[i];
+		const Qinfo* qi = structuralQinfo_[i];
 		if ( !qi->isDummy() ) {
 			// Instead of ScriptThreadNum I use the first worker thread here
 			Qinfo newQ( qi, 1 );
 			const Element* e = qi->src_.element();
-			e->exec( &newQ, buf + newQ.dataIndex_ );
+			e->exec( &newQ, inQ_ + newQ.dataIndex_ );
 		}
 	}
 
 	disableStructuralOps();
 	structuralQinfo_.resize( 0 );
-	structuralQdata_.resize( 0 );
+// 	structuralQdata_.resize( 0 );
 }
 
 void readBuf(const double* buf, ThreadId threadNum )
 {
 	unsigned int bufsize = static_cast< unsigned int >( buf[0] );
 	unsigned int numQinfo = static_cast< unsigned int >( buf[1] );
-	assert( bufsize > numQinfo * 3 );
+	assert( bufsize > numQinfo * QinfoSizeInDoubles );
 
 	const double* qptr = buf + 2;
 
 	for ( unsigned int i = 0; i < numQinfo; ++i ) {
 		// const Qinfo* qi = reinterpret_cast< const Qinfo* >( qptr );
 		Qinfo qi( reinterpret_cast< const Qinfo* >( qptr ), threadNum );
-		qptr += 3;
+		qptr += QinfoSizeInDoubles;
 		if ( !qi.isDummy() ) {
 			const Element* e = qi.src().element();
 			e->exec( &qi, buf + qi.dataIndex() );
@@ -199,7 +200,7 @@ void Qinfo::swapQ()
 			datasize += dBuf_[i].size();
 		}
 	
-		bufsize = numQinfo * 3 + datasize + 2;
+		bufsize = numQinfo * QinfoSizeInDoubles + datasize + 2;
 		if ( bufsize > q0_.capacity() )
 			q0_.reserve( bufsize + bufsize / 2 );
 		q0_.resize( bufsize );
@@ -208,7 +209,7 @@ void Qinfo::swapQ()
 		q0_[1] = numQinfo;
 		double* qptr = &q0_[2];
 		double* dptr = &q0_[0];
-		unsigned int prevQueueDataIndex = numQinfo * 3 + 2;
+		unsigned int prevQueueDataIndex = numQinfo * QinfoSizeInDoubles + 2;
 		// Note that we have an extra queue for the parser
 		for ( unsigned int i = 0; i <= Shell::numCores(); ++i ) {
 			const double *dataOrig = &( dBuf_[i][0] );
@@ -229,7 +230,7 @@ void Qinfo::swapQ()
 					dataOrig + qvec[j].dataIndex(),
 					size * sizeof( double ) );
 
-				qptr += 3;
+				qptr += QinfoSizeInDoubles;
 			}
 			prevQueueDataIndex += dBuf_[i].size();
 		}
@@ -341,7 +342,7 @@ void innerReportQ( const double* q, const string& name )
 				", size= " << f->entrySize << ", n= " << f->numEntries;
 		}
 		cout << endl;
-		qptr += 3;
+		qptr += QinfoSizeInDoubles;
 	}
 }
 
@@ -387,7 +388,7 @@ void Qinfo::reportQ()
 		datasize += dBuf_[i].size();
 	}
 	cout << Shell::myNode() << ":	outQ: numCores = " << 
-		Shell::numCores() << ", size = " << datasize + 3 * numQinfo << 
+		Shell::numCores() << ", size = " << datasize + QinfoSizeInDoubles * numQinfo << 
 		", numQinfo = " << numQinfo << endl;
 
 	if ( inQ_[1] > 0 ) innerReportQ(inQ_, "inQ" );
@@ -528,20 +529,41 @@ bool Qinfo::addToStructuralQ() const
 	bool ret = 0;
 	// pthread_mutex_lock( qMutex_ );
 		if ( !isSafeForStructuralOps_ ) {
-			structuralQinfo_.push_back( *this );
-			/// Here we assert that we are reading from the inQ_ 
-			/// and that there are no gaps in the data or Qinfo sections,
-			/// and that the last used Qinfo is terminated by a null Qinfo.
+			structuralQinfo_.push_back( this );
+			/*
 			const double* data = &( inQ_[ dataIndex_ ] );
-			const Qinfo* nextQinfo = this + 1;
-			unsigned int size = nextQinfo->dataIndex_ - dataIndex_;
+			unsigned int size = dataSizeOnInQ();
+			// const Qinfo* nextQinfo = this + 1;
+			// unsigned int size = nextQinfo->dataIndex_ - dataIndex_;
 			structuralQinfo_.back().dataIndex_ = structuralQdata_.size();
 			structuralQdata_.insert( structuralQdata_.end(), data, data + size );
+			*/
 			ret = 1;
 		}
 	// pthread_mutex_unlock( qMutex_ );
 	return ret;
 }
+
+/// Here we assert that we are reading from the inQ_ 
+/// and that there are no gaps in the data or Qinfo sections,
+/// and that the last used Qinfo is terminated by a null Qinfo.
+/*
+unsigned int Qinfo::dataSizeOnInQ() const
+{
+	const Qinfo* begin = reinterpret_cast< const Qinfo* >( &inQ_[2] );
+
+	const double* qbegin = &inQ_[2];
+	const double* qptr = reinterpret_cast< const double* >( this );
+	assert( ( qptr - qbegin ) % QinfoSizeInDoubles == 0 );
+	unsigned int qIndex = ( qptr - qbegin ) / QinfoSizeInDoubles;
+	unsigned int bufSize = inQ_[0];
+	unsigned int numQinfo = inQ_[1];
+	if ( qIndex < numQinfo - 1 )
+		return ( this + 1 )->dataIndex_ - dataIndex_;
+	else
+		return bufSize - dataIndex_;
+}
+*/
 
 
 /// Static func
