@@ -183,6 +183,10 @@ static DestFinfo handleAddMsg( "handleAddMsg",
 			new EpFunc6< Shell, string, MsgId, ObjId, string, ObjId, string >
 				( & Shell::handleAddMsg ) );
 
+static DestFinfo handleQuit( "handleQuit", 
+			"Stops simulation running and quits the simulator",
+			new OpFunc0< Shell >( & Shell::handleQuit ) );
+
 /*
 static DestFinfo handleSet( "handleSet", 
 			"Deals with request, to set specified field on any node to a value.",
@@ -292,14 +296,14 @@ static DestFinfo handleReMesh( "handleReMesh",
 static Finfo* shellMaster[] = {
 	&requestCreate, &requestDelete,
 	&requestAddMsg, 
-	// requestSet(), requestGet(),
+	&requestQuit,
 	&requestMove, &requestCopy, &requestUseClock,
 	&requestSync, &requestReMesh,
 	handleAck() };
 static Finfo* shellWorker[] = {
 	&handleCreate, &handleDelete,
 		&handleAddMsg,
-		// &handleSet, &handleGet,
+		&handleQuit,
 		&handleMove, &handleCopy, &handleUseClock,
 		&handleSync, &handleReMesh,
 	ack() };
@@ -307,7 +311,7 @@ static Finfo* shellWorker[] = {
 static Finfo* clockControlFinfos[] = 
 {
 	&requestStart, &requestStep, &requestStop, &requestSetupTick,
-	&requestReinit, &requestQuit, handleAck()
+	&requestReinit, handleAck()
 };
 
 ReduceFinfoBase* reduceArraySizeFinfo()
@@ -370,9 +374,6 @@ const Cinfo* Shell::initCinfo()
 ////////////////////////////////////////////////////////////////
 //  Predefined Msg Src and MsgDests.
 ////////////////////////////////////////////////////////////////
-
-		// requestGet(),
-		// lowLevelSetGet(),
 		reduceArraySizeFinfo(),
 ////////////////////////////////////////////////////////////////
 //  Shared msg
@@ -1070,6 +1071,11 @@ void Shell::handleUseClock( const Eref& e, const Qinfo* q,
 		*/
 	}
 	ack()->send( Eref( shelle_, 0 ), q->threadNum(), Shell::myNode(), OkStatus );
+}
+
+void Shell::handleQuit()
+{
+	Shell::keepLooping_ = 0;
 }
 
 void Shell::warning( const string& text )

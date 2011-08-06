@@ -97,10 +97,19 @@ class Qinfo
 		}
 
 		/**
-		 * Utility function to get the data size of the current Qinfo,
-		 * provided it resides on the InQ.
+		 * Lock Mutex, but only if a bunch of conditions are met:
+		 * First we should be running pthreads
+		 * Second, the system should be in multithread mode
+		 * Third, must be running on Script thread.
+		 * I put this into a function so that I can apply these 
+		 * conditions whenver we have to lock the thread.
 		 */
-		unsigned int dataSizeOnInQ() const;
+		static void qLockMutex();
+
+		/**
+		 * Unlock Mutex, but only if a bunch of conditions are met.
+		 */
+		static void qUnlockMutex();
 
 		/**
 		 * Add data to the queue. Fills up an entry in the qBuf as well
@@ -172,6 +181,16 @@ class Qinfo
 		 */
 		// bool addToStructuralQ( const double* data, unsigned int size) const;
 		bool addToStructuralQ() const;
+
+		/**
+		 * Locks Qmutex if multithreaded and on thread 0
+		 */
+		static void lockQmutex( ThreadId threadNum );
+
+		/**
+		 * Unlocks Qmutex if multithreaded and on thread 0
+		 */
+		static void unlockQmutex( ThreadId threadNum );
 
 		//////////////////////////////////////////////////////////////
 		// From here, static funcs handling the Queues.
