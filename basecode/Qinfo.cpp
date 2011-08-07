@@ -77,8 +77,10 @@ Qinfo::Qinfo( const Qinfo* orig, ThreadId threadNum )
 
 bool Qinfo::execThread( Id id, unsigned int dataIndex ) const
 {
+	// Note that nothing will ever be executed on thread# 0 unless it is
+	// in single thread mode.
 	return ( Shell::isSingleThreaded() || 
-		( threadNum_ == ( ( id.value() + dataIndex ) % Shell::numProcessThreads() ) ) );
+		( threadNum_ == ( 1 + ( ( id.value() + dataIndex ) % Shell::numProcessThreads() ) ) ) );
 }
 
 /**
@@ -91,9 +93,14 @@ void Qinfo::clearStructuralQ()
 	for ( unsigned int i = 0; i < structuralQinfo_.size(); ++i ) {
 		const Qinfo* qi = structuralQinfo_[i];
 		if ( !qi->isDummy() ) {
+			/*
 			Qinfo newQ( qi, ScriptThreadNum );
 			const Element* e = qi->src_.element();
+			// cout << "Executing Structural Q[" << i << "] with " << e->getName() << endl;
 			e->exec( &newQ, inQ_ + newQ.dataIndex_ );
+			*/
+			const Element* e = qi->src_.element();
+			e->exec( qi, inQ_ + qi->dataIndex_ );
 		}
 	}
 
@@ -320,6 +327,21 @@ void Qinfo::sendAllToAll( const ProcInfo* proc )
 */
 }
 
+void reportQentry( unsigned int i, const Qinfo* qi, const double *q )
+{
+	cout << i << ": src= " << qi->src() << 
+		", msgBind=" << qi->bindIndex() <<
+		", threadNum=" << qi->threadNum() <<
+		", dataIndex=" << qi->dataIndex();
+	if ( qi->isDirect() ) {
+		const ObjFid *f;
+		f = reinterpret_cast< const ObjFid* >( q + qi->dataIndex() );
+		cout << ", dest= " << f->oi << ", fid= " << f->fid << 
+			", size= " << f->entrySize << ", n= " << f->numEntries;
+	}
+	cout << endl;
+}
+
 void innerReportQ( const double* q, const string& name )
 {
 	cout << endl << Shell::myNode() << ": Reporting " << name << endl;
@@ -327,17 +349,7 @@ void innerReportQ( const double* q, const string& name )
 	const double* qptr = q + 2;
 	for ( unsigned int i = 0; i < numQinfo; ++i ) {
 		const Qinfo* qi = reinterpret_cast< const Qinfo* >( qptr );
-		cout << "src= " << qi->src() << 
-			", msgBind=" << qi->bindIndex() <<
-			", threadNum=" << qi->threadNum() <<
-			", dataIndex=" << qi->dataIndex();
-		if ( qi->isDirect() ) {
-			const ObjFid *f;
-			f = reinterpret_cast< const ObjFid* >( q + qi->dataIndex() );
-			cout << ", dest= " << f->oi << ", fid= " << f->fid << 
-				", size= " << f->entrySize << ", n= " << f->numEntries;
-		}
-		cout << endl;
+		reportQentry( i, qi, q );
 		qptr += QinfoSizeInDoubles;
 	}
 }
@@ -364,6 +376,13 @@ void reportOutQ( const vector< vector< Qinfo > >& q,
 	}
 }
 
+void reportStructQ( const vector< const Qinfo* >& sq, const double* q )
+{
+	cout << endl << Shell::myNode() << ": Reporting structuralQinfo\n";
+	for ( unsigned int i = 0; i < sq.size(); ++i ) {
+		reportQentry( i, sq[i], q + 2 );
+	}
+}
 
 /**
  * Static func. readonly, so it is thread safe
@@ -387,10 +406,13 @@ void Qinfo::reportQ()
 		Shell::numProcessThreads() << ", size = " << datasize + QinfoSizeInDoubles * numQinfo << 
 		", numQinfo = " << numQinfo << endl;
 
+	cout << Shell::myNode() << ":	structuralQ: numQinfo =  " << structuralQinfo_.size() << endl;
+
 	if ( inQ_[1] > 0 ) innerReportQ(inQ_, "inQ" );
 	if ( numQinfo > 0 ) reportOutQ( qBuf_, dBuf_, "outQ" );
 	if ( mpiInQ_[1] > 0 ) innerReportQ( mpiInQ_, "mpiInQ" );
 	if ( mpiRecvQ_[1] > 0 ) innerReportQ( mpiRecvQ_, "mpiRecvQ" );
+	if ( structuralQinfo_.size() > 0 ) reportStructQ( structuralQinfo_, inQ_ );
 }
 
 /**
