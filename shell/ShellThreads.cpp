@@ -95,6 +95,9 @@ void Shell::handleAck( unsigned int ackNode, unsigned int status )
 		cout << myNode_ << ": Shell::handleAck: Error: status = " <<
 			status << " from node " << ackNode << endl;
 	}
+	if ( !isAckPending() && !isSingleThreaded() ) {
+		pthread_cond_signal( parserBlockCond() );
+	}
 }
 
 ///////////////////////////////////////////////////////////////////

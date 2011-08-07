@@ -62,13 +62,9 @@ const vector< double* >* SetGet::dispatchGet(
 	static Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 	s->clearGetBuf();
 	s->expectVector( tgt.dataId == DataId::any() );
-	// 0 is presumed threadNum here, but need to figure out.
-	// s->initAck();
-		Qinfo::addDirectToQ( ObjId(), tgt, 0, tgtFid, arg, size );
-	// s->waitForGetAck();
+	Qinfo::addDirectToQ( ObjId(), tgt, ScriptThreadNum, tgtFid, arg, size );
 	Qinfo::waitProcCycles( 2 );
 	return &s->getBuf();
-	// return Shell::awaitGottenData();
 }
 
 
