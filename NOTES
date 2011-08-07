@@ -14467,4 +14467,11 @@ before the Queue entry comes up for execution. Sequence:
 	request if not.
 
 Implemented these. Now gets past the msg bug. Hangs now in the mpiTests,
-when threads and ProcessLoop have been turned on.
+when threads and ProcessLoop have been turned on. Checkin 2880.
+
+Fixed one problem, which was a bad check for thread number. 
+
+
+Now up against a more fundamental issue, that of the ack system.
+On reflection, I can probably get by with just the delay of a couple of 
+process cycles in most cases. Let's try.
