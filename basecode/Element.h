@@ -157,6 +157,12 @@ class Element
 		const vector< MsgFuncBinding >* getMsgAndFunc( BindIndex b ) const;
 
 		/**
+		 * Returns true if there are one or more Msgs on the specified
+		 * BindIndex
+		 */
+		bool hasMsgs( BindIndex b ) const;
+
+		/**
 		 * Utility function for printing out all fields and their values
 		 */
 		void showFields() const;
