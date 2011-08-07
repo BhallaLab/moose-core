@@ -221,6 +221,11 @@ const vector< MsgFuncBinding >* Element::getMsgAndFunc( BindIndex b ) const
 	return 0;
 }
 
+bool Element::hasMsgs( BindIndex b ) const
+{
+	return ( b < msgBinding_.size() && msgBinding_[b].size() > 0 );
+}
+
 
 const Cinfo* Element::cinfo() const
 {

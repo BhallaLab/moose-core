@@ -91,8 +91,7 @@ void Qinfo::clearStructuralQ()
 	for ( unsigned int i = 0; i < structuralQinfo_.size(); ++i ) {
 		const Qinfo* qi = structuralQinfo_[i];
 		if ( !qi->isDummy() ) {
-			// Instead of ScriptThreadNum I use the first worker thread here
-			Qinfo newQ( qi, 1 );
+			Qinfo newQ( qi, ScriptThreadNum );
 			const Element* e = qi->src_.element();
 			e->exec( &newQ, inQ_ + newQ.dataIndex_ );
 		}
@@ -117,7 +116,8 @@ void readBuf(const double* buf, ThreadId threadNum )
 		qptr += QinfoSizeInDoubles;
 		if ( !qi.isDummy() ) {
 			const Element* e = qi.src().element();
-			e->exec( &qi, buf + qi.dataIndex() );
+			if ( e )
+				e->exec( &qi, buf + qi.dataIndex() );
 		}
 	}
 }
@@ -346,7 +346,7 @@ void reportOutQ( const vector< vector< Qinfo > >& q,
 	const vector< vector< double > >& d, const string& name )
 {
 	cout << endl << Shell::myNode() << ": Reporting " << name << endl;
-	for ( unsigned int i = 0; i < Shell::numProcessThreads(); ++i ) {
+	for ( unsigned int i = 0; i <= Shell::numProcessThreads(); ++i ) {
 		for ( vector< Qinfo >::const_iterator qi = q[i].begin(); 
 			qi != q[i].end(); ++qi ) {
 			cout << i << ": src= " << qi->src() <<
@@ -379,7 +379,7 @@ void Qinfo::reportQ()
 
 	unsigned int datasize = 0;
 	unsigned int numQinfo = 0;
-	for ( unsigned int i = 0; i < Shell::numProcessThreads(); ++i ) {
+	for ( unsigned int i = 0; i <= Shell::numProcessThreads(); ++i ) {
 		numQinfo += qBuf_[i].size();
 		datasize += dBuf_[i].size();
 	}
@@ -401,14 +401,16 @@ void Qinfo::addToQ( const ObjId& oi,
 	BindIndex bindIndex, ThreadId threadNum,
 	const double* arg, unsigned int size )
 {
-	lockQmutex( threadNum );
-		vector< double >& vec = dBuf_[ threadNum ];
-		qBuf_[ threadNum ].push_back( 
-			Qinfo( oi, bindIndex, threadNum, vec.size() ) );
-		if ( size > 0 ) {
-			vec.insert( vec.end(), arg, arg + size );
-		}
-	unlockQmutex( threadNum );
+	if ( oi.element()->hasMsgs( bindIndex ) ) {
+		lockQmutex( threadNum );
+			vector< double >& vec = dBuf_[ threadNum ];
+			qBuf_[ threadNum ].push_back( 
+				Qinfo( oi, bindIndex, threadNum, vec.size() ) );
+			if ( size > 0 ) {
+				vec.insert( vec.end(), arg, arg + size );
+			}
+		unlockQmutex( threadNum );
+	}
 }
 
 /// Utility variant that adds two args.
@@ -417,15 +419,17 @@ void Qinfo::addToQ( const ObjId& oi,
 	const double* arg1, unsigned int size1, 
 	const double* arg2, unsigned int size2 )
 {
-	lockQmutex( threadNum );
-		vector< double >& vec = dBuf_[ threadNum ];
-		qBuf_[ threadNum ].push_back( 
-			Qinfo( oi, bindIndex, threadNum, vec.size() ) );
-		if ( size1 > 0 )
-			vec.insert( vec.end(), arg1, arg1 + size1 );
-		if ( size2 > 0 )
-			vec.insert( vec.end(), arg2, arg2 + size2 );
-	unlockQmutex( threadNum );
+	if ( oi.element()->hasMsgs( bindIndex ) ) {
+		lockQmutex( threadNum );
+			vector< double >& vec = dBuf_[ threadNum ];
+			qBuf_[ threadNum ].push_back( 
+				Qinfo( oi, bindIndex, threadNum, vec.size() ) );
+			if ( size1 > 0 )
+				vec.insert( vec.end(), arg1, arg1 + size1 );
+			if ( size2 > 0 )
+				vec.insert( vec.end(), arg2, arg2 + size2 );
+		unlockQmutex( threadNum );
+	}
 }
 
 // Static function
