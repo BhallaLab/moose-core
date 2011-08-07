@@ -665,6 +665,8 @@ void Qinfo::addToReduceQ( ReduceBase* r, unsigned int threadIndex )
 	unsigned int threadIndex )
 	*/
 {
+	assert( threadIndex >= 1 );
+	threadIndex -= 1;
 	reduceQ_[ threadIndex ].push_back( r );
 }
 

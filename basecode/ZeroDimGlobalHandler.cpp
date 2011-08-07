@@ -110,7 +110,8 @@ void ZeroDimGlobalHandler::process( const ProcInfo* p, Element* e, FuncId fid ) 
 	// In principle we could subdivide the zeroDim cases using
 	// the Element Id:
 	// if ( p->threadIndexInGroup == e->id()->value() % p->numThreadsinGroup)
-	if ( p->threadIndexInGroup == p->numThreadsInGroup - 1 ) {
+	if ( p->numThreadsInGroup < 2 || 
+		( ( p->threadIndexInGroup + e->id().value() ) % p->numThreadsInGroup ) == 0 ) {
 		const OpFunc* f = e->cinfo()->getOpFunc( fid );
 		const ProcOpFuncBase* pf = dynamic_cast< const ProcOpFuncBase* >( f );
 		assert( pf );
