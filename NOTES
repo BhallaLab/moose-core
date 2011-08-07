@@ -14435,4 +14435,36 @@ Steps:
 Converted the flags to static, and separated out Clock operations. Now
 clears unit tests to the same point as earlier.
 
+Further movement through unit tests. Now it is stuck with
+a Set call in testScheduling.cpp:203.
+
 ============================================================================
+7 August 2011
+Two outocmes of this latest bug:
+- It is possible for an Element to insert a Queue entry, and then be deleted
+before the Queue entry comes up for execution. Sequence:
+	Element gets a process or msg call -> inserts Q entry
+	Delete call also arrives -> Goes into StructuralQ
+	At SwapQ: StructuralQ is executed, so is Element.
+		Q entry is swapped into InQ
+	During ProcessPhase2: Q entry is read. The associated Element is zero.
+	Crash.
+  Solutions:
+  	- Check for zeros for every Q entry in ReadBuf
+	- When deleting Elements, go through Q and clear entries.
+	- It looks like this will be a problem only with Process calls. So,
+	  ensure that there is a cycle after the clock run is over, for the
+	  calls to propagate through. This won't work though for runtime
+	  model changes, which may happen in due course.
+	I'll go with the first option for now. Later I think that the third
+	option may be do-able with suitable housekeeping.
+	
+- It is possible for an Element to insert a Queue entry even if it has no
+	downstream Msg targets. Wasteful. 
+  Solution:
+	- In addToQ (but not any of the addDirect options) check if the
+	selected msgBindIndex has any outgoing msgs at all. Ignore send
+	request if not.
+
+Implemented these. Now gets past the msg bug. Hangs now in the mpiTests,
+when threads and ProcessLoop have been turned on.
