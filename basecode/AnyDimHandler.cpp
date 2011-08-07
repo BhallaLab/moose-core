@@ -143,22 +143,26 @@ void AnyDimHandler::process( const ProcInfo* p, Element* e, FuncId fid )
 	/**
 	 * This is the variant with threads in a block.
 	 */
-	unsigned int startIndex = start_ + 
-		( ( end_ - start_ ) * p->threadIndexInGroup + 
-		p->numThreadsInGroup - 1 ) /
-			p->numThreadsInGroup;
-	unsigned int endIndex = start_ + 
-		( ( end_ - start_ ) * ( 1 + p->threadIndexInGroup ) +
-		p->numThreadsInGroup - 1 ) /
-			p->numThreadsInGroup;
-	
-	char* temp = data_ + ( startIndex - start_ ) * dinfo()->size();
-	/*
-	for ( unsigned int i = startIndex; i != endIndex; ++i ) {
-		reinterpret_cast< Data* >( temp )->process( p, Eref( e, i ) );
-		temp += dinfo()->size();
+	unsigned int startIndex = start_;
+	unsigned int endIndex = end_;
+	if ( p->numThreadsInGroup > 1 ) {
+		// Note that threadIndexInGroup is indexed from 1 up.
+		assert( p->threadIndexInGroup >= 1 );
+		startIndex =
+			start_ + 
+			( ( end_ - start_ ) * ( p->threadIndexInGroup - 1 ) + 
+			p->numThreadsInGroup - 1 ) /
+				p->numThreadsInGroup;
+		endIndex = 
+			start_ + 
+			( ( end_ - start_ ) * p->threadIndexInGroup +
+			p->numThreadsInGroup - 1 ) /
+				p->numThreadsInGroup;
 	}
-	*/
+	
+	assert( startIndex >= start_ && startIndex < end_ );
+	assert( endIndex >= start_ && endIndex < end_ );
+	char* temp = data_ + ( startIndex - start_ ) * dinfo()->size();
 
 	const OpFunc* f = e->cinfo()->getOpFunc( fid );
 	const ProcOpFuncBase* pf = dynamic_cast< const ProcOpFuncBase* >( f );

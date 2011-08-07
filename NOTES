@@ -14493,6 +14493,28 @@ Implemented the HandleAck to send the condition signal. Things move along.
 Fixed a race condition with the qMutex. The clearStructuralQ call, which
 issues calls to addToQ that lock the qMutex, was itself within a block where
 the qMutex was locked. After some thought it seems like clearStructuralQ is
-safe outside the lock. Cleared the race.
+safe outside the lock. Cleared the race. Checkin 2882.
 
 Next bug is to do with reduceQ.
+
+Something fundamental to sort out: The indexing of threadNum. I keep threadNum=0
+reserved for the parser thread. Confusion arises between single and multi-
+thread modes, because in singlethread mode we must do everything on thread 0,
+whereas in multithread mode we currently do everything on threads 1 and up.
+For clean handling internally, what we should do is distinguish the
+queue for the parser thread, from the queues for the process threads.
+In single thread mode, the extra queue won't cause any problems.
+In multithread mode, we'll avoido
+
+		Single Thread mode		Multithread
+Q0		parser				Parser
+ThreadNum 0	parser, process			Parser
+Other Qs	-				Process
+Other threads	-				Process
+
+Is there a way to use thread 0..n always for Process? This would help with
+how the DataHandlers partition load.
+Otherwise, just some really ugly condition grunging for each DataHandler.
+Did the ugly grunging. Leaves most of the rest of stuff intact.
+
+

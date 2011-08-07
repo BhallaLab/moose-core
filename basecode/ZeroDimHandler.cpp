@@ -92,7 +92,8 @@ DataHandler* ZeroDimHandler::copyToNewDim( unsigned int newDimSize,
 void ZeroDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 {
 	if ( Shell::myNode() == 0 && 
-		p->threadIndexInGroup == p->numThreadsInGroup - 1 ) {
+		( Shell::numProcessThreads() < 2 || 
+		( ( p->threadIndexInGroup + e->id().value() ) % Shell::numProcessThreads() ) == 0 ) ) {
 		// reinterpret_cast< Data* >( data_ )->process( p, Eref( e, 0 ) );
 
 		const OpFunc* f = e->cinfo()->getOpFunc( fid );
