@@ -180,17 +180,24 @@ void Qinfo::readMpiQ( ThreadId threadNum, unsigned int node )
 void Qinfo::swapQ()
 {
 	/**
+	 * clearStructuralQ is not protected by the mutex, as it may issue
+	 * calls that put further entries into the Q, and this would cause a
+	 * race condition. 
+	 * While this means that the parser may request operations at the same
+	 * time as we have operations that change the structure of the model,
+	 * note that the parser requests just go into the queue. So things
+	 * should not conflict.
+	 */
+	clearStructuralQ(); // static function.
+
+	/**
 	 * This whole function is protected by a mutex so that the master
 	 * thread from the parser does not issue any more commands while we
 	 * are shuffling data from the queues to the inQ. Note that queue0
 	 * is for the master thread and therefore it must also be protected.
-	 * clearStructuralQ happens here protected by the barrier, so that 
-	 * operations that change the structure of the model can occur without 
-	 * risk of affecting ongoing messaging.
 	 */
-	if ( !Shell::isSingleThreaded() ) pthread_mutex_lock( qMutex_ );
-		clearStructuralQ(); // static function.
 
+	if ( !Shell::isSingleThreaded() ) pthread_mutex_lock( qMutex_ );
 		/**
 	 	* Here we just deposit all the data from the data and Q vectors into
 	 	* the inQ.

@@ -14470,8 +14470,29 @@ Implemented these. Now gets past the msg bug. Hangs now in the mpiTests,
 when threads and ProcessLoop have been turned on. Checkin 2880.
 
 Fixed one problem, which was a bad check for thread number. 
+Checkin 2881.
 
+Now up against a more fundamental issue, that of the ack system. It has
+relied on the shellThread, which has been removed, to send the condition signal.
+But the structure of waitForAck is ugly and involves msg traffic.
 
-Now up against a more fundamental issue, that of the ack system.
 On reflection, I can probably get by with just the delay of a couple of 
 process cycles in most cases. Let's try.
+Major case that does not work with this approach: Blocking parser while the
+simulation is running, following doStart.
+Currently we have Clock itself doing a checkProcState right at the end of the
+process loop, in barrier3.
+- Don't want to gratuitously add another mutex in the barrier.
+- There is already a message coming from the Clock object to the shell, 
+	when the run is finished. Currently it is an ack, could send something
+	else to indicate time out.
+Options:
+	- HandleAck sends the condition signal.
+
+Implemented the HandleAck to send the condition signal. Things move along.
+Fixed a race condition with the qMutex. The clearStructuralQ call, which
+issues calls to addToQ that lock the qMutex, was itself within a block where
+the qMutex was locked. After some thought it seems like clearStructuralQ is
+safe outside the lock. Cleared the race.
+
+Next bug is to do with reduceQ.
