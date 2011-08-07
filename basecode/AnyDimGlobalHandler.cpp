@@ -11,6 +11,7 @@
 #include "DataDimensions.h"
 #include "AnyDimGlobalHandler.h"
 #include "AnyDimHandler.h"
+#include "../shell/Shell.h"
 
 AnyDimGlobalHandler::AnyDimGlobalHandler( const DinfoBase* dinfo )
 	: DataHandler( dinfo ),
@@ -201,22 +202,16 @@ void AnyDimGlobalHandler::process( const ProcInfo* p, Element* e, FuncId fid )
 	/**
 	 * This is the variant with threads in a block.
 	 */
-	unsigned int startIndex = 
-		( ( numData_ ) * p->threadIndexInGroup + 
-		p->numThreadsInGroup - 1 ) /
-			p->numThreadsInGroup;
-	unsigned int endIndex = 
-		( ( numData_ ) * ( 1 + p->threadIndexInGroup ) +
-		p->numThreadsInGroup - 1 ) /
-			p->numThreadsInGroup;
-	
-	char* temp = data_ + startIndex * dinfo()->size();
-	/*
-	for ( unsigned int i = startIndex; i != endIndex; ++i ) {
-		reinterpret_cast< Data* >( temp )->process( p, Eref( e, i ) );
-		temp += dinfo()->size();
+	unsigned int startIndex = 0;
+	unsigned int endIndex = numData_;
+	if ( Shell::numProcessThreads() > 1 ) {
+		startIndex = ( numData_ * ( p ->threadIndexInGroup - 1 ) +
+			Shell::numProcessThreads() - 1 ) / Shell::numProcessThreads();
+
+		endIndex = ( numData_ * p ->threadIndexInGroup +
+			Shell::numProcessThreads() - 1 ) / Shell::numProcessThreads();
 	}
-	*/
+	char* temp = data_ + startIndex * dinfo()->size();
 
 	const OpFunc* f = e->cinfo()->getOpFunc( fid );
 	const ProcOpFuncBase* pf = dynamic_cast< const ProcOpFuncBase* >( f );

@@ -10,6 +10,7 @@
 #include "header.h"
 #include "AnyDimGlobalHandler.h"
 #include "AnyDimHandler.h"
+#include "../shell/Shell.h"
 
 OneDimGlobalHandler::OneDimGlobalHandler( const DinfoBase* dinfo )
 		: DataHandler( dinfo ), 
@@ -129,19 +130,47 @@ DataHandler* OneDimGlobalHandler::copyToNewDim( unsigned int newDimSize,
 void OneDimGlobalHandler::process( const ProcInfo* p, Element* e, 
 	FuncId fid ) const
 {
-	char* temp = data_ + p->threadIndexInGroup * dinfo()->size();
-	unsigned int stride = dinfo()->size() * p->numThreadsInGroup;
 
 	const OpFunc* f = e->cinfo()->getOpFunc( fid );
 	const ProcOpFuncBase* pf = dynamic_cast< const ProcOpFuncBase* >( f );
 	assert( pf );
 
-	for ( unsigned int i = p->threadIndexInGroup; i < numData_; 
-		i+= p->numThreadsInGroup )
+	/*
+	 * This is the variant with interleaved ops for successive threads.
+	char* temp = data_ + p->threadIndexInGroup * dinfo()->size();
+	unsigned int start = 0;
+	unsigned int increment = 1;
+	if ( Shell::numProcessThreads() > 1 ) {
+		start = p->threadIndexInGroup - 1;
+		increment = Shell::numProcessThreads();
+	}
+	unsigned int stride = dinfo()->size() * increment;
+	for ( unsigned int i = start; i < numData_; i += increment )
 	{
 		// reinterpret_cast< Data* >( temp )->process( p, Eref( e, i ) );
 		pf->proc( temp, Eref( e, i ), p );
 		temp += stride;
+	}
+	*/
+
+	/*
+	 * This is the variant with all ops for a given thread in a block
+	 */
+	unsigned int startIndex = 0;
+	unsigned int endIndex = numData_;
+	if ( Shell::numProcessThreads() > 1 ) {
+		startIndex = ( numData_ * ( p ->threadIndexInGroup - 1 ) +
+			Shell::numProcessThreads() - 1 ) / Shell::numProcessThreads();
+
+		endIndex = ( numData_ * p ->threadIndexInGroup +
+			Shell::numProcessThreads() - 1 ) / Shell::numProcessThreads();
+	}
+	char* temp = data_ + startIndex * dinfo()->size();
+
+	for ( unsigned int i = startIndex; i < endIndex; ++i )
+	{
+		pf->proc( temp, Eref( e, i ), p );
+		temp += dinfo()->size();
 	}
 }
 
