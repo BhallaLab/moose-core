@@ -34,7 +34,7 @@ vector< double > Qinfo::mpiQ2_( 1000, 0.0 );
 double* Qinfo::mpiInQ_ = &mpiQ1_[0];
 double* Qinfo::mpiRecvQ_ = &mpiQ2_[0];
 
-vector< const Qinfo* > Qinfo::structuralQinfo_;
+vector< Qinfo > Qinfo::structuralQinfo_( 0 );
 // vector< double > Qinfo::structuralQdata_;
 
 pthread_mutex_t* Qinfo::qMutex_;
@@ -91,16 +91,16 @@ void Qinfo::clearStructuralQ()
 {
 	enableStructuralOps();
 	for ( unsigned int i = 0; i < structuralQinfo_.size(); ++i ) {
-		const Qinfo* qi = structuralQinfo_[i];
-		if ( !qi->isDummy() ) {
+		const Qinfo& qi = structuralQinfo_[i];
+		if ( !qi.isDummy() ) {
 			/*
 			Qinfo newQ( qi, ScriptThreadNum );
 			const Element* e = qi->src_.element();
 			// cout << "Executing Structural Q[" << i << "] with " << e->getName() << endl;
 			e->exec( &newQ, inQ_ + newQ.dataIndex_ );
 			*/
-			const Element* e = qi->src_.element();
-			e->exec( qi, inQ_ + qi->dataIndex_ );
+			const Element* e = qi.src_.element();
+			e->exec( &qi, inQ_ + qi.dataIndex_ );
 		}
 	}
 
@@ -214,7 +214,7 @@ void Qinfo::swapQ()
 		bufsize = numQinfo * QinfoSizeInDoubles + datasize + 2;
 		if ( bufsize > q0_.capacity() )
 			q0_.reserve( bufsize + bufsize / 2 );
-		q0_.resize( bufsize );
+		q0_.resize( bufsize, 0 );
 		inQ_ = &q0_[0];
 		q0_[0] = bufsize;
 		q0_[1] = numQinfo;
@@ -264,7 +264,8 @@ void Qinfo::swapQ()
 
 /**
  * Waits the specified number of Process cycles before returning.
- * Should only be called on the master thread (thread 0)
+ * Should only be called on the master thread (thread 0).
+ * Static func.
  */
 void Qinfo::waitProcCycles( unsigned int numCycles )
 {
@@ -284,6 +285,7 @@ void Qinfo::waitProcCycles( unsigned int numCycles )
 
 /**
  * Need to allocate space for incoming block
+ * Static func.
  */
 void Qinfo::swapMpiQ()
 {
@@ -383,11 +385,11 @@ void reportOutQ( const vector< vector< Qinfo > >& q,
 	}
 }
 
-void reportStructQ( const vector< const Qinfo* >& sq, const double* q )
+void reportStructQ( const vector< Qinfo >& sq, const double* q )
 {
 	cout << endl << Shell::myNode() << ": Reporting structuralQinfo\n";
 	for ( unsigned int i = 0; i < sq.size(); ++i ) {
-		reportQentry( i, sq[i], q + 2 );
+		reportQentry( i, &sq[i], q + 2 );
 	}
 }
 
@@ -558,7 +560,9 @@ bool Qinfo::addToStructuralQ() const
 	bool ret = 0;
 	// pthread_mutex_lock( qMutex_ );
 		if ( !isSafeForStructuralOps_ ) {
-			structuralQinfo_.push_back( this );
+			if ( isDummy() )
+				cout << "d" << flush;
+			structuralQinfo_.push_back( *this );
 			/*
 			const double* data = &( inQ_[ dataIndex_ ] );
 			unsigned int size = dataSizeOnInQ();
@@ -621,6 +625,7 @@ void Qinfo::emptyAllQs()
 // main thread-handling loop is inactive.
 // Called after all the 'send' functions have been done. Typically just
 // one is pending.
+// Static func.
 void Qinfo::clearQ( ThreadId threadNum )
 {
 	swapQ();
