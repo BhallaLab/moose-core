@@ -14526,3 +14526,6 @@ how I handled Conv<string>. Fixed.
 
 Second issue turned out to be that the structuralQ was storing pointers to
 temporary Qinfos, not to the inQ as I had thought. Easily fixed once found.
+Checkin 2885.
+
+Third issue was in Conv< vector< T > >. Bad handling of zero size vectors.

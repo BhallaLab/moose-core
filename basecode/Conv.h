@@ -705,7 +705,8 @@ template< class T > class Conv< vector< T > >
 		Conv( const vector< T >& arg )
 		{
 			if ( arg.size() == 0 ) {
-				vec_.resize( 0 );
+				vec_.resize( 1 );
+				vec_[0] = 0;
 				return;
 			}
 
@@ -720,12 +721,11 @@ template< class T > class Conv< vector< T > >
 
 		/** 
 		 * Returns ptr to entire array
+		 * We rely on the constructors to ensure size is at least 1.
 		 */
 		const double* ptr() const
 		{
-			if ( vec_.size() > 0 )
-				return &vec_[0];
-			return 0;
+			return &vec_[0];
 		}
 
 		/** 
@@ -747,11 +747,8 @@ template< class T > class Conv< vector< T > >
 		}
 
 		unsigned int val2buf( double* buf ) const {
-			if ( vec_.size() > 0 ) {
-				memcpy( buf, &vec_[0], vec_.size() * sizeof( double ) );
-				return vec_.size();
-			}
-			return 0;
+			memcpy( buf, &vec_[0], vec_.size() * sizeof( double ) );
+			return vec_.size();
 		}
 
 		static void str2val( vector< T >& val, const string& s ) {
