@@ -120,7 +120,7 @@ void OneDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 	}
 	
 	assert( startIndex >= start_ && startIndex < end_ );
-	assert( endIndex >= start_ && endIndex < end_ );
+	assert( endIndex >= start_ && endIndex <= end_ );
 	char* temp = data_ + ( startIndex - start_ ) * dinfo()->size();
 	/*
 	for ( unsigned int i = startIndex; i != endIndex; ++i ) {
