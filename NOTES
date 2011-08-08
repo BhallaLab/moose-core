@@ -14516,5 +14516,11 @@ Is there a way to use thread 0..n always for Process? This would help with
 how the DataHandlers partition load.
 Otherwise, just some really ugly condition grunging for each DataHandler.
 Did the ugly grunging. Leaves most of the rest of stuff intact.
+Checkin 2883.
 
+============================================================================
+8 August 2011
+Ran into odd and unpredictable bug. This prompted me to go back and do a
+valgrind. First thing there was memory alignment stuff, turned out to be
+how I handled Conv<string>. Fixed.
 
