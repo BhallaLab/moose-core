@@ -14524,3 +14524,5 @@ Ran into odd and unpredictable bug. This prompted me to go back and do a
 valgrind. First thing there was memory alignment stuff, turned out to be
 how I handled Conv<string>. Fixed.
 
+Second issue turned out to be that the structuralQ was storing pointers to
+temporary Qinfos, not to the inQ as I had thought. Easily fixed once found.
