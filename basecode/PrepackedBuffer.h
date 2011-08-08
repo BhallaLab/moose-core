@@ -45,6 +45,10 @@ class PrepackedBuffer
 		~PrepackedBuffer();
 
 		const double* data() const {
+			return data_ + 2;
+		}
+
+		const double* ptr() const {
 			return data_;
 		}
 
@@ -59,7 +63,7 @@ class PrepackedBuffer
 		 * 	Returns the size of the data contents, in doubles.
 		 */
 		unsigned int dataSize() const {
-			return dataSize_;
+			return data_[0];
 		}
 
 		/**
@@ -67,7 +71,7 @@ class PrepackedBuffer
 		 * double*
 		 */
 		unsigned int size() const {
-			return dataSize_ + 2; // Note that we don't need to transfer the individualDataSize_ entry.
+			return data_[0] + 2; // Note that we don't need to transfer the individualDataSize_ entry.
 		}
 
 		/**
@@ -79,18 +83,20 @@ class PrepackedBuffer
 		 * Returns number of data entries: size of transferred array.
 		 */
 		unsigned int numEntries() const {
-			return numEntries_;
+			return data_[1];
 		}
 
 		/**
 		 * Flag: is the data type a single value or a vector?
 		 */
 		bool isVector() const {
-			return numEntries_ > 0;
+			return data_[1] > 0;
 		}
 	private:
-		unsigned int dataSize_; // Size of data.
-		unsigned int numEntries_; // Number of data entries, if array.
-		unsigned int individualDataSize_; // size of each entry.
+		// unsigned int dataSize_; // Size of data.
+		// unsigned int numEntries_; // Number of data entries, if array.
+		// unsigned int individualDataSize_; // size of each entry.
+		/// data_[0] = dataSize, data_[1] = numEntries, rest = actual data.
+		/// dataSize means size of all the converted data.
 		double* data_; // Converted data.
 };

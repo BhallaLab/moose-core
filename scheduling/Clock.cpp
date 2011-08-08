@@ -447,7 +447,7 @@ void Clock::processPhase1( ProcInfo* info )
 		advancePhase1( info );
 	else if ( doingReinit_ )
 		reinitPhase1( info );
-	else if ( info->threadIndexInGroup == 0 )
+	else if ( Shell::isSingleThreaded() || info->threadIndexInGroup == 1 )
 		++countNull1_;
 }
 
@@ -457,7 +457,7 @@ void Clock::processPhase2( ProcInfo* info )
 		advancePhase2( info );
 	else if ( doingReinit_ )
 		reinitPhase2( info );
-	else if ( info->threadIndexInGroup == 0 )
+	else if ( Shell::isSingleThreaded() || info->threadIndexInGroup == 1 )
 		++countNull2_;
 }
 
@@ -571,7 +571,7 @@ void Clock::handleStep( unsigned int numSteps )
 void Clock::advancePhase1(  ProcInfo *p )
 {
 	tickPtr_[0].mgr()->advancePhase1( p );
-	if ( p->threadIndexInGroup == 0 ) {
+	if ( Shell::isSingleThreaded() || p->threadIndexInGroup == 1 ) {
 		++countAdvance1_;
 	}
 }
@@ -583,7 +583,7 @@ void Clock::advancePhase1(  ProcInfo *p )
 // things. So it cannot touch any fields which might affect other threads.
 void Clock::advancePhase2(  ProcInfo *p )
 {
-	if ( p->threadIndexInGroup == 0 ) {
+	if ( Shell::isSingleThreaded() || p->threadIndexInGroup == 1 ) {
 		tickPtr_[0].mgr()->advancePhase2( p );
 		if ( tickPtr_.size() > 1 )
 			sort( tickPtr_.begin(), tickPtr_.end() );
@@ -595,8 +595,8 @@ void Clock::advancePhase2(  ProcInfo *p )
 			// isRunning_ = 0; // Should not set this flag here, it affects other threads.
 			finished.send( clockId.eref(), p->threadIndexInGroup );
 		//	ack()->send( clockId.eref(), p, p->nodeIndexInGroup, OkStatus );
-		Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-		s->handleAck( p->nodeIndexInGroup, OkStatus );
+			Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+			s->handleAck( p->nodeIndexInGroup, OkStatus );
 		}
 		++countAdvance2_;
 	}
@@ -641,7 +641,7 @@ void Clock::reinitPhase1( ProcInfo* info )
 		i != tickPtr_.end(); ++i ) {
 		i->mgr()->reinitPhase1( info );
 	}
-	if ( info->threadIndexInGroup == 0 )
+	if ( Shell::isSingleThreaded() || info->threadIndexInGroup == 1 )
 		++countReinit1_;
 }
 
@@ -651,7 +651,7 @@ void Clock::reinitPhase1( ProcInfo* info )
 void Clock::reinitPhase2( ProcInfo* info )
 {
 	info->currTime = 0.0;
-	if ( info->threadIndexInGroup == 0 ) {
+	if ( Shell::isSingleThreaded() || info->threadIndexInGroup == 1 ) {
 		// doingReinit_ = 0; //Cannot touch this here, affects other threads
 		for ( vector< TickPtr >::iterator i = tickPtr_.begin();
 			i != tickPtr_.end(); ++i ) {
