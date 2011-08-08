@@ -138,6 +138,89 @@ template< class T > class Conv
 		const double* val_;
 };
 
+/**
+ * This stores the data as the equivalent of a char* string, terminated with
+ * the usual \0, but allocates it as a double[].
+ */
+template<> class Conv< string >
+{
+	public:
+		Conv( const char* buf )
+		{
+			unsigned int len = 0;
+			if ( buf != 0 ) {
+				len = strlen( buf );
+			}
+			val_ = new double[ 1 + len/ sizeof( double ) ];
+			memcpy( val_, buf, len + 1 );
+		}
+
+		Conv( const double* dbuf )
+		{
+			const char* buf = reinterpret_cast< const char* >( dbuf );
+			unsigned int len = 0;
+			if ( dbuf != 0 ) {
+				len = strlen( buf );
+			}
+			val_ = new double[ 1 + len/ sizeof( double ) ];
+			memcpy( val_, buf, len + 1 );
+		}
+
+		Conv( const string& arg )
+		{
+			val_ = new double[ 1 + arg.length()/ sizeof( double ) ];
+			memcpy( val_, arg.c_str(), arg.length() + 1 );
+		}
+
+		~Conv()
+		{
+			delete[] val_;
+		}
+
+
+		const double* ptr() const
+		{
+			return val_;
+		}
+
+		/**
+		 * This is the size used in the serialized form, as a double*
+		 * Note that we do some ugly stuff to get alignment on 8-byte
+		 * boundaries.
+		 * We need to have strlen + 1 as a minimum.
+		 */
+		unsigned int size() const
+		{
+			return ( 1 + strlen( reinterpret_cast< char* >( val_ ) ) / sizeof( double ) );
+		}
+
+		const string operator*() const {
+			return reinterpret_cast< const char* >( val_ );
+		}
+
+		unsigned int val2buf( double* dbuf ) const {
+			unsigned int len = 
+				strlen( reinterpret_cast< const char* >(val_) );
+			memcpy( dbuf, val_, len + 1 );
+			return 1 + len / sizeof( double );
+		}
+
+		static void str2val( string& val, const string& s ) {
+			val = s;
+		}
+
+		static void val2str( string& s, const string& val ) {
+			s = val;
+		}
+
+		static string rttiType() {
+			return "string";
+		}
+	private:
+		double* val_;
+};
+
+		/**
 template<> class Conv< string >
 {
 	public:
@@ -166,12 +249,10 @@ template<> class Conv< string >
 			return reinterpret_cast< const double* >( val_.c_str() );
 		}
 
-		/**
 		 * This is the size used in the serialized form, as a double*
 		 * Note that we do some ugly stuff to get alignment on 8-byte
 		 * boundaries.
 		 * We need to have strlen + 1 as a minimum.
-		 */
 		unsigned int size() const
 		{
 			
@@ -202,6 +283,7 @@ template<> class Conv< string >
 	private:
 		string val_;
 };
+*/
 
 /**
  * The template specialization of Conv< bool > sets up alignment on
