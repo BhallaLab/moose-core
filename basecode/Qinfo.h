@@ -446,7 +446,7 @@ class Qinfo
 		 * swapQ, and is serial and single-threaded.
 		 */
 		// static vector< double > structuralQ_;
-		static vector< const Qinfo* > structuralQinfo_;
+		static vector< Qinfo > structuralQinfo_;
 		// static vector< double > structuralQdata_;
 
 		/**
