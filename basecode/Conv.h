@@ -641,7 +641,7 @@ template<> class Conv< PrepackedBuffer >
 		{;}
 
 		/**
-		 * This is the size of the char* converted array
+		 * This is the size of the double* converted array
 		 */
 		unsigned int size() const
 		{
@@ -654,7 +654,7 @@ template<> class Conv< PrepackedBuffer >
 
 		const double* ptr() const
 		{
-			return reinterpret_cast< const double* >( &val_ );
+			return val_.ptr();
 		}
 
 		/**

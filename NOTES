@@ -14529,3 +14529,8 @@ temporary Qinfos, not to the inQ as I had thought. Easily fixed once found.
 Checkin 2885.
 
 Third issue was in Conv< vector< T > >. Bad handling of zero size vectors.
+With this valgrind is happy as far as the unit tests go.  Checkin 2886.
+
+Next to figure out why the tests hang or abort in various places in testShell.
+Figured out the 'hang'. It was due to obsolete checks for thread0 in
+Clock.cpp to do its main operations. Fixed. Now it crashes earlier.
