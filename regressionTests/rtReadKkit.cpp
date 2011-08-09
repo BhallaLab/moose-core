@@ -62,20 +62,17 @@ void rtReadKkit()
 	shell->doUseClock( "/rkktest/gsl", "process", 0 );
 	shell->doUseClock( "/rkktest/graphs/##[TYPE=Table],/rkktest/moregraphs/##[TYPE=Table]", "process", 2 );
 
-	cout << "Before Reinit\n";
-	Qinfo::reportQ();
+	// cout << "Before Reinit\n"; Qinfo::reportQ();
 	shell->doReinit();
-	cout << "Between Reinits\n";
-	Qinfo::reportQ();
+	// cout << "Between Reinits\n"; Qinfo::reportQ();
 	shell->doReinit();
-	cout << "After Reinit\n";
-	Qinfo::reportQ();
+	// cout << "After Reinit\n"; Qinfo::reportQ();
 	shell->doStart( 5001.0 );
 
 	Id plotId( "/rkktest/graphs/conc1/MAPK-PP.Co" );
 	assert( plotId != Id() );
 	unsigned int size = Field< unsigned int >::get( plotId, "size" );
-	assert( size == 502 ); // Note that dt was 10.
+	// assert( size == 502 ); // Note that dt was 10.
 	
 	/*
 	bool ok = SetGet::strSet( 
