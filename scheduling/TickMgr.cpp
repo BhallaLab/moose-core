@@ -131,3 +131,8 @@ void TickMgr::reinitPhase2( ProcInfo* p )
 	nextTime_ = dt_;
 	tickerator_ = 0;
 }
+
+const vector< const Tick* >& TickMgr::ticks() const
+{
+	return ticks_;
+}

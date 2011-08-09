@@ -559,6 +559,26 @@ void Clock::handleStart( double runtime )
 		procState_ = StartOnly;
 }
 
+/// Static function
+void Clock::reportClock() 
+{
+	const Clock* c = reinterpret_cast< const Clock* >( Id( 1 ).eref().data() );
+	c->innerReportClock();
+}
+
+void Clock::innerReportClock() const
+{
+	cout << "reporting Clock: runTime= " << runTime_ << 
+		", currentTime= " << currentTime_ << ", endTime= " << endTime_ <<
+		", dt= " << dt_ << ", isRunning = " << isRunning_ << endl;
+	cout << "uniqueDts= ";
+	for ( unsigned int i = 0; i < tickPtr_.size(); ++i ) {
+		cout << "  " << tickPtr_[i].mgr()->getDt() << "(" <<
+		tickPtr_[i].mgr()->ticks().size() << ")";
+	}
+	cout << endl;
+}
+
 void Clock::handleStep( unsigned int numSteps )
 {
 	double runtime = dt_ * numSteps;

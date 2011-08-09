@@ -59,6 +59,11 @@ class TickMgr {
 		 * True if tickerator_ has not been set to something sensible
 		 */
 		bool isInited() const;
+
+		/**
+		 * Utility function to inspect tick contents
+		 */
+		const vector< const Tick* >& ticks() const;
 		
 	private:
 		// Tick* ptr_;

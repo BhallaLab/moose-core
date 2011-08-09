@@ -721,7 +721,13 @@ void testMultiNodeIntFireNetwork()
 	vector< double > retVec;
 	// Eref allSyn( syne.element(), DataId::any() );
 	Field< double >::getVec( synId, "weight", retVec );
+
+
+	/**
+	 * This doesn't work anymore because we just fill up as many values
+	 * as come back.
 	assert( retVec.size() == size * fieldSize );
+	*/
 	/*
 	for ( unsigned int i = fieldSize* ( size /2 - 2 ); i < fieldSize * ( size / 2 + 2 ); i++ ) {
 		cout << "0Got wt[" << i << "] = " << retVec[i] << ", correct = " << weight[ i ] << endl << flush;

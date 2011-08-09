@@ -36,13 +36,16 @@ void OneToAllMsg::exec( const Qinfo* q, const double* arg, FuncId fid )
 	const
 {
 	if ( q->src().element() == e1_ ) {
-		DataHandler::iterator end = e2_->dataHandler()->end();
-		const OpFunc* f = e2_->cinfo()->getOpFunc( fid );
-		for ( DataHandler::iterator i = e2_->dataHandler()->begin();
-			i != end; ++i ) {
-			if ( q->execThread( e2_->id(), i.index().data() ) )
-			{
+		if ( q->src().dataId == i1_ ) {
+			DataHandler::iterator end = e2_->dataHandler()->end();
+			const OpFunc* f = e2_->cinfo()->getOpFunc( fid );
+			for ( DataHandler::iterator i = e2_->dataHandler()->begin();
+				i != end; ++i ) {
+				if ( q->execThread( e2_->id(), i.index().data() ) )
+				{
 					f->op( Eref( e2_, i.index() ), q, arg );
+					// cout << ":" << q->threadNum() << ": ObjId = " << ObjId( e2_->id(), i.index() ) << endl;
+				}
 			}
 		}
 	} else {
