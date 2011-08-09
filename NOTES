@@ -14534,3 +14534,18 @@ With this valgrind is happy as far as the unit tests go.  Checkin 2886.
 Next to figure out why the tests hang or abort in various places in testShell.
 Figured out the 'hang'. It was due to obsolete checks for thread0 in
 Clock.cpp to do its main operations. Fixed. Now it crashes earlier.
+Checkin 2887.
+
+Restored protection of DirectToQ targets to specific threads. 
+Unresolved problem with OneToAll, looks like it goes to the right
+places.
+
+After further tracking, it seems like we have a deeper problem: Every Object
+with a send call in Process will dump an entry into the queue if any Object
+on the Element has an outgoing Msg there. This crops up in the OneToAll
+msg. I can readily enough filter the spurious calls in the Msg, but this is
+after the Msg packet has trundled through the queue and all. Is it worth
+checking for outgoing Msgs to see if any originate at a given Object?
+
+For now: fixed bug, moved on with unit tests. Now hangs in TestSched::process,
+running at testScheduling.cpp:438.

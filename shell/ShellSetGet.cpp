@@ -34,7 +34,7 @@ void Shell::recvGet( const Eref& e, const Qinfo* q, PrepackedBuffer pb )
 			double*& c = getBuf_[ linearIndex ];
 			c = new double[ pb.dataSize() ];
 			memcpy( c, pb.data(), pb.dataSize() * sizeof( double ) );
-			// cout << myNode_ << ": Shell::recvGet[" << tgt.linearIndex() << "]= (" << pb.dataSize() << ", " <<  *reinterpret_cast< const double* >( c ) << ")\n";
+			// cout << myNode_ << ":" << q->threadNum() << ": Shell::recvGet[" << linearIndex << "]= (" << pb.dataSize() << ", " <<  *c << ")\n";
 		} else  {
 			assert ( getBuf_.size() == 1 );
 			double*& c = getBuf_[ 0 ];
