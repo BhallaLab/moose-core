@@ -524,7 +524,7 @@ void Table::setVec( vector< double >  val )
 
 void Table::recvData( PrepackedBuffer pb )
 {
-	assert ( pb.dataSize() == sizeof( double ) );
+	assert ( pb.dataSize() == 1 );
 	double ret = *reinterpret_cast< const double* >( pb.data() );
 
 	vec_.push_back( ret );

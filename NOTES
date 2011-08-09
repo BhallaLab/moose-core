@@ -14548,4 +14548,4 @@ after the Msg packet has trundled through the queue and all. Is it worth
 checking for outgoing Msgs to see if any originate at a given Object?
 
 For now: fixed bug, moved on with unit tests. Now hangs in TestSched::process,
-running at testScheduling.cpp:438.
+running at testScheduling.cpp:438. Checkin 2888
