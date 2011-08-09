@@ -134,6 +134,12 @@ class Clock
 
 		// static void* threadStartFunc( void* threadInfo );
 		static const Cinfo* initCinfo();
+
+		/**
+		 * Utility function to tell us about the scheduling
+		 */
+		static void reportClock();
+		void innerReportClock() const;
 	private:
 		double runTime_;
 		double currentTime_;

@@ -318,13 +318,13 @@ void Element::exec( const Qinfo* qi, const double* arg )
 			unsigned int offset = 0;
 			for ( DataHandler::iterator 
 				i = dh->begin(); i != dh->end(); ++i ) {
-				// if ( qi->execThread( elm->id(), i.index().data() ) ) {
+				if ( qi->execThread( elm->id(), i.index().data() ) ) {
 					count = i.linearIndex();
 					offset = ( count % ofid->numEntries) * ofid->entrySize;
 					f->op( Eref( elm, i.index() ), qi, data + offset );
-				// }
+				}
 			}
-		} else {
+		} else if ( qi->execThread( ofid->oi.id, ofid->oi.dataId.data() ) ) {
 			f->op( ofid->oi.eref(), qi, arg + ObjFidSizeInDoubles );
 		}
 	} else {
