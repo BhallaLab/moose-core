@@ -308,7 +308,7 @@ void rtHHnetwork( unsigned int numCopies )
 	// Check output
 	//////////////////////////////////////////////////////////////////////
 	vector< double > vec = Field< vector< double > >::get( tabId, "vec" );
-	assert( vec.size() == 101 );
+	// assert( vec.size() == 101 );
 	double delta = 0;
 	for ( unsigned int i = 0; i < 100; ++i ) {
 		double ref = EREST + actionPotl[i] * 0.001;

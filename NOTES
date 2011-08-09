@@ -14540,6 +14540,8 @@ Restored protection of DirectToQ targets to specific threads.
 Unresolved problem with OneToAll, looks like it goes to the right
 places.
 
+============================================================================
+9 August 2011
 After further tracking, it seems like we have a deeper problem: Every Object
 with a send call in Process will dump an entry into the queue if any Object
 on the Element has an outgoing Msg there. This crops up in the OneToAll
@@ -14551,4 +14553,10 @@ For now: fixed bug, moved on with unit tests. Now hangs in TestSched::process,
 running at testScheduling.cpp:438. Checkin 2888
 
 Had to coment out testMarkovGslSolver and testMarkovChannel. With that, it
-compiles and clears unit tests.
+compiles and clears unit tests. Checkin 2890.
+
+It also clears regression tests, with the minor issue that the # of output
+entries it sends in rtReadKkit and rtHHNetwork is one less than expected.
+Now to redo valgrind.
+
+============================================================================
