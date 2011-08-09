@@ -56,7 +56,7 @@ bool benchmarkTests( int argc, char** argv )
 	bool doPlot = 0;
 	optind = 0; // forces reinit of getopt
 
-	while ( ( opt = getopt( argc, argv, "shiqn:c:b:B:" ) ) != -1 ) {
+	while ( ( opt = getopt( argc, argv, "shiqn:t:b:B:" ) ) != -1 ) {
 		switch ( opt ) {
 			case 'B': // Benchmark
 				doPlot = 1; // fall through to case b.

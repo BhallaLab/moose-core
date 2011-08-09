@@ -608,6 +608,7 @@ void Qinfo::freeMutex()
 	ret = pthread_cond_destroy( qCond_ );
 	assert( ret == 0 );
 	delete qMutex_;
+	delete qCond_;
 }
 
 /// Static func

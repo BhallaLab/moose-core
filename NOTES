@@ -14557,6 +14557,11 @@ compiles and clears unit tests. Checkin 2890.
 
 It also clears regression tests, with the minor issue that the # of output
 entries it sends in rtReadKkit and rtHHNetwork is one less than expected.
+Checkin 2891.
 Now to redo valgrind.
+Valgrind is happy. It reports a loss of 104 bytes, 56 of which are presumably
+the pthread bytes. Turns out the other 48 are the qCond.
+
+Minor fix for the qCond memory leak, and for command line args.
 
 ============================================================================
