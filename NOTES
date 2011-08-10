@@ -14562,6 +14562,27 @@ Now to redo valgrind.
 Valgrind is happy. It reports a loss of 104 bytes, 56 of which are presumably
 the pthread bytes. Turns out the other 48 are the qCond.
 
-Minor fix for the qCond memory leak, and for command line args.
+Minor fix for the qCond memory leak, and for command line args. Checkin 2892.
 
 ============================================================================
+10 August 2011
+Minor fix for iterating through target objects in OneDimHandler and 
+AnyDimHandler.cpp. Now clears unit and regression tests on 16 threads.
+
+Some prelim benchmarks with -O3.
+
+Machine		# threads	test		runTime
+Mishti		2		ksolve		13.2
+Ghevar		7		ksolve		0.6
+
+Mishti		2		IntFire		190
+Ghevar		7		IntFire		57.3
+Ghevar		2		IntFire		154
+
+Mishti		2		hhNet		19.8
+Mishti		1		hhNet		24.7
+Ghevar		7		hhNet		26.0
+Ghevar		2		hhNet		19.4.
+Ghevar		1		hhNet		15.1
+
+Minor fix to runtime for ksolve

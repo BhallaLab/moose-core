@@ -22,7 +22,7 @@ extern void perfTestMarkovSolver();
 void testKsolve()
 {
 	double ktime1 = testGslIntegrator( "Kholodenko", "conc1/MAPK-PP.Co",
-		10.0, 1e4 );
+		10.0, 1e6 );
 	cout << "Kholodenko		" << ktime1 << endl;
 }
 
