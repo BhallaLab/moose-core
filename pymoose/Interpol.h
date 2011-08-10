@@ -43,7 +43,7 @@ namespace pymoose
         int __len__();
         int __get_calcMode() const;
         void __set_calcMode(int calc_mode);
-        vector <double> __get_table();
+        const vector <double>& __get_table();
         string dumpFile() const;
         void dumpFile(string fileName, bool append = false);
         void tabFill(int xdivs, int mode);
