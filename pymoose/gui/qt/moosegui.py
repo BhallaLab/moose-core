@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Aug 10 11:48:52 2011 (+0530)
+# Last-Updated: Wed Aug 10 12:06:07 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2671
+#     Update #: 2684
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -1029,19 +1029,18 @@ class MainWindow(QtGui.QMainWindow):
 		
     
     def resetVizDialogSettings(self):	#add_chait
-	self.vizDialogue.variable.setText("Vm")
-	self.vizDialogue.moosepath.setText("")
+        self.vizDialogue.variable.setText("Vm")
+        self.vizDialogue.moosepath.setText("")
         self.vizDialogue.vizMinVal.setText("-0.1")
         self.vizDialogue.vizMaxVal.setText("0.07")
         self.vizDialogue.variable_2.setText("")
-	self.vizDialogue.moosepath_2.setText("")
+        self.vizDialogue.moosepath_2.setText("")
         self.vizDialogue.vizMinVal_2.setText("")
         self.vizDialogue.vizMaxVal_2.setText("")
         self.vizDialogue.colorMapComboBox.setCurrentIndex(0)
         self.vizDialogue.styleComboBox.setCurrentIndex(2)
     
-    def vizSettings(self):   #add_chait
-    	
+    def vizSettings(self):   #add_chait    	
     	title = self.tr('GL %d' % (len(self.vizs)))
         vizWindow = newGLSubWindow()
         vizWindow.setWindowTitle(title)
@@ -1053,41 +1052,41 @@ class MainWindow(QtGui.QMainWindow):
         vizWindow.setWidget(viz)
         
         viz.viz=1	#turn on visualization mode
-	vizStyle = self.vizDialogue.styleComboBox.currentIndex()
+        vizStyle = self.vizDialogue.styleComboBox.currentIndex()
 	
-	if self.vizDialogue.specificCompartmentName.text()!='':					#if no compartment name selected, default is soma
+        if self.vizDialogue.specificCompartmentName.text()!='':					#if no compartment name selected, default is soma
        		viz.specificCompartmentName = str(self.vizDialogue.specificCompartmentName.text())	#else pick name from user ip text box
 	
-	if vizStyle==3:    									#grid view case
-		numberOfCellsDrawn = 0								#as yet drawn = 0, used as a counter
-		sideSquare = self.nearestSquare(self.vizDialogue.vizCells.count())		#get the side of the square
-		for yAxis in range(sideSquare):							#Yaxis - columns
-			for xAxis in range(sideSquare):						#Xaxis - fill rows first
-				if numberOfCellsDrawn < self.vizDialogue.vizCells.count(): 	#finished drawing all cells?
-					viz.drawNewCell(cellName=str(self.vizDialogue.vizCells.item(numberOfCellsDrawn).text()),cellCentre=[xAxis*0.5,yAxis*0.5,0.0],style = vizStyle)
-					numberOfCellsDrawn += 1					#increase number of cells drawn
-			
-       		if self.vizDialogue.variable_2.text()!='':					#field2 to represented as radius of the compartment
-       			currentVizSetting_2 = [float(str(self.vizDialogue.vizMinVal_2.text())),float(str(self.vizDialogue.vizMaxVal_2.text())),str(self.vizDialogue.moosepath_2.text()),str(self.vizDialogue.variable_2.text())]
-       			viz.setColorMap_2(*currentVizSetting_2[:4])				#set the colormap equivalent of radius
-			viz.gridRadiusViz=1							#viz using both radius and color - 2 fields
-		else:										
-			viz.gridRadiusViz=0							#no 2nd field selected, just viz using colors - not radius
+        if vizStyle==3:                                     #grid view case
+            numberOfCellsDrawn = 0                              #as yet drawn = 0, used as a counter
+            sideSquare = self.nearestSquare(self.vizDialogue.vizCells.count())      #get the side of the square
+            for yAxis in range(sideSquare):                         #Yaxis - columns
+                for xAxis in range(sideSquare):                     #Xaxis - fill rows first
+                    if numberOfCellsDrawn < self.vizDialogue.vizCells.count():  #finished drawing all cells?
+                        viz.drawNewCell(cellName=str(self.vizDialogue.vizCells.item(numberOfCellsDrawn).text()),cellCentre=[xAxis*0.5,yAxis*0.5,0.0],style = vizStyle)
+                        numberOfCellsDrawn += 1                 #increase number of cells drawn
+                        
+                if self.vizDialogue.variable_2.text()!='':                  #field2 to represented as radius of the compartment
+                    currentVizSetting_2 = [float(str(self.vizDialogue.vizMinVal_2.text())),float(str(self.vizDialogue.vizMaxVal_2.text())),str(self.vizDialogue.moosepath_2.text()),str(self.vizDialogue.variable_2.text())]
+                    viz.setColorMap_2(*currentVizSetting_2[:4])             #set the colormap equivalent of radius
+                    viz.gridRadiusViz=1                         #viz using both radius and color - 2 fields
+            else:                                       
+                viz.gridRadiusViz=0                         #no 2nd field selected, just viz using colors - not radius
 
-	else:
-    		for index in xrange(self.vizDialogue.vizCells.count()):				#non-grid view case
-        		viz.drawNewCell(cellName=str(self.vizDialogue.vizCells.item(index).text()),style = vizStyle)
+        else:
+            for index in xrange(self.vizDialogue.vizCells.count()):             #non-grid view case
+                viz.drawNewCell(cellName=str(self.vizDialogue.vizCells.item(index).text()),style = vizStyle)
         
-        currentVizSetting = [float(str(self.vizDialogue.vizMinVal.text())),float(str(self.vizDialogue.vizMaxVal.text())),str(self.vizDialogue.moosepath.text()),str(self.vizDialogue.variable.text()),os.path.join(str(self.settings.value(config.KEY_GL_COLORMAP).toString()),str(self.vizDialogue.colorMapComboBox.itemText(self.vizDialogue.colorMapComboBox.currentIndex())))]						#color map inputs from user
-    	#print currentVizSetting
+        currentVizSetting = [float(str(self.vizDialogue.vizMinVal.text())),float(str(self.vizDialogue.vizMaxVal.text())),str(self.vizDialogue.moosepath.text()),str(self.vizDialogue.variable.text()),os.path.join(str(self.settings.value(config.KEY_GL_COLORMAP).toString()),str(self.vizDialogue.colorMapComboBox.itemText(self.vizDialogue.colorMapComboBox.currentIndex())))]                      #color map inputs from user
+        #print currentVizSetting
         
-        viz.setColorMap(*currentVizSetting[:5])							#assign regular colormap
+        viz.setColorMap(*currentVizSetting[:5])                         #assign regular colormap
         
         QtCore.QObject.connect(viz,QtCore.SIGNAL("compartmentSelected(QString)"),self.pickCompartment)
         #viz.translate([0.0,0.0,-6.0])
         self.vizs.append(viz)
         
-        self.newDia.hide() 	#pressed OK button, so close the dialog
+        self.newDia.hide()  #pressed OK button, so close the dialog
         self.connect(vizWindow, QtCore.SIGNAL('subWindowClosed()'), self.decrementSubWindowCount)
         self.centralVizPanel.setActiveSubWindow(vizWindow)
         vizWindow.show()
@@ -1102,7 +1101,7 @@ class MainWindow(QtGui.QMainWindow):
     def pickCompartment(self,path):	#path is a QString type moosepath
         SelectedChild = self.modelTreeWidget.pathToTreeChild(path)
     	self.modelTreeWidget.setCurrentItem(SelectedChild)				#select the corresponding moosetree
-	self.makeObjectFieldEditor(SelectedChild.getMooseObject())		#update the corresponding property
+        self.makeObjectFieldEditor(SelectedChild.getMooseObject())		#update the corresponding property
 
     def nearestSquare(self, n):	#add_chait
     	i = 1
