@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Jun 17 12:20:38 2011 (+0530)
+# Last-Updated: Wed Aug 10 11:48:52 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2656
+#     Update #: 2671
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -92,6 +92,7 @@ from glwizard import MooseGLWizard
 from firsttime import FirstTimeWizard
 #from layout import Screen
 import layout
+from layout import Widgetvisibility
 from updatepaintGL import *
 from vizParasDialogue import *
 from electrodeParasDialog import *
@@ -1135,9 +1136,9 @@ class MainWindow(QtGui.QMainWindow):
     def addLayoutWindow(self):
     	centralWindowsize =  self.centralVizPanel.size()
         self.sceneLayout = layout.LayoutWidget(centralWindowsize)
-	self.connect(self.sceneLayout, QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"), self.makeObjectFieldEditor)
+        self.connect(self.sceneLayout, QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"), self.makeObjectFieldEditor)
         self.centralVizPanel.addSubWindow(self.sceneLayout)
-	self.centralVizPanel.tileSubWindows()
+        self.centralVizPanel.tileSubWindows()
         self.sceneLayout.show()
     
 
@@ -1177,27 +1178,29 @@ class MainWindow(QtGui.QMainWindow):
         layout.addWidget(targetTree)
         layout.addWidget(targetPanel)
         self.connect(targetTree, QtCore.SIGNAL('itemClicked(QTreeWidgetItem *, int)'), lambda item, column: targetText.setText(item.getMooseObject().path))
-	if fileDialog.exec_():
-	    fileNames = fileDialog.selectedFiles()
-	    fileFilter = fileDialog.selectedFilter()
-	    fileType = self.mooseHandler.fileExtensionMap[str(fileFilter)]
-	    directory = fileDialog.directory() # Potential bug: if user types the whole file path, does it work? - no but gives error message
-	    for fileName in fileNames: 
+        if fileDialog.exec_():
+            fileNames = fileDialog.selectedFiles()
+            fileFilter = fileDialog.selectedFilter()
+            fileType = self.mooseHandler.fileExtensionMap[str(fileFilter)]
+            directory = fileDialog.directory() # Potential bug: if user types the whole file path, does it work? - no but gives error message
+            for fileName in fileNames: 
                 modeltype  = self.mooseHandler.loadModel(str(fileName), str(fileType), str(targetText.text()))
-		if modeltype == MooseHandler.type_kkit:
-		    self.addLayoutWindow()
-                print 'Loaded model',  fileName, 'of type', modeltype
-            self.populateKKitPlots()
-            self.populateDataPlots()
-            self.updateDefaultTimes(modeltype)
+                if modeltype == MooseHandler.type_kkit:
+                    try:
+                        self.addLayoutWindow()
+                    except Widgetvisibility:
+                        print 'No kkit layout for: %s' % (str(fileName))
+                    self.populateKKitPlots()
+                self.populateDataPlots()
+                self.updateDefaultTimes(modeltype)
             self.modelTreeWidget.recreateTree()
-        
-        self.checkModelType()
+            self.checkModelType()
+            print 'Loaded model',  fileName, 'of type', modeltype
         
     #add_chait
     def checkModelType(self):
-        an=moose.Neutral('/')						#moose root children
-	all_ch=an.childList 	
+        an=moose.Neutral('/')                       #moose root children
+        all_ch=an.childList     
         ch = self.get_childrenOfField(all_ch,'Cell')
         if ch :#if has cell type child elements.
             #loaded model is a cell model, plot the cells in the 
@@ -1212,7 +1215,7 @@ class MainWindow(QtGui.QMainWindow):
                 viz.setObjectName(title)
                 vizWindow.setWidget(viz)
         
-                viz.viz=1	#turn on visualization mode
+                viz.viz=1   #turn on visualization mode
                 viz.drawNewCell(cellName=moose.Cell(ch[0]).path,style = 2)
                 viz.setColorMap(cMap=os.path.join(str(self.settings.value(config.KEY_GL_COLORMAP).toString()),'jet'))
                 QtCore.QObject.connect(viz,QtCore.SIGNAL("compartmentSelected(QString)"),self.pickCompartment)
