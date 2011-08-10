@@ -140,7 +140,7 @@ enum { OUTGOING, /// Messages for which the current object is a source.
         void tweakAlpha( std::string channel, std::string gate );
         void tweakTau( std::string channel, std::string gate);
         void tabFill(const Id& table, int xdivs, int mode);    
-        vector <double> getTableVector(const Id& table);
+        const vector <double>& getTableVector(const Id& table);
         void setupAlpha( const Id& gateId, std::vector <double> parms );
         void setupTau( const Id& gateId, std::vector <double> parms );
         void tweakAlpha( const Id& gateId );

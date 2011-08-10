@@ -215,7 +215,7 @@ void Interpol::pop()
 {
     set(id_(), "pop");
 }
-vector<double> Interpol::__get_table()
+const vector<double>& Interpol::__get_table()
 {    
     return PyMooseBase::getContext()->getTableVector(id_);
 }
