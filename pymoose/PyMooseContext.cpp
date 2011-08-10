@@ -1510,7 +1510,7 @@ void PyMooseContext::tabFill(const Id& table, int xdivs, int mode)
                                  setFieldSlot, table, "tabFill", argstr );
 }
 
-vector <double> PyMooseContext::getTableVector(const Id& table)
+const vector <double>& PyMooseContext::getTableVector(const Id& table)
 {
     get< vector < double > > (table(), "tableVector", dbls_);
     return dbls_;
