@@ -119,7 +119,7 @@ void OneDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 				p->numThreadsInGroup;
 	}
 	
-	assert( startIndex >= start_ && startIndex < end_ );
+	assert( startIndex >= start_ && startIndex <= end_ );
 	assert( endIndex >= start_ && endIndex <= end_ );
 	char* temp = data_ + ( startIndex - start_ ) * dinfo()->size();
 	/*
