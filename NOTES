@@ -14616,6 +14616,6 @@ Actually, this is messier. If we have each node manage its own blocksize then
 this will work, but will need monitoring of all incoming msgs.
 
 Coded up these rules. Compiles, clears unit tests in single-node mode,
-but runs into problems on multiple nodes.
+but runs into problems on multiple nodes. Checkin 2898.
 
-
+Tracked down first of the bugs, a silly pointer initialization one.
