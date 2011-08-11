@@ -20,19 +20,16 @@
 bool Qinfo::isSafeForStructuralOps_ = 0;
 const BindIndex Qinfo::DirectAdd = -1;
 vector< double > Qinfo::q0_( 1000, 0.0 );
-vector< double > Qinfo::q1_( 1000, 0.0 );
 
 vector< vector< double > > Qinfo::dBuf_;
 vector< vector< Qinfo > > Qinfo::qBuf_;
 
 double* Qinfo::inQ_ = &Qinfo::q0_[0];
-double* Qinfo::outQ_ = &Qinfo::q1_[0];
 vector< vector< ReduceBase* > > Qinfo::reduceQ_;
 
+vector< double > Qinfo::mpiQ0_( 1000, 0.0 );
 vector< double > Qinfo::mpiQ1_( 1000, 0.0 );
-vector< double > Qinfo::mpiQ2_( 1000, 0.0 );
-double* Qinfo::mpiInQ_ = &mpiQ1_[0];
-double* Qinfo::mpiRecvQ_ = &mpiQ2_[0];
+double* Qinfo::mpiRecvQ_ = &mpiQ0_[0];
 
 vector< Qinfo > Qinfo::structuralQinfo_( 0 );
 // vector< double > Qinfo::structuralQdata_;
@@ -41,9 +38,14 @@ pthread_mutex_t* Qinfo::qMutex_;
 pthread_cond_t* Qinfo::qCond_;
 
 bool Qinfo::waiting_ = 0;
-int Qinfo::numCycles_ = 0;
+int Qinfo::numCyclesToWait_ = 0;
+unsigned long Qinfo::numProcessCycles_ = 0;
+const double Qinfo::blockMargin_ = 1.1;
+const unsigned int Qinfo::historySize_ = 4;
+unsigned int Qinfo::sourceNode_ = 0;
+vector< vector< unsigned int > > Qinfo::history_;
+vector< unsigned int > Qinfo::blockSize_;
 
-static const unsigned int BLOCKSIZE = 20000;
 static const unsigned int QinfoSizeInDoubles = 
 			1 + ( sizeof( Qinfo ) - 1 ) / sizeof( double );
 
@@ -129,15 +131,6 @@ void readBuf(const double* buf, ThreadId threadNum )
 	}
 }
 
-/**
- * Static func.  Placeholder for now.
- * Will want to analyze data traffic and periodically tweak buffer
- * sizes
- */
-void Qinfo::doMpiStats( unsigned int bufsize, const ProcInfo* proc )
-{
-}
-
 /** 
  * Static func
  * In this variant we just go through the specified queue. 
@@ -152,27 +145,9 @@ void Qinfo::readQ( ThreadId threadNum )
 }
 
 /**
- * Static func. 
- * Deliver the contents of the mpiQ to target objects
- * Assumes that the Msgs invoked by readBuf handle the thread safety.
- * Checks the data block size in case it is over the regular
- * blocksize allocated for the current node.
- */
-void Qinfo::readMpiQ( ThreadId threadNum, unsigned int node )
-{
-	readBuf( mpiInQ_, threadNum );
-
-	/*
-	if ( proc->nodeIndexInGroup == 0 && mpiInQ_->isBigBlock() ) 
-		// Clock::requestBigBlock( proc->groupId, node );
-		;
-		*/
-}
-
-/**
  * Stitches together thread blocks on
- * the inQ so that the readBuf function will go through as a single 
- * unit.
+ * the inQ so that the readBuf function will go through as a single unit.
+ * Runs only in barrier 1.
  * Static func. Not thread safe. Must be done on single thread,
  * protected by barrier so that it happens at a defined point for all
  * threads.
@@ -252,14 +227,15 @@ void Qinfo::swapQ()
 		}
 
 		if ( waiting_ ) {
-			if ( numCycles_ == 0 ) {
+			if ( numCyclesToWait_ == 0 ) {
 				waiting_ = 0;
 				pthread_cond_signal( qCond_ );
 			} else {
-				--numCycles_;
+				--numCyclesToWait_;
 			}
 		}
 	if ( !Shell::isSingleThreaded() ) pthread_mutex_unlock( qMutex_ );
+	++numProcessCycles_;
 }
 
 /**
@@ -272,7 +248,7 @@ void Qinfo::waitProcCycles( unsigned int numCycles )
 	if ( Shell::keepLooping() && !Shell::isSingleThreaded()  ) {
 		pthread_mutex_lock( qMutex_ );
 			waiting_ = 1;
-			numCycles_ = numCycles;
+			numCyclesToWait_ = numCycles;
 			while( waiting_ )
 				pthread_cond_wait( qCond_, qMutex_ );
 		pthread_mutex_unlock( qMutex_ );
@@ -282,60 +258,107 @@ void Qinfo::waitProcCycles( unsigned int numCycles )
 	}
 }
 
+//////////////////////////////////////////////////////////////////////
+// MPI data stuff
+//////////////////////////////////////////////////////////////////////
+/**
+ * updateQhistory() keeps track of recent bufsizes and has a simple 
+ * heuristic to judge how big the next mpi data transfer should be:
+ * It takes the second-biggest of the last historySize_ entries, 
+ * adds 10% and adds 10 to that.
+ * static func.
+ */
+void Qinfo::updateQhistory()
+{
+	assert( history_.size() == Shell::numNodes() );
+	assert( blockSize_.size() == Shell::numNodes() );
+	assert( sourceNode_ < Shell::numNodes() );
+	vector< unsigned int >& h = history_[sourceNode_];
+	assert( h.size() == historySize_ );
+	assert( inQ_ );
+	h[ numProcessCycles_ % h.size() ] = inQ_[0];
+	unsigned int max = 0;
+	unsigned int nextMax = 0;
+	for ( unsigned int i = 0; i < h.size(); ++i ) {
+		unsigned int j = h[i];
+		if ( max < j )
+			max = j;
+		else if ( nextMax < j )
+			nextMax = j;
+	}
+	blockSize_[ sourceNode_ ] = 
+		static_cast< double >( nextMax ) * blockMargin_;
+}
+
 
 /**
- * Need to allocate space for incoming block
+ * If an MPI packet comes in asking for more space than the blockSize, this 
+ * function resizes the buffer to fit.
+ * Static func.
+ */
+void Qinfo::expandMpiRecvQ( unsigned int size )
+{
+	if ( mpiRecvQ_ == &mpiQ0_[0] ) {
+		if ( mpiQ0_.size() < size ) {
+			mpiQ0_.resize( size );
+			mpiRecvQ_ = &mpiQ0_[0];
+		}
+	} else {
+		if ( mpiQ1_.size() < size ) {
+			mpiQ1_.resize( size );
+			mpiRecvQ_ = &mpiQ1_[0];
+		}
+	}
+}
+
+// static func
+void Qinfo::setSourceNode( unsigned int n )
+{
+	sourceNode_ = n;
+}
+
+// static func
+unsigned int Qinfo::blockSize( unsigned int node )
+{
+	assert ( node < blockSize_.size() );
+	return blockSize_[ node ];
+}
+
+/**
+ * Puts the data ready to be processed into InQ, and sets up a suitable
+ * buffer for the RecvQ.
+ * Also updates history of MPI data transfer size.
+ * I have 3 pointers and 3 buffers.
+ * InQ always points to the buffer that has to be processed.
+ * recvQ always points to the buffer ready to receive data.
+ * sendQ simply points to the buffer holding the outgoing data, &q0_[0],
+ * and does not change.
  * Static func.
  */
 void Qinfo::swapMpiQ()
 {
-	if ( mpiInQ_ == &mpiQ2_[0] ) {
-		mpiInQ_ = &mpiQ1_[0];
-		mpiRecvQ_ = &mpiQ2_[0];
-	} else {
-		mpiInQ_ = &mpiQ2_[0];
+	assert( mpiQ0_.size() > 0 );
+	assert( mpiQ1_.size() > 0 );
+	assert( sourceNode_ < Shell::numNodes() );
+	if ( mpiRecvQ_ == &mpiQ0_[0] ) {
+		if ( mpiQ1_.size() < blockSize_[ sourceNode_ ] )
+			mpiQ1_.resize( blockSize_[ sourceNode_ ] );
 		mpiRecvQ_ = &mpiQ1_[0];
+		inQ_ = &mpiQ0_[0];
+	} else {
+		if ( mpiQ0_.size() < blockSize_[ sourceNode_ ] )
+			mpiQ0_.resize( blockSize_[ sourceNode_ ] );
+		mpiRecvQ_ = &mpiQ0_[0];
+		inQ_ = &mpiQ1_[0];
 	}
-	// mpiRecvQ_->resizeLinearData( BLOCKSIZE );
+	if ( sourceNode_ == Shell::myNode() ) {
+		inQ_ = &q0_[0];
+	}
+	updateQhistory();
 }
 
-/**
- * Static func.
- * Used for simulation time data transfer. Symmetric across all nodes.
- *
- * the MPI::Alltoall function doesn't work here because it partitions out
- * the send buffer into pieces targetted for each other node. 
- * The Scatter fucntion does something similar, but it is one-way.
- * The Broadcast function is good. Sends just the one datum from source
- * to all other nodes.
- * For return we need the Gather function: the root node collects responses
- * from each of the other nodes.
- */
-void Qinfo::sendAllToAll( const ProcInfo* proc )
-{
-/*
-	if ( proc->numNodesInGroup == 1 )
-		return;
-	// cout << proc->nodeIndexInGroup << ", " << proc->threadId << ": Qinfo::sendAllToAll\n";
-	assert( mpiRecvQ_->allocatedSize() >= BLOCKSIZE );
-#ifdef USE_MPI
-	assert( inQ_.size() == mpiQ_.size() );
-	const char* sendbuf = inQ_->data();
-	char* recvbuf = mpiQ_.writableData();
-	//assert ( inQ_[ proc->groupId ].size() == BLOCKSIZE );
 
-	MPI_Barrier( MPI_COMM_WORLD );
-
-	// Recieve data into recvbuf of all nodes from sendbuf of all nodes
-	MPI_Allgather( 
-		sendbuf, BLOCKSIZE, MPI_CHAR, 
-		recvbuf, BLOCKSIZE, MPI_CHAR, 
-		MPI_COMM_WORLD );
-	// cout << "\n\nGathered stuff via mpi, on node = " << proc->nodeIndexInGroup << ", size = " << *reinterpret_cast< unsigned int* >( recvbuf ) << "\n";
-#endif
-*/
-}
-
+//////////////////////////////////////////////////////////////////////
 void reportQentry( unsigned int i, const Qinfo* qi, const double *q )
 {
 	cout << i << ": src= " << qi->src() << 
@@ -400,8 +423,6 @@ void Qinfo::reportQ()
 {
 	cout << Shell::myNode() << ":	inQ: size =  " << inQ_[0] << 
 		", numQinfo = " << inQ_[1] << endl;
-	cout << Shell::myNode() << ":	mpiInQ: size =  " << mpiInQ_[0] << 
-		", numQinfo = " << mpiInQ_[1] << endl;
 	cout << Shell::myNode() << ":	mpiRecvQ: size =  " << mpiRecvQ_[0] << 
 		", numQinfo = " << mpiRecvQ_[1] << endl;
 
@@ -419,7 +440,6 @@ void Qinfo::reportQ()
 
 	if ( inQ_[1] > 0 ) innerReportQ(inQ_, "inQ" );
 	if ( numQinfo > 0 ) reportOutQ( qBuf_, dBuf_, "outQ" );
-	if ( mpiInQ_[1] > 0 ) innerReportQ( mpiInQ_, "mpiInQ" );
 	if ( mpiRecvQ_[1] > 0 ) innerReportQ( mpiRecvQ_, "mpiRecvQ" );
 	if ( structuralQinfo_.size() > 0 ) reportStructQ( structuralQinfo_, inQ_ );
 }
@@ -558,22 +578,12 @@ void Qinfo::enableStructuralOps()
 bool Qinfo::addToStructuralQ() const
 {
 	bool ret = 0;
-	// pthread_mutex_lock( qMutex_ );
 		if ( !isSafeForStructuralOps_ ) {
 			if ( isDummy() )
 				cout << "d" << flush;
 			structuralQinfo_.push_back( *this );
-			/*
-			const double* data = &( inQ_[ dataIndex_ ] );
-			unsigned int size = dataSizeOnInQ();
-			// const Qinfo* nextQinfo = this + 1;
-			// unsigned int size = nextQinfo->dataIndex_ - dataIndex_;
-			structuralQinfo_.back().dataIndex_ = structuralQdata_.size();
-			structuralQdata_.insert( structuralQdata_.end(), data, data + size );
-			*/
 			ret = 1;
 		}
-	// pthread_mutex_unlock( qMutex_ );
 	return ret;
 }
 
@@ -633,6 +643,18 @@ void Qinfo::clearQ( ThreadId threadNum )
 	readQ( threadNum );
 }
 
+// static function
+double* Qinfo::sendQ()
+{
+	return &q0_[0];
+}
+
+// static function
+double* Qinfo::mpiRecvQ()
+{
+	return mpiRecvQ_;
+}
+
 // static func. Called during setup in Shell::setHardware.
 void Qinfo::initQs( unsigned int numThreads, unsigned int reserve )
 {
@@ -645,13 +667,17 @@ void Qinfo::initQs( unsigned int numThreads, unsigned int reserve )
 		qBuf_.reserve( reserve );
 		dBuf_.reserve( reserve );
 	}
-}
-
-// static func. Typically only called during setup in Shell::setHardware.
-void Qinfo::initMpiQs()
-{
-	mpiQ1_.resize( BLOCKSIZE );
-	mpiQ2_.resize( BLOCKSIZE );
+	
+	if ( Shell::numNodes() > 1 ) {
+		history_.resize( Shell::numNodes() );
+		blockSize_.resize( Shell::numNodes(), reserve * blockMargin_ );
+		for ( unsigned int i = 0; i < Shell::numNodes(); ++i ) {
+			history_[i].resize( historySize_, reserve );
+		}
+		
+		mpiQ0_.resize( reserve );
+		mpiQ1_.resize( reserve );
+	}
 }
 
 /////////////////////////////////////////////////////////////////////

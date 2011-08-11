@@ -39,6 +39,10 @@ class Qinfo
 		/// Used in readBuf to create a copy of Qinfo with specified thread.
 		Qinfo( const Qinfo* other, ThreadId threadNum );
 
+		//////////////////////////////////////////////////////////////
+		// local Qinfo field access functions.
+		//////////////////////////////////////////////////////////////
+
 		/**
 		 * Returns true if the Qinfo is inserted just for padding, and
 		 * the data is not meant to be processed.
@@ -111,6 +115,10 @@ class Qinfo
 		 */
 		static void qUnlockMutex();
 
+
+		//////////////////////////////////////////////////////////////
+		// Functions to put data on Q.
+		//////////////////////////////////////////////////////////////
 		/**
 		 * Add data to the queue. Fills up an entry in the qBuf as well
 		 * as putting the corresponding data.
@@ -124,14 +132,6 @@ class Qinfo
 			const double* arg1, unsigned int size1,
 			const double* arg2, unsigned int size2 );
 
-		/**
-		 * Add data to the queue. Fills up an entry in the qBuf, allocate
-		 * space for the arguments, and return a pointer to this space.
-		 * Used for multiple args.
-		static double* addToQ( const ObjId& oi, 
-			BindIndex bindIndex, ThreadId threadNum,
-			unsigned int size );
-		 */
 
 		/**
 		 * Add data to queue without any underlying message. This is used
@@ -148,16 +148,6 @@ class Qinfo
 			const double* arg1, unsigned int size1,
 			const double* arg2, unsigned int size2 );
 
-		/**
-		 * Add data to queue without any underlying message, allocate space
-		 * for the arguments and return a pointer to this space. 
-		 * This is used
-		 * for specific point-to-point data delivery with multiple args.
-		static double* addDirectToQ( const ObjId& src, const ObjId& dest,
-			ThreadId threadNum,
-			FuncId fid,
-			unsigned int size );
-		 */
 
 		/**
 		 * Add vector data to queue without any underlying message,
@@ -179,7 +169,6 @@ class Qinfo
 		 * Returns false if it was in the Qinfo::clearStructuralQ function
 		 * and wants the calling function to actually operate on the queue.
 		 */
-		// bool addToStructuralQ( const double* data, unsigned int size) const;
 		bool addToStructuralQ() const;
 
 		/**
@@ -204,13 +193,7 @@ class Qinfo
 		static void readQ( ThreadId threadNum );
 
 		/**
-		 * Read the MPI Q. Similar to readQ, except that the data source
-		 * has arrived from off-node.
-		 */
-		static void readMpiQ( ThreadId threadNum, unsigned int node );
-
-		/**
-		 * Exchange inQ and outQ.
+		 * Move pending data in the qBuf and dBuf into the inQ.
 		 * Must be protected by a mutex as it affects data on
 		 * all threads.
 		 */
@@ -229,11 +212,6 @@ class Qinfo
 		static void emptyAllQs();
 
 		/**
-		 * Send contents of specified inQ to all nodes using MPI
-		 */
-		static void sendAllToAll( const ProcInfo* proc );
-
-		/**
 		 * Reporting function to tell us about queue status.
 		 */
 		static void reportQ();
@@ -246,28 +224,34 @@ class Qinfo
 		static void clearQ( ThreadId threadNum );
 
 		/**
-		 * Dummy function, in due course will monitor data transfer
-		 * stats and figure out the best data transfer size for each
-		 * group as it goes along.
+		 * Returns a pointer to the data buffer in the specified inQ.
+		 * Used for taking queue info to process.
+		 * This points to different places, typically q0_[0] during
+		 * single-node operation, and to mpiQ0 and mpiQ1 during 
+		 * multinode function.
+		 * The first entry in inQ is size (in doubles)
+		 * The second entry in inQ is numQinfo
+		 * The next set of entries are Qinfos
+		 * The final set of entries, indexed from the Qinfos, are the data
+		static const double* inQ();
 		 */
-		static void doMpiStats( unsigned int bufsize, const ProcInfo* p );
-
 
 		/**
-		 * Returns a pointer to the data buffer in the specified inQ
+		 * Returns a pointer to the data buffer on q0_[0].
+		 * This is the data that is to go out from current node.
 		 * Cannot be a const because the MPI call expects a variable.
+		 * Same structure as inQ:
+		 * The first entry in inQ is size (in doubles)
+		 * The second entry in inQ is numQinfo
+		 * The next set of entries are Qinfos
+		 * The final set of entries, indexed from the Qinfos, are the data
 		 */
-		static double* inQ();
-
-		/**
-		 * Looks up size of data buffer in specifid inQ
-		static unsigned int inQdataSize( unsigned int group );
-		 */
+		static double* sendQ();
 
 		/**
 		 * Returns a pointer to the block of memory on the mpiRecvQ.
 		 */
-		static double* mpiRecvQbuf();
+		static double* mpiRecvQ();
 
 		/**
 		 * Works through any requests for structural changes to the model.
@@ -285,12 +269,38 @@ class Qinfo
 		 */
 		static void initQs( unsigned int numThreads, unsigned int reserve );
 
+		///////////////////////////////////////////////////////////////////
+		// Here we have several functions that deal with the MPI data stuff.
+		///////////////////////////////////////////////////////////////////
 		/**
-		 * Does an initial allocation of space for data transfer in 
-		 * the MPIQs.
+		 * updateQhistory() keeps track of recent bufsizes and has a simple 
+		 * heuristic to judge how big the next mpi data transfer should be:
+		 * It takes the second-biggest of the last historySize_ entries, 
+		 * adds 10% and adds 10 to that.
+		 * static func.
 		 */
-		static void initMpiQs();
 
+		static void updateQhistory();
+
+		/**
+		 * If an MPI packet comes in asking for more space than the 
+		 * blockSize, this function resizes the buffer to fit.
+		 */
+		static void expandMpiRecvQ( unsigned int size );
+
+		/**
+		 * Assigns the number of the current source node for MPI data
+		 */
+		static void setSourceNode( unsigned int n );
+
+		/**
+		 * Returns the block size for data transfer from specified node.
+		 */
+		static unsigned int blockSize( unsigned int node );
+
+		///////////////////////////////////////////////////////////////////
+		// ReduceQ stuff.
+		///////////////////////////////////////////////////////////////////
 		/**
 		 * Adds an entry to the ReduceQ. If the Eref is a new one it 
 		 * creates a new Q entry with slots for each thread, otherwise
@@ -305,6 +315,7 @@ class Qinfo
 		 */
 		static void clearReduceQ( unsigned int numThreads );
 
+		///////////////////////////////////////////////////////////////////
 		/**
 		 * Zeroes the isSafeForStructuralOps_ flag.
 		 */
@@ -320,7 +331,7 @@ class Qinfo
 		 * process loops and threads are operational. 
 		 * Otherwise goes through the specified number of ClearQs.
 		 */
-		static void waitProcCycles( unsigned int numCycles );
+		static void waitProcCycles( unsigned int numCyclesToWait );
 	 
 
 		/**
@@ -370,7 +381,6 @@ class Qinfo
 		 * [data10]: Index of zero data entry, belongs to thread 1.
 		 * ...
 		 */
-		static double* outQ_;	/// Outgoing Msg data is written to outQ.
 		static double* inQ_;	/// Data is read from the inQ
 		static vector< unsigned int > qinfoCount_; ///# of qs on each thread
 
@@ -380,7 +390,6 @@ class Qinfo
 		static vector< unsigned int > nextDataIndex_; 
 
 		static vector< double > q0_;	/// Allocated space for data in q
-		static vector< double > q1_;	/// Allocated space for data in q
 
 		/**
 		 * The data buffer. One vector per thread. Data is written here
@@ -407,17 +416,8 @@ class Qinfo
 		 * This handles incoming data from MPI. It is used as a buffer
 		 * for the MPI_Bcast or other calls to dump internode data into.
 		 * Currently the outgoing data is sent each timestep from the inQ.
-		static Qvec* mpiRecvQ_;
 		 */
 		static double* mpiRecvQ_;
-
-		/**
-		 * This handles data that has arrived from MPI on the previous
-		 * transfer, and is now stable so it can be read through.
-		 * Equivalent in this role to the inQ_.
-		 */
-		static double* mpiInQ_;
-
 
 		/**
 		 * These are the actual allocated locations of the vectors
@@ -430,8 +430,8 @@ class Qinfo
 		 * Once the data is in, it does not care about originating
 		 * node/group since all threads chew on it anyway.
 		 */
+		static vector< double > mpiQ0_;
 		static vector< double > mpiQ1_;
-		static vector< double > mpiQ2_;
 
 		/**
 		 * This contains pointers to Queue entries requesting functions that
@@ -466,10 +466,30 @@ class Qinfo
 		static pthread_cond_t* qCond_;
 
 		static bool waiting_;
-		static int numCycles_;
+
+		/// Number of cycles to wait before returning in Set/Get.
+		static int numCyclesToWait_;
+
+		/// Number of cycles completed since the ProcessLoop started
+		static unsigned long numProcessCycles_;
+
+		/// The # of the source node being handled for MPI data transfers.
+		static unsigned int sourceNode_;
 
 		/// Flag setting
 		static const BindIndex DirectAdd;
+
+		/// Extra Margin (fraction) to leave for blocksize
+		static const double blockMargin_;
+
+		/// Number of entries of buffer size to retain for MPI data transfer
+		static const unsigned int historySize_;
+
+		/// History of recent buffer transfers using MPI.
+		static vector< vector< unsigned int > > history_;
+
+		/// Size of data blocks to send to each node
+		static vector< unsigned int > blockSize_;
 };
 
 #endif // QINFO_H
