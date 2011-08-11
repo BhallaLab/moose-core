@@ -115,6 +115,7 @@ void readBuf(const double* buf, ThreadId threadNum )
 {
 	unsigned int bufsize = static_cast< unsigned int >( buf[0] );
 	unsigned int numQinfo = static_cast< unsigned int >( buf[1] );
+	assert( bufsize > 0 );
 	assert( bufsize > numQinfo * QinfoSizeInDoubles );
 
 	const double* qptr = buf + 2;
@@ -287,7 +288,7 @@ void Qinfo::updateQhistory()
 			nextMax = j;
 	}
 	blockSize_[ sourceNode_ ] = 
-		static_cast< double >( nextMax ) * blockMargin_;
+		static_cast< double >( nextMax ) * blockMargin_ + 10;
 }
 
 
@@ -340,6 +341,10 @@ void Qinfo::swapMpiQ()
 	assert( mpiQ0_.size() > 0 );
 	assert( mpiQ1_.size() > 0 );
 	assert( sourceNode_ < Shell::numNodes() );
+	cout << Shell::myNode() << ": Qinfo::swapMpiQ: mpiRecvQ_=" << 
+		mpiRecvQ_ << 
+		", &mpiQ0= " << &mpiQ0_[0] << " (" << mpiQ0_.size() <<
+		"), &mpiQ1= " << &mpiQ1_[0] << " (" << mpiQ1_.size() << "\n"; 
 	if ( mpiRecvQ_ == &mpiQ0_[0] ) {
 		if ( mpiQ1_.size() < blockSize_[ sourceNode_ ] )
 			mpiQ1_.resize( blockSize_[ sourceNode_ ] );
@@ -355,6 +360,8 @@ void Qinfo::swapMpiQ()
 		inQ_ = &q0_[0];
 	}
 	updateQhistory();
+	cout << Shell::myNode() << ": Qinfo::swapMpiQ: bufsize=" << inQ_[0] <<
+		", numQinfo= " << inQ_[1] << endl;
 }
 
 
@@ -677,6 +684,7 @@ void Qinfo::initQs( unsigned int numThreads, unsigned int reserve )
 		
 		mpiQ0_.resize( reserve );
 		mpiQ1_.resize( reserve );
+		mpiRecvQ_ = &mpiQ0_[0];
 	}
 }
 

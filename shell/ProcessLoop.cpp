@@ -103,24 +103,29 @@ void* mpiEventLoop( void* info )
 		// Phase 2: Send data, then juggle Queue buffers in the barrier
 		/////////////////////////////////////////////////////////////////
 #ifdef USE_MPI
+		unsigned int actualSize = 0;
 		for ( unsigned int j = 0; j < Shell::numNodes(); ++j ) {
 			if ( p->nodeIndexInGroup == j ) { // Send out data
+				assert( Qinfo::sendQ()[0] >= 2 );
 				MPI_Bcast( Qinfo::sendQ(), Qinfo::blockSize(j), 
 					MPI_DOUBLE, j, MPI_COMM_WORLD );
-				unsigned int actualSize = Qinfo::sendQ()[0];
+				actualSize = Qinfo::sendQ()[0];
 				if ( actualSize > Qinfo::blockSize(j) )
 					MPI_Bcast( Qinfo::sendQ(), actualSize, 
 						MPI_DOUBLE, j, MPI_COMM_WORLD );
 			} else { // Receive data
 				MPI_Bcast( Qinfo::mpiRecvQ(), Qinfo::blockSize(j), 
 					MPI_DOUBLE, j, MPI_COMM_WORLD );
-				unsigned int actualSize = Qinfo::mpiRecvQ()[0];
+				actualSize = Qinfo::mpiRecvQ()[0];
+				assert( actualSize >= 2 );
 				if ( actualSize > Qinfo::blockSize(j) ) {
 					Qinfo::expandMpiRecvQ( actualSize );
 					MPI_Bcast( Qinfo::mpiRecvQ(), actualSize, 
 						MPI_DOUBLE, j, MPI_COMM_WORLD );
 				}
 			}
+			cout << Shell::myNode() << ":" << p->nodeIndexInGroup << ", data comes from node: " << j << ", blockSize = " << Qinfo::blockSize( j ) << ", actualSize= " << actualSize << "\n";
+
 			Qinfo::setSourceNode( j ); // needed for queue juggling.
 			p->barrier2->wait(); // This barrier swaps inQ and mpiRecvQ
 		}
