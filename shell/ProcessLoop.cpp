@@ -23,8 +23,6 @@
 
 #include "Shell.h"
 
-static const unsigned int BLOCKSIZE = 20000; // duplicate defn, other in Qinfo.cpp
-
 /*
 void Shell::eventLoopSingleThreaded()
 {
@@ -39,7 +37,12 @@ void Shell::eventLoopSingleThreaded()
 }
 */
 
-void* eventLoopForBcast( void* info )
+/**
+ * processEventLoop
+ * Executes all the Process operations, and executes all the recieved msgs.
+ * This executes on all the processThreads simultaneously.
+ */
+void* processEventLoop( void* info )
 {
 	ProcInfo *p = reinterpret_cast< ProcInfo* >( info );
 	// cout << "eventLoop on " << p->nodeIndexInGroup << ":" << p->threadIndexInGroup << endl;
@@ -48,113 +51,85 @@ void* eventLoopForBcast( void* info )
 	while( Shell::keepLooping() )
 	// for( unsigned int i = 0; i < NLOOP; ++i )
 	{
-		// Phase 1. Here we carry out the Process calculations
-		// on all simulated objects.
+		/////////////////////////////////////////////////////////////////
+		// Phase 1. Carry out Process calculations on all simulated objects
+		/////////////////////////////////////////////////////////////////
 		clock->processPhase1( p );
-		// This custom barrier also carries out the swap operation 
-		// internally.
-		// cout << Shell::myNode() << ":" << p->threadIndexInGroup << ":	phase1 :	" << loopNum << "\n";
+		// This custom barrier carries out the swap operation 
 		p->barrier1->wait(); // Within this func, inQ and outQ are swapped.
 
-		// Phase 2.
-		// Then we clean up all the local node Msgs.
-		// In parallel, the MPI data transfer begins by broadcasting
-		// contents of inQ on node 0.
+		/////////////////////////////////////////////////////////////////
+		// Phase 2: Execute inQ for all nodes. Transfer data as needed
+		/////////////////////////////////////////////////////////////////
 		clock->processPhase2( p ); // Do tick juggling for the clock.
-		Qinfo::readQ( p->threadIndexInGroup ); //Deliver all local node Msgs
-
-		// Phase 3
-		// The allgather approach is not going to scale well: 
-		// For N nodes mpiQ needs to set aside N*sizeof(inQ). 
-		// Instead, do N bcast calls and interleave with the processing
-		// for the data received on the previous bcast call.
-		// If we can permit slower internode data transfer then the #
-		// of bcast calls goes down.
-
-		if ( Shell::numNodes() > 1 ) {
-			for ( unsigned int j = 0; j < Shell::numNodes(); ++j )
-				{
-					// cout << Shell::myNode() << ":" << p->nodeIndexInGroup << "	: eventLoop, (numSimGroup, tgtNode) = (" << i << ", " << j << ")\n";
-					p->barrier2->wait(); // This barrier swaps mpiInQ and mpiRecvQ
-					// This internally checks if we are within the allowed
-					// blocksize for this buffer. If not, it pushes up a call
-					// to the Clock to schedule another cycle to finish of the
-					// data transfer.
-					Qinfo::readMpiQ( p->threadIndexInGroup, j ); 
-				}
+		if ( Shell::numNodes() <= 1 ) {
+			Qinfo::readQ( p->threadIndexInGroup ); //Deliver all local Msgs
+		} else {
+			for ( unsigned int j = 0; j < Shell::numNodes(); ++j ) {
+#ifdef USE_MPI
+				p->barrier2->wait(); // Wait for MPI thread to recv data
+#endif
+				Qinfo::readQ( p->threadIndexInGroup ); //Deliver all Msgs
+			}
 		}
-		// cout << Shell::myNode() << ":" << p->threadIndexInGroup << ":	phase3 :	" << loopNum++ << "\n";
-
-		// This barrier handles the state transitions for clock scheduling
-		// as its internal protected function.
+		/////////////////////////////////////////////////////////////////
+		// Phase 3: Just a barrier to tie things up and do clock scheduling
+		/////////////////////////////////////////////////////////////////
 		p->barrier3->wait();
 	}
 	pthread_exit( NULL );
 }
 
-/*
+/**
+ * mpiEventLoop.
  * Happens on the one thread doing MPI stuff. This variant does an
- * MPI_Bcast to every node in the group. 
+ * MPI_Bcast to every node in the group, going through each node in turn.
+ * The idea is to do calculations on recieved data for each node 
+ * at the same time as data for the next node in sequence is transferred.
  */
-void* mpiEventLoopForBcast( void* info )
+void* mpiEventLoop( void* info )
 {
 	ProcInfo *p = reinterpret_cast< ProcInfo* >( info );
-	// cout << "mpiEventLoop on " << p->nodeIndexInGroup << ":" << p->threadIndexInGroup << endl;
 
 	while( Shell::keepLooping() )
 	{
+		/////////////////////////////////////////////////////////////////
 		// Phase 1: do nothing. But we must wait for barrier 0 to clear,
 		// because we need inQ to be settled before broadcasting it.
-		p->barrier1->wait();
+		/////////////////////////////////////////////////////////////////
+		p->barrier1->wait(); // Here the inQ is set to the local Q.
 
-		// Phase 2, 3. Now we loop around barrier 2 till all nodes have
-		// sent data and the data has been received and processed.
-		// On the process threads the inQ/mpiInQ is busy being executed.
-		for ( unsigned int j = 0; j < Shell::numNodes(); ++j )
-		{
+		/////////////////////////////////////////////////////////////////
+		// Phase 2: Send data, then juggle Queue buffers in the barrier
+		/////////////////////////////////////////////////////////////////
 #ifdef USE_MPI
-				// cout << Shell::myNode() << ":" << p->nodeIndexInGroup << "	: mpiEventLoop, (numSimGroup, tgtNode) = (" << i << ", " << j << ")\n";
-				if ( p->nodeIndexInGroup == j ) {
-					MPI_Bcast( Qinfo::inQ( i ), BLOCKSIZE, MPI_CHAR, j, 
-						MPI_COMM_WORLD );
-					unsigned int actualSize = 
-						*reinterpret_cast< unsigned int* >( Qinfo::inQ(i) );
-					if ( actualSize > BLOCKSIZE )
-						MPI_Bcast( Qinfo::inQ( i ), actualSize, MPI_CHAR, j,
-							MPI_COMM_WORLD );
-				// cout << Shell::myNode() << ":" << p->nodeIndexInGroup << "	: mpiEventLoop outgoing, actualSize= " << actualSize << ", DestNode=" << j << ")\n";
-				} else {
-					MPI_Bcast( Qinfo::mpiRecvQbuf(), BLOCKSIZE, MPI_CHAR, j,
-						MPI_COMM_WORLD );
-					unsigned int actualSize = 
-						*reinterpret_cast< unsigned int* >(
-						Qinfo::mpiRecvQbuf() );
-					if ( actualSize > BLOCKSIZE ) {
-						Qinfo::expandMpiRecvQbuf( actualSize );
-						MPI_Bcast( Qinfo::mpiRecvQbuf(), actualSize, 
-							MPI_CHAR, j, MPI_COMM_WORLD );
-					}
-				// cout << Shell::myNode() << ":" << p->nodeIndexInGroup << "	: mpiEventLoop incoming, actualSize= " << actualSize << ", DestNode=" << j << ")\n";
+		for ( unsigned int j = 0; j < Shell::numNodes(); ++j ) {
+			if ( p->nodeIndexInGroup == j ) { // Send out data
+				MPI_Bcast( Qinfo::sendQ(), Qinfo::blockSize(j), 
+					MPI_DOUBLE, j, MPI_COMM_WORLD );
+				unsigned int actualSize = Qinfo::sendQ()[0];
+				if ( actualSize > Qinfo::blockSize(j) )
+					MPI_Bcast( Qinfo::sendQ(), actualSize, 
+						MPI_DOUBLE, j, MPI_COMM_WORLD );
+			} else { // Receive data
+				MPI_Bcast( Qinfo::mpiRecvQ(), Qinfo::blockSize(j), 
+					MPI_DOUBLE, j, MPI_COMM_WORLD );
+				unsigned int actualSize = Qinfo::mpiRecvQ()[0];
+				if ( actualSize > Qinfo::blockSize(j) ) {
+					Qinfo::expandMpiRecvQ( actualSize );
+					MPI_Bcast( Qinfo::mpiRecvQ(), actualSize, 
+						MPI_DOUBLE, j, MPI_COMM_WORLD );
 				}
-
-#endif
-				p->barrier2->wait(); // This barrier swaps mpiInQ and mpiRecvQ
+			}
+			Qinfo::setSourceNode( j ); // needed for queue juggling.
+			p->barrier2->wait(); // This barrier swaps inQ and mpiRecvQ
 		}
-
-		// Phase 3: Read and execute the arrived MPI data on all threads 
-		// except the one which just sent it out.
-		// On this thread, we just wait till the final barrier.
+#endif
+		/////////////////////////////////////////////////////////////////
+		// Phase 3: Do nothing, just let the Process threads wrap up.
+		/////////////////////////////////////////////////////////////////
 		p->barrier3->wait();
-		// int rc = pthread_barrier_wait( p->barrier3 );
-		// assert( rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD );
 	}
-	pthread_exit( NULL );
-}
-
-void* reportGraphics( void* info )
-{
-	// ProcInfo *p = reinterpret_cast< ProcInfo* >( info );
-	// cout << "reportGraphics on " << p->nodeIndexInGroup << ":" << p->threadIndexInGroup << endl;
 	pthread_exit( NULL );
 }
 
@@ -206,12 +181,12 @@ void Shell::launchThreads()
 
 	// cout << myNode_ << "." << i << ": ptr= " << &( p[i] ) << ", Shell::procInfo = " << &p_ << " setting up procs\n";
 		if ( i < numProcessThreads_ ) { // These are the compute threads
-			int rc = pthread_create( threads_ + i, NULL, eventLoopForBcast, 
+			int rc = pthread_create( threads_ + i, NULL, processEventLoop, 
 				(void *)&p[i] );
 			assert( rc == 0 );
 		} else if ( numNodes_ > 1 && i == numProcessThreads_ ) { // mpiThread stufff.
 			int rc = pthread_create( 
-				threads_ + i, NULL, mpiEventLoopForBcast, (void *)&p[i] );
+				threads_ + i, NULL, mpiEventLoop, (void *)&p[i] );
 			assert( rc == 0 );
 		}
 	}

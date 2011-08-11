@@ -128,8 +128,6 @@ void Shell::setHardware(
 	unsigned int numThreads, unsigned int numCores, unsigned int numNodes,
 	unsigned int myNode )
 {
-	if ( numNodes > 1 )
-		Qinfo::initMpiQs();
 	numProcessThreads_ = numThreads;
 	numCores_ = numCores;
 	numNodes_ = numNodes;
