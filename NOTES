@@ -14572,12 +14572,16 @@ AnyDimHandler.cpp. Now clears unit and regression tests on 16 threads.
 Some prelim benchmarks with -O3.
 
 Machine		# threads	test		runTime
+Mishti		1		ksolve		1.55
 Mishti		2		ksolve		13.2
-Ghevar		7		ksolve		0.6
+Ghevar		1		ksolve		0.8
+Ghevar		2		ksolve		6.7
+Ghevar		7		ksolve		25.9
 
 Mishti		2		IntFire		190
-Ghevar		7		IntFire		57.3
 Ghevar		2		IntFire		154
+Ghevar		4		IntFire		84.4
+Ghevar		7		IntFire		57.3
 
 Mishti		2		hhNet		19.8
 Mishti		1		hhNet		24.7
@@ -14585,4 +14589,33 @@ Ghevar		7		hhNet		26.0
 Ghevar		2		hhNet		19.4.
 Ghevar		1		hhNet		15.1
 
-Minor fix to runtime for ksolve
+Minor fix to runtime for ksolve. Checkin 2897. 
+
+The runtime for the ksolve test paints a rather alarming picture of overheads.
+This is for runtime = 1e6 at a dt of 10 sec, so 1e5 steps.
+The IntFire run is for 2000 steps. So the overhead there is about 1 sec for 
+	7 threads, assuming it scales as in the ksolve test.
+
+============================================================================
+11 August 2011
+Anyway, the profiling can come later. Next step is to check with MPI.
+Several fixes needed to get it to work. Most important is to have an
+adjustable data block size.
+
+Rules for block size:
+	- Keep track of running average, use blocksize a bit more than this:
+		say 1.2x + 10 doubles.
+	  ave = ave * (window - 1 )/window + bufsize / window.
+	- Keep track of sdev?
+	- If bufsize > 2x block size, don't put in running average, but do
+		add a resize alert.
+	- If resize alert > 2, resize the block size.
+	Or
+	- Second biggest of last 4 msgs, + 10%.
+Actually, this is messier. If we have each node manage its own blocksize then
+this will work, but will need monitoring of all incoming msgs.
+
+Coded up these rules. Compiles, clears unit tests in single-node mode,
+but runs into problems on multiple nodes.
+
+

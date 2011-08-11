@@ -19,6 +19,7 @@ TARGET = basecode.o
 OBJ = \
 	consts.o	\
 	Element.o	\
+	Qinfo.o \
 	DataHandler.o \
 	AnyDimGlobalHandler.o \
 	ZeroDimGlobalHandler.o \
@@ -39,7 +40,6 @@ OBJ = \
 	FieldElementFinfo.o \
 	Id.o \
 	ObjId.o \
-	Qinfo.o \
 	DataId.o \
 	SetGet.o \
 	OpFunc.o \
