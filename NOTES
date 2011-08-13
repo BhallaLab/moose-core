@@ -14645,6 +14645,10 @@ a bit further with MPI unit tests before running aground. Checkin 2900.
 
 Found next bug: Qinfo::updateHistory was bad. Progressed through more tests.
 Found next bug: Element::exec wasn't testing target ObjId::isDataHere for
-single object operations. Fixed, progressed through more tests.
+single object operations. Fixed, progressed through more tests. Checkin 2901.
+
+Next bug was an old hack where I had replaced the ack message with a direct
+call to the Shell object. This doesn't work on multiple nodes as the
+acks from all nodes have to reach node 0. Fixed.
 
 ============================================================================

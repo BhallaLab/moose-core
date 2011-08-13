@@ -614,9 +614,12 @@ void Clock::advancePhase2(  ProcInfo *p )
 			procState_ = StopOnly;
 			// isRunning_ = 0; // Should not set this flag here, it affects other threads.
 			finished.send( clockId.eref(), p->threadIndexInGroup );
-		//	ack()->send( clockId.eref(), p, p->nodeIndexInGroup, OkStatus );
+			ack()->send( clockId.eref(), p->threadIndexInGroup, 
+				p->nodeIndexInGroup, OkStatus );
+			/*
 			Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 			s->handleAck( p->nodeIndexInGroup, OkStatus );
+			*/
 		}
 		++countAdvance2_;
 	}
@@ -679,10 +682,13 @@ void Clock::reinitPhase2( ProcInfo* info )
 		}
 		sort( tickPtr_.begin(), tickPtr_.end() );
 		Id clockId( 1 );
+		ack()->send( clockId.eref(), info->threadIndexInGroup,
+			info->nodeIndexInGroup, OkStatus );
+		/*
 		/// For 1-node testing if the send is causing problems:
-		// ack()->send( clockId.eref(), info, info->nodeIndexInGroup, OkStatus );
 		Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 		s->handleAck( info->nodeIndexInGroup, OkStatus );
+		*/
 		procState_ = TurnOffReinit;
 		++countReinit2_;
 	}
