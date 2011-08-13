@@ -14619,3 +14619,28 @@ Coded up these rules. Compiles, clears unit tests in single-node mode,
 but runs into problems on multiple nodes. Checkin 2898.
 
 Tracked down first of the bugs, a silly pointer initialization one.
+Checkin 2899.
+
+Next bug is a Shell::doCreate one, and I suspect it has to do with sloppy
+dealing with the master msg between shells.
+
+Trigger of crash is on testShellParserCreateDelete () at testShell.cpp:40
+which is just the doCreate function.
+Dimensions seem to come across as 0.
+Let's check if all the bytes go. Should be.
+============================================================================
+12 August 2011
+
+Dies in innerCreate because dimensions is empty.
+In testSchell.cpp:40; testShell.cpp:1526.; main.cpp:296
+
+I think what is happening is that the addToStructuralQ is relying on the inQ
+being intact, but the inQ is instead being changed with the new MPI data by
+the time addToStructuralQ is called.
+
+============================================================================
+13 August 2011.
+Figured a way around this. Added dataSize_ field to Qinfo. Now system goes
+a bit further with MPI unit tests before running aground.
+
+============================================================================
