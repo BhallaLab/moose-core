@@ -124,7 +124,7 @@ void* mpiEventLoop( void* info )
 						MPI_DOUBLE, j, MPI_COMM_WORLD );
 				}
 			}
-			cout << Shell::myNode() << ":" << p->nodeIndexInGroup << ", data comes from node: " << j << ", blockSize = " << Qinfo::blockSize( j ) << ", actualSize= " << actualSize << "\n";
+			// cout << Shell::myNode() << ":" << p->nodeIndexInGroup << ", data comes from node: " << j << ", blockSize = " << Qinfo::blockSize( j ) << ", actualSize= " << actualSize << "\n";
 
 			Qinfo::setSourceNode( j ); // needed for queue juggling.
 			p->barrier2->wait(); // This barrier swaps inQ and mpiRecvQ
