@@ -14649,6 +14649,16 @@ single object operations. Fixed, progressed through more tests. Checkin 2901.
 
 Next bug was an old hack where I had replaced the ack message with a direct
 call to the Shell object. This doesn't work on multiple nodes as the
-acks from all nodes have to reach node 0. Fixed.
+acks from all nodes have to reach node 0. Fixed. Checkin 2902.
+
+Now it seems to be dying in Qinfo.cpp:354, which is a rather
+simple resize of a vector. It comes to a bit over 1 Megabytes, should be well
+within the memory capacity.
+
+Valgrind points out a trivial little memory leak, fixed.
+Possibly a lot of memory is being leaked in the process loop? Check.
+Possibly could start with a bigger reserve.
+This causes things to work up to 8 nodes, but 8 nodes fails. Looks like in
+ReduceBase.
 
 ============================================================================

@@ -308,11 +308,13 @@ void Qinfo::expandMpiRecvQ( unsigned int size )
 {
 	if ( mpiRecvQ_ == &mpiQ0_[0] ) {
 		if ( mpiQ0_.size() < size ) {
+			cout << Shell::myNode() << ": expanding mpiQ0 from " << mpiQ0_.size() << " to " << size << endl;
 			mpiQ0_.resize( size );
 			mpiRecvQ_ = &mpiQ0_[0];
 		}
 	} else {
 		if ( mpiQ1_.size() < size ) {
+			cout << Shell::myNode() << ": expanding mpiQ1 from " << mpiQ1_.size() << " to " << size << endl;
 			mpiQ1_.resize( size );
 			mpiRecvQ_ = &mpiQ1_[0];
 		}
@@ -350,13 +352,17 @@ void Qinfo::swapMpiQ()
 	assert( sourceNode_ < Shell::numNodes() );
 	// cout << Shell::myNode() << ": Qinfo::swapMpiQ: mpiRecvQ_=" << mpiRecvQ_ << ", &mpiQ0= " << &mpiQ0_[0] << " (" << mpiQ0_.size() << "), &mpiQ1= " << &mpiQ1_[0] << " (" << mpiQ1_.size() << ")\n"; 
 	if ( mpiRecvQ_ == &mpiQ0_[0] ) {
-		if ( mpiQ1_.size() < blockSize_[ sourceNode_ ] )
+		if ( mpiQ1_.size() < blockSize_[ sourceNode_ ] ) {
+			cout << Shell::myNode() << ": resizing mpiQ1 from " << mpiQ1_.size() << " to " << blockSize_[ sourceNode_ ] << endl;
 			mpiQ1_.resize( blockSize_[ sourceNode_ ] );
+		}
 		mpiRecvQ_ = &mpiQ1_[0];
 		inQ_ = &mpiQ0_[0];
 	} else {
-		if ( mpiQ0_.size() < blockSize_[ sourceNode_ ] )
+		if ( mpiQ0_.size() < blockSize_[ sourceNode_ ] ) {
+			cout << Shell::myNode() << ": resizing mpiQ0 from " << mpiQ0_.size() << " to " << blockSize_[ sourceNode_ ] << endl;
 			mpiQ0_.resize( blockSize_[ sourceNode_ ] );
+		}
 		mpiRecvQ_ = &mpiQ0_[0];
 		inQ_ = &mpiQ1_[0];
 	}
@@ -707,8 +713,8 @@ void Qinfo::initQs( unsigned int numThreads, unsigned int reserve )
 			history_[i].resize( historySize_, reserve );
 		}
 		
-		mpiQ0_.resize( reserve );
-		mpiQ1_.resize( reserve );
+		mpiQ0_.resize( reserve * 100 );
+		mpiQ1_.resize( reserve * 100 );
 		mpiRecvQ_ = &mpiQ0_[0];
 	}
 }
