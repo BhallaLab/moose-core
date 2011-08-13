@@ -29,10 +29,14 @@ class Qinfo
 	friend void testSendSpike();
 	friend void testSparseMsg();
 	public:
-		/// Used in addToQ and addDirectToQ
+		/**
+		 * Constructor.
+		 * Used in addToQ and addDirectToQ.
+		 * The size argument is in doubles, not bytes.
+		 */
 		Qinfo( const ObjId& src, 
 			BindIndex bindIndex, ThreadId threadNum,
-			unsigned int size );
+			unsigned int dataIndex, unsigned int dataSize );
 
 		Qinfo();
 
@@ -363,6 +367,13 @@ class Qinfo
 		 */
 		unsigned int dataIndex_;	
 
+		/**
+		 * Size of data packet on Qinfo. This is usually redundant info 
+		 * to dataIndex, except when we need to addToStructuralQ.
+		 * This is expressed in doubles, not in bytes.
+		 */
+		unsigned int dataSize_;
+
 		///////////////////////////////////////////////////////////
 		/**
 		 * Organization of inQ_, which is used as input to each thread and
@@ -447,7 +458,7 @@ class Qinfo
 		 */
 		// static vector< double > structuralQ_;
 		static vector< Qinfo > structuralQinfo_;
-		// static vector< double > structuralQdata_;
+		static vector< double > structuralQdata_;
 
 		/**
 		 * The reduceQ manages requests to 'reduce' data from many sources.
