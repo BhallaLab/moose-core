@@ -286,13 +286,16 @@ void Qinfo::updateQhistory()
 	unsigned int nextMax = 0;
 	for ( unsigned int i = 0; i < h.size(); ++i ) {
 		unsigned int j = h[i];
-		if ( max < j )
+		if ( max < j ) {
+			nextMax = max;
 			max = j;
-		else if ( nextMax < j )
+		} else if ( nextMax < j ) {
 			nextMax = j;
+		}
 	}
 	blockSize_[ sourceNode_ ] = 
 		static_cast< double >( nextMax ) * blockMargin_ + 10;
+	// cout << Shell::myNode() << ": blockSize[ " << sourceNode_ << " ] = " << blockSize_[ sourceNode_ ] << endl;
 }
 
 
@@ -345,10 +348,7 @@ void Qinfo::swapMpiQ()
 	assert( mpiQ0_.size() > 0 );
 	assert( mpiQ1_.size() > 0 );
 	assert( sourceNode_ < Shell::numNodes() );
-	cout << Shell::myNode() << ": Qinfo::swapMpiQ: mpiRecvQ_=" << 
-		mpiRecvQ_ << 
-		", &mpiQ0= " << &mpiQ0_[0] << " (" << mpiQ0_.size() <<
-		"), &mpiQ1= " << &mpiQ1_[0] << " (" << mpiQ1_.size() << "\n"; 
+	// cout << Shell::myNode() << ": Qinfo::swapMpiQ: mpiRecvQ_=" << mpiRecvQ_ << ", &mpiQ0= " << &mpiQ0_[0] << " (" << mpiQ0_.size() << "), &mpiQ1= " << &mpiQ1_[0] << " (" << mpiQ1_.size() << ")\n"; 
 	if ( mpiRecvQ_ == &mpiQ0_[0] ) {
 		if ( mpiQ1_.size() < blockSize_[ sourceNode_ ] )
 			mpiQ1_.resize( blockSize_[ sourceNode_ ] );
@@ -364,10 +364,9 @@ void Qinfo::swapMpiQ()
 		inQ_ = &q0_[0];
 	}
 	updateQhistory();
-	cout << Shell::myNode() << ": Qinfo::swapMpiQ: bufsize=" << inQ_[0] <<
-		", numQinfo= " << inQ_[1] << endl;
+	// cout << Shell::myNode() << ": Qinfo::swapMpiQ: bufsize=" << inQ_[0] << ", numQinfo= " << inQ_[1] << endl;
 
-	Qinfo::reportQ();
+	// Qinfo::reportQ();
 }
 
 

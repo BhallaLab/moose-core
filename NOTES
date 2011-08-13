@@ -14641,6 +14641,10 @@ the time addToStructuralQ is called.
 ============================================================================
 13 August 2011.
 Figured a way around this. Added dataSize_ field to Qinfo. Now system goes
-a bit further with MPI unit tests before running aground.
+a bit further with MPI unit tests before running aground. Checkin 2900.
+
+Found next bug: Qinfo::updateHistory was bad. Progressed through more tests.
+Found next bug: Element::exec wasn't testing target ObjId::isDataHere for
+single object operations. Fixed, progressed through more tests.
 
 ============================================================================
