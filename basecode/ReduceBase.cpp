@@ -69,6 +69,7 @@ bool ReduceBase::reduceNodes()
 	}
 	*/
 	delete[] recvBuf;
+	delete[] sendBuf;
 #endif
 	
 	return srcId_.isDataHere(); // Do we need to assign the result here?
