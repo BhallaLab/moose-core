@@ -32,7 +32,7 @@ vector< double > Qinfo::mpiQ1_( 1000, 0.0 );
 double* Qinfo::mpiRecvQ_ = &mpiQ0_[0];
 
 vector< Qinfo > Qinfo::structuralQinfo_( 0 );
-// vector< double > Qinfo::structuralQdata_;
+vector< double > Qinfo::structuralQdata_( 0 );
 
 pthread_mutex_t* Qinfo::qMutex_;
 pthread_cond_t* Qinfo::qCond_;
@@ -56,17 +56,19 @@ Qinfo::Qinfo()
 		src_(),
 		msgBindIndex_(0),
 		threadNum_( 0 ),
-		dataIndex_( 0 )
+		dataIndex_( 0 ),
+		dataSize_( 0 )
 {;}
 
 Qinfo::Qinfo( const ObjId& src, 
 	BindIndex bindIndex, ThreadId threadNum,
-	unsigned int dataIndex )
+	unsigned int dataIndex, unsigned int dataSize )
 	:	
 		src_( src ),
 		msgBindIndex_( bindIndex ),
 		threadNum_( threadNum ),
-		dataIndex_( dataIndex )
+		dataIndex_( dataIndex ),
+		dataSize_( dataSize )
 {;}
 
 Qinfo::Qinfo( const Qinfo* orig, ThreadId threadNum )
@@ -74,7 +76,8 @@ Qinfo::Qinfo( const Qinfo* orig, ThreadId threadNum )
 		src_( orig->src_ ),
 		msgBindIndex_( orig->msgBindIndex_ ),
 		threadNum_( threadNum ),
-		dataIndex_( orig->dataIndex_ )
+		dataIndex_( orig->dataIndex_ ),
+		dataSize_( orig->dataSize_ )
 {;}
 
 bool Qinfo::execThread( Id id, unsigned int dataIndex ) const
@@ -92,9 +95,10 @@ bool Qinfo::execThread( Id id, unsigned int dataIndex ) const
 void Qinfo::clearStructuralQ()
 {
 	enableStructuralOps();
+	const double* data = &structuralQdata_[0];
 	for ( unsigned int i = 0; i < structuralQinfo_.size(); ++i ) {
 		const Qinfo& qi = structuralQinfo_[i];
-		if ( !qi.isDummy() ) {
+		// if ( !qi.isDummy() ) {
 			/*
 			Qinfo newQ( qi, ScriptThreadNum );
 			const Element* e = qi->src_.element();
@@ -102,13 +106,13 @@ void Qinfo::clearStructuralQ()
 			e->exec( &newQ, inQ_ + newQ.dataIndex_ );
 			*/
 			const Element* e = qi.src_.element();
-			e->exec( &qi, inQ_ + qi.dataIndex_ );
-		}
+			e->exec( &qi, data + qi.dataIndex_ );
+		// }
 	}
 
 	disableStructuralOps();
 	structuralQinfo_.resize( 0 );
-// 	structuralQdata_.resize( 0 );
+ 	structuralQdata_.resize( 0 );
 }
 
 void readBuf(const double* buf, ThreadId threadNum )
@@ -362,6 +366,8 @@ void Qinfo::swapMpiQ()
 	updateQhistory();
 	cout << Shell::myNode() << ": Qinfo::swapMpiQ: bufsize=" << inQ_[0] <<
 		", numQinfo= " << inQ_[1] << endl;
+
+	Qinfo::reportQ();
 }
 
 
@@ -443,7 +449,8 @@ void Qinfo::reportQ()
 		Shell::numProcessThreads() << ", size = " << datasize + QinfoSizeInDoubles * numQinfo << 
 		", numQinfo = " << numQinfo << endl;
 
-	cout << Shell::myNode() << ":	structuralQ: numQinfo =  " << structuralQinfo_.size() << endl;
+	cout << Shell::myNode() << ":	structuralQ: size = " << 
+		structuralQdata_.size() + QinfoSizeInDoubles * structuralQinfo_.size() << ", numQinfo =  " << structuralQinfo_.size() << endl;
 
 	if ( inQ_[1] > 0 ) innerReportQ(inQ_, "inQ" );
 	if ( numQinfo > 0 ) reportOutQ( qBuf_, dBuf_, "outQ" );
@@ -463,7 +470,7 @@ void Qinfo::addToQ( const ObjId& oi,
 		lockQmutex( threadNum );
 			vector< double >& vec = dBuf_[ threadNum ];
 			qBuf_[ threadNum ].push_back( 
-				Qinfo( oi, bindIndex, threadNum, vec.size() ) );
+				Qinfo( oi, bindIndex, threadNum, vec.size(), size ) );
 			if ( size > 0 ) {
 				vec.insert( vec.end(), arg, arg + size );
 			}
@@ -481,7 +488,7 @@ void Qinfo::addToQ( const ObjId& oi,
 		lockQmutex( threadNum );
 			vector< double >& vec = dBuf_[ threadNum ];
 			qBuf_[ threadNum ].push_back( 
-				Qinfo( oi, bindIndex, threadNum, vec.size() ) );
+				Qinfo( oi, bindIndex, threadNum, vec.size(), size1 + size2 ) );
 			if ( size1 > 0 )
 				vec.insert( vec.end(), arg1, arg1 + size1 );
 			if ( size2 > 0 )
@@ -502,7 +509,7 @@ void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest,
 	lockQmutex( threadNum );
 		vector< double >& vec = dBuf_[ threadNum ];
 		qBuf_[ threadNum ].push_back(
-			Qinfo( src, DirectAdd, threadNum, vec.size() ) );
+			Qinfo( src, DirectAdd, threadNum, vec.size(), size ) );
 		ObjFid ofid = { dest, fid, size, 1 };
 		const double* ptr = reinterpret_cast< const double* >( &ofid );
 		vec.insert( vec.end(), ptr, ptr + ObjFidSizeInDoubles );
@@ -525,7 +532,7 @@ void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest,
 	lockQmutex( threadNum );
 		vector< double >& vec = dBuf_[ threadNum ];
 		qBuf_[ threadNum ].push_back(
-			Qinfo( src, DirectAdd, threadNum, vec.size() ) );
+			Qinfo( src, DirectAdd, threadNum, vec.size(), size1 + size2 ) );
 		ObjFid ofid = { dest, fid, size1 + size2, 1 };
 		const double* ptr = reinterpret_cast< const double* >( &ofid );
 		vec.insert( vec.end(), ptr, ptr + ObjFidSizeInDoubles );
@@ -549,7 +556,8 @@ void Qinfo::addVecDirectToQ( const ObjId& src, const ObjId& dest,
 		return;
 	lockQmutex( threadNum );
 		qBuf_[ threadNum ].push_back( 
-			Qinfo( src, DirectAdd, threadNum, dBuf_[threadNum].size() ) );
+			Qinfo( src, DirectAdd, threadNum, dBuf_[threadNum].size(),
+				entrySize * numEntries ) );
 	
 		ObjFid ofid = { dest, fid, entrySize, numEntries };
 		const double* ptr = reinterpret_cast< const double* >( &ofid );
@@ -589,6 +597,24 @@ bool Qinfo::addToStructuralQ() const
 			if ( isDummy() )
 				cout << "d" << flush;
 			structuralQinfo_.push_back( *this );
+			/*
+			const Qinfo* qstart = 
+				reinterpret_cast< const Qinfo* >( inQ_ + 2);
+			unsigned int qnum = this - qstart;
+			unsigned int nq = inQ_[0];
+			unsigned int nextData = 0;
+			if ( qnum < nq - 1 )
+				nextData = ( this + 1 )->dataIndex_;
+			else
+				nextData = inQ_[0];
+			unsigned int dataSize = nextData - dataIndex_;
+			assert( dataSize < ( 1 << ( sizeof( unsigned int ) - 1 ) ) );
+
+			structuralQinfo_.back().dataIndex_ = structuralQdata_.size();
+			*/
+			structuralQinfo_.back().dataIndex_ = structuralQdata_.size();
+			structuralQdata_.insert( structuralQdata_.end(), 
+				inQ_ + dataIndex_, inQ_ + dataIndex_ + dataSize_ );
 			ret = 1;
 		}
 	return ret;
