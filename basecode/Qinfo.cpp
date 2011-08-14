@@ -350,24 +350,33 @@ void Qinfo::swapMpiQ()
 	assert( mpiQ0_.size() > 0 );
 	assert( mpiQ1_.size() > 0 );
 	assert( sourceNode_ < Shell::numNodes() );
+	unsigned int nextNode = ( sourceNode_ + 1 ) % Shell::numNodes();
 	// cout << Shell::myNode() << ": Qinfo::swapMpiQ: mpiRecvQ_=" << mpiRecvQ_ << ", &mpiQ0= " << &mpiQ0_[0] << " (" << mpiQ0_.size() << "), &mpiQ1= " << &mpiQ1_[0] << " (" << mpiQ1_.size() << ")\n"; 
 	if ( mpiRecvQ_ == &mpiQ0_[0] ) {
-		if ( mpiQ1_.size() < blockSize_[ sourceNode_ ] ) {
-			cout << Shell::myNode() << ": resizing mpiQ1 from " << mpiQ1_.size() << " to " << blockSize_[ sourceNode_ ] << endl;
-			mpiQ1_.resize( blockSize_[ sourceNode_ ] );
+		if ( mpiQ1_.size() < blockSize_[ nextNode ] ) {
+			cout << Shell::myNode() << ": resizing mpiQ1 from " << mpiQ1_.size() << " to " << blockSize_[ nextNode ] << endl;
+			mpiQ1_.resize( blockSize_[ nextNode ] );
 		}
 		mpiRecvQ_ = &mpiQ1_[0];
 		inQ_ = &mpiQ0_[0];
 	} else {
-		if ( mpiQ0_.size() < blockSize_[ sourceNode_ ] ) {
-			cout << Shell::myNode() << ": resizing mpiQ0 from " << mpiQ0_.size() << " to " << blockSize_[ sourceNode_ ] << endl;
-			mpiQ0_.resize( blockSize_[ sourceNode_ ] );
+		if ( mpiQ0_.size() < blockSize_[ nextNode ] ) {
+			cout << Shell::myNode() << ": resizing mpiQ0 from " << mpiQ0_.size() << " to " << blockSize_[ nextNode ] << endl;
+			mpiQ0_.resize( blockSize_[ nextNode ] );
 		}
 		mpiRecvQ_ = &mpiQ0_[0];
 		inQ_ = &mpiQ1_[0];
 	}
 	if ( sourceNode_ == Shell::myNode() ) {
 		inQ_ = &q0_[0];
+	} else {
+		if ( nextNode == Shell::myNode() ) {
+			if ( q0_.capacity() < blockSize_[ nextNode ] ) {
+				cout << "Reserving q0 capacity from " <<
+					q0_.capacity() << " to " << blockSize_[nextNode] << endl;
+				q0_.reserve( blockMargin_ * blockSize_[ nextNode ] );
+			}
+		}
 	}
 	updateQhistory();
 	// cout << Shell::myNode() << ": Qinfo::swapMpiQ: bufsize=" << inQ_[0] << ", numQinfo= " << inQ_[1] << endl;
@@ -708,13 +717,19 @@ void Qinfo::initQs( unsigned int numThreads, unsigned int reserve )
 	
 	if ( Shell::numNodes() > 1 ) {
 		history_.resize( Shell::numNodes() );
-		blockSize_.resize( Shell::numNodes(), reserve * blockMargin_ );
+		// blockSize_.resize( Shell::numNodes(), reserve * blockMargin_ );
+		blockSize_.resize( Shell::numNodes(), 20 );
 		for ( unsigned int i = 0; i < Shell::numNodes(); ++i ) {
-			history_[i].resize( historySize_, reserve );
+			// history_[i].resize( historySize_, reserve );
+			history_[i].resize( historySize_, 20 );
 		}
 		
+		/*
 		mpiQ0_.resize( reserve * 100 );
 		mpiQ1_.resize( reserve * 100 );
+		*/
+		mpiQ0_.resize( 20 );
+		mpiQ1_.resize( 20 );
 		mpiRecvQ_ = &mpiQ0_[0];
 	}
 }
