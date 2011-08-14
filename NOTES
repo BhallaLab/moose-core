@@ -14652,7 +14652,7 @@ call to the Shell object. This doesn't work on multiple nodes as the
 acks from all nodes have to reach node 0. Fixed. Checkin 2902.
 
 Now it seems to be dying in Qinfo.cpp:354, which is a rather
-simple resize of a vector. It comes to a bit over 1 Megabytes, should be well
+simple resize of a vector. It comes to a bit over 1 Megabyte, should be well
 within the memory capacity.
 
 Valgrind points out a trivial little memory leak, fixed.
@@ -14662,3 +14662,16 @@ This causes things to work up to 8 nodes, but 8 nodes fails. Looks like in
 ReduceBase.
 
 ============================================================================
+14 August
+Fiddled around with reserve size. 
+- The reserve process works fine for smaller/bigger sizes.
+- The resize crash happens at the same place for smaller (20 doubles) reserve.
+
+I suspect a bad memory access somewhere in the mpiQ.
+
+Tracked it down. I was locking the barn door after... In other words, I was
+resizing the mpiQs to the new blocksize _after_ they were supposed to receive
+the data of that size. Fixed that. Now it clears various combinations,
+including regression tests, up to 4 nodes. 8 nodes has the same ReduceBase
+failure.
+
