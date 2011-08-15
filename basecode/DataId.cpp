@@ -34,6 +34,12 @@ const DataId& DataId::any() {
 	return any_;
 }
 
+const DataId& DataId::globalField() {
+	static DataId globalField_( ~2U, ~1U );
+	return globalField_;
+}
+
+
 const unsigned int DataId::anyPart()
 {
 	return ~1U;
