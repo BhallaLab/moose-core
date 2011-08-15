@@ -146,8 +146,8 @@ unsigned int OneDimHandler::localEntries() const
 
 char* OneDimHandler::data( DataId index ) const
 {
-	// Typically data will not be touched when index == any.
-	if ( index == DataId::any() )
+	// Typically data will not be touched when index == any or globalField
+	if ( index == DataId::any() || index == DataId::globalField() )
 		return data_; 
 	if ( isDataHere( index ) )
 		return data_ + ( index.data() - start_ ) * dinfo()->size();
@@ -214,8 +214,8 @@ bool OneDimHandler::resize( vector< unsigned int > dims )
  * current node
  */
 bool OneDimHandler::isDataHere( DataId index ) const {
-	return ( index == DataId::any() || (
-		index.data() >= start_ && index.data() < end_ ) );
+	return ( index == DataId::any() || index == DataId::globalField() ||
+		( index.data() >= start_ && index.data() < end_ ) );
 }
 
 bool OneDimHandler::isAllocated() const {

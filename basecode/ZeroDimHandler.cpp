@@ -125,7 +125,8 @@ char* ZeroDimHandler::data( DataId index ) const {
  * current node, or if the index explicitly states it is on any node.
  */
 bool ZeroDimHandler::isDataHere( DataId index ) const {
-	return ( Shell::myNode() == 0 || index == DataId::any() );
+	return ( Shell::myNode() == 0 || index == DataId::any() ||
+		index == DataId::globalField() );
 }
 
 bool ZeroDimHandler::isAllocated() const {

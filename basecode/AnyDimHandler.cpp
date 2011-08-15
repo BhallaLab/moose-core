@@ -180,8 +180,8 @@ unsigned int AnyDimHandler::localEntries() const
 
 char* AnyDimHandler::data( DataId index ) const
 {
-	// Typically data will not be touched when index == any.
-	if ( index == DataId::any() )
+	// Typically data will not be touched when index == any or globalField.
+	if ( index == DataId::any() || index == DataId::globalField() )
 		return data_; 
 	if ( isDataHere( index ) )
 		return data_ + ( index.data() - start_ ) * dinfo()->size();

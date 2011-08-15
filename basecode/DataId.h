@@ -77,6 +77,9 @@ class DataId {
 		/// Represents any dataId: a wildcard for any data index.
 		static const DataId& any();
 
+		/// Forces the DataId to be treated as global.
+		static const DataId& globalField();
+
 		/// Returns the 'any' value to compare with data and field parts
 		static const unsigned int anyPart();
 	
