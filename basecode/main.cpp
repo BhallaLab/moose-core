@@ -173,7 +173,8 @@ Id init( int argc, char** argv )
 	}
 	if ( isSingleThreaded )
 		numThreads = 0;
-	cout << "on node " << myNode << ", numNodes = " << numNodes << ", numCores = " << numCores << ", numComputeThreads = " << numThreads << endl;
+	if ( myNode == 0 ) 
+		cout << "on node " << myNode << ", numNodes = " << numNodes << ", numCores = " << numCores << ", numComputeThreads = " << numThreads << endl;
 
 	Msg::initNull();
 	Id shellId;

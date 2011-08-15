@@ -147,7 +147,7 @@ void ReduceStats::tertiaryReduce( const char* other )
 	data_.sumsq_ += d->sumsq_;
 	data_.count_ += d->count_;
 
-	cout << Shell::myNode() << ": ReduceStats::tertiaryReduce: stats = " << data_.sum_ << ", " << data_.sumsq_ << ", " << data_.count_ << endl;
+	// cout << Shell::myNode() << ": ReduceStats::tertiaryReduce: stats = " << data_.sum_ << ", " << data_.sumsq_ << ", " << data_.count_ << endl;
 }
 
 double ReduceStats::sum() const

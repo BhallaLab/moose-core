@@ -308,13 +308,13 @@ void Qinfo::expandMpiRecvQ( unsigned int size )
 {
 	if ( mpiRecvQ_ == &mpiQ0_[0] ) {
 		if ( mpiQ0_.size() < size ) {
-			cout << Shell::myNode() << ": expanding mpiQ0 from " << mpiQ0_.size() << " to " << size << endl;
+			// cout << Shell::myNode() << ": expanding mpiQ0 from " << mpiQ0_.size() << " to " << size << endl;
 			mpiQ0_.resize( size );
 			mpiRecvQ_ = &mpiQ0_[0];
 		}
 	} else {
 		if ( mpiQ1_.size() < size ) {
-			cout << Shell::myNode() << ": expanding mpiQ1 from " << mpiQ1_.size() << " to " << size << endl;
+			// cout << Shell::myNode() << ": expanding mpiQ1 from " << mpiQ1_.size() << " to " << size << endl;
 			mpiQ1_.resize( size );
 			mpiRecvQ_ = &mpiQ1_[0];
 		}
@@ -354,14 +354,14 @@ void Qinfo::swapMpiQ()
 	// cout << Shell::myNode() << ": Qinfo::swapMpiQ: mpiRecvQ_=" << mpiRecvQ_ << ", &mpiQ0= " << &mpiQ0_[0] << " (" << mpiQ0_.size() << "), &mpiQ1= " << &mpiQ1_[0] << " (" << mpiQ1_.size() << ")\n"; 
 	if ( mpiRecvQ_ == &mpiQ0_[0] ) {
 		if ( mpiQ1_.size() < blockSize_[ nextNode ] ) {
-			cout << Shell::myNode() << ": resizing mpiQ1 from " << mpiQ1_.size() << " to " << blockSize_[ nextNode ] << endl;
+			// cout << Shell::myNode() << ": resizing mpiQ1 from " << mpiQ1_.size() << " to " << blockSize_[ nextNode ] << endl;
 			mpiQ1_.resize( blockSize_[ nextNode ] );
 		}
 		mpiRecvQ_ = &mpiQ1_[0];
 		inQ_ = &mpiQ0_[0];
 	} else {
 		if ( mpiQ0_.size() < blockSize_[ nextNode ] ) {
-			cout << Shell::myNode() << ": resizing mpiQ0 from " << mpiQ0_.size() << " to " << blockSize_[ nextNode ] << endl;
+			// cout << Shell::myNode() << ": resizing mpiQ0 from " << mpiQ0_.size() << " to " << blockSize_[ nextNode ] << endl;
 			mpiQ0_.resize( blockSize_[ nextNode ] );
 		}
 		mpiRecvQ_ = &mpiQ0_[0];
@@ -372,8 +372,7 @@ void Qinfo::swapMpiQ()
 	} else {
 		if ( nextNode == Shell::myNode() ) {
 			if ( q0_.capacity() < blockSize_[ nextNode ] ) {
-				cout << "Reserving q0 capacity from " <<
-					q0_.capacity() << " to " << blockSize_[nextNode] << endl;
+				// cout << "Reserving q0 capacity from " << q0_.capacity() << " to " << blockSize_[nextNode] << endl;
 				q0_.reserve( blockMargin_ * blockSize_[ nextNode ] );
 			}
 		}
