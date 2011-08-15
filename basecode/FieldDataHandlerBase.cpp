@@ -226,7 +226,7 @@ void FieldDataHandlerBase::setFieldDimension( unsigned int size )
 	unsigned int i = biggestFieldArraySize();
 	assert( i <= size );
 	fieldDimension_ = size;
-	cout << Shell::myNode() << ": SetFieldDimension to " << size << endl;
+	//cout << Shell::myNode() << ": SetFieldDimension to " << size << endl;
 }
 
 /**

@@ -35,21 +35,21 @@ void ReduceMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const
 		ReduceBase* r = rfb_->makeReduce( ObjId( e1_->id(), i1_ ), f );
 		Qinfo::addToReduceQ( r, q->threadNum() );
 		DataHandler* d2 = e2_->dataHandler();
-		unsigned int count = 0;
+		//unsigned int count = 0;
 		for ( DataHandler::iterator i = d2->begin(); i != d2->end(); ++i )
 		{
 			if ( q->execThread( e2_->id(),i.index().data() ) ) {
 				// This fills up the first pass of reduce operations.
 				r->primaryReduce( ObjId( e2_->id(), i.index() ) );
 				r->setInited();
-				++count;
+				//++count;
 			}
 		}
-		cout << Shell::myNode() << ":" << q->threadNum() << " ReduceMsg::exec numPrimaryReduce = " << count << endl;
-		ReduceStats* rs = dynamic_cast< ReduceStats* >( r );
-		if ( rs ) {
-		cout << Shell::myNode() << ":" << q->threadNum() << " ReduceMsg::exec sum = " << rs->sum() << ", count = " << rs->count() << endl;
-		}
+		// cout << Shell::myNode() << ":" << q->threadNum() << " ReduceMsg::exec numPrimaryReduce = " << count << endl;
+		// ReduceStats* rs = dynamic_cast< ReduceStats* >( r );
+		// if ( rs ) {
+		// cout << Shell::myNode() << ":" << q->threadNum() << " ReduceMsg::exec sum = " << rs->sum() << ", count = " << rs->count() << endl;
+		// }
 	} else if ( e1_->dataHandler()->isDataHere( i1_ ) &&
 		q->execThread( e1_->id(), i1_.data() ) ) {
 		const OpFunc* f = e1_->cinfo()->getOpFunc( fid );

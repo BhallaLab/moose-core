@@ -497,10 +497,10 @@ void testMpiStatsReduce()
 	assert( mid != Msg::badMsg );
 	SetGet0::set( statsid, "trig" );
 	double x = Field< double >::get( statsid, "sum" );
-	cout << Shell::myNode() << ": x = " << x << ", sum = " << sum << endl;
+	// cout << Shell::myNode() << ": x = " << x << ", sum = " << sum << endl;
 	// assert( doubleEq( x, sum ) );
 	x = Field< double >::get( statsid, "sum" );
-	cout << Shell::myNode() << ": x = " << x << ", sum = " << sum << endl;
+	// cout << Shell::myNode() << ": x = " << x << ", sum = " << sum << endl;
 	// assert( doubleEq( x, sum ) );
 
 
