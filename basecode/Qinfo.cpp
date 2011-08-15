@@ -796,6 +796,8 @@ void Qinfo::clearReduceQ( unsigned int numThreads )
 			assert( r );
 			start->secondaryReduce( r );
 		}
+		if ( numThreads <= 1 )
+			start->setInited();
 		// At this point start has all the info from the current node.
 		// The reduceNodes returns 0 if the assignment should happen only
 		// on another node. Sometimes the assignment happens on all nodes.

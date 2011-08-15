@@ -730,9 +730,9 @@ void Shell::doSyncDataHandler( Id tgt )
 	// Check: will this function work on all nodes? No, only on master.
 	// So we have to do the ugly but reliable 'set' function.
 	// fv->setFieldDimension( maxIndex_ );
-	/*
 	Field< unsigned int >::set( ObjId( tgt, 0 ), 
 		"fieldDimension", maxIndex_ );
+	/*
 	*/
 }
 

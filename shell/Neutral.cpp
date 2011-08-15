@@ -11,6 +11,7 @@
 #include "Dinfo.h"
 #include "ElementValueFinfo.h"
 #include "LookupElementValueFinfo.h"
+#include "Shell.h"
 
 const Cinfo* Neutral::initCinfo()
 {
@@ -197,7 +198,8 @@ Neutral Neutral::getThis() const
 
 void Neutral::setName( const Eref& e, const Qinfo* q, string name )
 {
-	e.element()->setName( name );
+	if ( Shell::isSingleThreaded() || q->threadNum() == 1 )
+		e.element()->setName( name );
 }
 
 string Neutral::getName( const Eref& e, const Qinfo* q ) const
@@ -320,7 +322,8 @@ vector< unsigned int > Neutral::getDimensions(
 void Neutral::setFieldDimension( const Eref& e, const Qinfo* q, 
 	unsigned int size )
 {
-	e.element()->dataHandler()->setFieldDimension( size );
+	if ( Shell::isSingleThreaded() || q->threadNum() == 1 )
+		e.element()->dataHandler()->setFieldDimension( size );
 }
 
 unsigned int Neutral::getFieldDimension( 

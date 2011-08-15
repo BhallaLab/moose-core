@@ -106,9 +106,13 @@ unsigned int SetGet::checkSet(
 		tgt = oid_;
 	}
 
+	/*
+	* Not sure why this is here. May be legacy hack to indicate that it
+	* it is a global field.
 	if ( Neutral::isGlobalField( field ) ) {
 		tgt.dataId = DataId::any();
 	}
+	*/
 
 	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
 	if ( !df )
