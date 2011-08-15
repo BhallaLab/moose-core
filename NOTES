@@ -14687,5 +14687,25 @@ repeatedly, for half a million synapses.
 
 Fixed this. There was an odd hack in SetGet::checkSet which set the dataId to
 DataId::any whenever the field was a global field.
+Checkin 2905.
 
 But now it hangs in testMpiStatsReduce, in testBuiltins.cpp:488
+
+============================================================================
+15 August.
+
+Grinding through the 'Reduce' tests in testMpiStatsReduce. Now it looks like 
+the Reduce operations are OK, but many of the synaptic delays are set to zero.
+
+After considerable printf debugging, it looks like the problem is the
+set command for FieldDimension not propagating to other nodes. There was 
+a puzzle a while back about why I had converted the tgt in checkSet to
+DataId::any, for Global fields. Maybe this was why, to have the fields set
+on all nodes.
+
+Fixed, involved tracing through multiple levels of thread checking and 
+isDataHere. Added a hack: DataId::globalField(), which is set by 
+checkSet and alerts downstream calls to let the call through on all nodes.
+Now clears unit tests on 1, 2, 4 and 8 nodes.
+
+

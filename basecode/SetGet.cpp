@@ -107,12 +107,15 @@ unsigned int SetGet::checkSet(
 	}
 
 	/*
-	* Not sure why this is here. May be legacy hack to indicate that it
-	* it is a global field.
-	if ( Neutral::isGlobalField( field ) ) {
-		tgt.dataId = DataId::any();
-	}
+	* This is a hack to indicate that it it is a global field. Subsequently
+	* the check for isDataHere returns true. Possible issues crop up with
+	* messages calling the field multiple times, but that would require an
+	* odd combination of a message sent to such a field, and having a 
+	* large fan-out message.
 	*/
+	if ( Neutral::isGlobalField( field ) ) {
+		tgt.dataId = DataId::globalField();
+	}
 
 	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
 	if ( !df )
