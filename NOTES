@@ -14706,6 +14706,7 @@ on all nodes.
 Fixed, involved tracing through multiple levels of thread checking and 
 isDataHere. Added a hack: DataId::globalField(), which is set by 
 checkSet and alerts downstream calls to let the call through on all nodes.
-Now clears unit tests on 1, 2, 4 and 8 nodes.
+Now clears unit tests on 1, 2, 4 and 8 nodes. Checkin 2906.
 
+Cleaned up a lot of printf debugging.
 
