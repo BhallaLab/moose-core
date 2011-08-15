@@ -14673,5 +14673,19 @@ Tracked it down. I was locking the barn door after... In other words, I was
 resizing the mpiQs to the new blocksize _after_ they were supposed to receive
 the data of that size. Fixed that. Now it clears various combinations,
 including regression tests, up to 4 nodes. 8 nodes has the same ReduceBase
-failure.
+failure. 
+Checkin 2904.
 
+The ReduceBase failure is from testShell.cpp:416: testCopyFieldElement().
+Fixed an error in initializing tgtId, but it still fails a couple of lines 
+later, at 419.
+
+I've run into an old pending issue. There are 'global' fields of Objects,
+that actually belong to their parent Elements. Should only set them once.
+Currently things hang for a while because I'm setting the FieldDimension
+repeatedly, for half a million synapses.
+
+Fixed this. There was an odd hack in SetGet::checkSet which set the dataId to
+DataId::any whenever the field was a global field.
+
+But now it hangs in testMpiStatsReduce, in testBuiltins.cpp:488
