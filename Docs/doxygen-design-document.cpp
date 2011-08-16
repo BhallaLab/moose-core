@@ -19,10 +19,6 @@ This redesign does a lot of things differently from the earlier MOOSE messaging.
 	data traffic.
 - All Elements are now assumed to be array Elements, so indexing is built into
 	messaging from the ground up.
-- There is a split between synchronous messaging (exact amount of data
-	transferred on every timestep) and asynchronous messaging (variable
-	amounts of data transferred). This split is at the data transfer
-	level but the message specification should be nearly the same.
 - Field access function specification is cleaner.
 - Separation of function specification from messaging. This means that any
 	message can be used as a communication line for any function call 

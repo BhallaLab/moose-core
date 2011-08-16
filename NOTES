@@ -14708,5 +14708,22 @@ isDataHere. Added a hack: DataId::globalField(), which is set by
 checkSet and alerts downstream calls to let the call through on all nodes.
 Now clears unit tests on 1, 2, 4 and 8 nodes. Checkin 2906.
 
-Cleaned up a lot of printf debugging.
+Cleaned up a lot of printf debugging. Checkin 2907.
 
+============================================================================
+16 Aug
+Some things to do:
+- Partition up the SparseMsg::exec by thread ahead of time.
+- Gillespie method.
+- Thread-ify the ksolver
+- SBML reading
+- With Niraj: hsolver
+- With Harsha and Chaitanya: Interface
+- Documentation
+
+Started on documentation while things are still fresh. Figured out how to
+add stuff to doxygen, wrote up documentation on the threading and process
+loop design, including MPI data transfers. Spent quite a bit of time also
+putting in figures for this.
+
+============================================================================
