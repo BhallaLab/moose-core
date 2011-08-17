@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Mar 26 22:41:37 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Aug 17 13:19:00 2011 (+0530)
+// Last-Updated: Wed Aug 17 14:21:44 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 129
+//     Update #: 130
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -236,6 +236,7 @@ Shell& getShell()
         nonMpiTests( shell_ ); // These tests do not need the process loop.
 #endif    
         if (!shell_->isSingleThreaded())
+            Qinfo::initMutex(); // Mutex used to align Parser and MOOSE threads.
             shell_->launchThreads();
         if ( shell_->myNode() == 0 ) {
 #ifdef DO_UNIT_TESTS
