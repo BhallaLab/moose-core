@@ -167,7 +167,7 @@ void testTreeTraversal()
 	assert( f2a == Neutral::child( f1.eref(), "f2a" ) );
 	assert( f2b == Neutral::child( f1.eref(), "f2b" ) );
 	assert( f2c == Neutral::child( f1.eref(), "f2c" ) );
-
+        shell->setCwe( Id() );
 	shell->doDelete( f1 );
 	cout << "." << flush;
 }

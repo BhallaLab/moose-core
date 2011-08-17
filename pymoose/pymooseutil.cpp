@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Mar 26 22:41:37 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Aug 17 14:21:44 2011 (+0530)
+// Last-Updated: Wed Aug 17 17:43:41 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 130
+//     Update #: 135
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -139,6 +139,8 @@ Shell& getShell()
         int _isInfinite = 0;
         int _myNode = 0;
         int _numProcessThreads = 0;
+        int argc = 0;
+        char ** argv = NULL;
         string arg;
 
         map<string, string>::const_iterator it = getArgMap().find("SINGLETHREADED");    
@@ -179,9 +181,6 @@ Shell& getShell()
         // Do MPI Initialization
         // Not yet sure what should be passed on in argv
 #ifdef USE_MPI
-        int argc = 0;
-        int provided;
-        char ** argv = NULL;
         MPI_Init_thread( &argc, &argv, MPI_THREAD_SERIALIZED, &provided );
         MPI_Comm_size( MPI_COMM_WORLD, &_numNodes );
         MPI_Comm_rank( MPI_COMM_WORLD, &_myNode );
@@ -250,8 +249,9 @@ Shell& getShell()
             // mode, using a command-line argument. As soon as they are done
             // the system quits, in order to estimate timing.
             // if ( benchmarkTests( argc, argv ) || quitFlag )
-            if ( quitFlag )
+            if ( benchmarkTests( argc, argv ) || quitFlag ){
                 shell_->doQuit();
+            }
             // else 
             //     shell_->launchParser(); // Here we set off a little event loop to poll user input. It deals with the doQuit call too.
         }
@@ -265,6 +265,7 @@ void finalize()
     if (!getShell().isSingleThreaded()){
         cout << "Joining threads." << endl;
         getShell().joinThreads();
+        Qinfo::freeMutex();
     }
     // getShell().clearSetMsgs();
     Neutral* ns = reinterpret_cast<Neutral*>(shellE);
