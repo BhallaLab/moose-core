@@ -14724,6 +14724,14 @@ Some things to do:
 Started on documentation while things are still fresh. Figured out how to
 add stuff to doxygen, wrote up documentation on the threading and process
 loop design, including MPI data transfers. Spent quite a bit of time also
-putting in figures for this.
+putting in figures for this. Checkin 2911.
 
 ============================================================================
+17 Aug.
+Subha suggests priorities for documentation:
+	Clocks
+	API
+	Building new classes.
+
+
+Wrote some documentation for Clocks. Put it in the API section.

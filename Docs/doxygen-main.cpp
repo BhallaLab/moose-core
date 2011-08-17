@@ -54,5 +54,7 @@ some higher-level hand-written documents:
 
 \ref ProgrammersGuide
 
+\ref AppProgInterface
+
 \ref DesignDocument
 */
