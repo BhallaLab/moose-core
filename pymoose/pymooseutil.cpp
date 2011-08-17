@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Mar 26 22:41:37 2011 (+0530)
 // Version: 
-// Last-Updated: Fri Jun 17 18:26:56 2011 (+0530)
+// Last-Updated: Wed Aug 17 13:19:00 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 98
+//     Update #: 129
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -73,14 +73,14 @@ extern void speedTestMultiNodeIntFireNetwork(
 extern void regressionTests();
 #endif
 extern bool benchmarkTests( int argc, char** argv );
-
-extern unsigned int getNumCores();
+extern int getNumCores();
 
 int isSingleThreaded = 0;
 int isInfinite = 0;
 int numNodes = 1;
 int numCores = 1;
 int myNode = 0;
+int numProcessThreads = 0;
 static bool quitFlag = 0;
 static Element* shellE = NULL; // This is in order to keep a handle on
                                // the original shell element - I don't
@@ -98,13 +98,17 @@ void setup_runtime_env(bool verbose=true){
     if (it != argmap.end()){
         istringstream(it->second) >> isInfinite;
     }
+    it = argmap.find("NUMNODES");
+    if (it != argmap.end()){
+        istringstream(it->second) >> numNodes;
+    }
     it = argmap.find("NUMCORES");
     if (it != argmap.end()){
         istringstream(it->second) >> numCores;
     }
-    it = argmap.find("NUMNODES");
+    it = argmap.find("NUMPTHREADS");
     if (it != argmap.end()){
-        istringstream(it->second) >> numNodes;
+        istringstream(it->second) >> numProcessThreads;
     }
     it = argmap.find("QUIT");
     if (it != argmap.end()){
@@ -115,8 +119,9 @@ void setup_runtime_env(bool verbose=true){
              << "----------------------------------------" << endl
              << "   SINGLETHREADED = " << isSingleThreaded << endl
              << "   INFINITE = " << isInfinite << endl
-             << "   NUMCORES = " << numCores << endl
              << "   NUMNODES = " << numNodes << endl
+             << "   NUMCORES = " << numCores << endl
+             << "   NUMPTHREADS = " << numProcessThreads << endl
              << "========================================" << endl;
     }
 }
@@ -128,30 +133,49 @@ Shell& getShell()
     {
      
         // Set up the system parameters
-        int isSingleThreaded = 0;
-        int numCores = 1;
-        int numNodes = 1;
-        int isInfinite = 0;
-        int myNode = 0;
+        int _isSingleThreaded = 0;
+        int _numCores = 1;
+        int _numNodes = 1;
+        int _isInfinite = 0;
+        int _myNode = 0;
+        int _numProcessThreads = 0;
         string arg;
 
         map<string, string>::const_iterator it = getArgMap().find("SINGLETHREADED");    
         if (it != getArgMap().end()){
-            istringstream(it->second) >> isSingleThreaded;
+            istringstream(it->second) >> _isSingleThreaded;
         }
         it = getArgMap().find("NUMCORES");
         if ((it == getArgMap().end()) || it->second.empty()){
-            numCores = getNumCores();
+            _numCores = getNumCores();
+        } else {
+            istringstream(it->second) >> _numCores;
         }
         it = getArgMap().find("NUMNODES");
         if (it != getArgMap().end()){
-            istringstream(it->second) >> numNodes;
+            istringstream(it->second) >> _numNodes;
         }
         it = getArgMap().find("INFINITE");
         if (it != getArgMap().end()){
-            istringstream(it->second) >> isInfinite;
+            istringstream(it->second) >> _isInfinite;
         }
-
+        it = getArgMap().find("NUMPTHREADS");
+        if (it != getArgMap().end()){
+            istringstream(it->second) >> _numProcessThreads;
+        } else {
+            _numProcessThreads = _numCores;
+        }
+        if (_numProcessThreads == 0){
+            _isSingleThreaded = 1;
+        }
+        cout << "================================================" << endl
+             << "Final system parameters:" << endl
+             << " SINGLETHREADED: " << _isSingleThreaded << endl
+             << " NUMNODES: " << _numNodes << endl
+             << " NUMCORES: " << _numCores << endl
+             << " NUMPTHREADS: " << _numProcessThreads << endl
+             << " INFINITE: " << _isInfinite << endl
+             << "================================================" << endl;
         // Do MPI Initialization
         // Not yet sure what should be passed on in argv
 #ifdef USE_MPI
@@ -159,9 +183,9 @@ Shell& getShell()
         int provided;
         char ** argv = NULL;
         MPI_Init_thread( &argc, &argv, MPI_THREAD_SERIALIZED, &provided );
-        MPI_Comm_size( MPI_COMM_WORLD, &numNodes );
-        MPI_Comm_rank( MPI_COMM_WORLD, &myNode );
-        if ( provided < MPI_THREAD_SERIALIZED && myNode == 0 ) {
+        MPI_Comm_size( MPI_COMM_WORLD, &_numNodes );
+        MPI_Comm_rank( MPI_COMM_WORLD, &_myNode );
+        if ( provided < MPI_THREAD_SERIALIZED && _myNode == 0 ) {
             cout << "Warning: This MPI implementation does not like multithreading: " << provided << "\n";
         }    
 #endif
@@ -174,7 +198,7 @@ Shell& getShell()
         Id clockId = Id::nextId();
         shell_ = reinterpret_cast<Shell*>(shellId.eref().data());
         shell_->setShellElement(shellE);
-        shell_->setHardware(isSingleThreaded, numCores, numNodes, myNode);
+        shell_->setHardware(_numProcessThreads, _numCores, _numNodes, _myNode);
         shell_->loadBalance();
     
         // Initialize the system objects
@@ -241,7 +265,7 @@ void finalize()
         cout << "Joining threads." << endl;
         getShell().joinThreads();
     }
-    getShell().clearSetMsgs();
+    // getShell().clearSetMsgs();
     Neutral* ns = reinterpret_cast<Neutral*>(shellE);
     ns->destroy( shellE->id().eref(), 0, 0);
 #ifdef USE_MPI
