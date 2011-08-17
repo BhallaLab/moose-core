@@ -108,6 +108,17 @@ These steps are illustrated below:
 
 @image html MOOSE_MPI_threading.gif "MOOSE threading and Process Loop with MPI data transfers between nodes."
 
+
+\section NewClasses Writing new MOOSE classes
+\subsection NewClassesOverview	Overview
+
+MOOSE is designed to make it easy to set up new simulation classes. This
+process is discussed in detail in this section. Briefly, the developer
+provides their favourite implementation of some simulation concept as 
+a class. The functions and fields of this class are exposed to the MOOSE
+system through a stereotyped ClassInfo structure. With this, all of the
+MOOSE functionality becomes available to the new class.
+
 */
 
 /**
@@ -117,137 +128,4 @@ These steps are illustrated below:
 All content on a given "page" need not be in the same comment block, or even in
 the same file. This comment block can be moved to another file, and its content
 will still end up on the ProgrammersGuide page.
-*/
-
-/**
-\page AppProgInterface Applications Programming Interface, API.
-
-\section ClockScheduling Clocks, Ticks, and Scheduling
-\subsection ClockOverview	Overview
-Most of the computation in MOOSE occurs in a special function called 
-\e process,
-which is implemented in all object classes that advance their internal
-state over time. The role of Clocks and Ticks is to set up the sequence of
-calling \e process for different objects, which may have different intervals
-for updating their internal state. The design of scheduling in moose is
-similar to GENESIS.
-
-As a simple example, suppose we had six objects, which had to advance their
-internal state with the following intervals:
-\li \b A: 5
-\li \b B: 2
-\li \b C: 2
-\li \b D: 1
-\li \b E: 3
-\li \b F: 5
-
-Suppose we had to run this for 10 seconds. The desired order of updates 
-would be:
-
-\verbatim
-Time	Objects called
-1	D
-2	D,B,C
-3	D,E
-4	D,B,C
-5	D,A,F
-6	D,B,C,E
-7	D
-8	D,B,C
-9	D,E
-10	D,B,C,A,F
-\endverbatim
-
-\subsection ClockReinit	Reinit: Reinitializing state variables.
-In addition to advancing the simulation, the Clocks and Ticks play a closely
-related role in setting initial conditions. It is required that every object
-that has a \e process call, must have a matching \e reinit function. When the
-command \e doReinit is given from the shell, the simulation is reinitialized
-to its boundary conditions. To do so, the \e reinit function is called in the 
-same sequence that the \process would have been called at time 0 (zero).
-For the example above, this sequence would be:\n
-D,B,C,E,A,F
-
-In other words, the ordering is first by dt for the object, and second by 
-the sequence of the object in the list.
-
-During reinit, the object is expected to restore all state variables to their
-boundary condition. Objects typically also send out messages during reinit
-to specify this boundary condition value to dependent objects. For example,
-a compartment would be expected to send its initial \e Vm value out to a
-graph object to indicate its starting value.
-
-\subsection ClockSetup	Setting up scheduling
-The API for setting up scheduling is as follows:\n
-1. Create the objects to be scheduled.\n
-2. Create Clock Ticks for each time interval using
-
-\verbatim
-	doSetClock( TickNumber, dt ).
-\endverbatim
-
-	In many cases it is necessary to have a precise sequence of events
-	ocurring at the same time interval. In this case, set up two or more
-	Clock Ticks with the same dt but successive TickNumbers. They will
-	execute in the same order as their TickNumber. \n
-	Note that TickNumbers are unique. If you reuse a TickNumber, all that
-	will happen is that its previous value of dt will be overridden.
-	
-	Note also that dt can be any positive decimal number, and does not 
-	have to be a multiple of any other dt.
-
-3. Connect up the scheduled objects to their clock ticks:
-
-\verbatim
-	doUseClock( path, function, TickNumber )
-\endverbatim
-
-Here the \e path is a wildcard path that can specify any numer of objects.\n
-The \e function is the name of the \e process message that is to be used. This
-is provided because some objects may have multiple \e process messages.
-The \e TickNumber identifies which tick to use.
-
-Note that as soon as the \e doUseClock function is issued, both the 
-\e process and \e reinit functions are managed by the scheduler as discussed
-above.
-
-\subsection ClockSchedExample	Example of scheduling.
-As an example, here we set up the scheduling for the same 
-set of objects A to F we have discussed above.\n
-First we set up the clocks:
-
-\verbatim
-	doSetClock( 0, 1 );
-	doSetClock( 1, 2 );
-	doSetClock( 2, 3 );
-	doSetClock( 3, 5 );
-\endverbatim
-
-Now we connect up the relevant objects to them.
-
-\verbatim
-	doUseClock( "D", "process", 0 );
-	doUseClock( "B,C", "process", 1 );
-	doUseClock( "E", "process", 2 );
-	doUseClock( "A,F", "process", 3 );
-\endverbatim
-
-Next we initialize them:
-
-\verbatim
-	doReinit();
-\endverbatim
-
-During the \e doReinit call, the \e reinit function of the objects would be 
-called in the following sequence:
-\verbatim
-	D, B, C, E, A, F
-\endverbatim
-
-Finally, we run the calculation for 10 seconds:
-
-\verbatim
-	doStart( 10 );
-\endverbatim
-
 */

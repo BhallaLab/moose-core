@@ -14717,6 +14717,7 @@ Some things to do:
 - Gillespie method.
 - Thread-ify the ksolver
 - SBML reading
+- Scripting
 - With Niraj: hsolver
 - With Harsha and Chaitanya: Interface
 - Documentation
@@ -14729,9 +14730,15 @@ putting in figures for this. Checkin 2911.
 ============================================================================
 17 Aug.
 Subha suggests priorities for documentation:
-	Clocks
+	* Clocks
 	API
 	Building new classes.
 
 
-Wrote some documentation for Clocks. Put it in the API section.
+Wrote some documentation for Clocks. Put it in the API section. Checkin 2915.
+
+Wrote some documentation for Fields etc. Made a new file : doxygen-API.cpp
+for the API section. 
+
+
+============================================================================
