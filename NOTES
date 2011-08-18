@@ -14720,6 +14720,9 @@ Some things to do:
 - Scripting
 - With Niraj: hsolver
 - With Harsha and Chaitanya: Interface
+- Optimize
+- Test large-scale parallel sims
+- Reac-diff. See moose/threadMsg/msolve.
 - Documentation
 
 Started on documentation while things are still fresh. Figured out how to
@@ -14738,7 +14741,12 @@ Subha suggests priorities for documentation:
 Wrote some documentation for Clocks. Put it in the API section. Checkin 2915.
 
 Wrote some documentation for Fields etc. Made a new file : doxygen-API.cpp
-for the API section. 
-
+for the API section.  Checkin 2919.
 
 ============================================================================
+18 Aug
+Working on Gillespie method. I have a project to compute Kramer time for
+the DOCSS database entries, and this will help to do this with the new MOOSE.
+Restored some of the KinSparseMatrix functions used by the Gillespie
+calculations.
+

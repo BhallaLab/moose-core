@@ -110,7 +110,7 @@ ObjId oid, you would do:
                 Field< short >::set( oid, "abc", 123 );
 \endverbatim
 
-4. To get a field value "double pqr" on object obj:
+4. To get a field value "double pqr" on object oid:
 \verbatim
                 double x = Field< short >::get( oid, "pqr" );
 \endverbatim
@@ -141,6 +141,29 @@ element Id id, which has an array of the objects:
                 double x = LookupField< unsigned int, double >::get( objId, field, index );
                 LookupField< unsigned int, double >::set( objId, field, index, value );
 \endverbatim
+
+\section APIcalls API system calls
+\subsection FieldAccessOverview Overview
+There is a special set of calls on the Shell object, which function as the
+main MOOSE programmatic API. These calls are all prefixed with 'do'. Here is
+the list of functions:
+
+\li Id doCreate(  string type, Id parent, string name, vector< unsigned int > dimensions );
+\li bool doDelete( Id id )
+\li MsgId doAddMsg( const string& msgType, ObjId src, const string& srcField, ObjId dest, const string& destField);
+\li void doQuit();
+\li void doStart( double runtime );
+\li void doNonBlockingStart( double runtime );
+\li void doReinit();
+\li void doStop();
+\li void doTerminate();
+\li void doMove( Id orig, Id newParent );
+\li Id doCopyId orig, Id newParent, string newName, unsigned int n, bool copyExtMsgs);
+\li Id doFind( const string& path ) const
+\li void doSetClock( unsigned int tickNum, double dt )
+\li void doUseClock( string path, string field, unsigned int tick );
+\li Id doLoadModel( const string& fname, const string& modelpath );
+\li void doSyncDataHandler( Id elm, const string& sizeField, Id tgt );
 
 
 

@@ -73,7 +73,6 @@ void KinSparseMatrix::getGillespieDependence(
 	unsigned int row, vector< unsigned int >& deps
 ) const
 {
-	/*
 	deps.resize( 0 );
 	// vector< unsigned int > deps;
 	for ( unsigned int i = 0; i < nrows_; ++i ) {
@@ -99,7 +98,6 @@ void KinSparseMatrix::getGillespieDependence(
 			}
 		}
 	}
-	*/
 }
 
 /**
@@ -109,7 +107,6 @@ void KinSparseMatrix::getGillespieDependence(
 void KinSparseMatrix::fireReac( unsigned int reacIndex, vector< double >& S ) 
 	const
 {
-	/*
 	assert( ncolumns_ == S.size() && reacIndex < nrows_ );
 	unsigned int rowBeginIndex = rowStart_[ reacIndex ];
 	// vector< int >::const_iterator rowEnd = N_.begin() + rowStart_[ reacIndex + 1];
@@ -122,7 +119,6 @@ void KinSparseMatrix::fireReac( unsigned int reacIndex, vector< double >& S )
 
 	for ( vector< int >::const_iterator i = rowBegin; i != rowEnd; ++i )
 		S[ *molIndex++ ] += *i;
-	*/
 }
 
 /**
@@ -133,7 +129,6 @@ void KinSparseMatrix::fireReac( unsigned int reacIndex, vector< double >& S )
  */
 void KinSparseMatrix::truncateRow( unsigned int maxColumnIndex )
 {
-	/*
 	rowTruncated_.resize( nrows_, 0 );
 	if ( colIndex_.size() == 0 )
 		return;
@@ -149,7 +144,6 @@ void KinSparseMatrix::truncateRow( unsigned int maxColumnIndex )
 		}
 		rowTruncated_[ i ] = endCol;
 	}
-	*/
 }
 
 
