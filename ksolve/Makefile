@@ -22,6 +22,7 @@ OBJ = \
 	ZombieSumFunc.o \
 	RateTerm.o \
 	FuncTerm.o \
+	GssaStoich.o	\
 	testKsolve.o	\
 
 	
@@ -58,6 +59,7 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 Stoich.o:	ZombiePool.h ZombieReac.h ZombieBufPool.h ZombieEnz.h ZombieMMenz.h ../kinetics/Pool.h ../kinetics/Reac.h ../kinetics/BufPool.h ../kinetics/FuncPool.h ../kinetics/Enz.h ../kinetics/MMenz.h ../mesh/Boundary.h ../mesh/ChemMesh.h
+GssaStoich.o:	GssaStoich.h ZombiePool.h ZombieReac.h ZombieBufPool.h ZombieEnz.h ZombieMMenz.h ../kinetics/Pool.h ../kinetics/Reac.h ../kinetics/BufPool.h ../kinetics/FuncPool.h ../kinetics/Enz.h ../kinetics/MMenz.h ../mesh/Boundary.h ../mesh/ChemMesh.h ../randnum/randnum.h
 KinSparseMatrix.o:	KinSparseMatrix.h ../basecode/SparseMatrix.h
 ZombiePool.o:	ZombiePool.h
 ZombieBufPool.o:	ZombiePool.h ZombieBufPool.h

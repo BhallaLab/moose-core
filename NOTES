@@ -14748,5 +14748,6 @@ for the API section.  Checkin 2919.
 Working on Gillespie method. I have a project to compute Kramer time for
 the DOCSS database entries, and this will help to do this with the new MOOSE.
 Restored some of the KinSparseMatrix functions used by the Gillespie
-calculations.
+calculations. Checkin 2920.
 
+============================================================================
