@@ -36,10 +36,14 @@
 
 #define EPSILON 1e-15
 
-static SrcFinfo1< Id > plugin( 
+static SrcFinfo1< Id >* plugin()
+{
+	static SrcFinfo1< Id > ret(
 		"plugin", 
 		"Sends out Stoich Id so that plugins can directly access fields and functions"
 	);
+	return &ret;
+}
 
 const Cinfo* Stoich::initCinfo()
 {
@@ -104,7 +108,7 @@ const Cinfo* Stoich::initCinfo()
 		&useOneWay,		// Value
 		&nVarPools,		// Value
 		&path,			// Value
-		&plugin,		// SrcFinfo
+		plugin(),		// SrcFinfo
 		&portFinfo,		// FieldElementFinfo
 		&proc,			// SharedFinfo
 	};
