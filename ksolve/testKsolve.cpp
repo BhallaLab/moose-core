@@ -128,3 +128,43 @@ void testKsolveZombify( string modelFile )
 	uret -= tv0.tv_usec;
 	return sret + 1e-6 * uret;
 }
+
+void testGsolver(string modelName, string plotName, double plotDt, double simTime )
+{
+	ReadKkit rk;
+	Id base = rk.read( modelName + ".g" , "model", Id(), "GssaStoich" );
+	assert( base != Id() );
+	// Id kinetics = s->doFind( "/kinetics" );
+
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< unsigned int > dims( 1, 1 );
+	Id stoich = base;
+
+	s->doSetClock( 0, plotDt );
+	s->doSetClock( 1, plotDt );
+	s->doSetClock( 2, plotDt );
+	s->doSetClock( 3, plotDt );
+
+	string  plotpath = rk.getBasePath() + "/graphs/##[TYPE=Table]," +
+		rk.getBasePath() + "/moregraphs/##[TYPE=Table]";
+	s->doUseClock( base.path(), "process", 0 );
+	s->doUseClock( plotpath, "process", 2 );
+	s->doReinit();
+	s->doStart( simTime );
+
+	string plotfile = modelName + ".out";
+	if ( plotName.length() > 0 ) {
+		Id plotId( string( "/model/graphs/conc1/" ) + plotName );
+		assert( plotId != Id() );
+		SetGet2< string, string>::set( plotId, "xplot", plotfile, plotName);
+		/*
+		bool ok = SetGet::strSet( plotId, "compareXplot",
+			modelName + ".plot,/graphs/" + plotName + ",rmsr" );
+		assert( ok );
+		double rmsr = Field< double >::get( plotId, "outputValue" );
+		assert( rmsr < TOLERANCE );
+		*/
+	}
+	s->doDelete( base );
+	cout << "." << flush;
+}
