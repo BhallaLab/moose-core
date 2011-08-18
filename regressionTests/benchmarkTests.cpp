@@ -19,6 +19,9 @@ extern void rtHHnetwork( unsigned int numCopies );
 
 extern void perfTestMarkovSolver();			
 
+extern void testGsolver( string modelName, string plotName,
+	double plotDt, double simtime );
+
 void testKsolve()
 {
 	double ktime1 = testGslIntegrator( "Kholodenko", "conc1/MAPK-PP.Co",

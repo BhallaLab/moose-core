@@ -72,6 +72,13 @@ const Cinfo* GssaStoich::initCinfo()
 	///////////////////////////////////////////////////////
 	// Field definitions
 	///////////////////////////////////////////////////////
+	static ElementValueFinfo< GssaStoich, string > path(
+		"path",
+		"Path of reaction system to take over and solve",
+		&GssaStoich::setPath,
+		&GssaStoich::getPath
+	);
+
 	static ValueFinfo< GssaStoich, string > method( 
 		"method", 
 		"Numerical method to use for the GssaStoich. The default"
@@ -80,9 +87,11 @@ const Cinfo* GssaStoich::initCinfo()
 		&GssaStoich::getMethod
 	);
 
+	///////////////////////////////////////////////////////
 	//These are the fields of the stoich class
 	static Finfo* gssaStoichFinfos[] =
 	{
+		&path,
 		&method,
 		&proc,
 	};
@@ -130,11 +139,17 @@ string GssaStoich::getMethod() const
 {
 	return method_;
 }
+
 void GssaStoich::setMethod( string method )
 {
 	method_ = method;
 }
 
+void GssaStoich::setPath( const Eref& e, const Qinfo* q, string path )
+{
+	Stoich::setPath( e, q, path );
+	rebuildMatrix();
+}
 
 ///////////////////////////////////////////////////
 // Setup funcs

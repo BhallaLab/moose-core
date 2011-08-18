@@ -14750,4 +14750,13 @@ the DOCSS database entries, and this will help to do this with the new MOOSE.
 Restored some of the KinSparseMatrix functions used by the Gillespie
 calculations. Checkin 2920.
 
+Compiled in GssaStoich class. Yet to test. Checkin 2921.
+Set up test in regression test directory. Long way to go.
+
+Amazingly, after a few relatively small fixes, it generates a 
+reasonable-looking curve for the reaction A <===> B.
+
+Need to convert this into a proper regression test with validation
+of output. This will require seeding the rng with a known value.
+
 ============================================================================

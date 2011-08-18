@@ -105,7 +105,7 @@ string ReadKkit::getBasePath() const
 Id ReadKkit::read(
 	const string& filename, 
 	const string& modelname,
-	Id pa )
+	Id pa, const string& solverClass )
 {
 	ifstream fin( filename.c_str() );
 	if (!fin){
@@ -115,7 +115,7 @@ Id ReadKkit::read(
 
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 	vector< unsigned int > dims( 1,1 );
-	Id base = s->doCreate( "Stoich", pa, modelname, dims, true );
+	Id base = s->doCreate( solverClass, pa, modelname, dims, true );
 	assert( base != Id() );
 
 	baseId_ = base;
