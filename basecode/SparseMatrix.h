@@ -409,7 +409,7 @@ template < class T > class SparseMatrix
 			cout << endl;
 		}
 
-	private:
+	protected:
 		unsigned int nrows_;
 		unsigned int ncolumns_;
 		vector< T > N_;	/// Non-zero entries in the SparseMatrix.
