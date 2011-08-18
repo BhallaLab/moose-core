@@ -37,7 +37,7 @@ class ReadKkit
 		void innerRead( ifstream& fin );
 		ParseMode readInit( const string& line );
 		Id read( const string& filename, const string& cellname, 
-			Id parent );
+			Id parent, const string& solverClass = "Stoich" );
 		void readData( const string& line );
 		void undump( const vector< string >& args );
 

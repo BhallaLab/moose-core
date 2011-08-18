@@ -32,6 +32,9 @@ class GssaStoich: public Stoich
 		string getMethod() const;
 		void setMethod( string method );
 
+		// Overrides the Stoich version.
+		void setPath( const Eref& e, const Qinfo* q, string path );
+
 		///////////////////////////////////////////////////
 		// Functions used by the GillespieIntegrator
 		///////////////////////////////////////////////////

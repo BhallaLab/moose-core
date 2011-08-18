@@ -16,6 +16,9 @@ void rtFindModelType();
 void rtReadKkit();
 void rtHHnetwork( unsigned int numCopies );
 
+extern void testGsolver( string modelName, string plotName,
+	double plotDt, double simtime );
+
 void regressionTests()
 {
 	char* cwd = get_current_dir_name();
@@ -31,5 +34,7 @@ void regressionTests()
 	rtFindModelType();
 	rtReadKkit();
 	rtHHnetwork( 10 );
+
+	testGsolver( "reac", "A.Co", 0.1, 100 );
 	cout << endl;
 }
