@@ -417,9 +417,10 @@ void testStatsReduce()
 	x = Field< double >::get( statsid, "sdev" );
 	assert( doubleEq( x, sqrt( ( sum * sum - sumsq ) /num ) ) );
 
-	cout << "." << flush;
 	delete synId();
 	delete i2();
+	shell->doDelete( statsid );
+	cout << "." << flush;
 }
 
 void testMpiStatsReduce()
@@ -512,6 +513,7 @@ void testMpiStatsReduce()
 
 	delete synId();
 	delete i2();
+	shell->doDelete( statsid );
 	cout << "." << flush;
 }
 
