@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Fri Aug 19 15:25:00 2011 (+0530)
+// Last-Updated: Fri Aug 19 15:47:00 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 3995
+//     Update #: 4016
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -439,9 +439,12 @@ extern "C" {
         if (!PyArg_ParseTuple(args, ":_pymoose_Id_delete")){
             return NULL;
         }
+        if (self->_id == Id()){
+            PyErr_SetString(PyExc_ValueError, "Cannot delete moose shell.");
+            return NULL;
+        }
         getShell().doDelete(self->_id);
         self->_id = Id();
-        Py_DECREF((PyObject*)self);
         Py_RETURN_NONE;
     }
     static PyObject * _pymoose_Id_repr(_Id * self)
@@ -1260,6 +1263,10 @@ extern "C" {
         if (!PyArg_ParseTuple(args, "OO:_pymoose_move", &src, &dest)){
             return NULL;
         }
+        if (((_Id*)src)->_id == Id()){
+            PyErr_SetString(PyExc_ValueError, "Cannot move moose shell");
+            return NULL;
+        }
         getShell().doMove(((_Id*)src)->_id, ((_Id*)dest)->_id);
         Py_RETURN_NONE;
     }
@@ -1270,8 +1277,11 @@ extern "C" {
         if (!PyArg_ParseTuple(args, "O:_pymoose_delete", &obj)){
             return NULL;
         }
-        Id id = ((_Id*)obj)->_id;
-        getShell().doDelete(id);
+        if (((_Id*)obj)->_id == Id()){
+            PyErr_SetString(PyExc_ValueError, "Cannot delete moose shell.");
+            return NULL;
+        }
+        getShell().doDelete(((_Id*)obj)->_id);
         ((_Id*)obj)->_id = Id();
         Py_RETURN_NONE;
     }
