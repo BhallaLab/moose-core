@@ -43,7 +43,7 @@ void rtReadKkit()
 	assert( kineticId != Id() );
 	unsigned int numVarMols = Field< unsigned int >::get( 
 		kineticId, "nVarPools" );
-	// assert ( numVarMols == 15 );
+	assert ( numVarMols == 15 );
 
 	Id gsl = shell->doCreate( "GslIntegrator", kineticId, "gsl", dims );
 	bool ret = SetGet1< Id >::set( gsl, "stoich", kineticId );

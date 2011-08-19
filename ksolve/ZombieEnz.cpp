@@ -192,22 +192,34 @@ double ZombieEnz::getK1( const Eref& e, const Qinfo* q ) const
 
 void ZombieEnz::setK2( const Eref& e, const Qinfo* q, double v )
 {
-	rates_[ convertIdToReacIndex( e.id() ) ]->setR2( v );
+	if ( useOneWay_ )
+		rates_[ convertIdToReacIndex( e.id() ) + 1 ]->setR1( v );
+	else
+		rates_[ convertIdToReacIndex( e.id() ) ]->setR2( v );
 }
 
 double ZombieEnz::getK2( const Eref& e, const Qinfo* q ) const
 {
-	return rates_[ convertIdToReacIndex( e.id() ) ]->getR2();
+	if ( useOneWay_ )
+		return rates_[ convertIdToReacIndex( e.id() ) + 1 ]->getR1();
+	else
+		return rates_[ convertIdToReacIndex( e.id() ) ]->getR2();
 }
 
 void ZombieEnz::setK3( const Eref& e, const Qinfo* q, double v )
 {
-	rates_[ convertIdToReacIndex( e.id() ) + 1 ]->setR1( v );
+	if ( useOneWay_ )
+		rates_[ convertIdToReacIndex( e.id() ) + 2 ]->setR1( v );
+	else
+		rates_[ convertIdToReacIndex( e.id() ) + 1 ]->setR1( v );
 }
 
 double ZombieEnz::getK3( const Eref& e, const Qinfo* q ) const
 {
-	return rates_[ convertIdToReacIndex( e.id() ) + 1 ]->getR1();
+	if ( useOneWay_ )
+		return rates_[ convertIdToReacIndex( e.id() ) + 2 ]->getR1();
+	else
+		return rates_[ convertIdToReacIndex( e.id() ) + 1 ]->getR1();
 }
 
 //////////////////////////////////////////////////////////////
@@ -272,8 +284,14 @@ void ZombieEnz::zombify( Element* solver, Element* orig )
 	ZeroOrder* r3 = z->makeHalfReaction( orig, enz->getK3(), cplx, Id() );
 
 	unsigned int rateIndex = z->convertIdToReacIndex( orig->id() );
-	z->rates_[ rateIndex ] = new BidirectionalReaction( r1, r2 );
-	z->rates_[ rateIndex + 1 ] = r3;
+	if ( z->useOneWay_ ) {
+		z->rates_[ rateIndex ] = r1;
+		z->rates_[ rateIndex + 1 ] = r1;
+		z->rates_[ rateIndex + 2 ] = r3;
+	} else {
+		z->rates_[ rateIndex ] = new BidirectionalReaction( r1, r2 );
+		z->rates_[ rateIndex + 1 ] = r3;
+	}
 
 	vector< unsigned int > poolIndex;
 	numReactants = r1->getReactants( poolIndex ); // Substrates
@@ -284,20 +302,24 @@ void ZombieEnz::zombify( Element* solver, Element* orig )
 	numReactants = r2->getReactants( poolIndex );
 	assert( numReactants == 1 ); // Should only be cplx as the only product
 	unsigned int cplxPool = poolIndex[0];
-	z->N_.set( cplxPool, rateIndex, 1 );
+	if ( z->useOneWay_ )
+		z->N_.set( cplxPool, rateIndex + 1, 1 );
+	else
+		z->N_.set( cplxPool, rateIndex, 1 );
 
 	// Now assign reaction 3. The complex is the only substrate here.
-	z->N_.set( cplxPool, rateIndex + 1, -1 );
+	unsigned int ritemp = z->useOneWay_ ? rateIndex + 2 : rateIndex + 1;
+	z->N_.set( cplxPool, ritemp, -1 );
 	// For the products, we go to the prd list directly.
 	numReactants = orig->getOutputs( pools, prd ); 
 	for ( unsigned int i = 0; i < numReactants; ++i ) {
 		unsigned int j = z->convertIdToPoolIndex( pools[i] );
-		int temp = z->N_.get( j, rateIndex + 1 );
-		z->N_.set( j, rateIndex + 1, temp + 1 );
+		int temp = z->N_.get( j, ritemp );
+		z->N_.set( j, ritemp, temp + 1 );
 	}
 	// Enz is also a product here.
 	unsigned int enzPool = z->convertIdToPoolIndex( enzId );
-	z->N_.set( enzPool, rateIndex + 1, 1 );
+	z->N_.set( enzPool, ritemp, 1 );
 
 	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
 	orig->zombieSwap( zombieEnzCinfo, dh );
