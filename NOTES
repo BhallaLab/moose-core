@@ -14755,8 +14755,24 @@ Set up test in regression test directory. Long way to go.
 
 Amazingly, after a few relatively small fixes, it generates a 
 reasonable-looking curve for the reaction A <===> B.
+Checkin 2922.
 
 Need to convert this into a proper regression test with validation
 of output. This will require seeding the rng with a known value.
 
+Reexamined output, compared with GENESIS. The output is obviously wrong: isn't
+fluctuating about mean.
+There were issues because the useOneWay_ was not being used.
+Struggling now to fix this, bugs persist. See ZombieReac.cpp:237.
+
 ============================================================================
+19 Aug 2011
+Still struggling with useOneWay. The obvious updates have been applied to the
+code to build the Stoich. To get it sorted, I'm running the regular
+Kholodenko.g regression tests using the ksolve, with the useOneWay option. 
+It fails to handle the reverse reaction.
+
+Turned out to be a conceptual problem. When I have one-way reacs, I need to
+set up both the substrate and product entries for each one-way reac in the
+matrix. Did this. Both the ksolve and gsolve tests now seem sensible. Still
+need to apply to regular enzymes.

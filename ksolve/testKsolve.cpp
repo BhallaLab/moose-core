@@ -153,18 +153,26 @@ void testGsolver(string modelName, string plotName, double plotDt, double simTim
 	s->doStart( simTime );
 
 	string plotfile = modelName + ".out";
+	Id tempId( "/model/graphs/conc1" );
+	vector< Id > kids = Field< vector< Id > >::get( tempId, "children" );
+	assert( kids.size() > 0 );
+	for ( unsigned int i = 0 ; i < kids.size(); ++i ) {
+		string str = Field< string >::get( kids[i], "name" );
+		SetGet2< string, string>::set( kids[i], "xplot", plotfile, str);
+	}
+
+	/*
 	if ( plotName.length() > 0 ) {
 		Id plotId( string( "/model/graphs/conc1/" ) + plotName );
 		assert( plotId != Id() );
 		SetGet2< string, string>::set( plotId, "xplot", plotfile, plotName);
-		/*
 		bool ok = SetGet::strSet( plotId, "compareXplot",
 			modelName + ".plot,/graphs/" + plotName + ",rmsr" );
 		assert( ok );
 		double rmsr = Field< double >::get( plotId, "outputValue" );
 		assert( rmsr < TOLERANCE );
-		*/
 	}
+	*/
 	s->doDelete( base );
 	cout << "." << flush;
 }

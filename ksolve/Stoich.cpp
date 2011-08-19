@@ -131,6 +131,8 @@ static const Cinfo* stoichCinfo = Stoich::initCinfo();
 
 Stoich::Stoich()
 	: 
+		useOneWay_( 0 ),
+		path_( "" ),
 		totPortSize_( 0 ),
 		objMapStart_( 0 ),
 		numVarPools_( 0 ),
@@ -317,12 +319,25 @@ void Stoich::allocateModel( const vector< Id >& elist )
 			bufPools.push_back( *i );
 		} else if ( ei->cinfo() == funcPoolCinfo ) {
 			funcPools.push_back( *i );
-		} else if ( ei->cinfo() == reacCinfo || ei->cinfo() == mmEnzCinfo ){
+		} else if ( ei->cinfo() == mmEnzCinfo ){
 			objMap_[ i->value() - objMapStart_ ] = numReac_;
 			++numReac_;
+		} else if ( ei->cinfo() == reacCinfo ) {
+			if ( useOneWay_ ) {
+				objMap_[ i->value() - objMapStart_ ] = numReac_;
+				numReac_ += 2;
+			} else {
+				objMap_[ i->value() - objMapStart_ ] = numReac_;
+				++numReac_;
+			}
 		} else if ( ei->cinfo() == enzCinfo ) {
-			objMap_[ i->value() - objMapStart_ ] = numReac_;
-			numReac_ += 2;
+			if ( useOneWay_ ) {
+				objMap_[ i->value() - objMapStart_ ] = numReac_;
+				numReac_ += 3;
+			} else {
+				objMap_[ i->value() - objMapStart_ ] = numReac_;
+				numReac_ += 2;
+			}
 		} else if ( ei->cinfo() == sumFuncCinfo ){
 			objMap_[ i->value() - objMapStart_ ] = numFunc;
 			++numFunc;

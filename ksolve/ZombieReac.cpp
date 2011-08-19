@@ -158,12 +158,18 @@ double ZombieReac::getKf( const Eref& e, const Qinfo* q ) const
 
 void ZombieReac::setKb( const Eref& e, const Qinfo* q, double v )
 {
-	rates_[ convertIdToReacIndex( e.id() ) ]->setR2( v );
+	if ( useOneWay_ )
+		rates_[ convertIdToReacIndex( e.id() ) + 1 ]->setR1( v );
+	else
+		rates_[ convertIdToReacIndex( e.id() ) ]->setR2( v );
 }
 
 double ZombieReac::getKb( const Eref& e, const Qinfo* q ) const
 {
-	return rates_[ convertIdToReacIndex( e.id() ) ]->getR2();
+	if ( useOneWay_ )
+		return rates_[ convertIdToReacIndex( e.id() ) + 1 ]->getR1();
+	else
+		return rates_[ convertIdToReacIndex( e.id() ) ]->getR2();
 }
 
 //////////////////////////////////////////////////////////////
@@ -217,19 +223,46 @@ void ZombieReac::zombify( Element* solver, Element* orig )
 	ZeroOrder* reverse = z->makeHalfReaction( orig, reac->getKb(), prd );
 
 	unsigned int rateIndex = z->convertIdToReacIndex( orig->id() );
-	z->rates_[ rateIndex ] = new BidirectionalReaction( forward, reverse );
-
-	vector< unsigned int > molIndex;
-	unsigned int numReactants = forward->getReactants( molIndex );
-	for ( unsigned int i = 0; i < numReactants; ++i ) {
-		int temp = z->N_.get( molIndex[i], rateIndex );
-		z->N_.set( molIndex[i], rateIndex, temp - 1 );
+	unsigned int revRateIndex = rateIndex;
+	if ( z->useOneWay_ ) {
+		z->rates_[ rateIndex ] = forward;
+		revRateIndex = rateIndex + 1;
+		z->rates_[ revRateIndex ] = reverse;
+	} else {
+		z->rates_[ rateIndex ] = 
+			new BidirectionalReaction( forward, reverse );
 	}
 
-	numReactants = reverse->getReactants( molIndex );
-	for ( unsigned int i = 0; i < numReactants; ++i ) {
-		int temp = z->N_.get( molIndex[i], rateIndex );
-		z->N_.set( molIndex[i], rateIndex, temp + 1 );
+	vector< unsigned int > molIndex;
+
+	if ( z->useOneWay_ ) {
+		unsigned int numReactants = forward->getReactants( molIndex );
+		for ( unsigned int i = 0; i < numReactants; ++i ) {
+			int temp = z->N_.get( molIndex[i], rateIndex );
+			z->N_.set( molIndex[i], rateIndex, temp - 1 );
+			temp = z->N_.get( molIndex[i], revRateIndex );
+			z->N_.set( molIndex[i], revRateIndex, temp + 1 );
+		}
+
+		numReactants = reverse->getReactants( molIndex );
+		for ( unsigned int i = 0; i < numReactants; ++i ) {
+			int temp = z->N_.get( molIndex[i], rateIndex );
+			z->N_.set( molIndex[i], rateIndex, temp + 1 );
+			temp = z->N_.get( molIndex[i], revRateIndex );
+			z->N_.set( molIndex[i], revRateIndex, temp - 1 );
+		}
+	} else {
+		unsigned int numReactants = forward->getReactants( molIndex );
+		for ( unsigned int i = 0; i < numReactants; ++i ) {
+			int temp = z->N_.get( molIndex[i], rateIndex );
+			z->N_.set( molIndex[i], rateIndex, temp - 1 );
+		}
+
+		numReactants = reverse->getReactants( molIndex );
+		for ( unsigned int i = 0; i < numReactants; ++i ) {
+			int temp = z->N_.get( molIndex[i], revRateIndex );
+			z->N_.set( molIndex[i], rateIndex, temp + 1 );
+		}
 	}
 
 	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
