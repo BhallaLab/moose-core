@@ -14778,10 +14778,14 @@ matrix. Did this. Both the ksolve and gsolve tests now seem sensible. Still
 need to apply to regular enzymes. Checkin 2923.
 
 Now I've gone through with the cleanup for one-way reacs, applied to 
-regular enzymes. Need a few more regression or unit tests:
+regular enzymes.  Checkin 2924.
+Need a few more regression or unit tests:
 - Check a reaction system involving both reacs and enzymes with the oneWay 
 	flag set first to 0 and then to 1 and confirm results are the same.
 - Do a proper test of the Gillespie system, again using both reacs and enzymes,
 	and confirm that the output is reasonable both in mean and in stats.
 
+
+As a small cleanup, I located some leftover objects created during the unit
+tests but never deleted. Now deleted.
 ============================================================================
