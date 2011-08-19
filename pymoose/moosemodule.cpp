@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Fri Aug 19 15:47:00 2011 (+0530)
+// Last-Updated: Fri Aug 19 16:04:00 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4016
+//     Update #: 4018
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -1247,7 +1247,10 @@ extern "C" {
             PyErr_SetString(PyExc_TypeError, "Destination must be instance of Id.");
             return NULL;
         }
-        
+        if (((_Id*)src)->_id == Id()){
+            PyErr_SetString(PyExc_ValueError, "Cannot make copy of moose shell.");
+            return NULL;
+        }
         _Id * tgt = PyObject_New(_Id, &IdType);
         
         tgt->_id = getShell().doCopy(((_Id*)src)->_id, ((_Id*)dest)->_id, string(newName), num, toGlobal, copyExtMsgs);
