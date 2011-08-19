@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Thu Jun 23 14:57:06 2011 (+0530)
+# Last-Updated: Fri Aug 19 15:37:08 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 718
+#     Update #: 727
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -445,6 +445,13 @@ def move(src, dest):
         dest = dest._id
     _moose.move(src, dest)
 
+def delete(target):
+    if isinstance(target, NeutralArray):
+        target = target._id
+    if not isinstance(target, Id):
+        raise TypeError('Only Id or Array objects can be deleted: received %s' % (target.__class__.__name__))
+    _moose.delete(target)
+    
 def setCwe(element):
     if isinstance(element, NeutralArray):
         _moose.setCwe(element._id)
