@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Jun 15 11:51:00 2011 (+0530)
+// Last-Updated: Fri Aug 19 14:40:21 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 249
+//     Update #: 251
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -70,7 +70,7 @@ extern "C" {
     static void _pymoose_Id_dealloc(_Id * self);
     static PyObject * _pymoose_Id_repr(_Id * self);
     static PyObject * _pymoose_Id_str(_Id * self);
-    static PyObject * _pymoose_Id_destroy(_Id * self, PyObject * args);
+    static PyObject * _pymoose_Id_delete(_Id * self, PyObject * args);
     static PyObject * _pymoose_Id_getValue(_Id * self, PyObject * args);
     static PyObject * _pymoose_Id_getPath(_Id * self, PyObject * args);
     // static PyObject * _pymoose_Id_syncDataHandler(_Id * self, PyObject * args);
@@ -119,6 +119,7 @@ extern "C" {
     static PyObject * _pymoose_getCwe(PyObject * dummy, PyObject * args);
     static PyObject * _pymoose_copy(PyObject * dummy, PyObject * args, PyObject * kwargs);
     static PyObject * _pymoose_move(PyObject * dummy, PyObject * args);
+    static PyObject * _pymoose_delete(PyObject * dummy, PyObject * args);
     static PyObject * _pymoose_connect(PyObject * dummy, PyObject * args);
     static PyObject * _pymoose_getFieldDict(PyObject * dummy, PyObject * args);    
     PyMODINIT_FUNC init_moose();

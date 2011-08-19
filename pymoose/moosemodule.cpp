@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Jun 15 11:50:46 2011 (+0530)
+// Last-Updated: Fri Aug 19 15:25:00 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 3973
+//     Update #: 3995
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -88,8 +88,8 @@ extern "C" {
     static PyMethodDef IdMethods[] = {
         // {"init", (PyCFunction)_pymoose_Id_init, METH_VARARGS,
         //  "Initialize a Id object."},
-        {"destroy", (PyCFunction)_pymoose_Id_destroy, METH_VARARGS,
-         "destroy the underlying moose element"},
+        {"delete", (PyCFunction)_pymoose_Id_delete, METH_VARARGS,
+         "delete the underlying moose element"},
         {"getValue", (PyCFunction)_pymoose_Id_getValue, METH_VARARGS,
          "return integer representation of the id of the element."},
         // {"syncDataHandler", (PyCFunction)_pymoose_Id_syncDataHandler, METH_VARARGS,
@@ -170,6 +170,7 @@ extern "C" {
     static PyMethodDef MooseMethods[] = {
         {"copy", (PyCFunction)_pymoose_copy, METH_VARARGS|METH_KEYWORDS, "Copy a Id object to a target."},
         {"move", (PyCFunction)_pymoose_move, METH_VARARGS, "Move a Id object to a destination."},
+        {"delete", (PyCFunction)_pymoose_delete, METH_VARARGS, "Delete the moose object."},
         {"useClock", (PyCFunction)_pymoose_useClock, METH_VARARGS, "Schedule objects on a specified clock"},
         {"setClock", (PyCFunction)_pymoose_setClock, METH_VARARGS, "Set the dt of a clock."},
         {"start", (PyCFunction)_pymoose_start, METH_VARARGS, "Start simulation"},
@@ -433,12 +434,13 @@ extern "C" {
     // ObjId will destroy the containing element and invalidate all
     // the other ObjId with the same Id.
     // 2011-03-28 13:44:49 (+0530)
-    static PyObject * _pymoose_Id_destroy(_Id * self, PyObject * args)
+    static PyObject * _pymoose_Id_delete(_Id * self, PyObject * args)
     {
-        if (!PyArg_ParseTuple(args, ":_pymoose_Id_destroy")){
+        if (!PyArg_ParseTuple(args, ":_pymoose_Id_delete")){
             return NULL;
         }
-        self->_id.destroy();        
+        getShell().doDelete(self->_id);
+        self->_id = Id();
         Py_DECREF((PyObject*)self);
         Py_RETURN_NONE;
     }
@@ -1262,6 +1264,17 @@ extern "C" {
         Py_RETURN_NONE;
     }
 
+    static PyObject * _pymoose_delete(PyObject * dummy, PyObject * args)
+    {
+        PyObject * obj;
+        if (!PyArg_ParseTuple(args, "O:_pymoose_delete", &obj)){
+            return NULL;
+        }
+        Id id = ((_Id*)obj)->_id;
+        getShell().doDelete(id);
+        ((_Id*)obj)->_id = Id();
+        Py_RETURN_NONE;
+    }
 
     static PyObject * _pymoose_useClock(PyObject * dummy, PyObject * args)
     {
