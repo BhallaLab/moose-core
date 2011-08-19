@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Mar 26 22:41:37 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Aug 17 17:43:41 2011 (+0530)
+// Last-Updated: Fri Aug 19 14:26:09 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 135
+//     Update #: 137
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -263,6 +263,7 @@ void finalize()
 {
     cout << "In pymoose_finalize()" << endl;
     if (!getShell().isSingleThreaded()){
+        getShell().doQuit();
         cout << "Joining threads." << endl;
         getShell().joinThreads();
         Qinfo::freeMutex();
