@@ -86,7 +86,7 @@ class ReadCspace
 
 		void printEnz( Id id, Id cplx, double k1, double k2, double k3);
 
-		void readModelString( const string& model,
+		Id readModelString( const string& model,
 			const string& modelname, Id pa, const string& solverClass );
 
 		void build( const char* name );
