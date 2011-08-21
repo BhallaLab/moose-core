@@ -14787,5 +14787,16 @@ Need a few more regression or unit tests:
 
 
 As a small cleanup, I located some leftover objects created during the unit
-tests but never deleted. Now deleted.
+tests but never deleted. Now deleted. Checkin 2925.
+
+In order to deal with some of the DOCSS models, I want to resurrect the code
+to load in those models. Turns out to be in an archaic version of MOOSE,
+dating from 2006, in file conv_cspace.cpp. Brought it over to kinetics
+directory to refactor.
+
+Currently at ReadCspace.cpp:333.
+============================================================================
+21 Aug 2011
+Compiled in ReadCspace. Yet to test.
+
 ============================================================================
