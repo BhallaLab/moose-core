@@ -81,14 +81,14 @@ void ReadCspace::printEnz( Id id, Id cplx, double k1, double k2, double k3)
 
 // Model string always includes topology, after that the parameters
 // are filled in according to how many there are.
-void ReadCspace::readModelString( const string& model,
+Id ReadCspace::readModelString( const string& model,
 	const string& modelname, Id pa, const string& solverClass )
 {
 	unsigned long pos = model.find_first_of( "|" );
 	if ( pos == string::npos ) {
 		cerr << "ReadCspace::readModelString: Error: model undefined in\n";
 		cerr << model << "\n";
-		return;
+		return Id();
 	}
 	mol_.resize( 0 );
 	molseq_.resize( 0 );
@@ -124,6 +124,7 @@ void ReadCspace::readModelString( const string& model,
 	}
 
 	deployParameters();
+	return base_;
 }
 /////////////////////////////////////////////////////////////////////
 //	From reacdef.cpp in CSPACE:
@@ -306,11 +307,15 @@ void ReadCspace::deployParameters( )
 
 void ReadCspace::testReadModel( )
 {
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	// cout << "Testing ReadCspace::readModelString()\n";
-	readModelString( "|Habc|Lbca|", "mod1", Id(), "Stoich" );
+	Id modelId = readModelString( "|Habc|Lbca|", "mod1", Id(), "Stoich" );
 	assert( mol_.size() == 3 );
 	assert( reac_.size() == 2 );
-	readModelString( "|AabX|BbcX|CcdX|DdeX|Eefg|Ffgh|Gghi|Hhij|Iijk|Jjkl|Kklm|Llmn| 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 13.0 14.0 101 102 201 202 301 302 401 402 501 502 601 602 701 702 801 802 901 902 1001 1002 1101 1102 1201 1202",
+
+	shell->doDelete( modelId );
+
+	modelId = readModelString( "|AabX|BbcX|CcdX|DdeX|Eefg|Ffgh|Gghi|Hhij|Iijk|Jjkl|Kklm|Llmn| 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 13.0 14.0 101 102 201 202 301 302 401 402 501 502 601 602 701 702 801 802 901 902 1001 1002 1101 1102 1201 1202",
 		"kinetics", Id(), "Stoich" );
 	assert( mol_.size() == 14 );
 	assert( reac_.size() == 12 );
@@ -400,4 +405,5 @@ void ReadCspace::testReadModel( )
 	r1 = Field< double >::get( tempL, "k3");
 	r2 = Field< double >::get( tempL, "Km");
 	assert( doubleEq( r1, 1201 ) && doubleEq( r2, 1202 ) );
+	shell->doDelete( modelId );
 }
