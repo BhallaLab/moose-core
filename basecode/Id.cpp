@@ -84,6 +84,12 @@ Element* Id::operator()() const
 	return elements()[ id_ ];
 }
 
+/// Synonym for Id::operator()()
+Element* Id::element() const
+{
+	return elements()[ id_ ];
+}
+
 /*
 unsigned int Id::index() const 
 {
