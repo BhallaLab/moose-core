@@ -85,6 +85,13 @@ class Id
 		 */
 		Element* operator()() const;
 
+		/**
+		 * Returns the Element pointed to by the Id.
+		 * Perhaps cleaner to use than operator()() as it is an explicit 
+		 * function.
+		 */
+		Element* element() const;
+
 //		unsigned int index() const;
 
 		/**
