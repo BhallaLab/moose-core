@@ -13,5 +13,6 @@ enum ModelType {
 	SBML,
 	NEUROML,
 	NINEML,
-	SEDML
+	SEDML,
+	CSPACE
 };

@@ -12,22 +12,28 @@
 #include "Shell.h"
 #include "LoadModels.h"
 
+extern ModelType findModelType( string filename, ifstream& fin, 
+	string& line );
 
 void rtFindModelType()
 {
-	ModelType findModelType( string filename, ifstream& fin );
+	string line;
 
 	ifstream dotpfin( "ca1.p" );
 	assert( dotpfin );
-	assert( findModelType( "ca1.p", dotpfin ) == DOTP );
+	assert( findModelType( "ca1.p", dotpfin, line ) == DOTP );
 
 	ifstream kkitfin( "Kholodenko.g" );
 	assert( kkitfin );
-	assert( findModelType( "Kholodenko.g", kkitfin ) == KKIT );
+	assert( findModelType( "Kholodenko.g", kkitfin, line ) == KKIT );
 
 	ifstream sbmlfin( "Kholodenko.xml" );
 	assert( sbmlfin );
-	assert( findModelType( "Kholodenko.xml", sbmlfin ) == UNKNOWN );
+	assert( findModelType( "Kholodenko.xml", sbmlfin, line ) == UNKNOWN );
+
+	ifstream cspacefin( "M101.cspace" );
+	assert( cspacefin );
+	assert( findModelType( "M101.cspace", cspacefin, line ) == CSPACE );
 	cout << "." << flush;
 }
 
@@ -72,7 +78,7 @@ void rtReadKkit()
 	Id plotId( "/rkktest/graphs/conc1/MAPK-PP.Co" );
 	assert( plotId != Id() );
 	unsigned int size = Field< unsigned int >::get( plotId, "size" );
-	// assert( size == 502 ); // Note that dt was 10.
+	assert( size == 502 ); // Note that dt was 10.
 	
 	/*
 	bool ok = SetGet::strSet( 
