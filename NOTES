@@ -14801,4 +14801,11 @@ Compiled in ReadCspace. Yet to test. Checkin 2930.
 Activated the test. Many fixes. Now clears it. Cleanup after test is pending.
 Checkin 2931.
 
+Cleaned up after test. Also set up to return Id of created chem model by
+ReadCspace::readModelString. Checkin 2932.
+
+Did a valgrind check. Still clean.
+
+Added a check for a CSPACE file type in regression tests.
+
 ============================================================================
