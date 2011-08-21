@@ -14797,6 +14797,7 @@ directory to refactor.
 Currently at ReadCspace.cpp:333.
 ============================================================================
 21 Aug 2011
-Compiled in ReadCspace. Yet to test.
+Compiled in ReadCspace. Yet to test. Checkin 2930.
+Activated the test. Many fixes. Now clears it. Cleanup after test is pending.
 
 ============================================================================

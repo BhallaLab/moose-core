@@ -147,7 +147,7 @@ void ReadCspace::expandEnzyme(
 	static Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	static vector< unsigned int > dims( 1,1 );
 
-	Id enzMolId = mol_[e];
+	Id enzMolId = mol_[ name[e] - 'a' ];
 	
 	Id enzId = shell->doCreate( "Enz", enzMolId, name, dims, false );
 
@@ -192,7 +192,7 @@ void ReadCspace::expandReaction( const char* name, int nm1 )
 	}
 
 	if ( name[0] > 'D' ) { // C is a product
-		s->doAddMsg( "OneToOne", reacId, "prdout", mol_[ name[3] - 'a' ], "reac" );
+		s->doAddMsg( "OneToOne", reacId, "prd", mol_[ name[3] - 'a' ], "reac" );
 	}
 
 	if ( name[0] == 'H' ) { // C is a dual product
@@ -267,9 +267,13 @@ void ReadCspace::makeMolecule( char name )
 			molseq_.push_back( index - 1 );
 
 	for ( unsigned int i = mol_.size(); i < index; i++ ) {
+		string molname("");
+		molname += 'a' + i;
+		/*
 		stringstream ss( "a" );
 		ss << i ;
 		string molname = ss.str();
+		*/
 		Id temp = s->doCreate( "Pool", base_, molname, dims, false );
 		mol_.push_back( temp );
 		molparms_.push_back( DEFAULT_CONC );
@@ -286,7 +290,7 @@ void ReadCspace::deployParameters( )
 	for ( i = 0; i < mol_.size(); i++ ) {
 		// SetField(mol_[ i ], "volscale", volscale );
 		// SetField(mol_[ molseq_[i] ], "ninit", parms_[ i ] );
-		Field< double >::set( mol_[i], "nInit", parms_[i] );
+		Field< double >::set( mol_[i], "concInit", parms_[i] );
 	}
 	for ( j = 0; j < reac_.size(); j++ ) {
 		if ( reac_[ j ].element()->cinfo()->isA( "Reac" ) ) {
@@ -302,7 +306,7 @@ void ReadCspace::deployParameters( )
 
 void ReadCspace::testReadModel( )
 {
-	cout << "Testing ReadCspace::readModelString()\n";
+	// cout << "Testing ReadCspace::readModelString()\n";
 	readModelString( "|Habc|Lbca|", "mod1", Id(), "Stoich" );
 	assert( mol_.size() == 3 );
 	assert( reac_.size() == 2 );
@@ -312,17 +316,22 @@ void ReadCspace::testReadModel( )
 	assert( reac_.size() == 12 );
 	double concInit;
 	int i;
-	cout << "\nTesting ReadCspace:: conc assignment\n";
+	// cout << "\nTesting ReadCspace:: conc assignment\n";
 	for ( i = 0; i < 14; i++ ) {
+		string path( "/kinetics/" );
+		path += 'a' + i;
+		/*
 		stringstream ss( "/kinetics/" );
 		// const char* molname = ss.str();
 		ss << 'a' + i;
 		Id temp( ss.str() );
+		*/
+		Id temp( path );
 		concInit = Field< double >::get( temp, "concInit" );
 		assert( doubleEq( concInit, i + 1 ) );
 	}
 
-	cout << "\nTesting ReadCspace:: reac construction\n";
+	// cout << "\nTesting ReadCspace:: reac construction\n";
 	assert( reac_[ 0 ].path() == "/kinetics/AabX" );
 	assert( reac_[ 1 ].path() == "/kinetics/BbcX" );
 	assert( reac_[ 2 ].path() == "/kinetics/c/CcdX" );
@@ -336,7 +345,7 @@ void ReadCspace::testReadModel( )
 	assert( reac_[ 10 ].path() == "/kinetics/k/Kklm" );
 	assert( reac_[ 11 ].path() == "/kinetics/m/Llmn" );
 
-	cout << "\nTesting ReadCspace:: reac rate assignment\n";
+	// cout << "\nTesting ReadCspace:: reac rate assignment\n";
 	Id tempA( "/kinetics/AabX" );
 	double r1 = Field< double >::get( tempA, "kf");
 	double r2 = Field< double >::get( tempA, "kb");
@@ -349,19 +358,28 @@ void ReadCspace::testReadModel( )
 
 	Id tempC( "/kinetics/c/CcdX" );
 	r1 = Field< double >::get( tempC, "k3");
-	r2 = Field< double >::get( tempC, "km");
+	r2 = Field< double >::get( tempC, "Km");
 	assert( doubleEq( r1, 301 ) && doubleEq( r2, 302 ) );
 
 	Id tempD( "/kinetics/e/DdeX" );
 	r1 = Field< double >::get( tempD, "k3");
-	r2 = Field< double >::get( tempD, "km");
+	r2 = Field< double >::get( tempD, "Km");
 	assert( doubleEq( r1, 401 ) && doubleEq( r2, 402 ) );
 
 	for ( i = 4; i < 9; i++ ) {
+		/*
 		stringstream ss( "/kinetics/A" );
 		ss << i << 'a' + i << 'b' + i << 'c' + i;
 		// sprintf( ename, "/kinetics/%c%c%c%c", 'A' + i, 'a' + i, 'b' + i, 'c' + i );
 		Id temp( ss.str() );
+		*/
+
+		string path( "/kinetics/" );
+		path += 'A' + i;
+		path += 'a' + i;
+		path += 'b' + i;
+		path += 'c' + i;
+		Id temp( path );
 		r1 = Field< double >::get( temp, "kf");
 		r2 = Field< double >::get( temp, "kb");
 		assert( doubleEq( r1, i* 100 + 101 ) && 
@@ -370,18 +388,16 @@ void ReadCspace::testReadModel( )
 
 	Id tempJ( "/kinetics/k/Jjkl" );
 	r1 = Field< double >::get( tempJ, "k3");
-	r2 = Field< double >::get( tempJ, "km");
+	r2 = Field< double >::get( tempJ, "Km");
 	assert( doubleEq( r1, 1001 ) && doubleEq( r2, 1002 ) );
 
 	Id tempK( "/kinetics/k/Kklm" );
 	r1 = Field< double >::get( tempK, "k3");
-	r2 = Field< double >::get( tempK, "km");
+	r2 = Field< double >::get( tempK, "Km");
 	assert( doubleEq( r1, 1101 ) && doubleEq( r2, 1102 ) );
 
 	Id tempL( "/kinetics/m/Llmn" );
 	r1 = Field< double >::get( tempL, "k3");
-	r2 = Field< double >::get( tempL, "km");
+	r2 = Field< double >::get( tempL, "Km");
 	assert( doubleEq( r1, 1201 ) && doubleEq( r2, 1202 ) );
-
-	cout << ".";
 }
