@@ -157,11 +157,12 @@ class Shell
 		/**
 		 * Loads in a model to a specified path.
 		 * Tries to figure out model type from fname or contents of file.
-		 * Currently knows about kkit,
+		 * Currently knows about kkit, cspace.
 		 * Soon to learn .p, SBML, NeuroML.
 		 * Later to learn NineML
 		 */
-		 Id doLoadModel( const string& fname, const string& modelpath );
+		 Id doLoadModel( const string& fname, const string& modelpath, 
+		 	const string& solverClass = "" );
 
 		/**
  		 * This function synchronizes fieldDimension on the DataHandler 

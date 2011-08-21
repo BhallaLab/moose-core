@@ -12,19 +12,22 @@
 #include "Shell.h"
 #include "LoadModels.h" // For the ModelType enum.
 #include "../kinetics/ReadKkit.h"
+#include "../kinetics/ReadCspace.h"
 
-ModelType findModelType( string filename, ifstream& fin )
+ModelType findModelType( string filename, ifstream& fin, string& line )
 {
 	if ( filename.substr( filename.length() - 2 ) == ".p" )
 		return DOTP;
 
-	string line;
 	getline( fin, line );
 	if ( line == "//genesis" ) {
 		getline( fin, line );
 		if ( line.substr( 0, 7 ) == "// kkit" )
 			return KKIT;
 	}
+
+	if ( line.length() >= 6 && line[0] == '|' && line[5] == '|' )
+		return CSPACE;
 
 	return UNKNOWN;
 }
@@ -90,7 +93,7 @@ bool findModelParent( Id cwe, const string& path,
 }
 
 /// Returns the Id of the loaded model.
-Id Shell::doLoadModel( const string& fileName, const string& modelPath )
+Id Shell::doLoadModel( const string& fileName, const string& modelPath, const string& solverClass )
 {
 	ifstream fin( fileName.c_str() );
 	if ( !fin ) {
@@ -103,14 +106,26 @@ Id Shell::doLoadModel( const string& fileName, const string& modelPath )
 
 	if ( !( findModelParent ( cwe_, modelPath, parentId, modelName ) ) )
 		return Id();
-	
-	switch ( findModelType( fileName, fin ) ) {
+
+	string line;	
+	switch ( findModelType( fileName, fin, line ) ) {
 		case KKIT: 
 			{
-			ReadKkit rk;
-			return rk.read( fileName, modelName, parentId );
+				string sc = solverClass;
+				if ( solverClass == "" )
+					sc = "Stoich";
+				ReadKkit rk;
+				return rk.read( fileName, modelName, parentId, sc);
 			}
 			break;
+		case CSPACE:
+			{
+				string sc = solverClass;
+				if ( solverClass == "" )
+					sc = "Stoich";
+				ReadCspace rc;
+				return rc.readModelString( line, modelName, parentId, sc );
+			}
 		case UNKNOWN:
 		default:
 			cout << "Error: Shell::doLoadModel: File type of '" <<
