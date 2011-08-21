@@ -12,6 +12,7 @@
 
 #include "../shell/Shell.h"
 #include "ReadKkit.h"
+#include "ReadCspace.h"
 
 void testReadKkit()
 {
@@ -252,10 +253,18 @@ void testPoolVolumeScaling()
 	cout << "." << flush;
 }
 
+void testReadCspace()
+{
+	ReadCspace rc;
+	rc.testReadModel();
+	cout << "." << flush;
+}
+
 void testKinetics()
 {
 	testMathFunc();
 	testPoolVolumeScaling();
+	testReadCspace();
 }
 
 void testMpiKinetics( )
