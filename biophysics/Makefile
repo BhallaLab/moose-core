@@ -30,13 +30,14 @@ OBJ = \
 	HHGate2D.o	\
 	HHChannel2D.o	\
 	MgBlock.o	\
-	VectorTable.o \
-	MarkovRateTable.o \
-	MarkovChannel.o \
-	MarkovGslSolver.o \
-	MatrixOps.o \
-	MarkovSolverBase.o \
-	MarkovSolver.o \
+	VectorTable.o	\
+	MarkovRateTable.o	\
+	MarkovChannel.o	\
+	MarkovGslSolver.o	\
+	MatrixOps.o	\
+	MarkovSolverBase.o	\
+	MarkovSolver.o	\
+	ReadCell.o	\
 	testBiophysics.o	\
 
 # GSL_LIBS = -L/usr/lib -lgsl
@@ -76,6 +77,7 @@ MarkovRateTable.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h
 MarkovSolverBase.o : MarkovSolver.h MatrixOps.h MarkovRateTable.h
 MarkovSolver.o : MarkovSolverBase.h MarkovSolver.h
 MarkovChannel.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h ChanBase.h MarkovChannel.h 
+ReadCell.o: ReadCell.h ../shell/Shell.h ../utility/utility.h
 testBiophysics.o: SynBase.h IntFire.h Synapse.h Compartment.h HHChannel.h HHGate.h 
 
 .cpp.o:
