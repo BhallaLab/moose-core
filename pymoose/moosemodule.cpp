@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Fri Aug 19 16:04:00 2011 (+0530)
+// Last-Updated: Mon Aug 22 11:39:05 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4018
+//     Update #: 4040
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -183,6 +183,7 @@ extern "C" {
         {"getCwe", (PyCFunction)_pymoose_getCwe, METH_VARARGS, "Get the current working element."},
         {"setCwe", (PyCFunction)_pymoose_setCwe, METH_VARARGS, "Set the current working element."},
         {"getFieldDict", (PyCFunction)_pymoose_getFieldDict, METH_VARARGS, "Get dictionary of field names and types for specified class"},
+        {"loadModel", (PyCFunction)_pymoose_loadModel, METH_VARARGS, "Load a model and return the Id of the loaded model."},        
         {NULL, NULL, 0, NULL}        /* Sentinel */
     };
 
@@ -1352,13 +1353,16 @@ extern "C" {
     
     static PyObject * _pymoose_loadModel(PyObject * dummy, PyObject * args)
     {
-        char * fname, * modelpath;
-        if(!PyArg_ParseTuple(args, "ss:_pymoose_loadModel", &fname, &modelpath)){
+        char * fname = NULL, * modelpath = NULL, * solverclass = NULL;
+        if(!PyArg_ParseTuple(args, "ss|s:_pymoose_loadModel", &fname, &modelpath, &solverclass)){
             return NULL;
         }
-        
-        _Id * model = new _Id();
-        model->_id = getShell().doLoadModel(string(fname), string(modelpath));
+        _Id * model = (_Id*)PyObject_New(_Id, &IdType);
+        if (!solverclass){
+            model->_id = getShell().doLoadModel(string(fname), string(modelpath));
+        } else {
+            model->_id = getShell().doLoadModel(string(fname), string(modelpath), string(solverclass));
+        }
         PyObject * ret = reinterpret_cast<PyObject*>(model);
         return ret;
     }
@@ -1469,6 +1473,7 @@ extern "C" {
             fieldTypes.push_back(fieldType);
         }        
     }
+
 } // end extern "C"
 
 
