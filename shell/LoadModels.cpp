@@ -11,6 +11,7 @@
 #include "header.h"
 #include "Shell.h"
 #include "LoadModels.h" // For the ModelType enum.
+#include "../biophysics/ReadCell.h"
 #include "../kinetics/ReadKkit.h"
 #include "../kinetics/ReadCspace.h"
 
@@ -109,6 +110,11 @@ Id Shell::doLoadModel( const string& fileName, const string& modelPath, const st
 
 	string line;	
 	switch ( findModelType( fileName, fin, line ) ) {
+		case DOTP:
+			{
+			ReadCell rc;
+			return rc.read( fileName, modelName, parentId );
+			}
 		case KKIT: 
 			{
 				string sc = solverClass;
