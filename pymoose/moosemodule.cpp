@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Mon Aug 22 13:18:49 2011 (+0530)
+// Last-Updated: Wed Aug 24 16:35:03 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4049
+//     Update #: 4055
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -185,7 +185,9 @@ extern "C" {
 "\tstr solverclass -- (optional) solver type to be used for simulating the model.\n"},
         {"connect", (PyCFunction)_pymoose_connect, METH_VARARGS, "Create a message between srcField on src element to destField on target element."},        
         {"getCwe", (PyCFunction)_pymoose_getCwe, METH_VARARGS, "Get the current working element."},
+        {"pwe", (PyCFunction)_pymoose_getCwe, METH_VARARGS, "Get the current working element."},
         {"setCwe", (PyCFunction)_pymoose_setCwe, METH_VARARGS, "Set the current working element."},
+        {"ce", (PyCFunction)_pymoose_setCwe, METH_VARARGS, "Set the current working element."},
         {"getFieldDict", (PyCFunction)_pymoose_getFieldDict, METH_VARARGS, "Get dictionary of field names and types for specified class"},
 
         {NULL, NULL, 0, NULL}        /* Sentinel */

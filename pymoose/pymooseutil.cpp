@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Mar 26 22:41:37 2011 (+0530)
 // Version: 
-// Last-Updated: Fri Aug 19 14:26:09 2011 (+0530)
+// Last-Updated: Wed Aug 24 16:24:43 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 137
+//     Update #: 142
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -281,11 +281,13 @@ void finalize()
 
 string getFieldType(ObjId id, string fieldName)
 {
-    string fieldType;
+    string fieldType = "invalid";
     string className = Field<string>::get(id, "class");
     string classInfoPath("/classes/" + className);
     Id classId(classInfoPath);
-    assert(classId != Id());
+    if (classId == Id()){
+        return fieldType;
+    }
     static vector<string> finfotypes;
     if (finfotypes.empty()){
         finfotypes.push_back("srcFinfo");
@@ -318,7 +320,9 @@ vector<string> getFieldNames(ObjId id, string finfoType)
     assert(classId != Id());
     unsigned int numFinfos = Field<unsigned int>::get(ObjId(classId), "num_" + finfoType);
     Id fieldId(classId.path() + "/" + finfoType);
-    assert(fieldId != Id());
+    if (fieldId == Id()){
+        return ret;
+    }
     for (unsigned int ii = 0; ii < numFinfos; ++ii){
         string fieldName = Field<string>::get(ObjId(fieldId, DataId(0, ii)), "name");
         ret.push_back(fieldName);
