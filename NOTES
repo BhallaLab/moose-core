@@ -14806,6 +14806,25 @@ ReadCspace::readModelString. Checkin 2932.
 
 Did a valgrind check. Still clean.
 
-Added a check for a CSPACE file type in regression tests.
+Added a check for a CSPACE file type in regression tests. Checkin 2933.
 
 ============================================================================
+24 Aug 2011
+
+Working on implementing a model using ReadCspace and Python. Slow going. Some
+thoughts on the language construction.
+
+- restore pwe, ce, le, show.
+- Quick way to show and traverse messages.
+- Help( class ) to print out notes on each field and on the class.
+- A filtered list of fields so that they look more like what the user would use
+- Get rid of the Array suffix. Everything is an array.
+- Help( func ) to print out notes on each Shell func
+- Help to print out instructions for MOOSE help
+- Equivalence of an id and a path.
+- Substantial discussion with Subha about handling FieldElements.
+	An example is Synapse. Synapses are always created as child
+	FieldElements of IntFires. By default the size of the Synapse array 
+	is 0. Each IntFire Object can have a different number of Synapses.
+	How to represent all this in python?
+
