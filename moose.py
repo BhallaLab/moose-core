@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Fri Aug 19 15:37:08 2011 (+0530)
+# Last-Updated: Wed Aug 24 17:00:33 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 727
+#     Update #: 745
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -290,7 +290,10 @@ class NeutralArray(object):
             return other in self._id
         else:
             return False
-    
+
+    def __repr__(self):
+        return self._id.getPath()
+
     path = property(lambda self: self._id.getPath())
     id_ = property(lambda self: self._id)
     fieldNames = property(lambda self: self._id[0].getFieldNames('valueFinfo'))
@@ -316,17 +319,13 @@ class Neutral(object):
                 id_ = args[0]._id
             elif isinstance(args[0], str):
                 path = args[0].replace('[', ' ').replace(']', ' ')
-                print 'Path: ', path
                 components = path.split('/')
-                print components
                 current_path = ''
                 for component in components:
                     if not component:
                         continue
                     tokens = component.split()
-                    print 't', tokens
                     current_path = current_path + '/' + tokens[0]
-                    print current_path
                     if not _moose.exists(current_path):
                         if component == components[-1]: # this is the last entry and does not exist, so create a new one
                             class_obj = eval(self.__class__.__name__ + 'Array')
@@ -336,8 +335,11 @@ class Neutral(object):
                             raise NameError('%s does not exist.' % (current_path))
                     else:
                         array_obj = Id(current_path)
+                        print 'Current path', current_path
                         for index in tokens[1:]:
+                            print 'Index:', index
                             array_obj = array_obj[int(index)]
+                            print array_obj
                         if isinstance(array_obj, Id):
                             id_ = array_obj
                         elif isinstance(array_obj, ObjId):
@@ -419,7 +421,7 @@ class Neutral(object):
     className = property(lambda self: self._oid.getField('class'))
     fieldNames = property(lambda self: self._oid.getFieldNames())
     name = property(lambda self: self._oid.getField('name'))
-    path = property(lambda self: self._oid.getField('path'))
+    path = property(lambda self: '%s[%d]' % (self._oid.getField('path'), self._oid.getDataIndex()))
     id_ = property(lambda self: self._oid.getId())
     fieldIndex = property(lambda self: self._oid.getFieldIndex())
     dataIndex = property(lambda self: self._oid.getDataIndex())
@@ -473,6 +475,16 @@ def connect(src, srcMsg, dest, destMsg, msgType='Single'):
     if isinstance(dest, Neutral):
         dest = dest._oid
     return src.connect(srcMsg, dest, destMsg, msgType)
+
+def le(element=None):
+    if element is None:
+        element = getCwe()[0]
+    elif isinstance(element, str):
+        element = Neutral(element)
+    print 'Elements under', element.path
+    for ch in element.children:
+        print ch
+    
 
 #######################################################
 # This is to generate class definitions automatically
