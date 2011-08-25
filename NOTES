@@ -14828,3 +14828,15 @@ thoughts on the language construction.
 	is 0. Each IntFire Object can have a different number of Synapses.
 	How to represent all this in python?
 
+Checkin 2943.
+
+
+============================================================================
+25 Aug 2011
+
+Implemented Shell::doSetParserIdleFlag( bool isParserIdle) to tell system to
+wait in the ProcessLoop if nothing is going on.
+This can be inspected by static bool Shell::isParserIdle() on all nodes.
+Some cleanup for SetGet<>::innerStrSet for 4, 5 and 6 arguments.
+
+============================================================================

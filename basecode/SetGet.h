@@ -757,6 +757,7 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 			pos = temp.find_first_of( "," );
 			Conv< A2 >::str2val( arg2, temp.substr( 0, pos ) );
 			temp = temp.substr( pos + 1 );
+			pos = temp.find_first_of( "," );
 			Conv< A3 >::str2val( arg3, temp.substr( 0, pos ) );
 			Conv< A4 >::str2val( arg4, temp.substr( pos + 1 ) );
 			return set( dest, field, arg1, arg2, arg3, arg4 );
@@ -843,8 +844,10 @@ template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
 			pos = temp.find_first_of( "," );
 			Conv< A2 >::str2val( arg2, temp.substr( 0, pos ) );
 			temp = temp.substr( pos + 1 );
+			pos = temp.find_first_of( "," );
 			Conv< A3 >::str2val( arg3, temp.substr( 0, pos ) );
 			temp = temp.substr( pos + 1 );
+			pos = temp.find_first_of( "," );
 			Conv< A4 >::str2val( arg4, temp.substr( 0, pos ) );
 			Conv< A5 >::str2val( arg5, temp.substr( pos + 1 ) );
 			return set( dest, field, arg1, arg2, arg3, arg4, arg5 );
@@ -934,10 +937,13 @@ template< class A1, class A2, class A3, class A4, class A5, class A6 > class Set
 			pos = temp.find_first_of( "," );
 			Conv< A2 >::str2val( arg2, temp.substr( 0, pos ) );
 			temp = temp.substr( pos + 1 );
+			pos = temp.find_first_of( "," );
 			Conv< A3 >::str2val( arg3, temp.substr( 0, pos ) );
 			temp = temp.substr( pos + 1 );
+			pos = temp.find_first_of( "," );
 			Conv< A4 >::str2val( arg4, temp.substr( 0, pos ) );
 			temp = temp.substr( pos + 1 );
+			pos = temp.find_first_of( "," );
 			Conv< A5 >::str2val( arg5, temp.substr( 0, pos ) );
 			Conv< A6 >::str2val( arg6, temp.substr( pos + 1 ) );
 			return set( dest, field, arg1, arg2, arg3, arg4, arg5, arg6 );
