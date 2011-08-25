@@ -126,6 +126,49 @@ Id ReadCspace::readModelString( const string& model,
 	deployParameters();
 	return base_;
 }
+
+void ReadCspace::setupGslRun( double plotdt )
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+    vector< unsigned int > dims( 1, 1 ); 
+	shell->setCwe( base_ );
+	Field< string >::set( base_, "path", "##" );
+
+    Id gsl = shell->doCreate( "GslIntegrator", base_, "gsl", dims );
+    bool ret = SetGet1< Id >::set( gsl, "stoich", base_ );
+    assert( ret );
+    ret = Field< bool >::get( gsl, "isInitialized" );
+    assert( ret );
+
+	vector< Id > children;
+	Neutral::children( base_.eref(), children );
+	for ( unsigned int i = 0; i < children.size(); ++i ) {
+		cout << "In readCspace: " << children[i].path() << endl;
+		if ( children[i].element()->cinfo()->isA( "ZombiePool" ) ) {
+			string plotname = "plot" + children[i].element()->getName();
+    		Id tab = shell->doCreate( "Table", base_, plotname, dims );
+			assert( tab != Id() );
+			cout << "ReadCspace made plot " << plotname << endl;
+			MsgId mid = shell->doAddMsg( "Single", 
+				tab, "requestData", children[i], "get_n" );
+			assert( mid != Msg::badMsg );
+		}
+	}
+
+    shell->doSetClock( 0, plotdt );
+    shell->doSetClock( 1, plotdt );
+    shell->doSetClock( 2, plotdt );
+    shell->doSetClock( 3, 0 ); 
+
+	string basePath = base_.path();
+
+    string plotpath = basePath + "/##[TYPE=Table]";
+    shell->doUseClock( basePath + "/gsl", "process", 0 ); 
+    shell->doUseClock( plotpath, "process", 2 ); 
+    shell->doReinit();
+}
+
+
 /////////////////////////////////////////////////////////////////////
 //	From reacdef.cpp in CSPACE:
 //             if (line == "A <==> B") type = 'A';
@@ -151,8 +194,15 @@ void ReadCspace::expandEnzyme(
 	Id enzMolId = mol_[ name[e] - 'a' ];
 	
 	Id enzId = shell->doCreate( "Enz", enzMolId, name, dims, false );
-
+	assert( enzId != Id() );
+	string cplxName = name;
+	cplxName += "_cplx";
+	Id cplxId = shell->doCreate( "Pool", enzId, cplxName, dims, false );
+	assert( cplxId != Id() );
 	MsgId ret = shell->doAddMsg( "OneToOne", 
+		enzId, "cplx", cplxId, "reac" );
+
+	ret = shell->doAddMsg( "OneToOne", 
 		enzMolId, "reac", enzId, "enz" );
 
 	ret = shell->doAddMsg( "OneToOne", 
@@ -309,14 +359,14 @@ void ReadCspace::testReadModel( )
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	// cout << "Testing ReadCspace::readModelString()\n";
-	Id modelId = readModelString( "|Habc|Lbca|", "mod1", Id(), "Stoich" );
+	Id modelId = readModelString( "|Habc|Lbca|", "mod1", Id(), "Neutral" );
 	assert( mol_.size() == 3 );
 	assert( reac_.size() == 2 );
 
 	shell->doDelete( modelId );
 
 	modelId = readModelString( "|AabX|BbcX|CcdX|DdeX|Eefg|Ffgh|Gghi|Hhij|Iijk|Jjkl|Kklm|Llmn| 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 13.0 14.0 101 102 201 202 301 302 401 402 501 502 601 602 701 702 801 802 901 902 1001 1002 1101 1102 1201 1202",
-		"kinetics", Id(), "Stoich" );
+		"kinetics", Id(), "Neutral" );
 	assert( mol_.size() == 14 );
 	assert( reac_.size() == 12 );
 	double concInit;

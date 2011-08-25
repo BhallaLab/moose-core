@@ -88,6 +88,7 @@ class ReadCspace
 
 		Id readModelString( const string& model,
 			const string& modelname, Id pa, const string& solverClass );
+		void setupGslRun( double plotdt );
 
 		void build( const char* name );
 		void expandEnzyme( 
