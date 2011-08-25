@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Wed Aug 24 17:00:33 2011 (+0530)
+# Last-Updated: Thu Aug 25 18:35:42 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 745
+#     Update #: 831
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -153,7 +153,16 @@ i_f = intfire[0] will return a reference to the first element in the
 IntFire object we created earlier. All field-wise operations are done
 on Neutrals.
 
-A neutral object (and its derivatives) can also be created in the older way by specifying a path to the constructor. This path may contain an index. If there is a pre-existing NeutralArray object with the given path, then the index-th item of that array is returned. If the target object does not exist, but all the objects above it exist, then a new Array object is created and its first element is returned. If an index > 0 is specified in this case, that results in an IndexOutOfBounds exception. If any of the objects higher in the hierarchy do not exist (thus the path up to the parent is invalid), a NameError is raised.
+A neutral object (and its derivatives) can also be created in the
+older way by specifying a path to the constructor. This path may
+contain an index. If there is a pre-existing NeutralArray object with
+the given path, then the index-th item of that array is returned. If
+the target object does not exist, but all the objects above it exist,
+then a new Array object is created and its first element is
+returned. If an index > 0 is specified in this case, that results in
+an IndexOutOfBounds exception. If any of the objects higher in the
+hierarchy do not exist (thus the path up to the parent is invalid), a
+NameError is raised.
 
 a = Neutral('a') # creates /a
 b = IntFire(a/b') # Creates /a/b
@@ -163,10 +172,26 @@ e = Neutral('c[9]') # Last element in d
 
 Methods:
 
+Neutral and all its derivatives will have a bunch of methods that are
+for calling functions via destFinfos. help() for these functions
+should show something like:
+
+<lambda> lambda self, arg_0_{type}, arg_1_{type} unbound moose.{ClassName} method
+
+These are dynamically defined methods, and calling them with the right
+parameters will cause the corresponding moose function to be
+called. Note that all parameters are converted to strings, so you may
+loose some precision here.
+
+[Comment - subha: This explanation is no less convoluted than the
+implementation itself. Hopefully I'll have the documentation
+dynamically dragged out of Finfo documentation in future.]
 
 module functions:
 
-copy(src=<src>, dest=<dest>, name=<name_of_the_copy>, n=<num_copies>, copyMsg=<whether_to_copy_messages) -- make a copy of source object as a child of the destination object.
+copy(src=<src>, dest=<dest>, name=<name_of_the_copy>, n=<num_copies>,
+copyMsg=<whether_to_copy_messages) -- make a copy of source object as
+a child of the destination object.
 
 
 move(src, dest) -- move src object under dest object.
@@ -189,7 +214,9 @@ exists(path) -- true if there is a pre-existing object with the specified path.
 loadModel(filepath, modelpath) -- load file in <filepath> into node
 <modelpath> of the moose model-tree.
 
-setCwe(obj) -- set the current working element to <obj> - which can be either a string representing the path of the object in the moose model-tree, or an Id.
+setCwe(obj) -- set the current working element to <obj> - which can be
+either a string representing the path of the object in the moose
+model-tree, or an Id.
 
 getCwe() -- returns Id of the current working element.
 
@@ -506,15 +533,44 @@ def define_class(classId):
     field_dict = getFieldDict('/classes/%s' % (class_name), 'valueFinfo')
     for field in field_dict.keys():
         setattr(class_obj, field, _MooseDescriptor(field))
-    
+    # Go through the destFinfos and make them look like methods
+    known_types = ['char', 'short', 'int', 'unsigned int', 'double', 'float', 'long', 'unsigned long', 'string']
+    # print 'Processing:', class_name
+    for finfoName, finfoArgs in getFieldDict(class_name, 'destFinfo').items():
+        # print finfoName, finfoArgs
+        cont_flag = False
+        # 'get_...' and 'set_...' are internal destFinfos
+        if finfoName.startswith('get_') or finfoName.startswith('set_'):
+            continue
+        destfnArgs = finfoArgs.split(',')
+        fndef = 'lambda self'
+        fnargs = "'%s'" % (finfoName)
+        index = 0
+        for arg in destfnArgs:
+            # print arg
+            if arg not in known_types:
+                # print 'Cannot handle argument of type:', arg                # for debug
+                cont_flag = True
+                break
+            fndef += ', arg_%d_%s' % (index, arg.replace(' ', '_'))
+            fnargs += ', arg_%d_%s' % (index, arg.replace(' ', '_'))
+            index += 1
+        if cont_flag:
+            continue
+        function_string = '%s: self._oid.setDestField(%s)' % (fndef, fnargs)
+        # print 'Setting %s.%s - Function string: %s' % (class_obj.__name__, finfoName, function_string)
+        setattr(class_obj, finfoName, eval(function_string))
+
     globals()[class_name] = class_obj
     array_class_name = class_name + 'Array'
     if base != 'none':
         base_class = globals()[base + 'Array']
     else:
         base_class = object
-    class_obj = type(array_class_name, (base_class,), {'className':class_name})
-    globals()[array_class_name] = class_obj
+    array_class_obj = type(array_class_name, (base_class,), {'className':class_name})
+    globals()[array_class_name] = array_class_obj
+        
+            
 
 classes_Id = Id('/classes')
 class_obj_list = classes_Id[0].getField('children')    
