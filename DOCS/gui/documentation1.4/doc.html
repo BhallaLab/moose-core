@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+<title>doc</title>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2011-07-14 13:32:34 IST"/>
+<meta name="author" content="Chintaluri"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+
+<h1 class="title">doc</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 Getting Started </a></li>
+<li><a href="#sec-2">2 MooseGUI layout </a></li>
+<li><a href="#sec-3">3 Load Models </a>
+<ul>
+<li><a href="#sec-3.1">3.1 Kinetikit Models </a></li>
+<li><a href="#sec-3.2">3.2 Neural Models </a></li>
+</ul>
+</li>
+<li><a href="#sec-4">4 Record field values and Plots </a></li>
+<li><a href="#sec-5">5 Run Simulation </a></li>
+<li><a href="#sec-6">6 Save </a></li>
+<li><a href="#sec-7">7 Reset Settings </a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Getting Started </h2>
+<div class="outline-text-2" id="text-1">
+
+
+<p>
+The script to start the GUI for MOOSE is moosegui.py. Depending on where it is installed, you can enter the following in a command prompt:
+&gt;python {full path of moosegui.py}
+</p>
+<p>
+If you install it from a binary package, it should already be in your path and have execute permission set. In that case just entering
+&gt;moosegui.py
+should fire up the GUI.
+</p>
+<p>
+If you are running it for the first time, a graphical wizard will appear to confirm some details. It has three pages. Verify if the details in these pages are correct. Other wise select the appropriate values. The initial page contains general information about MOOSE and the wizard itself.
+</p>
+<p>
+<img src="/home/chaitu/Desktop/documentation/firsttime1.png" width=60% alt="/home/chaitu/Desktop/documentation/firsttime1.png" />
+</p>
+<p>
+Click next and you will be prompted to select the directory containing the PyMOOSE demos. On Linux systems, these are installed in usr/share/doc/moose1.3/DEMOS/pymoose. Verify that the contents of the text box labeled ``PyMOOSE demos directory'' has the correct location of the PyMOOSE demos. Otherwise, click the Browse button next to it and browse to the appropriate directory and click Open button on the pop-up dialog.
+</p>
+<p>
+<img src="/home/chaitu/Desktop/documentation/firsttime2.png" width=60% alt="/home/chaitu/Desktop/documentation/firsttime2.png" />
+</p>
+<p>
+Clicking next will take you to the next page to select the glclient executable. If this is installed in some location in your ${PATH} (which is the case for installation from binary packages), then just glclient in the textbox will do. Otherwise, you will have to browse and select the executable file.
+</p>
+<p>
+<img src="/home/chaitu/Desktop/documentation/firsttime3.png" width=60% alt="/home/chaitu/Desktop/documentation/firsttime3.png" />
+</p>
+<p>
+After clicking next you will reach the final page in the wizard. Here you specify a colormap file for OpenGL-based 3D visualization. Select any of the files in the colormaps directory and click Finish.
+</p>
+<p>
+<img src="/home/chaitu/Desktop/documentation/firsttime4.png" width=60% alt="/home/chaitu/Desktop/documentation/firsttime4.png" />
+</p>
+
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> MooseGUI layout </h2>
+<div class="outline-text-2" id="text-2">
+
+<p><img src="/home/chaitu/Desktop/documentation/layout.png"  alt="/home/chaitu/Desktop/documentation/layout.png" />
+</p><ol>
+<li>
+Menu Area
+</li>
+<li>
+Simulation Toolbar
+</li>
+<li>
+Visualization Area
+</li>
+<li>
+Plotting Area
+</li>
+<li>
+Moose Shell
+</li>
+<li>
+Object Editor
+</li>
+<li>
+Simulation Control Panel*
+</li>
+<li>
+Moose Element Tree*
+</li>
+<li>
+Moose Classes Panel*
+
+</li>
+</ol>
+
+<p>*by default not shown at startup, to make them visible: In menu&gt;View&gt; and check on corresponding item to show  
+</p>
+
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Load Models </h2>
+<div class="outline-text-2" id="text-3">
+
+
+<p>
+In the menu area, click on File&gt;Load Model (or alternatively Ctrl+L)
+</p>
+<p>
+A dialog box as shown would show up. Nagivate to the model and open.
+</p>
+<p>
+Currenly only one model can be loaded in one session.
+</p>
+<p>
+<img src="/home/chaitu/Desktop/documentation/loadmodel.png" width = 60% alt="/home/chaitu/Desktop/documentation/loadmodel.png" />
+</p>
+
+</div>
+
+<div id="outline-container-3.1" class="outline-3">
+<h3 id="sec-3.1"><span class="section-number-3">3.1</span> Kinetikit Models </h3>
+<div class="outline-text-3" id="text-3.1">
+
+<p>In addition to regular GENESIS scripts, the GUI recognizes .g files that contain kinetikit models. Kinetikit models have the commands to plot variables of interest. When one load the model, all these plots are added to the available plot window. Moreover,  A graphical representation of the reaction network is displayed in the visualization area  and the plots in the Plot window. 
+</p>
+<p>
+For example, load Kholodenko.g from DEMOS/kholodenko directory to get the following:
+</p>
+<p>
+<img src="/home/chaitu/Desktop/documentation/kinetikit.png" width = 60% alt="/home/chaitu/Desktop/documentation/kinetikit.png" />
+</p>
+<p>
+One can double click any item in the visualizaton area and it  will be opened in the Object Editor for the underlying MOOSE object. One can modify the properties of the objects (for example the initial concentration of a substrate) in the object editor. (In the above example 'MKK-P' has been double clicked)
+</p>
+
+</div>
+
+</div>
+
+<div id="outline-container-3.2" class="outline-3">
+<h3 id="sec-3.2"><span class="section-number-3">3.2</span> Neural Models </h3>
+<div class="outline-text-3" id="text-3.2">
+
+<p>In the visualization area the cell is displayed. By default only if single celled models are visualized. (To change this see, New GL Windows)
+</p>
+<p>
+For example, load mitral.g from DEMOS/mitral-ee directory to get the following:  (currently .py and .g models are supported) 
+</p>
+<p>
+<img src="/home/chaitu/Desktop/documentation/clickedSoma.png" width =60% alt="/home/chaitu/Desktop/documentation/clickedSoma.png" />
+</p>
+<ul>
+<li>
+Interaction: 
+Click on a compartment to open the the compartment properties in the Object Editor. Selected compartment is highlighted in green color. (In the above example 'soma' has been clicked. Notice the updation of the object editor fields)
+
+</li>
+<li>
+Navigation:
+One can navigate in this area using mouse and keyboard. 
+<ul>
+<li>
+Click and drag to rotate model. 
+</li>
+<li>
+Use arrow keys to pan the model. 
+</li>
+<li>
+Mouse wheel to zoom. 
+
+</li>
+</ul>
+</li>
+<li>
+New GL Windows:
+To add new GL Windows or to display models with more than one cell menu&gt;View&gt;New GL Window. A Dialog would then appear. Here add the cells to be visualized. Also one can select the style in which, the visualization be displayed. The field you wish to visualize, while specifying the range of the values of the field and the choice of colormap.  
+<img src="/home/chaitu/Desktop/documentation/newGL.png" width = 60% alt="/home/chaitu/Desktop/documentation/newGL.png" />
+
+
+</li>
+</ul>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> Record field values and Plots </h2>
+<div class="outline-text-2" id="text-4">
+
+
+<p>
+To record field values of a particular moose object, it must be added via the Object Editor. 
+</p><ul>
+<li>
+The corresponding field of interest is to be dragged onto the plot window (OR)
+</li>
+<li>
+Click the third column in the object editor, to bring up a combo box from which the Plot window name ('Plot 0' as shown below) can be selected
+
+</li>
+</ul>
+
+<p><img src="/home/chaitu/Desktop/documentation/plotCombo.png" width = 60% alt="/home/chaitu/Desktop/documentation/plotCombo.png" />
+</p>
+<p>
+One can add new plot windows to the Plot Area (in menu&gt;View&gt;New Plot Window), by default 1 plot is shown (named Plot 0). 
+To close the plots, right click on the window pane of the corresponding plot window. 
+Change the layout of the plots by changing it from menu&gt;View&gt; Tabbed View / Cascading Plots
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> Run Simulation </h2>
+<div class="outline-text-2" id="text-5">
+
+
+<p>
+To run the simulation, use the simulation toolbar. Use the 'Run','Continue' and 'Reset' buttons here for the corresponding actions.
+</p>
+<p>
+Further, to change the time step interval of the simulation and the plot/visualization update interval use the simulation control (by default not visible, to make visible, check menu&gt;View&gt;Simulation Control)
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> Save </h2>
+<div class="outline-text-2" id="text-6">
+
+
+<p>
+To save plots use menu&gt;File&gt;Save Plots (Ctrl+S). Saving action prompts user for the directory in which one wishes to save the files, this dumps all the data on the plot windows into corresponding fieldname.plot files. (One can save plots only after running the simulation)
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-7" class="outline-2">
+<h2 id="sec-7"><span class="section-number-2">7</span> Reset Settings </h2>
+<div class="outline-text-2" id="text-7">
+
+
+<p>
+To reset the layout of the GUI (also resets the 'First Time Wizard') use menu&gt;File&gt;Reset Settings, the settings are restored only after restarting moosegui.py
+</p></div>
+</div>
+<div id="postamble">
+<p class="author"> Author: Chintaluri
+<a href="mailto:chaitu@ubuntu">&lt;chaitu@ubuntu&gt;</a>
+</p>
+<p class="date"> Date: 2011-07-14 13:32:34 IST</p>
+<p class="creator">HTML generated by org-mode 6.33x in emacs 23</p>
+</div>
+</div>
+</body>
+</html>
