@@ -1,0 +1,126 @@
+#+title: Documentation of MooseGUI
+#+author: 
+* Getting Started
+
+  The script to start the GUI for MOOSE is moosegui.py. Depending on where it is installed, you can enter the following in a command prompt:
+  >python {full path of moosegui.py}
+
+  If you install it from a binary package, it should already be in your path and have execute permission set. In that case just entering
+  >moosegui.py
+  should fire up the GUI.
+
+  If you are running it for the first time, a graphical wizard will appear to confirm some details. It has three pages. Verify if the details in these pages are correct. Other wise select the appropriate values. The initial page contains general information about MOOSE and the wizard itself.
+
+  #+ATTR_LaTeX: width=14cm
+  #+ATTR_HTML: width=60%
+  [[/home/chaitu/Desktop/moose/pymoose/gui/qt/documentation/firsttime1.png]]
+
+  Click next and you will be prompted to select the directory containing the PyMOOSE demos. On Linux systems, these are installed in usr/share/doc/moose1.3/DEMOS/pymoose. Verify that the contents of the text box labeled ``PyMOOSE demos directory'' has the correct location of the PyMOOSE demos. Otherwise, click the Browse button next to it and browse to the appropriate directory and click Open button on the pop-up dialog.
+
+  #+ATTR_LaTeX: width=8cm
+  #+ATTR_HTML: width=60%
+  [[/home/chaitu/Desktop/moose/pymoose/gui/qt/documentation/firsttime2.png]]
+
+  After clicking next you will reach the final page in the wizard. Here you specify a colormap file for OpenGL-based 3D visualization. Select any of the files in the colormaps directory and click Finish.
+
+  #+ATTR_LaTeX: width=8cm
+  #+ATTR_HTML: width=60%
+  [[/home/chaitu/Desktop/moose/pymoose/gui/qt/documentation/firsttime4.png]]
+
+
+* MooseGUI layout
+
+  #+ATTR_HTML: width = 60%
+  #+ATTR_LaTeX: width=14cm
+  [[/home/chaitu/Desktop/moose/pymoose/gui/qt/documentation/layout.png]]
+  
+  1. Menu
+  2. Simulation Toolbar
+  3. Visualization Area
+  4. Plotting Area
+  5. Moose Shell
+  6. Object Editor
+  7. Simulation Control Panel*
+  8. Moose Element Tree*
+  9. Moose Classes Panel*
+  
+  *by default not shown at startup, to make them visible: In [[MooseGUI layout][Menu]]>View> and check on corresponding item to show  
+
+
+* Load Models
+
+  In the menu area, click on [[MooseGUI layout][Menu]]>File>Load Model (or alternatively Ctrl+L)
+
+  A dialog box as shown would show up. Nagivate to the model and open.
+
+  Currenly only one model can be loaded in one session.
+  
+  #+ATTR_LaTeX: width = 14cm
+  #+ATTR_HTML: width = 60%
+  [[/home/chaitu/Desktop/moose/pymoose/gui/qt/documentation/loadmodel.png]]
+
+** Kinetikit Models
+   In addition to regular GENESIS scripts, the GUI recognizes .g files that contain kinetikit models. Kinetikit models have the commands to plot variables of interest. When one load the model, all these plots are added to the available plot window in [[MooseGUI layout][Plotting Area]]. Moreover,  A graphical representation of the reaction network is displayed in the [[MooseGUI layout][Visualization Area]] and the plots in the [[MooseGUI layout][Plotting Area]]. 
+   
+   For example, load Kholodenko.g from DEMOS/kholodenko directory to get the following:
+
+  #+ATTR_LaTeX: width = 14cm
+  #+ATTR_HTML: width = 60%
+  [[/home/chaitu/Desktop/moose/pymoose/gui/qt/documentation/kinetikit.png]]
+
+   One can double click any item in the [[MooseGUI layout][Visualizaton Area]] and it  will be opened in the [[MooseGUI layout][Object Editor]] for the underlying MOOSE object. One can modify the properties of the objects (for example the initial concentration of a substrate) in the [[MooseGUI layout][Object Editor]]. (In the above example 'MKK-P' has been double clicked)
+
+   
+**  Neural Models 
+    In the visualization area the cell is displayed. By default only if single celled models are visualized. (To change this see, [[New GL Windows][New GL Windows]])
+    
+    For example, load mitral.g from DEMOS/mitral-ee directory to get the following:  (currently .py and .g models are supported) 
+
+  #+ATTR_LaTeX: width = 14cm
+  #+ATTR_HTML: width =60%
+  [[/home/chaitu/Desktop/moose/pymoose/gui/qt/documentation/clickedSoma.png]]
+    
+    + Interaction: 
+      Click on a compartment to open the the compartment properties in the [[MooseGUI layout][Object Editor]]. Selected compartment is highlighted in green color. (In the above example 'soma' has been clicked. Notice the updation of the object editor fields)
+
+    + Navigation:
+      One can navigate in this area using mouse and keyboard. 
+        + Click and drag to rotate model. 
+        + Use arrow keys to pan the model. 
+        + Mouse wheel to zoom. 
+    
+    + New GL Windows:
+      To add new GL Windows or to display models with more than one cell [[MooseGUI layout][Menu]]>View>New GL Window  A Dialog would then appear, here add the cells to be visualized. Also one can select the style in which, the visualization be displayed. The field you wish to visualize, while specifying the range of the values of the field and the choice of colormap.  
+
+  #+ATTR_HTML: width = 60%
+  #+ATTR_LaTeX: width = 14cm
+  [[/home/chaitu/Desktop/moose/pymoose/gui/qt/documentation/newGL.png]]
+
+      
+* Record field values and Plots 
+  
+  To record field values of a particular moose object, it must be added via the [[MooseGUI layout][Object Editor]]. 
+  + The corresponding field of interest is to be dragged onto the plot window in [[MooseGUI layout][Plotting Area]] (OR)
+  + Click the third column in the [[MooseGUI layout][Object Editor]], to bring up a combo box from which the plot window name ('Plot 0' as shown below) can be selected
+
+  #+ATTR_LaTeX: width=14cm
+  #+ATTR_HTML: width = 60%
+  [[/home/chaitu/Desktop/moose/pymoose/gui/qt/documentation/plotCombo.png]]
+ 
+  One can add new plot windows to the [[MooseGUI][Plotting Area]] (in [[MooseGUI layout][Menu]]>View>New Plot Window), by default 1 plot is shown (named Plot 0). 
+  To close the plots, right click on the window pane of the corresponding plot window. 
+  Change the layout of the plots by changing it from [[MooseGUI layout][Menu]]>View> Tabbed View / Cascading Plots
+
+* Run Simulation
+  
+  To run the simulation, use the [[MooseGUI layout][Simulation Toolbar]] Use the 'Run','Continue' and 'Reset' buttons here for the corresponding actions.
+  
+  Further, to change the time step interval of the simulation and the plot/visualization update interval use the simulation control (by default not visible, to make visible, check [[MooseGUI layout][Menu]]>View>Simulation Control)
+
+* Save 
+
+  To save plots use [[MooseGUI layout][Menu]]>File>Save Plots (Ctrl+S). Saving action prompts user for the directory in which one wishes to save the files, this dumps all the data on the plot windows into corresponding fieldname.plot files. (One can save plots only after running the simulation)
+
+* Reset Settings
+
+  To reset the layout of the GUI (also resets the 'First Time Wizard') use [[MooseGUI layout][Menu]]>File>Reset Settings, the settings are restored only after restarting moosegui.py
