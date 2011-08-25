@@ -14843,5 +14843,10 @@ Checkin 2948.
 Added code so that when LoadModel sees a kkit file and is asked to use 
 the 'gsl' solver, it sets up the full calculation including plots, plotdt
 and the GslIntegrator.  This followed by cleanup in the regression tests.
+Checkin 2950.
+Lots of little bugs in the ReadCspace code. Now looks better but still to 
+confirm.
 
+A possible major bug: If reinit does not find any targets, it hangs.
 ============================================================================
+
