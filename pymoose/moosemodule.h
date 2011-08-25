@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Fri Aug 19 14:40:21 2011 (+0530)
+// Last-Updated: Thu Aug 25 15:33:02 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 251
+//     Update #: 254
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -73,7 +73,7 @@ extern "C" {
     static PyObject * _pymoose_Id_delete(_Id * self, PyObject * args);
     static PyObject * _pymoose_Id_getValue(_Id * self, PyObject * args);
     static PyObject * _pymoose_Id_getPath(_Id * self, PyObject * args);
-    // static PyObject * _pymoose_Id_syncDataHandler(_Id * self, PyObject * args);
+    static PyObject * _pymoose_Id_syncDataHandler(_Id * self, PyObject * args);
     /* Id functions to allow part of sequence protocol */
     static Py_ssize_t _pymoose_Id_getLength(_Id * self);
     static PyObject * _pymoose_Id_getItem(_Id * self, Py_ssize_t index);
@@ -88,9 +88,10 @@ extern "C" {
     static long _pymoose_ObjId_hash(_ObjId * self, PyObject * args);
     static void _pymoose_ObjId_dealloc(_ObjId * self);
     static PyObject * _pymoose_ObjId_repr(_ObjId * self);
-    static PyObject * _pymoose_ObjId_str(_ObjId * self);
+    // static PyObject * _pymoose_ObjId_str(_ObjId * self);
     static PyObject * _pymoose_ObjId_getField(_ObjId * self, PyObject * args);
     static PyObject * _pymoose_ObjId_setField(_ObjId * self, PyObject * args);
+    static PyObject * _pymoose_ObjId_setDestField(_ObjId * self, PyObject * args);
     static PyObject * _pymoose_ObjId_getFieldNames(_ObjId * self, PyObject * args);
     static PyObject * _pymoose_ObjId_getFieldType(_ObjId * self, PyObject * args);
     static PyObject * _pymoose_ObjId_getDataIndex(_ObjId * self, PyObject * args);

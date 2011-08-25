@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Aug 24 16:35:03 2011 (+0530)
+// Last-Updated: Thu Aug 25 16:01:54 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4055
+//     Update #: 4220
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -66,7 +66,7 @@ extern const map<string, string>& getArgMap();
 extern Shell& getShell();
 extern void finalize();
 extern void setup_runtime_env(bool verbose);
-extern string getFieldType(ObjId oid, string fieldName);
+extern string getFieldType(ObjId oid, string fieldName, string finfoType="");
 extern vector<string> getFieldNames(ObjId oid, string fieldType);
 
 extern void nonMpiTests(Shell *);
@@ -89,13 +89,16 @@ extern "C" {
         // {"init", (PyCFunction)_pymoose_Id_init, METH_VARARGS,
         //  "Initialize a Id object."},
         {"delete", (PyCFunction)_pymoose_Id_delete, METH_VARARGS,
-         "delete the underlying moose element"},
+         "Delete the underlying moose element"},
         {"getValue", (PyCFunction)_pymoose_Id_getValue, METH_VARARGS,
-         "return integer representation of the id of the element."},
-        // {"syncDataHandler", (PyCFunction)_pymoose_Id_syncDataHandler, METH_VARARGS,
-        //  "?"},
+         "Return integer representation of the id of the element."},
+        {"syncDataHandler", (PyCFunction)_pymoose_Id_syncDataHandler, METH_VARARGS,
+         "synchronizes fieldDimension on the DataHandler"
+         " across nodes. Used after function calls that might alter the"
+         " number of Field entries in the table."
+         " The target is the FieldElement whose fieldDimension needs updating."},
         {"getPath", (PyCFunction)_pymoose_Id_getPath, METH_VARARGS,
-         "The path of this Id object."},
+         "Return the path of this Id object."},
         {"getShape", (PyCFunction)_pymoose_Id_getShape, METH_VARARGS,
          "Get the shape of the Id object as a tuple."},
         {NULL, NULL, 0, NULL},        /* Sentinel */        
@@ -114,28 +117,6 @@ extern "C" {
         0 // sq_inplace_repeat
     };
 
-    // static PyGetSetDef Id_getsetters[] = {
-    //     {"path",
-    //      (getter)_pymoose_Id_getPath, NULL,
-    //      "path of the element in the MOOSE object tree.",
-    //      NULL},
-    //     {"dimensions",
-    //      (getter)_pymoose_Id_getDimensions, NULL,
-    //      "dimensions of the object as tuple.",
-    //     NULL},
-    //     {"shape",
-    //      (getter)_pymoose_Id_getDimensions, NULL,
-    //      "dimensions of the object as tuple.",
-    //     NULL},
-    //     {"className",
-    //      (getter)_pymoose_Id_getClass, NULL,
-    //      "MOOSE class name of this object.",
-    //     NULL}
-    //     {"fieldNames",
-    //      (getter)_pymoose_Id_getField, NULL,
-        
-    //     {NULL},
-    // };
     static PyMethodDef ObjIdMethods[] = {
         {"getFieldType", (PyCFunction)_pymoose_ObjId_getFieldType, METH_VARARGS,
          "Get the string representation of the type of this field."},        
@@ -144,10 +125,10 @@ extern "C" {
         {"setField", (PyCFunction)_pymoose_ObjId_setField, METH_VARARGS,
          "Set specified attribute of the element."},
         {"getId", (PyCFunction)_pymoose_ObjId_getId, METH_VARARGS,
-         "return integer representation of the id of the element. This will be"
+         "Return integer representation of the id of the element. This will be"
          "an ObjId represented as a 3-tuple"},
         {"getFieldNames", (PyCFunction)_pymoose_ObjId_getFieldNames, METH_VARARGS,
-         "Returns a tuple containing the field-names."
+         "Return a tuple containing the field-names."
          "\n"
          "If one of 'valueFinfo', 'lookupFinfo', 'srcFinfo', 'destFinfo' or"
          "'sharedFinfo' is specified, then only fields of that type are"
@@ -162,6 +143,10 @@ extern "C" {
          "Get the index of this ObjId in the containing Id object."},
         {"getFieldIndex", (PyCFunction)_pymoose_ObjId_getFieldIndex, METH_VARARGS,
          "Get the index of this object as a field."},
+        {"setDestField", (PyCFunction)_pymoose_ObjId_setDestField, METH_VARARGS,
+         "Set a function field (DestFinfo). This should not be accessed directly. A python"
+         " member method should be wrapping it for each DestFinfo in each MOOSE"
+         " class. Return True on success, False on failure."},
         {NULL, NULL, 0, NULL},        /* Sentinel */        
     };
     /**
@@ -184,11 +169,15 @@ extern "C" {
 "\tstr modelpath -- moose path for the top level element of the model to be created.\n"
 "\tstr solverclass -- (optional) solver type to be used for simulating the model.\n"},
         {"connect", (PyCFunction)_pymoose_connect, METH_VARARGS, "Create a message between srcField on src element to destField on target element."},        
-        {"getCwe", (PyCFunction)_pymoose_getCwe, METH_VARARGS, "Get the current working element."},
-        {"pwe", (PyCFunction)_pymoose_getCwe, METH_VARARGS, "Get the current working element."},
-        {"setCwe", (PyCFunction)_pymoose_setCwe, METH_VARARGS, "Set the current working element."},
-        {"ce", (PyCFunction)_pymoose_setCwe, METH_VARARGS, "Set the current working element."},
-        {"getFieldDict", (PyCFunction)_pymoose_getFieldDict, METH_VARARGS, "Get dictionary of field names and types for specified class"},
+        {"getCwe", (PyCFunction)_pymoose_getCwe, METH_VARARGS, "Get the current working element. 'pwe' is an alias of this function."},
+        {"pwe", (PyCFunction)_pymoose_getCwe, METH_VARARGS, "Get the current working element. 'getCwe' is an alias of this function."},
+        {"setCwe", (PyCFunction)_pymoose_setCwe, METH_VARARGS, "Set the current working element. 'ce' is an alias of this function"},
+        {"ce", (PyCFunction)_pymoose_setCwe, METH_VARARGS, "Set the current working element. setCwe is an alias of this function."},
+        {"getFieldDict", (PyCFunction)_pymoose_getFieldDict, METH_VARARGS, "Get dictionary of field names and types for specified class.\n"
+         " Parameters:\n"
+         "str className -- MOOSE class to find the fields of.\n"
+         "str finfoType -- (optional) Finfo type of the fields to find. If empty or not specified, all fields will be retrieved."
+        },
 
         {NULL, NULL, 0, NULL}        /* Sentinel */
     };
@@ -262,7 +251,7 @@ extern "C" {
         0,                                  /* tp_as_mapping */
         (hashfunc)_pymoose_ObjId_hash,         /* tp_hash */
         0,                                  /* tp_call */
-        (reprfunc)_pymoose_ObjId_str,               /* tp_str */
+        (reprfunc)_pymoose_ObjId_repr,               /* tp_str */
         PyObject_GenericGetAttr,            /* tp_getattro */
         PyObject_GenericSetAttr,            /* tp_setattro */
         0,                                  /* tp_as_buffer */
@@ -456,7 +445,7 @@ extern "C" {
     }
     static PyObject * _pymoose_Id_repr(_Id * self)
     {
-        return PyString_FromFormat("<Id: id=%u>", self->_id.value());
+        return PyString_FromFormat("<Id: id=%u, path=%s>", self->_id.value(), self->_id.path().c_str());
     } // !  _pymoose_Id_repr
     static PyObject * _pymoose_Id_str(_Id * self)
     {
@@ -486,21 +475,22 @@ extern "C" {
         PyObject * ret = Py_BuildValue("s", path.c_str());
         return ret;
     }
-    // static PyObject * _pymoose_Id_syncDataHandler(_Id * self, PyObject * args)
-    // {
-    //     char * sizeField;
-    //     PyObject * target;
-    //     if(!PyArg_ParseTuple(args, "sO:_pymoose_Id_syncDataHandler", &sizeField, &target)){
-    //         return NULL;
-    //     }
-    //     _Id * tgt = reinterpret_cast<_Id*>(target);
-    //     if (!tgt){
-    //         PyErr_SetString(PyExc_TypeError, "Could not cast target to Id object");
-    //         return NULL;
-    //     }
-    //     getShell().doSyncDataHandler(self->_id, string(sizeField), tgt->_id);
-    //     Py_RETURN_NONE;        
-    // }
+
+    static PyObject * _pymoose_Id_syncDataHandler(_Id * self, PyObject * args)
+    {
+        char * sizeField;
+        PyObject * target;
+        if(!PyArg_ParseTuple(args, "sO:_pymoose_Id_syncDataHandler", &sizeField, &target)){
+            return NULL;
+        }
+        _Id * tgt = reinterpret_cast<_Id*>(target);
+        if (!tgt){
+            PyErr_SetString(PyExc_TypeError, "Could not cast target to Id object");
+            return NULL;
+        }
+        getShell().doSyncDataHandler(self->_id);
+        Py_RETURN_NONE;        
+    }
 
     /** Subset of sequence protocol functions */
     static Py_ssize_t _pymoose_Id_getLength(_Id * self)
@@ -646,13 +636,9 @@ extern "C" {
     
     static PyObject * _pymoose_ObjId_repr(_ObjId * self)
     {
-        return PyString_FromFormat("<ObjId: id=%u, dataIndex=%u, fieldIndex=%u>", self->_oid.id.value(), self->_oid.dataId.data(), self->_oid.dataId.field());
+        return PyString_FromFormat("<ObjId: id=%u, dataIndex=%u, fieldIndex=%u, path=%s>", self->_oid.id.value(), self->_oid.dataId.data(), self->_oid.dataId.field(), self->_oid.id.path().c_str());
     } // !  _pymoose_ObjId_repr
-    static PyObject * _pymoose_ObjId_str(_ObjId * self)
-    {
-        assert(self);
-        return PyString_FromFormat("<ObjId: id=%u, dataIndex=%u, fieldIndex=%u>", self->_oid.id.value(), self->_oid.dataId.data(), self->_oid.dataId.field());
-    } // !  _pymoose_ObjId_str
+
     
     static void _pymoose_ObjId_dealloc(_ObjId * self)
     {
@@ -1095,7 +1081,123 @@ extern "C" {
             return NULL;
         }
     } // _pymoose_Id_setField
-    
+
+    static PyObject * _pymoose_ObjId_setDestField(_ObjId * self, PyObject * args)
+    {
+        // Minimum number of arguments for setting destFinfo - 1-st
+        // the finfo name, 2-nd at least one value.
+        Py_ssize_t minArgs = 2;
+        // Arbitrarily setting maximum on variable argument
+        // list. Read: http://www.swig.org/Doc1.3/Varargs.html to
+        // understand why
+        Py_ssize_t maxArgs = 5;
+        PyObject * arglist[5] = {NULL, NULL, NULL, NULL, NULL};
+        ostringstream error;
+        error << "_pymoose_ObjId_setDestField: ";
+        
+        if (!PyArg_UnpackTuple(args, "setDestField", minArgs, maxArgs, &arglist[0], &arglist[1], &arglist[2], &arglist[3], arglist[4])){
+            return NULL;
+        }
+        char * fieldName = PyString_AsString(arglist[0]);
+        if (!fieldName){ // not a string, raises TypeError
+            return NULL;
+        }
+        string type = getFieldType(self->_oid, string(fieldName), "destFinfo");
+        if (type.empty()){
+            error << "No such function field available";
+            PyErr_SetString(PyExc_ValueError, error.str().c_str());
+            return NULL;
+        }
+        vector< string > argType;
+        tokenize(type, ",", argType);
+        if (argType.empty()){
+            error << "Error in determining the data type of the arguments: received: " << type
+                  << "Expected " << type;
+            PyErr_SetString(PyExc_RuntimeError, error.str().c_str());
+            return NULL;
+        } else if (argType.size() >= maxArgs) {
+            error << "_pymoose_ObjId_setDestField: number of arguments to this function exceeds the implemented maximum=" << (maxArgs - 1)
+                  << ".\nExpected arguments: " << type;
+            PyErr_SetString(PyExc_NotImplementedError, error.str().c_str());
+            return NULL;
+        }
+        ostringstream argstream;
+        for (size_t ii = 0; ii < argType.size(); ++ii){
+            PyObject * arg = arglist[ii+1];
+            if ( arg == NULL){
+                error << "Unspecified argument # " << ii;
+                PyErr_SetString(PyExc_ValueError, error.str().c_str());
+                return NULL;
+            }
+            switch (shortType(argType[ii])){                    
+                    case 'c':
+                        {
+                            char * param = PyString_AsString(arg);
+                            if (!param){
+                                error << ii << "-th expected of type char/string";
+                                PyErr_SetString(PyExc_TypeError, error.str().c_str());
+                                return NULL;
+                            } else if (strlen(param) == 0){
+                                error << "Empty string not allowed.";
+                                PyErr_SetString(PyExc_ValueError, error.str().c_str());
+                                return NULL;
+                            }
+                            argstream << param[0] << ",";
+                        }
+                        break;
+                    case 'i': case 'l':
+                        {
+                            long param = PyInt_AsLong(arg);
+                            if (param == -1 && PyErr_Occurred()){
+                                return NULL;
+                            }
+                            argstream << param << ",";
+                        }
+                        break;
+                    case 'I': case 'k':
+                        {
+                            unsigned long param =PyLong_AsUnsignedLong(arg);
+                            if (PyErr_Occurred()){
+                                return NULL;
+                            }
+                            argstream << param << ",";                            
+                        }
+                        break;
+                    case 'f': case 'd':
+                        {
+                            double param = PyFloat_AsDouble(arg);
+                            argstream << param << ",";
+                        }
+                        break;
+                    case 's':
+                        {
+                            char * param = PyString_AsString(arg);
+                            argstream << string(param) << ",";
+                        }
+                        break;
+                    default:
+                        {
+                            error << "Cannot handle argument type: " << argType[ii];
+                            PyErr_SetString(PyExc_TypeError, error.str().c_str());
+                            return NULL;
+                        }
+                } // switch (shortType(argType[ii])
+        } // for (size_t ii = 0; ...
+        string argstring = argstream.str();
+        if (argstring.length() < 2 ){
+            error << "Could not find any valid argument. Giving up.";
+            PyErr_SetString(PyExc_TypeError, error.str().c_str());
+            return NULL;
+        }
+        
+        argstring = argstring.substr(0, argstring.length() - 1);        
+        bool ret = SetGet::strSet(self->_oid, string(fieldName), argstring);
+        if (ret){
+            Py_RETURN_TRUE;
+        } else {
+            Py_RETURN_FALSE;
+        }        
+    } // _pymoose_ObjId_setDestField
     // 2011-03-23 15:28:26 (+0530)
     static PyObject * _pymoose_ObjId_getFieldNames(_ObjId * self, PyObject *args)
     {
@@ -1232,7 +1334,8 @@ extern "C" {
         }
         PyObject * ret = Py_BuildValue("I", self->_oid.dataId.field());
         return ret;
-    } 
+    }
+    
     ////////////////////////////////////////////
     // The following are global functions
     ////////////////////////////////////////////
