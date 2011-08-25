@@ -1067,6 +1067,7 @@ void Shell::handleUseClock( const Eref& e, const Qinfo* q,
 	wildcard( path, list ); // By default scans only Elements.
 	if ( list.size() == 0 ) {
 		cout << "Warning: no Elements found on path " << path << endl;
+		ack()->send( Eref( shelle_, 0 ), q->threadNum(), Shell::myNode(), OkStatus );
 		return;
 	}
 	string tickField = "proc";
