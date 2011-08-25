@@ -10,6 +10,7 @@
 #include "header.h"
 // #include "ReduceFinfo.h"
 #include "../shell/Shell.h"
+#include <time.h>
 /*
 #ifdef USE_MPI
 #include <mpi.h>
@@ -241,6 +242,12 @@ void Qinfo::swapQ()
 		}
 	if ( !Shell::isSingleThreaded() ) pthread_mutex_unlock( qMutex_ );
 	++numProcessCycles_;
+
+	// Used to avoid pounding on the CPU when nothing is happening.
+	if ( Shell::isParserIdle() && numQinfo == 0 ) {
+		struct timespec req = { 0, 1000000 };
+		nanosleep( &req, 0 );
+	}
 }
 
 /**
