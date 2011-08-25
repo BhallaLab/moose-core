@@ -41,6 +41,13 @@ class ReadKkit
 		void readData( const string& line );
 		void undump( const vector< string >& args );
 
+		/**
+		 * This function sets up the kkit model for a run using the GSL,
+		 * which means numerical integration using the GSL, all the plots
+		 * specified by the kkit file, and the timestep for plots as 
+		 * specified by the kkit file.
+		 */
+		void setupGslRun();
 		void run();
 		void dumpPlots( const string& filename );
 

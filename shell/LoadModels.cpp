@@ -112,16 +112,20 @@ Id Shell::doLoadModel( const string& fileName, const string& modelPath, const st
 	switch ( findModelType( fileName, fin, line ) ) {
 		case DOTP:
 			{
-			ReadCell rc;
-			return rc.read( fileName, modelName, parentId );
+				ReadCell rc;
+				return rc.read( fileName, modelName, parentId );
 			}
 		case KKIT: 
 			{
 				string sc = solverClass;
-				if ( solverClass == "" )
+				if ( solverClass == "" || solverClass == "gsl" )
 					sc = "Stoich";
 				ReadKkit rk;
-				return rk.read( fileName, modelName, parentId, sc);
+				Id ret = rk.read( fileName, modelName, parentId, sc);
+				if ( solverClass == "gsl" ) { // set up kkit run
+					rk.setupGslRun();
+				}
+				return ret;
 			}
 			break;
 		case CSPACE:
