@@ -14838,5 +14838,10 @@ Implemented Shell::doSetParserIdleFlag( bool isParserIdle) to tell system to
 wait in the ProcessLoop if nothing is going on.
 This can be inspected by static bool Shell::isParserIdle() on all nodes.
 Some cleanup for SetGet<>::innerStrSet for 4, 5 and 6 arguments.
+Checkin 2948.
+
+Added code so that when LoadModel sees a kkit file and is asked to use 
+the 'gsl' solver, it sets up the full calculation including plots, plotdt
+and the GslIntegrator.  This followed by cleanup in the regression tests.
 
 ============================================================================

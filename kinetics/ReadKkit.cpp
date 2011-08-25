@@ -132,11 +132,37 @@ Id ReadKkit::read(
 	return base;
 }
 
+/**
+ * Assume GSL solver, take graphs from kkit file, and set up plot dt from
+ * same file as clock 2.
+ */
+void ReadKkit::setupGslRun()
+{
+	vector< unsigned int > dims( 1, 1 );
+	Id gsl = shell_->doCreate( "GslIntegrator", baseId_, "gsl", dims );
+	bool ret = SetGet1< Id >::set( gsl, "stoich", baseId_ );
+	assert( ret );
+	ret = Field< bool >::get( gsl, "isInitialized" );
+	assert( ret );
+
+	shell_->doSetClock( 0, plotdt_ );
+	shell_->doSetClock( 1, plotdt_ );
+	shell_->doSetClock( 2, plotdt_ );
+	shell_->doSetClock( 3, 0 );
+
+	string plotpath = basePath_ + "/graphs/##[TYPE=Table]," + 
+		basePath_ + "/moregraphs/##[TYPE=Table]";
+	shell_->doUseClock( basePath_ + "/gsl", "process", 0 );
+	shell_->doUseClock( plotpath, "process", 2 );
+	shell_->doReinit();
+}
+
 void ReadKkit::run()
 {
 	shell_->doSetClock( 0, simdt_ );
 	shell_->doSetClock( 1, simdt_ );
 	shell_->doSetClock( 2, plotdt_ );
+	shell_->doSetClock( 3, 0 );
 	string poolpath = basePath_ + "/kinetics/##[ISA=Pool]";
 	string reacpath = basePath_ + "/kinetics/##[ISA!=Pool]";
 	string plotpath = basePath_ + "/graphs/##[TYPE=Table]," + 
