@@ -182,6 +182,15 @@ class Shell
 		void doReacDiffMesh( Id baseCompartment );
 
 		/**
+		 * This function is called by the parser to tell the ProcessLoop
+		 * to wait a bit between cycles. Used when we are waiting for user
+		 * input and there is no point in having the ProcessLoop go at
+		 * full speed. When flag is true, then the ProcessLoop will sleep
+		 * a bit, when false it will work at full speed.
+		 */
+		void doSetParserIdleFlag( bool isParserIdle );
+
+		/**
 		 * Works through internal queue of operations that modify the
 		 * structure of the simulation. These operations have to be 
 		 * carefully separated from any other functions or messaging,
@@ -292,6 +301,8 @@ class Shell
  		 * array sizes and set their new volumes.
  		 */
 		void handleReMesh( Id baseMesh );
+
+		void handleSetParserIdleFlag( bool isParserIdle );
 		////////////////////////////////////////////////////////////////
 		// Thread and MPI handling functions
 		////////////////////////////////////////////////////////////////
@@ -343,6 +354,12 @@ class Shell
 		 * True as long as the main process loop is looping
 		 */
 		static bool keepLooping();
+
+		/**
+		 * Flag to indicate if the parser is idle. If so, the main
+		 * ProcessLoop should also slow down to avoid pounding on the CPUs
+		 */
+		static bool isParserIdle();
 
 		/**
 		 * This function sets up the threading for the entire system.
@@ -533,6 +550,8 @@ class Shell
 		 * Simulation run time
 		 */
 		static double runtime_;
+
+		static bool isParserIdle_;
 
 		/// Current working Element
 		Id cwe_;

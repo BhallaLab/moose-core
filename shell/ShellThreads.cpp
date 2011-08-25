@@ -198,6 +198,10 @@ bool Shell::keepLooping()
 	return keepLooping_;
 }
 
+bool Shell::isParserIdle()
+{
+	return Shell::isParserIdle_;
+}
 
 ////////////////////////////////////////////////////////////////////////
 // Functions for setting off clocked processes.

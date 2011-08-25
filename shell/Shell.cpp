@@ -51,6 +51,7 @@ FuncBarrier* Shell::barrier1_( 0 );
 FuncBarrier* Shell::barrier2_( 0 );
 FuncBarrier* Shell::barrier3_( 0 );
 bool Shell::doReinit_( 0 );
+bool Shell::isParserIdle_( 0 );
 double Shell::runtime_( 0.0 );
 
 const ThreadId ScriptThreadNum = 0;
@@ -293,19 +294,31 @@ static DestFinfo handleReMesh( "handleReMesh",
 		"Mesh. The ElementId is the mesh being synchronized.",
 	new OpFunc1< Shell, Id >( & Shell::handleReMesh ) );
 
+static SrcFinfo1< bool > requestSetParserIdleFlag(
+			"requestSetParserIdleFlag",
+			"SetParserIdleFlag( bool isParserIdle );"
+			"When True, the main ProcessLoop waits a little each cycle"
+			"so as to avoid pounding on the CPU."
+			);
+static DestFinfo handleSetParserIdleFlag( "handleSetParserIdleFlag", 
+		"handleSetParserIdleFlag( bool isParserIdle ): "
+		"When True, tells the ProcessLoop to wait as the Parser is idle.",
+	new OpFunc1< Shell, bool >( & Shell::handleSetParserIdleFlag ) );
+
+
 static Finfo* shellMaster[] = {
 	&requestCreate, &requestDelete,
 	&requestAddMsg, 
 	&requestQuit,
 	&requestMove, &requestCopy, &requestUseClock,
-	&requestSync, &requestReMesh,
+	&requestSync, &requestReMesh, &requestSetParserIdleFlag,
 	handleAck() };
 static Finfo* shellWorker[] = {
 	&handleCreate, &handleDelete,
 		&handleAddMsg,
 		&handleQuit,
 		&handleMove, &handleCopy, &handleUseClock,
-		&handleSync, &handleReMesh,
+		&handleSync, &handleReMesh, &handleSetParserIdleFlag,
 	ack() };
 
 static Finfo* clockControlFinfos[] = 
@@ -791,6 +804,19 @@ void Shell::doReacDiffMesh( Id baseCompartment )
 
 	// Here we need to check on any non-matching Reacs and enzymes.
 	
+}
+
+// We don't need to do this through acks, as it has no effect on processing
+// other than to slow it down or speed it up.
+void Shell::doSetParserIdleFlag( bool isParserIdle )
+{
+	Eref sheller( shelle_, 0 );
+	requestSetParserIdleFlag.send( sheller, ScriptThreadNum, isParserIdle);
+}
+
+void Shell::handleSetParserIdleFlag( bool isParserIdle )
+{
+	Shell::isParserIdle_ = isParserIdle;
 }
 
 
