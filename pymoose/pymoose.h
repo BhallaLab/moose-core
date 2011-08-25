@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Fri Mar 11 09:49:33 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Mar 24 19:28:39 2011 (+0530)
+// Last-Updated: Thu Aug 25 15:25:02 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 176
+//     Update #: 183
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -51,6 +51,15 @@ void finalize();
 const std::map<std::string, std::string>& getArgMap();
 } // ! namespace pymoose
 
+////////////////////////////////////////////////////////
+// These functions are defined in pymooseutil.cpp
+////////////////////////////////////////////////////////
+void setup_runtime_env(bool verbose=true);
+Shell& getShell();
+void finalize();
+string getFieldType(ObjId id, string fieldName, string finfoType="");
+vector<string> getFieldNames(ObjId id, string finfoType);
+        
 #endif // !_PYMOOSE_H
 // 
 // pymoose.h ends here
