@@ -1,4 +1,4 @@
-// startfinish.cpp --- 
+// pymooseutil.cpp --- 
 // 
 // Filename: startfinish.cpp
 // Description: 
@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Mar 26 22:41:37 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Aug 24 16:24:43 2011 (+0530)
+// Last-Updated: Thu Aug 25 15:27:38 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 142
+//     Update #: 187
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -25,7 +25,9 @@
 // Change log:
 // 
 // This is for utility functions to initialize and finalize PyMOOSE
-// 
+//
+// 2011-08-25 15:27:10 (+0530) - It has now eveolved into a dumping
+// ground for all utility functions for pymoose.
 
 // Code:
 
@@ -44,7 +46,7 @@
 #include "../scheduling/TickMgr.h"
 #include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
-
+#include "pymoose.h"
 
 extern void testSync();
 extern void testAsync();
@@ -87,7 +89,7 @@ static Element* shellE = NULL; // This is in order to keep a handle on
                                // know how to get back the Id of
                                // stupid shell from the Shell&.
 
-void setup_runtime_env(bool verbose=true){
+void setup_runtime_env(bool verbose){
     const map<string, string>& argmap = getArgMap();
     map<string, string>::const_iterator it;
     it = argmap.find("SINGLETHREADED");
@@ -279,27 +281,46 @@ void finalize()
 
 }
 
-string getFieldType(ObjId id, string fieldName)
+/**
+   Return the data type of the field. If finfoType is specified try to
+look up a field of that finfoType. Otherwise, go through all finfo
+types and return the data type for whichever field name matches.
+
+Return empty string on failure (either there is no field of name
+{fieldName} or {finfoType} is not a correct type of finfo, or no field
+of {finfoType} with name {fieldName} exists.
+
+*/
+string getFieldType(ObjId id, string fieldName, string finfoType)
 {
-    string fieldType = "invalid";
+    string fieldType = "";
     string className = Field<string>::get(id, "class");
     string classInfoPath("/classes/" + className);
     Id classId(classInfoPath);
     if (classId == Id()){
         return fieldType;
     }
-    static vector<string> finfotypes;
-    if (finfotypes.empty()){
-        finfotypes.push_back("srcFinfo");
-        finfotypes.push_back("destFinfo");
-        finfotypes.push_back("valueFinfo");
-        finfotypes.push_back("lookupFinfo");
-        finfotypes.push_back("sharedFinfo");        
+    static vector<string> finfoTypes;
+    if (finfoTypes.empty()){
+        finfoTypes.push_back("srcFinfo");
+        finfoTypes.push_back("destFinfo");
+        finfoTypes.push_back("valueFinfo");
+        finfoTypes.push_back("lookupFinfo");
+        finfoTypes.push_back("sharedFinfo");        
     }
-
-    for (unsigned jj = 0; jj < finfotypes.size(); ++ jj){
-        unsigned int numFinfos = Field<unsigned int>::get(ObjId(classId, 0), "num_" + finfotypes[jj]);
-        Id fieldId(classId.path() + "/" + finfotypes[jj]);
+    size_t count = finfoTypes.size();
+    size_t jj = 0;
+    // This is to follow D.R.Y. principle - I had a loop inside if
+    // (finfoType.empty()) and then the same code as in the loop for
+    // the else clause.
+    if (!finfoType.empty()){
+        count = 1;
+    } else {        
+        finfoType = finfoTypes[jj];
+    }
+    do {
+        unsigned int numFinfos = Field<unsigned int>::get(ObjId(classId, 0), "num_" + finfoType);
+        Id fieldId(classId.path() + "/" + finfoType);
         for (unsigned int ii = 0; ii < numFinfos; ++ii){
             string _fieldName = Field<string>::get(ObjId(fieldId, DataId(0, ii)), "name");
             if (fieldName == _fieldName){                
@@ -307,11 +328,16 @@ string getFieldType(ObjId id, string fieldName)
                 return fieldType;
             }
         }
-    }
-    cerr << "Error: No such field: " << fieldName << endl;
-    return fieldType;        
+        jj ++;
+        finfoType = finfoTypes[jj];
+    } while ( jj < count );
+    cerr << "Error: No field named '" << fieldName << "' of type '" << finfoType << "'" << endl;    
+    return fieldType;
 }
 
+/**
+   Return a vector of field names of specified finfo type.
+ */
 vector<string> getFieldNames(ObjId id, string finfoType)
 {
     vector <string> ret;
@@ -331,4 +357,4 @@ vector<string> getFieldNames(ObjId id, string finfoType)
 }
 
 // 
-// startfinish.cpp ends here
+// pymooseutil.cpp ends here

@@ -111,6 +111,8 @@ template< class T > class Conv
 		}
 
 		static string rttiType() {
+                        if ( typeid( T ) == typeid( char ))
+                                return "char";
 			if ( typeid( T ) == typeid( int ) )
 				return "int";
 			if ( typeid( T ) == typeid( short ) )
