@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Aug 25 16:01:54 2011 (+0530)
+// Last-Updated: Thu Aug 25 18:20:19 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4220
+//     Update #: 4224
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -146,7 +146,12 @@ extern "C" {
         {"setDestField", (PyCFunction)_pymoose_ObjId_setDestField, METH_VARARGS,
          "Set a function field (DestFinfo). This should not be accessed directly. A python"
          " member method should be wrapping it for each DestFinfo in each MOOSE"
-         " class. Return True on success, False on failure."},
+         " class. When used directly, it takes the form:\n"
+         " {ObjId}.setDestField({destFinfoName}, {arg1},{arg2}, ... , {argN})\n"
+         " where destFinfoName is the string representing the name of the"
+         " DestFinfo refering to the target function, arg1, ..., argN are the"
+         " arguments to be passed to the target function."
+         " Return True on success, False on failure."},
         {NULL, NULL, 0, NULL},        /* Sentinel */        
     };
     /**
