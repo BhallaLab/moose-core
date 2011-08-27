@@ -394,7 +394,7 @@ void SynChan::innerReinitFunc( Eref e, ProcInfo info )
         if (isEqual(tau2_, 0.0)) {
                 yconst1_ = 1.0;
                 yconst2_ = 0.0;
-                norm_ = 1.0;
+                norm_ = Gbar_; // Adding this to scale conductance - subha 2011-08-26 19:11:23 (+0530) 
         } else {
                 yconst1_ = tau2_ * ( 1.0 - exp( -dt / tau2_ ) );
                 yconst2_ = exp( -dt / tau2_ );
