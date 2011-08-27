@@ -133,16 +133,9 @@ void HSolvePassive::initialize( ) {
                     get<double>( (*leakageIter)(), "Ek", tempE);
                     get<double>( (*leakageIter)(), "Gk", tempG);
                     ethev_rthev += tempE * tempG;
-                    rThevenin += tempG;
-#ifndef NDEBUG
-                    cout << "Hsolvepassive::initialize(): " << compartmentId_[ ic ].path() << " Leakage: Ek = " << tempE << ", Gk = " << tempG << endl;
-#endif
-                    
+                    rThevenin += tempG;                    
                 }
                 rThevenin = 1.0 / rThevenin;
-#ifndef NDEBUG
-                cout << "E_th = " << ethev_rthev / rThevenin << ", R_th = " << rThevenin << endl;
-#endif
 		CompartmentStruct compartment;
 		compartment.CmByDt = 2.0 * Cm / dt_;
 		compartment.EmByRm = ethev_rthev;
