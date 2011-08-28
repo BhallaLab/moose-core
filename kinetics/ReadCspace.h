@@ -109,6 +109,7 @@ class ReadCspace
 
 		// Id of base element for model tree. Typically a solver.
 		Id base_; 
+		Id mesh_;
 		ostream* fout_;
 
 		// All the molecules, in alphabetical order.
