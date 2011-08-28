@@ -101,6 +101,15 @@ Id ReadCspace::readModelString( const string& model,
 	base_ = s->doCreate( solverClass, pa, modelname, dims, false );
 	assert( base_ != Id() );
 
+	Id comptId = s->doCreate( "CubeMesh", base_, "compartment", dims, false );
+	assert( comptId != Id() );
+	mesh_ = Neutral::child( comptId.eref(), "meshEntries" );
+	assert( mesh_ != Id() );
+	double side = 1e-5;
+	vector< double > coords( 9, side );
+	bool ret = Field< vector< double > >::set( comptId, "coords", coords );
+	assert( ret );
+
 	string temp = model.substr( pos + 1 );
 	pos = temp.find_first_of( " 	\n" );
 	
@@ -333,12 +342,16 @@ void ReadCspace::makeMolecule( char name )
 
 void ReadCspace::deployParameters( )
 {
+	static Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	unsigned long i, j;
 	if ( parms_.size() != mol_.size() + 2 * reac_.size() ) {
 		cerr << "ReadCspace::deployParameters: Error: # of parms mismatch\n";
 		return;
 	}
 	for ( i = 0; i < mol_.size(); i++ ) {
+		MsgId ret = shell->doAddMsg( "OneToOne", mol_[i], "requestSize",
+			mesh_, "get_size" );
+		assert( ret != Msg::badMsg );
 		// SetField(mol_[ i ], "volscale", volscale );
 		// SetField(mol_[ molseq_[i] ], "ninit", parms_[ i ] );
 		Field< double >::set( mol_[i], "concInit", parms_[i] );

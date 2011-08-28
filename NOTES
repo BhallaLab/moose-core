@@ -14851,5 +14851,34 @@ A possible major bug: If reinit does not find any targets, it hangs.
 Tracked it down. Not reinit, but handleUseClock. Wasn't sending ack if it
 didn't find targets.
 
+Now trying to get stochastic calculations to work from pymoose and from the
+ReadCspace. Something funny happens during zombification at ZombiePool.cpp:255.
 ============================================================================
+27 Aug 2011.
+Working on homework/KRAMER/2011/23Aug_test_newQ/run1.py.
+Here, the system is fine if it loads model only.
+Gssa stoich seems to run but no stoch.
 
+Try a simple binding reaction regular and cspace then stoich.
+Did reac.cspace. Did reac1.py. This uses gsl, seems OK.
+Did reac2.py. Runs a little slowly but looks promising, seems stoch.
+Did reac3.py, explicitly set the # of mols to 100. Looks good. 
+	Also matched up shape of curves, looks good. Now to try enz reac.
+
+Did enz.cspace and enz1.py. Uses GSL, seems OK.
+Did enz2.py. Crashes.
+============================================================================
+28 Aug 2011.
+Tracked down a bit. It crashes in the reinit with a CSPACE defined a--b-->c
+reaction.
+
+Turns out problem with enz2.py was that I was loading the wrong reacn, and
+then trying to plot a nonexistent object. Odd that it should crop up only at
+reinit.
+
+Another thing to check: will it work for the same reac defined in kkit.
+Yes, seems to. enz3.py.
+
+Next key thing: get the volume scaling fixed.
+
+============================================================================
