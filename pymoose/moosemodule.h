@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Aug 25 15:33:02 2011 (+0530)
+// Last-Updated: Fri Aug 26 22:03:04 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 254
+//     Update #: 261
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -39,7 +39,7 @@ extern "C" {
     */
     typedef struct {
         PyObject_HEAD
-        Id _id;
+        Id id_;
     } _Id;
     /**
        _ObjId wraps the subelements of a Id - identified by
@@ -57,7 +57,7 @@ extern "C" {
     */
     typedef struct {
         PyObject_HEAD
-        ObjId _oid;
+        ObjId oid_;
     } _ObjId;
 
     static PyObject * MooseError;
@@ -73,7 +73,6 @@ extern "C" {
     static PyObject * _pymoose_Id_delete(_Id * self, PyObject * args);
     static PyObject * _pymoose_Id_getValue(_Id * self, PyObject * args);
     static PyObject * _pymoose_Id_getPath(_Id * self, PyObject * args);
-    static PyObject * _pymoose_Id_syncDataHandler(_Id * self, PyObject * args);
     /* Id functions to allow part of sequence protocol */
     static Py_ssize_t _pymoose_Id_getLength(_Id * self);
     static PyObject * _pymoose_Id_getItem(_Id * self, Py_ssize_t index);
@@ -123,6 +122,7 @@ extern "C" {
     static PyObject * _pymoose_delete(PyObject * dummy, PyObject * args);
     static PyObject * _pymoose_connect(PyObject * dummy, PyObject * args);
     static PyObject * _pymoose_getFieldDict(PyObject * dummy, PyObject * args);    
+    static PyObject * _pymoose_syncDataHandler(PyObject * dummy, _Id * target);
     PyMODINIT_FUNC init_moose();
 
 
