@@ -141,7 +141,8 @@ def df_traverse(root, operation, *args):
         return
     operation(root, *args)
     for child in root.children():
-        df_traverse(child, operation, *args)
+        childNode = Neutral(child)
+        df_traverse(childNode, operation, *args)
     root._visited = True
 
 def readcell_scrambled(filename, target):
