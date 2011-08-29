@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Aug 25 18:20:19 2011 (+0530)
+// Last-Updated: Mon Aug 29 16:15:09 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4224
+//     Update #: 4250
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -92,11 +92,6 @@ extern "C" {
          "Delete the underlying moose element"},
         {"getValue", (PyCFunction)_pymoose_Id_getValue, METH_VARARGS,
          "Return integer representation of the id of the element."},
-        {"syncDataHandler", (PyCFunction)_pymoose_Id_syncDataHandler, METH_VARARGS,
-         "synchronizes fieldDimension on the DataHandler"
-         " across nodes. Used after function calls that might alter the"
-         " number of Field entries in the table."
-         " The target is the FieldElement whose fieldDimension needs updating."},
         {"getPath", (PyCFunction)_pymoose_Id_getPath, METH_VARARGS,
          "Return the path of this Id object."},
         {"getShape", (PyCFunction)_pymoose_Id_getShape, METH_VARARGS,
@@ -183,6 +178,11 @@ extern "C" {
          "str className -- MOOSE class to find the fields of.\n"
          "str finfoType -- (optional) Finfo type of the fields to find. If empty or not specified, all fields will be retrieved."
         },
+        {"syncDataHandler", (PyCFunction)_pymoose_syncDataHandler, METH_VARARGS,
+         "synchronizes fieldDimension on the DataHandler"
+         " across nodes. Used after function calls that might alter the"
+         " number of Field entries in the table."
+         " The target is the FieldElement whose fieldDimension needs updating."},
 
         {NULL, NULL, 0, NULL}        /* Sentinel */
     };
@@ -337,12 +337,12 @@ extern "C" {
         PyObject * src = NULL;
         unsigned int id = 0;
         if (PyArg_ParseTuple(args, "I:_pymoose_Id_init", &id)){
-            self->_id = Id(id);
+            self->id_ = Id(id);
             return 0;
         }
         
         if (PyArg_ParseTuple(args, "O:_pymoose_Id_init", &src) && Id_Check(src)){
-            self->_id = ((_Id*)src)->_id;
+            self->id_ = ((_Id*)src)->id_;
             return 0;
         }
         if (//!PyArg_ParseTupleAndKeywords(args, kwds, "s|Is", const_cast<char**>(kwlist), &path, &i_dims, &type) &&            
@@ -397,9 +397,9 @@ extern "C" {
         if (vec_dims.empty()){
             vec_dims.push_back(len);
         }
-        self->_id = Id(path);
+        self->id_ = Id(path);
         // If object does not exist, create new
-        if ((self->_id == Id()) && (trimmed_path != "/") && (trimmed_path != "/root")){
+        if ((self->id_ == Id()) && (trimmed_path != "/") && (trimmed_path != "/root")){
             string parent_path;
             if (trimmed_path[0] != '/'){
                 parent_path = getShell().getCwe().path();
@@ -413,14 +413,14 @@ extern "C" {
             } else {
                 name = trimmed_path;
             }
-            self->_id = getShell().doCreate(string(type), Id(parent_path), string(name), vector<unsigned int>(vec_dims));
+            self->id_ = getShell().doCreate(string(type), Id(parent_path), string(name), vector<unsigned int>(vec_dims));
         } 
         return 0;            
     }// ! _pymoose_Id_init
 
     static long _pymoose_Id_hash(_Id * self, PyObject * args)
     {
-        return self->_id.value(); // hash is the same as the Id value
+        return self->id_.value(); // hash is the same as the Id value
     }
 
     static void _pymoose_Id_dealloc(_Id * self)
@@ -440,21 +440,21 @@ extern "C" {
         if (!PyArg_ParseTuple(args, ":_pymoose_Id_delete")){
             return NULL;
         }
-        if (self->_id == Id()){
+        if (self->id_ == Id()){
             PyErr_SetString(PyExc_ValueError, "Cannot delete moose shell.");
             return NULL;
         }
-        getShell().doDelete(self->_id);
-        self->_id = Id();
+        getShell().doDelete(self->id_);
+        self->id_ = Id();
         Py_RETURN_NONE;
     }
     static PyObject * _pymoose_Id_repr(_Id * self)
     {
-        return PyString_FromFormat("<Id: id=%u, path=%s>", self->_id.value(), self->_id.path().c_str());
+        return PyString_FromFormat("<Id: id=%u, path=%s>", self->id_.value(), self->id_.path().c_str());
     } // !  _pymoose_Id_repr
     static PyObject * _pymoose_Id_str(_Id * self)
     {
-        return PyString_FromFormat("%s", Id::id2str(self->_id).c_str());
+        return PyString_FromFormat("%s", Id::id2str(self->id_).c_str());
     } // !  _pymoose_Id_str
 
     // 2011-03-23 15:09:19 (+0530)
@@ -463,7 +463,7 @@ extern "C" {
         if (!PyArg_ParseTuple(args, ":_pymoose_Id_getValue")){
             return NULL;
         }
-        unsigned int id = self->_id.value();        
+        unsigned int id = self->id_.value();        
         PyObject * ret = Py_BuildValue("I", id);
         return ret;
     }
@@ -476,31 +476,15 @@ extern "C" {
         if (!PyArg_ParseTuple(args, ":_pymoose_Id_getPath", &obj)){
             return NULL;
         }
-        string path = self->_id.path();
+        string path = self->id_.path();
         PyObject * ret = Py_BuildValue("s", path.c_str());
         return ret;
-    }
-
-    static PyObject * _pymoose_Id_syncDataHandler(_Id * self, PyObject * args)
-    {
-        char * sizeField;
-        PyObject * target;
-        if(!PyArg_ParseTuple(args, "sO:_pymoose_Id_syncDataHandler", &sizeField, &target)){
-            return NULL;
-        }
-        _Id * tgt = reinterpret_cast<_Id*>(target);
-        if (!tgt){
-            PyErr_SetString(PyExc_TypeError, "Could not cast target to Id object");
-            return NULL;
-        }
-        getShell().doSyncDataHandler(self->_id);
-        Py_RETURN_NONE;        
     }
 
     /** Subset of sequence protocol functions */
     static Py_ssize_t _pymoose_Id_getLength(_Id * self)
     {
-        vector< unsigned int> dims = Field< vector <unsigned int> >::get(ObjId(self->_id), "dimensions");
+        vector< unsigned int> dims = Field< vector <unsigned int> >::get(ObjId(self->id_), "dimensions");
         if (dims.empty()){
             return (Py_ssize_t)1; // this is a bug in basecode - dimension 1 is returned as an empty vector
         } else {
@@ -512,7 +496,7 @@ extern "C" {
         if (!PyArg_ParseTuple(args, ":_pymoose_Id_getShape")){
             return NULL;
         }
-        vector< unsigned int> dims = Field< vector <unsigned int> >::get(self->_id, "dimensions");
+        vector< unsigned int> dims = Field< vector <unsigned int> >::get(self->id_, "dimensions");
         if (dims.empty()){
             dims.push_back(1);
         }
@@ -535,7 +519,7 @@ extern "C" {
             return NULL;
         }
         _ObjId * ret = PyObject_New(_ObjId, &ObjIdType);
-        ret->_oid = ObjId(self->_id, index);
+        ret->oid_ = ObjId(self->id_, index);
         return (PyObject*)ret;
     }
     static PyObject * _pymoose_Id_getSlice(_Id * self, PyObject * args)
@@ -559,7 +543,7 @@ extern "C" {
         // Py_XINCREF(ret);        
         for (unsigned int ii = start; ii < end; ++ii){
             _ObjId * value = PyObject_New(_ObjId, &ObjIdType);
-            value->_oid = ObjId(self->_id, ii);
+            value->oid_ = ObjId(self->id_, ii);
             if (PyTuple_SetItem(ret, (Py_ssize_t)ii, (PyObject*)value)){
                 Py_XDECREF(ret);
                 return NULL;
@@ -576,17 +560,17 @@ extern "C" {
         } else if (!Id_SubtypeCheck(other)){
             ret = 0;
         } else if (op == Py_EQ){
-            ret = (self->_id == ((_Id*)other)->_id);
+            ret = (self->id_ == ((_Id*)other)->id_);
         } else if (op == Py_NE) {
-            ret = (self->_id != ((_Id*)other)->_id);
+            ret = (self->id_ != ((_Id*)other)->id_);
         } else if (op == Py_LT){
-            ret = (self->_id < ((_Id*)other)->_id);
+            ret = (self->id_ < ((_Id*)other)->id_);
         } else if (op == Py_GT) {
-            ret = (((_Id*)other)->_id < self->_id);
+            ret = (((_Id*)other)->id_ < self->id_);
         } else if (op == Py_LE){
-            ret = ((self->_id < ((_Id*)other)->_id) || (self->_id == ((_Id*)other)->_id));
+            ret = ((self->id_ < ((_Id*)other)->id_) || (self->id_ == ((_Id*)other)->id_));
         } else if (op == Py_GE){
-            ret = ((((_Id*)other)->_id < self->_id) || (self->_id == ((_Id*)other)->_id));
+            ret = ((((_Id*)other)->id_ < self->id_) || (self->id_ == ((_Id*)other)->id_));
         } else {
             ret = 0;
         }
@@ -597,7 +581,7 @@ extern "C" {
     {
         int ret = 0;
         if (ObjId_Check(obj)){
-            ret = (((_ObjId*)obj)->_oid.id == self->_id);
+            ret = (((_ObjId*)obj)->oid_.id == self->id_);
         }
         return ret;
     }
@@ -611,15 +595,15 @@ extern "C" {
         PyObject * obj;
         static const char * kwlist[] = {"id", "dataIndex", "fieldIndex", NULL};
         if (PyArg_ParseTupleAndKeywords(args, kwargs, "I|II:_pymoose_ObjId_init", const_cast<char**>(kwlist), &id, &data, &field)){
-            self->_oid = ObjId(Id(id), DataId(data, field));
+            self->oid_ = ObjId(Id(id), DataId(data, field));
             return 0;
         } else if (PyArg_ParseTupleAndKeywords(args, kwargs, "O|II:_pymoose_ObjId_init", const_cast<char**>(kwlist), &obj, &data, &field)){
             PyErr_Clear();
             if (Id_Check(obj)){
-                self->_oid = ObjId(((_Id*)obj)->_id, DataId(data, field));
+                self->oid_ = ObjId(((_Id*)obj)->id_, DataId(data, field));
                 return 0;
             } else if (ObjId_Check(obj)){
-                self->_oid = ((_ObjId*)obj)->_oid;
+                self->oid_ = ((_ObjId*)obj)->oid_;
                 return 0;
             } else {
                 PyErr_SetString(PyExc_TypeError, "ObjId.__init__(self, id, dataindex, fieldindex=0) or ObjId.__init__(self, Id, dataIndex, fieldIndex=0) or ObjId.__init__(self, ObjId)");
@@ -633,15 +617,15 @@ extern "C" {
 
     static long _pymoose_ObjId_hash(_ObjId * self, PyObject * args)
     {
-        long id = self->_oid.id.value();
-        long dindex = self->_oid.dataId.data();
-        long findex = self->_oid.dataId.field();
+        long id = self->oid_.id.value();
+        long dindex = self->oid_.dataId.data();
+        long findex = self->oid_.dataId.field();
         return ((id << 32) | (dindex << 16) | findex); // This is a naive hash function                
     }
     
     static PyObject * _pymoose_ObjId_repr(_ObjId * self)
     {
-        return PyString_FromFormat("<ObjId: id=%u, dataIndex=%u, fieldIndex=%u, path=%s>", self->_oid.id.value(), self->_oid.dataId.data(), self->_oid.dataId.field(), self->_oid.id.path().c_str());
+        return PyString_FromFormat("<ObjId: id=%u, dataIndex=%u, fieldIndex=%u, path=%s>", self->oid_.id.value(), self->oid_.dataId.data(), self->oid_.dataId.field(), self->oid_.id.path().c_str());
     } // !  _pymoose_ObjId_repr
 
     
@@ -656,7 +640,7 @@ extern "C" {
             return NULL;
         }
         _Id * ret = PyObject_New(_Id, &IdType);
-        ret->_id = self->_oid.id;
+        ret->id_ = self->oid_.id;
         return (PyObject*)ret;
     }
 
@@ -667,7 +651,7 @@ extern "C" {
         if (!PyArg_ParseTuple(args, "s:_pymoose_ObjId_getFieldType", &fieldName)){
             return NULL;
         }
-        string typeStr = getFieldType(self->_oid, string(fieldName));
+        string typeStr = getFieldType(self->oid_, string(fieldName));
         if (typeStr.length() <= 0){
             PyErr_SetString(PyExc_ValueError, "Empty string for field type. Field name may be incorrect.");
             return NULL;
@@ -698,14 +682,14 @@ extern "C" {
         // TYPE is the full type string for the field. TYPEC is the corresponding Python Py_BuildValue format character.
 #define GET_FIELD(TYPE, TYPEC)                                          \
         { \
-            TYPE value = Field<TYPE>::get(self->_oid, string(field));    \
+            TYPE value = Field<TYPE>::get(self->oid_, string(field));    \
             ret = Py_BuildValue(#TYPEC, value);                         \
             break;                                                      \
         }                                                               \
         
 #define GET_VECFIELD(TYPE, TYPEC) \
         {                                                               \
-                vector<TYPE> val = Field< vector<TYPE> >::get(self->_oid, string(field)); \
+                vector<TYPE> val = Field< vector<TYPE> >::get(self->oid_, string(field)); \
                 ret = PyTuple_New((Py_ssize_t)val.size());              \
                 for (unsigned int ii = 0; ii < val.size(); ++ ii ){     \
                         PyObject * entry = Py_BuildValue(#TYPEC, val[ii]); \
@@ -718,10 +702,10 @@ extern "C" {
                 break;                                                  \
         }                                                               \
         
-        string type = getFieldType(self->_oid, string(field));
+        string type = getFieldType(self->oid_, string(field));
         if (type.empty()){
             string msg = "No such field on object ";
-            msg += self->_oid.id.path() + ": ";
+            msg += self->oid_.id.path() + ": ";
             msg += field;
             msg += " of type";
             msg += type;
@@ -745,22 +729,22 @@ extern "C" {
             case 'f': GET_FIELD(float, f)
             case 'd': GET_FIELD(double, d)
             case 's': {
-                string _s = Field<string>::get(self->_oid, string(field));
+                string _s = Field<string>::get(self->oid_, string(field));
                 ret = Py_BuildValue("s", _s.c_str());
                 break;
             }
             case 'x':
                 {                    
-                    Id value = Field<Id>::get(self->_oid, string(field));
+                    Id value = Field<Id>::get(self->oid_, string(field));
                     ret = (PyObject*)PyObject_New(_Id, &IdType);
-                    ((_Id*)ret)->_id = value;
+                    ((_Id*)ret)->id_ = value;
                     break;
                 }
             case 'y':
                 {
-                    ObjId value = Field<ObjId>::get(self->_oid, string(field));
+                    ObjId value = Field<ObjId>::get(self->oid_, string(field));
                     ret = (PyObject*)PyObject_New(_ObjId, &ObjIdType);
-                    ((_ObjId*)ret)->_oid = value;
+                    ((_ObjId*)ret)->oid_ = value;
                     break;
                 }
             case 'z':
@@ -776,7 +760,7 @@ extern "C" {
             case 'F': GET_VECFIELD(float, f)        
             case 'D': GET_VECFIELD(double, d)        
             case 'S': {                                                 
-                vector<string> val = Field< vector<string> >::get(self->_oid, string(field)); 
+                vector<string> val = Field< vector<string> >::get(self->oid_, string(field)); 
                 ret = PyTuple_New((Py_ssize_t)val.size());
                 for (unsigned int ii = 0; ii < val.size(); ++ ii ){     
                     PyObject * entry = Py_BuildValue("s", val[ii].c_str()); 
@@ -790,7 +774,7 @@ extern "C" {
             }
             case 'X': // vector<Id>
                 {
-                    vector<Id> value = Field< vector <Id> >::get(self->_oid, string(field));
+                    vector<Id> value = Field< vector <Id> >::get(self->oid_, string(field));
                     ret = PyTuple_New((Py_ssize_t)value.size());
                     for (unsigned int ii = 0; ii < value.size(); ++ii){
                         _Id * entry = PyObject_New(_Id, &IdType);
@@ -798,7 +782,7 @@ extern "C" {
                             Py_XDECREF(ret);
                             return NULL;
                         }
-                        entry->_id = value[ii];
+                        entry->id_ = value[ii];
                         if (PyTuple_SetItem(ret, (Py_ssize_t)ii, (PyObject*)entry)){
                             Py_XDECREF(ret);
                             return NULL;
@@ -808,7 +792,7 @@ extern "C" {
                 }
             case 'Y': // vector<ObjId>
                 {
-                    vector<ObjId> value = Field< vector <ObjId> >::get(self->_oid, string(field));
+                    vector<ObjId> value = Field< vector <ObjId> >::get(self->oid_, string(field));
                     ret = PyTuple_New(value.size());
                     for (unsigned int ii = 0; ii < value.size(); ++ii){
                         _ObjId * entry = PyObject_New(_ObjId, &ObjIdType);                       
@@ -816,7 +800,7 @@ extern "C" {
                             Py_XDECREF(ret);
                             return NULL;
                         }
-                        entry->_oid = value[ii];
+                        entry->oid_ = value[ii];
                         if (PyTuple_SetItem(ret, (Py_ssize_t)ii, (PyObject*)entry)){
                             Py_XDECREF(ret);
                             return NULL;
@@ -845,7 +829,7 @@ extern "C" {
         if (!PyArg_ParseTuple(args, "sO:_pymoose_ObjId_setField", &field,  &value)){
             return NULL;
         }
-        char ftype = shortType(getFieldType(self->_oid, string(field)));
+        char ftype = shortType(getFieldType(self->oid_, string(field)));
         
         if (!ftype){
             PyErr_SetString(PyExc_AttributeError, "Field not valid.");
@@ -857,7 +841,7 @@ extern "C" {
                 {
                     char * _value = PyString_AsString(value);
                     if (_value && _value[0]){
-                        ret = Field<char>::set(self->_oid, string(field), _value[0]);
+                        ret = Field<char>::set(self->oid_, string(field), _value[0]);
                     } else {
                         return NULL;
                     }
@@ -867,7 +851,7 @@ extern "C" {
                 {
                     int _value = PyInt_AsLong(value);
                     if ((_value != -1) || (!PyErr_Occurred())){
-                        ret = Field<int>::set(self->_oid, string(field), _value);
+                        ret = Field<int>::set(self->oid_, string(field), _value);
                     } else {
                         return NULL;
                     }
@@ -877,7 +861,7 @@ extern "C" {
                 {
                     short _value = (short)PyInt_AsLong(value);
                     if ((_value != -1) || (!PyErr_Occurred())){
-                        ret = Field<short>::set(self->_oid, string(field), _value);
+                        ret = Field<short>::set(self->oid_, string(field), _value);
                     } else {
                         return NULL;
                     }
@@ -887,7 +871,7 @@ extern "C" {
                 {
                     long _value = PyInt_AsLong(value);
                     if ((_value != -1) || (!PyErr_Occurred())){
-                        ret = Field<long>::set(self->_oid, string(field), _value);
+                        ret = Field<long>::set(self->oid_, string(field), _value);
                     } else {
                         return NULL;
                     }
@@ -896,33 +880,33 @@ extern "C" {
             case 'I': 
                 {
                     unsigned long _value = PyInt_AsUnsignedLongMask(value);
-                    ret = Field<unsigned int>::set(self->_oid, string(field), (unsigned int)_value);
+                    ret = Field<unsigned int>::set(self->oid_, string(field), (unsigned int)_value);
                     break;
                 }
             case 'k':
                 {
                     unsigned long _value = PyInt_AsUnsignedLongMask(value);
-                    ret = Field<unsigned long>::set(self->_oid, string(field), _value);
+                    ret = Field<unsigned long>::set(self->oid_, string(field), _value);
                     break;
                 }
                 
             case 'f': 
                 {
                     float _value = PyFloat_AsDouble(value);
-                    ret = Field<float>::set(self->_oid, string(field), _value);
+                    ret = Field<float>::set(self->oid_, string(field), _value);
                     break;
                 }
             case 'd': 
                 {
                     double _value = PyFloat_AsDouble(value);
-                    ret = Field<double>::set(self->_oid, string(field), _value);
+                    ret = Field<double>::set(self->oid_, string(field), _value);
                     break;
                 }
             case 's': 
                 {
                     char * _value = PyString_AsString(value);
                     if (_value){
-                        ret = Field<string>::set(self->_oid, string(field), string(_value));
+                        ret = Field<string>::set(self->oid_, string(field), string(_value));
                     } else {
                         return NULL;
                     }
@@ -931,7 +915,7 @@ extern "C" {
             case 'x': // Id
                 {
                     if (value){
-                        ret = Field<Id>::set(self->_oid, string(field), ((_Id*)value)->_id);
+                        ret = Field<Id>::set(self->oid_, string(field), ((_Id*)value)->id_);
                     } else {
                         PyErr_SetString(PyExc_ValueError, "Null pointer passed as Id value.");
                         return NULL;
@@ -941,7 +925,7 @@ extern "C" {
             case 'y': // ObjId
                 {
                     if (value){
-                        ret = Field<ObjId>::set(self->_oid, string(field), ((_ObjId*)value)->_oid);
+                        ret = Field<ObjId>::set(self->oid_, string(field), ((_ObjId*)value)->oid_);
                     } else {
                         PyErr_SetString(PyExc_ValueError, "Null pointer passed as Id value.");
                         return NULL;
@@ -965,7 +949,7 @@ extern "C" {
                         int v = PyInt_AsLong(PySequence_GetItem(value, ii));
                         _value.push_back(v);
                     }
-                    ret = Field< vector < int > >::set(self->_oid, string(field), _value);
+                    ret = Field< vector < int > >::set(self->oid_, string(field), _value);
                     break;
                 }
             case 'w': 
@@ -980,7 +964,7 @@ extern "C" {
                         short v = PyInt_AsLong(PySequence_GetItem(value, ii));
                         _value.push_back(v);
                     }
-                    ret = Field< vector < short > >::set(self->_oid, string(field), _value);
+                    ret = Field< vector < short > >::set(self->oid_, string(field), _value);
                     break;
                 }
             case 'L': //SET_VECFIELD(long, l)
@@ -995,7 +979,7 @@ extern "C" {
                         long v = PyInt_AsLong(PySequence_GetItem(value, ii));
                         _value.push_back(v);
                     }
-                    ret = Field< vector < long > >::set(self->_oid, string(field), _value);
+                    ret = Field< vector < long > >::set(self->oid_, string(field), _value);
                     break;
                 }
             case 'U': //SET_VECFIELD(unsigned int, I)
@@ -1010,7 +994,7 @@ extern "C" {
                         unsigned int v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
                         _value.push_back(v);
                     }
-                    ret = Field< vector < unsigned int > >::set(self->_oid, string(field), _value);
+                    ret = Field< vector < unsigned int > >::set(self->oid_, string(field), _value);
                     break;
                 }
             case 'K': //SET_VECFIELD(unsigned long, k)
@@ -1025,7 +1009,7 @@ extern "C" {
                         unsigned long v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
                         _value.push_back(v);
                     }
-                    ret = Field< vector < unsigned long > >::set(self->_oid, string(field), _value);
+                    ret = Field< vector < unsigned long > >::set(self->oid_, string(field), _value);
                     break;
                 }
             case 'F': //SET_VECFIELD(float, f)
@@ -1040,7 +1024,7 @@ extern "C" {
                         float v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
                         _value.push_back(v);
                     }
-                    ret = Field< vector < float > >::set(self->_oid, string(field), _value);
+                    ret = Field< vector < float > >::set(self->oid_, string(field), _value);
                     break;
                 }
             case 'D': //SET_VECFIELD(double, d)
@@ -1055,7 +1039,7 @@ extern "C" {
                         double v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
                         _value.push_back(v);
                     }
-                    ret = Field< vector < double > >::set(self->_oid, string(field), _value);
+                    ret = Field< vector < double > >::set(self->oid_, string(field), _value);
                     break;
                 }                
             case 'S':
@@ -1070,7 +1054,7 @@ extern "C" {
                         char * v = PyString_AsString(PySequence_GetItem(value, ii));
                         _value.push_back(string(v));
                     }
-                    ret = Field< vector < string > >::set(self->_oid, string(field), _value);
+                    ret = Field< vector < string > >::set(self->oid_, string(field), _value);
                     break;
                 }
                 
@@ -1107,7 +1091,7 @@ extern "C" {
         if (!fieldName){ // not a string, raises TypeError
             return NULL;
         }
-        string type = getFieldType(self->_oid, string(fieldName), "destFinfo");
+        string type = getFieldType(self->oid_, string(fieldName), "destFinfo");
         if (type.empty()){
             error << "No such function field available";
             PyErr_SetString(PyExc_ValueError, error.str().c_str());
@@ -1196,7 +1180,7 @@ extern "C" {
         }
         
         argstring = argstring.substr(0, argstring.length() - 1);        
-        bool ret = SetGet::strSet(self->_oid, string(fieldName), argstring);
+        bool ret = SetGet::strSet(self->oid_, string(fieldName), argstring);
         if (ret){
             Py_RETURN_TRUE;
         } else {
@@ -1219,11 +1203,11 @@ extern "C" {
             static const char * fieldTypes[] = {"valueFinfo", "srcFinfo", "destFinfo", "lookupFinfo", "sharedFinfo", 0};
             const char ** a;
             for (a = &fieldTypes[0]; *a; ++a){
-                vector<string> fields = getFieldNames(self->_oid, string(*a));
+                vector<string> fields = getFieldNames(self->oid_, string(*a));
                 ret.insert(ret.end(), fields.begin(), fields.end());
             }            
         } else {
-            ret = getFieldNames(self->_oid, ftype_str);
+            ret = getFieldNames(self->oid_, ftype_str);
         }
         
         PyObject * pyret = PyTuple_New((Py_ssize_t)ret.size());
@@ -1249,7 +1233,7 @@ extern "C" {
         if (!PyArg_ParseTuple(args, "s:_pymoose_ObjId_getMsgSrc", &field)){
             return NULL;
         }
-        vector< Id > val = LookupField< string, vector< Id > >::get(self->_oid, "msgSrc", string(field));
+        vector< Id > val = LookupField< string, vector< Id > >::get(self->oid_, "msgSrc", string(field));
     
         PyObject * ret = PyTuple_New((Py_ssize_t)val.size());
         for (unsigned int ii = 0; ii < val.size(); ++ ii ){            
@@ -1259,7 +1243,7 @@ extern "C" {
                 ret = NULL;                                 
                 break;                                      
             }
-            entry->_id = val[ii];
+            entry->id_ = val[ii];
         }
         return ret;
     }
@@ -1270,7 +1254,7 @@ extern "C" {
         if (!PyArg_ParseTuple(args, "s:_pymoose_ObjId_getMsgDest", &field)){
             return NULL;
         }
-        vector< Id > val = LookupField< string, vector< Id > >::get(self->_oid, "msgDest", string(field));
+        vector< Id > val = LookupField< string, vector< Id > >::get(self->oid_, "msgDest", string(field));
     
         PyObject * ret = PyTuple_New((Py_ssize_t)val.size());
         for (unsigned int ii = 0; ii < val.size(); ++ ii ){            
@@ -1280,7 +1264,7 @@ extern "C" {
                 ret = NULL;                                 
                 break;                                      
             }
-            entry->_id = val[ii];
+            entry->id_ = val[ii];
         }
         return ret;
         
@@ -1299,7 +1283,7 @@ extern "C" {
             return NULL;
         }
         _ObjId * dest = reinterpret_cast<_ObjId*>(destPtr);
-        bool ret = (getShell().doAddMsg(msgType, self->_oid, string(srcField), dest->_oid, string(destField)) != Msg::badMsg);
+        bool ret = (getShell().doAddMsg(msgType, self->oid_, string(srcField), dest->oid_, string(destField)) != Msg::badMsg);
         if (!ret){
             PyErr_SetString(PyExc_NameError, "connect failed: check field names and type compatibility.");
             return NULL;
@@ -1315,9 +1299,9 @@ extern "C" {
         } else if (!ObjId_SubtypeCheck(other)){
             ret = 0;
         } else if (op == Py_EQ){
-            ret = (self->_oid == ((_ObjId*)other)->_oid);
+            ret = (self->oid_ == ((_ObjId*)other)->oid_);
         } else if (op == Py_NE){
-            ret = !(self->_oid == ((_ObjId*)other)->_oid);
+            ret = !(self->oid_ == ((_ObjId*)other)->oid_);
         } else {
             ret = 0;
         }
@@ -1329,7 +1313,7 @@ extern "C" {
         if (!PyArg_ParseTuple(args, ":_pymoose_ObjId_getDataIndex")){
             return NULL;
         }
-        PyObject * ret = Py_BuildValue("I", self->_oid.dataId.data());
+        PyObject * ret = Py_BuildValue("I", self->oid_.dataId.data());
         return ret;
     }
     static PyObject * _pymoose_ObjId_getFieldIndex(_ObjId * self, PyObject * args)
@@ -1337,7 +1321,7 @@ extern "C" {
         if (!PyArg_ParseTuple(args, ":_pymoose_ObjId_getFieldIndex")){
             return NULL;
         }
-        PyObject * ret = Py_BuildValue("I", self->_oid.dataId.field());
+        PyObject * ret = Py_BuildValue("I", self->oid_.dataId.field());
         return ret;
     }
     
@@ -1362,13 +1346,13 @@ extern "C" {
             PyErr_SetString(PyExc_TypeError, "Destination must be instance of Id.");
             return NULL;
         }
-        if (((_Id*)src)->_id == Id()){
+        if (((_Id*)src)->id_ == Id()){
             PyErr_SetString(PyExc_ValueError, "Cannot make copy of moose shell.");
             return NULL;
         }
         _Id * tgt = PyObject_New(_Id, &IdType);
         
-        tgt->_id = getShell().doCopy(((_Id*)src)->_id, ((_Id*)dest)->_id, string(newName), num, toGlobal, copyExtMsgs);
+        tgt->id_ = getShell().doCopy(((_Id*)src)->id_, ((_Id*)dest)->id_, string(newName), num, toGlobal, copyExtMsgs);
         PyObject * ret = (PyObject*)tgt;
         return ret;            
     }
@@ -1381,11 +1365,11 @@ extern "C" {
         if (!PyArg_ParseTuple(args, "OO:_pymoose_move", &src, &dest)){
             return NULL;
         }
-        if (((_Id*)src)->_id == Id()){
+        if (((_Id*)src)->id_ == Id()){
             PyErr_SetString(PyExc_ValueError, "Cannot move moose shell");
             return NULL;
         }
-        getShell().doMove(((_Id*)src)->_id, ((_Id*)dest)->_id);
+        getShell().doMove(((_Id*)src)->id_, ((_Id*)dest)->id_);
         Py_RETURN_NONE;
     }
 
@@ -1395,12 +1379,12 @@ extern "C" {
         if (!PyArg_ParseTuple(args, "O:_pymoose_delete", &obj)){
             return NULL;
         }
-        if (((_Id*)obj)->_id == Id()){
+        if (((_Id*)obj)->id_ == Id()){
             PyErr_SetString(PyExc_ValueError, "Cannot delete moose shell.");
             return NULL;
         }
-        getShell().doDelete(((_Id*)obj)->_id);
-        ((_Id*)obj)->_id = Id();
+        getShell().doDelete(((_Id*)obj)->id_);
+        ((_Id*)obj)->id_ = Id();
         Py_RETURN_NONE;
     }
 
@@ -1473,9 +1457,9 @@ extern "C" {
         }
         _Id * model = (_Id*)PyObject_New(_Id, &IdType);
         if (!solverclass){
-            model->_id = getShell().doLoadModel(string(fname), string(modelpath));
+            model->id_ = getShell().doLoadModel(string(fname), string(modelpath));
         } else {
-            model->_id = getShell().doLoadModel(string(fname), string(modelpath), string(solverclass));
+            model->id_ = getShell().doLoadModel(string(fname), string(modelpath), string(solverclass));
         }
         PyObject * ret = reinterpret_cast<PyObject*>(model);
         return ret;
@@ -1491,9 +1475,9 @@ extern "C" {
         } else if (PyArg_ParseTuple(args, "O:_pymoose_setCwe", &element)){
             PyErr_Clear();
             if (Id_SubtypeCheck(element)){
-                id = (reinterpret_cast<_Id*>(element))->_id;
+                id = (reinterpret_cast<_Id*>(element))->id_;
             } else if (ObjId_SubtypeCheck(element)){
-                    id = (reinterpret_cast<_ObjId*>(element))->_oid.id;                    
+                    id = (reinterpret_cast<_ObjId*>(element))->oid_.id;                    
             } else {
                 PyErr_SetString(PyExc_NameError, "setCwe: Argument must be an Id or ObjId");
                 return NULL;
@@ -1511,7 +1495,7 @@ extern "C" {
             return NULL;
         }
         _Id * cwe = (_Id*)PyObject_New(_Id, &IdType);
-        cwe->_id = getShell().getCwe();        
+        cwe->id_ = getShell().getCwe();        
         PyObject * ret = (PyObject*)cwe;
         return ret;
     }
@@ -1525,7 +1509,7 @@ extern "C" {
         }
         _ObjId * dest = reinterpret_cast<_ObjId*>(destPtr);
         _ObjId * src = reinterpret_cast<_ObjId*>(srcPtr);
-        bool ret = (getShell().doAddMsg(msgType, src->_oid, string(srcField), dest->_oid, string(destField)) != Msg::badMsg);
+        bool ret = (getShell().doAddMsg(msgType, src->oid_, string(srcField), dest->oid_, string(destField)) != Msg::badMsg);
         if (!ret){
             PyErr_SetString(PyExc_NameError, "connect failed: check field names and type compatibility.");
             return NULL;
@@ -1576,7 +1560,7 @@ extern "C" {
     }
 
     void inner_getFieldDict(Id classId, string finfoType, vector<string>& fieldNames, vector<string>&fieldTypes)
-    {        
+    {
         unsigned int numFinfos = Field<unsigned int>::get(ObjId(classId), "num_" + string(finfoType));
         Id fieldId(classId.path() + "/" + string(finfoType));
         assert(fieldId != Id());
@@ -1587,6 +1571,13 @@ extern "C" {
             fieldTypes.push_back(fieldType);
         }        
     }
+
+    PyObject * _pymoose_syncDataHandler(PyObject * dummy, _Id * target)
+    {
+        getShell().doSyncDataHandler(target->id_);
+        Py_RETURN_NONE;
+    }
+
 
 } // end extern "C"
 
