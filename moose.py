@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Thu Aug 25 18:35:42 2011 (+0530)
+# Last-Updated: Mon Aug 29 16:18:10 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 831
+#     Update #: 911
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -141,7 +141,7 @@ will be effective on the other.
 Neutral -- The base class for all elements in object of class
 NeutralArray or derivatives of NeutralArray. A Neutral will always point
 to an index in an existing entity. The underlying data is ObjId (field
-_oid) - a triplet of id, dataIndex and fieldIndex. Here id is the Id
+oid_) - a triplet of id, dataIndex and fieldIndex. Here id is the Id
 of the NeutralArray object containing this element. dataIndex is the index
 of this element in the container. FieldIndex is a tertiary index and
 used only when this element acts as a field of another
@@ -217,9 +217,15 @@ loadModel(filepath, modelpath) -- load file in <filepath> into node
 setCwe(obj) -- set the current working element to <obj> - which can be
 either a string representing the path of the object in the moose
 model-tree, or an Id.
+cwe(obj) -- an alias for setCwe.
 
 getCwe() -- returns Id of the current working element.
+pwe() -- an alias for getCwe.
 
+showfields(obj) -- print the fields in object in human readable format
+
+le(obj) -- list element under object, if no parameter specified, list
+elements under current working element
 
 """
 
@@ -236,10 +242,10 @@ class _MooseDescriptor(object):
         self.name = name
 
     def __get__(self, obj, objtype=None):
-        return obj._oid.getField(self.name)
+        return obj.oid_.getField(self.name)
 
     def __set__(self, obj, value):
-        obj._oid.setField(self.name, value)
+        obj.oid_.setField(self.name, value)
 
     def __delete__(self, obj):
         raise AttributeError('ValueFinfos cannot be deleted.')
@@ -259,7 +265,7 @@ class NeutralArray(object):
     def __init__(self, *args, **kwargs):
         path ='/'
         dims = [1]
-        self._id = None
+        self.id_ = None
         try:
             className = kwargs['type']
             self.className = className
@@ -279,53 +285,64 @@ class NeutralArray(object):
             if isinstance(args[0], str):
                 path = args[0]
             elif isinstance(args[0], Id):
-                self._id = args[0]
+                self.id_ = args[0]
             elif isinstance(args[0], int):
-                self._id = Id(args[0])
+                self.id_ = Id(args[0])
         if len(args) > 1:
             dims = args[1]
         if len(args) > 2:
             self.className = args[2]
-        if self._id is None:
-            self._id = _moose.Id(path=path, dims=dims, type=self.className)
-        orig_classname = self._id[0].getField('class')
+        if self.id_ is None:
+            self.id_ = _moose.Id(path=path, dims=dims, type=self.className)
+        orig_classname = self.id_[0].getField('class')
         if self.__class__.__name__ != orig_classname+'Array':
             orig_class = eval('%sArray' % (orig_classname))
             if self.__class__ not in orig_class.mro():        
-                self._id = None
+                self.id_ = None
                 raise TypeError('Cannot convert %s to %s' % (orig_class, self.__class__))
 
     def getFieldNames(self, ftype=''):
-        return self._id[0].getFieldNames(ftype)
+        """Return a list of fields available in this object.
+
+        Parameters:
+
+        str ftype -- (default '') category of field, valid values are:
+        valueFinfo, lookupFinfo, srcFinfo, destFinfo or sharedFinfo.
+
+        If empty string or not specified, returns names of fields from
+        all categories.
+        """
+        
+        return self.id_[0].getFieldNames(ftype)
 
     def getFieldType(self, field):
-        return self._id[0].getFieldType(field)
+        """Return the data type of the field as a string."""
+        return self.id_[0].getFieldType(field)
 
     def __getitem__(self, index):
-        objid = self._id[index]
-        retclass = eval(self._id[0].getField('class'))
+        objid = self.id_[index]
+        retclass = eval(self.id_[0].getField('class'))
         ret = retclass(objid)
         return ret
 
     def __len__(self):
-        return len(self._id)
+        return len(self.id_)
 
     def __contains__(self, other):
         if isinstance(other, Neutral):
-            return other._oid in self._id
+            return other.oid_ in self.id_
         elif isinstance(other, ObjId):
-            return other in self._id
+            return other in self.id_
         else:
             return False
 
     def __repr__(self):
-        return self._id.getPath()
+        return self.id_.getPath()
 
-    path = property(lambda self: self._id.getPath())
-    id_ = property(lambda self: self._id)
-    fieldNames = property(lambda self: self._id[0].getFieldNames('valueFinfo'))
-    name = property(lambda self: self._id[0].getField('name'))
-    shape = property(lambda self: self._id.getShape())
+    path = property(lambda self: self.id_.getPath())
+    fieldNames = property(lambda self: self.id_[0].getFieldNames('valueFinfo'))
+    name = property(lambda self: self.id_[0].getField('name'))
+    shape = property(lambda self: self.id_.getShape())
     
 
         
@@ -341,9 +358,9 @@ class Neutral(object):
             elif isinstance(args[0], Id):
                 id_ = args[0].getValue()
             elif isinstance(args[0], Neutral):
-                (id_, dindex, findex) = (args[0]._oid.getId().getValue(),args[0]._oid.getDataIndex(), args[0]._oid.getFieldIndex())
+                (id_, dindex, findex) = (args[0].oid_.getId().getValue(),args[0].oid_.getDataIndex(), args[0].oid_.getFieldIndex())
             elif isinstance(args[0], NeutralArray):
-                id_ = args[0]._id
+                id_ = args[0].id_
             elif isinstance(args[0], str):
                 path = args[0].replace('[', ' ').replace(']', ' ')
                 components = path.split('/')
@@ -394,34 +411,34 @@ class Neutral(object):
                 findex = kwargs['fieldIndex']
             except KeyError:
                 pass
-        self._oid = _moose.ObjId(id_, dindex, findex)
-        orig_classname = self._oid.getField('class')
+        self.oid_ = _moose.ObjId(id_, dindex, findex)
+        orig_classname = self.oid_.getField('class')
         if self.__class__.__name__ != orig_classname:
             orig_class = eval(orig_classname)
             if self.__class__ not in orig_class.mro():
-                self._oid = None
+                self.oid_ = None
                 raise TypeError('Cannot convert %s to %s' % (orig_class, self.__class__))
 
     def getField(self, field):
-        return self._oid.getField(field)
+        return self.oid_.getField(field)
 
     def getFieldType(self, field):
-        return self._oid.getFieldType(field)
+        return self.oid_.getFieldType(field)
 
     def getFieldNames(self, fieldType=None):
         if fieldType is None:
-            return self._oid.getFieldNames()
+            return self.oid_.getFieldNames()
         else:
-            return self._oid.getFieldNames(fieldType)
+            return self.oid_.getFieldNames(fieldType)
 
     def getMsgSrc(self, fieldName):
-        return self._oid.getMsgSrc(fieldName)
+        return self.oid_.getMsgSrc(fieldName)
     
     def getMsgDest(self, fieldName):
-        return self._oid.getMsgDest(fieldName)
+        return self.oid_.getMsgDest(fieldName)
 
     def connect(self, srcField, dest, destField, msgType='Single'):
-        return self._oid.connect(srcField, dest._oid, destField, msgType)
+        return self.oid_.connect(srcField, dest.oid_, destField, msgType)
 
     
     def inMessages(self):
@@ -445,13 +462,13 @@ class Neutral(object):
         return msg_list
     
     
-    className = property(lambda self: self._oid.getField('class'))
-    fieldNames = property(lambda self: self._oid.getFieldNames())
-    name = property(lambda self: self._oid.getField('name'))
-    path = property(lambda self: '%s[%d]' % (self._oid.getField('path'), self._oid.getDataIndex()))
-    id_ = property(lambda self: self._oid.getId())
-    fieldIndex = property(lambda self: self._oid.getFieldIndex())
-    dataIndex = property(lambda self: self._oid.getDataIndex())
+    className = property(lambda self: self.oid_.getField('class'))
+    fieldNames = property(lambda self: self.oid_.getFieldNames())
+    name = property(lambda self: self.oid_.getField('name'))
+    path = property(lambda self: '%s[%d]' % (self.oid_.getField('path'), self.oid_.getDataIndex()))
+    id_ = property(lambda self: self.oid_.getId())
+    fieldIndex = property(lambda self: self.oid_.getFieldIndex())
+    dataIndex = property(lambda self: self.oid_.getDataIndex())
 
 
 ################################################################
@@ -460,32 +477,32 @@ class Neutral(object):
 
 def copy(src, dest, name, n=1, copyMsg=True):
     if isinstance(src, NeutralArray):
-        src = src._id
+        src = src.id_
     if isinstance(dest, NeutralArray):
-        dest = dest._id
+        dest = dest.id_
     new_id = _moose.copy(src=src, dest=dest, name=name, n=n, copyMsg=copyMsg)
     ret = NeutralArray(new_id)
     return ret
 
 def move(src, dest):
     if isinstance(src, NeutralArray):
-        src = src._id
+        src = src.id_
     if isinstance(dest, NeutralArray):
-        dest = dest._id
+        dest = dest.id_
     _moose.move(src, dest)
 
 def delete(target):
     if isinstance(target, NeutralArray):
-        target = target._id
+        target = target.id_
     if not isinstance(target, Id):
         raise TypeError('Only Id or Array objects can be deleted: received %s' % (target.__class__.__name__))
     _moose.delete(target)
     
 def setCwe(element):
     if isinstance(element, NeutralArray):
-        _moose.setCwe(element._id)
+        _moose.setCwe(element.id_)
     elif isinstance(element, Neutral):
-        _moose.setCwe(element._oid)
+        _moose.setCwe(element.oid_)
     else:
         _moose.setCwe(element)
 
@@ -498,9 +515,9 @@ def connect(src, srcMsg, dest, destMsg, msgType='Single'):
     """Connect src object's source field specified by srcMsg to
     destMsg field of target object."""
     if isinstance(src, Neutral):
-        src = src._oid
+        src = src.oid_
     if isinstance(dest, Neutral):
-        dest = dest._oid
+        dest = dest.oid_
     return src.connect(srcMsg, dest, destMsg, msgType)
 
 def le(element=None):
@@ -512,7 +529,50 @@ def le(element=None):
     for ch in element.children:
         print ch
     
+def syncDataHandler(target):
+    """Synchronize data handlers for target.
 
+    Parameter:
+    target -- target element or path or Id.
+    """
+    raise NotImplementedError('The implementation is not working for IntFire - goes to invalid objects. First fix that issue with SynBase or something in that line.')
+    if isinstance(target, str):
+        if not _moose.exists(target):
+            raise ValueError('%s: element does not exist.' % (target))
+        target = Id(target)
+        _moose.syncDataHandler(target)
+
+def showfields(element):
+    """Show the fields of the element, their data types and values in
+    human readable format.
+
+    Parameters:
+
+    element -- Element or path of an existing element or ObjId of an element.
+
+    showtype -- show the data type of each field or not.
+
+    """
+    if isinstance(element, str):
+        if not moose.exists(element):
+            raise ValueError('%s -- no such moose object exists.' % (element))
+        element = Neutral(element)
+    if not isinstance(element, Neutral):
+        if not isinstance(element, ObjId):
+            raise TypeError('Expected argument of type ObjId or Neutral or a path to an existing object. Found %s' % (type(element)))
+        element = Neutral(element)
+    value_field_dict = getFieldDict(element.className, 'valueFinfo')
+    print '------------------------------------'
+    print 'Value Fields of ', element.path
+    print '------------------------------------'
+    for key, dtype in value_field_dict.items():
+        if dtype == 'bad':
+            continue
+        value = element.oid_.getField(key)        
+        print dtype, key, ' = ', value
+        
+        
+    
 #######################################################
 # This is to generate class definitions automatically
 #######################################################
@@ -557,7 +617,7 @@ def define_class(classId):
             index += 1
         if cont_flag:
             continue
-        function_string = '%s: self._oid.setDestField(%s)' % (fndef, fnargs)
+        function_string = '%s: self.oid_.setDestField(%s)' % (fndef, fnargs)
         # print 'Setting %s.%s - Function string: %s' % (class_obj.__name__, finfoName, function_string)
         setattr(class_obj, finfoName, eval(function_string))
 
