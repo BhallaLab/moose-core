@@ -53,6 +53,8 @@ public:
 	
 	/// Interface to CaConc
 	const vector< Id >& getCaConcs( ) const;
+	double getCaBasal( unsigned int index ) const;
+	void setCaBasal( unsigned int index, double value );
 	double getCa( unsigned int index ) const;
 	void setCa( unsigned int index, double value );
 	

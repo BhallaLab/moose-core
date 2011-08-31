@@ -61,6 +61,8 @@ public:
 	static double getZ( Eref e );
 	
 	/// CaConc fields
+	static void setCaBasal( const Conn* c, double value );
+	static double getCaBasal( Eref e );
 	static void setCa( const Conn* c, double value );
 	static double getCa( Eref e );
 	///////////////////////////////////////////////////
