@@ -245,6 +245,19 @@ void HSolveActive::setZ( unsigned int index, double value )
 	state_[ stateIndex ] = value;
 }
 
+double HSolveActive::getCaBasal( unsigned int index ) const
+{
+	assert( index < caConc_.size() );
+	return caConc_[ index ].CaBasal_;
+}
+
+void HSolveActive::setCaBasal( unsigned int index, double value )
+{
+	assert( index < caConc_.size() );
+	
+	caConc_[ index ].CaBasal_ = value;
+}
+
 double HSolveActive::getCa( unsigned int index ) const
 {
 	assert( index < caConc_.size() );
