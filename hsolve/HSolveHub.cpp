@@ -856,6 +856,29 @@ double HSolveHub::getZ( Eref e )
 	return 0.0;
 }
 
+void HSolveHub::setCaBasal( const Conn* c, double value )
+{
+	Eref e = c->target();
+	set< double >( e, caConcCaFinfo, value );
+	
+	unsigned int index;
+	HSolveHub* nh = getHubFromZombie( e, index );
+	
+	if ( nh )
+		nh->integ_->setCaBasal( index, value );
+}
+
+double HSolveHub::getCaBasal( Eref e )
+{
+	unsigned int index;
+	HSolveHub* nh = getHubFromZombie( e, index );
+	
+	if ( nh )
+		return nh->integ_->getCaBasal( index );
+	
+	return 0.0;
+}
+
 void HSolveHub::setCa( const Conn* c, double value )
 {
 	Eref e = c->target();
