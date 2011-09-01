@@ -14879,6 +14879,32 @@ reinit.
 Another thing to check: will it work for the same reac defined in kkit.
 Yes, seems to. enz3.py.
 
+Checkin 2955, which basically puts in the ReadCspace fixes.
+
 Next key thing: get the volume scaling fixed.
 
 ============================================================================
+31 Aug 2011.
+
+Updated CubeMesh to have a flag 'preserveNumEntries' which decides whether nx
+or dx will remain the same when the cube is resized.
+
+For conc scaling, I need to replace several things:
+	- Messages formed from reac to pools should be OneToAll. A single
+		reac will deal with all pool entries in the compt
+	- kf, kb should be removed, Kf, Kb are now native units.
+		- setKf should now use the volScale
+		- setConcKf should not use the volScale
+	- the volScale function should iterate over all reactants. 
+		- Figure out what to do about the n-1 power used for scaling.
+		Perhaps that should not be n-1.
+	- ReadKkit and ReadCspace will need fixing for their setups of reacs.
+	- Need a sensible default for pool mesh entries for their volumes.
+
+============================================================================
+1 Sep 2011
+Running unit tests. Some things to add:
+- Test out the case where CubeMesh::preserveNumEntries is true in 
+	testShell.cpp.
+- Test out preserveNumEntries in testMesh.cpp.
+

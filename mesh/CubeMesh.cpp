@@ -76,6 +76,49 @@ const Cinfo* CubeMesh::initCinfo()
 			&CubeMesh::getDz
 		);
 
+		static ValueFinfo< CubeMesh, unsigned int > nx(
+			"nx",
+			"Number of subdivisions in mesh in X",
+			&CubeMesh::setNx,
+			&CubeMesh::getNx
+		);
+		static ValueFinfo< CubeMesh, unsigned int > ny(
+			"ny",
+			"Number of subdivisions in mesh in Y",
+			&CubeMesh::setNy,
+			&CubeMesh::getNy
+		);
+		static ValueFinfo< CubeMesh, unsigned int > nz(
+			"nz",
+			"Number of subdivisions in mesh in Z",
+			&CubeMesh::setNz,
+			&CubeMesh::getNz
+		);
+
+		static ValueFinfo< CubeMesh, bool > isToroid(
+			"isToroid",
+			"Flag. True when the mesh should be toroidal, that is,"
+			"when going beyond the right face brings us around to the"
+			"left-most mesh entry, and so on. If we have nx, ny, nz"
+			"entries, this rule means that the coordinate (x, ny, z)"
+			"will map onto (x, 0, z). Similarly,"
+			"(-1, y, z) -> (nx-1, y, z)"
+			"Default is false",
+			&CubeMesh::setIsToroid,
+			&CubeMesh::getIsToroid
+		);
+
+		static ValueFinfo< CubeMesh, bool > preserveNumEntries(
+			"preserveNumEntries",
+			"Flag. When it is true, the numbers nx, ny, nz remain"
+			"unchanged when x0, x1, y0, y1, z0, z1 are altered. Thus"
+			"dx, dy, dz would change instead. When it is false, then"
+			"dx, dy, dz remain the same and nx, ny, nz are altered."
+			"Default is true",
+			&CubeMesh::setPreserveNumEntries,
+			&CubeMesh::getPreserveNumEntries
+		);
+
 		static ValueFinfo< CubeMesh, vector< double > > coords(
 			"coords",
 			"Set all the coords of the cuboid at once. Order is:"
@@ -117,6 +160,8 @@ const Cinfo* CubeMesh::initCinfo()
 		//////////////////////////////////////////////////////////////
 
 	static Finfo* cubeMeshFinfos[] = {
+		&isToroid,		// Value
+		&preserveNumEntries,		// Value
 		&x0,			// Value
 		&y0,			// Value
 		&z0,			// Value
@@ -154,6 +199,7 @@ static const Cinfo* cubeMeshCinfo = CubeMesh::initCinfo();
 CubeMesh::CubeMesh()
 	:
 		isToroid_( 0 ),
+		preserveNumEntries_( 1 ),
 		x0_( 0.0 ),
 		y0_( 0.0 ),
 		z0_( 0.0 ),
@@ -189,13 +235,19 @@ CubeMesh::~CubeMesh()
  */
 void CubeMesh::updateCoords()
 {
-	nx_ = ceil( (x1_ - x0_) / dx_ );
-	ny_ = ceil( (y1_ - y0_) / dy_ );
-	nz_ = ceil( (z1_ - z0_) / dz_ );
-
-	if ( nx_ == 0 ) nx_ = 1;
-	if ( ny_ == 0 ) ny_ = 1;
-	if ( nz_ == 0 ) nz_ = 1;
+	if ( preserveNumEntries_ ) {
+		dx_ = ( x1_ - x0_ ) / nx_;
+		dy_ = ( y1_ - y0_ ) / ny_;
+		dz_ = ( z1_ - z0_ ) / nz_;
+	} else {
+		nx_ = ceil( (x1_ - x0_) / dx_ );
+		ny_ = ceil( (y1_ - y0_) / dy_ );
+		nz_ = ceil( (z1_ - z0_) / dz_ );
+	
+		if ( nx_ == 0 ) nx_ = 1;
+		if ( ny_ == 0 ) ny_ = 1;
+		if ( nz_ == 0 ) nz_ = 1;
+	}
 
 	/// Temporarily fill out the whole cube.
 	unsigned int size = nx_ * ny_ * nz_;
@@ -304,6 +356,61 @@ void CubeMesh::setDz( double v )
 double CubeMesh::getDz() const
 {
 	return dz_;
+}
+
+void CubeMesh::setNx( unsigned int v )
+{
+	nx_ = v;
+	updateCoords();
+}
+
+unsigned int CubeMesh::getNx() const
+{
+	return nx_;
+}
+
+
+void CubeMesh::setNy( unsigned int v )
+{
+	ny_ = v;
+	updateCoords();
+}
+
+unsigned int CubeMesh::getNy() const
+{
+	return ny_;
+}
+
+void CubeMesh::setNz( unsigned int v )
+{
+	nz_ = v;
+	updateCoords();
+}
+
+unsigned int CubeMesh::getNz() const
+{
+	return nz_;
+}
+
+
+void CubeMesh::setIsToroid( bool v )
+{
+	isToroid_ = v;
+}
+
+bool CubeMesh::getIsToroid() const
+{
+	return isToroid_;
+}
+
+void CubeMesh::setPreserveNumEntries( bool v )
+{
+	preserveNumEntries_ = v;
+}
+
+bool CubeMesh::getPreserveNumEntries() const
+{
+	return preserveNumEntries_;
 }
 
 void CubeMesh::setCoords( vector< double > v )
