@@ -188,6 +188,7 @@ void testMidLevelCylMesh()
 void testCubeMesh()
 {
 	CubeMesh cm;
+	cm.setPreserveNumEntries( 0 );
 	assert( cm.getMeshType( 0 ) == CUBOID );
 	assert( cm.getMeshDimensions( 0 ) == 3 );
 	assert( cm.getDimensions() == 3 );

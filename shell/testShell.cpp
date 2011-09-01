@@ -1481,13 +1481,18 @@ void testShellMesh()
 	vector< double > meshCoords( 9, 0.0 );
 	meshCoords[3] = meshCoords[4] = meshCoords[5] = 10.0;
 	meshCoords[6] = meshCoords[7] = meshCoords[8] = 1.0;
+
+	bool ret = Field< bool >::set( compt, "preserveNumEntries", 0 );
+	assert( ret );
 	
-	Field< vector< double > >::set( compt, "coords", meshCoords );
+	ret = Field< vector< double > >::set( compt, "coords", meshCoords );
+	assert( ret );
 	// Can't do this at this stage because the reduceQ hasn't been set up.
 	// shell->doSyncDataHandler( mesh );
 
 	double testN = 123.0;
-	Field< double >::set( pool, "n", testN );
+	ret = Field< double >::set( pool, "n", testN );
+	assert( ret );
 	
 	unsigned int size = Field< unsigned int >::get( mesh, "localNumField");
 	assert( size == 1000 );

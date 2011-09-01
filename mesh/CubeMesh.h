@@ -12,9 +12,9 @@
 
 /**
  * The CubeMesh represents a chemically identified compartment shaped
- * like an extended cylinder. This is psuedo-1 dimension: Only the
- * axial dimension is considered for diffusion and subdivisions.
- * Typically used in modelling small segments of dendrite
+ * like a cuboid. This is not really an effective geometry for most
+ * neurons because it would have to be rather finely subdivided to fit
+ * a typical dendrite or soma volume, but it is general.
  */
 class CubeMesh: public ChemMesh
 {
@@ -47,6 +47,13 @@ class CubeMesh: public ChemMesh
 		void setDz( double v );
 		double getDz() const;
 
+		void setNx( unsigned int v );
+		unsigned int getNx() const;
+		void setNy( unsigned int v );
+		unsigned int getNy() const;
+		void setNz( unsigned int v );
+		unsigned int getNz() const;
+
 		void setCoords( vector< double > v );
 		vector< double > getCoords() const;
 
@@ -57,6 +64,12 @@ class CubeMesh: public ChemMesh
 		vector< unsigned int > getSpaceToMesh() const;
 
 		unsigned int innerGetDimensions() const;
+
+		void setIsToroid( bool v );
+		bool getIsToroid() const;
+
+		void setPreserveNumEntries( bool v );
+		bool getPreserveNumEntries() const;
 
 		//////////////////////////////////////////////////////////////////
 		// FieldElement assignment stuff for MeshEntries
@@ -111,7 +124,8 @@ class CubeMesh: public ChemMesh
 
 	private:
 		double size_; /// Total Volume
-		bool isToroid_; // Flag: Should the ends loop around mathemagically?
+		bool isToroid_; ///Flag: Should the ends loop around mathemagically?
+		bool preserveNumEntries_; ///Flag: Should dx change or nx, with vol?
 
 		double x0_; /// coords
 		double y0_; /// coords
