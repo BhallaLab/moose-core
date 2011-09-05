@@ -14907,4 +14907,8 @@ Running unit tests. Some things to add:
 - Test out the case where CubeMesh::preserveNumEntries is true in 
 	testShell.cpp.
 - Test out preserveNumEntries in testMesh.cpp.
+Checkin 2964.
 
+============================================================================
+4 Sep 2011.
+Added test where CubeMesh::preserveNumEntries is true in testShell.cpp.
