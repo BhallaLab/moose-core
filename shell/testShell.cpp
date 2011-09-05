@@ -1508,6 +1508,34 @@ void testShellMesh()
 	assert( numMols.size() == size );
 	for ( unsigned int i = 0; i < size; ++i )
 		assert( doubleEq( numMols[i] , testN ) );
+	
+	///////////////////////////////////////////////////////////////////
+	// Here we preserve the numEntries but change sizes to 1/1000 of orig.
+	///////////////////////////////////////////////////////////////////
+	ret = Field< bool >::set( compt, "preserveNumEntries", 1 );
+	meshCoords[3] = meshCoords[4] = meshCoords[5] = 1.0;
+	ret = Field< vector< double > >::set( compt, "coords", meshCoords );
+	assert( ret );
+	meshCoords = Field< vector< double > >::get( compt, "coords" );
+	assert( doubleEq( meshCoords[6], 0.1 ) );
+	assert( doubleEq( meshCoords[7], 0.1 ) );
+	assert( doubleEq( meshCoords[8], 0.1 ) );
+
+	shell->handleReMesh( mesh );
+	size = Field< unsigned int >::get( pool, "linearSize" );
+	assert( size == 1000 );
+
+	// vector< double > temp( size, testN );
+	// Field< double >::setVec( pool, "conc", temp );
+	ret = Field< double >::setRepeat( pool, "conc", testN );
+	assert( ret );
+	Field< double >::getVec( pool, "n", numMols );
+	double numShouldBe = NA * testN * 1e-3 * 1e-3;
+	for ( unsigned int i = 0; i < size; ++i )
+		assert( doubleEq( numMols[i] , numShouldBe ) );
+
+
+	assert( ret );
 
 	shell->doDelete( compt );
 	cout << "." << flush;
