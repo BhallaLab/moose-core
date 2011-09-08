@@ -35,6 +35,16 @@ class Shell
 		///////////////////////////////////////////////////////////
 		// Field functions
 		///////////////////////////////////////////////////////////
+                /**
+                 * Returns version number of the software.
+                 */
+                string doVersion();
+                /**
+                 * Returns SVN revision number of the software. This
+                 * information is useful for developers. In release
+                 * versions it defaults to "0".
+                 */
+                string doRevision();
 		/**
 		 * Assigns the current working Element of the Shell
 		 */

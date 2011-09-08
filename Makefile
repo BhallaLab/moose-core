@@ -134,11 +134,18 @@ endif
 #
 #CXXFLAGS  =	-g -Wall -pedantic -DDO_UNIT_TESTS -ffriend-injection -DUSE_GENESIS_PARSER
 
-##########################################################################
-#
-# Don't mess with stuff below!
-#
-##########################################################################
+# Insert the svn revision no. into the code as a preprocessor macro.
+# Only for release versions we want to pass SVN=0 to make.
+ifndef SVN
+SVN?=1
+endif
+ifneq ($(SVN),0)
+SVN_REVISION=$(shell svnversion)
+ifneq ($(SVN_REVISION),export)
+CXXFLAGS+=-DSVN_REVISION=\"$(SVN_REVISION)\"
+endif
+endif
+
 
 
 # Libraries are defined below. For now we do not use threads.
@@ -151,17 +158,7 @@ LIBS =	-lm -lpthread -L/usr/lib -L/usr/local/lib
 ##########################################################################
 #
 # Developer options (Don't try these unless you are writing new code!)
-#
-# For generating python interface:
-# Do remember that you have to create a directory named "generated" 
-# in the working directory of moose. Also you have to do some editing 
-# to get the generated code to work. 
-# Although this binary of MOOSE is verbose in its complaints, is completely harmless 
-# except for the overhead of  checks for the existence of a few files at startup.
-ifdef GENERATE_WRAPPERS
-CXXFLAGS += -DGENERATE_WRAPPERS
-endif
-
+##########################################################################
 # For parallel (MPI) version:
 ifdef USE_MUSIC
 USE_MPI = 1		# Automatically enable MPI if USE_MUSIC is on

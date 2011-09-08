@@ -30,6 +30,17 @@
 
 using namespace std;
 
+// MOOSE version is hard coded here. Can be overridden from a
+// makefile.
+#ifndef MOOSE_VERSION
+#define MOOSE_VERSION "3.0"
+#endif
+// SVN revision number should be automatically detected in top level
+// Makefile and passed to gcc. For release versions, it defaults to
+// "0".
+#ifndef SVN_REVISION
+#define SVN_REVISION "0"
+#endif
 /**
  * Looks up and uniquely identifies functions, on a per-Cinfo basis.
  * These are NOT global indices to identify the function.

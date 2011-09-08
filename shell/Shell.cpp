@@ -824,6 +824,15 @@ void Shell::handleSetParserIdleFlag( bool isParserIdle )
 // DestFuncs
 ////////////////////////////////////////////////////////////////
 
+string Shell::doVersion()
+{
+    return MOOSE_VERSION;
+}
+
+string Shell::doRevision()
+{
+    return SVN_REVISION;
+}
 
 void Shell::setCwe( Id val )
 {

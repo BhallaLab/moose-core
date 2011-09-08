@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Mon Aug 29 16:18:10 2011 (+0530)
+# Last-Updated: Thu Sep  8 15:06:50 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 911
+#     Update #: 913
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -229,11 +229,9 @@ elements under current working element
 
 """
 
-__version__ = "$Revision$"
-# $Source$
 
 import _moose
-from _moose import useClock, setClock, start, reinit, stop, isRunning, loadModel, getFieldDict, Id, ObjId, exists
+from _moose import __version__, VERSION, SVN_REVISION, useClock, setClock, start, reinit, stop, isRunning, loadModel, getFieldDict, Id, ObjId, exists
 
 
 class _MooseDescriptor(object):
