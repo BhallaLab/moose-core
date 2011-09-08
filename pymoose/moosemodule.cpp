@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Mon Aug 29 16:15:09 2011 (+0530)
+// Last-Updated: Thu Sep  8 15:02:30 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4250
+//     Update #: 4258
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -313,14 +313,15 @@ extern "C" {
         
         setup_runtime_env(true);
         getShell();
-        if (getShell().myNode() == 0) {
-        }    
         assert (Py_AtExit(&finalize) == 0);                
         PyModule_AddIntConstant(moose_module, "SINGLETHREADED", isSingleThreaded);
         PyModule_AddIntConstant(moose_module, "NUMCORES", numCores);
         PyModule_AddIntConstant(moose_module, "NUMNODES", numNodes);
         PyModule_AddIntConstant(moose_module, "MYNODE", myNode);
         PyModule_AddIntConstant(moose_module, "INFINITE", isInfinite);
+        PyModule_AddStringConstant(moose_module, "__version__", getShell().doVersion().c_str());
+        PyModule_AddStringConstant(moose_module, "VERSION", getShell().doVersion().c_str());
+        PyModule_AddStringConstant(moose_module, "SVN_REVISION", getShell().doRevision().c_str());
         
     }
     
