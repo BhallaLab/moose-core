@@ -1008,6 +1008,8 @@ bool Shell::innerAddMsg( string msgType, MsgId mid,
 		m = new SingleMsg( mid, src.eref(), dest.eref() );
 	} else if ( msgType == "OneToAll" || msgType == "oneToAll" ) {
 		m = new OneToAllMsg( mid, src.eref(), dest.id() );
+	} else if ( msgType == "AllToOne" || msgType == "allToOne" ) {
+		m = new OneToAllMsg( mid, dest.eref(), src.id() ); // Little hack.
 	} else if ( msgType == "OneToOne" || msgType == "oneToOne" ) {
 		m = new OneToOneMsg( mid, src.id(), dest.id() );
 	} else if ( msgType == "Reduce" || msgType == "reduce" ) {

@@ -116,6 +116,8 @@ const Cinfo* Reac::initCinfo()
 	static Finfo* reacFinfos[] = {
 		&kf,	// Value
 		&kb,	// Value
+		&Kf,	// Value
+		&Kb,	// Value
 		&requestSize,		// SrcFinfo
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
@@ -254,7 +256,7 @@ double Reac::getConcKf( const Eref& e, const Qinfo* q ) const
 
 void Reac::setConcKb( const Eref& e, const Qinfo* q, double v )
 {
-	prd_ = kf_ = v * volScale( e, &requestSize, &toSub );
+	prd_ = kb_ = v * volScale( e, &requestSize, &toSub );
 }
 
 double Reac::getConcKb( const Eref& e, const Qinfo* q ) const

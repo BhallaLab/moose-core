@@ -558,6 +558,7 @@ void ReadKkit::assignPoolCompartments()
 		assert( meshId != Id() );
 		double side = pow( vols_[i], 1.0 / 3.0 );
 		vector< double > coords( 9, side );
+		coords[0] = coords[1] = coords[2] = 0;
 		// Field< double >::set( comptId, "size", vols_[i] );
 		Field< vector< double > >::set( comptId, "coords", coords );
 		// compartments_.push_back( comptId );
@@ -721,7 +722,7 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 
 		separateVols( cplx, parentVol );
 
-		bool ret = shell_->doAddMsg( "single", 
+		bool ret = shell_->doAddMsg( "OneToAll", 
 			ObjId( enz, 0 ), "cplx",
 			ObjId( cplx, 0 ), "reac" ); 
 		assert( ret != Msg::badMsg );
@@ -940,7 +941,8 @@ unsigned int ReadKkit::loadTab( const vector< string >& args )
 
 void ReadKkit::innerAddMsg( 
 	const string& src, const map< string, Id >& m1, const string& srcMsg,
-	const string& dest, const map< string, Id >& m2, const string& destMsg )
+	const string& dest, const map< string, Id >& m2, const string& destMsg,
+	bool isBackward )
 {
 	map< string, Id >::const_iterator i = m1.find( src );
 	assert( i != m1.end() );
@@ -951,10 +953,17 @@ void ReadKkit::innerAddMsg(
 	Id destId = i->second;
 
 	// dest pool is substrate of src reac
-	MsgId ret = shell_->doAddMsg( "OneToOne", 
-		ObjId( srcId, 0 ), srcMsg,
-		ObjId( destId, 0 ), destMsg ); 
-	assert( ret != Msg::badMsg );
+	if ( isBackward ) {
+		MsgId ret = shell_->doAddMsg( "AllToOne", 
+			ObjId( srcId, 0 ), srcMsg,
+			ObjId( destId, 0 ), destMsg ); 
+		assert( ret != Msg::badMsg );
+	} else {
+		MsgId ret = shell_->doAddMsg( "OneToAll", 
+			ObjId( srcId, 0 ), srcMsg,
+			ObjId( destId, 0 ), destMsg ); 
+		assert( ret != Msg::badMsg );
+	}
 }
 
 
@@ -981,9 +990,16 @@ void ReadKkit::addmsg( const vector< string >& args)
 	}
 	else if ( args[3] == "ENZYME" ) { // Msg from enz pool to enz site
 		if ( mmEnzIds_.find( dest ) == mmEnzIds_.end() )
+			innerAddMsg( dest, enzIds_, "ens", src, poolIds_, "reac" );
+		else
+			innerAddMsg( src, poolIds_, "nOut", dest, mmEnzIds_, "enz", 1);
+			// innerAddMsg( dest, mmEnzIds_, "enz", src, poolIds_, "nOut", 1);
+		/*
+		if ( mmEnzIds_.find( dest ) == mmEnzIds_.end() )
 			innerAddMsg( src, poolIds_, "reac", dest, enzIds_, "enz" );
 		else
 			innerAddMsg( src, poolIds_, "nOut", dest, mmEnzIds_, "enz" );
+			*/
 	}
 	else if ( args[3] == "MM_PRD" ) { // Msg from enz to Prd pool
 		if ( mmEnzIds_.find( src ) == mmEnzIds_.end() )

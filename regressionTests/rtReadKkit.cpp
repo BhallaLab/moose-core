@@ -103,3 +103,65 @@ void rtReadKkit()
 	// shell->doDelete( kineticId );
 	cout << "." << flush;
 }
+
+void rtReadCspace()
+{
+	const double TOLERANCE = 2e-3;
+
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< unsigned int > dims( 1, 1 );
+	// Shell::cleanSimulation();
+
+	Id kineticId = shell->doLoadModel( "Osc.cspace", "/osc", "gsl" );
+	assert( kineticId != Id() );
+	unsigned int numVarMols = Field< unsigned int >::get( 
+		kineticId, "nVarPools" );
+	assert ( numVarMols == 10 ); // 6 mols + 4 enz
+
+	shell->doSetClock( 0, 10 );
+	shell->doSetClock( 1, 10 );
+	shell->doSetClock( 2, 10 );
+	shell->doSetClock( 3, 10 );
+	// cout << "Before Reinit\n"; Qinfo::reportQ();
+	shell->doReinit();
+	// cout << "After Reinit\n"; Qinfo::reportQ();
+	shell->doStart( 15001.0 );
+
+	Id plotId( "/osc/plotd" );
+	assert( plotId != Id() );
+	unsigned int size = Field< unsigned int >::get( plotId, "size" );
+	// cout << "size = " << size << endl;
+	assert( size == 1501 ); // Note that dt was 10.
+	
+	/*
+	bool ok = SetGet::strSet( 
+		plotId.eref(), "compareXplot", "Kholodenko.plot,/graphs/conc1/MAPK-PP.Co,rmsr" );
+		*/
+	bool ok = SetGet3< string, string, string >::set(
+		plotId, "compareXplot", "Osc_cspace_ref_model.plot", 
+		"/osc/plotd", "rmsr" );
+	assert( ok );
+
+	ok = SetGet2< string, string >::set(
+		plotId, "xplot", "check.plot", "cspace_osc.plot" );
+	assert( ok );
+
+	Id plota( "/osc/plota" );
+	Id plotb( "/osc/plota" );
+	Id plotc( "/osc/plota" );
+	Id plote( "/osc/plota" );
+	Id plotf( "/osc/plota" );
+	SetGet2< string, string >::set( plota, "xplot", "check.plot", "a.plot");
+	SetGet2< string, string >::set( plotb, "xplot", "check.plot", "b.plot");
+	SetGet2< string, string >::set( plotc, "xplot", "check.plot", "c.plot");
+	SetGet2< string, string >::set( plote, "xplot", "check.plot", "e.plot");
+	SetGet2< string, string >::set( plotf, "xplot", "check.plot", "f.plot");
+
+	// Returns -1 on failure, otherwise the (positive) rms ratio.
+	double val = Field< double >::get( plotId, "outputValue" );
+	assert( val >= 0 && val < TOLERANCE );
+
+	/////////////////////////////////////////////////////////////////////
+	// shell->doDelete( kineticId );
+	cout << "." << flush;
+}
