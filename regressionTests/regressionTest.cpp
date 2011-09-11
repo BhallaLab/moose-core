@@ -14,6 +14,7 @@
 void rtTable();
 void rtFindModelType();
 void rtReadKkit();
+void rtReadCspace();
 void rtHHnetwork( unsigned int numCopies );
 
 extern void testGsolver( string modelName, string plotName,
@@ -33,6 +34,7 @@ void regressionTests()
 	rtTable();
 	rtFindModelType();
 	rtReadKkit();
+	rtReadCspace();
 	rtHHnetwork( 10 );
 
 	testGsolver( "reac", "A.Co", 0.1, 100 );
