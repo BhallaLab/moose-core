@@ -14912,3 +14912,76 @@ Checkin 2964.
 ============================================================================
 4 Sep 2011.
 Added test where CubeMesh::preserveNumEntries is true in testShell.cpp.
+Checkin 2965.
+
+Added further test in testShell.cpp:testShellMesh to change volume of mesh and
+watch what happens to pool amounts. Unfortunately at present the 'n' of the
+pool is the preserved quantity, and accordingly conc changes. Arguably the
+conc should be preserved. Anyway, passes unit test with current convention.
+
+
+Use cases for mesh changes:
+1. osmotic swelling. Here we preserve n, so conc changes.
+2. test stochastic effs at different volumes. Preserve conc, change n.
+3. remesh without changing total vol. Here we preserve overall n, and try 
+	to preserve spatial distrib. This could be done also with conc fixed.
+
+Options:
+- concInit is native form, n is native form. This is just nonobvious
+- Both nInit and n are native, but the base mesh Element has a way to 
+	tell it to resize while keeping either n or conc fixed.
+- Forget it, just use nInit and n as native forms, and proper sequencing of
+	conc assignment from script.
+
+============================================================================
+10 Sep 2011.
+Added in minor unit test for preserveNumEntries in testMesh.cpp.
+
+Some thoughts about DataId nesting
+
+- Have a single long as the DataId
+- The DataHandler knows its own indices
+- For nested arrays foo[i]/bar[j], the DataId for bar has a portion that
+	identifies i, and a portion for j. Should any operation require access
+	to foo[i] as the parent, we can extract i.
+	- This is recursive.
+	- This applies both to regular nested Elements, and also to 
+		FieldElements like synapses
+	- Implementation decision: should I bitmap it or modulo it?
+	- As before, ragged arrays are permitted but we require knowledge
+		of the max# entries of the ragged dimension(s)
+
+- For Synapses and similar FieldElement classes, the parent and child
+	DataHandlers need to be able to refer to each other.
+	- Also it is possible as before for the actual data to be stored on
+	the parent, and the FieldDataHandler just does a lookup from parent.
+
+- Iterators march through DataId, prompted as before by DataHandlers.
+
+- Thread blocks are linear chunks, except for FieldElements, where they
+	are referred to parent blocking.
+
+- Node blocks likewise.
+
+........................................................................
+Now back to practicalities. 
+- Set up OneToAll msgs in ReadKkit for reacs. This fails for MMEnz when we
+	send msg from the parent enz pool to the enz site. MOOSE does not yet
+	allow backward direction for a simple msg.
+- Fixed up the MMEnz issue, by creating a hack for AllToOne msg which is simply
+	a OneToAll msg connected backwards.
+- Fixed ReadKkit which was incorrectly setting coords in the CubeMesh.
+- Fixed ReadCspace which was incorrectly setting coords in the CubeMesh.
+
+Still need to put in a regression test for ReadCspace.
+Implemented Osc.cspace. Working on regression test.
+A bit stuck here with a memory access error that gdb doesn't pin.
+Tried going back and commenting out the previous test. Doesn't help.
+Found bug: the cspace reader was dying if it found extra spaces. Fixed the 
+model, not the cspace reader. Now trying to get it to correctly read the
+oscillatory model Osc.cspace. Putting in corrected volume handling in
+ReadCspace, currently stuck in the ReadCspace.cpp:testReadModel() unit test.
+It is having problems reading and converting in the reacn rates.
+This was relatively trivial mistakes in the set/get routines.
+
+============================================================================

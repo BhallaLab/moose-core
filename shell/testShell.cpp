@@ -1534,8 +1534,13 @@ void testShellMesh()
 	for ( unsigned int i = 0; i < size; ++i )
 		assert( doubleEq( numMols[i] , numShouldBe ) );
 
-
+	meshCoords[3] = meshCoords[4] = meshCoords[5] = 10.0;
+	ret = Field< vector< double > >::set( compt, "coords", meshCoords );
 	assert( ret );
+	vector< double > conc;
+	Field< double >::getVec( pool, "conc", conc );
+	for ( unsigned int i = 0; i < size; ++i )
+		assert( doubleEq( conc[i], testN * 0.001 ) );
 
 	shell->doDelete( compt );
 	cout << "." << flush;

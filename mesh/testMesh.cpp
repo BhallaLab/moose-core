@@ -277,6 +277,25 @@ void testCubeMesh()
 	assert( neighbors[1] = s2m[ 4 ] );
 	assert( neighbors[2] = s2m[ 16 ] );
 
+
+
+	cm.setPreserveNumEntries( 1 );
+	assert( cm.getNx() == 4 );
+	assert( cm.getNy() == 4 );
+	assert( cm.getNz() == 4 );
+	assert( doubleEq( cm.getDx(), 1.0 ) );
+	assert( doubleEq( cm.getDy(), 1.0 ) );
+	assert( doubleEq( cm.getDz(), 1.0 ) );
+
+	cm.setX0( 0 );
+	cm.setY0( 0 );
+	cm.setZ0( 0 );
+	// x1 is 5, y1 is 6 and z1 is 8
+
+	assert( doubleEq( cm.getDx(), 1.25 ) );
+	assert( doubleEq( cm.getDy(), 1.5 ) );
+	assert( doubleEq( cm.getDz(), 2.0 ) );
+
 	cout << "." << flush;
 }
 

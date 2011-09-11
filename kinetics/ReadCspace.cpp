@@ -105,8 +105,9 @@ Id ReadCspace::readModelString( const string& model,
 	assert( comptId != Id() );
 	mesh_ = Neutral::child( comptId.eref(), "meshEntries" );
 	assert( mesh_ != Id() );
-	double side = 1e-5;
+	double side = 1e-6;
 	vector< double > coords( 9, side );
+	coords[0] = coords[1] = coords[2] = 0;
 	bool ret = Field< vector< double > >::set( comptId, "coords", coords );
 	assert( ret );
 
@@ -123,10 +124,11 @@ Id ReadCspace::readModelString( const string& model,
 
 	pos = model.find_last_of( "|" ) + 1;
 	double val = 0;
-	int i = 0;
+	unsigned int i = 0;
 	while ( pos < model.length() ) {
 		if ( model[ pos ] == ' ' ) {
 			val = atof( model.c_str() + pos + 1 );
+			assert( i < parms_.size() );
 			parms_[ i++ ] = val;
 		}
 		pos++;
@@ -358,8 +360,8 @@ void ReadCspace::deployParameters( )
 	}
 	for ( j = 0; j < reac_.size(); j++ ) {
 		if ( reac_[ j ].element()->cinfo()->isA( "Reac" ) ) {
-			Field< double >::set( reac_[j], "kf", parms_[i++] );
-			Field< double >::set( reac_[j], "kb", parms_[i++] );
+			Field< double >::set( reac_[j], "Kf", parms_[i++] );
+			Field< double >::set( reac_[j], "Kb", parms_[i++] );
 		} else {
 			Field< double >::set( reac_[j], "k3", parms_[i] );
 			Field< double >::set( reac_[j], "k2", 4.0 * parms_[i++] );
@@ -415,13 +417,13 @@ void ReadCspace::testReadModel( )
 
 	// cout << "\nTesting ReadCspace:: reac rate assignment\n";
 	Id tempA( "/kinetics/AabX" );
-	double r1 = Field< double >::get( tempA, "kf");
-	double r2 = Field< double >::get( tempA, "kb");
+	double r1 = Field< double >::get( tempA, "Kf");
+	double r2 = Field< double >::get( tempA, "Kb");
 	assert( doubleEq( r1, 101 ) && doubleEq( r2, 102 ) );
 
 	Id tempB( "/kinetics/BbcX" );
-	r1 = Field< double >::get( tempB, "kf");
-	r2 = Field< double >::get( tempB, "kb");
+	r1 = Field< double >::get( tempB, "Kf");
+	r2 = Field< double >::get( tempB, "Kb");
 	assert( doubleEq( r1, 201 ) && doubleEq( r2, 202 ) );
 
 	Id tempC( "/kinetics/c/CcdX" );
@@ -448,8 +450,8 @@ void ReadCspace::testReadModel( )
 		path += 'b' + i;
 		path += 'c' + i;
 		Id temp( path );
-		r1 = Field< double >::get( temp, "kf");
-		r2 = Field< double >::get( temp, "kb");
+		r1 = Field< double >::get( temp, "Kf");
+		r2 = Field< double >::get( temp, "Kb");
 		assert( doubleEq( r1, i* 100 + 101 ) && 
 			doubleEq( r2, i * 100 + 102 ) );
 	}

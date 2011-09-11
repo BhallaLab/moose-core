@@ -77,7 +77,8 @@ class ReadKkit
 			const string& src, const map< string, Id >& m1, 
 				const string& srcMsg,
 			const string& dest, const map< string, Id >& m2, 
-				const string& destMsg );
+				const string& destMsg,
+			bool isBackward = 0 );
 		void call( const vector< string >& args );
 		void objdump( const vector< string >& args );
 		void textload( const vector< string >& args );
