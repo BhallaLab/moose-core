@@ -69,9 +69,9 @@ vector<Id> Neutral::children(string path, bool ordered)
     }
     return childList;
 }
-string  Neutral::__get_name() const
+const string&  Neutral::__get_name() const
 {
-return this->getField("name");
+    return this->getField("name");
 }
 void Neutral::__set_name( string name )
 {
