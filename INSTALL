@@ -4,6 +4,7 @@
  * Author:          Subhasis Ray
  * E-mail:          ray dot subhasis at gmail dot com
  * Created:         2010-08-03 11:00:13 (+0530)
+ * Updated:         2011-09-14 15:52:34 (+0530)
  ******************************************************************************/
 
 
@@ -16,6 +17,27 @@ binaries.
 
 0. PRE-REQUISITES
 ================================================================================
+
+Download MOOSE sources either from a released package of from
+subversion repository. If you are behind a firewall proxy, in order to
+access moose repository you need to set the http proxy in
+~/.subversion/servers file. Uncomment the lines containing
+http-proxy-host and http-proxy-port under the section [global] and set
+them to:
+
+http-proxy-host = your_proxy_server_adderess
+http-proxy-port = your_proxy_port
+
+Then check out the moose source code using the following command:
+
+svn co http://moose.svn.sourceforge.net/svnroot/moose/moose/trunk moose
+
+This will download the trunk of the repository to the moose
+directory.
+
+Once you have the source code, compile it according the following
+instructions.
+
 You need the following softwares: 
 
 (NOTE: For all C/C++ libraries, you need the include headers as well,
