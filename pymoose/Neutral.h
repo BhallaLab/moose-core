@@ -21,7 +21,7 @@ namespace pymoose
     
         ~Neutral();
         const std::string& getType();
-            string  __get_name() const;
+        const string&  __get_name() const;
             void __set_name(string name);
             int __get_index() const;
             const Id* __get_parent() const;
