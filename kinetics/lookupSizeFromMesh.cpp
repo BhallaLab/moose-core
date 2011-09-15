@@ -30,21 +30,9 @@ double lookupSizeFromMesh( const Eref& e, const SrcFinfo* sf )
  * Generates conversion factor for rates from concentration to mol# units.
  * Assumes that all reactant pools (substrate and product) are within the
  * same mesh entry and therefore have the same volume.
- * The outcome of this calculation is:
- * kf = Kf * convertConcToNumRate.
- * The Eref is an Enz or Reac.
- * The SrcFinfo is a message to the pools.
- * The meshIndex specifies the mesh voxel to use.
- * The scale term is a conversion from the conc units to SI:
- * The scale term is 1 if conc units are in SI, which is
- * equal to moles per cubic metre, which is equal to millimolar.
- * The scale term is 1e-3 for micromolar, uM.
- * The doPartialConversion flag tells the function that there are other
- * substrates not in the 'pools' list, and so it should compute the
- * conversion for all pools, not n-1. This flag defaults to 0.
  */
 
-double convertConcToNumRate( const Eref& e, const SrcFinfo* pools, 
+double convertConcToNumRateUsingMesh( const Eref& e, const SrcFinfo* pools, 
 	unsigned int meshIndex, double scale, bool doPartialConversion )
 {
 	static const Cinfo* poolCinfo = Cinfo::find( "Pool" );
@@ -64,6 +52,8 @@ double convertConcToNumRate( const Eref& e, const SrcFinfo* pools,
 	if ( mfb && mfb->size() > 0 ) {
 		if ( doPartialConversion || mfb->size() > 1 ) {
 			Element* pool = Msg::getMsg( (*mfb)[0].mid )->e2();
+			if ( pool == e.element() )
+				pool = Msg::getMsg( (*mfb)[0].mid )->e1();
 			assert( pool != e.element() );
 			Eref pooler( pool, meshIndex );
 			if ( pool->cinfo() == poolCinfo ) {
@@ -89,7 +79,7 @@ double convertConcToNumRate( const Eref& e, const SrcFinfo* pools,
  * This variant already knows the volume, but has to figure out # of
  * reactants.
  */
-double convertConcToNumRate( const Eref& e, const SrcFinfo* pools, 
+double convertConcToNumRateUsingVol( const Eref& e, const SrcFinfo* pools, 
 	double volume, double scale, bool doPartialConversion )
 {
 	const vector< MsgFuncBinding >* mfb = 
@@ -115,15 +105,8 @@ double convertConcToNumRate( const Eref& e, const SrcFinfo* pools,
  * This variant is used when the reactants are in different compartments
  * or mesh entries, and may therefore have different volumes.
  * We already know the reactants and their affiliations.
- * We use the first vol, v1, as the reference.
- * The outcome of this calculation is:
- * kf = Kf * convertConcToNumRate.
- * The scale term is a conversion from the conc units to SI:
- * The scale term is 1 if conc units are in SI, which is
- * equal to moles per cubic metre, which is equal to millimolar.
- * The scale term is 1e-3 for micromolar, uM.
  */
-double convertConcToNumRate( double v1, unsigned int n1, 
+double convertConcToNumRateInTwoCompts( double v1, unsigned int n1, 
 	double v2, unsigned int n2, double scale )
 {
 	double conversion = 1.0;

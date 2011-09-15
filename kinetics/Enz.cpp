@@ -288,6 +288,7 @@ double Enz::getK3() const
 // and ratio remain unchanged.
 //////////////////////////////////////////////////////////////
 
+/*
 static unsigned int findNumSubstrates( const Eref& e )
 {
 	const vector< MsgFuncBinding >* mfb =
@@ -304,15 +305,20 @@ static double volScale( const Eref& e )
 	double scale = pow( 1e-3 * NA * size, n ); // ES complex is one sub too.
 	return scale;
 }
+*/
 
 void Enz::setKm( const Eref& e, const Qinfo* q, double v )
 {
-	k1_ = ( k2_ + k3_ ) / ( v * volScale( e ) );
+	double volScale = 
+		convertConcToNumRateUsingMesh( e, &toSub, 0, 1.0e-3, 1 );
+	k1_ = ( k2_ + k3_ ) / ( v * volScale );
 }
 
 double Enz::getKm( const Eref& e, const Qinfo* q ) const
 {
-	return (k2_ + k3_) / ( k1_ * volScale( e ) );
+	double volScale = 
+		convertConcToNumRateUsingMesh( e, &toSub, 0, 1.0e-3, 1 );
+	return (k2_ + k3_) / ( k1_ * volScale );
 }
 
 void Enz::setRatio( double v )
