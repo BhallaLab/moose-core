@@ -124,6 +124,62 @@ void rtReadCspace()
 	shell->doSetClock( 3, 10 );
 	// cout << "Before Reinit\n"; Qinfo::reportQ();
 	shell->doReinit();
+
+	Id temp( "/osc/a" );
+	assert( temp != Id() );
+	double conc = Field< double >::get( Id( "/osc/a" ), "concInit" );
+	assert( doubleEq( conc, 3.5 ) );
+	conc = Field< double >::get( Id( "/osc/b" ), "conc" );
+	assert( doubleEq( conc, 0 ) );
+	conc = Field< double >::get( Id( "/osc/c" ), "conc" );
+	assert( doubleEq( conc, 0.1 ) );
+	conc = Field< double >::get( Id( "/osc/d" ), "conc" );
+	assert( doubleEq( conc, 0 ) );
+	conc = Field< double >::get( Id( "/osc/e" ), "conc" );
+	assert( doubleEq( conc, 0 ) );
+	conc = Field< double >::get( Id( "/osc/f" ), "conc" );
+	assert( doubleEq( conc, 0.1 ) );
+
+	double rate = Field< double >::get( Id( "/osc/AabX" ), "Kf" );
+	assert( doubleEq( rate, 0.01 ) );
+	rate = Field< double >::get( Id( "/osc/AabX" ), "Kb" );
+	assert( doubleEq( rate, 0.0 ) );
+
+	rate = Field< double >::get( Id( "/osc/b/DabX" ), "k3" );
+	assert( doubleEq( rate, 0.5 ) );
+	rate = Field< double >::get( Id( "/osc/b/DabX" ), "Km" );
+	assert( doubleEq( rate, 1 ) );
+
+	rate = Field< double >::get( Id( "/osc/c/Jbca" ), "k3" );
+	assert( doubleEq( rate, 1 ) );
+	rate = Field< double >::get( Id( "/osc/c/Jbca" ), "Km" );
+	assert( doubleEq( rate, 0.05 ) );
+
+	rate = Field< double >::get( Id( "/osc/AdeX" ), "Kf" );
+	assert( doubleEq( rate, 0.01 ) );
+	rate = Field< double >::get( Id( "/osc/AdeX" ), "Kb" );
+	assert( doubleEq( rate, 0.0 ) );
+
+	rate = Field< double >::get( Id( "/osc/e/DdeX" ), "k3" );
+	assert( doubleEq( rate, 0.5 ) );
+	rate = Field< double >::get( Id( "/osc/e/DdeX" ), "Km" );
+	assert( doubleEq( rate, 1 ) );
+
+	rate = Field< double >::get( Id( "/osc/f/Jefd" ), "k3" );
+	assert( doubleEq( rate, 1 ) );
+	rate = Field< double >::get( Id( "/osc/f/Jefd" ), "Km" );
+	assert( doubleEq( rate, 0.05 ) );
+
+	rate = Field< double >::get( Id( "/osc/AadX" ), "Kf" );
+	assert( doubleEq( rate, 0.002 ) );
+	rate = Field< double >::get( Id( "/osc/AadX" ), "Kb" );
+	assert( doubleEq( rate, 0.0 ) );
+
+	rate = Field< double >::get( Id( "/osc/AbeX" ), "Kf" );
+	assert( doubleEq( rate, 0.0 ) );
+	rate = Field< double >::get( Id( "/osc/AbeX" ), "Kb" );
+	assert( doubleEq( rate, 0.001 ) );
+
 	// cout << "After Reinit\n"; Qinfo::reportQ();
 	shell->doStart( 15001.0 );
 
@@ -139,7 +195,7 @@ void rtReadCspace()
 		*/
 	bool ok = SetGet3< string, string, string >::set(
 		plotId, "compareXplot", "Osc_cspace_ref_model.plot", 
-		"/osc/plotd", "rmsr" );
+		"plotd", "rmsr" );
 	assert( ok );
 
 	ok = SetGet2< string, string >::set(

@@ -11,6 +11,7 @@
 #include "ElementValueFinfo.h"
 #include "ZombieEnz.h"
 #include "Enz.h"
+#include "Reac.h"
 #include "DataHandlerWrapper.h"
 
 static SrcFinfo2< double, double > toSub( 
@@ -31,6 +32,16 @@ static SrcFinfo2< double, double > toCplx(
 		"toCplx", 
 		"Sends out increment of molecules on product each timestep"
 	);
+
+// Deprecated. Enzymes should refer to volumes of associated pools, and
+// do not have a volume of their own.
+static SrcFinfo1< double > requestSize(
+	"requestSize",
+	"Requests size (volume) in which reaction is embedded. Used for"
+	"conversion to concentration units from molecule # units,"
+	"and for calculations when resized."
+);
+
 
 static DestFinfo sub( "subDest",
 		"Handles # of molecules of substrate",
@@ -90,6 +101,28 @@ const Cinfo* ZombieEnz::initCinfo()
 			&ZombieEnz::getK3
 		);
 
+		static ElementValueFinfo< ZombieEnz, double > Km(
+			"Km",
+			"Michaelis-Menten constant",
+			&ZombieEnz::setKm,
+			&ZombieEnz::getKm
+		);
+
+		static ElementValueFinfo< ZombieEnz, double > kcat(
+			"kcat",
+			"Forward rate constant, equivalent to k3",
+			&ZombieEnz::setK3,
+			&ZombieEnz::getK3
+		);
+
+		static ElementValueFinfo< ZombieEnz, double > ratio(
+			"ratio",
+			"Ratio of k2/k3",
+			&ZombieEnz::setRatio,
+			&ZombieEnz::getRatio
+		);
+
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -136,6 +169,10 @@ const Cinfo* ZombieEnz::initCinfo()
 		&k1,	// Value
 		&k2,	// Value
 		&k3,	// Value
+		&Km,	// Value
+		&kcat,	// Value
+		&ratio,	// Value
+		&requestSize,		// SrcFinfo
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
 		&enz,				// SharedFinfo
@@ -220,6 +257,51 @@ double ZombieEnz::getK3( const Eref& e, const Qinfo* q ) const
 		return rates_[ convertIdToReacIndex( e.id() ) + 2 ]->getR1();
 	else
 		return rates_[ convertIdToReacIndex( e.id() ) + 1 ]->getR1();
+}
+
+
+void ZombieEnz::setKm( const Eref& e, const Qinfo* q, double v )
+{
+	double k2 = getK2( e, q );
+	double k3 = getK3( e, q );
+
+	double volScale = Reac::volScale( e, &requestSize, &toSub ) * 
+		Reac::volScale( e, &requestSize, &toZombieEnz );
+
+	double k1 = ( k2 + k3 ) / ( v * volScale );
+	setK1( e, q, k1 );
+}
+
+double ZombieEnz::getKm( const Eref& e, const Qinfo* q ) const
+{
+	double k1 = getK1( e, q );
+	double k2 = getK2( e, q );
+	double k3 = getK3( e, q );
+
+	double volScale = Reac::volScale( e, &requestSize, &toSub ) * 
+		Reac::volScale( e, &requestSize, &toZombieEnz );
+	
+	return (k2 + k3) / ( k1 * volScale );
+}
+
+void ZombieEnz::setRatio( const Eref& e, const Qinfo* q, double v )
+{
+	double Km = getKm( e, q );
+	double k2 = getK2( e, q );
+	double k3 = getK3( e, q );
+
+	k2 = v * k3;
+
+	double k1 = ( k2 + k3 ) / Km;
+
+	setK1( e, q, k1 );
+}
+
+double ZombieEnz::getRatio( const Eref& e, const Qinfo* q ) const
+{
+	double k2 = getK2( e, q );
+	double k3 = getK3( e, q );
+	return k2 / k3;
 }
 
 //////////////////////////////////////////////////////////////

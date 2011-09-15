@@ -25,6 +25,11 @@ class ZombieReac: public Stoich
 		void setKb( const Eref& e, const Qinfo* q, double v );
 		double getKb( const Eref& e, const Qinfo* q ) const;
 
+		void setConcKf( const Eref& e, const Qinfo* q, double v );
+		double getConcKf( const Eref& e, const Qinfo* q ) const;
+		void setConcKb( const Eref& e, const Qinfo* q, double v );
+		double getConcKb( const Eref& e, const Qinfo* q ) const;
+
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////

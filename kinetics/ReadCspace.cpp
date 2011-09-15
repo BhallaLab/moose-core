@@ -174,7 +174,7 @@ void ReadCspace::setupGslRun( double plotdt )
 	string basePath = base_.path();
 
     string plotpath = basePath + "/##[TYPE=Table]";
-    shell->doUseClock( basePath + "/gsl", "process", 0 ); 
+    shell->doUseClock( basePath + "," + basePath + "/gsl", "process", 0 ); 
     shell->doUseClock( plotpath, "process", 2 ); 
     shell->doReinit();
 }
