@@ -11,7 +11,6 @@
 #include "ElementValueFinfo.h"
 #include "ZombieEnz.h"
 #include "Enz.h"
-#include "Reac.h"
 #include "DataHandlerWrapper.h"
 
 static SrcFinfo2< double, double > toSub( 
@@ -265,8 +264,13 @@ void ZombieEnz::setKm( const Eref& e, const Qinfo* q, double v )
 	double k2 = getK2( e, q );
 	double k3 = getK3( e, q );
 
+	double volScale = 
+		convertConcToNumRateUsingMesh( e, &toSub, 0, 1.0e-3, 1 );
+
+	/*
 	double volScale = Reac::volScale( e, &requestSize, &toSub ) * 
 		Reac::volScale( e, &requestSize, &toZombieEnz );
+		*/
 
 	double k1 = ( k2 + k3 ) / ( v * volScale );
 	setK1( e, q, k1 );
@@ -278,8 +282,8 @@ double ZombieEnz::getKm( const Eref& e, const Qinfo* q ) const
 	double k2 = getK2( e, q );
 	double k3 = getK3( e, q );
 
-	double volScale = Reac::volScale( e, &requestSize, &toSub ) * 
-		Reac::volScale( e, &requestSize, &toZombieEnz );
+	double volScale = 	
+		convertConcToNumRateUsingMesh( e, &toSub, 0, 1.0e-3, 1 );
 	
 	return (k2 + k3) / ( k1 * volScale );
 }

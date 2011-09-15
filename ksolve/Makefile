@@ -39,6 +39,7 @@ HEADERS = \
 	FuncTerm.h \
 	KinSparseMatrix.h \
 	../kinetics/Pool.h \
+	../kinetics/lookupSizeFromMesh.h \
 
 
 # The GSL library (GNU Scientific Library) provides a range of

@@ -15112,4 +15112,10 @@ pools. Then generate the rate terms for each mesh index combination.
 
 ============================================================================
 15 Sep 2011
-Implemented a number of conc conversion utility functions.
+Implemented a number of conc conversion utility functions. Checkin 2971.
+
+Implemented fixes for Enz volume conversions. Now clears unit tests and 
+regression tests up to the point where the output is generated. Unfortunately
+the output is still garbage.
+
+
