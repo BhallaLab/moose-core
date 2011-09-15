@@ -226,7 +226,7 @@ static double lookupSize( const Eref& e, const SrcFinfo* sf )
 }
 */
 
-static unsigned int findNumReactants( const Eref& e, const SrcFinfo* sf )
+unsigned int findNumReactants( const Eref& e, const SrcFinfo* sf )
 {
 	const vector< MsgFuncBinding >* mfb = 
 		e.element()->getMsgAndFunc( sf->getBindIndex() );
@@ -234,12 +234,13 @@ static unsigned int findNumReactants( const Eref& e, const SrcFinfo* sf )
 	return mfb->size();
 }
 
-static double volScale( const Eref& e, 
+// Static func.
+double Reac::volScale( const Eref& e, 
 	const SrcFinfo *sizeF, const SrcFinfo *numF )
 {
-	unsigned int n = findNumReactants( e, &toPrd );
+	unsigned int n = findNumReactants( e, numF );
 	if ( n == 0 ) return 1.0;
-	double size = lookupSizeFromMesh( e, &requestSize );
+	double size = lookupSizeFromMesh( e, sizeF );
 	double scale = pow( 1e-3 * NA * size, n-1 );
 	return scale;
 }

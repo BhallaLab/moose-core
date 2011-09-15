@@ -22,6 +22,13 @@ static SrcFinfo2< double, double > toPrd(
 		"Sends out increment of molecules on product each timestep"
 	);
 
+static SrcFinfo1< double > requestSize( 
+		"requestSize", 
+		"Requests size (volume) in which reaction is embedded. Used for"
+		"conversion to concentration units from molecule # units,"
+		"and for calculations when resized."
+	);
+
 static DestFinfo sub( "subDest",
 		"Handles # of molecules of substrate",
 		new OpFunc1< ZombieReac, double >( &ZombieReac::sub ) );
@@ -45,16 +52,30 @@ const Cinfo* ZombieReac::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static ElementValueFinfo< ZombieReac, double > kf(
 			"kf",
-			"Forward rate constant",
+			"Forward rate constant, in # units",
 			&ZombieReac::setKf,
 			&ZombieReac::getKf
 		);
 
 		static ElementValueFinfo< ZombieReac, double > kb(
 			"kb",
-			"Backward rate constant",
+			"Reverse rate constant, in # units",
 			&ZombieReac::setKb,
 			&ZombieReac::getKb
+		);
+
+		static ElementValueFinfo< ZombieReac, double > Kf(
+			"Kf",
+			"Forward rate constant, in concentration units",
+			&ZombieReac::setConcKf,
+			&ZombieReac::getConcKf
+		);
+
+		static ElementValueFinfo< ZombieReac, double > Kb(
+			"Kb",
+			"Reverse rate constant, in concentration units",
+			&ZombieReac::setConcKb,
+			&ZombieReac::getConcKb
 		);
 
 		//////////////////////////////////////////////////////////////
@@ -94,6 +115,9 @@ const Cinfo* ZombieReac::initCinfo()
 	static Finfo* zombieReacFinfos[] = {
 		&kf,		// Value
 		&kb,		// Value
+		&Kf,		// Value
+		&Kb,		// Value
+		&requestSize,	// SrcFinfo
 		&sub,		// SharedFinfo
 		&prd,		// SharedFinfo
 		&proc,		// SharedFinfo
@@ -170,6 +194,27 @@ double ZombieReac::getKb( const Eref& e, const Qinfo* q ) const
 		return rates_[ convertIdToReacIndex( e.id() ) + 1 ]->getR1();
 	else
 		return rates_[ convertIdToReacIndex( e.id() ) ]->getR2();
+}
+
+
+void ZombieReac::setConcKf( const Eref& e, const Qinfo* q, double v )
+{
+	setKf( e, q, v * Reac::volScale( e, &requestSize, &toPrd ) );
+}
+
+double ZombieReac::getConcKf( const Eref& e, const Qinfo* q ) const
+{
+	return getKf( e, q ) / Reac::volScale( e, &requestSize, &toPrd );
+}
+
+void ZombieReac::setConcKb( const Eref& e, const Qinfo* q, double v )
+{
+	setKb( e, q, v * Reac::volScale( e, &requestSize, &toSub ) );
+}
+
+double ZombieReac::getConcKb( const Eref& e, const Qinfo* q ) const
+{
+	return getKb( e, q ) / Reac::volScale( e, &requestSize, &toSub );
 }
 
 //////////////////////////////////////////////////////////////

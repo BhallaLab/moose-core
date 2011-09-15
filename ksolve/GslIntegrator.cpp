@@ -300,8 +300,5 @@ void GslIntegrator::process( const Eref& e, ProcPtr info )
 
 void GslIntegrator::reinit( const Eref& e, ProcPtr info )
 {
-    // Everything is done in assignStoichFuncLocal
-	// But the init function should somehow move here.
-	// send0( c->target(), reinitSlot );
-	// y_[] = yprime_[]
+	;
 }

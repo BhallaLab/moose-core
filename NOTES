@@ -14985,3 +14985,131 @@ It is having problems reading and converting in the reacn rates.
 This was relatively trivial mistakes in the set/get routines.
 
 ============================================================================
+13 Sep 2011
+Working still on getting the Cspace loading to work, but there is a deeper
+problem lurking. I need to set up reacs volume conversion. Basically, in terms
+of # molecules/sec,
+
+flux( #/sec ) = kf * #_1 * #_2 *...
+
+And in terms of uM/sec, i.e., conc units, we have
+
+Flux (uM/sec) = Kf * conc_1 * conc_2 * ...
+
+This is a little problematic: what is the volume to use for the Flux? Clearly
+it has to be the same as whatever pool is being affected by the flux.
+
+So in terms of molar units we have
+Flux ( umoles/sec ) = Kf * Vo1 * conc1 * other concs?
+That is odd and usymmetric. I don't like.
+
+Suppose we assume that the Kf is defined for unit volume V, applicable to
+all reagents. The flux is then
+Flux (umoles/sec) = V * Kf * conc1 * conc2 * conc3 * ...
+
+Suppose now that the volume of the whole system changes to Vnew. We have
+Flux (umoles/sec) = Vnew * Kf * conc1 * conc2 * conc3 * ...
+
+dconc1/dt = -Kf * conc1 * conc2 * conc3 * ...
+	which is incompatible with 
+dconc2/dt = -Kf * conc1 * conc2 * conc3 * ...
+	if vol1 != vol2.
+
+Problem is to get kf in terms of Kf and vols.
+
+#_1 = vol1( m^3) * 1e3 * conc_1 (uM) * NA / 1e6 = vol_1 * conc_1 * NA * 1e-3
+
+Or, 
+conc_1 = #_1 * 1e3 / ( NA * vol1)
+
+etc.
+
+flux( #/sec ) = Flux (umoles/sec ) * NA * 1e-3
+
+So:
+flux = NA * 1e-3 * Flux = 
+	NA * 1e-3 * Vunit * Kf * 
+		#_1 * 1e3/( NA * vol1 ) *
+		#_2 * 1e3/( NA * vol2 ) *
+		...
+
+	= NA * 1e-3 * Vunit * Kf * (1e3/NA)^numReactants * #1 * #2 * ... /
+		(vol1 * vol2 * .. )
+
+But flux is also = kf * #1 * #2 * ...
+so divide out.
+
+1 = NA * 1e-3 * Vunit * (Kf/kf) * (1e3/NA)^numReactants / ( vol1 * vol2 * ... )
+
+Rearranging and setting Vunit to 1 m^3, we get
+
+kf = ( Kf * (1e3/NA)^(numReactants-1) ) / (vol1 * vol2 * ... )
+where all vols are in SI.
+
+Suppose vol1 = 1, and numReactants = 1
+kf = Kf. Good.
+But if vol1 = 1e-15, we get kf = Kf / 1e-15. Bad.
+This happens because the assumed vol of the tgt is still unity.
+
+In summary: The rate equation depending on concs is inherently asymmetric,
+and will need scale factors for different compartments. There is an implicit
+assumption of a reference compartment i, for which the relationship
+dconc_i/dt = -Kf * conc1 * conc2 * conc3 * ...
+is true. If volumes differ between compartments, the dconc for the other
+compartments will need to be scaled.
+
+So, despite its convenience, the conc version of the equation is less clean
+than the # version of the equation. I'll stick with the # version underneath
+because it is appropriate for stochastic calculations, and also because it
+avoids these issues.
+
+I should look at how SBML does it.
+
+Reaction design is to have a single Reac object per chemical reaction, 
+regardless of its spatial considerations. 
+Example 1: 
+There would be a single Reac
+defining A <---> B in a given chemical compartment, whether the compartment
+were meshed as a single voxel or as a million. Here A and B are meshed 
+identically so we just need a single volume term to convert rates.
+Example 2: 
+There would be a single object for an enzyme in a membrane that
+transfers molecules across the membrane. Here our enzyme reaction spans three
+chemical compartments: inside, membrane, and outside. 
+Example 3:
+Again, like example 1, consider A <---> B in a given chemcial compartment,
+but now allow A and B to have different meshes. This is a peculiar case and
+for now we should ignore it.
+
+In either case, the idea is that a single rate term should account for all the
+individual meshed up reaction transitions. In other words, the rate terms
+should be in intensive units like concentration.
+The job of the scaling calculations is therefore to allow the solver to
+ask of the Reac or Enz object, how to set up individual rates in each mesh.
+Or between meshes, for the inter-compartment reaction.
+These individual rates should be in extensive units, like molNumber.
+
+These fundamental considerations aside, I moved ahead with implementing
+the volume scaling in ZombieReac and ZombieEnz. However the latter fails 
+because it doesn't have a mesh entry to look up. More generally, I need to
+rewrite Reac::volScale to extract volume of each target Pool, rather than
+the volume of the current mesh entry.
+
+Even this isn't sufficient. I need to specify which mesh entries to use for
+each pool, since the extracted kf and kb will go to defining the reaction 
+rates.  This is easy within a compartment, the pools will all have the same
+mesh index though the volumes of each entry may differ.
+
+The diffusion terms are also easy, they are computed separately in a sweep
+through all mesh edges. Reactions don't apply here, just diffusion coeffs.
+
+The hard part is reactions spanning compartments. Here the reaction meshing
+routine must match up mesh entries on either side (sometimes 3 at a time).
+It must apply these mesh indices to the appropriate reactant molecules.
+Here the system will scan through space and generate the sets of mesh indices.
+Then it must confer with the reaction to match the indices to the reactant
+pools. Then generate the rate terms for each mesh index combination.
+
+============================================================================
+15 Sep 2011
+Implemented a number of conc conversion utility functions.
