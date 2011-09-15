@@ -44,6 +44,14 @@ class Reac
 		void sub( double v );
 		void prd( double v );
 
+		/**
+		 * Utility function for finding the scale factor from # mols to
+		 * conc expressed in micromolar.
+		 * The sizeF identifies which 
+		 */
+		static double volScale( const Eref& e, 
+			const SrcFinfo *sizeF, const SrcFinfo *numF );
+
 		static const Cinfo* initCinfo();
 	private:
 		double kf_;

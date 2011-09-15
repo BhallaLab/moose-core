@@ -243,18 +243,25 @@ double ZombiePool::getConc( const Eref& e, const Qinfo* q ) const
 void ZombiePool::setConcInit( const Eref& e, const Qinfo* q, double conc )
 {
 	unsigned int pool = convertIdToPoolIndex( e.id() );
+	Sinit_[ pool ] = 1e-3 * NA * conc * lookupSizeFromMesh( e, requestSize() );
+
+	/*
 	unsigned int index = compartment_[ pool ];
 	assert( index < compartmentSize_.size() );
 	Sinit_[ pool ] = 1e-3 * NA * conc * compartmentSize_[ index ];
+	*/
 }
 
 double ZombiePool::getConcInit( const Eref& e, const Qinfo* q ) const
 {
 	unsigned int pool = convertIdToPoolIndex( e.id() );
+	return 1e3 * Sinit_[ pool ] / ( NA * lookupSizeFromMesh( e, requestSize()));
+	/*
 	unsigned int index = compartment_[ pool ];
 	assert( index < compartmentSize_.size() );
 	assert( compartmentSize_[ index ] > 0.0 );
 	return 1e3 * Sinit_[ pool ] / ( NA * compartmentSize_[ index ] );
+	*/
 }
 
 void ZombiePool::setDiffConst( const Eref& e, const Qinfo* q, double v )
@@ -275,10 +282,13 @@ void ZombiePool::setSize( const Eref& e, const Qinfo* q, double v )
 
 double ZombiePool::getSize( const Eref& e, const Qinfo* q ) const
 {
+	return lookupSizeFromMesh( e, requestSize() );
+	/*
 	unsigned int pool = convertIdToPoolIndex( e.id() );
 	unsigned int index = compartment_[ pool ];
 	assert( index < compartmentSize_.size() );
 	return compartmentSize_[ index ];
+	*/
 }
 
 void ZombiePool::setSpecies( const Eref& e, const Qinfo* q, unsigned int v )
