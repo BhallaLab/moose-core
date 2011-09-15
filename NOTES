@@ -15117,5 +15117,15 @@ Implemented a number of conc conversion utility functions. Checkin 2971.
 Implemented fixes for Enz volume conversions. Now clears unit tests and 
 regression tests up to the point where the output is generated. Unfortunately
 the output is still garbage.
+Checkin 2972.
 
+Fixed some plot names. Suddenly it works though the units are off. 
+But the match with GENESIS is poor in the time axis, though the waveforms 
+match very well qualitatively. Possibly numerical.
+ 
+Turns out to be simple: I was earlier plotting n, rather than conc. Now
+fixed. I needed to redo the GENESIS reference simulation with a much smaller
+dt to get a better match.
 
+Did this. Some printf debug cleanup. Now it clears regression tests.
+============================================================================

@@ -106,7 +106,7 @@ void rtReadKkit()
 
 void rtReadCspace()
 {
-	const double TOLERANCE = 2e-3;
+	const double TOLERANCE = 1e-2;
 
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	vector< unsigned int > dims( 1, 1 );
@@ -202,16 +202,18 @@ void rtReadCspace()
 		plotId, "xplot", "check.plot", "cspace_osc.plot" );
 	assert( ok );
 
+	/*
 	Id plota( "/osc/plota" );
-	Id plotb( "/osc/plota" );
-	Id plotc( "/osc/plota" );
-	Id plote( "/osc/plota" );
-	Id plotf( "/osc/plota" );
+	Id plotb( "/osc/plotb" );
+	Id plotc( "/osc/plotc" );
+	Id plote( "/osc/plote" );
+	Id plotf( "/osc/plotf" );
 	SetGet2< string, string >::set( plota, "xplot", "check.plot", "a.plot");
 	SetGet2< string, string >::set( plotb, "xplot", "check.plot", "b.plot");
 	SetGet2< string, string >::set( plotc, "xplot", "check.plot", "c.plot");
 	SetGet2< string, string >::set( plote, "xplot", "check.plot", "e.plot");
 	SetGet2< string, string >::set( plotf, "xplot", "check.plot", "f.plot");
+	*/
 
 	// Returns -1 on failure, otherwise the (positive) rms ratio.
 	double val = Field< double >::get( plotId, "outputValue" );

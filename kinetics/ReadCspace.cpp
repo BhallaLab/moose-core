@@ -154,14 +154,14 @@ void ReadCspace::setupGslRun( double plotdt )
 	vector< Id > children;
 	Neutral::children( base_.eref(), children );
 	for ( unsigned int i = 0; i < children.size(); ++i ) {
-		cout << "In readCspace: " << children[i].path() << endl;
+		// cout << "In readCspace: " << children[i].path() << endl;
 		if ( children[i].element()->cinfo()->isA( "ZombiePool" ) ) {
 			string plotname = "plot" + children[i].element()->getName();
     		Id tab = shell->doCreate( "Table", base_, plotname, dims );
 			assert( tab != Id() );
-			cout << "ReadCspace made plot " << plotname << endl;
+			// cout << "ReadCspace made plot " << plotname << endl;
 			MsgId mid = shell->doAddMsg( "Single", 
-				tab, "requestData", children[i], "get_n" );
+				tab, "requestData", children[i], "get_conc" );
 			assert( mid != Msg::badMsg );
 		}
 	}
