@@ -76,6 +76,14 @@ MACHINE=$(shell uname -m)
 PLATFORM := $(shell uname -s)
 endif
 
+# Get the python version
+ifneq ($(OSTYPE),win32)
+PYTHON_VERSION := $(subst ., ,$(lastword $(shell python --version 2>&1)))
+PYTHON_VERSION_MAJOR := $(word 1,${PYTHON_VERSION})
+PYTHON_VERSION_MINOR := $(word 2,${PYTHON_VERSION})
+INSTALLED_PYTHON := python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
+endif
+
 # Debug mode:
 ifeq ($(BUILD),debug)
 CXXFLAGS = -g -pthread -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
@@ -283,12 +291,10 @@ libmoose.so: libs
 	@echo "Created dynamic library"
 
 # There are some unix/gcc specific paths here. Should be cleaned up later.
-pymoose: CXXFLAGS += -DPYMOOSE -fPIC -fno-strict-aliasing -I/usr/include/python2.6 # Should be updated according to platform
+pymoose: CXXFLAGS += -DPYMOOSE -fPIC -fno-strict-aliasing -I/usr/include/${INSTALLED_PYTHON} # Should be updated according to location of user include directory
 pymoose: SUBDIR += pymoose
 pymoose: OBJLIBS += pymoose/pymoose.o
-pymoose: LIBS += -lpython2.6 # Needs to be modified according to Python version
-pymoose: libs $(OBJLIBS) 
-	$(MAKE) -C $@
+pymoose: LIBS += -l${INSTALLED_PYTHON}
 pymoose: _moose.so
 _moose.so: libs $(OBJLIBS)
 	$(CXX) -shared $(LDFLAGS) $(CXXFLAGS) -o $@ $(OBJLIBS) $(LIBS)
