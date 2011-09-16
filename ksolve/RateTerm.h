@@ -22,13 +22,24 @@ class RateTerm
 		virtual ~RateTerm() {;}
 		/// Computes the rate. The argument is the molecule array.
 		virtual double operator() ( const double* S ) const = 0;
+
+		/**
+		 * Assign the rates.
+		 */
 		virtual void setRates( double k1, double k2 ) = 0;
-		// These next 4 terms are used for talking back to the
-		// original rate objects in MOOSE
+
+		/// Used by Zombie to assign rate terms
 		virtual void setR1( double k1 ) = 0;
+
+		/// Used by Zombie to assign rate terms
 		virtual void setR2( double k2 ) = 0;
+
+		/// Used by Zombie to return rate terms
 		virtual double getR1() const = 0;
+
+		/// Used by Zombie to return rate terms
 		virtual double getR2() const = 0;
+
 		/**
 		 * This function finds the reactant indices in the vector
 		 * S. It returns the number of substrates found, which are the
@@ -39,7 +50,17 @@ class RateTerm
 		virtual unsigned int  getReactants( 
 			vector< unsigned int >& molIndex ) const = 0;
 		static const double EPSILON;
-		virtual void rescaleVolume( double ratio ) = 0;
+
+		/**
+		 * This is used to rescale the RateTerm kinetics when the 
+		 * compartment volume changes. This is needed because the kinetics
+		 * are in extensive units, that is, mol numbers, rather than in
+		 * intensive units like concentration. So when the volume changes
+		 * the rate terms change. Each Rate term checks if any of its
+		 * reactant molecules are affected, and if so, rescales.
+		 */
+		virtual void rescaleVolume( short comptIndex, 
+			const vector< short >& compartmentLookup, double ratio ) = 0;
 };
 
 // Base class MMEnzme for the purposes of setting rates
@@ -84,7 +105,9 @@ class MMEnzymeBase: public RateTerm
 			return kcat_;
 		}
 
-		void rescaleVolume( double ratio ) {
+		void rescaleVolume( short comptIndex, 
+			const vector< short >& compartmentLookup, double ratio )
+		{
 			return; // Rates are already in conc units, no change needed
 		}
 
@@ -168,7 +191,9 @@ class ExternReac: public RateTerm
 			return 0;
 		}
 
-		void rescaleVolume( double ratio ) {
+		void rescaleVolume( short comptIndex, 
+			const vector< short >& compartmentLookup, double ratio )
+		{
 			return; // Need to figure out what to do here.
 		}
 
@@ -220,7 +245,9 @@ class ZeroOrder: public RateTerm
 			return 0;
 		}
 
-		void rescaleVolume( double ratio ) {
+		void rescaleVolume( short comptIndex, 
+			const vector< short >& compartmentLookup, double ratio )
+		{
 			return; // Nothing needs to be scaled.
 		}
 	protected:
@@ -250,7 +277,9 @@ class Flux: public ZeroOrder
 			return 0;
 		}
 
-		void rescaleVolume( double ratio ) {
+		void rescaleVolume( short comptIndex, 
+			const vector< short >& compartmentLookup, double ratio )
+		{
 			return; // Nothing needs to be scaled.
 		}
 
@@ -276,7 +305,9 @@ class FirstOrder: public ZeroOrder
 			return 1;
 		}
 
-		void rescaleVolume( double ratio ) {
+		void rescaleVolume( short comptIndex, 
+			const vector< short >& compartmentLookup, double ratio )
+		{
 			return; // Nothing needs to be scaled.
 		}
 
@@ -304,7 +335,11 @@ class SecondOrder: public ZeroOrder
 			return 2;
 		}
 
-		void rescaleVolume( double ratio ) {
+		void rescaleVolume( short comptIndex, 
+			const vector< short >& compartmentLookup, double ratio )
+		{
+			if ( comptIndex == compartmentLookup[ y1_ ] || 
+				comptIndex == compartmentLookup[ y2_ ] )
 			k_ /= ratio;
 		}
 
@@ -340,8 +375,11 @@ class StochSecondOrderSingleSubstrate: public ZeroOrder
 			return 2;
 		}
 
-		void rescaleVolume( double ratio ) {
-			k_ /= ratio;
+		void rescaleVolume( short comptIndex, 
+			const vector< short >& compartmentLookup, double ratio )
+		{
+			if ( comptIndex == compartmentLookup[ y_ ] )
+				k_ /= ratio;
 		}
 
 	private:
@@ -370,10 +408,12 @@ class NOrder: public ZeroOrder
 			return v_.size();
 		}
 
-		void rescaleVolume( double ratio ) {
-			unsigned int numSub = v_.size();
-			if ( numSub > 1 ) {
-				k_ /= pow( ratio, static_cast< double  >( numSub - 1 ));
+		void rescaleVolume( short comptIndex, 
+			const vector< short >& compartmentLookup, double ratio )
+		{
+			for ( unsigned int i = 1; i < v_.size(); ++i ) {
+				if ( comptIndex == compartmentLookup[ v_[i] ] )
+					k_ /= ratio;
 			}
 		}
 
@@ -449,9 +489,11 @@ class BidirectionalReaction: public RateTerm
 			return ret;
 		}
 
-		void rescaleVolume( double ratio ) {
-			forward_->rescaleVolume( ratio );
-			backward_->rescaleVolume( ratio );
+		void rescaleVolume( short comptIndex, 
+			const vector< short >& compartmentLookup, double ratio )
+		{
+			forward_->rescaleVolume( comptIndex, compartmentLookup, ratio );
+			backward_->rescaleVolume( comptIndex, compartmentLookup, ratio);
 		}
 
 	private:

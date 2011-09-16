@@ -31,6 +31,10 @@ class Stoich
 		unsigned int getNumPorts() const;
 		void setNumPorts( unsigned int num );
 
+		unsigned int numCompartments() const;
+		double getCompartmentVolume( short i ) const;
+		void setCompartmentVolume( short comptIndex, double v );
+
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
@@ -67,6 +71,7 @@ class Stoich
 		unsigned int convertIdToReacIndex( Id id ) const;
 		unsigned int convertIdToPoolIndex( Id id ) const;
 		unsigned int convertIdToFuncIndex( Id id ) const;
+		unsigned int convertIdToComptIndex( Id id ) const;
 
 		const double* S() const;
 		double* varS();
