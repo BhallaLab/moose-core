@@ -23,13 +23,6 @@ static SrcFinfo2< double, double > toPrd(
 		"Sends out increment of molecules on product each timestep"
 	);
 
-static SrcFinfo1< double > requestSize( 
-		"requestSize", 
-		"Requests size (volume) in which reaction is embedded. Used for"
-		"conversion to concentration units from molecule # units,"
-		"and for calculations when resized."
-	);
-
 static DestFinfo sub( "subDest",
 		"Handles # of molecules of substrate",
 		new OpFunc1< Reac, double >( &Reac::sub ) );
@@ -118,7 +111,6 @@ const Cinfo* Reac::initCinfo()
 		&kb,	// Value
 		&Kf,	// Value
 		&Kb,	// Value
-		&requestSize,		// SrcFinfo
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
 		&proc,				// SharedFinfo
@@ -207,61 +199,28 @@ double Reac::getKb() const
 	return kb_;
 }
 
-
-/// Utility function
-/*
-static double lookupSize( const Eref& e, const SrcFinfo* sf )
-{
-	const vector< MsgFuncBinding >* mfb = 
-		e.element()->getMsgAndFunc( sf->getBindIndex() );
-	if ( !mfb ) return 1.0;
-	if ( mfb->size() == 0 ) return 1.0;
-
-	double size = 
-		Field< double >::fastGet( e, (*mfb)[0].mid, (*mfb)[0].fid );
-
-	if ( size <= 0 ) size = 1.0;
-
-	return size;
-}
-*/
-
-unsigned int findNumReactants( const Eref& e, const SrcFinfo* sf )
-{
-	const vector< MsgFuncBinding >* mfb = 
-		e.element()->getMsgAndFunc( sf->getBindIndex() );
-	if ( !mfb ) return 0;
-	return mfb->size();
-}
-
-// Static func.
-double Reac::volScale( const Eref& e, 
-	const SrcFinfo *sizeF, const SrcFinfo *numF )
-{
-	unsigned int n = findNumReactants( e, numF );
-	if ( n == 0 ) return 1.0;
-	double size = lookupSizeFromMesh( e, sizeF );
-	double scale = pow( 1e-3 * NA * size, n-1 );
-	return scale;
-}
-
 void Reac::setConcKf( const Eref& e, const Qinfo* q, double v )
 {
-	sub_ = kf_ = v * volScale( e, &requestSize, &toPrd );
+	sub_ = kf_ = v * 
+		convertConcToNumRateUsingMesh( e, &toSub, 0, 1.0e-3, 0 );
 }
 
 double Reac::getConcKf( const Eref& e, const Qinfo* q ) const
 {
-	return kf_ / volScale( e, &requestSize, &toPrd );
+	double volScale = 
+		convertConcToNumRateUsingMesh( e, &toSub, 0, 1.0e-3, 0 );
+	return kf_ / volScale;
 }
 
 void Reac::setConcKb( const Eref& e, const Qinfo* q, double v )
 {
-	prd_ = kb_ = v * volScale( e, &requestSize, &toSub );
+	prd_ = kb_ = 
+		v * convertConcToNumRateUsingMesh( e, &toPrd, 0, 1.0e-3, 0 );
 }
 
 double Reac::getConcKb( const Eref& e, const Qinfo* q ) const
 {
-	return kb_ / volScale( e, &requestSize, &toSub );
+	double volScale = 
+		convertConcToNumRateUsingMesh( e, &toPrd, 0, 1.0e-3, 0 );
+	return kb_ / volScale;
 }
-

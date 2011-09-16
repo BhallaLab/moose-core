@@ -196,25 +196,33 @@ double ZombieReac::getKb( const Eref& e, const Qinfo* q ) const
 		return rates_[ convertIdToReacIndex( e.id() ) ]->getR2();
 }
 
-
 void ZombieReac::setConcKf( const Eref& e, const Qinfo* q, double v )
 {
-	setKf( e, q, v * Reac::volScale( e, &requestSize, &toPrd ) );
+	double volScale = 
+		convertConcToNumRateUsingMesh( e, &toSub, 0, 1.0e-3, 0 );
+
+	setKf( e, q, v * volScale );
 }
 
 double ZombieReac::getConcKf( const Eref& e, const Qinfo* q ) const
 {
-	return getKf( e, q ) / Reac::volScale( e, &requestSize, &toPrd );
+	double volScale = 
+		convertConcToNumRateUsingMesh( e, &toSub, 0, 1.0e-3, 0 );
+	return getKf( e, q ) / volScale;
 }
 
 void ZombieReac::setConcKb( const Eref& e, const Qinfo* q, double v )
 {
-	setKb( e, q, v * Reac::volScale( e, &requestSize, &toSub ) );
+	double volScale = 
+		convertConcToNumRateUsingMesh( e, &toPrd, 0, 1.0e-3, 0 );
+	setKb( e, q, v * volScale );
 }
 
 double ZombieReac::getConcKb( const Eref& e, const Qinfo* q ) const
 {
-	return getKb( e, q ) / Reac::volScale( e, &requestSize, &toSub );
+	double volScale = 
+		convertConcToNumRateUsingMesh( e, &toPrd, 0, 1.0e-3, 0 );
+	return getKb( e, q ) / volScale;
 }
 
 //////////////////////////////////////////////////////////////

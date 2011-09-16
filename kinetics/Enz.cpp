@@ -33,13 +33,6 @@ static SrcFinfo2< double, double > toCplx(
 		"Sends out increment of molecules on product each timestep"
 	);
 
-static SrcFinfo1< double > requestSize( 
-		"requestSize", 
-		"Requests size (volume) in which reaction is embedded. Used for"
-		"conversion to concentration units from molecule # units,"
-		"and for calculations when resized."
-	);
-
 static DestFinfo sub( "subDest",
 		"Handles # of molecules of substrate",
 		new OpFunc1< Enz, double >( &Enz::sub ) );
@@ -112,7 +105,7 @@ const Cinfo* Enz::initCinfo()
 			&Enz::getK3
 		);
 
-		static ValueFinfo< Enz, double > ratio(
+		static ElementValueFinfo< Enz, double > ratio(
 			"ratio",
 			"Ratio of k2/k3",
 			&Enz::setRatio,
@@ -167,7 +160,6 @@ const Cinfo* Enz::initCinfo()
 		&Km,	// Value
 		&kcat,	// Value
 		&ratio,	// Value
-		&requestSize,		// SrcFinfo
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
 		&enz,				// SharedFinfo
@@ -206,26 +198,22 @@ Enz::Enz( )
 void Enz::sub( double n )
 {
 	r1_ *= n;
-	// cout << "	sub: " << n;
 }
 
 void Enz::prd( double n ) // dummy
 {
 	;
-	// cout << "	prd: " << n;
 }
 
-void Enz::enz( double n ) // dummy
+void Enz::enz( double n )
 {
 	r1_ *= n;
-	// cout << "	enz: " << n;
 }
 
-void Enz::cplx( double n ) // dummy
+void Enz::cplx( double n )
 {
 	r2_ = k2_ * n;
 	r3_ = k3_ * n;
-	// cout << "	cplx: " << n;
 }
 
 void Enz::process( const Eref& e, ProcPtr p )
@@ -242,7 +230,6 @@ void Enz::process( const Eref& e, ProcPtr p )
 
 void Enz::reinit( const Eref& e, ProcPtr p )
 {
-	// cout << "	reinit: " << r1_ << ", " << r2_ << ", " << r3_ << endl;
 	r1_ = k1_;
 }
 
@@ -280,32 +267,12 @@ double Enz::getK3() const
 	return k3_;
 }
 
-
 //////////////////////////////////////////////////////////////
 // Scaled field terms.
 // We assume that when we set these, the k1, k2 and k3 vary as needed
 // to preserve the other field terms. So when we set Km, then kcat
 // and ratio remain unchanged.
 //////////////////////////////////////////////////////////////
-
-/*
-static unsigned int findNumSubstrates( const Eref& e )
-{
-	const vector< MsgFuncBinding >* mfb =
-		e.element()->getMsgAndFunc( toSub.getBindIndex() );
-	if ( !mfb ) return 0;
-	return mfb->size();
-}
-
-static double volScale( const Eref& e )
-{
-	unsigned int n = findNumSubstrates( e );
-	if ( n == 0 ) return 1.0;
-	double size = lookupSizeFromMesh( e, &requestSize );
-	double scale = pow( 1e-3 * NA * size, n ); // ES complex is one sub too.
-	return scale;
-}
-*/
 
 void Enz::setKm( const Eref& e, const Qinfo* q, double v )
 {
@@ -321,16 +288,16 @@ double Enz::getKm( const Eref& e, const Qinfo* q ) const
 	return (k2_ + k3_) / ( k1_ * volScale );
 }
 
-void Enz::setRatio( double v )
+void Enz::setRatio( const Eref& e, const Qinfo* q, double v )
 {
-	double Km = (k2_ + k3_) / k1_; // Fold in the volscale term.
+	double Km = getKm( e, q );
 
 	k2_ = v * k3_;
 
 	k1_ = ( k2_ + k3_ ) / Km;
 }
 
-double Enz::getRatio() const
+double Enz::getRatio( const Eref& e, const Qinfo* q ) const
 {
 	return k2_ / k3_;
 }
