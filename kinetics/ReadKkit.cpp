@@ -31,17 +31,6 @@ unsigned int chopLine( const string& line, vector< string >& ret )
 	return ret.size();
 }
 
-/*
-int main( int argc, const char* argv[] )
-{
-	string fname = "dend_v26.g";
-	if ( argc == 2 )
-		fname = argv[1];
-	ReadKkit rk;
-	rk.read( fname, "cell", 0 );
-}
-*/
-
 ////////////////////////////////////////////////////////////////////////
 
 ReadKkit::ReadKkit()
@@ -124,8 +113,8 @@ Id ReadKkit::read(
 	innerRead( fin );
 
 	assignPoolCompartments();
-	assignReacCompartments();
-	assignEnzCompartments();
+	// assignReacCompartments();
+	// assignEnzCompartments();
 	s->setCwe( base );
 	Field< string >::set( base, "path", "##" );
 	s->doReinit();
@@ -578,6 +567,7 @@ void ReadKkit::assignPoolCompartments()
 	}
 }
 
+/*
 static Id getMeshEntryForPool( Id pool )
 {
 	static const SrcFinfo* meshFinfo = 
@@ -594,84 +584,7 @@ static Id getMeshEntryForPool( Id pool )
 
 	return m->e2()->id();
 }
-
-static Id mostFrequentMeshId( vector< Id >& meshEntries )
-{
-	// Find the most frequently ocurring mesh Id.
-	sort( meshEntries.begin(), meshEntries.end() );
-	int maxIndex = 0;
-	int max = 0;
-	int currIndex = 0;
-	int curr = 0;
-	for ( unsigned int i = 0; i < meshEntries.size(); ++i ) {
-		if ( meshEntries[i] == meshEntries[ currIndex ] ) {
-			++curr;
-		} else {
-			currIndex = i;
-			curr = 1;
-		}
-		if ( curr > max ) {
-			maxIndex = currIndex;
-			max = curr;
-		}
-	}
-	Id frequentMeshId = meshEntries[maxIndex];
-	return frequentMeshId;
-}
-
-/**
- * This function puts the reaction on the most commonly occuring
- * compartment among its reactants. 
- */
-void ReadKkit::assignReacCompartments()
-{
-	for ( map< string, Id >::iterator i = reacIds_.begin();
-		i != reacIds_.end(); ++i )
-	{
-		vector< Id > meshEntries;
-		Neutral temp;
-		Id reacId = i->second;
-		vector< Id > subs = 
-			temp.getMsgTargetIds( reacId.eref(), 0, "toSub" );
-		vector< Id > prds = 
-			temp.getMsgTargetIds( reacId.eref(), 0, "toPrd" );
-		vector< Id > reactants = subs;
-		reactants.insert( reactants.end(), prds.begin(), prds.end() );
-		for ( vector< Id >::iterator j = reactants.begin();
-			j != reactants.end(); ++j ) {
-			meshEntries.push_back( getMeshEntryForPool( *j ) );
-		}
-		Id frequentMeshId = mostFrequentMeshId( meshEntries );
-
-		MsgId ret = shell_->doAddMsg( "OneToOne", 
-			ObjId( reacId, 0 ), "requestSize", frequentMeshId, "get_size" );
-		assert( ret != Msg::badMsg );
-	}
-
-}
-
-
-
-/**
- * This function simply puts the enzyme site on the parent enzyme molecule.
- * When we have enzyme reactions between different meshes, the # of 
- * enzyme sites is the same as the largest number of communicating
- * mesh entries.
- */
-void ReadKkit::assignEnzCompartments()
-{
-	for ( map< string, Id >::iterator i = enzIds_.begin();
-		i != enzIds_.end(); ++i )
-	{
-		Id enzId = i->second;
-		Id parentPoolId = Neutral::parent( enzId.eref() ).id;
-		Id meshId = getMeshEntryForPool( parentPoolId );
-		MsgId ret = shell_->doAddMsg( "OneToOne", 
-			ObjId( enzId, 0 ), "requestSize", 
-			ObjId( meshId, 0 ), "get_size" );
-		assert( ret != Msg::badMsg );
-	}
-}
+*/
 
 Id ReadKkit::buildEnz( const vector< string >& args )
 {

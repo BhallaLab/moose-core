@@ -28,8 +28,8 @@ class Enz
 
 		void setKm( const Eref& e, const Qinfo* q, double v );
 		double getKm( const Eref& e, const Qinfo* q ) const;
-		void setRatio( double v );
-		double getRatio() const;
+		void setRatio( const Eref& e, const Qinfo* q, double v );
+		double getRatio( const Eref& e, const Qinfo* q ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs

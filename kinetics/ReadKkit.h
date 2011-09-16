@@ -85,8 +85,8 @@ class ReadKkit
 		void loadtab( const vector< string >& args );
 		void separateVols( Id pool, double vol );
 		void assignPoolCompartments();
-		void assignReacCompartments();
-		void assignEnzCompartments();
+		// void assignReacCompartments();
+		// void assignEnzCompartments();
 
 		//////////////////////////////////////////////////////////////////
 		// Utility functions
