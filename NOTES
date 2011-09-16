@@ -15128,4 +15128,18 @@ fixed. I needed to redo the GENESIS reference simulation with a much smaller
 dt to get a better match.
 
 Did this. Some printf debug cleanup. Now it clears regression tests.
+Checkin 2974.
+
+Next steps:
+- ksolve replication
+- Reac-diff calculations using simple rk5 for space
+- tests
+- Stoch calculations in parallel.
+============================================================================
+
+16 Sep 2011
+Some minor cleanups of volume handling, to remove the requirement for Enz and
+Reac (and zombies thereof) to be associated with a mesh entry. Clears
+unit and regression tests.
+
 ============================================================================
