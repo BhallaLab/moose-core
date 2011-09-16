@@ -271,6 +271,44 @@ void Stoich::setNumPorts( unsigned int num )
 	ports_.resize( num );
 }
 
+void Stoich::setCompartmentVolume( short comptIndex, double v )
+{
+	if ( v <= 0 ) {
+		cout << "Error: Stoich::setCompartmentVolume: volume v must be > 0\n";
+		return;
+	}
+	unsigned int ci = comptIndex;
+	if ( ci >= compartmentSize_.size() ) {
+		cout << "Error: Stoich::setCompartmentVolume: Index " <<
+			comptIndex << " out of range, only " << 
+				compartmentSize_.size() <<
+			" compartments present\n";
+		return;
+	}
+
+	double origVol = compartmentSize_[ comptIndex ];
+	double ratio = v/origVol;
+
+	assert( compartment_.size() == S_.size() );
+	assert( compartment_.size() == Sinit_.size() );
+	for ( unsigned int i = 0; i < compartment_.size(); ++i ) {
+		S_[i] *= ratio;
+		Sinit_[i] *= ratio;
+	}
+
+	for ( vector< RateTerm* >::iterator i = rates_.begin(); i != rates_.end(); ++i ) {
+		(*i)->rescaleVolume(  comptIndex , compartment_, ratio );
+	}
+}
+
+double Stoich::getCompartmentVolume( short i ) const
+{
+	unsigned int temp = i;
+	if ( temp < compartmentSize_.size() )
+		return compartmentSize_[i];
+	return 0.0;
+}
+
 //////////////////////////////////////////////////////////////
 // Model zombification functions
 //////////////////////////////////////////////////////////////
@@ -421,14 +459,14 @@ void Stoich::zombifyChemMesh( Id compt )
 	const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >( finfo );
 	assert( sf );
 	unsigned int numTgts = e->getOutputs( pools, sf );
+	assert( numTgts > 0 );
 
-	for ( vector< Id >::iterator i = pools.begin(); i != pools.end(); ++i ) {
+	for ( vector< Id >::iterator i = pools.begin(); i != pools.end(); ++i ){
 		unsigned int m = convertIdToPoolIndex( *i );
 		compartment_[ m ] = compartmentSize_.size();
 	}
 
-	assert( numTgts > 0 );
-
+	objMap_[ compt.value() - objMapStart_ ] = compartmentSize_.size();
 	compartmentSize_.push_back( c->getEntireSize() );
 }
 
@@ -459,7 +497,14 @@ unsigned int Stoich::convertIdToFuncIndex( Id id ) const
 	return i;
 }
 
-
+unsigned int Stoich::convertIdToComptIndex( Id id ) const
+{
+	unsigned int i = id.value() - objMapStart_;
+	assert( i < objMap_.size() );
+	i = objMap_[i];
+	assert( i < compartmentSize_.size() );
+	return i;
+}
 
 //////////////////////////////////////////////////////////////
 // Model running functions

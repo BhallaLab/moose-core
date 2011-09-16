@@ -15140,6 +15140,31 @@ Next steps:
 16 Sep 2011
 Some minor cleanups of volume handling, to remove the requirement for Enz and
 Reac (and zombies thereof) to be associated with a mesh entry. Clears
-unit and regression tests.
+unit and regression tests. Checkin 2975.
 
+General scheme for changing vols and remeshing:
+	- Things to update:
+		Pool dimensions
+		Pool 'n'
+		Rates for enzymes and reacs
+		Solver dimensions
+		Solver n and nInit
+		Solver rates
+		diffusion coupling
+		output and graphics
+
+For starters, I'm going to allow the compartment volumes defined on the 
+solver to be changed. Later I'll set up messages from the compartments to the
+solver that request this change.
+
+Steps:
+	- Scan through all pools connected to this compt, update S_ and Sinit_.
+	- Scan through all RateTerms. Each rescales itself to the new vol,
+		by checking its reactants and seeing if they are in the 
+		affected compartment(s). Note that this magically propagates
+		to the ZombieReacs and ZombieEnzs, since if anyone checks them
+		they will find the new rates.
+
+Implemented volume rescaling in the Stoich. Compiles and clears unit and
+regression tests, need to do a specific test.
 ============================================================================
