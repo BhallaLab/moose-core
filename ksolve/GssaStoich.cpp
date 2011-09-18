@@ -366,7 +366,7 @@ void GssaStoich::makeReacDepsUnique()
 
 void GssaStoich::reinit( const Eref& e, ProcPtr p )
 {
-	Stoich::reinit( e, p );
+	Stoich::innerReinit();
 	// Here we round off up or down with prob depending on fractional
 	// part of the init value.
 	for ( vector< double >::iterator i = S_.begin(); i != S_.end(); ++i ) {

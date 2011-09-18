@@ -202,25 +202,25 @@ double Reac::getKb() const
 void Reac::setConcKf( const Eref& e, const Qinfo* q, double v )
 {
 	sub_ = kf_ = v * 
-		convertConcToNumRateUsingMesh( e, &toSub, 0, 1.0e-3, 0 );
+		convertConcToNumRateUsingMesh( e, &toSub, 0, CONC_UNIT_CONV, 0 );
 }
 
 double Reac::getConcKf( const Eref& e, const Qinfo* q ) const
 {
 	double volScale = 
-		convertConcToNumRateUsingMesh( e, &toSub, 0, 1.0e-3, 0 );
+		convertConcToNumRateUsingMesh( e, &toSub, 0, CONC_UNIT_CONV, 0 );
 	return kf_ / volScale;
 }
 
 void Reac::setConcKb( const Eref& e, const Qinfo* q, double v )
 {
 	prd_ = kb_ = 
-		v * convertConcToNumRateUsingMesh( e, &toPrd, 0, 1.0e-3, 0 );
+		v * convertConcToNumRateUsingMesh( e, &toPrd, 0, CONC_UNIT_CONV, 0);
 }
 
 double Reac::getConcKb( const Eref& e, const Qinfo* q ) const
 {
 	double volScale = 
-		convertConcToNumRateUsingMesh( e, &toPrd, 0, 1.0e-3, 0 );
+		convertConcToNumRateUsingMesh( e, &toPrd, 0, CONC_UNIT_CONV, 0 );
 	return kb_ / volScale;
 }

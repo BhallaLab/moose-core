@@ -143,14 +143,33 @@ void ZombieMMenz::reinit( const Eref& e, ProcPtr p )
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
+double getEnzVol( const Eref& e )
+{
+	vector< Id > enzMol;
+	e.element()->getInputs( enzMol, &enzDest );
+	assert( enzMol.size() == 1 );
+	const Finfo* f1 = enzMol[0].element()->cinfo()->findFinfo( "requestSize" );
+	const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >( f1 );
+	assert( sf );
+	double vol = lookupSizeFromMesh( enzMol[0].eref(), sf );
+	assert( vol > 0.0 );
+	return vol;
+}
+
 void ZombieMMenz::setKm( const Eref& e, const Qinfo* q, double v )
 {
-	rates_[ convertIdToPoolIndex( e.id() ) ]->setR1( v ); // First rate is Km
+	double Km = v * NA * CONC_UNIT_CONV * getEnzVol( e );
+
+	// First rate is Km
+	rates_[ convertIdToPoolIndex( e.id() ) ]->setR1( Km ); 
 }
 
 double ZombieMMenz::getKm( const Eref& e, const Qinfo* q ) const
 {
-	return rates_[ convertIdToPoolIndex( e.id() ) ]->getR1(); // First rate is Km
+	double Km = 
+		rates_[ convertIdToPoolIndex( e.id() ) ]->getR1();
+	
+	return Km / getEnzVol( e ) * NA * CONC_UNIT_CONV;
 }
 
 void ZombieMMenz::setKcat( const Eref& e, const Qinfo* q, double v )
