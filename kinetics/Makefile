@@ -43,8 +43,8 @@ MMenz.o:	MMenz.h  lookupSizeFromMesh.h
 Boundary.o:	Boundary.h
 ChemCompt.o:	ChemCompt.h
 Species.o:	Species.h
-ReadKkit.o:	ReadKkit.h Pool.h FuncPool.h ../shell/Shell.h
-ReadCspace.o:	ReadCspace.h ../shell/Shell.h
+ReadKkit.o:	lookupSizeFromMesh.h ReadKkit.h Pool.h FuncPool.h ../shell/Shell.h 
+ReadCspace.o:	lookupSizeFromMesh.h ReadCspace.h ../shell/Shell.h
 MathFunc.o:	MathFunc.h
 SumFunc.o:	SumFunc.h
 lookupSizeFromMesh.o: lookupSizeFromMesh.h

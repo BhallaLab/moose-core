@@ -70,7 +70,7 @@ const Cinfo* ChemMesh::initCinfo()
 		);
 
 		static FieldElementFinfo< ChemMesh, MeshEntry > entryFinfo( 
-			"meshEntries", 
+			"mesh", 
 			"Field Element for mesh entries",
 			MeshEntry::initCinfo(),
 			&ChemMesh::lookupEntry,

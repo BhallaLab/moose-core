@@ -141,7 +141,7 @@ void ReadKkit::setupGslRun()
 
 	string plotpath = basePath_ + "/graphs/##[TYPE=Table]," + 
 		basePath_ + "/moregraphs/##[TYPE=Table]";
-	shell_->doUseClock( basePath_ + "/gsl", "process", 0 );
+	shell_->doUseClock( basePath_ + "/gsl", "process", 0);
 	shell_->doUseClock( plotpath, "process", 2 );
 	shell_->doReinit();
 }
@@ -543,7 +543,7 @@ void ReadKkit::assignPoolCompartments()
 			comptId = shell_->doCreate( "CubeMesh", baseId_, name, dims, 
 				true );
 		}
-		Id meshId = Neutral::child( comptId.eref(), "meshEntries" );
+		Id meshId = Neutral::child( comptId.eref(), "mesh" );
 		assert( meshId != Id() );
 		double side = pow( vols_[i], 1.0 / 3.0 );
 		vector< double > coords( 9, side );

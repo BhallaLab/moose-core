@@ -10,6 +10,8 @@
 #include "header.h"
 #include "lookupSizeFromMesh.h"
 
+const double CONC_UNIT_CONV = 1.0e-3; // convert micromolar to SI units.
+
 /// Utility function to find the size of a pool.
 double lookupSizeFromMesh( const Eref& e, const SrcFinfo* sf )
 {

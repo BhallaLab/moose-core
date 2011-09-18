@@ -103,7 +103,7 @@ Id ReadCspace::readModelString( const string& model,
 
 	Id comptId = s->doCreate( "CubeMesh", base_, "compartment", dims, false );
 	assert( comptId != Id() );
-	mesh_ = Neutral::child( comptId.eref(), "meshEntries" );
+	mesh_ = Neutral::child( comptId.eref(), "mesh" );
 	assert( mesh_ != Id() );
 	double side = 1e-6;
 	vector< double > coords( 9, side );
@@ -174,7 +174,7 @@ void ReadCspace::setupGslRun( double plotdt )
 	string basePath = base_.path();
 
     string plotpath = basePath + "/##[TYPE=Table]";
-    shell->doUseClock( basePath + "," + basePath + "/gsl", "process", 0 ); 
+    shell->doUseClock( basePath + "/gsl", "process", 0 ); 
     shell->doUseClock( plotpath, "process", 2 ); 
     shell->doReinit();
 }

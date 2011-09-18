@@ -58,6 +58,7 @@ class RateTerm
 		 * intensive units like concentration. So when the volume changes
 		 * the rate terms change. Each Rate term checks if any of its
 		 * reactant molecules are affected, and if so, rescales.
+		 * Ratio is newVol / oldVol
 		 */
 		virtual void rescaleVolume( short comptIndex, 
 			const vector< short >& compartmentLookup, double ratio ) = 0;
@@ -108,7 +109,7 @@ class MMEnzymeBase: public RateTerm
 		void rescaleVolume( short comptIndex, 
 			const vector< short >& compartmentLookup, double ratio )
 		{
-			return; // Rates are already in conc units, no change needed
+			Km_ *= ratio;
 		}
 
 	protected:

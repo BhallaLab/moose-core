@@ -8,6 +8,11 @@
 **********************************************************************/
 
 /**
+ * Used to provide the conversion factor from preferred units to SI.
+ */
+extern const double CONC_UNIT_CONV;
+
+/**
  * Utility function for kinetics classes to find their volume from
  * the attached mesh. Works for Pools and subclasses.
  */

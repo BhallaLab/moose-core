@@ -39,9 +39,6 @@ class Stoich
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
 
-		void process( const Eref& e, ProcPtr p );
-		void reinit( const Eref& e, ProcPtr p );
-
 		/**
 		 * Handles incoming messages representing influx of molecules
  		 */
@@ -81,6 +78,14 @@ class Stoich
 		//////////////////////////////////////////////////////////////////
 		// Compute functions
 		//////////////////////////////////////////////////////////////////
+
+		/**
+		 * Reinitializes all variables and rates. This function may also do 
+		 * reallocation, so it must be called in a thread-safe manner
+		 * by whatever object directly handles the process calls.
+		 */
+		void innerReinit();
+
 		/**
 		 * Update the v_ vector for individual reaction velocities. Uses
 		 * hooks into the S_ vector for its arguments.

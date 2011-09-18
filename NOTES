@@ -15166,5 +15166,27 @@ Steps:
 		they will find the new rates.
 
 Implemented volume rescaling in the Stoich. Compiles and clears unit and
-regression tests, need to do a specific test.
+regression tests, need to do a specific test.  Checkin 2976.
+
 ============================================================================
+17 Sep 2011. 
+Rescaling volume debugging slowly progressing. Now it hangs with a negative
+mol-n  in in in MMEnzyme1::operator().
+
+Looks like the Km in MMEnzymeBase should be in # units. Also in
+MMenz.cpp and ZombieMMenz.cpp.
+
+Tried running Kholodenko.g with different volume term. Doesn't
+seem to make a difference.
+
+Is there a memory issue? Ran valgrind with the base unit tests. Still clear.
+Ran it on the regression tests. Nothing turns up till the negative mol-n.
+
+Something funny about Km for MM-Enz. It should be in # units too.
+============================================================================
+18 Sep 2011
+Much messing around to fix up the volume scaling. There were problems with
+reinit. There were problems with volume assignment. There were problems with
+numerical accuracy. There were plain old bugs. Anyway, it now works
+through the regression test, and in the process much other cleanup has
+occurred.
