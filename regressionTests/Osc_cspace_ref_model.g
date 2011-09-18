@@ -1,15 +1,15 @@
 //genesis
 // kkit Version 11 flat dumpfile
  
-// Saved on Sat Sep 10 21:14:19 2011
+// Saved on Sun Sep 18 11:50:03 2011
  
 include kkit {argv 1}
  
 FASTDT = 0.0001
-SIMDT = 0.01
+SIMDT = 0.005
 CONTROLDT = 5
 PLOTDT = 10
-MAXTIME = 15000
+MAXTIME = 2500
 TRANSIENT_TIME = 2
 VARIABLE_DT_FLAG = 1
 DEFAULT_VOL = 1e-20
@@ -66,11 +66,11 @@ call /kinetics/geometry[1]/notes LOAD \
 simundump text /kinetics/geometry[2]/notes 0 ""
 call /kinetics/geometry[2]/notes LOAD \
 ""
-simundump kreac /kinetics/exo 0 0.001 0 "" white black 1 11 0
+simundump kreac /kinetics/exo 0 0.005 0 "" white black 1 11 0
 simundump text /kinetics/exo/notes 0 ""
 call /kinetics/exo/notes LOAD \
 ""
-simundump kreac /kinetics/endo 0 0.002 0 "" white black -3 11 0
+simundump kreac /kinetics/endo 0 0.01 0 "" white black -3 11 0
 simundump text /kinetics/endo/notes 0 ""
 call /kinetics/endo/notes LOAD \
 ""
@@ -117,8 +117,8 @@ simundump kreac /kinetics/A/basal 0 0.01 0 "" white 16 0 13 0
 simundump text /kinetics/A/basal/notes 0 ""
 call /kinetics/A/basal/notes LOAD \
 ""
-simundump kpool /kinetics/A/Stot 0 0 0 3.4999 21 0 0 0 6 0 \
-  /kinetics/geometry[2] 41 16 -5 13 0
+simundump kpool /kinetics/A/Stot 0 0 0 3.5 21 0 0 0 6 0 /kinetics/geometry[2] \
+  41 16 -5 13 0
 simundump text /kinetics/A/Stot/notes 0 ""
 call /kinetics/A/Stot/notes LOAD \
 ""
@@ -132,7 +132,7 @@ simundump kenz /kinetics/A/P/kenz 0 0 0 0 0 5.9999 16.667 4 1 0 0 "" red 3 "" \
 simundump text /kinetics/A/P/kenz/notes 0 ""
 call /kinetics/A/P/kenz/notes LOAD \
 ""
-simundump kpool /kinetics/A/M 0 0 3.5 3.5 21 21 0 0 5.9999 0 \
+simundump kpool /kinetics/A/M 0 0 3.5001 3.5001 21 21 0 0 5.9999 0 \
   /kinetics/geometry 53 16 -2 16 0
 simundump text /kinetics/A/M/notes 0 ""
 call /kinetics/A/M/notes LOAD \
@@ -147,8 +147,8 @@ simundump kenz /kinetics/A/M*/kenz 0 0 0 0 0 5.9999 0.41667 2 0.5 0 0 "" red \
 simundump text /kinetics/A/M*/kenz/notes 0 ""
 call /kinetics/A/M*/kenz/notes LOAD \
 ""
-simundump xgraph /graphs/conc1 0 0 15000 0.001 3 0
-simundump xgraph /graphs/conc2 0 0 15000 0 5 0
+simundump xgraph /graphs/conc1 0 0 2500 0.001 3 0
+simundump xgraph /graphs/conc2 0 0 2500 0 5 0
 simundump xplot /graphs/conc1/M.Co 3 524288 \
   "delete_plot.w <s> <d>; edit_plot.D <w>" 53 0 0 1
 simundump xplot /graphs/conc1/M*.Co 3 524288 \
@@ -157,8 +157,8 @@ simundump xplot /graphs/conc2/M.Co 3 524288 \
   "delete_plot.w <s> <d>; edit_plot.D <w>" 62 0 0 1
 simundump xplot /graphs/conc2/M*.Co 3 524288 \
   "delete_plot.w <s> <d>; edit_plot.D <w>" 28 0 0 1
-simundump xgraph /moregraphs/conc3 0 0 15000 0 1 0
-simundump xgraph /moregraphs/conc4 0 0 15000 0 1 0
+simundump xgraph /moregraphs/conc3 0 0 2500 0 1 0
+simundump xgraph /moregraphs/conc4 0 0 2500 0 1 0
 simundump xcoredraw /edit/draw 0 -9 4 -2 19
 simundump xtree /edit/draw/tree 0 \
   /kinetics/#[],/kinetics/#[]/#[],/kinetics/#[]/#[]/#[][TYPE!=proto],/kinetics/#[]/#[]/#[][TYPE!=linkinfo]/##[] \

@@ -201,23 +201,23 @@ void rtReadCspace()
 	assert( doubleEq( rate, 0.05 ) );
 
 	rate = Field< double >::get( Id( "/osc/AadX" ), "Kf" );
-	assert( doubleEq( rate, 0.002 ) );
+	assert( doubleEq( rate, 0.01 ) );
 	rate = Field< double >::get( Id( "/osc/AadX" ), "Kb" );
 	assert( doubleEq( rate, 0.0 ) );
 
 	rate = Field< double >::get( Id( "/osc/AbeX" ), "Kf" );
 	assert( doubleEq( rate, 0.0 ) );
 	rate = Field< double >::get( Id( "/osc/AbeX" ), "Kb" );
-	assert( doubleEq( rate, 0.001 ) );
+	assert( doubleEq( rate, 0.005 ) );
 
 	// cout << "After Reinit\n"; Qinfo::reportQ();
-	shell->doStart( 15001.0 );
+	shell->doStart( 2501.0 );
 
 	Id plotId( "/osc/plotd" );
 	assert( plotId != Id() );
 	unsigned int size = Field< unsigned int >::get( plotId, "size" );
 	// cout << "size = " << size << endl;
-	assert( size == 1501 ); // Note that dt was 10.
+	assert( size == 251 ); // Note that dt was 10.
 	
 	/*
 	bool ok = SetGet::strSet( 

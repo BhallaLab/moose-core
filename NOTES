@@ -15189,4 +15189,8 @@ Much messing around to fix up the volume scaling. There were problems with
 reinit. There were problems with volume assignment. There were problems with
 numerical accuracy. There were plain old bugs. Anyway, it now works
 through the regression test, and in the process much other cleanup has
-occurred.
+occurred. Checkin 2977.
+
+Regression test for cspace model is taking too long to run. Worked on the
+model, reduced runtime by a factor of 6 or so. 
+============================================================================
