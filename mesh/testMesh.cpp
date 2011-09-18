@@ -162,7 +162,7 @@ void testMidLevelCylMesh()
 
 	assert( meshId()->dataHandler()->localEntries() == 5 );
 
-	unsigned int n = Field< unsigned int >::get( cylId, "num_meshEntries" );
+	unsigned int n = Field< unsigned int >::get( cylId, "num_mesh" );
 	assert( n == 5 );
 
 	ObjId oid( meshId, DataId( 0, 2 ) );

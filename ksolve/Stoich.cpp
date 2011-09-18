@@ -65,6 +65,13 @@ const Cinfo* Stoich::initCinfo()
 			&Stoich::getNumVarPools
 		);
 
+		static LookupValueFinfo< Stoich, short, double > compartmentVolume(
+			"compartmentVolume",
+			"Size of specified compartment",
+			&Stoich::setCompartmentVolume,
+			&Stoich::getCompartmentVolume
+		);
+
 		static ElementValueFinfo< Stoich, string > path(
 			"path",
 			"Path of reaction system to take over",
@@ -75,12 +82,14 @@ const Cinfo* Stoich::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
+		/*
 		static DestFinfo process( "process",
 			"Handles process call",
 			new ProcOpFunc< Stoich >( &Stoich::process ) );
 		static DestFinfo reinit( "reinit",
 			"Handles reinint call",
 			new ProcOpFunc< Stoich >( &Stoich::reinit ) );
+			*/
 
 		//////////////////////////////////////////////////////////////
 		// FieldElementFinfo defintion for Ports.
@@ -96,6 +105,7 @@ const Cinfo* Stoich::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
 		//////////////////////////////////////////////////////////////
+		/*
 		static Finfo* procShared[] = {
 			&process, &reinit
 		};
@@ -103,14 +113,15 @@ const Cinfo* Stoich::initCinfo()
 			"Shared message for process and reinit",
 			procShared, sizeof( procShared ) / sizeof( const Finfo* )
 		);
+		*/
 
 	static Finfo* stoichFinfos[] = {
 		&useOneWay,		// Value
 		&nVarPools,		// Value
+		&compartmentVolume,	//Value
 		&path,			// Value
 		plugin(),		// SrcFinfo
 		&portFinfo,		// FieldElementFinfo
-		&proc,			// SharedFinfo
 	};
 
 	static Cinfo stoichCinfo (
@@ -155,15 +166,18 @@ Stoich::~Stoich()
 // MsgDest Definitions
 //////////////////////////////////////////////////////////////
 
-void Stoich::process( const Eref& e, ProcPtr p )
-{
-	;
-}
-
-void Stoich::reinit( const Eref& e, ProcPtr p )
+// This must only be called by the object that is actually
+// handling the processing: GssaStoich or GslIntegrator at this
+// time. That is because this function may reallocate memory
+// and its values must propagate serially to the calling object.
+void Stoich::innerReinit()
 {
 	y_.assign( Sinit_.begin(), Sinit_.begin() + numVarPools_ );
 	S_ = Sinit_;
+	// v_.assign( v_.size(), 0.0 );
+
+	updateFuncs( 0 );
+	updateV();
 }
 
 /**
@@ -271,6 +285,11 @@ void Stoich::setNumPorts( unsigned int num )
 	ports_.resize( num );
 }
 
+unsigned int Stoich::numCompartments() const
+{
+	return compartment_.size();
+}
+
 void Stoich::setCompartmentVolume( short comptIndex, double v )
 {
 	if ( v <= 0 ) {
@@ -295,6 +314,8 @@ void Stoich::setCompartmentVolume( short comptIndex, double v )
 		S_[i] *= ratio;
 		Sinit_[i] *= ratio;
 	}
+	for ( vector< double >::iterator i = y_.begin(); i != y_.end(); ++i )
+		*i *= ratio;
 
 	for ( vector< RateTerm* >::iterator i = rates_.begin(); i != rates_.end(); ++i ) {
 		(*i)->rescaleVolume(  comptIndex , compartment_, ratio );
@@ -417,7 +438,7 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 	static const Cinfo* reacCinfo = Reac::initCinfo();
 	static const Cinfo* enzCinfo = Enz::initCinfo();
 	static const Cinfo* mmEnzCinfo = MMenz::initCinfo();
-	static const Cinfo* chemComptCinfo = ChemMesh::initCinfo();
+	// static const Cinfo* chemComptCinfo = ChemMesh::initCinfo();
 	// static const Cinfo* sumFuncCinfo = SumFunc::initCinfo();
 	// The FuncPool handles zombification of stuff coming in to it.
 
@@ -441,24 +462,25 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 		else if ( ei->cinfo() == enzCinfo ) {
 			ZombieEnz::zombify( e.element(), (*i)() );
 		}
-		else if ( ei->cinfo() == chemComptCinfo ) {
+		else if ( ei->cinfo()->isA( "MeshEntry" ) ) {
 			zombifyChemMesh( *i ); // It retains its identity.
 			// ZombieChemMesh::zombify( e.element(), (*i)() );
 		}
 	}
 }
 
-void Stoich::zombifyChemMesh( Id compt )
+void Stoich::zombifyChemMesh( Id meshEntry )
 {
-	static const Cinfo* chemComptCinfo = ChemMesh::initCinfo();
-	static const Finfo* finfo = chemComptCinfo->findFinfo( "compartment" );
-	ChemMesh* c = reinterpret_cast< ChemMesh* >( compt.eref().data() );
+	static const Cinfo* meshEntryCinfo = MeshEntry::initCinfo();
+	static const Finfo* finfo = meshEntryCinfo->findFinfo( "get_size" );
 
-	Element* e = compt();
+	MeshEntry* c = reinterpret_cast< MeshEntry* >( meshEntry.eref().data());
+
+	Element* e = meshEntry();
 	vector< Id > pools;
-	const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >( finfo );
-	assert( sf );
-	unsigned int numTgts = e->getOutputs( pools, sf );
+	const DestFinfo* df = dynamic_cast< const DestFinfo* >( finfo );
+	assert( df );
+	unsigned int numTgts = e->getInputs( pools, df );
 	assert( numTgts > 0 );
 
 	for ( vector< Id >::iterator i = pools.begin(); i != pools.end(); ++i ){
@@ -466,8 +488,8 @@ void Stoich::zombifyChemMesh( Id compt )
 		compartment_[ m ] = compartmentSize_.size();
 	}
 
-	objMap_[ compt.value() - objMapStart_ ] = compartmentSize_.size();
-	compartmentSize_.push_back( c->getEntireSize() );
+	objMap_[ meshEntry.value() - objMapStart_ ] = compartmentSize_.size();
+	compartmentSize_.push_back( c->getSize( meshEntry.eref(), 0 ) );
 }
 
 unsigned int Stoich::convertIdToPoolIndex( Id id ) const

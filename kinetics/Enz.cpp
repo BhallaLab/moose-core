@@ -277,14 +277,14 @@ double Enz::getK3() const
 void Enz::setKm( const Eref& e, const Qinfo* q, double v )
 {
 	double volScale = 
-		convertConcToNumRateUsingMesh( e, &toSub, 0, 1.0e-3, 1 );
+		convertConcToNumRateUsingMesh( e, &toEnz, 0, CONC_UNIT_CONV, 1 );
 	k1_ = ( k2_ + k3_ ) / ( v * volScale );
 }
 
 double Enz::getKm( const Eref& e, const Qinfo* q ) const
 {
 	double volScale = 
-		convertConcToNumRateUsingMesh( e, &toSub, 0, 1.0e-3, 1 );
+		convertConcToNumRateUsingMesh( e, &toEnz, 0, CONC_UNIT_CONV, 1 );
 	return (k2_ + k3_) / ( k1_ * volScale );
 }
 

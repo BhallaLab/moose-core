@@ -108,7 +108,7 @@ GslIntegrator::GslIntegrator()
 	gslStep_ = 0;
 #endif // USE_GSL
 	nVarPools_ = 0;
-	absAccuracy_ = 1.0e-6;
+	absAccuracy_ = 1.0e-9;
 	relAccuracy_ = 1.0e-6;
 	internalStepSize_ = 1.0e-4;
 	// y_ = 0;
@@ -216,6 +216,7 @@ void GslIntegrator::setInternalDt( double value )
 void GslIntegrator::stoich( Id stoichId )
 {
 #ifdef USE_GSL
+	stoichId_ = stoichId;
 	Stoich* s = reinterpret_cast< Stoich* >( stoichId.eref().data() );
 	nVarPools_ = s->getNumVarPools();
 	y_ = s->getY();
@@ -298,7 +299,44 @@ void GslIntegrator::process( const Eref& e, ProcPtr info )
 #endif // USE_GSL
 }
 
+// Must happen _after_ the Stoich::reinit
 void GslIntegrator::reinit( const Eref& e, ProcPtr info )
 {
-	;
+	Stoich* s = reinterpret_cast< Stoich* >( stoichId_.eref().data() );
+	s->innerReinit();
+	nVarPools_ = s->getNumVarPools();
+	y_ = s->getY();
+#ifdef USE_GSL
+	if ( isInitialized_ ) {
+        assert( gslStepType_ != 0 );
+        if ( gslStep_ )
+        {
+            gsl_odeiv_step_free(gslStep_);
+        }
+        
+        gslStep_ = gsl_odeiv_step_alloc( gslStepType_, nVarPools_ );
+        
+   	assert( gslStep_ != 0 );
+        if ( !gslEvolve_ )
+        {
+            gslEvolve_ = gsl_odeiv_evolve_alloc(nVarPools_);
+        }
+        else
+        {
+            gsl_odeiv_evolve_reset(gslEvolve_);
+        }
+        assert(gslEvolve_ != 0);
+        
+        if ( !gslControl_ )
+        {
+            gslControl_ = gsl_odeiv_control_y_new( absAccuracy_, relAccuracy_ );
+        }
+        else 
+        {
+            gsl_odeiv_control_init(gslControl_,absAccuracy_, relAccuracy_, 1, 0);
+        }
+        assert(gslControl_!= 0);
+	
+	}
+#endif // USE_GSL
 }

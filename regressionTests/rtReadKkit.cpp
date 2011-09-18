@@ -71,9 +71,7 @@ void rtReadKkit()
 	shell->doSetClock( 0, 10 );
 	shell->doSetClock( 1, 10 );
 	shell->doSetClock( 2, 10 );
-	// cout << "Before Reinit\n"; Qinfo::reportQ();
 	shell->doReinit();
-	// cout << "After Reinit\n"; Qinfo::reportQ();
 	shell->doStart( 5001.0 );
 
 	Id plotId( "/rkktest/graphs/conc1/MAPK-PP.Co" );
@@ -81,18 +79,14 @@ void rtReadKkit()
 	unsigned int size = Field< unsigned int >::get( plotId, "size" );
 	// cout << "size = " << size << endl;
 	assert( size == 501 ); // Note that dt was 10.
+
+	bool ok = SetGet2< string, string >::set(
+		plotId, "xplot", "check.plot", "MAPK-PP.plot" );
+	assert( ok );
 	
-	/*
-	bool ok = SetGet::strSet( 
-		plotId.eref(), "compareXplot", "Kholodenko.plot,/graphs/conc1/MAPK-PP.Co,rmsr" );
-		*/
-	bool ok = SetGet3< string, string, string >::set(
+	ok = SetGet3< string, string, string >::set(
 		plotId, "compareXplot", "Kholodenko.plot", 
 		"/graphs/conc1/MAPK-PP.Co", "rmsr" );
-	assert( ok );
-
-	ok = SetGet2< string, string >::set(
-		plotId, "xplot", "check.plot", "MAPK-PP.plot" );
 	assert( ok );
 
 	// Returns -1 on failure, otherwise the (positive) rms ratio.
@@ -100,7 +94,43 @@ void rtReadKkit()
 	assert( val >= 0 && val < TOLERANCE );
 
 	/////////////////////////////////////////////////////////////////////
-	// shell->doDelete( kineticId );
+	// Change volume and run it again.
+	/////////////////////////////////////////////////////////////////////
+	double vol = LookupField< short, double >::get( kineticId, "compartmentVolume", 0);
+	vol *= 0.1;
+	ok = LookupField< short, double >::set( kineticId, "compartmentVolume", 0, 
+		vol );
+
+	assert( ok );
+	double side = pow( vol, 1.0/3.0 );
+	ok = Field< double >::set( Id( "/rkktest/kinetics" ), "x1", side );
+	assert( ok );
+	ok = Field< double >::set( Id( "/rkktest/kinetics" ), "y1", side );
+	assert( ok );
+	ok = Field< double >::set( Id( "/rkktest/kinetics" ), "z1", side );
+	assert( ok );
+	double actualVol = 
+		Field< double >::get( Id( "/rkktest/kinetics/mesh" ), "size" );
+	assert( doubleEq( actualVol, vol ) );
+
+	shell->doReinit();
+	shell->doStart( 5001.0 );
+	size = Field< unsigned int >::get( plotId, "size" );
+	assert( size == 501 ); // Note that dt was 10.
+	ok = SetGet2< string, string >::set(
+		plotId, "xplot", "check.plot", "volscale_MAPK-PP.plot" );
+	assert( ok );
+
+	ok = SetGet3< string, string, string >::set(
+		plotId, "compareXplot", "Kholodenko.plot", 
+		"/graphs/conc1/MAPK-PP.Co", "rmsr" );
+	val = Field< double >::get( plotId, "outputValue" );
+	assert( val >= 0 && val < TOLERANCE );
+
+	assert( ok );
+	
+	/////////////////////////////////////////////////////////////////////
+	shell->doDelete( kineticId );
 	cout << "." << flush;
 }
 
