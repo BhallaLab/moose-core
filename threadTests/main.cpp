@@ -80,59 +80,90 @@ void* barrierLoop( void* info )
 	pthread_exit( NULL );
 }
 
+void* joinLoop( void* info )
+{
+	ThreadInfo* t = reinterpret_cast< ThreadInfo* >( info );
+	busyFunc( t );
+	pthread_exit( NULL );
+}
+
 //////////////////////////////////////////////////////////////////////////
 // This function sets up the threading for the process loop.
 //////////////////////////////////////////////////////////////////////////
 int main( int argc, char** argv )
 {
-	if ( argc < 4 ) {
-		cout << "Usage: " << argv[0] << " numThreads numJoins numBusy\n";
+	if ( argc < 5 ) {
+		cout << "Usage: " << argv[0] << " numThreads numJoins numBusy doBarrier\n";
 		return 1;
 	}
 	int numThreads = atoi( argv[1] );
 	int numJoins = atoi( argv[2] );
 	int numBusy = atoi( argv[3] );
+	int doBarrier = atoi( argv[4] );
+
+	int ret;
 
 	pthread_attr_t* attr = new pthread_attr_t;
 	pthread_attr_init( attr );
 	pthread_attr_setdetachstate( attr, PTHREAD_CREATE_JOINABLE );
 
-	barrier = new FuncBarrier( numThreads, &barrierOp );
-	int ret;
-
-	pthread_mutex_t* parserMutex = new pthread_mutex_t; // Assign the Shell variables.
-	pthread_cond_t* parserBlockCond = new pthread_cond_t;
-
-	ret = pthread_mutex_init( parserMutex, NULL );
-	assert( ret == 0 );
-
-	ret = pthread_cond_init( parserBlockCond, NULL );
-	assert( ret == 0 );
-
 	pthread_t* threads = new pthread_t[ numThreads ];
 	vector< ThreadInfo* > threadInfos( numThreads );
 
-	for ( unsigned int i = 0; i < numThreads; ++i ) {
+	for ( int i = 0; i < numThreads; ++i )
 		threadInfos[i] = new ThreadInfo( i, numJoins, numBusy );
-		int rc = pthread_create( threads + i, NULL, barrierLoop, 
-			(void *)threadInfos[i] );
-		assert( rc == 0 );
-	}
 
-	for ( int i = 0; i < numThreads; ++i ) {
-		void* status;
-		ret = pthread_join( threads[i], &status );
-		if ( ret )
-			cout << "Error: Unable to join threads\n";
+	if ( doBarrier ) {
+		barrier = new FuncBarrier( numThreads, &barrierOp );
+		/*
+		pthread_mutex_t* parserMutex = new pthread_mutex_t; // Assign the Shell variables.
+		pthread_cond_t* parserBlockCond = new pthread_cond_t;
+	
+		ret = pthread_mutex_init( parserMutex, NULL );
+		assert( ret == 0 );
+	
+		ret = pthread_cond_init( parserBlockCond, NULL );
+		assert( ret == 0 );
+		*/
+	
+		for ( int i = 0; i < numThreads; ++i ) {
+			int rc = pthread_create( threads + i, NULL, barrierLoop, 
+				(void *)threadInfos[i] );
+			assert( rc == 0 );
+		}
+	
+		for ( int i = 0; i < numThreads; ++i ) {
+			void* status;
+			ret = pthread_join( threads[i], &status );
+			if ( ret )
+				cout << "Error: Unable to join threads\n";
+		}
+	} else {
+		for ( int j = 0; j < numJoins; ++j ) {
+			for ( int i = 0; i < numThreads; ++i ) {
+				int rc = pthread_create( threads + i, NULL, joinLoop, 
+					(void *)threadInfos[i] );
+				assert( rc == 0 );
+			}
+	
+			for ( int i = 0; i < numThreads; ++i ) {
+				void* status;
+				ret = pthread_join( threads[i], &status );
+				if ( ret )
+					cout << "Error: Unable to join threads\n";
+			}
+		}
 	}
 
 	delete[] threads;
 	pthread_attr_destroy( attr );
 	delete attr;
+	/*
 	ret = pthread_mutex_destroy( parserMutex );
 	delete parserMutex;
 	ret = pthread_cond_destroy( parserBlockCond );
 	delete parserBlockCond;
+	*/
 
 	delete barrier;
 
