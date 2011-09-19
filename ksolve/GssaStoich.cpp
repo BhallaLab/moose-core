@@ -154,17 +154,6 @@ void GssaStoich::setPath( const Eref& e, const Qinfo* q, string path )
 ///////////////////////////////////////////////////
 // Setup funcs
 ///////////////////////////////////////////////////
-/*
- * This function could be much tighter if I maintain a dependency list
- * from molecules to reactions. If so I would only have to update the
- * affected reaction rates. But I don't expect to have
- * to assign molecules very often. So I just update the whole lot.
-void GssaStoich::innerSetMolN( double y, unsigned int i )
-{
-	Stoich::innerSetMolN( y, i );
-	updateAllRates();
-}
- */
 
 /**
  * Virtual function to make the data structures from the 
