@@ -15251,4 +15251,26 @@ Write some timing code to test threading options
 		Similar results come up if numBusy is 2 or 4.
 	- Using a master thread to unleash the crew.
 
+Checkin 2979: the barriers test.
+
+Modified a bit to do same thing using joins. Way slower.
+
+Machine	numThreads	numJoins	numBusy	doBarrier	usertime (s)
+mishti	1		100,000		3	0		7.6
+mishti	2		100,000		3	0		7.7
+mishti	3		100,000		3	0		8.2
+mishti	4		100,000		3	0		10.0
+mishti	5		100,000		3	0		14.1
+mishti	8		100,000		3	0		28.0
+
+
+mishti	8		100,000		3	1		8.8
+mishti	5		100,000		3	1		5.2
+mishti	4		100,000		3	1		3.9
+mishti	3		100,000		3	1		2.7
+mishti	2		100,000		3	1		1.45
+mishti	2		1000,000	3	1		14.7
+mishti	1		1000,000	3	1		0.4
+
+
 ============================================================================
