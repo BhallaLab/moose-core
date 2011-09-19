@@ -14714,10 +14714,10 @@ Cleaned up a lot of printf debugging. Checkin 2907.
 16 Aug
 Some things to do:
 - Partition up the SparseMsg::exec by thread ahead of time.
-- Gillespie method.
++ Gillespie method.
 - Thread-ify the ksolver
 - SBML reading
-- Scripting
++ Scripting
 - With Niraj: hsolver
 - With Harsha and Chaitanya: Interface
 - Optimize
@@ -15192,5 +15192,63 @@ through the regression test, and in the process much other cleanup has
 occurred. Checkin 2977.
 
 Regression test for cspace model is taking too long to run. Worked on the
-model, reduced runtime by a factor of 6 or so. 
+model, reduced runtime by a factor of 6 or so.  Checkin 2978.
+
+Time to get going on the reac-diff calculations. For starters, I'll just
+consider diffusive coupling between different solvers. In other words, if there
+is a cross-solver reaction, it has to be split into a local reaction or two,
+and then diffusion to move molecules between solvers.
+Likewise, any compartments within a solver are replicated uniformly for
+all instances. If I want to do different meshing of two compartments I'll need
+two different solvers.
+
+Stages:
+- Just set up replicates of data structures
+- Set up calculations on replicates. This will work with separate spines.
+- Set up calculations on replicates using GSSA.
+- Set up diffusive updates
+- Combine using an RK4 fixed-timestep with interleaved updates
+- Put in ports for different solvers to talk to each other.
+- Figure out how to multithread replicates.
+- Figure out how to multinode replicates.
+
+Some multithread design:
+Assume we set off solver on selected # of threads. The solver itself has to
+know which threads it is allowed.
+The GslIntegrator::process is the entry point for calls to the solver. It is
+a regular 'process' call, could be called from all the process threads 
+simultaneously.
+The gsl_odeiv_evolve_apply function is called there. But the gsl func
+has to be done on a single thread.
+What we do want is that as soon as the gslFunc is called from the single
+gsl thread, it latches onto all the available threads and deals with the
+appropriate part of the data.
+	- Send signals out to existing threads
+	- Spawn and rejoin threads
+	- Ignore this granularity of threading. 
+		Instead run separate gsl_odeiv_evolve_apply funcs, with
+		independent instantiations of the internal variables, each
+		for a different mesh location.
+		This is simpler but does not afford multithreading to big
+		signaling models which would be good candidates for division of
+		rate updates.
+		- Here we need to change the GslIntegrator to be a lightweight
+		class with a stoich ptr and a ProcInfo ptr. Allocate one
+		per thread.
+
+Could also possibly clean out the y_ vector from Stoich.
+============================================================================
+19 Sep 2011
+Write some timing code to test threading options
+- For spawning and joining threads
+- For cond-wait on existing set of threads 
+	- using a barrier.
+		Usage: barriers numThreads numJoins numBusy
+		Seems to be about 15 usec per loop around the barrier on
+			my laptop.
+		Tested using 
+			time barriers 2 1000000 3. 
+		Similar results come up if numBusy is 2 or 4.
+	- Using a master thread to unleash the crew.
+
 ============================================================================

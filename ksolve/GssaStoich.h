@@ -44,7 +44,6 @@ class GssaStoich: public Stoich
 			const vector< unsigned int >& deps );
 		void updateAllRates();
 		unsigned int pickReac();
-		void innerProcessFunc( Eref e, ProcInfo info );
 
 		static const Cinfo* initCinfo();
 	private:
