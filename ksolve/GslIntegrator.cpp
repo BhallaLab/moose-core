@@ -124,10 +124,6 @@ GslIntegrator::~GslIntegrator()
 		gsl_odeiv_control_free( gslControl_ );
 	if ( gslStep_ )
 		gsl_odeiv_step_free( gslStep_ );
-	/*
-	if ( y_ )
-		delete[] y_;
-		*/
 }
 
 ///////////////////////////////////////////////////
@@ -220,13 +216,6 @@ void GslIntegrator::stoich( Id stoichId )
 	Stoich* s = reinterpret_cast< Stoich* >( stoichId.eref().data() );
 	nVarPools_ = s->getNumVarPools();
 	y_ = s->getY();
-	/*
-	y_ = new double[ nVarPools_ ];
-
-	memcpy( y_, s->Sinit(), nVarPools_ * sizeof( double ) );
-	for ( unsigned int i = 0; i < nVarPools_; ++i )
-		assert( !isnan( y_[ i ] ) && y_[i] >= 0.0 );
-		*/
 
 	isInitialized_ = 1;
         // Allocate GSL functions if not already allocated,
