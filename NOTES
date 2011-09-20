@@ -15119,7 +15119,8 @@ regression tests up to the point where the output is generated. Unfortunately
 the output is still garbage.
 Checkin 2972.
 
-Fixed some plot names. Suddenly it works though the units are off. 
+Fixed some plot names. Suddenly it (the CSPACE reader) works though the
+units are off. 
 But the match with GENESIS is poor in the time axis, though the waveforms 
 match very well qualitatively. Possibly numerical.
  
@@ -15314,6 +15315,32 @@ Checkin 2981.
 
 Implemented code to pass ProcInfo into the Stoich::gslFunc. This is needed to
 deal with multiple GslIntegrators handling different subsets of the reaction
-spatial mesh.
+spatial mesh. Checkin 2982.
+
+
+Need to clear up: is there one GslIntegrator per meshEntry or per thread?
+Seems like per mesh entry.
+
+Spent significant time working through numerical methods for Reac-diff 
+systems. Some disappointments, e.g., with the Liao, Zhu and Khaliq 2006 paper,
+but a good general revision. There is also a potential lead in:
+Solving reaction–diffusion equations 10 times faster. Aly-Khan Kassam.
+
+For starters, I can use the Method of Lines
+with the current framework, if I add in terms for the diffusion. The problem
+is that the MoL uses a single giant ODE system whereas my thought is to use
+separate ODE solvers for each reac system. In essence, I use first-order
+(Euler) summation for the diffusion terms and add these onto the 
+5th-order RK5 solution for the reactions. Tau for diffusion terms is 
+
+tau = lambda^2 / 4D. If we use subdivisions of 1 um, and D = 1 um^2/sec we have
+
+tau = 1 * 1 / 4 = 0.25 sec. The typical synchronization timestep in MOOSE
+is 1 to 10 msec, so the Euler summation should do fine.
+
+Working on the implementation.
+Turns out that the GssaStoich should also come along rather nicely here.
+First pass: cleared regression tests with just a single mesh entry.
 
 ============================================================================
+

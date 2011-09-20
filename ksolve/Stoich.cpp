@@ -79,6 +79,12 @@ const Cinfo* Stoich::initCinfo()
 			&Stoich::getPath
 		);
 
+		static ReadOnlyValueFinfo< Stoich, unsigned int > numMeshEntries(
+			"numMeshEntries",
+			"Number of meshEntries in reac-diff system",
+			&Stoich::getNumMeshEntries
+		);
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -118,6 +124,7 @@ const Cinfo* Stoich::initCinfo()
 	static Finfo* stoichFinfos[] = {
 		&useOneWay,		// Value
 		&nVarPools,		// Value
+		&numMeshEntries,		// Value
 		&compartmentVolume,	//Value
 		&path,			// Value
 		plugin(),		// SrcFinfo
@@ -144,6 +151,10 @@ Stoich::Stoich()
 	: 
 		useOneWay_( 0 ),
 		path_( "" ),
+		S_(1),
+		Sinit_(1),
+		y_(1),
+		numMeshEntries_( 1 ),
 		totPortSize_( 0 ),
 		objMapStart_( 0 ),
 		numVarPools_( 0 ),
@@ -172,11 +183,16 @@ Stoich::~Stoich()
 // and its values must propagate serially to the calling object.
 void Stoich::innerReinit()
 {
-	y_.assign( Sinit_.begin(), Sinit_.begin() + numVarPools_ );
+	assert( y_.size() == S_.size() );
+	assert( Sinit_.size() == S_.size() );
+
+	for ( unsigned int i = 0; i < y_.size(); ++i )
+		y_[i].assign( Sinit_[i].begin(), Sinit_[i].begin() + numVarPools_ );
+	// y_.assign( Sinit_.begin(), Sinit_.begin() + numVarPools_ );
 	S_ = Sinit_;
 
-	updateFuncs( 0 );
-	updateV();
+	updateFuncs( 0, 0 );
+	updateV( 0 );
 }
 
 /**
@@ -248,8 +264,9 @@ void Stoich::setPath( const Eref& e, const Qinfo* q, string v )
 	allocateObjMap( elist );
 	allocateModel( elist );
 	zombifyModel( e, elist );
-	y_.assign( Sinit_.begin(), Sinit_.begin() + numVarPools_ );
-	S_ = Sinit_;
+	innerReinit();
+	// y_.assign( Sinit_.begin(), Sinit_.begin() + numVarPools_ );
+	// S_ = Sinit_;
 
 	/*
 	cout << "Zombified " << numVarPools_ << " Molecules, " <<
@@ -261,6 +278,11 @@ void Stoich::setPath( const Eref& e, const Qinfo* q, string v )
 string Stoich::getPath( const Eref& e, const Qinfo* q ) const
 {
 	return path_;
+}
+
+unsigned int Stoich::getNumMeshEntries() const
+{
+	return numMeshEntries_;
 }
 
 unsigned int Stoich::getNumVarPools() const
@@ -308,14 +330,20 @@ void Stoich::setCompartmentVolume( short comptIndex, double v )
 	double origVol = compartmentSize_[ comptIndex ];
 	double ratio = v/origVol;
 
-	assert( compartment_.size() == S_.size() );
-	assert( compartment_.size() == Sinit_.size() );
-	for ( unsigned int i = 0; i < compartment_.size(); ++i ) {
-		S_[i] *= ratio;
-		Sinit_[i] *= ratio;
+	assert( compartment_.size() == S_[0].size() );
+	assert( compartment_.size() == Sinit_[0].size() );
+	for ( unsigned int i = 0; i < numMeshEntries_; ++i ) {
+		for ( unsigned int j = 0; j < S_[i].size(); ++j ) {
+			S_[i][j] *= ratio;
+			Sinit_[i][j] *= ratio;
+		}
 	}
-	for ( vector< double >::iterator i = y_.begin(); i != y_.end(); ++i )
-		*i *= ratio;
+	for ( vector< vector< double > >::iterator i = y_.begin(); 
+		i != y_.end(); ++i ) {
+		for ( unsigned int j = 0; j < i->size(); ++j ) {
+			(*i)[j] *= ratio;
+		}
+	}
 
 	for ( vector< RateTerm* >::iterator i = rates_.begin(); i != rates_.end(); ++i ) {
 		(*i)->rescaleVolume(  comptIndex , compartment_, ratio );
@@ -364,6 +392,7 @@ void Stoich::allocateModel( const vector< Id >& elist )
 	static const Cinfo* enzCinfo = Enz::initCinfo();
 	static const Cinfo* mmEnzCinfo = MMenz::initCinfo();
 	static const Cinfo* sumFuncCinfo = SumFunc::initCinfo();
+	static const Cinfo* meshEntryCinfo = MeshEntry::initCinfo();
 	numVarPools_ = 0;
 	numReac_ = 0;
 	vector< Id > bufPools;
@@ -400,8 +429,17 @@ void Stoich::allocateModel( const vector< Id >& elist )
 		} else if ( ei->cinfo() == sumFuncCinfo ){
 			objMap_[ i->value() - objMapStart_ ] = numFunc;
 			++numFunc;
+		} else if ( ei->cinfo() == meshEntryCinfo ){
+			unsigned int ne = ei->dataHandler()->localEntries();
+			if ( numMeshEntries_ == 1 ) {
+				numMeshEntries_ = ne;
+			} else if ( numMeshEntries_ != ne ) {
+				cout << "Error: Stoich::allocateModel: two different numMeshEntries: " << ne << ", " << numMeshEntries_ << endl;
+			}
 		}
 	}
+	if ( numMeshEntries_ == 0 )
+		return;
 	// numVarPools_ += numEfflux_;
 
 	numBufPools_ = 0;
@@ -419,11 +457,18 @@ void Stoich::allocateModel( const vector< Id >& elist )
 	assert( numFunc == numFuncPools_ );
 
 	numVarPoolsBytes_ = numVarPools_ * sizeof( double );
-	S_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
-	Sinit_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
+
+	S_.resize( numMeshEntries_ );
+	Sinit_.resize( numMeshEntries_ );
+	y_.resize( numMeshEntries_ );
+	for ( unsigned int i = 0; i < numMeshEntries_; ++i ) {
+		S_[i].resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
+		Sinit_[i].resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0);
+		y_[i].resize( numVarPools_, 0.0 );
+	}
+
 	compartment_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0 );
 	species_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0 );
-	y_.resize( numVarPools_ );
 	rates_.resize( numReac_ );
 	v_.resize( numReac_, 0.0 );
 	funcs_.resize( numFuncPools_ );
@@ -497,7 +542,7 @@ unsigned int Stoich::convertIdToPoolIndex( Id id ) const
 	unsigned int i = id.value() - objMapStart_;
 	assert( i < objMap_.size() );
 	i = objMap_[i];
-	assert( i < S_.size() );
+	assert( i < S_[0].size() );
 	return i;
 }
 
@@ -533,7 +578,7 @@ unsigned int Stoich::convertIdToComptIndex( Id id ) const
 //////////////////////////////////////////////////////////////
 
 // Update the v_ vector for individual reac velocities.
-void Stoich::updateV( )
+void Stoich::updateV( unsigned int meshIndex )
 {
 	// Some algorithm to assign the values from the computed rates
 	// to the corresponding v_ vector entry
@@ -541,7 +586,7 @@ void Stoich::updateV( )
 
 	vector< RateTerm* >::const_iterator i;
 	vector< double >::iterator j = v_.begin();
-	const double* S = &S_[0];
+	const double* S = &S_[meshIndex][0];
 
 	for ( i = rates_.begin(); i != rates_.end(); i++)
 	{
@@ -557,9 +602,10 @@ void Stoich::updateV( )
 	*/
 }
 
-void Stoich::updateRates( vector< double>* yprime, double dt  )
+void Stoich::updateRates( vector< double>* yprime, double dt, 
+	unsigned int meshIndex  )
 {
-	updateV();
+	updateV( meshIndex );
 
 	// Much scope for optimization here.
 	vector< double >::iterator j = yprime->begin();
@@ -573,14 +619,14 @@ void Stoich::updateRates( vector< double>* yprime, double dt  )
 // but their values may be used by molecules that are.
 // The molecule vector S_ has a section for FuncTerms. In this section
 // there is a one-to-one match between entries in S_ and FuncTerm entries.
-void Stoich::updateFuncs( double t )
+void Stoich::updateFuncs( double t, unsigned int meshIndex )
 {
 	vector< FuncTerm* >::const_iterator i;
-	vector< double >::iterator j = S_.begin() + numVarPools_ + numBufPools_;
+	vector< double >::iterator j = S_[meshIndex].begin() + numVarPools_ + numBufPools_;
 
 	for ( i = funcs_.begin(); i != funcs_.end(); i++)
 	{
-		*j++ = (**i)( &( S_[0] ), t );
+		*j++ = (**i)( &( S_[meshIndex][0] ), t );
 		assert( !isnan( *( j-1 ) ) );
 	}
 }
@@ -603,24 +649,24 @@ void Stoich::updateDynamicBuffers()
 		S_[ *i ] = Sinit_[ *i ];
 }
  */
-const double* Stoich::S() const
+const double* Stoich::S( unsigned int meshIndex ) const
 {
-	return &S_[0];
+	return &S_[meshIndex][0];
 }
 
-double* Stoich::varS()
+double* Stoich::varS( unsigned int meshIndex )
 {
-	return &S_[0];
+	return &S_[meshIndex][0];
 }
 
-const double* Stoich::Sinit() const
+const double* Stoich::Sinit( unsigned int meshIndex ) const
 {
-	return &Sinit_[0];
+	return &Sinit_[meshIndex][0];
 }
 
-double* Stoich::getY()
+double* Stoich::getY( unsigned int meshIndex )
 {
-	return &y_[0];
+	return &y_[meshIndex][0];
 }
 
 #ifdef USE_GSL
@@ -648,24 +694,30 @@ double* Stoich::getY()
 int Stoich::gslFunc( double t, const double* y, double* yprime, void* s )
 {
 	StoichThread* st = static_cast< StoichThread* >( s );
-	return st->stoich()->innerGslFunc( t, y, yprime, st->procInfo() );
+	return st->stoich()->innerGslFunc( t, y, yprime, st->meshIndex() );
 	// return static_cast< Stoich* >( s )->innerGslFunc( t, y, yprime );
 }
 
 
 int Stoich::innerGslFunc( double t, const double* y, double* yprime, 
-	const ProcInfo* p )
+	unsigned int meshIndex )
 {
 	// Copy the y array into the S_ vector.
 	// Sometimes GSL passes in its own allocated version of y.
-	memcpy( &S_[0], y, numVarPoolsBytes_ );
+	/*
+	unsigned int begin = ( numMeshEntries_ * p->threadIndexInGroup ) /
+		p->numThreadsInGroup;
+	unsigned int end = ( numMeshEntries_ * ( 1 + p->threadIndexInGroup ) ) /
+		p->numThreadsInGroup;
+		*/
+	memcpy( &S_[meshIndex][0], y, numVarPoolsBytes_ );
 
-//	updateDynamicBuffers();
-	updateFuncs( t );
+	//	updateDynamicBuffers();
+	updateFuncs( t, meshIndex );
 
-	updateV();
+	updateV( meshIndex );
 
-	// Much scope for optimization here.
+		// Much scope for optimization here.
 	for (unsigned int i = 0; i < numVarPools_; i++) {
 		*yprime++ = N_.computeRowRate( i , v_ );
 	}
