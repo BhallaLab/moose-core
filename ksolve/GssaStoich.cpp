@@ -189,7 +189,7 @@ void GssaStoich::rebuildMatrix()
 
 	// Here we set up dependency stuff. First the basic reac deps.
 	// transN_.setSize( numRates, N_.nRows() );
-	assert( N_.nRows() == S_.size() );
+	assert( N_.nRows() == S_[0].size() );
 	transN_ = N_;
 	transN_.transpose();
 	transN_.truncateRow( numVarPools_ );
@@ -358,13 +358,15 @@ void GssaStoich::reinit( const Eref& e, ProcPtr p )
 	Stoich::innerReinit();
 	// Here we round off up or down with prob depending on fractional
 	// part of the init value.
-	for ( vector< double >::iterator i = S_.begin(); i != S_.end(); ++i ) {
-		double base = floor( *i );
-		double frac = *i - base;
-		if ( mtrand() > frac )
-			*i = base;
-		else
-			*i = base + 1.0;
+	for ( unsigned int j = 0; j < numMeshEntries_; ++j ) {
+		for ( vector< double >::iterator i = S_[j].begin(); i != S_[j].end(); ++i ) {
+			double base = floor( *i );
+			double frac = *i - base;
+			if ( mtrand() > frac )
+				*i = base;
+			else
+				*i = base + 1.0;
+		}
 	}
 	t_ = 0.0;
 	updateAllRates();
@@ -407,7 +409,7 @@ void GssaStoich::process( const Eref& e, ProcPtr info )
 			updateAllRates();
 			continue;
 		}
-		transN_.fireReac( rindex, S_ );
+		transN_.fireReac( rindex, S_[0] );
 
 		// Math expns must be first, because they may alter 
 		// substrate mol #.
@@ -429,7 +431,7 @@ void GssaStoich::updateDependentRates( const vector< unsigned int >& deps )
 	for( vector< unsigned int >::const_iterator i = deps.begin(); 
 		i != deps.end(); ++i ) {
 		atot_ -= v_[ *i ];
-		atot_ += ( v_[ *i ] = ( *rates_[ *i ] )( &S_[0] ) );
+		atot_ += ( v_[ *i ] = ( *rates_[ *i ] )( &S_[0][0] ) );
 	}
 }
 
@@ -459,7 +461,7 @@ void GssaStoich::updateAllRates()
 
 	atot_ = 0.0;
 	for( unsigned int i = 0; i < rates_.size(); ++i ) {
-		atot_ += ( v_[ i ] = ( *rates_[ i ] )( &S_[0] ) );
+		atot_ += ( v_[ i ] = ( *rates_[ i ] )( &S_[0][0] ) );
 	}
 	// Here we put in a safety factor into atot to ensure that
 	// cumulative roundoff errors from the dependency 

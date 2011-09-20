@@ -216,7 +216,7 @@ void GslIntegrator::stoich( const Eref& e, const Qinfo* q, Id stoichId )
 	stoichId_ = stoichId;
 	Stoich* s = reinterpret_cast< Stoich* >( stoichId.eref().data() );
 	nVarPools_ = s->getNumVarPools();
-	y_ = s->getY();
+	y_ = s->getY( e.index().data() );
 
 	isInitialized_ = 1;
         // Allocate GSL functions if not already allocated,
@@ -257,13 +257,7 @@ void GslIntegrator::stoich( const Eref& e, const Qinfo* q, Id stoichId )
 
 	// Use a good guess at the correct ProcInfo to set up.
 	// Should be reassigned at Reinit, just to be sure.
-	if ( e.index().data() <= Shell::numProcessThreads() ) {
-		Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-		stoichThread_.set( s, shell->getProcInfo( e.index().data() ) );
-	} else {
-		stoichThread_.set( s, Shell::procInfo() );
-		cout << "Warning: GslIntegrator::Stoich: Unable to find matching thread " << e.index().data() << "\n";
-	}	
+	stoichThread_.set( s, Shell::procInfo(), e.index().data() );
 	gslSys_.params = static_cast< void* >( &stoichThread_ );
 	// gslSys_.params = static_cast< void* >( s );
 #endif // USE_GSL
@@ -303,10 +297,10 @@ void GslIntegrator::process( const Eref& e, ProcPtr info )
 void GslIntegrator::reinit( const Eref& e, ProcPtr info )
 {
 	Stoich* s = reinterpret_cast< Stoich* >( stoichId_.eref().data() );
-	stoichThread_.set( s, info );
+	stoichThread_.set( s, info, e.index().data() );
 	s->innerReinit();
 	nVarPools_ = s->getNumVarPools();
-	y_ = s->getY();
+	y_ = s->getY( e.index().data() );
 #ifdef USE_GSL
 	if ( isInitialized_ ) {
         assert( gslStepType_ != 0 );
