@@ -15253,24 +15253,62 @@ Write some timing code to test threading options
 
 Checkin 2979: the barriers test.
 
-Modified a bit to do same thing using joins. Way slower.
+Modified a bit to do same thing using joins. Way slower. Checkin 2980
 
-Machine	numThreads	numJoins	numBusy	doBarrier	usertime (s)
-mishti	1		100,000		3	0		7.6
-mishti	2		100,000		3	0		7.7
-mishti	3		100,000		3	0		8.2
-mishti	4		100,000		3	0		10.0
-mishti	5		100,000		3	0		14.1
-mishti	8		100,000		3	0		28.0
+Usage: ttime numThreads numJoins numBusy doBarrier
+
+Ran both on mishti (Core 2 Duo U9400@1.4Ghz) and 
+ghevar (8 core Xeon E5520@2.27GHz)
+
+						User Times:
+numThreads	numJoins	numBusy		Barrier = 0	Barrier = 1
+						2core	8core	2core	8core
+1		100,000		3		7.6	3.7	0.04	0.02
+2		100,000		3		7.7	3.8	1.45	0.8
+3		100,000		3		8.2	5.4	2.7	1.5
+4		100,000		3		10	5.7	3.9	2.5
+5		100,000		3		14.1	10.7	5.2	4+-1
+8		100,000		3		28	20.5	8.8	7+-1
+16		100,000		3					40
 
 
-mishti	8		100,000		3	1		8.8
-mishti	5		100,000		3	1		5.2
-mishti	4		100,000		3	1		3.9
-mishti	3		100,000		3	1		2.7
-mishti	2		100,000		3	1		1.45
-mishti	2		1000,000	3	1		14.7
-mishti	1		1000,000	3	1		0.4
+So the thread creation and destruction costs about 40-80 usec per cycle,
+starts becoming linearly dependent on # of threads > 4.
 
+The barrier approach costs about 15-30 usec per cycle, scales sublinearly 
+up to 8 threads.
+
+This means that, at least in Linux systems, I should be able to use the
+thread create/join approach for particularly large reaction systems. The
+use of the existing barriers for reac-diff calculations is even better,
+considering that the infrastructure exists.
+
+- Should time the updateV function with different size models in a single
+	voxel, to get an idea of when it make sense to multithread them.
+
+Looking closely now at how to set up multiple threads in ksolve.
+- Set up an array of the GslIntegrator data structs, one per thread.
+	- Each knows its own index, preferably even its ProcPtr.
+	- Called in the GslIntegrator:stoich function.
+- Stoich::gslFunc needs to have an arg for threadIndex. Will need it
+	from the Process
+- Stoich::innerGslFunc should take the threadNum as arg.
+
+- Stoich should NOT use a shared y_ for the data, issues with the different 
+	threads.
+
+============================================================================
+20 Sep 2011
+Finally (after years of fiddling with it) figured out why we cannot just put 
+the S_ vector into the GSL for computation and to avoid memcopies. Turns out
+GSL passes back different versions of the state (y) vector, internally 
+allocated, as the numerical integration proceeds.
+Sometimes y is the same as the S_ vector, other times not. GSL needs to 
+maintain both vectors for its internal calculations, so we cannot even take
+the shortcut of memcpy( S, y ) when the pointers differ. In principle we could
+use the returned y vector for the updating, but now we need to keep track of
+this for the inspection of field values, which looks up S. We don't even
+want to retain the y pointer instead of S for inspection, in case the solver is running on a different thread than the function which wants to inspect the
+field value.
 
 ============================================================================
