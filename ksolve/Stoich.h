@@ -167,7 +167,8 @@ class Stoich
 
 		/**
 		 * y_ is working memory, only the variable molecule levels. 
-		 * Should be possible to replace with S.
+		 * Has to be distinct from S because GSL uses this and swaps it
+		 * back and forth with a distinct buffer.
 		 */
 		vector< double > y_;
 
@@ -226,6 +227,34 @@ class Stoich
 		 * Each Port connects to exactly one other solver.
 		 */
 		vector< Port > ports_;
+};
+
+class StoichThread
+{
+	public:
+		StoichThread( Stoich* s, const ProcInfo* p )
+			: s_( s ), p_( p )
+		{;}
+
+
+		void set( Stoich* s, const ProcInfo* p )
+		{
+			s_ = s;
+			p_ = p;
+		}
+
+		Stoich* stoich() const {
+			return s_;
+		}
+
+		const ProcInfo* procInfo() const {
+			return p_;
+		}
+	
+	private:
+		Stoich* s_;
+		const ProcInfo* p_;
+
 };
 
 #endif	// _STOICH_H

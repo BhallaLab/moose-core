@@ -253,6 +253,9 @@ void GslIntegrator::stoich( Id stoichId )
 	gslSys_.function = &Stoich::gslFunc;
 	gslSys_.jacobian = 0;
 	gslSys_.dimension = nVarPools_;
+
+	// stoichThread_.set( s, p );
+	// gslSys_.params = static_cast< void* >( &stoichThread );
 	gslSys_.params = static_cast< void* >( s );
 #endif // USE_GSL
 }
