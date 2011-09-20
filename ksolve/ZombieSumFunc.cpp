@@ -104,7 +104,7 @@ void ZombieSumFunc::input( double v )
 
 double ZombieSumFunc::getResult( const Eref& e, const Qinfo* q ) const
 {
-	return S_[ convertIdToFuncIndex( e.id() ) + numVarPools_ + numBufPools_ ];
+	return S_[ e.index().data() ][ convertIdToFuncIndex( e.id() ) + numVarPools_ + numBufPools_ ];
 }
 
 //////////////////////////////////////////////////////////////

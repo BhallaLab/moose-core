@@ -27,6 +27,8 @@ class Stoich
 		void setPath( const Eref& e, const Qinfo* q, string v );
 		string getPath( const Eref& e, const Qinfo* q ) const;
 
+		unsigned int getNumMeshEntries() const;
+
 		Port* getPort( unsigned int i );
 		unsigned int getNumPorts() const;
 		void setNumPorts( unsigned int num );
@@ -70,10 +72,10 @@ class Stoich
 		unsigned int convertIdToFuncIndex( Id id ) const;
 		unsigned int convertIdToComptIndex( Id id ) const;
 
-		const double* S() const;
-		double* varS();
-		const double* Sinit() const;
-		double* getY();
+		const double* S( unsigned int meshIndex ) const;
+		double* varS( unsigned int meshIndex );
+		const double* Sinit( unsigned int meshIndex ) const;
+		double* getY( unsigned int meshIndex );
 
 		//////////////////////////////////////////////////////////////////
 		// Compute functions
@@ -90,7 +92,7 @@ class Stoich
 		 * Update the v_ vector for individual reaction velocities. Uses
 		 * hooks into the S_ vector for its arguments.
 		 */
-		void updateV( );
+		void updateV( unsigned int meshIndex );
 
 		/**
 		 * Update all the function-computed molecule terms. These are not
@@ -98,14 +100,15 @@ class Stoich
 		 * be integrated using the solver.
 		 * Uses hooks into the S_ vector for arguments other than t.
 		 */
-		void updateFuncs( double t );
+		void updateFuncs( double t, unsigned int meshIndex );
 
-		void updateRates( vector< double>* yprime, double dt  );
+		void updateRates( vector< double>* yprime, double dt, 
+			unsigned int meshIndex );
 
 #ifdef USE_GSL
 		static int gslFunc( double t, const double* y, double* yprime, void* s );
 		int innerGslFunc( double t, const double* y, double* yprime,
-			const ProcInfo* p );
+			unsigned int meshIndex );
 #endif // USE_GSL
 
 
@@ -116,8 +119,17 @@ class Stoich
 		string path_;
 
 		/**
-		 * This is the array of molecules. Of these, the first numVarPools_
-		 * are variables and are integrated using the ODE solver. 
+		 * 
+		 * S_ is the array of molecules. Stored as n, number of molecules
+		 * per mesh entry. 
+		 * The array looks like n = S_[meshIndex][poolIndex]
+		 * The meshIndex specifies which spatial mesh entry to use.
+		 * The poolIndex specifies which molecular species pool to use.
+		 * We choose the poolIndex as the right-hand index because we need
+		 * to be able to pass the entire block of pools around for 
+		 * integration.
+		 * The first numVarPools_ in the poolIndex are state variables and
+		 * are integrated using the ODE solver. 
 		 * The last numEfflux_ molecules within numVarPools are those that
 		 * go out to another solver. They are also integrated by the ODE
 		 * solver, so that at the end of dt each has exactly as many
@@ -129,11 +141,29 @@ class Stoich
 		 * The functions should not cascade as there is no guarantee of
 		 * execution order.
 		 */
-		vector< double > S_;
-		vector< double > Sinit_;
+		vector< vector< double > > S_;
+
+		/**
+		 * Sinit_ specifies initial conditions at t = 0. Whenever the reac
+		 * system is rebuilt or reinited, all S_ values become set to Sinit.
+		 * Also used for buffered molecules as the fixed values of these
+		 * molecules.
+		 * The array looks like Sinit_[meshIndex][poolIndex]
+		 */
+		vector< vector< double > > Sinit_;
+
+		/**
+		 * y_ is working memory. It maps onto S_, but stores only the 
+		 * variable molecules (up to numVarPools).
+		 * Has to be distinct from S because GSL uses this and swaps it
+		 * back and forth with a distinct buffer.
+		 * The array looks like y_[meshIndex][poolIndex]
+		 */
+		vector< vector< double > > y_;
 
 		/**
 		 * Lookup from each molecule to its parent compartment index
+		 * compartment_.size() == number of distinct pools == max poolIndex
 		 */
 		vector< short > compartment_;
 
@@ -144,17 +174,20 @@ class Stoich
 		vector< SpeciesId > species_;
 
 		/**
-		 * Size of each compartment
+		 * Size of each compartment. Only need as many of these as there
+		 * are distinct compartments, usually 1 or 2.
 		 */
 		vector< double > compartmentSize_;
 
 		/**
-		 * Number of subdivisions of compartment. Actually should be
-		 * dimensions.
+		 * Number of meshEntries on this solver. Equal to first index of S_.
 		 */
-		vector< short > compartmentVoxels_;
+		unsigned int numMeshEntries_;
 
-		/// v_ holds the rates of each reaction
+		/**
+		* v_ holds the rates of each reaction. This is working memory and
+		* is reused for the calculations for each meshEntry.
+		*/
 		vector< double > v_;
 
 		/// The RateTerms handle the update operations for reaction rate v_
@@ -166,12 +199,6 @@ class Stoich
 		/// N_ is the stoichiometry matrix.
 		KinSparseMatrix N_;
 
-		/**
-		 * y_ is working memory, only the variable molecule levels. 
-		 * Has to be distinct from S because GSL uses this and swaps it
-		 * back and forth with a distinct buffer.
-		 */
-		vector< double > y_;
 
 		/**
 		 * totPortSize_: The sum of all port entries
@@ -234,13 +261,14 @@ class StoichThread
 {
 	public:
 		StoichThread()
-			: s_( 0 ), p_( 0 )
+			: s_( 0 ), p_( 0 ), meshIndex_( 0 )
 		{;}
 
-		void set( Stoich* s, const ProcInfo* p )
+		void set( Stoich* s, const ProcInfo* p, unsigned int m )
 		{
 			s_ = s;
 			p_ = p;
+			meshIndex_ = m;
 		}
 
 		Stoich* stoich() const {
@@ -250,11 +278,15 @@ class StoichThread
 		const ProcInfo* procInfo() const {
 			return p_;
 		}
+
+		unsigned int meshIndex() const {
+			return meshIndex_;
+		}
 	
 	private:
 		Stoich* s_;
 		const ProcInfo* p_;
-
+		unsigned int meshIndex_;
 };
 
 #endif	// _STOICH_H
