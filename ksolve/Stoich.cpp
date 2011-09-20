@@ -647,11 +647,14 @@ double* Stoich::getY()
 // Static function passed in as the stepper for GSL
 int Stoich::gslFunc( double t, const double* y, double* yprime, void* s )
 {
-	return static_cast< Stoich* >( s )->innerGslFunc( t, y, yprime );
+	StoichThread* st = static_cast< StoichThread* >( s );
+	return st->stoich()->innerGslFunc( t, y, yprime, st->procInfo() );
+	// return static_cast< Stoich* >( s )->innerGslFunc( t, y, yprime );
 }
 
 
-int Stoich::innerGslFunc( double t, const double* y, double* yprime )
+int Stoich::innerGslFunc( double t, const double* y, double* yprime, 
+	const ProcInfo* p )
 {
 	// Copy the y array into the S_ vector.
 	// Sometimes GSL passes in its own allocated version of y.

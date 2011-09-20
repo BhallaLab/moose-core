@@ -15310,5 +15310,10 @@ use the returned y vector for the updating, but now we need to keep track of
 this for the inspection of field values, which looks up S. We don't even
 want to retain the y pointer instead of S for inspection, in case the solver is running on a different thread than the function which wants to inspect the
 field value.
+Checkin 2981.
+
+Implemented code to pass ProcInfo into the Stoich::gslFunc. This is needed to
+deal with multiple GslIntegrators handling different subsets of the reaction
+spatial mesh.
 
 ============================================================================

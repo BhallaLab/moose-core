@@ -22,6 +22,7 @@ OBJ = \
 
 HEADERS = \
 	../basecode/header.h \
+	../basecode/FuncBarrier.h \
 	../basecode/ReduceBase.h \
 	../basecode/ReduceMax.h \
 
@@ -33,7 +34,7 @@ Shell.o:	Shell.h Neutral.h ../scheduling/Clock.h
 ShellCopy.o:	Shell.h Neutral.h
 ShellSetGet.o:	Shell.h
 ShellThreads.o:	Shell.h Neutral.h ../scheduling/Clock.h
-ProcessLoop.o:	Shell.h FuncBarrier.h
+ProcessLoop.o:	Shell.h ../basecode/FuncBarrier.h
 LoadModels.o:	Shell.h Neutral.h ../kinetics/ReadKkit.h
 Neutral.o:	Neutral.h ../basecode/ElementValueFinfo.h
 Wildcard.o:	Wildcard.h Shell.h Neutral.h ../basecode/ElementValueFinfo.h
