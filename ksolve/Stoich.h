@@ -104,7 +104,8 @@ class Stoich
 
 #ifdef USE_GSL
 		static int gslFunc( double t, const double* y, double* yprime, void* s );
-		int innerGslFunc( double t, const double* y, double* yprime );
+		int innerGslFunc( double t, const double* y, double* yprime,
+			const ProcInfo* p );
 #endif // USE_GSL
 
 
@@ -232,10 +233,9 @@ class Stoich
 class StoichThread
 {
 	public:
-		StoichThread( Stoich* s, const ProcInfo* p )
-			: s_( s ), p_( p )
+		StoichThread()
+			: s_( 0 ), p_( 0 )
 		{;}
-
 
 		void set( Stoich* s, const ProcInfo* p )
 		{

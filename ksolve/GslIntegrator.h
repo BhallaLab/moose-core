@@ -35,7 +35,7 @@ class GslIntegrator
 		void process( const Eref& e, ProcPtr info );
 		void reinit( const Eref& e, ProcPtr info );
 
-		void stoich( Id stoichId );
+		void stoich( const Eref& e, const Qinfo* q, Id stoichId );
 
 		static const Cinfo* initCinfo();
 	private:
@@ -47,6 +47,7 @@ class GslIntegrator
 		double* y_;
 		unsigned int nVarPools_;
 		Id stoichId_;
+		StoichThread stoichThread_;
 
 		const gsl_odeiv_step_type* gslStepType_;
 		gsl_odeiv_step* gslStep_;
