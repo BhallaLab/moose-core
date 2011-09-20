@@ -12,6 +12,7 @@
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv.h>
 #include "GslIntegrator.h"
+#include "../shell/Shell.h"
 
 const Cinfo* GslIntegrator::initCinfo()
 {
@@ -52,7 +53,7 @@ const Cinfo* GslIntegrator::initCinfo()
 		///////////////////////////////////////////////////////
 		static DestFinfo stoich( "stoich",
 			"Handle data from Stoich",
-			new OpFunc1< GslIntegrator, Id >( &GslIntegrator::stoich )
+			new EpFunc1< GslIntegrator, Id >( &GslIntegrator::stoich )
 		);
 
 		static DestFinfo process( "process",
@@ -209,7 +210,7 @@ void GslIntegrator::setInternalDt( double value )
  * This function should also set up the sizes, and it should be at 
  * allocate, not reinit time.
  */
-void GslIntegrator::stoich( Id stoichId )
+void GslIntegrator::stoich( const Eref& e, const Qinfo* q, Id stoichId )
 {
 #ifdef USE_GSL
 	stoichId_ = stoichId;
@@ -254,9 +255,17 @@ void GslIntegrator::stoich( Id stoichId )
 	gslSys_.jacobian = 0;
 	gslSys_.dimension = nVarPools_;
 
-	// stoichThread_.set( s, p );
-	// gslSys_.params = static_cast< void* >( &stoichThread );
-	gslSys_.params = static_cast< void* >( s );
+	// Use a good guess at the correct ProcInfo to set up.
+	// Should be reassigned at Reinit, just to be sure.
+	if ( e.index().data() <= Shell::numProcessThreads() ) {
+		Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+		stoichThread_.set( s, shell->getProcInfo( e.index().data() ) );
+	} else {
+		stoichThread_.set( s, Shell::procInfo() );
+		cout << "Warning: GslIntegrator::Stoich: Unable to find matching thread " << e.index().data() << "\n";
+	}	
+	gslSys_.params = static_cast< void* >( &stoichThread_ );
+	// gslSys_.params = static_cast< void* >( s );
 #endif // USE_GSL
 }
 
@@ -291,10 +300,10 @@ void GslIntegrator::process( const Eref& e, ProcPtr info )
 #endif // USE_GSL
 }
 
-// Must happen _after_ the Stoich::reinit
 void GslIntegrator::reinit( const Eref& e, ProcPtr info )
 {
 	Stoich* s = reinterpret_cast< Stoich* >( stoichId_.eref().data() );
+	stoichThread_.set( s, info );
 	s->innerReinit();
 	nVarPools_ = s->getNumVarPools();
 	y_ = s->getY();

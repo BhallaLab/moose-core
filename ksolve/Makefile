@@ -78,7 +78,7 @@ FuncTerm.o:		FuncTerm.h
 ifeq ($(USE_GSL),1)
 #Optional: Comment out the following two items if not using GSL.
 $(GSL_OBJ) : $(HEADERS)
-GslIntegrator.o:	GslIntegrator.h Stoich.h RateTerm.h KinSparseMatrix.h ../basecode/SparseMatrix.h
+GslIntegrator.o:	GslIntegrator.h Stoich.h RateTerm.h KinSparseMatrix.h ../basecode/SparseMatrix.h ../shell/Shell.h
 #SteadyState.o:	SteadyState.h RateTerm.h KinSparseMatrix.h 
 #StateScanner.o:	StateScanner.h
 endif # !USE_GSL
