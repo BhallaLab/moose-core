@@ -174,7 +174,6 @@ void Stoich::innerReinit()
 {
 	y_.assign( Sinit_.begin(), Sinit_.begin() + numVarPools_ );
 	S_ = Sinit_;
-	// v_.assign( v_.size(), 0.0 );
 
 	updateFuncs( 0 );
 	updateV();
@@ -250,6 +249,7 @@ void Stoich::setPath( const Eref& e, const Qinfo* q, string v )
 	allocateModel( elist );
 	zombifyModel( e, elist );
 	y_.assign( Sinit_.begin(), Sinit_.begin() + numVarPools_ );
+	S_ = Sinit_;
 
 	/*
 	cout << "Zombified " << numVarPools_ << " Molecules, " <<
@@ -653,13 +653,9 @@ int Stoich::gslFunc( double t, const double* y, double* yprime, void* s )
 
 int Stoich::innerGslFunc( double t, const double* y, double* yprime )
 {
-	//nCall_++;
-//	if ( lasty_ != y ) { // should count to see how often this copy happens
-		// Copy the y array into the y_ vector.
-		memcpy( &S_[0], y, numVarPoolsBytes_ );
-		// lasty_ = y;
-	//	nCopy_++;
-//	}
+	// Copy the y array into the S_ vector.
+	// Sometimes GSL passes in its own allocated version of y.
+	memcpy( &S_[0], y, numVarPoolsBytes_ );
 
 //	updateDynamicBuffers();
 	updateFuncs( t );
