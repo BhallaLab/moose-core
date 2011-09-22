@@ -30,6 +30,7 @@ OBJ = \
 	OneDimHandler.o \
 	FieldDataHandlerBase.o \
 	MsgDataHandler.o \
+	ZombieHandler.o \
 	Eref.o	\
 	Finfo.o	\
 	DestFinfo.o	\
@@ -69,6 +70,7 @@ HEADERS = \
 	FieldDataHandlerBase.h \
 	FieldDataHandler.h \
 	MsgDataHandler.h \
+	ZombieHandler.h \
 	Element.h \
 	Eref.h \
 	Finfo.h \

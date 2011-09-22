@@ -763,9 +763,12 @@ void Shell::handleReMesh( Id baseMesh )
 	vector< Id > tgts;
 	unsigned int numTgts = baseMesh()->getInputs( tgts, df );
 	assert( tgts.size() == numTgts );
-	vector< unsigned int > dims( 1, baseMesh()->dataHandler()->localEntries() );
+	unsigned int numMeshEntries = 
+		baseMesh()->dataHandler()->localEntries() ;
+	vector< unsigned int > dims( 1, numMeshEntries );
 	for ( vector< Id >::iterator i = tgts.begin(); i != tgts.end(); ++i )
 	{
+		// Note that the resize command also copies over the data values.
 		bool ret = i->operator()()->resize( dims );
 		assert( ret );
 		// Now we need to tell each tgt to scale its n, rates etc from vol.

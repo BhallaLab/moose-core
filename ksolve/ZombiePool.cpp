@@ -12,7 +12,7 @@
 #include "Pool.h"
 #include "lookupSizeFromMesh.h"
 #include "ElementValueFinfo.h"
-#include "DataHandlerWrapper.h"
+#include "ZombieHandler.h"
 
 #define EPSILON 1e-15
 
@@ -154,7 +154,7 @@ const Cinfo* ZombiePool::initCinfo()
 		Neutral::initCinfo(),
 		zombiePoolFinfos,
 		sizeof( zombiePoolFinfos ) / sizeof ( Finfo* ),
-		new Dinfo< ZombiePool >()
+		new ZeroSizeDinfo< ZombiePool >()
 	);
 
 	return &zombiePoolCinfo;
@@ -273,17 +273,22 @@ unsigned int ZombiePool::getSpecies( const Eref& e, const Qinfo* q ) const
 void ZombiePool::zombify( Element* solver, Element* orig )
 {
 	Element temp( orig->id(), zombiePoolCinfo, solver->dataHandler() );
-	Eref zer( &temp, 0 );
-	Eref oer( orig, 0 );
+	Eref zombier( &temp, 0 );
 
-	ZombiePool* z = reinterpret_cast< ZombiePool* >( zer.data() );
-	Pool* m = reinterpret_cast< Pool* >( oer.data() );
-
-	z->setN( zer, 0, m->getN() );
-	z->setNinit( zer, 0, m->getNinit() );
-	z->setSpecies( zer, 0, m->getSpecies() );
-	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
-	orig->zombieSwap( zombiePoolCinfo, dh );
+	unsigned int numEntries = orig->dataHandler()->localEntries();
+	ZombiePool* z = reinterpret_cast< ZombiePool* >( zombier.data() );
+	for ( unsigned int i = 0; i < numEntries; ++i ) {
+		Eref oer( orig, i );
+		Eref zer( &temp, i );
+		Pool* m = reinterpret_cast< Pool* >( oer.data() );
+		z->setN( zer, 0, m->getN() );
+		z->setNinit( zer, 0, m->getNinit() );
+		if ( i == 0 )
+			z->setSpecies( zombier, 0, m->getSpecies() );
+	}
+	DataHandler* zh = new ZombieHandler( solver->dataHandler(), 0, 
+		numEntries );
+	orig->zombieSwap( zombiePoolCinfo, zh );
 }
 
 // Static func

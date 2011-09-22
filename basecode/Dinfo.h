@@ -104,4 +104,12 @@ template< class D > class Dinfo: public DinfoBase
 		}
 };
 
+template< class D > class ZeroSizeDinfo: public Dinfo< D >
+{
+	public:
+		unsigned int size()  const {
+			return 0;
+		}
+};
+
 #endif // _DINFO_H

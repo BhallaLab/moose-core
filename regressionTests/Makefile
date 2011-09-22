@@ -14,6 +14,7 @@ OBJ = \
 	rtTable.o	\
 	rtReadKkit.o	\
 	rtHHnetwork.o	\
+	rtReacDiff.o	\
 	perfTestMarkovSolver.o \
 	benchmarkTests.o	\
 
@@ -25,6 +26,7 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 rtReadKkit.o:	../kinetics/ReadKkit.h ../shell/LoadModels.h
+rReacDiff.o:	../kinetics/ReadCspace.h ../shell/LoadModels.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg -I../shell $< -c
