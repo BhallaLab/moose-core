@@ -166,6 +166,8 @@ void GssaStoich::rebuildMatrix()
 	unsigned int numRates = N_.nColumns();
 	assert ( numRates == rates_.size() );
 
+	v_.resize( numReac_, 0 );
+
 	// Here we fix the issue of having a single substrate at
 	// more than first order. Its rate must be computed differently
 	// for stoch calculations, since one molecule is consumed for

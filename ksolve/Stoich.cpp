@@ -188,11 +188,10 @@ void Stoich::innerReinit()
 
 	for ( unsigned int i = 0; i < y_.size(); ++i )
 		y_[i].assign( Sinit_[i].begin(), Sinit_[i].begin() + numVarPools_ );
-	// y_.assign( Sinit_.begin(), Sinit_.begin() + numVarPools_ );
 	S_ = Sinit_;
 
-	updateFuncs( 0, 0 );
-	updateV( 0 );
+	// updateFuncs( 0, 0 );
+	// updateV( 0 );
 }
 
 /**
@@ -470,7 +469,7 @@ void Stoich::allocateModel( const vector< Id >& elist )
 	compartment_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0 );
 	species_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0 );
 	rates_.resize( numReac_ );
-	v_.resize( numReac_, 0.0 );
+	// v_.resize( numReac_, 0.0 ); // v is now allocated dynamically
 	funcs_.resize( numFuncPools_ );
 	N_.setSize( numVarPools_ + numBufPools_ + numFuncPools_, numReac_ );
 }
@@ -578,14 +577,14 @@ unsigned int Stoich::convertIdToComptIndex( Id id ) const
 //////////////////////////////////////////////////////////////
 
 // Update the v_ vector for individual reac velocities.
-void Stoich::updateV( unsigned int meshIndex )
+void Stoich::updateV( unsigned int meshIndex, vector< double >& v )
 {
 	// Some algorithm to assign the values from the computed rates
 	// to the corresponding v_ vector entry
 	// for_each( rates_.begin(), rates_.end(), assign);
 
 	vector< RateTerm* >::const_iterator i;
-	vector< double >::iterator j = v_.begin();
+	vector< double >::iterator j = v.begin();
 	const double* S = &S_[meshIndex][0];
 
 	for ( i = rates_.begin(); i != rates_.end(); i++)
@@ -603,15 +602,15 @@ void Stoich::updateV( unsigned int meshIndex )
 }
 
 void Stoich::updateRates( vector< double>* yprime, double dt, 
-	unsigned int meshIndex  )
+	unsigned int meshIndex, vector< double >& v )
 {
-	updateV( meshIndex );
+	updateV( meshIndex, v );
 
 	// Much scope for optimization here.
 	vector< double >::iterator j = yprime->begin();
 	assert( yprime->size() >= numVarPools_ );
 	for (unsigned int i = 0; i < numVarPools_; i++) {
-		*j++ = dt * N_.computeRowRate( i , v_ );
+		*j++ = dt * N_.computeRowRate( i , v );
 	}
 }
 
@@ -702,6 +701,7 @@ int Stoich::gslFunc( double t, const double* y, double* yprime, void* s )
 int Stoich::innerGslFunc( double t, const double* y, double* yprime, 
 	unsigned int meshIndex )
 {
+	vector< double > v( numReac_ );
 	// Copy the y array into the S_ vector.
 	// Sometimes GSL passes in its own allocated version of y.
 	/*
@@ -715,11 +715,11 @@ int Stoich::innerGslFunc( double t, const double* y, double* yprime,
 	//	updateDynamicBuffers();
 	updateFuncs( t, meshIndex );
 
-	updateV( meshIndex );
+	updateV( meshIndex, v );
 
 		// Much scope for optimization here.
 	for (unsigned int i = 0; i < numVarPools_; i++) {
-		*yprime++ = N_.computeRowRate( i , v_ );
+		*yprime++ = N_.computeRowRate( i , v );
 	}
 	// cout << t << ": " << y[0] << ", " << y[1] << endl;
 	return GSL_SUCCESS;

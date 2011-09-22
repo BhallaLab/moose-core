@@ -92,7 +92,7 @@ class Stoich
 		 * Update the v_ vector for individual reaction velocities. Uses
 		 * hooks into the S_ vector for its arguments.
 		 */
-		void updateV( unsigned int meshIndex );
+		void updateV( unsigned int meshIndex, vector< double >& v );
 
 		/**
 		 * Update all the function-computed molecule terms. These are not
@@ -103,7 +103,7 @@ class Stoich
 		void updateFuncs( double t, unsigned int meshIndex );
 
 		void updateRates( vector< double>* yprime, double dt, 
-			unsigned int meshIndex );
+			unsigned int meshIndex, vector< double >& v );
 
 #ifdef USE_GSL
 		static int gslFunc( double t, const double* y, double* yprime, void* s );
@@ -186,9 +186,10 @@ class Stoich
 
 		/**
 		* v_ holds the rates of each reaction. This is working memory and
-		* is reused for the calculations for each meshEntry.
-		*/
+		* is reused for the calculations for each meshEntry. But we need
+		* a separate one for each thread, so let's make it temporary.
 		vector< double > v_;
+		*/
 
 		/// The RateTerms handle the update operations for reaction rate v_
 		vector< RateTerm* > rates_;

@@ -15356,7 +15356,7 @@ Still fighting with array handling stuff in rtReplicateModels.
 
 ============================================================================
 22 Sep 2011
-Working on ZombieHandler and pool zombificiation. Seems like a good way to
+Working on ZombieHandler and pool zombification. Seems like a good way to
 have zero overhead zombies that use the parent solver, but keep track of
 # of entries.
 
@@ -15368,6 +15368,17 @@ and thread decomposition, sort out iterators and dimensionality, deal with
 the DataId stuff too.
 
 Subha wants FieldElementFinfos added to the Cinfo fields. Did it,
-not yet tested.
+not yet tested. Checkin 2986.
+
+I need a reference model that can be tested for individual mesh calculations,
+and also does something sensible when I set up reac-diff calculations.
+
+As a formal completion of the regression test with independent little models,
+I tested the output values of the different mesh locations in 
+rtReacDiff.cpp:rtReplicateModels. Surprisingly, the results differ from run
+to run. Major issue here, possibly to do with mixing of intermediate values
+due to threading.
+That was a good guess. The v_ vector in Stoich.h was being used by both 
+threads. Set up to dynamically allocate it. Later might preallocate.
 
 ============================================================================
