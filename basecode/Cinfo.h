@@ -207,6 +207,16 @@ class Cinfo
 			unsigned int getNumSharedFinfo() const;
 
 			/**
+			 * Return the specified FieldElementFinfo
+			 */
+			Finfo* getFieldElementFinfo( unsigned int i );
+
+			/**
+			 * Return number of FieldElementFinfos
+			 */
+			unsigned int getNumFieldElementFinfo() const;
+
+			/**
 			 * Dummy function. We never allow this assignment.
 			 */
 			void setNumFinfo( unsigned int v );
@@ -268,6 +278,9 @@ class Cinfo
 
 			/// Keep track of all SharedFinfos
 			vector< Finfo* > sharedFinfos_;
+
+			/// Keep track of all FieldElementFinfos
+			vector< Finfo* > fieldElementFinfos_;
 
 			/**
 			 * These are special Finfos which have to be invoked

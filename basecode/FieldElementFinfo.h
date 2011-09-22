@@ -26,7 +26,57 @@
 
 bool adopt( Id parent, Id child );
 
-template < class T, class F > class FieldElementFinfo: public Finfo
+class FieldElementFinfoBase: public Finfo
+{
+	public:
+		FieldElementFinfoBase( 
+			const string& name, 
+			const string& doc, 
+			const Cinfo* fieldCinfo,
+			bool deferCreate
+		)
+			: 	Finfo( name, doc), 
+				setNum_( 0 ),
+				getNum_( 0 ),
+				fieldCinfo_( fieldCinfo ),
+				deferCreate_( deferCreate )
+		{;}
+
+		virtual ~FieldElementFinfoBase() {
+			if ( setNum_ )
+				delete setNum_;
+			if ( getNum_ )
+				delete getNum_;
+		}
+
+		void registerFinfo( Cinfo* c ) {
+			c->registerFinfo( setNum_ );
+			c->registerFinfo( getNum_ );
+			c->registerPostCreationFinfo( this );
+		}
+
+		bool strSet( const Eref& tgt, const string& field, 
+			const string& arg ) const {
+			return 0; // always fails
+		}
+
+		bool strGet( const Eref& tgt, const string& field, 
+			string& returnValue ) const {
+			return 0; // always fails
+		}
+
+		// Virtual function to look up type of FieldElementFinfo, not
+		// defined here.  
+		// virtual string rttiType() const = 0;
+
+	protected:
+		DestFinfo* setNum_;
+		DestFinfo* getNum_;
+		const Cinfo* fieldCinfo_;
+		bool deferCreate_;
+};
+
+template < class T, class F > class FieldElementFinfo: public FieldElementFinfoBase
 {
 	public:
 
@@ -39,12 +89,10 @@ template < class T, class F > class FieldElementFinfo: public Finfo
 			unsigned int ( T::*getNumField )() const,
 			bool deferCreate = 0
 		)
-			: 	Finfo( name, doc), 
-				fieldCinfo_( fieldCinfo ),
+			: FieldElementFinfoBase( name, doc, fieldCinfo, deferCreate ),
 				lookupField_( lookupField ),
 				setNumField_( setNumField ),
-				getNumField_( getNumField ),
-				deferCreate_( deferCreate )
+				getNumField_( getNumField )
 		{
 				string setname = "set_num_" + name;
 				// setNumField is a tricky operation, because it may require
@@ -66,13 +114,8 @@ template < class T, class F > class FieldElementFinfo: public Finfo
 					new GetOpFunc< T, unsigned int >( getNumField ) );
 		}
 
-		~FieldElementFinfo() {
-			delete setNum_;
-			delete getNum_;
-		}
-
 		/**
-		 * Virtual function. 
+		 * Virtual function
 		 */
 		void postCreationFunc( Id parent, Element* parentElm ) const
 		{
@@ -89,37 +132,15 @@ template < class T, class F > class FieldElementFinfo: public Finfo
 			adopt( parent, kid );
 		}
 
-		void registerFinfo( Cinfo* c ) {
-			c->registerFinfo( setNum_ );
-			c->registerFinfo( getNum_ );
-			c->registerPostCreationFinfo( this );
-		}
-
-		bool strSet( const Eref& tgt, const string& field, 
-			const string& arg ) const {
-			return 0; // always fails
-		}
-
-		bool strGet( const Eref& tgt, const string& field, 
-			string& returnValue ) const {
-			return 0; // always fails
-		}
-
+		/// Virtual function to look up type of FieldElementFinfo
 		string rttiType() const {
 			return Conv<F>::rttiType();
 		}
 
 	private:
-		DestFinfo* setNum_;
-		DestFinfo* getNum_;
-		const Cinfo* fieldCinfo_;
 		F* ( T::*lookupField_ )( unsigned int );
 		void( T::*setNumField_ )( unsigned int num );
 		unsigned int ( T::*getNumField_ )() const;
-		bool deferCreate_;
-		
-	//	OpFunc1< T, F >* setOpFunc_;
-	//	GetOpFunc< T, F >* getOpFunc_;
 };
 
 
