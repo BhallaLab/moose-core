@@ -485,7 +485,7 @@ Finfo* Cinfo::getFieldElementFinfo( unsigned int i )
 		return &dummy;
 	if ( baseCinfo_ ) {
 		if ( i >= baseCinfo_->getNumFieldElementFinfo() )
-			return sharedFinfos_[ i - baseCinfo_->getNumFieldElementFinfo() ];
+			return fieldElementFinfos_[ i - baseCinfo_->getNumFieldElementFinfo() ];
 		else
 			return const_cast< Cinfo* >( baseCinfo_ )->getFieldElementFinfo( i );
 	}
