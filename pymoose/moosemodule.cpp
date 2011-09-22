@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Sep 22 20:24:05 2011 (+0530)
+// Last-Updated: Thu Sep 22 20:25:14 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4275
+//     Update #: 4276
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -726,7 +726,8 @@ extern "C" {
                 PyErr_SetString(PyExc_NotImplementedError, msg.c_str());
                 return NULL;
             } else {
-                Id fieldElementId = Id(self->oid_.id.path() + "/" + 
+                // TODO - finish it
+                // Id fieldElementId = Id(self->oid_.id.path() + "/" +  
             }
         }
         switch(ftype){
