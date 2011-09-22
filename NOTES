@@ -15361,12 +15361,13 @@ have zero overhead zombies that use the parent solver, but keep track of
 # of entries.
 
 Did this. Many messy fixes followed, to get all the zombie pools made
-and initialized properly.
+and initialized properly. Checkin 2985.
 
 Should revamp all of the DataHandlers, install policy in them for node
 and thread decomposition, sort out iterators and dimensionality, deal with 
 the DataId stuff too.
 
-Subha wants FieldElementFinfos added to the Cinfo fields.
+Subha wants FieldElementFinfos added to the Cinfo fields. Did it,
+not yet tested.
 
 ============================================================================
