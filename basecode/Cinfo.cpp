@@ -96,6 +96,9 @@ void Cinfo::registerFinfo( Finfo* f )
 		else if ( dynamic_cast< SharedFinfo* >( f ) ) {
 			sharedFinfos_.push_back( f );
 		}
+		else if ( dynamic_cast< FieldElementFinfoBase* >( f ) ) {
+			fieldElementFinfos_.push_back( f );
+		}
 }
 
 void Cinfo::registerPostCreationFinfo( const Finfo* f )
@@ -297,6 +300,14 @@ const Cinfo* Cinfo::initCinfo()
 			&Cinfo::setNumFinfo, // Dummy
 			&Cinfo::getNumSharedFinfo
 		);
+		static FieldElementFinfo< Cinfo, Finfo > fieldElementFinfo( 
+			"fieldElementFinfo",
+			"fieldElementFinfos in this Class",
+			Finfo::initCinfo(),
+			&Cinfo::getFieldElementFinfo,
+			&Cinfo::setNumFinfo, // Dummy
+			&Cinfo::getNumFieldElementFinfo
+		);
 
 	static Finfo* cinfoFinfos[] = {
 		&docs,				// ReadOnlyValue
@@ -306,6 +317,7 @@ const Cinfo* Cinfo::initCinfo()
 		&valueFinfo,			// FieldElementFinfo
 		&lookupFinfo,		// FieldElementFinfo
 		&sharedFinfo,		// FieldElementFinfo
+		&fieldElementFinfo,		// FieldElementFinfo
 	};
 
 	static Cinfo cinfoCinfo (
@@ -464,6 +476,29 @@ unsigned int Cinfo::getNumSharedFinfo() const
 		return sharedFinfos_.size() + baseCinfo_->getNumSharedFinfo();
 	else 
 		return sharedFinfos_.size();
+}
+
+////////////////////////////////////////////////////////////////////
+Finfo* Cinfo::getFieldElementFinfo( unsigned int i )
+{
+	if ( i >= getNumFieldElementFinfo() )
+		return &dummy;
+	if ( baseCinfo_ ) {
+		if ( i >= baseCinfo_->getNumFieldElementFinfo() )
+			return sharedFinfos_[ i - baseCinfo_->getNumFieldElementFinfo() ];
+		else
+			return const_cast< Cinfo* >( baseCinfo_ )->getFieldElementFinfo( i );
+	}
+
+	return fieldElementFinfos_[i];
+}
+
+unsigned int Cinfo::getNumFieldElementFinfo() const
+{
+	if ( baseCinfo_ )
+		return fieldElementFinfos_.size() + baseCinfo_->getNumFieldElementFinfo();
+	else 
+		return fieldElementFinfos_.size();
 }
 
 ////////////////////////////////////////////////////////////////////
