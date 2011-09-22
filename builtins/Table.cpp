@@ -69,6 +69,12 @@ const Cinfo* Table::initCinfo()
 			&Table::getVecSize
 		);
 
+		static ReadOnlyLookupValueFinfo< Table, unsigned int, double > y(
+			"y",
+			"Value of table at specified index",
+			&Table::getY
+		);
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -160,6 +166,7 @@ const Cinfo* Table::initCinfo()
 		&outputValue,	// ReadOnlyValue
 		&outputIndex,	// ReadOnlyValue
 		&size,			// ReadOnlyValue
+		&y,				// ReadOnlyLookupValue
 		&group,			// DestFinfo
 		&input,			// DestFinfo
 		&spike,			// DestFinfo
@@ -482,6 +489,13 @@ double Table::getOutputValue() const
 unsigned int Table::getOutputIndex() const
 {
 	return outputIndex_;
+}
+
+double Table::getY( unsigned int index ) const
+{
+	if ( index < vec_.size() )
+		return ( vec_[index] );
+	return 0;
 }
 
 //////////////////////////////////////////////////////////////

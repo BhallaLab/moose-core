@@ -14,13 +14,13 @@
 
 static void rtReplicateModels()
 {
-	// const double TOLERANCE = 1e-3;
-
+	static double expectedValueAtOneSec[] =
+		{ 0.7908, 1.275, 1.628, 1.912, 2.154, 2.369, 2.564, 2.744 };
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	vector< unsigned int > dims( 1, 1 );
 
 	ReadCspace rc;
-	Id modelId = rc.readModelString( "|AabX|Jacb| 1 1 1 0.1 0.1 0.1 1",
+	Id modelId = rc.readModelString( "|AabX|Jacb| 1 1 1 0.01 0.1 0.1 1",
 		"kinetics", Id(), "Neutral" );
 
 	// Assign the CubeMesh dims as a 2x2x2 cube with mesh size of 1 um
@@ -106,17 +106,17 @@ static void rtReplicateModels()
 	assert( mid != Msg::badMsg );
 
 	// Set up scheduling.
-	shell->doSetClock( 0, 1 );
-	shell->doSetClock( 1, 1 );
-	shell->doSetClock( 2, 1 );
-	shell->doSetClock( 3, 1 );
+	shell->doSetClock( 0, 0.1 );
+	shell->doSetClock( 1, 0.1 );
+	shell->doSetClock( 2, 0.1 );
+	shell->doSetClock( 3, 0.1 );
 	shell->doUseClock( "/kinetics/stoich/gsl", "process", 0 );
 	shell->doUseClock( "/kinetics/##[TYPE=Table]", "process", 2 );
 	// cout << "Before Reinit\n"; Qinfo::reportQ();
 	shell->doReinit();
 
 	// cout << "After Reinit\n"; Qinfo::reportQ();
-	shell->doStart( 100 );
+	shell->doStart( 10 );
 
 	unsigned int size = Field< unsigned int >::get( plots, "size" );
 	// cout << "size = " << size << endl;
@@ -136,6 +136,11 @@ static void rtReplicateModels()
 		ret = SetGet2< string, string >::set( oid, "xplot", "check.plot", 
 			name );
 		assert( ret );
+
+		//Look up step # 10, starting from 0.
+		double y = LookupField< unsigned int, double >::get( oid, "y", 10); 
+		assert( doubleApprox( expectedValueAtOneSec[i], y ) );
+		// cout << y << endl;
 	}
 	
 	/*
