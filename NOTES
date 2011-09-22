@@ -15341,6 +15341,32 @@ is 1 to 10 msec, so the Euler summation should do fine.
 Working on the implementation.
 Turns out that the GssaStoich should also come along rather nicely here.
 First pass: cleared regression tests with just a single mesh entry.
+Checkin 2983.
+
+Working on regressionTests::rtReacDiff.cpp
+============================================================================
+21 Sep 2011.
+
+rtReacDiff is coming along. The first test, the creation and running of 
+multiple instances of the models, is OK on creation but running seems to
+have a problem. I think that the model construction fails to bring in the
+initial values for all the pools, and only sets up the ones on index 0.
+
+Still fighting with array handling stuff in rtReplicateModels.
 
 ============================================================================
+22 Sep 2011
+Working on ZombieHandler and pool zombificiation. Seems like a good way to
+have zero overhead zombies that use the parent solver, but keep track of
+# of entries.
 
+Did this. Many messy fixes followed, to get all the zombie pools made
+and initialized properly.
+
+Should revamp all of the DataHandlers, install policy in them for node
+and thread decomposition, sort out iterators and dimensionality, deal with 
+the DataId stuff too.
+
+Subha wants FieldElementFinfos added to the Cinfo fields.
+
+============================================================================

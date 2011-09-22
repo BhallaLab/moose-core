@@ -94,6 +94,7 @@ class FuncBarrier;
 #include "DataDimensions.h"
 #include "AnyDimGlobalHandler.h"
 #include "AnyDimHandler.h"
+#include "ZombieHandler.h"
 #include "Element.h"
 #include "Eref.h"
 #include "PrepackedBuffer.h"

@@ -17,11 +17,12 @@
  * This version is used when making zombies. We want to have a
  * temporary Element for field access but nothing else, and it
  * should not mess with messages or Ids.
+ * The passed in DataHandler is wrapped in a ZombieHandler.
  */
 Element::Element( Id id, const Cinfo* c, DataHandler* d )
-	: id_( id ), cinfo_( c ), group_( 0 )
+	: id_( id ), dataHandler_( d ), cinfo_( c ), group_( 0 )
 {
-	dataHandler_ = new DataHandlerWrapper( d );
+	dataHandler_ = new ZombieHandler( d );
 }
 
 unsigned int numDimensionsActuallyUsed( 
