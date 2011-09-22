@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Mar 26 22:41:37 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Aug 25 15:27:38 2011 (+0530)
+// Last-Updated: Thu Sep 22 16:35:28 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 187
+//     Update #: 217
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -263,10 +263,8 @@ Shell& getShell()
 
 void finalize()
 {
-    cout << "In pymoose_finalize()" << endl;
     if (!getShell().isSingleThreaded()){
         getShell().doQuit();
-        cout << "Joining threads." << endl;
         getShell().joinThreads();
         Qinfo::freeMutex();
     }
@@ -274,11 +272,8 @@ void finalize()
     Neutral* ns = reinterpret_cast<Neutral*>(shellE);
     ns->destroy( shellE->id().eref(), 0, 0);
 #ifdef USE_MPI
-    cout << "Befor MPI Finalize." << endl; 
     MPI_Finalize();
 #endif
-    cout << "Finished pymoose_finalize()" << endl;
-
 }
 
 /**
@@ -291,8 +286,17 @@ Return empty string on failure (either there is no field of name
 of {finfoType} with name {fieldName} exists.
 
 */
-string getFieldType(ObjId id, string fieldName, string finfoType)
+pair<string, string> getFieldType(ObjId id, string fieldName, string finfoType)
 {
+    static vector<string> finfoTypes;
+    if (finfoTypes.empty()){
+        finfoTypes.push_back("srcFinfo");
+        finfoTypes.push_back("destFinfo");
+        finfoTypes.push_back("valueFinfo");
+        finfoTypes.push_back("lookupFinfo");
+        finfoTypes.push_back("sharedFinfo");
+        finfoTypes.push_back("fieldElementFinfo");
+    }
     string fieldType = "";
     string className = Field<string>::get(id, "class");
     string classInfoPath("/classes/" + className);
@@ -300,23 +304,15 @@ string getFieldType(ObjId id, string fieldName, string finfoType)
     if (classId == Id()){
         return fieldType;
     }
-    static vector<string> finfoTypes;
-    if (finfoTypes.empty()){
-        finfoTypes.push_back("srcFinfo");
-        finfoTypes.push_back("destFinfo");
-        finfoTypes.push_back("valueFinfo");
-        finfoTypes.push_back("lookupFinfo");
-        finfoTypes.push_back("sharedFinfo");        
-    }
-    size_t count = finfoTypes.size();
+    size_t count = 1;
     size_t jj = 0;
+    // I have a dillemma between simple code and clever code here.
     // This is to follow D.R.Y. principle - I had a loop inside if
     // (finfoType.empty()) and then the same code as in the loop for
     // the else clause.
-    if (!finfoType.empty()){
-        count = 1;
-    } else {        
+    if (finfoType.empty()){
         finfoType = finfoTypes[jj];
+        count = finfoTypes.size();
     }
     do {
         unsigned int numFinfos = Field<unsigned int>::get(ObjId(classId, 0), "num_" + finfoType);
@@ -325,14 +321,16 @@ string getFieldType(ObjId id, string fieldName, string finfoType)
             string _fieldName = Field<string>::get(ObjId(fieldId, DataId(0, ii)), "name");
             if (fieldName == _fieldName){                
                 fieldType = Field<string>::get(ObjId(fieldId, DataId(0, ii)), "type");
-                return fieldType;
+                cout << "Field type:" << fieldName <<  ": " << fieldType << endl;
+                return pair<string, string>(fieldType, finfoType);
             }
         }
         jj ++;
         finfoType = finfoTypes[jj];
     } while ( jj < count );
-    cerr << "Error: No field named '" << fieldName << "' of type '" << finfoType << "'" << endl;    
-    return fieldType;
+    cerr << "Error: No field named '" << fieldName << "' of type '" << finfoType << "'" << endl;
+    finfoType = "";
+    return pair<string, string>(fieldType, finfoType);
 }
 
 /**
