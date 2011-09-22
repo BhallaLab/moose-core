@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Thu Sep  8 15:06:50 2011 (+0530)
+# Last-Updated: Thu Sep 22 14:55:46 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 913
+#     Update #: 917
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -313,9 +313,9 @@ class NeutralArray(object):
         
         return self.id_[0].getFieldNames(ftype)
 
-    def getFieldType(self, field):
+    def getFieldType(self, field, ftype=''):
         """Return the data type of the field as a string."""
-        return self.id_[0].getFieldType(field)
+        return self.id_[0].getFieldType(field, ftype)
 
     def __getitem__(self, index):
         objid = self.id_[index]
@@ -420,8 +420,8 @@ class Neutral(object):
     def getField(self, field):
         return self.oid_.getField(field)
 
-    def getFieldType(self, field):
-        return self.oid_.getFieldType(field)
+    def getFieldType(self, field, ftype=''):
+        return self.oid_.getFieldType(field, ftype)
 
     def getFieldNames(self, fieldType=None):
         if fieldType is None:

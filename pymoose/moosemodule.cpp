@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Sep  8 15:02:30 2011 (+0530)
+// Last-Updated: Thu Sep 22 20:24:05 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4258
+//     Update #: 4275
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -649,10 +649,15 @@ extern "C" {
     static PyObject * _pymoose_ObjId_getFieldType(_ObjId * self, PyObject * args)
     {
         char * fieldName = NULL;
-        if (!PyArg_ParseTuple(args, "s:_pymoose_ObjId_getFieldType", &fieldName)){
+        char * finfoType = NULL;
+        if (!PyArg_ParseTuple(args, "s|s:_pymoose_ObjId_getFieldType", &fieldName, &finfoType)){
             return NULL;
         }
-        string typeStr = getFieldType(self->oid_, string(fieldName));
+        string finfoTypeStr = "";
+        if (finfoType != NULL){
+            finfoTypeStr = finfoType;
+        }
+        string typeStr = getFieldType(self->oid_, string(fieldName), finfoTypeStr);
         if (typeStr.length() <= 0){
             PyErr_SetString(PyExc_ValueError, "Empty string for field type. Field name may be incorrect.");
             return NULL;
@@ -703,22 +708,26 @@ extern "C" {
                 break;                                                  \
         }                                                               \
         
-        string type = getFieldType(self->oid_, string(field));
-        if (type.empty()){
+        pair<string, string> type = getFieldType(self->oid_, string(field));
+        if (type.first.empty()){
             string msg = "No such field on object ";
             msg += self->oid_.id.path() + ": ";
             msg += field;
             msg += " of type";
-            msg += type;
+            msg += type.first;
             PyErr_SetString(PyExc_AttributeError, msg.c_str());
             return NULL;
         }
-        ftype = shortType(type);
+        ftype = shortType(type.first);
         if (!ftype){
-            string msg = "Type ";
-            msg += type + " is not handled yet.";
-            PyErr_SetString(PyExc_NotImplementedError, msg.c_str());
-            return NULL;
+            if ( type.second != "fieldElementFinfo" ){
+                string msg = "Type ";
+                msg += type + " is not handled yet.";
+                PyErr_SetString(PyExc_NotImplementedError, msg.c_str());
+                return NULL;
+            } else {
+                Id fieldElementId = Id(self->oid_.id.path() + "/" + 
+            }
         }
         switch(ftype){
             case 'c': GET_FIELD(char, c)

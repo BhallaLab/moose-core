@@ -2355,7 +2355,7 @@ void testFinfoFields()
 	assert( synFinfo->src().size() == 0 );
 	assert( synFinfo->dest().size() == 0 );
 	// cout <<  synFinfo->type() << endl;
-	assert( synFinfo->type() == "bad" );
+	assert( synFinfo->type() == typeid(Synapse).name() );
 
 	assert( procFinfo->name() == "proc" );
 	assert( procFinfo->docs() == "Shared message for process and reinit" );
