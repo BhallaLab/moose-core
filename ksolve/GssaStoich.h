@@ -90,6 +90,13 @@ class GssaStoich: public Stoich
 		///////////////////////////////////////////////////
 
 		/**
+		 * Vector of rates of reactions. This is a state vector because
+		 * we don't recalculate it each time, only the subset that are
+		 * changed by the last reaction.
+		 */
+		vector< double > v_;
+
+		/**
 		 * Specifies method to use for calculation. Currently
 		 * only G1, but also plan tau-leap and an adaptive
 		 * one.
