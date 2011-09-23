@@ -29,10 +29,10 @@ class updatepaintGL(PyGLWidget):
 		glEnable(GL_LIGHT0)
 		glEnable(GL_COLOR_MATERIAL)
 
-		light0_pos = 200.0, 200.0, 300.0, 0
+		light0_pos = 200.0, 200.0, 600.0, 0
 		diffuse0 = 1.0, 1.0, 1.0, 1.0
 		specular0 = 1.0, 1.0, 1.0, 1.0
-		ambient0 = 0, 0, 0, 1
+		ambient0 = 0,0,0, 1
 
 		glMatrixMode(GL_MODELVIEW)
 		glLightfv(GL_LIGHT0, GL_POSITION, light0_pos)
@@ -279,6 +279,7 @@ class newGLWindow(QtGui.QMainWindow):
 	        
         MainWindow.setCentralWidget(self.centralwidget)
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", self.name, None, QtGui.QApplication.UnicodeUTF8))
+
 	
 if __name__ == '__main__':
         app = QtGui.QApplication(sys.argv)
