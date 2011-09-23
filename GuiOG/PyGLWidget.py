@@ -88,7 +88,6 @@ class PyGLWidget(QtOpenGL.QGLWidget):
         self.last_point_3D_ = [1.0, 0.0, 0.0]
         self.isInRotation_  = False
 	
-	
 
         #additions by chaitanya
 	#additions by chaitanya
@@ -120,7 +119,8 @@ class PyGLWidget(QtOpenGL.QGLWidget):
         # OpenGL state
         glClearColor(1.0, 1.0, 1.0, 1.0)
         glEnable(GL_DEPTH_TEST)
-	self.reset_view()
+	
+        self.reset_view()
 
     def resizeGL(self, width, height):
         glViewport( 0, 0, width, height );
@@ -128,9 +128,7 @@ class PyGLWidget(QtOpenGL.QGLWidget):
         self.updateGL()
 
     def paintGL(self):
-         
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-
         glMatrixMode(GL_MODELVIEW)
         glLoadMatrixd(self.modelview_matrix_)
 
@@ -362,64 +360,64 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 	self.releaseKeyboard()
 
     def keyPressEvent(self, ev):
-	"""
-	Key press callback.
-	"""
-	key = str(ev.text()).upper()
+        """
+        Key press callback.
+        """
+        key = str(ev.text()).upper()
 		
-	if (ev.modifiers() & QtCore.Qt.ControlModifier):
-	    self.ctrlPressed = True	
-	elif (ev.key() == QtCore.Qt.Key_Up):
-		self.translate([0.0, 0.25, 0.0])
+        if (ev.modifiers() & QtCore.Qt.ControlModifier):
+            self.ctrlPressed = True	
+        elif (ev.key() == QtCore.Qt.Key_Up):
+        	self.translate([0.0, 0.25, 0.0])
                 self.ypan += 0.25
-		self.updateGL()
-	elif (ev.key() == QtCore.Qt.Key_Down):
-		self.translate([0.0, -0.25, 0.0])
+        	self.updateGL()
+        elif (ev.key() == QtCore.Qt.Key_Down):
+        	self.translate([0.0, -0.25, 0.0])
                 self.ypan += -0.25
-		self.updateGL()
-	elif (ev.key() == QtCore.Qt.Key_Left):
-		self.translate([-0.25, 0.0, 0.0])
+        	self.updateGL()
+        elif (ev.key() == QtCore.Qt.Key_Left):
+        	self.translate([-0.25, 0.0, 0.0])
                 self.xpan += -0.25
-		self.updateGL()
-	elif (ev.key() == QtCore.Qt.Key_Right):
-		self.translate([0.25, 0.0, 0.0])
+        	self.updateGL()
+        elif (ev.key() == QtCore.Qt.Key_Right):
+        	self.translate([0.25, 0.0, 0.0])
                 self.xpan += 0.25
-		self.updateGL()
-	elif (ev.key() == QtCore.Qt.Key_Plus)or(ev.key() == QtCore.Qt.Key_PageUp)or(ev.key()==QtCore.Qt.Key_Period):
+        	self.updateGL()
+        elif (ev.key() == QtCore.Qt.Key_Plus)or(ev.key() == QtCore.Qt.Key_PageUp)or(ev.key()==QtCore.Qt.Key_Period):
             if ((self.zpan+0.75) <= self.near_+3):
                 self.translate([0.0, 0.0, 0.75])
                 self.zpan += 0.75
-		self.updateGL()
-	elif (ev.key() == QtCore.Qt.Key_Minus)or(ev.key() == QtCore.Qt.Key_PageDown)or(ev.key()==QtCore.Qt.Key_Comma):
+        	self.updateGL()
+        elif (ev.key() == QtCore.Qt.Key_Minus)or(ev.key() == QtCore.Qt.Key_PageDown)or(ev.key()==QtCore.Qt.Key_Comma):
              if ((self.zpan-0.75) >= -1*(self.far_-10)):
         	self.translate([0.0, 0.0, -0.75])
                 self.zpan += -0.75
                 self.updateGL()
-	elif (ev.key() == QtCore.Qt.Key_A):
-		self.rotate([1.0, 0.0, 0.0],2.0)
-		self.updateGL()
-	elif (ev.key() == QtCore.Qt.Key_Q):
-		self.rotate([1.0, 0.0, 0.0],-2.0)
-		self.updateGL()
-	elif (ev.key() == QtCore.Qt.Key_U):
-		self.rotate([0.0, 1.0, 0.0],2.0)
-		self.updateGL()
-	elif (ev.key() == QtCore.Qt.Key_Y):
-		self.rotate([0.0, 1.0, 0.0],-2.0)
-		self.updateGL()
-	elif (ev.key() == QtCore.Qt.Key_Z):
-		self.rotate([0.0, 0.0, 1.0],2.0)
-		self.updateGL()
-	elif (ev.key() == QtCore.Qt.Key_X):
-		self.rotate([0.0, 0.0, 1.0],-2.0)
-		self.updateGL()
+        elif (ev.key() == QtCore.Qt.Key_A):
+        	self.rotate([1.0, 0.0, 0.0],2.0)
+        	self.updateGL()
+        elif (ev.key() == QtCore.Qt.Key_Q):
+        	self.rotate([1.0, 0.0, 0.0],-2.0)
+        	self.updateGL()
+        elif (ev.key() == QtCore.Qt.Key_U):
+        	self.rotate([0.0, 1.0, 0.0],2.0)
+        	self.updateGL()
+        elif (ev.key() == QtCore.Qt.Key_Y):
+        	self.rotate([0.0, 1.0, 0.0],-2.0)
+        	self.updateGL()
+        elif (ev.key() == QtCore.Qt.Key_Z):
+        	self.rotate([0.0, 0.0, 1.0],2.0)
+        	self.updateGL()
+        elif (ev.key() == QtCore.Qt.Key_X):
+        	self.rotate([0.0, 0.0, 1.0],-2.0)
+        	self.updateGL()
 
     def keyReleaseEvent(self, ev):
-	"""
-	Key release callback.
-	"""
-	if (ev.key() == QtCore.Qt.Key_Control):
-	    self.ctrlPressed = False
+        """
+        Key release callback.
+        """
+        if (ev.key() == QtCore.Qt.Key_Control):
+            self.ctrlPressed = False
 
 
     def pressEventPicking(self):

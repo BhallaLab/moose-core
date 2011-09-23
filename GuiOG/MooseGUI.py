@@ -18,6 +18,7 @@ from MooseLayout import Ui_MainWindow
 #opengl imports
 from PyQt4.QtOpenGL import QGLWidget
 from OpenGL.GL import *
+from OpenGL.GLUT import *
 from updatepaintGL import newGLSubWindow,updatepaintGL,newGLWindow
 mc=moose.context
 
@@ -51,8 +52,21 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         SelectedChild = self.mtree.pathToTreeChild(path)
     	self.mtree.setCurrentItem(SelectedChild)				#select the corresponding moosetree
 	self.makeObjectFieldEditor(SelectedChild.getMooseObject())		#update the corresponding property
-    		
+
+    def mooseCell(self):
+        a = moose.Compartment('compartment1')
+        a.x0 = 0
+        a.y0 = 0
+        a.z0 = 0
+        a.x = 0
+        a.y = 0
+        a.z = 32e-6
+        a.diameter = 16e-6
+        a.length = 32e-6
+
     def update_graph(self):
+        
+        #self.mooseCell()
 
 	#mc.loadG('Mitral.g')
 	mc.readCell('/Purkinje4M9.p','cell')
@@ -84,12 +98,12 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 	self.qgl.updateGL()	
 
 	
-    def cmp_position(self,line_label): 		#used with onpickplaceline, returns the absolute value of the end of compartment position
-        a_id=mc.pathToId(line_label)
-        x= float(mc.getField(a_id,'x'))
-        y= float(mc.getField(a_id,'y'))
-        z= float(mc.getField(a_id,'z'))	
-        return x,y,z
+    # def cmp_position(self,line_label): 		#used with onpickplaceline, returns the absolute value of the end of compartment position
+    #     a_id=mc.pathToId(line_label)
+    #     x= float(mc.getField(a_id,'x'))
+    #     y= float(mc.getField(a_id,'y'))
+    #     z= float(mc.getField(a_id,'z'))	
+    #     return x,y,z
 
 
     def makeObjEditorFromTreeItem(self, item, column):
@@ -149,10 +163,11 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 	self.mtable.show()
 
 
-
-	
+#print 'tell you what'
+#glutInit(sys.argc,sys.argv)	
 # create the GUI application
 app = QtGui.QApplication(sys.argv)
+
 # instantiate the main window
 dmw = DesignerMainWindow()
 # show it
