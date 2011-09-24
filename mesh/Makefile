@@ -26,7 +26,7 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 MeshEntry.o:	MeshEntry.h
 Boundary.o:	Boundary.h
-ChemMesh.o:	ChemMesh.h MeshEntry.h Boundary.h
+ChemMesh.o:	ChemMesh.h MeshEntry.h Boundary.h ../ksolve/RateTerm.h ../ksolve/FuncTerm.h ../ksolve/KinSparseMatrix.h ../ksolve/Stoich.h
 CylMesh.o:	ChemMesh.h CylMesh.h MeshEntry.h Boundary.h
 CubeMesh.o:	ChemMesh.h CubeMesh.h MeshEntry.h Boundary.h
 testMesh.o:	MeshEntry.h ChemMesh.h CylMesh.h Boundary.h

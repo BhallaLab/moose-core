@@ -105,6 +105,23 @@ class Stoich
 		void updateRates( vector< double>* yprime, double dt, 
 			unsigned int meshIndex, vector< double >& v );
 
+		/**
+		 * Update diffusion terms for all molecules on specified meshIndex.
+		 * The stencil says how to weight diffusive flux from various offset
+		 * indices with respect to the current meshIndex.
+		 * The first entry of the stencil is the index offset.
+		 * The second entry of the stencil is the scale factor, including
+		 * coeffs of that term and 1/dx^2.
+		 * For example, in the Method Of Lines with second order stencil
+		 * in one dimension we have:
+		 * du/dt = (u_-1 - 2u + u_+1) / dx^2
+		 * The scale factor for u_-1 is then 1/dx^2. Index offset is -1.
+		 * The scale factor for u is then -2/dx^2. Index offset is 0.
+		 * The scale factor for u_+1 is then 1/dx^2. Index offset is +1.
+		 */
+		void updateDiffusion( unsigned int meshIndex,
+			const vector< pair< int, double > >& stencil );
+
 #ifdef USE_GSL
 		static int gslFunc( double t, const double* y, double* yprime, void* s );
 		int innerGslFunc( double t, const double* y, double* yprime,
@@ -160,6 +177,26 @@ class Stoich
 		 * The array looks like y_[meshIndex][poolIndex]
 		 */
 		vector< vector< double > > y_;
+
+		/**
+		 * Summed external flux terms for each meshpoint and each pool. 
+		 * These are in units of d#/dt and add onto whatever form of 
+		 * numerical integration (or stochastic calculation) is in play.
+		 * Note that these terms are constant for the entire duration of
+		 * one clock tick, so it represents a first order Euler integration.
+		 * The clock tick has to be set with this recognized.
+		 */
+		vector< vector< double > > flux_;
+
+		/**
+		 * Vector of diffusion constants, one per VarPool.
+		 */
+		vector< double > diffConst_;
+
+		/**
+		 * Vector of indices for non-zero diffusion constants. Later.
+		vector< unsigned int > indexOfDiffusingPools_;
+		 */
 
 		/**
 		 * Lookup from each molecule to its parent compartment index

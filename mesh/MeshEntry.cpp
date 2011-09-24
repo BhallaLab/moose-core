@@ -82,6 +82,23 @@ const Cinfo* MeshEntry::initCinfo()
 			"Handle for grouping. Doesn't do anything.",
 			new OpFuncDummy() );
 
+		static DestFinfo process( "process",
+			"Handles process call",
+			new ProcOpFunc< MeshEntry >( &MeshEntry::process ) );
+		static DestFinfo reinit( "reinit",
+			"Handles reinit call",
+			new ProcOpFunc< MeshEntry >( &MeshEntry::reinit ) );
+		///////////////////////////////////////////////////////
+		// Shared definitions
+		///////////////////////////////////////////////////////
+		static Finfo* procShared[] = {
+			&process, &reinit
+		};
+		static SharedFinfo proc( "proc",
+			"Shared message for process and reinit",
+			procShared, sizeof( procShared ) / sizeof( const Finfo* )
+		);
+
 		//////////////////////////////////////////////////////////////
 		// SrcFinfo Definitions
 		//////////////////////////////////////////////////////////////
@@ -95,6 +112,7 @@ const Cinfo* MeshEntry::initCinfo()
 		&diffusionArea,	// Readonly Value
 		&diffusionScaling,	// Readonly Value
 		&group,			// DestFinfo
+		&proc,			// SharedFinfo
 	};
 
 	static Cinfo meshEntryCinfo (
@@ -120,6 +138,30 @@ MeshEntry::MeshEntry()
 MeshEntry::MeshEntry( const ChemMesh* parent )
 	: parent_( parent )
 {;}
+
+//////////////////////////////////////////////////////////////
+// Process operations. Used for reac-diff calculations.
+//////////////////////////////////////////////////////////////
+
+/**
+ * Update the diffusion rate terms. Note that these stay the same
+ * through the entire clock tick, even if the GSL solver takes many
+ * intermediate steps. The assumption is that the concs change slowly
+ * enough that the diffusion terms are not hugely changed over the duration
+ * of one tick. Also assume that diffusion itself is slow. The latter
+ * assumption is OK for suitable grid sizes. The first assumption is OK
+ * with a sensible tick step.
+ */
+void MeshEntry::process( const Eref& e, ProcPtr info )
+{
+	parent_->updateDiffusion( e.index().data() );
+}
+
+void MeshEntry::reinit( const Eref& e, ProcPtr info )
+{
+	;
+}
+
 
 //////////////////////////////////////////////////////////////
 // Field Definitions

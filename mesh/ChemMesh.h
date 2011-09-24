@@ -33,6 +33,11 @@ class ChemMesh
 		virtual unsigned int innerGetDimensions() const = 0;
 
 		//////////////////////////////////////////////////////////////////
+		// Dest Finfo
+		//////////////////////////////////////////////////////////////////
+		void stoich( const Eref& e, const Qinfo* q, Id stoichId );
+
+		//////////////////////////////////////////////////////////////////
 		// FieldElementFinfo stuff for MeshEntry lookup
 		//////////////////////////////////////////////////////////////////
 		/**
@@ -52,6 +57,20 @@ class ChemMesh
 		 * Returns the matched lookupEntry
 		 */
 		MeshEntry* lookupEntry( unsigned int index );
+
+		//////////////////////////////////////////////////////////////////
+		// Utility function for diffusion handling
+		//////////////////////////////////////////////////////////////////
+		/**
+		 * Orchestrates diffusion calculations in the connected Stoich,
+		 * if any. Basically acts as a conduit for the execution of the
+		 * process call by subsidiary MeshEntries, and funnels these calls
+		 * to all attached Stoichs with the incorporation of the stencil
+		 * for the actual diffusion calculations.
+		 * In due course this should become a virtual function so that
+		 * we can have this handled by any ChemMesh class.
+		 */
+		virtual void updateDiffusion( unsigned int meshIndex ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Lookup funcs for Boundary
@@ -91,6 +110,14 @@ class ChemMesh
 
 	protected:
 		double size_; /// Volume or area
+		Id stoich_; /// Identifier for stoich object doing diffusion.
+
+		/**
+		 * defines how to combine neighbouring
+		 * mesh elements to set up the diffusion du/dt term, using the
+		 * method of lines.
+		 */
+		vector< pair< int, double > > stencil_;
 	private:
 		MeshEntry entry_; /// Wrapper for self ptr
 

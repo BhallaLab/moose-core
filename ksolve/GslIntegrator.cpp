@@ -62,6 +62,7 @@ const Cinfo* GslIntegrator::initCinfo()
 		static DestFinfo reinit( "reinit",
 			"Handles reinit call",
 			new ProcOpFunc< GslIntegrator >( &GslIntegrator::reinit ) );
+
 		///////////////////////////////////////////////////////
 		// Shared definitions
 		///////////////////////////////////////////////////////

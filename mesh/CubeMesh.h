@@ -105,6 +105,8 @@ class CubeMesh: public ChemMesh
 
 		void buildMesh( Id geom, double x, double y, double z );
 
+		void addStoich( Id stoich );
+
 		//////////////////////////////////////////////////////////////////
 		//  Utility func
 		//////////////////////////////////////////////////////////////////
@@ -117,6 +119,16 @@ class CubeMesh: public ChemMesh
 		unsigned int neighbor( unsigned int spaceIndex, 
 			int dx, int dy, int dz ) const;
 
+		//////////////////////////////////////////////////////////////////
+		//  Stuff for diffusion
+		//////////////////////////////////////////////////////////////////
+
+		/**
+		 * Sets up the stencil that defines how to combine neighbouring
+		 * mesh elements to set up the diffusion du/dt term, using the
+		 * method of lines.
+		 */
+		void buildStencil();
 
 		//////////////////////////////////////////////////////////////////
 
