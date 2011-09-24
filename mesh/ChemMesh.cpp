@@ -11,6 +11,7 @@
 #include "Boundary.h"
 #include "MeshEntry.h"
 #include "ChemMesh.h"
+#include "../ksolve/StoichHeaders.h"
 
 static SrcFinfo0 groupSurfaces( 
 		"groupSurfaces", 
@@ -41,6 +42,14 @@ const Cinfo* ChemMesh::initCinfo()
 		static DestFinfo group( "group",
 			"Handle for grouping. Doesn't do anything.",
 			new OpFuncDummy() );
+
+		static DestFinfo stoich( "stoich",
+			"Handle Id of stoich. Used to set up connection from mesh to"
+			"stoich for diffusion "
+			"calculations. Somewhat messy way of doing it, should really "
+			"use messaging.",
+			new EpFunc1< ChemMesh, Id >( &ChemMesh::stoich )
+		);
 
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
@@ -79,8 +88,9 @@ const Cinfo* ChemMesh::initCinfo()
 		);
 
 	static Finfo* chemMeshFinfos[] = {
-		&size,	// ReadOnlyValue
+		&size,			// ReadOnlyValue
 		&dimensions,	// ReadOnlyValue
+		&stoich,		// DestFinfo
 		&entryFinfo,	// FieldElementFinfo
 		&boundaryFinfo,	// Boundaries
 	};
@@ -116,7 +126,10 @@ ChemMesh::~ChemMesh()
 //////////////////////////////////////////////////////////////
 // MsgDest Definitions
 //////////////////////////////////////////////////////////////
-
+void ChemMesh::stoich( const Eref& e, const Qinfo* q, Id stoichId )
+{
+	stoich_ = stoichId;
+}
 
 //////////////////////////////////////////////////////////////
 // Field Definitions
@@ -174,4 +187,18 @@ void ChemMesh::setNumBoundary( unsigned int num )
 unsigned int ChemMesh::getNumBoundary() const
 {
 	return boundaries_.size();
+}
+
+//////////////////////////////////////////////////////////////
+// Orchestrate diffusion calculations in Stoich. This simply updates
+// the flux terms (du/dt due to diffusion). Virtual func, has to be
+// defined for every Mesh class if it differs from below.
+// Called from the MeshEntry.
+//////////////////////////////////////////////////////////////
+
+void ChemMesh::updateDiffusion( unsigned int meshIndex ) const
+{
+	// Later we'll have provision for multiple stoich targets.
+	Stoich* s = reinterpret_cast< Stoich* >( stoich_.eref().data() );
+	s->updateDiffusion( meshIndex, stencil_ );
 }

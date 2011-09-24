@@ -630,6 +630,29 @@ void Stoich::updateFuncs( double t, unsigned int meshIndex )
 	}
 }
 
+void Stoich::updateDiffusion( 
+	unsigned int meshIndex, const vector< pair< int, double > >& stencil)
+{
+	for ( unsigned int i = 0; i < stencil.size(); ++i ) {
+		int offset = stencil[i].first;
+		int index = meshIndex - offset;
+		if ( index < 0 ) { // use mirror entry.
+			index = meshIndex + offset;
+		} else if ( index >= static_cast< int >( numMeshEntries_ ) ) { 
+			// use mirror entry.
+			index = meshIndex + offset;
+		}
+		vector< double >& f = flux_[meshIndex];
+		if ( index >= 0 && index < static_cast< int >( numMeshEntries_  )) {
+			assert( f.size() <= S_[0].size() );
+			double scale = stencil[i].second;
+			for ( unsigned int j = 0; j < f.size(); ++j ) {
+				f[j] += diffConst_[j] * S_[ index ][j] * scale;
+			}
+		}
+	}
+}
+
 // Put in a similar updateVals() function to handle Math expressions.
 // Might update molecules, possibly even reac rates at some point.
 
