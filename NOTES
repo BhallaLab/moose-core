@@ -15380,5 +15380,49 @@ to run. Major issue here, possibly to do with mixing of intermediate values
 due to threading.
 That was a good guess. The v_ vector in Stoich.h was being used by both 
 threads. Set up to dynamically allocate it. Later might preallocate.
+Checkin 2988.
+
+For reac-diff: will need local neighbour list. Better as a stencil.
+Issue crops up here: when do we do this. It needs input of mol concs from all
+interfaces; rather selective exchanges per node.
+
+
+============================================================================
+
+23 Sep 2011
+Implemented the basic function for updateDiffusion, that is straightforward.
+Scheduling is tricky.  Need to be careful of 
+when the transfers happen between threads. We need the mol # for each 
+species and mesh location, (S_ matrix), to update the rate term v.
+Seems like the obvious solution is to have a vector of diffusion terms for each
+species. This can be updated both within the thread and using messages.
+
+One option is to have it scheduled through the GslIntegrator. I've done this
+but it is not clean and needs additional fields to be specified that have
+nothing to do with GSL.
+Another option is to create another solver helper, Diffuser. Like the GSL
+it will be scheduled and will drive the stoich functions. This would need
+to be split up into numMeshEntries entries.
+
+A third option is to have the ChemMesh object itself drive the stoich. Problem 
+here with the number of mesh entries, but the obvious thing is to have
+the mesh entries be scheduled and drive it.
+
+============================================================================
+24 Sep 2011
+
+Setting up diffusion calculations with the third option above. Use a message
+from the ChemMesh to the Stoich (there could be more than one Stoich target).
+Perhaps implement something like a fastSet to follow down multiple local
+Msgs? This is what I want to do anyway with the 
+CubeMesh::updateDiffusion iteration.
+
+Sequence will be: Process->MeshEntry->parent ChemMesh-> scan through msg
+tgts -> Stoichs-> diffusion calculations.
+
+Main reason to do it this way is to set up the scheduling and thread
+decomposition properly. It also lets the mesh figure out how to specify the
+stencil for the diffusion terms. Note that a single mesh may handle multiple
+stoichs, but we'll deal with this later.
 
 ============================================================================

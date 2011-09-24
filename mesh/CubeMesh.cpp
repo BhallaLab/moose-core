@@ -255,6 +255,8 @@ void CubeMesh::updateCoords()
 	s2m_.resize( size );
 	for ( unsigned int i = 0; i < size; ++i )
 		m2s_[i] = s2m_[i] = i;
+
+	buildStencil();
 }
 
 void CubeMesh::setX0( double v )
@@ -648,3 +650,31 @@ void CubeMesh::innerSetNumEntries( unsigned int n )
 {
 	cout << "Warning: CubeMesh::innerSetNumEntries is readonly.\n";
 }
+
+//////////////////////////////////////////////////////////////////
+
+void CubeMesh::buildStencil()
+{
+	stencil_.resize( 0 );
+	double middle = 0;
+	if ( nx_ > 1 ) {
+		double invdxsq = 1.0 / ( dx_ * dx_ );
+		stencil_.push_back( pair< int, double >( -1, invdxsq ) );
+		stencil_.push_back( pair< int, double >( 1, invdxsq ) );
+		middle = -2 * invdxsq;
+	}
+	if ( ny_ > 1 ) {
+		double invdysq = 1.0 / ( dy_ * dy_ );
+		stencil_.push_back( pair< int, double >( -nx_, invdysq ) );
+		stencil_.push_back( pair< int, double >( nx_, invdysq ) );
+		middle += -2 * invdysq;
+	}
+	if ( nz_ > 1 ) {
+		double invdzsq = 1.0 / ( dz_ * dz_ );
+		stencil_.push_back( pair< int, double >( -nx_*ny_, invdzsq ) );
+		stencil_.push_back( pair< int, double >( nx_*ny_, invdzsq ) );
+		middle += -2 * invdzsq;
+	}
+	stencil_.push_back( pair< int, double >( 0, middle ) );
+}
+
