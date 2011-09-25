@@ -236,13 +236,12 @@ double ZombiePool::getConcInit( const Eref& e, const Qinfo* q ) const
 
 void ZombiePool::setDiffConst( const Eref& e, const Qinfo* q, double v )
 {
-	// diffConst_ = v;
+	diffConst_[ convertIdToPoolIndex( e.id() ) ] = v;
 }
 
 double ZombiePool::getDiffConst( const Eref& e, const Qinfo* q ) const
 {
-	// return diffConst_;
-	return 0;
+	return diffConst_[ convertIdToPoolIndex( e.id() ) ];
 }
 
 void ZombiePool::setSize( const Eref& e, const Qinfo* q, double v )
@@ -283,6 +282,7 @@ void ZombiePool::zombify( Element* solver, Element* orig )
 		Pool* m = reinterpret_cast< Pool* >( oer.data() );
 		z->setN( zer, 0, m->getN() );
 		z->setNinit( zer, 0, m->getNinit() );
+		z->setDiffConst( zer, 0, m->getDiffConst() );
 		if ( i == 0 )
 			z->setSpecies( zombier, 0, m->getSpecies() );
 	}

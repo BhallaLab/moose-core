@@ -218,6 +218,7 @@ void GslIntegrator::stoich( const Eref& e, const Qinfo* q, Id stoichId )
 	Stoich* s = reinterpret_cast< Stoich* >( stoichId.eref().data() );
 	nVarPools_ = s->getNumVarPools();
 	y_ = s->getY( e.index().data() );
+	s->clearFlux();
 
 	isInitialized_ = 1;
         // Allocate GSL functions if not already allocated,
@@ -293,12 +294,15 @@ void GslIntegrator::process( const Eref& e, ProcPtr info )
 			*/
 	}
 #endif // USE_GSL
+	Stoich* s = reinterpret_cast< Stoich* >( stoichId_.eref().data() );
+	s->clearFlux( e.index().data() );
 }
 
 void GslIntegrator::reinit( const Eref& e, ProcPtr info )
 {
 	Stoich* s = reinterpret_cast< Stoich* >( stoichId_.eref().data() );
 	stoichThread_.set( s, info, e.index().data() );
+	s->clearFlux();
 	s->innerReinit();
 	nVarPools_ = s->getNumVarPools();
 	y_ = s->getY( e.index().data() );

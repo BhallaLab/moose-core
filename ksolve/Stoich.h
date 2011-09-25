@@ -122,6 +122,16 @@ class Stoich
 		void updateDiffusion( unsigned int meshIndex,
 			const vector< pair< int, double > >& stencil );
 
+		/**
+		 * Clear out the flux matrix, that is the matrix of all diffusive
+		 * and port-related influx and efflux from each mesh location for
+		 * each molecule. This should be called after the timestep for
+		 * numerical integration but before any of the flux updates
+		 * (such as updateDiffusion).
+		 */
+		void clearFlux();
+		void clearFlux( unsigned int meshIndex );
+
 #ifdef USE_GSL
 		static int gslFunc( double t, const double* y, double* yprime, void* s );
 		int innerGslFunc( double t, const double* y, double* yprime,

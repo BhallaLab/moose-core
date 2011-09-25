@@ -15423,6 +15423,115 @@ tgts -> Stoichs-> diffusion calculations.
 Main reason to do it this way is to set up the scheduling and thread
 decomposition properly. It also lets the mesh figure out how to specify the
 stencil for the diffusion terms. Note that a single mesh may handle multiple
-stoichs, but we'll deal with this later.
+stoichs, but we'll deal with this later. Checkin 2993.
+
+Implementing regression test: testDiff1D.  Analytical solution:
+
+c(x,t) = { c0 / (2 * sqrt(PI.D.t) ) }.exp(-x^2/(4Dt)
+
+Note that integral(-inf, +inf)( exp( -ax^2 ) = sqrt( PI/a )
+So we have a = 1/(4Dt) and the integral is 2 sqrt( PI.D.t ) so this
+works out to integral(-inf, +inf) c(x,t)dx = c0.
+
+In order to set it up for a finite initial amount, we have c0 = cmid * dx
+
+
+
+Ran into roadblock here. The FieldDataHandlerBase does not execute process
+calls. Need another way to get the calls into the stoich in a way which uses
+the threads effectively. 
+Even if it did, how would one decide how to partition threads? 
+Like OneDimHandler?
+
+============================================================================
+25 Sep 2011
+
+Reac-diff starting to work. Going through error terms.
+
+For dx = 1 micron, # segments = 21:
+for dt = 0.1:
+root sqr Error on t = 1 = 0.0133225
+root sqr Error on t = 2 = 0.00461179
+root sqr Error on t = 3 = 0.0026447
+root sqr Error on t = 4 = 0.00188755
+root sqr Error on t = 5 = 0.00200928
+root sqr Error on t = 6 = 0.00313812
+root sqr Error on t = 7 = 0.00497474
+root sqr Error on t = 8 = 0.00726361
+root sqr Error on t = 9 = 0.00984374
+root sqr Error on t = 10 = 0.0125965
+
+for dt = 0.01:
+root sqr Error on t = 1 = 0.0293132
+root sqr Error on t = 2 = 0.0104859
+root sqr Error on t = 3 = 0.00607502
+root sqr Error on t = 4 = 0.00423246
+root sqr Error on t = 5 = 0.00357299
+root sqr Error on t = 6 = 0.0040164
+root sqr Error on t = 7 = 0.00541802
+root sqr Error on t = 8 = 0.00744706
+root sqr Error on t = 9 = 0.00985837
+root sqr Error on t = 10 = 0.0124959
+
+For dt = 0.001: 
+root sqr Error on t = 1 = 0.0309297
+root sqr Error on t = 2 = 0.0110765
+root sqr Error on t = 3 = 0.00641892
+root sqr Error on t = 4 = 0.00446861
+root sqr Error on t = 5 = 0.00374003
+root sqr Error on t = 6 = 0.00411993
+root sqr Error on t = 7 = 0.00547308
+root sqr Error on t = 8 = 0.00747161
+root sqr Error on t = 9 = 0.00986352
+root sqr Error on t = 10 = 0.0124882
+
+Oddly, the results get better at larger dt, but there are much of the same
+order whether we use 1 to 100 msec dt. Part of this may be since we use a
+high order ODE method. Anyway, the outcome is that I don't have to worry much
+about the updates of the diffusion system.
+
+Tried now for 
+For dx = 0.5 micron, # segments = 41:
+dt = 0.1:
+root sqr Error on t = 1 = 0.00624078
+root sqr Error on t = 2 = 0.00250449
+root sqr Error on t = 3 = 0.00150366
+root sqr Error on t = 4 = 0.00105265
+root sqr Error on t = 5 = 0.000999846
+root sqr Error on t = 6 = 0.00166516
+root sqr Error on t = 7 = 0.00289127
+root sqr Error on t = 8 = 0.0044467
+root sqr Error on t = 9 = 0.00620283
+root sqr Error on t = 10 = 0.00807393
+
+dt = 0.01:
+root sqr Error on t = 1 = 0.00337378
+root sqr Error on t = 2 = 0.00138091
+root sqr Error on t = 3 = 0.000826444
+root sqr Error on t = 4 = 0.000638089
+root sqr Error on t = 5 = 0.000920407
+root sqr Error on t = 6 = 0.00173873
+root sqr Error on t = 7 = 0.00294765
+root sqr Error on t = 8 = 0.00444198
+root sqr Error on t = 9 = 0.00613543
+root sqr Error on t = 10 = 0.00795478
+
+dt = 0.001
+root sqr Error on t = 1 = 0.004319
+root sqr Error on t = 2 = 0.00177055
+root sqr Error on t = 3 = 0.00105967
+root sqr Error on t = 4 = 0.000792555
+root sqr Error on t = 5 = 0.00099915
+root sqr Error on t = 6 = 0.00177518
+root sqr Error on t = 7 = 0.00296457
+root sqr Error on t = 8 = 0.00444674
+root sqr Error on t = 9 = 0.00613151
+root sqr Error on t = 10 = 0.00794457
+
+This is reassuring, results have converged rather nicely especially at small
+times when the gradients are steepest.
+I'm a little concerned about the start/stop process, if it mangles time.
+Anyway, set this up to do a silent test for the root square error using
+dt = 0.01 and 41 segments of 0.5 microns each.
 
 ============================================================================
