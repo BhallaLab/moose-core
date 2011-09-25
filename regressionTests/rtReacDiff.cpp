@@ -158,15 +158,20 @@ static void rtReplicateModels()
  * The analytical solution for 1-D diffusion is:
  * 		c(x,t) = ( c0 / 2 / sqrt(PI.D.t) ).exp(-x^2/(4Dt)
  * c0 is the total amount of stuff.
- * In these sims the total amount is 1 uM conc in 1 compartment.
+ * In these sims the total amount is 1 uM conc in 1 compartment if input
+ * is in middle.
+ * The total amount is 1 uM conc in 2 compartments if input is at a corner
+ * because the edge acts like a mirror.
  */
-double 
-	checkDiff( const vector< double >& conc, double D, double t, double dx)
+double checkDiff( const vector< double >& conc, 
+	double D, double t, double dx)
 {
 	// static const double scaleFactor = sqrt( PI * D );
-	// 
-	const double scaleFactor = 0.5 * dx;
-	int mid = conc.size() / 2;
+	// const double scaleFactor = 0.5 * dx; // Case for input in middle
+	// int mid = conc.size() / 2; // Case for input in middle
+
+	const double scaleFactor = dx/2; // Case for input at end as well. Hm.
+	int mid = 0; // Case for input at end.
 	double err = 0;
 
 	for ( unsigned int j = 0; j < conc.size(); ++j ) {
@@ -185,7 +190,7 @@ double
 static void testDiff1D()
 {
 	// Diffusion length in mesh entries
-	static const unsigned int diffLength = 41; 
+	static const unsigned int diffLength = 20; 
 	static const double dt = 0.01;
 	static const double dx = 0.5e-6;
 	static const double D = 1e-12;
@@ -200,7 +205,7 @@ static void testDiff1D()
 	assert( ret );
 
 	Id compt = shell->doCreate( "CubeMesh", kinetics, "compartment", dims );
-	// Set it to 20 microns long, 1 micron in y and z.
+	// Set it to diffLength*dx long, dx in y and z.
 	vector< double > coords( 9, dx );
 	coords[0] = coords[1] = coords[2] = 0;
 	coords[3] = diffLength * dx;
@@ -235,7 +240,7 @@ static void testDiff1D()
 	assert( ret );
 	
 
-	Field< double >::set( ObjId( a, diffLength/2 ), "concInit", 1 );
+	Field< double >::set( ObjId( a, 0 ), "concInit", 1 );
 
     shell->doSetClock( 0, dt );
     shell->doSetClock( 1, dt );
@@ -253,8 +258,120 @@ static void testDiff1D()
 		Field< double >::getVec( a, "conc", conc );
 		assert( conc.size() == diffLength );
 		double ret = checkDiff( conc, D, i + 1, dx );
-		// cout << "root sqr Error on t = " << i + 1 << " = " << ret << endl;
+		cout << "root sqr Error on t = " << i + 1 << " = " << ret << endl;
 		assert ( ret < 0.01 );
+	}
+
+	shell->doDelete( kinetics );
+
+	cout << "." << flush;
+}
+
+/**
+ * Checks calculations in n-dimensions. Uses point at corner as input.
+ * Assumes cube.
+ */
+double checkNdimDiff( const vector< double >& conc, double D, double t, 
+		double dx, double n, unsigned int cubeSide )
+{
+	const double scaleFactor = pow( dx, n); 
+	double err = 0;
+
+	for ( unsigned int i = 0; i < 1; ++i ) {
+		for ( unsigned int j = 0; j < 1; ++j ) {
+			for ( unsigned int k = 0; k < cubeSide; ++k ) {
+				double x = k * dx;
+				double y = j * dx;
+				double z = i * dx;
+				double rsq = x * x + y * y + z * z;
+				unsigned int index = ( i * cubeSide + j ) * cubeSide + k;
+				double c = scaleFactor * pow( 4 * PI * D * t, -n/2 ) * 
+					exp( -rsq / ( 4 * D * t ) );
+				cout << endl << t << "	(" << i << "," << j << "," << k  << "), r= " << rsq << "	" << c << "	" << conc[index];
+				err += ( c - conc[index] ) * ( c - conc[index] );
+			}
+		}
+	}
+	return sqrt( err );
+	cout << endl;
+}
+
+
+static void testDiff3D()
+{
+	// Diffusion length in mesh entries
+	static const unsigned int cubeSide = 15; 
+	static const double dt = 0.1;
+	static const double dx = 0.5e-6;
+	static const double D = 1e-12;
+
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< unsigned int > dims( 1, 1 );
+
+	Id kinetics = shell->doCreate( "Neutral", Id(), "kinetics", dims );
+	Id a = shell->doCreate( "Pool", kinetics, "a", dims );
+	assert( a != Id() );
+	bool ret = Field< double >::set( a, "diffConst", D );
+	assert( ret );
+
+	Id compt = shell->doCreate( "CubeMesh", kinetics, "compartment", dims );
+	// Set it to cubeSide mesh divisions in each dimension, dx in each.
+	vector< double > coords( 9, dx );
+	coords[0] = coords[1] = coords[2] = 0;
+	coords[3] = cubeSide * dx;
+	// coords[4] = cubeSide * dx;
+	// coords[5] = cubeSide * dx;
+
+	ret = Field< bool >::set( compt, "preserveNumEntries", false );
+	assert( ret );
+	ret = Field< vector< double > >::set( compt, "coords", coords );
+	assert( ret );
+	Id mesh( "/kinetics/compartment/mesh" );
+	assert( mesh != Id() );
+	assert( mesh.element()->dataHandler()->localEntries() == cubeSide );
+	MsgId mid = shell->doAddMsg( "OneToOne", a, "requestSize",
+		mesh, "get_size" );
+	assert( mid != Msg::badMsg );
+
+	shell->handleReMesh( mesh );
+	// This should assign the same init conc to the new pool objects.
+	assert( a.element()->dataHandler()->localEntries() == cubeSide );
+
+	Id stoich = shell->doCreate( "Stoich", kinetics, "stoich", dims );
+
+	Field< string >::set( stoich, "path", "/kinetics/##" );
+
+	dims[0] = cubeSide;
+	Id gsl = shell->doCreate( "GslIntegrator", stoich, "gsl", dims );
+	ret = SetGet1< Id >::setRepeat( gsl, "stoich", stoich );
+	assert( ret );
+	ret = Field< bool >::get( gsl, "isInitialized" );
+	assert( ret );
+
+	ret = SetGet1< Id >::set( compt, "stoich", stoich );
+	assert( ret );
+	
+
+	Field< double >::set( ObjId( a, 0 ), "concInit", 1 );
+
+    shell->doSetClock( 0, dt );
+    shell->doSetClock( 1, dt );
+    shell->doSetClock( 2, dt );
+    shell->doSetClock( 3, 0 ); 
+
+    shell->doUseClock( "/kinetics/compartment/mesh", "process", 0 ); 
+    shell->doUseClock( "/kinetics/stoich/gsl", "process", 1 ); 
+    // shell->doUseClock( plotpath, "process", 2 ); 
+    shell->doReinit();
+
+	for ( unsigned int i = 0; i < 4; ++i ) {
+		shell->doStart( 1 );
+		vector< double > conc;
+		Field< double >::getVec( a, "conc", conc );
+		assert( conc.size() == cubeSide );
+		double ret = checkNdimDiff( conc, D, i + 1, dx, 1, cubeSide );
+		cout << "root sqr Error on t = " << i + 1 << " = " << ret << endl;
+		// assert ( ret < 0.01 );
 	}
 
 	shell->doDelete( kinetics );
@@ -266,4 +383,5 @@ void rtReacDiff()
 {
 	rtReplicateModels();
 	testDiff1D();
+	testDiff3D();
 }
