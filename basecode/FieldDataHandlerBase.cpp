@@ -53,7 +53,29 @@ DataHandler* FieldDataHandlerBase::copyToNewDim( unsigned int newDimSize )
 
 void FieldDataHandlerBase::process( const ProcInfo* p, Element* e, FuncId fid ) const 
 {
-	; // Fields don't do independent process?
+	/**
+	 * This is the variant with threads in a block.
+	 */
+	unsigned int startIndex = 0;
+	unsigned int endIndex = localEntries();
+	if ( Shell::numProcessThreads() > 1 ) {
+		// Note that threadIndexInGroup is indexed from 1 up.
+		assert( p->threadIndexInGroup >= 1 );
+		startIndex = ( localEntries() * ( p->threadIndexInGroup - 1 ) + 
+			Shell::numProcessThreads() - 1 ) / Shell::numProcessThreads();
+
+		endIndex = ( localEntries() * p ->threadIndexInGroup +
+			Shell::numProcessThreads() - 1 ) / Shell::numProcessThreads();
+	}
+
+	const OpFunc* f = e->cinfo()->getOpFunc( fid );
+	const ProcOpFuncBase* pf = dynamic_cast< const ProcOpFuncBase* >( f );
+	assert( pf );
+	for ( unsigned int i = startIndex; i != endIndex; ++i ) {
+		DataId me( 0, i );
+		char* temp = data( me );
+		pf->proc( temp, Eref( e, me ), p );
+	}
 }
 
 /**

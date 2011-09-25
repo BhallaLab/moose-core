@@ -460,12 +460,15 @@ void Stoich::allocateModel( const vector< Id >& elist )
 	S_.resize( numMeshEntries_ );
 	Sinit_.resize( numMeshEntries_ );
 	y_.resize( numMeshEntries_ );
+	flux_.resize( numMeshEntries_ );
 	for ( unsigned int i = 0; i < numMeshEntries_; ++i ) {
 		S_[i].resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
 		Sinit_[i].resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0);
 		y_[i].resize( numVarPools_, 0.0 );
+		flux_[i].resize( numVarPools_, 0.0 );
 	}
 
+	diffConst_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
 	compartment_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0 );
 	species_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0 );
 	rates_.resize( numReac_ );
@@ -653,6 +656,20 @@ void Stoich::updateDiffusion(
 	}
 }
 
+void Stoich::clearFlux( unsigned int meshIndex )
+{
+	vector< double >& f = flux_[meshIndex];
+
+	for ( vector< double >::iterator j = f.begin(); j != f.end(); ++j)
+		*j = 0.0;
+}
+
+void Stoich::clearFlux()
+{
+	for ( unsigned int i = 0; i < flux_.size(); ++i )
+		clearFlux( i );
+}
+
 // Put in a similar updateVals() function to handle Math expressions.
 // Might update molecules, possibly even reac rates at some point.
 
@@ -740,9 +757,14 @@ int Stoich::innerGslFunc( double t, const double* y, double* yprime,
 
 	updateV( meshIndex, v );
 
-		// Much scope for optimization here.
+	// updateDiffusion happens in the previous Process Tick, coordinated
+	// by the MeshEntries. At this point the new values are there in the
+	// flux_ matrix.
+
+	// Much scope for optimization here.
+	const vector< double >& f = flux_[ meshIndex ];
 	for (unsigned int i = 0; i < numVarPools_; i++) {
-		*yprime++ = N_.computeRowRate( i , v );
+		*yprime++ = N_.computeRowRate( i , v ) + f[i];
 	}
 	// cout << t << ": " << y[0] << ", " << y[1] << endl;
 	return GSL_SUCCESS;

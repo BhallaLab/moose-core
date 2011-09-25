@@ -154,7 +154,116 @@ static void rtReplicateModels()
 	cout << "." << flush;
 }
 
+/**
+ * The analytical solution for 1-D diffusion is:
+ * 		c(x,t) = ( c0 / 2 / sqrt(PI.D.t) ).exp(-x^2/(4Dt)
+ * c0 is the total amount of stuff.
+ * In these sims the total amount is 1 uM conc in 1 compartment.
+ */
+double 
+	checkDiff( const vector< double >& conc, double D, double t, double dx)
+{
+	// static const double scaleFactor = sqrt( PI * D );
+	// 
+	const double scaleFactor = 0.5 * dx;
+	int mid = conc.size() / 2;
+	double err = 0;
+
+	for ( unsigned int j = 0; j < conc.size(); ++j ) {
+		int i = static_cast< int >( j );
+		double x = ( i - mid ) * dx;
+		double y = scaleFactor * 
+			( 1.0 / sqrt( PI * D * t ) ) * exp( -x * x / ( 4 * D * t ) );
+		//assert( doubleApprox( conc[j], y ) );
+		// cout << endl << t << "	" << j << ":	" << y << "	" << conc[j];
+		err += ( y - conc[j] ) * ( y - conc[j] );
+	}
+	return sqrt( err );
+	cout << endl;
+}
+
+static void testDiff1D()
+{
+	// Diffusion length in mesh entries
+	static const unsigned int diffLength = 41; 
+	static const double dt = 0.01;
+	static const double dx = 0.5e-6;
+	static const double D = 1e-12;
+
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< unsigned int > dims( 1, 1 );
+
+	Id kinetics = shell->doCreate( "Neutral", Id(), "kinetics", dims );
+	Id a = shell->doCreate( "Pool", kinetics, "a", dims );
+	assert( a != Id() );
+	bool ret = Field< double >::set( a, "diffConst", D );
+	assert( ret );
+
+	Id compt = shell->doCreate( "CubeMesh", kinetics, "compartment", dims );
+	// Set it to 20 microns long, 1 micron in y and z.
+	vector< double > coords( 9, dx );
+	coords[0] = coords[1] = coords[2] = 0;
+	coords[3] = diffLength * dx;
+
+	ret = Field< bool >::set( compt, "preserveNumEntries", false );
+	assert( ret );
+	ret = Field< vector< double > >::set( compt, "coords", coords );
+	assert( ret );
+	Id mesh( "/kinetics/compartment/mesh" );
+	assert( mesh != Id() );
+	assert( mesh.element()->dataHandler()->localEntries() == diffLength );
+	MsgId mid = shell->doAddMsg( "OneToOne", a, "requestSize",
+		mesh, "get_size" );
+	assert( mid != Msg::badMsg );
+
+	shell->handleReMesh( mesh );
+	// This should assign the same init conc to the new pool objects.
+	assert( a.element()->dataHandler()->localEntries() == diffLength );
+
+	Id stoich = shell->doCreate( "Stoich", kinetics, "stoich", dims );
+
+	Field< string >::set( stoich, "path", "/kinetics/##" );
+
+	dims[0] = diffLength;
+	Id gsl = shell->doCreate( "GslIntegrator", stoich, "gsl", dims );
+	ret = SetGet1< Id >::setRepeat( gsl, "stoich", stoich );
+	assert( ret );
+	ret = Field< bool >::get( gsl, "isInitialized" );
+	assert( ret );
+
+	ret = SetGet1< Id >::set( compt, "stoich", stoich );
+	assert( ret );
+	
+
+	Field< double >::set( ObjId( a, diffLength/2 ), "concInit", 1 );
+
+    shell->doSetClock( 0, dt );
+    shell->doSetClock( 1, dt );
+    shell->doSetClock( 2, dt );
+    shell->doSetClock( 3, 0 ); 
+
+    shell->doUseClock( "/kinetics/compartment/mesh", "process", 0 ); 
+    shell->doUseClock( "/kinetics/stoich/gsl", "process", 1 ); 
+    // shell->doUseClock( plotpath, "process", 2 ); 
+    shell->doReinit();
+
+	for ( unsigned int i = 0; i < 10; ++i ) {
+		shell->doStart( 1 );
+		vector< double > conc;
+		Field< double >::getVec( a, "conc", conc );
+		assert( conc.size() == diffLength );
+		double ret = checkDiff( conc, D, i + 1, dx );
+		// cout << "root sqr Error on t = " << i + 1 << " = " << ret << endl;
+		assert ( ret < 0.01 );
+	}
+
+	shell->doDelete( kinetics );
+
+	cout << "." << flush;
+}
+
 void rtReacDiff()
 {
 	rtReplicateModels();
+	testDiff1D();
 }

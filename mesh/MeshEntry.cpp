@@ -154,7 +154,7 @@ MeshEntry::MeshEntry( const ChemMesh* parent )
  */
 void MeshEntry::process( const Eref& e, ProcPtr info )
 {
-	parent_->updateDiffusion( e.index().data() );
+	parent_->updateDiffusion( e.index().field() );
 }
 
 void MeshEntry::reinit( const Eref& e, ProcPtr info )
