@@ -54,6 +54,7 @@ void ZombieBufPool::zombify( Element* solver, Element* orig )
 
 	z->setN( zer, 0, m->getN() );
 	z->setNinit( zer, 0, m->getNinit() );
+	z->setDiffConst( zer, 0, m->getDiffConst() );
 	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
 	orig->zombieSwap( zombieBufPoolCinfo, dh );
 }

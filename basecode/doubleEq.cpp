@@ -24,7 +24,7 @@ bool doubleEq( double x, double y )
 bool doubleApprox( double x, double y )
 {
 	double denom = fabs( x ) + fabs( y );
-	if ( denom < EPS2 )
-		denom = EPS2;
+	if ( denom < EPS1 )
+		denom = EPS1;
 	return ( fabs( x - y ) / denom ) < EPS3;
 }
