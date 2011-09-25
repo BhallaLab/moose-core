@@ -15533,5 +15533,17 @@ times when the gradients are steepest.
 I'm a little concerned about the start/stop process, if it mangles time.
 Anyway, set this up to do a silent test for the root square error using
 dt = 0.01 and 41 segments of 0.5 microns each.
+Note that the long-time calculations will also build up error due to the 
+edge effects of the finite diffusion volume.
 
+Try moving input point to edge. This should let us compute the falloff using
+fewer points, important in higher dimensions. 
+This works. The error even starts out smaller.
+
+For n dimensions, we have:
+
+c(x,t) = { c0 / ((4.PI.D.t)^(n/2)) }.exp(-x^2/(4Dt)
+where x is a vector now. Let's try it.
+
+First pass: set it up with 1 D in a corner. Works.
 ============================================================================
