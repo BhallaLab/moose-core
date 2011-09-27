@@ -656,6 +656,8 @@ void CubeMesh::innerSetNumEntries( unsigned int n )
 
 void CubeMesh::buildStencil()
 {
+	for ( unsigned int i = 0; i < stencil_.size(); ++i )
+		delete stencil_[i];
 	stencil_.resize( 0 );
 	Stencil* s = 0;
 	if ( nx_ > 1 && ny_ == 1 && nz_ == 1 )
