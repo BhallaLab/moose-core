@@ -15567,4 +15567,17 @@ Setting up stencil classes. Still to do 3-D. Nearly ready to try.
 
 Stencil Class implemented, clears regression test in 2D. Checkin 2997.
 Extended tests. Now clears regression tests in 1, 2 and 3D. Checkin 2998.
+
+Minor fix for includes. Checkin 2999. Also confirmed it runs on 8 and 16
+threads.
+
+I now need something testable for reaction-diffusion.
+The keywords "analytical solution reaction-diffusion" yield 49 hits on PubMed.
+Number 3 and 5 and possibly 9 and 14 look OK. There is also the 
+calcium diffusion paper (ref 20) of Mironova and Mironov in BiophysJ 2008.
+
+Not able to get something analytic right away. Made a little ad-hoc reaction
+and set up initial conditions to produce what should be a distinctive output.
+Output seems reasonable.
+
 ============================================================================

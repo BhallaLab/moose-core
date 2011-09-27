@@ -8,6 +8,8 @@
 **********************************************************************/
 
 #include <fstream>
+#include <iostream>
+#include <iomanip>
 #include "header.h"
 #include "Shell.h"
 #include "../kinetics/ReadCspace.h"
@@ -393,6 +395,131 @@ static void testDiffNd( unsigned int n )
 	cout << "." << flush;
 }
 
+static void testReacDiffNd( unsigned int n )
+{
+	static const bool doPrint = 0;
+	// Diffusion length in mesh entries
+	static const unsigned int cubeSide = 10; 
+	static const double dt = 0.01;
+	static const double dx = 0.5e-6;
+	static const double D1 = 1e-12;
+	static const double D2 = 1e-13;
+	static const double D3 = 1e-13;
+
+	unsigned int vol = cubeSide;
+
+	if ( n == 2 ) 
+		vol *= cubeSide;
+
+	if ( n == 3 ) 
+		vol *= cubeSide * cubeSide;
+
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< unsigned int > dims( 1, 1 );
+
+	ReadCspace rc;
+	Id kinetics = rc.readModelString( "|AabX|Jacb| 1 1 1 0.01 0.1 1 1",
+		"kinetics", Id(), "Neutral" );
+
+	// Id kinetics = shell->doCreate( "Neutral", Id(), "kinetics", dims );
+	// Id a = shell->doCreate( "Pool", kinetics, "a", dims );
+	Id a( "/kinetics/a" );
+	assert( a != Id() );
+	Id b( "/kinetics/b" );
+	assert( b != Id() );
+	Id c( "/kinetics/c" );
+	assert( c != Id() );
+	bool ret = Field< double >::set( a, "diffConst", D1 );
+	assert( ret );
+	ret = Field< double >::set( b, "diffConst", D2 );
+	assert( ret );
+	ret = Field< double >::set( c, "diffConst", D3 );
+	assert( ret );
+
+	// Id compt = shell->doCreate( "CubeMesh", kinetics, "compartment", dims );
+	Id compt( "/kinetics/compartment" );
+	// Set it to cubeSide mesh divisions in each dimension, dx in each.
+	vector< double > coords( 9, dx );
+	coords[0] = coords[1] = coords[2] = 0;
+	coords[3] = cubeSide * dx;
+	if ( n >= 2 )
+		coords[4] = cubeSide * dx;
+	if ( n == 3 )
+		coords[5] = cubeSide * dx;
+
+	ret = Field< bool >::set( compt, "preserveNumEntries", false );
+	assert( ret );
+	ret = Field< vector< double > >::set( compt, "coords", coords );
+	assert( ret );
+	Id mesh( "/kinetics/compartment/mesh" );
+	assert( mesh != Id() );
+	assert( mesh.element()->dataHandler()->localEntries() == vol );
+	MsgId mid = shell->doAddMsg( "OneToOne", a, "requestSize",
+		mesh, "get_size" );
+	assert( mid != Msg::badMsg );
+
+	shell->handleReMesh( mesh );
+	// This should assign the same init conc to the new pool objects.
+	assert( a.element()->dataHandler()->localEntries() == vol );
+
+	Id stoich = shell->doCreate( "Stoich", kinetics, "stoich", dims );
+
+	Field< string >::set( stoich, "path", "/kinetics/##" );
+
+	dims[0] = vol;
+	Id gsl = shell->doCreate( "GslIntegrator", stoich, "gsl", dims );
+	ret = SetGet1< Id >::setRepeat( gsl, "stoich", stoich );
+	assert( ret );
+	ret = Field< bool >::get( gsl, "isInitialized" );
+	assert( ret );
+
+	ret = SetGet1< Id >::set( compt, "stoich", stoich );
+	assert( ret );
+	
+	Field< double >::setRepeat( a, "concInit", 0 );
+	Field< double >::setRepeat( b, "concInit", 0 );
+	Field< double >::setRepeat( c, "concInit", 0 );
+
+	Field< double >::set( ObjId( a, 0 ), "concInit", 50 );
+
+	Field< double >::set( ObjId( c, (cubeSide + 1 ) * cubeSide / 2 ), "concInit", 10 );
+
+	// Field< double >::set( ObjId( b, cubeSide - 1 ), "concInit", 1 );
+
+    shell->doSetClock( 0, dt );
+    shell->doSetClock( 1, dt );
+    shell->doSetClock( 2, dt );
+    shell->doSetClock( 3, 0 ); 
+
+    shell->doUseClock( "/kinetics/compartment/mesh", "process", 0 ); 
+    shell->doUseClock( "/kinetics/stoich/gsl", "process", 1 ); 
+    // shell->doUseClock( plotpath, "process", 2 ); 
+    shell->doReinit();
+
+	if ( doPrint )
+		cout << setprecision( 3 ) << setiosflags( ios::fixed ) << endl;
+	for ( unsigned int i = 0; i < 4; ++i ) {
+		shell->doStart( 1 );
+		vector< double > conc;
+		Field< double >::getVec( b, "conc", conc );
+		assert( conc.size() == vol );
+		if ( doPrint ) {
+			for ( unsigned int j = 0; j < cubeSide; ++j ) {
+				for ( unsigned int k = 0; k < cubeSide; ++k )
+					cout << conc[ j * cubeSide + k ] << " ";
+				cout << endl;
+			}
+			cout << endl;
+		}
+	}
+	if ( doPrint )
+		cout << setprecision( 6 );
+
+	shell->doDelete( kinetics );
+
+	cout << "." << flush;
+}
+
 void rtReacDiff()
 {
 	rtReplicateModels();
@@ -400,4 +527,6 @@ void rtReacDiff()
 	testDiffNd( 1 );
 	testDiffNd( 2 );
 	testDiffNd( 3 );
+
+	testReacDiffNd( 2 );
 }
