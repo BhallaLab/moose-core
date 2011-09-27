@@ -10,6 +10,7 @@
 #include "header.h"
 #include "Boundary.h"
 #include "MeshEntry.h"
+#include "Stencil.h"
 #include "ChemMesh.h"
 #include "CubeMesh.h"
 
@@ -656,25 +657,22 @@ void CubeMesh::innerSetNumEntries( unsigned int n )
 void CubeMesh::buildStencil()
 {
 	stencil_.resize( 0 );
-	double middle = 0;
-	if ( nx_ > 1 ) {
-		double invdxsq = 1.0 / ( dx_ * dx_ );
-		stencil_.push_back( pair< int, double >( -1, invdxsq ) );
-		stencil_.push_back( pair< int, double >( 1, invdxsq ) );
-		middle = -2 * invdxsq;
-	}
-	if ( ny_ > 1 ) {
-		double invdysq = 1.0 / ( dy_ * dy_ );
-		stencil_.push_back( pair< int, double >( -nx_, invdysq ) );
-		stencil_.push_back( pair< int, double >( nx_, invdysq ) );
-		middle += -2 * invdysq;
-	}
-	if ( nz_ > 1 ) {
-		double invdzsq = 1.0 / ( dz_ * dz_ );
-		stencil_.push_back( pair< int, double >( -nx_*ny_, invdzsq ) );
-		stencil_.push_back( pair< int, double >( nx_*ny_, invdzsq ) );
-		middle += -2 * invdzsq;
-	}
-	stencil_.push_back( pair< int, double >( 0, middle ) );
+	Stencil* s = 0;
+	if ( nx_ > 1 && ny_ == 1 && nz_ == 1 )
+		s = new LineStencil( dx_ );
+	else if ( nx_ == 1 && ny_ > 1 && nz_ == 1 )
+		s = new LineStencil( dy_ );
+	else if ( nx_ == 1 && ny_ == 1 && nz_ > 1 )
+		s = new LineStencil( dz_ );
+	else if ( nx_ > 1 && ny_ > 1 && nz_ == 1 )
+		s = new RectangleStencil( dx_, dy_, nx_ );
+	else if ( nx_ > 1 && ny_ == 1 && nz_ > 1 )
+		s = new RectangleStencil( dx_, dz_, nx_ );
+	else if ( nx_ == 1 && ny_ > 1 && nz_ > 1 )
+		s = new RectangleStencil( dy_, dz_, ny_ );
+	else if ( nx_ > 1 && ny_ > 1 && nz_ > 1 )
+		s = new CuboidStencil( dx_, dy_, dz_, nx_, ny_ );
+
+	stencil_.push_back( s );
 }
 

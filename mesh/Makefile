@@ -15,6 +15,7 @@ OBJ = \
 	CylMesh.o	\
 	CubeMesh.o	\
 	Boundary.o	\
+	Stencil.o	\
 	testMesh.o	\
 
 HEADERS = \
@@ -29,6 +30,7 @@ Boundary.o:	Boundary.h
 ChemMesh.o:	ChemMesh.h MeshEntry.h Boundary.h ../ksolve/RateTerm.h ../ksolve/FuncTerm.h ../ksolve/KinSparseMatrix.h ../ksolve/Stoich.h
 CylMesh.o:	ChemMesh.h CylMesh.h MeshEntry.h Boundary.h
 CubeMesh.o:	ChemMesh.h CubeMesh.h MeshEntry.h Boundary.h
+Stencil.o:	Stencil.h
 testMesh.o:	MeshEntry.h ChemMesh.h CylMesh.h Boundary.h
 
 .cpp.o:

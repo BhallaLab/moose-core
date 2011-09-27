@@ -20,5 +20,6 @@ class MathFunc;
 class Stoich;
 #include "../kinetics/Pool.h"
 #include "../kinetics/lookupSizeFromMesh.h"
+#include "../mesh/Stencil.h"
 #include "Port.h"
 #include "Stoich.h"
