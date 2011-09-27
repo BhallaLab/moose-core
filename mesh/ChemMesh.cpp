@@ -122,7 +122,12 @@ ChemMesh::ChemMesh()
 }
 
 ChemMesh::~ChemMesh()
-{ ; }
+{ 
+	for ( unsigned int i = 0; i < stencil_.size(); ++i ) {
+		if ( stencil_[i] )
+			delete stencil_[i];
+	}
+}
 
 //////////////////////////////////////////////////////////////
 // MsgDest Definitions

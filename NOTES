@@ -15565,5 +15565,6 @@ Setting up stencil classes. Still to do 3-D. Nearly ready to try.
 ============================================================================
 27 Sep 2011
 
-Stencil Class implemented, clears regression test in 2D.
+Stencil Class implemented, clears regression test in 2D. Checkin 2997.
+Extended tests. Now clears regression tests in 1, 2 and 3D.
 ============================================================================
