@@ -15545,5 +15545,25 @@ For n dimensions, we have:
 c(x,t) = { c0 / ((4.PI.D.t)^(n/2)) }.exp(-x^2/(4Dt)
 where x is a vector now. Let's try it.
 
-First pass: set it up with 1 D in a corner. Works.
+First pass: set it up with 1 D in a corner. Works. Checkin 2995.
+
+Then: try with 2D. Fails. Looks like a stencil error; that is, seems like
+molecules are spilling over to the wrong parts of the pool mesh. Particularly
+at boundaries.
+
+OK, stencils it is. in Stoich::updateDiffusion, need to check
+differently for boundaries, in 2 and 3-D diffusion.
+
+Rather than do the stencil checks in Stoich::updateDiffusion,
+should define Stencil as a more sophisticated class and have it
+internally return the appropriate index to use.
+
+============================================================================
+26 Sep
+Setting up stencil classes. Still to do 3-D. Nearly ready to try.
+
+============================================================================
+27 Sep 2011
+
+Stencil Class implemented, clears regression test in 2D.
 ============================================================================

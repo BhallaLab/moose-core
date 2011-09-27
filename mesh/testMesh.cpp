@@ -11,6 +11,7 @@
 #include "../shell/Shell.h"
 #include "Boundary.h"
 #include "MeshEntry.h"
+#include "Stencil.h"
 #include "ChemMesh.h"
 #include "CylMesh.h"
 #include "CubeMesh.h"

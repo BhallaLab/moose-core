@@ -27,6 +27,7 @@
 #include "ZombieEnz.h"
 #include "ZombieMMenz.h"
 #include "ZombieSumFunc.h"
+#include "../mesh/Stencil.h"
 
 #include "../shell/Shell.h"
 
@@ -633,6 +634,18 @@ void Stoich::updateFuncs( double t, unsigned int meshIndex )
 	}
 }
 
+/////////////////////////////////////////////////////////////////
+// 
+/////////////////////////////////////////////////////////////////
+void Stoich::updateDiffusion( 
+	unsigned int meshIndex, const vector< const Stencil* >& stencil)
+{
+	for ( unsigned int i = 0; i < stencil.size(); ++i ) {
+		stencil[i]->addFlux( meshIndex, flux_[meshIndex], S_, diffConst_ );
+	}
+}
+
+/*
 void Stoich::updateDiffusion( 
 	unsigned int meshIndex, const vector< pair< int, double > >& stencil)
 {
@@ -643,7 +656,7 @@ void Stoich::updateDiffusion(
 			index = meshIndex + offset;
 		} else if ( index >= static_cast< int >( numMeshEntries_ ) ) { 
 			// use mirror entry.
-			index = meshIndex + offset;
+			index = meshIndex - offset;
 		}
 		vector< double >& f = flux_[meshIndex];
 		if ( index >= 0 && index < static_cast< int >( numMeshEntries_  )) {
@@ -655,6 +668,7 @@ void Stoich::updateDiffusion(
 		}
 	}
 }
+*/
 
 void Stoich::clearFlux( unsigned int meshIndex )
 {

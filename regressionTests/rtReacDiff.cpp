@@ -276,9 +276,13 @@ double checkNdimDiff( const vector< double >& conc, double D, double t,
 {
 	const double scaleFactor = pow( dx, n); 
 	double err = 0;
+	unsigned int dimY = 1;
+	unsigned int dimZ = 1;
+	if ( n >= 2 ) dimY = cubeSide;
+	if ( n == 3 ) dimZ = cubeSide;
 
-	for ( unsigned int i = 0; i < 1; ++i ) {
-		for ( unsigned int j = 0; j < 1; ++j ) {
+	for ( unsigned int i = 0; i < dimZ; ++i ) {
+		for ( unsigned int j = 0; j < dimY; ++j ) {
 			for ( unsigned int k = 0; k < cubeSide; ++k ) {
 				double x = k * dx;
 				double y = j * dx;
@@ -287,7 +291,7 @@ double checkNdimDiff( const vector< double >& conc, double D, double t,
 				unsigned int index = ( i * cubeSide + j ) * cubeSide + k;
 				double c = scaleFactor * pow( 4 * PI * D * t, -n/2 ) * 
 					exp( -rsq / ( 4 * D * t ) );
-				cout << endl << t << "	(" << i << "," << j << "," << k  << "), r= " << rsq << "	" << c << "	" << conc[index];
+				// cout << endl << t << "	(" << i << "," << j << "," << k  << "), r= " << rsq << "	" << c << "	" << conc[index];
 				err += ( c - conc[index] ) * ( c - conc[index] );
 			}
 		}
@@ -301,9 +305,18 @@ static void testDiff3D()
 {
 	// Diffusion length in mesh entries
 	static const unsigned int cubeSide = 15; 
-	static const double dt = 0.1;
+	static const double dt = 0.01;
 	static const double dx = 0.5e-6;
 	static const double D = 1e-12;
+	static unsigned int n = 2; // Number of dimensions.
+
+	unsigned int vol = cubeSide;
+
+	if ( n == 2 ) 
+		vol *= cubeSide;
+
+	if ( n == 3 ) 
+		vol *= cubeSide * cubeSide;
 
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	vector< unsigned int > dims( 1, 1 );
@@ -319,8 +332,10 @@ static void testDiff3D()
 	vector< double > coords( 9, dx );
 	coords[0] = coords[1] = coords[2] = 0;
 	coords[3] = cubeSide * dx;
-	// coords[4] = cubeSide * dx;
-	// coords[5] = cubeSide * dx;
+	if ( n >= 2 )
+		coords[4] = cubeSide * dx;
+	if ( n == 3 )
+		coords[5] = cubeSide * dx;
 
 	ret = Field< bool >::set( compt, "preserveNumEntries", false );
 	assert( ret );
@@ -328,20 +343,20 @@ static void testDiff3D()
 	assert( ret );
 	Id mesh( "/kinetics/compartment/mesh" );
 	assert( mesh != Id() );
-	assert( mesh.element()->dataHandler()->localEntries() == cubeSide );
+	assert( mesh.element()->dataHandler()->localEntries() == vol );
 	MsgId mid = shell->doAddMsg( "OneToOne", a, "requestSize",
 		mesh, "get_size" );
 	assert( mid != Msg::badMsg );
 
 	shell->handleReMesh( mesh );
 	// This should assign the same init conc to the new pool objects.
-	assert( a.element()->dataHandler()->localEntries() == cubeSide );
+	assert( a.element()->dataHandler()->localEntries() == vol );
 
 	Id stoich = shell->doCreate( "Stoich", kinetics, "stoich", dims );
 
 	Field< string >::set( stoich, "path", "/kinetics/##" );
 
-	dims[0] = cubeSide;
+	dims[0] = vol;
 	Id gsl = shell->doCreate( "GslIntegrator", stoich, "gsl", dims );
 	ret = SetGet1< Id >::setRepeat( gsl, "stoich", stoich );
 	assert( ret );
@@ -368,8 +383,8 @@ static void testDiff3D()
 		shell->doStart( 1 );
 		vector< double > conc;
 		Field< double >::getVec( a, "conc", conc );
-		assert( conc.size() == cubeSide );
-		double ret = checkNdimDiff( conc, D, i + 1, dx, 1, cubeSide );
+		assert( conc.size() == vol );
+		double ret = checkNdimDiff( conc, D, i + 1, dx, n, cubeSide );
 		cout << "root sqr Error on t = " << i + 1 << " = " << ret << endl;
 		// assert ( ret < 0.01 );
 	}
