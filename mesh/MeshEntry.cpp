@@ -11,6 +11,7 @@
 #include "ElementValueFinfo.h"
 #include "MeshEntry.h"
 #include "Boundary.h"
+#include "Stencil.h"
 #include "ChemMesh.h"
 
 const Cinfo* MeshEntry::initCinfo()
