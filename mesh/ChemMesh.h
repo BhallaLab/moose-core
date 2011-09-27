@@ -117,7 +117,7 @@ class ChemMesh
 		 * mesh elements to set up the diffusion du/dt term, using the
 		 * method of lines.
 		 */
-		vector< pair< int, double > > stencil_;
+		vector< const Stencil* > stencil_;
 	private:
 		MeshEntry entry_; /// Wrapper for self ptr
 

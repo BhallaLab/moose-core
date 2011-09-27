@@ -10,6 +10,7 @@
 #include "header.h"
 #include "Boundary.h"
 #include "MeshEntry.h"
+#include "Stencil.h"
 #include "ChemMesh.h"
 #include "../ksolve/StoichHeaders.h"
 
