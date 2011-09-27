@@ -258,7 +258,7 @@ static void testDiff1D()
 		Field< double >::getVec( a, "conc", conc );
 		assert( conc.size() == diffLength );
 		double ret = checkDiff( conc, D, i + 1, dx );
-		cout << "root sqr Error on t = " << i + 1 << " = " << ret << endl;
+//		cout << "root sqr Error on t = " << i + 1 << " = " << ret << endl;
 		assert ( ret < 0.01 );
 	}
 
@@ -301,14 +301,13 @@ double checkNdimDiff( const vector< double >& conc, double D, double t,
 }
 
 
-static void testDiff3D()
+static void testDiffNd( unsigned int n )
 {
 	// Diffusion length in mesh entries
 	static const unsigned int cubeSide = 15; 
-	static const double dt = 0.01;
+	static const double dt = 0.02;
 	static const double dx = 0.5e-6;
 	static const double D = 1e-12;
-	static unsigned int n = 2; // Number of dimensions.
 
 	unsigned int vol = cubeSide;
 
@@ -385,8 +384,8 @@ static void testDiff3D()
 		Field< double >::getVec( a, "conc", conc );
 		assert( conc.size() == vol );
 		double ret = checkNdimDiff( conc, D, i + 1, dx, n, cubeSide );
-		cout << "root sqr Error on t = " << i + 1 << " = " << ret << endl;
-		// assert ( ret < 0.01 );
+		// cout << n << "dimensions: root sqr Error on t = " << i + 1 << " = " << ret << endl;
+		assert ( ret < 0.005 );
 	}
 
 	shell->doDelete( kinetics );
@@ -398,5 +397,7 @@ void rtReacDiff()
 {
 	rtReplicateModels();
 	testDiff1D();
-	testDiff3D();
+	testDiffNd( 1 );
+	testDiffNd( 2 );
+	testDiffNd( 3 );
 }
