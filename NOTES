@@ -15578,6 +15578,106 @@ calcium diffusion paper (ref 20) of Mironova and Mironov in BiophysJ 2008.
 
 Not able to get something analytic right away. Made a little ad-hoc reaction
 and set up initial conditions to produce what should be a distinctive output.
-Output seems reasonable.
+Output seems reasonable. Checkin 3000.
+
+Some release notes:
+This is MOOSE beta 1.4.0. At this point MOOSE has been used in several large
+network and multiscale research simulations and this beta release is primarily
+one for refinement of the current code framework. This beta release sees
+many GUI developments including:
+Run-time visualization and interaction GUI for cell models in 3D
+Run-time visualization and interaction GUI for signaling models
+Improved layout of the GUI, with a convenient Simulation Control Toolbar.
+This beta release also has simulator core object developments including:
+Efield object used in simulating field and EEG electrodes, ported from GENESIS
+PulseGen enhanced with arbitrary numbers of levels, delays, and width.
+Classes added to support stochastic synapses with short-term plasticity.
+Hsolve updates for better single-neuron and network modeling.
+
+This is likely to be the final beta release, and following this MOOSE will
+switch over to a new code base which supports multithreading and MPI. 
+Thus the next development cycle will be a release-candidate whose main
+focus will be to replicate the current features on the new code base.
+
+============================================================================
+28 Sep 2011
+Working now on the update to DataIds. From the notes from 10 Sep:
+
+- Have a single long as the DataId
+- The DataHandler knows its own indices
+- For nested arrays foo[i]/bar[j], the DataId for bar has a portion that
+	identifies i, and a portion for j. Should any operation require access
+	to foo[i] as the parent, we can extract i.
+	- This is recursive.
+	- This applies both to regular nested Elements, and also to 
+		FieldElements like synapses
+	- Implementation decision: should I bitmap it or modulo it?
+	- As before, ragged arrays are permitted but we require knowledge
+		of the max# entries of the ragged dimension(s)
+
+- For Synapses and similar FieldElement classes, the parent and child
+	DataHandlers need to be able to refer to each other.
+	- Also it is possible as before for the actual data to be stored on
+	the parent, and the FieldDataHandler just does a lookup from parent.
+
+- Iterators march through DataId, prompted as before by DataHandlers.
+
+- Thread blocks are linear chunks, except for FieldElements, where they
+	are referred to parent blocking.
+
+- Node blocks likewise.
+
+Use cases. Here the DataId description applies to the last portion of the path.
+Note that the last entry could be a fieldElement or a regular Element:
+no distinction in the DataId, only in what the DataHandlers do with it.
+
+Path				DataId		bitOffset	numBits
+/foo				0		0		0
+/foo[23]			23		0		5
+/foo/bar[23]			23		0		5
+/foo[23]/bar			23		5		0
+/foo[23]/bar[55]		55*32		5		6
+/foo[23][55]			55*32		0		11
+/foo[23][55]/bar[10]		10*64*32	11		4
+/foo[23]/bar[55]/zod[10]	10*64*32	11		4
+/foo[23]/bar/zod[55][10]	10*64*32	5		10
+
+An essential part of this design is that the Id+DataId is a unique identifier,
+but it is not complete until it matches up with the Element and its DataHandler.
+The Id+DataId part will uniquely specify any given object, but the 
+dimensionality of self and parent have to come from the DataHandler and Element.
+
+Note that the DataId of the parent can easily be extracted from the DataId
+and the bitOffset. Just blank out everything beyond the bitOffset.
+
+Discussed with Subha. He points out that if we have a sparse occupation of
+the indices, we may run out of space. Here is an example worst case: a highly
+detailed spine model set in a single highly detailed neuron model set in a
+large coarse-grained network of neurons:
+1e7 neurons:		23 bits
+1e3 compartments:	10 bits
+1e3 mol species:	10 bits
+1e9 molecules:		30 bits
+			-------
+			73 bits
+
+So, in principle, it is possible to occupy more space than a long long provides.
+For now we'll start with a long long (64 bits) as the DataId.
+
+
+
+
+Valgrind reports a problem with setRepeat on Ids. Added a unit test in
+testAsync, and confirmed it. Turns out to be an issue with Conv< T > where
+T is a class whose size is smaller than a double. Basically the memcpy tries
+to copy out memory in chunks of doubles, which is 8 bytes. Valgrind flags this
+because it is copying part of the field from unknown sources. I wonder
+if there is a way to tell templates to do something different 
+if sizeof( T ) < 8. It seems I've instead just brute-forced it for
+int, short, bool etc. Should do the same for Id. Done.
+The memory leak is gone but there is a nagging valgrind complaint about an
+uninitialized value, which I though I had fixed. Perhaps just needs a 
+recompile. This takes over half an hour to run, so let's set it off again
+some other time.
 
 ============================================================================
