@@ -631,6 +631,63 @@ template<> class Conv< bool >
 		double val_;
 };
 
+/**
+ * The template specialization of Conv< Id > sets up alignment on
+ * word boundaries by storing the Id as a double. It also deals with 
+ * the string conversion issues.
+ */
+template<> class Conv< Id >
+{
+	public:
+		Conv( const double* buf )
+		{
+			assert( buf );
+			val_ = *buf;
+		}
+
+		/// Constructor uses implicit conversion of bool to double.
+		Conv( const Id& arg )
+			: val_( arg.value() )
+		{;}
+
+		/**
+		 * This is the size used in the serialized form.
+		 */
+		unsigned int size() const
+		{
+			return 1;
+		}
+
+		const double* ptr() const
+		{
+			return &val_;
+		}
+
+		const Id operator*() const {
+			return Id( static_cast< unsigned int >( val_ ) );
+		}
+
+		unsigned int val2buf( double* buf ) const {
+			*buf = val_;
+			return 1;
+		}
+
+		static void str2val( Id& val, const string& s ) {
+			Id temp( s ); // converts the path
+			val = temp.value();
+		}
+
+		static void val2str( string& s, const Id& val ) {
+			s = val.path();
+		}
+
+		static string rttiType() {
+			return "Id";
+		}
+	private:
+		double val_;
+};
+
 template<> class Conv< PrepackedBuffer >
 {
 	public:
