@@ -858,6 +858,39 @@ void testFastGet()
 	cout << "." << flush;
 }
 
+class TestId {
+	public :
+		void setId( Id id ) {
+			id_ = id;
+		}
+		Id getId() const {
+			return id_;
+		}
+		static const Cinfo* initCinfo();
+	private :
+		Id id_ ;
+};
+// Here we test setRepeat using an Id field. This test is added
+// because of a memory leak problem that cropped up much later.
+const Cinfo* TestId::initCinfo()
+{
+		static ValueFinfo< TestId, Id > id(
+			"id",
+			"test",
+			&TestId::setId,
+			&TestId::getId
+		);
+		static Finfo* testIdFinfos[] = {&id};
+		static Cinfo testIdCinfo(
+			"TestIdRepeatAssignment",
+			Neutral::initCinfo(),
+			testIdFinfos,
+			sizeof( testIdFinfos )/ sizeof( Finfo* ),
+			new Dinfo< TestId >()
+		);
+		return &testIdCinfo;
+}
+
 void testSetRepeat()
 {
 	const Cinfo* ic = IntFire::initCinfo();
@@ -903,7 +936,15 @@ void testSetRepeat()
 				123.0 ) );
 		}
 	}
+
+	Id tid = Id::nextId();
+	Element* tel = new Element( tid, TestId::initCinfo(), "tid", dims, 1 );
+	assert( tel );
+	ret = Field< Id >::setRepeat( tid, "id", i2 );
+	assert( ret );
+
 	cout << "." << flush;
+	delete tid();
 	delete i3();
 	delete i2();
 }

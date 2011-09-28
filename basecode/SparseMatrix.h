@@ -186,11 +186,17 @@ template < class T > class SparseMatrix
 		unsigned int getRow( unsigned int row, 
 			const T** entry, const unsigned int** colIndex ) const
 		{
-			if ( row >= nrows_ )
+			if ( row >= nrows_ ) {
+				entry = 0;
+				colIndex = 0;
 				return 0;
+			}
 			unsigned int rs = rowStart_[row];
-			if ( rs >= N_.size() )
+			if ( rs >= N_.size() ) {
+				entry = 0;
+				colIndex = 0;
 				return 0;			
+			}
 			*entry = &( N_[ rs ] );
 			*colIndex = &( colIndex_[rs] );
 			return rowStart_[row + 1] - rs;
