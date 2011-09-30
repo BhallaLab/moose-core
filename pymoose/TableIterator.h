@@ -29,7 +29,7 @@ namespace pymoose
         }
         bool __hasNext__()
         {
-            if (next_ <= table_->__get_xdivs())
+            if (next_ < table_->__len__())
                 return true;
             else
                 return false;            
