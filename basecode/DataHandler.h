@@ -20,7 +20,7 @@
 class DataHandler
 {
 	public:
-		DataHandler( const DinfoBase* dinfo );
+		DataHandler( const DinfoBase* dinfo, bool isGlobal );
 
 		/**
 		 * The respective DataHandler subclasses should also provide
@@ -35,71 +35,13 @@ class DataHandler
 		 */
 		virtual ~DataHandler();
 
-		/**
-		 * Converts handler to its global version, where the same data is
-		 * present on all nodes. Ignored if already global.
-		 * Returns a newly allocated DataHandler, the old one remains.
-		 */
-		virtual DataHandler* globalize() const = 0;
-
-		/**
-		 * Converts handler to its local version, where the data is 
-		 * partitioned between nodes based on the load balancing policy.
-		 * Returns a newly allocated DataHandler, the old one remains.
-		 */
-		virtual DataHandler* unGlobalize() const = 0;
-
-		/**
-		 * Determines how to decompose data among nodes for specified size
-		 * Returns true if there is a change from the current configuration
-		 * Does NOT touch actual allocation.
-		 * This form of the function is just a front-end for the inner
-		 * function, as this talks to the Shell object to find node info.
-		 */
-		bool nodeBalance( unsigned int size );
-
-		/**
-		 * Determines how to decompose data among nodes for specified size
-		 * Returns true if there is a change from the current configuration
-		 * Does NOT touch actual allocation.
-		 * This inner function is self-contained and is independent of the
-		 * Shell. Each subclass of DataHandler has to supply this.
-		 */
-		virtual bool innerNodeBalance( unsigned int size, 
-			unsigned int myNode, unsigned int numNodes ) = 0;
-
-		/**
-		 * Copies to another DataHandler. If the source is global and
-		 * the dest is non-global, it does a selective copy of data
-		 * contents only for the entries on current node.
-		 * Otherwise it copies everthing over.
-		 */
-		virtual DataHandler* copy( bool toGlobal) const = 0;
-
-		/**
-		 * Copies DataHandler dimensions but uses new Dinfo to allocate
-		 * contents and handle new data. Useful when making zombie copies.
-		 * This does not need the toGlobal flag as the zombies are always
-		 * located identically to the original.
-		 */
-		virtual DataHandler* copyUsingNewDinfo( 
-			const DinfoBase* dinfo ) const = 0;
-
-		/**
-		 * Version 2: Copy same dimensions but different # of entries.
-		 * The copySize is the total number of targets, 
-		 * here we need to figure out
-		 * what belongs on the current node.
-		 */
-		virtual DataHandler* copyExpand( 
-			unsigned int copySize, bool toGlobal ) const = 0;
-
-		/**
-		 * Version 3: Add another dimension when doing the copy.
-		 * Here too we figure out what is to be on current node for copy.
-		 */
-		virtual DataHandler* copyToNewDim( 
-			unsigned int newDimSize, bool toGlobal ) const = 0;
+/////////////////////////////////////////////////////////////////////////
+// Information functions.
+/////////////////////////////////////////////////////////////////////////
+		const DinfoBase* dinfo() const
+		{
+			return dinfo_;
+		}
 
 		/**
 		 * Returns the data on the specified index.
@@ -112,12 +54,6 @@ class DataHandler
 		 * the FieldDataHandler; in all other cases it returns self.
 		 */
 		virtual const DataHandler* parentDataHandler() const;
-
-		/**
-		 * Goes through all the data resident on the local node, using
-		 * threading info from the ProcInfo
-		 */
-		virtual void process( const ProcInfo* p, Element* e, FuncId fid ) const = 0;
 
 		/**
 		 * Returns the number of data entries in the whole object,
@@ -140,18 +76,6 @@ class DataHandler
 		virtual unsigned int localEntries() const = 0;
 
 		/**
-		 * Returns a single number corresponding to the DataId.
-		 * Usually it is just the data part of the DataId, but it gets
-		 * interesting for the FieldDataHandler.
-		 */
-		virtual unsigned int linearIndex( const DataId& d ) const;
-
-		/**
-		 * Returns the DataId corresponding to a single index.
-		 */
-		virtual DataId dataId( unsigned int linearIndex) const;
-
-		/**
 		 * Returns the number of dimensions of the data.
 		 * 0 if there is a single entry.
 		 * 1 if it is a 1-D array
@@ -165,42 +89,6 @@ class DataHandler
 		 * If 'dim' is greater than the number of dimensions, returns zero.
 		 */
 		virtual unsigned int sizeOfDim( unsigned int dim ) const = 0;
-
-		/**
-		 * Reallocates data. Data not preserved unless same # of dims
-		 * Returns 0 if it cannot handle the requested allocation.
-		 */
-		virtual bool resize( vector< unsigned int > dims ) = 0;
-
-		/**
-		 * Reallocates field data. This uses the object-specific resize
-		 * function, so we don't know what happens to old data.
-		 * Most objects dont' care about this. It is used by the
-		 * FieldDataHandler.
-		 */
-		virtual void setFieldArraySize(
-			unsigned int objectIndex, unsigned int size );
-
-		/**
-		 * Looks up size of field data. Most objects don't have applicable
-		 * fields, and return zero. The FieldDataHandlers use it.
-		 */
-		virtual unsigned int getFieldArraySize( 
-			unsigned int objectIndex ) const;
-
-		/**
-		 * Access functions for the FieldDimension. Applicable for 
-		 * FieldDataHandlers, which typically manage a ragged array of 
-		 * field vectors, belonging to each object in the data array.
-		 * The FieldDimension provides a consistent range for indexing
-		 * into this ragged array, and it must be bigger than any of the
-		 * individual object array sizes.
-		 * non FieldDataHandlers return 0 as the dimension and ignore
-		 * the 'setFieldDimension' call.
-		 */
-		virtual void setFieldDimension( unsigned int size );
-		virtual unsigned int getFieldDimension() const;
-
 
 		 /**
 		  * Returns vector of dimensions.
@@ -221,7 +109,105 @@ class DataHandler
 		/**
 		 * True if the data is global on all nodes
 		 */
-		virtual bool isGlobal() const = 0;
+		bool isGlobal() const {
+			return isGlobal_;
+		}
+
+/////////////////////////////////////////////////////////////////////////
+// Load balancing functions
+/////////////////////////////////////////////////////////////////////////
+
+		/**
+		 * Determines how to decompose data among nodes for specified size
+		 * Returns true if there is a change from the current configuration
+		 * Does NOT touch actual allocation.
+		 * This form of the function is just a front-end for the inner
+		 * function, as this talks to the Shell object to find node info.
+		 */
+		bool nodeBalance( unsigned int size );
+
+		/**
+		 * Determines how to decompose data among nodes for specified size
+		 * Returns true if there is a change from the current configuration
+		 * Does NOT touch actual allocation.
+		 * This inner function is self-contained and is independent of the
+		 * Shell. Each subclass of DataHandler has to supply this.
+		 */
+		virtual bool innerNodeBalance( unsigned int size, 
+			unsigned int myNode, unsigned int numNodes ) = 0;
+/////////////////////////////////////////////////////////////////////////
+// Process function
+/////////////////////////////////////////////////////////////////////////
+		/**
+		 * Goes through all the data resident on the local node, using
+		 * threading info from the ProcInfo
+		 */
+		virtual void process( const ProcInfo* p, Element* e, FuncId fid ) const = 0;
+
+/////////////////////////////////////////////////////////////////////////
+// Data reallocation and copy functions
+/////////////////////////////////////////////////////////////////////////
+
+		/**
+		 * Sets state of DataHandler to be global, using the incoming data
+		 * to fill it in. 
+		 * These manipulations are done in-line, that is, the 
+		 * DataHandler itself is retained.
+		 */
+		virtual void globalize( const char* data, unsigned int numEntries )
+			= 0;
+
+		/**
+		 * Sets state of DataHandler to be local. Discards and frees data
+		 * if needed.
+		 * These manipulations are done in-line, that is, the 
+		 * DataHandler itself is retained.
+		 */
+		virtual void unGlobalize() = 0;
+
+		/**
+		 * Copies self, creating a new DataHandler. If n is 0 or 1 it
+		 * just makes a duplicate of original.
+		 * If n > 1 then it adds a dimension and replicates the original
+		 * n times.
+		 * If the source is global and
+		 * the dest is non-global, it does a selective copy of data
+		 * contents only for the entries on current node.
+		 * Otherwise it copies everything over.
+		 */
+		virtual DataHandler* copy( bool toGlobal, unsigned int n ) const =0;
+
+		/**
+		 * Copies DataHandler dimensions but uses new Dinfo to allocate
+		 * contents and handle new data. Useful when making zombie copies.
+		 * This does not need the toGlobal flag as the zombies are always
+		 * located identically to the original.
+		 */
+		virtual DataHandler* copyUsingNewDinfo( 
+			const DinfoBase* dinfo ) const = 0;
+
+		/**
+		 * Change the number of entries on the specified dimension. 
+		 * Return true if OK.
+		 * Does NOT change number of dimensions.
+		 */
+		virtual bool resize( unsigned int dimension, unsigned int numEntries) = 0;
+
+		/**
+		 * Copy over the original chunk of data to fill the entire data.
+		 * If the size doesn't match, use tiling. 
+		 * If the target is not global, use the tiling that would result
+		 * in the consolidated data matching the global version.
+		 * In other words, if we were to assign a chunk of data to a
+		 * non-global target on all nodes, and then globalize the target,
+		 * it should have the same contents as if we had assigned the
+		 * chunk of data to a global.
+		 */
+		virtual void assign( const char* orig, unsigned int numOrig ) = 0;
+
+/////////////////////////////////////////////////////////////////////////
+// Iterator class and functions
+/////////////////////////////////////////////////////////////////////////
 
 		/**
 		 * This class handles going through all data objects in turn.
@@ -229,63 +215,76 @@ class DataHandler
 		class iterator {
 			public: 
 				iterator( const iterator& other )
-					: dh_( other.dh_ ), index_( other.index_ ),
-					linearIndex_( other.linearIndex_ )
+					: dh_( other.dh_ ), index_( other.index_ ), 
+					data_( other.data_ )
 				{;}
 
-				iterator( const DataHandler* dh, const DataId& index,
-					unsigned int linearIndex )
+				iterator( const DataHandler* dh, const DataId& index )
 					: 
 						dh_( dh ), 
 						index_( index ),
-						linearIndex_( linearIndex )
+						data_( dh->data( index ) )
+				{;}
+
+				/// Failsafe to indicate end.
+				iterator()
+					: 
+						dh_( 0 ),
+					  index_( 0 ),
+					  data_( 0 )
 				{;}
 
 				/**
-				 * This is the DataId index of this entry, completely
-				 * specifying both the object index and the field index.
+				 * This is the DataId index of this entry
 				 */
-				DataId index() const {
+				DataId dataId() const {
 					return index_;
 				}
-				
-				/**
-				 * This provides the linear index of this entry.
-				 * If one were to iterate through all the entries and
-				 * count how many have passed, this would be the linear
-				 * index. With the exception of the FieldDataHandler
-				 * and other possible ragged array structures. In these
-				 * cases the linear index jumps.
-				 */
-				unsigned int linearIndex() const {
-					return linearIndex_;
-				}
 
-				// This does prefix increment.
+				/**
+				 * This does prefix increment.
+				 * Both the dh->sizeOfDim(0) and dh->dinfo()->size() calls
+				 * could be removed if they are slowing things down 
+				 * significantly.
+				 */
 				iterator operator++() {
-					dh_->nextIndex( index_, linearIndex_ );
+					if ( index_.increment( dh_->sizeOfDim( 0 ) ) ) {
+						dh_->rolloverIncrement( this );
+					} else {
+						data_ += dh_->dinfo()->size();
+					}
 					return *this;
 				}
 
 				// Bizarre C++ convention to tell it to do postfix increment
 				iterator operator++( int ) {
-					dh_->nextIndex( index_, linearIndex_ );
+					if ( index_.increment( dh_->sizeOfDim( 0 ) ) ) {
+						dh_->rolloverIncrement( this );
+					} else {
+						data_ += dh_->dinfo()->size();
+					}
 					return *this;
 				}
 
 				bool operator==( const iterator& other ) const
 				{
-					return ( index_ == other.index_ && dh_ == other.dh_ );
+				//	return ( index_ == other.index_ && dh_ == other.dh_ );
+					return ( data_ == other.data_ );
 				}
 
 				bool operator!=( const iterator& other ) const
 				{
-					return ( index_ != other.index_ || dh_ != other.dh_ );
+					// return ( index_ != other.index_ || dh_ != other.dh_ );
+					return ( data_ != other.data_ );
 				}
 
-				char* operator* () const
+				char* data() const
 				{
-					return dh_->data( index_ );
+					return data_;
+				}
+
+				void endit() {
+					data_ = 0;
 				}
 
 			private:
@@ -297,60 +296,30 @@ class DataHandler
 				 */
 				DataId index_;
 
-				/**
-				 * This field tracks the current linear index, which is
-				 * an unrolled integer index
-				 */
-				unsigned int linearIndex_;
+				char* data_;
 		};
 
 		/**
 		 * Iterator start point for going through all objects in the 
 		 * DataHandler.
 		 */
-		virtual iterator begin() const = 0;
+		virtual iterator begin( ThreadId threadNum ) const = 0;
 
 		/**
 		 * Iterator end point for going through all objects in the 
 		 * DataHandler.
 		 */
-		virtual iterator end() const = 0;
-
-		const DinfoBase* dinfo() const
-		{
-			return dinfo_;
-		}
+		virtual iterator end( ThreadId threadNum ) const = 0;
 
 		/**
-		 * Assigns block of data, which is a slice of 0 to n dimensions,
-		 * in a data handler of n dimensions. The block of data is a 
-		 * contiguous block in memory, and contains 'numData' objects in
-		 * the range starting at 'startIndex'.
-		 * The vector form of the function first converts the index
-		 * into the linear form.
-		 * Returns true if the assignment succeeds. In other words,
-		 * numData + startIndex should be less than size.
-		 * Does not do any memory allocation.
-		 * If the Handler is doing node decomposition, then this function
-		 * takes the full data array, and picks out of it only those
-		 * fields that belong on current node.
-		 * Some Handlers handle ragged arrays. The DataBlock is defined
-		 * to be a cuboid, so it is up to the Handler to select the
-		 * appropriate subset of the cuboid to use.
+		 * The iterator has just maxed out on the lowest dimension. Now
+		 * do a rollover (carry-over) to the next dimension, if any.
+		 * If completed, return end();
 		 */
-		virtual bool setDataBlock( 
-			const char* data, unsigned int numData,
-			const vector< unsigned int >& startIndex ) const = 0;
+		virtual void rolloverIncrement( iterator* i ) const = 0;
 
-		virtual bool setDataBlock( 
-			const char* data, unsigned int numData,
-			DataId startIndex ) const = 0;
-
-		/**
-		 * Used to march through the entries in this DataHandler
-		 */
-		virtual void nextIndex( 
-			DataId& index, unsigned int& linearIndex ) const = 0;
+	protected:
+		bool isGlobal_;
 
 	private:
 		const DinfoBase* dinfo_;

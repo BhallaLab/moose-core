@@ -15635,12 +15635,31 @@ Path				DataId		bitOffset	numBits
 /foo				0		0		0
 /foo[23]			23		0		5
 /foo/bar[23]			23		0		5
-/foo[23]/bar			23		5		0
-/foo[23]/bar[55]		55*32		5		6
-/foo[23][55]			55*32		0		11
-/foo[23][55]/bar[10]		10*64*32	11		4
-/foo[23]/bar[55]/zod[10]	10*64*32	11		4
-/foo[23]/bar/zod[55][10]	10*64*32	5		10
+/foo[23]/bar (bar has 1 entry)	23		0		0
+/foo[23]/bar[55]		55+(2^6)*23	0		6
+/foo[23][55]			55+(2^6)*23?	0		11
+/foo[23][55]/bar[10]		10+(2^4)*55+(2^10)*23
+						0		4
+/foo[23]/bar[55]/zod[10]	10 + (2^4)*55 + (2^10)*23
+						0		4
+/foo[23]/bar/zod[55][10]	10 + (2^4)*55 + (2^10)*23
+						0		10
+
+One possible change is to have multidimensional arrays at any level just
+be linear internally, using modulo arithmetic. In other words each level has
+a single bitmask of its own, and figures out what to do internally. Lookup
+will be faster this way. Also more compact. Then it would be:
+
+Path				DataId				numBits
+/foo				0				0
+/foo[23]			23				5
+/foo/bar[23]			23				5
+/foo[23]/bar (bar has 1 entry)	23				0
+/foo[23]/bar[55]		55+(2^6)*23			6
+/foo[23][55]			55+max*23			11 or whatever
+/foo[23][55]/bar[10]		10+(2^4) * (55+max*23)		4
+/foo[23]/bar[55]/zod[10]	10 + (2^4)*55 + (2^10)*23	4
+/foo[23]/bar/zod[55][10]	10+max*55 + (2^10)*23		10
 
 An essential part of this design is that the Id+DataId is a unique identifier,
 but it is not complete until it matches up with the Element and its DataHandler.
@@ -15664,7 +15683,111 @@ large coarse-grained network of neurons:
 So, in principle, it is possible to occupy more space than a long long provides.
 For now we'll start with a long long (64 bits) as the DataId.
 
+Implementing DataHandler::iterator, we run into some more issues:
+- What is begin()? If we assume that each DataHandler deals with the entire
+data block it should be DataId( 0 ). Block and thread decomposition can use
+this as a base.
+- What is end()? Again, if we assume the DataHandler deals with the entire data
+block, then even a ZeroDimHandler has to know the full hierarchy of sizes and
+indices of everything that is above it. I don't want to have such a dependence,
+there will be all sorts of synchronization issues when we change mesh sizes and
+the like.
+	This implies we want to split up the ZeroDimHandlers.
+	Consider Element zod in: /foo[0..25]/bar[0..60]/zod[0..14]
+	- Assume that there is a single Id referring to all the various indices
+	up to and including the one on zod itself.
+	- Should Element Zod handle different DataHandlers, so that each one 
+	is [0..14]? We would then be stuck trying to iterate through the 
+	whole set, as they wouldn't know about each other.
+	- This is effectively like a higher-order DataHandler. Looks like 
+	a mirror of the Element tree using MetaDataHandlers. This is 
+	bad if we want rapid field access from DataId.
 
+	Suppose Element zod in: /foo[0..25]/bar[0..60]/zod[0..14] is just
+	one of 25*60 such Elements, each with a unique Id. In other words,
+	the DataId now only needs to supply its lowest few bits for the local
+	lookup. Why bother then about the other bits? But, this gets rid of
+	the utility of making all elements ArrayElements.
+
+	Consider this tree: /foo[0..25]/bar[0..60]/zod[0..14].
+	- Let there be a single foo Element, with a OneDimHandler of 25 entries.
+	- Let there be 25 bar Elements, each with a OneDimHandler of 60 entries.
+		Or could even be a ragged array.
+	- Let there be 60 zod Elements on each bar element; a total of 1500.
+		Each has a OneDimDataHandler of 14 entries..
+	
+	Now we access /foo[11]/bar[12]/zod[13]
+	From the path, we come to an Id for the appropriate zod. It is actually
+	/foo/bar[11]/zod[12]. Hideous.
+	This zod has a DataHandler with 14 entries, and we pick entry 13.
+
+	Suppose Element zod is actually a FieldElement. Here we do need the
+	next level up for getting at parent Element index. We would use
+	/foo/bar[11] for the Id, and then the DataId would provide the lowest
+	index of 13, and the parent one is 12.
+
+In other words, the main change would be in having multiple Elements with the
+	same name but different indices.
+
+	Another option: DataId contains two parts: a full bitmapped index,
+	and a linear index. There is only one Element with a given name,
+	regardless of the indexing up and down.
+	- Lookup of data will be fast through the linear index.
+	- If we have FieldElements we can extract the field index fast, 
+	and the linearIndex will refer to the index of the parent data handler.
+	(This looks a lot like the current system).
+	- If we need to generate the full path we can use the bitmapped part
+	of the index and traverse it.
+	Problems with this:
+		- How do we generate a DataId? 
+			Iterators in Process: here the linearIndex is known
+			Paths: here the bitmapped index is known
+			Messages: Typically bitmapped.
+		- Should we make the DataHandlers map rather closely to the
+			Element indexing? In other words, not a solid block
+			but instead multidimensional arrays?
+			- Slower lookup as it will always need the bitmaps.
+			- Profusion of Handlers?
+		- How do we make sure the two stay in sync? 
+			Could do JustInTime and leave a flag for the unknown one
+			to be computed only when needed.
+		- It is ugly for the Element path stuff to be coming from the
+			DataId. But no other way once Elements abdicate indexing
+		- Same issues as before arise with traversal. Do we do 
+			traversal by marching through parent Elements? 
+			How do we do that? We would need Elements to get the 
+			parent DataHandlers.
+		- LinearIndex is volatile, changes if the element tree changes.
+		- What do we do with ragged arrays?
+			This would be the responsibility of the Data Handlers.
+			It gets messy for linearIndex.
+			- The combination of linearIndex and bitmapped Index
+				helps for the lowest level of indexing.
+			- It gets rather nasty if there is a ragged array up 
+				high on the tree. Fast lookup is hard either
+				way, but bitmaps less so.
+			- We currently don't even address this issue. We
+				assume a very flat tree structure.
+		- Should we redo the DataHandler::iterator to directly return
+			the relevant data ptr, and act on this? It would
+			address several of the speed concerns.
+		- Lacking a linear index, how do we do node and thread 
+			decomposition?
+		- Have a nested DataHandler structure to deal with the various
+			possible cases?
+			- Zero
+			- One
+			- Two
+			- Nested
+			No, won't work. Will instead have to do vector
+
+
+Summary: 
+	- Stick with proposed design for bitmapped unsigned long long DataId.
+	- Write DataHandlers to deal with matching indexing to the Elements, 
+		preferably minimum number of DataHandler classes.
+	- Provide a data ptr incremented within the DataHandler::iterator for
+		fast data access, much faster than dereferencing the DataId.
 
 
 Valgrind reports a problem with setRepeat on Ids. Added a unit test in
@@ -15678,6 +15801,16 @@ int, short, bool etc. Should do the same for Id. Done.
 The memory leak is gone but there is a nagging valgrind complaint about an
 uninitialized value, which I though I had fixed. Perhaps just needs a 
 recompile. This takes over half an hour to run, so let's set it off again
-some other time.
+some other time. 
+Checkin 3002.
 
+============================================================================
+29 Sep 2011. Trying to do whole compile. Stuck in Element.cpp.
+============================================================================
+30 Sep 2011. Slowly going through compile. Lots of design issues came up and
+were resolved in doing so. Have now cleared the ZeroDimHandler.cpp, many more
+to come.
+
+Compiled OneDimHandler.cpp except for the last function in it, 
+rolloverIncrement.
 ============================================================================

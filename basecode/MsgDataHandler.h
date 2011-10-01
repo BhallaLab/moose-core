@@ -31,7 +31,7 @@ class MsgDataHandler: public DataHandler
 		/**
 		 * Make a single copy
 		 */
-		DataHandler* copy( bool toGlobal ) const;
+		DataHandler* copy( bool toGlobal, unsigned int n ) const;
 
 		/**
 		 * Make a single copy with same dimensions, using a different Dinfo
@@ -92,9 +92,9 @@ class MsgDataHandler: public DataHandler
 
 		bool isGlobal() const;
 
-		iterator begin() const;
+		iterator begin( ThreadId threadNum ) const;
 
-		iterator end() const;
+		iterator end( ThreadId threadNum ) const;
 
 		/**
 		 * Assigns a block of data at the specified location.

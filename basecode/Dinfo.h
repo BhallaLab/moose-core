@@ -22,13 +22,23 @@ class DinfoBase
 		virtual unsigned int size() const = 0;
 
 		/**
+		 * Return a newly allocated copy of the original data, repeated 
+		 * copyEntries times. Orig data untouched.
 		 * Analogous to copying a vector into a bigger one. Repeat the
 		 * original data as many times as possible.
-		 * Destroys old data and allocates new.
-		 * returns new data.
 		 */
-		virtual char* copyData( const char* orig, unsigned int origSize,
-			unsigned int copySize ) const = 0;
+		virtual char* copyData( const char* orig, unsigned int origEntries,
+			unsigned int copyEntries ) const = 0;
+
+		/**
+		 * Assigns data contents from 'orig' over to 'copy'. Tiles the
+		 * origEntries onto the copyEntries. So if there are fewer 
+		 * origEntries, the orig data contents are repeated till the
+		 * copy is full.
+		 */
+		virtual void assignData( char* copy, unsigned int copyEntries,
+			const char* orig, unsigned int origEntries ) const = 0;
+
 		/*
 		static unsigned int size( const D* value ) const = 0;
 		static unsigned int serialize( char* buf, const Data* d ) const = 0;
@@ -51,17 +61,17 @@ template< class D > class Dinfo: public DinfoBase
 				return reinterpret_cast< char* >( new( nothrow) D[ numData ] );
 		}
 
-		char* copyData( const char* orig, unsigned int origSize,
-			unsigned int copySize ) const
+		char* copyData( const char* orig, unsigned int origEntries,
+			unsigned int copyEntries ) const
 		{
-			if ( origSize == 0 )
+			if ( origEntries == 0 )
 				return 0;
-			D* ret = new( nothrow ) D[copySize];
+			D* ret = new( nothrow ) D[copyEntries];
 			if ( !ret )
 				return 0;
 			const D* origData = reinterpret_cast< const D* >( orig );
-			for ( unsigned int i = 0; i < copySize; ++i ) {
-				ret[ i ] = origData[ i % origSize ];
+			for ( unsigned int i = 0; i < copyEntries; ++i ) {
+				ret[ i ] = origData[ i % origEntries ];
 			}
 
 			/*
@@ -74,6 +84,22 @@ template< class D > class Dinfo: public DinfoBase
 			}
 			*/
 			return reinterpret_cast< char* >( ret );
+		}
+
+		void assignData( char* data, unsigned int copyEntries,
+			const char* orig, unsigned int origEntries ) const
+		{
+			if ( origEntries == 0 || copyEntries == 0 ||
+				orig == 0 || data == 0 ) {
+				return;
+			}
+			for ( unsigned int i = 0; i < copyEntries; i+= origEntries ) {
+				unsigned int numCopies = origEntries;
+				if ( copyEntries - i < origEntries )
+					numCopies = copyEntries - i;
+
+				memcpy( data, orig, sizeof( D ) * numCopies );
+			}
 		}
 
 		void destroyData( char* d ) const {

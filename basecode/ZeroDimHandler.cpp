@@ -11,17 +11,25 @@
 
 #include "../shell/Shell.h"
 
-ZeroDimHandler::ZeroDimHandler( const DinfoBase* dinfo )
-	: ZeroDimGlobalHandler( dinfo )
-{;}
-
-ZeroDimHandler::ZeroDimHandler( const ZeroDimHandler* other )
-	: ZeroDimGlobalHandler( other->dinfo() )
+ZeroDimHandler::ZeroDimHandler( const DinfoBase* dinfo, bool isGlobal )
+	: DataHandler( dinfo, isGlobal )
 {
-	if ( Shell::myNode() == 0 )
-		data_ = dinfo()->copyData( other->data_, 1, 1 );
+	if ( isGlobal_ || Shell::myNode() == 0 )
+		data_ = dinfo->allocData( 1 );
 	else
 		data_ = 0;
+}
+
+ZeroDimHandler::ZeroDimHandler( const ZeroDimHandler* other )
+	: DataHandler( other->dinfo(), other->isGlobal() )
+{
+	if ( isGlobal_ || Shell::myNode() == 0 ) {
+		data_ = dinfo()->allocData( 1 ); 
+		if ( other->data_ )
+			dinfo()->assignData( data_, 1, other->data_, 1 );
+	} else {
+		data_ = 0;
+	}
 }
 
 ZeroDimHandler::~ZeroDimHandler()
@@ -29,15 +37,31 @@ ZeroDimHandler::~ZeroDimHandler()
 	// The base class ZeroDimGlobalHandler does the destruction.
 }
 
-DataHandler* ZeroDimHandler::globalize() const
-{
-	return 0;
+///////////////////////////////////////////////////////////////////////
+// Information functions
+///////////////////////////////////////////////////////////////////////
+
+char* ZeroDimHandler::data( DataId index ) const {
+	return data_;
 }
 
-DataHandler* ZeroDimHandler::unGlobalize() const
-{
-	return new ZeroDimHandler( this );
+unsigned int ZeroDimHandler::localEntries() const {
+	return ( data_ != 0 );
 }
+
+vector< unsigned int > ZeroDimHandler::dims() const {
+	static vector< unsigned int > ret( 0 );
+	return ret;
+}
+
+bool ZeroDimHandler::isDataHere( DataId index ) const
+{
+	return ( data_ != 0 );
+}
+
+///////////////////////////////////////////////////////////////////////
+// Load balancing
+///////////////////////////////////////////////////////////////////////
 
 bool ZeroDimHandler::innerNodeBalance( unsigned int size,
 	unsigned int myNode, unsigned int numNodes )
@@ -45,57 +69,15 @@ bool ZeroDimHandler::innerNodeBalance( unsigned int size,
 	return 0;
 }
 
-DataHandler* ZeroDimHandler::copy( bool toGlobal ) const
-{
-	// If we want to copy to a global, the DataHandler should first
-	// itself become a global, then make the copy.
-	assert( !toGlobal ); 
-	return ( new ZeroDimHandler( this ) );
-}
-
-DataHandler* ZeroDimHandler::copyUsingNewDinfo( 
-	const DinfoBase* dinfo) const
-{
-	ZeroDimHandler* ret = new ZeroDimHandler( dinfo );
-	if ( isDataHere( DataId( 0, 0 ) ) )
-		ret->data_ = dinfo->allocData( 1 );
-	return ret;
-}
-
-DataHandler* ZeroDimHandler::copyExpand( unsigned int copySize, 
-	bool toGlobal ) const
-{
-	// If we want to copy to a global, the DataHandler should first
-	// itself become a global, then make the copy.
-	assert( !toGlobal ); 
-
-	OneDimHandler* ret = new OneDimHandler( dinfo() );
-	vector< unsigned int > dims( 1, copySize );
-	ret->resize( dims );
-	cout << Shell::myNode() << ": CopyExpand gives " << 
-		ret->localEntries() << " from " <<
-		ret->begin().index() << " to " << ret->end().index() << endl;
-	for ( iterator i = ret->begin(); i != ret->end(); ++i ) {
-		char* temp = *i;
-		memcpy( temp, data_, dinfo()->size() );
-	}
-	return ret;
-}
-
-DataHandler* ZeroDimHandler::copyToNewDim( unsigned int newDimSize,
-	bool toGlobal ) const
-{
-	return copyExpand( newDimSize, toGlobal );
-}
-
+///////////////////////////////////////////////////////////////////////
+// Process
+///////////////////////////////////////////////////////////////////////
 
 void ZeroDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 {
-	if ( Shell::myNode() == 0 && 
+	if ( isGlobal() || ( Shell::myNode() == 0 && 
 		( Shell::numProcessThreads() < 2 || 
-		( ( p->threadIndexInGroup + e->id().value() ) % Shell::numProcessThreads() ) == 0 ) ) {
-		// reinterpret_cast< Data* >( data_ )->process( p, Eref( e, 0 ) );
-
+		( ( p->threadIndexInGroup + e->id().value() ) % Shell::numProcessThreads() ) == 0 ) ) ) {
 		const OpFunc* f = e->cinfo()->getOpFunc( fid );
 		const ProcOpFuncBase* pf = dynamic_cast< const ProcOpFuncBase* >( f );
 		assert( pf );
@@ -103,61 +85,84 @@ void ZeroDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 	}
 }
 
-unsigned int ZeroDimHandler::localEntries() const {
-	return ( Shell::myNode() == 0 );
-}
+///////////////////////////////////////////////////////////////////////
+// Data reallocation and copy
+///////////////////////////////////////////////////////////////////////
 
-
-bool ZeroDimHandler::resize( vector< unsigned int > dims )
+void ZeroDimHandler::globalize( const char* data, unsigned int numEntries )
 {
-	if ( Shell::myNode() == 0 && !data_ ) {
-		data_ = dinfo()->allocData( 1 );
-	}
-	return 1;
+	if ( !data_ )
+		data_ = dinfo()->copyData( data, numEntries, 1 );
+	isGlobal_ = 1;
 }
 
-char* ZeroDimHandler::data( DataId index ) const {
-	return data_;
-}
-
-/**
- * Returns true if the node decomposition has the data on the
- * current node, or if the index explicitly states it is on any node.
- */
-bool ZeroDimHandler::isDataHere( DataId index ) const {
-	return ( Shell::myNode() == 0 || index == DataId::any() ||
-		index == DataId::globalField() );
-}
-
-bool ZeroDimHandler::isAllocated() const {
-	return data_ != 0;
-}
-
-DataHandler::iterator ZeroDimHandler::end() const
+void ZeroDimHandler::unGlobalize()
 {
-	// cout << Shell::myNode() << ": ZeroDimHandler Iterator\n";
-	// end is same as begin except on node 1.
-	unsigned int i = ( Shell::myNode() == 0 );
-	return iterator( this, i, i );
-}
+	if ( !isGlobal_ ) return;
 
-bool ZeroDimHandler::setDataBlock( 
-	const char* data, unsigned int numData, 
-	const vector< unsigned int >& startIndex ) const
-{ 
-	if ( startIndex.size() != 0 ) return 0;
-	return setDataBlock( data, numData, 0 );
-}
-
-bool ZeroDimHandler::setDataBlock( 
-	const char* data, unsigned int numData, 
-	DataId startIndex ) const
-{ 
-	if ( numData != 1 ) return 0;
-	if ( startIndex.data() != 0 ) return 0;
-	if ( !isAllocated() ) return 0;
-	if ( Shell::myNode() == 0 ) {
-		memcpy( data_, data, dinfo()->size() );
+	isGlobal_ = 0;
+	if ( Shell::myNode() != 0 ) { // Clear it out
+		dinfo()->destroyData( data_ );
+		data_ = 0;
 	}
-	return 1;
+}
+
+DataHandler* ZeroDimHandler::copy( bool toGlobal, unsigned int n ) const
+{
+	if ( toGlobal ) {
+		if ( !isGlobal() ) {
+			cout << "Warning: ZeroDimHandler::copy: Cannot copy from nonGlobal to global\n";
+			return 0;
+		}
+	}
+	if ( n > 1 ) {
+		OneDimHandler* ret = new OneDimHandler( dinfo(), toGlobal, n );
+		if ( data_ )
+			ret->assign( data_, 1 );
+		return ret;
+	} else {
+		return ( new ZeroDimHandler( this ) );
+	}
+	return 0;
+}
+
+DataHandler* ZeroDimHandler::copyUsingNewDinfo( 
+	const DinfoBase* dinfo ) const
+{
+	ZeroDimHandler* ret = new ZeroDimHandler( dinfo, isGlobal_ );
+	return ret;
+}
+
+bool ZeroDimHandler::resize( unsigned int dimension, unsigned int size )
+{
+	return 0; // Cannot resize a zero dim array!
+}
+
+void ZeroDimHandler::assign( const char* orig, unsigned int numOrig )
+{
+	if ( data_ && numOrig > 0 ) {
+		dinfo()->assignData( data_, 1, orig, 1 );
+	}
+}
+
+//////////////////////////////////////////////////////////////////////
+// Iterator functions.
+//////////////////////////////////////////////////////////////////////
+
+DataHandler::iterator ZeroDimHandler::begin( ThreadId threadNum ) const
+{
+	if ( data_ && ( threadNum + 1U == Shell::numProcessThreads() ) )
+		return iterator( this, 0 );
+	else
+		return iterator();
+}
+
+DataHandler::iterator ZeroDimHandler::end( ThreadId threadNum ) const
+{
+	return iterator();
+}
+
+void ZeroDimHandler::rolloverIncrement( DataHandler::iterator* i ) const
+{
+	i->endit();
 }

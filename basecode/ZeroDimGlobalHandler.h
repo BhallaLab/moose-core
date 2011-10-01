@@ -36,7 +36,7 @@ class ZeroDimGlobalHandler: public DataHandler
 		/**
 		 * Make a single copy
 		 */
-		DataHandler* copy( bool toGlobal ) const;
+		DataHandler* copy( bool toGlobal, unsigned int n ) const;
 
 		/**
 		 * Make a single copy with same dimensions, using a different Dinfo
@@ -76,22 +76,6 @@ class ZeroDimGlobalHandler: public DataHandler
 		}
 
 		/**
-		 * Returns a number corresponding to DataId. Since this DataHandler
-		 * does not permit any index more than zero, we return zero.
-		 */
-		unsigned int linearIndex( const DataId& d ) const {
-			return 0;
-		}
-
-		/**
-		 * Returns the DataId corresponding to the specified linear index.
-		 * Again, we return zero since that is the only legal value.
-		 */
-		DataId dataId( unsigned int linearIndex) const {
-			return DataId( 0 );
-		}
-
-		/**
 		 * Returns the number of dimensions of the data.
 		 */
 		unsigned int numDimensions() const {
@@ -121,9 +105,11 @@ class ZeroDimGlobalHandler: public DataHandler
 			return 1;
 		}
 
-		iterator begin() const;
+		iterator begin( ThreadId threadNum ) const;
 
-		iterator end() const;
+		iterator end( ThreadId threadNum ) const;
+
+		void rolloverIncrement( iterator* i ) const;
 
 		/**
 		 * Assigns a block of data at the specified location.

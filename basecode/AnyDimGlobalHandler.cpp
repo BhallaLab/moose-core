@@ -222,10 +222,23 @@ void AnyDimGlobalHandler::process( const ProcInfo* p, Element* e, FuncId fid )
 	}
 }
 
+unsigned int AnyDimGlobalHandler::linearIndex( DataId index ) const
+{
+	unsigned int lastDim = 1;
+	unsigned int convertedIndex = 0;
+	for ( unsigned int i = 0; i < dims_.size(); ++i ) {
+		convertedIndex *= lastDim;
+		unsigned int x = ( index & bitMask_[i] ) >> bitOffset_[i];
+		lastDim = dims_[i];
+		convertedIndex += x;
+	}
+	return convertedIndex;
+}
+
 char* AnyDimGlobalHandler::data( DataId index ) const
 {
 	if ( isDataHere( index ) )
-		return data_ + index.data() * dinfo()->size();
+		return data_ + linearIndex( index ) * dinfo()->size();
 	return 0;
 }
 
@@ -298,9 +311,11 @@ AnyDimGlobalHandler::iterator AnyDimGlobalHandler::end() const
 	return iterator( this, numData_, numData_ );
 }
 
+
 /**
  * Returns true if slice is legal. Passes back index of start of slice,
  * and size of slice.
+void AnyDimGlobalHandler::rolloverIncrement( iterator* i ) const;
 bool AnyDimGlobalHandler::sliceInfo( 
 	const vector< unsigned int >& slice,
 	unsigned int& sliceStart, unsigned int& sliceSize )

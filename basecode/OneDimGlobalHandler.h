@@ -29,7 +29,7 @@ class OneDimGlobalHandler: public DataHandler
 		bool innerNodeBalance( unsigned int size,
 			unsigned int myNode, unsigned int numNodes );
 
-		DataHandler* copy( bool toGlobal ) const;
+		DataHandler* copy( bool toGlobal, unsigned int n ) const;
 
 		/**
 		 * Make a single copy with same dimensions, using a different Dinfo
@@ -88,12 +88,14 @@ class OneDimGlobalHandler: public DataHandler
 		bool isGlobal() const;
 
 		iterator begin() const {
-			return iterator( this, 0, 0 );
+			return iterator( this, 0 );
 		}
 
 		iterator end() const {
-			return iterator( this, numData_, numData_ );
+			return iterator( this, numData_ );
 		}
+
+		void rolloverIncrement( iterator* i ) const;
 
 		/**
 		 * Assigns a block of data at the specified location.
