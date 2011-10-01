@@ -17,75 +17,105 @@
  * dimensions. Alternatively, it should be able to index more than 1e10
  * data entries. However, the total address space will be unlikely to exceed
  * 64 bits for a while, so one could imagine doing different kinds of
- * bitfields out of the total. For now, just provide unsigned int for each
- * of the data and field indices.
+ * bitfields out of the total.
  */
 
-class DataId {
+class DataId
+{
 	public:
-		friend ostream& operator <<( ostream& s, const DataId& d );
-		friend istream& operator >>( istream& s, DataId& d );
+		friend ostream& operator <<( ostream& s, const Id& i );
+		friend istream& operator >>( istream& s, Id& i );
+
+		/**
+		 * Default DataId is zero index
+		 */
 		DataId()
-			: data_( 0 ), field_( 0 )
+			: index_( 0 )
 		{;}
 
-		DataId( unsigned int dIndex )
-			: data_( dIndex ), field_( 0 )
+		/**
+		 * Creates a DataId with the specified index
+		 */
+		DataId( unsigned long long index )
+			: index_( index )
 		{;}
 
-		DataId( unsigned int data, unsigned int field )
-			: data_( data ), field_( field )
+		/**
+		 * Destructor. Nothing much to do here, move along.
+		 */
+		~DataId()
 		{;}
 
-		unsigned int data() const {
-			return data_;
+		unsigned long long value() const
+		{
+			return index_;
 		}
 
-		unsigned int field() const {
-			return field_;
+		/**
+		 * Returns index of local object
+		 */
+		unsigned int myIndex( unsigned int mask ) const
+		{
+			return mask & index_;
 		}
+
+		/** 
+		 * returns index of parent object
+		 */
+		unsigned int parentIndex( unsigned short bitOffset ) const
+		{
+			return index_ >> bitOffset;
+		}
+		///////////////////////////////////////////////////////////////////
+		// Increment operators, to be used mostly by DataHandler::nextIndex
+		///////////////////////////////////////////////////////////////////
+
+		DataId operator++() { // prefix
+			return ++index_;
+		}
+
+		/*
+		DataId operator++( int ) { // postfix
+			return index_++;
+		}
+		*/
+
+		/**
+		 * Increment index, and return true if there is a rollover where
+		 * the index has exceeded the range allowed.
+		 */
+		bool increment( unsigned int max ) {
+			if ( index_ >= max - 1 ) 
+				return 1;
+			++index_;
+			return 0;
+		}
+
+		///////////////////////////////////////////////////////////////////
+		// Comparison operators
+		///////////////////////////////////////////////////////////////////
 
 		bool operator==( const DataId& other ) const {
-			return ( data_ == other.data_ && field_ == other.field_ );
+			return index_ == other.index_;
 		}
 
 		bool operator!=( const DataId& other ) const {
-			return ( data_ != other.data_ || field_ != other.field_ );
+			return index_ != other.index_;
 		}
 
 		bool operator<( const DataId& other ) const {
-			return ( data_ < other.data_ || (
-				data_ == other.data_ && field_ < other.field_ ) );
+			return ( index_ < other.index_ );
 		}
 
-		void incrementDataIndex() {
-			++data_;
-		}
-
-		void rolloverFieldIndex() {
-			++data_;
-			field_ = 0;
-		}
-
-		void incrementFieldIndex() {
-			++field_;
-		}
-
-		/// Represents a bad dataId.
-		static const DataId& bad();
-
-		/// Represents any dataId: a wildcard for any data index.
-		static const DataId& any();
-
-		/// Forces the DataId to be treated as global.
-		static const DataId& globalField();
-
-		/// Returns the 'any' value to compare with data and field parts
-		static const unsigned int anyPart();
-	
+		///////////////////////////////////////////////////////////////////
+		// Predefined values
+		///////////////////////////////////////////////////////////////////
+		static const DataId bad;
+		static const DataId any;
+		static const DataId globalField;
 	private:
-		unsigned int data_;
-		unsigned int field_;
+		unsigned long long index_;
 };
+
 
 #endif // _DATAID_H

@@ -139,14 +139,17 @@ bool ZeroDimGlobalHandler::isAllocated() const {
 
 DataHandler::iterator ZeroDimGlobalHandler::begin() const
 {
-	//cout << Shell::myNode() << ": ZeroDimGlobalHandler::begin\n";
-	return iterator( this, 0, 0 );
+	return iterator( this, 0 );
 }
 
 DataHandler::iterator ZeroDimGlobalHandler::end() const
 {
-	//cout << Shell::myNode() << ": ZeroDimGlobalHandler::end\n";
-	return iterator( this, 1, 1 );
+	return iterator( this, 1 );
+}
+
+void ZeroDimGlobalHandler::nextIndex( iterator i ) const 
+{
+	return end();
 }
 
 bool ZeroDimGlobalHandler::setDataBlock(
@@ -171,11 +174,4 @@ bool ZeroDimGlobalHandler::setDataBlock(
 	if ( startIndex.data() != 0 ) return 0;
 	memcpy( data_, data, dinfo()->size() );
 	return 1;
-}
-
-void ZeroDimGlobalHandler::nextIndex( DataId& index, 
-	unsigned int& linearIndex ) const
-{
-	index.incrementDataIndex();
-	++linearIndex;
 }

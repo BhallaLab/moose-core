@@ -135,6 +135,8 @@ class AnyDimGlobalHandler: public DataHandler
 		 */
 		iterator end() const;
 
+		void rolloverIncrement( iterator* i ) const;
+
 		/**
 		 * Assigns a block of data at the specified location.
 		 * Returns true if all OK. No allocation.
@@ -145,10 +147,14 @@ class AnyDimGlobalHandler: public DataHandler
 			DataId startIndex ) const;
 
 		void nextIndex( DataId& index, unsigned int& linearIndex ) const;
+
+		unsigned int linearIndex( DataId index ) const;
 	protected:
 		char* data_;
 		unsigned int numData_;	// Number of data entries in the whole array
 		vector< unsigned int > dims_;
+		vector< short > bitOffset_;
+		vector< unsigned int > bitMask_;
 	private:
 };
 

@@ -7,27 +7,27 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _ZOMBIE_HANDLER_H
-#define _ZOMBIE_HANDLER_H
+#ifndef _TWO_DIM_HANDLER_H
+#define _TWO_DIM_HANDLER_H
 
 /**
- * This class wraps a DataHandler pointer of a solver, to be used by
- * a Zombie class. It uses zero space per zombie entry. Unlike the generic
- * DataHandlerWrapper, it assumes that the Zombie has a single entry,
- * and the Zombie has an arbitrary number of entries. The parent solver
- * data handler is never modified, though the data contents may be.
+ * This class manages the data part of Elements. It handles a one-
+ * dimensional array.
  */
-class ZombieHandler: public DataHandler
+class TwoDimHandler: public DataHandler
 {
 	public:
-		ZombieHandler( const DataHandler* parentHandler,
-			unsigned int start = 0, unsigned int end = 1 );
 
-		~ZombieHandler();
+		TwoDimHandler( const DinfoBase* dinfo, bool isGlobal, 
+			unsigned int nx, unsigned int ny );
 
-		////////////////////////////////////////////////////////////////
+		TwoDimHandler( const TwoDimHandler* other );
+
+		~TwoDimHandler();
+
+		////////////////////////////////////////////////////////////
 		// Information functions
-		////////////////////////////////////////////////////////////////
+		////////////////////////////////////////////////////////////
 
 		/// Returns data on specified index
 		char* data( DataId index ) const;
@@ -35,7 +35,9 @@ class ZombieHandler: public DataHandler
 		/**
 		 * Returns the number of data entries.
 		 */
-		unsigned int totalEntries() const;
+		unsigned int totalEntries() const {
+			return nx_ * ny_;
+		}
 
 		/**
 		 * Returns the number of data entries on local node
@@ -45,7 +47,10 @@ class ZombieHandler: public DataHandler
 		/**
 		 * Returns the number of dimensions of the data.
 		 */
-		unsigned int numDimensions() const;
+		unsigned int numDimensions() const
+		{
+			return 2;
+		}
 
 		unsigned int sizeOfDim( unsigned int dim ) const;
 
@@ -53,9 +58,9 @@ class ZombieHandler: public DataHandler
 
 		bool isDataHere( DataId index ) const;
 
-		virtual bool isAllocated() const;
-
-		bool isGlobal() const;
+		bool isAllocated() const {
+			return ( data_ != 0 );
+		}
 
 		////////////////////////////////////////////////////////////////
 		// load balancing functions
@@ -76,7 +81,6 @@ class ZombieHandler: public DataHandler
 		////////////////////////////////////////////////////////////////
 
 		void globalize( const char* data, unsigned int size );
-
 		void unGlobalize();
 
 		/**
@@ -92,7 +96,6 @@ class ZombieHandler: public DataHandler
 		bool resize( unsigned int dimension, unsigned int size );
 
 		void assign( const char* orig, unsigned int numOrig );
-
 		////////////////////////////////////////////////////////////////
 		// Iterator functions
 		////////////////////////////////////////////////////////////////
@@ -103,10 +106,15 @@ class ZombieHandler: public DataHandler
 
 		void rolloverIncrement( iterator* i ) const;
 
+
 	private:
-		const DataHandler* parent_;
-		unsigned int start_;
-		unsigned int end_;
+		unsigned int nx_;
+		unsigned int ny_;
+		unsigned int start_;	// Starting index of data, used in MPI.
+		unsigned int end_;	// Starting index of data, used in MPI.
+		char* data_;
 };
 
-#endif // _ZOMBIE_HANDLER_H
+#endif	// _TWO_DIM_HANDLER_H
+
+

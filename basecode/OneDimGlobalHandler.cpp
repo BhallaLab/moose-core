@@ -192,7 +192,8 @@ unsigned int OneDimGlobalHandler::sizeOfDim( unsigned int dim ) const
 
 char* OneDimGlobalHandler::data( DataId index ) const
 {
-	return data_ + index.data() * dinfo()->size();
+	unsigned int i = index & bitMask_;
+	return data_ + i * dinfo()->size();
 }
 
 bool OneDimGlobalHandler::innerNodeBalance( unsigned int numData,

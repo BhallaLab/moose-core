@@ -21,13 +21,11 @@ OBJ = \
 	Element.o	\
 	Qinfo.o \
 	DataHandler.o \
-	AnyDimGlobalHandler.o \
-	ZeroDimGlobalHandler.o \
-	OneDimGlobalHandler.o \
-	DataHandlerWrapper.o \
-	AnyDimHandler.o \
 	ZeroDimHandler.o \
 	OneDimHandler.o \
+	TwoDimHandler.o \
+	AnyDimHandler.o \
+	DataHandlerWrapper.o \
 	FieldDataHandlerBase.o \
 	MsgDataHandler.o \
 	ZombieHandler.o \

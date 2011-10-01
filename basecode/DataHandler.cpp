@@ -10,8 +10,9 @@
 #include "header.h"
 #include "../shell/Shell.h"
 
-DataHandler::DataHandler( const DinfoBase* dinfo )
-	: dinfo_( dinfo )
+DataHandler::DataHandler( const DinfoBase* dinfo, bool isGlobal )
+	: isGlobal_( isGlobal ),
+	dinfo_( dinfo )
 {;}
 
 DataHandler::~DataHandler()
@@ -21,42 +22,6 @@ const DataHandler* DataHandler::parentDataHandler() const
 {
 	return this;
 }
-
-void DataHandler::setFieldArraySize( 
-	unsigned int objectIndex, unsigned int size )
-{
-	; // Default operation does nothing. Used only in FieldDataHandlers.
-}
-
-unsigned int DataHandler::getFieldArraySize( unsigned int objectIndex )
-	const
-{
-	return 0; // Default operation.
-}
-
-unsigned int DataHandler::linearIndex( const DataId& d ) const
-{
-	return d.data();
-}
-
-DataId DataHandler::dataId( unsigned int i ) const
-{
-	return DataId( i );
-}
-
-/**
- * Default operations for non-FieldDataHandlers
- */
-void DataHandler::setFieldDimension( unsigned int size )
-{
-	;
-}
-
-unsigned int DataHandler::getFieldDimension() const
-{
-	return 0;
-}
-
 
 bool DataHandler::nodeBalance( unsigned int size )
 {

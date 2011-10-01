@@ -41,7 +41,7 @@ template< class Parent, class Field > class FieldDataHandler: public FieldDataHa
 		 * anyway.
 		 * Needs post-processing to substitute in the new parent.
 		 */
-		DataHandler* copy( bool toGlobal ) const
+		DataHandler* copy( bool toGlobal, unsigned int n ) const
 		{
 			FieldDataHandler< Parent, Field >* ret =
 				new FieldDataHandler< Parent, Field >( *this );

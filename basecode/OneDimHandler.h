@@ -14,88 +14,106 @@
  * This class manages the data part of Elements. It handles a one-
  * dimensional array.
  */
-class OneDimHandler: public OneDimGlobalHandler
+class OneDimHandler: public DataHandler
 {
 	friend void testOneDimHandler();
 	friend void testFieldDataHandler();
 	public:
-		OneDimHandler( const DinfoBase* dinfo );
+
+		OneDimHandler( const DinfoBase* dinfo, bool isGlobal, 
+			unsigned int size );
+
 		OneDimHandler( const OneDimHandler* other );
 
-//		~OneDimHandler();
+		~OneDimHandler();
 
-		DataHandler* globalize() const;
+		////////////////////////////////////////////////////////////
+		// Information functions
+		////////////////////////////////////////////////////////////
 
-		DataHandler* unGlobalize() const;
-
-		bool innerNodeBalance( unsigned int size, 
-			unsigned int myNode, unsigned int numNodes );
-
-		DataHandler* copy( bool toGlobal ) const;
-
-		/**
-		 * Make a single copy with same dimensions, using a different Dinfo
-		 */
-		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo ) const;
-
-		DataHandler* copyExpand( unsigned int copySize, bool toGlobal ) const;
-
-		DataHandler* copyToNewDim( unsigned int newDimSize, bool toGlobal ) const;
-
-		/**
-		 * Returns the data on the specified index.
-		 */
+		/// Returns data on specified index
 		char* data( DataId index ) const;
 
 		/**
-		 * calls process on data, using threading info from the ProcInfo,
-		 * and internal info about node decomposition.
+		 * Returns the number of data entries.
 		 */
-		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
+		unsigned int totalEntries() const;
 
 		/**
-		 * Returns the number of data entries on local node,
-		 * overriding inherited version.
+		 * Returns the number of data entries on local node
 		 */
 		unsigned int localEntries() const;
 
-		bool resize( vector< unsigned int > dims );
-
 		/**
-		 * Returns true if the node decomposition has the data on the
-		 * current node
+		 * Returns the number of dimensions of the data.
 		 */
+		unsigned int numDimensions() const
+		{
+			return 1;
+		}
+
+		unsigned int sizeOfDim( unsigned int dim ) const;
+
+		vector< unsigned int > dims() const;
+
 		bool isDataHere( DataId index ) const;
 
 		bool isAllocated() const;
 
-		bool isGlobal() const
-		{
-			return 0;
-		}
+		////////////////////////////////////////////////////////////////
+		// load balancing functions
+		////////////////////////////////////////////////////////////////
+		bool innerNodeBalance( unsigned int size,
+			unsigned int myNode, unsigned int numNodes );
 
-		iterator begin() const {
-			return iterator( this, start_, start_ );
-		}
+		////////////////////////////////////////////////////////////////
+		// Process function
+		////////////////////////////////////////////////////////////////
+		/**
+		 * calls process on data, using threading info from the ProcInfo
+		 */
+		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
 
-		iterator end() const {
-			return iterator( this, end_, end_ );
-		}
+		////////////////////////////////////////////////////////////////
+		// Data Reallocation functions
+		////////////////////////////////////////////////////////////////
+
+		void globalize( const char* data, unsigned int size );
+		void unGlobalize();
 
 		/**
-		 * Assigns a block of data at the specified location.
-		 * Returns true if all OK.
+		 * Make a single identity copy, doing appropriate node 
+		 * partitioning if toGlobal is false.
 		 */
-		bool setDataBlock( const char* data, unsigned int numData,
-			const vector< unsigned int >& startIndex ) const;
-		bool setDataBlock( const char* data, unsigned int numData,
-			DataId startIndex ) const;
+		DataHandler* copy( bool toGlobal, unsigned int n ) const;
 
-	protected:
+		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo) const;
+
+		DataHandler* addNewDimension( unsigned int size ) const;
+
+		bool resize( unsigned int dimension, unsigned int size );
+
+		void assign( const char* orig, unsigned int numOrig );
+
+		////////////////////////////////////////////////////////////////
+		// Iterator functions
+		////////////////////////////////////////////////////////////////
+
+		iterator begin( ThreadId threadNum ) const;
+
+		iterator end( ThreadId threadNum ) const;
+
+		void rolloverIncrement( iterator* i ) const;
+
 
 	private:
+		unsigned int totalEntries_; // Total number of entries on all nodes
 		unsigned int start_;	// Starting index of data, used in MPI.
 		unsigned int end_;	// Starting index of data, used in MPI.
+		char* data_;
+// 		unsigned int bitMask_; // Masks out the index.
 };
 
 #endif	// _ONE_DIM_HANDLER_H
+
+

@@ -78,20 +78,6 @@ class FieldDataHandlerBase: public DataHandler
 		unsigned int localEntries() const;
 
 		/**
-		 * Returns a single number corresponding to the DataId.
-		 * Overrides the default behaviour as we need to take into account
-		 * the dimensions for the field part of the DataId
-		 */
-		unsigned int linearIndex( const DataId& d ) const;
-
-		/**
-		 * Returns the DataId corresponding to a single index.
-		 * Overrides the default behaviour as we need to take into account
-		 * the dimensions for the field part of the DataId
-		 */
-		DataId dataId( unsigned int linearIndex) const;
-
-		/**
 		 * Returns the number of dimensions of the data.
 		 */
 		unsigned int numDimensions() const;

@@ -170,7 +170,7 @@ template< class A > class SetGet1: public SetGet
 			if ( sg.checkSet( field, tgt, fid ) ) {
 				Conv< A > conv( arg[0] );
 				unsigned int entrySize = conv.size();
-				tgt.dataId = DataId::any();
+				tgt.dataId = DataId::any;
 				double* data = new double[ entrySize * arg.size() ];
 				double* ptr = data;
 
@@ -295,7 +295,7 @@ template< class A > class Field: public SetGet1< A >
 		 */
 		static void getVec( Id dest, const string& field, vector< A >& vec)
 		{
-			ObjId tgt( dest, DataId::any() );
+			ObjId tgt( dest, DataId::any );
 			const vector< double* >* ret = innerGet( tgt, field );
 			if ( ret ) {
 				vec.resize( ret->size() );
@@ -402,7 +402,7 @@ template< class A1, class A2 > class SetGet2: public SetGet
 				Conv< A1 > conv1( arg1[0] );
 				Conv< A2 > conv2( arg2[0] );
 				unsigned int entrySize = conv1.size() + conv2.size();
-				tgt.dataId = DataId::any();
+				tgt.dataId = DataId::any;
 				double* data = new double[ entrySize * arg1.size() ];
 				double* ptr = data;
 
@@ -597,7 +597,7 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 		static void getVec( Id dest, const string& field, 
 			vector< L >& index, vector< A >& vec )
 		{
-			ObjId tgt( dest, DataId::any() );
+			ObjId tgt( dest, DataId::any );
 			const vector< double* >* ret = 
 				innerGet( tgt, field, index, ret );
 			if ( ret ) {
