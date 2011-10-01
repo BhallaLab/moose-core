@@ -26,46 +26,48 @@ Element::Element( Id id, const Cinfo* c, DataHandler* d )
 }
 
 unsigned int numDimensionsActuallyUsed( 
-	const vector< unsigned int >& dimensions )
+	const vector< int >& dimensions, unsigned int& raggedStart )
 {
 	unsigned int ret = 0;
+	raggedStart = ~(0U);
 	for ( unsigned int i = 0; i < dimensions.size(); ++i ) {
 		if ( dimensions[i] > 1 ) {
 			++ret;
-		} else {
-			break; // Do not permit high dimensions later.
+		} else if ( dimensions[i] < -1 ) {
+			++ret;
+			raggedStart = i;
 		}
 	}
 	return ret;
 }
 
 Element::Element( Id id, const Cinfo* c, const string& name, 
-	const vector< unsigned int >& dimensions, bool isGlobal )
+	const vector< int >& dimensions, bool isGlobal )
 	:	name_( name ),
 		id_( id ),
 		cinfo_( c ), 
 		group_( 0 ),
 		msgBinding_( c->numBindIndex() )
 {
-	unsigned int numRealDimensions = numDimensionsActuallyUsed( dimensions);
+	unsigned int raggedStart;
+	unsigned int numRealDimensions = numDimensionsActuallyUsed( dimensions,
+		raggedStart );
 
-	if ( numRealDimensions == 0 ) {
-		if ( isGlobal )
-			dataHandler_ = new ZeroDimGlobalHandler( c->dinfo() );
-		else
-			dataHandler_ = new ZeroDimHandler( c->dinfo() );
-	} else if ( numRealDimensions == 1 ) {
-		if ( isGlobal )
-			dataHandler_ = new OneDimGlobalHandler( c->dinfo() );
-		else
-			dataHandler_ = new OneDimHandler( c->dinfo() );	
+	if ( raggedStart == ~(0U) ) { // All clean
+		if ( numRealDimensions == 0 ) {
+			dataHandler_ = new ZeroDimHandler( c->dinfo(), isGlobal );
+		} else if ( numRealDimensions == 1 ) {
+			dataHandler_ = new OneDimHandler( c->dinfo(), isGlobal,
+				dimensions[0]);	
+		} else if ( numRealDimensions == 2 ) {
+			dataHandler_ = new TwoDimHandler( c->dinfo(), isGlobal,
+				dimensions[0], dimensions[1] );	
+		} else {
+			dataHandler_ = new AnyDimHandler( c->dinfo(), isGlobal,
+				dimensions );	
+		}
 	} else {
-		if ( isGlobal )
-			dataHandler_ = new AnyDimGlobalHandler( c->dinfo() );
-		else
-			dataHandler_ = new AnyDimHandler( c->dinfo() );	
 	}
-	dataHandler_->resize( dimensions );
 
 	id.bindIdToElement( this );
 	c->postCreationFunc( id, this );
@@ -98,9 +100,7 @@ Element::Element( Id id, const Element* orig, unsigned int n, bool toGlobal)
 		msgBinding_( orig->cinfo_->numBindIndex() )
 {
 	if ( n <= 1 ) {
-		dataHandler_ = orig->dataHandler_->copy( toGlobal );
-	} else {
-		dataHandler_ = orig->dataHandler_->copyToNewDim( n, toGlobal  );
+		dataHandler_ = orig->dataHandler_->copy( toGlobal, n );
 	}
 	id.bindIdToElement( this );
 	// cinfo_->postCreationFunc( id, this );
@@ -158,7 +158,7 @@ void Element::process( const ProcInfo* p, FuncId fid )
 void Element::addMsg( MsgId m )
 {
 	while ( m_.size() > 0 ) {
-		if ( m_.back() == Msg::badMsg )
+		if ( m_.back() == Msg::bad )
 			m_.pop_back();
 		else
 			break;
@@ -249,42 +249,9 @@ DataHandler* Element::dataHandler() const
 * Note that the resizing only works on the data dimensions, it
 * does not touch the field dimensions.
 */
-DataHandler* Element::resize( const vector< unsigned int >& dims )
+bool Element::resize( unsigned int dimension, unsigned int size )
 {
-	unsigned int numRealDimensions = numDimensionsActuallyUsed( dims );
-	if ( numRealDimensions == dataHandler_->numDimensions() ) {
-		dataHandler_->resize( dims );
-		return dataHandler_;
-	} else {
-		DataHandler* old = dataHandler_;
-		if ( numRealDimensions == 0 ) {
-			if ( old->isGlobal() )
-				dataHandler_ = new ZeroDimGlobalHandler( old->dinfo() );
-			else
-				dataHandler_ = new ZeroDimHandler( old->dinfo() );
-		} else if ( numRealDimensions == 1 ) {
-			if ( old->isGlobal() )
-				dataHandler_ = new OneDimGlobalHandler( old->dinfo() );
-			else
-				dataHandler_ = new OneDimHandler( old->dinfo() );	
-		} else {
-			if ( old->isGlobal() )
-				dataHandler_ = new AnyDimGlobalHandler( old->dinfo() );
-			else
-				dataHandler_ = new AnyDimHandler( old->dinfo() );	
-		}
-		dataHandler_->resize( dims );
-		unsigned int oldSize = old->localEntries();
-		unsigned int newSize = dataHandler_->localEntries();
-		const char* data = *( old->begin() );
-
-		unsigned int start = dataHandler_->begin().index().data(); 
-		for( unsigned int i = 0; i < newSize; i += oldSize ) {
-			dataHandler_->setDataBlock( data, oldSize, DataId( i + start ));
-		}
-		delete old;
-	}
-	return dataHandler_;
+	return dataHandler_->resize( dimension, size );
 }
 
 Id Element::id() const
@@ -305,10 +272,10 @@ void Element::exec( const Qinfo* qi, const double* arg )
 		const ObjFid *ofid = reinterpret_cast< const ObjFid* >( arg );
 		const OpFunc* f = 
 			ofid->oi.element()->cinfo()->getOpFunc( ofid->fid );
-		if ( ofid->oi.dataId == DataId::bad() )  {
+		if ( ofid->oi.dataId == DataId::bad )  {
 			return;
 		}
-		if ( ofid->oi.dataId == DataId::any() ) {
+		if ( ofid->oi.dataId == DataId::any ) {
 			// Here we iterate through the DataId, using the
 			// numEntries and entrySize of the ofid to set args.
 			Element* elm = ofid->oi.element();
@@ -318,14 +285,14 @@ void Element::exec( const Qinfo* qi, const double* arg )
 			unsigned int count = 0;
 			unsigned int offset = 0;
 			for ( DataHandler::iterator 
-				i = dh->begin(); i != dh->end(); ++i ) {
-				if ( qi->execThread( elm->id(), i.index().data() ) ) {
-					count = i.linearIndex();
-					offset = ( count % ofid->numEntries) * ofid->entrySize;
-					f->op( Eref( elm, i.index() ), qi, data + offset );
-				}
+				i = dh->begin( qi->threadNum() ); 
+					i != dh->end( qi->threadNum() ); ++i ) {
+					// count = dh->getLinearIndex( i.dataId() );
+					offset = count * ofid->entrySize;
+					++count;
+					f->op( Eref( elm, i.dataId() ), qi, data + offset );
 			}
-		} else if ( ofid->oi.isDataHere() && qi->execThread( ofid->oi.id, ofid->oi.dataId.data() ) ) {
+		} else if ( ofid->oi.isDataHere() && qi->execThread( ofid->oi.id, ofid->oi.dataId.value() ) ) {
 			f->op( ofid->oi.eref(), qi, arg + ObjFidSizeInDoubles );
 		}
 	} else {
@@ -439,7 +406,7 @@ MsgId Element::findCaller( FuncId fid ) const
 			return *i;
 		}
 	}
-	return Msg::badMsg;
+	return Msg::bad;
 }
 
 unsigned int Element::findBinding( MsgFuncBinding b ) const

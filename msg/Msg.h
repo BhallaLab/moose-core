@@ -194,7 +194,7 @@ class Msg
 		/**
 		 * The zero MsgId, used as the error value.
 		 */
-		static const MsgId badMsg;
+		static const MsgId bad;
 
 		/**
 		 * A special MsgId used for Shell to get/set values

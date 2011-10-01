@@ -14,121 +14,100 @@
  * This class manages the data part of Elements. It handles arrays of
  * any dimension.
  */
-class AnyDimHandler: public AnyDimGlobalHandler
+class AnyDimHandler: public DataHandler
 {
 	public:
-		AnyDimHandler( const DinfoBase* dinfo );
-		AnyDimHandler( const AnyDimHandler* other );
-		// ~AnyDimHandler(); Inherited.
+		AnyDimHandler( const DinfoBase* dinfo, bool isGlobal, 
+			const vector< int >& dims );
+
+		AnyDimHandler( const OneDimHandler* other );
+
+		~AnyDimHandler();
+
+		////////////////////////////////////////////////////////////
+		// Information functions
+		////////////////////////////////////////////////////////////
+
+		/// Returns data on specified index
+		char* data( DataId index ) const;
 
 		/**
-		 * Converts handler to its global version, where the same data is
-		 * present on all nodes. Ignored if already global.
-		 * returns true on success.
+		 * Returns the number of data entries.
 		 */
-		DataHandler* globalize() const;
+		unsigned int totalEntries() const;
 
 		/**
-		 * Converts handler to its local version, where the data is 
-		 * partitioned between nodes based on the load balancing policy.
-		 * This is basically a matter of figuring out data range and
-		 * deleting other stuff.
-		 * Returns true on success.
-		 */
-		DataHandler* unGlobalize() const;
-
-		/**
-		 * Determines how to decompose data among nodes for specified size
-		 * Returns true if there is a change from the current configuration
-		 */
-		bool innerNodeBalance( unsigned int size,
-			unsigned int myNode, unsigned int numNodes );
-
-		/**
-		 * For copy we won't worry about global status. 
-		 * Instead define function: globalize above.
-		 * Version 1: Just copy as original
-		 */
-		DataHandler* copy( bool toGlobal ) const;
-
-		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo ) const;
-
-		/**
-		 * Version 2: Copy same dimensions but different # of entries.
-		 * The copySize is the total number of targets, 
-		 * here we need to figure out
-		 * what belongs on the current node.
-		 */
-		DataHandler* copyExpand( unsigned int copySize, bool toGlobal ) const;
-
-		/**
-		 * Version 3: Add another dimension when doing the copy.
-		 * Here too we figure out what is to be on current node for copy.
-		 */
-		DataHandler* copyToNewDim( unsigned int newDimSize, bool toGlobal ) const;
-
-		/**
-		 * Returns the actual number of data entries used on the 
-		 * object, on current node.
+		 * Returns the number of data entries on local node
 		 */
 		unsigned int localEntries() const;
 
 		/**
-		 * Returns the data on the specified index.
+		 * Returns the number of dimensions of the data.
 		 */
-		char* data( DataId index ) const;
+		unsigned int numDimensions() const;
 
+		unsigned int sizeOfDim( unsigned int dim ) const;
+
+		vector< unsigned int > dims() const;
+
+		bool isDataHere( DataId index ) const;
+
+		bool isAllocated() const {
+			return ( data_ != 0 );
+		}
+
+		////////////////////////////////////////////////////////////////
+		// load balancing functions
+		////////////////////////////////////////////////////////////////
+		bool innerNodeBalance( unsigned int size,
+			unsigned int myNode, unsigned int numNodes );
+
+		////////////////////////////////////////////////////////////////
+		// Process function
+		////////////////////////////////////////////////////////////////
 		/**
-		 * calls process on data, using threading info from the ProcInfo,
-		 * and internal info about node decomposition.
+		 * calls process on data, using threading info from the ProcInfo
 		 */
 		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
 
-		/**
-		 * Reallocates data. Data not preserved unless same # of dims
-		 */
-		bool resize( vector< unsigned int > dims );
+		////////////////////////////////////////////////////////////////
+		// Data Reallocation functions
+		////////////////////////////////////////////////////////////////
+
+		void globalize( const char* data, unsigned int size );
+		void unGlobalize();
 
 		/**
-		 * Returns true if the node decomposition has the data on the
-		 * current node
+		 * Make a single identity copy, doing appropriate node 
+		 * partitioning if toGlobal is false.
 		 */
-		bool isDataHere( DataId index ) const;
+		DataHandler* copy( bool toGlobal, unsigned int n ) const;
 
-		/**
-		 * Returns true if data is allocated.
-		 */
-		bool isAllocated() const;
+		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo) const;
 
-		/**
-		 * Returns true if data is global. Not so here.
-		 */
-		bool isGlobal() const;
+		DataHandler* addNewDimension( unsigned int size ) const;
 
-		/**
-		 * Iterator to start of data
-		 */
-		iterator begin() const;
+		bool resize( unsigned int dimension, unsigned int size );
 
-		/**
-		 * Iterator to start of data
-		 */
-		iterator end() const;
+		void assign( const char* orig, unsigned int numOrig );
+		////////////////////////////////////////////////////////////////
+		// Iterator functions
+		////////////////////////////////////////////////////////////////
 
-		/**
-		 * Assigns a block of data at the specified location.
-		 * Returns true if all OK. No allocation.
-		 */
-		bool setDataBlock( const char* data, unsigned int numData,
-			const vector< unsigned int >& startIndex ) const;
-		bool setDataBlock( const char* data, unsigned int numData,
-			DataId startIndex ) const;
+		iterator begin( ThreadId threadNum ) const;
 
-// Inherit from AnyDimGlobalHandler: void nextIndex( DataId& index, unsigned int& linearIndex ) const;
+		iterator end( ThreadId threadNum ) const;
+
+		void rolloverIncrement( iterator* i ) const;
+
 
 	private:
 		unsigned int start_;	// Starting index of data, used in MPI.
 		unsigned int end_;	// Starting index of data, used in MPI.
+		char* data_;
+		vector< unsigned int > dims_;
+		vector< short > bitOffset_;
+		unsigned long long bitMask_;
 };
 
 #endif	// _ANY_DIM_HANDLER_H

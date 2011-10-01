@@ -36,9 +36,24 @@ class Element
 		 * This is the main constructor, used by Shell::innerCreate
 		 * which makes most Elements. Also used to create base
 		 * Elements to init the simulator in main.cpp.
+		 * Id is the Id of the new Element
+		 * Cinfo is the class
+		 * name is its name
+		 * dimensions specify the cumulative dimensions all the way up
+		 * to the current Element. So if you want to create an
+		 * Element 'synapse' as follows:
+		 * /bulb[0..1]/glom[0..1999]/mit[0..24]/dend[0..99]/synapse
+		 * the dimensions would be {2,2000,25,100,1}
+		 * Dimensions also allows you specify when a given dimension should
+		 * be ragged, that is, contain differently sized sub arrays. A
+		 * ragged array dimension has a negative sign. For example,
+		 * supposing we permitted anywhere up to 50 mitral cells per glom,
+		 * we would have dimensions[] = {2,2000,-50,100,1}
+		 * The isGlobal flag specifies whether the created objects should
+		 * be replicated on all nodes, or partitioned without replication. 
 		 */
 		Element( Id id, const Cinfo* c, const string& name,
-			const vector< unsigned int >& dimensions, 
+			const vector< int >& dimensions, 
 			bool isGlobal = 0 );
 
 		/**
@@ -93,18 +108,12 @@ class Element
 		DataHandler* dataHandler() const;
 
 		/**
-		 * Resizes the current data, may include changing dimensions and
-		 * hence changing the dataHandler.
-		 * Returns the dataHandler on success, and NULL on failure.
+		 * Resizes the current data on the specified dimension. 
+		 * Returns true on success.
 		 * When resizing it uses the current data and puts it treadmill-
-		 * fashion into the new dimensions. This means that if we had a
-		 * 2-D array and add a z dimension while keeping x and y fixed, we
-		 * should just repeat the same plane of data for all z values.
-		 * But it will get terribly messy if we change x and y dimensions.
-		 * Note that the resizing only works on the data dimensions, it
-		 * does not touch the field dimensions.
+		 * fashion into the expanded dimension. 
 		 */
-		DataHandler* resize( const vector< unsigned int >& dims );
+		bool resize( unsigned int dimension, unsigned int size );
 
 		/**
 		 * Asynchronous send command. Adds Qinfo and data onto msg specified

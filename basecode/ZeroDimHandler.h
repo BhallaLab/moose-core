@@ -14,96 +14,104 @@
  * This class manages the data part of Elements having just one
  * data entry.
  */
-class ZeroDimHandler: public ZeroDimGlobalHandler
+class ZeroDimHandler: public DataHandler
 {
 	public:
-		ZeroDimHandler( const DinfoBase* dinfo );
+		ZeroDimHandler( const DinfoBase* dinfo, bool isGlobal );
 
 		ZeroDimHandler( const ZeroDimHandler* other );
 
 		~ZeroDimHandler();
 
-		DataHandler* globalize() const;
+		////////////////////////////////////////////////////////////
+		// Information functions
+		////////////////////////////////////////////////////////////
 
-		DataHandler* unGlobalize() const;
+		/// Returns data on specified index
+		char* data( DataId index ) const;
 
 		/**
-		 * Determines how to decompose data among nodes for specified size
-		 * Returns true if there is a change from the current configuration
+		 * Returns the number of data entries.
 		 */
+		unsigned int totalEntries() const
+		{
+			return 1; // Somewhere, on some node, there is an entry.
+		}
+
+		/**
+		 * Returns the number of data entries on local node
+		 */
+		unsigned int localEntries() const;
+
+		/**
+		 * Returns the number of dimensions of the data.
+		 */
+		unsigned int numDimensions() const
+		{
+			return 0;
+		}
+
+		unsigned int sizeOfDim( unsigned int dim ) const
+		{
+			return ( dim == 0 );
+		}
+
+		vector< unsigned int > dims() const;
+
+		bool isDataHere( DataId index ) const;
+
+		bool isAllocated() const {
+			return ( data_ != 0 );
+		}
+
+		////////////////////////////////////////////////////////////////
+		// load balancing functions
+		////////////////////////////////////////////////////////////////
 		bool innerNodeBalance( unsigned int size,
 			unsigned int myNode, unsigned int numNodes );
 
-		/**
-		 * For copy we won't worry about global status. 
-		 * Instead define function: globalize above.
-		 * Version 1: Just copy as original
-		 */
-		DataHandler* copy( bool toGlobal ) const;
-
-		/**
-		 * Make a single copy with same dimensions, using a different Dinfo
-		 */
-		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo ) const;
-
-		/**
-		 * Version 2: Copy same dimensions but different # of entries.
-		 * The copySize is the total number of targets, 
-		 * here we need to figure out
-		 * what belongs on the current node.
-		 */
-		DataHandler* copyExpand( unsigned int copySize, bool toGlobal ) const;
-
-		/**
-		 * Version 3: Add another dimension when doing the copy.
-		 * Here too we figure out what is to be on current node for copy.
-		 */
-		DataHandler* copyToNewDim( unsigned int newDimSize, bool toGlobal ) const;
-
-
-		/**
-		 * Returns the data on the specified index.
-		 */
-		char* data( DataId index ) const;
-
+		////////////////////////////////////////////////////////////////
+		// Process function
+		////////////////////////////////////////////////////////////////
 		/**
 		 * calls process on data, using threading info from the ProcInfo
 		 */
 		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
 
-		/**
-		 * Returns the number of data entries on local node.
-		 * One only if current node is zero.
-		 */
-		unsigned int localEntries() const;
+		////////////////////////////////////////////////////////////////
+		// Data Reallocation functions
+		////////////////////////////////////////////////////////////////
 
-		bool resize( vector< unsigned int > dims );
+		void globalize( const char* data, unsigned int size );
 
-		/**
-		 * Returns true if the node decomposition has the data on the
-		 * current node
-		 */
-		bool isDataHere( DataId index ) const;
-
-		bool isAllocated() const;
-
-		bool isGlobal() const
-		{
-			return 0;
-		}
-
-		iterator end() const;
+		void unGlobalize();
 
 		/**
-		 * Assigns a block of data at the specified location.
-		 * Here the numData has to be 1 and the startIndex
-		 * has to be 0. Returns true if all this is OK.
+		 * Make a single identity copy, doing appropriate node 
+		 * partitioning if toGlobal is false.
 		 */
-		bool setDataBlock( const char* data, unsigned int numData,
-			const vector< unsigned int >& startIndex ) const;
-		bool setDataBlock( const char* data, unsigned int numData,
-			DataId startIndex ) const;
+		DataHandler* copy( bool toGlobal, unsigned int n ) const;
+
+		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo) const;
+
+		bool resize( unsigned int dimension, unsigned int size );
+		
+		void assign( const char* orig, unsigned int numOrig );
+
+		////////////////////////////////////////////////////////////////
+		// Iterator functions
+		////////////////////////////////////////////////////////////////
+
+		iterator begin( ThreadId threadNum ) const;
+
+		iterator end( ThreadId threadNum ) const;
+
+		void rolloverIncrement( iterator* i ) const;
+
+
 	private:
+		bool isGlobal_;
+		char* data_;
 };
 
 #endif // _ZERO_DIM_HANDLER_H

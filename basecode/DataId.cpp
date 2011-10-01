@@ -7,40 +7,20 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include <iostream>
-using namespace std;
 #include "DataId.h"
+
+const DataId DataId::bad( ~unsigned long long( 0 ) );
+const DataId DataId::any( ~unsigned long long( 1 ) );
+const DataId DataId::globalField( ~unsigned long long( 2 ) );
 
 ostream& operator <<( ostream& s, const DataId& d )
 {
-	s << d.data_ << ":" << d.field_;
+	s << d.index_;
 	return s;
 }
 
 istream& operator >>( istream& s, DataId& d )
 {
-	string dummy;
-	s >> d.data_ >> dummy >> d.field_;
+	s >> d.index_;
 	return s;
-}
-
-const DataId& DataId::bad() {
-	static DataId bad_( ~0U, ~0U );
-	return bad_;
-}
-
-const DataId& DataId::any() {
-	static DataId any_( ~1U, ~1U );
-	return any_;
-}
-
-const DataId& DataId::globalField() {
-	static DataId globalField_( ~2U, ~1U );
-	return globalField_;
-}
-
-
-const unsigned int DataId::anyPart()
-{
-	return ~1U;
 }

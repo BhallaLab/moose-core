@@ -112,26 +112,6 @@ unsigned int FieldDataHandlerBase::localEntries() const
 }
 
 /**
- * Returns a single number corresponding to the DataId.
- * Note that this does NOT compact the number in the case of
- * ragged arrays. It instead treats the indexing as if on a
- * square matrix.
- */
-unsigned int FieldDataHandlerBase::linearIndex( const DataId& d ) const
-{
-	return d.data() * fieldDimension_ + d.field();
-}
-
-/**
- * Returns the DataId corresponding to a single index.
- */
-DataId FieldDataHandlerBase::dataId( unsigned int linearIndex) const
-{
-	return DataId( linearIndex / fieldDimension_, 
-		linearIndex % fieldDimension_ );
-}
-
-/**
  * Returns the number of dimensions of the data.
  */
 unsigned int FieldDataHandlerBase::numDimensions() const {
