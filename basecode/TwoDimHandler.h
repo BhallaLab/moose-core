@@ -35,9 +35,7 @@ class TwoDimHandler: public DataHandler
 		/**
 		 * Returns the number of data entries.
 		 */
-		unsigned int totalEntries() const {
-			return nx_ * ny_;
-		}
+		unsigned int totalEntries() const;
 
 		/**
 		 * Returns the number of data entries on local node
@@ -58,9 +56,7 @@ class TwoDimHandler: public DataHandler
 
 		bool isDataHere( DataId index ) const;
 
-		bool isAllocated() const {
-			return ( data_ != 0 );
-		}
+		bool isAllocated() const;
 
 		////////////////////////////////////////////////////////////////
 		// load balancing functions

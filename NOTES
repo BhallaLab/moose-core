@@ -15814,3 +15814,32 @@ to come.
 Compiled OneDimHandler.cpp except for the last function in it, 
 rolloverIncrement.
 ============================================================================
+01 Oct. Compiled OneDimHandler.cpp.
+============================================================================
+02 Oct.
+A bit of an update to the use cases for the indexing. If I add a dimension, 
+it is usually the top-level one. 
+That is, /library/bar/zod[0..10] gets copied over 200 times and becomes 
+	/model/foo/bar[0..200]/zod[0..10]. 
+I may then expand, in which case the foo becomes foo[0..40], etc.
+I may also do the following:
+	/library/pong/ gets copied over 200 times to give
+	/model/pong[0..200].
+
+This means that going from a 1-D to a 2-D Handler, I would usually put the
+new 'n' into ny, rather than nx.
+Doesn't much affect current design, but will need to keep track.
+
+Got TwoDimHandler to compile.
+Got AnyDimHandler to compile. 
+	In this there is a bit of fuzziness about what happens when we 
+	reallocate in various ways. We would like the data at old indices to
+	be intact. This is not possible if isGlobal==0. It gets messy at
+	higher dimensions even if isGlobal==1. Deal with it later.
+
+Got DataHandlerWrapper to compile.
+
+============================================================================
+03 Oct
+
+Working on FieldDataHandler.

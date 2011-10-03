@@ -1,145 +1,138 @@
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment.
-**           Copyright (C) 2003-2010 Upinder S. Bhalla. and NCBS
+**           Copyright (C) 2003-2011 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
 #include "header.h"
-#include "DataDimensions.h"
-#include "AnyDimGlobalHandler.h"
-#include "AnyDimHandler.h"
+#include "../shell/Shell.h"
 
-AnyDimHandler::AnyDimHandler( const DinfoBase* dinfo )
-	: AnyDimGlobalHandler( dinfo ),
-		start_( 0 ), end_( 0 )
+AnyDimHandler::AnyDimHandler( const DinfoBase* dinfo, bool isGlobal,
+	const vector< int >& dims )
+		: DataHandler( dinfo, isGlobal ), 
+			start_( 0 ), end_( 0 )
 {
-	;
+	dims_.resize( dims.size() );
+	totalEntries_ = 1;
+	for ( unsigned int i = 0; i < dims.size(); ++i ) {
+		assert( dims[i] > 0 );
+		dims_[i] = dims[i];
+		totalEntries_ *= dims_[i];
+	}
+	innerNodeBalance( totalEntries_, Shell::myNode(), Shell::numNodes() );
+	data_ = dinfo->allocData( end_ - start_ );
+	/*
+	double numBits = log( totalEntries_ ) / log( 2.0 );
+	bitMask_ = ~( (~0) << static_cast< unsigned int >( ceil( numBits ) ) );
+	*/
 }
 
 AnyDimHandler::AnyDimHandler( const AnyDimHandler* other )
-	: AnyDimGlobalHandler( other->dinfo() ),
-		start_( other->start_ ), end_( other->end_ )
+	: DataHandler( other->dinfo(), other->isGlobal_ ), 
+	  start_( other->start_ ),
+	  end_( other->end_ ),
+	  totalEntries_( other->totalEntries_ ),
+	  dims_( other->dims_ )
 {
+	/*
+	double numBits = log( totalEntries_ ) / log( 2.0 );
+	bitMask_ = ~( (~0) << static_cast< unsigned int >( ceil( numBits ) ) );
+	*/
 	unsigned int num = end_ - start_;
-	data_ = dinfo()->copyData( data_, num, num );
+	data_ = dinfo()->copyData( other->data_, num, num );
 }
 
-// Sequence: The Shell tells all nodes to globalize. The local node
-// immediately creates the data handler and assigns its size, and
-// then sends out its contents to all other nodes. There needs to be
-// a barrier here to guarantee that the input from other nodes doesn't
-// come in till the Handler is created. Then the data arrives from other
-// nodes and is filled in using assimilateData.
-// 
-DataHandler* AnyDimHandler::globalize() const
+AnyDimHandler::~AnyDimHandler() {
+	if ( data_ )
+		dinfo()->destroyData( data_ );
+}
+////////////////////////////////////////////////////////////////////////
+// Information functions
+////////////////////////////////////////////////////////////////////////
+
+char* AnyDimHandler::data( DataId index ) const
 {
-	/*
-	AnyDimGlobalHandler* ret = new AnyDimGlobalHandler( dinfo() );
-	ret->resize( dims_ );
-	ret->assimilateData( data_, start_, end_ );
-	return ret; 
-	*/
+	// unsigned int i = index & bitMask_;
+	return data_ + ( index.value() + start_ ) * dinfo()->size();
+}
+
+unsigned int AnyDimHandler::totalEntries() const
+{
+	return totalEntries_;
+}
+
+unsigned int AnyDimHandler::localEntries() const
+{
+	return end_ - start_;
+}
+
+unsigned int AnyDimHandler::sizeOfDim( unsigned int dim ) const
+{
+	if ( dim < dims_.size() )
+		return dims_[dim];
 	return 0;
-	// For now we just pass on this. Will need significant stuff to do
-	// with Shell
 }
 
-DataHandler* AnyDimHandler::unGlobalize() const
+vector< unsigned int > AnyDimHandler::dims() const
 {
-	return copy( 0 ); // It is already unglobal. Do you want a copy?
-	/*
-	nodeBalance( numData_ );
-	char* newData = dinfo()->copyData( 
-		data_ + start_ * dinfo->size(), end_ - start_, end_ - start_ );
-	dinfo()->destroyData( data_ );
-	data_ = newData;
-	isGlobal_ = 0;
-	return 1;
-	*/
+	return dims_;
 }
 
 /**
- * Determines how to decompose data among nodes for specified size
- * Returns true if there is a change from the current configuration
+ * Returns true if the node decomposition has the data on the
+ * current node
  */
+bool AnyDimHandler::isDataHere( DataId index ) const {
+	return ( isGlobal_ || 
+		index == DataId::any || index == DataId::globalField ||
+		( index.value() >= start_ && index.value() < end_ ) );
+}
+
+bool AnyDimHandler::isAllocated() const {
+	return data_ != 0;
+}
+
+////////////////////////////////////////////////////////////////////////
+// Load balancing
+////////////////////////////////////////////////////////////////////////
+
 bool AnyDimHandler::innerNodeBalance( unsigned int numData,
 	unsigned int myNode, unsigned int numNodes )
 {
-	unsigned int oldNumData = numData_;
-	numData_ = numData;
-	unsigned int start =
-		( numData * myNode ) / numNodes;
-	unsigned int end = 
-		( numData * ( 1 + myNode ) ) / numNodes;
-	return ( numData != oldNumData || start != start_ || end != end_ );
+	if ( isGlobal_ ) {
+		if ( totalEntries_ == numData )
+			return 0;
+		start_ = 0;
+		end_ = totalEntries_ = numData;
+		return 1;
+	} else {
+		unsigned int oldNumData = totalEntries_;
+		unsigned int oldstart = start_;
+		unsigned int oldend = end_;
+		totalEntries_ = numData;
+		start_ = ( numData * myNode ) / numNodes;
+		end_ = ( numData * ( 1 + myNode ) ) / numNodes;
+		return ( numData != oldNumData || oldstart != start_ || 
+			oldend != end_ );
+	}
+	// bitMask_ = ~( (~0) << static_cast< unsigned int >( ceil( numBits ) ) );
+
+	// cout << "AnyDimHandler::innerNodeBalance( " << numData_ << ", " << start_ << ", " << end_ << "), fieldDimension = " << getFieldDimension() << "\n";
+
 }
+
+////////////////////////////////////////////////////////////////////////
+// Process function
+////////////////////////////////////////////////////////////////////////
 
 /**
- * For copy we won't worry about global status. 
- * Instead define function: globalize, which converts local data to global.
- * Version 1: Just copy as original
+ * Handles both the thread and node decomposition
  */
-DataHandler* AnyDimHandler::copy( bool toGlobal ) const
+void AnyDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 {
-	assert( !toGlobal ); // Cannot yet handle globalization
-	AnyDimHandler* ret = new AnyDimHandler( this );
-	return ret;
-}
-
-DataHandler* AnyDimHandler::copyUsingNewDinfo( const DinfoBase* dinfo) const
-{
-	AnyDimHandler* ret = new AnyDimHandler( dinfo );
-	ret->start_ = start_;
-	ret->end_ = end_;
-	ret->data_ = dinfo->allocData( end_ - start_ );
-	return ret;
-}
-
-
-// Version 2: Copy same dimensions but different # of entries.
-// The copySize is the total number of targets, here we need to figure out
-// what belongs on the current node.
-DataHandler* AnyDimHandler::copyExpand( 
-	unsigned int copySize, bool toGlobal ) const
-{
-	assert( !toGlobal ); // Cannot yet handle copies to globals.
-	AnyDimHandler* ret = new AnyDimHandler( this );
-	ret->nodeBalance( copySize );
-	ret->data_ = dinfo()->copyData( data_, end_ - start_, 
-		ret->end_ - ret->start_ );
-	return ret;
-}
-
-DataHandler* AnyDimHandler::copyToNewDim(
-	unsigned int newDimSize, bool toGlobal ) const
-{
-	assert( !toGlobal ); // Cannot yet handle copies to globals.
-	AnyDimHandler* ret = new AnyDimHandler( this );
-
-	ret->nodeBalance( numData_ * newDimSize );
-	ret->dims_.push_back( newDimSize );
-	ret->data_ = dinfo()->copyData( data_, end_ - start_, 
-		ret->end_ - ret->start_ );
-	return ret;
-}
-
-void AnyDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) 
-	const
-{
-	/**
-	 * This is the variant with interleaved threads.
-	char* temp = data_ + p->threadIndexInGroup * dinfo()->size();
-	unsigned int stride = dinfo()->size() * p->numThreadsInGroup;
-	for ( unsigned int i = start_ + p->threadIndexInGroup; i < end_;
-		i += p->numThreadsInGroup ) {
-		reinterpret_cast< Data* >( temp )->process( p, Eref( e, i ) );
-		temp += stride;
-	}
-	 */
-
 	/**
 	 * This is the variant with threads in a block.
 	 */
@@ -161,7 +154,7 @@ void AnyDimHandler::process( const ProcInfo* p, Element* e, FuncId fid )
 	}
 	
 	assert( startIndex >= start_ && startIndex <= end_ );
-	assert( endIndex >= start_ && endIndex < end_ );
+	assert( endIndex >= start_ && endIndex <= end_ );
 	char* temp = data_ + ( startIndex - start_ ) * dinfo()->size();
 
 	const OpFunc* f = e->cinfo()->getOpFunc( fid );
@@ -173,92 +166,191 @@ void AnyDimHandler::process( const ProcInfo* p, Element* e, FuncId fid )
 	}
 }
 
-unsigned int AnyDimHandler::localEntries() const
+////////////////////////////////////////////////////////////////////////
+// Data Reallocation functions.
+////////////////////////////////////////////////////////////////////////
+
+void AnyDimHandler::globalize( const char* data, unsigned int numEntries )
 {
-	return end_ - start_;
+	if ( isGlobal_ )
+		return;
+	isGlobal_ = true;
+
+	assert( numEntries == totalEntries_ );
+
+	dinfo()->destroyData( data_ );
+	data_ = dinfo()->copyData( data, numEntries, numEntries );
+	start_ = 0;
+	end_ = numEntries;
+
 }
 
-char* AnyDimHandler::data( DataId index ) const
+void AnyDimHandler::unGlobalize()
 {
-	// Typically data will not be touched when index == any or globalField.
-	if ( index == DataId::any() || index == DataId::globalField() )
-		return data_; 
-	if ( isDataHere( index ) )
-		return data_ + ( index.data() - start_ ) * dinfo()->size();
+	if ( !isGlobal_ ) return;
+	isGlobal_ = false;
+
+	if ( innerNodeBalance( totalEntries_, Shell::myNode(), 
+		Shell::numNodes() ) ) {
+		char* temp = data_;
+		unsigned int n = end_ - start_;
+		data_ = dinfo()->copyData( temp + start_ * dinfo()->size(), n, n );
+		dinfo()->destroyData( temp );
+	}
+}
+
+DataHandler* AnyDimHandler::copy( bool toGlobal, unsigned int n ) const
+{
+	if ( toGlobal ) {
+		if ( !isGlobal() ) {
+			cout << "Warning: AnyDimHandler::copy: Cannot copy from nonGlob    al to global\n";
+			return 0;
+		}
+	}
+	if ( n > 1 ) {
+		vector< int > dims( dims_.size() + 1);
+		for ( unsigned int i = 0; i < dims_.size(); ++i )
+			dims[i] = dims_[i];
+		dims[ dims.size() ] = n;
+
+		AnyDimHandler* ret = new AnyDimHandler( dinfo(), toGlobal, dims );
+		if ( data_ )  {
+			ret->assign( data_, end_ - start_ );
+		}
+		return ret;
+	} else {
+		return new AnyDimHandler( this );
+	}
 	return 0;
 }
 
-bool AnyDimHandler::resize( vector< unsigned int > dims )
+DataHandler* AnyDimHandler::copyUsingNewDinfo( const DinfoBase* dinfo) const
 {
-	numData_ = 1;
-	for ( vector< unsigned int >::iterator i = dims.begin();
-		i != dims.end(); ++i ) {
-		numData_ *= *i;
+	vector< int > temp( dims_.size() );
+	for ( unsigned int i = 0; i < dims_.size(); ++i ) {
+		temp[i] = dims_[i];
 	}
-	if ( nodeBalance( numData_ ) ) { // It changed, reallocate
-		if ( data_ )
-			dinfo()->destroyData( data_ );
-			data_ = reinterpret_cast< char* >( 
-				dinfo()->allocData( end_ - start_ ) );
+	return new AnyDimHandler( dinfo, isGlobal_, temp );
+}
+
+/**
+ * Resize if size has changed in any one of its dimensions, in this case
+ * only dim zero. Does NOT alter # of dimensions.
+ * In the best case, we would leave the old data alone. This isn't
+ * possible if the data starts out as non-Global, as the index allocation
+ * gets shuffled around. So I deal with it only in the isGlobal case.
+ * Returns 1 if the size has changed.
+ */
+bool AnyDimHandler::resize( unsigned int dimension, unsigned int numEntries)
+{
+	if ( dimension < dims_.size() && data_ != 0 && totalEntries_ > 0 &&
+		numEntries > 0 ) {
+		if ( dims_[ dimension ] == numEntries )
+			return 0;
+		unsigned int oldN = dims_[ dimension ];
+		unsigned int oldTotalEntries = totalEntries_;
+		dims_[ dimension ] = numEntries;
+		totalEntries_ = 1;
+		for ( unsigned int i = 0; i < dims_.size(); ++i ) {
+			totalEntries_ *= dims_[i];
+		}
+		
+		if ( dimension == 0 ) {
+			// go from 1 2 3 : 4 5 6 to 1 2 3 .. : 4 5 6 ..
+			// Try to preserve original data, possible if it is global.
+			char* temp = data_;
+			innerNodeBalance( totalEntries_, 
+				Shell::myNode(), Shell::numNodes() );
+			unsigned int newLocalEntries = end_ - start_;
+			data_ = dinfo()->allocData( newLocalEntries );
+			if ( isGlobal_ ) {
+				unsigned int newBlockSize = dims_[0] * dinfo()->size();
+				unsigned int oldBlockSize = oldN * dinfo()->size();
+				unsigned int j = totalEntries_ / dims_[0];
+				for ( unsigned int i = 0; i < j; ++i ) {
+					memcpy( data_ + i * newBlockSize, temp + i * oldBlockSize, oldBlockSize );
+				}
+			} 
+			dinfo()->destroyData( temp );
+		} else {
+			char* temp = data_;
+			innerNodeBalance( totalEntries_, 
+				Shell::myNode(), Shell::numNodes() );
+			unsigned int newLocalEntries = end_ - start_;
+			if ( isGlobal_ ) {
+				assert( newLocalEntries == totalEntries_ );
+				data_ = dinfo()->copyData( temp, oldTotalEntries,
+					totalEntries_ );
+			} else {
+				data_ = dinfo()->allocData( newLocalEntries );
+			}
+			dinfo()->destroyData( temp );
+		}
 	}
-	dims_ = dims;
-	return ( data_ != 0 );
-}
-
-bool AnyDimHandler::isDataHere( DataId index ) const {
-	return ( 
-		index == DataId::any() ||
-		( index.data() >= start_ && index.data() < end_ )
-	);
-}
-
-bool AnyDimHandler::isAllocated() const
-{
-	return ( data_ != 0 );
-}
-
-bool AnyDimHandler::isGlobal() const
-{
 	return 0;
 }
 
-DataHandler::iterator AnyDimHandler::begin() const
+void AnyDimHandler::assign( const char* orig, unsigned int numOrig )
 {
-	return DataHandler::iterator( this, start_, start_ );
+	if ( data_ && numOrig > 0 ) {
+		if ( isGlobal() ) {
+			dinfo()->assignData( data_, totalEntries_, orig, numOrig );
+		} else {
+			unsigned int n = end_ - start_;
+			if ( numOrig >= end_ ) {
+				dinfo()->assignData( data_, n, 
+					orig + start_ * dinfo()->size(), n );
+			} else {
+				char* temp = dinfo()->
+					copyData( orig, numOrig, totalEntries_ );
+				dinfo()->assignData( data_, n, 
+					temp + start_ * dinfo()->size(), n );
+				dinfo()->destroyData( temp );
+			}
+		}
+	}
 }
 
-DataHandler::iterator AnyDimHandler::end() const
-{
-	return DataHandler::iterator( this, end_, end_ );
-}
+////////////////////////////////////////////////////////////////////////
+// Iterators
+////////////////////////////////////////////////////////////////////////
 
-bool AnyDimHandler::setDataBlock( 
-	const char* data, unsigned int numData,
-	const vector< unsigned int >& startIndex ) const
+DataHandler::iterator AnyDimHandler::begin( ThreadId threadNum ) const
 {
-
-	DataDimensions dd( dims_ );
-	unsigned int start = dd.linearIndex( startIndex );
+	unsigned int startIndex = start_;
+	if ( Shell::numProcessThreads() > 1 ) {
+		// Note that threadNum is indexed from 1 up.
+		assert( threadNum >= 1 );
+		startIndex =
+			start_ + 
+			( ( end_ - start_ ) * ( threadNum - 1 ) + 
+			Shell::numProcessThreads() - 1 ) /
+				Shell::numProcessThreads();
+	}
 	
-	return setDataBlock( data, numData, start );
+	assert( startIndex >= start_ && startIndex <= end_ );
+	return iterator( this, startIndex );
+	
 }
 
-bool AnyDimHandler::setDataBlock( const char* data, 
-	unsigned int numEntries,
-	DataId startIndex ) const
+DataHandler::iterator AnyDimHandler::end( ThreadId threadNum ) const
 {
-	if ( startIndex.data() + numEntries > totalEntries() )
-		return 0;
-	unsigned int actualStart = start_;
-	if ( start_ < startIndex.data() ) 
-		actualStart = startIndex.data();
-	unsigned int actualEnd = end_;
-	if ( actualEnd > startIndex.data() + numEntries )
-		actualEnd = startIndex.data() + numEntries;
-	if ( actualEnd > actualStart )
-		memcpy( data_ + (actualStart - start_) * dinfo()->size(),
-			data + ( actualStart - startIndex.data() ) * dinfo()->size(),
-			( actualEnd - actualStart ) * dinfo()->size() );
-	return 1;
+	unsigned int endIndex = end_;
+	if ( Shell::numProcessThreads() > 1 ) {
+		// Note that threadNum is indexed from 1 up.
+		assert( threadNum >= 1 );
+		endIndex = 
+			start_ + 
+			( ( end_ - start_ ) * threadNum +
+			Shell::numProcessThreads() - 1 ) /
+				Shell::numProcessThreads();
+	}
+	assert( endIndex >= start_ && endIndex <= end_ );
+	return iterator( this, endIndex );
+}
+
+void AnyDimHandler::rolloverIncrement( DataHandler::iterator* i ) const
+{
+	i->setData( i->data() + dinfo()->size() );
 }
 

@@ -22,29 +22,12 @@ class DataHandlerWrapper: public DataHandler
 
 		~DataHandlerWrapper();
 
-		DataHandler* globalize() const;
-		DataHandler* unGlobalize() const;
-		bool innerNodeBalance( unsigned int size,
-			unsigned int myNode, unsigned int numNodes );
+		////////////////////////////////////////////////////////////
+		// Information functions
+		////////////////////////////////////////////////////////////
 
-		/**
-		 * Make a single identity copy, doing appropriate node 
-		 * partitioning if toGlobal is false.
-		 */
-		DataHandler* copy( bool toGlobal ) const;
-
-		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo) const;
-
-		DataHandler* copyExpand( unsigned int copySize, bool toGlobal ) const;
-
-		DataHandler* copyToNewDim( unsigned int newDimSize, bool toGlobal ) const;
-
+		/// Returns data on specified index
 		char* data( DataId index ) const;
-
-		/**
-		 * calls process on data, using threading info from the ProcInfo
-		 */
-		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
 
 		/**
 		 * Returns the number of data entries.
@@ -63,30 +46,56 @@ class DataHandlerWrapper: public DataHandler
 
 		unsigned int sizeOfDim( unsigned int dim ) const;
 
-		bool resize( vector< unsigned int > dims );
-
 		vector< unsigned int > dims() const;
 
 		bool isDataHere( DataId index ) const;
 
-		virtual bool isAllocated() const;
+		bool isAllocated() const;
 
-		bool isGlobal() const;
+		////////////////////////////////////////////////////////////////
+		// load balancing functions
+		////////////////////////////////////////////////////////////////
+		bool innerNodeBalance( unsigned int size,
+			unsigned int myNode, unsigned int numNodes );
 
-		iterator begin() const;
+		////////////////////////////////////////////////////////////////
+		// Process function
+		////////////////////////////////////////////////////////////////
+		/**
+		 * calls process on data, using threading info from the ProcInfo
+		 */
+		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
 
-		iterator end() const;
+		////////////////////////////////////////////////////////////////
+		// Data Reallocation functions
+		////////////////////////////////////////////////////////////////
+
+		void globalize( const char* data, unsigned int size );
+		void unGlobalize();
 
 		/**
-		 * Assigns a block of data at the specified location.
-		 * Returns true if all OK. No allocation.
+		 * Make a single identity copy, doing appropriate node 
+		 * partitioning if toGlobal is false.
 		 */
-		bool setDataBlock( const char* data, unsigned int numData,
-			const vector< unsigned int >& startIndex ) const;
-		bool setDataBlock( const char* data, unsigned int numData,
-			DataId startIndex ) const;
+		DataHandler* copy( bool toGlobal, unsigned int n ) const;
 
-		void nextIndex( DataId& index, unsigned int& linearIndex ) const;
+		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo) const;
+
+		DataHandler* addNewDimension( unsigned int size ) const;
+
+		bool resize( unsigned int dimension, unsigned int size );
+
+		void assign( const char* orig, unsigned int numOrig );
+
+		////////////////////////////////////////////////////////////////
+		// Iterator functions
+		////////////////////////////////////////////////////////////////
+
+		iterator begin( ThreadId threadNum ) const;
+
+		iterator end( ThreadId threadNum ) const;
+
+		void rolloverIncrement( iterator* i ) const;
 
 	private:
 		const DataHandler* parent_;

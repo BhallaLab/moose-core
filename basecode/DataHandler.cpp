@@ -18,6 +18,12 @@ DataHandler::DataHandler( const DinfoBase* dinfo, bool isGlobal )
 DataHandler::~DataHandler()
 {;}
 
+
+bool DataHandler::isGlobal() const
+{
+	return isGlobal_;
+}
+
 const DataHandler* DataHandler::parentDataHandler() const
 {
 	return this;
