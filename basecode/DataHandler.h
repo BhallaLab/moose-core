@@ -107,11 +107,10 @@ class DataHandler
 		virtual bool isAllocated() const = 0;
 
 		/**
-		 * True if the data is global on all nodes
+		 * True if the data is global on all nodes.
+		 * This is overridden in rare cases, like FieldDataHandler.
 		 */
-		bool isGlobal() const {
-			return isGlobal_;
-		}
+		virtual bool isGlobal() const;
 
 /////////////////////////////////////////////////////////////////////////
 // Load balancing functions
@@ -283,8 +282,8 @@ class DataHandler
 					return data_;
 				}
 
-				void endit() {
-					data_ = 0;
+				void setData( char* data ) {
+					data_ = data;
 				}
 
 			private:
