@@ -20,7 +20,7 @@ class AnyDimHandler: public DataHandler
 		AnyDimHandler( const DinfoBase* dinfo, bool isGlobal, 
 			const vector< int >& dims );
 
-		AnyDimHandler( const OneDimHandler* other );
+		AnyDimHandler( const AnyDimHandler* other );
 
 		~AnyDimHandler();
 
@@ -52,9 +52,7 @@ class AnyDimHandler: public DataHandler
 
 		bool isDataHere( DataId index ) const;
 
-		bool isAllocated() const {
-			return ( data_ != 0 );
-		}
+		bool isAllocated() const;
 
 		////////////////////////////////////////////////////////////////
 		// load balancing functions
@@ -105,9 +103,13 @@ class AnyDimHandler: public DataHandler
 		unsigned int start_;	// Starting index of data, used in MPI.
 		unsigned int end_;	// Starting index of data, used in MPI.
 		char* data_;
+
+		// dims_[0] varies fastest. To index it would be 
+		// data[dimN][...][dim0]
+		unsigned int totalEntries_;
 		vector< unsigned int > dims_;
-		vector< short > bitOffset_;
-		unsigned long long bitMask_;
+//		vector< short > bitOffset_;
+//		unsigned long long bitMask_;
 };
 
 #endif	// _ANY_DIM_HANDLER_H

@@ -102,8 +102,12 @@ template< class Parent, class Field > class FieldDataHandler: public FieldDataHa
 			if ( data ) {
 				Parent* pa = reinterpret_cast< Parent* >( data );
 				( pa->*setNumField_ )( size );
-				if ( size > getFieldDimension() )
-					setFieldDimension( size );
+				if ( size > maxFieldEntries_ ) {
+					maxFieldEntries_ = size;
+					// setFieldDimension( size );
+					/// Here we need to request the higher powers to realloc
+					/// the field dimension.
+				}
 			}
 		}
 

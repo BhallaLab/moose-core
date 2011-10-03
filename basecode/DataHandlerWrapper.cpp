@@ -11,61 +11,20 @@
 #include "DataHandlerWrapper.h"
 
 DataHandlerWrapper::DataHandlerWrapper( const DataHandler* parentHandler )
-	: DataHandler( parentHandler->dinfo() ), parent_( parentHandler )
-{
-}
+	: DataHandler( parentHandler->dinfo(), parentHandler->isGlobal() ),
+	parent_( parentHandler )
+{;}
 
 DataHandlerWrapper::~DataHandlerWrapper()
 {;} // This is the key function. It deletes itself but does not touch parent
 
-
-DataHandler* DataHandlerWrapper::globalize() const
-{
-	return parent_->globalize();
-}
-
-DataHandler* DataHandlerWrapper::unGlobalize() const
-{
-	return parent_->unGlobalize();
-}
-
-bool DataHandlerWrapper::innerNodeBalance( unsigned int size,
-	unsigned int myNode, unsigned int numNodes )
-{
-	return 0;
-}
-
-DataHandler* DataHandlerWrapper::copy( bool toGlobal ) const
-{
-	return parent_->copy( toGlobal );
-}
-
-DataHandler* DataHandlerWrapper::copyUsingNewDinfo(
-	const DinfoBase* dinfo ) const
-{
-	return parent_->copyUsingNewDinfo( dinfo );
-}
-
-DataHandler* DataHandlerWrapper::copyExpand( 
-	unsigned int copySize, bool toGlobal ) const
-{
-	return parent_->copyExpand( copySize, toGlobal );
-}
-
-DataHandler* DataHandlerWrapper::copyToNewDim( 
-	unsigned int newDimSize, bool toGlobal ) const
-{
-	return parent_->copyToNewDim( newDimSize, toGlobal );
-}
+////////////////////////////////////////////////////////////
+// Information functions
+////////////////////////////////////////////////////////////
 
 char* DataHandlerWrapper::data( DataId index ) const
 {
 	return parent_->data( index );
-}
-
-void DataHandlerWrapper::process( const ProcInfo* p, Element* e, FuncId fid ) const
-{
-	parent_->process( p, e, fid );
 }
 
 /**
@@ -93,12 +52,6 @@ unsigned int DataHandlerWrapper::sizeOfDim( unsigned int dim ) const {
 	return parent_->sizeOfDim( dim );
 }
 
-// Cannot do, as it modifies parent.
-bool DataHandlerWrapper::resize( vector< unsigned int > dims ) {
-	return 0;
-	// return parent_->resize( dims );
-}
-
 vector< unsigned int > DataHandlerWrapper::dims() const {
 	return parent_->dims();
 }
@@ -111,36 +64,78 @@ bool DataHandlerWrapper::isAllocated() const {
 	return parent_->isAllocated();
 }
 
-bool DataHandlerWrapper::isGlobal() const
+////////////////////////////////////////////////////////////////
+// load balancing functions
+////////////////////////////////////////////////////////////////
+
+bool DataHandlerWrapper::innerNodeBalance( unsigned int size,
+	unsigned int myNode, unsigned int numNodes )
 {
-	return parent_->isGlobal();
+	return 0;
 }
 
-DataHandler::iterator DataHandlerWrapper::begin() const
+////////////////////////////////////////////////////////////////
+// Process function
+////////////////////////////////////////////////////////////////
+
+void DataHandlerWrapper::process( const ProcInfo* p, Element* e, FuncId fid ) const
 {
-	return parent_->begin();
+	parent_->process( p, e, fid );
 }
 
-DataHandler::iterator DataHandlerWrapper::end() const
+////////////////////////////////////////////////////////////////
+// Data Reallocation functions
+////////////////////////////////////////////////////////////////
+
+void DataHandlerWrapper::globalize( const char* data, unsigned int size)
 {
-	return parent_->end();
+	cout << "Error: DataHandlerWrapper::globalize: parent is const\n";
 }
 
-bool DataHandlerWrapper::setDataBlock( const char* data, 
-	unsigned int numEntries, DataId startIndex ) const
+void DataHandlerWrapper::unGlobalize()
 {
-	return parent_->setDataBlock( data, numEntries, startIndex );
+	cout << "Error: DataHandlerWrapper::unGlobalize: parent is const\n";
 }
 
-bool DataHandlerWrapper::setDataBlock( 
-	const char* data, unsigned int numEntries, 
-	const vector< unsigned int >& startIndex ) const
+DataHandler* DataHandlerWrapper::copy( bool toGlobal, unsigned int n ) const
 {
-	return parent_->setDataBlock( data, numEntries, startIndex );
+	return parent_->copy( toGlobal, n );
 }
 
-void DataHandlerWrapper::nextIndex( DataId& index, 
-	unsigned int& linearIndex ) const
+DataHandler* DataHandlerWrapper::copyUsingNewDinfo(
+	const DinfoBase* dinfo ) const
 {
-	parent_->nextIndex( index, linearIndex );
+	return parent_->copyUsingNewDinfo( dinfo );
+}
+
+bool DataHandlerWrapper::resize( 
+	unsigned int dimension, unsigned int numEntries    )
+{
+	cout << "Error: DataHandlerWrapper::resize: parent is const\n";
+	return 0;
+}
+
+void DataHandlerWrapper::assign( const char* orig, unsigned int numOrig )
+{
+	cout << "Error: DataHandlerWrapper::assign: parent is const\n";
+}
+
+////////////////////////////////////////////////////////////
+// Iterators
+////////////////////////////////////////////////////////////
+
+DataHandler::iterator DataHandlerWrapper::begin( ThreadId threadNum ) const
+{
+	return parent_->begin( threadNum );
+}
+
+DataHandler::iterator DataHandlerWrapper::end( ThreadId threadNum ) const
+{
+	return parent_->end( threadNum );
+}
+
+
+void DataHandlerWrapper::rolloverIncrement( iterator* i ) const
+{
+	parent_->rolloverIncrement( i );
 }

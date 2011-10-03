@@ -62,9 +62,6 @@ HEADERS = \
 	AnyDimHandler.h \
 	ZeroDimHandler.h \
 	OneDimHandler.h \
-	AnyDimGlobalHandler.h \
-	ZeroDimGlobalHandler.h \
-	OneDimGlobalHandler.h \
 	FieldDataHandlerBase.h \
 	FieldDataHandler.h \
 	MsgDataHandler.h \

@@ -12,24 +12,102 @@
 #include "../shell/Shell.h"
 
 FieldDataHandlerBase::FieldDataHandlerBase( 
-	const DinfoBase* dinfo, const DataHandler* parentDataHandler )
-			: DataHandler( dinfo ),
-				parentDataHandler_( parentDataHandler ),
-				fieldDimension_( 1 )
+	const DinfoBase* dinfo,
+	const DataHandler* parentDataHandler )
+			: DataHandler( dinfo, parentDataHandler->isGlobal() ),
+				maxFieldEntries_( 1 ),
+				parentDataHandler_( parentDataHandler )
 {;}
 
 FieldDataHandlerBase::~FieldDataHandlerBase()
 {;} // Don't delete data because the parent Element should do so.
 
-DataHandler* FieldDataHandlerBase::globalize() const
+/////////////////////////////////////////////////////////////////////////
+// Information functions
+/////////////////////////////////////////////////////////////////////////
+/**
+ * Returns the data on the specified index.
+ */
+char* FieldDataHandlerBase::data( DataId index ) const
 {
-	return 0;
+	return lookupField( parentDataHandler_->data( index ), index.myIndex( mask_ ) );
 }
 
-DataHandler* FieldDataHandlerBase::unGlobalize() const
+const DataHandler* FieldDataHandlerBase::parentDataHandler() const
 {
-	return 0;
+	return parentDataHandler_;
 }
+
+/**
+ * Returns the number of field entries.
+ * If parent is global the return value is also global.
+ * If parent is local then it returns # on current node.
+ */
+unsigned int FieldDataHandlerBase::totalEntries() const
+{
+	return parentDataHandler_->totalEntries() * maxFieldEntries_;
+}
+
+/**
+ * Returns the number of field entries.
+ * If parent is global the return value is also global.
+ * If parent is local then it returns # on current node.
+ */
+unsigned int FieldDataHandlerBase::localEntries() const
+{
+	unsigned int ret = 0;
+	for ( DataHandler::iterator i = parentDataHandler_->begin( 0 );
+		i != parentDataHandler_->end( Shell::numProcessThreads() ); ++i ) {
+		ret += getNumField( *i );
+	}
+	return ret;
+}
+
+/**
+ * Returns the number of dimensions of the data.
+ */
+unsigned int FieldDataHandlerBase::numDimensions() const {
+	// Should refine to include local dimensions.
+	// For now assume 1 dim.
+	return parentDataHandler_->numDimensions() + 1;
+}
+
+/**
+ * Returns the indexing range of the data at the specified dimension.
+ */
+unsigned int FieldDataHandlerBase::sizeOfDim( unsigned int dim ) const
+{
+	if ( dim > 0 )
+		return parentDataHandler_->sizeOfDim( dim - 1 );
+	return maxFieldEntries_;
+}
+
+/**
+ * Returns the dimensions of this. The Field dimension is on 
+ * index 0.
+ */
+vector< unsigned int > FieldDataHandlerBase::dims() const
+{
+	vector< unsigned int > ret( parentDataHandler_->dims() );
+	ret.insert( ret.begin(), maxFieldEntries_ );
+	return ret;
+}
+
+/**
+ * Returns true if the node decomposition has the data on the
+ * current node
+ */
+bool FieldDataHandlerBase::isDataHere( DataId index ) const {
+	return parentDataHandler_->isDataHere( index );
+}
+
+bool FieldDataHandlerBase::isAllocated() const {
+	return parentDataHandler_->isAllocated();
+}
+
+/////////////////////////////////////////////////////////////////////////
+// Load balancing
+/////////////////////////////////////////////////////////////////////////
 
 bool FieldDataHandlerBase::innerNodeBalance( unsigned int size,
 	unsigned int myNode, unsigned int numNodes )
@@ -37,19 +115,9 @@ bool FieldDataHandlerBase::innerNodeBalance( unsigned int size,
 	return 0;
 }
 
-DataHandler* FieldDataHandlerBase::copyExpand( 
-	unsigned int copySize, bool toGlobal ) const
-{
-	return 0;
-}
-
-/*
-DataHandler* FieldDataHandlerBase::copyToNewDim( unsigned int newDimSize )
-	const
-{
-	return 0;
-}
-*/
+/////////////////////////////////////////////////////////////////////////
+// Process
+/////////////////////////////////////////////////////////////////////////
 
 void FieldDataHandlerBase::process( const ProcInfo* p, Element* e, FuncId fid ) const 
 {
@@ -78,78 +146,23 @@ void FieldDataHandlerBase::process( const ProcInfo* p, Element* e, FuncId fid ) 
 	}
 }
 
-/**
- * Returns the data on the specified index.
- */
-char* FieldDataHandlerBase::data( DataId index ) const
-{
-	return lookupField( parentDataHandler_->data( index ), index.field() );
-}
+/////////////////////////////////////////////////////////////////////////
+// Data reallocation.
+/////////////////////////////////////////////////////////////////////////
+void FieldDataHandlerBase::globalize( const char* data, unsigned int size )
+{;}
 
-/**
- * Returns the number of field entries.
- * If parent is global the return value is also global.
- * If parent is local then it returns # on current node.
- */
-unsigned int FieldDataHandlerBase::totalEntries() const
-{
-	return parentDataHandler_->totalEntries() * fieldDimension_;
-}
-
-/**
- * Returns the number of field entries.
- * If parent is global the return value is also global.
- * If parent is local then it returns # on current node.
- */
-unsigned int FieldDataHandlerBase::localEntries() const
-{
-	unsigned int ret = 0;
-	for ( DataHandler::iterator i = parentDataHandler_->begin();
-		i != parentDataHandler_->end(); ++i ) {
-		ret += getNumField( *i );
-	}
-	return ret;
-}
-
-/**
- * Returns the number of dimensions of the data.
- */
-unsigned int FieldDataHandlerBase::numDimensions() const {
-	// Should refine to include local dimensions.
-	// For now assume 1 dim.
-	return parentDataHandler_->numDimensions() + 1;
-}
-
-/**
- * Returns the indexing range of the data at the specified dimension.
- */
-unsigned int FieldDataHandlerBase::sizeOfDim( unsigned int dim ) const
-{
-	if ( dim > 0 )
-		return parentDataHandler_->sizeOfDim( dim - 1 );
-	return fieldDimension_;
-}
-
+void FieldDataHandlerBase::unGlobalize()
+{;}
 
 /**
  * Assigns size for first (data) dimension. This usually will not
  * be called here, but by the parent data Element.
  */
-bool FieldDataHandlerBase::resize( vector< unsigned int > dims )
+bool FieldDataHandlerBase::resize( unsigned int dimension, unsigned int size)
 {
-	cout << Shell::myNode() << ": FieldDataHandler::setNumData1: Error: Cannot resize from Field\n";
+	cout << Shell::myNode() << ": FieldDataHandler::resize: Error: Cannot resize from Field\n";
 	return 0;
-}
-
-/**
- * Returns the dimensions of this. The Field dimension is on 
- * index 0.
- */
-vector< unsigned int > FieldDataHandlerBase::dims() const
-{
-	vector< unsigned int > ret( parentDataHandler_->dims() );
-	ret.insert( ret.begin(), fieldDimension_ );
-	return ret;
 }
 
 /**
@@ -163,10 +176,12 @@ void FieldDataHandlerBase::setFieldArraySize(
 	if ( parentDataHandler_->isDataHere( objectIndex ) ) {
 		char* pa = parentDataHandler_->data( objectIndex );
 		setNumField( pa, size );
-		if ( size > fieldDimension_ )
-			fieldDimension_ = size;
+		if ( size > maxFieldEntries_ )
+			maxFieldEntries_ = size;
 	}
 }
+
+/////////////////////////////////////////////////////////////////////////
 
 /**
  * Looks up the size of the local field array on the specified object
@@ -206,49 +221,37 @@ unsigned int FieldDataHandlerBase::biggestFieldArraySize() const
 
 /**
  * This func gets the FieldArraySize from all nodes and updates
- * fieldDimension to the largest.
+ * maxFieldEntries_ to the largest.
  * MUST be called on all nodes in sync.
  * Deprecated
 unsigned int FieldDataHandlerBase::syncFieldArraySize()
 {
 	unsigned int ret = biggestFieldArraySize();
 	// ret = Shell::reduceInt( ret ); 
-	if ( fieldDimension_ < ret )
-		fieldDimension_ = ret;
+	if ( maxFieldEntries_ < ret )
+		maxFieldEntries_ = ret;
 	return ret;
 }
  */
 
 /**
- * Assigns the fieldDimension. Checks that it is bigger than the
+ * Assigns the maxFieldEntries_. Checks that it is bigger than the
  * biggest size on this node.
  */
 void FieldDataHandlerBase::setFieldDimension( unsigned int size )
 {
 	unsigned int i = biggestFieldArraySize();
 	assert( i <= size );
-	fieldDimension_ = size;
+	maxFieldEntries_ = size;
 	//cout << Shell::myNode() << ": SetFieldDimension to " << size << endl;
 }
 
 /**
- * Returns fieldDimension
+ * Returns maxFieldEntries_
  */
 unsigned int FieldDataHandlerBase::getFieldDimension( ) const
 {
-	return fieldDimension_;
-}
-
-/**
- * Returns true if the node decomposition has the data on the
- * current node
- */
-bool FieldDataHandlerBase::isDataHere( DataId index ) const {
-	return parentDataHandler_->isDataHere( index );
-}
-
-bool FieldDataHandlerBase::isAllocated() const {
-	return parentDataHandler_->isAllocated();
+	return maxFieldEntries_;
 }
 
 bool FieldDataHandlerBase::isGlobal() const
@@ -268,7 +271,7 @@ DataHandler::iterator FieldDataHandlerBase::begin() const {
 		unsigned int numHere = getNumField( pa );
 		if ( numHere != 0 )
 			return iterator( this, i.index(), 
-				i.index().data() * fieldDimension_ );
+				i.index().data() * maxFieldEntries_ );
 	}
 	// Failed to find any valid index
 	return end();
@@ -280,7 +283,7 @@ DataHandler::iterator FieldDataHandlerBase::begin() const {
  */
 DataHandler::iterator FieldDataHandlerBase::end() const {
 	return iterator( this, parentDataHandler_->end().index(), 
-		parentDataHandler_->end().index().data() * fieldDimension_);
+		parentDataHandler_->end().index().data() * maxFieldEntries_);
 }
 
 void FieldDataHandlerBase::nextIndex( DataId& index, unsigned int& linearIndex ) const {
@@ -295,14 +298,14 @@ void FieldDataHandlerBase::nextIndex( DataId& index, unsigned int& linearIndex )
 
 	index.rolloverFieldIndex();
 	unsigned int j = index.data();
-	for ( iterator i( parentDataHandler_, j, j * fieldDimension_ ); 
+	for ( iterator i( parentDataHandler_, j, j * maxFieldEntries_ ); 
 		i != parentDataHandler_->end(); ++i ) {
 		index = i.index();
 		char* pa = *i;
 		assert( pa );
 		numHere = getNumField( pa );
 		if ( numHere > 0 ) {
-			linearIndex = index.data() * fieldDimension_;
+			linearIndex = index.data() * maxFieldEntries_;
 			return;
 		}
 	}
@@ -311,11 +314,6 @@ void FieldDataHandlerBase::nextIndex( DataId& index, unsigned int& linearIndex )
 }
 
 /////////////////////////////////////////////////////////////////
-
-const DataHandler* FieldDataHandlerBase::parentDataHandler() const
-{
-	return parentDataHandler_;
-}
 
 void FieldDataHandlerBase::assignParentDataHandler( 
 	const DataHandler* parent )

@@ -1,7 +1,7 @@
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment.
-**           Copyright (C) 2003-2010 Upinder S. Bhalla. and NCBS
+**           Copyright (C) 2003-2011 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
@@ -21,41 +21,36 @@ class FieldDataHandlerBase: public DataHandler
 
 		~FieldDataHandlerBase();
 
-		DataHandler* globalize() const;
-		DataHandler* unGlobalize() const;
 
-		bool innerNodeBalance( unsigned int size,
-			unsigned int myNode, unsigned int numNodes );
+		////////////////////////////////////////////////////////////
+		// Information functions
+		////////////////////////////////////////////////////////////
 
-		/// We don't implement the copy() func, left to the derived class
-		// DataHandler* copy() const
-
-		// These copy functions both return 0. Don't apply to Fields.
-		DataHandler* copyExpand( unsigned int copySize, bool toGlobal ) const;
-		// DataHandler* copyToNewDim( unsigned int copySize ) const;
-
-		// Process doesn't do anything, left to the parent DataHandler.
-		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
-
-		/**
-		 * Looks up and returns data pointer of field.
-		 */
+		/// Returns data on specified index
 		char* data( DataId index ) const;
 
-		//////////////////////////////////////////////////////////////////
-		// Utility functions managed by derived class
-		//////////////////////////////////////////////////////////////////
 		/**
-		 * Return number of fields on Parent object pa located at
-		 * the specified location
+		 * Returns the number of data entries.
 		 */
-		virtual unsigned int getNumField( const char* pa ) const = 0;
+		unsigned int totalEntries() const;
 
 		/**
-		 * Set number of fields on Parent object located at
-		 * the specified data location
+		 * Returns the number of data entries on local node
 		 */
-		virtual void setNumField( char* pa, unsigned int num ) = 0;
+		unsigned int localEntries() const;
+
+		/**
+		 * Returns the number of dimensions of the data.
+		 */
+		unsigned int numDimensions() const;
+
+		unsigned int sizeOfDim( unsigned int dim ) const;
+
+		vector< unsigned int > dims() const;
+
+		bool isDataHere( DataId index ) const;
+
+		bool isAllocated() const;
 
 		/**
 		 * Looks up field entry on specified parent data object, 
@@ -65,105 +60,56 @@ class FieldDataHandlerBase: public DataHandler
 		virtual char* lookupField( char* pa, unsigned int index ) 
 			const = 0;
 
-		/**
-		 * Returns the number of field entries.
-		 * If parent is global the return value is also global.
-		 * If parent is local then it returns # on current node.
-		 */
-		unsigned int totalEntries() const;
+		////////////////////////////////////////////////////////////////
+		// load balancing functions
+		////////////////////////////////////////////////////////////////
+		bool innerNodeBalance( unsigned int size,
+			unsigned int myNode, unsigned int numNodes );
 
+		////////////////////////////////////////////////////////////////
+		// Process function
+		////////////////////////////////////////////////////////////////
 		/**
-		 * Returns the number of field entries on local node.
+		 * calls process on data, using threading info from the ProcInfo
 		 */
-		unsigned int localEntries() const;
+		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
 
-		/**
-		 * Returns the number of dimensions of the data.
-		 */
-		unsigned int numDimensions() const;
+		////////////////////////////////////////////////////////////////
+		// Data Reallocation functions
+		////////////////////////////////////////////////////////////////
 
-		/**
-		 * Returns size of specified dimension. Note that dimension 0 
-		 * is the size of the field.
-		 */
-		unsigned int sizeOfDim( unsigned int dim ) const;
+		void globalize( const char* data, unsigned int size );
+		void unGlobalize();
 
+		// We do not implement these copy() funcs here, left to the
+		// derived templated class.
+		//DataHandler* copy( bool toGlobal, unsigned int n ) const;
+		// DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo) const;
 
-		/**
-		 * Assigns size for first (data) dimension. This usually will not
-		 * be called here, but by the parent data Element.
-		 */
-		bool resize( vector< unsigned int > dims );
+		DataHandler* addNewDimension( unsigned int size ) const;
 
-		/**
-		 * Returns the dimensions of this. The Field dimension is on 
-		 * index 0.
-		 */
-		vector< unsigned int > dims() const;
+		bool resize( unsigned int dimension, unsigned int size );
 
-		/**
-		 * Assigns the size of the field array on the specified object.
-		 * 
-		 */
-		void setFieldArraySize( 
-			unsigned int objectIndex, unsigned int size );
+		// Handled by derived templated FieldDataHandler classes.
+		// void assign( const char* orig, unsigned int numOrig );
 
-		/**
-		 * Looks up the size of the field array on the specified object
-		 */
-		unsigned int getFieldArraySize( unsigned int objectIndex ) const;
+		virtual void setNumField( char* data, unsigned int size ) = 0;
+
+		////////////////////////////////////////////////////////////////
+		// Iterator functions
+		////////////////////////////////////////////////////////////////
+
+		iterator begin( ThreadId threadNum ) const;
+
+		iterator end( ThreadId threadNum ) const;
+
+		void rolloverIncrement( iterator* i ) const;
 
 		/**
 		 * Looks up the biggest field array size on the current node
 		 * Implemented in derived classes.
 		 */
 		unsigned int biggestFieldArraySize() const;
-
-		/**
-		 * This func gets the FieldArraySize from all nodes and updates
-		 * Deprecated.
-		unsigned int syncFieldArraySize();
-		 */
-
-		/**
-		 * Assigns the fieldDimension. Checks that it is bigger than the
-		 * biggest size on this node.
-		 */
-		void setFieldDimension( unsigned int size );
-		unsigned int getFieldDimension() const;
-
-		/**
-		 * Returns true if the node decomposition has the data on the
-		 * current node
-		 */
-		bool isDataHere( DataId index ) const;
-
-		bool isAllocated() const;
-
-		bool isGlobal() const;
-
-		/////////////////////////////////////////////////////////////////
-		// Iterators
-		/////////////////////////////////////////////////////////////////
-
-		/**
-		 * Starting point for iterating over all Fields on all Objects on
-		 * this node.
-		 */
-		iterator begin() const;
-
-		/**
-		 * This is 1+(last valid field entry) on the last valid data entry
-		 * on the parent data handler, expressed as a single int.
-		 */
-		iterator end() const;
-
-		/**
-		 * Advances the iteration by one place. Note that due to the
-		 * ragged array and skipping zero arrays, both the DataId index
-		 * and the linear index may jump forward.
-		 */
-		void nextIndex( DataId& index, unsigned int& linearIndex ) const;
 
 		/////////////////////////////////////////////////////////////////
 		// Data access
@@ -180,22 +126,8 @@ class FieldDataHandlerBase: public DataHandler
 		 * Shell::innerCopyElements().
 		 */
 		void assignParentDataHandler( const DataHandler* parent );
-
-		/**
-		 * Assigns a data block.
-		 * Note that due to the possible ragged arrays here, the incoming
-		 * data block may have sections that are skipped over.
-		 */
-		bool setDataBlock( const char* data, unsigned int numData,
-			DataId startIndex ) const;
-
-		
-		/**
-		 * Assigns a block of data at the specified location.
-		 * Returns true if all OK. No allocation.
-		 */
-		bool setDataBlock( const char* data, unsigned int numData,
-			const vector< unsigned int >& startIndex ) const;
+	protected:
+		unsigned int maxFieldEntries_;
 		
 	private:
 		/**
@@ -204,13 +136,9 @@ class FieldDataHandlerBase: public DataHandler
 		const DataHandler* parentDataHandler_;
 
 		/**
-		 * This keeps track of the max # of fieldElements assigned. It is
-		 * analogous to the reserve size of a vector, but does not incur
-		 * any extra overhead in memory. This determines how the indexing
-		 * happens.
+		 * Bitmask for field part of DataId
 		 */
-		unsigned int fieldDimension_;
-
+		unsigned int mask_;
 };
 
 

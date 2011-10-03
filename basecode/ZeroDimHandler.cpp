@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-
 #include "../shell/Shell.h"
 
 ZeroDimHandler::ZeroDimHandler( const DinfoBase* dinfo, bool isGlobal )
@@ -164,5 +163,5 @@ DataHandler::iterator ZeroDimHandler::end( ThreadId threadNum ) const
 
 void ZeroDimHandler::rolloverIncrement( DataHandler::iterator* i ) const
 {
-	i->endit();
+	i->setData( 0 );
 }
