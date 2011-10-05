@@ -23,8 +23,8 @@
 class DataId
 {
 	public:
-		friend ostream& operator <<( ostream& s, const Id& i );
-		friend istream& operator >>( istream& s, Id& i );
+		friend ostream& operator <<( ostream& s, const DataId& i );
+		friend istream& operator >>( istream& s, DataId& i );
 
 		/**
 		 * Default DataId is zero index

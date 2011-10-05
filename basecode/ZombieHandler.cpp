@@ -11,63 +11,22 @@
 
 ZombieHandler::ZombieHandler( const DataHandler* parentHandler,
 	unsigned int start, unsigned int end )
-	: DataHandler( parentHandler->dinfo() ), parent_( parentHandler ),
+	: DataHandler( parentHandler->dinfo(), parentHandler->isGlobal() ),
+		parent_( parentHandler ),
 		start_( start ), end_( end )
 {;}
 
 ZombieHandler::~ZombieHandler()
 {;} // This deletes itself but does not touch parent
 
-
-DataHandler* ZombieHandler::globalize() const
-{
-	return 0; // Don't know how to do this.
-}
-
-DataHandler* ZombieHandler::unGlobalize() const
-{
-	return 0;
-}
-
-bool ZombieHandler::innerNodeBalance( unsigned int size,
-	unsigned int myNode, unsigned int numNodes )
-{
-	return 0;
-}
-
-DataHandler* ZombieHandler::copy( bool toGlobal ) const
-{
-	return ( new ZombieHandler( parent_, start_, end_ ) );
-}
-
-DataHandler* ZombieHandler::copyUsingNewDinfo(
-	const DinfoBase* dinfo ) const
-{
-	return 0;
-}
-
-DataHandler* ZombieHandler::copyExpand( 
-	unsigned int copySize, bool toGlobal ) const
-{
-	// Can't really do this till we have the policy for copying to and
-	// from globals sorted out.
-	ZombieHandler* ret = new ZombieHandler( parent_ );
-	return ret;
-}
-
-DataHandler* ZombieHandler::copyToNewDim( 
-	unsigned int newDimSize, bool toGlobal ) const
-{
-	return 0;
-}
+////////////////////////////////////////////////////////////////////
+// Information functions
+////////////////////////////////////////////////////////////////////
 
 char* ZombieHandler::data( DataId index ) const
 {
 	return parent_->data( 0 );
 }
-
-void ZombieHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
-{;} // Solver parent does process, this does not.
 
 /**
  * Returns the number of data entries.
@@ -90,25 +49,16 @@ unsigned int ZombieHandler::numDimensions() const {
 	return parent_->numDimensions();
 }
 
-unsigned int ZombieHandler::sizeOfDim( unsigned int dim ) const {
-	return parent_->sizeOfDim( dim );
-}
-
-// For now just change start_ and end_, later figure out how to put in
-// node policy.
-bool ZombieHandler::resize( vector< unsigned int > dims ) {
-	assert( dims.size() > 0 );
-	start_ = 0;
-	end_ = dims[0];
-	return 1;
-}
-
 vector< unsigned int > ZombieHandler::dims() const {
 	return parent_->dims();
 }
 
+unsigned int ZombieHandler::sizeOfDim( unsigned int dim ) const {
+	return parent_->sizeOfDim( dim );
+}
+
 bool ZombieHandler::isDataHere( DataId index ) const {
-	return ( start_ <= index.data() && end_ > index.data() );
+	return ( start_ <= index.value() && end_ > index.value() );
 }
 
 bool ZombieHandler::isAllocated() const {
@@ -120,32 +70,62 @@ bool ZombieHandler::isGlobal() const
 	return parent_->isGlobal();
 }
 
-DataHandler::iterator ZombieHandler::begin() const
-{
-	return iterator( this, start_, start_ );
-}
+////////////////////////////////////////////////////////////////////
+// Load balancing
+////////////////////////////////////////////////////////////////////
 
-DataHandler::iterator ZombieHandler::end() const
-{
-	return iterator( this, end_, end_ );
-}
-
-bool ZombieHandler::setDataBlock( const char* data, 
-	unsigned int numEntries, DataId startIndex ) const
+bool ZombieHandler::innerNodeBalance( unsigned int size,
+	unsigned int myNode, unsigned int numNodes )
 {
 	return 0;
 }
 
-bool ZombieHandler::setDataBlock( 
-	const char* data, unsigned int numEntries, 
-	const vector< unsigned int >& startIndex ) const
+////////////////////////////////////////////////////////////////////
+// Process and foreach
+////////////////////////////////////////////////////////////////////
+
+void ZombieHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
+{;} // Solver parent does process, this does not.
+
+void ZombieHandler::foreach( const OpFunc* f, Element* e, const Qinfo* q,
+ 	const double* arg, unsigned int argIncrement ) const
+{ // This should be relevant.
+	;
+}
+
+////////////////////////////////////////////////////////////////////
+// Data reallocation functions
+////////////////////////////////////////////////////////////////////
+
+void ZombieHandler::globalize( const char* data, unsigned int size )
+{
+	; // Don't know how to do this.
+}
+
+void ZombieHandler::unGlobalize()
+{
+	;
+}
+
+DataHandler* ZombieHandler::copy( bool toGlobal, unsigned int n ) const
+{
+	return ( new ZombieHandler( parent_, start_ * n, end_ * n ) );
+}
+
+DataHandler* ZombieHandler::copyUsingNewDinfo(
+	const DinfoBase* dinfo ) const
 {
 	return 0;
 }
 
-void ZombieHandler::nextIndex( DataId& index, 
-	unsigned int& linearIndex ) const
+// Unsure what to do here.
+bool ZombieHandler::resize( unsigned int dimension, unsigned int size )
 {
-	index.incrementDataIndex();
-	++linearIndex;
+	return 1;
+}
+
+// Can't really do this.
+void assign( const char* orig, unsigned int numOrig )
+{
+	;
 }

@@ -19,6 +19,9 @@ class ZeroDimHandler: public DataHandler
 	public:
 		ZeroDimHandler( const DinfoBase* dinfo, bool isGlobal );
 
+		/// Special constructor used in Cinfo::makeCinfoElements
+		ZeroDimHandler( const DinfoBase* dinfo, char* data );
+
 		ZeroDimHandler( const ZeroDimHandler* other );
 
 		~ZeroDimHandler();
@@ -78,6 +81,13 @@ class ZeroDimHandler: public DataHandler
 		 */
 		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
 
+		/**
+		 * Calls OpFunc f on all data entries, using threading info from 
+		 * the Qinfo and the specified argument(s)
+		 */
+		void foreach( const OpFunc* f, Element* e, const Qinfo* q,
+			const double* arg, unsigned int argIncrement ) const;
+
 		////////////////////////////////////////////////////////////////
 		// Data Reallocation functions
 		////////////////////////////////////////////////////////////////
@@ -101,17 +111,21 @@ class ZeroDimHandler: public DataHandler
 		////////////////////////////////////////////////////////////////
 		// Iterator functions
 		////////////////////////////////////////////////////////////////
+		/*
 
 		iterator begin( ThreadId threadNum ) const;
 
 		iterator end( ThreadId threadNum ) const;
 
 		void rolloverIncrement( iterator* i ) const;
+		*/
 
 
 	private:
 		bool isGlobal_;
 		char* data_;
+		/// Specifies which thread is allowed to call it
+		ThreadId myThread_;
 };
 
 #endif // _ZERO_DIM_HANDLER_H

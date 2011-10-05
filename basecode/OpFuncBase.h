@@ -59,4 +59,22 @@ class OpFuncDummy: public OpFunc
 		void op( const Eref& e, const Qinfo* q, const double* buf ) const;
 		string rttiType() const;
 };
+
+class FieldOpFunc: public OpFunc
+{
+	public:
+		FieldOpFunc( const OpFunc* parentOpFunc, Element* localElement );
+		bool checkFinfo( const Finfo* s) const;
+		bool checkSet( const SetGet* s) const;
+
+		bool strSet( const Eref& tgt, 
+			const string& field, const string& arg ) const;
+
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const;
+		string rttiType() const;
+	private:
+		const OpFunc* f_;
+		Element* e_;
+};
+
 #endif // _OPFUNCBASE_H

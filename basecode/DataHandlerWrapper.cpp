@@ -83,6 +83,13 @@ void DataHandlerWrapper::process( const ProcInfo* p, Element* e, FuncId fid ) co
 	parent_->process( p, e, fid );
 }
 
+void DataHandlerWrapper:: foreach( const OpFunc* f, Element* e, 
+	const Qinfo* q, const double* arg, unsigned int argIncrement ) const
+{
+	parent_->foreach( f, e, q, arg, argIncrement );
+}
+
+
 ////////////////////////////////////////////////////////////////
 // Data Reallocation functions
 ////////////////////////////////////////////////////////////////
@@ -120,6 +127,7 @@ void DataHandlerWrapper::assign( const char* orig, unsigned int numOrig )
 	cout << "Error: DataHandlerWrapper::assign: parent is const\n";
 }
 
+/*
 ////////////////////////////////////////////////////////////
 // Iterators
 ////////////////////////////////////////////////////////////
@@ -139,3 +147,4 @@ void DataHandlerWrapper::rolloverIncrement( iterator* i ) const
 {
 	parent_->rolloverIncrement( i );
 }
+*/

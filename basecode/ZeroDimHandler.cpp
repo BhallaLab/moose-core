@@ -19,6 +19,10 @@ ZeroDimHandler::ZeroDimHandler( const DinfoBase* dinfo, bool isGlobal )
 		data_ = 0;
 }
 
+ZeroDimHandler::ZeroDimHandler( const DinfoBase* dinfo, char* data )
+	: DataHandler( dinfo, 1 ), data_( data )
+{;}
+
 ZeroDimHandler::ZeroDimHandler( const ZeroDimHandler* other )
 	: DataHandler( other->dinfo(), other->isGlobal() )
 {
@@ -84,6 +88,13 @@ void ZeroDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 	}
 }
 
+void ZeroDimHandler::foreach( const OpFunc* f, Element* e, const Qinfo* q,
+	const double* arg, unsigned int argIncrement ) const
+{
+	if ( data_ && q->threadNum() == myThread_ )
+		f->op( Eref( e, 0 ), q, arg );
+}
+
 ///////////////////////////////////////////////////////////////////////
 // Data reallocation and copy
 ///////////////////////////////////////////////////////////////////////
@@ -144,6 +155,7 @@ void ZeroDimHandler::assign( const char* orig, unsigned int numOrig )
 	}
 }
 
+/*
 //////////////////////////////////////////////////////////////////////
 // Iterator functions.
 //////////////////////////////////////////////////////////////////////
@@ -165,3 +177,4 @@ void ZeroDimHandler::rolloverIncrement( DataHandler::iterator* i ) const
 {
 	i->setData( 0 );
 }
+*/

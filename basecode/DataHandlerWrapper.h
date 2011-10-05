@@ -66,6 +66,9 @@ class DataHandlerWrapper: public DataHandler
 		 */
 		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
 
+		void foreach( const OpFunc* f, Element* e, const Qinfo* q,
+			const double* arg, unsigned int argIncrement ) const;
+
 		////////////////////////////////////////////////////////////////
 		// Data Reallocation functions
 		////////////////////////////////////////////////////////////////
@@ -87,6 +90,7 @@ class DataHandlerWrapper: public DataHandler
 
 		void assign( const char* orig, unsigned int numOrig );
 
+		/*
 		////////////////////////////////////////////////////////////////
 		// Iterator functions
 		////////////////////////////////////////////////////////////////
@@ -96,6 +100,7 @@ class DataHandlerWrapper: public DataHandler
 		iterator end( ThreadId threadNum ) const;
 
 		void rolloverIncrement( iterator* i ) const;
+		*/
 
 	private:
 		const DataHandler* parent_;

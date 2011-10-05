@@ -15843,3 +15843,54 @@ Got DataHandlerWrapper to compile.
 03 Oct
 
 Working on FieldDataHandler.
+FieldDataHandlerBase::process.
+Need here a way to extract root portion of dataId in order to do iteration.
+Actually that went much easier using the iterator from the DataHandler. 
+Perhaps could do same with other DataHandlers, if there isn't too much of a
+speed penalty.
+
+next hurdle: setFieldArraySize is used only once in the entire code base, just
+in sparseMsg.cpp. 
+
+getFieldArraySize is used more often.
+
+Cannot replace getFieldArraySize with sizeOfDim(0), as the latter func is 
+for the maxFieldSize.
+============================================================================
+4 Oct
+Further slow progress on FieldDataHandler , now on rolloverIndex.
+============================================================================
+5 Oct
+Revisiting the whole iterator business. It is turning out to be ugly and
+inefficient.
+
+There seem to be just four use cases where the DataHandler iterates
+through stuff:
+One is the Process. This is already done with internal iterators.
+Two cases involve calling OpFuncs with specified arguments. 
+These two cases are Element::exec and OneToAllMsg::exec.
+This will do:
+foreach( ThreadId threadNum, Element* e,
+	const OpFunc f, const double* arg, unsigned int argIncrement ) 
+
+A fourth case is the ReduceMsg::exec, which wants to go through
+all targets and call ReduceBase::primaryReduce( ObjId ) on each.
+I could probably cast this into a form compatible with the previous
+foreach.
+
+Implementing this. It greatly simplifies the code and will also improve 
+efficiency a lot.
+
+As always, the FieldDataHandler stuff needs some extra work. Here the key
+thing will be to
+a) implement a Process for the FieldDataHandler that operates from the 
+	parent ptr, and does the iteration through all field entries on a given
+	parent object, starting from the parent object as base.
+	This will be passed in to the DataHandler::process of the parent.
+b) Implement a FieldOpFunc that again operates from the parent ptr and deals 
+	with the iteration using the parent object.
+
+This is somewhat nasty but note that it is nicely recursive.
+
+Finally managed to work through all of the Handlers. Some few functions still
+dangle. It now compiles through to Cinfo.
