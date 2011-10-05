@@ -128,7 +128,6 @@ void OneDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 {
 	/**
 	 * This is the variant with threads in a block.
-	 */
 	unsigned int startIndex = start_;
 	unsigned int endIndex = end_;
 	if ( p->numThreadsInGroup > 1 ) {
@@ -145,6 +144,10 @@ void OneDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 			p->numThreadsInGroup - 1 ) /
 				p->numThreadsInGroup;
 	}
+	*/
+	unsigned int startIndex = threadStart_[ p->threadIndexInGroup ];
+	unsigned int endIndex = threadStart_[ p->threadIndexInGroup +1 ];
+	// unsigned int endIndex = end_;
 	
 	assert( startIndex >= start_ && startIndex <= end_ );
 	assert( endIndex >= start_ && endIndex <= end_ );
@@ -156,6 +159,17 @@ void OneDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 	for ( unsigned int i = startIndex; i != endIndex; ++i ) {
 		pf->proc( temp, Eref( e, i ), p );
 		temp += dinfo()->size();
+	}
+}
+
+void OneDimHandler:: foreach( const OpFunc* f, Element* e, const Qinfo* q,
+			const double* arg, unsigned int argIncrement ) const
+{
+	assert( q->threadNum() < threadStart_.size() );
+	unsigned int end = threadStart_[ q->threadNum() + 1 ];
+	for( unsigned int i = threadStart_[ q->threadNum() ]; i != end; ++i) {
+		f->op( Eref( e, i ), q, arg );
+		arg += argIncrement;
 	}
 }
 
@@ -264,6 +278,7 @@ void OneDimHandler::assign( const char* orig, unsigned int numOrig )
 	}
 }
 
+/*
 ////////////////////////////////////////////////////////////////////////
 // Iterators
 ////////////////////////////////////////////////////////////////////////
@@ -308,3 +323,4 @@ void OneDimHandler::rolloverIncrement( DataHandler::iterator* i ) const
 	i->setData( i->data() + dinfo()->size() );
 }
 
+*/

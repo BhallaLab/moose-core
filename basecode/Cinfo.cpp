@@ -124,7 +124,7 @@ void Cinfo::makeCinfoElements( Id parent )
 		i != cinfoMap().end(); ++i ) {
 		Id id = Id::nextId();
 		char* data = reinterpret_cast< char* >( i->second );
-		DataHandler* dh = new ZeroDimGlobalHandler( &dummy, data );
+		DataHandler* dh = new ZeroDimHandler( &dummy, data );
 			// (new Dinfo< Cinfo >(), data );
 		new Element( id, Cinfo::initCinfo(), i->first, dh );
 		Shell::adopt( parent, id );

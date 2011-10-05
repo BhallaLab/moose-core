@@ -64,12 +64,15 @@ class ZombieHandler: public DataHandler
 			unsigned int myNode, unsigned int numNodes );
 
 		////////////////////////////////////////////////////////////////
-		// Process function
+		// Process and foreach functions
 		////////////////////////////////////////////////////////////////
 		/**
 		 * calls process on data, using threading info from the ProcInfo
 		 */
 		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
+
+		void foreach( const OpFunc* f, Element* e, const Qinfo* q,
+			const double* arg, unsigned int argIncrement ) const;
 
 		////////////////////////////////////////////////////////////////
 		// Data Reallocation functions
@@ -87,12 +90,11 @@ class ZombieHandler: public DataHandler
 
 		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo) const;
 
-		DataHandler* addNewDimension( unsigned int size ) const;
-
 		bool resize( unsigned int dimension, unsigned int size );
 
 		void assign( const char* orig, unsigned int numOrig );
 
+		/*
 		////////////////////////////////////////////////////////////////
 		// Iterator functions
 		////////////////////////////////////////////////////////////////
@@ -102,6 +104,7 @@ class ZombieHandler: public DataHandler
 		iterator end( ThreadId threadNum ) const;
 
 		void rolloverIncrement( iterator* i ) const;
+		*/
 
 	private:
 		const DataHandler* parent_;

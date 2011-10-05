@@ -51,6 +51,9 @@ class FieldDataHandlerBase: public DataHandler
 		bool isDataHere( DataId index ) const;
 
 		bool isAllocated() const;
+		////////////////////////////////////////////////////////////////
+		// Special field access funcs
+		////////////////////////////////////////////////////////////////
 
 		/**
 		 * Looks up field entry on specified parent data object, 
@@ -59,6 +62,35 @@ class FieldDataHandlerBase: public DataHandler
 		 */
 		virtual char* lookupField( char* pa, unsigned int index ) 
 			const = 0;
+
+		/**
+		 * Return number of fields on Parent object pa
+		 */
+		virtual unsigned int getNumField( const char* pa ) const = 0;
+
+		/**
+		 * Set number of fields on Parent object pa
+		 */
+		virtual void setNumField( char* pa, unsigned int num ) = 0;
+
+		/**
+		 * Assigns the size of the field array on the specified object.
+		 * 
+		 */
+		void setFieldArraySize( 
+			unsigned int objectIndex, unsigned int size );
+
+		/**
+		 * Looks up the size of the field array on the specified object
+		 */
+		unsigned int getFieldArraySize( unsigned int objectIndex ) const;
+
+		/**
+		 * Looks up the biggest field array size on the current node
+		 * Implemented in derived classes.
+		 */
+		unsigned int biggestFieldArraySize() const;
+
 
 		////////////////////////////////////////////////////////////////
 		// load balancing functions
@@ -73,6 +105,9 @@ class FieldDataHandlerBase: public DataHandler
 		 * calls process on data, using threading info from the ProcInfo
 		 */
 		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
+
+		void foreach( const OpFunc* f, Element* e, const Qinfo* q,
+			const double* arg, unsigned int argIncrement ) const;
 
 		////////////////////////////////////////////////////////////////
 		// Data Reallocation functions
@@ -93,8 +128,7 @@ class FieldDataHandlerBase: public DataHandler
 		// Handled by derived templated FieldDataHandler classes.
 		// void assign( const char* orig, unsigned int numOrig );
 
-		virtual void setNumField( char* data, unsigned int size ) = 0;
-
+		/*
 		////////////////////////////////////////////////////////////////
 		// Iterator functions
 		////////////////////////////////////////////////////////////////
@@ -104,12 +138,7 @@ class FieldDataHandlerBase: public DataHandler
 		iterator end( ThreadId threadNum ) const;
 
 		void rolloverIncrement( iterator* i ) const;
-
-		/**
-		 * Looks up the biggest field array size on the current node
-		 * Implemented in derived classes.
-		 */
-		unsigned int biggestFieldArraySize() const;
+		*/
 
 		/////////////////////////////////////////////////////////////////
 		// Data access
@@ -139,6 +168,12 @@ class FieldDataHandlerBase: public DataHandler
 		 * Bitmask for field part of DataId
 		 */
 		unsigned int mask_;
+
+		/**
+		 * bits used by the last portion of the DataId to specify last
+		 * dimension.
+		 */
+		unsigned int numFieldBits_;
 };
 
 
