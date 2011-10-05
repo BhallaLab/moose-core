@@ -68,6 +68,9 @@ class AnyDimHandler: public DataHandler
 		 */
 		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
 
+		void foreach( const OpFunc* f, Element* e, const Qinfo* q,
+			const double* arg, unsigned int argIncrement ) const;
+
 		////////////////////////////////////////////////////////////////
 		// Data Reallocation functions
 		////////////////////////////////////////////////////////////////
@@ -88,6 +91,8 @@ class AnyDimHandler: public DataHandler
 		bool resize( unsigned int dimension, unsigned int size );
 
 		void assign( const char* orig, unsigned int numOrig );
+
+		/*
 		////////////////////////////////////////////////////////////////
 		// Iterator functions
 		////////////////////////////////////////////////////////////////
@@ -97,6 +102,7 @@ class AnyDimHandler: public DataHandler
 		iterator end( ThreadId threadNum ) const;
 
 		void rolloverIncrement( iterator* i ) const;
+		*/
 
 
 	private:
@@ -108,8 +114,13 @@ class AnyDimHandler: public DataHandler
 		// data[dimN][...][dim0]
 		unsigned int totalEntries_;
 		vector< unsigned int > dims_;
-//		vector< short > bitOffset_;
-//		unsigned long long bitMask_;
+
+		/**
+		 * Start index for each specified thread. The n+1 index is the 
+		 * 'end' of the set for the nth thread. There is an extra index
+		 * at the end of threadStart_ for the very end of the list.
+		 */
+		vector< unsigned int > threadStart_;
 };
 
 #endif	// _ANY_DIM_HANDLER_H

@@ -135,13 +135,27 @@ class DataHandler
 		virtual bool innerNodeBalance( unsigned int size, 
 			unsigned int myNode, unsigned int numNodes ) = 0;
 /////////////////////////////////////////////////////////////////////////
-// Process function
+// Function to go through entire dataset applying specified operations
+// in a thread-safe manner.
 /////////////////////////////////////////////////////////////////////////
 		/**
 		 * Goes through all the data resident on the local node, using
 		 * threading info from the ProcInfo
 		 */
-		virtual void process( const ProcInfo* p, Element* e, FuncId fid ) const = 0;
+		virtual void process( const ProcInfo* p, Element* e, FuncId fid )
+			const = 0;
+
+		/**
+		 * This function iterates through all array entries assigned to
+		 * this node and this thread, and calls the OpFunc f with the
+		 * specified argument. The Qinfo provides the threadNum.
+		 * The arg ptr increments on each cycle:
+		 * if you don't want it to change, just set argIncrement to 0.
+		 */
+		virtual void foreach( const OpFunc* f, Element* e, const Qinfo* q,
+			const double* arg, unsigned int argIncrement )
+			const = 0;
+
 
 /////////////////////////////////////////////////////////////////////////
 // Data reallocation and copy functions
@@ -207,6 +221,7 @@ class DataHandler
 /////////////////////////////////////////////////////////////////////////
 // Iterator class and functions
 /////////////////////////////////////////////////////////////////////////
+#if 0
 
 		/**
 		 * This class handles going through all data objects in turn.
@@ -316,6 +331,7 @@ class DataHandler
 		 * If completed, return end();
 		 */
 		virtual void rolloverIncrement( iterator* i ) const = 0;
+#endif
 
 	protected:
 		bool isGlobal_;

@@ -25,18 +25,6 @@ FieldDataHandlerBase::~FieldDataHandlerBase()
 /////////////////////////////////////////////////////////////////////////
 // Information functions
 /////////////////////////////////////////////////////////////////////////
-/**
- * Returns the data on the specified index.
- */
-char* FieldDataHandlerBase::data( DataId index ) const
-{
-	return lookupField( parentDataHandler_->data( index ), index.myIndex( mask_ ) );
-}
-
-const DataHandler* FieldDataHandlerBase::parentDataHandler() const
-{
-	return parentDataHandler_;
-}
 
 /**
  * Returns the number of field entries.
@@ -56,10 +44,12 @@ unsigned int FieldDataHandlerBase::totalEntries() const
 unsigned int FieldDataHandlerBase::localEntries() const
 {
 	unsigned int ret = 0;
+	/*
 	for ( DataHandler::iterator i = parentDataHandler_->begin( 0 );
 		i != parentDataHandler_->end( Shell::numProcessThreads() ); ++i ) {
-		ret += getNumField( *i );
+		ret += getNumField( i.data() );
 	}
+	*/
 	return ret;
 }
 
@@ -105,6 +95,19 @@ bool FieldDataHandlerBase::isAllocated() const {
 	return parentDataHandler_->isAllocated();
 }
 
+/**
+ * Returns the data on the specified index.
+ */
+char* FieldDataHandlerBase::data( DataId index ) const
+{
+	return lookupField( parentDataHandler_->data( index ), index.myIndex( mask_ ) );
+}
+
+const DataHandler* FieldDataHandlerBase::parentDataHandler() const
+{
+	return parentDataHandler_;
+}
+
 /////////////////////////////////////////////////////////////////////////
 // Load balancing
 /////////////////////////////////////////////////////////////////////////
@@ -123,7 +126,6 @@ void FieldDataHandlerBase::process( const ProcInfo* p, Element* e, FuncId fid ) 
 {
 	/**
 	 * This is the variant with threads in a block.
-	 */
 	unsigned int startIndex = 0;
 	unsigned int endIndex = localEntries();
 	if ( Shell::numProcessThreads() > 1 ) {
@@ -135,15 +137,33 @@ void FieldDataHandlerBase::process( const ProcInfo* p, Element* e, FuncId fid ) 
 		endIndex = ( localEntries() * p ->threadIndexInGroup +
 			Shell::numProcessThreads() - 1 ) / Shell::numProcessThreads();
 	}
+	 */
 
+	/*
+	* We set up the ProcFunc of this field class to do the local iteration
+	* in a manner somewhat like below. The fid is then defined locally in
+	* this Field class and the parentDataHandler's process deals with it.
 	const OpFunc* f = e->cinfo()->getOpFunc( fid );
 	const ProcOpFuncBase* pf = dynamic_cast< const ProcOpFuncBase* >( f );
 	assert( pf );
-	for ( unsigned int i = startIndex; i != endIndex; ++i ) {
-		DataId me( 0, i );
-		char* temp = data( me );
-		pf->proc( temp, Eref( e, me ), p );
-	}
+	FieldProcOpFunc fp = pf->makeFieldProcOpFunc( this );
+	assert( fp );
+	*/
+	parentDataHandler_->process( p, e, fid );
+}
+
+/**
+ * Here we delegate the operation to the parent, and wrap up the local
+ * iterators for the field in the FieldOpFunc. Note that the thread
+ * decomposition belongs to the parent, as it must: the operations here
+ * will modify data structures on the parent.
+ */
+void FieldDataHandlerBase::foreach( const OpFunc* f, Element* e,
+	const Qinfo* q, const double* arg, unsigned int argIncrement ) const
+{
+	FieldOpFunc fof( f, e );
+	ObjId parent = Neutral::parent( Eref( e, 0 ) );
+	parentDataHandler_->foreach( &fof, parent.element(), q, arg, argIncrement );
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -161,12 +181,20 @@ void FieldDataHandlerBase::unGlobalize()
  */
 bool FieldDataHandlerBase::resize( unsigned int dimension, unsigned int size)
 {
+	if ( dimension == 0 ) {
+		unsigned int i = biggestFieldArraySize();
+		assert( i <= size );
+		maxFieldEntries_ = size;
+	}
+
 	cout << Shell::myNode() << ": FieldDataHandler::resize: Error: Cannot resize from Field\n";
 	return 0;
 }
 
 /**
  * Assigns the size of the field array on the specified object.
+ * Here we could replace objectIndex with a DataId and 
+ * trim off the field part.
  */
 void FieldDataHandlerBase::setFieldArraySize( 
 	unsigned int objectIndex, unsigned int size )
@@ -202,15 +230,17 @@ unsigned int FieldDataHandlerBase::getFieldArraySize( unsigned int objectIndex )
 unsigned int FieldDataHandlerBase::biggestFieldArraySize() const
 {
 	unsigned int ret = 0;
-	for ( iterator i = parentDataHandler_->begin(); i !=
-		parentDataHandler_->end(); ++i )
+	/*
+	for ( iterator i = parentDataHandler_->begin(0); i !=
+		parentDataHandler_->end( Shell::numProcessThreads() ); ++i )
 	{
-		char* pa = *i;
+		char* pa = i.data();
 		assert( pa );
 		unsigned int numHere = getNumField( pa );
 		if ( numHere > ret )
 			ret = numHere;
 	}
+	*/
 
 	// Here it would be nice to get FieldArraySize from all nodes. 
 	// But we can't do this here as we don't know for sure that the
@@ -219,154 +249,10 @@ unsigned int FieldDataHandlerBase::biggestFieldArraySize() const
 	return ret;
 }
 
-/**
- * This func gets the FieldArraySize from all nodes and updates
- * maxFieldEntries_ to the largest.
- * MUST be called on all nodes in sync.
- * Deprecated
-unsigned int FieldDataHandlerBase::syncFieldArraySize()
-{
-	unsigned int ret = biggestFieldArraySize();
-	// ret = Shell::reduceInt( ret ); 
-	if ( maxFieldEntries_ < ret )
-		maxFieldEntries_ = ret;
-	return ret;
-}
- */
-
-/**
- * Assigns the maxFieldEntries_. Checks that it is bigger than the
- * biggest size on this node.
- */
-void FieldDataHandlerBase::setFieldDimension( unsigned int size )
-{
-	unsigned int i = biggestFieldArraySize();
-	assert( i <= size );
-	maxFieldEntries_ = size;
-	//cout << Shell::myNode() << ": SetFieldDimension to " << size << endl;
-}
-
-/**
- * Returns maxFieldEntries_
- */
-unsigned int FieldDataHandlerBase::getFieldDimension( ) const
-{
-	return maxFieldEntries_;
-}
-
-bool FieldDataHandlerBase::isGlobal() const
-{
-	return parentDataHandler_->isGlobal();
-}
-
-/////////////////////////////////////////////////////////////////
-// Iterators
-/////////////////////////////////////////////////////////////////
-
-DataHandler::iterator FieldDataHandlerBase::begin() const {
-	for ( iterator i = parentDataHandler_->begin(); i !=
-		parentDataHandler_->end(); ++i ) {
-		char* pa = *i;
-		assert( pa );
-		unsigned int numHere = getNumField( pa );
-		if ( numHere != 0 )
-			return iterator( this, i.index(), 
-				i.index().data() * maxFieldEntries_ );
-	}
-	// Failed to find any valid index
-	return end();
-}
-
-/**
- * This is 1+(last valid field entry) on the last valid data entry
- * on the parent data handler, expressed as a single int.
- */
-DataHandler::iterator FieldDataHandlerBase::end() const {
-	return iterator( this, parentDataHandler_->end().index(), 
-		parentDataHandler_->end().index().data() * maxFieldEntries_);
-}
-
-void FieldDataHandlerBase::nextIndex( DataId& index, unsigned int& linearIndex ) const {
-	char* pa = parentDataHandler_->data( index );
-	assert( pa );
-	unsigned int numHere = getNumField( pa );
-	if ( index.field() + 1 < numHere ) {
-		index.incrementFieldIndex();
-		++linearIndex;
-		return;
-	}
-
-	index.rolloverFieldIndex();
-	unsigned int j = index.data();
-	for ( iterator i( parentDataHandler_, j, j * maxFieldEntries_ ); 
-		i != parentDataHandler_->end(); ++i ) {
-		index = i.index();
-		char* pa = *i;
-		assert( pa );
-		numHere = getNumField( pa );
-		if ( numHere > 0 ) {
-			linearIndex = index.data() * maxFieldEntries_;
-			return;
-		}
-	}
-	// If we fall out of this loop we must be at the end.
-	index = parentDataHandler_->end().index();
-}
-
 /////////////////////////////////////////////////////////////////
 
 void FieldDataHandlerBase::assignParentDataHandler( 
 	const DataHandler* parent )
 {
 	parentDataHandler_ = parent;
-}
-
-/////////////////////////////////////////////////////////////////
-// setDataBlock stuff. Defer implementation for now.
-/////////////////////////////////////////////////////////////////
-
-bool FieldDataHandlerBase::setDataBlock( const char* data, unsigned int numData,
-	DataId startIndex ) const 
-{
-	/*
-	if ( parentDataHandler_->isDataHere( startIndex.data() ) ) {
-		char* temp = parentDataHandler_->data( startIndex.data() );
-		assert( temp );
-		Parent* pa = reinterpret_cast< Parent* >( temp );
-
-		unsigned int numField = ( pa->*getNumField_ )();
-		unsigned int max = numData;
-		if ( did.field() + numData > numField  )
-			max = numField - did.field();
-		for ( unsigned int i = 0; i < max; ++i ) {
-			Field* f = ( pa->*lookupField_ )( did.field() + i );
-			*f = *reinterpret_cast< const Field* >( 
-				data + i * dinfo()->size() );
-		}
-	}
-	return 1;
-	*/
-	return 0;
-}
-
-/**
- * Assigns a block of data at the specified location.
- * Returns true if all OK. No allocation.
- */
-bool FieldDataHandlerBase::setDataBlock( const char* data, unsigned int numData,
-	const vector< unsigned int >& startIndex ) const
-{
-/*
-	if ( startIndex.size() == 0 )
-		return setDataBlock( data, numData, 0 );
-	unsigned int fieldIndex = startIndex[0];
-	if ( startIndex.size() == 1 )
-		return setDataBlock( data, numData, DataId( 0, fieldIndex ) );
-	vector< unsigned int > temp = startIndex;
-	temp.pop_back(); // Get rid of fieldIndex.
-	DataDimensions dd( parentDataHandler_->dims() );
-	unsigned int paIndex = dd.linearIndex( temp );
-	return setDataBlock( data, numData, DataId( paIndex, fieldIndex ) );
-	*/
-	return 0;
 }

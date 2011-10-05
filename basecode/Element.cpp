@@ -8,10 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "DataDimensions.h"
-#include "AnyDimGlobalHandler.h"
-#include "AnyDimHandler.h"
-#include "DataHandlerWrapper.h"
 
 /**
  * This version is used when making zombies. We want to have a
@@ -280,8 +276,11 @@ void Element::exec( const Qinfo* qi, const double* arg )
 			// numEntries and entrySize of the ofid to set args.
 			Element* elm = ofid->oi.element();
 			assert( ofid->numEntries > 0 );
-			DataHandler* dh = elm->dataHandler();
 			const double* data = arg + ObjFidSizeInDoubles;
+			elm->dataHandler()->foreach( f,  elm, qi, 
+				data, ofid->entrySize );
+			/*
+			DataHandler* dh = elm->dataHandler();
 			unsigned int count = 0;
 			unsigned int offset = 0;
 			for ( DataHandler::iterator 
@@ -292,6 +291,7 @@ void Element::exec( const Qinfo* qi, const double* arg )
 					++count;
 					f->op( Eref( elm, i.dataId() ), qi, data + offset );
 			}
+			*/
 		} else if ( ofid->oi.isDataHere() && qi->execThread( ofid->oi.id, ofid->oi.dataId.value() ) ) {
 			f->op( ofid->oi.eref(), qi, arg + ObjFidSizeInDoubles );
 		}

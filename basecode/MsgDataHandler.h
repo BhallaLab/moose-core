@@ -16,41 +16,18 @@
 class MsgDataHandler: public DataHandler
 {
 	public:
-		MsgDataHandler( const DinfoBase* dinfo );
+		MsgDataHandler( const DinfoBase* dinfo, bool isGlobal );
 
 		MsgDataHandler( const MsgDataHandler* other );
 
 		~MsgDataHandler();
 
-		DataHandler* globalize() const;
-		DataHandler* unGlobalize() const;
+		////////////////////////////////////////////////////////////
+		// Information functions
+		////////////////////////////////////////////////////////////
 
-		bool innerNodeBalance( unsigned int size,
-			unsigned int myNode, unsigned int numNodes );
-
-		/**
-		 * Make a single copy
-		 */
-		DataHandler* copy( bool toGlobal, unsigned int n ) const;
-
-		/**
-		 * Make a single copy with same dimensions, using a different Dinfo
-		 */
-		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo ) const;
-
-		DataHandler* copyExpand( unsigned int copySize, bool toGlobal ) const;
-
-		DataHandler* copyToNewDim( unsigned int newDimSize, bool toGlobal ) const;
-
-		/**
-		 * Returns the data on the specified index.
-		 */
+		/// Returns data on specified index
 		char* data( DataId index ) const;
-
-		/**
-		 * calls process on data, using threading info from the ProcInfo
-		 */
-		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
 
 		/**
 		 * Returns the number of data entries.
@@ -58,18 +35,9 @@ class MsgDataHandler: public DataHandler
 		unsigned int totalEntries() const;
 
 		/**
-		 * Returns the number of data entries on local node.
+		 * Returns the number of data entries on local node
 		 */
 		unsigned int localEntries() const;
-
-		// Inherited. Returns data part of DataId. 
-		// unsigned int linearIndex( const DataId& d ) const;
-
-		/**
-		 * Returns the DataId corresponding to the specified linear index.
-		 * Again, inherited. Returns the linearIndex as the data part.
-		 */
-		// DataId dataId( unsigned int linearIndex) const;
 
 		/**
 		 * Returns the number of dimensions of the data.
@@ -78,35 +46,47 @@ class MsgDataHandler: public DataHandler
 
 		unsigned int sizeOfDim( unsigned int dim ) const;
 
-		bool resize( vector< unsigned int > dims );
-
 		vector< unsigned int > dims() const;
 
-		/**
-		 * Returns true always: it is a global.
-		 */
 		bool isDataHere( DataId index ) const;
 
-		/// Return true: msgs are always allocated.
-		virtual bool isAllocated() const;
+		bool isAllocated() const;
 
-		bool isGlobal() const;
+		////////////////////////////////////////////////////////////////
+		// load balancing functions
+		////////////////////////////////////////////////////////////////
+		bool innerNodeBalance( unsigned int size,
+			unsigned int myNode, unsigned int numNodes );
 
-		iterator begin( ThreadId threadNum ) const;
+		////////////////////////////////////////////////////////////////
+		// Process and foreach functions
+		////////////////////////////////////////////////////////////////
+		/**
+		 * calls process on data, using threading info from the ProcInfo
+		 */
+		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
 
-		iterator end( ThreadId threadNum ) const;
+		void foreach( const OpFunc* f, Element* e, const Qinfo* q,
+			const double* arg, unsigned int argIncrement ) const;
+
+		////////////////////////////////////////////////////////////////
+		// Data Reallocation functions
+		////////////////////////////////////////////////////////////////
+
+		void globalize( const char* data, unsigned int size );
+		void unGlobalize();
 
 		/**
-		 * Assigns a block of data at the specified location.
-		 * Here the numData has to be 1 and the startIndex
-		 * has to be 0. Returns true if all this is OK.
+		 * Make a single identity copy, doing appropriate node 
+		 * partitioning if toGlobal is false.
 		 */
-		bool setDataBlock( const char* data, unsigned int numData,
-			const vector< unsigned int >& startIndex ) const;
-		bool setDataBlock( const char* data, unsigned int numData,
-			DataId startIndex ) const;
+		DataHandler* copy( bool toGlobal, unsigned int n ) const;
 
-		void nextIndex( DataId& index, unsigned int& linearIndex ) const;
+		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo) const;
+
+		bool resize( unsigned int dimension, unsigned int size );
+
+		void assign( const char* orig, unsigned int numOrig );
 
 	protected:
 		char* data_;

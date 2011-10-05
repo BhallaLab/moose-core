@@ -67,12 +67,15 @@ class OneDimHandler: public DataHandler
 			unsigned int myNode, unsigned int numNodes );
 
 		////////////////////////////////////////////////////////////////
-		// Process function
+		// Process and foreach functions
 		////////////////////////////////////////////////////////////////
 		/**
 		 * calls process on data, using threading info from the ProcInfo
 		 */
 		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
+
+		void foreach( const OpFunc* f, Element* e, const Qinfo* q,
+			const double* arg, unsigned int argIncrement ) const;
 
 		////////////////////////////////////////////////////////////////
 		// Data Reallocation functions
@@ -95,6 +98,7 @@ class OneDimHandler: public DataHandler
 
 		void assign( const char* orig, unsigned int numOrig );
 
+		/*
 		////////////////////////////////////////////////////////////////
 		// Iterator functions
 		////////////////////////////////////////////////////////////////
@@ -104,7 +108,7 @@ class OneDimHandler: public DataHandler
 		iterator end( ThreadId threadNum ) const;
 
 		void rolloverIncrement( iterator* i ) const;
-
+		*/
 
 	private:
 		unsigned int totalEntries_; // Total number of entries on all nodes
@@ -112,6 +116,12 @@ class OneDimHandler: public DataHandler
 		unsigned int end_;	// Starting index of data, used in MPI.
 		char* data_;
 // 		unsigned int bitMask_; // Masks out the index.
+		/**
+		 * Start index for each specified thread. The n+1 index is the 
+		 * 'end' of the set for the nth thread. There is an extra index
+		 * at the end of threadStart_ for the very end of the list.
+		 */
+		vector< unsigned int > threadStart_;
 };
 
 #endif	// _ONE_DIM_HANDLER_H
