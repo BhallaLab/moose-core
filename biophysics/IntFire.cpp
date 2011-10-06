@@ -159,9 +159,11 @@ void IntFire::process( const Eref &e, ProcPtr p )
 	if ( Vm_ > thresh_ ) {
 		spike.send( e, p->threadIndexInGroup, p->currTime );
 		// e.sendSpike( spikeSlot, p->currTime );
-		if ( e.index().data() % 100 == 0 ) {
-			// cout << "IntFire[" << e.index().data() << "]::process, zeroing Vm= " << Vm_ << ", Ptr = " << this << endl;
+		/*
+		if ( e.index().value() % 100 == 0 ) {
+			cout << "IntFire[" << e.index().data() << "]::process, zeroing Vm= " << Vm_ << ", Ptr = " << this << endl;
 		}
+		*/
 		Vm_ = -1.0e-7;
 	} else {
 		Vm_ *= ( 1.0 - p->dt / tau_ );
@@ -202,10 +204,10 @@ void IntFire::process( const Eref &e, ProcPtr p )
  * and gets redirected to the IntFire.
  * This is called by UpFunc1< double >
  */
-void IntFire::innerAddSpike( DataId index, const double time )
+void IntFire::innerAddSpike( unsigned int index, const double time )
 {
-	assert( index.field() < getNumSynapses() );
-	Synapse s( *getSynapse( index.field() ), time );
+	assert( index < getNumSynapses() );
+	Synapse s( *getSynapse( index ), time );
 	// cout << index << "	";
 	pendingEvents_.push( s );
 }

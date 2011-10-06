@@ -51,7 +51,7 @@ class SynChan: public SynChanBase
 		/**
 		 * Override base class function for spike handling
 		 */
-		void innerAddSpike( DataId synIndex, const double time );
+		void innerAddSpike( unsigned int synIndex, const double time );
 
 		static const Cinfo* initCinfo();
 	protected: // Used by NMDAChan

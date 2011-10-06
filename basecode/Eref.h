@@ -46,6 +46,11 @@ class Eref
 		}
 
 		/**
+		 * Returns index from field part of DataId.
+		 */
+		unsigned int fieldIndex() const;
+
+		/**
 		 * Returns the ObjId corresponding to the Eref. All info is kept.
 		 */
 		ObjId objId() const;

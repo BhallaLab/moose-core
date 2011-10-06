@@ -22,7 +22,7 @@
 template< class T > class UpFunc0: public OpFunc
 {
 	public:
-		UpFunc0( void ( T::*func )( DataId index ) )
+		UpFunc0( void ( T::*func )( unsigned int index ) )
 			: func_( func )
 			{;}
 
@@ -44,20 +44,20 @@ template< class T > class UpFunc0: public OpFunc
 		 * argument.
 		 */
 		void op( const Eref& e, const Qinfo* q, const char* buf ) const {
-			(reinterpret_cast< T* >( e.parentData() )->*func_)( e.index() );
+			(reinterpret_cast< T* >( e.parentData() )->*func_)( e.fieldIndex() );
 		}
 
 		string rttiType() const {
 			return "void";
 		}
 	private:
-		void ( T::*func_ )( DataId index ); 
+		void ( T::*func_ )( unsigned int index ); 
 };
 
 template< class T, class A > class UpFunc1: public OpFunc
 {
 	public:
-		UpFunc1( void ( T::*func )( DataId, A ) )
+		UpFunc1( void ( T::*func )( unsigned int, A ) )
 			: func_( func )
 			{;}
 
@@ -77,7 +77,7 @@ template< class T, class A > class UpFunc1: public OpFunc
 		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			Conv< A > arg1( buf );
 			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
-				e.index(), *arg1 );
+				e.fieldIndex(), *arg1 );
 		}
 
 		string rttiType() const {
@@ -85,13 +85,13 @@ template< class T, class A > class UpFunc1: public OpFunc
 		}
 
 	private:
-		void ( T::*func_ )( DataId index, const A ); 
+		void ( T::*func_ )( unsigned int index, const A ); 
 };
 
 template< class T, class A1, class A2 > class UpFunc2: public OpFunc
 {
 	public:
-		UpFunc2( void ( T::*func )( DataId, A1, A2 ) )
+		UpFunc2( void ( T::*func )( unsigned int, A1, A2 ) )
 			: func_( func )
 			{;}
 
@@ -113,7 +113,7 @@ template< class T, class A1, class A2 > class UpFunc2: public OpFunc
 			buf += arg1.size();
 			Conv< A2 > arg2( buf );
 			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
-				e.index(), *arg1, *arg2 );
+				e.fieldIndex(), *arg1, *arg2 );
 		}
 
 		string rttiType() const {
@@ -121,14 +121,14 @@ template< class T, class A1, class A2 > class UpFunc2: public OpFunc
 		}
 
 	private:
-		void ( T::*func_ )( DataId, A1, A2 ); 
+		void ( T::*func_ )( unsigned int, A1, A2 ); 
 };
 
 template< class T, class A1, class A2, class A3 > class UpFunc3: 
 	public OpFunc
 {
 	public:
-		UpFunc3( void ( T::*func )( DataId index, A1, A2, A3 ) )
+		UpFunc3( void ( T::*func )( unsigned int index, A1, A2, A3 ) )
 			: func_( func )
 			{;}
 
@@ -152,7 +152,7 @@ template< class T, class A1, class A2, class A3 > class UpFunc3:
 			buf += arg2.size();
 			Conv< A3 > arg3( buf );
 			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
-				e.index(), *arg1, *arg2, *arg3 );
+				e.fieldIndex(), *arg1, *arg2, *arg3 );
 		}
 
 		string rttiType() const {
@@ -161,14 +161,14 @@ template< class T, class A1, class A2, class A3 > class UpFunc3:
 		}
 
 	private:
-		void ( T::*func_ )( DataId, A1, A2, A3 ); 
+		void ( T::*func_ )( unsigned int, A1, A2, A3 ); 
 };
 
 template< class T, class A1, class A2, class A3, class A4 > class UpFunc4: 
 	public OpFunc
 {
 	public:
-		UpFunc4( void ( T::*func )( DataId index, A1, A2, A3, A4 ) )
+		UpFunc4( void ( T::*func )( unsigned int index, A1, A2, A3, A4 ) )
 			: func_( func )
 			{;}
 
@@ -194,7 +194,7 @@ template< class T, class A1, class A2, class A3, class A4 > class UpFunc4:
 			buf += arg3.size();
 			Conv< A4 > arg4( buf );
 			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
-				e.index(), *arg1, *arg2, *arg3, *arg4 );
+				e.fieldIndex(), *arg1, *arg2, *arg3, *arg4 );
 		}
 
 		string rttiType() const {
@@ -203,14 +203,14 @@ template< class T, class A1, class A2, class A3, class A4 > class UpFunc4:
 		}
 
 	private:
-		void ( T::*func_ )( DataId, A1, A2, A3, A4 ); 
+		void ( T::*func_ )( unsigned int, A1, A2, A3, A4 ); 
 };
 
 template< class T, class A1, class A2, class A3, class A4, class A5 > class UpFunc5: 
 	public OpFunc
 {
 	public:
-		UpFunc5( void ( T::*func )( DataId index, A1, A2, A3, A4, A5 ) )
+		UpFunc5( void ( T::*func )( unsigned int index, A1, A2, A3, A4, A5 ) )
 			: func_( func )
 			{;}
 
@@ -238,7 +238,7 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class UpFu
 			buf += arg4.size();
 			Conv< A5 > arg5( buf );
 			(reinterpret_cast< T* >( e.parentData() )->*func_)( 
-				e.index(), *arg1, *arg2, *arg3, *arg4, *arg5 );
+				e.fieldIndex(), *arg1, *arg2, *arg3, *arg4, *arg5 );
 		}
 
 		string rttiType() const {
@@ -248,7 +248,7 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class UpFu
 		}
 
 	private:
-		void ( T::*func_ )( DataId, A1, A2, A3, A4, A5 ); 
+		void ( T::*func_ )( unsigned int, A1, A2, A3, A4, A5 ); 
 };
 
 /**
@@ -261,7 +261,7 @@ template< class T, class A1, class A2, class A3, class A4, class A5 > class UpFu
 template< class T, class A > class GetUpFunc: public GetOpFuncBase< A >
 {
 	public:
-		GetUpFunc( A ( T::*func )( DataId ) const )
+		GetUpFunc( A ( T::*func )( unsigned int ) const )
 			: func_( func )
 			{;}
 
@@ -291,7 +291,7 @@ template< class T, class A > class GetUpFunc: public GetOpFuncBase< A >
 		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
 			if ( skipWorkerNodeGlobal( e ) )
 				return;
-			const A& ret = (( reinterpret_cast< T* >( e.parentData() ) )->*func_)( e.index() );
+			const A& ret = (( reinterpret_cast< T* >( e.parentData() ) )->*func_)( e.fieldIndex() );
 			Conv< A > conv0( ret );
 			returnFromGet( e, q, buf, conv0.ptr(), conv0.size() );
 		}
@@ -302,7 +302,7 @@ template< class T, class A > class GetUpFunc: public GetOpFuncBase< A >
 		}
 
 	private:
-		A ( T::*func_ )( DataId ) const;
+		A ( T::*func_ )( unsigned int ) const;
 };
 
 

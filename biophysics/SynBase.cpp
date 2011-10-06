@@ -70,7 +70,7 @@ SynBase::~SynBase()
  * and gets redirected to the SynBase.
  * This is called by UpFunc1< double >
  */
-void SynBase::addSpike( DataId index, const double time )
+void SynBase::addSpike( unsigned int index, const double time )
 {
 	this->innerAddSpike( index, time );
 }
