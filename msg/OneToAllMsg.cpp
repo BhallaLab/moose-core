@@ -53,7 +53,7 @@ void OneToAllMsg::exec( const Qinfo* q, const double* arg, FuncId fid )
 		}
 	} else {
 		if ( e1_->dataHandler()->isDataHere( i1_ )  &&
-			q->execThread( e1_->id(), i1_.data() ) )
+			q->execThread( e1_->id(), i1_.value() ) )
 		{
 			const OpFunc* f = e1_->cinfo()->getOpFunc( fid );
 			f->op( Eref( e1_, i1_ ), q, arg );
@@ -81,7 +81,7 @@ ObjId OneToAllMsg::findOtherEnd( ObjId f ) const
 		if ( f.dataId == i1_ )
 			return ObjId( e2()->id(), 0 );
 		else
-			return ObjId( e2()->id(), DataId::bad() );
+			return ObjId( e2()->id(), DataId::bad );
 	} else if ( f.id() == e2() ) {
 		return ObjId( e1()->id(), i1_ );
 	}
@@ -115,6 +115,29 @@ Msg* OneToAllMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 unsigned int OneToAllMsg::srcToDestPairs(
 	vector< DataId >& src, vector< DataId >& dest ) const
 {
+	/*
+	class GetDataId: public OpFuncDummy
+	{
+		public:
+			GetDataId( vector< DataId >* vec )
+				: vec_( vec )
+			{;}
+			void op( const Eref& e, const Qinfo* q, const double* buf) const
+			{
+				vec_->push_back( e.index() );
+			}
+		private:
+			vector< DataId >* vec_;
+	};
+	*/
+
+	dest.resize( 0 );
+	DataIdExtractor di( &dest );
+
+	e2_->dataHandler()->foreach( &di, 0, 0, 0, 0 );
+	src.resize( dest.size(), i1_ );
+
+	/*
 	 unsigned int destRange = e2_->dataHandler()->totalEntries();
 	src.resize( destRange, i1_ );
 	dest.resize( destRange );
@@ -126,8 +149,9 @@ unsigned int OneToAllMsg::srcToDestPairs(
 		for ( unsigned int i = 0; i < destRange; ++i )
 			dest[i] = DataId( i / fd, i % fd );
 	}
+	*/
 
-	return destRange;
+	return dest.size();
 }
 
 ///////////////////////////////////////////////////////////////////////

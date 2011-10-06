@@ -210,19 +210,9 @@ SparseMsg::~SparseMsg()
 
 unsigned int rowIndex( const Element* e, const DataId& d )
 {
-	if ( e->dataHandler()->numDimensions() == 1 ) {
-		return d.data();
-	} else if ( e->dataHandler()->numDimensions() == 2 ) {
-		// rectangular grid, looking for index
-		unsigned int row = e->dataHandler()->sizeOfDim(0) * d.data();
-		/*
-		unsigned int row = 0;
-		for ( unsigned int i = 0; i < d.data(); ++i )
-			row += e->dataHandler()->numData2( i );
-		*/
-		return ( row + d.field() );
-	}
-	return 0;
+	// FieldDataHandlerBase* fdh = dynamic_cast< FieldDataHandlerBase* >( e->dataHandler() );
+
+	return d.value();
 }
 
 void SparseMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const
@@ -234,12 +224,15 @@ void SparseMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const
 	 */
 	if ( q->src().element() == e1_ ) {
 		const OpFunc* f = e2_->cinfo()->getOpFunc( fid );
-		unsigned int row = rowIndex( e1_, q->src().dataId.data() );
+		unsigned int row = rowIndex( e1_, q->src().dataId.value() );
 		// unsigned int oldRow = row;
 
 		const unsigned int* fieldIndex;
 		const unsigned int* colIndex;
 		unsigned int n = matrix_.getRow( row, &fieldIndex, &colIndex );
+
+		FieldDataHandlerBase* fdh = 
+			dynamic_cast< FieldDataHandlerBase* >( e2_->dataHandler() );
 
 		// if ( e1_->getName() == "test2" )
 			report = 0;
@@ -249,12 +242,25 @@ void SparseMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const
 				": SparseMsg " << e1_->getName() << "->" << 
 				e2_->getName() << ", row= " << row << ": entries= ";
 		// J counts over all the column entries, i.e., all targets.
-		for ( unsigned int j = 0; j < n; ++j ) {
-			if ( report ) cout << "(" << colIndex[j] << "," << fieldIndex[j] << ")";
-			if ( q->execThread( e2_->id(), colIndex[j] ) ) {
-				Eref tgt( e2_, DataId( colIndex[j], fieldIndex[j] ) );
-				if ( tgt.isDataHere() )
-					f->op( tgt, q, arg );
+
+
+		if ( fdh ) {
+			for ( unsigned int j = 0; j < n; ++j ) {
+				if ( report ) cout << "(" << colIndex[j] << "," << fieldIndex[j] << ")";
+				if ( q->execThread( e2_->id(), colIndex[j] ) ) {
+					Eref tgt( e2_, DataId( colIndex[j], fieldIndex[j] , fdh->numFieldBits() ) );
+					if ( tgt.isDataHere() )
+						f->op( tgt, q, arg );
+				}
+			}
+		} else {
+			for ( unsigned int j = 0; j < n; ++j ) {
+				if ( report ) cout << "(" << colIndex[j] << "," << fieldIndex[j] << ")";
+				if ( q->execThread( e2_->id(), colIndex[j] ) ) {
+					Eref tgt( e2_, DataId( colIndex[j] ) );
+					if ( tgt.isDataHere() )
+						f->op( tgt, q, arg );
+				}
 			}
 		}
 		if ( report ) cout << "\n";
@@ -263,7 +269,7 @@ void SparseMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const
 		// Note that we do NOT use the fieldIndex going backward. It is
 		// assumed that e1 does not have fieldArrays.
 		const OpFunc* f = e1_->cinfo()->getOpFunc( fid );
-		unsigned int column = rowIndex( e2_, q->src().dataId.data() );
+		unsigned int column = rowIndex( e2_, q->src().dataId.value() );
 		vector< unsigned int > fieldIndex;
 		vector< unsigned int > rowIndex;
 		unsigned int n = matrix_.getColumn( column, fieldIndex, rowIndex );
@@ -285,10 +291,18 @@ Eref SparseMsg::firstTgt( const Eref& src ) const
 	if ( src.element() == e1_ ) {
 		const unsigned int* fieldIndex;
 		const unsigned int* colIndex;
-		unsigned int n = matrix_.getRow( src.index().data(), 
+		unsigned int n = matrix_.getRow( src.index().value(), 
 			&fieldIndex, &colIndex );
-		if ( n != 0 )
-			return Eref( e2_, DataId( colIndex[0], fieldIndex[0] )  );
+		if ( n != 0 ) {
+			FieldDataHandlerBase* fdh = 
+				dynamic_cast< FieldDataHandlerBase* >( e2_->dataHandler() );
+			if ( fdh ) {
+				return Eref( e2_, DataId( colIndex[0], fieldIndex[0], 
+					fdh->numFieldBits() ) );
+			} else {
+				return Eref( e2_, DataId( colIndex[0] )  );
+			}
+		}
 	} else if ( src.element() == e2_ ) {
 		return Eref( e1_, 0 );
 	}
@@ -343,10 +357,14 @@ unsigned int SparseMsg::randomConnect( double probability )
 			if ( r < probability )
 				++totSynNum;
 		}
-		syn->dataHandler()->setFieldArraySize( i, synNum );
+		FieldDataHandlerBase* fdh = 
+			dynamic_cast< FieldDataHandlerBase* >( syn->dataHandler() );
+		if ( fdh ) {
+		// syn->dataHandler()->setFieldArraySize( i, synNum );
+			fdh->setFieldArraySize( i, synNum );
 		// sizes[ i ] = synNum;
-		totalSynapses += synNum;
-
+			totalSynapses += synNum;
+		}
 		matrix_.addRow( i, synIndex );
 	}
 	/*
@@ -385,23 +403,35 @@ ObjId SparseMsg::findOtherEnd( ObjId f ) const
 	if ( f.id() == e1() ) {
 		const unsigned int* entry;
 		const unsigned int* colIndex;
-		unsigned int num = matrix_.getRow( f.dataId.data(),
+		unsigned int num = matrix_.getRow( f.dataId.value(),
 			&entry, &colIndex );
 		if ( num > 0 ) { // Return the first matching entry.
-			return ObjId( e2()->id(), DataId( colIndex[0], entry[0] ) );
+			FieldDataHandlerBase* fdh = 
+				dynamic_cast< FieldDataHandlerBase* >( e2_->dataHandler() );
+			if ( fdh )
+				return ObjId( e2()->id(), DataId( colIndex[0], entry[0],
+					fdh->numFieldBits() ) );
+			else
+				return ObjId( e2()->id(), DataId( colIndex[0] ) );
 		}
-		return ObjId( e2()->id(), DataId::bad() );
+		return ObjId( e2()->id(), DataId::bad );
 	} else if ( f.id() == e2() ) { // Bad! Slow! Avoid!
 		vector< unsigned int > entry;
 		vector< unsigned int > rowIndex;
-		unsigned int num = matrix_.getColumn( f.dataId.data(), 
+		unsigned int num = matrix_.getColumn( f.dataId.value(), 
 			entry, rowIndex );
 		if ( num > 0 ) { // Return the first matching entry.
-			return ObjId( e1()->id(), DataId( rowIndex[0], entry[0] ) );
+			FieldDataHandlerBase* fdh = 
+				dynamic_cast< FieldDataHandlerBase* >( e2_->dataHandler() );
+			if ( fdh )
+				return ObjId( e1()->id(), DataId( rowIndex[0], entry[0],
+					fdh->numFieldBits() ) );
+			else
+				return ObjId( e1()->id(), DataId( rowIndex[0] ) );
 		}
-		return ObjId( e1()->id(), DataId::bad() );
+		return ObjId( e1()->id(), DataId::bad );
 	}
-	return ObjId::bad();
+	return ObjId::bad;
 }
 
 Msg* SparseMsg::copy( Id origSrc, Id newSrc, Id newTgt,
@@ -438,14 +468,20 @@ unsigned int SparseMsg::srcToDestPairs(
 	dest.resize( 0 );
 	src.reserve( matrix_.nEntries() );
 	dest.reserve( matrix_.nEntries() );
+	FieldDataHandlerBase* fdh = 
+		dynamic_cast< FieldDataHandlerBase* >( e2_->dataHandler() );
 	for ( unsigned int i = 0; i < nRows; ++i ) {
 		const unsigned int* fieldIndex;
 		const unsigned int* colIndex;
 		unsigned int n = matrix_.getRow( i, &fieldIndex, &colIndex );
 		// N is number of used column entries in this row.
 		for ( unsigned int j = 0; j < n; ++j ) {
-			src.push_back( DataId( i, 0 ) );
-			dest.push_back( DataId( colIndex[j], fieldIndex[j] ) );
+			src.push_back( DataId( i ) );
+			if ( fdh )
+				dest.push_back( DataId( colIndex[j], fieldIndex[j], 
+					fdh->numFieldBits() ) );
+			else
+				dest.push_back( DataId( colIndex[j] ) );
 		}
 	}
 	assert( src.size() == matrix_.nEntries() );

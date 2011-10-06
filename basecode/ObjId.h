@@ -41,8 +41,6 @@ class ObjId
 			: id( i ), dataId( 0 )
 		{;}
 
-		static const ObjId& bad();
-
 		/**
 		 * Returns the Eref matching itself.
 		 */
@@ -74,6 +72,8 @@ class ObjId
 		Id id; 
 		DataId dataId;
 
+		/// A useful test value
+		static const ObjId bad;
 	private:
 };
 
