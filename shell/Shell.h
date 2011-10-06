@@ -254,7 +254,7 @@ class Shell
 			vector< unsigned int > dimensions );
 		void destroy( const Eref& e, const Qinfo* q, Id eid);
 		void innerCreate( string type, Id parent, Id newElm, string name,
-			const vector< unsigned int >& dimensions );
+			const vector< int >& dimensions );
 
 		/**
 		 * Connects src to dest on appropriate fields, with specified

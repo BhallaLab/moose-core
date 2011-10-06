@@ -52,6 +52,8 @@ class FieldDataHandlerBase: public DataHandler
 
 		bool isAllocated() const;
 
+		unsigned int getFieldArraySize( DataId di ) const;
+
 		unsigned int numFieldBits() const;
 		////////////////////////////////////////////////////////////////
 		// Special field access funcs
@@ -79,8 +81,7 @@ class FieldDataHandlerBase: public DataHandler
 		 * Assigns the size of the field array on the specified object.
 		 * 
 		 */
-		void setFieldArraySize( 
-			unsigned int objectIndex, unsigned int size );
+		void setFieldArraySize( DataId di, unsigned int size );
 
 		/**
 		 * Looks up the size of the field array on the specified object

@@ -231,7 +231,7 @@ ObjId Neutral::getParent( const Eref& e, const Qinfo* q ) const
 	static const FuncId pafid = pf2->getFid();
 
 	MsgId mid = e.element()->findCaller( pafid );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 
 	return Msg::getMsg( mid )->findOtherEnd( e.objId() );
 	*/
@@ -323,19 +323,21 @@ void Neutral::setFieldDimension( const Eref& e, const Qinfo* q,
 	unsigned int size )
 {
 	// if ( Shell::isSingleThreaded() || q->threadNum() == 1 )
-		e.element()->dataHandler()->setFieldDimension( size );
+	// e.element()->dataHandler()->setFieldDimension( size );
+	e.element()->dataHandler()->resize( 0, size );
 }
 
 unsigned int Neutral::getFieldDimension( 
 	const Eref& e, const Qinfo* q ) const
 {
-	return e.element()->dataHandler()->getFieldDimension();
+	// return e.element()->dataHandler()->getFieldDimension();
+	return e.element()->dataHandler()->sizeOfDim( 0 );
 }
 
 unsigned int Neutral::getLocalNumField( 
 	const Eref& e, const Qinfo* q ) const
 {
-	return e.element()->dataHandler()->getFieldArraySize( e.index().data());
+	return e.element()->dataHandler()->getFieldArraySize( e.index() );
 }
 
 vector< ObjId > Neutral::getOutgoingMsgs( 
@@ -444,7 +446,7 @@ bool Neutral::isDescendant( Id me, Id ancestor )
 	
 	while ( e.element()->id() != Id() && e.element()->id() != ancestor ) {
 		MsgId mid = e.element()->findCaller( pafid );
-		assert( mid != Msg::badMsg );
+		assert( mid != Msg::bad );
 		ObjId fid = Msg::getMsg( mid )->findOtherEnd( e.objId() );
 		e = fid.eref();
 	}
@@ -490,7 +492,7 @@ ObjId Neutral::parent( const Eref& e )
 	}
 
 	MsgId mid = e.element()->findCaller( pafid );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 
 	return Msg::getMsg( mid )->findOtherEnd( e.objId() );
 }
@@ -509,7 +511,7 @@ string Neutral::path( const Eref& e )
 	pathVec.push_back( curr );
 	while ( curr.id != Id() ) {
 		MsgId mid = curr.eref().element()->findCaller( pafid );
-		assert( mid != Msg::badMsg );
+		assert( mid != Msg::bad );
 		curr = Msg::getMsg( mid )->findOtherEnd( curr );
 		pathVec.push_back( curr );
 	}

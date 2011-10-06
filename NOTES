@@ -15900,5 +15900,6 @@ dangle. It now compiles through to Cinfo. Checkin 3015.
 6 Oct
 Compiles through to testAsync.cpp. Checkin 3017.
 Compiles through the basecode directory. Checkin 3019.
-Compiles through the msg directory.
+Compiles through the msg directory. Checkin 3021.
+Compiles through the shell directory.
 ============================================================================

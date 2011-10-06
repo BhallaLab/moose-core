@@ -33,3 +33,9 @@ bool DataHandler::nodeBalance( unsigned int size )
 {
 	return this->innerNodeBalance( size, Shell::myNode(), Shell::numNodes() );
 }
+
+ /// Overridden in FieldDataHandler.
+ unsigned int DataHandler::getFieldArraySize( DataId di ) const
+ {
+ 	return 0;
+ }
