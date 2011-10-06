@@ -35,7 +35,7 @@ void testHHGateCreation()
 	Id chanId = shell->doCreate( "HHChannel", nid, "Na", dims );
 	MsgId mid = shell->doAddMsg( "Single", ObjId( comptId ), "channel", 
 		ObjId( chanId ), "channel" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 	
 	// Check gate construction and removal when powers are assigned
 	vector< Id > kids;
@@ -312,11 +312,11 @@ void testHHChannel()
 	Id naId = shell->doCreate( "HHChannel", comptId, "Na", dims );
 	MsgId mid = shell->doAddMsg( "Single", ObjId( comptId ), "channel", 
 		ObjId( naId ), "channel" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 	Id kId = shell->doCreate( "HHChannel", comptId, "K", dims );
 	mid = shell->doAddMsg( "Single", ObjId( comptId ), "channel", 
 		ObjId( kId ), "channel" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 
 	Id tabId = shell->doCreate( "Table", nid, "tab", dims );
 	mid = shell->doAddMsg( "Single", ObjId( tabId, 0 ), "requestData",
@@ -540,22 +540,22 @@ void testMarkovGslSolver()
 
 	MsgId mid = shell->doAddMsg( "Single", ObjId( comptId ), "channel", 
 			ObjId( mChanId ), "channel" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 
 	mid = shell->doAddMsg( "Single", ObjId( comptId ), "channel",
 			ObjId( rateTabId ), "channel" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 
 	mid = shell->doAddMsg( "Single", ObjId( gslSolverId ), "stateOut", 
 			ObjId( mChanId ), "handlestate" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 
 	mid = shell->doAddMsg("Single", ObjId( rateTabId ), "instratesOut",
 			ObjId( gslSolverId ), "handleQ" ); 
 
 	mid = shell->doAddMsg( "Single", ObjId( tabId, 0 ), "requestData",
 			ObjId( mChanId, 0 ), "get_Ik" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 
 	//////////////////////////////////////////////////////////////////////
 	// set up compartment properties
@@ -728,11 +728,11 @@ void testMarkovChannel()
 	//it.
 	MsgId	mid = shell->doAddMsg( "Single", ObjId( gslComptId ), "channel", 
 			  ObjId( mChanGslId ), "channel" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 
  	mid = shell->doAddMsg( "Single", ObjId( exptlComptId ), "channel", 
 			  ObjId( mChanExptlId ), "channel" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 
 	////////
 	//Connecting up the MarkovGslSolver.
@@ -749,7 +749,7 @@ void testMarkovChannel()
 	//solvers.
 	mid = shell->doAddMsg( "Single", ObjId( gslComptId ), "channel",
 			ObjId( gslRateTableId ), "channel" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 
 	//Connecting the MarkovRateTable with the MarkovGslSolver object.
 	//As mentioned earlier, the MarkovRateTable object sends out information
@@ -765,7 +765,7 @@ void testMarkovChannel()
 	//this information to the compartment. 
 	mid = shell->doAddMsg( "Single", ObjId( gslSolverId ), "stateOut", 
 			ObjId( mChanGslId ), "handlestate" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 
 	//////////
 	//Connecting up the MarkovSolver class.
@@ -778,11 +778,11 @@ void testMarkovChannel()
 	//tables.
 	mid = shell->doAddMsg( "Single", ObjId( exptlComptId ), "channel", 
 			ObjId( exptlSolverId ), "channel" );
-	assert( mid != Msg::badMsg );						
+	assert( mid != Msg::bad );						
 
 	mid = shell->doAddMsg( "Single", ObjId( exptlSolverId ), "stateOut", 
 			ObjId( mChanExptlId ), "handlestate" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 
 	/////////
 	//Connecting up the Table objects to cross-check values.
@@ -791,12 +791,12 @@ void testMarkovChannel()
 	//Get the current values from the GSL solver based channel.
 	mid = shell->doAddMsg( "Single", ObjId( gslTableId ), "requestData", 
 				ObjId( mChanGslId ), "get_Ik" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 
 	//Get the current values from the matrix exponential solver based channel.
 	mid = shell->doAddMsg( "Single", ObjId( exptlTableId ), "requestData", 
 				ObjId( mChanExptlId ), "get_Ik" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 
 	////////////////////
 	//Compartment properties. Identical to ones used in testHHChannel()
@@ -1079,13 +1079,13 @@ void testSynChan()
 	assert( syne->dataHandler()->sizeOfDim( 0 ) == 2 );
 
 	MsgId mid = shell->doAddMsg( "single", 
-		ObjId( sgId1, DataId( 0, 0 ) ), "event",
-		ObjId( synId, DataId( 0, 0 ) ), "addSpike" );
-	assert( mid != Msg::badMsg );
+		ObjId( sgId1, DataId( 0 ) ), "event",
+		ObjId( synId, DataId( 0 ) ), "addSpike" );
+	assert( mid != Msg::bad );
 	mid = shell->doAddMsg( "single", 
-		ObjId( sgId2, DataId( 0, 0 ) ), "event",
-		ObjId( synId, DataId( 0, 1 ) ), "addSpike" );
-	assert( mid != Msg::badMsg );
+		ObjId( sgId2, DataId( 0 ) ), "event",
+		ObjId( synId, DataId( 1 ) ), "addSpike" );
+	assert( mid != Msg::bad );
 	
 	ret = Field< double >::set( sgId1, "threshold", 0.0 );
 	ret = Field< double >::set( sgId1, "refractT", 1.0 );
@@ -1094,27 +1094,27 @@ void testSynChan()
 	ret = Field< double >::set( sgId2, "refractT", 1.0 );
 	ret = Field< bool >::set( sgId2, "edgeTriggered", 0 );
 
-	ret = Field< double >::set( ObjId( synId, DataId( 0, 0 ) ), 
+	ret = Field< double >::set( ObjId( synId, DataId( 0 ) ), 
 		"weight", 1.0 );
 	assert( ret);
-	ret = Field< double >::set( ObjId( synId, DataId( 0, 0 ) ), 
+	ret = Field< double >::set( ObjId( synId, DataId( 0 ) ), 
 		"delay", 0.001 );
 	assert( ret);
-	ret = Field< double >::set( ObjId( synId, DataId( 0, 1 ) ),
+	ret = Field< double >::set( ObjId( synId, DataId( 1 ) ),
 		"weight", 1.0 );
 	assert( ret);
-	ret = Field< double >::set( ObjId( synId, DataId( 0, 1 ) ), 
+	ret = Field< double >::set( ObjId( synId, DataId( 1 ) ), 
 		"delay", 0.01 );
 	assert( ret);
 
 	double dret;
-	dret = Field< double >::get( ObjId( synId, DataId( 0, 0 ) ), "weight" );
+	dret = Field< double >::get( ObjId( synId, DataId( 0 ) ), "weight" );
 	assert( doubleEq( dret, 1.0 ) );
-	dret = Field< double >::get( ObjId( synId, DataId( 0, 0 ) ), "delay" );
+	dret = Field< double >::get( ObjId( synId, DataId( 0 ) ), "delay" );
 	assert( doubleEq( dret, 0.001 ) );
-	dret = Field< double >::get( ObjId( synId, DataId( 0, 1 ) ), "weight" );
+	dret = Field< double >::get( ObjId( synId, DataId( 1 ) ), "weight" );
 	assert( doubleEq( dret, 1.0 ) );
-	dret = Field< double >::get( ObjId( synId, DataId( 0, 1 ) ), "delay" );
+	dret = Field< double >::get( ObjId( synId, DataId( 1 ) ), "delay" );
 	assert( doubleEq( dret, 0.01 ) );
 
 	dret = SetGet1< double >::set( sgId1, "Vm", 2.0 );
@@ -1196,25 +1196,25 @@ void testNMDAChan()
 	assert( syne->dataHandler()->sizeOfDim( 0 ) == 1 );
 
 	MsgId mid = shell->doAddMsg( "single", 
-		ObjId( sgId1, DataId( 0, 0 ) ), "event",
-		ObjId( synId, DataId( 0, 0 ) ), "addSpike" );
-	assert( mid != Msg::badMsg );
+		ObjId( sgId1, DataId( 0 ) ), "event",
+		ObjId( synId, DataId( 0 ) ), "addSpike" );
+	assert( mid != Msg::bad );
 	
 	ret = Field< double >::set( sgId1, "threshold", 0.0 );
 	ret = Field< double >::set( sgId1, "refractT", 1.0 );
 	ret = Field< bool >::set( sgId1, "edgeTriggered", 0 );
 
-	ret = Field< double >::set( ObjId( synId, DataId( 0, 0 ) ), 
+	ret = Field< double >::set( ObjId( synId, DataId( 0 ) ), 
 		"weight", 1.0 );
 	assert( ret);
-	ret = Field< double >::set( ObjId( synId, DataId( 0, 0 ) ), 
+	ret = Field< double >::set( ObjId( synId, DataId( 0 ) ), 
 		"delay", 0.001 );
 	assert( ret);
 
 	double dret;
-	dret = Field< double >::get( ObjId( synId, DataId( 0, 0 ) ), "weight" );
+	dret = Field< double >::get( ObjId( synId, DataId( 0 ) ), "weight" );
 	assert( doubleEq( dret, 1.0 ) );
-	dret = Field< double >::get( ObjId( synId, DataId( 0, 0 ) ), "delay" );
+	dret = Field< double >::get( ObjId( synId, DataId( 0 ) ), "delay" );
 	assert( doubleEq( dret, 0.001 ) );
 
 	dret = SetGet1< double >::set( sgId1, "Vm", 2.0 );

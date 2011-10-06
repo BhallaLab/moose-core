@@ -30,7 +30,7 @@ class SynBase
 		/**
  		 * Inserts an event into the pendingEvents queue for spikes.
  		 */
-		void addSpike( DataId synIndex, const double time );
+		void addSpike( unsigned int synIndex, const double time );
 		
 		////////////////////////////////////////////////////////////////
 		// Field assignment stuff.

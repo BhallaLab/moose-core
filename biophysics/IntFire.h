@@ -23,7 +23,7 @@ class IntFire: public SynBase
 		 * Overrides base class function.
  		 * Inserts an event into the pendingEvents queue for spikes.
  		 */
-		void innerAddSpike( DataId synIndex, const double time );
+		void innerAddSpike( unsigned int  synIndex, const double time );
 		
 		////////////////////////////////////////////////////////////////
 		// Field assignment stuff.

@@ -835,7 +835,7 @@ void testMarkovSolverBase()
 	vector< MarkovRateTable* > rateTables;
 	vector< MarkovSolverBase* > solverBases;
 
-	vector< unsigned int > single( 1, 1 );
+	vector< int > single( 1, 1 );
 	string str;
 
 	unsigned int numCopies = 4;

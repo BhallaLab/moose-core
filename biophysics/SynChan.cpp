@@ -234,9 +234,9 @@ unsigned int SynChan::countNumSynapses( const Eref& er )
 }
 */
 
-void SynChan::innerAddSpike( DataId synIndex, const double time )
+void SynChan::innerAddSpike( unsigned int synIndex, const double time )
 {
-	assert( synIndex.field() < getNumSynapses() );
-	Synapse s( *getSynapse( synIndex.field() ), time );
+	assert( synIndex < getNumSynapses() );
+	Synapse s( *getSynapse( synIndex ), time );
 	pendingEvents_.push( s );
 }
