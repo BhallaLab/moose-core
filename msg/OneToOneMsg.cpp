@@ -25,7 +25,7 @@ OneToOneMsg::~OneToOneMsg()
 
 void OneToOneMsg::exec( const Qinfo* q, const double* arg, FuncId fid) const
 {
-	unsigned int src = q->src().dataId.data(); // will also be dest index.
+	unsigned int src = q->src().dataId.value(); // will also be dest index.
 	if ( q->src().element() == e1_ ) {
 		if ( e2_->dataHandler()->isDataHere( src ) &&
 			q->execThread( e2_->id(), src ) )
@@ -51,6 +51,8 @@ void OneToOneMsg::exec( const Qinfo* q, const double* arg, FuncId fid) const
 Eref OneToOneMsg::firstTgt( const Eref& src ) const 
 {
 	if ( src.element() == e1_ ) {
+		return Eref( e2_, src.index() );
+		/*
 		if ( e2_->dataHandler()->getFieldArraySize( 0 ) == 0 ) {
 			if ( e2_->dataHandler()->isDataHere( src.index() ) )
 				return Eref( e2_, src.index() );
@@ -59,7 +61,10 @@ Eref OneToOneMsg::firstTgt( const Eref& src ) const
 				src.index().data() )
 			return Eref( e2_, DataId( 0, src.index().data() ) );
 		}
+		*/
 	} else if ( src.element() == e2_ ) {
+		return Eref( e1_, src.index() );
+		/*
 		if ( e2_->dataHandler()->getFieldArraySize( 0 ) == 0 ) {
 			if ( e1_->dataHandler()->isDataHere( src.index() ) )
 				return Eref( e1_, src.index() );
@@ -68,6 +73,7 @@ Eref OneToOneMsg::firstTgt( const Eref& src ) const
 				src.index().data() )
 				return Eref( e1_, DataId( 0, src.index().data() ) );
 		}
+		*/
 	}
 	return Eref( 0, 0 );
 }
@@ -90,6 +96,13 @@ ObjId OneToOneMsg::findOtherEnd( ObjId f ) const
 unsigned int OneToOneMsg::srcToDestPairs(
 	vector< DataId >& src, vector< DataId >& dest ) const
 {
+	DataIdExtractor srcdi( &src );
+	e1_->dataHandler()->foreach( &srcdi, 0, 0, 0, 0 );
+	DataIdExtractor destdi( &dest );
+	e2_->dataHandler()->foreach( &destdi, 0, 0, 0, 0 );
+	assert ( src.size() == dest.size() );
+
+	/*
 	unsigned int srcRange = e1_->dataHandler()->totalEntries();
 	unsigned int destRange = e2_->dataHandler()->totalEntries();
 	unsigned int range = ( srcRange < destRange ) ? srcRange : destRange;
@@ -108,8 +121,9 @@ unsigned int OneToOneMsg::srcToDestPairs(
 		src[i] = DataId( i / fd1, i % fd1 );
 		dest[i] = DataId( i / fd2, i % fd2 );
 	}
+	*/
 
-	return range;
+	return src.size();
 }
 
 Msg* OneToOneMsg::copy( Id origSrc, Id newSrc, Id newTgt,

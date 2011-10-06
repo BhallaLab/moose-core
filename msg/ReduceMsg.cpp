@@ -34,8 +34,17 @@ void ReduceMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const
 		const OpFunc* f = e2_->cinfo()->getOpFunc( fid );
 		ReduceBase* r = rfb_->makeReduce( ObjId( e1_->id(), i1_ ), f );
 		Qinfo::addToReduceQ( r, q->threadNum() );
-		DataHandler* d2 = e2_->dataHandler();
+		// DataHandler* d2 = e2_->dataHandler();
 		//unsigned int count = 0;
+		vector< DataId > vec;
+		DataIdExtractor di( &vec );
+		e2_->dataHandler()->foreach( &di, 0, q, 0, 0 );
+		for ( vector< DataId >::const_iterator i = vec.begin(); 
+			i != vec.end(); ++i ) {
+			r->primaryReduce( ObjId( e2_->id(), *i ) );
+			r->setInited();
+		}
+		/*
 		for ( DataHandler::iterator i = d2->begin(); i != d2->end(); ++i )
 		{
 			if ( q->execThread( e2_->id(),i.index().data() ) ) {
@@ -45,13 +54,14 @@ void ReduceMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const
 				//++count;
 			}
 		}
+		*/
 		// cout << Shell::myNode() << ":" << q->threadNum() << " ReduceMsg::exec numPrimaryReduce = " << count << endl;
 		// ReduceStats* rs = dynamic_cast< ReduceStats* >( r );
 		// if ( rs ) {
 		// cout << Shell::myNode() << ":" << q->threadNum() << " ReduceMsg::exec sum = " << rs->sum() << ", count = " << rs->count() << endl;
 		// }
 	} else if ( e1_->dataHandler()->isDataHere( i1_ ) &&
-		q->execThread( e1_->id(), i1_.data() ) ) {
+		q->execThread( e1_->id(), i1_.value() ) ) {
 		const OpFunc* f = e1_->cinfo()->getOpFunc( fid );
 		f->op( Eref( e1_, i1_ ), q, arg );
 	}
@@ -90,7 +100,7 @@ ObjId ReduceMsg::findOtherEnd( ObjId f ) const
 	if ( f.id() == e2() ) {
 		return ObjId( e1()->id(), i1_ );
 	}
-	return ObjId::bad();
+	return ObjId::bad;
 }
 
 /// Dummy. We should never be copying assignment messages.
@@ -104,6 +114,14 @@ Msg* ReduceMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 unsigned int ReduceMsg::srcToDestPairs(
 	vector< DataId >& src, vector< DataId >& dest ) const
 {
+	dest.resize( 0 );
+	DataIdExtractor di( &dest );
+
+	e2_->dataHandler()->foreach( &di, 0, 0, 0, 0 );
+	src.resize( dest.size(), i1_ );
+	return dest.size();
+
+	/*
 	 unsigned int destRange = e2_->dataHandler()->totalEntries();
 	src.resize( destRange, i1_ );
 	dest.resize( destRange );
@@ -117,6 +135,7 @@ unsigned int ReduceMsg::srcToDestPairs(
 	}
 
 	return destRange;
+	*/
 }
 
 ///////////////////////////////////////////////////////////////////////

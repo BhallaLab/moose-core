@@ -13,6 +13,8 @@
 //	ObjId I/O 
 //////////////////////////////////////////////////////////////
 
+const ObjId ObjId::bad( Id(), DataId::bad );
+
 ostream& operator <<( ostream& s, const ObjId& i )
 {
 	if ( i.dataId.value() == 0 )
@@ -39,12 +41,6 @@ Eref ObjId::eref() const
 bool ObjId::operator==( const ObjId& other ) const
 {
 	return ( id == other.id && dataId == other.dataId );
-}
-
-const ObjId& ObjId::bad()
-{
-	static ObjId bad_( Id(), DataId::bad );
-	return bad_;
 }
 
 bool ObjId::isDataHere() const
