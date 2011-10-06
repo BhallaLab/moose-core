@@ -400,7 +400,7 @@ void testMarkovSolver()
 	const Cinfo* vectorTableCinfo = VectorTable::initCinfo();
 	const Cinfo* markovSolverCinfo = MarkovSolver::initCinfo();
 
-	vector< unsigned int > single( 1, 1 );
+	vector< int > single( 1, 1 );
 
 	Id rateTable2dId = Id::nextId();
 	Id rateTable1dId = Id::nextId();

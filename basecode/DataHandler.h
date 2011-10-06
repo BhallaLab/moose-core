@@ -118,6 +118,13 @@ class DataHandler
 		 */
 		virtual unsigned int getFieldArraySize( DataId di ) const;
 
+		/**
+		 * Returns the mask for the field portion of the DataId that works
+		 * with this DataHandler. In most cases this is zero, in 
+		 * FieldDataHandlerBase it is a bitmask.
+		 */
+		virtual unsigned int fieldMask() const;
+
 /////////////////////////////////////////////////////////////////////////
 // Load balancing functions
 /////////////////////////////////////////////////////////////////////////

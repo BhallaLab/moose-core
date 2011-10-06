@@ -39,3 +39,9 @@ bool DataHandler::nodeBalance( unsigned int size )
  {
  	return 0;
  }
+
+ /// Overridden in FieldDataHandler
+ unsigned int DataHandler::fieldMask() const
+ {
+ 	return 0;
+ }

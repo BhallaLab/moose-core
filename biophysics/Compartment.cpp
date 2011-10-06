@@ -652,7 +652,7 @@ void testCompartment()
 {
 	const Cinfo* comptCinfo = Compartment::initCinfo();
 	Id comptId = Id::nextId();
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 	Element* n = new Element( comptId, comptCinfo, "compt", dims, 1 );
 	assert( n != 0 );
 	Eref compter( n, 0 );
@@ -734,10 +734,10 @@ void testCompartmentProcess()
 	// might have used, below, into two individual messages.
 	// MsgId mid = shell->doAddMsg( "Diagonal", ObjId( cid ), "raxial", ObjId( cid ), "axial" );
 	MsgId mid = shell->doAddMsg( "Diagonal", ObjId( cid ), "axialOut", ObjId( cid ), "handleAxial" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad);
 	// mid = shell->doAddMsg( "Diagonal", ObjId( cid ), "handleRaxial", ObjId( cid ), "raxialOut" );
 	mid = shell->doAddMsg( "Diagonal", ObjId( cid ), "raxialOut", ObjId( cid ), "handleRaxial" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 	ObjId managerId = Msg::getMsg( mid )->manager().objId();
 	// Make the raxial data go from high to lower index compartments.
 	Field< int >::set( managerId, "stride", -1 );

@@ -54,6 +54,8 @@ class FieldDataHandlerBase: public DataHandler
 
 		unsigned int getFieldArraySize( DataId di ) const;
 
+ 		unsigned int fieldMask() const;
+
 		unsigned int numFieldBits() const;
 		////////////////////////////////////////////////////////////////
 		// Special field access funcs

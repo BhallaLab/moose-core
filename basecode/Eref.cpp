@@ -48,3 +48,8 @@ Id Eref::id() const
 {
 	return e_->id();
 }
+
+unsigned int Eref::fieldIndex() const
+{
+	return i_.myIndex( e_->dataHandler()->fieldMask() );
+}
