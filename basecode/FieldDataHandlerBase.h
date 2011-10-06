@@ -51,6 +51,8 @@ class FieldDataHandlerBase: public DataHandler
 		bool isDataHere( DataId index ) const;
 
 		bool isAllocated() const;
+
+		unsigned int numFieldBits() const;
 		////////////////////////////////////////////////////////////////
 		// Special field access funcs
 		////////////////////////////////////////////////////////////////

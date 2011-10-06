@@ -15898,4 +15898,6 @@ dangle. It now compiles through to Cinfo. Checkin 3015.
 
 ============================================================================
 6 Oct
-Compiles through to testAsync.cpp.
+Compiles through to testAsync.cpp. Checkin 3017.
+Comples through the basecode directory.
+============================================================================

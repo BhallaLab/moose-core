@@ -40,6 +40,10 @@ class DataId
 			: index_( index )
 		{;}
 
+		DataId( unsigned long long data, unsigned int field, unsigned int numFieldBits )
+			: index_( ( data << numFieldBits ) + field )
+		{;}
+
 		/**
 		 * Destructor. Nothing much to do here, move along.
 		 */
