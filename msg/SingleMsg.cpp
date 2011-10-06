@@ -34,7 +34,7 @@ void SingleMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const
 	if ( q->src().element() == e1_ ) { // forward message
 		if ( q->src().dataId == i1_ && 
 			e2_->dataHandler()->isDataHere( i2_ ) &&
-			q->execThread( e2_->id(), i2_.data() ) ) {
+			q->execThread( e2_->id(), i2_.value() ) ) {
 			const OpFunc* f = e2_->cinfo()->getOpFunc( fid );
 			f->op( Eref( e2_, i2_ ), q, arg );
 			return;
@@ -42,7 +42,7 @@ void SingleMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const
 	} else {
 		if ( q->src().dataId == i2_ && 
 			e1_->dataHandler()->isDataHere( i1_ ) &&
-			q->execThread( e1_->id(), i1_.data() ) ) {
+			q->execThread( e1_->id(), i1_.value() ) ) {
 			const OpFunc* f = e1_->cinfo()->getOpFunc( fid );
 			f->op( Eref( e1_, i1_ ), q, arg );
 			return;
@@ -92,13 +92,13 @@ ObjId SingleMsg::findOtherEnd( ObjId f ) const
 		if ( f.dataId == i1_ )
 			return ObjId( e2()->id(), i2_ );
 		else
-			return ObjId( e2()->id(), DataId::bad() );
+			return ObjId( e2()->id(), DataId::bad );
 	}
 	else if ( f.id() == e2() ) {
 		if ( f.dataId == i2_ )
 			return ObjId( e1()->id(), i1_ );
 		else
-			return ObjId( e1()->id(), DataId::bad() );
+			return ObjId( e1()->id(), DataId::bad );
 	}
 	
 	return ObjId::bad();

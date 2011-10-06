@@ -24,7 +24,7 @@
 // Static field declaration.
 vector< Msg* > Msg::msg_;
 vector< MsgId > Msg::garbageMsg_;
-const MsgId Msg::badMsg = 0;
+const MsgId Msg::bad = 0;
 const MsgId Msg::setMsg = 1;
 Id Msg::msgManagerId_;
 vector< Id > msgMgrs;
@@ -103,7 +103,7 @@ const Msg* Msg::getMsg( MsgId m )
 
 Msg* Msg::safeGetMsg( MsgId m )
 {
-	if ( m == badMsg )
+	if ( m == bad )
 		return 0;
 	if ( m < msg_.size() )
 		return msg_[ m ];
@@ -303,7 +303,7 @@ static const Cinfo* msgCinfo = Msg::initCinfo();
 // Static func
 void Msg::initMsgManagers()
 {
-	vector< unsigned int > dims( 1, 0 );
+	vector< int > dims( 1, 0 );
 	Dinfo< short > dummyDinfo;
 
 	// This is to be the parent of all the msg managers.
@@ -312,7 +312,7 @@ void Msg::initMsgManagers()
 
 	SingleMsg::managerId_ = Id::nextId();
 	new Element( SingleMsg::managerId_, SingleMsg::initCinfo(), 
-		"singleMsg", new MsgDataHandler( &dummyDinfo ) );
+		"singleMsg", new MsgDataHandler( &dummyDinfo, true ) );
 
 	Shell::adopt( Id(), msgManagerId_ );
 	Shell::adopt( msgManagerId_, SingleMsg::managerId_ );
@@ -320,25 +320,25 @@ void Msg::initMsgManagers()
 
 	OneToOneMsg::managerId_ = Id::nextId();
 	new Element( OneToOneMsg::managerId_, OneToOneMsg::initCinfo(),
-		"oneToOneMsg", new MsgDataHandler( &dummyDinfo ) );
+		"oneToOneMsg", new MsgDataHandler( &dummyDinfo, true ) );
 	Shell::adopt( msgManagerId_, OneToOneMsg::managerId_ );
 	msgMgrs.push_back( OneToOneMsg::managerId_ );
 
 	OneToAllMsg::managerId_ = Id::nextId();
 	new Element( OneToAllMsg::managerId_, OneToAllMsg::initCinfo(), 
-		"oneToAllMsg", new MsgDataHandler( &dummyDinfo ) );
+		"oneToAllMsg", new MsgDataHandler( &dummyDinfo, true ) );
 	Shell::adopt( msgManagerId_, OneToAllMsg::managerId_ );
 	msgMgrs.push_back( OneToAllMsg::managerId_ );
 
 	DiagonalMsg::managerId_ = Id::nextId();
 	new Element( DiagonalMsg::managerId_, DiagonalMsg::initCinfo(), 
-		"diagonalMsg", new MsgDataHandler( &dummyDinfo ) );
+		"diagonalMsg", new MsgDataHandler( &dummyDinfo, true ) );
 	Shell::adopt( msgManagerId_, DiagonalMsg::managerId_ );
 	msgMgrs.push_back( DiagonalMsg::managerId_ );
 
 	SparseMsg::managerId_ = Id::nextId();
 	new Element( SparseMsg::managerId_, SparseMsg::initCinfo(), 
-		"sparseMsg", new MsgDataHandler( &dummyDinfo ) );
+		"sparseMsg", new MsgDataHandler( &dummyDinfo, true ) );
 	Shell::adopt( msgManagerId_, SparseMsg::managerId_ );
 	msgMgrs.push_back( SparseMsg::managerId_ );
 
@@ -358,7 +358,7 @@ void Msg::initMsgManagers()
 
 	ReduceMsg::managerId_ = Id::nextId();
 	new Element( ReduceMsg::managerId_, ReduceMsg::initCinfo(),
-		"ReduceMsg", new MsgDataHandler( &dummyDinfo ) );
+		"ReduceMsg", new MsgDataHandler( &dummyDinfo, true ) );
 	Shell::adopt( msgManagerId_, ReduceMsg::managerId_ );
 	msgMgrs.push_back( ReduceMsg::managerId_ );
 

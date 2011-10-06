@@ -32,7 +32,7 @@ DiagonalMsg::~DiagonalMsg()
  */
 void DiagonalMsg::exec( const Qinfo* q, const double* arg, FuncId fid) const
 {
-	int src = q->src().dataId.data();
+	int src = q->src().dataId.value();
 	if ( q->src().element() == e1_ ) {
 		int dest = src + stride_;
 		if ( dest >= 0 && e2_->dataHandler()->isDataHere( dest ) ) {
@@ -56,12 +56,12 @@ void DiagonalMsg::exec( const Qinfo* q, const double* arg, FuncId fid) const
 Eref DiagonalMsg::firstTgt( const Eref& src ) const 
 {
 	if ( src.element() == e1_ ) {
-		unsigned int nextData = src.index().data() + stride_;
+		unsigned int nextData = src.index().value() + stride_;
 		if ( e2_->dataHandler()->isDataHere( nextData ) )
 			return Eref( e2_, nextData );
 	}
 	else if ( src.element() == e2_ ) {
-		unsigned int nextData = src.index().data() - stride_;
+		unsigned int nextData = src.index().value() - stride_;
 		if ( e1_->dataHandler()->isDataHere( nextData ) )
 			return Eref( e1_, nextData );
 	}
@@ -86,21 +86,21 @@ int DiagonalMsg::getStride() const
 ObjId DiagonalMsg::findOtherEnd( ObjId f ) const
 {
 	if ( f.id() == e1() ) {
-		int i2 = f.dataId.data() + stride_;
+		int i2 = f.dataId.value() + stride_;
 		if ( i2 >= 0 ) {
 			unsigned int ui2 = i2;
 			if ( ui2 < e2()->dataHandler()->totalEntries() )
-				return ObjId( e2()->id(), DataId( ui2, f.dataId.field() ) );
+				return ObjId( e2()->id(), DataId( ui2 ) );
 		}
-		return ObjId( e2()->id(), DataId::bad() );
+		return ObjId( e2()->id(), DataId::bad );
 	} else if ( f.id() == e2() ) {
-		int i1 = f.dataId.data() - stride_;
+		int i1 = f.dataId.value() - stride_;
 		if ( i1 >= 0 ) {
 			unsigned int ui1 = i1;
 			if ( ui1 < e1()->dataHandler()->totalEntries() )
-				return ObjId( e1()->id(), DataId( ui1, f.dataId.field() ));
+				return ObjId( e1()->id(), DataId( ui1 ));
 		}
-		return ObjId( e1()->id(), DataId::bad() );
+		return ObjId( e1()->id(), DataId::bad );
 	}
 	return ObjId::bad();
 }
@@ -133,18 +133,22 @@ unsigned int DiagonalMsg::srcToDestPairs(
 	vector< DataId >& src, vector< DataId >& dest ) const
 {
 	unsigned int srcRange = e1_->dataHandler()->totalEntries();
+	/*
 	if ( e1_->dataHandler()->getFieldDimension() != 0 ) {
 		srcRange /= e1_->dataHandler()->getFieldDimension();
 		cout << "Warning: DiagonalMsg::srcToDestPairs on " << mid() << ":"
 		<< "\nDiagonalMsgs do not properly handle FieldElement arrays.\n";
 	}
+	*/
 
 	unsigned int destRange = e2_->dataHandler()->totalEntries();
+	/*
 	if ( e2_->dataHandler()->getFieldDimension() != 0 ) {
 		destRange /= e2_->dataHandler()->getFieldDimension();
 		cout << "Warning: DiagonalMsg::srcToDestPairs on " << mid() << ":"
 		<< "\nDiagonalMsgs do not properly handle FieldElement arrays.\n";
 	}
+	*/
 	src.resize( 0 );
 	dest.resize( 0 );
 	for ( unsigned int i = 0; i < srcRange; ++i ) {

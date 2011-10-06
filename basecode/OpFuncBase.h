@@ -77,4 +77,18 @@ class FieldOpFunc: public OpFunc
 		Element* e_;
 };
 
+class DataIdExtractor: public OpFuncDummy
+{
+	public:
+		DataIdExtractor( vector< DataId >* vec )
+			: vec_( vec )
+		{;}
+		void op( const Eref& e, const Qinfo* q, const double* buf) const
+		{
+			vec_->push_back( e.index() );
+		}
+	private:
+		vector< DataId >* vec_;
+};
+
 #endif // _OPFUNCBASE_H
