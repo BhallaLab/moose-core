@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Wed Jul 20 14:52:24 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Jul 21 15:30:01 2011 (+0530)
+// Last-Updated: Thu Oct  6 08:38:07 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 110
+//     Update #: 123
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -154,6 +154,9 @@ void Efield::currentFunc(const Conn *conn, double value)
     assert(instance!= NULL);
     assert((index < instance->distance_.size()));
     instance->innerPot_ += value / instance->distance_[index];
+#ifndef NDEBUG
+    cout << "Efield::currentFunc " << conn->target().id().path() << "<-" << conn->source().id().path() << ": Im = " << value << ", distance = " << instance->distance_[index] << ", potential = " << instance->innerPot_ << endl;
+#endif
 }
 
 void Efield::reinitFunc(const Conn * conn, ProcInfo proc)
