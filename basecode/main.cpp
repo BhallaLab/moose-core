@@ -178,7 +178,7 @@ Id init( int argc, char** argv )
 
 	Msg::initNull();
 	Id shellId;
-	vector< unsigned int > dims;
+	vector< int > dims;
 	dims.push_back( 1 );
 	Element* shelle = 
 		new Element( shellId, Shell::initCinfo(), "root", dims, 1 );

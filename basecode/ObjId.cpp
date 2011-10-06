@@ -15,7 +15,7 @@
 
 ostream& operator <<( ostream& s, const ObjId& i )
 {
-	if ( i.dataId.data() == 0 && i.dataId.field() == 0 )
+	if ( i.dataId.value() == 0 )
 		s << i.id;
 	else 
 		s << i.id << "[" << i.dataId << "]";
@@ -43,7 +43,7 @@ bool ObjId::operator==( const ObjId& other ) const
 
 const ObjId& ObjId::bad()
 {
-	static ObjId bad_( Id(), DataId::bad() );
+	static ObjId bad_( Id(), DataId::bad );
 	return bad_;
 }
 

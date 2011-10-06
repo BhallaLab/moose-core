@@ -61,7 +61,7 @@ const vector< double* >* SetGet::dispatchGet(
 {
 	static Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 	s->clearGetBuf();
-	s->expectVector( tgt.dataId == DataId::any() );
+	s->expectVector( tgt.dataId == DataId::any );
 	Qinfo::addDirectToQ( ObjId(), tgt, ScriptThreadNum, tgtFid, arg, size );
 	Qinfo::waitProcCycles( 2 );
 	return &s->getBuf();
@@ -114,7 +114,7 @@ unsigned int SetGet::checkSet(
 	* large fan-out message.
 	*/
 	if ( Neutral::isGlobalField( field ) ) {
-		tgt.dataId = DataId::globalField();
+		tgt.dataId = DataId::globalField;
 	}
 
 	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );

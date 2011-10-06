@@ -121,8 +121,6 @@ class FieldDataHandlerBase: public DataHandler
 		//DataHandler* copy( bool toGlobal, unsigned int n ) const;
 		// DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo) const;
 
-		DataHandler* addNewDimension( unsigned int size ) const;
-
 		bool resize( unsigned int dimension, unsigned int size );
 
 		// Handled by derived templated FieldDataHandler classes.
