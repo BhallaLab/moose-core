@@ -635,7 +635,7 @@ void testSetGetSynapse()
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
 		for ( unsigned int j = 0; j < i; ++j ) {
-			DataId di( i, j );
+			DataId di( i, j, fdh->numFieldBits() );
 			// Eref syne( syn, di );
 			ObjId synoid( synId, di );
 			double temp = i * 1000 + j ;
@@ -692,7 +692,7 @@ void testSetGetVec()
 	}
 
 	vector< unsigned int > getSyn;
-	Eref tempE( e2.element(), DataId::any() );
+	Eref tempE( e2.element(), DataId::any );
 	Field< unsigned int >::getVec( i2, "numSynapses", getSyn );
 	assert (getSyn.size() == size );
 	for ( unsigned int i = 0; i < size; ++i )
@@ -704,7 +704,8 @@ void testSetGetVec()
 	assert( fd->localEntries() == nd );
 	
 	assert( fd->biggestFieldArraySize() == size - 1 );
-	fd->setFieldDimension( size );
+	// fd->setFieldDimension( size );
+	fd->resize( 0, size );
 	assert ( fd->totalEntries() == size * size );
 	// Here we test setting a 2-D array with different dims on each axis.
 	vector< double > delay( size * size, 0.0 );
@@ -719,7 +720,7 @@ void testSetGetVec()
 	ret = Field< double >::setVec( synId, "delay", delay );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		for ( unsigned int j = 0; j < i; ++j ) {
-			DataId di( i, j );
+			DataId di( i, j, fd->numFieldBits() );
 			Eref syne( syn, di );
 			double temp = i * 1000 + j ;
 			assert( doubleEq( 
@@ -727,7 +728,7 @@ void testSetGetVec()
 				temp ) );
 		}
 	}
-	Eref syne( syn, DataId::any() );
+	Eref syne( syn, DataId::any );
 	vector< double > delayVec;
 	Field< double >::getVec( synId, "delay", delayVec );
 	assert( delayVec.size() == size * size - 1 );
@@ -821,10 +822,16 @@ void testFastGet()
 	assert ( syn->getName() == "synapse" );
 	bool ret = Field< unsigned int >::set( ObjId( tgtId2, 0 ), "numSynapses", size );
 	assert( ret );
-	assert( syn->dataHandler()->getFieldArraySize( 0 ) == size );
+	// assert( syn->dataHandler()->getFieldArraySize( 0 ) == size );
+	FieldDataHandlerBase* fdh = dynamic_cast< FieldDataHandlerBase* >(
+		syn->dataHandler() );
+	assert( fdh );
+	assert( fdh->getFieldArraySize( 0 ) == size );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
-		Synapse* f = reinterpret_cast< Synapse* >( syn->dataHandler()->data( DataId( 0, i ) ) );
+		DataId di( 0, i, fdh->numFieldBits() );
+		Synapse* f = reinterpret_cast< Synapse* >( 
+			syn->dataHandler()->data( di ) );
 		f->setWeight( 5 + 10 * i - i * i );
 	}
 
@@ -928,9 +935,12 @@ void testSetRepeat()
 	Eref se( syn, 0 );
 	ret = Field< double >::setRepeat( synId, "delay", 123.0 );
 	assert( ret );
+	FieldDataHandlerBase* fdh = dynamic_cast< FieldDataHandlerBase* >(
+		syn->dataHandler() );
+	assert( fdh );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		for ( unsigned int j = 0; j < i; ++j ) {
-			DataId di( i, j );
+			DataId di( i, j, fdh->numFieldBits() );
 			Eref syne( syn, di );
 			assert( doubleEq( 
 				reinterpret_cast< Synapse* >(syne.data())->getDelay(), 
@@ -958,7 +968,7 @@ void testSendSpike()
 	const Cinfo* ic = IntFire::initCinfo();
 	// const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 100;
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
 	Id i3( i2.value() + 1 );
@@ -981,12 +991,13 @@ void testSendSpike()
 	}
 	FieldDataHandlerBase * fdh =
 		static_cast< FieldDataHandlerBase *>( syn->dataHandler() );
-	fdh->setFieldDimension( fdh->biggestFieldArraySize() );
+	// fdh->setFieldDimension( fdh->biggestFieldArraySize() );
+	fdh->resize( 0, fdh->biggestFieldArraySize() );
 	// fdh->syncFieldArraySize();
 	assert( fdh->localEntries() == ( size * (size - 1) ) / 2 );
 	assert( fdh->totalEntries() == size * ( size - 1) );
 
-	DataId di( 1, 0 ); // DataId( data, field )
+	DataId di( 1, 0, fdh->numFieldBits() ); // DataId( data, field )
 	Eref syne( syn, di );
 	reinterpret_cast< Synapse* >(syne.data())->setWeight( WEIGHT );
 
@@ -1243,7 +1254,7 @@ void testSparseMsg()
 	assert( df );
 	// const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 1024;
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 	string arg;
 
 	mtseed( 5489UL ); // The default value, but better to be explicit.
@@ -1261,8 +1272,11 @@ void testSparseMsg()
 
 	assert( syn->dataHandler()->localEntries() == 0 );
 	assert( syn->dataHandler()->totalEntries() == size );
+	FieldDataHandlerBase* fd = dynamic_cast< FieldDataHandlerBase* >(
+		syn->dataHandler() );
+	assert( fd );
 
-	DataId di( 1, 0 ); // DataId( data, field )
+	DataId di( 1, 0, fd->numFieldBits() ); // DataId( data, field )
 	Eref syne( syn, di );
 
 	/*
@@ -1278,14 +1292,13 @@ void testSparseMsg()
 	f1->addMsg( f2, sm->mid(), t2 );
 	sm->randomConnect( connectionProbability );
 	//sm->loadBalance( 1 );
-	FieldDataHandlerBase* fd = dynamic_cast< FieldDataHandlerBase* >(
-		syne.element()->dataHandler() );
-	assert( fd );
-	fd->setFieldDimension( fd->biggestFieldArraySize() );
+	// fd->setFieldDimension( fd->biggestFieldArraySize() );
+	fd->resize( 0, fd->biggestFieldArraySize() );
 	// fd->syncFieldArraySize();
 	unsigned int fieldSize = fd->biggestFieldArraySize();
 	// cout << "fieldSize = " << fieldSize << endl;
-	fd->setFieldDimension( fieldSize );
+	// fd->setFieldDimension( fieldSize );
+	fd->resize( 0, fieldSize );
 
 	unsigned int nd = syn->dataHandler()->localEntries();
 //	cout << "Num Syn = " << nd << endl;
@@ -1385,7 +1398,7 @@ void testUpValue()
 	const Cinfo* cc = Clock::initCinfo();
 	// const Cinfo* tc = Tick::initCinfo();
 	unsigned int size = 10;
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 	Id clock = Id::nextId();
 	// bool ret = cc->create( clock, "clock", 1 );
 	Element* temp = new Element( clock, cc, "clock", dims, 1 );
@@ -1401,7 +1414,8 @@ void testUpValue()
 	assert( ticke->dataHandler()->totalEntries() == 1 );
 	FieldDataHandlerBase * fdh =
 		static_cast< FieldDataHandlerBase *>( ticke->dataHandler() );
-	fdh->setFieldDimension( fdh->biggestFieldArraySize() );
+	// fdh->setFieldDimension( fdh->biggestFieldArraySize() );
+	fdh->resize( 0, fdh->biggestFieldArraySize() );
 	// fdh->syncFieldArraySize();
 	assert( ticke->dataHandler()->totalEntries() == 10 );
 	/*
@@ -1411,7 +1425,7 @@ void testUpValue()
 
 
 	for ( unsigned int i = 0; i < size; ++i ) {
-		DataId di( 0, i ); // DataId( data, field )
+		DataId di( 0, i, fdh->numFieldBits() ); // DataId( data, field )
 		ObjId oid( tickId, di );
 		double dt = i;
 		bool ret = Field< double >::set( oid, "dt", dt );
@@ -1515,7 +1529,7 @@ void testSharedMsg()
 	Id t1 = Id::nextId();
 	Id t2 = Id::nextId();
 	// bool ret = Test::initCinfo()->create( t1, "test1", 1 );
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 	Element* temp = new Element( t1, Test::initCinfo(), "test1", dims, 1 );
 	assert( temp );
 	temp = new Element( t2, Test::initCinfo(), "test2", dims, 1 );
@@ -1641,7 +1655,7 @@ void testMsgField()
 		ac->findFinfo( "set_outputValue" ) );
 	assert( df != 0 );
 	FuncId fid = df->getFid();
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 
 	Id i1 = Id::nextId();
 	Id i2 = Id::nextId();
@@ -1713,7 +1727,7 @@ void testSetGetExtField()
 	const Cinfo* nc = Neutral::initCinfo();
 	const Cinfo* rc = Mdouble::initCinfo();
 	unsigned int size = 100;
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 	string arg;
 	Id i1 = Id::nextId();
 	Id i2( i1.value() + 1 );
@@ -1812,7 +1826,7 @@ void testLookupSetGet()
 	unsigned int size = 100;
 	string arg;
 	Id i2 = Id::nextId();
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 	Element* elm = new Element( i2, ac, "test2", dims, 1 );
 	assert( elm );
 	ObjId obj( i2, 0 );
@@ -1876,11 +1890,11 @@ void testDataCopyZero()
 	double x = 3.14;
 	char* cx = reinterpret_cast< char* >( &x );
 	Dinfo< double > Ddbl;
-	ZeroDimGlobalHandler zd( &Ddbl );
+	ZeroDimHandler zd( &Ddbl, 1 );
 	bool ok;
 	vector< unsigned int > dim;
 	assert ( zd.isAllocated() == 0 );
-	ok = zd.resize( dim );
+	ok = zd.resize( 0, 1 );
 	assert( ok );
 	assert ( zd.isAllocated() == 1 );
 	assert( zd.totalEntries() == 1 );
@@ -1891,24 +1905,24 @@ void testDataCopyZero()
 	*dptr( &zd, 0 ) = 0.0;
 	assert( doubleEq( *dptr( &zd, 0 ), 0.0 ) );
 
-	ok = zd.setDataBlock( cx, 1, dim );
+	zd.assign( cx, 1 );
 	assert( doubleEq( *dptr( &zd, 0 ), x ) );
 
-	DataHandler* czd = zd.copy( 1 );
-	assert( dynamic_cast< ZeroDimGlobalHandler* >( czd ) != 0 );
+	DataHandler* czd = zd.copy( 1, 1 );
+	assert( dynamic_cast< ZeroDimHandler* >( czd ) != 0 );
 	assert ( czd->isAllocated() == 1 );
 	assert( czd->totalEntries() == 1 );
 	assert( doubleEq( *dptr( czd, 0 ), x ) );
 
-	DataHandler* czd1 = zd.copyExpand( 10, 1 );
-	assert( dynamic_cast< OneDimGlobalHandler* >( czd1 ) != 0 );
+	DataHandler* czd1 = zd.copy( 1, 10 );
+	assert( dynamic_cast< OneDimHandler* >( czd1 ) != 0 );
 	assert ( czd1->isAllocated() == 1 );
 	assert( czd1->totalEntries() == 10 );
 	for ( unsigned int i = 0; i < 10; ++i )
 		assert( doubleEq( *dptr( czd1, i ), x ) );
 
-	DataHandler* czd2 = zd.copyToNewDim( 20, 1 );
-	assert( dynamic_cast< OneDimGlobalHandler* >( czd2 ) != 0 );
+	DataHandler* czd2 = zd.copy( 1, 20 );
+	assert( dynamic_cast< OneDimHandler* >( czd2 ) != 0 );
 	assert ( czd2->isAllocated() == 1 );
 	assert( czd2->totalEntries() == 20 );
 	for ( unsigned int i = 0; i < 20; ++i )
@@ -1930,12 +1944,12 @@ void testDataCopyOne()
 
 	char* cy = reinterpret_cast< char* >( y );
 	Dinfo< double > Ddbl;
-	OneDimGlobalHandler od( &Ddbl );
+	OneDimHandler od( &Ddbl, 1, 10 );
 	bool ok;
 	vector< unsigned int > dim;
 	dim.push_back( 10 );
 	assert ( od.isAllocated() == 0 );
-	ok = od.resize( dim );
+	ok = od.resize( 0, 10 );
 	assert( ok );
 	assert ( od.isAllocated() == 1 );
 	assert( od.totalEntries() == 10 );
@@ -1948,19 +1962,21 @@ void testDataCopyOne()
 
 	*dptr( &od, 0 ) = 0.0;
 	assert( doubleEq( *dptr( &od, 0 ), 0.0 ) );
-	ok = od.setDataBlock( cy, 10, 0 );
+	od.assign( cy, 10 );
 	for ( unsigned int i = 0; i < 10; ++i )
 		assert( doubleEq( *dptr( &od, i ), x * i ) );
 
-	DataHandler* cod = od.copy( true );
-	assert( dynamic_cast< OneDimGlobalHandler* >( cod ) != 0 );
+	DataHandler* cod = od.copy( true, 1 );
+	assert( dynamic_cast< OneDimHandler* >( cod ) != 0 );
 	assert ( cod->isAllocated() == 1 );
 	assert( cod->totalEntries() == 10 );
 	for ( unsigned int i = 0; i < 10; ++i )
 		assert( doubleEq( *dptr( &od, i ), x * i ) );
 
-	DataHandler* cod1 = od.copyExpand( 27, true );
-	assert( dynamic_cast< OneDimGlobalHandler* >( cod1 ) != 0 );
+	DataHandler* cod1 = od.copy( true, 1 );
+	ok = cod1->resize( 0, 27 );
+	assert( ok );
+	assert( dynamic_cast< OneDimHandler* >( cod1 ) != 0 );
 	assert ( cod1->isAllocated() == 1 );
 	assert( cod1->totalEntries() == 27 );
 	assert( cod1->numDimensions() == 1 );
@@ -1972,8 +1988,8 @@ void testDataCopyOne()
 	for ( unsigned int i = 0; i < 27; ++i )
 		assert( doubleEq( *dptr( cod1, i ), x * ( i % 10 ) ) );
 
-	DataHandler* cod2 = od.copyToNewDim( 9, true );
-	assert( dynamic_cast< AnyDimGlobalHandler* >( cod2 ) != 0 );
+	DataHandler* cod2 = od.copy( true, 9 );
+	assert( dynamic_cast< TwoDimHandler* >( cod2 ) != 0 );
 	assert ( cod2->isAllocated() == 1 );
 	assert( cod2->totalEntries() == 90 );
 	assert( cod2->numDimensions() == 2 );
@@ -2012,14 +2028,10 @@ void testDataCopyAny()
 
 	char* cy = reinterpret_cast< char* >( y );
 	Dinfo< double > Ddbl;
-	AnyDimGlobalHandler ad( &Ddbl );
-	bool ok;
-	vector< unsigned int > dim;
+	vector< int > dim;
 	dim.push_back( n0 );
 	dim.push_back( n1 );
-	assert ( ad.isAllocated() == 0 );
-	ok = ad.resize( dim );
-	assert( ok );
+	AnyDimHandler ad( &Ddbl, 1, dim );
 	assert ( ad.isAllocated() == 1 );
 	assert( ad.totalEntries() == n0 * n1 );
 	assert( ad.data( 0 ) != 0 );
@@ -2033,14 +2045,13 @@ void testDataCopyAny()
 
 	*dptr( &ad, 0 ) = 0.0;
 	assert( doubleEq( *dptr( &ad, 0 ), 0.0 ) );
-	ok = ad.setDataBlock( cy, n0 * n1, 0 );
-	assert( ok );
+	ad.assign( cy, n0 * n1 );
 	for ( unsigned int i = 0; i < n1; ++i )
 		for ( unsigned int j = 0; j < n0; ++j )
 			assert( doubleEq( *dptr( &ad, i * n0 + j ), i * n0 + j ) );
 
-	DataHandler* cad = ad.copy( true );
-	assert( dynamic_cast< AnyDimGlobalHandler* >( cad ) != 0 );
+	DataHandler* cad = ad.copy( true, 1 );
+	assert( dynamic_cast< AnyDimHandler* >( cad ) != 0 );
 	assert ( cad->isAllocated() == 1 );
 	assert( cad->totalEntries() == n0 * n1 );
 	assert( cad->numDimensions() == 2 );
@@ -2060,11 +2071,9 @@ void testDataCopyAny()
 	21	22	23	24	25	26	27
 	*/
 
-	DataHandler* cad1 = ad.copyExpand( 27, true );
-	assert( cad1 == 0 ); // Do not permit non-multiple expansions.
-	cad1 = ad.copyExpand( 28, true ); // A multiple of dim1 == n1 == 4
-		// Now dim0 becomes 7.
-	assert( dynamic_cast< AnyDimGlobalHandler* >( cad1 ) != 0 );
+	DataHandler* cad1 = ad.copy( true, 1 );
+	cad1->resize( 0, 7 ); // dim0 goes from 5  to 7
+	assert( dynamic_cast< AnyDimHandler* >( cad1 ) != 0 );
 	assert ( cad1->isAllocated() == 1 );
 	assert( cad1->totalEntries() == 28 );
 	assert( cad1->numDimensions() == 2 );
@@ -2082,8 +2091,8 @@ void testDataCopyAny()
 		}
 	}
 
-	DataHandler* cad2 = ad.copyToNewDim( n2, true );
-	assert( dynamic_cast< AnyDimGlobalHandler* >( cad2 ) != 0 );
+	DataHandler* cad2 = ad.copy( true, n2 );
+	assert( dynamic_cast< AnyDimHandler* >( cad2 ) != 0 );
 	assert ( cad2->isAllocated() == 1 );
 	assert( cad2->totalEntries() == n0 * n1 * n2 );
 	assert( cad2->numDimensions() == 3 );
@@ -2113,10 +2122,48 @@ void testDataCopyAny()
 	cout << "." << flush;
 }
 
+/*
+class testForeach: public Arith
+{
+	public:
+		testForeach() {
+			vec_.resize( 0 );
+		}
+
+		pushBack( int i ) {
+			vec_.push_back( i );
+		}
+
+		const vector< int >& vec() const {
+			return vec_;
+		}
+	private:
+		vector< int > vec_;
+}
+*/
+
+class testForeach: public OpFuncDummy
+{
+	public:
+		testForeach( vector< double >* vec )
+			: vec_( vec )
+		{;}
+		void op( const Eref& e, const Qinfo* q, const double* buf ) const
+		{
+			vec_->push_back( *buf );
+		}
+		
+		const vector< double >& vec() const {
+			return *vec_;
+		}
+	private:
+		vector< double >* vec_;
+};
+
 void testOneDimHandler()
 {
 	Dinfo< int > dummyDinfo;
-	OneDimHandler odh( &dummyDinfo );
+	OneDimHandler odh( &dummyDinfo, 0, 1000 );
 	// nodeBalance( size, myNode, numNodes );
 	// Check start and end entries.
 	// Here we have 1000 entries on 10 nodes. Should be divided as
@@ -2134,7 +2181,17 @@ void testOneDimHandler()
 	assert( odh.start_ == 900 );
 	assert( odh.end_ == 1000 );
 
+	
 	// Next, test the iterators
+	vector< double > vec;
+	testForeach tf( &vec );
+	double arg = 12.34;
+	odh.foreach( &tf, 0, 0, &arg, 0 );
+	assert ( vec.size() == odh.localEntries() );
+	for ( unsigned int i = 0; i < odh.localEntries(); ++i )
+		assert( doubleEq( arg, vec[i] ) );
+	/*
+
 	OneDimHandler::iterator i = odh.begin();
 	assert ( i.index() == 900 );
 	assert( i.linearIndex() == 900 );
@@ -2146,6 +2203,7 @@ void testOneDimHandler()
 	++i;
 	assert ( i.index() == 901 );
 	assert( i.linearIndex() == 901 );
+	*/
 	
 	cout << "." << flush;
 }
@@ -2154,8 +2212,6 @@ void testFieldDataHandler()
 {
 	Dinfo< IntFire > dinfo1;
 	Dinfo< Synapse > dinfo2;
-	OneDimHandler odh( &dinfo1 );
-	// Check start and end entries.
 	// Here we have 1000 entries on 10 nodes. Should be divided as
 	// 0 to 99, then 100 to 199, and so on.
 	// These would refer to the 'data' part of the DataId.
@@ -2163,13 +2219,15 @@ void testFieldDataHandler()
 	unsigned int numNeurons = 1000;
 	unsigned int numNodes = 10;
 
-
+	OneDimHandler odh( &dinfo1, false, numNeurons );
+	// Check start and end entries.
 	// nodeBalance( size, myNode, numNodes );
 	odh.innerNodeBalance( numNeurons, 3, numNodes );
 	assert( odh.start_ == 300 );
 	assert( odh.end_ == 400 );
 
-	assert( odh.isAllocated() == 0 );
+	/*
+	assert( odh.isAllocated() == 1 );
 
 	vector< unsigned int > dims( 1, numNeurons );
 
@@ -2178,6 +2236,7 @@ void testFieldDataHandler()
 	// odh.resize( dims );
 	// So here I use a function from inside the OneDimHandler.
 	odh.data_ = odh.dinfo()->allocData( odh.end_ - odh.start_ );
+	*/
 
 	assert( odh.isAllocated() == 1 );
 	assert( odh.totalEntries() == numNeurons );
@@ -2189,6 +2248,15 @@ void testFieldDataHandler()
 	assert( odh.isDataHere( 999 ) == 0 );
 
 	// Next, test the iterators
+	vector< double > vec;
+	testForeach tf( &vec );
+	double arg = 12.34;
+	odh.foreach( &tf, 0, 0, &arg, 0 );
+	assert ( vec.size() == odh.localEntries() );
+	for ( unsigned int i = 0; i < odh.localEntries(); ++i )
+		assert( doubleEq( arg, vec[i] ) );
+
+	/*
 	OneDimHandler::iterator i = odh.begin();
 	assert ( i.index() == 300 );
 	assert( i.linearIndex() == 300 );
@@ -2200,6 +2268,7 @@ void testFieldDataHandler()
 	++i;
 	assert ( i.index() == 301 );
 	assert( i.linearIndex() == 301 );
+	*/
 
 	// Next, put in the FieldDataHandler.
 
@@ -2222,8 +2291,20 @@ void testFieldDataHandler()
 
 	assert( fdh.biggestFieldArraySize() == 399 );
 
-	fdh.setFieldDimension( 399 );
-	assert( fdh.getFieldDimension() == 399 );
+	// fdh.setFieldDimension( 399 );
+	// assert( fdh.getFieldDimension() == 399 );
+	fdh.resize( 0, 399 );
+	assert( fdh.sizeOfDim( 0 ) == 399 );
+
+	// Play with iterators
+	vec.resize(0);
+	arg = 56.78;
+	fdh.foreach( &tf, 0, 0, &arg, 0 );
+	assert( vec.size() == fdh.localEntries() );
+	for ( unsigned int i = 0; i < fdh.localEntries(); ++i )
+		assert( doubleEq( arg, vec[i] ) );
+
+	/*
 
 	i = fdh.begin();
 	assert( i.index() == DataId( 300, 0 ) );
@@ -2260,6 +2341,7 @@ void testFieldDataHandler()
 	end = fdh.end();
 	assert( end.index() == DataId( 400, 0 ) );
 	assert( end.linearIndex() == 400 * 399 );
+	*/
 	
 	cout << "." << flush;
 }
@@ -2273,7 +2355,7 @@ void testCopyFieldElementData()
 {
 	const Cinfo* ic = IntFire::initCinfo();
 	unsigned int size = 10;
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
 	Element* origElm = new Element( i2, ic, "test2", dims, true );
@@ -2301,12 +2383,13 @@ void testCopyFieldElementData()
 
 	FieldDataHandlerBase * fdh =
 		static_cast< FieldDataHandlerBase *>( syn->dataHandler() );
-	fdh->setFieldDimension( fdh->biggestFieldArraySize() );
+	// fdh->setFieldDimension( fdh->biggestFieldArraySize() );
+	fdh->resize( 0, fdh->biggestFieldArraySize() );
 	assert( syn->dataHandler()->totalEntries() == ( size - 1 ) * size );
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
 		for ( unsigned int j = 0; j < i; ++j ) {
-			DataId di( i, j );
+			DataId di( i, j, fdh->numFieldBits() );
 			ObjId synoid( synId, di );
 			double temp = i * 1000 + j ;
 			bool ret = Field< double >::set( synoid, "delay", temp );
@@ -2353,13 +2436,14 @@ void testCopyFieldElementData()
 
 	fdh =
 		static_cast< FieldDataHandlerBase *>( copySynElm->dataHandler() );
-	fdh->setFieldDimension( fdh->biggestFieldArraySize() );
+	// fdh->setFieldDimension( fdh->biggestFieldArraySize() );
+	fdh->resize( 0, fdh->biggestFieldArraySize() );
 	assert( copySynElm->dataHandler()->totalEntries() == 
 		(size * (size - 1) ) );
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
 		for ( unsigned int j = 0; j < i; ++j ) {
-			DataId di( i, j );
+			DataId di( i, j, fdh->numFieldBits() );
 			ObjId synoid( synId, di );
 			double temp = i * 1000 + j ;
 			assert( 
@@ -2506,7 +2590,7 @@ void testCinfoElements()
 	
 	Id intFireSrcFinfoId( "/classes/IntFire/srcFinfo" );
 	assert( intFireSrcFinfoId != Id() );
-	ObjId temp( intFireSrcFinfoId, DataId( 0, nsf ) );
+	ObjId temp( intFireSrcFinfoId, DataId( nsf ) );
 	assert( Field< string >::get( temp, "name" ) == "spike" );
 	assert( Field< string >::get( temp, "type" ) == "double" );
 
@@ -2517,10 +2601,10 @@ void testCinfoElements()
 	assert( Field< unsigned int >::get( intFireDestFinfoId, "linearSize" ) == 14 );
 	*/
 
-	temp = ObjId( intFireDestFinfoId, DataId( 0, 7 + sdf ) );
+	temp = ObjId( intFireDestFinfoId, DataId( 7 + sdf ) );
 	string str = Field< string >::get( temp, "name" );
 	assert( str == "get_refractoryPeriod");
-	temp = ObjId( intFireDestFinfoId, DataId( 0, 9 + sdf ) );
+	temp = ObjId( intFireDestFinfoId, DataId( 9 + sdf ) );
 	// temp.dataId.fieldu= 11;
 	str = Field< string >::get( temp, "name" );
 	assert( str == "reinit" );
@@ -2553,7 +2637,7 @@ void testMsgSrcDestFields()
 	Id t1 = Id::nextId();
 	Id t2 = Id::nextId();
 	// bool ret = Test::initCinfo()->create( t1, "test1", 1 );
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 	Element* e1 = new Element( t1, Test::initCinfo(), "test1", dims, 1 );
 	assert( e1 );
 	assert( e1 == t1() );

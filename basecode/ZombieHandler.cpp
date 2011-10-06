@@ -125,7 +125,7 @@ bool ZombieHandler::resize( unsigned int dimension, unsigned int size )
 }
 
 // Can't really do this.
-void assign( const char* orig, unsigned int numOrig )
+void ZombieHandler::assign( const char* orig, unsigned int numOrig )
 {
 	;
 }

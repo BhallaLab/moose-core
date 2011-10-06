@@ -166,7 +166,7 @@ void TwoDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 	}
 }
 
-void TwoDimHandler:: foreach( const OpFunc* f, Element* e, const Qinfo* q,
+void TwoDimHandler::foreach( const OpFunc* f, Element* e, const Qinfo* q,
 	const double* arg, unsigned int argIncrement ) const
 {
 	assert( q->threadNum() < threadStart_.size() );

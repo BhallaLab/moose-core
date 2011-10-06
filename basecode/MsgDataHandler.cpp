@@ -143,7 +143,7 @@ bool MsgDataHandler::resize( unsigned int dimension, unsigned int size )
 	return 0;
 }
 
-void assign( const char* orig, unsigned int numOrig )
+void MsgDataHandler::assign( const char* orig, unsigned int numOrig )
 {
 	;
 }
