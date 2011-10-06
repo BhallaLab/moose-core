@@ -27,6 +27,15 @@ FieldDataHandlerBase::~FieldDataHandlerBase()
 /////////////////////////////////////////////////////////////////////////
 
 /**
+* Returns the data on the specified index.
+*/
+char* FieldDataHandlerBase::data( DataId di ) const
+{
+	return lookupField( parentDataHandler_->data( di.parentIndex( numFieldBits_ ) ), di.myIndex( mask_ ) );
+}
+
+
+/**
  * Returns the number of field entries.
  * If parent is global the return value is also global.
  * If parent is local then it returns # on current node.
@@ -95,14 +104,6 @@ bool FieldDataHandlerBase::isAllocated() const {
 	return parentDataHandler_->isAllocated();
 }
 
-/**
- * Returns the data on the specified index.
- */
-char* FieldDataHandlerBase::data( DataId index ) const
-{
-	return lookupField( parentDataHandler_->data( index ), index.myIndex( mask_ ) );
-}
-
 const DataHandler* FieldDataHandlerBase::parentDataHandler() const
 {
 	return parentDataHandler_;
@@ -119,7 +120,7 @@ bool FieldDataHandlerBase::innerNodeBalance( unsigned int size,
 }
 
 /////////////////////////////////////////////////////////////////////////
-// Process
+// Process and foreach
 /////////////////////////////////////////////////////////////////////////
 
 void FieldDataHandlerBase::process( const ProcInfo* p, Element* e, FuncId fid ) const 
