@@ -36,7 +36,7 @@ const Cinfo* initTableCinfo()
 			// Sends out the request. Issued from the process call.
 		new SrcFinfo( "requestInput", Ftype0::global() ),
 			// Handle the returned value.
-	    new DestFinfo( "handleInput", Ftype1< double >::global(),
+                new DestFinfo( "handleInput", Ftype1< double >::global(),
 				RFCAST( &Table::setInput ) ),
 	};
 
@@ -347,9 +347,9 @@ void Table::innerProcess( Eref e, ProcInfo p )
 			 * Differs from GENESIS version because again we allow
 			 * the table to expand as needed.
 			 */
-			index = expandTable( e, output_ );
 			if ( input_ > stepSize_ ) {
 				if ( lastSpike_ <= stepSize_ ) { // Check for new spike
+                       			index = expandTable( e, output_ );
 					table_[ index ] = p->currTime_;
 					output_ += 1.0;
 					xmax_ = output_;
