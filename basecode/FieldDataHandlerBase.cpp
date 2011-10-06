@@ -104,6 +104,10 @@ bool FieldDataHandlerBase::isAllocated() const {
 	return parentDataHandler_->isAllocated();
 }
 
+unsigned int FieldDataHandlerBase::numFieldBits() const {
+	return numFieldBits_;
+}
+
 const DataHandler* FieldDataHandlerBase::parentDataHandler() const
 {
 	return parentDataHandler_;
