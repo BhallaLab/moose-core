@@ -83,13 +83,13 @@ class DataId
 		/**
 		 * Increment index, and return true if there is a rollover where
 		 * the index has exceeded the range allowed.
-		 */
 		bool increment( unsigned int max ) {
 			if ( index_ >= max - 1 ) 
 				return 1;
 			++index_;
 			return 0;
 		}
+		 */
 
 		///////////////////////////////////////////////////////////////////
 		// Comparison operators

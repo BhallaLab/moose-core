@@ -15893,4 +15893,9 @@ b) Implement a FieldOpFunc that again operates from the parent ptr and deals
 This is somewhat nasty but note that it is nicely recursive.
 
 Finally managed to work through all of the Handlers. Some few functions still
-dangle. It now compiles through to Cinfo.
+dangle. It now compiles through to Cinfo. Checkin 3015.
+
+
+============================================================================
+6 Oct
+Compiles through to testAsync.cpp.

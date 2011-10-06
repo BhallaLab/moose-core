@@ -92,8 +92,6 @@ class OneDimHandler: public DataHandler
 
 		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo) const;
 
-		DataHandler* addNewDimension( unsigned int size ) const;
-
 		bool resize( unsigned int dimension, unsigned int size );
 
 		void assign( const char* orig, unsigned int numOrig );

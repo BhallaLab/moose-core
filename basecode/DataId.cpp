@@ -7,11 +7,15 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#include <iostream>
+using namespace std;
+
 #include "DataId.h"
 
-const DataId DataId::bad( ~unsigned long long( 0 ) );
-const DataId DataId::any( ~unsigned long long( 1 ) );
-const DataId DataId::globalField( ~unsigned long long( 2 ) );
+
+const DataId DataId::bad( ~0U );
+const DataId DataId::any( ~1U );
+const DataId DataId::globalField( ~2U );
 
 ostream& operator <<( ostream& s, const DataId& d )
 {

@@ -34,7 +34,7 @@ void showFields()
 {
 	const Cinfo* nc = Neutral::initCinfo();
 	Id i1 = Id::nextId();
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 	Element* ret = new Element( i1, nc, "test1", dims, 1 );
 	// bool ret = nc->create( i1, "test1", 1 );
 	assert( ret );
@@ -118,7 +118,7 @@ void insertIntoQ( )
 
 	Id i1 = Id::nextId();
 	Id i2 = Id::nextId();
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 
 	Element* ret = new Element( i1, ac, "test1", dims, 1 );
 	// bool ret = nc->create( i1, "test1", size );
@@ -176,7 +176,7 @@ void testSendMsg()
 		ac->findFinfo( "set_outputValue" ) );
 	assert( df != 0 );
 	FuncId fid = df->getFid();
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 
 	Id i1 = Id::nextId();
 	Id i2 = Id::nextId();
@@ -222,7 +222,7 @@ void testCreateMsg()
 {
 	const Cinfo* ac = Arith::initCinfo();
 	unsigned int size = 100;
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 	Id i1 = Id::nextId();
 	Id i2 = Id::nextId();
 	Element* temp = new Element( i1, ac, "test1", dims, 1 );
@@ -273,7 +273,7 @@ void testInnerSet()
 	// Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 	const Cinfo* ac = Arith::initCinfo();
 	unsigned int size = 100;
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
 	Element* ret = new Element( i2, ac, "test2", dims, 1 );
@@ -328,7 +328,7 @@ void testInnerGet() // Uses low-level ops to do a 'get'.
 	unsigned int size = 100;
 	string arg;
 	Id i2 = Id::nextId();
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 	Element* ret = new Element( i2, ac, "test2", dims, 1 );
 	assert( ret );
 	Eref sheller = Id().eref();
@@ -389,7 +389,7 @@ void testSetGet()
 {
 	const Cinfo* ac = Arith::initCinfo();
 	unsigned int size = 100;
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
 	Element* ret = new Element( i2, ac, "test2", dims, 1 );
@@ -422,7 +422,7 @@ void testStrSet()
 {
 	const Cinfo* ac = Arith::initCinfo();
 	unsigned int size = 100;
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
 	Element* ret = new Element( i2, ac, "test2", dims, 1 );
@@ -465,7 +465,7 @@ void testGet()
 	unsigned int size = 100;
 	string arg;
 	Id i2 = Id::nextId();
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 	Element* ret = new Element( i2, ac, "test2", dims, 1 );
 	assert( ret );
 	// Element* shell = Id()();
@@ -504,7 +504,7 @@ void testStrGet()
 	unsigned int size = 100;
 	string arg;
 	Id i2 = Id::nextId();
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 	Element* ret = new Element( i2, ac, "test2", dims, 1 );
 	assert( ret );
 	// Element* shell = Id()();
@@ -547,7 +547,7 @@ void testSetGetDouble()
 {
 	const Cinfo* ic = IntFire::initCinfo();
 	unsigned int size = 100;
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
 	Id i3( i2.value() + 1 );
@@ -585,7 +585,7 @@ void testSetGetSynapse()
 	const Cinfo* ic = IntFire::initCinfo();
 	// const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 100;
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
 	// bool ret = ic->create( i2, "test2", size );
@@ -627,7 +627,8 @@ void testSetGetSynapse()
 	*/
 	FieldDataHandlerBase * fdh =
 		static_cast< FieldDataHandlerBase *>( syn->dataHandler() );
-	fdh->setFieldDimension( fdh->biggestFieldArraySize() );
+	// fdh->setFieldDimension( fdh->biggestFieldArraySize() );
+	fdh->resize( 0, fdh->biggestFieldArraySize() );
 	// fdh->syncFieldArraySize();
 	assert( syn->dataHandler()->totalEntries() == 9900 );
 	// cout << "NumSyn = " << syn.totalEntries() << endl;
@@ -655,7 +656,7 @@ void testSetGetVec()
 	const Cinfo* ic = IntFire::initCinfo();
 	// const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 100;
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
 	Id i3( i2.value() + 1 );
@@ -746,7 +747,7 @@ void test2ArgSetVec()
 {
 	const Cinfo* ac = Arith::initCinfo();
 	unsigned int size = 100;
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
 	Element* ret = new Element( i2, ac, "test2", dims, 1 );
@@ -781,7 +782,7 @@ void testFastGet()
 	assert( sgf );
 
 	unsigned int size = 100;
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 	string arg;
 	Id srcId = Id::nextId();
 	Element* src = new Element( srcId, ic, "src", dims, 1 );
@@ -896,7 +897,7 @@ void testSetRepeat()
 	const Cinfo* ic = IntFire::initCinfo();
 	// const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 100;
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 	string arg;
 	Id i2 = Id::nextId();
 	Id i3( i2.value() + 1 );
