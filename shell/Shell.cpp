@@ -415,7 +415,7 @@ Shell::Shell()
 		gettingVector_( 0 ),
 		numGetVecReturns_( 0 ),
 		cwe_( Id() ),
-		reduceMsg_( Msg::badMsg )
+		reduceMsg_( Msg::bad )
 {
 	// cout << myNode() << ": fids\n";
 	// shellCinfo->reportFids();
@@ -469,27 +469,27 @@ MsgId Shell::doAddMsg( const string& msgType,
 {
 	if ( !src.id() ) {
 		cout << myNode_ << ": Error: Shell::doAddMsg: src not found\n";
-		return Msg::badMsg;
+		return Msg::bad;
 	}
 	if ( !dest.id() ) {
 		cout << myNode_ << ": Error: Shell::doAddMsg: dest not found\n";
-		return Msg::badMsg;
+		return Msg::bad;
 	}
 	const Finfo* f1 = src.id()->cinfo()->findFinfo( srcField );
 	if ( !f1 ) {
 		cout << myNode_ << ": Shell::doAddMsg: Error: Failed to find field " << srcField << 
 			" on src: " << src.id()->getName() << "\n";
-		return Msg::badMsg;
+		return Msg::bad;
 	}
 	const Finfo* f2 = dest.id()->cinfo()->findFinfo( destField );
 	if ( !f2 ) {
 		cout << myNode_ << ": Shell::doAddMsg: Error: Failed to find field " << destField << 
 			" on dest: " << dest.id()->getName() << "\n";
-		return Msg::badMsg;
+		return Msg::bad;
 	}
 	if ( ! f1->checkTarget( f2 ) ) {
 		cout << myNode_ << ": Shell::doAddMsg: Error: Src/Dest Msg type mismatch: " << srcField << "/" << destField << endl;
-		return Msg::badMsg;
+		return Msg::bad;
 	}
 	initAck();
 	MsgId mid = Msg::nextMsgId();
@@ -765,11 +765,10 @@ void Shell::handleReMesh( Id baseMesh )
 	assert( tgts.size() == numTgts );
 	unsigned int numMeshEntries = 
 		baseMesh()->dataHandler()->localEntries() ;
-	vector< unsigned int > dims( 1, numMeshEntries );
 	for ( vector< Id >::iterator i = tgts.begin(); i != tgts.end(); ++i )
 	{
 		// Note that the resize command also copies over the data values.
-		bool ret = i->operator()()->resize( dims );
+		bool ret = i->element()->resize( 0, numMeshEntries );
 		assert( ret );
 		// Now we need to tell each tgt to scale its n, rates etc from vol.
 	}
@@ -877,7 +876,12 @@ void Shell::handleCreate( const Eref& e, const Qinfo* q,
 	// cout << myNode_ << ": Shell::handleCreate inner Create done for element " << name << " id " << newElm << endl;
 	if ( q->addToStructuralQ() )
 		return;
-	innerCreate( type, parent, newElm, name, dimensions );
+
+	vector< int > dims;
+	for ( unsigned int i = 0; i < dimensions.size(); ++i ) {
+		dims[i] = dimensions[i];
+	}
+	innerCreate( type, parent, newElm, name, dims );
 //	if ( myNode_ != 0 )
 	ack()->send( e, q->threadNum(), Shell::myNode(), OkStatus );
 	// cout << myNode_ << ": Shell::handleCreate ack sent" << endl;
@@ -918,7 +922,7 @@ bool Shell::adopt( Id parent, Id child ) {
  * This function actually creates the object. Runs on all nodes.
  */
 void Shell::innerCreate( string type, Id parent, Id newElm, string name,
-	const vector< unsigned int >& dimensions )
+	const vector< int >& dimensions )
 {
 	assert( dimensions.size() >= 1 );
 	// cout << "in Shell::innerCreate for " << parent.path() << "/" << name << endl << flush;
@@ -931,7 +935,7 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 			warning( ss.str() );
 			return;
 		}
-		vector< unsigned int > dims( dimensions );
+		vector< int > dims( dimensions );
 		bool isGlobal = dims.back();
 		dims.pop_back();
 		Element* ret = new Element( newElm, c, name, dims, isGlobal);
@@ -1000,7 +1004,7 @@ bool Shell::innerAddMsg( string msgType, MsgId mid,
 	// Should have been done before msgs request went out.
 	assert( f1->checkTarget( f2 ) );
 
-	latestMsgId_ = Msg::badMsg;
+	latestMsgId_ = Msg::bad;
 
 	Msg *m = 0;
 	if ( msgType == "diagonal" || msgType == "Diagonal" ) {
@@ -1095,7 +1099,7 @@ void Shell::handleUseClock( const Eref& e, const Qinfo* q,
 		*/
 	for ( vector< Id >::iterator i = list.begin(); i != list.end(); ++i ) {
 		stringstream ss;
-		ObjId tickId( Id( 2 ), DataId( 0, tick ) );
+		ObjId tickId( Id( 2 ), DataId( tick ) );
 		ss << tickField << tick;
 		// bool ret = 
 		innerAddMsg( "OneToAll", Msg::nextMsgId(), 

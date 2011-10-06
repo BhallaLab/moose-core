@@ -112,6 +112,12 @@ class DataHandler
 		 */
 		virtual bool isGlobal() const;
 
+		/**
+		 * Returns the # of entries in the field on this object, should
+		 * it indeed be a FieldDataHandler. Otherwise returns 0.
+		 */
+		virtual unsigned int getFieldArraySize( DataId di ) const;
+
 /////////////////////////////////////////////////////////////////////////
 // Load balancing functions
 /////////////////////////////////////////////////////////////////////////

@@ -202,8 +202,9 @@ bool FieldDataHandlerBase::resize( unsigned int dimension, unsigned int size)
  * trim off the field part.
  */
 void FieldDataHandlerBase::setFieldArraySize( 
-	unsigned int objectIndex, unsigned int size )
+	DataId di, unsigned int size )
 {
+	unsigned int objectIndex = di.value() >> numFieldBits_;
 	assert( objectIndex < parentDataHandler_->totalEntries() );
 
 	if ( parentDataHandler_->isDataHere( objectIndex ) ) {
@@ -219,8 +220,9 @@ void FieldDataHandlerBase::setFieldArraySize(
 /**
  * Looks up the size of the local field array on the specified object
  */
-unsigned int FieldDataHandlerBase::getFieldArraySize( unsigned int objectIndex ) const
+unsigned int FieldDataHandlerBase::getFieldArraySize( DataId di ) const
 {
+	unsigned int objectIndex = di.value() >> numFieldBits_;
 	assert( objectIndex < parentDataHandler_->totalEntries() );
 	if ( parentDataHandler_->isDataHere( objectIndex ) ) {
 		char* pa = parentDataHandler_->data( objectIndex );

@@ -485,19 +485,19 @@ void testShellParserStart()
 
 
 	const Cinfo* testSchedCinfo = TestSched::initCinfo();
-	vector< unsigned int > dims;
+	vector< int > dims;
 	Id tsid = Id::nextId();
 	Element* tse = new Element( tsid, testSchedCinfo, "tse", dims );
 
 	// testThreadSchedElement tse;
 	Eref ts( tse, 0 );
 	Element* ticke = Id( 2 )();
-	Eref er0( ticke, DataId( 0, 0 ) );
-	Eref er1( ticke, DataId( 0, 1 ) );
-	Eref er2( ticke, DataId( 0, 2 ) );
-	Eref er3( ticke, DataId( 0, 3 ) );
-	Eref er4( ticke, DataId( 0, 4 ) );
-	Eref er5( ticke, DataId( 0, 5 ) );
+	Eref er0( ticke, DataId( 0 ) );
+	Eref er1( ticke, DataId( 1 ) );
+	Eref er2( ticke, DataId( 2 ) );
+	Eref er3( ticke, DataId( 3 ) );
+	Eref er4( ticke, DataId( 4 ) );
+	Eref er5( ticke, DataId( 5 ) );
 
 	// No idea what FuncId to use here. Assume 0.
 	FuncId f( 0 );
@@ -604,7 +604,7 @@ bool setupSched( Shell* shell, ObjId& tick, Id dest )
 {
 	MsgId ret = shell->doAddMsg( "OneToAll", 
 		tick, "proc0", ObjId( dest, 0 ), "proc" );
-	return ( ret != Msg::badMsg );
+	return ( ret != Msg::bad );
 }
 
 bool checkArg1( Id e, 
@@ -707,27 +707,27 @@ void testShellAddMsg()
 	// Should give 04000
 	MsgId m1 = shell->doAddMsg( "Single", 
 		ObjId( a1, 3 ), "output", ObjId( a2, 1 ), "arg3" );
-	assert( m1 != Msg::badMsg );
+	assert( m1 != Msg::bad );
 
 	// Should give 33333
 	MsgId m2 = shell->doAddMsg( "OneToAll", 
 		ObjId( b1, 2 ), "output", ObjId( b2, 0 ), "arg3" );
-	assert( m2 != Msg::badMsg );
+	assert( m2 != Msg::bad );
 
 	// Should give 12345
 	MsgId m3 = shell->doAddMsg( "OneToOne", 
 		ObjId( c1, 0 ), "output", ObjId( c2, 0 ), "arg3" );
-	assert( m3 != Msg::badMsg );
+	assert( m3 != Msg::bad );
 
 	// Should give 01234
 	MsgId m4 = shell->doAddMsg( "Diagonal", 
 		ObjId( d1, 0 ), "output", ObjId( d2, 0 ), "arg3" );
-	assert( m4 != Msg::badMsg );
+	assert( m4 != Msg::bad );
 
 	// Should give 54321
 	MsgId m5 = shell->doAddMsg( "Sparse", 
 		ObjId( e1, 0 ), "output", ObjId( e2, 0 ), "arg3" );
-	assert( m5 != Msg::badMsg );
+	assert( m5 != Msg::bad );
 
 	const Msg* m5p = Msg::getMsg( m5 );
 	Eref m5er = m5p->manager();
@@ -753,13 +753,13 @@ void testShellAddMsg()
 	for ( unsigned int i = 0; i < 5; ++i ) {
 		MsgId m6 = shell->doAddMsg( "OneToAll", 
 			ObjId( f1, i ), "output", ObjId( f2, i ), "arg3" );
-		assert( m6 != Msg::badMsg );
+		assert( m6 != Msg::bad );
 	}
 
 	// Should give 14 13 12 11 10
 	MsgId m7 = shell->doAddMsg( "Sparse", 
 		ObjId( g1, 0 ), "output", ObjId( g2, 0 ), "arg3" );
-	assert( m7 != Msg::badMsg );
+	assert( m7 != Msg::bad );
 	const Msg* m7p = Msg::getMsg( m7 );
 	Eref m7er = m7p->manager();
 	for ( unsigned int i = 0; i < 5; ++i ) {
@@ -965,27 +965,27 @@ void testCopyMsgOps()
 	// Should give 04000
 	MsgId m1 = shell->doAddMsg( "Single", 
 		ObjId( a1, 3 ), "output", ObjId( a2, 1 ), "arg1" );
-	assert( m1 != Msg::badMsg );
+	assert( m1 != Msg::bad );
 
 	// Should give 33333
 	MsgId m2 = shell->doAddMsg( "OneToAll", 
 		ObjId( b1, 2 ), "output", ObjId( b2, 0 ), "arg1" );
-	assert( m2 != Msg::badMsg );
+	assert( m2 != Msg::bad );
 
 	// Should give 12345
 	MsgId m3 = shell->doAddMsg( "OneToOne", 
 		ObjId( c1, 0 ), "output", ObjId( c2, 0 ), "arg1" );
-	assert( m3 != Msg::badMsg );
+	assert( m3 != Msg::bad );
 
 	// Should give 01234
 	MsgId m4 = shell->doAddMsg( "Diagonal", 
 		ObjId( d1, 0 ), "output", ObjId( d2, 0 ), "arg1" );
-	assert( m4 != Msg::badMsg );
+	assert( m4 != Msg::bad );
 
 	// Should give 54321
 	MsgId m5 = shell->doAddMsg( "Sparse", 
 		ObjId( e1, 0 ), "output", ObjId( e2, 0 ), "arg1" );
-	assert( m5 != Msg::badMsg );
+	assert( m5 != Msg::bad );
 
 	const Msg* m5p = Msg::getMsg( m5 );
 	Eref m5er = m5p->manager();
@@ -1306,27 +1306,27 @@ void testGetMsgs()
 	// Should give 04000
 	MsgId m1 = shell->doAddMsg( "Single", 
 		ObjId( a1, 3 ), "output", ObjId( a2, 1 ), "arg3" );
-	assert( m1 != Msg::badMsg );
+	assert( m1 != Msg::bad );
 
 	// Should give 33333
 	MsgId m2 = shell->doAddMsg( "OneToAll", 
 		ObjId( a1, 2 ), "output", ObjId( b2, 0 ), "arg3" );
-	assert( m2 != Msg::badMsg );
+	assert( m2 != Msg::bad );
 
 	// Should give 12345
 	MsgId m3 = shell->doAddMsg( "OneToOne", 
 		ObjId( a1, 0 ), "output", ObjId( c2, 0 ), "arg3" );
-	assert( m3 != Msg::badMsg );
+	assert( m3 != Msg::bad );
 
 	// Should give 01234
 	MsgId m4 = shell->doAddMsg( "Diagonal", 
 		ObjId( a1, 0 ), "output", ObjId( d2, 0 ), "arg3" );
-	assert( m4 != Msg::badMsg );
+	assert( m4 != Msg::bad );
 
 	// Should give 54321
 	MsgId m5 = shell->doAddMsg( "Sparse", 
 		ObjId( a1, 0 ), "output", ObjId( e2, 0 ), "arg3" );
-	assert( m5 != Msg::badMsg );
+	assert( m5 != Msg::bad );
 
 	////////////////////////////////////////////////////////////////
 	// Check that the outgoing Msgs are OK.
@@ -1415,7 +1415,7 @@ void testGetMsgs()
 
 	MsgId m6 = shell->doAddMsg( "Single", 
 		ObjId( b1, 3 ), "output", ObjId( b2, 1 ), "arg3" );
-	assert( m6 != Msg::badMsg );
+	assert( m6 != Msg::bad );
 	srcIds.resize( 0 );
 	srcIds = LookupField< string, vector< Id > >::get( b2, "msgSrc", "arg3" );
 	assert( srcIds.size() == 2 );
