@@ -15907,4 +15907,5 @@ Compiles through biophysics directory. Checkin 3024.
 Having to backtrack: in testShell.cpp.
 ============================================================================
 7 Oct
-Compiles through builtins.
+Compiles through builtins. Checkin 3026.
+Compiles through kinetics.

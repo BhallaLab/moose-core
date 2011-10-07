@@ -103,7 +103,7 @@ Id ReadKkit::read(
     }
 
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-	vector< unsigned int > dims( 1,1 );
+	vector< int > dims( 1,1 );
 	Id base = s->doCreate( solverClass, pa, modelname, dims, true );
 	assert( base != Id() );
 
@@ -127,7 +127,7 @@ Id ReadKkit::read(
  */
 void ReadKkit::setupGslRun()
 {
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 	Id gsl = shell_->doCreate( "GslIntegrator", baseId_, "gsl", dims );
 	bool ret = SetGet1< Id >::set( gsl, "stoich", baseId_ );
 	assert( ret );
@@ -265,7 +265,7 @@ void ReadKkit::innerRead( ifstream& fin )
 
 void ReadKkit::makeStandardElements()
 {
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 	Id kinetics = Neutral::child( baseId_.eref(), "kinetics" );
 	if ( kinetics == Id() ) {
 		kinetics = 
@@ -469,7 +469,7 @@ Id ReadKkit::buildCompartment( const vector< string >& args )
 
 Id ReadKkit::buildReac( const vector< string >& args )
 {
-	static vector< unsigned int > dim( 1, 1 );
+	static vector< int > dim( 1, 1 );
 
 	string head;
 	string tail = pathTail( args[2], head );
@@ -527,7 +527,7 @@ void ReadKkit::assignPoolCompartments()
 	}
 	
 	// Field< double >::set( kinetics.eref(), "size", max );
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 
 	for ( unsigned int i = 0 ; i < volCategories_.size(); ++i ) {
 		string name;
@@ -562,7 +562,7 @@ void ReadKkit::assignPoolCompartments()
 				ObjId( compt, 0 ), "sizeOut",
 				ObjId( *j, 0 ), "setSize" ); 
 				*/
-			assert( ret != Msg::badMsg );
+			assert( ret != Msg::bad );
 		}
 	}
 }
@@ -588,7 +588,7 @@ static Id getMeshEntryForPool( Id pool )
 
 Id ReadKkit::buildEnz( const vector< string >& args )
 {
-	static vector< unsigned int > dim( 1, 1 );
+	static vector< int > dim( 1, 1 );
 	string head;
 	string tail = pathTail( args[2], head );
 	Id pa = shell_->doFind( head );
@@ -638,7 +638,7 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 		bool ret = shell_->doAddMsg( "OneToAll", 
 			ObjId( enz, 0 ), "cplx",
 			ObjId( cplx, 0 ), "reac" ); 
-		assert( ret != Msg::badMsg );
+		assert( ret != Msg::bad );
 
 		// cplx()->showFields();
 		// enz()->showFields();
@@ -659,7 +659,7 @@ Id ReadKkit::buildText( const vector< string >& args )
 Id ReadKkit::buildInfo( Id parent, 
 	map< string, int >& m, const vector< string >& args )
 {
-	static vector< unsigned int > dim( 1, 1 );
+	static vector< int > dim( 1, 1 );
 	Id info = shell_->doCreate( "Neutral", parent, "info", dim, true );
 	assert( info != Id() );
 
@@ -679,7 +679,7 @@ Id ReadKkit::buildInfo( Id parent,
 
 Id ReadKkit::buildGroup( const vector< string >& args )
 {
-	static vector< unsigned int > dim( 1, 1 );
+	static vector< int > dim( 1, 1 );
 
 	string head;
 	string tail = pathTail( args[2], head );
@@ -696,7 +696,7 @@ Id ReadKkit::buildGroup( const vector< string >& args )
 
 Id ReadKkit::buildPool( const vector< string >& args )
 {
-	static vector< unsigned int > dim( 1, 1 );
+	static vector< int > dim( 1, 1 );
 	const double NA = 6.0e23; // Kkit uses 6e23 for NA.
 
 	string head;
@@ -762,10 +762,10 @@ void ReadKkit::buildSumTotal( const string& src, const string& dest )
 	Id sumId;
 	// Check if the pool has not yet been converted to handle SumTots.
 	if ( destId()->cinfo()->name() == "Pool" ) {
-		vector< unsigned int > dim( 1, 1 );
+		vector< int > dim( 1, 1 );
 		sumId = shell_->doCreate( "SumFunc", destId, "sumFunc", dim, true );
 		const DataHandler* orig = destId()->dataHandler();
-		DataHandler* dup = orig->copy( false );
+		DataHandler* dup = orig->copy( false, 1 );
 	
 		// Turn dest into a FuncPool.
 		destId()->zombieSwap( FuncPool::initCinfo(), dup );
@@ -805,7 +805,7 @@ Id ReadKkit::buildGeometry( const vector< string >& args )
 
 Id ReadKkit::buildGraph( const vector< string >& args )
 {
-	static vector< unsigned int > dim( 1, 1 );
+	static vector< int > dim( 1, 1 );
 
 	string head;
 	string tail = pathTail( args[2], head );
@@ -820,7 +820,7 @@ Id ReadKkit::buildGraph( const vector< string >& args )
 
 Id ReadKkit::buildPlot( const vector< string >& args )
 {
-	static vector< unsigned int > dim( 1, 1 );
+	static vector< int > dim( 1, 1 );
 
 	string head;
 	string tail = pathTail( args[2], head ); // Name of plot
@@ -870,12 +870,12 @@ void ReadKkit::innerAddMsg(
 		MsgId ret = shell_->doAddMsg( "AllToOne", 
 			ObjId( srcId, 0 ), srcMsg,
 			ObjId( destId, 0 ), destMsg ); 
-		assert( ret != Msg::badMsg );
+		assert( ret != Msg::bad );
 	} else {
 		MsgId ret = shell_->doAddMsg( "OneToAll", 
 			ObjId( srcId, 0 ), srcMsg,
 			ObjId( destId, 0 ), destMsg ); 
-		assert( ret != Msg::badMsg );
+		assert( ret != Msg::bad );
 	}
 }
 
