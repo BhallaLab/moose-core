@@ -88,6 +88,8 @@ OBJ = PyMooseBase.o \
 	Molecule.o \
 	Reaction.o \
 	Stoich.o \
+	GslIntegrator.o	\
+	SteadyState.o	\
 	NeuroScan.o \
 	HSolve.o \
 	RandGenerator.o	\
@@ -123,7 +125,6 @@ OBJ = PyMooseBase.o \
 	IzhikevichNrn.o	\
 	HHChannel2D.o	\
 	HHGate2D.o	\
-	SteadyState.o	\
 	InterSolverFlux.o	\
 	Adaptor.o	\
 	SigNeur.o	\
@@ -164,6 +165,8 @@ HEADERS=PyMooseUtil.h \
 	Enzyme.h \
 	KineticHub.h \
 	Kintegrator.h \
+	GslIntegrator.h	\
+	SteadyState.h	\
 	KineticManager.h	\
 	Molecule.h \
 	Reaction.h \
@@ -203,7 +206,6 @@ HEADERS=PyMooseUtil.h \
 	IzhikevichNrn.h	\
 	HHChannel2D.h	\
 	HHGate2D.h	\
-	SteadyState.h	\
 	InterSolverFlux.h	\
 	../randnum/randnum.h	\
 	../randnum/Probability.h	\
