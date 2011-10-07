@@ -822,11 +822,13 @@ void testFastGet()
 	assert ( syn->getName() == "synapse" );
 	bool ret = Field< unsigned int >::set( ObjId( tgtId2, 0 ), "numSynapses", size );
 	assert( ret );
-	// assert( syn->dataHandler()->getFieldArraySize( 0 ) == size );
+	assert( syn->dataHandler()->getFieldArraySize( 0 ) == size );
 	FieldDataHandlerBase* fdh = dynamic_cast< FieldDataHandlerBase* >(
 		syn->dataHandler() );
 	assert( fdh );
-	assert( fdh->getFieldArraySize( 0 ) == size );
+	/*
+	assert( fdh->getFieldArraySize( DataId( 0 ) ) == size );
+	*/
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		DataId di( 0, i, fdh->numFieldBits() );

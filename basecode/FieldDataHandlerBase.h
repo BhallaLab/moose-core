@@ -87,8 +87,8 @@ class FieldDataHandlerBase: public DataHandler
 
 		/**
 		 * Looks up the size of the field array on the specified object
-		 */
 		unsigned int getFieldArraySize( unsigned int objectIndex ) const;
+		 */
 
 		/**
 		 * Looks up the biggest field array size on the current node
