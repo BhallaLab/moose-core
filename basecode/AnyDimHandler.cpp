@@ -69,6 +69,11 @@ unsigned int AnyDimHandler::localEntries() const
 	return end_ - start_;
 }
 
+unsigned int AnyDimHandler::numDimensions() const
+{
+	return dims_.size();
+}
+
 unsigned int AnyDimHandler::sizeOfDim( unsigned int dim ) const
 {
 	if ( dim < dims_.size() )

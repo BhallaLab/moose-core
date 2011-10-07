@@ -15914,4 +15914,13 @@ Compiles through all libraries, but not the link step.
 
 Implemented FieldDataHandler::foreach using excessively clever OpFunc derived
 class to deal with iteration through arrays of fields. Link step still
-has several functions to go.
+has several functions to go. Checkin 3030.
+
+
+I need to formalize the path traversal rules for DataHandlers and Elements for
+assigning indices. First let's finish the compile, then go back to this,
+esp with things like set/getFieldArraySize, leading on to the 'path' functions.
+DataHandler::isDataHere( DataId di ) is also a concern.
+Will need to deal early with having ragged arrays.
+
+First, compile the whole mess. Compiled.
