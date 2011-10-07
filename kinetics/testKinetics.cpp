@@ -38,7 +38,7 @@ bool isClose( double x, double y, double tol )
 void testMathFunc()
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 	Id nid = shell->doCreate( "Neutral", Id(), "n", dims );
 	Id mid = shell->doCreate( "MathFunc", nid, "m", dims );
 	MathFunc* math = reinterpret_cast< MathFunc* >( mid.eref().data() );
@@ -140,7 +140,7 @@ void testMathFunc()
 void testMathFuncProcess()
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 	//////////////////////////////////////////////////////////////////////
 	// This set is the test kinetic calculation using MathFunc
 	//////////////////////////////////////////////////////////////////////
@@ -207,7 +207,7 @@ void testMathFuncProcess()
 void testPoolVolumeScaling()
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 	Id comptId = shell->doCreate( "CylMesh", Id(), "cyl", dims );
 	Id meshId( comptId.value() + 1 );
 	Id poolId = shell->doCreate( "Pool", comptId, "pool", dims );
@@ -216,7 +216,7 @@ void testPoolVolumeScaling()
 		ObjId( poolId, 0 ), "requestSize",
 		ObjId( meshId, 0 ), "get_size" );
 
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 
 	vector< double > coords( 9, 0.0 );
 	double x1 = 100e-6;
