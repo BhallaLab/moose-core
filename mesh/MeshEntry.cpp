@@ -155,7 +155,7 @@ MeshEntry::MeshEntry( const ChemMesh* parent )
  */
 void MeshEntry::process( const Eref& e, ProcPtr info )
 {
-	parent_->updateDiffusion( e.index().field() );
+	parent_->updateDiffusion( e.fieldIndex() );
 }
 
 void MeshEntry::reinit( const Eref& e, ProcPtr info )
@@ -170,39 +170,39 @@ void MeshEntry::reinit( const Eref& e, ProcPtr info )
 
 double MeshEntry::getSize( const Eref& e, const Qinfo* q ) const
 {
-	return parent_->getMeshEntrySize( e.index().field() );
+	return parent_->getMeshEntrySize( e.fieldIndex() );
 }
 
 unsigned int MeshEntry::getDimensions( const Eref& e, const Qinfo* q ) const
 {
-	return parent_->getMeshDimensions( e.index().field() );
+	return parent_->getMeshDimensions( e.fieldIndex() );
 }
 
 unsigned int MeshEntry::getMeshType( const Eref& e, const Qinfo* q ) const
 {
-	return parent_->getMeshType( e.index().field() );
+	return parent_->getMeshType( e.fieldIndex() );
 }
 
 vector< double >MeshEntry::getCoordinates( const Eref& e, const Qinfo* q ) const
 {
-	return parent_->getCoordinates( e.index().field() );
+	return parent_->getCoordinates( e.fieldIndex() );
 }
 
 vector< unsigned int >MeshEntry::getNeighbors(
 	const Eref& e, const Qinfo* q ) const
 {
-	return parent_->getNeighbors( e.index().field() );
+	return parent_->getNeighbors( e.fieldIndex() );
 }
 
 
 vector< double >MeshEntry::getDiffusionArea( const Eref& e, const Qinfo* q ) const
 {
-	return parent_->getDiffusionArea( e.index().field() );
+	return parent_->getDiffusionArea( e.fieldIndex() );
 }
 
 
 vector< double >MeshEntry::getDiffusionScaling( const Eref& e, const Qinfo* q ) const
 {
-	return parent_->getDiffusionScaling( e.index().field() );
+	return parent_->getDiffusionScaling( e.fieldIndex() );
 }
 

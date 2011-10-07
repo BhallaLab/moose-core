@@ -17,7 +17,7 @@
 void perfTestMarkovSolver( )
 {
 	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 	
 	Id nid = shell->doCreate( "Neutral", Id(), "n", dims ); 
 
@@ -41,15 +41,15 @@ void perfTestMarkovSolver( )
 
  	MsgId mid = shell->doAddMsg( "Single", ObjId( comptId ), "channel", 
 			  ObjId( mChanId ), "channel" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 
 	mid = shell->doAddMsg( "Single", ObjId( comptId ), "channel", 
 			ObjId( solverId ), "channel" );
-	assert( mid != Msg::badMsg );						
+	assert( mid != Msg::bad );						
 
 	mid = shell->doAddMsg( "Single", ObjId( solverId ), "stateOut", 
 			ObjId( mChanId ), "handlestate" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 
 	Field< double >::set( comptId, "Cm", 0.007854e-6 );
 	Field< double >::set( comptId, "Ra", 7639.44e3 ); // does it matter?
