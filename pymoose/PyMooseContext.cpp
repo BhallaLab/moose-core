@@ -1819,6 +1819,12 @@ const vector<string>& PyMooseContext::getFieldList(Id id, FieldType ftype)
     return strings_;
 }
 
+const vector<Id>& PyMooseContext::getStoichPathVector(Id id)
+{
+    get < vector<Id> > (id(), "pathVec", elist_);
+    return elist_;
+}
+
 #ifdef DO_UNIT_TESTS
 /**
    These are the unit tests

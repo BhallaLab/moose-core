@@ -32,8 +32,14 @@ unsigned int KineticHub::__get_nEnz() const
     get < unsigned int > (id_(), "nEnz",nEnz);
     return nEnz;
 }
-void KineticHub::destroy()
+bool KineticHub::__get_zombifySeparate() const
 {
-    set(id_(), "destroy");
+    bool zombifySeparate;
+    get < bool > (id_(), "zombifySeparate",zombifySeparate);
+    return zombifySeparate;
+}
+void KineticHub::__set_zombifySeparate( bool zombifySeparate )
+{
+    set < bool > (id_(), "zombifySeparate", zombifySeparate);
 }
 #endif

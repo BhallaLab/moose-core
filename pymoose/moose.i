@@ -42,6 +42,8 @@
 	#include "Enzyme.h"
 	#include "KineticHub.h"		
 	#include "Kintegrator.h"
+        #include "GslIntegrator.h"
+        #include "SteadyState.h"
 	#include "MathFunc.h"
 	#include "Molecule.h"
 	#include "Reaction.h"
@@ -590,6 +592,21 @@ zGate = property(__get_zGate)
 %attribute(pymoose::Kintegrator, bool, isInitiatilized, __get_isInitiatilized)
 %attribute(pymoose::Kintegrator, string, integrate_method, __get_method, __set_method)
 //%attribute_ref(Kintegrator, string, method)
+
+%include "SteadyState.h"
+%attribute(pymoose::SteadyState, bool, badStoichiometry, __get_badStoichiometry)
+%attribute(pymoose::SteadyState, bool, isInitialized, __get_isInitialized)
+%attribute(pymoose::SteadyState, unsigned int, nIter, __get_nIter)
+%attribute(pymoose::SteadyState, string, status, __get_status)
+%attribute(pymoose::SteadyState, unsigned int, maxIter, __get_maxIter, __set_maxIter)
+%attribute(pymoose::SteadyState, double, convergenceCriterion, __get_convergenceCriterion, __set_convergenceCriterion)
+%attribute(pymoose::SteadyState, unsigned int, nVarMols, __get_nVarMols)
+%attribute(pymoose::SteadyState, unsigned int, rank, __get_rank)
+%attribute(pymoose::SteadyState, unsigned int, stateType, __get_stateType)
+%attribute(pymoose::SteadyState, unsigned int, nNegEigenvalues, __get_nNegEigenvalues)
+%attribute(pymoose::SteadyState, unsigned int, nPosEigenvalues, __get_nPosEigenvalues)
+%attribute(pymoose::SteadyState, unsigned int, solutionStatus, __get_solutionStatus)
+
 %include "MathFunc.h"
 %attribute(pymoose::MathFunc, string, mathML, __get_mathML, __set_mathML)
 %attribute(pymoose::MathFunc, string, function, __get_function, __set_function)
@@ -607,11 +624,20 @@ zGate = property(__get_zGate)
 %attribute(pymoose::Stoich, bool, useOneWayReacs, __get_useOneWayReacs, __set_useOneWayReacs)
 %attribute(pymoose::Stoich, string, targetPath, __get_targetPath, __set_targetPath)// -- path here is something different from element path
 %attribute(pymoose::Stoich, unsigned int, rateVectorSize, __get_rateVectorSize)
+%attribute(pymoose::Stoich, const vector<Id>&, pathVec, __get_pathVec)
 
 %include "KineticHub.h"
 %attribute(pymoose::KineticHub, unsigned int, nVarMol, __get_nVarMol)
 %attribute(pymoose::KineticHub, unsigned int, nReac, __get_nReac)
 %attribute(pymoose::KineticHub, unsigned int, nEnz, __get_nEnz)
+%attribute(pymoose::KineticHub, bool, zombifySeparate, __get_zombifySeparate, __set_zombifySeparate)
+
+%include "GslIntegrator.h"
+%attribute(pymoose::GslIntegrator, bool, isInitiatilized, __get_isInitiatilized)
+%attribute(pymoose::GslIntegrator, string, method, __get_method, __set_method)
+%attribute(pymoose::GslIntegrator, double, relativeAccuracy, __get_relativeAccuracy, __set_relativeAccuracy)
+%attribute(pymoose::GslIntegrator, double, absoluteAccuracy, __get_absoluteAccuracy, __set_absoluteAccuracy)
+%attribute(pymoose::GslIntegrator, double, internalDt, __get_internalDt, __set_internalDt)
 
 %include "Enzyme.h"
 %attribute(pymoose::Enzyme, double, k1, __get_k1, __set_k1)
