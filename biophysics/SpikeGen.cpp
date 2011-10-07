@@ -222,7 +222,7 @@ void SpikeGen::handleVm( double val )
 void testSpikeGen()
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 	Id sid = shell->doCreate( "SpikeGen", Id(), "spike", dims );
 	SpikeGen& sg = *( reinterpret_cast< SpikeGen* >( sid.eref().data() ) );
 

@@ -140,8 +140,8 @@ template < class T, class F > class UpValueFinfo: public ValueFinfoBase
 		}
 
 		UpValueFinfo( const string& name, const string& doc, 
-			void ( T::*setFunc )( DataId, F ),
-			F ( T::*getFunc )( DataId ) const )
+			void ( T::*setFunc )( unsigned int, F ),
+			F ( T::*getFunc )( unsigned int ) const )
 			: ValueFinfoBase( name, doc )
 		{
 				string setname = "set_" + name;

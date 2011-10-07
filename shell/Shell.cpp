@@ -56,7 +56,7 @@ double Shell::runtime_( 0.0 );
 
 const ThreadId ScriptThreadNum = 0;
 
-static SrcFinfo5< string, Id, Id, string, vector< unsigned int > > requestCreate( "requestCreate",
+static SrcFinfo5< string, Id, Id, string, vector< int > > requestCreate( "requestCreate",
 			"requestCreate( class, parent, newElm, name, dimensions ): "
 			"creates a new Element on all nodes with the specified Id. "
 			"Initiates a callback to indicate completion of operation. "
@@ -444,10 +444,10 @@ void Shell::setShellElement( Element* shelle )
  * Idea is that the model should be fully defined before load balancing.
  *
  */
-Id Shell::doCreate( string type, Id parent, string name, vector< unsigned int > dimensions, bool isGlobal )
+Id Shell::doCreate( string type, Id parent, string name, vector< int > dimensions, bool isGlobal )
 {
 	Id ret = Id::nextId();
-	vector< unsigned int > dims( dimensions );
+	vector< int > dims( dimensions );
 	dims.push_back( isGlobal );
 	initAck(); // Nasty thread stuff happens here for multithread mode.
 		requestCreate.send( Id().eref(), ScriptThreadNum, type, parent, ret, name, dims );

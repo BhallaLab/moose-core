@@ -70,9 +70,11 @@ class Shell
 		 * parent: Id of parent element
 		 * name: Name to be used for identifying Element.
 		 * dimensions: Size of array in any # of dimensions.
+		 * Negative entries mean that that dimension is ragged. Each
+		 * array in that dimension may be a different size.
 		 */
 		Id doCreate( string type, Id parent, string name, 
-			vector< unsigned int > dimensions, bool isGlobal = 0 );
+			vector< int > dimensions, bool isGlobal = 0 );
 
 		/**
 		 * Delete specified Element and all its children and all 

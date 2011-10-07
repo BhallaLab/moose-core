@@ -702,7 +702,7 @@ void testCompartmentProcess()
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	unsigned int size = 100;
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 
 	double Rm = 1.0;
 	double Ra = 0.01;
