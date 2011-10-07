@@ -204,8 +204,7 @@ bool FieldDataHandlerBase::resize( unsigned int dimension, unsigned int size)
 
 /**
  * Assigns the size of the field array on the specified object.
- * Here we could replace objectIndex with a DataId and 
- * trim off the field part.
+ * Here we use a DataId and trim off the field part to find index of parent
  */
 void FieldDataHandlerBase::setFieldArraySize( 
 	DataId di, unsigned int size )
@@ -225,6 +224,7 @@ void FieldDataHandlerBase::setFieldArraySize(
 
 /**
  * Looks up the size of the local field array on the specified object
+ * Here we use a DataId and trim off the field part to find index of parent
  */
 unsigned int FieldDataHandlerBase::getFieldArraySize( DataId di ) const
 {
