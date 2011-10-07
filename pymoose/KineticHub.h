@@ -23,7 +23,9 @@ namespace pymoose
         unsigned int __get_nVarMol() const;
         unsigned int __get_nReac() const;
         unsigned int __get_nEnz() const;
-        void destroy();
+        bool __get_zombifySeparate() const;
+        void __set_zombifySeparate(bool zombifySeparate);
+        // void destroy();
     
         // none __get_destroy() const;
 //         void __set_destroy(none destroy);
