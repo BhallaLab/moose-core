@@ -131,18 +131,6 @@ class FieldDataHandlerBase: public DataHandler
 		// Handled by derived templated FieldDataHandler classes.
 		// void assign( const char* orig, unsigned int numOrig );
 
-		/*
-		////////////////////////////////////////////////////////////////
-		// Iterator functions
-		////////////////////////////////////////////////////////////////
-
-		iterator begin( ThreadId threadNum ) const;
-
-		iterator end( ThreadId threadNum ) const;
-
-		void rolloverIncrement( iterator* i ) const;
-		*/
-
 		/////////////////////////////////////////////////////////////////
 		// Data access
 		/////////////////////////////////////////////////////////////////
@@ -178,7 +166,6 @@ class FieldDataHandlerBase: public DataHandler
 		 */
 		unsigned int numFieldBits_;
 };
-
 
 #endif	// _FIELD_DATA_HANDLER_BASE_H
 

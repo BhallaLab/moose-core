@@ -86,3 +86,4 @@ template<> Neutral* getEpFuncData< Neutral >( const Eref& e )
 	static Neutral dummy;
 	return &dummy;
 }
+//////////////////////////////////////////////////////////////////
