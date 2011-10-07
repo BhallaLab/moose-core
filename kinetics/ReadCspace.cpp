@@ -96,7 +96,7 @@ Id ReadCspace::readModelString( const string& model,
 	molparms_.resize( 0 );
 	parms_.resize( 0 );
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-	vector< unsigned int > dims( 1,1 );
+	vector< int > dims( 1,1 );
 
 	base_ = s->doCreate( solverClass, pa, modelname, dims, false );
 	assert( base_ != Id() );
@@ -141,7 +141,7 @@ Id ReadCspace::readModelString( const string& model,
 void ReadCspace::setupGslRun( double plotdt )
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-    vector< unsigned int > dims( 1, 1 ); 
+    vector< int > dims( 1, 1 ); 
 	shell->setCwe( base_ );
 	Field< string >::set( base_, "path", "##" );
 
@@ -162,7 +162,7 @@ void ReadCspace::setupGslRun( double plotdt )
 			// cout << "ReadCspace made plot " << plotname << endl;
 			MsgId mid = shell->doAddMsg( "Single", 
 				tab, "requestData", children[i], "get_conc" );
-			assert( mid != Msg::badMsg );
+			assert( mid != Msg::bad );
 		}
 	}
 
@@ -200,7 +200,7 @@ void ReadCspace::expandEnzyme(
 	const char* name, int e, int s, int p, int p2 )
 {
 	static Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-	static vector< unsigned int > dims( 1,1 );
+	static vector< int > dims( 1,1 );
 
 	Id enzMolId = mol_[ name[e] - 'a' ];
 	
@@ -234,7 +234,7 @@ void ReadCspace::expandEnzyme(
 void ReadCspace::expandReaction( const char* name, int nm1 )
 {
 	static Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-	static vector< unsigned int > dims( 1,1 );
+	static vector< int > dims( 1,1 );
 
 	if ( name[0] == 'C' || name[0] == 'D' || name[0] >= 'J' ) // enzymes
 		return;
@@ -311,7 +311,7 @@ void ReadCspace::build( const char* name )
 void ReadCspace::makeMolecule( char name )
 {
 	static Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-	static vector< unsigned int > dims( 1,1 );
+	static vector< int > dims( 1,1 );
 
 	if ( name == 'X' ) // silently ignore it, as it is a legal state
 		return;
@@ -353,7 +353,7 @@ void ReadCspace::deployParameters( )
 	for ( i = 0; i < mol_.size(); i++ ) {
 		MsgId ret = shell->doAddMsg( "OneToOne", mol_[i], "requestSize",
 			mesh_, "get_size" );
-		assert( ret != Msg::badMsg );
+		assert( ret != Msg::bad );
 		// SetField(mol_[ i ], "volscale", volscale );
 		// SetField(mol_[ molseq_[i] ], "ninit", parms_[ i ] );
 		Field< double >::set( mol_[i], "concInit", parms_[i] );
