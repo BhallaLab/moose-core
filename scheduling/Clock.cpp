@@ -332,20 +332,20 @@ void Clock::stop()
  * This function handles any changes to dt in the ticks. This means
  * it must redo the ordering of the ticks and call a resched on them.
  */
-void Clock::setTickDt( DataId i, double dt )
+void Clock::setTickDt( unsigned int i, double dt )
 {
-	if ( i.field() < ticks_.size() ) {
-		ticks_[ i.field() ].setDt( dt ); 
+	if ( i < ticks_.size() ) {
+		ticks_[ i ].setDt( dt ); 
 		rebuild();
 	} else {
 		cout << "Clock::setTickDt:: Tick " << i << " not found\n";
 	}
 }
 
-double Clock::getTickDt( DataId i ) const
+double Clock::getTickDt( unsigned int i ) const
 {
-	if ( i.field() < ticks_.size() ) {
-		return ticks_[ i.field() ].getDt(); 
+	if ( i < ticks_.size() ) {
+		return ticks_[ i ].getDt(); 
 	} else {
 		cout << "Clock::getTickDt:: Tick " << i << " not found\n";
 	}

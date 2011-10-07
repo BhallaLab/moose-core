@@ -36,8 +36,8 @@ class Clock
 		unsigned int getNsteps( ) const;
 		unsigned int getCurrentStep() const;
 
-		void setTickDt( DataId i, double v );
-		double getTickDt( DataId i ) const;
+		void setTickDt( unsigned int i, double v );
+		double getTickDt( unsigned int i ) const;
 		
 		//////////////////////////////////////////////////////////
 		//  Dest functions

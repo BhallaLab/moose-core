@@ -16,7 +16,7 @@ void testAssortedMsg()
 {
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-	vector< unsigned int > dimensions;
+	vector< int > dimensions;
 	Id pa = shell->doCreate( "Neutral", Id(), "pa", dimensions );
 	dimensions.push_back( 5 );
 

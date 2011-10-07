@@ -122,7 +122,7 @@ Id ReadCell::read(
 	}
 	*/
 	
-	vector< unsigned int > dimensions( 1, 1 );
+	vector< int > dimensions( 1, 1 );
 	cell_ = shell_->doCreate( "Neutral", parent, cellName, dimensions );
 	currCell_ = cell_;
 	
@@ -415,7 +415,7 @@ Id ReadCell::buildCompartment(
 		//~ }
 	//~ }
 	
-	vector< unsigned int > dimensions( 1, 1 );
+	vector< int > dimensions( 1, 1 );
 	Id compt;
 	if ( graftFlag_ && ( parent == "none" || parent == "nil" ) ) {
 		compt = currCell_;
@@ -546,7 +546,7 @@ Id ReadCell::startGraftCell( const string& cellPath )
 		cellName = cellPath.substr( pos_2 + 1 );
 	}
 	
-	vector< unsigned int > dimensions( 1, 1 );
+	vector< int > dimensions( 1, 1 );
 	return shell_->doCreate( "Compartment", parentId, cellName, dimensions );
 }
 

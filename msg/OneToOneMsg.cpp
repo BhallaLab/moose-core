@@ -90,7 +90,7 @@ ObjId OneToOneMsg::findOtherEnd( ObjId f ) const
 	else if ( f.id() == e2() )
 		return ObjId( e1()->id(), f.dataId );
 	
-	return ObjId::bad();
+	return ObjId::bad;
 }
 
 unsigned int OneToOneMsg::srcToDestPairs(
