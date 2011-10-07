@@ -13,13 +13,13 @@
 void rtTable()
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 	Id tabid = shell->doCreate( "Table", Id(), "tab", dims );
 	assert( tabid != Id() );
 	Eref tab = tabid.eref();
 
 	Id tabentryId ( tabid.value() + 1 );
-	ObjId tabentry( tabentryId, DataId( 0, 3 ) );
+	ObjId tabentry( tabentryId, DataId( 3 ) );
 
 	// Check loading
 	bool ok = SetGet::strSet( tabid, "loadXplot", "tab1.xplot,plot1" );
