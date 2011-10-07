@@ -33,6 +33,7 @@ namespace pymoose{
         void __set_useOneWayReacs(bool useOneWayReacs);
         string  __get_targetPath() const;
         void __set_targetPath(string path);
+        const vector<Id> & __get_pathVec() const;
         unsigned int __get_rateVectorSize() const;
     };
 }
