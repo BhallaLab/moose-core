@@ -113,6 +113,7 @@ enum { OUTGOING, /// Messages for which the current object is a source.
         const std::vector <Id>& getChildren(Id id);
         const std::vector <Id>& getChildren(std::string path);
         const std::vector <Id> & getWildcardList(std::string path, bool ordered);
+        const std::vector <Id> & getStoichPathVector(Id id);
         Id pathToId(std::string path, bool echo = true);
         /// set the seed for random number generator
         static void srandom(long seed);

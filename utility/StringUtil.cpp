@@ -51,6 +51,19 @@ std::string trim(const std::string& myString)
     return "";    
 }
 
+std::string relaceAll(std::string source, const std::string& target, const std::string& replacement)
+{
+    size_t pos = 0;
+    while(true){
+        pos = source.find(target, pos);
+        if (pos == string::npos){
+            break;
+        }
+        source.replace(pos, replacement.size(), replacement);
+    }
+    return source;
+}
+
 int testTrim()
 {
     std::string testStrings [] = 
