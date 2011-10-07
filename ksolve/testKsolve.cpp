@@ -28,7 +28,7 @@ void testKsolveZombify( string modelFile )
 	// Id kinetics = s->doFind( "/kinetics" );
 
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 	Id stoich = s->doCreate( "Stoich", base, "stoich", dims );
 	assert( stoich != Id() );
 	string temp = "/dend/##";
@@ -60,7 +60,7 @@ void testKsolveZombify( string modelFile )
 	// Id kinetics = s->doFind( "/kinetics" );
 
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 	/*
 	Id stoich = s->doCreate( "Stoich", base, "stoich", dims );
 	assert( stoich != Id() );

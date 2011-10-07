@@ -192,46 +192,46 @@ void ZombiePool::reac( double A, double B )
 
 void ZombiePool::setN( const Eref& e, const Qinfo* q, double v )
 {
-	S_[ e.index().data() ][ convertIdToPoolIndex( e.id() ) ] = v;
+	S_[ e.index().value() ][ convertIdToPoolIndex( e.id() ) ] = v;
 }
 
 double ZombiePool::getN( const Eref& e, const Qinfo* q ) const
 {
-	return S_[ e.index().data() ][ convertIdToPoolIndex( e.id() ) ];
+	return S_[ e.index().value() ][ convertIdToPoolIndex( e.id() ) ];
 }
 
 void ZombiePool::setNinit( const Eref& e, const Qinfo* q, double v )
 {
-	Sinit_[ e.index().data() ][ convertIdToPoolIndex( e.id() ) ] = v;
+	Sinit_[ e.index().value() ][ convertIdToPoolIndex( e.id() ) ] = v;
 }
 
 double ZombiePool::getNinit( const Eref& e, const Qinfo* q ) const
 {
-	return Sinit_[ e.index().data() ][ convertIdToPoolIndex( e.id() ) ];
+	return Sinit_[ e.index().value() ][ convertIdToPoolIndex( e.id() ) ];
 }
 
 void ZombiePool::setConc( const Eref& e, const Qinfo* q, double conc )
 {
 	unsigned int pool = convertIdToPoolIndex( e.id() );
-	S_[ e.index().data() ][ pool ] = CONC_UNIT_CONV * NA * conc * lookupSizeFromMesh( e, requestSize() );
+	S_[ e.index().value() ][ pool ] = CONC_UNIT_CONV * NA * conc * lookupSizeFromMesh( e, requestSize() );
 }
 
 double ZombiePool::getConc( const Eref& e, const Qinfo* q ) const
 {
 	unsigned int pool = convertIdToPoolIndex( e.id() );
-	return S_[ e.index().data() ][ pool ] / ( CONC_UNIT_CONV * NA * lookupSizeFromMesh( e, requestSize()));
+	return S_[ e.index().value() ][ pool ] / ( CONC_UNIT_CONV * NA * lookupSizeFromMesh( e, requestSize()));
 }
 
 void ZombiePool::setConcInit( const Eref& e, const Qinfo* q, double conc )
 {
 	unsigned int pool = convertIdToPoolIndex( e.id() );
-	Sinit_[ e.index().data() ][ pool ] = CONC_UNIT_CONV * NA * conc * lookupSizeFromMesh( e, requestSize() );
+	Sinit_[ e.index().value() ][ pool ] = CONC_UNIT_CONV * NA * conc * lookupSizeFromMesh( e, requestSize() );
 }
 
 double ZombiePool::getConcInit( const Eref& e, const Qinfo* q ) const
 {
 	unsigned int pool = convertIdToPoolIndex( e.id() );
-	return Sinit_[ e.index().data() ][ pool ] / ( CONC_UNIT_CONV * NA * lookupSizeFromMesh( e, requestSize()));
+	return Sinit_[ e.index().value() ][ pool ] / ( CONC_UNIT_CONV * NA * lookupSizeFromMesh( e, requestSize()));
 }
 
 void ZombiePool::setDiffConst( const Eref& e, const Qinfo* q, double v )

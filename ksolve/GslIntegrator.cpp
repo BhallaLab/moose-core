@@ -217,7 +217,7 @@ void GslIntegrator::stoich( const Eref& e, const Qinfo* q, Id stoichId )
 	stoichId_ = stoichId;
 	Stoich* s = reinterpret_cast< Stoich* >( stoichId.eref().data() );
 	nVarPools_ = s->getNumVarPools();
-	y_ = s->getY( e.index().data() );
+	y_ = s->getY( e.index().value() );
 	s->clearFlux();
 
 	isInitialized_ = 1;
@@ -259,7 +259,7 @@ void GslIntegrator::stoich( const Eref& e, const Qinfo* q, Id stoichId )
 
 	// Use a good guess at the correct ProcInfo to set up.
 	// Should be reassigned at Reinit, just to be sure.
-	stoichThread_.set( s, Shell::procInfo(), e.index().data() );
+	stoichThread_.set( s, Shell::procInfo(), e.index().value() );
 	gslSys_.params = static_cast< void* >( &stoichThread_ );
 	// gslSys_.params = static_cast< void* >( s );
 #endif // USE_GSL
@@ -295,17 +295,17 @@ void GslIntegrator::process( const Eref& e, ProcPtr info )
 	}
 #endif // USE_GSL
 	Stoich* s = reinterpret_cast< Stoich* >( stoichId_.eref().data() );
-	s->clearFlux( e.index().data() );
+	s->clearFlux( e.index().value() );
 }
 
 void GslIntegrator::reinit( const Eref& e, ProcPtr info )
 {
 	Stoich* s = reinterpret_cast< Stoich* >( stoichId_.eref().data() );
-	stoichThread_.set( s, info, e.index().data() );
+	stoichThread_.set( s, info, e.index().value() );
 	s->clearFlux();
 	s->innerReinit();
 	nVarPools_ = s->getNumVarPools();
-	y_ = s->getY( e.index().data() );
+	y_ = s->getY( e.index().value() );
 #ifdef USE_GSL
 	if ( isInitialized_ ) {
         assert( gslStepType_ != 0 );
