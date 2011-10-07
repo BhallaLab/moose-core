@@ -51,17 +51,17 @@ static double actionPotl[] = { 0,
 void rtHHnetwork( unsigned int numCopies )
 {
 	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 	Id nid = shell->doCreate( "Neutral", Id(), "n", dims, 1 );
 	Id comptId = shell->doCreate( "Compartment", nid, "compt", dims, 1 );
 	Id naId = shell->doCreate( "HHChannel", comptId, "Na", dims, 1 );
 	MsgId mid = shell->doAddMsg( "OneToOne", ObjId( comptId ), "channel", 
 		ObjId( naId ), "channel" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 	Id kId = shell->doCreate( "HHChannel", comptId, "K", dims, 1 );
 	mid = shell->doAddMsg( "OneToOne", ObjId( comptId ), "channel", 
 		ObjId( kId ), "channel" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 
 	
 	//////////////////////////////////////////////////////////////////////
@@ -193,14 +193,14 @@ void rtHHnetwork( unsigned int numCopies )
 	assert( ret );
 
 	mid = shell->doAddMsg( "OneToOne", 
-		ObjId( comptId, DataId( 0, 0 ) ), "VmOut",
-		ObjId( axonId, DataId( 0, 0 ) ), "Vm" );
-	assert( mid != Msg::badMsg );
+		ObjId( comptId, DataId( 0 ) ), "VmOut",
+		ObjId( axonId, DataId( 0 ) ), "Vm" );
+	assert( mid != Msg::bad );
 
 	mid = shell->doAddMsg( "OneToOne", 
-		ObjId( comptId, DataId( 0, 0 ) ), "channel",
-		ObjId( synChanId, DataId( 0, 0 ) ), "channel" );
-	assert( mid != Msg::badMsg );
+		ObjId( comptId, DataId( 0 ) ), "channel",
+		ObjId( synChanId, DataId( 0 ) ), "channel" );
+	assert( mid != Msg::bad );
 
 	// This is a hack, should really inspect msgs to automatically figure
 	// out how many synapses are needed.
@@ -210,7 +210,7 @@ void rtHHnetwork( unsigned int numCopies )
 	MsgId mid = shell->doAddMsg( "single", 
 		ObjId( axonId, DataId( 0, 0 ) ), "event",
 		ObjId( synId, DataId( 0, 0 ) ), "addSpike" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 	*/
 	
 	ret = Field< double >::set( axonId, "threshold", 0.0 );
@@ -284,7 +284,7 @@ void rtHHnetwork( unsigned int numCopies )
 	Id tabId = shell->doCreate( "Table", copyParentId, "tab", dims );
 	mid = shell->doAddMsg( "single", ObjId( tabId, 0 ), "requestData",
 		ObjId( copyId, numCopies/2 ), "get_Vm" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 
 	//////////////////////////////////////////////////////////////////////
 	// Schedule, Reset, and run.
@@ -324,7 +324,7 @@ void rtHHnetwork( unsigned int numCopies )
 
 	mid = shell->doAddMsg( "Sparse", kids[3], "event", 
 		synCopyId, "addSpike" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 	Eref manager = Msg::getMsg( mid )->manager();
 	SetGet2< double, long >::set( manager.objId(), "setRandomConnectivity",
 		connectionProbability, 1234UL );

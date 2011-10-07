@@ -19,7 +19,7 @@ static void rtReplicateModels()
 	static double expectedValueAtOneSec[] =
 		{ 0.7908, 1.275, 1.628, 1.912, 2.154, 2.369, 2.564, 2.744 };
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 
 	ReadCspace rc;
 	Id modelId = rc.readModelString( "|AabX|Jacb| 1 1 1 0.01 0.1 0.1 1",
@@ -105,7 +105,7 @@ static void rtReplicateModels()
 	// Create the plots.
 	Id plots = shell->doCreate( "Table", compt, "table", dims );
 	MsgId mid = shell->doAddMsg( "OneToOne", plots, "requestData", a, "get_conc" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 
 	// Set up scheduling.
 	shell->doSetClock( 0, 0.1 );
@@ -198,7 +198,7 @@ static void testDiff1D()
 	static const double D = 1e-12;
 
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 
 	Id kinetics = shell->doCreate( "Neutral", Id(), "kinetics", dims );
 	Id a = shell->doCreate( "Pool", kinetics, "a", dims );
@@ -221,7 +221,7 @@ static void testDiff1D()
 	assert( mesh.element()->dataHandler()->localEntries() == diffLength );
 	MsgId mid = shell->doAddMsg( "OneToOne", a, "requestSize",
 		mesh, "get_size" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 
 	shell->handleReMesh( mesh );
 	// This should assign the same init conc to the new pool objects.
@@ -320,7 +320,7 @@ static void testDiffNd( unsigned int n )
 		vol *= cubeSide * cubeSide;
 
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 
 	Id kinetics = shell->doCreate( "Neutral", Id(), "kinetics", dims );
 	Id a = shell->doCreate( "Pool", kinetics, "a", dims );
@@ -347,7 +347,7 @@ static void testDiffNd( unsigned int n )
 	assert( mesh.element()->dataHandler()->localEntries() == vol );
 	MsgId mid = shell->doAddMsg( "OneToOne", a, "requestSize",
 		mesh, "get_size" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 
 	shell->handleReMesh( mesh );
 	// This should assign the same init conc to the new pool objects.
@@ -415,7 +415,7 @@ static void testReacDiffNd( unsigned int n )
 		vol *= cubeSide * cubeSide;
 
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 
 	ReadCspace rc;
 	Id kinetics = rc.readModelString( "|AabX|Jacb| 1 1 1 0.01 0.1 1 1",
@@ -456,7 +456,7 @@ static void testReacDiffNd( unsigned int n )
 	assert( mesh.element()->dataHandler()->localEntries() == vol );
 	MsgId mid = shell->doAddMsg( "OneToOne", a, "requestSize",
 		mesh, "get_size" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 
 	shell->handleReMesh( mesh );
 	// This should assign the same init conc to the new pool objects.

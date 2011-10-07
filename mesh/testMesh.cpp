@@ -127,7 +127,7 @@ void testCylMesh()
 void testMidLevelCylMesh()
 {
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 
 	Id cylId = s->doCreate( "CylMesh", Id(), "cyl", dims, 0 );
 	Id meshId( cylId.value() + 1 );
@@ -166,7 +166,7 @@ void testMidLevelCylMesh()
 	unsigned int n = Field< unsigned int >::get( cylId, "num_mesh" );
 	assert( n == 5 );
 
-	ObjId oid( meshId, DataId( 0, 2 ) );
+	ObjId oid( meshId, DataId( 2 ) );
 
 	double totLen = sqrt( 29.0 );
 	assert( doubleEq( Field< double >::get( oid, "size" ),
