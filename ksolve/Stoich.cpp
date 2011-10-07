@@ -198,7 +198,7 @@ void Stoich::innerReinit()
 /**
  * Handles incoming messages representing influx of molecules
  */
-void Stoich::influx( DataId port, vector< double > pool )
+void Stoich::influx( unsigned int port, vector< double > pool )
 {
 	/*
 	assert( pool.size() == inPortEnd_ - inPortStart_ );
@@ -212,7 +212,7 @@ void Stoich::influx( DataId port, vector< double > pool )
 /**
  * Should really do this using a map indexed by SpeciesId.
  */
-void Stoich::handleAvailableMolsAtPort( DataId port, vector< SpeciesId > mols )
+void Stoich::handleAvailableMolsAtPort( unsigned int port, vector< SpeciesId > mols )
 {
 	/*
 	vector< SpeciesId > ret;
@@ -231,7 +231,7 @@ void Stoich::handleAvailableMolsAtPort( DataId port, vector< SpeciesId > mols )
 	*/
 }
 
-void Stoich::handleMatchedMolsAtPort( DataId port, vector< SpeciesId > mols )
+void Stoich::handleMatchedMolsAtPort( unsigned int port, vector< SpeciesId > mols )
 {
 	;
 }

@@ -44,20 +44,20 @@ class Stoich
 		/**
 		 * Handles incoming messages representing influx of molecules
  		 */
-		void influx( DataId port, vector< double > mol );
+		void influx( unsigned int port, vector< double > mol );
 
 		/**
 		 * Scans through incoming and self molecule list, matching up Ids
 		 * to use in the port. Sets up the data structures to do so.
 		 * Sends out a message indicated the selected subset.
 		 */
-		void handleAvailableMolsAtPort( DataId port, vector< SpeciesId > mols );
+		void handleAvailableMolsAtPort( unsigned int port, vector< SpeciesId > mols );
 
 		/**
 		 * Scans through incoming and self molecule list, checking that
 		 * all match. Sets up the data structures for the port.
 		 */
-		void handleMatchedMolsAtPort( DataId port, vector< SpeciesId > mols );
+		void handleMatchedMolsAtPort( unsigned int port, vector< SpeciesId > mols );
 
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions

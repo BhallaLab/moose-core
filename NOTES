@@ -15908,4 +15908,5 @@ Having to backtrack: in testShell.cpp.
 ============================================================================
 7 Oct
 Compiles through builtins. Checkin 3026.
-Compiles through kinetics.
+Compiles through kinetics. Checkin 3027.
+Compiles through ksolve.
