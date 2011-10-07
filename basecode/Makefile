@@ -42,6 +42,7 @@ OBJ = \
 	DataId.o \
 	SetGet.o \
 	OpFunc.o \
+	FieldOpFunc.o \
 	SparseMatrix.o \
 	PrepackedBuffer.o \
 	FuncBarrier.o \
@@ -95,6 +96,8 @@ testAsync.o:	SparseMatrix.h SetGet.h ../scheduling/Clock.h ../scheduling/Tick.h 
 SparseMsg.o:	SparseMatrix.h
 SetGet.o:	SetGet.h ../shell/Neutral.h
 DataHandlerWrapper.o: DataHandlerWrapper.h
+FieldDataHandlerBase.o: FieldOpFunc.h
+FieldOpFunc.o: FieldOpFunc.h FieldDataHandlerBase.h
 FuncBarrier.o:	FuncBarrier.h
 #TestBasecode.o:	Shell.h ShellWrapper.h
 

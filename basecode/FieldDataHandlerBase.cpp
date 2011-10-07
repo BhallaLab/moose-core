@@ -8,7 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
-
+#include "FieldOpFunc.h"
 #include "../shell/Shell.h"
 
 FieldDataHandlerBase::FieldDataHandlerBase( 
@@ -165,14 +165,16 @@ void FieldDataHandlerBase::process( const ProcInfo* p, Element* e, FuncId fid ) 
  * Here we delegate the operation to the parent, and wrap up the local
  * iterators for the field in the FieldOpFunc. Note that the thread
  * decomposition belongs to the parent, as it must: the operations here
- * will modify data structures on the parent.
+ * may modify data structures on the parent.
+ * The OpFunc belongs to the FieldElement.
  */
 void FieldDataHandlerBase::foreach( const OpFunc* f, Element* e,
 	const Qinfo* q, const double* arg, unsigned int argIncrement ) const
 {
-	FieldOpFunc fof( f, e );
+	unsigned int argOffset = 0;	
+	FieldOpFunc fof( f, e, argIncrement, &argOffset );
 	ObjId parent = Neutral::parent( Eref( e, 0 ) );
-	parentDataHandler_->foreach( &fof, parent.element(), q, arg, argIncrement );
+	parentDataHandler_->foreach( &fof, parent.element(), q, arg, 0 );
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -267,3 +269,5 @@ void FieldDataHandlerBase::assignParentDataHandler(
 {
 	parentDataHandler_ = parent;
 }
+
+//////////////////////////////////////////////////////////////////

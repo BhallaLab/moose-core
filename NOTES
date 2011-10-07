@@ -15911,3 +15911,7 @@ Compiles through builtins. Checkin 3026.
 Compiles through kinetics. Checkin 3027.
 Compiles through ksolve. Checkin 3028.
 Compiles through all libraries, but not the link step.
+
+Implemented FieldDataHandler::foreach using excessively clever OpFunc derived
+class to deal with iteration through arrays of fields. Link step still
+has several functions to go.
