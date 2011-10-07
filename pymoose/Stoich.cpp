@@ -107,4 +107,10 @@ unsigned int Stoich::__get_rateVectorSize() const
     get < unsigned int > (id_(), "rateVectorSize",rateVectorSize);
     return rateVectorSize;
 }
+
+const vector<Id>& Stoich::__get_pathVec() const
+{
+    return getContext()->getStoichPathVector(id_);
+}
+
 #endif
