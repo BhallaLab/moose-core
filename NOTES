@@ -15902,5 +15902,9 @@ Compiles through to testAsync.cpp. Checkin 3017.
 Compiles through the basecode directory. Checkin 3019.
 Compiles through the msg directory. Checkin 3021.
 Compiles through the shell directory. Checkin 3022.
-Compiles through biophysics directory. 
+Compiles through biophysics directory. Checkin 3024.
+
+Having to backtrack: in testShell.cpp.
 ============================================================================
+7 Oct
+Compiles through builtins.

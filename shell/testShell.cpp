@@ -35,7 +35,7 @@ void testShellParserCreateDelete()
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 
-	vector< unsigned int > dimensions;
+	vector< int > dimensions;
 	dimensions.push_back( 1 );
 	Id child = shell->doCreate( "Neutral", Id(), "test", dimensions );
 
@@ -51,7 +51,7 @@ void testTreeTraversal()
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 
-	vector< unsigned int > dimensions;
+	vector< int > dimensions;
 	dimensions.push_back( 1 );
 	Id f1 = shell->doCreate( "Neutral", Id(), "f1", dimensions );
 	assert( f1 != Id() );
@@ -178,7 +178,7 @@ void testDescendant()
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 
-	vector< unsigned int > dimensions;
+	vector< int > dimensions;
 	dimensions.push_back( 1 );
 	Id f1 = shell->doCreate( "Neutral", Id(), "f1", dimensions );
 	Id f2a = shell->doCreate( "Neutral", f1, "f2a", dimensions );
@@ -236,7 +236,7 @@ void testChildren()
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 
-	vector< unsigned int > dimensions;
+	vector< int > dimensions;
 	dimensions.push_back( 1 );
 	Id f1 = shell->doCreate( "Neutral", Id(), "f1", dimensions );
 	Id f2a = shell->doCreate( "Neutral", f1, "f2a", dimensions );
@@ -256,7 +256,7 @@ void testMove()
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 
-	vector< unsigned int > dimensions;
+	vector< int > dimensions;
 	dimensions.push_back( 1 );
 	/*
 	Id f1 = shell->doCreate( "Neutral", Id(), "f1", dimensions );
@@ -329,7 +329,7 @@ void testCopy()
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 
-	vector< unsigned int > dimensions;
+	vector< int > dimensions;
 	dimensions.push_back( 1 );
 	Id f1 = shell->doCreate( "Neutral", Id(), "f1", dimensions );
 	Id f2a = shell->doCreate( "Neutral", f1, "f2a", dimensions );
@@ -383,7 +383,7 @@ void testCopyFieldElement()
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 	unsigned int size = 10;
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 	Id origId = shell->doCreate( "IntFire", Id(), "f1", dims );
 	Id origSynId( origId.value() + 1 );
 	
@@ -532,7 +532,7 @@ void testInterNodeOps() // redundant.
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 	Id child;
 	if ( shell->myNode() == 0 ) {
-		vector< unsigned int > dimensions;
+		vector< int > dimensions;
 		dimensions.push_back( 6139 );
 		child = shell->doCreate( "Neutral", Id(), "test", dimensions );
 	} 
@@ -548,7 +548,7 @@ void testShellSetGet()
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 	const unsigned int size = 100;
-	vector< unsigned int > dimensions;
+	vector< int > dimensions;
 	dimensions.push_back( size );
 	vector< double > val;
 
@@ -672,7 +672,7 @@ void testShellAddMsg()
 {
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-	vector< unsigned int > dimensions;
+	vector< int > dimensions;
 	dimensions.push_back( 5 );
 
 
@@ -915,7 +915,7 @@ void testCopyMsgOps()
 {
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-	vector< unsigned int > dimensions;
+	vector< int > dimensions;
 	Id pa = shell->doCreate( "Neutral", Id(), "pa", dimensions );
 	dimensions.push_back( 5 );
 
@@ -1145,7 +1145,7 @@ void testFindModelParent()
 	///////////////////////////////////////////////////////////
 	// Set up the objects.
 	///////////////////////////////////////////////////////////
-	vector< unsigned int > dimensions( 1, 1 );
+	vector< int > dimensions( 1, 1 );
 	Id foo = shell->doCreate( "Neutral", Id(), "foo", dimensions );
 	Id zod = shell->doCreate( "Neutral", Id(), "zod", dimensions );
 	Id foo2 = shell->doCreate( "Neutral", zod, "foo", dimensions );
@@ -1218,7 +1218,7 @@ void testSyncSynapseSize()
 	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
 	assert( df );
 	unsigned int size = 1000;
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 	Id neuronId = shell->doCreate( "IntFire", Id(), "neurons", dims );
 	assert( neuronId != Id() );
 	Id synId( neuronId.value() + 1 );
@@ -1253,13 +1253,13 @@ void testSyncSynapseSize()
 	assert( Field< unsigned int >::get( synId, "linearSize" ) == size * (size - 1 ) );
 
 	dims = 
-		Field< vector< unsigned int > >::get( neuronId, "dimensions" );
+		Field< vector< int > >::get( neuronId, "dimensions" );
 	assert( dims.size() == 1 );
-	assert( dims[0] == size );
-	dims = Field< vector< unsigned int > >::get( synId, "dimensions" );
+	assert( dims[0] == static_cast< int >( size ) );
+	dims = Field< vector< int > >::get( synId, "dimensions" );
 	assert( dims.size() == 2 );
-	assert( dims[0] == size - 1 ); // Note that the order is reversed.
-	assert( dims[1] == size );
+	assert( dims[0] == static_cast< int >( size ) - 1 ); // Note that the order is reversed.
+	assert( dims[1] == static_cast< int >( size ) );
 
 	// cout << "NumSyn = " << syn.totalEntries() << endl;
 	shell->doDelete( neuronId );
@@ -1278,7 +1278,7 @@ void testGetMsgs()
 {
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-	vector< unsigned int > dimensions;
+	vector< int > dimensions;
 	dimensions.push_back( 5 );
 
 
@@ -1466,7 +1466,7 @@ void testShellMesh()
 {
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-	vector< unsigned int > dimensions(1,1);
+	vector< int > dimensions(1,1);
 
 	///////////////////////////////////////////////////////////
 	// Set up the objects.

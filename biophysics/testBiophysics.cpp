@@ -29,7 +29,7 @@ extern void testMarkovSolver();		//Defined in MarkovSolver.cpp
 void testHHGateCreation()
 {
 	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 	Id nid = shell->doCreate( "Neutral", Id(), "n", dims );
 	Id comptId = shell->doCreate( "Compartment", nid, "compt", dims );
 	Id chanId = shell->doCreate( "HHChannel", nid, "Na", dims );
@@ -306,7 +306,7 @@ void testHHGateSetup()
 void testHHChannel()
 {
 	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 	Id nid = shell->doCreate( "Neutral", Id(), "n", dims );
 	Id comptId = shell->doCreate( "Compartment", nid, "compt", dims );
 	Id naId = shell->doCreate( "HHChannel", comptId, "Na", dims );
@@ -528,7 +528,7 @@ static double sampleCurrent[] =
 void testMarkovGslSolver()
 {
 	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 
 	Id nid = shell->doCreate( "Neutral", Id(), "n", dims );
 	Id comptId = shell->doCreate( "Compartment", nid, "compt", dims );
@@ -686,7 +686,7 @@ void testMarkovGslSolver()
 void testMarkovChannel()
 {
 	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 	
 	Id nid = shell->doCreate( "Neutral", Id(), "n", dims ); 
 
@@ -1046,7 +1046,7 @@ void testSynChan()
 {
 	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
 
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 	Id nid = shell->doCreate( "Neutral", Id(), "n", dims );
 
 	Id synChanId = shell->doCreate( "SynChan", nid, "synChan", dims );
@@ -1164,7 +1164,7 @@ void testNMDAChan()
 {
     Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
 
-    vector< unsigned int > dims( 1, 1 );
+    vector< int > dims( 1, 1 );
     Id nid = shell->doCreate( "Neutral", Id(), "n", dims );
 
     Id synChanId = shell->doCreate( "NMDAChan", nid, "nmdaChan", dims );

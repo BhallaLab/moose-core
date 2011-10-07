@@ -445,7 +445,7 @@ void testWildcard()
 
 
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 	Id a1 = shell->doCreate( "Neutral", Id(), "a1", dims );
 	Id c1 = shell->doCreate( "Arith", a1, "c1", dims );
 	Id c2 = shell->doCreate( "Arith", a1, "c2", dims );

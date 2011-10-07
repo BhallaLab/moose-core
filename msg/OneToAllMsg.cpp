@@ -86,7 +86,7 @@ ObjId OneToAllMsg::findOtherEnd( ObjId f ) const
 		return ObjId( e1()->id(), i1_ );
 	}
 	
-	return ObjId::bad();
+	return ObjId::bad;
 }
 
 Msg* OneToAllMsg::copy( Id origSrc, Id newSrc, Id newTgt,

@@ -41,7 +41,7 @@ void testTicks()
 {
 	Eref sheller( Id().eref() );
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 	Id clockId = shell->doCreate( "Clock", Id(), "tclock", dims );
 	Id tickId = Id( clockId.value() + 1 );
 	Id arithId = shell->doCreate( "Arith", clockId, "arith", dims );
@@ -49,7 +49,7 @@ void testTicks()
 
 	MsgId m1 = shell->doAddMsg( "Single", 
 		ObjId( tickId, 0 ), "proc0", ObjId( arithId, 0 ), "proc" );
-	assert( m1 != Msg::badMsg );
+	assert( m1 != Msg::bad );
 
 	vector< Id > msgDests;
 	const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >( 
@@ -177,7 +177,7 @@ void setupTicks()
 	const double runtime = 20.0;
 	// const Cinfo* tc = Tick::initCinfo();
 	Id clock = Id::nextId();
-	vector< unsigned int > dims( 1, 1 );
+	vector< int > dims( 1, 1 );
 	Element* clocke = new Element( clock, Clock::initCinfo(), "tclock",
 		dims, 1 );
 	assert( clocke );
@@ -192,31 +192,31 @@ void setupTicks()
 	unsigned int size = 10;
 
 	for ( unsigned int i = 0; i < size; ++i ) {
-		Eref er( ticke, DataId( 0, i ) );
+		Eref er( ticke, DataId( i ) );
 		reinterpret_cast< Tick* >( er.data() )->setElement( ticke );
 	}
 
 	// cout << Shell::myNode() << ": numTicks: " << ticke->dataHandler()->totalEntries() << ", " << size << endl;
 	assert( ticke->dataHandler()->localEntries() == size );
 
-	ObjId er0( tickId, DataId( 0, 2 ) );
+	ObjId er0( tickId, DataId( 2 ) );
 	bool ret = Field< double >::set( er0, "dt", 5.0);
 	assert( ret );
-	ObjId er1( tickId, DataId( 0, 1 ) );
+	ObjId er1( tickId, DataId( 1 ) );
 	ret = Field< double >::set( er1, "dt", 2.0);
 	assert( ret );
-	ObjId er2( tickId, DataId( 0, 0 ) );
+	ObjId er2( tickId, DataId( 0 ) );
 	ret = Field< double >::set( er2, "dt", 2.0);
 	assert( ret );
-	ObjId er3( tickId, DataId( 0, 3 ) );
+	ObjId er3( tickId, DataId( 3 ) );
 	ret = Field< double >::set( er3, "dt", 1.0);
 	assert( ret );
-	ObjId er4( tickId, DataId( 0, 4 ) );
+	ObjId er4( tickId, DataId( 4 ) );
 	ret = Field< double >::set( er4, "dt", 3.0);
 	assert( ret );
 	// Note that here I put the tick on a different DataId. later it gets
 	// to sit on the appropriate Conn, when the SingleMsg is set up.
-	ObjId er5( tickId, DataId( 0, 7 ) );
+	ObjId er5( tickId, DataId( 7 ) );
 	ret = Field< double >::set( er5, "dt", 5.0);
 	assert( ret );
 
@@ -312,19 +312,19 @@ void testThreads()
 	s->doSetClock( 4, 3.0 );
 	s->doSetClock( 5, 5.0 );
 
-	vector< unsigned int > dims;
+	vector< int > dims;
 	dims.push_back( 7 ); // A suitable number to test dispatch of Process calls during threading.
 	Id tsid = Id::nextId();
 	Element* tse = new Element( tsid, testSchedCinfo, "tse", dims, 1 );
 	// testThreadSchedElement tse;
 	Eref ts( tse, 0 );
 	Element* ticke = Id( 2 )();
-	Eref er0( ticke, DataId( 0, 0 ) );
-	Eref er1( ticke, DataId( 0, 1 ) );
-	Eref er2( ticke, DataId( 0, 2 ) );
-	Eref er3( ticke, DataId( 0, 3 ) );
-	Eref er4( ticke, DataId( 0, 4 ) );
-	Eref er5( ticke, DataId( 0, 5 ) );
+	Eref er0( ticke, DataId( 0 ) );
+	Eref er1( ticke, DataId( 1 ) );
+	Eref er2( ticke, DataId( 2 ) );
+	Eref er3( ticke, DataId( 3 ) );
+	Eref er4( ticke, DataId( 4 ) );
+	Eref er5( ticke, DataId( 5 ) );
 
 	const Finfo* proc0 = ticke->cinfo()->findFinfo( "process0" );
 	assert( proc0 );
@@ -372,19 +372,19 @@ void testQueueAndStart()
 	s->doSetClock( 4, 3.0 );
 	s->doSetClock( 5, 5.0 );
 
-	vector< unsigned int > dims;
+	vector< int > dims;
 	dims.push_back( 7 ); // A suitable number to test dispatch of Process calls during threading.
 	Id tsid = Id::nextId();
 	Element* tse = new Element( tsid, testSchedCinfo, "tse", dims, 1 );
 	// testThreadSchedElement tse;
 	Eref ts( tse, 0 );
 	Element* ticke = Id( 2 )();
-	Eref er0( ticke, DataId( 0, 0 ) );
-	Eref er1( ticke, DataId( 0, 1 ) );
-	Eref er2( ticke, DataId( 0, 2 ) );
-	Eref er3( ticke, DataId( 0, 3 ) );
-	Eref er4( ticke, DataId( 0, 4 ) );
-	Eref er5( ticke, DataId( 0, 5 ) );
+	Eref er0( ticke, DataId( 0 ) );
+	Eref er1( ticke, DataId( 1 ) );
+	Eref er2( ticke, DataId( 2 ) );
+	Eref er3( ticke, DataId( 3 ) );
+	Eref er4( ticke, DataId( 4 ) );
+	Eref er5( ticke, DataId( 5 ) );
 
 	const Finfo* proc0 = ticke->cinfo()->findFinfo( "process0" );
 	assert( proc0 );
@@ -428,7 +428,7 @@ void testQueueAndStart()
 	ret = Field< double >::set( reac, "kb", 222 );
 	MsgId mid = s->doAddMsg( "OneToOne",
 		pool, "reac", reac, "sub" );
-	assert( mid != Msg::badMsg );
+	assert( mid != Msg::bad );
 	s->doUseClock( "/pool,/reac", "process", 0 );
 	s->doReinit();
 	TestSched* tsData = reinterpret_cast< TestSched* >( ts.data() );
@@ -488,7 +488,7 @@ void testThreadIntFireNetwork()
 
 	Id i2 = Id::nextId();
 	// bool ret = ic->create( i2, "test2", size );
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 	Element* t2 = new Element( i2, ic, "test2", dims );
 	assert( t2 );
 
@@ -500,7 +500,7 @@ void testThreadIntFireNetwork()
 	assert( syn->dataHandler()->totalEntries() == size );
 	assert( syn->dataHandler()->localEntries() == 0 );
 
-	DataId di( 1, 0 ); // DataId( data, field )
+	DataId di( 1 ); // DataId( data, field )
 	Eref syne( syn, di );
 
 	SparseMsg* sm = new SparseMsg( Msg::nextMsgId(), e2.element(), syn );
@@ -534,7 +534,7 @@ void testThreadIntFireNetwork()
 		syn->dataHandler() );
 	assert( fd );
 	unsigned int fieldSize = fd->biggestFieldArraySize();
-	fd->setFieldDimension( fieldSize );
+	fd->resize( 0, fieldSize );
 	assert( fieldSize == 134 );
 	assert( fd->totalEntries() == size * 134 );
 
@@ -559,7 +559,7 @@ void testThreadIntFireNetwork()
 
 
 	Element* ticke = Id( 2 )();
-	Eref er0( ticke, DataId( 0, 0 ) );
+	Eref er0( ticke, DataId( 0 ) );
 
 	SingleMsg* m = new SingleMsg( Msg::nextMsgId(), er0, e2 );
 	const Finfo* p1 = Tick::initCinfo()->findFinfo( "process0" );
@@ -615,7 +615,7 @@ void testMultiNodeIntFireNetwork()
 	Eref sheller( Id().eref() );
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 	Id i2 = shell->doCreate( "IntFire", Id(), "test2", dims );
 	assert( i2()->getName() == "test2" );
 	Eref e2 = i2.eref();
@@ -627,7 +627,7 @@ void testMultiNodeIntFireNetwork()
 	assert( syn->dataHandler()->totalEntries() == size );
 	assert( syn->dataHandler()->localEntries() == 0 );
 
-	DataId di( 1, 0 ); // DataId( data, field )
+	DataId di( 1 ); // DataId( data, field )
 	Eref syne( syn, di );
 
 	MsgId mid = shell->doAddMsg( "Sparse", e2.objId(), "spike",
@@ -742,14 +742,14 @@ void testMultiNodeIntFireNetwork()
 
 	for ( unsigned int i = 0; i < size; i+= 100 ) {
 		double wt = Field< double >::get( 
-			ObjId( synId, DataId( i, 0 ) ), "weight" );
+			ObjId( synId, DataId( i ) ), "weight" );
 
 		// cout << "Got wt = " << wt << ", correct = " << weight[ i * fieldSize ] << endl << flush;
 		assert( doubleEq( wt, weight[ i * fieldSize ] ) );
 	}
 
 	Element* ticke = Id( 2 )();
-	Eref er0( ticke, DataId( 0, 0 ) );
+	Eref er0( ticke, DataId( 0 ) );
 
 	shell->doAddMsg( "Single", er0.objId(), "process0",
 		e2.objId(), "process" );
@@ -827,7 +827,7 @@ void speedTestMultiNodeIntFireNetwork( unsigned int size, unsigned int runsteps 
 	Eref sheller( Id().eref() );
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 
-	vector< unsigned int > dims( 1, size );
+	vector< int > dims( 1, size );
 	Id i2 = shell->doCreate( "IntFire", Id(), "test2", dims );
 	assert( i2()->getName() == "test2" );
 	Eref e2 = i2.eref();
@@ -838,7 +838,7 @@ void speedTestMultiNodeIntFireNetwork( unsigned int size, unsigned int runsteps 
 
 	assert( syn->dataHandler()->totalEntries() == 0 );
 
-	DataId di( 1, 0 ); // DataId( data, field )
+	DataId di( 1 ); // DataId( data, field )
 	Eref syne( syn, di );
 
 	/*
@@ -894,7 +894,7 @@ void speedTestMultiNodeIntFireNetwork( unsigned int size, unsigned int runsteps 
 	assert( ret );
 
 	Element* ticke = Id( 2 )();
-	Eref er0( ticke, DataId( 0, 0 ) );
+	Eref er0( ticke, DataId( 0 ) );
 
 	shell->doAddMsg( "Single", er0.objId(), "process0",
 		e2.objId(), "process" );

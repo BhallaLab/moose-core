@@ -101,7 +101,7 @@ ObjId SingleMsg::findOtherEnd( ObjId f ) const
 			return ObjId( e1()->id(), DataId::bad );
 	}
 	
-	return ObjId::bad();
+	return ObjId::bad;
 }
 
 Msg* SingleMsg::copy( Id origSrc, Id newSrc, Id newTgt,

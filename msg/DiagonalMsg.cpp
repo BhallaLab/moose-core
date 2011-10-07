@@ -102,7 +102,7 @@ ObjId DiagonalMsg::findOtherEnd( ObjId f ) const
 		}
 		return ObjId( e1()->id(), DataId::bad );
 	}
-	return ObjId::bad();
+	return ObjId::bad;
 }
 
 Msg* DiagonalMsg::copy( Id origSrc, Id newSrc, Id newTgt,

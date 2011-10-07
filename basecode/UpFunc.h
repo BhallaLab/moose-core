@@ -298,7 +298,7 @@ template< class T, class A > class GetUpFunc: public GetOpFuncBase< A >
 
 		A reduceOp( const Eref& e ) const {
 			return ( ( reinterpret_cast< T* >( e.parentData() ) )->*func_)(
-				e.index() );
+				e.index().value() );
 		}
 
 	private:
