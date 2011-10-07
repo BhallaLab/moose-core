@@ -70,6 +70,12 @@ unsigned int SteadyState::__get_stateType() const
     get < unsigned int > (id_(), "stateType",stateType);
     return stateType;
 }
+
+const string&  SteadyState::__get_status() const
+{
+    return this->getField("status");
+}
+
 unsigned int SteadyState::__get_nNegEigenvalues() const
 {
     unsigned int nNegEigenvalues;
