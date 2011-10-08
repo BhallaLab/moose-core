@@ -184,6 +184,16 @@ void AnyDimHandler::foreach( const OpFunc* f, Element* e, const Qinfo* q,
 	}
 }
 
+unsigned int AnyDimHandler::getAllData( vector< char* >& dataVec ) const
+{
+	dataVec.resize( 0 );
+	char* temp = data_;
+	for ( unsigned int i = start_; i < end_; ++i ) {
+		dataVec.push_back( temp );
+		temp += dinfo()->size();
+	}
+	return dataVec.size();
+}
 
 ////////////////////////////////////////////////////////////////////////
 // Data Reallocation functions.

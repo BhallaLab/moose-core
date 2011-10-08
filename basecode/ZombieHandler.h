@@ -74,6 +74,8 @@ class ZombieHandler: public DataHandler
 		void foreach( const OpFunc* f, Element* e, const Qinfo* q,
 			const double* arg, unsigned int argIncrement ) const;
 
+		unsigned int getAllData( vector< char* >& data ) const;
+
 		////////////////////////////////////////////////////////////////
 		// Data Reallocation functions
 		////////////////////////////////////////////////////////////////

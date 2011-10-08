@@ -60,6 +60,10 @@ class OpFuncDummy: public OpFunc
 		string rttiType() const;
 };
 
+/**
+ * This class is used in the foreach call to extract a list of all DataIds
+ * on the DataHandler.
+ */
 class DataIdExtractor: public OpFuncDummy
 {
 	public:

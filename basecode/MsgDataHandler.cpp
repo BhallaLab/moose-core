@@ -111,6 +111,18 @@ void MsgDataHandler::foreach( const OpFunc* f, Element* e, const Qinfo* q,
 {
 	;
 }
+
+unsigned int MsgDataHandler::getAllData( vector< char* >& dataVec ) const
+{
+	dataVec.resize( 0 );
+	char* temp = data_;
+	for ( unsigned int i = 0; i < localEntries(); ++i ) {
+		dataVec.push_back( temp );
+		temp += dinfo()->size();
+	}
+	return dataVec.size();
+}
+
 /////////////////////////////////////////////////////////////////////////
 // Data Reallocation functions
 /////////////////////////////////////////////////////////////////////////

@@ -95,6 +95,14 @@ void ZeroDimHandler::foreach( const OpFunc* f, Element* e, const Qinfo* q,
 		f->op( Eref( e, 0 ), q, arg );
 }
 
+unsigned int ZeroDimHandler::getAllData( vector< char* >& dataVec ) const
+{
+	dataVec.resize( 0 );
+	if ( data_ )
+		dataVec.push_back( data_ );
+	return dataVec.size();
+}
+
 ///////////////////////////////////////////////////////////////////////
 // Data reallocation and copy
 ///////////////////////////////////////////////////////////////////////

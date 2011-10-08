@@ -15924,3 +15924,14 @@ DataHandler::isDataHere( DataId di ) is also a concern.
 Will need to deal early with having ragged arrays.
 
 First, compile the whole mess. Compiled.
+
+Now stuck on FieldDataHandlerBase::localEntries().
+Some kind of foreach and OpFunc should work for this, but I don't see
+it right away.
+============================================================================
+8 Oct
+Implemented another iterator, DataHandler::getAllData, in order to be able 
+to handle the FieldDataHandlerBase::totalEntries. This compiles, currently
+stuck with odd problems in unit tests.
+
+============================================================================
