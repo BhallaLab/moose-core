@@ -104,6 +104,7 @@ template< class Parent, class Field > class FieldDataHandler: public FieldDataHa
 		///////////////////////////////////////////////////////////////
 		// Already defined FieldDataHandlerBase::process()
 		// Already defined FieldDataHandlerBase::foreach()
+		// Already defined FieldDataHandlerBase::getAllData()
 
 		///////////////////////////////////////////////////////////////
 		// Data reallocation

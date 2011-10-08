@@ -53,12 +53,11 @@ unsigned int FieldDataHandlerBase::totalEntries() const
 unsigned int FieldDataHandlerBase::localEntries() const
 {
 	unsigned int ret = 0;
-	/*
-	for ( DataHandler::iterator i = parentDataHandler_->begin( 0 );
-		i != parentDataHandler_->end( Shell::numProcessThreads() ); ++i ) {
-		ret += getNumField( i.data() );
-	}
-	*/
+	vector< char* > parents;
+	parentDataHandler_->getAllData( parents );
+	for ( vector< char* >::iterator i = parents.begin(); 
+		i != parents.end(); ++i )
+		ret += this->getNumField( *i );
 	return ret;
 }
 
@@ -115,6 +114,21 @@ unsigned int FieldDataHandlerBase::numFieldBits() const {
 const DataHandler* FieldDataHandlerBase::parentDataHandler() const
 {
 	return parentDataHandler_;
+}
+
+unsigned int FieldDataHandlerBase::getAllData( vector< char* >& data ) const
+{
+	data.resize( 0 );
+	vector< char* > parents;
+	parentDataHandler_->getAllData( parents );
+	for( vector< char* >::iterator i = parents.begin(); 
+		i != parents.end(); ++i ) {
+		unsigned int n = this->getNumField( *i );
+		for ( unsigned int j = 0; j < n; ++j ) {
+			data.push_back( this->lookupField( *i, j ) );
+		}
+	}	
+	return data.size();
 }
 
 /////////////////////////////////////////////////////////////////////////

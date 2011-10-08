@@ -125,6 +125,7 @@ class DataHandler
 		 */
 		virtual unsigned int fieldMask() const;
 
+
 /////////////////////////////////////////////////////////////////////////
 // Load balancing functions
 /////////////////////////////////////////////////////////////////////////
@@ -169,6 +170,11 @@ class DataHandler
 			const double* arg, unsigned int argIncrement )
 			const = 0;
 
+		/**
+		 * Fills up all the data entries into the provided vector of 
+		 * chars. Return number found.
+		 */
+		virtual unsigned int getAllData( vector< char* >& data ) const = 0;
 
 /////////////////////////////////////////////////////////////////////////
 // Data reallocation and copy functions

@@ -93,6 +93,12 @@ void ZombieHandler::foreach( const OpFunc* f, Element* e, const Qinfo* q,
 	;
 }
 
+unsigned int ZombieHandler::getAllData( vector< char* >& dataVec ) const
+{
+	dataVec.resize( 0 );
+	return 0;
+}
+
 ////////////////////////////////////////////////////////////////////
 // Data reallocation functions
 ////////////////////////////////////////////////////////////////////
