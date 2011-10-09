@@ -185,12 +185,21 @@ void FieldDataHandlerBase::process( const ProcInfo* p, Element* e, FuncId fid ) 
  * The OpFunc belongs to the FieldElement.
  */
 void FieldDataHandlerBase::foreach( const OpFunc* f, Element* e,
-	const Qinfo* q, const double* arg, unsigned int argIncrement ) const
+	const Qinfo* q, const double* arg, 
+	unsigned int argSize, unsigned int numArgs ) const
 {
-	unsigned int argOffset = 0;	
-	FieldOpFunc fof( f, e, argIncrement, &argOffset );
-	ObjId parent = Neutral::parent( Eref( e, 0 ) );
-	parentDataHandler_->foreach( &fof, parent.element(), q, arg, 0 );
+	if ( numArgs > 1 ) {
+		unsigned int argOffset = 0;	
+		FieldOpFunc fof( f, e, argSize, numArgs, &argOffset );
+		ObjId parent = Neutral::parent( Eref( e, 0 ) );
+		parentDataHandler_->foreach( &fof, parent.element(), q, 
+			arg, argSize, 0 );
+	} else {
+		FieldOpFuncSingle fof( f, e );
+		ObjId parent = Neutral::parent( Eref( e, 0 ) );
+		parentDataHandler_->foreach( &fof, parent.element(), q, 
+			arg, argSize, 0 );
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////

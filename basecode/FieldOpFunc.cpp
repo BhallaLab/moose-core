@@ -16,11 +16,12 @@
 /////////////////////////////////////////////////////////////////
 
 FieldOpFunc::FieldOpFunc( const OpFunc* f, Element* e, 
-	unsigned int argIncrement, unsigned int* argOffset )
+	unsigned int argSize, unsigned int numArgs, unsigned int* argOffset )
 	: 
 		f_( f ),
 		e_( e ),
-		argIncrement_( argIncrement ),
+		argSize_( argSize ),
+		maxArgOffset_( numArgs * argSize  ),
 		argOffset_( argOffset )
 {
 	*argOffset_ = 0;
@@ -35,7 +36,31 @@ void FieldOpFunc::op(const Eref& e, const Qinfo* q, const double* buf )
 	for ( unsigned int i = 0; i < fdh_->localEntries(); ++i ) {
 		Eref fielder( e_, index + i );
 		f_->op( fielder, q, buf + *argOffset_ ); 
-		*argOffset_ += argIncrement_;
+		*argOffset_ += argSize_;
+		if ( *argOffset_ >= maxArgOffset_ )
+			*argOffset_ = 0;
+	}
+}
+//////////////////////////////////////////////////////////////////
+// Define funcs for FieldOpFuncSingle
+//////////////////////////////////////////////////////////////////
+
+FieldOpFuncSingle::FieldOpFuncSingle( const OpFunc* f, Element* e )
+	: 
+		f_( f ),
+		e_( e )
+{
+	fdh_ = dynamic_cast< FieldDataHandlerBase* >( e_->dataHandler() );
+}
+
+void FieldOpFuncSingle::op(const Eref& e, const Qinfo* q, const double* buf)
+	const
+{
+	unsigned long long index = e.index().value() << fdh_->numFieldBits();
+
+	for ( unsigned int i = 0; i < fdh_->localEntries(); ++i ) {
+		Eref fielder( e_, index + i );
+		f_->op( fielder, q, buf );
 	}
 }
 //////////////////////////////////////////////////////////////////

@@ -84,9 +84,10 @@ void DataHandlerWrapper::process( const ProcInfo* p, Element* e, FuncId fid ) co
 }
 
 void DataHandlerWrapper:: foreach( const OpFunc* f, Element* e, 
-	const Qinfo* q, const double* arg, unsigned int argIncrement ) const
+	const Qinfo* q, const double* arg, 
+	unsigned int argSize, unsigned int numArgs ) const
 {
-	parent_->foreach( f, e, q, arg, argIncrement );
+	parent_->foreach( f, e, q, arg, argSize, numArgs );
 }
 
 unsigned int DataHandlerWrapper::getAllData( vector< char* >& data ) const
