@@ -167,7 +167,7 @@ class DataHandler
 		 * if you don't want it to change, just set argIncrement to 0.
 		 */
 		virtual void foreach( const OpFunc* f, Element* e, const Qinfo* q,
-			const double* arg, unsigned int argIncrement )
+			const double* arg, unsigned int argSize, unsigned int numArgs )
 			const = 0;
 
 		/**

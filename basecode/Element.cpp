@@ -256,7 +256,9 @@ Id Element::id() const
 }
 
 /**
- * Executes a queue entry from the buffer.
+ * Executes a queue entry from the buffer. This is used primarily for
+ * script-driven field access. The heavy-duty clock-driven function 
+ * execution is dealt with by process and messages.
  */
 void Element::exec( const Qinfo* qi, const double* arg )
 	const
@@ -278,7 +280,7 @@ void Element::exec( const Qinfo* qi, const double* arg )
 			assert( ofid->numEntries > 0 );
 			const double* data = arg + ObjFidSizeInDoubles;
 			elm->dataHandler()->foreach( f,  elm, qi, 
-				data, ofid->entrySize );
+				data, ofid->entrySize, ofid->numEntries );
 			/*
 			DataHandler* dh = elm->dataHandler();
 			unsigned int count = 0;

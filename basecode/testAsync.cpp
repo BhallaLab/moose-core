@@ -2188,7 +2188,7 @@ void testOneDimHandler()
 	vector< double > vec;
 	testForeach tf( &vec );
 	double arg = 12.34;
-	odh.foreach( &tf, 0, 0, &arg, 0 );
+	odh.foreach( &tf, 0, 0, &arg, 1, 0 );
 	assert ( vec.size() == odh.localEntries() );
 	for ( unsigned int i = 0; i < odh.localEntries(); ++i )
 		assert( doubleEq( arg, vec[i] ) );
@@ -2253,7 +2253,7 @@ void testFieldDataHandler()
 	vector< double > vec;
 	testForeach tf( &vec );
 	double arg = 12.34;
-	odh.foreach( &tf, 0, 0, &arg, 0 );
+	odh.foreach( &tf, 0, 0, &arg, 1, 0 );
 	assert ( vec.size() == odh.localEntries() );
 	for ( unsigned int i = 0; i < odh.localEntries(); ++i )
 		assert( doubleEq( arg, vec[i] ) );
@@ -2301,7 +2301,7 @@ void testFieldDataHandler()
 	// Play with iterators
 	vec.resize(0);
 	arg = 56.78;
-	fdh.foreach( &tf, 0, 0, &arg, 0 );
+	fdh.foreach( &tf, 0, 0, &arg, 1, 0 );
 	assert( vec.size() == fdh.localEntries() );
 	for ( unsigned int i = 0; i < fdh.localEntries(); ++i )
 		assert( doubleEq( arg, vec[i] ) );
