@@ -47,6 +47,8 @@ void OneToOneMsg::exec( const Qinfo* q, const double* arg, FuncId fid) const
  * This is a little tricky because we might be mapping between
  * data entries and field entries here.
  * May wish also to apply to exec operations.
+ * At this point, the effect of trying to go between regular
+ * data entries and field entries is undefined.
  */
 Eref OneToOneMsg::firstTgt( const Eref& src ) const 
 {

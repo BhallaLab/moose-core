@@ -105,6 +105,10 @@ bool FieldDataHandlerBase::isAllocated() const {
 	return parentDataHandler_->isAllocated();
 }
 
+unsigned int FieldDataHandlerBase::getMaxFieldEntries() const {
+	return maxFieldEntries_;
+}
+
 unsigned int FieldDataHandlerBase::fieldMask() const {
 	return mask_;
 }
