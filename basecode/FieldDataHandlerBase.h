@@ -55,8 +55,17 @@ class FieldDataHandlerBase: public DataHandler
 		unsigned int getFieldArraySize( unsigned int i ) const;
 		unsigned int getFieldArraySize( DataId di ) const;
 
+		/**
+		 * Returns the size of the largest field entry array on any object
+		 * on all nodes handled by this DataHandler. Equivalent to 
+		 * sizeOfDim( 0 ).
+		 */
+		unsigned int getMaxFieldEntries() const;
+
+		/// Returns the bitmask for the field index
  		unsigned int fieldMask() const;
 
+		/// Returns the number of bits in the field index.
 		unsigned int numFieldBits() const;
 		////////////////////////////////////////////////////////////////
 		// Special field access funcs
@@ -158,10 +167,15 @@ class FieldDataHandlerBase: public DataHandler
 		 * Shell::innerCopyElements().
 		 */
 		void assignParentDataHandler( const DataHandler* parent );
-	protected:
-		unsigned int maxFieldEntries_;
 		
 	private:
+
+		/**
+		 * This is the size of the largest array of fields on all the 
+		 * parent objects on this node.
+		 */
+		unsigned int maxFieldEntries_;
+
 		/**
 		 * Pointer to the data handler of the parent object.
 		 */

@@ -840,6 +840,8 @@ void testFastGet()
 		f->setWeight( 5 + 10 * i - i * i );
 	}
 
+	/*
+	* The OneToOneMsg between regular and field entries is undefined.
 	const Cinfo* sc = Synapse::initCinfo();
 	const Finfo* wtf = sc->findFinfo("get_weight");
 	Msg* m2 = new OneToOneMsg( Msg::nextMsgId(), src, syn );
@@ -857,6 +859,7 @@ void testFastGet()
 		double v = Field< double >::fastGet( srcer, m2->mid(), fid );
 		assert( doubleEq( v, 5 + 10 * i - i * i ) );
 	}
+	*/
 
 
 	Id synId0( srcId.value() + 1 );
@@ -921,7 +924,7 @@ void testSetRepeat()
 	assert ( syn != 0 );
 	assert ( syn->getName() == "synapse" );
 
-	assert( syn->dataHandler()->totalEntries() == size );
+	assert( syn->dataHandler()->totalEntries() == 0 );
 	assert( syn->dataHandler()->localEntries() == 0 );
 	vector< unsigned int > numSyn( size, 0 );
 	for ( unsigned int i = 0; i < size; ++i )
@@ -931,7 +934,13 @@ void testSetRepeat()
 	// Here we test setting a 1-D vector
 	bool ret = Field< unsigned int >::setVec( i2, "numSynapses", numSyn );
 	assert( ret );
-	assert( syn->dataHandler()->totalEntries() == size );
+	FieldDataHandlerBase* fdh = dynamic_cast< FieldDataHandlerBase* >( 
+		syn->dataHandler() );
+	assert( fdh );
+	unsigned int biggestSize = fdh->biggestFieldArraySize();
+	assert( biggestSize == size - 1 );
+	fdh->setMaxFieldEntries( biggestSize );
+	assert( syn->dataHandler()->totalEntries() == size * biggestSize );
 	unsigned int nd = syn->dataHandler()->localEntries();
 	assert( nd == ( size * (size - 1) ) / 2 );
 	// cout << "NumSyn = " << nd << endl;
@@ -940,9 +949,6 @@ void testSetRepeat()
 	Eref se( syn, 0 );
 	ret = Field< double >::setRepeat( synId, "delay", 123.0 );
 	assert( ret );
-	FieldDataHandlerBase* fdh = dynamic_cast< FieldDataHandlerBase* >(
-		syn->dataHandler() );
-	assert( fdh );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		for ( unsigned int j = 0; j < i; ++j ) {
 			DataId di( i, j, fdh->numFieldBits() );
@@ -986,7 +992,7 @@ void testSendSpike()
 	assert ( syn != 0 );
 	assert ( syn->getName() == "synapse" );
 
-	assert( syn->dataHandler()->totalEntries() == size );
+	assert( syn->dataHandler()->totalEntries() == 0 );
 	assert( syn->dataHandler()->localEntries() == 0 );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		// Eref er( i2(), i );

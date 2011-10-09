@@ -15949,4 +15949,6 @@ Fairly extensive changes to fix this in a general way. Compiles, clears this
 bug, but now stuck a little further on. Checkin 3037.
 
 More progress. Now stuck with getVec. Checkin 3038.
-Now cleared the testSetGetVec batch of tests.
+Now cleared the testSetGetVec batch of tests. Checkin 3039.
+
+Now clears testSetRepeat tests.
