@@ -253,7 +253,7 @@ class Shell
 
 		void handleCreate( const Eref& e, const Qinfo* q, 
 			string type, Id parent, Id newElm, string name,
-			vector< unsigned int > dimensions );
+			vector< int > dimensions );
 		void destroy( const Eref& e, const Qinfo* q, Id eid);
 		void innerCreate( string type, Id parent, Id newElm, string name,
 			const vector< int >& dimensions );

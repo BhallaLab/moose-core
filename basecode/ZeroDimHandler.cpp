@@ -13,25 +13,40 @@
 ZeroDimHandler::ZeroDimHandler( const DinfoBase* dinfo, bool isGlobal )
 	: DataHandler( dinfo, isGlobal )
 {
-	if ( isGlobal_ || Shell::myNode() == 0 )
+	myThread_ = 0;
+	if ( isGlobal_ || Shell::myNode() == 0 ) {
 		data_ = dinfo->allocData( 1 );
-	else
+	} else {
 		data_ = 0;
+	}
+
+	if ( data_ && Shell::numProcessThreads() > 1 ) {
+		myThread_ = Id::numIds() % Shell::numProcessThreads();
+	}
 }
 
 ZeroDimHandler::ZeroDimHandler( const DinfoBase* dinfo, char* data )
 	: DataHandler( dinfo, 1 ), data_( data )
-{;}
+{
+	myThread_ = 0;
+	if ( data_ && Shell::numProcessThreads() >= 2 )
+		myThread_ = Id::numIds() % Shell::numProcessThreads();
+}
 
 ZeroDimHandler::ZeroDimHandler( const ZeroDimHandler* other )
 	: DataHandler( other->dinfo(), other->isGlobal() )
 {
+	myThread_ = 0;
 	if ( isGlobal_ || Shell::myNode() == 0 ) {
 		data_ = dinfo()->allocData( 1 ); 
 		if ( other->data_ )
 			dinfo()->assignData( data_, 1, other->data_, 1 );
 	} else {
 		data_ = 0;
+	}
+
+	if ( data_ && Shell::numProcessThreads() > 1 ) {
+		myThread_ = Id::numIds() % Shell::numProcessThreads();
 	}
 }
 
@@ -78,9 +93,7 @@ bool ZeroDimHandler::innerNodeBalance( unsigned int size,
 
 void ZeroDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 {
-	if ( isGlobal() || ( Shell::myNode() == 0 && 
-		( Shell::numProcessThreads() < 2 || 
-		( ( p->threadIndexInGroup + e->id().value() ) % Shell::numProcessThreads() ) == 0 ) ) ) {
+	if ( data_ && p->threadIndexInGroup == myThread_ ) {
 		const OpFunc* f = e->cinfo()->getOpFunc( fid );
 		const ProcOpFuncBase* pf = dynamic_cast< const ProcOpFuncBase* >( f );
 		assert( pf );

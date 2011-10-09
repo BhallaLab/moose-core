@@ -15,8 +15,10 @@ FieldDataHandlerBase::FieldDataHandlerBase(
 	const DinfoBase* dinfo,
 	const DataHandler* parentDataHandler )
 			: DataHandler( dinfo, parentDataHandler->isGlobal() ),
-				maxFieldEntries_( 1 ),
-				parentDataHandler_( parentDataHandler )
+				maxFieldEntries_( 0 ),
+				parentDataHandler_( parentDataHandler ),
+				mask_( 0 ),
+				numFieldBits_( 0 )
 {;}
 
 FieldDataHandlerBase::~FieldDataHandlerBase()
@@ -209,10 +211,11 @@ bool FieldDataHandlerBase::resize( unsigned int dimension, unsigned int size)
 	if ( dimension == 0 ) {
 		unsigned int i = biggestFieldArraySize();
 		assert( i <= size );
-		maxFieldEntries_ = size;
+		setMaxFieldEntries( size );
+		return 1;
+	} else {
+		cout << Shell::myNode() << ": FieldDataHandler::resize: Error: Cannot resize from Field\n";
 	}
-
-	cout << Shell::myNode() << ": FieldDataHandler::resize: Error: Cannot resize from Field\n";
 	return 0;
 }
 
@@ -230,8 +233,21 @@ void FieldDataHandlerBase::setFieldArraySize(
 		char* pa = parentDataHandler_->data( objectIndex );
 		setNumField( pa, size );
 		if ( size > maxFieldEntries_ )
-			maxFieldEntries_ = size;
+			setMaxFieldEntries( size );
 	}
+}
+
+void FieldDataHandlerBase::setMaxFieldEntries( unsigned int num )
+{
+	unsigned int maxBits = sizeof( long long ) * 8;
+	unsigned int i = 0;
+	for ( i = 0; i < maxBits; ++i ) {
+		if ( ( num >> i ) == 0 )
+			break;
+	}
+	maxFieldEntries_ = num;
+	numFieldBits_ = i;
+	mask_ = ( 1 << i ) - 1;
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -257,17 +273,14 @@ unsigned int FieldDataHandlerBase::getFieldArraySize( DataId di ) const
 unsigned int FieldDataHandlerBase::biggestFieldArraySize() const
 {
 	unsigned int ret = 0;
-	/*
-	for ( iterator i = parentDataHandler_->begin(0); i !=
-		parentDataHandler_->end( Shell::numProcessThreads() ); ++i )
-	{
-		char* pa = i.data();
-		assert( pa );
-		unsigned int numHere = getNumField( pa );
-		if ( numHere > ret )
-			ret = numHere;
+	vector< char* > parents;
+	parentDataHandler_->getAllData( parents );
+	for ( vector< char* >::iterator i = parents.begin(); 
+		i != parents.end(); ++i ) {
+		unsigned int temp = this->getNumField( *i );
+		if ( ret < temp )
+			ret = temp;
 	}
-	*/
 
 	// Here it would be nice to get FieldArraySize from all nodes. 
 	// But we can't do this here as we don't know for sure that the

@@ -103,6 +103,7 @@ Eref Id::eref() const
 	// return Eref( elements()[ id_ ], index_ );
 }
 
+// Static func.
 Id Id::nextId()
 {
 	// Should really look up 'available' list.
@@ -111,6 +112,12 @@ Id Id::nextId()
 	Id ret( elements().size() );
 	elements().push_back( 0 );
 	return ret;
+}
+
+// Static func.
+unsigned int Id::numIds()
+{
+	return elements().size();
 }
 
 void Id::bindIdToElement( Element* e )

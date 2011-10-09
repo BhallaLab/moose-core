@@ -164,7 +164,7 @@ static DestFinfo handleUseClock( "handleUseClock",
 
 static DestFinfo handleCreate( "create", 
 			"create( class, parent, newElm, name, dimensions )",
-			new EpFunc5< Shell, string, Id, Id, string, vector< unsigned int > >( &Shell::handleCreate ) );
+			new EpFunc5< Shell, string, Id, Id, string, vector< int > >( &Shell::handleCreate ) );
 
 static DestFinfo handleDelete( "delete", 
 			"Destroys Element, all its messages, and all its children. Args: Id",
@@ -871,16 +871,18 @@ const vector< double* >& Shell::getBuf() const
  */
 void Shell::handleCreate( const Eref& e, const Qinfo* q, 
 	string type, Id parent, Id newElm, string name,
-	vector< unsigned int > dimensions )
+	vector< int > dims )
 {
 	// cout << myNode_ << ": Shell::handleCreate inner Create done for element " << name << " id " << newElm << endl;
 	if ( q->addToStructuralQ() )
 		return;
 
+	/*
 	vector< int > dims;
 	for ( unsigned int i = 0; i < dimensions.size(); ++i ) {
 		dims[i] = dimensions[i];
 	}
+	*/
 	innerCreate( type, parent, newElm, name, dims );
 //	if ( myNode_ != 0 )
 	ack()->send( e, q->threadNum(), Shell::myNode(), OkStatus );
