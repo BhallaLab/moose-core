@@ -337,7 +337,8 @@ unsigned int Neutral::getFieldDimension(
 unsigned int Neutral::getLocalNumField( 
 	const Eref& e, const Qinfo* q ) const
 {
-	return e.element()->dataHandler()->getFieldArraySize( e.index() );
+	// This is wrong, placefiller till I come to it. 9 oct 2011
+	return e.element()->dataHandler()->getFieldArraySize( e.index().value() );
 }
 
 vector< ObjId > Neutral::getOutgoingMsgs( 
