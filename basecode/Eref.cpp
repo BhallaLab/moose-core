@@ -31,7 +31,7 @@ char* Eref::data() const
 
 char* Eref::parentData() const
 {
-	return e_->dataHandler()->parentDataHandler()->data( i_ );
+	return e_->dataHandler()->parentData( i_ );
 }
 
 bool Eref::isDataHere() const

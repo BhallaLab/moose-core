@@ -57,7 +57,7 @@ class SynBase
 		 * It doesn't do anything here, but the derived classes use this
 		 * to decide what to do with their spike events.
 		 */
-		virtual void innerAddSpike( DataId synIndex, const double time );
+		virtual void innerAddSpike( unsigned int synIndex, double time );
 
 		static const unsigned int MAX_SYNAPSES;
 		static const Cinfo* initCinfo();

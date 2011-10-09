@@ -15951,4 +15951,6 @@ bug, but now stuck a little further on. Checkin 3037.
 More progress. Now stuck with getVec. Checkin 3038.
 Now cleared the testSetGetVec batch of tests. Checkin 3039.
 
-Now clears testSetRepeat tests.
+Now clears testSetRepeat tests. Checkin 3040.
+
+Now clears testSendSpike and a few others. Fails in testSparseMsg.

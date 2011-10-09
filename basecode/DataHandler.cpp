@@ -24,6 +24,11 @@ bool DataHandler::isGlobal() const
 	return isGlobal_;
 }
 
+char* DataHandler::parentData( DataId index ) const
+{
+	return 0;
+}
+
 const DataHandler* DataHandler::parentDataHandler() const
 {
 	return this;
