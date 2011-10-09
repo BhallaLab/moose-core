@@ -75,9 +75,10 @@ void SynBase::addSpike( unsigned int index, const double time )
 	this->innerAddSpike( index, time );
 }
 
-void SynBase::innerAddSpike( DataId index, const double time )
+void SynBase::innerAddSpike( unsigned int index, const double time )
 {
 	cout << "Warning: SynBase::innerAddSpike: Should not get here\n";
+	assert( 0 );
 }
 
 

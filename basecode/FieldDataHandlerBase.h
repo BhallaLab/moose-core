@@ -30,6 +30,12 @@ class FieldDataHandlerBase: public DataHandler
 		char* data( DataId index ) const;
 
 		/**
+		 * Returns parent data specific to current index, from 
+		 * parentDataHandler.
+		 */
+		char* parentData( DataId index ) const;
+
+		/**
 		 * Returns the number of data entries.
 		 */
 		unsigned int totalEntries() const;
