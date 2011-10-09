@@ -53,6 +53,12 @@ class Id
 		 */
 		static Id nextId();
 
+
+		/**
+		 * Returns the number of Ids in use.
+		 */
+		static unsigned int numIds();
+
 		/**
 		 * The specified element is placed into current id.
 		 */
