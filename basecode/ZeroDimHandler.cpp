@@ -14,7 +14,7 @@ ZeroDimHandler::ZeroDimHandler( const DinfoBase* dinfo, bool isGlobal )
 	: DataHandler( dinfo, isGlobal )
 {
 	myThread_ = 0;
-	if ( isGlobal_ || Shell::myNode() == 0 ) {
+	if ( isGlobal || Shell::myNode() == 0 ) {
 		data_ = dinfo->allocData( 1 );
 	} else {
 		data_ = 0;
@@ -37,7 +37,7 @@ ZeroDimHandler::ZeroDimHandler( const ZeroDimHandler* other )
 	: DataHandler( other->dinfo(), other->isGlobal() )
 {
 	myThread_ = 0;
-	if ( isGlobal_ || Shell::myNode() == 0 ) {
+	if ( other->isGlobal() || Shell::myNode() == 0 ) {
 		data_ = dinfo()->allocData( 1 ); 
 		if ( other->data_ )
 			dinfo()->assignData( data_, 1, other->data_, 1 );
@@ -102,7 +102,7 @@ void ZeroDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 }
 
 void ZeroDimHandler::foreach( const OpFunc* f, Element* e, const Qinfo* q,
-	const double* arg, unsigned int argIncrement ) const
+	const double* arg, unsigned int argSize, unsigned int numArgs ) const
 {
 	if ( data_ && q->threadNum() == myThread_ )
 		f->op( Eref( e, 0 ), q, arg );

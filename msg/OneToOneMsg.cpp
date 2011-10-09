@@ -96,10 +96,11 @@ ObjId OneToOneMsg::findOtherEnd( ObjId f ) const
 unsigned int OneToOneMsg::srcToDestPairs(
 	vector< DataId >& src, vector< DataId >& dest ) const
 {
+	Qinfo q;
 	DataIdExtractor srcdi( &src );
-	e1_->dataHandler()->foreach( &srcdi, 0, 0, 0, 0 );
+	e1_->dataHandler()->foreach( &srcdi, 0, &q, 0, 0, 0 );
 	DataIdExtractor destdi( &dest );
-	e2_->dataHandler()->foreach( &destdi, 0, 0, 0, 0 );
+	e2_->dataHandler()->foreach( &destdi, 0, &q, 0, 0, 0 );
 	assert ( src.size() == dest.size() );
 
 	/*

@@ -88,9 +88,26 @@ void ZombieHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 {;} // Solver parent does process, this does not.
 
 void ZombieHandler::foreach( const OpFunc* f, Element* e, const Qinfo* q,
- 	const double* arg, unsigned int argIncrement ) const
-{ // This should be relevant.
-	;
+ 	const double* arg, unsigned int argSize, unsigned int numArgs ) const
+{ // This should be relevant. But I still have to define threadStart_
+/*
+	assert( q->threadNum() < threadStart_.size() );
+	unsigned int end = threadStart_[ q->threadNum() + 1 ];
+	if ( numArgs <= 1 ) {
+		for( unsigned int i = threadStart_[ q->threadNum() ]; i != end; ++i)
+			f->op( Eref( e, i ), q, arg );
+	} else {
+		unsigned int argOffset = 0;
+		unsigned int maxOffset = argSize * numArgs;
+		for( unsigned int i = threadStart_[ q->threadNum() ];
+			i != end; ++i) {
+			f->op( Eref( e, i ), q, arg + argOffset );
+			argOffset += argSize;
+			if ( argOffset >= maxOffset )
+				argOffset = 0;
+		}
+	}
+	*/
 }
 
 unsigned int ZombieHandler::getAllData( vector< char* >& dataVec ) const
