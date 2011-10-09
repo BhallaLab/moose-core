@@ -732,11 +732,13 @@ void testSetGetVec()
 	Eref syne( syn, DataId::any );
 	vector< double > delayVec;
 	Field< double >::getVec( synId, "delay", delayVec );
-	assert( delayVec.size() == size * size - 1 );
+	assert( delayVec.size() == ( size * ( size - 1 ) ) / 2 );
+	k = 0;
 	for ( unsigned int i = 0; i < size; ++i ) {
 		for ( unsigned int j = 0; j < i; ++j ) {
 			double temp = i * 1000 + j ;
-			assert( doubleEq( delayVec[ i * size + j ], temp ) );
+			assert( doubleEq( delayVec[ k++ ], temp ) );
+			// assert( doubleEq( delayVec[ i * size + j ], temp ) );
 		}
 	}
 

@@ -292,22 +292,27 @@ template< class A > class Field: public SetGet1< A >
 
 		/**
 		 * Blocking call that returns a vector of values
+		 * Note that the vector returned by innerGet is sparse due to
+		 * the way the indexing is done. We assume
+		 * all the entries have come in, and discard the holes.
 		 */
 		static void getVec( Id dest, const string& field, vector< A >& vec)
 		{
 			ObjId tgt( dest, DataId::any );
 			const vector< double* >* ret = innerGet( tgt, field );
+
+			vec.resize( 0 );
 			if ( ret ) {
-				vec.resize( ret->size() );
+				// vec.resize( ret->size() );
 				for ( unsigned int i = 0; i < ret->size(); ++i ) {
 					if ( ( *ret )[i] ) {
 						Conv< A > conv( (*ret)[i] );
-						vec[i] = *conv;
+						vec.push_back( *conv );
+						// vec[i] = *conv;
 					}
 				}
 				return;
 			}
-			vec.resize( 0 );
 		}
 
 		/**
@@ -593,6 +598,8 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 		 * This variant goes through each target object entry on dest,
 		 * and passes in the same lookup index to each one. The results
 		 * are put together in the vector vec.
+		 * As the vector returned from the innerGet command is sparse but
+		 * ordered, we compact it to build up the return vector.
 		 */
 		static void getVec( Id dest, const string& field, 
 			vector< L >& index, vector< A >& vec )
@@ -600,11 +607,13 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 			ObjId tgt( dest, DataId::any );
 			const vector< double* >* ret = 
 				innerGet( tgt, field, index, ret );
+			vec.resize( 0 );
 			if ( ret ) {
-				vec.resize( ret->size() );
+				// vec.resize( ret->size() );
 				for ( unsigned int i = 0; i < ret->size(); ++i ) {
 					Conv< A > conv( (*ret)[i] );
-					vec[i] = *conv;
+					// vec[i] = *conv;
+					vec.push_back( *conv );
 				}
 			}
 		}
