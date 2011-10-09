@@ -36,6 +36,10 @@ char* FieldDataHandlerBase::data( DataId di ) const
 	return lookupField( parentDataHandler_->data( di.parentIndex( numFieldBits_ ) ), di.myIndex( mask_ ) );
 }
 
+char* FieldDataHandlerBase::parentData( DataId di ) const
+{
+	return parentDataHandler_->data( di.parentIndex( numFieldBits_ ) );
+}
 
 /**
  * Returns the number of field entries.

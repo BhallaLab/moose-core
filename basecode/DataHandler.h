@@ -50,6 +50,13 @@ class DataHandler
 		virtual char* data( DataId index ) const = 0;
 
 		/**
+		 * Returns the data of the parent DataHandler of the specified index
+		 * Returns 0 if data not present on current node on specified index,
+		 * or if the DataId does not refer to a FieldDataHandler.
+		 */
+		virtual char* parentData( DataId index ) const;
+
+		/**
 		 * Returns DataHandler for the parent object. This applies to 
 		 * the FieldDataHandler; in all other cases it returns self.
 		 */
