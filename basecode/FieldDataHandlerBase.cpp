@@ -263,17 +263,26 @@ void FieldDataHandlerBase::setMaxFieldEntries( unsigned int num )
 
 /**
  * Looks up the size of the local field array on the specified object
+ * Here we use an integer as the index of parent object
+ */
+unsigned int FieldDataHandlerBase::getFieldArraySize( unsigned int i ) const
+{
+	assert( i < parentDataHandler_->totalEntries() );
+	if ( parentDataHandler_->isDataHere( i ) ) {
+		char* pa = parentDataHandler_->data( i );
+		return getNumField( pa );
+	}
+	return 0;
+}
+
+/**
+ * Looks up the size of the local field array on the specified object
  * Here we use a DataId and trim off the field part to find index of parent
  */
 unsigned int FieldDataHandlerBase::getFieldArraySize( DataId di ) const
 {
 	unsigned int objectIndex = di.value() >> numFieldBits_;
-	assert( objectIndex < parentDataHandler_->totalEntries() );
-	if ( parentDataHandler_->isDataHere( objectIndex ) ) {
-		char* pa = parentDataHandler_->data( objectIndex );
-		return getNumField( pa );
-	}
-	return 0;
+	return getFieldArraySize( objectIndex );
 }
 
 /**

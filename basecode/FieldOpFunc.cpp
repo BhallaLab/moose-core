@@ -33,7 +33,10 @@ void FieldOpFunc::op(const Eref& e, const Qinfo* q, const double* buf )
 {
 	unsigned long long index = e.index().value() << fdh_->numFieldBits();
 
-	for ( unsigned int i = 0; i < fdh_->localEntries(); ++i ) {
+	unsigned int fieldArraySize = 
+		fdh_->getFieldArraySize( e.index().value() );
+
+	for ( unsigned int i = 0; i < fieldArraySize; ++i ) {
 		Eref fielder( e_, index + i );
 		f_->op( fielder, q, buf + *argOffset_ ); 
 		*argOffset_ += argSize_;
@@ -57,8 +60,10 @@ void FieldOpFuncSingle::op(const Eref& e, const Qinfo* q, const double* buf)
 	const
 {
 	unsigned long long index = e.index().value() << fdh_->numFieldBits();
+	unsigned int fieldArraySize = 
+		fdh_->getFieldArraySize( e.index().value() );
 
-	for ( unsigned int i = 0; i < fdh_->localEntries(); ++i ) {
+	for ( unsigned int i = 0; i < fieldArraySize; ++i ) {
 		Eref fielder( e_, index + i );
 		f_->op( fielder, q, buf );
 	}

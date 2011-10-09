@@ -15946,4 +15946,4 @@ the linearIndex which actually didn't work properly, so the two errors
 cancelled out.
 
 Fairly extensive changes to fix this in a general way. Compiles, clears this
-bug, but now stuck a little further on.
+bug, but now stuck a little further on. Checkin 3037.

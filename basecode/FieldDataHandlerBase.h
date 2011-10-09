@@ -52,6 +52,7 @@ class FieldDataHandlerBase: public DataHandler
 
 		bool isAllocated() const;
 
+		unsigned int getFieldArraySize( unsigned int i ) const;
 		unsigned int getFieldArraySize( DataId di ) const;
 
  		unsigned int fieldMask() const;
