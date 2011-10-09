@@ -115,8 +115,11 @@ class DataHandler
 		/**
 		 * Returns the # of entries in the field on this object, should
 		 * it indeed be a FieldDataHandler. Otherwise returns 0.
+		 * The index i specifies which parent object to refer to.
+		 * If I had 100 synchans, each with assorted synapses as Fields,
+		 * the index i would identify the parent synchan.
 		 */
-		virtual unsigned int getFieldArraySize( DataId di ) const;
+		virtual unsigned int getFieldArraySize( unsigned int i ) const;
 
 		/**
 		 * Returns the mask for the field portion of the DataId that works

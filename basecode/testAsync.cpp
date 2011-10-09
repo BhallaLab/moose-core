@@ -708,9 +708,10 @@ void testSetGetVec()
 	fd->resize( 0, size );
 	assert ( fd->totalEntries() == size * size );
 	// Here we test setting a 2-D array with different dims on each axis.
+	unsigned int k = 0;
 	vector< double > delay( size * size, 0.0 );
 	for ( unsigned int i = 0; i < size; ++i ) {
-		unsigned int k = i * size;
+		// unsigned int k = i * size;
 		for ( unsigned int j = 0; j < i; ++j ) {
 			delay[k++] = i * 1000 + j;
 		}
@@ -723,9 +724,9 @@ void testSetGetVec()
 			DataId di( i, j, fd->numFieldBits() );
 			Eref syne( syn, di );
 			double temp = i * 1000 + j ;
-			assert( doubleEq( 
-				reinterpret_cast< Synapse* >(syne.data())->getDelay(), 
-				temp ) );
+			double y = 
+				reinterpret_cast< Synapse* >(syne.data())->getDelay();
+			assert( doubleEq( y, temp ) );
 		}
 	}
 	Eref syne( syn, DataId::any );

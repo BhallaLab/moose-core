@@ -35,7 +35,7 @@ bool DataHandler::nodeBalance( unsigned int size )
 }
 
  /// Overridden in FieldDataHandler.
- unsigned int DataHandler::getFieldArraySize( DataId di ) const
+ unsigned int DataHandler::getFieldArraySize( unsigned int i ) const
  {
  	return 0;
  }
