@@ -89,6 +89,10 @@ void DataHandlerWrapper:: foreach( const OpFunc* f, Element* e,
 	parent_->foreach( f, e, q, arg, argIncrement );
 }
 
+unsigned int DataHandlerWrapper::getAllData( vector< char* >& data ) const
+{
+	return parent_->getAllData( data );
+}
 
 ////////////////////////////////////////////////////////////////
 // Data Reallocation functions

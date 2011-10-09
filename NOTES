@@ -15932,6 +15932,8 @@ it right away.
 8 Oct
 Implemented another iterator, DataHandler::getAllData, in order to be able 
 to handle the FieldDataHandlerBase::totalEntries. This compiles, currently
-stuck with odd problems in unit tests.
+stuck with odd problems in unit tests. Checkin 3034.
+
+Need to set fdh->numFieldBits when we assign maxIndex. Need to compile.
 
 ============================================================================

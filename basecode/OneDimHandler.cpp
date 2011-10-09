@@ -36,6 +36,7 @@ OneDimHandler::OneDimHandler( const OneDimHandler* other )
 	*/
 	unsigned int num = end_ - start_;
 	data_ = dinfo()->copyData( other->data_, num, num );
+	innerNodeBalance( totalEntries_, Shell::myNode(), Shell::numNodes() );
 }
 
 OneDimHandler::~OneDimHandler() {
@@ -96,11 +97,11 @@ bool OneDimHandler::isAllocated() const {
 bool OneDimHandler::innerNodeBalance( unsigned int numData,
 	unsigned int myNode, unsigned int numNodes )
 {
+	bool ret = 0;
 	if ( isGlobal_ ) {
 		start_ = 0;
-		bool ret = ( totalEntries_ != numData );
+		ret = ( totalEntries_ != numData );
 		end_ = totalEntries_ = numData;
-		return ret;
 	} else {
 		unsigned int oldNumData = totalEntries_;
 		unsigned int oldstart = start_;
@@ -108,11 +109,22 @@ bool OneDimHandler::innerNodeBalance( unsigned int numData,
 		totalEntries_ = numData;
 		start_ = ( numData * myNode ) / numNodes;
 		end_ = ( numData * ( 1 + myNode ) ) / numNodes;
-		return ( numData != oldNumData || oldstart != start_ || 
+		ret = ( numData != oldNumData || oldstart != start_ || 
 			oldend != end_ );
 	}
-	// bitMask_ = ~( (~0) << static_cast< unsigned int >( ceil( numBits ) ) );
-
+	if ( Shell::numProcessThreads() == 0 ) { // Single thread mode.
+		threadStart_.resize( 2 );
+		threadStart_[0] = start_;
+		threadStart_[1] = end_;
+	} else {
+		threadStart_.resize( Shell::numProcessThreads() + 1 );
+		for ( unsigned int i = 0; i <= Shell::numProcessThreads(); ++i ) {
+			threadStart_[i] = start_ + 
+			( ( end_ - start_ ) * i + Shell::numProcessThreads() - 1 ) /
+				Shell::numProcessThreads();
+		}
+	}
+	return ret;
 	// cout << "OneDimHandler::innerNodeBalance( " << numData_ << ", " << start_ << ", " << end_ << "), fieldDimension = " << getFieldDimension() << "\n";
 
 }

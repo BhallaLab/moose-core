@@ -123,6 +123,7 @@ class FieldDataHandlerBase: public DataHandler
 		void globalize( const char* data, unsigned int size );
 		void unGlobalize();
 
+
 		// We do not implement these copy() funcs here, left to the
 		// derived templated class.
 		//DataHandler* copy( bool toGlobal, unsigned int n ) const;
@@ -132,6 +133,13 @@ class FieldDataHandlerBase: public DataHandler
 
 		// Handled by derived templated FieldDataHandler classes.
 		// void assign( const char* orig, unsigned int numOrig );
+
+
+		/**
+		 * This function updates the mask_ and the numFieldBits_ in
+		 * coordination with maxFieldEntries.
+		 */
+		void setMaxFieldEntries( unsigned int num );
 
 		/////////////////////////////////////////////////////////////////
 		// Data access

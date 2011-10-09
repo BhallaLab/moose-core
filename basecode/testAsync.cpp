@@ -601,7 +601,7 @@ void testSetGetSynapse()
 
 //	assert( syn->dataHandler()->data( 0 ) != 0 ); // Should give warning
 
-	assert( syn->dataHandler()->totalEntries() == 100 );
+	assert( syn->dataHandler()->totalEntries() == 0 );
 	assert( syn->dataHandler()->localEntries() == 0 );
 	// could/should use SetVec here.
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -669,7 +669,7 @@ void testSetGetVec()
 	assert ( syn->getName() == "synapse" );
 
 	assert( syn->dataHandler()->localEntries() == 0 );
-	assert( syn->dataHandler()->totalEntries() == 100 );
+	assert( syn->dataHandler()->totalEntries() == 0 );
 
 	FieldDataHandlerBase* fd = dynamic_cast< FieldDataHandlerBase *>( 
 		syn->dataHandler() );
@@ -692,7 +692,7 @@ void testSetGetVec()
 	}
 
 	vector< unsigned int > getSyn;
-	Eref tempE( e2.element(), DataId::any );
+
 	Field< unsigned int >::getVec( i2, "numSynapses", getSyn );
 	assert (getSyn.size() == size );
 	for ( unsigned int i = 0; i < size; ++i )
