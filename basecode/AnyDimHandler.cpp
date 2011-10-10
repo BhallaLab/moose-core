@@ -108,10 +108,11 @@ bool AnyDimHandler::innerNodeBalance( unsigned int numData,
 	unsigned int myNode, unsigned int numNodes )
 {
 	if ( isGlobal_ ) {
-		if ( totalEntries_ == numData )
-			return 0;
+		unsigned int oldNumData = totalEntries_;
 		start_ = 0;
 		end_ = totalEntries_ = numData;
+		if ( oldNumData == numData )
+			return 0;
 		return 1;
 	} else {
 		unsigned int oldNumData = totalEntries_;
@@ -247,12 +248,12 @@ DataHandler* AnyDimHandler::copy( bool toGlobal, unsigned int n ) const
 		}
 	}
 	if ( n > 1 ) {
-		vector< int > dims( dims_.size() + 1);
+		vector< int > newDims( dims_.size() + 1);
 		for ( unsigned int i = 0; i < dims_.size(); ++i )
-			dims[i] = dims_[i];
-		dims[ dims.size() ] = n;
+			newDims[i] = dims_[i];
+		newDims[ dims_.size() ] = n;
 
-		AnyDimHandler* ret = new AnyDimHandler( dinfo(), toGlobal, dims );
+		AnyDimHandler* ret = new AnyDimHandler( dinfo(), toGlobal, newDims);
 		if ( data_ )  {
 			ret->assign( data_, end_ - start_ );
 		}
@@ -303,11 +304,13 @@ bool AnyDimHandler::resize( unsigned int dimension, unsigned int numEntries)
 			unsigned int newLocalEntries = end_ - start_;
 			data_ = dinfo()->allocData( newLocalEntries );
 			if ( isGlobal_ ) {
+				assert ( totalEntries_ == newLocalEntries);
 				unsigned int newBlockSize = dims_[0] * dinfo()->size();
 				unsigned int oldBlockSize = oldN * dinfo()->size();
 				unsigned int j = totalEntries_ / dims_[0];
 				for ( unsigned int i = 0; i < j; ++i ) {
-					memcpy( data_ + i * newBlockSize, temp + i * oldBlockSize, oldBlockSize );
+					dinfo()->assignData( data_ + i * newBlockSize, dims_[0],
+						temp + i * oldBlockSize, oldN );
 				}
 			} 
 			dinfo()->destroyData( temp );

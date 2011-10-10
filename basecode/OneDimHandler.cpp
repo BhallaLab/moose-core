@@ -248,7 +248,8 @@ DataHandler* OneDimHandler::copy( bool toGlobal, unsigned int n ) const
 	if ( n > 1 ) { 
 		// Note that we expand into ny, rather than nx. The current array
 		// size is going to remain the lowest level index.
-		TwoDimHandler* ret = new TwoDimHandler( dinfo(), toGlobal, n, totalEntries_ );
+		// ny is the last argument.
+		TwoDimHandler* ret = new TwoDimHandler( dinfo(), toGlobal, totalEntries_, n );
 		if ( data_ )  {
 			if ( isGlobal() ) {
 				ret->assign( data_, totalEntries_ );
