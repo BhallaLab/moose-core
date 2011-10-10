@@ -15960,6 +15960,7 @@ events ?
 ============================================================================
 10 Oct
 Tracked it down: it was because of the change in syntax for vector 
-field assignment for ragged arrays.
+field assignment for ragged arrays. Checkin 3042.
 
-
+Fixed problem in testDataCopyZero, when going from zero to one dim: 
+Turned out to be a fairly fundamental problem with the Dinfo::assignData.
