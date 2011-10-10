@@ -1425,7 +1425,7 @@ void testUpValue()
 	assert ( ticke->getName() == "tick" );
 
 	assert( ticke->dataHandler()->localEntries() == 10 );
-	assert( ticke->dataHandler()->totalEntries() == 1 );
+	assert( ticke->dataHandler()->totalEntries() == 0 );
 	FieldDataHandlerBase * fdh =
 		static_cast< FieldDataHandlerBase *>( ticke->dataHandler() );
 	// fdh->setFieldDimension( fdh->biggestFieldArraySize() );
@@ -1906,10 +1906,10 @@ void testDataCopyZero()
 	Dinfo< double > Ddbl;
 	ZeroDimHandler zd( &Ddbl, 1 );
 	bool ok;
-	vector< unsigned int > dim;
-	assert ( zd.isAllocated() == 0 );
-	ok = zd.resize( 0, 1 );
-	assert( ok );
+	assert ( zd.isAllocated() == 1 );
+	assert( zd.totalEntries() == 1 );
+	ok = zd.resize( 0, 1 ); // Does not permit
+	assert( !ok );
 	assert ( zd.isAllocated() == 1 );
 	assert( zd.totalEntries() == 1 );
 	assert( zd.data( 0 ) != 0 );
