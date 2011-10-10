@@ -15953,4 +15953,13 @@ Now cleared the testSetGetVec batch of tests. Checkin 3039.
 
 Now clears testSetRepeat tests. Checkin 3040.
 
-Now clears testSendSpike and a few others. Fails in testSparseMsg.
+Now clears testSendSpike and a few others. Fails in testSparseMsg. Checkin 3041.
+
+Still struggling with testSparseMsg, something to do with the delivery of
+events ?
+============================================================================
+10 Oct
+Tracked it down: it was because of the change in syntax for vector 
+field assignment for ragged arrays.
+
+

@@ -1282,7 +1282,7 @@ void testSparseMsg()
 	assert ( syn->getName() == "synapse" );
 
 	assert( syn->dataHandler()->localEntries() == 0 );
-	assert( syn->dataHandler()->totalEntries() == size );
+	assert( syn->dataHandler()->totalEntries() == 0 );
 	FieldDataHandlerBase* fd = dynamic_cast< FieldDataHandlerBase* >(
 		syn->dataHandler() );
 	assert( fd );
@@ -1337,13 +1337,16 @@ void testSparseMsg()
 	vector< double > weight( size * fieldSize, 0.0 );
 	vector< double > delay( size * fieldSize, 0.0 );
 	assert( syne.element()->dataHandler()->numDimensions() == 2 );
+	unsigned int k = 0;
 	for ( unsigned int i = 0; i < size; ++i ) {
 		// unsigned int numSyn = syne.element()->dataHandler()->numData2( i );
 		unsigned int numSyn = fd->getFieldArraySize( i );
-		unsigned int k = i * fieldSize;
+		// unsigned int k = i * fieldSize;
 		for ( unsigned int j = 0; j < numSyn; ++j ) {
-			weight[ k + j ] = mtrand() * weightMax;
-			delay[ k + j ] = mtrand() * delayMax;
+			// weight[ k + j ] = mtrand() * weightMax;
+			// delay[ k + j ] = mtrand() * delayMax;
+			weight[ k ] = mtrand() * weightMax;
+			delay[ k++ ] = mtrand() * delayMax;
 		}
 	}
 	/*
