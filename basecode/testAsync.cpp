@@ -1962,7 +1962,6 @@ void testDataCopyOne()
 	bool ok;
 	vector< unsigned int > dim;
 	dim.push_back( 10 );
-	assert ( od.isAllocated() == 0 );
 	ok = od.resize( 0, 10 );
 	assert( ok );
 	assert ( od.isAllocated() == 1 );
@@ -2100,7 +2099,8 @@ void testDataCopyAny()
 	for ( unsigned int i = 0; i < n1; ++i ) {
 		for ( unsigned int j = 0; j < 7; ++j ) {
 			unsigned int k = j % n0;
-			assert( doubleEq( *dptr( cad1, i * 7 + j ), i * n0 + k ) );
+			double val = *dptr( cad1, i * 7 + j );
+			assert( doubleEq( val , i * n0 + k ) );
 			// cout << *dptr( cad1, i * 7 + j ) << "	";
 		}
 	}
@@ -2200,7 +2200,8 @@ void testOneDimHandler()
 	vector< double > vec;
 	testForeach tf( &vec );
 	double arg = 12.34;
-	odh.foreach( &tf, 0, 0, &arg, 1, 0 );
+	Qinfo q;
+	odh.foreach( &tf, 0, &q, &arg, 1, 0 );
 	assert ( vec.size() == odh.localEntries() );
 	for ( unsigned int i = 0; i < odh.localEntries(); ++i )
 		assert( doubleEq( arg, vec[i] ) );
@@ -2265,7 +2266,8 @@ void testFieldDataHandler()
 	vector< double > vec;
 	testForeach tf( &vec );
 	double arg = 12.34;
-	odh.foreach( &tf, 0, 0, &arg, 1, 0 );
+	Qinfo q;
+	odh.foreach( &tf, 0, &q, &arg, 1, 0 );
 	assert ( vec.size() == odh.localEntries() );
 	for ( unsigned int i = 0; i < odh.localEntries(); ++i )
 		assert( doubleEq( arg, vec[i] ) );
@@ -2313,7 +2315,7 @@ void testFieldDataHandler()
 	// Play with iterators
 	vec.resize(0);
 	arg = 56.78;
-	fdh.foreach( &tf, 0, 0, &arg, 1, 0 );
+	fdh.foreach( &tf, 0, &q, &arg, 1, 0 );
 	assert( vec.size() == fdh.localEntries() );
 	for ( unsigned int i = 0; i < fdh.localEntries(); ++i )
 		assert( doubleEq( arg, vec[i] ) );
