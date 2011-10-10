@@ -98,7 +98,7 @@ template< class D > class Dinfo: public DinfoBase
 				if ( copyEntries - i < origEntries )
 					numCopies = copyEntries - i;
 
-				memcpy( data, orig, sizeof( D ) * numCopies );
+				memcpy( data + i * sizeof( D ), orig, sizeof( D ) * numCopies );
 			}
 		}
 
