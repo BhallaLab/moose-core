@@ -15967,4 +15967,7 @@ Turned out to be a fairly fundamental problem with the Dinfo::assignData.
 Checkin 3043.
 
 Fixed bugs with copy and resize, especially pertaining to assigning data to a 
-larger dimension with tiling.
+larger dimension with tiling. Checkin 3044.
+
+Further progress, had to skip a unit test on foreach for the FieldDataHandler
+because it needs a valid Element argument.
