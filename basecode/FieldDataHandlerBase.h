@@ -96,10 +96,11 @@ class FieldDataHandlerBase: public DataHandler
 		virtual void setNumField( char* pa, unsigned int num ) = 0;
 
 		/**
-		 * Assigns the size of the field array on the specified object.
+		 * Assigns the size of the field array on the specified object,
+		 * which is on the parentDataHandler.
 		 * 
 		 */
-		void setFieldArraySize( DataId di, unsigned int size );
+		void setFieldArraySize( unsigned int objectIndex, unsigned int size );
 
 		/**
 		 * Looks up the size of the field array on the specified object

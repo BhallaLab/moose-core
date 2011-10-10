@@ -102,7 +102,9 @@ vector< unsigned int > FieldDataHandlerBase::dims() const
  * current node
  */
 bool FieldDataHandlerBase::isDataHere( DataId index ) const {
-	return parentDataHandler_->isDataHere( index );
+	return parentDataHandler_->isDataHere( 
+		index.parentIndex( numFieldBits_ )
+	); 
 }
 
 bool FieldDataHandlerBase::isAllocated() const {
@@ -238,12 +240,12 @@ bool FieldDataHandlerBase::resize( unsigned int dimension, unsigned int size)
 
 /**
  * Assigns the size of the field array on the specified object.
- * Here we use a DataId and trim off the field part to find index of parent
+ * Here we specify the index of the parent object as the first argument.
  */
 void FieldDataHandlerBase::setFieldArraySize( 
-	DataId di, unsigned int size )
+	unsigned int objectIndex, unsigned int size )
 {
-	unsigned int objectIndex = di.value() >> numFieldBits_;
+	// unsigned int objectIndex = di.value() >> numFieldBits_;
 	assert( objectIndex < parentDataHandler_->totalEntries() );
 
 	if ( parentDataHandler_->isDataHere( objectIndex ) ) {

@@ -249,7 +249,8 @@ void SparseMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const
 				if ( report ) cout << "(" << colIndex[j] << "," << fieldIndex[j] << ")";
 				if ( q->execThread( e2_->id(), colIndex[j] ) ) {
 					Eref tgt( e2_, DataId( colIndex[j], fieldIndex[j] , fdh->numFieldBits() ) );
-					if ( tgt.isDataHere() )
+					// if ( tgt.isDataHere() )
+					if ( fdh->parentDataHandler()->isDataHere( colIndex[j] ) )
 						f->op( tgt, q, arg );
 				}
 			}
