@@ -56,7 +56,8 @@ AnyDimHandler::~AnyDimHandler() {
 char* AnyDimHandler::data( DataId index ) const
 {
 	// unsigned int i = index & bitMask_;
-	return data_ + ( index.value() + start_ ) * dinfo()->size();
+	assert( index.value() >= start_ );
+	return data_ + ( index.value() - start_ ) * dinfo()->size();
 }
 
 unsigned int AnyDimHandler::totalEntries() const
