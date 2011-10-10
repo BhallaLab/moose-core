@@ -2241,18 +2241,6 @@ void testFieldDataHandler()
 	assert( odh.start_ == 300 );
 	assert( odh.end_ == 400 );
 
-	/*
-	assert( odh.isAllocated() == 1 );
-
-	vector< unsigned int > dims( 1, numNeurons );
-
-	// The original resize function takes node info from Shell, so I can't
-	// use that here in this test. 
-	// odh.resize( dims );
-	// So here I use a function from inside the OneDimHandler.
-	odh.data_ = odh.dinfo()->allocData( odh.end_ - odh.start_ );
-	*/
-
 	assert( odh.isAllocated() == 1 );
 	assert( odh.totalEntries() == numNeurons );
 	assert( odh.localEntries() == numNeurons / numNodes );
@@ -2271,20 +2259,6 @@ void testFieldDataHandler()
 	assert ( vec.size() == odh.localEntries() );
 	for ( unsigned int i = 0; i < odh.localEntries(); ++i )
 		assert( doubleEq( arg, vec[i] ) );
-
-	/*
-	OneDimHandler::iterator i = odh.begin();
-	assert ( i.index() == 300 );
-	assert( i.linearIndex() == 300 );
-
-	OneDimHandler::iterator end = odh.end();
-	assert( end.index() == 400 );
-	assert( end.linearIndex() == 400 );
-
-	++i;
-	assert ( i.index() == 301 );
-	assert( i.linearIndex() == 301 );
-	*/
 
 	// Next, put in the FieldDataHandler.
 
@@ -2312,51 +2286,22 @@ void testFieldDataHandler()
 	fdh.resize( 0, 399 );
 	assert( fdh.sizeOfDim( 0 ) == 399 );
 
+
+	/*
+	const Cinfo* ic = IntFire::initCinfo();
+	Id id = Id::nextId();
+	vector< int > dims( 1, 1 );
+	Element* elm = new Element( id, ic, "test2", dims, false );
+	*/
+
 	// Play with iterators
+	/*
 	vec.resize(0);
 	arg = 56.78;
 	fdh.foreach( &tf, 0, &q, &arg, 1, 0 );
 	assert( vec.size() == fdh.localEntries() );
 	for ( unsigned int i = 0; i < fdh.localEntries(); ++i )
 		assert( doubleEq( arg, vec[i] ) );
-
-	/*
-
-	i = fdh.begin();
-	assert( i.index() == DataId( 300, 0 ) );
-	assert( i.linearIndex() == 300 * 399 );
-	i++;
-
-	assert( i.index() == DataId( 300, 1 ) );
-	assert( i.linearIndex() == 300 * 399 + 1 );
-	for ( unsigned int k = 2; k < 300; ++k )
-		i++;
-
-	assert( i.index() == DataId( 300, 299 ) );
-	assert( i.linearIndex() == 300 * 399 + 299 );
-
-	i++;
-	assert( i.index() == DataId( 301, 0 ) );
-	assert( i.linearIndex() == 301 * 399 );
-
-	i++;
-	assert( i.index() == DataId( 301, 1 ) );
-	assert( i.linearIndex() == 301 * 399 + 1 );
-
-	for ( unsigned int k = 1; k < 301; ++k ) {
-		assert( i.index() == DataId( 301, k ) );
-		assert( i.linearIndex() == 301 * 399 + k );
-		assert( fdh.linearIndex( i.index() ) == i.linearIndex() );
-		i++;
-	}
-
-	assert( i.index() == DataId( 302, 0 ) );
-	assert( i.linearIndex() == 302 * 399 );
-
-
-	end = fdh.end();
-	assert( end.index() == DataId( 400, 0 ) );
-	assert( end.linearIndex() == 400 * 399 );
 	*/
 	
 	cout << "." << flush;
@@ -2386,7 +2331,7 @@ void testCopyFieldElementData()
 
 	// assert( syn->dataHandler()->data( 0 ) != 0 ); // Should generate warning
 
-	assert( syn->dataHandler()->totalEntries() == size );
+	assert( syn->dataHandler()->totalEntries() == 0 );
 	assert( syn->dataHandler()->localEntries() == 0 );
 	// could/should use SetVec here.
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -2524,7 +2469,7 @@ void testFinfoFields()
 
 	assert( createFinfo );
 	assert( createFinfo->name() == "requestCreate" );
-	assert( createFinfo->type() == "string,Id,Id,string,vector<unsigned int>" );
+	assert( createFinfo->type() == "string,Id,Id,string,vector<int>" );
 
 	cout << "." << flush;
 }
