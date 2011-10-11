@@ -21,7 +21,7 @@ ZeroDimHandler::ZeroDimHandler( const DinfoBase* dinfo, bool isGlobal )
 	}
 
 	if ( data_ && Shell::numProcessThreads() > 1 ) {
-		myThread_ = Id::numIds() % Shell::numProcessThreads();
+		myThread_ = 1 + Id::numIds() % Shell::numProcessThreads();
 	}
 }
 
@@ -30,7 +30,7 @@ ZeroDimHandler::ZeroDimHandler( const DinfoBase* dinfo, char* data )
 {
 	myThread_ = 0;
 	if ( data_ && Shell::numProcessThreads() >= 2 )
-		myThread_ = Id::numIds() % Shell::numProcessThreads();
+		myThread_ = 1 + Id::numIds() % Shell::numProcessThreads();
 }
 
 ZeroDimHandler::ZeroDimHandler( const ZeroDimHandler* other )
@@ -46,7 +46,7 @@ ZeroDimHandler::ZeroDimHandler( const ZeroDimHandler* other )
 	}
 
 	if ( data_ && Shell::numProcessThreads() > 1 ) {
-		myThread_ = Id::numIds() % Shell::numProcessThreads();
+		myThread_ = 1 + Id::numIds() % Shell::numProcessThreads();
 	}
 }
 
@@ -93,7 +93,8 @@ bool ZeroDimHandler::innerNodeBalance( unsigned int size,
 
 void ZeroDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 {
-	if ( data_ && p->threadIndexInGroup == myThread_ ) {
+	if ( data_ && ( p->threadIndexInGroup == myThread_ || 
+		p->threadIndexInGroup == 0 ) ) {
 		const OpFunc* f = e->cinfo()->getOpFunc( fid );
 		const ProcOpFuncBase* pf = dynamic_cast< const ProcOpFuncBase* >( f );
 		assert( pf );
@@ -104,7 +105,7 @@ void ZeroDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 void ZeroDimHandler::foreach( const OpFunc* f, Element* e, const Qinfo* q,
 	const double* arg, unsigned int argSize, unsigned int numArgs ) const
 {
-	if ( data_ && q->threadNum() == myThread_ )
+	if ( data_ && ( q->threadNum() == myThread_ || q->threadNum() == 0 ) )
 		f->op( Eref( e, 0 ), q, arg );
 }
 

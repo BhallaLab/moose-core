@@ -15996,6 +15996,12 @@ I keep running into the issue of synchronizing FieldDataHandler sizes. Should
 implement an Element or Id operation to do this.
 Element::syncFieldDim();
 
-Done. Now clears all single-thread tests.
+Done. Now clears all single-thread tests. Checkin 3051.
+
+Ran into issues with thread handling. Made the fixes in OneDimHandler, and then
+it was clear that the same code would extend to the Two and Any Dim cases.
+So did a clean sweep and made a new baseclass, BlockHandler, that deals with
+a lot of common code in One, Two and Any Dim. Clears tests up to previous
+point.
 
 ============================================================================

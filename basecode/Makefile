@@ -22,6 +22,7 @@ OBJ = \
 	Qinfo.o \
 	DataHandler.o \
 	ZeroDimHandler.o \
+	BlockHandler.o \
 	OneDimHandler.o \
 	TwoDimHandler.o \
 	AnyDimHandler.o \
@@ -60,6 +61,7 @@ HEADERS = \
 	Dinfo.h \
 	DataDimensions.h \
 	DataHandler.h \
+	BlockHandler.h \
 	AnyDimHandler.h \
 	ZeroDimHandler.h \
 	OneDimHandler.h \
