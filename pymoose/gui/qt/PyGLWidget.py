@@ -91,17 +91,14 @@ class PyGLWidget(QtOpenGL.QGLWidget):
         self.viewport_matrix_   = []
         self.projection_matrix_ = []
         self.near_   = 1.0		#0.1
-        self.far_    = 200.0
+        self.far_    = 500.0
         self.fovy_   = 4.0
-        self.radius_ = 10.0
+        self.radius_ = 7.0
         self.last_point_2D_ = QtCore.QPoint()
         self.last_point_ok_ = False
         self.last_point_3D_ = [1.0, 0.0, 0.0]
         self.isInRotation_  = False
 	
-	
-
-        #additions by chaitanya
 	#additions by chaitanya
 	self.xpan = 0.0
         self.ypan = 0.0
@@ -113,7 +110,8 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 	self.sceneObjects = []		#scene objects, abstraction depends on the selection mode.
 	self.sceneObjectNames = []	#names of the scene objects being drawn
 	self.selectionMode = 0 		#select compartments by default =1 selects compartments.
-	
+
+	self.defaultPosVal = 0
 	#viz parameters
 	self.viz=0
 	self.vizObjectNames=[]
@@ -138,10 +136,10 @@ class PyGLWidget(QtOpenGL.QGLWidget):
         self.set_projection( self.near_, self.far_, self.fovy_ );
         self.updateGL()
 
+
     def paintGL(self):
          
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-
         glMatrixMode(GL_MODELVIEW)
         glLoadMatrixd(self.modelview_matrix_)
 
@@ -270,7 +268,15 @@ class PyGLWidget(QtOpenGL.QGLWidget):
             self.zpan = self.zpan + d
             self.updateGL()
             _event.accept()
-	#print self.z_d
+        #print self.zpan
+
+    def defaultTranslate(self):
+        
+        self.reset_view()
+        self.translate([0.0, 0.0,-50.0])
+        self.rotate([1.0, 0.0, 0.0],-2.0)
+        self.updateGL()
+
 
     def mousePressEvent(self, _event):
         self.last_point_2D_ = _event.pos()
@@ -327,6 +333,7 @@ class PyGLWidget(QtOpenGL.QGLWidget):
             self.xpan += 2.0 * dx / w * right / n * z
             self.ypan += -2.0 * dy / h * up / n * z
 
+
             self.translate( [2.0 * dx / w * right / n * z,
                              -2.0 * dy / h * up / n * z,
                              0.0] )
@@ -377,7 +384,6 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 	Key press callback.
 	"""
 	key = str(ev.text()).upper()
-		
 	if (ev.modifiers() & QtCore.Qt.ControlModifier):
 	    self.ctrlPressed = True	
 	elif (ev.key() == QtCore.Qt.Key_Up):
@@ -539,38 +545,39 @@ class PyGLWidget(QtOpenGL.QGLWidget):
         self.translate([-1*self.xpan,-1*self.ypan,-1*self.zpan])
         glMatrixMode(GL_MODELVIEW)
 
-        # XYZ axis
+	# XYZ axis
 	glLineWidth(2)
 	glDisable(GL_LIGHTING)
 	glBegin(GL_LINES)
 	glColor(1, 0, 0)	#Xaxis, Red color
 	glVertex3f(0, 0, 0)
-	glVertex3f(0.15, 0, 0)
+	glVertex3f(0.10, 0, 0)
 	glColor(0, 1, 0)	#Yaxis, Green color
 	glVertex3f(0, 0, 0)
-	glVertex3f(0, 0.15, 0)
+	glVertex3f(0, 0.10, 0)
 	glColor(0, 0, 1)	#Zaxis, Blue color
 	glVertex3f(0, 0, 0)
-	glVertex3f(0, 0, 0.15)
+	glVertex3f(0, 0, 0.10)
 	glEnd()
- 
-	glLineWidth(1)	
 
+        glLineWidth(1)	
+    
         glutInit()
         glColor(1,0,0)
-        glRasterPos3f(0.16, 0.0, 0.0)
+        glRasterPos3f(0.11, 0.0, 0.0)
         glutBitmapCharacter(GLUT_BITMAP_8_BY_13,88)#ascii x
         glColor(0,1,0)
-        glRasterPos3f(0.0, 0.16, 0.0)
+        glRasterPos3f(0.0, 0.11, 0.0)
         glutBitmapCharacter(GLUT_BITMAP_8_BY_13,89)#ascii y
         glColor(0,0,1)
-        glRasterPos3f(0.0, 0.0, 0.16)
+        glRasterPos3f(0.0, 0.0, 0.11)
         glutBitmapCharacter(GLUT_BITMAP_8_BY_13,90)#ascii z
 
         glEnable(GL_LIGHTING)
 
         self.translate([self.xpan,self.ypan,self.zpan])
         glViewport(0,0,self.width(),self.height())
+
 
 
 #===============================================================================
