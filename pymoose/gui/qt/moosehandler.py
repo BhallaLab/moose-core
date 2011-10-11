@@ -140,6 +140,10 @@ class MooseHandler(QtCore.QObject):
         self._pathPortMap = defaultdict(set)
         self._portServerMap = {}
 
+    def getCurrentTime(self):
+        clock = moose.ClockJob('/sched/cj')
+        return clock.currentTime
+
     def getCurrentElement(self):
         return self._current_element
 
