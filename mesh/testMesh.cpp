@@ -160,6 +160,7 @@ void testMidLevelCylMesh()
 
 	ret = Field< double >::set( cylId, "lambda", 1 );
 	assert( ret );
+	meshId.element()->syncFieldDim();
 
 	assert( meshId()->dataHandler()->localEntries() == 5 );
 

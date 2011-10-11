@@ -120,6 +120,12 @@ class FieldDataHandlerBase: public DataHandler
 		bool innerNodeBalance( unsigned int size,
 			unsigned int myNode, unsigned int numNodes );
 
+		/**
+		 * Updates maxFieldEntries by checking all array sizes, and then
+		 * does the necessary field mask adjustment.
+		 * returns the updated maxFieldEntries.
+		 */
+		unsigned int syncFieldDim();
 		////////////////////////////////////////////////////////////////
 		// Process function
 		////////////////////////////////////////////////////////////////
