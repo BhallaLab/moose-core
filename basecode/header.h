@@ -87,6 +87,7 @@ class FuncBarrier;
 #include "Qinfo.h"
 #include "Dinfo.h"
 #include "DataHandler.h"
+#include "BlockHandler.h"
 #include "ZeroDimHandler.h"
 #include "OneDimHandler.h"
 #include "TwoDimHandler.h"
