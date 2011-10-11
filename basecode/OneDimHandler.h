@@ -14,7 +14,7 @@
  * This class manages the data part of Elements. It handles a one-
  * dimensional array.
  */
-class OneDimHandler: public DataHandler
+class OneDimHandler: public BlockHandler
 {
 	friend void testOneDimHandler();
 	friend void testFieldDataHandler();
@@ -31,18 +31,9 @@ class OneDimHandler: public DataHandler
 		// Information functions
 		////////////////////////////////////////////////////////////
 
-		/// Returns data on specified index
-		char* data( DataId index ) const;
-
-		/**
-		 * Returns the number of data entries.
-		 */
-		unsigned int totalEntries() const;
-
-		/**
-		 * Returns the number of data entries on local node
-		 */
-		unsigned int localEntries() const;
+		/// data() is defined in BlockHandler
+		/// totalEntries() is defined in BlockHandler
+		/// localEntries() is defined in BlockHandler
 
 		/**
 		 * Returns the number of dimensions of the data.
@@ -56,36 +47,21 @@ class OneDimHandler: public DataHandler
 
 		vector< unsigned int > dims() const;
 
-		bool isDataHere( DataId index ) const;
-
-		bool isAllocated() const;
-
-		////////////////////////////////////////////////////////////////
-		// load balancing functions
-		////////////////////////////////////////////////////////////////
-		bool innerNodeBalance( unsigned int size,
-			unsigned int myNode, unsigned int numNodes );
+		/// isDataHere() is defined in BlockHandler
+		/// isAllocated() is defined in BlockHandler
 
 		////////////////////////////////////////////////////////////////
-		// Process and foreach functions
+		// load balancing functions defined in BlockHandler
 		////////////////////////////////////////////////////////////////
-		/**
-		 * calls process on data, using threading info from the ProcInfo
-		 */
-		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
-
-		void foreach( const OpFunc* f, Element* e, const Qinfo* q,
-			const double* arg, unsigned int argSize, unsigned int numArgs )
-			const;
-
-		unsigned int getAllData( vector< char* >& data ) const;
+		////////////////////////////////////////////////////////////////
+		// Process and foreach functions defined in BlockHandler
+		////////////////////////////////////////////////////////////////
 
 		////////////////////////////////////////////////////////////////
 		// Data Reallocation functions
 		////////////////////////////////////////////////////////////////
-
-		void globalize( const char* data, unsigned int size );
-		void unGlobalize();
+		/// globalize() is defined in BlockHandler
+		/// unGlobalize() is defined in BlockHandler
 
 		/**
 		 * Make a single identity copy, doing appropriate node 
@@ -97,32 +73,9 @@ class OneDimHandler: public DataHandler
 
 		bool resize( unsigned int dimension, unsigned int size );
 
-		void assign( const char* orig, unsigned int numOrig );
-
-		/*
-		////////////////////////////////////////////////////////////////
-		// Iterator functions
-		////////////////////////////////////////////////////////////////
-
-		iterator begin( ThreadId threadNum ) const;
-
-		iterator end( ThreadId threadNum ) const;
-
-		void rolloverIncrement( iterator* i ) const;
-		*/
+		/// assign() is defined in BlockHandler
 
 	private:
-		unsigned int totalEntries_; // Total number of entries on all nodes
-		unsigned int start_;	// Starting index of data, used in MPI.
-		unsigned int end_;	// Starting index of data, used in MPI.
-		char* data_;
-// 		unsigned int bitMask_; // Masks out the index.
-		/**
-		 * Start index for each specified thread. The n+1 index is the 
-		 * 'end' of the set for the nth thread. There is an extra index
-		 * at the end of threadStart_ for the very end of the list.
-		 */
-		vector< unsigned int > threadStart_;
 };
 
 #endif	// _ONE_DIM_HANDLER_H
