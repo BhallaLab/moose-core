@@ -272,6 +272,11 @@ void testTable()
 	unsigned int numEntries = Field< unsigned int >::get( 
 		tabid, "num_table" );
 	assert( numEntries == 100 );
+	/// need to sort out this issue with updating maxFieldEntries.
+	FieldDataHandlerBase* fdh = dynamic_cast< FieldDataHandlerBase* >(
+		tabentry.element()->dataHandler() );
+	assert( fdh );
+	fdh->setMaxFieldEntries( numEntries );
 	for ( unsigned int i = 0; i < 100; ++i ) {
 		ObjId temp( tabentry, DataId( i ) );
 		double ret = Field< double >::get( temp, "value" );
