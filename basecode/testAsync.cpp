@@ -1425,7 +1425,7 @@ void testUpValue()
 	assert ( ticke->getName() == "tick" );
 
 	assert( ticke->dataHandler()->localEntries() == 10 );
-	assert( ticke->dataHandler()->totalEntries() == 0 );
+	assert( ticke->dataHandler()->totalEntries() == 10 );
 	FieldDataHandlerBase * fdh =
 		static_cast< FieldDataHandlerBase *>( ticke->dataHandler() );
 	// fdh->setFieldDimension( fdh->biggestFieldArraySize() );
@@ -2552,6 +2552,8 @@ void testCinfoElements()
 	Id intFireSrcFinfoId( "/classes/IntFire/srcFinfo" );
 	assert( intFireSrcFinfoId != Id() );
 	ObjId temp( intFireSrcFinfoId, DataId( nsf ) );
+	string foo = Field< string >::get( temp, "name" );
+	foo = Field< string >::get( temp, "type" );
 	assert( Field< string >::get( temp, "name" ) == "spike" );
 	assert( Field< string >::get( temp, "type" ) == "double" );
 
