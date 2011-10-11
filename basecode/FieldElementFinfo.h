@@ -122,14 +122,14 @@ template < class T, class F > class FieldElementFinfo: public FieldElementFinfoB
 			if ( deferCreate_ )
 				return;
 			Id kid = Id::nextId();
-			new Element(
-				kid, fieldCinfo_, name(), 
+			FieldDataHandlerBase* fdh = 
 				new FieldDataHandler< T, F >(
 					fieldCinfo_->dinfo(),
 					parentElm->dataHandler(),
-					lookupField_, getNumField_, setNumField_ )
-			);
+					lookupField_, getNumField_, setNumField_ );
+			new Element( kid, fieldCinfo_, name(), fdh );
 			adopt( parent, kid );
+			fdh->setMaxFieldEntries( fdh->biggestFieldArraySize() );
 		}
 
 		/// Virtual function to look up type of FieldElementFinfo
