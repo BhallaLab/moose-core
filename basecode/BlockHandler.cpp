@@ -157,14 +157,14 @@ void BlockHandler:: foreach( const OpFunc* f, Element* e, const Qinfo* q,
 {
 	assert( q->threadNum() < threadStart_.size() );
 	unsigned int end = threadEnd_[ q->threadNum() ];
+	unsigned int start = threadStart_[ q->threadNum() ];
 	if ( numArgs <= 1 ) {
-		for( unsigned int i = threadStart_[ q->threadNum() ]; i != end; ++i)
+		for( unsigned int i = start; i != end; ++i)
 			f->op( Eref( e, i ), q, arg );
 	} else {
-		unsigned int argOffset = 0;
+		unsigned int argOffset = argSize * start;
 		unsigned int maxOffset = argSize * numArgs;
-		for( unsigned int i = threadStart_[ q->threadNum() ];
-			i != end; ++i) {
+		for( unsigned int i = start; i != end; ++i) {
 			f->op( Eref( e, i ), q, arg + argOffset );
 			argOffset += argSize;
 			if ( argOffset >= maxOffset )
