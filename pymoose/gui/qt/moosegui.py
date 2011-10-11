@@ -1450,6 +1450,7 @@ class MainWindow(QtGui.QMainWindow):
     def populateKKitPlots(self):
         graphs = self.mooseHandler.getKKitGraphs()
         for graph in graphs:
+            self.plots[0].xmin = self.mooseHandler.getCurrentTime()
             self.plots[0].addTable(graph)
             config.LOGGER.info('Adding plot ' + graph.path)
         self.plots[0].replot()
@@ -1458,6 +1459,7 @@ class MainWindow(QtGui.QMainWindow):
             if len(self.plots) == 1:
                 self.addPlotWindow()
             for graph in moregraphs:
+                self.plots[1].xmin = self.mooseHandler.getCurrentTime()
                 self.plots[1].addTable(graph)
             self.plots[1].replot()
 
