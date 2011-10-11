@@ -129,7 +129,7 @@ class MainWindow(QtGui.QMainWindow):
         # if not self.demosDir:
         #     self.demosDir = str(QtGui.QFileDialog.getExistingDirectory(self, 'Please select pymoose demos directory'))
         #self.resize(800, 600)
-        self.setWindowState(Qt.WindowMaximized)
+        #self.setWindowState(Qt.WindowMaximized)
         self.setDockOptions(self.AllowNestedDocks | self.AllowTabbedDocks | self.ForceTabbedDocks | self.AnimatedDocks)        
         self.setDockNestingEnabled(True)
 
@@ -251,36 +251,44 @@ class MainWindow(QtGui.QMainWindow):
         self.currentTimeEditToolbar.setGeometry(300,0,50,30)
         
         self.runButtonToolbar = QtGui.QToolButton(self.simToolbar)
-        self.runButtonToolbar.setText('Run')
-        #self.runButtonToolbar.setIcon(QtGui.QIcon("run1.png"))
-        self.runButtonToolbar.setGeometry(360,0,80,30)
-#        print self.runButton.size()
-       # self.simToolbar.addSeparator()
+        self.runButtonToolbar.setToolTip('Run')
+        self.runButtonToolbar.setIcon(QtGui.QIcon("run.png"))
+        self.runButtonToolbar.setGeometry(360,0,50,30)
+        self.runButtonToolbar.setEnabled(0)
 
         self.continueButtonToolbar = QtGui.QToolButton(self.simToolbar)
-        self.continueButtonToolbar.setText('Continue')
-        #self.continueButtonToolbar.setIcon(QtGui.QIcon("continue.png"))
-        self.continueButtonToolbar.setGeometry(450,0,80,30)
+        self.continueButtonToolbar.setToolTip('Continue')
+        self.continueButtonToolbar.setIcon(QtGui.QIcon("continue.png"))
+        self.continueButtonToolbar.setGeometry(410,0,50,30)
+        self.continueButtonToolbar.setEnabled(0)
 
         self.resetButtonToolbar = QtGui.QToolButton(self.simToolbar)
-        self.resetButtonToolbar.setText('Reset')
-        self.resetButtonToolbar.setGeometry(540,0,80,30)
+        self.resetButtonToolbar.setToolTip('Reset')
+        self.resetButtonToolbar.setIcon(QtGui.QIcon("reset.png"))
+        self.resetButtonToolbar.setGeometry(460,0,50,30)
+        self.resetButtonToolbar.setEnabled(0)
 
 #        self.stopButtonToolbar = QtGui.QToolButton(self.simToolbar)
 #        self.stopButtonToolbar.setText('Stop')
 #        self.stopButtonToolbar.setGeometry(630,0,80,30)
 #        self.stopButtonToolbar.setEnabled(False)
 
-        self.connect(self.runButtonToolbar, QtCore.SIGNAL('clicked()'), self.resetAndRunSlot1)
-        self.connect(self.continueButtonToolbar, QtCore.SIGNAL('clicked()'), self._runSlot1)
+        self.connect(self.runButtonToolbar, QtCore.SIGNAL('clicked()'), self.resetAndRunSlot) #1
+        self.connect(self.continueButtonToolbar, QtCore.SIGNAL('clicked()'), self._runSlot) #1
         self.connect(self.resetButtonToolbar,QtCore.SIGNAL('clicked()'),self._resetSlot)
+        self.connect(self.runTimeEditToolbar,QtCore.SIGNAL('textEdited(QString)'),self.simulationToolbarTextChanged)
 
         self.simToolbar.show()
         self.simToolbar.setMinimumHeight(30)
 #        print self.simToolbar.size()
         self.addToolBar(Qt.TopToolBarArea,self.simToolbar)
 
-    
+    def simulationToolbarTextChanged(self,text):
+        self.runtimeText.setText(text)
+
+    def controlDockTextChanged(self,text):
+        self.runTimeEditToolbar.setText(text)
+
     def makeConnectionPopup(self):
         """Create a dialog to connect moose objects via messages."""
         self.connectionDialog = QtGui.QDialog(self)
@@ -823,6 +831,8 @@ class MainWindow(QtGui.QMainWindow):
         # self.resetButton = QtGui.QPushButton(self.tr('Reset'), self.controlPanel)
         self.runButton = QtGui.QPushButton(self.tr('Run'), self.controlPanel)
         self.continueButton = QtGui.QPushButton(self.tr('Continue'), self.controlPanel)
+        self.runButton.setEnabled(0)
+        self.continueButton.setEnabled(0)
         self.simdtLabel = QtGui.QLabel(self.tr('Simulation timestep (second):'), self.controlPanel)
         self.simdtLabel.setWordWrap(True)
         self.plotdtLabel = QtGui.QLabel(self.tr('Plotting timestep (second):'), self.controlPanel)
@@ -832,7 +842,7 @@ class MainWindow(QtGui.QMainWindow):
         self.plotdtText = QtGui.QLineEdit('%1.3e' % (MooseHandler.plotdt), self)
         #self.gldtText = QtGui.QLineEdit('%1.3e' % (MooseHandler.gldt), self.controlPanel)
         # self.overlayCheckBox = QtGui.QCheckBox(self.tr('Overlay plots'), self.controlPanel)
-        
+        self.connect(self.runtimeText,QtCore.SIGNAL('textEdited(QString)'),self.controlDockTextChanged)
         self.connect(self.runButton, QtCore.SIGNAL('clicked()'), self.resetAndRunSlot)
         self.connect(self.continueButton, QtCore.SIGNAL('clicked()'), self._runSlot)
         layout.addWidget(self.simdtLabel, 0,0)
@@ -1194,8 +1204,16 @@ class MainWindow(QtGui.QMainWindow):
                 self.populateDataPlots()
                 self.updateDefaultTimes(modeltype)
             self.modelTreeWidget.recreateTree()
+            self.enableControlButtons()
             self.checkModelType()
             print 'Loaded model',  fileName, 'of type', modeltype
+
+    def enableControlButtons(self):
+        self.runButton.setEnabled(1)
+        self.continueButton.setEnabled(1)
+        self.runButtonToolbar.setEnabled(1)
+        self.continueButtonToolbar.setEnabled(1)
+        self.resetButtonToolbar.setEnabled(1)
 
     #add_chait
     def checkModelType(self):
@@ -1300,12 +1318,12 @@ class MainWindow(QtGui.QMainWindow):
         self.mooseHandler.doRun(runtime)
         #harsha: only after the model is run, saving the plot is enabled,otherwise there will be nothing to save
         self.saveTablePlotsAction.setEnabled(1)
-    #add_chait
+    #add_chait - changed this, no longed used
     def resetAndRunSlot1(self): #horrible way of doing it. because of simulation toolbar.
         self._resetSlot()
         self._runSlot1()
 
-    #add_chait    
+    #add_chait, changed this, no longer used    
     def _runSlot1(self):#bad way of doing it. but works just fine. (this is because of the simulation toolbar)
         """Run the simulation.
 
@@ -1449,8 +1467,9 @@ class MainWindow(QtGui.QMainWindow):
 
     def populateKKitPlots(self):
         graphs = self.mooseHandler.getKKitGraphs()
+        currentTime = self.mooseHandler.getCurrentTime()
         for graph in graphs:
-            self.plots[0].xmin = self.mooseHandler.getCurrentTime()
+            self.plots[0].xmin = currentTime
             self.plots[0].addTable(graph)
             config.LOGGER.info('Adding plot ' + graph.path)
         self.plots[0].replot()
@@ -1459,11 +1478,13 @@ class MainWindow(QtGui.QMainWindow):
             if len(self.plots) == 1:
                 self.addPlotWindow()
             for graph in moregraphs:
-                self.plots[1].xmin = self.mooseHandler.getCurrentTime()
+                self.plots[1].xmin = currentTime
                 self.plots[1].addTable(graph)
             self.plots[1].replot()
-	# harsha enable save plot after pre-running genesis model
-	self.saveTablePlotsAction.setEnabled(1)
+        self.currentTimeEditToolbar.setText(str(currentTime))
+
+        # harsha enable save plot after pre-running genesis model
+        self.saveTablePlotsAction.setEnabled(1)
 
     def populateDataPlots(self):
         """Create plots for all Table objects in /data element"""
@@ -1524,7 +1545,7 @@ if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     icon = QtGui.QIcon('moose_icon.png')
     app.setWindowIcon(icon)
-
+    computerProps = app.desktop()
     QtCore.QObject.connect(app, QtCore.SIGNAL('lastWindowClosed()'), app, QtCore.SLOT('quit()'))
     mainWin = MainWindow()
     if not config.get_settings().contains(config.KEY_FIRSTTIME):
@@ -1533,6 +1554,7 @@ if __name__ == '__main__':
 	firstTimeWizard.connect(firstTimeWizard, QtCore.SIGNAL('accepted()'), mainWin.updatePaths)
         firstTimeWizard.show()
     mainWin.show()
-    #mainWin.setWindowState(Qt.WindowMaximized)
+#    mainWin.setWindowState(Qt.WindowMaximized)
+    mainWin.resize(computerProps.width(),computerProps.height())
     app.exec_()
 	
