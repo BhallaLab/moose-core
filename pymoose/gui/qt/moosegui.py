@@ -1462,6 +1462,8 @@ class MainWindow(QtGui.QMainWindow):
                 self.plots[1].xmin = self.mooseHandler.getCurrentTime()
                 self.plots[1].addTable(graph)
             self.plots[1].replot()
+	# harsha enable save plot after pre-running genesis model
+	self.saveTablePlotsAction.setEnabled(1)
 
     def populateDataPlots(self):
         """Create plots for all Table objects in /data element"""
