@@ -39,8 +39,17 @@ class updatepaintGL(PyGLWidget):
 
     def setSelectionMode(self,mode):	
 	self.selectionMode = mode	
-	
+
     def render(self):
+        if (self.defaultPosVal==0):
+            self.translate([0.5,-0.5,-30.0])
+            self.rotate([1.0, 0.0, 0.0],-7.0)
+            self.rotate([0.0, 1.0, 0.0],-7.0)
+            self.xpan = 0.5
+            self.ypan = -0.5
+            self.zpan = -30.0
+            self.defaultPosVal = 1
+
 	if self.lights:
 		glMatrixMode(GL_MODELVIEW)
 		glEnable(GL_LIGHTING)
@@ -58,7 +67,7 @@ class updatepaintGL(PyGLWidget):
 		glLightfv(GL_LIGHT0, GL_SPECULAR, specular0)
 		glLightfv(GL_LIGHT0, GL_AMBIENT, ambient0)
 	self.renderAxis()	#draws 3 axes at origin
-	
+
 	for obj in self.sceneObjects:
 	    obj.render()
 	    
@@ -110,6 +119,7 @@ class updatepaintGL(PyGLWidget):
 	an=moose.Neutral(cellName)
 	all_ch=an.childList 					#all children
 	ch = self.get_childrenOfField(all_ch,'Compartment')	#compartments only
+
 	l_coords = []
 	for i in range(0,len(ch),1):
     	    	x=float(mc.getField(ch[i],'x'))*(1e+04)
@@ -183,6 +193,8 @@ class updatepaintGL(PyGLWidget):
 	    			if self.viz==1:
 					self.vizObjects.append(compartmentLine)
 					self.vizObjectNames.append(l_coords[i][7])	    		
+
+    
 
     def drawAllCells(self, style = 2, cellCentre=[0.0,0.0,0.0], cellAngle=[0.0,0.0,0.0,0.0]):
         an=moose.Neutral('/')						#moose root children
