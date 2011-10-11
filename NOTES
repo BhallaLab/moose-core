@@ -15977,4 +15977,16 @@ Fixed subtle problem in setting up the ClassInfo objects for introspection.
 Turned out that the hard-coded resizing of the FieldElements for each Finfo
 was not propagating to the totalEntries, and hence subsequent lookup failed.
 
-With this we clear testAsync.cpp.
+With this we clear testAsync.cpp. Checkin 3049.
+
+Now into testShell. Stuck in Shell::handleReMesh. The isssue is that here
+we need to resize the pools, adding a new dimension for the mesh. Usually 
+when we add a dimension (by the 'copy' function) it is done at the root of 
+the tree. In this case though, it is the top of the tree that is expanded.
+
+For now, set up a special Element operation not to resize, but to 
+appendDimension, and insist that this can only happen from dim0.
+
+Now clears tests through to testMesh.
+
+============================================================================

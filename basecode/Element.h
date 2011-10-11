@@ -110,10 +110,20 @@ class Element
 		/**
 		 * Resizes the current data on the specified dimension. 
 		 * Returns true on success.
+		 * Adds a dimension if the original was zero and size > 1.
 		 * When resizing it uses the current data and puts it treadmill-
 		 * fashion into the expanded dimension. 
 		 */
 		bool resize( unsigned int dimension, unsigned int size );
+
+		/**
+		 * Creates a new dimension at the top of the Element tree,
+		 * as opposed to the more conventional copy function which adds
+		 * dimensions at the root of the tree.
+		 * Used when converting a regular Pool to a mesh of pool entries.
+		 * For now only works to go from zero to one dim.
+		bool appendDimension( unsigned int size );
+		 */
 
 		/**
 		 * Asynchronous send command. Adds Qinfo and data onto msg specified
