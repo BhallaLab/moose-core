@@ -16002,6 +16002,13 @@ Ran into issues with thread handling. Made the fixes in OneDimHandler, and then
 it was clear that the same code would extend to the Two and Any Dim cases.
 So did a clean sweep and made a new baseclass, BlockHandler, that deals with
 a lot of common code in One, Two and Any Dim. Clears tests up to previous
-point.
+point. Checkin 3054.
 
+Now stuck in ReduceMsg::exec. The vector of extracted DataIds is odd, having
+35 entries rather than 10.
+
+Issue was with the totalEntries. Had to do the syncFieldDim.
+
+Now stuck with shell::doCopy. It seems to copy structure but not the 
+values.
 ============================================================================
