@@ -247,8 +247,35 @@ DataHandler* Element::dataHandler() const
 */
 bool Element::resize( unsigned int dimension, unsigned int size )
 {
-	return dataHandler_->resize( dimension, size );
+	if ( size == 0 )
+		return 0;
+	if ( dataHandler_->numDimensions() > dimension ) {
+		dataHandler_->resize( dimension, size );
+		return 1;
+	} else if ( dimension == 0 && dataHandler_->numDimensions() == 0 && 
+		size > 1 ) {
+		DataHandler* old = dataHandler_;
+		dataHandler_ = dataHandler_->copy( dataHandler_->isGlobal(), size );
+		delete old;
+		return 1;
+	}
+	return 0;
 }
+
+/**
+ * Appends a dimension at the top of the element tree.
+ * Currently only for starting cases with zero dims.
+bool Element::appendDimension( unsigned int size )
+{
+	if ( size > 1 && dataHandler_->numDimensions() == 0 ) {
+		DataHandler* old = dataHandler_;
+		dataHandler_ = dataHandler_->copy( dataHandler_->isGlobal(), size );
+		delete old;
+		return 1;
+	}
+	return 0;
+}
+*/
 
 Id Element::id() const
 {
