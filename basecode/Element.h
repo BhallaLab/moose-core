@@ -117,13 +117,11 @@ class Element
 		bool resize( unsigned int dimension, unsigned int size );
 
 		/**
-		 * Creates a new dimension at the top of the Element tree,
-		 * as opposed to the more conventional copy function which adds
-		 * dimensions at the root of the tree.
-		 * Used when converting a regular Pool to a mesh of pool entries.
-		 * For now only works to go from zero to one dim.
-		bool appendDimension( unsigned int size );
+		 * Synchronizes the maxFieldEntries with the number of actual fields
+		 * in the parent. 
+		 * Also will need to synchronize across nodes, in due course.
 		 */
+		void syncFieldDim() const;
 
 		/**
 		 * Asynchronous send command. Adds Qinfo and data onto msg specified

@@ -262,6 +262,12 @@ bool Element::resize( unsigned int dimension, unsigned int size )
 	return 0;
 }
 
+void Element::syncFieldDim() const
+{
+	dataHandler_->syncFieldDim();
+	// Later we use fieldMax to go through all nodes. ReduceOp.
+}
+
 /**
  * Appends a dimension at the top of the element tree.
  * Currently only for starting cases with zero dims.
