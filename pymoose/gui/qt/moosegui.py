@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Wed Aug 10 12:06:07 2011 (+0530)
+# Last-Updated: Fri Jun 17 12:20:38 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2684
+#     Update #: 2656
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -92,11 +92,11 @@ from glwizard import MooseGLWizard
 from firsttime import FirstTimeWizard
 #from layout import Screen
 import layout
-from layout import Widgetvisibility
-from updatepaintGL import *
+from layout import Widgetvisibilityfrom updatepaintGL import *
 from vizParasDialogue import *
-from electrodeParasDialog import *
-from mooseelectrodes import *
+#from electrodeParasDialog import *
+#from mooseelectrodes import *
+
 
 def makeClassList(parent=None, mode=MooseGlobals.MODE_ADVANCED):
     """Make a list of classes that can be used in current mode
@@ -127,9 +127,12 @@ class MainWindow(QtGui.QMainWindow):
         # print self.demosDir
         # if not self.demosDir:
         #     self.demosDir = str(QtGui.QFileDialog.getExistingDirectory(self, 'Please select pymoose demos directory'))
-        self.resize(800, 600)
+        #self.resize(800, 600)
+        self.setWindowState(Qt.WindowMaximized)
         self.setDockOptions(self.AllowNestedDocks | self.AllowTabbedDocks | self.ForceTabbedDocks | self.AnimatedDocks)        
         self.setDockNestingEnabled(True)
+
+        self.setContextMenuPolicy(Qt.NoContextMenu)
         
         #add_chait
         self.mainCentralWidget = QtGui.QWidget(self)
@@ -141,6 +144,7 @@ class MainWindow(QtGui.QMainWindow):
         self.horizontalLayout.addWidget(self.centralVizPanel)
         self.centralVizPanel.setViewMode(self.centralVizPanel.TabbedView)
         self.centralVizPanel.setBackground(QtGui.QBrush(QtGui.QImage('QMdiBackground.png')))
+        #self.centralVizPanel.setStyleSheet("QWidget{background-color: white;}")
 
         self.centralPanel = QtGui.QMdiArea(self)
         self.horizontalLayout.addWidget(self.centralPanel)
@@ -518,9 +522,8 @@ class MainWindow(QtGui.QMainWindow):
         self.connectionDialogAction = QtGui.QAction(self.tr('&Connect elements'), self)
 	self.connect(self.connectionDialogAction, QtCore.SIGNAL('triggered()'), self.makeConnectionPopup)
 
-        self.addElectrodesDialogAction = QtGui.QAction(self.tr('&Insert Electode'),self)
-        self.connect(self.addElectrodesDialogAction, QtCore.SIGNAL('triggered()'),self.addElectrodesPopup)
-
+        #self.addElectrodesDialogAction = QtGui.QAction(self.tr('&Insert Electode'),self)
+        #self.connect(self.addElectrodesDialogAction, QtCore.SIGNAL('triggered()'),self.addElectrodesPopup)
         # Actions for file menu
         self.loadModelAction = QtGui.QAction(self.tr('Load Model'), self)
         self.loadModelAction.setShortcut(QtGui.QKeySequence(self.tr('Ctrl+L')))
@@ -539,7 +542,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.newPlotWindowAction, QtCore.SIGNAL('triggered(bool)'), self.addPlotWindow)
         self.firstTimeWizardAction = QtGui.QAction(self.tr('FirstTime Configuration Wizard'), self)
         self.connect(self.firstTimeWizardAction, QtCore.SIGNAL('triggered(bool)'), self.startFirstTimeWizard)
-        self.resetSettingsAction = QtGui.QAction(self.tr('Reset Settings'), self)
+        self.resetSettingsAction = QtGui.QAction(self.tr('Reset GUI Settings'), self)
         self.connect(self.resetSettingsAction, QtCore.SIGNAL('triggered()'), self.resetSettings)
 
         # Actions to switch the command line between python and genesis mode.
@@ -623,8 +626,8 @@ class MainWindow(QtGui.QMainWindow):
         menu.addAction(self.MichaelisMentenDemoAction)
         menu.addAction(self.squidDemoAction)
         menu.addAction(self.IzhikevichDemoAction)
-        menu.addAction(self.glCellDemoAction)
-        menu.addAction(self.glViewDemoAction)
+        #menu.addAction(self.glCellDemoAction)
+        #menu.addAction(self.glViewDemoAction)
         return menu
         
     def makeMenu(self):
@@ -673,8 +676,8 @@ class MainWindow(QtGui.QMainWindow):
 
         self.editModelMenu = QtGui.QMenu(self.tr('&Edit'), self)
         self.editModelMenu.addAction(self.connectionDialogAction)
-        self.editModelMenu.addAction(self.addElectrodesDialogAction)
-
+        #self.editModelMenu.addAction(self.addElectrodesDialogAction)
+        
 		
         #self.plotMenu = QtGui.QMenu(self.tr('&Plot Settings'), self)
         
@@ -879,41 +882,7 @@ class MainWindow(QtGui.QMainWindow):
         self.currentPlotWindow = plotWindow
         return plotWindow
        
-    def addElectrodesPopup(self):
-        self.newElectodeDia = QtGui.QDialog(self)
-        self.electrodeDialog = Electrode_dialog()
-        self.electrodeDialog.setupUi(self.newElectodeDia)
-        self.newElectodeDia.show()
-        
-        self.connect(self.electrodeDialog.okayPushButton, QtCore.SIGNAL('clicked()'),self.newElectrode)
-#        self.connect(self.electrodeDialog.
-
-
-    def newElectrode(self):
-        baseLevel = float(self.electrodeDialog.baseLevelEdit.text())
-        firstLevel = float(self.electrodeDialog.firstLevelEdit.text())
-        secondLevel = float(self.electrodeDialog.secondLevelEdit.text())
-        firstDelay = float(self.electrodeDialog.firstDelayEdit.text())
-        secondDelay = float(self.electrodeDialog.secondDelayEdit.text())
-        firstWidth = float(self.electrodeDialog.firstWidthEdit.text())
-        secondWidth = float(self.electrodeDialog.secondWidthEdit.text())
-        clampOption = self.electrodeDialog.electrodeSelectionCombo.currentIndex()
-        #print baseLevel,firstLevel,secondLevel,firstDelay,secondDelay,firstWidth,secondWidth,clampOption
-        paramDict = { 'baseLevel':baseLevel,'firstLevel':firstLevel,'secondLevel':secondLevel,'firstDelay':firstDelay,'secondDelay':secondDelay,'firstWidth':firstWidth,'secondWidth':secondWidth}
-        #print paramDict.values(), clampOption
-        self.electrodeCompartment = '/mit/soma'
-        if clampOption:
-            print 'Voltage Clamp at compartment'
-            wateva = mooseElectrodes()
-            wateva.voltageClamp(paramDict,moose.Neutral(self.electrodeCompartment))
-        else:
-            print 'Current Clamp at compartment'
-            wateva = mooseElectrodes()
-            wateva.currentClamp(paramDict,moose.Neutral(self.electrodeCompartment))
-        self.newElectodeDia.hide()
-        self.modelTreeWidget.recreateTree()
-
-    def addGLWindow(self):   #add_chait
+    def addElectrodesPopup(self):        self.newElectodeDia = QtGui.QDialog(self)        self.electrodeDialog = Electrode_dialog()        self.electrodeDialog.setupUi(self.newElectodeDia)        self.newElectodeDia.show()                self.connect(self.electrodeDialog.okayPushButton, QtCore.SIGNAL('clicked()'),self.newElectrode)#        self.connect(self.electrodeDialog.    def newElectrode(self):        baseLevel = float(self.electrodeDialog.baseLevelEdit.text())        firstLevel = float(self.electrodeDialog.firstLevelEdit.text())        secondLevel = float(self.electrodeDialog.secondLevelEdit.text())        firstDelay = float(self.electrodeDialog.firstDelayEdit.text())        secondDelay = float(self.electrodeDialog.secondDelayEdit.text())        firstWidth = float(self.electrodeDialog.firstWidthEdit.text())        secondWidth = float(self.electrodeDialog.secondWidthEdit.text())        clampOption = self.electrodeDialog.electrodeSelectionCombo.currentIndex()        #print baseLevel,firstLevel,secondLevel,firstDelay,secondDelay,firstWidth,secondWidth,clampOption        paramDict = { 'baseLevel':baseLevel,'firstLevel':firstLevel,'secondLevel':secondLevel,'firstDelay':firstDelay,'secondDelay':secondDelay,'firstWidth':firstWidth,'secondWidth':secondWidth}        #print paramDict.values(), clampOption        self.electrodeCompartment = '/mit/soma'        if clampOption:            print 'Voltage Clamp at compartment'            wateva = mooseElectrodes()            wateva.voltageClamp(paramDict,moose.Neutral(self.electrodeCompartment))        else:            print 'Current Clamp at compartment'            wateva = mooseElectrodes()            wateva.currentClamp(paramDict,moose.Neutral(self.electrodeCompartment))        self.newElectodeDia.hide()        self.modelTreeWidget.recreateTree()    def addGLWindow(self):   #add_chait
         self.newDia = QtGui.QDialog(self)	
         self.vizDialogue = Ui_Dialog()
         self.vizDialogue.setupUi(self.newDia)
@@ -1040,7 +1009,8 @@ class MainWindow(QtGui.QMainWindow):
         self.vizDialogue.colorMapComboBox.setCurrentIndex(0)
         self.vizDialogue.styleComboBox.setCurrentIndex(2)
     
-    def vizSettings(self):   #add_chait    	
+    def vizSettings(self):   #add_chait
+    	
     	title = self.tr('GL %d' % (len(self.vizs)))
         vizWindow = newGLSubWindow()
         vizWindow.setWindowTitle(title)
@@ -1057,38 +1027,23 @@ class MainWindow(QtGui.QMainWindow):
         if self.vizDialogue.specificCompartmentName.text()!='':					#if no compartment name selected, default is soma
        		viz.specificCompartmentName = str(self.vizDialogue.specificCompartmentName.text())	#else pick name from user ip text box
 	
-        if vizStyle==3:                                     #grid view case
-            numberOfCellsDrawn = 0                              #as yet drawn = 0, used as a counter
-            sideSquare = self.nearestSquare(self.vizDialogue.vizCells.count())      #get the side of the square
-            for yAxis in range(sideSquare):                         #Yaxis - columns
-                for xAxis in range(sideSquare):                     #Xaxis - fill rows first
-                    if numberOfCellsDrawn < self.vizDialogue.vizCells.count():  #finished drawing all cells?
-                        viz.drawNewCell(cellName=str(self.vizDialogue.vizCells.item(numberOfCellsDrawn).text()),cellCentre=[xAxis*0.5,yAxis*0.5,0.0],style = vizStyle)
-                        numberOfCellsDrawn += 1                 #increase number of cells drawn
-                        
-                if self.vizDialogue.variable_2.text()!='':                  #field2 to represented as radius of the compartment
-                    currentVizSetting_2 = [float(str(self.vizDialogue.vizMinVal_2.text())),float(str(self.vizDialogue.vizMaxVal_2.text())),str(self.vizDialogue.moosepath_2.text()),str(self.vizDialogue.variable_2.text())]
-                    viz.setColorMap_2(*currentVizSetting_2[:4])             #set the colormap equivalent of radius
-                    viz.gridRadiusViz=1                         #viz using both radius and color - 2 fields
-            else:                                       
-                viz.gridRadiusViz=0                         #no 2nd field selected, just viz using colors - not radius
+        if vizStyle==3:                                     #grid view case            numberOfCellsDrawn = 0                              #as yet drawn = 0, used as a counter            sideSquare = self.nearestSquare(self.vizDialogue.vizCells.count())      #get the side of the square            for yAxis in range(sideSquare):                         #Yaxis - columns                for xAxis in range(sideSquare):                     #Xaxis - fill rows first                    if numberOfCellsDrawn < self.vizDialogue.vizCells.count():  #finished drawing all cells?                        viz.drawNewCell(cellName=str(self.vizDialogue.vizCells.item(numberOfCellsDrawn).text()),cellCentre=[xAxis*0.5,yAxis*0.5,0.0],style = vizStyle)                        numberOfCellsDrawn += 1                 #increase number of cells drawn                                        if self.vizDialogue.variable_2.text()!='':                  #field2 to represented as radius of the compartment                    currentVizSetting_2 = [float(str(self.vizDialogue.vizMinVal_2.text())),float(str(self.vizDialogue.vizMaxVal_2.text())),str(self.vizDialogue.moosepath_2.text()),str(self.vizDialogue.variable_2.text())]                    viz.setColorMap_2(*currentVizSetting_2[:4])             #set the colormap equivalent of radius                    viz.gridRadiusViz=1                         #viz using both radius and color - 2 fields            else:                                                       viz.gridRadiusViz=0                         #no 2nd field selected, just viz using colors - not radius
 
-        else:
-            for index in xrange(self.vizDialogue.vizCells.count()):             #non-grid view case
-                viz.drawNewCell(cellName=str(self.vizDialogue.vizCells.item(index).text()),style = vizStyle)
+        else:            for index in xrange(self.vizDialogue.vizCells.count()):             #non-grid view case                viz.drawNewCell(cellName=str(self.vizDialogue.vizCells.item(index).text()),style = vizStyle)
         
-        currentVizSetting = [float(str(self.vizDialogue.vizMinVal.text())),float(str(self.vizDialogue.vizMaxVal.text())),str(self.vizDialogue.moosepath.text()),str(self.vizDialogue.variable.text()),os.path.join(str(self.settings.value(config.KEY_GL_COLORMAP).toString()),str(self.vizDialogue.colorMapComboBox.itemText(self.vizDialogue.colorMapComboBox.currentIndex())))]                      #color map inputs from user
-        #print currentVizSetting
+        currentVizSetting = [float(str(self.vizDialogue.vizMinVal.text())),float(str(self.vizDialogue.vizMaxVal.text())),str(self.vizDialogue.moosepath.text()),str(self.vizDialogue.variable.text()),os.path.join(str(self.settings.value(config.KEY_GL_COLORMAP).toString()),str(self.vizDialogue.colorMapComboBox.itemText(self.vizDialogue.colorMapComboBox.currentIndex())))]						#color map inputs from user
+    	#print currentVizSetting
         
-        viz.setColorMap(*currentVizSetting[:5])                         #assign regular colormap
-        
+        viz.setColorMap(*currentVizSetting[:5])							#assign regular colormap
+        # print viz.modelview_matrix_
+        # viz.defaultTranslate()
         QtCore.QObject.connect(viz,QtCore.SIGNAL("compartmentSelected(QString)"),self.pickCompartment)
-        #viz.translate([0.0,0.0,-6.0])
         self.vizs.append(viz)
         
-        self.newDia.hide()  #pressed OK button, so close the dialog
+        self.newDia.hide() 	#pressed OK button, so close the dialog
         self.connect(vizWindow, QtCore.SIGNAL('subWindowClosed()'), self.decrementSubWindowCount)
         self.centralVizPanel.setActiveSubWindow(vizWindow)
+        
         vizWindow.show()
         #print vizWindow.width()
         #print vizWindow.height()
@@ -1100,7 +1055,7 @@ class MainWindow(QtGui.QMainWindow):
    
     def pickCompartment(self,path):	#path is a QString type moosepath
         SelectedChild = self.modelTreeWidget.pathToTreeChild(path)
-    	self.modelTreeWidget.setCurrentItem(SelectedChild)				#select the corresponding moosetree
+        self.modelTreeWidget.setCurrentItem(SelectedChild)				#select the corresponding moosetree
         self.makeObjectFieldEditor(SelectedChild.getMooseObject())		#update the corresponding property
 
     def nearestSquare(self, n):	#add_chait
@@ -1195,7 +1150,7 @@ class MainWindow(QtGui.QMainWindow):
             self.modelTreeWidget.recreateTree()
             self.checkModelType()
             print 'Loaded model',  fileName, 'of type', modeltype
-        
+
     #add_chait
     def checkModelType(self):
         an=moose.Neutral('/')                       #moose root children
@@ -1214,10 +1169,12 @@ class MainWindow(QtGui.QMainWindow):
                 viz.setObjectName(title)
                 vizWindow.setWidget(viz)
         
-                viz.viz=1   #turn on visualization mode
+                viz.viz=1	#turn on visualization mode
                 viz.drawNewCell(cellName=moose.Cell(ch[0]).path,style = 2)
                 viz.setColorMap(cMap=os.path.join(str(self.settings.value(config.KEY_GL_COLORMAP).toString()),'jet'))
                 QtCore.QObject.connect(viz,QtCore.SIGNAL("compartmentSelected(QString)"),self.pickCompartment)
+                #print viz.modelview_matrix_
+                viz.defaultTranslate()
                 self.vizs.append(viz)
                 vizWindow.show()
                 vizWindow.showMaximized()
@@ -1526,6 +1483,6 @@ if __name__ == '__main__':
 	firstTimeWizard.connect(firstTimeWizard, QtCore.SIGNAL('accepted()'), mainWin.updatePaths)
         firstTimeWizard.show()
     mainWin.show()
-    mainWin.setWindowState(Qt.WindowMaximized)
+    #mainWin.setWindowState(Qt.WindowMaximized)
     app.exec_()
 	
