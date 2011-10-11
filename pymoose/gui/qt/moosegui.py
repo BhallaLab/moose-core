@@ -92,7 +92,8 @@ from glwizard import MooseGLWizard
 from firsttime import FirstTimeWizard
 #from layout import Screen
 import layout
-from layout import Widgetvisibilityfrom updatepaintGL import *
+from layout import Widgetvisibility
+from updatepaintGL import *
 from vizParasDialogue import *
 #from electrodeParasDialog import *
 #from mooseelectrodes import *
@@ -882,7 +883,37 @@ class MainWindow(QtGui.QMainWindow):
         self.currentPlotWindow = plotWindow
         return plotWindow
        
-    def addElectrodesPopup(self):        self.newElectodeDia = QtGui.QDialog(self)        self.electrodeDialog = Electrode_dialog()        self.electrodeDialog.setupUi(self.newElectodeDia)        self.newElectodeDia.show()                self.connect(self.electrodeDialog.okayPushButton, QtCore.SIGNAL('clicked()'),self.newElectrode)#        self.connect(self.electrodeDialog.    def newElectrode(self):        baseLevel = float(self.electrodeDialog.baseLevelEdit.text())        firstLevel = float(self.electrodeDialog.firstLevelEdit.text())        secondLevel = float(self.electrodeDialog.secondLevelEdit.text())        firstDelay = float(self.electrodeDialog.firstDelayEdit.text())        secondDelay = float(self.electrodeDialog.secondDelayEdit.text())        firstWidth = float(self.electrodeDialog.firstWidthEdit.text())        secondWidth = float(self.electrodeDialog.secondWidthEdit.text())        clampOption = self.electrodeDialog.electrodeSelectionCombo.currentIndex()        #print baseLevel,firstLevel,secondLevel,firstDelay,secondDelay,firstWidth,secondWidth,clampOption        paramDict = { 'baseLevel':baseLevel,'firstLevel':firstLevel,'secondLevel':secondLevel,'firstDelay':firstDelay,'secondDelay':secondDelay,'firstWidth':firstWidth,'secondWidth':secondWidth}        #print paramDict.values(), clampOption        self.electrodeCompartment = '/mit/soma'        if clampOption:            print 'Voltage Clamp at compartment'            wateva = mooseElectrodes()            wateva.voltageClamp(paramDict,moose.Neutral(self.electrodeCompartment))        else:            print 'Current Clamp at compartment'            wateva = mooseElectrodes()            wateva.currentClamp(paramDict,moose.Neutral(self.electrodeCompartment))        self.newElectodeDia.hide()        self.modelTreeWidget.recreateTree()    def addGLWindow(self):   #add_chait
+    def addElectrodesPopup(self):        
+        self.newElectodeDia = QtGui.QDialog(self)       
+        self.electrodeDialog = Electrode_dialog()        
+        self.electrodeDialog.setupUi(self.newElectodeDia)        
+        self.newElectodeDia.show()                
+        self.connect(self.electrodeDialog.okayPushButton, QtCore.SIGNAL('clicked()'),self.newElectrode)#        
+    
+    def newElectrode(self):        
+        baseLevel = float(self.electrodeDialog.baseLevelEdit.text())        
+        firstLevel = float(self.electrodeDialog.firstLevelEdit.text())        
+        secondLevel = float(self.electrodeDialog.secondLevelEdit.text())        
+        firstDelay = float(self.electrodeDialog.firstDelayEdit.text())        
+        secondDelay = float(self.electrodeDialog.secondDelayEdit.text())        
+        firstWidth = float(self.electrodeDialog.firstWidthEdit.text())        
+        secondWidth = float(self.electrodeDialog.secondWidthEdit.text())        
+        clampOption = self.electrodeDialog.electrodeSelectionCombo.currentIndex()        
+        #print baseLevel,firstLevel,secondLevel,firstDelay,secondDelay,firstWidth,secondWidth,clampOption        
+        paramDict = { 'baseLevel':baseLevel,'firstLevel':firstLevel,'secondLevel':secondLevel,'firstDelay':firstDelay,'secondDelay':secondDelay,'firstWidth':firstWidth,'secondWidth':secondWidth}        #print paramDict.values(), clampOption        
+        self.electrodeCompartment = '/mit/soma'        
+        if clampOption:            
+            print 'Voltage Clamp at compartment'            
+            wateva = mooseElectrodes()            
+            wateva.voltageClamp(paramDict,moose.Neutral(self.electrodeCompartment))        
+        else:            
+            print 'Current Clamp at compartment'            
+            wateva = mooseElectrodes()            
+            wateva.currentClamp(paramDict,moose.Neutral(self.electrodeCompartment))        
+            self.newElectodeDia.hide()        
+            self.modelTreeWidget.recreateTree()    
+
+    def addGLWindow(self):   #add_chait
         self.newDia = QtGui.QDialog(self)	
         self.vizDialogue = Ui_Dialog()
         self.vizDialogue.setupUi(self.newDia)
@@ -1027,9 +1058,24 @@ class MainWindow(QtGui.QMainWindow):
         if self.vizDialogue.specificCompartmentName.text()!='':					#if no compartment name selected, default is soma
        		viz.specificCompartmentName = str(self.vizDialogue.specificCompartmentName.text())	#else pick name from user ip text box
 	
-        if vizStyle==3:                                     #grid view case            numberOfCellsDrawn = 0                              #as yet drawn = 0, used as a counter            sideSquare = self.nearestSquare(self.vizDialogue.vizCells.count())      #get the side of the square            for yAxis in range(sideSquare):                         #Yaxis - columns                for xAxis in range(sideSquare):                     #Xaxis - fill rows first                    if numberOfCellsDrawn < self.vizDialogue.vizCells.count():  #finished drawing all cells?                        viz.drawNewCell(cellName=str(self.vizDialogue.vizCells.item(numberOfCellsDrawn).text()),cellCentre=[xAxis*0.5,yAxis*0.5,0.0],style = vizStyle)                        numberOfCellsDrawn += 1                 #increase number of cells drawn                                        if self.vizDialogue.variable_2.text()!='':                  #field2 to represented as radius of the compartment                    currentVizSetting_2 = [float(str(self.vizDialogue.vizMinVal_2.text())),float(str(self.vizDialogue.vizMaxVal_2.text())),str(self.vizDialogue.moosepath_2.text()),str(self.vizDialogue.variable_2.text())]                    viz.setColorMap_2(*currentVizSetting_2[:4])             #set the colormap equivalent of radius                    viz.gridRadiusViz=1                         #viz using both radius and color - 2 fields            else:                                                       viz.gridRadiusViz=0                         #no 2nd field selected, just viz using colors - not radius
+        if vizStyle==3:                                     #grid view case            
+            numberOfCellsDrawn = 0                              #as yet drawn = 0, used as a counter            
+            sideSquare = self.nearestSquare(self.vizDialogue.vizCells.count())      #get the side of the square            
+            for yAxis in range(sideSquare):                         #Yaxis - columns                
+                for xAxis in range(sideSquare):                     #Xaxis - fill rows first                    
+                    if numberOfCellsDrawn < self.vizDialogue.vizCells.count():  #finished drawing all cells?                        
+                        viz.drawNewCell(cellName=str(self.vizDialogue.vizCells.item(numberOfCellsDrawn).text()),cellCentre=[xAxis*0.5,yAxis*0.5,0.0],style = vizStyle)                        
+                        numberOfCellsDrawn += 1                 #increase number of cells drawn                                        
+                        if self.vizDialogue.variable_2.text()!='':                  #field2 to represented as radius of the compartment                    
+                            currentVizSetting_2 = [float(str(self.vizDialogue.vizMinVal_2.text())),float(str(self.vizDialogue.vizMaxVal_2.text())),str(self.vizDialogue.moosepath_2.text()),str(self.vizDialogue.variable_2.text())]                    
+                            viz.setColorMap_2(*currentVizSetting_2[:4])             #set the colormap equivalent of radius                    
+                            viz.gridRadiusViz=1                         #viz using both radius and color - 2 fields            
+                        else:                                                       
+                            viz.gridRadiusViz=0                         #no 2nd field selected, just viz using colors - not radius
 
-        else:            for index in xrange(self.vizDialogue.vizCells.count()):             #non-grid view case                viz.drawNewCell(cellName=str(self.vizDialogue.vizCells.item(index).text()),style = vizStyle)
+        else:            
+            for index in xrange(self.vizDialogue.vizCells.count()):             #non-grid view case                
+                viz.drawNewCell(cellName=str(self.vizDialogue.vizCells.item(index).text()),style = vizStyle)
         
         currentVizSetting = [float(str(self.vizDialogue.vizMinVal.text())),float(str(self.vizDialogue.vizMaxVal.text())),str(self.vizDialogue.moosepath.text()),str(self.vizDialogue.variable.text()),os.path.join(str(self.settings.value(config.KEY_GL_COLORMAP).toString()),str(self.vizDialogue.colorMapComboBox.itemText(self.vizDialogue.colorMapComboBox.currentIndex())))]						#color map inputs from user
     	#print currentVizSetting
