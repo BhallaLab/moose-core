@@ -410,18 +410,21 @@ void testCopyFieldElement()
 		}
 	}
 	assert( syn->dataHandler()->localEntries() == numHere );
+	syn->syncFieldDim();
 
 	// FieldDataHandlerBase * fdh = static_cast< FieldDataHandlerBase *>( syn->dataHandler() );
 	// shell->doSyncDataHandler( origId, "get_numSynapses", origSynId );
-	shell->doSyncDataHandler( origSynId );
+	// shell->doSyncDataHandler( origSynId );
 	// fdh->setFieldDimension( fdh->biggestFieldArraySize() );
 	// cout << shell->myNode() << ":"  << " bfa = " << fdh->biggestFieldArraySize() << ", expected totalEntries=" << (size - 1) * size << ", actual = " << syn->dataHandler()->totalEntries() << ", numHere = " << numHere << endl;
 	assert( syn->dataHandler()->totalEntries() == ( size - 1 ) * size );
 
-	vector< double > delay( size * (size - 1 ), 0 );
+	vector< double > delay( ( size * (size - 1 ) ) / 2 );
+	unsigned int k = 0;
 	for ( unsigned int i = 0; i < size; ++i ) {
 		for ( unsigned int j = 0; j < i; ++j ) {
-			delay[ i * (size - 1 ) + j ] = 3.14 * j + i * i;
+			delay[ k++ ] = 3.14 * j + i * i;
+			// delay[ i * (size - 1 ) + j ] = 3.14 * j + i * i;
 		}
 	}
 	ret = Field< double >::setVec( origSynId, "delay", delay );
@@ -456,7 +459,7 @@ void testCopyFieldElement()
 	
 	vector< double > del;
 	Field< double >::getVec( origSynId, "delay", del );
-	assert( del.size() == size * (size - 1 ) );
+	assert( del.size() == ( size * (size - 1 ) ) / 2 );
 	assert( del.size() == delay.size() );
 
 	for ( unsigned int i = 0; i < del.size(); ++i )
