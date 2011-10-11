@@ -15987,6 +15987,15 @@ the tree. In this case though, it is the top of the tree that is expanded.
 For now, set up a special Element operation not to resize, but to 
 appendDimension, and insist that this can only happen from dim0.
 
-Now clears tests through to testMesh.
+Revisited this, went back to resize, but did things in a more sophisticated
+way.
+
+Now clears tests through to testMesh. Checkin 3050.
+
+I keep running into the issue of synchronizing FieldDataHandler sizes. Should
+implement an Element or Id operation to do this.
+Element::syncFieldDim();
+
+Done. Now clears all single-thread tests.
 
 ============================================================================

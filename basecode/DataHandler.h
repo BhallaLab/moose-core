@@ -158,6 +158,14 @@ class DataHandler
 		 */
 		virtual bool innerNodeBalance( unsigned int size, 
 			unsigned int myNode, unsigned int numNodes ) = 0;
+
+		/**
+		 * Updates maxFieldEntries by checking all array sizes, and then
+		 * does the necessary field mask adjustment.
+		 * returns the updated maxFieldEntries.
+		 * Most DataHandlers ignore this, we use a default that returns 0.
+		 */
+		virtual unsigned int syncFieldDim();
 /////////////////////////////////////////////////////////////////////////
 // Function to go through entire dataset applying specified operations
 // in a thread-safe manner.

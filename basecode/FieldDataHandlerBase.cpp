@@ -153,6 +153,15 @@ bool FieldDataHandlerBase::innerNodeBalance( unsigned int size,
 	return 0;
 }
 
+unsigned int FieldDataHandlerBase::syncFieldDim()
+{
+	unsigned int max = biggestFieldArraySize();
+	if ( max != maxFieldEntries_ )
+		setMaxFieldEntries( max );
+	
+	return max;
+}
+
 /////////////////////////////////////////////////////////////////////////
 // Process and foreach
 /////////////////////////////////////////////////////////////////////////

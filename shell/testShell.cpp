@@ -391,7 +391,7 @@ void testCopyFieldElement()
 	assert( syn != 0 );
 	assert( syn->getName() == "synapse" );
 	// assert( syn->dataHandler()->data( 0 ) != 0 ); // Should give warning
-	assert( syn->dataHandler()->totalEntries() == size );
+	assert( syn->dataHandler()->totalEntries() == 0 );
 	assert( syn->dataHandler()->localEntries() == 0 );
 	vector< unsigned int > vec(size);
 	for ( unsigned int i = 0; i < size; ++i )
