@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Jan 30 18:56:46 2010 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  8 14:39:21 2010 (+0530)
+# Last-Updated: Wed Oct 12 14:11:11 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 146
+#     Update #: 149
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -68,7 +68,9 @@ class MooseShell(PyCute):
         self.gen_ps1 = 'MOOSE > '
         self.gen_ps2 = '        '
         self.interpreter.runsource('from __main__ import *')
+        self.interpreter.runsource('from moose import *')
         self.mooseContext = PyMooseBase.getContext()
+        self.setLineWrapMode(self.WidgetWidth)
 
     def setMode(self, mode=MooseGlobals.CMD_MODE_PYMOOSE):
         """Toggle current command mode"""
