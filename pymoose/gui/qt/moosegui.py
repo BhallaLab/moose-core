@@ -134,6 +134,11 @@ class MainWindow(QtGui.QMainWindow):
         self.setDockNestingEnabled(True)
 
         self.setContextMenuPolicy(Qt.NoContextMenu)
+
+        self.statusBar = QtGui.QStatusBar(self)
+        self.statusBar.setObjectName('statusBar')
+        self.setStatusBar(self.statusBar)
+        self.statusBar.showMessage('To load a model, Menu >File >Load Model or Ctrl+L')
         
         #add_chait
         self.mainCentralWidget = QtGui.QWidget(self)
@@ -195,7 +200,7 @@ class MainWindow(QtGui.QMainWindow):
         
 	
         # By default, we show information about MOOSE in the central widget
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
+        #sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
         
         # tablePlotMap is a maps all currently available tables to the
         # plot widgets they belong to.
@@ -375,9 +380,9 @@ class MainWindow(QtGui.QMainWindow):
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.commandLineDock)
         self.commandLineDock.setObjectName('MooseCommandLine')
         #add_chait
-        self.commandLineDock.setMaximumHeight(180)
-        self.commandLineDock.setMinimumWidth(1000)
-        #self.commandLineDock.setSizePolicy(QtGui.QSizePolicy.MaximumExpanding, QtGui.QSizePolicy.MinimumExpanding)
+        #self.commandLineDock.setMaximumHeight(180)
+        #self.commandLineDock.setMinimumWidth(1000)
+        self.commandLineDock.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
         self.commandLineDock.setFeatures(QtGui.QDockWidget.DockWidgetClosable)
         return self.commandLineDock
 
@@ -444,6 +449,8 @@ class MainWindow(QtGui.QMainWindow):
 	self.objFieldEditPanel.show()
         #add_chait
         self.objFieldEditPanel.setMinimumWidth(320)
+        self.objFieldEditPanel.setMaximumWidth(330)
+        self.objFieldEditPanel.setMinimumHeight(180)
         self.objFieldEditPanel.setFeatures(QtGui.QDockWidget.DockWidgetClosable)
         
     def closeObjectEditorPanel(self,status):
@@ -1150,7 +1157,6 @@ class MainWindow(QtGui.QMainWindow):
         self.centralVizPanel.addSubWindow(self.sceneLayout)
         self.centralVizPanel.tileSubWindows()
         self.sceneLayout.show()
-    
 
     def decrementSubWindowCount(self):
         if self._visiblePlotWindowCount > 0:
@@ -1222,6 +1228,7 @@ class MainWindow(QtGui.QMainWindow):
         ch = self.get_childrenOfField(all_ch,'Cell')
         if ch :#if has cell type child elements.
             #loaded model is a cell model, plot the cells in the 
+            self.statusBar.showMessage('Loaded a Neural Model')
             if len(ch)==1:
                 #only the single cell models to be visualized
                 title = self.tr('GL %d' % (len(self.vizs)))
@@ -1245,6 +1252,8 @@ class MainWindow(QtGui.QMainWindow):
                 self._visiblePlotWindowCount += 1
                 self.currentPlotWindow = vizWindow
                 return vizWindow
+        else:
+            self.statusBar.showMessage('Loaded a KKit Model')
    
 
     def resetSettings(self):
@@ -1318,36 +1327,7 @@ class MainWindow(QtGui.QMainWindow):
         self.mooseHandler.doRun(runtime)
         #harsha: only after the model is run, saving the plot is enabled,otherwise there will be nothing to save
         self.saveTablePlotsAction.setEnabled(1)
-    #add_chait - changed this, no longed used
-    def resetAndRunSlot1(self): #horrible way of doing it. because of simulation toolbar.
-        self._resetSlot()
-        self._runSlot1()
-
-    #add_chait, changed this, no longer used    
-    def _runSlot1(self):#bad way of doing it. but works just fine. (this is because of the simulation toolbar)
-        """Run the simulation.
-
-        """
- 
-        if self.autoHideAction.isChecked():
-            if self.commandLineDock.isVisible():
-                self.commandLineDock.setVisible(False)
-            if self.mooseClassesPanel.isVisible():
-                self.mooseClassesPanel.setVisible(False)
-            # if self.glClientDock.isVisible():
-            #     self.glClientDock.setVisible(False)
-            if hasattr(self, 'objFieldEditPanel') and self.objFieldEditPanel.isVisible():
-                self.objFieldEditPanel.setVisible(False)
-            self.showRightBottomDocksAction.setChecked(False)
-        try:
-            runtime = float(str(self.runTimeEditToolbar.text()))
-        except ValueError:
-            runtime = MooseHandler.runtime
-            self.runtimeText.setText(str(runtime))
-        self.updatePlots(runtime)
-        self.mooseHandler.doRun(runtime)
-        #harsha: only after the model is run, saving the plot is enabled,otherwise there will be nothing to save
-        self.saveTablePlotsAction.setEnabled(1)
+    
               
     def resetAndRunSlot(self):
         self._resetSlot()
@@ -1545,7 +1525,7 @@ if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     icon = QtGui.QIcon('moose_icon.png')
     app.setWindowIcon(icon)
-    computerProps = app.desktop()
+#    computerProps = app.desktop()
     QtCore.QObject.connect(app, QtCore.SIGNAL('lastWindowClosed()'), app, QtCore.SLOT('quit()'))
     mainWin = MainWindow()
     if not config.get_settings().contains(config.KEY_FIRSTTIME):
@@ -1554,7 +1534,7 @@ if __name__ == '__main__':
 	firstTimeWizard.connect(firstTimeWizard, QtCore.SIGNAL('accepted()'), mainWin.updatePaths)
         firstTimeWizard.show()
     mainWin.show()
-#    mainWin.setWindowState(Qt.WindowMaximized)
-    mainWin.resize(computerProps.width(),computerProps.height())
+    mainWin.setWindowState(Qt.WindowMaximized)
+#    mainWin.resize(computerProps.width(),computerProps.height())
     app.exec_()
 	
