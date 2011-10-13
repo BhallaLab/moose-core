@@ -16083,7 +16083,15 @@ Fixed various issues which all boiled down to the thread selection in
 DataHandlers. Now gets all the way to testMultiNodeIntFireNetwork.
 Checkin 3066.
 
-Sundry further fixes, now clears unit tests.
+Sundry further fixes, now clears unit tests. Checkin 3067.
+
+Fails to produce output in the rtReadKkit. This turns out to be due to the
+ZombieHandler::foreach not being defined, which oddly enough is needed 
+because the msg type for plots in rtReadKkit was OneToAll. 
+Changed that to Single, but the basic issue of lacking foreach in ZombieHandler
+remains.
+Now it clears rtReadKkit, but fails in rtReplicateModels. I suspect this is
+the same ZombieHandler::foreach problem.
 
 A silly bit of refactoring: should replace Eref::index() with Eref::dataId().
 ============================================================================

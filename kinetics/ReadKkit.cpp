@@ -926,13 +926,25 @@ void ReadKkit::addmsg( const vector< string >& args)
 		dest = pathTail( args[2], head );
 		string graph = pathTail( head, temp );
 		temp = graph + "/" + dest;
-		if ( args[4] == "Co" )
-			innerAddMsg( temp, plotIds_, "requestData", src, poolIds_, "get_conc" );
-		else if ( args[4] == "n" )
-		// innerAddMsg( src, poolIds_, "nOut", dest, plotIds_, "input" );
-			innerAddMsg( temp, plotIds_, "requestData", src, poolIds_, "get_n" );
-		else
+		map< string, Id >::const_iterator i = plotIds_.find( temp );
+		assert( i != plotIds_.end() );
+		Id plot = i->second;
+
+		i = poolIds_.find( src );
+		assert( i != poolIds_.end() );
+		Id pool = i->second;
+
+		if ( args[4] == "Co" ) {
+			MsgId ret = shell_->doAddMsg( "Single",
+				plot, "requestData", pool, "get_conc" );
+			assert( ret != Msg::bad );
+		} else if ( args[4] == "n" ) {
+			MsgId ret = shell_->doAddMsg( "Single",
+				plot, "requestData", pool, "get_n" );
+			assert( ret != Msg::bad );
+		} else {
 			cout << "Unknown PLOT msg field '" << args[4] << "'\n";
+		}
 	}
 	else if ( args[3] == "SUMTOTAL" ) { // Summation function.
 		buildSumTotal( src, dest );
