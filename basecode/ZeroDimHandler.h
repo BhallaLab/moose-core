@@ -17,11 +17,13 @@
 class ZeroDimHandler: public DataHandler
 {
 	public:
+		/// This is the generic constructor
 		ZeroDimHandler( const DinfoBase* dinfo, bool isGlobal );
 
 		/// Special constructor used in Cinfo::makeCinfoElements
 		ZeroDimHandler( const DinfoBase* dinfo, char* data );
 
+		/// This is the copy constructor
 		ZeroDimHandler( const ZeroDimHandler* other );
 
 		~ZeroDimHandler();
