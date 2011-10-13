@@ -176,6 +176,8 @@ unsigned int FieldDataHandlerBase::syncFieldDim()
 
 bool FieldDataHandlerBase::execThread( ThreadId thread, DataId di ) const
 {
+	if ( di == DataId::globalField && thread <= 1 )
+		return 1;
 	return parentDataHandler_->execThread( thread, di.parentIndex( numFieldBits_ ) );
 }
 

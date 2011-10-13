@@ -10,10 +10,11 @@
 #include "header.h"
 #include "../shell/Shell.h"
 
+/// Generic constructor
 ZeroDimHandler::ZeroDimHandler( const DinfoBase* dinfo, bool isGlobal )
 	: DataHandler( dinfo, isGlobal )
 {
-	myThread_ = 0;
+	myThread_ = 1;
 	if ( isGlobal || Shell::myNode() == 0 ) {
 		data_ = dinfo->allocData( 1 );
 	} else {
@@ -25,18 +26,20 @@ ZeroDimHandler::ZeroDimHandler( const DinfoBase* dinfo, bool isGlobal )
 	}
 }
 
+/// Special constructor using in Cinfo::makeCinfoElements
 ZeroDimHandler::ZeroDimHandler( const DinfoBase* dinfo, char* data )
 	: DataHandler( dinfo, 1 ), data_( data )
 {
-	myThread_ = 0;
+	myThread_ = 1;
 	if ( data_ && Shell::numProcessThreads() >= 2 )
 		myThread_ = 1 + Id::numIds() % Shell::numProcessThreads();
 }
 
+/// Copy constructor
 ZeroDimHandler::ZeroDimHandler( const ZeroDimHandler* other )
 	: DataHandler( other->dinfo(), other->isGlobal() )
 {
-	myThread_ = 0;
+	myThread_ = 1;
 	if ( other->isGlobal() || Shell::myNode() == 0 ) {
 		data_ = dinfo()->allocData( 1 ); 
 		if ( other->data_ )
