@@ -95,7 +95,7 @@ Element::Element( Id id, const Element* orig, unsigned int n, bool toGlobal)
 		group_( orig->group_ ),
 		msgBinding_( orig->cinfo_->numBindIndex() )
 {
-	if ( n <= 1 ) {
+	if ( n >= 1 ) {
 		dataHandler_ = orig->dataHandler_->copy( toGlobal, n );
 	}
 	id.bindIdToElement( this );
@@ -478,7 +478,8 @@ void Element::destroyElementTree( const vector< Id >& tree )
 void Element::zombieSwap( const Cinfo* newCinfo, DataHandler* newDataHandler )
 {
 	cinfo_ = newCinfo;
-	delete dataHandler_;
+	// delete dataHandler_;
+	// The zombie handler has now engulfed the original one.
 	dataHandler_ = newDataHandler;
 }
 
