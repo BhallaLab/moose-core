@@ -174,6 +174,11 @@ unsigned int FieldDataHandlerBase::syncFieldDim()
 	return max;
 }
 
+bool FieldDataHandlerBase::execThread( ThreadId thread, DataId di ) const
+{
+	return parentDataHandler_->execThread( thread, di.parentIndex( numFieldBits_ ) );
+}
+
 /////////////////////////////////////////////////////////////////////////
 // Process and foreach
 /////////////////////////////////////////////////////////////////////////

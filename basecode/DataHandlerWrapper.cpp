@@ -79,6 +79,10 @@ bool DataHandlerWrapper::innerNodeBalance( unsigned int size,
 	return 0;
 }
 
+bool DataHandlerWrapper::execThread( ThreadId thread, DataId di ) const
+{
+	return parent_->execThread( thread, di );
+}
 ////////////////////////////////////////////////////////////////
 // Process function
 ////////////////////////////////////////////////////////////////

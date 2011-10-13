@@ -247,20 +247,25 @@ void SparseMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const
 		if ( fdh ) {
 			for ( unsigned int j = 0; j < n; ++j ) {
 				if ( report ) cout << "(" << colIndex[j] << "," << fieldIndex[j] << ")";
-				if ( q->execThread( e2_->id(), colIndex[j] ) ) {
+				if ( e2_->dataHandler()->execThread( 
+					q->threadNum(), colIndex[j] ) )
+				{
 					Eref tgt( e2_, DataId( colIndex[j], fieldIndex[j] , fdh->numFieldBits() ) );
-					// if ( tgt.isDataHere() )
-					if ( fdh->parentDataHandler()->isDataHere( colIndex[j] ) )
+					// DataHere is checked in the execThread call
+					// if ( tgt.isDataHere() ) 
+					// if ( fdh->parentDataHandler()->isDataHere( colIndex[j] ) )
 						f->op( tgt, q, arg );
 				}
 			}
 		} else {
 			for ( unsigned int j = 0; j < n; ++j ) {
 				if ( report ) cout << "(" << colIndex[j] << "," << fieldIndex[j] << ")";
-				if ( q->execThread( e2_->id(), colIndex[j] ) ) {
+				if ( e2_->dataHandler()->execThread( 
+					q->threadNum(), colIndex[j] ) )
+				{
 					Eref tgt( e2_, DataId( colIndex[j] ) );
-					if ( tgt.isDataHere() )
-						f->op( tgt, q, arg );
+					// if ( tgt.isDataHere() ) // execThread checks it.
+					f->op( tgt, q, arg );
 				}
 			}
 		}
@@ -275,9 +280,11 @@ void SparseMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const
 		vector< unsigned int > rowIndex;
 		unsigned int n = matrix_.getColumn( column, fieldIndex, rowIndex );
 		for ( unsigned int j = 0; j < n; ++j ) {
-			if ( q->execThread( e1_->id(), rowIndex[j] ) ) {
+			if ( e1_->dataHandler()->execThread( 
+				q->threadNum(), rowIndex[j] ) )
+			{
 				Eref tgt( e1_, DataId( rowIndex[j] ) );
-				if ( tgt.isDataHere() )
+				// if ( tgt.isDataHere() ) // execThread checks it
 					f->op( tgt, q, arg );
 			}
 		}

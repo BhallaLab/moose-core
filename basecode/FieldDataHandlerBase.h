@@ -128,6 +128,8 @@ class FieldDataHandlerBase: public DataHandler
 		 * returns the updated maxFieldEntries.
 		 */
 		unsigned int syncFieldDim();
+
+		bool execThread( ThreadId thread, DataId di ) const;
 		////////////////////////////////////////////////////////////////
 		// Process function
 		////////////////////////////////////////////////////////////////

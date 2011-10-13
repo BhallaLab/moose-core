@@ -77,6 +77,7 @@ class ZeroDimHandler: public DataHandler
 		bool innerNodeBalance( unsigned int size,
 			unsigned int myNode, unsigned int numNodes );
 
+		bool execThread( ThreadId thread, DataId di ) const;
 		////////////////////////////////////////////////////////////////
 		// Process function
 		////////////////////////////////////////////////////////////////
