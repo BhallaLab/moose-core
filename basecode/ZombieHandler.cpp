@@ -84,6 +84,11 @@ bool ZombieHandler::innerNodeBalance( unsigned int size,
 	return 0;
 }
 
+bool ZombieHandler::execThread( ThreadId thread, DataId di ) const
+{
+	return parent_->execThread( thread, di );
+}
+
 ////////////////////////////////////////////////////////////////////
 // Process and foreach
 ////////////////////////////////////////////////////////////////////

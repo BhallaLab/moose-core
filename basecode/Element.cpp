@@ -327,7 +327,8 @@ void Element::exec( const Qinfo* qi, const double* arg )
 					f->op( Eref( elm, i.dataId() ), qi, data + offset );
 			}
 			*/
-		} else if ( ofid->oi.isDataHere() && qi->execThread( ofid->oi.id, ofid->oi.dataId.value() ) ) {
+		} else if ( ofid->oi.element()->dataHandler()->execThread( 
+			qi->threadNum(), ofid->oi.dataId ) ) {
 			f->op( ofid->oi.eref(), qi, arg + ObjFidSizeInDoubles );
 		}
 	} else {

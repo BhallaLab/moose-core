@@ -442,7 +442,7 @@ void testMpiStatsReduce()
 	assert ( syn->getName() == "synapse" );
 
 	assert( syn->dataHandler()->localEntries() == 0 );
-	assert( syn->dataHandler()->totalEntries() == 100 );
+	assert( syn->dataHandler()->totalEntries() == size * 65536 );
 	Eref syner( syn, 0 );
 
 	FieldDataHandlerBase* fd = dynamic_cast< FieldDataHandlerBase *>( 

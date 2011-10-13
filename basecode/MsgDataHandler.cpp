@@ -86,6 +86,12 @@ bool MsgDataHandler::innerNodeBalance( unsigned int size,
 	return 0;
 }
 
+/// Later do something more sensible.
+bool MsgDataHandler::execThread( ThreadId thread, DataId di ) const
+{
+	return (thread <= 1);
+}
+
 /////////////////////////////////////////////////////////////////////////
 // Process and foreach functions
 /////////////////////////////////////////////////////////////////////////

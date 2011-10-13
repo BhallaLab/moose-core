@@ -172,12 +172,20 @@ class DataHandler
 			unsigned int myNode, unsigned int numNodes ) = 0;
 
 		/**
+		 * Deprecated.
 		 * Updates maxFieldEntries by checking all array sizes, and then
 		 * does the necessary field mask adjustment.
 		 * returns the updated maxFieldEntries.
 		 * Most DataHandlers ignore this, we use a default that returns 0.
 		 */
 		virtual unsigned int syncFieldDim();
+
+		/**
+		 * True if the specified thread can operate on the specified DataId.
+		 * This function combines attributes of IsDataHere with the
+		 * threading check. However, it does NOT pass DataId::any.
+		 */
+		virtual bool execThread( ThreadId thread, DataId di ) const = 0;
 /////////////////////////////////////////////////////////////////////////
 // Function to go through entire dataset applying specified operations
 // in a thread-safe manner.

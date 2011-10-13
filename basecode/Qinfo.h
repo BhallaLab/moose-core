@@ -348,7 +348,7 @@ class Qinfo
 		 */
 		static void freeMutex();
 
-		bool execThread( Id id, unsigned int dataIndex ) const;
+		// bool execThread( Id id, unsigned int dataIndex ) const;
 
 	private:
 		ObjId src_;	/// Originating object

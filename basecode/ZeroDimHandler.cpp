@@ -87,6 +87,15 @@ bool ZeroDimHandler::innerNodeBalance( unsigned int size,
 	return 0;
 }
 
+bool ZeroDimHandler::execThread( ThreadId thread, DataId di ) const
+{
+	return ( 
+		data_ && (
+			( thread == myThread_ || thread == 0 ) || 
+			( di == DataId::globalField && thread <= 1 )
+		)
+	);
+}
 ///////////////////////////////////////////////////////////////////////
 // Process
 ///////////////////////////////////////////////////////////////////////
