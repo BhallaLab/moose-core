@@ -390,7 +390,6 @@ void testCopyFieldElement()
 	Element* syn = origSynId();
 	assert( syn != 0 );
 	assert( syn->getName() == "synapse" );
-	// assert( syn->dataHandler()->data( 0 ) != 0 ); // Should give warning
 	assert( syn->dataHandler()->totalEntries() == size * 65536 );
 	assert( syn->dataHandler()->localEntries() == 0 );
 	vector< unsigned int > vec(size);
@@ -412,19 +411,14 @@ void testCopyFieldElement()
 	assert( syn->dataHandler()->localEntries() == numHere );
 	syn->syncFieldDim();
 
-	// FieldDataHandlerBase * fdh = static_cast< FieldDataHandlerBase *>( syn->dataHandler() );
-	// shell->doSyncDataHandler( origId, "get_numSynapses", origSynId );
-	// shell->doSyncDataHandler( origSynId );
-	// fdh->setFieldDimension( fdh->biggestFieldArraySize() );
-	// cout << shell->myNode() << ":"  << " bfa = " << fdh->biggestFieldArraySize() << ", expected totalEntries=" << (size - 1) * size << ", actual = " << syn->dataHandler()->totalEntries() << ", numHere = " << numHere << endl;
 	assert( syn->dataHandler()->totalEntries() == ( size - 1 ) * size );
 
-	vector< double > delay( ( size * (size - 1 ) ) / 2 );
-	unsigned int k = 0;
+	vector< double > delay( size * ( size - 1 ), 0 );
+	// unsigned int k = 0;
 	for ( unsigned int i = 0; i < size; ++i ) {
 		for ( unsigned int j = 0; j < i; ++j ) {
-			delay[ k++ ] = 3.14 * j + i * i;
-			// delay[ i * (size - 1 ) + j ] = 3.14 * j + i * i;
+			// delay[ k++ ] = 3.14 * j + i * i;
+			delay[ i * (size - 1 ) + j ] = 3.14 * j + i * i;
 		}
 	}
 	ret = Field< double >::setVec( origSynId, "delay", delay );
@@ -459,22 +453,22 @@ void testCopyFieldElement()
 	
 	vector< double > del;
 	Field< double >::getVec( origSynId, "delay", del );
-	assert( del.size() == ( size * (size - 1 ) ) / 2 );
+	assert( del.size() == size * (size - 1 ) );
 	assert( del.size() == delay.size() );
 
 	for ( unsigned int i = 0; i < del.size(); ++i ) {
-		cout << i << "	" << del[i] << "	" << delay[i] << endl;
-		// assert( doubleEq( del[i], delay[i] ) );
+		// cout << i << "	" << del[i] << "	" << delay[i] << endl;
+		assert( doubleEq( del[i], delay[i] ) );
 	}
 
 	del.resize( 0 );
 	Field< double >::getVec( copySynId, "delay", del );
-	assert( del.size() == ( size * (size - 1 ) ) / 2 );
+	assert( del.size() == size * (size - 1 ) );
 	assert( del.size() == delay.size() );
 
 	for ( unsigned int i = 0; i < del.size(); ++i ) {
-		cout << i << "	" << del[i] << "	" << delay[i] << endl;
-		// assert( doubleEq( del[i], delay[i] ) );
+		// cout << i << "	" << del[i] << "	" << delay[i] << endl;
+		assert( doubleEq( del[i], delay[i] ) );
 	}
 	
 	shell->doDelete( origId );
@@ -1245,7 +1239,7 @@ void testSyncSynapseSize()
 
 	// assert( syn->dataHandler()->data( 0 ) != 0 ); // Should warn
 
-	assert( syn->dataHandler()->totalEntries() == 0 );
+	assert( syn->dataHandler()->totalEntries() == 65536 * size );
 	assert( syn->dataHandler()->localEntries() == 0 );
 	vector< unsigned int > ns( size, 0 );
 	for ( unsigned int i = 0; i < size; ++i )

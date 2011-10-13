@@ -731,7 +731,7 @@ void testSetGetVec()
 	Eref syne( syn, DataId::any );
 	vector< double > delayVec;
 	Field< double >::getVec( synId, "delay", delayVec );
-	assert( delayVec.size() == ( size * ( size - 1 ) ) / 2 );
+	assert( delayVec.size() == size * size - 1);
 	for ( unsigned int i = 0; i < size; ++i ) {
 		for ( unsigned int j = 0; j < i; ++j ) {
 			double temp = i * 1000 + j ;
@@ -1335,16 +1335,16 @@ void testSparseMsg()
 	vector< double > weight( size * fieldSize, 0.0 );
 	vector< double > delay( size * fieldSize, 0.0 );
 	assert( syne.element()->dataHandler()->numDimensions() == 2 );
-	unsigned int k = 0;
+	// unsigned int k = 0;
 	for ( unsigned int i = 0; i < size; ++i ) {
 		// unsigned int numSyn = syne.element()->dataHandler()->numData2( i );
 		unsigned int numSyn = fd->getFieldArraySize( i );
-		// unsigned int k = i * fieldSize;
+		unsigned int k = i * fieldSize;
 		for ( unsigned int j = 0; j < numSyn; ++j ) {
-			// weight[ k + j ] = mtrand() * weightMax;
-			// delay[ k + j ] = mtrand() * delayMax;
-			weight[ k ] = mtrand() * weightMax;
-			delay[ k++ ] = mtrand() * delayMax;
+			weight[ k + j ] = mtrand() * weightMax;
+			delay[ k + j ] = mtrand() * delayMax;
+			// weight[ k ] = mtrand() * weightMax;
+			// delay[ k++ ] = mtrand() * delayMax;
 		}
 	}
 	/*
