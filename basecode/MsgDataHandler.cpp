@@ -73,6 +73,9 @@ bool MsgDataHandler::isAllocated() const {
 	return 1; // Msgs are always allocated
 }
 
+unsigned int MsgDataHandler::linearIndex( DataId di ) const {
+	return di.value();
+}
 /////////////////////////////////////////////////////////////////////////
 // Load balancing functions
 /////////////////////////////////////////////////////////////////////////

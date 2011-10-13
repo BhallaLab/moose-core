@@ -70,6 +70,10 @@ bool ZombieHandler::isGlobal() const
 	return parent_->isGlobal();
 }
 
+unsigned int ZombieHandler::linearIndex( DataId di ) const
+{
+	return parent_->linearIndex( di );
+}
 ////////////////////////////////////////////////////////////////////
 // Load balancing
 ////////////////////////////////////////////////////////////////////
