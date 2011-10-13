@@ -189,6 +189,7 @@ void FieldDataHandlerBase::process( const ProcInfo* p, Element* e, FuncId fid ) 
 {
 	/**
 	 * This is the variant with threads in a block.
+	 */
 	unsigned int startIndex = 0;
 	unsigned int endIndex = localEntries();
 	if ( Shell::numProcessThreads() > 1 ) {
@@ -200,7 +201,14 @@ void FieldDataHandlerBase::process( const ProcInfo* p, Element* e, FuncId fid ) 
 		endIndex = ( localEntries() * p ->threadIndexInGroup +
 			Shell::numProcessThreads() - 1 ) / Shell::numProcessThreads();
 	}
-	 */
+	const OpFunc* f = e->cinfo()->getOpFunc( fid );
+	const ProcOpFuncBase* pf = dynamic_cast< const ProcOpFuncBase* >( f );
+	assert( pf );
+	for ( unsigned int i = startIndex; i != endIndex; ++i ) {
+		DataId me( i );
+		char* temp = data( me );
+		pf->proc( temp, Eref( e, me ), p );
+	}
 
 	/*
 	* We set up the ProcFunc of this field class to do the local iteration
@@ -212,7 +220,7 @@ void FieldDataHandlerBase::process( const ProcInfo* p, Element* e, FuncId fid ) 
 	FieldProcOpFunc fp = pf->makeFieldProcOpFunc( this );
 	assert( fp );
 	*/
-	parentDataHandler_->process( p, e, fid );
+	// parentDataHandler_->process( p, e, fid );
 }
 
 /**

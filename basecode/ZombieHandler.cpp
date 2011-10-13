@@ -72,7 +72,11 @@ bool ZombieHandler::isGlobal() const
 
 unsigned int ZombieHandler::linearIndex( DataId di ) const
 {
-	return parent_->linearIndex( di );
+	// Hack. need somehow to keep track of how the original Handler
+	// dealt with this.
+	return di.value(); 
+
+	// return parent_->linearIndex( di );
 }
 ////////////////////////////////////////////////////////////////////
 // Load balancing
@@ -99,24 +103,27 @@ void ZombieHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 void ZombieHandler::foreach( const OpFunc* f, Element* e, const Qinfo* q,
  	const double* arg, unsigned int argSize, unsigned int numArgs ) const
 { // This should be relevant. But I still have to define threadStart_
-/*
-	assert( q->threadNum() < threadStart_.size() );
-	unsigned int end = threadStart_[ q->threadNum() + 1 ];
-	if ( numArgs <= 1 ) {
-		for( unsigned int i = threadStart_[ q->threadNum() ]; i != end; ++i)
-			f->op( Eref( e, i ), q, arg );
-	} else {
-		unsigned int argOffset = 0;
-		unsigned int maxOffset = argSize * numArgs;
-		for( unsigned int i = threadStart_[ q->threadNum() ];
-			i != end; ++i) {
-			f->op( Eref( e, i ), q, arg + argOffset );
-			argOffset += argSize;
-			if ( argOffset >= maxOffset )
-				argOffset = 0;
+	// Find which thread parent is willing to handle
+	// I still don't know how to get at the parent DataId. I need it.
+	if ( parent_->execThread( q->threadNum(), 0 ) ) {
+		// On this thread, figure out which index range we should use.
+		// We have start and end, so that is fine.
+		// Iterate through the opfunc for all of these.
+		if ( numArgs <= 1 ) {
+			for( unsigned int i = start_; i != end_; ++i ) {
+				f->op( Eref( e, i ), q, arg );
+			}
+		} else {
+			unsigned int argOffset = argSize * start_;
+			unsigned int maxOffset = argSize * numArgs;
+			for( unsigned int i = start_; i != end_; ++i ) {
+				f->op( Eref( e, i ), q, arg + argOffset );
+				argOffset += argSize;
+				if ( argOffset >= maxOffset )
+					argOffset = 0;
+			}
 		}
 	}
-	*/
 }
 
 unsigned int ZombieHandler::getAllData( vector< char* >& dataVec ) const
