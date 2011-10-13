@@ -16066,6 +16066,11 @@ Decision: Yes, define a default size.
 Implementing above. Now stuck where I left off last. Checkin 3061.
 
 Fixed some issues with the foreach field assignment. Now stuck much
-earlier, in testSetGetVec().
+earlier, in testSetGetVec(). Checkin 3062.
 
+Cleared this. Cleared also the earlier problem with threads in 
+testShell.cpp:testCopyFieldElement. 
+Now stuck in testSyncSynapseSize
+
+A silly bit of refactoring: should replace Eref::index() with Eref::dataId().
 ============================================================================
