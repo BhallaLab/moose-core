@@ -601,7 +601,7 @@ void testSetGetSynapse()
 
 //	assert( syn->dataHandler()->data( 0 ) != 0 ); // Should give warning
 
-	assert( syn->dataHandler()->totalEntries() == 0 );
+	assert( syn->dataHandler()->totalEntries() == size * 65536 );
 	assert( syn->dataHandler()->localEntries() == 0 );
 	// could/should use SetVec here.
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -669,7 +669,7 @@ void testSetGetVec()
 	assert ( syn->getName() == "synapse" );
 
 	assert( syn->dataHandler()->localEntries() == 0 );
-	assert( syn->dataHandler()->totalEntries() == 0 );
+	assert( syn->dataHandler()->totalEntries() == size * 65536 );
 
 	FieldDataHandlerBase* fd = dynamic_cast< FieldDataHandlerBase *>( 
 		syn->dataHandler() );
@@ -924,7 +924,7 @@ void testSetRepeat()
 	assert ( syn != 0 );
 	assert ( syn->getName() == "synapse" );
 
-	assert( syn->dataHandler()->totalEntries() == 0 );
+	assert( syn->dataHandler()->totalEntries() == size * 65536 );
 	assert( syn->dataHandler()->localEntries() == 0 );
 	vector< unsigned int > numSyn( size, 0 );
 	for ( unsigned int i = 0; i < size; ++i )
@@ -992,7 +992,7 @@ void testSendSpike()
 	assert ( syn != 0 );
 	assert ( syn->getName() == "synapse" );
 
-	assert( syn->dataHandler()->totalEntries() == 0 );
+	assert( syn->dataHandler()->totalEntries() == size * 65536 );
 	assert( syn->dataHandler()->localEntries() == 0 );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		// Eref er( i2(), i );
@@ -1282,7 +1282,7 @@ void testSparseMsg()
 	assert ( syn->getName() == "synapse" );
 
 	assert( syn->dataHandler()->localEntries() == 0 );
-	assert( syn->dataHandler()->totalEntries() == 0 );
+	assert( syn->dataHandler()->totalEntries() == size * 65536 );
 	FieldDataHandlerBase* fd = dynamic_cast< FieldDataHandlerBase* >(
 		syn->dataHandler() );
 	assert( fd );
@@ -1425,7 +1425,7 @@ void testUpValue()
 	assert ( ticke->getName() == "tick" );
 
 	assert( ticke->dataHandler()->localEntries() == 10 );
-	assert( ticke->dataHandler()->totalEntries() == 10 );
+	assert( ticke->dataHandler()->totalEntries() == 16 );
 	FieldDataHandlerBase * fdh =
 		static_cast< FieldDataHandlerBase *>( ticke->dataHandler() );
 	// fdh->setFieldDimension( fdh->biggestFieldArraySize() );
@@ -2263,6 +2263,7 @@ void testFieldDataHandler()
 	// Next, put in the FieldDataHandler.
 
 	FieldDataHandler< IntFire, Synapse > fdh( &dinfo2, &odh, 
+		65536,
 		&IntFire::getSynapse,
 		&IntFire::getNumSynapses,
 		&IntFire::setNumSynapses
@@ -2331,7 +2332,7 @@ void testCopyFieldElementData()
 
 	// assert( syn->dataHandler()->data( 0 ) != 0 ); // Should generate warning
 
-	assert( syn->dataHandler()->totalEntries() == 0 );
+	assert( syn->dataHandler()->totalEntries() == size * 65536 );
 	assert( syn->dataHandler()->localEntries() == 0 );
 	// could/should use SetVec here.
 	for ( unsigned int i = 0; i < size; ++i ) {

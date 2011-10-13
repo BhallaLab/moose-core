@@ -17,7 +17,7 @@ class FieldDataHandlerBase: public DataHandler
 {
 	public:
 		FieldDataHandlerBase( const DinfoBase* dinfo,
-			const DataHandler* parentDataHandler );
+			const DataHandler* parentDataHandler, unsigned int size );
 
 		~FieldDataHandlerBase();
 

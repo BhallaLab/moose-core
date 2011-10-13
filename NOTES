@@ -16010,5 +16010,57 @@ Now stuck in ReduceMsg::exec. The vector of extracted DataIds is odd, having
 Issue was with the totalEntries. Had to do the syncFieldDim.
 
 Now stuck with shell::doCopy. It seems to copy structure but not the 
-values.
+values. Checkin 3058.
 ============================================================================
+12 Oct
+Stuck for a while in testShell.cpp:testCopyFieldElement. Looks like the 
+problem may really be with getVec on multiple threads.
+Also check why we are doing a getVec on the orig rather than the copy.
+
+A bit more analysis: The problem is probably with the setVec even before the
+copy. Turns out that the copied version actually matches up perfectly with the 
+original: both have the wrong values.
+
+Looked at it. There is a fundamental problem with trying to SetVec using a
+FieldDataHandler: it uses the foreach, and I would have to know how many
+entries partition for each thread if I do the assignment sequentially by
+entry sequence. So I need to go back to reconsider how to do this with a
+fixed 'block' type vector assignment, even if many entries are blank.
+
+For this to work, we need to stipulate that the maxFieldEntries_ and
+associated bitfields are valid at all times.
+This will require callbacks from FieldDataHandlers and a guarantee that any
+function that messes with the field array size is immediately followed by a
+check on maxFieldEntries. 
+
+Should these change, we have another kind of problem: DataIds will
+point to something different. The same will happen for any kind of 
+dimension resize.
+
+Options:
+	- Fix maxFieldEntries and dimensions once and for all at creation time.
+		- This is nice as we don't have to do nasty node sync stuff.
+		- This may cause problems if we run over. Trap and die?
+	- Permit explicit dimension resizing, all applied from Shell rather
+		than generated internally. User has to redo all ObjIds of
+		resized objects if this happens.
+		- Trap and die if we exceed.
+
+Try option one.
+Problem here: When I create an entry of the parent class, how do I define the
+size of the expected array? It would require the Element to know ahead of time 
+that it is going to have a FieldElement or two.
+
+Option two it is then.
+
+Minor elaboration: Should I define a default size for the array? 
+	Advantage: May be enough always, like Ticks
+	Neutral: No cost to defining a larger size, just bits used in DataId.
+	Advantage: Usually do not have to remember to  resize.
+	Problem: Likely confusion in cases where the default is too small and
+		one gets out of the habit of resizing it right after creation.
+Decision: Yes, define a default size.
+
+============================================================================
+13 Oct
+Implementing above.

@@ -21,11 +21,12 @@ template< class Parent, class Field > class FieldDataHandler: public FieldDataHa
 	public:
 		FieldDataHandler( const DinfoBase* dinfo,
 			const DataHandler* parentDataHandler,
+			unsigned int size,
 			Field* ( Parent::*lookupField )( unsigned int ),
 			unsigned int ( Parent::*getNumField )() const,
 			void ( Parent::*setNumField )( unsigned int num ) )
 			: 
-				FieldDataHandlerBase( dinfo , parentDataHandler ),
+				FieldDataHandlerBase( dinfo , parentDataHandler, size ),
 				lookupField_( lookupField ),
 				getNumField_( getNumField ),
 				setNumField_( setNumField )
@@ -115,9 +116,7 @@ template< class Parent, class Field > class FieldDataHandler: public FieldDataHa
 
 
 		/**
-		 * Makes a copy of the FieldDataHandler. Doesn't care what the
-		 * parent dimesion was, as it just refers everything to the parent
-		 * anyway.
+		 * Makes a copy of the FieldDataHandler.
 		 * Needs post-processing to substitute in the new parent.
 		 */
 		DataHandler* copy( bool toGlobal, unsigned int n ) const
@@ -138,6 +137,7 @@ template< class Parent, class Field > class FieldDataHandler: public FieldDataHa
 				new FieldDataHandler< Parent, Field >(
 					dinfo,
 					parentDataHandler(),
+					getMaxFieldEntries(),
 					lookupField_,
 					getNumField_,
 					setNumField_

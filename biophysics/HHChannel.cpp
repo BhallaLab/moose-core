@@ -117,27 +117,31 @@ const Cinfo* HHChannel::initCinfo()
 // FieldElementFinfo definition for HHGates. Note that these are made
 // with the deferCreate flag off, so that the HHGates are created 
 // right away even if they are empty.
+// Assume only a single entry allocated in each gate.
 ///////////////////////////////////////////////////////
 		static FieldElementFinfo< HHChannel, HHGate > gateX( "gateX",
 			"Sets up HHGate X for channel",
 			HHGate::initCinfo(),
 			&HHChannel::getXgate,
 			&HHChannel::setNumGates,
-			&HHChannel::getNumXgates
+			&HHChannel::getNumXgates,
+			1
 		);
 		static FieldElementFinfo< HHChannel, HHGate > gateY( "gateY",
 			"Sets up HHGate Y for channel",
 			HHGate::initCinfo(),
 			&HHChannel::getYgate,
 			&HHChannel::setNumGates,
-			&HHChannel::getNumYgates
+			&HHChannel::getNumYgates,
+			1
 		);
 		static FieldElementFinfo< HHChannel, HHGate > gateZ( "gateZ",
 			"Sets up HHGate Z for channel",
 			HHGate::initCinfo(),
 			&HHChannel::getZgate,
 			&HHChannel::setNumGates,
-			&HHChannel::getNumZgates
+			&HHChannel::getNumZgates,
+			1
 		);
 	
 ///////////////////////////////////////////////////////
