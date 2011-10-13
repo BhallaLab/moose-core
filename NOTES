@@ -16081,6 +16081,9 @@ the main process loop began. Now crashes in testMpiStatsReduce.
 
 Fixed various issues which all boiled down to the thread selection in
 DataHandlers. Now gets all the way to testMultiNodeIntFireNetwork.
+Checkin 3066.
+
+Sundry further fixes, now clears unit tests.
 
 A silly bit of refactoring: should replace Eref::index() with Eref::dataId().
 ============================================================================

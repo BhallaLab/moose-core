@@ -497,7 +497,7 @@ void testThreadIntFireNetwork()
 	Element* syn = synId();
 	assert( syn->getName() == "synapse" );
 
-	assert( syn->dataHandler()->totalEntries() == size );
+	assert( syn->dataHandler()->totalEntries() == 65536 * size );
 	assert( syn->dataHandler()->localEntries() == 0 );
 
 	DataId di( 1 ); // DataId( data, field )
@@ -624,7 +624,7 @@ void testMultiNodeIntFireNetwork()
 	Element* syn = synId();
 	assert( syn->getName() == "synapse" );
 
-	assert( syn->dataHandler()->totalEntries() == size );
+	assert( syn->dataHandler()->totalEntries() == 65536 * size );
 	assert( syn->dataHandler()->localEntries() == 0 );
 
 	DataId di( 1 ); // DataId( data, field )
@@ -739,10 +739,14 @@ void testMultiNodeIntFireNetwork()
 		 assert( retVec[i] == weight[i] );
 	}
 	
+	FieldDataHandlerBase* fdh = dynamic_cast< FieldDataHandlerBase* >( 
+		synId.element()->dataHandler() );
+	assert( fdh );
+	unsigned int numFieldBits = fdh->numFieldBits();
 
 	for ( unsigned int i = 0; i < size; i+= 100 ) {
 		double wt = Field< double >::get( 
-			ObjId( synId, DataId( i ) ), "weight" );
+			ObjId( synId, DataId( i, 0, numFieldBits ) ), "weight" );
 
 		// cout << "Got wt = " << wt << ", correct = " << weight[ i * fieldSize ] << endl << flush;
 		assert( doubleEq( wt, weight[ i * fieldSize ] ) );
