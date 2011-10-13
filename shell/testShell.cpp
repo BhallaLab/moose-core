@@ -1262,14 +1262,14 @@ void testSyncSynapseSize()
 	assert( Field< unsigned int >::get( neuronId, "linearSize" ) == size );
 	assert( Field< unsigned int >::get( synId, "linearSize" ) == size * (size - 1 ) );
 
-	dims = 
-		Field< vector< int > >::get( neuronId, "dimensions" );
-	assert( dims.size() == 1 );
-	assert( dims[0] == static_cast< int >( size ) );
-	dims = Field< vector< int > >::get( synId, "dimensions" );
-	assert( dims.size() == 2 );
-	assert( dims[0] == static_cast< int >( size ) - 1 ); // Note that the order is reversed.
-	assert( dims[1] == static_cast< int >( size ) );
+	vector< unsigned int > udims =
+		Field< vector< unsigned int > >::get( neuronId, "dimensions" );
+	assert( udims.size() == 1 );
+	assert( udims[0] == size );
+	udims = Field< vector< unsigned int > >::get( synId, "dimensions" );
+	assert( udims.size() == 2 );
+	assert( udims[0] == size - 1 ); // Note that the order is reversed.
+	assert( udims[1] == size );
 
 	// cout << "NumSyn = " << syn.totalEntries() << endl;
 	shell->doDelete( neuronId );
