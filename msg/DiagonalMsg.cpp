@@ -35,20 +35,19 @@ void DiagonalMsg::exec( const Qinfo* q, const double* arg, FuncId fid) const
 	int src = q->src().dataId.value();
 	if ( q->src().element() == e1_ ) {
 		int dest = src + stride_;
-		if ( dest >= 0 && e2_->dataHandler()->isDataHere( dest ) ) {
-			if ( q->execThread( e2_->id(), dest ) ) {
+			
+		if ( dest >= 0 && 
+			e2_->dataHandler()->execThread( q->threadNum(), dest ) ) {
 				const OpFunc* f = e2_->cinfo()->getOpFunc( fid );
 				f->op( Eref( e2_, dest ), q, arg );
-			}
 		}
 	} else {
 		// Here we are stuck a bit. I will assume srcIndex is now for e2
 		int dest = src - stride_;
-		if ( dest >= 0 && e1_->dataHandler()->isDataHere( dest ) ) {
-			if ( q->execThread( e1_->id(), dest ) ) {
+		if ( dest >= 0 && 
+			e1_->dataHandler()->execThread( q->threadNum(), dest ) ) {
 				const OpFunc* f = e1_->cinfo()->getOpFunc( fid );
 				f->op( Eref( e1_, dest ), q, arg );
-			}
 		}
 	}
 }

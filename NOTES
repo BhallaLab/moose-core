@@ -16070,7 +16070,11 @@ earlier, in testSetGetVec(). Checkin 3062.
 
 Cleared this. Cleared also the earlier problem with threads in 
 testShell.cpp:testCopyFieldElement. Checkin 3063.
-Now stuck in testSyncSynapseSize. Fixed. Now clears testShell.
+Now stuck in testSyncSynapseSize. Fixed. Now clears testShell. Checkin 3064.
+
+Another, important thing: get rid of Qinfo::execThread. Should instead
+refer to the DataHandler to decide if it wants to deal with a request on a 
+given thread. Did. Gets stuck late in unit tests.
 
 A silly bit of refactoring: should replace Eref::index() with Eref::dataId().
 ============================================================================

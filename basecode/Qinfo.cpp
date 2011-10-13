@@ -81,6 +81,7 @@ Qinfo::Qinfo( const Qinfo* orig, ThreadId threadNum )
 		dataSize_( orig->dataSize_ )
 {;}
 
+/*
 bool Qinfo::execThread( Id id, unsigned int dataIndex ) const
 {
 	// Note that nothing will ever be executed on thread# 0 unless it is
@@ -88,6 +89,7 @@ bool Qinfo::execThread( Id id, unsigned int dataIndex ) const
 	return ( Shell::isSingleThreaded() || 
 		( threadNum_ == ( 1 + ( ( id.value() + dataIndex ) % Shell::numProcessThreads() ) ) ) );
 }
+*/
 
 /**
  * This is called within barrier1 of the ProcessLoop. It isn't

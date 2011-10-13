@@ -60,8 +60,8 @@ void ReduceMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const
 		// if ( rs ) {
 		// cout << Shell::myNode() << ":" << q->threadNum() << " ReduceMsg::exec sum = " << rs->sum() << ", count = " << rs->count() << endl;
 		// }
-	} else if ( e1_->dataHandler()->isDataHere( i1_ ) &&
-		q->execThread( e1_->id(), i1_.value() ) ) {
+	} else if ( e1_->dataHandler()->execThread( q->threadNum(), i1_ ) )
+	{
 		const OpFunc* f = e1_->cinfo()->getOpFunc( fid );
 		f->op( Eref( e1_, i1_ ), q, arg );
 	}
