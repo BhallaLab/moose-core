@@ -16091,7 +16091,15 @@ because the msg type for plots in rtReadKkit was OneToAll.
 Changed that to Single, but the basic issue of lacking foreach in ZombieHandler
 remains.
 Now it clears rtReadKkit, but fails in rtReplicateModels. I suspect this is
-the same ZombieHandler::foreach problem.
+the same ZombieHandler::foreach problem. Checkin 3068.
+Tracked it down. It is a subtle bug: We need the linearIndex for each zombie,
+and it tries to refer this to the parent, which always sends back zero.
+Zombies need to encapsulate the original DataHandler, with the data
+cleared out. It will retain the hierarchy info. Later.
+
+Managed to get it to clear unit tests and regression tests.
+
+
 
 A silly bit of refactoring: should replace Eref::index() with Eref::dataId().
 ============================================================================
