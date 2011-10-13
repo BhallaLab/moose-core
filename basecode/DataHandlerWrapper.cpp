@@ -64,6 +64,11 @@ bool DataHandlerWrapper::isAllocated() const {
 	return parent_->isAllocated();
 }
 
+unsigned int DataHandlerWrapper::linearIndex( DataId di ) const
+{
+	return parent_->linearIndex( di );
+}
+
 ////////////////////////////////////////////////////////////////
 // load balancing functions
 ////////////////////////////////////////////////////////////////

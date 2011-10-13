@@ -146,6 +146,15 @@ unsigned int FieldDataHandlerBase::getAllData( vector< char* >& data ) const
 	return data.size();
 }
 
+unsigned int FieldDataHandlerBase::linearIndex( DataId di ) const
+{
+	return parentDataHandler_->linearIndex( 
+			di.parentIndex( numFieldBits_ ) 
+		) * maxFieldEntries_ + 
+		di.myIndex( mask_ );
+}
+	
+
 /////////////////////////////////////////////////////////////////////////
 // Load balancing
 /////////////////////////////////////////////////////////////////////////
@@ -231,7 +240,7 @@ void FieldDataHandlerBase::foreach( const OpFunc* f, Element* e,
 		FieldOpFunc fof( f, e, argSize, numArgs, &argOffset );
 		ObjId parent = Neutral::parent( Eref( e, 0 ) );
 		parentDataHandler_->foreach( &fof, parent.element(), q, 
-			arg, argSize * maxFieldEntries_, 0 );
+			arg, argSize * maxFieldEntries_, numArgs / maxFieldEntries_ );
 	} else {
 		FieldOpFuncSingle fof( f, e );
 		ObjId parent = Neutral::parent( Eref( e, 0 ) );

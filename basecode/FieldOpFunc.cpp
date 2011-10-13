@@ -31,17 +31,22 @@ FieldOpFunc::FieldOpFunc( const OpFunc* f, Element* e,
 void FieldOpFunc::op(const Eref& e, const Qinfo* q, const double* buf ) 
 	const
 {
-	unsigned long long index = e.index().value() << fdh_->numFieldBits();
+	unsigned int index = e.index().value() << fdh_->numFieldBits();
 
 	unsigned int fieldArraySize = 
 		fdh_->getFieldArraySize( e.index().value() );
 
 	for ( unsigned int i = 0; i < fieldArraySize; ++i ) {
 		Eref fielder( e_, index + i );
-		f_->op( fielder, q, buf + *argOffset_ ); 
+		//  There is a little problem here, if we run out of numArgs.
+		f_->op( fielder, q, buf + i * argSize_ ); 
+
+		// f_->op( fielder, q, buf + *argOffset_ ); 
+		/*
 		*argOffset_ += argSize_;
 		if ( *argOffset_ >= maxArgOffset_ )
 			*argOffset_ = 0;
+		*/
 	}
 }
 //////////////////////////////////////////////////////////////////

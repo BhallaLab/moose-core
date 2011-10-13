@@ -135,6 +135,18 @@ class DataHandler
 		 */
 		virtual unsigned int fieldMask() const;
 
+		/**
+		 * Returns the linearIndex equivalent of the dataId. linearIndex
+		 * is the index that would apply to a linear mapping of an
+		 * n-dimensional cuboid indexed by the dimensions of the object.
+		 * This differs from DataId::value because
+		 * ragged arrays use bitmasks for sections of the DataId value,
+		 * and the sizes of these bitmasks are typically larger than the
+		 * dimension (maxFieldEntries) assigned to the ragged array,
+		 * which would be an edge of the cuboid.
+		 */
+		virtual unsigned int linearIndex( DataId di ) const = 0;
+
 
 /////////////////////////////////////////////////////////////////////////
 // Load balancing functions

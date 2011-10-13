@@ -24,7 +24,9 @@ void Shell::recvGet( const Eref& e, const Qinfo* q, PrepackedBuffer pb )
 	if ( myNode_ == 0 ) {
 		if ( gettingVector_ ) {
 			ObjId tgt = q->src();
-			unsigned int linearIndex = q->src().eref().index().value();
+			// unsigned int linearIndex = q->src().eref().index().value();
+			unsigned int linearIndex = 
+				tgt.element()->dataHandler()->linearIndex( tgt.dataId );
 			if ( linearIndex >= getBuf_.size() ) {
 				if ( linearIndex >= getBuf_.capacity() )
 					getBuf_.reserve( linearIndex * 2 );

@@ -66,6 +66,10 @@ class ZeroDimHandler: public DataHandler
 		bool isAllocated() const {
 			return ( data_ != 0 );
 		}
+		
+		unsigned int linearIndex( DataId di ) const {
+			return 0;
+		}
 
 		////////////////////////////////////////////////////////////////
 		// load balancing functions

@@ -303,12 +303,12 @@ template< class A > class Field: public SetGet1< A >
 
 			vec.resize( 0 );
 			if ( ret ) {
-				// vec.resize( ret->size() );
+				vec.resize( ret->size() );
 				for ( unsigned int i = 0; i < ret->size(); ++i ) {
 					if ( ( *ret )[i] ) {
 						Conv< A > conv( (*ret)[i] );
-						vec.push_back( *conv );
-						// vec[i] = *conv;
+						// vec.push_back( *conv );
+						vec[i] = *conv;
 					}
 				}
 				return;
@@ -609,11 +609,11 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 				innerGet( tgt, field, index, ret );
 			vec.resize( 0 );
 			if ( ret ) {
-				// vec.resize( ret->size() );
+				vec.resize( ret->size() );
 				for ( unsigned int i = 0; i < ret->size(); ++i ) {
 					Conv< A > conv( (*ret)[i] );
-					// vec[i] = *conv;
-					vec.push_back( *conv );
+					vec[i] = *conv;
+					// vec.push_back( *conv );
 				}
 			}
 		}
