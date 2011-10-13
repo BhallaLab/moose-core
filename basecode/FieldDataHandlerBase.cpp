@@ -13,13 +13,16 @@
 
 FieldDataHandlerBase::FieldDataHandlerBase( 
 	const DinfoBase* dinfo,
-	const DataHandler* parentDataHandler )
+	const DataHandler* parentDataHandler, 
+	unsigned int size )
 			: DataHandler( dinfo, parentDataHandler->isGlobal() ),
-				maxFieldEntries_( 0 ),
+				maxFieldEntries_( size ),
 				parentDataHandler_( parentDataHandler ),
 				mask_( 0 ),
 				numFieldBits_( 0 )
-{;}
+{
+	setMaxFieldEntries( size );
+}
 
 FieldDataHandlerBase::~FieldDataHandlerBase()
 {;} // Don't delete data because the parent Element should do so.
@@ -207,12 +210,28 @@ void FieldDataHandlerBase::foreach( const OpFunc* f, Element* e,
 	const Qinfo* q, const double* arg, 
 	unsigned int argSize, unsigned int numArgs ) const
 {
+	/*
+	vector< char* > pa;
+	unsigned int numPa = getAllData( pa );
+	// I really want getThreadData( pa, threadNum ) to get just the
+	// block of data that works on the current thread.
+	for( unsigned int i = 0; i < numPa; ++i ) {
+		unsigned long long val = i << numFieldBits_;
+		unsigned int numFields = this->getNumfield( pa[i] );
+		unsigned int argOffset = dinfo()->size * val;
+		for( unsigned int j = 0; j < numPa; ++i ) {
+			f->op( Eref( e, DataId( val + j ) ), q, arg + argOffset );
+			argOffset += dinfo()->size();
+		}
+	}
+	*/
+
 	if ( numArgs > 1 ) {
 		unsigned int argOffset = 0;	
 		FieldOpFunc fof( f, e, argSize, numArgs, &argOffset );
 		ObjId parent = Neutral::parent( Eref( e, 0 ) );
 		parentDataHandler_->foreach( &fof, parent.element(), q, 
-			arg, argSize, 0 );
+			arg, argSize * maxFieldEntries_, 0 );
 	} else {
 		FieldOpFuncSingle fof( f, e );
 		ObjId parent = Neutral::parent( Eref( e, 0 ) );
@@ -267,10 +286,14 @@ void FieldDataHandlerBase::setFieldArraySize(
 
 void FieldDataHandlerBase::setMaxFieldEntries( unsigned int num )
 {
+	if ( num == 0 ) {
+		cout << "FieldDataHandlerBase::setMaxFieldEntries:: Error: Cannot set to zero\n";
+		num = 1;
+	}
 	unsigned int maxBits = sizeof( long long ) * 8;
 	unsigned int i = 0;
 	for ( i = 0; i < maxBits; ++i ) {
-		if ( ( num >> i ) == 0 )
+		if ( ( ( num - 1 ) >> i ) == 0 )
 			break;
 	}
 	maxFieldEntries_ = num;

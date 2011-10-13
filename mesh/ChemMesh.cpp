@@ -76,7 +76,8 @@ const Cinfo* ChemMesh::initCinfo()
 			Boundary::initCinfo(),
 			&ChemMesh::lookupBoundary,
 			&ChemMesh::setNumBoundary,
-			&ChemMesh::getNumBoundary
+			&ChemMesh::getNumBoundary,
+			16
 		);
 
 		static FieldElementFinfo< ChemMesh, MeshEntry > entryFinfo( 
@@ -85,7 +86,8 @@ const Cinfo* ChemMesh::initCinfo()
 			MeshEntry::initCinfo(),
 			&ChemMesh::lookupEntry,
 			&ChemMesh::setNumEntries,
-			&ChemMesh::getNumEntries
+			&ChemMesh::getNumEntries,
+			1048576
 		);
 
 	static Finfo* chemMeshFinfos[] = {

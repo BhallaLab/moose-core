@@ -39,7 +39,8 @@ const Cinfo* HHGate2D::initCinfo()
 			Interpol2D::initCinfo(),
 			&HHGate2D::getTableA,
 			&HHGate2D::setNumTable,
-			&HHGate2D::getNumTable
+			&HHGate2D::getNumTable,
+			1 // Only a single entry here.
 		);
 
 		static FieldElementFinfo< HHGate2D, Interpol2D > tableB( 
@@ -48,7 +49,8 @@ const Cinfo* HHGate2D::initCinfo()
 			Interpol2D::initCinfo(),
 			&HHGate2D::getTableB,
 			&HHGate2D::setNumTable,
-			&HHGate2D::getNumTable
+			&HHGate2D::getNumTable,
+			1 // Only a single entry here.
 		);
 	///////////////////////////////////////////////////////
 	// DestFinfos

@@ -181,8 +181,8 @@ template< class A > class SetGet1: public SetGet
 					ptr += entrySize;
 				}
 
-				Qinfo::addVecDirectToQ( ObjId(), tgt, 0, fid, data,
-					entrySize, arg.size() );
+				Qinfo::addVecDirectToQ( ObjId(), tgt, ScriptThreadNum,
+					fid, data, entrySize, arg.size() );
 				Qinfo::waitProcCycles( 1 );
 				delete[] data;
 
@@ -420,8 +420,8 @@ template< class A1, class A2 > class SetGet2: public SetGet
 					ptr += conv2.size();
 				}
 
-				Qinfo::addVecDirectToQ( ObjId(), tgt, 0, fid, data,
-					entrySize, arg1.size() );
+				Qinfo::addVecDirectToQ( ObjId(), tgt, ScriptThreadNum,
+					fid, data, entrySize, arg1.size() );
 				Qinfo::waitProcCycles( 1 );
 				delete[] data;
 				return 1;

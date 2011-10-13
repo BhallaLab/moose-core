@@ -66,7 +66,8 @@ const Cinfo* ChemCompt::initCinfo()
 		);
 
 		//////////////////////////////////////////////////////////////
-		// Field Element for the boundaries
+		// Field Element for the boundaries.
+		// Assume about 16.
 		//////////////////////////////////////////////////////////////
 		static FieldElementFinfo< ChemCompt, Boundary > boundaryFinfo( 
 			"boundary", 
@@ -74,7 +75,8 @@ const Cinfo* ChemCompt::initCinfo()
 			Boundary::initCinfo(),
 			&ChemCompt::lookupBoundary,
 			&ChemCompt::setNumBoundary,
-			&ChemCompt::getNumBoundary
+			&ChemCompt::getNumBoundary,
+			16
 		);
 
 	static Finfo* chemComptFinfos[] = {
