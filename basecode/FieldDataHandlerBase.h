@@ -73,6 +73,8 @@ class FieldDataHandlerBase: public DataHandler
 
 		/// Returns the number of bits in the field index.
 		unsigned int numFieldBits() const;
+
+		unsigned int linearIndex( DataId di ) const;
 		////////////////////////////////////////////////////////////////
 		// Special field access funcs
 		////////////////////////////////////////////////////////////////

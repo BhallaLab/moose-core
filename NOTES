@@ -16063,4 +16063,9 @@ Decision: Yes, define a default size.
 
 ============================================================================
 13 Oct
-Implementing above.
+Implementing above. Now stuck where I left off last. Checkin 3061.
+
+Fixed some issues with the foreach field assignment. Now stuck much
+earlier, in testSetGetVec().
+
+============================================================================
