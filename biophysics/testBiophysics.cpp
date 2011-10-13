@@ -1074,9 +1074,10 @@ void testSynChan()
 	assert( syne->dataHandler()->localEntries() == 2 );
 	dynamic_cast< FieldDataHandlerBase* >( syne->dataHandler() )->setNumField( synChanId.eref().data(), 2 );
 	
-	assert( syne->dataHandler()->totalEntries() == 2 );
+	unsigned int size = dims[0];
+	assert( syne->dataHandler()->totalEntries() == size * 65536 );
 	assert( syne->dataHandler()->numDimensions() == 1 );
-	assert( syne->dataHandler()->sizeOfDim( 0 ) == 2 );
+	assert( syne->dataHandler()->sizeOfDim( 0 ) == size * 65536 );
 
 	MsgId mid = shell->doAddMsg( "single", 
 		ObjId( sgId1, DataId( 0 ) ), "event",
