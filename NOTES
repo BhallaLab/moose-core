@@ -16076,5 +16076,11 @@ Another, important thing: get rid of Qinfo::execThread. Should instead
 refer to the DataHandler to decide if it wants to deal with a request on a 
 given thread. Did. Gets stuck late in unit tests.
 
+Progress. The Shell had been assigned thread0, which was not being selected once
+the main process loop began. Now crashes in testMpiStatsReduce.
+
+Fixed various issues which all boiled down to the thread selection in
+DataHandlers. Now gets all the way to testMultiNodeIntFireNetwork.
+
 A silly bit of refactoring: should replace Eref::index() with Eref::dataId().
 ============================================================================
