@@ -99,14 +99,15 @@ const Cinfo* Stoich::initCinfo()
 			*/
 
 		//////////////////////////////////////////////////////////////
-		// FieldElementFinfo defintion for Ports.
+		// FieldElementFinfo defintion for Ports. Assume up to 16.
 		//////////////////////////////////////////////////////////////
 		static FieldElementFinfo< Stoich, Port > portFinfo( "port",
 			"Sets up field Elements for ports",
 			Port::initCinfo(),
 			&Stoich::getPort,
 			&Stoich::setNumPorts,
-			&Stoich::getNumPorts
+			&Stoich::getNumPorts,
+			16
 		);
 
 		//////////////////////////////////////////////////////////////

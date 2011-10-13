@@ -33,12 +33,14 @@ class FieldElementFinfoBase: public Finfo
 			const string& name, 
 			const string& doc, 
 			const Cinfo* fieldCinfo,
+			unsigned int defaultSize,
 			bool deferCreate
 		)
 			: 	Finfo( name, doc), 
 				setNum_( 0 ),
 				getNum_( 0 ),
 				fieldCinfo_( fieldCinfo ),
+				defaultSize_( defaultSize ),
 				deferCreate_( deferCreate )
 		{;}
 
@@ -73,6 +75,7 @@ class FieldElementFinfoBase: public Finfo
 		DestFinfo* setNum_;
 		DestFinfo* getNum_;
 		const Cinfo* fieldCinfo_;
+		unsigned int defaultSize_;
 		bool deferCreate_;
 };
 
@@ -87,9 +90,11 @@ template < class T, class F > class FieldElementFinfo: public FieldElementFinfoB
 			F* ( T::*lookupField )( unsigned int ),
 			void( T::*setNumField )( unsigned int num ),
 			unsigned int ( T::*getNumField )() const,
+			unsigned int defaultSize,
 			bool deferCreate = 0
 		)
-			: FieldElementFinfoBase( name, doc, fieldCinfo, deferCreate ),
+			: FieldElementFinfoBase( name, doc, fieldCinfo, 
+				defaultSize, deferCreate ),
 				lookupField_( lookupField ),
 				setNumField_( setNumField ),
 				getNumField_( getNumField )
@@ -126,10 +131,14 @@ template < class T, class F > class FieldElementFinfo: public FieldElementFinfoB
 				new FieldDataHandler< T, F >(
 					fieldCinfo_->dinfo(),
 					parentElm->dataHandler(),
+					defaultSize_,
 					lookupField_, getNumField_, setNumField_ );
 			new Element( kid, fieldCinfo_, name(), fdh );
 			adopt( parent, kid );
-			fdh->setMaxFieldEntries( fdh->biggestFieldArraySize() );
+			// This function applies during a copy, in which case we
+			// already know the size of the array. So we shouldn't have
+			// to call this.
+			// fdh->setMaxFieldEntries( fdh->biggestFieldArraySize() );
 		}
 
 		/// Virtual function to look up type of FieldElementFinfo

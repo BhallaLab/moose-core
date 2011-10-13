@@ -264,41 +264,47 @@ const Cinfo* Cinfo::initCinfo()
 
 		//////////////////////////////////////////////////////////////
 		// FieldElementFinfo definitions for different kinds of Finfos
+		// Assume up to 64 of each.
 		//////////////////////////////////////////////////////////////
 		static FieldElementFinfo< Cinfo, Finfo > srcFinfo( "srcFinfo",
 			"SrcFinfos in this Class",
 			Finfo::initCinfo(),
 			&Cinfo::getSrcFinfo,
 			&Cinfo::setNumFinfo, // Dummy
-			&Cinfo::getNumSrcFinfo
+			&Cinfo::getNumSrcFinfo,
+			64
 		);
 		static FieldElementFinfo< Cinfo, Finfo > destFinfo( "destFinfo",
 			"DestFinfos in this Class",
 			Finfo::initCinfo(),
 			&Cinfo::getDestFinfo,
 			&Cinfo::setNumFinfo, // Dummy
-			&Cinfo::getNumDestFinfo
+			&Cinfo::getNumDestFinfo,
+			64
 		);
 		static FieldElementFinfo< Cinfo, Finfo > valueFinfo( "valueFinfo",
 			"ValueFinfos in this Class",
 			Finfo::initCinfo(),
 			&Cinfo::getValueFinfo,
 			&Cinfo::setNumFinfo, // Dummy
-			&Cinfo::getNumValueFinfo
+			&Cinfo::getNumValueFinfo,
+			64
 		);
 		static FieldElementFinfo< Cinfo, Finfo > lookupFinfo( "lookupFinfo",
 			"LookupFinfos in this Class",
 			Finfo::initCinfo(),
 			&Cinfo::getLookupFinfo,
 			&Cinfo::setNumFinfo, // Dummy
-			&Cinfo::getNumLookupFinfo
+			&Cinfo::getNumLookupFinfo,
+			64
 		);
 		static FieldElementFinfo< Cinfo, Finfo > sharedFinfo( "sharedFinfo",
 			"SharedFinfos in this Class",
 			Finfo::initCinfo(),
 			&Cinfo::getSharedFinfo,
 			&Cinfo::setNumFinfo, // Dummy
-			&Cinfo::getNumSharedFinfo
+			&Cinfo::getNumSharedFinfo,
+			64
 		);
 		static FieldElementFinfo< Cinfo, Finfo > fieldElementFinfo( 
 			"fieldElementFinfo",
@@ -306,7 +312,8 @@ const Cinfo* Cinfo::initCinfo()
 			Finfo::initCinfo(),
 			&Cinfo::getFieldElementFinfo,
 			&Cinfo::setNumFinfo, // Dummy
-			&Cinfo::getNumFieldElementFinfo
+			&Cinfo::getNumFieldElementFinfo,
+			64
 		);
 
 	static Finfo* cinfoFinfos[] = {

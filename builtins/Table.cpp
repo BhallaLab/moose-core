@@ -150,6 +150,7 @@ const Cinfo* Table::initCinfo()
 
 		//////////////////////////////////////////////////////////////
 		// Field Element for the vector data
+		// Use a limit of 2^20 entries for the tables, about 1 million.
 		//////////////////////////////////////////////////////////////
 		static FieldElementFinfo< Table, double > tableEntryFinfo( 
 			"table", 
@@ -157,7 +158,8 @@ const Cinfo* Table::initCinfo()
 			TableEntry::initCinfo(),
 			&Table::lookupVec,
 			&Table::setVecSize,
-			&Table::getVecSize
+			&Table::getVecSize,
+			1048576
 		);
 
 	static Finfo* tableFinfos[] = {

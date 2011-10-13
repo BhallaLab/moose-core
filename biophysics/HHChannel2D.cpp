@@ -121,27 +121,31 @@ const Cinfo* HHChannel2D::initCinfo()
 // FieldElementFinfo definition for HHGates. Note that these are made
 // with the deferCreate flag off, so that the HHGates are created 
 // right away even if they are empty.
+// I assume that we only have a single HHGate entry for each one.
 ///////////////////////////////////////////////////////
 		static FieldElementFinfo< HHChannel2D, HHGate2D > gateX( "gateX",
 			"Sets up HHGate X for channel",
 			HHGate2D::initCinfo(),
 			&HHChannel2D::getXgate,
 			&HHChannel2D::setNumGates,
-			&HHChannel2D::getNumXgates
+			&HHChannel2D::getNumXgates,
+			1
 		);
 		static FieldElementFinfo< HHChannel2D, HHGate2D > gateY( "gateY",
 			"Sets up HHGate Y for channel",
 			HHGate2D::initCinfo(),
 			&HHChannel2D::getYgate,
 			&HHChannel2D::setNumGates,
-			&HHChannel2D::getNumYgates
+			&HHChannel2D::getNumYgates,
+			1
 		);
 		static FieldElementFinfo< HHChannel2D, HHGate2D > gateZ( "gateZ",
 			"Sets up HHGate Z for channel",
 			HHGate2D::initCinfo(),
 			&HHChannel2D::getZgate,
 			&HHChannel2D::setNumGates,
-			&HHChannel2D::getNumZgates
+			&HHChannel2D::getNumZgates,
+			1
 		);
 	static Finfo* HHChannel2DFinfos[] =
 	{

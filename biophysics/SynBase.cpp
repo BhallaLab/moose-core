@@ -31,13 +31,17 @@ const Cinfo* SynBase::initCinfo()
 
 		//////////////////////////////////////////////////////////////
 		// FieldElementFinfo definition for Synapses
+		// Let's assume that there will be 10K synapses per IntFire.
+		// This merely sets aside a certain # of bits to deal with it,
+		// doesn't actually use space. 60K will be 16 bits.
 		//////////////////////////////////////////////////////////////
 		static FieldElementFinfo< SynBase, Synapse > synFinfo( "synapse",
 			"Sets up field Elements for synapse",
 			Synapse::initCinfo(),
 			&SynBase::getSynapse,
 			&SynBase::setNumSynapses,
-			&SynBase::getNumSynapses
+			&SynBase::getNumSynapses,
+			65536
 		);
 
 	static Finfo* synBaseFinfos[] = {

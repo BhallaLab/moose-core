@@ -176,13 +176,15 @@ const Cinfo* Clock::initCinfo()
 		);
 	///////////////////////////////////////////////////////
 	// FieldElementFinfo definition for ticks.
+	// Setup max of 16 of them.
 	///////////////////////////////////////////////////////
 		static FieldElementFinfo< Clock, Tick > tickFinfo( "tick",
 			"Sets up field Elements for Tick",
 			Tick::initCinfo(),
 			&Clock::getTick,
 			&Clock::setNumTicks,
-			&Clock::getNumTicks
+			&Clock::getNumTicks,
+			16
 		);
 
 	static Finfo* clockFinfos[] =
