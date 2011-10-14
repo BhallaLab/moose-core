@@ -72,7 +72,7 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
                   visibility of these fields to advanced mode.
 
     """
-    extra_fields = ['parent', 'childList', 'fieldList', 'index', 'xtree_textfg_req', 'xtree_fg_req','nInitComplex','concInitComplex', 'step_mode', 'tableVector','x','y']
+    extra_fields = ['name','parent', 'childList', 'fieldList', 'index', 'xtree_textfg_req', 'xtree_fg_req','nInitComplex','concInitComplex', 'step_mode', 'tableVector','x','y']
     sys_fields = ['node', 'cpu', 'dataMem', 'msgMem', 'class']
     moose_py_fieldname_map = {'step_mode': 'stepMode',
                               'stepmode': 'stepMode',
