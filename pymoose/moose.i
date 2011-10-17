@@ -737,7 +737,10 @@ zGate = property(__get_zGate)
 %attribute(pymoose::KineticManager, string, description, __get_description)
 %attribute(pymoose::KineticManager, double, recommendedDt, __get_recommendedDt)
 %attribute(pymoose::KineticManager, double, eulerError, __get_eulerError, __set_eulerError)
-
+#harsha
+%attribute(pymoose::KineticManager, bool, auto, __get_autoMode, __set_autoMode)
+%attribute(pymoose::KineticManager, double, loadEstimate, __get_loadEstimate)
+%attribute(pymoose::KineticManager, double, memEstimate, __get_memEstimate)
 
 %include "Panel.h"
 %attribute(pymoose::Panel, unsigned int, nPts, __get_nPts)
