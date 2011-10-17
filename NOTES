@@ -16158,3 +16158,6 @@ How to set up the pathPosition?
 ============================================================================
 17 Oct
 Implemented path hierarchy code, compiled through the basecode directory.
+Checkin 3072.
+
+Compiles all the way through, now to grind through unit tests.

@@ -26,8 +26,9 @@
 void testArith()
 {
 	Id a1id = Id::nextId();
-	vector< int > dims( 1, 10 );
-	Element* a1 = new Element( a1id, Arith::initCinfo(), "a1", dims, 1 );
+	DimInfo diEntry = { 10, 1, false };
+	vector< DimInfo > dims( 1, diEntry );
+	Element* a1 = new Element( a1id, Arith::initCinfo(), "a1", dims, 1, true );
 
 	Eref a1_0( a1, 0 );
 	Eref a1_1( a1, 1 );
@@ -64,10 +65,11 @@ void testFibonacci()
 	if ( Shell::numNodes() > 1 )
 		return;
 	unsigned int numFib = 20;
-	vector< int > dims( 1, numFib );
+	DimInfo diEntry = { numFib, 1, false };
+	vector< DimInfo > dims( 1, diEntry );
 
 	Id a1id = Id::nextId();
-	Element* a1 = new Element( a1id, Arith::initCinfo(), "a1", dims );
+	Element* a1 = new Element( a1id, Arith::initCinfo(), "a1", dims, 1, false );
 
 	Arith* data = reinterpret_cast< Arith* >( a1->dataHandler()->data( 0 ) );
 	if ( data ) {
@@ -351,11 +353,12 @@ void testStatsReduce()
 	const Cinfo* ic = IntFire::initCinfo();
 	// const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 100;
-	vector< int > dims( 1, size );
+	DimInfo diEntry = { size, 1, false };
+	vector< DimInfo > dims( 1, diEntry );
 	string arg;
 	Id i2 = Id::nextId();
 	// bool ret = ic->create( i2, "test2", size );
-	Element* temp = new Element( i2, ic, "test2", dims, 1 );
+	Element* temp = new Element( i2, ic, "test2", dims, 1, true );
 	assert( temp );
 	Id synId( i2.value() + 1 );
 	Element* syn = synId();
@@ -402,8 +405,8 @@ void testStatsReduce()
 	ret = Field< double >::setVec( synId, "delay", delay );
 	Eref syner( syn, DataId::any );
 
-	dims[0] = 1;
-	Id statsid = shell->doCreate( "Stats", Id(), "stats", dims );
+	vector< int > d2;
+	Id statsid = shell->doCreate( "Stats", Id(), "stats", d2, false );
 
 
 	MsgId mid = shell->doAddMsg( "Reduce", 
