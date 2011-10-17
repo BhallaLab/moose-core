@@ -130,9 +130,10 @@ class MainWindow(QtGui.QMainWindow):
         #     self.demosDir = str(QtGui.QFileDialog.getExistingDirectory(self, 'Please select pymoose demos directory'))
         #self.resize(800, 600)
         #self.setWindowState(Qt.WindowMaximized)
-        self.setDockOptions(self.AllowNestedDocks | self.AllowTabbedDocks | self.ForceTabbedDocks | self.AnimatedDocks)        
+        self.setDockOptions(  self.AnimatedDocks | self.AllowNestedDocks |self.AllowTabbedDocks  ) # self.ForceTabbedDocks | 
         self.setDockNestingEnabled(True)
-
+        self.setTabPosition(Qt.LeftDockWidgetArea,QtGui.QTabWidget.North)
+        
         self.setContextMenuPolicy(Qt.NoContextMenu)
 
         self.statusBar = QtGui.QStatusBar(self)
@@ -152,9 +153,9 @@ class MainWindow(QtGui.QMainWindow):
         
 #        self.centralVizPanel.setBackground(QtGui.QBrush(QtGui.QImage('background.png').scaled(self.centralVizPanel.size(),Qt.KeepAspectRatio)))
         self.centralVizPanel.setBackground(QtGui.QBrush(QtGui.QImage('QMdiBackground.png')))
-        #self.centralVizPanel.setStyleSheet("QWidget{background-color: white;}")
+
         self.centralVizPanel.setStatusTip('To load a model, Menu >File >Load Model or Ctrl+L')
-        self.centralVizPanel.setWhatsThis('To load a model, Menu >File >Load Model or Ctrl+L')
+        self.centralVizPanel.setWhatsThis('This is MOOSE. To load a model, Menu >File >Load Model or Ctrl+L')
         self.centralPanel = QtGui.QMdiArea(self)
         self.centralPanel.setStatusTip('Plot Window. Drag field from Editor to plot. Click and drag area to zoom in. Esc to zoom out. To add new Plot Windows, Menu >View >New Plot Window')
         self.centralPanel.setWhatsThis('Plot Window. Drag field from Editor to plot. Click and drag area to zoom in. Esc to zoom out. To add new Plot Windows, Menu >View >New Plot Window')
@@ -202,7 +203,6 @@ class MainWindow(QtGui.QMainWindow):
                      QtCore.SIGNAL('itemClicked(QTreeWidgetItem *, int)'),
                      self.setCurrentElement)
         
-        
 	
         # By default, we show information about MOOSE in the central widget
         #sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
@@ -237,6 +237,7 @@ class MainWindow(QtGui.QMainWindow):
         #add_chait
         self.createSimulationToolbar()
         self.loadLayout()
+        
 
     def createSimulationToolbar(self):
         self.simToolbar = QtGui.QToolBar(self)
