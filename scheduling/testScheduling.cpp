@@ -177,9 +177,9 @@ void setupTicks()
 	const double runtime = 20.0;
 	// const Cinfo* tc = Tick::initCinfo();
 	Id clock = Id::nextId();
-	vector< int > dims( 1, 1 );
+	vector< DimInfo > dims;
 	Element* clocke = new Element( clock, Clock::initCinfo(), "tclock",
-		dims, 1 );
+		dims, 1, true );
 	assert( clocke );
 	// bool ret = Clock::initCinfo()->create( clock, "tclock", 1 );
 	// assert( ret );
@@ -312,10 +312,11 @@ void testThreads()
 	s->doSetClock( 4, 3.0 );
 	s->doSetClock( 5, 5.0 );
 
-	vector< int > dims;
-	dims.push_back( 7 ); // A suitable number to test dispatch of Process calls during threading.
+	// A suitable number to test dispatch of Process calls during threading.
+	DimInfo temp = { 7, 1, false };
+	vector< DimInfo > dims( 1, temp );
 	Id tsid = Id::nextId();
-	Element* tse = new Element( tsid, testSchedCinfo, "tse", dims, 1 );
+	Element* tse = new Element( tsid, testSchedCinfo, "tse", dims, 1, true);
 	// testThreadSchedElement tse;
 	Eref ts( tse, 0 );
 	Element* ticke = Id( 2 )();
@@ -372,10 +373,11 @@ void testQueueAndStart()
 	s->doSetClock( 4, 3.0 );
 	s->doSetClock( 5, 5.0 );
 
-	vector< int > dims;
-	dims.push_back( 7 ); // A suitable number to test dispatch of Process calls during threading.
+	// A suitable number to test dispatch of Process calls during threading.
+	DimInfo temp = { 7, 1, false };
+	vector< DimInfo > dims( 1, temp );
 	Id tsid = Id::nextId();
-	Element* tse = new Element( tsid, testSchedCinfo, "tse", dims, 1 );
+	Element* tse = new Element( tsid, testSchedCinfo, "tse", dims, 1, true);
 	// testThreadSchedElement tse;
 	Eref ts( tse, 0 );
 	Element* ticke = Id( 2 )();
@@ -415,9 +417,9 @@ void testQueueAndStart()
 	er5.element()->addMsgAndFunc( m5->mid(), f, 10 + b0 );
 
 	unsigned int num = 12;
-	dims[0] = num;
-	Id pool = s->doCreate( "Pool", Id(), "pool", dims );
-	Id reac = s->doCreate( "Reac", Id(), "reac", dims );
+	vector< int > d2( 1, num );
+	Id pool = s->doCreate( "Pool", Id(), "pool", d2, false );
+	Id reac = s->doCreate( "Reac", Id(), "reac", d2, false );
 	bool ret = Field< double >::set( pool, "nInit", 123 );
 	assert( ret );
 	ret = Field< double >::set( pool, "n", 456 );
@@ -488,8 +490,10 @@ void testThreadIntFireNetwork()
 
 	Id i2 = Id::nextId();
 	// bool ret = ic->create( i2, "test2", size );
-	vector< int > dims( 1, size );
-	Element* t2 = new Element( i2, ic, "test2", dims );
+	DimInfo diEntry = { size, 1, false };
+	vector< DimInfo > dims( 1, diEntry );
+
+	Element* t2 = new Element( i2, ic, "test2", dims, 1, false );
 	assert( t2 );
 
 	Eref e2 = i2.eref();

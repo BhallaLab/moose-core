@@ -50,10 +50,8 @@ Id Shell::doCopy( Id orig, Id newParent, string newName, unsigned int n, bool to
 Element* innerCopyElements( Id orig, Id newParent, Id newElm, 
 	unsigned int n, bool toGlobal, map< Id, Id >& tree )
 {
-	// static const Finfo* pf = Neutral::initCinfo()->findFinfo( "parentMsg" );
-	// static const Finfo* cf = Neutral::initCinfo()->findFinfo( "childMsg" );
-
-	Element* e = new Element( newElm, orig(), n, toGlobal );
+	unsigned short depth = newParent.element()->dataHandler()->pathDepth() + 1;
+	Element* e = new Element( newElm, orig(), n, depth, toGlobal );
 	assert( e );
 	Shell::adopt( newParent, newElm );
 
@@ -70,12 +68,6 @@ Element* innerCopyElements( Id orig, Id newParent, Id newElm,
 	tree[ orig ] = e->id();
 
 	// cout << Shell::myNode() << ": ice, pa = " << newParent << ", pair= (" << orig << "," << e->id() << ")\n";
-
-	/*
-	const Neutral* origData = reinterpret_cast< const Neutral* >(
-		orig.eref().data() );
-	vector< Id > kids = origData->getChildren( orig.eref(), 0 );
-	*/
 	vector< Id > kids;
 	Neutral::children( orig.eref(), kids );
 

@@ -931,7 +931,7 @@ unsigned int cleanDimensions( vector< int >& dims )
 {
 	vector< int > temp = dims;
 	dims.resize( 0 );
-	raggedStart = 0; // Can't have the root being ragged!
+	unsigned int raggedStart = 0; // Can't have the root being ragged!
 	for ( unsigned int i = 0; i < temp.size(); ++i ) {
 		if ( temp[i] > 1 )
 			dims.push_back( temp[i] );
@@ -972,7 +972,7 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 				myDims.push_back( di );
 			}
 		}
-		Element* ret = new Element( newElm, c, name, dims, 
+		Element* ret = new Element( newElm, c, name, myDims, 
 			myPathDepth, isGlobal);
 		assert( ret );
 		adopt( parent, newElm );

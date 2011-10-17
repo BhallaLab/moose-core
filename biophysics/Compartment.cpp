@@ -652,8 +652,8 @@ void testCompartment()
 {
 	const Cinfo* comptCinfo = Compartment::initCinfo();
 	Id comptId = Id::nextId();
-	vector< int > dims( 1, 1 );
-	Element* n = new Element( comptId, comptCinfo, "compt", dims, 1 );
+	vector< DimInfo > dims;
+	Element* n = new Element( comptId, comptCinfo, "compt", dims, 1, true );
 	assert( n != 0 );
 	Eref compter( n, 0 );
 	Compartment* c = reinterpret_cast< Compartment* >( compter.data() );

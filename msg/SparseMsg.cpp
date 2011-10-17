@@ -338,8 +338,7 @@ unsigned int SparseMsg::randomConnect( double probability )
 	assert( nCols == syn->dataHandler()->parentDataHandler()->sizeOfDim( 0  ) );
 	// assert( nRows == syn->dataHandler()->sizeOfDim( 1 ) );
 
-	vector< unsigned int > dims( syn->dataHandler()->dims() );
-	assert( dims.size() > 1 );
+	assert ( syn->dataHandler()->dims().size() > 1 );
 
 	for ( unsigned int i = 0; i < nCols; ++i ) {
 		// Check if synapse is on local node

@@ -344,8 +344,9 @@ void testLeakyIaF()
 {
     const Cinfo * leakyIaFCinfo = LeakyIaF::initCinfo();
     Id leakyIaFId = Id::nextId();
-    vector< int > dims(1, 1);
-    Element * elem = new Element(leakyIaFId, leakyIaFCinfo, "LeakyIaF", dims, 1);
+    vector< DimInfo > dims;
+    Element * elem = new Element(leakyIaFId, leakyIaFCinfo, "LeakyIaF", 
+		dims, 1, true );
     assert(elem != 0);
     Eref eref(elem, 0);
     LeakyIaF* instance_ptr = reinterpret_cast<LeakyIaF*>(eref.data());
