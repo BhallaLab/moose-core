@@ -16160,4 +16160,8 @@ How to set up the pathPosition?
 Implemented path hierarchy code, compiled through the basecode directory.
 Checkin 3072.
 
-Compiles all the way through, now to grind through unit tests.
+Compiles all the way through, now to grind through unit tests. Checkin 3074.
+
+Steady progress through unit tests. Now in testAsync.cpp:testDataCopyAny.
+
+============================================================================

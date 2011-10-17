@@ -1445,8 +1445,9 @@ void testUpValue()
 	// const Cinfo* tc = Tick::initCinfo();
 	unsigned int size = 10;
 
-	DimInfo di = { size, 1, 0 };
-	vector< DimInfo > dims( 1, di );
+	// DimInfo di = { 1, 1, 0 };
+	// vector< DimInfo > dims( 1, di );
+	vector< DimInfo > dims;
 	Id clock = Id::nextId();
 	// bool ret = cc->create( clock, "clock", 1 );
 	Element* temp = new Element( clock, cc, "clock", dims, 1, 1 );
