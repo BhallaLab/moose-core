@@ -22,23 +22,22 @@ Element::Element( Id id, const Cinfo* c, DataHandler* d )
 }
 
 unsigned int numDimensionsActuallyUsed( 
-	const vector< int >& dimensions, unsigned int& raggedStart )
+	const vector< DimInfo >& dimensions, unsigned int& raggedStart )
 {
 	unsigned int ret = 0;
-	raggedStart = ~(0U);
+	raggedStart = 0;
 	for ( unsigned int i = 0; i < dimensions.size(); ++i ) {
-		if ( dimensions[i] > 1 ) {
+		if ( dimensions[i].size > 1 )
 			++ret;
-		} else if ( dimensions[i] < -1 ) {
-			++ret;
+		if ( dimensions[i].isRagged )
 			raggedStart = i;
-		}
 	}
 	return ret;
 }
 
 Element::Element( Id id, const Cinfo* c, const string& name, 
-	const vector< int >& dimensions, bool isGlobal )
+	const vector< DimInfo >& dimensions, unsigned short pathDepth,
+	bool isGlobal )
 	:	name_( name ),
 		id_( id ),
 		cinfo_( c ), 
@@ -49,20 +48,22 @@ Element::Element( Id id, const Cinfo* c, const string& name,
 	unsigned int numRealDimensions = numDimensionsActuallyUsed( dimensions,
 		raggedStart );
 
-	if ( raggedStart == ~(0U) ) { // All clean
+	if ( raggedStart == 0 ) { // All clean
 		if ( numRealDimensions == 0 ) {
-			dataHandler_ = new ZeroDimHandler( c->dinfo(), isGlobal );
+			dataHandler_ = new ZeroDimHandler( c->dinfo(), dimensions,
+				pathDepth, isGlobal );
 		} else if ( numRealDimensions == 1 ) {
-			dataHandler_ = new OneDimHandler( c->dinfo(), isGlobal,
-				dimensions[0]);	
+			dataHandler_ = new OneDimHandler( c->dinfo(), dimensions,
+				pathDepth, isGlobal );
 		} else if ( numRealDimensions == 2 ) {
-			dataHandler_ = new TwoDimHandler( c->dinfo(), isGlobal,
-				dimensions[0], dimensions[1] );	
+			dataHandler_ = new TwoDimHandler( c->dinfo(), dimensions,
+				pathDepth, isGlobal );
 		} else {
-			dataHandler_ = new AnyDimHandler( c->dinfo(), isGlobal,
-				dimensions );	
+			dataHandler_ = new AnyDimHandler( c->dinfo(), dimensions,
+				pathDepth, isGlobal );
 		}
 	} else {
+	//	dataHandler_ = new RaggedHandler( c->dinfo(), isGlobal, dimensions);
 	}
 
 	id.bindIdToElement( this );
@@ -88,7 +89,8 @@ Element::Element( Id id, const Cinfo* c, const string& name,
  * the parent element is created. This allows the copied FieldElements to
  * retain info from the originals.
  */
-Element::Element( Id id, const Element* orig, unsigned int n, bool toGlobal)
+Element::Element( Id id, const Element* orig, unsigned int n,
+	unsigned short copyDepth, bool toGlobal)
 	:	name_( orig->getName() ),
 		id_( id ),
 		cinfo_( orig->cinfo_ ), 
@@ -96,7 +98,7 @@ Element::Element( Id id, const Element* orig, unsigned int n, bool toGlobal)
 		msgBinding_( orig->cinfo_->numBindIndex() )
 {
 	if ( n >= 1 ) {
-		dataHandler_ = orig->dataHandler_->copy( toGlobal, n );
+		dataHandler_ = orig->dataHandler_->copy( copyDepth, toGlobal, n );
 	}
 	id.bindIdToElement( this );
 	// cinfo_->postCreationFunc( id, this );
@@ -255,7 +257,8 @@ bool Element::resize( unsigned int dimension, unsigned int size )
 	} else if ( dimension == 0 && dataHandler_->numDimensions() == 0 && 
 		size > 1 ) {
 		DataHandler* old = dataHandler_;
-		dataHandler_ = dataHandler_->copy( dataHandler_->isGlobal(), size );
+		dataHandler_ = dataHandler_->copy( 
+			dataHandler_->pathDepth(), dataHandler_->isGlobal(), size );
 		delete old;
 		return 1;
 	}

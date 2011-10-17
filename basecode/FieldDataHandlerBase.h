@@ -36,23 +36,9 @@ class FieldDataHandlerBase: public DataHandler
 		char* parentData( DataId index ) const;
 
 		/**
-		 * Returns the number of data entries.
-		 */
-		unsigned int totalEntries() const;
-
-		/**
 		 * Returns the number of data entries on local node
 		 */
 		unsigned int localEntries() const;
-
-		/**
-		 * Returns the number of dimensions of the data.
-		 */
-		unsigned int numDimensions() const;
-
-		unsigned int sizeOfDim( unsigned int dim ) const;
-
-		vector< unsigned int > dims() const;
 
 		bool isDataHere( DataId index ) const;
 
@@ -189,7 +175,7 @@ class FieldDataHandlerBase: public DataHandler
 
 		/**
 		 * This is the size of the largest array of fields on all the 
-		 * parent objects on this node.
+		 * parent objects on all nodes.
 		 */
 		unsigned int maxFieldEntries_;
 

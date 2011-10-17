@@ -15,13 +15,20 @@ FieldDataHandlerBase::FieldDataHandlerBase(
 	const DinfoBase* dinfo,
 	const DataHandler* parentDataHandler, 
 	unsigned int size )
-			: DataHandler( dinfo, parentDataHandler->isGlobal() ),
+			: DataHandler( 
+					dinfo, parentDataHandler->dims(), 
+					parentDataHandler->pathDepth() + 1,
+					parentDataHandler->isGlobal()
+				),
 				maxFieldEntries_( size ),
 				parentDataHandler_( parentDataHandler ),
 				mask_( 0 ),
 				numFieldBits_( 0 )
 {
+	DimInfo temp = { size, parentDataHandler->pathDepth() + 1, 1 };
+	dims_.push_back( temp );
 	setMaxFieldEntries( size );
+	totalEntries_ = size * parentDataHandler->totalEntries();
 }
 
 FieldDataHandlerBase::~FieldDataHandlerBase()
@@ -49,16 +56,6 @@ char* FieldDataHandlerBase::parentData( DataId di ) const
  * If parent is global the return value is also global.
  * If parent is local then it returns # on current node.
  */
-unsigned int FieldDataHandlerBase::totalEntries() const
-{
-	return parentDataHandler_->totalEntries() * maxFieldEntries_;
-}
-
-/**
- * Returns the number of field entries.
- * If parent is global the return value is also global.
- * If parent is local then it returns # on current node.
- */
 unsigned int FieldDataHandlerBase::localEntries() const
 {
 	unsigned int ret = 0;
@@ -67,36 +64,6 @@ unsigned int FieldDataHandlerBase::localEntries() const
 	for ( vector< char* >::iterator i = parents.begin(); 
 		i != parents.end(); ++i )
 		ret += this->getNumField( *i );
-	return ret;
-}
-
-/**
- * Returns the number of dimensions of the data.
- */
-unsigned int FieldDataHandlerBase::numDimensions() const {
-	// Should refine to include local dimensions.
-	// For now assume 1 dim.
-	return parentDataHandler_->numDimensions() + 1;
-}
-
-/**
- * Returns the indexing range of the data at the specified dimension.
- */
-unsigned int FieldDataHandlerBase::sizeOfDim( unsigned int dim ) const
-{
-	if ( dim > 0 )
-		return parentDataHandler_->sizeOfDim( dim - 1 );
-	return maxFieldEntries_;
-}
-
-/**
- * Returns the dimensions of this. The Field dimension is on 
- * index 0.
- */
-vector< unsigned int > FieldDataHandlerBase::dims() const
-{
-	vector< unsigned int > ret( parentDataHandler_->dims() );
-	ret.insert( ret.begin(), maxFieldEntries_ );
 	return ret;
 }
 

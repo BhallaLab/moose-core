@@ -30,23 +30,9 @@ class DataHandlerWrapper: public DataHandler
 		char* data( DataId index ) const;
 
 		/**
-		 * Returns the number of data entries.
-		 */
-		unsigned int totalEntries() const;
-
-		/**
 		 * Returns the number of data entries on local node
 		 */
 		unsigned int localEntries() const;
-
-		/**
-		 * Returns the number of dimensions of the data.
-		 */
-		unsigned int numDimensions() const;
-
-		unsigned int sizeOfDim( unsigned int dim ) const;
-
-		vector< unsigned int > dims() const;
 
 		bool isDataHere( DataId index ) const;
 
@@ -87,7 +73,8 @@ class DataHandlerWrapper: public DataHandler
 		 * Make a single identity copy, doing appropriate node 
 		 * partitioning if toGlobal is false.
 		 */
-		DataHandler* copy( bool toGlobal, unsigned int n ) const;
+		DataHandler* copy( unsigned short copyDepth, bool toGlobal, 
+			unsigned int n ) const;
 
 		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo) const;
 

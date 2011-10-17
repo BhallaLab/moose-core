@@ -11,8 +11,9 @@
 #include "../shell/Shell.h"
 
 /// Generic constructor
-ZeroDimHandler::ZeroDimHandler( const DinfoBase* dinfo, bool isGlobal )
-	: DataHandler( dinfo, isGlobal )
+ZeroDimHandler::ZeroDimHandler( const DinfoBase* dinfo, 
+	const vector< DimInfo >&dims, unsigned short pathDepth, bool isGlobal )
+	: DataHandler( dinfo, dims, pathDepth, isGlobal )
 {
 	myThread_ = 1;
 	if ( isGlobal || Shell::myNode() == 0 ) {
@@ -28,7 +29,8 @@ ZeroDimHandler::ZeroDimHandler( const DinfoBase* dinfo, bool isGlobal )
 
 /// Special constructor using in Cinfo::makeCinfoElements
 ZeroDimHandler::ZeroDimHandler( const DinfoBase* dinfo, char* data )
-	: DataHandler( dinfo, 1 ), data_( data )
+	: DataHandler( dinfo, vector< DimInfo >(), 2, true ),
+		data_( data )
 {
 	myThread_ = 1;
 	if ( data_ && Shell::numProcessThreads() >= 2 )
@@ -37,7 +39,8 @@ ZeroDimHandler::ZeroDimHandler( const DinfoBase* dinfo, char* data )
 
 /// Copy constructor
 ZeroDimHandler::ZeroDimHandler( const ZeroDimHandler* other )
-	: DataHandler( other->dinfo(), other->isGlobal() )
+	: DataHandler( other->dinfo(), other->dims_, 
+		other->pathDepth_, other->isGlobal() )
 {
 	myThread_ = 1;
 	if ( other->isGlobal() || Shell::myNode() == 0 ) {
@@ -68,11 +71,6 @@ char* ZeroDimHandler::data( DataId index ) const {
 
 unsigned int ZeroDimHandler::localEntries() const {
 	return ( data_ != 0 );
-}
-
-vector< unsigned int > ZeroDimHandler::dims() const {
-	static vector< unsigned int > ret( 0 );
-	return ret;
 }
 
 bool ZeroDimHandler::isDataHere( DataId index ) const
@@ -151,7 +149,8 @@ void ZeroDimHandler::unGlobalize()
 	}
 }
 
-DataHandler* ZeroDimHandler::copy( bool toGlobal, unsigned int n ) const
+DataHandler* ZeroDimHandler::copy( unsigned short tgtPathDepth, 
+	bool toGlobal, unsigned int n ) const
 {
 	if ( toGlobal ) {
 		if ( !isGlobal() ) {
@@ -160,7 +159,12 @@ DataHandler* ZeroDimHandler::copy( bool toGlobal, unsigned int n ) const
 		}
 	}
 	if ( n > 1 ) {
-		OneDimHandler* ret = new OneDimHandler( dinfo(), toGlobal, n );
+		vector< DimInfo > di( 1 );
+		di[0].size = n;
+		di[0].depth = tgtPathDepth;
+		di[0].isRagged = 0;
+		OneDimHandler* ret = new OneDimHandler( dinfo(), di,
+			tgtPathDepth, toGlobal );
 		if ( data_ )
 			ret->assign( data_, 1 );
 		return ret;
@@ -173,7 +177,8 @@ DataHandler* ZeroDimHandler::copy( bool toGlobal, unsigned int n ) const
 DataHandler* ZeroDimHandler::copyUsingNewDinfo( 
 	const DinfoBase* dinfo ) const
 {
-	ZeroDimHandler* ret = new ZeroDimHandler( dinfo, isGlobal_ );
+	ZeroDimHandler* ret = new ZeroDimHandler( dinfo, 
+		dims_, pathDepth_, isGlobal_ );
 	return ret;
 }
 

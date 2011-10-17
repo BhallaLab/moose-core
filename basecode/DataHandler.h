@@ -10,6 +10,12 @@
 #ifndef _DATA_HANDLER_H
 #define _DATA_HANDLER_H
 
+typedef struct {
+	unsigned int size;
+	unsigned short depth;
+	bool isRagged;
+} DimInfo;
+
 /**
  * This class manages the data part of Elements. This includes
  * allocation and freeing, lookup, and decomposition between nodes.
@@ -20,7 +26,8 @@
 class DataHandler
 {
 	public:
-		DataHandler( const DinfoBase* dinfo, bool isGlobal );
+		DataHandler( const DinfoBase* dinfo, const vector< DimInfo >& dims,
+			unsigned short pathDepth, bool isGlobal );
 
 		/**
 		 * The respective DataHandler subclasses should also provide
@@ -71,7 +78,7 @@ class DataHandler
 		 * N-dimension array cuboid, and reports the product of all sides
 		 * rather than the sum of individual array counts.
 		 */
-		virtual unsigned int totalEntries() const = 0;
+		unsigned int totalEntries() const;
 
 		/**
 		 * Returns the actual number of data entries used on the 
@@ -89,18 +96,26 @@ class DataHandler
 		 * 2 if it is a 2-D array or nesting of arrays of X in array of Y.
 		 * and so on.
 		 */
-		virtual unsigned int numDimensions() const = 0;
+		unsigned int numDimensions() const;
+
+		/**
+		 * Returns the depth of the current DataHandler in the element
+		 * tree. Root is zero.
+		 */
+		unsigned short pathDepth() const;
 
 		/**
 		 * Returns the number of data entries at any index.
 		 * If 'dim' is greater than the number of dimensions, returns zero.
 		 */
-		virtual unsigned int sizeOfDim( unsigned int dim ) const = 0;
+		unsigned int sizeOfDim( unsigned int dim ) const;
 
 		 /**
 		  * Returns vector of dimensions.
+		  * Highest index is closest to root.
+		  * Lowest index varies fastest.
 		  */
-		 virtual vector< unsigned int > dims() const = 0;
+		 const vector< DimInfo >& dims() const;
 
 		/**
 		 * Returns true if the node decomposition has the data on the
@@ -115,7 +130,8 @@ class DataHandler
 
 		/**
 		 * True if the data is global on all nodes.
-		 * This is overridden in rare cases, like FieldDataHandler.
+		 * This is overridden in rare cases, like FieldDataHandler,
+		 * which look up their parent.
 		 */
 		virtual bool isGlobal() const;
 
@@ -146,7 +162,32 @@ class DataHandler
 		 * which would be an edge of the cuboid.
 		 */
 		virtual unsigned int linearIndex( DataId di ) const = 0;
+/////////////////////////////////////////////////////////////////////////
+// Path management
+/////////////////////////////////////////////////////////////////////////
 
+		 /**
+		  * Returns the path position of each dimension. For example:
+		  * /cortex/v1[2]/layer4/cells/pyramidal[10000][10000]/dends[200]
+		  * 0   1     2      3     4                5            6
+		  *
+		  * Note that the position for root is always 0, and root is
+		  * the only Element with position 0.
+		  * This lookup only returns positions associated with one of 
+		  * the dimensions handled by the DataHandler. For the example
+		  * above, the positions would be:
+		  * 2, 5, 5, 6.
+		  * Positions not listed in this lookup are assumed to have a 
+		  * dimension size of 1.
+		 vector< unsigned int > getPathPosition() const;
+		  */
+
+
+		 /**
+		  * Assigns the pathPosition vector. Must be the same size as the
+		  * dims vector.
+		 virtual void setPathPosition( vector< unsigned int > pos ) = 0;
+		  */
 
 /////////////////////////////////////////////////////////////////////////
 // Load balancing functions
@@ -236,21 +277,48 @@ class DataHandler
 		virtual void unGlobalize() = 0;
 
 		/**
-		 * Copies self, creating a new DataHandler. If n is 0 or 1 it
-		 * just makes a duplicate of original.
+		 * Copies self, creating a new DataHandler at the specified depth
+		 * in the path tree. 
+		 * So if we copy with n=5 from
+		 * /something/other[10] to /foo/bar/zod, we get
+		 * /foo/bar/zod/something[5]/other[10]
+		 * where the depth of the copy is 4 to indicate that 'something'
+		 * is now positioned at depth 4. Note that 'other' gets pushed up
+		 * to depth 5.
+		 * If n is 0 or 1 it just makes a duplicate of original, with the
+		 * orginal dimensions.
 		 * If n > 1 then it adds a dimension and replicates the original
 		 * n times.
 		 * If the source is global and
 		 * the dest is non-global, it does a selective copy of data
 		 * contents only for the entries on current node.
 		 * Otherwise it copies everything over.
+		 * It is the responsibility of the wrapping Shell command to ensure
+		 * that the size of the dimensions matches the parent onto which
+		 * the copy is being made.
+		 *
+		 * In due course need to extend so I can copy off a single entry.
 		 */
-		virtual DataHandler* copy( bool toGlobal, unsigned int n ) const =0;
+		virtual DataHandler* copy( unsigned short copyDepth, bool toGlobal,
+			unsigned int n ) const =0;
+
+		/**
+		 * Moves the depth to the specified level.
+		 * If moving up, then it adds single-dimensions for the inserted
+		 * levels at the root of the tree.
+		 * If moving down, then it removes levels toward the root of the 
+		 * three. It requires that the removed levels all have dimension
+		 * size of one.
+		 * Returns True on success.
+		 * Returns False if the removed levels were non-unity.
+		 */
+		bool changeDepth( unsigned short newDepth );
 
 		/**
 		 * Copies DataHandler dimensions but uses new Dinfo to allocate
 		 * contents and handle new data. Useful when making zombie copies.
-		 * This does not need the toGlobal flag as the zombies are always
+		 * This does not need the depth or the toGlobal flag,
+		 * as the zombies are always
 		 * located identically to the original.
 		 */
 		virtual DataHandler* copyUsingNewDinfo( 
@@ -276,7 +344,10 @@ class DataHandler
 		virtual void assign( const char* orig, unsigned int numOrig ) = 0;
 
 	protected:
+		vector< DimInfo > dims_;
+		unsigned short pathDepth_;
 		bool isGlobal_;
+		unsigned int totalEntries_;
 
 	private:
 		const DinfoBase* dinfo_;

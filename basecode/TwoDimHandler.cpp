@@ -10,10 +10,11 @@
 #include "header.h"
 #include "../shell/Shell.h"
 
-TwoDimHandler::TwoDimHandler( const DinfoBase* dinfo, bool isGlobal,
-	unsigned int nx, unsigned int ny )
-		: BlockHandler( dinfo, isGlobal, nx * ny ), 
-			nx_( nx ), ny_( ny )
+TwoDimHandler::TwoDimHandler( const DinfoBase* dinfo, 
+	const vector< DimInfo >& dims, unsigned short pathDepth,
+	bool isGlobal )
+		: BlockHandler( dinfo, dims, pathDepth, isGlobal ),
+			nx_( dims[0].size ), ny_( dims[1].size )
 {;}
 
 TwoDimHandler::TwoDimHandler( const TwoDimHandler* other )
@@ -29,23 +30,6 @@ TwoDimHandler::~TwoDimHandler()
 // Information functions
 ////////////////////////////////////////////////////////////////////////
 
-unsigned int TwoDimHandler::sizeOfDim( unsigned int dim ) const
-{
-	if ( dim == 0 )
-		return nx_;
-	if ( dim == 1 )
-		return ny_;
-	return 0;
-}
-
-vector< unsigned int > TwoDimHandler::dims() const
-{
-	vector< unsigned int > ret( 2 );
-	ret[0] = nx_;
-	ret[1] = ny_;
-	return ret;
-}
-
 ////////////////////////////////////////////////////////////////////////
 // Load balancing defined in base class BlockHandler
 ////////////////////////////////////////////////////////////////////////
@@ -58,7 +42,8 @@ vector< unsigned int > TwoDimHandler::dims() const
 // Data Reallocation functions. Defined in BlockHandler
 ////////////////////////////////////////////////////////////////////////
 
-DataHandler* TwoDimHandler::copy( bool toGlobal, unsigned int n ) const
+DataHandler* TwoDimHandler::copy( unsigned short copyDepth,
+	bool toGlobal, unsigned int n ) const
 {
 	if ( toGlobal ) {
 		if ( !isGlobal() ) {
@@ -67,11 +52,15 @@ DataHandler* TwoDimHandler::copy( bool toGlobal, unsigned int n ) const
 		}
 	}
 	if ( n > 1 ) {
-		vector< int > dims(3);
-		dims[0] = nx_;
-		dims[1] = ny_;
-		dims[2] = n;
-		AnyDimHandler* ret = new AnyDimHandler( dinfo(), toGlobal, dims );
+		DimInfo temp = {n, copyDepth, 0 };
+		vector< DimInfo > newDims;
+		newDims.push_back( temp );
+		newDims.push_back( dims_[0] );
+		newDims.back().depth += copyDepth - pathDepth_;
+		newDims.push_back( dims_[1] );
+		newDims.back().depth += copyDepth - pathDepth_;
+		AnyDimHandler* ret = new AnyDimHandler( dinfo(), 
+			newDims, copyDepth, toGlobal );
 		if ( data_ )  {
 			ret->assign( data_, end_ - start_ );
 		}
@@ -84,7 +73,7 @@ DataHandler* TwoDimHandler::copy( bool toGlobal, unsigned int n ) const
 
 DataHandler* TwoDimHandler::copyUsingNewDinfo( const DinfoBase* dinfo) const
 {
-	return new TwoDimHandler( dinfo, isGlobal_, nx_, ny_ );
+	return new TwoDimHandler( dinfo, dims_, pathDepth_, isGlobal_ );
 }
 
 /**
@@ -105,6 +94,7 @@ bool TwoDimHandler::resize( unsigned int dimension, unsigned int numEntries)
 			char* temp = data_;
 			unsigned int oldNx = nx_;
 			nx_ = numEntries;
+			dims_[0].size = numEntries;
 			innerNodeBalance( nx_ * ny_, 
 				Shell::myNode(), Shell::numNodes() );
 			unsigned int newN = end_ - start_;
@@ -125,6 +115,7 @@ bool TwoDimHandler::resize( unsigned int dimension, unsigned int numEntries)
 			char* temp = data_;
 			unsigned int oldNy = ny_;
 			ny_ = numEntries;
+			dims_[1].size = numEntries;
 			innerNodeBalance( nx_ * ny_, 
 				Shell::myNode(), Shell::numNodes() );
 			unsigned int newN = end_ - start_;
