@@ -20,8 +20,9 @@ class OneDimHandler: public BlockHandler
 	friend void testFieldDataHandler();
 	public:
 
-		OneDimHandler( const DinfoBase* dinfo, bool isGlobal, 
-			unsigned int size );
+		OneDimHandler( const DinfoBase* dinfo, 
+			const vector< DimInfo >& dims, unsigned short pathDepth,
+			bool isGlobal ); 
 
 		OneDimHandler( const OneDimHandler* other );
 
@@ -34,19 +35,9 @@ class OneDimHandler: public BlockHandler
 		/// data() is defined in BlockHandler
 		/// totalEntries() is defined in BlockHandler
 		/// localEntries() is defined in BlockHandler
-
-		/**
-		 * Returns the number of dimensions of the data.
-		 */
-		unsigned int numDimensions() const
-		{
-			return 1;
-		}
-
-		unsigned int sizeOfDim( unsigned int dim ) const;
-
-		vector< unsigned int > dims() const;
-
+		/// numDimensions is defined in DataHandler
+		/// sizeOfDim is defined in Data Handler
+		/// dims is defined in Data Handler
 		/// isDataHere() is defined in BlockHandler
 		/// isAllocated() is defined in BlockHandler
 
@@ -64,10 +55,12 @@ class OneDimHandler: public BlockHandler
 		/// unGlobalize() is defined in BlockHandler
 
 		/**
-		 * Make a single identity copy, doing appropriate node 
+		 * Make a copy to specified depth and with specified number of
+		 * copies, doing appropriate node 
 		 * partitioning if toGlobal is false.
 		 */
-		DataHandler* copy( bool toGlobal, unsigned int n ) const;
+		DataHandler* copy( unsigned short copyDepth, bool toGlobal, 
+			unsigned int n ) const;
 
 		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo) const;
 

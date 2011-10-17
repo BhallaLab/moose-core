@@ -10,13 +10,18 @@
 #include "header.h"
 #include "MsgDataHandler.h"
 
-MsgDataHandler::MsgDataHandler( const DinfoBase* dinfo, bool isGlobal )
-		: DataHandler( dinfo, isGlobal ), 
+MsgDataHandler::MsgDataHandler( const DinfoBase* dinfo, 
+		const vector< DimInfo >& dims, unsigned short pathDepth, 
+		bool isGlobal )
+		: DataHandler( dinfo, dims, pathDepth, isGlobal ), 
 			data_( 0 )
 {;}
 
 MsgDataHandler::MsgDataHandler( const MsgDataHandler* other )
-		: DataHandler( other->dinfo(), other->isGlobal() ),
+		: DataHandler( 
+				other->dinfo(), other->dims(), 
+				other->pathDepth(), other->isGlobal()
+			),
 			data_( 0 )
 {;}
 
@@ -37,32 +42,11 @@ char* MsgDataHandler::data( DataId index ) const
 }
 
 /// Later do something intelligent based on # of Msgs of current type.
-unsigned int MsgDataHandler::totalEntries() const {
-	return 1;
-}
+// unsigned int MsgDataHandler::totalEntries() const
 
 /// Later do something intelligent based on # of Msgs of current type.
 unsigned int MsgDataHandler::localEntries() const {
 	return 1;
-}
-
-unsigned int MsgDataHandler::numDimensions() const {
-	return 1;
-}
-
-
-/// Later do something intelligent based on # of Msgs of current type.
-unsigned int MsgDataHandler::sizeOfDim( unsigned int dim ) const
-{
-	if ( dim == 0 )
-		return 1;
-	return 0;
-}
-
-vector< unsigned int > MsgDataHandler::dims() const
-{
-	vector< unsigned int > ret( 1, Msg::numMsgs() );
-	return ret;
 }
 
 bool MsgDataHandler::isDataHere( DataId index ) const {
@@ -146,7 +130,8 @@ void MsgDataHandler::unGlobalize()
 	;
 }
 
-DataHandler* MsgDataHandler::copy( bool toGlobal, unsigned int n ) const
+DataHandler* MsgDataHandler::copy( 
+	unsigned short pathDepth, bool toGlobal, unsigned int n ) const
 {
 	return ( new MsgDataHandler( this ) );
 }

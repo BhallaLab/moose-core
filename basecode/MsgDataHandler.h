@@ -16,7 +16,9 @@
 class MsgDataHandler: public DataHandler
 {
 	public:
-		MsgDataHandler( const DinfoBase* dinfo, bool isGlobal );
+		MsgDataHandler( const DinfoBase* dinfo, 
+			const vector< DimInfo >& dims, unsigned short pathDepth,
+			bool isGlobal );
 
 		MsgDataHandler( const MsgDataHandler* other );
 
@@ -30,23 +32,9 @@ class MsgDataHandler: public DataHandler
 		char* data( DataId index ) const;
 
 		/**
-		 * Returns the number of data entries.
-		 */
-		unsigned int totalEntries() const;
-
-		/**
 		 * Returns the number of data entries on local node
 		 */
 		unsigned int localEntries() const;
-
-		/**
-		 * Returns the number of dimensions of the data.
-		 */
-		unsigned int numDimensions() const;
-
-		unsigned int sizeOfDim( unsigned int dim ) const;
-
-		vector< unsigned int > dims() const;
 
 		bool isDataHere( DataId index ) const;
 
@@ -86,7 +74,8 @@ class MsgDataHandler: public DataHandler
 		 * Make a single identity copy, doing appropriate node 
 		 * partitioning if toGlobal is false.
 		 */
-		DataHandler* copy( bool toGlobal, unsigned int n ) const;
+		DataHandler* copy( unsigned short pathDepth,
+			bool toGlobal, unsigned int n ) const;
 
 		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo) const;
 

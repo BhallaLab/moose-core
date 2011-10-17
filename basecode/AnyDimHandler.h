@@ -17,8 +17,9 @@
 class AnyDimHandler: public BlockHandler
 {
 	public:
-		AnyDimHandler( const DinfoBase* dinfo, bool isGlobal, 
-			const vector< int >& dims );
+		AnyDimHandler( const DinfoBase* dinfo, 
+			const vector< DimInfo >& dims, 
+			unsigned short pathDepth, bool isGlobal );
 
 		AnyDimHandler( const AnyDimHandler* other );
 
@@ -27,16 +28,6 @@ class AnyDimHandler: public BlockHandler
 		////////////////////////////////////////////////////////////
 		// Information functions
 		////////////////////////////////////////////////////////////
-
-		/**
-		 * Returns the number of dimensions of the data.
-		 */
-		unsigned int numDimensions() const;
-
-		unsigned int sizeOfDim( unsigned int dim ) const;
-
-		vector< unsigned int > dims() const;
-
 		////////////////////////////////////////////////////////////////
 		// load balancing functions
 		////////////////////////////////////////////////////////////////
@@ -47,10 +38,12 @@ class AnyDimHandler: public BlockHandler
 		// Data Reallocation functions
 		////////////////////////////////////////////////////////////////
 		/**
-		 * Make a single identity copy, doing appropriate node 
+		 * Make 'n' copies, to specified depth on element tree, 
+		 * doing appropriate node 
 		 * partitioning if toGlobal is false.
 		 */
-		DataHandler* copy( bool toGlobal, unsigned int n ) const;
+		DataHandler* copy( unsigned short copyDepth,
+			bool toGlobal, unsigned int n ) const;
 
 		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo) const;
 
@@ -61,7 +54,7 @@ class AnyDimHandler: public BlockHandler
 	private:
 		// dims_[0] varies fastest. To index it would be 
 		// data[dimN][...][dim0]
-		vector< unsigned int > dims_;
+		vector< DimInfo > dims_;
 };
 
 #endif	// _ANY_DIM_HANDLER_H

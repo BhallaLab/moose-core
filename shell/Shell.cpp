@@ -927,6 +927,22 @@ bool Shell::adopt( Id parent, Id child ) {
 	return 1;
 }
 
+unsigned int cleanDimensions( vector< int >& dims )
+{
+	vector< int > temp = dims;
+	dims.resize( 0 );
+	raggedStart = 0; // Can't have the root being ragged!
+	for ( unsigned int i = 0; i < temp.size(); ++i ) {
+		if ( temp[i] > 1 )
+			dims.push_back( temp[i] );
+		else if ( temp[i] < -1 ) {
+			dims.push_back( -temp[i] );
+			raggedStart = i;
+		}
+	}
+	return raggedStart;
+}
+
 /**
  * This function actually creates the object. Runs on all nodes.
  */
@@ -947,7 +963,17 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 		vector< int > dims( dimensions );
 		bool isGlobal = dims.back();
 		dims.pop_back();
-		Element* ret = new Element( newElm, c, name, dims, isGlobal);
+		cleanDimensions( dims );
+		vector< DimInfo > myDims = pa->dataHandler()->dims();
+		unsigned int myPathDepth = pa->dataHandler()->pathDepth() + 1;
+		for ( unsigned int i = 0; i < dims.size(); ++i ) {
+			if ( dims[i] > 1 || dims[i] < -1 ) {
+				DimInfo di = { dims[i], myPathDepth, 0 };
+				myDims.push_back( di );
+			}
+		}
+		Element* ret = new Element( newElm, c, name, dims, 
+			myPathDepth, isGlobal);
 		assert( ret );
 		adopt( parent, newElm );
 

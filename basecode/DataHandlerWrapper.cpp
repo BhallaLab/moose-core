@@ -11,7 +11,10 @@
 #include "DataHandlerWrapper.h"
 
 DataHandlerWrapper::DataHandlerWrapper( const DataHandler* parentHandler )
-	: DataHandler( parentHandler->dinfo(), parentHandler->isGlobal() ),
+	: DataHandler( 
+		parentHandler->dinfo(), parentHandler->dims(), 
+		parentHandler->pathDepth(), parentHandler->isGlobal()
+	),
 	parent_( parentHandler )
 {;}
 
@@ -28,32 +31,10 @@ char* DataHandlerWrapper::data( DataId index ) const
 }
 
 /**
- * Returns the number of data entries.
- */
-unsigned int DataHandlerWrapper::totalEntries() const {
-	return parent_->totalEntries();
-}
-
-/**
  * Returns the number of data entries on local node.
  */
 unsigned int DataHandlerWrapper::localEntries() const {
 	return parent_->localEntries();
-}
-
-/**
- * Returns the number of dimensions of the data.
- */
-unsigned int DataHandlerWrapper::numDimensions() const {
-	return parent_->numDimensions();
-}
-
-unsigned int DataHandlerWrapper::sizeOfDim( unsigned int dim ) const {
-	return parent_->sizeOfDim( dim );
-}
-
-vector< unsigned int > DataHandlerWrapper::dims() const {
-	return parent_->dims();
 }
 
 bool DataHandlerWrapper::isDataHere( DataId index ) const {
@@ -118,9 +99,10 @@ void DataHandlerWrapper::unGlobalize()
 	cout << "Error: DataHandlerWrapper::unGlobalize: parent is const\n";
 }
 
-DataHandler* DataHandlerWrapper::copy( bool toGlobal, unsigned int n ) const
+DataHandler* DataHandlerWrapper::copy( unsigned short copyDepth, 
+	bool toGlobal, unsigned int n ) const
 {
-	return parent_->copy( toGlobal, n );
+	return parent_->copy( copyDepth, toGlobal, n );
 }
 
 DataHandler* DataHandlerWrapper::copyUsingNewDinfo(

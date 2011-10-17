@@ -10,19 +10,20 @@
 #include "header.h"
 #include "../shell/Shell.h"
 
-BlockHandler::BlockHandler( const DinfoBase* dinfo, bool isGlobal,
-	unsigned int size )
-		: DataHandler( dinfo, isGlobal ), 
-			totalEntries_( size ),
+BlockHandler::BlockHandler( const DinfoBase* dinfo, 
+	const vector< DimInfo >& dims,
+	unsigned short pathDepth, bool isGlobal )
+		: DataHandler( dinfo, dims, pathDepth, isGlobal ), 
 			start_( 0 ), end_( 0 )
 {
-	innerNodeBalance( size, Shell::myNode(), Shell::numNodes() );
+	assert( totalEntries_ > 0 );
+	innerNodeBalance( totalEntries_, Shell::myNode(), Shell::numNodes() );
 	data_ = dinfo->allocData( end_ - start_ );
 }
 
 BlockHandler::BlockHandler( const BlockHandler* other )
-	: DataHandler( other->dinfo(), other->isGlobal_ ), 
-		totalEntries_( other->totalEntries_ ),
+	: DataHandler( other->dinfo(), other->dims(), 
+			other->pathDepth(),  other->isGlobal_ ), 
 	  	start_( other->start_ ),
 	  	end_( other->end_ )
 {
@@ -30,12 +31,6 @@ BlockHandler::BlockHandler( const BlockHandler* other )
 	data_ = dinfo()->copyData( other->data_, num, num );
 	innerNodeBalance( totalEntries_, Shell::myNode(), Shell::numNodes() );
 }
-
-/// This variant is used for the AnyDimHandler.
-BlockHandler::BlockHandler( const DinfoBase* dinfo, bool isGlobal )
-		: DataHandler( dinfo, isGlobal ), 
-			start_( 0 ), end_( 0 )
-{;}
 
 BlockHandler::~BlockHandler() {
 	if ( data_ )

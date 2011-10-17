@@ -53,7 +53,7 @@ class Element
 		 * be replicated on all nodes, or partitioned without replication. 
 		 */
 		Element( Id id, const Cinfo* c, const string& name,
-			const vector< int >& dimensions, 
+			const vector< DimInfo >& dimensions, unsigned short pathDepth,
 			bool isGlobal = 0 );
 
 		/**
@@ -68,7 +68,8 @@ class Element
 		 * This constructor copies over the original n times. It is
 		 * used for doing all copies, in Shell::innerCopyElements.
 		 */
-		Element( Id id, const Element* orig, unsigned int n, bool toGlobal);
+		Element( Id id, const Element* orig, unsigned int n, 
+			unsigned short copyDepth, bool toGlobal);
 
 		/**
 		 * Destructor

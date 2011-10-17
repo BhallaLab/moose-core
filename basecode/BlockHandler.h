@@ -22,12 +22,11 @@ class BlockHandler: public DataHandler
 {
 	public:
 
-		BlockHandler( const DinfoBase* dinfo, bool isGlobal, 
-			unsigned int size );
+		BlockHandler( const DinfoBase* dinfo,
+			const vector< DimInfo >& dims, 
+			unsigned short pathDepth, bool isGlobal );
 
 		BlockHandler( const BlockHandler* other );
-
-		BlockHandler( const DinfoBase* dinfo, bool isGlobal );
 
 		~BlockHandler();
 

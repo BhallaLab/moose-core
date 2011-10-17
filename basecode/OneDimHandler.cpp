@@ -10,9 +10,10 @@
 #include "header.h"
 #include "../shell/Shell.h"
 
-OneDimHandler::OneDimHandler( const DinfoBase* dinfo, bool isGlobal,
-	unsigned int size )
-		: BlockHandler( dinfo, isGlobal, size )
+OneDimHandler::OneDimHandler( const DinfoBase* dinfo, 
+	const vector< DimInfo >& dims,
+	unsigned short pathDepth, bool isGlobal )
+		: BlockHandler( dinfo, dims, pathDepth, isGlobal )
 {;}
 
 OneDimHandler::OneDimHandler( const OneDimHandler* other )
@@ -25,19 +26,6 @@ OneDimHandler::~OneDimHandler()
 ////////////////////////////////////////////////////////////////////////
 // Information functions
 ////////////////////////////////////////////////////////////////////////
-
-unsigned int OneDimHandler::sizeOfDim( unsigned int dim ) const
-{
-	if ( dim == 0 )
-		return totalEntries_;
-	return 0;
-}
-
-vector< unsigned int > OneDimHandler::dims() const
-{
-	vector< unsigned int > ret( 1, totalEntries_ );
-	return ret;
-}
 
 ////////////////////////////////////////////////////////////////////////
 // Load balancing
@@ -52,7 +40,8 @@ vector< unsigned int > OneDimHandler::dims() const
 // Data Reallocation functions.
 ////////////////////////////////////////////////////////////////////////
 
-DataHandler* OneDimHandler::copy( bool toGlobal, unsigned int n ) const
+DataHandler* OneDimHandler::copy( unsigned short copyDepth,
+	bool toGlobal, unsigned int n ) const
 {
 	if ( toGlobal ) {
 		if ( !isGlobal() ) {
@@ -64,7 +53,13 @@ DataHandler* OneDimHandler::copy( bool toGlobal, unsigned int n ) const
 		// Note that we expand into ny, rather than nx. The current array
 		// size is going to remain the lowest level index.
 		// ny is the last argument.
-		TwoDimHandler* ret = new TwoDimHandler( dinfo(), toGlobal, totalEntries_, n );
+		DimInfo temp = { n, copyDepth, 0 };
+		vector< DimInfo > newDims;
+		newDims.push_back( temp ); // Lowest index is fastest varying.
+		newDims.push_back( dims_[0] ); // Highest index closest to root.
+		newDims.back().depth += copyDepth - pathDepth_;
+		TwoDimHandler* ret = new TwoDimHandler( dinfo(), newDims, 
+			copyDepth, toGlobal );
 		if ( data_ )  {
 			if ( isGlobal() ) {
 				ret->assign( data_, totalEntries_ );
@@ -81,7 +76,7 @@ DataHandler* OneDimHandler::copy( bool toGlobal, unsigned int n ) const
 
 DataHandler* OneDimHandler::copyUsingNewDinfo( const DinfoBase* dinfo) const
 {
-	return new OneDimHandler( dinfo, isGlobal_, totalEntries_ );
+	return new OneDimHandler( dinfo, dims_, pathDepth_, isGlobal_ );
 }
 
 /**
@@ -97,6 +92,7 @@ bool OneDimHandler::resize( unsigned int dimension, unsigned int numEntries)
 		}
 		char* temp = data_;
 		unsigned int n = end_ - start_;
+		dims_[0].size = numEntries;
 		innerNodeBalance( numEntries, 
 			Shell::myNode(), Shell::numNodes() );
 		unsigned int newN = end_ - start_;
@@ -105,4 +101,3 @@ bool OneDimHandler::resize( unsigned int dimension, unsigned int numEntries)
 	}
 	return 0;
 }
-

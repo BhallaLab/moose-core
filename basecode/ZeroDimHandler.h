@@ -18,7 +18,9 @@ class ZeroDimHandler: public DataHandler
 {
 	public:
 		/// This is the generic constructor
-		ZeroDimHandler( const DinfoBase* dinfo, bool isGlobal );
+		ZeroDimHandler( const DinfoBase* dinfo, 
+			const vector< DimInfo >& dims, unsigned short pathDepth,
+			bool isGlobal );
 
 		/// Special constructor used in Cinfo::makeCinfoElements
 		ZeroDimHandler( const DinfoBase* dinfo, char* data );
@@ -36,32 +38,9 @@ class ZeroDimHandler: public DataHandler
 		char* data( DataId index ) const;
 
 		/**
-		 * Returns the number of data entries.
-		 */
-		unsigned int totalEntries() const
-		{
-			return 1; // Somewhere, on some node, there is an entry.
-		}
-
-		/**
 		 * Returns the number of data entries on local node
 		 */
 		unsigned int localEntries() const;
-
-		/**
-		 * Returns the number of dimensions of the data.
-		 */
-		unsigned int numDimensions() const
-		{
-			return 0;
-		}
-
-		unsigned int sizeOfDim( unsigned int dim ) const
-		{
-			return ( dim == 0 );
-		}
-
-		vector< unsigned int > dims() const;
 
 		bool isDataHere( DataId index ) const;
 
@@ -110,7 +89,8 @@ class ZeroDimHandler: public DataHandler
 		 * Make a single identity copy, doing appropriate node 
 		 * partitioning if toGlobal is false.
 		 */
-		DataHandler* copy( bool toGlobal, unsigned int n ) const;
+		DataHandler* copy( unsigned short copyDepth, 
+			bool toGlobal, unsigned int n ) const;
 
 		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo) const;
 

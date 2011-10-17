@@ -10,24 +10,15 @@
 #include "header.h"
 #include "../shell/Shell.h"
 
-AnyDimHandler::AnyDimHandler( const DinfoBase* dinfo, bool isGlobal,
-	const vector< int >& dims )
-		: BlockHandler( dinfo, isGlobal )
-{
-	dims_.resize( dims.size() );
-	totalEntries_ = 1;
-	for ( unsigned int i = 0; i < dims.size(); ++i ) {
-		assert( dims[i] > 0 );
-		dims_[i] = dims[i];
-		totalEntries_ *= dims_[i];
-	}
-	innerNodeBalance( totalEntries_, Shell::myNode(), Shell::numNodes() );
-	data_ = dinfo->allocData( end_ - start_ );
-}
+AnyDimHandler::AnyDimHandler( const DinfoBase* dinfo, 
+	const vector< DimInfo >& dims,
+	unsigned short pathDepth,
+	bool isGlobal )
+		: BlockHandler( dinfo, dims, pathDepth, isGlobal )
+{;}
 
 AnyDimHandler::AnyDimHandler( const AnyDimHandler* other )
-	: BlockHandler( other ), 
-	  dims_( other->dims_ )
+	: BlockHandler( other )
 {;}
 
 AnyDimHandler::~AnyDimHandler()
@@ -36,24 +27,6 @@ AnyDimHandler::~AnyDimHandler()
 ////////////////////////////////////////////////////////////////////////
 // Information functions
 ////////////////////////////////////////////////////////////////////////
-
-unsigned int AnyDimHandler::numDimensions() const
-{
-	return dims_.size();
-}
-
-unsigned int AnyDimHandler::sizeOfDim( unsigned int dim ) const
-{
-	if ( dim < dims_.size() )
-		return dims_[dim];
-	return 0;
-}
-
-vector< unsigned int > AnyDimHandler::dims() const
-{
-	return dims_;
-}
-
 ////////////////////////////////////////////////////////////////////////
 // Load balancing
 ////////////////////////////////////////////////////////////////////////
@@ -64,7 +37,8 @@ vector< unsigned int > AnyDimHandler::dims() const
 // Data Reallocation functions.
 ////////////////////////////////////////////////////////////////////////
 
-DataHandler* AnyDimHandler::copy( bool toGlobal, unsigned int n ) const
+DataHandler* AnyDimHandler::copy( unsigned short copyDepth,
+	bool toGlobal, unsigned int n ) const
 {
 	if ( toGlobal ) {
 		if ( !isGlobal() ) {
@@ -73,12 +47,15 @@ DataHandler* AnyDimHandler::copy( bool toGlobal, unsigned int n ) const
 		}
 	}
 	if ( n > 1 ) {
-		vector< int > newDims( dims_.size() + 1);
-		for ( unsigned int i = 0; i < dims_.size(); ++i )
-			newDims[i] = dims_[i];
-		newDims[ dims_.size() ] = n;
-
-		AnyDimHandler* ret = new AnyDimHandler( dinfo(), toGlobal, newDims);
+		DimInfo temp = {n, copyDepth, 0 };
+		vector< DimInfo > newDims;
+		newDims.push_back( temp );
+		for ( unsigned int i = 0; i < dims_.size(); ++i ) {
+			newDims.push_back( dims_[0] );
+			newDims.back().depth += copyDepth - pathDepth_;
+		}
+		AnyDimHandler* ret = new AnyDimHandler( dinfo(), 
+			newDims, copyDepth, toGlobal );
 		if ( data_ )  {
 			ret->assign( data_, end_ - start_ );
 		}
@@ -91,11 +68,7 @@ DataHandler* AnyDimHandler::copy( bool toGlobal, unsigned int n ) const
 
 DataHandler* AnyDimHandler::copyUsingNewDinfo( const DinfoBase* dinfo) const
 {
-	vector< int > temp( dims_.size() );
-	for ( unsigned int i = 0; i < dims_.size(); ++i ) {
-		temp[i] = dims_[i];
-	}
-	return new AnyDimHandler( dinfo, isGlobal_, temp );
+	return new AnyDimHandler( dinfo, dims_, pathDepth_, isGlobal_ );
 }
 
 /**
@@ -110,14 +83,14 @@ bool AnyDimHandler::resize( unsigned int dimension, unsigned int numEntries)
 {
 	if ( dimension < dims_.size() && data_ != 0 && totalEntries_ > 0 &&
 		numEntries > 0 ) {
-		if ( dims_[ dimension ] == numEntries )
+		if ( dims_[ dimension ].size == numEntries )
 			return 0;
-		unsigned int oldN = dims_[ dimension ];
+		unsigned int oldN = dims_[ dimension ].size;
 		unsigned int oldTotalEntries = totalEntries_;
-		dims_[ dimension ] = numEntries;
+		dims_[ dimension ].size = numEntries;
 		totalEntries_ = 1;
 		for ( unsigned int i = 0; i < dims_.size(); ++i ) {
-			totalEntries_ *= dims_[i];
+			totalEntries_ *= dims_[i].size;
 		}
 		
 		if ( dimension == 0 ) {
@@ -126,16 +99,17 @@ bool AnyDimHandler::resize( unsigned int dimension, unsigned int numEntries)
 			char* temp = data_;
 			innerNodeBalance( totalEntries_, 
 				Shell::myNode(), Shell::numNodes() );
+			dims_[0].size = numEntries;
 			unsigned int newLocalEntries = end_ - start_;
 			data_ = dinfo()->allocData( newLocalEntries );
 			if ( isGlobal_ ) {
 				assert ( totalEntries_ == newLocalEntries);
-				unsigned int newBlockSize = dims_[0] * dinfo()->size();
+				unsigned int newBlockSize = dims_[0].size * dinfo()->size();
 				unsigned int oldBlockSize = oldN * dinfo()->size();
-				unsigned int j = totalEntries_ / dims_[0];
+				unsigned int j = totalEntries_ / dims_[0].size;
 				for ( unsigned int i = 0; i < j; ++i ) {
-					dinfo()->assignData( data_ + i * newBlockSize, dims_[0],
-						temp + i * oldBlockSize, oldN );
+					dinfo()->assignData( data_ + i * newBlockSize, 
+						dims_[0].size, temp + i * oldBlockSize, oldN );
 				}
 			} 
 			dinfo()->destroyData( temp );
@@ -151,6 +125,7 @@ bool AnyDimHandler::resize( unsigned int dimension, unsigned int numEntries)
 			} else {
 				data_ = dinfo()->allocData( newLocalEntries );
 			}
+			dims_[dimension].size = numEntries;
 			dinfo()->destroyData( temp );
 		}
 	}
