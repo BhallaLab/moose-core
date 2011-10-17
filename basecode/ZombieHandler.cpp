@@ -11,7 +11,10 @@
 
 ZombieHandler::ZombieHandler( const DataHandler* parentHandler,
 	unsigned int start, unsigned int end )
-	: DataHandler( parentHandler->dinfo(), parentHandler->isGlobal() ),
+	: DataHandler( 
+			parentHandler->dinfo(), parentHandler->dims(),
+			parentHandler->pathDepth(), parentHandler->isGlobal()
+		),
 		parent_( parentHandler ),
 		start_( start ), end_( end )
 {;}
@@ -29,32 +32,10 @@ char* ZombieHandler::data( DataId index ) const
 }
 
 /**
- * Returns the number of data entries.
- */
-unsigned int ZombieHandler::totalEntries() const {
-	return end_ - start_;
-}
-
-/**
  * Returns the number of data entries on local node.
  */
 unsigned int ZombieHandler::localEntries() const {
 	return end_ - start_;
-}
-
-/**
- * Returns the number of dimensions of the data.
- */
-unsigned int ZombieHandler::numDimensions() const {
-	return parent_->numDimensions();
-}
-
-vector< unsigned int > ZombieHandler::dims() const {
-	return parent_->dims();
-}
-
-unsigned int ZombieHandler::sizeOfDim( unsigned int dim ) const {
-	return parent_->sizeOfDim( dim );
 }
 
 bool ZombieHandler::isDataHere( DataId index ) const {
@@ -63,11 +44,6 @@ bool ZombieHandler::isDataHere( DataId index ) const {
 
 bool ZombieHandler::isAllocated() const {
 	return parent_->isAllocated();
-}
-
-bool ZombieHandler::isGlobal() const
-{
-	return parent_->isGlobal();
 }
 
 unsigned int ZombieHandler::linearIndex( DataId di ) const
@@ -146,7 +122,8 @@ void ZombieHandler::unGlobalize()
 	;
 }
 
-DataHandler* ZombieHandler::copy( bool toGlobal, unsigned int n ) const
+DataHandler* ZombieHandler::copy( 
+	unsigned short pathDepth, bool toGlobal, unsigned int n ) const
 {
 	return ( new ZombieHandler( parent_, start_ * n, end_ * n ) );
 }

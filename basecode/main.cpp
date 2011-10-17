@@ -178,10 +178,9 @@ Id init( int argc, char** argv )
 
 	Msg::initNull();
 	Id shellId;
-	vector< int > dims;
-	dims.push_back( 1 );
+	vector< DimInfo > dims;
 	Element* shelle = 
-		new Element( shellId, Shell::initCinfo(), "root", dims, 1 );
+		new Element( shellId, Shell::initCinfo(), "root", dims, 0, 1 );
 	// Shell::initCinfo()->create( shellId, "root", 1 );
 
 	Id clockId = Id::nextId();
@@ -192,7 +191,7 @@ Id init( int argc, char** argv )
 	s->loadBalance();
 
 	// Element* clocke = 
-	new Element( clockId, Clock::initCinfo(), "clock", dims, 1 );
+	new Element( clockId, Clock::initCinfo(), "clock", dims, 1, 1 );
 
 	// Clock::initCinfo()->postCreationFunc( clockId, clocke );
 	// Should put this initialization stuff within the Clock creation
@@ -204,7 +203,7 @@ Id init( int argc, char** argv )
 	assert( tickId()->getName() == "tick" ) ;
 
 	Id classMasterId( 3 );
-	new Element( classMasterId, Neutral::initCinfo(), "classes", dims, 1 );
+	new Element( classMasterId, Neutral::initCinfo(), "classes", dims, 1, 1 );
 
 	assert ( shellId == Id() );
 	assert( clockId == Id( 1 ) );

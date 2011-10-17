@@ -18,8 +18,9 @@ class TwoDimHandler: public BlockHandler
 {
 	public:
 
-		TwoDimHandler( const DinfoBase* dinfo, bool isGlobal, 
-			unsigned int nx, unsigned int ny );
+		TwoDimHandler( const DinfoBase* dinfo, 
+			const vector< DimInfo >& dimensions,
+			unsigned short pathDepth, bool isGlobal );
 
 		TwoDimHandler( const TwoDimHandler* other );
 
@@ -28,18 +29,6 @@ class TwoDimHandler: public BlockHandler
 		////////////////////////////////////////////////////////////
 		// Information functions
 		////////////////////////////////////////////////////////////
-		/**
-		 * Returns the number of dimensions of the data.
-		 */
-		unsigned int numDimensions() const
-		{
-			return 2;
-		}
-
-		unsigned int sizeOfDim( unsigned int dim ) const;
-
-		vector< unsigned int > dims() const;
-
 		////////////////////////////////////////////////////////////////
 		// load balancing functions: defined in BlockHandler
 		////////////////////////////////////////////////////////////////
@@ -53,10 +42,12 @@ class TwoDimHandler: public BlockHandler
 		// unGlobalize(): defined in BlockHandler
 
 		/**
-		 * Make a single identity copy, doing appropriate node 
+		 * Make a copy to specified depth in the element tree, with
+		 * specified number n of copies, doing appropriate node 
 		 * partitioning if toGlobal is false.
 		 */
-		DataHandler* copy( bool toGlobal, unsigned int n ) const;
+		DataHandler* copy( unsigned short copyDepth,
+			bool toGlobal, unsigned int n ) const;
 
 		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo) const;
 

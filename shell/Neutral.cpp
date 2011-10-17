@@ -521,9 +521,15 @@ string Neutral::path( const Eref& e )
 		pathVec.push_back( curr );
 	}
 
+	const DataHandler* dh = e.element().dataHandler();
 	ss << "/";
+	unsigned int j = 0;
 	for ( int i = pathVec.size() - 2; i >= 0; --i ) {
 		ss << pathVec[i].eref();
+		while ( dh->pathDepth[j] == ( pathVec.size() - 1 - i ) ) {
+			ss << "[" << dh->dims[j] << "]";
+			++j;
+		}
 		if ( i > 0 )
 			ss << "/";
 	}
