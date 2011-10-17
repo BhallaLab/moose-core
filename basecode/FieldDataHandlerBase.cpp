@@ -288,6 +288,7 @@ void FieldDataHandlerBase::setMaxFieldEntries( unsigned int num )
 			break;
 	}
 	maxFieldEntries_ = num;
+	totalEntries_ = parentDataHandler_->totalEntries() * maxFieldEntries_;
 	numFieldBits_ = i;
 	mask_ = ( 1 << i ) - 1;
 }

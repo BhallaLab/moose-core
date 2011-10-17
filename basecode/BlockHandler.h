@@ -94,7 +94,6 @@ class BlockHandler: public DataHandler
 
 	protected:
 
-		unsigned int totalEntries_; /// Total number of entries on all nodes
 		unsigned int start_;	/// Starting index of data, used in MPI.
 		unsigned int end_;	/// Starting index of data, used in MPI.
 

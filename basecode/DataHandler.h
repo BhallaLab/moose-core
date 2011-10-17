@@ -112,8 +112,8 @@ class DataHandler
 
 		 /**
 		  * Returns vector of dimensions.
-		  * Highest index is closest to root.
-		  * Lowest index varies fastest.
+		  * Lowest index is closest to root. 0 is root.
+		  * Highest index varies fastest.
 		  */
 		 const vector< DimInfo >& dims() const;
 

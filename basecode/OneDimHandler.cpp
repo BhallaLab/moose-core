@@ -55,8 +55,8 @@ DataHandler* OneDimHandler::copy( unsigned short copyDepth,
 		// ny is the last argument.
 		DimInfo temp = { n, copyDepth, 0 };
 		vector< DimInfo > newDims;
-		newDims.push_back( temp ); // Lowest index is fastest varying.
-		newDims.push_back( dims_[0] ); // Highest index closest to root.
+		newDims.push_back( dims_[0] ); // Lowest index closest to root.
+		newDims.push_back( temp ); // Highest index is fastest varying.
 		newDims.back().depth += copyDepth - pathDepth_;
 		TwoDimHandler* ret = new TwoDimHandler( dinfo(), newDims, 
 			copyDepth, toGlobal );

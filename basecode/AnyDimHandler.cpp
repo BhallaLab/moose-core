@@ -49,11 +49,11 @@ DataHandler* AnyDimHandler::copy( unsigned short copyDepth,
 	if ( n > 1 ) {
 		DimInfo temp = {n, copyDepth, 0 };
 		vector< DimInfo > newDims;
-		newDims.push_back( temp );
 		for ( unsigned int i = 0; i < dims_.size(); ++i ) {
-			newDims.push_back( dims_[0] );
+			newDims.push_back( dims_[i] );
 			newDims.back().depth += copyDepth - pathDepth_;
 		}
+		newDims.push_back( temp );
 		AnyDimHandler* ret = new AnyDimHandler( dinfo(), 
 			newDims, copyDepth, toGlobal );
 		if ( data_ )  {
