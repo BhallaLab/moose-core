@@ -494,9 +494,10 @@ void testShellParserStart()
 
 
 	const Cinfo* testSchedCinfo = TestSched::initCinfo();
-	vector< int > dims;
+	vector< DimInfo > dims;
 	Id tsid = Id::nextId();
-	Element* tse = new Element( tsid, testSchedCinfo, "tse", dims );
+	Element* tse = new Element( tsid, testSchedCinfo, "tse", dims,
+		1, true );
 
 	// testThreadSchedElement tse;
 	Eref ts( tse, 0 );

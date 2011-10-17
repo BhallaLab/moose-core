@@ -400,7 +400,7 @@ void testMarkovSolver()
 	const Cinfo* vectorTableCinfo = VectorTable::initCinfo();
 	const Cinfo* markovSolverCinfo = MarkovSolver::initCinfo();
 
-	vector< int > single( 1, 1 );
+	vector< DimInfo > single;
 
 	Id rateTable2dId = Id::nextId();
 	Id rateTable1dId = Id::nextId();
@@ -410,16 +410,16 @@ void testMarkovSolver()
 	Id solver1dId = Id::nextId();
 
 	Element *eRateTable2d = new Element( rateTable2dId, rateTableCinfo, 
-																			"rateTable2d", single, 1 );
+																			"rateTable2d", single, 1, true );
 	Element *eRateTable1d = new Element( rateTable1dId, rateTableCinfo, 
-																			"rateTable1d", single, 1 );
+																			"rateTable1d", single, 1, true );
 	Element *eInt2d = new Element( int2dId, interpol2dCinfo, "int2d", single, 1 );
 	Element *eVecTable = new Element( vecTableId, vectorTableCinfo, "vecTable", 
-																		single, 1 );
+																		single, 1, true );
 	Element *eSolver2d = new Element( solver2dId, markovSolverCinfo, 
-																		"solver2d", single, 1 );	
+																		"solver2d", single, 1, true );	
 	Element *eSolver1d = new Element( solver1dId, markovSolverCinfo, 
-																		"solver1d", single, 1 );	
+																		"solver1d", single, 1, true );	
 																		 
 	Eref rateTable2dEref( eRateTable2d, 0 );
 	Eref rateTable1dEref( eRateTable1d, 0 );

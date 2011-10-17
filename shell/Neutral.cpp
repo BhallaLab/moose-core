@@ -316,7 +316,11 @@ unsigned int Neutral::getLinearSize( const Eref& e, const Qinfo* q ) const
 vector< unsigned int > Neutral::getDimensions( 
 	const Eref& e, const Qinfo* q ) const
 {
-	return e.element()->dataHandler()->dims();
+	vector< unsigned int > ret;
+	const vector< DimInfo >& dims = e.element()->dataHandler()->dims();
+	for ( unsigned int i = 0; i < dims.size(); ++i )
+		ret.push_back( dims[i].size );
+	return ret;
 }
 
 void Neutral::setFieldDimension( const Eref& e, const Qinfo* q, 
@@ -521,13 +525,14 @@ string Neutral::path( const Eref& e )
 		pathVec.push_back( curr );
 	}
 
-	const DataHandler* dh = e.element().dataHandler();
+	const DataHandler* dh = e.element()->dataHandler();
+	const vector< DimInfo >& dims = dh->dims();
 	ss << "/";
 	unsigned int j = 0;
 	for ( int i = pathVec.size() - 2; i >= 0; --i ) {
 		ss << pathVec[i].eref();
-		while ( dh->pathDepth[j] == ( pathVec.size() - 1 - i ) ) {
-			ss << "[" << dh->dims[j] << "]";
+		while ( dims[j].depth == ( pathVec.size() - 1 - i ) ) {
+			ss << "[" << dims[j].size << "]";
 			++j;
 		}
 		if ( i > 0 )
