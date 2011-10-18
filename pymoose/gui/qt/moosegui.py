@@ -155,7 +155,7 @@ class MainWindow(QtGui.QMainWindow):
         self.centralVizPanel.setBackground(QtGui.QBrush(QtGui.QImage('QMdiBackground.png')))
 
         self.centralVizPanel.setStatusTip('To load a model, Menu >File >Load Model or Ctrl+L')
-        self.centralVizPanel.setWhatsThis("<font color='black'> This is MOOSE. To load a model, Menu >File >Load Model or Ctrl+L </font>")
+        self.centralVizPanel.setWhatsThis("<font color='black'> To load a model, Menu >File >Load Model or Ctrl+L </font>")
         self.centralPanel = QtGui.QMdiArea(self)
         self.centralPanel.setStatusTip('Plot Window. Drag field from Property Editor to plot. Click and drag area to zoom in. Esc to zoom out. To add new Plot Windows, Menu >View >New Plot Window')
         self.centralPanel.setWhatsThis("<font color='black'> Plot Window. Drag field from Property Editor to plot. Click and drag area to zoom in. Esc to zoom out. To add new Plot Windows, Menu >View >New Plot Window </font>")
