@@ -14,7 +14,7 @@ TwoDimHandler::TwoDimHandler( const DinfoBase* dinfo,
 	const vector< DimInfo >& dims, unsigned short pathDepth,
 	bool isGlobal )
 		: BlockHandler( dinfo, dims, pathDepth, isGlobal ),
-			nx_( dims[0].size ), ny_( dims[1].size )
+			nx_( dims[1].size ), ny_( dims[0].size )
 {;}
 
 TwoDimHandler::TwoDimHandler( const TwoDimHandler* other )
@@ -53,17 +53,17 @@ DataHandler* TwoDimHandler::copy(
 			return 0;
 		}
 	}
-	if ( copyRootDepth >= dims_[0].depth || copyRootDepth >= dims_[1].depth)
+	if ( copyRootDepth > dims_[0].depth || copyRootDepth >= dims_[1].depth)
 		return 0;
 
 	if ( n > 1 ) {
 		DimInfo temp = {n, newParentDepth + 1, 0 };
 		vector< DimInfo > newDims;
+		newDims.push_back( temp );
 		newDims.push_back( dims_[0] );
 		newDims.back().depth += 1 + newParentDepth - copyRootDepth;
 		newDims.push_back( dims_[1] );
 		newDims.back().depth += 1 + newParentDepth - copyRootDepth;
-		newDims.push_back( temp );
 		AnyDimHandler* ret = new AnyDimHandler( dinfo(), 
 			newDims, 
 			1 + pathDepth() + newParentDepth - copyRootDepth, toGlobal );
@@ -97,7 +97,7 @@ DataHandler* TwoDimHandler::copyUsingNewDinfo( const DinfoBase* dinfo) const
 bool TwoDimHandler::resize( unsigned int dimension, unsigned int numEntries)
 {
 	if ( data_ != 0 && nx_ * ny_ > 0 && numEntries > 0 ) {
-		if ( dimension == 0 ) {
+		if ( dimension == 1 ) {
 			// go from 1 2 3 : 4 5 6 to 1 2 3 .. : 4 5 6 ..
 			// Try to preserve original data, possible if it is global.
 			if ( numEntries == nx_ )
@@ -105,19 +105,20 @@ bool TwoDimHandler::resize( unsigned int dimension, unsigned int numEntries)
 			char* temp = data_;
 			unsigned int oldNx = nx_;
 			nx_ = numEntries;
-			dims_[0].size = numEntries;
+			dims_[1].size = numEntries;
 			innerNodeBalance( nx_ * ny_, 
 				Shell::myNode(), Shell::numNodes() );
 			unsigned int newN = end_ - start_;
 			data_ = dinfo()->allocData( newN );
 			if ( isGlobal_ ) {
-				unsigned int newBlockSize = nx_ * dinfo()->size();
-				unsigned int oldBlockSize = oldNx * dinfo()->size();
 				for ( unsigned int i = 0; i < ny_; ++i ) {
-					memcpy( data_ + i * newBlockSize, temp + i * oldBlockSize, oldBlockSize );
+					dinfo()->assignData( 
+						data_ + i * nx_ * dinfo()->size(), nx_,
+						temp + i * oldNx * dinfo()->size(), oldNx );
 				}
 			} 
 			dinfo()->destroyData( temp );
+			return 1;
 		} else if ( dimension == 1 ) {
 			// go from 1 2 3 : 4 5 6 to 1 2 3 : 4 5 6 : 7 8 9 : ....
 			// Try to preserve original data, possible if it is global.
@@ -126,7 +127,7 @@ bool TwoDimHandler::resize( unsigned int dimension, unsigned int numEntries)
 			char* temp = data_;
 			unsigned int oldNy = ny_;
 			ny_ = numEntries;
-			dims_[1].size = numEntries;
+			dims_[0].size = numEntries;
 			innerNodeBalance( nx_ * ny_, 
 				Shell::myNode(), Shell::numNodes() );
 			unsigned int newN = end_ - start_;
@@ -137,6 +138,7 @@ bool TwoDimHandler::resize( unsigned int dimension, unsigned int numEntries)
 				data_ = dinfo()->allocData( newN );
 			}
 			dinfo()->destroyData( temp );
+			return 1;
 		}
 	}
 	return 0;
