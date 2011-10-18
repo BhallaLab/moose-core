@@ -155,10 +155,10 @@ class MainWindow(QtGui.QMainWindow):
         self.centralVizPanel.setBackground(QtGui.QBrush(QtGui.QImage('QMdiBackground.png')))
 
         self.centralVizPanel.setStatusTip('To load a model, Menu >File >Load Model or Ctrl+L')
-        self.centralVizPanel.setWhatsThis('This is MOOSE. To load a model, Menu >File >Load Model or Ctrl+L')
+        self.centralVizPanel.setWhatsThis("<font color='black'> This is MOOSE. To load a model, Menu >File >Load Model or Ctrl+L </font>")
         self.centralPanel = QtGui.QMdiArea(self)
-        self.centralPanel.setStatusTip('Plot Window. Drag field from Editor to plot. Click and drag area to zoom in. Esc to zoom out. To add new Plot Windows, Menu >View >New Plot Window')
-        self.centralPanel.setWhatsThis('Plot Window. Drag field from Editor to plot. Click and drag area to zoom in. Esc to zoom out. To add new Plot Windows, Menu >View >New Plot Window')
+        self.centralPanel.setStatusTip('Plot Window. Drag field from Property Editor to plot. Click and drag area to zoom in. Esc to zoom out. To add new Plot Windows, Menu >View >New Plot Window')
+        self.centralPanel.setWhatsThis("<font color='black'> Plot Window. Drag field from Property Editor to plot. Click and drag area to zoom in. Esc to zoom out. To add new Plot Windows, Menu >View >New Plot Window </font>")
         self.horizontalLayout.addWidget(self.centralPanel)
         
         # The following are for holding transient selections from
@@ -253,7 +253,7 @@ class MainWindow(QtGui.QMainWindow):
         self.runTimeEditToolbar.setText('%1.3e' % (MooseHandler.runtime))
         self.runTimeEditToolbar.setGeometry(100,0,80,30)
         self.runTimeEditToolbar.setStatusTip('Set run time for the simulation')
-        self.runTimeEditToolbar.setWhatsThis('Set run time for the simulation')
+        self.runTimeEditToolbar.setWhatsThis("<font color='black'> Set run time for the simulation </font>")
 
         self.currentTimeLabelToolbar = QtGui.QLabel(self.simToolbar)
         self.currentTimeLabelToolbar.setText(' Current Time :')
@@ -269,7 +269,7 @@ class MainWindow(QtGui.QMainWindow):
         self.runButtonToolbar.setGeometry(360,0,50,30)
         self.runButtonToolbar.setEnabled(0)
         self.runButtonToolbar.setStatusTip('Run to start simulation')
-        self.runButtonToolbar.setWhatsThis('Run to start simulation')
+        self.runButtonToolbar.setWhatsThis("<font color='black'> Run to start simulation </font>")
 
         self.continueButtonToolbar = QtGui.QToolButton(self.simToolbar)
         self.continueButtonToolbar.setToolTip('Continue')
@@ -277,7 +277,7 @@ class MainWindow(QtGui.QMainWindow):
         self.continueButtonToolbar.setGeometry(410,0,50,30)
         self.continueButtonToolbar.setEnabled(0)
         self.continueButtonToolbar.setStatusTip('Continue simulation')
-        self.continueButtonToolbar.setWhatsThis('Continue simulation')
+        self.continueButtonToolbar.setWhatsThis("<font color='black'> Continue simulation </font>")
 
         self.resetButtonToolbar = QtGui.QToolButton(self.simToolbar)
         self.resetButtonToolbar.setToolTip('Reset')
@@ -285,7 +285,7 @@ class MainWindow(QtGui.QMainWindow):
         self.resetButtonToolbar.setGeometry(460,0,50,30)
         self.resetButtonToolbar.setEnabled(0)
         self.resetButtonToolbar.setStatusTip('Reset simulation')
-        self.resetButtonToolbar.setWhatsThis('Reset simulation')
+        self.resetButtonToolbar.setWhatsThis("<font color='black'> Reset simulation </font>")
         
         self.whatsThisAction  = QtGui.QWhatsThis.createAction(self.simToolbar)
         self.whatsThisButtonToolbar = QtGui.QToolButton(self.simToolbar)
@@ -402,7 +402,7 @@ class MainWindow(QtGui.QMainWindow):
         self.commandLineDock.setObjectName('MooseCommandLine')
         #add_chait
         self.commandLineDock.setStatusTip('Moose Shell. Create and manipulate moose objects using python')
-        self.commandLineDock.setWhatsThis('Moose Shell. Create and manipulate moose objects using python')
+        self.commandLineDock.setWhatsThis("<font color='black'> Moose Shell. Create and manipulate moose objects using python </font>")
         self.commandLineDock.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
         self.commandLineDock.setFeatures(QtGui.QDockWidget.DockWidgetClosable)
         return self.commandLineDock
@@ -465,7 +465,7 @@ class MainWindow(QtGui.QMainWindow):
         	             self.sceneLayout.updateItemSlot)
 
         self.objFieldEditPanel.setWidget(self.objFieldEditor)
-        self.objFieldEditPanel.setWindowTitle('Editor - '+self.tr(obj.name))
+        self.objFieldEditPanel.setWindowTitle('Property Editor - '+self.tr(obj.name))
         self.objFieldEditPanel.raise_()
 	self.objFieldEditPanel.show()
         #add_chait
@@ -473,8 +473,8 @@ class MainWindow(QtGui.QMainWindow):
         self.objFieldEditPanel.setMaximumWidth(330)
         self.objFieldEditPanel.setMinimumHeight(180)
         self.objFieldEditPanel.setFeatures(QtGui.QDockWidget.DockWidgetClosable)
-        self.objFieldEditPanel.setStatusTip('Editor. Drag field into plot window to plot or select plot from drop-down in column 3. Edit field values in column 2.') 
-        self.objFieldEditPanel.setWhatsThis('Editor. Drag field into plot window to plot or select plot from drop-down in column 3. Edit field values in column 2.') 
+        self.objFieldEditPanel.setStatusTip('Property Editor. Drag field into plot window to plot or select plot from drop-down in column 3. Edit field values in column 2.') 
+        self.objFieldEditPanel.setWhatsThis("<font color='black'> Property Editor. Drag field into plot window to plot or select plot from drop-down in column 3. Edit field values in column 2. </font>") 
 
     def closeObjectEditorPanel(self,status):
         self.showObjectEditorAction.setChecked(status)
@@ -519,7 +519,7 @@ class MainWindow(QtGui.QMainWindow):
 	self.connect(self.showRightBottomDocksAction, QtCore.SIGNAL('triggered(bool)'), self.showRightBottomDocks)
         self.showRightBottomDocksAction.setChecked(False)
 
-        self.showObjectEditorAction = QtGui.QAction(self.tr('Object Editor'),self)
+        self.showObjectEditorAction = QtGui.QAction(self.tr('Property Editor'),self)
         self.showObjectEditorAction.setCheckable(True)
         self.connect(self.showObjectEditorAction, QtCore.SIGNAL('triggered(bool)'),self.showObjectEditor)
         self.showObjectEditorAction.setChecked(True)
@@ -828,8 +828,8 @@ class MainWindow(QtGui.QMainWindow):
 	self.mooseTreePanel.setWidget(self.modelTreeWidget)
         config.LOGGER.debug('createMooseTreePanel - end')
         #self.ForceTabbedDocks
-        self.mooseTreePanel.setStatusTip('Moose Tree. Double click on object to open its properties in Editor')
-        self.mooseTreePanel.setWhatsThis('Moose Tree. Double click on object to open its properties in Editor')
+        self.mooseTreePanel.setStatusTip('Moose Tree. Double click on object to open its properties in Property Editor')
+        self.mooseTreePanel.setWhatsThis("<font color='black'> Moose Tree. Double click on object to open its properties in Property Editor </font>")
         self.makeObjectFieldEditor(self.modelTreeWidget.currentItem().getMooseObject())
         
     def createGLClientDock(self):
@@ -894,12 +894,12 @@ class MainWindow(QtGui.QMainWindow):
         self.controlDock.setWidget(self.controlPanel)
         self.controlDock.hide()#add_chait
         self.controlDock.setStatusTip('Simulation Control. Load model to activate Run/Continue')
-        self.controlDock.setWhatsThis('Simulation Control. Load model to activate Run/Continue')
+        self.controlDock.setWhatsThis("<font color='black'> Simulation Control. Load model to activate Run/Continue </font>")
 
     def addPlotWindow(self):
         title = self.tr('Plot %d' % (len(self.plots)))
         plotWindow = MoosePlotWindow()
-        plotWindow.setToolTip('Drag field from editor into the plot window to plot')
+        plotWindow.setToolTip('Drag field from Property Editor into the plot window to plot')
 
         plotWindow.setWindowTitle(title)
         plotWindow.setObjectName(title)
@@ -961,6 +961,7 @@ class MainWindow(QtGui.QMainWindow):
     def addGLWindow(self):   #add_chait
         self.newDia = QtGui.QDialog(self)	
         self.vizDialogue = Ui_Dialog()
+        self.newDia.setWhatsThis("<font color='black'> Place mouse over to see help (Tool Tips) </font>")
         self.vizDialogue.setupUi(self.newDia)
         self.newDia.show()
         
@@ -1191,7 +1192,8 @@ class MainWindow(QtGui.QMainWindow):
             self.togglePlotWindowsAction.setChecked(False)
 
     def popupLoadModelDialog(self):
-        fileDialog = QtGui.QFileDialog(self)        
+        fileDialog = QtGui.QFileDialog(self)
+        fileDialog.setToolTip('Select a model Neural / KKit to open. Try Mitral.g / Kholodenko.g from DEMOS> mitral-ee / kholodenko folders')
         fileDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
         ffilter = ''
         for key in sorted(self.mooseHandler.fileExtensionMap.keys()):
@@ -1225,6 +1227,8 @@ class MainWindow(QtGui.QMainWindow):
             fileFilter = fileDialog.selectedFilter()
             fileType = self.mooseHandler.fileExtensionMap[str(fileFilter)]
             directory = fileDialog.directory() # Potential bug: if user types the whole file path, does it work? - no but gives error message
+            self.statusBar.showMessage('Loading model, please wait')
+            app.setOverrideCursor(QtGui.QCursor(Qt.BusyCursor)) #shows a hourglass - or a busy/working arrow
             for fileName in fileNames: 
                 modeltype  = self.mooseHandler.loadModel(str(fileName), str(fileType), str(targetText.text()))
                 if modeltype == MooseHandler.type_kkit:
@@ -1239,6 +1243,7 @@ class MainWindow(QtGui.QMainWindow):
             self.enableControlButtons()
             self.checkModelType()
             print 'Loaded model',  fileName, 'of type', modeltype
+            app.restoreOverrideCursor()
 
     def enableControlButtons(self):
         self.runButton.setEnabled(1)
@@ -1255,8 +1260,8 @@ class MainWindow(QtGui.QMainWindow):
         if ch :#if has cell type child elements.
             #loaded model is a cell model, plot the cells in the 
             self.statusBar.showMessage('Loaded a Neural Model')
-            self.centralVizPanel.setStatusTip('Up-Down-Right-Left arrow keys to pan model. Click and drag to rotate. Scroll to zoom. Click on compartment to open properties in Editor. To visualize more cells Menu >View >New GL Window')
-            self.centralVizPanel.setWhatsThis('Up-Down-Right-Left arrow keys to pan model. Click and drag to rotate. Scroll to zoom. Click on compartment to open properties in Editor. To visualize more cells Menu >View >New GL Window')
+            self.centralVizPanel.setStatusTip('Click on compartment to open properties in Property Editor. Use arrow keys to pan model. Click and drag to rotate. Scroll to zoom. To visualize more cells Menu >View >New GL Window')
+            self.centralVizPanel.setWhatsThis("<font color='black'> Click on compartment to open properties in Property Editor. Use arrow keys to pan model. Click and drag to rotate. Scroll to zoom. To visualize more cells Menu >View >New GL Window </font>")
             if len(ch)==1:
                 #only the single cell models to be visualized
                 title = self.tr('GL %d' % (len(self.vizs)))
@@ -1282,8 +1287,8 @@ class MainWindow(QtGui.QMainWindow):
                 return vizWindow
         else:
             self.statusBar.showMessage('Loaded a KKit Model')
-            self.centralVizPanel.setStatusTip('Double click on item to open properties in Editor. < > keys to zoom. Click and draw rectangle (Rubberband tool) to multi-select. Click and drag to move')
-            self.centralVizPanel.setWhatsThis('Double click on item to open properties in Editor. < > keys to zoom. Click and draw rectangle (Rubberband tool) to multi-select. Click and drag to move')
+            self.centralVizPanel.setStatusTip('Double click on item to open properties in Property Editor. < > keys to zoom. Click and draw rectangle (Rubberband tool) to multi-select. Click and drag to move')
+            self.centralVizPanel.setWhatsThis("<font color='black'>Double click on item to open properties in Property Editor. < > keys to zoom. Click and draw rectangle (Rubberband tool) to multi-select. Click and drag to move </font>")
 
     def resetSettings(self):
         self.settingsReset = True
