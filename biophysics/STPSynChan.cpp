@@ -448,6 +448,9 @@ void STPSynChan::innerProcessFunc( Eref e, ProcInfo info )
     Y_ = X_ * yconst1_ + Y_ * yconst2_;
     Gk_ = Y_ * norm_;
     Ik_ = ( Ek_ - Vm_ ) * Gk_;
+#ifndef NDEBUG
+    cout << "STPSynChan::innerProcessFunc: " << e.id().path() << ":: Gk_ = " << Gk_ << ", Ik_ = " << Ik_ << ", activation: " << activation_ << ", EK_ = " << Ek_ << ", Vm_ = " << Vm_ << endl;
+#endif
     activation_ = 0.0;
     modulation_ = 1.0;
     for (unsigned int ii = 0; ii < synapses_.size(); ++ii){
