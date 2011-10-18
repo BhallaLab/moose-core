@@ -483,7 +483,7 @@ void PulseGen::innerProcessFunc(const Conn* c, ProcInfo p)
     double currentTime = p->currTime_;
     double period = width_[0] + delay_[0];
     double phase = 0.0;
-    for (unsigned int ii = 1; ii < width_.size(); ++ii){
+    for (unsigned int ii = 1; ii < width_.size() && width_[ii] > 0.0; ++ii){
         double incr = delay_[ii] + width_[ii] - width_[ii-1];
         if  (incr > 0){
             period += incr;
