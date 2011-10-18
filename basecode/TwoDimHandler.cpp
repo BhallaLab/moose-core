@@ -42,7 +42,9 @@ TwoDimHandler::~TwoDimHandler()
 // Data Reallocation functions. Defined in BlockHandler
 ////////////////////////////////////////////////////////////////////////
 
-DataHandler* TwoDimHandler::copy( unsigned short copyDepth,
+DataHandler* TwoDimHandler::copy( 
+	unsigned short newParentDepth,
+	unsigned short copyRootDepth,
 	bool toGlobal, unsigned int n ) const
 {
 	if ( toGlobal ) {
@@ -51,22 +53,31 @@ DataHandler* TwoDimHandler::copy( unsigned short copyDepth,
 			return 0;
 		}
 	}
+	if ( copyRootDepth >= dims_[0].depth || copyRootDepth >= dims_[1].depth)
+		return 0;
+
 	if ( n > 1 ) {
-		DimInfo temp = {n, copyDepth, 0 };
+		DimInfo temp = {n, newParentDepth + 1, 0 };
 		vector< DimInfo > newDims;
 		newDims.push_back( dims_[0] );
-		newDims.back().depth += copyDepth - pathDepth_;
+		newDims.back().depth += 1 + newParentDepth - copyRootDepth;
 		newDims.push_back( dims_[1] );
-		newDims.back().depth += copyDepth - pathDepth_;
+		newDims.back().depth += 1 + newParentDepth - copyRootDepth;
 		newDims.push_back( temp );
 		AnyDimHandler* ret = new AnyDimHandler( dinfo(), 
-			newDims, copyDepth, toGlobal );
+			newDims, 
+			1 + pathDepth() + newParentDepth - copyRootDepth, toGlobal );
 		if ( data_ )  {
 			ret->assign( data_, end_ - start_ );
 		}
 		return ret;
 	} else {
-		return new TwoDimHandler( this );
+		TwoDimHandler* ret = new TwoDimHandler( this );
+		if ( !ret->changeDepth( pathDepth() + 1 + newParentDepth - copyRootDepth ) ) {
+			delete ret;
+			return 0;
+		}
+		return ret;
 	}
 	return 0;
 }

@@ -42,7 +42,8 @@ class AnyDimHandler: public BlockHandler
 		 * doing appropriate node 
 		 * partitioning if toGlobal is false.
 		 */
-		DataHandler* copy( unsigned short copyDepth,
+		DataHandler* copy( unsigned short newParentDepth,
+			unsigned short copyRootDepth,
 			bool toGlobal, unsigned int n ) const;
 
 		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo) const;

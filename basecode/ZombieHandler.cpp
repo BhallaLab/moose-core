@@ -123,7 +123,8 @@ void ZombieHandler::unGlobalize()
 }
 
 DataHandler* ZombieHandler::copy( 
-	unsigned short pathDepth, bool toGlobal, unsigned int n ) const
+	unsigned short newParentDepth, unsigned short copyRootDepth,
+	bool toGlobal, unsigned int n ) const
 {
 	return ( new ZombieHandler( parent_, start_ * n, end_ * n ) );
 }

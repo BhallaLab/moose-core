@@ -59,8 +59,9 @@ class OneDimHandler: public BlockHandler
 		 * copies, doing appropriate node 
 		 * partitioning if toGlobal is false.
 		 */
-		DataHandler* copy( unsigned short copyDepth, bool toGlobal, 
-			unsigned int n ) const;
+		DataHandler* copy( unsigned short newParentDepth,
+			unsigned short copyRootDepth,
+			bool toGlobal, unsigned int n ) const;
 
 		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo) const;
 

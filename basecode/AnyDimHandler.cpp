@@ -37,7 +37,8 @@ AnyDimHandler::~AnyDimHandler()
 // Data Reallocation functions.
 ////////////////////////////////////////////////////////////////////////
 
-DataHandler* AnyDimHandler::copy( unsigned short copyDepth,
+DataHandler* AnyDimHandler::copy( unsigned short newParentDepth,
+	unsigned short copyRootDepth,
 	bool toGlobal, unsigned int n ) const
 {
 	if ( toGlobal ) {
@@ -46,23 +47,36 @@ DataHandler* AnyDimHandler::copy( unsigned short copyDepth,
 			return 0;
 		}
 	}
+
+	// Don't allow copying that would remove an array.
+	for ( unsigned int i = 0; i < dims_.size(); ++i )
+		if ( copyRootDepth > dims_[i].depth )
+			return 0;
+
 	if ( n > 1 ) {
-		DimInfo temp = {n, copyDepth, 0 };
+		DimInfo temp = {n, newParentDepth + 1, 0 };
 		vector< DimInfo > newDims;
 		newDims.push_back( temp );
 		for ( unsigned int i = 0; i < dims_.size(); ++i ) {
 			newDims.push_back( dims_[i] );
-			newDims.back().depth += 1 + copyDepth - pathDepth_;
+			newDims.back().depth += 1 + newParentDepth - copyRootDepth;
 		}
 		AnyDimHandler* ret = new AnyDimHandler( dinfo(), 
-			newDims, copyDepth, toGlobal );
+			newDims, 
+			1 + pathDepth() + newParentDepth - copyRootDepth, toGlobal );
 		if ( data_ )  {
 			ret->assign( data_, end_ - start_ );
 		}
 		return ret;
 	} else {
 		AnyDimHandler* ret = new AnyDimHandler( this ); 
-		ret->changeDepth( copyDepth );
+		if ( !ret->changeDepth( 
+				pathDepth() + 1 + newParentDepth - copyRootDepth
+			) 
+		) {
+			delete ret;
+			return 0;
+		}
 		return ret; 
 	}
 	return 0;

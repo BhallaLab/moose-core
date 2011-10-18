@@ -99,10 +99,11 @@ void DataHandlerWrapper::unGlobalize()
 	cout << "Error: DataHandlerWrapper::unGlobalize: parent is const\n";
 }
 
-DataHandler* DataHandlerWrapper::copy( unsigned short copyDepth, 
+DataHandler* DataHandlerWrapper::copy( unsigned short newParentDepth, 
+	unsigned short copyRootDepth,
 	bool toGlobal, unsigned int n ) const
 {
-	return parent_->copy( copyDepth, toGlobal, n );
+	return parent_->copy( newParentDepth, copyRootDepth, toGlobal, n );
 }
 
 DataHandler* DataHandlerWrapper::copyUsingNewDinfo(

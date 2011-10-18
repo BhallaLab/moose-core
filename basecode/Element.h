@@ -69,7 +69,8 @@ class Element
 		 * used for doing all copies, in Shell::innerCopyElements.
 		 */
 		Element( Id id, const Element* orig, unsigned int n, 
-			unsigned short copyDepth, bool toGlobal);
+			unsigned short newParentDepth,
+			unsigned short copyRootDepth, bool toGlobal);
 
 		/**
 		 * Destructor
@@ -109,13 +110,13 @@ class Element
 		DataHandler* dataHandler() const;
 
 		/**
-		 * Resizes the current data on the specified dimension. 
+		 * Resizes the data at the specified depth on the Element tree,
 		 * Returns true on success.
 		 * Adds a dimension if the original was zero and size > 1.
 		 * When resizing it uses the current data and puts it treadmill-
 		 * fashion into the expanded dimension. 
 		 */
-		bool resize( unsigned int dimension, unsigned int size );
+		bool resize( unsigned short pathDepth, unsigned int size );
 
 		/**
 		 * Synchronizes the maxFieldEntries with the number of actual fields

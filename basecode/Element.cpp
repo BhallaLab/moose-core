@@ -90,7 +90,8 @@ Element::Element( Id id, const Cinfo* c, const string& name,
  * retain info from the originals.
  */
 Element::Element( Id id, const Element* orig, unsigned int n,
-	unsigned short copyDepth, bool toGlobal)
+	unsigned short newParentDepth, unsigned short copyRootDepth,
+	bool toGlobal)
 	:	name_( orig->getName() ),
 		id_( id ),
 		cinfo_( orig->cinfo_ ), 
@@ -98,7 +99,8 @@ Element::Element( Id id, const Element* orig, unsigned int n,
 		msgBinding_( orig->cinfo_->numBindIndex() )
 {
 	if ( n >= 1 ) {
-		dataHandler_ = orig->dataHandler_->copy( copyDepth, toGlobal, n );
+		dataHandler_ = orig->dataHandler_->copy( newParentDepth, 
+			copyRootDepth, toGlobal, n );
 	}
 	id.bindIdToElement( this );
 	// cinfo_->postCreationFunc( id, this );
@@ -237,31 +239,37 @@ DataHandler* Element::dataHandler() const
 }
 
 /**
-* Resizes the current data, may include changing dimensions.
-* Returns the new dataHandler if needed, and NULL on failure.
+* Resizes the current data, may include changing dimensions at the
+* specified pathDepth, or even introducing a new dimension in the
+* DataHandler.
+* Returns 0 on failure.
 * When resizing it uses the current data and puts it treadmill-
 * fashion into the new dimensions. This means that if we had a
 * 2-D array and add a z dimension while keeping x and y fixed, we
 * should just repeat the same plane of data for all z values.
-* But it will get terribly messy if we change x and y dimensions.
 * Note that the resizing only works on the data dimensions, it
 * does not touch the field dimensions.
 */
-bool Element::resize( unsigned int dimension, unsigned int size )
+
+bool Element::resize( unsigned short pathDepth, unsigned int size )
 {
+	if ( pathDepth < 1 )
+		return 0;
 	if ( size == 0 )
 		return 0;
-	if ( dataHandler_->numDimensions() > dimension ) {
-		dataHandler_->resize( dimension, size );
-		return 1;
-	} else if ( dimension == 0 && dataHandler_->numDimensions() == 0 && 
-		size > 1 ) {
-		DataHandler* old = dataHandler_;
-		dataHandler_ = dataHandler_->copy( 
-			dataHandler_->pathDepth(), dataHandler_->isGlobal(), size );
+	for ( unsigned int i = 0; i < dataHandler_->dims().size(); ++i ) {
+		if ( pathDepth == dataHandler_->dims()[i].depth ) {
+			return dataHandler_->resize( i, size );
+		}
+	}
+	DataHandler* old = dataHandler_;
+	dataHandler_ = dataHandler_->copy( pathDepth - 1, pathDepth, 
+		dataHandler_->isGlobal(), size );
+	if ( dataHandler_ ) {
 		delete old;
 		return 1;
 	}
+	dataHandler_ = old;
 	return 0;
 }
 
