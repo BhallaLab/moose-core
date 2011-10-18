@@ -16185,4 +16185,7 @@ with depths of 2 or 4.
 
 Before going through all this, let's checkin. Checkin 3081.
 
-Made changes. Compiles.
+Made changes. Compiles. Checkin 3084.
+
+Steady work through testAsync unit tests, especially the DataHandler
+tests. About halfway.

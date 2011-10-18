@@ -246,7 +246,7 @@ void FieldDataHandlerBase::unGlobalize()
  */
 bool FieldDataHandlerBase::resize( unsigned int dimension, unsigned int size)
 {
-	if ( dimension == 0 ) {
+	if ( dimension == dims_.size() - 1 ) {
 		unsigned int i = biggestFieldArraySize();
 		assert( i <= size );
 		setMaxFieldEntries( size );
