@@ -649,7 +649,7 @@ void testSetGetSynapse()
 	FieldDataHandlerBase * fdh =
 		static_cast< FieldDataHandlerBase *>( syn->dataHandler() );
 	// fdh->setFieldDimension( fdh->biggestFieldArraySize() );
-	fdh->resize( 0, fdh->biggestFieldArraySize() );
+	fdh->resize( fdh->numDimensions() - 1, fdh->biggestFieldArraySize() );
 	// fdh->syncFieldArraySize();
 	assert( syn->dataHandler()->totalEntries() == 9900 );
 	// cout << "NumSyn = " << syn.totalEntries() << endl;
@@ -729,7 +729,7 @@ void testSetGetVec()
 	
 	assert( fd->biggestFieldArraySize() == size - 1 );
 	// fd->setFieldDimension( size );
-	fd->resize( 0, size );
+	fd->resize( fd->numDimensions() - 1, size );
 	assert ( fd->totalEntries() == size * size );
 	// Here we test setting a 2-D array with different dims on each axis.
 	vector< double > delay( size * size, 0.0 );
@@ -1033,7 +1033,7 @@ void testSendSpike()
 	FieldDataHandlerBase * fdh =
 		static_cast< FieldDataHandlerBase *>( syn->dataHandler() );
 	// fdh->setFieldDimension( fdh->biggestFieldArraySize() );
-	fdh->resize( 0, fdh->biggestFieldArraySize() );
+	fdh->resize( fdh->numDimensions() - 1, fdh->biggestFieldArraySize() );
 	// fdh->syncFieldArraySize();
 	assert( fdh->localEntries() == ( size * (size - 1) ) / 2 );
 	assert( fdh->totalEntries() == size * ( size - 1) );
@@ -2029,10 +2029,10 @@ void testDataCopyOne()
 	for ( unsigned int i = 0; i < SIZE; ++i )
 		assert( doubleEq( *dptr( &od, i ), x * i ) );
 
-	DataHandler* cod = od.copy( 1, 1, true, 1 );
+	DataHandler* cod = od.copy( 1, 3, true, 1 );
 	assert( cod == 0 ); // illegal copy, because it takes the array away.
 
-	cod = od.copy( 3, 1, true, 1 ); // Array was at 2, now at depth 1.
+	cod = od.copy( 0, 2, true, 1 ); // Array was at 2, now at depth 1.
 	assert( dynamic_cast< OneDimHandler* >( cod ) != 0 );
 	assert ( cod->isAllocated() == 1 );
 	assert( cod->numDimensions() == 1 );
@@ -2046,7 +2046,7 @@ void testDataCopyOne()
 	for ( unsigned int i = 0; i < SIZE; ++i )
 		assert( doubleEq( *dptr( &od, i ), x * i ) );
 
-	DataHandler* cod1 = od.copy( 5, 1, true, 1 );
+	DataHandler* cod1 = od.copy( 1, 1, true, 1 );
 	ok = cod1->resize( 0, 27 );
 	assert( ok );
 	assert( dynamic_cast< OneDimHandler* >( cod1 ) != 0 );
@@ -2062,7 +2062,7 @@ void testDataCopyOne()
 	for ( unsigned int i = 0; i < 27; ++i )
 		assert( doubleEq( *dptr( cod1, i ), x * ( i % SIZE ) ) );
 
-	DataHandler* cod2 = od.copy( 6, 1, true, (SIZE - 1) );
+	DataHandler* cod2 = od.copy( 2, 1, true, (SIZE - 1) );
 	assert( dynamic_cast< TwoDimHandler* >( cod2 ) != 0 );
 	assert ( cod2->isAllocated() == 1 );
 	assert( cod2->totalEntries() == SIZE * (SIZE - 1) );
@@ -2091,10 +2091,10 @@ void testDataCopyTwo()
 	static const unsigned int nx = 7;
 	static const unsigned int ny = 8;
 	static const unsigned int nz = 9;
-	double x = 11.2233;
 	double y[ny * nx];
-	for ( unsigned int i = 0; i < ny * nx ; ++i )
-		y[i] = x + i;
+	for ( unsigned int j = 0; j < ny ; ++j )
+		for ( unsigned int i = 0; i < nx ; ++i )
+			y[ j * nx + i ] = j * 1000 + i;
 
 	char* cy = reinterpret_cast< char* >( y );
 	DimInfo temp = { ny, 1, 0 };
@@ -2124,9 +2124,9 @@ void testDataCopyTwo()
 	assert( doubleEq( *dptr( &td, 0 ), 0.0 ) );
 	td.assign( cy, nx * ny );
 	for ( unsigned int i = 0; i < nx * ny; ++i )
-		assert( doubleEq( *dptr( &td, i ), x + i ) );
+		assert( doubleEq( *dptr( &td, i ), ( i / nx ) * 1000 + i % nx ) );
 
-	DataHandler* ctd = td.copy( 3, 1, true, 1 );
+	DataHandler* ctd = td.copy( 1, 1, true, 1 );
 	assert( dynamic_cast< TwoDimHandler* >( ctd ) != 0 );
 	assert ( ctd->isAllocated() == 1 );
 	assert( ctd->numDimensions() == 2 );
@@ -2140,9 +2140,9 @@ void testDataCopyTwo()
 	assert( ctd->sizeOfDim(2) == 0 );
 	assert( ctd->totalEntries() == nx * ny );
 	for ( unsigned int i = 0; i < nx * ny; ++i )
-		assert( doubleEq( *dptr( &td, i ), x + i ) );
+		assert( doubleEq( *dptr( &td, i ), ( i/nx )*1000 + i % nx ) );
 
-	DataHandler* ctd1 = td.copy( 4, 1, true, 1 );
+	DataHandler* ctd1 = td.copy( 5, 1, true, 1 );
 	ok = ctd1->resize( 1, 27 );
 	assert( ok );
 	assert( dynamic_cast< TwoDimHandler* >( ctd1 ) != 0 );
@@ -2160,9 +2160,9 @@ void testDataCopyTwo()
 	for ( unsigned int j = 0; j < ny; ++j )
 		for ( unsigned int i = 0; i < 27; ++i )
 			assert( doubleEq( *dptr( ctd1, j * 27 + i ), 
-				x + j * nx  + ( i % nx ) ) );
+				j * 1000  + ( i % nx ) ) );
 
-	DataHandler* ctd2 = td.copy( 0, 1, true, nz );
+	DataHandler* ctd2 = td.copy( 0, 0, true, nz );
 	assert( dynamic_cast< AnyDimHandler* >( ctd2 ) != 0 );
 	assert ( ctd2->isAllocated() == 1 );
 	assert( ctd2->totalEntries() == nx * ny * nz );
@@ -2170,7 +2170,7 @@ void testDataCopyTwo()
 	assert( ctd2->dims().size() == 3 );
 	assert( ctd2->dims()[0].size == nz );
 	assert( ctd2->dims()[1].size == ny );
-	assert( ctd2->dims()[3].size == nx );
+	assert( ctd2->dims()[2].size == nx );
 	assert( ctd2->dims()[0].depth == 1 );
 	assert( ctd2->dims()[1].depth == 2 );
 	assert( ctd2->dims()[2].depth == 3 );
@@ -2182,7 +2182,8 @@ void testDataCopyTwo()
 	for ( unsigned int i = 0; i < nz ; ++i )
 		for ( unsigned int j = 0; j < ny; ++j )
 			for ( unsigned int k = 0; k < nx; ++k )
-				assert( doubleEq( *dptr( ctd2, ( i * ny + j ) * nx + k ), x * ( ( j * nx + k ) ) ) );
+				assert( doubleEq( *dptr( ctd2, ( i * ny + j ) * nx + k ),
+					j * 1000 + k ) );	
 
 	delete ctd;
 	delete ctd1;
@@ -2277,7 +2278,7 @@ void testDataCopyAny()
 		}
 	}
 
-	DataHandler* cad2 = ad.copy( 2, 1, true, n0 );
+	DataHandler* cad2 = ad.copy( 2, 0, true, n0 );
 	assert( dynamic_cast< AnyDimHandler* >( cad2 ) != 0 );
 	assert ( cad2->isAllocated() == 1 );
 	assert( cad2->totalEntries() == n0 * n1 * n2 );
@@ -2465,8 +2466,8 @@ void testFieldDataHandler()
 
 	// fdh.setFieldDimension( 399 );
 	// assert( fdh.getFieldDimension() == 399 );
-	fdh.resize( 0, 399 );
-	assert( fdh.sizeOfDim( 0 ) == 399 );
+	fdh.resize( fdh.numDimensions() - 1, 399 );
+	assert( fdh.sizeOfDim( fdh.numDimensions() - 1 ) == 399 );
 
 
 	/*

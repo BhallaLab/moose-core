@@ -53,7 +53,7 @@ DataHandler* OneDimHandler::copy( unsigned short newParentDepth,
 
 	// don't allow copying that would kill the array.
 	// Later we can put in options to copy part of the array.
-	if ( copyRootDepth >= dims_[0].depth )
+	if ( copyRootDepth > dims_[0].depth )
 		return 0;
 
 	if ( n > 1 ) {
