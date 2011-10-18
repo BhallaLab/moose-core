@@ -49,11 +49,11 @@ DataHandler* AnyDimHandler::copy( unsigned short copyDepth,
 	if ( n > 1 ) {
 		DimInfo temp = {n, copyDepth, 0 };
 		vector< DimInfo > newDims;
+		newDims.push_back( temp );
 		for ( unsigned int i = 0; i < dims_.size(); ++i ) {
 			newDims.push_back( dims_[i] );
-			newDims.back().depth += copyDepth - pathDepth_;
+			newDims.back().depth += 1 + copyDepth - pathDepth_;
 		}
-		newDims.push_back( temp );
 		AnyDimHandler* ret = new AnyDimHandler( dinfo(), 
 			newDims, copyDepth, toGlobal );
 		if ( data_ )  {
@@ -61,7 +61,9 @@ DataHandler* AnyDimHandler::copy( unsigned short copyDepth,
 		}
 		return ret;
 	} else {
-		return new AnyDimHandler( this );
+		AnyDimHandler* ret = new AnyDimHandler( this ); 
+		ret->changeDepth( copyDepth );
+		return ret; 
 	}
 	return 0;
 }
@@ -72,8 +74,8 @@ DataHandler* AnyDimHandler::copyUsingNewDinfo( const DinfoBase* dinfo) const
 }
 
 /**
- * Resize if size has changed in any one of its dimensions, in this case
- * only dim zero. Does NOT alter # of dimensions.
+ * Resize if size has changed in any one of its dimensions.
+ * Does NOT alter # of dimensions.
  * In the best case, we would leave the old data alone. This isn't
  * possible if the data starts out as non-Global, as the index allocation
  * gets shuffled around. So I deal with it only in the isGlobal case.
@@ -92,24 +94,25 @@ bool AnyDimHandler::resize( unsigned int dimension, unsigned int numEntries)
 		for ( unsigned int i = 0; i < dims_.size(); ++i ) {
 			totalEntries_ *= dims_[i].size;
 		}
-		
-		if ( dimension == 0 ) {
+	
+		unsigned int lastDim = dims_.size() - 1;
+		if ( dimension == lastDim ) {
 			// go from 1 2 3 : 4 5 6 to 1 2 3 .. : 4 5 6 ..
 			// Try to preserve original data, possible if it is global.
 			char* temp = data_;
 			innerNodeBalance( totalEntries_, 
 				Shell::myNode(), Shell::numNodes() );
-			dims_[0].size = numEntries;
+			dims_[ lastDim ].size = numEntries;
 			unsigned int newLocalEntries = end_ - start_;
 			data_ = dinfo()->allocData( newLocalEntries );
 			if ( isGlobal_ ) {
 				assert ( totalEntries_ == newLocalEntries);
-				unsigned int newBlockSize = dims_[0].size * dinfo()->size();
+				unsigned int newBlockSize = numEntries * dinfo()->size();
 				unsigned int oldBlockSize = oldN * dinfo()->size();
-				unsigned int j = totalEntries_ / dims_[0].size;
+				unsigned int j = totalEntries_ / numEntries;
 				for ( unsigned int i = 0; i < j; ++i ) {
 					dinfo()->assignData( data_ + i * newBlockSize, 
-						dims_[0].size, temp + i * oldBlockSize, oldN );
+						numEntries, temp + i * oldBlockSize, oldN );
 				}
 			} 
 			dinfo()->destroyData( temp );

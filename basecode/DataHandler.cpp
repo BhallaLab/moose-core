@@ -87,8 +87,7 @@ bool DataHandler::changeDepth( unsigned short newDepth )
 	}
 
 	for ( unsigned int i = 0; i < dims_.size(); ++i ) {
-		short d = dims_[i].depth;
-		dims_[i].depth += d;
+		dims_[i].depth += deltaDepth;
 	}
 	pathDepth_ += deltaDepth;
 	return 1;
