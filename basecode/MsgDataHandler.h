@@ -74,7 +74,8 @@ class MsgDataHandler: public DataHandler
 		 * Make a single identity copy, doing appropriate node 
 		 * partitioning if toGlobal is false.
 		 */
-		DataHandler* copy( unsigned short pathDepth,
+		DataHandler* copy( unsigned short newParentDepth,
+			unsigned short copyRootDepth,
 			bool toGlobal, unsigned int n ) const;
 
 		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo) const;

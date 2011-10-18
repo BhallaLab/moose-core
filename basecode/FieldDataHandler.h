@@ -120,8 +120,9 @@ template< class Parent, class Field > class FieldDataHandler: public FieldDataHa
 		 * Needs post-processing to substitute in the new parent.
 		 * Ignore the copyDepth argument as it comes from the new parent.
 		 */
-		DataHandler* copy( unsigned short copyDepth, bool toGlobal, 
-			unsigned int n ) const
+		DataHandler* copy( unsigned short newParentDepth,
+			unsigned short copyRootDepth,
+			bool toGlobal, unsigned int n ) const
 		{
 			FieldDataHandler< Parent, Field >* ret =
 				new FieldDataHandler< Parent, Field >( *this );

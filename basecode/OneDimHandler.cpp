@@ -40,7 +40,8 @@ OneDimHandler::~OneDimHandler()
 // Data Reallocation functions.
 ////////////////////////////////////////////////////////////////////////
 
-DataHandler* OneDimHandler::copy( unsigned short copyDepth,
+DataHandler* OneDimHandler::copy( unsigned short newParentDepth,
+	unsigned short copyRootDepth,
 	bool toGlobal, unsigned int n ) const
 {
 	if ( toGlobal ) {
@@ -51,22 +52,24 @@ DataHandler* OneDimHandler::copy( unsigned short copyDepth,
 	}
 
 	// don't allow copying that would kill the array.
-	if ( pathDepth_ - copyDepth >= dims_[0].depth )
+	// Later we can put in options to copy part of the array.
+	if ( copyRootDepth >= dims_[0].depth )
 		return 0;
 
 	if ( n > 1 ) {
 		// Note that we expand into ny, rather than nx. The current array
 		// size is going to become the fastest varying one, highest index.
-		DimInfo temp = { n, copyDepth, 0 };
+		// The copyRoot is going to be multiplied.
+		DimInfo temp = { n, newParentDepth + 1, 0 };
 		vector< DimInfo > newDims;
 		newDims.push_back( temp ); // new dim is closest to root.
 		newDims.push_back( dims_[0] ); // Old index is fastest varying.
 
-		// old depth of array portion adjusted.
-		newDims.back().depth += copyDepth - pathDepth_; 
+		// depth of array portion adjusted.
+		newDims.back().depth += 1 + newParentDepth - copyRootDepth;
 
 		TwoDimHandler* ret = new TwoDimHandler( dinfo(), newDims, 
-			copyDepth, toGlobal );
+			1 + pathDepth() + newParentDepth - copyRootDepth, toGlobal );
 		if ( data_ )  {
 			if ( isGlobal() ) {
 				ret->assign( data_, totalEntries_ );
@@ -77,7 +80,7 @@ DataHandler* OneDimHandler::copy( unsigned short copyDepth,
 		return ret;
 	} else {
 		OneDimHandler* ret = new OneDimHandler( this );
-		if ( !ret->changeDepth( copyDepth ) ) {
+		if ( !ret->changeDepth( pathDepth() + 1 + newParentDepth - copyRootDepth ) ) {
 			delete ret;
 			return 0;
 		}
