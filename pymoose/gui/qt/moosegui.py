@@ -264,7 +264,7 @@ class MainWindow(QtGui.QMainWindow):
         self.currentTimeEditToolbar.setGeometry(300,0,50,30)
         
         self.runButtonToolbar = QtGui.QToolButton(self.simToolbar)
-        self.runButtonToolbar.setToolTip('Run')
+        self.runButtonToolbar.setToolTip("<font color='black'> Run </font>")
         self.runButtonToolbar.setIcon(QtGui.QIcon("run.png"))
         self.runButtonToolbar.setGeometry(360,0,50,30)
         self.runButtonToolbar.setEnabled(0)
@@ -272,7 +272,7 @@ class MainWindow(QtGui.QMainWindow):
         self.runButtonToolbar.setWhatsThis("<font color='black'> Run to start simulation </font>")
 
         self.continueButtonToolbar = QtGui.QToolButton(self.simToolbar)
-        self.continueButtonToolbar.setToolTip('Continue')
+        self.continueButtonToolbar.setToolTip("<font color='black'> Continue </font>")
         self.continueButtonToolbar.setIcon(QtGui.QIcon("continue.png"))
         self.continueButtonToolbar.setGeometry(410,0,50,30)
         self.continueButtonToolbar.setEnabled(0)
@@ -280,7 +280,7 @@ class MainWindow(QtGui.QMainWindow):
         self.continueButtonToolbar.setWhatsThis("<font color='black'> Continue simulation </font>")
 
         self.resetButtonToolbar = QtGui.QToolButton(self.simToolbar)
-        self.resetButtonToolbar.setToolTip('Reset')
+        self.resetButtonToolbar.setToolTip("<font color='black'> Reset </font>")
         self.resetButtonToolbar.setIcon(QtGui.QIcon("reset.png"))
         self.resetButtonToolbar.setGeometry(460,0,50,30)
         self.resetButtonToolbar.setEnabled(0)
@@ -289,7 +289,7 @@ class MainWindow(QtGui.QMainWindow):
         
         self.whatsThisAction  = QtGui.QWhatsThis.createAction(self.simToolbar)
         self.whatsThisButtonToolbar = QtGui.QToolButton(self.simToolbar)
-        self.whatsThisButtonToolbar.setToolTip('Whats this?')
+        self.whatsThisButtonToolbar.setToolTip("<font color='black'> Whats this? </font>")
         self.whatsThisButtonToolbar.setIcon(QtGui.QIcon('help.png'))
         self.whatsThisButtonToolbar.setGeometry(510,0,50,30)
 
@@ -899,7 +899,7 @@ class MainWindow(QtGui.QMainWindow):
     def addPlotWindow(self):
         title = self.tr('Plot %d' % (len(self.plots)))
         plotWindow = MoosePlotWindow()
-        plotWindow.setToolTip('Drag field from Property Editor into the plot window to plot')
+        plotWindow.setToolTip("<font color='black'> Drag field from Property Editor into the plot window to plot </font>")
 
         plotWindow.setWindowTitle(title)
         plotWindow.setObjectName(title)
@@ -1193,7 +1193,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def popupLoadModelDialog(self):
         fileDialog = QtGui.QFileDialog(self)
-        fileDialog.setToolTip('Select a model Neural / KKit to open. Try Mitral.g / Kholodenko.g from DEMOS> mitral-ee / kholodenko folders')
+        fileDialog.setToolTip("<font color='black'> Select a model Neural / KKit to open. Try Mitral.g / Kholodenko.g from DEMOS> mitral-ee / kholodenko folders </font>")
         fileDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
         ffilter = ''
         for key in sorted(self.mooseHandler.fileExtensionMap.keys()):
@@ -1234,6 +1234,7 @@ class MainWindow(QtGui.QMainWindow):
                 if modeltype == MooseHandler.type_kkit:
                     try:
                         self.addLayoutWindow()
+                        self.loadModelAction.setEnabled(0) #to prevent multiple loads
                     except Widgetvisibility:
                         print 'No kkit layout for: %s' % (str(fileName))
                     self.populateKKitPlots()
@@ -1284,6 +1285,7 @@ class MainWindow(QtGui.QMainWindow):
                 vizWindow.showMaximized()
                 self._visiblePlotWindowCount += 1
                 self.currentPlotWindow = vizWindow
+                self.loadModelAction.setEnabled(0) #to prevent multiple loads
                 return vizWindow
         else:
             self.statusBar.showMessage('Loaded a KKit Model')
