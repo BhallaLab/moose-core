@@ -16163,5 +16163,24 @@ Checkin 3072.
 Compiles all the way through, now to grind through unit tests. Checkin 3074.
 
 Steady progress through unit tests. Now in testAsync.cpp:testDataCopyAny.
+Checkin 3076.
 
 ============================================================================
+18 Oct.
+Doing unit tests. Transpires we need another argument in copy:
+suppose I copy
+/library/cells/pyramidal/apical/dends[200]/channels[10]
+to 
+/cortex/v1/layer4.
+with multiplication factor 1000 to get:
+
+/cortex/v1/layer4/pyramidal[1000]/dends[200]/channels[10]
+
+I know that the copy began at pyramidal, because I would issue the command
+	copy( /library/cells/pyramidal, /cortex/v1/layer4, 1000 )
+The first argument defines the depth of the new array. 
+But my DataHandler::copy for the channels has to know that the 
+startDepth was 3. It could just as well have been 'cells' or 'apical'
+with depths of 2 or 4.
+
+Before going through all this, let's checkin.

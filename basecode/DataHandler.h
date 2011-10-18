@@ -344,7 +344,16 @@ class DataHandler
 		virtual void assign( const char* orig, unsigned int numOrig ) = 0;
 
 	protected:
+		 /**
+		  * vector of dimensions.
+		  * Lowest index is closest to root. 0 is root.
+		  * Highest index varies fastest.
+		  */
 		vector< DimInfo > dims_;
+
+		/**
+		 * Specifies Depth on Element tree. Root is zero
+		 */
 		unsigned short pathDepth_;
 		bool isGlobal_;
 		unsigned int totalEntries_;

@@ -52,9 +52,6 @@ class AnyDimHandler: public BlockHandler
 		bool resize( unsigned int dimension, unsigned int size );
 
 	private:
-		// dims_[0] varies fastest. To index it would be 
-		// data[dimN][...][dim0]
-		vector< DimInfo > dims_;
 };
 
 #endif	// _ANY_DIM_HANDLER_H

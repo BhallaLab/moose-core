@@ -49,15 +49,22 @@ DataHandler* OneDimHandler::copy( unsigned short copyDepth,
 			return 0;
 		}
 	}
-	if ( n > 1 ) { 
+
+	// don't allow copying that would kill the array.
+	if ( pathDepth_ - copyDepth >= dims_[0].depth )
+		return 0;
+
+	if ( n > 1 ) {
 		// Note that we expand into ny, rather than nx. The current array
-		// size is going to remain the lowest level index.
-		// ny is the last argument.
+		// size is going to become the fastest varying one, highest index.
 		DimInfo temp = { n, copyDepth, 0 };
 		vector< DimInfo > newDims;
-		newDims.push_back( dims_[0] ); // Lowest index closest to root.
-		newDims.push_back( temp ); // Highest index is fastest varying.
-		newDims.back().depth += copyDepth - pathDepth_;
+		newDims.push_back( temp ); // new dim is closest to root.
+		newDims.push_back( dims_[0] ); // Old index is fastest varying.
+
+		// old depth of array portion adjusted.
+		newDims.back().depth += copyDepth - pathDepth_; 
+
 		TwoDimHandler* ret = new TwoDimHandler( dinfo(), newDims, 
 			copyDepth, toGlobal );
 		if ( data_ )  {
@@ -69,7 +76,12 @@ DataHandler* OneDimHandler::copy( unsigned short copyDepth,
 		}
 		return ret;
 	} else {
-		return new OneDimHandler( this );
+		OneDimHandler* ret = new OneDimHandler( this );
+		if ( !ret->changeDepth( copyDepth ) ) {
+			delete ret;
+			return 0;
+		}
+		return ret;
 	}
 	return 0;
 }
