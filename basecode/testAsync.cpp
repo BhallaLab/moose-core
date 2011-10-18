@@ -1336,12 +1336,12 @@ void testSparseMsg()
 	sm->randomConnect( connectionProbability );
 	//sm->loadBalance( 1 );
 	// fd->setFieldDimension( fd->biggestFieldArraySize() );
-	fd->resize( 0, fd->biggestFieldArraySize() );
+	fd->resize( fd->numDimensions() - 1, fd->biggestFieldArraySize() );
 	// fd->syncFieldArraySize();
 	unsigned int fieldSize = fd->biggestFieldArraySize();
 	// cout << "fieldSize = " << fieldSize << endl;
 	// fd->setFieldDimension( fieldSize );
-	fd->resize( 0, fieldSize );
+	fd->resize( fd->numDimensions() - 1, fieldSize );
 
 	unsigned int nd = syn->dataHandler()->localEntries();
 //	cout << "Num Syn = " << nd << endl;
@@ -1464,7 +1464,7 @@ void testUpValue()
 	FieldDataHandlerBase * fdh =
 		static_cast< FieldDataHandlerBase *>( ticke->dataHandler() );
 	// fdh->setFieldDimension( fdh->biggestFieldArraySize() );
-	fdh->resize( 0, fdh->biggestFieldArraySize() );
+	fdh->resize( fdh->numDimensions() - 1, fdh->biggestFieldArraySize() );
 	// fdh->syncFieldArraySize();
 	assert( ticke->dataHandler()->totalEntries() == 10 );
 	/*
@@ -2530,7 +2530,7 @@ void testCopyFieldElementData()
 	FieldDataHandlerBase * fdh =
 		static_cast< FieldDataHandlerBase *>( syn->dataHandler() );
 	// fdh->setFieldDimension( fdh->biggestFieldArraySize() );
-	fdh->resize( 0, fdh->biggestFieldArraySize() );
+	fdh->resize( fdh->numDimensions() - 1, fdh->biggestFieldArraySize() );
 	assert( syn->dataHandler()->totalEntries() == ( size - 1 ) * size );
 	
 	for ( unsigned int i = 0; i < size; ++i ) {

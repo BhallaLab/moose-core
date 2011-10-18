@@ -16188,4 +16188,6 @@ Before going through all this, let's checkin. Checkin 3081.
 Made changes. Compiles. Checkin 3084.
 
 Steady work through testAsync unit tests, especially the DataHandler
-tests. About halfway.
+tests. About halfway. Checkin 3086.
+
+Cleared all of testAsync.cpp unit tests.
