@@ -278,13 +278,16 @@ class DataHandler
 
 		/**
 		 * Copies self, creating a new DataHandler at the specified depth
-		 * in the path tree. 
+		 * in the path tree, and taking only the portion of the tree
+		 * starting from copyRootDepth.
 		 * So if we copy with n=5 from
-		 * /something/other[10] to /foo/bar/zod, we get
+		 * /library/something/other[10] to /foo/bar/zod, 
+		 * using /library/something as the copyRoot,
+		 * we get
 		 * /foo/bar/zod/something[5]/other[10]
-		 * where the depth of the copy is 4 to indicate that 'something'
-		 * is now positioned at depth 4. Note that 'other' gets pushed up
-		 * to depth 5.
+		 * Here newParentDepth == 3 ( for zod )
+		 * copyRootDepth == 2 (for something)
+		 * Note that 'other' gets pushed up to depth 5.
 		 * If n is 0 or 1 it just makes a duplicate of original, with the
 		 * orginal dimensions.
 		 * If n > 1 then it adds a dimension and replicates the original
@@ -299,11 +302,12 @@ class DataHandler
 		 *
 		 * In due course need to extend so I can copy off a single entry.
 		 */
-		virtual DataHandler* copy( unsigned short copyDepth, bool toGlobal,
+		virtual DataHandler* copy( unsigned short newParentDepth,
+			unsigned short copyRootDepth, bool toGlobal,
 			unsigned int n ) const =0;
 
 		/**
-		 * Moves the depth to the specified level.
+		 * Moves the pathDepth to the specified level.
 		 * If moving up, then it adds single-dimensions for the inserted
 		 * levels at the root of the tree.
 		 * If moving down, then it removes levels toward the root of the 

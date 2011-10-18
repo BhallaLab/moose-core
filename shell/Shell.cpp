@@ -767,16 +767,11 @@ void Shell::handleReMesh( Id baseMesh )
 		baseMesh()->dataHandler()->localEntries() ;
 	for ( vector< Id >::iterator i = tgts.begin(); i != tgts.end(); ++i )
 	{
-		unsigned int origDim = i->element()->dataHandler()->numDimensions();
+		unsigned short depth = i->element()->dataHandler()->pathDepth();
 		// Note that the resize command also copies over the data values.
 		// bool ret = i->element()->appendDimension( numMeshEntries );
-		if ( origDim == 0 ) {
-			bool ret = i->element()->resize( 0, numMeshEntries );
-			assert( ret );
-		} else {
-			bool ret = i->element()->resize( origDim - 1, numMeshEntries );
-			assert( ret );
-		}
+		bool ret = i->element()->resize( depth, numMeshEntries );
+		assert( ret );
 		// Now we need to tell each tgt to scale its n, rates etc from vol.
 	}
 }

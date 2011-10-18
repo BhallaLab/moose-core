@@ -16174,7 +16174,7 @@ to
 /cortex/v1/layer4.
 with multiplication factor 1000 to get:
 
-/cortex/v1/layer4/pyramidal[1000]/dends[200]/channels[10]
+/cortex/v1/layer4/pyramidal[1000]/apical/dends[200]/channels[10]
 
 I know that the copy began at pyramidal, because I would issue the command
 	copy( /library/cells/pyramidal, /cortex/v1/layer4, 1000 )
@@ -16183,4 +16183,6 @@ But my DataHandler::copy for the channels has to know that the
 startDepth was 3. It could just as well have been 'cells' or 'apical'
 with depths of 2 or 4.
 
-Before going through all this, let's checkin.
+Before going through all this, let's checkin. Checkin 3081.
+
+Made changes. Compiles.

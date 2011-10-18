@@ -149,7 +149,9 @@ void ZeroDimHandler::unGlobalize()
 	}
 }
 
-DataHandler* ZeroDimHandler::copy( unsigned short tgtPathDepth, 
+DataHandler* ZeroDimHandler::copy( 
+	unsigned short newParentDepth, 
+	unsigned short copyRootDepth, 
 	bool toGlobal, unsigned int n ) const
 {
 	if ( toGlobal ) {
@@ -161,15 +163,20 @@ DataHandler* ZeroDimHandler::copy( unsigned short tgtPathDepth,
 	if ( n > 1 ) {
 		vector< DimInfo > di( 1 );
 		di[0].size = n;
-		di[0].depth = tgtPathDepth;
+		di[0].depth = newParentDepth + 1;
 		di[0].isRagged = 0;
 		OneDimHandler* ret = new OneDimHandler( dinfo(), di,
-			tgtPathDepth, toGlobal );
+			1 + pathDepth() + newParentDepth - copyRootDepth, toGlobal );
 		if ( data_ )
 			ret->assign( data_, 1 );
 		return ret;
 	} else {
-		return ( new ZeroDimHandler( this ) );
+		ZeroDimHandler* ret = new ZeroDimHandler( this );
+		if ( !ret->changeDepth( pathDepth() + 1 + newParentDepth - copyRootDepth ) ) {
+			delete ret;
+			return 0;
+		}
+		return ret;
 	}
 	return 0;
 }

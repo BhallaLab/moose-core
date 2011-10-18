@@ -50,8 +50,10 @@ Id Shell::doCopy( Id orig, Id newParent, string newName, unsigned int n, bool to
 Element* innerCopyElements( Id orig, Id newParent, Id newElm, 
 	unsigned int n, bool toGlobal, map< Id, Id >& tree )
 {
-	unsigned short depth = newParent.element()->dataHandler()->pathDepth() + 1;
-	Element* e = new Element( newElm, orig(), n, depth, toGlobal );
+	unsigned short paDepth =newParent.element()->dataHandler()->pathDepth();
+	unsigned short origDepth =orig.element()->dataHandler()->pathDepth();
+	Element* e = new Element( newElm, orig(), n, 
+		paDepth, origDepth, toGlobal );
 	assert( e );
 	Shell::adopt( newParent, newElm );
 

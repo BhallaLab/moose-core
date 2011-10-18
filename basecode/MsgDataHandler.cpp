@@ -130,9 +130,13 @@ void MsgDataHandler::unGlobalize()
 	;
 }
 
+// Really a dummy, since we don't expect to have this call.
 DataHandler* MsgDataHandler::copy( 
-	unsigned short pathDepth, bool toGlobal, unsigned int n ) const
+	unsigned short newParentDepth, 
+	unsigned short copyRootDepth, 
+	bool toGlobal, unsigned int n ) const
 {
+	cout << "Error: MsgDataHandler::copy: should never call me\n";
 	return ( new MsgDataHandler( this ) );
 }
 
