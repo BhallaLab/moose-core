@@ -383,7 +383,7 @@ void testStatsReduce()
 	assert( ret );
 
 	assert( fd->biggestFieldArraySize() == size - 1 );
-	fd->resize( 0, size );
+	fd->resize( fd->numDimensions() - 1, size );
 	// fd->setFieldDimension( size );
 	assert ( fd->totalEntries() == size * size );
 	// Here we test setting a 2-D array with different dims on each axis.

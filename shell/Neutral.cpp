@@ -328,14 +328,19 @@ void Neutral::setFieldDimension( const Eref& e, const Qinfo* q,
 {
 	// if ( Shell::isSingleThreaded() || q->threadNum() == 1 )
 	// e.element()->dataHandler()->setFieldDimension( size );
-	e.element()->dataHandler()->resize( 0, size );
+	DataHandler* dh = e.element()->dataHandler();
+	if ( dh->numDimensions() > 0 )
+		dh->resize( dh->numDimensions() - 1, size );
 }
 
 unsigned int Neutral::getFieldDimension( 
 	const Eref& e, const Qinfo* q ) const
 {
 	// return e.element()->dataHandler()->getFieldDimension();
-	return e.element()->dataHandler()->sizeOfDim( 0 );
+	const DataHandler* dh = e.element()->dataHandler();
+	if ( dh->numDimensions() == 0 )
+		return 0;
+	return dh->sizeOfDim( dh->numDimensions() - 1 );
 }
 
 unsigned int Neutral::getLocalNumField( 
@@ -531,7 +536,7 @@ string Neutral::path( const Eref& e )
 	unsigned int j = 0;
 	for ( int i = pathVec.size() - 2; i >= 0; --i ) {
 		ss << pathVec[i].eref();
-		while ( dims[j].depth == ( pathVec.size() - 1 - i ) ) {
+		while ( j < dims.size() && ( dims[j].depth == ( pathVec.size() - 1 - i ) ) ) {
 			ss << "[" << dims[j].size << "]";
 			++j;
 		}
