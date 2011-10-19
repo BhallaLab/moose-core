@@ -231,6 +231,7 @@ bool ReduceFieldDimension::reduceNodes()
 	// cout << Shell::myNode() << ": ReduceFieldDimension::reduceNodes: maxindex= " << maxIndex_ << ", tgt=" << tgtId_ << endl;
 	
 	// tgtId_.element()->dataHandler()->setFieldDimension( maxIndex_ );
-	tgtId_.element()->dataHandler()->resize( 0, maxIndex_ );
+	DataHandler* dh = tgtId_.element()->dataHandler();
+	dh->resize( dh->numDimensions() - 1, maxIndex_ );
 	return ret;
 }

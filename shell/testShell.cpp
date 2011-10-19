@@ -1269,8 +1269,8 @@ void testSyncSynapseSize()
 	assert( udims[0] == size );
 	udims = Field< vector< unsigned int > >::get( synId, "dimensions" );
 	assert( udims.size() == 2 );
-	assert( udims[0] == size - 1 ); // Note that the order is reversed.
-	assert( udims[1] == size );
+	assert( udims[0] == size );
+	assert( udims[1] == size - 1 );
 
 	// cout << "NumSyn = " << syn.totalEntries() << endl;
 	shell->doDelete( neuronId );

@@ -538,7 +538,7 @@ void testThreadIntFireNetwork()
 		syn->dataHandler() );
 	assert( fd );
 	unsigned int fieldSize = fd->biggestFieldArraySize();
-	fd->resize( 0, fieldSize );
+	fd->resize( fd->numDimensions() - 1, fieldSize );
 	assert( fieldSize == 134 );
 	assert( fd->totalEntries() == size * 134 );
 
