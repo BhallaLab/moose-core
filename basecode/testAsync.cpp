@@ -2587,7 +2587,7 @@ void testCopyFieldElementData()
 	fdh =
 		static_cast< FieldDataHandlerBase *>( copySynElm->dataHandler() );
 	// fdh->setFieldDimension( fdh->biggestFieldArraySize() );
-	fdh->resize( 0, fdh->biggestFieldArraySize() );
+	fdh->resize( fdh->numDimensions() - 1, fdh->biggestFieldArraySize() );
 	assert( copySynElm->dataHandler()->totalEntries() == 
 		(size * (size - 1) ) );
 	

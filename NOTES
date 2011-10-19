@@ -16190,4 +16190,13 @@ Made changes. Compiles. Checkin 3084.
 Steady work through testAsync unit tests, especially the DataHandler
 tests. About halfway. Checkin 3086.
 
-Cleared all of testAsync.cpp unit tests.
+Cleared all of testAsync.cpp unit tests. Checkin 3087.
+
+Now stuck in testScheduling.cpp:691.
+============================================================================
+19 Oct.
+Now clears all unit tests, stuck in the rtHHnetwork regression test. The
+problem is that when an n-copy is made of a cell with an array of synapses,
+the dimensions of the cell are changed but this does not propagate to the
+synapses.
+============================================================================
