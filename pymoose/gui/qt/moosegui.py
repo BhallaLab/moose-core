@@ -1013,6 +1013,7 @@ class MainWindow(QtGui.QMainWindow):
         fileDialog2.setFileMode(QtGui.QFileDialog.Directory)
         fileDialog2.setWindowTitle('Save Plots In')
         fileDialog2.setOptions(QtGui.QFileDialog.ShowDirsOnly)
+        fileDialog2.setLabelText(QtGui.QFileDialog.Accept, self.tr("Save"))
         targetPanel = QtGui.QFrame(fileDialog2)
         targetPanel.setLayout(QtGui.QVBoxLayout())
         currentPath = self.mooseHandler._current_element.path
