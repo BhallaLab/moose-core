@@ -48,10 +48,9 @@ Id Shell::doCopy( Id orig, Id newParent, string newName, unsigned int n, bool to
 
 /// Runs in parallel on all nodes.
 Element* innerCopyElements( Id orig, Id newParent, Id newElm, 
+	unsigned short paDepth, unsigned short origDepth,
 	unsigned int n, bool toGlobal, map< Id, Id >& tree )
 {
-	unsigned short paDepth =newParent.element()->dataHandler()->pathDepth();
-	unsigned short origDepth =orig.element()->dataHandler()->pathDepth();
 	Element* e = new Element( newElm, orig(), n, 
 		paDepth, origDepth, toGlobal );
 	assert( e );
@@ -74,7 +73,9 @@ Element* innerCopyElements( Id orig, Id newParent, Id newElm,
 	Neutral::children( orig.eref(), kids );
 
 	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i ) {
-		innerCopyElements( *i, e->id(), Id::nextId(), n, toGlobal, tree );
+		innerCopyElements( *i, e->id(), Id::nextId(), 
+		paDepth, origDepth,
+		n, toGlobal, tree );
 	}
 	return e;
 }
@@ -163,11 +164,14 @@ void Shell::handleCopy( const Eref& er, const Qinfo* q,
 		cout << " (" << i << ", " << temp[i] << ") " << 
 		temp[i]()->getName() << "\n";
 #endif
+	unsigned short origDepth =args[0].element()->dataHandler()->pathDepth();
+	unsigned short paDepth =args[1].element()->dataHandler()->pathDepth();
 
 	map< Id, Id > tree;
 	// args are orig, newParent, newElm.
 	assert( args.size() == 3 );
-	Element* e = innerCopyElements( args[0], args[1], args[2], n, toGlobal, tree );
+	Element* e = innerCopyElements( args[0], args[1], args[2], 
+		paDepth, origDepth, n, toGlobal, tree );
 	if ( !e ) {
 		ack->send( 
 			Eref( shelle_, 0 ), ScriptThreadNum, Shell::myNode(), ErrorStatus );

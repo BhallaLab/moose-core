@@ -118,14 +118,43 @@ template< class Parent, class Field > class FieldDataHandler: public FieldDataHa
 		/**
 		 * Makes a copy of the FieldDataHandler.
 		 * Needs post-processing to substitute in the new parent.
-		 * Ignore the copyDepth argument as it comes from the new parent.
+		 * Although the data allocation is done by the new parent,
+		 * I have to deal with the dims here.
 		 */
 		DataHandler* copy( unsigned short newParentDepth,
 			unsigned short copyRootDepth,
 			bool toGlobal, unsigned int n ) const
 		{
+			if ( toGlobal ) {
+				if ( !isGlobal() ) {
+					cout << "Warning: FieldDataHandler::copy: Cannot copy from nonGlobal to global\n";
+					return 0;
+				}
+			}
+			for ( unsigned int i = 0; i < dims_.size(); ++i ) {
+				if ( copyRootDepth > dims_[i].depth ) {
+					cout << "Warning: FieldDataHandler::copy: copyRootDepth truncates array\n";
+					return 0;
+				}
+			}
 			FieldDataHandler< Parent, Field >* ret =
 				new FieldDataHandler< Parent, Field >( *this );
+			if ( n > 1 ) { 
+				DimInfo temp = { n, newParentDepth + 1, 0 };
+				for ( unsigned int i = 0; i < ret->dims_.size(); ++i ) {
+					ret->dims_[i].depth += 1 + newParentDepth - copyRootDepth;
+				}
+				ret->dims_.insert( ret->dims_.begin(), temp );
+			} else {
+				bool ok = ret->changeDepth( 
+					pathDepth() + 1 + newParentDepth - copyRootDepth
+				);
+				if ( !ok ) {
+					cout << "Warning: FieldDataHandler::copy: changeDepth failed\n";
+					return 0;
+				}
+			}
+
 			return ret;
 		}
 

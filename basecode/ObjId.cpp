@@ -53,6 +53,11 @@ char* ObjId::data() const
 	return id()->dataHandler()->data( dataId );
 }
 
+string ObjId::path() const
+{
+	return Neutral::path( eref() );
+}
+
 Element* ObjId::element() const
 {
 	return id();
