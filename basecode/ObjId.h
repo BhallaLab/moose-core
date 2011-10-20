@@ -42,6 +42,11 @@ class ObjId
 		{;}
 
 		/**
+		 * Returns the absolute path including all array indices.
+		 */
+		string path() const;
+
+		/**
 		 * Returns the Eref matching itself.
 		 */
 		Eref eref() const;

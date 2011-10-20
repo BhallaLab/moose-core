@@ -476,6 +476,54 @@ void testCopyFieldElement()
 	cout << "." << flush;
 }
 
+void testErefToPath()
+{
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+	unsigned int s1 = 10;
+	unsigned int s2 = 1;
+	unsigned int s3 = 23;
+	unsigned int s4 = 1;
+	unsigned int s5 = 9;
+	unsigned int s5a = 11;
+	vector< int > dims( 1, s1 );
+	Id level1 = shell->doCreate( "IntFire", Id(), "f1", dims );
+	Id origSynId( level1.value() + 1 );
+	dims[0] = s2;
+	Id level2 = shell->doCreate( "Neutral", level1, "f2", dims );
+	dims[0] = s3;
+	Id level3 = shell->doCreate( "Neutral", level2, "f3", dims );
+	dims[0] = s4;
+	Id level4 = shell->doCreate( "Neutral", level3, "f4", dims );
+	dims[0] = s5;
+	dims.push_back( s5a );
+	Id level5 = shell->doCreate( "Neutral", level4, "f5", dims );
+
+	int index1 = 1;
+	int index2 = 0;
+	int index3 = 3;
+	int index4 = 0;
+	int index5 = 5;
+	int index5a = 6;
+
+	int temp = ( ( ( ( index1 * s2 + index2 ) * 
+		s3 + index3 ) * 
+		s4 + index4 ) *
+		s5 + index5 ) *
+		s5a + index5a;
+
+	ObjId oi( level5, DataId( temp ) );
+	string path = oi.path();
+	assert( path == "/f1[1]/f2/f3[3]/f4/f5[5][6]" );
+
+	shell->doDelete( level1 );
+	cout << "." << flush;
+}
+
+void testPathToObjId()
+{
+	cout << "." << flush;
+}
 
 // Here we create the element independently on each node, and connect
 // it up independently. Using the doAddMsg we will be able to do this
@@ -1579,6 +1627,10 @@ void testMpiShell( )
 	testMove();
 	testCopy();
 	testCopyFieldElement();
+
+//	testErefToPath();
+//	testPathToObjId();
+
 	testShellSetGet();
 	testInterNodeOps();
 	testShellAddMsg();
