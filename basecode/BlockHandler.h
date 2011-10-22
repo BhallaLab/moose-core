@@ -57,6 +57,12 @@ class BlockHandler: public DataHandler
 
 		unsigned int linearIndex( DataId di ) const;
 
+		/**
+		 * Returns vector of array indices present at each level of the
+		 * path.
+		 */
+		vector< vector< unsigned int > > pathIndices( DataId di ) const;
+
 		////////////////////////////////////////////////////////////////
 		// load balancing functions
 		////////////////////////////////////////////////////////////////

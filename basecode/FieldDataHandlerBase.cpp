@@ -121,6 +121,15 @@ unsigned int FieldDataHandlerBase::linearIndex( DataId di ) const
 		di.myIndex( mask_ );
 }
 	
+vector< vector< unsigned int > > FieldDataHandlerBase::pathIndices( 
+	DataId di ) const
+{
+	vector< vector< unsigned int > > ret = 
+		parentDataHandler()->pathIndices( di.parentIndex( numFieldBits_ ) );
+	vector< unsigned int > temp( di.myIndex( mask_ ), 1 );
+	ret.push_back( temp );
+	return ret;
+}
 
 /////////////////////////////////////////////////////////////////////////
 // Load balancing

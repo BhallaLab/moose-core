@@ -73,6 +73,10 @@ const vector< DimInfo >& DataHandler::dims() const
 	return dims_;
 }
 
+/////////////////////////////////////////////////////////////////////
+// Path management
+/////////////////////////////////////////////////////////////////////
+
 bool DataHandler::changeDepth( unsigned short newDepth )
 {
 	short deltaDepth = newDepth - pathDepth_;
