@@ -16211,3 +16211,7 @@ From the 14th: The test cases are
 	- Creating new Elements: option on a single twig or across all.
 
 ============================================================================
+22 Oct 2011.
+Cleared unit test testShell.cpp:testErefToPath().
+
+============================================================================

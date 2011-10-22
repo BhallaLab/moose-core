@@ -76,6 +76,41 @@ unsigned int BlockHandler::linearIndex( DataId di ) const
 	return di.value();
 }
 
+vector< vector< unsigned int > > BlockHandler::pathIndices( DataId di ) 
+	const
+{
+	/*
+	unsigned int j = 0;
+	vector< vector< unsigned int > > ret( pathDepth_ + 1 );
+	unsigned long long index = di.value();
+
+	for( unsigned int i = 0; i <= pathDepth_; ++i ) {
+		if ( j < dims_.size() && dims_[j].depth == i ) {
+			unsigned int q = index % dims_[j].size;
+			ret[i].push_back( q );
+			index /= dims_[j].size;
+			j++
+		}
+	}
+	return ret;
+	*/
+
+	vector< vector< unsigned int > > ret( pathDepth_ + 1 );
+	int j = dims_.size() - 1;
+	unsigned long long index = di.value();
+	for ( unsigned int i = pathDepth_; i > 0;  --i ) {
+		vector< unsigned int > temp;
+		while ( j >= 0 && dims_[j].depth == i ) {
+			unsigned int q = index % dims_[j].size;
+			temp.push_back( q );
+			index /= dims_[j].size;
+			--j;
+		}
+		ret[i] = temp;
+	}
+	return ret;
+}
+
 ////////////////////////////////////////////////////////////////////////
 // Load balancing
 ////////////////////////////////////////////////////////////////////////

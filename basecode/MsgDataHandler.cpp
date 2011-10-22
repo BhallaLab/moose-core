@@ -60,6 +60,16 @@ bool MsgDataHandler::isAllocated() const {
 unsigned int MsgDataHandler::linearIndex( DataId di ) const {
 	return di.value();
 }
+
+vector< vector< unsigned int > > 
+	MsgDataHandler::pathIndices( DataId di ) const
+{
+	vector< vector< unsigned int > > ret( pathDepth_ );
+	assert( pathDepth_ >= 3 );
+	vector < unsigned int > temp( 1, di.value() );
+	ret[2] = temp;
+	return ret;
+}
 /////////////////////////////////////////////////////////////////////////
 // Load balancing functions
 /////////////////////////////////////////////////////////////////////////

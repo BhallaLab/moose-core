@@ -1077,6 +1077,28 @@ bool Shell::innerAddMsg( string msgType, MsgId mid,
 //	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus );
 }
 
+static bool changeTreeDepth( Id id, short delta )
+{
+	DataHandler* dh = id.element()->dataHandler();
+	if ( delta < 0 ) {
+		unsigned short i = -delta;
+		if ( i > dh->pathDepth() )
+			return 0;
+	}
+
+	unsigned short newDepth = dh->pathDepth() + delta;
+	if ( !dh->changeDepth( newDepth ) )
+		return 0;
+	
+	vector< Id > children;
+	Neutral::children( id.eref(), children );
+	bool ret = 1;
+	for ( unsigned int i = 0; i < children.size(); ++i ) {
+		ret &= changeTreeDepth( children[i], delta );
+	}
+	return ret;
+}
+
 void Shell::handleMove( const Eref& e, const Qinfo* q,
 	Id orig, Id newParent )
 {
@@ -1089,6 +1111,13 @@ void Shell::handleMove( const Eref& e, const Qinfo* q,
 	assert( !( newParent() == 0 ) );
 
 	if ( q->addToStructuralQ() )
+		return;
+	
+	short origDepth = orig.element()->dataHandler()->pathDepth();
+	short newDepth = 1 +
+		newParent.element()->dataHandler()->pathDepth();
+	
+	if ( !changeTreeDepth( orig, newDepth - origDepth ) )
 		return;
 
 	MsgId mid = orig()->findCaller( pafid );

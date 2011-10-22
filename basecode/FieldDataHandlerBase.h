@@ -61,6 +61,8 @@ class FieldDataHandlerBase: public DataHandler
 		unsigned int numFieldBits() const;
 
 		unsigned int linearIndex( DataId di ) const;
+
+		vector< vector< unsigned int > > pathIndices( DataId di ) const;
 		////////////////////////////////////////////////////////////////
 		// Special field access funcs
 		////////////////////////////////////////////////////////////////
