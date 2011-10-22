@@ -54,6 +54,12 @@ unsigned int ZombieHandler::linearIndex( DataId di ) const
 
 	// return parent_->linearIndex( di );
 }
+
+vector< vector< unsigned int > > ZombieHandler::pathIndices( DataId di ) 
+	const
+{
+	return parent_->pathIndices( di ); // Should really be orig.
+}
 ////////////////////////////////////////////////////////////////////
 // Load balancing
 ////////////////////////////////////////////////////////////////////

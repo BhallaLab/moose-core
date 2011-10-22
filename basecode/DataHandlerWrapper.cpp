@@ -50,6 +50,11 @@ unsigned int DataHandlerWrapper::linearIndex( DataId di ) const
 	return parent_->linearIndex( di );
 }
 
+vector< vector< unsigned int > > 
+	DataHandlerWrapper::pathIndices( DataId di ) const
+{
+	return parent_->pathIndices( di );
+}
 ////////////////////////////////////////////////////////////////
 // load balancing functions
 ////////////////////////////////////////////////////////////////

@@ -531,6 +531,34 @@ string Neutral::path( const Eref& e )
 	}
 
 	const DataHandler* dh = e.element()->dataHandler();
+	vector< vector< unsigned int > > pathIndex = dh->pathIndices( e.index() );
+	assert( pathVec.size() == pathIndex.size() );
+	assert( pathIndex.size() == static_cast< unsigned int >( dh->pathDepth()  ) + 1 );
+
+	ss << "/";
+	/*
+	for ( int i = pathVec.size() - 2; i >= 0; --i ) {
+		ss << pathVec[i].eref();
+		for ( unsigned int k = 0; k < pathIndex[i].size(); ++k ) {
+			ss << "[" << pathIndex[i][k] << "]";
+		}
+		if ( i > 0 )
+			ss << "/";
+	}
+	*/
+
+	// Skip the root
+	for ( unsigned int i = 1; i <= dh->pathDepth(); ++i ) {
+		unsigned int j = pathVec.size() - i - 1;
+		ss << pathVec[j].element()->getName();
+		unsigned int size = pathIndex[i].size();
+		for ( unsigned int k = 0; k < size; ++k ) {
+			ss << "[" << pathIndex[i][size - k - 1] << "]";
+		}
+		if ( i < dh->pathDepth() )
+			ss << "/";
+	}
+	/*
 	const vector< DimInfo >& dims = dh->dims();
 	ss << "/";
 	unsigned int j = 0;
@@ -543,6 +571,7 @@ string Neutral::path( const Eref& e )
 		if ( i > 0 )
 			ss << "/";
 	}
+	*/
 	return ss.str();
 }
 

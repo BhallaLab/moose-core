@@ -78,6 +78,12 @@ bool ZeroDimHandler::isDataHere( DataId index ) const
 	return ( data_ != 0 );
 }
 
+vector< vector< unsigned int > > ZeroDimHandler::pathIndices( DataId di )
+	const
+{
+	vector< vector< unsigned int > > ret( pathDepth_ + 1 );
+	return ret; // Just empty.
+}
 ///////////////////////////////////////////////////////////////////////
 // Load balancing
 ///////////////////////////////////////////////////////////////////////

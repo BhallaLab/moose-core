@@ -162,32 +162,41 @@ class DataHandler
 		 * which would be an edge of the cuboid.
 		 */
 		virtual unsigned int linearIndex( DataId di ) const = 0;
+
 /////////////////////////////////////////////////////////////////////////
 // Path management
 /////////////////////////////////////////////////////////////////////////
 
-		 /**
-		  * Returns the path position of each dimension. For example:
-		  * /cortex/v1[2]/layer4/cells/pyramidal[10000][10000]/dends[200]
-		  * 0   1     2      3     4                5            6
-		  *
-		  * Note that the position for root is always 0, and root is
-		  * the only Element with position 0.
-		  * This lookup only returns positions associated with one of 
-		  * the dimensions handled by the DataHandler. For the example
-		  * above, the positions would be:
-		  * 2, 5, 5, 6.
-		  * Positions not listed in this lookup are assumed to have a 
-		  * dimension size of 1.
-		 vector< unsigned int > getPathPosition() const;
-		  */
+		/**
+		 * Returns a vector of array indices for the specified DataId.
+		 * At any level of the path we may have multidimensional arrays,
+		 * so each level is represented by a vector.
+		 * The size of the vector is pathDepth + 1, so that the root
+		 * element (which is always a singleton) would be returned as an
+		 * empty vector entry at index 0.
+		 * If the return pathIndex vector is of size zero, it means that 
+		 * there is a * mismatch and the requested DataId does not fit 
+		 * in the current DataHandler.
+		 * /foo[23]/bar[4][5][6]/zod would return the following
+		 * vectors at each level:
+		 *	root	foo		bar		zod
+		 * 	{} 		{23} 	{4,5,6}	{}
+		 */
+		virtual vector< vector< unsigned int > > pathIndices( DataId di ) 
+			const = 0;
 
+		/**
+		 * Moves the pathDepth to the specified level.
+		 * If moving up, then it adds single-dimensions for the inserted
+		 * levels at the root of the tree.
+		 * If moving down, then it removes levels toward the root of the 
+		 * three. It requires that the removed levels all have dimension
+		 * size of one.
+		 * Returns True on success.
+		 * Returns False if the removed levels were non-unity.
+		 */
+		bool changeDepth( unsigned short newDepth );
 
-		 /**
-		  * Assigns the pathPosition vector. Must be the same size as the
-		  * dims vector.
-		 virtual void setPathPosition( vector< unsigned int > pos ) = 0;
-		  */
 
 /////////////////////////////////////////////////////////////////////////
 // Load balancing functions
@@ -305,18 +314,6 @@ class DataHandler
 		virtual DataHandler* copy( unsigned short newParentDepth,
 			unsigned short copyRootDepth, bool toGlobal,
 			unsigned int n ) const =0;
-
-		/**
-		 * Moves the pathDepth to the specified level.
-		 * If moving up, then it adds single-dimensions for the inserted
-		 * levels at the root of the tree.
-		 * If moving down, then it removes levels toward the root of the 
-		 * three. It requires that the removed levels all have dimension
-		 * size of one.
-		 * Returns True on success.
-		 * Returns False if the removed levels were non-unity.
-		 */
-		bool changeDepth( unsigned short newDepth );
 
 		/**
 		 * Copies DataHandler dimensions but uses new Dinfo to allocate

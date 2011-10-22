@@ -1628,8 +1628,8 @@ void testMpiShell( )
 	testCopy();
 	testCopyFieldElement();
 
-//	testErefToPath();
-//	testPathToObjId();
+	testErefToPath();
+	testPathToObjId();
 
 	testShellSetGet();
 	testInterNodeOps();

@@ -52,6 +52,12 @@ class ZeroDimHandler: public DataHandler
 			return 0;
 		}
 
+		/**
+		 * Returns vector of array indices present at each level of the
+		 * path. Here it is empty.
+		 */
+		vector< vector< unsigned int > > pathIndices( DataId di ) const;
+
 		////////////////////////////////////////////////////////////////
 		// load balancing functions
 		////////////////////////////////////////////////////////////////
