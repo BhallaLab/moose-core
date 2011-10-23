@@ -28,7 +28,7 @@ Id::Id( const string& path, const string& separator )
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	assert( shell );
-	id_ = shell->doFind( path ).id_;
+	id_ = shell->doFind( path ).id.id_;
 }
 
 /**

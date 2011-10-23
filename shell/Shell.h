@@ -155,7 +155,7 @@ class Shell
 		 * relative references and the internal cwe 
 		 * (current working Element) on the shell
 		 */
-		Id doFind( const string& path ) const;
+		ObjId doFind( const string& path ) const;
 
 		/**
 		 * Connects up process messages from the specified Tick to the
@@ -437,12 +437,30 @@ class Shell
 			const Eref& er, const ReduceFieldDimension* arg );
 
 		/**
- 		 * static func.
- 		 * Chops up the names in the path into the vector of strings. 
+ 		 * Chops up the names in the string into the vector of strings,
+		 * using the specified separator.
+ 		 * Returns true if it is an absolute path, that is, starts with the
+		 * separator.
+		 */
+		static bool chopString( const string& path, vector< string >& ret,
+			char separator = '/' );
+
+		/**
+		 * Chop up the path into a vector of Element names, and 
+ 		 * also fills out a matching vector of indices. If at any level of
+ 		 * the path there are no indices or the index is zero, the 
+		 * index entry * remains empty. Otherwise the entry contains a 
+		 * vector with index values for this level of the path. 
+		 * The zeroth position of this index vector is the slowest
+ 		 * varying, i.e., most significant.
  		 * Returns true if it starts at '/'.
+ 		 *
+ 		 * Example: /foo/bar[10]/zod[3][4][5] would return:
+ 		 * ret: {"foo", "bar", "zod" }
+ 		 * index: { {}, {10}, {3,4,5} }
  		 */
 		static bool chopPath( const string& path, vector< string >& ret,
-			char separator = '/' );
+			vector< vector< unsigned int > >& index ); 
 
 		static void wildcard( const string& path, vector< Id >& list );
 

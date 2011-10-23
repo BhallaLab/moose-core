@@ -95,7 +95,8 @@ static int innerFind( const string& path, vector< Id >& ret)
 	}
 
 	vector< string > names;
-	bool isAbsolute = Shell::chopPath( path, names );
+	vector< vector< unsigned int > > indices;
+	bool isAbsolute = Shell::chopString( path, names, '/' );
 	Id start; // set to root id.
 	if ( !isAbsolute ) {
 		Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
@@ -138,7 +139,7 @@ int simpleWildcardFind( const string& path, vector<Id>& ret)
 		return 0;
 	unsigned int n = ret.size();
 	vector< string > wildcards;
-	Shell::chopPath( path, wildcards, ',' );
+	Shell::chopString( path, wildcards, ',' );
 	// separateString( path, wildcards, "," );
 	vector< string >::iterator i;
 	for ( i = wildcards.begin(); i != wildcards.end(); ++i )
@@ -215,7 +216,7 @@ void findBraceContent( const string& path, string& beforeBrace,
 	if ( path.length() == 0 )
 		return;
 	vector< string > names;
-	Shell::chopPath( path, names, '[' );
+	Shell::chopString( path, names, '[' );
 	if ( names.size() == 0 )
 		return;
 	if ( names.size() >= 1 )
