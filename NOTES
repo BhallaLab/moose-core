@@ -16222,4 +16222,6 @@ Working on handling the indexing. Implementation is at odds with existing
 wildcarding implementation, will need to reconcile.
 
 Did so. Still doesn't clear unit tests, but checking in as there have been
-many changes.
+many changes. Checkin 3100.
+
+Clears unit tests. Still have some dummy functions for DataHandler::pathDataId.

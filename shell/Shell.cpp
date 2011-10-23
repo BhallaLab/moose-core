@@ -663,13 +663,13 @@ bool extractIndices( const string& s, vector< unsigned int >& indices )
 
 	const char* str = s.c_str();
 	for ( unsigned int i = 0; i < open.size(); ++i ) {
-		if ( open[i] < close[i] ) {
+		if ( open[i] > close[i] ) {
 			indices.clear();
 			return 0;
 		} else if ( open[i] == close[i] ) {
-			indices.push_back( ~1U ); // Indicate any index.
+			indices.push_back( ~1U ); // []: Indicate any index.
 		} else {
-			int j = atoi( str + s[ open[i] ] );
+			int j = atoi( str + open[i] );
 			if ( j >= 0 ) {
 				indices.push_back( j );
 			} else {
@@ -727,16 +727,32 @@ bool Shell::chopString( const string& path, vector< string >& ret,
  * index: { {}, {10}, {3,4,5} }
  */
 bool Shell::chopPath( const string& path, vector< string >& ret, 
-	vector< vector< unsigned int > >& index )
+	vector< vector< unsigned int > >& index, Id cwe )
 {
 	bool isAbsolute = chopString( path, ret, '/' );
-	index.clear();
-	index.resize( ret.size() );
+	vector< unsigned int > empty;
+	if ( isAbsolute ) {
+		index.clear();
+		index.resize( 1 ); // The zero index is for /root.
+	} else {
+		index = cwe.element()->dataHandler()->pathIndices( 0 );
+	}
 	for ( unsigned int i = 0; i < ret.size(); ++i )
 	{
-		if ( !extractIndices( ret[i], index[i] ) ) {
+		if ( ret[i] == "." )
+			continue;
+		if ( ret[i] == ".." ) {
+			index.pop_back();
+			continue;
+		}
+		index.push_back( empty );
+		if ( !extractIndices( ret[i], index.back() ) ) {
 			cout << "Error: Shell::chopPath: Failed to parse indices in path '" <<
 				path << "'\n";
+		}
+		if ( index.back().size() > 0 ) {
+			unsigned int pos = ret[i].find_first_of( '[' );
+			ret[i] = ret[i].substr( 0, pos );
 		}
 	}
 
@@ -749,7 +765,7 @@ ObjId Shell::doFind( const string& path ) const
 	Id curr = Id();
 	vector< string > names;
 	vector< vector< unsigned int > > indices;
-	bool isAbsolute = chopPath( path, names, indices );
+	bool isAbsolute = chopPath( path, names, indices, cwe_ );
 
 	if ( !isAbsolute )
 		curr = cwe_;

@@ -117,7 +117,22 @@ DataId BlockHandler::pathDataId(
 {
 	if ( indices.size() != static_cast< unsigned int >( pathDepth_ ) + 1 )
 		return DataId::bad;
-	return DataId( 0 );
+
+	unsigned short depth = 0;
+	unsigned long long linearIndex = 0;
+	unsigned int j = 0;
+	for ( unsigned int i = 0; i < dims_.size(); ++i ) {
+		if ( depth != dims_[i].depth ) {
+			j = 0;
+			depth = dims_[i].depth;
+		}
+		assert( indices.size() > depth );
+		assert( indices[ depth ].size() > j );
+		linearIndex *= dims_[i].size;
+		linearIndex += indices[depth][j++];
+	}
+
+	return DataId( linearIndex );
 }
 
 ////////////////////////////////////////////////////////////////////////

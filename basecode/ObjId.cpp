@@ -9,6 +9,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "../shell/Shell.h"
 //////////////////////////////////////////////////////////////
 //	ObjId I/O 
 //////////////////////////////////////////////////////////////
@@ -36,6 +37,9 @@ istream& operator >>( istream& s, ObjId& i )
 //////////////////////////////////////////////////////////////
 ObjId::ObjId( const string& path )
 {
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	assert( shell );
+	*this = shell->doFind( path );
 }
 
 Eref ObjId::eref() const

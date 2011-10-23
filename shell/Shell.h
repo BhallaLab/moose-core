@@ -460,7 +460,7 @@ class Shell
  		 * index: { {}, {10}, {3,4,5} }
  		 */
 		static bool chopPath( const string& path, vector< string >& ret,
-			vector< vector< unsigned int > >& index ); 
+			vector< vector< unsigned int > >& index, Id cwe ); 
 
 		static void wildcard( const string& path, vector< Id >& list );
 
