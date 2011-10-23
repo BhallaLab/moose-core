@@ -44,6 +44,9 @@ class ZombieHandler: public DataHandler
 		unsigned int linearIndex( DataId di ) const;
 
 		vector< vector< unsigned int > > pathIndices( DataId di ) const;
+
+		DataId pathDataId( const vector< vector< unsigned int > >& indices )
+			const;
 		////////////////////////////////////////////////////////////////
 		// load balancing functions
 		////////////////////////////////////////////////////////////////

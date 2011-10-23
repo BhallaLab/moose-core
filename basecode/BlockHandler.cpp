@@ -111,6 +111,15 @@ vector< vector< unsigned int > > BlockHandler::pathIndices( DataId di )
 	return ret;
 }
 
+/// Dummy for now.
+DataId BlockHandler::pathDataId( 
+	const vector< vector< unsigned int > >& indices) const
+{
+	if ( indices.size() != static_cast< unsigned int >( pathDepth_ ) + 1 )
+		return DataId::bad;
+	return DataId( 0 );
+}
+
 ////////////////////////////////////////////////////////////////////////
 // Load balancing
 ////////////////////////////////////////////////////////////////////////

@@ -42,6 +42,12 @@ class ObjId
 		{;}
 
 		/**
+		 * Creates an ObjId by reading the path string
+		 * Returns bad on failure.
+		 */
+		ObjId( const string& path );
+
+		/**
 		 * Returns the absolute path including all array indices.
 		 */
 		string path() const;

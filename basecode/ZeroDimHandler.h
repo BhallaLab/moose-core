@@ -58,6 +58,11 @@ class ZeroDimHandler: public DataHandler
 		 */
 		vector< vector< unsigned int > > pathIndices( DataId di ) const;
 
+		/**
+		 * Return DataId specified by indices vector. 
+		 */
+		DataId pathDataId( const vector< vector< unsigned int > >& indices )
+			const;
 		////////////////////////////////////////////////////////////////
 		// load balancing functions
 		////////////////////////////////////////////////////////////////

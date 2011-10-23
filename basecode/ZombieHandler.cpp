@@ -60,6 +60,15 @@ vector< vector< unsigned int > > ZombieHandler::pathIndices( DataId di )
 {
 	return parent_->pathIndices( di ); // Should really be orig.
 }
+
+/// Dummy for now.
+DataId ZombieHandler::pathDataId( 
+	const vector< vector< unsigned int > >& indices) const
+{
+	if ( indices.size() != static_cast< unsigned int >( pathDepth_ ) + 1 )
+		return DataId::bad;
+	return DataId( 0 );
+}
 ////////////////////////////////////////////////////////////////////
 // Load balancing
 ////////////////////////////////////////////////////////////////////

@@ -639,12 +639,52 @@ void Shell::doMove( Id orig, Id newParent )
 	waitForAck();
 }
 
+bool extractIndices( const string& s, vector< unsigned int >& indices )
+{
+	vector< unsigned int > open;
+	vector< unsigned int > close;
+
+	indices.clear();
+	if ( s.length() == 0 ) // a plain slash is OK
+		return 1;
+
+	if ( s[0] == '[' ) // Cannot open with a brace
+		return 0;
+
+	for ( unsigned int i = 0; i < s.length(); ++i ) {
+		if ( s[i] == '[' )
+			open.push_back( i+1 );
+		else if ( s[i] == ']' )
+			close.push_back( i );
+	}
+
+	if ( open.size() != close.size() )
+		return 0;
+
+	const char* str = s.c_str();
+	for ( unsigned int i = 0; i < open.size(); ++i ) {
+		if ( open[i] < close[i] ) {
+			indices.clear();
+			return 0;
+		} else if ( open[i] == close[i] ) {
+			indices.push_back( ~1U ); // Indicate any index.
+		} else {
+			int j = atoi( str + s[ open[i] ] );
+			if ( j >= 0 ) {
+				indices.push_back( j );
+			} else {
+				indices.clear();
+				return 0;
+			}
+		}
+	}
+	return 1;
+}
+
 /**
- * static func.
- * Chops up the names in the path into the vector of strings. 
- * Returns true if it starts at '/'.
+ * Static func to subdivide a string at the specified separator.
  */
-bool Shell::chopPath( const string& path, vector< string >& ret, 
+bool Shell::chopString( const string& path, vector< string >& ret, 
 	char separator )
 {
 	// /foo/bar/zod
@@ -676,22 +716,40 @@ bool Shell::chopPath( const string& path, vector< string >& ret,
 		pos = temp.find_first_of( separator );
 		ret.push_back( temp.substr( 0, pos ) );
 	}
+	return isAbsolute;
+}
 
-	/*
-	do {
-		ret.push_back( temp.substr( 0, pos ) );
-		temp = temp.substr( pos );
-	} while ( pos != string::npos ) ;
-	*/
+/**
+ * static func.
+ *
+ * Example: /foo/bar[10]/zod[3][4][5] would return:
+ * ret: {"foo", "bar", "zod" }
+ * index: { {}, {10}, {3,4,5} }
+ */
+bool Shell::chopPath( const string& path, vector< string >& ret, 
+	vector< vector< unsigned int > >& index )
+{
+	bool isAbsolute = chopString( path, ret, '/' );
+	index.clear();
+	index.resize( ret.size() );
+	for ( unsigned int i = 0; i < ret.size(); ++i )
+	{
+		if ( !extractIndices( ret[i], index[i] ) ) {
+			cout << "Error: Shell::chopPath: Failed to parse indices in path '" <<
+				path << "'\n";
+		}
+	}
+
 	return isAbsolute;
 }
 
 /// non-static func. Returns the Id found by traversing the specified path.
-Id Shell::doFind( const string& path ) const
+ObjId Shell::doFind( const string& path ) const
 {
 	Id curr = Id();
 	vector< string > names;
-	bool isAbsolute = chopPath( path, names );
+	vector< vector< unsigned int > > indices;
+	bool isAbsolute = chopPath( path, names, indices );
 
 	if ( !isAbsolute )
 		curr = cwe_;
@@ -705,7 +763,13 @@ Id Shell::doFind( const string& path ) const
 			curr = Neutral::child( curr.eref(), *i );
 		}
 	}
-	return curr;
+	
+	assert( curr.element() );
+	assert( curr.element()->dataHandler() );
+	DataId di = curr.element()->dataHandler()->pathDataId( indices );
+	if ( di == DataId::bad )
+		return ObjId::bad;
+	return ObjId( curr, di );
 }
 
 /// Static func.
