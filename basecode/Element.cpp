@@ -18,7 +18,7 @@
 Element::Element( Id id, const Cinfo* c, DataHandler* d )
 	: id_( id ), dataHandler_( d ), cinfo_( c ), group_( 0 )
 {
-	dataHandler_ = new ZombieHandler( d );
+	dataHandler_ = new ZombieHandler( d, d );
 }
 
 unsigned int numDimensionsActuallyUsed( 

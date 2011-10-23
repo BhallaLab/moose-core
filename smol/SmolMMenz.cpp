@@ -227,7 +227,8 @@ void SmolMMenz::zombify( Element* solver, Element* orig )
 		z->N_.set( molIndex, rateIndex, temp + 1 );
 	}
 
-	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
+	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler(),
+		orig->dataHandler() );
 	orig->zombieSwap( smolMMenzCinfo, dh );
 	*/
 }

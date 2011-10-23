@@ -286,8 +286,8 @@ void ZombiePool::zombify( Element* solver, Element* orig )
 		if ( i == 0 )
 			z->setSpecies( zombier, 0, m->getSpecies() );
 	}
-	DataHandler* zh = new ZombieHandler( solver->dataHandler(), 0, 
-		numEntries );
+	DataHandler* zh = new ZombieHandler( solver->dataHandler(), 
+		orig->dataHandler(), 0, numEntries );
 	orig->zombieSwap( zombiePoolCinfo, zh );
 }
 

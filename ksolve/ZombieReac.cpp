@@ -318,7 +318,8 @@ void ZombieReac::zombify( Element* solver, Element* orig )
 		}
 	}
 
-	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
+	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler(),
+		orig->dataHandler() );
 	orig->zombieSwap( zombieReacCinfo, dh );
 }
 
