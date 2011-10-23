@@ -34,7 +34,9 @@ class DataHandler
 		 * a constructor that takes another DataHandler ptr of the
 		 * same type as an argument. This should allocate a copy
 		 * of the original data
+		 * This version copies the dinfo, dims, depth and isGlobal fields.
 		 */
+		 DataHandler( const DataHandler* orig );
 
 
 		/**

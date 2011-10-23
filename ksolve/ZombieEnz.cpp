@@ -425,7 +425,8 @@ void ZombieEnz::zombify( Element* solver, Element* orig )
 	temp = z->N_.get( enzPool, reac3index );
 	z->N_.set( enzPool, reac3index, temp + 1 );
 
-	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
+	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler(),
+		orig->dataHandler() );
 	orig->zombieSwap( zombieEnzCinfo, dh );
 }
 

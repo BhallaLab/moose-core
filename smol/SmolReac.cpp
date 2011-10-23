@@ -243,7 +243,8 @@ void SmolReac::zombify( Element* solver, Element* orig )
 	halfName = orig->getName() + "_b";
 	buildHalfReac( z->sim_, halfName.c_str(), prds, subs, r->getKb() );
 
-	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
+	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler(),
+		orig->dataHandler() );
 	orig->zombieSwap( smolReacCinfo, dh );
 }
 

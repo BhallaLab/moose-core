@@ -24,6 +24,18 @@ DataHandler::DataHandler(
 		totalEntries_ *= dims[i].size;
 }
 
+DataHandler::DataHandler( const DataHandler* orig )
+	:
+		dims_( orig->dims_ ),
+		pathDepth_( orig->pathDepth_ ),
+		isGlobal_( orig->isGlobal_ ),
+		dinfo_( orig->dinfo_ )
+{
+	totalEntries_ = 1;
+	for ( unsigned int i = 0; i < dims_.size(); ++i )
+		totalEntries_ *= dims_[i].size;
+}
+
 DataHandler::~DataHandler()
 {;}
 
