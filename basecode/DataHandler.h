@@ -186,6 +186,14 @@ class DataHandler
 			const = 0;
 
 		/**
+		 * Returns the DataId for the specified vector of array indices.
+		 * If the indices cannot fit in the current DataHandler, then it
+		 * returns DataId::bad.
+		 */
+		virtual DataId pathDataId( 
+			const vector< vector < unsigned int > >& indices ) const = 0;
+
+		/**
 		 * Moves the pathDepth to the specified level.
 		 * If moving up, then it adds single-dimensions for the inserted
 		 * levels at the root of the tree.

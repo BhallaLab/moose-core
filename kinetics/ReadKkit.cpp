@@ -473,7 +473,7 @@ Id ReadKkit::buildReac( const vector< string >& args )
 
 	string head;
 	string tail = pathTail( args[2], head );
-	Id pa = shell_->doFind( head );
+	Id pa = shell_->doFind( head ).id;
 	assert( pa != Id() );
 
 	double kf = atof( args[ reacMap_[ "kf" ] ].c_str() );
@@ -591,7 +591,7 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 	static vector< int > dim( 1, 1 );
 	string head;
 	string tail = pathTail( args[2], head );
-	Id pa = shell_->doFind( head );
+	Id pa = shell_->doFind( head ).id;
 	assert ( pa != Id() );
 
 	double k1 = atof( args[ enzMap_[ "k1" ] ].c_str() );
@@ -684,7 +684,7 @@ Id ReadKkit::buildGroup( const vector< string >& args )
 	string head;
 	string tail = pathTail( args[2], head );
 
-	Id pa = shell_->doFind( head );
+	Id pa = shell_->doFind( head ).id;
 	assert( pa != Id() );
 	Id group = shell_->doCreate( "Neutral", pa, tail, dim, true );
 	assert( group != Id() );
@@ -701,7 +701,7 @@ Id ReadKkit::buildPool( const vector< string >& args )
 
 	string head;
 	string tail = pathTail( args[2], head );
-	Id pa = shell_->doFind( head );
+	Id pa = shell_->doFind( head ).id;
 	assert( pa != Id() );
 
 	double nInit = atof( args[ poolMap_[ "nInit" ] ].c_str() );
@@ -810,7 +810,7 @@ Id ReadKkit::buildGraph( const vector< string >& args )
 	string head;
 	string tail = pathTail( args[2], head );
 
-	Id pa = shell_->doFind( head );
+	Id pa = shell_->doFind( head ).id;
 	assert( pa != Id() );
 	Id graph = shell_->doCreate( "Neutral", pa, tail, dim, true );
 	assert( graph != Id() );
@@ -827,7 +827,7 @@ Id ReadKkit::buildPlot( const vector< string >& args )
 	string temp;
 	string graph = pathTail( head, temp ); // Name of graph
 
-	Id pa = shell_->doFind( head );
+	Id pa = shell_->doFind( head ).id;
 	assert( pa != Id() );
 
 	Id plot = shell_->doCreate( "Table", pa, tail, dim );

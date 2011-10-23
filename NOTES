@@ -16212,6 +16212,14 @@ From the 14th: The test cases are
 
 ============================================================================
 22 Oct 2011.
-Cleared unit test testShell.cpp:testErefToPath().
+Cleared unit test testShell.cpp:testErefToPath(). Checking 3099.
+Now working on generating an ObjId from a path.
+Work on Shell.cpp: around 690.
 
 ============================================================================
+23 Oct 2011.
+Working on handling the indexing. Implementation is at odds with existing
+wildcarding implementation, will need to reconcile.
+
+Did so. Still doesn't clear unit tests, but checking in as there have been
+many changes.

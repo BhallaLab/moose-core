@@ -499,14 +499,14 @@ void testErefToPath()
 	dims.push_back( s5a );
 	Id level5 = shell->doCreate( "Neutral", level4, "f5", dims );
 
-	int index1 = 1;
-	int index2 = 0;
-	int index3 = 3;
-	int index4 = 0;
-	int index5 = 5;
-	int index5a = 6;
+	unsigned int index1 = 1;
+	unsigned int index2 = 0;
+	unsigned int index3 = 3;
+	unsigned int index4 = 0;
+	unsigned int index5 = 5;
+	unsigned int index5a = 6;
 
-	int temp = ( ( ( ( index1 * s2 + index2 ) * 
+	unsigned int temp = ( ( ( ( index1 * s2 + index2 ) * 
 		s3 + index3 ) * 
 		s4 + index4 ) *
 		s5 + index5 ) *
@@ -515,6 +515,10 @@ void testErefToPath()
 	ObjId oi( level5, DataId( temp ) );
 	string path = oi.path();
 	assert( path == "/f1[1]/f2/f3[3]/f4/f5[5][6]" );
+
+	ObjId readPath( path );
+	assert( readPath.id == level5 );
+	assert( readPath.dataId.value() == temp );
 
 	shell->doDelete( level1 );
 	cout << "." << flush;
@@ -1143,51 +1147,141 @@ void testShellParserQuit()
 	cout << "." << flush;
 }
 
-void testChopPath()
+extern bool 
+	extractIndices( const string& s, vector< unsigned int >& indices );
+
+void testExtractIndices()
+{
+	vector< unsigned int > ret;
+
+	bool ok = extractIndices( "foo", ret );
+	assert( ok );
+	assert( ret.size() == 0 );
+
+	ok = extractIndices( "..", ret );
+	assert( ok );
+	assert( ret.size() == 0 );
+
+	ok = extractIndices( "a1[2]", ret );
+	assert( ok );
+	assert( ret.size() == 1 );
+	assert( ret[0] == 2 );
+
+	ok = extractIndices( "be451[0]", ret );
+	assert( ok );
+	assert( ret.size() == 1 );
+	assert( ret[0] == 2 );
+
+	ok = extractIndices( "be[0", ret );
+	assert( !ok );
+	assert( ret.size() == 0 );
+
+	ok = extractIndices( "[0]be", ret );
+	assert( !ok );
+	assert( ret.size() == 0 );
+
+	ok = extractIndices( "oops[0]]", ret );
+	assert( !ok );
+	assert( ret.size() == 0 );
+
+	ok = extractIndices( "fine[0] [ 123 ]", ret );
+	assert( ok );
+	assert( ret.size() == 2 );
+	assert( ret[0] == 0 );
+	assert( ret[1] == 123 );
+
+	cout << "." << flush;
+}
+
+void testChopString()
 {
 	vector< string > args;
 
-	assert( Shell::chopPath( ".", args ) == 0 );
+	assert( Shell::chopString( ".", args ) == 0 );
 	assert( args.size() == 1 );
 	assert( args[0] == "." );
 
-	assert( Shell::chopPath( "/", args ) == 1 );
+	assert( Shell::chopString( "/", args ) == 1 );
 	assert( args.size() == 0 );
 
-	assert( Shell::chopPath( "..", args ) == 0 );
+	assert( Shell::chopString( "..", args ) == 0 );
 	assert( args.size() == 1 );
 	assert( args[0] == ".." );
 
-	assert( Shell::chopPath( "./", args ) == 0 );
+	assert( Shell::chopString( "./", args ) == 0 );
 	assert( args.size() == 1 );
 	assert( args[0] == "." );
 
-	assert( Shell::chopPath( "./foo", args ) == 0 );
+	assert( Shell::chopString( "./foo", args ) == 0 );
 	assert( args.size() == 2 );
 	assert( args[0] == "." );
 	assert( args[1] == "foo" );
 
-	assert( Shell::chopPath( "/foo", args ) == 1 );
+	assert( Shell::chopString( "/foo", args ) == 1 );
 	assert( args.size() == 1 );
 	assert( args[0] == "foo" );
 
-	assert( Shell::chopPath( "foo", args ) == 0 );
+	assert( Shell::chopString( "foo", args ) == 0 );
 	assert( args.size() == 1 );
 	assert( args[0] == "foo" );
 
-	assert( Shell::chopPath( "foo/", args ) == 0 );
+	assert( Shell::chopString( "foo/", args ) == 0 );
 	assert( args.size() == 1 );
 	assert( args[0] == "foo" );
 
-	assert( Shell::chopPath( "/foo/", args ) == 1 );
+	assert( Shell::chopString( "/foo/", args ) == 1 );
 	assert( args.size() == 1 );
 	assert( args[0] == "foo" );
 
-	assert( Shell::chopPath( "foo/bar/zod", args ) == 0 );
+	assert( Shell::chopString( "foo/bar/zod", args ) == 0 );
 	assert( args.size() == 3 );
 	assert( args[0] == "foo" );
 	assert( args[1] == "bar" );
 	assert( args[2] == "zod" );
+
+	cout << "." << flush;
+}
+
+void testChopPath()
+{
+	vector< string > args;
+	vector< vector< unsigned int > > index;
+
+	assert( Shell::chopPath( "foo[1]/bar[2]/zod[3]", args, index ) == 0 );
+	assert( args.size() == 3 );
+	assert( args[0] == "foo" );
+	assert( args[1] == "bar" );
+	assert( args[2] == "zod" );
+
+	assert( index.size() == 3 );
+	assert( index[0].size() == 1 );
+	assert( index[1].size() == 1 );
+	assert( index[2].size() == 1 );
+	
+	assert( index[0][0] == 1 );
+	assert( index[1][0] == 2 );
+	assert( index[2][0] == 3 );
+
+	assert( Shell::chopPath( "/foo/bar[1]/zod[2][3]/zung[4][5][6]", 
+		args, index ) == 0 );
+	assert( args.size() == 4 );
+	assert( args[0] == "foo" );
+	assert( args[1] == "bar" );
+	assert( args[2] == "zod" );
+	assert( args[4] == "zung" );
+
+	assert( index.size() == 4 );
+	assert( index[0].size() == 0 );
+	assert( index[1].size() == 1 );
+	assert( index[2].size() == 2 );
+	assert( index[3].size() == 3 );
+	
+	assert( index[1][0] == 1 );
+	assert( index[2][0] == 2 );
+	assert( index[2][1] == 3 );
+	assert( index[3][0] == 4 );
+	assert( index[3][1] == 5 );
+	assert( index[3][2] == 6 );
 
 	cout << "." << flush;
 }
@@ -1607,6 +1701,7 @@ void testShellMesh()
 
 void testShell( )
 {
+	testExtractIndices();
 	testChopPath();
 	testTreeTraversal();
 	testChildren();

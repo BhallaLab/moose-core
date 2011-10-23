@@ -84,6 +84,20 @@ vector< vector< unsigned int > > ZeroDimHandler::pathIndices( DataId di )
 	vector< vector< unsigned int > > ret( pathDepth_ + 1 );
 	return ret; // Just empty.
 }
+
+DataId ZeroDimHandler::pathDataId( 
+	const vector< vector< unsigned int > >& indices) const
+{
+	if ( indices.size() != static_cast< unsigned int >( pathDepth_ ) + 1 )
+		return DataId::bad;
+
+	for ( unsigned int i = 0; i < indices.size(); ++i )
+		if ( !( indices[i].size() == 0 || 
+			indices[i][0] == 0 ||
+			indices[i][0] == ~1U ) )
+			return DataId::bad;
+	return DataId( 0 );
+}
 ///////////////////////////////////////////////////////////////////////
 // Load balancing
 ///////////////////////////////////////////////////////////////////////

@@ -33,6 +33,11 @@ istream& operator >>( istream& s, ObjId& i )
 	return s;
 }
 
+//////////////////////////////////////////////////////////////
+ObjId::ObjId( const string& path )
+{
+}
+
 Eref ObjId::eref() const
 {
 	return Eref( id(), dataId );
