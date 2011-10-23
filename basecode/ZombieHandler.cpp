@@ -10,12 +10,11 @@
 #include "header.h"
 
 ZombieHandler::ZombieHandler( const DataHandler* parentHandler,
+	const DataHandler* origHandler,
 	unsigned int start, unsigned int end )
-	: DataHandler( 
-			parentHandler->dinfo(), parentHandler->dims(),
-			parentHandler->pathDepth(), parentHandler->isGlobal()
-		),
+	: DataHandler( origHandler ),
 		parent_( parentHandler ),
+		orig_( origHandler ),
 		start_( start ), end_( end )
 {;}
 
@@ -58,16 +57,36 @@ unsigned int ZombieHandler::linearIndex( DataId di ) const
 vector< vector< unsigned int > > ZombieHandler::pathIndices( DataId di ) 
 	const
 {
-	return parent_->pathIndices( di ); // Should really be orig.
+	return orig_->pathIndices( di ); // Should really be orig.
 }
 
-/// Dummy for now.
+/// For now I'm just copying over the code for the BlockHandler.
 DataId ZombieHandler::pathDataId( 
 	const vector< vector< unsigned int > >& indices) const
 {
 	if ( indices.size() != static_cast< unsigned int >( pathDepth_ ) + 1 )
 		return DataId::bad;
+
+	unsigned short depth = 0;
+	unsigned long long linearIndex = 0;
+	unsigned int j = 0;
+	for ( unsigned int i = 0; i < dims_.size(); ++i ) {
+		if ( depth != dims_[i].depth ) {
+			j = 0;
+			depth = dims_[i].depth;
+		}
+		assert( indices.size() > depth );
+		assert( indices[ depth ].size() > j );
+		linearIndex *= dims_[i].size;
+		linearIndex += indices[depth][j++];
+	}
+
+	return DataId( linearIndex );
+	/*
+	if ( indices.size() != static_cast< unsigned int >( pathDepth_ ) + 1 )
+		return DataId::bad;
 	return DataId( 0 );
+	*/
 }
 ////////////////////////////////////////////////////////////////////
 // Load balancing
@@ -141,7 +160,7 @@ DataHandler* ZombieHandler::copy(
 	unsigned short newParentDepth, unsigned short copyRootDepth,
 	bool toGlobal, unsigned int n ) const
 {
-	return ( new ZombieHandler( parent_, start_ * n, end_ * n ) );
+	return ( new ZombieHandler( parent_, orig_, start_ * n, end_ * n ) );
 }
 
 DataHandler* ZombieHandler::copyUsingNewDinfo(

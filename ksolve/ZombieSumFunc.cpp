@@ -133,7 +133,8 @@ void ZombieSumFunc::zombify( Element* solver, Element* orig, Id molId )
 		poolIndex[i] = z->convertIdToPoolIndex( srcPools[i] );
 	z->funcs_[ funcIndex ] = new SumTotal( poolIndex );
 
-	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
+	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler(),
+		orig->dataHandler() );
 	orig->zombieSwap( zombieSumFuncCinfo, dh );
 }
 

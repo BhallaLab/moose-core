@@ -111,7 +111,6 @@ vector< vector< unsigned int > > BlockHandler::pathIndices( DataId di )
 	return ret;
 }
 
-/// Dummy for now.
 DataId BlockHandler::pathDataId( 
 	const vector< vector< unsigned int > >& indices) const
 {

@@ -18,7 +18,8 @@
 class DataHandlerWrapper: public DataHandler
 {
 	public:
-		DataHandlerWrapper( const DataHandler* parentHandler );
+		DataHandlerWrapper( const DataHandler* parentHandler,
+			const DataHandler* origHandler );
 
 		~DataHandlerWrapper();
 

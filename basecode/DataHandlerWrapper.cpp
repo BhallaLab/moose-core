@@ -10,11 +10,9 @@
 #include "header.h"
 #include "DataHandlerWrapper.h"
 
-DataHandlerWrapper::DataHandlerWrapper( const DataHandler* parentHandler )
-	: DataHandler( 
-		parentHandler->dinfo(), parentHandler->dims(), 
-		parentHandler->pathDepth(), parentHandler->isGlobal()
-	),
+DataHandlerWrapper::DataHandlerWrapper( const DataHandler* parentHandler,
+	const DataHandler* origHandler )
+	: DataHandler( origHandler ),
 	parent_( parentHandler )
 {;}
 

@@ -274,7 +274,8 @@ void SmolEnz::zombify( Element* solver, Element* orig )
 	unsigned int enzMol = z->convertIdToMolIndex( enzId );
 	z->N_.set( enzMol, rateIndex + 1, 1 );
 
-	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
+	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler(),
+		orig->dataHandler() );
 	orig->zombieSwap( smolEnzCinfo, dh );
 	*/
 }

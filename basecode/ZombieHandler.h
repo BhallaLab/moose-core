@@ -21,6 +21,7 @@ class ZombieHandler: public DataHandler
 {
 	public:
 		ZombieHandler( const DataHandler* parentHandler,
+			const DataHandler* origHander,
 			unsigned int start = 0, unsigned int end = 1 );
 
 		~ZombieHandler();
@@ -104,6 +105,7 @@ class ZombieHandler: public DataHandler
 
 	private:
 		const DataHandler* parent_;
+		const DataHandler* orig_;
 		unsigned int start_;
 		unsigned int end_;
 };

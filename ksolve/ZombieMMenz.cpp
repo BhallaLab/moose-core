@@ -243,7 +243,8 @@ void ZombieMMenz::zombify( Element* solver, Element* orig )
 		z->N_.set( poolIndex, rateIndex, temp + 1 );
 	}
 
-	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler() );
+	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler(),
+		orig->dataHandler() );
 	orig->zombieSwap( zombieMMenzCinfo, dh );
 }
 
