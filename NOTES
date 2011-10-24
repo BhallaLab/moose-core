@@ -16230,4 +16230,7 @@ Checkin 3101
 Some progress into regression tests, but not cleared. Checkin 3102.
 ============================================================================
 24 Oct 2011.
-Fixed pathDataId error, now clears regression tests too.
+Fixed pathDataId error, now clears regression tests too. Checkin 3104.
+Added in a unit test for nested copying into arrays, to build up model. Clears.
+
+============================================================================
