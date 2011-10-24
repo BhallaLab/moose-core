@@ -476,7 +476,7 @@ void testCopyFieldElement()
 	cout << "." << flush;
 }
 
-void testErefToPath()
+void testObjIdToAndFromPath()
 {
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
@@ -524,33 +524,66 @@ void testErefToPath()
 	cout << "." << flush;
 }
 
-void testPathToObjId()
+void testMultiLevelCopyAndPath()
 {
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+	unsigned int numChan = 10;
+	unsigned int numMitDend = 25;
+	unsigned int numPGdend = 4;
+	unsigned int numMit = 25;
+	unsigned int numPG = 40;
+	unsigned int numGlom = 50;
 
-/*
 	vector< int > dims;
 	Id library = shell->doCreate( "Neutral", Id(), "library", dims );
-	Id chan = shell->doCreate( "Neutral", library, "chan", dims );
+	Id chan = shell->doCreate( "HHChannel", library, "chan", dims );
+	Field< double >::set( chan, "Gbar", 111 );
 
-	Id dend = shell->doCreate( "Neutral", Id(), "dend", dims );
-	Id level1 = shell->doCopy( chan, dend, "chan", 10, 1, 0 );
+	Id dend = shell->doCreate( "Compartment", library, "dend", dims );
+	Field< double >::set( dend, "Em", -65 );
+	Id level1 = shell->doCopy( chan, dend, "chan", numChan, 0, 0 );
+	vector< double > gbar( numChan );
+	for ( unsigned int i = 0; i < numChan; ++i ) {
+		gbar[i] = i + 1;
+	}
+	Field< double >::setVec( level1, "Gbar", gbar );
 
-	Id mit = shell->doCreate( "Neutral", Id(), "mit", dims );
-	Id level2 = shell->doCopy( dend, mit, "dends", 11, 1, 0 );
+	Id mit = shell->doCreate( "Neutral", library, "mit", dims );
+	Id level2 = shell->doCopy( dend, mit, "dends", numMitDend, 0, 0 );
 
-	Id pg = shell->doCreate( "Neutral", Id(), "pg", dims );
-	Id level3 = shell->doCopy( dend, pg, "dends", 4, 1, 0 );
+	Id pg = shell->doCreate( "Neutral", library, "pg", dims );
+	Id level3 = shell->doCopy( dend, pg, "dends", numPGdend, 0, 0 );
 
-	Id glom = shell->doCreate( "Neutral", Id(), "glom", dims );
-	Id level4 = shell->doCopy( mit, cell, "mit", 25, 1, 0 );
-	Id level5 = shell->doCopy( pg, cell, "pg", 40, 1, 0 );
+	Id glom = shell->doCreate( "Neutral", library, "glom", dims );
+	Id level4 = shell->doCopy( mit, glom, "mit", numMit, 0, 0 );
+	Id level5 = shell->doCopy( pg, glom, "pg", numPG, 0, 0 );
 
 	Id bulb = shell->doCreate( "Neutral", Id(), "bulb", dims );
-	Id level6 = shell->doCopy( glom, cell, "glom", 50, 1, 0 );
-	*/
+	Id level6 = shell->doCopy( glom, bulb, "glom", numGlom, 0, 0 );
 
+	unsigned int glomNum = 3;
+	unsigned int mitNum = 4;
+	unsigned int dendNum = 5;
+	unsigned int chanNum = 6;
+	unsigned long long index = ( ( glomNum * numMit + mitNum ) * 
+								numMitDend + dendNum ) *
+								numChan + chanNum;
+	
+	Id temp( "/bulb/glom/mit/dends/chan" );
+	assert( temp != Id() );
+	ObjId oid( temp, DataId( index ) );
+	ObjId oid2( "/bulb/glom[3]/mit[4]/dends[5]/chan[6]" );
+	assert( oid == oid2 );
+
+	double g = Field< double >::get( oid2, "Gbar" );
+	assert( doubleEq( g, chanNum + 1 ) );
+
+	assert( oid.element()->dataHandler()->totalEntries() == 
+		numChan * numMitDend * numMit * numGlom );
+
+	shell->doDelete( library );
+	shell->doDelete( bulb );
 	cout << "." << flush;
 }
 
@@ -1750,8 +1783,8 @@ void testMpiShell( )
 	testCopy();
 	testCopyFieldElement();
 
-	testErefToPath();
-	testPathToObjId();
+	testObjIdToAndFromPath();
+	testMultiLevelCopyAndPath();
 
 	testShellSetGet();
 	testInterNodeOps();
