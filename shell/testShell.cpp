@@ -579,8 +579,32 @@ void testMultiLevelCopyAndPath()
 	double g = Field< double >::get( oid2, "Gbar" );
 	assert( doubleEq( g, chanNum + 1 ) );
 
-	assert( oid.element()->dataHandler()->totalEntries() == 
-		numChan * numMitDend * numMit * numGlom );
+	unsigned int totSize = numChan * numMitDend * numMit * numGlom;
+	assert( oid.element()->dataHandler()->totalEntries() == totSize );
+	
+	gbar.resize( totSize );
+	for ( unsigned int i = 0 ; i < totSize; ++i ) {
+		gbar[i] = i;
+	}
+	Field< double >::setVec( temp, "Gbar", gbar );
+	for ( unsigned int i = 0 ; i < totSize; i += 1234 ) {
+		ObjId oi( temp, i );
+		unsigned int index = i;
+		chanNum = index % numChan;
+		index = index / numChan;
+		dendNum = index % numMitDend;
+		index = index / numMitDend;
+		mitNum = index % numMit;
+		index = index / numMit;
+		glomNum = index % numGlom;
+		stringstream ss;
+		ss << "/bulb/glom[" << glomNum << "]/mit[" << mitNum << 
+			"]/dends[" << dendNum << "]/chan[" << chanNum << "]";
+		assert( oi.path() == ss.str() );
+
+		double x = Field< double >::get( oi, "Gbar" );
+		assert( doubleEq( x, i ) );
+	}
 
 	shell->doDelete( library );
 	shell->doDelete( bulb );
