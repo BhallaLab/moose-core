@@ -16203,10 +16203,10 @@ Checkin 3088.
 
 Some cleanup in ShellCopy.cpp. Now it clears unit and regression tests.
 From the 14th: The test cases are
-	- Returning path
-	- Generating ObjId from path
+	* Returning path
+	* Generating ObjId from path
 	- Generating ObjId of parent
-	- copying to build up the arrays, indexing thereof.
+	* copying to build up the arrays, indexing thereof.
 	- Moving
 	- Creating new Elements: option on a single twig or across all.
 
@@ -16232,5 +16232,9 @@ Some progress into regression tests, but not cleared. Checkin 3102.
 24 Oct 2011.
 Fixed pathDataId error, now clears regression tests too. Checkin 3104.
 Added in a unit test for nested copying into arrays, to build up model. Clears.
+Checkin 3105.
+
+Made a somewhat more strenuous test of the assignment of values into this
+nested array. Works.
 
 ============================================================================
