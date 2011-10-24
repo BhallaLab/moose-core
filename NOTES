@@ -16227,4 +16227,7 @@ many changes. Checkin 3100.
 Clears unit tests. Still have some dummy functions for DataHandler::pathDataId.
 Checkin 3101
 
-Some progress into regression tests, but not cleared.
+Some progress into regression tests, but not cleared. Checkin 3102.
+============================================================================
+24 Oct 2011.
+Fixed pathDataId error, now clears regression tests too.
