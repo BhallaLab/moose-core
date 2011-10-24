@@ -323,7 +323,7 @@ void Element::exec( const Qinfo* qi, const double* arg )
 			Element* elm = ofid->oi.element();
 			assert( ofid->numEntries > 0 );
 			const double* data = arg + ObjFidSizeInDoubles;
-			elm->dataHandler()->foreach( f,  elm, qi, 
+			elm->dataHandler()->forall( f,  elm, qi, 
 				data, ofid->entrySize, ofid->numEntries );
 			/*
 			DataHandler* dh = elm->dataHandler();

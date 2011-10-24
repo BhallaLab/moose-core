@@ -167,7 +167,7 @@ bool FieldDataHandlerBase::execThread( ThreadId thread, DataId di ) const
 }
 
 /////////////////////////////////////////////////////////////////////////
-// Process and foreach
+// Process and forall
 /////////////////////////////////////////////////////////////////////////
 
 void FieldDataHandlerBase::process( const ProcInfo* p, Element* e, FuncId fid ) const 
@@ -215,7 +215,7 @@ void FieldDataHandlerBase::process( const ProcInfo* p, Element* e, FuncId fid ) 
  * may modify data structures on the parent.
  * The OpFunc belongs to the FieldElement.
  */
-void FieldDataHandlerBase::foreach( const OpFunc* f, Element* e,
+void FieldDataHandlerBase::forall( const OpFunc* f, Element* e,
 	const Qinfo* q, const double* arg, 
 	unsigned int argSize, unsigned int numArgs ) const
 {
@@ -239,12 +239,12 @@ void FieldDataHandlerBase::foreach( const OpFunc* f, Element* e,
 		unsigned int argOffset = 0;	
 		FieldOpFunc fof( f, e, argSize, numArgs, &argOffset );
 		ObjId parent = Neutral::parent( Eref( e, 0 ) );
-		parentDataHandler_->foreach( &fof, parent.element(), q, 
+		parentDataHandler_->forall( &fof, parent.element(), q, 
 			arg, argSize * maxFieldEntries_, numArgs / maxFieldEntries_ );
 	} else {
 		FieldOpFuncSingle fof( f, e );
 		ObjId parent = Neutral::parent( Eref( e, 0 ) );
-		parentDataHandler_->foreach( &fof, parent.element(), q, 
+		parentDataHandler_->forall( &fof, parent.element(), q, 
 			arg, argSize, 0 );
 	}
 }

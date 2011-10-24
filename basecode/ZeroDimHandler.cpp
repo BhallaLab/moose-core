@@ -135,7 +135,7 @@ void ZeroDimHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 	}
 }
 
-void ZeroDimHandler::foreach( const OpFunc* f, Element* e, const Qinfo* q,
+void ZeroDimHandler::forall( const OpFunc* f, Element* e, const Qinfo* q,
 	const double* arg, unsigned int argSize, unsigned int numArgs ) const
 {
 	if ( data_ && ( q->threadNum() == myThread_ || q->threadNum() == 0 ) )

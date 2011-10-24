@@ -82,7 +82,7 @@ class ZeroDimHandler: public DataHandler
 		 * Calls OpFunc f on all data entries, using threading info from 
 		 * the Qinfo and the specified argument(s)
 		 */
-		void foreach( const OpFunc* f, Element* e, const Qinfo* q,
+		void forall( const OpFunc* f, Element* e, const Qinfo* q,
 			const double* arg, unsigned int argSize, unsigned int numArgs )
 			const;
 

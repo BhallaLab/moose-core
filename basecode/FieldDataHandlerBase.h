@@ -129,7 +129,7 @@ class FieldDataHandlerBase: public DataHandler
 		 */
 		void process( const ProcInfo* p, Element* e, FuncId fid ) const;
 
-		void foreach( const OpFunc* f, Element* e, const Qinfo* q,
+		void forall( const OpFunc* f, Element* e, const Qinfo* q,
 			const double* arg, 
 			unsigned int argSize, unsigned int numArgs ) const;
 

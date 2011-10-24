@@ -38,7 +38,7 @@ void ReduceMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const
 		//unsigned int count = 0;
 		vector< DataId > vec;
 		DataIdExtractor di( &vec );
-		e2_->dataHandler()->foreach( &di, e2_, q, 0, 0, 0 );
+		e2_->dataHandler()->forall( &di, e2_, q, 0, 0, 0 );
 		for ( vector< DataId >::const_iterator i = vec.begin(); 
 			i != vec.end(); ++i ) {
 			r->primaryReduce( ObjId( e2_->id(), *i ) );
@@ -118,7 +118,7 @@ unsigned int ReduceMsg::srcToDestPairs(
 	DataIdExtractor di( &dest );
 
 	Qinfo q;
-	e2_->dataHandler()->foreach( &di, 0, &q, 0, 0, 0 );
+	e2_->dataHandler()->forall( &di, 0, &q, 0, 0, 0 );
 	src.resize( dest.size(), i1_ );
 	return dest.size();
 

@@ -28,18 +28,27 @@ across all nodes and threads of a multiprocessor simulation. Ids are
 basically indices to a master array of all Elements. Ids are used by
 the Python system too.
 
-\subsection DataStructObjectAccess	DataId: Handles for Objects within elements.
+\subsection DataStructDataAccess	DataHandlers: Handles for Objects within elements.
+The \b DataHandler is a virtual base class that contains and access data
+belonging to an Element. It deals with creation, resizing, lookup and
+destruction of the data. It also provides a 'forall' function to
+efficiently iterate through all data entries and operate upon them. The
+partitioning of data entries between threads and nodes is done by the
+DataHandler. The 'forall' call on worker threads only operates on the 
+subset of data entries assigned to that thread. It is safe and recommended
+to call 'forall' on all worker threads.
 
-The \b DataId specifies a specific object within the Element. 
-The DataId has a data part and a field part.
-The data part is the parent object, and is used for any array Element.
-The field part is for array fields within individual data entries,
-in cases where the array fields themselves are accessed like Elements.
-For example, in an IntFire neuron, you could have an
-array of a million IntFire neurons on Element A, and each IntFire
-neuron might have a random individual number, say, 10000, 15000, 8000,
-etc Synapses. To index Synapse 234 on IntFire 999999 you would use a
-DataId( 999999, 234).
+\subsection DataStructObjectAccess	DataId: Identifiers for Objects within elements.
+
+The \b DataId specifies a specific object within the Element. It is used
+by the DataHandler to look up the data.
+The DataId contains an unsigned long long, which acts like a very large
+linear index. This linear index is partitioned by the DataHandlers in
+various complicated ways. For programmer purposes it is important to note
+that the linear index is not always contiguous. 
+When an Element or its DataHandler is resized, this invalidates all DataIds
+previously found for that Element. This is because the indexing will have
+changed.
 
 \subsection DataStructObjId	ObjId: Fully specified handle for objects.
 
@@ -47,6 +56,8 @@ The ObjId is a composite of Id and DataId. It uniquely specifies any
 entity in the simulation. It is consistent across nodes. 
 In general, one would use the ObjId for most Object manipulation,
 field access, and messaging API calls.
+The ObjId can be initialized using a string path of an object. 
+The string path of an object can be looked up from its ObjId.
 
 \subsection DataStructTrees	Element hierarchies and path specifiers.
 Elements are organized into a tree hierarchy, much like a Unix file
@@ -60,6 +71,15 @@ follows:
 \endverbatim
 
 Note that this path specifier maps onto a single ObjId.
+
+Path specifiers can be arbitrarily nested. Additionally, one can have
+multidimensional arrays at any level of nesting. Here is an example 
+path with nested arrays:
+
+\verbatim
+/network/layerIV/cell[23][34]/dendrite[50]/synchan/synapse[1234]
+\endverbatim
+
 
 Some commands take a \e wildcard path. This compactly specifies a large
 number of ObjIds. Some example wildcards are
