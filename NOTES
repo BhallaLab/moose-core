@@ -16205,7 +16205,7 @@ Some cleanup in ShellCopy.cpp. Now it clears unit and regression tests.
 From the 14th: The test cases are
 	* Returning path
 	* Generating ObjId from path
-	- Generating ObjId of parent
+	* Generating ObjId of parent
 	* copying to build up the arrays, indexing thereof.
 	- Moving
 	- Creating new Elements: option on a single twig or across all.
@@ -16239,6 +16239,9 @@ nested array. Works. Checkin 3107.
 
 Did a valgrind test. Lots of leakage. Turns out that ZeroDimHandler wasn't
 freeing stuff. This cleared up most of it.
-Found another leak in OneDimHandler::resize. Now clean. 
+Found another leak in OneDimHandler::resize. Now clean.  Checkin 3109.
+
+Implemented code for and test for Neutral::parent to obtain the full
+ObjId of the parent of an Eref. Works.
 
 ============================================================================

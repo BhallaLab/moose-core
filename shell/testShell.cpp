@@ -520,6 +520,27 @@ void testObjIdToAndFromPath()
 	assert( readPath.id == level5 );
 	assert( readPath.dataId.value() == temp );
 
+	ObjId f4 = Neutral::parent( oi.eref() );
+	path = f4.path();
+	assert( path == "/f1[1]/f2/f3[3]/f4" );
+
+	ObjId f3 = Neutral::parent( f4.eref() );
+	path = f3.path();
+	assert( path == "/f1[1]/f2/f3[3]" );
+
+	ObjId f2 = Neutral::parent( f3.eref() );
+	path = f2.path();
+	assert( path == "/f1[1]/f2" );
+
+	ObjId f1 = Neutral::parent( f2.eref() );
+	path = f1.path();
+	assert( path == "/f1[1]" );
+
+	ObjId f0 = Neutral::parent( f1.eref() );
+	path = f0.path();
+	assert( path == "/" );
+	assert( f0 == Id() );
+
 	shell->doDelete( level1 );
 	cout << "." << flush;
 }
