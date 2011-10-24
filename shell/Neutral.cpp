@@ -508,7 +508,12 @@ ObjId Neutral::parent( const Eref& e )
 	MsgId mid = e.element()->findCaller( pafid );
 	assert( mid != Msg::bad );
 
-	return Msg::getMsg( mid )->findOtherEnd( e.objId() );
+	Id pa = Msg::getMsg( mid )->findOtherEnd( e.objId() ).id;
+	vector< vector< unsigned int > > index = e.element()->dataHandler()->pathIndices( e.index() );
+	assert( index.size() > 0 );
+	index.pop_back();
+	DataId padi = pa.element()->dataHandler()->pathDataId( index );
+	return ObjId( pa, padi );
 }
 
 // Static function
