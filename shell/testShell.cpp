@@ -541,7 +541,22 @@ void testObjIdToAndFromPath()
 	assert( path == "/" );
 	assert( f0 == Id() );
 
-	shell->doDelete( level1 );
+	// Here check what happens with a move.
+	dims.resize( 1 );
+	dims[0] = 1;
+	Id level6 = shell->doCreate( "Neutral", Id(), "foo", dims );
+	Id level7 = shell->doCreate( "Neutral", level6, "bar", dims );
+	Id level8 = shell->doCreate( "Neutral", level7, "zod", dims );
+
+	shell->doMove( level1, level8 );
+
+	ObjId noi( "/foo/bar/zod/f1[1]/f2/f3[3]/f4/f5[5][6]" );
+	assert( noi.dataId.value() == temp );
+	assert( noi.id == level5 );
+	assert( noi == oi );
+	// cout << noi.path() << endl;
+
+	shell->doDelete( level6 );
 	cout << "." << flush;
 }
 
