@@ -76,17 +76,19 @@ DataId ZombieHandler::pathDataId(
 			depth = dims_[i].depth;
 		}
 		assert( indices.size() > depth );
-		assert( indices[ depth ].size() > j );
-		linearIndex *= dims_[i].size;
-		linearIndex += indices[depth][j++];
+		if ( indices[ depth ].size() > j ) {
+			linearIndex *= dims_[i].size;
+			linearIndex += indices[depth][j++];
+		} else if ( indices[ depth ].size() == 0 ) { 
+			// if no braces given in path string, assume index of zero.
+			linearIndex *= dims_[i].size;
+			j++;
+		} else {
+			return DataId::bad;
+		}
 	}
 
 	return DataId( linearIndex );
-	/*
-	if ( indices.size() != static_cast< unsigned int >( pathDepth_ ) + 1 )
-		return DataId::bad;
-	return DataId( 0 );
-	*/
 }
 ////////////////////////////////////////////////////////////////////
 // Load balancing
