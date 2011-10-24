@@ -112,6 +112,7 @@ bool OneDimHandler::resize( unsigned int dimension, unsigned int numEntries)
 			Shell::myNode(), Shell::numNodes() );
 		unsigned int newN = end_ - start_;
 		data_ = dinfo()->copyData( temp, n, newN );
+		dinfo()->destroyData( temp );
 		return 1;
 	}
 	return 0;
