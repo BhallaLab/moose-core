@@ -101,10 +101,10 @@ template< class Parent, class Field > class FieldDataHandler: public FieldDataHa
 		// Already defined FieldDataHandlerBase::innerNodeBalance()
 
 		///////////////////////////////////////////////////////////////
-		// Process and foreach
+		// Process and forall
 		///////////////////////////////////////////////////////////////
 		// Already defined FieldDataHandlerBase::process()
-		// Already defined FieldDataHandlerBase::foreach()
+		// Already defined FieldDataHandlerBase::forall()
 		// Already defined FieldDataHandlerBase::getAllData()
 
 		///////////////////////////////////////////////////////////////

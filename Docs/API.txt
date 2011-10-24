@@ -129,7 +129,8 @@ This has the following fields of note:
 
 5.2 Neutral. These fields are shared by all objects.
 	string name
-	Id parent			// Parent Id.
+	ObjId parent			// Parent ObjId. Note this is fully
+					// specified, including index.
 	vector< Id > children		// All child elements.
 	string path			// Full path
 	string className		

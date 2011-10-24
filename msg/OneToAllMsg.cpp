@@ -38,7 +38,7 @@ void OneToAllMsg::exec( const Qinfo* q, const double* arg, FuncId fid )
 	if ( q->src().element() == e1_ ) {
 		if ( q->src().dataId == i1_ ) {
 			const OpFunc* f = e2_->cinfo()->getOpFunc( fid );
-			e2_->dataHandler()->foreach( f, e2_, q, arg, 1, 0 );
+			e2_->dataHandler()->forall( f, e2_, q, arg, 1, 0 );
 		}
 	} else {
 		if ( e1_->dataHandler()->execThread( q->threadNum(), i1_ ) )
@@ -122,7 +122,7 @@ unsigned int OneToAllMsg::srcToDestPairs(
 	dest.resize( 0 );
 	DataIdExtractor di( &dest );
 
-	e2_->dataHandler()->foreach( &di, 0, 0, 0, 0, 0 );
+	e2_->dataHandler()->forall( &di, 0, 0, 0, 0, 0 );
 	src.resize( dest.size(), i1_ );
 
 	/*

@@ -228,7 +228,7 @@ void BlockHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 	}
 }
 
-void BlockHandler:: foreach( const OpFunc* f, Element* e, const Qinfo* q,
+void BlockHandler:: forall( const OpFunc* f, Element* e, const Qinfo* q,
 	const double* arg, unsigned int argSize, unsigned int numArgs ) const
 {
 	assert( q->threadNum() < threadStart_.size() );

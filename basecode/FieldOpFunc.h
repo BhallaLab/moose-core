@@ -8,8 +8,8 @@
 **********************************************************************/
 
 /**
- * This class is used by FieldDataHandlerBase to enable the foreach command
- * to iterate through all field entries, when the foreach command is
+ * This class is used by FieldDataHandlerBase to enable the forall command
+ * to iterate through all field entries, when the forall command is
  * passed down to the parent DataHandler. It encapsulates the actual OpFunc
  * to be used by the Field class, and performs the iteration. It lets
  * the parent class deal with thread specificity.

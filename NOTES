@@ -16244,4 +16244,10 @@ Found another leak in OneDimHandler::resize. Now clean.  Checkin 3109.
 Implemented code for and test for Neutral::parent to obtain the full
 ObjId of the parent of an Eref. Works.
 
+Should also implement a broader function for Neutral::children, which
+at present only returns a vector of Ids. Would be good to return a vector
+of ObjIds and restrict them to the ones specifically below the parent
+index specified in the argument Eref.
+
+Renamed the 'foreach' call with 'forall', which is more accurate.
 ============================================================================
