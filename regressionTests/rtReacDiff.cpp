@@ -42,6 +42,10 @@ static void rtReplicateModels()
 	assert( mesh != Id() );
 	assert( mesh.element()->dataHandler()->localEntries() == 8 );
 
+	Id olda( "/kinetics/a" );
+	assert( olda != Id() );
+	assert( olda.element()->dataHandler()->localEntries() == 1 );
+
 	shell->handleReMesh( mesh );
 	// This should assign the same init conc to the new pool objects.
 
