@@ -16249,5 +16249,7 @@ at present only returns a vector of Ids. Would be good to return a vector
 of ObjIds and restrict them to the ones specifically below the parent
 index specified in the argument Eref.
 
-Renamed the 'foreach' call with 'forall', which is more accurate.
+Renamed the 'foreach' call with 'forall', which is more accurate. Checkin 3111.
+
+Added in a test of path to ObjId conversion following a move of objects. OK.
 ============================================================================
