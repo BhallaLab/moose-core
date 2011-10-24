@@ -16235,6 +16235,10 @@ Added in a unit test for nested copying into arrays, to build up model. Clears.
 Checkin 3105.
 
 Made a somewhat more strenuous test of the assignment of values into this
-nested array. Works.
+nested array. Works. Checkin 3107.
+
+Did a valgrind test. Lots of leakage. Turns out that ZeroDimHandler wasn't
+freeing stuff. This cleared up most of it.
+Found another leak in OneDimHandler::resize. Now clean. 
 
 ============================================================================

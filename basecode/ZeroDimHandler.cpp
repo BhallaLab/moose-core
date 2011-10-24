@@ -58,7 +58,10 @@ ZeroDimHandler::ZeroDimHandler( const ZeroDimHandler* other )
 
 ZeroDimHandler::~ZeroDimHandler()
 {
-	// The base class ZeroDimGlobalHandler does the destruction.
+	static Dinfo< Cinfo > ref;
+	if ( data_ && !dinfo()->isA( &ref ) )
+		dinfo()->destroyData( data_ );
+	data_ = 0;
 }
 
 ///////////////////////////////////////////////////////////////////////
