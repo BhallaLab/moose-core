@@ -96,7 +96,7 @@ bool MsgDataHandler::execThread( ThreadId thread, DataId di ) const
 }
 
 /////////////////////////////////////////////////////////////////////////
-// Process and foreach functions
+// Process and forall functions
 /////////////////////////////////////////////////////////////////////////
 
 /**
@@ -118,7 +118,7 @@ void MsgDataHandler::process( const ProcInfo* p, Element* e,
 }
 
 /// Another unlikely function for MsgDataHandler
-void MsgDataHandler::foreach( const OpFunc* f, Element* e, const Qinfo* q,
+void MsgDataHandler::forall( const OpFunc* f, Element* e, const Qinfo* q,
 	const double* arg, unsigned int argSize, unsigned int numArgs ) const
 {
 	;

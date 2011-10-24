@@ -61,7 +61,7 @@ class OpFuncDummy: public OpFunc
 };
 
 /**
- * This class is used in the foreach call to extract a list of all DataIds
+ * This class is used in the forall call to extract a list of all DataIds
  * on the DataHandler.
  */
 class DataIdExtractor: public OpFuncDummy

@@ -98,9 +98,9 @@ unsigned int OneToOneMsg::srcToDestPairs(
 {
 	Qinfo q;
 	DataIdExtractor srcdi( &src );
-	e1_->dataHandler()->foreach( &srcdi, 0, &q, 0, 0, 0 );
+	e1_->dataHandler()->forall( &srcdi, 0, &q, 0, 0, 0 );
 	DataIdExtractor destdi( &dest );
-	e2_->dataHandler()->foreach( &destdi, 0, &q, 0, 0, 0 );
+	e2_->dataHandler()->forall( &destdi, 0, &q, 0, 0, 0 );
 	assert ( src.size() == dest.size() );
 
 	/*

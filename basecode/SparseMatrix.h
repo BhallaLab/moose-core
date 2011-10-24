@@ -178,7 +178,7 @@ template < class T > class SparseMatrix
 		 * Returns # entries.
 		 * Passes back iterators for the row and for the column index.
 		 *
-		 * Ideally I should provide a foreach type function so that the
+		 * Ideally I should provide a forall type function so that the
 		 * user passes in their operation as a functor, and it is 
 		 * applied to the entire row.
 		 *

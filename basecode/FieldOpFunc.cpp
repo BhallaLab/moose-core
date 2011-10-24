@@ -12,7 +12,7 @@
 
 /////////////////////////////////////////////////////////////////
 // Here we define the functions used by the FieldOpFunc for setting
-// up the 'foreach' iteration of the FieldDataHandlerBase.
+// up the 'forall' iteration of the FieldDataHandlerBase.
 /////////////////////////////////////////////////////////////////
 
 FieldOpFunc::FieldOpFunc( const OpFunc* f, Element* e, 

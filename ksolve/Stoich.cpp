@@ -598,7 +598,7 @@ void Stoich::updateV( unsigned int meshIndex, vector< double >& v )
 		assert( !isnan( *( j-1 ) ) );
 	}
 
-	// I should use foreach here.
+	// I should use forall here.
 	/*
 	vector< SumTotal >::const_iterator k;
 	for ( k = sumTotals_.begin(); k != sumTotals_.end(); k++ )
