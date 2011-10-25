@@ -58,6 +58,8 @@ class PyCute(QTextEdit):
         """
 
         QTextEdit.__init__(self, parent)
+        self.__mousePressed = False
+        self.__lastMousePressPos = None
         self.interpreter = interpreter
         self.colorizer = SyntaxColor()
 
@@ -315,7 +317,14 @@ class PyCute(QTextEdit):
                 if self.pointer == len(self.history):
                     self.pointer = 0
                 self._recall()
-
+        elif e.matches(QtGui.QKeySequence.Paste):
+            clipboard = QtGui.qApp.clipboard()
+            mimedata = clipboard.mimeData()
+            if mimedata and mimedata.hasText():
+                self.moveCursor(QTextCursor.End)
+                self._insertText(mimedata.text())
+        elif e.matches(QtGui.QKeySequence.Copy):
+            self.copy()
         elif text.length():
             self._insertText(text)
             return
@@ -342,14 +351,6 @@ class PyCute(QTextEdit):
         self._insertText(self.history[self.pointer])
 
         
-    def mousePressEvent(self, e):
-        """
-        Keep the cursor after the last prompt.
-        """
-        if e.button() == Qt.LeftButton:
-            self.moveCursor(QTextCursor.End)
-            
-
     def contentsContextMenuEvent(self,ev):
         """
         Suppress the right button context menu.
