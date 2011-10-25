@@ -58,8 +58,7 @@ class PyCute(QTextEdit):
         """
 
         QTextEdit.__init__(self, parent)
-        self.__mousePressed = False
-        self.__lastMousePressPos = None
+        self.setUndoRedoEnabled(True)
         self.interpreter = interpreter
         self.colorizer = SyntaxColor()
 
@@ -166,7 +165,7 @@ class PyCute(QTextEdit):
         """
         # The output of self.append(text) contains to many newline characters,
         # so work around QTextEdit's policy for handling newline characters.
-
+        self.setUndoRedoEnabled(True)
         cursor = self.textCursor()
 
         cursor.movePosition(QTextCursor.End)
@@ -183,7 +182,6 @@ class PyCute(QTextEdit):
         format = cursor.charFormat()
         format.setForeground( QtGui.QBrush(QtGui.QColor(0,0,0)))
         cursor.setCharFormat(format)
-
 
     def writelines(self, text):
         """
@@ -256,7 +254,7 @@ class PyCute(QTextEdit):
         """
         text  = e.text()
         key   = e.key()
-
+        self.setUndoRedoEnabled(True)
         if key == Qt.Key_Backspace:
             if self.point:
                 cursor = self.textCursor()
@@ -281,6 +279,7 @@ class PyCute(QTextEdit):
                 self.reading = 0
             else:
                 self._run()
+                self.setUndoRedoEnabled(False)
                 
         elif key == Qt.Key_Tab:
             self._insertText(text)
@@ -304,7 +303,6 @@ class PyCute(QTextEdit):
             self.point = self.line.length() 
 
         elif key == Qt.Key_Up:
-
             if len(self.history):
                 if self.pointer == 0:
                     self.pointer = len(self.history)
@@ -325,6 +323,10 @@ class PyCute(QTextEdit):
                 self._insertText(mimedata.text())
         elif e.matches(QtGui.QKeySequence.Copy):
             self.copy()
+        elif e.matches(QtGui.QKeySequence.Undo):
+            self.undo()
+        elif e.matches(QtGui.QKeySequence.Redo):
+            self.redo()
         elif text.length():
             self._insertText(text)
             return
