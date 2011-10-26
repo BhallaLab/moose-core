@@ -10,7 +10,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-enum TableModes { TAB_IO, TAB_LOOP, TAB_ONCE, TAB_BUF, TAB_SPIKE, TAB_FIELDS, TAB_DELAY };
+enum TableModes { TAB_IO, TAB_LOOP, TAB_ONCE, TAB_BUF, TAB_SPIKE, TAB_FIELDS, TAB_DELAY, TAB_BUF_TO_FILE };
 
 class Table: public Interpol
 {
@@ -30,6 +30,10 @@ class Table: public Interpol
 		static double getStepsize( Eref e );
 		static void setStepMode( const Conn* c, int value );
 		static int getStepMode( Eref e );
+
+		static void setFname( const Conn* c, string value );
+		static string getFname( Eref e );
+
 		static double getLookup( Eref e, const double& x );
 
 		////////////////////////////////////////////////////////////
@@ -60,6 +64,7 @@ class Table: public Interpol
 		double py_;
 		double lastSpike_;
 		unsigned int counter_;
+		string fname_;
 };
 
 extern const Cinfo* initTableCinfo();

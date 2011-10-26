@@ -9159,4 +9159,4 @@ and execute pymoose.sh
 8 Nov 2010
 Put in a check for kinetic models where the rank = nVarMols. This is an 
 extremely improbable situation and might reflect a bug in the model itself,
-but should not cause the simulator to crash.
+but should not cause the simulator to crash. Checkin 2336.
