@@ -70,6 +70,10 @@ const Cinfo* initTableCinfo()
 			GFCAST( &Table::getStepsize ),
 			RFCAST( &Table::setStepsize )
 		),
+		new ValueFinfo( "fname", ValueFtype1< string >::global(),
+			GFCAST( &Table::getFname ),
+			RFCAST( &Table::setFname )
+		),
 		new LookupFinfo( "tableLookup",
 			LookupFtype< double, unsigned int >::global(),
 			GFCAST( &Table::getLookup ),
@@ -213,6 +217,15 @@ double Table::getStepsize( Eref e )
 	return static_cast< Table* >( e.data() )->stepSize_;
 }
 
+void Table::setFname( const Conn* c, string val ) 
+{
+	static_cast< Table* >( c->data() )->fname_ = val;
+}
+string Table::getFname( Eref e )
+{
+	return static_cast< Table* >( e.data() )->fname_;
+}
+
 double Table::getLookup( Eref e, const double& x )
 {
 	return static_cast< Table* >( e.data() )->innerLookup( x );
@@ -313,6 +326,28 @@ void Table::innerProcess( Eref e, ProcInfo p )
 			table_[ index ] = input_;
 			output_ += 1.0;
 			xmax_ = output_;
+			break;
+		case TAB_BUF_TO_FILE:
+			/**
+			 * Buffers data till table is full, then appends it to
+			 * a file and empties table so it can accumulate more.
+			 * Replaces TAB_BUF in cases where there is so much data to
+			 * store that it would fill up memory.
+			 * Output value is current sample number, can be set to
+			 * let us fill the table from any point.
+			 */
+			index = (static_cast< long >( output_ + 0.5 )) % table_.size();
+			// cout << index << "," << table_.size() << "	";
+			table_[ index ] = input_;
+			output_ += 1.0;
+			xmax_ = output_;
+			if ( index == table_.size() - 1 ) { // dump it
+				// cout << " Dumping " << fname_ << endl;
+				innerPrint( fname_, true );
+				for ( vector< double >::iterator i = table_.begin(); 
+					i != table_.end(); ++i )
+					*i = 0;
+			}
 			break;
 		case TAB_DELAY:
 			{
