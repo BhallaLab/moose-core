@@ -16,7 +16,10 @@
 # ** GNU General Public License version 2
 # ** See the file COPYING.LIB for the full notice.
 # **********************************************************************/
-
+import types
+import parser
+import token
+import symbol
 from moose import *
 
 def listmsg(pymoose_object):
@@ -85,7 +88,108 @@ def getfields(moose_object):
 
     return fields
 
+def apply_to_tree(moose_wildcard, python_filter=None, value=None):
+    """
+    Select objects by a moose/genesis wildcard, apply a python filter on them and apply a value on them.
 
+    moose_wildcard - this follows GENESIS convention.
+
+    {path}/#[{condition}] returns all elements directly under {path} that satisfy condition. For example:
+
+    '/mynetwork/mycell_0/#[TYPE=Compartment]'
+
+    will return all Compartment objects directly under mycell_0 in mynetwork.
+
+    '{path}/##[{condition}]' will recursively go through all the
+    objects that are under {path} (i.e. children, grandchildren,
+    great-grandchildren and so on up to the leaf level) and a list of
+    the ones meet {condition} will be obtained.
+
+    Thus, '/mynetwork/##[TYPE=Compartment]' will return all
+    compartments under mynetwork or its children, or children thereof
+    and so on.
+
+    python_filter - if a single string, it will be taken as a
+    fieldname, and value will be assigned to this field. It can also
+    be a lambda function returning True or False which will be applied
+    to each id in the id list returned by moose wildcard
+    search. Remember, the argument to the lambda will be an Id, so it
+    is up to you to wrap it into a moose object of appropriate type. An example is:
+
+    lambda moose_id: Compartment(moose_id).diameter <  2e-6
+
+    If your moose_wildcard selected objects of Compartment class, then
+    this lambda function will select only those with diameter less
+    than 2 um.
+
+    value - can be a lambda function to apply arbitrary operations on
+    the selected objects.
+
+    If python_filter is a string it, the return
+    value of applying the lambda for value() will assigned to the
+    field specified by python_filter.
+
+    But if it is value is a data object and {python_filter} is a
+    string, then {value} will be assigned to the field named
+    {python_filter}.
+    
+    """
+    if not isinstance(moose_wildcard, str):
+        raise TypeError('moose_wildcard must be a string.')
+    id_list = context.getWildcardList(moose_wildcard, True)
+    if isinstance(python_filter, types.LambdaType):
+        id_list = [moose_id for moose_id in id_list if python_filter(moose_id)]
+    elif isinstance(python_filter, str):
+        id_list = [moose_id for moose_id in id_list if hasattr(eval('%s(moose_id)' % Neutral(moose_id).className), python_filter)]
+    else:
+        pass
+    if isinstance(value, types.LambdaType):
+        if isinstance(python_filter, str):
+            for moose_id in id_list:
+                moose_obj = eval('%s(moose_id)' % Neutral(moose_id).className)
+                setattr(moose_obj, python_filter, value(moose_id))
+        else:
+            for moose_id in id_list:
+                value(moose_id)
+    else:
+        if isinstance(python_filter, str):
+            for moose_id in id_list:
+                moose_obj = eval('%s(moose_id)' % Neutral(moose_id).className)
+                setattr(moose_obj, python_filter, value)
+        else:
+            raise TypeError('Second argument must be a string specifying a field to assign to when third argument is a value')
+            
+
+def tweak_field(moose_wildcard, field, assignment_string):
+    """Tweak a specified field of all objects that match the
+    moose_wildcard using assignment string. All identifiers in
+    assignment string must be fields of the target object."""    
+    if not isinstance(moose_wildcard, str):
+        raise TypeError('moose_wildcard must be a string.')
+    id_list = context.getWildcardList(moose_wildcard, True)
+    expression = parser.expr(assignment_string)
+    expr_list = expression.tolist()
+    # This is a hack: I just tried out some possible syntax trees and
+    # hand coded the replacement such that any identifier is replaced
+    # by moose_obj.identifier
+    def replace_fields_with_value(x):
+        if len(x)>1:
+            if x[0] == symbol.power and x[1][0] == symbol.atom and x[1][1][0] == token.NAME:
+                field = x[1][1][1]
+                x[1] = [symbol.atom, [token.NAME, 'moose_obj']]
+                x.append([symbol.trailer, [token.DOT, '.'], [token.NAME, field]])
+            for item in x:
+                if isinstance(item, list):
+                    replace_fields_with_value(item)
+        return x
+    tmp = replace_fields_with_value(expr_list)
+    new_expr = parser.sequence2st(tmp)
+    code = new_expr.compile()
+    for moose_id in id_list:
+        moose_obj = eval('%s(moose_id)' % (Neutral(moose_id).className))
+        value = eval(code)
+        context.setField(moose_id, field, str(value))
+        
 def printtree(root, vchar='|', hchar='__', vcount=1, depth=0, prefix='', is_last=False):
     """Pretty-print a MOOSE tree.
     
