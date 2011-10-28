@@ -132,7 +132,17 @@ def apply_to_tree(moose_wildcard, python_filter=None, value=None):
     But if it is value is a data object and {python_filter} is a
     string, then {value} will be assigned to the field named
     {python_filter}.
+
+
+    If you want to assign Rm = 1e6 for each compartment in mycell
+    whose name match 'axon_*':
     
+    apply_to_tree('/mycell/##[Class=Compartment]',
+            lambda x: 'axon_' in Neutral(x).name,
+            lambda x: setattr(Compartment(x), 'Rm', 1e6))
+
+    [you must use setattr to assign value to a field because lambda
+    functions don't allow assignments].
     """
     if not isinstance(moose_wildcard, str):
         raise TypeError('moose_wildcard must be a string.')
@@ -163,7 +173,15 @@ def apply_to_tree(moose_wildcard, python_filter=None, value=None):
 def tweak_field(moose_wildcard, field, assignment_string):
     """Tweak a specified field of all objects that match the
     moose_wildcard using assignment string. All identifiers in
-    assignment string must be fields of the target object."""    
+    assignment string must be fields of the target object.
+
+    Example:
+
+    tweak_field('/mycell/##[Class=Compartment]', 'Rm', '1.5 / (3.1416 * diameter * length')
+
+    will assign Rm to every compartment in mycell such that the
+    specific membrane resistance is 1.5 Ohm-m2.
+    """    
     if not isinstance(moose_wildcard, str):
         raise TypeError('moose_wildcard must be a string.')
     id_list = context.getWildcardList(moose_wildcard, True)
