@@ -368,20 +368,20 @@ class PyGLWidget(QtOpenGL.QGLWidget):
         if (ev.modifiers() & QtCore.Qt.ControlModifier):
             self.ctrlPressed = True	
         elif (ev.key() == QtCore.Qt.Key_Up):
-        	self.translate([0.0, 0.25, 0.0])
-                self.ypan += 0.25
+        	self.translate([0.0, 0.05, 0.0])
+                self.ypan += 0.05
         	self.updateGL()
         elif (ev.key() == QtCore.Qt.Key_Down):
-        	self.translate([0.0, -0.25, 0.0])
-                self.ypan += -0.25
+        	self.translate([0.0, -0.05, 0.0])
+                self.ypan += -0.05
         	self.updateGL()
         elif (ev.key() == QtCore.Qt.Key_Left):
-        	self.translate([-0.25, 0.0, 0.0])
-                self.xpan += -0.25
+        	self.translate([-0.05, 0.0, 0.0])
+                self.xpan += -0.05
         	self.updateGL()
         elif (ev.key() == QtCore.Qt.Key_Right):
-        	self.translate([0.25, 0.0, 0.0])
-                self.xpan += 0.25
+        	self.translate([0.05, 0.0, 0.0])
+                self.xpan += 0.05
         	self.updateGL()
         elif (ev.key() == QtCore.Qt.Key_Plus)or(ev.key() == QtCore.Qt.Key_PageUp)or(ev.key()==QtCore.Qt.Key_Period):
             if ((self.zpan+0.75) <= self.near_+3):
