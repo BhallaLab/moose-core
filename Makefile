@@ -316,11 +316,11 @@ pymoose: CXXFLAGS += -DPYMOOSE -fPIC -I/usr/include/python2.6
 pymoose: SUBDIR += pymoose	
 pymoose: OBJLIBS := pymoose/pymoose.o $(OBJLIBS)
 pymoose: LIBS += -lpython2.6
-pymoose: _moose.so	
+pymoose: python/moose/_moose.so	
 
-_moose.so: libs $(OBJLIBS) $(LIBNEUROML_DYNAMIC) 
+python/moose/_moose.so: libs $(OBJLIBS) $(LIBNEUROML_DYNAMIC) 
 	$(CXX) -shared $(LDFLAGS) $(CXXFLAGS) -o $@ $(OBJLIBS) $(LIBS)
-	cp pymoose/moose.py ./
+	cp pymoose/moose.py ./python/moose/
 
 $(LIBNEUROML_DYNAMIC): 
 	$(MAKE) -C $(LIBNEUROML_SRC) TYPE=dynamic

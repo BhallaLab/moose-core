@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Apr 22 22:21:11 2009 (+0530)
 # Version: 
-# Last-Updated: Wed Sep 16 18:10:50 2009 (+0530)
-#           By: subhasis ray
-#     Update #: 58
+# Last-Updated: Fri Oct 21 16:33:16 2011 (+0530)
+#           By: Subhasis Ray
+#     Update #: 60
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -51,15 +51,28 @@ from cachans import CaL
 from kchans import KCaChannel
 
 class CaPool(moose.CaConc):
-    def __init__(self, *args):
-	moose.CaConc.__init__(self, *args)
+    def __init__(self, name, parent=None):
+        if parent is None:
+            path = name
+        else:
+            path = parent.path + '/' + name
+        if config.context.exists(path):
+            moose.CaConc.__init__(self, path)
+            print 'returning already existing ', path
+            return
+        moose.CaConc.__init__(self, path)
+        config.LOGGER.debug('Creating %s' % (path))
         self.CaBasal = 0.0        
         config.context.runG('setfield ' + self.path + ' ceiling 1e6')
         config.context.runG('setfield ' + self.path + ' floor 0.0')
+        self.addField('addmsg1')
+        self.setField('addmsg1', '../CaL . I_Ca Ik')
         
     def connectCaChannels(self, channel_list):
         """Connects the Ca2+ channels in channel_list as a source of
         Ca2+ to the pool."""
+        raise Exception, 'Deprecated - as Ca channel is connected via addmsg1 field in readcell.'
+
         for channel in channel_list:
                 if not hasattr(channel, 'connected_to_pool') or not channel.connected_to_pool:
                     channel.connect('IkSrc', self, 'current')
@@ -69,9 +82,10 @@ class CaPool(moose.CaConc):
                 
     def connectDepChannels(self, channel_list):
         """Connect channels in channel_list as dependent channels"""
+        raise Exception, 'Deprecated - as CaPool is connected to Ca-dependent channels via addmsg1 field in readcell.'
         for channel in channel_list:
             if channel.useConcentration == 0:
-                print "WRANING: This channel does not use concentration:", channel.path
+                print "WARNING: This channel does not use concentration:", channel.path
             elif not hasattr(channel, 'connected_to_ca') or not channel.connected_to_ca:
                 self.connect("concSrc", channel, "concen")
                 channel.connected_to_ca = True

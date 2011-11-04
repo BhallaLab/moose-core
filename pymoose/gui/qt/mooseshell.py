@@ -68,7 +68,7 @@ class MooseShell(PyCute):
         self.gen_ps1 = 'MOOSE > '
         self.gen_ps2 = '        '
         self.interpreter.runsource('from __main__ import *')
-        self.interpreter.runsource('from pymoose import *')
+        self.interpreter.runsource('from moose.utils import *')
         self.mooseContext = PyMooseBase.getContext()
         self.setLineWrapMode(self.WidgetWidth)
 
