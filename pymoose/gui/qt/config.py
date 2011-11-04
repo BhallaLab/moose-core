@@ -69,6 +69,7 @@ KEY_GL_PORT = 'glclient/port'
 KEY_GL_CLIENT_EXECUTABLE = 'glclient/executable'
 KEY_GL_BACKGROUND_COLOR = 'glclient/bgcolor'
 
+KEY_HOME_DIR = 'main'
 KEY_WINDOW_GEOMETRY = 'main/geometry'
 KEY_WINDOW_LAYOUT = 'main/layout'
 KEY_RUNTIME_AUTOHIDE = 'main/rtautohide'

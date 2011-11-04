@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Sep 21 01:45:00 2009 (+0530)
 # Version: 
-# Last-Updated: Tue Feb  9 14:31:39 2010 (+0100)
+# Last-Updated: Fri Oct 21 17:10:23 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 125
+#     Update #: 129
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -53,21 +53,53 @@ from cell import *
 from capool import CaPool
 
 class SupPyrFRB(TraubCell):
-    prototype = TraubCell.read_proto("SupPyrFRB.p", "SupPyrFRB")
-    def __init__(self, *args):
-        self.chan_list = ['all channels']
-#         self.chan_list = ['NaF', 'NaP', 'KC', 'KAHP', 'KDR', 'KA', 'K2', 'KM', 'CaL', 'CaT', 'AR']
-	TraubCell.__init__(self, *args)
+    chan_params = {
+    'ENa': 50e-3,
+    'EK': -95e-3,
+    'EAR': -35e-3,
+    'ECa': 125e-3,
+    'EGABA': -81e-3,
+    'TauCa': 20e-3
+    }
+    ca_dep_chans = ['KAHP', 'KC']
+    num_comp = 74
+    presyn = 72
+    proto_file = 'SupPyrFRB.p'
+    # level maps level number to the set of compartments belonging to it
+    level = None
+    # depth stores a map between level number and the depth of the compartments.
+    depth = {
+        1: 850 * 1e-6,
+        2: 885 * 1e-6,
+        3: 920 * 1e-6,
+        4: 955 * 1e-6,
+        5: 825 * 1e-6,
+        6: 775 * 1e-6,
+        7: 725 * 1e-6,
+        8: 690 * 1e-6,
+        9: 655 * 1e-6,
+        10: 620 * 1e-6,
+        11: 585 * 1e-6,
+        12: 550 * 1e-6,
+        }
+    prototype = TraubCell.read_proto(proto_file, "SupPyrFRB", level_dict=level, depth_dict=depth, params=chan_params)
 
+    def __init__(self, *args):
+        TraubCell.__init__(self, *args)
+        soma_ca_pool = moose.CaConc(self.soma.path + '/CaPool')
+        soma_ca_pool.tau = 100e-3
 
     def _topology(self):
+        raise Exception, 'Deprecated'
 	self.presyn = 72
 
     def _setup_passive(self):
+        raise Exception, 'Deprecated'
 	for comp in self.comp[1:]:
 	    comp.initVm = -70e-3
 
     def _setup_channels(self):
+        raise Exception, 'Deprecated'
 	for comp in self.comp[1:]:
 	    ca_pool = None
 	    ca_dep_chans = []
@@ -123,9 +155,23 @@ class SupPyrFRB(TraubCell):
         mycell = SupPyrFRB(SupPyrFRB.prototype, sim.model.path + "/SupPyrFRB")
         print 'Created cell:', mycell.path
         vm_table = mycell.comp[mycell.presyn].insertRecorder('Vm_suppyrFRB', 'Vm', sim.data)
-        ca_table = mycell.soma.insertCaRecorder('CaPool', sim.data)
+        ca_conc_path = mycell.soma.path + '/CaPool'
+        ca_table = None
+        if config.context.exists(ca_conc_path):
+            ca_conc = moose.CaConc(ca_conc_path)
+            ca_table = moose.Table('Ca_suppyrFRB', sim.data)
+            ca_table.stepMode = 3
+            ca_conc.connect('Ca', ca_table, 'inputRequest')
+        kc_path = mycell.soma.path + '/KC'
+        gk_table = None
+        if config.context.exists(kc_path):
+            gk_table = moose.Table('gkc', sim.data)
+            gk_table.stepMode = 3
+            kc = moose.HHChannel(kc_path)
+            kc.connect('Gk', gk_table, 'inputRequest')
+            pymoose.showmsg(ca_conc)
         pulsegen = mycell.soma.insertPulseGen('pulsegen', sim.model, firstLevel=3e-10, firstDelay=50e-3, firstWidth=50e-3)
-
+#         pulsegen1 = mycell.soma.insertPulseGen('pulsegen1', sim.model, firstLevel=3e-7, firstDelay=150e-3, firstWidth=10e-3)
 
         sim.schedule()
         if mycell.has_cycle():
@@ -136,17 +182,19 @@ class SupPyrFRB(TraubCell):
         delta = t2 - t1
         print 'simulation time: ', delta.seconds + 1e-6 * delta.microseconds
         sim.dump_data('data')
-        mus_vm = pylab.array(vm_table) * 1e3
-        mus_t = linspace(0, sim.simtime * 1e3, len(mus_vm))
-        mus_ca = pylab.array(ca_table)
-        nrn_vm = trbutil.read_nrn_data('Vm_suppyrFRB.plot', 'test_suppyrFRB.hoc')
-        nrn_ca = trbutil.read_nrn_data('Ca_suppyrFRB.plot', 'test_suppyrFRB.hoc')
-        if len(nrn_vm) > 0:
-            nrn_t = nrn_vm[:, 0]
-            nrn_vm = nrn_vm[:, 1]
-            nrn_ca = nrn_ca[:,1]
-
-        trbutil.do_plot(cls.__name__, mus_t, mus_ca, mus_vm, nrn_t, nrn_ca, nrn_vm)
+        if config.has_pylab:
+            mus_vm = config.pylab.array(vm_table) * 1e3
+            mus_t = linspace(0, sim.simtime * 1e3, len(mus_vm))
+            try:
+                nrn_vm = config.pylab.loadtxt('../nrn/mydata/Vm_deepLTS.plot')
+                nrn_t = nrn_vm[:, 0]
+                nrn_vm = nrn_vm[:, 1]
+                config.pylab.plot(nrn_t, nrn_vm, 'y-', label='nrn vm')
+            except IOError:
+                print 'NEURON Data not available.'
+            config.pylab.plot(mus_t, mus_vm, 'g-.', label='mus vm')
+            config.pylab.legend()
+            config.pylab.show()
         
         
 # test main --

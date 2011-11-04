@@ -21,7 +21,8 @@
 *cartesian
 *relative
 *asymmetric
-
+*set_global EREST_ACT -0.075
+  
 *set_compt_param ELEAK -0.075
 *set_compt_param RM 2
 *set_compt_param CM 0.01

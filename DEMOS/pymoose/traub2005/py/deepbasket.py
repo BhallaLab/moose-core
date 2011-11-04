@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Oct 16 14:30:33 2009 (+0530)
 # Version: 
-# Last-Updated: Tue Feb  9 14:33:49 2010 (+0100)
+# Last-Updated: Fri Oct 21 17:17:29 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 72
+#     Update #: 74
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -54,10 +54,25 @@ from capool import CaPool
 
 
 class DeepBasket(TraubCell):
-    prototype = TraubCell.read_proto("DeepBasket.p", "DeepBasket")
-    ca_dep_chans = ['KAHP','KAHP_SLOWER', 'KAHP_DP', 'KC', 'KC_FAST']
+    chan_params = {
+        'ENa': 50e-3,
+        'EK': -100e-3,
+        'EAR': -40e-3,
+        'ECa': 125e-3,
+        'EGABA': -75e-3, # Sanchez-Vives et al. 1997 
+        'TauCa': 20e-3,
+        'X_AR': 0.25
+        }
+    ca_dep_chans = ['KC_FAST']
+    num_comp = 59
+    presyn = 59
+    level = TraubCell.readlevels('DeepBasket.levels')
+    depth = None
+    proto_file = 'DeepBasket.p'
+    prototype = TraubCell.read_proto(proto_file, "DeepBasket", chan_params)
     def __init__(self, *args):
-	TraubCell.__init__(self, *args)
+        TraubCell.__init__(self, *args)
+        moose.CaConc(self.soma.path + '/CaPool').tau = 50e-3
 	
     def _topology(self):
         self.presyn = 59
@@ -122,9 +137,23 @@ class DeepBasket(TraubCell):
         mycell = DeepBasket(DeepBasket.prototype, sim.model.path + "/DeepBasket")
         print 'Created cell:', mycell.path
         vm_table = mycell.comp[mycell.presyn].insertRecorder('Vm_deepbask', 'Vm', sim.data)
-        ca_table = mycell.soma.insertCaRecorder('CaPool', sim.data)
-
+        ca_conc_path = mycell.soma.path + '/CaPool'
+        ca_table = None
+        if config.context.exists(ca_conc_path):
+            ca_conc = moose.CaConc(ca_conc_path)
+            ca_table = moose.Table('Ca_deepbask', sim.data)
+            ca_table.stepMode = 3
+            ca_conc.connect('Ca', ca_table, 'inputRequest')
+        kc_path = mycell.soma.path + '/KC'
+        gk_table = None
+        if config.context.exists(kc_path):
+            gk_table = moose.Table('gkc', sim.data)
+            gk_table.stepMode = 3
+            kc = moose.HHChannel(kc_path)
+            kc.connect('Gk', gk_table, 'inputRequest')
+            pymoose.showmsg(ca_conc)
         pulsegen = mycell.soma.insertPulseGen('pulsegen', sim.model, firstLevel=3e-10, firstDelay=50e-3, firstWidth=50e-3)
+#         pulsegen1 = mycell.soma.insertPulseGen('pulsegen1', sim.model, firstLevel=3e-7, firstDelay=150e-3, firstWidth=10e-3)
 
         sim.schedule()
         if mycell.has_cycle():
@@ -135,17 +164,23 @@ class DeepBasket(TraubCell):
         delta = t2 - t1
         print 'simulation time: ', delta.seconds + 1e-6 * delta.microseconds
         sim.dump_data('data')
-        mus_vm = pylab.array(vm_table) * 1e3
-        mus_t = linspace(0, sim.simtime * 1e3, len(mus_vm))
-        mus_ca = pylab.array(ca_table)
-        nrn_vm = trbutil.read_nrn_data('Vm_deepbask.plot', 'test_deepbask.hoc')
-        nrn_ca = trbutil.read_nrn_data('Ca_deepbask.plot', 'test_deepbask.hoc')
-        if len(nrn_vm) > 0:
+        if config.has_pylab:
+            mus_vm = config.pylab.array(vm_table) * 1e3
+            nrn_vm = config.pylab.loadtxt('../nrn/mydata/Vm_deepbask.plot')
             nrn_t = nrn_vm[:, 0]
+            mus_t = linspace(0, nrn_t[-1], len(mus_vm))
             nrn_vm = nrn_vm[:, 1]
+            nrn_ca = config.pylab.loadtxt('../nrn/mydata/Ca_deepbask.plot')
             nrn_ca = nrn_ca[:,1]
-
-        trbutil.do_plot(cls.__name__, mus_t, mus_ca, mus_vm, nrn_t, nrn_ca, nrn_vm)
+            config.pylab.plot(nrn_t, nrn_vm, 'y-', label='nrn vm')
+            config.pylab.plot(mus_t, mus_vm, 'g-.', label='mus vm')
+    #         if ca_table:
+    #             ca_array = config.pylab.array(ca_table)
+    #             config.pylab.plot(nrn_t, -nrn_ca, 'r-', label='nrn (-)ca')
+    #             config.pylab.plot(mus_t, -ca_array, 'b-.', label='mus (-)ca')
+    #             print config.pylab.amax(ca_table)
+            config.pylab.legend()
+            config.pylab.show()
         
         
 # test main --
