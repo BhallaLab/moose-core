@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 24 10:01:45 2009 (+0530)
 # Version: 
-# Last-Updated: Tue Feb  9 14:12:09 2010 (+0100)
+# Last-Updated: Fri Oct 21 16:07:30 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 176
+#     Update #: 177
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -47,11 +47,6 @@ class MyCompartment(moose.Compartment):
         self._xarea = None
         self._sarea = None
         self.raxial_list = []
-
-    def connect(self, src_field, target, dst_field):
-        if src_field == 'raxial':
-            self.raxial_list.append(target)
-        moose.Compartment.connect(self, src_field, target, dst_field)
 
     def setSpecificRm(self, RM):
         self.Rm = RM / self.sarea()
@@ -142,12 +137,16 @@ class MyCompartment(moose.Compartment):
     def insertCaRecorder(self, object_name, data_container):
         """Creates a table for recording [Ca2+] under data_container"""
         ca_table = None
-        ca_conc_path = self.path + '/' + object_name
+        ca_table_path = data_container.path + '/' + object_name
+        if config.context.exists(ca_table_path):
+            return moose.Table(ca_table_path)
+        ca_conc_path = self.path + '/CaPool'
         if config.context.exists(ca_conc_path):
             ca_conc = moose.CaConc(ca_conc_path)
-            ca_table = moose.Table(object_name, data_container)
+            ca_table = moose.Table(ca_table_path)
             ca_table.stepMode = 3
-            ca_conc.connect('Ca', ca_table, 'inputRequest')
+            if not ca_conc.connect('Ca', ca_table, 'inputRequest'):
+                print 'Error connecting [Ca2+] on', ca_conc.path, 'to', ca_table.path
 
         return ca_table
 
@@ -171,17 +170,59 @@ class MyCompartment(moose.Compartment):
         self.pulsegen.connect('outputSrc', self, 'injectMsg')
         return self.pulsegen
 
-    def traubConnect(self, child):
-        # Check for common neighbours within a single hop
-        # This is enough to avoid delta connections
-        my_neighbours = self.neighbours('raxial') + self.neighbours('axial')
-        child_neighbours = child.neighbours('raxial') + child.neighbours('axial')
-        for item in my_neighbours:
-            if item in child_neighbours:
-                return
-        self.connect('axial', child, 'raxial')
-        print 'Connecting', self.name, 'to', child.name
-            
+    def makeSynapse(self, target, 
+                    classname='SynChan', 
+                    name='synapse', 
+                    threshold=0.0, 
+                    absRefract=0.0, 
+                    Ek=0.0, 
+                    Gbar=None, 
+                    tau1=None, 
+                    tau2=None,
+                    weight=1.0,
+                    delay=0.0,
+                    Pr=1.0):
+        """Make a synaptic connection from this compartment to target
+        compartment and set the properties of the synaptic connection
+        as specified in the parametrs.
+
+        For NMDAChan, [Mg2+] has to be set separately. Also note that
+        the weight and delay vectors are not available until reset is
+        called. So these must be assigned afterwards.
+
+        """
+        classobj = eval('moose.' + classname)
+        synapse = classobj(name, target)
+        synapse.Ek = Ek # TODO set value according to original model
+        synapse.Gbar = Gbar # TODO set value according to original model
+        synapse.tau1 = tau1
+        synapse.tau2 = tau2
+        target.connect('channel', synapse, 'channel')
+        spikegen = None
+        spikegen = moose.SpikeGen('%s/spike' % (self.path))
+        spikegen.threshold = threshold
+        spikegen.absRefract = absRefract
+        self.connect('VmSrc', spikegen, 'Vm')
+        if not spikegen.connect('event', synapse, 'synapse'):
+            raise Exception('Error creating connection: %s->%s' % (spikegen.path, synapse.path))
+        # This is too much of log info. Hence commenting out.
+        # else:
+        #     config.LOGGER.debug('Connected %s->%s' % (spikegen.path, synapse.path))
+
+        # We had an awkward situation here: the weight and delay
+        # vectors were not updated until reset/setDelay/setWeight was
+        # called.  So we had to use num_synapse (which should
+        # actually have been incremented by 1 due to the connection)
+        # instead of (num_synapse - 1).
+        # 2010-03-29 After making a mandatory call to updateNumSynapse()
+        # in getNumSynapses(), this is fixed. 
+        num_synapses = synapse.numSynapses
+        synapse.delay[num_synapses - 1] = delay
+        synapse.weight[num_synapses - 1] = weight
+        if config.stochastic:
+            synapse.initPr[num_synapses - 1] = Pr
+        return synapse
+        
 
     def get_props(self):
         """Returns information about the compartment as a string

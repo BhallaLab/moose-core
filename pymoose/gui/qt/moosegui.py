@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Wed Jan 20 15:24:05 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Jun 17 12:20:38 2011 (+0530)
+# Last-Updated: Wed Nov  2 16:54:31 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 2656
+#     Update #: 2674
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -65,7 +65,7 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.Qt import Qt
 
 import config
-from glclientgui import GLClientGUI
+#from glclientgui import GLClientGUI
 # The following line is for ease in development environment. Normal
 # users will have moose.py and _moose.so installed in some directory
 # in PYTHONPATH.  If you have these two files in /usr/local/moose, you
@@ -88,7 +88,7 @@ from mooseshell import MooseShell
 from moosehandler import MooseHandler
 from mooseplot import MoosePlot, MoosePlotWindow
 from plotconfig import PlotConfig
-from glwizard import MooseGLWizard
+#from glwizard import MooseGLWizard
 from firsttime import FirstTimeWizard
 #from layout import Screen
 import layout
@@ -152,13 +152,13 @@ class MainWindow(QtGui.QMainWindow):
         self.centralVizPanel.setViewMode(self.centralVizPanel.TabbedView)
         
 #        self.centralVizPanel.setBackground(QtGui.QBrush(QtGui.QImage('background.png').scaled(self.centralVizPanel.size(),Qt.KeepAspectRatio)))
-        self.centralVizPanel.setBackground(QtGui.QBrush(QtGui.QImage('QMdiBackground.png')))
+        self.centralVizPanel.setBackground(QtGui.QBrush(QtGui.QImage(os.path.join(config.KEY_HOME_DIR,'QMdiBackground.png'))))
 
         self.centralVizPanel.setStatusTip('To load a model, Menu >File >Load Model or Ctrl+L')
         self.centralVizPanel.setWhatsThis("<font color='black'> To load a model, Menu >File >Load Model or Ctrl+L </font>")
         self.centralPanel = QtGui.QMdiArea(self)
-        self.centralPanel.setStatusTip('Plot Window. Drag field from Property Editor to plot. Click and drag area to zoom in. Esc to zoom out. To add new Plot Windows, Menu >View >New Plot Window')
-        self.centralPanel.setWhatsThis("<font color='black'> Plot Window. Drag field from Property Editor to plot. Click and drag area to zoom in. Esc to zoom out. To add new Plot Windows, Menu >View >New Plot Window </font>")
+        self.centralPanel.setStatusTip('Plot Window. Ctrl+H to toggle overlay. Drag field from Property Editor to plot. Click and drag area to zoom in. Esc to zoom out. To add new Plot Windows, Menu >View >New Plot Window')
+        self.centralPanel.setWhatsThis("<font color='black'> Plot Window. Ctrl+H to toggle overlay. Drag field from Property Editor to plot. Click and drag area to zoom in. Esc to zoom out. To add new Plot Windows, Menu >View >New Plot Window </font>")
         self.horizontalLayout.addWidget(self.centralPanel)
         
         # The following are for holding transient selections from
@@ -211,6 +211,7 @@ class MainWindow(QtGui.QMainWindow):
         # plot widgets they belong to.
         self.tablePlotMap = {}
         self.currentPlotWindow = None
+        self.currentVizWindow = None
         # Start with a default number of plot widgets
         self._visiblePlotWindowCount = 0
         for ii in range(MainWindow.default_plot_count):
@@ -221,9 +222,9 @@ class MainWindow(QtGui.QMainWindow):
         #self.setCentralWidget(self.centralPanel)
         self.setCentralWidget(self.mainCentralWidget)
         
-        self.centralPanel.tileSubWindows()
+        #self.centralPanel.tileSubWindows()
         self.connect(self.centralPanel, QtCore.SIGNAL('subWindowActivated(QMdiSubWindow *)'), self.setCurrentPlotWindow)
-
+        self.centralPanel.setViewMode(self.centralPanel.TabbedView)
 	# We connect the double-click event on the class-list to
         # insertion of moose object in model tree.
         self.connect(self.mooseClassesWidget, 
@@ -265,32 +266,32 @@ class MainWindow(QtGui.QMainWindow):
         
         self.runButtonToolbar = QtGui.QToolButton(self.simToolbar)
         self.runButtonToolbar.setToolTip("<font color='black'> Run </font>")
-        self.runButtonToolbar.setIcon(QtGui.QIcon("run.png"))
+        self.runButtonToolbar.setIcon(QtGui.QIcon(os.path.join(config.KEY_HOME_DIR,"run.png")))
         self.runButtonToolbar.setGeometry(360,0,50,30)
-        self.runButtonToolbar.setEnabled(0)
+        self.runButtonToolbar.setEnabled(1)
         self.runButtonToolbar.setStatusTip('Run to start simulation')
         self.runButtonToolbar.setWhatsThis("<font color='black'> Run to start simulation </font>")
 
         self.continueButtonToolbar = QtGui.QToolButton(self.simToolbar)
         self.continueButtonToolbar.setToolTip("<font color='black'> Continue </font>")
-        self.continueButtonToolbar.setIcon(QtGui.QIcon("continue.png"))
+        self.continueButtonToolbar.setIcon(QtGui.QIcon(os.path.join(config.KEY_HOME_DIR,"continue.png")))
         self.continueButtonToolbar.setGeometry(410,0,50,30)
-        self.continueButtonToolbar.setEnabled(0)
+        self.continueButtonToolbar.setEnabled(1)
         self.continueButtonToolbar.setStatusTip('Continue simulation')
         self.continueButtonToolbar.setWhatsThis("<font color='black'> Continue simulation </font>")
 
         self.resetButtonToolbar = QtGui.QToolButton(self.simToolbar)
         self.resetButtonToolbar.setToolTip("<font color='black'> Reset </font>")
-        self.resetButtonToolbar.setIcon(QtGui.QIcon("reset.png"))
+        self.resetButtonToolbar.setIcon(QtGui.QIcon(os.path.join(config.KEY_HOME_DIR,"reset.png")))
         self.resetButtonToolbar.setGeometry(460,0,50,30)
-        self.resetButtonToolbar.setEnabled(0)
+        self.resetButtonToolbar.setEnabled(1)
         self.resetButtonToolbar.setStatusTip('Reset simulation')
         self.resetButtonToolbar.setWhatsThis("<font color='black'> Reset simulation </font>")
         
         self.whatsThisAction  = QtGui.QWhatsThis.createAction(self.simToolbar)
         self.whatsThisButtonToolbar = QtGui.QToolButton(self.simToolbar)
         self.whatsThisButtonToolbar.setToolTip("<font color='black'> Whats this? </font>")
-        self.whatsThisButtonToolbar.setIcon(QtGui.QIcon('help.png'))
+        self.whatsThisButtonToolbar.setIcon(QtGui.QIcon(os.path.join(config.KEY_HOME_DIR,'help.png')))
         self.whatsThisButtonToolbar.setGeometry(510,0,50,30)
 
 #        self.stopButtonToolbar = QtGui.QToolButton(self.simToolbar)
@@ -526,21 +527,24 @@ class MainWindow(QtGui.QMainWindow):
 
         self.tabbedViewAction = QtGui.QAction(self.tr('Tabbed view'), self)
         self.tabbedViewAction.setCheckable(True)
-        self.tabbedViewAction.setChecked(False)
+        self.tabbedViewAction.setChecked(True)
         self.connect(self.tabbedViewAction, QtCore.SIGNAL('triggered(bool)'), self.switchTabbedView)
 
         self.tilePlotWindowsAction = QtGui.QAction(self.tr('Tile Plots'), self)
 	self.tilePlotWindowsAction.setCheckable(True)
 	self.connect(self.tilePlotWindowsAction, QtCore.SIGNAL('triggered(bool)'), self.centralPanel.tileSubWindows)
+	self.connect(self.tilePlotWindowsAction, QtCore.SIGNAL('triggered(bool)'), self.switchSubWindowView)
         self.cascadePlotWindowsAction = QtGui.QAction(self.tr('Cascade Plots'), self)
         self.cascadePlotWindowsAction.setCheckable(True)
 	self.connect(self.cascadePlotWindowsAction, QtCore.SIGNAL('triggered(bool)'), self.centralPanel.cascadeSubWindows)
-        
+	self.connect(self.cascadePlotWindowsAction, QtCore.SIGNAL('triggered(bool)'), self.switchSubWindowView)
+
         self.subWindowLayoutActionGroup = QtGui.QActionGroup(self)
         self.subWindowLayoutActionGroup.addAction(self.tilePlotWindowsAction)
         self.subWindowLayoutActionGroup.addAction(self.cascadePlotWindowsAction)
+        self.subWindowLayoutActionGroup.addAction(self.tabbedViewAction)
         self.subWindowLayoutActionGroup.setExclusive(True)
-        self.tilePlotWindowsAction.setChecked(True)
+        self.tilePlotWindowsAction.setChecked(False)
         self.togglePlotWindowsAction = QtGui.QAction(self.tr('Plot windows'), self)
         self.togglePlotWindowsAction.setCheckable(True)
         self.togglePlotWindowsAction.setChecked(True)
@@ -560,6 +564,12 @@ class MainWindow(QtGui.QMainWindow):
         # Action to create connections
         self.connectionDialogAction = QtGui.QAction(self.tr('&Connect elements'), self)
 	self.connect(self.connectionDialogAction, QtCore.SIGNAL('triggered()'), self.makeConnectionPopup)
+
+        self.overlayAction = QtGui.QAction(self.tr('&Overlay Active Plot'),self)
+        self.overlayAction.setCheckable(True)
+        self.overlayAction.setChecked(False)
+        self.overlayAction.setShortcut(QtGui.QKeySequence(self.tr('Ctrl+H')))
+        self.connect(self.overlayAction,QtCore.SIGNAL('triggered(bool)'),self.toggleOverlay)
 
         #self.addElectrodesDialogAction = QtGui.QAction(self.tr('&Insert Electode'),self)
         #self.connect(self.addElectrodesDialogAction, QtCore.SIGNAL('triggered()'),self.addElectrodesPopup)
@@ -715,6 +725,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.editModelMenu = QtGui.QMenu(self.tr('&Edit'), self)
         self.editModelMenu.addAction(self.connectionDialogAction)
+        self.editModelMenu.addAction(self.overlayAction)
         #self.editModelMenu.addAction(self.addElectrodesDialogAction)
         
 		
@@ -832,18 +843,18 @@ class MainWindow(QtGui.QMainWindow):
         self.mooseTreePanel.setWhatsThis("<font color='black'> Moose Tree. Double click on object to open its properties in Property Editor </font>")
         self.makeObjectFieldEditor(self.modelTreeWidget.currentItem().getMooseObject())
         
-    def createGLClientDock(self):
-        config.LOGGER.debug('createGLClientDock - start')
-        self.glClientWidget = GLClientGUI(self)
-        config.LOGGER.debug('createGLClientDock - 1')
-        self.glClientDock = QtGui.QDockWidget('GL Client', self)
-        config.LOGGER.debug('createGLClientDock - 2')
-        self.glClientDock.setObjectName(self.tr('GLClient'))
-        config.LOGGER.debug('createGLClientDock - 3')
-        self.glClientDock.setWidget(self.glClientWidget)
-        config.LOGGER.debug('createGLClientDock - 4')
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.glClientDock)
-        config.LOGGER.debug('createGLClientDock - end')
+    # def createGLClientDock(self):
+    #     config.LOGGER.debug('createGLClientDock - start')
+    #     self.glClientWidget = GLClientGUI(self)
+    #     config.LOGGER.debug('createGLClientDock - 1')
+    #     self.glClientDock = QtGui.QDockWidget('GL Client', self)
+    #     config.LOGGER.debug('createGLClientDock - 2')
+    #     self.glClientDock.setObjectName(self.tr('GLClient'))
+    #     config.LOGGER.debug('createGLClientDock - 3')
+    #     self.glClientDock.setWidget(self.glClientWidget)
+    #     config.LOGGER.debug('createGLClientDock - 4')
+    #     self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.glClientDock)
+    #     config.LOGGER.debug('createGLClientDock - end')
 
     def createControlDock(self):
         config.LOGGER.debug('Making control panel')
@@ -873,7 +884,7 @@ class MainWindow(QtGui.QMainWindow):
         self.simdtText = QtGui.QLineEdit('%1.3e' % (MooseHandler.simdt), self.controlPanel)
         self.plotdtText = QtGui.QLineEdit('%1.3e' % (MooseHandler.plotdt), self)
         #self.gldtText = QtGui.QLineEdit('%1.3e' % (MooseHandler.gldt), self.controlPanel)
-        # self.overlayCheckBox = QtGui.QCheckBox(self.tr('Overlay plots'), self.controlPanel)
+        #self.overlayCheckBox = QtGui.QCheckBox(self.tr('Overlay plots'), self.controlPanel)
         self.connect(self.runtimeText,QtCore.SIGNAL('textEdited(QString)'),self.controlDockTextChanged)
         self.connect(self.runButton, QtCore.SIGNAL('clicked()'), self.resetAndRunSlot)
         self.connect(self.continueButton, QtCore.SIGNAL('clicked()'), self._runSlot)
@@ -883,7 +894,7 @@ class MainWindow(QtGui.QMainWindow):
         layout.addWidget(self.plotdtText, 1, 1)
         #layout.addWidget(self.gldtLabel, 2, 0)
         #layout.addWidget(self.gldtText, 2, 1)
-        # layout.addWidget(self.overlayCheckBox, 3, 0)
+        #layout.addWidget(self.overlayCheckBox, 3, 0)
         layout.addWidget(self.runtimeLabel, 4, 0)
         layout.addWidget(self.runtimeText, 4, 1)
         layout.addWidget(self.updateTimeLabel, 5, 0)
@@ -899,7 +910,7 @@ class MainWindow(QtGui.QMainWindow):
     def addPlotWindow(self):
         title = self.tr('Plot %d' % (len(self.plots)))
         plotWindow = MoosePlotWindow()
-        plotWindow.setToolTip("<font color='black'> Drag field from Property Editor into the plot window to plot </font>")
+        plotWindow.setToolTip("<font color='black'> Drag field from Property Editor into the plot window to plot. Ctrl+H to toggle overlay </font>")
 
         plotWindow.setWindowTitle(title)
         plotWindow.setObjectName(title)
@@ -1141,7 +1152,7 @@ class MainWindow(QtGui.QMainWindow):
         #vizWindow.setFixed
         vizWindow.showMaximized()
         self._visiblePlotWindowCount += 1
-        self.currentPlotWindow = vizWindow
+        self.currentVizWindow = vizWindow
         return vizWindow
    
     def pickCompartment(self,path):	#path is a QString type moosepath
@@ -1173,7 +1184,12 @@ class MainWindow(QtGui.QMainWindow):
             self.centralPanel.setViewMode(self.centralPanel.TabbedView)
         else:
             self.centralPanel.setViewMode(self.centralPanel.SubWindowView)
-            
+    
+    def switchSubWindowView(self, checked):
+        if checked:
+            self.centralPanel.setViewMode(self.centralPanel.SubWindowView)
+        else:
+            self.centralPanel.setViewMode(self.centralPanel.TabbedView)        
         
     def showObjectEditor(self,checked):
         self.objFieldEditPanel.setVisible(checked)
@@ -1264,7 +1280,7 @@ class MainWindow(QtGui.QMainWindow):
             self.statusBar.showMessage('Loaded a Neural Model')
             self.centralVizPanel.setStatusTip('Click on compartment to open properties in Property Editor. Use arrow keys to pan model. Click and drag to rotate. Scroll to zoom. To visualize more cells Menu >View >New GL Window')
             self.centralVizPanel.setWhatsThis("<font color='black'> Click on compartment to open properties in Property Editor. Use arrow keys to pan model. Click and drag to rotate. Scroll to zoom. To visualize more cells Menu >View >New GL Window </font>")
-            if len(ch)==1:
+            if len(ch)!=0:
                 #only the single cell models to be visualized
                 title = self.tr('GL %d' % (len(self.vizs)))
                 vizWindow = newGLSubWindow()
@@ -1276,7 +1292,8 @@ class MainWindow(QtGui.QMainWindow):
                 vizWindow.setWidget(viz)
         
                 viz.viz=1	#turn on visualization mode
-                viz.drawNewCell(cellName=moose.Cell(ch[0]).path,style = 2)
+                for i in ch:
+                    viz.drawNewCell(cellName=moose.Cell(i).path,style = 2)
                 viz.setColorMap(cMap=os.path.join(str(self.settings.value(config.KEY_GL_COLORMAP).toString()),'jet'))
                 QtCore.QObject.connect(viz,QtCore.SIGNAL("compartmentSelected(QString)"),self.pickCompartment)
                 #print viz.modelview_matrix_
@@ -1285,7 +1302,7 @@ class MainWindow(QtGui.QMainWindow):
                 vizWindow.show()
                 vizWindow.showMaximized()
                 self._visiblePlotWindowCount += 1
-                self.currentPlotWindow = vizWindow
+                self.currentVizWindow = vizWindow
                 self.loadModelAction.setEnabled(0) #to prevent multiple loads
                 return vizWindow
         else:
@@ -1333,11 +1350,15 @@ class MainWindow(QtGui.QMainWindow):
             self.updateTimeText.setText(str(updateInterval))
         #self.mooseHandler.doReset(simdt, plotdt, gldt,updateInterval)
         self.mooseHandler.doReset(simdt, plotdt, updateInterval)
+        plots = set()
         for table, plot in self.tablePlotMap.items():
             print 'Clearing plot', table.name
             table.clear()
-            # plot.setOverlay(self.overlayCheckBox.isChecked())
-            plot.reset()
+            plots.add(plot)
+            
+        for plot in plots:
+            #plot.setOverlay(self.overlayCheckBox.isChecked())
+            plot.reset(self.mooseHandler.runcount)
                     
 
     def _runSlot(self):
@@ -1360,11 +1381,10 @@ class MainWindow(QtGui.QMainWindow):
         except ValueError:
             runtime = MooseHandler.runtime
             self.runtimeText.setText(str(runtime))
-        self.updatePlots(runtime)
         self.mooseHandler.doRun(runtime)
+        self.updatePlots(self.mooseHandler.getCurrentTime())
         #harsha: only after the model is run, saving the plot is enabled,otherwise there will be nothing to save
         self.saveTablePlotsAction.setEnabled(1)
-    
               
     def resetAndRunSlot(self):
         self._resetSlot()
@@ -1387,8 +1407,8 @@ class MainWindow(QtGui.QMainWindow):
                     oldplot.removeTable(table)
                 except KeyError:
                     pass
-                #plot.addTable(table)
-                plot.addTable(table, tokens[-2] + '_' + tokens[-1])
+                plot.addTable(table)
+                #plot.addTable(table, tokens[-2] + '_' + tokens[-1])
                 plot.replot()
                 self.tablePlotMap[table] = plot
                 
@@ -1456,6 +1476,14 @@ class MainWindow(QtGui.QMainWindow):
                 plot.showSelectedCurves(not hide)
                 break
 
+    def toggleOverlay(self,hold):
+        activePlot = self.currentPlotWindow            
+        plotName = activePlot.objectName()
+        for plot in self.plots:
+            if plot.objectName() == plotName:
+                print plot.objectName(), 'overlay', hold
+                plot.setOverlay(hold)
+
     def showAllPlots(self):
         for plot in self.plots:
             plot.showAllCurves()
@@ -1477,6 +1505,11 @@ class MainWindow(QtGui.QMainWindow):
     def setCurrentPlotWindow(self, subWindow):
         if subWindow:
             self.currentPlotWindow = subWindow.widget()
+            activePlot = self.currentPlotWindow            
+            plotName = activePlot.objectName()
+            for plot in self.plots:
+                if plot.objectName() == plotName:
+                    self.overlayAction.setChecked(plot.overlay)
 
     def startGLWizard(self):
         self.glWizard = MooseGLWizard(self, self.mooseHandler)
@@ -1508,6 +1541,7 @@ class MainWindow(QtGui.QMainWindow):
         tables = self.mooseHandler.getDataTables()
         for table in tables:
             self.plots[0].addTable(table)
+            self.tablePlotMap[table] = self.plots[0]
             config.LOGGER.info('Added plot ' + table.path)
         self.plots[0].replot()
 
@@ -1540,8 +1574,8 @@ class MainWindow(QtGui.QMainWindow):
         self.objFieldEditPanel.setWindowTitle(mooseObject.name)
 
     def browseDocumentation(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl(QtCore.QString(config.MOOSE_DOC_URL)))
-        #QtGui.QDesktopServices.openUrl(QtCore.QUrl("documentation.pdf"))
+        #QtGui.QDesktopServices.openUrl(QtCore.QUrl(QtCore.QString(config.MOOSE_DOC_URL)))
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl(os.path.join(config.KEY_HOME_DIR,"documentation.pdf")))
 
     def openBugsPage(self):
         QtGui.QDesktopServices.openUrl(QtCore.QUrl(QtCore.QString(config.MOOSE_REPORT_BUG_URL)))
@@ -1561,7 +1595,8 @@ class MainWindow(QtGui.QMainWindow):
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
-    icon = QtGui.QIcon('moose_icon.png')
+    config.KEY_HOME_DIR = str(str(config).split()[3][1:-12])
+    icon = QtGui.QIcon(os.path.join(config.KEY_HOME_DIR,'moose_icon.png'))
     app.setWindowIcon(icon)
 #    computerProps = app.desktop()
     QtCore.QObject.connect(app, QtCore.SIGNAL('lastWindowClosed()'), app, QtCore.SLOT('quit()'))

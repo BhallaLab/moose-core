@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Aug  7 13:59:30 2009 (+0530)
 # Version: 
-# Last-Updated: Tue Feb  9 14:29:27 2010 (+0100)
+# Last-Updated: Fri Oct 21 17:12:04 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 601
+#     Update #: 605
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -53,88 +53,61 @@ from cell import *
 from capool import CaPool
 
 class SupPyrRS(TraubCell):
-    prototype = TraubCell.read_proto("SupPyrRS.p", "SupPyrRS")
-    ca_dep_chans = ['KAHP','KAHP_SLOWER', 'KAHP_DP', 'KC', 'KC_FAST']
+    """Superficial Pyramidal Regula Spiking cell."""
+    chan_params = {
+        'ENa': 50e-3,
+        'EK': -95e-3,
+        'ECa': 125e-3,
+        'EAR': -35e-3,
+        'EGABA': -81e-3,
+        'TauCa': 20e-3
+        }
+    ca_dep_chans = ['KAHP', 'KC']
+    num_comp = 74
+    presyn = 72
+    proto_file = "SupPyrRS.p"
+    # level maps level number to the set of compartments belonging to it
+    level = None
+    # depth stores a map between level number and the depth of the compartments.
+    depth = {
+        1: 850.0 * 1e-6,
+        2: 885.0 * 1e-6,
+        3: 920.0 * 1e-6,
+        4: 955.0 * 1e-6,
+        5: 825.0 * 1e-6,
+        6: 775.0 * 1e-6,
+        7: 725.0 * 1e-6,
+        8: 690.0 * 1e-6,
+        9: 655.0 * 1e-6,
+        10: 620.0 * 1e-6,
+        11: 585.0 * 1e-6,
+        12: 550.0 * 1e-6
+        }
+    prototype = TraubCell.read_proto(proto_file, "SupPyrRS", level_dict=level, depth_dict=depth, params=chan_params)
+    
     def __init__(self, *args):
-	TraubCell.__init__(self, *args)
-	
+        # start = datetime.now()
+        TraubCell.__init__(self, *args)
+        soma_ca_pool = moose.CaConc(self.soma.path + '/CaPool')
+        soma_ca_pool.tau = 100e-3
+        # end = datetime.now()
+        # delta = end - start
+        # config.BENCHMARK_LOGGER.info('created cell in: %g s' % (delta.days * 86400 + delta.seconds + delta.microseconds * 1e-6))
+        
+
     def _topology(self):
-        self.presyn = 72
-	self.level[1].add(self.comp[1])
-	for ii in range(2,14):
-	    self.level[2].add(self.comp[ii])
-	for ii in range(14, 26):
-	    self.level[3].add(self.comp[ii])
-	for ii in range(26, 38):
-	    self.level[4].add(self.comp[ii])
-	self.level[5].add(self.comp[38])
-	self.level[6].add(self.comp[39])
-	self.level[7].add(self.comp[40])
-	self.level[8].add(self.comp[41])
-	self.level[8].add(self.comp[42])
-	self.level[9].add(self.comp[43])
-	self.level[9].add(self.comp[44])
-	for ii in range(45, 53):
-	    self.level[10].add(self.comp[ii])
-	for ii in range(53, 61):
-	    self.level[11].add(self.comp[ii])
-	for ii in range(61, 69):
-	    self.level[12].add(self.comp[ii])
-	for ii in range(69, 75):
-	    self.level[0].add(self.comp[ii])
+        raise Exception, 'Deprecated'
     
     def _setup_passive(self):
-        for comp in self.comp[1:]:
-            comp.Em = -70e-3
+        raise Exception, 'Deprecated'
 
     def _setup_channels(self):
         """Set up connections between compartment and channels, and Ca pool"""
-        for i in range(len(self.level)):
-            for comp in self.level[i]:
-                ca_pool = None
-                ca_dep_chans = []
-                ca_chans = []
-                for child in comp.children():
-                    obj = moose.Neutral(child)
-                    if obj.name == 'CaPool':
-                        ca_pool = moose.CaConc(child)
-                        ca_pool.B = ca_pool.B * 1e3
-                        ca_pool.tau = 1e-3/0.05
-                    else:
-                        obj_class = obj.className
-                        if obj_class == "HHChannel":
-                            obj = moose.HHChannel(child)
-                            pyclass = eval(obj.name)                            
-                            
-                            if issubclass(pyclass, KChannel):
-                                obj.Ek = -95e-3
-                                if issubclass(pyclass, KCaChannel):
-                                    ca_dep_chans.append(obj)
-                            elif issubclass(pyclass, NaChannel):
-                                obj.Ek = 50e-3
-                            elif issubclass(pyclass, CaChannel):
-                                obj.Ek = 125e-3
-                                if issubclass(pyclass, CaL):
-                                    ca_chans.append(obj)
-                            elif issubclass(pyclass, AR):
-                                obj.Ek = -35e-3
-                if ca_pool: # Setup connections for CaPool : from CaL, to KAHP and KC
-                    for channel in ca_chans:
-                        channel.connect('IkSrc', ca_pool, 'current')
-
-                    for channel in ca_dep_chans:
-                        channel.useConcentration = 1
-                        ca_pool.connect("concSrc", channel, "concen")
-
-
-
-        obj = moose.CaConc(self.soma.path + '/CaPool')
-        obj.tau = 1e-3 / 0.01
-        config.LOGGER.debug(obj.path + 'set tau to %g' % (obj.tau))
+        raise Exception, 'Deprecated'
 
     @classmethod
     def test_single_cell(cls):
-        """Simulates a single superficial pyramidal regula spiking
+        """Simulates a single superficial pyramidal regular spiking
         cell and plots the Vm and [Ca2+]"""
 
         config.LOGGER.info("/**************************************************************************")
@@ -145,11 +118,8 @@ class SupPyrRS(TraubCell):
         sim = Simulation(cls.__name__)
         mycell = SupPyrRS(SupPyrRS.prototype, sim.model.path + "/SupPyrRS")
         config.LOGGER.info('Created cell: %s' % (mycell.path))
-        vm_table = mycell.comp[mycell.presyn].insertRecorder('Vm_suppyrrs', 'Vm', sim.data)
-        ca_table = mycell.soma.insertCaRecorder('CaPool', sim.data)
-
+        vm_table = mycell.comp[SupPyrRS.presyn].insertRecorder('Vm_suppyrrs', 'Vm', sim.data)
         pulsegen = mycell.soma.insertPulseGen('pulsegen', sim.model, firstLevel=3e-10, firstDelay=50e-3, firstWidth=50e-3)
-
 
         sim.schedule()
         if mycell.has_cycle():
@@ -158,19 +128,20 @@ class SupPyrRS(TraubCell):
         sim.run(200e-3)
         t2 = datetime.now()
         delta = t2 - t1
-        print 'simulation time: ', delta.seconds + 1e-6 * delta.microseconds
-        sim.dump_data('data')
-        mus_vm = pylab.array(vm_table) * 1e3
-        mus_t = linspace(0, sim.simtime * 1e3, len(mus_vm))
-        mus_ca = pylab.array(ca_table)
-        nrn_vm = trbutil.read_nrn_data('Vm_suppyrRS.plot', 'test_suppyrRS.hoc')
-        nrn_ca = trbutil.read_nrn_data('Ca_suppyrRS.plot', 'test_suppyrRS.hoc')
-        if len(nrn_vm) > 0:
-            nrn_t = nrn_vm[:, 0]
-            nrn_vm = nrn_vm[:, 1]
-            nrn_ca = nrn_ca[:,1]
+        if config.has_pylab:
+            mus_vm = config.pylab.array(vm_table) * 1e3
+            mus_t = linspace(0, sim.simtime * 1e3, len(mus_vm))
+            try:
+                nrn_vm = config.pylab.loadtxt('../nrn/mydata/Vm_deepLTS.plot')
+                nrn_t = nrn_vm[:, 0]
+                nrn_vm = nrn_vm[:, 1]
+                config.pylab.plot(nrn_t, nrn_vm, 'y-', label='nrn vm')
+            except IOError:
+                print 'NEURON Data not available.'
+            config.pylab.plot(mus_t, mus_vm, 'g-.', label='mus vm')
+            config.pylab.legend()
+            config.pylab.show()
 
-        trbutil.do_plot(cls.__name__, mus_t, mus_ca, mus_vm, nrn_t, nrn_ca, nrn_vm)
         
         
 # test main --

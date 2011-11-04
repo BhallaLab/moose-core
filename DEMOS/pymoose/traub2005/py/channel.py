@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 15:17:35 2009 (+0530)
 # Version: 
-# Last-Updated: Sun May  3 23:37:38 2009 (+0530)
-#           By: subhasis ray
-#     Update #: 23
+# Last-Updated: Fri Oct 21 15:58:15 2011 (+0530)
+#           By: Subhasis Ray
+#     Update #: 24
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -55,7 +55,7 @@ class ChannelBase(moose.HHChannel):
         moose.HHChannel.__init__(self, name, parent)
         if xpower != 0:
             self.Xpower = float(xpower)
-            self.xGate = moose.HHGate(self.path + '/xGate')
+            # self.xGate = moose.HHGate(self.path + '/xGate')
             self.xGate.A.xmin = config.vmin
             self.xGate.A.xmax = config.vmax
             self.xGate.A.xdivs = config.ndivs
@@ -65,7 +65,7 @@ class ChannelBase(moose.HHChannel):
 
         if ypower != 0:
             self.Ypower = float(ypower)
-            self.yGate = moose.HHGate(self.path + '/yGate')
+            # self.yGate = moose.HHGate(self.path + '/yGate')
             self.yGate.A.xmin = config.vmin
             self.yGate.A.xmax = config.vmax
             self.yGate.A.xdivs = config.ndivs
