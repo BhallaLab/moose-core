@@ -157,6 +157,8 @@ static const Finfo* hubCompartmentChannelFinfo =
  */
 static const Finfo* compartmentInjectFinfo =
 	initCompartmentCinfo()->findFinfo( "injectMsg" );
+static const Finfo* compartmentInjectFieldFinfo =
+	initCompartmentCinfo()->findFinfo( "inject" );
 static const Finfo* compartmentChannelFinfo =
 	initCompartmentCinfo()->findFinfo( "channel" );
 static const Finfo* compartmentVmFinfo =
@@ -676,7 +678,7 @@ double HSolveHub::getVm( Eref e )
 void HSolveHub::setInject( const Conn* c, double value )
 {
 	Eref e = c->target();
-	set< double >( e, compartmentInjectFinfo, value );
+	set< double >( e, compartmentInjectFieldFinfo, value );
 	
 	unsigned int index;
 	HSolveHub* nh = getHubFromZombie( e, index );
