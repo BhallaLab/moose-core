@@ -58,9 +58,9 @@ class FirstTimeWizard(QtGui.QWizard):
         self._pymooseDemosDir = str(config.get_settings().value(config.KEY_DEMOS_DIR).toString())
         if not self._pymooseDemosDir:
             self._pymooseDemosDir = '/usr/share/doc/moose1.3/DEMOS/pymoose'
-        self._glclientPath = str(config.get_settings().value(config.KEY_GL_CLIENT_EXECUTABLE).toString())
-        if not self._glclientPath:
-            self._glclientPath = '/usr/bin/glclient'
+        # self._glclientPath = str(config.get_settings().value(config.KEY_GL_CLIENT_EXECUTABLE).toString())
+        # if not self._glclientPath:
+        #     self._glclientPath = '/usr/bin/glclient'
         self._colormapPath = str(config.get_settings().value(config.KEY_GL_COLORMAP).toString())
         if not self._colormapPath:
             self._colormapPath = '/usr/share/moose1.3/colormaps/rainbow2'
@@ -154,7 +154,7 @@ class FirstTimeWizard(QtGui.QWizard):
 
     def _finished(self):
         config.get_settings().setValue(config.KEY_FIRSTTIME, QtCore.QVariant(False))
-        config.get_settings().setValue(config.KEY_GL_CLIENT_EXECUTABLE, self.field('glclient'))
+#        config.get_settings().setValue(config.KEY_GL_CLIENT_EXECUTABLE, self.field('glclient'))
         config.get_settings().setValue(config.KEY_DEMOS_DIR, self.field('demosdir'))
         config.get_settings().setValue(config.KEY_GL_COLORMAP, self.field('colormap'))
 	config.get_settings().sync()      

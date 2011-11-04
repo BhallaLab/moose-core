@@ -4,6 +4,8 @@
 
 *asymmetric
 
+*set_compt_param EREST_ACT -0.065
+
 *set_compt_param ELEAK -0.065
 *set_compt_param RM 5
 *set_compt_param CM 0.009
