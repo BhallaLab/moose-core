@@ -493,6 +493,8 @@ class QtSquid(QtGui.QMainWindow):
     def runSlot(self):
         """Run the simulation"""
         runtime = 1e-3*float(self.runTimeEdit.text())
+        print 'runtime', runtime
+        self.resetSlot()
         self.squidModel.doRun(runtime)
         # Convert the tables into numpy arrays. 
         # Also convert the SI units to physiological units

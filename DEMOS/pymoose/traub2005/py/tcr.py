@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Oct 16 10:14:07 2009 (+0530)
 # Version: 
-# Last-Updated: Tue Feb  9 14:29:25 2010 (+0100)
+# Last-Updated: Fri Oct 21 17:14:04 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 56
+#     Update #: 60
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -54,13 +54,41 @@ from capool import CaPool
 
 
 class TCR(TraubCell):
-    prototype = TraubCell.read_proto("TCR.p", "TCR")
-    ca_dep_chans = ['KAHP','KAHP_SLOWER', 'KAHP_DP', 'KC', 'KC_FAST']
+    chan_params = {
+        'ENa': 50e-3,
+        'EK': -95e-3,
+        'EAR': -35e-3,
+        'ECa': 125e-3,
+        'EGABA': -75e-3, # Sanchez-Vives et al. 1997 
+        'TauCa': 20e-3,
+        'X_AR': 0.25
+    }
+    ca_dep_chans = ['KAHP_SLOWER', 'KC']
+    num_comp = 137
+    presyn = 135
+    level = None
+    depth = None
+    proto_file = 'TCR.p'
+    prototype = TraubCell.read_proto(proto_file, "TCR", chan_params)
     def __init__(self, *args):
-	TraubCell.__init__(self, *args)
+        TraubCell.__init__(self, *args)
+        moose.CaConc(self.soma.path + '/CaPool').tau = 50e-3
 	
     def _topology(self):
         self.presyn = 135
+        self.level[1].add(self.comp[1])
+        for ii  in range(2, 120, 13):
+            self.level[2].add(self.comp[ii])
+        for ii  in range(3, 121, 13):
+            self.level[3].add(self.comp[ii])
+            self.level[3].add(self.comp[ii+1])
+            self.level[3].add(self.comp[ii+2])
+        for ii  in range(6, 124, 13):
+            for kk in range(0,9):
+                self.level[4].add(self.comp[ii+kk])
+        for ii  in range(132, 138):
+            self.level[0].add(self.comp[ii])
+            
     
     def _setup_passive(self):
         for comp in self.comp[1:]:
@@ -82,6 +110,8 @@ class TCR(TraubCell):
 		    obj_class = obj.className
 		    if obj_class == 'HHChannel':
 			obj = moose.HHChannel(child)
+#                         if not obj.name in self.chan_list:
+#                             obj.Gbar = 0.0
 			pyclass = eval(obj.name)
 			if issubclass(pyclass, KChannel):
 			    obj.Ek = -95e-3
@@ -102,8 +132,6 @@ class TCR(TraubCell):
 		    channel.useConcentration = 1
 		    ca_pool.connect("concSrc", channel, "concen")
 
-	obj = moose.CaConc(self.soma.path + '/CaPool')
-        obj.tau = 50e-3
 
     @classmethod
     def test_single_cell(cls):
@@ -119,9 +147,7 @@ class TCR(TraubCell):
         mycell = TCR(TCR.prototype, sim.model.path + "/TCR")
         print 'Created cell:', mycell.path
         vm_table = mycell.comp[mycell.presyn].insertRecorder('Vm_TCR', 'Vm', sim.data)
-        ca_table = mycell.soma.insertCaRecorder('CaPool', sim.data)
         pulsegen = mycell.soma.insertPulseGen('pulsegen', sim.model, firstLevel=3e-10, firstDelay=50e-3, firstWidth=50e-3)
-
 
         sim.schedule()
         if mycell.has_cycle():
@@ -132,17 +158,19 @@ class TCR(TraubCell):
         delta = t2 - t1
         print 'simulation time: ', delta.seconds + 1e-6 * delta.microseconds
         sim.dump_data('data')
-        mus_vm = pylab.array(vm_table) * 1e3
-        mus_t = linspace(0, sim.simtime * 1e3, len(mus_vm))
-        mus_ca = pylab.array(ca_table)
-        nrn_vm = trbutil.read_nrn_data('Vm_TCR.plot', 'test_TCR.hoc')
-        nrn_ca = trbutil.read_nrn_data('Ca_TCR.plot', 'test_TCR.hoc')
-        if len(nrn_vm) > 0:
-            nrn_t = nrn_vm[:, 0]
-            nrn_vm = nrn_vm[:, 1]
-            nrn_ca = nrn_ca[:,1]
-
-        trbutil.do_plot(cls.__name__, mus_t, mus_ca, mus_vm, nrn_t, nrn_ca, nrn_vm)
+        if config.has_pylab:
+            mus_vm = config.pylab.array(vm_table) * 1e3
+            mus_t = linspace(0, sim.simtime * 1e3, len(mus_vm))
+            try:
+                nrn_vm = config.pylab.loadtxt('../nrn/mydata/Vm_deepLTS.plot')
+                nrn_t = nrn_vm[:, 0]
+                nrn_vm = nrn_vm[:, 1]
+                config.pylab.plot(nrn_t, nrn_vm, 'y-', label='nrn vm')
+            except IOError:
+                print 'NEURON Data not available.'
+            config.pylab.plot(mus_t, mus_vm, 'g-.', label='mus vm')
+            config.pylab.legend()
+            config.pylab.show()
         
         
 # test main --

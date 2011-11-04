@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 23:58:13 2009 (+0530)
 # Version: 
-# Last-Updated: Tue Feb  9 13:49:48 2010 (+0100)
+# Last-Updated: Fri Oct 21 17:18:52 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 152
+#     Update #: 154
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -53,12 +53,18 @@ from channel import ChannelBase
 class NaChannel(ChannelBase):
     """Dummy base class for all Na+ channels"""
     def __init__(self, name, parent, xpower, ypower=0.0, Ek=50e-3):
+        if config.context.exists(parent.path + '/' + name):
+            ChannelBase.__init__(self, name, parent, xpower=xpower, ypower=ypower)
+            return
         ChannelBase.__init__(self, name, parent, xpower=xpower, ypower=ypower)
         self.Ek = Ek
         self.X = 0.0
 
 class NaF(NaChannel):
     def __init__(self, name, parent, shift=-3.5e-3, Ek=50e-3):
+        if config.context.exists(parent.path + '/' + name):
+            NaChannel.__init__(self, name, parent, xpower=3.0, ypower=1.0, Ek=Ek)
+            return
         NaChannel.__init__(self, name, parent, xpower=3.0, ypower=1.0, Ek=Ek)
         v = linspace(config.vmin, config.vmax, config.ndivs + 1) + shift
         tau_m = where(v < -30e-3, \
@@ -79,6 +85,9 @@ class NaF(NaChannel):
         
 class NaF2(NaChannel):
     def __init__(self, name, parent, shift=-2.5e-3, Ek=50e-3):
+        if config.context.exists(parent.path + '/' + name):
+            NaChannel.__init__(self, name, parent, xpower=3.0, ypower=1.0, Ek=Ek)
+            return
         NaChannel.__init__(self, name, parent, xpower=3.0, ypower=1.0, Ek=Ek)
         config.LOGGER.debug('NaF2: shift = %g' % (shift))
         v = linspace(config.vmin, config.vmax, config.ndivs + 1)
@@ -109,6 +118,9 @@ class NaF2_nRT(NaF2):
 
 class NaP(NaChannel):
     def __init__(self, name, parent, Ek=50e-3):
+        if config.context.exists(parent.path + '/' + name):
+            NaChannel.__init__(self, name, parent, xpower=1.0, Ek=Ek)
+            return
         NaChannel.__init__(self, name, parent, xpower=1.0, Ek=Ek)
         v = linspace(config.vmin, config.vmax, config.ndivs + 1)
         tau_m = where(v < -40e-3, \
@@ -125,6 +137,9 @@ class NaP(NaChannel):
 class NaPF(NaChannel):
     """Persistent Na+ current, fast"""
     def __init__(self, name, parent, Ek=50e-3):
+        if config.context.exists(parent.path + '/' + name):
+            NaChannel.__init__(self, name, parent, xpower=3.0, Ek=Ek)
+            return
         NaChannel.__init__(self, name, parent, xpower=3.0, Ek=Ek)
         v = linspace(config.vmin, config.vmax, config.ndivs + 1)
         tau_m = where(v < -30e-3, \
@@ -139,6 +154,9 @@ class NaPF(NaChannel):
 
 class NaPF_SS(NaChannel):
     def __init__(self, name, parent, shift=-2.5e-3, Ek=50e-3):
+        if config.context.exists(parent.path + '/' + name):
+            NaChannel.__init__(self, name, parent, xpower=3.0, Ek=Ek)
+            return
         NaChannel.__init__(self, name, parent, xpower=3.0, Ek=Ek)
         if shift is None:
             shift = -2.5e-3
@@ -158,6 +176,9 @@ class NaPF_TCR(NaChannel):
     """Persistent Na+ channel specific to TCR cells. Only difference
     with NaPF is power of m is 1 as opposed 3."""
     def __init__(self, name, parent, shift=7e-3, Ek=50e-3):
+        if config.context.exists(parent.path + '/' + name):
+            NaChannel.__init__(self, name, parent, xpower=1.0, Ek=Ek)
+            return 
         NaChannel.__init__(self, name, parent, xpower=1.0, Ek=Ek)
         v = linspace(config.vmin, config.vmax, config.ndivs + 1) + shift
         tau_m = where(v < -30e-3, \
@@ -173,6 +194,9 @@ class NaF_TCR(NaChannel):
     """Fast Na+ channel for TCR cells. This is almost identical to
     NaF, but there is a nasty voltage shift in the tables."""
     def __init__(self, name, parent, Ek=50e-3):
+        if config.context.exists(parent.path + '/' + name):
+            NaChannel.__init__(self, name, parent, xpower=3.0, ypower=1.0, Ek=Ek)
+            return
         NaChannel.__init__(self, name, parent, xpower=3.0, ypower=1.0, Ek=Ek)
         shift_mnaf = -5.5e-3
         shift_hnaf = -7e-3

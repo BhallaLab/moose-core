@@ -20,14 +20,14 @@ import types
 import parser
 import token
 import symbol
-from moose import *
+import moose as __moose
 
 def listmsg(pymoose_object):
     """Prints the incoming and outgoing messages of the given object."""
     obj = pymoose_object
     ret = []
     if type(pymoose_object) is type(""):
-        obj = Neutral(pymoose_object)
+        obj = __moose.Neutral(pymoose_object)
     for msg in obj.inMessages():
         ret.append(msg)
     for msg in obj.outMessages():
@@ -39,7 +39,7 @@ def showmsg(pymoose_object):
     """Prints the incoming and outgoing messages of the given object."""
     obj = pymoose_object
     if type(pymoose_object) is type(""):
-        obj = Neutral(pymoose_object)
+        obj = __moose.Neutral(pymoose_object)
     print 'INCOMING:'
     for msg in obj.inMessages():
         print msg
@@ -146,17 +146,17 @@ def apply_to_tree(moose_wildcard, python_filter=None, value=None):
     """
     if not isinstance(moose_wildcard, str):
         raise TypeError('moose_wildcard must be a string.')
-    id_list = context.getWildcardList(moose_wildcard, True)
+    id_list = __moose.context.getWildcardList(moose_wildcard, True)
     if isinstance(python_filter, types.LambdaType):
         id_list = [moose_id for moose_id in id_list if python_filter(moose_id)]
     elif isinstance(python_filter, str):
-        id_list = [moose_id for moose_id in id_list if hasattr(eval('%s(moose_id)' % Neutral(moose_id).className), python_filter)]
+        id_list = [moose_id for moose_id in id_list if hasattr(eval('__moose.%s(moose_id)' % (__moose.Neutral(moose_id).className)), python_filter)]
     else:
         pass
     if isinstance(value, types.LambdaType):
         if isinstance(python_filter, str):
             for moose_id in id_list:
-                moose_obj = eval('%s(moose_id)' % Neutral(moose_id).className)
+                moose_obj = eval('__moose.%s(moose_id)' % (__moose.Neutral(moose_id).className))
                 setattr(moose_obj, python_filter, value(moose_id))
         else:
             for moose_id in id_list:
@@ -164,7 +164,7 @@ def apply_to_tree(moose_wildcard, python_filter=None, value=None):
     else:
         if isinstance(python_filter, str):
             for moose_id in id_list:
-                moose_obj = eval('%s(moose_id)' % Neutral(moose_id).className)
+                moose_obj = eval('__moose.%s(moose_id)' % (__moose.Neutral(moose_id).className))
                 setattr(moose_obj, python_filter, value)
         else:
             raise TypeError('Second argument must be a string specifying a field to assign to when third argument is a value')
@@ -184,7 +184,7 @@ def tweak_field(moose_wildcard, field, assignment_string):
     """    
     if not isinstance(moose_wildcard, str):
         raise TypeError('moose_wildcard must be a string.')
-    id_list = context.getWildcardList(moose_wildcard, True)
+    id_list = __moose.context.getWildcardList(moose_wildcard, True)
     expression = parser.expr(assignment_string)
     expr_list = expression.tolist()
     # This is a hack: I just tried out some possible syntax trees and
@@ -204,9 +204,9 @@ def tweak_field(moose_wildcard, field, assignment_string):
     new_expr = parser.sequence2st(tmp)
     code = new_expr.compile()
     for moose_id in id_list:
-        moose_obj = eval('%s(moose_id)' % (Neutral(moose_id).className))
+        moose_obj = eval('__moose.%s(moose_id)' % (__moose.Neutral(moose_id).className))
         value = eval(code)
-        context.setField(moose_id, field, str(value))
+        __moose.context.setField(moose_id, field, str(value))
         
 def printtree(root, vchar='|', hchar='__', vcount=1, depth=0, prefix='', is_last=False):
     """Pretty-print a MOOSE tree.
@@ -228,8 +228,8 @@ def printtree(root, vchar='|', hchar='__', vcount=1, depth=0, prefix='', is_last
     is_last - for internal use - should not be explicitly passed.
 
     """
-    if isinstance(root, str) or isinstance(root, Id):
-        root = Neutral(root)
+    if isinstance(root, str) or isinstance(root, __moose.Id):
+        root = __moose.Neutral(root)
 
     for i in range(vcount):
         print prefix
@@ -246,7 +246,7 @@ def printtree(root, vchar='|', hchar='__', vcount=1, depth=0, prefix='', is_last
 
     print root.name
     
-    children = [ Neutral(child) for child in root.children() ]
+    children = [ __moose.Neutral(child) for child in root.children() ]
     for i in range(0, len(children) - 1):
         printtree(children[i],
                   vchar, hchar, vcount, depth + 1, 
@@ -263,7 +263,7 @@ def df_traverse(root, operation, *args):
         return
     operation(root, *args)
     for child in root.children():
-        childNode = Neutral(child)
+    	childNode = __moose.Neutral(child)
         df_traverse(childNode, operation, *args)
     root._visited = True
 
@@ -308,17 +308,17 @@ def readcell_scrambled(filename, target):
         stack.extend(children)
         tmpfile.write(data[current])
     tmpfile.close()
-    PyMooseBase.getContext().readCell(tmpfilename, target)
-    return Cell(target)
+    __moose.context.readCell(tmpfilename, target)
+    return __moose.Cell(target)
 
 if __name__ == "__main__": # test printtree
-    s = Neutral('cell')
-    soma = Neutral('soma', s)
-    d1 = Neutral('d1', soma)
-    d2 = Neutral('d2', soma)
-    d3 = Neutral('d3', d1)
-    d4 = Neutral('d4', d1)
-    d5 = Neutral('d5', s)
+    s = __moose.Neutral('cell')
+    soma = __moose.Neutral('soma', s)
+    d1 = __moose.Neutral('d1', soma)
+    d2 = __moose.Neutral('d2', soma)
+    d3 = __moose.Neutral('d3', d1)
+    d4 = __moose.Neutral('d4', d1)
+    d5 = __moose.Neutral('d5', s)
     printtree(s)
 
     expected = 'cell            \
@@ -335,15 +335,15 @@ if __name__ == "__main__": # test printtree
                 |               \
                 |__d5'
 
-    s1 = Neutral('cell1')
-    c1 = Neutral('c1', s1)
-    c2 = Neutral('c2', c1)
-    c3 = Neutral('c3', c1)
-    c4 = Neutral('c4', c2)
-    c5 = Neutral('c5', c3)
-    c6 = Neutral('c6', c3)
-    c7 = Neutral('c7', c4)
-    c8 = Neutral('c8', c5)
+    s1 = __moose.Neutral('cell1')
+    c1 = __moose.Neutral('c1', s1)
+    c2 = __moose.Neutral('c2', c1)
+    c3 = __moose.Neutral('c3', c1)
+    c4 = __moose.Neutral('c4', c2)
+    c5 = __moose.Neutral('c5', c3)
+    c6 = __moose.Neutral('c6', c3)
+    c7 = __moose.Neutral('c7', c4)
+    c8 = __moose.Neutral('c8', c5)
     printtree(s1)
     expected1 = 'cell1                  \
                  |                      \

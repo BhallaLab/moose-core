@@ -62,6 +62,8 @@ import moose
 import config
 from glclient import GLClient
 
+## for python neuroml import
+from moose import neuroml
 
 class MooseXMLHandler(saxhandler.ContentHandler):
     def __init__(self):
@@ -75,7 +77,7 @@ class MooseXMLHandler(saxhandler.ContentHandler):
         """
         if name == 'sbml':
             self.model_type = MooseHandler.type_sbml
-        elif name == 'neuroml':
+        elif name == 'neuroml' or name == 'networkml':
             self.model_type = MooseHandler.type_neuroml
         else:
             pass
@@ -96,7 +98,7 @@ class MooseHandler(QtCore.QObject):
     # Map between file extension and known broad filetypes.
     fileExtensionMap = {
         'Genesis Script(*.g)': type_genesis,
-        'neuroML/SBML(*.xml *.bz2 *.zip *.gz)': type_xml,
+        'neuroML/SBML(*.xml *.nml *.bz2 *.zip *.gz)': type_xml,
         'Python script(*.py)': type_python
         }
     DEFAULT_SIMDT = 2.5e-4
@@ -242,7 +244,11 @@ class MooseHandler(QtCore.QObject):
         self._saxhandler.model_type = None
         self._xmlreader.reset()
         if ret == MooseHandler.type_neuroml:
-            self._context.readNeuroML(filename, target)
+            #self._context.readNeuroML(filename, target)
+            nmlReader = neuroml.NeuroML()
+            ## I need to allow arbitrary targets,
+            ## presently '/' by default - Aditya.
+            nmlReader.readNeuroMLFromFile(filename)
         elif ret == MooseHandler.type_sbml:
             self._context.readSBML(filename, target)
         
