@@ -9,8 +9,11 @@ from PyQt4.Qt import Qt
 from StringIO import StringIO
 from updatepaintGL import *
 
-#simulation is saved in /movieMake folder in the name of simulation.avi, at fps=10, to change this see ln 180 of player.py
-
+#movie saving defaults
+movie_fps = 10
+movie_width = 1280
+movie_height = 800
+movie_filename = 'simulation.avi' 
 
 #visualization mode, visualize single parameter (=1); to visualize 2 simultaneously (=2)
 numberOfParaToViz = 2  #(= 2 is Visualize_MAPKglu / two parameters simultaneously) (=1 is to visualize just Ca)
@@ -163,13 +166,15 @@ def updateColor(w,timeDataDig,t):
         w.updateGL()
 
 def saveAsMovie(w,startFrame,stopFrame):
+    if not os.path.exists('movieMake'):
+        os.mkdir('movieMake')
+
     for framenum in range(startFrame,stopFrame+1):
         print framenum
         newWin.slider.setValue(framenum)
         pic = w.grabFrameBuffer()
-        pic.save('movie/sim_'+str(framenum)+'.png','PNG')
+        pic.save('movieMake/sim_'+str(framenum)+'.png','PNG')
     
-    tempPath = os.getcwd()
     os.chdir('movieMake')
     f = open('filelist.txt','w')
     filelist = ["sim_"+str(i)+".png" for i in range(startFrame,stopFrame+1)]
@@ -177,10 +182,9 @@ def saveAsMovie(w,startFrame,stopFrame):
     f.close()
 
     ## mpeg4 compression
-    os.system('mencoder mf://@filelist.txt -mf w=1280:h=800:fps=10:type=png '\
-                  ' -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o simulation.avi')
-
-    os.chdir(tempPath)
+    mpegString = 'mencoder mf://@filelist.txt -mf w='+str(movie_width)+':h='+str(movie_height)+':fps='+str(movie_fps)+':type=png  -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o '+ movie_filename
+    os.system(mpegString)
+    os.chdir('..')
 
 def getValue(value):
     updateColor(w,timeDataDig,value)
