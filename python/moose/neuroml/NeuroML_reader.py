@@ -16,9 +16,14 @@ class NeuroML():
         tree = ET.parse(filename)
         root_element = tree.getroot()
         self.lengthUnits = root_element.attrib['lengthUnits']
+        self.temperature = CELSIUS # gets replaced below if tag for temperature is present
+        for meta_property in root_element.findall('.//{'+meta_ns+'}property'):
+            tagname = meta_property.attrib['tag']
+            if 'temperature' in tagname:
+                self.temperature = float(meta_property.attrib['value'])
 
         #print "Loading channels and synapses into MOOSE /library ..."
-        cmlR = ChannelML()
+        cmlR = ChannelML(self.temperature)
         for channels in root_element.findall('.//{'+neuroml_ns+'}channels'):
             self.channelUnits = channels.attrib['units']
             for channel in channels.findall('.//{'+cml_ns+'}channel_type'):
