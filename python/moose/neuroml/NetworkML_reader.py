@@ -2,7 +2,6 @@ from xml.etree import ElementTree as ET
 from neuroml_utils import * # tweak_model()
 import string
 import moose
-from moose_utils import * # for underscorize()
 from MorphML_reader import *
 from ChannelML_reader import *
 import sys
@@ -56,7 +55,55 @@ class NetworkML():
         self.createPopulations() # create cells
         print "creating connections ... "
         self.createProjections() # create connections
+        print "creating inputs ... "
+        self.createInputs() # create inputs (only current pulse supported)
         return (self.populationDict,self.projectionDict)
+
+    def createInputs(self):
+        for inputs in self.network.findall(".//{"+nml_ns+"}inputs"):
+            units = inputs.attrib['units']
+            if units == 'Physiological Units': # see pg 219 (sec 13.2) of Book of Genesis
+                Vfactor = 1e-3 # V from mV
+                Tfactor = 1e-3 # s from ms
+                Ifactor = 1e-6 # A from microA
+            else:
+                Vfactor = 1.0
+                Tfactor = 1.0
+                Ifactor = 1.0
+            for inputelem in inputs.findall(".//{"+nml_ns+"}input"):
+                inputname = inputelem.attrib['name']
+                pulseinput = inputelem.find(".//{"+nml_ns+"}pulse_input")
+                if pulseinput is not None:
+                    ## If /elec doesn't exists it creates /elec
+                    ## and returns a reference to it. If it does,
+                    ## it just returns its reference.
+                    moose.Neutral('/elec')
+                    pulsegen = moose.PulseGen('/elec/pulsegen_'+inputname)
+                    iclamp = moose.DiffAmp('/elec/iclamp_'+inputname)
+                    iclamp.saturation = 1e6
+                    iclamp.gain = 1.0
+                    pulsegen.trigMode = 0 # free run
+                    pulsegen.baseLevel = 0.0
+                    pulsegen.firstDelay = float(pulseinput.attrib['delay'])*Tfactor
+                    pulsegen.firstWidth = float(pulseinput.attrib['duration'])*Tfactor
+                    pulsegen.firstLevel = float(pulseinput.attrib['amplitude'])*Ifactor
+                    pulsegen.secondDelay = 1e6 # to avoid repeat
+                    pulsegen.secondLevel = 0.0
+                    pulsegen.secondWidth = 0.0
+                    pulsegen.count = 1
+                    pulsegen.connect('outputSrc',iclamp,'plusDest')
+                    target = inputelem.find(".//{"+nml_ns+"}target")
+                    population = target.attrib['population']
+                    for site in target.findall(".//{"+nml_ns+"}site"):
+                        cell_id = site.attrib['cell_id']
+                        if site.attrib.has_key('segment_id'): segment_id = site.attrib['segment_id']
+                        else: segment_id = 0 # default segment_id is specified to be 0
+                        ## population is populationname, self.populationDict[population][0] is cellname
+                        cell_name = self.populationDict[population][0]
+                        segment_path = self.populationDict[population][1][int(cell_id)].path+'/'+\
+                            self.cellSegmentDict[cell_name][segment_id][0]
+                        compartment = moose.Compartment(segment_path)
+                        iclamp.connect('outputSrc',compartment,'injectMsg')
 
     def createPopulations(self):
         self.populationDict = {}
