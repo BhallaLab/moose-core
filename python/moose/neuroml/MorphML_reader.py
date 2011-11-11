@@ -3,8 +3,8 @@ import string
 import moose
 import sys, math
 
-from moose_utils import *
 from ChannelML_reader import *
+from moose.utils import *
 
 class MorphML():
 
