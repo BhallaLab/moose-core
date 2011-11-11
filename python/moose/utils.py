@@ -1,11 +1,13 @@
 # /*******************************************************************
-#  * File:            pymoose.py
+#  * File:             pymoose.py
 #  * Description:      This is a wrapper over moose.py and apart from
 #  *                   exposing the functions thereof, it adds some 
 #  *                   utility functions.
-#  * Author:          Subhasis Ray
-#  * E-mail:          ray dot subhasis at gmail dot com
-#  * Created:         2008-10-12 22:50:06
+#  * Author1:          Subhasis Ray
+#  * E-mail1:          ray dot subhasis at gmail dot com
+#  * Created:          2008-10-12 22:50:06
+#  * Author2:          Aditya Gilra
+#  * E-mail2:          aditya underscore gilra at yahoo dot com
 #  ********************************************************************/
 # /**********************************************************************
 # ** This program is part of 'MOOSE', the
@@ -20,7 +22,10 @@ import types
 import parser
 import token
 import symbol
+import string
+import os
 import moose as __moose
+from .mooseConstants import *
 
 def listmsg(pymoose_object):
     """Prints the incoming and outgoing messages of the given object."""
@@ -310,6 +315,235 @@ def readcell_scrambled(filename, target):
     tmpfile.close()
     __moose.context.readCell(tmpfilename, target)
     return __moose.Cell(target)
+
+############# added by Aditya Gilra -- begin ################
+
+def resetSim(context, simdt, plotdt):
+    """ Sets the simdt and plotdt and resets the MOOSE 'context'. """
+    context.setClock(0, simdt, 0)
+    context.setClock(1, simdt, 0) #### The hsolve and ee methods use clock 1
+    context.setClock(2, simdt, 0) #### hsolve uses clock 2 for mg_block, nmdachan and others.
+    context.setClock(PLOTCLOCK, plotdt, 0) # PLOTCLOCK is in mooseConstants.py
+    context.reset()
+
+def setupTable(name, obj, qtyname):
+    """ Sets up a table with 'name' which stores 'qtyname' from 'obj'. """
+    # Setup the tables to pull data
+    vmTable = __moose.Table(name, __moose.Neutral(obj.path+"/data"))
+    vmTable.stepMode = TAB_BUF #TAB_BUF: table acts as a buffer.
+    vmTable.connect("inputRequest", obj, qtyname)
+    vmTable.useClock(PLOTCLOCK)
+    return vmTable
+
+def connectSynapse(context, compartment, synname, gbar_factor):
+    """
+    Creates a synname synapse under compartment, sets Gbar*gbar_factor, and attaches to compartment.
+    synname must be a synapse in /library of MOOSE.
+    """
+    synapseid = context.deepCopy(context.pathToId('/library/'+synname),\
+        context.pathToId(compartment.path),synname)
+    synapse = __moose.SynChan(synapseid)
+    synapse.Gbar = synapse.Gbar*gbar_factor
+    if synapse.getField('mgblock')=='True': # If NMDA synapse based on mgblock, connect to mgblock
+        mgblock = __moose.Mg_block(synapse.path+'/mgblock')
+        compartment.connect("channel", mgblock, "channel")
+    else:
+        compartment.connect("channel", synapse, "channel")
+    return synapse
+
+def connect_CaConc(compartment_list):
+    """ Connect the Ca pools and channels within each of the compartments in compartment_list
+     Ca channels should have an extra field called 'ion' defined and set in MOOSE.
+     Ca dependent channels like KCa should have an extra field called 'ionDependency' defined and set in MOOSE.
+     Call this only after instantiating cell so that all channels and pools have been created. """
+    context = __moose.PyMooseBase.getContext()
+    for compartment in compartment_list:
+        caconc = None
+        for child in compartment.getChildren(compartment.id):
+            neutralwrap = __moose.Neutral(child)
+            if neutralwrap.className == 'CaConc':
+                caconc = __moose.CaConc(child)
+                break
+        if caconc is not None:
+            for child in compartment.getChildren(compartment.id):
+                neutralwrap = __moose.Neutral(child)
+                if neutralwrap.className == 'HHChannel':
+                    channel = __moose.HHChannel(child)
+                    ## If 'ion' field is not present, the Shell returns '0',
+                    ## cribs and prints out a message but it does not throw an exception
+                    if channel.getField('ion') in ['Ca','ca']:
+                        channel.connect('IkSrc',caconc,'current')
+                        #print 'Connected ',channel.path
+                if neutralwrap.className == 'HHChannel2D':
+                    channel = __moose.HHChannel2D(child)
+                    ## If 'ionDependency' field is not present, the Shell returns '0',
+                    ## cribs and prints out a message but it does not throw an exception
+                    if channel.getField('ionDependency') in ['Ca','ca']:
+                        caconc.connect('concSrc',channel,'concen')
+                        #print 'Connected ',channel.path
+
+def printNetTree():
+    """ Prints all the cells under /, and recursive prints the cell tree for each cell. """
+    root = __moose.Neutral('/')
+    for id in root.getChildren(root.id): # all subelements of 'root'
+        if __moose.Neutral(id).className == 'Cell':
+            cell = __moose.Cell(id)
+            print "-------------------- CELL : ",cell.name," ---------------------------"
+            printCellTree(cell)
+
+def printCellTree(cell):
+    """
+    Prints the tree under MOOSE object 'cell'.
+    Assumes cells have all their compartments one level below,
+    also there should be nothing other than compartments on level below.
+    Apart from compartment properties and messages,
+    it displays the same for subelements of compartments only one level below the compartments.
+    Thus NMDA synapses' mgblock-s will be left out.
+    """
+    for compartmentid in cell.getChildren(cell.id): # compartments
+        comp = __moose.Compartment(compartmentid)
+        print "  |-",comp.path, 'l=',comp.length, 'd=',comp.diameter, 'Rm=',comp.Rm, 'Ra=',comp.Ra, 'Cm=',comp.Cm, 'EM=',comp.Em
+        for inmsg in comp.inMessages():
+            print "    |---", inmsg
+        for outmsg in comp.outMessages():
+            print "    |---", outmsg
+        printRecursiveTree(compartmentid, level=2) # for channels and synapses and recursively lower levels
+
+def printRecursiveTree(elementid, level):
+    """ Recursive helper function for printCellTree,
+    specify depth/'level' to recurse and print subelements under MOOSE 'elementid'. """
+    spacefill = '  '*level
+    element = __moose.Neutral(elementid)
+    for childid in element.getChildren(elementid): 
+        childobj = __moose.Neutral(childid)
+        classname = childobj.className
+        if classname in ['SynChan','KinSynChan']:
+            childobj = __moose.SynChan(childid)
+            print spacefill+"|--", childobj.name, childobj.className, 'Gbar=',childobj.Gbar
+        elif classname in ['HHChannel', 'HHChannel2D']:
+            childobj = __moose.HHChannel(childid)
+            print spacefill+"|--", childobj.name, childobj.className, 'Gbar=',childobj.Gbar, 'Ek=',childobj.Ek
+        elif classname in ['CaConc']:
+            childobj = __moose.CaConc(childid)
+            print spacefill+"|--", childobj.name, childobj.className, 'thick=',childobj.thick, 'B=',childobj.B
+        elif classname in ['Mg_block']:
+            childobj = __moose.Mg_block(childid)
+            print spacefill+"|--", childobj.name, childobj.className, 'CMg',childobj.CMg, 'KMg_A',childobj.KMg_A, 'KMg_B',childobj.KMg_B
+        elif classname in ['Table']: # Table gives segfault if printRecursiveTree is called on it
+            return # so go no deeper
+        for inmsg in childobj.inMessages():
+            print spacefill+"  |---", inmsg
+        for outmsg in childobj.outMessages():
+            print spacefill+"  |---", outmsg
+        if len(childobj.getChildren(childid))>0:
+            printRecursiveTree(childid, level+1)
+
+def setup_vclamp(compartment, name, delay1, width1, level1, gain=0.5e-5):
+    """
+    Sets up a voltage clamp with 'name' on MOOSE 'compartment' object:
+    adapted from squid.g in DEMOS (moose/genesis)
+    Specify the 'delay1', 'width1' and 'level1' of the voltage to be applied to the compartment.
+    Typically you need to adjust the PID 'gain'
+    For perhaps the Davison 4-compartment mitral or the Davison granule:
+    0.5e-5 optimal gain - too high 0.5e-4 drives it to oscillate at high frequency,
+    too low 0.5e-6 makes it have an initial overshoot (due to Na channels?)
+    Returns a MOOSE table with the PID output.
+    """
+    ## If /elec doesn't exists it creates /elec and returns a reference to it.
+    ## If it does, it just returns its reference.
+    __moose.Neutral('/elec')
+    pulsegen = __moose.PulseGen('/elec/pulsegen'+name)
+    vclamp = __moose.DiffAmp('/elec/vclamp'+name)
+    vclamp.saturation = 999.0
+    vclamp.gain = 1.0
+    lowpass = __moose.RC('/elec/lowpass'+name)
+    lowpass.R = 1.0
+    lowpass.C = 50e-6 # 50 microseconds tau
+    PID = __moose.PIDController('/elec/PID'+name)
+    PID.gain = gain
+    PID.tau_i = 20e-6
+    PID.tau_d = 5e-6
+    PID.saturation = 999.0
+    # All connections should be written as source.connect('',destination,'')
+    pulsegen.connect('outputSrc',lowpass,'injectMsg')
+    lowpass.connect('outputSrc',vclamp,'plusDest')
+    vclamp.connect('outputSrc',PID,'commandDest')
+    PID.connect('outputSrc',compartment,'injectMsg')
+    compartment.connect('VmSrc',PID,'sensedDest')
+    
+    pulsegen.trigMode = 0 # free run
+    pulsegen.baseLevel = -70e-3
+    pulsegen.firstDelay = delay1
+    pulsegen.firstWidth = width1
+    pulsegen.firstLevel = level1
+    pulsegen.secondDelay = 1e6
+    pulsegen.secondLevel = -70e-3
+    pulsegen.secondWidth = 0.0
+
+    vclamp_I = __moose.Table("/elec/vClampITable"+name)
+    vclamp_I.stepMode = TAB_BUF #TAB_BUF: table acts as a buffer.
+    vclamp_I.connect("inputRequest", PID, "output")
+    vclamp_I.useClock(PLOTCLOCK)
+    
+    return vclamp_I
+
+def setup_iclamp(compartment, name, delay1, width1, level1):
+    """
+    Sets up a current clamp with 'name' on MOOSE 'compartment' object:
+    Specify the 'delay1', 'width1' and 'level1' of the current pulse to be applied to the compartment.
+    Returns the MOOSE pulsegen that sends the current pulse.
+    """
+    ## If /elec doesn't exists it creates /elec and returns a reference to it.
+    ## If it does, it just returns its reference.
+    __moose.Neutral('/elec')
+    pulsegen = __moose.PulseGen('/elec/pulsegen'+name)
+    iclamp = __moose.DiffAmp('/elec/iclamp'+name)
+    iclamp.saturation = 1e6
+    iclamp.gain = 1.0
+    pulsegen.trigMode = 0 # free run
+    pulsegen.baseLevel = 0.0
+    pulsegen.firstDelay = delay1
+    pulsegen.firstWidth = width1
+    pulsegen.firstLevel = level1
+    pulsegen.secondDelay = 1e6 # to avoid repeat
+    pulsegen.secondLevel = 0.0
+    pulsegen.secondWidth = 0.0
+    pulsegen.connect('outputSrc',iclamp,'plusDest')
+    iclamp.connect('outputSrc',compartment,'injectMsg')
+    return pulsegen
+
+def get_matching_children(parent, names):
+    """ Returns non-recursive children of 'parent' MOOSE object
+    with their names containing any of the strings in list 'names'. """
+    matchlist = []
+    for childID in parent.children():
+        child = __moose.Neutral(childID)
+        for name in names:
+            if name in child.name:
+                matchlist.append(childID)
+    return matchlist
+
+def underscorize(path):
+    """ Returns: / replaced by underscores in 'path' """
+    return string.join(string.split(path,'/'),'_')
+
+def blockChannels(cell, channel_list):
+    """
+    Sets gmax to zero for channels of the 'cell' specified in 'channel_list'
+    Substring matches in channel_list are allowed
+    e.g. 'K' should block all K channels (ensure that you don't use capital K elsewhere in your channel name!)
+    """
+    for compartmentid in cell.getChildren(cell.id): # compartments
+        comp = __moose.Compartment(compartmentid)
+        for childid in comp.getChildren(comp.id):
+            child = __moose.Neutral(childid)
+            if child.className in ['HHChannel', 'HHChannel2D']:
+                chan = __moose.HHChannel(childid)
+                for channame in channel_list:
+                    if channame in chan.name:
+                        chan.Gbar = 0.0
+
+############# added by Aditya Gilra -- end ################
 
 if __name__ == "__main__": # test printtree
     s = __moose.Neutral('cell')

@@ -10,4 +10,7 @@ BSplineFill = 0 # B-spline fill (default)
 CSplineFill = 1 # C_Spline fill (not yet implemented)
 LinearFill = 2 # Linear fill
 
+## The hsolve and ee methods use clock 1.
+## hsolve further uses clock 2 for mg_block, nmdachan and others.
+## keep clock 3 for plots.
 PLOTCLOCK = 3
