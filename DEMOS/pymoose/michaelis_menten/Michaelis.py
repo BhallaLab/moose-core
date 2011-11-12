@@ -61,8 +61,6 @@ except ImportError:
     print "ERROR: Could not import moose. Please add the directory containing moose.py in your PYTHONPATH"
     sys.exit(1)
 
-import pymoose
-
 class Michaelis(object):
 
 	def __init__(self):
