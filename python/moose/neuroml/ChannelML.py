@@ -8,10 +8,11 @@ from neuroml_utils import *
 
 class ChannelML():
 
-    def __init__(self,temperature):
+    def __init__(self,nml_params):
         self.cml='http://morphml.org/channelml/schema'
         self.context = moose.PyMooseBase.getContext()
-        self.temperature = temperature
+        self.nml_params = nml_params
+        self.temperature = nml_params['temperature']
 
     def readChannelMLFromFile(self,filename,params={}):
         """ specify params as a dict: e.g. temperature that you need to pass to channels """
