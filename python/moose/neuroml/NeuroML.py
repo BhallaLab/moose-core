@@ -29,9 +29,10 @@ class NeuroML():
                 self.temperature_default = False
         if self.temperature_default:
             print "Using default temperature of", self.temperature,"degrees Celsius."
+        self.nml_params = {'temperature':self.temperature}
 
         #print "Loading channels and synapses into MOOSE /library ..."
-        cmlR = ChannelML(self.temperature)
+        cmlR = ChannelML(self.nml_params)
         for channels in root_element.findall('.//{'+neuroml_ns+'}channels'):
             self.channelUnits = channels.attrib['units']
             for channel in channels.findall('.//{'+cml_ns+'}channel_type'):
@@ -45,7 +46,7 @@ class NeuroML():
                 cmlR.readIonConcML(ionConc,units=self.channelUnits)
 
         #print "Loading cell definitions into MOOSE /library ..."
-        mmlR = MorphML()
+        mmlR = MorphML(self.nml_params)
         self.cellsDict = {}
         for cells in root_element.findall('.//{'+neuroml_ns+'}cells'):
             for cell in cells.findall('.//{'+neuroml_ns+'}cell'):
@@ -53,7 +54,7 @@ class NeuroML():
                 self.cellsDict.update(cellDict)
 
         #print "Loading individual cells into MOOSE root ... "
-        nmlR = NetworkML()
+        nmlR = NetworkML(self.nml_params)
         self.populationDict, self.projectionDict = \
             nmlR.readNetworkML(root_element,self.cellsDict,params=params,lengthUnits=self.lengthUnits)
 
