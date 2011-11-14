@@ -8,10 +8,11 @@ import sys
 
 class NetworkML():
 
-    def __init__(self):
+    def __init__(self, nml_params):
         self.cellDictBySegmentId={}
         self.cellDictByCableId={}
         self.context = moose.PyMooseBase.getContext()
+        self.nml_params = nml_params
 
     def readNetworkMLFromFile(self,filename,cellSegmentDict,params={}):
         """ 
@@ -113,7 +114,7 @@ class NetworkML():
             print "loading", populationname
             ## if channel does not exist in library load it from xml file
             if not self.context.exists('/library/'+cellname):
-                mmlR = MorphML()
+                mmlR = MorphML(self.nml_params)
                 cellDict = mmlR.readMorphMLFromFile(cellname+'.morph.xml')
                 self.cellSegmentDict.update(cellDict)
             libcell = moose.Cell('/library/'+cellname)
@@ -305,7 +306,7 @@ class NetworkML():
     def make_new_synapse(self, syn_name, postcomp, syn_name_full):
         ## if channel does not exist in library load it from xml file
         if not self.context.exists('/library/'+syn_name):
-            cmlR = ChannelML()
+            cmlR = ChannelML(self.nml_params)
             cmlR.readChannelMLFromFile(syn_name+'.xml')
         synid = self.context.deepCopy(self.context.pathToId('/library/'+syn_name),postcomp.id,syn_name_full)
         syn = moose.SynChan(synid)

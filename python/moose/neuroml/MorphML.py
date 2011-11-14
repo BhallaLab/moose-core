@@ -8,7 +8,7 @@ from moose.utils import *
 
 class MorphML():
 
-    def __init__(self):
+    def __init__(self,nml_params):
         self.neuroml='http://morphml.org/neuroml/schema'
         self.bio='http://morphml.org/biophysics/schema'
         self.mml='http://morphml.org/morphml/schema'
@@ -16,6 +16,7 @@ class MorphML():
         self.cellDictBySegmentId={}
         self.cellDictByCableId={}
         self.context = moose.PyMooseBase.getContext()
+        self.nml_params = nml_params
 
     def readMorphMLFromFile(self,filename,params={}):
         """
@@ -251,7 +252,7 @@ class MorphML():
             if not self.context.exists(compartment.path+'/'+mechanismname):
                 ## if channel does not exist in library load it from xml file
                 if not self.context.exists("/library/"+mechanismname):
-                    cmlR = ChannelML()
+                    cmlR = ChannelML(self.nml_params)
                     cmlR.readChannelMLFromFile(mechanismname+'.xml')
                 neutralObj = moose.Neutral("/library/"+mechanismname)
                 if 'Conc' in neutralObj.className: # Ion concentration pool
