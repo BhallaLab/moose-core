@@ -2,8 +2,8 @@ from xml.etree import ElementTree as ET
 from neuroml_utils import * # tweak_model()
 import string
 import moose
-from MorphML_reader import *
-from ChannelML_reader import *
+from MorphML import *
+from ChannelML import *
 import sys
 
 class NetworkML():
