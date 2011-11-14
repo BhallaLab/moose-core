@@ -1,7 +1,7 @@
 from xml.etree import ElementTree as ET
-from ChannelML_reader import *
-from MorphML_reader import *
-from NetworkML_reader import *
+from ChannelML import *
+from MorphML import *
+from NetworkML import *
 import string
 import moose
 import sys
@@ -11,16 +11,24 @@ class NeuroML():
     def __init__(self):
         self.context = moose.PyMooseBase.getContext()
 
-    def readNeuroMLFromFile(self,filename):
+    def readNeuroMLFromFile(self,filename,params={}):
+        """
+        For the format of params required to tweak what cells are loaded,
+        refer to the doc string of NetworkML.readNetworkMLFromFile().
+        """
         print "Loading neuroml file ... ", filename
         tree = ET.parse(filename)
         root_element = tree.getroot()
         self.lengthUnits = root_element.attrib['lengthUnits']
-        self.temperature = CELSIUS # gets replaced below if tag for temperature is present
+        self.temperature = CELSIUS_default # gets replaced below if tag for temperature is present
+        self.temperature_default = True
         for meta_property in root_element.findall('.//{'+meta_ns+'}property'):
             tagname = meta_property.attrib['tag']
             if 'temperature' in tagname:
                 self.temperature = float(meta_property.attrib['value'])
+                self.temperature_default = False
+        if self.temperature_default:
+            print "Using default temperature of", self.temperature,"degrees Celsius."
 
         #print "Loading channels and synapses into MOOSE /library ..."
         cmlR = ChannelML(self.temperature)
@@ -47,7 +55,7 @@ class NeuroML():
         #print "Loading individual cells into MOOSE root ... "
         nmlR = NetworkML()
         self.populationDict, self.projectionDict = \
-            nmlR.readNetworkML(root_element,self.cellsDict,params={},lengthUnits=self.lengthUnits)
+            nmlR.readNetworkML(root_element,self.cellsDict,params=params,lengthUnits=self.lengthUnits)
 
 def loadNeuroML_L123(filename):
     neuromlR = NeuroML()
