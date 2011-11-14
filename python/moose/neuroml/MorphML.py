@@ -3,7 +3,7 @@ import string
 import moose
 import sys, math
 
-from ChannelML_reader import *
+from ChannelML import *
 from moose.utils import *
 
 class MorphML():
@@ -201,7 +201,10 @@ class MorphML():
         return {cellname:self.segDict}
 
     def set_group_compartment_param(self, cell, cellname, parameter, name, value, grouptype, mechanismname=None):
-    ### Find the compartments that belong to the cablegroups refered to for this parameter and set_compartment_param
+        """
+        Find the compartments that belong to the cablegroups refered to
+         for this parameter and set_compartment_param.
+        """
         for group in parameter.findall(".//{"+grouptype+"}group"):
             cablegroupname = group.text
             if cablegroupname == 'all':
@@ -216,7 +219,7 @@ class MorphML():
                             self.set_compartment_param(compartment,name,value,mechanismname)
 
     def set_compartment_param(self, compartment, name, value, mechanismname):
-    ### Set the param for the compartment depending on name and mechanismname
+        """ Set the param for the compartment depending on name and mechanismname. """
         if name == 'CM':
             compartment.Cm = value*math.pi*compartment.diameter*compartment.length
         elif name == 'RM':
@@ -229,15 +232,18 @@ class MorphML():
             compartment.initVm = value
         elif mechanismname is 'synapse': # synapse being added to the compartment
             ## these are potential locations, we do not actually make synapses.
-            #synapse = self.context.deepCopy(self.context.pathToId('/library/'+value),self.context.pathToId(compartment.path),value) # value contains name of synapse i.e. synapse_type
+            #synapse = self.context.deepCopy(self.context.pathToId('/library/'+value),\
+            #    self.context.pathToId(compartment.path),value) # value contains name of synapse i.e. synapse_type
             #compartment.connect("channel", synapse, "channel")
-            ### I assume below that compartment name has _segid at its end
+            ## I assume below that compartment name has _segid at its end
             segid = string.split(compartment.name,'_')[-1] # get segment id from compartment name
             self.segDict[segid][5].append(value)
         elif mechanismname is 'spikegen': # spikegen being added to the compartment
             ## these are potential locations, we do not actually make the spikegens.
-            ## spikegens for different synapses can have different thresholds, hence include synapse_type in its name
-            #spikegen = moose.SpikeGen(compartment.path+'/'+value+'_spikegen') # value contains name of synapse i.e. synapse_type
+            ## spikegens for different synapses can have different thresholds,
+            ## hence include synapse_type in its name
+            ## value contains name of synapse i.e. synapse_type
+            #spikegen = moose.SpikeGen(compartment.path+'/'+value+'_spikegen')
             #compartment.connect("VmSrc",spikegen,"Vm")
             pass
         elif mechanismname is not None:
@@ -250,18 +256,20 @@ class MorphML():
                 neutralObj = moose.Neutral("/library/"+mechanismname)
                 if 'Conc' in neutralObj.className: # Ion concentration pool
                     libcaconc = moose.CaConc("/library/"+mechanismname)
-                    caconc = moose.CaConc(libcaconc,mechanismname,compartment) # deep copies the library caconc under the compartment
+                    ## deep copies the library caconc under the compartment
+                    caconc = moose.CaConc(libcaconc,mechanismname,compartment)
                     ## CaConc connections are made later using connect_CaConc()
-                    ## JUST Default value of thick WILL NOT DO - HAVE TO SET B based on this thick!
-                    caconc.B = 1 / (2*FARADAY) / (math.pi*compartment.diameter*compartment.length * caconc.thick)
-                    # I am using a translation from Neuron, hence this method. In Genesis, gmax / (surfacearea*thick) is set as value of B!
+                    ## thickness of Ca shell is set below and
+                    ## caconc.B is also set below based on thickness
                 elif 'HHChannel2D' in neutralObj.className : ## HHChannel2D
                     libchannel = moose.HHChannel2D("/library/"+mechanismname)
-                    channel = moose.HHChannel2D(libchannel,mechanismname,compartment) # deep copies the library channel under the compartment
+                    ## deep copies the library channel under the compartment
+                    channel = moose.HHChannel2D(libchannel,mechanismname,compartment)
                     channel.connect('channel',compartment,'channel')
                 elif 'HHChannel' in neutralObj.className : ## HHChannel
                     libchannel = moose.HHChannel("/library/"+mechanismname)
-                    channel = moose.HHChannel(libchannel,mechanismname,compartment) # deep copies the library channel under the compartment
+                    ## deep copies the library channel under the compartment
+                    channel = moose.HHChannel(libchannel,mechanismname,compartment)
                     channel.connect('channel',compartment,'channel')
             ## if mechanism is present in compartment, just wrap it
             else:
@@ -279,5 +287,6 @@ class MorphML():
             elif name == 'thick':
                 caconc.thick = value ## JUST THIS WILL NOT DO - HAVE TO SET B based on this thick!
                 caconc.B = 1 / (2*FARADAY) / (math.pi*compartment.diameter*compartment.length * value)
-                # I am using a translation from Neuron, hence this method. In Genesis, gmax / (surfacearea*thick) is set as value of B!
+                ## I am using a translation from Neuron, hence this method.
+                ## In Genesis, gmax / (surfacearea*thick) is set as value of B!
         #print "Setting ",name," for ",compartment.path," value ",value
