@@ -23,7 +23,7 @@ ET._namespace_map[xsi_ns] = 'xsi'
 
 #FARADAY = 96154.0 # Coulombs # from cadecay.mod : 1/(2*96154.0) = 5.2e-6 which is the Book of Genesis / readcell value
 FARADAY = 96485.3415 # Coulombs/mol # from Wikipedia
-CELSIUS = 32.0 # default temperature if meta:property tag for temperature is not present
+CELSIUS_default = 32.0 # deg C # default temperature if meta:property tag for temperature is not present
 VMIN = -0.1 # Volts
 VMAX = 0.1 # Volts
 NDIVS = 200 # number

@@ -1,14 +1,14 @@
 from xml.etree import ElementTree as ET
 import string
 import os, sys
-from pylab import *
+from math import *
 
 import moose
 from neuroml_utils import *
 
 class ChannelML():
 
-    def __init__(self,temperature=32.0):
+    def __init__(self,temperature):
         self.cml='http://morphml.org/channelml/schema'
         self.context = moose.PyMooseBase.getContext()
         self.temperature = temperature
