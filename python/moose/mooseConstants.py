@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+
+## for Ca Pool
+#FARADAY = 96154.0 # Coulombs # from cadecay.mod : 1/(2*96154.0) = 5.2e-6 which is the Book of Genesis / readcell value
+FARADAY = 96485.3415 # Coulombs/mol # from Wikipedia
+
 ## Table step_mode
 TAB_IO=0 # table acts as lookup - default mode
 TAB_ONCE=2 # table outputs value until it reaches the end and then stays at the last value
