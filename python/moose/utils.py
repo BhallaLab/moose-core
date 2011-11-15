@@ -24,6 +24,7 @@ import token
 import symbol
 import string
 import os
+import math
 import moose as __moose
 from .mooseConstants import *
 
@@ -351,37 +352,6 @@ def connectSynapse(context, compartment, synname, gbar_factor):
         compartment.connect("channel", synapse, "channel")
     return synapse
 
-def connect_CaConc(compartment_list):
-    """ Connect the Ca pools and channels within each of the compartments in compartment_list
-     Ca channels should have an extra field called 'ion' defined and set in MOOSE.
-     Ca dependent channels like KCa should have an extra field called 'ionDependency' defined and set in MOOSE.
-     Call this only after instantiating cell so that all channels and pools have been created. """
-    context = __moose.PyMooseBase.getContext()
-    for compartment in compartment_list:
-        caconc = None
-        for child in compartment.getChildren(compartment.id):
-            neutralwrap = __moose.Neutral(child)
-            if neutralwrap.className == 'CaConc':
-                caconc = __moose.CaConc(child)
-                break
-        if caconc is not None:
-            for child in compartment.getChildren(compartment.id):
-                neutralwrap = __moose.Neutral(child)
-                if neutralwrap.className == 'HHChannel':
-                    channel = __moose.HHChannel(child)
-                    ## If 'ion' field is not present, the Shell returns '0',
-                    ## cribs and prints out a message but it does not throw an exception
-                    if channel.getField('ion') in ['Ca','ca']:
-                        channel.connect('IkSrc',caconc,'current')
-                        #print 'Connected ',channel.path
-                if neutralwrap.className == 'HHChannel2D':
-                    channel = __moose.HHChannel2D(child)
-                    ## If 'ionDependency' field is not present, the Shell returns '0',
-                    ## cribs and prints out a message but it does not throw an exception
-                    if channel.getField('ionDependency') in ['Ca','ca']:
-                        caconc.connect('concSrc',channel,'concen')
-                        #print 'Connected ',channel.path
-
 def printNetTree():
     """ Prints all the cells under /, and recursive prints the cell tree for each cell. """
     root = __moose.Neutral('/')
@@ -542,6 +512,42 @@ def blockChannels(cell, channel_list):
                 for channame in channel_list:
                     if channame in chan.name:
                         chan.Gbar = 0.0
+
+def connect_CaConc(compartment_list):
+    """ Connect the Ca pools and channels within each of the compartments in compartment_list
+     Ca channels should have an extra field called 'ion' defined and set in MOOSE.
+     Ca dependent channels like KCa should have an extra field called 'ionDependency' defined and set in MOOSE.
+     Call this only after instantiating cell so that all channels and pools have been created. """
+    context = __moose.PyMooseBase.getContext()
+    for compartment in compartment_list:
+        caconc = None
+        for child in compartment.getChildren(compartment.id):
+            neutralwrap = __moose.Neutral(child)
+            if neutralwrap.className == 'CaConc':
+                caconc = __moose.CaConc(child)
+                break
+        if caconc is not None:
+            ## B has to be set for caconc based on thickness of Ca shell and compartment l and dia.
+            ## I am using a translation from Neuron, hence this method.
+            ## In Genesis, gmax / (surfacearea*thick) is set as value of B!
+            caconc.B = 1 / (2*FARADAY) / \
+                (math.pi*compartment.diameter*compartment.length * caconc.thick)
+            for child in compartment.getChildren(compartment.id):
+                neutralwrap = __moose.Neutral(child)
+                if neutralwrap.className == 'HHChannel':
+                    channel = __moose.HHChannel(child)
+                    ## If 'ion' field is not present, the Shell returns '0',
+                    ## cribs and prints out a message but it does not throw an exception
+                    if channel.getField('ion') in ['Ca','ca']:
+                        channel.connect('IkSrc',caconc,'current')
+                        #print 'Connected ',channel.path
+                if neutralwrap.className == 'HHChannel2D':
+                    channel = __moose.HHChannel2D(child)
+                    ## If 'ionDependency' field is not present, the Shell returns '0',
+                    ## cribs and prints out a message but it does not throw an exception
+                    if channel.getField('ionDependency') in ['Ca','ca']:
+                        caconc.connect('concSrc',channel,'concen')
+                        #print 'Connected ',channel.path
 
 ############# added by Aditya Gilra -- end ################
 

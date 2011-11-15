@@ -45,7 +45,7 @@ class MorphML():
         else:
             self.length_factor = 1.0
         cellname = cell.attrib["name"]
-        print "loading cell :", cellname
+        print "loading cell :", cellname,"into /library ."
         moosecell = moose.Cell('/library/'+cellname)
         self.cellDictBySegmentId[cellname] = [moosecell,{}]
         self.cellDictByCableId[cellname] = [moosecell,{}]
@@ -260,8 +260,8 @@ class MorphML():
                     ## deep copies the library caconc under the compartment
                     caconc = moose.CaConc(libcaconc,mechanismname,compartment)
                     ## CaConc connections are made later using connect_CaConc()
-                    ## thickness of Ca shell is set below and
-                    ## caconc.B is also set below based on thickness
+                    ## Later, when calling connect_CaConc,
+                    ## B is set for caconc based on thickness of Ca shell and compartment l and dia.
                 elif 'HHChannel2D' in neutralObj.className : ## HHChannel2D
                     libchannel = moose.HHChannel2D("/library/"+mechanismname)
                     ## deep copies the library channel under the compartment
@@ -287,7 +287,6 @@ class MorphML():
                 channel.Ek = value
             elif name == 'thick':
                 caconc.thick = value ## JUST THIS WILL NOT DO - HAVE TO SET B based on this thick!
-                caconc.B = 1 / (2*FARADAY) / (math.pi*compartment.diameter*compartment.length * value)
-                ## I am using a translation from Neuron, hence this method.
-                ## In Genesis, gmax / (surfacearea*thick) is set as value of B!
+                ## Later, when calling connect_CaConc,
+                ## B is set for caconc based on thickness of Ca shell and compartment l and dia.
         #print "Setting ",name," for ",compartment.path," value ",value
