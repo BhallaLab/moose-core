@@ -39,7 +39,7 @@ class ChannelML():
         else:
             print "wrong units", units,": exiting ..."
             sys.exit(1)
-        print "loading synapse :",synapseElement.attrib['name']
+        print "loading synapse :",synapseElement.attrib['name'],"into /library ."
         moosesynapse = moose.SynChan('/library/'+synapseElement.attrib['name'])
         doub_exp_syn = synapseElement.find('./{'+self.cml+'}doub_exp_syn')
         moosesynapse.Ek = float(doub_exp_syn.attrib['reversal_potential'])*Vfactor
@@ -71,7 +71,7 @@ class ChannelML():
             print "wrong units", units,": exiting ..."
             sys.exit(1)
         channel_name = channelElement.attrib['name']
-        print "loading channel :", channel_name
+        print "loading channel :", channel_name,"into /library ."
         IVrelation = channelElement.find('./{'+self.cml+'}current_voltage_relation')
         concdep = IVrelation.find('./{'+self.cml+'}conc_dependence')
         if concdep is None:
@@ -277,7 +277,7 @@ class ChannelML():
                 print "Sorry, I cannot handle non-Ca-ion pools. Exiting ..."
                 sys.exit(1)
         capoolName = ionConcElement.attrib['name']
-        print "loading Ca pool :",capoolName
+        print "loading Ca pool :",capoolName,"into /library ."
         caPool = moose.CaConc('/library/'+capoolName)
         poolModel = ionConcElement.find('./{'+self.cml+'}decaying_pool_model')
         caPool.CaBasal = float(poolModel.attrib['resting_conc']) * concfactor

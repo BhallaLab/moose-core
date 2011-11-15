@@ -56,7 +56,7 @@ class NetworkML():
         self.createPopulations() # create cells
         print "creating connections ... "
         self.createProjections() # create connections
-        print "creating inputs ... "
+        print "creating inputs in /elec ... "
         self.createInputs() # create inputs (only current pulse supported)
         return (self.populationDict,self.projectionDict)
 
@@ -91,7 +91,9 @@ class NetworkML():
                     pulsegen.secondDelay = 1e6 # to avoid repeat
                     pulsegen.secondLevel = 0.0
                     pulsegen.secondWidth = 0.0
-                    pulsegen.count = 1
+                    ## do not set count to 1, let it be at 2 by default
+                    ## else it will set secondDelay to 0.0 and repeat the first pulse!
+                    #pulsegen.count = 1
                     pulsegen.connect('outputSrc',iclamp,'plusDest')
                     target = inputelem.find(".//{"+nml_ns+"}target")
                     population = target.attrib['population']

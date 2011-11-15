@@ -21,8 +21,6 @@ ET._namespace_map[cml_ns] = 'cml'
 ET._namespace_map[meta_ns] = 'meta'
 ET._namespace_map[xsi_ns] = 'xsi'
 
-#FARADAY = 96154.0 # Coulombs # from cadecay.mod : 1/(2*96154.0) = 5.2e-6 which is the Book of Genesis / readcell value
-FARADAY = 96485.3415 # Coulombs/mol # from Wikipedia
 CELSIUS_default = 32.0 # deg C # default temperature if meta:property tag for temperature is not present
 VMIN = -0.1 # Volts
 VMAX = 0.1 # Volts
@@ -209,9 +207,9 @@ def keepOnlyInclude(network, onlyInclude):
                 ## remove is a very slow operation!
                 connections.remove(connection)
 
-## in-place prettyprint formatter copied from http://effbot.org/zone/element-lib.htm
-## first call indent(root, level=0), and then doc.write(filename)
 def indent(elem, level=0):
+    """ in-place prettyprint formatter copied from http://effbot.org/zone/element-lib.htm
+    first call indent(root, level=0), and then doc.write(filename) ."""
     i = "\n" + level*"  "
     if len(elem):
         if not elem.text or not elem.text.strip():
