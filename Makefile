@@ -295,8 +295,8 @@ pymoose: CXXFLAGS += -DPYMOOSE -fPIC -fno-strict-aliasing -I/usr/include/${INSTA
 pymoose: SUBDIR += pymoose
 pymoose: OBJLIBS += pymoose/pymoose.o
 pymoose: LIBS += -l${INSTALLED_PYTHON}
-pymoose: _moose.so
-_moose.so: libs $(OBJLIBS)
+pymoose: python/moose/_moose.so
+python/moose/_moose.so: libs $(OBJLIBS)
 	$(CXX) -shared $(LDFLAGS) $(CXXFLAGS) -o $@ $(OBJLIBS) $(LIBS)
 
 libs:
@@ -310,4 +310,4 @@ default: moose mpp
 
 clean:
 	@(for i in $(CLEANSUBDIR) ; do $(MAKE) -C $$i clean;  done)
-	-rm -rf moose mpp core.* DOCS/html *.so *.pyc
+	-rm -rf moose mpp core.* DOCS/html python/moose/*.so python/moose/*.pyc  
