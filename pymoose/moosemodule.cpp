@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Sep 22 20:25:14 2011 (+0530)
+// Last-Updated: Wed Nov 16 11:31:50 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4276
+//     Update #: 4304
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -66,7 +66,7 @@ extern const map<string, string>& getArgMap();
 extern Shell& getShell();
 extern void finalize();
 extern void setup_runtime_env(bool verbose);
-extern string getFieldType(ObjId oid, string fieldName, string finfoType="");
+extern pair<string,string> getFieldType(ObjId oid, string fieldName, string finfoType="");
 extern vector<string> getFieldNames(ObjId oid, string fieldType);
 
 extern void nonMpiTests(Shell *);
@@ -374,7 +374,7 @@ extern "C" {
             PyErr_SetString(PyExc_ValueError, "Non-root path must not end with '/'");
             return -1;
         }
-        vector <unsigned int> vec_dims;
+        vector <int> vec_dims;
         Py_ssize_t len = 1;
         if (dims){
             if (PySequence_Check(dims)){
@@ -414,7 +414,7 @@ extern "C" {
             } else {
                 name = trimmed_path;
             }
-            self->id_ = getShell().doCreate(string(type), Id(parent_path), string(name), vector<unsigned int>(vec_dims));
+            self->id_ = getShell().doCreate(string(type), Id(parent_path), string(name), vector<int>(vec_dims));
         } 
         return 0;            
     }// ! _pymoose_Id_init
@@ -596,12 +596,12 @@ extern "C" {
         PyObject * obj;
         static const char * kwlist[] = {"id", "dataIndex", "fieldIndex", NULL};
         if (PyArg_ParseTupleAndKeywords(args, kwargs, "I|II:_pymoose_ObjId_init", const_cast<char**>(kwlist), &id, &data, &field)){
-            self->oid_ = ObjId(Id(id), DataId(data, field));
+            self->oid_ = ObjId(Id(id), DataId(data, field, 0)); // putting numFieldBits=0 by default.No clue if/how we are supposed to compute this stuff beforehand.
             return 0;
         } else if (PyArg_ParseTupleAndKeywords(args, kwargs, "O|II:_pymoose_ObjId_init", const_cast<char**>(kwlist), &obj, &data, &field)){
             PyErr_Clear();
             if (Id_Check(obj)){
-                self->oid_ = ObjId(((_Id*)obj)->id_, DataId(data, field));
+                self->oid_ = ObjId(((_Id*)obj)->id_, DataId(data, field, 0));
                 return 0;
             } else if (ObjId_Check(obj)){
                 self->oid_ = ((_ObjId*)obj)->oid_;
@@ -618,15 +618,13 @@ extern "C" {
 
     static long _pymoose_ObjId_hash(_ObjId * self, PyObject * args)
     {
-        long id = self->oid_.id.value();
-        long dindex = self->oid_.dataId.data();
-        long findex = self->oid_.dataId.field();
-        return ((id << 32) | (dindex << 16) | findex); // This is a naive hash function                
+        long long unsigned index = self->oid_.dataId.value();
+        return index;
     }
     
     static PyObject * _pymoose_ObjId_repr(_ObjId * self)
     {
-        return PyString_FromFormat("<ObjId: id=%u, dataIndex=%u, fieldIndex=%u, path=%s>", self->oid_.id.value(), self->oid_.dataId.data(), self->oid_.dataId.field(), self->oid_.id.path().c_str());
+        return PyString_FromFormat("<ObjId: id=%u, dataId=%lld, path=%s>", self->oid_.id.value(), self->oid_.dataId.value(), self->oid_.id.path().c_str());
     } // !  _pymoose_ObjId_repr
 
     
@@ -657,7 +655,7 @@ extern "C" {
         if (finfoType != NULL){
             finfoTypeStr = finfoType;
         }
-        string typeStr = getFieldType(self->oid_, string(fieldName), finfoTypeStr);
+        string typeStr = getFieldType(self->oid_, string(fieldName), finfoTypeStr).first;
         if (typeStr.length() <= 0){
             PyErr_SetString(PyExc_ValueError, "Empty string for field type. Field name may be incorrect.");
             return NULL;
@@ -707,6 +705,7 @@ extern "C" {
                 }                                                       \
                 break;                                                  \
         }                                                               \
+
         
         pair<string, string> type = getFieldType(self->oid_, string(field));
         if (type.first.empty()){
@@ -722,7 +721,7 @@ extern "C" {
         if (!ftype){
             if ( type.second != "fieldElementFinfo" ){
                 string msg = "Type ";
-                msg += type + " is not handled yet.";
+                msg += type.second + " is not handled yet.";
                 PyErr_SetString(PyExc_NotImplementedError, msg.c_str());
                 return NULL;
             } else {
@@ -840,7 +839,7 @@ extern "C" {
         if (!PyArg_ParseTuple(args, "sO:_pymoose_ObjId_setField", &field,  &value)){
             return NULL;
         }
-        char ftype = shortType(getFieldType(self->oid_, string(field)));
+        char ftype = shortType(getFieldType(self->oid_, string(field)).first);
         
         if (!ftype){
             PyErr_SetString(PyExc_AttributeError, "Field not valid.");
@@ -1102,7 +1101,7 @@ extern "C" {
         if (!fieldName){ // not a string, raises TypeError
             return NULL;
         }
-        string type = getFieldType(self->oid_, string(fieldName), "destFinfo");
+        string type = getFieldType(self->oid_, string(fieldName), "destFinfo").first;
         if (type.empty()){
             error << "No such function field available";
             PyErr_SetString(PyExc_ValueError, error.str().c_str());
@@ -1294,7 +1293,7 @@ extern "C" {
             return NULL;
         }
         _ObjId * dest = reinterpret_cast<_ObjId*>(destPtr);
-        bool ret = (getShell().doAddMsg(msgType, self->oid_, string(srcField), dest->oid_, string(destField)) != Msg::badMsg);
+        bool ret = (getShell().doAddMsg(msgType, self->oid_, string(srcField), dest->oid_, string(destField)) != Msg::bad);
         if (!ret){
             PyErr_SetString(PyExc_NameError, "connect failed: check field names and type compatibility.");
             return NULL;
@@ -1324,15 +1323,19 @@ extern "C" {
         if (!PyArg_ParseTuple(args, ":_pymoose_ObjId_getDataIndex")){
             return NULL;
         }
-        PyObject * ret = Py_BuildValue("I", self->oid_.dataId.data());
+        PyObject * ret = Py_BuildValue("I", self->oid_.dataId.value());
         return ret;
     }
+
+    // WARNING: fieldIndex has been deprecated in dh_branch. This
+    // needs to be updated accordingly.  The current code is just
+    // place-holer to avoid compilation errors.
     static PyObject * _pymoose_ObjId_getFieldIndex(_ObjId * self, PyObject * args)
     {
         if (!PyArg_ParseTuple(args, ":_pymoose_ObjId_getFieldIndex")){
             return NULL;
         }
-        PyObject * ret = Py_BuildValue("I", self->oid_.dataId.field());
+        PyObject * ret = Py_BuildValue("I", self->oid_.dataId.value());
         return ret;
     }
     
@@ -1520,7 +1523,7 @@ extern "C" {
         }
         _ObjId * dest = reinterpret_cast<_ObjId*>(destPtr);
         _ObjId * src = reinterpret_cast<_ObjId*>(srcPtr);
-        bool ret = (getShell().doAddMsg(msgType, src->oid_, string(srcField), dest->oid_, string(destField)) != Msg::badMsg);
+        bool ret = (getShell().doAddMsg(msgType, src->oid_, string(srcField), dest->oid_, string(destField)) != Msg::bad);
         if (!ret){
             PyErr_SetString(PyExc_NameError, "connect failed: check field names and type compatibility.");
             return NULL;
@@ -1576,9 +1579,9 @@ extern "C" {
         Id fieldId(classId.path() + "/" + string(finfoType));
         assert(fieldId != Id());
         for (unsigned int ii = 0; ii < numFinfos; ++ii){
-            string fieldName = Field<string>::get(ObjId(fieldId, DataId(0, ii)), "name");
+            string fieldName = Field<string>::get(ObjId(fieldId, DataId(0, ii, 0)), "name");
             fieldNames.push_back(fieldName);
-            string fieldType = Field<string>::get(ObjId(fieldId, DataId(0, ii)), "type");
+            string fieldType = Field<string>::get(ObjId(fieldId, DataId(0, ii, 0)), "type");
             fieldTypes.push_back(fieldType);
         }        
     }
