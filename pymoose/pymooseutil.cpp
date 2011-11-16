@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Mar 26 22:41:37 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Sep 22 16:35:28 2011 (+0530)
+// Last-Updated: Wed Nov 16 11:39:49 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 217
+//     Update #: 228
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -193,9 +193,9 @@ Shell& getShell()
         Msg::initNull();
         // Initialize the shell
         Id shellId;
-        vector <unsigned int> dims;
-        dims.push_back(1);
-        shellE = new Element(shellId, Shell::initCinfo(), "root", dims, 1);
+        vector <DimInfo> dims; // TODO: DimInfo is new in dh_branch .. confirm this is correct
+        // dims.push_back(DimInfo(1));
+        shellE = new Element(shellId, Shell::initCinfo(), "root", dims, 1, 1);
         Id clockId = Id::nextId();
         shell_ = reinterpret_cast<Shell*>(shellId.eref().data());
         shell_->setShellElement(shellE);
@@ -204,7 +204,7 @@ Shell& getShell()
     
         // Initialize the system objects
 
-        new Element(clockId, Clock::initCinfo(), "clock", dims, 1);
+        new Element(clockId, Clock::initCinfo(), "clock", dims, 1, 1);
         Id tickId( 2 );
         assert(tickId() != 0);
         assert( tickId.value() == 2 );
@@ -212,7 +212,7 @@ Shell& getShell()
     
         Id classMasterId( 3 );
     
-        new Element( classMasterId, Neutral::initCinfo(), "classes", dims, 1 );
+        new Element( classMasterId, Neutral::initCinfo(), "classes", dims, 1 , 1);
     
         assert ( shellId == Id() );
         assert( clockId == Id( 1 ) );
@@ -302,7 +302,7 @@ pair<string, string> getFieldType(ObjId id, string fieldName, string finfoType)
     string classInfoPath("/classes/" + className);
     Id classId(classInfoPath);
     if (classId == Id()){
-        return fieldType;
+        return pair<string, string>(fieldType, "");
     }
     size_t count = 1;
     size_t jj = 0;
@@ -318,9 +318,9 @@ pair<string, string> getFieldType(ObjId id, string fieldName, string finfoType)
         unsigned int numFinfos = Field<unsigned int>::get(ObjId(classId, 0), "num_" + finfoType);
         Id fieldId(classId.path() + "/" + finfoType);
         for (unsigned int ii = 0; ii < numFinfos; ++ii){
-            string _fieldName = Field<string>::get(ObjId(fieldId, DataId(0, ii)), "name");
+            string _fieldName = Field<string>::get(ObjId(fieldId, DataId(0, ii, 0)), "name");
             if (fieldName == _fieldName){                
-                fieldType = Field<string>::get(ObjId(fieldId, DataId(0, ii)), "type");
+                fieldType = Field<string>::get(ObjId(fieldId, DataId(0, ii, 0)), "type");
                 cout << "Field type:" << fieldName <<  ": " << fieldType << endl;
                 return pair<string, string>(fieldType, finfoType);
             }
@@ -348,7 +348,7 @@ vector<string> getFieldNames(ObjId id, string finfoType)
         return ret;
     }
     for (unsigned int ii = 0; ii < numFinfos; ++ii){
-        string fieldName = Field<string>::get(ObjId(fieldId, DataId(0, ii)), "name");
+        string fieldName = Field<string>::get(ObjId(fieldId, DataId(0, ii, 0)), "name");
         ret.push_back(fieldName);
     }
     return ret;
