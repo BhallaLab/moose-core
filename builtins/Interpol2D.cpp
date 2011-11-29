@@ -14,8 +14,12 @@
 
 const unsigned int Interpol2D::MAX_DIVS = 100000;
 
-static SrcFinfo1< double > trig( "trig",
-	"respond to a request for a value lookup" );
+static SrcFinfo1< double >* trig()
+{
+	static SrcFinfo1< double > trig( "trig",
+		"respond to a request for a value lookup" );
+	return &trig;
+}
 
 const Cinfo* Interpol2D::initCinfo()
 {
@@ -30,7 +34,7 @@ const Cinfo* Interpol2D::initCinfo()
 	);
 	static Finfo* lookupReturnShared[] =
 	{
-		&trig, &lookup
+		trig(), &lookup
 	};
 
 	static SharedFinfo lookupReturn2D( "lookupReturn2D",
@@ -438,7 +442,7 @@ void Interpol2D::lookupReturn( const Eref& e, const Qinfo*q,
 	double v1, double v2 )
 {
 	double ret = innerLookup( v1, v2 );
-	trig.send( e, q->threadNum(), ret );
+	trig()->send( e, q->threadNum(), ret );
 }
 
 ////////////////////////////////////////////////////////////////////
