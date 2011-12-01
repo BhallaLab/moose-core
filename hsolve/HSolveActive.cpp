@@ -68,7 +68,7 @@ void HSolveActive::calculateChannelCurrents( ) {
 	
 	if ( state_.size() != 0 ) {
 		double* istate = &state_[ 0 ];
-			
+		
 		for ( ichan = channel_.begin(); ichan != channel_.end(); ++ichan ) {
 			ichan->process( istate, *icurrent );
 			++icurrent;
@@ -127,8 +127,11 @@ void HSolveActive::updateMatrix( ) {
 	}
 	
 	ihs = HS_.begin();
-	vector< double >::iterator iec;
-	for ( iec = externalCurrent_.begin(); iec != externalCurrent_.end(); iec += 2 ) {
+	for ( vector< double >::iterator
+	      iec = externalCurrent_.begin();
+	      iec != externalCurrent_.end();
+	      iec += 2 )
+	{
 		*ihs += *iec;
 		*( 3 + ihs ) += *( iec + 1 );
 		
@@ -139,10 +142,10 @@ void HSolveActive::updateMatrix( ) {
 }
 
 void HSolveActive::advanceCalcium( ) {
+	vector< CaTractStruct >::iterator icatract = caTract_.begin();
+	vector< CurrentStruct* >::iterator icasource = caSource_.begin();
+	vector< double >::iterator icaactivation = caActivation_.begin();
 	vector< double* >::iterator icatarget = caTarget_.begin();
-	vector< double >::iterator ivmid = VMid_.begin();
-	vector< CurrentStruct >::iterator icurrent = current_.begin();
-	vector< currentVecIter >::iterator iboundary = currentBoundary_.begin();
 	
 	caActivation_.assign( caActivation_.size(), 0.0 );
 	
@@ -153,43 +156,86 @@ void HSolveActive::advanceCalcium( ) {
 	 * GENESIS does its computations. A value of 1 means the membrane potential
 	 * at the middle of the time-step is used. This is the correct way of
 	 * integration, and is the default way.
-	 */	
-	if ( caAdvance_ == 1 ) {
-		for ( ; iboundary != currentBoundary_.end(); ++iboundary ) {
-			for ( ; icurrent < *iboundary; ++icurrent ) {
-				if ( *icatarget )
-					**icatarget += icurrent->Gk * ( icurrent->Ek - *ivmid );
-				
-				++icatarget;
-			}
-			
-			++ivmid;
-		}
-	} else if ( caAdvance_ == 0 ) {
-		vector< double >::iterator iv = V_.begin();
-		double v0;
+	 */
+	vector< double > v0;
+	vector< double >::iterator iv;
+	if ( caAdvance_ > 0 ) {
+		iv = VMid_.begin();
+	} else {
+		v0.resize( nCompt_ );
+		iv = v0.begin();
 		
-		for ( ; iboundary != currentBoundary_.end(); ++iboundary ) {
-			for ( ; icurrent < *iboundary; ++icurrent ) {
-				if ( *icatarget ) {
-					v0 = ( 2 * *ivmid - *iv );
+		/*
+		 * Reconstructing Vm at the beginning of the time-step, by
+		 * extrapolating backwards (using Vm at the middle and end of
+		 * time-step).
+		 */
+		for ( unsigned int ic = 0; ic < nCompt_; ++ic )
+			v0[ ic ] = ( 2 * VMid_[ ic ] - V_[ ic ] );
+	}
+	
+	for ( ; icatract != caTract_.end(); ++icatract ) {
+		switch( icatract->type )
+		{
+			case 0:
+				iv += icatract->length;
+				
+				break;
+			
+			case 1:
+				for ( unsigned int ic = 0;
+					  ic < icatract->length;
+					  ++ic )
+				{
+					*icaactivation +=
+						( *icasource )->Gk *
+						( ( *icasource )->Ek - *iv );
 					
-					**icatarget += icurrent->Gk * ( icurrent->Ek - v0 );
+					++icasource, ++icaactivation, ++iv;
 				}
 				
-				++icatarget;
-			}
+				break;
 			
-			++ivmid, ++iv;
+			case 2:
+				for ( unsigned int ic = 0;
+					  ic < icatract->length;
+					  ++ic )
+				{
+					unsigned int nConnections =
+						icatract->nConnections[ ic ];
+					
+					for ( unsigned int iconn = 0;
+						  iconn < nConnections;
+						  ++iconn )
+					{
+						**icatarget +=
+							( *icasource )->Gk *
+							( ( *icasource )->Ek - *iv );
+						
+						++icasource, ++icatarget, ++iv;
+					}
+				}
+				
+				icaactivation += icatract->nPools;
+				
+				break;
+			
+			default: assert( 0 );
 		}
 	}
 	
-	vector< CaConcStruct >::iterator icaconc;
-	vector< double >::iterator icaactivation = caActivation_.begin();
-	vector< double >::iterator ica = ca_.begin();
-	for ( icaconc = caConc_.begin(); icaconc != caConc_.end(); ++icaconc ) {
-		*ica = icaconc->process( *icaactivation );
-		++ica, ++icaactivation;
+	vector< LookupRow >::iterator icarow = caRow_.begin();
+	icaactivation = caActivation_.begin();
+	for ( vector< CaConcStruct >::iterator
+	      icaconc = caConc_.begin();
+	      icaconc != caConc_.end();
+	      ++icaconc )
+	{
+		icaconc->process( *icaactivation );
+		
+		caTable_.row( icaconc->ca_, *icarow );
+		
+		++icaactivation, ++icarow;
 	}
 }
 
@@ -199,23 +245,17 @@ void HSolveActive::advanceChannels( double dt ) {
 	vector< int >::iterator ichannelcount = channelCount_.begin();
 	vector< ChannelStruct >::iterator ichan = channel_.begin();
 	vector< ChannelStruct >::iterator chanBoundary;
-	vector< unsigned int >::iterator icacount = caCount_.begin();
-	vector< double >::iterator ica = ca_.begin();
-	vector< double >::iterator caBoundary;
 	vector< LookupColumn >::iterator icolumn = column_.begin();
-	vector< LookupRow >::iterator icarowcompt;
-	vector< LookupRow* >::iterator icarow = caRow_.begin();
+	vector< LookupRow* >::iterator icarowchan = caRowChan_.begin();
+	
+	/*
+	 * \TODO: replace channelCount_ with channelBoundary_.
+	 */
 	
 	LookupRow vRow;
 	double C1, C2;
 	for ( iv = V_.begin(); iv != V_.end(); ++iv ) {
 		vTable_.row( *iv, vRow );
-		icarowcompt = caRowCompt_.begin();
-		caBoundary = ica + *icacount;
-		for ( ; ica < caBoundary; ++ica ) {
-			caTable_.row( *ica, *icarowcompt );
-			++icarowcompt;
-		}
 		
 		chanBoundary = ichan + *ichannelcount;
 		for ( ; ichan < chanBoundary; ++ichan ) {
@@ -248,9 +288,9 @@ void HSolveActive::advanceChannels( double dt ) {
 			}
 			
 			if ( ichan->Zpower_ > 0.0 ) {
-				LookupRow* caRow = *icarow;
-				if ( caRow ) {
-					caTable_.lookup( *icolumn, *caRow, C1, C2 );
+				LookupRow* caRowChan = *icarowchan;
+				if ( caRowChan ) {
+					caTable_.lookup( *icolumn, *caRowChan, C1, C2 );
 				} else {
 					vTable_.lookup( *icolumn, vRow, C1, C2 );
 				}
@@ -264,11 +304,11 @@ void HSolveActive::advanceChannels( double dt ) {
 					*istate = ( *istate * ( 2.0 - temp ) + dt * C1 ) / temp;
 				}
 				
-				++icolumn, ++istate, ++icarow;
+				++icolumn, ++istate, ++icarowchan;
 			}
 		}
 		
-		++ichannelcount, ++icacount;
+		++ichannelcount;
 	}
 }
 
@@ -302,9 +342,9 @@ void HSolveActive::sendValues( ) {
 		initCaConcCinfo( )->getSlot( "concSrc" );
 	static const Slot compartmentChannelVmSlot =
 		initCompartmentCinfo( )->getSlot( "channel.Vm" );
-    static const Slot compartmentImSrcSlot =
-        initCompartmentCinfo( )->getSlot( "ImSrc" );
-    
+	static const Slot compartmentImSrcSlot =
+		initCompartmentCinfo( )->getSlot( "ImSrc" );
+	
 	for ( unsigned int i = 0; i < compartmentId_.size( ); ++i ) {
 		send1< double > (
 			compartmentId_[ i ].eref(),
@@ -312,10 +352,10 @@ void HSolveActive::sendValues( ) {
 			V_[ i ]
 		);
 		send1< double > (
-                compartmentId_[ i ].eref(),
-                compartmentImSrcSlot,
-                getIm( i )
-        );
+			compartmentId_[ i ].eref(),
+			compartmentImSrcSlot,
+			getIm( i )
+		);
 		// An advantage of sending from the compartment here is that we can use
 		// as simple 'send' as opposed to 'sendTo'. sendTo requires the conn
 		// index for the target, and that will require extra book keeping.
@@ -335,6 +375,6 @@ void HSolveActive::sendValues( ) {
 		send1< double > (
 			caConcId_[ i ].eref(),
 			caConcConcSrcSlot,
-			ca_[ i ]
+			caConc_[ i ].ca_
 		);
 }
