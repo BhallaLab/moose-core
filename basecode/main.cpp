@@ -81,7 +81,7 @@ unsigned int getNumCores()
 #endif
 
 #ifdef MACOSX
-	nt mib[4];
+	int mib[4];
 	size_t len; 
 
 	/* set the mib for hw.ncpu */
