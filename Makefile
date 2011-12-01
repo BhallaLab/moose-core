@@ -134,7 +134,8 @@ endif
 ##########################################################################
 #
 # MAC OS X compilation, Debug mode:
-ifeq ($(PLATFORM),mac)
+ifeq ($(PLATFORM),Darwin)
+CXXFLAGS += -DMACOSX # GCC compiler also sets __APPLE__ for Mac OS X which can be used instead
 CXXFLAGS += -Wno-deprecated -force_cpusubtype_ALL -mmacosx-version-min=10.4
 endif
 # Use the options below for compiling on GCC4.1
@@ -155,14 +156,22 @@ endif
 endif
 
 
-
-# Libraries are defined below. For now we do not use threads.
+# Libraries are defined below.
 SUBLIBS = 
 LIBS =	-lm -lpthread -L/usr/lib -L/usr/local/lib
 #LIBS = 	-lm
 #ifeq ($(BUILD),thread)
 #LIBS += -lpthread
 #endif
+
+# For 64 bit Linux systems add paths to 64 bit libraries 
+ifeq ($(PLATFORM),Linux)
+CXXFLAGS += -DLINUX
+ifeq ($(MACHINE),x86_64)
+LIBS+= -L/lib64 -L/usr/lib64
+endif
+endif
+
 ##########################################################################
 #
 # Developer options (Don't try these unless you are writing new code!)
@@ -189,7 +198,7 @@ endif
 
 # To use GSL, pass USE_GSL=true ( anything on the right will do) in make command line
 ifdef USE_GSL
-LIBS+= -L/usr/lib -L/usr/lib64 -lgsl -lgslcblas
+LIBS+= -L/usr/lib -lgsl -lgslcblas
 CXXFLAGS+= -DUSE_GSL
 endif
 
@@ -212,14 +221,6 @@ endif
 ifdef USE_CURSES
 LIBS += -lcurses
 CXXFLAGS+= -DUSE_CURSES
-endif
-
-# For 64 bit Linux systems add paths to 64 bit libraries 
-ifeq ($(PLATFORM),Linux)
-CXXFLAGS += -DLINUX
-ifeq ($(MACHINE),x86_64)
-LIBS+= -L/lib64 -L/usr/lib64
-endif
 endif
 
 ifdef USE_MUSIC
