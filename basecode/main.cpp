@@ -82,7 +82,7 @@ unsigned int getNumCores()
 
 #ifdef MACOSX
 	int mib[4];
-	size_t len; 
+	size_t len = sizeof(numCPU); 
 
 	/* set the mib for hw.ncpu */
 	mib[0] = CTL_HW;
