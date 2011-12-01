@@ -87,9 +87,27 @@ struct CaConcStruct
 {
 	double c_;
 	double CaBasal_;
+	double ca_;
+	
 	double factor1_;
 	double factor2_;
-	double process( double activation );
+	
+	void process( double activation );
+};
+
+struct CaTractStruct
+{
+	CaTractStruct()
+		:
+		type( 0 ),
+		length( 0 ),
+		nPools( 0 )
+	{ ; }
+	
+	unsigned int    type;
+	unsigned int    length;
+	unsigned int    nPools;
+	vector< int >   nConnections;
 };
 
 #endif // _HSOLVE_STRUCT_H

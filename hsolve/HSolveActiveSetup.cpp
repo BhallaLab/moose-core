@@ -118,69 +118,142 @@ void HSolveActive::readGates( ) {
 	}
 }
 
+namespace hsolve{
+	/*
+	 * This struct is used in HSolveActive::readCalcium. Since it is
+	 * used as a template argument (vector< CaInfo >), the standard does
+	 * not allow the struct to be placed locally inside the function.
+	 * Hence placing it outside the function, but in a separate
+	 * namespace to avoid polluting the global namespace.
+	 * 
+	 * The structure holds information about Calcium-channel
+	 * interactions in a compartment.
+	 */
+	struct CaInfo
+	{
+		vector< unsigned int > sourceChannelIndex;
+		vector< Id >           targetCaId;
+	};
+}
+
 void HSolveActive::readCalcium( ) {
-	CaConcStruct caConc;
-	double Ca, CaBasal, tau, B;
-	vector< Id > caConcId;
-	vector< int > caTargetIndex;
-	map< Id, int > caConcIndex;
-	int nTarget, nDepend;
-	vector< Id >::iterator iconc;
+	/* Stage 1 */
+	caDependIndex_.resize( channel_.size(), -1 );
+	vector< hsolve::CaInfo > caInfo( nCompt_ );
+	map< Id, unsigned int > caIndex;
 	
-	caCount_.resize( nCompt_ );
 	unsigned int ichan = 0;
 	for ( unsigned int ic = 0; ic < nCompt_; ++ic ) {
 		unsigned int chanBoundary = ichan + channelCount_[ ic ];
-		unsigned int nCa = caConc_.size();
-		
 		for ( ; ichan < chanBoundary; ++ichan ) {
-			caConcId.clear( );
+			vector< Id > caTarget;
+			vector< Id > caDepend;
 			
-			nTarget = BioScan::caTarget( channelId_[ ichan ], caConcId );
-			if ( nTarget == 0 )
-				// No calcium pools fed by this channel.
-				caTargetIndex.push_back( -1 );
-			
-			nDepend = BioScan::caDepend( channelId_[ ichan ], caConcId );
-			if ( nDepend == 0 )
-				// Channel does not depend on calcium.
-				caDependIndex_.push_back( -1 );
-			
-			for ( iconc = caConcId.begin(); iconc != caConcId.end(); ++iconc )
-				if ( caConcIndex.find( *iconc ) == caConcIndex.end() ) {
-					caConcIndex[ *iconc ] = caCount_[ ic ];
-					++caCount_[ ic ];
-					
-					Eref elm = ( *iconc )();
-					get< double >( elm, "Ca", Ca );
-					get< double >( elm, "CaBasal", CaBasal );
-					get< double >( elm, "tau", tau );
-					get< double >( elm, "B", B );
-					caConc.c_ = Ca - CaBasal;
-					caConc.factor1_ = 4.0 / ( 2.0 + dt_ / tau ) - 1.0;
-					caConc.factor2_ = 2.0 * B * dt_ / ( 2.0 + dt_ / tau );
-					caConc.CaBasal_ = CaBasal;
-					
-					caConc_.push_back( caConc );
-					caConcId_.push_back( *iconc );
+			BioScan::caTarget( channelId_[ ichan ], caTarget );
+			for ( vector< Id >::iterator
+			      ica = caTarget.begin();
+			      ica != caTarget.end();
+			      ++ica )
+			{
+				caInfo[ ic ].sourceChannelIndex.push_back( ichan );
+				caInfo[ ic ].targetCaId.push_back( *ica );
+				
+				if ( caIndex.find( *ica ) == caIndex.end() ) {
+					caIndex[ *ica ] = caConcId_.size();
+					caConcId_.push_back( *ica );
 				}
+			}
 			
-			if ( nTarget != 0 )
-				caTargetIndex.push_back( caConcIndex[ caConcId.front() ] + nCa );
-			if ( nDepend != 0 )
-				caDependIndex_.push_back( caConcIndex[ caConcId.back() ] );
+			BioScan::caDepend( channelId_[ ichan ], caDepend );
+			
+			if ( channel_[ ichan ].Zpower_ == 0.0 ) {
+				if ( caDepend.size() > 0 ) {
+					cerr << "Warning!" << endl;
+				}
+			} else if ( caDepend.size() > 0 ) {
+				if ( caDepend.size() > 1 ) {
+					cerr << "Warning!" << endl;
+				}
+				
+				Id& ca0 = caDepend.front();
+				if ( caIndex.find( ca0 ) == caIndex.end() ) {
+					caIndex[ ca0 ] = caConcId_.size();
+					caConcId_.push_back( ca0 );
+				}
+				
+				caDependIndex_[ ichan ] = caIndex[ ca0 ];
+			}
 		}
 	}
 	
-	caTarget_.resize( channel_.size() );
-	ca_.resize( caConc_.size() );
-	caActivation_.resize( caConc_.size() );
+	/* Stage 2 */
+	caActivation_.resize( caConcId_.size() );
 	
-	for ( unsigned int ichan = 0; ichan < channel_.size(); ++ichan ) {
-		if ( caTargetIndex[ ichan ] == -1 )
-			caTarget_[ ichan ] = 0;
-		else
-			caTarget_[ ichan ] = &caActivation_[ caTargetIndex[ ichan ] ];
+	for ( vector< hsolve::CaInfo >::iterator
+	      icainfo = caInfo.begin();
+	      icainfo != caInfo.end();
+	      ++icainfo )
+	{
+		unsigned int nConnections = icainfo->sourceChannelIndex.size();
+		
+		unsigned int type;
+		switch ( nConnections )
+		{
+			case 0:  type = 0; break;
+			case 1:  type = 1; break;
+			default: type = 2; break;
+		}
+		
+		if ( caTract_.empty() || caTract_.back().type != type )
+			caTract_.push_back( CaTractStruct() );
+		CaTractStruct& caTract = caTract_.back();
+		
+		caTract.type = type;
+		caTract.length++;
+		
+		if ( nConnections == 0 )
+			continue;
+		
+		caTract.nConnections.push_back( nConnections );
+		
+		for ( unsigned int iconn = 0; iconn < nConnections; ++iconn ) {
+			CurrentStruct& sourceChannel =
+				current_[ icainfo->sourceChannelIndex[ iconn ] ];
+			caSource_.push_back( &sourceChannel );
+			
+			if ( type == 2 ) {
+				Id targetCaId = icainfo->targetCaId[ iconn ];
+				caTarget_.push_back(
+					&caActivation_[ caIndex[ targetCaId ] ]
+				);
+			}
+		}
+	}
+	
+	/* Stage 3 */
+	double Ca;
+	double CaBasal;
+	double tau;
+	double B;
+	for ( vector< Id >::iterator
+	      ica = caConcId_.begin();
+	      ica != caConcId_.end();
+	      ++ica )
+	{
+		Eref elm = ( *ica )();
+		get< double >( elm, "Ca", Ca );
+		get< double >( elm, "CaBasal", CaBasal );
+		get< double >( elm, "tau", tau );
+		get< double >( elm, "B", B );
+		
+		CaConcStruct caConc;
+		caConc.c_ = Ca - CaBasal;
+		caConc.ca_ = Ca;
+		caConc.factor1_ = 4.0 / ( 2.0 + dt_ / tau ) - 1.0;
+		caConc.factor2_ = 2.0 * B * dt_ / ( 2.0 + dt_ / tau );
+		caConc.CaBasal_ = CaBasal;
+		
+		caConc_.push_back( caConc );
 	}
 }
 
@@ -314,16 +387,32 @@ void HSolveActive::createLookupTables( ) {
 		column_.push_back( column );
 	}
 	
-	///////////////////!!!!!!!!!!
-	unsigned int maxN = *( max_element( caCount_.begin(), caCount_.end() ) );
-	caRowCompt_.resize( maxN );
+	/*
+	 * Setting up caRow_: Resizing it appropriately, and initializing
+	 * it with appropriate values for the first time-step in HSolve.
+	 * 
+	 * Later HSolve takes care of updating caRow_ with new values as
+	 * Ca values evolve.
+	 */
+	caRow_.resize( caConc_.size() );
+	vector< CaConcStruct >::iterator icaconc = caConc_.begin();
+	for ( vector< LookupRow >::iterator
+	      icarow = caRow_.begin();
+	      icarow != caRow_.end();
+	      ++icarow )
+	{
+		caTable_.row( icaconc->ca_, *icarow );
+		
+		++icaconc;
+	}
+	
 	for ( unsigned int ichan = 0; ichan < channel_.size(); ++ichan ) {
 		if ( channel_[ ichan ].Zpower_ > 0.0 ) {
 			int index = caDependIndex_[ ichan ];
 			if ( index == -1 )
-				caRow_.push_back( 0 );
+				caRowChan_.push_back( 0 );
 			else
-				caRow_.push_back( &caRowCompt_[ index ] );
+				caRowChan_.push_back( &caRow_[ index ] );
 		}
 	}
 }

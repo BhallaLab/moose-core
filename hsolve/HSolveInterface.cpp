@@ -261,13 +261,13 @@ void HSolveActive::setCaBasal( unsigned int index, double value )
 double HSolveActive::getCa( unsigned int index ) const
 {
 	assert( index < caConc_.size() );
-	return ca_[ index ];
+	return caConc_[ index ].ca_;
 }
 
 void HSolveActive::setCa( unsigned int index, double value )
 {
 	assert( index < caConc_.size() );
 	
-	ca_[ index ] = value;
+	caConc_[ index ].ca_ = value;
 	caConc_[ index ].c_ = value - caConc_[ index ].CaBasal_;
 }
