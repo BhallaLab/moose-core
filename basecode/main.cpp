@@ -23,6 +23,9 @@
 #include <mpi.h>
 #endif
 #include "../shell/Shell.h"
+#ifdef MACOSX
+#include <sys/sysctl.h>
+#endif // MACOSX
 
 #ifdef DO_UNIT_TESTS
 extern void testSync();
@@ -65,7 +68,7 @@ bool benchmarkTests( int argc, char** argv );
 
 unsigned int getNumCores()
 {
-	unsigned int numCPU = 1;
+	unsigned int numCPU = 0;
 #ifdef WIN_32
 	SYSTEM_INFO sysinfo;
 	GetSystemInfo( &sysinfo );
@@ -92,12 +95,13 @@ unsigned int getNumCores()
 	{
 		mib[1] = HW_NCPU;
 		sysctl( mib, 2, &numCPU, &len, NULL, 0 );
-		if( numCPU < 1 )
-		{
-		numCPU = 1;
-		}
 	}
 #endif
+	if ( numCPU < 1 )
+	{
+		cout << "No CPU information available. Assuming single core." << endl;
+		numCPU = 1;
+	}
 	return numCPU;
 }
 
