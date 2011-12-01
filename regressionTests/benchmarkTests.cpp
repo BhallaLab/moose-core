@@ -31,7 +31,9 @@ void testKsolve()
 
 void innerBenchmarks( const string& optarg )
 {
-	char* cwd = get_current_dir_name();
+	//char* cwd = get_current_dir_name();
+	// get_current_dir_name is not available on all platforms
+	char *cwd = getcwd(NULL,0); // same behaviour but this also resolves symbolic links
 	string currdir = cwd;
 	free( cwd );
 	if ( currdir.substr( currdir.find_last_of( "/" ) ) != 
