@@ -61,7 +61,7 @@ void ChannelStruct::process( double*& state, CurrentStruct& current )
 	current.Gk = Gbar_ * fraction;
 }
 
-double CaConcStruct::process( double activation ) {
-        c_ = factor1_ * c_ + factor2_ * activation;
-        return ( CaBasal_ + c_ );
+void CaConcStruct::process( double activation ) {
+	c_ = factor1_ * c_ + factor2_ * activation;
+	ca_ = ( CaBasal_ + c_ );
 }

@@ -102,18 +102,18 @@ private:
 	vector< SpikeGenStruct >  spikegen_;
 	vector< SynChanStruct >   synchan_;
 	vector< CaConcStruct >    caConc_;
-	vector< double >          ca_;
 	vector< double >          caActivation_;
+	vector< CaTractStruct >   caTract_;
+	vector< CurrentStruct* >  caSource_;
 	vector< double* >         caTarget_;
 	LookupTable               vTable_;
 	LookupTable               caTable_;
 	vector< Id >              caConcId_;
 	vector< bool >            gCaDepend_;
-	vector< unsigned int >    caCount_;
 	vector< int >             caDependIndex_;
 	vector< LookupColumn >    column_;
-	vector< LookupRow >       caRowCompt_;
-	vector< LookupRow* >      caRow_;
+	vector< LookupRow >       caRow_;
+	vector< LookupRow* >      caRowChan_;
 	vector< Id >              channelId_;
 	vector< Id >              gateId_;
 	vector< int >             channelCount_;
@@ -131,7 +131,6 @@ private:
 	void readCalcium( );
 	void readSynapses( );
 	void readExternalChannels( );
-
 	void createLookupTables( );
 	void cleanup( );
 
