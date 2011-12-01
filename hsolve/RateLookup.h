@@ -26,7 +26,7 @@ struct LookupColumn
 class LookupTable
 {
 public:
-	LookupTable( ) { ; }
+	LookupTable() { ; } // To keep compiler happy.
 	
 	LookupTable(
 		double min,
