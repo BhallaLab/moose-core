@@ -23,7 +23,7 @@
 // of the Ticks.
 // vector< SrcFinfo* > process;
 
-SrcFinfo ** processVec() {
+vector< SrcFinfo* > processVec() {
 	static SrcFinfo1< ProcPtr > process0( "process0", "Process for Tick 0" );
 	static SrcFinfo1< ProcPtr > process1( "process1", "Process for Tick 1" );
 	static SrcFinfo1< ProcPtr > process2( "process2", "Process for Tick 2" );
@@ -35,13 +35,14 @@ SrcFinfo ** processVec() {
 	static SrcFinfo1< ProcPtr > process8( "process8", "Process for Tick 8" );
 	static SrcFinfo1< ProcPtr > process9( "process9", "Process for Tick 9" );
 
-	static SrcFinfo* processVec[] = {
+	static SrcFinfo* processArray[] = {
 		&process0, &process1, &process2, &process3, &process4, &process5, &process6, &process7, &process8, &process9, };
+	static vector< SrcFinfo* > processVec(processArray, processArray + sizeof(processArray) / sizeof(SrcFinfo *));
 
 	return processVec;
 }
 
-SrcFinfo ** reinitVec() {
+vector< SrcFinfo* > reinitVec() {
 
 	static SrcFinfo1< ProcPtr > reinit0( "reinit0", "Reinit for Tick 0" );
 	static SrcFinfo1< ProcPtr > reinit1( "reinit1", "Reinit for Tick 1" );
@@ -54,8 +55,9 @@ SrcFinfo ** reinitVec() {
 	static SrcFinfo1< ProcPtr > reinit8( "reinit8", "Reinit for Tick 8" );
 	static SrcFinfo1< ProcPtr > reinit9( "reinit9", "Reinit for Tick 9" );
 
-	static SrcFinfo* reinitVec[] = {
+	static SrcFinfo* reinitArray[] = {
 		&reinit0, &reinit1, &reinit2, &reinit3, &reinit4, &reinit5, &reinit6, &reinit7, &reinit8, &reinit9, };
+	static vector< SrcFinfo* > reinitVec(reinitArray, reinitArray + sizeof(reinitArray) / sizeof(SrcFinfo *));
 
 	return reinitVec;
 }
@@ -258,7 +260,7 @@ void Tick::reinit( const Eref& e, ProcInfo* info ) const
 	info->dt = dt_;
 	info->currTime = 0;
 
-	assert( index_ < sizeof( reinitVec() ) / sizeof( SrcFinfo* ) );
+	assert( index_ < reinitVec().size() );
 	BindIndex b = reinitVec()[ index_ ]->getBindIndex();
 	const vector< MsgFuncBinding >* m = e.element()->getMsgAndFunc( b );
 	for ( vector< MsgFuncBinding >::const_iterator i = m->begin();
@@ -286,7 +288,7 @@ void Tick::advance( ProcInfo* info ) const
 	// March through Process calls for each scheduled Element.
 	// Note that there is a unique BindIndex for each tick.
 	// We preallocate 0 through 10 for this.
-	assert( index_ < sizeof( processVec() ) / sizeof( SrcFinfo* ) );
+	assert( index_ < processVec().size() );
 	BindIndex b = processVec()[ index_ ]->getBindIndex();
 	const vector< MsgFuncBinding >* m = ticke_->getMsgAndFunc( b );
 	for ( vector< MsgFuncBinding >::const_iterator i = m->begin();
@@ -303,7 +305,7 @@ void Tick::reinit( ProcInfo* info ) const
 	info->dt = dt_;
 	info->currTime = 0;
 
-	assert( index_ < sizeof( reinitVec() ) / sizeof( SrcFinfo* ) );
+	assert( index_ < reinitVec().size() );
 	BindIndex b = reinitVec()[ index_ ]->getBindIndex();
 	const vector< MsgFuncBinding >* m = ticke_->getMsgAndFunc( b );
 	for ( vector< MsgFuncBinding >::const_iterator i = m->begin();
