@@ -12,6 +12,14 @@ Plots: Vm and [Ca++] from soma.
 include compatibility.g
 int USE_SOLVER = 1
 
+/*
+ * Genesis integrates the calcium current (into the calcium pool) in a 
+ * slightly different way from Moose. While the integration in Moose is 
+ * slightly more accurate, this flag forces Moose to imitate the Genesis 
+ * method, to get a better match.
+ */
+int IMITATE_GENESIS = 1
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // MODEL CONSTRUCTION
@@ -110,14 +118,14 @@ end
 //=====================================
 reset
 
-//
-// Genesis integrates the calcium current (into the calcium pool) in a slightly
-// different way from Moose. While the integration in Moose is sligthly more
-// accurate, here we force Moose to imitate the Genesis method, to get a better
-// match.
-//
+/*
+ * Genesis integrates the calcium current (into the calcium pool) in a 
+ * slightly different way from Moose. While the integration in Moose is 
+ * slightly more accurate, this flag forces Moose to imitate the Genesis 
+ * method, to get a better match.
+ */
 if ( MOOSE && USE_SOLVER )
-	setfield /CA3/solve/integ CaAdvance 1
+	setfield /CA3/solve/integ CaAdvance { 1 - IMITATE_GENESIS }
 end
 step {SIMLENGTH} -time
 
