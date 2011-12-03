@@ -108,7 +108,6 @@ we will need when the rate parameters do not fit this form.
             setfield Ca Y_A->table[{i}] {y}
             setfield Ca Y_B->table[{i}] 5.0
             x = x + dx
-//echo "<entry value=\""{5-y}"\"/>"	
         end
 
 // For speed during execution, set the calculation mode to "no interpolation"
@@ -222,7 +221,6 @@ function make_K_AHP
             setfield K_AHP Z_A->table[{i}] {y}
             setfield K_AHP Z_B->table[{i}] {y + 1.0}
             x = x + dx
-//echo "<entry value=\""{y}"\"/>"		
         end
 // For speed during execution, set the calculation mode to "no interpolation"
 // and use TABFILL to expand the table to 3000 entries.
@@ -284,7 +282,6 @@ function make_K_C
             setfield K_C X_A->table[{i}] {alpha}
             setfield K_C X_B->table[{i}] {alpha+beta}
             x = x + dx
-//echo "<entry value=\""{beta}"\"/>"
         end
 // Expand the tables to 3000 entries to use without interpolation
 	setfield K_C X_A->calc_mode 0 X_B->calc_mode 0
@@ -314,9 +311,7 @@ function make_K_C
             end
 	    /* activation will be computed as Z_A/Z_B */
             setfield K_C Z_A->table[{i}] {y}
-//echo "<entry value=\""{y}"\"/>"
             setfield K_C Z_B->table[{i}] 1.0
-//echo "<entry value=\""{1-y}"\"/>"
             x = x + dx
         end
 
