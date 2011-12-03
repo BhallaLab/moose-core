@@ -41,34 +41,7 @@ ce /
 //  Create cells
 //=====================================
 readcell CA3.p /CA3
-str target = "/CA3"
-/* float x,b
-str name
-str msg = ""
-str comp
-int id = 0
-foreach comp ( { el { target }/##[TYPE=Compartment] }  )
-	if ( { exists {comp}/K_C } )
-		x = { getfield {comp}/K_C Gbar }
-		b = { getfield {comp}/K_C Ek  }
-		name = {getpath {comp} -tail}
-		echo {name} {x} {b} 
-		msg = { showmsg {comp}/K_C }
-		echo msg
-	end
-	
 
-           // <mml:segment id="2" name="basal_2"  parent="1" cable="1">
-             //     <mml:distal x="0.0" y="110.0" z="0.0" diameter="3.84"/>
-           // </mml:segment>
-
-	/* echo "<mml:segment id=\""{id}"\" name=\""{name}"\"  parent=\""{parent}"\" cable=\"1\">"
-	echo "    <mml:distal x=\""{x*1e6}"\" y=\""{y*1e6}"\" z=\""{z*1e6}"\" diameter=\""{d*1e6}"\"/>"
-	echo "</mml:segment>"
-
-	id = id + 1
-	parent = name */
-//end 
 
 ////////////////////////////////////////////////////////////////////////////////
 // PLOTTING
@@ -83,33 +56,13 @@ create table /data/Ca
 call /data/Ca TABCREATE {SIMLENGTH / IODT} 0 {SIMLENGTH}
 setfield /data/Ca step_mode 3
 
-/*create table /data/Vm1
-call /data/Vm1 TABCREATE {SIMLENGTH / IODT} 0 {SIMLENGTH}
-setfield /data/Vm1 step_mode 3
-
-create table /data/Vm2
-call /data/Vm2 TABCREATE {SIMLENGTH / IODT} 0 {SIMLENGTH}
-setfield /data/Vm2 step_mode 3
-
-create table /data/Ca1
-call /data/Ca1 TABCREATE {SIMLENGTH / IODT} 0 {SIMLENGTH}
-setfield /data/Ca1 step_mode 3
-
-create table /data/Ca2
-call /data/Ca2 TABCREATE {SIMLENGTH / IODT} 0 {SIMLENGTH}
-setfield /data/Ca2 step_mode 3 */
-
 //=====================================
 //  Record from compartment
 //=====================================
 addmsg /CA3/soma /data/Vm INPUT Vm
 addmsg /CA3/soma/Ca_conc /data/Ca INPUT Ca
 
-/*addmsg /CA3/basal_8 /data/Vm1 INPUT Vm
-addmsg /CA3/basal_8/Ca_conc /data/Ca1 INPUT Ca
 
-addmsg /CA3/apical_11 /data/Vm2 INPUT Vm
-addmsg /CA3/apical_11/Ca_conc /data/Ca2 INPUT Ca */
 ////////////////////////////////////////////////////////////////////////////////
 // SIMULATION CONTROL
 ////////////////////////////////////////////////////////////////////////////////
@@ -118,7 +71,6 @@ addmsg /CA3/apical_11/Ca_conc /data/Ca2 INPUT Ca */
 //  Stimulus
 //=====================================
 setfield /CA3/soma inject {INJECT}
-
 
 //=====================================
 //  Clocks
@@ -165,9 +117,8 @@ reset
 // match.
 //
 if ( MOOSE && USE_SOLVER )
-	setfield /CA3/solve/integ CaAdvance 0
+	setfield /CA3/solve/integ CaAdvance 1
 end
-
 step {SIMLENGTH} -time
 
 
@@ -196,40 +147,7 @@ writefile {filename} "/plotname Ca"
 closefile {filename}
 tab2file {filename} /data/Ca table
 
-/* filename = "Vm1" @ {extension}
-openfile {filename} w
-writefile {filename} "/newplot"
-writefile {filename} "/plotname Vm1"
-closefile {filename}
-tab2file {filename} /data/Vm1 table
 
-filename = "Vm2" @ {extension}
-openfile {filename} w
-writefile {filename} "/newplot"
-writefile {filename} "/plotname Vm2"
-closefile {filename}
-tab2file {filename} /data/Vm2 table
-
-filename = "Ca1" @ {extension}
-openfile {filename} w
-writefile {filename} "/newplot"
-writefile {filename} "/plotname Ca1"
-closefile {filename}
-tab2file {filename} /data/Ca1 table
-
-filename = "Ca2" @ {extension}
-openfile {filename} w
-writefile {filename} "/newplot"
-writefile {filename} "/plotname Ca2"
-closefile {filename}
-tab2file {filename} /data/Ca2 table */
-
-/*tab2file dKdrX_A.txt /library/K_DR X_A
-tab2file dKdrX_B.txt /library/K_DR X_B*/
-/*tab2file dKCX_A.txt /library/K_C X_A
-tab2file dKCX_B.txt /library/K_C X_B
-tab2file dKCZ_A.txt /library/K_C Z_A
-tab2file dKCZ_B.txt /library/K_C Z_B */
 echo "
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Plots written to *.plot. Reference curves from GENESIS are in files named
