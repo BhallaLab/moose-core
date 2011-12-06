@@ -100,13 +100,26 @@ vector< vector< unsigned int > > BlockHandler::pathIndices( DataId di )
 	unsigned long long index = di.value();
 	for ( unsigned int i = pathDepth_; i > 0;  --i ) {
 		vector< unsigned int > temp;
+		/*
+		for ( unsigned int j = 0; j < dims_.size() && dims_[j].depth == i; ++j ) {
+			unsigned int q = index % dims_[j].size;
+			temp.push_back( q );
+			index /= dims_[j].size;
+		}
+		*/
 		while ( j >= 0 && dims_[j].depth == i ) {
 			unsigned int q = index % dims_[j].size;
 			temp.push_back( q );
 			index /= dims_[j].size;
 			--j;
 		}
-		ret[i] = temp;
+		vector< unsigned int > t2( temp.size() );
+		for ( unsigned int k = 0; k < temp.size(); ++k )
+			t2[k] = temp[ temp.size() - k - 1 ];
+
+		/*
+		*/
+		ret[i] = t2;
 	}
 	return ret;
 }
