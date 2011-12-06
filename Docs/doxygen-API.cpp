@@ -80,7 +80,78 @@ path with nested arrays:
 /network/layerIV/cell[23][34]/dendrite[50]/synchan/synapse[1234]
 \endverbatim
 
+\subsection ObjIdAndPaths	ObjIds, paths, and dimensions.
 
+This section refers to the unit test \e testShell.cpp:testObjIdToAndFromPath().
+
+Suppose we create an Element tree with the following dimensions:
+\verbatim
+f1[0..9]
+f2
+f3[0..22]
+f4
+f5[0..8][0..10]
+\endverbatim
+
+To do this, we need to first create f1 with dims = {10}, then f2 upon f1 with
+dims = {} (or equivalently, using dims = {1}), then f3 upon f2 with dims = {23} and so on.
+Note that when you create f2 with dims = {} on f1 with dims = {10}, 
+there are actually 10 instances of f2 created. You would access them as
+
+\verbatim
+/f1[0]/f2
+/f1[1]/f2
+/f1[2]/f2
+...
+\endverbatim
+
+Some useful API calls for dealing with the path:
+
+ObjId::ObjId( const string& path ): Creates the ObjId pointing to an
+	already created object on the specified path.
+
+string ObjId::path(): Returns the path string for the specified ObjId.
+
+The next few API calls use the DataHandler, which is accessed from the
+ObjId using:
+
+const DataHandler* ObjId::element()->dataHandler().
+
+unsigned int DataHandler::totalEntries(): Returns total size of object
+array on specified DataHandler. This is the product of all dimensions.
+
+\verbatim
+ObjId f2( "/f1[2]/f2" );
+assert( f2.element()->dataHandler()->totalEntries() == 10 );
+\endverbatim
+
+Note that some dimensions may be ragged, that is, they might not have the
+same number of entries on all indices. This is commonly the case for 
+synapses, in which each SynChan may receive different numbers of inputs.
+In this case the dimension is larger than the largest SynChan array.
+In the example above, we might have
+
+unsigned int DataHandler::sizeOfDim( unsigned int dim ): Returns the size
+of the specified dimension.
+
+unsigned int DataHandler::pathDepth(): Returns the depth of the current DataHandler in the element tree. Root is zero.
+
+
+vector< vector< unsigned int > > pathIndices( DataId di ) const: 
+Returns a vector of array indices for the specified DataId.
+In the above example:
+
+\verbatim
+ObjId f5( "/f1[1]/f2/f3[3]/f4/f5[5][6]" );
+vector< vector< unsigned int pathIndices = f5.element()->dataHandler()->pathIndices( f5.dataId );
+assert( pathIndices.size() == 6 ); // The zero index is the root element.
+
+// Vectors at each level are:
+//	root	f1	f2	f3	f4	f5
+// 	{}	{1}	{}	{3}	{}	{5,6}
+\endverbatim
+
+\subsection Wildcard_paths	Wildcard paths
 Some commands take a \e wildcard path. This compactly specifies a large
 number of ObjIds. Some example wildcards are
 

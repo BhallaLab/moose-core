@@ -16254,3 +16254,6 @@ Renamed the 'foreach' call with 'forall', which is more accurate. Checkin 3111.
 Added in a test of path to ObjId conversion following a move of objects. OK.
 Checkin 3114.
 ============================================================================
+
+Subha needs: a clear API of how path-based addressing is translated to the
+new dh_branch system, traversal of messages and elements.

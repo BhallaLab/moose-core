@@ -558,7 +558,8 @@ string Neutral::path( const Eref& e )
 		ss << pathVec[j].element()->getName();
 		unsigned int size = pathIndex[i].size();
 		for ( unsigned int k = 0; k < size; ++k ) {
-			ss << "[" << pathIndex[i][size - k - 1] << "]";
+			// ss << "[" << pathIndex[i][size - k - 1] << "]";
+			ss << "[" << pathIndex[i][k] << "]";
 		}
 		if ( i < dh->pathDepth() )
 			ss << "/";
