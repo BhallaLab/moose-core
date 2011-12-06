@@ -484,8 +484,8 @@ void testObjIdToAndFromPath()
 	unsigned int s2 = 1;
 	unsigned int s3 = 23;
 	unsigned int s4 = 1;
-	unsigned int s5 = 9;
-	unsigned int s5a = 11;
+	unsigned int s5 = 9; // slower varying
+	unsigned int s5a = 11; // faster varying, rightmost bracket
 	vector< int > dims( 1, s1 );
 	Id level1 = shell->doCreate( "IntFire", Id(), "f1", dims );
 	Id origSynId( level1.value() + 1 );
@@ -495,16 +495,16 @@ void testObjIdToAndFromPath()
 	Id level3 = shell->doCreate( "Neutral", level2, "f3", dims );
 	dims[0] = s4;
 	Id level4 = shell->doCreate( "Neutral", level3, "f4", dims );
-	dims[0] = s5;
-	dims.push_back( s5a );
+	dims[0] = s5; // slower varying
+	dims.push_back( s5a ); // faster varying, rightmost bracket
 	Id level5 = shell->doCreate( "Neutral", level4, "f5", dims );
 
 	unsigned int index1 = 1;
 	unsigned int index2 = 0;
 	unsigned int index3 = 3;
 	unsigned int index4 = 0;
-	unsigned int index5 = 5;
-	unsigned int index5a = 6;
+	unsigned int index5 = 5; // slower varying, closer to root.
+	unsigned int index5a = 6; // faster varying
 
 	unsigned int temp = ( ( ( ( index1 * s2 + index2 ) * 
 		s3 + index3 ) * 
@@ -515,6 +515,22 @@ void testObjIdToAndFromPath()
 	ObjId oi( level5, DataId( temp ) );
 	string path = oi.path();
 	assert( path == "/f1[1]/f2/f3[3]/f4/f5[5][6]" );
+	assert( oi.element()->dataHandler()->totalEntries() == s1 * s2 * s3 * s4 * s5 * s5a );
+	assert( oi.element()->dataHandler()->numDimensions() == 4 );
+	assert( oi.element()->dataHandler()->pathDepth() == 5 );
+	vector< vector< unsigned int > > pathIndices = 
+		oi.element()->dataHandler()->pathIndices( oi.dataId );
+	assert( pathIndices.size() == 6 );
+	assert( pathIndices[0].size() == 0 );
+	assert( pathIndices[1].size() == 1 );
+	assert( pathIndices[1][0] == index1 );
+	assert( pathIndices[2].size() == 0 );
+	assert( pathIndices[3].size() == 1 );
+	assert( pathIndices[3][0] == index3 );
+	assert( pathIndices[4].size() == 0 );
+	assert( pathIndices[5].size() == 2 );
+	assert( pathIndices[5][0] == index5 );
+	assert( pathIndices[5][1] == index5a );
 
 	ObjId readPath( path );
 	assert( readPath.id == level5 );
