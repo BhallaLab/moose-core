@@ -124,7 +124,7 @@ endif
 
 # Debug mode:
 ifeq ($(BUILD),debug)
-CXXFLAGS = -g -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
+CXXFLAGS = -g -Wall -Wno-long-long -pedantic  -DUSE_GENESIS_PARSER
 endif
 # Optimized mode:
 ifeq ($(BUILD),release)
@@ -172,6 +172,13 @@ LIBS = 	-lm
 # except for the overhead of  checks for the existence of a few files at startup.
 ifeq ($(GENERATE_WRAPPERS),1)
 CXXFLAGS += -DGENERATE_WRAPPERS
+endif
+
+ifneq ($(OSTYPE),win32)
+PYTHON_VERSION := $(subst ., ,$(lastword $(shell python --version 2>&1)))
+PYTHON_VERSION_MAJOR := $(word 1,${PYTHON_VERSION})
+PYTHON_VERSION_MINOR := $(word 2,${PYTHON_VERSION})
+INSTALLED_PYTHON := python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
 endif
 
 # For parallel (MPI) version:
@@ -312,10 +319,11 @@ libmoose.so: libs
 
 .PHONEY : pymoose
 
-pymoose: CXXFLAGS += -DPYMOOSE -fPIC -I/usr/include/python2.6
+pymoose: CXXFLAGS += -DPYMOOSE -fPIC -I/usr/include/${INSTALLED_PYTHON}
 pymoose: SUBDIR += pymoose	
 pymoose: OBJLIBS := pymoose/pymoose.o $(OBJLIBS)
-pymoose: LIBS += -lpython2.6
+pymoose: LIBS += -l${INSTALLED_PYTHON}
+pymoose: LDFLAGS +=-shared
 pymoose: python/moose/_moose.so	
 
 python/moose/_moose.so: libs $(OBJLIBS) $(LIBNEUROML_DYNAMIC) 
