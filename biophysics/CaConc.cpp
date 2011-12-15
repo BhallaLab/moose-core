@@ -14,8 +14,11 @@
 ///////////////////////////////////////////////////////
 // MsgSrc definitions
 ///////////////////////////////////////////////////////
-static SrcFinfo1< double > concOut( "concOut", 
-		"Concentration of Ca in pool" );
+static SrcFinfo1< double > *concOut() {
+	static SrcFinfo1< double > concOut( "concOut", 
+			"Concentration of Ca in pool" );
+	return &concOut;
+}
 
 const Cinfo* CaConc::initCinfo()
 {
@@ -114,7 +117,7 @@ const Cinfo* CaConc::initCinfo()
 	static Finfo* CaConcFinfos[] =
 	{
 		&proc,		// Shared 
-		&concOut,	// Src
+		concOut(),	// Src
 		&Ca,		// Value
 		&CaBasal,	// Value
 		&Ca_base,	// Value
@@ -241,7 +244,7 @@ void CaConc::reinit( const Eref& e, ProcPtr p )
 	activation_ = 0.0;
 	c_ = 0.0;
 	Ca_ = CaBasal_;
-	concOut.send( e, p->threadIndexInGroup, Ca_ );
+	concOut()->send( e, p->threadIndexInGroup, Ca_ );
 }
 
 void CaConc::process( const Eref& e, ProcPtr p )
@@ -254,7 +257,7 @@ void CaConc::process( const Eref& e, ProcPtr p )
 		Ca_ = floor_;
 	}
 	c_ = Ca_ - CaBasal_;
-	concOut.send( e, p->threadIndexInGroup, Ca_ );
+	concOut()->send( e, p->threadIndexInGroup, Ca_ );
 	activation_ = 0;
 }
 

@@ -7,7 +7,7 @@
 #** See the file COPYING.LIB for the full notice.
 #**********************************************************************/
 
-TARGET = msg.o
+TARGET = _msg.o
 
 OBJ = \
 	Msg.o	\

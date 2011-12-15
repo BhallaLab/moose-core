@@ -12,35 +12,21 @@
 
 #define EPSILON 1e-15
 
-static SrcFinfo2< double, double > toSub( 
-		"toSub", 
-		"Sends out increment of molecules on product each timestep"
-	);
+static SrcFinfo2< double, double > *toSub() {
+	static SrcFinfo2< double, double > toSub( 
+			"toSub", 
+			"Sends out increment of molecules on product each timestep"
+			);
+	return &toSub;
+}
 
-static SrcFinfo2< double, double > toPrd( 
-		"toPrd", 
-		"Sends out increment of molecules on product each timestep"
-	);
-
-static DestFinfo sub( "subDest",
-		"Handles # of molecules of substrate",
-		new OpFunc1< MMenz, double >( &MMenz::sub ) );
-
-static DestFinfo enzDest( "enz",
-		"Handles # of molecules of MMenzyme",
-		new OpFunc1< MMenz, double >( &MMenz::enz ) );
-
-static DestFinfo prd( "prdDest",
-		"Handles # of molecules of product. Dummy.",
-		new OpFunc1< MMenz, double >( &MMenz::prd ) );
-	
-static Finfo* subShared[] = {
-	&toSub, &sub
-};
-
-static Finfo* prdShared[] = {
-	&toPrd, &prd
-};
+static SrcFinfo2< double, double > *toPrd() {
+	static SrcFinfo2< double, double > toPrd( 
+			"toPrd", 
+			"Sends out increment of molecules on product each timestep"
+			);
+	return &toPrd;
+}
 
 const Cinfo* MMenz::initCinfo()
 {
@@ -67,6 +53,7 @@ const Cinfo* MMenz::initCinfo()
 		static DestFinfo process( "process",
 			"Handles process call",
 			new ProcOpFunc< MMenz >( &MMenz::process ) );
+
 		static DestFinfo reinit( "reinit",
 			"Handles reinit call",
 			new ProcOpFunc< MMenz >( &MMenz::reinit ) );
@@ -75,9 +62,26 @@ const Cinfo* MMenz::initCinfo()
 			"Handle for group msgs. Doesn't do anything",
 			new OpFuncDummy() );
 
+		static DestFinfo enzDest( "enz",
+				"Handles # of molecules of MMenzyme",
+				new OpFunc1< MMenz, double >( &MMenz::enz ) );
+
 		//////////////////////////////////////////////////////////////
 		// Shared Msg Definitions
 		//////////////////////////////////////////////////////////////
+		static DestFinfo subDest( "subDest",
+				"Handles # of molecules of substrate",
+				new OpFunc1< MMenz, double >( &MMenz::sub ) );
+		static DestFinfo prdDest( "prdDest",
+				"Handles # of molecules of product. Dummy.",
+				new OpFunc1< MMenz, double >( &MMenz::prd ) );
+		static Finfo* subShared[] = {
+			toSub(), &subDest
+		};
+
+		static Finfo* prdShared[] = {
+			toPrd(), &prdDest
+		};
 		static SharedFinfo sub( "sub",
 			"Connects to substrate molecule",
 			subShared, sizeof( subShared ) / sizeof( const Finfo* )
@@ -97,7 +101,7 @@ const Cinfo* MMenz::initCinfo()
 	static Finfo* mmEnzFinfos[] = {
 		&Km,	// Value
 		&kcat,	// Value
-		&enzDest,				// DestFinfo
+		&enzDest,			// DestFinfo
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
 		&proc,				// SharedFinfo
@@ -149,8 +153,8 @@ void MMenz::enz( double n )
 void MMenz::process( const Eref& e, ProcPtr p )
 {
 	double rate = kcat_ * enz_ * sub_ / ( Km_ + sub_ );
-	toSub.send( e, p->threadIndexInGroup, 0, rate );
-	toPrd.send( e, p->threadIndexInGroup, rate, 0 );
+	toSub()->send( e, p->threadIndexInGroup, 0, rate );
+	toPrd()->send( e, p->threadIndexInGroup, rate, 0 );
 	
 	sub_ = 1.0;
 }

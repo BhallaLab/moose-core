@@ -7,7 +7,7 @@
 #** See the file COPYING.LIB for the full notice.
 #**********************************************************************/
 
-TARGET = ksolve.o
+TARGET = _ksolve.o
 
 OBJ = \
 	Port.o	\

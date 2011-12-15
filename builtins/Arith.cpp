@@ -11,10 +11,13 @@
 #include "header.h"
 #include "Arith.h"
 
-static SrcFinfo1< double > output( 
-		"output", 
-		"Sends out the computed value"
-	);
+static SrcFinfo1< double > *output() {
+	static SrcFinfo1< double > output( 
+			"output", 
+			"Sends out the computed value"
+			);
+	return &output;
+}
 
 const Cinfo* Arith::initCinfo()
 {
@@ -92,7 +95,7 @@ const Cinfo* Arith::initCinfo()
 		&arg2,		// DestFinfo
 		&arg3,		// DestFinfo
 		&arg1x2,	// DestFinfo
-		&output, 	// SrcFinfo
+		output(), 	// SrcFinfo
 		&proc		// SharedFinfo
 	};
 
@@ -127,7 +130,7 @@ void Arith::process( const Eref& e, ProcPtr p )
 			e.element()->getName() << ", " << e.objId() << "		" << 
 			arg3_ << "	" << &arg3_ << endl;
 	}
-	output.send( e, p->threadIndexInGroup, output_ );
+	output()->send( e, p->threadIndexInGroup, output_ );
 	arg3_ = 0.0;
 }
 

@@ -13,66 +13,49 @@
 #include "Enz.h"
 #include "DataHandlerWrapper.h"
 
-static SrcFinfo2< double, double > toSub( 
-		"toSub", 
-		"Sends out increment of molecules on product each timestep"
-	);
+static SrcFinfo2< double, double > *toSub() {
+	static SrcFinfo2< double, double > toSub( 
+			"toSub", 
+			"Sends out increment of molecules on product each timestep"
+			);
+	return &toSub;
+}
 
-static SrcFinfo2< double, double > toPrd( 
-		"toPrd", 
-		"Sends out increment of molecules on product each timestep"
-	);
-	
-static SrcFinfo2< double, double > toZombieEnz( 
-		"toZombieEnz", 
-		"Sends out increment of molecules on product each timestep"
-	);
-static SrcFinfo2< double, double > toCplx( 
-		"toCplx", 
-		"Sends out increment of molecules on product each timestep"
-	);
+static SrcFinfo2< double, double > *toPrd() {
+	static SrcFinfo2< double, double > toPrd( 
+			"toPrd", 
+			"Sends out increment of molecules on product each timestep"
+			);
+	return &toPrd;
+}
+
+static SrcFinfo2< double, double > *toZombieEnz() {
+	static SrcFinfo2< double, double > toZombieEnz( 
+			"toZombieEnz", 
+			"Sends out increment of molecules on product each timestep"
+			);
+	return &toZombieEnz;
+}
+
+static SrcFinfo2< double, double > *toCplx() {
+	static SrcFinfo2< double, double > toCplx( 
+			"toCplx", 
+			"Sends out increment of molecules on product each timestep"
+			);
+	return &toCplx;
+}
 
 // Deprecated. Enzymes should refer to volumes of associated pools, and
 // do not have a volume of their own.
-static SrcFinfo1< double > requestSize(
-	"requestSize",
-	"Requests size (volume) in which reaction is embedded. Used for"
-	"conversion to concentration units from molecule # units,"
-	"and for calculations when resized."
-);
-
-
-static DestFinfo sub( "subDest",
-		"Handles # of molecules of substrate",
-		new OpFunc1< ZombieEnz, double >( &ZombieEnz::dummy ) );
-
-static DestFinfo enz( "enzDest",
-		"Handles # of molecules of ZombieEnzyme",
-		new OpFunc1< ZombieEnz, double >( &ZombieEnz::dummy ) );
-
-static DestFinfo prd( "prdDest",
-		"Handles # of molecules of product. Dummy.",
-		new OpFunc1< ZombieEnz, double >( &ZombieEnz::dummy ) );
-
-static DestFinfo cplx( "prdDest",
-		"Handles # of molecules of enz-sub complex",
-		new OpFunc1< ZombieEnz, double >( &ZombieEnz::dummy ) );
-	
-static Finfo* subShared[] = {
-	&toSub, &sub
-};
-
-static Finfo* enzShared[] = {
-	&toZombieEnz, &enz
-};
-
-static Finfo* prdShared[] = {
-	&toPrd, &prd
-};
-
-static Finfo* cplxShared[] = {
-	&toCplx, &cplx
-};
+static SrcFinfo1< double > *requestSize() {
+	static SrcFinfo1< double > requestSize(
+			"requestSize",
+			"Requests size (volume) in which reaction is embedded. Used for"
+			"conversion to concentration units from molecule # units,"
+			"and for calculations when resized."
+			);
+	return &requestSize;
+}
 
 const Cinfo* ZombieEnz::initCinfo()
 {
@@ -140,6 +123,31 @@ const Cinfo* ZombieEnz::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// Shared Msg Definitions
 		//////////////////////////////////////////////////////////////
+
+		static DestFinfo subDest( "subDest",
+				"Handles # of molecules of substrate",
+				new OpFunc1< ZombieEnz, double >( &ZombieEnz::dummy ) );
+		static DestFinfo enzDest( "enzDest",
+				"Handles # of molecules of ZombieEnzyme",
+				new OpFunc1< ZombieEnz, double >( &ZombieEnz::dummy ) );
+		static DestFinfo prdDest( "prdDest",
+				"Handles # of molecules of product. Dummy.",
+				new OpFunc1< ZombieEnz, double >( &ZombieEnz::dummy ) );
+		static DestFinfo cplxDest( "cplxDest",
+				"Handles # of molecules of enz-sub complex",
+				new OpFunc1< ZombieEnz, double >( &ZombieEnz::dummy ) );
+		static Finfo* subShared[] = {
+			toSub(), &subDest
+		};
+		static Finfo* enzShared[] = {
+			toZombieEnz(), &enzDest
+		};
+		static Finfo* prdShared[] = {
+			toPrd(), &prdDest
+		};
+		static Finfo* cplxShared[] = {
+			toCplx(), &cplxDest
+		};
 		static SharedFinfo sub( "sub",
 			"Connects to substrate pool",
 			subShared, sizeof( subShared ) / sizeof( const Finfo* )
@@ -171,7 +179,7 @@ const Cinfo* ZombieEnz::initCinfo()
 		&Km,	// Value
 		&kcat,	// Value
 		&ratio,	// Value
-		&requestSize,		// SrcFinfo
+		requestSize(),		// SrcFinfo
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
 		&enz,				// SharedFinfo
@@ -265,11 +273,11 @@ void ZombieEnz::setKm( const Eref& e, const Qinfo* q, double v )
 	double k3 = getK3( e, q );
 
 	double volScale = 
-		convertConcToNumRateUsingMesh( e, &toSub, 0, 1.0e-3, 1 );
+		convertConcToNumRateUsingMesh( e, toSub(), 0, 1.0e-3, 1 );
 
 	/*
-	double volScale = Reac::volScale( e, &requestSize, &toSub ) * 
-		Reac::volScale( e, &requestSize, &toZombieEnz );
+	double volScale = Reac::volScale( e, requestSize(), toSub() ) * 
+		Reac::volScale( e, requestSize(), toZombieEnz() );
 		*/
 
 	double k1 = ( k2 + k3 ) / ( v * volScale );
@@ -283,7 +291,7 @@ double ZombieEnz::getKm( const Eref& e, const Qinfo* q ) const
 	double k3 = getK3( e, q );
 
 	double volScale = 	
-		convertConcToNumRateUsingMesh( e, &toSub, 0, 1.0e-3, 1 );
+		convertConcToNumRateUsingMesh( e, toSub(), 0, 1.0e-3, 1 );
 	
 	return (k2 + k3) / ( k1 * volScale );
 }

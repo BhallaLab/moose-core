@@ -7,7 +7,7 @@
 #** See the file COPYING.LIB for the full notice.
 #**********************************************************************/
 
-TARGET = kinetics.o
+TARGET = _kinetics.o
 
 OBJ = \
 	Pool.o	\

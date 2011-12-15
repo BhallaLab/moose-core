@@ -13,37 +13,31 @@
 #include "ElementValueFinfo.h"
 #include "DataHandlerWrapper.h"
 
-static SrcFinfo2< double, double > toSub( 
-		"toSub", 
-		"Sends out increment of molecules on product each timestep"
-	);
-static SrcFinfo2< double, double > toPrd( 
-		"toPrd", 
-		"Sends out increment of molecules on product each timestep"
-	);
+static SrcFinfo2< double, double > *toSub() {
+	static SrcFinfo2< double, double > toSub( 
+			"toSub", 
+			"Sends out increment of molecules on product each timestep"
+			);
+	return &toSub;
+}
 
-static SrcFinfo1< double > requestSize( 
-		"requestSize", 
-		"Requests size (volume) in which reaction is embedded. Used for"
-		"conversion to concentration units from molecule # units,"
-		"and for calculations when resized."
-	);
+static SrcFinfo2< double, double > *toPrd() {
+	static SrcFinfo2< double, double > toPrd( 
+			"toPrd", 
+			"Sends out increment of molecules on product each timestep"
+			);
+	return &toPrd;
+}
 
-static DestFinfo sub( "subDest",
-		"Handles # of molecules of substrate",
-		new OpFunc1< ZombieReac, double >( &ZombieReac::sub ) );
-
-static DestFinfo prd( "prdDest",
-		"Handles # of molecules of product",
-		new OpFunc1< ZombieReac, double >( &ZombieReac::prd ) );
-	
-static Finfo* subShared[] = {
-	&toSub, &sub
-};
-
-static Finfo* prdShared[] = {
-	&toPrd, &prd
-};
+static SrcFinfo1< double > *requestSize() {
+	static SrcFinfo1< double > requestSize( 
+			"requestSize", 
+			"Requests size (volume) in which reaction is embedded. Used for"
+			"conversion to concentration units from molecule # units,"
+			"and for calculations when resized."
+			);
+	return &requestSize;
+}
 
 const Cinfo* ZombieReac::initCinfo()
 {
@@ -96,6 +90,18 @@ const Cinfo* ZombieReac::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
 		//////////////////////////////////////////////////////////////
+		static DestFinfo subDest( "subDest",
+				"Handles # of molecules of substrate",
+				new OpFunc1< ZombieReac, double >( &ZombieReac::sub ) );
+		static DestFinfo prdDest( "prdDest",
+				"Handles # of molecules of product",
+				new OpFunc1< ZombieReac, double >( &ZombieReac::prd ) );
+		static Finfo* subShared[] = {
+			toSub(), &subDest
+		};
+		static Finfo* prdShared[] = {
+			toPrd(), &prdDest
+		};
 		static SharedFinfo sub( "sub",
 			"Connects to substrate molecule",
 			subShared, sizeof( subShared ) / sizeof( const Finfo* )
@@ -117,7 +123,7 @@ const Cinfo* ZombieReac::initCinfo()
 		&kb,		// Value
 		&Kf,		// Value
 		&Kb,		// Value
-		&requestSize,	// SrcFinfo
+		requestSize(),	// SrcFinfo
 		&sub,		// SharedFinfo
 		&prd,		// SharedFinfo
 		&proc,		// SharedFinfo
@@ -199,7 +205,7 @@ double ZombieReac::getKb( const Eref& e, const Qinfo* q ) const
 void ZombieReac::setConcKf( const Eref& e, const Qinfo* q, double v )
 {
 	double volScale = 
-		convertConcToNumRateUsingMesh( e, &toSub, 0, 1.0e-3, 0 );
+		convertConcToNumRateUsingMesh( e, toSub(), 0, 1.0e-3, 0 );
 
 	setKf( e, q, v * volScale );
 }
@@ -207,21 +213,21 @@ void ZombieReac::setConcKf( const Eref& e, const Qinfo* q, double v )
 double ZombieReac::getConcKf( const Eref& e, const Qinfo* q ) const
 {
 	double volScale = 
-		convertConcToNumRateUsingMesh( e, &toSub, 0, 1.0e-3, 0 );
+		convertConcToNumRateUsingMesh( e, toSub(), 0, 1.0e-3, 0 );
 	return getKf( e, q ) / volScale;
 }
 
 void ZombieReac::setConcKb( const Eref& e, const Qinfo* q, double v )
 {
 	double volScale = 
-		convertConcToNumRateUsingMesh( e, &toPrd, 0, 1.0e-3, 0 );
+		convertConcToNumRateUsingMesh( e, toPrd(), 0, 1.0e-3, 0 );
 	setKb( e, q, v * volScale );
 }
 
 double ZombieReac::getConcKb( const Eref& e, const Qinfo* q ) const
 {
 	double volScale = 
-		convertConcToNumRateUsingMesh( e, &toPrd, 0, 1.0e-3, 0 );
+		convertConcToNumRateUsingMesh( e, toPrd(), 0, 1.0e-3, 0 );
 	return getKb( e, q ) / volScale;
 }
 

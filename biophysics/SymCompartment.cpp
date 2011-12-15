@@ -12,24 +12,41 @@
 #include "Compartment.h"
 #include "SymCompartment.h"
 
+static SrcFinfo2< double, double > *raxialOut() {
+	static SrcFinfo2< double, double > raxialOut( "raxialOut", 
+			"Sends out Ra and Vm on each timestep" );
+	return &raxialOut;
+}
 
-static SrcFinfo2< double, double > raxialOut( "raxialOut", 
-	"Sends out Ra and Vm on each timestep" );
+static SrcFinfo1< double > *sumRaxialOut() {
+	static SrcFinfo1< double > sumRaxialOut( "sumRaxialOut",
+		"Sends out Ra" );
+	return &sumRaxialOut;
+}
 
-static SrcFinfo1< double > sumRaxialOut( "sumRaxialOut",
-	"Sends out Ra" );
-
-static SrcFinfo0 requestSumAxial( "requestSumAxial",
-		"Sends out request for Ra." );
-
-static SrcFinfo2< double, double > raxial2Out( "Raxial2Out", 
-			"Sends out Ra and Vm");
-
-static SrcFinfo1< double> sumRaxial2Out( "sumRaxial2Out", 
-			"Sends out Ra" );
-
-static SrcFinfo0 requestSumAxial2( "requestSumAxial2",
+static SrcFinfo0 *requestSumAxial() {
+	static SrcFinfo0 requestSumAxial( "requestSumAxial",
 			"Sends out request for Ra." );
+	return &requestSumAxial;
+}
+
+static SrcFinfo2< double, double > *raxial2Out() {
+	static SrcFinfo2< double, double > raxial2Out( "Raxial2Out", 
+			"Sends out Ra and Vm");
+	return &raxial2Out;
+}
+
+static SrcFinfo1< double > *sumRaxial2Out() {
+	static SrcFinfo1< double> sumRaxial2Out( "sumRaxial2Out", 
+			"Sends out Ra" );
+	return &sumRaxial2Out;
+}
+
+static SrcFinfo0 *requestSumAxial2() {
+	static SrcFinfo0 requestSumAxial2( "requestSumAxial2",
+			"Sends out request for Ra." );
+	return &requestSumAxial2;
+}
 
 const Cinfo* SymCompartment::initCinfo()
 {
@@ -56,7 +73,7 @@ const Cinfo* SymCompartment::initCinfo()
 	static Finfo* raxial1Shared[] =
 	{
 		&raxialSym, &sumRaxial, &handleSumRaxialRequest, 
-		&raxialOut, &sumRaxialOut, &requestSumAxial
+		raxialOut(), sumRaxialOut(), requestSumAxial()
 	};
 
 	static SharedFinfo raxial1( "raxial1",
@@ -93,7 +110,7 @@ const Cinfo* SymCompartment::initCinfo()
 	static Finfo* raxial2Shared[] =
 	{
 		&raxial2sym, &sumRaxial2, &handleSumRaxial2Request,
-		&raxial2Out, &sumRaxial2Out, &requestSumAxial2
+		raxial2Out(), sumRaxial2Out(), requestSumAxial2()
 		
 	};
 
@@ -207,8 +224,8 @@ void SymCompartment::innerProcessFunc( Element* e, ProcInfo p )
 // Alternates with the 'process' message
 void SymCompartment::innerInitProc( const Eref& e, ProcPtr p )
 {
-	raxialOut.send( e, p->threadIndexInGroup, Ra_, Vm_ ); // to kids
-	raxial2Out.send( e, p->threadIndexInGroup, Ra_, Vm_ ); // to parent and sibs.
+	raxialOut()->send( e, p->threadIndexInGroup, Ra_, Vm_ ); // to kids
+	raxial2Out()->send( e, p->threadIndexInGroup, Ra_, Vm_ ); // to parent and sibs.
 }
 
 // Virtual func. Must be called after the 'init' phase.
@@ -230,18 +247,18 @@ void SymCompartment::innerReinit( const Eref& e, ProcPtr p )
 // This funciton is called during 'init' phase to send Raxial info around.
 void SymCompartment::innerInitReinit( const Eref& e, ProcPtr p )
 {
-	requestSumAxial.send( e, p->threadIndexInGroup );
-	requestSumAxial2.send( e, p->threadIndexInGroup );
+	requestSumAxial()->send( e, p->threadIndexInGroup );
+	requestSumAxial2()->send( e, p->threadIndexInGroup );
 }
 
 void SymCompartment::handleSumRaxialRequest( const Eref& e, const Qinfo* q )
 {
-	sumRaxialOut.send( e, q->threadNum(), Ra_ );
+	sumRaxialOut()->send( e, q->threadNum(), Ra_ );
 }
 
 void SymCompartment::handleSumRaxial2Request( const Eref& e, const Qinfo* q)
 {
-	sumRaxial2Out.send( e, q->threadNum(), Ra_ );
+	sumRaxial2Out()->send( e, q->threadNum(), Ra_ );
 }
 
 void SymCompartment::sumRaxial( double Ra )

@@ -13,10 +13,13 @@
 #include "SynBase.h"
 #include "IntFire.h"
 
-static SrcFinfo1< double > spike( 
-		"spike", 
-		"Sends out spike events"
-	);
+static SrcFinfo1< double > *spike() {
+	static SrcFinfo1< double > spike( 
+			"spike", 
+			"Sends out spike events"
+			);
+	return &spike;
+}
 
 const Cinfo* IntFire::initCinfo()
 {
@@ -99,7 +102,7 @@ const Cinfo* IntFire::initCinfo()
 		&refractoryPeriod,		// Value
 		// &numSynapses,			// Value
 		&proc,					// SharedFinfo
-		&spike, 		// MsgSrc
+		spike(), 		// MsgSrc
 		// &synFinfo		// FieldElementFinfo for synapses.
 	};
 
@@ -157,7 +160,7 @@ void IntFire::process( const Eref &e, ProcPtr p )
 		Vm_ = 0.0;
 
 	if ( Vm_ > thresh_ ) {
-		spike.send( e, p->threadIndexInGroup, p->currTime );
+		spike()->send( e, p->threadIndexInGroup, p->currTime );
 		// e.sendSpike( spikeSlot, p->currTime );
 		/*
 		if ( e.index().value() % 100 == 0 ) {

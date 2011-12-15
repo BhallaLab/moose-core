@@ -10,6 +10,7 @@
 #include "header.h"
 #include "DiagonalMsg.h"
 
+// Static field declaration
 Id DiagonalMsg::managerId_;
 
 DiagonalMsg::DiagonalMsg( MsgId mid, Element* e1, Element* e2 )

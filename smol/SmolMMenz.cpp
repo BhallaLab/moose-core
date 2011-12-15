@@ -13,36 +13,6 @@
 #include "MMenz.h"
 #include "DataHandlerWrapper.h"
 
-static SrcFinfo2< double, double > toSub( 
-		"toSub", 
-		"Sends out increment of molecules on product each timestep"
-	);
-
-static SrcFinfo2< double, double > toPrd( 
-		"toPrd", 
-		"Sends out increment of molecules on product each timestep"
-	);
-
-static DestFinfo sub( "subDest",
-		"Handles # of molecules of substrate",
-		new OpFunc1< SmolMMenz, double >( &SmolMMenz::dummy ) );
-
-static DestFinfo enzDest( "enz",
-		"Handles # of molecules of SmolMMenzyme",
-		new OpFunc1< SmolMMenz, double >( &SmolMMenz::dummy ) );
-
-static DestFinfo prd( "prdDest",
-		"Handles # of molecules of product. Dummy.",
-		new OpFunc1< SmolMMenz, double >( &SmolMMenz::dummy ) );
-	
-static Finfo* subShared[] = {
-	&toSub, &sub
-};
-
-static Finfo* prdShared[] = {
-	&toPrd, &prd
-};
-
 const Cinfo* SmolMMenz::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
@@ -80,43 +50,67 @@ const Cinfo* SmolMMenz::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// Shared Msg Definitions
 		//////////////////////////////////////////////////////////////
+		static SrcFinfo2< double, double > toSub( 
+				"toSub", 
+				"Sends out increment of molecules on product each timestep"
+				);
+		static SrcFinfo2< double, double > toPrd( 
+				"toPrd", 
+				"Sends out increment of molecules on product each timestep"
+				);
+		static DestFinfo subDest( "subDest",
+				"Handles # of molecules of substrate",
+				new OpFunc1< SmolMMenz, double >( &SmolMMenz::dummy ) );
+		static DestFinfo enzDest( "enz",
+				"Handles # of molecules of SmolMMenzyme",
+				new OpFunc1< SmolMMenz, double >( &SmolMMenz::dummy ) );
+		static DestFinfo prdDest( "prdDest",
+				"Handles # of molecules of product. Dummy.",
+				new OpFunc1< SmolMMenz, double >( &SmolMMenz::dummy ) );
+		static Finfo* subShared[] = {
+			&toSub, &subDest
+		};
+		static Finfo* prdShared[] = {
+			&toPrd, &prdDest
+		};
+
 		static SharedFinfo sub( "sub",
-			"Connects to substrate molecule",
-			subShared, sizeof( subShared ) / sizeof( const Finfo* )
-		);
+				"Connects to substrate molecule",
+				subShared, sizeof( subShared ) / sizeof( const Finfo* )
+				);
 		static SharedFinfo prd( "prd",
-			"Connects to product molecule",
-			prdShared, sizeof( prdShared ) / sizeof( const Finfo* )
-		);
+				"Connects to product molecule",
+				prdShared, sizeof( prdShared ) / sizeof( const Finfo* )
+				);
 		static Finfo* procShared[] = {
 			&process, &reinit
 		};
 		static SharedFinfo proc( "proc",
-			"Shared message for process and reinit",
-			procShared, sizeof( procShared ) / sizeof( const Finfo* )
-		);
+				"Shared message for process and reinit",
+				procShared, sizeof( procShared ) / sizeof( const Finfo* )
+				);
 
-	static Finfo* mmEnzFinfos[] = {
-		&Km,	// Value
-		&kcat,	// Value
-		&enzDest,				// DestFinfo
-		&sub,				// SharedFinfo
-		&prd,				// SharedFinfo
-		&proc,				// SharedFinfo
-	};
+		static Finfo* mmEnzFinfos[] = {
+			&Km,	// Value
+			&kcat,	// Value
+			&enzDest,				// DestFinfo
+			&sub,				// SharedFinfo
+			&prd,				// SharedFinfo
+			&proc,				// SharedFinfo
+		};
 
-	static Cinfo smolMMenzCinfo (
-		"SmolMMenz",
-		Neutral::initCinfo(),
-		mmEnzFinfos,
-		sizeof( mmEnzFinfos ) / sizeof ( Finfo* ),
-		new Dinfo< SmolMMenz >()
-	);
+		static Cinfo smolMMenzCinfo (
+				"SmolMMenz",
+				Neutral::initCinfo(),
+				mmEnzFinfos,
+				sizeof( mmEnzFinfos ) / sizeof ( Finfo* ),
+				new Dinfo< SmolMMenz >()
+				);
 
-	return &smolMMenzCinfo;
+		return &smolMMenzCinfo;
 }
 
- static const Cinfo* smolMMenzCinfo = SmolMMenz::initCinfo();
+static const Cinfo* smolMMenzCinfo = SmolMMenz::initCinfo();
 
 //////////////////////////////////////////////////////////////
 // SmolMMenz internal functions
@@ -145,7 +139,7 @@ void SmolMMenz::reinit( const Eref& e, ProcPtr p )
 
 void SmolMMenz::setKm( const Eref& e, const Qinfo* q, double v )
 {
-//	rates_[ convertIdToMolIndex( e.id() ) ]->setR1( v ); // First rate is Km
+	//	rates_[ convertIdToMolIndex( e.id() ) ]->setR1( v ); // First rate is Km
 }
 
 double SmolMMenz::getKm( const Eref& e, const Qinfo* q ) const

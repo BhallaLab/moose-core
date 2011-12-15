@@ -23,10 +23,13 @@
 #include "../geom/Surface.h"
 #include "../geom/Panel.h"
 
-static SrcFinfo1< Id > plugin( 
-		"plugin", 
-		"Sends out SmolSim Id so that plugins can directly access fields and functions"
-	);
+static SrcFinfo1< Id > *plugin() {
+	static SrcFinfo1< Id > plugin( 
+			"plugin", 
+			"Sends out SmolSim Id so that plugins can directly access fields and functions"
+			);
+	return &plugin;
+}
 
 const Cinfo* SmolSim::initCinfo()
 {

@@ -13,31 +13,6 @@
 #include "ElementValueFinfo.h"
 #include "DataHandlerWrapper.h"
 
-static SrcFinfo2< double, double > toSub( 
-		"toSub", 
-		"Sends out increment of molecules on product each timestep"
-	);
-static SrcFinfo2< double, double > toPrd( 
-		"toPrd", 
-		"Sends out increment of molecules on product each timestep"
-	);
-
-static DestFinfo sub( "subDest",
-		"Handles # of molecules of substrate",
-		new OpFunc1< SmolReac, double >( &SmolReac::sub ) );
-
-static DestFinfo prd( "prdDest",
-		"Handles # of molecules of product",
-		new OpFunc1< SmolReac, double >( &SmolReac::prd ) );
-	
-static Finfo* subShared[] = {
-	&toSub, &sub
-};
-
-static Finfo* prdShared[] = {
-	&toPrd, &prd
-};
-
 const Cinfo* SmolReac::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
@@ -75,6 +50,27 @@ const Cinfo* SmolReac::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
 		//////////////////////////////////////////////////////////////
+		static SrcFinfo2< double, double > toSub( 
+				"toSub", 
+				"Sends out increment of molecules on product each timestep"
+				);
+		static SrcFinfo2< double, double > toPrd( 
+				"toPrd", 
+				"Sends out increment of molecules on product each timestep"
+				);
+		static DestFinfo subDest( "subDest",
+				"Handles # of molecules of substrate",
+				new OpFunc1< SmolReac, double >( &SmolReac::sub ) );
+		static DestFinfo prdDest( "prdDest",
+				"Handles # of molecules of product",
+				new OpFunc1< SmolReac, double >( &SmolReac::prd ) );
+		static Finfo* subShared[] = {
+			&toSub, &subDest
+		};
+		static Finfo* prdShared[] = {
+			&toPrd, &prdDest
+		};
+
 		static SharedFinfo sub( "sub",
 			"Connects to substrate molecule",
 			subShared, sizeof( subShared ) / sizeof( const Finfo* )

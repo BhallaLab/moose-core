@@ -14,6 +14,7 @@
 #include "ChemMesh.h"
 #include "../ksolve/StoichHeaders.h"
 
+// Not used anywhere currently. - Sid
 static SrcFinfo0 groupSurfaces( 
 		"groupSurfaces", 
 		"Goes to all surfaces that define this ChemMesh"
