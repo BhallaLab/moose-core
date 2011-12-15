@@ -22,10 +22,14 @@
 ///////////////////////////////////////////////////////
 // MsgSrc definitions
 ///////////////////////////////////////////////////////
-static SrcFinfo1< double > returnSize(
-	"returnSize",
-	"Return size of compartment"
-);
+static SrcFinfo1< double > *returnSize() {
+	static SrcFinfo1< double > returnSize(
+			"returnSize",
+			"Return size of compartment"
+			);
+	return &returnSize;
+}
+
 const Cinfo* Geometry::initCinfo()
 {
 	///////////////////////////////////////////////////////
@@ -64,7 +68,7 @@ const Cinfo* Geometry::initCinfo()
 	///////////////////////////////////////////////////////
 	static Finfo* comptShared[] = {
 		&handleSizeRequest,
-		&returnSize
+		returnSize()
 	};
 	
 	static SharedFinfo compt( "compt",
@@ -140,6 +144,6 @@ double Geometry::getNeighDist() const
 
 void Geometry::handleSizeRequest( const Eref& e, const Qinfo* q )
 {
-	returnSize.send( e, q->threadNum(), 0.0 );
+	returnSize()->send( e, q->threadNum(), 0.0 );
 }
 

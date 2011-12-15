@@ -14,30 +14,21 @@
 
 #define EPSILON 1e-15
 
-static SrcFinfo2< double, double > toSub( 
-		"toSub", 
-		"Sends out increment of molecules on product each timestep"
-	);
-static SrcFinfo2< double, double > toPrd( 
-		"toPrd", 
-		"Sends out increment of molecules on product each timestep"
-	);
+static SrcFinfo2< double, double > *toSub() {
+	static SrcFinfo2< double, double > toSub( 
+			"toSub", 
+			"Sends out increment of molecules on product each timestep"
+			);
+	return &toSub;
+}
 
-static DestFinfo sub( "subDest",
-		"Handles # of molecules of substrate",
-		new OpFunc1< Reac, double >( &Reac::sub ) );
-
-static DestFinfo prd( "prdDest",
-		"Handles # of molecules of product",
-		new OpFunc1< Reac, double >( &Reac::prd ) );
-	
-static Finfo* subShared[] = {
-	&toSub, &sub
-};
-
-static Finfo* prdShared[] = {
-	&toPrd, &prd
-};
+static SrcFinfo2< double, double > *toPrd() {
+	static SrcFinfo2< double, double > toPrd( 
+			"toPrd", 
+			"Sends out increment of molecules on product each timestep"
+			);
+	return &toPrd;
+}
 
 const Cinfo* Reac::initCinfo()
 {
@@ -89,6 +80,19 @@ const Cinfo* Reac::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// Shared Msg Definitions
 		//////////////////////////////////////////////////////////////
+
+		static DestFinfo subDest( "subDest",
+				"Handles # of molecules of substrate",
+				new OpFunc1< Reac, double >( &Reac::sub ) );
+		static DestFinfo prdDest( "prdDest",
+				"Handles # of molecules of product",
+				new OpFunc1< Reac, double >( &Reac::prd ) );
+		static Finfo* subShared[] = {
+			toSub(), &subDest
+		};
+		static Finfo* prdShared[] = {
+			toPrd(), &prdDest
+		};
 		static SharedFinfo sub( "sub",
 			"Connects to substrate pool",
 			subShared, sizeof( subShared ) / sizeof( const Finfo* )
@@ -162,8 +166,8 @@ void Reac::prd( double v )
 
 void Reac::process( const Eref& e, ProcPtr p )
 {
-	toPrd.send( e, p->threadIndexInGroup, sub_, prd_ );
-	toSub.send( e, p->threadIndexInGroup, prd_, sub_ );
+	toPrd()->send( e, p->threadIndexInGroup, sub_, prd_ );
+	toSub()->send( e, p->threadIndexInGroup, prd_, sub_ );
 	
 	sub_ = kf_;
 	prd_ = kb_;
@@ -202,25 +206,25 @@ double Reac::getKb() const
 void Reac::setConcKf( const Eref& e, const Qinfo* q, double v )
 {
 	sub_ = kf_ = v * 
-		convertConcToNumRateUsingMesh( e, &toSub, 0, CONC_UNIT_CONV, 0 );
+		convertConcToNumRateUsingMesh( e, toSub(), 0, CONC_UNIT_CONV, 0 );
 }
 
 double Reac::getConcKf( const Eref& e, const Qinfo* q ) const
 {
 	double volScale = 
-		convertConcToNumRateUsingMesh( e, &toSub, 0, CONC_UNIT_CONV, 0 );
+		convertConcToNumRateUsingMesh( e, toSub(), 0, CONC_UNIT_CONV, 0 );
 	return kf_ / volScale;
 }
 
 void Reac::setConcKb( const Eref& e, const Qinfo* q, double v )
 {
 	prd_ = kb_ = 
-		v * convertConcToNumRateUsingMesh( e, &toPrd, 0, CONC_UNIT_CONV, 0);
+		v * convertConcToNumRateUsingMesh( e, toPrd(), 0, CONC_UNIT_CONV, 0);
 }
 
 double Reac::getConcKb( const Eref& e, const Qinfo* q ) const
 {
 	double volScale = 
-		convertConcToNumRateUsingMesh( e, &toPrd, 0, CONC_UNIT_CONV, 0 );
+		convertConcToNumRateUsingMesh( e, toPrd(), 0, CONC_UNIT_CONV, 0 );
 	return kb_ / volScale;
 }

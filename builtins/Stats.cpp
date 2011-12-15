@@ -12,12 +12,15 @@
 #include "ReduceBase.h"
 #include "Stats.h"
 
-static ReduceFinfo< Stats, double, ReduceStats > reduce(
+static ReduceFinfo< Stats, double, ReduceStats > *reduce() {
+	static ReduceFinfo< Stats, double, ReduceStats > reduce(
 			"reduce",
 			"Execute statistics reduction operation on all targets and"
 			"place results in this object",
 			&Stats::digest
-);
+			);
+	return &reduce;
+}
 
 const Cinfo* Stats::initCinfo()
 {
@@ -79,7 +82,7 @@ const Cinfo* Stats::initCinfo()
 		&sdev,	// ReadOnlyValue
 		&sum,	// ReadOnlyValue
 		&num,	// ReadOnlyValue
-		&reduce,	// ReduceFinfo
+		reduce(),	// ReduceFinfo
 		&trig,		// DestFinfo
 		&process,		// DestFinfo
 		&reinit,		// DestFinfo
@@ -133,7 +136,7 @@ void Stats::reinit( const Eref& e, ProcPtr p )
 void Stats::trig( const Eref& e, const Qinfo* q )
 {
 	ProcInfo p;
-	reduce.send( e, q->threadNum(), 0 );
+	reduce()->send( e, q->threadNum(), 0 );
 }
 ///////////////////////////////////////////////////////////////////////////
 // Reduce func

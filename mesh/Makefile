@@ -7,7 +7,7 @@
 #** See the file COPYING.LIB for the full notice.
 #**********************************************************************/
 
-TARGET = mesh.o
+TARGET = _mesh.o
 
 OBJ = \
 	ChemMesh.o	\

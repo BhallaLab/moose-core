@@ -15,13 +15,16 @@
 
 using namespace MathFuncNames;
 
-	///////////////////////////////////////////////////////
-	// MsgSrc definitions
-	///////////////////////////////////////////////////////
-		static SrcFinfo1< double > output( 
+///////////////////////////////////////////////////////
+// MsgSrc definitions
+///////////////////////////////////////////////////////
+static SrcFinfo1< double > *output() {
+	static SrcFinfo1< double > output( 
 			"output", 
 			"Sends out result of computation"
-		);
+			);
+	return &output;
+}
 
 const Cinfo* MathFunc::initCinfo()
 {
@@ -109,7 +112,7 @@ const Cinfo* MathFunc::initCinfo()
 		&mathML,	// Value
 		&func,		// Value
 		&result,	// Value
-		&output,	// SrcFinfo
+		output(),	// SrcFinfo
 //		&args, 		// DestFinfo
 		&arg1, 		// DestFinfo
 		&arg2, 		// DestFinfo
@@ -239,7 +242,7 @@ void MathFunc::processFunc( const Eref& e, ProcPtr info)
   }
   //cout << result_ << endl;
   // send1< double >( e, outputSlot, result_ );
-  output.send( e, info->threadIndexInGroup, result_ );
+  output()->send( e, info->threadIndexInGroup, result_ );
   v.clear();
 }
 

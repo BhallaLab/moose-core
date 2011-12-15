@@ -11,15 +11,21 @@
 #include "Boundary.h"
 #include "ChemCompt.h"
 
-static SrcFinfo1< double > compartment( 
-		"compartment", 
-		"Tracks all molecules in the compartment, also updates with size."
-);
+static SrcFinfo1< double > *compartment() {
+	static SrcFinfo1< double > compartment( 
+			"compartment", 
+			"Tracks all molecules in the compartment, also updates with size."
+			);
+	return &compartment;
+}
 
-static SrcFinfo0 requestSize( 
-		"requestSize", 
-		"Requests size from geometry. "
-);
+static SrcFinfo0 *requestSize() {
+	static SrcFinfo0 requestSize( 
+			"requestSize", 
+			"Requests size from geometry. "
+			);
+	return &requestSize;
+}
 
 const Cinfo* ChemCompt::initCinfo()
 {
@@ -57,7 +63,7 @@ const Cinfo* ChemCompt::initCinfo()
 		//////////////////////////////////////////////////////////////
 
 		static Finfo* geomShared[] = {
-			&requestSize, &handleSize
+			requestSize(), &handleSize
 		};
 
 		static SharedFinfo geom( "geom",
@@ -82,8 +88,8 @@ const Cinfo* ChemCompt::initCinfo()
 	static Finfo* chemComptFinfos[] = {
 		&size,	// Value
 		&dimensions,	// Value
-		&requestSize,	// SrcFinfo
-		&compartment,	// SrcFinfo
+		requestSize(),	// SrcFinfo
+		compartment(),	// SrcFinfo
 		&group,			// DestFinfo
 		&geom,			// SharedFinfo
 		&boundaryFinfo,	// FieldElementFinfo

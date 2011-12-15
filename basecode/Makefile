@@ -12,7 +12,7 @@
 # $Log: $
 #
 
-TARGET = basecode.o
+TARGET = _basecode.o
 
 #  CXXFLAGS += -I.. -I../kinetics -I../biophysics
 

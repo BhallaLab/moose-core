@@ -207,7 +207,7 @@ ifdef USE_SMOLDYN
 #LIBS+= -L/usr/local/lib -lsmoldyn
 CXXFLAGS+= -DUSE_SMOLDYN
 SMOLDYN_DIR = smol
-SMOLDYN_LIB = smol/smol.o /usr/local/lib/libsmoldyn.a
+SMOLDYN_LIB = smol/_smol.o /usr/local/lib/libsmoldyn.a
 LIBS += -lsmoldyn
 endif
 
@@ -262,19 +262,19 @@ SUBDIR = \
 CLEANSUBDIR = $(SUBDIR) $(PARALLEL_DIR) pymoose
 
 OBJLIBS =	\
-	basecode/basecode.o \
-	msg/msg.o \
-	shell/shell.o \
-	biophysics/biophysics.o \
-	randnum/randnum.o \
-	scheduling/scheduling.o \
-	builtins/builtins.o \
-	kinetics/kinetics.o \
-	ksolve/ksolve.o \
-	regressionTests/rt.o \
-	utility/utility.o \
-	geom/geom.o \
-	mesh/mesh.o \
+	basecode/_basecode.o \
+	msg/_msg.o \
+	shell/_shell.o \
+	biophysics/_biophysics.o \
+	randnum/_randnum.o \
+	scheduling/_scheduling.o \
+	builtins/_builtins.o \
+	kinetics/_kinetics.o \
+	ksolve/_ksolve.o \
+	regressionTests/_rt.o \
+	utility/_utility.o \
+	geom/_geom.o \
+	mesh/_mesh.o \
 	$(SMOLDYN_LIB) \
 
 export CXX

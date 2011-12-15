@@ -16,9 +16,12 @@ const double Nernst::ZERO_CELSIUS = 273.15;
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
-static SrcFinfo1< double > Eout( "Eout", 
-	"Computed reversal potential"
-);
+static SrcFinfo1< double > *Eout() {
+	static SrcFinfo1< double > Eout( "Eout", 
+			"Computed reversal potential"
+			);
+	return &Eout;
+}
 
 const Cinfo* Nernst::initCinfo()
 {
@@ -75,7 +78,7 @@ const Cinfo* Nernst::initCinfo()
 	///////////////////////////////////////////////////////
 	static Finfo* NernstFinfos[] =
 	{
-		&Eout,		// SrcFinfo
+		Eout(),		// SrcFinfo
 		&E,			// ReadOnlyValue
 		&temperature,	// Value
 		&valence,		// Value
@@ -196,14 +199,14 @@ void Nernst::handleCin( const Eref& er, const Qinfo* q, double conc )
 {
 	Cin_ = conc;
 	updateE();
-	Eout.send( er, q->threadNum(), E_ );
+	Eout()->send( er, q->threadNum(), E_ );
 }
 
 void Nernst::handleCout( const Eref& er, const Qinfo* q, double conc )
 {
 	Cout_ = conc;
 	updateE();
-	Eout.send( er, q->threadNum(), E_ );
+	Eout()->send( er, q->threadNum(), E_ );
 }
 
 ///////////////////////////////////////////////////

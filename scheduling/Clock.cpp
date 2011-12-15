@@ -79,23 +79,32 @@ Clock::ProcState Clock::procState_ = NoChange;
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
-static SrcFinfo0 tickSrc( 
-		"childTick",
-		"Parent of Tick element"
-	);
+static SrcFinfo0 *tickSrc() {
+	static SrcFinfo0 tickSrc( 
+			"childTick",
+			"Parent of Tick element"
+			);
+	return &tickSrc;
+}
 
-static SrcFinfo0 finished( 
-		"finished",
-		"Signal for completion of run"
-	);
+static SrcFinfo0 *finished() {
+	static SrcFinfo0 finished( 
+			"finished",
+			"Signal for completion of run"
+			);
+	return &finished;
+}
 
 /*
-static SrcFinfo2< unsigned int, unsigned int > ack( 
-		"ack",
-		"Acknowledgement signal for receipt/completion of function."
-		"Goes back to Shell on master node"
-	);
-	*/
+static SrcFinfo2< unsigned int, unsigned int > *ack() {
+	static SrcFinfo2< unsigned int, unsigned int > ack( 
+			"ack",
+			"Acknowledgement signal for receipt/completion of function."
+			"Goes back to Shell on master node"
+			);
+	return &ack;
+}
+*/
 
 const Cinfo* Clock::initCinfo()
 {
@@ -196,8 +205,8 @@ const Cinfo* Clock::initCinfo()
 		&numTicks,
 		&currentStep,
 		// SrcFinfos
-		&tickSrc,
-		&finished,
+		tickSrc(),
+		finished(),
 		// DestFinfos
 		// Shared Finfos
 		&clockControl,
@@ -363,7 +372,7 @@ void Clock::setupTick( unsigned int tickNum, double dt )
 	ticks_[ tickNum ].setDt( dt );
 	// ticks_[ tickNum ].setStage( stage );
 	rebuild();
-	// ack.send( clockId.eref(), p, p->nodeIndexInGroup, OkStatus );
+	// ack()->send( clockId.eref(), p, p->nodeIndexInGroup, OkStatus );
 }
 
 ///////////////////////////////////////////////////
@@ -615,7 +624,7 @@ void Clock::advancePhase2(  ProcInfo *p )
 			Id clockId( 1 );
 			procState_ = StopOnly;
 			// isRunning_ = 0; // Should not set this flag here, it affects other threads.
-			finished.send( clockId.eref(), p->threadIndexInGroup );
+			finished()->send( clockId.eref(), p->threadIndexInGroup );
 			ack()->send( clockId.eref(), p->threadIndexInGroup, 
 				p->nodeIndexInGroup, OkStatus );
 			/*

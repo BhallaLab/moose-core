@@ -7,7 +7,7 @@
 #** See the file COPYING.LIB for the full notice.
 #**********************************************************************/
 
-TARGET = builtins.o
+TARGET = _builtins.o
 
 OBJ = \
 	Arith.o	\
