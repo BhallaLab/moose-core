@@ -7,7 +7,7 @@
 #** See the file COPYING.LIB for the full notice.
 #**********************************************************************/
 
-TARGET = shell.o
+TARGET = _shell.o
 
 OBJ = \
 	Shell.o	\

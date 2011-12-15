@@ -13,35 +13,29 @@
 #include "MMenz.h"
 #include "DataHandlerWrapper.h"
 
-static SrcFinfo2< double, double > toSub( 
-		"toSub", 
-		"Sends out increment of molecules on product each timestep"
-	);
+static SrcFinfo2< double, double > *toSub() {
+	static SrcFinfo2< double, double > toSub( 
+			"toSub", 
+			"Sends out increment of molecules on product each timestep"
+			);
+	return &toSub;
+}
 
-static SrcFinfo2< double, double > toPrd( 
-		"toPrd", 
-		"Sends out increment of molecules on product each timestep"
-	);
+static SrcFinfo2< double, double > *toPrd() {
+	static SrcFinfo2< double, double > toPrd( 
+			"toPrd", 
+			"Sends out increment of molecules on product each timestep"
+			);
+	return &toPrd;
+}
 
-static DestFinfo sub( "subDest",
-		"Handles # of molecules of substrate",
-		new OpFunc1< ZombieMMenz, double >( &ZombieMMenz::dummy ) );
+static DestFinfo *enzDest() {
+	static DestFinfo enzDest( "enzDest",
+			"Handles # of molecules of ZombieMMenzyme",
+			new OpFunc1< ZombieMMenz, double >( &ZombieMMenz::dummy ) );
+	return &enzDest;
+}
 
-static DestFinfo enzDest( "enz",
-		"Handles # of molecules of ZombieMMenzyme",
-		new OpFunc1< ZombieMMenz, double >( &ZombieMMenz::dummy ) );
-
-static DestFinfo prd( "prdDest",
-		"Handles # of molecules of product. Dummy.",
-		new OpFunc1< ZombieMMenz, double >( &ZombieMMenz::dummy ) );
-	
-static Finfo* subShared[] = {
-	&toSub, &sub
-};
-
-static Finfo* prdShared[] = {
-	&toPrd, &prd
-};
 
 const Cinfo* ZombieMMenz::initCinfo()
 {
@@ -80,6 +74,18 @@ const Cinfo* ZombieMMenz::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// Shared Msg Definitions
 		//////////////////////////////////////////////////////////////
+		static DestFinfo subDest( "subDest",
+				"Handles # of molecules of substrate",
+				new OpFunc1< ZombieMMenz, double >( &ZombieMMenz::dummy ) );
+		static DestFinfo prdDest( "prdDest",
+				"Handles # of molecules of product. Dummy.",
+				new OpFunc1< ZombieMMenz, double >( &ZombieMMenz::dummy ) );
+		static Finfo* subShared[] = {
+			toSub(), &subDest
+		};
+		static Finfo* prdShared[] = {
+			toPrd(), &prdDest
+		};
 		static SharedFinfo sub( "sub",
 			"Connects to substrate pool",
 			subShared, sizeof( subShared ) / sizeof( const Finfo* )
@@ -99,7 +105,7 @@ const Cinfo* ZombieMMenz::initCinfo()
 	static Finfo* mmEnzFinfos[] = {
 		&Km,	// Value
 		&kcat,	// Value
-		&enzDest,				// DestFinfo
+		enzDest(),				// DestFinfo
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
 		&proc,				// SharedFinfo
@@ -146,7 +152,7 @@ void ZombieMMenz::reinit( const Eref& e, ProcPtr p )
 double getEnzVol( const Eref& e )
 {
 	vector< Id > enzMol;
-	e.element()->getInputs( enzMol, &enzDest );
+	e.element()->getInputs( enzMol, enzDest() );
 	assert( enzMol.size() == 1 );
 	const Finfo* f1 = enzMol[0].element()->cinfo()->findFinfo( "requestSize" );
 	const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >( f1 );

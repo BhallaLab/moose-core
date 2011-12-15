@@ -2,7 +2,7 @@ CXXFLAGS += -I..
 # the line below are for easy inclusion of libxml++
 #CXXFLAGS += $(shell pkg-config libxml++-2.6 --CXXFLAGS) 
 
-TARGET = randnum.o
+TARGET = _randnum.o
 
 OBJ = \
 	mt19937ar.o	\

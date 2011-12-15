@@ -184,7 +184,7 @@ void testMathFuncProcess()
 	shell->doAddMsg( "Single", ObjId( rid ), "nOut", ObjId( tabid2 ), "input" );
 	shell->doSetClock( 0, 0.01 );
 	shell->doUseClock( "/n/##", "process", 0 );
-
+	
 	//////////////////////////////////////////////////////////////////////
 	// Now run models and compare outputs
 	//////////////////////////////////////////////////////////////////////

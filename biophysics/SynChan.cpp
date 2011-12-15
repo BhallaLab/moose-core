@@ -16,7 +16,10 @@
 #include "SynChanBase.h"
 #include "SynChan.h"
 
-static const double SynE = exp(1.0);
+const double& SynE() {
+	static const double SynE = exp(1.0);
+	return SynE;
+}
 
 const Cinfo* SynChan::initCinfo()
 {
@@ -190,7 +193,7 @@ void SynChan::reinit( const Eref& e, ProcPtr info )
                 yconst1_ = tau2_ * ( 1.0 - exp( -dt / tau2_ ) );
                 yconst2_ = exp( -dt / tau2_ );
                 if ( tau1_ == tau2_ ) {
-                    norm_ = SynChanBase::getGbar() * SynE / tau1_;
+                    norm_ = SynChanBase::getGbar() * SynE() / tau1_;
                 } else {
                     double tpeak = tau1_ * tau2_ * log( tau1_ / tau2_ ) / 
                             ( tau1_ - tau2_ );

@@ -14,56 +14,37 @@
 
 #define EPSILON 1e-15
 
-static SrcFinfo2< double, double > toSub( 
-		"toSub", 
-		"Sends out increment of molecules on product each timestep"
-	);
+static SrcFinfo2< double, double > *toSub() {
+	static SrcFinfo2< double, double > toSub( 
+			"toSub", 
+			"Sends out increment of molecules on product each timestep"
+			);
+	return &toSub;
+}
 
-static SrcFinfo2< double, double > toPrd( 
-		"toPrd", 
-		"Sends out increment of molecules on product each timestep"
-	);
-	
-static SrcFinfo2< double, double > toEnz( 
-		"toEnz", 
-		"Sends out increment of molecules on product each timestep"
-	);
-static SrcFinfo2< double, double > toCplx( 
-		"toCplx", 
-		"Sends out increment of molecules on product each timestep"
-	);
+static SrcFinfo2< double, double > *toPrd() {
+	static SrcFinfo2< double, double > toPrd( 
+			"toPrd", 
+			"Sends out increment of molecules on product each timestep"
+			);
+	return &toPrd;
+}
 
-static DestFinfo sub( "subDest",
-		"Handles # of molecules of substrate",
-		new OpFunc1< Enz, double >( &Enz::sub ) );
+static SrcFinfo2< double, double > *toEnz() {
+	static SrcFinfo2< double, double > toEnz( 
+			"toEnz", 
+			"Sends out increment of molecules on product each timestep"
+			);
+	return &toEnz;
+}
 
-static DestFinfo enz( "enzDest",
-		"Handles # of molecules of Enzyme",
-		new OpFunc1< Enz, double >( &Enz::enz ) );
-
-static DestFinfo prd( "prdDest",
-		"Handles # of molecules of product. Dummy.",
-		new OpFunc1< Enz, double >( &Enz::prd ) );
-
-static DestFinfo cplx( "prdDest",
-		"Handles # of molecules of enz-sub complex",
-		new OpFunc1< Enz, double >( &Enz::cplx ) );
-	
-static Finfo* subShared[] = {
-	&toSub, &sub
-};
-
-static Finfo* enzShared[] = {
-	&toEnz, &enz
-};
-
-static Finfo* prdShared[] = {
-	&toPrd, &prd
-};
-
-static Finfo* cplxShared[] = {
-	&toCplx, &cplx
-};
+static SrcFinfo2< double, double > *toCplx() {
+	static SrcFinfo2< double, double > toCplx( 
+			"toCplx", 
+			"Sends out increment of molecules on product each timestep"
+			);
+	return &toCplx;
+}
 
 const Cinfo* Enz::initCinfo()
 {
@@ -129,6 +110,31 @@ const Cinfo* Enz::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// Shared Msg Definitions
 		//////////////////////////////////////////////////////////////
+		static DestFinfo subDest( "subDest",
+				"Handles # of molecules of substrate",
+				new OpFunc1< Enz, double >( &Enz::sub ) );
+		static DestFinfo enzDest( "enzDest",
+				"Handles # of molecules of Enzyme",
+				new OpFunc1< Enz, double >( &Enz::enz ) );
+		static DestFinfo prdDest( "prdDest",
+				"Handles # of molecules of product. Dummy.",
+				new OpFunc1< Enz, double >( &Enz::prd ) );
+		static DestFinfo cplxDest( "cplxDest",
+				"Handles # of molecules of enz-sub complex",
+				new OpFunc1< Enz, double >( &Enz::cplx ) );
+		static Finfo* subShared[] = {
+			toSub(), &subDest
+		};
+		static Finfo* enzShared[] = {
+			toEnz(), &enzDest
+		};
+		static Finfo* prdShared[] = {
+			toPrd(), &prdDest
+		};
+		static Finfo* cplxShared[] = {
+			toCplx(), &cplxDest
+		};
+
 		static SharedFinfo sub( "sub",
 			"Connects to substrate pool",
 			subShared, sizeof( subShared ) / sizeof( const Finfo* )
@@ -218,10 +224,10 @@ void Enz::cplx( double n )
 
 void Enz::process( const Eref& e, ProcPtr p )
 {
-	toSub.send( e, p->threadIndexInGroup, r2_, r1_ );
-	toPrd.send( e, p->threadIndexInGroup, r3_, 0 );
-	toEnz.send( e, p->threadIndexInGroup, r3_ + r2_, r1_ );
-	toCplx.send( e, p->threadIndexInGroup, r1_, r3_ + r2_ );
+	toSub()->send( e, p->threadIndexInGroup, r2_, r1_ );
+	toPrd()->send( e, p->threadIndexInGroup, r3_, 0 );
+	toEnz()->send( e, p->threadIndexInGroup, r3_ + r2_, r1_ );
+	toCplx()->send( e, p->threadIndexInGroup, r1_, r3_ + r2_ );
 
 	// cout << "	proc: " << r1_ << ", " << r2_ << ", " << r3_ << endl;
 	
@@ -277,14 +283,14 @@ double Enz::getK3() const
 void Enz::setKm( const Eref& e, const Qinfo* q, double v )
 {
 	double volScale = 
-		convertConcToNumRateUsingMesh( e, &toEnz, 0, CONC_UNIT_CONV, 1 );
+		convertConcToNumRateUsingMesh( e, toEnz(), 0, CONC_UNIT_CONV, 1 );
 	k1_ = ( k2_ + k3_ ) / ( v * volScale );
 }
 
 double Enz::getKm( const Eref& e, const Qinfo* q ) const
 {
 	double volScale = 
-		convertConcToNumRateUsingMesh( e, &toEnz, 0, CONC_UNIT_CONV, 1 );
+		convertConcToNumRateUsingMesh( e, toEnz(), 0, CONC_UNIT_CONV, 1 );
 	return (k2_ + k3_) / ( k1_ * volScale );
 }
 

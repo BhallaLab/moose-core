@@ -468,23 +468,23 @@ MsgId Shell::doAddMsg( const string& msgType,
 	ObjId dest, const string& destField )
 {
 	if ( !src.id() ) {
-		cout << myNode_ << ": Error: Shell::doAddMsg: src not found\n";
+		cout << myNode_ << ": Error: Shell::doAddMsg: src not found" << endl;
 		return Msg::bad;
 	}
 	if ( !dest.id() ) {
-		cout << myNode_ << ": Error: Shell::doAddMsg: dest not found\n";
+		cout << myNode_ << ": Error: Shell::doAddMsg: dest not found" << endl;
 		return Msg::bad;
 	}
 	const Finfo* f1 = src.id()->cinfo()->findFinfo( srcField );
 	if ( !f1 ) {
 		cout << myNode_ << ": Shell::doAddMsg: Error: Failed to find field " << srcField << 
-			" on src: " << src.id()->getName() << "\n";
+			" on src: " << src.id()->getName() << endl;
 		return Msg::bad;
 	}
 	const Finfo* f2 = dest.id()->cinfo()->findFinfo( destField );
 	if ( !f2 ) {
 		cout << myNode_ << ": Shell::doAddMsg: Error: Failed to find field " << destField << 
-			" on dest: " << dest.id()->getName() << "\n";
+			" on dest: " << dest.id()->getName() << endl;
 		return Msg::bad;
 	}
 	if ( ! f1->checkTarget( f2 ) ) {

@@ -7,7 +7,7 @@
 #** See the file COPYING.LIB for the full notice.
 #**********************************************************************/
 
-TARGET = rt.o
+TARGET = _rt.o
 
 OBJ = \
 	regressionTest.o	\

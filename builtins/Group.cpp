@@ -14,16 +14,19 @@
 //////////////////////////////////////////////////////////////
 // MsgSrc Definitions
 //////////////////////////////////////////////////////////////
-static SrcFinfo0 group( 
-		"group", 
-		"Handle for grouping Elements"
-	);
+static SrcFinfo0 *group() {
+	static SrcFinfo0 group( 
+			"group", 
+			"Handle for grouping Elements"
+			);
+	return &group;
+}
 
 const Cinfo* Group::initCinfo()
 {
 
 	static Finfo* groupFinfos[] = {
-		&group,	// Value
+		group(),	// Value
 	};
 
 	static Cinfo groupCinfo (

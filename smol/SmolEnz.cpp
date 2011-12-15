@@ -13,57 +13,6 @@
 #include "Enz.h"
 #include "DataHandlerWrapper.h"
 
-static SrcFinfo2< double, double > toSub( 
-		"toSub", 
-		"Sends out increment of molecules on product each timestep"
-	);
-
-static SrcFinfo2< double, double > toPrd( 
-		"toPrd", 
-		"Sends out increment of molecules on product each timestep"
-	);
-	
-static SrcFinfo2< double, double > toSmolEnz( 
-		"toSmolEnz", 
-		"Sends out increment of molecules on product each timestep"
-	);
-static SrcFinfo2< double, double > toCplx( 
-		"toCplx", 
-		"Sends out increment of molecules on product each timestep"
-	);
-
-static DestFinfo sub( "subDest",
-		"Handles # of molecules of substrate",
-		new OpFunc1< SmolEnz, double >( &SmolEnz::dummy ) );
-
-static DestFinfo enz( "enzDest",
-		"Handles # of molecules of SmolEnzyme",
-		new OpFunc1< SmolEnz, double >( &SmolEnz::dummy ) );
-
-static DestFinfo prd( "prdDest",
-		"Handles # of molecules of product. Dummy.",
-		new OpFunc1< SmolEnz, double >( &SmolEnz::dummy ) );
-
-static DestFinfo cplx( "prdDest",
-		"Handles # of molecules of enz-sub complex",
-		new OpFunc1< SmolEnz, double >( &SmolEnz::dummy ) );
-	
-static Finfo* subShared[] = {
-	&toSub, &sub
-};
-
-static Finfo* enzShared[] = {
-	&toSmolEnz, &enz
-};
-
-static Finfo* prdShared[] = {
-	&toPrd, &prd
-};
-
-static Finfo* cplxShared[] = {
-	&toCplx, &cplx
-};
-
 const Cinfo* SmolEnz::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
@@ -108,6 +57,49 @@ const Cinfo* SmolEnz::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// Shared Msg Definitions
 		//////////////////////////////////////////////////////////////
+
+		static SrcFinfo2< double, double > toSub( 
+				"toSub", 
+				"Sends out increment of molecules on product each timestep"
+				);
+		static SrcFinfo2< double, double > toPrd( 
+				"toPrd", 
+				"Sends out increment of molecules on product each timestep"
+				);
+		static SrcFinfo2< double, double > toSmolEnz( 
+				"toSmolEnz", 
+				"Sends out increment of molecules on product each timestep"
+				);
+		static SrcFinfo2< double, double > toCplx( 
+				"toCplx", 
+				"Sends out increment of molecules on product each timestep"
+				);
+		static DestFinfo subDest( "subDest",
+				"Handles # of molecules of substrate",
+				new OpFunc1< SmolEnz, double >( &SmolEnz::dummy ) );
+		static DestFinfo enzDest( "enzDest",
+				"Handles # of molecules of SmolEnzyme",
+				new OpFunc1< SmolEnz, double >( &SmolEnz::dummy ) );
+		static DestFinfo prdDest( "prdDest",
+				"Handles # of molecules of product. Dummy.",
+				new OpFunc1< SmolEnz, double >( &SmolEnz::dummy ) );
+		static DestFinfo cplxDest( "cplxDest",
+				"Handles # of molecules of enz-sub complex",
+				new OpFunc1< SmolEnz, double >( &SmolEnz::dummy ) );
+		
+		static Finfo* subShared[] = {
+			&toSub, &subDest
+		};
+		static Finfo* enzShared[] = {
+			&toSmolEnz, &enzDest
+		};
+		static Finfo* prdShared[] = {
+			&toPrd, &prdDest
+		};
+		static Finfo* cplxShared[] = {
+			&toCplx, &cplxDest
+		};
+
 		static SharedFinfo sub( "sub",
 			"Connects to substrate molecule",
 			subShared, sizeof( subShared ) / sizeof( const Finfo* )

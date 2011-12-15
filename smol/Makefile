@@ -7,7 +7,7 @@
 #** See the file COPYING.LIB for the full notice.
 #**********************************************************************/
 
-TARGET = smol.o
+TARGET = _smol.o
 
 OBJ = \
 	SmolSim.o	\
