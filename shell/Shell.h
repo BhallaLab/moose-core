@@ -19,12 +19,14 @@ class FuncBarrier;
 enum AssignmentType { SINGLE, VECTOR, REPEAT };
 extern const ThreadId ScriptThreadNum; // Defined in Shell.cpp
 
-extern SrcFinfo1< PrepackedBuffer >* lowLevelSetGet();
-extern SrcFinfo4< Id, DataId, FuncId, PrepackedBuffer >* requestSet();
-extern SrcFinfo4< Id, DataId, FuncId, unsigned int >* requestGet();
+// These Finfo objects are exposed to other classes for convenience in test cases and other functions.
+// NOTE: These should never be re-registered in an initCinfo of another class.
+//extern SrcFinfo1< PrepackedBuffer >* lowLevelSetGet(); // Not available
+//extern SrcFinfo4< Id, DataId, FuncId, PrepackedBuffer >* requestSet(); // Not currently used.
+//extern SrcFinfo4< Id, DataId, FuncId, unsigned int >* requestGet(); // Not available
 extern DestFinfo* receiveGet();
 extern ReduceFinfoBase* reduceArraySizeFinfo();
-extern SrcFinfo2< unsigned int, unsigned int >* ack();
+//extern SrcFinfo2< unsigned int, unsigned int >* ack(); // Not currently used.
 
 class Shell
 {

@@ -95,7 +95,6 @@ static SrcFinfo0 *finished() {
 	return &finished;
 }
 
-/*
 static SrcFinfo2< unsigned int, unsigned int > *ack() {
 	static SrcFinfo2< unsigned int, unsigned int > ack( 
 			"ack",
@@ -104,7 +103,6 @@ static SrcFinfo2< unsigned int, unsigned int > *ack() {
 			);
 	return &ack;
 }
-*/
 
 const Cinfo* Clock::initCinfo()
 {
