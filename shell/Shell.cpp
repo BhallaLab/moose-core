@@ -56,14 +56,17 @@ double Shell::runtime_( 0.0 );
 
 const ThreadId ScriptThreadNum = 0;
 
-static SrcFinfo5< string, Id, Id, string, vector< int > > requestCreate( "requestCreate",
+static SrcFinfo5< string, Id, Id, string, vector< int > > *requestCreate() {
+	static SrcFinfo5< string, Id, Id, string, vector< int > > requestCreate( "requestCreate",
 			"requestCreate( class, parent, newElm, name, dimensions ): "
 			"creates a new Element on all nodes with the specified Id. "
 			"Initiates a callback to indicate completion of operation. "
 			"Goes to all nodes including self."
 			);
+	return &requestCreate;
+}
 
-SrcFinfo2< unsigned int, unsigned int >* ack()
+static SrcFinfo2< unsigned int, unsigned int >* ack()
 {
 	static SrcFinfo2< unsigned int, unsigned int > temp( "ack",
 			"ack( unsigned int node#, unsigned int status ):"
@@ -73,61 +76,97 @@ SrcFinfo2< unsigned int, unsigned int >* ack()
 	return &temp;
 }
 
-static SrcFinfo1< Id  > requestDelete( "requestDelete",
+static SrcFinfo1< Id  > *requestDelete() {
+	static SrcFinfo1< Id  > requestDelete( "requestDelete",
 			"requestDelete( doomedElement ):"
 			"Deletes specified Element on all nodes."
 			"Initiates a callback to indicate completion of operation."
 			"Goes to all nodes including self." ); 
+	return &requestDelete;
+}
 
-static SrcFinfo0 requestQuit( "requestQuit",
+static SrcFinfo0 *requestQuit() {
+	static SrcFinfo0 requestQuit( "requestQuit",
 			"requestQuit():"
 			"Emerges from the inner loop, and wraps up. No return value." );
-static SrcFinfo1< double > requestStart( "requestStart",
+	return &requestQuit;
+}
+
+static SrcFinfo1< double > *requestStart() {
+	static SrcFinfo1< double > requestStart( "requestStart",
 			"requestStart( runtime ):"
 			"Starts a simulation. Goes to all nodes including self."
 			"Initiates a callback to indicate completion of run."
 			);
-static SrcFinfo1< unsigned int > requestStep( "requestStep",
+	return &requestStart;
+}
+
+static SrcFinfo1< unsigned int > *requestStep() {
+	static SrcFinfo1< unsigned int > requestStep( "requestStep",
 			"requestStep():"
 			"Advances a simulation for the specified # of steps."
 			"Goes to all nodes including self."
 			);
-static SrcFinfo0 requestStop( "requestStop",
+	return &requestStep;
+}
+
+static SrcFinfo0 *requestStop() {
+	static SrcFinfo0 requestStop( "requestStop",
 			"requestStop():"
 			"Gently stops a simulation after completing current ops."
 			"After this op it is save to do 'start' again, and it will"
 			"resume where it left off"
 			"Goes to all nodes including self."
 			);
-static SrcFinfo2< unsigned int, double > requestSetupTick( 
+	return &requestStop;
+}
+
+static SrcFinfo2< unsigned int, double > *requestSetupTick() {
+	static SrcFinfo2< unsigned int, double > requestSetupTick( 
 			"requestSetupTick",
 			"requestSetupTick():"
 			"Asks the Clock to coordinate the assignment of a specific"
 			"clock tick. Args: Tick#, dt."
 			"Goes to all nodes including self."
 			);
-static SrcFinfo0 requestReinit( "requestReinit",
+	return &requestSetupTick;
+}
+
+static SrcFinfo0 *requestReinit() {
+	static SrcFinfo0 requestReinit( "requestReinit",
 			"requestReinit():"
 			"Reinits a simulation: sets to time 0."
 			"If simulation is running it stops it first."
 			"Goes to all nodes including self."
 			);
+	return &requestReinit;
+}
 
-static SrcFinfo0 requestTerminate( "requestTerminate",
+/*
+static SrcFinfo0 *requestTerminate() {
+	static SrcFinfo0 requestTerminate( "requestTerminate",
 			"requestTerminate():"
 			"Violently stops a simulation, possibly leaving things half-done."
 			"Goes to all nodes including self."
 			);
-static SrcFinfo6< string, MsgId, ObjId, string, ObjId, string > 
-		requestAddMsg( 
-			"requestAddMsg",
-			"requestAddMsg( type, src, srcField, dest, destField );"
-			"Creates specified Msg between specified Element on all nodes."
-			"Initiates a callback to indicate completion of operation."
-			"Goes to all nodes including self."
-			); 
+	return &requestTerminate;
+}
+*/
 
-SrcFinfo4< Id, DataId, FuncId, PrepackedBuffer >* requestSet()
+static SrcFinfo6< string, MsgId, ObjId, string, ObjId, string > *requestAddMsg() {
+	static SrcFinfo6< string, MsgId, ObjId, string, ObjId, string > 
+		requestAddMsg( 
+				"requestAddMsg",
+				"requestAddMsg( type, src, srcField, dest, destField );"
+				"Creates specified Msg between specified Element on all nodes."
+				"Initiates a callback to indicate completion of operation."
+				"Goes to all nodes including self."
+			     ); 
+	return &requestAddMsg;
+}
+
+/*
+static SrcFinfo4< Id, DataId, FuncId, PrepackedBuffer >* requestSet()
 {
 	static SrcFinfo4< Id, DataId, FuncId, PrepackedBuffer > temp(
 			"requestSet",
@@ -136,18 +175,28 @@ SrcFinfo4< Id, DataId, FuncId, PrepackedBuffer >* requestSet()
 			);
 	return &temp;
 }
+*/
 
-static SrcFinfo2< Id, Id > requestMove(
+static SrcFinfo2< Id, Id > *requestMove() {
+	static SrcFinfo2< Id, Id > requestMove(
 			"move",
 			"move( origId, newParent);"
 			"Moves origId to become a child of newParent"
 			);
-static SrcFinfo5< vector< Id >, string, unsigned int, bool, bool > requestCopy(
+	return &requestMove;
+}
+
+static SrcFinfo5< vector< Id >, string, unsigned int, bool, bool > *requestCopy() {
+	static SrcFinfo5< vector< Id >, string, unsigned int, bool, bool > requestCopy(
 			"copy",
 			"copy( origId, newParent, numRepeats, toGlobal, copyExtMsg );"
 			"Copies origId to become a child of newParent"
 			);
-static SrcFinfo3< string, string, unsigned int > requestUseClock(
+	return &requestCopy;
+}
+
+static SrcFinfo3< string, string, unsigned int > *requestUseClock() {
+	static SrcFinfo3< string, string, unsigned int > requestUseClock(
 			"useClock",
 			"useClock( path, field, tick# );"
 			"Specifies which clock tick to use for all elements in Path."
@@ -155,38 +204,9 @@ static SrcFinfo3< string, string, unsigned int > requestUseClock(
 			"updates to the 'init' field."
 			"Tick # specifies which tick to be attached to the objects."
 			);
-
-static DestFinfo handleUseClock( "handleUseClock", 
-			"Deals with assignment of path to a given clock.",
-			new EpFunc3< Shell, string, string, unsigned int >( 
-				&Shell::handleUseClock )
-			);
-
-static DestFinfo handleCreate( "create", 
-			"create( class, parent, newElm, name, dimensions )",
-			new EpFunc5< Shell, string, Id, Id, string, vector< int > >( &Shell::handleCreate ) );
-
-static DestFinfo handleDelete( "delete", 
-			"Destroys Element, all its messages, and all its children. Args: Id",
-			new EpFunc1< Shell, Id >( & Shell::destroy ) );
-
-DestFinfo* handleAck()
-{
-	static DestFinfo temp( "handleAck", 
-			"Keeps track of # of acks to a blocking shell command. Arg: Source node num.",
-			new OpFunc2< Shell, unsigned int, unsigned int >( 
-				& Shell::handleAck ) );
-	return &temp;
+	return &requestUseClock;
 }
 
-static DestFinfo handleAddMsg( "handleAddMsg", 
-			"Makes a msg",
-			new EpFunc6< Shell, string, MsgId, ObjId, string, ObjId, string >
-				( & Shell::handleAddMsg ) );
-
-static DestFinfo handleQuit( "handleQuit", 
-			"Stops simulation running and quits the simulator",
-			new OpFunc0< Shell >( & Shell::handleQuit ) );
 
 /*
 static DestFinfo handleSet( "handleSet", 
@@ -204,6 +224,7 @@ static DestFinfo handleSet( "handleSet",
  */
 
 /*
+// Declared extern in Shell.h. Hence, no static qualifier.
 SrcFinfo4< Id, DataId, FuncId, unsigned int >* requestGet()
 {
 	static SrcFinfo4< Id, DataId, FuncId, unsigned int > temp( 
@@ -222,6 +243,7 @@ static DestFinfo handleGet( "handleGet",
 				&Shell::handleGet )
 			);
 
+// Declared extern in Shell.h. Hence, no static qualifier.
 SrcFinfo1< PrepackedBuffer >* lowLevelSetGet() {
 	static SrcFinfo1< PrepackedBuffer > temp(
 			"lowLevelSetGet",
@@ -234,6 +256,8 @@ SrcFinfo1< PrepackedBuffer >* lowLevelSetGet() {
 }
 */
 
+// Declared extern in Shell.h. Hence, no static qualifier.
+// This function is used directly outside of this file (see testAsync.cpp). 
 DestFinfo* receiveGet() {
 	static DestFinfo temp( "receiveGet", 
 		"receiveGet( Uint node#, Uint status, PrepackedBuffer data )"
@@ -250,22 +274,8 @@ static SrcFinfo3< unsigned int, unsigned int, PrepackedBuffer > relayGet(
 );
 */
 
-static DestFinfo handleMove( "move", 
-		"handleMove( Id orig, Id newParent ): "
-		"moves an Element to a new parent",
-	new EpFunc2< Shell, Id, Id >( & Shell::handleMove ) );
-
-static DestFinfo handleCopy( "handleCopy", 
-		"handleCopy( vector< Id > args, string newName, unsigned int nCopies, bool toGlobal, bool copyExtMsgs ): "
-		" The vector< Id > has Id orig, Id newParent, Id newElm. " 
-		"This function copies an Element and all its children to a new parent."
-		" May also expand out the original into nCopies copies."
-		" Normally all messages within the copy tree are also copied. "
-		" If the flag copyExtMsgs is true, then all msgs going out are also copied.",
-			new EpFunc5< Shell, vector< Id >, string, unsigned int, bool, bool >( 
-				& Shell::handleCopy ) );
-
-static SrcFinfo2< Id, FuncId > requestSync(
+static SrcFinfo2< Id, FuncId > *requestSync() {
+	static SrcFinfo2< Id, FuncId > requestSync(
 			"sync",
 			"sync( ElementId, FuncId );"
 			"Synchronizes Element data indexing across all nodes."
@@ -274,59 +284,30 @@ static SrcFinfo2< Id, FuncId > requestSync(
 			"The ElementId is the element being synchronized."
 			"The FuncId is the 'get' function for the synchronized field."
 			);
-static DestFinfo handleSync( "handleSync", 
-		"handleSync( Id Element): "
-		"Synchronizes DataHandler indexing across nodes"
-		"The ElementId is the element being synchronized."
-		"The FuncId is the 'get' function for the synchronized field.",
-	new EpFunc2< Shell, Id, FuncId >( & Shell::handleSync ) );
+	return &requestSync;
+}
 
-static SrcFinfo1< Id > requestReMesh(
+static SrcFinfo1< Id > *requestReMesh() {
+	static SrcFinfo1< Id > requestReMesh(
 			"requestReMesh",
 			"requestReMesh( meshId );"
 			"Chops up specified mesh."
 			);
-static DestFinfo handleReMesh( "handleReMesh", 
-		"handleReMesh( Id BaseMesh): "
-		"Deals with outcome of resizing the meshing in a cellular"
-		"compartment (the ChemMesh class). The mesh change has to"
-		"propagate down to the molecules and reactions managed by this."
-		"Mesh. The ElementId is the mesh being synchronized.",
-	new OpFunc1< Shell, Id >( & Shell::handleReMesh ) );
+	return &requestReMesh;
+}
 
-static SrcFinfo1< bool > requestSetParserIdleFlag(
+static SrcFinfo1< bool > *requestSetParserIdleFlag() {
+	static SrcFinfo1< bool > requestSetParserIdleFlag(
 			"requestSetParserIdleFlag",
 			"SetParserIdleFlag( bool isParserIdle );"
 			"When True, the main ProcessLoop waits a little each cycle"
 			"so as to avoid pounding on the CPU."
 			);
-static DestFinfo handleSetParserIdleFlag( "handleSetParserIdleFlag", 
-		"handleSetParserIdleFlag( bool isParserIdle ): "
-		"When True, tells the ProcessLoop to wait as the Parser is idle.",
-	new OpFunc1< Shell, bool >( & Shell::handleSetParserIdleFlag ) );
+	return &requestSetParserIdleFlag;
+}
 
 
-static Finfo* shellMaster[] = {
-	&requestCreate, &requestDelete,
-	&requestAddMsg, 
-	&requestQuit,
-	&requestMove, &requestCopy, &requestUseClock,
-	&requestSync, &requestReMesh, &requestSetParserIdleFlag,
-	handleAck() };
-static Finfo* shellWorker[] = {
-	&handleCreate, &handleDelete,
-		&handleAddMsg,
-		&handleQuit,
-		&handleMove, &handleCopy, &handleUseClock,
-		&handleSync, &handleReMesh, &handleSetParserIdleFlag,
-	ack() };
-
-static Finfo* clockControlFinfos[] = 
-{
-	&requestStart, &requestStep, &requestStop, &requestSetupTick,
-	&requestReinit, handleAck()
-};
-
+// Declared extern in Shell.h. Hence, no static qualifier.
 ReduceFinfoBase* reduceArraySizeFinfo()
 {
 	static ReduceFinfo< Shell, unsigned int, ReduceFieldDimension >
@@ -360,6 +341,79 @@ const Cinfo* Shell::initCinfo()
 ////////////////////////////////////////////////////////////////
 // Dest Finfos: Functions handled by Shell
 ////////////////////////////////////////////////////////////////
+	static DestFinfo handleAck( "handleAck", 
+			"Keeps track of # of acks to a blocking shell command. Arg: Source node num.",
+			new OpFunc2< Shell, unsigned int, unsigned int >( 
+				& Shell::handleAck ) );
+	static Finfo* shellMaster[] = {
+		requestCreate(), requestDelete(),
+		requestAddMsg(), 
+		requestQuit(),
+		requestMove(), requestCopy(), requestUseClock(),
+		requestSync(), requestReMesh(), requestSetParserIdleFlag(),
+		&handleAck };
+	static DestFinfo handleUseClock( "handleUseClock", 
+			"Deals with assignment of path to a given clock.",
+			new EpFunc3< Shell, string, string, unsigned int >( 
+				&Shell::handleUseClock )
+			);
+	static DestFinfo handleCreate( "create", 
+			"create( class, parent, newElm, name, dimensions )",
+			new EpFunc5< Shell, string, Id, Id, string, vector< int > >( &Shell::handleCreate ) );
+	static DestFinfo handleDelete( "delete", 
+			"Destroys Element, all its messages, and all its children. Args: Id",
+			new EpFunc1< Shell, Id >( & Shell::destroy ) );
+	static DestFinfo handleAddMsg( "handleAddMsg", 
+			"Makes a msg",
+			new EpFunc6< Shell, string, MsgId, ObjId, string, ObjId, string >
+			( & Shell::handleAddMsg ) );
+	static DestFinfo handleQuit( "handleQuit", 
+			"Stops simulation running and quits the simulator",
+			new OpFunc0< Shell >( & Shell::handleQuit ) );
+	static DestFinfo handleMove( "move", 
+			"handleMove( Id orig, Id newParent ): "
+			"moves an Element to a new parent",
+			new EpFunc2< Shell, Id, Id >( & Shell::handleMove ) );
+	static DestFinfo handleCopy( "handleCopy", 
+			"handleCopy( vector< Id > args, string newName, unsigned int nCopies, bool toGlobal, bool copyExtMsgs ): "
+			" The vector< Id > has Id orig, Id newParent, Id newElm. " 
+			"This function copies an Element and all its children to a new parent."
+			" May also expand out the original into nCopies copies."
+			" Normally all messages within the copy tree are also copied. "
+			" If the flag copyExtMsgs is true, then all msgs going out are also copied.",
+			new EpFunc5< Shell, vector< Id >, string, unsigned int, bool, bool >( 
+				& Shell::handleCopy ) );
+	static DestFinfo handleSync( "handleSync", 
+			"handleSync( Id Element): "
+			"Synchronizes DataHandler indexing across nodes"
+			"The ElementId is the element being synchronized."
+			"The FuncId is the 'get' function for the synchronized field.",
+			new EpFunc2< Shell, Id, FuncId >( & Shell::handleSync ) );
+	static DestFinfo handleReMesh( "handleReMesh", 
+			"handleReMesh( Id BaseMesh): "
+			"Deals with outcome of resizing the meshing in a cellular"
+			"compartment (the ChemMesh class). The mesh change has to"
+			"propagate down to the molecules and reactions managed by this."
+			"Mesh. The ElementId is the mesh being synchronized.",
+			new OpFunc1< Shell, Id >( & Shell::handleReMesh ) );
+	static DestFinfo handleSetParserIdleFlag( "handleSetParserIdleFlag", 
+			"handleSetParserIdleFlag( bool isParserIdle ): "
+			"When True, tells the ProcessLoop to wait as the Parser is idle.",
+			new OpFunc1< Shell, bool >( & Shell::handleSetParserIdleFlag ) );
+
+	static Finfo* shellWorker[] = {
+		&handleCreate, &handleDelete,
+		&handleAddMsg,
+		&handleQuit,
+		&handleMove, &handleCopy, &handleUseClock,
+		&handleSync, &handleReMesh, &handleSetParserIdleFlag,
+		ack() };
+	static Finfo* clockControlFinfos[] = 
+	{
+		requestStart(), requestStep(), requestStop(), requestSetupTick(),
+		requestReinit(), &handleAck
+	};
+
 		static DestFinfo setclock( "setclock", 
 			"Assigns clock ticks. Args: tick#, dt",
 			new OpFunc2< Shell, unsigned int, double >( & Shell::doSetClock ) );
@@ -450,7 +504,7 @@ Id Shell::doCreate( string type, Id parent, string name, vector< int > dimension
 	vector< int > dims( dimensions );
 	dims.push_back( isGlobal );
 	initAck(); // Nasty thread stuff happens here for multithread mode.
-		requestCreate.send( Id().eref(), ScriptThreadNum, type, parent, ret, name, dims );
+		requestCreate()->send( Id().eref(), ScriptThreadNum, type, parent, ret, name, dims );
 	waitForAck();
 	return ret;
 }
@@ -458,7 +512,7 @@ Id Shell::doCreate( string type, Id parent, string name, vector< int > dimension
 bool Shell::doDelete( Id i )
 {
 	initAck();
-		requestDelete.send( Id().eref(), ScriptThreadNum, i );
+		requestDelete()->send( Id().eref(), ScriptThreadNum, i );
 	waitForAck();
 	return 1;
 }
@@ -493,7 +547,7 @@ MsgId Shell::doAddMsg( const string& msgType,
 	}
 	initAck();
 	MsgId mid = Msg::nextMsgId();
-	requestAddMsg.send( Eref( shelle_, 0 ), ScriptThreadNum, 
+	requestAddMsg()->send( Eref( shelle_, 0 ), ScriptThreadNum, 
 		msgType, mid, src, srcField, dest, destField );
 	//	Qinfo::clearQ( &p_ );
 	waitForAck();
@@ -546,7 +600,7 @@ void Shell::doQuit( )
 {
 	// No acks needed: the next call from parser should be to 
 	// exit parser itself.
-	requestQuit.send( Id().eref(), ScriptThreadNum );
+	requestQuit()->send( Id().eref(), ScriptThreadNum );
 }
 
 void Shell::doStart( double runtime )
@@ -556,7 +610,7 @@ void Shell::doStart( double runtime )
 
 	// Then actually run simulation.
 	initAck();
-		requestStart.send( sheller, ScriptThreadNum, runtime );
+		requestStart()->send( sheller, ScriptThreadNum, runtime );
 	waitForAck();
 	// cout << Shell::myNode() << ": Shell::doStart(" << runtime << ")" << endl;
 }
@@ -566,14 +620,14 @@ void Shell::doNonBlockingStart( double runtime )
 	Eref sheller( shelle_, 0 );
 	// Check if sim not yet initialized. Do it if needed.
 
-	requestStart.send( sheller, ScriptThreadNum, runtime );
+	requestStart()->send( sheller, ScriptThreadNum, runtime );
 }
 
 void Shell::doReinit()
 {
 	Eref sheller( shelle_, 0 );
 	initAck();
-		requestReinit.send( sheller, ScriptThreadNum );
+		requestReinit()->send( sheller, ScriptThreadNum );
 	waitForAck();
 }
 
@@ -581,7 +635,7 @@ void Shell::doStop()
 {
 	Eref sheller( shelle_, 0 );
 	initAck();
-		requestStop.send( sheller, ScriptThreadNum );
+		requestStop()->send( sheller, ScriptThreadNum );
 	waitForAck();
 }
 ////////////////////////////////////////////////////////////////////////
@@ -610,7 +664,7 @@ void Shell::doUseClock( string path, string field, unsigned int tick )
 {
 	Eref sheller( shelle_, 0 );
 	initAck();
-		requestUseClock.send( sheller, ScriptThreadNum, path, field, tick );
+		requestUseClock()->send( sheller, ScriptThreadNum, path, field, tick );
 	waitForAck();
 }
 
@@ -635,7 +689,7 @@ void Shell::doMove( Id orig, Id newParent )
 	// Put in check here that newParent is not a child of orig.
 	Eref sheller( shelle_, 0 );
 	initAck();
-		requestMove.send( sheller, ScriptThreadNum, orig, newParent );
+		requestMove()->send( sheller, ScriptThreadNum, orig, newParent );
 	waitForAck();
 }
 
@@ -817,7 +871,7 @@ void Shell::doSyncDataHandler( Id tgt )
 	}
 	Eref sheller( shelle_, 0 );
 	initAck();
-		requestSync.send( sheller, ScriptThreadNum, tgt, sizeFid );
+		requestSync()->send( sheller, ScriptThreadNum, tgt, sizeFid );
 	waitForAck();
 	// Now the data is back, assign the field.
 	// Check: will this function work on all nodes? No, only on master.
@@ -873,7 +927,7 @@ void Shell::doReacDiffMesh( Id baseCompartment )
 	doSyncDataHandler( baseMesh );
 
 	initAck();
-		requestReMesh.send( sheller, ScriptThreadNum, baseMesh );
+		requestReMesh()->send( sheller, ScriptThreadNum, baseMesh );
 	waitForAck();
 
 	// Traverse all child compts and do their meshes.
@@ -895,7 +949,7 @@ void Shell::doReacDiffMesh( Id baseCompartment )
 void Shell::doSetParserIdleFlag( bool isParserIdle )
 {
 	Eref sheller( shelle_, 0 );
-	requestSetParserIdleFlag.send( sheller, ScriptThreadNum, isParserIdle);
+	requestSetParserIdleFlag()->send( sheller, ScriptThreadNum, isParserIdle);
 }
 
 void Shell::handleSetParserIdleFlag( bool isParserIdle )
@@ -1138,13 +1192,13 @@ bool Shell::innerAddMsg( string msgType, MsgId mid,
 		cout << myNode_ << 
 			": Error: Shell::handleAddMsg: msgType not known: "
 			<< msgType << endl;
-		// ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus );
+		// ack()->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus );
 		return 0;
 	}
 	if ( m ) {
 		if ( f1->addMsg( f2, m->mid(), src.id() ) ) {
 			latestMsgId_ = m->mid();
-			// ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
+			// ack()->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
 			return 1;
 		}
 		delete m;
@@ -1154,7 +1208,7 @@ bool Shell::innerAddMsg( string msgType, MsgId mid,
 			<< msgType << " from " << src.id()->getName() <<
 			" to " << dest.id()->getName() << endl;
 	return 1;
-//	ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus );
+//	ack()->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus );
 }
 
 static bool changeTreeDepth( Id id, short delta )
@@ -1248,7 +1302,7 @@ void Shell::handleUseClock( const Eref& e, const Qinfo* q,
 		/*
 		if ( !ret ) {
 			cout << Shell::myNode() << "Error: Shell::handleUseClock: Messaging failed\n";
-			ack.send( Eref( shelle_, 0 ), &p_, Shell::myNode(), 
+			ack()->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), 
 				ErrorStatus );
 			return;
 		}
