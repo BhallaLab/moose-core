@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Mar 26 22:41:37 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Nov 16 11:39:49 2011 (+0530)
+// Last-Updated: Thu Dec 22 15:53:09 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 228
+//     Update #: 241
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -47,6 +47,8 @@
 #include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
 #include "pymoose.h"
+
+using namespace pymoose;
 
 extern void testSync();
 extern void testAsync();
@@ -89,7 +91,7 @@ static Element* shellE = NULL; // This is in order to keep a handle on
                                // know how to get back the Id of
                                // stupid shell from the Shell&.
 
-void setup_runtime_env(bool verbose){
+void pymoose::setup_runtime_env(bool verbose){
     const map<string, string>& argmap = getArgMap();
     map<string, string>::const_iterator it;
     it = argmap.find("SINGLETHREADED");
@@ -128,7 +130,7 @@ void setup_runtime_env(bool verbose){
     }
 }
 
-Shell& getShell()
+Shell& pymoose::getShell(int argc, char ** argv)
 {
     static Shell * shell_ = NULL;
     if (shell_ == NULL)
@@ -141,8 +143,6 @@ Shell& getShell()
         int _isInfinite = 0;
         int _myNode = 0;
         int _numProcessThreads = 0;
-        int argc = 0;
-        char ** argv = NULL;
         string arg;
 
         map<string, string>::const_iterator it = getArgMap().find("SINGLETHREADED");    
@@ -195,7 +195,7 @@ Shell& getShell()
         Id shellId;
         vector <DimInfo> dims; // TODO: DimInfo is new in dh_branch .. confirm this is correct
         // dims.push_back(DimInfo(1));
-        shellE = new Element(shellId, Shell::initCinfo(), "root", dims, 1, 1);
+        shellE = new Element(shellId, Shell::initCinfo(), "root", dims, 0, 1);
         Id clockId = Id::nextId();
         shell_ = reinterpret_cast<Shell*>(shellId.eref().data());
         shell_->setShellElement(shellE);
@@ -261,7 +261,7 @@ Shell& getShell()
     return *shell_;
 }
 
-void finalize()
+void pymoose::finalize()
 {
     if (!getShell().isSingleThreaded()){
         getShell().doQuit();
@@ -269,7 +269,7 @@ void finalize()
         Qinfo::freeMutex();
     }
     // getShell().clearSetMsgs();
-    Neutral* ns = reinterpret_cast<Neutral*>(shellE);
+    Neutral* ns = reinterpret_cast<Neutral*>(shellE->dataHandler()->data(0));
     ns->destroy( shellE->id().eref(), 0, 0);
 #ifdef USE_MPI
     MPI_Finalize();
@@ -286,7 +286,7 @@ Return empty string on failure (either there is no field of name
 of {finfoType} with name {fieldName} exists.
 
 */
-pair<string, string> getFieldType(ObjId id, string fieldName, string finfoType)
+pair<string, string> pymoose::getFieldType(ObjId id, string fieldName, string finfoType)
 {
     static vector<string> finfoTypes;
     if (finfoTypes.empty()){
@@ -321,7 +321,6 @@ pair<string, string> getFieldType(ObjId id, string fieldName, string finfoType)
             string _fieldName = Field<string>::get(ObjId(fieldId, DataId(0, ii, 0)), "name");
             if (fieldName == _fieldName){                
                 fieldType = Field<string>::get(ObjId(fieldId, DataId(0, ii, 0)), "type");
-                cout << "Field type:" << fieldName <<  ": " << fieldType << endl;
                 return pair<string, string>(fieldType, finfoType);
             }
         }
@@ -336,7 +335,7 @@ pair<string, string> getFieldType(ObjId id, string fieldName, string finfoType)
 /**
    Return a vector of field names of specified finfo type.
  */
-vector<string> getFieldNames(ObjId id, string finfoType)
+vector<string> pymoose::getFieldNames(ObjId id, string finfoType)
 {
     vector <string> ret;
     string className = Field<string>::get(id, "class");    
