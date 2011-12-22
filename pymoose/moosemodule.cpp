@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Nov 16 11:31:50 2011 (+0530)
+// Last-Updated: Thu Dec 22 16:41:12 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4304
+//     Update #: 4345
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -58,16 +58,11 @@
 #include "../utility/utility.h"
 #include "../shell/Shell.h"
 
+#include "pymoose.h"
 #include "moosemodule.h"
 
 using namespace std;
-
-extern const map<string, string>& getArgMap();
-extern Shell& getShell();
-extern void finalize();
-extern void setup_runtime_env(bool verbose);
-extern pair<string,string> getFieldType(ObjId oid, string fieldName, string finfoType="");
-extern vector<string> getFieldNames(ObjId oid, string fieldType);
+using namespace pymoose;
 
 extern void nonMpiTests(Shell *);
 extern void mpiTests();
@@ -164,10 +159,10 @@ extern "C" {
         {"isRunning", (PyCFunction)_pymoose_isRunning, METH_VARARGS, "True if the simulation is currently running."},
         {"exists", (PyCFunction)_pymoose_exists, METH_VARARGS, "True if there is an object with specified path."},
         {"loadModel", (PyCFunction)_pymoose_loadModel, METH_VARARGS, "Load model from a file to a specified path.\n"
-"Parameters:\n"
-"\tstr filename -- model description file.\n"
-"\tstr modelpath -- moose path for the top level element of the model to be created.\n"
-"\tstr solverclass -- (optional) solver type to be used for simulating the model.\n"},
+         "Parameters:\n"
+         "\tstr filename -- model description file.\n"
+         "\tstr modelpath -- moose path for the top level element of the model to be created.\n"
+         "\tstr solverclass -- (optional) solver type to be used for simulating the model.\n"},
         {"connect", (PyCFunction)_pymoose_connect, METH_VARARGS, "Create a message between srcField on src element to destField on target element."},        
         {"getCwe", (PyCFunction)_pymoose_getCwe, METH_VARARGS, "Get the current working element. 'pwe' is an alias of this function."},
         {"pwe", (PyCFunction)_pymoose_getCwe, METH_VARARGS, "Get the current working element. 'getCwe' is an alias of this function."},
@@ -346,10 +341,9 @@ extern "C" {
             self->id_ = ((_Id*)src)->id_;
             return 0;
         }
-        if (//!PyArg_ParseTupleAndKeywords(args, kwds, "s|Is", const_cast<char**>(kwlist), &path, &i_dims, &type) &&            
-            !PyArg_ParseTupleAndKeywords(args, kwds, "s|Os:_pymoose_Id_init", const_cast<char**>(kwlist), &path, &dims, &type)){
-            PyErr_SetString(PyExc_TypeError, "Invalid paramaters. Id.__init__ has the following signature:"
-                            "Id.__init__(path, dims, type) or Id.__init__(other_Id) or"
+        if (!PyArg_ParseTupleAndKeywords(args, kwds, "s|Os:_pymoose_Id_init", const_cast<char**>(kwlist), &path, &dims, &type)){
+            PyErr_SetString(PyExc_TypeError, "Invalid paramaters. Id.__init__ has the following signature: "
+                            "Id.__init__(path, dims, type) or Id.__init__(other_Id) or "
                             "Id.__init__(id_value)");
             return -1;
         }
@@ -592,22 +586,25 @@ extern "C" {
 
     static int _pymoose_ObjId_init(_ObjId * self, PyObject * args, PyObject * kwargs)
     {
-        unsigned int id = 0, data = 0, field = 0;
+        unsigned int id = 0, data = 0, field = 0, numFieldBits = 0;
         PyObject * obj;
-        static const char * kwlist[] = {"id", "dataIndex", "fieldIndex", NULL};
-        if (PyArg_ParseTupleAndKeywords(args, kwargs, "I|II:_pymoose_ObjId_init", const_cast<char**>(kwlist), &id, &data, &field)){
-            self->oid_ = ObjId(Id(id), DataId(data, field, 0)); // putting numFieldBits=0 by default.No clue if/how we are supposed to compute this stuff beforehand.
+        static const char * kwlist[] = {"id", "dataIndex", "fieldIndex", "numFieldBits", NULL};
+        if (PyArg_ParseTupleAndKeywords(args, kwargs, "I|III:_pymoose_ObjId_init", const_cast<char**>(kwlist), &id, &data, &field, &numFieldBits)){
+            self->oid_ = ObjId(Id(id), DataId(data, field, numFieldBits));
             return 0;
-        } else if (PyArg_ParseTupleAndKeywords(args, kwargs, "O|II:_pymoose_ObjId_init", const_cast<char**>(kwlist), &obj, &data, &field)){
+        } else if (PyArg_ParseTupleAndKeywords(args, kwargs, "O|III:_pymoose_ObjId_init", const_cast<char**>(kwlist), &obj, &data, &field, &numFieldBits)){
             PyErr_Clear();
             if (Id_Check(obj)){
-                self->oid_ = ObjId(((_Id*)obj)->id_, DataId(data, field, 0));
+                self->oid_ = ObjId(((_Id*)obj)->id_, DataId(data, field, numFieldBits));
                 return 0;
             } else if (ObjId_Check(obj)){
                 self->oid_ = ((_ObjId*)obj)->oid_;
                 return 0;
+            } else if (PyString_Check(obj)){
+                self->oid_ = ObjId(string(PyString_AsString(obj)));
+                return 0;
             } else {
-                PyErr_SetString(PyExc_TypeError, "ObjId.__init__(self, id, dataindex, fieldindex=0) or ObjId.__init__(self, Id, dataIndex, fieldIndex=0) or ObjId.__init__(self, ObjId)");
+                PyErr_SetString(PyExc_TypeError, "ObjId.__init__(self, id, dataindex, fieldindex=0, numFieldBits=0) or ObjId.__init__(self, Id, dataIndex, fieldIndex=0, numFieldBits=0) or ObjId.__init__(self, ObjId) or ObjId.__init__(self, path)");
                 return -1;
             }            
         } else {
@@ -616,15 +613,21 @@ extern "C" {
         }        
     }
 
+    /**
+       This function simple returns the python hash of the unique path
+       of this object.
+    */
     static long _pymoose_ObjId_hash(_ObjId * self, PyObject * args)
     {
-        long long unsigned index = self->oid_.dataId.value();
-        return index;
+        PyObject * path = Py_BuildValue("s", self->oid_.path().c_str());        
+        long ret = PyObject_Hash(path);
+        Py_XDECREF(path);
+        return ret;
     }
     
     static PyObject * _pymoose_ObjId_repr(_ObjId * self)
     {
-        return PyString_FromFormat("<ObjId: id=%u, dataId=%lld, path=%s>", self->oid_.id.value(), self->oid_.dataId.value(), self->oid_.id.path().c_str());
+        return PyString_FromFormat("<ObjId: id=%u, dataId=%lld, path=%s>", self->oid_.id.value(), self->oid_.dataId.value(), self->oid_.path().c_str());
     } // !  _pymoose_ObjId_repr
 
     
