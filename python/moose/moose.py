@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Thu Sep 22 14:55:46 2011 (+0530)
+# Last-Updated: Thu Dec 22 16:33:01 2011 (+0530)
 #           By: Subhasis Ray
-#     Update #: 917
+#     Update #: 952
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -254,7 +254,7 @@ class _MooseDescriptor(object):
 class _MooseMeta(type):
     def __init__(cls, name, bases, classdict):        
         super(_MooseMeta, cls).__init__(name, bases, classdict)
-        field_dict = getFieldDict('/classes/%s' % (name), 'valueFinfo')
+        field_dict = getFieldDict(name, 'valueFinfo')
         for field in field_dict.keys():
             setattr(cls, field, _MooseDescriptor(field))
         
@@ -347,55 +347,30 @@ class NeutralArray(object):
 class Neutral(object):
     __metaclass__ = _MooseMeta
     def __init__(self, *args, **kwargs):
-        id_ = 0
-        dindex = 0
-        findex = 0
+        id_ = None
+        self.oid_ = None
+        dindex = None
+        findex = None
+        numFieldBits = None
         if len(args) >= 1:
             if isinstance(args[0], ObjId):
-                (id_, dindex, findex) = (args[0].getId().getValue(), args[0].getDataIndex(), args[0].getFieldIndex())
+                self.oid_ = args[0]
             elif isinstance(args[0], Id):
                 id_ = args[0].getValue()
             elif isinstance(args[0], Neutral):
-                (id_, dindex, findex) = (args[0].oid_.getId().getValue(),args[0].oid_.getDataIndex(), args[0].oid_.getFieldIndex())
+                self.oid_ = args[0].oid_
             elif isinstance(args[0], NeutralArray):
                 id_ = args[0].id_
             elif isinstance(args[0], str):
-                path = args[0].replace('[', ' ').replace(']', ' ')
-                components = path.split('/')
-                current_path = ''
-                for component in components:
-                    if not component:
-                        continue
-                    tokens = component.split()
-                    current_path = current_path + '/' + tokens[0]
-                    if not _moose.exists(current_path):
-                        if component == components[-1]: # this is the last entry and does not exist, so create a new one
-                            class_obj = eval(self.__class__.__name__ + 'Array')
-                            array_obj = class_obj(current_path)
-                            id_ = array_obj.id_
-                        else:
-                            raise NameError('%s does not exist.' % (current_path))
-                    else:
-                        array_obj = Id(current_path)
-                        print 'Current path', current_path
-                        for index in tokens[1:]:
-                            print 'Index:', index
-                            array_obj = array_obj[int(index)]
-                            print array_obj
-                        if isinstance(array_obj, Id):
-                            id_ = array_obj
-                        elif isinstance(array_obj, ObjId):
-                            id_ = array_obj.getId()
-                            dindex = array_obj.getDataIndex()
-                            findex = array_obj.getFieldIndex()
-                        
-                    
+                self.oid_ = _moose.ObjId(args[0])
             else:
                 raise TypeError('First non-keyword argument must be a number or an existing Id/ObjId/Neutral/NeutralArray object.')
         if len(args) >= 2:
             dindex = args[1]
         if len(args) >= 3:
             findex = args[2]
+        if len(args) >= 4:
+            numFieldBits = args[3]
         if (kwargs):
             try:
                 id_ = kwargs['id']
@@ -409,7 +384,20 @@ class Neutral(object):
                 findex = kwargs['fieldIndex']
             except KeyError:
                 pass
-        self.oid_ = _moose.ObjId(id_, dindex, findex)
+            try:
+                numFieldBits = kwargs['numFieldBits']
+            except KeyError:
+                pass
+        if self.oid_ is None:
+            if id_ is not None:
+                if dindex is None:
+                    self.oid_ = _moose.ObjId(id_)
+                elif findex is None:
+                    self.oid_ = _moose.ObjId(id_, dindex)
+                elif numFieldBits is None:
+                    self.oid_ = _moose.ObjId(id_, dindex, findex)
+                else:
+                    self.oid_ = _moose.ObjId(id_, dindex, findex, numFieldBits)
         orig_classname = self.oid_.getField('class')
         if self.__class__.__name__ != orig_classname:
             orig_class = eval(orig_classname)
@@ -588,7 +576,7 @@ def define_class(classId):
     else:
         base_class = object
     class_obj = type(class_name, (base_class,), {'className': class_name})
-    field_dict = getFieldDict('/classes/%s' % (class_name), 'valueFinfo')
+    field_dict = getFieldDict(class_name, 'valueFinfo')
     for field in field_dict.keys():
         setattr(class_obj, field, _MooseDescriptor(field))
     # Go through the destFinfos and make them look like methods

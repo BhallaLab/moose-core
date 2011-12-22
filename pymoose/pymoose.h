@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Fri Mar 11 09:49:33 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Nov 15 22:19:31 2011 (+0530)
+// Last-Updated: Thu Dec 22 14:29:04 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 184
+//     Update #: 197
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -46,19 +46,19 @@ class PyMooseBase
     PyMooseBase();
     virtual ~PyMooseBase();    
 }; // ! class PyMooseBase
-Shell& getShell();
-void finalize();
-const std::map<std::string, std::string>& getArgMap();
-} // ! namespace pymoose
 
 ////////////////////////////////////////////////////////
 // These functions are defined in pymooseutil.cpp
 ////////////////////////////////////////////////////////
+
 void setup_runtime_env(bool verbose=true);
-Shell& getShell();
+Shell& getShell(int argc=0, char ** argv=0);
 void finalize();
 pair<string, string> getFieldType(ObjId id, string fieldName, string finfoType="");
 vector<string> getFieldNames(ObjId id, string finfoType);
+
+} // ! namespace pymoose
+
         
 #endif // !_PYMOOSE_H
 // 
