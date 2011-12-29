@@ -47,15 +47,15 @@ const Cinfo* ZombieReac::initCinfo()
 		static ElementValueFinfo< ZombieReac, double > kf(
 			"kf",
 			"Forward rate constant, in # units",
-			&ZombieReac::setKf,
-			&ZombieReac::getKf
+			&ZombieReac::setNumKf,
+			&ZombieReac::getNumKf
 		);
 
 		static ElementValueFinfo< ZombieReac, double > kb(
 			"kb",
 			"Reverse rate constant, in # units",
-			&ZombieReac::setKb,
-			&ZombieReac::getKb
+			&ZombieReac::setNumKb,
+			&ZombieReac::getNumKb
 		);
 
 		static ElementValueFinfo< ZombieReac, double > Kf(
@@ -176,17 +176,17 @@ void ZombieReac::prd( double v )
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
-void ZombieReac::setKf( const Eref& e, const Qinfo* q, double v )
+void ZombieReac::setNumKf( const Eref& e, const Qinfo* q, double v )
 {
 	rates_[ convertIdToReacIndex( e.id() ) ]->setR1( v );
 }
 
-double ZombieReac::getKf( const Eref& e, const Qinfo* q ) const
+double ZombieReac::getNumKf( const Eref& e, const Qinfo* q ) const
 {
 	return rates_[ convertIdToReacIndex( e.id() ) ]->getR1();
 }
 
-void ZombieReac::setKb( const Eref& e, const Qinfo* q, double v )
+void ZombieReac::setNumKb( const Eref& e, const Qinfo* q, double v )
 {
 	if ( useOneWay_ )
 		rates_[ convertIdToReacIndex( e.id() ) + 1 ]->setR1( v );
@@ -194,7 +194,7 @@ void ZombieReac::setKb( const Eref& e, const Qinfo* q, double v )
 		rates_[ convertIdToReacIndex( e.id() ) ]->setR2( v );
 }
 
-double ZombieReac::getKb( const Eref& e, const Qinfo* q ) const
+double ZombieReac::getNumKb( const Eref& e, const Qinfo* q ) const
 {
 	if ( useOneWay_ )
 		return rates_[ convertIdToReacIndex( e.id() ) + 1 ]->getR1();
@@ -207,28 +207,28 @@ void ZombieReac::setConcKf( const Eref& e, const Qinfo* q, double v )
 	double volScale = 
 		convertConcToNumRateUsingMesh( e, toSub(), 0, 1.0e-3, 0 );
 
-	setKf( e, q, v * volScale );
+	setNumKf( e, q, v * volScale );
 }
 
 double ZombieReac::getConcKf( const Eref& e, const Qinfo* q ) const
 {
 	double volScale = 
 		convertConcToNumRateUsingMesh( e, toSub(), 0, 1.0e-3, 0 );
-	return getKf( e, q ) / volScale;
+	return getNumKf( e, q ) / volScale;
 }
 
 void ZombieReac::setConcKb( const Eref& e, const Qinfo* q, double v )
 {
 	double volScale = 
 		convertConcToNumRateUsingMesh( e, toPrd(), 0, 1.0e-3, 0 );
-	setKb( e, q, v * volScale );
+	setNumKb( e, q, v * volScale );
 }
 
 double ZombieReac::getConcKb( const Eref& e, const Qinfo* q ) const
 {
 	double volScale = 
 		convertConcToNumRateUsingMesh( e, toPrd(), 0, 1.0e-3, 0 );
-	return getKb( e, q ) / volScale;
+	return getNumKb( e, q ) / volScale;
 }
 
 //////////////////////////////////////////////////////////////
@@ -278,8 +278,8 @@ void ZombieReac::zombify( Element* solver, Element* orig )
 	ZombieReac* z = reinterpret_cast< ZombieReac* >( zer.data() );
 	Reac* reac = reinterpret_cast< Reac* >( oer.data() );
 
-	ZeroOrder* forward = z->makeHalfReaction( orig, reac->getKf(), sub );
-	ZeroOrder* reverse = z->makeHalfReaction( orig, reac->getKb(), prd );
+	ZeroOrder* forward = z->makeHalfReaction( orig, reac->getNumKf( oer, 0 ), sub );
+	ZeroOrder* reverse = z->makeHalfReaction( orig, reac->getNumKb( oer, 0 ), prd );
 
 	unsigned int rateIndex = z->convertIdToReacIndex( orig->id() );
 	unsigned int revRateIndex = rateIndex;
@@ -346,6 +346,6 @@ void ZombieReac::unzombify( Element* zombie )
 
 	Reac* m = reinterpret_cast< Reac* >( oer.data() );
 
-	m->setKf( z->getKf( zer, 0 ) );
-	m->setKb( z->getKb( zer, 0 ) );
+	m->setNumKf( oer, 0, z->getNumKf( zer, 0 ) );
+	m->setNumKb( oer, 0, z->getNumKb( zer, 0 ) );
 }

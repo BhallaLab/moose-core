@@ -16257,3 +16257,54 @@ Checkin 3114.
 
 Subha needs: a clear API of how path-based addressing is translated to the
 new dh_branch system, traversal of messages and elements.
+
+6 Dec 2011: Did some documentation of this API. Checkin 3220.
+============================================================================
+28 Dec 2011.
+Wish list of things to implement:
+- New Synapse code with lookup rather than queue
+- Batched messaging for axonal transmission: club a lot of events.
+- Implement proximity activity synaptic capture learning rule
+- Implement standard STDP learning rule
+- New IntFire with dendritic domains
+- MPI
+- Conc units for reactions
+- ReacDiff solver to permit compartment-specific reacs.
+- SteadyState solver
+	- Automated dose-response generation
+	- Estimates of all possible steady states of system
+- SBML I/O
+- NeuroML I/O
+- kkit13
+
+
+Started out working on conc units for reactions. I have a utility
+function "convertConcToNumRateUsingMesh()"
+which does the conversion either way, but currently reacs (and enz)
+use mol#s for the rate unit. The design is to have only the pools
+replicated for each voxel in the mesh, the reacs and enzs remain as singleton
+Elements.
+- What to do for stochastic calculations?
+- What to do for exp Euler calculations? 
+- What quantity (n or conc) to use for pools?
+	- The last two are easy if all calculations are in the same volume.
+	EE works fine in conc units, so pools could be in conc units.
+	- If pools are in different vols and in conc units:
+		- We would need the ratio of vols in the ODE.
+		- Need factor also to use in EE calculations if calculations
+			are done in 'n.
+	- The last two could also be one in 'n' units.
+		- EE wourks fine, but need to have rate scale factors to use
+			for the calculations
+	- 
+	
+
+
+
+============================================================================
+29 Dec 2011.
+Began work on converting Reacs to use conc units. The reac side of the story is
+now sorted out, but for the solver system I still need to figure out how to
+retain the authoritative Kf and Kb values: in the solver data structs, or back
+on the ZombieReac.
+Compiles and clears unit and regression tests.
