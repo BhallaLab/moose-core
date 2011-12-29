@@ -20,10 +20,10 @@ class Reac
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
 
-		void setKf( double v );
-		double getKf() const;
-		void setKb( double v );
-		double getKb() const;
+		void setNumKf( const Eref&e, const Qinfo* q, double v );
+		double getNumKf( const Eref& e, const Qinfo *q ) const;
+		void setNumKb( const Eref&e, const Qinfo* q, double v );
+		double getNumKb( const Eref& e, const Qinfo *q ) const;
 
 		/// set Kf in concentration units
 		void setConcKf( const Eref& e, const Qinfo* q, double v );
@@ -46,10 +46,12 @@ class Reac
 
 		static const Cinfo* initCinfo();
 	private:
-		double kf_;
-		double kb_;
-		double sub_;
-		double prd_;
+		double kf_;	// Used for EE method, but secondary to the ConcKf
+		double kb_;	// Used for EE method, but secondary to the ConcKf
+		double concKf_;	// Kf in concentration and time units
+		double concKb_;	// Kb in concentration and time units
+		double sub_;	// State variable
+		double prd_;	// State variable
 };
 
 #endif // REAC_H
