@@ -175,8 +175,10 @@ void Reac::process( const Eref& e, ProcPtr p )
 
 void Reac::reinit( const Eref& e, ProcPtr p )
 {
-	sub_ = kf_;
-	prd_ = kb_;
+	sub_ = kf_ = concKf_ *
+		convertConcToNumRateUsingMesh( e, toSub(), 0, CONC_UNIT_CONV, 0 );
+	prd_ = kb_ = concKb_ * 
+		convertConcToNumRateUsingMesh( e, toPrd(), 0, CONC_UNIT_CONV, 0 );
 }
 
 //////////////////////////////////////////////////////////////
@@ -193,7 +195,9 @@ void Reac::setNumKf( const Eref& e, const Qinfo* q, double v )
 
 double Reac::getNumKf( const Eref& e, const Qinfo* q) const
 {
-	return kf_;
+	double kf = concKf_ / 
+		convertConcToNumRateUsingMesh( e, toSub(), 0, CONC_UNIT_CONV, 0 );
+	return kf;
 }
 
 void Reac::setNumKb( const Eref& e, const Qinfo* q, double v )
@@ -206,7 +210,9 @@ void Reac::setNumKb( const Eref& e, const Qinfo* q, double v )
 
 double Reac::getNumKb( const Eref& e, const Qinfo* q ) const
 {
-	return kb_;
+	double kb = concKb_ / 
+		convertConcToNumRateUsingMesh( e, toPrd(), 0, CONC_UNIT_CONV, 0 );
+	return kb;
 }
 
 void Reac::setConcKf( const Eref& e, const Qinfo* q, double v )

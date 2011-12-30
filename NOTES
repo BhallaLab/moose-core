@@ -16307,4 +16307,77 @@ Began work on converting Reacs to use conc units. The reac side of the story is
 now sorted out, but for the solver system I still need to figure out how to
 retain the authoritative Kf and Kb values: in the solver data structs, or back
 on the ZombieReac.
-Compiles and clears unit and regression tests.
+Compiles and clears unit and regression tests. Checkin 3226.
+
+On solver data structs: We may have different volume meshes, so would
+need either a volume term in the calculations, or precompute different
+RateTerms. Either way, the Kf and Kb values would be for reference, not
+for calculation.
+Are we likely to have different RateTerms? Probably not, but will need to
+incorporate different volume scaling terms.
+
+On Reac: Would need to refer back each time there is a remeshing.
+
+I think this belongs on the Reac. Redo the zombie.
+There is also the concern that (#/cell) units are meaningless in a reac that
+describes an entire mesh. Each mesh entry will have its own kf and kb if the 
+volumes differ between mesh entries. Even if they are the same, the values 
+are dependent on mesh dimensions.
+
+Structure of kinetic models:
+
+/base	:					solver, 
+					could be Ksolve, Gsolve, or other.
+	/kinetics:				Mesh
+		/mesh				MeshEntry
+		/boundary			Boundary
+		/<poolname>	 		Pool
+			/<enzname>		MMEnz
+			/<enzname>		Enz
+				/<enzname_cplx>	Pool
+		/<reacname>			Reac
+		/<sumtotname>			SumTot
+		/<group, pool, reac: recursively>
+	/compartments:				Neutral
+	/compartment_<i>			Mesh
+		/mesh				MeshEntry
+		/boundary			Boundary
+	/geometry: 				Neutral
+	/groups: 				Neutral
+	/graphs: 				Neutral
+	/moregraphs: 				Neutral
+
+
+OneToOne Messages go from pools/requestSize to the matching MeshEntries/size.
+compartments doesn't seem to be doing anything, it should have been holding the
+compartments.
+Geometry doesn't have anything in it now.
+Groups: Not doing anything now.
+Info: not present now.
+
+============================================================================
+30 Dec 2011.
+x The readkkit needs to direct the reacs to the compartment (ChemMesh) for size,
+and the pools to the MeshEntries on the compartment.
+	This isn't right. The reacs need to query their sub/prd pools
+	for volume, and in this process they handle different volumes too.
+	So current function is a good start on this.
+. Need to make unit test for Reac volume scaling
+	- Need to go back and fix the scaling. The function should go to each
+	of the substrates, get their volume, and then work out the scaling for
+	kf. Likewise for kb.
+- The ChemMesh needs to be linked to a suitable Geometry
+- ReadKkit needs to insert ChemMeshes/compartments under the master /kinetics
+	tree, and to put the embedded pools and reacs under their compartment.
+- ReadKkit needs to put reacs that span compts into the smaller compartment.
+- I need to build some good unit and regression tests for all this.
+- Need to simply insert solver and have it traverse its children as its default
+	path. 
+	- The solver should itself figure out what to do with the mesh and 
+	geometry.
+	- Solver needs to set up messages or other links to the solved 
+	ChemMesh objects, to handle remesh requests.
+
+
+
+

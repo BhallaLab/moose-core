@@ -233,7 +233,6 @@ void testPoolVolumeScaling()
 	double size = Field< double >::get( poolId, "size" );
 	assert( doubleEq( size, PI * x1 * (r0+r1) * (r0+r1) / 4.0 ) );
 
-	double NA =  6.0221415e23;
 	Field< double >::set( poolId, "n", 400 );
 	double volscale = 1e3 / ( NA * size );
 	double conc = Field< double >::get( poolId, "conc" );
@@ -253,6 +252,65 @@ void testPoolVolumeScaling()
 	cout << "." << flush;
 }
 
+void testReacVolumeScaling()
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< int > dims( 1, 1 );
+	Id comptId = shell->doCreate( "CubeMesh", Id(), "cube", dims );
+	Id meshId( comptId.value() + 1 );
+	Id subId = shell->doCreate( "Pool", comptId, "sub", dims );
+	Id prdId = shell->doCreate( "Pool", comptId, "prd", dims );
+	Id reacId = shell->doCreate( "Reac", comptId, "reac", dims );
+
+	MsgId mid = shell->doAddMsg( "OneToOne", 
+		subId, "requestSize", meshId, "get_size" );
+	assert( mid != Msg::bad );
+	mid = shell->doAddMsg( "OneToOne", 
+		prdId, "requestSize", meshId, "get_size" );
+	assert( mid != Msg::bad );
+
+	vector< double > coords( 9, 10.0e-6 );
+	coords[0] = coords[1] = coords[2] = 0;
+
+	Field< vector< double > >::set( comptId, "coords", coords );
+
+	double size = Field< double >::get( comptId, "size" );
+	assert( doubleEq( size, 1e-15 ) );
+
+	MsgId ret = shell->doAddMsg( "Single", reacId, "sub", subId, "reac" );
+	assert( ret != Msg::bad );
+	ret = shell->doAddMsg( "Single", reacId, "prd", prdId, "reac" );
+	assert( ret != Msg::bad );
+
+	Field< double >::set( reacId, "Kf", 2 );
+	Field< double >::set( reacId, "Kb", 3 );
+	double x = Field< double >::get( reacId, "kf" );
+	assert( doubleEq( x, 2 ) );
+	x = Field< double >::get( reacId, "kb" );
+	assert( doubleEq( x, 3 ) );
+	
+	ret = shell->doAddMsg( "Single", reacId, "sub", subId, "reac" );
+	assert( ret != Msg::bad );
+	double conv = 1.0 / ( NA * 1e-18 );
+	x = Field< double >::get( reacId, "kf" );
+	assert( doubleEq( x, 2 * conv ) );
+	x = Field< double >::get( reacId, "kb" );
+	assert( doubleEq( x, 3 ) );
+
+	ret = shell->doAddMsg( "Single", reacId, "sub", subId, "reac" );
+	assert( ret != Msg::bad );
+	ret = shell->doAddMsg( "Single", reacId, "prd", prdId, "reac" );
+	assert( ret != Msg::bad );
+	x = Field< double >::get( reacId, "kf" );
+	assert( doubleEq( x, 2 * conv * conv ) );
+	x = Field< double >::get( reacId, "kb" );
+	assert( doubleEq( x, 3 * conv ) );
+
+	shell->doDelete( comptId );
+	cout << "." << flush;
+}
+
+
 void testReadCspace()
 {
 	ReadCspace rc;
@@ -264,6 +322,7 @@ void testKinetics()
 {
 	testMathFunc();
 	testPoolVolumeScaling();
+	testReacVolumeScaling();
 	testReadCspace();
 }
 
