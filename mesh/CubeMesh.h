@@ -135,7 +135,6 @@ class CubeMesh: public ChemMesh
 		static const Cinfo* initCinfo();
 
 	private:
-		double size_; /// Total Volume
 		bool isToroid_; ///Flag: Should the ends loop around mathemagically?
 		bool preserveNumEntries_; ///Flag: Should dx change or nx, with vol?
 

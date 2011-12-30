@@ -257,6 +257,10 @@ void CubeMesh::updateCoords()
 	for ( unsigned int i = 0; i < size; ++i )
 		m2s_[i] = s2m_[i] = i;
 
+	size_ = ( x1_ - x0_ ) * ( y1_ - y0_ ) * ( z1_ - z0_ );
+	if ( size_ < 0 )
+		size_ = -size_;
+
 	buildStencil();
 }
 
