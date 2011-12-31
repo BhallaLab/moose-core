@@ -29,11 +29,94 @@ double lookupSizeFromMesh( const Eref& e, const SrcFinfo* sf )
 }
 
 /**
+ * Figures out all the volumes of the substrates or products on the
+ * specified reaction 'reac'. The SrcFinfo is for the sub or prd msg.
+ * Returns the index of the smallest vol. Passes back a vector of volumes.
+ * The meshIndex is zero. Reasoning is as follows: both in the case of 
+ * well-stirred (single mesh entry) models, and in the case of spatial
+ * models with consistent mesh sizes and alignments, the mesh entry 
+ * volumes are in the same ratio.
+ * Cases with more complex arrangements may also use the current vols as
+ * a starting point, but will need to add index-specific scaling factors
+ * to their reaction system.
+ */
+
+unsigned int getReactantVols( const Eref& reac, const SrcFinfo* pools, 
+	vector< double >& vols )
+{
+	static const unsigned int meshIndex = 0;
+	static const Cinfo* poolCinfo = Cinfo::find( "Pool" );
+	static const Cinfo* zombiePoolCinfo = Cinfo::find( "ZombiePool" );
+
+	static const Finfo* f1 = poolCinfo->findFinfo( "requestSize" );
+	static const SrcFinfo* poolRequestSize = 
+		dynamic_cast< const SrcFinfo* >( f1 );
+
+	static const Finfo* f2 = zombiePoolCinfo->findFinfo( "requestSize" );
+	static const SrcFinfo* zombiePoolRequestSize = 
+		dynamic_cast< const SrcFinfo* >( f2 );
+
+	const vector< MsgFuncBinding >* mfb = 
+		reac.element()->getMsgAndFunc( pools->getBindIndex() );
+
+	unsigned int smallIndex = 0;
+
+	vols.resize( 0 );
+	if ( mfb ) {
+		for ( unsigned int i = 0; i < mfb->size(); ++i ) {
+			double v = 1;
+			Element* pool = Msg::getMsg( (*mfb)[0].mid )->e2();
+			if ( pool == reac.element() )
+				pool = Msg::getMsg( (*mfb)[0].mid )->e1();
+			assert( pool != reac.element() );
+			Eref pooler( pool, meshIndex );
+			if ( pool->cinfo()->isA( "Pool" ) ) {
+				v = lookupSizeFromMesh( pooler, poolRequestSize );
+			} else if ( pool->cinfo()->isA( "ZombiePool" ) ) {
+				v = lookupSizeFromMesh( pooler, zombiePoolRequestSize );
+			} else {
+				cout << "Error: getReactantVols: pool is neither regular nor zombie\n";
+				assert( 0 );
+			}
+			vols.push_back( v );
+			if ( v < vols[0] )
+				smallIndex = i;
+		}
+	}
+	return smallIndex;
+}
+
+/**
+ * Returns conversion factor to convert rates from concentration to 
+ * mol# units.
+ * Handles arbitrary combinations of volumes.
+ * Assumes that the reference volume for computing rates is the 
+ * smallest volume.
+ * Assumes all calculations are in SI: cubic metres and millimolar.
+ */
+
+double convertConcToNumRateUsingMesh( const Eref& e, const SrcFinfo* pools, 
+	bool doPartialConversion )
+{
+	vector< double > vols;
+	unsigned int smallest = getReactantVols( e, pools, vols );
+	double conv = 1;
+
+	for ( unsigned int i = 0; i < vols.size(); ++i ) {
+		if ( doPartialConversion || smallest != i ) {
+			conv *= vols[i] * NA;
+		}
+	}
+	return conv;
+}
+
+
+/**
  * Generates conversion factor for rates from concentration to mol# units.
  * Assumes that all reactant pools (substrate and product) are within the
  * same mesh entry and therefore have the same volume.
  */
-
+/*
 double convertConcToNumRateUsingMesh( const Eref& e, const SrcFinfo* pools, 
 	unsigned int meshIndex, double scale, bool doPartialConversion )
 {
@@ -75,6 +158,7 @@ double convertConcToNumRateUsingMesh( const Eref& e, const SrcFinfo* pools,
 
 	return conversion;
 }
+*/
 
 /**
  * Generates conversion factor for rates from concentration to mol# units.

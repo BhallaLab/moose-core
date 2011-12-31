@@ -16268,7 +16268,7 @@ Wish list of things to implement:
 - Implement standard STDP learning rule
 - New IntFire with dendritic domains
 - MPI
-- Conc units for reactions
++ Conc units for reactions
 - ReacDiff solver to permit compartment-specific reacs.
 - SteadyState solver
 	- Automated dose-response generation
@@ -16379,5 +16379,82 @@ and the pools to the MeshEntries on the compartment.
 	ChemMesh objects, to handle remesh requests.
 
 
+Checkin 3227. So far I've only begun on the unit test for reac volume
+scaling, need to fix up the function that asks the reactants for their volumes.
+
+Need to have API for geoms and meshes to talk to each other so that 
+changes on geom reflect on the mesh, and when the mesh is general, like a 
+CubeMesh, we can apply arbitrary geoms to define the limits.
 
 
+============================================================================
+31 Dec 2011.
+Working on reac rate/volume conversion.
+See also discussion on 13 Sep 2011.
+Ran into a problem with it because one needs to specify a meshIndex, but
+which one? If the reactants are on different meshes then we have a big
+problem of matching up. What is this function used for anyway?
+If it is for the generic kf and kb of the bulk terms, then we can use
+a simpler function that ignores meshIndex.
+If it is for the specialized job of handling transfer between different
+compartments, and generating terms for those reactions, this is a job
+for the solver and meshes to work out. Here we would have the additional
+issue that the rate terms for reacs are not constant, so the regular
+solver replication approach would need an additional scaling term to
+deal with volume.
+
+Use cases:
+traffic between bulk and PSD (with an anchor protein): 
+	1 vol for bulk, other vol for PSD having complex and anchor in it.
+Transport via channel
+	1 vol for outside ion, 1 vol for inside ion, surface for channel
+Receptor-ligand binding
+	1 vol for ligand, surface for receptor, surface for product.
+GProtein activation
+	Ternary complex (memb) + GTP (bulk) <---> complex (memb) <---> Galpha.GTP (memb) + GbetaGamma (memb) + GDP (bulk)
+
+The basic idea is that both in the case of the single-mesh-entry bulk
+reactions, and in the case where the solver does a straightforward
+replication of reac terms, they all have the same kf and kb rates.
+So we will just need to use the first index of the mesh.
+In the case of nastier mesh alignments, the reac will need an additional
+scaling term which can be condensed into something like another
+reactant. The job of the solver and meshes is then converted to figuring
+out which reactions need this treatment, modifying them, and generating
+the array of scaling terms.
+
+After some pen/paper analysis, we come back to the point from earlier: the
+Kf, Kb are defined for a certain volume. If molecule A1 is in this volume,
+then
+
+dA1/dt = -Kf.A1.A2.A3...  + Kb.B1.B2... // Regardless of v2, v3 etc.
+
+Then, dA2/dt = dA1/dt * v1/v2
+etc.
+
+flux = d.nA1/dt = kf * nA1 * nA2 * ...
+
+Converting to conc:
+
+flux = dA1/dt * v1*NA = kf * A1*v1*NA * A2*v2*NA *...
+Cancel out v1*NA
+
+dA1/dt = kf * A1 * A2 * ... * v2*NA * ...
+
+But 
+dA1/dt = Kf * A1 * A2 * ...
+So
+
+Kf = kf / ( v2 * NA * ... ); 
+
+kf = Kf * ( v2 * NA ) * ( v3 * NA ) * ... // More terms as needed.
+
+So which pool do we pick for A1?
+
+Assume the smallest.
+
+Implementation in progress. I have replace the original 
+convertConcToNumRatesUnsingMesh
+Need to get the stuff to compile first. Done.
+Need to clear unit tests for reac and add more tests for multiple vols.
+Clears original unit tests but fails regression tests. 

@@ -270,6 +270,9 @@ void ReadKkit::makeStandardElements()
 	if ( kinetics == Id() ) {
 		kinetics = 
 		shell_->doCreate( "CubeMesh", baseId_, "kinetics", dims, true );
+		vector< double > coords( 9, 10.0e-6 );
+		coords[0] = coords[1] = coords[2] = 0;
+		Field< vector< double > >::set( kinetics, "coords", coords );
 	}
 	assert( kinetics != Id() );
 	assert( kinetics.eref().element()->getName() == "kinetics" );
@@ -297,8 +300,11 @@ void ReadKkit::makeStandardElements()
 
 	Id geometry = Neutral::child( baseId_.eref(), "geometry" );
 	if ( geometry == Id() ) {
+
 		geometry = 
-		shell_->doCreate( "Neutral", baseId_, "geometry", dims, true );
+		shell_->doCreate( "Geometry", baseId_, "geometry", dims, true );
+		MsgId ret = shell_->doAddMsg( "Single", geometry, "compt", kinetics, "reac" );
+		assert( ret != Msg::bad );
 	}
 	assert( geometry != Id() );
 

@@ -262,6 +262,8 @@ void testReacVolumeScaling()
 	Id prdId = shell->doCreate( "Pool", comptId, "prd", dims );
 	Id reacId = shell->doCreate( "Reac", comptId, "reac", dims );
 
+	double vol1 = 1e-15;
+
 	MsgId mid = shell->doAddMsg( "OneToOne", 
 		subId, "requestSize", meshId, "get_size" );
 	assert( mid != Msg::bad );
@@ -275,7 +277,7 @@ void testReacVolumeScaling()
 	Field< vector< double > >::set( comptId, "coords", coords );
 
 	double size = Field< double >::get( comptId, "size" );
-	assert( doubleEq( size, 1e-15 ) );
+	assert( doubleEq( size, vol1 ) );
 
 	MsgId ret = shell->doAddMsg( "Single", reacId, "sub", subId, "reac" );
 	assert( ret != Msg::bad );
@@ -291,7 +293,7 @@ void testReacVolumeScaling()
 	
 	ret = shell->doAddMsg( "Single", reacId, "sub", subId, "reac" );
 	assert( ret != Msg::bad );
-	double conv = 1.0 / ( NA * 1e-18 );
+	double conv = 1.0 / ( NA * vol1 );
 	x = Field< double >::get( reacId, "kf" );
 	assert( doubleEq( x, 2 * conv ) );
 	x = Field< double >::get( reacId, "kb" );
