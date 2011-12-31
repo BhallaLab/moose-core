@@ -176,9 +176,9 @@ void Reac::process( const Eref& e, ProcPtr p )
 void Reac::reinit( const Eref& e, ProcPtr p )
 {
 	sub_ = kf_ = concKf_ *
-		convertConcToNumRateUsingMesh( e, toSub(), 0, CONC_UNIT_CONV, 0 );
+		convertConcToNumRateUsingMesh( e, toSub(), 0 );
 	prd_ = kb_ = concKb_ * 
-		convertConcToNumRateUsingMesh( e, toPrd(), 0, CONC_UNIT_CONV, 0 );
+		convertConcToNumRateUsingMesh( e, toPrd(), 0 );
 }
 
 //////////////////////////////////////////////////////////////
@@ -188,38 +188,33 @@ void Reac::reinit( const Eref& e, ProcPtr p )
 void Reac::setNumKf( const Eref& e, const Qinfo* q, double v )
 {
 	sub_ = kf_ = v;
-	double volScale = 
-		convertConcToNumRateUsingMesh( e, toSub(), 0, CONC_UNIT_CONV, 0 );
+	double volScale = convertConcToNumRateUsingMesh( e, toSub(), 0 );
 	concKf_ = kf_ / volScale;
 }
 
 double Reac::getNumKf( const Eref& e, const Qinfo* q) const
 {
-	double kf = concKf_ / 
-		convertConcToNumRateUsingMesh( e, toSub(), 0, CONC_UNIT_CONV, 0 );
+	double kf = concKf_ / convertConcToNumRateUsingMesh( e, toSub(), 0 );
 	return kf;
 }
 
 void Reac::setNumKb( const Eref& e, const Qinfo* q, double v )
 {
 	prd_ = kb_ = v;
-	double volScale = 
-		convertConcToNumRateUsingMesh( e, toPrd(), 0, CONC_UNIT_CONV, 0 );
+	double volScale = convertConcToNumRateUsingMesh( e, toPrd(), 0 );
 	concKb_ = kb_ / volScale;
 }
 
 double Reac::getNumKb( const Eref& e, const Qinfo* q ) const
 {
-	double kb = concKb_ / 
-		convertConcToNumRateUsingMesh( e, toPrd(), 0, CONC_UNIT_CONV, 0 );
+	double kb = concKb_ / convertConcToNumRateUsingMesh( e, toPrd(), 0 );
 	return kb;
 }
 
 void Reac::setConcKf( const Eref& e, const Qinfo* q, double v )
 {
 	concKf_ = v;
-	sub_ = kf_ = v * 
-		convertConcToNumRateUsingMesh( e, toSub(), 0, CONC_UNIT_CONV, 0 );
+	sub_ = kf_ = v * convertConcToNumRateUsingMesh( e, toSub(), 0 );
 }
 
 double Reac::getConcKf( const Eref& e, const Qinfo* q ) const
@@ -230,8 +225,7 @@ double Reac::getConcKf( const Eref& e, const Qinfo* q ) const
 void Reac::setConcKb( const Eref& e, const Qinfo* q, double v )
 {
 	concKb_ = v;
-	prd_ = kb_ = 
-		v * convertConcToNumRateUsingMesh( e, toPrd(), 0, CONC_UNIT_CONV, 0);
+	prd_ = kb_ = v * convertConcToNumRateUsingMesh( e, toPrd(), 0 );
 }
 
 double Reac::getConcKb( const Eref& e, const Qinfo* q ) const
