@@ -273,7 +273,7 @@ void ZombieEnz::setKm( const Eref& e, const Qinfo* q, double v )
 	double k3 = getK3( e, q );
 
 	double volScale = 
-		convertConcToNumRateUsingMesh( e, toSub(), 0, 1.0e-3, 1 );
+		convertConcToNumRateUsingMesh( e, toSub(), 1 );
 
 	/*
 	double volScale = Reac::volScale( e, requestSize(), toSub() ) * 
@@ -291,7 +291,7 @@ double ZombieEnz::getKm( const Eref& e, const Qinfo* q ) const
 	double k3 = getK3( e, q );
 
 	double volScale = 	
-		convertConcToNumRateUsingMesh( e, toSub(), 0, 1.0e-3, 1 );
+		convertConcToNumRateUsingMesh( e, toSub(), 1 );
 	
 	return (k2 + k3) / ( k1 * volScale );
 }

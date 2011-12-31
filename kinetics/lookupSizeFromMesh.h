@@ -36,7 +36,7 @@ double lookupSizeFromMesh( const Eref& e, const SrcFinfo* sf );
  * conversion for all pools, not n-1. This flag defaults to 0.
  */
 double convertConcToNumRateUsingMesh( const Eref& e, const SrcFinfo* pools, 
-	unsigned int meshIndex, double scale, bool doPartialConversion );
+	bool doPartialConversion );
 
 /**
  * Generates conversion factor for rates from concentration to mol# units.
