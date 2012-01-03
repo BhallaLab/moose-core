@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Tue Jan  3 17:35:50 2012 (+0530)
+# Last-Updated: Tue Jan  3 23:48:48 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 964
+#     Update #: 1011
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -296,9 +296,11 @@ class NeutralArray(object):
         if self.id_ is None:
             self.id_ = _moose.Id(path=path, dims=dims, type=self.className)
         orig_classname = self.id_[0].getField('class')
-        if self.__class__.__name__ != orig_classname+'Array':
-            orig_class = eval('%sArray' % (orig_classname))
-            if self.__class__ not in orig_class.mro():        
+        orig_class = eval('%sArray' % (orig_classname))
+        self_class = self.__class__
+        while self_class not in orig_class.mro():
+            self_class = super(self_class, self).__class__
+            if self_class == object:        
                 self.id_ = None
                 raise TypeError('Cannot convert %s to %s' % (orig_class, self.__class__))
 
@@ -368,9 +370,16 @@ class Neutral(object):
                 try:
                     self.oid_ = _moose.ObjId(args[0])
                 except ValueError:
-                    id_ = Id(args[0])
+                    moose_classes = [child.getPath().rpartition('/')[-1] for child in Id('/classes')[0].getField('children')]
+                    self_class = self.__class__
+                    while (self_class != object) and (self_class.__name__ not in moose_classes):
+                        self_class = self_class.__base__
+                        print self_class.__name__
+                    if self_class == object:
+                        raise TypeError('Class %s does not inherit any MOOSE class.' % (self.__class__.__name__))
+                    id_ = Id(path=args[0], dims=(1,), type=self_class.__name__)
             else:
-                raise TypeError('First non-keyword argument must be a number or an existing Id/ObjId/Neutral/NeutralArray object.')
+                raise TypeError('First non-keyword argument must be a number or an existing Id/ObjId/Neutral/NeutralArray object or a path.')
         if len(args) >= 2:
             dindex = args[1]
         if len(args) >= 3:
@@ -408,7 +417,10 @@ class Neutral(object):
         orig_classname = self.oid_.getField('class')
         if self.__class__.__name__ != orig_classname:
             orig_class = eval(orig_classname)
-            if self.__class__ not in orig_class.mro():
+            self_class = self.__class__
+            while self_class != object and self_class not in orig_class.mro():
+                self_class = self_class.__base__
+            if self_class == object:
                 self.oid_ = None
                 raise TypeError('Cannot convert %s to %s' % (orig_class, self.__class__))
 
