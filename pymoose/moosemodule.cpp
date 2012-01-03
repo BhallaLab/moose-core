@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Dec 22 16:41:12 2011 (+0530)
+// Last-Updated: Tue Jan  3 14:05:06 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4345
+//     Update #: 4358
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -56,6 +56,7 @@
 #include "../basecode/DataId.h"
 #include "../utility/strutil.h"
 #include "../utility/utility.h"
+#include "../randnum/randnum.h"
 #include "../shell/Shell.h"
 
 #include "pymoose.h"
@@ -178,6 +179,7 @@ extern "C" {
          " across nodes. Used after function calls that might alter the"
          " number of Field entries in the table."
          " The target is the FieldElement whose fieldDimension needs updating."},
+        {"seed", (PyCFunction)_pymoose_seed, METH_VARARGS, "Seed the random number generator of MOOSE."},
 
         {NULL, NULL, 0, NULL}        /* Sentinel */
     };
@@ -1558,7 +1560,7 @@ extern "C" {
         if (fieldType && strlen(fieldType) > 0){
             inner_getFieldDict(classId, string(fieldType), fields, types);
         } else {
-            for (const char ** ptr = finfoTypes; ptr != NULL; ++ptr){
+            for (const char ** ptr = finfoTypes; *ptr != NULL; ++ptr){
                 inner_getFieldDict(classId, string(*ptr), fields, types);
             }
         }
@@ -1595,6 +1597,16 @@ extern "C" {
         Py_RETURN_NONE;
     }
 
+
+    PyObject * _pymoose_seed(PyObject * dummy, PyObject * args)
+    {
+        long seed = 0;
+        if (!PyArg_ParseTuple(args, "|l", &seed)){
+            return NULL;
+        }
+        mtseed(seed);
+        Py_RETURN_NONE;
+    }
 
 } // end extern "C"
 
