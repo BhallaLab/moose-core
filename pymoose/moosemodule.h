@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Fri Aug 26 22:03:04 2011 (+0530)
+// Last-Updated: Tue Jan  3 13:34:29 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 261
+//     Update #: 262
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -123,6 +123,7 @@ extern "C" {
     static PyObject * _pymoose_connect(PyObject * dummy, PyObject * args);
     static PyObject * _pymoose_getFieldDict(PyObject * dummy, PyObject * args);    
     static PyObject * _pymoose_syncDataHandler(PyObject * dummy, _Id * target);
+    static PyObject * _pymoose_seed(PyObject * dummy, PyObject * args);
     PyMODINIT_FUNC init_moose();
 
 
