@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Thu Dec 22 16:33:01 2011 (+0530)
+# Last-Updated: Tue Jan  3 15:29:30 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 952
+#     Update #: 962
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -362,7 +362,10 @@ class Neutral(object):
             elif isinstance(args[0], NeutralArray):
                 id_ = args[0].id_
             elif isinstance(args[0], str):
-                self.oid_ = _moose.ObjId(args[0])
+                try:
+                    self.oid_ = _moose.ObjId(args[0])
+                except ValueError:
+                    id_ = Id(args[0])
             else:
                 raise TypeError('First non-keyword argument must be a number or an existing Id/ObjId/Neutral/NeutralArray object.')
         if len(args) >= 2:
@@ -398,6 +401,7 @@ class Neutral(object):
                     self.oid_ = _moose.ObjId(id_, dindex, findex)
                 else:
                     self.oid_ = _moose.ObjId(id_, dindex, findex, numFieldBits)
+        
         orig_classname = self.oid_.getField('class')
         if self.__class__.__name__ != orig_classname:
             orig_class = eval(orig_classname)
