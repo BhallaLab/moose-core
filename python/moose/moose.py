@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Tue Jan  3 15:29:30 2012 (+0530)
+# Last-Updated: Tue Jan  3 17:35:50 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 962
+#     Update #: 964
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -231,7 +231,7 @@ elements under current working element
 
 
 import _moose
-from _moose import __version__, VERSION, SVN_REVISION, useClock, setClock, start, reinit, stop, isRunning, loadModel, getFieldDict, Id, ObjId, exists
+from _moose import __version__, VERSION, SVN_REVISION, useClock, setClock, start, reinit, stop, isRunning, loadModel, getFieldDict, Id, ObjId, exists, seed
 
 
 class _MooseDescriptor(object):
@@ -254,9 +254,12 @@ class _MooseDescriptor(object):
 class _MooseMeta(type):
     def __init__(cls, name, bases, classdict):        
         super(_MooseMeta, cls).__init__(name, bases, classdict)
-        field_dict = getFieldDict(name, 'valueFinfo')
-        for field in field_dict.keys():
-            setattr(cls, field, _MooseDescriptor(field))
+        try:
+            field_dict = getFieldDict(name, 'valueFinfo')
+            for field in field_dict.keys():
+                setattr(cls, field, _MooseDescriptor(field))
+        except NameError:
+            pass
         
 
 class NeutralArray(object):
