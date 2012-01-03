@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Jan  3 14:05:06 2012 (+0530)
+// Last-Updated: Tue Jan  3 15:29:38 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4358
+//     Update #: 4388
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -603,7 +603,12 @@ extern "C" {
                 self->oid_ = ((_ObjId*)obj)->oid_;
                 return 0;
             } else if (PyString_Check(obj)){
-                self->oid_ = ObjId(string(PyString_AsString(obj)));
+                string path(PyString_AsString(obj));
+                self->oid_ = ObjId(path);
+                if (ObjId::bad == self->oid_){
+                    PyErr_SetString(PyExc_ValueError, "Path does not match any existing object. Give an arrayelement compatible path to create a new object.");
+                    return -1;
+                }
                 return 0;
             } else {
                 PyErr_SetString(PyExc_TypeError, "ObjId.__init__(self, id, dataindex, fieldindex=0, numFieldBits=0) or ObjId.__init__(self, Id, dataIndex, fieldIndex=0, numFieldBits=0) or ObjId.__init__(self, ObjId) or ObjId.__init__(self, path)");
