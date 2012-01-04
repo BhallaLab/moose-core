@@ -1,9 +1,26 @@
+#Author:Chaitanya CH
+#FileName: objects.py
+
+#This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 3, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street, Fifth
+# Floor, Boston, MA 02110-1301, USA.
+
 from OpenGL.GL import *
 from OpenGL.raw.GLUT import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from numpy import sqrt,arccos
-from moose import Compartment as mcc	#because of detecting soma.
 
 class BaseObject(object):
 	"""
@@ -58,225 +75,9 @@ class BaseObject(object):
 		else:
 			self.r, self.g, self.b = self.oldColor
 		
-
-class cellStruct(BaseObject):
-	"""
-	Class that defines a cellstructure.
-	"""
-	def __init__(self, parent,l_coords,cellName,style,gridCompartmentName,cropName=[]):
-		"""
-		Constructor.
-		"""
-		super(cellStruct, self).__init__(parent)
-		self.daddy = cropName
-		
-		for i in range(0,len(l_coords),1):	
-			if (mcc(l_coords[i][7]).name=='soma'):	#moose.Compartment =mcc
-				if style==0:	#simple disk model
-					compartmentLine = somaDisk(self,l_coords[i],cellName)
-					self.kids.append(compartmentLine)
-				elif (style==1)or(style==2):
-					compartmentLine = somaSphere(self,l_coords[i],cellName)
-			else:
-	    			if style==1:	#ball and stick model
-	    				compartmentLine = cLine(self,l_coords[i],cellName)
-				elif style==2:	#realistic model
-					compartmentLine = cCylinder(self,l_coords[i],cellName)
-			if (mcc(l_coords[i][7]).name==gridCompartmentName):	#grid View
-				if style==3:
-					compartmentLine = somaDisk(self,[0,0,0,0,0,0,l_coords[i][7]],cellName)
-					compartmentLine.radius = 0.25
-					self.kids.append(compartmentLine)
-			if (style==1)or(style==2):
-				self.kids.append(compartmentLine)	
-
-    	
-	def setCropParentProps(self,centralPos,rotation,r,g,b):
-		self._centralPos = centralPos	
-		self.rotation	
-		self.r = r
-		self.g = g
-		self.b = b	
-
-
-	def render(self):
-		"""
-		Renders the cell structure.
-		"""
-
-		if self.kids:
-			glRotate(*self.rotation[:4])			#move pen to given orientation
-			glTranslate(*self._centralPos[:3])		#move pen to given location
-			for obj in self.kids:
-				obj.setCellParentProps([0.0,0.0,0.0],[0.0,0.0,0.0,0.0],self.r, self.g, self.b)	#need not have to move the component objects again.
-				obj.render()
-			glTranslate(*[i*-1 for i in self._centralPos[:3]]) 	#bring back pen to origin and orientation
-			glRotate(*[i*-1 for i in self.rotation[:4]])
-
-			
-
-class somaSphere(BaseObject):
-	"""
-	Class that defines a sphere.
-	"""
-	
-	def __init__(self, parent,l_coords,cellName=[]):
-		"""
-		Constructor.
-		"""
-		super(somaSphere, self).__init__(parent)
-		self.radius = (sqrt((l_coords[0]-l_coords[3])**2+(l_coords[1]-l_coords[4])**2+(l_coords[2]-l_coords[5])**2))/2
-		self.centre = [(l_coords[0]+l_coords[3])/2,(l_coords[1]+l_coords[4])/2,(l_coords[2]+l_coords[5])/2]
-		self.daddy  = cellName
-		self.l_coords = l_coords
-
-	def setCellParentProps(self,centralPos,rotation,r,g,b):
-		self._centralPos = centralPos	
-		self.rotation = rotation	
-		self.r = r
-		self.g = g
-		self.b = b
-		
-			
-	def render(self):
-		"""
-		Renders the sphere.
-		"""
-		glutInit(1,1)
-		glPushMatrix()
-		glColor(self.r, self.g, self.b)
-		
-		glRotate(*self.rotation[:4])			#move pen to given orientation
-		glTranslate(*self._centralPos[:3])		#move pen to given location
-		glTranslate(*self.centre[:3])			#mid point of the compartment line
-
-		gluSphere(gluNewQuadric(),self.radius, 20, 20)
-
-		glTranslate(*[i*-1 for i in self.centre[:3]])	#bring back pen to origin and orientation
-		glTranslate(*[i*-1 for i in self._centralPos[:3]])
-		glRotate(*[i*-1 for i in self.rotation[:4]])
-
-		glPopMatrix()
-		
-		
-class somaDisk(BaseObject):
-	"""
-	Class that defines a sphere.
-	"""
-	
-	def __init__(self, parent,l_coords,cellName=[]):
-		"""
-		Constructor.
-		"""
-		super(somaDisk, self).__init__(parent)
-		self.radius = (sqrt((l_coords[0]-l_coords[3])**2+(l_coords[1]-l_coords[4])**2+(l_coords[2]-l_coords[5])**2))/2
-		self.centre = [(l_coords[0]+l_coords[3])/2,(l_coords[1]+l_coords[4])/2,(l_coords[2]+l_coords[5])/2]
-		self.daddy  = cellName
-		self.l_coords = l_coords
-
-	def setCellParentProps(self,centralPos,rotation,r,g,b):
-		self._centralPos = centralPos	
-		self.rotation = rotation	
-		self.r = r
-		self.g = g
-		self.b = b
-		
-			
-	def render(self):
-		"""
-		Renders the soma as a disk.
-		"""
-		glutInit(1,1)
-		glPushMatrix()
-		glColor(self.r, self.g, self.b)
-		
-		glRotate(*self.rotation[:4])				#move pen to the given orientation, absolute coordinate =[0,0,0,0]
-		glTranslate(*self._centralPos[:3])			#move pen to the given location, absolute coordinate =[0,0,0]
-		glTranslate(*self.centre[:3])				#mid point of the compartment line
-		
-		quadric = gluNewQuadric()
-		gluDisk( quadric, 0.0, self.radius, 30, 1)
-		
-		glTranslate(*[i*-1 for i in self.centre[:3]])
-		glTranslate(*[i*-1 for i in self._centralPos[:3]])	#bring back to origin
-		glRotate(*[i*-1 for i in self.rotation[:4]])		#bring back to original orientation
-		glPopMatrix()
-
-
-class cCylinder(BaseObject):
-	"""
-	Class that defines a compartment line.
-	"""
-	
-	def __init__(self, parent,l_coords,cellName=[]):
-		"""
-		Constructor.
-		"""
-		super(cCylinder, self).__init__(parent)
-		self.l_coords = l_coords
-		self.daddy = cellName
-
-
-	def setCellParentProps(self,centralPos,rotation,r,g,b):
-		self._centralPos = centralPos	
-		self.rotation = rotation	
-		self.r = r
-		self.g = g
-		self.b = b	
-
-	def render(self):
-		"""
-		Renders the compartment as a cylinder.
-		"""
-		x1,y1,z1,x2,y2,z2 = self.l_coords[:6]
-		radius = self.l_coords[6]/2
-		subdivisions = 20
-		
-		vx = x2-x1
-  		vy = y2-y1
-  		vz = z2-z1
-
-  		if(vz == 0):
-      			vz = .0001
-
-  		v = sqrt( vx*vx + vy*vy + vz*vz )
- 		ax = 57.2957795*arccos( vz/v )
-  		if ( vz < 0.0 ):
-      			ax = -ax
-  		rx = -vy*vz
-		ry = vx*vz
-  		glPushMatrix()
-		glColor(self.r, self.g, self.b)
-		
-		glRotate(*self.rotation[:4]) 		#get pen to set orientation, in absolute coordinates [0,0,0,0].
-		glTranslate(*self._centralPos[:3])	#if absolute coordinates [0,0,0]
-		
-  		glTranslatef(x1,y1,z1 )
-  		glRotatef(ax,rx,ry,0.0)
-  		
-  		quadric = gluNewQuadric()
-  		gluQuadricNormals(quadric, GLU_SMOOTH)
-  		
-  		gluQuadricOrientation(quadric,GLU_OUTSIDE)
-  		gluCylinder(quadric, radius, radius, v, subdivisions, 1)
-  		
-  		gluQuadricOrientation(quadric,GLU_INSIDE)
-  		#gluDisk( quadric, 0.0, radius, subdivisions, 1)
-  		gluSphere(gluNewQuadric(),radius, 10, 10)
-  		glTranslatef( 0,0,v )
-  		
-  		gluQuadricOrientation(quadric,GLU_OUTSIDE)
-  		#gluDisk( quadric, 0.0, radius, subdivisions, 1)
-  		gluSphere(gluNewQuadric(),radius, 20, 20)
-  		
-  		glTranslate(*[i*-1 for i in self._centralPos[:3]])	#bring pen back to origin.
-		glRotate(*[i*-1 for i in self.rotation[:4]])		#bring back to original orientation
-  		
-  		glPopMatrix()	
-  		
 class cLine(BaseObject):
 	"""
-	Class that defines a compartment line.
+	Class that defines a compartment as a simple line.
 	"""
 	
 	def __init__(self, parent,l_coords,cellName=[]):
@@ -316,4 +117,215 @@ class cLine(BaseObject):
 		glRotate(*[i*-1 for i in self.rotation[:4]])		#get pen to the original orientation
 		
 		glPopMatrix()	
+
+
+class somaSphere(BaseObject):
+	"""
+	Class that defines a compartment as a sphere. drawn only when x=x0&y=y0&z=z0
+	"""
+	
+	def __init__(self, parent,l_coords,cellName=[]):
+		"""
+		Constructor.
+		"""
+		super(somaSphere, self).__init__(parent)
+		#self.radius = (sqrt((l_coords[0]-l_coords[3])**2+(l_coords[1]-l_coords[4])**2+(l_coords[2]-l_coords[5])**2))/2
+		self.radius = l_coords[6]/2
+		self.centre = [l_coords[0],l_coords[1],l_coords[2]]
+		self.daddy  = cellName
+
+	def setCellParentProps(self,centralPos,rotation,r,g,b):
+		self._centralPos = centralPos	
+		self.rotation = rotation	
+		self.r = r
+		self.g = g
+		self.b = b
+		
+			
+	def render(self):
+		"""
+		Renders the sphere.
+		"""
+		glutInit(1,1)
+		glPushMatrix()
+		glColor(self.r, self.g, self.b)
+		
+		glTranslate(*self._centralPos[:3])		#move pen to given location
+		glTranslate(*self.centre[:3])			#mid point of the compartment line
+
+		gluSphere(gluNewQuadric(),self.radius, 10, 10)
+
+		glTranslate(*[i*-1 for i in self.centre[:3]])	#bring back pen to origin and orientation
+		glTranslate(*[i*-1 for i in self._centralPos[:3]])
+
+		glPopMatrix()
+		
+		
+class somaDisk(BaseObject):
+	"""
+	Class that defines a compartment as a disk.
+	"""
+	
+	def __init__(self, parent,l_coords,cellName=[]):
+		"""
+		Constructor.
+		"""
+		super(somaDisk, self).__init__(parent)
+		self.radius = l_coords[6]/2
+		self.centre = [l_coords[0],l_coords[1],l_coords[2]]
+		self.daddy  = cellName
+
+	def setCellParentProps(self,centralPos,rotation,r,g,b):
+		self._centralPos = centralPos	
+		self.rotation = rotation	
+		self.r = r
+		self.g = g
+		self.b = b
+		
+			
+	def render(self):
+		"""
+		Renders the soma as a disk.
+		"""
+		glutInit(1,1)
+		glPushMatrix()
+		glColor(self.r, self.g, self.b)
+		
+		glRotate(*self.rotation[:4])				#move pen to the given orientation, absolute coordinate =[0,0,0,0]
+		glTranslate(*self._centralPos[:3])			#move pen to the given location, absolute coordinate =[0,0,0]
+		glTranslate(*self.centre[:3])				#mid point of the compartment line
+		
+		quadric = gluNewQuadric()
+		gluDisk( quadric, 0.0, self.radius, 10, 1)
+		
+		glTranslate(*[i*-1 for i in self.centre[:3]])
+		glTranslate(*[i*-1 for i in self._centralPos[:3]])	#bring back to origin
+		glRotate(*[i*-1 for i in self.rotation[:4]])		#bring back to original orientation
+		glPopMatrix()
+
+
+class cCylinder(BaseObject):
+	"""
+	Class that defines a compartment as a cylindrical shape. Looks like a capsule.
+	"""
+	
+	def __init__(self, parent,l_coords,cellName=[]):
+		"""
+		Constructor.
+		"""
+		super(cCylinder, self).__init__(parent)
+		self.l_coords = l_coords
+		self.daddy = cellName
+
+	def setCellParentProps(self,centralPos,rotation,r,g,b):
+		self._centralPos = centralPos	
+		self.rotation = rotation	
+		self.r = r
+		self.g = g
+		self.b = b	
+
+	def render(self):
+		"""
+		Renders the compartment as a cylinder.
+		"""
+		x1,y1,z1,x2,y2,z2 = self.l_coords[:6]
+		radius = self.l_coords[6]/2
+		subdivisions = 10
+		
+		vx = x2-x1
+  		vy = y2-y1
+  		vz = z2-z1
+
+  		if(vz == 0.0):
+			vz = .001 #causes trouble sometimes
+
+		v = sqrt( vx*vx + vy*vy + vz*vz )
+ 		ax = 57.2957795*arccos( vz/v )
+  		if ( vz < 0.0 ):
+      			ax = -ax
+  		rx = -vy*vz
+		ry = vx*vz
+  		glPushMatrix()
+		glColor(self.r, self.g, self.b)
+		
+		glRotate(*self.rotation[:4]) 		#get pen to set orientation, in absolute coordinates [0,0,0,0].
+		glTranslate(*self._centralPos[:3])	#if absolute coordinates [0,0,0]
+		
+  		glTranslatef(x1,y1,z1 )
+  		glRotatef(ax,rx,ry,0.0)
+  		
+  		quadric = gluNewQuadric()
+  		gluQuadricNormals(quadric, GLU_SMOOTH)
+  		
+  		gluQuadricOrientation(quadric,GLU_OUTSIDE)
+  		gluCylinder(quadric, radius, radius, v, subdivisions, 1)
+  		
+  		gluQuadricOrientation(quadric,GLU_INSIDE)
+  		#gluDisk( quadric, 0.0, radius, subdivisions, 1)
+  		gluSphere(gluNewQuadric(),radius, subdivisions, subdivisions)
+  		glTranslatef( 0,0,v )
+  		
+  		gluQuadricOrientation(quadric,GLU_OUTSIDE)
+  		#gluDisk( quadric, 0.0, radius, subdivisions, 1)
+  		gluSphere(gluNewQuadric(),radius, subdivisions, subdivisions)
+  		
+  		glTranslate(*[i*-1 for i in self._centralPos[:3]])	#bring pen back to origin.
+		glRotate(*[i*-1 for i in self.rotation[:4]])		#bring back to original orientation
+  		
+  		glPopMatrix()	
  
+class cellStruct(BaseObject):
+	"""
+	Class that defines a cellstructure.
+	"""
+	def __init__(self, parent,l_coords,cellName,style,cropName=[]):
+		"""
+		Constructor.
+		"""
+		super(cellStruct, self).__init__(parent)
+		self.daddy = cropName
+		
+		for i in range(0,len(l_coords),1):	
+			if (l_coords[i][0] == l_coords[i][3] and l_coords[i][1] == l_coords[i][4] and l_coords[i][2] == l_coords[i][5]):
+				if style==0:	#simple disk model
+					compartmentLine = somaDisk(self,l_coords[i],cellName)
+					self.kids.append(compartmentLine)
+				elif (style==1)or(style==2):
+					compartmentLine = somaSphere(self,l_coords[i],cellName)
+				elif style==3:
+					compartmentLine = somaDisk(self,[0,0,0,0,0,0,l_coords[i][7]],cellName)
+					compartmentLine.radius = 0.20
+					self.kids.append(compartmentLine)
+			else:
+	    			if style==1:	#ball and stick model
+	    				compartmentLine = cLine(self,l_coords[i],cellName)
+				elif style==2:	#realistic model
+					compartmentLine = cCylinder(self,l_coords[i],cellName)
+				
+			if (style==1)or(style==2):
+				self.kids.append(compartmentLine)	
+
+    	
+	def setCropParentProps(self,centralPos,rotation,r,g,b):
+		self._centralPos = centralPos	
+		self.rotation	
+		self.r = r
+		self.g = g
+		self.b = b	
+
+
+	def render(self):
+		"""
+		Renders the cell structure.
+		"""
+
+		if self.kids:
+			glRotate(*self.rotation[:4])			#move pen to given orientation
+			glTranslate(*self._centralPos[:3])		#move pen to given location
+			for obj in self.kids:
+				obj.setCellParentProps([0.0,0.0,0.0],[0.0,0.0,0.0,0.0],self.r, self.g, self.b)	#need not have to move the component objects again.
+				obj.render()
+			glTranslate(*[i*-1 for i in self._centralPos[:3]]) 	#bring back pen to origin and orientation
+			glRotate(*[i*-1 for i in self.rotation[:4]])
+
+			

@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>661</width>
+    <height>466</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Style Selector</string>
+  </property>
+  <property name="accessibleName">
+   <string/>
+  </property>
+  <widget class="QLineEdit" name="filterLineEdit">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>30</y>
+     <width>161</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="inputMethodHints">
+    <set>Qt::ImhNone</set>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QToolButton" name="addToolButton">
+   <property name="geometry">
+    <rect>
+     <x>200</x>
+     <y>70</y>
+     <width>24</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>+</string>
+   </property>
+  </widget>
+  <widget class="QToolButton" name="minusToolButton">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>70</y>
+     <width>24</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>-</string>
+   </property>
+  </widget>
+  <widget class="QToolButton" name="allToolButton">
+   <property name="geometry">
+    <rect>
+     <x>280</x>
+     <y>70</y>
+     <width>24</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>A</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="styleComboBox">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>70</y>
+     <width>161</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="currentIndex">
+    <number>2</number>
+   </property>
+   <item>
+    <property name="text">
+     <string>Disks</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Ball &amp; Sticks</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Cylinders</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Capsules</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Pyramids</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>34</y>
+     <width>51</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Filter</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="okayPushButton">
+   <property name="geometry">
+    <rect>
+     <x>530</x>
+     <y>410</y>
+     <width>97</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>OK</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="useDefaultsPushButton">
+   <property name="geometry">
+    <rect>
+     <x>370</x>
+     <y>410</y>
+     <width>97</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Use Default</string>
+   </property>
+  </widget>
+  <widget class="QListWidget" name="listWidget">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>110</y>
+     <width>281</width>
+     <height>241</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="offsetPositionLineEdit">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>370</y>
+     <width>151</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>0.0,0.0,0.0</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="offsetAngleLineEdit">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>410</y>
+     <width>151</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>0.0,0.0,0.0,0.0</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>370</y>
+     <width>111</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Offset Position</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>410</y>
+     <width>101</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Offset Angle</string>
+   </property>
+  </widget>
+  <widget class="QListWidget" name="canvasContentsListWidget">
+   <property name="geometry">
+    <rect>
+     <x>320</x>
+     <y>70</y>
+     <width>321</width>
+     <height>321</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>320</x>
+     <y>40</y>
+     <width>121</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Canvas Contents</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

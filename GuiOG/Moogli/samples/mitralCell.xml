@@ -1,0 +1,1153 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<neuroml length_units="meter" name="testing the writer" xmlns="http://morphml.org/neuroml/schema" xmlns:bio="http://morphml.org/biophysics/schema" xmlns:cml="http://morphml.org/channelml/schema" xmlns:meta="http://morphml.org/metadata/schema" xmlns:mml="http://morphml.org/morphml/schema" xmlns:nml="http://morphml.org/networkml/schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://morphml.org/neuroml/schema">
+  <cells>
+    <cell name="mit">
+      <segments xmlns="http://morphml.org/morphml/schema">
+        <segment id="0" name="soma">
+          <proximal diameter="3.2e-05" x="0" y="0" z="0" />
+          <distal diameter="3.2e-05" x="3.2e-05" y="0" z="0" />
+        </segment>
+        <segment id="1" name="axon">
+          <proximal diameter="1e-05" x="3.2e-05" y="0" z="0" />
+          <distal diameter="1e-05" x="3.2e-05" y="0" z="-1e-05" />
+        </segment>
+        <segment id="2" name="axon[1]">
+          <proximal diameter="7e-06" x="3.2e-05" y="0" z="-1e-05" />
+          <distal diameter="7e-06" x="3.2e-05" y="0" z="-2e-05" />
+        </segment>
+        <segment id="3" name="axon[2]">
+          <proximal diameter="5e-06" x="3.2e-05" y="0" z="-2e-05" />
+          <distal diameter="5e-06" x="3.2e-05" y="0" z="-3e-05" />
+        </segment>
+        <segment id="4" name="axon[3]">
+          <proximal diameter="3e-06" x="3.2e-05" y="0" z="-3e-05" />
+          <distal diameter="3e-06" x="3.2e-05" y="0" z="-4e-05" />
+        </segment>
+        <segment id="5" name="axon[4]">
+          <proximal diameter="2e-06" x="3.2e-05" y="0" z="-4e-05" />
+          <distal diameter="2e-06" x="3.2e-05" y="0" z="-5e-05" />
+        </segment>
+        <segment id="6" name="axon[5]">
+          <proximal diameter="1.5e-06" x="3.2e-05" y="0" z="-5e-05" />
+          <distal diameter="1.5e-06" x="3.2e-05" y="0" z="-6e-05" />
+        </segment>
+        <segment id="7" name="axon[6]">
+          <proximal diameter="1.5e-06" x="3.2e-05" y="0" z="-6e-05" />
+          <distal diameter="1.5e-06" x="3.2e-05" y="0" z="-8e-05" />
+        </segment>
+        <segment id="8" name="axon[7]">
+          <proximal diameter="1.5e-06" x="3.2e-05" y="0" z="-8e-05" />
+          <distal diameter="1.5e-06" x="3.2e-05" y="0" z="-0.00013" />
+        </segment>
+        <segment id="9" name="axon[8]">
+          <proximal diameter="1e-06" x="3.2e-05" y="0" z="-0.00013" />
+          <distal diameter="1e-06" x="3.2e-05" y="0" z="-0.00018" />
+        </segment>
+        <segment id="10" name="axon[9]">
+          <proximal diameter="9e-07" x="3.2e-05" y="0" z="-0.00018" />
+          <distal diameter="9e-07" x="3.2e-05" y="0" z="-0.00027" />
+        </segment>
+        <segment id="11" name="axon[10]">
+          <proximal diameter="9e-07" x="3.2e-05" y="0" z="-0.00027" />
+          <distal diameter="9e-07" x="3.2e-05" y="0" z="-0.00036" />
+        </segment>
+        <segment id="12" name="axon[11]">
+          <proximal diameter="9e-07" x="3.2e-05" y="0" z="-0.00036" />
+          <distal diameter="9e-07" x="3.2e-05" y="0" z="-0.00045" />
+        </segment>
+        <segment id="13" name="axon[12]">
+          <proximal diameter="9e-07" x="3.2e-05" y="0" z="-0.00045" />
+          <distal diameter="9e-07" x="3.2e-05" y="0" z="-0.00054" />
+        </segment>
+        <segment id="14" name="primary_dend">
+          <proximal diameter="7.9e-06" x="3.2e-05" y="0" z="0" />
+          <distal diameter="7.9e-06" x="3.2e-05" y="0" z="9.5e-05" />
+        </segment>
+        <segment id="15" name="primary_dend[1]">
+          <proximal diameter="7.3e-06" x="3.2e-05" y="0" z="9.5e-05" />
+          <distal diameter="7.3e-06" x="3.2e-05" y="0" z="0.00019" />
+        </segment>
+        <segment id="16" name="primary_dend[2]">
+          <proximal diameter="6.6e-06" x="3.2e-05" y="0" z="0.00019" />
+          <distal diameter="6.6e-06" x="3.2e-05" y="0" z="0.000285" />
+        </segment>
+        <segment id="17" name="primary_dend[3]">
+          <proximal diameter="6e-06" x="3.2e-05" y="0" z="0.000285" />
+          <distal diameter="6e-06" x="3.2e-05" y="0" z="0.00038" />
+        </segment>
+        <segment id="18" name="primary_dend[4]">
+          <proximal diameter="5.3e-06" x="3.2e-05" y="0" z="0.00038" />
+          <distal diameter="5.3e-06" x="3.2e-05" y="0" z="0.000475" />
+        </segment>
+        <segment id="19" name="primary_dend[5]">
+          <proximal diameter="4.7e-06" x="3.2e-05" y="0" z="0.000475" />
+          <distal diameter="4.7e-06" x="3.2e-05" y="0" z="0.00057" />
+        </segment>
+        <segment id="20" name="glom1">
+          <proximal diameter="3.5e-06" x="3.2e-05" y="0" z="0.00057" />
+          <distal diameter="3.5e-06" x="4.2e-05" y="0" z="0.000587321" />
+        </segment>
+        <segment id="21" name="glom11">
+          <proximal diameter="2.8e-06" x="4.2e-05" y="0" z="0.000587321" />
+          <distal diameter="2.8e-06" x="4.45882e-05" y="4.48288e-06" z="0.000606639" />
+        </segment>
+        <segment id="22" name="glom111">
+          <proximal diameter="2e-06" x="4.45882e-05" y="4.48288e-06" z="0.000606639" />
+          <distal diameter="2e-06" x="4.45882e-05" y="2.56961e-05" z="0.000627852" />
+        </segment>
+        <segment id="23" name="glom1111">
+          <proximal diameter="1.5e-06" x="4.45882e-05" y="2.56961e-05" z="0.000627852" />
+          <distal diameter="1.5e-06" x="3.83382e-05" y="3.65214e-05" z="0.000649503" />
+        </segment>
+        <segment id="24" name="glom11111">
+          <proximal diameter="1e-06" x="3.83382e-05" y="3.65214e-05" z="0.000649503" />
+          <distal diameter="1e-06" x="2.30289e-05" y="4.53602e-05" z="0.000667181" />
+        </segment>
+        <segment id="25" name="glom111111">
+          <proximal diameter="9e-07" x="2.30289e-05" y="4.53602e-05" z="0.000667181" />
+          <distal diameter="9e-07" x="-2.95188e-06" y="3.03602e-05" z="0.000667181" />
+        </segment>
+        <segment id="26" name="glom111112">
+          <proximal diameter="9e-07" x="2.30289e-05" y="4.53602e-05" z="0.000667181" />
+          <distal diameter="9e-07" x="2.30289e-05" y="5.78602e-05" z="0.000688831" />
+        </segment>
+        <segment id="27" name="glom1111111">
+          <proximal diameter="8e-07" x="2.30289e-05" y="5.78602e-05" z="0.000688831" />
+          <distal diameter="8e-07" x="3.00999e-05" y="6.49313e-05" z="0.000671511" />
+        </segment>
+        <segment id="28" name="glom1111112">
+          <proximal diameter="8e-07" x="2.30289e-05" y="5.78602e-05" z="0.000688831" />
+          <distal diameter="8e-07" x="1.80289e-05" y="6.65205e-05" z="0.000706152" />
+        </segment>
+        <segment id="29" name="glom11112">
+          <proximal diameter="7e-07" x="3.83382e-05" y="3.65214e-05" z="0.000649503" />
+          <distal diameter="7e-07" x="4.58382e-05" y="4.95118e-05" z="0.000675484" />
+        </segment>
+        <segment id="30" name="glom1112">
+          <proximal diameter="7e-07" x="4.45882e-05" y="2.56961e-05" z="0.000627852" />
+          <distal diameter="7e-07" x="6.70882e-05" y="3.86865e-05" z="0.000612852" />
+        </segment>
+        <segment id="31" name="glom112">
+          <proximal diameter="2e-06" x="4.45882e-05" y="4.48288e-06" z="0.000606639" />
+          <distal diameter="2e-06" x="5.75786e-05" y="1.19829e-05" z="0.00063262" />
+        </segment>
+        <segment id="32" name="glom1121">
+          <proximal diameter="1.5e-06" x="5.75786e-05" y="1.19829e-05" z="0.00063262" />
+          <distal diameter="1.5e-06" x="6.21539e-05" y="1.65582e-05" z="0.000656768" />
+        </segment>
+        <segment id="33" name="glom11211">
+          <proximal diameter="1e-06" x="6.21539e-05" y="1.65582e-05" z="0.000656768" />
+          <distal diameter="1e-06" x="7.4228e-05" y="3.74711e-05" z="0.000663238" />
+        </segment>
+        <segment id="34" name="glom112111">
+          <proximal diameter="9e-07" x="7.4228e-05" y="3.74711e-05" z="0.000663238" />
+          <distal diameter="9e-07" x="7.4228e-05" y="5.24711e-05" z="0.000637258" />
+        </segment>
+        <segment id="35" name="glom112112">
+          <proximal diameter="9e-07" x="7.4228e-05" y="3.74711e-05" z="0.000663238" />
+          <distal diameter="9e-07" x="8.50533e-05" y="4.37211e-05" z="0.000684889" />
+        </segment>
+        <segment id="36" name="glom1121121">
+          <proximal diameter="8e-07" x="8.50533e-05" y="4.37211e-05" z="0.000684889" />
+          <distal diameter="8e-07" x="8.76415e-05" y="5.33804e-05" z="0.00070221" />
+        </segment>
+        <segment id="37" name="glom11211211">
+          <proximal diameter="7e-07" x="8.76415e-05" y="5.33804e-05" z="0.00070221" />
+          <distal diameter="7e-07" x="8.50533e-05" y="5.78632e-05" z="0.000721528" />
+        </segment>
+        <segment id="38" name="glom11211212">
+          <proximal diameter="7e-07" x="8.76415e-05" y="5.33804e-05" z="0.00070221" />
+          <distal diameter="7e-07" x="7.89812e-05" y="4.83804e-05" z="0.00071953" />
+        </segment>
+        <segment id="39" name="glom112112121">
+          <proximal diameter="5e-07" x="7.89812e-05" y="4.83804e-05" z="0.00071953" />
+          <distal diameter="5e-07" x="7.67398e-05" y="4.00152e-05" z="0.00072453" />
+        </segment>
+        <segment id="40" name="glom112112122">
+          <proximal diameter="5e-07" x="7.89812e-05" y="4.83804e-05" z="0.00071953" />
+          <distal diameter="5e-07" x="7.39812e-05" y="5.33804e-05" z="0.000726601" />
+        </segment>
+        <segment id="41" name="glom1121122">
+          <proximal diameter="8e-07" x="8.50533e-05" y="4.37211e-05" z="0.000684889" />
+          <distal diameter="8e-07" x="9.21243e-05" y="3.665e-05" z="0.000667569" />
+        </segment>
+        <segment id="42" name="glom11212">
+          <proximal diameter="7e-07" x="6.21539e-05" y="1.65582e-05" z="0.000656768" />
+          <distal diameter="7e-07" x="8.38045e-05" y="4.05819e-06" z="0.000656768" />
+        </segment>
+        <segment id="43" name="glom1122">
+          <proximal diameter="7e-07" x="5.75786e-05" y="1.19829e-05" z="0.00063262" />
+          <distal diameter="7e-07" x="7.0569e-05" y="-1.05171e-05" z="0.00061762" />
+        </segment>
+        <segment id="44" name="glom12">
+          <proximal diameter="2.8e-06" x="4.2e-05" y="0" z="0.000587321" />
+          <distal diameter="2.8e-06" x="4.45882e-05" y="-4.48288e-06" z="0.000606639" />
+        </segment>
+        <segment id="45" name="glom121">
+          <proximal diameter="2e-06" x="4.45882e-05" y="-4.48288e-06" z="0.000606639" />
+          <distal diameter="2e-06" x="5.23528e-05" y="-4.48288e-06" z="0.000635617" />
+        </segment>
+        <segment id="46" name="glom1211">
+          <proximal diameter="1.5e-06" x="5.23528e-05" y="-4.48288e-06" z="0.000635617" />
+          <distal diameter="1.5e-06" x="5.23528e-05" y="-4.48288e-06" z="0.000660617" />
+        </segment>
+        <segment id="47" name="glom12111">
+          <proximal diameter="1e-06" x="5.23528e-05" y="-4.48288e-06" z="0.000660617" />
+          <distal diameter="1e-06" x="5.6235e-05" y="2.24144e-06" z="0.000689595" />
+        </segment>
+        <segment id="48" name="glom121111">
+          <proximal diameter="9e-07" x="5.6235e-05" y="2.24144e-06" z="0.000689595" />
+          <distal diameter="9e-07" x="4.65932e-05" y="1.89416e-05" z="0.000712576" />
+        </segment>
+        <segment id="49" name="glom121112">
+          <proximal diameter="9e-07" x="5.6235e-05" y="2.24144e-06" z="0.000689595" />
+          <distal diameter="9e-07" x="4.1235e-05" y="2.24144e-06" z="0.000715575" />
+        </segment>
+        <segment id="50" name="glom1211111">
+          <proximal diameter="8e-07" x="4.1235e-05" y="2.24144e-06" z="0.000715575" />
+          <distal diameter="8e-07" x="4.83061e-05" y="-4.82963e-06" z="0.000698255" />
+        </segment>
+        <segment id="51" name="glom1211112">
+          <proximal diameter="8e-07" x="4.1235e-05" y="2.24144e-06" z="0.000715575" />
+          <distal diameter="8e-07" x="5.20604e-05" y="8.49144e-06" z="0.000737226" />
+        </segment>
+        <segment id="52" name="glom12112">
+          <proximal diameter="7e-07" x="5.23528e-05" y="-4.48288e-06" z="0.000660617" />
+          <distal diameter="7e-07" x="6.31781e-05" y="-1.07329e-05" z="0.000682267" />
+        </segment>
+        <segment id="53" name="glom1212">
+          <proximal diameter="7e-07" x="5.23528e-05" y="-4.48288e-06" z="0.000635617" />
+          <distal diameter="7e-07" x="6.68416e-05" y="-2.95784e-05" z="0.000643381" />
+        </segment>
+        <segment id="54" name="glom122">
+          <proximal diameter="2e-06" x="4.45882e-05" y="-4.48288e-06" z="0.000606639" />
+          <distal diameter="2e-06" x="5.20882e-05" y="-1.74733e-05" z="0.00063262" />
+        </segment>
+        <segment id="55" name="glom1221">
+          <proximal diameter="1.5e-06" x="5.20882e-05" y="-1.74733e-05" z="0.00063262" />
+          <distal diameter="1.5e-06" x="5.66635e-05" y="-2.20486e-05" z="0.000656768" />
+        </segment>
+        <segment id="56" name="glom12211">
+          <proximal diameter="1e-06" x="5.66635e-05" y="-2.20486e-05" z="0.000656768" />
+          <distal diameter="1e-06" x="7.75764e-05" y="-3.41226e-05" z="0.000663238" />
+        </segment>
+        <segment id="57" name="glom122111">
+          <proximal diameter="9e-07" x="7.75764e-05" y="-3.41226e-05" z="0.000663238" />
+          <distal diameter="9e-07" x="9.00764e-05" y="-3.41226e-05" z="0.000641588" />
+        </segment>
+        <segment id="58" name="glom122112">
+          <proximal diameter="9e-07" x="7.75764e-05" y="-3.41226e-05" z="0.000663238" />
+          <distal diameter="9e-07" x="8.38264e-05" y="-4.4948e-05" z="0.000684889" />
+        </segment>
+        <segment id="59" name="glom1221121">
+          <proximal diameter="8e-07" x="8.38264e-05" y="-4.4948e-05" z="0.000684889" />
+          <distal diameter="8e-07" x="9.34857e-05" y="-4.75362e-05" z="0.00070221" />
+        </segment>
+        <segment id="60" name="glom12211211">
+          <proximal diameter="7e-07" x="9.34857e-05" y="-4.75362e-05" z="0.00070221" />
+          <distal diameter="7e-07" x="9.79686e-05" y="-4.4948e-05" z="0.000721528" />
+        </segment>
+        <segment id="61" name="glom12211212">
+          <proximal diameter="7e-07" x="9.34857e-05" y="-4.75362e-05" z="0.00070221" />
+          <distal diameter="7e-07" x="8.84857e-05" y="-3.88759e-05" z="0.00071953" />
+        </segment>
+        <segment id="62" name="glom122112121">
+          <proximal diameter="5e-07" x="8.84857e-05" y="-3.88759e-05" z="0.00071953" />
+          <distal diameter="5e-07" x="8.01205e-05" y="-3.66345e-05" z="0.00072453" />
+        </segment>
+        <segment id="63" name="glom122112122">
+          <proximal diameter="5e-07" x="8.84857e-05" y="-3.88759e-05" z="0.00071953" />
+          <distal diameter="5e-07" x="9.34857e-05" y="-3.38759e-05" z="0.000726601" />
+        </segment>
+        <segment id="64" name="glom1221122">
+          <proximal diameter="8e-07" x="8.38264e-05" y="-4.4948e-05" z="0.000684889" />
+          <distal diameter="8e-07" x="7.67553e-05" y="-5.2019e-05" z="0.000667569" />
+        </segment>
+        <segment id="65" name="glom12212">
+          <proximal diameter="7e-07" x="5.66635e-05" y="-2.20486e-05" z="0.000656768" />
+          <distal diameter="7e-07" x="4.16635e-05" y="-4.80293e-05" z="0.000656768" />
+        </segment>
+        <segment id="66" name="glom1222">
+          <proximal diameter="7e-07" x="5.20882e-05" y="-1.74733e-05" z="0.00063262" />
+          <distal diameter="7e-07" x="2.95882e-05" y="-3.04636e-05" z="0.00061762" />
+        </segment>
+        <segment id="67" name="glom2">
+          <proximal diameter="3.5e-06" x="3.2e-05" y="0" z="0.00057" />
+          <distal diameter="3.5e-06" x="2.2e-05" y="1.22461e-21" z="0.000587321" />
+        </segment>
+        <segment id="68" name="glom21">
+          <proximal diameter="2.8e-06" x="2.2e-05" y="1.22461e-21" z="0.000587321" />
+          <distal diameter="2.8e-06" x="1.94118e-05" y="-4.48288e-06" z="0.000606639" />
+        </segment>
+        <segment id="69" name="glom211">
+          <proximal diameter="2e-06" x="1.94118e-05" y="-4.48288e-06" z="0.000606639" />
+          <distal diameter="2e-06" x="1.94118e-05" y="-2.56961e-05" z="0.000627852" />
+        </segment>
+        <segment id="70" name="glom2111">
+          <proximal diameter="1.5e-06" x="1.94118e-05" y="-2.56961e-05" z="0.000627852" />
+          <distal diameter="1.5e-06" x="2.56618e-05" y="-3.65214e-05" z="0.000649503" />
+        </segment>
+        <segment id="71" name="glom21111">
+          <proximal diameter="1e-06" x="2.56618e-05" y="-3.65214e-05" z="0.000649503" />
+          <distal diameter="1e-06" x="4.09711e-05" y="-4.53602e-05" z="0.000667181" />
+        </segment>
+        <segment id="72" name="glom211111">
+          <proximal diameter="9e-07" x="4.09711e-05" y="-4.53602e-05" z="0.000667181" />
+          <distal diameter="9e-07" x="6.69519e-05" y="-3.03602e-05" z="0.000667181" />
+        </segment>
+        <segment id="73" name="glom211112">
+          <proximal diameter="9e-07" x="4.09711e-05" y="-4.53602e-05" z="0.000667181" />
+          <distal diameter="9e-07" x="4.09711e-05" y="-5.78602e-05" z="0.000688831" />
+        </segment>
+        <segment id="74" name="glom2111111">
+          <proximal diameter="8e-07" x="4.09711e-05" y="-5.78602e-05" z="0.000688831" />
+          <distal diameter="8e-07" x="3.27796e-05" y="-6.3596e-05" z="0.000671511" />
+        </segment>
+        <segment id="75" name="glom2111112">
+          <proximal diameter="8e-07" x="4.09711e-05" y="-5.78602e-05" z="0.000688831" />
+          <distal diameter="8e-07" x="4.59711e-05" y="-6.65205e-05" z="0.000706152" />
+        </segment>
+        <segment id="76" name="glom21112">
+          <proximal diameter="7e-07" x="2.56618e-05" y="-3.65214e-05" z="0.000649503" />
+          <distal diameter="7e-07" x="1.81618e-05" y="-4.95118e-05" z="0.000675484" />
+        </segment>
+        <segment id="77" name="glom2112">
+          <proximal diameter="7e-07" x="1.94118e-05" y="-2.56961e-05" z="0.000627852" />
+          <distal diameter="7e-07" x="-3.08819e-06" y="-3.86865e-05" z="0.000612852" />
+        </segment>
+        <segment id="78" name="glom212">
+          <proximal diameter="2e-06" x="1.94118e-05" y="-4.48288e-06" z="0.000606639" />
+          <distal diameter="2e-06" x="6.42143e-06" y="-1.19829e-05" z="0.00063262" />
+        </segment>
+        <segment id="79" name="glom2121">
+          <proximal diameter="1.5e-06" x="6.42143e-06" y="-1.19829e-05" z="0.00063262" />
+          <distal diameter="1.5e-06" x="1.12112e-06" y="-1.56942e-05" z="0.000656768" />
+        </segment>
+        <segment id="80" name="glom21211">
+          <proximal diameter="1e-06" x="1.12112e-06" y="-1.56942e-05" z="0.000656768" />
+          <distal diameter="1e-06" x="-1.09529e-05" y="-3.66071e-05" z="0.000663238" />
+        </segment>
+        <segment id="81" name="glom212111">
+          <proximal diameter="9e-07" x="-1.09529e-05" y="-3.66071e-05" z="0.000663238" />
+          <distal diameter="9e-07" x="-1.09529e-05" y="-5.16071e-05" z="0.000637258" />
+        </segment>
+        <segment id="82" name="glom212112">
+          <proximal diameter="9e-07" x="-1.09529e-05" y="-3.66071e-05" z="0.000663238" />
+          <distal diameter="9e-07" x="-2.17783e-05" y="-4.28571e-05" z="0.000684889" />
+        </segment>
+        <segment id="83" name="glom2121121">
+          <proximal diameter="8e-07" x="-2.17783e-05" y="-4.28571e-05" z="0.000684889" />
+          <distal diameter="8e-07" x="-2.43665e-05" y="-5.25164e-05" z="0.00070221" />
+        </segment>
+        <segment id="84" name="glom21211211">
+          <proximal diameter="7e-07" x="-2.43665e-05" y="-5.25164e-05" z="0.00070221" />
+          <distal diameter="7e-07" x="-2.17783e-05" y="-5.69992e-05" z="0.000721528" />
+        </segment>
+        <segment id="85" name="glom21211212">
+          <proximal diameter="7e-07" x="-2.43665e-05" y="-5.25164e-05" z="0.00070221" />
+          <distal diameter="7e-07" x="-1.57062e-05" y="-4.75164e-05" z="0.00071953" />
+        </segment>
+        <segment id="86" name="glom212112121">
+          <proximal diameter="5e-07" x="-1.57062e-05" y="-4.75164e-05" z="0.00071953" />
+          <distal diameter="5e-07" x="-1.34648e-05" y="-3.91512e-05" z="0.00072453" />
+        </segment>
+        <segment id="87" name="glom212112122">
+          <proximal diameter="5e-07" x="-1.57062e-05" y="-4.75164e-05" z="0.00071953" />
+          <distal diameter="5e-07" x="-1.07062e-05" y="-5.25164e-05" z="0.000726601" />
+        </segment>
+        <segment id="88" name="glom2121122">
+          <proximal diameter="8e-07" x="-2.17783e-05" y="-4.28571e-05" z="0.000684889" />
+          <distal diameter="8e-07" x="-2.88493e-05" y="-3.5786e-05" z="0.000667569" />
+        </segment>
+        <segment id="89" name="glom21212">
+          <proximal diameter="7e-07" x="1.12112e-06" y="-1.56942e-05" z="0.000656768" />
+          <distal diameter="7e-07" x="-2.05295e-05" y="-3.19419e-06" z="0.000656768" />
+        </segment>
+        <segment id="90" name="glom2122">
+          <proximal diameter="7e-07" x="6.42143e-06" y="-1.19829e-05" z="0.00063262" />
+          <distal diameter="7e-07" x="-6.56895e-06" y="1.05171e-05" z="0.00061762" />
+        </segment>
+        <segment id="91" name="glom22">
+          <proximal diameter="2.8e-06" x="2.2e-05" y="1.22461e-21" z="0.000587321" />
+          <distal diameter="2.8e-06" x="1.94118e-05" y="4.48288e-06" z="0.000606639" />
+        </segment>
+        <segment id="92" name="glom221">
+          <proximal diameter="2e-06" x="1.94118e-05" y="4.48288e-06" z="0.000606639" />
+          <distal diameter="2e-06" x="1.16472e-05" y="4.48288e-06" z="0.000635617" />
+        </segment>
+        <segment id="93" name="glom2211">
+          <proximal diameter="1.5e-06" x="1.16472e-05" y="4.48288e-06" z="0.000635617" />
+          <distal diameter="1.5e-06" x="1.16472e-05" y="4.48288e-06" z="0.000660617" />
+        </segment>
+        <segment id="94" name="glom22111">
+          <proximal diameter="1e-06" x="1.16472e-05" y="4.48288e-06" z="0.000660617" />
+          <distal diameter="1e-06" x="7.76495e-06" y="-2.24144e-06" z="0.000689595" />
+        </segment>
+        <segment id="95" name="glom221111">
+          <proximal diameter="9e-07" x="7.76495e-06" y="-2.24144e-06" z="0.000689595" />
+          <distal diameter="9e-07" x="1.74068e-05" y="-1.89416e-05" z="0.000712576" />
+        </segment>
+        <segment id="96" name="glom221112">
+          <proximal diameter="9e-07" x="7.76495e-06" y="-2.24144e-06" z="0.000689595" />
+          <distal diameter="9e-07" x="2.2765e-05" y="-2.24144e-06" z="0.000715575" />
+        </segment>
+        <segment id="97" name="glom2211111">
+          <proximal diameter="8e-07" x="2.2765e-05" y="-2.24144e-06" z="0.000715575" />
+          <distal diameter="8e-07" x="1.56939e-05" y="4.82963e-06" z="0.000698255" />
+        </segment>
+        <segment id="98" name="glom2211112">
+          <proximal diameter="8e-07" x="2.2765e-05" y="-2.24144e-06" z="0.000715575" />
+          <distal diameter="8e-07" x="1.19396e-05" y="-8.49144e-06" z="0.000737226" />
+        </segment>
+        <segment id="99" name="glom22112">
+          <proximal diameter="7e-07" x="1.16472e-05" y="4.48288e-06" z="0.000660617" />
+          <distal diameter="7e-07" x="8.21921e-07" y="1.07329e-05" z="0.000682267" />
+        </segment>
+        <segment id="100" name="glom2212">
+          <proximal diameter="7e-07" x="1.16472e-05" y="4.48288e-06" z="0.000635617" />
+          <distal diameter="7e-07" x="-2.84165e-06" y="2.95784e-05" z="0.000643381" />
+        </segment>
+        <segment id="101" name="glom222">
+          <proximal diameter="2e-06" x="1.94118e-05" y="4.48288e-06" z="0.000606639" />
+          <distal diameter="2e-06" x="1.19118e-05" y="1.74733e-05" z="0.00063262" />
+        </segment>
+        <segment id="102" name="glom2221">
+          <proximal diameter="1.5e-06" x="1.19118e-05" y="1.74733e-05" z="0.00063262" />
+          <distal diameter="1.5e-06" x="7.33649e-06" y="2.20486e-05" z="0.000656768" />
+        </segment>
+        <segment id="103" name="glom22211">
+          <proximal diameter="1e-06" x="7.33649e-06" y="2.20486e-05" z="0.000656768" />
+          <distal diameter="1e-06" x="-1.7759e-05" y="3.65375e-05" z="0.000664533" />
+        </segment>
+        <segment id="104" name="glom222111">
+          <proximal diameter="9e-07" x="-1.7759e-05" y="3.65375e-05" z="0.000664533" />
+          <distal diameter="9e-07" x="-3.0259e-05" y="3.65375e-05" z="0.000642882" />
+        </segment>
+        <segment id="105" name="glom222112">
+          <proximal diameter="9e-07" x="-1.7759e-05" y="3.65375e-05" z="0.000664533" />
+          <distal diameter="9e-07" x="-2.4009e-05" y="4.73628e-05" z="0.000686183" />
+        </segment>
+        <segment id="106" name="glom2221121">
+          <proximal diameter="8e-07" x="-2.4009e-05" y="4.73628e-05" z="0.000686183" />
+          <distal diameter="8e-07" x="-3.36683e-05" y="4.9951e-05" z="0.000703504" />
+        </segment>
+        <segment id="107" name="glom22211211">
+          <proximal diameter="7e-07" x="-3.36683e-05" y="4.9951e-05" z="0.000703504" />
+          <distal diameter="7e-07" x="-3.81511e-05" y="4.73628e-05" z="0.000722822" />
+        </segment>
+        <segment id="108" name="glom22211212">
+          <proximal diameter="7e-07" x="-3.36683e-05" y="4.9951e-05" z="0.000703504" />
+          <distal diameter="7e-07" x="-2.86683e-05" y="4.12907e-05" z="0.000720824" />
+        </segment>
+        <segment id="109" name="glom222112121">
+          <proximal diameter="5e-07" x="-2.86683e-05" y="4.12907e-05" z="0.000720824" />
+          <distal diameter="5e-07" x="-2.03031e-05" y="3.90493e-05" z="0.000725824" />
+        </segment>
+        <segment id="110" name="glom222112122">
+          <proximal diameter="5e-07" x="-2.86683e-05" y="4.12907e-05" z="0.000720824" />
+          <distal diameter="5e-07" x="-3.36683e-05" y="3.62907e-05" z="0.000727895" />
+        </segment>
+        <segment id="111" name="glom2221122">
+          <proximal diameter="8e-07" x="-2.4009e-05" y="4.73628e-05" z="0.000686183" />
+          <distal diameter="8e-07" x="-1.69379e-05" y="5.44338e-05" z="0.000668863" />
+        </segment>
+        <segment id="112" name="glom22212">
+          <proximal diameter="7e-07" x="7.33649e-06" y="2.20486e-05" z="0.000656768" />
+          <distal diameter="7e-07" x="2.23365e-05" y="4.80293e-05" z="0.000656768" />
+        </segment>
+        <segment id="113" name="glom2222">
+          <proximal diameter="7e-07" x="1.19118e-05" y="1.74733e-05" z="0.00063262" />
+          <distal diameter="7e-07" x="3.44118e-05" y="3.04636e-05" z="0.00061762" />
+        </segment>
+        <segment id="114" name="sec_dend1">
+          <proximal diameter="5.8e-06" x="3.2e-05" y="0" z="0" />
+          <distal diameter="5.8e-06" x="5.79808e-05" y="0" z="1.5e-05" />
+        </segment>
+        <segment id="115" name="sec_dend1[1]">
+          <proximal diameter="5.6e-06" x="5.79808e-05" y="0" z="1.5e-05" />
+          <distal diameter="5.6e-06" x="9.26218e-05" y="0" z="3.5e-05" />
+        </segment>
+        <segment id="116" name="sec_dend1[2]">
+          <proximal diameter="5.8e-06" x="9.26218e-05" y="0" z="3.5e-05" />
+          <distal diameter="5.8e-06" x="0.000103014" y="0" z="4.1e-05" />
+        </segment>
+        <segment id="117" name="sec_dend11">
+          <proximal diameter="3.2e-06" x="0.000103014" y="0" z="4.1e-05" />
+          <distal diameter="3.2e-06" x="0.000169935" y="3.8637e-05" z="6.17055e-05" />
+        </segment>
+        <segment id="118" name="sec_dend11[1]">
+          <proximal diameter="2.9e-06" x="0.000169935" y="3.8637e-05" z="6.17055e-05" />
+          <distal diameter="2.9e-06" x="0.000236857" y="7.72741e-05" z="8.2411e-05" />
+        </segment>
+        <segment id="119" name="sec_dend11[2]">
+          <proximal diameter="2.7e-06" x="0.000236857" y="7.72741e-05" z="8.2411e-05" />
+          <distal diameter="2.7e-06" x="0.000303778" y="0.000115911" z="0.000103117" />
+        </segment>
+        <segment id="120" name="sec_dend11[3]">
+          <proximal diameter="2.7e-06" x="0.000303778" y="0.000115911" z="0.000103117" />
+          <distal diameter="2.7e-06" x="0.000370699" y="0.000154548" z="0.000123822" />
+        </segment>
+        <segment id="121" name="sec_dend11[4]">
+          <proximal diameter="3.2e-06" x="0.000370699" y="0.000154548" z="0.000123822" />
+          <distal diameter="3.2e-06" x="0.000412525" y="0.000178696" z="0.000136763" />
+        </segment>
+        <segment id="122" name="sec_dend111">
+          <proximal diameter="2e-06" x="0.000412525" y="0.000178696" z="0.000136763" />
+          <distal diameter="2e-06" x="0.000460821" y="0.000262348" z="0.000162645" />
+        </segment>
+        <segment id="123" name="sec_dend111[1]">
+          <proximal diameter="1.8e-06" x="0.000460821" y="0.000262348" z="0.000162645" />
+          <distal diameter="1.8e-06" x="0.000485821" y="0.000355649" z="0.000188527" />
+        </segment>
+        <segment id="124" name="sec_dend111[2]">
+          <proximal diameter="1.6e-06" x="0.000485821" y="0.000355649" z="0.000188527" />
+          <distal diameter="1.6e-06" x="0.000534118" y="0.000439301" z="0.000214409" />
+        </segment>
+        <segment id="125" name="sec_dend111[3]">
+          <proximal diameter="1.5e-06" x="0.000534118" y="0.000439301" z="0.000214409" />
+          <distal diameter="1.5e-06" x="0.000602419" y="0.000507602" z="0.000240291" />
+        </segment>
+        <segment id="126" name="sec_dend111[4]">
+          <proximal diameter="1.4e-06" x="0.000602419" y="0.000507602" z="0.000240291" />
+          <distal diameter="1.4e-06" x="0.000631397" y="0.000557793" z="0.00025582" />
+        </segment>
+        <segment id="127" name="sec_dend112">
+          <proximal diameter="2.2e-06" x="0.000412525" y="0.000178696" z="0.000136763" />
+          <distal diameter="2.2e-06" x="0.000509118" y="0.000178696" z="0.000162645" />
+        </segment>
+        <segment id="128" name="sec_dend112[1]">
+          <proximal diameter="2e-06" x="0.000509118" y="0.000178696" z="0.000162645" />
+          <distal diameter="2e-06" x="0.000602419" y="0.000153696" z="0.000188527" />
+        </segment>
+        <segment id="129" name="sec_dend112[2]">
+          <proximal diameter="1.9e-06" x="0.000602419" y="0.000153696" z="0.000188527" />
+          <distal diameter="1.9e-06" x="0.000686071" y="0.0001054" z="0.000214409" />
+        </segment>
+        <segment id="130" name="sec_dend112[3]">
+          <proximal diameter="1.8e-06" x="0.000686071" y="0.0001054" z="0.000214409" />
+          <distal diameter="1.8e-06" x="0.000769722" y="5.71037e-05" z="0.000240291" />
+        </segment>
+        <segment id="131" name="sec_dend112[4]">
+          <proximal diameter="2.2e-06" x="0.000769722" y="5.71037e-05" z="0.000240291" />
+          <distal diameter="2.2e-06" x="0.000819913" y="2.81259e-05" z="0.00025582" />
+        </segment>
+        <segment id="132" name="sec_dend1121">
+          <proximal diameter="1.6e-06" x="0.000819913" y="2.81259e-05" z="0.00025582" />
+          <distal diameter="1.6e-06" x="0.000894554" y="8.12592e-06" z="0.000276525" />
+        </segment>
+        <segment id="133" name="sec_dend1121[1]">
+          <proximal diameter="1.5e-06" x="0.000894554" y="8.12592e-06" z="0.000276525" />
+          <distal diameter="1.5e-06" x="0.000969195" y="-1.18741e-05" z="0.000297231" />
+        </segment>
+        <segment id="134" name="sec_dend1121[2]">
+          <proximal diameter="1.4e-06" x="0.000969195" y="-1.18741e-05" z="0.000297231" />
+          <distal diameter="1.4e-06" x="0.00104647" y="-1.18741e-05" z="0.000317936" />
+        </segment>
+        <segment id="135" name="sec_dend1121[3]">
+          <proximal diameter="1.3e-06" x="0.00104647" y="-1.18741e-05" z="0.000317936" />
+          <distal diameter="1.3e-06" x="0.00112374" y="-1.18741e-05" z="0.000338642" />
+        </segment>
+        <segment id="136" name="sec_dend1121[4]">
+          <proximal diameter="1e-06" x="0.00112374" y="-1.18741e-05" z="0.000338642" />
+          <distal diameter="1e-06" x="0.00119329" y="-1.18741e-05" z="0.000357277" />
+        </segment>
+        <segment id="137" name="sec_dend1122">
+          <proximal diameter="1.6e-06" x="0.000819913" y="2.81259e-05" z="0.00025582" />
+          <distal diameter="1.6e-06" x="0.000881384" y="-3.33452e-05" z="0.000279114" />
+        </segment>
+        <segment id="138" name="sec_dend1122[1]">
+          <proximal diameter="1.5e-06" x="0.000881384" y="-3.33452e-05" z="0.000279114" />
+          <distal diameter="1.5e-06" x="0.000942855" y="-9.48164e-05" z="0.000302407" />
+        </segment>
+        <segment id="139" name="sec_dend1122[2]">
+          <proximal diameter="1.4e-06" x="0.000942855" y="-9.48164e-05" z="0.000302407" />
+          <distal diameter="1.4e-06" x="0.00100433" y="-0.000156288" z="0.000325701" />
+        </segment>
+        <segment id="140" name="sec_dend1122[3]">
+          <proximal diameter="1.3e-06" x="0.00100433" y="-0.000156288" z="0.000325701" />
+          <distal diameter="1.3e-06" x="0.0010658" y="-0.000217759" z="0.000348995" />
+        </segment>
+        <segment id="141" name="sec_dend1122[4]">
+          <proximal diameter="1.6e-06" x="0.0010658" y="-0.000217759" z="0.000348995" />
+          <distal diameter="1.6e-06" x="0.00108765" y="-0.000239615" z="0.000357277" />
+        </segment>
+        <segment id="142" name="sec_dend11221">
+          <proximal diameter="1.4e-06" x="0.00108765" y="-0.000239615" z="0.000357277" />
+          <distal diameter="1.4e-06" x="0.00117163" y="-0.000217115" z="0.000380571" />
+        </segment>
+        <segment id="143" name="sec_dend11221[1]">
+          <proximal diameter="1.3e-06" x="0.00117163" y="-0.000217115" z="0.000380571" />
+          <distal diameter="1.3e-06" x="0.0012556" y="-0.000194615" z="0.000403864" />
+        </segment>
+        <segment id="144" name="sec_dend11221[2]">
+          <proximal diameter="1.2e-06" x="0.0012556" y="-0.000194615" z="0.000403864" />
+          <distal diameter="1.2e-06" x="0.00133957" y="-0.000172115" z="0.000427158" />
+        </segment>
+        <segment id="145" name="sec_dend11221[3]">
+          <proximal diameter="1.2e-06" x="0.00133957" y="-0.000172115" z="0.000427158" />
+          <distal diameter="1.2e-06" x="0.00142354" y="-0.000149615" z="0.000450452" />
+        </segment>
+        <segment id="146" name="sec_dend11221[4]">
+          <proximal diameter="1e-06" x="0.00142354" y="-0.000149615" z="0.000450452" />
+          <distal diameter="1e-06" x="0.00146086" y="-0.000139615" z="0.000460804" />
+        </segment>
+        <segment id="147" name="sec_dend11222">
+          <proximal diameter="1.4e-06" x="0.00108765" y="-0.000239615" z="0.000357277" />
+          <distal diameter="1.4e-06" x="0.00114913" y="-0.000301086" z="0.000380571" />
+        </segment>
+        <segment id="148" name="sec_dend11222[1]">
+          <proximal diameter="1.3e-06" x="0.00114913" y="-0.000301086" z="0.000380571" />
+          <distal diameter="1.3e-06" x="0.0012106" y="-0.000362557" z="0.000403864" />
+        </segment>
+        <segment id="149" name="sec_dend11222[2]">
+          <proximal diameter="1.2e-06" x="0.0012106" y="-0.000362557" z="0.000403864" />
+          <distal diameter="1.2e-06" x="0.0012331" y="-0.000446528" z="0.000427158" />
+        </segment>
+        <segment id="150" name="sec_dend11222[3]">
+          <proximal diameter="1.2e-06" x="0.0012331" y="-0.000446528" z="0.000427158" />
+          <distal diameter="1.2e-06" x="0.0012556" y="-0.0005305" z="0.000450452" />
+        </segment>
+        <segment id="151" name="sec_dend11222[4]">
+          <proximal diameter="1e-06" x="0.0012556" y="-0.0005305" z="0.000450452" />
+          <distal diameter="1e-06" x="0.0012656" y="-0.00056782" z="0.000460804" />
+        </segment>
+        <segment id="152" name="sec_dend12">
+          <proximal diameter="2.7e-06" x="0.000103014" y="0" z="4.1e-05" />
+          <distal diameter="2.7e-06" x="0.000169935" y="-3.8637e-05" z="6.17055e-05" />
+        </segment>
+        <segment id="153" name="sec_dend12[1]">
+          <proximal diameter="2.2e-06" x="0.000169935" y="-3.8637e-05" z="6.17055e-05" />
+          <distal diameter="2.2e-06" x="0.000236857" y="-7.72741e-05" z="8.2411e-05" />
+        </segment>
+        <segment id="154" name="sec_dend12[2]">
+          <proximal diameter="1.8e-06" x="0.000236857" y="-7.72741e-05" z="8.2411e-05" />
+          <distal diameter="1.8e-06" x="0.000303778" y="-0.000115911" z="0.000103117" />
+        </segment>
+        <segment id="155" name="sec_dend12[3]">
+          <proximal diameter="1.6e-06" x="0.000303778" y="-0.000115911" z="0.000103117" />
+          <distal diameter="1.6e-06" x="0.000370699" y="-0.000154548" z="0.000123822" />
+        </segment>
+        <segment id="156" name="sec_dend12[4]">
+          <proximal diameter="1.5e-06" x="0.000370699" y="-0.000154548" z="0.000123822" />
+          <distal diameter="1.5e-06" x="0.000412525" y="-0.000178696" z="0.000136763" />
+        </segment>
+        <segment id="157" name="sec_dend2">
+          <proximal diameter="5.8e-06" x="3.2e-05" y="0" z="0" />
+          <distal diameter="5.8e-06" x="3.2e-05" y="2.59808e-05" z="1.5e-05" />
+        </segment>
+        <segment id="158" name="sec_dend2[1]">
+          <proximal diameter="5.6e-06" x="3.2e-05" y="2.59808e-05" z="1.5e-05" />
+          <distal diameter="5.6e-06" x="3.2e-05" y="6.06218e-05" z="3.5e-05" />
+        </segment>
+        <segment id="159" name="sec_dend2[2]">
+          <proximal diameter="5.8e-06" x="3.2e-05" y="6.06218e-05" z="3.5e-05" />
+          <distal diameter="5.8e-06" x="3.2e-05" y="7.10141e-05" z="4.1e-05" />
+        </segment>
+        <segment id="160" name="sec_dend21">
+          <proximal diameter="3.1e-06" x="3.2e-05" y="7.10141e-05" z="4.1e-05" />
+          <distal diameter="3.1e-06" x="-6.63703e-06" y="0.000137935" z="6.17055e-05" />
+        </segment>
+        <segment id="161" name="sec_dend21[1]">
+          <proximal diameter="2.9e-06" x="-6.63703e-06" y="0.000137935" z="6.17055e-05" />
+          <distal diameter="2.9e-06" x="-4.52741e-05" y="0.000204857" z="8.2411e-05" />
+        </segment>
+        <segment id="162" name="sec_dend21[2]">
+          <proximal diameter="2.7e-06" x="-4.52741e-05" y="0.000204857" z="8.2411e-05" />
+          <distal diameter="2.7e-06" x="-8.39111e-05" y="0.000271778" z="0.000103117" />
+        </segment>
+        <segment id="163" name="sec_dend21[3]">
+          <proximal diameter="2.7e-06" x="-8.39111e-05" y="0.000271778" z="0.000103117" />
+          <distal diameter="2.7e-06" x="-0.000103911" y="0.000346419" z="0.000123822" />
+        </segment>
+        <segment id="164" name="sec_dend21[4]">
+          <proximal diameter="3.1e-06" x="-0.000103911" y="0.000346419" z="0.000123822" />
+          <distal diameter="3.1e-06" x="-0.000116411" y="0.00039307" z="0.000136763" />
+        </segment>
+        <segment id="165" name="sec_dend211">
+          <proximal diameter="2e-06" x="-0.000116411" y="0.00039307" z="0.000136763" />
+          <distal diameter="2e-06" x="-0.000200063" y="0.000441366" z="0.000162645" />
+        </segment>
+        <segment id="166" name="sec_dend211[1]">
+          <proximal diameter="1.8e-06" x="-0.000200063" y="0.000441366" z="0.000162645" />
+          <distal diameter="1.8e-06" x="-0.000293364" y="0.000466366" z="0.000188527" />
+        </segment>
+        <segment id="167" name="sec_dend211[2]">
+          <proximal diameter="1.6e-06" x="-0.000293364" y="0.000466366" z="0.000188527" />
+          <distal diameter="1.6e-06" x="-0.000389957" y="0.000466366" z="0.000214409" />
+        </segment>
+        <segment id="168" name="sec_dend211[3]">
+          <proximal diameter="1.5e-06" x="-0.000389957" y="0.000466366" z="0.000214409" />
+          <distal diameter="1.5e-06" x="-0.000486549" y="0.000466366" z="0.000240291" />
+        </segment>
+        <segment id="169" name="sec_dend211[4]">
+          <proximal diameter="1.4e-06" x="-0.000486549" y="0.000466366" z="0.000240291" />
+          <distal diameter="1.4e-06" x="-0.000544505" y="0.000466366" z="0.00025582" />
+        </segment>
+        <segment id="170" name="sec_dend212">
+          <proximal diameter="2.2e-06" x="-0.000116411" y="0.00039307" z="0.000136763" />
+          <distal diameter="2.2e-06" x="-0.000141411" y="0.000486371" z="0.000162645" />
+        </segment>
+        <segment id="171" name="sec_dend212[1]">
+          <proximal diameter="2e-06" x="-0.000141411" y="0.000486371" z="0.000162645" />
+          <distal diameter="2e-06" x="-0.000166411" y="0.000579672" z="0.000188527" />
+        </segment>
+        <segment id="172" name="sec_dend212[2]">
+          <proximal diameter="1.9e-06" x="-0.000166411" y="0.000579672" z="0.000188527" />
+          <distal diameter="1.9e-06" x="-0.000166411" y="0.000676265" z="0.000214409" />
+        </segment>
+        <segment id="173" name="sec_dend212[3]">
+          <proximal diameter="1.8e-06" x="-0.000166411" y="0.000676265" z="0.000214409" />
+          <distal diameter="1.8e-06" x="-0.000166411" y="0.000772857" z="0.000240291" />
+        </segment>
+        <segment id="174" name="sec_dend212[4]">
+          <proximal diameter="2.2e-06" x="-0.000166411" y="0.000772857" z="0.000240291" />
+          <distal diameter="2.2e-06" x="-0.000166411" y="0.000830813" z="0.00025582" />
+        </segment>
+        <segment id="175" name="sec_dend2121">
+          <proximal diameter="1.6e-06" x="-0.000166411" y="0.000830813" z="0.00025582" />
+          <distal diameter="1.6e-06" x="-0.000186411" y="0.000905454" z="0.000276525" />
+        </segment>
+        <segment id="176" name="sec_dend2121[1]">
+          <proximal diameter="1.5e-06" x="-0.000186411" y="0.000905454" z="0.000276525" />
+          <distal diameter="1.5e-06" x="-0.000241052" y="0.000960095" z="0.000297231" />
+        </segment>
+        <segment id="177" name="sec_dend2121[2]">
+          <proximal diameter="1.4e-06" x="-0.000241052" y="0.000960095" z="0.000297231" />
+          <distal diameter="1.4e-06" x="-0.000295693" y="0.00101474" z="0.000317936" />
+        </segment>
+        <segment id="178" name="sec_dend2121[3]">
+          <proximal diameter="1.3e-06" x="-0.000295693" y="0.00101474" z="0.000317936" />
+          <distal diameter="1.3e-06" x="-0.000350334" y="0.00106938" z="0.000338642" />
+        </segment>
+        <segment id="179" name="sec_dend2121[4]">
+          <proximal diameter="1e-06" x="-0.000350334" y="0.00106938" z="0.000338642" />
+          <distal diameter="1e-06" x="-0.000399511" y="0.00111855" z="0.000357277" />
+        </segment>
+        <segment id="180" name="sec_dend2122">
+          <proximal diameter="1.6e-06" x="-0.000166411" y="0.000830813" z="0.00025582" />
+          <distal diameter="1.6e-06" x="-0.000166411" y="0.000917746" z="0.000279114" />
+        </segment>
+        <segment id="181" name="sec_dend2122[1]">
+          <proximal diameter="1.5e-06" x="-0.000166411" y="0.000917746" z="0.000279114" />
+          <distal diameter="1.5e-06" x="-0.000122944" y="0.000993033" z="0.000302407" />
+        </segment>
+        <segment id="182" name="sec_dend2122[2]">
+          <proximal diameter="1.4e-06" x="-0.000122944" y="0.000993033" z="0.000302407" />
+          <distal diameter="1.4e-06" x="-4.7658e-05" y="0.0010365" z="0.000325701" />
+        </segment>
+        <segment id="183" name="sec_dend2122[3]">
+          <proximal diameter="1.3e-06" x="-4.7658e-05" y="0.0010365" z="0.000325701" />
+          <distal diameter="1.3e-06" x="2.76285e-05" y="0.00107997" z="0.000348995" />
+        </segment>
+        <segment id="184" name="sec_dend2122[4]">
+          <proximal diameter="1.6e-06" x="2.76285e-05" y="0.00107997" z="0.000348995" />
+          <distal diameter="1.6e-06" x="5.4397e-05" y="0.00109542" z="0.000357277" />
+        </segment>
+        <segment id="185" name="sec_dend21221">
+          <proximal diameter="1.4e-06" x="5.4397e-05" y="0.00109542" z="0.000357277" />
+          <distal diameter="1.4e-06" x="9.78637e-05" y="0.00117071" z="0.000380571" />
+        </segment>
+        <segment id="186" name="sec_dend21221[1]">
+          <proximal diameter="1.3e-06" x="9.78637e-05" y="0.00117071" z="0.000380571" />
+          <distal diameter="1.3e-06" x="9.78637e-05" y="0.00125764" z="0.000403864" />
+        </segment>
+        <segment id="187" name="sec_dend21221[2]">
+          <proximal diameter="1.2e-06" x="9.78637e-05" y="0.00125764" z="0.000403864" />
+          <distal diameter="1.2e-06" x="5.4397e-05" y="0.00133293" z="0.000427158" />
+        </segment>
+        <segment id="188" name="sec_dend21221[3]">
+          <proximal diameter="1.2e-06" x="5.4397e-05" y="0.00133293" z="0.000427158" />
+          <distal diameter="1.2e-06" x="1.09304e-05" y="0.00140821" z="0.000450452" />
+        </segment>
+        <segment id="189" name="sec_dend21221[4]">
+          <proximal diameter="1e-06" x="1.09304e-05" y="0.00140821" z="0.000450452" />
+          <distal diameter="1e-06" x="-8.38816e-06" y="0.00144167" z="0.000460804" />
+        </segment>
+        <segment id="190" name="sec_dend21222">
+          <proximal diameter="1.4e-06" x="5.4397e-05" y="0.00109542" z="0.000357277" />
+          <distal diameter="1.4e-06" x="0.000129683" y="0.00113889" z="0.000380571" />
+        </segment>
+        <segment id="191" name="sec_dend21222[1]">
+          <proximal diameter="1.3e-06" x="0.000129683" y="0.00113889" z="0.000380571" />
+          <distal diameter="1.3e-06" x="0.00020497" y="0.00118235" z="0.000403864" />
+        </segment>
+        <segment id="192" name="sec_dend21222[2]">
+          <proximal diameter="1.2e-06" x="0.00020497" y="0.00118235" z="0.000403864" />
+          <distal diameter="1.2e-06" x="0.000288941" y="0.00115985" z="0.000427158" />
+        </segment>
+        <segment id="193" name="sec_dend21222[3]">
+          <proximal diameter="1.2e-06" x="0.000288941" y="0.00115985" z="0.000427158" />
+          <distal diameter="1.2e-06" x="0.000372912" y="0.00113735" z="0.000450452" />
+        </segment>
+        <segment id="194" name="sec_dend21222[4]">
+          <proximal diameter="1e-06" x="0.000372912" y="0.00113735" z="0.000450452" />
+          <distal diameter="1e-06" x="0.000410233" y="0.00112735" z="0.000460804" />
+        </segment>
+        <segment id="195" name="sec_dend22">
+          <proximal diameter="2.7e-06" x="3.2e-05" y="7.10141e-05" z="4.1e-05" />
+          <distal diameter="2.7e-06" x="3.2e-05" y="0.000148288" z="6.17055e-05" />
+        </segment>
+        <segment id="196" name="sec_dend22[1]">
+          <proximal diameter="2.2e-06" x="3.2e-05" y="0.000148288" z="6.17055e-05" />
+          <distal diameter="2.2e-06" x="5.2e-05" y="0.000222929" z="8.2411e-05" />
+        </segment>
+        <segment id="197" name="sec_dend22[2]">
+          <proximal diameter="1.8e-06" x="5.2e-05" y="0.000222929" z="8.2411e-05" />
+          <distal diameter="1.8e-06" x="7.2e-05" y="0.00029757" z="0.000103117" />
+        </segment>
+        <segment id="198" name="sec_dend22[3]">
+          <proximal diameter="1.6e-06" x="7.2e-05" y="0.00029757" z="0.000103117" />
+          <distal diameter="1.6e-06" x="9.2e-05" y="0.000372211" z="0.000123822" />
+        </segment>
+        <segment id="199" name="sec_dend22[4]">
+          <proximal diameter="1.5e-06" x="9.2e-05" y="0.000372211" z="0.000123822" />
+          <distal diameter="1.5e-06" x="0.0001045" y="0.000418862" z="0.000136763" />
+        </segment>
+        <segment id="200" name="sec_dend3">
+          <proximal diameter="5.8e-06" x="3.2e-05" y="0" z="0" />
+          <distal diameter="5.8e-06" x="6.01924e-06" y="3.18162e-21" z="1.5e-05" />
+        </segment>
+        <segment id="201" name="sec_dend3[1]">
+          <proximal diameter="5.6e-06" x="6.01924e-06" y="3.18162e-21" z="1.5e-05" />
+          <distal diameter="5.6e-06" x="-2.86218e-05" y="7.42378e-21" z="3.5e-05" />
+        </segment>
+        <segment id="202" name="sec_dend3[2]">
+          <proximal diameter="5.8e-06" x="-2.86218e-05" y="7.42378e-21" z="3.5e-05" />
+          <distal diameter="5.8e-06" x="-3.90141e-05" y="8.69643e-21" z="4.1e-05" />
+        </segment>
+        <segment id="203" name="sec_dend31">
+          <proximal diameter="3.1e-06" x="-3.90141e-05" y="8.69643e-21" z="4.1e-05" />
+          <distal diameter="3.1e-06" x="-0.000116288" y="1.81595e-20" z="6.17055e-05" />
+        </segment>
+        <segment id="204" name="sec_dend31[1]">
+          <proximal diameter="2.9e-06" x="-0.000116288" y="1.81595e-20" z="6.17055e-05" />
+          <distal diameter="2.9e-06" x="-0.000183209" y="-3.8637e-05" z="8.2411e-05" />
+        </segment>
+        <segment id="205" name="sec_dend31[2]">
+          <proximal diameter="2.7e-06" x="-0.000183209" y="-3.8637e-05" z="8.2411e-05" />
+          <distal diameter="2.7e-06" x="-0.000250131" y="-7.72741e-05" z="0.000103117" />
+        </segment>
+        <segment id="206" name="sec_dend31[3]">
+          <proximal diameter="2.7e-06" x="-0.000250131" y="-7.72741e-05" z="0.000103117" />
+          <distal diameter="2.7e-06" x="-0.000317052" y="-0.000115911" z="0.000123822" />
+        </segment>
+        <segment id="207" name="sec_dend31[4]">
+          <proximal diameter="3.1e-06" x="-0.000317052" y="-0.000115911" z="0.000123822" />
+          <distal diameter="3.1e-06" x="-0.000358878" y="-0.000140059" z="0.000136763" />
+        </segment>
+        <segment id="208" name="sec_dend311">
+          <proximal diameter="2.2e-06" x="-0.000358878" y="-0.000140059" z="0.000136763" />
+          <distal diameter="2.2e-06" x="-0.000420966" y="-0.000214053" z="0.000162645" />
+        </segment>
+        <segment id="209" name="sec_dend311[1]">
+          <proximal diameter="2e-06" x="-0.000420966" y="-0.000214053" z="0.000162645" />
+          <distal diameter="2e-06" x="-0.000483055" y="-0.000288048" z="0.000188527" />
+        </segment>
+        <segment id="210" name="sec_dend311[2]">
+          <proximal diameter="1.9e-06" x="-0.000483055" y="-0.000288048" z="0.000188527" />
+          <distal diameter="1.9e-06" x="-0.000483055" y="-0.00038464" z="0.000214409" />
+        </segment>
+        <segment id="211" name="sec_dend311[3]">
+          <proximal diameter="1.8e-06" x="-0.000483055" y="-0.00038464" z="0.000214409" />
+          <distal diameter="1.8e-06" x="-0.000483055" y="-0.000481233" z="0.000240291" />
+        </segment>
+        <segment id="212" name="sec_dend311[4]">
+          <proximal diameter="2.2e-06" x="-0.000483055" y="-0.000481233" z="0.000240291" />
+          <distal diameter="2.2e-06" x="-0.000483055" y="-0.000539188" z="0.00025582" />
+        </segment>
+        <segment id="213" name="sec_dend3111">
+          <proximal diameter="1.6e-06" x="-0.000483055" y="-0.000539188" z="0.00025582" />
+          <distal diameter="1.6e-06" x="-0.000463055" y="-0.000613829" z="0.000276525" />
+        </segment>
+        <segment id="214" name="sec_dend3111[1]">
+          <proximal diameter="1.5e-06" x="-0.000463055" y="-0.000613829" z="0.000276525" />
+          <distal diameter="1.5e-06" x="-0.000424418" y="-0.000680751" z="0.000297231" />
+        </segment>
+        <segment id="215" name="sec_dend3111[2]">
+          <proximal diameter="1.4e-06" x="-0.000424418" y="-0.000680751" z="0.000297231" />
+          <distal diameter="1.4e-06" x="-0.000385781" y="-0.000747672" z="0.000317936" />
+        </segment>
+        <segment id="216" name="sec_dend3111[3]">
+          <proximal diameter="1.3e-06" x="-0.000385781" y="-0.000747672" z="0.000317936" />
+          <distal diameter="1.3e-06" x="-0.000347144" y="-0.000814593" z="0.000338642" />
+        </segment>
+        <segment id="217" name="sec_dend3111[4]">
+          <proximal diameter="1e-06" x="-0.000347144" y="-0.000814593" z="0.000338642" />
+          <distal diameter="1e-06" x="-0.00031237" y="-0.000874822" z="0.000357277" />
+        </segment>
+        <segment id="218" name="sec_dend3112">
+          <proximal diameter="1.6e-06" x="-0.000483055" y="-0.000539188" z="0.00025582" />
+          <distal diameter="1.6e-06" x="-0.000526522" y="-0.000614475" z="0.000279114" />
+        </segment>
+        <segment id="219" name="sec_dend3112[1]">
+          <proximal diameter="1.5e-06" x="-0.000526522" y="-0.000614475" z="0.000279114" />
+          <distal diameter="1.5e-06" x="-0.000601808" y="-0.000657942" z="0.000302407" />
+        </segment>
+        <segment id="220" name="sec_dend3112[2]">
+          <proximal diameter="1.4e-06" x="-0.000601808" y="-0.000657942" z="0.000302407" />
+          <distal diameter="1.4e-06" x="-0.000677095" y="-0.000701408" z="0.000325701" />
+        </segment>
+        <segment id="221" name="sec_dend3112[3]">
+          <proximal diameter="1.3e-06" x="-0.000677095" y="-0.000701408" z="0.000325701" />
+          <distal diameter="1.3e-06" x="-0.000752381" y="-0.000744875" z="0.000348995" />
+        </segment>
+        <segment id="222" name="sec_dend3112[4]">
+          <proximal diameter="1.6e-06" x="-0.000752381" y="-0.000744875" z="0.000348995" />
+          <distal diameter="1.6e-06" x="-0.000779149" y="-0.00076033" z="0.000357277" />
+        </segment>
+        <segment id="223" name="sec_dend31121">
+          <proximal diameter="1.4e-06" x="-0.000779149" y="-0.00076033" z="0.000357277" />
+          <distal diameter="1.4e-06" x="-0.000854436" y="-0.000803796" z="0.000380571" />
+        </segment>
+        <segment id="224" name="sec_dend31121[1]">
+          <proximal diameter="1.3e-06" x="-0.000854436" y="-0.000803796" z="0.000380571" />
+          <distal diameter="1.3e-06" x="-0.000897903" y="-0.000879083" z="0.000403864" />
+        </segment>
+        <segment id="225" name="sec_dend31121[2]">
+          <proximal diameter="1.2e-06" x="-0.000897903" y="-0.000879083" z="0.000403864" />
+          <distal diameter="1.2e-06" x="-0.000941369" y="-0.000954369" z="0.000427158" />
+        </segment>
+        <segment id="226" name="sec_dend31121[3]">
+          <proximal diameter="1.2e-06" x="-0.000941369" y="-0.000954369" z="0.000427158" />
+          <distal diameter="1.2e-06" x="-0.000984836" y="-0.00102966" z="0.000450452" />
+        </segment>
+        <segment id="227" name="sec_dend31121[4]">
+          <proximal diameter="1.4e-06" x="-0.000984836" y="-0.00102966" z="0.000450452" />
+          <distal diameter="1.4e-06" x="-0.00100415" y="-0.00106312" z="0.000460804" />
+        </segment>
+        <segment id="228" name="sec_dend311211">
+          <proximal diameter="1.1e-06" x="-0.00100415" y="-0.00106312" z="0.000460804" />
+          <distal diameter="1.1e-06" x="-0.00103989" y="-0.00112502" z="0.000479957" />
+        </segment>
+        <segment id="229" name="sec_dend311211[1]">
+          <proximal diameter="1e-06" x="-0.00103989" y="-0.00112502" z="0.000479957" />
+          <distal diameter="1e-06" x="-0.0010737" y="-0.00118357" z="0.000498074" />
+        </segment>
+        <segment id="230" name="sec_dend311211[2]">
+          <proximal diameter="9e-07" x="-0.0010737" y="-0.00118357" z="0.000498074" />
+          <distal diameter="9e-07" x="-0.00107959" y="-0.00125093" z="0.000516192" />
+        </segment>
+        <segment id="231" name="sec_dend311211[3]">
+          <proximal diameter="9e-07" x="-0.00107959" y="-0.00125093" z="0.000516192" />
+          <distal diameter="9e-07" x="-0.00108549" y="-0.00131829" z="0.000534309" />
+        </segment>
+        <segment id="232" name="sec_dend311211[4]">
+          <proximal diameter="9e-07" x="-0.00108549" y="-0.00131829" z="0.000534309" />
+          <distal diameter="9e-07" x="-0.00109138" y="-0.00138565" z="0.000552426" />
+        </segment>
+        <segment id="233" name="sec_dend311212">
+          <proximal diameter="1.1e-06" x="-0.00100415" y="-0.00106312" z="0.000460804" />
+          <distal diameter="1.1e-06" x="-0.00106606" y="-0.00109886" z="0.000479957" />
+        </segment>
+        <segment id="234" name="sec_dend311212[1]">
+          <proximal diameter="1e-06" x="-0.00106606" y="-0.00109886" z="0.000479957" />
+          <distal diameter="1e-06" x="-0.00113137" y="-0.00108136" z="0.000498074" />
+        </segment>
+        <segment id="235" name="sec_dend311212[2]">
+          <proximal diameter="9e-07" x="-0.00113137" y="-0.00108136" z="0.000498074" />
+          <distal diameter="9e-07" x="-0.00119668" y="-0.00106386" z="0.000516192" />
+        </segment>
+        <segment id="236" name="sec_dend311212[3]">
+          <proximal diameter="9e-07" x="-0.00119668" y="-0.00106386" z="0.000516192" />
+          <distal diameter="9e-07" x="-0.00126199" y="-0.00104636" z="0.000534309" />
+        </segment>
+        <segment id="237" name="sec_dend311212[4]">
+          <proximal diameter="9e-07" x="-0.00126199" y="-0.00104636" z="0.000534309" />
+          <distal diameter="9e-07" x="-0.0013273" y="-0.00102886" z="0.000552426" />
+        </segment>
+        <segment id="238" name="sec_dend31122">
+          <proximal diameter="1.4e-06" x="-0.000779149" y="-0.00076033" z="0.000357277" />
+          <distal diameter="1.4e-06" x="-0.000854436" y="-0.000716863" z="0.000380571" />
+        </segment>
+        <segment id="239" name="sec_dend31122[1]">
+          <proximal diameter="1.3e-06" x="-0.000854436" y="-0.000716863" z="0.000380571" />
+          <distal diameter="1.3e-06" x="-0.000915907" y="-0.000655392" z="0.000403864" />
+        </segment>
+        <segment id="240" name="sec_dend31122[2]">
+          <proximal diameter="1.2e-06" x="-0.000915907" y="-0.000655392" z="0.000403864" />
+          <distal diameter="1.2e-06" x="-0.000977378" y="-0.000593921" z="0.000427158" />
+        </segment>
+        <segment id="241" name="sec_dend31122[3]">
+          <proximal diameter="1.2e-06" x="-0.000977378" y="-0.000593921" z="0.000427158" />
+          <distal diameter="1.2e-06" x="-0.00103885" y="-0.00053245" z="0.000450452" />
+        </segment>
+        <segment id="242" name="sec_dend31122[4]">
+          <proximal diameter="1e-06" x="-0.00103885" y="-0.00053245" z="0.000450452" />
+          <distal diameter="1e-06" x="-0.00106617" y="-0.000505129" z="0.000460804" />
+        </segment>
+        <segment id="243" name="sec_dend312">
+          <proximal diameter="2e-06" x="-0.000358878" y="-0.000140059" z="0.000136763" />
+          <distal diameter="2e-06" x="-0.000452179" y="-0.000165059" z="0.000162645" />
+        </segment>
+        <segment id="244" name="sec_dend312[1]">
+          <proximal diameter="1.8e-06" x="-0.000452179" y="-0.000165059" z="0.000162645" />
+          <distal diameter="1.8e-06" x="-0.000535831" y="-0.000116763" z="0.000188527" />
+        </segment>
+        <segment id="245" name="sec_dend312[2]">
+          <proximal diameter="1.6e-06" x="-0.000535831" y="-0.000116763" z="0.000188527" />
+          <distal diameter="1.6e-06" x="-0.000619482" y="-6.84667e-05" z="0.000214409" />
+        </segment>
+        <segment id="246" name="sec_dend312[3]">
+          <proximal diameter="1.5e-06" x="-0.000619482" y="-6.84667e-05" z="0.000214409" />
+          <distal diameter="1.5e-06" x="-0.000703134" y="-2.01704e-05" z="0.000240291" />
+        </segment>
+        <segment id="247" name="sec_dend312[4]">
+          <proximal diameter="1.4e-06" x="-0.000703134" y="-2.01704e-05" z="0.000240291" />
+          <distal diameter="1.4e-06" x="-0.000753325" y="8.8074e-06" z="0.00025582" />
+        </segment>
+        <segment id="248" name="sec_dend32">
+          <proximal diameter="2.7e-06" x="-3.90141e-05" y="8.69643e-21" z="4.1e-05" />
+          <distal diameter="2.7e-06" x="-0.000105935" y="3.8637e-05" z="6.17055e-05" />
+        </segment>
+        <segment id="249" name="sec_dend32[1]">
+          <proximal diameter="2.2e-06" x="-0.000105935" y="3.8637e-05" z="6.17055e-05" />
+          <distal diameter="2.2e-06" x="-0.000172857" y="7.72741e-05" z="8.2411e-05" />
+        </segment>
+        <segment id="250" name="sec_dend32[2]">
+          <proximal diameter="1.8e-06" x="-0.000172857" y="7.72741e-05" z="8.2411e-05" />
+          <distal diameter="1.8e-06" x="-0.000239778" y="0.000115911" z="0.000103117" />
+        </segment>
+        <segment id="251" name="sec_dend32[3]">
+          <proximal diameter="1.6e-06" x="-0.000239778" y="0.000115911" z="0.000103117" />
+          <distal diameter="1.6e-06" x="-0.000306699" y="0.000154548" z="0.000123822" />
+        </segment>
+        <segment id="252" name="sec_dend32[4]">
+          <proximal diameter="1.5e-06" x="-0.000306699" y="0.000154548" z="0.000123822" />
+          <distal diameter="1.5e-06" x="-0.000348525" y="0.000178696" z="0.000136763" />
+        </segment>
+        <segment id="253" name="sec_dend4">
+          <proximal diameter="5.8e-06" x="3.2e-05" y="0" z="0" />
+          <distal diameter="5.8e-06" x="3.2e-05" y="-2.59808e-05" z="1.5e-05" />
+        </segment>
+        <segment id="254" name="sec_dend4[1]">
+          <proximal diameter="5.6e-06" x="3.2e-05" y="-2.59808e-05" z="1.5e-05" />
+          <distal diameter="5.6e-06" x="3.2e-05" y="-6.06218e-05" z="3.5e-05" />
+        </segment>
+        <segment id="255" name="sec_dend4[2]">
+          <proximal diameter="5.8e-06" x="3.2e-05" y="-6.06218e-05" z="3.5e-05" />
+          <distal diameter="5.8e-06" x="3.2e-05" y="-7.10141e-05" z="4.1e-05" />
+        </segment>
+        <segment id="256" name="sec_dend41">
+          <proximal diameter="3.1e-06" x="3.2e-05" y="-7.10141e-05" z="4.1e-05" />
+          <distal diameter="3.1e-06" x="8.6641e-05" y="-0.000125655" z="6.17055e-05" />
+        </segment>
+        <segment id="257" name="sec_dend41[1]">
+          <proximal diameter="2.9e-06" x="8.6641e-05" y="-0.000125655" z="6.17055e-05" />
+          <distal diameter="2.9e-06" x="0.000141282" y="-0.000180296" z="8.2411e-05" />
+        </segment>
+        <segment id="258" name="sec_dend41[2]">
+          <proximal diameter="2.7e-06" x="0.000141282" y="-0.000180296" z="8.2411e-05" />
+          <distal diameter="2.7e-06" x="0.000195923" y="-0.000234937" z="0.000103117" />
+        </segment>
+        <segment id="259" name="sec_dend41[3]">
+          <proximal diameter="2.7e-06" x="0.000195923" y="-0.000234937" z="0.000103117" />
+          <distal diameter="2.7e-06" x="0.000250564" y="-0.000289578" z="0.000123822" />
+        </segment>
+        <segment id="260" name="sec_dend41[4]">
+          <proximal diameter="3.1e-06" x="0.000250564" y="-0.000289578" z="0.000123822" />
+          <distal diameter="3.1e-06" x="0.000284715" y="-0.000323729" z="0.000136763" />
+        </segment>
+        <segment id="261" name="sec_dend411">
+          <proximal diameter="2.2e-06" x="0.000284715" y="-0.000323729" z="0.000136763" />
+          <distal diameter="2.2e-06" x="0.000353016" y="-0.00039203" z="0.000162645" />
+        </segment>
+        <segment id="262" name="sec_dend411[1]">
+          <proximal diameter="2e-06" x="0.000353016" y="-0.00039203" z="0.000162645" />
+          <distal diameter="2e-06" x="0.000421317" y="-0.000460331" z="0.000188527" />
+        </segment>
+        <segment id="263" name="sec_dend411[2]">
+          <proximal diameter="1.9e-06" x="0.000421317" y="-0.000460331" z="0.000188527" />
+          <distal diameter="1.9e-06" x="0.000504969" y="-0.000508628" z="0.000214409" />
+        </segment>
+        <segment id="264" name="sec_dend411[3]">
+          <proximal diameter="1.8e-06" x="0.000504969" y="-0.000508628" z="0.000214409" />
+          <distal diameter="1.8e-06" x="0.000588621" y="-0.000556924" z="0.000240291" />
+        </segment>
+        <segment id="265" name="sec_dend411[4]">
+          <proximal diameter="2.2e-06" x="0.000588621" y="-0.000556924" z="0.000240291" />
+          <distal diameter="2.2e-06" x="0.000638811" y="-0.000585902" z="0.00025582" />
+        </segment>
+        <segment id="266" name="sec_dend4111">
+          <proximal diameter="1.6e-06" x="0.000638811" y="-0.000585902" z="0.00025582" />
+          <distal diameter="1.6e-06" x="0.000716086" y="-0.000585902" z="0.000276525" />
+        </segment>
+        <segment id="267" name="sec_dend4111[1]">
+          <proximal diameter="1.5e-06" x="0.000716086" y="-0.000585902" z="0.000276525" />
+          <distal diameter="1.5e-06" x="0.000790727" y="-0.000565902" z="0.000297231" />
+        </segment>
+        <segment id="268" name="sec_dend4111[2]">
+          <proximal diameter="1.4e-06" x="0.000790727" y="-0.000565902" z="0.000297231" />
+          <distal diameter="1.4e-06" x="0.000857648" y="-0.000527265" z="0.000317936" />
+        </segment>
+        <segment id="269" name="sec_dend4111[3]">
+          <proximal diameter="1.3e-06" x="0.000857648" y="-0.000527265" z="0.000317936" />
+          <distal diameter="1.3e-06" x="0.000924569" y="-0.000488628" z="0.000338642" />
+        </segment>
+        <segment id="270" name="sec_dend4111[4]">
+          <proximal diameter="1e-06" x="0.000924569" y="-0.000488628" z="0.000338642" />
+          <distal diameter="1e-06" x="0.000984798" y="-0.000453854" z="0.000357277" />
+        </segment>
+        <segment id="271" name="sec_dend4112">
+          <proximal diameter="1.6e-06" x="0.000638811" y="-0.000585902" z="0.00025582" />
+          <distal diameter="1.6e-06" x="0.000693452" y="-0.000640543" z="0.000276525" />
+        </segment>
+        <segment id="272" name="sec_dend4112[1]">
+          <proximal diameter="1.5e-06" x="0.000693452" y="-0.000640543" z="0.000276525" />
+          <distal diameter="1.5e-06" x="0.000748094" y="-0.000695184" z="0.000297231" />
+        </segment>
+        <segment id="273" name="sec_dend4112[2]">
+          <proximal diameter="1.4e-06" x="0.000748094" y="-0.000695184" z="0.000297231" />
+          <distal diameter="1.4e-06" x="0.000802735" y="-0.000749825" z="0.000317936" />
+        </segment>
+        <segment id="274" name="sec_dend4112[3]">
+          <proximal diameter="1.3e-06" x="0.000802735" y="-0.000749825" z="0.000317936" />
+          <distal diameter="1.3e-06" x="0.000857376" y="-0.000804466" z="0.000338642" />
+        </segment>
+        <segment id="275" name="sec_dend4112[4]">
+          <proximal diameter="1e-06" x="0.000857376" y="-0.000804466" z="0.000338642" />
+          <distal diameter="1e-06" x="0.000906552" y="-0.000853643" z="0.000357277" />
+        </segment>
+        <segment id="276" name="sec_dend412">
+          <proximal diameter="2e-06" x="0.000284715" y="-0.000323729" z="0.000136763" />
+          <distal diameter="2e-06" x="0.000333011" y="-0.00040738" z="0.000162645" />
+        </segment>
+        <segment id="277" name="sec_dend412[1]">
+          <proximal diameter="1.8e-06" x="0.000333011" y="-0.00040738" z="0.000162645" />
+          <distal diameter="1.8e-06" x="0.000333011" y="-0.000503973" z="0.000188527" />
+        </segment>
+        <segment id="278" name="sec_dend412[2]">
+          <proximal diameter="1.6e-06" x="0.000333011" y="-0.000503973" z="0.000188527" />
+          <distal diameter="1.6e-06" x="0.000333011" y="-0.000600566" z="0.000214409" />
+        </segment>
+        <segment id="279" name="sec_dend412[3]">
+          <proximal diameter="1.5e-06" x="0.000333011" y="-0.000600566" z="0.000214409" />
+          <distal diameter="1.5e-06" x="0.000333011" y="-0.000697158" z="0.000240291" />
+        </segment>
+        <segment id="280" name="sec_dend412[4]">
+          <proximal diameter="1.4e-06" x="0.000333011" y="-0.000697158" z="0.000240291" />
+          <distal diameter="1.4e-06" x="0.000333011" y="-0.000755114" z="0.00025582" />
+        </segment>
+        <segment id="281" name="sec_dend42">
+          <proximal diameter="2.7e-06" x="3.2e-05" y="-7.10141e-05" z="4.1e-05" />
+          <distal diameter="2.7e-06" x="3.2e-05" y="-0.000148288" z="6.17055e-05" />
+        </segment>
+        <segment id="282" name="sec_dend42[1]">
+          <proximal diameter="2.2e-06" x="3.2e-05" y="-0.000148288" z="6.17055e-05" />
+          <distal diameter="2.2e-06" x="5.2e-05" y="-0.000222929" z="8.2411e-05" />
+        </segment>
+        <segment id="283" name="sec_dend42[2]">
+          <proximal diameter="1.8e-06" x="5.2e-05" y="-0.000222929" z="8.2411e-05" />
+          <distal diameter="1.8e-06" x="7.2e-05" y="-0.00029757" z="0.000103117" />
+        </segment>
+        <segment id="284" name="sec_dend42[3]">
+          <proximal diameter="1.6e-06" x="7.2e-05" y="-0.00029757" z="0.000103117" />
+          <distal diameter="1.6e-06" x="9.2e-05" y="-0.000372211" z="0.000123822" />
+        </segment>
+        <segment id="285" name="sec_dend42[4]">
+          <proximal diameter="1.5e-06" x="9.2e-05" y="-0.000372211" z="0.000123822" />
+          <distal diameter="1.5e-06" x="0.0001045" y="-0.000418862" z="0.000136763" />
+        </segment>
+      </segments>
+    </cell>
+  </cells>
+</neuroml>
