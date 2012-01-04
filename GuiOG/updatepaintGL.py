@@ -1,3 +1,21 @@
+#Author:Chaitanya CH
+#FileName: updatepaintGL.py
+
+#This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 3, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street, Fifth
+# Floor, Boston, MA 02110-1301, USA.
+
 import sys
 from PyQt4 import QtCore, QtGui
 from PyGLWidget import PyGLWidget
@@ -21,32 +39,34 @@ class updatepaintGL(PyGLWidget):
 
     def setSelectionMode(self,mode):	
 	self.selectionMode = mode	
-	
+
     def render(self):
-	if self.lights:
-		glMatrixMode(GL_MODELVIEW)
-		glEnable(GL_LIGHTING)
-		glEnable(GL_LIGHT0)
-		glEnable(GL_COLOR_MATERIAL)
+#	if self.lights:
+        glMatrixMode(GL_MODELVIEW)
+        glEnable(GL_LIGHTING)
+        glEnable(GL_LIGHT0)
+        glEnable(GL_COLOR_MATERIAL)
 
-		light0_pos = 200.0, 200.0, 600.0, 0
-		diffuse0 = 1.0, 1.0, 1.0, 1.0
-		specular0 = 1.0, 1.0, 1.0, 1.0
-		ambient0 = 0,0,0, 1
+        light0_pos = 200.0, 200.0, 300.0, 0
+        diffuse0 = 0.8, 0.8, 0.8, 1.0
+        specular0 = 0.5, 0.5, 0.5, 1.0
+        ambient0 = 0.2, 0.2, 0.2, 1.0
 
-		glMatrixMode(GL_MODELVIEW)
-		glLightfv(GL_LIGHT0, GL_POSITION, light0_pos)
-		glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse0)
-		glLightfv(GL_LIGHT0, GL_SPECULAR, specular0)
-		glLightfv(GL_LIGHT0, GL_AMBIENT, ambient0)
-	self.renderAxis()	#draws 3 axes at origin
-	
+        glMatrixMode(GL_MODELVIEW)
+        glLightfv(GL_LIGHT0, GL_POSITION, light0_pos)
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse0)
+        glLightfv(GL_LIGHT0, GL_SPECULAR, specular0)
+        glLightfv(GL_LIGHT0, GL_AMBIENT, ambient0)
+
+#        gluLookAt(2,0,0,0,0,0,0,0,1)
+        self.camera.setLens(self.width(), self.height())
+        self.camera.setView()
 	for obj in self.sceneObjects:
 	    obj.render()
 	    
 	for obj in self.vizObjects:
 	    obj.render()
-	
+	self.renderAxis()	#draws 3 axes at origin	
 	self.selectedObjects.render()	
 	
     def updateViz(self):
@@ -57,8 +77,6 @@ class updatepaintGL(PyGLWidget):
 			d=float(mc.getField(r,self.variable))
                         vals.append(d)
 		inds = digitize(vals,self.stepVals)
-
-                self.allinds.append(inds)
 
 		for i in range(0,len(self.vizObjects)):
 			self.vizObjects[i].r,self.vizObjects[i].g,self.vizObjects[i].b=self.colorMap[inds[i]-1]
@@ -85,29 +103,15 @@ class updatepaintGL(PyGLWidget):
 			self.vizObjects[i].radius=self.indRadius[inds_2[i]-1]
 
 	self.updateGL()
-
-    def saveVizAll(self, filename):
-        print 'Saving the Visualization'
-        openGLConfig = []
-        for i in range(0,len(self.vizObjects)):
-
-            openGLConfig.append([self.vizObjects[i].__class__.__name__,self.vizObjects[i].l_coords, self.vizObjects[i].daddy,self.vizObjects[i]._centralPos,self.vizObjects[i].rotation])
-        
-        self.allinds.append(openGLConfig)
-
-        f = open(filename,'w')
-        pickle.dump(self.allinds,f)
-        f.close()
-
     
-    def setSpecificCompartmentName(self,name):
-    	self.specificCompartmentName = name
 			
     def drawNewCell(self, cellName, style = 2,cellCentre=[0.0,0.0,0.0],cellAngle=[0.0,0.0,0.0,0.0]):	
     	#***cellName = moosepath in the GL canvas***
 	an=moose.Neutral(cellName)
 	all_ch=an.childList 					#all children
-	ch = self.get_childrenOfField(all_ch,'Compartment')	#compartments only
+        ch = self.get_childrenOfField(all_ch,'Compartment')	#compartments only
+
+
 	l_coords = []
 	for i in range(0,len(ch),1):
     	    	x=float(mc.getField(ch[i],'x'))*(1e+04)
@@ -118,15 +122,12 @@ class updatepaintGL(PyGLWidget):
 	   	z0=float(mc.getField(ch[i],'z0'))*(1e+04)
 	   	d=float(mc.getField(ch[i],'diameter'))*(1e+04)
     	    	l_coords.append((x0,y0,z0,x,y,z,d,ch[i].path()))
-    	    	
+
     	if self.viz==1:				#fix
     		self.selectionMode=0
     		
-    	if (style==1) or (style==2):		#ensures soma is drawn as a sphere
-    		self.specificCompartmentName='soma'
-
 	if (self.selectionMode):		#self.selectionMode = 1,cells are pickable
-		newCell = cellStruct(self,l_coords,cellName,style,specificCompartmentName=self.specificCompartmentName)
+		newCell = cellStruct(self,l_coords,cellName,style)
 		newCell._centralPos = cellCentre
 		newCell.rotation = cellAngle
 		self.sceneObjectNames.append(cellName)
@@ -137,7 +138,7 @@ class updatepaintGL(PyGLWidget):
 			
 	else:					#self.selectionMode=0,comapartments are pickable
 		for i in range(0,len(l_coords),1):
-			if (moose.Compartment(ch[i]).name==self.specificCompartmentName):#drawing of the select compartment in style 0
+			if (l_coords[i][0] == l_coords[i][3] and l_coords[i][1] == l_coords[i][4] and l_coords[i][2] == l_coords[i][5]):
 				if style==0:
 					compartmentLine=somaDisk(self,l_coords[i],cellName)
 					compartmentLine._centralPos = cellCentre
@@ -182,6 +183,7 @@ class updatepaintGL(PyGLWidget):
 					self.vizObjects.append(compartmentLine)
 					self.vizObjectNames.append(l_coords[i][7])	    		
 
+
     def drawAllCells(self, style = 2, cellCentre=[0.0,0.0,0.0], cellAngle=[0.0,0.0,0.0,0.0]):
         an=moose.Neutral('/')						#moose root children
 	all_ch=an.childList 	
@@ -218,7 +220,7 @@ class updatepaintGL(PyGLWidget):
 	        ch.append(all_ch[i])
         return tuple(ch)  
         
-    def setColorMap(self,vizMinVal=-0.1,vizMaxVal=0.07,moosepath='',variable='Vm',cMap='/home/chaitu/Desktop/GuiOG/oglfunc/colors/jet'):
+    def setColorMap(self,vizMinVal=-0.1,vizMaxVal=0.07,moosepath='',variable='Vm',cMap='jet'):
     	self.colorMap=[]
     	self.stepVals=[]
     	self.moosepath=moosepath
@@ -267,8 +269,8 @@ class newGLWindow(QtGui.QMainWindow):
         MainWindow.setSizePolicy(sizePolicy)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.verticalLayout = QtGui.QVBoxLayout(self.centralwidget)
-        self.verticalLayout.setObjectName("horizontalLayout")
-        self.mgl = updatepaintGL(self.centralwidget)
+        self.verticalLayout.setObjectName("verticalLayout")
+	self.mgl = updatepaintGL(self.centralwidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -276,16 +278,8 @@ class newGLWindow(QtGui.QMainWindow):
         self.mgl.setSizePolicy(sizePolicy)
         self.mgl.setObjectName("mgl")
         self.verticalLayout.addWidget(self.mgl)
-	        
         MainWindow.setCentralWidget(self.centralwidget)
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", self.name, None, QtGui.QApplication.UnicodeUTF8))
-
-	
-if __name__ == '__main__':
-        app = QtGui.QApplication(sys.argv)
-        widget = newGLWindow()
-        widget.show()
-        app.exec_()
 
 
 
