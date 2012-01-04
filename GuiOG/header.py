@@ -57,22 +57,21 @@ class updatepaintGL(PyGLWidget):
 #        else:
         self.renderAxis()	#draws 3 axes at origin
  
-        if self.lights:
-		glMatrixMode(GL_MODELVIEW)
-		glEnable(GL_LIGHTING)
-		glEnable(GL_LIGHT0)
-		glEnable(GL_COLOR_MATERIAL)
+        glMatrixMode(GL_MODELVIEW)
+        glEnable(GL_LIGHTING)
+        glEnable(GL_LIGHT0)
+        glEnable(GL_COLOR_MATERIAL)
+        
+        light0_pos = 200.0, 200.0, 600.0, 0
+        diffuse0 = 1.0, 1.0, 1.0, 1.0
+        specular0 = 1.0, 1.0, 1.0, 1.0
+        ambient0 = 0,0,0, 1
 
-		light0_pos = 200.0, 200.0, 600.0, 0
-		diffuse0 = 1.0, 1.0, 1.0, 1.0
-		specular0 = 1.0, 1.0, 1.0, 1.0
-		ambient0 = 0,0,0, 1
-
-		glMatrixMode(GL_MODELVIEW)
-		glLightfv(GL_LIGHT0, GL_POSITION, light0_pos)
-		glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse0)
-		glLightfv(GL_LIGHT0, GL_SPECULAR, specular0)
-		glLightfv(GL_LIGHT0, GL_AMBIENT, ambient0)
+        glMatrixMode(GL_MODELVIEW)
+        glLightfv(GL_LIGHT0, GL_POSITION, light0_pos)
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse0)
+        glLightfv(GL_LIGHT0, GL_SPECULAR, specular0)
+        glLightfv(GL_LIGHT0, GL_AMBIENT, ambient0)
 
 	
 	for obj in self.sceneObjects:

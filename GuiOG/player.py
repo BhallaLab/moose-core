@@ -218,7 +218,6 @@ def stopTimer():
     newWin.ctimer.stop()
 
 
-
 #timer
 newWin.ctimer = QtCore.QTimer()
 newWin.connect(newWin.ctimer, QtCore.SIGNAL("timeout()"),playMovie)
