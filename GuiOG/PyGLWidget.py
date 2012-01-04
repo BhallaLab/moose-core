@@ -42,6 +42,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 from oglfunc.group import *
+from oglfunc.camera import *
 
 class PyGLWidget(QtOpenGL.QGLWidget):
 
@@ -57,24 +58,8 @@ class PyGLWidget(QtOpenGL.QGLWidget):
         format.setSampleBuffers(True)
         QtOpenGL.QGLWidget.__init__(self, format, parent)
        
-        #self.toolbar=QtGui.QToolBar(self)
-        #self.toolbar.setGeometry(10,20,200,40)
-        #self.toolbar.setFloatable(False)
-        #self.toolbar.setMovable(True)
-        #self.toolbar.addSeparator()
-        #self.toolbar.show()
-	#self.toolbar.raise_()
-        #self.catbutt = QtGui.QToolButton(self.toolbar)
-        #self.catbutt.setGeometry(10,0,40,40)
-        #self.catbutt.setIcon(QtGui.QIcon("Search.png"))
-        #self.catbutt2 = QtGui.QToolButton(self.toolbar)
-        #self.catbutt2.setGeometry(50,0,40,40)
-        #self.catbutt2.setIcon(QtGui.QIcon("resize.png"))
-        #self.toolbar.allowedAreas(Qt.BottomToolBarArea)
-        
         
         self.setMouseTracking(True)
-
         self.modelview_matrix_  = []
         self.translate_vector_  = [0.0, 0.0, 0.0]
         self.viewport_matrix_   = []
@@ -88,15 +73,17 @@ class PyGLWidget(QtOpenGL.QGLWidget):
         self.last_point_3D_ = [1.0, 0.0, 0.0]
         self.isInRotation_  = False
 	
-
         #additions by chaitanya
 	#additions by chaitanya
 	self.xpan = 0.0
         self.ypan = 0.0
         self.zpan = 0.0
 
-	self.lights = 1			#lights	
+        self.camera = Camera()
+
+	#self.lights = 1			#lights	
 	self.ctrlPressed = False 	#default no control pressed
+        self.shiftPressed = False       #default no shift pressed
 	self.selectedObjects =Group(self)		#each line is a scene object.
 	self.sceneObjects = []		#scene objects, abstraction depends on the selection mode.
 	self.sceneObjectNames = []	#names of the scene objects being drawn
@@ -117,7 +104,7 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 
     def initializeGL(self):
         # OpenGL state
-        glClearColor(1.0, 1.0, 1.0, 1.0)
+        glClearColor(1.0, 1.0, 1.0, 1.0) #background color
         glEnable(GL_DEPTH_TEST)
 	
         self.reset_view()
@@ -366,49 +353,67 @@ class PyGLWidget(QtOpenGL.QGLWidget):
         key = str(ev.text()).upper()
 		
         if (ev.modifiers() & QtCore.Qt.ControlModifier):
-            self.ctrlPressed = True	
-        elif (ev.key() == QtCore.Qt.Key_Up):
-        	self.translate([0.0, 0.05, 0.0])
-                self.ypan += 0.05
-        	self.updateGL()
-        elif (ev.key() == QtCore.Qt.Key_Down):
-        	self.translate([0.0, -0.05, 0.0])
-                self.ypan += -0.05
-        	self.updateGL()
-        elif (ev.key() == QtCore.Qt.Key_Left):
-        	self.translate([-0.05, 0.0, 0.0])
-                self.xpan += -0.05
-        	self.updateGL()
-        elif (ev.key() == QtCore.Qt.Key_Right):
-        	self.translate([0.05, 0.0, 0.0])
-                self.xpan += 0.05
-        	self.updateGL()
-        elif (ev.key() == QtCore.Qt.Key_Plus)or(ev.key() == QtCore.Qt.Key_PageUp)or(ev.key()==QtCore.Qt.Key_Period):
+            self.ctrlPressed = True
+        elif (ev.modifiers() & QtCore.Qt.ShiftModifier):
+            self.shiftPressed = True
+        elif (ev.key() == QtCore.Qt.Key_Up) or  (ev.key() == QtCore.Qt.Key_I):
+            self.camera.moveUp()
+            self.updateGL()
+        	# self.translate([0.0, 0.05, 0.0])
+                # self.ypan += 0.05
+        	# self.updateGL()
+        elif (ev.key() == QtCore.Qt.Key_Down) or  (ev.key() == QtCore.Qt.Key_K):
+            self.camera.moveDown()
+            self.updateGL()
+            #self.translate([0.0, -0.05, 0.0])
+                #self.ypan += -0.05
+        	#self.updateGL()
+        elif (ev.key() == QtCore.Qt.Key_Left) or  (ev.key() == QtCore.Qt.Key_J):
+            self.camera.moveLeft()
+            self.updateGL()
+	#self.translate([-0.05, 0.0, 0.0])
+                #self.xpan += -0.05
+        	#self.updateGL()
+        elif (ev.key() == QtCore.Qt.Key_Right) or  (ev.key() == QtCore.Qt.Key_L):
+            self.camera.moveRight()
+            self.updateGL()
+            #self.translate([0.05, 0.0, 0.0])
+                #self.xpan += 0.05
+        	#self.updateGL()
+        elif (ev.key() == QtCore.Qt.Key_Plus)or(ev.key() == QtCore.Qt.Key_PageUp)or(ev.key()==QtCore.Qt.Key_Period) or  (ev.key() == QtCore.Qt.Key_U):
             if ((self.zpan+0.75) <= self.near_+3):
-                self.translate([0.0, 0.0, 0.75])
-                self.zpan += 0.75
-        	self.updateGL()
-        elif (ev.key() == QtCore.Qt.Key_Minus)or(ev.key() == QtCore.Qt.Key_PageDown)or(ev.key()==QtCore.Qt.Key_Comma):
-             if ((self.zpan-0.75) >= -1*(self.far_-10)):
-        	self.translate([0.0, 0.0, -0.75])
-                self.zpan += -0.75
+                self.camera.moveForward()
                 self.updateGL()
+#self.translate([0.0, 0.0, 0.75])
+                #self.zpan += 0.75
+        	#self.updateGL()
+        elif (ev.key() == QtCore.Qt.Key_Minus)or(ev.key() == QtCore.Qt.Key_PageDown)or(ev.key()==QtCore.Qt.Key_Comma)or  (ev.key() == QtCore.Qt.Key_O):
+             if ((self.zpan-0.75) >= -1*(self.far_-10)):
+                 self.camera.moveBackward()
+                 self.updateGL()
+	#self.translate([0.0, 0.0, -0.75])
+                #self.zpan += -0.75
+                #self.updateGL()
+        elif (ev.key() == QtCore.Qt.Key_S):
+            self.camera.tiltDown()
+#self.rotate([1.0, 0.0, 0.0],2.0)
+            self.updateGL()
+        elif (ev.key() == QtCore.Qt.Key_W):
+            self.camera.tiltUp()
+#self.rotate([1.0, 0.0, 0.0],-2.0)
+            self.updateGL()
+        elif (ev.key() == QtCore.Qt.Key_D):
+            self.camera.tiltRight()
+#self.rotate([0.0, 1.0, 0.0],2.0)
+            self.updateGL()
         elif (ev.key() == QtCore.Qt.Key_A):
-        	self.rotate([1.0, 0.0, 0.0],2.0)
-        	self.updateGL()
+            self.camera.tiltLeft()
+#self.rotate([0.0, 1.0, 0.0],-2.0)
+            self.updateGL()
         elif (ev.key() == QtCore.Qt.Key_Q):
-        	self.rotate([1.0, 0.0, 0.0],-2.0)
-        	self.updateGL()
-        elif (ev.key() == QtCore.Qt.Key_U):
-        	self.rotate([0.0, 1.0, 0.0],2.0)
-        	self.updateGL()
-        elif (ev.key() == QtCore.Qt.Key_Y):
-        	self.rotate([0.0, 1.0, 0.0],-2.0)
-        	self.updateGL()
-        elif (ev.key() == QtCore.Qt.Key_Z):
         	self.rotate([0.0, 0.0, 1.0],2.0)
         	self.updateGL()
-        elif (ev.key() == QtCore.Qt.Key_X):
+        elif (ev.key() == QtCore.Qt.Key_E):
         	self.rotate([0.0, 0.0, 1.0],-2.0)
         	self.updateGL()
 
@@ -418,7 +423,8 @@ class PyGLWidget(QtOpenGL.QGLWidget):
         """
         if (ev.key() == QtCore.Qt.Key_Control):
             self.ctrlPressed = False
-
+        if (ev.key() == QtCore.Qt.Key_Shift):
+            self.shiftPressed = False
 
     def pressEventPicking(self):
 	"""
@@ -430,9 +436,9 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 	pickedObject = self.tryPick()
 	if pickedObject != None:
 		# An object was picked.
-	    if not(self.ctrlPressed):
+	    if not(self.ctrlPressed):# and not(self.shiftPressed):
 			# CTRL is not pressed.
-				
+    				
 		if pickedObject in self.selectedObjects:
 		# The picked object is already selected.
 		# releaseEventPicking
@@ -440,14 +446,19 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 				
 		else:
 		# The picked object was not previously selected.
-					
 		# Deselect all previously selected objects.
 	 	    self.selectedObjects.removeAll()
 					
 		# Select the picked object.
 		    self.selectedObjects.add(pickedObject)
-			
 		    self.preSelectedObject = pickedObject
+
+
+            # elif (self.shiftPressed):  #selects the parent instead, the whole cell for instance
+            #     for objectSelected in self.sceneObjects:
+            #         if (objectSelected.daddy == pickedObject.daddy):
+            #             self.selectedObjects.add(objectSelected)
+
 	    else:
 		# CTRL is pressed.
 			
@@ -460,7 +471,6 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 	else:
 		# No objects were picked.
             self.selectedObjects.removeAll()
-
 	#if selectedName: 	#prints the name of the selection if any
 	#    print selectedName[0]
 	#print self.selectedObjects	
@@ -513,7 +523,7 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 	    self.compartmentSelected.emit(str(self.sceneObjectNames[names[0]]))	#printing the cell path
 	    #self.compartmentSelected.emit(QtCore.SIGNAL('PyQt_PyObject'),self.sceneObjectNames[names[0]])
 	if nearestHit != None:
-	    return self.sceneObjects[nearestHit[1]]
+	    return self.sceneObjects[names[0]]
 
 	return nearestHit
 
