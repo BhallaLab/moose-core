@@ -112,7 +112,7 @@ class Camera(object):
 		
 		self.fovAngle = Camera.FOVY
 		
-	def rotate(self, rotation):
+	def rotate(self,_angle, rotation):
 		"""
 		Rotates the camera around the rotation center, given a rotation matrix.
 		"""
@@ -213,7 +213,7 @@ class Camera(object):
 		
 		glPushMatrix()
 		glLoadIdentity()
-		glRotate(-2, self.leftVector[X], self.leftVector[Y], self.leftVector[Z])
+		glRotate(-0.1, self.leftVector[X], self.leftVector[Y], self.leftVector[Z])
 		rotation = glGetDouble(GL_MODELVIEW_MATRIX)
 		glPopMatrix()
 		
@@ -229,7 +229,7 @@ class Camera(object):
 		
 		glPushMatrix()
 		glLoadIdentity()
-		glRotate(2, self.leftVector[X], self.leftVector[Y], self.leftVector[Z])
+		glRotate(0.1, self.leftVector[X], self.leftVector[Y], self.leftVector[Z])
 		rotation = glGetDouble(GL_MODELVIEW_MATRIX)
 		glPopMatrix()
 		
@@ -245,7 +245,7 @@ class Camera(object):
 		
 		glPushMatrix()
 		glLoadIdentity()
-		glRotate(2, self.upVector[X], self.upVector[Y], self.upVector[Z])
+		glRotate(0.1, self.upVector[X], self.upVector[Y], self.upVector[Z])
 		rotation = glGetDouble(GL_MODELVIEW_MATRIX)
 		glPopMatrix()
 		
@@ -261,7 +261,7 @@ class Camera(object):
 		
 		glPushMatrix()
 		glLoadIdentity()
-		glRotate(-2, self.upVector[X], self.upVector[Y], self.upVector[Z])
+		glRotate(-0.1, self.upVector[X], self.upVector[Y], self.upVector[Z])
 		rotation = glGetDouble(GL_MODELVIEW_MATRIX)
 		glPopMatrix()
 		
