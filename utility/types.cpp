@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Wed Mar 23 10:10:45 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Mar 31 12:33:23 2011 (+0530)
+// Last-Updated: Thu Jan  5 16:03:26 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 48
+//     Update #: 49
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -42,6 +42,7 @@ char shortType(string name)
 {
     static map<string, char> typemap;
     if (typemap.empty()){
+        typemap.insert(pair<string, char>("bool", 'b'));
         typemap.insert(pair<string, char>("char", 'c'));
         typemap.insert(pair<string, char>("int", 'i'));
         typemap.insert(pair<string, char>("short", 'h'));
