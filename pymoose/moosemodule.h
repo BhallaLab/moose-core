@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Jan  3 15:21:43 2012 (+0530)
+// Last-Updated: Thu Jan  5 12:16:32 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 263
+//     Update #: 343
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -129,8 +129,107 @@ extern "C" {
 
     void inner_getFieldDict(Id classId, string finfoType, vector<string>& fields, vector<string>& types); 
 
+
+    
 } //!extern "C"
 
+template <class A> inline PyObject * get_item(vector<A>& store, PyObject * item, int index)
+{
+    Py_RETURN_FALSE;
+}
+template <> inline PyObject * get_item<int>(vector<int>& store, PyObject * item, int index)
+{
+    int v = PyInt_AsLong(item);
+    store.push_back(v);
+    Py_RETURN_TRUE;
+}
+template <> inline PyObject * get_item<long>(vector<long>& store, PyObject * item, int index)
+{
+    long v = PyInt_AsLong(item);
+    store.push_back(v);
+    Py_RETURN_TRUE;
+}
+template <> inline PyObject * get_item<short>(vector<short>& store, PyObject * item, int index)
+{
+    short v = PyInt_AsLong(item);
+    store.push_back(v);
+    Py_RETURN_TRUE;
+}
+template <> inline PyObject * get_item<float>(vector<float>& store, PyObject * item, int index)
+{
+    float v = (float)PyFloat_AsDouble(item);
+    if ( v == -1.0 && PyErr_Occurred()){
+        PyErr_SetString(PyExc_TypeError, "Expected a sequence of floating point numbers.");
+        Py_RETURN_FALSE;
+    }
+    store.push_back(v);
+    Py_RETURN_TRUE;
+}
+template <> inline PyObject * get_item<double>(vector<double>& store, PyObject * item, int index)
+{
+    double v = PyFloat_AsDouble(item);
+    if ( v == -1.0 && PyErr_Occurred()){
+        PyErr_SetString(PyExc_TypeError, "Expected a sequence of floating point numbers.");
+        Py_RETURN_FALSE;
+    }
+    store.push_back(v);
+    Py_RETURN_TRUE;
+}
+template <> inline PyObject * get_item<string>(vector<string>& store, PyObject * item, int index)
+{
+    char* tmp = PyString_AsString(item);
+    if (tmp == NULL){
+        Py_RETURN_FALSE;
+    }
+    store.push_back(string(tmp));
+    Py_RETURN_TRUE;
+}
+template <> inline PyObject * get_item<unsigned int>(vector<unsigned int>& store, PyObject * item, int index)
+{
+    unsigned int v = PyInt_AsUnsignedLongMask(item);
+    store.push_back(v);
+    Py_RETURN_TRUE;
+}
+template <> inline PyObject * get_item<unsigned long>(vector<unsigned long>& store, PyObject * item, int index)
+{
+    unsigned long v = PyInt_AsUnsignedLongMask(item);
+    store.push_back(v);
+    Py_RETURN_TRUE;
+}
+
+template <class A> inline PyObject* _set_vector_destFinfo(_ObjId* obj, string fieldName, int argIndex, PyObject * value)
+{
+    ostringstream error;
+    if (!PySequence_Check(value)){                                  
+        PyErr_SetString(PyExc_TypeError, "For setting vector field, specified value must be a sequence." );
+        return false;
+    }
+    if (argIndex > 0){
+        PyErr_SetString(PyExc_TypeError, "Can handle only single-argument functions with vector argument." );
+        return false;
+    }            
+    Py_ssize_t length = PySequence_Length(value);
+    vector<A> _value;
+    for (unsigned int ii = 0; ii < length; ++ii){
+        PyObject * item = PySequence_GetItem(value, ii);
+        if (item == NULL){
+            error << "Item # " << ii << " is NULL";
+            PyErr_SetString(PyExc_TypeError, error.str().c_str());
+            Py_RETURN_FALSE;
+        }
+        if (get_item<A>(_value, item, ii) == Py_False){
+            error << "Cannot handle sequence of type " << typeid(A).name();
+            PyErr_SetString(PyExc_TypeError, error.str().c_str());
+            Py_RETURN_FALSE;
+        }
+    }
+    bool ret = SetGet1< vector < A > >::set(obj->oid_, fieldName, _value);
+    if (ret){
+        Py_RETURN_TRUE;
+    } else {
+        Py_RETURN_FALSE;
+    }
+}
 
 #endif // _MOOSEMODULE_H
 

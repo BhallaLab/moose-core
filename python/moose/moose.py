@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Tue Jan  3 23:48:48 2012 (+0530)
+# Last-Updated: Thu Jan  5 12:19:05 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1011
+#     Update #: 1026
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -374,7 +374,7 @@ class Neutral(object):
                     self_class = self.__class__
                     while (self_class != object) and (self_class.__name__ not in moose_classes):
                         self_class = self_class.__base__
-                        print self_class.__name__
+                        # print self_class.__name__
                     if self_class == object:
                         raise TypeError('Class %s does not inherit any MOOSE class.' % (self.__class__.__name__))
                     id_ = Id(path=args[0], dims=(1,), type=self_class.__name__)
@@ -599,7 +599,8 @@ def define_class(classId):
     for field in field_dict.keys():
         setattr(class_obj, field, _MooseDescriptor(field))
     # Go through the destFinfos and make them look like methods
-    known_types = ['char', 'short', 'int', 'unsigned int', 'double', 'float', 'long', 'unsigned long', 'string']
+    sequence_types = [ 'vector<double>', 'vector<int>', 'vector<long>', 'vector<unsigned int>', 'vector<float>', 'vector<unsigned long>', 'vector<short>' ]
+    known_types = ['void', 'char', 'short', 'int', 'unsigned int', 'double', 'float', 'long', 'unsigned long', 'string'] + sequence_types
     # print 'Processing:', class_name
     for finfoName, finfoArgs in getFieldDict(class_name, 'destFinfo').items():
         # print finfoName, finfoArgs
@@ -617,8 +618,9 @@ def define_class(classId):
                 # print 'Cannot handle argument of type:', arg                # for debug
                 cont_flag = True
                 break
-            fndef += ', arg_%d_%s' % (index, arg.replace(' ', '_'))
-            fnargs += ', arg_%d_%s' % (index, arg.replace(' ', '_'))
+            if arg != 'void':
+                fndef += ', arg_%d_%s' % (index, arg.replace(' ', '_').replace('<', '_').replace('>', ''))
+                fnargs += ', arg_%d_%s' % (index, arg.replace(' ', '_').replace('<', '_').replace('>', ''))
             index += 1
         if cont_flag:
             continue
