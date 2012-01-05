@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Jan  5 11:31:24 2012 (+0530)
+// Last-Updated: Thu Jan  5 16:05:39 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4491
+//     Update #: 4495
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -744,6 +744,7 @@ extern "C" {
             }
         }
         switch(ftype){
+            case 'b': GET_FIELD(int, i)
             case 'c': GET_FIELD(char, c)
             case 'i': GET_FIELD(int, i)
             case 'h': GET_FIELD(short, h)
@@ -861,6 +862,12 @@ extern "C" {
         }
         
         switch(ftype){
+            case 'b':
+                {
+                    bool _value = (Py_True == value);
+                    ret = Field<bool>::set(self->oid_, string(field), _value);
+                    break;
+                }
             case 'c':
                 {
                     char * _value = PyString_AsString(value);
