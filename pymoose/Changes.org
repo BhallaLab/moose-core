@@ -1,0 +1,15 @@
+* No context (PyMooseContext) object. All global functions are
+  directly available under moose module.
+
+* HHChannel and HHGate
+** Hodgkin-Huxley type gates in a channel have been renamed gateX, gateY and gateZ
+   from xGate, yGate and zGate.
+
+** The gate tables are not available directly. 
+   The entries can be accessed as the sequence fields tableA and
+   tableB. You can set:
+
+   mygate.tableA = [1.0, 2.0, 3.0]
+** No more individual xmin xmax and xdivs fields of the gate tables. 
+   They are clubbed in min, max and divs.
+
