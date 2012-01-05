@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Jan  3 15:29:38 2012 (+0530)
+// Last-Updated: Thu Jan  5 11:31:24 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4388
+//     Update #: 4491
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -38,6 +38,8 @@
 // 
 // 2011-03-10 Initial version. Starting coding directly with Python API.
 // 
+// 2012-01-05 Much polished version. Handling destFinfos as methods in
+// Python class.
 
 // Code:
 
@@ -466,7 +468,7 @@ extern "C" {
     }
     /**
        Not to be redone. 2011-03-23 14:42:48 (+0530)
-     */
+    */
     static PyObject * _pymoose_Id_getPath(_Id * self, PyObject * args)
     {
         PyObject * obj = NULL;
@@ -683,7 +685,7 @@ extern "C" {
        really ugly. When you don't pass an index, it is just treated
        as 0. Then what is the point of having Id separately? ObjId
        would been just fine!
-     */
+    */
     static PyObject * _pymoose_ObjId_getField(_ObjId * self, PyObject * args)
     {
         const char * field = NULL;
@@ -695,25 +697,25 @@ extern "C" {
         // The GET_FIELD macro is just a short-cut to reduce typing
         // TYPE is the full type string for the field. TYPEC is the corresponding Python Py_BuildValue format character.
 #define GET_FIELD(TYPE, TYPEC)                                          \
-        { \
-            TYPE value = Field<TYPE>::get(self->oid_, string(field));    \
+        {                                                               \
+            TYPE value = Field<TYPE>::get(self->oid_, string(field));   \
             ret = Py_BuildValue(#TYPEC, value);                         \
             break;                                                      \
         }                                                               \
         
-#define GET_VECFIELD(TYPE, TYPEC) \
+#define GET_VECFIELD(TYPE, TYPEC)                                       \
         {                                                               \
-                vector<TYPE> val = Field< vector<TYPE> >::get(self->oid_, string(field)); \
-                ret = PyTuple_New((Py_ssize_t)val.size());              \
-                for (unsigned int ii = 0; ii < val.size(); ++ ii ){     \
-                        PyObject * entry = Py_BuildValue(#TYPEC, val[ii]); \
-                        if (!entry || PyTuple_SetItem(ret, (Py_ssize_t)ii, entry)){ \
-                            Py_XDECREF(ret);                             \
-                            ret = NULL;                                 \
-                            break;                                      \
-                        }                                               \
+            vector<TYPE> val = Field< vector<TYPE> >::get(self->oid_, string(field)); \
+            ret = PyTuple_New((Py_ssize_t)val.size());                  \
+            for (unsigned int ii = 0; ii < val.size(); ++ ii ){         \
+                PyObject * entry = Py_BuildValue(#TYPEC, val[ii]);      \
+                if (!entry || PyTuple_SetItem(ret, (Py_ssize_t)ii, entry)){ \
+                    Py_XDECREF(ret);                                    \
+                    ret = NULL;                                         \
+                    break;                                              \
                 }                                                       \
-                break;                                                  \
+            }                                                           \
+            break;                                                      \
         }                                                               \
 
         
@@ -735,8 +737,10 @@ extern "C" {
                 PyErr_SetString(PyExc_NotImplementedError, msg.c_str());
                 return NULL;
             } else {
-                // TODO - finish it
-                // Id fieldElementId = Id(self->oid_.id.path() + "/" +  
+                Id fieldElementId = Id(self->oid_.id.path() + "/" +  field);
+                _Id * ret = PyObject_New(_Id, &IdType);
+                ret->id_ = fieldElementId;
+                return (PyObject*)ret;                
             }
         }
         switch(ftype){
@@ -839,7 +843,7 @@ extern "C" {
     }
     /**
        Set a specified field. Redone on 2011-03-23 14:41:45 (+0530)
-     */
+    */
     static PyObject * _pymoose_ObjId_setField(_ObjId * self, PyObject * args)
     {
         
@@ -960,7 +964,7 @@ extern "C" {
             case 'v': 
                 {
                     if (!PySequence_Check(value)){
-                        PyErr_SetString(PyExc_TypeError, "For setting vector<string> field, specified value must be a sequence." );
+                        PyErr_SetString(PyExc_TypeError, "For setting vector<int> field, specified value must be a sequence." );
                         return NULL;
                     }
                     Py_ssize_t length = PySequence_Length(value);
@@ -975,7 +979,7 @@ extern "C" {
             case 'w': 
                 {
                     if (!PySequence_Check(value)){
-                        PyErr_SetString(PyExc_TypeError, "For setting vector<string> field, specified value must be a sequence." );
+                        PyErr_SetString(PyExc_TypeError, "For setting vector<short> field, specified value must be a sequence." );
                         return NULL;
                     }
                     Py_ssize_t length = PySequence_Length(value);
@@ -990,7 +994,7 @@ extern "C" {
             case 'L': //SET_VECFIELD(long, l)
                 {
                     if (!PySequence_Check(value)){
-                        PyErr_SetString(PyExc_TypeError, "For setting vector<string> field, specified value must be a sequence." );
+                        PyErr_SetString(PyExc_TypeError, "For setting vector<long> field, specified value must be a sequence." );
                         return NULL;
                     }
                     Py_ssize_t length = PySequence_Length(value);
@@ -1005,7 +1009,7 @@ extern "C" {
             case 'U': //SET_VECFIELD(unsigned int, I)
                 {
                     if (!PySequence_Check(value)){
-                        PyErr_SetString(PyExc_TypeError, "For setting vector<string> field, specified value must be a sequence." );
+                        PyErr_SetString(PyExc_TypeError, "For setting vector<unsigned int> field, specified value must be a sequence." );
                         return NULL;
                     }
                     Py_ssize_t length = PySequence_Length(value);
@@ -1020,7 +1024,7 @@ extern "C" {
             case 'K': //SET_VECFIELD(unsigned long, k)
                 {
                     if (!PySequence_Check(value)){
-                        PyErr_SetString(PyExc_TypeError, "For setting vector<string> field, specified value must be a sequence." );
+                        PyErr_SetString(PyExc_TypeError, "For setting vector<unsigned long> field, specified value must be a sequence." );
                         return NULL;
                     }
                     Py_ssize_t length = PySequence_Length(value);
@@ -1035,7 +1039,7 @@ extern "C" {
             case 'F': //SET_VECFIELD(float, f)
                 {
                     if (!PySequence_Check(value)){
-                        PyErr_SetString(PyExc_TypeError, "For setting vector<string> field, specified value must be a sequence." );
+                        PyErr_SetString(PyExc_TypeError, "For setting vector<float> field, specified value must be a sequence." );
                         return NULL;
                     }
                     Py_ssize_t length = PySequence_Length(value);
@@ -1050,7 +1054,7 @@ extern "C" {
             case 'D': //SET_VECFIELD(double, d)
                 {
                     if (!PySequence_Check(value)){
-                        PyErr_SetString(PyExc_TypeError, "For setting vector<string> field, specified value must be a sequence." );
+                        PyErr_SetString(PyExc_TypeError, "For setting vector<double> field, specified value must be a sequence." );
                         return NULL;
                     }
                     Py_ssize_t length = PySequence_Length(value);
@@ -1093,9 +1097,10 @@ extern "C" {
 
     static PyObject * _pymoose_ObjId_setDestField(_ObjId * self, PyObject * args)
     {
+                
         // Minimum number of arguments for setting destFinfo - 1-st
-        // the finfo name, 2-nd at least one value.
-        Py_ssize_t minArgs = 2;
+        // the finfo name.
+        Py_ssize_t minArgs = 1;
         // Arbitrarily setting maximum on variable argument
         // list. Read: http://www.swig.org/Doc1.3/Varargs.html to
         // understand why
@@ -1134,64 +1139,108 @@ extern "C" {
         for (size_t ii = 0; ii < argType.size(); ++ii){
             PyObject * arg = arglist[ii+1];
             if ( arg == NULL){
-                error << "Unspecified argument # " << ii;
-                PyErr_SetString(PyExc_ValueError, error.str().c_str());
-                return NULL;
+                bool ret = SetGet0::set(self->oid_, string(fieldName));
+                if (ret){
+                    Py_RETURN_TRUE;
+                } else {
+                    Py_RETURN_FALSE;
+                }
             }
             switch (shortType(argType[ii])){                    
-                    case 'c':
-                        {
-                            char * param = PyString_AsString(arg);
-                            if (!param){
-                                error << ii << "-th expected of type char/string";
-                                PyErr_SetString(PyExc_TypeError, error.str().c_str());
-                                return NULL;
-                            } else if (strlen(param) == 0){
-                                error << "Empty string not allowed.";
-                                PyErr_SetString(PyExc_ValueError, error.str().c_str());
-                                return NULL;
-                            }
-                            argstream << param[0] << ",";
-                        }
-                        break;
-                    case 'i': case 'l':
-                        {
-                            long param = PyInt_AsLong(arg);
-                            if (param == -1 && PyErr_Occurred()){
-                                return NULL;
-                            }
-                            argstream << param << ",";
-                        }
-                        break;
-                    case 'I': case 'k':
-                        {
-                            unsigned long param =PyLong_AsUnsignedLong(arg);
-                            if (PyErr_Occurred()){
-                                return NULL;
-                            }
-                            argstream << param << ",";                            
-                        }
-                        break;
-                    case 'f': case 'd':
-                        {
-                            double param = PyFloat_AsDouble(arg);
-                            argstream << param << ",";
-                        }
-                        break;
-                    case 's':
-                        {
-                            char * param = PyString_AsString(arg);
-                            argstream << string(param) << ",";
-                        }
-                        break;
-                    default:
-                        {
-                            error << "Cannot handle argument type: " << argType[ii];
+                case 'c':
+                    {
+                        char * param = PyString_AsString(arg);
+                        if (!param){
+                            error << ii << "-th expected of type char/string";
                             PyErr_SetString(PyExc_TypeError, error.str().c_str());
                             return NULL;
+                        } else if (strlen(param) == 0){
+                            error << "Empty string not allowed.";
+                            PyErr_SetString(PyExc_ValueError, error.str().c_str());
+                            return NULL;
                         }
-                } // switch (shortType(argType[ii])
+                        argstream << param[0] << ",";
+                    }
+                    break;
+                case 'i': case 'l':
+                    {
+                        long param = PyInt_AsLong(arg);
+                        if (param == -1 && PyErr_Occurred()){
+                            return NULL;
+                        }
+                        argstream << param << ",";
+                    }
+                    break;
+                case 'I': case 'k':
+                    {
+                        unsigned long param =PyLong_AsUnsignedLong(arg);
+                        if (PyErr_Occurred()){
+                            return NULL;
+                        }
+                        argstream << param << ",";                            
+                    }
+                    break;
+                case 'f': case 'd':
+                    {
+                        double param = PyFloat_AsDouble(arg);
+                        argstream << param << ",";
+                    }
+                    break;
+                case 's':
+                    {
+                        char * param = PyString_AsString(arg);
+                        argstream << string(param) << ",";
+                    }
+                    break;
+                case 'v': 
+                    {
+                        return _set_vector_destFinfo<int>(self, string(fieldName), ii, arg);
+                        break;
+                    }
+                case 'w': 
+                    {
+                        return _set_vector_destFinfo<short>(self, string(fieldName), ii, arg);
+                        break;
+                    }
+                case 'L': //SET_VECFIELD(long, l)
+                    {
+                        return _set_vector_destFinfo<long>(self, string(fieldName), ii, arg);
+                        break;
+                    }
+                case 'U'://SET_VECFIELD(unsigned int, I)
+                    {
+                        return _set_vector_destFinfo<unsigned int>(self, string(fieldName), ii, arg);
+                        break;
+                    }
+                case 'K': //SET_VECFIELD(unsigned long, k)
+                    {
+                        return _set_vector_destFinfo<unsigned long>(self, string(fieldName), ii, arg);
+                        break;
+                    }
+                case 'F': //SET_VECFIELD(float, f)
+                    {
+                        return _set_vector_destFinfo<float>(self, string(fieldName), ii, arg);
+                        break;
+                    }
+                case 'D': //SET_VECFIELD(double, d)
+                    {
+                        return _set_vector_destFinfo<double>(self, string(fieldName), ii, arg);
+                        break;
+                    }                
+                case 'S':
+                    {
+                        return _set_vector_destFinfo<string>(self, string(fieldName), ii, arg);
+                        break;
+                    }
+                default:
+                    {
+                        error << "Cannot handle argument type: " << argType[ii];
+                        PyErr_SetString(PyExc_TypeError, error.str().c_str());
+                        return NULL;
+                    }
+            } // switch (shortType(argType[ii])
         } // for (size_t ii = 0; ...
+        // TODO: handle vector args and void functions properly
         string argstring = argstream.str();
         if (argstring.length() < 2 ){
             error << "Could not find any valid argument. Giving up.";
@@ -1381,8 +1430,8 @@ extern "C" {
         return ret;            
     }
 
-// Not sure what this function should return... ideally the Id of the
-// moved object - does it change though?
+    // Not sure what this function should return... ideally the Id of the
+    // moved object - does it change though?
     static PyObject * _pymoose_move(PyObject * dummy, PyObject * args)
     {
         PyObject * src, * dest;
@@ -1501,7 +1550,7 @@ extern "C" {
             if (Id_SubtypeCheck(element)){
                 id = (reinterpret_cast<_Id*>(element))->id_;
             } else if (ObjId_SubtypeCheck(element)){
-                    id = (reinterpret_cast<_ObjId*>(element))->oid_.id;                    
+                id = (reinterpret_cast<_ObjId*>(element))->oid_.id;                    
             } else {
                 PyErr_SetString(PyExc_NameError, "setCwe: Argument must be an Id or ObjId");
                 return NULL;
