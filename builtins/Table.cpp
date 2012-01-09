@@ -103,6 +103,10 @@ const Cinfo* Table::initCinfo()
 			"Fills spike timings into the Table. Signal has to exceed thresh",
 			new OpFunc1< Table, double >( &Table::spike ) );
 
+		static DestFinfo linearTransform( "linearTransform",
+			"Linearly scales and offsets data. Scale first, then offset.",
+			new OpFunc2< Table, double, double >( &Table::linearTransform ) );
+
 		static DestFinfo xplot( "xplot",
 			"Dumps table contents to xplot-format file. "
 			"Argument 1 is filename, argument 2 is plotname",
@@ -184,6 +188,7 @@ const Cinfo* Table::initCinfo()
 		&group,			// DestFinfo
 		&input,			// DestFinfo
 		&spike,			// DestFinfo
+		&linearTransform,	// DestFinfo
 		&xplot,			// DestFinfo
 		&loadCSV,			// DestFinfo
 		&loadXplot,			// DestFinfo
@@ -269,6 +274,12 @@ void Table::spike( double v )
 {
 	if ( v > threshold_ )
 		vec_.push_back( lastTime_ );
+}
+
+void Table::linearTransform( double scale, double offset )
+{
+	for ( vector< double >::iterator i = vec_.begin(); i != vec_.end(); ++i)
+		*i = *i * scale + offset;
 }
 
 void Table::xplot( string fname, string plotname )

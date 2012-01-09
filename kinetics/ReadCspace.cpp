@@ -356,7 +356,9 @@ void ReadCspace::deployParameters( )
 		assert( ret != Msg::bad );
 		// SetField(mol_[ i ], "volscale", volscale );
 		// SetField(mol_[ molseq_[i] ], "ninit", parms_[ i ] );
-		Field< double >::set( mol_[i], "concInit", parms_[i] );
+
+		// Parameters are in micromolar, but the conc units are millimolar.
+		Field< double >::set( mol_[i], "concInit", parms_[i] * 1e-3 );
 	}
 	for ( j = 0; j < reac_.size(); j++ ) {
 		if ( reac_[ j ].element()->cinfo()->isA( "Reac" ) ) {
@@ -365,13 +367,16 @@ void ReadCspace::deployParameters( )
 		} else {
 			Field< double >::set( reac_[j], "k3", parms_[i] );
 			Field< double >::set( reac_[j], "k2", 4.0 * parms_[i++] );
-			Field< double >::set( reac_[j], "Km", parms_[i++] );
+			// Again, note that conc units in MOOSE are millimolar, so we
+			// need to convert from the CSPACE micromolar units.
+			Field< double >::set( reac_[j], "Km", parms_[i++] * 1e-3 );
 		}
 	}
 }
 
 void ReadCspace::testReadModel( )
 {
+	const double CONCSCALE = 1e-3;
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	// cout << "Testing ReadCspace::readModelString()\n";
 	Id modelId = readModelString( "|Habc|Lbca|", "mod1", Id(), "Neutral" );
@@ -398,7 +403,10 @@ void ReadCspace::testReadModel( )
 		*/
 		Id temp( path );
 		concInit = Field< double >::get( temp, "concInit" );
-		assert( doubleEq( concInit, i + 1 ) );
+
+		// The 0.001 is for converting to millimolar, which is the internal
+		// unit used in MOOSE.
+		assert( doubleEq( concInit, 0.001 * ( i + 1 ) ) );
 	}
 
 	// cout << "\nTesting ReadCspace:: reac construction\n";
@@ -429,12 +437,12 @@ void ReadCspace::testReadModel( )
 	Id tempC( "/kinetics/c/CcdX" );
 	r1 = Field< double >::get( tempC, "k3");
 	r2 = Field< double >::get( tempC, "Km");
-	assert( doubleEq( r1, 301 ) && doubleEq( r2, 302 ) );
+	assert( doubleEq( r1, 301 ) && doubleEq( r2, 302 * CONCSCALE ) );
 
 	Id tempD( "/kinetics/e/DdeX" );
 	r1 = Field< double >::get( tempD, "k3");
 	r2 = Field< double >::get( tempD, "Km");
-	assert( doubleEq( r1, 401 ) && doubleEq( r2, 402 ) );
+	assert( doubleEq( r1, 401 ) && doubleEq( r2, 402 * CONCSCALE ) );
 
 	for ( i = 4; i < 9; i++ ) {
 		/*
@@ -459,16 +467,16 @@ void ReadCspace::testReadModel( )
 	Id tempJ( "/kinetics/k/Jjkl" );
 	r1 = Field< double >::get( tempJ, "k3");
 	r2 = Field< double >::get( tempJ, "Km");
-	assert( doubleEq( r1, 1001 ) && doubleEq( r2, 1002 ) );
+	assert( doubleEq( r1, 1001 ) && doubleEq( r2, 1002 * CONCSCALE ) );
 
 	Id tempK( "/kinetics/k/Kklm" );
 	r1 = Field< double >::get( tempK, "k3");
 	r2 = Field< double >::get( tempK, "Km");
-	assert( doubleEq( r1, 1101 ) && doubleEq( r2, 1102 ) );
+	assert( doubleEq( r1, 1101 ) && doubleEq( r2, 1102 * CONCSCALE ) );
 
 	Id tempL( "/kinetics/m/Llmn" );
 	r1 = Field< double >::get( tempL, "k3");
 	r2 = Field< double >::get( tempL, "Km");
-	assert( doubleEq( r1, 1201 ) && doubleEq( r2, 1202 ) );
+	assert( doubleEq( r1, 1201 ) && doubleEq( r2, 1202 * CONCSCALE ) );
 	shell->doDelete( modelId );
 }

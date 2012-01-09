@@ -10,7 +10,7 @@
 #ifndef _ZOMBIE_REAC_H
 #define _ZOMBIE_REAC_H
 
-class ZombieReac: public Stoich
+class ZombieReac
 {
 	public: 
 		ZombieReac();
@@ -29,6 +29,9 @@ class ZombieReac: public Stoich
 		double getConcKf( const Eref& e, const Qinfo* q ) const;
 		void setConcKb( const Eref& e, const Qinfo* q, double v );
 		double getConcKb( const Eref& e, const Qinfo* q ) const;
+
+		unsigned int getNumSub( const Eref& e, const Qinfo* q ) const;
+		unsigned int getNumPrd( const Eref& e, const Qinfo* q ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
@@ -50,6 +53,9 @@ class ZombieReac: public Stoich
 
 		static const Cinfo* initCinfo();
 	private:
+		Stoich* stoich_;
+		double concKf_;
+		double concKb_;
 };
 
 #endif	// _ZOMBIE_REAC_H

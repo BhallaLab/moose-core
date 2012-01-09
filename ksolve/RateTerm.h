@@ -157,9 +157,7 @@ class MMEnzyme: public MMEnzymeBase
 
 		double operator() ( const double* S ) const {
 			double sub = (*substrates_)( S );
-			// the subtrates_() operator returns the negative of 
-			// the conc product.
-			// Here we the overall rate.
+			// the subtrates_() operator returns the conc product.
 			assert( sub >= -EPSILON );
 			return ( sub * kcat_ * S[ enz_ ] ) / ( Km_ + sub );
 		}

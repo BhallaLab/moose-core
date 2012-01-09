@@ -577,6 +577,113 @@ unsigned int Stoich::convertIdToComptIndex( Id id ) const
 	return i;
 }
 
+
+void Stoich::installReaction( ZeroOrder* forward, ZeroOrder* reverse, Id reacId )
+{
+	unsigned int rateIndex = convertIdToReacIndex( reacId );
+	unsigned int revRateIndex = rateIndex;
+	if ( useOneWay_ ) {
+		rates_[ rateIndex ] = forward;
+		revRateIndex = rateIndex + 1;
+		rates_[ revRateIndex ] = reverse;
+	} else {
+		rates_[ rateIndex ] = 
+			new BidirectionalReaction( forward, reverse );
+	}
+
+	vector< unsigned int > molIndex;
+
+	if ( useOneWay_ ) {
+		unsigned int numReactants = forward->getReactants( molIndex );
+		for ( unsigned int i = 0; i < numReactants; ++i ) {
+			int temp = N_.get( molIndex[i], rateIndex );
+			N_.set( molIndex[i], rateIndex, temp - 1 );
+			temp = N_.get( molIndex[i], revRateIndex );
+			N_.set( molIndex[i], revRateIndex, temp + 1 );
+		}
+
+		numReactants = reverse->getReactants( molIndex );
+		for ( unsigned int i = 0; i < numReactants; ++i ) {
+			int temp = N_.get( molIndex[i], rateIndex );
+			N_.set( molIndex[i], rateIndex, temp + 1 );
+			temp = N_.get( molIndex[i], revRateIndex );
+			N_.set( molIndex[i], revRateIndex, temp - 1 );
+		}
+	} else {
+		unsigned int numReactants = forward->getReactants( molIndex );
+		for ( unsigned int i = 0; i < numReactants; ++i ) {
+			int temp = N_.get( molIndex[i], rateIndex );
+			N_.set( molIndex[i], rateIndex, temp - 1 );
+		}
+
+		numReactants = reverse->getReactants( molIndex );
+		for ( unsigned int i = 0; i < numReactants; ++i ) {
+			int temp = N_.get( molIndex[i], revRateIndex );
+			N_.set( molIndex[i], rateIndex, temp + 1 );
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////
+// Field interface functionsl
+//////////////////////////////////////////////////////////////
+
+/**
+ * Sets the forward rate v (given in millimoloar concentration units)
+ * for the specified reaction throughout the compartment in which the
+ * reaction lives. Internally the stoich uses #/voxel units so this 
+ * involves querying the volume subsystem about volumes for each
+ * voxel, and scaling accordingly.
+ * For now assume a uniform voxel volume and hence just convert on 
+ * 0 meshIndex.
+ */
+void Stoich::setReacKf( const Eref& e, double v ) const
+{
+	static const SrcFinfo* toSub = dynamic_cast< const SrcFinfo* > (
+		ZombieReac::initCinfo()->findFinfo( "toSub" ) );
+
+	assert( toSub );
+	double volScale = convertConcToNumRateUsingMesh( e, toSub, 0 );
+
+	rates_[ convertIdToReacIndex( e.id() ) ]->setR1( v / volScale );
+}
+
+/**
+ * For now assume a single rate term.
+ */
+void Stoich::setReacKb( const Eref& e, double v ) const
+{
+	static const SrcFinfo* toPrd = static_cast< const SrcFinfo* > (
+		ZombieReac::initCinfo()->findFinfo( "toPrd" ) );
+
+	assert( toPrd );
+	double volScale = convertConcToNumRateUsingMesh( e, toPrd, 0 );
+
+
+	if ( useOneWay_ )
+		 rates_[ convertIdToReacIndex( e.id() ) + 1 ]->setR1( v / volScale);
+	else
+		 rates_[ convertIdToReacIndex( e.id() ) ]->setR2( v / volScale );
+}
+
+/**
+ * Looks up the matching rate for R1. Later we may have additional 
+ * scaling terms for the specified voxel.
+ */
+double Stoich::getR1( unsigned int reacIndex, unsigned int voxel ) const
+{
+	return rates_[ reacIndex ]->getR1();
+}
+
+/**
+ * Looks up the matching rate for R2. Later we may have additional 
+ * scaling terms for the specified voxel.
+ */
+double Stoich::getR2( unsigned int reacIndex, unsigned int voxel ) const
+{
+	return rates_[ reacIndex ]->getR2();
+}
+
 //////////////////////////////////////////////////////////////
 // Model running functions
 //////////////////////////////////////////////////////////////

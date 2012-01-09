@@ -24,8 +24,11 @@ class MMenz
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
 
-		void setKm( double v );
-		double getKm() const;
+		void setKm( const Eref& e, const Qinfo* q, double v );
+		double getKm( const Eref& e, const Qinfo* q ) const;
+		void setNumKm( const Eref& e, const Qinfo* q, double v );
+		double getNumKm( const Eref& e, const Qinfo* q ) const;
+		unsigned int getNumSub( const Eref& e, const Qinfo* q ) const;
 		void setKcat( double v );
 		double getKcat() const;
 
@@ -41,10 +44,11 @@ class MMenz
 
 		static const Cinfo* initCinfo();
 	private:
-		double Km_;
-		double kcat_;
-		double sub_;
-		double enz_;
+		double Km_; /// Km in Concentration units, millimolar.
+		double numKm_; /// Km in number units
+		double kcat_; /// kcat in 1/sec
+		double sub_;	/// State variable: substrate (in num units) * numKm
+		double enz_;	/// State variable: enz number.
 };
 
 #endif // MM_ENZ_H
