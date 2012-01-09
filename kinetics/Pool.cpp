@@ -298,27 +298,27 @@ static double lookupSize( const Eref& e )
 }
 */
 
-// Conc is given micromolar. Size is in m^3
+// Conc is given in millimolar. Size is in m^3
 void Pool::setConc( const Eref& e, const Qinfo* q, double c ) 
 {
 	
-	n_ = 1e-3 * NA * c * lookupSizeFromMesh( e, requestSize() );
+	n_ = NA * c * lookupSizeFromMesh( e, requestSize() );
 }
 
-// Returns conc in micromolar.
+// Returns conc in millimolar.
 double Pool::getConc( const Eref& e, const Qinfo* q ) const
 {
-	return 1e3 * (n_ / NA) / lookupSizeFromMesh( e, requestSize() );
+	return (n_ / NA) / lookupSizeFromMesh( e, requestSize() );
 }
 
 void Pool::setConcInit( const Eref& e, const Qinfo* q, double c )
 {
-	nInit_ = 1e-3 * NA * c * lookupSizeFromMesh( e, requestSize() );
+	nInit_ = NA * c * lookupSizeFromMesh( e, requestSize() );
 }
 
 double Pool::getConcInit( const Eref& e, const Qinfo* q ) const
 {
-	return 1e3 * ( nInit_ / NA ) / lookupSizeFromMesh( e, requestSize() );
+	return ( nInit_ / NA ) / lookupSizeFromMesh( e, requestSize() );
 }
 
 void Pool::setDiffConst( double v )

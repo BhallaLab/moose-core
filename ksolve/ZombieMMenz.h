@@ -26,8 +26,11 @@ class ZombieMMenz: public Stoich
 
 		void setKm( const Eref& e, const Qinfo* q, double v );
 		double getKm( const Eref& e, const Qinfo* q ) const;
+		void setNumKm( const Eref& e, const Qinfo* q, double v );
+		double getNumKm( const Eref& e, const Qinfo* q ) const;
 		void setKcat( const Eref& e, const Qinfo* q, double v );
 		double getKcat( const Eref& e, const Qinfo* q ) const;
+		unsigned int getNumSub( const Eref& e, const Qinfo* q ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs

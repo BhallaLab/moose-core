@@ -19,6 +19,7 @@
 #include "ReadKkit.h"
 
 const double ReadKkit::EPSILON = 1.0e-15;
+static const double KKIT_NA = 6.0e23; // Causes all sorts of conversion fun
 
 unsigned int chopLine( const string& line, vector< string >& ret )
 {
@@ -115,8 +116,12 @@ Id ReadKkit::read(
 	assignPoolCompartments();
 	// assignReacCompartments();
 	// assignEnzCompartments();
+
+	convertParametersToConcUnits();
+
 	s->setCwe( base );
-	Field< string >::set( base, "path", "##" );
+	if ( solverClass == "gsl" || solverClass == "Stoich" )
+		Field< string >::set( base, "path", "##" );
 	s->doReinit();
 	return base;
 }
@@ -303,8 +308,8 @@ void ReadKkit::makeStandardElements()
 
 		geometry = 
 		shell_->doCreate( "Geometry", baseId_, "geometry", dims, true );
-		MsgId ret = shell_->doAddMsg( "Single", geometry, "compt", kinetics, "reac" );
-		assert( ret != Msg::bad );
+		// MsgId ret = shell_->doAddMsg( "Single", geometry, "compt", kinetics, "reac" );
+		// assert( ret != Msg::bad );
 	}
 	assert( geometry != Id() );
 
@@ -485,6 +490,12 @@ Id ReadKkit::buildReac( const vector< string >& args )
 	double kf = atof( args[ reacMap_[ "kf" ] ].c_str() );
 	double kb = atof( args[ reacMap_[ "kb" ] ].c_str() );
 
+	// We have a slight problem because MOOSE has a more precise value for
+	// NA than does kkit. Here we assume that the conc units from Kkit are
+	// meant to be OK, so they override the #/cell (lower case k) units.
+	// So we convert all the Kfs and Kbs in the entire system after
+	// the model has been created, once we know the order of each reac.
+
 	Id reac = shell_->doCreate( "Reac", pa, tail, dim, true );
 	reacIds_[ args[2].substr( 10 ) ] = reac; 
 
@@ -603,7 +614,9 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 	double k1 = atof( args[ enzMap_[ "k1" ] ].c_str() );
 	double k2 = atof( args[ enzMap_[ "k2" ] ].c_str() );
 	double k3 = atof( args[ enzMap_[ "k3" ] ].c_str() );
-	double nComplexInit = atof( args[ enzMap_[ "nComplexInit" ] ].c_str());
+	// double volscale = atof( args[ enzMap_[ "vol" ] ].c_str() );
+	double nComplexInit = 
+		atof( args[ enzMap_[ "nComplexInit" ] ].c_str() );
 	// double vol = atof( args[ enzMap_[ "vol" ] ].c_str());
 	bool isMM = atoi( args[ enzMap_[ "usecomplex" ] ].c_str());
 
@@ -615,6 +628,7 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 
 		assert( k1 > EPSILON );
 		double Km = ( k2 + k3 ) / k1;
+
 		Field< double >::set( enz, "Km", Km );
 		Field< double >::set( enz, "kcat", k3 );
 		Id info = buildInfo( enz, enzMap_, args );
@@ -627,6 +641,8 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 		string enzPath = args[2].substr( 10 );
 		enzIds_[ enzPath ] = enz; 
 
+		// Need to figure out what to do about these. Perhaps it is OK
+		// to do this assignments in raw #/cell units.
 		Field< double >::set( enz, "k1", k1 );
 		Field< double >::set( enz, "k2", k2 );
 		Field< double >::set( enz, "k3", k3 );
@@ -700,10 +716,18 @@ Id ReadKkit::buildGroup( const vector< string >& args )
 	return group;
 }
 
+/**
+ * There is a problem with this conversion, because of the discrepancy of
+ * the correct NA and the version (6e23) used in kkit. I take the 
+ * concentration as authoritative, not the # of molecules. This is because
+ * I use conc units for the rates as well, and to use n for pools and
+ * conc for reactions will always introduce errors. This is still not
+ * a great solution, because, for example, simulations involving receptor
+ * traffic are originally framed in terms of number of receptors, not conc.
+ */
 Id ReadKkit::buildPool( const vector< string >& args )
 {
 	static vector< int > dim( 1, 1 );
-	const double NA = 6.0e23; // Kkit uses 6e23 for NA.
 
 	string head;
 	string tail = pathTail( args[2], head );
@@ -718,7 +742,7 @@ Id ReadKkit::buildPool( const vector< string >& args )
 	 * Also, n = ( conc (uM) / 1e6 ) * NA * vol
 	 * so, vol = 1e6 * vsf / NA
 	 */
-	double vol = 1.0e3 * vsf / NA; // Converts volscale to actual vol in m^3
+	double vol = 1.0e3 * vsf / KKIT_NA; // Converts volscale to actual vol in m^3
 	int slaveEnable = atoi( args[ poolMap_[ "slave_enable" ] ].c_str() );
 	double diffConst = atof( args[ poolMap_[ "DiffConst" ] ].c_str() );
 
@@ -954,5 +978,100 @@ void ReadKkit::addmsg( const vector< string >& args)
 	}
 	else if ( args[3] == "SUMTOTAL" ) { // Summation function.
 		buildSumTotal( src, dest );
+	}
+}
+
+// We have a slight problem because MOOSE has a more precise value for
+// NA than does kkit. Also, at the time the model is loaded, the volume
+// relationships are unknown. So we need to fix up conc units of all reacs.
+// Here we assume that the conc units from Kkit are
+// meant to be OK, so they override the #/cell (lower case k) units.
+// So we convert all the Kfs and Kbs in the entire system after
+// the model has been created, once we know the order of each reac.
+void ReadKkit::convertParametersToConcUnits()
+{
+	convertPoolAmountToConcUnits();
+	convertReacRatesToConcUnits();
+	convertMMenzRatesToConcUnits();
+	convertEnzRatesToConcUnits();
+}
+
+void ReadKkit::convertPoolAmountToConcUnits()
+{
+	const double NA_RATIO = KKIT_NA / NA;
+	for ( map< string, Id >::iterator i = poolIds_.begin(); 
+		i != poolIds_.end(); ++i ) {
+		Id pool = i->second;
+		double nInit = Field< double >::get( pool, "nInit" );
+		double n = Field< double >::get( pool, "n" );
+
+		nInit /= NA_RATIO;
+		n /= NA_RATIO;
+		Field< double >::set( pool, "nInit", nInit );
+		Field< double >::set( pool, "n", n );
+	}
+}
+
+void ReadKkit::convertReacRatesToConcUnits()
+{
+	const double NA_RATIO = KKIT_NA / NA;
+	for ( map< string, Id >::iterator i = reacIds_.begin(); 
+		i != reacIds_.end(); ++i ) {
+		Id reac = i->second;
+		double kf = Field< double >::get( reac, "Kf" );
+		double kb = Field< double >::get( reac, "Kb" );
+		// Note funny access here, using the Conc unit term (Kf) to get the
+		// num unit term (kf). When reading, there are no volumes so the
+		// Kf gets assigned to what was the kf value from kkit.
+
+		// At this point the kf and kb are off because the
+		// NA for kkit is not accurate. So we correct for this.
+		unsigned int numSub = 
+			Field< unsigned int >::get( reac, "numSubstrates" );
+		unsigned int numPrd = 
+			Field< unsigned int >::get( reac, "numProducts" );
+
+		if ( numSub > 1 )
+			kf *= pow( NA_RATIO, numSub - 1.0 );
+
+		if ( numPrd > 1 )
+			kb *= pow( NA_RATIO, numPrd - 1.0 );
+
+		// Now we have the correct kf and kb, plug them into the reac, and
+		// let it internally fix up the Kf and Kb.
+		Field< double >::set( reac, "kf", kf );
+		Field< double >::set( reac, "kb", kb );
+	}
+}
+
+void ReadKkit::convertMMenzRatesToConcUnits()
+{
+	const double NA_RATIO = KKIT_NA / NA;
+	for ( map< string, Id >::iterator i = mmEnzIds_.begin(); 
+		i != mmEnzIds_.end(); ++i ) {
+		Id enz = i->second;
+		// This was set in the original # units.
+		double numKm = Field< double >::get( enz, "Km" );
+		// At this point the numKm is inaaccurate because the
+		// NA for kkit is not accurate. So we correct for this.
+		double numSub = 
+			Field< unsigned int >::get( enz, "numSubstrates" );
+		// Note that we always have the enz itself as a substrate term.
+		if ( numSub > 0 ) 
+			numKm *= pow( NA_RATIO, -numSub );
+
+		// Now we have the correct numKm, plug it into the MMenz, and
+		// let it internally fix up the Km
+		Field< double >::set( enz, "numKm", numKm );
+	}
+}
+
+void ReadKkit::convertEnzRatesToConcUnits()
+{
+	// const double NA_RATIO = KKIT_NA / NA;
+	for ( map< string, Id >::iterator i = enzIds_.begin(); 
+		i != enzIds_.end(); ++i ) {
+		Id enz = i->second;
+		cout << enz.path() << ": enz rate conv pending\n";
 	}
 }

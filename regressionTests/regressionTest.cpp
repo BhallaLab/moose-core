@@ -14,7 +14,9 @@
 void rtTable();
 void rtFindModelType();
 void rtReadKkit();
+void rtRunKkit();
 void rtReadCspace();
+void rtRunCspace();
 void rtReacDiff();
 void rtHHnetwork( unsigned int numCopies );
 
@@ -37,7 +39,9 @@ void regressionTests()
 	rtTable();
 	rtFindModelType();
 	rtReadKkit();
+	rtRunKkit();
 	rtReadCspace();
+	rtRunCspace();
 	rtReacDiff();
 	rtHHnetwork( 10 );
 

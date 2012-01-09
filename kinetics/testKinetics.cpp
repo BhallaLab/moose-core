@@ -234,7 +234,7 @@ void testPoolVolumeScaling()
 	assert( doubleEq( size, PI * x1 * (r0+r1) * (r0+r1) / 4.0 ) );
 
 	Field< double >::set( poolId, "n", 400 );
-	double volscale = 1e3 / ( NA * size );
+	double volscale = 1 / ( NA * size );
 	double conc = Field< double >::get( poolId, "conc" );
 	assert( doubleEq( conc, 400 * volscale ) );
 	Field< double >::set( poolId, "conc", 500 * volscale );

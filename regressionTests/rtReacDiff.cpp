@@ -16,6 +16,7 @@
 
 static void rtReplicateModels()
 {
+	static double CONCSCALE = 1e-3; // convert from uM to mM.
 	static double expectedValueAtOneSec[] =
 		{ 0.7908, 1.275, 1.628, 1.912, 2.154, 2.369, 2.564, 2.744 };
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
@@ -57,7 +58,7 @@ static void rtReplicateModels()
 	Field< double >::getVec( a, "concInit", checkInit );
 	assert( checkInit.size() == 8 );
 	for ( unsigned int i = 0; i < 8; ++i )
-		assert( doubleEq( checkInit[i], 1 ) );
+		assert( doubleEq( checkInit[i], 1 * CONCSCALE ) );
 
 	// Here we create the stoich
 	Id stoich = shell->doCreate( "Stoich", modelId, "stoich", dims );
@@ -80,22 +81,22 @@ static void rtReplicateModels()
 	Field< double >::getVec( a, "concInit", checkInit );
 	assert( checkInit.size() == 8 );
 	for ( unsigned int i = 0; i < 8; ++i )
-		assert( doubleEq( checkInit[i], 1 ) );
+		assert( doubleEq( checkInit[i], 1 * CONCSCALE ) );
 
 	Field< double >::getVec( Id( "/kinetics/b" ), "concInit", checkInit );
 	assert( checkInit.size() == 8 );
 	for ( unsigned int i = 0; i < 8; ++i )
-		assert( doubleEq( checkInit[i], 1 ) );
+		assert( doubleEq( checkInit[i], 1 * CONCSCALE ) );
 
 	Field< double >::getVec( Id( "/kinetics/c" ), "concInit", checkInit );
 	assert( checkInit.size() == 8 );
 	for ( unsigned int i = 0; i < 8; ++i )
-		assert( doubleEq( checkInit[i], 1 ) );
+		assert( doubleEq( checkInit[i], 1 * CONCSCALE ) );
 
 	// Set up novel init conditions
 	vector< double > init( 8 );
 	for ( unsigned int i = 0; i < 8; ++i )
-		init[i] = i + 1;
+		init[i] = ( i + 1 ) * CONCSCALE;
 	ret = Field< double >::setVec( a, "concInit", init );
 	ret = Field< double >::setVec( Id( "/kinetics/b" ), "concInit", init );
 	ret = Field< double >::setVec( Id( "/kinetics/c" ), "concInit", init );
@@ -145,7 +146,7 @@ static void rtReplicateModels()
 
 		//Look up step # 10, starting from 0.
 		double y = LookupField< unsigned int, double >::get( oid, "y", 10); 
-		assert( doubleApprox( expectedValueAtOneSec[i], y ) );
+		assert( doubleApprox( expectedValueAtOneSec[i] * CONCSCALE, y ) );
 		// cout << y << endl;
 	}
 	

@@ -8,6 +8,8 @@
 **********************************************************************/
 
 #include "header.h"
+#include "ElementValueFinfo.h"
+#include "lookupSizeFromMesh.h"
 #include "MMenz.h"
 
 #define EPSILON 1e-15
@@ -33,22 +35,37 @@ const Cinfo* MMenz::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// Field Definitions
 		//////////////////////////////////////////////////////////////
-		static ValueFinfo< MMenz, double > Km(
+		static ElementValueFinfo< MMenz, double > Km(
 			"Km",
-			"Michaelis-Menten constant",
+			"Michaelis-Menten constant in SI conc units (milliMolar)",
 			&MMenz::setKm,
 			&MMenz::getKm
 		);
 
+		static ElementValueFinfo< MMenz, double > numKm(
+			"numKm",
+			"Michaelis-Menten constant in number units, volume dependent",
+			&MMenz::setNumKm,
+			&MMenz::getNumKm
+		);
+
 		static ValueFinfo< MMenz, double > kcat(
 			"kcat",
-			"Forward rate constant for enzyme",
+			"Forward rate constant for enzyme, units 1/sec",
 			&MMenz::setKcat,
 			&MMenz::getKcat
 		);
 
+		static ReadOnlyElementValueFinfo< MMenz, unsigned int > numSub(
+			"numSubstrates",
+			"Number of substrates in this MM reaction. Usually 1."
+			"Does not include the enzyme itself",
+			&MMenz::getNumSub
+		);
+
+
 		//////////////////////////////////////////////////////////////
-		// MsgDest Definitions
+		// Shared Msg Definitions
 		//////////////////////////////////////////////////////////////
 		static DestFinfo process( "process",
 			"Handles process call",
@@ -62,13 +79,12 @@ const Cinfo* MMenz::initCinfo()
 			"Handle for group msgs. Doesn't do anything",
 			new OpFuncDummy() );
 
+		//////////////////////////////////////////////////////////////
+		// MsgDest Definitions
+		//////////////////////////////////////////////////////////////
 		static DestFinfo enzDest( "enz",
 				"Handles # of molecules of MMenzyme",
 				new OpFunc1< MMenz, double >( &MMenz::enz ) );
-
-		//////////////////////////////////////////////////////////////
-		// Shared Msg Definitions
-		//////////////////////////////////////////////////////////////
 		static DestFinfo subDest( "subDest",
 				"Handles # of molecules of substrate",
 				new OpFunc1< MMenz, double >( &MMenz::sub ) );
@@ -99,8 +115,10 @@ const Cinfo* MMenz::initCinfo()
 		);
 
 	static Finfo* mmEnzFinfos[] = {
-		&Km,	// Value
+		&Km,	// ElementValue
+		&numKm,	// ElementValue
 		&kcat,	// Value
+		&numSub,	// ReadOnlyElementValue
 		&enzDest,			// DestFinfo
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
@@ -152,7 +170,7 @@ void MMenz::enz( double n )
 
 void MMenz::process( const Eref& e, ProcPtr p )
 {
-	double rate = kcat_ * enz_ * sub_ / ( Km_ + sub_ );
+	double rate = kcat_ * enz_ * sub_ / ( numKm_ + sub_ );
 	toSub()->send( e, p->threadIndexInGroup, 0, rate );
 	toPrd()->send( e, p->threadIndexInGroup, rate, 0 );
 	
@@ -169,15 +187,31 @@ void MMenz::reinit( const Eref& e, ProcPtr p )
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
-void MMenz::setKm( double v )
+void MMenz::setKm( const Eref& enz, const Qinfo* q, double v )
 {
 	Km_ = v;
+	double volScale = convertConcToNumRateUsingMesh( enz, toSub(), 1 );
+	numKm_ = v * volScale;
 }
 
-double MMenz::getKm() const
+double MMenz::getKm( const Eref& enz, const Qinfo* q ) const
 {
 	return Km_;
 }
+
+void MMenz::setNumKm( const Eref& enz, const Qinfo* q, double v )
+{
+	double volScale = convertConcToNumRateUsingMesh( enz, toSub(), 1 );
+	numKm_ = v;
+	Km_ = v / volScale;
+}
+
+double MMenz::getNumKm( const Eref& enz, const Qinfo* q ) const
+{
+	double volScale = convertConcToNumRateUsingMesh( enz, toSub(), 1 );
+	return Km_ * volScale;
+}
+
 
 void MMenz::setKcat( double v )
 {
@@ -187,4 +221,12 @@ void MMenz::setKcat( double v )
 double MMenz::getKcat() const
 {
 	return kcat_;
+}
+
+unsigned int MMenz::getNumSub( const Eref& e, const Qinfo* q ) const
+{
+	const vector< MsgFuncBinding >* mfb = 
+		e.element()->getMsgAndFunc( toSub()->getBindIndex() );
+	assert( mfb );
+	return ( mfb->size() );
 }
