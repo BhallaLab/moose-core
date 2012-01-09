@@ -72,10 +72,47 @@ class Stoich
 		unsigned int convertIdToFuncIndex( Id id ) const;
 		unsigned int convertIdToComptIndex( Id id ) const;
 
+		/**
+		 * This takes the specified forward and reverse half-reacs belonging
+		 * to the specified Reac, and builds them into the Stoich.
+		 */
+		void installReaction( ZeroOrder* forward, ZeroOrder* reverse, Id reacId );
+
 		const double* S( unsigned int meshIndex ) const;
 		double* varS( unsigned int meshIndex );
 		const double* Sinit( unsigned int meshIndex ) const;
 		double* getY( unsigned int meshIndex );
+
+		/**
+		 * Sets the forward rate v (given in millimoloar concentration units)
+		 * for the specified reaction throughout the compartment in which the
+		 * reaction lives. Internally the stoich uses #/voxel units so this 
+		 * involves querying the volume subsystem about volumes for each
+		 * voxel, and scaling accordingly.
+		 */
+		void setReacKf( const Eref& e, double v ) const;
+
+		/**
+		 * Sets the reverse rate v (given in millimoloar concentration units)
+		 * for the specified reaction throughout the compartment in which the
+		 * reaction lives. Internally the stoich uses #/voxel units so this 
+		 * involves querying the volume subsystem about volumes for each
+		 * voxel, and scaling accordingly.
+		 */
+		void setReacKb( const Eref& e, double v ) const;
+
+		/**
+		 * Returns the internal rate in #/voxel, for R1, for the specified
+		 * reacIndex and voxel index.
+		 */
+		double getR1( unsigned int reacIndex, unsigned int voxel ) const;
+
+		/**
+		 * Returns the internal rate in #/voxel, for R2, for the specified
+		 * reacIndex and voxel index. In some cases R2 is undefined, and it
+		 * then returns 0.
+		 */
+		double getR2( unsigned int reacIndex, unsigned int voxel ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Compute functions

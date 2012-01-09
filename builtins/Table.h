@@ -48,6 +48,7 @@ class Table
 
 		void input( double v );
 		void spike( double v );
+		void linearTransform( double scale, double offset );
 		void xplot( string file, string plotname );
 		void recvData( PrepackedBuffer pb );
 		void loadXplot( string fname, string plotname );

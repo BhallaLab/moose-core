@@ -29,6 +29,7 @@ static SrcFinfo2< double, double > *toPrd() {
 	return &toPrd;
 }
 
+/*
 static SrcFinfo1< double > *requestSize() {
 	static SrcFinfo1< double > requestSize( 
 			"requestSize", 
@@ -38,6 +39,7 @@ static SrcFinfo1< double > *requestSize() {
 			);
 	return &requestSize;
 }
+*/
 
 const Cinfo* ZombieReac::initCinfo()
 {
@@ -70,6 +72,18 @@ const Cinfo* ZombieReac::initCinfo()
 			"Reverse rate constant, in concentration units",
 			&ZombieReac::setConcKb,
 			&ZombieReac::getConcKb
+		);
+
+		static ReadOnlyElementValueFinfo< ZombieReac, unsigned int > numSub(
+			"numSubstrates",
+			"Number of substrates of reaction",
+			&ZombieReac::getNumSub
+		);
+
+		static ReadOnlyElementValueFinfo< ZombieReac, unsigned int > numPrd(
+			"numProducts",
+			"Number of products of reaction",
+			&ZombieReac::getNumPrd
 		);
 
 		//////////////////////////////////////////////////////////////
@@ -123,7 +137,9 @@ const Cinfo* ZombieReac::initCinfo()
 		&kb,		// Value
 		&Kf,		// Value
 		&Kb,		// Value
-		requestSize(),	// SrcFinfo
+		&numSub,		// ReadOnlyValue
+		&numPrd,		// ReadOnlyValue
+		//requestSize(),	// SrcFinfo
 		&sub,		// SharedFinfo
 		&prd,		// SharedFinfo
 		&proc,		// SharedFinfo
@@ -178,58 +194,119 @@ void ZombieReac::prd( double v )
 
 void ZombieReac::setNumKf( const Eref& e, const Qinfo* q, double v )
 {
+	cout << "Warning: numKf undefined for spatial reaction systems.\n";
+	cout << "Use concKf if you want to change rates in this volume.\n";
+	/*
+	double volScale = 
+		convertConcToNumRateUsingMesh( e, toSub(), 0 );
+	concKf_ = v * volScale;
 	rates_[ convertIdToReacIndex( e.id() ) ]->setR1( v );
+	*/
 }
 
 double ZombieReac::getNumKf( const Eref& e, const Qinfo* q ) const
 {
-	return rates_[ convertIdToReacIndex( e.id() ) ]->getR1();
+	// Return value for voxel 0. Conceivably I might want to use the
+	// DataId part to specify which voxel to use, but that isn't in the
+	// current definition for Reacs as being a single entity for the entire
+	// compartment.
+	return stoich_->getR1( stoich_->convertIdToReacIndex( e.id() ), 0 );
+	// return rates_[ convertIdToReacIndex( e.id() ) ]->getR1();
 }
 
 void ZombieReac::setNumKb( const Eref& e, const Qinfo* q, double v )
 {
+	cout << "Warning: numKb undefined for spatial reaction systems.\n";
+	cout << "Use concKb if you want to change rates in this volume.\n";
+	/*
 	if ( useOneWay_ )
 		rates_[ convertIdToReacIndex( e.id() ) + 1 ]->setR1( v );
 	else
 		rates_[ convertIdToReacIndex( e.id() ) ]->setR2( v );
+		*/
 }
 
 double ZombieReac::getNumKb( const Eref& e, const Qinfo* q ) const
 {
+	if ( stoich_->getOneWay() ) {
+		return stoich_->getR1( stoich_->convertIdToReacIndex( e.id() ) + 1, 0 );
+	} else {
+		return stoich_->getR2( stoich_->convertIdToReacIndex( e.id() ), 0 );
+	}
+	/*
 	if ( useOneWay_ )
 		return rates_[ convertIdToReacIndex( e.id() ) + 1 ]->getR1();
 	else
 		return rates_[ convertIdToReacIndex( e.id() ) ]->getR2();
+	*/
 }
 
 void ZombieReac::setConcKf( const Eref& e, const Qinfo* q, double v )
 {
+	concKf_ = v;
+	stoich_->setReacKf( e, v );
+	/*
 	double volScale = 
 		convertConcToNumRateUsingMesh( e, toSub(), 0 );
-
-	setNumKf( e, q, v * volScale );
+	rates_[ convertIdToReacIndex( e.id() ) ]->setR1( v / volScale );
+	*/
+	// setNumKf( e, q, v / volScale );
 }
 
 double ZombieReac::getConcKf( const Eref& e, const Qinfo* q ) const
 {
+	return concKf_;
+	/*
 	double volScale = 
 		convertConcToNumRateUsingMesh( e, toSub(), 0 );
-	return getNumKf( e, q ) / volScale;
+	return getNumKf( e, q ) * volScale;
+	*/
 }
 
 void ZombieReac::setConcKb( const Eref& e, const Qinfo* q, double v )
 {
+	concKb_ = v;
+	stoich_->setReacKb( e, v );
+	/*
 	double volScale = 
 		convertConcToNumRateUsingMesh( e, toPrd(), 0 );
-	setNumKb( e, q, v * volScale );
+	// setNumKb( e, q, v / volScale );
+	v /= volScale
+
+	if ( useOneWay_ )
+		rates_[ convertIdToReacIndex( e.id() ) + 1 ]->setR1( v );
+	else
+		rates_[ convertIdToReacIndex( e.id() ) ]->setR2( v );
+		*/
 }
 
 double ZombieReac::getConcKb( const Eref& e, const Qinfo* q ) const
 {
+	return concKb_;
+	/*
 	double volScale = 
 		convertConcToNumRateUsingMesh( e, toPrd(), 0 );
-	return getNumKb( e, q ) / volScale;
+	return getNumKb( e, q ) * volScale;
+	*/
 }
+
+unsigned int ZombieReac::getNumSub( const Eref& e, const Qinfo* q ) const
+{
+	const vector< MsgFuncBinding >* mfb =
+	e.element()->getMsgAndFunc( toSub()->getBindIndex() );
+	assert( mfb );
+	return ( mfb->size() );
+}
+
+unsigned int ZombieReac::getNumPrd( const Eref& e, const Qinfo* q ) const
+{
+	const vector< MsgFuncBinding >* mfb =
+	e.element()->getMsgAndFunc( toPrd()->getBindIndex() );
+	assert( mfb );
+	return ( mfb->size() );
+}
+
+
 
 //////////////////////////////////////////////////////////////
 // Utility function
@@ -243,15 +320,15 @@ ZeroOrder* ZombieReac::makeHalfReaction(
 	ZeroOrder* rateTerm = 0;
 	if ( numReactants == 1 ) {
 		rateTerm = 
-			new FirstOrder( rate, convertIdToPoolIndex( mols[0] ) );
+			new FirstOrder( rate, stoich_->convertIdToPoolIndex( mols[0] ) );
 	} else if ( numReactants == 2 ) {
 		rateTerm = new SecondOrder( rate,
-				convertIdToPoolIndex( mols[0] ), 
-				convertIdToPoolIndex( mols[1] ) );
+				stoich_->convertIdToPoolIndex( mols[0] ), 
+				stoich_->convertIdToPoolIndex( mols[1] ) );
 	} else if ( numReactants > 2 ) {
 		vector< unsigned int > v;
 		for ( unsigned int i = 0; i < numReactants; ++i ) {
-			v.push_back( convertIdToPoolIndex( mols[i] ) );
+			v.push_back( stoich_->convertIdToPoolIndex( mols[i] ) );
 		}
 		rateTerm = new NOrder( rate, v );
 	} else {
@@ -263,6 +340,17 @@ ZeroOrder* ZombieReac::makeHalfReaction(
 // static func
 void ZombieReac::zombify( Element* solver, Element* orig )
 {
+	DataHandler* dh = orig->dataHandler()->copyUsingNewDinfo( ZombieReac::initCinfo()->dinfo() );
+
+	Reac* reac = reinterpret_cast< Reac* >( orig->dataHandler()->data( 0 ));
+	double concKf = reac->getConcKf( Eref( orig, 0 ), 0 );
+	double concKb = reac->getConcKb( Eref( orig, 0 ), 0 );
+
+	ZombieReac* zr = reinterpret_cast< ZombieReac* >( dh->data( 0 ) );
+	zr->concKf_ = concKf;
+	zr->concKb_ = concKb;
+	zr->stoich_ = reinterpret_cast< Stoich* >( solver->dataHandler()->data( 0 ) );
+
 	static const SrcFinfo* sub = dynamic_cast< const SrcFinfo* >(
 		Reac::initCinfo()->findFinfo( "toSub" ) );
 	static const SrcFinfo* prd = dynamic_cast< const SrcFinfo* >(
@@ -271,81 +359,32 @@ void ZombieReac::zombify( Element* solver, Element* orig )
 	assert( sub );
 	assert( prd );
 
-	Element temp( orig->id(), zombieReacCinfo, solver->dataHandler() );
-	Eref zer( &temp, 0 );
-	Eref oer( orig, 0 );
+	ZeroOrder* forward = zr->makeHalfReaction( orig, concKf, sub );
+	ZeroOrder* reverse = zr->makeHalfReaction( orig, concKb, prd );
 
-	ZombieReac* z = reinterpret_cast< ZombieReac* >( zer.data() );
-	Reac* reac = reinterpret_cast< Reac* >( oer.data() );
+	zr->stoich_->installReaction( forward, reverse, orig->id() );
 
-	ZeroOrder* forward = z->makeHalfReaction( orig, reac->getNumKf( oer, 0 ), sub );
-	ZeroOrder* reverse = z->makeHalfReaction( orig, reac->getNumKb( oer, 0 ), prd );
+	orig->zombieSwap( ZombieReac::initCinfo(), dh );
 
-	unsigned int rateIndex = z->convertIdToReacIndex( orig->id() );
-	unsigned int revRateIndex = rateIndex;
-	if ( z->useOneWay_ ) {
-		z->rates_[ rateIndex ] = forward;
-		revRateIndex = rateIndex + 1;
-		z->rates_[ revRateIndex ] = reverse;
-	} else {
-		z->rates_[ rateIndex ] = 
-			new BidirectionalReaction( forward, reverse );
-	}
-
-	vector< unsigned int > molIndex;
-
-	if ( z->useOneWay_ ) {
-		unsigned int numReactants = forward->getReactants( molIndex );
-		for ( unsigned int i = 0; i < numReactants; ++i ) {
-			int temp = z->N_.get( molIndex[i], rateIndex );
-			z->N_.set( molIndex[i], rateIndex, temp - 1 );
-			temp = z->N_.get( molIndex[i], revRateIndex );
-			z->N_.set( molIndex[i], revRateIndex, temp + 1 );
-		}
-
-		numReactants = reverse->getReactants( molIndex );
-		for ( unsigned int i = 0; i < numReactants; ++i ) {
-			int temp = z->N_.get( molIndex[i], rateIndex );
-			z->N_.set( molIndex[i], rateIndex, temp + 1 );
-			temp = z->N_.get( molIndex[i], revRateIndex );
-			z->N_.set( molIndex[i], revRateIndex, temp - 1 );
-		}
-	} else {
-		unsigned int numReactants = forward->getReactants( molIndex );
-		for ( unsigned int i = 0; i < numReactants; ++i ) {
-			int temp = z->N_.get( molIndex[i], rateIndex );
-			z->N_.set( molIndex[i], rateIndex, temp - 1 );
-		}
-
-		numReactants = reverse->getReactants( molIndex );
-		for ( unsigned int i = 0; i < numReactants; ++i ) {
-			int temp = z->N_.get( molIndex[i], revRateIndex );
-			z->N_.set( molIndex[i], rateIndex, temp + 1 );
-		}
-	}
-
-	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler(),
-		orig->dataHandler() );
-	orig->zombieSwap( zombieReacCinfo, dh );
+	zr->stoich_->setReacKf( Eref( orig, 0 ), concKf );
+	zr->stoich_->setReacKb( Eref( orig, 0 ), concKb );
 }
 
 // Static func
 void ZombieReac::unzombify( Element* zombie )
 {
-	Element temp( zombie->id(), zombie->cinfo(), zombie->dataHandler() );
-	Eref zer( &temp, 0 );
-	Eref oer( zombie, 0 );
+	DataHandler* dh = zombie->dataHandler()->copyUsingNewDinfo( Reac::initCinfo()->dinfo() );
 
-	ZombieReac* z = reinterpret_cast< ZombieReac* >( zer.data() );
+	ZombieReac* zr = reinterpret_cast< ZombieReac* >( zombie->dataHandler()->data( 0 ));
 
-	// Here I am unsure how to recreate the correct kind of data handler
-	// for the original. Do later.
-	DataHandler* dh = 0;
+	Reac* reac = reinterpret_cast< Reac* >( dh->data( 0 ));
+	double concKf = zr->getConcKf( Eref( zombie, 0 ), 0 );
+	double concKb = zr->getConcKb( Eref( zombie, 0 ), 0 );
+
 
 	zombie->zombieSwap( Reac::initCinfo(), dh );
+	// Now the zombie is a regular reac.
 
-	Reac* m = reinterpret_cast< Reac* >( oer.data() );
-
-	m->setNumKf( oer, 0, z->getNumKf( zer, 0 ) );
-	m->setNumKb( oer, 0, z->getNumKb( zer, 0 ) );
+	reac->setConcKf( Eref( zombie, 0 ), 0, concKf );
+	reac->setConcKb( Eref( zombie, 0 ), 0, concKb );
 }

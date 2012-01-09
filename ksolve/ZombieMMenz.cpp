@@ -44,9 +44,16 @@ const Cinfo* ZombieMMenz::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static ElementValueFinfo< ZombieMMenz, double > Km(
 			"Km",
-			"Michaelis-Menten constant",
+			"Michaelis-Menten constant in SI conc units (millimolar)",
 			&ZombieMMenz::setKm,
 			&ZombieMMenz::getKm
+		);
+
+		static ElementValueFinfo< ZombieMMenz, double > numKm(
+			"numKm",
+			"Michaelis-Menten constant in number units, volume dependent",
+			&ZombieMMenz::setNumKm,
+			&ZombieMMenz::getNumKm
 		);
 
 		static ElementValueFinfo< ZombieMMenz, double > kcat(
@@ -54,6 +61,13 @@ const Cinfo* ZombieMMenz::initCinfo()
 			"Forward rate constant for enzyme",
 			&ZombieMMenz::setKcat,
 			&ZombieMMenz::getKcat
+		);
+
+		static ReadOnlyElementValueFinfo< ZombieMMenz, unsigned int > numSub(
+			"numSubstrates",
+			"Number of substrates in this MM reaction. Usually 1."
+			"Does not include the enzyme itself",
+			&ZombieMMenz::getNumSub
 		);
 
 		//////////////////////////////////////////////////////////////
@@ -104,7 +118,9 @@ const Cinfo* ZombieMMenz::initCinfo()
 
 	static Finfo* mmEnzFinfos[] = {
 		&Km,	// Value
+		&numKm,	// Value
 		&kcat,	// Value
+		&numSub,	// ReadOnlyElementValue
 		enzDest(),				// DestFinfo
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
@@ -149,6 +165,7 @@ void ZombieMMenz::reinit( const Eref& e, ProcPtr p )
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
+/*
 double getEnzVol( const Eref& e )
 {
 	vector< Id > enzMol;
@@ -161,21 +178,37 @@ double getEnzVol( const Eref& e )
 	assert( vol > 0.0 );
 	return vol;
 }
+*/
 
 void ZombieMMenz::setKm( const Eref& e, const Qinfo* q, double v )
 {
-	double Km = v * NA * CONC_UNIT_CONV * getEnzVol( e );
+	double volScale = convertConcToNumRateUsingMesh( e, toSub(), 1 );
+	// double numKm = v * NA * CONC_UNIT_CONV * getEnzVol( e );
 
 	// First rate is Km
-	rates_[ convertIdToPoolIndex( e.id() ) ]->setR1( Km ); 
+	rates_[ convertIdToPoolIndex( e.id() ) ]->setR1( v * volScale ); 
 }
 
 double ZombieMMenz::getKm( const Eref& e, const Qinfo* q ) const
 {
-	double Km = 
+	double numKm = 
+		rates_[ convertIdToPoolIndex( e.id() ) ]->getR1();
+	double volScale = convertConcToNumRateUsingMesh( e, toSub(), 1 );
+	
+	return numKm / volScale;
+}
+
+void ZombieMMenz::setNumKm( const Eref& e, const Qinfo* q, double v )
+{
+	rates_[ convertIdToPoolIndex( e.id() ) ]->setR1( v ); 
+}
+
+double ZombieMMenz::getNumKm( const Eref& e, const Qinfo* q ) const
+{
+	double numKm = 
 		rates_[ convertIdToPoolIndex( e.id() ) ]->getR1();
 	
-	return Km / getEnzVol( e ) * NA * CONC_UNIT_CONV;
+	return numKm;
 }
 
 void ZombieMMenz::setKcat( const Eref& e, const Qinfo* q, double v )
@@ -186,6 +219,14 @@ void ZombieMMenz::setKcat( const Eref& e, const Qinfo* q, double v )
 double ZombieMMenz::getKcat( const Eref& e, const Qinfo* q ) const
 {
 	return rates_[ convertIdToPoolIndex( e.id() ) ]->getR2(); // Second rate is kcat
+}
+
+unsigned int ZombieMMenz::getNumSub( const Eref& e, const Qinfo* q ) const
+{
+	const vector< MsgFuncBinding >* mfb =
+		e.element()->getMsgAndFunc( toSub()->getBindIndex() );
+	assert( mfb );
+	return ( mfb->size() );
 }
 
 //////////////////////////////////////////////////////////////
@@ -222,7 +263,7 @@ void ZombieMMenz::zombify( Element* solver, Element* orig )
 		unsigned int subIndex = z->convertIdToPoolIndex( pools[0] );
 		assert( num == 1 );
 		z->rates_[ rateIndex ] = new MMEnzyme1( 
-			mmEnz->getKm(), mmEnz->getKcat(),
+			mmEnz->getNumKm( oer, 0 ), mmEnz->getKcat(),
 			enzIndex, subIndex );
 	} else if ( num > 1 ) {
 		vector< unsigned int > v;
@@ -230,7 +271,7 @@ void ZombieMMenz::zombify( Element* solver, Element* orig )
 			v.push_back( z->convertIdToPoolIndex( pools[i] ) );
 		ZeroOrder* rateTerm = new NOrder( 1.0, v );
 		z->rates_[ rateIndex ] = new MMEnzyme( 
-			mmEnz->getKm(), mmEnz->getKcat(),
+			mmEnz->getNumKm( oer, 0 ), mmEnz->getKcat(),
 			enzIndex, rateTerm );
 	} else {
 		cout << "Error: ZombieMMenz::zombify: No substrates\n";
@@ -271,6 +312,6 @@ void ZombieMMenz::unzombify( Element* zombie )
 
 	MMenz* m = reinterpret_cast< MMenz* >( oer.data() );
 
-	m->setKm( z->getKm( zer, 0 ) );
+	m->setKm( oer, 0, z->getNumKm( zer, 0 ) );
 	m->setKcat( z->getKcat( zer, 0 ) );
 }

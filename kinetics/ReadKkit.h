@@ -88,6 +88,37 @@ class ReadKkit
 		// void assignReacCompartments();
 		// void assignEnzCompartments();
 
+		/**
+		 * We have a slight problem because MOOSE has a more precise value
+		 * for NA than does kkit. Also, at the time the model is loaded,
+		 * the volume relationships are unknown. So we need to fix up conc
+		 * units of all pools reacs post-facto.
+		 * Here we assume that the conc units from Kkit are
+		 * meant to be OK, so they override the #/cell (lower case k) units.
+		 * So we convert all the Kfs and Kbs in the entire system after
+		 * the model has been created, once we know the order of each reac.
+		 */
+		void convertParametersToConcUnits();
+
+		/// Convert pool amounts. Initially given in n, but scaling issue.
+		void convertPoolAmountToConcUnits();
+
+		/// Convert Reac rates, initially in n units.
+		void convertReacRatesToConcUnits();
+
+		/**
+		 * Convert MMEnz rates. Km should be in conc units. Actually rates
+		 * stored as k1, k2, k3 in num units, so this has to be computed
+		 * and then converted.
+		 */
+		void convertMMenzRatesToConcUnits();
+
+		/**
+		 * Convert regular Enz rates. Binding step k1 has similar issues 
+		 * as reac rates. k2 and k3 are both in units of 1/time, so OK.
+		 */
+		void convertEnzRatesToConcUnits();
+
 		//////////////////////////////////////////////////////////////////
 		// Utility functions
 		//////////////////////////////////////////////////////////////////

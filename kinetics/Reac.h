@@ -35,6 +35,11 @@ class Reac
 		/// get Kb in concentration units
 		double getConcKb( const Eref& e, const Qinfo* q ) const;
 
+		/// Get number of substrates
+		unsigned int getNumSub( const Eref& e, const Qinfo* q ) const;
+		/// Get number of products
+		unsigned int getNumPrd( const Eref& e, const Qinfo* q ) const;
+
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////

@@ -1819,7 +1819,9 @@ void testShellMesh()
 	ret = Field< double >::setRepeat( pool, "conc", testN );
 	assert( ret );
 	Field< double >::getVec( pool, "n", numMols );
-	double numShouldBe = NA * testN * 1e-3 * 1e-3;
+
+	// This comes from scaling testN to the 0.1x0.1x0.1 metre mesh size.
+	double numShouldBe = NA * testN * 1e-3;
 	for ( unsigned int i = 0; i < size; ++i )
 		assert( doubleEq( numMols[i] , numShouldBe ) );
 
@@ -1828,8 +1830,14 @@ void testShellMesh()
 	assert( ret );
 	vector< double > conc;
 	Field< double >::getVec( pool, "conc", conc );
+	// Here we make the size of the mesh 10x bigger. We've set the field
+	// 'preserveNumEntries', so making the whole volume bigger increases
+	// voxel size accordingly. Voxel size is now 1x1x1.
+	// Conc was testN.
+	// Num mols in 1e-3 m^3 was NA * testN * 1e-3. 
+	// Expanding the mesh preserves numMols. So conc is now 1e-3 smaller
 	for ( unsigned int i = 0; i < size; ++i )
-		assert( doubleEq( conc[i], testN * 0.001 ) );
+		assert( doubleEq( conc[i], testN * 1e-3 ) );
 
 	shell->doDelete( compt );
 	cout << "." << flush;

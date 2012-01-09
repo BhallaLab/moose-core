@@ -63,6 +63,18 @@ const Cinfo* Reac::initCinfo()
 			&Reac::getConcKb
 		);
 
+		static ReadOnlyElementValueFinfo< Reac, unsigned int > numSub(
+			"numSubstrates",
+			"Number of substrates of reaction",
+			&Reac::getNumSub
+		);
+
+		static ReadOnlyElementValueFinfo< Reac, unsigned int > numPrd(
+			"numProducts",
+			"Number of products of reaction",
+			&Reac::getNumPrd
+		);
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -115,6 +127,8 @@ const Cinfo* Reac::initCinfo()
 		&kb,	// Value
 		&Kf,	// Value
 		&Kb,	// Value
+		&numSub,	// ReadOnlyValue
+		&numPrd,	// ReadOnlyValue
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
 		&proc,				// SharedFinfo
@@ -189,7 +203,7 @@ void Reac::setNumKf( const Eref& e, const Qinfo* q, double v )
 {
 	sub_ = kf_ = v;
 	double volScale = convertConcToNumRateUsingMesh( e, toSub(), 0 );
-	concKf_ = kf_ / volScale;
+	concKf_ = kf_ * volScale;
 }
 
 double Reac::getNumKf( const Eref& e, const Qinfo* q) const
@@ -202,7 +216,7 @@ void Reac::setNumKb( const Eref& e, const Qinfo* q, double v )
 {
 	prd_ = kb_ = v;
 	double volScale = convertConcToNumRateUsingMesh( e, toPrd(), 0 );
-	concKb_ = kb_ / volScale;
+	concKb_ = kb_ * volScale;
 }
 
 double Reac::getNumKb( const Eref& e, const Qinfo* q ) const
@@ -214,7 +228,7 @@ double Reac::getNumKb( const Eref& e, const Qinfo* q ) const
 void Reac::setConcKf( const Eref& e, const Qinfo* q, double v )
 {
 	concKf_ = v;
-	sub_ = kf_ = v * convertConcToNumRateUsingMesh( e, toSub(), 0 );
+	sub_ = kf_ = v / convertConcToNumRateUsingMesh( e, toSub(), 0 );
 }
 
 double Reac::getConcKf( const Eref& e, const Qinfo* q ) const
@@ -225,10 +239,26 @@ double Reac::getConcKf( const Eref& e, const Qinfo* q ) const
 void Reac::setConcKb( const Eref& e, const Qinfo* q, double v )
 {
 	concKb_ = v;
-	prd_ = kb_ = v * convertConcToNumRateUsingMesh( e, toPrd(), 0 );
+	prd_ = kb_ = v / convertConcToNumRateUsingMesh( e, toPrd(), 0 );
 }
 
 double Reac::getConcKb( const Eref& e, const Qinfo* q ) const
 {
 	return concKb_;
+}
+
+unsigned int Reac::getNumSub( const Eref& e, const Qinfo* q ) const
+{
+	const vector< MsgFuncBinding >* mfb = 
+		e.element()->getMsgAndFunc( toSub()->getBindIndex() );
+	assert( mfb );
+	return ( mfb->size() );
+}
+
+unsigned int Reac::getNumPrd( const Eref& e, const Qinfo* q ) const
+{
+	const vector< MsgFuncBinding >* mfb = 
+		e.element()->getMsgAndFunc( toPrd()->getBindIndex() );
+	assert( mfb );
+	return ( mfb->size() );
 }

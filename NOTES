@@ -16457,4 +16457,56 @@ Implementation in progress. I have replace the original
 convertConcToNumRatesUnsingMesh
 Need to get the stuff to compile first. Done.
 Need to clear unit tests for reac and add more tests for multiple vols.
-Clears original unit tests but fails regression tests. 
+Clears original unit tests but fails regression tests. Checkin 3228.
+============================================================================
+01 Jan 2012
+Absolute can of worms in ReadKkit.cpp. The rates in kkit are saved as
+kf, kb. These get assigned to Reacs, which refer back to the pool vols to
+set Kf and Kb, but unfortunately at this point pool vols are meaningless.
+Then the pool vols get setup, leaving discrepancies between kf and Kf.
+To add to the fun, the MOOSE vol units are SI (mM) while the kkit units are
+usually uM. 
+Furthermore, NA in MOOSE is a good best current value, but NA in kkit is 6e23.
+So conversions between kf and Kf differ for the same model in MOOSE and kkit.
+
+Need to do some post-loading fixups.
+
+Begun, with ReadKkit::convertRatesToConcUnits. Still doesn't clear test.
+
+============================================================================
+06 Jan 2012
+Still working on regression tests relating to volume conversion.
+Got the conversions for Reac to work. Now fails on MMenz, which is odd as those
+should use conc units natively. However, the kkit storage of values is as
+k1, k2, k3 so the conversion fails there.
+
+
+============================================================================
+7 Jan
+Much progress on setting up the ZombieReac so it, not the solver, maintains
+Kf and Kb. Also redesigned it so that scaling Kf and Kb refers the problem of
+rescaling individual voxel rates to the solver.
+Still stuck on rtReadKkit.cpp:83.
+
+============================================================================
+8 Jan 2012
+Now it clears the regression test stuff for checking reac rates,
+back to dealing with the MMEnz rates.
+
+Now clears the Kholodenko test both for ReadKkit and for running it.
+Stuck in Cspace, may be I now need to fix up enzymes.
+
+Fixed enzymes. Now problem with pools, which were converting to and from 
+micromolar. Converted all to millimolar, playing havoc with unit tests.
+Fixed. Regression tests are also nasty. Need to put in a unit conversion
+function into the Table, perhaps just a scaling factor. 
+Did that. Now able to go through unit tests. Regression tests now stuck in
+the readCSPACE conversions.
+
+============================================================================
+9 Jan 2012.
+Finally clears the rtReadKkit.cpp regression tests. Now fails in 
+rtReacDiff.cpp:rtReplicateModels.
+Fixed up some concscales there too. Now clears all unit and regression tests.
+
+============================================================================
