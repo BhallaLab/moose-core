@@ -108,6 +108,55 @@ These steps are illustrated below:
 
 @image html MOOSE_MPI_threading.gif "MOOSE threading and Process Loop with MPI data transfers between nodes."
 
+\subsection ksolve_threading Threading with the Kinetics GSL solver.
+
+Currently we only subdivide voxels, not parts of a single large model
+ 	within one voxel.\n
+<ul>
+<li>The GslIntegrator handles Process and Reinit. This drives the data
+structures set up by the Stoich class.
+<li>The Compartment, which is a ChemMesh subclass,
+	is subdivided into a number of MeshEntries (voxels).
+<li>The GslIntegrator has to be created with as many instances as there are
+MeshEntries (voxels) in the mesh.
+<li>The setup function (currently manual) calls the GslIntegrator::stoich() 
+function on all instances of GslIntegrator (e.g., using setRepeat).
+<li>The scheduling (currently manual) does:
+	<ol>
+	<li>Clock0: MeshEntry::process.
+	<li>Clock1: GslIntegrator::process.
+	</ol>
+<li>During Reinit, the GslIntegrator builds up a small data structure called
+StoichThread. This contains a pointer to the Stoich, to the ProcInfo, and
+the meshIndex. There is a separate StoichThread on each GslIntegrator
+instance.
+<li> During Process on the MeshEntry, the following sequence of calls 
+ensues:
+	<ol>
+	<li>ChemMesh::updateDiffusion( meshIndex )
+	<li>Stoich::updateDiffusion( meshIndex, stencil )
+	<li>Iterate through stencils, calling Stencil::addFlux for meshIndex
+	<li>In Stencil::addFlux: Add flux values to the Stoich::flux vector.
+	</ol>
+	
+<li>During Process on the GslIntegrator:
+	<ol>
+	<li> the GslIntegrators on all threads call their inner loop
+	for advancing to the next timestep through gsl_odeiv_evolve_apply.
+	<li>The GslIntegrators on all threads call Stoich::clearFlux.
+	</ol>
+<li>During Process on the Stoich, which is called through the GslIntegrator
+	functions, not directly from Process:
+	<ol>
+	<li>Through the GSL, Stoich::gslFunc is called on each thread. This
+	calls the innerGslFunc with the appropriate meshIndex. This does the
+	calculations for the specified voxel. These calculations include
+	the chemistry, and also add on the appropriate flux terms for each
+	molecule at this meshIndex.\n
+	<li>The Stoich::clearFlux function zeroes out all the entries in the
+	flux_ vector at the specified meshIndex.\n
+	</ol>
+</ul>
 
 \section NewClasses Writing new MOOSE classes
 \subsection NewClassesOverview	Overview
