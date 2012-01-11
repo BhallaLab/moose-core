@@ -143,7 +143,7 @@ def apply_to_tree(moose_wildcard, python_filter=None, value=None):
     If you want to assign Rm = 1e6 for each compartment in mycell
     whose name match 'axon_*':
     
-    apply_to_tree('/mycell/##[Class=Compartment]',
+    apply_to_tree('/mycell/##[TYPE=Compartment]',
             lambda x: 'axon_' in Neutral(x).name,
             lambda x: setattr(Compartment(x), 'Rm', 1e6))
 
@@ -183,7 +183,7 @@ def tweak_field(moose_wildcard, field, assignment_string):
 
     Example:
 
-    tweak_field('/mycell/##[Class=Compartment]', 'Rm', '1.5 / (3.1416 * diameter * length')
+    tweak_field('/mycell/##[TYPE=Compartment]', 'Rm', '1.5 / (3.1416 * diameter * length')
 
     will assign Rm to every compartment in mycell such that the
     specific membrane resistance is 1.5 Ohm-m2.
