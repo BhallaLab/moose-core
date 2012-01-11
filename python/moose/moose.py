@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Thu Jan  5 12:19:05 2012 (+0530)
+# Last-Updated: Wed Jan 11 20:27:57 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1026
+#     Update #: 1050
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -264,8 +264,8 @@ class _MooseMeta(type):
 
 class NeutralArray(object):
     def __init__(self, *args, **kwargs):
-        path ='/'
-        dims = [1]
+        path = None
+        dims = None
         self.id_ = None
         try:
             className = kwargs['type']
@@ -277,7 +277,7 @@ class NeutralArray(object):
         try:
             dims = kwargs['dims']
         except KeyError:
-            dims = [1]
+            pass
         try:
             path = kwargs['path']
         except KeyError:
@@ -294,7 +294,27 @@ class NeutralArray(object):
         if len(args) > 2:
             self.className = args[2]
         if self.id_ is None:
+            if path is None:
+                raise TypeError('A string path or an existing Id or an int value for existing Id must be the first argument to __init__')
+            if exists(path):
+                self.id_ = _moose.Id(path=path)
+                # Check if specified dimensions match the existing object's dimensions
+                if dims is not None:
+                    shape = self.id_.getShape()
+                    if isinstance(dims, int):
+                        if shape[0] != dims:
+                            raise ValueError('Specified dimensions do not match that of existing array object')
+                    else:
+                        if len(shape) != len(dims):
+                            raise ValueError('Specified dimensions do not match that of existing array object')
+                        for ii in range(len(shape)):
+                            if shape[ii] != dims[ii]:
+                                raise ValueError('Specified dimensions do not match that of existing array object')
+                else:
+                    dims = (1)
             self.id_ = _moose.Id(path=path, dims=dims, type=self.className)
+        
+                    
         orig_classname = self.id_[0].getField('class')
         orig_class = eval('%sArray' % (orig_classname))
         self_class = self.__class__
@@ -372,6 +392,7 @@ class Neutral(object):
                 except ValueError:
                     moose_classes = [child.getPath().rpartition('/')[-1] for child in Id('/classes')[0].getField('children')]
                     self_class = self.__class__
+                    print 'creating object of class', self_class
                     while (self_class != object) and (self_class.__name__ not in moose_classes):
                         self_class = self_class.__base__
                         # print self_class.__name__
