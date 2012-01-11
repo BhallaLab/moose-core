@@ -46,7 +46,9 @@ class TestNeutralArray(unittest.TestCase):
         self.sharedFinfos = []
     
     def setUp(self):
-        self.testObj = moose.NeutralArray('neutral%d' % (uuid.uuid4().int))
+        path = 'neutral%d' % (uuid.uuid4().int)
+        print 'TestNeutralArray.setUp: test object will be:', path
+        self.testObj = moose.NeutralArray(path)
         self.valueFinfos.sort()
         self.lookupFinfos.sort()
         self.srcFinfos.sort()
@@ -54,6 +56,7 @@ class TestNeutralArray(unittest.TestCase):
         self.sharedFinfos.sort()
         
     def testFields(self):
+        print 'Testing fields ...',
         srcFields = sorted(list(self.testObj.getFieldNames('srcFinfo')))
         self.assertEqual(len(self.srcFinfos), len(srcFields))        
         for ii in range(len(self.srcFinfos)):
@@ -78,9 +81,11 @@ class TestNeutralArray(unittest.TestCase):
         self.assertEqual(len(self.sharedFinfos), len(sharedFields))        
         for ii in range(len(self.sharedFinfos)):
             self.assertEqual(self.sharedFinfos[ii], sharedFields[ii])
+        print 'OK'
 
 
     def testNew(self):
+        print 'Testing array object creation ...',
         a_path = 'neutral%d' % (uuid.uuid4().int)
         b_path = a_path + '/b'
         c_path = '/neutral%d' % (uuid.uuid4().int)
@@ -96,24 +101,36 @@ class TestNeutralArray(unittest.TestCase):
         self.assertEqual(b.name, 'b')
         self.assertEqual(d.name, 'd')
         self.assertRaises(ValueError, moose.NeutralArray, 'test/')
+        print 'OK'
         
 class TestPyMooseGlobals(unittest.TestCase):
     def setUp(self):
-        self.src1 = moose.NeutralArray('/neutral%d' % (uuid.uuid4().int))
-        self.dest1 = moose.NeutralArray('/neutral%d' % (uuid.uuid4().int))
+        
+        path1 = 'neutral%d' % (uuid.uuid4().int)
+        path2 = 'neutral%d' % (uuid.uuid4().int)
+        print 'TestPyMooseGlobals.setUp: test objects will be:', path1, path2
+        self.src1 = moose.NeutralArray(path1)
+        self.dest1 = moose.NeutralArray(path2)
 
     def testCopy(self):
+        print 'Testing copy ...',
         newname = 'neutral%d' % (uuid.uuid4().int)
         newobj = moose.copy(self.src1, self.dest1, newname, 3, True)
         self.assertEqual(newobj.path, self.dest1.path + "/" + newname)
         self.assertEqual(len(newobj), 3)
+        print 'OK'
 
 class TestMessages(unittest.TestCase):
     def setUp(self):
-        self.src1 = moose.MolArray('/molecule%d' % (uuid.uuid4().int))
-        self.dest1 = moose.ReacArray('/reaction%d' % (uuid.uuid4().int))
+        path1 = '/molecule%d' % (uuid.uuid4().int)
+        path2 = '/reaction%d' % (uuid.uuid4().int)
+        print 'TestMessages.setUp: test objects will be:', path1, path2
+        
+        self.src1 = moose.MolArray(path1)
+        self.dest1 = moose.ReacArray(path2)
 
     def testConnect(self):
+        print 'Testing connect ...',
         self.src1[0].connect('reac', self.dest1[0], 'sub')
         print 1
         outmsgs_src = self.src1[0].msgOut
@@ -128,6 +145,7 @@ class TestMessages(unittest.TestCase):
             self.assertEqual(srcFieldsOnE1[0], 'nOut')
             destFieldsOnE2 = outmsgs_src[ii].getField('destFieldsOnE2')
             self.assertEqual(destFieldsOnE2[0], 'subDest')
+        print 'OK'        
         # inmsg_list = self.dest1[0].msgIn
         # outmsg_list = self.src1[0].msgOut
         # print inmsg_list, outmsg_list

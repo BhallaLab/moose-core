@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Jan  5 16:05:39 2012 (+0530)
+// Last-Updated: Wed Jan 11 20:55:51 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4495
+//     Update #: 4506
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -407,12 +407,15 @@ extern "C" {
             string name;
             if (pos != string::npos){
                 name = trimmed_path.substr(pos+1);
-                parent_path += "/";
-                parent_path += trimmed_path.substr(0, pos+1);
+                if (parent_path.at(parent_path.length() - 1) != '/'){
+                    parent_path += "/";
+                }
+                parent_path += trimmed_path.substr(0, pos);
             } else {
                 name = trimmed_path;
             }
-            self->id_ = getShell().doCreate(string(type), Id(parent_path), string(name), vector<int>(vec_dims));
+            Id parent_id(parent_path);
+            self->id_ = getShell().doCreate(string(type), parent_id, string(name), vector<int>(vec_dims));
         } 
         return 0;            
     }// ! _pymoose_Id_init
