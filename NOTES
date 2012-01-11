@@ -16508,5 +16508,137 @@ the readCSPACE conversions.
 Finally clears the rtReadKkit.cpp regression tests. Now fails in 
 rtReacDiff.cpp:rtReplicateModels.
 Fixed up some concscales there too. Now clears all unit and regression tests.
+Checkin 3237.
+
+From 28 Dec 2011:
+Wish list of things to implement:
+- New Synapse code with lookup rather than queue
+- Batched messaging for axonal transmission: club a lot of events.
+- Implement proximity activity synaptic capture learning rule
+- Implement standard STDP learning rule
+- New IntFire with dendritic domains
+- MPI
+* Conc units for reactions
+- ReacDiff solver to permit compartment-specific reacs.
+- SteadyState solver
+	- Automated dose-response generation
+	- Estimates of all possible steady states of system
+- SBML I/O
+- NeuroML I/O
+- kkit13
+
+Rather alarming that it has taken 2 weeks for just one of these things.
+
+Some more specific items based on plans to do SigNeur calculations and
+the traffilator stuff in spatial systems:
+- Branching 1-D diffusion
+- Different volume meshes
+- Generating 1-D diffusion meshes from neuron morphology
+- Arbitrary boundary 2-D square meshes
+-> MPI and thread partitioning of diffusive calculations
+- Stochastic spatial calculations.
+-> Interfaces between sections handling different reac systems
+-> Transport and conc gradient calculations
+
+Starting with MPI and thread partitioning of diffusive calculations.
+Stoich::updateDiffusion is called from the Process of the MeshEntry. The
+MeshEntries are presumably the entities subdivided among threads.
+MeshEntry::process --> ChemMesh->updateDiffusion-> Stoich::updateDiffusion
+--> Stencil::addFlux -> stencil1()
+
+Here the thread partitioning happens at the specified meshIndex, which is
+from the e.fieldIndex used in MeshEntry::process.
+
+The stencil operation is where the values add up. Here we would wish to 
+accumulate stuff for inter-node messaging, but need to know the
+partitioning beforehand.
+
+As the ChemMesh is where the stencil setup and flux calculation happens, it
+is clearly there that the partitioning to other nodes needs to be assessed,
+and from there that inter-node messaging must proceed.
+
+============================================================================
+10 Jan 2012
+
+In CubeMesh::buildStencil, should examine the edges of the node range. There
+should put in an alternative to the various Stencil forms that handles 
+messaging. This message should originate from the Stoich, and go into the
+Stoich. The dest part is relatively easy, as the sender has all info that the
+recipient will need to put the required flux to the required place. Could even
+club a lot of this. 
+Sending is a bit tricky as the Stoich will need to know its own Eref and
+Qinfo and so on, but the original call is through the MeshEntry::process.
+
+============================================================================
+11 Jan 
+How is Stoich load divided among threads?  How does this relate to the flux
+calculations? Worked through this and added to the doxygen programmers
+guide. Will need to send out the flux messages at the first clock, 
+triggered by MeshEntry::process. With suitable message dests in the 
+Stoich, this will all be there in time for the second clock when the
+GslSolver::process is called.
+
+Stuff to pass down to Stoich::updateDiffusion: ThreadId, for the
+send call.
+Stuff to add to the Stoich data structure: Its Eref, for the send call.
+Stuff to consolidate: 
+
+We currently have a bottleneck in the destination fluxes all converging on
+the Stoich. Later.
+
+Rather than devise a new stencil for off-node entries, one option is to 
+create dummy S vectors for them. The message would then not be flux, but the
+value to populate these dummy S entries. Problem is with multidimensional
+edges.
+
+Assume we can set these up. These will have to be figured out at the ChemMesh,
+but it is the Stoich that has to send the messages out.
+
+The time to send stuff is at the end of Clock1. The messages are needed in
+Clock0 to deal with the diffusion calculations.
+So the Stoich::clearFlux function is the right time. Will need to put in the
+additional stuff for threadId and Eref, which actually the GslIntegrator has
+handy and can pass in.
+
+Would be nice to do some consolidation here, for all the S values for all
+the GslIntegrators on this thread. Probably only a minor optimization.
+
+Underlying this, and perhaps should be done first: We need a solver setup
+class. Could be the Stoich, or something else. Needs to deal with the message
+setup and handling Stoichs, Mesh, Gsl and other integrators, and of course the
+chemical system.
+
+Stoich:
+Already deals with chem
+Already has most of the data structures needed for diffusion internally
+Already nearly 1000 lines long.
+
+Separate class
+Will have to orchestrate Stoich with extra func calls. Both good and
+	bad aspects to this.
+Keeps the functionality somewhat better separated: the molecular traversal
+	to the Stoich, and the system traversal to self.
+Consider the SigNeur to be one variant of this. Here the Stoich as well as
+	an hsolver have to be handled.
+Consider a reaction system with multiple reaction sets in different
+	compartments. This will need multiple Stoichs.
+
+Seems clear enough that I should make a separate class. In
+the earlier incarnation of MOOSE there was a KineticManager.
+
+Let's design some defaults:
+1. Simple reaction tree: Kinetic Manager builds the volume stuff and sets up 
+	solver.
+2. Reaction tree with spatial stuff on it: 
+	Kinetic manager builds a deterministic PDE solver system
+3. Reaction tree with 'hints' as fields on the ChemMesh parent of the 
+	signaling tree.
+	Hints may also help assign # of nodes and threads.
+	Sets up a multi-solver model with the hints indicating whether to solve
+	each sub-tree using GSL, GSSA, Smoldyn or whatever.
+4. SigNeur?	Neuronal model with usual solver, with 'channel' placeholders
+	to indicate name of signaling model in each compartment.
+	Signaling model done as in 3.
+	Adaptors defined in sig models, work on local channels.
 
 ============================================================================
