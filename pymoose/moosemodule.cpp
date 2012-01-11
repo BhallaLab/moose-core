@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Jan 11 20:55:51 2012 (+0530)
+// Last-Updated: Wed Jan 11 20:58:43 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4506
+//     Update #: 4507
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -407,7 +407,7 @@ extern "C" {
             string name;
             if (pos != string::npos){
                 name = trimmed_path.substr(pos+1);
-                if (parent_path.at(parent_path.length() - 1) != '/'){
+                if (parent_path.length() > 0 && parent_path.at(parent_path.length() - 1) != '/'){
                     parent_path += "/";
                 }
                 parent_path += trimmed_path.substr(0, pos);
