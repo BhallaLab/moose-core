@@ -52,7 +52,6 @@ class TestNeutralArray(unittest.TestCase):
     
     def setUp(self):
         path = 'neutral%d' % (uuid.uuid4().int)
-        print 'TestNeutralArray.setUp: test object will be:', path
         self.testObj = moose.NeutralArray(path)
         self.valueFinfos.sort()
         self.lookupFinfos.sort()
@@ -110,10 +109,8 @@ class TestNeutralArray(unittest.TestCase):
         
 class TestPyMooseGlobals(unittest.TestCase):
     def setUp(self):
-        
         path1 = 'neutral%d' % (uuid.uuid4().int)
         path2 = 'neutral%d' % (uuid.uuid4().int)
-        print 'TestPyMooseGlobals.setUp: test objects will be:', path1, path2
         self.src1 = moose.NeutralArray(path1)
         self.dest1 = moose.NeutralArray(path2)
 
@@ -121,9 +118,6 @@ class TestPyMooseGlobals(unittest.TestCase):
         print 'Testing copy ...',
         newname = 'neutral%d' % (uuid.uuid4().int)
         new_id = moose.copy(self.src1, self.dest1, newname, 3, toGlobal=False)
-        print
-        print self.src1.path
-        print new_id.getPath()
         new_obj = moose.NeutralArray(new_id)
         self.assertEqual(len(new_obj), 3)
         self.assertEqual(new_obj.path, self.dest1.path + "/" + newname)
@@ -133,7 +127,6 @@ class TestMessages(unittest.TestCase):
     def setUp(self):
         path1 = '/comp%d' % (uuid.uuid4().int)
         path2 = '/comp%d' % (uuid.uuid4().int)
-        print 'TestMessages.setUp: test objects will be:', path1, path2        
         self.src1 = moose.CompartmentArray(path1)
         self.dest1 = moose.CompartmentArray(path2)
 
@@ -150,19 +143,7 @@ class TestMessages(unittest.TestCase):
             destFieldsOnE2 = outmsgs_src[ii].getField('destFieldsOnE2')
             self.assertEqual(destFieldsOnE2[0], 'handleRaxial')
         print 'OK'        
-        # inmsg_list = self.dest1[0].msgIn
-        # outmsg_list = self.src1[0].msgOut
-        # print inmsg_list, outmsg_list
-        # self.assertEqual(len(inmsg_list), 2)
-        # self.assertEqual(len(outmsg_list), 1)
-        # srcfield1 = inmsg_list[0].getField('srcFieldsOnE2')
-        # destfield1 = inmsg_list[0].getField('destFieldsOnE1')
-        # srcField2 = inmsg_list[0].getField('srcFieldsOnE1')
-        # destField2 = inmsg_list[0].getField('destFieldsOnE2')
-        # self.assertEqual(destfield1, 'reacDest')
-        # self.assertEqual(srcfield1, 'nOut')
-        # self.assertEqual(destField2, 'subDest')
-        # self.assertEqual(srcField2, 'toSub')
         
 if __name__ == '__main__':
+    print 'PyMOOSE regression tests'
     unittest.main()
