@@ -37,6 +37,16 @@ class ChemMesh
 		//////////////////////////////////////////////////////////////////
 		void stoich( const Eref& e, const Qinfo* q, Id stoichId );
 
+		/**
+		 * buildDefaultMesh tells the ChemMesh to make a standard mesh 
+		 * partitioning with the specified total size (typically volume)
+		 * and the specified number of subdivisions. For example, 
+		 * a CubeMesh of size 8 and subdivisions 8 would make a 2x2x2 mesh.
+		 * This function is specialized in each derived class.
+		 */
+		void buildDefaultMesh( double size, unsigned int numEntries );
+		virtual void innerBuildDefaultMesh( double size, unsigned int numEntries ) = 0;
+
 		//////////////////////////////////////////////////////////////////
 		// FieldElementFinfo stuff for MeshEntry lookup
 		//////////////////////////////////////////////////////////////////
