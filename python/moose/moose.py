@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Thu Jan 12 11:42:31 2012 (+0530)
+# Last-Updated: Thu Jan 12 14:48:05 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1071
+#     Update #: 1072
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -392,7 +392,6 @@ class Neutral(object):
                 except ValueError:
                     moose_classes = [child.getPath().rpartition('/')[-1] for child in Id('/classes')[0].getField('children')]
                     self_class = self.__class__
-                    print 'creating object of class', self_class
                     while (self_class != object) and (self_class.__name__ not in moose_classes):
                         self_class = self_class.__base__
                         # print self_class.__name__

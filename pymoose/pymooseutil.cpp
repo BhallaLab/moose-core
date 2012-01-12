@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Mar 26 22:41:37 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Dec 22 15:53:09 2011 (+0530)
+// Last-Updated: Thu Jan 12 14:54:03 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 241
+//     Update #: 249
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -257,6 +257,7 @@ Shell& pymoose::getShell(int argc, char ** argv)
             // else 
             //     shell_->launchParser(); // Here we set off a little event loop to poll user input. It deals with the doQuit call too.
         }
+        shell_->setCwe(0);
     } // ! if (shell_ == NULL)
     return *shell_;
 }
