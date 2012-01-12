@@ -53,6 +53,13 @@ const Cinfo* ChemMesh::initCinfo()
 			new EpFunc1< ChemMesh, Id >( &ChemMesh::stoich )
 		);
 
+		static DestFinfo buildDefaultMesh( "buildDefaultMesh",
+			"Tells ChemMesh derived class to build a default mesh with the"
+			"specified size and number of meshEntries.",
+			new OpFunc2< ChemMesh, double, unsigned int >( 
+				&ChemMesh::buildDefaultMesh )
+		);
+
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
 		//////////////////////////////////////////////////////////////
@@ -95,6 +102,7 @@ const Cinfo* ChemMesh::initCinfo()
 		&size,			// ReadOnlyValue
 		&dimensions,	// ReadOnlyValue
 		&stoich,		// DestFinfo
+		&buildDefaultMesh,	// DestFinfo
 		&entryFinfo,	// FieldElementFinfo
 		&boundaryFinfo,	// Boundaries
 	};
@@ -139,6 +147,12 @@ void ChemMesh::stoich( const Eref& e, const Qinfo* q, Id stoichId )
 {
 	stoich_ = stoichId;
 }
+
+void ChemMesh::buildDefaultMesh( double size, unsigned int numEntries )
+{
+	this->innerBuildDefaultMesh( size, numEntries );
+}
+
 
 //////////////////////////////////////////////////////////////
 // Field Definitions

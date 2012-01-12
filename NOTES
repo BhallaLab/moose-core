@@ -16641,4 +16641,36 @@ Let's design some defaults:
 	Signaling model done as in 3.
 	Adaptors defined in sig models, work on local channels.
 
+Checkin 3242.
 ============================================================================
+12 Jan 2012
+Revised structure of kinetic models:
+
+/base	:					Manager
+	/<solver_name>				Solver
+	/<compartment_name>			Mesh
+		/mesh				MeshEntry
+		/boundary			Boundary
+		/<poolname>	 		Pool
+			/<enzname>		MMEnz
+			/<enzname>		Enz
+				/<enzname_cplx>	Pool
+		/<reacname>			Reac
+		/<sumtotname>			SumTot
+		/<group, pool, reac: recursively>
+		/<compartment_name>
+			/mesh			MeshEntry
+			/boundary		Boundary
+			/<poolname> 		Pool
+			etc, recursively.
+	/geometry: 				Neutral
+	/groups: 				Neutral
+	/graphs: 				Neutral
+
+Basic principle is that compartments and reactants are the biological building
+blocks, so let's keep that as the backbone tree.
+I would like to put the solver under the relevant compartment, but we may
+have a single solver manage multiple sibling compartments. For example,
+PSD and bulk. I could insist on a containment relationship, for example put
+the whole lot into the spine, but this is hard to extract from kkit models.
+

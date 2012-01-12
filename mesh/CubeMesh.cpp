@@ -494,6 +494,36 @@ void CubeMesh::buildMesh( Id geom, double x, double y, double z )
 	;
 }
 
+/**
+ * Builds something as close to a cube as can get. This needs a
+ * smarter boundary handling code than I have here. For now, goes for
+ * the nearest cube
+ */
+void CubeMesh::innerBuildDefaultMesh( double size, unsigned int numEntries )
+{
+	double approxN = numEntries;
+	approxN = pow( approxN, 1.0 / 3.0 );
+	unsigned int smaller = floor( approxN );
+	unsigned int bigger = ceil( approxN );
+	unsigned int numSide;
+	if ( smaller != bigger ) {
+		numSide = smaller; 
+	} else {
+		unsigned int smallerVol = smaller * smaller * smaller;
+		unsigned int biggerVol = bigger * bigger * bigger;
+		if ( numEntries - smallerVol < biggerVol - numEntries )
+			numSide = smaller;
+		else
+			numSide = bigger;
+	}
+	// To do this right, we need to have 
+	double side = pow( size, 1.0 / 3.0 );
+	vector< double > coords( 9, side );
+	coords[0] = coords[1] = coords[2] = 0;
+	coords[6] = coords[7] = coords[8] = side / numSide;
+	setCoords( coords );
+}
+
 //////////////////////////////////////////////////////////////////
 // FieldElement assignment stuff for MeshEntries
 //////////////////////////////////////////////////////////////////

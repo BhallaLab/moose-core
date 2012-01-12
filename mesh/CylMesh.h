@@ -95,6 +95,9 @@ class CylMesh: public ChemMesh
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
 
+		/// Virtual func to make a mesh with specified size and numEntries
+		void innerBuildDefaultMesh( double size, unsigned int numEntries );
+
 		static const Cinfo* initCinfo();
 
 	private:
