@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Jan  5 12:16:32 2012 (+0530)
+// Last-Updated: Thu Jan 12 14:09:53 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 343
+//     Update #: 344
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -127,7 +127,7 @@ extern "C" {
     PyMODINIT_FUNC init_moose();
 
 
-    void inner_getFieldDict(Id classId, string finfoType, vector<string>& fields, vector<string>& types); 
+    int inner_getFieldDict(Id classId, string finfoType, vector<string>& fields, vector<string>& types); 
 
 
     

@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Wed Jan 11 20:27:57 2012 (+0530)
+# Last-Updated: Thu Jan 12 11:42:31 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1050
+#     Update #: 1071
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -501,14 +501,13 @@ class Neutral(object):
 # Wrappers for global functions
 ################################################################ 
 
-def copy(src, dest, name, n=1, copyMsg=True):
+def copy(src, dest, name, n=1, toGlobal=False, copyExtMsg=False):
     if isinstance(src, NeutralArray):
         src = src.id_
     if isinstance(dest, NeutralArray):
         dest = dest.id_
-    new_id = _moose.copy(src=src, dest=dest, name=name, n=n, copyMsg=copyMsg)
-    ret = NeutralArray(new_id)
-    return ret
+    new_id = _moose.copy(src, dest, name, n=n, toGlobal=toGlobal, copyExtMsg=copyExtMsg)
+    return new_id
 
 def move(src, dest):
     if isinstance(src, NeutralArray):

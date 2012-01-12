@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Jan 11 20:58:43 2012 (+0530)
+// Last-Updated: Thu Jan 12 14:09:31 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4507
+//     Update #: 4530
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -1417,8 +1417,8 @@ extern "C" {
     {
         PyObject * src, *dest;
         char * newName;
-        static const char * kwlist[] = {"src", "dest", "name", "n", "toGlobal", "copyMsg", NULL};
-        unsigned int num=1, toGlobal=1, copyExtMsgs=1;
+        static const char * kwlist[] = {"src", "dest", "name", "n", "toGlobal", "copyExtMsg", NULL};
+        unsigned int num=1, toGlobal=0, copyExtMsgs=0;
         if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOs|III:_pymoose_copy", const_cast<char**>(kwlist), &src, &dest, &newName, &num, &toGlobal, &copyExtMsgs)){
             return NULL;
         }
@@ -1434,7 +1434,6 @@ extern "C" {
             return NULL;
         }
         _Id * tgt = PyObject_New(_Id, &IdType);
-        
         tgt->id_ = getShell().doCopy(((_Id*)src)->id_, ((_Id*)dest)->id_, string(newName), num, toGlobal, copyExtMsgs);
         PyObject * ret = (PyObject*)tgt;
         return ret;            
@@ -1622,10 +1621,18 @@ extern "C" {
         static const char * finfoTypes [] = {"valueFinfo", "lookupFinfo", "srcFinfo", "destFinfo", "sharedFinfo", NULL};
         vector <string> fields, types;
         if (fieldType && strlen(fieldType) > 0){
-            inner_getFieldDict(classId, string(fieldType), fields, types);
+            if (inner_getFieldDict(classId, string(fieldType), fields, types) == 0){
+                PyErr_SetString(PyExc_ValueError, "Invalid finfo type.");
+                return NULL;
+            }
         } else {
             for (const char ** ptr = finfoTypes; *ptr != NULL; ++ptr){
-                inner_getFieldDict(classId, string(*ptr), fields, types);
+                if (inner_getFieldDict(classId, string(*ptr), fields, types) == 0){
+                    string message = "No such finfo type: ";
+                    message += string(*ptr);
+                    PyErr_SetString(PyExc_ValueError, message.c_str());
+                    return NULL;
+                }
             }
         }
         PyObject * ret = PyDict_New();
@@ -1642,17 +1649,20 @@ extern "C" {
         return ret;
     }
 
-    void inner_getFieldDict(Id classId, string finfoType, vector<string>& fieldNames, vector<string>&fieldTypes)
+    int inner_getFieldDict(Id classId, string finfoType, vector<string>& fieldNames, vector<string>&fieldTypes)
     {
         unsigned int numFinfos = Field<unsigned int>::get(ObjId(classId), "num_" + string(finfoType));
         Id fieldId(classId.path() + "/" + string(finfoType));
-        assert(fieldId != Id());
+        if (fieldId == Id()){
+            return 0;
+        }
         for (unsigned int ii = 0; ii < numFinfos; ++ii){
             string fieldName = Field<string>::get(ObjId(fieldId, DataId(0, ii, 0)), "name");
             fieldNames.push_back(fieldName);
             string fieldType = Field<string>::get(ObjId(fieldId, DataId(0, ii, 0)), "type");
             fieldTypes.push_back(fieldType);
-        }        
+        }
+        return 1;
     }
 
     PyObject * _pymoose_syncDataHandler(PyObject * dummy, _Id * target)
