@@ -255,6 +255,7 @@ SUBDIR = \
 	utility \
 	geom \
 	mesh \
+	manager \
 	$(SMOLDYN_DIR) \
 
 
@@ -275,6 +276,7 @@ OBJLIBS =	\
 	utility/_utility.o \
 	geom/_geom.o \
 	mesh/_mesh.o \
+	manager/_manager.o \
 	$(SMOLDYN_LIB) \
 
 export CXX
