@@ -107,6 +107,9 @@ class CubeMesh: public ChemMesh
 
 		void addStoich( Id stoich );
 
+		/// Virtual func to make a mesh with specified size and numEntries
+		void innerBuildDefaultMesh( double size, unsigned int numEntries );
+
 		//////////////////////////////////////////////////////////////////
 		//  Utility func
 		//////////////////////////////////////////////////////////////////

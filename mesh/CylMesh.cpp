@@ -550,3 +550,18 @@ void CylMesh::innerSetNumEntries( unsigned int n )
 	numEntries_ = n;
 	lambda_ = totLen_ / n;
 }
+
+
+void CylMesh::innerBuildDefaultMesh( double size, unsigned int numEntries )
+{
+	/// Cylinder with diameter = length.
+	/// vol = size = pi.r^2.len. 
+	/// So len = 2r, size = pi*r^2*2r = 2pi*r^3 so r = (size/2pi)^(1/3)
+	double r = pow( ( size / ( PI * 2 ) ), 1.0 / 3 );
+	vector< double > coords( 9, 0 );
+	coords[3] = 2 * r;
+	coords[6] = r;
+	coords[7] = r;
+	coords[8] = 2 * r / numEntries;
+	setCoords( coords );
+}
