@@ -16674,3 +16674,9 @@ have a single solver manage multiple sibling compartments. For example,
 PSD and bulk. I could insist on a containment relationship, for example put
 the whole lot into the spine, but this is hard to extract from kkit models.
 
+Added ChemMesh::buildDefaultMesh to make it a little easier to set up models.
+Checkin 3248.
+
+Compiled in SimManager. Doesn't do anything yet, only stubs for tests.
+
+============================================================================
