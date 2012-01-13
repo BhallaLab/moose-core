@@ -94,16 +94,20 @@ class TestNeutralArray(unittest.TestCase):
         b_path = a_path + '/b'
         c_path = '/neutral%d' % (uuid.uuid4().int)
         d_path = c_path + '/d'
+        c_len = 3
+        d_len = 4
         a = moose.NeutralArray(a_path)
         b = moose.NeutralArray(b_path)
-        c = moose.NeutralArray(c_path)
-        d = moose.NeutralArray(d_path)
+        c = moose.NeutralArray(c_path, c_len)
+        d = moose.NeutralArray(d_path, (d_len))
         self.assertEqual(a.path, '/' + a_path)
         self.assertEqual(b.path, '/' + b_path)
-        self.assertEqual(c.path, c_path)
-        self.assertEqual(d.path, d_path)
+        self.assertEqual(c.path, c_path + '[0]')
+        self.assertEqual(d.path, c_path + '[0]/d[0]')
         self.assertEqual(b.name, 'b')
         self.assertEqual(d.name, 'd')
+        self.assertEqual(len(c), c_len)
+        self.assertEqual(d.shape, (c_len, d_len))
         self.assertRaises(ValueError, moose.NeutralArray, 'test/')
         print 'OK'
         
@@ -120,7 +124,7 @@ class TestPyMooseGlobals(unittest.TestCase):
         new_id = moose.copy(self.src1, self.dest1, newname, 3, toGlobal=False)
         new_obj = moose.NeutralArray(new_id)
         self.assertEqual(len(new_obj), 3)
-        self.assertEqual(new_obj.path, self.dest1.path + "/" + newname)
+        self.assertEqual(new_obj.path, self.dest1.path + "/" + newname + '[0]')
         print 'OK'
 
 class TestMessages(unittest.TestCase):
@@ -145,5 +149,5 @@ class TestMessages(unittest.TestCase):
         print 'OK'        
         
 if __name__ == '__main__':
-    print 'PyMOOSE regression tests'
+    print 'PyMOOSE Regression Tests:'
     unittest.main()
