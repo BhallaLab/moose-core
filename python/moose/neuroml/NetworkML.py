@@ -1,5 +1,5 @@
 from xml.etree import ElementTree as ET
-from neuroml_utils import * # tweak_model()
+from moose.neuroml.utils import * # tweak_model()
 import string
 import moose
 from MorphML import *
@@ -11,7 +11,6 @@ class NetworkML():
     def __init__(self, nml_params):
         self.cellDictBySegmentId={}
         self.cellDictByCableId={}
-        self.context = moose.PyMooseBase.getContext()
         self.nml_params = nml_params
 
     def readNetworkMLFromFile(self,filename,cellSegmentDict,params={}):
@@ -115,7 +114,7 @@ class NetworkML():
             populationname = population.attrib["name"]
             print "loading", populationname
             ## if channel does not exist in library load it from xml file
-            if not self.context.exists('/library/'+cellname):
+            if not moose.exists('/library/'+cellname):
                 mmlR = MorphML(self.nml_params)
                 cellDict = mmlR.readMorphMLFromFile(cellname+'.morph.xml')
                 self.cellSegmentDict.update(cellDict)
@@ -233,7 +232,7 @@ class NetworkML():
         else:
             syn_name_full = syn_name
             ## if syn doesn't exist in this compartment, create it
-            if not self.context.exists(post_path+'/'+syn_name_full):
+            if not moose.exists(post_path+'/'+syn_name_full):
                 self.make_new_synapse(syn_name, postcomp, syn_name_full)
         syn = moose.SynChan(post_path+'/'+syn_name_full) # wrap the synapse in this compartment
         #### weights are set at the end according to whether the synapse is graded or event-based
@@ -255,7 +254,7 @@ class NetworkML():
                 precomp = moose.Compartment(pre_path)
                 ## if spikegen for this synapse doesn't exist in this compartment, create it
                 ## spikegens for different synapse_types can have different thresholds
-                if not self.context.exists(pre_path+'/'+syn_name+'_spikegen'):
+                if not moose.exists(pre_path+'/'+syn_name+'_spikegen'):
                     spikegen = moose.SpikeGen(pre_path+'/'+syn_name+'_spikegen')
                     # connect the compartment Vm to the spikegen
                     precomp.connect("VmSrc",spikegen,"Vm")
@@ -280,7 +279,7 @@ class NetworkML():
                     glomstr = ''
                     filenums = pre_path.split('_',1)[1]
                 tt_path = postcomp.path+'/'+syn_name_full+glomstr+'_tt'
-                if not self.context.exists(tt_path):
+                if not moose.exists(tt_path):
                     # if timetable for this synapse doesn't exist in this compartment, create it,
                     # and add the field 'fileNumbers'
                     tt = moose.TimeTable(tt_path)
@@ -307,10 +306,10 @@ class NetworkML():
 
     def make_new_synapse(self, syn_name, postcomp, syn_name_full):
         ## if channel does not exist in library load it from xml file
-        if not self.context.exists('/library/'+syn_name):
+        if not moose.exists('/library/'+syn_name):
             cmlR = ChannelML(self.nml_params)
             cmlR.readChannelMLFromFile(syn_name+'.xml')
-        synid = self.context.deepCopy(self.context.pathToId('/library/'+syn_name),postcomp.id,syn_name_full)
+        #~ synid = self.context.deepCopy(self.context.pathToId('/library/'+syn_name),postcomp.id,syn_name_full)
         syn = moose.SynChan(synid)
         #### connect the post compartment to the synapse
         if syn.getField('mgblock')=='True': # If NMDA synapse based on mgblock, connect to mgblock

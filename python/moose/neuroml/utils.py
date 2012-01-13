@@ -27,6 +27,41 @@ VMAX = 0.1 # Volts
 NDIVS = 200 # number
 dv = ( VMAX - VMIN ) / NDIVS # Volts
 
+def connect_CaConc(compartment_list):
+    """ Connect the Ca pools and channels within each of the compartments in compartment_list
+     Ca channels should have an extra field called 'ion' defined and set in MOOSE.
+     Ca dependent channels like KCa should have an extra field called 'ionDependency' defined and set in MOOSE.
+     Call this only after instantiating cell so that all channels and pools have been created. """
+    for compartment in compartment_list:
+        caconc = None
+        for child in compartment.children:
+            neutralwrap = moose.Neutral(child)
+            if neutralwrap.className == 'CaConc':
+                caconc = moose.CaConc(child)
+                break
+        if caconc is not None:
+            ## B has to be set for caconc based on thickness of Ca shell and compartment l and dia.
+            ## I am using a translation from Neuron, hence this method.
+            ## In Genesis, gmax / (surfacearea*thick) is set as value of B!
+            caconc.B = 1 / (2*FARADAY) / \
+                (math.pi*compartment.diameter*compartment.length * caconc.thick)
+            for child in compartment.getChildren(compartment.id):
+                neutralwrap = moose.Neutral(child)
+                if neutralwrap.className == 'HHChannel':
+                    channel = moose.HHChannel(child)
+                    ## If 'ion' field is not present, the Shell returns '0',
+                    ## cribs and prints out a message but it does not throw an exception
+                    if channel.getField('ion') in ['Ca','ca']:
+                        channel.connect('IkSrc',caconc,'current')
+                        print 'Connected ',channel.path
+                if neutralwrap.className == 'HHChannel2D':
+                    channel = moose.HHChannel2D(child)
+                    ## If 'ionDependency' field is not present, the Shell returns '0',
+                    ## cribs and prints out a message but it does not throw an exception
+                    if channel.getField('ionDependency') in ['Ca','ca']:
+                        caconc.connect('concSrc',channel,'concen')
+                        print 'Connected ',channel.path
+
 def set_neuroml_namespaces_attribs(neuromlroot):
     set_attrib_if_not_found(neuromlroot,"xmlns",neuroml_ns)
     set_attrib_if_not_found(neuromlroot,"xmlns:nml",nml_ns)
