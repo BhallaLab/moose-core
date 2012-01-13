@@ -4,13 +4,12 @@ import os, sys
 from math import *
 
 import moose
-from neuroml_utils import *
+from moose.neuroml import utils
 
 class ChannelML():
 
     def __init__(self,nml_params):
         self.cml='http://morphml.org/channelml/schema'
-        self.context = moose.PyMooseBase.getContext()
         self.nml_params = nml_params
         self.temperature = nml_params['temperature']
 
@@ -208,14 +207,14 @@ class ChannelML():
                 ## Hence use runG to set these via Genesis command
                 ## UNITS: while calculating, use the units used in xml defn,
                 ##        while filling in table, I convert to SI units.
-                self.context.runG("setfield "+moosegate.path+"/A"+\
-                    #" ydivs "+str(CaNDIVS)+\ # these get overridden by the number of values in the table
-                    " ymin "+str(float(concdep.attrib['min_conc'])*concfactor)+\
-                    " ymax "+str(float(concdep.attrib['max_conc'])*concfactor))
-                self.context.runG("setfield "+moosegate.path+"/B"+\
-                    #" ydivs "+str(CaNDIVS)+\ # these get overridden by the number of values in the table
-                    " ymin "+str(float(concdep.attrib['min_conc'])*concfactor)+\
-                    " ymax "+str(float(concdep.attrib['max_conc'])*concfactor))
+                #~ self.context.runG("setfield "+moosegate.path+"/A"+\
+                    #~ #" ydivs "+str(CaNDIVS)+\ # these get overridden by the number of values in the table
+                    #~ " ymin "+str(float(concdep.attrib['min_conc'])*concfactor)+\
+                    #~ " ymax "+str(float(concdep.attrib['max_conc'])*concfactor))
+                #~ self.context.runG("setfield "+moosegate.path+"/B"+\
+                    #~ #" ydivs "+str(CaNDIVS)+\ # these get overridden by the number of values in the table
+                    #~ " ymin "+str(float(concdep.attrib['min_conc'])*concfactor)+\
+                    #~ " ymax "+str(float(concdep.attrib['max_conc'])*concfactor))
                 ## for Ca dep channel, I expect only generic alpha and beta functions
                 ## these have already been made above
                 ftableA = open("CaDepA.dat","w")
@@ -245,8 +244,8 @@ class ChannelML():
                 ### PRESENTLY, Interpol2D.cpp in MOOSE only allows loading via a data file,
                 ### one cannot set individual entries A[0][0] etc.
                 ### Thus pyMOOSE also has not wrapped Interpol2D
-                self.context.runG("call "+moosegate.path+"/A load CaDepA.dat 0")
-                self.context.runG("call "+moosegate.path+"/B load CaDepB.dat 0")
+                #~ self.context.runG("call "+moosegate.path+"/A load CaDepA.dat 0")
+                #~ self.context.runG("call "+moosegate.path+"/B load CaDepB.dat 0")
                 os.remove('CaDepA.dat')
                 os.remove('CaDepB.dat')
 
@@ -286,8 +285,8 @@ class ChannelML():
         volInfo = poolModel.find('./{'+self.cml+'}pool_volume_info')
         caPool.thick = float(volInfo.attrib['shell_thickness']) * Lfactor
         ## Put a high ceiling and floor for the Ca conc
-        self.context.runG('setfield ' + caPool.path + ' ceiling 1e6')
-        self.context.runG('setfield ' + caPool.path + ' floor 0.0')
+        #~ self.context.runG('setfield ' + caPool.path + ' ceiling 1e6')
+        #~ self.context.runG('setfield ' + caPool.path + ' floor 0.0')
 
     def make_cml_function(self, element, fn_name, concdep=None):
         fn_type = element.attrib['expr_form']

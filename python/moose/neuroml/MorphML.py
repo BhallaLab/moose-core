@@ -4,7 +4,7 @@ import moose
 import sys, math
 
 from ChannelML import *
-from moose.utils import *
+from moose.neuroml import utils
 
 class MorphML():
 
@@ -15,7 +15,6 @@ class MorphML():
         self.nml='http://morphml.org/networkml/schema'
         self.cellDictBySegmentId={}
         self.cellDictByCableId={}
-        self.context = moose.PyMooseBase.getContext()
         self.nml_params = nml_params
 
     def readMorphMLFromFile(self,filename,params={}):
@@ -46,7 +45,8 @@ class MorphML():
             self.length_factor = 1.0
         cellname = cell.attrib["name"]
         print "loading cell :", cellname,"into /library ."
-        moosecell = moose.Cell('/library/'+cellname)
+        #~ moosecell = moose.Cell('/library/'+cellname)
+        moosecell = moose.Neutral('/library/'+cellname)
         self.cellDictBySegmentId[cellname] = [moosecell,{}]
         self.cellDictByCableId[cellname] = [moosecell,{}]
         self.segDict = {}
@@ -55,13 +55,15 @@ class MorphML():
         #### load morphology and connections between compartments
         for segment in cell.findall(".//{"+self.mml+"}segment"):
             segmentname = segment.attrib['name']
-            #print segmentname
+            print segmentname
             segmentid = segment.attrib['id']
             # the moose "hsolve" method assumes compartments to be asymmetric compartments and symmetrizes them
             # but that is not what we want when translating from Neuron which has only symcompartments -- so be careful!
             moosesegmentname = segmentname+'_'+segmentid
+            moosesegmentpath = moosecell.path+'/'+moosesegmentname
             self.segDict[segmentid]=[moosesegmentname]
-            moosesegment = moose.Compartment(moosesegmentname, moosecell) # segmentname is NOT unique - eg: mitral bbmit exported from NEURON
+            #~ moosesegment = moose.Compartment(moosesegmentname, moosecell) # segmentname is NOT unique - eg: mitral bbmit exported from NEURON
+            moosesegment = moose.Compartment(moosesegmentpath) # segmentname is NOT unique - eg: mitral bbmit exported from NEURON
             self.cellDictBySegmentId[cellname][1][segmentid] = moosesegment
             # cable is an optional attribute. Need to change the way things are done.
             cableid = segment.attrib['cable']
@@ -143,7 +145,7 @@ class MorphML():
                 if mechanism.attrib.has_key("passive_conductance"):
                     if mechanism.attrib['passive_conductance'] in ["true",'True','TRUE']:
                         passive = True
-                #print "Loading mechanism ", mechanismname
+                print "Loading mechanism ", mechanismname
                 ## ONLY creates channel if at least one parameter (like gmax) is specified in the xml
                 ## Neuroml does not allow you to specify all default values.
                 ## However, granule cell example in neuroconstruct has Ca ion pool without
@@ -183,7 +185,7 @@ class MorphML():
                              parametername, " in mechanism ",mechanismname
             #### Connect the Ca pools and channels
             #### Am connecting these at the very end so that all channels and pools have been created
-            connect_CaConc(self.cellDictByCableId[cellname][1].values())
+            utils.connect_CaConc(self.cellDictByCableId[cellname][1].values())
         
         ##########################################################
         #### load connectivity / synapses into the compartments
@@ -198,7 +200,7 @@ class MorphML():
                         self.set_group_compartment_param(cell, cellname, potential_syn_loc,\
                          'spikegen_type', potential_syn_loc.attrib['synapse_type'], self.nml, mechanismname='spikegen')
 
-        #print "Finished loading into library cell: ",cellname
+        print "Finished loading into library cell: ",cellname
         return {cellname:self.segDict}
 
     def set_group_compartment_param(self, cell, cellname, parameter, name, value, grouptype, mechanismname=None):
@@ -249,9 +251,9 @@ class MorphML():
             pass
         elif mechanismname is not None:
             ## if mechanism is not present in compartment, deep copy from library
-            if not self.context.exists(compartment.path+'/'+mechanismname):
+            if not moose.exists(compartment.path+'/'+mechanismname):
                 ## if channel does not exist in library load it from xml file
-                if not self.context.exists("/library/"+mechanismname):
+                if not moose.exists("/library/"+mechanismname):
                     cmlR = ChannelML(self.nml_params)
                     cmlR.readChannelMLFromFile(mechanismname+'.xml')
                 neutralObj = moose.Neutral("/library/"+mechanismname)
@@ -289,4 +291,4 @@ class MorphML():
                 caconc.thick = value ## JUST THIS WILL NOT DO - HAVE TO SET B based on this thick!
                 ## Later, when calling connect_CaConc,
                 ## B is set for caconc based on thickness of Ca shell and compartment l and dia.
-        #print "Setting ",name," for ",compartment.path," value ",value
+        print "Setting ",name," for ",compartment.path," value ",value

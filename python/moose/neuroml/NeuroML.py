@@ -9,7 +9,7 @@ import sys
 class NeuroML():
 
     def __init__(self):
-        self.context = moose.PyMooseBase.getContext()
+        pass
 
     def readNeuroMLFromFile(self,filename,params={}):
         """
