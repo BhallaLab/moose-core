@@ -50,12 +50,19 @@ const Cinfo* SimManager::initCinfo()
 			"empty if the intention is that methods be set up through "
 			"hints in the ChemMesh compartments.",
 			new EpFunc1< SimManager, string >( &SimManager::build ) );
+
+		static DestFinfo makeStandardElements( "makeStandardElements",
+			"Sets up the usual infrastructure for a model, with the"
+			"ChemMesh, Stoich, solver and suitable messaging."
+			"The argument is the MeshClass to use.",
+			new EpFunc1< SimManager, string >( &SimManager::makeStandardElements ) );
 		//////////////////////////////////////////////////////////////
 
 	static Finfo* simManagerFinfos[] = {
 		&syncTime,		// Value
 		&autoPlot,		// Value
 		&build,			// DestFinfo
+		&makeStandardElements,			// DestFinfo
 	};
 
 	static Cinfo simManagerCinfo (
@@ -133,51 +140,6 @@ void SimManager::build( const Eref& e, const Qinfo* q, string method )
 	}
 }
 
-//////////////////////////////////////////////////////////////
-// Utility functions
-//////////////////////////////////////////////////////////////
-SimManager::TreeType SimManager::findTreeType( const Eref& e )
-{
-	return KKIT; // dummy for now.
-}
-
-void SimManager::buildFromBareKineticTree( const string& method )
-{
-	;
-}
-
-void SimManager::buildFromKkitTree( const string& method )
-{
-	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-	autoPlot_ = 0;
-	vector< int > dims( 1, 1 );
-	string basePath = baseId_.path();
-	Id stoich = shell->doCreate( "Stoich", baseId_, "stoich", dims );
-	Field< string >::set( stoich, "path", basePath + "/##" );
-	if ( method == "Gillespie" || method == "gillespie" || 
-		method == "GSSA" || method == "gssa" ) {
-	} else {
-		Id gsl = shell->doCreate( "GslIntegrator", stoich, "gsl", dims );
-		bool ret = SetGet1< Id >::set( gsl, "stoich", stoich );
-		assert( ret );
-		ret = Field< bool >::get( gsl, "isInitialized" );
-		assert( ret );
-		ret = Field< string >::set( gsl, "method", method );
-		assert( ret );
-	}
-
-	shell->doSetClock( 0, plotdt_ );
-	shell->doSetClock( 1, plotdt_ );
-	shell->doSetClock( 2, plotdt_ );
-	shell->doSetClock( 3, 0 );
-
-	string plotpath = basePath + "/graphs/##[TYPE=Table]," + 
-		basePath + "/moregraphs/##[TYPE=Table]";
-	shell->doUseClock( basePath + "/gsl", "process", 0);
-	shell->doUseClock( plotpath, "process", 2 );
-	shell->doReinit();
-}
-
 void SimManager::makeStandardElements( const Eref& e, const Qinfo* q, 
 	string meshClass )
 {
@@ -186,7 +148,7 @@ void SimManager::makeStandardElements( const Eref& e, const Qinfo* q,
 	Id baseId_ = e.id();
 	Id kinetics = 
 		shell->doCreate( meshClass, baseId_, "kinetics", dims, true );
-		SetGet2< double, unsigned int >::set( kinetics, "defaultMesh", 1e-15, 1 );
+		SetGet2< double, unsigned int >::set( kinetics, "buildDefaultMesh", 1e-15, 1 );
 	assert( kinetics != Id() );
 	assert( kinetics.eref().element()->getName() == "kinetics" );
 
@@ -214,3 +176,56 @@ void SimManager::makeStandardElements( const Eref& e, const Qinfo* q,
 	}
 	assert( groups != Id() );
 }
+
+//////////////////////////////////////////////////////////////
+// Utility functions
+//////////////////////////////////////////////////////////////
+SimManager::TreeType SimManager::findTreeType( const Eref& e )
+{
+	return KKIT; // dummy for now.
+}
+
+void SimManager::buildFromBareKineticTree( const string& method )
+{
+	;
+}
+
+void SimManager::buildFromKkitTree( const string& method )
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	autoPlot_ = 0;
+	vector< int > dims( 1, 1 );
+
+	shell->doSetClock( 0, plotdt_ );
+	shell->doSetClock( 1, plotdt_ );
+	shell->doSetClock( 2, plotdt_ );
+	shell->doSetClock( 3, 0 );
+
+	string basePath = baseId_.path();
+	if ( method == "Gillespie" || method == "gillespie" || 
+		method == "GSSA" || method == "gssa" || method == "Gssa" ) {
+		Id stoich = shell->doCreate( "Stoich", baseId_, "stoich", dims );
+		Field< string >::set( stoich, "path", basePath + "/##" );
+		cout << "SimManager::buildFromKkitTree: Not yet got GSSA working here.\n";
+	} else if ( method == "Neutral" || method == "ee" || method == "EE" ) {
+		// cout << "SimManager::buildFromKkitTree: No solvers built\n";
+		; // Don't make any solvers.
+	} else {
+		Id stoich = shell->doCreate( "Stoich", baseId_, "stoich", dims );
+		Field< string >::set( stoich, "path", basePath + "/##" );
+		Id gsl = shell->doCreate( "GslIntegrator", stoich, "gsl", dims );
+		bool ret = SetGet1< Id >::set( gsl, "stoich", stoich );
+		assert( ret );
+		ret = Field< bool >::get( gsl, "isInitialized" );
+		assert( ret );
+		ret = Field< string >::set( gsl, "method", method );
+		assert( ret );
+		shell->doUseClock( basePath + "/stoich/gsl", "process", 0);
+	}
+
+	string plotpath = basePath + "/graphs/##[TYPE=Table]," + 
+		basePath + "/moregraphs/##[TYPE=Table]";
+	shell->doUseClock( plotpath, "process", 2 );
+	shell->doReinit();
+}
+

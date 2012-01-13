@@ -47,7 +47,8 @@ class ReadKkit
 		 * specified by the kkit file, and the timestep for plots as 
 		 * specified by the kkit file.
 		 */
-		void setupGslRun();
+		// void setupGslRun();
+
 		void run();
 		void dumpPlots( const string& filename );
 
