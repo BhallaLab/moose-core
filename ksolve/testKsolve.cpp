@@ -132,7 +132,7 @@ void testKsolveZombify( string modelFile )
 void testGsolver(string modelName, string plotName, double plotDt, double simTime )
 {
 	ReadKkit rk;
-	Id base = rk.read( modelName + ".g" , "model", Id(), "GssaStoich" );
+	Id base = rk.read( modelName + ".g" , "model", Id(), "Gssa" );
 	assert( base != Id() );
 	// Id kinetics = s->doFind( "/kinetics" );
 

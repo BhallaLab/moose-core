@@ -15,6 +15,7 @@
 #include "FuncPool.h"
 
 #include "../shell/Shell.h"
+#include "../manager/SimManager.h"
 
 #include "ReadKkit.h"
 
@@ -95,7 +96,7 @@ string ReadKkit::getBasePath() const
 Id ReadKkit::read(
 	const string& filename, 
 	const string& modelname,
-	Id pa, const string& solverClass )
+	Id pa, const string& method )
 {
 	ifstream fin( filename.c_str() );
 	if (!fin){
@@ -105,9 +106,17 @@ Id ReadKkit::read(
 
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 	vector< int > dims( 1,1 );
+	Id base = s->doCreate( "SimManager", pa, modelname, dims, true );
+	assert( base != Id() );
+	SimManager* sm = reinterpret_cast< SimManager* >( base.eref().data() );
+	sm->makeStandardElements( base.eref(), 0, "CubeMesh" );
+	Id moregraphs = s->doCreate( "Neutral", base, "moregraphs", dims, true );
+	assert( moregraphs != Id() );
+
+	/*
 	Id base = s->doCreate( solverClass, pa, modelname, dims, true );
 	assert( base != Id() );
-
+	*/
 	baseId_ = base;
 	basePath_ = base.path();
 
@@ -120,8 +129,12 @@ Id ReadKkit::read(
 	convertParametersToConcUnits();
 
 	s->setCwe( base );
+	sm->build( base.eref(), 0, method );
+	// SetGet1< string >::set( baseId_, "build", method );
+	/*
 	if ( solverClass == "gsl" || solverClass == "Stoich" )
 		Field< string >::set( base, "path", "##" );
+		*/
 	s->doReinit();
 	return base;
 }
@@ -129,7 +142,6 @@ Id ReadKkit::read(
 /**
  * Assume GSL solver, take graphs from kkit file, and set up plot dt from
  * same file as clock 2.
- */
 void ReadKkit::setupGslRun()
 {
 	vector< int > dims( 1, 1 );
@@ -150,6 +162,7 @@ void ReadKkit::setupGslRun()
 	shell_->doUseClock( plotpath, "process", 2 );
 	shell_->doReinit();
 }
+ */
 
 void ReadKkit::run()
 {
@@ -268,6 +281,7 @@ void ReadKkit::innerRead( ifstream& fin )
 			*/
 }
 
+/*
 void ReadKkit::makeStandardElements()
 {
 	vector< int > dims( 1, 1 );
@@ -320,6 +334,7 @@ void ReadKkit::makeStandardElements()
 	}
 	assert( groups != Id() );
 }
+*/
 
 ReadKkit::ParseMode ReadKkit::readInit( const string& line )
 {
@@ -367,7 +382,11 @@ ReadKkit::ParseMode ReadKkit::readInit( const string& line )
 
 	if ( argv[0] == "initdump" ) {
 		initdumpVersion_ = atoi( argv[2].c_str() );
-		makeStandardElements();
+		/*
+		SetGet1< string >::set( baseId_, "makeStandardElements", 
+			"CubeMesh" );
+			*/
+		// makeStandardElements();
 		return DATA;
 	}
 

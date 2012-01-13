@@ -24,13 +24,12 @@ class SimManager
 
 		/// Destination function
 		void build( const Eref& e, const Qinfo* q, string method );
-
+		void makeStandardElements( const Eref& e, const Qinfo*q, string meshClass );
 
 		// Utility functions
 		TreeType findTreeType( const Eref& e );
 		void buildFromBareKineticTree( const string& method );
 		void buildFromKkitTree( const string& method );
-		void makeStandardElements( const Eref& e, const Qinfo*q, string meshClass );
 
 		static const Cinfo* initCinfo();
 	private:

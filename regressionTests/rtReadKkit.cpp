@@ -165,10 +165,14 @@ void rtRunKkit()
 	vector< unsigned int > dims( 1, 1 );
 	Shell::cleanSimulation();
 
-	Id kineticId = shell->doLoadModel( "Kholodenko.g", "/rkktest", "gsl" );
-	assert( kineticId != Id() );
+	Id modelId = shell->doLoadModel( "Kholodenko.g", "/rkktest", "rk5" );
+	assert( modelId != Id() );
+	Id stoichId( "/rkktest/stoich" );
+	assert( stoichId != Id() );
+	Id comptId( "/rkktest/kinetics" );
+	assert( comptId != Id() );
 	unsigned int numVarMols = Field< unsigned int >::get( 
-		kineticId, "nVarPools" );
+		stoichId, "nVarPools" );
 	assert ( numVarMols == 15 );
 
 	double n;
@@ -289,10 +293,11 @@ void rtRunKkit()
 	/////////////////////////////////////////////////////////////////////
 	// Change volume and run it again.
 	/////////////////////////////////////////////////////////////////////
-	double vol = LookupField< short, double >::get( kineticId, "compartmentVolume", 0);
+	double vol = LookupField< short, double >::get( stoichId, 
+		"compartmentVolume", 0);
 	vol *= 0.1;
-	ok = LookupField< short, double >::set( kineticId, "compartmentVolume", 0, 
-		vol );
+	ok = LookupField< short, double >::set( stoichId, "compartmentVolume",
+		0, vol );
 
 	assert( ok );
 	double side = pow( vol, 1.0/3.0 );
@@ -326,7 +331,7 @@ void rtRunKkit()
 	assert( ok );
 	
 	/////////////////////////////////////////////////////////////////////
-	shell->doDelete( kineticId );
+	shell->doDelete( modelId );
 	cout << "." << flush;
 }
 

@@ -16678,5 +16678,18 @@ Added ChemMesh::buildDefaultMesh to make it a little easier to set up models.
 Checkin 3248.
 
 Compiled in SimManager. Doesn't do anything yet, only stubs for tests.
+Checkin 3249.
+
+Next step: Use the SimManager utility functions in ReadKkit and
+ReadCspace. 
+Next: Fix up Shell::doLoadModel to correctly use the SimManager.
 
 ============================================================================
+13 Jan 2012
+This is now working for the original model, but I've run into problems due to
+the earlier hack
+for changing volumes. The correct way to do this is to have the stoich and the
+Mesh/meshEntries talk to each other much as the chemical system does.
+
+For now, patch up the regression test and move on.
+

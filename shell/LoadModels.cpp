@@ -118,13 +118,17 @@ Id Shell::doLoadModel( const string& fileName, const string& modelPath, const st
 		case KKIT: 
 			{
 				string sc = solverClass;
+				/*
 				if ( solverClass == "" || solverClass == "gsl" )
 					sc = "Stoich";
+					*/
 				ReadKkit rk;
 				Id ret = rk.read( fileName, modelName, parentId, sc);
+				/*
 				if ( solverClass == "gsl" ) { // set up kkit run
 					rk.setupGslRun();
 				}
+				*/
 				return ret;
 			}
 			break;
