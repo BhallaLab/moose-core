@@ -1,7 +1,7 @@
 from xml.etree import ElementTree as ET
 import string
 import os, sys
-from math import *
+import math
 
 import moose
 from moose.neuroml import utils
@@ -84,7 +84,7 @@ class ChannelML():
             moosechannel.ion = IVrelation.attrib['ion']
             if concdep is not None:
                 moosechannel.ionDependency = concdep.attrib['ion']
-            
+        
         gates = IVrelation.findall('./{'+self.cml+'}gate')
         if len(gates)>3:
             print "Sorry! Maximum x, y, and z (three) gates are possible in MOOSE/Genesis"
@@ -313,16 +313,16 @@ class ChannelML():
         If fin_type is generic, **kwargs is a dict having key expr_string """
         if fn_type == 'exponential':
             def fn(self,v):
-                return kwargs['rate']*exp((v-kwargs['midpoint'])/kwargs['scale'])
+                return kwargs['rate']*math.exp((v-kwargs['midpoint'])/kwargs['scale'])
         elif fn_type == 'sigmoid':
             def fn(self,v):
-                return kwargs['rate'] / ( 1 + exp((v-kwargs['midpoint'])/kwargs['scale']) )
+                return kwargs['rate'] / ( 1 + math.exp((v-kwargs['midpoint'])/kwargs['scale']) )
         elif fn_type == 'exp_linear':
             def fn(self,v):
                 if v-kwargs['midpoint'] == 0.0: return kwargs['rate']
                 else:
                     return kwargs['rate'] * ((v-kwargs['midpoint'])/kwargs['scale']) \
-                        / ( 1 - exp((kwargs['midpoint']-v)/kwargs['scale']) )
+                        / ( 1 - math.exp((kwargs['midpoint']-v)/kwargs['scale']) )
         elif fn_type == 'generic':
             ## python cannot evaluate the ternary operator ?:, so evaluate explicitly
             ## for security purposes eval() is not allowed any __builtins__

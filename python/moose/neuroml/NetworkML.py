@@ -1,10 +1,12 @@
 from xml.etree import ElementTree as ET
-from moose.neuroml.utils import * # tweak_model()
 import string
+import os
+from math import cos, sin
+from MorphML import MorphML
+from ChannelML import ChannelML
 import moose
-from MorphML import *
-from ChannelML import *
-import sys
+from moose.neuroml.utils import meta_ns, nml_ns
+from moose import utils
 
 class NetworkML():
 
@@ -36,7 +38,7 @@ class NetworkML():
         tree = ET.parse(filename)
         root_element = tree.getroot()
         print "Tweaking model ... "
-        tweak_model(root_element, params)
+        utils.tweak_model(root_element, params)
         print "Loading model into MOOSE ... "
         return self.readNetworkML(root_element,cellSegmentDict,params,root_element.attrib['lengthUnits'])
 
@@ -122,7 +124,7 @@ class NetworkML():
                 model_filenames = (cellname+'.xml', cellname+'.morph.xml')
                 success = False
                 for model_filename in model_filenames:
-                    model_path = path.join(self.model_dir, model_filename)
+                    model_path = os.path.join(self.model_dir, model_filename)
                     try:
                         cellDict = mmlR.readMorphMLFromFile(model_path)
                         success = True
